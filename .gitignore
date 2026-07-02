@@ -4,3 +4,4 @@ __pycache__/
 *.tmp
 *.dl
 tra_luat_config.v2.json
+node_modules/

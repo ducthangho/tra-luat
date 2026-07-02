@@ -1,3 +1,24 @@
+# ★ Apps Script REDEPLOY (2026-07-02) — clasp thay browser editor; version 73 LIVE
+
+Chuyển hạ tầng dev Apps Script sang **`google/clasp`** (canonical dir di chuyển `Downloads\tra-luat`
+→ `D:\Quốc hội\tra-luat`; `git init` + `gas-project/` clone qua `clasp clone <scriptId>`).
+
+**Phát hiện khi clone:** diff `gas-project/Code.gs` (live) vs `references/Code.2.21.2i.gs` (repo) lộ **2 điểm lệch**:
+1. Fix `doWriteConfig_` (v1.29.0, chặn clobber `registryDocId` về Doc legacy `1mATG`) — **đã pending redeploy từ
+   phiên v1.29.0**, đúng kỳ vọng.
+2. **Phát hiện mới:** khối `PENDING_EFFECT`/`effectiveDateIso_` (vb_status phát hiện văn bản hiệu lực TƯƠNG LAI,
+   thêm field `effective_date`/`pending_effect`) tồn tại trong `references/Code.2.21.2i.gs` nhưng **chưa từng
+   deploy** — viết vào tài liệu tham chiếu ở phiên nào đó, quên push.
+
+**Deploy (2026-07-02, user xác nhận):** `clasp push` (2 file) → `clasp version` (73) → `clasp deploy -i
+<deploymentId hiện tại>` (**GIỮ NGUYÊN deployment `/exec` — không tạo mới**, khớp `webappUrl` trong config).
+
+**Verify LIVE:** `ping` OK (version 2.21.2i) · `writeconfig`+`readconfig` trả `registryDocId=1C21i65…` (Sheet
+thật, KHÔNG còn `1mATG` — xác nhận fix #1 hoạt động) · `vb_status` trả `effective_date`/`pending_effect` không
+lỗi, note enum có `PENDING_EFFECT` (xác nhận tính năng #2 hoạt động) · local selftest 372/372 + integrity 33/0.
+
+---
+
 # ★ v1.29.4 (gws3env) — Xử DỨT ĐIỂM 5 vấn đề công cụ (log LIVE) + hoàn tất roadmap #8/#9/#10
 
 Từ báo cáo 5 vấn đề công cụ các phiên LIVE (workflow Explore read-only root-cause 5 hướng song song).

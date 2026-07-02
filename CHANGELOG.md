@@ -1,3 +1,39 @@
+# ★ v1.29.5 — Cài dev-tooling → `ruff` bắt BUG THẬT: đường đọc văn bản nhanh nhất chưa từng chạy được
+
+Sau khi thiết lập hạ tầng dev (git/clasp), cài thêm `ruff`/`pyright`/`hypothesis`/`gh`/`ccusage`/`claude-code-log`/
+`gas-fakes` theo khuyến nghị. Chạy `ruff check --select F821` (undefined-name) lập tức bắt được **bug thật đang
+chạy production từ lâu**:
+
+**`_read_doc_text`** (hàm đọc nguyên văn GDoc — dùng khắp nơi: corpus-audit, header-verify, extract, xref,
+footnote-map) có nhánh **direct-media** (nhanh nhất, chỉ cần cred gws, KHÔNG cần binary) gọi
+`tempfile.TemporaryDirectory()` nhưng **`tempfile` chưa từng được import ở module scope** (chỉ có 2
+`import tempfile as _tf` cục bộ ở HAI hàm khác, tên alias khác). Mỗi lần nhánh này chạy → `NameError` → bị
+`except Exception: pass` ngay dưới **nuốt âm thầm** → luôn rơi xuống fallback chậm hơn (transport→gws binary /
+GAS webapp `exporttext`). **Nhánh nhanh nhất chưa từng thực thi đúng kể từ khi được viết** — một phần nguyên
+nhân hợp lý cho các báo cáo "corpus-audit chậm" trước đây (i1, đã vá bằng `--offset` ở v1.29.4, nhưng gốc rễ
+tốc độ per-item nằm ở đây).
+
+**FIX:** `import tempfile` vào khối import global (tl.py dòng 41). Dọn thêm 2 `F841` (unused-variable):
+`except Exception as e` bỏ `as e`; `cat_in_45` dư thừa trong `cmd_ingest_local` (`cat_valid` đã cùng giá trị,
+sót từ refactor #10 AUDIT v1.29.4).
+
+**Verify LIVE:** `_read_doc_text` chạy sạch không lỗi (41706 ký tự, văn bản thật). selftest 372/372, integrity
+33/0, `ruff check --select F821,F841` sạch.
+
+**Hạ tầng dev mới (2026-07-02):**
+- Canonical dir → **`D:\Quốc hội\tra-luat`** (từ `Downloads\tra-luat`) + `git init`
+- Apps Script chuyển sang **`clasp`** (thay sửa tay browser editor) — `gas-project/` clone qua `clasp clone`;
+  **`gas-deploy.ps1`** = 1 lệnh push+version+deploy (diff-check trước khi lên production; auto đồng bộ ngược
+  `gas-project/Code.gs` → `references/Code.2.21.2i.gs` sau deploy — chống trôi tài liệu)
+- Deploy đầu tiên qua clasp (version 73): fix `doWriteConfig_` (pending từ v1.29.0) + tính năng `PENDING_EFFECT`
+  (viết sẵn trong reference nhưng chưa từng deploy) — cả 2 verify LIVE OK
+- Cài: `ruff`, `pyright`, `hypothesis`, `gh` CLI, `ccusage`, `claude-code-log`, `@mcpher/gas-fakes` (devDependency
+  trong `gas-project/`, `.claspignore` xác nhận không lọt vào push)
+
+Deploy skill: `upload-skill-to-Package.cmd` (nay tại `D:\Quốc hội\`) → verify Package=1.29.5.
+
+---
+
 # ★ Apps Script REDEPLOY (2026-07-02) — clasp thay browser editor; version 73 LIVE
 
 Chuyển hạ tầng dev Apps Script sang **`google/clasp`** (canonical dir di chuyển `Downloads\tra-luat`

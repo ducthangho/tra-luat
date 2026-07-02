@@ -1136,6 +1136,47 @@ def run() -> int:
                   and "VBHN_MISSING_YEAR_OR_DATE" in _vf_n))
     # v1.29.6 P2.3: cờ boolean nhận giá trị tường minh.
     cases.append(("optional_bool_flag", _optional_bool_flag("true") is True and _optional_bool_flag("False") is False))
+
+    # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
+    # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
+    # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).
+    _r5_main = {"id": "m131", "drive_id": "m131", "name": "ND_131-2021-ND-CP_Nghi_dinh_chi_tiet_BLLD",
+                "so_hieu": "131/2021/NĐ-CP", "loai": "Nghị định", "corpus": "true",
+                "mime": "application/vnd.google-apps.document"}
+    _r5_pl = {"id": "p131", "drive_id": "p131", "name": "PL_131-2021-ND-CP_Phu_luc_I_Bieu_mau",
+              "so_hieu": "", "corpus": "true", "mime": "application/vnd.google-apps.document"}
+    _r5_best, _r5_gid, _n, _h = _resolve_deep_target("131/2021/NĐ-CP", [_r5_pl, _r5_main])
+    cases.append(("r5_resolver_main_over_appendix", _r5_gid == "m131"))
+    _r5_main2 = dict(_r5_main, so_hieu="")   # cả hai sohieu rỗng → PL_ penalty vẫn đẩy chính văn lên
+    _r5_best2, _r5_gid2, _n2, _h2 = _resolve_deep_target("131/2021/NĐ-CP", [_r5_pl, _r5_main2])
+    cases.append(("r5_resolver_pl_penalty_alone", _r5_gid2 == "m131"))
+    # (#4) dedup gate KHÔNG còn tier sohieu: phụ lục (drive_id khác, title khác) CÙNG SỐ HIỆU với nguồn live
+    # → 'clear' (trước: false-positive TITLE_ALREADY_ON_NOTEBOOK trỏ nhầm source chính văn). Trùng THẬT vẫn 'dup'.
+    class _FakeNC5:
+        def __init__(self, srcs): self._s = srcs
+        def source_list(self, nb, skip_freshness=True, drive=True):
+            return {"ok": True, "sources": self._s}
+    _DGM = "1MainDriveId0123456789abcd"
+    _live5 = [{"id": "s-main", "title": "ND_131-2021-ND-CP_Nghi_dinh_chi_tiet_BLLD", "drive_id": _DGM}]
+    _v5a, _d5a = _nlm_dedup_gate(_FakeNC5(_live5), "nb", [{"drive_id": "1PhuLucDriveId9876543210zz",
+                                                           "name": "PL_131-2021-ND-CP_Phu_luc_I_Bieu_mau"}])
+    _v5b, _d5b = _nlm_dedup_gate(_FakeNC5(_live5), "nb", [{"drive_id": _DGM, "name": "khac"}])
+    _v5c, _d5c = _nlm_dedup_gate(_FakeNC5(_live5), "nb", [{"drive_id": "1XyzDriveId000000000000aa",
+                                                           "name": "ND_131-2021-ND-CP_Nghi_dinh_chi_tiet_BLLD"}])
+    cases.append(("r5_dedup_gate_sohieu_variant_clear", _v5a == "clear" and _d5a == []
+                  and _v5b == "dup" and _d5b[0][1] == "s-main" and _v5c == "dup"))
+    # (#7) register --row-kind: parser nhận own/overflow/ref, CHẶN giá trị lạ (SystemExit).
+    _ap5 = build_parser()
+    _ns5 = _ap5.parse_args(["register", "--drive-id", "d1", "--row-kind", "own"])
+    try:
+        _ap5.parse_args(["register", "--drive-id", "d1", "--row-kind", "xyz"])
+        _r5_bad = False
+    except SystemExit:
+        _r5_bad = True
+    cases.append(("r5_register_row_kind_flag", _ns5.row_kind == "own" and _r5_bad))
+    # (#9) ingest-local có cờ --skip-nlm-preflight (mặc định False = pre-check bật).
+    _ns9 = _ap5.parse_args(["ingest-local", "x.docx"])
+    cases.append(("r5_ingest_local_nlm_preflight_flag", getattr(_ns9, "skip_nlm_preflight", None) is False))
     cases.append(("source_map_qt5_hint_from_number_subject", any("thi dua khen thuong" in _strip_accents(q).lower() and "hop nhat" in _strip_accents(q).lower() for q in sm_tdk.get("qt5_search_hints", []))))
     cases.append(("vbhn_check_derives_subject_from_goc", any("thi dua khen thuong" in _strip_accents(q).lower() for q in _qt5_queries(_derive_subject_from_entries([rel_fx[0]]), "06/2022/QH15", ""))))
     cases.append(("vbhn_check_candidate", (_vbhn_candidates([

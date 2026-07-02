@@ -1,3 +1,38 @@
+# ★ v1.29.7 — Xử log NĐ131+phụ lục: 9 vấn đề ingest/extract/dedup/bookkeeping + 3 script quy trình
+
+Từ log LIVE nạp NĐ 131/2021 + phụ lục vào profile "Pháp lệnh NCC" (9 vấn đề, xếp theo ảnh hưởng).
+
+## Lỗi dữ liệu/độ tin cậy
+- **#1 `--sohieu` không vào registry (ingest-local):** organize có nhận sohieu server-side nhưng thực tế từng không
+  persist → **READ-BACK sau organize + BACKFILL** journaled `reg_upsert` (sohieu immutable; kèm loai/goc) + cảnh báo.
+- **#2 extract chọn nhầm PHỤ LỤC làm canonical:** tie-break `_resolve_deep_target` khi query số hiệu:
+  registry-sohieu khớp THẬT **+150** · tên phụ lục (`PL_`/`Phu_luc`) **−120** — chính văn thắng cả khi cả 2 sohieu rỗng.
+- **#3 extract dính cap ~200k dù đã `cache-build`:** ưu tiên **cache CONSOLIDATED** (`cache.find(sohieu).articles`,
+  ca 185 Điều từng cụt ở Điều 26 — không lấy được Điều 40/130) → dựng full-text nguồn `cache-build (no-cap)`.
+- **#4 dedup gate dương tính giả trên phụ lục:** **BỎ tầng SOHIEU** khỏi `_nlm_dedup_gate` — chính văn + phụ lục CÙNG
+  số hiệu → phụ lục hợp lệ từng bị chặn TITLE_ALREADY_ON_NOTEBOOK trỏ nhầm source chính văn (phải --skip-live-check
+  tay). Gate = drive_id + exact-title-duy-nhất (chống re-push CÙNG tài liệu); `ingest-missing` GIỮ 3 tầng (backlog 1-1).
+
+## Lỗi quy trình / bookkeeping
+- **#5 `nlm-reconcile` không link nguồn vừa `nlm-add`:** SELF-HEAL — `unregistered≠∅` mà chưa `--refresh` → tự refresh
+  manifest + re-plan 1 lần (row vừa ingest chỉ thiếu trong cache → thành `link_candidates`, `--apply` backfill được).
+- **#6 `row_kind=overflow` gán nhầm cho profile-own:** trước `target != NLM_BASE_NOTEBOOK → overflow` (mọi profile
+  dính); nay overflow **CHỈ khi target == overflow-shard đã cấu hình** (TL_OVERFLOW_NOTEBOOK_ID).
+- **#7 không có đường sửa row_kind:** `tl register --drive-id <id> --row-kind own|overflow|ref` (choices chặn giá trị lạ).
+
+## Cấu hình / khởi động — 3 SCRIPT QUY TRÌNH (tại `D:\Quốc hội\`, hướng dẫn: references/DEV_TOOLING_GUIDE.md §9)
+- **#8 `new-profile.ps1`** — seed profile ĐÃ có hạ tầng (4 ID từ SKILL_OF_RECORD) vào config, journaled + verify;
+  guard registry rỗng/Doc-legacy (bài học clobber).
+- **#9 `preflight-ingest.ps1`** — `tl up --nlm` XANH mới ingest; VÀ trong skill: `ingest-local --apply` nay **TỰ
+  PRE-CHECK NLM** (binary + notebook_get) TRƯỚC upload — fail → dừng sớm CHƯA đụng Drive/registry (hết chuỗi dở
+  dang gãy ở bước cuối); ép: `--skip-nlm-preflight`. (Review vá 1 bug: điều kiện ready chỉ tin `ok`.)
+- **#6/#7 `fix-row-kind.ps1`** — rà + sửa hàng loạt dòng overflow-nhầm về own (mỗi dòng journaled, undo được).
+
+selftest **383/383** (+5 r5_*). integrity 33/0. Review đối kháng: 1 bug MEDIUM (preflight condition) đã vá.
+Deploy: `upload-skill-to-Package.ps1` → verify Package=1.29.7.
+
+---
+
 # ★ v1.29.6 — Xử log rà 118 Luật: P0 amendment-gate precision (15 PAUSE giả = 13%) + P1/P2
 
 Từ báo cáo rà toàn corpus 118 Luật (67 gốc + 51 VBHN, v1.29.5): P0 nghiêm trọng nhất — `source-map` ép

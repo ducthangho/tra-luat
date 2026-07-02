@@ -158,7 +158,23 @@ HANDOFF.md thủ công từ đầu — giờ có thể trích + biên tập lạ
 7. (khi release) .\upload-skill-to-Package.ps1  (xem §9)
 ```
 
-## 9. Build + upload skill lên Package
+## 9. Quy trình vận hành đóng gói sẵn (scripts tại `D:\Quốc hội\`, v1.29.7)
+
+Ba script cho các quy trình hay lặp (từ log sự cố NĐ131 — #6/#7/#8/#9):
+
+| Script | Quy trình | Dùng khi |
+|---|---|---|
+| **`fix-row-kind.ps1`** | Rà + sửa dòng bị gán nhầm `row_kind=overflow` trong 1 profile (bug ingest-local <v1.29.7) | Sau khi phát hiện dòng profile-own mang overflow: `.\fix-row-kind.ps1 -Profile "X"` (DRY) → `-Apply` (mỗi dòng qua `register --row-kind own`, journaled + undo được) |
+| **`new-profile.ps1`** | ĐĂNG KÝ profile đã có hạ tầng sẵn (4 ID từ SKILL_OF_RECORD) vào config — hết thêm block JSON tay | Profile như "Pháp lệnh NCC" có notebookId/folder/registry/manifest nhưng thiếu trong config: `.\new-profile.ps1 -Name "..." -NotebookId ... -RootFolderId ... -RegistryDocId ...` — CHẶN registry rỗng/Doc-legacy; ghi journaled + verify bằng profile-info |
+| **`preflight-ingest.ps1`** | Nghiệm hạ tầng (`tl up --nlm`) TRƯỚC rồi mới `ingest-local` — không gãy ở bước cuối | Mọi lần nạp văn bản mới: `.\preflight-ingest.ps1 -Profile "X" -File "...docx" --sohieu "..." --cat NN --apply` (args sau -File chuyển thẳng cho ingest-local) |
+
+Lưu ý liên quan (đã vá trong skill v1.29.7 — script là lớp tiện dụng bên ngoài):
+- `ingest-local` nay TỰ pre-check NLM trước upload (tắt: `--skip-nlm-preflight`) + read-back/backfill `--sohieu` sau organize.
+- `register --row-kind own|overflow|ref` là đường sửa row_kind chính thức.
+- `extract` tự dùng cache consolidated của `cache-build` (hết cap 200k); resolver ưu tiên chính văn hơn phụ lục `PL_`.
+- `nlm-reconcile` tự refresh manifest khi thấy `unregistered` (nguồn vừa nlm-add hết bị báo oan).
+
+## 10. Build + upload skill lên Package
 
 Script `D:\Quốc hội\upload-skill-to-Package.ps1` (đã có sẵn từ trước, vừa sửa đường dẫn xuất zip):
 

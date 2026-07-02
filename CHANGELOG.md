@@ -1,3 +1,48 @@
+# ★ v1.29.6 — Xử log rà 118 Luật: P0 amendment-gate precision (15 PAUSE giả = 13%) + P1/P2
+
+Từ báo cáo rà toàn corpus 118 Luật (67 gốc + 51 VBHN, v1.29.5): P0 nghiêm trọng nhất — `source-map` ép
+PAUSE_AND_ASK_USER cho 15/118 Luật, **100% ứng viên gây PAUSE đều confidence=low, non-linked**.
+Recon 5-agent read-only + **verify EMPIRICAL trước/sau trên manifest thật** (doctrine v1.27.1).
+
+## P0 — 4 fix precision cổng amendment-existence
+- **(a) FILTER ứng viên:** `corpus=false` (bản đã thay — Luat_51/46-2024) · cat `Van_ban_thuong` (bản góp ý
+  Quy chế lao động HR từng bị gán làm amendment cho **Luật Giá**!) · tên PHI-QUY-PHẠM khi registry-sohieu rỗng
+  (+`lịch trình`/`thẩm tra`/`dự thảo`/`kế hoạch họp` — ca 'Lịch trình thẩm tra dự án Luật SĐ Luật Xuất bản';
+  prefix `YK_` loại vô điều kiện). Chuẩn hoá `_`→space trước match (keyword cũ 'gop y' không match 'gop_y').
+- **(b) NGƯỠNG PAUSE:** candidate **MẠNH** = dẫn chiếu đúng số hiệu base (linked) / confidence=high — chỉ mạnh
+  mới escalate PAUSE; weak-only → cờ mới `AMENDMENT_CANDIDATE_LOW_CONFIDENCE` = **REVIEW** (không dừng workflow).
+- **(c) VBHN date-coverage FALLBACK NĂM** (cổng cũ im lặng vì manifest thiếu full-date → 9/15 base-là-VBHN vẫn
+  PAUSE): so **năm-từ-sohieu-key** STRICT (`25-2026-VBHN` > `90-2025-QH15` → covered `(year-only)`; cùng năm =
+  mơ hồ, không cover — an toàn).
+- **(d) OMNIBUS** `sua_doi_N_luat` non-linked = weak vô điều kiện (từng bị gán cho 8 base nó KHÔNG sửa chỉ vì
+  khớp chủ đề trần); linked qua goc/sua_doi/refs vẫn strong → PAUSE đúng.
+
+**Empirical (manifest 762):** 19/2012 + 90/2025 + 57/2024: PAUSE→REVIEW ✓ ('Lịch trình' bị lọc, 51/46-2024
+corpus=false bị lọc, 19/2012 covered=2026 year-only) · control 80/2025 + 25/VBHN: OK giữ nguyên ✓ · test
+**linked-still-PAUSES** pass (không mất an toàn) ✓.
+
+## P1 — corpus-audit under-scan âm thầm
+`--all` bị limit mặc định cắt → scanned=40/515, 0 proposal → "sạch" GIẢ. Fix: cảnh báo **⚠ CẮT BATCH** LOUD
+(X..Y/N + lệnh trang kế) + JSON thêm `pool_total`/`next_offset`/`coverage_complete` (KHÔNG bỏ cap — 515
+header-read sẽ lại client-timeout). Đối chiếu sweep: **2 thước đo KHÁC NHAU** (corpus-audit = header thật,
+guard chặt; sweep = heuristic tên/enum-field) — note rõ 2 phía (`note_vs_sweep` + next_actions), đếm lệch
+là bình thường, không phải "một trong hai sai".
+
+## P2 — nhiễu cờ + CLI
+- `_vbhn_metadata_flags` nhận **năm trong sohieu-key** (`NN-YYYY-VBHN-XXX`): hết cờ thiếu-năm oan →
+  `VBHN_NUMBER_REUSE_RISK` hết nổ trên mọi VBHN (20×) → `TITLE_OR_REGISTRY_WARN` hết treo-rỗng (24×) —
+  empirical: cờ giờ luôn kèm `risky_candidates` có finding THẬT (vd tên file thiếu năm).
+- `--corpus`/`--nlm` (reg-query, profile-files): nhận cả `--corpus true/false` (hết rc=2 usage-error);
+  SKILL.md bảng CLI cập nhật.
+
+selftest **378/378** (+7 test, 1 test cũ cập nhật theo semantics mới — có test chống-vacuous cho omnibus).
+integrity 33/0. Deploy: `upload-skill-to-Package.ps1` → verify Package=1.29.6.
+
+**Data-ops còn lại của log (LIVE, user duyệt — xem tổng kết phiên):** backfill sohieu Luật PCBTN (03/2007/QH12);
+5 file thô corpus=true chưa chuẩn hoá; dedup 94 nhóm/orphan 71 (`dedup-plan`/`hygiene plan`).
+
+---
+
 # ★ v1.29.5 — Cài dev-tooling → `ruff` bắt BUG THẬT: đường đọc văn bản nhanh nhất chưa từng chạy được
 
 Sau khi thiết lập hạ tầng dev (git/clasp), cài thêm `ruff`/`pyright`/`hypothesis`/`gh`/`ccusage`/`claude-code-log`/

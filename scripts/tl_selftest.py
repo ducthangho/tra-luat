@@ -1091,7 +1091,51 @@ def run() -> int:
     rel = _relation_audit(rel_fx, base="06/2022/QH15", subject="thi đua khen thưởng", amendments=["06/2026/QH16"])
     cases.append(("relation_check_finds_unlinked_amendment", (rel["amendment_candidates"] or [{}])[0].get("entry", {}).get("drive_id") == "tdkt2026" and len(rel["missing_links"]) >= 2))
     sm_tdk = _source_map_one("06/2022/QH15", rel_fx)
-    cases.append(("source_map_unlinked_amendment_detected", bool(sm_tdk.get("unlinked_amendment_candidates")) and any("PAUSE_AND_ASK_USER" in w for w in sm_tdk.get("warnings", []))))
+    # v1.29.6 (P0b — log 118 Luật): candidate NON-LINKED conf=low nay là WEAK → REVIEW (cờ LOW_CONFIDENCE),
+    # KHÔNG còn PAUSE (trước 15/118 Luật dừng giả vì chính pattern này). Vẫn phải LIỆT KÊ đủ trong unlinked list.
+    cases.append(("source_map_unlinked_amendment_detected",
+                  bool(sm_tdk.get("unlinked_amendment_candidates"))
+                  and any("AMENDMENT_CANDIDATE_LOW_CONFIDENCE" in w for w in sm_tdk.get("warnings", []))
+                  and not any("PAUSE_AND_ASK_USER" in w for w in sm_tdk.get("warnings", []))
+                  and sm_tdk.get("verdict") == "REVIEW"))
+    # v1.29.6 P0b: candidate LINKED (registry goc trỏ đúng base) = STRONG → vẫn PAUSE như cũ (không mất an toàn).
+    rel_fx_linked = [rel_fx[0], dict(rel_fx[1], goc="06-2022-QH15")]
+    sm_tdk_l = _source_map_one("06/2022/QH15", rel_fx_linked)
+    cases.append(("source_map_linked_amendment_still_pauses",
+                  sm_tdk_l.get("action_required") == "PAUSE_AND_ASK_USER"
+                  and any(c.get("strong") for c in sm_tdk_l.get("amendment_candidates") or [])))
+    # v1.29.6 P0a: corpus=false / cat Van_ban_thuong / tên phi-quy-phạm (lịch trình/thẩm tra/YK_) KHÔNG là candidate.
+    _p0a_ents = [rel_fx[0],
+                 dict(rel_fx[1], corpus="false"),
+                 {"id": "hr1", "drive_id": "hr1", "name": "YK_tham_gia_du_thao_SDBS_QCLV_mau", "cat": "Van_ban_thuong",
+                  "so_hieu": "", "corpus": "true"},
+                 {"id": "lt1", "drive_id": "lt1", "name": "Lịch trình thẩm tra dự án Luật sửa đổi Luật Thi đua",
+                  "so_hieu": "", "cat": "29", "corpus": "true"}]
+    _p0a_c = _find_amendment_candidates("06-2022-QH15", [_p0a_ents[0]], [], _p0a_ents)
+    cases.append(("amendment_filter_corpus_false_thuong_nonnormative", _p0a_c == []))
+    # v1.29.6 P0d: omnibus 'sua_doi_N_luat' non-linked = weak (omnibus=True, strong=False); linked qua goc → strong.
+    # Fixture đặt subject-tokens TRONG TÊN để candidate THẬT SỰ vào list (probe: tukhoa không đủ vào overlap-gate)
+    # — assert đòi len>=1, KHÔNG cho vacuous-pass.
+    _omn = {"id": "om1", "drive_id": "om1", "name": "Luat_90-2025-QH15_sua_doi_8_luat_Thi_dua_Khen_thuong_va_khac",
+            "so_hieu": "90/2025/QH15", "cat": "29", "corpus": "true"}
+    _omn_c = _find_amendment_candidates("06-2022-QH15", [rel_fx[0]], [], [rel_fx[0], _omn])
+    cases.append(("amendment_omnibus_nonlinked_weak",
+                  len(_omn_c) >= 1 and all((c.get("_amendment_omnibus") and not c.get("_amendment_strong")) for c in _omn_c)))
+    # v1.29.6 P0c: VBHN year-fallback — VBHN key 2026 > luật-sửa key 2025 → covered (year-only); CÙNG năm → KHÔNG.
+    _vbhn26 = {"id": "v26", "drive_id": "v26", "name": "VBHN_25-2026-VBHN-VPQH_2026_Luat_Gia", "so_hieu": "25-2026-VBHN-VPQH", "loai": "VBHN"}
+    _am25 = {"id": "a25", "drive_id": "a25", "name": "Luat_90-2025-QH15_sua_doi_8_luat", "so_hieu": "90/2025/QH15"}
+    _cv1, _lbl1, _ = _amendments_covered_by_vbhn_date(_vbhn26, [_am25])
+    _am26 = {"id": "a26", "drive_id": "a26", "name": "Luat_99-2026-QH16_SuaDoi", "so_hieu": "99/2026/QH16"}
+    _cv2, _, _ = _amendments_covered_by_vbhn_date(_vbhn26, [_am26])
+    cases.append(("vbhn_date_year_fallback", _cv1 is True and "year-only" in str(_lbl1) and _cv2 is False))
+    # v1.29.6 P2.2: VBHN sohieu-key ĐÃ CÓ NĂM (133-2025-VBHN-VPQH) → KHÔNG cờ MISSING_YEAR (hết reuse-risk oan).
+    _vf_y = _vbhn_metadata_flags({"id": "x", "name": "VBHN_133-2025-VBHN-VPQH_Luat_Dat_dai", "so_hieu": "133-2025-VBHN-VPQH", "loai": "VBHN"}, "luat dat dai")
+    _vf_n = _vbhn_metadata_flags({"id": "y", "name": "VBHN_14-VBHN-VPQH_Luat_X", "so_hieu": "14/VBHN-VPQH", "loai": "VBHN"}, "luat x")
+    cases.append(("vbhn_flags_key_year_no_false_missing",
+                  "VBHN_MISSING_YEAR_OR_DATE" not in _vf_y and "VBHN_NAME_MISSING_YEAR" not in _vf_y
+                  and "VBHN_MISSING_YEAR_OR_DATE" in _vf_n))
+    # v1.29.6 P2.3: cờ boolean nhận giá trị tường minh.
+    cases.append(("optional_bool_flag", _optional_bool_flag("true") is True and _optional_bool_flag("False") is False))
     cases.append(("source_map_qt5_hint_from_number_subject", any("thi dua khen thuong" in _strip_accents(q).lower() and "hop nhat" in _strip_accents(q).lower() for q in sm_tdk.get("qt5_search_hints", []))))
     cases.append(("vbhn_check_derives_subject_from_goc", any("thi dua khen thuong" in _strip_accents(q).lower() for q in _qt5_queries(_derive_subject_from_entries([rel_fx[0]]), "06/2022/QH15", ""))))
     cases.append(("vbhn_check_candidate", (_vbhn_candidates([

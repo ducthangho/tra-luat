@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.29.5)
+# tra-luat — LÕI VẬN HÀNH (v1.29.6)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -212,7 +212,7 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 | `tl ingest-local <file> --auto-plan [--text-file <txt>] [--force-cat] [--apply]` | **(v1.25) NẠP TÍCH HỢP:** `--auto-plan` đọc nội dung local → tự suy `name/sohieu/loai/cat` (chỉ điền ô còn trống; explicit `--name/--cat` thắng) → upload→convert GDoc→cat folder→registry→`nlm add`. Cat mơ hồ/thiếu text → DRY, chặn `--apply` trừ `--cat`/`--force-cat`. `--source-quality ocr --ocr-verified` cho PDF OCR |
 | `tl ingest-local <file> --name --sohieu --cat --goc [--apply]` | **(2)+(3) ĐƯỜNG UPLOAD TRỰC TIẾP (file local trong môi trường Claude)** 1-lệnh: upload **MIME thật (.docx/.doc/.pdf)**(convert=false)→organize(convert=true server-side+rename+cat+stamp+register)→preflight→CLI nlm add→push. DRY mặc định; validate cat theo 45 chủ đề + auto `mkdir`. .pdf→cảnh báo `format_warn` (verify nguyên văn). **Luồng khuyến nghị: `ingest-analyze` (suy name+cat) → verify → `ingest-local --apply`** |
 | `tl cat-list [--missing]` | liệt kê 45 chủ đề pháp điển chính thức (`references/phap_dien_45.json`) + folder đã có |
-| `tl reg-query [--name/--sohieu/--cat/--nlm/--no-nlm/--row-kind/--corpus/--mime] [--json]` | **truy vấn registry/manifest OFFLINE + lọc** — thay viết tay `json.load(manifest)+filter`; tra drive_id theo tên, liệt kê 1 cat, lọc nlm/corpus… |
+| `tl reg-query [--name/--sohieu/--cat/--nlm/--no-nlm/--row-kind/--corpus/--mime] [--json]` | **truy vấn registry/manifest OFFLINE + lọc** — thay viết tay `json.load(manifest)+filter`; tra drive_id theo tên, liệt kê 1 cat, lọc nlm/corpus… ⚠ `--corpus`/`--nlm` là CỜ TRẦN (lọc =true); từ v1.29.6 nhận cả `--corpus true/false`; lọc corpus=false dùng `--no-corpus` |
 | `tl recat <drive_id…> --cat NN [--quarantine] [--apply]` | **di dời file → folder chủ đề** (mkdir đúng tên nếu thiếu) + cập nhật registry; `--quarantine` cách ly. DRY mặc định |
 | `tl cat-audit [--json]` | **audit cấp 2**: doc corpus có folder ≠ chủ đề suy từ tên (heuristic) → rà tay rồi `recat` |
 | `tl confirm --sohieu/-drive-id/-cat NN/--all-unconfirmed [--apply] [--force]` | **GÁN NHÃN ĐÃ-RÀ-KỸ** (registry.verified): ĐỌC HEADER xác minh sohieu+tiêu đề+loại+cat khớp tên+thư mục → mismatch KHÔNG gán (trừ `--force`). DRY mặc định. Entry đã confirm → source-map/dedup TIN dùng luôn (bỏ DIRTY/WARN, tăng tốc rà soát) |

@@ -5,3 +5,5 @@ __pycache__/
 *.dl
 tra_luat_config.v2.json
 node_modules/
+.ruff_cache/
+.pytest_cache/

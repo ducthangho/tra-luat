@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.tra_luat_cache/
+*.tmp
+*.dl
+tra_luat_config.v2.json

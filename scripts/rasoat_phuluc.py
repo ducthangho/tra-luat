@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""rasoat_phuluc.py — Sinh Phụ lục 03–07-BN từ BẢNG TỔNG HỢP PHÁT HIỆN (master).
+
+Triết lý (xem references/QUY_TRINH_RA_SOAT_3_TANG.md, mục Pha 4): rà từng luật, dồn
+phát hiện vào MỘT bảng tổng hợp, rồi sinh phụ lục MỘT LẦN ở cuối — dedup xuyên luật,
+đánh số liên tục theo lĩnh vực. Đây là bước KẾT XUẤT, không phân tích lại.
+
+Đầu vào: 1 file JSON master, HOẶC 1 thư mục chứa nhiều file .json (gộp tất cả).
+Cấu trúc master: xem templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json
+  {
+    "co_quan": "...",
+    "van_ban":  [ {linh_vuc, loai, so_hieu, ngay, ten, hieu_luc_tu, tinh_trang,
+                   sua_doi_bo_sung, ghi_chu} ... ],   # -> Phụ lục I (03-BN)
+    "noi_dung": [ {key, linh_vuc, van_ban, can_cu, phan_tich, hinh_thuc,
+                   lo_trinh, tieu_chi, ghi_chu} ... ] # -> Phụ lục II..V (04..07-BN)
+  }
+
+Định tuyến theo trường "hinh_thuc" (không phân biệt hoa thường, có dấu):
+  - "ban hành mới"                              -> 05-BN (Phụ lục III)
+  - "bãi bỏ toàn bộ"                            -> 06-BN (Phụ lục IV)
+  - "tạm ngưng/ngừng toàn bộ"                   -> 07-BN (Phụ lục V)
+  - "nghiên cứu" / "mục f" / "chờ"             -> KHÔNG vào phụ lục (đưa danh sách Mục F)
+  - còn lại (sửa đổi/bổ sung/thay thế/bãi bỏ một phần/tạm ngưng hiệu lực/giải thích/hướng dẫn)
+                                               -> 04-BN (Phụ lục II)
+
+Dedup: theo "key" nếu có; nếu trống thì theo (van_ban + can_cu + hinh_thuc) chuẩn hóa.
+Giữ bản đầu, gộp các văn bản trùng vào ghi chú, ĐẾM MỘT LẦN (đúng nguyên tắc Mục D).
+
+KHÔNG gọi mạng, KHÔNG gọi NLM. Xuất Markdown (bảng) + tóm tắt số liệu Mục D.
+Văn phong: tuân references/VAN_PHONG_HANH_CHINH.md (người nhập chịu trách nhiệm nội dung ô).
+
+Cách dùng:
+  rasoat_phuluc.py --in master.json --out-dir .
+  rasoat_phuluc.py --in thu_muc_cac_luat/ --out-dir .   # gộp nhiều file
+"""
+import argparse, json, re, hashlib, datetime, unicodedata
+from pathlib import Path
+
+
+def _norm(s):
+    s = (s or "").strip().lower()
+    s = unicodedata.normalize("NFC", s)
+    return re.sub(r"\s+", " ", s)
+
+
+def route(hinh_thuc):
+    h = _norm(hinh_thuc)
+    if not h:
+        return "04"
+    if "ban hành mới" in h:
+        return "05"
+    if "bãi bỏ toàn bộ" in h:
+        return "06"
+    if ("tạm ngưng toàn bộ" in h) or ("tạm ngừng toàn bộ" in h):
+        return "07"
+    if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
+        return "F"
+    return "04"
+
+
+def load_master(p):
+    path = Path(p)
+    files = sorted(path.glob("*.json")) if path.is_dir() else [path]
+    van_ban, noi_dung, co_quan = [], [], ""
+    for f in files:
+        d = json.loads(f.read_text(encoding="utf-8"))
+        co_quan = co_quan or d.get("co_quan", "")
+        van_ban += d.get("van_ban", [])
+        noi_dung += d.get("noi_dung", [])
+    return co_quan, van_ban, noi_dung
+
+
+def dedup(items):
+    seen, out = {}, []
+    for it in items:
+        k = (it.get("key") or "").strip()
+        if not k:
+            k = hashlib.md5(("|".join(_norm(it.get(x, "")) for x in
+                            ("van_ban", "can_cu", "hinh_thuc"))).encode()).hexdigest()
+        if k in seen:
+            # nội dung trùng (vd cùng mâu thuẫn lộ ra từ 2 luật) — đếm 1 lần, gộp văn bản
+            base = out[seen[k]]
+            vb = it.get("van_ban", "")
+            if vb and vb not in base.get("van_ban", ""):
+                base["ghi_chu"] = (base.get("ghi_chu", "") +
+                                   ("; " if base.get("ghi_chu") else "") +
+                                   "Cũng phát sinh khi rà: " + vb)
+            continue
+        seen[k] = len(out)
+        out.append(dict(it))
+    return out
+
+
+def group_by_linhvuc(items):
+    g = {}
+    for it in items:
+        g.setdefault(it.get("linh_vuc", "(Chưa phân loại)"), []).append(it)
+    return g
+
+
+def md_escape(s):
+    return (s or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def table_03(van_ban):
+    L = ["| STT | Số, ký hiệu; ngày ban hành | Tên gọi/Trích yếu | Thời điểm có hiệu lực "
+         "| VB sửa đổi, bổ sung, bãi bỏ một phần | Ghi chú |",
+         "|---|---|---|---|---|---|"]
+    n = 0
+    for lv, rows in group_by_linhvuc(van_ban).items():
+        L.append(f"| | **LĨNH VỰC {lv.upper()}** | | | | |")
+        loai_g = {}
+        for r in rows:
+            loai_g.setdefault(r.get("loai", "Bộ luật, luật của Quốc hội"), []).append(r)
+        for loai, rs in loai_g.items():
+            L.append(f"| | *{loai}* | | | | |")
+            for r in rs:
+                n += 1
+                sh = md_escape(r.get("so_hieu", ""))
+                ngay = md_escape(r.get("ngay", ""))
+                L.append("| {} | {} | {} | {} | {} | {} |".format(
+                    n, (sh + (", ngày " + ngay if ngay else "")),
+                    md_escape(r.get("ten", "")), md_escape(r.get("hieu_luc_tu", "")),
+                    md_escape(r.get("sua_doi_bo_sung", "")),
+                    md_escape(r.get("tinh_trang", "") + ("; " + r.get("ghi_chu") if r.get("ghi_chu") else ""))))
+    return "\n".join(L), n
+
+
+def table_xuly(items, kind):
+    """04/05/06/07 — cùng khung 8 cột (đủ cho 04); 05 có cột khác nhưng dùng chung cho gọn."""
+    L = ["| STT | Tên VB được rà soát | Căn cứ rà soát | Phân tích nội dung cần xử lý "
+         "| Hình thức xử lý | Lộ trình | Tiêu chí | Ghi chú |",
+         "|---|---|---|---|---|---|---|---|"]
+    n = 0
+    for lv, rows in group_by_linhvuc(items).items():
+        L.append(f"| | **LĨNH VỰC {lv.upper()}** | | | | | | |")
+        for r in rows:
+            n += 1
+            L.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                n, md_escape(r.get("van_ban", "")), md_escape(r.get("can_cu", "")),
+                md_escape(r.get("phan_tich", "")), md_escape(r.get("hinh_thuc", "")),
+                md_escape(r.get("lo_trinh", "")), md_escape(r.get("tieu_chi", "")),
+                md_escape(r.get("ghi_chu", ""))))
+    return "\n".join(L), n
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--in", dest="inp", required=True, help="file master.json hoặc thư mục .json")
+    ap.add_argument("--out-dir", default=".")
+    ap.add_argument("--title", default="")
+    a = ap.parse_args()
+
+    co_quan, van_ban, noi_dung = load_master(a.inp)
+    noi_dung = dedup(noi_dung)
+
+    buckets = {"04": [], "05": [], "06": [], "07": [], "F": []}
+    for it in noi_dung:
+        buckets[route(it.get("hinh_thuc"))].append(it)
+
+    today = datetime.date.today().isoformat()
+    out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
+    f = out / "PHU_LUC_03_07_BN_TONG_HOP.md"
+
+    NAMES = {"04": ("Phụ lục II", "Mẫu 04-BN", "đề xuất sửa đổi, bổ sung; thay thế; tạm ngưng hiệu lực, bãi bỏ một phần"),
+             "05": ("Phụ lục III", "Mẫu 05-BN", "đề xuất ban hành mới"),
+             "06": ("Phụ lục IV", "Mẫu 06-BN", "đề xuất bãi bỏ toàn bộ"),
+             "07": ("Phụ lục V", "Mẫu 07-BN", "đề xuất tạm ngưng hiệu lực toàn bộ")}
+
+    P = [f"# PHỤ LỤC TỔNG HỢP KẾT QUẢ RÀ SOÁT (03–07-BN)",
+         f"*Cơ quan rà soát: {co_quan or '……'} · lập ngày {today} · "
+         f"{len(van_ban)} văn bản · {len(noi_dung)} nội dung (đã dedup)*",
+         "\n> Văn phong tuân `references/VAN_PHONG_HANH_CHINH.md`. Đếm theo văn bản gốc, mỗi nội dung một lần.\n",
+         "## Phụ lục I — Mẫu 03-BN — Danh mục VBQPPL thuộc đối tượng, phạm vi rà soát"]
+    t03, n03 = table_03(van_ban); P.append(t03)
+
+    counts = {"03": n03}
+    for k in ("04", "05", "06", "07"):
+        pl, mau, mota = NAMES[k]
+        P.append(f"\n## {pl} — {mau} — Danh mục VBQPPL {mota}")
+        if buckets[k]:
+            tb, nb = table_xuly(buckets[k], k); P.append(tb); counts[k] = nb
+        else:
+            P.append("*Không có nội dung.*"); counts[k] = 0
+
+    # Mục F (ngoài phụ lục)
+    P.append("\n## Nội dung chuyển Mục F (chờ bổ sung căn cứ — KHÔNG vào phụ lục)")
+    if buckets["F"]:
+        P.append("| STT | Văn bản | Nội dung | Căn cứ cần bổ sung |")
+        P.append("|---|---|---|---|")
+        for i, r in enumerate(buckets["F"], 1):
+            P.append(f"| {i} | {md_escape(r.get('van_ban',''))} | {md_escape(r.get('phan_tich',''))} | {md_escape(r.get('can_cu',''))} |")
+    else:
+        P.append("*Không có.*")
+
+    # Tóm tắt Mục D
+    P.append("\n## Tóm tắt số liệu (đối chiếu Mục D Báo cáo)")
+    P.append(f"- Tổng văn bản rà soát (Mẫu 03-BN): **{counts['03']}**")
+    P.append(f"- Đề xuất sửa đổi, bổ sung… (Mẫu 04-BN): **{counts['04']}**")
+    P.append(f"- Đề xuất ban hành mới (Mẫu 05-BN): **{counts['05']}**")
+    P.append(f"- Đề xuất bãi bỏ toàn bộ (Mẫu 06-BN): **{counts['06']}**")
+    P.append(f"- Đề xuất tạm ngưng toàn bộ (Mẫu 07-BN): **{counts['07']}**")
+    P.append(f"- Nội dung chờ bổ sung căn cứ (Mục F): **{len(buckets['F'])}**")
+
+    f.write_text("\n".join(P), encoding="utf-8")
+    print(json.dumps({"ok": True, "out": str(f), "counts": counts,
+                      "muc_f": len(buckets["F"]), "n_van_ban": len(van_ban),
+                      "n_noi_dung_dedup": len(noi_dung)}, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,620 @@
+{
+ "schema": "tra-luat-linhvuc/1.0",
+ "nguon": "Điều 7 Pháp lệnh pháp điển hệ thống QPPL số 03/2012/UBTVQH13 (45 chủ đề) + 2 mã mở rộng nội bộ (00, 46)",
+ "quy_tac_ranh_gioi": [
+  "Đầu tư KINH DOANH (Luật Đầu tư, PPP, Đấu thầu) -> 34; đầu tư CÔNG (vốn NSNN: Luật Đầu tư công) -> 26.",
+  "Hải quan -> 26 (chức năng tài chính nhà nước), KHÔNG vào 33 (33 chỉ thuế/phí/lệ phí).",
+  "BHXH/BHYT -> 02 (Bảo hiểm), không vào 20 dù gắn lao động; Công đoàn -> 36.",
+  "Luật sửa >=2 luật -> cat 46; linhvuc = chủ đề luật ở Điều 1; linhvuc_list = toàn bộ chủ đề các luật đích.",
+  "VBHN xếp theo chủ đề của LUẬT GỐC được hợp nhất.",
+  "Văn bản Đảng (mọi loại) -> 00, không trộn vào 01-46.",
+  "Điều ước/Công ước quốc tế -> 23.",
+  "Hồ sơ dự án luật/dự thảo: theo chủ đề nội dung dự luật, đánh dấu hieuluc=du_thao.",
+  "Không khớp alias nào hoặc khớp >=2 nhóm điểm ngang nhau -> QUARANTINE + HỎI."
+ ],
+ "chude": {
+  "01": {
+   "ten_vn": "An ninh quốc gia",
+   "slug": "An_ninh_quoc_gia",
+   "folder": "01_An_ninh_quoc_gia",
+   "phap_dien": true,
+   "alias": [
+    "an ninh quoc gia",
+    "bao ve bi mat nha nuoc",
+    "phong chong khung bo",
+    "an ninh mang"
+   ]
+  },
+  "02": {
+   "ten_vn": "Bảo hiểm",
+   "slug": "Bao_hiem",
+   "folder": "02_Bao_hiem",
+   "phap_dien": true,
+   "alias": [
+    "bao hiem",
+    "BHXH",
+    "BHYT",
+    "bao hiem xa hoi",
+    "bao hiem y te",
+    "bao hiem that nghiep"
+   ]
+  },
+  "03": {
+   "ten_vn": "Bưu chính, viễn thông",
+   "slug": "Buu_chinh_vien_thong",
+   "folder": "03_Buu_chinh_vien_thong",
+   "phap_dien": true,
+   "alias": [
+    "buu chinh",
+    "vien thong",
+    "tan so"
+   ]
+  },
+  "04": {
+   "ten_vn": "Bổ trợ tư pháp",
+   "slug": "Bo_tro_tu_phap",
+   "folder": "04_Bo_tro_tu_phap",
+   "phap_dien": true,
+   "alias": [
+    "bo tro tu phap",
+    "luat su",
+    "cong chung",
+    "giam dinh",
+    "dau gia",
+    "trong tai vien",
+    "tro giup phap ly",
+    "thua phat lai"
+   ]
+  },
+  "05": {
+   "ten_vn": "Cán bộ, công chức, viên chức",
+   "slug": "Can_bo_cong_chuc_vien_chuc",
+   "folder": "05_Can_bo_cong_chuc_vien_chuc",
+   "phap_dien": true,
+   "alias": [
+    "can bo",
+    "cong chuc",
+    "vien chuc"
+   ]
+  },
+  "06": {
+   "ten_vn": "Chính sách xã hội",
+   "slug": "Chinh_sach_xa_hoi",
+   "folder": "06_Chinh_sach_xa_hoi",
+   "phap_dien": true,
+   "alias": [
+    "chinh sach xa hoi",
+    "nguoi co cong",
+    "giam ngheo",
+    "bao tro xa hoi",
+    "nguoi cao tuoi",
+    "nguoi khuyet tat"
+   ]
+  },
+  "07": {
+   "ten_vn": "Công nghiệp",
+   "slug": "Cong_nghiep",
+   "folder": "07_Cong_nghiep",
+   "phap_dien": true,
+   "alias": []
+  },
+  "08": {
+   "ten_vn": "Dân số, gia đình, trẻ em, bình đẳng giới",
+   "slug": "Dan_so_gia_dinh_tre_em_binh_dang_gioi",
+   "folder": "08_Dan_so_gia_dinh_tre_em_binh_dang_gioi",
+   "phap_dien": true,
+   "alias": [
+    "dan so",
+    "gia dinh",
+    "tre em",
+    "binh dang gioi",
+    "hon nhan"
+   ]
+  },
+  "09": {
+   "ten_vn": "Dân sự",
+   "slug": "Dan_su",
+   "folder": "09_Dan_su",
+   "phap_dien": true,
+   "alias": [
+    "dan su",
+    "bo luat dan su"
+   ]
+  },
+  "10": {
+   "ten_vn": "Dân tộc",
+   "slug": "Dan_toc",
+   "folder": "10_Dan_toc",
+   "phap_dien": true,
+   "alias": [
+    "dan toc"
+   ]
+  },
+  "11": {
+   "ten_vn": "Đất đai",
+   "slug": "Dat_dai",
+   "folder": "11_Dat_dai",
+   "phap_dien": true,
+   "alias": [
+    "dat dai"
+   ]
+  },
+  "12": {
+   "ten_vn": "Doanh nghiệp, hợp tác xã",
+   "slug": "Doanh_nghiep_hop_tac_xa",
+   "folder": "12_Doanh_nghiep_hop_tac_xa",
+   "phap_dien": true,
+   "alias": [
+    "doanh nghiep",
+    "hop tac xa",
+    "ho tro doanh nghiep nho"
+   ]
+  },
+  "13": {
+   "ten_vn": "Giáo dục, đào tạo",
+   "slug": "Giao_duc_dao_tao",
+   "folder": "13_Giao_duc_dao_tao",
+   "phap_dien": true,
+   "alias": [
+    "giao duc",
+    "dao tao",
+    "nha giao",
+    "day nghe",
+    "giao duc nghe nghiep",
+    "giao duc dai hoc"
+   ]
+  },
+  "14": {
+   "ten_vn": "Giao thông, vận tải",
+   "slug": "Giao_thong_van_tai",
+   "folder": "14_Giao_thong_van_tai",
+   "phap_dien": true,
+   "alias": [
+    "giao thong",
+    "van tai",
+    "duong bo",
+    "duong sat",
+    "hang khong",
+    "hang hai",
+    "duong thuy"
+   ]
+  },
+  "15": {
+   "ten_vn": "Hành chính tư pháp",
+   "slug": "Hanh_chinh_tu_phap",
+   "folder": "15_Hanh_chinh_tu_phap",
+   "phap_dien": true,
+   "alias": [
+    "hanh chinh tu phap",
+    "ho tich",
+    "quoc tich",
+    "chung thuc",
+    "ly lich tu phap",
+    "nuoi con nuoi"
+   ]
+  },
+  "16": {
+   "ten_vn": "Hình sự",
+   "slug": "Hinh_su",
+   "folder": "16_Hinh_su",
+   "phap_dien": true,
+   "alias": [
+    "hinh su",
+    "bo luat hinh su",
+    "thi hanh an hinh su tam giam"
+   ]
+  },
+  "17": {
+   "ten_vn": "Kế toán, kiểm toán",
+   "slug": "Ke_toan_kiem_toan",
+   "folder": "17_Ke_toan_kiem_toan",
+   "phap_dien": true,
+   "alias": [
+    "ke toan",
+    "kiem toan"
+   ]
+  },
+  "18": {
+   "ten_vn": "Khiếu nại, tố cáo",
+   "slug": "Khieu_nai_to_cao",
+   "folder": "18_Khieu_nai_to_cao",
+   "phap_dien": true,
+   "alias": [
+    "khieu nai",
+    "to cao",
+    "tiep cong dan"
+   ]
+  },
+  "19": {
+   "ten_vn": "Khoa học, công nghệ",
+   "slug": "Khoa_hoc_cong_nghe",
+   "folder": "19_Khoa_hoc_cong_nghe",
+   "phap_dien": true,
+   "alias": [
+    "khoa hoc",
+    "cong nghe",
+    "doi moi sang tao",
+    "tri tue nhan tao",
+    "AI",
+    "chuyen giao cong nghe",
+    "tieu chuan quy chuan",
+    "so huu tri tue",
+    "cong nghiep cong nghe so"
+   ]
+  },
+  "20": {
+   "ten_vn": "Lao động",
+   "slug": "Lao_dong",
+   "folder": "20_Lao_dong",
+   "phap_dien": true,
+   "alias": [
+    "lao dong",
+    "viec lam",
+    "an toan ve sinh lao dong",
+    "BLLD",
+    "bo luat lao dong",
+    "nguoi lao dong viet nam di lam viec",
+    "tien luong"
+   ]
+  },
+  "21": {
+   "ten_vn": "Môi trường",
+   "slug": "Moi_truong",
+   "folder": "21_Moi_truong",
+   "phap_dien": true,
+   "alias": [
+    "moi truong",
+    "bao ve moi truong",
+    "bien doi khi hau"
+   ]
+  },
+  "22": {
+   "ten_vn": "Ngân hàng, tiền tệ",
+   "slug": "Ngan_hang_tien_te",
+   "folder": "22_Ngan_hang_tien_te",
+   "phap_dien": true,
+   "alias": [
+    "ngan hang",
+    "tien te",
+    "tin dung",
+    "ngoai hoi"
+   ]
+  },
+  "23": {
+   "ten_vn": "Ngoại giao, điều ước quốc tế",
+   "slug": "Ngoai_giao_dieu_uoc_quoc_te",
+   "folder": "23_Ngoai_giao_dieu_uoc_quoc_te",
+   "phap_dien": true,
+   "alias": [
+    "ngoai giao",
+    "dieu uoc",
+    "thoa thuan quoc te",
+    "co quan dai dien",
+    "cong uoc"
+   ]
+  },
+  "24": {
+   "ten_vn": "Nông nghiệp, nông thôn",
+   "slug": "Nong_nghiep_nong_thon",
+   "folder": "24_Nong_nghiep_nong_thon",
+   "phap_dien": true,
+   "alias": [
+    "nong nghiep",
+    "nong thon",
+    "trong trot",
+    "chan nuoi",
+    "thuy san",
+    "thu y",
+    "lam nghiep",
+    "de dieu",
+    "phong chong thien tai"
+   ]
+  },
+  "25": {
+   "ten_vn": "Quốc phòng",
+   "slug": "Quoc_phong",
+   "folder": "25_Quoc_phong",
+   "phap_dien": true,
+   "alias": [
+    "quoc phong",
+    "dan quan",
+    "nghia vu quan su",
+    "bien phong",
+    "phong khong"
+   ]
+  },
+  "26": {
+   "ten_vn": "Tài chính",
+   "slug": "Tai_chinh",
+   "folder": "26_Tai_chinh",
+   "phap_dien": true,
+   "alias": [
+    "tai chinh",
+    "ngan sach",
+    "NSNN",
+    "hai quan",
+    "dau tu cong",
+    "kho bac",
+    "du toan",
+    "quyet toan"
+   ]
+  },
+  "27": {
+   "ten_vn": "Tài nguyên",
+   "slug": "Tai_nguyen",
+   "folder": "27_Tai_nguyen",
+   "phap_dien": true,
+   "alias": [
+    "tai nguyen",
+    "khoang san",
+    "nuoc",
+    "bien va hai dao",
+    "lam nghiep tai nguyen"
+   ]
+  },
+  "28": {
+   "ten_vn": "Tài sản công, nợ công, dự trữ nhà nước",
+   "slug": "Tai_san_cong_no_cong_du_tru_nha_nuoc",
+   "folder": "28_Tai_san_cong_no_cong_du_tru_nha_nuoc",
+   "phap_dien": true,
+   "alias": [
+    "tai san cong",
+    "no cong",
+    "du tru quoc gia",
+    "du tru nha nuoc",
+    "quan ly su dung tai san"
+   ]
+  },
+  "29": {
+   "ten_vn": "Thi đua, khen thưởng, các danh hiệu vinh dự nhà nước",
+   "slug": "Thi_dua_khen_thuong_cac_danh_hieu_vinh_du_nha_nuoc",
+   "folder": "29_Thi_dua_khen_thuong_cac_danh_hieu_vinh_du_nha_nuoc",
+   "phap_dien": true,
+   "alias": [
+    "thi dua",
+    "khen thuong"
+   ]
+  },
+  "30": {
+   "ten_vn": "Thi hành án",
+   "slug": "Thi_hanh_an",
+   "folder": "30_Thi_hanh_an",
+   "phap_dien": true,
+   "alias": [
+    "thi hanh an"
+   ]
+  },
+  "31": {
+   "ten_vn": "Thống kê",
+   "slug": "Thong_ke",
+   "folder": "31_Thong_ke",
+   "phap_dien": true,
+   "alias": [
+    "thong ke"
+   ]
+  },
+  "32": {
+   "ten_vn": "Thông tin, báo chí, xuất bản",
+   "slug": "Thong_tin_bao_chi_xuat_ban",
+   "folder": "32_Thong_tin_bao_chi_xuat_ban",
+   "phap_dien": true,
+   "alias": [
+    "bao chi",
+    "xuat ban",
+    "thong tin truyen thong",
+    "an ninh mang thong tin"
+   ]
+  },
+  "33": {
+   "ten_vn": "Thuế, phí, lệ phí, các khoản thu khác",
+   "slug": "Thue_phi_le_phi_cac_khoan_thu_khac",
+   "folder": "33_Thue_phi_le_phi_cac_khoan_thu_khac",
+   "phap_dien": true,
+   "alias": [
+    "thue",
+    "phi",
+    "le phi",
+    "gia tri gia tang",
+    "GTGT",
+    "xuat khau thue",
+    "tieu thu dac biet",
+    "thu nhap doanh nghiep",
+    "thu nhap ca nhan"
+   ]
+  },
+  "34": {
+   "ten_vn": "Thương mại, đầu tư, chứng khoán",
+   "slug": "Thuong_mai_dau_tu_chung_khoan",
+   "folder": "34_Thuong_mai_dau_tu_chung_khoan",
+   "phap_dien": true,
+   "alias": [
+    "dau tu",
+    "dau thau",
+    "thuong mai",
+    "chung khoan",
+    "PPP",
+    "doi tac cong tu",
+    "canh tranh",
+    "bao ve quyen loi nguoi tieu dung",
+    "so huu tri tue thuong mai"
+   ]
+  },
+  "35": {
+   "ten_vn": "Tổ chức bộ máy nhà nước",
+   "slug": "To_chuc_bo_may_nha_nuoc",
+   "folder": "35_To_chuc_bo_may_nha_nuoc",
+   "phap_dien": true,
+   "alias": [
+    "to chuc chinh phu",
+    "to chuc quoc hoi",
+    "to chuc chinh quyen dia phuong",
+    "bo may nha nuoc",
+    "can bo to chuc"
+   ]
+  },
+  "36": {
+   "ten_vn": "Tổ chức chính trị - xã hội, hội",
+   "slug": "To_chuc_chinh_tri_xa_hoi_hoi",
+   "folder": "36_To_chuc_chinh_tri_xa_hoi_hoi",
+   "phap_dien": true,
+   "alias": [
+    "cong doan",
+    "mat tran",
+    "hoi",
+    "thanh nien",
+    "phu nu",
+    "chu thap do",
+    "tu thien"
+   ]
+  },
+  "37": {
+   "ten_vn": "Tố tụng và các phương thức giải quyết tranh chấp",
+   "slug": "To_tung_va_cac_phuong_thuc_giai_quyet_tranh_chap",
+   "folder": "37_To_tung_va_cac_phuong_thuc_giai_quyet_tranh_chap",
+   "phap_dien": true,
+   "alias": [
+    "to tung",
+    "trong tai",
+    "hoa giai",
+    "doi thoai"
+   ]
+  },
+  "38": {
+   "ten_vn": "Tôn giáo, tín ngưỡng",
+   "slug": "Ton_giao_tin_nguong",
+   "folder": "38_Ton_giao_tin_nguong",
+   "phap_dien": true,
+   "alias": [
+    "ton giao",
+    "tin nguong"
+   ]
+  },
+  "39": {
+   "ten_vn": "Trật tự an toàn xã hội",
+   "slug": "Trat_tu_an_toan_xa_hoi",
+   "folder": "39_Trat_tu_an_toan_xa_hoi",
+   "phap_dien": true,
+   "alias": [
+    "trat tu an toan",
+    "phong chay",
+    "chua chay",
+    "cu tru",
+    "can cuoc",
+    "xuat nhap canh",
+    "vu khi",
+    "ma tuy trat tu"
+   ]
+  },
+  "40": {
+   "ten_vn": "Tương trợ tư pháp",
+   "slug": "Tuong_tro_tu_phap",
+   "folder": "40_Tuong_tro_tu_phap",
+   "phap_dien": true,
+   "alias": [
+    "tuong tro tu phap",
+    "dan do",
+    "chuyen giao nguoi"
+   ]
+  },
+  "41": {
+   "ten_vn": "Văn hóa, thể thao, du lịch",
+   "slug": "Van_hoa_the_thao_du_lich",
+   "folder": "41_Van_hoa_the_thao_du_lich",
+   "phap_dien": true,
+   "alias": [
+    "van hoa",
+    "the thao",
+    "du lich",
+    "di san",
+    "dien anh",
+    "quang cao"
+   ]
+  },
+  "42": {
+   "ten_vn": "Văn thư, lưu trữ",
+   "slug": "Van_thu_luu_tru",
+   "folder": "42_Van_thu_luu_tru",
+   "phap_dien": true,
+   "alias": [
+    "van thu",
+    "luu tru"
+   ]
+  },
+  "43": {
+   "ten_vn": "Xây dựng, nhà ở, đô thị",
+   "slug": "Xay_dung_nha_o_do_thi",
+   "folder": "43_Xay_dung_nha_o_do_thi",
+   "phap_dien": true,
+   "alias": [
+    "xay dung",
+    "nha o",
+    "do thi",
+    "quy hoach do thi",
+    "kinh doanh bat dong san",
+    "kien truc"
+   ]
+  },
+  "44": {
+   "ten_vn": "Xây dựng pháp luật và thi hành pháp luật",
+   "slug": "Xay_dung_phap_luat_va_thi_hanh_phap_luat",
+   "folder": "44_Xay_dung_phap_luat_va_thi_hanh_phap_luat",
+   "phap_dien": true,
+   "alias": [
+    "ban hanh van ban quy pham",
+    "pho bien giao duc phap luat",
+    "phap dien",
+    "kiem tra van ban",
+    "xay dung phap luat",
+    "thi hanh phap luat",
+    "giam sat"
+   ]
+  },
+  "45": {
+   "ten_vn": "Y tế, dược",
+   "slug": "Y_te_duoc",
+   "folder": "45_Y_te_duoc",
+   "phap_dien": true,
+   "alias": [
+    "y te",
+    "duoc",
+    "kham benh",
+    "chua benh",
+    "an toan thuc pham",
+    "phong chong dich"
+   ]
+  },
+  "00": {
+   "ten_vn": "Văn bản của Đảng",
+   "slug": "Van_ban_cua_Dang",
+   "folder": "00_Van_ban_cua_Dang",
+   "phap_dien": false,
+   "ghi_chu": "ngoài phạm vi pháp điển (Pháp lệnh chỉ pháp điển VBQPPL nhà nước TW, trừ Hiến pháp)",
+   "alias": [
+    "nghi quyet trung uong",
+    "bo chinh tri",
+    "ban bi thu",
+    "ket luan cua",
+    "chi thi cua bo chinh tri",
+    "van kien dai hoi",
+    "dang cong san",
+    "dang uy",
+    "BCH trung uong"
+   ]
+  },
+  "46": {
+   "ten_vn": "Luật sửa đổi nhiều luật",
+   "slug": "Luat_sua_doi_nhieu_luat",
+   "folder": "46_Luat_sua_doi_nhieu_luat",
+   "phap_dien": false,
+   "ghi_chu": "bucket kỹ thuật lập pháp: luật sửa >=2 luật đích; linhvuc_list mang phân loại thật",
+   "alias": []
+  },
+  "QUARANTINE": {
+   "ten_vn": "Cách ly chờ phân loại",
+   "slug": "QUARANTINE",
+   "folder": "QUARANTINE",
+   "phap_dien": false,
+   "alias": []
+  }
+ }
+}

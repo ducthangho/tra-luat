@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "nguon": "Bộ pháp điển VN — 45 chủ đề (Pháp lệnh pháp điển 2012 + QĐ 843/QĐ-TTg 2014). Danh mục: thuvienphapluat.vn/phap-luat/chu-de/bo-phap-dien",
+  "ghi_chu": "Mã chính thức 1-45. 'exists'=folder đã có trên Drive. '00'/'46' là rổ PHI-pháp-điển tự thêm.",
+  "chu_de": {
+    "01": {
+      "ten": "An ninh quốc gia",
+      "folder": "01_An_ninh_quoc_gia",
+      "exists": true
+    },
+    "02": {
+      "ten": "Bảo hiểm",
+      "folder": "02_Bao_hiem",
+      "exists": true
+    },
+    "03": {
+      "ten": "Bưu chính, viễn thông",
+      "folder": "03_Buu_chinh_vien_thong",
+      "exists": true
+    },
+    "04": {
+      "ten": "Bổ trợ tư pháp",
+      "folder": "04_Bo_tro_tu_phap",
+      "exists": false
+    },
+    "05": {
+      "ten": "Cán bộ, công chức, viên chức",
+      "folder": "05_Can_bo_cong_chuc_vien_chuc",
+      "exists": false
+    },
+    "06": {
+      "ten": "Chính sách xã hội",
+      "folder": "06_Chinh_sach_xa_hoi",
+      "exists": true
+    },
+    "07": {
+      "ten": "Công nghiệp",
+      "folder": "07_Cong_nghiep",
+      "exists": false
+    },
+    "08": {
+      "ten": "Dân số, gia đình, trẻ em, bình đẳng giới",
+      "folder": "08_Dan_so_gia_dinh_tre_em_binh_dang_gioi",
+      "exists": true
+    },
+    "09": {
+      "ten": "Dân sự",
+      "folder": "09_Dan_su",
+      "exists": true
+    },
+    "10": {
+      "ten": "Dân tộc",
+      "folder": "10_Dan_toc",
+      "exists": false
+    },
+    "11": {
+      "ten": "Đất đai",
+      "folder": "11_Dat_dai",
+      "exists": true
+    },
+    "12": {
+      "ten": "Doanh nghiệp, hợp tác xã",
+      "folder": "12_Doanh_nghiep_hop_tac_xa",
+      "exists": false
+    },
+    "13": {
+      "ten": "Giáo dục, đào tạo",
+      "folder": "13_Giao_duc_dao_tao",
+      "exists": true
+    },
+    "14": {
+      "ten": "Giao thông, vận tải",
+      "folder": "14_Giao_thong_van_tai",
+      "exists": false
+    },
+    "15": {
+      "ten": "Hành chính tư pháp",
+      "folder": "15_Hanh_chinh_tu_phap",
+      "exists": false
+    },
+    "16": {
+      "ten": "Hình sự",
+      "folder": "16_Hinh_su",
+      "exists": false
+    },
+    "17": {
+      "ten": "Kế toán, kiểm toán",
+      "folder": "17_Ke_toan_kiem_toan",
+      "exists": false
+    },
+    "18": {
+      "ten": "Khiếu nại, tố cáo",
+      "folder": "18_Khieu_nai_to_cao",
+      "exists": true
+    },
+    "19": {
+      "ten": "Khoa học, công nghệ",
+      "folder": "19_Khoa_hoc_cong_nghe",
+      "exists": true
+    },
+    "20": {
+      "ten": "Lao động",
+      "folder": "20_Lao_dong",
+      "exists": true
+    },
+    "21": {
+      "ten": "Môi trường",
+      "folder": "21_Moi_truong",
+      "exists": false
+    },
+    "22": {
+      "ten": "Ngân hàng, tiền tệ",
+      "folder": "22_Ngan_hang_tien_te",
+      "exists": true
+    },
+    "23": {
+      "ten": "Ngoại giao, điều ước quốc tế",
+      "folder": "23_Ngoai_giao_dieu_uoc_quoc_te",
+      "exists": true
+    },
+    "24": {
+      "ten": "Nông nghiệp, nông thôn",
+      "folder": "24_Nong_nghiep_nong_thon",
+      "exists": false
+    },
+    "25": {
+      "ten": "Quốc phòng",
+      "folder": "25_Quoc_phong",
+      "exists": false
+    },
+    "26": {
+      "ten": "Tài chính",
+      "folder": "26_Tai_chinh",
+      "exists": true
+    },
+    "27": {
+      "ten": "Tài nguyên",
+      "folder": "27_Tai_nguyen",
+      "exists": false
+    },
+    "28": {
+      "ten": "Tài sản công, nợ công, dự trữ nhà nước",
+      "folder": "28_Tai_san_cong_no_cong_du_tru_nha_nuoc",
+      "exists": false
+    },
+    "29": {
+      "ten": "Thi đua, khen thưởng, các danh hiệu vinh dự nhà nước",
+      "folder": "29_Thi_dua_khen_thuong_cac_danh_hieu_vinh_du_nha_nuoc",
+      "exists": true
+    },
+    "30": {
+      "ten": "Thi hành án",
+      "folder": "30_Thi_hanh_an",
+      "exists": false
+    },
+    "31": {
+      "ten": "Thống kê",
+      "folder": "31_Thong_ke",
+      "exists": true
+    },
+    "32": {
+      "ten": "Thông tin, báo chí, xuất bản",
+      "folder": "32_Thong_tin_bao_chi_xuat_ban",
+      "exists": true
+    },
+    "33": {
+      "ten": "Thuế, phí, lệ phí, các khoản thu khác",
+      "folder": "33_Thue_phi_le_phi_cac_khoan_thu_khac",
+      "exists": true
+    },
+    "34": {
+      "ten": "Thương mại, đầu tư, chứng khoán",
+      "folder": "34_Thuong_mai_dau_tu_chung_khoan",
+      "exists": true
+    },
+    "35": {
+      "ten": "Tổ chức bộ máy nhà nước",
+      "folder": "35_To_chuc_bo_may_nha_nuoc",
+      "exists": true
+    },
+    "36": {
+      "ten": "Tổ chức chính trị - xã hội, hội",
+      "folder": "36_To_chuc_chinh_tri_xa_hoi_hoi",
+      "exists": true
+    },
+    "37": {
+      "ten": "Tố tụng và các phương thức giải quyết tranh chấp",
+      "folder": "37_To_tung_va_cac_phuong_thuc_giai_quyet_tranh_chap",
+      "exists": true
+    },
+    "38": {
+      "ten": "Tôn giáo, tín ngưỡng",
+      "folder": "38_Ton_giao_tin_nguong",
+      "exists": true
+    },
+    "39": {
+      "ten": "Trật tự an toàn xã hội",
+      "folder": "39_Trat_tu_an_toan_xa_hoi",
+      "exists": true
+    },
+    "40": {
+      "ten": "Tương trợ tư pháp",
+      "folder": "40_Tuong_tro_tu_phap",
+      "exists": false
+    },
+    "41": {
+      "ten": "Văn hóa, thể thao, du lịch",
+      "folder": "41_Van_hoa_the_thao_du_lich",
+      "exists": true
+    },
+    "42": {
+      "ten": "Văn thư, lưu trữ",
+      "folder": "42_Van_thu_luu_tru",
+      "exists": true
+    },
+    "43": {
+      "ten": "Xây dựng, nhà ở, đô thị",
+      "folder": "43_Xay_dung_nha_o_do_thi",
+      "exists": true
+    },
+    "44": {
+      "ten": "Xây dựng pháp luật và thi hành pháp luật",
+      "folder": "44_Xay_dung_phap_luat_va_thi_hanh_phap_luat",
+      "exists": true
+    },
+    "45": {
+      "ten": "Y tế, dược",
+      "folder": "45_Y_te_duoc",
+      "exists": true
+    }
+  },
+  "custom_non_phapdien": {
+    "00": {
+      "ten": "Văn bản của Đảng",
+      "folder": "00_Van_ban_cua_Dang",
+      "exists": true
+    },
+    "46": {
+      "ten": "Luật sửa đổi, bổ sung nhiều luật",
+      "folder": "46_Luat_sua_doi_nhieu_luat",
+      "exists": true
+    }
+  },
+  "ghi_chu_them": "Quyết định 2026-06-26: AI/Trí tuệ nhân tạo, Chuyển đổi số, Công nghiệp công nghệ số CHƯA có đề mục pháp điển → tạm giữ cat 19 (KHCN), không tự chuyển 03. Dữ liệu/CSDL/CNTT/GDĐT đã về 03 (đề mục CNTT = chủ đề 3)."
+}

@@ -1,0 +1,45 @@
+{
+  "version": "1.22.1",
+  "note": "E2: bản đồ cụm lĩnh vực — 'pháp luật về X' → số hiệu canonical VBHN-first. Dùng cho xref/rasoat-chongcheo. SỐ HIỆU TRÙNG (vd 14/VBHN-VPQH dùng cho CẢ ATVSLĐ-2024 lẫn NLĐ-đi-nước-ngoài-2023): GIỮ số hiệu VBHN, để _resolve_cluster_member disambiguate theo CHỦ ĐỀ (subj key) + còn-hiệu-lực + năm — KHÔNG tụt về Luật gốc.",
+  "clusters": {
+    "lao_dong_xa_hoi": {
+      "base": "18/VBHN-VPQH",
+      "base_name": "Bộ luật Lao động (hợp nhất)",
+      "base_aliases": ["45/2019/QH14"],
+      "members": {
+        "bảo hiểm xã hội": "19/VBHN-VPQH",
+        "an toàn vệ sinh lao động": "14/VBHN-VPQH",
+        "việc làm": "74/2025/QH15",
+        "công đoàn": "90/VBHN-VPQH",
+        "giáo dục nghề nghiệp": "124/2025/QH15",
+        "người lao động việt nam đi làm việc ở nước ngoài": "8/VBHN-BNV",
+        "dân số": "113/2025/QH15"
+      }
+    },
+    "dau_tu_PPP": {
+      "base": "123/VBHN-VPQH",
+      "base_name": "Luật Đầu tư theo phương thức đối tác công tư (PPP) (hợp nhất)",
+      "base_aliases": ["64/2020/QH14"],
+      "members": {
+        "đối tác công tư": "123/VBHN-VPQH",
+        "ppp": "123/VBHN-VPQH",
+        "đầu tư": "09/VBHN-VPQH",
+        "đầu tư công": "03/VBHN-VPQH",
+        "đấu thầu": "74/VBHN-VPQH"
+      }
+    },
+    "y_te_kham_chua_benh": {
+      "base": "40/VBHN-VPQH",
+      "base_name": "Luật Bảo hiểm y tế (hợp nhất)",
+      "base_aliases": ["46/2014/QH13", "25/2008/QH12"],
+      "members": {
+        "bảo hiểm y tế": "40/VBHN-VPQH",
+        "khám bệnh chữa bệnh": "15/2023/QH15",
+        "phòng bệnh": "114/2025/QH15",
+        "dược": "105/2016/QH13",
+        "an toàn thực phẩm": "61/VBHN-VPQH",
+        "dân số": "113/2025/QH15"
+      }
+    }
+  }
+}

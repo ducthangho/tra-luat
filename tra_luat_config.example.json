@@ -1,0 +1,77 @@
+{
+  "schema": 2,
+  "generatedAt": "<auto>",
+  "webappUrl": "<DÁN webappUrl /exec của bạn>",
+  "token": "<DÁN webapp token tl_... — KHÔNG commit/zip file này>",
+  "defaultProfile": "vbqppl",
+  "profiles": {
+    "vbqppl": {
+      "rootFolderId": "11Rkwf3nhudPNNcsGlloV8acaXiXqdutJ",
+      "notebookId": "743ed200-2e55-4673-b7a0-9bfd13b41ce6",
+      "registryDocId": "1C21i65wTzBsCm8FEOOQjQplS8BmXYLge4IW3-5QBtio",
+      "manifestId": "1d8Pau1x-Qeq0i8ClQnxuTMohGNf6GEeI",
+      "categories": {
+        "00": "1AK6l9ZNmr9rJxYeHkAgV9Cvi_uNHAuM7",
+        "01": "1dmTuWyBUUygiYe4kUL1Nf70DYfvSTp1y",
+        "02": "1_kRzUyta67w8Q0c4lqbkwwXzI7DqE_bi",
+        "06": "12jIOcotstycZJgZSWm7UvkErGRj6L2Ze",
+        "08": "1AmaG1OjlLzC_nMpMb3do5m1JgPbw-AES",
+        "09": "1p6Xpy1kIGqGjQdNDmGMK8HNywyCJZlLW",
+        "11": "11e34iuj2X0qQeBCwbuECcKCCjqyvQJ05",
+        "13": "1StbHm-aBS0gBbvrdwep5h4UFCI3eOJXu",
+        "18": "1dMFmY4Poz5U780s2r497NFz35U2PbY0L",
+        "19": "1amrlZ6xtuy9aRcDLITKF5B3cQDsdk_1H",
+        "20": "1AoIaRJGFt1Tti7DIGAFwyUTn4G0A014-",
+        "22": "1klTTDzf186xF2YBrpaOYbUMxBxYu7NHk",
+        "23": "1d50CbAM9WHRa1bAaw3HzG0b-_CKvLA_M",
+        "26": "1MC-PEMH8ahZDTVO1UH8b4een7WbevX1F",
+        "29": "1MCwq57W_ZA9_cL8A1VkXtge5Vmoepmzi",
+        "31": "16tUtNbS-3ou2Gg4wScZ1FVZynl067nsx",
+        "32": "14H2GCtKZReC_D0M6HMHAGBUFBo9kilNU",
+        "33": "15uR8Rfzq4dCSJE8_xVLUAg487kqgev-7",
+        "34": "1AmROn7N78pGGOp9OG2oVozOWyrxUWg7x",
+        "35": "1l3rHXzZBu1n_0YxM0oweZYWOxcdyOBsi",
+        "36": "1AX-QVMHOL0kbNoujLUFIerA2lAETK5dX",
+        "37": "1gdRrzncLFPrY3dR4kd7LHSJmc-oCwH7k",
+        "38": "1EccVZHYZm_VTAbBFfJ2kXUjB3DmtPPzq",
+        "39": "1aijrHqL8QG3wRSTPylz8NX2JltcDnOdY",
+        "41": "1bBI8-FsJwKhqcloWoB00uKHA7qCv3PD8",
+        "42": "1KcHrZeE_R9ZuwJ-LvQFWnWCz0gOv4YDj",
+        "44": "1SVKfgHAHu3xmInE3yOuLI7hzg1rSAHmK",
+        "45": "1L0RSsh62RJroKQpwEfVEHLE2EJRp141z",
+        "46": "1Z5JUnjRzv_3-fVKu9HPnJOox_YK-B3Ux",
+        "QUARANTINE": "153C8u1SoyttNMcC2albawErEev8wgLVi",
+        "03": "15KUgPThRtN-JWLgkmYo3cq9S3tP4nxLF",
+        "43": "11ba_XtZP40MEWuZFhEElXZwQVrAUURku",
+        "16": "1_W-IRoM6erc8qbdjMcT2zh25mTzggAv1",
+        "17": "1gCXZpCbnOlK898Mc3ZzwfrJNYVvDMQlF"
+      },
+      "shards": [
+        "743ed200-2e55-4673-b7a0-9bfd13b41ce6",
+        "45739ff7-347a-45c7-8066-0f2f3b55f76a"
+      ],
+      "overflowNotebookId": "45739ff7-347a-45c7-8066-0f2f3b55f76a"
+    },
+    "vbthuong": {
+      "rootFolderId": "1Ik9TXfkkXThbBecMWm4CMXo-mZCRAw84",
+      "notebookId": "fec6c125-e01c-433d-aed5-666c16540dd8",
+      "registryDocId": "1hkebEkdAkZcdXw210UROwrXI4GN_ZX4GN7MdcZPjdLg",
+      "manifestId": "1bUtirq2rVMDCl7zPPGHSoBc5AXI8S0zy",
+      "categories": "inherit"
+    },
+    "Luật BHXH": {
+      "rootFolderId": "1iJmt1GEHVzXSqoSIO83_1sbLCVjMaCX1",
+      "notebookId": "59e8d0de-c0fa-4dc7-ae69-66be0e8afc6b",
+      "registryDocId": "1yh0fxKk_G8FBvuYTu1KEjkpjQwBeCTVVMbQIpfNnAek",
+      "manifestId": "1Kz5ymAqXaYpQDsmz-4W15KK0GSKdxIDI",
+      "categories": "inherit"
+    },
+    "NQ80": {
+      "rootFolderId": "1m3z9-6r4xD6_N3H4GP5kqTiBQ8je8y_N",
+      "notebookId": "cc39895d-1d3d-4668-9b53-a1f7be0bbebd",
+      "registryDocId": "1LMKnAwqaw5LlyFyI8F_fWl2Swx4NwTxGo9khThLmP_w",
+      "manifestId": "1WobFhTUdSP3EpflzWkGVR20WJJ0L7Y-R",
+      "categories": "inherit"
+    }
+  }
+}

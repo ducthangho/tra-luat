@@ -1,3 +1,480 @@
+# ★ v1.33.0 — Log rà 69 Luật (A-mục) + log rà 15 Luật v1.32.2: CAT-auditor over-fire 78% + name/reuse-risk/dup oan + circuit-breaker gws
+
+Hai log hội tụ về CÙNG các defect precision của auditor; bản này xử trọn nhóm CODE (A1/A2/A3 log-69; B1/B2/B3/B4/C4 log-15).
+
+## A1+B1+B2 — `CAT_LIKELY_WRONG` chỉ suy từ TIÊU ĐỀ + cổng phủ định (`_cat_likely_wrong_suggest`)
+- ĐO THẬT log-69: 59 đề xuất/54 trên 69 Luật ≈ 78% false-positive (134 AI →46; BLHS 100 →23 'điều ước'; mọi VBHN →46)
+  — khối 5b cũ đưa CẢ 24KB header vào `_vb_auto_cat_from_text` → điều khoản chuyển tiếp 'sửa đổi, bổ sung' + dẫn
+  chiếu 'điều ước quốc tế' + token lạc (hải quan/BHXH) trong THÂN của gần như mọi luật kích boundary-rule.
+- Nay: (1) bằng chứng = TITLE-SCOPE (tên + khối tiêu đề IN HOA `_title_block_from_text` + title_vn), thân văn bản
+  KHÔNG còn là bằng chứng cat; (2) VBHN KHÔNG BAO GIỜ →46 (hợp nhất ≠ omnibus — cat theo LUẬT ĐÍCH); omnibus THẬT
+  (`_is_omnibus_entry`, cả tên nén) vẫn →46 kể cả khi title-block miss; (3) →23 chặn khi loai/tên đã định danh
+  Luật/Bộ luật; (4) allowlist Quyết định 26/6: AI/CĐS/CNCNS đang cat 19 → KHÔNG đề xuất dời (`_CAT19_PIN_RE`);
+  (5) cross-check `_expected_cat_from_alias` (CÙNG engine cat-audit → xử luôn B3 'hai auditor mâu thuẫn'): alias
+  khẳng định cat hiện tại → bỏ; alias ra cat thứ ba → bỏ; alias đồng thuận → ghi vào evidence.
+- Tín hiệu thật GIỮ: 143-2025 'Đầu tư' cat 45 → đề xuất 34 (không còn 46 sai); omnibus 57-2024 → 46.
+- note_vs_sweep cập nhật cho khớp thực đo (A1e: hết tự nhận 'precision-first' trong khi bắn 59 phát).
+
+## A2 — NAME_NONSTANDARD nhận viết tắt Bộ luật (`BLDS_/BLHS_/BLLD_/BLTTHS_/BLTTDS_/BLHH_`)
+- `_NAME_TYPE_PREFIX_RE` whitelist + `_NAME_PREFIX_FAMILY` (BLDS↔Bo_luat cùng HỌ — không tính 'đổi mã loại' i2c).
+  Áp cả 3 chỗ: `_name_structural_issues` (sweep name_nonstandard dùng chung), `_name_looks_nonstandard`, guard prefix
+  NAME_TRICH_YEU. 4 ca tên hỏng thật (.html/thiếu sohieu/cụt) VẪN bắt.
+
+## A3 — Circuit-breaker gws AUTH-DEAD (transport + tl_gws + `_read_doc_text`)
+- Log-69: `[FALLBACK→GAS] gws rc=2: Authentication failed` trên MỌI văn bản + mỗi doc tốn retry gws → batch 69 vượt
+  timeout shell. Lỗi auth là TERMINAL trong 1 process: `tl_gws._CRED_AUTH_DEAD` (set khi invalid_grant trong
+  `_access_token`) → `_read_doc_text`/transport-download SKIP direct-media từ doc thứ 2; `transport._GWS_AUTH_DEAD`
+  (+`_is_gws_auth_error`) → op sau đi THẲNG GAS, thông báo đúng 1 lần. 2 cờ TÁCH RỜI đúng kiến trúc 2-credential.
+  gws-ping/doctor canary gọi thẳng `_access_token` nên không bị breaker che.
+
+## B4 — `VBHN_NUMBER_REUSE_RISK`/`TITLE_OR_REGISTRY_WARN` hết oan khi năm ĐỦ (ca 25-2025 Kế toán)
+- GỐC RỄ tìm ra khi viết test: `VBHN_BARE_NUMBER` false-positive — tail 'Luat_Ke_toan' bị `_token_set` bỏ 'luat'
+  (stop-word) + 'ke' (2 ký tự) → đếm <2 tưởng TÊN TRƠ → kéo cả REUSE_RISK lẫn TITLE_WARN. Vá tận gốc trong
+  `_vbhn_metadata_flags`: fallback đếm từ-chữ ≥2 ký tự trong tail.
+- Thêm 2 lớp cho reuse-risk: (a) 'nhiều ứng viên cùng số' chỉ đếm VĂN BẢN PHÂN BIỆT (bỏ sidecar .docx/quarantine —
+  cặp GDoc+file-thô cùng số là MỘT văn bản); (b) `_vbhn_year_complete` — năm có ở CẢ sohieu-key lẫn TÊN thì hết rủi
+  ro tái-dùng-số (số VBHN tái dùng THEO NĂM). Tên trơ thiếu năm (133/61/72) VẪN cờ đúng.
+
+## C4 — sweep/hygiene dup by_sohieu tách TRÙNG THẬT vs cặp lành (`_sohieu_dup_group_real`)
+- Headline '93 trùng' = báo động giả (log-15: chỉ 4 cụm ≥2 corpus=true, cả 4 là tách Phụ lục/Final cố ý; 49 cụm
+  gốc+VBHN/quarantine lành). Trùng THẬT = ≥2 bản corpus=true CÙNG PHÍA (≥2 VBHN hoặc ≥2 non-VBHN) sau khi loại
+  sidecar/quarantine/template/phụ-lục (nhận cả 'PhuLuc' nén). sweep in `sohieu=<real> (raw=<N> gồm gốc+VBHN/phụ-lục
+  lành)`; hygiene scan: `duplicates_by_sohieu`=real, `duplicate_sohieu_groups_raw`=raw (đúng tên khóa sẵn có).
+
+## B3-log69 — `corpus-audit --sohieu-file <f> [--resume]`
+- Vòng `--sohieu X` ×69 process rời = 69 lần boot + retry gws per-doc → 1 PROCESS cả lô (mỗi dòng 1 số hiệu, '#'
+  comment, dedup drive_id, dòng không resolve báo LOUD). CHECKPOINT theo md5 nội dung file: ghi sau mỗi target,
+  `--resume` nạp lại bỏ target đã xử (kể cả sau READ_BACKEND_DOWN — abort message chỉ lệnh resume), chạy trọn tự xoá.
+
+## KHÔNG sửa (đúng chủ đích)
+- B2-log69 (doctor false-green): ĐÃ vá v1.32.1 (canary) — log-15 xác nhận doctor nay ĐỎ đúng.
+- D1/D2-log15 (509 vs 521; NLM 295/300): khác ĐỊNH NGHĨA + snapshot, sweep đã in corpus_basis; tin `nlm-get` LIVE.
+
+## Nợ DỮ LIỆU (user duyệt & chạy — lệnh sẵn, thứ tự khuyến nghị)
+1. `tl backfill-loai --normalize --apply` — 63-77 loai phi-chuẩn (C1 cả 2 log; ⚠ PHẢI có --normalize).
+2. Verify header 143-2025 rồi `tl recat 143-2025-QH15 --cat 34 --apply` (C4-log69 — misfile THẬT, đích 34 không phải 46).
+3. `tl backfill-title-vn` / `tl register --title-vn` cho 33-2024 (C3-log69 boilerplate).
+4. `tl header-verify --fix-suggest` → `source-rename` 4 ca tên hỏng thật (123_GD, 71-2020, 64-2006, 03-2007, 22-2023.html) + lô tên VBHN trơ thiếu năm (C2-log15: 133/61/72 — `source-rename --rename-drive`).
+5. E1-log15: QT-5 tìm VBHN mới nhất Bộ luật Hình sự (135/VBHN 2025) → nạp QT-3; mẻ QT-5 14 luật NO_VERIFIED_VBHN.
+6. `tl dedup-plan` (DRY) soát các cụm same_document/md5 còn lại.
+
+selftest **478/478** (+9 r13: cat-body-not-evidence, pin19, true-positive-alias, omnibus-46/VBHN-never-46,
+name-BLDS, reuse-sidecar+year-complete, dup-real, gws-breaker, sohieu-file flags). transport selftest 12/12.
+
+---
+
+# ★ v1.32.2 — Log rà 69 Luật (chạy LIVE trên v1.32.x): cold-start + loai-conflict + omnibus-tên-nén + tách bước setup
+
+TIN XÁC NHẬN từ log: gate A1/A2 v1.32.0 hoạt động đúng thực địa (90-2025 nay OK + AMENDMENT_GATE_SUPPRESSED_CONFIRMED;
+115-2026-VBHN nay OK + AMENDMENTS_ALREADY_CONSOLIDATED); doctor 13/13 sau khi user refresh cred; nlm-install --resume
++ canary vào guồng. REVIEW còn lại chủ yếu ĐÚNG THIẾT KẾ (14 luật thiếu VBHN cần QT-5 web; 3 luật cần relation-backfill).
+
+## S1 — `tl ping` retry cold-start Apps Script
+- Webapp lạnh trả 404/timeout 2-3 lần gọi ĐẦU rồi mới ấm → phiên từng kết luận sai 'webapp chết'. Ping nay retry ×3
+  (backoff 2s/5s) CHỈ với lỗi dạng cold-start (404/timeout) — lỗi khác giữ nguyên, không che.
+
+## S3 — backfill-loai --normalize thêm mode CONFLICT (ca 115-2026-VBHN mang loai='Luật')
+- loai HỢP LỆ enum nhưng mâu thuẫn bằng chứng → chỉ đề xuất khi 2 bằng chứng ĐỒNG THUẬN: tên prefix `VBHN_` VÀ
+  sohieu chứa `-VBHN-` → 'Văn bản hợp nhất' (mode=conflict; prefix khác nhiều ngoại lệ nên KHÔNG mở rộng).
+
+## S5 — `_is_omnibus_entry` nhánh đề-tài-trong-tên (dạng NÉN)
+- Ca 57-2024 vẫn REVIEW lặp sau v1.32.0: registry goc/sua_doi CHƯA backfill → nhánh ≥2-ref câm; tên
+  'SuaDoi_QuyHoach_DauTu_PPP_DauThau' strip xong DÍNH LIỀN nên so alias có-space không khớp → so DẠNG NÉN,
+  ≥2 đề-tài = omnibus. Guard: sửa-1-luật (75-2025 Quảng cáo) / luật thường có 'đầu tư' trong tên (68-2025) KHÔNG dính.
+
+## S4 — `tl_fetch.sh --setup-step core|gws|boot|nlm`
+- --setup trọn gói vượt trần 45s/lệnh Cowork (bị kill giữa chừng, log C1) → tách 4 bước, mỗi lệnh 1 bước;
+  bước nlm lặp cùng lệnh tới hết PARTIAL (rc=3 = còn bước, KHÔNG lỗi — in rõ).
+
+Ghi chú log C1 còn lại = giới hạn môi trường đã biết (mount cắt cụt/bwrap kill nền/boot 36.7s gần trần — boot sẽ
+nhanh hơn khi cred sống vì manifest đi direct-media). Data runbook mục D giữ nguyên (6 bước — các lệnh đều sẵn).
+
+selftest **469/469** (+3 r12: omnibus-tên-nén ± guard, loai-conflict corroborated ± guard, nlm-read gates).
+
+---
+
+# ★ v1.32.1 — Log rà 119 Luật: read-path CHẾT TOÀN BỘ nhưng health-check FALSE-GREEN
+
+Từ phiên rà toàn tập 119 Luật (v1.31.2): gws refresh_token đã revoke NHƯNG `doctor`/`gws-ping` vẫn ✓
+(chỉ kiểm binary + cấu hình oauth2, KHÔNG thử token thật) → phiên tưởng sẵn sàng rồi corpus-audit lặp
+từng doc ~22s toàn 'header rỗng' (pool 531 ≈ 3.2h all-error). Đồng thời lộ khẳng định SAI trong message
+GWS_CRED_EXPIRED cũ: fallback GAS 'vẫn đúng' — thực tế exporttext (đọc text) chết theo vì webapp thiếu
+scope `script.external_request`; chỉ download-file (b64) sống.
+
+## P1a — Canary token thật (`_gws_cred_alive`)
+- 1 POST oauth2 (~200ms, cache token process): `gws-ping` + `doctor` nay ĐỎ khi invalid_grant, kèm remediation
+  (`gws auth login` → `tl secrets-set --gws`) + workaround (`tl nlm-content`); `doctor --offline` skip canary
+  và GHI RÕ chưa kiểm. Note cuối gws-ping phân biệt 'cred CHẾT' (đọc Drive hỏng) vs 'chưa nạp' (fallback OK).
+  Verify LIVE trên máy dev (cred đang chết thật): gws-ping ✗ đúng.
+
+## P1b — Fast-fail + đường đọc dự phòng NLM
+- `corpus-audit` + `backfill-title-vn` (header mode): ≥3 lỗi đọc LIÊN TIẾP (đã thử cả 2 đường) → ABORT
+  `READ_BACKEND_DOWN` rc=2 kèm chẩn đoán, không cày hết pool.
+- `_read_doc_text_via_nlm` (mới): entry có nlm_source_id live → đọc text qua `nlm source content` (bản đã nạp,
+  vẫn verbatim nguồn — đủ cho header/audit). corpus-audit/backfill-title-vn tự thử khi Drive chết → 295 nguồn
+  NLM vẫn audit được trong lúc chờ refresh cred.
+
+## P0-msg — Sửa khẳng định sai
+- GWS_CRED_EXPIRED nay nói đúng: fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT chết theo (webapp thiếu scope
+  `script.external_request`) — extract/corpus-audit đi đường NLM tạm. (Cấp scope cho webapp = việc GAS-side,
+  cần sửa appsscript.json + redeploy nếu muốn fallback đọc thật sự sống.)
+
+Nợ OPS/DATA (mục E log — không đổi): (1) `gws auth login` → `tl secrets-set --gws` [P0, chặn nhiều nhất];
+(2) sau khi có read: header-verify 21 dòng TITLE_OR_REGISTRY_WARN + backfill hieuluc + QT-5 web 14 luật REVIEW;
+(3) hygiene: dedup-plan/backfill-loai --normalize/chuẩn hoá 173 tên (gồm canonical .html Đấu thầu 22-2023).
+
+selftest **467/467** (+1 r12). Lưu ý: log này chạy v1.31.2 — các defect gate A1/A2/A3 nó gặp (REVIEW omnibus/
+confirmed/VBHN) đã vá ở v1.32.0 chưa-deploy; deploy 1 lần được cả 2 đợt.
+
+---
+
+# ★ v1.32.0 — Log rà 77 Luật: 3 defect lớp AMENDMENT-GATE (A1/A2/A3) + enum điều ước + sidecar noise
+
+Từ backlog rà 77 Luật trên bản deploy v1.31.x (xác nhận qua name_nonstandard/stale_nlm_ref trong log): mọi defect
+đều ở LỚP GATE trong `_source_map_one`, không phải detector.
+
+## A1 — confirmed=yes phải chặn CẢ nhóm cờ amendment-gate (ca 90-2025)
+- Trước: `_entry_confirmed` chỉ suppress DIRTY/TITLE_WARN; khối escalation (UNLINKED_AMENDMENT_CANDIDATE /
+  VBHN_RECHECK_REQUIRED / PAUSE / LOW_CONFIDENCE) chạy bất kể canonical đã verified — trái doctrine §confirm.
+- Nay: canonical confirmed → cờ `AMENDMENT_GATE_SUPPRESSED_CONFIRMED` (ứng viên chỉ liệt kê tham khảo), KHÔNG
+  escalation; `action_required` nhất quán (`_gate_escalate` = strong ∧ ¬covered ∧ ¬confirmed). Nghi có sửa đổi
+  MỚI hơn ngày confirm → gỡ nhãn verified rồi rà lại (ghi rõ trong cờ).
+
+## A2 — gate 'tìm VBHN cho một VBHN' (ca 115-2026-VBHN)
+- Gốc: khối consolidated chỉ gom goc của `related_vbhn` — RỖNG khi query THẲNG số VBHN (canonical = chính VBHN
+  từ direct) → luật nó đã hợp nhất (06-2026) bị coi amendment mồ côi + đòi 'recheck VBHN'.
+- Nay: canonical là VBHN → refilter ứng viên thuộc `_goc_keys(canonical)` sang consolidated_amendments
+  (+AMENDMENTS_ALREADY_CONSOLIDATED); ứng viên NGOÀI goc còn lại → `VBHN_GOC_VERIFY` (xác minh chuỗi goc/sua_doi
+  qua footnote-map/relation-check + bản MỚI NHẤT lượt-2) thay vì VBHN_RECHECK_REQUIRED; REVIEW giữ cho ca này
+  (VBHN có amendment chưa hợp nhất = rủi ro lỗi thời THẬT).
+
+## A3 — omnibus bị coi amendment mồ côi lặp vô hạn (57-2024/68-2025/90-2025/123-2025)
+- `_is_omnibus_entry` (PURE): cat 46 ∨ tên 'sua doi N luat' ∨ (cụm sửa-đổi + ≥2 ref goc/sua_doi). Canonical
+  omnibus → `OMNIBUS_AMENDS_OTHER` (bản chất amends-other, không bao giờ có VBHN của chính nó — rà theo từng
+  luật ĐÍCH), BỎ UNLINKED/LOW_CONFIDENCE → verdict OK thay REVIEW lặp. PAUSE cho ứng viên STRONG giữ nguyên.
+
+## A4 + B3
+- `_LOAI_CANON` + 'Điều ước quốc tế'/'Công ước' (keys dieu uoc quoc te/dieu uoc/cong uoc…) — hết 56 dòng công ước
+  ILO đếm nonmappable/loai_noncanonical GIẢ; `backfill-loai --normalize` hưởng ngay.
+- `RAW_NAME_NOT_NLM` bỏ khỏi `risky_candidates` khi entry là SIDECAR .docx/.pdf cạnh GDoc cùng nhóm
+  (`_is_source_sidecar` — 21 ca noise mỗi lần rà; cờ gốc trong _title_flags giữ nguyên cho sweep/doctor).
+
+## Nợ DỮ LIỆU (mục C log — user chạy LIVE, thứ tự corpus-fix):
+1. `tl backfill-loai --normalize --apply` (60 dòng + hết 56 nonmappable-giả sau A4; sửa cả 115 về VBHN).
+2. BHXH 41-2024: giữ GDoc -QH15 canonical → gỡ NLM bản PDF trùng → `tl source-update-corpus 41-2024-QH15 true`
+   + bỏ quarantine (xem stale_nlm_ref sweep).
+3. 61_2020 Đầu tư: backfill goc/sua_doi (57-2024 sửa) qua `tl relation-backfill --base 61-2020-QH14` + sửa
+   sohieu underscore.
+4. `tl recat 143-2025-QH15 --cat 34 --apply` (sau header-verify) · điền cat 44-2024 · xác minh 46-2024→04 (medium)
+   · vá hậu tố tên folder cat trơ (46-2019→32, 57-2024→34, 129-2025→05).
+5. Mẻ QT-5 web lượt-2: ưu tiên 22-2023 Đấu thầu + 109-2025 Thuế TNCN (HIGH_VELOCITY), rồi 16 QT5_WEB_REQUIRED +
+   19 UNVERIFIED_LATEST (query đã sinh sẵn trong source-map/vbhn-check --json, chạy Claude-in-Chrome).
+
+selftest **466/466** (+7 r11_*: confirmed-suppress cả strong-linked, VBHN-consolidates-own-goc, GOC_VERIFY,
+omnibus amends-other + detector, treaty enum, sidecar-not-risky).
+
+---
+
+# ★ v1.31.2 — Log LIVE vòng 3: U1 sanitize UTF-8 export-text + U2 trích yếu từ KHỐI TIÊU ĐỀ (tier-1)
+
+Từ lần chạy tiếp của phiên rà (vẫn bản mount v1.30.1): (1) `tl extract --dieu 1` làm vỡ capture bash vì byte
+không hợp UTF-8 trong output; (2) phát hiện ĐÚNG của họ: nguồn trích yếu chuẩn = KHỐI TIÊU ĐỀ (dòng LUẬT/BỘ LUẬT
+IN HOA → dòng chủ đề, trước 'Căn cứ'), không phải Điều 1 (trả khoản phạm-vi). Script + sidecar 34 mục gửi kèm
+đã THẨM ĐỊNH — sidecar lộ ≥6 mục CỤT/SAI ('Luật Lưu trữ và pháp', 'Luật Thi', 'Luật Quản lý', 91/2015 thành
+'Luật Dân sự' SAI LOẠI, casing .lower() trần) → KHÔNG import; làm lại parser trong skill.
+
+## U1 — `_sanitize_export_text` (chống vỡ UTF-8 mọi driver)
+- Diệt lone-surrogate (round-trip encode-replace — rò từ decode surrogateescape các đường export/gws) + bỏ
+  control-char (giữ \n \t). Bọc MỌI nhánh `_read_doc_text` (cache/direct-media/transport/exporttext) +
+  `cmd_extract` TRƯỚC khi ghi đĩa/in — stdout reconfigure errors='replace' sẵn có (tl.py:44) KHÔNG cứu được
+  file `--out` và text chui vào pipeline JSON của driver.
+
+## U2 — `_title_block_from_text` + `_title_sentence_case` (TIER-1 của `_title_vn_from_header`)
+- Bóc dòng LOẠI IN HOA đứng riêng (`BỘ LUẬT` ưu tiên TRƯỚC `LUẬT` — script gốc match ngược → sai loại) → gom
+  ĐỦ các dòng chủ đề in-hoa (≥80% chữ hoa; KHÔNG cap 4 dòng như script gốc → hết cụt '(HIV/AIDS)'/'…quy phạm
+  pháp luật'; dừng ở Căn cứ/CHƯƠNG/Điều/kẻ ngang/dòng thường) → sentence-case GIỮ token có số/`/`/ngoặc.
+- Nhận cả PHÁP LỆNH/NGHỊ QUYẾT/NGHỊ ĐỊNH/THÔNG TƯ (kind qua _normalize_loai). Miss → tier-2 cũ
+  (_doc_subject_for_name) giữ nguyên; guard dấu/boilerplate như cũ. `backfill-title-vn` (header mode) hưởng trực tiếp.
+- Ghim test đúng các ca sidecar hỏng: multiline-no-cap, Bộ-luật-đúng-loại, (HIV/AIDS), dừng-ở-dòng-thường.
+
+## Vá thêm cùng ngày (debug phiên deploy của user)
+- **FP cat-guard CNTT (phiên rà xác nhận, canonical dính y hệt — tự tái hiện):** chude 19 có alias TRẦN
+  'cong nghe' còn 03 KHÔNG có alias 'cong nghe thong tin' trong linhvuc_phapdien.json → Luật CNTT (03 đúng chuẩn)
+  bị `_expected_cat_from_alias` nghi 19. Vá MẠNH HƠN script tham khảo (họ defer-im-lặng): boundary
+  'cong nghe thong tin' → trả POSITIVE **03** (đã xác minh pháp điển, doctrine §0.13 — bắt được cả ca Luật CNTT
+  nằm SAI cat khác) + 'cong nghe' trần vào _ALIAS_TOO_GENERIC (alias 19 đặc thù giữ nguyên). +1 test r9. ⚠ KHÔNG
+  áp gói patch/sidecar của phiên kia lên canonical: patch nhắm v1.30.1 (đã bị v1.31.x vượt — áp vào là THỤT LÙI
+  derive_subject + tái nhập sidecar trái doctrine); sidecar 34 mục vẫn nguyên ≥6 lỗi cụt/sai-loại.
+- **Selftest xả noise test-lỗi-chủ-đích ra console deploy** (user đọc thành "vẫn lỗi"): `tl register: error:
+  invalid choice: 'xyz'` là test r5 CỐ TÌNH truyền giá trị sai để xác nhận parser CHẶN (PASS nhờ chính dòng đó);
+  tương tự CẮT BATCH (test phân trang loud), [gas-retry] TimeoutError (mock), ENTRY_RAW_NO_GDOC (hành vi đang
+  test), [manifest] gws-fallback (test env-restore chạm LIVE). → helper `_hush` nuốt stdout/stderr của 5 block đó;
+  console selftest nay CHỈ còn [OK]/[FAIL] + 2 dòng tổng. Debug lại: `TL_SELFTEST_VERBOSE=1`.
+- **`upload-skill-to-Package.cmd` in "The system cannot find the path specified." mỗi lần chạy:** bisect bằng
+  echo-on lộ thủ phạm = mũi tên `->` trong dòng `title` — cmd hiểu `>` là REDIRECTION, cố ghi stdout vào file
+  `VBQPPL/Package` không tồn tại. Bỏ mũi tên khỏi title → hết (không liên quan Unicode/AutoRun như nghi ban đầu).
+- **direct-media HTTP 400 "Bad Request" (mọi đường _drive_media_download):** cô lập từng bước → gốc =
+  **GWS_CRED_EXPIRED**: refresh_token trong `~/.config/gws/credentials.json` hết hạn/bị thu hồi (invalid_grant
+  từ oauth2.googleapis.com). Kiến trúc: file cred này (nguồn direct-media) TÁCH RỜI token keyring của gws CLI
+  binary → gws CLI (drive-push/files list) vẫn chạy tốt trong khi direct-media chết → không ai nghi cred.
+  `_access_token` nay đọc body lỗi + raise thông điệp tự-chẩn-đoán (GWS_CRED_EXPIRED + cách sửa). Fallback GAS
+  b64 vẫn đúng (chỉ chậm + noisy). **Ops:** `gws auth login` → `tl secrets-set --gws` (làm mới bundle cho Cowork
+  — bundle hiện tại nhiều khả năng cũng chứa cred hết hạn ⇒ Cowork cũng đang rơi fallback).
+
+selftest **458/458** (+7 r10_*). Dữ liệu: sidecar 34 mục của phiên kia KHÔNG cần import — sau deploy chạy
+`tl backfill-title-vn --from-tukhoa --apply` rồi `tl backfill-title-vn --apply` (header tier-1 mới) lặp tới
+writable=0 là phủ sạch + ĐÚNG hơn sidecar.
+
+---
+
+# ★ v1.31.1 — Log phiên rà 68 Luật VÒNG 2 (tham khảo 4 script user): title_vn at-ingest + tier tukhoa + alias-strict + sweep name_nonstandard
+
+Bối cảnh: phiên Cowork kia chạy bản MOUNT v1.30.1 (v1.31.0 đã zip nhưng CHƯA push) → nhiều mục họ vá lại là thứ
+v1.31.0 ĐÃ CÓ (derive_subject title-first, CAT_LIKELY_WRONG, NAME_NONSTANDARD, P1-4 agency-gate). Chỉ tích hợp
+phần MỚI THẬT từ 4 script gửi kèm (đã thẩm định + vá lỗi họ tự báo).
+
+## N1 — title_vn AT-INGEST (fix gốc họ đề xuất: "bắt trích yếu tại ingest, không vá post-hoc")
+- `ingest-local` backfill sau organize nay ghi KÈM `title_vn` từ auto-plan (`_title_vn_from_plan` — analyzer đã
+  đọc header/probe-text sẵn, 0 call thêm; guard có-dấu + không-boilerplate; chỉ ghi khi read-back title_vn rỗng;
+  journaled before → undo). Dòng registry MỚI hết rơi vào nợ backfill.
+
+## N2 — `backfill-title-vn --from-tukhoa` (tier-2 OFFLINE; thay thế đề xuất sidecar của script gốc)
+- `_title_vn_from_tukhoa`: bóc `(Bộ luật|Luật) <chủ đề CÓ DẤU>` từ field `tukhoa` sẵn có — 0 call/dòng, quét cả
+  pool 1 phát; guard: cắt heading-giữa-câu (regex `[A-ZĐ]` — KHÔNG dùng dải `À-Ỹ` vì Unicode XEN KẼ hoa/thường,
+  'đ'∈À-Ỹ từng cắt nhầm giữa 'quy định'; bug tự bắt khi smoke), cắt đuôi liên từ (+năm/quy/định), boilerplate,
+  PHẢI có dấu, CROSS-CHECK token với tên file qua `_token_set`.
+- **Vá 2 lỗi script gốc TỰ BÁO:** (a) false-reject viết tắt (CNTT ↔ 'công nghệ thông tin') → cross-check dùng
+  `_token_set` (đã expand `_ABBREV_MAP`) + bổ sung 6 viết tắt (cntt/pcth/pccc/hnvgd/gtvt/khcn); (b) méo/cụt
+  ('Luật Thi', 'Luật Mặt trận') → chính cross-check + junk-cut loại.
+- **KHÔNG dùng sidecar `~/.tra_luat_trichyeu.json`** như script gốc — trái doctrine single-source (sự cố
+  2026-06-30): registry cột `title_vn` là nguồn duy nhất, `_META_TITLE_KEYS` tự ăn. Vận hành: chạy
+  `--from-tukhoa --apply` TRƯỚC (phủ nhanh phần sạch) → mặc định (header, lô 40) vét phần còn lại.
+
+## N3 — cat-audit tầng ALIAS pháp điển (từ cat_audit_strict.py, thẩm định)
+- `_expected_cat_from_alias` (+`_alias_cat_pairs` cache): alias `linhvuc_phapdien.chude[].alias`+slug,
+  longest-match whole-word ≥5 ký tự, blacklist alias quá chung (giám sát/quản lý/…), boundary-guard
+  'vốn nhà nước/đầu tư công/ngân sách' → nhường `_cat_boundary_rule` (chống over-fire 68-2025 → đúng 26).
+- Nối vào `cmd_cat_audit` nhánh cuối (chỉ khi boundary + keyword-tên đều im; chỉ tên Luật/Bộ luật; subject =
+  tail-pretty + title_vn — giàu thêm sau backfill): cờ `CAT_LIKELY_WRONG` confidence=medium, REVIEW-tay.
+  Bắt đúng 2 true-positive log: **143-2025 Đầu tư ở 45 Y tế → 34**; **46-2024 Công chứng ở 09 → 04**.
+
+## N4 — sweep `name_nonstandard` (từ name_audit.py; corpus-audit chỉ chấm dòng ĐÃ đọc header → thiếu phủ)
+- `_sweep_report` + bucket `name_nonstandard`/`name_nonstandard_rows` (offline toàn corpus, dùng
+  `_name_structural_issues` sẵn có; cùng guard corpus-audit: bỏ PL_/Mau_/điều-ước/non-corpus) + NEXT ACTION.
+
+## Review đối kháng (2 chiều + verify) — 1 CONFIRMED đã VÁ, chiều alias/sweep PASS toàn bộ
+- **VÁ (CONFIRMED critical):** heading-split tukhoa đoán theo chữ-hoa cắt trước MỌI từ viết-Hoa → tukhoa
+  Title-Case ('Bảo Hiểm Xã Hội Điều 2') cụt còn 'Bảo' — nay cắt theo TỪ-KHÓA heading thật
+  (Điều/Chương/Mục/Phần/Khoản/Giải thích/Phạm vi/Đối tượng/Hiệu lực); danh-từ-riêng giữa tên
+  ('Mặt trận Tổ quốc Việt Nam') không còn bị cắt (+test r9 ghim cả 2 ca).
+- **Siết (major reviewer nêu):** N1 title_vn CHỈ ghi khi reg_get read-back OK (lỗi mạng → thôi, không ghi mù —
+  backfill-title-vn vét sau).
+- Trade-off boundary-guard N3 (nhường corpus-audit level-3 ca đầu-tư-công nằm sai cat): reviewer chiều 2 xác nhận
+  đúng thiết kế precision-first; _corpus_fix_plan không đọc key mới → 0 regression.
+
+selftest **451/451** (+9 r9_*: tukhoa extract/abbrev/rejects/heading-đ/Title-Case, alias-cat + boundary,
+title_vn_from_plan, sweep offline, parser). Nợ DỮ LIỆU giữ nguyên runbook: backfill-title-vn (tukhoa→header) →
+nạp VBHN 135 BLHS → LƯỢT-2 web set-A/B → consolidation-cleanup 44 → dedup/year/loai.
+
+---
+
+# ★ v1.31.0 — Backlog rà 68 Luật (2026-07-03): P0 độ-chính-xác-phát-hiện + P1 nhất quán vocab/đếm
+
+Từ BACKLOG hợp nhất Lượt 1-3 + QT-5 web trên 68 Luật (v1.30.1): tầng LỆNH ổn định (0 crash, đúng rc) — mọi vấn đề
+nằm ở ĐỘ CHÍNH XÁC PHÁT HIỆN + NHẤT QUÁN VOCAB. User kèm patch tham khảo P0-1 (đã thẩm định, tích hợp có điều chỉnh).
+
+## 🔴 P0 — độ chính xác phát hiện
+- **P0-1 QT-5 subject (bằng chứng: query literal-filename tìm ra 0; query tay có dấu ra ngay VBHN 135 BLHS):**
+  (a) `_derive_subject_from_entries` ĐẢO ưu tiên: title-first (guard `_looks_like_filename_title` — nlm_title/
+  title_vn nhiều khi = tên file) → `_name_tail_pretty` (GIỮ hoa/thường) → fallback tail-key ASCII cũ;
+  (b) cờ `QT5_SUBJECT_NO_DIACRITICS` (advisory) trong vbhn-check khi subject không dấu — nhắc --subject tay;
+  (c) **`tl backfill-title-vn` (MỚI):** phát hiện then chốt khi rà — cột `title_vn` ĐÃ CÓ SẴN trong 27 cột
+  (v2.13.0, entryOf_ đã export, _META_TITLE_KEYS đã ưu tiên) → KHÔNG cần đổi schema/deploy GAS như backlog dự kiến;
+  chỉ cần BACKFILL: đọc header thật (`_read_doc_text`, lô 40 + --offset + heartbeat) → `_title_vn_from_header`
+  (PURE: ALL-CAPS→sentence-case, '<Loại> <Chủ đề>'; skip LOUD khi NO_DIACRITICS/BOILERPLATE — không đoán) →
+  journaled reg_bulk cột title_vn (before→undo). Sau backfill toàn chuỗi QT-5 tự ăn khớp.
+- **P0-2 `CAT_LIKELY_WRONG`:** corpus-audit trước CHỈ fill-missing (cat rỗng/00) → ca `Luat_143-2025 Đầu tư` nằm
+  cat 45 Y tế mà 0 proposals. Nay cat CÓ GIÁ TRỊ + suy-nội-dung confidence=high ra cat KHÁC → proposal 🟡 REVIEW
+  (`tl recat` DRY, người duyệt — KHÔNG auto-move, giữ bài học over-fire v1.27.1).
+- **P0-3 `NAME_NONSTANDARD`:** `_name_structural_issues` (PURE) so tên với mẫu `<Loai>_<sohieu>_<Chu_de>` ĐỘC LẬP
+  header — bắt trọn 4 ca lọt lưới: `.html` filename, thiếu cụm sohieu (`Luat_Phong_chong_benh_truyen_nhiem`),
+  thiếu token chủ đề (`Luat_64-2006-QH11`); skip PL_/Mau_/điều-ước/non-corpus; không trùng NAME_TRICH_YEU.
+
+## 🟠 P1 — precision & nhất quán
+- **P1-4 `_vbhn_agency_mismatch`:** VBHN cấp BỘ (VBHN-BTP/BGDDT/…, hợp nhất NĐ/TT) KHÔNG được nổi làm candidate
+  của văn bản QH (…-QHxx/UBTVQHxx/LCT-HDNN) khi KHÔNG có goc-chain dẫn chiếu base — gate ở CẢ `_vbhn_candidates`
+  (vbhn-check) + `_relation_audit` (relation-check). Chặn ca 4231-2025-VBHN-BTP score 158 nổi cho Luật 90/2025.
+- **P1-5 vocab QT-5 thống nhất `{verdict, flags, qt5_queries, google_discovery}`:** relation-check thêm
+  verdict/flags top-level (REVIEW khi missing_links/footnote-thiếu/subject-only · QT5_WEB_REQUIRED khi chưa thấy
+  VBHN · OK) + `qt5_queries` (giữ `vbhn_queries` compat); source-map item thêm alias `qt5_queries`.
+- **P1-6:** sweep `quarantine.still_on_nlm` nay = LIVE-status (`_entry_on_nlm_live` — khớp reg-query; hết bất đồng
+  4 vs 0); nlm_source_id sót trên dòng đã gỡ → `stale_nlm_ref` riêng (rác metadata → reg_clear).
+- **P1-7:** sweep text 1 CON SỐ HEADLINE = server-rule (khớp `tl boot`) + 1 dòng Δ gọn; `--verbose` mới in giải
+  thích định nghĩa đầy đủ. JSON giữ nguyên đủ trường.
+- **P1-8:** `_is_treaty_entry` — Công ước/Điều ước quốc tế (CU_ILO-*, Cong_uoc_*) sohieu RỖNG là HỢP LỆ → lớp
+  `treaties` riêng trong hygiene/sweep, KHÔNG tính orphan (orphans=46 trước đây gộp cả ILO).
+- **P1-9 (data — ĐÃ LÀM LIVE trong phiên):** config public `1dEOBJ…` vá `profiles.vbqppl.registryDocId`
+  1mATG Doc-legacy → `1C21i65…` Sheet thật; drive-push GIỮ fileId; verify curl PASS (hết auto-heal mỗi phiên trống;
+  GAS v73 doWriteConfig_ đã vá clobber nên không bị ghi đè lại).
+
+## Review đối kháng (3 reviewer + verify per-finding, Explore read-only) — kết quả
+- **VÁ (finding thật, tự tái hiện):** `_name_tail_pretty` để LỌT NĂM sau khi bóc sohieu tên VBHN
+  (`VBHN_121-VBHN-VPQH_2025_Luat_HNGD` → '2025 Luat Hon nhan…') → + 1 lớp bóc năm đứng đầu; test r8 siết
+  SO CHÍNH XÁC (endswith cũ che mất bug).
+- **VÁ (CONFIRMED):** `backfill-title-vn --apply` pool TỰ CO sau mỗi lần ghi → `--offset` cũ NHẢY CÓC bỏ sót —
+  nay --apply BỎ QUA --offset (loud); semantics = LẶP CÙNG LỆNH tới writable=0 (--offset chỉ cho DRY).
+- **REFUTED:** 'qt5_queries alias mismatch source-map vs relation-check' — chủ đích thiết kế (mỗi lệnh alias
+  sang list QT-5 tương ứng của nó; test ghim cả 2; không consumer nào gộp chéo).
+- Minor ghi nhận không vá: `mo_ta` trong _META_TITLE_KEYS có thể nhiễu (đã guard filename+token; theo dõi);
+  `.capitalize()` hạ chữ hoa danh-từ-riêng (hiếm ở trích yếu luật; NO_DIACRITICS chặn phần lớn ca OCR);
+  corpus=='true' strict (convention toàn codebase); CAT_LIKELY_WRONG hiển thị cat đầy đủ vs so 2-digit (trung thực).
+
+selftest **442/442** (+21 r8_*; 1 test cũ `derive_subject_no_hl_garbage` cập nhật theo hành-vi-giữ-hoa-thường có
+chủ đích). Nợ DỮ LIỆU P2 (nạp VBHN 135 BLHS, LƯỢT-2 web 30 luật, consolidation review_on_nlm=44, dedup 93 nhóm,
+22 VBHN tên thiếu năm, 77 loai) → mục 4 runbook phiên; `backfill-title-vn --apply` chạy 1 LẦN trước LƯỢT-2 web.
+
+---
+
+# ★ v1.30.1 — Xử log LIVE 2026-07-03 (9 vấn đề): 4 vá CẤP SKILL + runbook nợ DỮ LIỆU
+
+Từ log rà 108 Luật + audit corpus trên Cowork. Phân loại: #1/#7/#8/#4 có gốc CÔNG CỤ → vá skill;
+#2/#3/#5/#6/#9 là nợ DỮ LIỆU (detector/lệnh sửa ĐÃ CÓ) → runbook thứ-tự-phụ-thuộc cho user chạy LIVE.
+
+## #1 — `nlm-install --resume` (Cowork 45s/lệnh + bwrap --unshare-pid kill tiến trình nền)
+- Gốc: cả chuỗi (tải 31MB → giải nén → uv tool install) chạy 1 lệnh liền; tarball nằm TemporaryDirectory —
+  kill giữa chừng mất trắng; nohup/setsid vô dụng (mỗi bash 1 PID-namespace riêng). Log thật: phải bóc tay 3 bước.
+- FIX: **máy trạng thái 3 bước idempotent** — `_nlm_install_probe` (trạng thái dò từ ĐĨA: nlm→done / pybin→install /
+  tgz→extract / else→fetch) + `_nlm_step_fetch` (tarball VỊ TRÍ BỀN `_dl/py311.tar.gz`, `.part`→md5→`os.replace`) +
+  `_nlm_step_extract` (xong dọn tarball) + `_nlm_step_install` (uv cache tự resume — đo thật 3 lần là xong).
+  **`--resume`: mỗi lần gọi chạy ĐÚNG 1 bước → rc=3 PARTIAL còn bước / rc=0 xong — LẶP CÙNG LỆNH tới rc=0.**
+  Đường trọn-gói (mặc định, env không giới hạn) tái dùng step-machine → kill giữa chừng cũng resume được.
+  Guard chống lặp vô hạn/PARTIAL giả khi install rc=0 mà `nlm` chưa thấy trên PATH (tin rc=0 + hướng dẫn export PATH).
+  +`--version` pin bản. rc md5-lệch 3→2 (3 nay = PARTIAL; caller cũ chỉ check ==0 — an toàn).
+
+## #7 — số corpus lệch boot(527)/sweep(515): KHÁC ĐỊNH NGHĨA + snapshot, nay tự khai
+- Gốc THẬT (đọc Code.gs:2173-2183): server `corpus_count` = corpus∈{true,vbqppl} ∪ row_kind=overflow, TRỪ ref &
+  loai='thuong'; sweep `corpus` = corpus=='true' thuần; cộng lệch snapshot (client cache + GAS đọc-cache ~600s).
+- FIX: `_corpus_count_server_rule` (PURE, mô phỏng đúng luật server) → sweep in CẢ 2 thước đo trên CÙNG snapshot
+  + `corpus_basis` giải thích + `snapshot_age_s` + dòng ℹ khi 2 số lệch; boot.py thêm `corpus_count_rule`.
+
+## #8 — cat-audit tự khai độ phủ (1 cờ/515 doc là THIẾT KẾ precision-first, không phải corpus sạch)
+- Thêm `coverage_note` (JSON + text): heuristic TÊN level-2; audit sâu đọc HEADER thật = `tl corpus-audit`;
+  sức khoẻ tổng = `tl sweep`; per-file = `cat-verify`.
+
+## #4 — `backfill-loai --normalize` (GAP THẬT: 77 dòng loai phi-chuẩn KHÔNG BAO GIỜ được sửa)
+- Gốc: sweep gợi `backfill-loai --apply` cho loai_noncanonical nhưng lệnh idempotent BỎ QUA mọi dòng đã-có-loai →
+  9 dòng "Luat" không dấu (+68 khác) nằm ngoài tầm với.
+- FIX: `_backfill_loai_candidates(entries, normalize)` (PURE) — normalize=True sửa CẢ dòng SAI enum khi map TẤT ĐỊNH
+  qua `_normalize_loai` ('Luat'→'Luật', 'nd'→'Nghị định'); giá trị lạ → `nonmappable` (báo, KHÔNG đoán).
+  sweep NEXT-ACTIONS + corpus-fix bước 6 đổi gợi ý sang `tl backfill-loai --normalize --apply`.
+
+## Review đối kháng delta (2 reviewer + verify; 1 reviewer nhánh resume hỏng schema — các điểm nhọn nhánh đó đã
+## tự kiểm: .part ghi đè sạch, tarball chỉ xóa SAU extract OK, caller cũ chỉ check rc==0) — 4 CONFIRMED đã VÁ:
+- `_corpus_count_server_rule`: loai so EXACT `== 'thuong'` (GAS không lower/strip — Code.gs:2183; lower-hoá = tự tạo
+  lệch mới với boot; 'Thuong' hoa server VẪN đếm — test cập nhật).
+- `backfill-loai --apply`: kèm `before_by_key` {loai cũ: fill=rỗng / normalize=loai_raw} → `tl undo` khôi phục được
+  (trước thiếu before → undo câm — cùng họ bug missing-sohieu đã vá từ v1.28.2).
+- `_LOAI_CANON` + `"cd": "Công điện"` (CD ∈ họ canonical `_canon_fams` từ v1.29.4 — loại trừ 'cd' trần là TỰ MÂU
+  THUẪN: dòng loai='CD' rơi nonmappable thay vì map; nhất quán nd/tt/nq/qd/kl/ct sẵn có).
+- Minor ghi nhận không vá: cat-audit in coverage_note cả khi 0 cờ (chủ đích — nhắc chính lúc "0 cờ" dễ ngộ nhận sạch).
+
+## Nợ DỮ LIỆU (skill đã có công cụ — user chạy LIVE theo runbook thứ-tự-phụ-thuộc, xem HANDOFF/phiên):
+#2 CANONICAL_VBHN_NUMBER_DIFFERS ×2 (52-2014→VBHN 121-2025, 85-2015→VBHN 83-2026) → `source-rename --sohieu`;
+#3 PCBTN thiếu sohieu → `register --sohieu 03-2007-QH12`; #5 dedup 94 nhóm (⚠ phụ-lục-cùng-số-hiệu KHÔNG dedup mù
+— doctrine v1.29.7 #4) → `dedup-plan`/`hygiene plan`; #6 5 dòng corpus=true chưa NLM (3 báo cáo ILO nghi KHÔNG phải
+VBQPPL) → `source-update-corpus false` TRƯỚC rồi mới `ingest-missing`; #9 19 VBHN_CANDIDATE_UNVERIFIED_LATEST (QT-5
+web) + 7 UNLINKED_AMENDMENT → `relation-backfill`.
+
+selftest **421/421** (+8 r7_*: probe-steps, rc-map, corpus-server-rule×2, sweep-fields, backfill-normalize×2,
+normalize-map, parser). KHÔNG đóng zip (gộp với v1.30.0 chờ user duyệt).
+
+---
+
+# ★ v1.30.0 — Rà soát kiến trúc PROFILE: A base-also + B discover + C adopt + D doctor + E index + F doctrine
+
+Từ rà soát kiến trúc profile (log 2026-07-03): config chỉ biết 3 profile nhưng Drive có ≥6 thư mục đã-là-profile
+(registry+manifest riêng: DinhMucChi, NQ80, NQ36…); `apply_profile_env` THAY THẾ scope (chọn profile = mất VBQPPL);
+registry/manifest đặt lạc chỗ (NQ36 ở gốc Van_ban_thuong); không có "sổ cái" profile đọc được trên Drive.
+Thứ tự triển khai B→C→E→D (reversible/an toàn) rồi A (đổi hành vi đọc). +24 test r6_* (383→407).
+
+## A — profile CỘNG VBQPPL (`TL_BASE_ALSO`, đổi hành vi ĐỌC — codify doctrine MULTI_CORPUS_V1_18 §2 vào CLI)
+- `_apply_profile_env`: profile DỰ ÁN mặc định set `TL_BASE_ALSO=1`; opt-out `profiles.<p>.baseAlso=false`;
+  vbqppl KHÔNG set; cặp cờ `--base-also/--no-base-also` override per-lệnh (`_add_base_also_flags`).
+- **Hợp nhất** (profile TRƯỚC, nền BỔ SUNG, dedup drive_id, hit nền `_scope='vbqppl'`): `locate` (mục
+  `[nền VBQPPL]` riêng; base-also BỎ shortcut index vì index chỉ chứa scope profile; LOW_CONFIDENCE tính trên
+  CẢ 2 scope) + `reg-query` (envelope thêm `base_also{base_hits}`, row thêm `scope`, text mode đuôi `[nền]`).
+- **Fallback-khi-miss** (đúng doctrine profile-first): `source-map`/`exists` — profile MISS hoàn toàn → tra tiếp
+  manifest nền, hit gắn `scope='vbqppl'` + cờ `BASE_SCOPE_HIT` (exists thêm warning rõ). Canonical profile luôn thắng.
+- `nlm-cross`: mặc định nối thêm notebook NỀN (`_vbqppl_notebooks` = base+overflow+shards từ config, dedup) sau
+  notebook profile.
+- Hạ tầng: `_base_manifest_entries` (đọc manifest nền bằng snapshot→swap→KHÔI PHỤC env overlay — cache nền rơi
+  đúng thư mục cache gốc, không nhiễm cache profile) + `_merge_base_entries` (PURE). **Đường GHI/ingest KHÔNG đổi.**
+
+## B — `profile-list --discover [--folder-cap N]` (READ-ONLY, LIVE)
+- Quét `Van_ban_thuong` 2 cấp (con trực tiếp + `_meta` từng thư mục) qua GAS `list`; lõi phân loại PURE
+  `_discover_classify`: ✅ in_config / 🟠 **unregistered_profile** (kèm lệnh `profile-adopt` điền sẵn) / ⚪ empty_folder
+  / · plain_folder / 🔴 **misplaced_root_assets** (registry/manifest Ở GỐC VBT — ca NQ36; loại trừ asset đã trong
+  config, vd registry vbthuong) / ⚠ config_only (bỏ qua profile có root == VBT).
+- `_discover_item_kind` nhận diện KHOAN DUNG biến thể tên thật: `tra_luat_registry.LuatBHXH` / `Registry_NQ36` /
+  `tra_luat_registry` trơ / `_manifest_DinhMucChi.json` / `tra_luat_manifest.NQ36.json`; đòi mime Sheet cho registry;
+  `_PROFILES_INDEX*` = hạ tầng (không phải asset lạc). Cap thư mục quét LOUD (60 mặc định).
+
+## C — `profile-adopt` (lệnh MỚI — seed profile ĐÃ CÓ hạ tầng; nội-hoá new-profile.ps1 #8 v1.29.7 vào skill)
+- `--name <p> --folder <id> [--notebook] [--registry] [--manifest] [--bootstrap-manifest] [--apply]`. Tự dò asset
+  trong folder+`_meta` (`_adopt_pick_assets` PURE); nhiều ứng viên → AMBIGUOUS bắt chọn (KHÔNG đoán); override thắng.
+- **GUARD registry 3 tầng** (bài học CLOBBER 766 dòng): mime = Google Sheet THẬT · ≠ `_LEGACY_REGISTRY_DOC_ID`
+  (1mATG Doc-as-Sheet đọc RỖNG) · `--apply` chạy `_verify_registry_sheet` (schema 27 cột, heal cột thiếu idempotent).
+- notebookId: `--notebook` > đọc từ manifest JSON (schema `_manifest_placeholder`); thiếu → warning NO_NOTEBOOK_ID
+  (lệnh NLM sẽ chặn — đúng thiết kế, không fallback base). `--bootstrap-manifest` sinh manifest mới + manifest_export.
+- Ghi `manifestScope='own'` + `categories='own'` qua `_persist_profile_config` (journaled `config_write`, merge giữ
+  field cũ); PROFILE_EXISTS_DIFFERENT_FOLDER chặn đè nhầm; adopt lại cùng folder = idempotent. DRY mặc định.
+
+## D — `profile-doctor` (BẤT BIẾN LAYOUT mới) 
+- **Bất biến: registry + manifest của profile nằm TRONG thư mục profile (root hoặc `_meta`).** `_doctor_check_profile`
+  (PURE) đối chiếu `parents` (action `info`): `MISPLACED_ASSET` (kèm fix move) · `REGISTRY_LEGACY_DOC` ·
+  `REGISTRY_NOT_SHEET_MIME` · `*_TRASHED` (critical) · thiếu registryDocId (critical)/notebookId/manifestId (warn).
+- `--fix --apply`: `resolvefolder _meta` (tạo nếu thiếu + persist metaFolderId journaled) → action `move`
+  (fileId GIỮ NGUYÊN ⇒ config registryDocId/manifestId KHÔNG phải đổi) — journal `drive_move` intent{before parents}.
+  rc=0 sạch / 1 finding / 2 lỗi. Ca NQ36: adopt bằng --registry/--manifest (asset lạc gốc) → doctor --fix move vào chỗ.
+
+## E — `profile-index` (SỔ CÁI `Van_ban_thuong/_PROFILES_INDEX` — Google Sheet)
+- Cột: profile | default | rootFolderId | folder_name | notebookId | registryDocId | manifestId | categories |
+  manifestScope | baseAlso | note. **BẢN CHIẾU từ config — nguồn sự thật DUY NHẤT vẫn là config** (tránh
+  nguồn-sự-thật-thứ-4 trôi, sự cố 2026-06-30). DRY in CSV; `--rebuild --apply` LIVE.
+- `upload` GAS KHÔNG ghi-đè-tại-chỗ (force=true chỉ bypass dedup sha) ⇒ mô hình **tạo-trước-dọn-sau** fail-safe:
+  upload CSV → `copy_convert` Sheet MỚI → trash bản cũ + CSV trung gian (journal `drive_trash`, phục hồi được).
+  sheetId ĐỔI mỗi rebuild — mở qua folder, đừng bookmark id.
+
+## F — doctrine/tài liệu
+- SKILL.md §0.9 bổ sung: **profile chạy CÙNG VBQPPL, KHÔNG thay thế** + bất biến layout + 3 lệnh mới + `--discover`;
+  bảng CLI thêm 4 dòng; locate row ghi rõ cặp cờ base-also áp cho 5 lệnh đọc.
+
+## Review đối kháng (workflow 4 reviewer + verify per-finding, Explore read-only) — 8 CONFIRMED đã VÁ, 1 REFUTED
+- **(A)** `_apply_profile_env`: profile KHÔNG tồn tại trong config rơi về data NỀN mà vẫn set TL_BASE_ALSO →
+  nay CHỈ set khi `profiles.get(name)` thật (hết nền tự quét mình 2 lần).
+- **(C)** adopt: + guard `REGISTRY_SHARED_WITH_OTHER_PROFILE`/`MANIFEST_SHARED_WITH_OTHER_PROFILE`
+  (`_profile_asset_owners` — chặn --apply reg_addcols mutate Sheet đang thuộc profile khác); + manifest lạ
+  (trường `profile` ≠ tên adopt, so theo slug) KHÔNG được cấp notebookId (`_notebook_from_manifest_json`,
+  warning MANIFEST_PROFILE_MISMATCH — hết nguy cơ ghi đè notebookId đúng bằng notebook profile khác).
+- **(D)** doctor: + `_strip_shared_fixes` — asset dùng chung ≥2 profile → BỎ fix-move, nâng
+  `SHARED_ASSET_MULTI_PROFILE` critical (move theo profile này = phá layout profile kia; soi TOÀN config kể cả
+  khi --profile-name 1 profile); + `move` bọc `_gas_get_retry` (idempotent — re-move cùng đích = no-op; hết treo
+  fix vì 1 timeout transient); + journal `drive_move` BỎ `before` theo hợp đồng op non-reg v1.29.1 (parents cũ →
+  `set.from_parents` forensic/undo tay — trước đây undo sinh restore-op rác đẩy nhầm vào `_journaled_reg_write`).
+- **(E)** index: dọn bản cũ theo TÊN CHÍNH XÁC `_PROFILES_INDEX`/`.csv` (`_index_old_candidates`) — hết nguy cơ
+  trash nhầm file người dùng `_PROFILES_INDEX_backup…` (startswith cũ quá rộng).
+- **(B/C/D/E)** `_ProfileEnvGuard`: 4 lệnh profile-ops ép scope NỀN (load_creds DEFAULT) → snapshot + KHÔI PHỤC
+  env overlay khi ra (kể cả lỗi) — caller cùng-process không bị đổi TL_PROFILE ngầm.
+- REFUTED: "resolvefolder parentId không tới GAS" — doResolveFolder_ xử parentId đúng (Code.gs:463-476).
+- Minor ghi nhận (không vá): `info.parents` không được contract bảo đảm tường minh (GAS hiện luôn trả);
+  `_mime_from_info` rỗng khi info dị dạng → báo FOLDER_ID_INVALID kèm info thô (đủ chẩn đoán).
+
+selftest **413/413** (+30 r6_*: 24 tính năng + 6 review-fix: base-also-unknown-profile, asset-owners,
+strip-shared-fix, manifest-mismatch, index-exact-names, env-guard-restore). KHÔNG đóng zip đợt này
+(chờ yêu cầu bổ sung của user).
+
+---
+
 # ★ v1.29.7 — Xử log NĐ131+phụ lục: 9 vấn đề ingest/extract/dedup/bookkeeping + 3 script quy trình
 
 Từ log LIVE nạp NĐ 131/2021 + phụ lục vào profile "Pháp lệnh NCC" (9 vấn đề, xếp theo ảnh hưởng).

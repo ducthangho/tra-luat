@@ -175,6 +175,18 @@ _NO_GAS_FALLBACK = {"upload"}
 # khiến script gọi tự động tưởng có lỗi. Key "gws-unavailable" cho ca systemic; "<op>:<err>" cho lỗi gws cá biệt.
 _GWS_FALLBACK_WARNED: set = set()
 
+# v1.33.0 (log rà 69 A3 — corpus-audit in '[FALLBACK→GAS] gws rc=2: Authentication failed' + tốn retry gws
+# TRÊN MỌI văn bản): lỗi AUTH của gws binary là TERMINAL trong 1 process (keyring không tự sống lại) —
+# circuit-breaker: gặp 1 lần → các op sau đi THẲNG GAS, không retry gws per-op. Tách rời cờ cred-file
+# (tl_gws._CRED_AUTH_DEAD — direct-media) vì 2 credential ĐỘC LẬP nhau.
+_GWS_AUTH_DEAD = False
+
+
+def _is_gws_auth_error(msg: str) -> bool:
+    m = (msg or "").lower()
+    return ("invalid_grant" in m or "gws_cred_expired" in m or "authentication failed" in m
+            or ("rc=2" in m and "auth" in m))
+
 
 def _gas_call(op, *, gas=None, **kw):
     gas = _gas_module(gas)
@@ -237,12 +249,23 @@ def drive_op(op, *, env=None, confirmed=False, gas=None, _quiet=False, **kw):
             import importlib
             _tlg = importlib.import_module("tl_gws")
             _cred = _tlg._read_gws_cred()
-            if _cred:
+            # v1.33.0: cred-file đã chết auth (invalid_grant) trong phiên → skip direct-media, khỏi fail lại.
+            if _cred and not getattr(_tlg, "_CRED_AUTH_DEAD", False):
                 return _tlg._drive_media_download(kw["file_id"], kw["dest"], _cred,
                                                   export_mime=kw.get("export_mime"))
         except Exception as e:  # noqa: BLE001
             if not _quiet:
                 _sys.stderr.write(f"[download] direct-media lỗi ({type(e).__name__}: {e}); thử gws/GAS…\n")
+
+    # v1.33.0 (circuit-breaker): gws binary đã lỗi AUTH trong phiên → đi thẳng GAS, không retry per-op.
+    global _GWS_AUTH_DEAD
+    if _GWS_AUTH_DEAD and op not in _NO_GAS_FALLBACK:
+        if not _quiet and "gws-auth-dead" not in _GWS_FALLBACK_WARNED:
+            _GWS_FALLBACK_WARNED.add("gws-auth-dead")
+            _sys.stderr.write("[FALLBACK→GAS] gws AUTH CHẾT (phát hiện trước đó trong phiên — circuit-breaker) → "
+                              "mọi op còn lại đi thẳng GAS, không retry gws per-op. Khắc phục: `gws auth login` "
+                              "→ `tl secrets-set --gws`. [ẩn lặp sau]\n")
+        return _gas_call(op, gas=gas, **kw)
 
     # Code/Cowork → gws PRIMARY, lỗi → FALLBACK→GAS ồn ào.
     try:
@@ -252,6 +275,8 @@ def drive_op(op, *, env=None, confirmed=False, gas=None, _quiet=False, **kw):
     except NotImplementedError:
         raise   # op chưa hiện thực ở gws (GĐ3) → KHÔNG nuốt thành fallback (để lộ rõ giai đoạn)
     except Exception as e:  # noqa: BLE001
+        if _is_gws_auth_error(str(e)):
+            _GWS_AUTH_DEAD = True   # v1.33.0: op sau đi thẳng GAS
         if op in _NO_GAS_FALLBACK:
             raise   # không có đối xứng GAS (vd upload binary) → ném lỗi gws, không giả vờ fallback
         if not _quiet:

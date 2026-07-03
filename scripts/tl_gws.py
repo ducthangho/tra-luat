@@ -33,11 +33,16 @@ def bind(tl_module):
 
 
 _TOKEN_CACHE: dict = {}        # sha256(refresh_token) → (access_token, expiry_epoch). Bỏ 1-roundtrip đổi token/lần tải.
+# v1.33.0 (log rà 69 A3): invalid_grant là TERMINAL trong 1 process — cred không tự sống lại giữa chừng.
+# Cờ cho caller đọc-hàng-loạt (corpus-audit ×N, _read_doc_text, transport download) SKIP direct-media ngay từ
+# doc thứ 2 thay vì retry-fail ~2-20s/doc; gws-ping/doctor canary vẫn gọi thẳng _access_token nên không bị che.
+_CRED_AUTH_DEAD = False
 
 
 def _access_token(cred):
     """Đổi gws cred (authorized_user refresh_token) → OAuth access_token, CACHE trong process tới gần hết hạn.
     Nhờ cache, tải nhiều file (vd loạt config .js/.json) chỉ tốn 1 lần đổi token cho cả loạt."""
+    global _CRED_AUTH_DEAD
     import urllib.request as _u, urllib.parse as _up, json as _j, time as _t, hashlib as _h
     c = cred if isinstance(cred, dict) else _j.loads(cred)
     key = _h.sha256(c["refresh_token"].encode()).hexdigest()
@@ -47,10 +52,48 @@ def _access_token(cred):
         return hit[0]
     data = _up.urlencode({"client_id": c["client_id"], "client_secret": c["client_secret"],
                           "refresh_token": c["refresh_token"], "grant_type": "refresh_token"}).encode()
-    with _u.urlopen(_u.Request("https://oauth2.googleapis.com/token", data=data), timeout=30) as r:
-        j = _j.loads(r.read())
+    # v1.31.2 (chẩn đoán LIVE 2026-07-03): lỗi ở đây từng nổi lên chỉ là 'HTTPError 400: Bad Request' ở MỌI đường
+    # direct-media → không ai biết là CRED HẾT HẠN (invalid_grant). Đọc body + raise thông điệp tự-chẩn-đoán.
+    # Kiến trúc: credentials.json (FILE — nguồn của direct-media) TÁCH RỜI token keyring của gws CLI binary
+    # → gws CLI vẫn chạy tốt trong khi file cred hết hạn. Làm mới: `gws auth login` rồi `tl secrets-set --gws`
+    # (cập nhật bundle để Cowork cũng nhận cred mới).
+    import urllib.error as _ue
+    try:
+        with _u.urlopen(_u.Request("https://oauth2.googleapis.com/token", data=data), timeout=30) as r:
+            j = _j.loads(r.read())
+    except _ue.HTTPError as e:
+        _body = ""
+        try:
+            _body = e.read().decode("utf-8", errors="replace")[:200]
+        except Exception:
+            pass
+        if "invalid_grant" in _body:
+            _CRED_AUTH_DEAD = True   # v1.33.0: circuit-breaker — caller hàng loạt skip direct-media từ đây
+            # v1.32.1 (log rà 119 sửa lại khẳng định SAI 'fallback GAS vẫn đúng'): fallback GAS chỉ cứu DOWNLOAD
+            # file (action download b64 — DriveApp); op ĐỌC TEXT (exporttext) CHẾT THEO vì webapp thiếu OAuth scope
+            # script.external_request → extract/corpus-audit/header-verify không còn đường Drive nào.
+            raise RuntimeError("GWS_CRED_EXPIRED: refresh_token trong ~/.config/gws/credentials.json HẾT HẠN/bị thu hồi "
+                               "(invalid_grant) → chạy `gws auth login` trên máy user rồi `tl secrets-set --gws` "
+                               "(làm mới bundle cho Cowork). ⚠ Fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT "
+                               "(exporttext) chết theo (webapp thiếu scope script.external_request) — tạm rà verbatim "
+                               "qua `tl nlm-content <source_id> --dieu N` (corpus-audit/backfill-title-vn tự thử đường NLM).") from None
+        raise RuntimeError(f"GWS_TOKEN_REFRESH_HTTP_{e.code}: {_body or e.reason}") from None
     _TOKEN_CACHE[key] = (j["access_token"], now + float(j.get("expires_in", 3600)))
     return j["access_token"]
+
+
+def _gws_cred_alive(timeout: float = 20.0) -> tuple[bool, str]:
+    """P1 (v1.32.1 — log rà 119: doctor/gws-ping FALSE-GREEN khi refresh_token đã REVOKE): CANARY đổi token THẬT
+    từ ~/.config/gws/credentials.json (nguồn direct-media — TÁCH RỜI keyring gws CLI; auth_method=oauth2 KHÔNG
+    chứng minh cred sống). 1 POST oauth2 (~200ms); token cache process nên gọi lặp = rẻ. Trả (alive, msg)."""
+    cred = _read_gws_cred()
+    if not cred:
+        return False, "NO_CRED: thiếu ~/.config/gws/credentials.json (direct-media tắt)"
+    try:
+        _access_token(cred)
+        return True, "token OK"
+    except Exception as e:  # noqa: BLE001
+        return False, str(e)[:240]
 
 
 def _drive_media_download(file_id, dest, cred, export_mime: str | None = None, timeout: float = 300.0):
@@ -299,8 +342,16 @@ def cmd_gws_ping(a) -> int:
     if not info["authed"]:
         info["issues"].append("gws CHƯA auth → Code: `gws auth login`; Cowork: export cred (RUNBOOK §A0) "
                               "+ `export GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE=<path>`")
+    # P1 (v1.32.1 — log rà 119 FALSE-GREEN): auth_method=oauth2 chỉ nói CÓ cấu hình, KHÔNG nói cred còn SỐNG
+    # (ca invalid_grant: token revoke mà ping vẫn ✓). CANARY đổi token thật; chết → ĐỎ + hướng refresh.
+    _alive, _amsg = _gws_cred_alive()
+    info["cred_alive"] = _alive
+    if not _alive:
+        info["issues"].append(f"CRED CHẾT (canary token): {_amsg} → `gws auth login` rồi `tl secrets-set --gws` "
+                              "(Cowork nhận cred mới qua bundle). ⚠ đọc Drive (extract/corpus-audit) CHẾT tới khi refresh "
+                              "— tạm rà verbatim qua `tl nlm-content <source_id> --dieu N`.")
 
-    info["ok"] = info["gws_found"] and info["version_match"] and info["authed"]
+    info["ok"] = info["gws_found"] and info["version_match"] and info["authed"] and _alive
     _gws_ping_emit(info, want_json)
     return 0 if info["ok"] else 3
 
@@ -314,7 +365,13 @@ def _gws_ping_emit(info: dict, want_json: bool) -> None:
     for it in info["issues"]:
         print(f"  - {it}", file=sys.stderr)
     if not info.get("ok") and info.get("runtime_env") in ("code", "cowork"):
-        print("  ℹ gws chưa sẵn → op A/B/C tự [FALLBACK→GAS] (chỉ `upload` cần gws); skill VẪN DÙNG ĐƯỢC.")
+        if info.get("cred_alive") is False:
+            # v1.32.1: cred CHẾT ≠ 'chưa nạp' — op ĐỌC Drive (extract/corpus-audit/header-verify) CHẾT
+            # (fallback GAS exporttext thiếu scope); chỉ download-manifest/upload còn đường khác.
+            print("  ⚠ CRED CHẾT: op ĐỌC Drive sẽ hỏng tới khi `gws auth login` + `tl secrets-set --gws`; "
+                  "tạm rà verbatim qua `tl nlm-content` / backfill-title-vn --from-tukhoa (offline).")
+        else:
+            print("  ℹ gws chưa sẵn → op A/B/C tự [FALLBACK→GAS] (chỉ `upload` cần gws); skill VẪN DÙNG ĐƯỢC.")
 
 
 def _master_key() -> str:
@@ -608,11 +665,110 @@ def _persist_local_bin_on_path() -> str:
     return ("PATH ~/.local/bin ghi bền vào " + ", ".join(done)) if done else ""
 
 
+def _nlm_install_probe(home: str | None = None, nlm_path: str | None = None) -> dict:
+    """v1.30.1 (#1 log Cowork): dò TRẠNG THÁI cài nlm từ ĐĨA (idempotent, không mạng) → bước kế tiếp.
+    fetch→extract→install→done; artifact bền: tarball `_dl/py311.tar.gz` (md5-verified) + pydir + uv cache.
+    home/nlm_path: tham số test offline (mặc định máy thật)."""
+    import shutil as _sh
+    if nlm_path is None:
+        try:
+            nlm_path = _imp("nlm_cli").nlm_exe() or _sh.which("nlm") or ""
+        except Exception:
+            nlm_path = _sh.which("nlm") or ""
+    pydir = os.path.join(home or os.path.expanduser("~"), ".local", "python311")
+    pybin = os.path.join(pydir, "python", "bin", "python3.11")
+    tgz = os.path.join(pydir, "_dl", "py311.tar.gz")
+    if nlm_path:
+        step = "done"
+    elif os.path.exists(pybin):
+        step = "install"
+    elif os.path.exists(tgz):
+        step = "extract"
+    else:
+        step = "fetch"
+    return {"nlm": nlm_path or "", "pydir": pydir, "pybin": pybin, "tgz": tgz,
+            "have_pybin": os.path.exists(pybin), "have_tgz": os.path.exists(tgz), "next_step": step}
+
+
+def _nlm_step_fetch(a, st: dict) -> tuple[bool, str]:
+    """Bước 1: tải Python 3.11 standalone về VỊ TRÍ BỀN (`.part` → md5-verify → os.replace) — chết giữa chừng
+    KHÔNG để lại tarball hỏng, và bước sau resume khỏi tải lại (trước đây TemporaryDirectory → mất trắng)."""
+    import hashlib as _hl
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    except (Exception, SystemExit):
+        pass
+    fid = getattr(a, "py_file_id", None) or PY311_FILEID
+    os.makedirs(os.path.dirname(st["tgz"]), exist_ok=True)
+    part = st["tgz"] + ".part"
+    print(f"[nlm-install] tải Python 3.11 standalone (fileId={fid}, ~31MB) — ưu tiên public-curl…")
+    try:
+        _fast_drive_fetch(fid, part, label="py311", env=getattr(a, "env", None))   # public-curl → direct-media → GAS
+    except Exception as e:  # noqa: BLE001
+        return False, f"tải lỗi: {e}"
+    got = _hl.md5(open(part, "rb").read()).hexdigest()
+    if PY311_MD5 and got != PY311_MD5:
+        try:
+            os.remove(part)
+        except Exception:
+            pass
+        return False, f"md5 LỆCH {got} ≠ {PY311_MD5} (file hỏng/sai bản — đã xóa, tải lại)"
+    os.replace(part, st["tgz"])
+    return True, f"tải + md5 OK → {st['tgz']}"
+
+
+def _nlm_step_extract(st: dict) -> tuple[bool, str]:
+    """Bước 2: giải nén tarball (đã md5-verify) → pydir; xong DỌN tarball 31MB (pybin là artifact bền của bước này)."""
+    import tarfile as _tf
+    with _tf.open(st["tgz"]) as t:
+        # filter="fully_trusted": tarball ĐÃ md5-verify (đúng bản python-build-standalone chính thức) →
+        # CHO PHÉP symlink hợp lệ (vd python/share/terminfo/…). filter="data" (backport 3.10.12) từ chối
+        # các symlink này (LinkOutsideDestinationError) dù tarball hợp lệ → giải nén fail.
+        try:
+            t.extractall(st["pydir"], filter="fully_trusted")
+        except TypeError:
+            t.extractall(st["pydir"])                      # Python quá cũ chưa có tham số filter (mặc định = trusted)
+    if not os.path.exists(st["pybin"]):
+        return False, "không thấy python3.11 sau giải nén"
+    try:
+        os.remove(st["tgz"])
+    except Exception:
+        pass
+    return True, f"giải nén Python → {st['pybin']}"
+
+
+def _nlm_step_install(st: dict, version: str | None = None) -> tuple[bool, str]:
+    """Bước 3: `uv tool install --python <pybin>` (uv KHÔNG tải managed Python — bỏ qua astral CDN; pkg từ PyPI)
+    hoặc pip. Bị kill giữa chừng: uv CACHE giữ tiến độ tải gói (đo thật log 2026-07-03: 3 lần gọi là xong) —
+    chạy lại CÙNG bước là resume."""
+    import subprocess as _sp, shutil as _sh
+    spec = f"notebooklm-mcp-cli=={version}" if version else "notebooklm-mcp-cli"
+    uv = _sh.which("uv")
+    if uv:
+        p = _sp.run([uv, "tool", "install", "--python", st["pybin"], spec], capture_output=True, text=True, timeout=600)
+    else:
+        p = _sp.run([st["pybin"], "-m", "pip", "install", "--user", spec], capture_output=True, text=True, timeout=600)
+    out = (p.stdout or "") + (p.stderr or "")
+    try:
+        nx = _imp("nlm_cli").nlm_exe() or _sh.which("nlm")
+    except Exception:
+        nx = _sh.which("nlm")
+    if p.returncode == 0 or nx:
+        return True, f"cài notebooklm-mcp-cli{(' → ' + nx) if nx else ''} (qua Python staged). Auth: `nlm login`."
+    return False, f"cài nlm lỗi (bị kill 45s/PyPI chặn? uv cache GIỮ tiến độ — chạy lại): {out[-200:].strip()}"
+
+
+_NLM_STEP_RC = {"fetch": 2, "extract": 4, "install": 5}    # rc lỗi theo bước (giữ tương thích cũ; md5 nay = 2)
+
+
 def cmd_nlm_install(a) -> int:
     """[Cowork CHẶN egress astral CDN → uv không tải managed Python được] Cài nlm bằng Python 3.11 STANDALONE
-    tải từ Drive (egress Drive MỞ): tải PY311_FILEID → giải nén ~/.local/python311 → `uv tool install --python
-    <bin>` (uv KHÔNG tải Python vì đã có local) hoặc pip. Một lệnh, bỏ qua hoàn toàn astral CDN.
-    `--uv`: egress MỞ → uv tự cài Python 3.11 (hoặc dùng python hệ thống nếu ≥3.11) → KHÔNG tải 31MB từ Drive."""
+    tải từ Drive (egress Drive MỞ): fetch PY311_FILEID → extract ~/.local/python311 → `uv tool install --python
+    <bin>`/pip. Mặc định chạy TRỌN GÓI (env không giới hạn thời gian).
+    ★ `--resume` (v1.30.1, #1 log Cowork 45s/lệnh + bwrap --unshare-pid kill tiến trình nền giữa 2 lần bash):
+    MỖI LẦN GỌI chạy ĐÚNG 1 BƯỚC kế tiếp (trạng thái dò từ ĐĨA, idempotent) → rc=3 PARTIAL còn bước sau,
+    rc=0 xong — LẶP LẠI CÙNG LỆNH tới rc=0 (thường ≤5 lần; bước install tự resume nhờ uv cache).
+    `--uv`: egress MỞ → uv tự cài Python 3.11 (hoặc python hệ thống ≥3.11) → KHÔNG tải 31MB từ Drive."""
     if getattr(a, "uv", False):                            # egress mở: ưu tiên uv (python hệ thống ≥3.11 / uv tự cài 3.11)
         ok, msg = _ensure_nlm_installed(getattr(a, "version", None))   # fallback Drive bên trong (gọi lại với uv=False)
         print(f"[nlm-install] {'✓' if ok else '✗'} {msg}", file=(sys.stdout if ok else sys.stderr))
@@ -621,59 +777,58 @@ def cmd_nlm_install(a) -> int:
             if _pmsg:
                 print(f"[nlm-install] {_pmsg}")
         return 0 if ok else 5
-    import subprocess as _sp, shutil as _sh, tarfile as _tf, hashlib as _hl
-    pydir = os.path.expanduser("~/.local/python311")
-    pybin = os.path.join(pydir, "python", "bin", "python3.11")
-    if not os.path.exists(pybin):
-        try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (Exception, SystemExit):
-            pass
-        fid = getattr(a, "py_file_id", None) or PY311_FILEID
-        with tempfile.TemporaryDirectory() as d:
-            tgz = os.path.join(d, "py311.tar.gz")
-            print(f"[nlm-install] tải Python 3.11 standalone (fileId={fid}, ~31MB) — ưu tiên public-curl…")
-            try:
-                _fast_drive_fetch(fid, tgz, label="py311", env=getattr(a, "env", None))   # public-curl → direct-media → GAS
-            except Exception as e:  # noqa: BLE001
-                print(f"[nlm-install] ✗ tải lỗi: {e}", file=sys.stderr)
-                return 2
-            got = _hl.md5(open(tgz, "rb").read()).hexdigest()
-            if PY311_MD5 and got != PY311_MD5:
-                print(f"[nlm-install] ✗ md5 LỆCH {got} ≠ {PY311_MD5} (file hỏng/sai bản)", file=sys.stderr)
-                return 3
-            os.makedirs(pydir, exist_ok=True)
-            with _tf.open(tgz) as t:
-                # filter="fully_trusted": tarball ĐÃ md5-verify (đúng bản python-build-standalone chính thức) →
-                # CHO PHÉP symlink hợp lệ (vd python/share/terminfo/…). filter="data" (backport 3.10.12) từ chối
-                # các symlink này (LinkOutsideDestinationError) dù tarball hợp lệ → giải nén fail.
-                try:
-                    t.extractall(pydir, filter="fully_trusted")
-                except TypeError:
-                    t.extractall(pydir)                    # Python quá cũ chưa có tham số filter (mặc định = trusted)
-        print(f"[nlm-install] ✓ giải nén Python → {pybin}")
-    if not os.path.exists(pybin):
-        print("[nlm-install] ✗ không thấy python3.11 sau giải nén", file=sys.stderr)
-        return 4
-    spec = "notebooklm-mcp-cli"
-    uv = _sh.which("uv")
-    if uv:   # uv dùng interpreter LOCAL (pybin) → KHÔNG tải managed Python (bỏ qua astral CDN); pkg vẫn lấy từ PyPI
-        p = _sp.run([uv, "tool", "install", "--python", pybin, spec], capture_output=True, text=True, timeout=600)
-    else:
-        p = _sp.run([pybin, "-m", "pip", "install", "--user", spec], capture_output=True, text=True, timeout=600)
-    out = (p.stdout or "") + (p.stderr or "")
-    try:
-        nx = _imp("nlm_cli").nlm_exe() or _sh.which("nlm")
-    except Exception:
-        nx = _sh.which("nlm")
-    if p.returncode == 0 or nx:
-        print(f"[nlm-install] ✓ cài notebooklm-mcp-cli{(' → ' + nx) if nx else ''} (qua Python staged). Auth: `nlm login`.")
+
+    def _run_step(st: dict) -> tuple[bool, str]:
+        if st["next_step"] == "fetch":
+            return _nlm_step_fetch(a, st)
+        if st["next_step"] == "extract":
+            return _nlm_step_extract(st)
+        return _nlm_step_install(st, getattr(a, "version", None))
+
+    def _done(st: dict) -> int:
+        print(f"[nlm-install] ✓ DONE — nlm sẵn sàng ({st['nlm']}). Auth: `nlm login`.")
         _pmsg = _persist_local_bin_on_path()
         if _pmsg:
             print(f"[nlm-install] {_pmsg}")
         return 0
-    print(f"[nlm-install] ✗ cài nlm lỗi (PyPI cũng bị chặn?): {out[-240:].strip()}", file=sys.stderr)
-    return 5
+
+    if getattr(a, "resume", False):
+        st = _nlm_install_probe()
+        if st["next_step"] == "done":
+            return _done(st)
+        print(f"[nlm-install] --resume: bước kế = {st['next_step']} (fetch→extract→install; trạng thái từ đĩa)")
+        ok, msg = _run_step(st)
+        print(f"[nlm-install] {'✓' if ok else '✗'} {msg}", file=(sys.stdout if ok else sys.stderr))
+        if not ok:
+            print("[nlm-install] chạy LẠI: `tl nlm-install --resume` — bước lỗi được thử tiếp, tiến độ KHÔNG mất "
+                  "(tarball bền + uv cache).", file=sys.stderr)
+            return _NLM_STEP_RC[st["next_step"]]
+        st2 = _nlm_install_probe()
+        if st2["next_step"] == "done":
+            return _done(st2)
+        if st["next_step"] == "install":     # install OK nhưng nlm chưa thấy trên PATH probe → tin rc=0 (hành vi cũ),
+            print("[nlm-install] ✓ install OK nhưng `nlm` chưa thấy trên PATH phiên này — mở shell mới / "
+                  "`export PATH=$HOME/.local/bin:$PATH` rồi `nlm login`.")
+            return 0                          # KHÔNG trả PARTIAL lặp vô ích trên cùng bước.
+        print(f"[nlm-install] PARTIAL — xong '{st['next_step']}', còn '{st2['next_step']}'. "
+              f"Chạy LẠI: `tl nlm-install --resume` (rc=3 = còn bước, KHÔNG phải lỗi).")
+        return 3
+    # đường TRỌN GÓI (giữ hành vi cũ cho env không giới hạn) — tái dùng step-machine + tarball BỀN:
+    # bị kill giữa chừng thì lần chạy sau (trọn gói hoặc --resume) tiếp đúng bước dở, không mất tiến độ.
+    _prev = None
+    while True:
+        st = _nlm_install_probe()
+        if st["next_step"] == "done":
+            return _done(st)
+        if st["next_step"] == _prev:         # bước OK mà trạng thái KHÔNG TIẾN (vd install rc=0, nlm chưa trên PATH)
+            print("[nlm-install] ✓ bước cuối OK nhưng `nlm` chưa thấy trên PATH phiên này — mở shell mới / "
+                  "`export PATH=$HOME/.local/bin:$PATH` rồi `nlm login`.")
+            return 0                          # chống lặp vô hạn; tin rc=0 của bước (hành vi cũ)
+        ok, msg = _run_step(st)
+        print(f"[nlm-install] {'✓' if ok else '✗'} {msg}", file=(sys.stdout if ok else sys.stderr))
+        if not ok:
+            return _NLM_STEP_RC[st["next_step"]]
+        _prev = st["next_step"]
 
 
 def cmd_nlm_auth_pull(a) -> int:

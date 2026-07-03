@@ -7,6 +7,30 @@ from __future__ import annotations
 import re  # noqa: F401
 import json  # noqa: F401
 
+import io as _hio
+import os as _hos
+import sys as _hsys
+
+
+class _hush:
+    """v1.31.2 (log deploy user 2026-07-03 'Vẫn lỗi'): NUỐT stdout/stderr của các test CỐ TÌNH đi nhánh lỗi —
+    argparse chặn '--row-kind xyz' (in usage+error là PASS-by-design), retry-transient mock, CẮT BATCH loud,
+    fallback gws-direct-media — output đó xả ra console deploy khiến người đọc tưởng selftest hỏng.
+    Debug: TL_SELFTEST_VERBOSE=1 để xem lại toàn bộ."""
+
+    def __enter__(self):
+        self._v = str(_hos.environ.get("TL_SELFTEST_VERBOSE", "")).lower() in ("1", "true", "yes")
+        if not self._v:
+            self._so, self._se = _hsys.stdout, _hsys.stderr
+            _hsys.stdout = _hsys.stderr = _hio.StringIO()
+        return self
+
+    def __exit__(self, *exc):
+        if not self._v:
+            _hsys.stdout, _hsys.stderr = self._so, self._se
+        return False
+
+
 _BOUND = False
 def bind(tl_module):
     global _BOUND
@@ -472,9 +496,10 @@ def run() -> int:
                       and not _subject_is_boilerplate("Bổ sung một số điều của Luật Kế toán")))
         # (i1) --offset phân trang trong resolver batch
         _ents4 = [{"drive_id": f"d{i}", "name": f"Doc {i}", "cat": "45", "corpus": "true"} for i in range(5)]
-        _tg_a = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=0), _ents4)
-        _tg_b = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=2), _ents4)
-        _tg_c = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=4), _ents4)
+        with _hush():   # cảnh báo CẮT BATCH = chính thứ đang test (phân trang loud) — không xả ra console deploy
+            _tg_a = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=0), _ents4)
+            _tg_b = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=2), _ents4)
+            _tg_c = _resolve_headerverify_targets(_ty3.SimpleNamespace(drive_id=None, sohieu=None, cat="45", all=False, limit=2, offset=4), _ents4)
         cases.append(("r4_headerverify_offset",
                       [e["drive_id"] for e in _tg_a] == ["d0", "d1"] and [e["drive_id"] for e in _tg_b] == ["d2", "d3"]
                       and [e["drive_id"] for e in _tg_c] == ["d4"]))
@@ -488,9 +513,10 @@ def run() -> int:
                     return {"ok": False, "error": self.err}
                 return {"ok": True, "entries": []}
         _gf = _GFlaky(2, "webapp GET manifest_export: TimeoutError: timed out")
-        _rt1 = _gas_get_retry(_gf, "manifest_export", _backoff=0)
         _gr = _GFlaky(9, "MANIFEST_NOT_FOUND")
-        _rt2 = _gas_get_retry(_gr, "manifest_export", _backoff=0)
+        with _hush():   # dòng '[gas-retry] … thử lại' là MOCK chủ đích — không xả ra console deploy
+            _rt1 = _gas_get_retry(_gf, "manifest_export", _backoff=0)
+            _rt2 = _gas_get_retry(_gr, "manifest_export", _backoff=0)
         cases.append(("r4_gas_retry_transient_only", _rt1.get("ok") is True and _gf.n == 3
                       and _rt2.get("ok") is False and _gr.n == 1))
         # (#10) PURE _ingest_local_cat_gate
@@ -1013,7 +1039,8 @@ def run() -> int:
     cases.append(("cluster_ppp_dau_tu", any(m["cluster"] == "dau_tu_PPP" for m in _cluster_lookup("đối tác công tư")["matches"])))
     # v1.22.67 (rà 59 luật — A2 subject sạch / A6 keyring noise / không xung đột _HL_DATE_RE thân-văn-bản)
     cases.append(("clean_subject_strips_hl_suadoi", ("hl2026" not in _clean_subject_text("thu do hl2026 07 01")) and _clean_subject_text("suadoi quang cao") == "quang cao" and _clean_subject_text("kham chua benh") == "kham chua benh"))
-    cases.append(("derive_subject_no_hl_garbage", "hl" not in _derive_subject_from_entries([{"name":"Luat_02-2026-QH16_Thu_do_HL2026-07-01"}]) and _derive_subject_from_entries([{"name":"Luat_115-2023-QH15_Kham_chua_benh"}]) == "kham chua benh"))
+    # v1.31.0 P0-1: derive_subject nay GIỮ hoa/thường (pretty-tail — query web tốt hơn) → so case-insensitive.
+    cases.append(("derive_subject_no_hl_garbage", "hl" not in _derive_subject_from_entries([{"name":"Luat_02-2026-QH16_Thu_do_HL2026-07-01"}]).lower() and _derive_subject_from_entries([{"name":"Luat_115-2023-QH15_Kham_chua_benh"}]).lower() == "kham chua benh"))
     cases.append(("hl_date_body_regex_intact", "hiệu lực" in _HL_DATE_RE.pattern and _HL_SUFFIX_RE.pattern.startswith(r"\bhl")))
     cases.append(("strip_keyring_noise", _imp("tl_gws")._strip_keyring_noise("Using keyring backend: keyring\n{\"ok\":true}") == "{\"ok\":true}" and _imp("tl_gws")._strip_keyring_noise("data\nok") == "data\nok"))
     # R1 (nhóm-D READ gws-primary): parse Sheets values → rows PARITY GAS rowsToObjs_ (header-zip, ép str, bù ô đuôi
@@ -1121,6 +1148,85 @@ def run() -> int:
     _omn_c = _find_amendment_candidates("06-2022-QH15", [rel_fx[0]], [], [rel_fx[0], _omn])
     cases.append(("amendment_omnibus_nonlinked_weak",
                   len(_omn_c) >= 1 and all((c.get("_amendment_omnibus") and not c.get("_amendment_strong")) for c in _omn_c)))
+    # ═══ v1.32.0 (log rà 77 Luật — 3 defect lớp amendment-gate) — r11_* ═══
+    # (A1) canonical CONFIRMED → suppress TOÀN BỘ escalation (kể cả strong-linked), ar=None, verdict OK.
+    _sm11a = _source_map_one("06/2022/QH15", [dict(rel_fx[0], verified="yes"), rel_fx[1]])
+    _sm11b = _source_map_one("06/2022/QH15", [dict(rel_fx[0], verified="yes"), dict(rel_fx[1], goc="06-2022-QH15")])
+    cases.append(("r11_confirmed_suppresses_amendment_gate",
+                  any(w.startswith("AMENDMENT_GATE_SUPPRESSED_CONFIRMED") for w in _sm11a["warnings"])
+                  and not any(w.startswith(("UNLINKED_AMENDMENT_CANDIDATE", "VBHN_RECHECK_REQUIRED",
+                                            "AMENDMENT_CANDIDATE_LOW_CONFIDENCE")) for w in _sm11a["warnings"])
+                  and _sm11a.get("action_required") is None and _sm11a["verdict"] == "OK"
+                  and _sm11b.get("action_required") is None and _sm11b["verdict"] == "OK"
+                  and not any(w.startswith("PAUSE_AND_ASK_USER") for w in _sm11b["warnings"])))
+    # (A2a) canonical CHÍNH LÀ VBHN + candidate nằm trong chuỗi goc CỦA NÓ → consolidated, sạch cờ mồ-côi (ca 115-2026).
+    _vb115 = {"id": "v115", "drive_id": "v115", "name": "VBHN_115-2026-VBHN-VPQH_2026_Luat_Thi_dua_Khen_thuong_HopNhat",
+              "so_hieu": "115-2026-VBHN-VPQH", "loai": "VBHN", "cat": "29", "goc": "06-2026-QH16;06-2022-QH15",
+              "nlm_source_id": "nv"}
+    _sm11c = _source_map_one("115-2026-VBHN-VPQH", [_vb115, rel_fx[1], rel_fx[0]])
+    cases.append(("r11_vbhn_canonical_consolidates_own_goc",
+                  [c.get("drive_id") for c in _sm11c["consolidated_amendments"]] == ["tdkt2026"]
+                  and not any(w.startswith(("UNLINKED_AMENDMENT_CANDIDATE", "VBHN_RECHECK_REQUIRED"))
+                              for w in _sm11c["warnings"])
+                  and _sm11c["verdict"] == "OK"))
+    # (A2b) canonical VBHN + candidate NGOÀI goc → VBHN_GOC_VERIFY (không 'tìm VBHN cho VBHN'); REVIEW giữ (đúng —
+    # VBHN có amendment chưa hợp nhất là rủi ro lỗi thời thật).
+    _sm11d = _source_map_one("115-2026-VBHN-VPQH", [dict(_vb115, goc="01-2020-QH14"), rel_fx[1], rel_fx[0]])
+    cases.append(("r11_vbhn_canonical_goc_verify_not_recheck",
+                  any(w.startswith("VBHN_GOC_VERIFY") for w in _sm11d["warnings"])
+                  and not any(w.startswith("VBHN_RECHECK_REQUIRED") for w in _sm11d["warnings"])))
+    # (A3) canonical OMNIBUS → OMNIBUS_AMENDS_OTHER, KHÔNG UNLINKED/LOW_CONF/RECHECK → hết REVIEW lặp.
+    _omn11 = {"id": "om1", "drive_id": "om1", "name": "Luat_90-2025-QH15_sua_doi_8_luat_Thi_dua_Khen_thuong_va_khac",
+              "so_hieu": "90/2025/QH15", "cat": "29", "corpus": "true", "nlm_source_id": "no1"}
+    _cand11 = {"id": "c2", "drive_id": "c2", "name": "Luat_99-2026-QH16_SuaDoi_Thi_dua_Khen_thuong",
+               "so_hieu": "99/2026/QH16", "cat": "29"}
+    _sm11e = _source_map_one("90/2025/QH15", [_omn11, _cand11])
+    cases.append(("r11_omnibus_canonical_amends_other",
+                  _is_omnibus_entry(_omn11)
+                  and any(w.startswith("OMNIBUS_AMENDS_OTHER") for w in _sm11e["warnings"])
+                  and not any(w.startswith(("UNLINKED_AMENDMENT_CANDIDATE", "VBHN_RECHECK_REQUIRED",
+                                            "AMENDMENT_CANDIDATE_LOW_CONFIDENCE")) for w in _sm11e["warnings"])
+                  and _sm11e["verdict"] == "OK"))
+    cases.append(("r11_omnibus_detector",
+                  _is_omnibus_entry({"name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu", "cat": "46"})
+                  and not _is_omnibus_entry(rel_fx[0])
+                  and not _is_omnibus_entry(_vb115)))
+    # (A4) enum Điều ước quốc tế/Công ước — hết nonmappable/loai_noncanonical GIẢ cho công ước ILO.
+    _t11 = {"drive_id": "cu1", "name": "CU_ILO-105_Xoa_bo_lao_dong_cuong_buc", "loai": "Điều ước quốc tế"}
+    _s11, _u11, _n11 = _backfill_loai_candidates([_t11], normalize=True)
+    cases.append(("r11_treaty_loai_enum",
+                  _normalize_loai("dieu uoc quoc te") == "Điều ước quốc tế"
+                  and "Điều ước quốc tế" in _LOAI_CANON_VALUES and "Công ước" in _LOAI_CANON_VALUES
+                  and _s11 == [] and _n11 == []))
+    # (B3) RAW_NAME_NOT_NLM là SIDECAR cạnh GDoc → không vào risky (cờ gốc _title_flags vẫn có — chỉ suppress hiển thị).
+    _gd11 = {"id": "g1", "drive_id": "g1", "name": "Luat_60_2024_QH15_Du_lieu", "so_hieu": "60/2024/QH15",
+             "cat": "03", "nlm_source_id": "s1", "corpus": "true"}
+    _raw11 = {"id": "r1", "drive_id": "r1", "name": "Luat_60_2024_QH15_Du_lieu.docx", "so_hieu": "", "cat": "03",
+              "mime": "application/vnd.openxmlformats"}
+    _sm11f = _source_map_one("60/2024/QH15", [_gd11, _raw11])
+    cases.append(("r11_rawname_sidecar_not_risky",
+                  "RAW_NAME_NOT_NLM" in _title_flags(_raw11)
+                  and not any("RAW_NAME_NOT_NLM" in (r.get("flags") or []) for r in _sm11f["risky_candidates"])))
+    # ═══ v1.32.1 (log rà 119 — read-path chết + false-green) — r12_* ═══
+    # _read_doc_text_via_nlm: gate offline (không nlm_source_id / nguồn removed → '' KHÔNG network).
+    cases.append(("r12_nlm_read_fallback_gates",
+                  _read_doc_text_via_nlm({}) == ""
+                  and _read_doc_text_via_nlm({"nlm_source_id": "s1", "nlm_status": "removed_from_drive"}) == ""
+                  and _read_doc_text_via_nlm({"name": "x", "nlm_source_id": ""}) == ""))
+    # v1.32.2 (log rà 69): omnibus theo ĐỀ-TÀI-TRONG-TÊN dạng nén (57-2024 registry chưa backfill goc → nhánh
+    # ≥2-ref câm; tên SuaDoi_QuyHoach_DauTu strip xong DÍNH LIỀN nên phải so compact); sửa-1-luật KHÔNG omnibus.
+    cases.append(("r12_omnibus_name_topics_compact",
+                  _is_omnibus_entry({"name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau", "cat": "34"})
+                  and not _is_omnibus_entry({"name": "Luat_75-2025-QH15_SuaDoi_Quang_cao", "cat": "35"})
+                  and not _is_omnibus_entry({"name": "Luat_68-2025-QH15_Quan_ly_dau_tu_von_nha_nuoc_tai_DN", "cat": "26"})))
+    # v1.32.2 (ca 115-2026-VBHN loai='Luật'): conflict-mode CHỈ khi tên VBHN_ + sohieu -VBHN- đồng thuận.
+    _cfl = {"drive_id": "v115", "name": "VBHN_115-VBHN-VPQH_2026_Thi_dua", "so_hieu": "115-2026-VBHN-VPQH", "loai": "Luật"}
+    _s12a, _, _n12a = _backfill_loai_candidates([_cfl], normalize=True)
+    _s12b, _, _ = _backfill_loai_candidates([dict(_cfl, loai="Văn bản hợp nhất")], normalize=True)
+    _s12c, _, _ = _backfill_loai_candidates([dict(_cfl, name="Luat_115_Thi_dua", so_hieu="115/2026/QH16")], normalize=True)
+    cases.append(("r12_loai_conflict_vbhn_corroborated",
+                  len(_s12a) == 1 and _s12a[0]["mode"] == "conflict" and _s12a[0]["loai"] == "Văn bản hợp nhất"
+                  and _s12a[0]["loai_raw"] == "Luật" and _s12b == [] and _s12c == [] and _n12a == []))
     # v1.29.6 P0c: VBHN year-fallback — VBHN key 2026 > luật-sửa key 2025 → covered (year-only); CÙNG năm → KHÔNG.
     _vbhn26 = {"id": "v26", "drive_id": "v26", "name": "VBHN_25-2026-VBHN-VPQH_2026_Luat_Gia", "so_hieu": "25-2026-VBHN-VPQH", "loai": "VBHN"}
     _am25 = {"id": "a25", "drive_id": "a25", "name": "Luat_90-2025-QH15_sua_doi_8_luat", "so_hieu": "90/2025/QH15"}
@@ -1136,6 +1242,120 @@ def run() -> int:
                   and "VBHN_MISSING_YEAR_OR_DATE" in _vf_n))
     # v1.29.6 P2.3: cờ boolean nhận giá trị tường minh.
     cases.append(("optional_bool_flag", _optional_bool_flag("true") is True and _optional_bool_flag("False") is False))
+
+    # ═══ v1.33.0 (log rà 69+15 Luật — CAT over-fire ~78% / BLDS name / reuse-risk / dup-real / breaker) — r13_* ═══
+    # (F1a) CAT_LIKELY_WRONG chỉ suy từ TIÊU ĐỀ — thân văn bản nhắc 'điều ước'/'sửa đổi các luật' KHÔNG còn là
+    # bằng chứng: BLHS (cur=16) không →23; VBHN Kế toán (cur=17) không →46.
+    _hx13_blhs = ("QUỐC HỘI\n\nBỘ LUẬT\nHÌNH SỰ\n\nCăn cứ Hiến pháp\nĐiều 1. Nhiệm vụ\n"
+                  "việc thực hiện điều ước quốc tế mà Việt Nam là thành viên; "
+                  "sửa đổi, bổ sung một số điều của luật A, luật B và các luật khác.")
+    _e13_blhs = {"drive_id": "d100", "name": "Luat_100-2015-QH13_Bo_Luat_Hinh_su", "so_hieu": "100/2015/QH13",
+                 "loai": "Bộ luật", "cat": "16", "corpus": "true"}
+    _hx13_vbhn = ("VĂN BẢN HỢP NHẤT\n\nLUẬT\nKẾ TOÁN\n\nhợp nhất các văn bản: "
+                  "sửa đổi, bổ sung một số điều của các luật: luật X, luật Y, luật Z.")
+    _e13_vbhn = {"drive_id": "d25", "name": "VBHN_25-2025-VBHN-VPQH_2025_Luat_Ke_toan",
+                 "so_hieu": "25-2025-VBHN-VPQH", "loai": "VBHN", "cat": "17", "corpus": "true"}
+    cases.append(("r13_cat_body_not_evidence",
+                  _cat_likely_wrong_suggest(_e13_blhs, _hx13_blhs) is None
+                  and _cat_likely_wrong_suggest(_e13_vbhn, _hx13_vbhn) is None))
+    # (F1b) pin Quyết định 26/6: AI/CĐS đang cat 19 → KHÔNG đề xuất dời dù nội dung/alias nói gì.
+    cases.append(("r13_cat_pin19_qd266",
+                  _cat_likely_wrong_suggest({"drive_id": "d134", "name": "Luat_134-2025-QH15_Tri_tue_nhan_tao",
+                                             "so_hieu": "134/2025/QH15", "loai": "Luật", "cat": "19",
+                                             "corpus": "true"}, "LUẬT\nTRÍ TUỆ NHÂN TẠO\n\nĐiều 1. Phạm vi") is None
+                  and _cat_likely_wrong_suggest({"drive_id": "d148", "name": "Luat_148-2025-QH15_Chuyen_doi_so",
+                                                 "so_hieu": "148/2025/QH15", "loai": "Luật", "cat": "19",
+                                                 "corpus": "true"}, "LUẬT\nCHUYỂN ĐỔI SỐ\n\nĐiều 1.") is None))
+    # (F1c) tín hiệu THẬT giữ nguyên: 143-2025 'Đầu tư' ở cat 45 → đề xuất 34 (alias pháp điển đồng thuận).
+    _p13_143 = _cat_likely_wrong_suggest({"drive_id": "d143", "name": "Luat_143-2025-QH15_Dau_tu",
+                                          "so_hieu": "143/2025/QH15", "loai": "Luật", "cat": "45",
+                                          "corpus": "true"}, "LUẬT\nĐẦU TƯ\n\nĐiều 1. Phạm vi điều chỉnh")
+    cases.append(("r13_cat_true_positive_alias_agree",
+                  _p13_143 is not None and _p13_143["suggested"] == "34"
+                  and "alias" in str(_p13_143.get("evidence"))))
+    # (F1d) omnibus tên NÉN (57-2024, title-block miss) → vẫn đề xuất 46; cùng entry dạng VBHN → im.
+    _p13_57 = _cat_likely_wrong_suggest({"drive_id": "d57", "name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau",
+                                         "so_hieu": "57/2024/QH15", "loai": "Luật", "cat": "34", "corpus": "true"}, "")
+    _p13_57v = _cat_likely_wrong_suggest({"drive_id": "d57v", "name": "VBHN_131-2025-VBHN-VPQH_2025_Luat_Quy_hoach_HopNhat",
+                                          "so_hieu": "131-2025-VBHN-VPQH", "loai": "VBHN", "cat": "43",
+                                          "corpus": "true"},
+                                         "VĂN BẢN HỢP NHẤT\n\nLUẬT\nQUY HOẠCH\n\nsửa đổi, bổ sung một số điều của "
+                                         "các luật: luật A, luật B, luật C.")
+    cases.append(("r13_cat_omnibus_46_vbhn_never_46",
+                  _p13_57 is not None and _p13_57["suggested"] == "46" and _p13_57v is None))
+    # (F2) tên BLDS_/BLHS_ = quy ước hợp lệ (viết tắt Bộ luật) — hết NAME_NONSTANDARD oan; tên hỏng thật vẫn bắt.
+    cases.append(("r13_name_boluat_abbrev_ok",
+                  _name_structural_issues("BLDS_91-2015-QH13_Bo_luat_Dan_su") == []
+                  and not _name_looks_nonstandard("BLDS_91-2015-QH13_Bo_luat_Dan_su")
+                  and "FILE_EXTENSION" in _name_structural_issues("luat-dau-thau-22-2023.html")
+                  and _name_prefix_family(_NAME_TYPE_PREFIX_RE.match("BLDS_x")) == "Bo_luat"))
+    # (F4) reuse-risk: GDoc năm-đủ + sidecar .docx cùng số = MỘT văn bản → KHÔNG VBHN_NUMBER_REUSE_RISK;
+    # control: VBHN tên trơ thiếu năm (133-VPQH) VẪN cờ (tín hiệu thật giữ).
+    _v13 = {"id": "v25", "drive_id": "v25", "name": "VBHN_25-2025-VBHN-VPQH_2025_Luat_Ke_toan",
+            "so_hieu": "25-2025-VBHN-VPQH", "loai": "VBHN", "cat": "17", "corpus": "true", "nlm_source_id": "s25"}
+    _v13raw = {"id": "v25r", "drive_id": "v25r", "name": "VBHN_25-2025-VBHN-VPQH_2025_Luat_Ke_toan.docx",
+               "so_hieu": "25-2025-VBHN-VPQH", "cat": "17"}
+    _sm13a = _source_map_one("25-2025-VBHN-VPQH", [_v13, _v13raw])
+    _v13b = {"id": "v133", "drive_id": "v133", "name": "VBHN_133-VPQH_Luat_Dat_dai_HopNhat",
+             "so_hieu": "133-2025-VBHN-VPQH", "loai": "VBHN", "cat": "18", "corpus": "true", "nlm_source_id": "s133"}
+    _sm13b = _source_map_one("133-2025-VBHN-VPQH", [_v13b])
+    cases.append(("r13_vbhn_reuse_sidecar_suppressed",
+                  not any(w.startswith(("VBHN_NUMBER_REUSE_RISK", "TITLE_OR_REGISTRY_WARN"))
+                          for w in _sm13a["warnings"])
+                  and any(w.startswith("VBHN_NUMBER_REUSE_RISK") for w in _sm13b["warnings"])
+                  and _vbhn_year_complete(_v13) and not _vbhn_year_complete(_v13b)))
+    # (F5) dup by_sohieu: gốc+VBHN cùng số chỉ-mục = LÀNH; 2 bản corpus=true cùng phía = trùng THẬT; phụ lục tách = LÀNH.
+    _d13_goc = {"id": "a", "drive_id": "a", "name": "Luat_52-2014-QH13_Hon_nhan_gia_dinh",
+                "so_hieu": "52/2014/QH13", "corpus": "true", "cat": "20"}
+    _d13_vbhn = {"id": "b", "drive_id": "b", "name": "VBHN_121-2025-VBHN-VPQH_2025_Hon_nhan_HopNhat",
+                 "so_hieu": "52/2014/QH13", "loai": "VBHN", "corpus": "true", "cat": "20"}
+    _d13_l1 = {"id": "c", "drive_id": "c", "name": "ND_30-2020-ND-CP_Cong_tac_van_thu",
+               "so_hieu": "30/2020/NĐ-CP", "corpus": "true", "cat": "05"}
+    _d13_l2 = {"id": "d", "drive_id": "d", "name": "ND_30-2020-ND-CP_Van_thu_ban_hai",
+               "so_hieu": "30/2020/NĐ-CP", "corpus": "true", "cat": "05"}
+    _d13_pl = {"id": "e", "drive_id": "e", "name": "ND_142-2026-ND-CP_Luat_TTNT_PhuLuc",
+               "so_hieu": "142/2026/NĐ-CP", "corpus": "true", "cat": "19"}
+    _d13_main = {"id": "f", "drive_id": "f", "name": "ND_142-2026-ND-CP_TTNT_Final",
+                 "so_hieu": "142/2026/NĐ-CP", "corpus": "true", "cat": "19"}
+    cases.append(("r13_dup_sohieu_real",
+                  not _sohieu_dup_group_real([_d13_goc, _d13_vbhn])
+                  and _sohieu_dup_group_real([_d13_l1, _d13_l2])
+                  and not _sohieu_dup_group_real([_d13_pl, _d13_main])
+                  and not _sohieu_dup_group_real([_d13_l1, dict(_d13_l2, corpus="false")])))
+    # (F3) circuit-breaker: gws lỗi AUTH 1 lần → op sau đi THẲNG GAS (gws chỉ bị gọi 1 lần); cờ bật.
+    import transport as _tp13
+    _calls13 = {"gws": 0, "gas": 0}
+    class _FkGas13:
+        def get(self, action, **kw):
+            _calls13["gas"] += 1
+            return {"ok": True, "text": "x"}
+    def _fk13_avail():
+        return True
+    def _fk13_call(op, **kw):
+        _calls13["gws"] += 1
+        raise _tp13.gws_bridge.GwsError("gws rc=2: Authentication failed")
+    _o13_avail, _o13_call = _tp13.gws_bridge.is_available, _tp13.gws_bridge.call
+    _o13_dead, _o13_warn = _tp13._GWS_AUTH_DEAD, set(_tp13._GWS_FALLBACK_WARNED)
+    try:
+        _tp13.gws_bridge.is_available = _fk13_avail
+        _tp13.gws_bridge.call = _fk13_call
+        _tp13._GWS_AUTH_DEAD = False
+        with _hush():   # [FALLBACK→GAS] chủ đích của test breaker — nuốt khỏi console deploy
+            _tp13.drive_op("read", gas=_FkGas13(), file_id="f1")
+            _tp13.drive_op("read", gas=_FkGas13(), file_id="f2")
+        _ok13 = _calls13["gws"] == 1 and _calls13["gas"] == 2 and _tp13._GWS_AUTH_DEAD is True
+    finally:
+        _tp13.gws_bridge.is_available = _o13_avail
+        _tp13.gws_bridge.call = _o13_call
+        _tp13._GWS_AUTH_DEAD = _o13_dead
+        _tp13._GWS_FALLBACK_WARNED.clear(); _tp13._GWS_FALLBACK_WARNED.update(_o13_warn)
+    cases.append(("r13_gws_auth_circuit_breaker",
+                  _ok13 and _tp13._is_gws_auth_error("GWS_CRED_EXPIRED: invalid_grant")
+                  and not _tp13._is_gws_auth_error("timeout sau 30s")))
+    # (F6) parser nhận --sohieu-file/--resume.
+    _ns13 = build_parser().parse_args(["corpus-audit", "--sohieu-file", "ds.txt", "--resume"])
+    cases.append(("r13_corpus_audit_sohieu_file_flags",
+                  _ns13.sohieu_file == "ds.txt" and _ns13.resume is True))
 
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
@@ -1168,11 +1388,12 @@ def run() -> int:
     # (#7) register --row-kind: parser nhận own/overflow/ref, CHẶN giá trị lạ (SystemExit).
     _ap5 = build_parser()
     _ns5 = _ap5.parse_args(["register", "--drive-id", "d1", "--row-kind", "own"])
-    try:
-        _ap5.parse_args(["register", "--drive-id", "d1", "--row-kind", "xyz"])
-        _r5_bad = False
-    except SystemExit:
-        _r5_bad = True
+    with _hush():   # argparse in `usage… error: invalid choice: 'xyz'` = PASS-by-design (parser CHẶN đúng) — nuốt
+        try:
+            _ap5.parse_args(["register", "--drive-id", "d1", "--row-kind", "xyz"])
+            _r5_bad = False
+        except SystemExit:
+            _r5_bad = True
     cases.append(("r5_register_row_kind_flag", _ns5.row_kind == "own" and _r5_bad))
     # (#9) ingest-local có cờ --skip-nlm-preflight (mặc định False = pre-check bật).
     _ns9 = _ap5.parse_args(["ingest-local", "x.docx"])
@@ -1229,6 +1450,428 @@ def run() -> int:
     cases.append(("scoped_gas_merge_keeps_explicit", _m2["registryDocId"] == "EXPLICIT"))
     _apply_profile_env(cfg2, "vbqppl")  # reset về mặc định: KHÔNG forward (dùng nền VBQPPL)
     cases.append(("scope_params_empty_for_default", _scope_params() == {}))
+
+    # ═══ v1.30.0 (profile ops: A base-also / B discover / C adopt / D doctor / E index) — r6_* ═══
+    from types import SimpleNamespace as _NS6
+    cfg6 = {"schema": 2, "defaultProfile": "vbqppl", "profiles": {
+        "vbqppl": {"manifestId": "m1", "notebookId": "n1", "rootFolderId": "r1", "registryDocId": "g1",
+                   "overflowNotebookId": "n1b", "shards": ["n1", "n1b", "n1c"]},
+        "p6": {"manifestId": "m6", "notebookId": "n6", "rootFolderId": "r6", "registryDocId": "g6", "categories": "own"},
+        "p6off": {"manifestId": "m7", "notebookId": "n7", "rootFolderId": "r7", "registryDocId": "g7",
+                  "categories": "own", "baseAlso": False},
+    }}
+    # (A) TL_BASE_ALSO: profile DỰ ÁN mặc định BẬT; opt-out config baseAlso=false; vbqppl KHÔNG set; CLI override thắng.
+    _apply_profile_env(cfg6, "p6")
+    cases.append(("r6_base_also_default_on_project", os.environ.get("TL_BASE_ALSO") == "1" and _base_also_enabled()))
+    _apply_profile_env(cfg6, "p6off")
+    cases.append(("r6_base_also_optout_config", os.environ.get("TL_BASE_ALSO") == "0" and not _base_also_enabled()))
+    cases.append(("r6_base_also_cli_override", _base_also_enabled(_NS6(base_also=True))
+                  and not _base_also_enabled(_NS6(base_also=False))))
+    _apply_profile_env(cfg6, "vbqppl")
+    cases.append(("r6_base_also_unset_on_default", "TL_BASE_ALSO" not in os.environ and not _base_also_enabled()))
+    cases.append(("r6_vbqppl_notebooks_dedup", _vbqppl_notebooks(cfg6) == ["n1", "n1b", "n1c"]))
+    _m6 = _merge_base_entries([{"id": "A", "drive_id": "A"}, {"id": "B", "drive_id": "B"}],
+                              [{"id": "B", "drive_id": "B"}, {"id": "C", "drive_id": "C"}])
+    cases.append(("r6_merge_base_entries_dedup_order",
+                  [_entry_drive_id(e) for e in _m6] == ["A", "B", "C"] and _m6[2].get("_scope") == "vbqppl"
+                  and "_scope" not in _m6[0]))
+    # (A) _base_manifest_entries KHÔI PHỤC env overlay profile (kể cả TL_BASE_ALSO) dù đọc nền lỗi/thành công.
+    _apply_profile_env(cfg6, "p6")
+    with _hush():   # có thể chạm LIVE (cache miss → gas-retry/gws-fallback GWS_CRED_EXPIRED) — test chỉ cần env-restore
+        _ents6, _err6 = _base_manifest_entries(None)
+    cases.append(("r6_base_entries_restores_env", isinstance(_ents6, list) and (_err6 is None or isinstance(_err6, str))
+                  and os.environ.get("TL_PROFILE") == "p6" and os.environ.get("TL_REGISTRY_DOC_ID") == "g6"
+                  and os.environ.get("TL_BASE_ALSO") == "1"))
+    _apply_profile_env(cfg6, "vbqppl")
+    # (B) phân loại item Drive — khoan dung biến thể tên thật (Registry_NQ36 / _manifest_DinhMucChi.json / bare).
+    cases.append(("r6_discover_item_kinds",
+                  _discover_item_kind({"name": "Registry_NQ36", "mime": REGISTRY_SHEET_MIME, "type": "file"}) == "registry"
+                  and _discover_item_kind({"name": "tra_luat_registry", "mime": "application/vnd.google-apps.document", "type": "file"}) == "registry_nonsheet"
+                  and _discover_item_kind({"name": "tra_luat_registry.X.csv", "mime": "text/csv", "type": "file"}) == "registry_csv"
+                  and _discover_item_kind({"name": "_manifest_DinhMucChi.json", "mime": "application/json", "type": "file"}) == "manifest"
+                  and _discover_item_kind({"name": "_PROFILES_INDEX", "mime": REGISTRY_SHEET_MIME, "type": "file"}) == "index"
+                  and _discover_item_kind({"name": "BC_khao_sat.docx", "mime": "application/x", "type": "file"}) == "other"
+                  and _discover_item_kind({"name": "sub", "mime": "application/vnd.google-apps.folder", "type": "folder"}) == "folder"))
+    _fx6_folders = [
+        {"id": "F1", "name": "Luat_BHXH", "items": [
+            {"id": "R1", "name": "tra_luat_registry.LuatBHXH", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+            {"id": "M1", "name": "tra_luat_manifest.LuatBHXH.json", "mime": "application/json", "type": "file"}]},
+        {"id": "F2", "name": "Định mức chi", "items": [
+            {"id": "R2", "name": "tra_luat_registry.DinhMucChi", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+            {"id": "M2", "name": "_manifest_DinhMucChi.json", "mime": "application/json", "type": "file"}]},
+        {"id": "F3", "name": "Khảo sát Luật XB", "items": []},
+        {"id": "F4", "name": "Khảo sát Luật Xuất bản", "items": [
+            {"id": "D1", "name": "BC_khao_sat.docx", "mime": "application/x-docx", "type": "file"}]},
+    ]
+    _fx6_root = [
+        {"id": "RG36", "name": "Registry_NQ36", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+        {"id": "MN36", "name": "tra_luat_manifest.NQ36.json", "mime": "application/json", "type": "file"},
+        {"id": "IDX", "name": "_PROFILES_INDEX", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+        {"id": "RVBT", "name": "tra_luat_registry", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+    ]
+    _fx6_profiles = {"vbqppl": {"rootFolderId": "r1"},
+                     "LuatBHXH": {"rootFolderId": "F1", "registryDocId": "R1", "manifestId": "M1"},
+                     "vbthuong": {"rootFolderId": "VBT", "registryDocId": "RVBT", "manifestId": "MVBT"},
+                     "ghost": {"rootFolderId": "FX"}}
+    _dc6 = _discover_classify(_fx6_folders, _fx6_root, _fx6_profiles, vbt_id="VBT")
+    _st6 = {r["folder_id"]: r["status"] for r in _dc6["folders"]}
+    cases.append(("r6_discover_classify_buckets",
+                  _st6 == {"F1": "in_config", "F2": "unregistered_profile", "F3": "empty_folder", "F4": "plain_folder"}))
+    cases.append(("r6_discover_suggest_adopt",
+                  len(_dc6["unregistered"]) == 1
+                  and "profile-adopt --name Dinh_muc_chi --folder F2 --registry R2 --manifest M2" in _dc6["unregistered"][0]["suggest"]))
+    cases.append(("r6_discover_misplaced_root_assets",
+                  {m["id"] for m in _dc6["misplaced_root_assets"]} == {"RG36", "MN36"}))
+    cases.append(("r6_discover_config_only_skips_vbt_root",
+                  [c["profile"] for c in _dc6["config_only"]] == ["ghost"]))
+    # (C) adopt: chọn asset đơn trị; nhiều registry → AMBIGUOUS; tên-registry-không-Sheet → chặn; override thắng.
+    _pk6 = _adopt_pick_assets(_fx6_folders[0]["items"])
+    cases.append(("r6_adopt_pick_single", (_pk6["registry"] or {}).get("id") == "R1"
+                  and (_pk6["manifest"] or {}).get("id") == "M1" and not _pk6["errors"]))
+    _pk6b = _adopt_pick_assets(_fx6_folders[0]["items"]
+                               + [{"id": "R9", "name": "tra_luat_registry.copy", "mime": REGISTRY_SHEET_MIME, "type": "file"}])
+    cases.append(("r6_adopt_pick_ambiguous", any(x.startswith("REGISTRY_AMBIGUOUS") for x in _pk6b["errors"])))
+    _pk6c = _adopt_pick_assets([{"id": "RD", "name": "tra_luat_registry", "mime": "application/vnd.google-apps.document", "type": "file"}])
+    cases.append(("r6_adopt_blocks_nonsheet_registry", _pk6c["registry"] is None
+                  and any(x.startswith("REGISTRY_NOT_SHEET") for x in _pk6c["errors"])))
+    _pk6d = _adopt_pick_assets([], reg_override="RX", man_override="MX")
+    cases.append(("r6_adopt_override_wins", (_pk6d["registry"] or {}).get("id") == "RX"
+                  and (_pk6d["manifest"] or {}).get("id") == "MX" and not _pk6d["errors"]))
+    _pk6e = _adopt_pick_assets([{"id": "R1", "name": "tra_luat_registry.X", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+                                {"id": "MA", "name": "tra_luat_manifest.X.json", "mime": "application/json", "type": "file"},
+                                {"id": "MB", "name": "_manifest_X.json", "mime": "application/json", "type": "file"}])
+    cases.append(("r6_adopt_manifest_prefers_standard", (_pk6e["manifest"] or {}).get("id") == "MA" and not _pk6e["errors"]))
+    # (D) doctor: bất biến layout (registry/manifest trong root|_meta) + legacy-Doc critical + thiếu id.
+    _prof6 = {"rootFolderId": "F1", "metaFolderId": "MT1", "notebookId": "n6", "registryDocId": "R1", "manifestId": "M1"}
+    _inf6_ok = {"R1": {"mimeType": REGISTRY_SHEET_MIME, "parents": ["MT1"], "trashed": False},
+                "M1": {"mimeType": "application/json", "parents": ["F1"], "trashed": False}}
+    cases.append(("r6_doctor_clean", _doctor_check_profile("p", _prof6, _inf6_ok) == []))
+    _inf6_mis = {"R1": {"mimeType": REGISTRY_SHEET_MIME, "parents": ["VBT"], "trashed": False},
+                 "M1": {"mimeType": "application/json", "parents": ["F1"], "trashed": False}}
+    _fd6 = _doctor_check_profile("p", _prof6, _inf6_mis)
+    cases.append(("r6_doctor_misplaced_fix_to_meta",
+                  any(x.get("check") == "MISPLACED_ASSET" and (x.get("fix") or {}).get("to") == "MT1" for x in _fd6)))
+    _fd6b = _doctor_check_profile("p", dict(_prof6, registryDocId=_LEGACY_REGISTRY_DOC_ID), _inf6_ok)
+    cases.append(("r6_doctor_legacy_doc_critical",
+                  any(x.get("check") == "REGISTRY_LEGACY_DOC" and x.get("severity") == "critical" for x in _fd6b)))
+    _fd6c = _doctor_check_profile("p", {"rootFolderId": "F1"}, {})
+    cases.append(("r6_doctor_missing_ids",
+                  any(x.get("check") == "NO_REGISTRY_ID" and x.get("severity") == "critical" for x in _fd6c)
+                  and any(x.get("check") == "NO_NOTEBOOK_ID" for x in _fd6c)))
+    # (E) index: BẢN CHIẾU từ config — default marker, folder_name map, cột baseAlso, CSV header đúng thứ tự cột.
+    _rows6 = _profile_index_rows(cfg6, folder_names={"r6": "P6_folder"})
+    _rmap6 = {r["profile"]: r for r in _rows6}
+    cases.append(("r6_index_rows_from_config",
+                  _rmap6["vbqppl"]["default"] == "yes" and _rmap6["p6"]["folder_name"] == "P6_folder"
+                  and _rmap6["p6"]["baseAlso"] == "on" and _rmap6["p6off"]["baseAlso"] == "off"
+                  and _rmap6["vbqppl"]["baseAlso"] == ""))
+    _csv6 = _profile_index_csv(_rows6)
+    cases.append(("r6_index_csv_header", _csv6.splitlines()[0] == ",".join(_PROFILES_INDEX_COLS)
+                  and len([x for x in _csv6.splitlines() if x.strip()]) == 1 + len(_rows6)))
+    # (wiring) parser: cờ base-also trên lệnh đọc + 3 lệnh profile mới nhận đúng flags.
+    _ap6 = build_parser()
+    _ns6a = _ap6.parse_args(["locate", "q"])
+    _ns6b = _ap6.parse_args(["reg-query", "--no-base-also"])
+    _ns6c = _ap6.parse_args(["profile-adopt", "--name", "x", "--folder", "f", "--bootstrap-manifest"])
+    _ns6d = _ap6.parse_args(["profile-doctor", "--fix"])
+    _ns6e = _ap6.parse_args(["profile-index", "--rebuild"])
+    _ns6f = _ap6.parse_args(["profile-list", "--discover", "--folder-cap", "99"])
+    cases.append(("r6_parser_wiring",
+                  getattr(_ns6a, "base_also", "MISSING") is None and _ns6b.base_also is False
+                  and _ns6c.bootstrap_manifest is True and _ns6d.fix is True and _ns6e.rebuild is True
+                  and _ns6f.discover is True and _ns6f.folder_cap == 99))
+    # ═══ v1.30.0 review đối kháng — 8 finding CONFIRMED → vá + test ═══
+    # (fix1) profile KHÔNG tồn tại trong config rơi về data NỀN → KHÔNG set TL_BASE_ALSO (hết nền tự quét mình 2 lần).
+    _apply_profile_env(cfg6, "khong_ton_tai_trong_config")
+    cases.append(("r6_base_also_not_set_unknown_profile",
+                  "TL_BASE_ALSO" not in os.environ and not _base_also_enabled()))
+    _apply_profile_env(cfg6, "vbqppl")
+    # (fix5/6) asset dùng chung ≥2 profile: owners map + doctor BỎ fix-move, nâng SHARED_ASSET_MULTI_PROFILE critical.
+    _shared_profs = {"P1": {"registryDocId": "R1", "manifestId": "M1"},
+                     "P2": {"registryDocId": "R1", "manifestId": "M2"},
+                     "P3": {"registryDocId": "R3"}}
+    cases.append(("r6_profile_asset_owners", _profile_asset_owners(_shared_profs, "R1") == ["P1", "P2"]
+                  and _profile_asset_owners(_shared_profs, "R3") == ["P3"]
+                  and _profile_asset_owners(_shared_profs, "") == []))
+    _sf = _strip_shared_fixes([{"check": "MISPLACED_ASSET", "severity": "warn", "profile": "P1", "fileId": "R1",
+                                "fix": {"action": "move", "fileId": "R1", "to": "MT"}},
+                               {"check": "MISPLACED_ASSET", "severity": "warn", "profile": "P3", "fileId": "R3",
+                                "fix": {"action": "move", "fileId": "R3", "to": "MT3"}}], _shared_profs)
+    cases.append(("r6_doctor_strips_shared_fix",
+                  _sf[0].get("check") == "SHARED_ASSET_MULTI_PROFILE" and _sf[0].get("severity") == "critical"
+                  and "fix" not in _sf[0] and _sf[0].get("owners") == ["P1", "P2"]
+                  and _sf[1].get("check") == "MISPLACED_ASSET" and _sf[1].get("fix")))
+    # (fix4) manifest lạ (profile ≠ tên adopt) KHÔNG được cấp notebookId; manifest đúng/không ghi profile → lấy bình thường.
+    _nb1, _w1 = _notebook_from_manifest_json({"profile": "P_khac", "notebookId": "nb_x"}, "P_dang_adopt")
+    _nb2, _w2 = _notebook_from_manifest_json({"profile": "Định mức chi", "notebookId": "nb_ok"}, "Dinh_muc_chi")
+    _nb3, _w3 = _notebook_from_manifest_json({"notebookId": "nb_bare"}, "P1")
+    cases.append(("r6_manifest_notebook_profile_mismatch",
+                  _nb1 == "" and (_w1 or "").startswith("MANIFEST_PROFILE_MISMATCH")
+                  and _nb2 == "nb_ok" and _w2 is None and _nb3 == "nb_bare" and _w3 is None))
+    # (fix7) index chỉ dọn TÊN CHÍNH XÁC — file người dùng `_PROFILES_INDEX_backup…` KHÔNG bị trash.
+    _oc = _index_old_candidates([{"id": "1", "name": "_PROFILES_INDEX"}, {"id": "2", "name": "_PROFILES_INDEX.csv"},
+                                 {"id": "3", "name": "_PROFILES_INDEX_backup_2026.csv"}, {"id": "4", "name": "khac.csv"}])
+    cases.append(("r6_index_old_exact_names", [x["id"] for x in _oc] == ["1", "2"]))
+    # (fix3) _ProfileEnvGuard: lệnh profile-ops ép scope nền bên trong nhưng KHÔI PHỤC env caller (kể cả khi lỗi).
+    _apply_profile_env(cfg6, "p6")
+    try:
+        with _ProfileEnvGuard():
+            _apply_profile_env(cfg6, "vbqppl")
+            raise RuntimeError("boom")
+    except RuntimeError:
+        pass
+    cases.append(("r6_profile_env_guard_restores",
+                  os.environ.get("TL_PROFILE") == "p6" and os.environ.get("TL_REGISTRY_DOC_ID") == "g6"
+                  and os.environ.get("TL_BASE_ALSO") == "1"))
+    _apply_profile_env(cfg6, "vbqppl")
+
+    # ═══ v1.30.1 (xử log LIVE 2026-07-03: #1 nlm-install 45s / #7 corpus lệch / #4 loai phi-chuẩn) — r7_* ═══
+    # (#1) máy trạng thái cài nlm: bước kế dò từ ĐĨA (fetch→extract→install→done), idempotent.
+    import tempfile as _tf7
+    from pathlib import Path as _P7
+    _tlg7 = _imp("tl_gws")
+    with _tf7.TemporaryDirectory() as _d7:
+        _st7 = _tlg7._nlm_install_probe(home=_d7, nlm_path="")
+        _ok7a = _st7["next_step"] == "fetch" and not _st7["have_tgz"] and not _st7["have_pybin"]
+        _P7(_st7["tgz"]).parent.mkdir(parents=True, exist_ok=True)
+        _P7(_st7["tgz"]).write_bytes(b"x")
+        _ok7b = _tlg7._nlm_install_probe(home=_d7, nlm_path="")["next_step"] == "extract"
+        _P7(_st7["pybin"]).parent.mkdir(parents=True, exist_ok=True)
+        _P7(_st7["pybin"]).write_bytes(b"x")
+        _ok7c = _tlg7._nlm_install_probe(home=_d7, nlm_path="")["next_step"] == "install"
+        _ok7d = _tlg7._nlm_install_probe(home=_d7, nlm_path="/x/nlm")["next_step"] == "done"
+    cases.append(("r7_nlm_install_probe_steps", _ok7a and _ok7b and _ok7c and _ok7d))
+    cases.append(("r7_nlm_install_step_rc_map", _tlg7._NLM_STEP_RC == {"fetch": 2, "extract": 4, "install": 5}))
+    # (#7) 2 thước đo corpus: client corpus=='true' vs luật server GAS (vbqppl/overflow đếm; ref/thuong loại).
+    _ents7 = [
+        {"corpus": "true", "row_kind": "own", "loai": "Luật"},     # cả 2 thước đếm
+        {"corpus": "vbqppl", "row_kind": "own", "loai": ""},       # CHỈ server
+        {"corpus": "false", "row_kind": "overflow", "loai": ""},   # CHỈ server (overflow)
+        {"corpus": "true", "row_kind": "ref", "loai": ""},         # CHỈ client (server loại ref)
+        {"corpus": "true", "row_kind": "own", "loai": "thuong"},   # CHỈ client (server loại thuong — EXACT match)
+        {"corpus": "false", "row_kind": "own", "loai": ""},        # không ai đếm
+        {"corpus": "true", "row_kind": "own", "loai": "Thuong"},   # CẢ 2 (review: GAS exact 'thuong' — 'Thuong' hoa VẪN đếm)
+    ]
+    cases.append(("r7_corpus_count_server_rule", _corpus_count_server_rule(_ents7) == 4
+                  and _corpus_count_server_rule([_ents7[0], _ents7[3], _ents7[4]]) == 1))
+    _rep7 = _sweep_report([{"id": "a1", "drive_id": "a1", "name": "Luat_12-2025-QH15_X",
+                            "so_hieu": "12/2025/QH15", "corpus": "true", "row_kind": "own", "loai": "Luật"}])
+    cases.append(("r7_sweep_two_measures_fields", _rep7.get("corpus") == 1
+                  and _rep7.get("corpus_server_rule_equiv") == 1 and isinstance(_rep7.get("corpus_basis"), dict)
+                  and "regIsCorpusCounted_" in _rep7["corpus_basis"]["corpus_server_rule_equiv"]))
+    # (#4) backfill-loai: mặc định CHỈ điền dòng RỖNG; --normalize sửa dòng SAI enum map tất định; giá trị lạ → báo.
+    _sug7, _uns7, _non7 = _backfill_loai_candidates([
+        {"id": "e1", "drive_id": "e1", "name": "Luat_12-2025-QH15_X", "so_hieu": "12/2025/QH15", "loai": ""},
+        {"id": "e2", "drive_id": "e2", "name": "abc", "loai": "Luat"},
+        {"id": "e3", "drive_id": "e3", "name": "def", "loai": "loai-la-khong-map-duoc"},
+        {"id": "e4", "drive_id": "e4", "name": "ghi", "loai": "Luật"},
+    ], normalize=True)
+    cases.append(("r7_backfill_loai_normalize",
+                  any(s["drive_id"] == "e2" and s["loai"] == "Luật" and s.get("mode") == "normalize" for s in _sug7)
+                  and any(s["drive_id"] == "e1" and s.get("mode") == "fill" for s in _sug7)
+                  and [x["drive_id"] for x in _non7] == ["e3"]
+                  and all(s["drive_id"] != "e4" for s in _sug7) and _uns7 == 0))
+    _sug7b, _uns7b, _non7b = _backfill_loai_candidates([{"id": "e2", "drive_id": "e2", "name": "abc", "loai": "Luat"}],
+                                                       normalize=False)
+    cases.append(("r7_backfill_loai_default_skips_nonempty", _sug7b == [] and _non7b == [] and _uns7b == 0))
+    cases.append(("r7_normalize_loai_map", _normalize_loai("Luat") == "Luật" and _normalize_loai("vbhn") == "Văn bản hợp nhất"
+                  and _normalize_loai("Cong dien") == "Công điện" and _normalize_loai("Công điện") == "Công điện"
+                  and _normalize_loai("CD") == "Công điện"))     # review: CD ∈ họ canonical → phải map, không nonmappable
+    # wiring parser
+    _ap7 = build_parser()
+    _n7a = _ap7.parse_args(["nlm-install", "--resume", "--version", "0.5.0"])
+    _n7b = _ap7.parse_args(["backfill-loai", "--normalize"])
+    cases.append(("r7_parser_wiring", _n7a.resume is True and _n7a.version == "0.5.0" and _n7b.normalize is True))
+
+    # ═══ v1.31.0 (backlog P0/P1 log rà 68 Luật 2026-07-03) — r8_* ═══
+    # (P0-1) guard tên-file + pretty-tail + đảo ưu tiên title-first + cờ không-dấu.
+    cases.append(("r8_looks_like_filename_title",
+                  _looks_like_filename_title("Luat_100-2015-QH13_Bo_Luat_Hinh_su")
+                  and _looks_like_filename_title("VBHN_121-VBHN-VPQH_2025_Luat_HNGD")
+                  and not _looks_like_filename_title("Luật Hôn nhân và gia đình")
+                  and not _looks_like_filename_title("Bộ luật Hình sự")
+                  and not _looks_like_filename_title("")))
+    cases.append(("r8_name_tail_pretty_keeps_case",
+                  _name_tail_pretty("Luat_100-2015-QH13_Bo_Luat_Hinh_su") == "Bo Luat Hinh su"
+                  # review v1.31.0: SO CHÍNH XÁC (endswith từng che year-leak '2025 Luat …') + năm sau sohieu phải bị bóc
+                  and _name_tail_pretty("VBHN_121-VBHN-VPQH_2025_Luat_Hon_nhan_va_gia_dinh") == "Luat Hon nhan va gia dinh"
+                  and _name_tail_pretty("ND_131-2021-ND-CP_Nghi_dinh_chi_tiet_BLLD") == "Nghi dinh chi tiet BLLD"))
+    cases.append(("r8_derive_subject_prefers_diacritic_title",
+                  _derive_subject_from_entries([{"name": "Luat_100-2015-QH13_Bo_Luat_Hinh_su",
+                                                 "title_vn": "Bộ luật Hình sự"}]) == "Bộ luật Hình sự"
+                  and _derive_subject_from_entries([{"name": "Luat_100-2015-QH13_Bo_Luat_Hinh_su",
+                                                     "nlm_title": "Luat_100-2015-QH13_Bo_Luat_Hinh_su"}]) == "Bo Luat Hinh su"))
+    cases.append(("r8_has_diacritics", _has_diacritics("Bộ luật Hình sự") and not _has_diacritics("Bo luat Hinh su")
+                  and not _has_diacritics("")))
+    # (P0-1) _title_vn_from_header: header IN HOA có dấu → 'Loại + Chủ đề'; mất dấu/boilerplate → skip loud.
+    _h8 = "LUẬT\nPHÒNG, CHỐNG BỆNH TRUYỀN NHIỄM\nCăn cứ Hiến pháp...\nĐiều 1. Phạm vi điều chỉnh"
+    _tv8, _w8 = _title_vn_from_header(_h8, {"name": "Luat_Phong_chong_benh_truyen_nhiem", "loai": "Luật"})
+    cases.append(("r8_title_vn_from_header_diacritic",
+                  _tv8.startswith("Luật ") and _has_diacritics(_tv8) and _w8 == ""))
+    _tv8b, _w8b = _title_vn_from_header("LUAT\nDAU THAU\nDieu 1.", {"name": "luat-dau-thau.html", "loai": ""})
+    cases.append(("r8_title_vn_skips_no_diacritics", _tv8b == "" and _w8b in ("NO_DIACRITICS", "NO_SUBJECT", "BOILERPLATE")))
+    _c8 = _backfill_titlevn_candidates([
+        {"drive_id": "a", "name": "Luat_A", "corpus": "true", "row_kind": "own", "title_vn": ""},
+        {"drive_id": "b", "name": "Luat_B", "corpus": "true", "row_kind": "own", "title_vn": "Luật B thật"},
+        {"drive_id": "c", "name": "Luat_C", "corpus": "false", "row_kind": "own", "title_vn": ""},
+        {"drive_id": "d", "name": "Luat_D", "corpus": "true", "row_kind": "ref", "title_vn": ""},
+    ])
+    cases.append(("r8_backfill_titlevn_candidates", [x["drive_id"] for x in _c8] == ["a"]))
+    _c8f = _backfill_titlevn_candidates([
+        {"drive_id": "e", "name": "Luat_E", "corpus": "true", "row_kind": "own", "title_vn": "Luat_100-2015-QH13_X"},
+        {"drive_id": "f", "name": "Luat_F", "corpus": "true", "row_kind": "own", "title_vn": "Luật F chuẩn"},
+    ], force=True)
+    cases.append(("r8_backfill_titlevn_force_skips_real_title", [x["drive_id"] for x in _c8f] == ["e"]))
+    # (P0-3) cấu trúc tên độc lập header — 3 ca log fire, tên chuẩn KHÔNG fire.
+    cases.append(("r8_name_structural_issues",
+                  "FILE_EXTENSION" in _name_structural_issues("luat-dau-thau-2023-so-22-2023-qh15-moi-nhat.html")
+                  and "NO_SOHIEU_IN_NAME" in _name_structural_issues("Luat_Phong_chong_benh_truyen_nhiem")
+                  and "NO_SUBJECT_TOKENS" in _name_structural_issues("Luat_64-2006-QH11")
+                  and _name_structural_issues("Luat_113-2025-QH15_Dan_so") == []
+                  and _name_structural_issues("VBHN_14-VBHN-VPQH_2024_Luat_An_toan_ve_sinh_lao_dong") == []))
+    # (P0-2) CAT_LIKELY_WRONG: cat có giá trị + suy-nội-dung high ra cat khác → REVIEW proposal (không auto).
+    _e8 = {"id": "x8", "drive_id": "x8", "name": "Luat_143-2025-QH15_Dau_tu", "so_hieu": "143/2025/QH15",
+           "sohieu": "143/2025/QH15", "loai": "Luật", "cat": "45_Y_te_duoc", "corpus": "true", "row_kind": "own"}
+    _hdr8 = ("LUẬT\nĐẦU TƯ\nSố: 143/2025/QH15\nngày 15 tháng 6 năm 2025\n"
+             "Điều 1. Phạm vi điều chỉnh\nLuật này quy định về hoạt động đầu tư kinh doanh tại Việt Nam, "
+             "ngành nghề đầu tư kinh doanh có điều kiện, ưu đãi đầu tư, dự án đầu tư.")
+    _ar8 = _corpus_audit_row(_e8, _hdr8)
+    _clw8 = [p for p in _ar8["proposals"] if p["type"] == "CAT_LIKELY_WRONG"]
+    cases.append(("r8_cat_likely_wrong_fires", len(_clw8) == 1 and "REVIEW" in _clw8[0]["fix_command"]))
+    _e8ok = dict(_e8, cat="34_Xay_dung_nha_o_do_thi")   # alias chính thức 'đầu tư'→34 (khớp gợi ý backlog cho Luật 57-2024)
+    _ar8b = _corpus_audit_row(_e8ok, _hdr8)
+    cases.append(("r8_cat_likely_wrong_silent_when_cat_matches",
+                  not any(p["type"] == "CAT_LIKELY_WRONG" for p in _ar8b["proposals"])))
+    cases.append(("r8_name_nonstandard_proposal",
+                  any(p["type"] == "NAME_NONSTANDARD" for p in _corpus_audit_row(
+                      {"id": "y8", "drive_id": "y8", "name": "Luat_64-2006-QH11", "so_hieu": "64/2006/QH11",
+                       "loai": "Luật", "cat": "19", "corpus": "true", "row_kind": "own"},
+                      "LUẬT\nCÔNG NGHỆ THÔNG TIN\nSố: 64/2006/QH11")["proposals"])))
+    # (P1-8) điều ước quốc tế: nhận diện + KHÔNG NAME_NONSTANDARD + tách khỏi orphans trong hygiene.
+    _tr8 = {"id": "t8", "drive_id": "t8", "name": "CU_ILO-105_Xoa_bo_lao_dong_cuong_buc", "so_hieu": "",
+            "sohieu": "", "loai": "", "cat": "23_Ngoai_giao_dieu_uoc_quoc_te", "corpus": "true", "row_kind": "own"}
+    cases.append(("r8_treaty_detect", _is_treaty_entry(_tr8)
+                  and _is_treaty_entry({"name": "Cong_uoc_Vien_1980", "loai": ""})
+                  and not _is_treaty_entry({"name": "Luat_113-2025-QH15_Dan_so", "loai": "Luật"})))
+    _hg8 = _hygiene_groups([_tr8, {"id": "o8", "drive_id": "o8", "name": "van_ban_la_khong_so", "so_hieu": "",
+                                   "sohieu": "", "loai": "", "cat": "19", "corpus": "true", "row_kind": "own"}])
+    cases.append(("r8_treaty_not_orphan",
+                  all(_entry_drive_id(x) != "t8" for x in _hg8["orphans"])
+                  and any(_entry_drive_id(x) == "t8" for x in _hg8["treaties"])
+                  and any(_entry_drive_id(x) == "o8" for x in _hg8["orphans"])))
+    # (P1-6) quarantine still_on_nlm = LIVE (loại removed*), nlm_source_id sót → stale_nlm_ref.
+    _q8 = [{"id": "q1", "drive_id": "q1", "name": "A", "cat": QUARANTINE_CAT, "corpus": "false",
+            "nlm_source_id": "s1", "nlm_status": "pushed", "row_kind": "own"},
+           {"id": "q2", "drive_id": "q2", "name": "B", "cat": QUARANTINE_CAT, "corpus": "false",
+            "nlm_source_id": "s2", "nlm_status": "removed_below_nd", "row_kind": "own"}]
+    _sw8 = _sweep_report(_q8)
+    cases.append(("r8_sweep_still_on_nlm_live",
+                  _sw8["quarantine"]["still_on_nlm"] == 1 and _sw8["quarantine"]["stale_nlm_ref"] == 1
+                  and isinstance(_sw8.get("treaties"), int)))
+    # (P1-4) VBHN cấp Bộ không được làm candidate của Luật QH khi thiếu goc-chain; VPQH/goc-match giữ nguyên.
+    cases.append(("r8_vbhn_agency_mismatch_helper",
+                  _vbhn_agency_mismatch("90-2025-QH15", {"name": "VBHN_4231-2025-VBHN-BTP_ND_xu_ly", "so_hieu": "4231/2025/VBHN-BTP"})
+                  and not _vbhn_agency_mismatch("90-2025-QH15", {"name": "VBHN_121-VBHN-VPQH_2025_HNGD", "so_hieu": "121/VBHN-VPQH"})
+                  and not _vbhn_agency_mismatch("187-2025-ND-CP", {"name": "VBHN_4231-2025-VBHN-BTP_ND", "so_hieu": "4231/2025/VBHN-BTP"})))
+    _vc8 = _vbhn_candidates([
+        {"id": "m8", "drive_id": "m8", "name": "VBHN_4231-2025-VBHN-BTP_Nghi_dinh_dau_tu", "so_hieu": "4231/2025/VBHN-BTP",
+         "loai": "Văn bản hợp nhất", "cat": "26", "corpus": "true", "row_kind": "own", "goc": "",
+         "tukhoa": "đầu tư kinh doanh"},
+    ], subject="đầu tư", goc="90/2025/QH15", year="2025")
+    cases.append(("r8_vbhn_candidates_agency_gate", _vc8 == []))
+    _vc8b = _vbhn_candidates([
+        {"id": "v8", "drive_id": "v8", "name": "VBHN_12-VBHN-VPQH_2025_Luat_Dau_tu", "so_hieu": "12/VBHN-VPQH",
+         "loai": "Văn bản hợp nhất", "cat": "26", "corpus": "true", "row_kind": "own", "goc": "90/2025/QH15",
+         "tukhoa": "đầu tư kinh doanh"},
+    ], subject="đầu tư", goc="90/2025/QH15", year="2025")
+    cases.append(("r8_vbhn_candidates_vpqh_kept", len(_vc8b) == 1))
+    # (P1-5) vocab thống nhất: relation-audit có verdict/flags/qt5_queries; source-map item có alias qt5_queries.
+    _ra8 = _relation_audit([], base="90/2025/QH15", subject="đầu tư", amendments=[], footnote_amend_keys=[])
+    cases.append(("r8_relation_audit_vocab",
+                  _ra8.get("verdict") in ("OK", "REVIEW", "QT5_WEB_REQUIRED") and isinstance(_ra8.get("flags"), list)
+                  and _ra8.get("qt5_queries") == _ra8.get("vbhn_queries")))
+    _sm8 = _source_map_one("Luật Đầu tư", [])
+    cases.append(("r8_source_map_qt5_alias", _sm8.get("qt5_queries") == _sm8.get("qt5_search_hints")))
+    # (P1-7) sweep --verbose parser + backfill-title-vn parser wiring.
+    _ap8 = build_parser()
+    _n8a = _ap8.parse_args(["sweep", "--verbose"])
+    _n8b = _ap8.parse_args(["backfill-title-vn", "--limit", "5", "--offset", "40", "--force-refresh"])
+    cases.append(("r8_parser_wiring", _n8a.verbose is True and _n8b.limit == 5 and _n8b.offset == 40
+                  and _n8b.force_refresh is True))
+
+    # ═══ v1.31.1 (log phiên rà 68 Luật — vòng 2: N1 at-ingest / N2 tukhoa tier / N3 alias-strict / N4 sweep) — r9_* ═══
+    cases.append(("r9_tukhoa_title_extract",
+                  _title_vn_from_tukhoa("Phạm vi điều chỉnh của Bộ luật hình sự Điều 2 Giải thích",
+                                        "Luat_100-2015-QH13_Bo_Luat_Hinh_su") == "Bộ luật Hình sự"
+                  and _title_vn_from_tukhoa("Luật Đầu tư và các luật có liên quan", "Luat_143-2025-QH15_Dau_tu") == "Luật Đầu tư"
+                  and _title_vn_from_tukhoa("Luật Bảo hiểm xã hội năm", "Luat_41-2024-QH15_Bao_hiem_xa_hoi") == "Luật Bảo hiểm xã hội"))
+    cases.append(("r9_tukhoa_abbrev_crosscheck",   # bài học #2 log: CNTT phải khớp nhờ _ABBREV_MAP mở rộng (hết false-reject)
+                  _title_vn_from_tukhoa("Luật công nghệ thông tin quy định", "Luat_67-2006-QH11_CNTT") == "Luật Công nghệ thông tin"))
+    cases.append(("r9_tukhoa_rejects",
+                  _title_vn_from_tukhoa("Luật Mặt trận tổ quốc", "Luat_113-2025-QH15_Dan_so") == ""      # méo/khác luật
+                  and _title_vn_from_tukhoa("Luat Dau tu khong dau", "Luat_143-2025-QH15_Dau_tu") == ""   # không dấu
+                  and _title_vn_from_tukhoa("", "Luat_x") == ""))
+    cases.append(("r9_tukhoa_heading_split_not_lowercase_dj",   # 'đ' thường ∈ dải À-Ỹ từng bị coi là HOA → cắt giữa 'quy định'
+                  _title_vn_from_tukhoa("Luật Thủ đô quy định", "Luat_39-2024-QH15_Thu_do") == "Luật Thủ đô"))
+    # review v1.31.1 (CONFIRMED): split theo TỪ-KHÓA heading — tukhoa Title-Case không còn cụt còn 1 từ;
+    # tên có danh-từ-riêng viết Hoa giữa chừng (Tổ quốc Việt Nam) không bị cắt.
+    cases.append(("r9_tukhoa_titlecase_not_truncated",
+                  _title_vn_from_tukhoa("Luật Bảo Hiểm Xã Hội Điều 2 Giải thích",
+                                        "Luat_41-2024-QH15_Bao_hiem_xa_hoi") == "Luật Bảo Hiểm Xã Hội"
+                  and _title_vn_from_tukhoa("Luật Mặt trận Tổ quốc Việt Nam Điều 1",
+                                            "Luat_75-2015-QH13_Mat_tran_To_quoc") == "Luật Mặt trận Tổ quốc Việt Nam"))
+    cases.append(("r9_expected_cat_alias",   # ca thật log: 143-2025 Đầu tư→34, 46-2024 Công chứng→04; boundary vốn-NN nhường
+                  _expected_cat_from_alias("Dau tu")[0] == "34" and _expected_cat_from_alias("Cong chung")[0] == "04"
+                  and _expected_cat_from_alias("dau tu von nha nuoc tai doanh nghiep") == ("", "")
+                  and _expected_cat_from_alias("") == ("", "")))
+    # v1.31.2 (FP thật phiên rà): Luật CNTT phải ra 03 POSITIVE (không phải 19 qua alias 'cong nghe' trần, không im lặng);
+    # 'cong nghe' trần = blacklist; alias 19 đặc thù (khoa hoc cong nghe) vẫn sống.
+    cases.append(("r9_expected_cat_cntt_boundary",
+                  _expected_cat_from_alias("Cong nghe thong tin") == ("03", "cong nghe thong tin")
+                  and _expected_cat_from_alias("Luat Cong nghe thong tin quy dinh")[0] == "03"
+                  and _expected_cat_from_alias("cong nghe") == ("", "")
+                  and _expected_cat_from_alias("khoa hoc cong nghe")[0] == "19"))
+    cases.append(("r9_title_vn_from_plan",
+                  _title_vn_from_plan({"classification": {"title": "Dân số", "loai": "Luật"}}) == "Luật Dân số"
+                  and _title_vn_from_plan({"classification": {"title": "Dan so", "loai": "Luat"}}) == ""
+                  and _title_vn_from_plan({}) == ""))
+    _sw9 = _sweep_report([
+        {"drive_id": "a1", "name": "luat-dau-thau-2023.html", "corpus": "true", "row_kind": "own"},
+        {"drive_id": "a2", "name": "Luat_113-2025-QH15_Dan_so", "corpus": "true", "row_kind": "own"},
+        {"drive_id": "a3", "name": "PL_06-2025-QH15_Phu_luc", "corpus": "true", "row_kind": "own"},
+        {"drive_id": "a4", "name": "CU_ILO-105_Xoa_bo_lao_dong_cuong_buc", "corpus": "true", "row_kind": "own"},
+    ])
+    cases.append(("r9_sweep_name_nonstandard_offline",
+                  _sw9.get("name_nonstandard") == 1
+                  and _sw9["name_nonstandard_rows"][0]["drive_id"] == "a1"
+                  and any("tên phi-chuẩn" in x for x in _sw9["next_actions"])))
+    _ap9 = build_parser()
+    cases.append(("r9_parser_from_tukhoa", _ap9.parse_args(["backfill-title-vn", "--from-tukhoa"]).from_tukhoa is True))
+
+    # ═══ v1.31.2 (log LIVE vòng 3 — UTF-8 capture vỡ + nguồn trích yếu = KHỐI TIÊU ĐỀ) — r10_* ═══
+    # (U2) parser khối tiêu đề — ghim đúng các ca script tham khảo làm HỎNG (sidecar họ gửi lộ lỗi):
+    cases.append(("r10_title_block_multiline_no_cap",   # họ cắt 4 dòng → 'Luật Ban hành văn bản quy phạm pháp' CỤT
+                  _title_block_from_text("LUẬT\nBAN HÀNH VĂN BẢN\nQUY PHẠM PHÁP LUẬT\n\nCăn cứ...")
+                  == ("Luật", "Ban hành văn bản quy phạm pháp luật")))
+    cases.append(("r10_title_block_bo_luat_kind",       # họ match 'LUẬT' trước → 91/2015 thành 'Luật Dân sự' SAI LOẠI
+                  _title_block_from_text("BỘ LUẬT\nDÂN SỰ\nCăn cứ...") == ("Bộ luật", "Dân sự")))
+    cases.append(("r10_title_block_keeps_special_tokens",   # họ .lower() trần → hỏng '(HIV/AIDS)'; họ cụt '…miễn'
+                  _title_block_from_text("LUẬT\nPHÒNG, CHỐNG NHIỄM VI RÚT GÂY RA HỘI CHỨNG SUY GIẢM MIỄN DỊCH "
+                                         "MẮC PHẢI Ở NGƯỜI (HIV/AIDS)\nCăn cứ...")[1].endswith("(HIV/AIDS)")))
+    cases.append(("r10_title_block_stops_at_lowercase",   # dòng thường (không in hoa) = hết khối, không nuốt bừa
+                  _title_block_from_text("NGHỊ ĐỊNH\nQuy định chi tiết một số điều...\nCăn cứ...") == ("", "")))
+    cases.append(("r10_title_vn_header_tier1_block",     # _title_vn_from_header ưu tiên tier khối-tiêu-đề
+                  _title_vn_from_header("BỘ LUẬT\nDÂN SỰ\nCăn cứ...", {"name": "BLDS_91-2015-QH13"})[0] == "Bộ luật Dân sự"))
+    cases.append(("r10_title_sentence_case_tokens",
+                  _title_sentence_case("QUẢN LÝ, SỬ DỤNG VŨ KHÍ (CT06) VÀ VẬT LIỆU NỔ")
+                  == "Quản lý, sử dụng vũ khí (CT06) và vật liệu nổ"))
+    # (U1) sanitize export text: diệt lone-surrogate + control-byte, GIỮ \n\t + tiếng Việt.
+    _dirty = "Điều 1.\tPhạm vi\x00\x0b" + "\udcE1" + "\nĐiều 2."
+    _clean = _sanitize_export_text(_dirty)
+    cases.append(("r10_sanitize_export_text",
+                  "\x00" not in _clean and "\x0b" not in _clean and "\udcE1" not in _clean
+                  and "Điều 1.\tPhạm vi" in _clean and "\nĐiều 2." in _clean
+                  and _clean.encode("utf-8") is not None))
     _rk, _rd, _rr = _profile_rebuild_partition([
         {"id": "own-no-nb", "row_kind": "own"},
         {"id": "notebook-row", "nlm_notebook_id": "n2", "row_kind": "own"},
@@ -2221,7 +2864,9 @@ def run() -> int:
     cases.append(("deep_resolver_prefers_gdoc", _b is not None and _entry_google_doc(_b) and not _entry_raw_no_gdoc(_b)))
     _b2, _gid2, _nm2, _h2 = _resolve_deep_target("Luat_Phong_chong_benh_truyen_nhiem", _mres)
     cases.append(("deep_resolver_long_name_not_driveid", _gid2 == "DRV_pcbtn"))
-    cases.append(("emit_raw_no_gdoc_rc2", _emit_raw_no_gdoc("x.docx", True) == 2))
+    with _hush():   # in JSON ENTRY_RAW_NO_GDOC là hành vi đang test — nuốt khỏi console deploy
+        _er_rc10 = _emit_raw_no_gdoc("x.docx", True)
+    cases.append(("emit_raw_no_gdoc_rc2", _er_rc10 == 2))
     # HỢP NHẤT Codex — _classify_ref kiểm VBHN-coverage TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED).
     _vcov = [{"id": "v", "name": "VBHN_11-VBHN-VPQH_PCTH_thuoc_la", "so_hieu": "11/VBHN-VPQH", "cat": "45", "corpus": "true", "goc": "09/2012/QH13;28/2018/QH14"}]
     _clv = _classify_ref({"raw": "x", "name_phrase": "PCTH thuoc la", "sohieu": "09-2012-QH13", "loai": "Luật"}, _vcov)

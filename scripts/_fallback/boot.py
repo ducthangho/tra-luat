@@ -153,6 +153,8 @@ def _reuse_local_cache(cache, ttl: float):
     return {"ok": True, "cache": str(cache), "cache_hit": True, "cache_age_s": round(age, 1),
             "webapp_calls": 0, "profile": _active_profile(),
             "count": meta.get("count"), "corpus_count": meta.get("corpus_count"),
+            "corpus_count_rule": "server GAS: corpus∈{true,vbqppl} ∪ row_kind=overflow, trừ ref & loai='thuong' — "
+                                 "KHÁC sweep.corpus (corpus=='true' thuần); đối chiếu: sweep.corpus_server_rule_equiv",
             "entries_indexed": ei, "treeHash": meta.get("treeHash")}
 
 
@@ -186,6 +188,8 @@ def main(argv=None) -> int:
     (cache / "manifest_index.json").write_text(json.dumps(idx, ensure_ascii=False), encoding="utf-8")
     out = {"ok": True, "cache": str(cache), "cache_hit": False, "webapp_calls": 2, "profile": _active_profile(), "registryDocId": os.environ.get("TL_REGISTRY_DOC_ID", ""), "manifestId": os.environ.get("TL_MANIFEST_ID", ""), "count": idx["_meta"].get("count"),
            "corpus_count": idx["_meta"].get("corpus_count"),
+           "corpus_count_rule": "server GAS: corpus∈{true,vbqppl} ∪ row_kind=overflow, trừ ref & loai='thuong' — "
+                                "KHÁC sweep.corpus (corpus=='true' thuần); đối chiếu: sweep.corpus_server_rule_equiv",
            "entries_indexed": entries_indexed,
            "treeHash": idx["_meta"].get("treeHash"), "ms": int((time.time()-t0)*1000)}
     print(json.dumps(out, ensure_ascii=False, indent=None if a.json else 2)); return 0

@@ -5,6 +5,9 @@
 # chặn `curl -o` → exit 23, và file rỗng làm script tưởng "đã có").  Shell (sống sót cắt cụt) + nhỏ (dán-lại được).
 #   sh scripts/tl_fetch.sh <args>        # tải zip 1 lần → chạy `tl.py <args>` từ bản sạch
 #   sh scripts/tl_fetch.sh --setup [--nlm]   # BOOTSTRAP đủ: CONFIG(curl public)+GWS TRƯỚC → init-config → ping → gws(direct-media) → boot [→ nlm uv]
+#   sh scripts/tl_fetch.sh --setup-step core|gws|boot|nlm   # v1.32.2 (Cowork 45s/lệnh): TÁCH BƯỚC — mỗi lệnh 1 bước
+#       core = config + init-config + ping + uv · gws = gws-bootstrap · boot = boot · nlm = nlm-install --resume
+#       (bước nlm chạy LẶP CÙNG LỆNH tới khi hết PARTIAL — rc=3 là còn bước, KHÔNG phải lỗi)
 # Subsequent (nhanh hơn, khỏi qua script):  cd "$(cat ~/.tl_fetch/ROOT)" && python3 scripts/tl.py <args>
 FID="${TL_SKILL_FILEID:-1H5kAt3SRVP7_xmLMIzcqyFtFc4VSDH0P}"
 CONFIG_FILEID="${TL_CONFIG_FILEID:-1dEOBJ8PRmKoLgziEF5xuKjRhHLNhUUYq}"   # config v2 (apps script + token) nay PUBLIC ở Package → curl được
@@ -12,6 +15,7 @@ DIR="${TL_DIR:-$HOME/.tl_fetch}"; ZIP="$DIR/skill.zip"; OUT="$DIR/live"
 CFG="${TL_CONFIG:-$HOME/.tra_luat_config.json}"
 PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
 MODE=run; [ "$1" = "--setup" ] && { MODE=setup; shift; }
+STEP=""; [ "$1" = "--setup-step" ] && { MODE=step; STEP="$2"; shift 2; }
 DO_NLM=0; [ "$1" = "--nlm" ] && { DO_NLM=1; shift; }
 mkdir -p "$DIR" 2>/dev/null || { echo "[tl_fetch] không tạo được $DIR" >&2; exit 2; }
 
@@ -54,6 +58,43 @@ if [ -z "$TL" ] || [ ! -s "$TL" ]; then
   [ -n "$TL" ] || { echo "[tl_fetch] không thấy scripts/tl.py trong zip." >&2; exit 3; }
 fi
 ROOT=$(dirname "$(dirname "$TL")"); echo "$ROOT" > "$DIR/ROOT"
+
+# 3b) v1.32.2 — TÁCH BƯỚC setup (Cowork 45s/lệnh: --setup trọn gói từng bị kill giữa chừng).
+if [ "$MODE" = step ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+  case "$STEP" in
+    core)
+      if [ ! -s "$CFG" ]; then
+        CU="https://drive.usercontent.google.com/download?id=$CONFIG_FILEID&export=download&confirm=t"
+        curl -fsSL "$CU" -o "$CFG.tmp" 2>/dev/null || wget -qO "$CFG.tmp" "$CU" 2>/dev/null || true
+        if [ -s "$CFG.tmp" ] && ! head -c 256 "$CFG.tmp" | grep -qi '<!doctype html\|<html\|accounts.google.com'; then
+          mv "$CFG.tmp" "$CFG"; echo "[tl_fetch] config: curl public ✓" >&2
+        else rm -f "$CFG.tmp"; echo "[tl_fetch] THIẾU config (curl fail) — xem hướng dẫn --setup." >&2; exit 10; fi
+      fi
+      "$PY" "$TL" init-config --file "$CFG" 2>/dev/null || true
+      "$PY" "$TL" ping || exit 1     # ping đã tự retry cold-start ×3 (v1.32.2)
+      command -v uv >/dev/null 2>&1 || [ -x "$HOME/.local/bin/uv" ] || \
+        "$PY" -m pip install --user --upgrade uv >/dev/null 2>&1 || true
+      echo "[tl_fetch] ✓ STEP core xong → tiếp: --setup-step gws" >&2 ;;
+    gws)
+      GWSTGZ=$(find "$OUT" -path '*assets*' -name 'gws.tgz' 2>/dev/null | head -1)
+      if [ -n "$GWSTGZ" ]; then "$PY" "$TL" gws-bootstrap-cowork --local-tgz "$GWSTGZ"
+      else "$PY" "$TL" gws-bootstrap-cowork; fi
+      echo "[tl_fetch] ✓ STEP gws xong → tiếp: --setup-step boot" >&2 ;;
+    boot)
+      "$PY" "$TL" boot || exit 1
+      echo "[tl_fetch] ✓ STEP boot xong → (tùy chọn) --setup-step nlm" >&2 ;;
+    nlm)
+      "$PY" "$TL" nlm-install --resume; RC=$?
+      if [ "$RC" = 3 ]; then echo "[tl_fetch] PARTIAL — chạy LẠI: --setup-step nlm (rc=3 = còn bước, KHÔNG lỗi)." >&2; exit 3; fi
+      [ "$RC" = 0 ] || exit "$RC"
+      "$PY" "$TL" nlm-auth-load 2>/dev/null && echo "[tl_fetch] ✓ nlm auth headless." >&2 || \
+        echo "[tl_fetch] nlm CHƯA auth headless → 'nlm login' thủ công / nlm-MCP." >&2
+      echo "[tl_fetch] ✓ STEP nlm xong — SETUP đủ." >&2 ;;
+    *) echo "[tl_fetch] --setup-step cần core|gws|boot|nlm" >&2; exit 2 ;;
+  esac
+  exit 0
+fi
 
 # 3) BOOTSTRAP đủ (--setup) hoặc chạy 1 lệnh
 if [ "$MODE" = setup ]; then

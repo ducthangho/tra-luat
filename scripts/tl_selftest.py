@@ -1731,6 +1731,49 @@ def run() -> int:
                   and _o22c["counts"]["corpus_client"] == 1 and _o22c["counts"]["luat_loai_all"] == 0
                   and set(_o22c["basis"]) == set(_o22c["counts"])))
 
+    # ═══ v1.33.10 (log rà: xref chết exporttext-scope dù gws sống; status vs vbhn-check 'mâu thuẫn' 143;
+    # nlm-get không nhận tên profile; nghi --json bẩn stdout) — r23_* ═══
+    # (B1) status USE_VBHN tự khai corroboration: goc VBHN RỖNG → +VBHN_GOC_UNCORROBORATED (vbhn-check --goc
+    # 0 candidate là TẤT YẾU, không phải 2 sự thật) + LUÔN +USE_VBHN_UNVERIFIED_LATEST (S9 chưa lượt-2);
+    # goc CÓ dẫn chiếu bản gốc → hết UNCORROBORATED.
+    _cur23 = {"status": "CONSOLIDATED_INTO_VBHN", "sohieu": "143/2025/QH15"}
+    _vb23a = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": ""}
+    _vb23b = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": "143-2025-QH15; 90-2025-QH15"}
+    _st23a = _pg17._alias_vocab(_pg17.decide(dict(_cur23, superseded_by=[_vb23a]), [], False, False))
+    _st23b = _pg17._alias_vocab(_pg17.decide(dict(_cur23, superseded_by=[_vb23b]), [], False, False))
+    cases.append(("r23_status_use_vbhn_corroboration",
+                  _st23a.get("decision") == "SKIP" and "USE_VBHN_UNVERIFIED_LATEST" in _st23a["flags"]
+                  and "VBHN_GOC_UNCORROBORATED" in _st23a["flags"]
+                  and _st23b.get("use_vbhn_goc_corroborated") is True
+                  and "VBHN_GOC_UNCORROBORATED" not in _st23b["flags"]
+                  and "USE_VBHN_UNVERIFIED_LATEST" in _st23b["flags"]))
+    # (B1-log1) --json SẠCH stdout máy-đọc: sweep + review-queue cmd-level trên fixture → stdout parse thẳng
+    # json.loads, không banner/preamble (heartbeat đều đi stderr — corpus-audit/dedup/counts đã khoá ở r20-r22).
+    _orig_me23 = _tlm20._manifest_entries
+    _tlm20._manifest_entries = lambda refresh=False: _fix21
+    try:
+        _ns23s = build_parser().parse_args(["sweep", "--json"])
+        _buf23s = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf23s), _ctx20.redirect_stderr(_io20.StringIO()):
+            cmd_sweep(_ns23s)
+        _o23s = json.loads(_buf23s.getvalue())
+        _ns23r = build_parser().parse_args(["review-queue", "--json"])
+        _buf23r = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf23r), _ctx20.redirect_stderr(_io20.StringIO()):
+            cmd_review_queue(_ns23r)
+        _o23r = json.loads(_buf23r.getvalue())
+    finally:
+        _tlm20._manifest_entries = _orig_me23
+    cases.append(("r23_json_stdout_pure",
+                  _buf23s.getvalue().lstrip().startswith("{") and isinstance(_o23s.get("total"), int)
+                  and _buf23r.getvalue().lstrip().startswith("{") and _o23r.get("schema") == "review_queue.v1"))
+    # (E1) nlm-get nhận TÊN PROFILE quen: 'vbqppl'/'base' → notebook nền (hết NLM API NOT_FOUND).
+    _nb23, _er23 = _resolve_nlm_notebook("vbqppl")
+    _nb23b, _ = _resolve_nlm_notebook("743ed200-aaaa-bbbb-cccc-000000000000")
+    cases.append(("r23_nlm_notebook_profile_alias",
+                  _nb23 == NLM_BASE_NOTEBOOK and _er23 is None
+                  and _nb23b == "743ed200-aaaa-bbbb-cccc-000000000000"))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

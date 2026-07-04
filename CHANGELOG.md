@@ -1,3 +1,35 @@
+# ★ v1.33.10 — xref/vbhn-verify/frontier GWS-FIRST (hết chết theo exporttext-scope) + status USE_VBHN tự khai corroboration
+
+## A1 🔴 (log: `tl xref` chết 'thiếu scope script.external_request' TRONG KHI gws direct-media đang SỐNG)
+- 3 chỗ còn gọi THẲNG webapp exporttext (`_read_verify_text` của vbhn-verify, đường export của xref/extract-target,
+  `_frontier_doc_text`) nay đi `_read_doc_text` GWS-FIRST (cache → direct-media → transport → exporttext CUỐI).
+  Hệ quả: xref/vbhn-verify/frontier-expand/cache-build sống bằng direct-media như extract/corpus-audit; exporttext
+  chỉ còn là fallback cuối. (Muốn fallback GAS đọc được thật: thêm scope `script.external_request` vào
+  appsscript.json + clasp redeploy + OWNER re-authorize — việc GAS-side, xem references/APPSSCRIPT_MANIFEST.open-egress.json.)
+
+## B1 🟠 (log: status 'USE_VBHN 61-2026' cho 143-2025 nhưng `vbhn-check --goc 143` 0 candidate — 2 lệnh 'mâu thuẫn')
+- KHÔNG phải 2 sự thật: status tin gợi ý webapp (superseded_by, đã qua guard chủ đề §1.1); vbhn-check đi
+  registry.goc — goc VBHN CHƯA backfill thì 0 candidate là TẤT YẾU. Nay USE_VBHN TỰ KHAI: field
+  `use_vbhn_goc_corroborated` + flags máy-đọc `USE_VBHN_UNVERIFIED_LATEST` (LUÔN — S9 chưa lượt-2, xử cả B2)
+  và `VBHN_GOC_UNCORROBORATED` (khi goc trống/không dẫn chiếu bản gốc) + action giải thích và lệnh verify.
+
+## E1 + kiểm chứng B1-log1
+- `tl nlm-get vbqppl|base` → tự map notebook nền (hết NLM API NOT_FOUND khi truyền tên profile).
+- `--json` SẠCH stdout: khoá bằng test cmd-level (sweep/review-queue parse thẳng json.loads; corpus-audit/
+  dedup-check/counts đã khoá ở r20-r22 — heartbeat/banner đều đi stderr). Log ghi nhận bẩn nhiều khả năng do
+  driver gộp 2>&1 — tách stream khi parse.
+
+## Đối chiếu phần còn lại (không đổi code)
+- A2-log2 (nlm PATH): `nlm_exe()` ĐÃ tự nối ~/.local/bin từ 2.2 — mọi lệnh `tl nlm-*` không cần .bashrc; chỉ
+  gọi `nlm` TRẦN ngoài tl mới cần export PATH. C1 (extract CAP): cache-build/extract nay cùng đường gws-first
+  ở trên. C2-C5 (45s/lock/tmp/resume-loop): giới hạn env đã biết. D1-D4 + A-mục log-1 (loai 2 Bộ luật, recat 4,
+  rename 5, convert 4 raw, backfill 2 quan hệ, hieuluc): NỢ DATA — lệnh sẵn theo runbook; D3 lưu ý dùng
+  `reg-query --loai` (so CHUẨN HOÁ, 'Luat' khớp 'Luật') thay lọc tay có dấu.
+
+selftest **511/511** (+3 r23: use-vbhn-corroboration, json-stdout-pure, nlm-notebook-alias).
+
+---
+
 # ★ v1.33.9 — Log rà 90/531 chạy v1.33.8: GỐC RỄ 31 ca VBHN no-proposal + dedup-check schema + lệnh `tl counts`
 
 Bucket A5 v1.33.7 (`header_mismatch_no_proposal`) làm đúng nhiệm vụ — 31/90 ca lộ ra là MỘT defect hệ thống:

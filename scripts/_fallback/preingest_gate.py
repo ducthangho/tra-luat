@@ -135,12 +135,25 @@ def decide(current: dict, targets: list[dict] | None = None, is_amendment: bool 
         _vbsh = str(vb.get("sohieu") or "")
         _today = _dt.date.today().isoformat()
         _pend = [str(t.get("sohieu") or "") for t in targets if (_effective_iso(t) or "") > _today]
+        # B1 (v1.33.10 — log: status quả quyết 'USE_VBHN 61-2026' cho 143-2025 trong khi `vbhn-check --goc 143`
+        # trả 0 candidate → 2 lệnh mâu thuẫn, agent tin status sẽ trích VBHN chưa kiểm chứng được): USE_VBHN
+        # nay tự khai (a) goc registry của VBHN có DẪN CHIẾU bản gốc không (goc trống/không chứa → vbhn-check
+        # --goc đương nhiên 0 — KHÔNG phải 2 sự thật, mà là goc chưa backfill); (b) S9: CHƯA lượt-2 xác minh
+        # MỚI NHẤT (số VBHN tăng dần) — cả hai thành flags máy-đọc qua _alias_vocab.
+        _k = re.sub(r"[^0-9A-Za-z]+", "-", str(current.get("sohieu") or "")).strip("-").lower()
+        _g = re.sub(r"[^0-9A-Za-z]+", "-", str(vb.get("goc") or "")).lower()
+        _corrob = bool(_k) and bool(_g) and _k in _g
         return {"decision": "SKIP", "reason": f"Bản gốc đã được hợp nhất — dùng VBHN {_vbsh}",
                 "surface": f"USE_VBHN: {_vbsh}", "use_vbhn": _vbsh,
+                "use_vbhn_goc_corroborated": _corrob,
                 "caution": "PENDING_AMENDMENT_NOT_IN_VBHN", "pending_amendments": _pend,
                 "actions": [f"Dùng VBHN hợp nhất {_vbsh} (đang hiệu lực/đã trên NLM), không nạp bản gốc rời.",
                             f"CHƯA kết luận xong: KIỂM footnote-map/Điều hiệu lực của {_vbsh} có phản ánh ĐỦ sửa đổi HIỆU LỰC TƯƠNG LAI (pending) chưa — VBHN có thể ra đời TRƯỚC sửa đổi pending."
-                            + ((" Pending nghi ngờ: " + ", ".join(_pend)) if _pend else "")]}
+                            + ((" Pending nghi ngờ: " + ", ".join(_pend)) if _pend else ""),
+                            ("Corroboration: registry.goc của VBHN " + ("ĐÃ dẫn chiếu bản gốc." if _corrob else
+                             "CHƯA dẫn chiếu bản gốc — `vbhn-check --goc` sẽ 0 candidate (goc chưa backfill, "
+                             "KHÔNG phải mâu thuẫn); verify dòng hợp nhất/footnote-map trước khi tin."))
+                            + " S9: CHƯA lượt-2 xác minh MỚI NHẤT — `vbhn-verify --official-required` trước khi trích dẫn."]}
     if status in ("NOT_FOUND", "MISSING", ""):
         return {"decision": "ADD", "reason": "Chưa thấy trong registry/NLM", "surface": status or "UNKNOWN",
                 "actions": ["Có thể nạp, nhưng vẫn cần kiểm số hiệu/tên văn bản."]}
@@ -172,6 +185,9 @@ def _alias_vocab(res: dict) -> dict:
         flags.append(head)
     if res.get("use_vbhn"):
         flags.append("USE_VBHN")
+        flags.append("USE_VBHN_UNVERIFIED_LATEST")   # B1 v1.33.10 (S9): chưa lượt-2 — driver không được coi là chốt
+        if res.get("use_vbhn_goc_corroborated") is False:
+            flags.append("VBHN_GOC_UNCORROBORATED")  # goc chưa backfill → vbhn-check --goc 0 candidate là TẤT YẾU
     if res.get("caution"):
         flags.append(str(res["caution"]))
     if res.get("pending_amendments"):

@@ -2401,8 +2401,57 @@ def run() -> int:
     # flags_all=None + qt5_queries rỗng trong khi review-queue đầy đủ → driver batch đọc đồng nhất gãy) — r37_* ═══
     _sm37 = _source_map_one("71/2020/QH14", [_r30_base, _r30_amend, _r30_vbhn])
     cases.append(("r37_source_map_item_flags_all_alias",
-                  _sm37.get("flags_all") == _sm37.get("flags") and _sm37.get("flags_all") is not None
+                  set(_sm37.get("flags_all") or []) == set(_sm37.get("flags") or [])
+                  and _sm37.get("flags_all") is not None
                   and isinstance(_sm37.get("qt5_queries"), list)))
+
+    # ═══ v1.33.26 (MERGE bundle-25 — nhánh hội tụ trên v1.33.24, A5 của họ là SUPERSET bản ta v1.33.25
+    # [+review_reason, dedup BASE_SCOPE_HIT, QT5-fallback] + 2 món mới: --out atomic [A3 timeout] +
+    # config-pin-registry [S-9]; port trọn, 0 reject — lần 2 liên tiếp) — r38_* ═══
+    # (test gốc bundle, giữ ngữ nghĩa) schema parity: REVIEW có cờ web → flags_all/review_reason/qt5 đủ.
+    _sm38 = _source_map_one("100-2015-QH13", [
+        {"id": "law100", "name": "BLuat_100-2015-QH13_Bo_luat_hinh_su", "so_hieu": "100/2015/QH13",
+         "loai": "Bộ luật", "cat": "22", "corpus": "true", "mime": "application/vnd.google-apps.document"}])
+    cases.append(("r38_source_map_schema_parity_qt5",
+                  isinstance(_sm38.get("flags_all"), list)
+                  and set(_sm38.get("flags_all") or []) == set(_sm38.get("flags") or [])
+                  and isinstance(_sm38.get("review_reason"), list) and bool(_sm38.get("qt5_queries"))))
+    # (test gốc bundle) config-pin-registry: pin an toàn vào config local, TỪ CHỐI Doc legacy 1mATG,
+    # giữ nguyên key khác trong config (read-modify-write, không clobber).
+    import tempfile as _tmp38
+    import os as _os38
+    _cfg38 = _os38.path.join(_tmp38.gettempdir(), "tl_selftest_pin_cfg38.json")
+    try:
+        open(_cfg38, "w", encoding="utf-8").write(json.dumps(
+            {"profiles": {"vbqppl": {"rootFolderId": "R0"}}, "defaultProfile": "vbqppl", "webappUrl": "https://x"}))
+        _pin_ok38 = _pin_registry_doc_id_config(_cfg38, "SHEET_REAL_123", profile="vbqppl")
+        _pin_bad38 = _pin_registry_doc_id_config(_cfg38, _LEGACY_REGISTRY_DOC_ID, profile="vbqppl")
+        _pd38 = json.loads(open(_cfg38, encoding="utf-8").read())
+        cases.append(("r38_config_pin_registry_safe",
+                      bool(_pin_ok38.get("ok")) and _pin_bad38.get("error") == "REFUSE_LEGACY_DOC_ID"
+                      and _pd38["profiles"]["vbqppl"]["registryDocId"] == "SHEET_REAL_123"
+                      and _pd38["profiles"]["vbqppl"]["rootFolderId"] == "R0"
+                      and _pd38.get("webappUrl") == "https://x"))
+    finally:
+        try:
+            _os38.remove(_cfg38)
+        except OSError:
+            pass
+    # (+của ta) --out atomic: _emit_json_payload ghi file + in path; nội dung parse lại đúng.
+    _out38 = _os38.path.join(_tmp38.gettempdir(), "tl_selftest_out38", "payload.json")
+    try:
+        _b38 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b38):
+            _emit_json_payload({"ok": True, "n": 3}, _out38)
+        _rt38 = json.loads(open(_out38, encoding="utf-8").read())
+        cases.append(("r38_emit_json_out_atomic",
+                      _rt38 == {"ok": True, "n": 3} and _out38 in _b38.getvalue()
+                      and not _os38.path.exists(_out38 + ".tmp")))
+    finally:
+        try:
+            _os38.remove(_out38)
+        except OSError:
+            pass
 
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —

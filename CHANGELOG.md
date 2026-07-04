@@ -1,3 +1,25 @@
+# ★ v1.33.26 — MERGE bundle-25 (`tra-luat-skill-v1.33.25-gws3env-fixed.zip`): A5 superset + --out atomic + config-pin-registry — port TRỌN, 0 reject (lần 2 liên tiếp)
+
+Bundle-25 dựng trên v1.33.24, xử cùng log với v1.33.25 ta. Fix A5 của họ là SUPERSET bản ta (thêm
+`review_reason` alias, dedup BASE_SCOPE_HIT, QT5-fallback sinh query tối thiểu khi có cờ web mà hint rỗng)
+→ lấy tl.py của họ làm nền v1.33.26 (helpers `_mutable_config_target`/`_write_json_atomic` verify tồn tại).
+
+## PORT (4)
+- **A5 superset**: flags_all + review_reason ở item + top-level; qt5_queries top-level gộp-dedup (cap 12);
+  fallback QT5 khi cờ web mà hints rỗng. Thực địa BLHS: flags_all 3 cờ, review_reason khớp, qt5=8.
+- **`--out <file>`** cho source-map/review-queue (+config-pin-registry): `_emit_json_payload` ghi JSON ATOMIC
+  (.tmp → os.replace) + in path — xử A3 (heredoc/stdout dài bị trần 30s Cowork giết): driver ghi file rồi
+  phân tích tách bước.
+- **`tl config-pin-registry <SHEET_ID>`** (S-9 usability): pin registryDocId vào config LOCAL an toàn —
+  read-modify-write giữ nguyên key khác, từ chối Doc legacy 1mATG, không gọi Drive/Sheets; --profile-name/
+  --root. Checklist mục 6 nay = 1 lệnh (vẫn cần SHEET_ID thật từ user).
+- 2 selftest gốc bundle (schema parity + pin-safe) port thành r38 + thêm test --out atomic của ta.
+
+selftest **572/572** (+3 r38). Ghi chú: v1.33.25 canonical (A5 bản ta) bị SUPERSEDE bởi bản superset này —
+không mất gì (r37 vẫn pass trên code họ).
+
+---
+
 # ★ v1.33.25 — A5 log rà 67 LIVE v1.33.24: schema source-map ↔ review-queue lệch (flags_all/qt5_queries)
 
 Log rà 67 Luật vòng mới CHẠY LIVE v1.33.24 (bản deploy đầy đủ chuỗi 21..24 — log tự xác nhận advisory=11,

@@ -2074,6 +2074,46 @@ def run() -> int:
                   _fl28["command"] == _fl28["fix_command"] and _fl28["proposal_count"] == 1
                   and _fl28["current"] == "cu"))
 
+    # ═══ v1.33.17 (MERGE nhánh-5 `tra-luat-skill-v1.33.17-gws3env-patch-merged.zip` — nền là CHÍNH v1.33.15
+    # canonical + merge song song nhánh-4 + `tl_changes.patch`; port 1 món mới + khoá 2 reject) — r29_* ═══
+    # (S-2i) số hiệu format LỎNG 'Số: 47 / 2024 / NĐ - CP' (separator lạ — _SOHIEU_RE trượt) → compact-match
+    # alnum trên 2000 ký tự đầu vẫn khớp; số hiệu SAI THẬT (99/2099) vẫn fail (test gốc của nhánh-5, giữ nguyên).
+    _vr29_loose = _verify_header_match(_e27c, "NGHỊ ĐỊNH\nSố: 47 / 2024 / NĐ - CP\nquy định về cơ sở dữ liệu quốc gia")
+    _vr29_wrong = _verify_header_match(_e27c, "NGHỊ ĐỊNH\nSố: 99 / 2099 / NĐ - CP\nquy định về cơ sở dữ liệu quốc gia")
+    cases.append(("r29_header_sohieu_loose_spacing",
+                  _vr29_loose["checks"].get("sohieu") is True
+                  and _vr29_wrong["checks"].get("sohieu") is False))
+    # (S-3, chiều VÀO-46 — test nhánh-5 PASS bằng CƠ CHẾ ta: boundary text-pattern, KHÔNG phải evidence
+    # refs-based của họ): omnibus 57-2024 nằm nhầm 34 → cat-audit đề xuất 46.
+    _e29o = dict(_e27o, cat="34_Dau_tu")
+    _TL_MODULE._manifest_entries = lambda refresh=False: [_e29o]
+    _buf29 = _io27.StringIO()
+    try:
+        with _ctx27.redirect_stdout(_buf29):
+            _rc29 = _TL_MODULE.cmd_cat_audit(build_parser().parse_args(["cat-audit", "--json"]))
+    finally:
+        _TL_MODULE._manifest_entries = _orig_me27
+    _ca29 = json.loads(_buf29.getvalue())
+    cases.append(("r29_cat_audit_moves_omnibus_into_46",
+                  _rc29 == 0 and _ca29["count"] == 1 and _ca29["flags"][0].get("suggest") == ["46"]))
+    # (REJECT nhánh-5, PHẢN CHỨNG khoá vĩnh viễn): luật sửa MỘT đích + registry có goc+related (2 ref tokens)
+    # KHÔNG được coi là omnibus để kéo vào 46 — bundle nhánh-5 dùng _omnibus_name_evidence (gồm nhánh ≥2-refs)
+    # làm cờ VÀO-46 → 71-2020 SuaDoi_HIV (cat 45 Y tế) bị đề xuất 45→46 confidence HIGH (repro trên bundle).
+    # Evidence refs-based CHỈ được dùng chiều SUPPRESS (giữ-trong-46), chiều PROPOSE phải qua text-pattern chặt.
+    _e29hiv = {"id": "a71", "drive_id": "a71", "name": "Luat_71-2020-QH14_SuaDoi_Phong_chong_HIV_AIDS",
+               "so_hieu": "71/2020/QH14", "loai": "Luật", "cat": "45_Y_te", "corpus": "true",
+               "goc": "64-2006-QH11", "related": "01-2021-VBHN-VPQH"}
+    _TL_MODULE._manifest_entries = lambda refresh=False: [_e29hiv]
+    _buf29b = _io27.StringIO()
+    try:
+        with _ctx27.redirect_stdout(_buf29b):
+            _rc29b = _TL_MODULE.cmd_cat_audit(build_parser().parse_args(["cat-audit", "--json"]))
+    finally:
+        _TL_MODULE._manifest_entries = _orig_me27
+    _ca29b = json.loads(_buf29b.getvalue())
+    cases.append(("r29_single_target_amender_not_forced_46",
+                  _rc29b == 0 and not any(f.get("suggest") == ["46"] for f in _ca29b["flags"])))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

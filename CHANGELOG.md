@@ -1,3 +1,32 @@
+# ★ v1.33.17 — MERGE nhánh-5 (`tra-luat-skill-v1.33.17-gws3env-patch-merged.zip`): nhánh HỘI TỤ trên chính canonical v1.33.15 — port 2, reject 2
+
+Nhánh-5 = canonical v1.33.15 CỦA TA làm nền + họ tự merge nhánh-4 SONG SONG (trùng phần lớn v1.33.16 ta: cùng
+reject `_corpus_audit_json_row`/S-2-guard-đơn-giản, cùng sửa key `unregistered` chết của nhánh-4 — hội tụ độc
+lập, tín hiệu tốt) + merge thêm `tl_changes.patch`. Đối chiếu BẰNG HÀNH VI 2 chiều như mọi lần.
+
+## PORT (2)
+- **S-2i compact sohieu-match** (món MỚI duy nhất, từ tl_changes.patch): header format LỎNG
+  'Số: 47 / 2024 / NĐ - CP' (separator lạ — _SOHIEU_RE lẫn substring-check đều trượt, REPRO lỗ thật trên bản
+  ta) → so COMPACT chỉ-chữ-số trên 2000 ký tự đầu, kèm dạng không-năm VBHN; số hiệu SAI thật (99/2099) vẫn fail.
+- sweep --live-nlm dòng text +`unregistered=` (JSON ta đã có từ v1.33.16).
+
+## REJECT (2 — có phản chứng, khoá test r29)
+- **cat-audit đề xuất VÀO-46 bằng `_omnibus_name_evidence`** (gồm nhánh ≥2-refs): luật sửa MỘT đích có
+  goc+related = 2 ref tokens → bundle họ flag `71-2020 SuaDoi_Phong_chong_HIV` (cat 45 Y tế) thành 45→46
+  confidence HIGH (repro trên bundle). Evidence refs-based chỉ an toàn chiều SUPPRESS (giữ-trong-46); chiều
+  PROPOSE ta đã có qua `_cat_boundary_rule` text-pattern chặt (v1.33.16) — test VÀO-46 của chính họ (57-2024
+  nằm nhầm 34 → 46) PASS trên cơ chế ta, giữ nguyên làm r29.
+- **Doctor S-9 FAIL khi registryDocId rỗng** (lần 2 — nhánh-4 và nhánh-5 cùng chọn FAIL): giữ quyết định
+  v1.33.16 — rỗng = auto-discover an toàn by-design (v1.23.22), PASS + khuyến nghị pin rõ; FAIL làm doctor đỏ
+  trường kỳ + rủi ro Cowork loop tự-sửa-config.
+
+Ghi chú: nhánh-5 KHÔNG có các phần v1.33.16 ta (S-2h `_declared_loai_from_header` viết-lại + 4c, widen
+`_omnibus_name_text`, boundary-46+guard VBHN, dedup trigger active, flatten alias, advisory lô) — canonical
+giữ tất. Kiểm thực địa: cat-audit vẫn 2 cờ; BLHS live PASS 4/4. selftest **543/543** (+3 r29: loose-spacing
+[test gốc nhánh-5], into-46-qua-boundary, phản-chứng 71-2020 khoá reject).
+
+---
+
 # ★ v1.33.16 — MERGE nhánh-4 (`tra-luat-skill-v1.33.15-gws3env-patched.zip`): bản độc lập CÙNG backlog S-1..S-9 trên v1.33.14 — port 6, reject 4
 
 Nhánh-4 tự đặt tên v1.33.15 (TRÙNG SỐ với canonical — 2 nhánh độc lập cùng vá backlog log rà 40/531 + 67 Luật).

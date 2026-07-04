@@ -1688,6 +1688,49 @@ def run() -> int:
                   _rc21 == 0 and sorted(_o21["scanned_ids"]) == ["g1", "g2"]
                   and _calls21["n"] == 2 and _o21["scanned_clean"] == 2))
 
+    # ═══ v1.33.9 (log rà 90/531 chạy v1.33.8 — A1 header_mismatch_no_proposal 31 ca ~100% VBHN, A6 dedup schema,
+    # B '6 con số corpus') — r22_* ═══
+    # (A1) GỐC RỄ: registry VBHN mang NĂM TIÊM THÊM (bất biến NN-YYYY-VBHN-XXX) còn văn bản in 'Số: NN/VBHN-XXX'
+    # KHÔNG năm → check sohieu FAIL hệ thống; kèm A1b: toks title chỉ còn 1 token ('Luat_Ke_toan' → 'toan') mà
+    # sàn max(2,…)=2 → title KHÔNG BAO GIỜ pass. Sau vá: header_ok=True, 0 proposals, RA KHỎI bucket.
+    _e22v = {"drive_id": "v25t", "name": "VBHN_25-2025-VBHN-VPQH_2025_Luat_Ke_toan", "so_hieu": "25-2025-VBHN-VPQH",
+             "loai": "VBHN", "cat": "17", "corpus": "true"}
+    _hx22 = "VĂN PHÒNG QUỐC HỘI\n\nSố: 25/VBHN-VPQH\n\nLUẬT\nKẾ TOÁN\n\nCăn cứ\nĐiều 1. Phạm vi điều chỉnh kế toán"
+    _vr22 = _verify_header_match(_e22v, _hx22)
+    _ar22 = _corpus_audit_row(_e22v, _hx22)
+    cases.append(("r22_vbhn_yearless_header_ok",
+                  _vr22["checks"].get("sohieu") is True and _vr22["checks"].get("title") is True
+                  and _vr22["ok"] is True and _ar22["proposals"] == []))
+    # (A6) dedup-check: verdict=COLLISION nhưng payload chỉ ở exact_sohieu_collision → driver đọc `groups` thấy 0.
+    # Nay alias groups/duplicates = cùng payload.
+    _fix22 = [{"id": "da", "drive_id": "da", "name": "Luat_44-2024-QH15_SuaDoi_Duoc", "so_hieu": "44/2024/QH15",
+               "corpus": "true", "cat": "45", "mime": "application/vnd.google-apps.document"},
+              {"id": "db", "drive_id": "db", "name": "44_2024_QH15_583839.docx", "so_hieu": "44_2024_QH15",
+               "cat": "45", "mime": "application/msword"}]
+    _orig_me22 = _tlm20._manifest_entries
+    _tlm20._manifest_entries = lambda refresh=False: _fix22
+    try:
+        _ns22 = build_parser().parse_args(["dedup-check", "44/2024/QH15", "--json"])
+        _buf22 = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf22), _ctx20.redirect_stderr(_io20.StringIO()):
+            cmd_dedup_check(_ns22)
+        _o22 = json.loads(_buf22.getvalue())
+        # (B) tl counts: MỘT BẢNG mẫu số + định nghĩa trên cùng snapshot fixture.
+        _ns22c = build_parser().parse_args(["counts", "--json"])
+        _buf22c = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf22c), _ctx20.redirect_stderr(_io20.StringIO()):
+            _rc22c = cmd_counts(_ns22c)
+        _o22c = json.loads(_buf22c.getvalue())
+    finally:
+        _tlm20._manifest_entries = _orig_me22
+    cases.append(("r22_dedup_check_groups_alias",
+                  _o22["verdict"] == "COLLISION" and _o22["groups"] == _o22["exact_sohieu_collision"]
+                  and len(_o22["groups"]) >= 2 and _o22["duplicates"] == _o22["groups"]))
+    cases.append(("r22_counts_one_table",
+                  _rc22c == 0 and _o22c["counts"]["registry_rows"] == 2
+                  and _o22c["counts"]["corpus_client"] == 1 and _o22c["counts"]["luat_loai_all"] == 0
+                  and set(_o22c["basis"]) == set(_o22c["counts"])))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

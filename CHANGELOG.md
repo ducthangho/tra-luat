@@ -1,3 +1,37 @@
+# ★ v1.33.9 — Log rà 90/531 chạy v1.33.8: GỐC RỄ 31 ca VBHN no-proposal + dedup-check schema + lệnh `tl counts`
+
+Bucket A5 v1.33.7 (`header_mismatch_no_proposal`) làm đúng nhiệm vụ — 31/90 ca lộ ra là MỘT defect hệ thống:
+
+## A1 🔴 — VBHN year-injected FAIL header-verify HỆ THỐNG (31 ca ~100% VBHN) — 2 gốc rễ, cả 2 đã vá
+- (a) SOHIEU: registry VBHN mang NĂM TIÊM THÊM theo bất biến `NN-YYYY-VBHN-XXX` (quy ước CỦA TA chống tái dùng
+  số), còn văn bản in dạng chính thức KHÔNG NĂM `Số: NN/VBHN-XXX` → check cũ fail với MỌI VBHN đã year-fix.
+  Nay chấp nhận dạng KHÔNG-NĂM tương đương là KHỚP (cả qua head_shs lẫn substring head_norm).
+- (b) TITLE: toks chủ đề có thể chỉ còn 1 token (`Luat_Ke_toan` → 'luat' stop + 'ke' ngắn bị bỏ, còn 'toan')
+  mà SÀN cũ max(2,…)=2 > số token → check KHÔNG BAO GIỜ pass. Sàn nay bị chặn bởi chính số token đang có.
+- (c) guard A1c: KHÔNG BAO GIỜ đề xuất SOHIEU_MISMATCH rớt-năm cho VBHN year-fixed (chống sót nếu check tương
+  lai đổi). Kết quả: ca 25/VBHN-VPQH mẫu → header_ok=True, 0 proposals, RA KHỎI bucket; ca còn lại trong bucket
+  từ nay là LỆCH THẬT.
+
+## A6 — dedup-check hết lệch schema
+- verdict=COLLISION nhưng payload chỉ nằm ở `exact_sohieu_collision` → driver đọc `groups` thấy 0 ⇒ kết luận
+  'không trùng' SAI. Nay alias `groups`/`duplicates` = cùng payload (compat giữ nguyên khoá cũ).
+
+## B — `tl counts` (MỚI): MỘT BẢNG mẫu số trên CÙNG snapshot
+- 5 log liên tiếp vấp '6 con số corpus khác nhau' (743/509/521/531/110-68/544-295). Một lệnh in đủ:
+  registry_rows / corpus_client / corpus_server_rule / corpus_audit_pool / luat_loai_all / luat_corpus /
+  registry_claim_nlm — MỖI DÒNG kèm ĐỊNH NGHĨA; NLM vật lý ghi rõ ESTIMATE + trỏ `tl nlm-get` LIVE (L4/L5).
+
+## Đối chiếu phần còn lại của log (đã xử trước đó / data)
+- A2 (sweep drift offline false-clean → live desync 76/2026 Dược): ĐÚNG THIẾT KẾ sau v1.33.4 — sweep tự dán nhãn
+  OFFLINE + phiên rà đã nghe theo và chạy nlm-reconcile LIVE bắt được. Data: --clear-stale/re-push.
+- A3 (4 raw trên NLM), A4 (loai Bộ luật — corpus-audit v1.33.7 đã flag), A5 (sohieu thô 44_2024 — dedup-plan),
+  A7/A8/A9 (tên/sohieu sai/blank — rename/hygiene), cat_label_variants=11 (recat): DATA-OPS theo runbook.
+- NLM 295/300 còn 5 slot: neo nlm-get trước mọi push (doctrine sẵn).
+
+selftest **508/508** (+3 r22: vbhn-yearless-header-ok, dedup-groups-alias, counts-one-table).
+
+---
+
 # ★ v1.33.8 — Kiểm chứng thực địa bộ vá v1.33.7 + `corpus-audit --workers` (đọc header song song)
 
 Log gửi lại = CÙNG bộ A1..A6/§A-I đã vá ở v1.33.7. Đợt này:

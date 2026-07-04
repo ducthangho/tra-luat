@@ -1,3 +1,36 @@
+# ★ v1.33.19 — Xử S-10 (3 surface kiểm cat KHÔNG nhất quán) + nhóm B log rà v1.33.18 LIVE (B.1/B.2/B.3/B.5/B.7)
+
+2 log rà chạy LIVE v1.33.18 (fresh bootstrap): S-10 guard omnibus-46/điều-ước ĐÃ vá ở cat-audit + corpus-audit
+nhưng CHƯA lan sang header-verify → ~61 dương-tính-giả dồn về lệnh đó; + nhóm B (schema/heuristic/hygiene).
+
+## FIX
+- **S-10** `_verify_header_match` check-4 CAT đồng bộ ĐÚNG bộ guard 3 surface: cat 00/23 (Đảng/điều ước) →
+  check KHÔNG ÁP DỤNG (mirror cat-audit skip — hết ILO-088 cat:False đòi dời 20); boundary-rule khẳng định
+  cat hiện tại → PASS; cat 46 + `_omnibus_name_evidence` → PASS (57-2024 LIVE nay ok:True 4/4). Misfile
+  THẬT trong 46 vẫn FAIL (fixture 38-2019 Quản lý thuế cat 46 → cat:False — không nới quá tay).
+  `fix_suggest.infer_cat` chỉ còn đề xuất khi check cat THẬT SỰ fail (hết in ['34'] mồi false-recat).
+- **B.1** review-queue: flags lọc theo nhóm-việc RỖNG → mirror flags_all (4/4 row review_other từng flags=[]
+  câm dù flags_all đầy — driver duyệt .flags đồng nhất hết mù lý do).
+- **B.2** `_ABBREV_MAP` += gddh/gdnn/vbqppl (GDDH khớp 0/1, BH_VBQPPL 0/1 fail oan dù sohieu/loai/cat PASS).
+  BONUS thực địa: nở viết tắt mở khoá khớp chủ đề → lộ 3 ứng viên sửa-đổi THẬT trước đây VÔ HÌNH
+  (125-GDĐH/124-GDNN ↔ 123-2025 sửa luật giáo dục; 64-2025 BH_VBQPPL ↔ 87-2025) — vào bucket INFO rel_low.
+- **B.3** `_name_tail_key` strip hậu tố ngày-hiệu-lực `_HL<date>` (Thu_do_HL2026-07-01 → token rác 'hl2026'
+  làm title 1/2 fail) — strip SAU bước đổi separator (trước đó \b không bắt được '_hl…').
+- **B.5** `TITLE_METADATA_MISMATCH` hết oan khi metadata title là TÊN-FILE-CỤT ('Luat_123-2025-QH15_GD' /
+  'Luat_71-2020-QH14' — token còn mỗi qh15/qh14, không bao giờ giao tail): lọc qua `_looks_like_filename_title`
+  (P0-1 v1.31.0 sinh ra đúng cho việc này) + so TAIL-vs-TAIL — meta không có bằng chứng chủ đề thì KHÔNG
+  buộc tội; misname THẬT (meta trích yếu chủ đề khác hẳn) VẪN bắt. Thực địa: review_other 4→2 (123-2025 +
+  71-2020 rời), sweep title_mismatch 20→17. SKILL §4 sửa câu overclaim 'HẾT nhiễu' → 'GIẢM nhiễu 2 đợt'.
+- **B.7** orphan detector: `_is_treaty_entry` nhận FTA/chương điều ước (CPTPP/EVFTA/RCEP/UKVFTA/DUQT_/ILO-);
+  văn kiện Đảng (cat 00 / VK_/Van_kien) → lớp riêng `party_docs` mới. Thực địa: orphans 16→8 (treaties 31→33,
+  party_docs=6) — 8 còn lại là ca thật cần soi (219_2025_ND-CP_m_668418…).
+
+Nhóm còn lại của log = DATA-ops (B.6 reg-delete 2 .doc quarantine; B.9 quarantine-fix 4 stale; B.10 loai/cat
+lạ; B.11 pin registryDocId; + title_vn RÁC ca 33-2024 'Luật số: 33/2024/QH15' → backfill-title-vn re-derive).
+selftest **553/553** (+6 r31, có control chống-nới cho từng guard).
+
+---
+
 # ★ v1.33.18 — Xử nhóm CLI/hợp-đồng log rà 67 Luật CHẠY LIVE v1.33.17 (A1/A2/A3/D) — MERGE bundle-18 + phần tốt tl_changes.patch
 
 Bundle-18 dựng TRỰC TIẾP trên canonical v1.33.17 (35 dòng, 4 fix đúng trọng tâm, TỰ loại phần độc của

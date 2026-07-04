@@ -2185,6 +2185,66 @@ def run() -> int:
                   and _j30b["pagination_mode"] == "full_checkpoint" and _j30b["scanned"] == 2
                   and _j30b["next_offset"] is None and _j30b["coverage_complete"] is True and _ck30_gone))
 
+    # ═══ v1.33.19 (log rà v1.33.18 LIVE — S-10 guard cat mới vá 2/3 surface + nhóm B schema/heuristic) — r31_* ═══
+    # (S-10) header-verify checks.cat ĐỒNG BỘ guard với cat-audit/corpus-audit: omnibus-46 PASS; điều ước
+    # cat 23 → check KHÔNG ÁP DỤNG (mirror cat-audit skip 00/23); misfile THẬT trong 46 (không bằng chứng
+    # omnibus) VẪN FAIL — không nới quá tay.
+    _e31o = {"drive_id": "o57h", "name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau",
+             "so_hieu": "57/2024/QH15", "loai": "Luật", "cat": "46_Sua_doi_nhieu_luat", "corpus": "true"}
+    _hdr31 = ("LUẬT\nSửa đổi, bổ sung một số điều của Luật Quy hoạch, Luật Đầu tư, Luật PPP, Luật Đấu thầu\n"
+              "Luật số: 57/2024/QH15\nCăn cứ Hiến pháp...")
+    _vr31o = _verify_header_match(_e31o, _hdr31)
+    _e31t = {"drive_id": "ilo88", "name": "DUQT_ILO-088_Dich_vu_viec_lam", "so_hieu": "",
+             "loai": "Điều ước quốc tế", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true"}
+    _vr31t = _verify_header_match(_e31t, "CÔNG ƯỚC SỐ 88\nVề tổ chức dịch vụ việc làm\nlao động việc làm dịch vụ")
+    _e31bad = {"drive_id": "m38", "name": "Luat_38-2019-QH14_Quan_ly_thue", "so_hieu": "38/2019/QH14",
+               "loai": "Luật", "cat": "46_Sua_doi_nhieu_luat", "corpus": "true"}   # misfile thật trong 46 (infer 33)
+    _vr31bad = _verify_header_match(_e31bad, "LUẬT\nQUẢN LÝ THUẾ\nLuật số: 38/2019/QH14\nquản lý thuế")
+    cases.append(("r31_header_cat_guard_3_surfaces",
+                  _vr31o["checks"].get("cat") is True
+                  and "cat" not in _vr31t["checks"]
+                  and _vr31bad["checks"].get("cat") is False))
+    # (B.1) review-queue: row REVIEW có cờ NGOÀI nhóm-việc → flags mirror flags_all (hết flags=[] câm);
+    # tạo REVIEW bằng DIRTY_CANDIDATES (∈ review-set nhưng ∉ nhóm-việc): bản sao cùng số hiệu cat root.
+    _e31d = {"id": "dr31", "drive_id": "dr31", "name": "Luat_88-2030-QH17_Thu_nghiem",
+             "so_hieu": "88/2030/QH17", "loai": "Luật", "cat": "20", "corpus": "true", "nlm_source_id": "sd31"}
+    _e31dirty = {"id": "dr31b", "drive_id": "dr31b", "name": "Luat_88-2030-QH17_Thu_nghiem_copy",
+                 "so_hieu": "88/2030/QH17", "loai": "Luật", "cat": "root_ZZ", "corpus": "true"}
+    _rq31 = _review_queue_report([_e31d, _e31dirty], limit=None)
+    _row31 = (_rq31["review_other"] or [{}])[0]
+    cases.append(("r31_review_other_flags_not_empty",
+                  len(_rq31["review_other"]) >= 1
+                  and bool(_row31.get("flags")) and "DIRTY_CANDIDATES" in (_row31.get("flags") or [])))
+    # (B.2+B.3) viết tắt GDDH/VBQPPL nở được + đuôi _HL<date> bị strip khỏi tail:
+    _e31g = {"drive_id": "g125", "name": "Luat_125-2025-QH15_GDDH", "so_hieu": "125/2025/QH15",
+             "loai": "Luật", "cat": "13", "corpus": "true"}
+    _vr31g = _verify_header_match(_e31g, "LUẬT\nGIÁO DỤC ĐẠI HỌC\nLuật số: 125/2025/QH15\ngiáo dục đại học")
+    _e31v = {"drive_id": "v64", "name": "Luat_64-2025-QH15_BH_VBQPPL", "so_hieu": "64/2025/QH15",
+             "loai": "Luật", "cat": "42", "corpus": "true"}
+    _vr31v = _verify_header_match(_e31v, "LUẬT\nBAN HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT\nLuật số: 64/2025/QH15\n"
+                                         "văn bản quy phạm pháp luật")
+    cases.append(("r31_abbrev_gddh_vbqppl_title_pass",
+                  _vr31g["checks"].get("title") is True and _vr31v["checks"].get("title") is True))
+    cases.append(("r31_hl_suffix_stripped",
+                  _name_tail_key("Luat_02-2026-QH16_Thu_do_HL2026-07-01") == "thu do"))
+    # (B.5) TITLE_METADATA_MISMATCH hết oan khi metadata title là TÊN-FILE-CỤT ('Luat_123-2025-QH15_GD' →
+    # tail rỗng = không bằng chứng); misname THẬT (meta trích yếu chủ đề KHÁC hẳn) vẫn bắt.
+    _tf31a = _title_flags({"name": "Luat_123-2025-QH15_SuaDoi_Giao_duc", "so_hieu": "123/2025/QH15",
+                           "loai": "Luật", "cat": "13", "nlm_title": "Luat_123-2025-QH15_GD"})
+    _tf31b = _title_flags({"name": "Luat_123-2025-QH15_SuaDoi_Giao_duc", "so_hieu": "123/2025/QH15",
+                           "loai": "Luật", "cat": "13", "title_vn": "Quản lý thuế xuất khẩu, thuế nhập khẩu"})
+    cases.append(("r31_title_meta_filename_not_mismatch",
+                  "TITLE_METADATA_MISMATCH" not in _tf31a and "TITLE_METADATA_MISMATCH" in _tf31b))
+    # (B.7) orphan detector: FTA-chương/văn kiện Đảng KHÔNG còn là orphan (lớp riêng); tên thô THẬT vẫn orphan.
+    _g31 = _hygiene_groups([
+        {"id": "c19", "drive_id": "c19", "name": "CPTPP_Chuong_19_Lao_dong", "cat": "23_Ngoai_giao_dieu_uoc"},
+        {"id": "vk4", "drive_id": "vk4", "name": "VK_DH_XIV_Bao_cao_chinh_tri", "cat": "00_Van_ban_cua_Dang"},
+        {"id": "raw3", "drive_id": "raw3", "name": "219_2025_ND-CP_m_668418", "cat": "20"},
+    ])
+    cases.append(("r31_orphans_exclude_treaty_party",
+                  [_x.get("drive_id") for _x in _g31["orphans"]] == ["raw3"]
+                  and len(_g31["treaties"]) == 1 and len(_g31["party_docs"]) == 1))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

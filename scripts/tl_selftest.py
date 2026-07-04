@@ -1856,6 +1856,59 @@ def run() -> int:
     # --force-insert (wired — patch kia dùng --force-unsafe KHÔNG có trong parser register).
     cases.append(("r25_recat_plan_cat_label_alias", _cat_reg_label("32") == "32_Thong_tin_bao_chi_xuat_ban"))
 
+    # ═══ v1.33.14 (MERGE nhánh-3 `D:\admin\tra-luat\tra-luat.zip` — bản độc lập thứ 3 trên v1.33.11) — r26_* ═══
+    # (1) _normalize_loai tách nhãn KÉP tại NGUỒN (mọi caller hưởng): '/', ' và '.
+    cases.append(("r26_normalize_loai_dual_at_source",
+                  _normalize_loai("Quyết định/Quy định") == "Quyết định"
+                  and _normalize_loai("Luat") == "Luật"))
+    # (2) _infer_loai nhận prefix BLuat_ (chuẩn sinh standardize_name).
+    cases.append(("r26_infer_loai_bluat",
+                  _infer_loai("BLuat_100-2015-QH13_Hinh_su", "") == "Bộ luật"))
+    # (3) register --bulk LỚP 2: id đúng-dạng nhưng không tồn tại → really_missing; id trong manifest/probe-OK
+    # không dính; quá cap → coi missing luôn (không probe).
+    _items26 = [{"drive_id": "1KnownIdAAAAAAAAAAAAAAAA"}, {"drive_id": "1GoodOnDriveBBBBBBBBBBBB"},
+                {"drive_id": "1GhostIdCCCCCCCCCCCCCCCC"}]
+    _rm26 = _register_bulk_missing(_items26, {"1KnownIdAAAAAAAAAAAAAAAA"},
+                                   lambda f: f == "1GoodOnDriveBBBBBBBBBBBB")
+    _rm26b = _register_bulk_missing([{"drive_id": f"1Cap{i:020d}"} for i in range(3)], set(),
+                                    lambda f: True, cap=2)
+    cases.append(("r26_register_bulk_missing",
+                  _rm26 == ["1GhostIdCCCCCCCCCCCCCCCC"] and len(_rm26b) == 1))
+    # (4) _resolve_cat_folder_impl (FakeG): exact-canonical dùng luôn KHÔNG rename; bare-đơn-nhất → RENAME về
+    # canonical (gộp thật, giữ fileId); miss hết → mkdir đúng tên + parentId root.
+    class _FkG26:
+        def __init__(self, items):
+            self.items = items; self.renames = []; self.mkdirs = []
+        def get(self, action, **kw):
+            if action == "list":
+                return {"ok": True, "items": self.items}
+            if action == "rename":
+                self.renames.append((kw.get("fileId"), kw.get("name"))); return {"ok": True}
+            if action == "info":
+                return {"ok": True, "file": {"id": kw.get("fileId"), "name": "cũ-có-dấu"}}
+            if action == "mkdir":
+                self.mkdirs.append(kw); return {"ok": True, "folderId": "NEWF26", "created": True}
+            raise AssertionError(action)
+    _gA = _FkG26([{"id": "fE", "name": "05_Can_bo_cong_chuc_vien_chuc", "type": "folder"},
+                  {"id": "fB", "name": "05", "type": "folder"}])
+    _fidA, _ = _resolve_cat_folder_impl(_gA, "05", {}, "ROOT", "05_Can_bo_cong_chuc_vien_chuc")
+    _gB = _FkG26([{"id": "fB", "name": "05", "type": "folder"}])
+    with _hush():   # print 'gộp folder' chủ đích
+        _fidB, _ = _resolve_cat_folder_impl(_gB, "05", {}, "ROOT", "05_Can_bo_cong_chuc_vien_chuc")
+        _gC = _FkG26([])
+        _fidC, _createdC = _resolve_cat_folder_impl(_gC, "05", {}, "ROOT", "05_Can_bo_cong_chuc_vien_chuc")
+    cases.append(("r26_resolve_cat_folder_impl",
+                  _fidA == "fE" and _gA.renames == []
+                  and _fidB == "fB" and _gB.renames == [("fB", "05_Can_bo_cong_chuc_vien_chuc")]
+                  and _fidC == "NEWF26" and _createdC is True
+                  and _gC.mkdirs and _gC.mkdirs[0].get("parentId") == "ROOT"))
+    # (5) backfill-loai trigger name-only v1.33.14: VBHN_ + loai='Luật' (sohieu KHÔNG -VBHN-) vẫn conflict
+    # (ca 115 tổng quát — trước cần 2 bằng chứng nên sohieu thiếu -VBHN- là lọt).
+    _s26, _, _ = _backfill_loai_candidates([{"drive_id": "v115b", "name": "VBHN_115_Thi_dua_HopNhat",
+                                             "so_hieu": "115/2026/QH16", "loai": "Luật"}], normalize=True)
+    cases.append(("r26_vbhn_name_only_conflict",
+                  len(_s26) == 1 and _s26[0]["mode"] == "conflict" and _s26[0]["loai"] == "Văn bản hợp nhất"))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

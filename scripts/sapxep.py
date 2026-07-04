@@ -66,7 +66,9 @@ def classify(name, tax):
 def suggest_name(name, mime, code):
     """Đề xuất tên chuẩn từ tên cũ (heuristic nhẹ; tên đã chuẩn -> giữ)."""
     base = re.sub(r"\.(docx?|pdf|html?|txt)$", "", name, flags=re.I)
-    if re.match(r"^(Luat|BLDS|BLLD|VBHN|ND|NQ|TT|QD|CT|KL|CU)_", base):
+    # MERGE nhánh-3 v1.33.14: +BLuat (chuẩn sinh standardize_name P1-3) + BLHS; GIỮ BLDS/BLLD legacy —
+    # patch gốc BỎ legacy là regression (tên cũ hợp lệ bị coi không-prefix → đề xuất đổi tên oan).
+    if re.match(r"^(Luat|BLuat|BLDS|BLHS|BLLD|VBHN|ND|NQ|TT|QD|CT|KL|CU)_", base):
         return base  # đã theo convention
     m = re.search(r"(\d+)[_/](\d{4})[_/](QH\d+|ND-CP|TT-\w+|QD-\w+|UBTVQH\d+|VBHN-\w+)", base)
     if m:

@@ -1,3 +1,37 @@
+# ★ v1.33.14 — MERGE nhánh-3 (`D:\admin\tra-luat\tra-luat.zip`): bản độc lập THỨ BA vá backlog trên v1.33.11 — port 7, reject 4
+
+## PORT (7 — mỗi món đều mạnh hơn bản ta hoặc lấp lỗ ta chưa có)
+- `_normalize_loai` tách nhãn KÉP tại NGUỒN ('/', '\\', '|', ' và ') — mọi caller hưởng (register-normalize,
+  backfill-loai, reg-query --loai, corpus-audit) thay vì vá lẻ từng chỗ như v1.33.12.
+- `_infer_loai` + token BLUAT (lỗ thật: ta thêm BLuat vào prefix-RE v1.33.12 nhưng quên _infer_loai).
+- `register --bulk` LỚP 2 existence-check (`_register_bulk_missing` PURE, probe cap 20, escape --force-insert)
+  — v1.33.13 mới có format-guard cho bulk, chưa có existence.
+- `_valid_cats` + `_resolve_cat_folder` nhận categories='inherit' (doctrine §12) — profile dự án inherit
+  trước đây trả set rỗng/cây sai.
+- `_resolve_cat_folder` NÂNG CẤP LỚN (contract-verified list/info/rename/mkdir+parentId): exact-canonical dùng
+  luôn; folder MÃ TRƠ ĐƠN NHẤT cùng prefix → **RENAME về canonical (gộp thật, giữ fileId)** — mkdir-by-name
+  v1.33.12 tạo folder mới SONG SONG còn folder trơ vẫn ôm file; ≥2 ứng viên mờ → dùng cái đầu, KHÔNG tự rename;
+  config-map → best-effort rename; mkdir kèm parentId=root profile. Lõi tách `_resolve_cat_folder_impl`
+  (test FakeG 3 kịch bản).
+- `backfill-loai` trigger NAME-ONLY: tên VBHN_ là bằng chứng đủ mạnh một mình → conflict 'Văn bản hợp nhất'
+  cho MỌI nhãn khác (lịch sử nới có kiểm chứng: S3 2-bằng-chứng → 2 ca thật lọt [115 loai='Luật', 67-2025
+  'thuong' sohieu thiếu -VBHN-] → name-only; propose-only/DRY nên không có ghi tự động).
+- `sapxep.suggest_name` prefix: +BLuat +BLHS, GIỮ BLDS/BLLD legacy (file ngoài tl.py — cả 3 nhánh trước đều bỏ sót).
+
+## REJECT (4 — kèm lý do)
+- `register` DRY-mặc-định (`--apply` gate): PHÁ CONTRACT CLI — mọi runbook/script sẵn có gọi register không
+  --apply sẽ thành no-op rc=0 (automation tưởng thành công). Lớp validate 2 tầng đã chặn gốc rác mà không phá.
+- Prefix-RE bỏ Bo_luat/BLDS…, family → 'BLuat': REGRESSION — tên legacy hợp lệ (BLDS_91-2015 đang sống trong
+  corpus) sẽ bị flag NO_TYPE_PREFIX oan; doctrine v1.33.12 giữ legacy. sapxep của họ cùng lỗi — đã sửa khi port.
+- review-queue rel_low FLAG-based + rel_low xếp TRƯỚC web: ta giữ PAYLOAD-based `_rq_rel_strong` (mịn hơn cờ
+  tổng) + web trước rel_low (việc web là thật, không được rơi khỏi hàng đợi chính).
+- 'REVIEW không cờ → demote clean': GIẤU anomaly — ta giữ review_other + reason/flags_all.
+
+selftest **524/524** (+5 r26: normalize-dual-source, infer-bluat, bulk-missing, resolve-folder-impl-3-kịch-bản,
+vbhn-name-only-conflict).
+
+---
+
 # ★ v1.33.13 — MERGE patch "AUDIT 07/2026" (files.zip): 2 nhánh cùng vá backlog 9 lỗi trên v1.33.11 — hợp nhất chọn lọc
 
 Patch đính kèm (tra-luat_v1.33.13_cumulative.patch) = nhánh khác tự vá CÙNG backlog trên nền v1.33.11.

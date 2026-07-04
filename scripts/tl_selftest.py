@@ -2114,6 +2114,77 @@ def run() -> int:
     cases.append(("r29_single_target_amender_not_forced_46",
                   _rc29b == 0 and not any(f.get("suggest") == ["46"] for f in _ca29b["flags"])))
 
+    # ═══ v1.33.18 (log rà 67 Luật CHẠY LIVE v1.33.17 — A1 nlm-get --json · A2 pagination mâu thuẫn ·
+    # A3 thiếu full-audit · D cặp gốc/sửa lệch pha; MERGE bundle-18 [4 fix đúng trọng tâm] + tl_changes.patch
+    # [chỉ lấy ngữ nghĩa --full-giữ-checkpoint; reject bypass-sohieu/into-46-refs/fix_command --apply]) — r30_* ═══
+    # (A1+A3 parser) nlm-get nhận --json no-op; corpus-audit nhận --full.
+    _ns30 = build_parser().parse_args(["nlm-get", "nb743", "--json"])
+    _ns30b = build_parser().parse_args(["corpus-audit", "--all", "--full", "--json"])
+    cases.append(("r30_parser_nlm_get_json_and_full",
+                  _ns30.json is True and _ns30b.full is True and _ns30b.all is True))
+    # (D) luật SỬA đã nằm trong chuỗi goc của VBHN khác (AMENDS_OTHER_VBHN) → KHÔNG còn NO_VERIFIED_VBHN/QT5
+    # (nội dung đã phản ánh trong VBHN của luật ĐÍCH — hết lệch pha 64-2006 OK vs 71-2020 bị đẩy web lượt-2);
+    # control: thiếu VBHN trong corpus thì gate cũ VẪN nổ (không nới quá tay).
+    _r30_base = {"id": "h64", "drive_id": "h64", "name": "Luat_64-2006-QH11_Phong_chong_HIV_AIDS",
+                 "so_hieu": "64/2006/QH11", "loai": "Luật", "cat": "45", "corpus": "true", "nlm_source_id": "s64"}
+    _r30_amend = {"id": "h71", "drive_id": "h71", "name": "Luat_71-2020-QH14_SuaDoi_Phong_chong_HIV",
+                  "so_hieu": "71/2020/QH14", "loai": "Luật", "cat": "45", "corpus": "true", "nlm_source_id": "s71"}
+    _r30_vbhn = {"id": "hv30", "drive_id": "hv30", "name": "VBHN_01-2021-VBHN-VPQH_2021_Luat_Phong_chong_HIV_HopNhat",
+                 "so_hieu": "01-2021-VBHN-VPQH", "loai": "Văn bản hợp nhất", "goc": "64-2006-QH11;71-2020-QH14",
+                 "cat": "45", "corpus": "true", "nlm_source_id": "sv30"}
+    _sm30 = _source_map_one("71/2020/QH14", [_r30_base, _r30_amend, _r30_vbhn])
+    _sm30b = _source_map_one("71/2020/QH14", [_r30_base, _r30_amend])
+    cases.append(("r30_amends_vbhn_suppresses_no_verified",
+                  any(w.startswith("AMENDS_OTHER_VBHN") for w in _sm30["warnings"])
+                  and not any(w.startswith("NO_VERIFIED_VBHN_IN_CORPUS") for w in _sm30["warnings"])
+                  and not any(w.startswith("QT5_WEB_REQUIRED") for w in _sm30["warnings"])
+                  and any(w.startswith("NO_VERIFIED_VBHN_IN_CORPUS") for w in _sm30b["warnings"])
+                  and any(w.startswith("QT5_WEB_REQUIRED") for w in _sm30b["warnings"])))
+    # (A2+A3 END-TO-END offline, fixture RAW nên không đọc mạng): vòng 1 `--all --resume --limit 1` →
+    # rc=3 PARTIAL + resume_required + next_offset=PROGRESS(1) + pagination_mode=checkpoint_resume;
+    # vòng 2 `--all --full` NỐI CHECKPOINT (ngữ nghĩa tl_changes.patch — bundle-18 chạy trần mất tiến độ
+    # nếu chết giữa chừng) → quét nốt 2 target còn lại, rc=0, coverage_complete, checkpoint tự dọn.
+    _fx30 = [
+        {"id": "z1", "drive_id": "z1", "name": "37_2025_TT-BYT_668487.docx", "so_hieu": "37/2025/TT-BYT",
+         "cat": "45", "corpus": "true", "mime": "application/msword"},
+        {"id": "z2", "drive_id": "z2", "name": "141_2024_ND-CP_999.docx", "so_hieu": "141/2024/NĐ-CP",
+         "cat": "20", "corpus": "true", "mime": "application/msword"},
+        {"id": "z3", "drive_id": "z3", "name": "95_2025_TT-BTC_888.docx", "so_hieu": "95/2025/TT-BTC",
+         "cat": "06", "corpus": "true", "mime": "application/msword"},
+    ]
+    _ck30 = _cache_file("corpus_audit_ckpt_all.json")
+    _orig_me30 = _TL_MODULE._manifest_entries
+    _TL_MODULE._manifest_entries = lambda refresh=False: _fx30
+    try:
+        if _ck30.exists():
+            _ck30.unlink()
+        _b30a, _e30a = _io27.StringIO(), _io27.StringIO()
+        with _ctx27.redirect_stdout(_b30a), _ctx27.redirect_stderr(_e30a):
+            _rc30a = _TL_MODULE.cmd_corpus_audit(
+                build_parser().parse_args(["corpus-audit", "--all", "--resume", "--limit", "1", "--json"]))
+        _j30a = json.loads(_b30a.getvalue())
+        _b30b, _e30b = _io27.StringIO(), _io27.StringIO()
+        with _ctx27.redirect_stdout(_b30b), _ctx27.redirect_stderr(_e30b):
+            _rc30b = _TL_MODULE.cmd_corpus_audit(
+                build_parser().parse_args(["corpus-audit", "--all", "--full", "--json"]))
+        _j30b = json.loads(_b30b.getvalue())
+        _ck30_gone = not _ck30.exists()
+    finally:
+        _TL_MODULE._manifest_entries = _orig_me30
+        try:
+            if _ck30.exists():
+                _ck30.unlink()
+        except OSError:
+            pass
+    cases.append(("r30_pagination_partial_markers",
+                  _rc30a == 3 and _j30a["partial"] is True and _j30a["resume_required"] is True
+                  and _j30a["next_offset"] == 1 and _j30a["pagination_mode"] == "checkpoint_resume"
+                  and bool(_j30a["resume_command"]) and _j30a["remaining"] == 2))
+    cases.append(("r30_full_resumes_checkpoint_to_done",
+                  _rc30b == 0 and _j30b["partial"] is False and _j30b["resume_required"] is False
+                  and _j30b["pagination_mode"] == "full_checkpoint" and _j30b["scanned"] == 2
+                  and _j30b["next_offset"] is None and _j30b["coverage_complete"] is True and _ck30_gone))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

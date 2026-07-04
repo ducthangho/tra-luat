@@ -1,3 +1,40 @@
+# ★ v1.33.18 — Xử nhóm CLI/hợp-đồng log rà 67 Luật CHẠY LIVE v1.33.17 (A1/A2/A3/D) — MERGE bundle-18 + phần tốt tl_changes.patch
+
+Bundle-18 dựng TRỰC TIẾP trên canonical v1.33.17 (35 dòng, 4 fix đúng trọng tâm, TỰ loại phần độc của
+tl_changes.patch — nhánh thứ 2 liên tiếp hội tụ với quyết định canonical). Đối chiếu hành vi như mọi lần.
+
+## FIX (4 — port bundle-18, riêng A3 lấy ngữ nghĩa patch)
+- **A1** `nlm-get --json`: parser nhận no-op (lệnh vốn luôn xuất JSON) — driver thêm --json đồng nhất cho nhóm
+  read-only hết gãy `unrecognized arguments`.
+- **A2** corpus-audit pagination MÂU THUẪN (`partial=true` + `next_offset=null` → driver phân trang DỪNG sau
+  40/530 âm thầm): chế độ checkpoint nay phát `next_offset` = PROGRESS MARKER (số drive_id đã checkpoint) +
+  `pagination_mode` (checkpoint_resume/full_checkpoint/offset) + `resume_required` + `resume_command` điền sẵn;
+  text in tiến độ N/pool. Lệnh đúng vẫn là LẶP CÙNG LỆNH --all --resume tới rc=0.
+- **A3** `corpus-audit --all --full`: quét HẾT pool 1 lệnh (bỏ cap trang 40, nên kèm --workers 4-6). LẤY NGỮ
+  NGHĨA CỦA PATCH thay vì bundle: --full VẪN đi qua máy CHECKPOINT + nạp checkpoint sẵn có — chết ở doc #500
+  không mất 499 header đã đọc, chạy lại là nối (bundle-18 cho --full chạy trần: timeout = mất trắng);
+  Cowork trần-lệnh-ngắn vẫn dùng --all --resume trang nhỏ.
+- **D** cặp gốc/sửa LỆCH PHA (64-2006 HIV verdict OK 'đã hợp nhất' nhưng luật sửa 71-2020 CÙNG CHUỖI vẫn bị
+  NO_VERIFIED_VBHN + QT5 đẩy web lượt-2): luật SỬA có amends_vbhn (AMENDS_OTHER_VBHN — nội dung đã phản ánh
+  trong VBHN của luật ĐÍCH) → 2 gate NO_VERIFIED_VBHN/QT5 im (đồng dạng nhánh omnibus AMENDS_OTHER).
+  Thực địa: 71-2020 rời web bucket (25→24, sang review_other vì TITLE warn); 26-2018 GIỮ đúng (đích chưa có
+  VBHN trong corpus — control chống nới quá tay).
+
+## REJECT từ tl_changes.patch (3 — cái mới có phản chứng, cái cũ đã khoá test)
+- **Bypass sohieu cho Bộ luật/VBHN khi header KHÔNG có số nào**: biến 'không xác minh được' thành PASS —
+  `_verify_header_match.ok` là cổng `tl confirm` (gán verified) → false-confirm cho scan/doc sai. Ca thật
+  (VBHN_21-2026 số ở khối ký cuối) đã xử ĐÚNG CÁCH bằng full-text+compact từ v1.33.15/17. Bundle-18 cũng
+  không lấy (hội tụ).
+- cat-audit into-46 refs-based — đã reject + khoá r29 (phản chứng 71-2020 goc+related).
+- `fix_command` LOAI_MISMATCH đổi thành `tl register ... --apply`: NHÚNG lệnh ghi tự-áp vào worklist
+  propose-only — trái doctrine DRY-trước/duyệt-tay; giữ lệnh review + reg_upsert.
+
+selftest **547/547** (+4 r30: parser A1/A3, D suppress + control, A2/A3 END-TO-END offline 2 vòng thật —
+partial-markers rồi --full nối checkpoint chạy nốt + tự dọn). Các mục B/C/E của log là DATA-ops/môi trường
+(đã có trong runbook: nlm-reconcile LIVE, dedup-plan, 163 tên, quarantine-fix, pin registryDocId).
+
+---
+
 # dev-tooling 2026-07-04 (KHÔNG bump version — không đổi runtime, KHÔNG vào zip deploy)
 
 Bộ phòng vệ phía DEV cho phiên Claude Code trên máy này (Cowork LIVE không dùng các file này — phòng vệ LIVE

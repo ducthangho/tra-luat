@@ -1,3 +1,49 @@
+# ★ v1.33.12 — Backlog 9 lỗi phiên khắc phục 04/07: chặn register-rác, recat/folder canonical, review-queue hết báo động giả
+
+## 🔴 P0-1 — `register` hết CHÈN DÒNG RÁC (drive_id cắt cụt → reg_upsert insert dòng rỗng, ok:true không báo)
+- `_register_target_exists`: drive_id phải có trong MANIFEST hoặc Drive LIVE (files_get — file vừa upload chưa
+  vào cache vẫn hợp lệ, không gãy luồng ingest). Không thấy → REFUSE rc=2 `DRIVE_ID_NOT_FOUND` + hướng dọn rác
+  (`reg-delete --force`); cố ý tạo dòng mới không gắn Drive → `--force-insert` (LOUD).
+
+## 🟠 P1-1 + P1-2 — recat/folder: GỘP FOLDER VẬT LÝ KHẢ THI trở lại
+- P1-1: recat trước ghi MÃ TRƠ vào registry (`cat=code`) → nhãn trơ cùng mã "patched=0 = đã đúng" GIẢ, bare-cat
+  36→36. Nay ghi NHÃN ĐỦ canonical `NN_Ten` (`_cat_reg_label` từ phap_dien_45.folder — khớp cat-list); plan DRY
+  in `reg_label`.
+- P1-2: `_resolve_cat_folder` trước ưu tiên config.categories (folder mã-trơ/tên-có-dấu cũ) → move vào folder
+  SAI TÊN, cat-list vẫn báo '10 mã chưa có folder'. Nay resolve THEO TÊN CANONICAL ASCII trước (mkdir
+  find-or-create đúng `NN_Ten`), config chỉ còn fallback.
+
+## 🟠 P1-3 — Chốt doctrine prefix Bộ luật
+- `BLuat_` = CHUẨN SINH TỰ ĐỘNG (standardize_name); BLDS_/BLHS_/BLLĐ_… = legacy HỢP LỆ cùng họ Bo_luat
+  (migrate dần khi rename, không bắt buộc). VÁ KHẨN kèm theo: corpus ĐÃ có BLuat_100-2015/45-2019 sau
+  source-rename mà `_NAME_TYPE_PREFIX_RE` chưa nhận `BLuat` → sẽ flag oan chính tên chuẩn vừa sinh; đã thêm
+  vào RE + family-map + _ABBREV_MAP.
+
+## 🟡 P2-1 + P2-2 — review-queue: REVIEW luôn có lý do; rel low-conf hết phồng hàng đợi
+- P2-1: mọi row có `flags_all` (toàn bộ cờ source-map, không lọc nhóm); review_other thêm `reason` — hết
+  "verdict=REVIEW, flags=[]" câm (ca 123-2025).
+- P2-2: bucket HÀNH ĐỘNG `relation_backfill` chỉ nhận ứng viên MẠNH (linked/strong/confidence≠low —
+  `_rq_rel_strong`, cùng ngưỡng escalate v1.29.6); toàn low-conf → bucket INFO MỚI `relation_low_confidence`
+  (vẫn kèm candidates + lệnh relation-check phủ định nhanh). Log chứng minh: relation-check trả OK/
+  missing_links=[] cho CẢ 3 ca low-conf từng nằm bucket hành động. counts thêm khóa mới, tổng vẫn = laws_scanned.
+
+## 🟡 P2-3 — backfill-loai --normalize hết "no-op"
+- Nhãn KÉP 'Quyết định/Quy định' → lấy VẾ ĐẦU; VBHN ĐỘI LỐT 'thuong' (ca VBHN_67-2025 Doanh nghiệp — LỖI THẬT
+  từng lọt) → mode=conflict 'Văn bản hợp nhất' (2 bằng chứng: prefix VBHN_ + nhãn thuong vô lý; bắt cả 2 nhánh
+  enum-hợp-lệ lẫn phi-chuẩn).
+
+## 🟡 P2-4 + 🔴 P0-2 — chẩn đoán rõ tiến độ
+- P2-4: sweep duplicates thêm `by_sohieu_raw_active`/`by_name_active` (cụm còn ≥2 dòng corpus=true — GIẢM theo
+  tiến độ dedup; raw giữ nguyên by design, in kèm giải thích).
+- P0-2: `sweep --live-nlm` — sweep TỰ đối soát NLM LIVE 1 lượt (read-only qua nlm-reconcile plan): JSON
+  `nlm_live{live_on_nlm, desync_real, already_removed, claiming}` + next_action 🔴 khi desync>0. Mặc định
+  offline như cũ (nhãn OFFLINE giữ); khi rà TOÀN corpus → bật cờ này.
+
+selftest **516/516** (+5 r24: register-guard, recat-full-label, bluat-prefix, backfill-loai-dual+vbhn-thuong,
+rel-strong+sweep-live-flag; r17b/r19 cập nhật theo bucket relation_low_confidence).
+
+---
+
 # ★ v1.33.11 — MERGE HỘI TỤ 2 nhánh v1.33.10 (canonical Claude ⊕ bundle Codex — cùng vá 1 bộ log, khác code)
 
 Bundle Codex rẽ từ canonical v1.33.9, tự vá cùng bộ log rồi cũng đặt tên v1.33.10. So diff đầy đủ (4 file):

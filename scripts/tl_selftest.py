@@ -1519,14 +1519,18 @@ def run() -> int:
                   _rq17a["relation_backfill"] == [] and _rq17a["clean_count"] == 1
                   and _rq17a["laws_scanned"] == 1
                   and sum(_rq17a["counts"].values()) == _rq17a["laws_scanned"]))
-    # (A1b) ca THẬT giữ nguyên: base KHÔNG verified + amendment mồ côi → REVIEW + UNLINKED → rel bucket,
-    # kèm fix_command; counts loại trừ nhau cộng đúng về tổng (A2).
+    # (A1b, CẬP NHẬT P2-2 v1.33.12) base KHÔNG verified + amendment mồ côi LOW-CONF → REVIEW + UNLINKED nhưng
+    # ứng viên toàn low-conf → bucket INFO `relation_low_confidence` (log: relation-check phủ định 3/3 ca
+    # low-conf — bucket HÀNH ĐỘNG chỉ nhận strong/linked); vẫn kèm fix_command + flags_all (P2-1);
+    # counts loại trừ nhau cộng đúng về tổng (A2).
     _rq17_base_rev = dict(rel_fx[0], drive_id="tdkt2022b", corpus="true", loai="Luật")
     _rq17b = _review_queue_report([_rq17_base_rev, _rq17_amend], limit=None)
-    cases.append(("r17_review_queue_rel_real_counts",
-                  len(_rq17b["relation_backfill"]) == 1
-                  and "relation-check" in _rq17b["relation_backfill"][0]["fix_command"]
-                  and "relation_backfill" in _rq17b["relation_backfill"][0]["buckets"]
+    cases.append(("r17_review_queue_rel_low_conf_info",
+                  _rq17b["relation_backfill"] == []
+                  and len(_rq17b["relation_low_confidence"]) == 1
+                  and "relation-check" in _rq17b["relation_low_confidence"][0]["fix_command"]
+                  and "relation_low_confidence" in _rq17b["relation_low_confidence"][0]["buckets"]
+                  and bool(_rq17b["relation_low_confidence"][0].get("flags_all"))
                   and sum(_rq17b["counts"].values()) == _rq17b["laws_scanned"] == 1
                   and sum(_rq16["counts"].values()) == _rq16["laws_scanned"]))
     # (B1) status/preingest_gate: alias {verdict, flags} top-level — driver batch hết nhận None câm;
@@ -1579,9 +1583,9 @@ def run() -> int:
 
     # ═══ v1.33.6 (log rà 66/68 chạy CANONICAL v1.33.5 — C flag≠payload, B7 reg-query --loai, F --version,
     # D cat trơ-vs-đủ) — r19_* ═══
-    # (C) row relation_backfill phải KÈM ứng viên cụ thể để soi ngay (log: 'cổng báo có ứng viên mà không trả
-    # ứng viên nào') — _rq17b là ca rel THẬT (UNLINKED 06/2026 quanh 06/2022).
-    _r19_cands = (_rq17b["relation_backfill"][0].get("candidates") or [])
+    # (C) row rel (nay ở bucket relation_low_confidence — P2-2 v1.33.12) phải KÈM ứng viên cụ thể để soi ngay
+    # (log: 'cổng báo có ứng viên mà không trả ứng viên nào') — _rq17b là ca UNLINKED 06/2026 quanh 06/2022.
+    _r19_cands = (_rq17b["relation_low_confidence"][0].get("candidates") or [])
     cases.append(("r19_rel_row_carries_candidates",
                   bool(_r19_cands) and any("06/2026" in c or "06-2026" in c for c in _r19_cands)))
     # (B7) reg-query: trường loai + loai_canon trong row; parser nhận --loai.
@@ -1785,6 +1789,48 @@ def run() -> int:
     cases.append(("r23_nlm_notebook_profile_alias",
                   _nb23 == NLM_BASE_NOTEBOOK and _er23 is None
                   and _nb23b == "743ed200-aaaa-bbbb-cccc-000000000000"))
+
+    # ═══ v1.33.12 (backlog 9 lỗi phiên khắc phục 04/07 — P0 register-rác · P1 recat/folder/BLuat · P2) — r24_* ═══
+    # (P0-1) register: drive_id lạ (không manifest, không Drive) → validator False = REFUSE, KHÔNG insert dòng
+    # rác; id trong manifest / file mới trên Drive (live_prober True) → cho ghi; parser có --force-insert.
+    _orig_me24 = _tlm20._manifest_entries
+    _tlm20._manifest_entries = lambda refresh=False: [{"id": "okid", "drive_id": "okid", "name": "Luat_X"}]
+    try:
+        _ok24a = _register_target_exists("okid", live_prober=lambda f: False)
+        _ok24b = _register_target_exists("1CutOffId", live_prober=lambda f: False)
+        _ok24c = _register_target_exists("1NewUploadId", live_prober=lambda f: True)
+    finally:
+        _tlm20._manifest_entries = _orig_me24
+    _ns24 = build_parser().parse_args(["register", "--drive-id", "d1", "--force-insert", "--loai", "Luật"])
+    cases.append(("r24_register_target_guard",
+                  _ok24a is True and _ok24b is False and _ok24c is True and _ns24.force_insert is True))
+    # (P1-1) recat ghi NHÃN ĐỦ canonical `NN_Ten` (khớp cat-list/folder) — nhãn trơ cùng mã vẫn được relabel.
+    cases.append(("r24_recat_full_label",
+                  _cat_reg_label("05") == "05_Can_bo_cong_chuc_vien_chuc"
+                  and _cat_reg_label("34").startswith("34_")
+                  and _cat_reg_label("QUARANTINE") == "QUARANTINE"))
+    # (P1-3) `BLuat_` (chuẩn SINH TỰ ĐỘNG của standardize_name) là prefix hợp lệ, cùng họ Bo_luat với BLDS_/BLHS_.
+    cases.append(("r24_bluat_prefix",
+                  _name_structural_issues("BLuat_100-2015-QH13_Hinh_su") == []
+                  and _name_prefix_family(_NAME_TYPE_PREFIX_RE.match("BLuat_x")) == "Bo_luat"))
+    # (P2-3) backfill-loai --normalize: nhãn KÉP 'Quyết định/Quy định' → vế đầu; VBHN_* + loai='thuong'
+    # (LỖI THẬT từng lọt) → conflict 'Văn bản hợp nhất'; không dòng nào rơi nonmappable.
+    _bl24 = [{"drive_id": "q1", "name": "QD_5-2025-QD-TTg_X", "so_hieu": "5/2025/QĐ-TTg",
+              "loai": "Quyết định/Quy định"},
+             {"drive_id": "v67", "name": "VBHN_67-2025_Luat_Doanh_nghiep", "so_hieu": "67/2025",
+              "loai": "thuong"}]
+    _s24, _, _n24 = _backfill_loai_candidates(_bl24, normalize=True)
+    _by24 = {s["drive_id"]: s for s in _s24}
+    cases.append(("r24_backfill_loai_dual_and_vbhn_thuong",
+                  _by24.get("q1", {}).get("loai") == "Quyết định"
+                  and _by24.get("v67", {}).get("loai") == "Văn bản hợp nhất"
+                  and _by24.get("v67", {}).get("mode") == "conflict" and _n24 == []))
+    # (P2-2) ngưỡng strong của bucket rel + (P0-2) parser sweep --live-nlm.
+    _ns24s = build_parser().parse_args(["sweep", "--live-nlm", "--json"])
+    cases.append(("r24_rel_strong_and_sweep_live_flag",
+                  _rq_rel_strong([{"confidence": "high"}]) and _rq_rel_strong([{"linked_to_query": True}])
+                  and _rq_rel_strong([{"strong": True}]) and not _rq_rel_strong([{"confidence": "low"}])
+                  and not _rq_rel_strong([]) and _ns24s.live_nlm is True))
 
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —

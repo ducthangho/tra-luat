@@ -2359,6 +2359,23 @@ def run() -> int:
                   [_x.get("drive_id") for _x in _g34h["title_mismatch"]] == ["t2"]
                   and [_x.get("drive_id") for _x in _g34h["vbhn_metadata_advisory"]] == ["t1"]))
 
+    # ═══ v1.33.23 (log rà Cowork LIVE v1.33.20 — C-1.4: installer ghi PATH vào ~/.profile/.bashrc nhưng bash
+    # NON-INTERACTIVE không source → `nlm` trần chết, chỉ chạy được absolute-path/`tl nlm-*`) — r35_* ═══
+    # _symlink_nlm_system_path: 3 nhánh test được offline (nhánh symlink thật chỉ chạy POSIX/Cowork):
+    # non-POSIX → no-op; src chưa cài → no-op; dst đã tồn tại trỏ chỗ khác → CẢNH BÁO, KHÔNG đè.
+    _tg35 = _need_base("tl_gws")
+    import tempfile as _tmp35
+    with _tmp35.TemporaryDirectory() as _d35:
+        _src35 = os.path.join(_d35, "nlm"); _dst35 = os.path.join(_d35, "usrbin_nlm")
+        open(_src35, "w").write("#!/bin/sh\n")
+        open(_dst35, "w").write("other\n")
+        _r35a = _tg35._symlink_nlm_system_path(src=_src35, dst=_dst35, posix=False)      # non-POSIX
+        _r35b = _tg35._symlink_nlm_system_path(src=os.path.join(_d35, "khong_co"),
+                                               dst=_dst35, posix=True)                    # src thiếu
+        _r35c = _tg35._symlink_nlm_system_path(src=_src35, dst=_dst35, posix=True)        # dst đã có → cảnh báo
+    cases.append(("r35_nlm_symlink_guards",
+                  _r35a == "" and _r35b == "" and "đã tồn tại" in _r35c))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

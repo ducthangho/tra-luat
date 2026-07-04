@@ -1,3 +1,25 @@
+# ★ v1.33.23 — C-1.4 log rà Cowork LIVE v1.33.20: `nlm` trần chết ở bash non-interactive
+
+Log rà 67 Luật vòng mới (Cowork, LIVE v1.33.20): 19 mục / 5 lớp — ĐỐI CHIẾU: C-2..C-5 đều là data-ops/known
+đã có fixer hoặc trong runbook (C-3 "17 title_mismatch" đã 17→2+advisory ở v1.33.22 CHƯA deploy; "4 stale_nlm_ref"
+đã có quarantine-fix reg_clear v1.33.22; 161 tên đã có lô corpus-audit + lane name-only v1.33.21); C-1 phần lớn
+là ràng buộc nền tảng đã docs (mount cắt cụt → BƯỚC 0 curl zip; 45s → --resume; gws MUSL → bootstrap sẵn).
+CODE-fixable còn đúng 1 món:
+
+## FIX
+- **C-1.4**: installer ghi `export PATH=~/.local/bin` vào ~/.profile + ~/.bashrc (v2.2) nhưng bash
+  NON-INTERACTIVE không source 2 file đó → `nlm ...` trần báo 'No such file or directory', chỉ chạy được
+  absolute-path / `tl nlm-*` (tự nối PATH). Thêm `_symlink_nlm_system_path`: best-effort symlink
+  `~/.local/bin/nlm → /usr/local/bin/nlm` sau khi cài xong (/usr/local/bin nằm trong PATH MẶC ĐỊNH mọi shell;
+  Cowork chạy root ghi được) — idempotent, KHÔNG đè file/link lạ (cảnh báo thay vì đè), nuốt lỗi khi không có
+  quyền, chỉ POSIX. Gọi ở cả 2 đường done (--uv + --resume/trọn gói).
+
+selftest **564/564** (+1 r35: 3 nhánh guard test offline — non-POSIX no-op / src thiếu no-op / dst-đã-có
+không-đè). Việc còn lại của log = checklist data-ops sẵn có (deploy v1.33.23 rồi chạy: quarantine-fix --apply,
+vbhn-year-fix --with-name --apply, dedup-plan --apply, pin registryDocId, web lượt-2 nhóm HIGH_VELOCITY).
+
+---
+
 # ★ v1.33.22 — MERGE bundle-21 (`tra-luat-skill-v1.33.21-gws3env-fixed.zip`): nhánh hội tụ trên v1.33.20, BỔ TRỢ v1.33.21 — port 2 có sửa primitive, giữ lane name-only của ta
 
 Bundle-21 dựng trên canonical v1.33.20 (91 dòng), xử CÙNG nhóm dư B.5-residual/B3-B9 nhưng bằng cách KHÁC và

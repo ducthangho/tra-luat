@@ -695,6 +695,28 @@ def _persist_local_bin_on_path() -> str:
     return ("PATH ~/.local/bin ghi bền vào " + ", ".join(done)) if done else ""
 
 
+def _symlink_nlm_system_path(src: str | None = None, dst: str = "/usr/local/bin/nlm",
+                             posix: bool | None = None) -> str:
+    """C-1.4 (v1.33.23 — log rà Cowork v1.33.20: installer ghi PATH vào ~/.profile/.bashrc nhưng bash
+    NON-INTERACTIVE không source → `nlm` trần 'No such file or directory', chỉ chạy được absolute-path /
+    `tl nlm-*`): best-effort SYMLINK ~/.local/bin/nlm → /usr/local/bin/nlm — /usr/local/bin nằm trong PATH
+    MẶC ĐỊNH của mọi shell kể cả non-interactive; Cowork chạy root nên ghi được. Idempotent; KHÔNG đè file/
+    link có sẵn trỏ chỗ khác (tôn trọng cài đặt ngoài); nuốt lỗi (máy không quyền ghi = no-op); CHỈ POSIX."""
+    if not (os.name == "posix" if posix is None else posix):
+        return ""
+    src = src or os.path.expanduser("~/.local/bin/nlm")
+    try:
+        if not os.path.exists(src):
+            return ""
+        if os.path.exists(dst) or os.path.islink(dst):
+            return "" if os.path.realpath(dst) == os.path.realpath(src) else \
+                f"⚠ {dst} đã tồn tại trỏ chỗ khác — giữ nguyên; dùng `tl nlm-*` (tự nối PATH) nếu `nlm` trần lỗi"
+        os.symlink(src, dst)
+        return f"symlink {dst} → ~/.local/bin/nlm (bash non-interactive gọi `nlm` trần chạy được)"
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def _nlm_install_probe(home: str | None = None, nlm_path: str | None = None) -> dict:
     """v1.30.1 (#1 log Cowork): dò TRẠNG THÁI cài nlm từ ĐĨA (idempotent, không mạng) → bước kế tiếp.
     fetch→extract→install→done; artifact bền: tarball `_dl/py311.tar.gz` (md5-verified) + pydir + uv cache.
@@ -803,9 +825,9 @@ def cmd_nlm_install(a) -> int:
         ok, msg = _ensure_nlm_installed(getattr(a, "version", None))   # fallback Drive bên trong (gọi lại với uv=False)
         print(f"[nlm-install] {'✓' if ok else '✗'} {msg}", file=(sys.stdout if ok else sys.stderr))
         if ok:
-            _pmsg = _persist_local_bin_on_path()
-            if _pmsg:
-                print(f"[nlm-install] {_pmsg}")
+            for _pmsg in (_persist_local_bin_on_path(), _symlink_nlm_system_path()):
+                if _pmsg:
+                    print(f"[nlm-install] {_pmsg}")
         return 0 if ok else 5
 
     def _run_step(st: dict) -> tuple[bool, str]:
@@ -817,9 +839,9 @@ def cmd_nlm_install(a) -> int:
 
     def _done(st: dict) -> int:
         print(f"[nlm-install] ✓ DONE — nlm sẵn sàng ({st['nlm']}). Auth: `nlm login`.")
-        _pmsg = _persist_local_bin_on_path()
-        if _pmsg:
-            print(f"[nlm-install] {_pmsg}")
+        for _pmsg in (_persist_local_bin_on_path(), _symlink_nlm_system_path()):
+            if _pmsg:
+                print(f"[nlm-install] {_pmsg}")
         return 0
 
     if getattr(a, "resume", False):

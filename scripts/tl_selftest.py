@@ -1596,6 +1596,65 @@ def run() -> int:
     cases.append(("r19_cat_bare_full_variants",
                   set(_r19_cv) == {"05", "32"} and "31" not in _r19_cv and "45" not in _r19_cv))
 
+    # ═══ v1.33.7 (log rà v1.33.6 — corpus-audit A1..A5 + schema marker) — r20_* ═══
+    # (A1+A3+A4) `--all --resume`: cày TRỌN pool theo trang, rc=3=PARTIAL rồi LẶP CÙNG LỆNH tới rc=0 + tự dọn
+    # checkpoint; nhánh RAW vẫn chạy check TÊN offline (slug .html 22-2023 — ca nonstandard nặng nhất trước đây
+    # bị skip câm); JSON có partial/remaining/scanned_ids/clean_ids.
+    import io as _io20, contextlib as _ctx20
+    _tlm20 = _TL_MODULE
+    _fix20 = [
+        {"id": "w1", "drive_id": "w1", "name": "luat-dau-thau-so-22-2023-qh15-259737-d1.html",
+         "so_hieu": "22/2023/QH15", "cat": "34", "corpus": "true", "mime": "text/html"},
+        {"id": "w2", "drive_id": "w2", "name": "37_2025_TT-BYT_668487.docx", "so_hieu": "37/2025/TT-BYT",
+         "cat": "45", "corpus": "true", "mime": "application/msword"},
+        {"id": "w3", "drive_id": "w3", "name": "ND_39-2016-ND-CP_Quy_dinh_chi_tiet.docx", "so_hieu": "39/2016/NĐ-CP",
+         "cat": "20", "corpus": "true", "mime": "application/msword"},
+    ]
+    _orig_me20 = _tlm20._manifest_entries
+    _tlm20._manifest_entries = lambda refresh=False: _fix20
+    _ck20 = _cache_file("corpus_audit_ckpt_all.json")
+    try:
+        if _ck20.exists():
+            _ck20.unlink()
+        _ns20a = build_parser().parse_args(["corpus-audit", "--all", "--resume", "--limit", "2", "--json"])
+        _buf20a = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf20a), _ctx20.redirect_stderr(_io20.StringIO()):
+            _rc20a = cmd_corpus_audit(_ns20a)
+        _o20a = json.loads(_buf20a.getvalue())
+        _ns20b = build_parser().parse_args(["corpus-audit", "--all", "--resume", "--limit", "2", "--json"])
+        _buf20b = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf20b), _ctx20.redirect_stderr(_io20.StringIO()):
+            _rc20b = cmd_corpus_audit(_ns20b)
+        _o20b = json.loads(_buf20b.getvalue())
+        _ck20_gone = not _ck20.exists()
+    finally:
+        _tlm20._manifest_entries = _orig_me20
+        try:
+            if _ck20.exists():
+                _ck20.unlink()
+        except OSError:
+            pass
+    cases.append(("r20_corpus_audit_all_resume_pages",
+                  _rc20a == 3 and _o20a["partial"] is True and _o20a["remaining"] == 1
+                  and _rc20b == 0 and _o20b["partial"] is False and _o20b["coverage_complete"] is True
+                  and _ck20_gone))
+    cases.append(("r20_raw_name_nonstandard_flagged",
+                  any(r["drive_id"] == "w1" and any(p["type"] == "NAME_NONSTANDARD" for p in r["proposals"])
+                      for r in _o20a["rows"])
+                  and "scanned_ids" in _o20a and "header_mismatch_no_proposal" in _o20a))
+    # (A2) Bộ luật ↔ Luật: header 'BỘ LUẬT' + registry loai='Luat' → LOAI_MISMATCH suggested 'Bộ luật';
+    # registry đã đúng 'Bộ luật' → im.
+    _hx20 = "QUỐC HỘI\n\nBỘ LUẬT\nHÌNH SỰ\n\nLuật số: 100/2015/QH13\nCăn cứ Hiến pháp\nĐiều 1. Nhiệm vụ"
+    _e20 = {"drive_id": "d100b", "name": "Luat_100-2015-QH13_Bo_Luat_Hinh_su", "so_hieu": "100/2015/QH13",
+            "loai": "Luat", "cat": "16", "corpus": "true"}
+    _ar20a = _corpus_audit_row(_e20, _hx20)
+    _ar20b = _corpus_audit_row(dict(_e20, loai="Bộ luật"), _hx20)
+    cases.append(("r20_loai_bo_luat_mismatch",
+                  any(p["type"] == "LOAI_MISMATCH" and p["suggested"] == "Bộ luật" for p in _ar20a["proposals"])
+                  and not any(p["type"] == "LOAI_MISMATCH" for p in _ar20b["proposals"])))
+    # (schema marker) driver kiểm trước khi tin payload review-queue.
+    cases.append(("r20_review_queue_schema_marker", _rq18b.get("schema") == "review_queue.v1"))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

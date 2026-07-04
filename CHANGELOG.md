@@ -1,3 +1,42 @@
+# ★ v1.33.7 — Log rà v1.33.6: corpus-audit hết cắt-âm-thầm/mù-tên-raw/mù-Bộ-luật + JSON phân biệt sạch-vs-chưa-quét
+
+## A1 — `corpus-audit --all --resume`: cày TRỌN pool theo TRANG (idiom nlm-install)
+- Log: `--all` cắt âm thầm ở 40; `--limit 600` thì cày 531 header một lượt ~9' vượt trần Cowork. Nay
+  `--all --resume` = trang --limit (mặc định 40) + checkpoint `corpus_audit_ckpt_all.json`: rc=3 = PARTIAL
+  (JSON `partial/remaining` máy-đọc) → LẶP CÙNG LỆNH tới rc=0, chạy trọn tự dọn checkpoint. Không resume:
+  giữ cảnh báo CẮT BATCH loud cũ (v1.29.6).
+
+## A2 — Bắt lệch loai Bộ luật ↔ Luật (BLHS 100/2015, BLLĐ 45/2019 loai='Luat' mà proposals=0)
+- 'Bộ luật' và 'Luật' CÙNG tier-5 nên checks['loai'] pass khi header có 'luat' → nhánh LOAI_MISMATCH cũ câm.
+  Check 4b mới đối chiếu RIÊNG cặp này theo HEADER (title-block đã ưu tiên 'BỘ LUẬT' trước 'LUẬT' từ v1.31.2);
+  fix qua register/reg_upsert (backfill-loai không đoán ca này — enum 'Luat'→'Luật' là hợp lệ nên normalize im).
+
+## A3 — Nhánh RAW không còn skip check TÊN (slug .html 22-2023 — ca nonstandard NẶNG NHẤT lại thoát)
+- NAME structural là check OFFLINE, không cần header → chạy ngay trong nhánh raw_no_gdoc trước khi vào
+  need_manual_read. `luat-dau-thau-…-d1.html` nay ra NAME_NONSTANDARD (FILE_EXTENSION+NO_TYPE_PREFIX).
+
+## A4 + A5 — JSON phân biệt 'sạch' vs 'chưa quét'; header FAIL không nuốt câm
+- A4: `scanned_ids` (đã đọc header thật) + `clean_ids`/`scanned_clean` — hết cảnh rows=[] mơ hồ giữa sạch và
+  chưa quét (cộng với partial/coverage_complete là đủ tín hiệu máy).
+- A5: `header_mismatch_no_proposal` — header_ok=False mà 0 đề xuất (64-2006/71-2020) vào hàng đợi RÀ TAY riêng
+  kèm lệnh header-verify --fix-suggest, in cả bản text.
+
+## Markers minh bạch (log §A intermittent + §B mâu thuẫn auditor)
+- review-queue JSON + `schema: "review_queue.v1"` — driver kiểm marker trước khi tin payload (log ghi nhận 1 lần
+  nhận nhầm dump reg-query.v2 ~660KB, KHÔNG tái hiện được sau 3 lần chạy lại).
+- cat-audit JSON + `scanned` — log claim 'cat-audit 0 mismatch với ca 143' KHÔNG TÁI HIỆN: chạy nguyên vòng
+  trên canonical + manifest cache flag đủ 2 ca ALIAS (45→34 Đầu tư, 09→04 Công chứng); nghi phiên đó chạy
+  bản/cache khác — có `scanned` thì 0-finding tự lộ bối cảnh.
+
+## Data (log §B/C-I — lệnh sẵn, user duyệt)
+- 143/2025 NHÂN BẢN 3 dòng + bản sống misfile 45: `tl recat <id-bản-sống> --cat 34 --apply` + dedup-check
+  2 bản corpus=false; VBHN 115 loai='Luật': backfill-loai --normalize (conflict-mode v1.32.2 đã đề xuất sẵn);
+  6 naming defect + 172 tên; lượt-2 web 10 HIGH_VELOCITY + 14 QT5; backfill 123/68-2025; quarantine 4 stale.
+
+selftest **504/504** (+4 r20: all-resume-pages, raw-name-flag, bo-luat-mismatch, schema-marker).
+
+---
+
 # ★ v1.33.6 — Log rà 66/68 CHẠY CANONICAL v1.33.5 (fix v1.33.4 phát huy thực địa): rel-row kèm ứng viên + reg-query --loai + --version + detector cat trơ
 
 TIN XÁC NHẬN thực địa: kế toán review-queue khớp máy (29+37+2=68), rel còn đúng 2 ca thật (123/68-2025 — hết

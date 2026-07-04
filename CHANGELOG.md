@@ -1,3 +1,43 @@
+# ★ v1.33.3 — Log rà 66×3 + 68 Luật: siết 2 dương-tính-giả heuristic (D1/D2) + lệnh `review-queue` gỡ nghẽn gom-tay lượt-2
+
+Tin tốt log xác nhận: ~200 lần gọi 0 traceback/timeout/parse-fail; defect lịch sử không tái phát. Còn lại:
+D (heuristic FP) + B (nghẽn quy trình: ~26 Luật cần lượt web nhưng phải GOM TAY từ 66-111 lần source-map).
+
+## D1 — CAT_LIKELY_WRONG hết trộn thật/giả (ca 87/2015 cat 35 → gợi 44 CHỈ vì alias 'giam sat')
+- Thủ phạm đo được: chủ đề 44 có alias đơn 'giam sat' — khớp 2/10 từ của chủ đề "Hoạt động giám sát của QH và
+  HĐND" vẫn thành đề xuất high-confidence. 2 cổng phủ định mới (chỉ áp tầng content_alias — boundary/pin/
+  omnibus-46 là bằng chứng tầng doctrine, không đụng):
+  (a) `_cat_alias_evidence_for(cur)`: alias pháp điển của CHÍNH cat hiện tại xuất hiện trong title-scope →
+      title cũng ủng hộ cat đang gán → không dời;
+  (b) COVERAGE-GATE: alias đề xuất phải BAO TRÙM ≥1/2 số từ chủ đề — 'dau tu'/'cong chung' phủ trọn subject
+      → GIỮ tín hiệu thật (143→34, 46/2024→04); 'giam sat' 2/10 → nhiễu, BỎ.
+
+## D2 — header-verify TITLE-token over-fire (87/2015 HEADER_MISMATCH 3/4 dù tên ĐÚNG)
+- Token VIẾT TẮT trong tên (HDND…) không bao giờ xuất hiện nguyên dạng trong header viết đầy đủ → nay khớp qua
+  DẠNG MỞ RỘNG (_ABBREV_MAP, +hdnd/ubnd/mttq); thêm lối thoát TỶ LỆ ≥3/4 cho tên ≥4 token (1 token lạ không
+  đánh sập cả check); tên 2-3 token giữ ngưỡng chặt cũ; tên SAI chủ đề thật vẫn FAIL.
+
+## B — `tl review-queue` (MỚI): 1 lệnh gom hàng đợi rà soát
+- 3 log liên tiếp cùng kết luận "~26 Luật cần lượt web LƯỢT-2 mới finalize" nhưng đều phải chạy 66-111 lần
+  source-map rời rồi gom tay. Nay: quét mọi Luật/Bộ luật corpus=true (dedup sohieu; dòng thiếu sohieu đếm
+  LOUD; VBHN rà theo luật gốc) → source-map offline → nhóm VIỆC:
+  `web_round2` (NO_VERIFIED/UNVERIFIED_LATEST/HIGH_VELOCITY — ★ HIGH_VELOCITY xếp trước, kèm qt5_queries
+  sẵn dán cho phiên Chrome) · `relation_backfill` (lệnh relation-check điền sẵn — ghi phải hỏi user) ·
+  `pause` · `clean_count`. KHÔNG thay verify official — chỉ diệt công đoạn gom-và-phân-loại. `--json/--limit`.
+- Quy trình chuẩn mới: `tl review-queue --json` → phiên Chrome chạy lượt-2 theo nhóm ★ trước →
+  `tl vbhn-verify --official-required` → nạp QT-3.
+
+## Không đổi (đúng chủ đích, trả lời mục F/G của log)
+- F (521/509/521): khác định nghĩa + snapshot — sweep in headline server-rule "khớp `tl boot`" + corpus_basis
+  từ v1.30.1/v1.31.0; muốn khớp tuyệt đối: `boot --refresh` + `sweep --refresh` cùng phiên.
+- G (295/300): doctrine L4/L5 giữ nguyên — neo `tl nlm-get` LIVE trước khi kết luận FULL (memory đã sửa).
+- E: nợ dữ liệu (rename 4 tên, ORPHAN_CAT 44/2024, 105/2016, backfill-loai 63, dedup 39/7/9, quarantine 107)
+  — lệnh sẵn, xem runbook v1.33.0.
+
+selftest **490/490** (+4 r16: header-abbrev-ratio, cat-coverage-gate, review-queue groups, parser).
+
+---
+
 # ★ v1.33.2 — Log rà 111 Luật (chạy v1.33.0): 6 defect A1..A6 — false-clean name-query, pin §0.13, evidence overclaim
 
 Tin tốt log xác nhận: errors:[] xuyên suốt — P0-1 double-fault + pagination không tái hiện trên v1.33.0.

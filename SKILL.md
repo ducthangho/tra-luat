@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.2)
+# tra-luat — LÕI VẬN HÀNH (v1.33.3)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -205,6 +205,7 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 | `tl cache-snapshot export\|import` | snapshot manifest_index có cổng treeHash |
 | `tl nlm-list <nb>` | fast-lane CLI `nlm` --skip-freshness (~4s) — thay source_list_drive (MCP timeout) |
 | `tl nlm-reconcile <nb> [--apply] [--clear-stale]` | đối soát registry↔NLM ground-truth: backfill nlm_notebook_id, báo stale/unregistered |
+| `tl review-queue [--json]` | (v1.33.3) 1 lệnh gom HÀNG ĐỢI rà soát mọi Luật: nhóm việc web LƯỢT-2 (★HIGH_VELOCITY trước) / relation-backfill / PAUSE + qt5_queries sẵn dán — thay vòng 66×source-map + gom tay |
 | `tl preflight <số hiệu>` | sharding: định tuyến nạp VBQPPL mới (nlm_preflight); base đầy 300 → `overflow_route` sang shard phụ |
 | `tl push-overflow --drive-id <> --source-id <>` | sau source_add vào shard overflow → cập nhật registry `row_kind=overflow` |
 | `tl nlm-add <nb> --drive <id> [--wait]` | **(1)** thêm nguồn NLM qua CLI `nlm source add` (thay MCP source_add) |

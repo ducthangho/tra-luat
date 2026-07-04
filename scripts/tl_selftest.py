@@ -1464,6 +1464,42 @@ def run() -> int:
             pass
     cases.append(("r15_sohieu_file_respects_limit", _ok15))
 
+    # ═══ v1.33.3 (log rà 66×3 — D1/D2 dương-tính-giả heuristic + B nghẽn gom-tay lượt-2) — r16_* ═══
+    # (D2) header-verify title: token VIẾT TẮT (hdnd) khớp theo dạng mở rộng; tên sai chủ đề THẬT vẫn FAIL.
+    _hv16 = {"id": "h87", "drive_id": "h87", "name": "Luat_87-2015-QH13_HD_giam_sat_QH_HDND",
+             "so_hieu": "87/2015/QH13", "loai": "Luật", "cat": "35", "corpus": "true"}
+    _hx16 = ("QUỐC HỘI\n\nLUẬT\nHOẠT ĐỘNG GIÁM SÁT CỦA QUỐC HỘI VÀ HỘI ĐỒNG NHÂN DÂN\n\n"
+             "Luật số: 87/2015/QH13\nCăn cứ Hiến pháp;\n"
+             "Quốc hội ban hành Luật hoạt động giám sát của Quốc hội và Hội đồng nhân dân.\nĐiều 1. Phạm vi")
+    _vr16 = _verify_header_match(_hv16, _hx16)
+    _vr16b = _verify_header_match(dict(_hv16, name="Luat_87-2015-QH13_Kinh_doanh_bat_dong_san"), _hx16)
+    cases.append(("r16_header_title_abbrev_ratio",
+                  _vr16["checks"].get("title") is True and _vr16b["checks"].get("title") is False))
+    # (D1) CAT_LIKELY_WRONG: 87/2015 (cur=35) KHÔNG còn bị gợi 44 chỉ vì alias 'giam sat' 2/10 từ (coverage-gate);
+    # misfile THẬT giữ nguyên: 46/2024 Công chứng ở 09 → 04 (alias phủ TRỌN chủ đề).
+    _p16a = _cat_likely_wrong_suggest({"drive_id": "d87", "name": "Luat_87-2015-QH13_HD_giam_sat_QH_HDND",
+                                       "so_hieu": "87/2015/QH13", "loai": "Luật", "cat": "35", "corpus": "true"},
+                                      "LUẬT\nHOẠT ĐỘNG GIÁM SÁT CỦA QUỐC HỘI VÀ HỘI ĐỒNG NHÂN DÂN\n\nĐiều 1.")
+    _p16b = _cat_likely_wrong_suggest({"drive_id": "d46", "name": "Luat_46-2024-QH15_Cong_chung",
+                                       "so_hieu": "46/2024/QH15", "loai": "Luật", "cat": "09", "corpus": "true"},
+                                      "LUẬT\nCÔNG CHỨNG\n\nĐiều 1.")
+    cases.append(("r16_cat_content_alias_coverage",
+                  _p16a is None and _p16b is not None and _p16b["suggested"] == "04"))
+    # (B) review-queue: gom đúng nhóm — BLHS → web LƯỢT-2 (★ high-velocity); luật 2025 sạch → clean;
+    # dòng Luật thiếu sohieu → đếm LOUD; VBHN không thành mục hàng đợi riêng.
+    _rq_new16 = {"id": "n1", "drive_id": "n1", "name": "Luat_91-2025-QH15_Bao_ve_du_lieu_ca_nhan",
+                 "so_hieu": "91/2025/QH15", "loai": "Luật", "cat": "03", "corpus": "true", "nlm_source_id": "sn1"}
+    _rq_nosh16 = {"id": "n2", "drive_id": "n2", "name": "Luat_khong_ro_so_hieu", "loai": "Luật", "corpus": "true"}
+    _rq16 = _review_queue_report([_blhs15, _rq_new16, _rq_nosh16, _v13], limit=None)
+    cases.append(("r16_review_queue_groups",
+                  _rq16["laws_scanned"] == 2 and _rq16["skipped_no_sohieu"] == 1
+                  and _rq16["web_round2_count"] == 1 and _rq16["web_round2"][0]["sohieu"] == "100-2015-QH13"
+                  and _rq16["web_round2"][0]["priority_high_velocity"] is True
+                  and bool(_rq16["web_round2"][0]["qt5_queries"])
+                  and _rq16["clean_count"] == 1 and _rq16["relation_backfill"] == []))
+    _rqns16 = build_parser().parse_args(["review-queue", "--json", "--limit", "5"])
+    cases.append(("r16_review_queue_parser", _rqns16.json is True and _rqns16.limit == 5))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

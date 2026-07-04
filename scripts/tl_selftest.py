@@ -1568,6 +1568,34 @@ def run() -> int:
                   _rq18b["laws_scanned"] == 0 and _rq18b["skipped_vbhn_as_base"] == 1
                   and sum(_rq18b["counts"].values()) == 0))
 
+    # ═══ v1.33.6 (log rà 66/68 chạy CANONICAL v1.33.5 — C flag≠payload, B7 reg-query --loai, F --version,
+    # D cat trơ-vs-đủ) — r19_* ═══
+    # (C) row relation_backfill phải KÈM ứng viên cụ thể để soi ngay (log: 'cổng báo có ứng viên mà không trả
+    # ứng viên nào') — _rq17b là ca rel THẬT (UNLINKED 06/2026 quanh 06/2022).
+    _r19_cands = (_rq17b["relation_backfill"][0].get("candidates") or [])
+    cases.append(("r19_rel_row_carries_candidates",
+                  bool(_r19_cands) and any("06/2026" in c or "06-2026" in c for c in _r19_cands)))
+    # (B7) reg-query: trường loai + loai_canon trong row; parser nhận --loai.
+    _r19_row = _reg_query_row({"drive_id": "x", "name": "Luat_X", "loai": "Luat"})
+    _r19_ns = build_parser().parse_args(["reg-query", "--loai", "Luật", "--corpus"])
+    cases.append(("r19_reg_query_loai",
+                  _r19_row["loai"] == "Luat" and _r19_row["loai_canon"] == "Luật"
+                  and _r19_ns.loai == "Luật"))
+    # (F) `tl --version` là flag hợp lệ (argparse action=version → SystemExit 0, KHÔNG usage-error).
+    with _hush():
+        try:
+            build_parser().parse_args(["--version"])
+            _r19_ver = False
+        except SystemExit as _se19:
+            _r19_ver = (_se19.code in (0, None))
+    cases.append(("r19_version_flag", _r19_ver))
+    # (D) detector cat trơ-vs-đủ-tên: prefix có CẢ '05' lẫn '05_...' = biến thể; '31_X' đơn độc không dính.
+    _r19_cv = _cat_bare_full_variants([{"cat": "05"}, {"cat": "05_Can_bo_cong_chuc_vien_chuc"},
+                                       {"cat": "32"}, {"cat": "32_Thong_tin_bao_chi_xuat_ban"},
+                                       {"cat": "31_Xay_dung"}, {"cat": "45"}])
+    cases.append(("r19_cat_bare_full_variants",
+                  set(_r19_cv) == {"05", "32"} and "31" not in _r19_cv and "45" not in _r19_cv))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

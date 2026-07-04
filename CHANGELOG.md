@@ -1,3 +1,38 @@
+# ★ v1.33.6 — Log rà 66/68 CHẠY CANONICAL v1.33.5 (fix v1.33.4 phát huy thực địa): rel-row kèm ứng viên + reg-query --loai + --version + detector cat trơ
+
+TIN XÁC NHẬN thực địa: kế toán review-queue khớp máy (29+37+2=68), rel còn đúng 2 ca thật (123/68-2025 — hết
+2 ca khống), `raw_on_nlm` bắt 4 nguồn thô (thêm 3 .docx ngoài ca .html), nlm_drift đã dán nhãn OFFLINE.
+
+## C — "flag ≠ payload" (123-2025): KHÔNG tái hiện được payload rỗng; vá đúng chỗ THẬT
+- Repro trên manifest cache: `source-map 123-2025 --json` CÓ payload (ứng viên 57-2024 omnibus, confidence=low)
+  — nơi thật sự "không có gì để soi" là ROW của review-queue (chỉ flags+fix_command). Vá: row relation_backfill
+  nay KÈM `candidates` top-3 (`sohieu|tên|confidence` từ chính payload source-map; text in "↳ ứng viên: …");
+  warning UNLINKED trỏ rõ key `unlinked_amendment_candidates`. Ca 123-2025: miss-link THẬT (VBHN_72 Giáo dục
+  không được thấy vì tên 'Luat_123-2025-QH15_GD' cụt — nợ rename D2) → REVIEW đúng, nay có ứng viên soi ngay.
+
+## B7 — `reg-query` nhận `--loai` + trả trường loai
+- Log: loai là khái niệm hạng nhất mà reg-query trả loai=None mọi dòng → không liệt kê được Luật theo loại,
+  phải lọc tay theo tiền tố tên. Nay: row có `loai` (raw) + `loai_canon` (chuẩn hoá enum); `--loai Luật` khớp
+  cả 'Luat'/'luật' (so bản chuẩn hoá; 'Bộ luật' là loại riêng).
+
+## F — `tl --version` + docstring hết drift
+- `--version` là flag chuẩn (in `tl <VERSION> (webapp target 2.21.2i)` thay vì usage-error). Docstring tl.py
+  BỎ số version hardcode (v1.22.68 cũ 11 bậc) — hằng VERSION là nguồn chân lý duy nhất.
+
+## D — detector `cat_label_variants` (folder trơ vs đủ tên)
+- Log: tồn tại đồng thời `05` & `05_Can_bo_cong_chuc_vien_chuc`, `32` & `32_Thong_tin…`, bare 32 chứa văn bản
+  làm việc lọt corpus → sweep nay đếm `cat_label_variants` + rows + next_action gộp qua `tl recat`.
+
+## Data/ops còn lại của log (lệnh sẵn, user duyệt)
+- 🔴 desync 76/2026-VBHN Luật Dược: `nlm-reconcile --apply --clear-stale` (nếu gỡ chủ đích) hoặc re-push.
+- 🔴 4 nguồn thô trên NLM (22-2023.html + 37_2025_TT-BYT/59_2023_TT-BTC/39_2016_ND-CP .docx): convert chain.
+- 🟡 gộp cat trơ (05/32/34) + name_nonstandard 171 + loai 63 + dedup 93/39/7/9 + quarantine 107 + 80/531
+  corpus-audit (tiếp --offset 80). 🟡 slot −1: neo `nlm-get` (doctrine L4/L5).
+
+selftest **500/500** (+4 r19: rel-row-candidates, reg-query-loai, version-flag, cat-variants).
+
+---
+
 # ★ v1.33.5 — Khoá regression ca 19-2012 (OK+COVERED) + kế toán VBHN-đội-lốt-Luật + doc status vocab
 
 Log rà 69 (phiên chạy MOUNT v1.33.3) báo lại đúng bộ A1/A2/B1/C1/C2 — TẤT CẢ đã vá ở v1.33.4 bên dưới

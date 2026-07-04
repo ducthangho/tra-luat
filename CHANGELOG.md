@@ -1,3 +1,35 @@
+# ★ v1.33.13 — MERGE patch "AUDIT 07/2026" (files.zip): 2 nhánh cùng vá backlog 9 lỗi trên v1.33.11 — hợp nhất chọn lọc
+
+Patch đính kèm (tra-luat_v1.33.13_cumulative.patch) = nhánh khác tự vá CÙNG backlog trên nền v1.33.11.
+So với v1.33.12 của ta: TRÙNG HƯỚNG P1-1 (nhãn đủ)/P2-1/P2-2/P2-3; THIẾU P1-2 (_resolve_cat_folder canonical),
+P1-3 (BLuat), P2-4 (*_active), P0-2 (--live-nlm), và escape-hatch --force-unsafe của họ KHÔNG được wire vào
+parser register (getattr luôn False — user không bypass được). GIỮ canonical base; PORT 3 phần họ MẠNH HƠN:
+
+## P0-1 nay 2 LỚP + phủ cả --bulk
+- LỚP 1 (port): `_looks_like_drive_id` — format-guard OFFLINE rẻ (≥20 ký tự [A-Za-z0-9_-], nhận prefix `nlm:`)
+  → id cắt cụt bị chặn NGAY với lỗi rõ `DRIVE_ID_MALFORMED`, không tốn round-trip; áp CẢ `register --bulk`
+  (v1.33.12 ta chỉ guard đường đơn — lỗ họ vá được). Escape thống nhất `--force-insert` (đã wire parser).
+- LỚP 2 (giữ của ta): `_register_target_exists` — id ĐÚNG DẠNG nhưng không tồn tại (manifest + Drive live)
+  vẫn REFUSE `DRIVE_ID_NOT_FOUND` (format-guard một mình KHÔNG bắt được ca này).
+
+## P2-3 rộng hơn: corroboration sohieu
+- Port trigger của họ: tên `VBHN_` + sohieu chứa `-VBHN-` + nhãn KHÔNG-map-được BẤT KỲ → conflict 'Văn bản
+  hợp nhất' (không chỉ 'thuong'); giữ mode=conflict của ta (họ để lẫn vào normalize). Working-doc 'thuong'
+  không tên VBHN_ tuyệt đối không bị đề xuất VBHN (test khoá).
+
+## Vocab máy-đọc
+- recat plan + `cat_label` (alias `reg_label` — key patch kia dùng); review_other + `review_reason` LIST.
+
+## KHÔNG port (đã có bản mạnh hơn / khác thiết kế)
+- `_RQ_REL_STRONG` flag-based của họ: ta dùng `_rq_rel_strong` PAYLOAD-based + bucket INFO
+  `relation_low_confidence` riêng (giữ được candidates/fix_command thay vì dồn vào review_other).
+- Test 'BC thuong không được đề xuất gì' của họ: nới đúng ngữ nghĩa — normalize 'thuong'→'Văn bản thường'
+  (enum hợp lệ) được phép; chỉ cấm đề xuất 'Văn bản hợp nhất'.
+
+selftest **519/519** (+3 r25: looks-like-drive-id, vbhn-masquerade-sohieu-corroborated, cat-label-alias).
+
+---
+
 # ★ v1.33.12 — Backlog 9 lỗi phiên khắc phục 04/07: chặn register-rác, recat/folder canonical, review-queue hết báo động giả
 
 ## 🔴 P0-1 — `register` hết CHÈN DÒNG RÁC (drive_id cắt cụt → reg_upsert insert dòng rỗng, ok:true không báo)

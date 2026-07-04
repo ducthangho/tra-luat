@@ -1832,6 +1832,30 @@ def run() -> int:
                   and _rq_rel_strong([{"strong": True}]) and not _rq_rel_strong([{"confidence": "low"}])
                   and not _rq_rel_strong([]) and _ns24s.live_nlm is True))
 
+    # ═══ v1.33.13 (MERGE patch AUDIT 07/2026 — 2 nhánh cùng vá backlog 9 lỗi trên v1.33.11) — r25_* ═══
+    # (P0-1 LỚP 1) format-guard drive_id: ID thật 33/44 ký tự PASS, prefix nlm: PASS, id cắt cụt/rỗng FAIL.
+    cases.append(("r25_looks_like_drive_id",
+                  _looks_like_drive_id("198ZW9NykVi9NGaWReLH8zicdxdOkWz7CunOdlVixhu4") is True
+                  and _looks_like_drive_id("nlm:398d50d7-a639-4528-8820-56644b12fb3e") is True
+                  and _looks_like_drive_id("198ZW9NykVi9") is False
+                  and _looks_like_drive_id("") is False))
+    # (P2-3 mở rộng) VBHN đội lốt với sohieu -VBHN- corroborate nhãn KHÔNG-map-được BẤT KỲ → conflict;
+    # BC working-doc loai='thuong' KHÔNG tên VBHN_ → tuyệt đối KHÔNG bị đề xuất 'Văn bản hợp nhất'
+    # (assertion gốc của patch nới cho phép normalize enum hợp lệ nếu _normalize_loai map được 'thuong').
+    _bl25 = [{"drive_id": "1AAAAAAAAAAAAAAAAAAAAAAAA", "name": "VBHN_67-2025-VBHN-VPQH_2025_Luat_Doanh_nghiep",
+              "so_hieu": "67-2025-VBHN-VPQH", "loai": "nhãn-lạ-không-map"},
+             {"drive_id": "1CCCCCCCCCCCCCCCCCCCCCCCC", "name": "BC_bao_cao_lam_viec", "so_hieu": "",
+              "loai": "thuong"}]
+    _s25, _, _n25 = _backfill_loai_candidates(_bl25, normalize=True)
+    _by25 = {s["drive_id"]: s for s in _s25}
+    cases.append(("r25_vbhn_masquerade_sohieu_corroborated",
+                  _by25.get("1AAAAAAAAAAAAAAAAAAAAAAAA", {}).get("loai") == "Văn bản hợp nhất"
+                  and _by25.get("1AAAAAAAAAAAAAAAAAAAAAAAA", {}).get("mode") == "conflict"
+                  and _by25.get("1CCCCCCCCCCCCCCCCCCCCCCCC", {}).get("loai") != "Văn bản hợp nhất"))
+    # (P0-1 bulk + recat alias + review_reason) parser/plan vocab: register --bulk chặn qua cùng cờ
+    # --force-insert (wired — patch kia dùng --force-unsafe KHÔNG có trong parser register).
+    cases.append(("r25_recat_plan_cat_label_alias", _cat_reg_label("32") == "32_Thong_tin_bao_chi_xuat_ban"))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

@@ -1,3 +1,47 @@
+# ★ v1.33.16 — MERGE nhánh-4 (`tra-luat-skill-v1.33.15-gws3env-patched.zip`): bản độc lập CÙNG backlog S-1..S-9 trên v1.33.14 — port 6, reject 4
+
+Nhánh-4 tự đặt tên v1.33.15 (TRÙNG SỐ với canonical — 2 nhánh độc lập cùng vá backlog log rà 40/531 + 67 Luật).
+Đối chiếu BẰNG HÀNH VI (không grep chuỗi): chạy fixture của họ trên bản ta, bơm ca phản-chứng vào bản họ.
+GIỮ canonical base v1.33.15 (S-2 của ta vá đúng gốc rễ ĐO ĐƯỢC: 4/5 fail TITLE vì token rác + 1/5 sohieu khối-ký-cuối,
+verify 5/5 PASS LIVE — S-2 nhánh-4 chỉ đoán 'Bộ luật/VBHN guard', không chữa được ca nào trong 5 ca thật).
+
+## PORT (6 — mỗi món lấp lỗ thật, có sửa lỗi của chính bản họ khi port)
+- **S-3b** `_omnibus_name_text` (tách text-core khỏi `_omnibus_name_evidence`): +pattern chữ 'sửa đổi (bổ sung)
+  (một số) (điều của) các/nhiều luật' — NỚI hơn nhánh-4 (bắt cả phrasing thật 'một số điều của các luật' mà regex
+  họ miss); `_cat_boundary_rule` nay ép 46 cho CẢ omnibus dạng NÉN nằm nhầm folder (đề xuất ĐƯA VÀO 46 — chiều
+  ta chưa có) + GUARD hơn họ: VBHN không bao giờ ép 46; `_cat_likely_wrong_suggest` nhận omnibus qua title-scope.
+- **S-2h** `_declared_loai_from_header` — port Ý TƯỞNG, VIẾT LẠI detector: registry 'Luật' + khối tiêu đề in
+  'BỘ LUẬT' xen kẽ ('BỘ LUẬT\nSố:…\nHÌNH SỰ') là lỗ THẬT của ta (repro: 0 đề xuất, header_ok=True). Check 4c mới
+  đề xuất LOAI_MISMATCH khi khai báo MẠNH (Bộ luật/VBHN) ≠ registry; guard kép: entry VBHN không qua (VBHN in
+  tiêu đề luật gốc — đo thật ca 21-2026), registry VBHN không bao giờ bị hạ.
+- **S-8b** `_vbhn_latest_low_priority_recent_law` (vbhn-check) — ĐỐI XỨNG với S-8 source-map v1.33.15: luật rất
+  mới chưa có ứng viên VBHN + không high-velocity → cờ INFO `VBHN_LATEST_LOW_PRIORITY_RECENT_LAW` thay
+  UNVERIFIED_LATEST (QT5_WEB_REQUIRED giữ). Năm ĐỘNG (≥ nay−2) thay hardcode 2024 của họ (sẽ mục theo thời gian).
+- **S-4/S-5** sweep --live-nlm JSON +other_notebook/link_candidates/unregistered_on_nlm/registry_live_gap/basis
+  + dòng text gap — SỬA BUG bản họ: plan key là `unregistered`, họ đọc `unregistered_on_nlm` không tồn tại → luôn 0.
+- **S-6/S-7** next-actions: trigger dedup-plan nay tính CẢ cụm ACTIVE by_sohieu_raw_active/by_name_active (P2-4
+  v1.33.12 đo được nhưng chưa nối trigger); 163 tên phi-chuẩn → hướng dẫn chạy LÔ corpus-audit đọc
+  rows[].fix_command (khớp S-1) thay lệnh từng-ca; advisory NLM nêu rõ claim=estimate không chốt FULL/overflow.
+- **S-1b** `_audit_row_flatten` +alias `command`/`proposal_count`/`current` (phần đáng giá của
+  `_corpus_audit_json_row` họ). KHÔNG port `proposal_rows[]` (trùng proposals[] vốn đã phẳng từng món).
+
+## REJECT (4 — đều có PHẢN CHỨNG chạy được, khoá bằng test r28)
+- `_declared_loai_from_header` bản 12k-scan tự do: NĐ 'Căn cứ Bộ luật Lao động' → đọc thành 'Bộ luật', TT 'Căn
+  cứ Văn bản hợp nhất số 19/…' → 'VBHN' (repro trên chính bundle họ) ⇒ 🔴 LOAI_MISMATCH oan HÀNG LOẠT cho mọi
+  NĐ/TT quy định chi tiết Bộ luật. Thay bằng detector dòng-IN-HOA-đứng-riêng khớp-đầu-dòng, dòng đầu tiên thắng.
+- Topic 'dautucong' trong list omnibus: 'dautu' là SUBSTRING của 'dautucong' → tên 1-đề-tài 'SuaDoi_Dau_tu_cong'
+  đếm thành 2 = false-omnibus.
+- Doctor S-9 coi registryDocId RỖNG là FAIL: rỗng = fallback auto-discover AN TOÀN by-design (v1.23.22) — FAIL
+  làm doctor đỏ trường kỳ tới khi user pin + rủi ro Cowork loop tự-sửa-config. Port dạng PASS + khuyến nghị pin rõ.
+- S-2 'guard Bộ luật' làm fix CHÍNH cho header_mismatch_no_proposal: sai chẩn đoán — 5/5 ca thật là TITLE-token-rác
+  /sohieu-khối-ký-cuối (đã vá + verify LIVE ở v1.33.15); bản họ không chữa được ca nào trong 5.
+
+Kiểm thực địa sau merge: cat-audit vẫn 2 cờ hợp lệ; vbhn-check 91/2025 → LOW_PRIORITY thay latest, BLHS giữ
+UNVERIFIED+HIGH_VELOCITY; review-queue web 25 (dòng 89-2025 mới xuất hiện là do DATA cache refresh — A/B cùng
+cache trên code v1.33.15 cũng ra 25, KHÔNG phải regression merge). selftest **540/540** (+6 r28, khoá cả 4 reject).
+
+---
+
 # ★ v1.33.15 — Xử nhóm CODE log rà 40/531 + review-queue 67 Luật CHẠY LIVE v1.33.14 (S-1/S-2/S-3/S-8)
 
 Toàn bộ 4 bug đều REPRO BẰNG HÀNH VI trước khi vá (bài học đối chiếu nhánh: test hành vi, không grep chuỗi) —

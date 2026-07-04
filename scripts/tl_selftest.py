@@ -2014,6 +2014,66 @@ def run() -> int:
                   _rq27["web_round2_count"] == 0 and _rq27["clean_count"] == 1
                   and sum(_rq27["counts"].values()) == _rq27["laws_scanned"] == 1))
 
+    # ═══ v1.33.16 (MERGE nhánh-4 `tra-luat-skill-v1.33.15-gws3env-patched.zip` — bản độc lập CÙNG backlog
+    # S-1..S-9 trên v1.33.14; port chọn lọc + REJECT có kiểm chứng) — r28_* ═══
+    # (S-3b) _omnibus_name_text: pattern chữ 'sửa đổi (bổ sung) (một số) (điều của) các/nhiều luật' (nới hơn
+    # nhánh-4 — bắt cả phrasing thật) + dạng nén giữ nguyên; KHÔNG double-count 'dautucong' (bug nhánh-4:
+    # 'dautu' ⊂ 'dautucong' → 1 đề tài đếm thành 2 → false-omnibus, đã reject).
+    cases.append(("r28_omnibus_text_patterns",
+                  _omnibus_name_text("Luat_SuaDoi_bo_sung_mot_so_dieu_cua_cac_luat_ve_dau_tu")
+                  and _omnibus_name_text("Luật sửa đổi nhiều luật")
+                  and _omnibus_name_text("Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau")
+                  and not _omnibus_name_text("Luat_SuaDoi_Dau_tu_cong")
+                  and not _omnibus_name_text("Luat_75-2025-QH15_SuaDoi_Quang_cao")))
+    # (S-3b) boundary rule ép 46 cho omnibus dạng NÉN nằm nhầm folder — GUARD: VBHN không bao giờ ép 46
+    # (lỗ nhánh-4: VBHN của luật-sửa tên có SuaDoi+nhiều đề tài sẽ bị kéo vào 46 — trái doctrine).
+    cases.append(("r28_boundary_46_compact_not_vbhn",
+                  _cat_boundary_rule("Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau")[0] == "46"
+                  and _cat_boundary_rule("VBHN_09-2026-VBHN-VPQH_2026_SuaDoi_QuyHoach_DauTu_HopNhat")[0] != "46"))
+    # (S-2h) _declared_loai_from_header — detector VIẾT LẠI: dòng IN HOA đứng riêng, khớp đầu-dòng, dòng ĐẦU
+    # TIÊN thắng. 2 ca REJECT nhánh-4 (repro thật): NĐ 'Căn cứ Bộ luật…' phải ra Nghị định (bản 12k-scan của
+    # nhánh-4 ra 'Bộ luật' → LOAI_MISMATCH oan 🔴); TT 'Căn cứ Văn bản hợp nhất số…' phải ra Thông tư.
+    _nd28 = ("NGHỊ ĐỊNH\nSố: 145/2020/NĐ-CP\nQuy định chi tiết Bộ luật Lao động\n"
+             "Căn cứ Bộ luật Lao động ngày 20 tháng 11 năm 2019;")
+    cases.append(("r28_declared_loai_anchored",
+                  _declared_loai_from_header("BỘ LUẬT\nSố: 100/2015/QH13\nHÌNH SỰ\nĐiều 1. Phạm vi") == "Bộ luật"
+                  and _declared_loai_from_header("VĂN BẢN HỢP NHẤT\nLUẬT\nCÔNG ĐOÀN\nLuật Công đoàn số 50/2024/QH15") == "Văn bản hợp nhất"
+                  and _declared_loai_from_header(_nd28) == "Nghị định"
+                  and _declared_loai_from_header("THÔNG TƯ\nSố: 95/2025/TT-BTC\nCăn cứ Văn bản hợp nhất số 19/VBHN-VPQH;") == "Thông tư"))
+    # (S-2h) 4c corpus-audit: registry 'Luật' + tiêu đề 'BỘ LUẬT' xen kẽ (ca 4/4b câm — repro trên chính bản ta
+    # TRƯỚC port: 0 đề xuất) → nay LOAI_MISMATCH 'Bộ luật'; NEGATIVE: NĐ trích 'Căn cứ Bộ luật' KHÔNG dính,
+    # entry VBHN (tiêu đề in luật gốc 'BỘ LUẬT' — ca 21-2026 BLTTDS) KHÔNG dính.
+    _bl28 = _corpus_audit_row({"drive_id": "Dbl28", "name": "Luat_100-2015-QH13_Hinh_su", "loai": "Luật",
+                               "so_hieu": "100/2015/QH13", "cat": "16", "corpus": "true"},
+                              "BỘ LUẬT\nSố: 100/2015/QH13\nHÌNH SỰ\nĐiều 1. Phạm vi tội phạm hình sự")
+    _nd28r = _corpus_audit_row({"drive_id": "Dnd28", "name": "ND_145-2020-ND-CP_Dieu_kien_lao_dong",
+                                "loai": "Nghị định", "so_hieu": "145/2020/NĐ-CP", "cat": "20", "corpus": "true"},
+                               _nd28 + "\nquy định điều kiện lao động")
+    _vb28r = _corpus_audit_row({"drive_id": "Dvb28", "name": "VBHN_21-2026-VBHN-VPQH_2026_Bo_luat_To_tung_dan_su",
+                                "loai": "Văn bản hợp nhất", "so_hieu": "21-2026-VBHN-VPQH", "cat": "37",
+                                "corpus": "true"},
+                               "BỘ LUẬT\nTỐ TỤNG DÂN SỰ\nSố: 21/VBHN-VPQH\nvề tố tụng dân sự")
+    cases.append(("r28_loai_declared_proposal_guarded",
+                  any(p["type"] == "LOAI_MISMATCH" and p["suggested"] == "Bộ luật" for p in _bl28["proposals"])
+                  and not any(p["type"] == "LOAI_MISMATCH" for p in _nd28r["proposals"])
+                  and not any(p["type"] == "LOAI_MISMATCH" for p in _vb28r["proposals"])))
+    # (S-8b) vbhn-check dampener: luật RẤT MỚI (năm động ≥ nay−2) không candidate + không high-velocity → hạ;
+    # high-velocity (Đấu thầu) / có candidate / luật cũ → KHÔNG hạ.
+    _yr28 = _t27.localtime().tm_year
+    cases.append(("r28_vbhn_latest_low_priority",
+                  _vbhn_latest_low_priority_recent_law("Lưu trữ", f"33/{_yr28}/QH15", "", False)
+                  and not _vbhn_latest_low_priority_recent_law("Đấu thầu", f"57/{_yr28}/QH15", "", False)
+                  and not _vbhn_latest_low_priority_recent_law("Lưu trữ", f"33/{_yr28}/QH15", "", True)
+                  and not _vbhn_latest_low_priority_recent_law("Thư viện", "46/2019/QH14", "", False)))
+    # (S-1b) flatten alias driver phẳng: command/proposal_count/current (phần port được của
+    # _corpus_audit_json_row nhánh-4; proposal_rows[] KHÔNG port — trùng proposals[] vốn đã phẳng từng món).
+    _fl28 = _audit_row_flatten({"drive_id": "x", "proposals": [
+        {"type": "NAME_NONSTANDARD", "current": "cu", "suggested": "moi", "severity": 2, "icon": "🟠",
+         "fix_command": "tl header-verify --drive-id x --fix-suggest"}]})
+    cases.append(("r28_flatten_command_alias",
+                  _fl28["command"] == _fl28["fix_command"] and _fl28["proposal_count"] == 1
+                  and _fl28["current"] == "cu"))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

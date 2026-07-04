@@ -2245,6 +2245,43 @@ def run() -> int:
                   [_x.get("drive_id") for _x in _g31["orphans"]] == ["raw3"]
                   and len(_g31["treaties"]) == 1 and len(_g31["party_docs"]) == 1))
 
+    # ═══ v1.33.20 (MERGE bundle-20 — nhánh song song CÙNG backlog S-10/nhóm-B trên v1.33.18; lấy KIẾN TRÚC
+    # hàm chung _header_verify_infer_cats + infer_cat_rule, SỬA 2 guard-bug của họ) — r32_* ═══
+    # (S-10 chiều MỚI, port bundle-20): omnibus thật NẰM NHẦM 34 → header-verify nay bắt được (infer ['46']
+    # + rule máy-đọc trong mismatch) — v1.33.19 ta chỉ chắn chiều giữ-đúng-chỗ, surface này im với misfile.
+    _e32mis = {"drive_id": "o57m", "name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau",
+               "so_hieu": "57/2024/QH15", "loai": "Luật", "cat": "34_Dau_tu", "corpus": "true"}
+    _vr32mis = _verify_header_match(_e32mis, _hdr31)
+    cases.append(("r32_header_catches_misfiled_omnibus",
+                  _header_verify_infer_cats(_e32mis) == (["46"], "omnibus-46")
+                  and _vr32mis["checks"].get("cat") is False
+                  and any("rule=omnibus-46" in m for m in _vr32mis["mismatches"])))
+    # (REJECT bundle-20, khoá lần 3 lớp r29 trên surface THỨ 3): luật sửa MỘT đích + goc+related (2 refs)
+    # nằm ĐÚNG 45 — bundle infer ['46'] rule omnibus-46 → cat:False oan (repro trên bundle). Ta: chiều
+    # PROPOSE chỉ text-pattern → infer KHÔNG phải ['46'].
+    _e32hiv = {"drive_id": "a71h", "name": "Luat_71-2020-QH14_SuaDoi_Phong_chong_HIV_AIDS",
+               "so_hieu": "71/2020/QH14", "loai": "Luật", "cat": "45_Y_te", "corpus": "true",
+               "goc": "64-2006-QH11", "related": "01-2021-VBHN-VPQH"}
+    cases.append(("r32_single_target_refs_not_forced_46_3rd_surface",
+                  _header_verify_infer_cats(_e32hiv)[0] != ["46"]))
+    # (SUPPRESS arm giữ evidence RỘNG): omnibus tên mờ ('SuaDoi_Mot_so_van_ban' — text-pattern im) nhưng
+    # registry có ≥2 refs, ĐANG Ở 46 → giữ (infer ['46'] = pass).
+    _e32sup = {"drive_id": "s99", "name": "Luat_99-2029-QH17_SuaDoi_Mot_so_van_ban",
+               "so_hieu": "99/2029/QH17", "loai": "Luật", "cat": "46_Sua_doi_nhieu_luat", "corpus": "true",
+               "goc": "11-2020-QH14;22-2021-QH15"}
+    cases.append(("r32_suppress_arm_refs_kept_in_46",
+                  _header_verify_infer_cats(_e32sup) == (["46"], "omnibus-46")))
+    # (treaty 2 chiều): trong 23 → not-applicable (rỗng); tên treaty nằm NHẦM 20 → đề xuất về 23.
+    _e32t20 = {"drive_id": "cu105", "name": "CU_ILO-105_Lao_dong_cuong_buc", "so_hieu": "",
+               "loai": "Công ước", "cat": "20_Lao_dong", "corpus": "true"}
+    cases.append(("r32_treaty_two_directions",
+                  _header_verify_infer_cats(_e31t) == ([], "cat-23-not-applicable")
+                  and _header_verify_infer_cats(_e32t20) == (["23"], "treaty-23")))
+    # (abbrev bổ sung bundle-20): bh/qppl/gdpt nở được (append-only).
+    _exp32 = _expand_abbrev("bh qppl gdpt")
+    cases.append(("r32_abbrev_bh_qppl_gdpt",
+                  "ban hanh" in _exp32 and "quy pham phap luat" in _exp32 and "giao duc pho thong" in _exp32))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

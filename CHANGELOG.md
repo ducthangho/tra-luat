@@ -1,3 +1,34 @@
+# ★ v1.33.20 — MERGE bundle-20 (`tra-luat-skill-v1.33.20-gws3env-fixed.zip`): nhánh song song CÙNG backlog S-10/nhóm-B trên v1.33.18 — lấy KIẾN TRÚC, sửa 2 guard-bug
+
+Bundle-20 dựng trên v1.33.18 (52 dòng), vá đúng backlog mà canonical v1.33.19 vừa xử — lần HỘI TỤ THỨ 3.
+Đối chiếu hành vi 2 chiều: phần lớn trùng quyết định ta (B.1/B.3/B.7 bản ta mạnh hơn hoặc tương đương — giữ ta);
+1 phần KIẾN TRÚC của họ tốt hơn → port có sửa.
+
+## PORT (3)
+- **S-10 v2 — hàm chung `_header_verify_infer_cats(entry) -> (cats, rule)`** (kiến trúc bundle-20): check-4 +
+  fix_suggest cùng MỘT nguồn suy luận cat, thêm `infer_cat_rule` máy-đọc + rule trong text mismatch. NÂNG so
+  v1.33.19: header-verify nay bắt CẢ chiều omnibus/điều-ước NẰM NHẦM folder (57-2024 đặt ở 34 → cat:False +
+  rule=omnibus-46; CU_ILO-105 đặt ở 20 → đề xuất về 23) — v1.33.19 chỉ chắn chiều giữ-đúng-chỗ.
+  SỬA 2 BUG bản họ (phản chứng chạy được, khoá r32):
+  (a) chiều PROPOSE vào-46 của họ dùng `_omnibus_name_evidence` (nhánh ≥2-refs) → 71-2020 SuaDoi_HIV
+      goc+related nằm ĐÚNG 45 bị cat:False rule=omnibus-46 (đúng lớp r29, tái xuất lần 3 trên surface thứ 3)
+      — ta: PROPOSE chỉ text-pattern, refs CHỈ dùng SUPPRESS (tên mờ + ≥2 refs + đang ở 46 → giữ);
+  (b) họ bỏ skip 00/23 tổng quát (chỉ chắn 23 khi tên khớp prefix treaty) → doc trong 23/00 tên khác vẫn bị
+      suy thô — ta giữ not-applicable cho cả 2 rổ (mirror cat-audit).
+- `_ABBREV_MAP` += gdpt/bh/qppl ('bh' đứng-một-mình = Ban hành theo quy ước tên corpus; expansion append-only).
+- `_is_treaty_entry` += unesco.
+
+## GIỮ TA (3 — bản họ yếu hơn)
+- B.1: họ chỉ vá flags trong nhánh review_other; ta fallback ở CHỖ BUILD ROW (phủ mọi bucket).
+- B.3: regex HL tự viết của họ ≈ `_HL_SUFFIX_RE` sẵn có ta tái dùng.
+- B.7: họ nuốt CÂM cat-00 (pass không đếm) + gộp MỌI cat-23 không-số-hiệu vào treaties (giấu file thô misfile);
+  ta: bucket `party_docs` đếm được + treaty theo tên/loai (file thô trong 23 vẫn ra orphan).
+
+Thực địa sau merge: 57-2024 LIVE ok 4/4 + infer rỗng; cat-audit giữ 2 cờ. selftest **558/558** (+5 r32:
+misfile-omnibus bắt được, r29-lock lần 3, suppress-arm refs, treaty 2 chiều, abbrev mới).
+
+---
+
 # ★ v1.33.19 — Xử S-10 (3 surface kiểm cat KHÔNG nhất quán) + nhóm B log rà v1.33.18 LIVE (B.1/B.2/B.3/B.5/B.7)
 
 2 log rà chạy LIVE v1.33.18 (fresh bootstrap): S-10 guard omnibus-46/điều-ước ĐÃ vá ở cat-audit + corpus-audit

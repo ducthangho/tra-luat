@@ -63,18 +63,24 @@ def _subject_tokens(st: dict) -> set:
     return {t for t in re.findall(r"[a-z0-9]{2,}", _subject_text(st)) if t not in _STOP and not t.isdigit()}
 
 
-def _relation_subject_compatible(current: dict, vbhn: dict) -> bool:
-    """Best-effort: chỉ redirect VBHN-first khi tên/chủ đề đủ giống. Thiếu tên 2 bên → True (no-op an toàn)."""
+def _relation_subject_verdict(current: dict, vbhn: dict) -> str:
+    """MERGE Codex v1.33.10→v1.33.11: chỉ redirect VBHN-first khi tên/chủ đề đủ giống. Trả ok|mismatch|unknown —
+    'unknown' (thiếu tên 2 bên) trước đây coi là True/no-op nên status TỰ TIN USE_VBHN dù KHÔNG có bằng chứng
+    chủ đề nào (ca 143-2025→61-2026 trong log): nay unknown KHÔNG được tự USE_VBHN."""
     a, b = _subject_tokens(current), _subject_tokens(vbhn)
     if not a or not b:
-        return True
+        return "unknown"
     compact_a = re.sub(r"[^a-z0-9]+", "", _subject_text(current))
     compact_b = re.sub(r"[^a-z0-9]+", "", _subject_text(vbhn))
     if len(compact_a) >= 4 and (compact_a in compact_b or compact_b in compact_a):
-        return True
+        return "ok"
     overlap = a & b
     needed = 1 if min(len(a), len(b)) == 1 else 2
-    return len(overlap) >= needed
+    return "ok" if len(overlap) >= needed else "mismatch"
+
+
+def _relation_subject_compatible(current: dict, vbhn: dict) -> bool:
+    return _relation_subject_verdict(current, vbhn) == "ok"
 
 
 def _redirect_vbhn(current: dict) -> tuple:
@@ -87,8 +93,11 @@ def _redirect_vbhn(current: dict) -> tuple:
     rejected = []
     for t in (current.get("superseded_by") or []):
         if is_vbhn_name(str(t.get("sohieu") or "")) and (t.get("on_nlm") or str(t.get("hieuluc") or "").strip()):
-            if not _relation_subject_compatible(current, t):
-                rejected.append(t)
+            _sv = _relation_subject_verdict(current, t)
+            if _sv != "ok":
+                tt = dict(t)
+                tt["_subject_reject"] = _sv     # MERGE Codex: phân biệt LỆCH chủ đề vs THIẾU bằng chứng
+                rejected.append(tt)
                 continue
             return t, rejected
     return None, rejected
@@ -125,9 +134,13 @@ def decide(current: dict, targets: list[dict] | None = None, is_amendment: bool 
                 "actions": ["Đối chiếu VBHN trước khi nạp bản sửa đổi rời."]}
     vb, rejected_vbhn = _redirect_vbhn(current)
     if rejected_vbhn:
-        # §1.1 (status): webapp gợi ý VBHN nhưng tên/chủ đề LỆCH bản gốc (goc nhiễm) → KHÔNG tự SKIP/USE_VBHN.
-        return {"decision": "REVIEW", "reason": "VBHN được gợi ý nhưng tên/chủ đề lệch văn bản gốc",
-                "surface": "VBHN_GOC_SUBJECT_MISMATCH",
+        # §1.1 (status): webapp gợi ý VBHN nhưng tên/chủ đề LỆCH hoặc THIẾU bằng chứng → KHÔNG tự SKIP/USE_VBHN.
+        # MERGE Codex v1.33.11: tách surface UNVERIFIED (thiếu dữ liệu corroborate) khỏi MISMATCH (lệch thật).
+        _unknown = all(str(t.get("_subject_reject") or "") == "unknown" for t in rejected_vbhn)
+        return {"decision": "REVIEW",
+                "reason": ("VBHN được gợi ý nhưng thiếu dữ liệu tên/chủ đề để corroborate với bản gốc"
+                           if _unknown else "VBHN được gợi ý nhưng tên/chủ đề lệch văn bản gốc"),
+                "surface": "VBHN_GOC_SUBJECT_UNVERIFIED" if _unknown else "VBHN_GOC_SUBJECT_MISMATCH",
                 "rejected_vbhn": [str(t.get("sohieu") or "") for t in rejected_vbhn],
                 "actions": ["KHÔNG dùng USE_VBHN tự động; chạy `tl source-map <số hiệu> --json` và kiểm goc/cat/tên "
                             "rút gọn trước khi rà (source-map đã có cổng goc-corroboration)."]}
@@ -195,7 +208,9 @@ def _alias_vocab(res: dict) -> dict:
     if res.get("hieuluc_unknown"):
         flags.append("IN_REGISTRY_HIEULUC_UNKNOWN")
     if res.get("rejected_vbhn"):
-        flags.append("VBHN_GOC_SUBJECT_MISMATCH")
+        _surf = str(res.get("surface") or "")
+        flags.append(_surf if _surf in ("VBHN_GOC_SUBJECT_MISMATCH", "VBHN_GOC_SUBJECT_UNVERIFIED")
+                     else "VBHN_GOC_SUBJECT_MISMATCH")
     out = dict(res)
     out.setdefault("verdict", res.get("decision"))
     out["flags"] = list(dict.fromkeys(f for f in flags if f))

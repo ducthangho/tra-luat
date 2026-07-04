@@ -109,12 +109,16 @@ def run() -> int:
         {"drive_id": "d1", "nlm_source_id": "S", "nlm_status": "pushed", "name": "Luat_a", "so_hieu": "1/2025/QH15", "corpus": "true"},
         {"drive_id": "d2", "nlm_source_id": "S", "nlm_status": "pushed", "name": "Luat_b", "so_hieu": "2/2025/QH15", "corpus": "true"},
         {"drive_id": "inf", "name": "tl_secrets.enc", "corpus": "true", "mimeType": "application/octet-stream"},
+        # MERGE Codex v1.33.11: nguồn thô .html đang trên NLM → plan phải có bước raw_on_nlm (human_confirm).
+        {"drive_id": "rawhtml", "name": "luat-dau-thau-so-22-2023-qh15-259737-d1.html", "mime": "text/html",
+         "corpus": "true", "nlm_source_id": "rawsrc", "nlm_status": "pushed"},
     ]
     _cfp = _corpus_fix_plan(_cfx)
     cases.append(("corpus_fix_plan_ordered_tiered",
                   [s["order"] for s in _cfp["steps"]] == sorted(s["order"] for s in _cfp["steps"])
                   and any(s["id"] == "shared_source_id" and s["tier"] == "human_confirm" for s in _cfp["steps"])
-                  and any(s["id"] == "infra_in_corpus" and s["tier"] == "safe_auto" and s["reversible"] for s in _cfp["steps"])))
+                  and any(s["id"] == "infra_in_corpus" and s["tier"] == "safe_auto" and s["reversible"] for s in _cfp["steps"])
+                  and any(s["id"] == "raw_on_nlm" and s["tier"] == "human_confirm" for s in _cfp["steps"])))
     _ssf = _shared_source_fix_plan([
         {"drive_id": "hi", "nlm_source_id": "S", "name": "Luat_x", "so_hieu": "1/2025/QH15", "nlm_status": "pushed"},
         {"drive_id": "lo", "nlm_source_id": "S", "name": "lo", "nlm_status": "pushed"},
@@ -969,10 +973,15 @@ def run() -> int:
         _pg = _imp("preingest_gate")
         _dmis = _pg.decide({"sohieu":"113-2025-QH15", "name":"Luat Dan so", "status":"CONSOLIDATED_INTO_VBHN",
                             "superseded_by":[{"sohieu":"18-2026-VBHN-VPQH", "name":"Bo luat Lao dong", "on_nlm":True}]})
+        # MERGE Codex v1.33.11 (ca 143-2025→61-2026 log): VBHN gợi ý KHÔNG có tên/chủ đề để corroborate →
+        # REVIEW VBHN_GOC_SUBJECT_UNVERIFIED (trước đây unknown = no-op → tự tin USE_VBHN không bằng chứng).
+        _dunk = _pg.decide({"sohieu":"143-2025-QH15", "name":"Luat Dau tu", "status":"CONSOLIDATED_INTO_VBHN",
+                            "superseded_by":[{"sohieu":"61-2026-VBHN-VPQH", "on_nlm":True}]})
         _dok = _pg.decide({"sohieu":"84-2015-QH13", "name":"Luat An toan ve sinh lao dong", "status":"CONSOLIDATED_INTO_VBHN",
                            "superseded_by":[{"sohieu":"14-2024-VBHN-VPQH", "name":"An toan ve sinh lao dong hop nhat", "on_nlm":True}]})
         cases.append(("status_vbhn_subject_mismatch_guard",
             _dmis["decision"] == "REVIEW" and _dmis.get("surface") == "VBHN_GOC_SUBJECT_MISMATCH"
+            and _dunk["decision"] == "REVIEW" and _dunk.get("surface") == "VBHN_GOC_SUBJECT_UNVERIFIED"
             and _dok["decision"] == "SKIP" and _dok.get("use_vbhn") == "14-2024-VBHN-VPQH"))
     except Exception:
         cases.append(("status_vbhn_subject_mismatch_guard", False))
@@ -1736,9 +1745,12 @@ def run() -> int:
     # (B1) status USE_VBHN tự khai corroboration: goc VBHN RỖNG → +VBHN_GOC_UNCORROBORATED (vbhn-check --goc
     # 0 candidate là TẤT YẾU, không phải 2 sự thật) + LUÔN +USE_VBHN_UNVERIFIED_LATEST (S9 chưa lượt-2);
     # goc CÓ dẫn chiếu bản gốc → hết UNCORROBORATED.
-    _cur23 = {"status": "CONSOLIDATED_INTO_VBHN", "sohieu": "143/2025/QH15"}
-    _vb23a = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": ""}
-    _vb23b = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": "143-2025-QH15; 90-2025-QH15"}
+    # (v1.33.11: fixture PHẢI có tên 2 bên khớp chủ đề — unknown-guard MERGE Codex nay chặn USE_VBHN khi
+    # thiếu bằng chứng; nhánh SKIP + cờ corroboration bên dưới là ca ĐÃ pass subject.)
+    _cur23 = {"status": "CONSOLIDATED_INTO_VBHN", "sohieu": "143/2025/QH15", "name": "Luat Dau tu"}
+    _vb23a = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": "", "name": "Luat Dau tu hop nhat"}
+    _vb23b = {"sohieu": "61-2026-VBHN-VPQH", "on_nlm": True, "goc": "143-2025-QH15; 90-2025-QH15",
+              "name": "Luat Dau tu hop nhat"}
     _st23a = _pg17._alias_vocab(_pg17.decide(dict(_cur23, superseded_by=[_vb23a]), [], False, False))
     _st23b = _pg17._alias_vocab(_pg17.decide(dict(_cur23, superseded_by=[_vb23b]), [], False, False))
     cases.append(("r23_status_use_vbhn_corroboration",

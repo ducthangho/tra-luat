@@ -1,3 +1,28 @@
+# ★ v1.33.11 — MERGE HỘI TỤ 2 nhánh v1.33.10 (canonical Claude ⊕ bundle Codex — cùng vá 1 bộ log, khác code)
+
+Bundle Codex rẽ từ canonical v1.33.9, tự vá cùng bộ log rồi cũng đặt tên v1.33.10. So diff đầy đủ (4 file):
+GIỮ canonical làm base (Codex THIẾU: E1 nlm-get alias, `_read_verify_text` gws-first — vbhn-verify của họ vẫn
+chết theo exporttext, cờ USE_VBHN corroboration, bộ test r23), PORT 5 phần UNIQUE của Codex:
+1. **`_journal_dir()` env-override** — `TL_JOURNAL_DIR` > `TL_CACHE_DIR/_journal` > `~/.tl_journal` (selftest/
+   sandbox/cache tách profile không mất dấu WAL) + docstring cmd_journal.
+2. **`doctor --deep` probe `webapp exporttext scope`** — gọi exporttext TRỰC TIẾP trên 1 GDoc nhẹ (cố ý KHÔNG
+   qua gws-first) → bắt đúng ca ping XANH nhưng fallback GAS chết vì thiếu script.external_request, kèm
+   remediation (manifest open-egress + RUN re-authorize + Deploy). Bổ trợ hoàn hảo cho GWS-FIRST v1.33.10.
+3. **preingest/status: `_relation_subject_verdict` ok|mismatch|unknown** — unknown (thiếu tên/chủ đề 2 bên,
+   trước là no-op True) KHÔNG được tự USE_VBHN nữa → REVIEW `VBHN_GOC_SUBJECT_UNVERIFIED` (tách khỏi
+   MISMATCH lệch thật). ĐÚNG ca 143-2025→61-2026 của log. KẾT HỢP với cờ corroboration của canonical: ca pass
+   subject vẫn tự khai USE_VBHN_UNVERIFIED_LATEST + VBHN_GOC_UNCORROBORATED — hai lớp phòng thủ bổ nhau.
+4. **`corpus-fix` bước `raw_on_nlm`** (order 8, human_confirm) — detector v1.33.4 nay có đường sửa trong
+   orchestrator: copy_convert → nlm-add GDoc → gỡ raw; các bước sau renumber 9-13.
+5. **xref error detail trỏ `tl doctor --deep`** (đồng bộ với probe #2).
+Tests: +raw_on_nlm trong corpus_fix_plan_ordered_tiered, +ca _dunk trong status_vbhn_subject_mismatch_guard
+(fixture r23 thêm TÊN 2 bên — unknown-guard mới chặn đường SKIP với fixture trơ cũ, đúng thiết kế).
+
+selftest **511/511** (tổng KHÔNG đổi — 2 phần Codex là MỞ RỘNG assertion trong case sẵn có: corpus_fix_plan
++raw_on_nlm, status_guard +_dunk; fixture r23 cập nhật theo unknown-guard).
+
+---
+
 # ★ v1.33.10 — xref/vbhn-verify/frontier GWS-FIRST (hết chết theo exporttext-scope) + status USE_VBHN tự khai corroboration
 
 ## A1 🔴 (log: `tl xref` chết 'thiếu scope script.external_request' TRONG KHI gws direct-media đang SỐNG)

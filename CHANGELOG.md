@@ -1,3 +1,40 @@
+# ★ v1.33.2 — Log rà 111 Luật (chạy v1.33.0): 6 defect A1..A6 — false-clean name-query, pin §0.13, evidence overclaim
+
+Tin tốt log xác nhận: errors:[] xuyên suốt — P0-1 double-fault + pagination không tái hiện trên v1.33.0.
+
+## A1 🔴 source-map query THEO TÊN false-clean (ca "Bộ luật Hình sự" OK/flags=[])
+- Gate NO_VERIFIED_VBHN_IN_CORPUS/QT5 cũ đòi `qkey and direct` → truy vấn theo TÊN câm hoàn toàn: BLHS trả OK,
+  chọn bản gốc 2015, không cờ nào — dù §0.1 lấy chính BLHS làm ví dụ VBHN lỗi thời (web có 135/VBHN-2025).
+- Vá: nhánh ELIF cho name-query — canonical là bản GỐC + pool không có VBHN nào + năm canonical ≤2021 (cùng
+  ngưỡng gate sohieu) → cùng cặp cờ REVIEW. Thêm A1b: VBHN_HIGH_AMENDMENT_VELOCITY (S10) nay bắn CẢ khi corpus
+  chưa có VBHN (trước chỉ nằm trong nhánh `related_vbhn` — đúng ca cần nhất lại im).
+
+## A2 🔴 + A3 — pin cat §0.13 + evidence hết overclaim
+- `_CAT_PIN_RULES` (§0.13 "KHÔNG đoán cat"): xuất/nhập cảnh = 01 (hết đề xuất VBHN_62 01→39); tố tụng = 37;
+  dân tộc = 10. Title khớp pin: cat ĐÚNG pin → im; cat KHÁC pin → đề xuất CHÍNH pin (doctrine thắng alias);
+  omnibus nhắc chủ đề pin trong tên → nhường rổ 46. AI/CĐS/CNCNS (QĐ 26/6) im lặng CẢ 2 CHIỀU.
+- A3: evidence bỏ "(đồng thuận cat-audit)" — cat-audit có guard/blacklist riêng nên có thể vẫn im với cùng
+  alias; nay ghi "(alias pháp điển cùng hướng; cat-audit có guard riêng, có thể vẫn im)".
+
+## A4 — NO_SUBJECT_TOKENS false-positive hệ thống (Thong_ke/Gia/Lao_dong/Thu_vien)
+- Gốc: `_subject_tokens` bỏ stop-token TRÙNG TỪ-LOẠI văn bản ('thong' ∈ thông-tư…) + từ <3 ký tự → tên CÓ chủ
+  đề đếm rỗng — dính cả 3 lệnh dùng chung `_name_structural_issues`. Fallback: tail còn từ-chữ ≥3 ký tự ngoài
+  từ-loại → CÓ chủ đề. Tên trơ thật (`_GD`, 71-2020 cụt) VẪN cờ đúng.
+
+## A5 + A6 — CLI nhất quán
+- `nlm-reconcile --json` hết crash unrecognized arguments (output vốn đã JSON — nhận cờ cho driver batch đồng nhất).
+- `corpus-audit --sohieu-file` + `--limit/--offset`: hết bỏ qua IM LẶNG — mặc định CẢ LÔ (đúng thiết kế
+  1-process + --resume), truyền --limit/--offset thì cắt LOUD kèm trang kế; --limit default nay None để phân
+  biệt explicit (fallback --all/--cat vẫn 40 như cũ).
+
+Phần B/C của log (20 UNVERIFIED_LATEST, 15 NO_VERIFIED cần QT-5, quarantine 107, dedup, backfill-loai, misfile
+143/46, slot drift −1, desync Luật Dược 76-2026, HTML đấu thầu, collision 73-82-ND-CP…) = NỢ DỮ LIỆU/vận hành —
+lệnh sẵn trong runbook v1.33.0; friction Cowork (mount cắt cụt/45s/glibc/sticky-tmp) là giới hạn env đã biết.
+
+selftest **486/486** (+6 r15: name-query gate, pin §0.13, evidence, subject-tokens, --json, sohieu-file×limit).
+
+---
+
 # ★ v1.33.1 — Vòng đời credential: 2 đường (bundle + public) cùng tươi bằng 1 lệnh; auth-stage ghi đè TẠI CHỖ
 
 Từ log Cowork (A1 GWS_CRED_EXPIRED tái diễn) + chốt của user: "cả đường bundle lẫn đường public đều chạy".

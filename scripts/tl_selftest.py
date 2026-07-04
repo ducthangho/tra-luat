@@ -1392,6 +1392,78 @@ def run() -> int:
                   and _n14.cred_file_id == "F2" and _n14.new is False
                   and _s14.no_public is True and _s14b.no_public is False))
 
+    # ═══ v1.33.2 (log rà 111 Luật — 6 defect A1..A6) — r15_* ═══
+    # (A1) source-map query THEO TÊN không còn false-clean: BLHS name-query phải REVIEW + đủ 3 cờ (gate cũ đòi
+    # qkey+direct nên câm); control: pool có VBHN canonical → gate im.
+    _blhs15 = {"id": "b15", "drive_id": "b15", "name": "Luat_100-2015-QH13_Bo_Luat_Hinh_su",
+               "so_hieu": "100/2015/QH13", "loai": "Bộ luật", "cat": "16", "corpus": "true", "nlm_source_id": "sb15"}
+    _smA15 = _source_map_one("Bộ luật Hình sự", [_blhs15])
+    _smB15 = _source_map_one("Luật Kế toán", [_v13])
+    cases.append(("r15_srcmap_name_query_vbhn_gate",
+                  any(w.startswith("NO_VERIFIED_VBHN_IN_CORPUS") for w in _smA15["warnings"])
+                  and any(w.startswith("QT5_WEB_REQUIRED") for w in _smA15["warnings"])
+                  and any(w.startswith("VBHN_HIGH_AMENDMENT_VELOCITY") for w in _smA15["warnings"])
+                  and _smA15["verdict"] == "REVIEW"
+                  and not any(w.startswith("NO_VERIFIED_VBHN_IN_CORPUS") for w in _smB15["warnings"])))
+    # (A2) pin §0.13: XNC đang 01 → IM (hết đề xuất 01→39); XNC ở cat SAI → đề xuất CHÍNH pin 01;
+    # AI/CĐS (QĐ 26/6) im lặng CẢ 2 chiều kể cả khi nằm cat lạ.
+    _xnc15 = {"drive_id": "d62", "name": "VBHN_62-2025-VBHN-VPQH_2025_Nhap_canh_xuat_canh_qua_canh_cu_tru_NNN",
+              "so_hieu": "62-2025-VBHN-VPQH", "loai": "VBHN", "cat": "01", "corpus": "true"}
+    _hx15 = "VĂN BẢN HỢP NHẤT\n\nLUẬT\nNHẬP CẢNH, XUẤT CẢNH, QUÁ CẢNH, CƯ TRÚ CỦA NGƯỜI NƯỚC NGOÀI TẠI VIỆT NAM"
+    _p15a = _cat_likely_wrong_suggest(_xnc15, _hx15)
+    _p15b = _cat_likely_wrong_suggest(dict(_xnc15, cat="39"), _hx15)
+    _p15c = _cat_likely_wrong_suggest({"drive_id": "d134b", "name": "Luat_134-2025-QH15_Tri_tue_nhan_tao",
+                                       "so_hieu": "134/2025/QH15", "loai": "Luật", "cat": "45", "corpus": "true"}, "")
+    cases.append(("r15_cat_pin_rules_s013",
+                  _p15a is None and _p15b is not None and _p15b["suggested"] == "01"
+                  and "§0.13" in str(_p15b.get("evidence")) and _p15c is None))
+    # (A3) evidence không còn khẳng định 'đồng thuận cat-audit' (cat-audit có guard riêng, có thể vẫn im).
+    _p15d = _cat_likely_wrong_suggest({"drive_id": "d143b", "name": "Luat_143-2025-QH15_Dau_tu",
+                                       "so_hieu": "143/2025/QH15", "loai": "Luật", "cat": "45",
+                                       "corpus": "true"}, "LUẬT\nĐẦU TƯ\n\nĐiều 1.")
+    cases.append(("r15_cat_evidence_no_overclaim",
+                  _p15d is not None and "đồng thuận cat-audit" not in str(_p15d.get("evidence"))
+                  and "alias" in str(_p15d.get("evidence"))))
+    # (A4) NO_SUBJECT_TOKENS hết oan: 'Thong_ke' ('thong' đụng stop-token thông-tư) = CÓ chủ đề; tên trơ thật vẫn cờ.
+    cases.append(("r15_no_subject_tokens_fallback",
+                  _name_structural_issues("Luat_89-2015-QH13_Luat_Thong_ke") == []
+                  and "NO_SUBJECT_TOKENS" in _name_structural_issues("Luat_123-2025-QH15_GD")
+                  and "NO_SUBJECT_TOKENS" in _name_structural_issues("Luat_71-2020-QH14")))
+    # (A5+A6) parser: nlm-reconcile nhận --json; corpus-audit --limit default None (phân biệt explicit).
+    _ns15 = build_parser().parse_args(["nlm-reconcile", "nb1", "--json"])
+    _ca15 = build_parser().parse_args(["corpus-audit", "--all"])
+    cases.append(("r15_reconcile_json_and_limit_default", _ns15.json is True and _ca15.limit is None))
+    # (A6) --sohieu-file: mặc định CẢ LÔ (dedup, bỏ comment); --limit cắt LOUD + pool_total giữ tổng thật.
+    import tempfile as _tf15, os as _os15
+    _tlm15 = _TL_MODULE
+    _fx15 = {"111-2025-QH15": {"id": "t1", "drive_id": "t1", "name": "Luat_111-2025-QH15_A", "so_hieu": "111/2025/QH15"},
+             "112-2025-QH15": {"id": "t2", "drive_id": "t2", "name": "Luat_112-2025-QH15_B", "so_hieu": "112/2025/QH15"},
+             "113-2025-QH15": {"id": "t3", "drive_id": "t3", "name": "Luat_113-2025-QH15_C", "so_hieu": "113/2025/QH15"}}
+    _orig15 = _tlm15._canonical_for_query
+    def _fk15(qq, refresh=False):
+        e = _fx15.get(norm_sohieu(qq))
+        return (e, [e] if e else [])
+    _tlm15._canonical_for_query = _fk15
+    try:
+        _fd15, _fp15 = _tf15.mkstemp(suffix=".txt"); _os15.close(_fd15)
+        with open(_fp15, "w", encoding="utf-8") as _f15:
+            _f15.write("111/2025/QH15\n# comment\n112/2025/QH15\n113/2025/QH15\n111/2025/QH15\n")
+        _nsA15 = build_parser().parse_args(["corpus-audit", "--sohieu-file", _fp15])
+        _nsB15 = build_parser().parse_args(["corpus-audit", "--sohieu-file", _fp15, "--limit", "2"])
+        with _hush():   # CẮT BATCH loud là chủ đích — nuốt khỏi console deploy
+            _tA15 = _resolve_headerverify_targets(_nsA15, [])
+            _tB15 = _resolve_headerverify_targets(_nsB15, [])
+        _ok15 = (len(_tA15) == 3 and len(_tB15) == 2
+                 and getattr(_nsB15, "_targets_pool_total", 0) == 3
+                 and [_e["drive_id"] for _e in _tB15] == ["t1", "t2"])
+    finally:
+        _tlm15._canonical_for_query = _orig15
+        try:
+            _os15.remove(_fp15)
+        except OSError:
+            pass
+    cases.append(("r15_sohieu_file_respects_limit", _ok15))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

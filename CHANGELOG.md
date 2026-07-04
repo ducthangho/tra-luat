@@ -1,3 +1,21 @@
+# ★ v1.33.5 — Khoá regression ca 19-2012 (OK+COVERED) + kế toán VBHN-đội-lốt-Luật + doc status vocab
+
+Log rà 69 (phiên chạy MOUNT v1.33.3) báo lại đúng bộ A1/A2/B1/C1/C2 — TẤT CẢ đã vá ở v1.33.4 bên dưới
+(khớp từng chi tiết: _RQ_REL_SUPPRESS, bucket loại trừ + counts, _alias_vocab, nlm_drift_basis, raw_on_nlm).
+Đợt này chỉ bổ sung phần log lộ thêm:
+- **r18a khoá ĐÚNG HÌNH DẠNG 19-2012**: amendment LINKED (goc) + VBHN phủ theo năm → OK + COVERED_BY_VBHN_DATE
+  → KHÔNG vào relation_backfill (r17 mới khoá ca CONFIRMED); vẫn ở web_round2 vì UNVERIFIED_LATEST là việc thật.
+- **Kế toán 69-vs-68 minh bạch**: phiên rà mất thời gian truy "1 Luật rớt câm" — thực ra là VBHN đội lốt
+  loai='Luật' (ca 115-VBHN, data bẩn) lọt bộ lọc Luật của người vận hành. review-queue nay đếm TƯỜNG MINH
+  `skipped_vbhn_as_base` (JSON + headline "VBHN-rà-theo-gốc: n") — mọi con số cộng khớp máy được.
+- **SKILL §4**: dòng `tl status` ghi rõ vocab RIÊNG decision ADD/SKIP/REVIEW + alias verdict/flags từ v1.33.4
+  (ADD/SKIP ≠ OK của source-map) — hết nguồn hiểu lầm "đã hợp nhất vocab" mà log B1 chỉ ra.
+
+selftest **496/496** (+2 r18). Nợ DATA giữ nguyên thứ tự v1.33.4 (backfill-title-vn → hieuluc → nlm-reconcile
+--clear-stale → ca .html 22-2023 → dedup/loai/rename).
+
+---
+
 # ★ v1.33.4 — Log chạy LIVE review-queue lần đầu: vá A1/A2 (backfill khống, đếm lệch) + status verdict-alias + 2 điểm mù sweep
 
 ## A1 — relation_backfill hết VIỆC KHỐNG (~40% hàng đợi là giả)

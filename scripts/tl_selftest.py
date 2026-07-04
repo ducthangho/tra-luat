@@ -1541,6 +1541,33 @@ def run() -> int:
     cases.append(("r17_raw_on_nlm_detector",
                   [e["drive_id"] for e in _c17] == ["h1"]))
 
+    # ═══ v1.33.5 (log rà 69 v1.33.3-mount — khoá nốt regression + kế toán minh bạch) — r18_* ═══
+    # (r18a) ĐÚNG HÌNH DẠNG ca 19-2012: amendment LINKED (goc) + VBHN 2026 phủ theo năm → verdict OK +
+    # AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE → KHÔNG vào relation_backfill (v1.33.3 cũ xếp backfill khống);
+    # vẫn nằm web_round2 (UNVERIFIED_LATEST — việc verify bản mới nhất là THẬT).
+    _r18_base = {"id": "b19", "drive_id": "b19", "name": "Luat_19-2012-QH13_Xuat_ban", "so_hieu": "19/2012/QH13",
+                 "loai": "Luật", "cat": "32", "corpus": "true", "nlm_source_id": "sb19"}
+    _r18_vbhn = {"id": "v26x", "drive_id": "v26x", "name": "VBHN_25-2026-VBHN-VPQH_2026_Luat_Xuat_ban_HopNhat",
+                 "so_hieu": "25-2026-VBHN-VPQH", "loai": "VBHN", "goc": "19-2012-QH13", "cat": "32",
+                 "corpus": "true", "nlm_source_id": "sv26"}
+    _r18_amend = {"id": "a25x", "drive_id": "a25x", "name": "Luat_35-2025-QH15_SuaDoi_Xuat_ban",
+                  "so_hieu": "35/2025/QH15", "cat": "32", "goc": "19-2012-QH13"}
+    _sm18 = _source_map_one("19/2012/QH13", [_r18_base, _r18_vbhn, _r18_amend])
+    _rq18 = _review_queue_report([_r18_base, _r18_vbhn, _r18_amend], limit=None)
+    cases.append(("r18_covered_shape_no_fake_rel",
+                  any(w.startswith("AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE") for w in _sm18["warnings"])
+                  and _sm18["verdict"] == "OK"
+                  and _rq18["relation_backfill"] == [] and _rq18["laws_scanned"] == 1
+                  and _rq18["counts"]["web_round2"] == 1
+                  and "AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE" in _rq18["web_round2"][0]["flags"]
+                  and sum(_rq18["counts"].values()) == 1))
+    # (r18b) VBHN đội lốt loai='Luật' (ca 115-VBHN — data bẩn lọt bộ lọc Luật của người vận hành) →
+    # đếm TƯỜNG MINH skipped_vbhn_as_base, không thành mục hàng đợi, kế toán 69-vs-68 khớp máy.
+    _rq18b = _review_queue_report([dict(_v13, loai="Luật")], limit=None)
+    cases.append(("r18_vbhn_as_base_accounting",
+                  _rq18b["laws_scanned"] == 0 and _rq18b["skipped_vbhn_as_base"] == 1
+                  and sum(_rq18b["counts"].values()) == 0))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

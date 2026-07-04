@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.4)
+# tra-luat — LÕI VẬN HÀNH (v1.33.5)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -273,7 +273,7 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 | `tl undo <run_id> [--apply --confirm yes]` | **(v1.28.3 Pha 2)** HOÀN TÁC ghi registry của 1 run — khôi phục `before` các dòng đã commit-ok reversible (đúng loại reg_upsert/reg_bulk gốc). ⚠ CHỈ registry — xóa NLM/Drive/reg_clear KHÔNG undo được. DRY mặc định |
 | `tl quarantine-fix [--apply]` | **COMPOSITE**: dọn quarantine mâu thuẫn — set corpus=false (raw-dup) + chuẩn nhãn (auto); review_restore (GDoc kẹt) + ghost_nlm chỉ BÁO |
 | `tl vbhn-compare --official-text ... --candidate-text ... --focus "Điều 53"` | so bản chính thức với bản tạm/tự ghép, soi footnote và stale-ref ở điều trọng tâm |
-| `tl status <sh> [--amendment\|--vbhn] [--targets a,b]` | CỔNG TIỀN-NẠP QT-2 |
+| `tl status <sh> [--amendment\|--vbhn] [--targets a,b]` | CỔNG TIỀN-NẠP QT-2 — vocab RIÊNG `decision` ADD/SKIP/REVIEW (+reason/surface); từ v1.33.4 JSON có alias `verdict`/`flags` cho driver batch, nhưng ADD/SKIP ≠ OK của source-map |
 | `tl extract <số hiệu\|gdocId> --dieu N` | export ra đĩa + in đúng Điều (token-saving); vị trí nhận cả số hiệu (tự resolve) |
 | `tl ingest <fileId> [--apply]` | QT-2 → copy_convert + organize (mặc định DRY) |
 | `tl register --drive-id … \| --bulk f.json` | reg_upsert / reg_bulk (khóa `sohieu`, KHÔNG `so_hieu`) |

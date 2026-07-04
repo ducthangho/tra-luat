@@ -1,0 +1,15 @@
+#!/bin/sh
+# tra-luat pre-commit guard (dev-side): chan commit secrets/binary lon.
+# Kich hoat: git config core.hooksPath .githooks
+# Escape co y (CHI khi chac chan): git commit --no-verify
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+bad=$(printf '%s\n' "$staged" | grep -Ei '(\.enc$|\.env$|cookie|tl_secrets|client_secret|credentials.*\.json$|\.zip$|\.dl$)')
+if [ -n "$bad" ]; then
+  echo "" >&2
+  echo "=== pre-commit CHAN: file nghi SECRET/binary dang duoc stage ===" >&2
+  printf '%s\n' "$bad" >&2
+  echo "Go stage: git restore --staged <file>. Neu CHAC CHAN co y: git commit --no-verify." >&2
+  exit 1
+fi
+exit 0

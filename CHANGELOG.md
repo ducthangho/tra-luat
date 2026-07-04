@@ -1,3 +1,17 @@
+# dev-tooling 2026-07-04 (KHÔNG bump version — không đổi runtime, KHÔNG vào zip deploy)
+
+Bộ phòng vệ phía DEV cho phiên Claude Code trên máy này (Cowork LIVE không dùng các file này — phòng vệ LIVE
+vẫn là _apply_gate/DRY-default/journal trong tl.py): `CLAUDE.md` điều phối ngắn (kiến trúc ghi/đọc + 5 bài học
+đắt giá + quy trình sửa code); `.claude/settings.json` permission allow(read/test)/ask(commit/push/clasp)/
+deny(secrets, rm -rf) + hook PreToolUse `pretooluse_guard.py` — lệnh chạm `--apply|--clear-stale|source-delete|
+reg-delete|drive_trash|rm -rf|clasp push|gas-deploy|--force-insert` → HỎI user (ask, không deny cứng — runbook
+vẫn có ngày chạy --apply có duyệt); `.githooks/pre-commit` (core.hooksPath) chặn stage secrets/binary
+(.enc/.env/cookie/tl_secrets/client_secret/credentials/zip/dl — test hành vi: fake .enc bị chặn rc=1, stage
+sạch rc=0); agent `tl-auditor` READ-ONLY (tiêu hoá log audit dài, cấm mutate — bài học rogue-edit);
+upload-skill-to-Package.ps1 stage nay tự loại `.claude/`, `.githooks/`, `CLAUDE.md` khỏi zip.
+
+---
+
 # ★ v1.33.17 — MERGE nhánh-5 (`tra-luat-skill-v1.33.17-gws3env-patch-merged.zip`): nhánh HỘI TỤ trên chính canonical v1.33.15 — port 2, reject 2
 
 Nhánh-5 = canonical v1.33.15 CỦA TA làm nền + họ tự merge nhánh-4 SONG SONG (trùng phần lớn v1.33.16 ta: cùng

@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(ruff check:*)",
+      "Bash(python -m ruff check:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(python scripts/tl.py --selftest:*)",
+      "Bash(python scripts/tl.py counts:*)",
+      "Bash(python scripts/tl.py sweep:*)",
+      "Bash(python scripts/tl.py review-queue:*)",
+      "Bash(python scripts/tl.py reg-query:*)"
+    ],
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(clasp:*)"
+    ],
+    "deny": [
+      "Read(**/*.enc)",
+      "Read(**/tl_secrets*)",
+      "Read(**/.env)",
+      "Read(**/*cookie*)",
+      "Read(**/client_secret*)",
+      "Read(**/credentials*.json)",
+      "Edit(**/*.enc)",
+      "Edit(**/tl_secrets*)",
+      "Edit(**/.env)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/pretooluse_guard.py"
+          }
+        ]
+      }
+    ]
+  }
+}

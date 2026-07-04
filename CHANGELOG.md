@@ -1,3 +1,41 @@
+# ★ v1.33.1 — Vòng đời credential: 2 đường (bundle + public) cùng tươi bằng 1 lệnh; auth-stage ghi đè TẠI CHỖ
+
+Từ log Cowork (A1 GWS_CRED_EXPIRED tái diễn) + chốt của user: "cả đường bundle lẫn đường public đều chạy".
+Gốc rễ friction: `gws-auth-stage`/`nlm-auth-stage` cũ `upload()` TẠO FILE MỚI mỗi lần → fileId đổi → phải bake
+lại tl.py / truyền --cred-file-id mỗi phiên; trong khi bundle (`secrets-set`) đã ghi-đè-tại-chỗ từ lâu.
+
+## `_stage_enc_upload` (helper chung) + auth-stage GHI ĐÈ TẠI CHỖ mặc định
+- `gws-auth-stage`: mặc định `update_content(GWS_CRED_FILEID)` — fileId GIỮ NGUYÊN → phiên Chat/Cowork sau chỉ
+  `tl up`/`gws-auth-load` như cũ là nhận cred tươi, KHÔNG bake lại, KHÔNG đổi lệnh. `--cred-file-id` nhắm file
+  khác; `--new` giữ hành vi cũ (tạo file mới, in fileId để bake).
+- `nlm-auth-stage`: cùng khuôn với `NLM_CRED_FILEID`/env `TL_NLM_CRED_FILEID` (cookie rụng ~2-4 tuần — mỗi lần
+  re-stage không còn đổi fileId).
+
+## `secrets-set --gws/--nlm` đồng bộ luôn đường PUBLIC (1 lệnh = cả 2 đường tươi)
+- Sau khi ghi đè bundle, tự mã hoá lại field tương ứng bằng WEBAPP TOKEN và ghi đè tại chỗ
+  `gws_cred.enc`/`nlm_cred.enc` public. Lỗi public chỉ WARN (bundle đã xong, rc=0) + chỉ lệnh vá tay;
+  `--no-public` opt-out. Thiếu token → WARN rõ, không im lặng.
+- VÒNG ĐỜI TỪ NAY (mỗi lần token rụng, chạy trên máy Windows đã login):
+  `gws auth login` → `tl secrets-set --gws` — XONG: Cowork (bundle) lẫn Chat (public 1Wb…) đều tự nhận.
+  Cookie nlm rụng: `nlm login` → `tl secrets-set --nlm` (tương tự). KHÔNG trộn bundle & public trong CÙNG phiên
+  Chat (2 đường cùng ghi ~/.config/gws/credentials.json — cái sau thắng); fix vĩnh viễn chu kỳ 7 ngày: đưa OAuth
+  app sang Production (Cloud Console → OAuth consent screen → Publish).
+- Message remediation (GWS_CRED_EXPIRED + canary doctor) cập nhật theo.
+
+## Đối chiếu phần còn lại của log Cowork (không phải bug code mới)
+- A2 nlm-install 45s / A3 mount cắt cụt: friction cố hữu Cowork — đã có `--resume` (v1.30.1) + `tl_fetch.sh
+  --setup-step` (v1.32.2) + BƯỚC 0 curl zip sạch.
+- E2 corpus-audit timeout: dùng `--offset` phân trang hoặc `--sohieu-file <f> --resume` (v1.33.0) trong 1 process.
+- E1 lệch 509/521: định nghĩa client vs server-rule + snapshot (sweep in corpus_basis; `boot --refresh` +
+  `sweep --refresh` cùng phiên nếu cần khớp).
+- B1 (13 luật NO_VERIFIED_VBHN + QT-5), B2 (18 luật UNVERIFIED_LATEST lượt-2), B3 (109/2025 HIGH_VELOCITY),
+  C1/C2 (relation backfill 123-2025/68-2025), D1 (recat 46-2024→04, 143-2025→34), D2 (backfill-title-vn 3 tên
+  trơ), E3 (1 dòng sohieu rỗng) = NỢ DỮ LIỆU — lệnh sẵn trong runbook v1.33.0 mục 'Nợ DỮ LIỆU'.
+
+selftest **480/480** (+2 r14: stage-enc-inplace fake-bridge, parser flags).
+
+---
+
 # ★ v1.33.0 — Log rà 69 Luật (A-mục) + log rà 15 Luật v1.32.2: CAT-auditor over-fire 78% + name/reuse-risk/dup oan + circuit-breaker gws
 
 Hai log hội tụ về CÙNG các defect precision của auditor; bản này xử trọn nhóm CODE (A1/A2/A3 log-69; B1/B2/B3/B4/C4 log-15).

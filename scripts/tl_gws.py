@@ -74,7 +74,8 @@ def _access_token(cred):
             # script.external_request → extract/corpus-audit/header-verify không còn đường Drive nào.
             raise RuntimeError("GWS_CRED_EXPIRED: refresh_token trong ~/.config/gws/credentials.json HẾT HẠN/bị thu hồi "
                                "(invalid_grant) → chạy `gws auth login` trên máy user rồi `tl secrets-set --gws` "
-                               "(làm mới bundle cho Cowork). ⚠ Fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT "
+                               "(v1.33.1: 1 lệnh làm tươi CẢ bundle LẪN file public TẠI CHỖ — Chat/Cowork tự nhận, "
+                               "không bake lại; chỉ-public: `tl gws-auth-stage`). ⚠ Fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT "
                                "(exporttext) chết theo (webapp thiếu scope script.external_request) — tạm rà verbatim "
                                "qua `tl nlm-content <source_id> --dieu N` (corpus-audit/backfill-title-vn tự thử đường NLM).") from None
         raise RuntimeError(f"GWS_TOKEN_REFRESH_HTTP_{e.code}: {_body or e.reason}") from None
@@ -348,7 +349,8 @@ def cmd_gws_ping(a) -> int:
     info["cred_alive"] = _alive
     if not _alive:
         info["issues"].append(f"CRED CHẾT (canary token): {_amsg} → `gws auth login` rồi `tl secrets-set --gws` "
-                              "(Cowork nhận cred mới qua bundle). ⚠ đọc Drive (extract/corpus-audit) CHẾT tới khi refresh "
+                              "(1 lệnh làm tươi CẢ bundle + public tại chỗ; chỉ-public: `tl gws-auth-stage`). "
+                              "⚠ đọc Drive (extract/corpus-audit) CHẾT tới khi refresh "
                               "— tạm rà verbatim qua `tl nlm-content <source_id> --dieu N`.")
 
     info["ok"] = info["gws_found"] and info["version_match"] and info["authed"] and _alive
@@ -569,6 +571,34 @@ def cmd_secrets_set(a) -> int:
     new = store.encrypt(json.dumps(bundle, ensure_ascii=False).encode("utf-8"), master)
     _secrets_upload(new, getattr(a, "folder", None) or HOPNAP_FOLDER_ID, fid)
     print(f"[secrets-set] ✓ đã đổi {changed} → ghi đè bundle id={fid} ({len(new)}B).")
+    # v1.33.1 (user chốt: CẢ đường bundle LẪN đường public đều phải chạy): 1 lệnh làm tươi CẢ HAI —
+    # sau khi bundle xong, đồng bộ luôn file public .enc tương ứng (khoá=webapp token, GHI ĐÈ TẠI CHỖ
+    # GWS_CRED_FILEID/NLM_CRED_FILEID → Chat đường public tự nhận). Lỗi public chỉ WARN (bundle ĐÃ tươi,
+    # rc vẫn 0); --no-public để bỏ qua chủ đích.
+    if not getattr(a, "no_public", False):
+        _tok = os.environ.get("TL_TOKEN") or str(bundle.get("token") or "")
+        _folder = getattr(a, "folder", None) or HOPNAP_FOLDER_ID
+        _pub = []
+        if ("gws_cred" in changed or "nlm_auth" in changed) and not _tok:
+            print("[secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); "
+                  "chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.", file=sys.stderr)
+        else:
+            try:
+                if "gws_cred" in changed:
+                    _stage_enc_upload("gws_cred.enc",
+                                      store.encrypt(str(bundle["gws_cred"]).encode("utf-8"), _tok),
+                                      _folder, GWS_CRED_FILEID, False)
+                    _pub.append(f"gws_cred.enc→{GWS_CRED_FILEID}")
+                if "nlm_auth" in changed:
+                    _stage_enc_upload("nlm_cred.enc",
+                                      store.encrypt(json.dumps(bundle["nlm_auth"], ensure_ascii=False).encode("utf-8"), _tok),
+                                      _folder, os.environ.get("TL_NLM_CRED_FILEID") or NLM_CRED_FILEID, False)
+                    _pub.append(f"nlm_cred.enc→{os.environ.get('TL_NLM_CRED_FILEID') or NLM_CRED_FILEID}")
+            except Exception as e:  # noqa: BLE001
+                print(f"[secrets-set] ⚠ đồng bộ public .enc lỗi ({e}) — bundle ĐÃ tươi; vá đường public bằng "
+                      "`tl gws-auth-stage` / `tl nlm-auth-stage`.", file=sys.stderr)
+        if _pub:
+            print(f"[secrets-set] ✓ đồng bộ PUBLIC tại chỗ: {', '.join(_pub)} — Chat/Cowork đường public cũng tươi.")
     return 0
 
 
@@ -999,10 +1029,29 @@ class _NS:
         self.__dict__.update(kw)
 
 
+def _stage_enc_upload(name: str, blob: bytes, folder: str, fid_inplace: str | None, force_new: bool, g=None):
+    """v1.33.1 (log Cowork A1 — vòng đời cred tái diễn): ghi blob .enc lên Drive. MẶC ĐỊNH GHI ĐÈ TẠI CHỖ
+    `fid_inplace` (update_content — fileId GIỮ NGUYÊN → đường PUBLIC của Chat/Cowork tự tươi, KHÔNG phải bake
+    lại tl.py sau mỗi lần token rụng). force_new/thiếu fid → upload file MỚI (hành vi cũ, in fileId để bake).
+    Trả (fid, in_place). Dùng chung gws-auth-stage / nlm-auth-stage / secrets-set đồng-bộ-public."""
+    import tempfile as _tf
+    g = g or _imp("gws_bridge")
+    with _tf.TemporaryDirectory() as d:
+        fp = os.path.join(d, name)
+        with open(fp, "wb") as f:
+            f.write(blob)
+        if fid_inplace and not force_new:
+            g.update_content(fid_inplace, fp, mime="application/octet-stream")
+            return fid_inplace, True
+        r = g.upload(name, fp, parents=[folder], mime="application/octet-stream")
+        return (r.get("file") or {}).get("id"), False
+
+
 def cmd_gws_auth_stage(a) -> int:
-    """[CHẠY Ở CODE] Xuất gws cred → MÃ HOÁ (khoá=webapp token) → upload Drive. In fileId để baked.
-    Cred KHÔNG plaintext, KHÔNG vào zip — chỉ bản mã hoá nằm trên Drive riêng của bạn."""
-    import subprocess as _sp, shutil as _sh, tempfile
+    """[CHẠY Ở CODE] Xuất gws cred → MÃ HOÁ (khoá=webapp token) → Drive. v1.33.1: mặc định GHI ĐÈ TẠI CHỖ
+    GWS_CRED_FILEID (fileId giữ nguyên — Chat/Cowork `up`/`gws-auth-load` tự nhận bản tươi, không bake lại);
+    `--new` tạo file mới (hành vi cũ). Cred KHÔNG plaintext, KHÔNG vào zip — chỉ bản mã hoá trên Drive."""
+    import subprocess as _sp
     store = _imp("gws_cred_store")
     token = os.environ.get("TL_TOKEN") or ""
     if not token:
@@ -1017,15 +1066,14 @@ def cmd_gws_auth_stage(a) -> int:
         print(f"[gws-auth-stage] ✗ export lỗi: {(p.stderr or '').strip()[:200]}", file=sys.stderr)
         return 3
     blob = store.encrypt((p.stdout or "").strip().encode("utf-8"), token)   # cred chỉ tồn tại trong RAM
-    folder = getattr(a, "folder", None) or HOPNAP_FOLDER_ID
-    g = _imp("gws_bridge")
-    with tempfile.TemporaryDirectory() as d:
-        fp = os.path.join(d, "gws_cred.enc")
-        with open(fp, "wb") as f:
-            f.write(blob)
-        r = g.upload("gws_cred.enc", fp, parents=[folder], mime="application/octet-stream")
-    fid = (r.get("file") or {}).get("id")
-    print(f"[gws-auth-stage] ✓ cred MÃ HOÁ ({len(blob)}B) → Drive id={fid}")
+    fid, in_place = _stage_enc_upload("gws_cred.enc", blob, getattr(a, "folder", None) or HOPNAP_FOLDER_ID,
+                                      getattr(a, "cred_file_id", None) or GWS_CRED_FILEID,
+                                      getattr(a, "new", False))
+    if in_place:
+        print(f"[gws-auth-stage] ✓ cred MÃ HOÁ ({len(blob)}B) → GHI ĐÈ TẠI CHỖ id={fid} (fileId GIỮ NGUYÊN — "
+              "Chat/Cowork `tl up`/`gws-auth-load` tự nhận bản tươi, KHÔNG bake lại).")
+        return 0
+    print(f"[gws-auth-stage] ✓ cred MÃ HOÁ ({len(blob)}B) → Drive id={fid} (file MỚI — --new)")
     print(f"  → baked: đặt GWS_CRED_FILEID = \"{fid}\" trong tl.py (hoặc dùng `gws-auth-load --cred-file-id {fid}`).")
     return 0
 
@@ -1131,17 +1179,19 @@ def cmd_nlm_auth_stage(a) -> int:
         print("[nlm-auth-stage] ✗ chưa có cookie nlm ở máy này — chạy `nlm login` trước.", file=sys.stderr)
         return 3
     blob = store.encrypt(json.dumps(nlm, ensure_ascii=False).encode("utf-8"), token)   # cookie chỉ ở RAM
-    folder = getattr(a, "folder", None) or HOPNAP_FOLDER_ID
-    g = _imp("gws_bridge")
-    with tempfile.TemporaryDirectory() as d:
-        fp = os.path.join(d, "nlm_cred.enc")
-        with open(fp, "wb") as f:
-            f.write(blob)
-        r = g.upload("nlm_cred.enc", fp, parents=[folder], mime="application/octet-stream")
-    fid = (r.get("file") or {}).get("id")
+    # v1.33.1: cùng khuôn gws-auth-stage — mặc định GHI ĐÈ TẠI CHỖ NLM_CRED_FILEID (cookie rụng ~2-4 tuần,
+    # mỗi lần re-stage không còn đổi fileId); --new tạo file mới.
+    fid, in_place = _stage_enc_upload("nlm_cred.enc", blob, getattr(a, "folder", None) or HOPNAP_FOLDER_ID,
+                                      getattr(a, "cred_file_id", None) or os.environ.get("TL_NLM_CRED_FILEID")
+                                      or NLM_CRED_FILEID,
+                                      getattr(a, "new", False))
     age = _nlm_auth_age_days(nlm)
     agestr = f", ~{age:.0f} ngày" if age is not None else ""
-    print(f"[nlm-auth-stage] ✓ nlm cookie MÃ HOÁ ({len(nlm)} file, {len(blob)}B{agestr}) → Drive id={fid}")
+    if in_place:
+        print(f"[nlm-auth-stage] ✓ nlm cookie MÃ HOÁ ({len(nlm)} file, {len(blob)}B{agestr}) → GHI ĐÈ TẠI CHỖ "
+              f"id={fid} (fileId GIỮ NGUYÊN — Cowork `nlm-auth-load` tự nhận bản tươi).")
+        return 0
+    print(f"[nlm-auth-stage] ✓ nlm cookie MÃ HOÁ ({len(nlm)} file, {len(blob)}B{agestr}) → Drive id={fid} (file MỚI — --new)")
     print(f"  → baked: đặt NLM_CRED_FILEID = \"{fid}\" trong tl.py (hoặc env TL_NLM_CRED_FILEID / `nlm-auth-load --cred-file-id {fid}`).")
     return 0
 

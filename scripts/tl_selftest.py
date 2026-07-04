@@ -1357,6 +1357,41 @@ def run() -> int:
     cases.append(("r13_corpus_audit_sohieu_file_flags",
                   _ns13.sohieu_file == "ds.txt" and _ns13.resume is True))
 
+    # ═══ v1.33.1 (log Cowork A1 — vòng đời cred: 2 đường bundle + public đều phải tự tươi) — r14_* ═══
+    # _stage_enc_upload: mặc định GHI ĐÈ TẠI CHỖ (update_content, fileId giữ nguyên — hết bake lại sau mỗi lần
+    # token rụng); --new/thiếu fid → upload MỚI (hành vi cũ). Fake bridge đếm đường đi + soi đúng byte blob.
+    import tl_gws as _tg14
+    class _FkBridge14:
+        def __init__(self):
+            self.upd = 0; self.up = 0; self.last = None
+        def update_content(self, fid, path, mime=None, **k):
+            with open(path, "rb") as f:
+                self.last = (fid, f.read())
+            self.upd += 1
+            return {"ok": True, "file": {"id": fid}}
+        def upload(self, name, path, parents=None, mime=None, **k):
+            self.up += 1
+            return {"ok": True, "file": {"id": "NEWID14"}}
+    _b14 = _FkBridge14()
+    _f14a, _ip14a = _tg14._stage_enc_upload("x.enc", b"BLOB14", "fold", "FID14", False, g=_b14)
+    _f14b, _ip14b = _tg14._stage_enc_upload("x.enc", b"BLOB14", "fold", "FID14", True, g=_b14)   # --new
+    _f14c, _ip14c = _tg14._stage_enc_upload("x.enc", b"BLOB14", "fold", None, False, g=_b14)     # thiếu fid
+    cases.append(("r14_stage_enc_inplace",
+                  _f14a == "FID14" and _ip14a is True and _b14.upd == 1 and _b14.last == ("FID14", b"BLOB14")
+                  and _f14b == "NEWID14" and _ip14b is False
+                  and _f14c == "NEWID14" and _ip14c is False and _b14.up == 2))
+    # Parser: gws-auth-stage/nlm-auth-stage nhận --cred-file-id/--new; secrets-set nhận --no-public
+    # (mặc định no_public=False = CÓ đồng bộ public — đúng chốt 'cả 2 đường đều chạy').
+    _ap14 = build_parser()
+    _g14 = _ap14.parse_args(["gws-auth-stage", "--cred-file-id", "F1", "--new"])
+    _n14 = _ap14.parse_args(["nlm-auth-stage", "--cred-file-id", "F2"])
+    _s14 = _ap14.parse_args(["secrets-set", "--gws", "--no-public"])
+    _s14b = _ap14.parse_args(["secrets-set", "--gws"])
+    cases.append(("r14_auth_stage_parser_flags",
+                  _g14.cred_file_id == "F1" and _g14.new is True
+                  and _n14.cred_file_id == "F2" and _n14.new is False
+                  and _s14.no_public is True and _s14b.no_public is False))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

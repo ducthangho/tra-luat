@@ -1,3 +1,19 @@
+# ★ v1.33.8 — Kiểm chứng thực địa bộ vá v1.33.7 + `corpus-audit --workers` (đọc header song song)
+
+Log gửi lại = CÙNG bộ A1..A6/§A-I đã vá ở v1.33.7. Đợt này:
+- **KIỂM CHỨNG trên dữ liệu THẬT (manifest cache):** ca 22-2023.html → NAME_NONSTANDARD (offline, rc=0, vào
+  need_manual_read); BLHS 100/2015 → LOAI_MISMATCH suggested 'Bộ luật'; review-queue schema=review_queue.v1 +
+  counts cộng khớp laws_scanned. Cả 3 fix hoạt động đúng trên chính các ca log nêu.
+- **`--workers N` (A1 phần còn thiếu 'cần chế độ đọc song song'):** PREFETCH text theo CHÙM bằng thread-pool
+  (I/O-bound — direct-media/GAS/NLM đều là network round-trip), rồi XỬ TUẦN TỰ — logic fast-fail/checkpoint/
+  heartbeat giữ nguyên thứ tự; mỗi doc đọc ĐÚNG 1 lần; circuit-breaker auth-dead dùng chung cờ process nên
+  worker sau tự skip khi cred chết. Mặc định 1 = tuần tự như cũ; gợi ý 4-6. Kết hợp chuẩn cho pool lớn:
+  `corpus-audit --all --resume --limit 40 --workers 4` (mỗi trang ~10-15s, lặp tới rc=0).
+
+selftest **505/505** (+1 r21: parallel-prefetch — 2 doc/2 luồng, đọc đúng 2 lần, scanned_clean=2).
+
+---
+
 # ★ v1.33.7 — Log rà v1.33.6: corpus-audit hết cắt-âm-thầm/mù-tên-raw/mù-Bộ-luật + JSON phân biệt sạch-vs-chưa-quét
 
 ## A1 — `corpus-audit --all --resume`: cày TRỌN pool theo TRANG (idiom nlm-install)

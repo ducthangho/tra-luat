@@ -1655,6 +1655,39 @@ def run() -> int:
     # (schema marker) driver kiểm trước khi tin payload review-queue.
     cases.append(("r20_review_queue_schema_marker", _rq18b.get("schema") == "review_queue.v1"))
 
+    # ═══ v1.33.8 (log rà v1.33.6 gửi lại — mục còn thiếu duy nhất: 'cần chế độ đọc header song song') — r21_* ═══
+    # --workers N: PREFETCH text song song theo chùm rồi xử TUẦN TỰ — mỗi doc chỉ đọc ĐÚNG 1 lần (không re-read
+    # ở vòng tuần tự), kết quả/scanned_ids như tuần tự; mặc định 1 = hành vi cũ.
+    _calls21 = {"n": 0}
+    def _fk21_read(did, cfg=None):
+        _calls21["n"] += 1
+        if did == "g1":
+            return "QUỐC HỘI\n\nLUẬT\nTHƯ VIỆN\n\nLuật số: 46/2019/QH14\nĐiều 1. Phạm vi"
+        return "QUỐC HỘI\n\nLUẬT\nBÁO CHÍ\n\nLuật số: 126/2025/QH15\nĐiều 1. Phạm vi"
+    _fix21 = [
+        {"id": "g1", "drive_id": "g1", "name": "Luat_46-2019-QH14_Thu_vien", "so_hieu": "46/2019/QH14",
+         "loai": "Luật", "cat": "32_Thong_tin_bao_chi_xuat_ban", "corpus": "true",
+         "mime": "application/vnd.google-apps.document"},
+        {"id": "g2", "drive_id": "g2", "name": "Luat_126-2025-QH15_Bao_chi", "so_hieu": "126/2025/QH15",
+         "loai": "Luật", "cat": "32_Thong_tin_bao_chi_xuat_ban", "corpus": "true",
+         "mime": "application/vnd.google-apps.document"},
+    ]
+    _orig_me21, _orig_rd21 = _tlm20._manifest_entries, _tlm20._read_doc_text
+    _tlm20._manifest_entries = lambda refresh=False: _fix21
+    _tlm20._read_doc_text = _fk21_read
+    try:
+        _ns21 = build_parser().parse_args(["corpus-audit", "--all", "--json", "--workers", "2"])
+        _buf21 = _io20.StringIO()
+        with _ctx20.redirect_stdout(_buf21), _ctx20.redirect_stderr(_io20.StringIO()):
+            _rc21 = cmd_corpus_audit(_ns21)
+        _o21 = json.loads(_buf21.getvalue())
+    finally:
+        _tlm20._manifest_entries = _orig_me21
+        _tlm20._read_doc_text = _orig_rd21
+    cases.append(("r21_corpus_audit_parallel_prefetch",
+                  _rc21 == 0 and sorted(_o21["scanned_ids"]) == ["g1", "g2"]
+                  and _calls21["n"] == 2 and _o21["scanned_clean"] == 2))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

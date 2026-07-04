@@ -2397,6 +2397,13 @@ def run() -> int:
     cases.append(("r36_parser_cowork_plan_counts_live",
                   _ns36.live_nlm is True and _ns36.notebook_id == "nb1" and _ns36b.json is True))
 
+    # ═══ v1.33.25 (log rà 67 LIVE v1.33.24 — A5: schema lệch giữa 2 surface: source-map --json trả
+    # flags_all=None + qt5_queries rỗng trong khi review-queue đầy đủ → driver batch đọc đồng nhất gãy) — r37_* ═══
+    _sm37 = _source_map_one("71/2020/QH14", [_r30_base, _r30_amend, _r30_vbhn])
+    cases.append(("r37_source_map_item_flags_all_alias",
+                  _sm37.get("flags_all") == _sm37.get("flags") and _sm37.get("flags_all") is not None
+                  and isinstance(_sm37.get("qt5_queries"), list)))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

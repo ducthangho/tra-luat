@@ -1,3 +1,23 @@
+# ★ v1.33.25 — A5 log rà 67 LIVE v1.33.24: schema source-map ↔ review-queue lệch (flags_all/qt5_queries)
+
+Log rà 67 Luật vòng mới CHẠY LIVE v1.33.24 (bản deploy đầy đủ chuỗi 21..24 — log tự xác nhận advisory=11,
+claim=542+slot_rule, doctor path-note hoạt động). Duy nhất 1 bug code mới:
+
+## FIX
+- **A5**: `tl source-map <sh> --json` trả `flags_all=None` + `qt5_queries` RỖNG ở top-level trong khi
+  review-queue cùng văn bản có đủ — driver batch đọc `.flags_all` đồng nhất giữa 2 surface phải fallback
+  (đúng lớp schema-drift B.1 đã vá cho review_other). Fix 2 tầng: item `_source_map_one` +alias
+  `flags_all` (= flags — vốn là TOÀN BỘ warning-codes, cùng ngữ nghĩa flags_all của review-queue rows);
+  top-level cmd_source_map +`flags_all` aggregate + `qt5_queries` gộp-dedup từ items. Verify thực địa
+  71/2020: top flags_all=['AMENDS_OTHER_VBHN'], qt5_queries=8.
+
+Còn lại của log: A1/A2/A4 = workaround đã ship hoạt động (log tự xác nhận); A3 (bash 30s heredoc) = trần
+sandbox — khuyến nghị sẵn có (--json ra file rồi phân tích tách bước); B/C/D/E = data-ops/ràng-buộc đã nằm
+trong runbook (pin registryDocId, nlm-reconcile --apply 1 mục, web lượt-2 24 Luật, dedup/160-tên/loai,
+kế hoạch overflow slot 298/300). selftest **569/569** (+1 r37).
+
+---
+
 # ★ v1.33.24 — MERGE bundle-23 (`tra-luat-skill-v1.33.23-gws3env-fixed.zip`): nhánh hội tụ trên v1.33.22, xử CÙNG log Cowork bằng các món BỔ TRỢ — port TRỌN, 0 reject (bundle sạch nhất chuỗi merge)
 
 Bundle-23 dựng trên canonical v1.33.22, xử cùng log rà Cowork với v1.33.23 ta nhưng chọn các món KHÁC —

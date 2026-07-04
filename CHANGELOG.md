@@ -1,3 +1,31 @@
+# ★ v1.33.22 — MERGE bundle-21 (`tra-luat-skill-v1.33.21-gws3env-fixed.zip`): nhánh hội tụ trên v1.33.20, BỔ TRỢ v1.33.21 — port 2 có sửa primitive, giữ lane name-only của ta
+
+Bundle-21 dựng trên canonical v1.33.20 (91 dòng), xử CÙNG nhóm dư B.5-residual/B3-B9 nhưng bằng cách KHÁC và
+BỔ TRỢ bản ta: ta làm FIXER dữ liệu (lane name-only ×11), họ làm PHÂN LOẠI counter + fixer stale-ref. Không
+trùng — merge cả hai. Họ KHÔNG có lane name-only của ta.
+
+## PORT (2)
+- **B.5-residual (advisory split)**: headline `sweep.title_mismatch`/`hygiene.title_mismatch_candidates` CHỈ
+  còn lệch hành-động-được (OMNIBUS_NARROW_TITLE_CHECK/TITLE_METADATA_MISMATCH); cờ VBHN metadata → bucket
+  `vbhn_metadata_advisory` (+_rows) — việc của vbhn-year-fix, không phồng hàng source-rename/recat; drift NLM
+  (STATUS_MISMATCH/NOTEBOOK_ID/CORPUS_TRUE_NOT_ON_NLM) hết đếm KÉP với nhóm nlm_drift. Thực địa:
+  title_mismatch 17→2, vbhn_advisory=21. (Đơn giản hoá so bundle: advisory = entry VBHN + bất kỳ cờ VBHN_* —
+  không hardcode list dễ mục.)
+- **B3/B9 (quarantine stale-ref fixer)**: `_quarantine_fix_items` +bucket `clear_stale_nlm_ref` (còn
+  nlm_source_id nhưng KHÔNG live — status removed*/deleted) → `quarantine-fix --apply` tự dọn; ghost LIVE vẫn
+  chỉ báo (xoá nguồn tay sau verify). **SỬA PRIMITIVE bản bundle — vi phạm BẤT BIẾN đã ghi memory**: họ clear
+  bằng `_journaled_reg_write` (reg_bulk) ghi giá trị RỖNG → webapp BỎ QUA im lặng = báo cleared nhưng không
+  clear gì (false-success). Bản merge: helper `_quarantine_clear_stale` đi `_journaled_reg_clear` (action
+  reg_clear keyed + confirm=yes) TỪNG DÒNG, kèm before cho `tl undo`; khoá bằng test FakeG r34 (mọi action
+  khác reg_clear = AssertionError). Thực địa DRY: bắt đúng 4 ca (62-VBHN XNC/09-VBHN Đầu tư/20-VPQH ĐTC/
+  41-2024 BHXH) — checklist mục 5 nay 1 lệnh thay reg_clear tay.
+- Sweep next-action + corpus-fix bước quarantine phân biệt stale_nlm_ref (fixer tất định) vs still_on_nlm
+  (xoá tay); hygiene scan text +vbhn_advisory.
+
+selftest **563/563** (+3 r34: bucket stale-vs-ghost, PRIMITIVE-lock reg_clear, advisory split).
+
+---
+
 # ★ v1.33.21 — B.5-residual: lane NAME-ONLY cho vbhn-year-fix (11 VBHN tên-thiếu-năm không fixer nào phủ)
 
 Log verify v1.33.20 LIVE xác nhận MỌI bug code trước đã đóng (corpus-audit 67/67 sạch, header_mismatch 5→0).

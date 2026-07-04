@@ -2316,6 +2316,49 @@ def run() -> int:
                   and _f33_sh[0]["new_sohieu"] == "14-2024-VBHN-VPQH"
                   and not any(s["drive_id"] in ("y2", "y3") for s in _f33)))
 
+    # ═══ v1.33.22 (MERGE bundle-21 — nhánh hội tụ trên v1.33.20, BỔ TRỢ v1.33.21 ta: advisory-split +
+    # quarantine stale-ref fixer; SỬA PRIMITIVE bundle vi phạm bất biến reg_clear) — r34_* ═══
+    # (B3/B9 bucket) quarantine: ref NLM + status removed → clear_stale_nlm_ref; status pushed (live) →
+    # ghost_nlm (KHÔNG clear — xoá nguồn tay); không ref → không bucket nào.
+    _q34 = _quarantine_fix_items([
+        {"id": "q1", "drive_id": "q1", "name": "VBHN_09-VBHN-VPQH_Dau_tu", "cat": QUARANTINE_CAT,
+         "corpus": "false", "nlm_source_id": "s-old", "nlm_status": "removed"},
+        {"id": "q2", "drive_id": "q2", "name": "Luat_X_ghost", "cat": QUARANTINE_CAT,
+         "corpus": "false", "nlm_source_id": "s-live", "nlm_status": "pushed"},
+        {"id": "q3", "drive_id": "q3", "name": "Luat_Y_sach", "cat": QUARANTINE_CAT, "corpus": "false"},
+    ])
+    cases.append(("r34_quarantine_stale_vs_ghost",
+                  [r["drive_id"] for r in _q34["clear_stale_nlm_ref"]] == ["q1"]
+                  and [r["drive_id"] for r in _q34["ghost_nlm"]] == ["q2"]))
+    # (B3/B9 primitive — khoá BẤT BIẾN): _quarantine_clear_stale phải đi action `reg_clear` keyed+confirm,
+    # KHÔNG reg_bulk giá trị rỗng (bundle-21 dùng _journaled_reg_write → webapp BỎ QUA ghi-rỗng = false-success).
+    class _FkG34:
+        def __init__(self):
+            self.calls = []
+        def get(self, action, **kw):
+            self.calls.append((action, kw))
+            if action == "reg_clear":
+                return {"ok": True, "cleared": 1}
+            raise AssertionError(f"lệnh cấm: {action}")
+    _g34 = _FkG34()
+    _ok34, _fail34 = _quarantine_clear_stale("selftest-r34", _g34,
+                                             [{"drive_id": "q1", "nlm_source_id": "s-old", "nlm_notebook_id": "nb1"}])
+    cases.append(("r34_clear_stale_uses_reg_clear",
+                  _ok34 == 1 and _fail34 == []
+                  and len(_g34.calls) == 1 and _g34.calls[0][0] == "reg_clear"
+                  and _g34.calls[0][1].get("confirm") == "yes"
+                  and "nlm_source_id" in str(_g34.calls[0][1].get("cols"))))
+    # (B.5-residual split) headline title_mismatch CHỈ còn lệch hành-động-được; VBHN metadata → advisory riêng.
+    _g34h = _hygiene_groups([
+        {"id": "t1", "drive_id": "t1", "name": "VBHN_14-VBHN-VPQH_Luat_84-2015_ATVSLD_HopNhat",
+         "so_hieu": "14/VBHN-VPQH", "loai": "VBHN", "issue_year": "2024", "cat": "20", "corpus": "true"},
+        {"id": "t2", "drive_id": "t2", "name": "Luat_123-2025-QH15_SuaDoi_Giao_duc", "so_hieu": "123/2025/QH15",
+         "loai": "Luật", "cat": "13", "corpus": "true", "title_vn": "Quản lý thuế xuất khẩu, thuế nhập khẩu"},
+    ])
+    cases.append(("r34_title_mismatch_vs_vbhn_advisory_split",
+                  [_x.get("drive_id") for _x in _g34h["title_mismatch"]] == ["t2"]
+                  and [_x.get("drive_id") for _x in _g34h["vbhn_metadata_advisory"]] == ["t1"]))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

@@ -1555,13 +1555,17 @@ def run() -> int:
                   [e["drive_id"] for e in _c17] == ["h1"]))
 
     # ═══ v1.33.5 (log rà 69 v1.33.3-mount — khoá nốt regression + kế toán minh bạch) — r18_* ═══
-    # (r18a) ĐÚNG HÌNH DẠNG ca 19-2012: amendment LINKED (goc) + VBHN 2026 phủ theo năm → verdict OK +
-    # AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE → KHÔNG vào relation_backfill (v1.33.3 cũ xếp backfill khống);
-    # vẫn nằm web_round2 (UNVERIFIED_LATEST — việc verify bản mới nhất là THẬT).
+    # (r18a) ĐÚNG HÌNH DẠNG ca 19-2012: amendment LINKED (goc) + VBHN năm-nay phủ theo năm → verdict OK +
+    # AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE → KHÔNG vào relation_backfill (v1.33.3 cũ xếp backfill khống).
+    # CẬP NHẬT S-8 v1.33.15: VBHN duy nhất RẤT MỚI + covered + không thuộc nhóm HIGH_VELOCITY → UNVERIFIED_LATEST
+    # hạ thành VBHN_LATEST_RECENT_COVERED (INFO) → RỜI hàng web_round2 luôn (về clean; năm fixture đặt ĐỘNG
+    # để bất biến theo thời gian — VBHN năm-nay luôn 'rất mới').
+    import time as _t18
+    _yr18 = _t18.localtime().tm_year
     _r18_base = {"id": "b19", "drive_id": "b19", "name": "Luat_19-2012-QH13_Xuat_ban", "so_hieu": "19/2012/QH13",
                  "loai": "Luật", "cat": "32", "corpus": "true", "nlm_source_id": "sb19"}
-    _r18_vbhn = {"id": "v26x", "drive_id": "v26x", "name": "VBHN_25-2026-VBHN-VPQH_2026_Luat_Xuat_ban_HopNhat",
-                 "so_hieu": "25-2026-VBHN-VPQH", "loai": "VBHN", "goc": "19-2012-QH13", "cat": "32",
+    _r18_vbhn = {"id": "v26x", "drive_id": "v26x", "name": f"VBHN_25-{_yr18}-VBHN-VPQH_{_yr18}_Luat_Xuat_ban_HopNhat",
+                 "so_hieu": f"25-{_yr18}-VBHN-VPQH", "loai": "VBHN", "goc": "19-2012-QH13", "cat": "32",
                  "corpus": "true", "nlm_source_id": "sv26"}
     _r18_amend = {"id": "a25x", "drive_id": "a25x", "name": "Luat_35-2025-QH15_SuaDoi_Xuat_ban",
                   "so_hieu": "35/2025/QH15", "cat": "32", "goc": "19-2012-QH13"}
@@ -1569,10 +1573,11 @@ def run() -> int:
     _rq18 = _review_queue_report([_r18_base, _r18_vbhn, _r18_amend], limit=None)
     cases.append(("r18_covered_shape_no_fake_rel",
                   any(w.startswith("AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE") for w in _sm18["warnings"])
+                  and any(w.startswith("VBHN_LATEST_RECENT_COVERED") for w in _sm18["warnings"])
+                  and not any(w.startswith("VBHN_CANDIDATE_UNVERIFIED_LATEST") for w in _sm18["warnings"])
                   and _sm18["verdict"] == "OK"
                   and _rq18["relation_backfill"] == [] and _rq18["laws_scanned"] == 1
-                  and _rq18["counts"]["web_round2"] == 1
-                  and "AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE" in _rq18["web_round2"][0]["flags"]
+                  and _rq18["counts"]["web_round2"] == 0 and _rq18["clean_count"] == 1
                   and sum(_rq18["counts"].values()) == 1))
     # (r18b) VBHN đội lốt loai='Luật' (ca 115-VBHN — data bẩn lọt bộ lọc Luật của người vận hành) →
     # đếm TƯỜNG MINH skipped_vbhn_as_base, không thành mục hàng đợi, kế toán 69-vs-68 khớp máy.
@@ -1908,6 +1913,106 @@ def run() -> int:
                                              "so_hieu": "115/2026/QH16", "loai": "Luật"}], normalize=True)
     cases.append(("r26_vbhn_name_only_conflict",
                   len(_s26) == 1 and _s26[0]["mode"] == "conflict" and _s26[0]["loai"] == "Văn bản hợp nhất"))
+
+    # ═══ v1.33.15 (log rà 40/531 + review-queue 67 Luật CHẠY LIVE v1.33.14 — S-1 row-serialize · S-2 header
+    # no-proposal 5 ca · S-3 cat-audit đề nghị rời rổ 46 · S-8 over-flag UNVERIFIED_LATEST 37/67 web) — r27_* ═══
+    # (S-2b) _name_tail_key strip prefix họ Bộ-luật (BLuat chuẩn sinh + BLDS/BLHS… legacy) + sohieu → tail SẠCH
+    # (trước: tail = NGUYÊN tên → token chủ đề dính rác 'bluat'/'qh13').
+    cases.append(("r27_name_tail_key_bluat",
+                  _name_tail_key("BLuat_100-2015-QH13_Bo_luat_hinh_su") == "bo luat hinh su"
+                  and _name_tail_key("BLDS_91-2015-QH13_Bo_luat_Dan_su") == "bo luat dan su"))
+    # (S-2a/c/d/e) title-check header-verify: token TAIL-first (hết rác prefix/sohieu), token NÉN CamelCase
+    # ('NhapCanh') khớp text đã nén, viết tắt CSDL/NCC mở rộng so TỪ NGUYÊN VĂN trên text (từ 2-ký-tự 'co'/'so'/
+    # 'du' bị _token_set lọc không còn làm trượt). 3 ca thật log rà 40 tái dựng — TRƯỚC fail title, NAY pass.
+    _e27a = {"drive_id": "b27", "name": "BLuat_100-2015-QH13_Bo_luat_hinh_su", "so_hieu": "100/2015/QH13",
+             "loai": "Bộ luật", "cat": "16_Hinh_su", "corpus": "true"}
+    _vr27a = _verify_header_match(_e27a, "BỘ LUẬT\nHÌNH SỰ\nLuật số: 100/2015/QH13\nBộ luật này quy định về tội phạm và hình phạt.")
+    _e27b = {"drive_id": "v62", "name": "VBHN_62-2026-VBHN-VPQH_2026_Luat_NhapCanh_XuatCanh_NN",
+             "so_hieu": "62-2026-VBHN-VPQH", "loai": "Văn bản hợp nhất", "cat": "01", "corpus": "true"}
+    _vr27b = _verify_header_match(_e27b, "VĂN BẢN HỢP NHẤT\nLUẬT\nNhập cảnh, xuất cảnh, quá cảnh, cư trú của người "
+                                         "nước ngoài tại Việt Nam\nSố: 62/VBHN-VPQH\nLuật này quy định nhập cảnh, xuất cảnh.")
+    _e27c = {"drive_id": "n47", "name": "ND_47-2024-ND-CP_CSDL_Quoc_gia", "so_hieu": "47/2024/NĐ-CP",
+             "loai": "Nghị định", "cat": "03", "corpus": "true"}
+    _vr27c = _verify_header_match(_e27c, "NGHỊ ĐỊNH\nSố: 47/2024/NĐ-CP\nChính phủ ban hành Nghị định về danh mục "
+                                         "cơ sở dữ liệu quốc gia.")
+    cases.append(("r27_header_title_no_junk_tokens",
+                  _vr27a["checks"].get("title") is True and _vr27b["checks"].get("title") is True
+                  and _vr27c["checks"].get("title") is True))
+    # (S-2f) layout VPQH: 'Số: NN/VBHN-VPQH' CHỈ ở khối ký CUỐI văn bản (ca VBHN_21-2026 BLTTDS — đo thật vị trí
+    # 492k/532k, ngoài head-6000) → check sohieu tìm trên TOÀN văn bản vẫn PASS.
+    _e27f = {"drive_id": "v21", "name": "VBHN_21-2026-VBHN-VPQH_2026_Bo_luat_To_tung_dan_su",
+             "so_hieu": "21-2026-VBHN-VPQH", "loai": "Văn bản hợp nhất", "cat": "37", "corpus": "true"}
+    _txt27f = ("BỘ LUẬT\nTỐ TỤNG DÂN SỰ\nBộ luật Tố tụng dân sự số 92/2015/QH13 được sửa đổi, bổ sung bởi:\n"
+               + ("Điều X. Nội dung tố tụng dân sự.\n" * 300)
+               + "VĂN PHÒNG QUỐC HỘI\nSố: 21/VBHN-VPQH")
+    _vr27f = _verify_header_match(_e27f, _txt27f)
+    cases.append(("r27_vbhn_sohieu_in_signature_tail",
+                  len(_txt27f) > 6000 and _vr27f["checks"].get("sohieu") is True))
+    # (S-1) row corpus-audit TỰ MÔ TẢ: mirror proposal CHÍNH lên top-level (type/severity/suggested_name/
+    # fix_command/proposal/flags) — driver phẳng hết đọc null; idempotent (checkpoint đời cũ nạp lại vẫn ra).
+    _ar27 = _corpus_audit_row({"drive_id": "d141", "name": "ND_141-2024-ND-CP", "so_hieu": "141/2024/NĐ-CP",
+                               "loai": "Nghị định", "cat": "45", "corpus": "true"},
+                              "NGHỊ ĐỊNH\nSố: 141/2024/NĐ-CP\nquy định chi tiết một số điều")
+    cases.append(("r27_audit_row_selfdescribing",
+                  _ar27.get("type") == "NAME_NONSTANDARD"
+                  and _ar27.get("suggested_name") == _ar27["proposals"][0]["suggested"]
+                  and _ar27.get("fix_command") == _ar27["proposals"][0]["fix_command"]
+                  and _ar27.get("flags") == ["NAME_NONSTANDARD"]
+                  and _audit_row_flatten(dict(_ar27)).get("type") == "NAME_NONSTANDARD"))
+    # (S-2g) header_ok=False + 0 đề xuất KHÔNG còn câm: row mang header_mismatches/header_checks nêu LÝ DO.
+    _ar27g = _corpus_audit_row({"drive_id": "d27g", "name": "Luat_99-2020-QH14_Chu_de_khong_khop",
+                                "so_hieu": "99/2020/QH14", "loai": "Luật", "cat": "20", "corpus": "true"},
+                               "LUẬT\nSố: 99/2020/QH14\nquy định về vấn đề riêng.")
+    cases.append(("r27_hdr_bad_carries_reason",
+                  _ar27g.get("header_ok") is False and _ar27g["proposals"] == []
+                  and any("TITLE" in m for m in _ar27g.get("header_mismatches") or [])))
+    # (S-3) rổ 46: bằng chứng omnibus theo TÊN/REF — KHÔNG lấy cat 46 làm bằng chứng cho chính nó (lập luận
+    # vòng); đang ở 46 + có bằng chứng → cat-audit/CAT_LIKELY_WRONG không đề xuất rời (ca 57-2024 46→34 log rà
+    # 40); sửa-1-đích (TT_37) và luật thường không dính; chiều đề xuất VÀO 46 giữ nguyên (r13).
+    cases.append(("r27_omnibus_name_evidence",
+                  _omnibus_name_evidence({"name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau"})
+                  and not _omnibus_name_evidence({"name": "TT_37-2025-TT-BYT_SuaDoi_TT05-2024_Dau_thau_thuoc"})
+                  and not _omnibus_name_evidence({"name": "Luat_143-2025-QH15_Dau_tu"})))
+    _e27o = {"drive_id": "o57", "name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau",
+             "so_hieu": "57/2024/QH15", "loai": "Luật", "cat": "46_Sua_doi_nhieu_luat", "corpus": "true"}
+    cases.append(("r27_cat_keeps_omnibus_in_46",
+                  _cat_likely_wrong_suggest(_e27o, "") is None
+                  and _cat_likely_wrong_suggest(dict(_e27o, cat="34"), "") is not None))
+    import io as _io27, contextlib as _ctx27
+    _orig_me27 = _TL_MODULE._manifest_entries
+    _TL_MODULE._manifest_entries = lambda refresh=False: [_e27o]
+    _buf27 = _io27.StringIO()
+    try:
+        with _ctx27.redirect_stdout(_buf27):
+            _rc27 = _TL_MODULE.cmd_cat_audit(build_parser().parse_args(["cat-audit", "--json"]))
+    finally:
+        _TL_MODULE._manifest_entries = _orig_me27
+    _ca27 = json.loads(_buf27.getvalue())
+    cases.append(("r27_cat_audit_cmd_keeps_46", _rc27 == 0 and _ca27["count"] == 0))
+    # (S-8) hạ UNVERIFIED_LATEST khi VBHN DUY NHẤT + RẤT MỚI (năm ≥ nay−1) + không luật-sửa nào MỚI HƠN đã biết
+    # → cờ INFO VBHN_LATEST_RECENT_COVERED, rời hàng web LƯỢT-2 (log: 37/67 vào lượt-2, ~15 chỉ vì cờ này);
+    # VBHN CŨ giữ nguyên hành vi (verify bản-mới-nhất là việc THẬT).
+    import time as _t27
+    _yr27 = _t27.localtime().tm_year
+    _r27_base = {"id": "b50", "drive_id": "b50", "name": "Luat_50-2024-QH15_Cong_doan", "so_hieu": "50/2024/QH15",
+                 "loai": "Luật", "cat": "20", "corpus": "true", "nlm_source_id": "s50"}
+    _r27_vnew = {"id": "v90", "drive_id": "v90", "name": f"VBHN_90-{_yr27}-VBHN-VPQH_{_yr27}_Luat_Cong_doan_HopNhat",
+                 "so_hieu": f"90-{_yr27}-VBHN-VPQH", "loai": "Văn bản hợp nhất", "goc": "50-2024-QH15",
+                 "cat": "20", "corpus": "true", "nlm_source_id": "sv90"}
+    _sm27n = _source_map_one("50/2024/QH15", [_r27_base, _r27_vnew])
+    _r27_vold = {"id": "v01", "drive_id": "v01", "name": "VBHN_01-2017-VBHN-VPQH_2017_Luat_Cong_doan_HopNhat",
+                 "so_hieu": "01-2017-VBHN-VPQH", "loai": "Văn bản hợp nhất", "goc": "50-2024-QH15",
+                 "cat": "20", "corpus": "true", "nlm_source_id": "sv01"}
+    _sm27o = _source_map_one("50/2024/QH15", [_r27_base, _r27_vold])
+    cases.append(("r27_recent_vbhn_downgrades_unverified",
+                  not any(w.startswith("VBHN_CANDIDATE_UNVERIFIED_LATEST") for w in _sm27n["warnings"])
+                  and any(w.startswith("VBHN_LATEST_RECENT_COVERED") for w in _sm27n["warnings"])
+                  and any(w.startswith("VBHN_CANDIDATE_UNVERIFIED_LATEST") for w in _sm27o["warnings"])
+                  and not any(w.startswith("VBHN_LATEST_RECENT_COVERED") for w in _sm27o["warnings"])))
+    _rq27 = _review_queue_report([_r27_base, _r27_vnew], limit=None)
+    cases.append(("r27_review_queue_web_denoised",
+                  _rq27["web_round2_count"] == 0 and _rq27["clean_count"] == 1
+                  and sum(_rq27["counts"].values()) == _rq27["laws_scanned"] == 1))
 
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —

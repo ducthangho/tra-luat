@@ -1,3 +1,53 @@
+# ★ v1.33.15 — Xử nhóm CODE log rà 40/531 + review-queue 67 Luật CHẠY LIVE v1.33.14 (S-1/S-2/S-3/S-8)
+
+Toàn bộ 4 bug đều REPRO BẰNG HÀNH VI trước khi vá (bài học đối chiếu nhánh: test hành vi, không grep chuỗi) —
+5 ca S-2 verify LIVE trên chính document Drive thật, S-3/S-8 verify offline trên manifest cache thật.
+
+## S-2 🔴 corpus-audit `header_mismatch_no_proposal` 5/40 (BLHS, ND_47-2024, VBHN_21/62-2026, TT_95-2025)
+Chẩn đoán thật (khác giả thuyết 'ma sát Luật vs Bộ luật' của log): 4/5 fail check TITLE vì token chủ đề RÁC,
+1/5 fail check SOHIEU vì layout văn bản. Vá 7 lớp, cả 5 ca nay PASS LIVE:
+- (a) title-check TAIL-FIRST: token chủ đề lấy từ `_name_tail_key` (sau prefix+sohieu), hết rác
+  'bluat'/'qh13'/'tt44'/'btc' lọt vào bộ token phải-khớp; fallback full-name khi tail rỗng (tên trơ).
+- (b) `_name_tail_key` nhận prefix họ Bộ-luật `bluat|bl[a-z]{2,6}` (BLuat chuẩn sinh P1-3 + BLDS/BLHS legacy)
+  — trước đó tail của MỌI tên BLuat_/BLDS_ = nguyên tên không strip.
+- (c) viết tắt mở rộng so TỪ NGUYÊN VĂN trên text (regex word-bound) — từ 2-ký-tự ('co','so','du' của CSDL)
+  bị `_token_set` lọc len≥3 nên check cũ `w in _ftoks` KHÔNG BAO GIỜ đậu.
+- (d) token NÉN CamelCase ≥6 ký tự ('nhapcanh','xuatcanh','suadoi') khớp SUBSTRING trên text đã nén.
+- (e) `_ABBREV_MAP` += csdl (cơ sở dữ liệu), ncc (người có công).
+- (f) sohieu VBHN: layout VPQH in 'Số: NN/VBHN-VPQH' CHỈ ở khối ký CUỐI (đo thật ca 21-2026 BLTTDS: vị trí
+  492k/532k ký tự — ngoài head-6000) → tìm dạng có-năm/không-năm trên TOÀN văn bản.
+- (g) hết CÂM: `_corpus_audit_row` trả `header_mismatches`/`header_checks`; hàng `header_mismatch_no_proposal`
+  + bản in text kèm LÝ DO lệch — người rà tay khỏi chạy lại header-verify.
+
+## S-1 🔴 corpus-audit --json: summary đếm proposal nhưng rows[].type/suggested_name/proposal = null
+Chi tiết chỉ nằm LỒNG trong `proposals[]` (schema summary↔row lệch — driver phẳng đọc null). `_audit_row_flatten`
+MIRROR đề xuất CHÍNH (nặng nhất) lên top-level row: `type/severity/icon/suggested/suggested_name/fix_command/
+proposal/flags`; áp cả 3 đường (engine chung, nhánh raw, và LÚC XUẤT JSON — idempotent, checkpoint đời cũ nạp
+lại vẫn ra schema mới). `proposals[]` giữ nguyên là nguồn sự thật đầy đủ.
+
+## S-3 🟠 cat-audit/CAT_LIKELY_WRONG đề nghị rời rổ 46 cho omnibus (57-2024 46→34)
+`_omnibus_name_evidence` (PURE) = bằng chứng omnibus theo TÊN/REF, ĐỘC LẬP VỚI CAT — không lấy 'đang ở 46' làm
+bằng chứng 'thuộc rổ 46' (lập luận vòng); `_is_omnibus_entry` = cat46 ∨ name-evidence (contract cũ giữ nguyên).
+Cả 2 auditor (cat-audit + `_cat_likely_wrong_suggest`) suppress đề xuất RỜI 46 khi có name-evidence; VBHN nằm
+nhầm 46 VẪN được đề xuất dời (VBHN cat theo luật đích); chiều đề xuất VÀO 46 giữ nguyên (r13). Kiểm thực địa:
+cat-audit 3 cờ → 2 (mất đúng cờ giả 46→34; 2 gợi ý TT medium-conf hợp lệ GIỮ).
+
+## S-8 🟡 over-flag VBHN_CANDIDATE_UNVERIFIED_LATEST đẩy 37/67 Luật vào hàng web lượt-2
+Đính chính log: các luật 2024-2026 bị cờ KHÔNG phải 'chưa/không có VBHN' — chúng CÓ VBHN 2025-2026 trong corpus
+(vd 50-2024 Công đoàn → VBHN_90-VPQH_2025) nhưng cờ bật VÔ ĐIỀU KIỆN khi related_vbhn≠∅. Hạ cờ khi: VBHN DUY
+NHẤT + năm rõ ≥ năm-nay−1 + không luật-sửa nào MỚI HƠN đã biết (covered theo ngày ∨ không ứng viên normative)
++ KHÔNG thuộc nhóm S10 HIGH_VELOCITY → cờ INFO mới `VBHN_LATEST_RECENT_COVERED`. Kiểm thực địa: web lượt-2
+37→24, sạch 28→39; 10 ca ★ HIGH_VELOCITY giữ nguyên (khớp đúng danh sách B1 của phiên rà); doctrine
+`vbhn-verify --official-required` trước khi trích dẫn KHÔNG đổi — chỉ hạ ưu tiên hàng đợi.
+
+selftest **534/534** (+9 r27: tail-key-bluat, title-no-junk ×3 ca thật, sohieu-signature-tail, row-selfdescribing,
+hdr-bad-carries-reason, omnibus-name-evidence, cat-keeps-46 ×2, recent-vbhn-downgrade, review-queue-denoised;
+r18a cập nhật theo hành vi S-8 + năm fixture ĐỘNG). Nợ DATA (ops, không phải code — giao user): nlm-reconcile
+--apply --clear-stale (17 dangling, S-4/S-5) · dedup-plan --apply (S-7) · header-verify --fix-suggest lô 163 tên
+(S-6) · pin registryDocId vào config (S-9) · chốt VBHN 10 luật ★ + backfill 68-2025/44-2019 (B1/B3).
+
+---
+
 # ★ v1.33.14 — MERGE nhánh-3 (`D:\admin\tra-luat\tra-luat.zip`): bản độc lập THỨ BA vá backlog trên v1.33.11 — port 7, reject 4
 
 ## PORT (7 — mỗi món đều mạnh hơn bản ta hoặc lấp lỗ ta chưa có)

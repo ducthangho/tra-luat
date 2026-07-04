@@ -2282,6 +2282,40 @@ def run() -> int:
     cases.append(("r32_abbrev_bh_qppl_gdpt",
                   "ban hanh" in _exp32 and "quy pham phap luat" in _exp32 and "giao duc pho thong" in _exp32))
 
+    # ═══ v1.33.21 (log verify v1.33.20 — B.5-residual: 15/17 title_mismatch là VBHN tên-thiếu-năm, sohieu ĐÃ
+    # year-fix → KHÔNG fixer nào phủ, backlog treo vĩnh viễn) — r33_* ═══
+    # (a) _name_inject_vbhn_year nhận CẢ dạng NGẮN NN-VPQH (ca thật VBHN_34-VPQH trả nguyên tên trước fix);
+    # idempotent với tên đã có năm.
+    cases.append(("r33_name_inject_short_form",
+                  _name_inject_vbhn_year("VBHN_34-VPQH_Luat_Luu_tru_hop_nhat", "34", 2026, "VPQH")
+                  == "VBHN_34-2026-VBHN-VPQH_Luat_Luu_tru_hop_nhat"
+                  and _name_inject_vbhn_year("VBHN_61-VBHN-VPQH_An_toan_thuc_pham", "61", 2025, "VPQH")
+                  == "VBHN_61-2025-VBHN-VPQH_An_toan_thuc_pham"
+                  and _name_inject_vbhn_year("VBHN_61-2025-VBHN-VPQH_ATTP", "61", 2025, "VPQH")
+                  == "VBHN_61-2025-VBHN-VPQH_ATTP"))
+    # (b) lane NAME-ONLY trong _vbhn_year_fix_items: sohieu có năm + tên thiếu năm → mode=name_only, sohieu
+    # GIỮ NGUYÊN; tên đã đủ năm → KHÔNG đề xuất; corpus=false → bỏ qua; ca sohieu-thiếu-năm cũ vẫn ra như trước.
+    _fx33 = [
+        {"id": "y1", "drive_id": "y1", "name": "VBHN_34-VPQH_Luat_Luu_tru_hop_nhat",
+         "so_hieu": "34-2026-VBHN-VPQH", "loai": "Văn bản hợp nhất", "corpus": "true"},
+        {"id": "y2", "drive_id": "y2", "name": "VBHN_61-2025-VBHN-VPQH_An_toan_thuc_pham",
+         "so_hieu": "61-2025-VBHN-VPQH", "loai": "Văn bản hợp nhất", "corpus": "true"},
+        {"id": "y3", "drive_id": "y3", "name": "VBHN_99-VPQH_Bo_qua_quarantine",
+         "so_hieu": "99-2026-VBHN-VPQH", "loai": "Văn bản hợp nhất", "corpus": "false"},
+        {"id": "y4", "drive_id": "y4", "name": "VBHN_14-VBHN-VPQH_ATVSLD", "so_hieu": "14-VBHN-VPQH",
+         "loai": "Văn bản hợp nhất", "corpus": "true", "issue_year": "2024"},
+    ]
+    _f33, _n33, _c33 = _vbhn_year_fix_items(_fx33)
+    _f33_no = [s for s in _f33 if s.get("mode") == "name_only"]
+    _f33_sh = [s for s in _f33 if s.get("mode") != "name_only"]
+    cases.append(("r33_year_fix_name_only_lane",
+                  len(_f33_no) == 1 and _f33_no[0]["drive_id"] == "y1"
+                  and _f33_no[0]["new_sohieu"] == _f33_no[0]["old_sohieu"] == "34-2026-VBHN-VPQH"
+                  and "2026" in _f33_no[0]["new_name"]
+                  and len(_f33_sh) == 1 and _f33_sh[0]["drive_id"] == "y4"
+                  and _f33_sh[0]["new_sohieu"] == "14-2024-VBHN-VPQH"
+                  and not any(s["drive_id"] in ("y2", "y3") for s in _f33)))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

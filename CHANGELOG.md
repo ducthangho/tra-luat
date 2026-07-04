@@ -1,3 +1,26 @@
+# ★ v1.33.21 — B.5-residual: lane NAME-ONLY cho vbhn-year-fix (11 VBHN tên-thiếu-năm không fixer nào phủ)
+
+Log verify v1.33.20 LIVE xác nhận MỌI bug code trước đã đóng (corpus-audit 67/67 sạch, header_mismatch 5→0).
+Mổ nốt 2 lớp dư: (a) TITLE_OR_REGISTRY_WARN còn lại của 33-2024/55-2010 = cờ ĐÚNG — bản VBHN trong chuỗi mang
+tên thiếu năm (`VBHN_34-VPQH_Luat_Luu_tru`, `VBHN_61-VBHN-VPQH_ATTP`) vi phạm bất biến NN-YYYY-VBHN dù sohieu
+ĐÃ year-fix; (b) 17 title_mismatch = 15 VBHN, chi phối VBHN_NAME_MISSING_YEAR ×11 — CÙNG lớp. Phát hiện LỖ
+TOOLING: `vbhn-year-fix` chỉ quét sohieu-thiếu-năm → DRY trả fixable=0, lớp name-only KHÔNG fixer nào phủ =
+backlog treo vĩnh viễn (phải source-rename tay ×11).
+
+## FIX
+- `_vbhn_year_fix_items` lane **NAME-ONLY** (`mode='name_only'`): sohieu chuẩn NN-YYYY-VBHN-XXX + TÊN thiếu
+  năm-ban-hành → đề xuất đổi TÊN, sohieu GIỮ NGUYÊN (không thể tạo collision số hiệu). Chỉ ghi khi
+  `--with-name`; chạy thiếu cờ → loại khỏi sel + nhắc LOUD (không upsert sohieu no-op).
+- `_name_inject_vbhn_year` nhận CẢ dạng NGẮN `NN-VPQH` (thiếu segment VBHN — ca 34-VPQH trước trả nguyên tên
+  → lane câm với đúng ca cần nhất); idempotent giữ nguyên.
+- DRY in marker `📛NAME-ONLY` + cột TÊN→.
+
+Thực địa DRY: bắt ĐÚNG 11 ca (khớp phân tích flag), CONFLICT 0, tên mới đúng bất biến — sẵn chờ user duyệt
+`tl vbhn-year-fix --with-name --apply`. selftest **560/560** (+2 r33: inject dạng ngắn + lane 4-fixture có
+control corpus=false/tên-đã-đủ-năm). Các mục còn lại của 2 log = DATA-ops đã DRY-preview đủ (xem runbook).
+
+---
+
 # ★ v1.33.20 — MERGE bundle-20 (`tra-luat-skill-v1.33.20-gws3env-fixed.zip`): nhánh song song CÙNG backlog S-10/nhóm-B trên v1.33.18 — lấy KIẾN TRÚC, sửa 2 guard-bug
 
 Bundle-20 dựng trên v1.33.18 (52 dòng), vá đúng backlog mà canonical v1.33.19 vừa xử — lần HỘI TỤ THỨ 3.

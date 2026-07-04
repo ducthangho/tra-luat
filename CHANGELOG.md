@@ -1,3 +1,43 @@
+# ★ v1.33.4 — Log chạy LIVE review-queue lần đầu: vá A1/A2 (backfill khống, đếm lệch) + status verdict-alias + 2 điểm mù sweep
+
+## A1 — relation_backfill hết VIỆC KHỐNG (~40% hàng đợi là giả)
+- Đo thật trên 5 ca: 19-2012 (verdict OK + AMENDMENT_CANDIDATES_COVERED_BY_VBHN_DATE) và 90-2025 (OK +
+  CONFIRMED) vẫn bị xếp backfill — bucket cũ phân loại thuần theo cờ thô AMENDMENT_CANDIDATE_IN_CORPUS, vứt
+  verdict + cờ HOÁ-GIẢI mà source-map đã tính. Nay `_RQ_REL_SUPPRESS` (CONSOLIDATED/COVERED_BY_VBHN_DATE/
+  GATE_SUPPRESSED_CONFIRMED/CONFIRMED/OMNIBUS_AMENDS_OTHER): rel = verdict≠OK ∧ cờ-rel ∧ ¬suppressor.
+  Ca thật 123-2025/68-2025 (REVIEW + UNLINKED) GIỮ NGUYÊN; 57-2024 (OK) → hết mập mờ, về clean/web theo verdict.
+
+## A2 — bucket CHÍNH loại trừ lẫn nhau; counts CỘNG VỀ laws_scanned
+- Trước: 68-2025/19-2012 nằm cả web_round2 lẫn relation_backfill → 39+5=44 line-item cho 42 Luật, tổng không
+  đối soát được. Nay: ưu tiên pause > relation > web > clean/review_other (mỗi Luật đúng 1 nhóm chính; JSON có
+  `counts` — tổng LUÔN = laws_scanned, máy đối soát được); VIỆC KÉP vẫn thấy đủ qua trường `buckets` từng dòng
+  (text in "(+web lượt-2)"). Thêm nhóm `review_other` — REVIEW không rơi nhóm nào (trước bị RƠI KHỎI mọi đếm).
+
+## B1 — `status --json` phát alias {verdict, flags} top-level
+- Driver batch đọc `d['verdict']` cho mọi lệnh audit nhưng status chỉ có decision/reason/surface → None câm
+  12/12. `preingest_gate._alias_vocab`: verdict = decision (ADD/SKIP/REVIEW — vocab tiền-nạp, KHÔNG đánh đồng
+  OK của source-map); flags = mã surface + USE_VBHN/PENDING_AMENDMENTS/IN_REGISTRY_HIEULUC_UNKNOWN/
+  VBHN_GOC_SUBJECT_MISMATCH/caution. decision/reason/surface GIỮ NGUYÊN (compat).
+
+## C1 + C2 — hai điểm mù sweep
+- C1: sweep in `nlm_drift ... [OFFLINE registry-only — live: tl nlm-reconcile]` + `nlm_drift_basis` trong JSON
+  + next_action thường trực — ca thật: sweep=0 nhưng nlm-reconcile LIVE thấy 24 dòng desync/removed
+  (registry_rows_claiming_nlm=544 vs live=295: slot registry chỉ là ESTIMATE, doctrine L4/L5).
+- C2: detector MỚI `raw_on_nlm` — file THÔ (html/docx) đang là nguồn NLM live (trái 'chỉ push GDoc'; gate #3
+  chỉ chặn push MỚI, hàng tồn cũ như 22-2023.html lọt) → 🔴 + rows + next_action: convert GDoc → re-push →
+  gỡ nguồn raw + reg_clear mapping.
+
+## Nợ DỮ LIỆU (thứ tự user duyệt — từ mục D của log, lệnh sẵn)
+1. `tl backfill-title-vn --apply` (65/68 title_vn rỗng — GỐC RỄ QT-5 recall kém → 39 Luật web lượt-2).
+2. Backfill `hieuluc` 66/68 dòng Luật (cổng status phân biệt lại được; xem IN_REGISTRY_HIEULUC_UNKNOWN).
+3. `tl nlm-reconcile 743ed200-… --apply --clear-stale` (24 dòng desync/removed).
+4. Ca 22-2023 .html: convert GDoc + re-push + gỡ nguồn HTML (raw_on_nlm sẽ về 0) + source-rename.
+5. `tl dedup-plan --apply` + `tl backfill-loai --normalize --apply` + rename 64-2006/71-2020/03-2007.
+
+selftest **494/494** (+4 r17: no-fake-rel, rel-real+counts-reconciliation, status-alias, raw_on_nlm).
+
+---
+
 # ★ v1.33.3 — Log rà 66×3 + 68 Luật: siết 2 dương-tính-giả heuristic (D1/D2) + lệnh `review-queue` gỡ nghẽn gom-tay lượt-2
 
 Tin tốt log xác nhận: ~200 lần gọi 0 traceback/timeout/parse-fail; defect lịch sử không tái phát. Còn lại:

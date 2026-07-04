@@ -161,6 +161,31 @@ def decide(current: dict, targets: list[dict] | None = None, is_amendment: bool 
             "actions": ["Kiểm registry/NLM và quyết định thủ công trước khi nạp."]}
 
 
+def _alias_vocab(res: dict) -> dict:
+    """B1 (v1.33.4 — log rà 66: driver batch đọc d['verdict'] cho MỌI lệnh audit nhưng status chỉ phát
+    decision/reason/surface → verdict=None CÂM 12/12 Luật, rc vẫn 0): alias vocab chuẩn v1.24.4 {verdict, flags}
+    TOP-LEVEL — GIỮ NGUYÊN decision/reason/surface (compat). verdict = decision (ADD/SKIP/REVIEW — vocab tiền-nạp,
+    KHÔNG map sang OK để không đánh đồng với source-map); flags = mã surface + cờ phụ máy-đọc."""
+    flags = []
+    head = str(res.get("surface") or "").split(":", 1)[0].strip().replace(" ", "_")
+    if re.fullmatch(r"[A-Z][A-Z0-9_]*", head or ""):
+        flags.append(head)
+    if res.get("use_vbhn"):
+        flags.append("USE_VBHN")
+    if res.get("caution"):
+        flags.append(str(res["caution"]))
+    if res.get("pending_amendments"):
+        flags.append("PENDING_AMENDMENTS")
+    if res.get("hieuluc_unknown"):
+        flags.append("IN_REGISTRY_HIEULUC_UNKNOWN")
+    if res.get("rejected_vbhn"):
+        flags.append("VBHN_GOC_SUBJECT_MISMATCH")
+    out = dict(res)
+    out.setdefault("verdict", res.get("decision"))
+    out["flags"] = list(dict.fromkeys(f for f in flags if f))
+    return out
+
+
 def verdict_exit(decision: str, strict: bool=False) -> int:
     """A3 (EXIT CODE doctrine): verdict ADD/SKIP/REVIEW là PHÁT HIỆN dữ liệu, KHÔNG phải lệnh lỗi → rc=0
     (không phá &&/CI; driver agentic không hiểu nhầm REVIEW = lệnh hỏng). Chỉ `--strict` mới rc=1 khi REVIEW
@@ -173,7 +198,7 @@ def run_live(sohieu: str, targets: list[str] | None, amendment: bool, vbhn: bool
     import gas  # noqa
     cur = gas.get("vb_status", q=sohieu)
     tstats = [dict(gas.get("vb_status", q=t), sohieu=t) for t in (targets or [])]
-    res = decide(cur, tstats, amendment or is_amendment_name(sohieu), vbhn or is_vbhn_name(sohieu))
+    res = _alias_vocab(decide(cur, tstats, amendment or is_amendment_name(sohieu), vbhn or is_vbhn_name(sohieu)))
     if as_json:
         print(json.dumps(res, ensure_ascii=False, indent=2))
     else:

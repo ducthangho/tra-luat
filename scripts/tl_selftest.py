@@ -1500,6 +1500,47 @@ def run() -> int:
     _rqns16 = build_parser().parse_args(["review-queue", "--json", "--limit", "5"])
     cases.append(("r16_review_queue_parser", _rqns16.json is True and _rqns16.limit == 5))
 
+    # ═══ v1.33.4 (log chạy LIVE review-queue lần đầu — A1 backfill khống 2/5, A2 đếm không khớp; B1 status
+    # thiếu verdict; C1/C2 điểm mù sweep) — r17_* ═══
+    # (A1) canonical CONFIRMED (verdict OK + suppressor) KHÔNG còn thành relation_backfill khống → về clean.
+    _rq17_base_ok = dict(rel_fx[0], drive_id="tdkt2022", corpus="true", loai="Luật", verified="yes")
+    _rq17_amend = dict(rel_fx[1], drive_id="tdkt2026x")
+    _rq17a = _review_queue_report([_rq17_base_ok, _rq17_amend], limit=None)
+    cases.append(("r17_review_queue_no_fake_rel",
+                  _rq17a["relation_backfill"] == [] and _rq17a["clean_count"] == 1
+                  and _rq17a["laws_scanned"] == 1
+                  and sum(_rq17a["counts"].values()) == _rq17a["laws_scanned"]))
+    # (A1b) ca THẬT giữ nguyên: base KHÔNG verified + amendment mồ côi → REVIEW + UNLINKED → rel bucket,
+    # kèm fix_command; counts loại trừ nhau cộng đúng về tổng (A2).
+    _rq17_base_rev = dict(rel_fx[0], drive_id="tdkt2022b", corpus="true", loai="Luật")
+    _rq17b = _review_queue_report([_rq17_base_rev, _rq17_amend], limit=None)
+    cases.append(("r17_review_queue_rel_real_counts",
+                  len(_rq17b["relation_backfill"]) == 1
+                  and "relation-check" in _rq17b["relation_backfill"][0]["fix_command"]
+                  and "relation_backfill" in _rq17b["relation_backfill"][0]["buckets"]
+                  and sum(_rq17b["counts"].values()) == _rq17b["laws_scanned"] == 1
+                  and sum(_rq16["counts"].values()) == _rq16["laws_scanned"]))
+    # (B1) status/preingest_gate: alias {verdict, flags} top-level — driver batch hết nhận None câm;
+    # decision/surface GIỮ NGUYÊN (compat).
+    _pg17 = _need_base("preingest_gate")
+    _st17a = _pg17._alias_vocab(_pg17.decide({"status": "IN_REGISTRY_HIEULUC_UNKNOWN", "sohieu": "74/2025/QH15"},
+                                             [], False, False))
+    _st17b = _pg17._alias_vocab(_pg17.decide({"status": "NOT_FOUND"}, [], False, False))
+    cases.append(("r17_status_verdict_flags_alias",
+                  _st17a.get("verdict") == "REVIEW" and _st17a.get("decision") == "REVIEW"
+                  and "IN_REGISTRY_HIEULUC_UNKNOWN" in (_st17a.get("flags") or [])
+                  and _st17b.get("verdict") == "ADD" and "NOT_FOUND" in (_st17b.get("flags") or [])))
+    # (C2) detector raw_on_nlm: file THÔ (html/docx) đang là nguồn NLM LIVE = vi phạm 'chỉ push GDoc';
+    # GDoc-native trên NLM và raw KHÔNG trên NLM đều không dính.
+    _c17_html = {"id": "h1", "drive_id": "h1", "name": "luat-dau-thau-so-22-2023-qh15-259737-d1.html",
+                 "mime": "text/html", "corpus": "true", "nlm_source_id": "eb6d0f", "nlm_status": "pushed"}
+    _c17_gdoc = {"id": "g1", "drive_id": "g1", "name": "Luat_22-2023-QH15_Dau_thau", "corpus": "true",
+                 "mime": "application/vnd.google-apps.document", "nlm_source_id": "s22", "nlm_status": "pushed"}
+    _c17_raw = {"id": "r1", "drive_id": "r1", "name": "Luat_X.docx", "mime": "application/msword"}
+    _c17 = _raw_on_nlm_rows([_c17_html, _c17_gdoc, _c17_raw])
+    cases.append(("r17_raw_on_nlm_detector",
+                  [e["drive_id"] for e in _c17] == ["h1"]))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

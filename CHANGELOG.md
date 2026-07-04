@@ -1,3 +1,30 @@
+# ★ v1.33.24 — MERGE bundle-23 (`tra-luat-skill-v1.33.23-gws3env-fixed.zip`): nhánh hội tụ trên v1.33.22, xử CÙNG log Cowork bằng các món BỔ TRỢ — port TRỌN, 0 reject (bundle sạch nhất chuỗi merge)
+
+Bundle-23 dựng trên canonical v1.33.22, xử cùng log rà Cowork với v1.33.23 ta nhưng chọn các món KHÁC —
+BỔ TRỢ hoàn hảo (ta: symlink /usr/local/bin; họ: 5 món dưới). Verify hành vi: chạy integrity check của họ
+trên CHÍNH cây canonical (PASS — boot.py ở _fallback lookup với tới) + canary SyntaxError/NUL đều bắt được
++ mọi helper họ gọi (transport.runtime_env, gws_bridge.gws_exe, _resolve_nlm_notebook, NLM_SLOT_CAP,
+nlm_cli.notebook_get) tồn tại. LẦN ĐẦU trong chuỗi 8 merge: KHÔNG có gì để reject.
+
+## PORT (5 — nguyên vẹn)
+- **`tl cowork-plan [--json]`** (C-1 tổng hợp): checklist bootstrap READ-ONLY — package integrity, gws MUSL,
+  nlm step-machine, PATH non-interactive, nhắc slot-LIVE + pin registryDocId; next_actions máy-đọc.
+- **doctor +check `package integrity`** (C-1.1): `_skill_package_integrity` compile 7 file core (nhận cả
+  _fallback/), bắt NUL/SyntaxError/file-cụt → khuyến nghị tải zip sạch — mount-cắt-cụt hết âm thầm.
+- **`tl up --nlm` trên Cowork chỉ chạy 1 bước `nlm-install --resume`** (C-1.2): detect runtime qua
+  transport.runtime_env; rc=3 → báo PARTIAL kèm lệnh lặp — hết chết giữa chừng vì trần 45s.
+- **doctor phân biệt `tl_nlm_path` vs `shell_nlm_path`** (C-1.4 phía hiển-thị — bổ trợ symlink v1.33.23 ta:
+  symlink xử gốc trên Cowork root, hiển thị xử máy không quyền ghi /usr/local/bin).
+- **`tl counts --live-nlm [--notebook-id]`** (C-2/C-4): bảng counts in kèm số VẬT LÝ LIVE
+  (source_count/cap/remaining/near_full) + `slot_rule` — diệt hẳn bẫy claim-542-vs-vật-lý-298 ngay tại chỗ
+  người vận hành nhìn số.
+
+Giữ của ta: `_symlink_nlm_system_path` (bundle không có). SKILL.md +2 dòng lệnh mới.
+selftest **568/568** (+4 r36: 2 canary gốc bundle + integrity-PASS-trên-cây-thật [chống doctor false-alarm
+vĩnh viễn nếu danh sách file core lệch cây] + parser 2 lệnh mới).
+
+---
+
 # ★ v1.33.23 — C-1.4 log rà Cowork LIVE v1.33.20: `nlm` trần chết ở bash non-interactive
 
 Log rà 67 Luật vòng mới (Cowork, LIVE v1.33.20): 19 mục / 5 lớp — ĐỐI CHIẾU: C-2..C-5 đều là data-ops/known

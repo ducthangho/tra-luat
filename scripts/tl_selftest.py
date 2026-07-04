@@ -2376,6 +2376,27 @@ def run() -> int:
     cases.append(("r35_nlm_symlink_guards",
                   _r35a == "" and _r35b == "" and "đã tồn tại" in _r35c))
 
+    # ═══ v1.33.24 (MERGE bundle-23 — nhánh hội tụ trên v1.33.22, xử CÙNG log Cowork bằng các món BỔ TRỢ ta:
+    # cowork-plan / package-integrity / up --nlm 1-bước / counts --live-nlm; bundle sạch nhất từ trước tới nay
+    # — verify trên cây thật + canary PASS, 0 reject) — r36_* ═══
+    # (2 test gốc bundle giữ nguyên) package integrity canary: cây lành PASS; NUL/cắt cụt bị bắt.
+    import tempfile as _tmp36
+    import pathlib as _pl36
+    with _tmp36.TemporaryDirectory() as _td36:
+        _base36 = _pl36.Path(_td36)
+        for _fn36 in ["tl.py", "tl_gws.py", "nlm_cli.py", "transport.py", "gas.py", "boot.py", "contract_check.py"]:
+            (_base36 / _fn36).write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
+        cases.append(("r36_skill_package_integrity_ok", _skill_package_integrity(_base36)["ok"] is True))
+        (_base36 / "tl_gws.py").write_bytes(b"x=1\x00")
+        cases.append(("r36_skill_package_integrity_catches_nul", _skill_package_integrity(_base36)["ok"] is False))
+    # (+của ta) integrity phải PASS trên CHÍNH cây skill đang chạy (boot.py nằm ở _fallback — lookup phải với tới;
+    # nếu check này đỏ trên cây lành thì doctor sẽ false-alarm vĩnh viễn) + parser nhận cowork-plan/counts --live-nlm.
+    cases.append(("r36_integrity_passes_on_real_tree", _skill_package_integrity(None)["ok"] is True))
+    _ns36 = build_parser().parse_args(["counts", "--live-nlm", "--notebook-id", "nb1"])
+    _ns36b = build_parser().parse_args(["cowork-plan", "--json"])
+    cases.append(("r36_parser_cowork_plan_counts_live",
+                  _ns36.live_nlm is True and _ns36.notebook_id == "nb1" and _ns36b.json is True))
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

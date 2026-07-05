@@ -1,3 +1,33 @@
+# ★ v1.33.37 — MERGE bundle-14 (`tra-luat_v1.33.36.zip`): nhánh incremental TRÊN chính v1.33.35 ta — #15 SCRIPT-REUSE GATE + enforcement selftest + fix BOM/zero-width title_vn
+
+Bundle-14 fork TRỰC TIẾP từ canonical v1.33.35 (tl.py diff CHỈ 2 hunk BOM — M1/M2/Q1 ta còn nguyên), thêm 3 món
+từ log rà GĐ3 backfill title_vn. Tất cả DISJOINT với việc ta đang làm → PORT trọn, 0 reject. (Bỏ số 1.33.36 của
+họ vì gộp = 1.33.37.)
+
+## PORT (3)
+- **Nguyên tắc bất biến #15 — SCRIPT-REUSE GATE** (SKILL.md §0): bắt buộc kiểm kho script/hàm sẵn có TRƯỚC khi
+  viết mới, 3 bước (`tl -h`/`--help` · liệt kê `scripts/*.py`+docstring §7 · `grep def <từ khoá>`). Chỉ viết mới
+  khi không lệnh nào phủ; sửa file skill CHỈ qua `tl edit-skill`+`verify-integrity`. Bài học 2026-07-06: suýt
+  hand-roll loop bóc trích yếu trong khi `tl backfill-title-vn` đã có + tốt hơn (xử BỘ-LUẬT-trước-LUẬT + đa dòng).
+- **Enforcement cứng** — selftest `skill_md_has_script_reuse_gate` (đọc SKILL.md, assert "SCRIPT-REUSE GATE" +
+  "SCRIPT_REUSE_GATE"): ĐỎ nếu #15 bị xoá khỏi doctrine.
+- **Fix BOM/zero-width lọt title_vn** (ca QD_671-QD-BTTTT ra `"Quyết định ﻿bộ thông tin và"` lẫn BOM + cụt):
+  `_sanitize_export_text` chỉ diệt control/surrogate, BOM là UTF-8 HỢP LỆ nên lọt. Nay strip zero-width ở
+  ĐƯỜNG ĐẶT TÊN/title_vn (`_title_sentence_case` + `_title_vn_from_header` pre-strip, phủ cả 2 tier) — KHÔNG
+  đụng đường export nguyên văn (giữ verbatim). Sau fix: QD_671 → `('', 'BOILERPLATE')` (không ghi rác), BLHS
+  sạch vẫn → 'Bộ luật Hình sự'.
+
+## TINH CHỈNH khi nhận (2 — an toàn hơn bản họ)
+- **BOM regex bằng escape `\u` tường minh** thay ký tự vô hình nhúng trong source (`_ZERO_WIDTH_RE =
+  re.compile("[﻿​-‍⁠￾]")`) — bản họ nhúng literal invisible chars vào source, chính là
+  lớp bug đang sửa (editor/copy-paste/git dễ làm hỏng). Codepoint khớp CHÍNH XÁC set họ (feff·200b-200d·2060·fffe).
+- **+test r48 khoá HÀNH VI extractor** (họ chỉ có guard SKILL.md-presence): `_title_sentence_case` hết BOM đầu ·
+  header có BOM → BOILERPLATE/rỗng · header sạch bóc đúng. Fixture BOM = escape ASCII `"﻿"` (không literal).
+
+selftest **594/594** (592 + skill_md_has_script_reuse_gate + r48). ruff 390 = baseline (0 lỗi mới). integrity 33/0.
+
+---
+
 # ★ v1.33.35 — xử log rà 45 Luật LIVE (Chat+Cowork): NLM auth FALSE-GREEN (M1) · slot-audit −288 giả (M2) · QT5 query lai dấu (Q1)
 
 Log môi trường lành (mount đủ, Py3.12+uv+curl) rà 45 Luật. Phần OFFLINE (source-map ×45, sweep, extract) sạch;

@@ -3865,6 +3865,14 @@ def run() -> int:
         cases.append(("skill_md_version_matches_VERSION", ("v" + VERSION) in _skmd))
     except Exception:
         cases.append(("skill_md_version_matches_VERSION", False))
+    # ───── v1.33.37 (MERGE bundle-14) — ENFORCEMENT #15: SKILL.md PHẢI khai §15 SCRIPT-REUSE GATE + token
+    # SCRIPT_REUSE_GATE. Selftest ĐỎ nếu doctrine #15 bị xoá khỏi SKILL.md (chống trôi nguyên tắc kiểm-kho). ─────
+    try:
+        _skmd_full = (Path(__file__).resolve().parent.parent / "SKILL.md").read_text(encoding="utf-8")
+        cases.append(("skill_md_has_script_reuse_gate",
+                      ("SCRIPT-REUSE GATE" in _skmd_full) and ("SCRIPT_REUSE_GATE" in _skmd_full)))
+    except Exception:
+        cases.append(("skill_md_has_script_reuse_gate", False))
     # ───── KH1 Pha 1.5 — relation-backfill: pure _relation_backfill_items (set goc + MERGE sua_doi, không đè), offline ─────
     _ml_rb = [
         {"action": "BACKFILL_GOC_ON_AMENDMENT", "drive_id": "a1", "sohieu": "90/2025/QH15", "set_goc": "19/2012/QH13"},
@@ -4327,6 +4335,15 @@ def run() -> int:
                   not any("hợp nhất" in q or "mới nhất" in q for q in _q_nd)
                   and any("hop nhat" in q for q in _q_nd)
                   and any("hợp nhất" in q for q in _q_d)))
+    # ═══ v1.33.37 (MERGE bundle-14 — BOM/zero-width lọt title_vn ca QD_671) — r48_* ═══
+    # sentence-case strip BOM ở đầu (hết 'Quyết định ﻿bộ…'); title_vn header có BOM → BOILERPLATE/rỗng (không
+    # ghi rác); header sạch vẫn bóc đúng (BỘ LUẬT trước LUẬT). BOM = "﻿".
+    _bom = "﻿"
+    _tv48_bom = _TL_MODULE._title_vn_from_header("QUYẾT ĐỊNH\n" + _bom + "BỘ THÔNG TIN VÀ\n\nĐiều 1.", {})
+    _tv48_ok = _TL_MODULE._title_vn_from_header("BỘ LUẬT\nHÌNH SỰ\n\nĐiều 1.", {})
+    cases.append(("r48_title_vn_strips_bom_zero_width",
+                  not _TL_MODULE._title_sentence_case(_bom + "BỘ THÔNG TIN VÀ").startswith(_bom)
+                  and _tv48_bom[0] == "" and _tv48_ok[0] == "Bộ luật Hình sự"))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.35)
+# tra-luat — LÕI VẬN HÀNH (v1.33.37)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -61,6 +61,7 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 **TẠM giữ cat 19 (KHCN)** — pháp điển CHƯA có đề mục riêng → KHÔNG tự chuyển 03/tạo rổ mới/flag là misfile.
 (Dữ liệu/CSDL/CNTT/GDĐT thì ĐÃ về 03 vì đề mục CNTT = chủ đề 3, đã xác minh phapdien.)
 14. **DÙNG LỆNH CÓ SẴN — đừng viết snippet `json.load(manifest)`/`g.get("move")` tay** (bài học 26/6: nhiều thao tác ad-hoc trùng lệnh sẵn có). Tra/lọc registry → **`tl reg-query`**; tìm trùng + kế hoạch quarantine → **`tl hygiene scan/plan/apply`** (đã subject-aware: KHÔNG gộp khác-cơ-quan/phụ-lục); rà sai chủ đề → **`tl cat-audit`** → sửa bằng **`tl recat … --cat NN [--apply]`** (hoặc `--quarantine`); đếm/đối soát NLM → `tl nlm-get/-list/-reconcile/-cross`; check trùng 1 văn bản → `tl dedup-check`. Chỉ viết Python tay khi KHÔNG lệnh nào phủ.
+15. **SCRIPT-REUSE GATE — KIỂM KHO TRƯỚC KHI VIẾT MỚI (bắt buộc; mở rộng #14).** Trước khi viết BẤT KỲ script/hàm/loop mới, PHẢI kiểm kho sẵn có theo 3 bước: (a) **subcommand** — `tl -h` / `tl <lệnh> --help`; (b) **script + mục đích** — liệt kê `scripts/*.py` kèm docstring dòng đầu (§7 BẢN ĐỒ SCRIPT là mục lục); (c) **hàm nghiệp vụ** — `grep -nE "def .*<từ khoá>" scripts/tl.py scripts/common.py`. CHỈ viết mới khi KHÔNG lệnh/script/hàm nào phủ chức năng. Có sẵn thì DÙNG bản của skill (đã xử ca biên + có journal/undo), KHÔNG hand-roll — vd: bóc **TRÍCH YẾU** = `tl backfill-title-vn` (`_title_block_from_text`/`_title_vn_from_header`, đã xử BỘ-LUẬT-trước-LUẬT + trích yếu đa dòng); lọc registry = `tl reg-query`; dedup = `tl dedup-plan`/`hygiene`; chuẩn tên = `standardize_name.py`/`tl source-rename`; đọc toàn văn = `tl extract`. **Bài học 2026-07-06:** suýt viết lại loop bóc trích yếu tay trong khi `tl backfill-title-vn` đã có và tốt hơn. **Enforcement:** bước kiểm-kho là TIỀN-ĐIỀU-KIỆN của mọi việc viết/loop; SỬA hoặc THÊM file skill CHỈ qua `tl edit-skill` (DRY + py_compile/assert) rồi `tl verify-integrity` — KHÔNG Edit/Write native (mount Cowork cắt cụt). Instruction/loop phải khai khối `SCRIPT_REUSE_GATE` (bổ sung vào `tl instruction-audit`/selftest).
 
 ## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
 > ## ★★ BƯỚC 0 — CHỌN ĐÚNG 1 ĐƯỜNG THEO MÔI TRƯỜNG (ĐỪNG TRỘN, ĐỪNG ĐỤNG `_parts` SỚM) ★★

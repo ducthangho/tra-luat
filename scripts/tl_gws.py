@@ -97,6 +97,33 @@ def _gws_cred_alive(timeout: float = 20.0) -> tuple[bool, str]:
         return False, str(e)[:240]
 
 
+def _nlm_auth_alive(notebook_id: str, timeout: int = 30) -> tuple[bool | None, str]:
+    """M1 (v1.33.35 — log rà 45 Luật LIVE: nlm-auth-load/doctor/`nlm login --check` báo XANH [rc=0] nhưng
+    nlm-get/list/reconcile LIVE đều 'Authentication expired'): CANARY LIVE THẬT cho NLM — gọi 1 lệnh chạm
+    server (`nlm notebook get` base notebook) thay vì tin tuổi file / `login --check` (không chứng minh cookie
+    Google session còn sống). Tách khỏi `_nlm_auth_age_days` (tuổi file = KHÔNG bằng chứng auth sống).
+    Trả (alive, msg): True=auth sống · False=EXPIRED (auth_hint) · None=không kết luận được (thiếu binary/
+    mạng/timeout — KHÔNG hạ đỏ oan). Rẻ (1 notebook get ~2s), chỉ gọi khi doctor KHÔNG --offline."""
+    try:
+        nc = _imp("nlm_cli")
+    except Exception as e:  # noqa: BLE001
+        return None, f"NLM_CLI_IMPORT_FAIL: {type(e).__name__}"
+    if not nc.nlm_available():
+        return None, "NO_BINARY: nlm CLI chưa trên PATH (không probe được)"
+    if not notebook_id:
+        return None, "NO_NOTEBOOK: thiếu base notebook id để probe"
+    try:
+        r = nc.notebook_get(notebook_id, timeout=timeout)
+    except Exception as e:  # noqa: BLE001
+        return None, f"PROBE_EXC: {type(e).__name__}: {str(e)[:120]}"
+    if r.get("ok"):
+        return True, f"LIVE OK (base notebook {int(r.get('source_count') or 0)} nguồn)"
+    # ok:False → phân biệt AUTH (hết hạn — RED) vs mạng/khác (không kết luận)
+    if r.get("auth_hint"):
+        return False, "AUTH_EXPIRED: nlm cookie hết hạn — `nlm login` (tương tác) rồi `tl nlm-auth-stage`/`secrets-set --nlm`"
+    return None, f"PROBE_INCONCLUSIVE (không phải auth): {str(r.get('error') or '?')[:160]}"
+
+
 def _drive_media_download(file_id, dest, cred, export_mime: str | None = None, timeout: float = 300.0):
     """Tải file Drive bằng DIRECT MEDIA qua HTTP — RAW bytes STREAMING thẳng xuống đĩa: KHÔNG base64
     (không phình 33%), KHÔNG cap 9MB webapp, không nạp vào RAM/context, byte-exact MỌI loại (kể cả text/JSON

@@ -1,3 +1,39 @@
+# ★ v1.33.35 — xử log rà 45 Luật LIVE (Chat+Cowork): NLM auth FALSE-GREEN (M1) · slot-audit −288 giả (M2) · QT5 query lai dấu (Q1)
+
+Log môi trường lành (mount đủ, Py3.12+uv+curl) rà 45 Luật. Phần OFFLINE (source-map ×45, sweep, extract) sạch;
+3 lỗi CODE-fixable lộ ra — đều đã REPRO + verify LIVE trước khi vá:
+
+## M1 (🔴 ưu tiên nhất) — doctor probe NLM auth LIVE THẬT, chống false-green
+- **Hiện tượng:** `nlm-auth-load`/`doctor`/`nlm login --check` báo OK (rc=0) nhưng `nlm-get`/`nlm-list`/
+  `nlm-reconcile` LIVE đều "Authentication expired". Health-check tin tuổi cookie + `login --check` (không chứng
+  minh Google session còn sống) → xanh-giả, chặn mọi đối soát NLM mà không báo.
+- **Fix:** `_nlm_auth_alive(notebook_id)` (tl_gws) — CANARY LIVE THẬT: 1 `nlm notebook get` base notebook (giống
+  `_gws_cred_alive` v1.32.1). Trả True (auth sống) / False (auth_hint → RED) / None (thiếu binary/mạng → KHÔNG
+  đỏ oan). doctor thêm check **"nlm auth (LIVE probe)"** khi có binary + KHÔNG `--offline`. **Verify LIVE:** doctor
+  thật hiện `✓ nlm CLI (fast-lane)` (binary có) NHƯNG `✗ nlm auth (LIVE probe) — 🔴 AUTH_EXPIRED` — bắt đúng cái
+  fast-lane bỏ sót (raw error nlm CLI: "Authentication expired"). Phân loại chuẩn: lỗi non-auth (notebook-not-
+  found) → None, KHÔNG false-red.
+
+## M2 (🔴) — slot-audit không coi auth-fail là 0 nguồn (hết gap −288 giả)
+- **Gốc rễ:** `notebook_get()` trả `{ok:False, auth_hint}` khi cookie chết (KHÔNG raise) → cũ
+  `int(_ng.get("source_count") or 0)` = 0 → `gap = 0 − 288 = −288` giả (M1 kéo theo).
+- **Fix:** kiểm `.ok` TRƯỚC; ok=False → `live_read_failed=True` + `live_note` (kèm 🔴 AUTH nếu auth_hint), phys
+  giữ None → KHÔNG suy gap. Text mode in cảnh báo thay vì im lặng nuốt lỗi thành 0-vật-lý.
+
+## Q1 (🟡) — QT5 query nhất quán dấu (hết trộn subject-không-dấu + keyword-có-dấu)
+- **Hiện tượng:** subject suy từ tên file ASCII ("Bo luat hinh su") bị TRỘN keyword có dấu ("hợp nhất") →
+  query LAI recall/exact-phrase kém (cờ `QT5_SUBJECT_NO_DIACRITICS`).
+- **Fix:** `_qt5_queries` chọn từ vựng keyword THEO dấu subject (`_has_diacritics`): subject không dấu → keyword
+  cũng không dấu (query đồng-nhất, Google chuẩn hoá dấu tiếng Việt nên recall tốt hơn lai). Có dấu → giữ nguyên.
+  Advisory backfill title_vn vẫn giữ (bản có dấu + site:vbpl vẫn tối ưu nhất). Sort high-velocity so bản strip-
+  accents (bắt cả "mới nhất"/"moi nhat"). Verify: no-diac → 0 keyword có dấu; diac → giữ có dấu.
+
+**Không xử ở đây (log tự nêu = vận hành/corpus, không phải lỗi code):** S1/S2 20/45 Luật cần web lượt-2 (thiết kế),
+nợ hygiene 159 tên/6 md5/12 identity/2 miscat/1 loai/8 orphan (lệnh P1 sẵn), NLM cookie hết hạn cần `nlm login`
+tương tác. selftest **592/592** (+3: r45 M1 phân loại canary, r46 M2 no-fake-gap, r47 Q1 nhất quán dấu).
+
+---
+
 # ★ v1.33.34 — MERGE bundle-13 (`tra-luat-v1.33.33.zip`): nhánh song song thêm cờ `--out` cho reg-query + corpus-audit (S-4) — DISJOINT với cookie-fix v1.33.33 ta, PORT trọn 0 reject
 
 Bundle-13 fork từ v1.33.32 (586 test), làm việc KHÁC HẲN cookie-fix v1.33.33 ta: bít nốt 2 lệnh JSON nặng CÒN

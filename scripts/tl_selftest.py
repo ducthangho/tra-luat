@@ -4280,6 +4280,53 @@ def run() -> int:
     _ca44 = _parse_out(["corpus-audit", "--all", "--out", "/tmp/_ca_selftest.json"])
     cases.append(("r44_reg_query_accepts_out", _rq44 == "/tmp/_rq_selftest.json"))
     cases.append(("r44_corpus_audit_accepts_out", _ca44 == "/tmp/_ca_selftest.json"))
+
+    # ═══ v1.33.35 (log rà 45 Luật LIVE — M1 NLM auth false-green · M2 slot-audit −288 giả · Q1 QT5 lai dấu) — r45_* ═══
+    build_parser()   # đảm bảo tl_gws đã bind (_imp khả dụng) trước khi gọi _nlm_auth_alive
+    # (M1) canary LIVE phân loại đúng: ok:True→alive True · auth_hint→False (RED) · lỗi-non-auth→None (không đỏ
+    # oan) · thiếu binary→None. Monkeypatch nlm_cli.notebook_get/nlm_available (KHÔNG chạm mạng thật).
+    _tg45 = _need_base("tl_gws"); _nc45 = _need_base("nlm_cli")
+    _o_ng45, _o_av45 = _nc45.notebook_get, _nc45.nlm_available
+    try:
+        _nc45.nlm_available = lambda: True
+        _nc45.notebook_get = lambda nb, timeout=120: {"ok": True, "source_count": 298}
+        _m1_ok = _tg45._nlm_auth_alive("NB45")
+        _nc45.notebook_get = lambda nb, timeout=120: {"ok": False, "error": "Authentication expired", "auth_hint": "nlm login"}
+        _m1_exp = _tg45._nlm_auth_alive("NB45")
+        _nc45.notebook_get = lambda nb, timeout=120: {"ok": False, "error": "notebook not found", "auth_hint": None}
+        _m1_inc = _tg45._nlm_auth_alive("NB45")
+        _nc45.nlm_available = lambda: False
+        _m1_nob = _tg45._nlm_auth_alive("NB45")
+    finally:
+        _nc45.notebook_get, _nc45.nlm_available = _o_ng45, _o_av45
+    cases.append(("r45_nlm_auth_alive_classifies",
+                  _m1_ok[0] is True and _m1_exp[0] is False and _m1_inc[0] is None and _m1_nob[0] is None
+                  and "EXPIRED" in _m1_exp[1]))
+    # (M2) slot-audit: notebook_get ok:False (auth chết, KHÔNG raise) → phys KHÔNG bị coi là 0 → KHÔNG suy gap
+    # (trước: int(None or 0)=0 → gap −288 giả); live_read_failed=True, không có physical_source_count.
+    _o_ng46 = _nc45.notebook_get; _o_me46 = _TL_MODULE._manifest_entries
+    _nc45.notebook_get = lambda nb, timeout=120: {"ok": False, "error": "Authentication expired", "auth_hint": "nlm login"}
+    _TL_MODULE._manifest_entries = lambda refresh=False: [
+        {"drive_id": "d1", "nlm_source_id": "s1", "nlm_notebook_id": "NB46", "corpus": "true"}]
+    try:
+        _b46 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b46), _ctx27.redirect_stderr(_io27.StringIO()):
+            _TL_MODULE.cmd_slot_audit(build_parser().parse_args(
+                ["slot-audit", "--notebook-id", "NB46", "--json"]))
+        _out46 = json.loads(_b46.getvalue())
+    finally:
+        _nc45.notebook_get = _o_ng46; _TL_MODULE._manifest_entries = _o_me46
+    cases.append(("r46_slot_audit_authfail_no_fake_gap",
+                  "gap" not in _out46 and "physical_source_count" not in _out46
+                  and _out46.get("live_read_failed") is True))
+    # (Q1) QT5: subject KHÔNG dấu → KHÔNG trộn keyword có dấu (query nhất quán không-dấu); subject CÓ dấu → giữ
+    # có dấu. Thuần offline.
+    _q_nd = _qt5_queries("Bo luat hinh su")
+    _q_d = _qt5_queries("Bộ luật hình sự")
+    cases.append(("r47_qt5_consistent_diacritics",
+                  not any("hợp nhất" in q or "mới nhất" in q for q in _q_nd)
+                  and any("hop nhat" in q for q in _q_nd)
+                  and any("hợp nhất" in q for q in _q_d)))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

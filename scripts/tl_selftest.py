@@ -4246,6 +4246,24 @@ def run() -> int:
     cases.append(("r43_registry_hygiene_omnibus_not_title_mismatch",
                   "OMNIBUS_NARROW_TITLE_CHECK" in _rh43.title_flags(_rh43_omn)
                   and _rh43_rep["title_mismatch_rows"] == []))
+
+    # (r43b — phát hiện live 2026-07-05 khi refresh nlm token thật): `nlm login --force` re-auth THÀNH CÔNG
+    # (account xác nhận, session mới) nhưng root auth.json.extracted_at KHÔNG được nlm CLI bản mới ghi lại
+    # → _nlm_auth_age_days cũ báo ~19 ngày dù VỪA refresh xong. Fix: ưu tiên metadata.json.last_validated (ISO,
+    # cập nhật đúng lúc login/--check OK) — fixture "vừa xong" (last_validated=now) phải cho age≈0 dù
+    # auth.json.extracted_at cũ 19 ngày; thiếu metadata.json → fallback extracted_at (bundle cũ, tương thích ngược).
+    import datetime as _dt43
+    import time as _t43
+    _now_iso43 = _dt43.datetime.now().isoformat()
+    _old_epoch43 = _t43.time() - 19 * 86400
+    _fresh_meta = {"auth.json": json.dumps({"extracted_at": _old_epoch43}),
+                   "profiles/default/metadata.json": json.dumps({"last_validated": _now_iso43})}
+    _legacy_only = {"auth.json": json.dumps({"extracted_at": _old_epoch43})}
+    _age_fresh43 = _tg42._nlm_auth_age_days(_fresh_meta)
+    _age_legacy43 = _tg42._nlm_auth_age_days(_legacy_only)
+    cases.append(("r43_nlm_auth_age_prefers_metadata_last_validated",
+                  _age_fresh43 is not None and _age_fresh43 < 0.01
+                  and _age_legacy43 is not None and 18.9 < _age_legacy43 < 19.1))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

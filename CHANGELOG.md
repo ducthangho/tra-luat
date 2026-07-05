@@ -1,3 +1,26 @@
+# ★ v1.33.33 — FIX THẬT phát hiện khi refresh nlm token live (2026-07-05): cảnh báo tuổi cookie ĐỌC NHẦM NGUỒN, luôn báo cũ dù vừa refresh xong
+
+Tự kiểm chứng tính năng cookie-age vừa xây (v1.33.31/32) bằng cách refresh token thật trên máy Code:
+`nlm login --force` → mở Chrome → đăng nhập lại `ducthangho@gmail.com` thành công (50 cookie, CSRF token, session
+mới). Nhưng `tl secrets-set --nlm` NGAY SAU ĐÓ vẫn in "cookie ~19 ngày tuổi ⚠" — cảnh báo SAI ngay sau khi làm
+đúng việc chính nó khuyên.
+
+## Gốc rễ
+`_nlm_auth_age_days` đọc `extracted_at` từ **root `auth.json`**. Nhưng bản `nlm` CLI hiện tại (profile-based
+storage) không còn ghi lại field này khi re-auth — tín hiệu tươi THẬT nằm ở
+**`profiles/default/metadata.json.last_validated`** (ISO timestamp, cập nhật đúng lúc mỗi `nlm login`/`--check`
+xác thực OK). Root `auth.json` mtime/nội dung `extracted_at` có thể ĐỨNG YÊN qua nhiều lần login thành công.
+
+## Fix
+`_nlm_auth_age_days`: ưu tiên `metadata.json.last_validated` (parse ISO, so với `datetime.now()`); fallback
+`auth.json.extracted_at` (epoch) khi thiếu metadata.json — tương thích bundle cũ/máy chưa có profile storage.
+
+**Verify LIVE:** trước fix `secrets-set --nlm` báo "~19 ngày ⚠"; sau fix cùng dữ liệu (đã refresh) báo "~0 ngày",
+cookie mới đã đồng bộ cả bundle .enc lẫn public NLM_CRED_FILEID. +1 test r43b (fixture metadata mới + auth.json
+cũ → age≈0; chỉ auth.json → fallback đúng 19 ngày). selftest **587/587**.
+
+---
+
 # ★ v1.33.32 — MERGE bundle-12 (`tra-luat-skill-v1.33.31-gws3env-fixed.zip`): nhánh song song CÙNG 3 vấn đề trên v1.33.30 — hội tụ lần 4, mỗi bên mạnh một nửa
 
 Bundle-12 dựng trên v1.33.30, tự đặt TRÙNG SỐ v1.33.31, xử CÙNG log rà LIVE v1.33.28 với canonical v1.33.31 ta

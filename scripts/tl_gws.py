@@ -466,8 +466,23 @@ def _refresh_nlm_auth():
 
 
 def _nlm_auth_age_days(nlm_auth):
-    """Tuổi cookie (ngày) từ extracted_at trong auth.json — để cảnh báo cookie cũ sắp hết hạn (~2–4 tuần)."""
+    """Tuổi cookie (ngày) — cảnh báo cookie cũ sắp hết hạn (~2–4 tuần).
+
+    Phát hiện 2026-07-05 (refresh token thật): `nlm login --force` re-auth THÀNH CÔNG (account xác nhận,
+    session mới) nhưng root `auth.json.extracted_at` KHÔNG được nlm CLI bản mới ghi lại nữa (profile-based
+    storage) → age vẫn báo ~19 ngày dù vừa refresh, khiến cảnh báo LUÔN SAI sau khi đã làm đúng việc user được
+    khuyên làm. Tín hiệu tươi THẬT nằm ở `profiles/default/metadata.json.last_validated` (ISO, cập nhật mỗi lần
+    `nlm login`/`--check` xác thực OK) — ưu tiên đọc đó; fallback `auth.json.extracted_at` (epoch) cho bundle cũ
+    không có metadata.json (tương thích ngược)."""
     import time as _t
+    from datetime import datetime as _dt
+    try:
+        meta = json.loads(nlm_auth.get("profiles/default/metadata.json", "{}"))
+        lv = meta.get("last_validated")
+        if lv:
+            return (_dt.now() - _dt.fromisoformat(lv)).total_seconds() / 86400.0
+    except Exception:
+        pass
     try:
         ts = json.loads(nlm_auth.get("auth.json", "{}")).get("extracted_at")
         return (_t.time() - float(ts)) / 86400.0 if ts else None

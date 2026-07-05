@@ -4120,15 +4120,40 @@ def run() -> int:
     cases.append(("r40_compound_sohieu_not_flagged",
                   "NO_SOHIEU_IN_NAME" not in _name_structural_issues("VBHN_73-82-ND-CP_Quan_ly_dau_tu_CNTT_NSNN")
                   and "NO_SOHIEU_IN_NAME" in _name_structural_issues("Luat_Phong_chong_benh_truyen_nhiem")))
-    # (F5) source-map item mang candidates[] compact 'sohieu|tên|conf' (parity review-queue) — fixture r30.
+    # (F5 → v1.33.30 MERGE bundle-29: STRUCTURED thay compact) source-map item + candidates[] dict đầy đủ
+    # sohieu_key/confidence/candidate_type/linked/strong — driver hết gọi thêm review-queue.
     _sm40 = _source_map_one("44/2019/QH14", [
         {"id": "b44", "drive_id": "b44", "name": "Luat_44-2019-QH14_PCTH_ruou_bia", "so_hieu": "44/2019/QH14",
          "loai": "Luật", "cat": "45", "corpus": "true", "nlm_source_id": "s44"},
         {"id": "a44", "drive_id": "a44", "name": "Luat_99-2029-QH17_SuaDoi_PCTH_ruou_bia",
          "so_hieu": "99/2029/QH17", "loai": "Luật", "cat": "45", "corpus": "true"}])
-    cases.append(("r40_source_map_candidates_compact",
+    cases.append(("r40_source_map_candidates_structured",
                   isinstance(_sm40.get("candidates"), list) and bool(_sm40["candidates"])
-                  and _sm40["candidates"][0].count("|") == 2 and _sm40["candidates"][0].startswith("99-2029-QH17|")))
+                  and _sm40["candidates"][0].get("sohieu_key") == "99-2029-QH17"
+                  and {"candidate_type", "confidence", "linked_to_query", "strong"}.issubset(set(_sm40["candidates"][0].keys()))
+                  and _sm40.get("candidate_count") == len(_sm40["candidates"])))
+
+    # ═══ v1.33.30 (MERGE bundle-29 — nhánh song song CÙNG log v1.33.28: giữ ta [doctor helper, BrokenPipe,
+    # tl_fetch version-compare, .gitattributes], port họ [candidates STRUCTURED, compound-sohieu tầng PARSER
+    # có guard VBHN-marker, --refresh flag], +test rc-doctrine của họ) — r41_* ═══
+    # (parser tầng sâu) số kép trả VỀ GIÁ TRỊ với tên VBHN; KHÔNG nhận với tên thường (guard marker).
+    cases.append(("r41_parse_compound_sohieu_guarded",
+                  _parse_sohieu_from_name("VBHN_73-82-ND-CP_Quan_ly_dau_tu_CNTT_NSNN") == "73-82-ND-CP"
+                  and _parse_sohieu_from_name("Bao_cao_73-82-ND-CP_tong_ket") == ""   # số kép KHÔNG marker VBHN → guard chặn
+                  and _parse_sohieu_from_name("Luat_100-2015-QH13_Hinh_su") == "100-2015-QH13"))
+    # (rc-doctrine, test gốc bundle-29 adapt fixture ta): sweep/review-queue --json rc=0 dù có findings.
+    _orig_me41 = _TL_MODULE._manifest_entries
+    _TL_MODULE._manifest_entries = lambda refresh=False: _fx30
+    try:
+        _b41s, _b41r = _io27.StringIO(), _io27.StringIO()
+        with _ctx27.redirect_stdout(_b41s), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc41s = _TL_MODULE.cmd_sweep(build_parser().parse_args(["sweep", "--json"]))
+        with _ctx27.redirect_stdout(_b41r), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc41r = _TL_MODULE.cmd_review_queue(build_parser().parse_args(["review-queue", "--json"]))
+    finally:
+        _TL_MODULE._manifest_entries = _orig_me41
+    cases.append(("r41_sweep_review_queue_rc0_findings", _rc41s == 0 and _rc41r == 0
+                  and json.loads(_b41s.getvalue()).get("total") == 3))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,3 +1,28 @@
+# ★ v1.33.30 — MERGE bundle-29 (`tra-luat-skill-v1.33.29-gws3env-fixed.zip`): nhánh song song CÙNG log v1.33.28 — port 3 món SÂU hơn bản ta, giữ 4 món ta có mà họ không
+
+Bundle-29 dựng trên v1.33.28, xử cùng 3 log với canonical v1.33.29 — hội tụ lần nữa, mỗi bên mạnh một nửa:
+
+## PORT (3 — bản họ sâu/giàu hơn)
+- **candidates[] STRUCTURED** (thay compact-string v1.33.29 ta): item + top-level gộp-dedup, mỗi row đủ
+  sohieu_key/confidence/candidate_type/linked_to_query/strong/omnibus/subject_overlap + candidate_count.
+  Field-verify 44/2019: ứng viên 71-2020 hiện structured ở top-level.
+- **Compound-sohieu ở TẦNG PARSER** `_parse_sohieu_from_name` (thay suppress-flag v1.33.29 ta — mọi consumer
+  MISSING_SOHIEU/sweep/corpus-audit cùng hưởng): nhận 'NN-MM-<CQ>[-<CQ>]' CHỈ khi tên có marker VBHN —
+  số kép không-marker vẫn trả rỗng (control r41; fixture đầu của ta sai vì '2024-2025-ND' vốn được regex CŨ
+  bắt — đã thay control đúng). Giữ luôn suppress-flag ta làm phòng-vệ-kép.
+- **`--refresh` flag + TL_FETCH_REFRESH** cho tl_fetch.sh: ép xoá zip+live — escape hatch cho ca Drive re-up
+  CÙNG VERSION khác nội dung mà version-compare của ta không bắt được. GIỮ máy version-compare ta (nhanh hơn
+  full-refresh mặc định của họ: không re-extract khi version trùng).
+
+## GIỮ TA (4 — họ không có)
+- `_resolve_registry_doc_id` (tương đương `_effective_registry_doc_id` họ — giữ bản ta đã test r40).
+- BrokenPipe hardening main() · tl_fetch ROOT in kèm VERSION · .gitattributes *.sh=LF.
+
++test rc-doctrine của họ (sweep/review-queue --json rc=0 dù có findings) adapt fixture ta.
+selftest **579/579** (+2 r41, r40 candidates chuyển structured).
+
+---
+
 # ★ v1.33.29 — Xử log verify + log rà v1.33.28 LIVE: doctor pin-check stale · footgun tl_fetch 2 tầng · NO_SOHIEU số-kép · candidates parity · rc=1 ma
 
 3 log chạy LIVE v1.33.28. Fix 5 + phân xử 3:

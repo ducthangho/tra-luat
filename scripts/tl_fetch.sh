@@ -14,9 +14,19 @@ CONFIG_FILEID="${TL_CONFIG_FILEID:-1dEOBJ8PRmKoLgziEF5xuKjRhHLNhUUYq}"   # confi
 DIR="${TL_DIR:-$HOME/.tl_fetch}"; ZIP="$DIR/skill.zip"; OUT="$DIR/live"
 CFG="${TL_CONFIG:-$HOME/.tra_luat_config.json}"
 PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
-MODE=run; [ "$1" = "--setup" ] && { MODE=setup; shift; }
+# v1.33.30 (MERGE bundle-29): --refresh / TL_FETCH_REFRESH=1 = ép xoá CẢ zip + live rồi tải/giải nén lại
+# (escape hatch khi Drive re-up CÙNG VERSION khác nội dung — version-compare bên dưới không bắt được ca đó).
+MODE=run; REFRESH="${TL_FETCH_REFRESH:-0}"
+[ "$1" = "--refresh" ] && { REFRESH=1; shift; }
+[ "$1" = "--setup" ] && { MODE=setup; shift; }
+[ "$1" = "--refresh" ] && { REFRESH=1; shift; }
 STEP=""; [ "$1" = "--setup-step" ] && { MODE=step; STEP="$2"; shift 2; }
+[ "$1" = "--refresh" ] && { REFRESH=1; shift; }
 DO_NLM=0; [ "$1" = "--nlm" ] && { DO_NLM=1; shift; }
+if [ "$REFRESH" = 1 ]; then
+  rm -f "$ZIP"; rm -rf "$OUT"
+  echo "[tl_fetch] --refresh: xoa cache zip/live cu -> tai + giai nen lai ban sach" >&2
+fi
 mkdir -p "$DIR" 2>/dev/null || { echo "[tl_fetch] không tạo được $DIR" >&2; exit 2; }
 
 # 1) TẢI ZIP — (a) curl Drive public TRƯỚC (nhanh, không token); (b) webapp GAS (token); (c) MCP-placed.

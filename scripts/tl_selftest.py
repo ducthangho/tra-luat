@@ -4157,8 +4157,9 @@ def run() -> int:
 
     # ═══ v1.33.31 (log rà LIVE v1.33.28 — S-1 hai engine bất đồng 124/125-2025 · S-2 advisory kép
     # OMNIBUS_NARROW 45-2019 · A cookie 19 ngày nạp im lặng) — r42_* ═══
-    # (S-1a) relation-check phủ định (audit verdict=OK) → row RỜI bucket hành động, mang cờ
-    # RELATION_CHECK_NEGATED, fix_command nêu PHỦ ĐỊNH, negated_count đếm; counts vẫn cộng về tổng.
+    # (S-1a — CẬP NHẬT v1.33.32 MERGE bundle-12) relation-check phủ định → row RỜI bucket hành động sang bucket
+    # RIÊNG `relation_probe_suppressed` (bundle), mang cờ RELATION_CHECK_NEGATED (ta) + payload `relation_probe`
+    # (bundle), fix_command nêu PHỦ ĐỊNH, negated_count đếm; counts (có bucket mới) vẫn cộng về tổng.
     # Audit fake qua monkeypatch — hình dạng bất đồng THẬT đã field-verify LIVE (124/125-2025).
     _orig_ra42 = _TL_MODULE._relation_audit
     _TL_MODULE._relation_audit = (lambda entries, base="", subject="", amendments=None,
@@ -4167,25 +4168,33 @@ def run() -> int:
         _rq42 = _TL_MODULE._review_queue_report([_rq17_base_rev, _rq17_amend], limit=None)
     finally:
         _TL_MODULE._relation_audit = _orig_ra42
-    _rq42_row = (_rq42["relation_low_confidence"] or [{}])[0]
+    _rq42_row = (_rq42["relation_probe_suppressed"] or [{}])[0]
     cases.append(("r42_rel_negated_demoted_and_flagged",
-                  _rq42["relation_backfill"] == []
+                  _rq42["relation_backfill"] == [] and _rq42["relation_low_confidence"] == []
                   and _rq42["relation_negated_count"] == 1
+                  and _rq42["counts"]["relation_probe_suppressed"] == 1
                   and "RELATION_CHECK_NEGATED" in (_rq42_row.get("flags_all") or [])
                   and "RELATION_CHECK_NEGATED" in (_rq42_row.get("flags") or [])
+                  and (_rq42_row.get("relation_probe") or {}).get("suppressed") is True
                   and "PHỦ ĐỊNH" in _rq42_row.get("fix_command", "")
                   and sum(_rq42["counts"].values()) == _rq42["laws_scanned"] == 1))
-    # (S-1b control) audit THẬT trả REVIEW/QT5 (fixture 06/2022 subject-only) → KHÔNG negate — _rq17b
-    # (đã chạy audit thật ở trên) giữ nguyên bucket rel_low, negated_count=0.
+    # (S-1b control) audit THẬT trả subject_only (fixture 06/2022) → KHÔNG negate — _rq17b giữ nguyên bucket
+    # rel_low, negated_count=0, payload probe đi kèm với suppressed=False (driver thấy vì sao GIỮ).
     cases.append(("r42_rel_not_negated_when_audit_review",
                   _rq17b["relation_negated_count"] == 0
-                  and "RELATION_CHECK_NEGATED" not in (_rq17b["relation_low_confidence"][0].get("flags_all") or [])))
-    # (S-1c) ops-plan: row negated KHÔNG vào P0 relation_check_before_backfill — hạ dòng info P3 (audit-trail).
+                  and _rq17b["relation_probe_suppressed"] == []
+                  and "RELATION_CHECK_NEGATED" not in (_rq17b["relation_low_confidence"][0].get("flags_all") or [])
+                  and (_rq17b["relation_low_confidence"][0].get("relation_probe") or {}).get("suppressed") is False))
+    # (S-1c — CẬP NHẬT v1.33.32) ops-plan 3 tầng: P0 CHỈ strong; low-conf còn tín hiệu → P2 read-only probe
+    # (bundle); ca phủ định → P3 info audit-trail (ta). Không còn low-conf/negated nào lọt P0.
     _orig_rq42 = _TL_MODULE._review_queue_report
     _TL_MODULE._review_queue_report = lambda entries, limit=None: {
         "counts": {}, "web_round2": [], "relation_backfill": [],
-        "relation_low_confidence": [{"sohieu": "124-2025-QH15", "name": "Luat_GDNN",
-                                     "flags_all": ["RELATION_CHECK_NEGATED", "UNLINKED_AMENDMENT_CANDIDATE"]}]}
+        "relation_low_confidence": [{"sohieu": "68-2025-QH15", "name": "Luat_DT_von_NN",
+                                     "flags_all": ["AMENDMENT_CANDIDATE_LOW_CONFIDENCE"]}],
+        "relation_probe_suppressed": [{"sohieu": "124-2025-QH15", "name": "Luat_GDNN",
+                                       "flags_all": ["RELATION_CHECK_NEGATED", "UNLINKED_AMENDMENT_CANDIDATE"]}],
+        "relation_negated_count": 1}
     try:
         _op42 = _TL_MODULE._ops_plan_report([], include_sweep=False)
     finally:
@@ -4193,6 +4202,9 @@ def run() -> int:
     _op42_ids = {x["id"]: x for x in _op42["actions"]}
     cases.append(("r42_ops_plan_negated_not_p0",
                   "relation_check_before_backfill" not in _op42_ids
+                  and _op42_ids.get("relation_low_confidence_probe", {}).get("priority") == "P2"
+                  and _op42_ids["relation_low_confidence_probe"]["count"] == 1
+                  and _op42_ids["relation_low_confidence_probe"]["confirm_required"] is False
                   and _op42_ids.get("relation_candidates_negated", {}).get("priority") == "P3"
                   and _op42_ids["relation_candidates_negated"]["count"] == 1
                   and _op42_ids["relation_candidates_negated"]["confirm_required"] is False))
@@ -4214,6 +4226,26 @@ def run() -> int:
                   bool(_tg42._nlm_cookie_age_note(19.0)) and "19" in _tg42._nlm_cookie_age_note(19.0)
                   and _tg42._nlm_cookie_age_note(3.0) == "" and _tg42._nlm_cookie_age_note(None) == ""
                   and _tg42._NLM_COOKIE_WARN_DAYS == 14))
+
+    # ═══ v1.33.32 (MERGE bundle-12 `tra-luat-skill-v1.33.31-gws3env-fixed.zip` — nhánh song song CÙNG 3 vấn đề
+    # trên v1.33.30: PORT tiêu chí actionable + bucket suppressed + payload probe + ops-plan 3 tầng + mirror
+    # registry_hygiene; GIỮ ta: phạm vi probe strong+low, cờ NEGATED, P3 audit-trail, cookie superset) — r43_* ═══
+    # (a) TIÊU CHÍ PORT: phủ định theo TÍN-HIỆU-HÀNH-ĐỘNG, KHÔNG đòi verdict=OK — corpus chỉ có base (không
+    # candidate, KHÔNG VBHN → verdict=QT5_WEB_REQUIRED) vẫn suppressed; có subject_only → GIỮ (không phủ định).
+    _p43a = _rq_relation_probe([_rq17_base_rev], _rq17_base_rev)
+    _p43b = _rq_relation_probe([_rq17_base_rev, _rq17_amend], _rq17_base_rev)
+    cases.append(("r43_probe_criterion_actionable_not_verdict",
+                  _p43a["ok"] and _p43a["suppressed"] is True and _p43a["verdict"] == "QT5_WEB_REQUIRED"
+                  and _p43b["ok"] and _p43b["suppressed"] is False and _p43b["subject_only_review"] >= 1))
+    # (b) mirror registry_hygiene (PORT bundle-12): entry CHỈ có OMNIBUS_NARROW không vào title_mismatch_rows
+    # của registry-doctor (cờ vẫn giữ ở title_flags); TITLE_METADATA vẫn vào.
+    _rh43 = _need_base("registry_hygiene")
+    _rh43_omn = {"so_hieu": "45/2019/QH14", "name": "BLuat_45-2019-QH14_Lao_dong", "drive_id": "rh1",
+                 "corpus": "true", "sua_doi": "51-2024-QH15;74-2025-QH15", "loai": "Bộ luật", "cat": "20"}
+    _rh43_rep = _rh43.analyze([_rh43_omn])
+    cases.append(("r43_registry_hygiene_omnibus_not_title_mismatch",
+                  "OMNIBUS_NARROW_TITLE_CHECK" in _rh43.title_flags(_rh43_omn)
+                  and _rh43_rep["title_mismatch_rows"] == []))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

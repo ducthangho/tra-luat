@@ -296,7 +296,9 @@ def analyze(rows: list[dict]) -> dict:
         sh = row_sohieu(e)
         nk = name_key(e.get("name", ""))
         flags = title_flags(e)
-        if any(f in flags for f in ("OMNIBUS_NARROW_TITLE_CHECK", "TITLE_METADATA_MISMATCH", "VBHN_BARE_NUMBER", "VBHN_MISSING_YEAR_OR_DATE", "VBHN_NAME_MISSING_YEAR", "VBHN_SOHIEU_NORMALIZED_FROM_SHORT_VPQH", "VBHN_MINISTRY_MISSING_YEAR", "VBHN_MINISTRY_NAME_MISSING_YEAR", "NLM_GHOST_SOURCE", "NLM_STATUS_MISMATCH")):
+        # S-2 (v1.33.32 — PORT bundle-12): OMNIBUS_NARROW_TITLE_CHECK là advisory trên entry (source-map/status;
+        # sweep tl.py có bucket omnibus_title_advisory riêng) — mirror này không đếm kép vào title_mismatch.
+        if any(f in flags for f in ("TITLE_METADATA_MISMATCH", "VBHN_BARE_NUMBER", "VBHN_MISSING_YEAR_OR_DATE", "VBHN_NAME_MISSING_YEAR", "VBHN_SOHIEU_NORMALIZED_FROM_SHORT_VPQH", "VBHN_MINISTRY_MISSING_YEAR", "VBHN_MINISTRY_NAME_MISSING_YEAR", "NLM_GHOST_SOURCE", "NLM_STATUS_MISMATCH")):
             title_mismatch.append(e)
         if "NLM_GHOST_SOURCE" in flags:
             ghost_rows.append(e)

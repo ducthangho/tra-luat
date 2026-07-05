@@ -1,3 +1,35 @@
+# ★ v1.33.32 — MERGE bundle-12 (`tra-luat-skill-v1.33.31-gws3env-fixed.zip`): nhánh song song CÙNG 3 vấn đề trên v1.33.30 — hội tụ lần 4, mỗi bên mạnh một nửa
+
+Bundle-12 dựng trên v1.33.30, tự đặt TRÙNG SỐ v1.33.31, xử CÙNG log rà LIVE v1.33.28 với canonical v1.33.31 ta
+(S-1 P0 giả · S-2 đếm kép omnibus · A cookie già). Đối chiếu BẰNG HÀNH VI từng mảng:
+
+## PORT (4 — bản họ đúng/giàu hơn)
+- **S-1 TIÊU CHÍ PHỦ ĐỊNH theo tín-hiệu-hành-động** (thay `verdict=OK` của ta): suppress khi
+  missing_links/subject_only_review/footnote_only_amendments ĐỀU rỗng — negate được cả ca THIẾU VBHN
+  (verdict=QT5_WEB_REQUIRED; thiếu VBHN là việc bucket WEB, không giữ oan tín hiệu rel — ta bỏ sót lớp 68-2025/
+  44-2019). TINH CHỈNH khi nhận: BỎ `amend_n` khỏi tiêu chí bundle — candidates ĐÃ-linked-đủ (không missing_links)
+  không có gì để backfill, giữ chúng là oan (bundle giữ → ca đã-hợp-nhất-xong vẫn treo INFO).
+- **S-1 bucket riêng `relation_probe_suppressed`** (+counts key) — hàng đợi rel_low chỉ còn ca CÒN tín hiệu;
+  ca phủ định tách bạch, counts vẫn cộng về laws_scanned.
+- **S-1 payload `row.relation_probe`** (verdict/flags/counts/note) đi kèm row kể cả khi row rơi bucket web —
+  driver thấy NGAY vì sao phủ định/giữ, khỏi chạy lại relation-check tay.
+- **S-1 ops-plan 3 tầng**: P0 CHỈ ứng viên MẠNH (`relation_check_before_backfill`); low-conf còn tín hiệu →
+  **P2 `relation_low_confidence_probe`** read-only (LOW_CONF là INFO, không phải việc P0); + **mirror
+  registry_hygiene.py**: OMNIBUS_NARROW rời title_mismatch của registry-doctor (nhất quán với sweep).
+
+## GIỮ TA (4 — bundle không có/nông hơn)
+- Phạm vi probe = strong LẪN low-conf (bundle chỉ low-conf — bỏ sót backfill-khống lớp A1 v1.33.4).
+- Cờ `RELATION_CHECK_NEGATED` trên row + `relation_negated_count` (grep-được, đếm cả row rơi bucket web).
+- **P3 `relation_candidates_negated`** info audit-trail trong ops-plan (bundle drop hẳn — mất dấu vì sao biến mất).
+- S-2 bucket `omnibus_title_advisory` trong sweep (bundle DROP im lặng khỏi title_mismatch — mất visibility);
+  cookie-age: helper `_nlm_cookie_age_note` phủ 6 đường + doctor (bundle chỉ vá nlm-auth-load, message inline).
+
+Bundle KHÔNG có test nào (0); ta viết lại r42 theo shape gộp + r43 khoá tiêu chí PORT (suppress-dù-QT5, control
+subject-only giữ; mirror registry_hygiene). selftest **586/586** (+2). Zip bundle còn __pycache__/.pytest_cache —
+không port thói quen đóng gói.
+
+---
+
 # ★ v1.33.31 — xử log rà LIVE v1.33.28 (2026-07-05): S-1 hai engine bất đồng · S-2 advisory kép omnibus · A cookie già nạp im lặng
 
 Log Cowork chạy LIVE v1.33.28 (67 Luật, ops-plan P0→P3). Nhóm 🟠 false-positive + 1 ma sát vận hành = CODE-fixable:

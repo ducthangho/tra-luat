@@ -1,0 +1,3 @@
+# tl_fetch.sh chạy trên Cowork Linux — CRLF trong shell script = "\r: command not found".
+# Ép LF cho mọi .sh bất kể autocrlf máy dev Windows.
+*.sh text eol=lf

@@ -4264,6 +4264,22 @@ def run() -> int:
     cases.append(("r43_nlm_auth_age_prefers_metadata_last_validated",
                   _age_fresh43 is not None and _age_fresh43 < 0.01
                   and _age_legacy43 is not None and 18.9 < _age_legacy43 < 19.1))
+
+    # ═══ v1.33.34 (MERGE bundle-13 `tra-luat-v1.33.33.zip` — nhánh song song thêm cờ --out cho reg-query +
+    # corpus-audit [S-4]; DISJOINT với cookie-fix v1.33.33 ta → PORT trọn, 0 reject) — r44_* ═══
+    # (S-4) reg-query + corpus-audit CHẤP NHẬN --out (trước TỪ CHỐI → unrecognized arguments, rc=2 dù mọi lệnh
+    # JSON nặng khác đã có). Behavior-lock: parser nhận --out; và --out tự bật JSON (cmd_* gate _is_json |= a.out).
+    _bp44 = build_parser()
+    def _parse_out(_argv):
+        try:
+            _ns = _bp44.parse_args(_argv)
+        except SystemExit:
+            return None
+        return getattr(_ns, "out", "__MISSING__")
+    _rq44 = _parse_out(["reg-query", "--out", "/tmp/_rq_selftest.json"])
+    _ca44 = _parse_out(["corpus-audit", "--all", "--out", "/tmp/_ca_selftest.json"])
+    cases.append(("r44_reg_query_accepts_out", _rq44 == "/tmp/_rq_selftest.json"))
+    cases.append(("r44_corpus_audit_accepts_out", _ca44 == "/tmp/_ca_selftest.json"))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

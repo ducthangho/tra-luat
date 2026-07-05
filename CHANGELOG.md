@@ -1,3 +1,26 @@
+# ★ v1.33.34 — MERGE bundle-13 (`tra-luat-v1.33.33.zip`): nhánh song song thêm cờ `--out` cho reg-query + corpus-audit (S-4) — DISJOINT với cookie-fix v1.33.33 ta, PORT trọn 0 reject
+
+Bundle-13 fork từ v1.33.32 (586 test), làm việc KHÁC HẲN cookie-fix v1.33.33 ta: bít nốt 2 lệnh JSON nặng CÒN
+TỪ CHỐI `--out`. Va version-number lần nữa (cả 2 nhánh đánh 1.33.33) → gộp thành v1.33.34.
+
+## PORT (S-4 — bít gap thật, đã verify canonical CHƯA có)
+- **`reg-query --out <file>`** + **`corpus-audit --out <file>`**: atomic JSON qua đúng writer chung
+  `_emit_json_payload` (mirror doctor/sweep/counts/nlm-get/review-queue đã có từ v1.33.28); `--out` TỰ bật JSON
+  (`_is_json |= bool(a.out)` / gate `or a.out`). Trước đây 2 lệnh này trả `unrecognized arguments` rc=2 dù mọi
+  lệnh JSON nặng khác đã có `--out` → Cowork phải `>` redirect stdout (vỡ trần 30s / heredoc timeout).
+- **Không đổi hành vi mặc định**: không `--out` → vẫn in stdout như cũ (regression-tested).
+- **+2 test r44** (parser nhận --out + set đúng `.out` cho cả 2 lệnh). Smoke LIVE `reg-query --out`: ghi file
+  hợp lệ (schema=reg-query.v2, 3 rows), in path, 0 sót `.tmp` (atomic sạch).
+
+## GIỮ TA (bundle THIẾU — họ fork trước v1.33.33)
+- Cookie-age fix v1.33.33 (`_nlm_auth_age_days` đọc metadata.json.last_validated) — bundle-13 lack; áp diff
+  nguyên khối sẽ REVERT mất → chỉ trích 4 hunk S-4 + 2 test, KHÔNG đụng tl_gws.py/r43b.
+
+**Bối cảnh S-1..S-3/S-8/9/10 bundle nêu = trạng thái vận hành/corpus (slot 298/300, cookie, dedup) — không phải
+lỗi code**; ta đã xử S-1/S-2/S-3 riêng ở v1.33.31-33. selftest **589/589** (587 + 2 r44). ruff baseline (0 lỗi mới).
+
+---
+
 # ★ v1.33.33 — FIX THẬT phát hiện khi refresh nlm token live (2026-07-05): cảnh báo tuổi cookie ĐỌC NHẦM NGUỒN, luôn báo cũ dù vừa refresh xong
 
 Tự kiểm chứng tính năng cookie-age vừa xây (v1.33.31/32) bằng cách refresh token thật trên máy Code:

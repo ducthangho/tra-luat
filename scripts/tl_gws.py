@@ -463,9 +463,40 @@ def _secrets_fetch(a, fid: str):
 _NLM_AUTH_RELS = ("auth.json", "profiles/default/cookies.json", "profiles/default/metadata.json")
 
 
+def _nlm_sync_authjson_from_profile(base):
+    """M1b (v1.33.38 — ROOT CAUSE 'stage cookie tươi mà Cowork vẫn Authentication expired'): nlm CLI MỚI ghi
+    cookie vào `profiles/default/{cookies.json,metadata.json}` (nguồn authoritative — local canary đọc file này
+    nên báo SỐNG) NHƯNG KHÔNG cập nhật `auth.json` root (legacy). → auth.json STALE (cookie hết hạn) trong khi
+    profile TƯƠI. `_nlm_auth_files` gói CẢ auth.json stale; Cowork nạp về, nlm CLI ở đó đọc trúng auth.json stale
+    → 'Authentication expired' dù đã stage sau `nlm login` mới. Fix: DỰNG LẠI auth.json từ profile TƯƠI trước khi
+    gói (cookie format khớp CHÍNH XÁC: domain/expires/name/value/…). Trả text auth.json mới, hoặc None nếu profile
+    không đủ dữ liệu / KHÔNG tươi hơn auth.json (giữ nguyên hành vi cũ cho nlm CLI đời cũ chỉ dùng auth.json)."""
+    import time as _t
+    ck_p = os.path.join(base, "profiles", "default", "cookies.json")
+    md_p = os.path.join(base, "profiles", "default", "metadata.json")
+    aj_p = os.path.join(base, "auth.json")
+    if not (os.path.exists(ck_p) and os.path.exists(md_p)):
+        return None
+    # chỉ ghi đè khi profile TƯƠI HƠN-hoặc-BẰNG auth.json (mtime) — tránh hạ cấp nếu auth.json mới hơn (đời cũ)
+    if os.path.exists(aj_p) and os.path.getmtime(ck_p) < os.path.getmtime(aj_p):
+        return None
+    try:
+        cookies = json.load(open(ck_p, encoding="utf-8"))
+        meta = json.load(open(md_p, encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+    if not isinstance(cookies, list) or not cookies:
+        return None
+    auth = {"cookies": cookies, "csrf_token": meta.get("csrf_token"),
+            "session_id": meta.get("session_id"), "build_label": meta.get("build_label"),
+            "extracted_at": _t.time()}
+    return json.dumps(auth, ensure_ascii=False)
+
+
 def _nlm_auth_files():
     """Thu file auth nlm (profile 'default') từ ~/.notebooklm-mcp-cli → {relpath: text}. SECRET (cookies Google).
-    Cho `secrets-stage` gói vào bundle .enc → Cowork ghi lại → nlm chạy headless không cần `nlm login`."""
+    Cho `secrets-stage` gói vào bundle .enc → Cowork ghi lại → nlm chạy headless không cần `nlm login`.
+    M1b (v1.33.38): auth.json root có thể STALE (nlm CLI mới chỉ ghi profiles/default) → dựng lại từ profile TƯƠI."""
     base = os.path.expanduser("~/.notebooklm-mcp-cli")
     out = {}
     for rel in _NLM_AUTH_RELS:
@@ -475,6 +506,9 @@ def _nlm_auth_files():
                 out[rel] = open(p, encoding="utf-8").read()
             except Exception:
                 pass
+    synced = _nlm_sync_authjson_from_profile(base)   # auth.json TƯƠI dựng từ profile (nếu profile mới hơn)
+    if synced is not None:
+        out["auth.json"] = synced
     return out
 
 

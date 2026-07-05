@@ -4344,6 +4344,34 @@ def run() -> int:
     cases.append(("r48_title_vn_strips_bom_zero_width",
                   not _TL_MODULE._title_sentence_case(_bom + "BỘ THÔNG TIN VÀ").startswith(_bom)
                   and _tv48_bom[0] == "" and _tv48_ok[0] == "Bộ luật Hình sự"))
+
+    # ═══ v1.33.38 (log Cowork: STAGE cookie TƯƠI mà vẫn 'Authentication expired' — auth.json root STALE vì nlm
+    # CLI mới chỉ ghi profiles/default; Cowork đọc auth.json stale) — r49_* ═══
+    # _nlm_sync_authjson_from_profile: profile TƯƠI hơn → dựng lại auth.json từ profile (cookies+csrf+session_id,
+    # extracted_at=now); auth.json mới hơn → None (KHÔNG hạ cấp); thiếu profile → None.
+    import tempfile as _tmp49
+    _tg49 = _need_base("tl_gws")
+    with _tmp49.TemporaryDirectory() as _d49:
+        _prof = _os38.path.join(_d49, "profiles", "default"); _os38.makedirs(_prof)
+        _aj49 = _os38.path.join(_d49, "auth.json")
+        _ck49 = _os38.path.join(_prof, "cookies.json"); _md49 = _os38.path.join(_prof, "metadata.json")
+        open(_aj49, "w", encoding="utf-8").write(json.dumps(
+            {"cookies": [{"name": "OTZ", "expires": 100}], "csrf_token": "old", "session_id": "olds", "extracted_at": 1}))
+        open(_ck49, "w", encoding="utf-8").write(json.dumps(
+            [{"name": "__Secure-1PSID", "expires": 9999999999, "value": "v", "domain": ".google.com"}]))
+        open(_md49, "w", encoding="utf-8").write(json.dumps(
+            {"csrf_token": "newcsrf", "session_id": "newsess", "build_label": "b"}))
+        _os38.utime(_aj49, (1000, 1000)); _os38.utime(_ck49, (2000, 2000)); _os38.utime(_md49, (2000, 2000))
+        _sj49 = json.loads(_tg49._nlm_sync_authjson_from_profile(_d49) or "{}")
+        _fresh_ok = (len(_sj49.get("cookies", [])) == 1 and _sj49["cookies"][0]["name"] == "__Secure-1PSID"
+                     and _sj49.get("csrf_token") == "newcsrf" and _sj49.get("session_id") == "newsess"
+                     and _sj49.get("extracted_at", 0) > 1)
+        _os38.utime(_aj49, (3000, 3000))                       # auth.json mới hơn profile → None
+        _none_older = (_tg49._nlm_sync_authjson_from_profile(_d49) is None)
+        _os38.remove(_ck49)                                     # thiếu profile → None
+        _none_noprof = (_tg49._nlm_sync_authjson_from_profile(_d49) is None)
+    cases.append(("r49_nlm_authjson_synced_from_fresh_profile",
+                  _fresh_ok and _none_older and _none_noprof))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

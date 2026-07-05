@@ -1,3 +1,33 @@
+# ★ v1.33.38 — ROOT CAUSE: stage cookie NLM tươi mà Cowork vẫn "Authentication expired" (auth.json root STALE)
+
+Log Cowork: user `nlm login` mới + `tl nlm-auth-stage`, nhưng Cowork `nlm-auth-load` vẫn "Authentication expired".
+Cowork agent decode fileId `156StZc…` thấy `cookies[0]` hết hạn 2026-06-20 → kết luận "stage lại cookie cũ". **Điều
+tra local cho thấy kết luận đó SAI phần nguyên nhân** — và lộ bug skill-side thật.
+
+## Nguyên nhân THẬT (điều tra local, có 2 kho cookie)
+- `~/.notebooklm-mcp-cli/auth.json` (root, LEGACY): `extracted_at=2026-06-16`, cookie `OTZ` hết hạn 2026-06-21 →
+  STALE. `nlm login` mới **KHÔNG cập nhật file này**.
+- `~/.notebooklm-mcp-cli/profiles/default/{cookies.json,metadata.json}`: mtime 2026-07-05 (TƯƠI, từ `nlm login`),
+  50 cookie, core `__Secure-1PSID`/`PSIDCC` còn sống 2027 → **local canary đọc file này nên báo SỐNG**.
+- `_nlm_auth_files()` gói CẢ auth.json stale. Cowork nạp về, nlm CLI ở đó đọc trúng auth.json (legacy) → hết hạn.
+  Stage cũ có profile tươi nhưng Cowork KHÔNG đọc profile → vẫn fail. (Giải thích trọn vẹn mâu thuẫn "local SỐNG,
+  Cowork CHẾT".)
+
+## Fix — dựng lại auth.json từ profile TƯƠI trước khi gói
+- `_nlm_sync_authjson_from_profile(base)`: khi `profiles/default/` TƯƠI hơn-hoặc-bằng auth.json (mtime), tái tạo
+  auth.json = {cookies từ cookies.json, csrf_token/session_id/build_label từ metadata.json, extracted_at=now}.
+  Cookie format khớp CHÍNH XÁC (domain/expires/name/value/httpOnly/…). Guard: auth.json mới hơn → None (không hạ
+  cấp cho nlm CLI đời cũ chỉ dùng auth.json); thiếu profile → None.
+- `_nlm_auth_files()` gọi helper → override auth.json bằng bản tươi. **Verify local:** auth.json gói giờ 50 cookie
+  (was 25 stale), core PSID/PSIDCC sống, extracted_at=now; blob 42309B (was 35526B). ĐÃ re-stage vào
+  `156StZc…` → Cowork `nlm-auth-load` kế tiếp nhận auth.json tươi.
+
+**Lưu ý:** RTS rotation-cookie (`__Secure-1PSIDRTS`) hết hạn nhanh (ngày) là BÌNH THƯỜNG — Google tự refresh khi
+dùng; core `__Secure-1PSID` mới quyết định auth (canary local sống chứng minh). selftest **595/595** (+r49: sync
+từ profile tươi, guard không-hạ-cấp, thiếu-profile→None). ruff baseline (0 lỗi mới).
+
+---
+
 # ★ v1.33.37 — MERGE bundle-14 (`tra-luat_v1.33.36.zip`): nhánh incremental TRÊN chính v1.33.35 ta — #15 SCRIPT-REUSE GATE + enforcement selftest + fix BOM/zero-width title_vn
 
 Bundle-14 fork TRỰC TIẾP từ canonical v1.33.35 (tl.py diff CHỈ 2 hunk BOM — M1/M2/Q1 ta còn nguyên), thêm 3 món

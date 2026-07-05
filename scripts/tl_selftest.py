@@ -4154,6 +4154,66 @@ def run() -> int:
         _TL_MODULE._manifest_entries = _orig_me41
     cases.append(("r41_sweep_review_queue_rc0_findings", _rc41s == 0 and _rc41r == 0
                   and json.loads(_b41s.getvalue()).get("total") == 3))
+
+    # ═══ v1.33.31 (log rà LIVE v1.33.28 — S-1 hai engine bất đồng 124/125-2025 · S-2 advisory kép
+    # OMNIBUS_NARROW 45-2019 · A cookie 19 ngày nạp im lặng) — r42_* ═══
+    # (S-1a) relation-check phủ định (audit verdict=OK) → row RỜI bucket hành động, mang cờ
+    # RELATION_CHECK_NEGATED, fix_command nêu PHỦ ĐỊNH, negated_count đếm; counts vẫn cộng về tổng.
+    # Audit fake qua monkeypatch — hình dạng bất đồng THẬT đã field-verify LIVE (124/125-2025).
+    _orig_ra42 = _TL_MODULE._relation_audit
+    _TL_MODULE._relation_audit = (lambda entries, base="", subject="", amendments=None,
+                                  footnote_amend_keys=None: {"verdict": "OK", "missing_links": []})
+    try:
+        _rq42 = _TL_MODULE._review_queue_report([_rq17_base_rev, _rq17_amend], limit=None)
+    finally:
+        _TL_MODULE._relation_audit = _orig_ra42
+    _rq42_row = (_rq42["relation_low_confidence"] or [{}])[0]
+    cases.append(("r42_rel_negated_demoted_and_flagged",
+                  _rq42["relation_backfill"] == []
+                  and _rq42["relation_negated_count"] == 1
+                  and "RELATION_CHECK_NEGATED" in (_rq42_row.get("flags_all") or [])
+                  and "RELATION_CHECK_NEGATED" in (_rq42_row.get("flags") or [])
+                  and "PHỦ ĐỊNH" in _rq42_row.get("fix_command", "")
+                  and sum(_rq42["counts"].values()) == _rq42["laws_scanned"] == 1))
+    # (S-1b control) audit THẬT trả REVIEW/QT5 (fixture 06/2022 subject-only) → KHÔNG negate — _rq17b
+    # (đã chạy audit thật ở trên) giữ nguyên bucket rel_low, negated_count=0.
+    cases.append(("r42_rel_not_negated_when_audit_review",
+                  _rq17b["relation_negated_count"] == 0
+                  and "RELATION_CHECK_NEGATED" not in (_rq17b["relation_low_confidence"][0].get("flags_all") or [])))
+    # (S-1c) ops-plan: row negated KHÔNG vào P0 relation_check_before_backfill — hạ dòng info P3 (audit-trail).
+    _orig_rq42 = _TL_MODULE._review_queue_report
+    _TL_MODULE._review_queue_report = lambda entries, limit=None: {
+        "counts": {}, "web_round2": [], "relation_backfill": [],
+        "relation_low_confidence": [{"sohieu": "124-2025-QH15", "name": "Luat_GDNN",
+                                     "flags_all": ["RELATION_CHECK_NEGATED", "UNLINKED_AMENDMENT_CANDIDATE"]}]}
+    try:
+        _op42 = _TL_MODULE._ops_plan_report([], include_sweep=False)
+    finally:
+        _TL_MODULE._review_queue_report = _orig_rq42
+    _op42_ids = {x["id"]: x for x in _op42["actions"]}
+    cases.append(("r42_ops_plan_negated_not_p0",
+                  "relation_check_before_backfill" not in _op42_ids
+                  and _op42_ids.get("relation_candidates_negated", {}).get("priority") == "P3"
+                  and _op42_ids["relation_candidates_negated"]["count"] == 1
+                  and _op42_ids["relation_candidates_negated"]["confirm_required"] is False))
+    # (S-2) advisory-split OMNIBUS_NARROW: 45-2019 BLLĐ (sua_doi ≥2 ref, tên hẹp) → omnibus_title_advisory,
+    # KHÔNG còn ở headline title_mismatch (hết đếm kép với cờ trên bảng danh sách); TITLE_METADATA giữ headline.
+    _g42 = _hygiene_groups([
+        {"id": "o1", "drive_id": "o1", "name": "BLuat_45-2019-QH14_Lao_dong", "so_hieu": "45/2019/QH14",
+         "loai": "Bộ luật", "cat": "20", "corpus": "true", "sua_doi": "51-2024-QH15;74-2025-QH15"},
+        {"id": "o2", "drive_id": "o2", "name": "Luat_123-2025-QH15_SuaDoi_Giao_duc", "so_hieu": "123/2025/QH15",
+         "loai": "Luật", "cat": "13", "corpus": "true", "title_vn": "Quản lý thuế xuất khẩu, thuế nhập khẩu"},
+    ])
+    cases.append(("r42_omnibus_narrow_advisory_split",
+                  [_x.get("drive_id") for _x in _g42["omnibus_title_advisory"]] == ["o1"]
+                  and [_x.get("drive_id") for _x in _g42["title_mismatch"]] == ["o2"]
+                  and "OMNIBUS_NARROW_TITLE_CHECK" in _title_flags(dict(_g42["omnibus_title_advisory"][0]))))
+    # (A cookie) ngưỡng cảnh báo tuổi cookie: ≥14 ngày → chuỗi ⚠ chủ động; trẻ/không rõ → rỗng.
+    _tg42 = _need_base("tl_gws")
+    cases.append(("r42_nlm_cookie_age_note_threshold",
+                  bool(_tg42._nlm_cookie_age_note(19.0)) and "19" in _tg42._nlm_cookie_age_note(19.0)
+                  and _tg42._nlm_cookie_age_note(3.0) == "" and _tg42._nlm_cookie_age_note(None) == ""
+                  and _tg42._NLM_COOKIE_WARN_DAYS == 14))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

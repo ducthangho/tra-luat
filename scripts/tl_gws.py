@@ -475,6 +475,20 @@ def _nlm_auth_age_days(nlm_auth):
         return None
 
 
+_NLM_COOKIE_WARN_DAYS = 14
+
+
+def _nlm_cookie_age_note(age):
+    """Log Cowork 2026-07-05 (A): cookie ~19 ngày nạp IM LẶNG (chỉ in tuổi như info) — không ai được nhắc
+    re-stage cho tới khi auth chết giữa phiên. Cookie sống ~2–4 tuần → từ _NLM_COOKIE_WARN_DAYS trả chuỗi
+    ⚠ CHỦ ĐỘNG để mọi đường nạp/gói (auth-load/auth-pull/stage/bootstrap/doctor) cùng cảnh báo; rỗng khi
+    cookie còn trẻ hoặc không rõ tuổi."""
+    if age is None or age < _NLM_COOKIE_WARN_DAYS:
+        return ""
+    return (f" ⚠ cookie ~{age:.0f} NGÀY tuổi (sống ~2–4 tuần) — rủi ro hết hạn giữa phiên; re-stage sớm: "
+            "ở Code `nlm login` → `tl nlm-auth-stage` (hoặc `tl secrets-set --nlm`).")
+
+
 def cmd_secrets_stage(a) -> int:
     """[CODE] Gom {webappUrl, token GAS, gws_cred, nlm_auth} → MÃ HOÁ (TL_MASTER_KEY) → upload Drive (tl_secrets.enc).
     In fileId để baked vào SECRETS_FILEID. Cred/token chỉ ở RAM, KHÔNG plaintext ra Drive/zip."""
@@ -564,7 +578,7 @@ def cmd_secrets_set(a) -> int:
         bundle["nlm_auth"] = nlm; changed.append("nlm_auth")
         age = _nlm_auth_age_days(nlm)
         if age is not None:
-            print(f"[secrets-set] nlm cookie ~{age:.0f} ngày tuổi.")
+            print(f"[secrets-set] nlm cookie ~{age:.0f} ngày tuổi." + _nlm_cookie_age_note(age))
     if not changed:
         print("[secrets-set] ⚠ không có trường nào để đổi (--gas-token/--webapp/--gws/--nlm).", file=sys.stderr)
         return 1
@@ -930,7 +944,8 @@ def cmd_nlm_auth_pull(a) -> int:
             pass
     age = _nlm_auth_age_days(nlm)
     agestr = f" (~{age:.0f} ngày tuổi)" if age is not None else ""
-    print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm: nlm login --check")
+    print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm: nlm login --check"
+          + _nlm_cookie_age_note(age))
     return 0
 
 
@@ -1019,9 +1034,9 @@ def cmd_bootstrap(a) -> int:
             age = _nlm_auth_age_days(bundle["nlm_auth"])
             agestr = f" · cookie ~{age:.0f} ngày tuổi" if age is not None else ""
             print(f"[bootstrap] ✓ nlm auth ({len(bundle['nlm_auth'])} file) → ~/.notebooklm-mcp-cli (nlm headless){agestr}")
-            if age is not None and age > 14:           # cookie sống ~2–4 tuần → nhắc re-stage ở Code
-                print(f"[bootstrap] ⚠ nlm cookie ~{age:.0f} ngày — nếu auth lỗi, ở Code chạy `nlm login` rồi "
-                      f"`tl secrets-set --nlm`.", file=sys.stderr)
+            _agenote = _nlm_cookie_age_note(age)       # ngưỡng/thông điệp thống nhất mọi đường nạp (A log 2026-07-05)
+            if _agenote:
+                print(f"[bootstrap]{_agenote}", file=sys.stderr)
         if not _imp("gws_bridge").gws_exe() and not getattr(a, "no_gws", False):
             print("[bootstrap] gws chưa có PATH → cài binary (direct-media nếu có cred)…")
             try:
@@ -1177,7 +1192,9 @@ def _nlm_auth_load(token: str, fid: str):
         except OSError:
             pass
     age = _nlm_auth_age_days(nlm)
-    return True, f"~/.notebooklm-mcp-cli ({len(nlm)} file" + (f", ~{age:.0f} ngày tuổi" if age is not None else "") + ")"
+    return True, (f"~/.notebooklm-mcp-cli ({len(nlm)} file"
+                  + (f", ~{age:.0f} ngày tuổi" if age is not None else "") + ")"
+                  + _nlm_cookie_age_note(age))
 
 
 def cmd_nlm_auth_stage(a) -> int:
@@ -1209,6 +1226,9 @@ def cmd_nlm_auth_stage(a) -> int:
                                       getattr(a, "new", False))
     age = _nlm_auth_age_days(nlm)
     agestr = f", ~{age:.0f} ngày" if age is not None else ""
+    _agenote = _nlm_cookie_age_note(age)
+    if _agenote:      # đang gói cookie ĐÃ GIÀ → nhắc làm tươi trước (nlm login / --refresh) thay vì stage bản sắp chết
+        print(f"[nlm-auth-stage]{_agenote} (cân nhắc `nlm login` hoặc --refresh trước khi gói)", file=sys.stderr)
     if in_place:
         print(f"[nlm-auth-stage] ✓ nlm cookie MÃ HOÁ ({len(nlm)} file, {len(blob)}B{agestr}) → GHI ĐÈ TẠI CHỖ "
               f"id={fid} (fileId GIỮ NGUYÊN — Cowork `nlm-auth-load` tự nhận bản tươi).")

@@ -1,3 +1,44 @@
+# ★ v1.33.31 — xử log rà LIVE v1.33.28 (2026-07-05): S-1 hai engine bất đồng · S-2 advisory kép omnibus · A cookie già nạp im lặng
+
+Log Cowork chạy LIVE v1.33.28 (67 Luật, ops-plan P0→P3). Nhóm 🟠 false-positive + 1 ma sát vận hành = CODE-fixable:
+
+## S-1 — review-queue CROSS-VALIDATE ứng viên sửa đổi qua relation-check (hết P0 giả)
+- **Hiện tượng:** review-queue gắn 124/125-2025 (GDNN/GDĐH) cờ `AMENDMENT_CANDIDATE_LOW_CONFIDENCE`/
+  `UNLINKED_AMENDMENT_CANDIDATE`/`VBHN_RECHECK_REQUIRED` → ops-plan đẩy **P0** `relation_check_before_backfill`;
+  nhưng `tl relation-check --base 124-2025-QH15` (engine tất định `_relation_audit`) trả **verdict=OK, flags=[],
+  candidates=[]**. Hai engine BẤT ĐỒNG — người vận hành phải chạy relation-check tay TỪNG SỐ để loại (cùng lớp:
+  68-2025, 44-2019 trong web_round2).
+- **Fix:** `_review_queue_report` nay tự chạy `_relation_audit(entries, base=<sohieu>)` cho MỌI row có cờ rel
+  (strong lẫn low-conf). Audit **verdict=OK** (= không missing_links/subject_only/footnote-thiếu, VBHN đã thấy)
+  → cờ **`RELATION_CHECK_NEGATED`** + hạ khỏi bucket hành động (rel→rel_low), fix_command ghi "ĐÃ PHỦ ĐỊNH",
+  top-level +`relation_negated_count`. Audit còn REVIEW/QT5 → KHÔNG negate (fixture 06/2022 subject-only nguyên trạng).
+- **ops-plan:** row mang `RELATION_CHECK_NEGATED` KHÔNG vào P0 nữa — hạ dòng info **P3
+  `relation_candidates_negated`** (audit-trail, confirm_required=false); P0 chỉ giữ ca chưa phủ định + note số ca đã loại.
+
+## S-2 — khử advisory KÉP `OMNIBUS_NARROW_TITLE_CHECK` (sweep)
+- **Hiện tượng:** 45-2019 (BLLĐ) xuất cờ ở bảng flags từng entry RỒI LẠI vào `title_mismatch` của sweep (2 dòng)
+  — 1 nguyên nhân đếm 2 lần, người rà tưởng 2 vấn đề. "Không sai dữ liệu": tên hẹp vs BỊ luật sửa-nhiều-luật đụng
+  tới, không có action rename.
+- **Fix (mirror advisory-split v1.33.22):** headline `title_mismatch` CHỈ còn `TITLE_METADATA_MISMATCH`;
+  OMNIBUS_NARROW một mình → bucket mới **`omnibus_title_advisory`** (+`_rows`, in `omnibus_advisory=` ở sweep text
+  + hygiene). Cờ trên entry giữ nguyên (source-map/corpus-audit vẫn thấy).
+
+## A — cảnh báo CHỦ ĐỘNG tuổi cookie NLM (trước đây chỉ in info)
+- **Hiện tượng:** `nlm-auth-load` nạp cookie ~19 ngày tuổi IM LẶNG (chỉ in "~19 ngày tuổi" như info) — không ai
+  được nhắc re-stage cho tới khi auth chết giữa phiên (cookie sống ~2–4 tuần).
+- **Fix:** helper chung `_nlm_cookie_age_note` (ngưỡng `_NLM_COOKIE_WARN_DAYS=14`) — nối chuỗi ⚠ "re-stage sớm:
+  `nlm login` → `tl nlm-auth-stage` / `tl secrets-set --nlm`" vào MỌI đường: `nlm-auth-load`, `nlm-auth-pull`,
+  `nlm-auth-stage` (nhắc làm tươi TRƯỚC khi gói bản già), `bootstrap` (thay warn ad-hoc >14), `secrets-set --nlm`,
+  và **doctor** check `nlm CLI` (đọc extracted_at local; advisory — KHÔNG đổi ok/rc).
+
+**Verify:** selftest **584/584** (+5 r42: rel-negated demote+flag+counts, control not-negated, ops-plan P0→P3,
+omnibus advisory-split, cookie threshold) · ruff 505 lỗi = baseline HEAD (0 lỗi mới) · compile OK.
+**Không xử ở đây (data/ops, chờ user):** web lượt-2 23-24 Luật (Chrome official-first + vbhn-verify), dedup-plan
+--apply (ready 3/review 46), backfill-loai --normalize --apply (1), 159 tên phi chuẩn (corpus-audit --all --full),
+slot 298/300 (kế hoạch overflow trước đợt nạp mới), quarantine 105/orphan 8.
+
+---
+
 # ★ v1.33.30 — MERGE bundle-29 (`tra-luat-skill-v1.33.29-gws3env-fixed.zip`): nhánh song song CÙNG log v1.33.28 — port 3 món SÂU hơn bản ta, giữ 4 món ta có mà họ không
 
 Bundle-29 dựng trên v1.33.28, xử cùng 3 log với canonical v1.33.29 — hội tụ lần nữa, mỗi bên mạnh một nửa:

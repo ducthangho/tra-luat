@@ -1928,8 +1928,17 @@ def cmd_doctor(a) -> int:
     # báo đỏ GIẢ dù nlm đã cài). Dùng nlm_cli.nlm_exe() (đã nối ~/.local/bin + user-base bin) → khớp lúc tl spawn nlm.
     nprobe = _nlm_probe_summary(getattr(a, "env", None))
     nlm_bin = nprobe.get("tl_nlm_path") or nprobe.get("shell_nlm_path")
+    # A (log Cowork 2026-07-05): cookie ~19 ngày nạp không ai nhắc — doctor nay đọc tuổi cookie local
+    # (extracted_at trong auth.json) và nối cảnh báo chủ động khi ≥ ngưỡng (advisory, KHÔNG đổi ok/rc).
+    _nlm_age_note = ""
+    if nlm_bin:
+        try:
+            _tlgd = _imp("tl_gws")
+            _nlm_age_note = _tlgd._nlm_cookie_age_note(_tlgd._nlm_auth_age_days(_tlgd._nlm_auth_files() or {}))
+        except Exception:   # noqa: BLE001 — advisory best-effort
+            _nlm_age_note = ""
     add("nlm CLI (fast-lane)", bool(nlm_bin),
-        (f"tl={nlm_bin}; {nprobe.get('path_note')}" if nlm_bin else
+        (f"tl={nlm_bin}; {nprobe.get('path_note')}{_nlm_age_note}" if nlm_bin else
          "KHÔNG tìm thấy → NLM rơi về MCP (chậm). Cowork: chạy lặp `tl nlm-install --resume` tới rc=0; "
          "sau đó `tl nlm-auth-load`/`nlm login`."))
     # gws/direct-media: cần gws binary + cred nạp; thiếu → đọc Drive rơi về GAS (ĐÚNG nhưng chậm + tốn round-trip).
@@ -5270,6 +5279,7 @@ def _hygiene_groups(entries: list[dict]) -> dict:
     treaties = []
     party_docs = []                # B.7 v1.33.19: văn kiện Đảng (cat 00/VK_) — không số hiệu là HỢP LỆ
     vbhn_metadata_advisory = []    # B.5-residual v1.33.22 (MERGE bundle-21): VBHN metadata — advisory, KHÔNG phải lệch tên
+    omnibus_title_advisory = []    # S-2 v1.33.31: OMNIBUS_NARROW một mình = advisory trên entry, KHÔNG phải lệch tên
     sidecars = []
     ghost_nlm = []
     vbhn_reuse: dict[str, list[dict]] = {}
@@ -5280,8 +5290,15 @@ def _hygiene_groups(entries: list[dict]) -> dict:
         # source-rename/recat]): headline `title_mismatch` CHỈ còn lệch tên/tiêu đề HÀNH ĐỘNG ĐƯỢC
         # (OMNIBUS_NARROW/TITLE_METADATA); cờ VBHN metadata → bucket advisory riêng; drift NLM
         # (NLM_STATUS_MISMATCH/NOTEBOOK_ID_MISSING/CORPUS_TRUE_NOT_ON_NLM) đã có nhóm `nlm_drift` — hết đếm kép.
-        if any(f in flags for f in ("OMNIBUS_NARROW_TITLE_CHECK", "TITLE_METADATA_MISMATCH")):
+        # S-2 (v1.33.31 — log rà v1.33.28: 45-2019 BLLĐ đếm KÉP — cờ OMNIBUS_NARROW đã hiện ở bảng flags
+        # từng entry [source-map/review-queue/corpus-audit] RỒI lại vào title_mismatch của sweep → người rà
+        # tưởng 2 vấn đề; 'không sai dữ liệu' — tên hẹp vs BỊ luật sửa-nhiều-luật đụng tới, không có action
+        # rename): headline title_mismatch CHỈ giữ TITLE_METADATA_MISMATCH (lệch hành-động-được);
+        # OMNIBUS_NARROW một mình → bucket advisory riêng (mirror advisory-split v1.33.22 cho VBHN_*).
+        if "TITLE_METADATA_MISMATCH" in flags:
             title_mismatch.append(e)
+        elif "OMNIBUS_NARROW_TITLE_CHECK" in flags:
+            omnibus_title_advisory.append(e)
         elif _is_vbhn_entry(e) and any(f.startswith("VBHN_") for f in flags):
             vbhn_metadata_advisory.append(e)
         if "NLM_GHOST_SOURCE" in flags:
@@ -5338,6 +5355,7 @@ def _hygiene_groups(entries: list[dict]) -> dict:
             "duplicates_by_md5": dup_md5, "orphans": orphans, "treaties": treaties,
             "party_docs": party_docs,
             "vbhn_metadata_advisory": vbhn_metadata_advisory,
+            "omnibus_title_advisory": omnibus_title_advisory,
             "sidecar_source_files": sidecars, "sidecar_corpus_fix": sidecar_corpus_fix,
             "loai_noncanonical": loai_noncanonical,
             "ghost_nlm_sources": ghost_nlm,
@@ -5497,6 +5515,7 @@ def cmd_hygiene(a) -> int:
                "vbhn_same_document_dups": len(groups["vbhn_same_document_dups"]),
                "title_mismatch_candidates": len(groups["title_mismatch"]),
                "vbhn_metadata_advisory": len(groups.get("vbhn_metadata_advisory") or []),
+               "omnibus_title_advisory": len(groups.get("omnibus_title_advisory") or []),
                "reconcile_clusters": len(clusters),
                "quarantine_candidates": sum(len(c["quarantine"]) for c in clusters),
                "quarantine_label_variants": sum(1 for e in entries if _is_quarantine_label_variant(_entry_cat(e))),
@@ -5525,6 +5544,7 @@ def cmd_hygiene(a) -> int:
             print(f"entries={out['entries']} dup_sohieu_raw={out['duplicate_sohieu_groups_raw']} dup_identity={out['duplicate_identity_groups']} dup_name={out['duplicates_by_name']} "
                   f"dup_md5={out['duplicates_by_md5']} orphans={out['orphans']} reconcile_clusters={out['reconcile_clusters']} "
                   f"title_mismatch={out['title_mismatch_candidates']} vbhn_advisory={out['vbhn_metadata_advisory']} "
+                  f"omnibus_advisory={out['omnibus_title_advisory']} "
                   f"same_doc_dups={out['vbhn_same_document_dups']} quarantine_candidates={out['quarantine_candidates']}")
             for d in groups["vbhn_same_document_dups"][:10]:   # #4: trùng CÙNG văn bản (cùng số hiệu) → cần dọn
                 print(f"  ⚠TRÙNG-CÙNG-VĂN-BẢN [{d['key']}] giữ «{_entry_name(d['canonical'])[:48]}» · dọn {len(d['dups'])}: "
@@ -13468,6 +13488,9 @@ def _sweep_report(entries: list) -> dict:
         # tách khỏi headline title_mismatch để hàng rename/recat hết phồng ảo.
         "vbhn_metadata_advisory": len(g.get("vbhn_metadata_advisory") or []),
         "vbhn_metadata_advisory_rows": [_summ_entry(e) for e in (g.get("vbhn_metadata_advisory") or [])[:50]],
+        # S-2 v1.33.31: OMNIBUS_NARROW một mình — advisory (đã hiện ở flags từng entry), hết đếm kép với headline.
+        "omnibus_title_advisory": len(g.get("omnibus_title_advisory") or []),
+        "omnibus_title_advisory_rows": [_summ_entry(e) for e in (g.get("omnibus_title_advisory") or [])[:50]],
         "loai_noncanonical": len(g["loai_noncanonical"]),
         # N4 (v1.31.1 — name_audit.py phiên rà): tên phi-chuẩn OFFLINE toàn corpus (corpus-audit chỉ chấm dòng
         # ĐÃ đọc được header → thiếu độ phủ; đây là tầng đếm rẻ dùng _name_structural_issues sẵn có).
@@ -13622,6 +13645,7 @@ def cmd_sweep(a) -> int:
         print(f"  orphans={rep['orphans']} (tách riêng hợp-lệ-không-số-hiệu: treaties={rep['treaties']} "
               f"party_docs={rep.get('party_docs', 0)}) "
               f"title_mismatch={rep['title_mismatch']} vbhn_advisory={rep.get('vbhn_metadata_advisory', 0)} "
+              f"omnibus_advisory={rep.get('omnibus_title_advisory', 0)} "
               f"loai_noncanonical={rep['loai_noncanonical']} name_nonstandard={rep['name_nonstandard']}")
         print(f"  vbhn_year: fixable={rep['vbhn_year']['fixable']} needs_year={rep['vbhn_year']['needs_year']} conflicts={rep['vbhn_year']['conflicts']}")
         print(f"  nlm_drift: {rep['nlm_drift_total']} (" + " ".join(f"{k}={v}" for k, v in drift.items())
@@ -15344,6 +15368,7 @@ def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
     if limit:
         laws = laws[:int(limit)]
     web, rel, rel_low, pause, clean, other = [], [], [], [], [], []
+    neg_n = 0                       # S-1: đếm mọi row bị relation-check phủ định (kể cả row rơi bucket web)
     for e in laws:
         r = _source_map_one(_entry_sohieu(e) or _sohieu_key_entry(e), entries)
         flags = set(r.get("flags") or _warning_codes(r.get("warnings") or []))
@@ -15357,6 +15382,23 @@ def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
         # confidence≠low — cùng ngưỡng escalate v1.29.6); low-conf-only → nhóm INFO riêng, không phồng hàng đợi.
         _in_rel = _in_rel_flags and _rq_rel_strong(_rel_cands_raw)
         _in_rel_low = _in_rel_flags and not _in_rel
+        # S-1 (v1.33.31 — log rà LIVE v1.33.28: review-queue gắn 124/125-2025 cờ UNLINKED/LOW_CONFIDENCE →
+        # ops-plan đẩy P0, nhưng `tl relation-check --base` [chính _relation_audit] trả verdict=OK/candidates=[]
+        # — 2 engine BẤT ĐỒNG, người vận hành phải chạy relation-check tay từng số để loại): cross-validate
+        # NGAY TẠI ĐÂY bằng cùng engine tất định trên cùng entries. Audit verdict=OK nghĩa là KHÔNG có gì để
+        # backfill (không missing_links/subject_only/footnote-thiếu) → cờ RELATION_CHECK_NEGATED + hạ khỏi
+        # bucket hành động; KHÔNG negate khi audit còn REVIEW/QT5 (fixture 06/2022 subject-only vẫn nguyên).
+        _rel_negated = False
+        if _in_rel or _in_rel_low:
+            try:
+                _aud = _relation_audit(entries, base=(_entry_sohieu(e) or _sohieu_key_entry(e)))
+                _rel_negated = (_aud.get("verdict") == "OK")
+            except Exception:   # noqa: BLE001 — cross-check best-effort, không được giết queue
+                _rel_negated = False
+        if _rel_negated:
+            flags.add("RELATION_CHECK_NEGATED")
+            _in_rel, _in_rel_low = False, True
+            neg_n += 1
         _in_web = bool(flags & _RQ_WEB_FLAGS)
         _is_pause = r.get("verdict") == "PAUSE_AND_ASK_USER"
         _buckets = [b for b, c in (("pause", _is_pause), ("relation_backfill", _in_rel),
@@ -15368,7 +15410,8 @@ def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
         # sạch → driver duyệt đồng nhất .flags thấy 'REVIEW không lý do'): lọc theo nhóm-việc TRƯỚC, nhưng
         # lọc RỖNG thì mirror toàn bộ flags_all — .flags không bao giờ câm khi có cờ thật.
         row = {"sohieu": _sohieu_key_entry(e), "name": _entry_name(e)[:55], "verdict": r.get("verdict"),
-               "flags": (sorted(flags & (_RQ_WEB_FLAGS | _RQ_REL_FLAGS | _RQ_REL_SUPPRESS | {"PAUSE_AND_ASK_USER"}))
+               "flags": (sorted(flags & (_RQ_WEB_FLAGS | _RQ_REL_FLAGS | _RQ_REL_SUPPRESS
+                                         | {"PAUSE_AND_ASK_USER", "RELATION_CHECK_NEGATED"}))
                          or sorted(flags)),
                # P2-1 (v1.33.12 — log: review_other verdict=REVIEW mà flags=[] → REVIEW không nêu LÝ DO):
                # flags_all = TOÀN BỘ cờ source-map (không lọc nhóm) — mọi REVIEW đều tự giải thích được.
@@ -15390,9 +15433,11 @@ def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
         elif _in_web:
             web.append(row)
         elif _in_rel_low:
+            _rl_note = ("# ĐÃ PHỦ ĐỊNH (S-1): relation-check verdict=OK, không missing_links — KHÔNG cần backfill; "
+                        "bỏ qua trừ khi có dữ liệu mới" if _rel_negated else
+                        "# INFO: ứng viên đều low-conf — phủ định nhanh bằng relation-check trước khi tin")
             rel_low.append(dict(row, candidates=_cands,
-                                fix_command=f"tl relation-check --base {_sohieu_key_entry(e)} --json   "
-                                            "# INFO: ứng viên đều low-conf — phủ định nhanh bằng relation-check trước khi tin"))
+                                fix_command=f"tl relation-check --base {_sohieu_key_entry(e)} --json   " + _rl_note))
         elif r.get("verdict") == "OK":
             clean.append(row)
         else:
@@ -15407,6 +15452,9 @@ def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
             "web_round2": web, "web_round2_count": len(web),
             "web_priority_count": sum(1 for x in web if x["priority_high_velocity"]),
             "relation_backfill": rel, "relation_low_confidence": rel_low, "pause": pause,
+            # S-1: số row bị relation-check phủ định (cờ RELATION_CHECK_NEGATED trên row) — driver/ops-plan
+            # loại các ca này khỏi hàng đợi hành động thay vì chạy relation-check tay từng số.
+            "relation_negated_count": neg_n,
             "clean_count": len(clean),
             "review_other": other,
             # A2: counts LOẠI TRỪ lẫn nhau — tổng LUÔN bằng laws_scanned (đối soát máy được).
@@ -15477,13 +15525,25 @@ def _ops_plan_report(entries: list[dict], config_path: str | None = None, profil
                       "tl review-queue --json --out /tmp/review_queue.json",
                       count=len(web_normal), confirm_required=True, mode="manual_web",
                       reason="NO_VERIFIED_VBHN_IN_CORPUS/QT5_WEB_REQUIRED/VBHN_CANDIDATE_UNVERIFIED_LATEST")
-    rel = (review.get("relation_backfill") or []) + (review.get("relation_low_confidence") or [])
+    # S-1 (v1.33.31 — log rà v1.33.28: 124/125-2025 vào P0 dù relation-check verdict=OK): row đã bị
+    # review-queue cross-validate phủ định (cờ RELATION_CHECK_NEGATED) KHÔNG được đẩy P0 nữa — hạ xuống
+    # dòng info P3 để còn audit-trail, hàng đợi hành động chỉ giữ ca relation-check chưa phủ định.
+    rel_all = (review.get("relation_backfill") or []) + (review.get("relation_low_confidence") or [])
+    rel = [x for x in rel_all if "RELATION_CHECK_NEGATED" not in (x.get("flags_all") or [])]
+    rel_neg = [x for x in rel_all if "RELATION_CHECK_NEGATED" in (x.get("flags_all") or [])]
     if rel:
         _ops_plan_add(actions, "P0", "relation_check_before_backfill", "Xác minh ứng viên sửa đổi trước khi backfill goc/sua_doi",
                       "tl relation-check --base <SOHIEU> --json  # chỉ --apply sau khi người dùng duyệt",
                       count=len(rel), confirm_required=True, mode="review_then_apply",
                       reason="UNLINKED_AMENDMENT_CANDIDATE/LOW_CONFIDENCE không được tự ghi registry",
+                      note=(f"đã loại {len(rel_neg)} ca RELATION_CHECK_NEGATED khỏi queue" if rel_neg else ""),
                       sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in rel[:10]])
+    if rel_neg:
+        _ops_plan_add(actions, "P3", "relation_candidates_negated",
+                      "Ứng viên sửa đổi ĐÃ bị relation-check phủ định — KHÔNG cần backfill",
+                      count=len(rel_neg), confirm_required=False, mode="info",
+                      reason="review-queue cross-validate qua _relation_audit: verdict=OK/missing_links=[] — không đẩy P0 giả",
+                      sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in rel_neg[:10]])
     drift_total = int(sweep.get("nlm_drift_total") or 0) if isinstance(sweep, dict) else 0
     if drift_total:
         _ops_plan_add(actions, "P1", "nlm_reconcile_live", "Đối soát LIVE registry↔NLM trước khi kết luận slot/desync",
@@ -15574,6 +15634,8 @@ def cmd_review_queue(a) -> int:
           f"(ưu tiên HIGH_VELOCITY: {rep['web_priority_count']}) · relation-backfill: {len(rep['relation_backfill'])} "
           f"· PAUSE: {len(rep['pause'])} · sạch: {rep['clean_count']}"
           + (f" · rel-LOW-CONF(info): {len(rep['relation_low_confidence'])}" if rep.get("relation_low_confidence") else "")
+          + (f" · rel-ĐÃ-PHỦ-ĐỊNH: {rep['relation_negated_count']} (S-1 cross-check, bỏ khỏi hàng đợi)"
+             if rep.get("relation_negated_count") else "")
           + (f" · REVIEW-khác: {len(rep['review_other'])}" if rep["review_other"] else "")
           + (f" · VBHN-rà-theo-gốc: {rep['skipped_vbhn_as_base']}" if rep.get("skipped_vbhn_as_base") else "")
           + (f" · ⚠ {rep['skipped_no_sohieu']} dòng Luật THIẾU sohieu (sửa registry)" if rep["skipped_no_sohieu"] else "")

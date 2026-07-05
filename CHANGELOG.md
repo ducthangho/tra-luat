@@ -1,3 +1,28 @@
+# ★ v1.33.28 — MERGE bundle-27 (`tra-luat-skill-v1.33.27-gws3env-fixed.zip`): ops-plan + --out phủ lệnh nặng — port trọn, sửa 1 test env-leak + 1 F841
+
+Bundle-27 dựng TRỰC TIẾP trên canonical v1.33.26 (cả selftest xây trên block r38 ta — hội tụ chuỗi công cụ).
+Port trọn 2 nhóm, 0 reject lần 3 liên tiếp; 2 chỉnh nhỏ khi nhận:
+
+## PORT (2)
+- **`tl ops-plan [--json] [--out]`** (READ-ONLY): gom review-queue + sweep thành HÀNG ĐỢI VIỆC P0→P3
+  máy-đọc ({id, command điền sẵn, confirm_required, mode, reason, sample}) — thay việc đọc log dài rồi suy
+  lệnh tay; phủ đúng vòng lặp A/B/C/D/E (pin registry, web lượt-2, relation-check-trước-backfill,
+  reconcile LIVE, dedup, lô tên, loai, quarantine, slot preflight, cowork-plan). Thực địa: 9 action,
+  tự nhận registryDocId_pinned=True sau khi pin. Doctrine giữ: dòng confirm_required=true KHÔNG tự ghi.
+- **`--out` atomic mở rộng** cho doctor/cowork-plan/sweep/counts/nlm-get/nlm-reconcile (cùng
+  `_emit_json_payload`) — trọn bộ lệnh JSON nặng nay ghi-file-rồi-phân-tích được, né trần 30s Cowork.
+
+## SỬA khi nhận (2)
+- Test r39 của bundle KHÔNG hermetic: máy ĐÃ pin registry + env TL_NOTEBOOK_ID từ apply_profile_offline
+  (config thật) đè fixture → action pin biến mất + notebook ≠ NB39 → fail OAN trên máy-đã-pin (máy bundle
+  chưa pin nên không thấy). Sửa: pop cả bộ env TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID/TL_PROFILE quanh call,
+  khôi phục sau.
+- F841 `drift` gán không dùng trong _ops_plan_report — bỏ.
+
+SKILL.md +1 dòng ops-plan/--out. selftest **574/574** (+2 r39, đã hermetic-hoá).
+
+---
+
 # ★ v1.33.26 — MERGE bundle-25 (`tra-luat-skill-v1.33.25-gws3env-fixed.zip`): A5 superset + --out atomic + config-pin-registry — port TRỌN, 0 reject (lần 2 liên tiếp)
 
 Bundle-25 dựng trên v1.33.24, xử cùng log với v1.33.25 ta. Fix A5 của họ là SUPERSET bản ta (thêm

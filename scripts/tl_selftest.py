@@ -2453,6 +2453,47 @@ def run() -> int:
         except OSError:
             pass
 
+    # ═══ v1.33.27 (log Cowork lặp A/B/C/D/E): ops-plan + --out phủ lệnh JSON nặng — r39_* ═══
+    _cfg39 = _os38.path.join(_tmp38.gettempdir(), "tl_selftest_ops_cfg39.json")
+    try:
+        open(_cfg39, "w", encoding="utf-8").write(json.dumps(
+            {"profiles": {"vbqppl": {"notebookId": "NB39"}}, "defaultProfile": "vbqppl"}))
+        # v1.33.28 (sửa test bundle-27 env-leak): các case trước gọi apply_profile_offline(config THẬT) →
+        # TL_REGISTRY_DOC_ID (máy đã pin) + TL_NOTEBOOK_ID nằm sẵn trong env và ĐÈ fixture → action pin biến
+        # mất + notebook ≠ NB39 → fail OAN trên máy-đã-pin. Test phải HERMETIC: pop cả bộ env, khôi phục sau.
+        _env39 = {k: _os38.environ.pop(k, None) for k in ("TL_REGISTRY_DOC_ID", "TL_NOTEBOOK_ID", "TL_PROFILE")}
+        try:
+            _op39 = _ops_plan_report([], config_path=_cfg39, profile="vbqppl")
+        finally:
+            for _k39, _v39 in _env39.items():
+                if _v39 is not None:
+                    _os38.environ[_k39] = _v39
+        _ids39 = {x.get("id") for x in _op39.get("actions") or []}
+        cases.append(("r39_ops_plan_has_pin_slot_cowork",
+                      _op39.get("schema") == "ops_plan.v1"
+                      and "pin_registry_doc_id" in _ids39
+                      and "slot_preflight" in _ids39
+                      and "cowork_bootstrap_guard" in _ids39
+                      and _op39.get("notebook") == "NB39"))
+        _ap39 = build_parser()
+        _n39a = _ap39.parse_args(["ops-plan", "--json", "--out", "/tmp/ops.json"])
+        _n39b = _ap39.parse_args(["sweep", "--json", "--out", "/tmp/sweep.json"])
+        _n39c = _ap39.parse_args(["counts", "--json", "--out", "/tmp/counts.json"])
+        _n39d = _ap39.parse_args(["nlm-get", "NB39", "--json", "--out", "/tmp/nlm.json"])
+        _n39e = _ap39.parse_args(["doctor", "--json", "--out", "/tmp/doctor.json"])
+        cases.append(("r39_parser_out_heavy_json_commands",
+                      _n39a.out.endswith("ops.json") and _n39b.out.endswith("sweep.json")
+                      and _n39c.out.endswith("counts.json") and _n39d.out.endswith("nlm.json")
+                      and _n39e.out.endswith("doctor.json")))
+    except Exception:
+        cases.append(("r39_ops_plan_has_pin_slot_cowork", False))
+        cases.append(("r39_parser_out_heavy_json_commands", False))
+    finally:
+        try:
+            _os38.remove(_cfg39)
+        except OSError:
+            pass
+
     # ═══ v1.29.7 (log NĐ131 — 9 vấn đề ingest phụ lục) — r5_* ═══
     # (#2) resolver: query SỐ HIỆU với 2 ứng viên (chính văn + PHỤ LỤC cùng key) phải chọn CHÍNH VĂN —
     # cả khi chính văn có sohieu-registry khớp, lẫn khi CẢ HAI sohieu rỗng (PL_ penalty tự quyết).

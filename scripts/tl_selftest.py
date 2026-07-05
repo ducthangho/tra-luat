@@ -4372,6 +4372,40 @@ def run() -> int:
         _none_noprof = (_tg49._nlm_sync_authjson_from_profile(_d49) is None)
     cases.append(("r49_nlm_authjson_synced_from_fresh_profile",
                   _fresh_ok and _none_older and _none_noprof))
+
+    # ═══ v1.33.39 (log Cowork: stage cookie 'mới' [extracted_at tiến] mà NLM từ chối MỌI endpoint — cookie hết
+    # hạn NHANH, chết cả local; stage cookie chết = Cowork kẹt vòng lặp) — r50_* ═══
+    # cmd_nlm_auth_stage VERIFY LIVE (canary notebook_get, KHÔNG tin nlm login --check) TRƯỚC stage:
+    # dead+không-force → rc=4 TỪ CHỐI (KHÔNG upload); dead+--force → bỏ qua cổng, upload chạy; alive → stage.
+    _tg50 = _need_base("tl_gws")
+    _o_files50, _o_alive50, _o_up50 = _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload
+    _o_tok50 = _os38.environ.get("TL_TOKEN")
+    _uploaded50 = []
+    _os38.environ["TL_TOKEN"] = _o_tok50 or "selftest-token"
+    try:
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_uploaded50.append(fid) or (fid, True))
+        _mkns50 = lambda force: argparse.Namespace(config=None, profile=None, refresh=False, folder=None,
+                                                   cred_file_id="F50", new=False, force=force)
+        _tg50._nlm_auth_alive = lambda nb, timeout=30: (False, "AUTH_EXPIRED (test)")
+        with _hush():
+            _rc50_dead = _tg50.cmd_nlm_auth_stage(_mkns50(False))
+        _refused = (_rc50_dead == 4 and _uploaded50 == [])
+        with _hush():
+            _rc50_force = _tg50.cmd_nlm_auth_stage(_mkns50(True))
+        _forced = (_rc50_force == 0 and _uploaded50 == ["F50"])
+        _uploaded50.clear()
+        _tg50._nlm_auth_alive = lambda nb, timeout=30: (True, "LIVE OK (test)")
+        with _hush():
+            _rc50_alive = _tg50.cmd_nlm_auth_stage(_mkns50(False))
+        _allowed = (_rc50_alive == 0 and _uploaded50 == ["F50"])
+    finally:
+        _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload = _o_files50, _o_alive50, _o_up50
+        if _o_tok50 is None:
+            _os38.environ.pop("TL_TOKEN", None)
+        else:
+            _os38.environ["TL_TOKEN"] = _o_tok50
+    cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

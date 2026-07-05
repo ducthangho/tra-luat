@@ -1293,6 +1293,24 @@ def cmd_nlm_auth_stage(a) -> int:
     if not nlm:
         print("[nlm-auth-stage] ✗ chưa có cookie nlm ở máy này — chạy `nlm login` trước.", file=sys.stderr)
         return 3
+    # M1c (v1.33.39 — log Cowork: user stage cookie 'mới' [extracted_at TIẾN] nhưng NLM từ chối MỌI endpoint;
+    # điều tra local thấy cookie đã CHẾT CẢ Ở MÁY NÀY → stage cookie chết = Cowork nhận cookie chết = kẹt vòng
+    # lặp stage-lại-vô-ích). VERIFY LIVE bằng canary notebook_get (KHÔNG tin `nlm login --check` — false-red)
+    # TRƯỚC khi stage. Cookie chết → TỪ CHỐI (trừ --force); sống → stage; chưa-kết-luận → cảnh báo vẫn stage.
+    if not getattr(a, "force", False):
+        _nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
+        _alive, _amsg = _nlm_auth_alive(_nb)
+        if _alive is False:
+            print(f"[nlm-auth-stage] ✗ TỪ CHỐI STAGE: cookie nlm ở MÁY NÀY ĐANG CHẾT ({_amsg}).", file=sys.stderr)
+            print("  → Stage cookie chết = Cowork/Chat nhận cookie chết (kẹt vòng lặp). Làm tươi TRƯỚC KHI stage:", file=sys.stderr)
+            print("     1) `nlm login` (hoàn tất trọn phiên NotebookLM, không chỉ đăng nhập Google)", file=sys.stderr)
+            print("     2) xác nhận SỐNG: `tl doctor` → dòng 'nlm auth (LIVE probe)' phải ✓ (ĐỪNG tin `nlm login --check`)", file=sys.stderr)
+            print("     3) rồi `tl nlm-auth-stage` lại. (Ép stage dù chết: thêm --force.)", file=sys.stderr)
+            return 4
+        if _alive is None:
+            print(f"[nlm-auth-stage] ⚠ CHƯA xác nhận cookie sống ({_amsg}) — vẫn stage; kiểm `tl doctor` sau.", file=sys.stderr)
+        else:
+            print(f"[nlm-auth-stage] ✓ verify LIVE trước stage: {_amsg}")
     blob = store.encrypt(json.dumps(nlm, ensure_ascii=False).encode("utf-8"), token)   # cookie chỉ ở RAM
     # v1.33.1: cùng khuôn gws-auth-stage — mặc định GHI ĐÈ TẠI CHỖ NLM_CRED_FILEID (cookie rụng ~2-4 tuần,
     # mỗi lần re-stage không còn đổi fileId); --new tạo file mới.

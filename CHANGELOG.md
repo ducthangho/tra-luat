@@ -1,3 +1,29 @@
+# ★ v1.33.39 — nlm-auth-stage TỪ CHỐI stage cookie CHẾT (phá vòng lặp Cowork "stage cookie mới mà vẫn expired")
+
+Log Cowork (tiếp v1.33.38): user stage cookie 'mới' (`extracted_at` TIẾN 19:44→19:50Z, hạn 2027) nhưng NLM từ chối
+ở MỌI endpoint (`notebook_get`/`notebook list`/`login --check`) với `ClientAuthenticationError` — không còn "expired".
+Cowork agent kết luận "login chưa hợp lệ". **Điều tra local lật ngược:** chạy canary `notebook_get` TRÊN MÁY NÀY →
+cũng AUTH_EXPIRED (earlier phiên đọc 292 nguồn, giờ chết). → cookie CHẾT CẢ LOCAL, không phải "login sai".
+
+## Chẩn đoán chốt
+- **NLM cookie hết hạn CỰC NHANH (~1-2h)** — chết cả local lẫn Cowork (RTS rotation `__Secure-1PSIDRTS` + session
+  binding). extracted_at mới KHÔNG bảo chứng session còn được NLM công nhận.
+- **`nlm login --check` KHÔNG đáng tin làm cổng** (M1 v1.33.35: từng false-red khi notebook_get xanh). Cowork agent
+  bảo "chờ --check xanh" = sai công cụ; cổng ĐÚNG = `notebook_get` canary (`_nlm_auth_alive`).
+- **Bug quy trình:** `nlm-auth-stage` stage CẢ cookie đã chết → Cowork nhận cookie chết → kẹt vòng lặp stage-lại.
+
+## Fix — verify-LIVE gate trước khi stage
+- `cmd_nlm_auth_stage` chạy canary `_nlm_auth_alive(base_notebook)` TRƯỚC khi mã hoá/upload: cookie CHẾT → **TỪ
+  CHỐI (rc=4)** kèm hướng dẫn (`nlm login` → `tl doctor` xác nhận 'nlm auth (LIVE probe)' ✓ → mới stage; ĐỪNG tin
+  `nlm login --check`); alive → stage; chưa-kết-luận (None) → cảnh báo vẫn stage. `--force` bỏ qua cổng.
+- **Verify LIVE:** cookie đang chết → `nlm-auth-stage` từ chối đúng (rc=4), không upload cookie chết lên Drive nữa.
+
+selftest **596/596** (+r50: dead→rc4 không-upload · --force→bỏ-cổng-upload · alive→stage). ruff baseline (0 lỗi mới).
+**Khuyến nghị dứt điểm** (ngoài skill): kết nối **NotebookLM MCP connector** (claude.ai OAuth, refresh token tự động)
+thay cookie-scraping — cookie-staging luôn mong manh vì cửa sổ ~1h.
+
+---
+
 # ★ v1.33.38 — ROOT CAUSE: stage cookie NLM tươi mà Cowork vẫn "Authentication expired" (auth.json root STALE)
 
 Log Cowork: user `nlm login` mới + `tl nlm-auth-stage`, nhưng Cowork `nlm-auth-load` vẫn "Authentication expired".

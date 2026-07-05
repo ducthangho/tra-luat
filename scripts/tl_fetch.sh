@@ -20,6 +20,11 @@ DO_NLM=0; [ "$1" = "--nlm" ] && { DO_NLM=1; shift; }
 mkdir -p "$DIR" 2>/dev/null || { echo "[tl_fetch] không tạo được $DIR" >&2; exit 2; }
 
 # 1) TẢI ZIP — (a) curl Drive public TRƯỚC (nhanh, không token); (b) webapp GAS (token); (c) MCP-placed.
+# v1.33.29 — FOOTGUN re-bootstrap (log verify v1.33.28 suýt kết luận sai 'ops-plan thiếu'): $ZIP cũ còn đó
+# → bước tải BỎ QUA → --setup chạy mãi bản CŨ dù Drive đã có bản mới. --setup / --setup-step core = ý định
+# "lấy bản MỚI NHẤT" → xoá zip cũ ép tải lại (zip ~1MB, curl nhanh; các step gws/boot/nlm giữ zip để khỏi tốn).
+if [ "$MODE" = setup ]; then rm -f "$ZIP"; fi
+if [ "$MODE" = step ] && [ "$STEP" = core ]; then rm -f "$ZIP"; fi
 if [ ! -s "$ZIP" ]; then
   U="https://drive.usercontent.google.com/download?id=$FID&export=download&confirm=t"
   curl -fsSL "$U" -o "$ZIP" 2>/dev/null || wget -qO "$ZIP" "$U" 2>/dev/null || true
@@ -50,6 +55,14 @@ fi
 [ -s "$ZIP" ] || { echo "[tl_fetch] CHƯA tải được zip. Agent: Drive MCP download_file_content fileId=$FID → ghi $ZIP (path MÌNH sở hữu, KHÔNG /tmp). Cần allowlist drive.usercontent.google.com HOẶC script.google.com." >&2; exit 2; }
 
 # 2) GIẢI NÉN (bỏ qua nếu đã có tl.py từ lần trước → re-run nhanh)
+# v1.33.29 — FOOTGUN tầng 2 (cùng log): $OUT/live còn tl.py bản CŨ → bước giải nén bị BỎ QUA và ROOT bị ghi
+# đè về bản CŨ dù $ZIP vừa tải là bản MỚI. So VERSION trong zip vs bản đã giải nén; LỆCH → re-extract.
+ZV=$(unzip -p "$ZIP" '*/VERSION' 2>/dev/null | head -1 | tr -d '\r\n ')
+OV=$(cat "$OUT"/*/VERSION 2>/dev/null | head -1 | tr -d '\r\n ')
+if [ -n "$ZV" ] && [ -n "$OV" ] && [ "$ZV" != "$OV" ]; then
+  echo "[tl_fetch] VERSION zip=$ZV != ban-da-giai-nen=$OV -> re-extract ban moi." >&2
+  rm -rf "$OUT"
+fi
 TL=$(find "$OUT" -path '*/scripts/tl.py' 2>/dev/null | head -1)
 if [ -z "$TL" ] || [ ! -s "$TL" ]; then
   rm -rf "$OUT"; mkdir -p "$OUT"
@@ -58,6 +71,7 @@ if [ -z "$TL" ] || [ ! -s "$TL" ]; then
   [ -n "$TL" ] || { echo "[tl_fetch] không thấy scripts/tl.py trong zip." >&2; exit 3; }
 fi
 ROOT=$(dirname "$(dirname "$TL")"); echo "$ROOT" > "$DIR/ROOT"
+echo "[tl_fetch] ROOT=$ROOT (VERSION $(cat "$ROOT/VERSION" 2>/dev/null | tr -d '\r\n '))" >&2
 
 # 3b) v1.32.2 — TÁCH BƯỚC setup (Cowork 45s/lệnh: --setup trọn gói từng bị kill giữa chừng).
 if [ "$MODE" = step ]; then

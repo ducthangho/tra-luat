@@ -4088,6 +4088,47 @@ def run() -> int:
                   {"id": "b", "name": "MTTQ", "so_hieu": "89/VBHN-VPQH", "drive_id": "D2"}]
     _coll = _nlm_reconcile_plan([{"id": "s1", "title": "x", "sohieu": "89/VBHN-VPQH"}], _coll_ents, "NB1")
     cases.append(("nlm_reconcile_no_falselink_on_sohieu_reuse", len(_coll["link_candidates"]) == 0 and _coll["unregistered"] == ["s1"]))
+    # ═══ v1.33.29 (log verify v1.33.28 — doctor pin-check stale · footgun tl_fetch ROOT · NO_SOHIEU số kép ·
+    # candidates parity · BrokenPipe rc=1 ma) — r40_* ═══
+    # (F1) _resolve_registry_doc_id: env thắng; env rỗng → profile → root; nguồn ghi rõ.
+    _cfg40 = _os38.path.join(_tmp38.gettempdir(), "tl_selftest_reg40.json")
+    _env40 = {k: _os38.environ.pop(k, None) for k in ("TL_REGISTRY_DOC_ID", "TL_PROFILE")}
+    try:
+        open(_cfg40, "w", encoding="utf-8").write(json.dumps(
+            {"profiles": {"vbqppl": {"registryDocId": "SHEET_PROF"}}, "defaultProfile": "vbqppl",
+             "registryDocId": "SHEET_ROOT"}))
+        _r40a = _resolve_registry_doc_id(_cfg40, "vbqppl")
+        open(_cfg40, "w", encoding="utf-8").write(json.dumps(
+            {"profiles": {"vbqppl": {}}, "defaultProfile": "vbqppl", "registryDocId": "SHEET_ROOT"}))
+        _r40b = _resolve_registry_doc_id(_cfg40, "vbqppl")
+        _os38.environ["TL_REGISTRY_DOC_ID"] = "SHEET_ENV"
+        _r40c = _resolve_registry_doc_id(_cfg40, "vbqppl")
+    finally:
+        for _k40, _v40 in _env40.items():
+            if _v40 is not None:
+                _os38.environ[_k40] = _v40
+            else:
+                _os38.environ.pop(_k40, None)
+        try:
+            _os38.remove(_cfg40)
+        except OSError:
+            pass
+    cases.append(("r40_resolve_registry_doc_id_layers",
+                  _r40a[0] == "SHEET_PROF" and _r40a[1].startswith("config:")
+                  and _r40b[0] == "SHEET_ROOT" and _r40c == ("SHEET_ENV", "env")))
+    # (F4) số hiệu VBHN GỘP 'NN-MM-CQ-CQ' KHÔNG còn cờ NO_SOHIEU oan; tên thật-sự-thiếu-số vẫn cờ.
+    cases.append(("r40_compound_sohieu_not_flagged",
+                  "NO_SOHIEU_IN_NAME" not in _name_structural_issues("VBHN_73-82-ND-CP_Quan_ly_dau_tu_CNTT_NSNN")
+                  and "NO_SOHIEU_IN_NAME" in _name_structural_issues("Luat_Phong_chong_benh_truyen_nhiem")))
+    # (F5) source-map item mang candidates[] compact 'sohieu|tên|conf' (parity review-queue) — fixture r30.
+    _sm40 = _source_map_one("44/2019/QH14", [
+        {"id": "b44", "drive_id": "b44", "name": "Luat_44-2019-QH14_PCTH_ruou_bia", "so_hieu": "44/2019/QH14",
+         "loai": "Luật", "cat": "45", "corpus": "true", "nlm_source_id": "s44"},
+        {"id": "a44", "drive_id": "a44", "name": "Luat_99-2029-QH17_SuaDoi_PCTH_ruou_bia",
+         "so_hieu": "99/2029/QH17", "loai": "Luật", "cat": "45", "corpus": "true"}])
+    cases.append(("r40_source_map_candidates_compact",
+                  isinstance(_sm40.get("candidates"), list) and bool(_sm40["candidates"])
+                  and _sm40["candidates"][0].count("|") == 2 and _sm40["candidates"][0].startswith("99-2029-QH17|")))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

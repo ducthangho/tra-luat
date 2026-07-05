@@ -1,3 +1,35 @@
+# ★ v1.33.29 — Xử log verify + log rà v1.33.28 LIVE: doctor pin-check stale · footgun tl_fetch 2 tầng · NO_SOHIEU số-kép · candidates parity · rc=1 ma
+
+3 log chạy LIVE v1.33.28. Fix 5 + phân xử 3:
+
+## FIX (5)
+- **S-9b doctor pin-check STALE**: pin xong bằng config-pin-registry (root+profile) mà doctor VẪN in
+  '(rỗng → NÊN PIN)' — check cũ CHỈ đọc env TL_REGISTRY_DOC_ID (apply_profile_offline không export key này).
+  Helper mới `_resolve_registry_doc_id` (env → profile → root config, trả kèm NGUỒN) dùng cho doctor; note
+  pinned in rõ 'pinned · config:<path>'. Field-verify: resolver thấy đúng Sheet 1C21i65… đã pin.
+- **Footgun tl_fetch.sh 2 TẦNG** (suýt gây kết luận sai 'ops-plan thiếu'): (t1) $ZIP cũ còn → bước tải BỎ QUA
+  → --setup chạy mãi bản cũ → nay `--setup`/`--setup-step core` XOÁ zip ép tải mới (ý định = lấy bản mới nhất;
+  step gws/boot/nlm giữ zip); (t2) $OUT/live còn tl.py cũ → giải nén bị bỏ qua + ROOT ghi đè về bản cũ → nay
+  SO VERSION zip-vs-đã-giải-nén, lệch = re-extract; ROOT in kèm VERSION mỗi lần.
+- **4D NO_SOHIEU_IN_NAME oan cho VBHN số KÉP** ('VBHN_73-82-ND-CP_…' — repro offline): nhận pattern
+  'NN-MM-<CQ>[-<CQ>]' trước khi cờ (VBHN gộp nhiều văn bản không thiếu số hiệu).
+- **4D source-map thiếu chi tiết ứng viên**: item +`candidates[]` compact 'sohieu|tên|confidence' — CÙNG
+  format review-queue rows, driver hết phải gọi thêm lệnh.
+- **BrokenPipe hardening** ở main(): 'sweep/review-queue --json rc=1 dù chạy OK' KHÔNG tái hiện (cả 2 return 0
+  vô điều kiện) — triệu chứng khớp `--json | head/jq-thoát-sớm` → BrokenPipeError exit 1 → nay nuốt, rc=0
+  (payload trọn = dùng --out).
+
+## PHÂN XỬ (không phải lỗi / đã có sẵn)
+- `reg-query --json` shape: ĐÃ là envelope `reg-query.v2 {ok, schema, count, rows, entries}` — verify chạy
+  thật; 'list trần' của log không tái hiện (khả năng parse nhầm field con).
+- `confirm --all-unconfirmed (+--limit)`: ĐÃ TỒN TẠI từ trước — khuyến nghị P1-5 của log là gap nhận-biết;
+  usage lệnh tự liệt kê.
+- Trôi mẫu số giữa lệnh = GAS cache ~600s + định nghĩa khác nhau — đã docs (`tl counts` + note).
+
+selftest **577/577** (+3 r40: resolver 3 tầng env/profile/root, số-kép không-cờ + control, candidates compact).
+
+---
+
 # ★ v1.33.28 — MERGE bundle-27 (`tra-luat-skill-v1.33.27-gws3env-fixed.zip`): ops-plan + --out phủ lệnh nặng — port trọn, sửa 1 test env-leak + 1 F841
 
 Bundle-27 dựng TRỰC TIẾP trên canonical v1.33.26 (cả selftest xây trên block r38 ta — hội tụ chuỗi công cụ).

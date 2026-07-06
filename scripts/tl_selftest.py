@@ -4625,6 +4625,61 @@ def run() -> int:
     cases.append(("r54_backfill_titlevn_offset_advances_past_skips",
                   _rc54a == 0 and _s54a.get("next_offset") == 2 and _s54a.get("coverage_complete") is False
                   and _rc54b == 0 and _s54b.get("next_offset") is None and _s54b.get("coverage_complete") is True))
+
+    # ═══ v1.33.44 (log Cowork 7A — vá lô vấn đề vận hành skill S4-S14) — r55_* ═══
+    # S4/S5/S6 — ingest-local ghi registry SẠCH ngay tại ingest: shape-lock nguồn (normalize loai + nhãn cat đủ +
+    # corpus=true ở bước link cuối) + helper thật chạy offline đúng ('VBHN'→enum, '03'→nhãn đủ).
+    import inspect as _ins55
+    _src55 = _ins55.getsource(_TL_MODULE.cmd_ingest_local)
+    cases.append(("r55_ingest_local_canonical_loai_cat_corpus",
+                  "loai = _normalize_loai(loai)" in _src55
+                  and "_cat_reg_label(cat)" in _src55
+                  and '"corpus": "true"' in _src55
+                  and _normalize_loai("VBHN") == "Văn bản hợp nhất"
+                  and _cat_reg_label("03") == "03_Buu_chinh_vien_thong"))
+    # S7 — journal --close: PURE plan chỉ heal op có set ĐÃ KHỚP registry (so mềm strip+lower); mismatch/không-set → blocked.
+    _cp55 = _journal_close_plan(
+        [{"t": "run_start", "run_id": "r55", "cmd": "ingest-local"},
+         {"t": "intent", "op": "reg_bulk", "key": "g1",
+          "set": {"nlm_source_id": "s1", "nlm_status": "pushed", "corpus": "true"}},
+         {"t": "intent", "op": "reg_bulk", "key": "g2", "set": {"nlm_source_id": "s2"}},
+         {"t": "intent", "op": "upload", "key": "f3"}],
+        {"g1": {"nlm_source_id": "s1", "nlm_status": " PUSHED", "corpus": "true"},
+         "g2": {"nlm_source_id": ""}})
+    cases.append(("r55_journal_close_plan_heals_matched_only",
+                  _cp55["counts"] == {"inflight": 3, "healable": 1, "blocked": 2}
+                  and _cp55["healable"][0]["key"] == "g1"
+                  and {b["key"]: b["reason"] for b in _cp55["blocked"]}
+                  == {"g2": "VALUES_NOT_MATCHED", "f3": "NO_SET_TO_VERIFY"}))
+    # S8 — nlm-add nhận alias --drive (=--drive-id) + --wait no-op (drift doc↔CLI hết gãy usage-error).
+    _n55 = build_parser().parse_args(["nlm-add", "--drive", "D55", "--wait"])
+    cases.append(("r55_nlm_add_flag_aliases", _n55.drive_id == "D55" and _n55.wait is True and _n55.no_wait is False))
+    # S11/S12 — sweep: headline name_nonstandard = VBQPPL thật (trừ loai='thuong' + quarantine → _other);
+    # next_action gợi corpus-audit trang NHỎ Cowork-safe (--limit 15).
+    _sw55 = _sweep_report([
+        {"drive_id": "b1", "name": "luat-dau-thau-2023.html", "corpus": "true", "row_kind": "own"},
+        {"drive_id": "b2", "name": "bao-cao-giao-ban-q3.html", "corpus": "true", "row_kind": "own", "loai": "thuong"},
+        {"drive_id": "b3", "name": "van-ban-cach-ly-cu.html", "corpus": "true", "row_kind": "own",
+         "cat": "_ZZZ_QUARANTINE_taluat"},
+    ])
+    cases.append(("r55_sweep_name_nonstandard_corpus_scope",
+                  _sw55.get("name_nonstandard") == 1
+                  and _sw55["name_nonstandard_rows"][0]["drive_id"] == "b1"
+                  and _sw55.get("name_nonstandard_other") == 2
+                  and any("--limit 15" in x for x in _sw55["next_actions"])))
+    # S14 — source-rename gợi ý: chủ đề từ title_vn (bỏ từ-loại đầu) + số hiệu GẠCH-NỐI đủ (hết 'TT_28_2023_TT-BYT' cụt);
+    # thiếu sohieu → cảnh báo SOHIEU_MISSING_IN_SUGGESTION.
+    _pl55 = _source_rename_plan(
+        [{"drive_id": "x55", "name": "thong-tu-28-2023-tt-byt-benh-nghe-nghiep.html", "sohieu": "28/2023/TT-BYT",
+          "title_vn": "Thông tư Hướng dẫn chẩn đoán bệnh nghề nghiệp do yếu tố vi sinh", "corpus": "true"}], "x55")
+    _pl55b = _source_rename_plan(
+        [{"drive_id": "y55", "name": "van-ban-khong-so-hieu.html", "corpus": "true"}], "y55")
+    cases.append(("r55_source_rename_suggest_titlevn_and_hyphen_sohieu",
+                  _pl55.get("ok") is True
+                  and _pl55["new_name"].startswith("TT_28-2023-TT-BYT_")
+                  and "Huong_dan" in _pl55["new_name"]
+                  and "28_2023" not in _pl55["new_name"]
+                  and any(w.startswith("SOHIEU_MISSING_IN_SUGGESTION") for w in _pl55b.get("warnings") or [])))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

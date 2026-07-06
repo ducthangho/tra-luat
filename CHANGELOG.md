@@ -1,3 +1,50 @@
+# ★ v1.33.44 — Vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): registry sạch NGAY tại ingest + journal self-heal + Cowork-safe paging
+
+Nguồn: bảng 7A "Vấn đề VẬN HÀNH SKILL" của phiên rà 34 Luật + nạp 65/VBHN CNTT (log Cowork 2026-07-06/07).
+Nhóm KHÔNG vá vì cố hữu/ngoài code: S1 (NLM cookie ~1-2h — đã có nlm-auth-stage gate v1.33.39 + doctor LIVE probe),
+S2 (review-queue OFFLINE — bù bằng Chrome/WebSearch, thiết kế), S3 (mount Cowork cắt cụt — đã có BƯỚC 0 curl zip),
+S9/S10 (ESTIMATE/đa-mẫu-số — đã chú thích tường minh từ v1.33.16/v1.30.1).
+
+## S4+S5+S6 — `ingest-local` ghi registry SẠCH ngay tại ingest (hết chuỗi vá hậu-ingest)
+- **S5:** `loai` chuẩn hoá enum NGAY khi ingest (`_normalize_loai`: 'VBHN' trơ → 'Văn bản hợp nhất') — trước
+  đây mỗi ingest xong phải `backfill-loai --normalize` vá lại.
+- **S6:** `reg_cat` = NHÃN ĐỦ canonical `NN_Ten` (`_cat_reg_label`, đồng bộ recat P1-1 v1.33.12 + sapxep) —
+  trước để mã trơ '03' → sweep `cat_label_variants` + phải `recat` sau MỖI ingest. Folder resolve vẫn theo mã.
+  Plan DRY + output kèm `reg_cat_label` để thấy giá trị THẬT sẽ ghi.
+- **S4:** bước reg_link CUỐI ghi KÈM `corpus=true` (đồng bộ đường profile-ingest 1-file vốn đã set) — ca thật:
+  timeout 45s cắt giữa `nlm add`↔`reg_link` để lại dòng registry corpus/nlm TRỐNG, phải vá tay nlm-add+register.
+  Nay đứt giữa chừng → chạy lại CÙNG LỆNH + `--resume` là ghi nốt TRỌN metadata (idempotent).
+
+## S7 — `tl journal <run> --close`: SELF-HEAL inflight đã được lệnh khác hoàn tất
+- Ca thật: ingest đứt trước reg_link → vá tay xong mà journal vẫn báo `inflight=1` VĨNH VIỄN (resume/undo coi là dở).
+- `--close` đối chiếu TẤT ĐỊNH `intent.set` ↔ registry hiện tại (`_journal_close_plan` PURE, so mềm strip+lower):
+  khớp hết → append commit `healed` (chỉ ghi file journal LOCAL, không đụng remote); chưa khớp → giữ + gợi ý
+  `boot --refresh` (manifest stale); `--force` ép đóng sau khi verify tay. Màn hình inflight nay tự trỏ lệnh này.
+
+## S8 — `nlm-add` alias cờ (drift doc↔CLI)
+- `--drive` = alias `--drive-id`; `--wait` = no-op tương thích (mặc định ĐÃ wait; tắt: `--no-wait`) — ghi chú
+  cũ trong SKILL.md (`nlm source add --drive … --wait`) hết gãy usage-error.
+
+## S11 — `corpus-audit` Cowork 45s: trang NHỎ + resume_command giữ --limit
+- Ca thật: ops-plan gợi `--all --full` (489 header) KHÔNG chạy nổi Cowork; trang mặc định 40 cũng timeout (~20/45s).
+- ops-plan + sweep next_action nay gợi `--all --resume --limit 15 --workers 4` (LẶP CÙNG LỆNH tới rc=0; rc=3=PARTIAL);
+  `resume_command` trong JSON GIỮ NGUYÊN `--limit` người dùng chọn (trước bỏ → lần lặp sau rơi về trang 40 lại chết).
+
+## S12 — sweep `name_nonstandard` headline = VBQPPL thật (hết 65-vs-8 phồng ảo)
+- Ca thật: sweep báo 65 tên phi-chuẩn → tưởng corpus bẩn; thực VBQPPL corpus=true chỉ 8, còn lại là văn bản
+  LÀM VIỆC (loai='thuong') + dòng kẹt quarantine. Headline nay TRỪ 2 nhóm đó; phần trừ đếm riêng
+  `name_nonstandard_other` + `name_nonstandard_basis` (không nuốt — nhóm đó là việc của tách profile/quarantine-fix).
+
+## S13+S14 — `source-rename`: doc 1-file/lệnh + gợi ý tên ĐỦ chuẩn
+- **S13 (doc):** Cowork 45s chạy 1 FILE/lệnh — `--rename-drive` ~3 round-trip (registry+Drive+NLM), batch ≥2 SẼ timeout.
+- **S14:** gợi ý khi bỏ `--name` từng ra 'TT_28_2023_TT-BYT' (số hiệu lẫn tail underscore, THIẾU chủ đề). Nay:
+  số hiệu = `--sohieu` mới > registry (normalize_number tự gạch-nối); CHỦ ĐỀ ưu tiên title_vn/trích yếu
+  (`_derive_subject_from_entries` — CÓ DẤU, ~83% corpus sau backfill, guard tên-file) bỏ từ-loại đứng đầu + cắt ≤10 từ;
+  fallback tail cũ LỌC token số-hiệu lọt vào; thiếu sohieu → cảnh báo `SOHIEU_MISSING_IN_SUGGESTION`.
+
+**Selftest:** +5 case `r55_*` (shape-lock ingest-local canonical, journal close plan, alias nlm-add, sweep scope,
+rename suggestion) — **611/611**. SKILL.md đồng bộ các dòng lệnh liên quan.
+
 # ★ v1.33.43 — MERGE bundle-17 (`tra-luat_v1.33.42.zip`): A2 backfill-title-vn KẸT PAGINATION — fix cứu lại 21 dòng bị vòng lặp cũ bỏ sót
 
 Bundle-17 fork từ v1.33.40, gồm A1 (reg-query projection — ĐÃ có từ bundle-16, bản ta superset +sua_doi/hieuluc)

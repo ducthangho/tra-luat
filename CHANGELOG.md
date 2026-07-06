@@ -1,3 +1,53 @@
+# ★ v1.33.41 — xử log rà VBHN-first (4 văn bản, Cowork): N1 double-add sau timeout · N2 ingest-analyze sai cho VBHN · N3 register bỏ field im lặng · N4 corpus=false không clear ref · N5 nlm-list cắt câm
+
+Log Cowork nạp 4 bản VBHN mới nhất + gỡ 5 bản bị thay. Kết quả VBHN-first ĐÚNG (0 desync cuối phiên) nhưng lộ 5
+lỗi CODE:
+
+## N1 (🔴) — TRÙNG NLM ngầm sau timeout 45s
+- **Hiện tượng:** ingest-local vượt 45s Cowork → client bị giết NHƯNG source_add server-side vẫn XONG → nlm-add
+  tường minh sau đó add LẦN 2 (130/135 mỗi cái 2 nguồn); chỉ lộ khi nlm-reconcile → xóa tay. Gate PRE-add
+  (_nlm_dedup_gate) thua cuộc đua LẮNG-ĐỌNG-ASYNC (nguồn vừa add chưa hiện trong source_list; log ghi số nguồn
+  LIVE dao động 286→292→290→288).
+- **Fix:** `_nlm_post_add_dup_check` — SELF-CHECK NGAY SAU add (re-list FRESH skip_freshness=False, mirror
+  fresh-verify của ingest-missing): ≥2 nguồn cùng drive_id → in 🔴 dup_after_add + lệnh xóa điền sẵn. Wire vào
+  cả `nlm-add` lẫn bước add của `ingest-local`. Read-only, KHÔNG tự xóa.
+
+## N2 (🔴) — ingest-analyze auto-plan sai hàng loạt cho VBHN (4 gốc rễ)
+- (a) **sohieu lấy số GỐC** (100/2015 thay vì VBHN 135): layout VPQH in số VBHN ở KHỐI KÝ CUỐI (đã biết S-2
+  v1.33.15) → match đầu trong head = số luật gốc trong câu '…được hợp nhất'. Nay: doc LÀ VBHN mà match đầu
+  không phải dạng VBHN → quét tìm match VBHN; không thấy trong probe → sohieu RỖNG (ép --sohieu tường minh,
+  KHÔNG đăng ký nhầm số gốc). loai ép 'Văn bản hợp nhất' (header in 'BỘ LUẬT' to → _infer_loai đoán nhầm).
+- (b) **cờ DUTHAO sai**: draft quét TOÀN 16000 chars → 'lấy ý kiến' trong THÂN luật bắn nhầm. Nay marker chỉ có
+  nghĩa ở VÙNG TIÊU ĐỀ (head 1500 + filename); VBHN không bao giờ draft.
+- (c) **tên theo cơ quan**: 'VĂN PHÒNG QUỐC HỘI' lọt thành chủ đề — _SUBJ_NOISE_RE thiếu 'van phong'. Đã thêm.
+- (d) **cat=00 (Đảng) cho Luật giám sát QH**: thân luật nhắc 'Đảng' làm alias 00 thắng điểm — cat 00 KHÔNG BAO
+  GIỜ hợp lệ cho VBQPPL (mirror gate _CAT_PIN) → hạ rỗng + CAT_00_PARTY_BLOCKED_FOR_VBQPPL. + warning
+  VBHN_AUTO_PLAN_VERIFY_EXPLICIT nhắc set --name/--sohieu/--cat tường minh cho VBHN.
+
+## N3 (🟠) — register --goc/--title-vn bị bỏ IM LẶNG vẫn 'verified'
+- **Gốc rễ:** `_verified_reg_upsert` chỉ kiểm `ok` = request ĐƯỢC NHẬN — cột bị webapp bỏ im lặng vẫn 'verified'
+  (ca 62/2025 goc/title_vn=null sau set). **Fix:** READ-BACK field-level qua reg_get (refresh=true, né cache đọc
+  600s): field set mà đọc lại LỆCH → verified=False + `fields_dropped` LOUD; reg_get không trả row → readback=
+  NO_ROW (không kết luận, không phủ nhận write); lỗi mạng → readback=FAILED. + `register --apply` = NO-OP compat
+  (hết usage-error rc=2 giữa agent loop quen lệnh DRY-mặc-định).
+
+## N4 (🟠) — source-update-corpus false không clear nlm_source_id
+- Sau corpus=false + NLM delete THÀNH CÔNG: clear luôn nlm_source_id/nlm_notebook_id qua `_journaled_reg_clear`
+  (2 cột ∈ _REG_CLEARABLE_COLS; delete FAIL → GIỮ ref để thử lại). Output +nlm_ref_cleared. 5 dòng tồn của phiên
+  (100-2015, 97-2015, 87-2015, 57-2014, 62-2025) dọn bằng lệnh CÓ SẴN `register --nlm-source-id "" --nlm-notebook-id ""`
+  (clear-route v1.29.4 — đúng #15, không cần fixer mới).
+
+## N5 (🟡) — nlm-list cắt ~14 dòng IM LẶNG
+- `--max 0` = TẤT CẢ; bị cắt → in LOUD '… còn N nguồn BỊ CẮT — --max 0 / --json / --out'; + `--out` atomic.
+
+selftest **603/603** (+6 r52: VBHN classify/subject-noise/read-back-dropped/post-add-dup/corpus-false-clear/
+parser-flags; 3 test cũ verified_reg_upsert cập nhật theo read-back NO_ROW). ruff 389 < 390 baseline (0 lỗi mới).
+**Đã biết (không phải bug):** đếm nguồn LIVE dao động = async settle (ground-truth = nlm-reconcile); dedup-check
+MAYBE = propose-only by-design; Q1 ASCII-query đã vá v1.33.35 (LIVE 1.33.28 CHƯA deploy — gốc rễ title_vn trống
+xử bằng backfill-title-vn data-op); lệch 467 vs 510 = định nghĩa (tl counts).
+
+---
+
 # ★ v1.33.40 — MERGE bundle-15 (`tra-luat_v1.33.36_complete.zip`): PORT fix `source-delete` (WRITE-path bug) — bù bundle-14
 
 Bundle-15 'complete' fork từ v1.33.35 = bundle-14 (#15 SCRIPT-REUSE GATE + BOM fix + selftest — ĐÃ có trong canonical

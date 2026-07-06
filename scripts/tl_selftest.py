@@ -4440,6 +4440,112 @@ def run() -> int:
     _sd_no_legacy = not any(c[0] == "get" and c[1] == "reg_delete" for c in _sd_calls)   # hết g.get(reg_delete,force)
     cases.append(("r51_source_delete_trashes_drive_and_posts_reg_delete",
                   _sd_rc == 0 and _sd_trash and _sd_reg and _sd_no_legacy))
+
+    # ═══ v1.33.41 (log rà VBHN-first 4 văn bản: N1 double-add sau timeout · N2 ingest-analyze sai cho VBHN ·
+    # N3 register bỏ field im lặng · N4 corpus=false không clear ref · N5 nlm-list cắt câm) — r52_* ═══
+    # (N2a/b) VBHN: match sohieu đầu tiên là số GỐC (layout VPQH in số VBHN ở khối ký cuối) → sohieu rỗng thay vì
+    # số gốc; có số VBHN trong probe → bắt đúng; loai=VBHN dù header in 'BỘ LUẬT'; draft=False (marker 'lấy ý
+    # kiến' trong THÂN không còn bắn); luật thường + dự thảo thật không đổi.
+    _hdr52 = ("VĂN PHÒNG QUỐC HỘI\nBỘ LUẬT\nHÌNH SỰ\n\nBộ luật Hình sự số 100/2015/QH13 của Quốc hội, "
+              "được hợp nhất bởi văn bản hợp nhất...\n" + "Điều X. Việc lấy ý kiến nhân dân..." * 40)
+    _c52a = _classify_doc_header(_hdr52, "vbhn-blhs.docx")
+    _c52b = _classify_doc_header(_hdr52 + "\n\nXÁC THỰC VĂN BẢN HỢP NHẤT\nSố: 135/VBHN-VPQH", "vbhn-blhs.docx")
+    _c52c = _classify_doc_header("QUỐC HỘI\nLUẬT\nDÂN SỐ\nLuật số: 113/2025/QH15", "luat113.docx")
+    _c52d = _classify_doc_header("DỰ THẢO\nLUẬT ABC\n...", "duthao.docx")
+    cases.append(("r52_vbhn_header_classify",
+                  _c52a["sohieu"] == "" and _c52a["loai"] == "Văn bản hợp nhất" and _c52a["draft"] is False
+                  and "135" in _c52b["sohieu"] and "VBHN" in _c52b["sohieu"].upper()
+                  and _c52c["sohieu"] == "113/2025/QH15" and _c52c["draft"] is False
+                  and _c52d["draft"] is True))
+    # (N2c) chủ đề đặt tên KHÔNG dính dòng cơ quan 'VĂN PHÒNG QUỐC HỘI'.
+    _s52 = _doc_subject_for_name("VĂN PHÒNG QUỐC HỘI\nBỘ LUẬT\nHÌNH SỰ\n", {"title": ""})
+    cases.append(("r52_subject_skips_van_phong", "phong" not in _strip_accents(_s52).lower()))
+    # (N3) _verified_reg_upsert READ-BACK field-level: webapp ok nhưng cột bị bỏ im lặng (read-back lệch) →
+    # verified=False + fields_dropped; read-back khớp → verified=True (ca 62/2025 goc/title_vn=null).
+    class _FkG52:
+        def __init__(self, row):
+            self.row = row
+        def get(self, action, **kw):
+            if action == "reg_upsert":
+                return {"ok": True, "updated": True}
+            if action == "reg_get":
+                return {"ok": True, "rows": [self.row]}
+            raise AssertionError(action)
+    _v52a = _verified_reg_upsert(_FkG52({"goc": "", "title_vn": ""}),
+                                 {"drive_id": "d62", "goc": "62-2025-QH15", "title_vn": "Luật X"})
+    _v52b = _verified_reg_upsert(_FkG52({"goc": "62-2025-QH15", "title_vn": "Luật X"}),
+                                 {"drive_id": "d62", "goc": "62-2025-QH15", "title_vn": "Luật X"})
+    cases.append(("r52_reg_upsert_readback_catches_dropped_fields",
+                  _v52a["verified"] is False and _v52a.get("error") == "FIELDS_DROPPED_ON_WRITE"
+                  and {d["col"] for d in _v52a["fields_dropped"]} == {"goc", "title_vn"}
+                  and _v52b["verified"] is True))
+    # (N1) _nlm_post_add_dup_check: 2 nguồn cùng drive_id → payload 🔴 kèm fix; 1 nguồn → None; list fail → None.
+    class _FkNC52:
+        def __init__(self, srcs, ok=True):
+            self.srcs, self.okv = srcs, ok
+        def source_list(self, nb, skip_freshness=True, drive=True):
+            return {"ok": self.okv, "sources": self.srcs}
+    _dX52 = "D52" + "x" * 25   # drive_id thật ≥20 ký tự (_nlm_source_drive_id lọc id ngắn)
+    _dup52 = _nlm_post_add_dup_check(_FkNC52([{"id": "s1", "drive_id": _dX52}, {"id": "s2", "drive_id": _dX52}]),
+                                     "NB", _dX52, "s2")
+    _one52 = _nlm_post_add_dup_check(_FkNC52([{"id": "s1", "drive_id": _dX52}]), "NB", _dX52, "s1")
+    _fail52 = _nlm_post_add_dup_check(_FkNC52([], ok=False), "NB", _dX52, "s1")
+    cases.append(("r52_post_add_dup_check",
+                  _dup52 is not None and _dup52["dup_after_add"] and "s1" in _dup52["fix"]
+                  and _one52 is None and _fail52 is None))
+    # (N4) source-update-corpus false: NLM delete OK → reg_clear nlm_source_id,nlm_notebook_id; register --apply
+    # (N3) + nlm-list --max/--out (N5) parser nhận.
+    _n4_calls = []
+    class _FkG54:
+        def get(self, action, **kw):
+            _n4_calls.append((action, kw))
+            if action == "reg_upsert":
+                return {"ok": True, "updated": True}
+            if action == "reg_get":
+                return {"ok": True, "rows": [{"corpus": "false", "nlm_status": "removed_by_user"}]}
+            if action == "reg_clear":
+                return {"ok": True, "cleared": 1}
+            raise AssertionError(action)
+    _n4_ent = {"drive_id": "d54", "name": "Luat_54", "so_hieu": "54/2020/QH14", "cat": "20",
+               "corpus": "true", "nlm_source_id": "sid54", "nlm_notebook_id": "NB54", "nlm_status": "pushed"}
+    _n4_keys = ("apply_profile_offline", "_manifest_entries", "_apply_gate", "load_creds", "_gas",
+                "_apply_journal_start", "_journal_append", "_resolve_nlm_notebook", "_invalidate_manifest_cache")
+    _n4_saved = {k: getattr(_TL_MODULE, k) for k in _n4_keys}
+    _nc54 = _need_base("nlm_cli")
+    _o_sd54, _o_av54 = _nc54.source_delete, _nc54.nlm_available
+    try:
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [_n4_ent]
+        _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: _FkG54()
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run54"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._resolve_nlm_notebook = lambda x: ("NB54", None)
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _nc54.nlm_available = lambda: True
+        _nc54.source_delete = lambda sid, timeout=120: {"ok": True}
+        with _hush():
+            _n4_rc = _TL_MODULE.cmd_source_update_corpus(argparse.Namespace(
+                config=None, profile=None, refresh=False, target="d54", status="false",
+                apply=True, confirm="yes"))
+    finally:
+        for _k, _v in _n4_saved.items():
+            setattr(_TL_MODULE, _k, _v)
+        _nc54.source_delete, _nc54.nlm_available = _o_sd54, _o_av54
+    _n4_clear = [c for c in _n4_calls if c[0] == "reg_clear"]
+    cases.append(("r52_corpus_false_clears_nlm_refs",
+                  _n4_rc == 0 and len(_n4_clear) == 1
+                  and "nlm_source_id" in str(_n4_clear[0][1].get("cols"))
+                  and "nlm_notebook_id" in str(_n4_clear[0][1].get("cols"))))
+    _bp52 = build_parser()
+    try:
+        _ns52a = _bp52.parse_args(["register", "--drive-id", "X" * 30, "--goc", "1-2020-QH14", "--apply"])
+        _ns52b = _bp52.parse_args(["nlm-list", "--max", "0", "--out", "/tmp/_nl.json"])
+        _p52_ok = (_ns52a.apply is True and _ns52b.max == 0 and _ns52b.out == "/tmp/_nl.json")
+    except SystemExit:
+        _p52_ok = False
+    cases.append(("r52_register_apply_nlm_list_flags", _p52_ok))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

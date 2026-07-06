@@ -1,3 +1,30 @@
+# ★ v1.33.42 — MERGE bundle-16 (`tra-luat_v1.33.41.zip`) + N6 `ingest-local --resume` (TĂNG TÍNH TẤT ĐỊNH)
+
+Bundle-16 fork từ v1.33.40 canonical, xử CÙNG log VBHN-first với v1.33.41 ta — nhưng chỉ 1 thay đổi 2 dòng, và
+đó là một PHÁT HIỆN ĐẮT: root cause khác của vụ 'register --title-vn/--goc không persist'.
+
+## PORT (bundle-16) — reg-query projection THIẾU field ⇒ chẩn đoán sai
+- **`_reg_query_row` KHÔNG phơi `title_vn`/`goc`** → field ĐƯỢC reg_upsert ghi ĐÚNG (reg_get raw thấy) nhưng
+  reg-query --json đọc lại =None → phiên rà kết luận nhầm 'register bỏ field im lặng'. Nay phơi title_vn+goc,
+  + `sua_doi`/`hieuluc` CÙNG LỚP gap (workflow backfill quan hệ phải reg_get raw mới thấy). BỔ TRỢ N3 v1.33.41
+  (read-back verify trong _verified_reg_upsert): một cái vá đường GHI (bắt drop thật), một cái vá đường ĐỌC
+  (hết ảo giác drop) — phòng-vệ-kép, giữ CẢ HAI. Bundle 0 test → +r53 khoá projection.
+
+## N6 — `ingest-local --resume`: script hóa việc agent phải TỰ SUY sau timeout (yêu cầu user: tăng tất định)
+- **Ma sát log:** pipeline monolithic vượt 45s Cowork → agent phải tự suy 'còn bước nào' rồi tay-chain
+  register/nlm-add (4-5 round-trip/file); nguồn add xong server-side → gate abort bắt đi nlm-reconcile tay.
+- **Fix:** `_ingest_local_prev_state` đọc JOURNAL run trước cho CÙNG file (match meta.file; run mới nhất thắng)
+  → `--resume` skip TẤT ĐỊNH bước đã xong: upload xong → tái dùng fileId; organize xong → tái dùng gdoc/srcId
+  (không tạo GDoc thứ 2); nlm add xong → LINK registry với source_id từ journal. Gate dup + --resume → **LINK
+  nguồn đã-live thay vì abort** (đúng ca 130/135: client-timeout nhưng add xong server-side). Doctrine Cowork:
+  lặp CÙNG LỆNH + --resume tới rc=0 — mirror `nlm-install --resume`/`corpus-audit --all --resume`, agent KHÔNG
+  còn phải suy luận. Thông điệp abort/fail đều trỏ '--resume'.
+
+selftest **605/605** (+2 r53: projection expose · prev-state từ journal [commit-fail không nhặt, file khác → {}]
++ parser --resume). ruff 389 = baseline. Bundle-16 VERSION còn 1.33.40 (quên bump) — gộp thành 1.33.42.
+
+---
+
 # ★ v1.33.41 — xử log rà VBHN-first (4 văn bản, Cowork): N1 double-add sau timeout · N2 ingest-analyze sai cho VBHN · N3 register bỏ field im lặng · N4 corpus=false không clear ref · N5 nlm-list cắt câm
 
 Log Cowork nạp 4 bản VBHN mới nhất + gỡ 5 bản bị thay. Kết quả VBHN-first ĐÚNG (0 desync cuối phiên) nhưng lộ 5

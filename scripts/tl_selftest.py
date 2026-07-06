@@ -4546,6 +4546,49 @@ def run() -> int:
     except SystemExit:
         _p52_ok = False
     cases.append(("r52_register_apply_nlm_list_flags", _p52_ok))
+
+    # ═══ v1.33.42 (MERGE bundle-16 + N6 determinism) — r53_* ═══
+    # (bundle-16 ROOT CAUSE) reg-query projection THIẾU title_vn/goc → field ghi ĐÚNG mà đọc lại =None → chẩn
+    # đoán sai 'register không persist'. Nay phơi title_vn/goc + sua_doi/hieuluc (cùng lớp gap).
+    _r53row = _reg_query_row({"drive_id": "x53", "name": "Luat_X", "title_vn": "Luật X", "goc": "1-2020-QH14",
+                              "sua_doi": "2-2021-QH15", "hieuluc": "Còn hiệu lực"})
+    cases.append(("r53_reg_query_row_exposes_relation_fields",
+                  _r53row.get("title_vn") == "Luật X" and _r53row.get("goc") == "1-2020-QH14"
+                  and _r53row.get("sua_doi") == "2-2021-QH15" and _r53row.get("hieuluc") == "Còn hiệu lực"))
+    # (N6) _ingest_local_prev_state đọc journal run trước: match theo meta.file; nhặt fileId/gdoc/source_id từ
+    # commit ok; run MỚI NHẤT thắng; file khác → {}. + parser ingest-local nhận --resume.
+    import tempfile as _tmp53
+    with _tmp53.TemporaryDirectory() as _d53:
+        _o_env53 = _os38.environ.get("TL_JOURNAL_DIR")
+        _os38.environ["TL_JOURNAL_DIR"] = _d53
+        try:
+            _j53 = _os38.path.join(_d53, "ingest-local_100_1.jsonl")
+            with open(_j53, "w", encoding="utf-8") as _fh53:
+                _fh53.write(json.dumps({"t": "run_start", "cmd": "ingest-local", "run_id": "ingest-local_100_1",
+                                        "file": "C:/in/f53.docx", "name": "Luat_53"}) + "\n")
+                _fh53.write(json.dumps({"t": "commit", "op": "upload", "key": "Luat_53.docx", "ok": True,
+                                        "verify": {"fileId": "FID53"}}) + "\n")
+                _fh53.write(json.dumps({"t": "commit", "op": "organize", "key": "FID53", "ok": True,
+                                        "verify": {"gdoc": "GD53", "srcId": "SRC53"}}) + "\n")
+                _fh53.write(json.dumps({"t": "commit", "op": "nlm_source_add", "key": "GD53", "ok": False,
+                                        "verify": {"source_id": None}}) + "\n")   # add FAIL → không nhặt
+            _st53 = _TL_MODULE._ingest_local_prev_state("C:/in/f53.docx", "Luat_53")
+            _st53_miss = _TL_MODULE._ingest_local_prev_state("C:/in/khac.docx", "Luat_khac")
+        finally:
+            if _o_env53 is None:
+                _os38.environ.pop("TL_JOURNAL_DIR", None)
+            else:
+                _os38.environ["TL_JOURNAL_DIR"] = _o_env53
+    try:
+        _ns53 = build_parser().parse_args(["ingest-local", "f.docx", "--apply", "--resume"])
+        _p53_ok = (_ns53.resume is True and _ns53.apply is True)
+    except SystemExit:
+        _p53_ok = False
+    cases.append(("r53_ingest_local_prev_state_and_resume_flag",
+                  _st53.get("upload_fid") == "FID53" and _st53.get("gdoc") == "GD53"
+                  and _st53.get("src_docx") == "SRC53" and "nlm_source_id" not in _st53
+                  and _st53.get("journal_prev") == "ingest-local_100_1"
+                  and _st53_miss == {} and _p53_ok))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

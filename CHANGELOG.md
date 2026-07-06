@@ -1,3 +1,29 @@
+# ★ v1.33.40 — MERGE bundle-15 (`tra-luat_v1.33.36_complete.zip`): PORT fix `source-delete` (WRITE-path bug) — bù bundle-14
+
+Bundle-15 'complete' fork từ v1.33.35 = bundle-14 (#15 SCRIPT-REUSE GATE + BOM fix + selftest — ĐÃ có trong canonical
+từ v1.33.37) + **1 fix MỚI mà bundle-14 thiếu**: `cmd_source_delete`. Đối chiếu vs ancestor v1.33.35 để cô lập đúng
+thay đổi của họ (tl_gws KHÔNG đổi → không đụng auth.json/gate v1.33.38/39 của ta).
+
+## PORT — `cmd_source_delete` 2 lỗi WRITE-path (verify vs API_CONTRACT + pattern đã chứng minh)
+- **FIX #2 — KHÔNG trash Drive:** docstring nói 'gỡ NLM + trash Drive + xóa dòng registry' nhưng code CHỈ nlm-delete
+  + reg_delete, KHÔNG BAO GIỜ trash file Drive → file rác kẹt lại. Thêm `g.get("trash", fileId, confirm="yes")`
+  (khớp API_CONTRACT `trash|GET|fileId,confirm=yes` + 3 call trash khác trong tl.py); reversible qua 'restore'.
+- **FIX #1 — reg_delete SAI shape:** cũ `g.get("reg_delete", fileId=, force="true")` — nhưng GAS `reg_delete` là
+  **POST + drive_ids[] + confirm='yes'** (API_CONTRACT dòng 175; fileId/force BỊ BỎ QUA → dòng registry KHÔNG xóa,
+  ok giả). Đổi `g.post("reg_delete", drive_ids=json.dumps([id]), confirm="yes", require_removed="no")` — khớp CHÍNH
+  XÁC `cmd_reg_delete` (lệnh reg-delete chuẩn). require_removed='no' = hard-delete có chủ đích sau --apply --confirm
+  yes + _apply_gate. +journal op `drive_trash`; output +`drive_trash`.
+- **TINH CHỈNH:** tích hợp journal (commit drive_trash + reg_delete riêng) thay vì chỉ đổi 2 dòng như bundle.
+
+## Verify
+- Smoke test mock gas: source-delete fire ĐÚNG `get trash{fileId,confirm=yes}` + `post reg_delete{drive_ids=["d51"],
+  confirm=yes,require_removed=no}`, output có drive_trash, HẾT legacy `g.get(reg_delete,force)`.
+- **+r51** khoá shape (fake gas + mock deps tối thiểu) — bundle KHÔNG có test cho fix này. selftest **597/597**.
+- BOM/#15/selftest của bundle: ĐÃ có (v1.33.37, escape \u tường minh + r48 behavioral — mạnh hơn bản họ).
+  ruff baseline (0 lỗi mới).
+
+---
+
 # ★ v1.33.39 — nlm-auth-stage TỪ CHỐI stage cookie CHẾT (phá vòng lặp Cowork "stage cookie mới mà vẫn expired")
 
 Log Cowork (tiếp v1.33.38): user stage cookie 'mới' (`extracted_at` TIẾN 19:44→19:50Z, hạn 2027) nhưng NLM từ chối

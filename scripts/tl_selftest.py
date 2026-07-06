@@ -4406,6 +4406,40 @@ def run() -> int:
         else:
             _os38.environ["TL_TOKEN"] = _o_tok50
     cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
+
+    # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
+    # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══
+    _sd_calls = []
+    class _FakeGSD:
+        def get(self, action, **kw): _sd_calls.append(("get", action, kw)); return {"ok": True, "trashed": True, "name": "T"}
+        def post(self, action, **kw): _sd_calls.append(("post", action, kw)); return {"ok": True, "removed": 1}
+    _sd_keys = ("apply_profile_offline", "_manifest_entries", "_apply_gate", "load_creds", "_gas",
+                "_apply_journal_start", "_journal_append", "_resolve_nlm_notebook", "_invalidate_manifest_cache")
+    _sd_saved = {k: getattr(_TL_MODULE, k) for k in _sd_keys}
+    try:
+        _sd_ent = {"drive_id": "d51", "name": "Test_Doc", "so_hieu": "", "cat": "20", "corpus": "true"}
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [_sd_ent]
+        _TL_MODULE._apply_gate = lambda a: (True, None)
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: _FakeGSD()
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run51"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._resolve_nlm_notebook = lambda x: (None, "skip")
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        with _hush():
+            _sd_rc = _TL_MODULE.cmd_source_delete(argparse.Namespace(
+                config=None, profile=None, refresh=False, target="d51", apply=True, confirm="yes"))
+    finally:
+        for _k, _v in _sd_saved.items():
+            setattr(_TL_MODULE, _k, _v)
+    _sd_trash = any(c[0] == "get" and c[1] == "trash" and c[2].get("fileId") == "d51"
+                    and c[2].get("confirm") == "yes" for c in _sd_calls)
+    _sd_reg = any(c[0] == "post" and c[1] == "reg_delete" and json.loads(c[2].get("drive_ids", "[]")) == ["d51"]
+                  and c[2].get("confirm") == "yes" and c[2].get("require_removed") == "no" for c in _sd_calls)
+    _sd_no_legacy = not any(c[0] == "get" and c[1] == "reg_delete" for c in _sd_calls)   # hết g.get(reg_delete,force)
+    cases.append(("r51_source_delete_trashes_drive_and_posts_reg_delete",
+                  _sd_rc == 0 and _sd_trash and _sd_reg and _sd_no_legacy))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

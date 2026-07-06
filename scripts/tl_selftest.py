@@ -4589,6 +4589,42 @@ def run() -> int:
                   and _st53.get("src_docx") == "SRC53" and "nlm_source_id" not in _st53
                   and _st53.get("journal_prev") == "ingest-local_100_1"
                   and _st53_miss == {} and _p53_ok))
+
+    # ═══ v1.33.43 (MERGE bundle-17 — A2 backfill-title-vn KẸT pagination: ép offset=0 ở --apply + next_offset=
+    # None ⇒ lô đầu TOÀN skip lặp vĩnh viễn, pool 79 mà 0/79 quét được) — r54_* ═══
+    # --apply nay HONOR --offset; trang toàn-skip → next_offset TIẾN QUA skip; trang cuối → None+coverage_complete.
+    _r54_keys = ("apply_profile_offline", "_manifest_entries", "_backfill_titlevn_candidates", "_apply_gate",
+                 "load_creds", "_gas", "_apply_journal_start", "_journal_append", "_invalidate_manifest_cache")
+    _r54_saved = {k: getattr(_TL_MODULE, k) for k in _r54_keys}
+    class _FkG54b:
+        def get(self, action, **kw): return {"ok": True}
+        def post(self, action, **kw): return {"ok": True, "patched": 0}
+    def _r54_run(off, lim):
+        _ns = argparse.Namespace(config=None, profile=None, refresh=False, force_refresh=False,
+                                 offset=off, limit=lim, from_tukhoa=True, apply=True, out=None)
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = _TL_MODULE.cmd_backfill_titlevn(_ns)
+        return _rc, json.loads(_b.getvalue())
+    try:
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE._backfill_titlevn_candidates = lambda entries, force=False: [
+            {"entry": {"tukhoa": ""}, "drive_id": f"d54{i}", "name": f"ND_{i}-2020-ND-CP_X"} for i in range(5)]
+        _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: _FkG54b()
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run54b"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _rc54a, _s54a = _r54_run(0, 2)     # trang đầu: 2 skip / pool 5 → next=2
+        _rc54b, _s54b = _r54_run(2, 10)    # trang cuối: 3 skip, hết pool → next=None
+    finally:
+        for _k, _v in _r54_saved.items():
+            setattr(_TL_MODULE, _k, _v)
+    cases.append(("r54_backfill_titlevn_offset_advances_past_skips",
+                  _rc54a == 0 and _s54a.get("next_offset") == 2 and _s54a.get("coverage_complete") is False
+                  and _rc54b == 0 and _s54b.get("next_offset") is None and _s54b.get("coverage_complete") is True))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

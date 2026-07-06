@@ -1,3 +1,30 @@
+# ★ v1.33.43 — MERGE bundle-17 (`tra-luat_v1.33.42.zip`): A2 backfill-title-vn KẸT PAGINATION — fix cứu lại 21 dòng bị vòng lặp cũ bỏ sót
+
+Bundle-17 fork từ v1.33.40, gồm A1 (reg-query projection — ĐÃ có từ bundle-16, bản ta superset +sua_doi/hieuluc)
++ **A2 MỚI**: `backfill-title-vn --apply` kẹt pagination.
+
+## PORT A2 — pagination tiến qua trang toàn-skip
+- **Gốc rễ:** thiết kế 'pool tự co sau khi ghi' (v1.31.0: ép `--offset=0` ở --apply + `next_offset=None`) CHỈ
+  đúng khi CÓ dòng ghi được; lô đầu TOÀN skip (boilerplate) → pool KHÔNG co → mọi lần chạy lặp đúng lô đầu,
+  KHÔNG BAO GIỜ tới dòng sau.
+- **Fix:** HONOR `--offset` ở --apply; `next_offset = offset + số-dòng-SKIP` (dòng ghi được rời pool nên offset
+  không nhảy cóc) + `coverage_complete`; stderr trỏ lệnh trang kế TƯỜNG MINH (tất định — driver không phải suy).
+- **VERIFY LIVE + GIÁ TRỊ THỰC NGHIỆM:** trang đầu toàn-skip → `next_offset=40` (trước None=kẹt); quét chuỗi
+  offset phát hiện **trang ẩn offset=40 có 21 dòng WRITABLE** mà vòng lặp cũ ('lặp cùng lệnh tới applied=0')
+  đã BỎ SÓT — ghi nốt 21 dòng, `coverage_complete=true`. Tổng backfill title_vn phiên này: **~242 dòng**.
+- **+r54** khoá pagination (trang toàn-skip advance đúng, trang cuối → None+complete; mock offline qua đường
+  --from-tukhoa). Bundle 0 test.
+
+## Đối chiếu B-list của bundle (đề xuất chưa vá của họ) — ĐÃ có trong canonical
+B2 (pipeline 45s) = N6 `--resume` v1.33.42 (sâu hơn đề xuất --stage) · B3 (idempotent add) = gate pre-add
+v1.29.3 + N1 post-add v1.33.41 + dup→LINK khi --resume · B4 (VBHN plan) = N2 v1.33.41 · B5 (clear ref) = N4
+v1.33.41 · B6 (nlm-list) = N5 v1.33.41 · B7 (cookie) = v1.33.33-39. Còn **B1** (extractor trích yếu cho
+NĐ/TT/QĐ/VBHN phức tạp) — ĐỒNG Ý với bundle: rủi ro heuristic cao, cần bộ eval trước/sau, để bản sau.
+
+selftest **606/606** (+r54). ruff baseline.
+
+---
+
 # ★ v1.33.42 — MERGE bundle-16 (`tra-luat_v1.33.41.zip`) + N6 `ingest-local --resume` (TĂNG TÍNH TẤT ĐỊNH)
 
 Bundle-16 fork từ v1.33.40 canonical, xử CÙNG log VBHN-first với v1.33.41 ta — nhưng chỉ 1 thay đổi 2 dòng, và

@@ -4680,6 +4680,60 @@ def run() -> int:
                   and "Huong_dan" in _pl55["new_name"]
                   and "28_2023" not in _pl55["new_name"]
                   and any(w.startswith("SOHIEU_MISSING_IN_SUGGESTION") for w in _pl55b.get("warnings") or [])))
+
+    # ═══ v1.33.47 (MERGE bundle-45 + đối chiếu fix v1.33.46 nhánh song song) — r56_* ═══
+    # (a) bare-VBHN matcher 1 CHIỀU — ca thật 'VBHN 88 Quảng cáo ĐÃ CÓ mà lần nào chạy cũng báo thiếu':
+    # web/footnote ghi '88/VBHN-VPQH' (không năm), corpus lưu '88-2025-VBHN-VPQH' → exact/substring miss.
+    cases.append(("r56_vbhn_bare_key",
+                  _vbhn_bare_key("88-2025-VBHN-VPQH") == "88-VBHN-VPQH"
+                  and _vbhn_bare_key("88/VBHN-VPQH") == "88-VBHN-VPQH"
+                  and _vbhn_bare_key("113-2025-QH15") == ""))
+    cases.append(("r56_sohieu_query_hits_entry_one_way",
+                  _sohieu_query_hits_entry("88-VBHN-VPQH", "88-2025-VBHN-VPQH") is True      # bare → year-qualified: NỚI
+                  and _sohieu_query_hits_entry("50-2025-VBHN-VPQH", "50-2026-VBHN-VPQH") is False  # có năm: giữ CHẶT (collision)
+                  and _sohieu_query_hits_entry("88-2025-VBHN-VPQH", "88-VBHN-VPQH") is False       # chiều ngược: KHÔNG nới
+                  and _sohieu_query_hits_entry("113-2025", "113-2025-QH15", substring=True) is True
+                  and _sohieu_query_hits_entry("", "gi-cung-duoc") is True))
+    # site-level: source-map direct + locate-match dùng matcher mới (query bare hit entry year-qualified)
+    _e56 = {"drive_id": "v56", "name": "VBHN_88-2025-VBHN-VPQH_Quang_cao", "sohieu": "88/2025/VBHN-VPQH", "corpus": "true"}
+    _sm56 = _source_map_one("88/VBHN-VPQH", [_e56])
+    cases.append(("r56_source_map_direct_bare_vbhn",
+                  any(x.get("drive_id") == "v56" for x in (_sm56.get("direct_hits") or []))))
+    # (b) QT-5 hints ưu tiên title_vn CÓ DẤU + guard tên-file (bundle thiếu guard — P0-1 v1.31.0)
+    _h56 = _qt5_search_hints("", [{"name": "Luat_46-2024-QH15_Cong_chung", "title_vn": "Luật Công chứng"}])
+    _h56b = _qt5_search_hints("", [{"name": "Luat_46-2024-QH15_Cong_chung",
+                                    "title_vn": "Luat_46-2024-QH15_Cong_chung"}])   # title_vn = tên file → guard, fallback tail
+    cases.append(("r56_qt5_hints_titlevn_first_with_filename_guard",
+                  any("Luật Công chứng" in h for h in _h56)
+                  and not any("Luat_46-2024-QH15" in h for h in _h56b)
+                  and any("cong chung" in h for h in _h56b)))
+    # (c) _nlm_auth_alive retry ×3: transient lần đầu → True khi lần 2 OK; auth_hint BỀN → False (GIỮ M1 —
+    # bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE = false-green);
+    # transient bền → None (không đỏ oan). Patch time.sleep (module chia sẻ) để khỏi chờ backoff thật.
+    _tg56 = _imp("tl_gws")
+    import time as _tm56
+    _sleep56, _imp56 = _tm56.sleep, _tg56.__dict__.get("_imp")
+    class _FkNC56:
+        def __init__(self, seq): self.seq, self.i = seq, 0
+        def nlm_available(self): return True
+        def notebook_get(self, nb, timeout=30):
+            r = self.seq[min(self.i, len(self.seq) - 1)]; self.i += 1; return r
+    try:
+        _tm56.sleep = lambda s: None
+        def _mk56(seq):
+            _fk = _FkNC56(seq)
+            _tg56._imp = lambda name: _fk if name == "nlm_cli" else _imp56(name)
+            return _tg56._nlm_auth_alive("nb56")
+        _a56 = _mk56([{"ok": False, "error": "network_error: could not reach host"}, {"ok": True, "source_count": 5}])
+        _b56 = _mk56([{"ok": False, "error": "ClientAuthenticationError: expired", "auth_hint": True}] * 3)
+        _c56 = _mk56([{"ok": False, "error": "network_error: connection reset"}] * 3)
+    finally:
+        _tm56.sleep = _sleep56
+        if _imp56 is not None:
+            _tg56._imp = _imp56
+    cases.append(("r56_nlm_auth_alive_retry_transient_vs_expired",
+                  _a56[0] is True and _b56[0] is False and "AUTH_EXPIRED" in _b56[1]
+                  and _c56[0] is None and "INCONCLUSIVE" in _c56[1]))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

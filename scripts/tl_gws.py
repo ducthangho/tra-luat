@@ -112,15 +112,35 @@ def _nlm_auth_alive(notebook_id: str, timeout: int = 30) -> tuple[bool | None, s
         return None, "NO_BINARY: nlm CLI chưa trên PATH (không probe được)"
     if not notebook_id:
         return None, "NO_NOTEBOOK: thiếu base notebook id để probe"
-    try:
-        r = nc.notebook_get(notebook_id, timeout=timeout)
-    except Exception as e:  # noqa: BLE001
-        return None, f"PROBE_EXC: {type(e).__name__}: {str(e)[:120]}"
-    if r.get("ok"):
-        return True, f"LIVE OK (base notebook {int(r.get('source_count') or 0)} nguồn)"
-    # ok:False → phân biệt AUTH (hết hạn — RED) vs mạng/khác (không kết luận)
+    # MERGE bundle-45c (v1.33.47 — log phiên rà 34 Luật nhánh kia): probe LẦN ĐẦU có thể fail TRANSIENT
+    # (network_error / ClientAuthenticationError thoáng qua khi cookie thực SỐNG — nlm-get OK ngay sau) →
+    # trước đây doctor kết luận AUTH_EXPIRED rc=2 oan ngay lần đầu. Retry ×3 backoff 1.5s/3s.
+    # TINH CHỈNH so bundle (GIỮ giá trị M1): sau 3 lần, auth_hint BỀN → EXPIRED (RED) — bundle xếp
+    # 'clientauthentication' vào transient và check transient TRƯỚC auth_hint → cookie chết THẬT (chữ ký
+    # ClientAuthenticationError bền, đúng ca v1.33.39) sẽ thành INCONCLUSIVE vĩnh viễn = tái false-green
+    # mà M1 sinh ra để diệt. Transient thật đã có 3 cơ hội thành công; bền qua 3 lần + auth_hint = chết thật.
+    import time as _t
+    _TRANSIENT = ("network", "reach", "timeout", "temporarily", "503", "502", "connection")
+    r = {}
+    for _att in range(3):
+        try:
+            r = nc.notebook_get(notebook_id, timeout=timeout)
+        except Exception as e:  # noqa: BLE001
+            r = {"ok": False, "error": f"PROBE_EXC: {type(e).__name__}: {str(e)[:120]}"}
+        if r.get("ok"):
+            return True, f"LIVE OK (base notebook {int(r.get('source_count') or 0)} nguồn)"
+        if _att < 2:
+            _errl = str(r.get("error") or "").lower()
+            if r.get("auth_hint") or "clientauthentication" in _errl or any(s in _errl for s in _TRANSIENT):
+                _t.sleep(1.5 * (_att + 1))   # backoff 1.5s → 3s
+                continue
+        break
+    # sau retry — auth_hint BỀN → EXPIRED (RED, ưu tiên trước transient); mạng/transient → KHÔNG kết luận
     if r.get("auth_hint"):
-        return False, "AUTH_EXPIRED: nlm cookie hết hạn — `nlm login` (tương tác) rồi `tl nlm-auth-stage`/`secrets-set --nlm`"
+        return False, "AUTH_EXPIRED: nlm cookie hết hạn (bền qua 3 lần probe) — `nlm login` (tương tác) rồi `tl nlm-auth-stage`/`secrets-set --nlm`"
+    _errl = str(r.get("error") or "").lower()
+    if any(s in _errl for s in _TRANSIENT):
+        return None, f"PROBE_INCONCLUSIVE (transient/mạng sau 3 lần — KHÔNG kết luận auth; thử `tl nlm-auth-load` rồi probe lại): {str(r.get('error') or '?')[:140]}"
     return None, f"PROBE_INCONCLUSIVE (không phải auth): {str(r.get('error') or '?')[:160]}"
 
 

@@ -1,3 +1,43 @@
+# ★ v1.33.47 — MERGE bundle-45 (`tra-luat_v1.33.45.zip`) + đối chiếu fix v1.33.46 nhánh song song (bare-VBHN matcher) + gói vá S5/S6 rời
+
+Nhánh song song fork từ v1.33.43 (bản LIVE Cowork), TỰ ĐÁNH SỐ 1.33.44/45 (TRÙNG số, KHÁC nội dung với canonical
+v1.33.44), sau đó publish tiếp **v1.33.46 lên package Drive** (fix bare-VBHN, không kèm zip trong bundle này).
+Canonical gộp tất cả → **v1.33.47** (bỏ qua 45/46 tránh nhầm bản). ⚠ LIVE Cowork hiện = **1.33.46 nhánh kia**
+(THIẾU toàn bộ S4-S14 của canonical v1.33.44) → NÊN deploy 1.33.47 sớm để hợp nhất.
+
+## PORT bundle-45 (3 thay đổi, đều GIỮ + TINH CHỈNH)
+- **45a `_qt5_search_hints` subject CÓ DẤU:** ưu tiên `title_vn`/`trich_yeu` (≥2 token) thay tail tên file ASCII
+  ('cong chung'/'cntt' → recall Google lượt-2 yếu). **TINH CHỈNH:** +guard `_looks_like_filename_title` — title_vn
+  nhiều dòng chính là TÊN FILE (bài học P0-1 v1.31.0: query literal filename ra 0); bundle thiếu guard này.
+- **45b `backfill-title-vn --out`:** JSON summary atomic qua `_emit_json_payload` (đồng bộ doctor/sweep/counts/
+  corpus-audit) — trước Cowork phải `>` redirect vỡ trần output.
+- **45c `_nlm_auth_alive` retry ×3 backoff 1.5s/3s:** probe đầu có thể fail TRANSIENT (network/CAE thoáng qua khi
+  cookie thực SỐNG) → trước doctor RED oan ngay lần 1. **TINH CHỈNH GIỮ M1:** sau 3 lần, `auth_hint` BỀN → vẫn
+  **AUTH_EXPIRED (RED)** — bundle xếp 'clientauthentication' vào transient VÀ check transient TRƯỚC auth_hint →
+  cookie chết THẬT (chữ ký CAE bền — đúng ca v1.33.39) sẽ thành INCONCLUSIVE vĩnh viễn = tái false-green mà M1
+  (v1.33.35) sinh ra để diệt. Transient thật đã có 3 cơ hội thành công trong retry.
+
+## REIMPLEMENT fix v1.33.46 nhánh kia — bare-VBHN matcher 1 CHIỀU (false-negative HỆ THỐNG)
+- **Ca thật:** VBHN 88 Quảng cáo ĐÃ CÓ (`88-2025-VBHN-VPQH`, corpus=true) nhưng `reg-query --sohieu "88/VBHN-VPQH"`
+  trả 0 → Track-1 kết luận "cần nạp 88" SAI, lặp lại MỌI phiên với MỌI VBHN đã có. Gốc rễ: web/footnote ghi số
+  VBHN KHÔNG năm; corpus lưu year-qualified (bất biến PHẢI-CÓ-NĂM chống collision) → exact/substring miss vì NĂM
+  CHÈN GIỮA (`"88-VBHN-VPQH" not in "88-2025-VBHN-VPQH"`).
+- **Fix:** `_vbhn_bare_key` + `_sohieu_query_hits_entry` — NỚI ĐÚNG 1 CHIỀU: query bare khớp entry year-qualified
+  CÙNG số+cơ-quan mọi năm (trúng nhiều năm → trả CẢ, người rà tự chốt); query CÓ năm giữ so CHẶT
+  ('50-2025' ≠ '50-2026'); chiều ngược (entry thiếu năm) KHÔNG nới — nợ vbhn-year-fix có detector riêng.
+  KHÔNG bao giờ đổi khóa canonical/registry.
+- **Áp 6 site** (nhánh kia 4): reg-query filter (substring mode) · source-map `direct` · locate `_locate_match`
+  (cả sohieu-field lẫn key) · `inline_amendments.in_corpus` · `footnote_amendments.in_corpus` · `_classify_ref`
+  by_sohieu + frontier-expand footnote `present` (2 site sau = nơi sinh MISSING giả cho refs-audit/ingest-missing).
+
+## Gói vá S5/S6 rời (patch_s5_loai.json / patch_s6_regcat.json) — ĐÃ PHỦ, không port
+- S5 (literal 'VBHN'→'Văn bản hợp nhất' chỉ ở default-theo-tên) ⊂ canonical v1.33.44 `_normalize_loai(loai)`
+  (chuẩn hoá MỌI đầu vào, kể cả `--loai VBHN` tường minh + auto-plan). S6 (`(official or {}).get("folder") or cat`)
+  ≡ canonical `_cat_reg_label(cat)` (cùng nguồn phap_dien_45.folder, cùng fallback mã). Không có gì mới để lấy.
+
+**Selftest:** +6 case `r56_*` (bare-key, one-way matcher, source-map direct end-to-end, qt5 title_vn+guard,
+auth retry transient-vs-expired-vs-inconclusive) — **616/616**. SKILL.md đồng bộ (reg-query/backfill-title-vn).
+
 # ★ v1.33.44 — Vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): registry sạch NGAY tại ingest + journal self-heal + Cowork-safe paging
 
 Nguồn: bảng 7A "Vấn đề VẬN HÀNH SKILL" của phiên rà 34 Luật + nạp 65/VBHN CNTT (log Cowork 2026-07-06/07).

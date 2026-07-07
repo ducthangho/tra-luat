@@ -119,6 +119,32 @@ def _effective_iso(st: dict) -> str | None:
     return None
 
 
+def registry_hit_summary(sohieu: str, entries: list, hits_fn=None) -> dict | None:
+    """v1.33.49 (#2 log rà 34 Luật — `status 57-2024-QH15 --amendment` → ADD 'Chưa thấy trong registry/NLM'
+    trong khi locate/reg-query THẤY canonical corpus=true nlm=pushed → driver dễ nạp TRÙNG): đối chiếu registry
+    LOCAL theo số hiệu TRƯỚC khi tin webapp NOT_FOUND. hits_fn(sohieu, entry) do caller cấp (run_live truyền
+    matcher chuẩn của tl — norm_sohieu + _sohieu_query_hits_entry, phủ cả bare-VBHN v1.33.47); thiếu → None.
+    Ưu tiên dòng corpus=true; trả {name, corpus, on_nlm, drive_id} hoặc None."""
+    if not callable(hits_fn):
+        return None
+    best = None
+    for e in entries or []:
+        try:
+            if not hits_fn(sohieu, e):
+                continue
+        except Exception:
+            continue
+        corpus = str(e.get("corpus") or "").strip().lower() == "true"
+        hit = {"name": str(e.get("name") or e.get("ten_file") or e.get("file_name") or "")[:80],
+               "corpus": corpus,
+               "on_nlm": bool(e.get("nlm_source_id")),
+               "drive_id": str(e.get("drive_id") or e.get("driveId") or e.get("id") or "")}
+        if corpus:
+            return hit                    # corpus=true thắng ngay (canonical)
+        best = best or hit
+    return best
+
+
 def decide(current: dict, targets: list[dict] | None = None, is_amendment: bool = False, is_vbhn: bool = False) -> dict:
     targets = targets or []
     status = str(current.get("status") or current.get("vb_status") or "").upper()
@@ -168,6 +194,23 @@ def decide(current: dict, targets: list[dict] | None = None, is_amendment: bool 
                              "KHÔNG phải mâu thuẫn); verify dòng hợp nhất/footnote-map trước khi tin."))
                             + " S9: CHƯA lượt-2 xác minh MỚI NHẤT — `vbhn-verify --official-required` trước khi trích dẫn."]}
     if status in ("NOT_FOUND", "MISSING", ""):
+        # v1.33.49 (#2): webapp NOT_FOUND nhưng registry LOCAL có dòng khớp số hiệu (run_live gắn `registry_hit`)
+        # → KHÔNG kết luận ADD (từng làm nhánh --amendment báo 'Chưa thấy' cho văn bản ĐÃ corpus=true → nạp trùng).
+        _rh = current.get("registry_hit")
+        if isinstance(_rh, dict) and _rh:
+            if _rh.get("corpus"):
+                return {"decision": "SKIP",
+                        "reason": f"ĐÃ có trong registry local (canonical: {_rh.get('name') or _rh.get('drive_id')})"
+                                  + (" + đã trên NLM" if _rh.get("on_nlm") else ""),
+                        "surface": "IN_REGISTRY_LOCAL", "registry_hit": _rh,
+                        "actions": ["KHÔNG nạp lại (tránh trùng). Webapp vb_status trả NOT_FOUND = lệch server-side; "
+                                    "kiểm `tl locate <số hiệu>` / `tl reg-query --sohieu <số hiệu>` để xác nhận, "
+                                    "và cân nhắc `tl boot --refresh` nếu nghi webapp index cũ."]}
+            return {"decision": "REVIEW",
+                    "reason": "Registry local có bản KHỚP số hiệu nhưng CHƯA corpus=true (bản thô/quarantine?)",
+                    "surface": "IN_REGISTRY_LOCAL_RAW", "registry_hit": _rh,
+                    "actions": ["Soát dòng hiện có (`tl reg-query --sohieu <số hiệu>`) rồi quyết: chuẩn hoá bản đó "
+                                "(corpus=true) HAY nạp bản mới + dedup — KHÔNG nạp mù."]}
         return {"decision": "ADD", "reason": "Chưa thấy trong registry/NLM", "surface": status or "UNKNOWN",
                 "actions": ["Có thể nạp, nhưng vẫn cần kiểm số hiệu/tên văn bản."]}
     # §1.8 (log rà): luật MỚI ban hành (vd 74-2025, 134-2025) trường `hieuluc` để TRỐNG → status IN_REGISTRY_HIEULUC_UNKNOWN
@@ -228,6 +271,21 @@ def run_live(sohieu: str, targets: list[str] | None, amendment: bool, vbhn: bool
     sys.path.insert(0, str(HERE))
     import gas  # noqa
     cur = gas.get("vb_status", q=sohieu)
+    # v1.33.49 (#2): webapp NOT_FOUND → đối chiếu registry LOCAL (manifest tl) TRƯỚC khi decide kết luận ADD.
+    # Best-effort: chưa boot/offline → bỏ qua êm (giữ hành vi cũ), KHÔNG chặn gate vì thiếu cache.
+    _st0 = str(cur.get("status") or cur.get("vb_status") or "").upper()
+    if _st0 in ("NOT_FOUND", "MISSING", ""):
+        try:
+            sys.path.insert(0, str(HERE.parent))
+            import tl as _tl  # noqa
+            _hits = lambda q, e: _tl._sohieu_query_hits_entry(  # noqa: E731
+                _tl.norm_sohieu(str(q or "")), _tl._sohieu_key_entry(e))
+            _hit = registry_hit_summary(sohieu, _tl._manifest_entries(), _hits)
+            if _hit:
+                cur = dict(cur)
+                cur["registry_hit"] = _hit
+        except Exception:
+            pass
     tstats = [dict(gas.get("vb_status", q=t), sohieu=t) for t in (targets or [])]
     res = _alias_vocab(decide(cur, tstats, amendment or is_amendment_name(sohieu), vbhn or is_vbhn_name(sohieu)))
     if as_json:

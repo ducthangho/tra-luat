@@ -1,3 +1,41 @@
+# ★ v1.33.49 — Vá log rà 34 Luật corpus (#2 status --amendment false-negative, #3 thiếu backfill-hieuluc) + gỡ tận gốc 'gws/nlm expire nhanh + login lỗi bước cuối' (2026-07-07)
+
+## P1 — #2 `tl status <sohieu> --amendment` false-negative (2 LỚP vá)
+- **Ca thật:** `status 57-2024-QH15 --amendment` → `ADD "Chưa thấy trong registry/NLM"` trong khi `locate`/
+  `reg-query` THẤY canonical corpus=true nlm=pushed → driver dễ nạp TRÙNG.
+- **Lớp 1 (`_status_amendment_registry_guard`, tl.py):** cmd_status đối chiếu manifest offline TRƯỚC khi gọi
+  preingest_gate — số hiệu đã corpus=true → SKIP `AMENDMENT_ALREADY_IN_CORPUS_ON_NLM`.
+- **Lớp 2 (`preingest_gate.registry_hit_summary` + decide):** webapp vb_status NOT_FOUND/MISSING/rỗng →
+  run_live tra registry LOCAL bằng matcher chuẩn tl (norm_sohieu + `_sohieu_query_hits_entry` — phủ cả
+  bare-VBHN v1.33.47); hit corpus=true → SKIP `IN_REGISTRY_LOCAL`, hit thô → REVIEW `IN_REGISTRY_LOCAL_RAW`
+  (phủ CẢ đường không --amendment / gọi preingest_gate trực tiếp). Offline/chưa boot → giữ hành vi cũ êm.
+
+## P1 — #3 `tl backfill-hieuluc` MỚI (bịt gap 33/34 Luật hieuluc rỗng → QT-2 gate mất phân loại)
+- Đọc HEADER thật (Drive → NLM fallback; fast-fail READ_BACKEND_DOWN sau 3 lỗi đọc liên tiếp): nhãn tường minh
+  `Còn/Hết/Chưa hiệu lực` (+ ngày hiệu lực nếu bóc được) — 'Hết hiệu lực' CHỈ khi header GHI RÕ, KHÔNG suy diễn.
+- Date-only (GDoc sạch không banner) phải opt-in `--infer-from-date` (suy Còn/Chưa từ ngày điều khoản thi hành).
+- DRY mặc định; `--apply` journaled/undo; pagination A2 (dòng ghi được rời pool, skip → --offset tiến qua);
+  `--force-refresh` cho giá trị mơ hồ (can_kiem_tra/unknown); `--out` atomic (Cowork).
+
+## P0-hạ-tầng — `tl drive-push --via auto|gws|gcloud` (root-cause 'expire nhanh + lỗi bước cuối')
+- **Chẩn đoán:** OAuth client của gws CLI đang chế độ **TESTING** → (a) refresh token TỰ CHẾT SAU 7 NGÀY
+  (= 'gws expire nhanh hơn trước'); (b) màn consent dễ lỗi 403/redirect Ở BƯỚC CUỐI dù cred đã ghi. NLM cookie
+  ~1h là session-rotation của Google (cố hữu, không sửa được từ script).
+- **Vá:** `drive-push` nhận `--via` — auto = gws trước, chết → **FALLBACK gcloud LOUD** (`gcloud auth
+  print-access-token`; OAuth client gcloud là PRODUCTION nên không dính hạn-7-ngày; cần
+  `gcloud auth login --enable-gdrive-access` 1 lần). Đường gcloud PATCH REST v3 giữ fileId + đổi tên +
+  **VERIFY md5 đọc-lại** (verified-write, không tin HTTP 200 trần); lỗi 401/403/404 kèm cách sửa cụ thể.
+- Helpers: `_gcloud_exe`/`_gcloud_access_token`/`_drive_push_route` (PURE, test offline)/`_gcloud_drive_update`.
+
+## Vận hành local (ngoài repo, máy user)
+- `refresh-tokens.ps1`: login trả rc≠0 → RE-PROBE canary, sống = chấp nhận (lỗi bước cuối OAuth Testing vô hại);
+  -Check thêm trạng thái gcloud; ghi chú hạn cred (NLM ~1h · gws 7-ngày-Testing + 2 lối thoát: publish app / gcloud).
+- `upload-skill-to-Package.ps1`/`.sh`: preflight MỀM — gws chết không còn chặn cứng (chỉ exit 2 khi CẢ gws lẫn
+  gcloud đều chết); thông điệp lỗi kèm 3 cách khắc phục (+`--via gcloud` ép đường).
+
+**Selftest:** +5 `r58_*` (guard amendment, hieuluc parser, candidates+parser, preingest registry-hit layer,
+drive-push route) — **625/625**. SKILL.md: +dòng backfill-hieuluc, header v1.33.49.
+
 # ★ v1.33.48 — Rà Instruction Project `Luật BHXH` (profile văn bản thường, tên CÓ DẤU + KHOẢNG TRẮNG): 3 fix an-toàn-profile + slot per-notebook
 
 Nguồn: Project Instruction "tra-luat (Luật BHXH)" — profile `Luật BHXH` (notebook 59e8d0de…, folder

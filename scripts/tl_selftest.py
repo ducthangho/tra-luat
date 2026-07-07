@@ -4791,6 +4791,64 @@ def run() -> int:
                   and _registry_claim_target(_es57, "NB-A") == 1      # removed KHÔNG đếm ('không đếm mọi nlm_status')
                   and _registry_claim_target(_es57, "NB-B") == 1
                   and _registry_claim_target(_es57, "") is None))
+    # ═══ v1.33.49 (log rà 34 Luật corpus — status amendment false-negative + hieuluc gap) — r58_* ═══
+    _m58_saved = _TL_MODULE._manifest_entries
+    try:
+        _TL_MODULE._manifest_entries = lambda refresh=False: [
+            {"drive_id": "d57", "name": "Luat_57-2024-QH15_SuaDoi_QuyHoach_DauTu_PPP_DauThau",
+             "so_hieu": "57/2024/QH15", "corpus": "true", "nlm_source_id": "s57", "nlm_status": "pushed"}]
+        _g58 = _status_amendment_registry_guard(argparse.Namespace(
+            amendment=True, sohieu="57-2024-QH15", refresh=False, strict=False, json=True))
+    finally:
+        _TL_MODULE._manifest_entries = _m58_saved
+    cases.append(("r58_status_amendment_registry_guard",
+                  _g58 is not None and _g58[0]["decision"] == "SKIP"
+                  and _g58[0]["surface"] == "AMENDMENT_ALREADY_IN_CORPUS_ON_NLM"))
+    _hl58, _why58 = _hieuluc_from_header_text(
+        "Tình trạng hiệu lực: Còn hiệu lực\nĐiều 99. Hiệu lực thi hành. Luật này có hiệu lực từ ngày 01 tháng 7 năm 2026.",
+        today="2026-07-07")
+    _hl58b, _ = _hieuluc_from_header_text(
+        "Điều 1. Luật này có hiệu lực từ ngày 01 tháng 01 năm 2027.", today="2026-07-07", infer_from_date=True)
+    cases.append(("r58_hieuluc_header_parser",
+                  _hl58 == "Còn hiệu lực; hiệu lực từ 01/07/2026" and _why58 == ""
+                  and _hl58b == "Chưa có hiệu lực; hiệu lực từ 01/01/2027"))
+    _bf58 = _backfill_hieuluc_candidates([
+        {"drive_id": "a", "name": "Luat_A", "corpus": "true", "row_kind": "own", "hieuluc": ""},
+        {"drive_id": "b", "name": "Luat_B", "corpus": "true", "row_kind": "own", "hieuluc": "Còn hiệu lực"},
+        {"drive_id": "c", "name": "Luat_C", "corpus": "false", "row_kind": "own", "hieuluc": ""},
+    ])
+    _ap58 = build_parser()
+    cases.append(("r58_backfill_hieuluc_candidates_and_parser",
+                  [x["drive_id"] for x in _bf58] == ["a"]
+                  and _ap58.parse_args(["backfill-hieuluc", "--limit", "5", "--offset", "3",
+                                        "--infer-from-date"]).infer_from_date is True))
+    # (v1.33.49) LỚP 2 fix #2 — preingest_gate.decide đối chiếu registry_hit khi webapp NOT_FOUND (phủ CẢ
+    # đường không --amendment / gọi trực tiếp): hit corpus=true → SKIP IN_REGISTRY_LOCAL; hit thô → REVIEW.
+    _pg58 = _need_base("preingest_gate")
+    _pg58a = _pg58.decide({"status": "NOT_FOUND",
+                           "registry_hit": {"name": "Luat_57", "corpus": True, "on_nlm": True, "drive_id": "d"}})
+    _pg58b = _pg58.decide({"status": "", "registry_hit": {"name": "raw", "corpus": False, "on_nlm": False, "drive_id": "e"}})
+    _pg58c = _pg58.decide({"status": "NOT_FOUND"})
+    _pg58h = _pg58.registry_hit_summary(
+        "57-2024-QH15",
+        [{"sohieu": "57/2024/QH15", "name": "raw_57", "corpus": "false", "drive_id": "a"},
+         {"sohieu": "57-2024-QH15", "name": "Luat_57_canon", "corpus": "true", "nlm_source_id": "s", "drive_id": "b"}],
+        lambda q, e: _sohieu_query_hits_entry(norm_sohieu(q), _sohieu_key_entry(e)))
+    cases.append(("r58_preingest_registry_hit_layer",
+                  _pg58a["decision"] == "SKIP" and _pg58a["surface"] == "IN_REGISTRY_LOCAL"
+                  and _pg58b["decision"] == "REVIEW" and _pg58b["surface"] == "IN_REGISTRY_LOCAL_RAW"
+                  and _pg58c["decision"] == "ADD"
+                  and _pg58h is not None and _pg58h["corpus"] and _pg58h["name"] == "Luat_57_canon"
+                  and "IN_REGISTRY_LOCAL" in _pg58._alias_vocab(_pg58a)["flags"]))
+    # (v1.33.49) drive-push route auto|gws|gcloud (PURE) — auto ưu tiên gws, chết → gcloud LOUD; ép thì chặt.
+    _dr58 = _imp("tl_gws")._drive_push_route
+    cases.append(("r58_drive_push_route",
+                  _dr58("auto", True, False)[0] == "gws"
+                  and _dr58("auto", False, True)[0] == "gcloud" and "FALLBACK" in _dr58("auto", False, True)[1]
+                  and _dr58("auto", False, False)[0] == ""
+                  and _dr58("gws", False, True)[0] == "" and _dr58("gcloud", True, False)[0] == ""
+                  and _dr58("gcloud", False, True)[0] == "gcloud"
+                  and _ap58.parse_args(["drive-push", "x.zip", "--via", "gcloud"]).via == "gcloud"))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

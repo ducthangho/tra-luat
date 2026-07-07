@@ -1366,9 +1366,90 @@ def cmd_nlm_auth_load(a) -> int:
     return 2
 
 
+def _gcloud_exe() -> str | None:
+    """v1.33.49 (log local: `gws auth login` LỖI Ở BƯỚC CUỐI sau khi cấp quyền + cred hết hạn nhanh — OAuth
+    client của gws CLI ở chế độ Testing: refresh token CHẾT SAU 7 NGÀY + màn consent dễ 403 access_denied):
+    gcloud CLI làm nguồn token DỰ PHÒNG — OAuth client của gcloud là PRODUCTION (refresh token bền)."""
+    import shutil as _sh
+    return _sh.which("gcloud") or _sh.which("gcloud.cmd")
+
+
+def _gcloud_access_token() -> tuple[str, str]:
+    """Access token user gcloud (cần DRIVE SCOPE: `gcloud auth login --enable-gdrive-access`). Trả (token, err)."""
+    exe = _gcloud_exe()
+    if not exe:
+        return "", "gcloud không có trên PATH"
+    try:
+        r = subprocess.run([exe, "auth", "print-access-token"], capture_output=True, text=True, timeout=30)
+    except Exception as e:  # noqa: BLE001
+        return "", f"{type(e).__name__}: {e}"
+    tok = (r.stdout or "").strip()
+    if r.returncode != 0 or not tok:
+        return "", ((r.stderr or "").strip()[:200] or f"rc={r.returncode}") + " — `gcloud auth login --enable-gdrive-access`"
+    return tok, ""
+
+
+def _drive_push_route(via: str, gws_ok: bool, gcloud_ok: bool) -> tuple[str, str]:
+    """PURE (test offline): chọn đường drive-push. auto = gws trước (đường chuẩn), chết → gcloud LOUD."""
+    v = (via or "auto").strip().lower()
+    if v == "gws":
+        return ("gws", "") if gws_ok else ("", "gws chưa sẵn/auth (--via gws ép) — `gws auth login` hoặc bỏ --via để auto-fallback gcloud")
+    if v == "gcloud":
+        return ("gcloud", "") if gcloud_ok else ("", "gcloud không sẵn/chưa login drive-scope — `gcloud auth login --enable-gdrive-access`")
+    if gws_ok:
+        return "gws", ""
+    if gcloud_ok:
+        return "gcloud", "[FALLBACK→gcloud] gws chưa sẵn/auth → dùng token gcloud (OAuth production, không hạn-7-ngày)"
+    return "", ("cả gws lẫn gcloud đều chưa sẵn sàng — (a) `gws auth login`; hoặc (b) cài gcloud + "
+                "`gcloud auth login --enable-gdrive-access` rồi chạy lại.")
+
+
+def _gcloud_drive_update(token: str, fid: str, path: str, mime: str, new_name: str | None = None) -> dict:
+    """PATCH nội dung file Drive (GIỮ fileId) qua REST v3 bằng Bearer token gcloud + VERIFY md5 đọc-lại
+    (verified-write doctrine — không tin HTTP 200 trần). new_name → PATCH metadata đổi tên cùng lượt."""
+    import urllib.request
+    import urllib.error
+    data = open(path, "rb").read()
+
+    def _call(url: str, body: bytes, ctype: str) -> dict:
+        req = urllib.request.Request(url, data=body, method="PATCH",
+                                     headers={"Authorization": f"Bearer {token}", "Content-Type": ctype})
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            return json.loads(resp.read().decode("utf-8", "replace") or "{}")
+
+    try:
+        meta = _call(f"https://www.googleapis.com/upload/drive/v3/files/{fid}"
+                     f"?uploadType=media&supportsAllDrives=true&fields=id,name,md5Checksum,modifiedTime",
+                     data, mime)
+        if new_name and (meta.get("name") or "") != new_name:
+            meta = _call(f"https://www.googleapis.com/drive/v3/files/{fid}"
+                         f"?supportsAllDrives=true&fields=id,name,md5Checksum,modifiedTime",
+                         json.dumps({"name": new_name}).encode("utf-8"), "application/json")
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")[:300]
+        except Exception:  # noqa: BLE001
+            pass
+        fix = {401: "token hết hạn/không hợp lệ → `gcloud auth login --enable-gdrive-access` rồi chạy lại",
+               403: "thiếu DRIVE SCOPE hoặc account gcloud KHÔNG có quyền sửa file → "
+                    "`gcloud auth login --enable-gdrive-access` bằng ĐÚNG account sở hữu Package",
+               404: "fileId sai hoặc file không share với account gcloud đang active (`gcloud config get account`)"}
+        return {"ok": False, "error": f"HTTP {e.code}: {body}", "fix": fix.get(e.code, "")}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(e).__name__}: {e}", "fix": ""}
+    want = hashlib.md5(data).hexdigest()
+    got = str(meta.get("md5Checksum") or "")
+    ok = (not got) or got == want          # GDoc-native không có md5; zip/binary PHẢI khớp
+    return {"ok": ok, "file": meta, "md5_local": want, "md5_drive": got or None,
+            **({} if ok else {"error": f"MD5 LỆCH sau upload: local {want} ≠ drive {got} (upload hỏng?)"})}
+
+
 def cmd_drive_push(a) -> int:
-    """[CHẠY Ở MÁY CÓ gws AUTH] Cập nhật NỘI DUNG file Drive (GIỮ fileId) = file local, qua gws update_content.
-    Dùng đẩy zip/bundle skill mới lên Drive mỗi lần ship mà KHÔNG đổi fileId → tl_fetch.sh tự lấy bản mới.
+    """[CHẠY Ở MÁY CÓ gws HOẶC gcloud AUTH] Cập nhật NỘI DUNG file Drive (GIỮ fileId) = file local.
+    v1.33.49: `--via auto|gws|gcloud` — auto = gws trước, gws chết → FALLBACK gcloud LOUD (token
+    `gcloud auth print-access-token`, cần `gcloud auth login --enable-gdrive-access` 1 lần; OAuth client
+    gcloud là PRODUCTION nên KHÔNG dính hạn-7-ngày Testing như gws). Đường gcloud có VERIFY md5 đọc-lại.
     Mặc định fileId = SKILL_FILEID. KHÔNG tạo file mới; chỉ thay nội dung."""
     import mimetypes
     path = getattr(a, "path", None)
@@ -1379,27 +1460,55 @@ def cmd_drive_push(a) -> int:
     if not fid:
         print("[drive-push] ✗ thiếu --file-id (và SKILL_FILEID trống).", file=sys.stderr)
         return 2
+    via = (getattr(a, "via", None) or "auto").strip().lower()
     gb = _imp("gws_bridge")
-    if not gb.is_available():
-        print("[drive-push] ✗ gws chưa sẵn/auth trên máy này — cần `gws` đã `gws auth login` để thay nội dung Drive.", file=sys.stderr)
+    gws_ok = (via != "gcloud") and gb.is_available()
+    gtok, gerr = ("", "")
+    if via == "gcloud" or (via == "auto" and not gws_ok):
+        gtok, gerr = _gcloud_access_token()
+    route, note = _drive_push_route(via, gws_ok, bool(gtok))
+    if not route:
+        print(f"[drive-push] ✗ {note}" + (f" (gcloud: {gerr})" if gerr else ""), file=sys.stderr)
         return 3
+    if note:
+        print(f"[drive-push] {note}", file=sys.stderr)
     mime = "application/zip" if path.lower().endswith(".zip") else (mimetypes.guess_type(path)[0] or "application/octet-stream")
-    try:
-        r = gb.update_content(fid, path, mime=mime)
-    except Exception as e:  # noqa: BLE001
-        print(f"[drive-push] ✗ update lỗi: {type(e).__name__}: {e}", file=sys.stderr)
-        return 4
-    f = (r or {}).get("file") or {}
-    # ĐỔI TÊN file Drive (GIỮ fileId): --name <tên> tường minh, hoặc --rename-to-file → lấy tên file upload (basename).
     new_name = getattr(a, "name", None) or (os.path.basename(path) if getattr(a, "rename_to_file", False) else None)
-    renamed = ""
-    if new_name:
+    if route == "gws":
         try:
-            gb.rename(fid, new_name)   # rename có ASSERT đọc-lại-tên (v1.22.60) → lỗi sẽ raise rõ
-            renamed = f" · đổi tên → '{new_name}'"
+            r = gb.update_content(fid, path, mime=mime)
         except Exception as e:  # noqa: BLE001
-            print(f"[drive-push] ⚠ update OK nhưng ĐỔI TÊN lỗi: {type(e).__name__}: {e}", file=sys.stderr)
-    print(f"[drive-push] ✓ Drive id={f.get('id') or fid} ← {os.path.basename(path)} ({os.path.getsize(path)}B){renamed}. "
+            # auto: gws chết GIỮA CHỪNG (thường auth) → thử gcloud trước khi bỏ cuộc (cùng lớp fallback LOUD).
+            if via == "auto" and not gtok:
+                gtok, gerr = _gcloud_access_token()
+            if via == "auto" and gtok:
+                print(f"[drive-push] ⚠ gws update lỗi ({type(e).__name__}: {e}) → [FALLBACK→gcloud]…", file=sys.stderr)
+                route = "gcloud"
+            else:
+                print(f"[drive-push] ✗ update lỗi: {type(e).__name__}: {e}"
+                      + (f" (gcloud cũng không sẵn: {gerr})" if via == "auto" else ""), file=sys.stderr)
+                return 4
+        if route == "gws":
+            f = (r or {}).get("file") or {}
+            renamed = ""
+            if new_name:
+                try:
+                    gb.rename(fid, new_name)   # rename có ASSERT đọc-lại-tên (v1.22.60) → lỗi sẽ raise rõ
+                    renamed = f" · đổi tên → '{new_name}'"
+                except Exception as e:  # noqa: BLE001
+                    print(f"[drive-push] ⚠ update OK nhưng ĐỔI TÊN lỗi: {type(e).__name__}: {e}", file=sys.stderr)
+            print(f"[drive-push] ✓ [gws] Drive id={f.get('id') or fid} ← {os.path.basename(path)} ({os.path.getsize(path)}B){renamed}. "
+                  f"fileId GIỮ NGUYÊN; tl_fetch.sh sẽ tải bản mới này.")
+            return 0
+    r = _gcloud_drive_update(gtok, fid, path, mime, new_name=new_name)
+    if not r.get("ok"):
+        print(f"[drive-push] ✗ [gcloud] {r.get('error')}" + (f"\n  KHẮC PHỤC: {r['fix']}" if r.get("fix") else ""),
+              file=sys.stderr)
+        return 4
+    f = r.get("file") or {}
+    print(f"[drive-push] ✓ [gcloud] Drive id={f.get('id') or fid} ← {os.path.basename(path)} ({os.path.getsize(path)}B)"
+          + (f" · đổi tên → '{f.get('name')}'" if new_name else "")
+          + f" · md5 VERIFY {'✓ ' + str(r.get('md5_drive')) if r.get('md5_drive') else '(không có — file GDoc-native)'}. "
           f"fileId GIỮ NGUYÊN; tl_fetch.sh sẽ tải bản mới này.")
     return 0
 

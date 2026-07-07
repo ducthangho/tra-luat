@@ -4734,6 +4734,63 @@ def run() -> int:
     cases.append(("r56_nlm_auth_alive_retry_transient_vs_expired",
                   _a56[0] is True and _b56[0] is False and "AUTH_EXPIRED" in _b56[1]
                   and _c56[0] is None and "INCONCLUSIVE" in _c56[1]))
+
+    # ═══ v1.33.48 (rà Instruction Project 'Luật BHXH' — profile tên CÓ DẤU + KHOẢNG TRẮNG) — r57_* ═══
+    # (a) _profile_lookup chịu-lỗi-gõ: exact > khớp không-dấu/hoa-thường/space-_- DUY NHẤT; ≥2 ứng viên mờ → không đoán.
+    _p57 = {"vbqppl": {"a": 1}, "Luật BHXH": {"notebookId": "NB-BHXH"}, "Luật BHYT": {"notebookId": "NB-BHYT"}}
+    cases.append(("r57_profile_lookup_tolerant",
+                  _profile_lookup(_p57, "Luật BHXH")[0] == "Luật BHXH"
+                  and _profile_lookup(_p57, "luat_bhxh")[0] == "Luật BHXH"
+                  and _profile_lookup(_p57, "LUAT-BHXH")[1] is not None
+                  and _profile_lookup(_p57, "Luat XYZ")[1] is None
+                  and _profile_lookup({"Luat BHXH": {}, "Luật BHXH": {}}, "luat bhxh")[1] is None))  # 2 ứng viên mờ → không đoán
+    # (b) _apply_profile_env: tên KHÔNG có trong config → scope RỖNG + profile_found=False (KHÔNG rơi âm thầm
+    # về nền vbqppl — trước đây TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID bị điền từ base → ghi/push nhầm corpus nền).
+    _cfg57 = {"schema": 2, "defaultProfile": "vbqppl",
+              "profiles": {"vbqppl": {"notebookId": "NB-BASE", "registryDocId": "REG-BASE"},
+                           "Luật BHXH": {"notebookId": "NB-BHXH", "registryDocId": "REG-BHXH",
+                                         "categories": "own", "manifestScope": "own"}}}
+    _envk57 = ("TL_PROFILE", "TL_NOTEBOOK_ID", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_ROOT_FOLDER_ID",
+               "TL_META_FOLDER_ID", "TL_OVERFLOW_NOTEBOOK_ID", "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO")
+    _sav57 = {k: _hos.environ.get(k) for k in _envk57}
+    try:
+        with _hush():   # PROFILE_NOT_FOUND in stderr là PASS-by-design
+            _r57a = _apply_profile_env(_cfg57, "Luật BHXH")
+            _ok57a = (_hos.environ.get("TL_NOTEBOOK_ID") == "NB-BHXH"
+                      and _hos.environ.get("TL_CATEGORIES_MODE") == "own" and _r57a["profile_found"])
+            _r57b = _apply_profile_env(_cfg57, "luat bhxh")     # gõ không dấu → vẫn đúng scope + TL_PROFILE canonical
+            _ok57b = (_hos.environ.get("TL_PROFILE") == "Luật BHXH"
+                      and _hos.environ.get("TL_NOTEBOOK_ID") == "NB-BHXH" and _r57b["profile_found"])
+            _r57c = _apply_profile_env(_cfg57, "Luat XYZ")      # sai hẳn → scope RỖNG, không lấy nền
+            _ok57c = (_hos.environ.get("TL_NOTEBOOK_ID") is None
+                      and _hos.environ.get("TL_REGISTRY_DOC_ID") is None and not _r57c["profile_found"])
+    finally:
+        for _k, _v in _sav57.items():
+            if _v is None:
+                _hos.environ.pop(_k, None)
+            else:
+                _hos.environ[_k] = _v
+    cases.append(("r57_profile_env_no_silent_base_fallback", _ok57a and _ok57b and _ok57c))
+    # (c) --profile/--config nhận Ở CẢ SAU subcommand (Instruction dặn 'mọi lệnh truyền --profile' — trước gãy
+    # rc=2); SUPPRESS giữ giá trị đặt TRƯỚC subcommand không bị default đè (bẫy namespace-con copy-đè Python mới).
+    _ap57 = build_parser()
+    cases.append(("r57_profile_flag_after_subcommand",
+                  _ap57.parse_args(["reg-query", "--profile", "Luật BHXH", "--json"]).profile == "Luật BHXH"
+                  and _ap57.parse_args(["--profile", "Luật BHXH", "reg-query", "--json"]).profile == "Luật BHXH"
+                  and _ap57.parse_args(["reg-query", "--json"]).profile is None
+                  and _ap57.parse_args(["--profile", "A", "reg-query", "--profile", "B"]).profile == "B"
+                  and _ap57.parse_args(["counts", "--config", "/tmp/c57.json"]).config == "/tmp/c57.json"))
+    # (d) slot per-notebook (Instruction manifest_fallback: 'chỉ đếm rows có nlm_notebook_id == notebook đích').
+    _es57 = [{"nlm_source_id": "s1", "nlm_notebook_id": "NB-A", "nlm_status": "pushed"},
+             {"nlm_source_id": "s2", "nlm_notebook_id": "NB-A", "nlm_status": "removed_from_drive"},
+             {"nlm_source_id": "s3", "nlm_notebook_id": "NB-B", "nlm_status": "pushed"},
+             {"nlm_source_id": "s4", "nlm_status": "pushed"},
+             {"name": "khong-nlm"}]
+    cases.append(("r57_registry_claim_per_notebook",
+                  _registry_claim_by_notebook(_es57) == {"NB-A": 2, "(trống)": 1, "NB-B": 1}
+                  and _registry_claim_target(_es57, "NB-A") == 1      # removed KHÔNG đếm ('không đếm mọi nlm_status')
+                  and _registry_claim_target(_es57, "NB-B") == 1
+                  and _registry_claim_target(_es57, "") is None))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

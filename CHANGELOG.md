@@ -1,3 +1,45 @@
+# ★ v1.33.48 — Rà Instruction Project `Luật BHXH` (profile văn bản thường, tên CÓ DẤU + KHOẢNG TRẮNG): 3 fix an-toàn-profile + slot per-notebook
+
+Nguồn: Project Instruction "tra-luat (Luật BHXH)" — profile `Luật BHXH` (notebook 59e8d0de…, folder
+Van_ban_thuong/Luat_BHXH, registry/manifest riêng, categories=own + manifestScope=own, luôn `--profile "Luật BHXH"`).
+Rà instruction lộ 3 lỗi THẬT trong skill (không phải lỗi instruction):
+
+## P1 — `_apply_profile_env` HẾT rơi-âm-thầm-về-nền (lớp 'ghi nhầm corpus VBQPPL')
+- **Trước:** profile yêu cầu tường minh KHÔNG có trong `config.profiles` → `prof = profiles.get(DEFAULT)` — env
+  TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID bị điền từ NỀN vbqppl trong khi TL_PROFILE = tên dự án → mọi ghi/push đi
+  thẳng registry + notebook NỀN; guard `NO_NOTEBOOK_ID` không bắt được (env đã có giá trị). Comment v1.30.0
+  từng ghi nhận ca này nhưng chỉ xử cờ BASE_ALSO, chưa xử scope.
+- **Nay:** scope RỖNG + cảnh báo `PROFILE_NOT_FOUND` loud → guard hạ nguồn tự chặn (NO_NOTEBOOK_ID cho NLM,
+  PROFILE_CATEGORIES_OWN_REQUIRED cho ingest, registry-id-empty blocker 1.23.21 cho ghi).
+
+## P2 — `_profile_lookup` CHỊU-LỖI-GÕ (tên có dấu/khoảng trắng)
+- 'Luat BHXH'/'luật bhxh'/'luat_bhxh' → khớp `Luật BHXH` khi DUY NHẤT 1 ứng viên (không-dấu + casefold + gộp
+  space/`_`/`-`); ≥2 ứng viên mờ → KHÔNG đoán (giữ PROFILE_NOT_FOUND). TL_PROFILE set theo tên CANONICAL trong
+  config → cache-dir per-profile + scope nhất quán 1 tên.
+
+## P3 — `--profile`/`--config` nhận Ở CẢ SAU subcommand (mọi lệnh)
+- Instruction dặn "mọi lệnh truyền `--profile`" nhưng flag chỉ khai ở ROOT parser → `tl reg-query --profile
+  "Luật BHXH"` gãy `unrecognized arguments` rc=2 (agent phải nhớ đặt TRƯỚC subcommand — cùng lớp ma sát A1
+  v1.33.18 `--json` no-op). Inject vào từng subparser chưa có, `default=argparse.SUPPRESS` — bắt buộc, vì
+  Python mới parse subcommand vào NAMESPACE CON rồi copy-đè: default None sẽ nuốt mất giá trị root-position
+  (bắt được bằng smoke ngay khi viết, r57 khoá cả 4 vị trí đặt cờ).
+
+## Q — `counts` slot per-notebook (đúng luật Instruction manifest_fallback)
+- "Khi tính slot NLM, chỉ đếm rows có nlm_notebook_id == notebook đích; không đếm mọi nlm_status" —
+  `registry_claim_nlm` gộp MỌI shard nên vô dụng cho việc này. Thêm `registry_claim_target_nb`
+  (nlm_notebook_id==đích + `_entry_on_nlm_live` loại removed*) + `registry_claim_by_notebook` breakdown
+  (JSON + 1 dòng text). Vẫn ESTIMATE — chốt FULL bằng LIVE như cũ.
+
+## Đối chiếu phần còn lại của Instruction (KHÔNG phải lỗi skill — ghi nhận)
+- `SKILL_OF_RECORD v1.33.43` = STALE (canonical nay 1.33.48; LIVE Cowork = 1.33.46 nhánh song song) → cập nhật
+  Instruction + deploy. Từ vựng `nlm_push`/`copy_convert`/`map_set` = tên BƯỚC pipeline/webapp-action (khớp
+  doctrine QT-3 trong instruction-audit), thực thi bằng `tl ingest-local`/`nlm-add`; `nlm_preflight` = `tl
+  preflight`; `exists`/`source-map`/`relation-check`/`vbhn-check`/`vb_status`/`locate` = lệnh tl có thật.
+  Quy tắc confirm_gate_web/grounding/VBHN-first/ocr_draft/link-priority khớp doctrine skill hiện hành.
+
+**Selftest:** +4 case `r57_*` (lookup tolerant, no-silent-base-fallback, flag placement ×5, claim per-notebook)
+— **620/620**. SKILL.md đồng bộ (mục NLM-theo-PROFILE + dòng counts).
+
 # ★ v1.33.47 — MERGE bundle-45 (`tra-luat_v1.33.45.zip`) + đối chiếu fix v1.33.46 nhánh song song (bare-VBHN matcher) + gói vá S5/S6 rời
 
 Nhánh song song fork từ v1.33.43 (bản LIVE Cowork), TỰ ĐÁNH SỐ 1.33.44/45 (TRÙNG số, KHÁC nội dung với canonical

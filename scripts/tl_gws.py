@@ -1445,6 +1445,14 @@ def _gcloud_drive_update(token: str, fid: str, path: str, mime: str, new_name: s
             **({} if ok else {"error": f"MD5 LỆCH sau upload: local {want} ≠ drive {got} (upload hỏng?)"})}
 
 
+def _bundle_meta_blocks_push(root) -> bool:
+    """v1.33.59 (ADR-0001): cây chứa BUNDLE_META.json = giải nén từ bundle nhánh song song → cấm publish."""
+    try:
+        return (Path(root) / "BUNDLE_META.json").exists()
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def cmd_drive_push(a) -> int:
     """[CHẠY Ở MÁY CÓ gws HOẶC gcloud AUTH] Cập nhật NỘI DUNG file Drive (GIỮ fileId) = file local.
     v1.33.49: `--via auto|gws|gcloud` — auto = gws trước, gws chết → FALLBACK gcloud LOUD (token
@@ -1460,6 +1468,11 @@ def cmd_drive_push(a) -> int:
     if not fid:
         print("[drive-push] ✗ thiếu --file-id (và SKILL_FILEID trống).", file=sys.stderr)
         return 2
+    if _bundle_meta_blocks_push(HERE.parent) and not getattr(a, "force", False):
+        print("[drive-push] ✗ BLOCKED_BY_BUNDLE_META (ADR-0001): cây này có BUNDLE_META.json — là bản giải nén"
+              " từ bundle nhánh song song, KHÔNG được publish. Giao zip bundle cho canonical merge; hoặc --force"
+              " nếu CHẮC đây là canonical (xoá BUNDLE_META.json trước).", file=sys.stderr)
+        return 3
     via = (getattr(a, "via", None) or "auto").strip().lower()
     gb = _imp("gws_bridge")
     gws_ok = (via != "gcloud") and gb.is_available()

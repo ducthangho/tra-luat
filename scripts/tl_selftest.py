@@ -5061,6 +5061,42 @@ def run() -> int:
                   and _sum64["schema"] == "command_registry.v1"
                   and _sum64["counts"]["total"] == len(_reg64.COMMAND_META)
                   and all(m["risk"] in ("low", "medium", "high") for m in _reg64.COMMAND_META.values())))
+    # ═══ v1.33.59 (Pha G) — r65_*: siết-6 contract + bundle-export/guard + golden {FIXTURES}/raw-stability ═══
+    import tl_core.command_registry as _reg65
+    import tl_core.workflow as _w65
+    _six65 = _reg65._CONTRACT_REQUIRED
+    cases.append(("r65_contract_required_six_wired",
+                  _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan"}
+                  and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
+    # drift-lock: nhóm advisory còn lại = ĐÚNG 6 lệnh đã biết (thêm lệnh ghi high-risk mới mà quên contract → lệch set → fail)
+    _adv65 = {n for n, m in _reg65.COMMAND_META.items()
+              if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"] and n not in _six65}
+    cases.append(("r65_grandfather_advisory_exact_set",
+                  _adv65 == {"drive-push", "nlm-reconcile", "push-overflow", "register", "shared-source-fix", "source-update-corpus"}))
+    # bundle-export + guard (ADR-0001)
+    import tempfile as _tf65, zipfile as _zf65
+    with _tf65.TemporaryDirectory() as _d65:
+        _out65 = Path(_d65) / "b.zip"
+        with _hush():
+            _rc65 = cmd_bundle_export(argparse.Namespace(root=None, out=str(_out65), note="r65", json=True))
+        with _zf65.ZipFile(_out65) as _z65:
+            _names65 = _z65.namelist()
+            _meta65 = json.loads(_z65.read([n for n in _names65 if n.endswith("BUNDLE_META.json")][0]).decode("utf-8"))
+        (Path(_d65) / "BUNDLE_META.json").write_text("{}", encoding="utf-8")
+        _blocks65 = _imp("tl_gws")._bundle_meta_blocks_push(Path(_d65))
+        _noblock65 = _imp("tl_gws")._bundle_meta_blocks_push(HERE.parent)
+    cases.append(("r65_bundle_export_meta_and_guard",
+                  _rc65 == 0 and _meta65.get("version_forked") == VERSION
+                  and _meta65.get("schema") == "bundle_meta.v1"
+                  and _blocks65 is True and _noblock65 is False
+                  and build_parser().parse_args(["drive-push", "x.zip", "--force"]).force is True))
+    # golden plumbing: {FIXTURES} substitution + fixtures tồn tại
+    _w65._golden_ensure_fixtures()
+    _case65 = {"args": ["chunk-plan", "{FIXTURES}/sample_profile.txt", "--json"]}
+    _sub65 = _w65._golden_args(_case65)
+    cases.append(("r65_golden_fixtures_substitution",
+                  "{FIXTURES}" not in _sub65[1] and Path(_sub65[1]).exists()
+                  and (_w65._golden_fixdir() / "slip.zip").exists() and (_w65._golden_fixdir() / "dup.zip").exists()))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

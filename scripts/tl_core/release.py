@@ -305,7 +305,7 @@ def cmd_release_check(a) -> int:
 
 # ───────────────────────── release/package integrity ─────────────────────────
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
-                         ".claude", ".githooks"}   # v1.33.54: dev-side (không vào zip skill — upload script cũng strip)
+                         ".claude", ".githooks", ".github"}   # v1.33.54 dev-side; v1.33.59: +.github (CI)
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 
@@ -317,6 +317,7 @@ _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_lua
 _RELEASE_EXCLUDE_NAMES = {
     "RELEASE_MANIFEST.json",
     ".__det_audit_probe__.json",
+    "BUNDLE_META.json",
     "before.json", "after.json",
     "live_state_before.json", "live_state_after.json", "live_state_diff.json",
     "release_check_report.json", "determinism_report.json",
@@ -363,6 +364,7 @@ _RELEASE_REQUIRED_WORKFLOWS = [
     "references/workflows/live_readiness.json",
     "references/workflows/live_contract_check.json",
     "references/workflows/live_state_snapshot.json",
+    "references/workflows/bundle_export.json",
     "references/workflows/live_state_diff.json",
     "references/workflows/live_smoke_plan.json",
     "references/workflows/deploy_plan.json",
@@ -396,6 +398,8 @@ def _release_should_include(path: Path, root: Path) -> bool:
         # Do not hash generated root-level manifests/snapshots/reports by default; release-bundle adds a fresh manifest.
         return False
     if rel.name in _RELEASE_EXCLUDE_NAMES_ANYWHERE:   # v1.33.54: config thật/CLAUDE.md ở MỌI cấp
+        return False
+    if rel.as_posix().startswith("references/golden/fixtures/"):   # v1.33.59: fixtures SINH-TẠI-CHỖ (không commit, không hash)
         return False
     if len(rel.parts) == 1 and rel.name.endswith("-release.zip"):   # v1.33.56 (F6): bundle rơi vào root không nhiễm hash
         return False
@@ -532,6 +536,62 @@ def _zip_write_bytes_deterministic(zf, data: bytes, arcname: str):
     info.compress_type = zipfile.ZIP_DEFLATED
     info.external_attr = 0o100644 << 16
     zf.writestr(info, data)
+
+
+
+def cmd_bundle_export(a) -> int:
+    """v1.33.59 (ADR-0001 — quyết định grilling #2): sản phẩm CHUẨN của nhánh song song. Zip GIỮ NGUYÊN
+    VERSION fork-point + nhúng BUNDLE_META.json (KHÔNG ghi ra đĩa — file META trên đĩa chính là cái bẫy
+    khiến drive-push từ chối, đúng thiết kế: cây giải nén từ bundle không được publish)."""
+    root = _release_root_from_arg(getattr(a, "root", None))
+    out_path = Path(getattr(a, "out", None) or f"{root.name}-bundle.zip").expanduser().resolve()
+    try:
+        _relo = out_path.relative_to(root.resolve())
+        if not (_relo.parts and _relo.parts[0] in _RELEASE_EXCLUDE_DIRS):
+            out_path = (root.parent / out_path.name).resolve()
+    except ValueError:
+        pass
+    top = root.name
+    manifest = _build_release_manifest(root)
+    if not manifest.get("ok"):
+        res = {"ok": False, "error": "MANIFEST_NOT_OK", "required_missing": manifest.get("required_missing")}
+        _print_json_or_text(res, getattr(a, "json", False)); return 2
+    version_forked = ""
+    try:
+        version_forked = (root / "VERSION").read_text(encoding="utf-8").strip()
+    except Exception:  # noqa: BLE001
+        pass
+    meta = {"schema": "bundle_meta.v1", "version_forked": version_forked,
+            "package_hash": manifest.get("package_hash"), "file_count": manifest.get("file_count"),
+            "note": str(getattr(a, "note", "") or ""),
+            "protocol": ("ADR-0001: bundle KHÔNG mang version mới, KHÔNG được drive-push. Canonical merge "
+                         "bundle rồi mới đánh số + publish. drive-push từ chối khi thấy BUNDLE_META.json.")}
+    tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    if tmp.exists():
+        tmp.unlink()
+    _sha_by_rel = {f["path"]: f.get("sha256") for f in manifest.get("files", [])}
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for f in manifest.get("files", []):
+            p = root / f["path"]
+            data = p.read_bytes()
+            if _sha_by_rel.get(f["path"]) and hashlib.sha256(data).hexdigest() != _sha_by_rel[f["path"]]:
+                try:
+                    tmp.unlink()
+                except FileNotFoundError:
+                    pass
+                res = {"ok": False, "error": "BUNDLE_EXPORT_FILE_CHANGED", "file": f["path"]}
+                _print_json_or_text(res, getattr(a, "json", False)); return 2
+            _zip_write_bytes_deterministic(zf, data, f"{top}/{f['path']}")
+        _zip_write_bytes_deterministic(zf, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
+        _zip_write_bytes_deterministic(zf, json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"), f"{top}/BUNDLE_META.json")
+    os.replace(tmp, out_path)
+    res = {"ok": True, "schema": "bundle_export.v1", "out": str(out_path), "version_forked": version_forked,
+           "package_hash": manifest.get("package_hash"), "file_count": manifest.get("file_count"),
+           "bundle_sha256": _sha256_file(out_path),
+           "note": "Giao zip này cho canonical merge. KHÔNG tự đánh version, KHÔNG drive-push (ADR-0001)."}
+    _print_json_or_text(res, getattr(a, "json", False))
+    return 0
 
 
 def cmd_release_bundle(a) -> int:

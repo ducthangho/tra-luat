@@ -1,0 +1,18 @@
+{
+  "engine": "analyze-only",
+  "file": "references/golden/fixtures/sample_profile.txt",
+  "metrics": {
+    "appendix_count": 0,
+    "article_count": 3,
+    "chars": 274,
+    "garbled_ratio": 0.0,
+    "letters": 190,
+    "lines": 8,
+    "vietnamese_mark_density": 0.289474
+  },
+  "ok": true,
+  "recommendations": [],
+  "schema": "ocr_analyze.v1",
+  "text_layer_detected": true,
+  "warnings": []
+}

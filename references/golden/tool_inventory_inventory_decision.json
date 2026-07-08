@@ -7,6 +7,7 @@
     "bench",
     "boot",
     "bootstrap",
+    "bundle-export",
     "cache-build",
     "cache-snapshot",
     "cat-audit",
@@ -243,6 +244,16 @@
         "workflow_task": null,
         "write_scope": "registry"
       },
+      "bundle-export": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "bundle_export",
+        "write_scope": "local"
+      },
       "chunk-apply": {
         "generated": false,
         "idempotency_contract": null,
@@ -295,7 +306,7 @@
       },
       "dedup-plan": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "dedup_plan",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -455,7 +466,7 @@
       },
       "nlm-add": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "nlm_add",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -575,7 +586,7 @@
       },
       "recat": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "recat",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -585,7 +596,7 @@
       },
       "reg-delete": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "reg_delete",
         "read_only": false,
         "requires_confirm": true,
         "risk": "high",
@@ -675,7 +686,7 @@
       },
       "source-delete": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "source_delete",
         "read_only": false,
         "requires_confirm": true,
         "risk": "high",
@@ -685,7 +696,7 @@
       },
       "source-rename": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "source_rename",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -735,16 +746,17 @@
       }
     },
     "counts": {
-      "generated_parsers": 8,
+      "generated_parsers": 9,
       "high_risk": 19,
-      "total": 52,
-      "write_commands": 32
+      "total": 53,
+      "write_commands": 33
     },
     "schema": "command_registry.v1"
   },
   "schema": "tool_inventory.v1",
   "scripts": [],
   "workflow_cards": [
+    "bundle_export",
     "chunk_ingest",
     "convert_rename",
     "deploy_plan",

@@ -1,0 +1,57 @@
+{
+  "accepted": 1,
+  "cat": "01",
+  "errors": [
+    "DUPLICATE_NORMALIZED_ZIP_PATH:a.docx->./a.docx"
+  ],
+  "files_total": 2,
+  "idempotency": {
+    "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+    "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+    "journal_key": "batch item path + child pipeline journal",
+    "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+    "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+    "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+    "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+    "schema": "idempotency_contract.v1"
+  },
+  "idempotency_key": "564c4915eb8bec657ed94c1bb85214e6be2dd31c89d2ad74c4f12ebb710b621c",
+  "items": [
+    {
+      "action": "ingest-local",
+      "convert": "drive_gdoc",
+      "expected_pipeline": [
+        "extract_to_temp",
+        "upload_binary",
+        "drive_convert_gdoc",
+        "standardize_name",
+        "verify_readback",
+        "register",
+        "nlm_add_after_verify"
+      ],
+      "ext": ".docx",
+      "normalized_path": "a.docx",
+      "path": "./a.docx",
+      "requires_ocr_review": false,
+      "size": 3,
+      "status": "accepted"
+    },
+    {
+      "duplicate_of": "./a.docx",
+      "normalized_path": "a.docx",
+      "path": "a.docx",
+      "reason": "DUPLICATE_NORMALIZED_ZIP_PATH",
+      "size": 3,
+      "status": "skipped"
+    }
+  ],
+  "mode": "vbqppl",
+  "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
+  "ok": false,
+  "profile": null,
+  "requires_apply": true,
+  "schema": "ingest_zip_plan.v1",
+  "skipped": 1,
+  "warnings": [],
+  "zip": "references/golden/fixtures/dup.zip"
+}

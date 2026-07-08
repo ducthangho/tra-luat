@@ -69,6 +69,14 @@ GENERATED_SPECS = [
          {"flags": ["--strict"], "action": "store_true", "help": "coi file thừa là lỗi"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "bundle-export", "handler": "cmd_bundle_export",
+     "help": "NHÁNH SONG SONG: xuất bundle giao nộp (zip + BUNDLE_META.json, GIỮ VERSION fork-point) — ADR-0001; không đổi version, không drive-push",
+     "args": [
+         {"flags": ["--root"], "help": "root gói skill; mặc định HERE.parent"},
+         {"flags": ["--out"], "help": "đường dẫn zip output; mặc định <root>-bundle.zip cạnh root"},
+         {"flags": ["--note"], "help": "ghi chú nhánh (mục đích, log gốc) — vào BUNDLE_META.json"},
+         {"flags": ["--json"], "action": "store_true"},
+     ]},
     {"name": "release-bundle", "handler": "cmd_release_bundle",
      "help": "OFFLINE: đóng gói zip tất định kèm RELEASE_MANIFEST.json; không gọi mạng",
      "args": [
@@ -115,6 +123,7 @@ COMMAND_META = {
     "release-manifest":     _m("low", False, "local", False, True, True, "release_manifest", None, True, "release", True),
     "release-verify":       _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),
     "release-bundle":       _m("medium", False, "local", False, False, True, "release_bundle", None, True, "release", True),
+    "bundle-export":        _m("low", False, "local", False, False, True, "bundle_export", None, True, "release", True),
     "release-check":        _m("medium", False, "local", False, False, True, "release_check", None, True, "release"),
     "live-readiness":       _m("medium", True, "none", False, False, True, "live_readiness", None, True, "live"),
     "live-contract-check":  _m("medium", True, "none", False, False, True, "live_contract_check", None, True, "live"),
@@ -141,20 +150,20 @@ COMMAND_META = {
     # ── legacy write high-risk (GRANDFATHER: card_required=False trừ khi card đã có; gate = --apply dry-run) ──
     "ingest-local":         _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "ingest_local", True, None),
     "profile-ingest":       _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "profile_ingest", True, None),
-    "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, None, False, None),
+    "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, "nlm_add", False, None),
                                  builtin_gate="nlm_dedup_live_gate"),
-    "recat":                _m("high", False, "drive_registry", False, True, False, None, None, False, None),
-    "source-rename":        _m("high", False, "drive_registry_nlm", False, True, False, None, None, False, None),
-    "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, None, False, None),
+    "recat":                _m("high", False, "drive_registry", False, True, False, None, "recat", False, None),
+    "source-rename":        _m("high", False, "drive_registry_nlm", False, True, False, None, "source_rename", False, None),
+    "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None),
     "source-update-corpus": _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
-    "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
+    "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, "dedup_plan", False, None),
     "register":             _m("high", False, "registry", False, True, False, None, None, False, None),
     "backfill-loai":        _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-title-vn":    _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-hieuluc":     _m("medium", False, "registry", False, True, False, None, None, False, None),
     "drive-push":           dict(_m("high", False, "drive", False, False, False, None, None, False, None),
                                  builtin_gate="md5_verify_fixed_fileid"),
-    "reg-delete":           _m("high", False, "registry", True, False, False, None, None, False, None),
+    "reg-delete":           _m("high", False, "registry", True, False, False, None, "reg_delete", False, None),
     "vbhn-year-fix":        _m("medium", False, "registry", False, True, False, None, None, False, None),
     "quarantine-fix":       _m("medium", False, "registry", False, True, False, None, None, False, None),
     "shared-source-fix":    _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
@@ -181,6 +190,9 @@ def registry_summary() -> dict:
     return {"schema": "command_registry.v1", "counts": counts, "commands": cmds}
 
 
+_CONTRACT_REQUIRED = {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan"}
+
+
 def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> dict:
     """E4: đối chiếu registry ↔ parser ↔ cards ↔ contracts. Trả {issues:[], warnings:[]} — issues = fail."""
     issues, warnings = [], []
@@ -202,8 +214,13 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
                                                      or m["supports_dry_run"] or m.get("builtin_gate")):
             issues.append(f"WRITE_CMD_NO_GATE:{name}")
         # high-risk ghi mà không có contract → warning (mục tiêu Pha G nâng thành fail)
+        # v1.33.59 (Pha G — quyết định grilling #6): 6 lệnh ghi đụng Drive/NLM/registry-corpus PHẢI có
+        # contract (fail-strict); nhóm còn lại advisory với deadline pha kế (trước v1.34.1).
         if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"]:
-            warnings.append(f"HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:{name}")
+            if name in _CONTRACT_REQUIRED:
+                issues.append(f"CONTRACT_REQUIRED_MISSING:{name}")
+            else:
+                warnings.append(f"HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:{name}")
         # card_required → card phải load được
         if m["card_required"] and m["workflow_task"] and callable(load_card):
             card = load_card(m["workflow_task"])

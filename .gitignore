@@ -8,3 +8,9 @@ tra_luat_config.v2.json
 node_modules/
 .ruff_cache/
 .pytest_cache/
+
+# ADR-0001: file đánh dấu cây-bundle — không bao giờ thuộc canonical
+BUNDLE_META.json
+
+# v1.33.59: fixtures golden sinh-tại-chỗ tất định (giữ repo text-only, hook chặn binary giữ nguyên)
+references/golden/fixtures/

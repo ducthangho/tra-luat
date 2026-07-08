@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.58)
+# tra-luat — LÕI VẬN HÀNH (v1.33.59)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -33,6 +33,8 @@ Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự
 3. `python scripts/tl.py -h` và `python scripts/tl.py <lệnh> --help` với nhóm lệnh liên quan.
 4. Kiểm `scripts/*.py` và `references/API_CONTRACT.md` trước khi gọi webapp/Drive/registry/NLM hoặc thêm tool mới.
 5. Khi sửa skill/workflow/release gate, chạy deterministic mode: `python scripts/tl.py --deterministic workflow-audit --strict --json`, `python scripts/tl.py --deterministic determinism-audit --strict --json`, và trước khi đóng gói `python scripts/tl.py --deterministic release-check --strict-determinism --full --json`.
+
+PHÁT HÀNH & NHÁNH (ADR-0001, chốt grilling 2026-07-09): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Phiên/nhánh song song giao nộp bằng `tl bundle-export --note "<mục đích>" --json` (zip GIỮ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version, KHÔNG publish; drive-push tự TỪ CHỐI cây có BUNDLE_META.json (BLOCKED_BY_BUNDLE_META). Deploy policy: canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
 
 Chỉ viết tool mới khi đã chứng minh lệnh/script/hàm hiện có không đáp ứng. Tool mới phải có input/output rõ, ưu tiên JSON, có dry-run nếu ghi dữ liệu, có verify/readback, và có selftest/audit phù hợp.
 

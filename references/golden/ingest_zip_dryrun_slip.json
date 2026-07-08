@@ -1,0 +1,61 @@
+{
+  "accepted": 1,
+  "cat": "01",
+  "errors": [],
+  "files_total": 3,
+  "idempotency": {
+    "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+    "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+    "journal_key": "batch item path + child pipeline journal",
+    "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+    "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+    "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+    "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+    "schema": "idempotency_contract.v1"
+  },
+  "idempotency_key": "556b181c8f8462fecd0a9401ee1cc7196b1c9f701f748c7bedc58a0c7b74654e",
+  "items": [
+    {
+      "normalized_path": null,
+      "path": "../evil.docx",
+      "reason": "UNSAFE_OR_SYSTEM_PATH",
+      "size": 4,
+      "status": "skipped"
+    },
+    {
+      "normalized_path": "bao cao?.docx",
+      "path": "bao cao?.docx",
+      "reason": "UNSAFE_OR_SYSTEM_PATH",
+      "size": 11,
+      "status": "skipped"
+    },
+    {
+      "action": "ingest-local",
+      "convert": "drive_gdoc",
+      "expected_pipeline": [
+        "extract_to_temp",
+        "upload_binary",
+        "drive_convert_gdoc",
+        "standardize_name",
+        "verify_readback",
+        "register",
+        "nlm_add_after_verify"
+      ],
+      "ext": ".docx",
+      "normalized_path": "van_ban_hop_le.docx",
+      "path": "van_ban_hop_le.docx",
+      "requires_ocr_review": false,
+      "size": 11,
+      "status": "accepted"
+    }
+  ],
+  "mode": "vbqppl",
+  "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
+  "ok": true,
+  "profile": null,
+  "requires_apply": true,
+  "schema": "ingest_zip_plan.v1",
+  "skipped": 2,
+  "warnings": [],
+  "zip": "references/golden/fixtures/slip.zip"
+}

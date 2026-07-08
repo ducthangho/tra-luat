@@ -1,3 +1,27 @@
+# ★ v1.33.59 — Pha G: drift-test expansion + siết gate (thực thi 9 quyết định grilling 2026-07-09)
+
+- **Siết-6 (quyết định #6):** contract idempotency THẬT cho nlm-add/recat/source-rename/source-delete/
+  reg-delete/dedup-plan (journal_key, resume, readback, rollback từng lệnh — khớp cơ chế thật: dedup-live
+  gate của nlm-add, before-cat trong journal recat, Trash-30-ngày của source-delete…); `_CONTRACT_REQUIRED`
+  → thiếu contract = FAIL-strict. 6 legacy còn lại (register, drive-push, nlm-reconcile, push-overflow,
+  shared-source-fix, source-update-corpus) advisory với DEADLINE trước v1.34.1; r65 drift-lock đúng-set
+  (thêm lệnh ghi high-risk mới mà quên contract → selftest đỏ).
+- **bundle-export + guard (quyết định #2, ADR-0001):** `tl bundle-export` zip giữ VERSION fork-point +
+  BUNDLE_META.json nhúng TRONG zip (không ghi ra cây); `drive-push` từ chối cây có BUNDLE_META.json
+  (BLOCKED_BY_BUNDLE_META rc=3, `--force` thoát tường minh); card workflow chuẩn schema v1 + registry meta
+  + GENERATED spec; BUNDLE_META vào .gitignore + _RELEASE_EXCLUDE_NAMES.
+- **Golden nâng cấp (quyết định #7 — đóng nợ P4-06):** check `raw_stable` (stdout THÔ chạy ×2 trùng byte,
+  bắt nondeterminism format thật) + `raw_sha256` ghi vào record; token `{FIXTURES}`; +6 case offline-thuần
+  trên fixtures cố định: chunk-plan profile, chunk-plan vbqppl-canonical BỊ CHẶN, ocr-analyze, ingest-zip
+  dry-run zip-slip + tên-cấm-Windows, ingest-zip duplicate-normalized, live-state-diff no-changes. Harness
+  chấp nhận JSON dict bất kể rc (case NEGATIVE rc=2 có chủ đích). Goldens cũ regen: diff ngữ nghĩa = 0
+  (đối chiếu key-level), chỉ rewrite EOL do .gitattributes mới khoá byte golden dir.
+- **CI (quyết định #8):** .github/workflows/ci.yml — ubuntu + windows, full gate (py_compile, 2 selftest,
+  3 audit, release-verify, bundle ×2 cùng SHA, tl_boot smoke); autocrlf OFF trước checkout (hash parity
+  manifest); `.github` excluded khỏi manifest/zip (dev-side).
+- Selftest **651/651** (+4 r65: siết-6 wired, advisory exact-set, bundle-export meta+guard+--force,
+  {FIXTURES} substitution).
+
 # ★ v1.33.58 — Pha E kế hoạch nợ-kỹ-thuật: command registry (2026-07-09)
 
 - **E1 `tl_core/command_registry.py`** (module THUẦN — không bind): metadata 52 lệnh (31 determinism-era +

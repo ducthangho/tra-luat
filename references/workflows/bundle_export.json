@@ -1,0 +1,51 @@
+{
+ "id": "bundle_export",
+ "title": "Xuất bundle giao nộp từ nhánh song song (ADR-0001)",
+ "risk": "low",
+ "applies_to": [
+  "packaging",
+  "branching",
+  "handoff"
+ ],
+ "recommended_commands": [
+  "bundle-export --note \"<mục đích nhánh>\" --json"
+ ],
+ "requires_dry_run": false,
+ "requires_apply": false,
+ "requires_readback": true,
+ "plan": [
+  "chạy gate offline trên cây nhánh (--selftest + workflow-audit --strict + golden-test)",
+  "build release manifest của cây hiện tại",
+  "zip tất định: files + RELEASE_MANIFEST.json + BUNDLE_META.json (version_forked giữ nguyên)",
+  "giao zip cho canonical merge — KHÔNG tự đánh version, KHÔNG drive-push"
+ ],
+ "verify": [
+  "unzip -p <zip> */BUNDLE_META.json — version_forked đúng fork-point",
+  "bundle_sha256 tồn tại trong output",
+  "cây giải nén từ bundle: drive-push phải bị BLOCKED_BY_BUNDLE_META (guard sống)"
+ ],
+ "stop_conditions": [
+  "MANIFEST_NOT_OK",
+  "BUNDLE_EXPORT_FILE_CHANGED"
+ ],
+ "rules": [
+  "Nhánh song song KHÔNG đổi VERSION, KHÔNG publish (ADR-0001)",
+  "BUNDLE_META.json chỉ nằm TRONG zip — không ghi ra cây làm việc canonical",
+  "Canonical merge bundle xong mới đánh số + deploy"
+ ],
+ "schema": "workflow_card.v1",
+ "write_scope": "local_bundle_zip",
+ "dry_run_required": false,
+ "confirm_required": false,
+ "readback_required": true,
+ "rollback_required": false,
+ "live_state_required": false,
+ "volatile_fields": [
+  "path",
+  "file",
+  "out_dir",
+  "seconds",
+  "stdout_tail",
+  "stderr_tail"
+ ]
+}

@@ -1,0 +1,40 @@
+{
+  "apply_enabled": true,
+  "chunk_count": 2,
+  "chunks": [
+    {
+      "chars": 184,
+      "end_char": 184,
+      "end_dieu": 2,
+      "expected_name": "sample__part01__Dieu_1-2",
+      "index": 1,
+      "sha256": "0b693d8c81057a13493feea729c84c177567210501e9abe57fa5377143918b87",
+      "start_char": 0,
+      "start_dieu": 1,
+      "text_preview": "Điều 1. Phạm vi điều chỉnh\nVăn bản mẫu dùng cho golden fixtures — nội dung ổn định, không đổi.\n\nĐiều 2. Đối tượng áp dụng\nCơ quan, tổ chức, cá nhân có liên quan",
+      "title": "Điều 1. Phạm vi điều chỉnh"
+    },
+    {
+      "chars": 90,
+      "end_char": 274,
+      "end_dieu": 3,
+      "expected_name": "sample__part02__Dieu_3-3",
+      "index": 2,
+      "sha256": "1b8d4ad95e7c4993fc67391b5e721cfde190b7708947ee2a799c871dffe6c7bc",
+      "start_char": 184,
+      "start_dieu": 3,
+      "text_preview": "\nĐiều 3. Hiệu lực thi hành\nVăn bản này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2026.\n",
+      "title": "Điều 3. Hiệu lực thi hành"
+    }
+  ],
+  "file": "references/golden/fixtures/sample_profile.txt",
+  "max_chars": 200,
+  "mode": "profile",
+  "note": "chunk-apply local chỉ tạo chunk files + manifest; chưa ghi Drive/NLM.",
+  "ok": true,
+  "schema": "chunk_plan.v2",
+  "source_hash": "c9753045c29f2f114da59522ddcd78b5ac0cda0444ff1a9b9fda0ddbae76a2d7",
+  "strategy": "by_article",
+  "total_chars": 274,
+  "warnings": []
+}

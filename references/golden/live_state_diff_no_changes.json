@@ -1,0 +1,17 @@
+{
+  "after": "references/golden/fixtures/snap_a2.json",
+  "allowed_prefixes": [
+    "volatile"
+  ],
+  "before": "references/golden/fixtures/snap_a.json",
+  "changes": [],
+  "ok": true,
+  "policy": "Diff bỏ qua block volatile + key volatile leaf (age_days/seconds/mtime/…). Thay đổi còn lại phải khai báo --allow <path_prefix> nếu là dự kiến.",
+  "schema": "live_state_diff.v1",
+  "summary": {
+    "allowed": 0,
+    "changed": 0,
+    "unexpected": 0
+  },
+  "unexpected_changes": []
+}

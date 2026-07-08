@@ -225,6 +225,72 @@ _IDEMPOTENCY_CONTRACTS = {
     }
 }
 
+# v1.33.59 (Pha G — siết lớp nguy hiểm, quyết định grilling #6): contract THẬT cho 6 lệnh ghi legacy
+# đụng Drive/NLM/registry-corpus. Nhóm backfill/plan còn lại: advisory, deadline trước v1.34.1.
+_IDEMPOTENCY_CONTRACTS.update({
+    "nlm_add": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "notebook_id+drive_id (hoặc +url/file)",
+        "journal_key": "n/a — 1 call API; an toàn nhờ gate, không nhờ journal",
+        "resume_behavior": "chạy lại CÙNG LỆNH — dedup-live gate pre-add + post-add re-list làm lệnh idempotent",
+        "duplicate_guard": "dedup-live theo drive_id/sohieu/title TRƯỚC add (ALREADY_ON_NOTEBOOK rc=2) + post-add dup check",
+        "readback_command": "nlm-get <notebook> --json (source_count + list) / reg-query --sohieu <sh> --json",
+        "resume_command": "nlm-add --drive-id <id> [--notebook-id <nb>] --json",
+        "rollback_hint": "xoá nguồn vừa add qua NLM UI/nlm source delete rồi reg_upsert clear nlm_source_id,nlm_status",
+    },
+    "recat": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+cat_đích (relabel idempotent — chạy lại vô hại)",
+        "journal_key": "tl_journal/recat_<run_id> (intent kèm before-cat từng drive_id)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — move + relabel đều idempotent; verified-write đối chiếu patched",
+        "duplicate_guard": "boundary-rule cảnh báo cat lệch tên; nhãn ĐỦ canonical chống relabel giả",
+        "readback_command": "reg-query --drive-id <id> --json (cat == nhãn đủ) + cat-verify",
+        "resume_command": "recat <drive_id...> --cat NN --apply",
+        "rollback_hint": "undo <run_id> --apply (journal giữ before-cat) + move file về folder cũ",
+    },
+    "source_rename": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+new_name",
+        "journal_key": "tl_journal/source-rename_<run_id> (before-name trong intent)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — rename Drive idempotent theo tên đích; NLM title sync theo sau",
+        "duplicate_guard": "assert đọc-lại-tên sau rename (v1.22.60); 1 file/lệnh ở Cowork (S13)",
+        "readback_command": "reg-query --drive-id <id> --json + files_get tên Drive",
+        "resume_command": "source-rename <drive_id> --name <tên> --apply",
+        "rollback_hint": "rename ngược về before-name trong journal; NLM title đồng bộ lại",
+    },
+    "source_delete": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id",
+        "journal_key": "tl_journal/source-delete_<run_id>",
+        "resume_behavior": "chạy lại an toàn: đã xoá → NOT_FOUND coi như done (idempotent theo trạng thái đích)",
+        "duplicate_guard": "requires_confirm=yes; chặn xoá khi row đang corpus=true trừ khi cờ tường minh",
+        "readback_command": "reg-query --drive-id <id> --json (status removed) + nlm-list không còn source",
+        "resume_command": "source-delete <drive_id> --confirm yes",
+        "rollback_hint": "KHÔNG tự động: khôi phục từ Drive Trash (30 ngày) + nlm-add lại + reg_upsert khôi phục cột",
+    },
+    "reg_delete": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id (row registry)",
+        "journal_key": "tl_journal/reg-delete_<run_id> (row đầy đủ trong before)",
+        "resume_behavior": "chạy lại an toàn: row đã mất → done",
+        "duplicate_guard": "requires_confirm=yes; chỉ xoá ROW registry — file Drive/nguồn NLM không đụng",
+        "readback_command": "reg-query --drive-id <id> --json (miss = đã xoá)",
+        "resume_command": "reg-delete <drive_id> --confirm yes",
+        "rollback_hint": "undo <run_id> --apply nếu journal có before-row; không thì reg_upsert dựng lại từ manifest cache",
+    },
+    "dedup_plan": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "sha256(tập cụm trùng + canonical được chọn) — plan trước, apply theo plan",
+        "journal_key": "tl_journal/dedup-plan_<run_id>",
+        "resume_behavior": "chạy lại CÙNG LỆNH: dòng đã corpus=false bị bỏ qua (idempotent)",
+        "duplicate_guard": "DRY mặc định; canonical-picker ưu tiên verified/VBHN-năm-mới; reversible corpus=false (không xoá)",
+        "readback_command": "sweep --json (duplicates.by_* == 0) + reg-query từng cụm",
+        "resume_command": "dedup-plan --apply",
+        "rollback_hint": "undo <run_id> --apply — apply chỉ set corpus=false nên đảo lại được toàn phần",
+    },
+})
+
+
 
 def _workflow_dir() -> Path:
     return HERE.parent / "references" / "workflows"
@@ -488,20 +554,100 @@ _GOLDEN_CASES = [
     {"id": "tool_inventory_inventory_decision", "file": "tool_inventory_inventory_decision.json", "args": ["tool-inventory", "--group", "inventory_decision", "--json"]},
     {"id": "route_task_ocr_ingest", "file": "route_task_ocr_ingest.json", "args": ["route-task", "--task", "ocr_ingest", "--json"]},
     {"id": "route_task_profile_ingest_chunks", "file": "route_task_profile_ingest_chunks.json", "args": ["route-task", "--task", "profile_ingest_chunks", "--json"]},
+    # v1.33.59 (Pha G1 — mở rộng theo kế hoạch): case OFFLINE-thuần trên fixtures cố định.
+    {"id": "chunk_plan_profile_fixture", "file": "chunk_plan_profile_fixture.json", "args": ["chunk-plan", "{FIXTURES}/sample_profile.txt", "--mode", "profile", "--name", "sample", "--max-chars", "200", "--json"]},
+    {"id": "chunk_plan_vbqppl_canonical_blocked", "file": "chunk_plan_vbqppl_canonical_blocked.json", "args": ["chunk-plan", "{FIXTURES}/sample_profile.txt", "--mode", "vbqppl-canonical", "--json"]},
+    {"id": "ocr_analyze_fixture", "file": "ocr_analyze_fixture.json", "args": ["ocr-analyze", "{FIXTURES}/sample_profile.txt", "--json"]},
+    {"id": "ingest_zip_dryrun_slip", "file": "ingest_zip_dryrun_slip.json", "args": ["ingest-zip", "{FIXTURES}/slip.zip", "--cat", "01", "--json"]},
+    {"id": "ingest_zip_dryrun_dup", "file": "ingest_zip_dryrun_dup.json", "args": ["ingest-zip", "{FIXTURES}/dup.zip", "--cat", "01", "--json"]},
+    {"id": "live_state_diff_no_changes", "file": "live_state_diff_no_changes.json", "args": ["live-state-diff", "{FIXTURES}/snap_a.json", "{FIXTURES}/snap_a2.json", "--json"]},
 ]
 
 
+def _golden_fixdir() -> Path:
+    return _golden_dir() / "fixtures"
+
+
+def _golden_ensure_fixtures() -> None:
+    """v1.33.59: fixtures SINH-TẠI-CHỖ byte-tất-định (zip date_time 1980, nội dung cố định) — repo giữ
+    text-only (pre-commit hook chặn binary là ĐÚNG, không nới); CI/gói giải nén tự tái tạo y hệt."""
+    fd = _golden_fixdir()
+    fd.mkdir(parents=True, exist_ok=True)
+    _nl = chr(10)
+    sample = _nl.join([
+        "Điều 1. Phạm vi điều chỉnh",
+        "Văn bản mẫu dùng cho golden fixtures — nội dung ổn định, không đổi.",
+        "",
+        "Điều 2. Đối tượng áp dụng",
+        "Cơ quan, tổ chức, cá nhân có liên quan đến kiểm thử tất định.",
+        "",
+        "Điều 3. Hiệu lực thi hành",
+        "Văn bản này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2026.",
+        "",
+    ]).encode("utf-8")
+    snap_a = json.dumps({
+        "schema": "live_state_snapshot.v1",
+        "auth": {"gws_credentials": {"present": True, "age_days": 4.793}},
+        "registry": {"rows": 745},
+        "volatile": {"generatedAt": "2026-07-09T00:00:00Z"},
+    }, ensure_ascii=False, indent=1, sort_keys=True).encode("utf-8")
+    snap_b = snap_a.replace(b"4.793", b"4.794").replace(b"00:00:00", b"11:11:11")
+    def _zip_bytes(members):
+        import io as _io
+        buf = _io.BytesIO()
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for name, data in members:
+                info = zipfile.ZipInfo(name)
+                info.date_time = (1980, 1, 1, 0, 0, 0)
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o100644 << 16
+                zf.writestr(info, data)
+        return buf.getvalue()
+    want = {
+        "sample_profile.txt": sample,
+        "snap_a.json": snap_a,
+        "snap_a2.json": snap_b,
+        "slip.zip": _zip_bytes([("../evil.docx", b"slip"), ("van_ban_hop_le.docx", b"binh thuong"), ("bao cao?.docx", b"ten cam win")]),
+        "dup.zip": _zip_bytes([("a.docx", b"mot"), ("./a.docx", b"hai")]),
+    }
+    for name, data in want.items():
+        fp = fd / name
+        if not fp.exists() or fp.read_bytes() != data:
+            fp.write_bytes(data)
+
+
+def _golden_args(case: dict) -> list[str]:
+    """v1.33.59: thay token {FIXTURES} bằng đường dẫn fixtures thật (output đã được deterministic-scrub
+    về project-relative nên golden ổn định cross-machine/CI)."""
+    fd = str(_golden_fixdir())
+    return [a.replace("{FIXTURES}", fd) for a in case["args"]]
+
+
 def _golden_test(*, write: bool = False) -> dict:
+    _golden_ensure_fixtures()
     gdir = _golden_dir()
     if write:
         gdir.mkdir(parents=True, exist_ok=True)
     cases = []
     for case in _GOLDEN_CASES:
         path = gdir / case["file"]
-        run = _run_tl_json(case["args"])
-        rec = {"id": case["id"], "file": str(path), "command": case["args"], "ok": False, "mode": "write" if write else "verify"}
-        if not run.get("ok"):
+        _args = _golden_args(case)
+        run = _run_tl_json(_args)
+        rec = {"id": case["id"], "file": str(path), "command": _args, "ok": False, "mode": "write" if write else "verify"}
+        # v1.33.59 (Pha G1): case NEGATIVE (vd DO_NOT_SPLIT, DUPLICATE_NORMALIZED) exit rc=2 CÓ CHỦ ĐÍCH —
+        # golden chấp nhận mọi output là JSON dict (payload đã mang ok:false); chỉ fail khi KHÔNG parse được.
+        if not isinstance(run.get("data"), dict):
             rec.update({"error": "COMMAND_FAILED_OR_NON_JSON", "returncode": run.get("returncode"), "parse_error": run.get("parse_error"), "stderr_tail": run.get("stderr_tail")})
+            cases.append(rec)
+            continue
+        # v1.33.59 (nợ P4-06, quyết định grilling #7 'canonical + raw-stability'): stdout THÔ chạy ×2 phải
+        # trùng BYTE (bắt nondeterminism format thật); PASS/FAIL nội dung vẫn so bản canonical-hoá.
+        run2 = _run_tl_json(_args)
+        _raw1, _raw2 = str(run.get("stdout") or ""), str(run2.get("stdout") or "")
+        rec["raw_stable"] = (_raw1 == _raw2)
+        rec["raw_sha256"] = hashlib.sha256(_raw1.encode("utf-8")).hexdigest()
+        if not rec["raw_stable"]:
+            rec.update({"error": "RAW_STDOUT_UNSTABLE", "diff": _first_text_diff(_raw1, _raw2)})
             cases.append(rec)
             continue
         actual = _json_dumps(run.get("data"), deterministic=True) + "\n"

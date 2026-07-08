@@ -1,0 +1,11 @@
+{
+  "apply_enabled": false,
+  "chunks": [],
+  "error": "DO_NOT_SPLIT_VBQPPL_CANONICAL",
+  "file": "references/golden/fixtures/sample_profile.txt",
+  "mode": "vbqppl-canonical",
+  "ok": false,
+  "schema": "chunk_plan.v2",
+  "source_hash": "c9753045c29f2f114da59522ddcd78b5ac0cda0444ff1a9b9fda0ddbae76a2d7",
+  "warnings": []
+}

@@ -1,0 +1,62 @@
+name: gate
+
+# CI 2 nền tảng (quyết định grilling 2026-07-09 #8): Cowork/Chat chạy Linux trong khi dev trên Windows —
+# lớp bug nền-tảng (cp1258 decode, path, symlink) từng lọt vì gate chỉ chạy 1 nền. Toàn bộ job OFFLINE,
+# không cần secret nào.
+#
+# LƯU Ý line-ending: RELEASE_MANIFEST.json hash byte THẬT của file — repo chuẩn LF. Phải tắt autocrlf
+# TRƯỚC checkout, nếu không runner Windows checkout CRLF → hash lệch → release-verify fail oan.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  gate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: py_compile
+        run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+      - name: gen_instructions selftest
+        run: python scripts/gen_instructions.py --selftest
+      - name: tl selftest
+        run: python scripts/tl.py --selftest
+      - name: workflow-audit strict
+        run: python scripts/tl.py workflow-audit --strict --json
+      - name: golden-test
+        run: python scripts/tl.py golden-test --json
+      - name: determinism-audit strict
+        run: python scripts/tl.py determinism-audit --strict --json
+      - name: release-verify (manifest khớp cây)
+        run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --json
+      - name: release-bundle x2 cùng SHA-256
+        shell: bash
+        run: |
+          python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
+          python scripts/tl.py release-bundle --out dist/b.zip --json > /dev/null
+          python - <<'PY'
+          import hashlib
+          h = [hashlib.sha256(open(f, "rb").read()).hexdigest() for f in ("dist/a.zip", "dist/b.zip")]
+          assert h[0] == h[1], f"bundle không tất định: {h}"
+          print("bundle sha256 =", h[0])
+          PY
+      - name: tl_boot smoke
+        run: python scripts/tl_boot.py --version

@@ -5,9 +5,9 @@
   "skill_version": "1.33.58",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
-  "file_count": 119,
-  "total_bytes": 3748969,
-  "package_hash": "804cfc7f3614d12866988d38695e949fcd6b3af35e0fa8ce40308119b08be762",
+  "file_count": 122,
+  "total_bytes": 3756969,
+  "package_hash": "f1376fe057a74110d0a946d98c01bd68ee7d451c52a5c72fe93af8eab236953a",
   "required_missing": [],
   "files": [
     {
@@ -24,6 +24,11 @@
       "path": "CHANGELOG.md",
       "size": 457900,
       "sha256": "1d3180606a7090f183934ca071bf67bacfe53fd7f2f4cce5848d34577c2035f9"
+    },
+    {
+      "path": "CONTEXT.md",
+      "size": 3876,
+      "sha256": "56d716701285a89719c0475231095137d98ff7446d1716dad134b41c3ca18a29"
     },
     {
       "path": "INSTALL.md",
@@ -49,6 +54,16 @@
       "path": "VERSION",
       "size": 8,
       "sha256": "cdbe20672a09b95e5162dd1946f0cb5fd8d0893fd2bc4301f47e89ec9961cc08"
+    },
+    {
+      "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
+      "size": 2064,
+      "sha256": "b5512e8c12abcd592964aabd2ceee8f21cd394921b269491c435f68f30d992db"
+    },
+    {
+      "path": "docs/adr/0002-bind-copy-globals-la-gian-giao-di-cu.md",
+      "size": 2060,
+      "sha256": "1f544b6a3e652c498020a8e048fd6863d6eaad4d2b15a96c7dc5c162079d0773"
     },
     {
       "path": "references/API_CONTRACT.md",

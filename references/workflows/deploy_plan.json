@@ -1,0 +1,61 @@
+{
+  "id": "deploy_plan",
+  "title": "Kế hoạch triển khai bundle an toàn",
+  "risk": "medium",
+  "applies_to": [
+    "release",
+    "deployment",
+    "operator handoff"
+  ],
+  "recommended_commands": [
+    "deploy-plan --bundle <file.zip> --json",
+    "release-verify RELEASE_MANIFEST.json --json",
+    "release-check --json",
+    "live-readiness --json"
+  ],
+  "requires_dry_run": true,
+  "requires_apply": false,
+  "requires_readback": true,
+  "plan": [
+    "verify bundle SHA-256",
+    "extract to temporary directory",
+    "verify RELEASE_MANIFEST inside extracted package",
+    "backup current skill directory",
+    "replace/sync only after verification passes",
+    "run release-check at target",
+    "run live-readiness and then live-smoke-plan"
+  ],
+  "verify": [
+    "bundle exists and SHA-256 is known",
+    "extracted manifest verifies ok",
+    "backup path exists before replacement",
+    "release-check ok after deployment"
+  ],
+  "stop_conditions": [
+    "bundle missing or checksum mismatch",
+    "release-verify fails in extracted package",
+    "backup cannot be created",
+    "release-check fails after sync",
+    "live-readiness fails before live smoke"
+  ],
+  "rules": [
+    "deploy-plan is read-only; it never copies files",
+    "Do not replace target skill without a backup",
+    "Do not run high-risk live apply smoke tests before live-readiness passes"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_deploy_plan",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

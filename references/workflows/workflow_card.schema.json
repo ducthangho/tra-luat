@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tra-luat.workflow_card.v1",
+  "title": "tra-luat workflow card",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "risk",
+    "plan",
+    "write_scope",
+    "dry_run_required",
+    "confirm_required",
+    "readback_required",
+    "rollback_required",
+    "live_state_required",
+    "volatile_fields"
+  ],
+  "properties": {
+    "schema": {
+      "const": "workflow_card.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "write_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dry_run_required": {
+      "type": "boolean"
+    },
+    "confirm_required": {
+      "type": "boolean"
+    },
+    "readback_required": {
+      "type": "boolean"
+    },
+    "rollback_required": {
+      "type": "boolean"
+    },
+    "live_state_required": {
+      "type": "boolean"
+    },
+    "volatile_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plan": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "verify": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "idempotency_contract": {
+      "type": "object"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "journal_key": {
+      "type": "string"
+    },
+    "resume_behavior": {
+      "type": "string"
+    },
+    "duplicate_guard": {
+      "type": "string"
+    },
+    "resume_command": {
+      "type": "string"
+    },
+    "readback_command": {
+      "type": "string"
+    },
+    "rollback_hint": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

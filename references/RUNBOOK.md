@@ -22,6 +22,37 @@
 
 ---
 
+
+## A-DET. CỔNG DETERMINISM / OCR / IDEMPOTENCY (trước khi ghi hoặc release)
+
+**A-DET.1 — OCR sidecar không đủ; phải có manifest.**
+```bash
+python scripts/tl.py ocr-run <file> --engine auto --mode vbqppl --json
+python scripts/tl.py ocr-verify <text_file.ocr.txt> --source <file> --mode vbqppl --json
+```
+- `ocr-run` phải tạo `ocr_manifest.v1` cạnh `.ocr.txt`.
+- `ocr-verify` phải kiểm `source_sha256`, `text_sha256`, engine/version/language, page report/coverage nếu là PDF, Điều/Phụ lục, mật độ dấu tiếng Việt và garbled ratio.
+- VBQPPL OCR thiếu manifest verified ⇒ **DỪNG**, không canonical.
+
+**A-DET.2 — Lệnh ghi phải có idempotency contract.**
+```bash
+python scripts/tl.py route-task --task ingest_zip --json
+python scripts/tl.py route-task --task ocr_ingest --json
+python scripts/tl.py route-task --task profile_ingest_chunks --json
+```
+Bắt buộc đọc 4 trường: `idempotency_key`, `resume_command`, `readback_command`, `rollback_hint`. Timeout giữa chừng ⇒ dùng resume/journal/readback; không tự viết script vá tay.
+
+**A-DET.3 — Release cuối.**
+```bash
+python scripts/tl.py --deterministic workflow-audit --strict --json
+python scripts/tl.py --deterministic determinism-audit --strict --json
+python scripts/tl.py --deterministic golden-test --json
+python scripts/tl.py --deterministic release-check --strict-determinism --full --json
+```
+Release pass offline chưa phải live ready. Live vẫn cần `live-readiness`, `live-contract-check`, snapshot before/after và `live-state-diff`.
+
+---
+
 ## A0. BOOT TRANSPORT `gws` (3-env — Code/Cowork; Chat SKIP)
 
 > **GĐ0.** `gws` (`@googleworkspace/cli`) = transport Drive direct-API cho Code/Cowork (**PRIMARY**), GAS = **FALLBACK**.

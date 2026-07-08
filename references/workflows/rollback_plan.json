@@ -1,0 +1,58 @@
+{
+  "id": "rollback_plan",
+  "title": "Kế hoạch rollback từ backup hoặc bundle trước đó",
+  "risk": "medium",
+  "applies_to": [
+    "rollback",
+    "failed deployment",
+    "operator handoff"
+  ],
+  "recommended_commands": [
+    "rollback-plan --json",
+    "release-verify RELEASE_MANIFEST.json --json",
+    "release-check --json",
+    "live-readiness --json"
+  ],
+  "requires_dry_run": true,
+  "requires_apply": false,
+  "requires_readback": true,
+  "plan": [
+    "stop clients using the skill directory",
+    "snapshot failed state before overwriting",
+    "restore from known-good backup or previous bundle",
+    "verify manifest if available",
+    "run release-check",
+    "run live-readiness"
+  ],
+  "verify": [
+    "backup or rollback bundle exists",
+    "target directory restored",
+    "release-check ok after rollback",
+    "live-readiness still sees config/auth"
+  ],
+  "stop_conditions": [
+    "no known-good backup or bundle",
+    "backup has no verifiable manifest and operator has not accepted risk",
+    "release-check fails after rollback"
+  ],
+  "rules": [
+    "rollback-plan is read-only; it never copies files",
+    "Do not delete failed state before snapshot",
+    "Prefer backup that has passed release-verify"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_rollback_plan",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "final_acceptance",
+  "title": "Final acceptance before handoff",
+  "risk": "low",
+  "purpose": "Tổng hợp các kiểm tra offline và live handoff trước khi bàn giao bundle triển khai.",
+  "recommended_commands": [
+    "final-acceptance --json",
+    "workflow-audit --json",
+    "release-check --json",
+    "release-manifest --out RELEASE_MANIFEST.json --json",
+    "release-verify RELEASE_MANIFEST.json --json",
+    "live-readiness --json",
+    "live-smoke-plan --json"
+  ],
+  "plan": [
+    "Audit workflow/router/CLI",
+    "Audit Project/NLM instructions",
+    "Build and verify release manifest",
+    "Generate live readiness and smoke-test handoff",
+    "Return deployment_gate instead of pretending live auth exists"
+  ],
+  "apply": [],
+  "verify": [
+    "offline_ok=true",
+    "deployment_gate is explicit",
+    "strict_live only passes when live-readiness passes"
+  ],
+  "stop_conditions": [
+    "workflow-audit fails",
+    "instruction audit fails",
+    "release manifest/verify fails",
+    "strict_live enabled while live-readiness fails"
+  ],
+  "rules": [
+    "No Drive/NLM calls",
+    "No registry/corpus writes",
+    "Live readiness is reported honestly as pass or pending"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "none",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

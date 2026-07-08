@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.49)
+# tra-luat — LÕI VẬN HÀNH (v1.33.54)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -23,6 +23,26 @@ description: >-
 > - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
 >
 > Khi mâu thuẫn: LÕI + API_CONTRACT + RUNBOOK **thắng** phụ lục.
+
+## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+
+Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự chế, PHẢI kiểm kho công cụ hiện có:
+
+1. `python scripts/tl.py tool-inventory --json` để xem nhóm tool/script/workflow.
+2. `python scripts/tl.py route-task --task <tac_vu> --json` với tác vụ rủi ro: `write_new_tool`, `nlm_query_quality`, `ingest_local`, `convert_rename`, `ingest_zip`, `ocr_pdf_scan`, `large_doc_chunk`.
+3. `python scripts/tl.py -h` và `python scripts/tl.py <lệnh> --help` với nhóm lệnh liên quan.
+4. Kiểm `scripts/*.py` và `references/API_CONTRACT.md` trước khi gọi webapp/Drive/registry/NLM hoặc thêm tool mới.
+5. Khi sửa skill/workflow/release gate, chạy deterministic mode: `python scripts/tl.py --deterministic workflow-audit --strict --json`, `python scripts/tl.py --deterministic determinism-audit --strict --json`, và trước khi đóng gói `python scripts/tl.py --deterministic release-check --strict-determinism --full --json`.
+
+Chỉ viết tool mới khi đã chứng minh lệnh/script/hàm hiện có không đáp ứng. Tool mới phải có input/output rõ, ưu tiên JSON, có dry-run nếu ghi dữ liệu, có verify/readback, và có selftest/audit phù hợp.
+
+Mọi quy trình nạp/convert/rename/OCR/zip/chunk phải đi theo mẫu:
+
+`route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
+
+`tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit` và `golden-test` là READ-ONLY mặc định, không gọi Drive/NLM nặng và không ghi dữ liệu. Workflow chi tiết đặt tại `references/workflows/*.json`; schema ở `references/workflows/workflow_card.schema.json`; fixtures ổn định ở `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi để tránh drift.
+
+Stage an toàn hiện có thêm các lệnh local deterministic: `ocr-run` tạo sidecar text/OCR local khi engine có sẵn; `chunk-apply` tạo chunk files + manifest; `chunk-verify` kiểm manifest/files. Các lệnh này chưa ghi Drive/NLM. Muốn đưa kết quả vào corpus vẫn phải quay về pipeline ingest/verify/readback.
 
 ## 0. NGUYÊN TẮC BẤT BIẾN
 1. **VBHN-first + LATEST-VBHN** — có VBHN còn hiệu lực → dùng VBHN, không bản gốc/sửa đổi rời. **Khi TRA/TÌM Luật theo tên:** thử keyword **'<tên> hợp nhất' TRƯỚC** (vd "Luật PPP hợp nhất") → rồi **'<tên> mới nhất'** → cuối cùng tên gốc; truy vấn theo SỐ HIỆU thì tìm thẳng. **MỌI tìm-văn-bản-trên-web dùng GOOGLE `site:` (VBHN-first), KHÔNG dùng search nội bộ TVPL/LVN (kém)** — áp cho `fetch-route`/`fetch-links`/`find-doc` VÀ QT-5 (`vbhn-check`/`status`/`relation-check` đều xuất `google_discovery`). **⚠ S9/S11 (log 🔴 2026-07-01): KHÔNG chốt ở VBHN ĐẦU TIÊN tìm thấy — số hiệu VBHN TĂNG theo mỗi lần hợp nhất (Bộ luật Hình sự: 01/VBHN 2017 → 11/VBHN → 135/VBHN 2025; KHÔNG phải semver).** Bắt buộc LƯỢT-2: tìm SỐ VBHN LỚN HƠN / NGÀY MỚI HƠN cùng cơ quan (VPQH) qua `'<tên> hợp nhất mới nhất <năm>'` + `site:congbao.chinhphu.vn`. Ứng viên VBHN chưa xác minh là mới nhất → cờ `VBHN_CANDIDATE_UNVERIFIED_LATEST`; NGOẠI LỆ v1.33.15: VBHN duy nhất RẤT MỚI (năm ≥ năm-nay−1) + không luật-sửa nào mới hơn đã biết + không thuộc nhóm S10 → hạ thành cờ INFO `VBHN_LATEST_RECENT_COVERED` (rời hàng web lượt-2; vẫn `vbhn-verify --official-required` trước khi trích dẫn). **S10:** luật cải cách cao 2024-2026 (Hình sự/tố tụng/phí-lệ-phí/đất đai/doanh nghiệp/đầu tư/đấu thầu/thuế…) → cờ `VBHN_HIGH_AMENDMENT_VELOCITY`, PHẢI kiểm bản hợp nhất mới nhất trước khi trả.
@@ -170,7 +190,8 @@ xóa→`nlm source delete`, sync→`nlm source sync`. MCP CHỈ fallback khi thi
 - **CỔNG TIỀN-NẠP QT-2** (TRƯỚC khi nạp văn bản sửa đổi/VBHN/nghi bị thay): `tl status <sohieu> --amendment --targets …` → ADD/SKIP/REVIEW. Surface quan hệ (sửa gì/bị VBHN nào hợp nhất/còn hiệu lực) TRƯỚC khi chốt. Bản sửa đổi chưa đủ VBHN cho mọi đích → GIỮ + ghi `sua_doi`.
 - **CỔNG TIỀN-NẠP WEB/NLM:** đồng ý "tìm nguồn" KHÁC đồng ý "ghi vào corpus/NLM". Trước khi nạp nguồn web, phải trình người dùng duyệt `{URL, official|thứ cấp, định dạng, cat/folder/notebook đích, tên chuẩn dự kiến, số hiệu/năm/trích yếu, quan hệ gốc/sửa đổi/VBHN}`. Đích mặc định là folder Drive + notebook đang dùng; không tạo notebook mới trừ khi người dùng yêu cầu rõ.
 - **Ưu tiên định dạng:** official-first; nếu có docx/doc/GDoc-convertible thì ưu tiên hơn PDF. Nếu chỉ có PDF thì convert/OCR trước; không nạp PDF thô làm canonical NLM khi có thể tạo GDoc chuẩn.
-- **★ FILE LỚN → HỎI TÁCH (chất lượng truy vấn cao nhất):** nạp NGUYÊN văn bản QUÁ LỚN vào 1 nguồn NLM làm GIẢM chất lượng RAG (NLM tổng hợp tốt nhất ~≤100k ký tự/nguồn; webapp exporttext CAP ~200k). `tl ingest-local` có **CỔNG HỎI TÁCH**: file > `NLM_LARGE_SRC_BYTES` (~1.2MB, chỉnh `--large-threshold`) → DỪNG `--apply`, in `large_file_split_gate` + gợi ý **TÁCH theo Phần/Chương/cụm Điều rồi ingest TỪNG PHẦN (mỗi phần 1 nguồn)**. PHẢI hỏi người dùng cho phép tách (hoặc họ chọn `--allow-large` để nạp nguyên, chấp nhận giảm chất lượng). KHÔNG tự tách (cần người duyệt cách tách hợp lý theo cấu trúc văn bản).
+- **★ VĂN BẢN LỚN → TÁCH CÓ KIỂM SOÁT (chất lượng truy vấn cao nhất):** nạp NGUYÊN văn bản QUÁ LỚN vào 1 nguồn NLM làm GIẢM chất lượng RAG (NLM tổng hợp tốt nhất ~≤100k ký tự/nguồn; webapp exporttext CAP ~200k). Với **VBQPPL**, KHÔNG tách bản canonical: luôn giữ 1 bản đầy đủ để `tl extract`, kiểm Điều/khoản/điểm, hiệu lực, VBHN và quan hệ sửa đổi. Chỉ tạo bản tách như **nguồn phụ phục vụ truy vấn NLM** khi thật sự cần; chunk phải có `row_kind=ref`, `corpus=false`, `goc=<drive_id canonical>`, ghi chú `nlm_query_chunk`, và không dùng làm căn cứ pháp lý cuối cùng. Với **văn bản thường/profile**, được tách để tăng chất lượng truy vấn: `tl profile-ingest` lập `chunk_plan` dry-run, ưu tiên tách theo Phần/Chương/Mục/Điều/Phụ lục/heading/pagebreak; mỗi chunk nên ≤100.000 ký tự, tên ổn định và có phạm vi rõ. `tl ingest-local` với file lớn > `NLM_LARGE_SRC_BYTES` (~1.2MB, chỉnh `--large-threshold`) vẫn DỪNG ở `large_file_split_gate`, hỏi người dùng chọn tách hoặc `--allow-large`; KHÔNG tự tách tùy tiện.
+- **★ PDF SCAN/OCR → CỔNG CHẤT LƯỢNG:** ưu tiên tìm bản `.docx`/`.doc`/GDoc hoặc text-layer sạch trước. Nếu cần tạo sidecar text local, dùng `tl ocr-run` (an toàn: text-layer/ocrmypdf nếu có; Drive/Paddle/DocumentAI vẫn bị gate nếu chưa cấu hình live), sau đó bắt buộc chạy `tl ocr-verify`. Khi ingest nguồn OCR phải gắn `--source-quality ocr`; chỉ dùng `--ocr-verified` sau khi đã đối chiếu không mất trang, không mất Điều, không sai Phụ lục và không lỗi chữ nghiêm trọng. Với VBQPPL, PDF scan/OCR chưa đạt thì KHÔNG đưa vào corpus/NLM làm canonical. Với profile văn bản thường, OCR chưa verify có thể lưu làm bản tham khảo/corpus=false, phải cảnh báo và không dùng làm căn cứ cuối cùng. Công cụ sẵn có: `tl ocr-analyze`, `tl ocr-run`, `tl ocr-verify`, `tl ingest-local --text-file --source-quality ocr --ocr-verified`, `tl profile-ingest --text-file --source-quality ocr --ocr-verified`, `tl source-verify`, `tl cat-verify`, `scripts/verify_deep.py`.
 - **★ NLM theo PROFILE (đa-corpus):** push/query NLM (`ingest-local`/`nlm-add`/`nlm-query`/`nlm-reconcile`) NHẮM `notebookId` của **PROFILE ĐANG DÙNG** (`TL_NOTEBOOK_ID` từ `config.profiles.<active>.notebookId`), KHÔNG mặc định VBQPPL base. Luôn chạy với `--profile <P>` đúng; profile thiếu `notebookId` → lỗi `NO_NOTEBOOK_ID` (truyền `--notebook-id`). **(v1.33.48)** `--profile`/`--config` nhận Ở CẢ SAU subcommand (`tl reg-query --profile "Luật BHXH"` hết gãy rc=2); tên profile CHỊU-LỖI-GÕ (không-dấu/hoa-thường/space-_- khớp DUY NHẤT → dùng tên canonical config); tên KHÔNG có trong config → **PROFILE_NOT_FOUND + scope RỖNG** (KHÔNG rơi âm thầm về nền vbqppl như trước — hết lớp 'ghi nhầm corpus nền vì gõ sai tên profile'). `register` nhận `--nlm-notebook-id` (khỏi `backfill-notebook` riêng); `nlm-reconcile` tự bắc cầu gdoc↔source_id (link nguồn live vào dòng registry theo drive_id/số hiệu). Sau khi GHI sheet (reg_upsert/ingest/backfill) → `reg-query --refresh` mới thấy LIVE (cache cũ báo nlm rỗng).
 - **Đặt tên + sắp xếp** (QT-3): `copy_convert` → `standardize_name.py` → `organize` → verify `list cat=<NN>` (ĐỪNG tin response `move`). File gốc nằm CẠNH GDoc, KHÔNG add NLM.
 - **Link cho người dùng** (QT-1): markdown click-mở-được; ĐỦ cả link upload (`_HOP_NAP`) lẫn download. Với link để người dùng tự tải: ưu tiên `thuvienphapluat.vn` → `luatvietnam.vn` → `congbao.chinhphu.vn` → official khác → trang khác. Không đổi canonical official-first.
@@ -225,6 +246,7 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 | `tl nlm-get <nb>` | số nguồn vật lý + chi tiết notebook CLI (thay `notebook_get`; slot/preflight) |
 | `tl nlm-content <source_id> [--out\|--dieu N]` | NLM read qua CLI: toàn văn raw 1 source (thay MCP `source_get_content`) |
 | `tl nlm-query <q> [--source-id …]` | NLM RAG qua CLI (thay MCP `notebook_query`); verify nguyên văn sau |
+| `tl nlm-query-plan <q> --source-id …` | READ-ONLY: kiểm số lượng nguồn NLM (mặc định 1-3, 5 hard cap) và chia batch trước khi hỏi |
 | `tl reg-delete --drive-ids id,… [--force]` | gỡ dòng registry (bọc reg_delete); chỉ xóa DÒNG, không đụng Drive/NLM |
 | `tl bench [--rounds N]` | đo hiệu năng tính năng in-code (offline) trên manifest |
 | `tl tvpl-url <số hiệu>` | URL tìm TVPL + luồng auto-download docx (Claude in Chrome login VIP → ~/Downloads → _HOP_NAP) |
@@ -443,3 +465,100 @@ Overlay độc lập có `_fallback` cho core runtime; các pipeline chuyên sâ
 - Trước mọi nạp nguồn web/NLM-native, chạy `tl external-ingest <url> ... --json` để kiểm kế hoạch. Lệnh này chỉ kiểm, không ghi Drive/NLM.
 - `research_start/research_status` chỉ dùng để phát hiện URL; `research_import/source_add(url)` không được dùng để nạp VBQPPL làm nguồn canonical.
 - Instruction dùng cho Claude Project/NLM phải qua `tl instruction-audit` hoặc sinh bằng `tl instructions`/`scripts/gen_instructions.py`; thiếu `SKILL_OF_RECORD`, `ingest_handoff`, `confirm_gate_web` thì không dùng.
+
+
+## STAGE4_BRIDGE_OCR_CHUNK
+
+OCR sidecar và chunk local không được ghi thẳng vào Drive/registry/NLM theo pipeline riêng.
+
+Luồng chuẩn:
+- OCR: `ocr-run` → `ocr-verify` → `ingest-ocr` hoặc `profile-ingest-ocr` → gọi lại `ingest-local`/`profile-ingest` hiện có với `--source-quality ocr --ocr-verified`.
+- Chunk profile: `chunk-plan` → `chunk-apply` → `chunk-verify` → `profile-ingest-chunks` → gọi lại `profile-ingest` từng chunk.
+
+Mọi bridge apply phải có `--confirm yes`. Nếu verify fail, thiếu text sidecar, thiếu cat VBQPPL hoặc manifest không phải profile thì phải dừng. Bridge không thay thế convert/readback/register/NLM gate của pipeline hiện có.
+
+
+Từ v1.33.53, mọi snapshot/report vận hành phải ưu tiên ghi vào `.tl_state/`; `before.json`, `after.json`, `reports/`, `dist/` và các runtime artifact không được tính vào release manifest. `live-readiness`/`live-contract-check` có thêm `command_ok` và `deployment_allowed`; không được dùng `ok=true` làm quyền deploy/apply.
+
+Từ v1.33.52, `ocr-run` luôn tạo manifest sidecar `ocr_manifest.v1` cạnh file `.ocr.txt`. Manifest phải có `engine_used`, `engine_version`, `language`, `source_sha256`, `text_sha256`, page report nếu là PDF, metrics và `verification_status`. Với VBQPPL, `ocr-verify --mode vbqppl` bắt buộc đọc được manifest, hash khớp và `verification_status=verified`; thiếu manifest hoặc manifest unverified thì không được đưa OCR vào nguồn canonical.
+
+
+## Stage 5 — deterministic release/audit harness (2026-07-07)
+- Added `tl workflow-audit --json` to catch drift between workflow cards, route-task mappings and CLI command inventory.
+- Added `tl release-check --json` as an in-process offline acceptance harness: py_compile, instruction audit, workflow audit, route-card check, OCR text metrics, chunk guard and live-smoke plan generation. It does not call Drive/NLM and does not write registry.
+- Added `tl determinism-audit --strict --json` to verify workflow card schema, volatile-field scrub, deterministic child CLI output and golden fixtures.
+- Added `tl golden-test --json` to compare deterministic JSON fixtures; use `--write` only after an intentional CLI/schema change and then rerun `determinism-audit --strict`.
+- Added `--deterministic` / `TL_DETERMINISTIC=1` JSON mode: sort keys, mask temp/time/tail fields and convert skill-root paths to relative paths.
+- Added `tl live-smoke-plan --json` to produce a safe ordered checklist for live Drive/NLM smoke tests on an authenticated machine.
+- Added workflow cards: `workflow_audit`, `release_check`, `live_smoke_plan`.
+- Stage 6-7 update: `live-readiness` now has explicit `env_ready` / `live_contract_ready` / `apply_ready` tiers; added `live-contract-check`, `live-state-snapshot`, and `live-state-diff` so live smoke has read-only contract proof and before/after diff evidence.
+- Stage 8-9 update: `ocr-run` must create `ocr_manifest.v1` with engine/version/language/source hash/text hash/page report/verification status; `ocr-verify` validates the manifest and VBQPPL OCR canonical ingest is blocked without `verification_status=verified`. `route-task` now exposes idempotency/resume/readback/rollback contract for write workflows.
+- Project Instruction now requires `workflow-audit`, `determinism-audit --strict`, `golden-test` and `release-check --strict-determinism --full` before packaging/after workflow-tool changes; `live-smoke-plan` is used for live auth environment checks.
+
+
+### Stage 6 — Release integrity gate
+Trước khi phát hành zip skill, dùng lớp kiểm đóng gói tất định:
+
+```bash
+python scripts/tl.py --deterministic workflow-audit --strict --json
+python scripts/tl.py --deterministic determinism-audit --strict --json
+python scripts/tl.py --deterministic release-check --strict-determinism --full --json
+python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json --json
+python scripts/tl.py release-verify RELEASE_MANIFEST.json --json
+python scripts/tl.py release-bundle --out tra-luat-skill-<version>.zip --json
+```
+
+`release-manifest` không chứa timestamp/đường dẫn tuyệt đối; mỗi file có `sha256`, `size`, `path` đã sort. `release-verify` phải pass trước khi coi gói là phát hành được. `release-bundle` chỉ đóng gói offline, không gọi Drive/NLM.
+
+### Stage 7 — live readiness, live contract, snapshot/diff gate
+
+Trước khi test live hoặc bàn giao triển khai, không chạy trực tiếp thao tác ghi. Dùng các lệnh read-only theo thứ tự:
+
+```bash
+python scripts/tl.py live-readiness --json
+python scripts/tl.py live-contract-check --json
+python scripts/tl.py live-state-snapshot --out before.json --json
+python scripts/tl.py live-smoke-plan --json
+python scripts/tl.py live-state-snapshot --out after.json --json
+python scripts/tl.py live-state-diff before.json after.json --json --allow source_counts --allow notebooks.get.source_count
+python scripts/tl.py deploy-plan --bundle <release.zip> --target-dir <skill_dir> --json
+python scripts/tl.py rollback-plan --target-dir <skill_dir> --backup-path <backup_dir> --json
+```
+
+`live-readiness` nay báo 3 tầng: `env_ready`, `live_contract_ready`, `apply_ready`. Thiếu auth thì `env_ready=false`; auth có nhưng webapp/Drive/NLM read-only sai schema hoặc lỗi đọc thì `live_contract_ready=false`; không có smoke proof/diff hợp lệ thì `apply_ready=false`. `live-contract-check` chỉ gọi webapp ping/info và NLM get/list, tuyệt đối không upload, không register, không add source. `live-state-snapshot`/`live-state-diff` biến smoke test từ lời nói “pass” thành bằng chứng before/after; diff chỉ được phép có thay đổi đã khai báo bằng `--allow`.
+
+
+### Stage 8 — OCR deterministic manifest
+
+Luồng OCR chuẩn:
+
+```bash
+python scripts/tl.py ocr-run <scan.pdf|file.txt> --engine auto --mode vbqppl --json
+python scripts/tl.py ocr-verify <text_file.ocr.txt> --source <scan.pdf|file.txt> --mode vbqppl --json
+python scripts/tl.py ingest-ocr <source> --text-file <text_file.ocr.txt> --cat <NN> --apply --confirm yes --json
+```
+
+Acceptance bắt buộc: cùng một nguồn OCR phải sinh sidecar text và manifest có hash ổn định; manifest ghi engine, engine version, ngôn ngữ, source hash, text hash, page report/coverage nếu trích được, article count, appendix markers, Vietnamese mark density, garbled ratio và trạng thái verify. Với VBQPPL, thiếu page coverage phải có warning rõ; thiếu manifest verified thì không được canonical.
+
+### Stage 9 — Idempotency contract cho lệnh ghi
+
+Trước mọi lệnh ghi hoặc bridge apply, chạy:
+
+```bash
+python scripts/tl.py route-task --task <ingest_local|ingest_zip|ocr_ingest|profile_ingest_chunks> --json
+```
+
+Router phải trả `idempotency_key`, `resume_command`, `readback_command`, `rollback_hint`. Khi rerun sau timeout, không tự viết script vá tay: dùng `resume_command` hoặc journal/readback mà router chỉ ra. Với batch zip/chunk/OCR, mỗi item phải có duplicate guard riêng; snapshot/diff live vẫn là cổng bắt buộc trước khi apply rộng.
+
+### Final handoff / go-live gate
+
+Trước khi bàn giao bundle cuối cùng, phải chạy:
+
+```bash
+python scripts/tl.py final-acceptance --json
+python scripts/tl.py go-live-runbook --out GO_LIVE_RUNBOOK.md
+```
+
+`final-acceptance` là kiểm tra offline + live handoff; lệnh này không gọi Drive/NLM và không ghi corpus. Nếu môi trường hiện tại chưa có auth live, kết quả hợp lệ phải ghi rõ `deployment_gate=offline_pass_live_auth_required`, không được giả vờ đã test live.
+
+`go-live-runbook` xuất checklist triển khai, smoke test, snapshot/diff và rollback. Chỉ chạy apply live sau khi `live-readiness --json` đạt `env_ready=true` + `live_contract_ready=true`, smoke test có before/after snapshot và `live-state-diff` không có `unexpected_changes`.

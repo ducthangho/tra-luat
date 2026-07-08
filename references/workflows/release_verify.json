@@ -1,0 +1,52 @@
+{
+  "id": "release_verify",
+  "title": "Verify release manifest",
+  "risk": "low",
+  "applies_to": [
+    "packaging",
+    "release"
+  ],
+  "recommended_commands": [
+    "release-verify RELEASE_MANIFEST.json --json",
+    "release-verify RELEASE_MANIFEST.json --strict --json"
+  ],
+  "requires_dry_run": false,
+  "requires_apply": false,
+  "requires_readback": true,
+  "plan": [
+    "read manifest",
+    "check each path exists",
+    "compare size and sha256",
+    "report extras"
+  ],
+  "verify": [
+    "package_hash_match true",
+    "no failed file checks",
+    "required files present"
+  ],
+  "stop_conditions": [
+    "MANIFEST_READ_FAILED",
+    "MISSING file",
+    "sha256 mismatch",
+    "required missing"
+  ],
+  "rules": [
+    "strict mode treats extra files as error",
+    "non-strict warns extra files only"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_manifest_verify",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

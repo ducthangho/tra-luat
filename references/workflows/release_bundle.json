@@ -1,0 +1,50 @@
+{
+  "id": "release_bundle",
+  "title": "Đóng gói zip tất định",
+  "risk": "low",
+  "applies_to": [
+    "packaging",
+    "release"
+  ],
+  "recommended_commands": [
+    "release-bundle --out <file.zip> --json"
+  ],
+  "requires_dry_run": false,
+  "requires_apply": false,
+  "requires_readback": true,
+  "plan": [
+    "build release manifest",
+    "write sorted files into zip",
+    "use fixed timestamp",
+    "embed RELEASE_MANIFEST.json"
+  ],
+  "verify": [
+    "bundle_sha256 exists",
+    "open zip and verify manifest after extract",
+    "run release-check before bundle"
+  ],
+  "stop_conditions": [
+    "manifest not ok",
+    "invalid top folder",
+    "zip write failed"
+  ],
+  "rules": [
+    "Do not package caches, pyc, git internals",
+    "Release bundle does not call Drive/NLM"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_release_bundle",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

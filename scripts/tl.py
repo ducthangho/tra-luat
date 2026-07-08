@@ -40,7 +40,7 @@ Creds: env (TL_WEBAPP/TL_TOKEN) → --config FILE → ~/.tra_luat_config.json �
 Offline: tl --selftest   (logic thuần, không gọi mạng)
 """
 from __future__ import annotations
-import argparse, base64, json, os, re, sys, shutil, subprocess, tempfile, time, unicodedata
+import argparse, base64, datetime, hashlib, json, os, re, sys, shutil, subprocess, tempfile, time, unicodedata, zipfile
 from pathlib import Path
 
 # UTF-8 hardening (Windows codepage / tiếng Việt)
@@ -62,7 +62,7 @@ EXPECT_VERSION = "2.21.2i"
 # [lịch sử, đã gộp 1.24.0] 1.23.22: ROOT-CAUSE THẬT sự cố 2026-06-30 (ĐÍNH CHÍNH 1.23.21: KHÔNG mất data 766 dòng!). Thật ra config `registryDocId` trỏ NHẦM Doc legacy `1mATG` (vnd.google-apps.document) thay vì SHEET registry thật → webapp mở Doc-as-Sheet → đọc RỖNG → count=0 ẢO (data vẫn nguyên; corpus 552 là do dedup-plan −50). Template public init-config hay ghi đè về Doc legacy → tái diễn mỗi setup. FIX: (1) doctor CHẶN cứng `registryDocId == _LEGACY_REGISTRY_DOC_ID` (1mATG) → báo sửa về Sheet/để rỗng; (2) `init-config` AUTO-HEAL: blank registryDocId (base+profiles) nếu = Doc legacy → webapp auto-discover Sheet `tra_luat_registry`. (Giữ guard 1.23.21 cho ca profile registryDocId rỗng.) +1 test → 260/260. # 1.23.21: ⛔ GUARD CHỐNG CLOBBER REGISTRY NỀN (SỰ CỐ NGHIÊM TRỌNG 2026-06-30: profile dự án 'Khảo sát Luật XB' registryDocId RỖNG → webapp `regSS_` rơi nhánh BASE → manifest --touched-drive quét phình rồi profile-rebuild-registry XÓA SẠCH 766 dòng registry NỀN VBQPPL). FIX: `cmd_manifest` (--touched-drive) + `cmd_profile_rebuild_registry` CHẶN khi profile dự án có TL_REGISTRY_DOC_ID rỗng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — phải tạo registry RIÊNG trước. PHÁT HIỆN từ GS: registry base = Google SHEET `tra_luat_registry` (regSS_ tìm theo tên/TL_REGSHEET_ID_AUTO), KHÔNG phải Doc 1mATG (chỉ ping/display); khôi phục = restore SHEET đó (version history Sheets), cache `tl212_reg_*` TTL 600s. +1 test → 259/259. # 1.23.20: DETECTOR `infra_in_corpus` (phát hiện khi rà 106 Luật dump) — file HẠ TẦNG (.json/.enc/secrets/nlm_sources_delta/manifest/registry) lẫn corpus=true = RÁC (vd tl_secrets.enc, nlm_sources_delta_*.json đếm như văn bản). `_is_infra_entry` (module-level, BẢO VỆ GDoc/PDF/Word) + thêm vào `tl sweep` (cờ + NEXT ACTION set corpus=false). +1 test → 258/258. # 1.23.19: COMPOSITE `tl dedup-plan` (user yêu cầu) — kế hoạch dedup TOÀN CORPUS 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). Tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters `_cluster_same_doc` = CÙNG văn bản theo subject-sig + gộp sidecars .docx/.pdf cạnh GDoc). GIỮ canonical, set corpus=false bản dup (reversible). BẤT BIẾN AN TOÀN: không quarantine chính canonical / canonical của cụm khác / trùng lặp. DRY mặc định; --apply ghi reg_bulk corpus=false; review (thiếu canonical) + dups_on_nlm (còn nguồn NLM→cân nhắc xoá tay) chỉ BÁO. sweep NEXT ACTION trỏ dedup-plan. Pure `_dedup_plan`. +1 test → 257/257. # 1.23.18: FIX false-fire NLM_STATUS_MISMATCH (phát hiện khi nlm-orphans --fix-mismatch LIVE trả MISMATCH_LIVE=0 dù sweep báo 79). Whitelist status exact-match KHÔNG nhận biến thể `removed_*` (removed_superseded_by_VBHN, removed_dedup…) → false-fire + `_entry_on_nlm_live` coi NHẦM removed_* là sống (lệch still_on_nlm/ghost). FIX: `_nlm_status_known`/`_nlm_status_removed` nhận HỌ tiền tố (pushed*/synced/removed*/trash*/deleted), áp 4 site (doctor flag, _title_flags, _entry_on_nlm_live, vbhn-normalize removed). sweep NEXT ACTION: NLM_STATUS_MISMATCH = nhãn LẠ (registry hygiene) KHÔNG phải live desync. +2 test → 256/256. # 1.23.17: `tl sweep` NEXT ACTION nlm_drift TÁCH theo sub-type (phát hiện khi reconcile LIVE không giảm drift) — trước gộp 288 thành 'nlm-reconcile --apply' GÂY HIỂU NHẦM (reconcile chỉ chữa LINKAGE). Nay: NLM_NOTEBOOK_ID_MISSING→nlm-reconcile (linkage); NLM_STATUS_MISMATCH→nlm-orphans --fix-mismatch (đọc live); CORPUS_TRUE_NOT_ON_NLM→ingest-missing (job lớn, phần lớn CẤU TRÚC corpus>cap, KHÔNG về 0). # 1.23.16: DETECTOR `shared_source_id` (phát hiện khi dọn ghost NLM LIVE) — ≥2 drive_id KHÁC nhau CÙNG 1 nlm_source_id (backfill/reconcile gắn nhầm) = FALSE-LINK: xóa nguồn của row này GÃY link row kia (ca NQ42: canonical + ghost chung source_id → xóa ghost làm canonical mất NLM, phải re-push). Pure `_shared_source_id_groups` + thêm vào `tl sweep` (cờ + NEXT ACTION cảnh báo SỬA TRƯỚC nlm-reconcile/xóa nguồn). Dev cache thấy 4 nhóm. +1 test → 254/254. # 1.23.15: xử báo cáo rà 106 Luật (mục code còn lại; 5.1/5.3/5.6/4.B đã vá ở 1.23.11-14). 5.2 vbhn-check goc_hit cross-subject LỌT (14-2024 ATVSLĐ vào --goc 09-2017 Du lịch vì _disc_conflict không biết cặp) → `_vbhn_candidates`: khi ĐÃ biết subject, goc_hit phải TƯƠNG THÍCH chủ đề (sscore≥30) mới giữ. 5.5 Cowork /tmp sticky owner-nobody không ghi được → `_ensure_writable_tmpdir()` trỏ TMPDIR về CACHE/tmp ($HOME) lúc import (tempfile.* + script con kế thừa). 5.4 SKILL.md bootstrap options + cảnh báo 45s; 4.B thêm vbhn-normalize/sweep/quarantine-fix/vbhn-year-fix vào bảng CLI. +2 test → 253/253. # 1.23.14: COMPOSITE `tl quarantine-fix` (dọn nhóm B tất định) — phân loại dòng quarantine MÂU THUẪN: set_corpus_false (raw-dup .pdf/.docx gán nhầm corpus→false, AN TOÀN) + normalize_label (nhãn biến thể→QUARANTINE_CAT) tự động qua --apply; review_restore (GDoc corpus=true nghi canonical kẹt như A1/BLLĐ→KHÔNG auto, quyết tay) + ghost_nlm (quarantine còn nguồn NLM live→báo source_id, xoá tay sau verify). Pure `_quarantine_fix_items`. DRY mặc định. +1 test → 251/251. # 1.23.13: (1) MERGE HỘI TỤ bản Codex v1.23.11 (cùng vá report rà corpus) — PORT phần UNIQUE: A1 SUBJECT-GATE thật (`_name_subject_match`/`_name_subject_text`: source-map ghim canonical CHỈ trong hit KHỚP CHỦ ĐỀ, abbrev-aware BLLD/BHXH; hit generic→None+SUBJECT_MISMATCH) + `resolve_identity` +name_tokens (dedup-check 'Luật Thư viện') + vbhn-check SUBJECT_FILTER_WEAK + reg-query LIMIT_TRUNCATED rõ. GIỮ bản tôi đã verify cho A2-A5 + reg-query json-all. (2) GỠ `_parts` (chống mount-cắt-cụt — Cowork nay bootstrap qua tl_fetch zip sạch nên hết tác dụng): xoá scripts/_parts/ + build_parts.py + tl_rebuild.sh; tl_boot.py rút gọn (strip-NUL→compile→exec); `_reassemble_parts`→None (heal degrade về on-disk); edit-skill/verify-integrity bỏ build_parts. (3) COMPOSITE TẤT ĐỊNH `tl sweep`: 1 lệnh thay chuỗi 6 audit (hygiene+cat+slot+drift+vbhn-year+quarantine) → JSON/text + NEXT ACTIONS điền sẵn (pure `_sweep_report`). +4 test → selftest 250/250. # 1.23.12: 2 fix từ chạy B1 LIVE. (1) reg-query `--json` UNDERCOUNT âm thầm — mặc định cắt 60 rows → script đếm `len(rows)` thiếu (audit quarantine thấy 60/110). Nay `--json` trả TẤT CẢ rows mặc định (text vẫn cắt 60 + dòng '(hiện 60)') + cờ `truncated`. (2) hygiene scan thêm cờ TRẠNG THÁI MÂU THUẪN `quarantine_corpus_true` (trong quarantine nhưng corpus=true) + `quarantine_still_on_nlm` (quarantine nhưng còn nguồn NLM live = ghost) → surface để dọn. # 1.23.11: xử báo cáo rà corpus (nhóm A). A2: hằng `QUARANTINE_CAT` + `_is_quarantine_label_variant` + cờ hygiene scan `quarantine_label_variants` (audit hội tụ dù nhãn lệch QUARANTINE/_ZZZ — `_is_quarantine_cat` nhận mọi biến thể). A3: `slot-audit` TỰ neo `live_source_count` từ nlm CLI (+`--no-live`) → cảnh báo gap estimate↔live khỏi gọi `--physical` tay. A4: `doctor` in BREAKDOWN từng cờ (NLM_STATUS_MISMATCH/CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING) + lệnh `nlm-reconcile <nb> --apply` ĐIỀN SẴN notebook id. A5: help `vbhn-check --subject` thêm cảnh báo QUOTE. A1 (source-map ghim sai canonical 'Bộ luật Lao động'→'Dân chủ 87'): KHÔNG tái hiện trên v1.23.11 với dữ liệu đại diện — gate LOW_CONFIDENCE_NAME_MATCH gốc đã null canonical khi top không strong-match; giữ gate (thử thay bằng nhóm tail-key gây regression abbrev/quarantine → revert). Cần `source-map --json` LIVE để soi nếu còn. +3 test. # 1.23.10: GUARD cat (phát hiện khi nạp THADS 106/2025 LIVE) — `register`/reg_bulk KHÔNG validate `cat` → workaround gõ tay folder RÁC '30_To_chuc_bo_may_nha_nuoc' (số 30 + tên cat 35) lọt im lặng → registry lệch folder vật lý. Nay `_is_valid_cat_value` chặn cat không thuộc taxonomy 45+2 (cả nhánh --bulk lẫn reg_upsert), rc=2, nhắc dùng `tl recat --cat <số>`. +1 test. BÀI HỌC: đổi cat LUÔN dùng recat (resolve+validate folder), KHÔNG register --bulk tên gõ tay. # 1.23.9: 2 FIX (phát hiện khi chạy vbhn-year-fix LIVE Cowork). (A) vbhn-year-fix CHỈ quét entry corpus=true — sidecar/quarantine (corpus=false) KHÔNG year-fix → hết CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số; hygiene báo 'sạch' nhưng vbhn-year-fix báo conflict = mâu thuẫn do quét cả non-corpus). (B) HINT SAI: lệnh ghi in `MANIFEST_STALE_RUN_REGEN2` → `tl regen2` KHÔNG phải lệnh (chỉ có `tl manifest`; regen2 là action GAS qua `manifest --touched-drive`) → user chạy nhầm. Sửa 5 hint + dòng recat → `tl boot --refresh` (sau ghi registry sheet) / `tl manifest` (sau đổi cây Drive). +test corpus-skip. # 1.23.8: SAFEGUARD cho vbhn-year-fix (phát hiện khi soát DRY) — nếu ≥2 dòng suy ra CÙNG `NN-YYYY-VBHN-XXX` (dòng dup cùng văn bản, HOẶC 2 văn bản khác cùng số+năm) thì ghi sẽ TẠO collision MỚI → tách bucket `conflicts`, KHÔNG auto-apply (rc=1), in 🔴 CONFLICT để dedup/phân biệt tay. `_vbhn_year_fix_items` nay trả (fixable, needs_year, conflicts). +1 test. # 1.23.7: ★ BẤT BIẾN ĐẶT TÊN (user nhấn mạnh) — số hiệu VBQPPL PHẢI có NĂM; VBHN là thủ phạm (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH=ATTP 2025+Thuế TNDN 2026, 115/VBHN-VPQH=THADS 2025+Thi đua 2026). Lệnh MỚI `tl vbhn-year-fix [--with-name] [--apply]`: quét VBHN sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên qua `_entry_issue_year`) → đề xuất `NN-YYYY-VBHN-XXX`, GHI qua reg_upsert (KHÔNG reg_bulk — sohieu là khóa immutable); ca không suy được năm → needs_year (xác minh tay). Pure `_vbhn_sohieu_inject_year`/`_name_inject_vbhn_year`/`_vbhn_year_fix_items` (test offline). + `register` cảnh báo `VBHN_SOHIEU_NO_YEAR` khi ghi sohieu VBHN thiếu năm. +3 test. (Phát hiện đã có sẵn: cờ VBHN_BARE_NUMBER/MISSING_YEAR_OR_DATE/NAME_MISSING_YEAR.) # 1.23.6: FIX (phát hiện khi KH2 Pha 2.6 recat Cowork) — `recat --apply` báo `reg_patched:0` ÂM THẦM khi Drive đã move nhưng webapp index chưa thấy row mới thêm (registry cat KHÔNG cập nhật → user tưởng xong). Nay LOUD cảnh báo stderr + rc=1 khi reg_patched < moved, chỉ rõ KHẮC PHỤC (regen2 --refresh rồi reg_bulk lại). Cùng họ "ghi im lặng" với 1.23.5. +1 test. # 1.23.5: FIX BUG (phát hiện khi KH2 Pha 2.8 chạy Cowork) — `missing-sohieu --apply` ghi reg_bulk cột `so_hieu` (có gạch dưới) → webapp BỎ IM LẶNG (đúng gotcha API_CONTRACT mục 0: khóa phải `sohieu`); apply thẳng trả patched=0 mà KHÔNG báo lỗi. Sửa items key + cols → `sohieu` (line ~8061) + help/docstring. Workaround Cowork (cols="sohieu") đã ghi 193/193; nay code gốc đúng. +1 test. # 1.23.4: ★ KH1 HOÀN TẤT — `tl relation-backfill --base <sh> [--apply]` (Pha 1.5 cuối, cho KH2 Pha 2.3): GHI quan hệ sửa đổi mà relation-check ĐÃ phát hiện (missing_links từ `_relation_audit`, tái dùng cổng footnote chống dương-tính-giả) — set `goc` cho luật SỬA, append `sua_doi` cho luật GỐC (pure `_relation_backfill_items` HỢP NHẤT sua_doi cũ + dedup, KHÔNG đè). CHỈ direct/ref-linked; subject-only → review (xác minh tay). DRY mặc định. +1 test → selftest 237/237. → TOÀN BỘ lệnh KH1 đã dựng (3 cổng + vòng lặp + dọn-corpus + nlm-orphans + relation-backfill). CÒN: cập nhật RUNBOOK/API_CONTRACT (tài liệu), KH2/KH3 (corpus). # 1.23.3: FIX DEPLOY-DISPLAY — SKILL.md header ghi CỨNG '(v1.22.70)' qua MỌI bump 1.22.71→1.23.2 (tôi quên sed SKILL.md) → bản deploy HIỂN THỊ 'v1.22.70' dù runtime đúng. Sửa SKILL.md→(v1.23.3) + GUARD selftest `skill_md_version_matches_VERSION` (bump nào quên cập nhật SKILL.md = selftest FAIL → chặn deploy). LƯU Ý vận hành: Package live khi kiểm = 1.23.0 (1.23.1/1.23.2 CHƯA push thành công — drive-push cần gws auth); verify push bằng curl Package fileId. +1 test → selftest 236/236. # 1.23.2:`tl nlm-orphans <notebook> [--fix-mismatch] [--deep]` — TỰ ĐỘNG HOÁ điều tra ghost (thay 6 vòng soi tay): đọc nguồn NLM LIVE (`nlm_cli.source_list`) ↔ registry → phân `_classify_nlm_sources` (PURE, test offline) thành REGISTERED_ACTIVE / **STATUS_MISMATCH_LIVE** (dòng registry removed* nhưng nguồn còn SỐNG = gắn nhãn SAI, vd 8 văn bản đã vá tay) / UNREGISTERED (trên NLM, không dòng registry). REPORT-ONLY; --fix-mismatch in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (KHÔNG đụng NLM/KHÔNG xóa); --deep đọc nội dung NLM lấy SỐ HIỆU header thật (vá cả sohieu cụt như '66'→'66.18/2026/NQ-CP'). +1 test → selftest 235/235. (CÒN: relation-backfill Pha 1.5 live; root-cause pipeline gắn nhầm removed_from_drive; SKILL.md/RUNBOOK/API_CONTRACT.) # 1.23.1: vá sweep-finding — `overflow-resolve` ĐỐI CHIẾU LIVE (nlm-get) thay vì registry-only: dùng MAX(registry, physical) làm slot hiệu lực (`_overflow_status`) → KHÔNG báo 'còn chỗ' giả khi vật lý vượt cap (vd base registry 279 / LIVE 315); cờ `REGISTRY_BEHIND_LIVE` lộ nguồn add thẳng CHƯA đăng ký (gợi `tl nlm-reconcile`); sửa cosmetic flag (BASE_HAS_ROOM khi base còn chỗ). `--no-live` để registry-only. (ingest-missing --apply ĐÃ physical-safe sẵn qua nlm-get.) +1 test → selftest 234/234. # 1.23.0: ★ KH1 (sửa skill sau báo cáo rà 70 Luật) — PHÁT HÀNH. Pha 1.3/III.2: `tl slot-audit --all-shards` (II.5 đếm slot TỪNG shard + cảnh báo near-full ≥270/300, pure `_slot_count_all_shards`) + `tl overflow-resolve` (II.1 kiểm shard overflow SẴN CÓ → cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE, chống tạo notebook nhầm; reuse `_overflow_route`) + `tl edit-skill <file> --patch` (III.2 sửa skill an toàn: assert-đếm→py_compile→write_text→build_parts, né Edit/Write mount; DRY mặc định). manifest-stale (II.4): lệnh ghi MỚI phát MANIFEST_STALE_RUN_REGEN2. canonical-not-sidecar (II.3): ĐÃ xử qua deep-resolver `_resolve_deep_target`+`_is_source_sidecar`+phạt raw-300. +3 test → selftest 233/233. ★ TỔNG KH1 (1.22.71→1.23.0): H1/H2/UTF-8/instructions--out; 3 CỔNG G1(source-verify)/G2(header-verify)/G3(cat-verify+cat-audit/recat FIX); vòng lặp frontier-expand/ingest-missing(no-new-notebook)/rasoat-loop; dọn corpus backfill-loai/sohieu-conflict/missing-sohieu; slot-audit/overflow-resolve/edit-skill. CÒN (1.23.1): relation-backfill (live, Pha 1.5); cập nhật SKILL.md/RUNBOOK/API_CONTRACT + upload Package (user-side). # 1.22.76: KH1 Pha 1.5 — `tl missing-sohieu` (đề xuất số hiệu cho dòng registry thiếu sohieu, parse từ TÊN qua `_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục; DRY mặc định, --apply ghi reg_bulk so_hieu; ⚠ ĐỀ XUẤT theo tên — XÁC MINH bằng header-verify/G2; LIVE suy 194/307 dòng thiếu). +1 test → selftest 231/231. HOÀN TẤT Pha 1.5 quick-wins pure (backfill-loai+sohieu-conflict+missing-sohieu). CÒN (v1.23.0): Pha 1.5 relation-backfill (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + III.2 edit-skill. # 1.22.75: KH1 Pha 1.5 (quick-wins pure) — `tl backfill-loai` (suy `loai` chuẩn cho dòng trống từ tên+số hiệu qua pure `_infer_loai`; DRY mặc định, --apply ghi reg_bulk; idempotent; LIVE manifest suy được 191/769) + TÁCH `SOHIEU_CONFLICT_DIFFERENT_DOC` (≥2 chữ-ký-chủ-đề KHÁC cùng số hiệu = văn bản KHÁC, NGUY HIỂM) khỏi `SAME_DOC` (sidecar) trong registry-doctor (`_subject_sig`; thêm khóa `sohieu_conflict_groups` vào schema text=json; LIVE 22 conflict/6 same trong 28 dup). +3 test → selftest 230/230. CÒN (v1.23.0): Pha 1.5 relation-backfill/missing-sohieu (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit) + III.2 edit-skill. # 1.22.74: KH1 Pha 1.2 HOÀN TẤT P0 — `tl ingest-missing` (nạp backlog corpus chưa NLM → source_add+reg_bulk; IDEMPOTENT + checkpoint resume; DRY mặc định; định tuyến theo chỗ trống base→overflow shard SẴN CÓ; BẤT BIẾN `_overflow_route` KHÔNG BAO GIỜ tạo notebook (đầy→BLOCKED hỏi user); pure `_ingest_missing_select`/`_overflow_route` test offline) + `tl rasoat-loop` (orchestrator VÒNG LẶP KHÉP KÍN report-only: SEED→frontier-expand→mở rộng đệ quy in-corpus đọc nguyên-văn KHÔNG RAG→dedup seen chống lặp→hội tụ dry_rounds≥K; xuất GAP ngoài-corpus + in-corpus-chưa-NLM; pure `_rasoat_dedup_push`). +4 test → selftest 228/228. CÒN (v1.23.0): Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + Pha 1.5 (backfill-loai/sohieu-conflict/relation-backfill/missing-sohieu) + III.2 edit-skill. LƯU Ý: ingest-missing/rasoat-loop nhánh mutate/expand-live CHƯA test trên dev (không NLM cred) — lần --apply đầu chạy Cowork batch nhỏ. # 1.22.73: KH1 Pha 1.2 — `tl frontier-expand <gdoc|sohieu>` (vòng lặp rà soát): trích MỌI dẫn chiếu (xref+footnote+inline) → ứng viên FRONTIER dedup theo số hiệu + ưu tiên (amending>VBHN>dẫn-chiếu) + cờ in_corpus; `missing_in_corpus` = đầu vào ingest-missing. Pure `_frontier_candidates` (test offline) + `_frontier_doc_text` reader; DISCOVERY/REPORT-ONLY, KHÔNG RAG; --text-file offline. +2 test → selftest 225/225. CÒN (v1.23.0): ingest-missing (mutate NLM, no-new-notebook), rasoat-loop (orchestrator); Pha 1.3; Pha 1.5. # 1.22.72: KH1 Pha 1.2 — DỰNG 3 CỔNG XÁC MINH G1/G2/G3 (dựng SẠCH, KHÔNG dùng bản agent tiêm đã revert). G3: helper pure `_load_linhvuc`/`_cat_taxonomy`/`_infer_cats_text`(suy cat theo NỘI DUNG alias, whole-word)/`_cat_boundary_rule`(ép quy_tac_ranh_gioi: BHXH/BHYT→02, đầu-tư-công/hải-quan→26, sửa≥2 luật→46, điều-ước→23, Đảng→00) + `tl cat-verify <gdoc|sohieu>` (read-only, --text-file offline) + FIX `cat-audit` (confidence/RULE/taxonomy-45+2/--strict) + FIX `recat` (BOUNDARY_CONFLICT advisory + --force-cat). G2: `_extract_header_facts` (ngày+cơ quan, pure) + `tl header-verify [--all/--sohieu/--drive-id/--cat] [--fix-suggest] [--strict]` (batch _verify_header_match, READ-ONLY, bắt DRIFT 775 dòng; KHÁC title_mismatch=metadata nội bộ). G1: `_content_md5` (NFC, pure) + `_official_rank` + `_DISCOVERY_SITES` re-rank OFFICIAL-FIRST (vbpl>congbao>luatvietnam>thuvienphapluat) + `tl source-verify <sohieu|gdoc>` (content_md5 + SOURCE_DISCREPANCY + nguồn official-first đối chiếu, --text-file offline). +14 test → selftest 223/223. CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3; Pha 1.5. # 1.22.71: KH1 (Pha 1.1/1.4) thực thi sau báo cáo rà 70 Luật. H2 `registry-doctor` text=JSON schema (dòng text SINH TỪ `_DOCTOR_SUMMARY_KEYS` → `build_doctor_summary`/`format_doctor_text`, hết lệch nhãn duplicate_sohieu↔_groups/title_mismatch↔_candidates/rows↔count). H1 `reg-query --json` rc=0+envelope KHÓA bằng test (không tái hiện ở canonical; rc=1 trong log = confound redirect/&&/bản cũ). III.1 `os.environ PYTHONUTF8=1`/PYTHONIOENCODING truyền xuống MỌI script con (hết UnicodeEncodeError 'charmap' gen_instructions.py… console Windows) + gen_instructions.py reconfigure standalone. III.3 `tl instructions --out <file>` ghi UTF-8 ra file. +3 test → selftest 209/209. (LƯU Ý: workflow thiết kế v1.23 từng tiêm nhầm header-verify/cat-verify vào canonical → ĐÃ revert, sẽ dựng lại CÓ REVIEW.) CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3 overflow-resolve/canonical-sidecar/manifest-stale/slot-audit; Pha 1.5 backfill-loai/sohieu-conflict/relation-backfill; cổng G1/G2/G3. # 1.22.70: ★ HỢP NHẤT bản Codex v1.22.69 (CONVERGENT — 2 nhánh cùng vá 13 lỗi 2 báo cáo, KHÁC code) + vá LOG RÀ MỚI (Nhóm A-E đa-profile) + LARGE-FILE SPLIT. MERGE: GIỮ bản Claude làm base (verify 197/198, có H/D/G/2.2 mà Codex THIẾU) + PORT phần Codex MẠNH HƠN: (1) DEEP-RESOLVER `_resolve_deep_target`+`_entry_mime`/`_entry_google_doc`/`_entry_raw_no_gdoc`/`_deep_entry_rank` cho extract/xref/footnote-map (ưu tiên GDoc native theo MIME + corpus + NLM-live; tên DÀI toàn chữ-gạch-dưới KHÔNG bị nhận nhầm DriveId → bug C TRỌN VẸN); (2) `_classify_ref` kiểm VBHN-COVERAGE TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED); (3) ENTRY_RAW_NO_GDOC rc=2 + ok:false (đúng yêu cầu báo cáo: chỉ-raw → rc≠0). NHÓM A-E (log đa-profile): B(NGHIÊM TRỌNG) `_ingest_target`/`nlm-add`/`nlm-query` push/query nhắm NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID) — hết đẩy nhầm VBQPPL base khi `--profile NQ36` (+nlm-add/nlm-query nạp apply_profile_offline). A1 `profile-create --apply` GHI BỀN config.profiles.<name> (`_persist_profile_config` merge) → profile-info hết fallback VBQPPL. A2 next-steps cấm copy sheet VBQPPL tay (orphan), dùng `manifest` tạo registry rỗng. C1 `nlm-reconcile` BẮC CẦU gdoc↔source_id (`_nlm_source_drive_id` + link_candidates: nguồn live khớp drive_id/số hiệu của dòng registry thiếu source_id → backfill, hết 'unregistered' giả). C2 `register --nlm-notebook-id` (khỏi backfill-notebook riêng). C3 `backfill-notebook` khóa ĐÚNG NGUỒN: --src-ids→nlm_source_id, --drive-ids→drive_id (hết lệch khóa). D1 cảnh báo profile non-default + categories=inherit (văn bản vào cây chung VBQPPL). D2 `regen2` LOẠI registry/manifest/orphan (mime spreadsheet/json + tên + registryDocId/manifestId) khỏi scan own (hết 3 dòng corpus rác, count 8→5). D3 `reg-delete --force` (đã có) + thông điệp rõ. E1 `nlm_cli._strip_keyring` lọc 'Using keyring backend' khỏi stdout/stderr (hết vỡ json.loads). E2 `reg-query --refresh` (đã có) + help nhắc refresh sau khi ghi sheet. LARGE-FILE: `ingest-local` cổng HỎI TÁCH file > ~1.2MB (NLM_LARGE_SRC_BYTES, --large-threshold) → DỪNG gợi ý tách theo Phần/Chương/Điều (chất lượng RAG cao nhất), `--allow-large` để nạp nguyên (+SKILL.md doctrine). RÀ SOÁT ĐỐI KHÁNG (review+verify) gia cố 14 phát hiện: Group B `_resolve_nlm_notebook` (profile DỰ ÁN thiếu notebookId → ERROR, KHÔNG fallback VBQPPL base — vá GỐC bug B, guard cũ là dead-code vì base luôn truthy) áp nlm-add/query/get/reconcile/cross/ingest-local; C1 link theo số hiệu CHỈ khi DUY NHẤT (số VBHN tái dùng → bỏ qua, hết false-link); cmd_extract positional+--sohieu → ƯU TIÊN --sohieu; `_persist_profile_config` ghi NGUYÊN TỬ (temp+os.replace); `_is_infra_file` chặn false-positive (văn bản GDoc/PDF KHÔNG bao giờ là infra); `_strip_keyring` JSON-safe (chỉ bỏ dòng nhiễu THUẦN, không nuốt thân JSON có cụm keyring); large-file gate ra STDOUT. +6 test → selftest 206/206. # 1.22.69: vá 13 lỗi CÔNG CỤ từ 2 BÁO CÁO RÀ 71+105 LUẬT. A `tl status` verdict→rc=0 (REVIEW/ADD/SKIP = PHÁT HIỆN dữ liệu ≠ lỗi lệnh, hết phá &&/CI; +`--strict` mirror xref; preingest_gate.verdict_exit). C/P0-1 resolver đọc sâu: `_entry_score` PHẠT -300 file THÔ (.docx/.pdf/.html) → GDoc native THẮNG sidecar CÙNG số hiệu (hết xref/footnote im-lặng stdout-rỗng-rc0 bỏ sót ≥6 VBHN); ENTRY_RAW_NO_GDOC in STDOUT (caller agentic THẤY); `_resolve_base_gdoc` fallback drive_id khi sohieu rỗng. B+P1-3 xref: `extract_refs` DEDUP theo SỐ HIỆU (1 phán quyết/số hiệu/run — hết MISSING+MISMATCH mâu thuẫn + phantom 'DCHIẾU 258 này có hiệu lực…' do bắc-cầu mệnh-đề-chuyển-tiếp) + `_clean_ref_name_phrase` cắt prose (GIỮ tên luật thật 'Thi hành án dân sự'). P0-2 `DOC_TEXT_SOHIEU_TYPO` KHÔNG bắc cầu QUA HỌ loại VB (`_doctype_family`: QH≠NQ-TW≠KL-TW≠NĐ-CP — tái dùng số+năm hợp pháp; CÙNG họ QH14↔QH15 vẫn flag). P1-4 source-map: >1 VBHN CÙNG số hiệu KHÁC chủ đề → canonical=None + VBHN_REUSE_AMBIGUOUS_NO_CANONICAL (đòi --subject/năm; CÙNG chủ đề/nhiều version vẫn chốt). P1-5 amendment-detector: LOẠI văn bản PHI quy phạm (sohieu=∅ + 'góp ý/kiến nghị/ý kiến'); PAUSE_AND_ASK_USER CHỈ khi có ứng viên MANG SỐ HIỆU hợp lệ (sohieu=∅ vẫn liệt kê, confidence=low). P2-6 vbhn-check: CONTENT_VERIFY_REQUIRED chỉ khi collision CỦA CHÍNH số hiệu ứng viên (KHÔNG corpus-wide → hết 86 cờ máy móc); verified+năm+duy-nhất+không-tự-collision → VBHN_METADATA_OK. H `tl doctor` cảnh báo TRÔI registry↔NLM (đếm cờ OFFLINE từ cache → gợi ý `tl nlm-reconcile`, KHÔNG chặn/mạng). D `_read_doc_text`+`cmd_xref` TÁI DÙNG cache `extract_<gid>.txt` (Bộ luật Dân sự hết export lại 3 lần→timeout). E `standardize_name.normalize_name` bỏ đuôi .doc/.docx/.pdf khỏi tên CHUẨN (GIỮ ở tên FILE gốc). G `hygiene` bucket `sidecar_corpus_fix` (.docx cạnh GDoc mà corpus=true → đề xuất SET_CORPUS_FALSE). P2-7 chuẩn hoá ENUM `loai`/`hieuluc` lúc register (`_normalize_loai`/`_normalize_hieuluc`) + bucket hygiene `loai_noncanonical` (KHÔNG nhồi `_title_flags` → tránh nhiễu source-map). 2.2 nlm PATH: `nlm_cli` nối ~/.local/bin+user-base bin vào PATH (shutil.which + subprocess env); `doctor` dùng `nlm_exe()` (hết báo đỏ giả); `nlm-install` ghi PATH bền ~/.profile/~/.bashrc (POSIX). +14 test → selftest 194/194. HOÃN P2-8 (tách MISSING ngoài-phạm-vi-corpus vs resolver-trượt — cần enrich manifest). RÀ SOÁT ĐỐI KHÁNG (workflow review+verify) gia cố 9 phát hiện: cmd_status dùng inspect.signature thay except-mù + GIỮ ngữ nghĩa --strict ở fallback (rc=2→1); `_entry_score` chỉ phạt raw CHƯA-trên-NLM (raw đã-push NLM = canonical thật, không hạ oan); P1-4 `_subj_keys` chỉ đếm tail CHỦ-ĐỀ-RÕ (bản tên-trơ không gây false-ambiguity); P1-5 gate góp-ý theo SỐ HIỆU REGISTRY (file 'Góp ý Luật 64/2020' có số trong TÊN vẫn bị loại); `_normalize_loai` gộp mọi ký tự lạ (kể cả ngoặc); cmd_register log khi chuẩn hoá loai/hieuluc; preingest_gate main() thêm --strict. # 1.22.68: rà 133+81 LUẬT (2 log live) — vá robustness phần A. P1 RAW-ENTRY PRECONDITION (gốc chung log2 A1/A2/A3): xref+footnote-map gặp entry THÔ (.docx/.pdf/.html chưa convert GDoc) → ENTRY_RAW_NO_GDOC rc=0 + thông điệp gọn (thay rc=2/JSON-lỗi-thô/stdout-rỗng/rò "Export only…"); `_is_raw_no_gdoc_name`/`_raw_no_gdoc`/`_emit_raw_no_gdoc` THỐNG NHẤT .docx↔.pdf. P2 FOOTNOTE DEDUP (log1 A2): resolve_footnote_amendments GOM dieu_level_amendment_map theo (dieu,khoan,diem,amending_sohieu) — hết 47 dòng pending trùng (Đ73K1 ×3); footnote_defs giữ ĐỦ marker + footnote_raw_count. P3 BASE_NO_CLUSTER (log1 A1): rasoat-chongcheo CỜ RÕ khi base ngoài cụm E2 (61/133 trước no-op IM LẶNG) → dựa xref/footnote-map cấp Điều. P4 DEDUP related theo sohieu (log1 A6, hết 85-2015 ×4). P5 missing_in_corpus→`unresolved_refs`+note (log1 A5: CHƯA kết luận vắng mặt, khớp exists=UNKNOWN_NOT_ABSENT). A4 BASE_UNRESOLVED khi base tên/file thô không số hiệu. P7 strip keyring khỏi gws_bridge error (log2 A3). +2 test → selftest 179/179. CÒN (data/feature): mở rộng subject_clusters 45 chủ đề; parser khoản-điều-thêm (6a/16b, A3 log1 nhỏ); Cowork batch-checkpoint (A4 log2); GAS serial (A5 log2, frozen). + `drive-push --name`/`--rename-to-file` (đổi tên file Drive THEO TÊN FILE upload, GIỮ fileId — qua gws_bridge.rename có ASSERT). # 1.22.67: rà 59 LUẬT (log live) — vá 6/7 lỗi CÔNG CỤ (phần A). A1 `tl extract <số hiệu>` (vị trí) HẾT 404 giả: positional không-phải-gdoc-id(≥20 ký tự alnum)→tự định tuyến --sohieu (+SKILL.md). A2 vbhn-check suy subject SẠCH: `_clean_subject_text` bỏ hậu tố `_HL<ngày>`/goc/SuaDoi/ngày-trơ → query QT-5 web hết "thu do hl2026 07 01 hợp nhất" (đặt `_HL_SUFFIX_RE`, KHÔNG clobber `_HL_DATE_RE` thân-văn-bản — bắt được name-collision). A3 exit-code: xref/vbhn-check rc=0 khi CHẠY OK kể cả có MISSING/MISMATCH/no-hit (phát hiện ≠ lỗi lệnh, không phá &&/CI); `xref --strict` mới rc=1 (+SKILL.md). A4 extract cảnh báo chạm CAP export ~200k ký tự (văn bản dài có thể bị CẮT → cache-build). A6 `_strip_keyring_noise` lọc 'Using keyring backend' khỏi output gws subprocess. A7 `CONTENT_VERIFY_REQUIRED` CHỈ bật khi rủi-ro-tái-dùng-số/thiếu-metadata (>1 ứng viên/collision/bare-number/missing-year); metadata RÕ+DUY NHẤT → `VBHN_METADATA_OK` (giảm 37/59 cờ máy móc). A5 (GAS tuần-tự, không scale) = giới hạn webapp FROZEN, không sửa client. +4 test → selftest 177/177. # 1.22.66: HỢP NHẤT bản Codex v1.22.65 (cùng rẽ từ v1.22.64 — 2 nhánh CÙNG vá batch-2 run-log, KHÁC code). GIỮ bản Claude làm base (đã verify 173/173 + có `status_pending` PENDING_AMENDMENT_NOT_IN_VBHN + cụm `dau_tu_PPP` mà Codex THIẾU). PORT 2 cải tiến robustness CHỈ-CÓ-Ở-CODEX: (1) vbhn-check/vbhn-verify nhận POSITIONAL `target` (tương thích runbook cũ: `tl vbhn-verify "14/VBHN-VPQH"` tự định tuyến text-file/gdoc-id/sohieu qua `_read_verify_text`; `tl vbhn-check "84/2015/QH13"`→goc/subject); (2) reg-query --json ENVELOPE chuẩn {ok,schema:reg-query.v2,count,limit,rows,entries} (cả rows+entries cho mọi parser). Các fix batch-2 TRÙNG (doctype/PPP-alias/sidecar/issue_year-goc/dedup-VBHN-first/xref-typo/vbhn-verify-json/relation-check) GIỮ bản Claude đã verify-live (Codex impl khác nhưng chưa verify). Codex thiếu status_pending → giữ bản Claude. selftest 173/173. # 1.22.65: vá 6 RUN-LOG batch-2 (workflow điều tra+verify đối kháng trên COPY CÔ LẬP — canonical md5 NGUYÊN, agent KHÔNG đụng được). 10 fix: srcmap_name_resolution (query nêu "Luật/Bộ luật"→ƯU TIÊN hit tier≥Luật `_query_doctype_tier`, hết chốt NĐ/TT: "Luật Đầu tư"→VBHN_03 KHÔNG NĐ; PPP≡"đối tác công tư" vào _ABBREV_MAP→VBHN_123; LOW_CONFIDENCE hết over-fire khi có hit-strong tier-Luật); issue_year_goc_token (`_strip_goc_token`+reject năm-bản-gốc: VBHN_123 hết issue_year=2020 từ token goc_64-2020); dedup_vbhn_first (dedup áp VBHN-first qua goc-chain dù KHÁC số hiệu: 64/2020→canonical VBHN 123, gốc SUPERSEDED); relcheck_footnote_only_fp (chỉ giữ luật THỰC SỰ sửa base, hết bơm FOOTNOTE_AMENDMENT_NOT_IN_CORPUS từ dẫn-chiếu/chuyển-tiếp); status_pending_vbhn (preingest SKIP→USE_VBHN nay cảnh báo PENDING_AMENDMENT_NOT_IN_VBHN khi VBHN ra đời TRƯỚC sửa-pending); corpus_nlm_sidecar_fp (`_dup_of_live_sibling`: không flag CORPUS_TRUE_NOT_ON_NLM cho sidecar-raw khi anh-em GDoc đã trên NLM); relcheck_json_types (int→`amendment_candidates_subject_filtered_count`); vbhn_verify_json_schema (`_vbhn_verdict`→field verdict/official/provisional + populate head_sample); xref_sohieu_typo (`_classify_ref`→DOC_TEXT_SOHIEU_TYPO khi số hiệu near-match KHÁC mã cơ quan, vd 41/2024/QH14 vs QH15); cluster_ppp (THÊM cụm dau_tu_PPP base 123/VBHN). SKIP: xref_alias (false-alarm), regquery_json+skill_cli (ĐÃ đúng trên v1.22.64 — log là DEPLOY-LAG zip Drive v1.22.35). +10 test → selftest 173/173. # 1.22.64: vá 6 RUN-LOG (workflow điều tra+verify đối kháng 16 issue → áp 15 fix, 1 reject-trên-cơ-sở). name_rank_collision (CHÍNH): source-map/exists "Luật Dân số/Việc làm/Phí lệ phí/BLLĐ" HẾT chốt SAI canonical (Dân chủ/NLĐ-nước-ngoài/Học phí/ATVSLĐ) — `_name_strong_match` + gate `LOW_CONFIDENCE_NAME_MATCH` (canonical=None khi khớp-MỜ) + `_name_phrase_match` ≥2-token (reg-query --name hết match-all 87→2); LIVE 3/4 nay chốt ĐÚNG, 1 LOW_CONFIDENCE. cluster BHYT neo `y_te_kham_chua_benh` (subject_clusters.json, hết lao_dong). vbhn-verify: HEADER_NOT_CLEAR nhận số-hiệu "NN/VBHN-" + ASSEMBLED CHỈ soi TÊN (hết "không đúng" thân→ASSEMBLED giả). status→USE_VBHN (41/2024→19/VBHN). CORPUS_TRUE_NOT_ON_NLM suppress khi nlm_status=removed_*. footnote `_multi_diem` ("điểm c và d"). `_strip_font_runs` (bỏ dòng "Times New Roman"). relation-check --json preamble→stderr + skip backfill cho quarantine. `tl up` fallback init-config. `_scan_inline_amendments`+E1 LIEN_DOMAIN (Điều 53 sửa luật khác cụm). sohieu-exact ưu tiên fuzzy. REJECT đúng: vbhn_year (sẽ regress year-reuse). +13 test → selftest 164/164. (⚠ vài agent workflow vi phạm "no-edit" → ĐÃ revert clean v1.22.63 + áp lại CHỈ patch đã-verify thủ công.) # 1.22.63: ★ HỢP NHẤT 2 nhánh v1.22.62 (Codex ⊕ Claude, đổi xứng) — (A·Codex) vá log hygiene/NLM/pending: tên "Luật X"↔canonical, footnote-map body_effective_dates (pending hết 0 giả), hygiene lọc OMNIBUS_NARROW khỏi query hẹp + không emit cluster canonical=None, reg-query/summary nlm-live-aware + cờ CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. (B·Claude) `tl up` BOOTSTRAP TẤT ĐỊNH 1-lệnh (config→gws cred+binary→nlm→manifest→readiness; helper CHUNG `_ensure_gws_nlm` cho init-config+up) + `tl confirm`/`_verify_header_match` (ĐỌC HEADER xác minh sohieu/tiêu đề/loại/cat khớp tên+thư mục → nhãn registry.verified; source-map/dedup TIN entry confirm, bỏ DIRTY/WARN) + upload-flow `_upload_mime_ext` (.doc/.pdf upload MIME THẬT → Drive organize convert server-side). selftest 153/153 (147 Codex + 6 Claude). # 1.22.62: vá log hygiene/NLM/pending — tên luật dạng "Luật X" khớp canonical đuôi "X"; footnote-map đọc thêm Điều hiệu lực trong thân luật gốc (body_effective_dates, pending không còn 0 giả); hygiene plan lọc OMNIBUS_NARROW_TITLE_CHECK khỏi query chủ đề hẹp và không emit cluster apply với canonical=None; summary/reg-query phơi nlm_source_id+nlm_notebook_id live-aware, flag CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. 1.22.61: vá log Chat/Cowork — #2 (CHÍNH: "Chat không cài gws+nlm từ đầu") init-config --from-public GỘP gws BINARY (gws-bootstrap-cowork → find/GHI hết FALLBACK→GAS) + cờ --nlm (uv-install+auth) = 1 lệnh bootstrap đủ; SKILL.md startup MỌI env dùng `--from-public --nlm`; --no-binary để chỉ-cred. #1 (NGUY HIỂM) exists/source-map: VBHN-first redirect CHỈ khi query LÀ BẢN GỐC (base = năm nhỏ nhất chuỗi goc, `_vbhn_base_key`) — 114/2025 Phòng bệnh (luật-sửa NẰM TRONG chuỗi VBHN thuốc lá) hết bị chốt canonical=VBHN thuốc lá; thêm bucket `amends_vbhn` + cờ AMENDS_OTHER_VBHN/MULTIPLE_VBHN_BASE. #3 source-map dương-tính-giả: `_vb_tier_rank` chặn SAI THỨ BẬC — NĐ/TT (118/2016/NĐ-CP) KHÔNG thể 'sửa đổi' Luật → hết AMENDMENT_CANDIDATE+PAUSE giả (đọc loại cả từ TÊN khi sohieu rỗng; base=tier cao nhất nhóm). #5 source-map NỔI `PENDING_FUTURE_EFFECT` + pending_future_count (đếm VB hiệu-lực-tương-lai, rẻ-không-footnote-map). +7 test → selftest 140/140. # 1.22.60: log rà BHYT (workflow điều tra+verify đối kháng) — #5 extract --sohieu khớp entry sohieu-RỖNG qua _sohieu_key_entry (parse từ TÊN '114_2025_QH15_658530'); #1 gws_bridge.rename ASSERT đọc-lại-tên (hết nuốt-lỗi-im-lặng rename 200-nhưng-không-đổi); #4 footnote-map _footnote_rel_kind = CROSS_CUTTING (omnibus 35/2018) / PARTIAL_REPEAL (bãi-bỏ-cục-bộ 32/2013) → hạ ưu tiên; #3 preflight TỰ KHÁM PHÁ overflow notebook từ registry (row_kind=overflow) khi config trống/placeholder (phòng thủ; config canonical đã có id thật). #2 slot over-count: đã sạch sẵn (L5), "329" trong log là GAS server-side. selftest 133/133. 1.22.59: log rà BHYT — B1 subject_clusters.json THÊM cụm `y_te_kham_chua_benh` (base 40/VBHN-VPQH BHYT + KCB 15/2023 + Phòng bệnh 114/2025 + Dược + ATTP) → rasoat-chongcheo BHYT neo ĐÚNG cụm y tế (trước neo nhầm lao_dong_xa_hoi); B3 cờ OMNIBUS hết false-positive trên luật-sửa TÊN-SỐ-TRƠ (chỉ flag khi chủ đề RÕ + khác lĩnh vực, ≥2 token); B5 `_summ_entry.nlm` = LIVE (`_entry_on_nlm_live`, False nếu removed) → relation-check khớp reg-query; B6 message gws fallback PHÂN BIỆT thiếu-cred vs thiếu-binary. 1.22.58: B1 GWS — `_read_doc_text` ƯU TIÊN direct-media EXPORT text/plain bằng CRED (KHÔNG cần binary gws → extract/footnote-map hết rơi GAS ở Cowork khi đã gws-auth-load; B5 hết spam); init-config đổi thông điệp "gws cred ✓ (direct-media đọc; find/ghi cần gws-bootstrap-cowork)" hết hiểu nhầm "BẬT". locate FALLBACK webapp gắn LOW_CONFIDENCE/NO_EXACT_SOHIEU (Cowork: locate 58/2014 → fulltext lạc đề). `_entry_subject_text` BỎ `cat` (nhãn folder '02_Bao_hiem' làm mọi entry khớp 'bảo hiểm' giả) → relation-check vbhn_candidates 14→3 (BHXH/KDBH/ATVSLĐ). 1.22.57: ★ GỐC RỄ "subject filter quá lỏng" (phát hiện khi chạy mục B live) — `_subject_score` CHỐNG nhiễu từ-phổ-biến: token-overlap chỉ tính ĐỦ khi entry chứa CỤM-ĐẦU PHÂN BIỆT của chủ đề ('bảo hiểm'='baohiem'); nếu không (chỉ trùng 'bảo/hội' lẻ ở từ-khoá) → 0 điểm. → relation-check vbhn_candidates hết kéo Luật Xuất bản/Người cao tuổi/Thanh niên/Công đoàn (sscore 40→0); BHXH=140, BHYT=0(disc), giữ KDBH=60. 1.22.56: vá log rà BHXH (Chat+Cowork) — (regression) `locate` cụm danh từ ('bảo hiểm xã hội') KHÔNG còn bị coi là số hiệu → hết LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (gate `_looks_like_sohieu_query`); `tl rasoat worksheet` TỰ dựng cache nếu thiếu (`_rasoat_autocache_worksheet`→`cache-build`, resolve gdoc từ manifest; --no-auto-cache để tắt) + message worksheet trỏ `tl cache-build`; `_find_amendment_candidates` thêm loại-trừ-chéo `_disc_conflict` (BHYT/BHTN khác BHXH); SKILL.md BƯỚC 0 TÁCH `--setup` (core nhanh) khỏi nlm (né timeout 45s Cowork). 1.22.55: #8 HỢP NHẤT footnote-map vào relation-check + rasoat-chongcheo — TỰ đọc nguyên văn base VBHN (auto-footnote, `_resolve_base_gdoc`, tắt --no-auto-footnote) → 2 lệnh nêu footnote_amendments thay vì rỗng; #11 cờ OMNIBUS_CROSS_DOMAIN (`_omnibus_cross_domain_note`): luật sửa có tên khác lĩnh vực base (84/2025 Thanh tra sửa BHXH = sửa-nhiều-luật) → cảnh báo đọc nguyên văn, KHÔNG hiểu nhầm lỗi tên. +test omnibus_cross_domain_flag. 1.22.54: ★ GỐC RỄ tên VBHN VIẾT TẮT — `_expand_abbrev`/`_ABBREV_MAP` (BHXH≡bảo hiểm xã hội, BHYT/BHTN/BLHS/BLLĐ…) nối vào `_token_set`+`_disc_conflict` → source-map/relation-check/reg-query/locate khớp đúng VBHN_19…BHXH (trước nhặt nhầm bản gốc 41/2024 viết-đầy-đủ đã quarantine). #3 extract: phân biệt CẮT-CỤT (export cap ~200k) vs sai cấu trúc → chỉ `tl cache-build --gdoc-id` lấy toàn văn. #10 locate: cờ LOW_CONFIDENCE/NO_EXACT_SOHIEU khi truy vấn số hiệu chỉ khớp-mờ-tên (vd 142/2025→VBHN_74 Đấu thầu). 1.22.53: log rà BHXH — A3 relation-check `_vbhn_candidates` KHÔNG nhận VBHN trùng-NĂM khác lĩnh vực (year-một-mình cần subject≥30; +disc_conflict) → hết VBHN_43 Xuất bản lọt vào BHXH; A4 `_cluster_for_base` reverse-map qua THÀNH VIÊN cụm (số hiệu VBHN 19/VBHN-VPQH → cụm, trước trả ∅); B1 rasoat alias --sohieu→--so-hieu (worksheet) / --file→--in (phuluc); B2 `tl cache-build <sh>` wrapper ingest_to_cache.py (sinh docs/<sh>--consolidated.json); B3 ingest_to_cache.py tự nạp webappUrl/token từ config/env. 1.22.52: TRA-THEO-TÊN âm-tính-giả (log Cowork #2/#3) — `_name_subset_match` token-subset (bỏ doctype/sốhiệu) cho source-map/locate/reg-query: 'Luật Bảo hiểm xã hội' KHỚP 'VBHN_19-VPQH_Bao_hiem_xa_hoi' (substring liền thất bại vì luat/vbhn/19 chèn giữa); reg-query --name trước CHỈ substring CÓ DẤU → 0 kết quả, nay khử dấu+token-subset. `_disc_conflict` chuẩn hoá underscore (BHXH↔BHYT đúng cả tên file). `_nlm_display` status-aware (locate hết báo nlm=Y khi removed → khớp reg-query). +test name_subset_match_vbhn/source_map_name_finds_vbhn_not_quarantine. 1.22.51: (A) ENV THỐNG NHẤT Chat=Cowork=Code — gỡ doctrine "chat hạn chế": nlm CLI BẮT BUỘC mọi env, gws-bootstrap BỎ QUA tải binary nếu gws đã có (--force ép), Chat dùng uv+python≥3.11 sẵn (không tải Drive). (B) footnote-map nhận "Cụm từ '…' được BỎ/THAY THẾ theo…" (84/2025 hết vô hình, +test footnote_remove_phrase_amendment); subject-score LOẠI TRỪ CHÉO BHXH↔BHYT↔BHTN (chung "bảo hiểm" ≠ cùng chủ đề, +test subject_bhxh_not_bhyt). 1.22.50: vá log Chat — B1/B2 `gws-auth-load`/`nlm-auth-load` + `init-config --from-public` tự bật gws từ cred PUBLIC (public-curl, KHÔNG cần master key); B3 gom log [FALLBACK→GAS] 1 lần/phiên (hết spam mỗi read); relation-check LỌC ứng viên chỉ-trùng-chủ-đề khỏi amendment_candidates (giảm dương-tính-giả 108/2026); B5 xref OUTDATED nêu RÕ số hiệu VBHN thay thế + SOHIEU_MISMATCH→VBHN ghi "đúng, trỏ bản mới". (B4 phantom-217 đã có test footnote_citation_not_amendment.) 1.22.49: SKILL.md §1 BƯỚC 0 — Cowork dùng KHỐI INLINE (curl zip public + unzip + chạy tl_fetch.sh SẠCH TRONG ZIP) vì mount cắt cụt CẢ scripts/tl_fetch.sh → `sh scripts/tl_fetch.sh` đường-mount hỏng. CẤM inspect/confirm truncation/dig-recovery (đã biết mount cắt). 1.22.48: GHI RÕ gws Cowork = BINARY MUSL-STATIC (đã verify static-pie, không GLIBC dep → chạy glibc 2.35) qua `gws-bootstrap-cowork` public-curl; CẤM `npm i -g @googleworkspace/cli` (bản GNU cần GLIBC 2.39, Cowork glibc 2.35 → không chạy). SKILL.md + help string. 1.22.47: nlm-install HẾT STALL ASTRAL — `uv tool install --python 3.11` chạy với UV_PYTHON_DOWNLOADS=never (cấm tải python từ astral/GitHub CDN bị Cowork chặn): system có 3.11→dùng ngay, chỉ 3.10→FAIL TỨC THÌ→rơi Python public-curl Drive; bỏ `uv python install 3.11` thừa. 1.22.46: BOOTSTRAP TỐC ĐỘ — `_fast_drive_fetch` ưu tiên PUBLIC-CURL (drive.usercontent) → direct-media → GAS, có ĐO THỜI GIAN ([fetch] log); PY311 + gws binary tải public-curl (hết kẹt GAS 31MB); tl_fetch.sh cài uv TRƯỚC (pip PyPI, astral chặn) rồi gws/nlm; rút timeout astral uv-python 420→90s (fail nhanh → Drive-public). 1.22.45: SKILL.md §1 BƯỚC 0 — Cowork ƯU TIÊN `sh tl_fetch.sh --setup` LÀM LỆNH ĐẦU TIÊN (tải bản sạch, KHÔNG đụng mount/_parts); CẤM chạy tl_boot/verify-integrity/build_parts/_parts TRƯỚC khi tl_fetch lỗi; tách rõ đường LOCAL A1–A3. 1.22.44: PACKAGE PUBLIC BOOTSTRAP — config v2 + creds (gws/nlm/secrets/binary/py311) ở Drive/Package (anyone-with-link). `init-config --from-public` + tl_fetch.sh curl CONFIG(apps script)+gws cred TRƯỚC (KHÔNG cần Drive MCP); uv-first cho nlm; Cowork tải zip skill; tl_boot loud-fail exit≠0 khi cắt cụt (B2); tl_rebuild.sh OUT mặc định $HOME (B4). 1.22.43: `tl drive-push <zip> [--file-id]` — cập nhật NỘI DUNG file Drive GIỮ fileId (gws update_content) → đẩy bản ship mới mỗi lần mà KHÔNG đổi fileId; SKILL_FILEID baked. 1.22.42: BUNDLE skill+gws — `gws-bootstrap-cowork --local-tgz` (dùng gws.tgz từ bundle, khỏi tải Drive; md5 vẫn verify); tl_fetch.sh tự dò assets/gws.tgz. Cắt 1 download. 1.22.41: `nlm-install --uv` (egress mở → uv tự lo Python 3.11, python hệ thống nếu ≥3.11, KHÔNG tải 31MB Drive; fallback Drive); `tl_fetch.sh --setup --nlm` dùng --uv → bootstrap đủ GAS+direct-media+gws+nlm+boot 1 lệnh. (v1.23.0 spec rasoat-loop/overlap: roadmap riêng.) 1.22.40: bake NLM_CRED_FILEID (đã stage+verify) → `--setup --nlm` có nlm headless ngay. 1.22.39: nlm HEADLESS — `nlm-auth-stage` (Code, sau `nlm login`: cookie nlm → mã hoá khoá=webapp-token → Drive) + `nlm-auth-load` (Cowork: tải+giải mã bằng token → ~/.notebooklm-mcp-cli, KHÔNG cần master key); `--setup --nlm` tự nlm-auth-load (mirror gws-auth-stage/load). 1.22.38: tl_fetch.sh ROUTE TỐI ƯU (curl public, $HOME, --setup) + gws TRƯỚC nlm. 1.22.37: tl_fetch.sh webapp GAS. 1.22.36: tl_fetch.sh bỏ qua mount. 1.22.35: tl_rebuild.sh + MANIFEST.sha256 + tl_boot verify sha. 1.22.34: dọn references/ 63→24 file. 1.22.33: _parts ≤200 file. 1.22.32: verify-integrity + COWORK_EDIT_SAFETY. 1.22.32: `tl verify-integrity` + COWORK_EDIT_SAFETY (write-side fallback); 1.22.31: truncation-resilience (FORCE _parts; _healed_script_path; --rebuild) + doctor nlm/gws + reg-query khóa NLM; 1.22.27: #4/#3/#6/#9; 1.22.26: #1 relation-check footnote-gate
 # GĐ0 (tích hợp gws): PIN bản gws — KHÔNG `latest` (gws pre-v1.0 hay breaking). Nguồn-chân-lý
 # duy nhất cho boot-check `tl gws-ping` và (GĐ1) gws_bridge.is_available(). Bump có chủ đích.
-VERSION = "1.33.49"              # 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
+VERSION = "1.33.54"              # 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
 GWS_PINNED_VERSION = "0.22.5"   # @googleworkspace/cli; npm i -g @googleworkspace/cli@0.22.5
 # Bootstrap gws cho Cowork (sandbox chặn github + no root): binary MUSL STATIC (chạy mọi glibc, kể cả
 # Ubuntu 22.04/glibc 2.35 — bản gnu cần GLIBC_2.39 nên KHÔNG chạy). Stage sẵn trên Drive _HOP_NAP.
@@ -1193,6 +1193,7 @@ def _scope_params() -> dict:
 # Apps Script /exec ~2–3s/round-trip dù server_ms tí xíu → biết được nút thắt I/O.
 _TIMING_ON = bool(os.environ.get("TL_TIMINGS"))
 _TIMING_LOG: list = []
+_DETERMINISTIC_ON = str(os.environ.get("TL_DETERMINISTIC") or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _record_timing(action: str, wall_ms: int, out) -> None:
@@ -1415,7 +1416,7 @@ def cmd_perf(a) -> int:
         ],
     }
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl perf (profile={_active_profile()}) ==")
         for x in rows:
@@ -1814,7 +1815,7 @@ def cmd_precheck(a) -> int:
             gl.update({"ok": False, "error": f"{type(e).__name__}: {e}"})
         out["gws_live"] = gl
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== precheck (write-safety) · profile={active} · {'BASE' if is_base else 'DỰ ÁN'} · registry={rid[:16] or '(rỗng)'} ==")
         for c in checks:
@@ -1896,7 +1897,7 @@ def cmd_journal(a) -> int:
            "done_keys": st["done_keys"][:30], "inflight": [iv.get("key") for iv in st["inflight"]][:30],
            "undo_ops": len(undo)}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== journal {run_id} · cmd={st['cmd']} · done={st['counts']['done']} inflight={st['counts']['inflight']} ==")
         if st["inflight"]:
@@ -2989,7 +2990,7 @@ def cmd_exists(a) -> int:
     if not found:
         out["warnings"] = ["NOT_FOUND_IN_MANIFEST_DO_NOT_CONCLUDE_ABSENT", "TRY_BY_SOHIEU_AND_SUBJECT", "IF_AMENDED_RUN_VBHN_CHECK_QT5"]
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl exists — {a.query} ==")
         print(out["conclusion"])
@@ -3638,7 +3639,7 @@ def cmd_relation_backfill(a) -> int:
            "note": "DRY — --apply để ghi goc/sua_doi. Ca chỉ-trùng-chủ-đề KHÔNG auto-ghi (xác minh nguyên văn). Bắt thêm "
                    "quan hệ qua footnote-map VBHN: chạy `tl relation-check --base <x>` trước (đọc base)."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== relation-backfill DRY · base={base or subject} · {len(items)} quan hệ đề xuất · {len(review)} subject-only BỎ ==")
         for it in items:
@@ -3729,7 +3730,7 @@ def cmd_relation_check(a) -> int:
         out["omnibus_cross_domain"] = [x for x in fa if x.get("omnibus_note")]
     out["google_discovery"] = _discovery_links(out.get("subject") or out.get("base") or "")["links_markdown"]
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl relation-check — base={out.get('base') or '∅'} subject={out.get('subject') or '∅'} ==")
         for w in out["warnings"]:
@@ -5769,7 +5770,7 @@ def cmd_hygiene(a) -> int:
                            "loai_noncanonical": [(_summ_entry(x) or {}) | {"loai_raw": str(x.get("loai") or ""), "loai_suggested": _normalize_loai(x.get("loai"))} for x in groups["loai_noncanonical"][:20]],
                            "orphans": [_summ_entry(x) for x in groups["orphans"][:20]]}}
         if a.json:
-            print(json.dumps(out, ensure_ascii=False, indent=2))
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         else:
             print(f"entries={out['entries']} dup_sohieu_raw={out['duplicate_sohieu_groups_raw']} dup_identity={out['duplicate_identity_groups']} dup_name={out['duplicates_by_name']} "
                   f"dup_md5={out['duplicates_by_md5']} orphans={out['orphans']} reconcile_clusters={out['reconcile_clusters']} "
@@ -5807,10 +5808,10 @@ def cmd_hygiene(a) -> int:
     if a.apply:
         if a.confirm != "yes":
             out["ok"] = False; out["error"] = "cần --confirm yes để apply"
-            print(json.dumps(out, ensure_ascii=False, indent=2)); return 2
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
         out["applied"] = _apply_quarantine(quarantine, getattr(a, "to_cat", None) or "QUARANTINE")
     if a.json or a.hsub in ("plan", "reconcile"):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         _print_reconcile(selected)
     return 0 if out.get("ok") else 1
@@ -5902,7 +5903,7 @@ def cmd_external_ingest(a) -> int:
         confirm=a.confirm or "",
     )
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"[{out['gate']}] ok={out['ok']} action={out['action']} format={out['format_class']} source={out['source_kind']}")
         for e in out["errors"]:
@@ -5936,8 +5937,9 @@ def cmd_instructions(a) -> int:
         except TypeError:  # tương thích ngược nếu generate() bản cũ chưa nhận profile
             text = gen_instructions.generate(target,
                                              getattr(a, "skill_version", VERSION) or VERSION)
+        audit_target = "project" if target == "config" else target
         audit = {"ok": True, "missing": []} if target == "style-template" else (
-            gen_instructions.audit(text) if hasattr(gen_instructions, "audit") else {"ok": True, "missing": []})
+            gen_instructions.audit(text, audit_target) if hasattr(gen_instructions, "audit") else {"ok": True, "missing": []})
         ok, missing = bool(audit.get("ok")), audit.get("missing", [])
     else:
         text = gen_instructions.build_instruction(target=a.target, skill_version=a.skill_version or VERSION)
@@ -6753,7 +6755,7 @@ def cmd_vbhn_normalize(a) -> int:
         "note": "report-only; mọi backfill/rename/quarantine/clear_nlm_mapping vẫn phải duyệt riêng",
     }
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl vbhn-normalize — recommendations={len(recs)} ghost_nlm={len(ghosts)} removed_nlm_mapping={len(removed_with_mapping)} ==")
         for r in recs[:getattr(a, "limit", 50)]:
@@ -7198,7 +7200,7 @@ def cmd_vbhn_check(a) -> int:
                "verdict": "REVIEW" if scan_flags else "OK", "flags": scan_flags,
                "collisions": [{"key": c["key"], "years": c["years"], "entries": [_summ_entry(e) for e in c["entries"]]} for c in scan["collisions"]],
                "missing_subject": [_summ_entry(e) for e in scan["missing_subject"][:50]]}
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 0
     cands = _vbhn_candidates(entries, subject, goc, year)
     gkeys = {norm_sohieu(goc)} if goc else set()
@@ -7284,7 +7286,7 @@ def cmd_vbhn_check(a) -> int:
            "google_discovery": _discovery_links(subject or derived_subject or goc or "")["links_markdown"],
            "vbhn_number_collisions": [{"key": c["key"], "years": c["years"], "entries": [_summ_entry(e) for e in c["entries"][:5]]} for c in scan["collisions"][:20]]}
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl vbhn-check — subject={subject or '∅'} goc={goc or '∅'} year={year or '∅'} ==")
         for w in warnings:
@@ -7500,7 +7502,7 @@ def cmd_vbhn_verify(a) -> int:
            "source": source, "chars": len(text or ""), "flags": flags,
            "head_sample": (head[:800] or None),
            "note": "OK nghĩa là qua gate sơ bộ. Với VBHN làm nguồn rà soát, vẫn ưu tiên bản chính thức người dùng nạp/nguồn VPQH; không tự ghép làm canonical."}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out["ok"] else 2
 
 
@@ -7590,7 +7592,7 @@ def _profile_info_from_config(config_path: str | None, profile: str | None = Non
 
 def cmd_profile_info(a) -> int:
     out = _profile_info_from_config(getattr(a, "config", None), getattr(a, "profile", None))
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
 
@@ -7969,7 +7971,7 @@ def cmd_profile_list(a) -> int:
     out = {"ok": bool(cfg), "config": path, "defaultProfile": cfg.get("defaultProfile") or DEFAULT_PROFILE,
            "activeProfile": active, "profiles": rows}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         if not cfg:
             print("[tl] Không thấy config; chạy `tl init-config --from-public` hoặc truyền --config.", file=sys.stderr)
@@ -7998,7 +8000,7 @@ def cmd_profile_use(a) -> int:
         print(json.dumps(plan, ensure_ascii=False, indent=2))
         return 0
     out = _set_default_profile_config(getattr(a, "config", None), name)
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
 
@@ -8036,7 +8038,7 @@ def cmd_profile_rename(a) -> int:
             asset_results.append({"role": role, "fileId": fid, "targetName": names[role], "result": r})
     out = _rename_profile_config(getattr(a, "config", None), old, new, getattr(a, "force", False))
     out["asset_renames"] = asset_results
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
 
@@ -8114,7 +8116,7 @@ def cmd_profile_delete(a) -> int:
     out["nlm_deletes"] = nlm_results
     out["nlm_blocked_shared_source_id"] = nlm_blocked_shared
     out["asset_trash"] = trash_results
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
 
@@ -8148,7 +8150,7 @@ def cmd_profile_files(a) -> int:
     shown = rows[:limit] if limit else rows
     out = {"ok": True, "profile": profile or _active_profile(), "count": len(rows), "shown": len(shown), "rows": shown}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== profile-files · profile={out['profile']} · {len(rows)} rows ==")
         for r in shown:
@@ -8253,7 +8255,7 @@ def cmd_profile_file_remove(a) -> int:
         reg_result = g.post("reg_delete", drive_ids=json.dumps(reg_ids), confirm="yes", require_removed="no")
     out = {**plan, "ok": True, "nlm_deletes": nlm_results, "nlm_blocked_shared_source_id": nlm_blocked_shared,
            "drive_trash": trash_results, "reg_delete": reg_result}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0
 
 
@@ -8535,7 +8537,7 @@ def _profile_list_discover(a, path, cfg) -> int:
         out["warning"] = (f"CHỈ quét {out['scanned']}/{out['folder_total']} thư mục (cap) — chạy lại với "
                           f"--folder-cap {out['folder_total']} để phủ đủ; kết luận 'config_only' có thể là giả khi cap.")
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 0
     print(f"== profile-list --discover · Van_ban_thuong={vbt_id} · {out['scanned']}/{out['folder_total']} thư mục ==")
     for r in rep["folders"]:
@@ -8851,7 +8853,7 @@ def _cmd_profile_doctor_impl(a) -> int:
         out["fix_results"] = fix_results
         out["journal"] = rid
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== profile-doctor · {len(names)} profile · findings={len(findings)} (critical={out['criticals']}) ==")
         for f in findings:
@@ -8987,7 +8989,7 @@ def _cmd_profile_index_impl(a) -> int:
            "replaced_old": cleanup, "journal": rid,
            "note": "Sổ cái = BẢN CHIẾU từ config (nguồn sự thật duy nhất). Mỗi rebuild tạo Sheet MỚI (id đổi), "
                    "bản cũ + CSV trung gian vào Trash (phục hồi được)."}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0
 
 
@@ -9082,7 +9084,7 @@ def cmd_profile_create(a) -> int:
         "actions": actions, "instruction": text,
     }
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         if not getattr(a, "apply", False):
             print(f"[DRY] profile-create '{name}': chạy --apply để tạo folder Van_ban_thuong/{folder_name}.")
@@ -9230,7 +9232,7 @@ def cmd_slot_audit(a) -> int:
             out["warning"] = (f"Lệch {phys} vật lý vs {reg} registry ({out['gap']:+d}) — backfill nlm_notebook_id "
                               f"(`tl backfill-notebook`) hoặc nguồn add thẳng chưa ghi registry.")
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         line = (f"notebook={out['notebook_id']} used={out['slots_effective']} "
                 f"matching={out['slots_for_notebook']} missing_nb={out['rows_missing_nlm_notebook_id']}")
@@ -9254,7 +9256,7 @@ def cmd_vbhn_compare(a) -> int:
         return 1
     out = _vbhn_compare(official, candidate, getattr(a, "focus", None) or [])
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl vbhn-compare — official={a.official_text} candidate={a.candidate_text} ==")
         for f in out["flags"]:
@@ -9305,8 +9307,17 @@ def cmd_instruction_audit(a) -> int:
     if getattr(a, "generate", False):
         try:
             import gen_instructions
-            text = gen_instructions.generate(getattr(a, "target", "both") or "both")
-            out = _instruction_audit_text(text)
+            # Không dùng VERSION hard-code trong gen_instructions.py; truyền version thật của tl.py
+            # và giữ các tham số profile giống lệnh `tl instructions`.
+            prof = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
+            nb = getattr(a, "notebook", None) or os.environ.get("TL_NOTEBOOK_ID") or None
+            fld = getattr(a, "folder_name", None) or None
+            root = getattr(a, "root_folder_id", None) or os.environ.get("TL_ROOT_FOLDER_ID") or None
+            text = gen_instructions.generate(getattr(a, "target", "both") or "both",
+                                             getattr(a, "skill_version", VERSION) or VERSION,
+                                             prof, nb, fld, root)
+            audit_target = "project" if (getattr(a, "target", "both") or "both") == "config" else (getattr(a, "target", "both") or "both")
+            out = gen_instructions.audit(text, audit_target) if hasattr(gen_instructions, "audit") else _instruction_audit_text(text)
             out["generated"] = text
         except Exception as e:
             print(f"[tl] instruction-audit: không generate được: {e}", file=sys.stderr)
@@ -9322,7 +9333,7 @@ def cmd_instruction_audit(a) -> int:
             return 1
         out = _instruction_audit_text(text)
     if a.json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         if out["ok"]:
             print("OK instruction-audit")
@@ -10023,7 +10034,7 @@ def cmd_xref(a) -> int:
            "pending_effect_count": len(pending),
            "note": "report-only; rel_type: SUA_DOI_BASE=sửa vào base, CHU_THICH_LICH_SU=lớp sửa lịch sử đã hợp nhất (đừng coi là OUTDATED), DAN_CHIEU_NOI_DUNG=dẫn chiếu luật khác."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl xref · {len(refs)} dẫn chiếu · " + " ".join(f"{k}={v}" for k, v in summary.items())
               + " · rel " + "/".join(f"{t.split('_')[0]}={n}" for t, n in rel_summary.items()) + " ==")
@@ -10150,7 +10161,7 @@ def cmd_frontier_expand(a) -> int:
            "frontier_count": len(frontier), "missing_in_corpus": missing, "inline_amendment_count": len(inline),
            "frontier": frontier}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== frontier-expand {name[:38]} · {len(frontier)} ứng viên · {len(missing)} THIẾU corpus ==")
         for f in frontier:
@@ -10232,7 +10243,7 @@ def cmd_rasoat_loop(a) -> int:
            "note": "REPORT-ONLY: bản thiếu TRONG corpus chưa NLM → `tl ingest-missing --apply`; bản NGOÀI corpus (gaps) "
                    "→ discovery/tải (KH3, qua G1/G2/G3); đánh giá sâu từng cặp → `tl overlap`."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== rasoat-loop {base_name[:34]} · {it} vòng · seen={len(seen)} · "
               f"{'HỘI TỤ' if out['converged'] else 'CHƯA hội tụ (chạm max-iter)'} ==")
@@ -10418,7 +10429,7 @@ def cmd_dedup_check(a) -> int:
                    "COLLISION=≥2 thực thể CÙNG số hiệu → dọn (giữ CANONICAL, quarantine DUP qua `tl hygiene plan`); "
                    "DUPLICATE=trùng số hiệu/tên; MAYBE=khớp tên/alias (verify số+năm+loại+dòng đầu); NEW=chưa thấy."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"{verdict} · {q} · số hiệu={sorted(qkeys) or '∅'} · exact={len(exact_group)} fuzzy={len(hits)}")
         for r in roles:
@@ -10460,7 +10471,7 @@ def cmd_ingest_route(a) -> int:
     out = {"ok": True, "query": q, "classified": kind, "route": route, "decision_tree": steps,
            "note": "ADVISORY: mọi ghi/source_add/tạo notebook/quarantine PHẢI qua xác nhận người dùng."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== ingest-route · {q} · class={kind} · ROUTE={route} ==")
         for s in steps:
@@ -11116,7 +11127,7 @@ def cmd_overflow_resolve(a) -> int:
     if st["registry_live_gap"]:
         out["warning"] = "REGISTRY_BEHIND_LIVE: có nguồn vật lý CHƯA đăng ký registry → chạy `tl nlm-reconcile <notebook> --apply` để khớp LIVE TRƯỚC khi nạp thêm."
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         _bp = f" (LIVE {base_phys})" if base_phys is not None else " (registry-only — chạy với nlm để đối chiếu LIVE)"
         print(f"== overflow-resolve · base={base_nb[:12]} {st['base_used']}/{NLM_SLOT_CAP}{_bp} · "
@@ -11219,7 +11230,7 @@ def cmd_ingest_missing(a) -> int:
                        "(dùng --allow-no-sohieu nếu THỰC SỰ muốn nạp). ⚠ manifest_snapshot có thể LỆCH registry live (GAS cache ~600s) "
                        "— sửa corpus xong nên đợi/`manifest`+`boot --refresh` rồi kiểm lại targets."}
         if getattr(a, "json", False):
-            print(json.dumps(out, ensure_ascii=False, indent=2))
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         else:
             print(f"== ingest-missing DRY · snapshot={snapshot_ts} · backlog={len(backlog)} · nạp {len(targets)} (limit {lim}) · "
                   f"skip sohieu='' {len(_skip_note)} · base={base_nb[:12]} overflow={overflow_shard or '(chưa có)'} ==")
@@ -11508,7 +11519,7 @@ def cmd_bench(a) -> int:
             rows.append((label, f"ERR {str(e)[:40]}"))
     out = {"ok": True, "entries": len(entries), "rounds": rounds, "timings_ms": dict(rows)}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== tl bench · {len(entries)} entries · {rounds} round(s) · best ms ==")
         for label, ms in rows:
@@ -11535,7 +11546,7 @@ def cmd_tvpl_url(a) -> int:
         ],
         "note": "TVPL chặn fetch server-side (403/CORS) → CHỈ trình duyệt đã đăng nhập tải được. Mật khẩu do người dùng tự nhập (không nhập hộ).",
     }
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0
 
 
@@ -11693,7 +11704,7 @@ def cmd_source_verify(a) -> int:
            "source_discrepancy": discrepancy, "cross_n": getattr(a, "cross", None) or 2,
            "official_first_sources": sources}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== source-verify {target} (G1) ==")
         print(f"  registry sohieu: {reg_sh or '(?)'} | header sohieu: {head_shs or '(chưa đọc)'} | md5: {md5[:12] or '(rỗng)'}")
@@ -11755,7 +11766,7 @@ def cmd_fetch_route(a) -> int:
     out = {"ok": True, "query": q, "dedup": dedup, "fetch_plan": _fetch_plan(q),
            "note": ("FORMAT docx>doc>pdf ⇒ TVPL/LuatVietnam (docx) trước → vbpl (doc) → Công báo (pdf). "
                     "Official (vbpl) để xác minh BẢN ĐÚNG + HIỆU-LỰC. in_corpus_active=true ⇒ dedup, chỉ tải nếu cần bản mới hơn.")}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0
 
 
@@ -12158,7 +12169,7 @@ def cmd_rasoat_chongcheo(a) -> int:
                    "đã đọc nguyên văn (--target/--text-file/auto). KHÁC missing_in_corpus (thiếu VB). OMNIBUS_CROSS_DOMAIN = "
                    "luật sửa có tên khác lĩnh vực (sửa-nhiều-luật) → đọc nguyên văn. So quy phạm: `tl overlap`."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         _pend = out["pending_effect_count"] if read_text else "n/a(chưa đọc nguyên văn)"
         _miss = "?(corpus chưa nạp)" if not corpus_loaded else len(out["unresolved_refs"])
@@ -12352,7 +12363,7 @@ def cmd_nlm_orphans(a) -> int:
                    "`tl register --bulk <file> --cols corpus,nlm_status[,sohieu]`. UNREGISTERED → điều tra đăng ký/xóa "
                    "(đọc `tl nlm-content <id>`). KHÔNG tự xóa nguồn NLM (mọi source_delete cần người duyệt)."}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== nlm-orphans {nb[:14]} · live={cls['live_count']} · active={cls['registered_active']} · "
               f"MISMATCH_LIVE={cls['mismatch_count']} · UNREGISTERED={cls['unregistered_count']} ==")
@@ -12911,7 +12922,7 @@ def cmd_cat_verify(a) -> int:
            "mismatch": bool(cat_suggested and cur_code and cat_suggested != cur_code),
            "matches": [{"cat": c, "score": sc, "alias": al} for c, sc, al in scored]}
     if getattr(a, "json", False):
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
         print(f"== cat-verify {target} ==")
         print(f"  hiện tại: {cur_code or '(?)'} | gợi ý: {cat_suggested or '(?)'} ({confidence})"
@@ -14432,7 +14443,7 @@ def cmd_loop(a) -> int:
                "k_dry": k_dry, "max_iter": max_iter,
                "note": "--apply: mỗi vòng set corpus=false (verified+journaled) rồi RE-DETECT đến HỘI TỤ; fail-safe PAUSE nếu "
                        "no-progress/verify hụt/max-iter. Hoàn tác toàn bộ: `tl undo <journal>`. (metadata/human: `corpus-fix` DRY.)"}
-        print(json.dumps(out, ensure_ascii=False, indent=2)) if getattr(a, "json", False) else \
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))) if getattr(a, "json", False) else \
             print(f"== loop DRY · phát hiện {len(sr0['ids'])} việc reversible (infra {sr0['infra']} + dedup {sr0['dedup']}) · "
                   f"k_dry={k_dry} max_iter={max_iter} · --apply để chạy vòng lặp (verified+journaled+fail-safe) ==")
         return 0
@@ -16451,6 +16462,17 @@ def cmd_profile_ingest(a) -> int:
     if not gdoc:
         print(json.dumps({"ok": False, "step": "organize", "detail": org}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
+    # Deterministic readback: không add NLM/registry tiếp nếu Drive convert/rename chưa xác nhận được.
+    src_id = org.get("srcId") or fid
+    rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=doc_name,
+                                          src_id=src_id, expected_src_name=doc_name + up_ext,
+                                          expected_folder_id=root_id)
+    if not rb_convert.get("ok"):
+        print(json.dumps({"ok": False, "step": "convert_readback", "gdoc": gdoc, "src_id": src_id,
+                          "readback": rb_convert,
+                          "note": "Dừng trước NLM add: Drive convert/rename/move chưa đạt readback."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
 
     actual_text = ""
     try:
@@ -16476,7 +16498,7 @@ def cmd_profile_ingest(a) -> int:
                     cols="name,corpus,row_kind,note,hieuluc")
         out = {"ok": False, "step": "verify_gate", "gdoc": gdoc, "src_id": fid, "gate": gate,
                "registry_patched": rb.get("patched"), "note": "Canonical đã tạo nhưng chưa corpus/NLM; cần verify/OCR lại."}
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 2
 
     nc = _imp("nlm_cli")
@@ -16538,7 +16560,7 @@ def cmd_profile_ingest(a) -> int:
            "classification": info, "verify_gate": gate, "split_count": len(chunks),
            "nlm_sources": nlm_sources, "registry_patched": rb.get("patched"),
            "target_notebook": notebook_id, "hieuluc": hieuluc}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if all(x.get("ok") for x in nlm_sources) else 2
 
 
@@ -16808,6 +16830,18 @@ def cmd_ingest_local(a) -> int:
         _step_ok("organize", fid, bool(gdoc), gdoc=gdoc, srcId=src_docx)
         if not gdoc:
             print(json.dumps({"ok": False, "step": "organize", "journal": run_id, "detail": org}, ensure_ascii=False), file=sys.stderr); return 2
+    # Deterministic readback sau convert/rename/move: không add NLM nếu GDoc/source chưa đúng tên, đúng MIME.
+    _src_for_rb = src_docx or fid
+    _rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=name,
+                                           src_id=_src_for_rb, expected_src_name=name + up_ext,
+                                           expected_folder_id="")
+    _step_ok("convert_readback", gdoc, bool(_rb_convert.get("ok")), checks=_rb_convert.get("checks"))
+    if not _rb_convert.get("ok"):
+        print(json.dumps({"ok": False, "step": "convert_readback", "journal": run_id, "gdoc": gdoc,
+                          "src_id": _src_for_rb, "readback": _rb_convert,
+                          "note": "Dừng trước NLM add: Drive convert/rename chưa đạt readback."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     # v1.29.7 (log NĐ131 #1 — dòng registry sohieu=None dù đã truyền --sohieu): organize register CÓ nhận sohieu
     # server-side nhưng thực tế từng KHÔNG persist → theo doctrine verified-write: READ-BACK registry sau organize,
     # thiếu thì BACKFILL tường minh qua journaled reg_upsert (sohieu = khóa immutable → upsert, không reg_bulk).
@@ -16914,9 +16948,3001 @@ def cmd_ingest_local(a) -> int:
            "target_notebook": target, "row_kind": rk, "nlm_source_id": src, "reg_pushed": rb.get("patched"),
            "reg_verified": bool(v.get("verified")), "via": "nlm-cli",
            "sidecar": "src_id=docx gắn vào dòng GDoc (register atomic; regen2 cũng tự ghép cặp cùng base-name)"}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0
 
+
+
+# ───────────────────────── deterministic workflow inventory/router ─────────────────────────
+_TOOL_GROUPS = {
+    "bootstrap_health": {
+        "title": "Bootstrap & Health",
+        "commands": ["up", "boot", "ping", "doctor", "precheck", "verify-integrity", "transport-info", "gws-ping"],
+        "purpose": "Khởi động, kiểm môi trường, kiểm config, kiểm transport.",
+    },
+    "inventory_decision": {
+        "title": "Inventory & Decision",
+        "commands": ["tool-inventory", "route-task", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook"],
+        "purpose": "Tra kho tool/script và định tuyến workflow trước khi viết tool mới hoặc làm tác vụ rủi ro.",
+    },
+    "source_discovery": {
+        "title": "Source Discovery",
+        "commands": ["find-doc", "fetch-links", "fetch-route", "fetch-batch", "exists", "locate", "source-map", "link-priority"],
+        "purpose": "Tìm nguồn, kiểm hiện diện, chọn đúng văn bản/phiên bản.",
+    },
+    "legal_verification": {
+        "title": "Legal Verification",
+        "commands": ["extract", "status", "relation-check", "relation-backfill", "vbhn-check", "vbhn-verify", "vbhn-compare", "overlap", "source-verify"],
+        "purpose": "Kiểm hiệu lực, VBHN, quan hệ sửa đổi/bổ sung và trích nguyên văn.",
+    },
+    "ingest_convert": {
+        "title": "Ingest & Convert",
+        "commands": ["ingest-route", "ingest-local", "ingest", "profile-ingest", "profile-file-add", "ingest-ocr", "profile-ingest-ocr", "ingest-zip", "profile-ingest-zip", "profile-ingest-chunks", "external-ingest", "preflight", "nlm-add", "convert-verify"],
+        "planned_commands": [],
+        "purpose": "Nạp file, convert, đổi tên, ghi registry, add NLM.",
+    },
+    "ocr_text_quality": {
+        "title": "OCR & Text Quality",
+        "commands": ["ocr-analyze", "ocr-run", "ocr-verify", "ingest-ocr", "profile-ingest-ocr", "source-verify", "cat-verify", "profile-ingest --text-file --source-quality ocr"],
+        "planned_commands": [],
+        "purpose": "Phát hiện PDF scan/OCR, kiểm chất lượng text trước khi dùng làm căn cứ.",
+    },
+    "chunk_query_quality": {
+        "title": "Chunking & Query Quality",
+        "commands": ["chunk-plan", "chunk-apply", "chunk-verify", "profile-ingest-chunks", "profile-ingest", "nlm-query-plan", "nlm-query", "nlm-cross", "nlm-content"],
+        "planned_commands": [],
+        "purpose": "Tách văn bản lớn có kiểm soát và truy vấn NLM hẹp, đúng nguồn.",
+    },
+    "nlm_operations": {
+        "title": "NLM Operations",
+        "commands": ["nlm-list", "nlm-get", "nlm-query", "nlm-cross", "nlm-content", "nlm-reconcile", "nlm-orphans", "slot-audit", "push-overflow", "overflow-resolve", "nlm-add"],
+        "purpose": "Quản trị/đối soát NotebookLM và truy vấn nguồn đã nạp.",
+    },
+    "registry_profile_corpus": {
+        "title": "Registry, Profile & Corpus",
+        "commands": ["profile-info", "profile-list", "profile-create", "profile-adopt", "profile-doctor", "profile-index", "profile-files", "registry-map", "reg-query", "register", "manifest"],
+        "purpose": "Quản trị registry, manifest, profile/corpus.",
+    },
+    "hygiene_maintenance": {
+        "title": "Hygiene & Maintenance",
+        "commands": ["sweep", "hygiene", "reconcile", "dedup-check", "dedup-plan", "source-rename", "source-update-corpus", "source-delete", "quarantine-fix", "cat-audit", "recat", "header-verify", "corpus-audit"],
+        "purpose": "Dọn lỗi, dedup, rename, recat, audit corpus.",
+    },
+    "prompt_instruction_dev": {
+        "title": "Prompt, Instruction & Dev",
+        "commands": ["instructions", "instruction-audit", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook", "edit-skill", "verify-integrity", "bench", "perf"],
+        "purpose": "Sinh prompt/instruction, audit, sửa skill an toàn.",
+    },
+}
+
+_TASK_TO_WORKFLOW = {
+    "write_new_tool": "write_new_tool",
+    "viet_tool_moi": "write_new_tool",
+    "nlm_query_quality": "nlm_query_quality",
+    "nlm_query_plan": "nlm_query_quality",
+    "nlm_query": "nlm_query_quality",
+    "truy_van_nlm": "nlm_query_quality",
+    "ingest_local": "ingest_local",
+    "nap_file": "ingest_local",
+    "convert_rename": "convert_rename",
+    "doi_ten_convert": "convert_rename",
+    "ingest_zip": "ingest_zip",
+    "profile_ingest_zip": "ingest_zip",
+    "ocr_pdf_scan": "ocr_pdf_scan",
+    "ocr": "ocr_pdf_scan",
+    "ocr_run": "ocr_pdf_scan",
+    "ocr_ingest": "ocr_ingest",
+    "ingest_ocr": "ocr_ingest",
+    "profile_ingest_ocr": "ocr_ingest",
+    "nap_ocr": "ocr_ingest",
+    "large_doc_chunk": "large_doc_chunk",
+    "chunk": "large_doc_chunk",
+    "chunk_apply": "large_doc_chunk",
+    "chunk_verify": "large_doc_chunk",
+    "chunk_ingest": "chunk_ingest",
+    "profile_ingest_chunks": "chunk_ingest",
+    "nap_chunks": "chunk_ingest",
+    "tach_van_ban_lon": "large_doc_chunk",
+    "trich_nguyen_van": "nlm_query_quality",
+    "workflow_audit": "workflow_audit",
+    "audit_workflow": "workflow_audit",
+    "determinism_audit": "workflow_audit",
+    "audit_determinism": "workflow_audit",
+    "golden_test": "workflow_audit",
+    "release_check": "release_check",
+    "deterministic_check": "release_check",
+    "release_manifest": "release_manifest",
+    "package_manifest": "release_manifest",
+    "release_verify": "release_verify",
+    "package_verify": "release_verify",
+    "release_bundle": "release_bundle",
+    "package_bundle": "release_bundle",
+    "live_smoke": "live_smoke_plan",
+    "live_smoke_plan": "live_smoke_plan",
+    "live_readiness": "live_readiness",
+    "live_contract_check": "live_contract_check",
+    "contract_check": "live_contract_check",
+    "live_state_snapshot": "live_state_snapshot",
+    "live_state_diff": "live_state_diff",
+    "state_snapshot": "live_state_snapshot",
+    "state_diff": "live_state_diff",
+    "env_readiness": "live_readiness",
+    "readiness": "live_readiness",
+    "deploy_plan": "deploy_plan",
+    "install_plan": "deploy_plan",
+    "rollback_plan": "rollback_plan",
+    "restore_plan": "rollback_plan",
+    "final_acceptance": "final_acceptance",
+    "acceptance": "final_acceptance",
+    "go_live_runbook": "go_live_runbook",
+    "runbook_live": "go_live_runbook",
+}
+
+
+_IDEMPOTENCY_CONTRACTS = {
+    "ingest_local": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "sha256(source_file_text_or_binary)+target_profile_or_cat+canonical_name",
+        "journal_key": "tl_journal/run_id for upload/convert/register/nlm-add",
+        "resume_behavior": "rerun same command with --resume when Drive/register succeeded but NLM/link step was interrupted",
+        "duplicate_guard": "convert/readback + registry drive_id/src_id + NLM dedup by drive_id/title before add",
+        "readback_command": "convert-verify --gdoc-id <id> --src-id <src_id> --expected-name <name> --json",
+        "resume_command": "ingest-local <file> ... --resume --json",
+        "rollback_hint": "journal <run_id> then undo <run_id> --apply --confirm yes for registry-safe rollback; Drive/NLM cleanup requires explicit source-delete/nlm-orphans review"
+    },
+    "profile_ingest": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "sha256(source_file_or_text)+profile+canonical_name",
+        "journal_key": "profile ingest child run/journal where available",
+        "resume_behavior": "rerun same profile-ingest command; duplicate guard should link existing target instead of adding another NLM source",
+        "duplicate_guard": "profile folder/name + registry/profile manifest + NLM source title/drive_id",
+        "readback_command": "profile-files --json and convert-verify --gdoc-id <id> --expected-name <name> --json",
+        "resume_command": "profile-ingest <file> ... --json",
+        "rollback_hint": "remove profile file via profile-file-remove or explicit source-delete after snapshot diff review"
+    },
+    "ingest_zip": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+        "journal_key": "batch item path + child pipeline journal",
+        "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+        "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+        "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+        "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+        "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup"
+    },
+    "ocr_ingest": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+cat_or_profile+canonical_name",
+        "journal_key": "ocr manifest path + child ingest journal",
+        "resume_behavior": "do not rerun OCR unless source hash changed; rerun bridge apply after ocr-verify manifest_status=verified",
+        "duplicate_guard": "verified OCR manifest + child ingest duplicate guards; VBQPPL blocks canonical ingest if manifest is missing/unverified",
+        "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+        "resume_command": "ingest-ocr <file> --text-file <text> --cat <NN> --apply --confirm yes --json",
+        "rollback_hint": "delete only local OCR sidecars freely; for Drive/registry/NLM use child pipeline journal/snapshot diff"
+    },
+    "profile_ingest_ocr": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+profile+canonical_name",
+        "journal_key": "ocr manifest path + profile child ingest journal",
+        "resume_behavior": "reuse verified sidecar text/manifest; rerun profile-ingest-ocr apply if child step was interrupted",
+        "duplicate_guard": "verified OCR manifest + profile ingest duplicate guards",
+        "readback_command": "ocr-verify <text_file> --source <source> --mode profile --json",
+        "resume_command": "profile-ingest-ocr <file> --text-file <text> --apply --confirm yes --json",
+        "rollback_hint": "remove profile source only after snapshot diff identifies created item"
+    },
+    "profile_ingest_chunks": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "chunk_manifest.source_hash+chunk.sha256+profile+expected_name",
+        "journal_key": "chunk manifest path + child profile-ingest result",
+        "resume_behavior": "rerun profile-ingest-chunks; chunk-verify prevents source drift and child commands are per chunk",
+        "duplicate_guard": "chunk_manifest hash verification + profile folder/name + NLM title/drive_id",
+        "readback_command": "chunk-verify <manifest> --json",
+        "resume_command": "profile-ingest-chunks <manifest> --apply --confirm yes --continue-on-error --json",
+        "rollback_hint": "rollback per child result; chunks are helper/profile sources, not VBQPPL canonical"
+    }
+}
+
+
+def _idempotency_contract_for_workflow(wf_id: str) -> dict:
+    key = wf_id
+    if wf_id == "chunk_ingest":
+        key = "profile_ingest_chunks"
+    if wf_id == "ocr_ingest":
+        key = "ocr_ingest"
+    if wf_id == "ingest_zip":
+        key = "ingest_zip"
+    return dict(_IDEMPOTENCY_CONTRACTS.get(key, {}))
+
+
+def _workflow_dir() -> Path:
+    return HERE.parent / "references" / "workflows"
+
+
+def _workflow_card_files() -> list[Path]:
+    return [p for p in sorted(_workflow_dir().glob("*.json")) if not p.name.endswith(".schema.json")]
+
+
+def _available_commands_from_parser() -> list[str]:
+    try:
+        ap = build_parser()
+        for act in ap._actions:
+            if isinstance(act, argparse._SubParsersAction):
+                return sorted(act.choices.keys())
+    except Exception:
+        pass
+    return []
+
+
+def _script_docstrings(limit: int = 200) -> list[dict]:
+    out = []
+    for sp in sorted(HERE.glob("*.py"))[:limit]:
+        try:
+            txt = sp.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r'^[uUrRfFbB]*(?:"""|\'\'\')(.*?)(?:"""|\'\'\')', txt, re.S)
+            doc = " ".join((m.group(1).strip().splitlines()[:2] if m else []))
+        except Exception as e:
+            doc = f"ERROR_READING:{type(e).__name__}"
+        out.append({"script": sp.name, "doc": doc[:240]})
+    return out
+
+
+def _load_workflow_card(wid: str) -> dict:
+    path = _workflow_dir() / f"{wid}.json"
+    if not path.exists():
+        return {"id": wid, "ok": False, "error": "WORKFLOW_CARD_NOT_FOUND", "path": str(path)}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data.setdefault("ok", True)
+        data.setdefault("path", str(path))
+        return data
+    except Exception as e:
+        return {"id": wid, "ok": False, "error": f"WORKFLOW_CARD_INVALID:{type(e).__name__}", "path": str(path)}
+
+
+def _unique_preserve_order(items) -> list[str]:
+    seen = set()
+    out = []
+    for item in items or []:
+        s = str(item)
+        if s in seen:
+            continue
+        seen.add(s)
+        out.append(s)
+    return out
+
+
+_VOLATILE_JSON_KEYS = {
+    "seconds", "elapsed_seconds", "duration_seconds", "duration", "elapsed", "wall_ms",
+    "server_ms", "client_ms", "_client_ms", "stdout_tail", "stderr_tail",
+    "generated_at", "generatedAt", "generated_epoch", "generatedEpoch",
+    "created_at", "createdAt", "created_time", "createdTime",
+    "updated_at", "updatedAt", "modified_time", "modifiedTime",
+    "timestamp", "time", "mtime", "age_days", "out_dir", "temp_dir", "tmp_dir",
+}
+
+
+def _deterministic_enabled(a=None) -> bool:
+    if a is not None and bool(getattr(a, "deterministic", False)):
+        return True
+    if _DETERMINISTIC_ON:
+        return True
+    return str(os.environ.get("TL_DETERMINISTIC") or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _stable_string_for_json(s: str) -> str:
+    """Make common path-like strings stable while leaving ordinary text intact."""
+    if not s:
+        return s
+    raw = s.replace("\\", os.sep)
+    try:
+        p = Path(raw)
+    except Exception:
+        return s
+    if not p.is_absolute():
+        return s.replace("\\", "/") if ("\\" in s and "/" not in s) else s
+    try:
+        root = HERE.parent.resolve()
+        rel = p.resolve().relative_to(root)
+        return rel.as_posix()
+    except Exception:
+        pass
+    tmp_roots = _unique_preserve_order([tempfile.gettempdir(), os.environ.get("TMP"), os.environ.get("TEMP")])
+    for t in tmp_roots:
+        if not t:
+            continue
+        try:
+            tp = Path(t).resolve()
+            if p.resolve() == tp or tp in p.resolve().parents:
+                return "<tmp>"
+        except Exception:
+            continue
+    return "<abs-path>"
+
+
+def _scrub_volatile(obj):
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            key = str(k)
+            if key in _VOLATILE_JSON_KEYS:
+                out[key] = "<volatile>"
+            elif key.endswith("_path") or key in {"path", "file", "root", "manifest", "report_path"}:
+                out[key] = _stable_string_for_json(str(v)) if isinstance(v, (str, os.PathLike)) else _scrub_volatile(v)
+            else:
+                out[key] = _scrub_volatile(v)
+        return out
+    if isinstance(obj, list):
+        return [_scrub_volatile(x) for x in obj]
+    if isinstance(obj, tuple):
+        return [_scrub_volatile(x) for x in obj]
+    if isinstance(obj, (str, os.PathLike)):
+        return _stable_string_for_json(str(obj))
+    return obj
+
+
+def _json_dumps(obj, *, deterministic: bool | None = None) -> str:
+    det = _deterministic_enabled() if deterministic is None else bool(deterministic)
+    payload = _scrub_volatile(obj) if det else obj
+    return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=det)
+
+
+def _print_json_or_text(obj: dict, as_json: bool) -> None:
+    if as_json:
+        print(_json_dumps(obj))
+        return
+    _schema = str(obj.get("schema") or "")
+    if not ("groups" in obj or _schema.startswith("route_task")):
+        # v1.33.54: renderer text chỉ biết tool-inventory/route-task — schema KHÁC (release_manifest/verify/…)
+        # từng in nhầm 'route-task ok=True task=None' → fallback JSON đầy đủ.
+        print(_json_dumps(obj))
+        return
+    if "groups" in obj:
+        print(f"tool-inventory ok={obj.get('ok')} commands={len(obj.get('commands_available', []))}")
+        for g in obj.get("groups", []):
+            print(f"- {g['name']}: {g.get('title','')} — {g.get('purpose','')}")
+            print("  commands:", ", ".join(g.get("commands", [])) or "(none)")
+            if g.get("planned_commands"):
+                print("  planned:", ", ".join(g.get("planned_commands", [])))
+        if obj.get("missing_capabilities"):
+            print("missing/planned:")
+            for m in obj["missing_capabilities"]:
+                print(f"- {m.get('capability')}: {m.get('status')} — {m.get('recommendation')}")
+        return
+    print(f"route-task ok={obj.get('ok')} task={obj.get('task')} workflow={obj.get('workflow_id')} risk={obj.get('risk')}")
+    print("recommended commands:", ", ".join(obj.get("recommended_commands", [])) or "(none)")
+    if obj.get("requires_dry_run"):
+        print("requires: dry-run")
+    if obj.get("requires_readback"):
+        print("requires: verify/readback")
+    if obj.get("stop_conditions"):
+        print("stop conditions:")
+        for s in obj["stop_conditions"]:
+            print("-", s)
+
+
+def cmd_tool_inventory(a) -> int:
+    commands_available = _available_commands_from_parser()
+    cmd_set = set(commands_available)
+    groups = []
+    for name, meta in _TOOL_GROUPS.items():
+        cmds = _unique_preserve_order(meta.get("commands", []))
+        groups.append({
+            "name": name,
+            "title": meta.get("title", name),
+            "purpose": meta.get("purpose", ""),
+            "commands": cmds,
+            "available_commands": [c for c in cmds if c.split()[0] in cmd_set],
+            "missing_commands": [c for c in cmds if c.split()[0] not in cmd_set],
+            "planned_commands": list(meta.get("planned_commands", [])),
+        })
+    task = (getattr(a, "task", None) or "").strip().lower().replace(" ", "_").replace("-", "_")
+    group = (getattr(a, "group", None) or "").strip().lower().replace(" ", "_").replace("-", "_")
+    if task:
+        wf_id = _TASK_TO_WORKFLOW.get(task, task)
+        card = _load_workflow_card(wf_id)
+        out = {
+            "ok": bool(card.get("ok", True)),
+            "mode": "task",
+            "task": task,
+            "workflow_id": wf_id,
+            "workflow": card,
+            "do_not_write_new_tool_until_checked": True,
+            "inventory_hint": "Nếu workflow báo thiếu capability, ưu tiên mở rộng lệnh hiện có trước khi viết tool mới.",
+        }
+    else:
+        if group:
+            groups = [g for g in groups if g["name"] == group or group in g["name"]]
+        missing = []
+        for g in groups:
+            for planned in g.get("planned_commands", []):
+                missing.append({"capability": planned, "group": g["name"], "status": "planned_not_implemented", "recommendation": "Dùng route-task/dry-run trước khi triển khai."})
+        out = {
+            "ok": True,
+            "schema": "tool_inventory.v1",
+            "groups": groups,
+            "commands_available": commands_available,
+            "scripts": _script_docstrings() if getattr(a, "scripts", False) else [],
+            "workflow_cards": sorted(p.stem for p in _workflow_card_files()),
+            "missing_capabilities": missing,
+        }
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok", True) else 2
+
+
+def cmd_route_task(a) -> int:
+    # v1.33.54 (merge determinism-53): nhận task ở CẢ positional lẫn --task — bundle bắt buộc --task làm gãy
+    # cách gọi `route-task ingest_local` trong doc/log cũ (cùng lớp ma sát S8/A1: drift doc↔CLI).
+    raw = ((getattr(a, "task", "") or "") or (getattr(a, "task_pos", "") or "")).strip()
+    if not raw:
+        print(json.dumps({"ok": False, "error": "MISSING_TASK",
+                          "fix": "truyền tên tác vụ: `tl route-task <task>` hoặc `tl route-task --task <task>`"},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    key = raw.lower().replace(" ", "_").replace("-", "_")
+    wf_id = _TASK_TO_WORKFLOW.get(key, key)
+    card = _load_workflow_card(wf_id)
+    risk = card.get("risk", "unknown") if card.get("ok", True) else "unknown"
+    card_recommended = _unique_preserve_order(card.get("recommended_commands", []) if isinstance(card.get("recommended_commands"), list) else [])
+    recommended = list(card_recommended)
+    if not recommended:
+        for g in _TOOL_GROUPS.values():
+            for cmd in _unique_preserve_order(g.get("commands", [])):
+                # fallback hints for older workflow cards without recommended_commands
+                if wf_id.startswith("nlm") and cmd.startswith("nlm"):
+                    recommended.append(cmd)
+                elif wf_id.startswith("ocr") and (cmd.split()[0] in {"ocr-analyze", "ocr-run", "ocr-verify", "ingest-ocr", "profile-ingest-ocr", "source-verify"} or "profile-ingest" in cmd):
+                    recommended.append(cmd)
+                elif wf_id.startswith("ingest") and (cmd.startswith("ingest") or cmd.startswith("profile-ingest") or cmd == "external-ingest"):
+                    recommended.append(cmd)
+                elif wf_id.startswith("convert") and (cmd in {"ingest-local", "profile-ingest", "external-ingest", "convert-verify"}):
+                    recommended.append(cmd)
+                elif (wf_id.startswith("large_doc") or wf_id.startswith("chunk_ingest")) and (cmd in {"chunk-plan", "chunk-apply", "chunk-verify", "profile-ingest-chunks", "profile-ingest", "nlm-query", "nlm-content"}):
+                    recommended.append(cmd)
+        if wf_id == "write_new_tool":
+            recommended = ["tool-inventory --json", "route-task --task <task> --json", "edit-skill", "workflow-audit --json", "release-check --json"]
+    out = {
+        "ok": bool(card.get("ok", True)),
+        "schema": "route_task.v1",
+        "task": raw,
+        "workflow_id": wf_id,
+        "risk": risk,
+        "workflow": card,
+        "recommended_commands": _unique_preserve_order(recommended),
+        "requires_dry_run": risk in {"medium", "high"},
+        "requires_apply": risk in {"medium", "high"},
+        "requires_readback": risk == "high" or wf_id in {"convert_rename", "ingest_local", "ingest_zip", "ocr_ingest", "chunk_ingest"},
+        "stop_conditions": card.get("stop_conditions", []),
+        "idempotency": _idempotency_contract_for_workflow(wf_id),
+        "idempotency_key": (_idempotency_contract_for_workflow(wf_id) or {}).get("idempotency_key"),
+        "resume_command": (_idempotency_contract_for_workflow(wf_id) or {}).get("resume_command"),
+        "readback_command": (_idempotency_contract_for_workflow(wf_id) or {}).get("readback_command"),
+        "rollback_hint": (_idempotency_contract_for_workflow(wf_id) or {}).get("rollback_hint"),
+        "note": "Đây là router READ-ONLY. Không ghi Drive/registry/NLM. Dùng để chọn workflow trước khi thực thi.",
+    }
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok", True) else 2
+
+
+def _split_source_ids(values: list[str] | None, combined: str = "") -> list[str]:
+    raw = []
+    for val in values or []:
+        raw.extend(str(val).split(","))
+    if combined:
+        raw.extend(str(combined).split(","))
+    return _unique_preserve_order([x.strip() for x in raw if x and x.strip()])
+
+
+def _nlm_query_plan(question: str, source_ids: list[str], *, justification: str = "") -> dict:
+    count = len(source_ids)
+    errors = []
+    warnings = []
+    if not question.strip():
+        warnings.append("QUESTION_EMPTY_OR_MISSING")
+    if count == 0:
+        errors.append("NO_SOURCE_IDS_SELECTED")
+    if count > 5:
+        errors.append("SOURCE_HARD_CAP_EXCEEDED")
+    elif count > 3 and not justification.strip():
+        errors.append("JUSTIFICATION_REQUIRED_FOR_4_OR_5_SOURCES")
+    elif count > 3:
+        warnings.append("SOURCE_COUNT_ABOVE_DEFAULT_1_TO_3")
+    batches = []
+    if count > 3:
+        for i in range(0, count, 3):
+            batches.append({"index": len(batches) + 1, "source_ids": source_ids[i:i+3]})
+    else:
+        batches.append({"index": 1, "source_ids": source_ids})
+    return {
+        "ok": not errors,
+        "schema": "nlm_query_plan.v1",
+        "question": question,
+        "source_ids": source_ids,
+        "source_count": count,
+        "default_source_window": "1-3",
+        "hard_cap": 5,
+        "justification": justification or None,
+        "errors": errors,
+        "warnings": warnings,
+        "recommended_commands": [
+            "nlm-query <question> --source-id <id> --json",
+            "nlm-cross <question> --source-id <id> --json",
+            "extract <query> --json",
+        ],
+        "batches": batches,
+        "verify_after_nlm": [
+            "Không coi RAG là trích nguyên văn cuối cùng.",
+            "Với VBQPPL, kiểm lại bằng tl extract/source-verify hoặc nguồn canonical.",
+            "Nếu cần hơn 3 nguồn, chia câu hỏi theo batches thay vì hỏi một lượt rộng.",
+        ],
+    }
+
+
+def cmd_nlm_query_plan(a) -> int:
+    source_ids = _split_source_ids(getattr(a, "source_id", None), getattr(a, "source_ids", "") or "")
+    out = _nlm_query_plan(getattr(a, "question", "") or "", source_ids, justification=getattr(a, "justification", "") or "")
+    if getattr(a, "json", False):
+        print(_json_dumps(out))
+    else:
+        print(f"nlm-query-plan ok={out.get('ok')} sources={out.get('source_count')} hard_cap={out.get('hard_cap')}")
+        for e in out.get("errors", []):
+            print(f"ERROR: {e}")
+        for w in out.get("warnings", []):
+            print(f"WARN: {w}")
+        for b in out.get("batches", []):
+            print(f"batch {b['index']}: {', '.join(b.get('source_ids', []))}")
+    return 0 if out.get("ok") else 2
+
+
+
+# ───────────────────────── convert / rename readback verification ─────────────────────────
+_GDOC_MIME = "application/vnd.google-apps.document"
+
+
+def _drive_info_file(g, file_id: str) -> dict:
+    """Best-effort Drive metadata readback qua webapp action=info. Không raise."""
+    if not file_id:
+        return {"ok": False, "error": "EMPTY_FILE_ID", "file": {}}
+    try:
+        info = g.get("info", fileId=file_id)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"INFO_EXCEPTION:{type(e).__name__}:{e}", "file": {}}
+    if not isinstance(info, dict):
+        return {"ok": False, "error": "INFO_NON_DICT", "raw": str(info)[:200], "file": {}}
+    f = info.get("file") if isinstance(info.get("file"), dict) else info
+    return {"ok": bool(info.get("ok", True) and (f.get("id") or f.get("fileId") or file_id)), "raw": info, "file": f}
+
+
+def _file_name(info: dict) -> str:
+    f = info.get("file") or {}
+    return str(f.get("name") or f.get("title") or "").strip()
+
+
+def _file_mime(info: dict) -> str:
+    f = info.get("file") or {}
+    return str(f.get("mimeType") or f.get("mime") or "").strip()
+
+
+def _file_parents(info: dict) -> list[str]:
+    f = info.get("file") or {}
+    parents = f.get("parents") or f.get("parentIds") or []
+    if isinstance(parents, str):
+        return [parents]
+    return [str(x.get("id") if isinstance(x, dict) else x) for x in parents if x]
+
+
+def _verify_convert_readback(g, *, gdoc_id: str, expected_name: str = "", src_id: str = "", expected_src_name: str = "", expected_folder_id: str = "") -> dict:
+    """Readback sau upload→convert→rename/move. Không ghi. Dùng bởi convert-verify và ingest pipelines."""
+    checks = []
+    def add(name, ok, detail=""):
+        checks.append({"name": name, "ok": bool(ok), "detail": str(detail)[:300]})
+    gi = _drive_info_file(g, gdoc_id)
+    gf = gi.get("file") or {}
+    add("gdoc_exists", gi.get("ok"), gi.get("error") or gf.get("id") or gf.get("fileId") or gdoc_id)
+    gm = _file_mime(gi)
+    add("gdoc_mime_is_google_doc", gm == _GDOC_MIME, gm or "<missing>")
+    gn = _file_name(gi)
+    if expected_name:
+        add("gdoc_name_matches", gn == expected_name, f"actual={gn!r} expected={expected_name!r}")
+    if expected_folder_id:
+        gps = _file_parents(gi)
+        add("gdoc_in_expected_folder", expected_folder_id in gps, ",".join(gps) or "<missing>")
+    si = {}
+    if src_id:
+        si = _drive_info_file(g, src_id)
+        sf = si.get("file") or {}
+        add("source_exists", si.get("ok"), si.get("error") or sf.get("id") or sf.get("fileId") or src_id)
+        sm = _file_mime(si)
+        add("source_not_google_doc", sm != _GDOC_MIME, sm or "<missing>")
+        sn = _file_name(si)
+        if expected_src_name:
+            add("source_name_matches", sn == expected_src_name, f"actual={sn!r} expected={expected_src_name!r}")
+        if expected_folder_id:
+            sps = _file_parents(si)
+            add("source_in_expected_folder", expected_folder_id in sps, ",".join(sps) or "<missing>")
+    ok = all(c["ok"] for c in checks)
+    return {"ok": ok, "schema": "convert_readback.v1", "gdoc_id": gdoc_id, "src_id": src_id or None,
+            "expected_name": expected_name or None, "expected_src_name": expected_src_name or None,
+            "expected_folder_id": expected_folder_id or None, "checks": checks,
+            "gdoc": {"name": gn, "mime": gm, "parents": _file_parents(gi)},
+            "source": ({"name": _file_name(si), "mime": _file_mime(si), "parents": _file_parents(si)} if src_id else None)}
+
+
+def cmd_convert_verify(a) -> int:
+    g = _gas()
+    out = _verify_convert_readback(g, gdoc_id=a.gdoc_id, expected_name=getattr(a, "expected_name", "") or "",
+                                   src_id=getattr(a, "src_id", "") or "", expected_src_name=getattr(a, "expected_src_name", "") or "",
+                                   expected_folder_id=getattr(a, "expected_folder_id", "") or "")
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+# ───────────────────────── safe dry-run helpers: zip/OCR/chunk ─────────────────────────
+_ALLOWED_INGEST_EXTS = {".doc", ".docx", ".pdf", ".txt", ".md", ".rtf", ".odt"}
+_IGNORED_ZIP_NAMES = {".ds_store", "thumbs.db"}
+_VIET_CHARS = set("ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵĂÂĐÊÔƠƯÁÀẢÃẠẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴ")
+
+
+def _zip_is_safe_member(name: str) -> bool:
+    if not name or name.endswith("/"):
+        return False
+    n = name.replace("\\", "/")
+    parts = [p for p in n.split("/") if p]
+    if any(p == ".." for p in parts):
+        return False
+    if n.startswith("/") or re.match(r"^[A-Za-z]:", n):
+        return False
+    low_base = parts[-1].lower() if parts else ""
+    if low_base in _IGNORED_ZIP_NAMES or n.startswith("__MACOSX/"):
+        return False
+    return True
+
+
+def _zip_normalized_member_path(name: str) -> str:
+    """Stable normalized zip member path for sorting/duplicate detection. Empty means unsafe."""
+    n = (name or "").replace("\\", "/")
+    if not n or n.endswith("/"):
+        return ""
+    parts: list[str] = []
+    for part in n.split("/"):
+        if not part or part == ".":
+            continue
+        if part == "..":
+            return ""
+        parts.append(part)
+    if not parts:
+        return ""
+    return "/".join(parts)
+
+
+def _zip_sorted_infos(zf: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
+    """Return members in deterministic order independent of original zip entry order."""
+    return sorted(zf.infolist(), key=lambda i: (_zip_normalized_member_path(i.filename).lower(), i.filename.replace("\\", "/")))
+
+
+def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_files: int = 200, max_size_mb: int = 100) -> dict:
+    zpath = Path(path)
+    out = {"ok": False, "schema": "ingest_zip_plan.v1", "zip": str(zpath), "mode": mode, "profile": profile or None, "cat": cat or None,
+           "files_total": 0, "accepted": 0, "skipped": 0, "items": [], "errors": [], "requires_apply": True,
+           "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM."}
+    if not zpath.exists():
+        out["errors"].append("ZIP_NOT_FOUND")
+        return out
+    if not zipfile.is_zipfile(zpath):
+        out["errors"].append("NOT_A_ZIP_FILE")
+        return out
+    max_bytes = max(1, int(max_size_mb)) * 1024 * 1024
+    try:
+        with zipfile.ZipFile(zpath) as zf:
+            infos = _zip_sorted_infos(zf)
+            out["files_total"] = len([i for i in infos if not i.is_dir()])
+            seen_norm: dict[str, str] = {}
+            if out["files_total"] > max_files:
+                out["errors"].append(f"TOO_MANY_FILES:{out['files_total']}>{max_files}")
+            for info in infos:
+                if info.is_dir():
+                    continue
+                norm_path = _zip_normalized_member_path(info.filename)
+                item = {"path": info.filename, "normalized_path": norm_path or None, "size": info.file_size, "status": "planned"}
+                if not _zip_is_safe_member(info.filename) or not norm_path:
+                    item.update({"status": "skipped", "reason": "UNSAFE_OR_SYSTEM_PATH"})
+                    out["items"].append(item); continue
+                norm_key = norm_path.lower()
+                if norm_key in seen_norm:
+                    item.update({"status": "skipped", "reason": "DUPLICATE_NORMALIZED_ZIP_PATH", "duplicate_of": seen_norm[norm_key]})
+                    out["errors"].append(f"DUPLICATE_NORMALIZED_ZIP_PATH:{info.filename}->{seen_norm[norm_key]}")
+                    out["items"].append(item); continue
+                seen_norm[norm_key] = info.filename
+                ext = Path(norm_path).suffix.lower()
+                item["ext"] = ext
+                if ext not in _ALLOWED_INGEST_EXTS:
+                    item.update({"status": "skipped", "reason": "UNSUPPORTED_EXTENSION"})
+                elif info.file_size > max_bytes:
+                    item.update({"status": "skipped", "reason": f"FILE_TOO_LARGE>{max_size_mb}MB"})
+                else:
+                    action = "profile-ingest" if mode == "profile" else "ingest-local"
+                    convert = "drive_gdoc" if ext in {".doc", ".docx", ".pdf", ".rtf", ".odt"} else "text_source"
+                    item.update({
+                        "action": action,
+                        "convert": convert,
+                        "requires_ocr_review": ext == ".pdf",
+                        "expected_pipeline": ["extract_to_temp", "upload_binary", "drive_convert_gdoc", "standardize_name", "verify_readback", "register", "nlm_add_after_verify"],
+                        "status": "accepted",
+                    })
+                out["items"].append(item)
+    except Exception as e:
+        out["errors"].append(f"ZIP_READ_ERROR:{type(e).__name__}")
+        return out
+    out["accepted"] = sum(1 for i in out["items"] if i.get("status") == "accepted")
+    out["skipped"] = sum(1 for i in out["items"] if i.get("status") == "skipped")
+    out["ok"] = not out["errors"] and out["accepted"] > 0
+    if mode == "vbqppl" and not cat:
+        out["warnings"] = ["CAT_NOT_PROVIDED_FOR_VBQPPL_BATCH_REVIEW_REQUIRED"]
+    else:
+        out["warnings"] = []
+    try:
+        member_basis = ";".join(i.get("path", "") for i in out.get("items", []) if i.get("status") == "accepted")
+        out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
+        out["idempotency_key"] = hashlib.sha256(((_sha256_bytes_file_local(zpath) if zpath.exists() else "") + "|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8", errors="replace")).hexdigest()
+    except Exception:
+        out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
+    return out
+
+
+def _safe_extract_zip_for_ingest(zip_path: str, temp_dir: str) -> list[dict]:
+    """Extract accepted members only. Caller phải đã chạy _zip_plan. Chống zip-slip."""
+    extracted = []
+    base = Path(temp_dir).resolve()
+    with zipfile.ZipFile(zip_path) as zf:
+        for info in _zip_sorted_infos(zf):
+            norm_path = _zip_normalized_member_path(info.filename)
+            if info.is_dir() or not _zip_is_safe_member(info.filename) or not norm_path:
+                continue
+            ext = Path(norm_path).suffix.lower()
+            if ext not in _ALLOWED_INGEST_EXTS:
+                continue
+            dest = (base / norm_path).resolve()
+            if not str(dest).startswith(str(base) + os.sep):
+                continue
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with zf.open(info) as src, open(dest, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            extracted.append({"zip_path": info.filename, "normalized_path": norm_path, "path": str(dest), "size": info.file_size, "ext": ext})
+    return extracted
+
+
+def _run_child_tl(args: list[str]) -> dict:
+    cmd = [sys.executable, str(HERE / "tl.py")] + args
+    cp = subprocess.run(cmd, text=True, capture_output=True, timeout=900)
+    payload = None
+    try:
+        payload = json.loads(cp.stdout) if cp.stdout.strip().startswith("{") else None
+    except Exception:
+        payload = None
+    return {"cmd": " ".join(args), "returncode": cp.returncode, "ok": cp.returncode == 0,
+            "json": payload, "stdout_tail": cp.stdout[-2000:], "stderr_tail": cp.stderr[-2000:]}
+
+
+def _zip_apply(a, *, mode: str) -> int:
+    cat = getattr(a, "cat", "") or ""
+    profile = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
+    if mode == "vbqppl" and not cat:
+        print(_json_dumps({"ok": False, "error": "CAT_REQUIRED_FOR_VBQPPL_ZIP_APPLY", "note": "Dùng --cat NN hoặc chạy dry-run để phân loại trước."}, deterministic=_deterministic_enabled(a)))
+        return 2
+    if getattr(a, "confirm", "") != "yes":
+        print(_json_dumps({"ok": False, "error": "CONFIRM_REQUIRED", "note": "Zip apply sẽ gọi ingest-local/profile-ingest từng file. Thêm --confirm yes sau khi đã xem dry-run."}, deterministic=_deterministic_enabled(a)))
+        return 2
+    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat, max_files=a.max_files, max_size_mb=a.max_size_mb)
+    if not plan.get("ok"):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    results = []
+    with tempfile.TemporaryDirectory(prefix="tl_zip_ingest_") as td:
+        extracted = _safe_extract_zip_for_ingest(a.file, td)
+        for item in extracted:
+            if mode == "profile":
+                child = ["profile-ingest", item["path"], "--apply", "--json"]
+                if profile:
+                    child += ["--profile", profile]
+            else:
+                child = ["ingest-local", item["path"], "--cat", cat, "--apply", "--json"]
+            if getattr(a, "skip_nlm_preflight", False) and mode != "profile":
+                child.append("--skip-nlm-preflight")
+            r = _run_child_tl(child)
+            r.update({"zip_path": item["zip_path"], "file": item["path"]})
+            results.append(r)
+            if not r.get("ok") and not getattr(a, "continue_on_error", False):
+                break
+    out = {"ok": bool(results) and all(r.get("ok") for r in results), "schema": "ingest_zip_apply.v1",
+           "mode": mode, "profile": (profile if mode == "profile" else None), "cat": (cat if mode == "vbqppl" else None),
+           "dry_run_plan": {k: plan.get(k) for k in ("zip", "files_total", "accepted", "skipped", "warnings")},
+           "results": results, "note": "Apply gọi lại pipeline hiện có từng file; từng pipeline tự upload→convert→readback→register→NLM."}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+def cmd_ingest_zip(a) -> int:
+    out = _zip_plan(a.file, mode="vbqppl", cat=getattr(a, "cat", "") or "", max_files=a.max_files, max_size_mb=a.max_size_mb)
+    if not getattr(a, "apply", False):
+        _print_json_or_text(out, getattr(a, "json", False))
+        return 0 if out.get("ok") else 2
+    return _zip_apply(a, mode="vbqppl")
+
+
+def cmd_profile_ingest_zip(a) -> int:
+    prof = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
+    out = _zip_plan(a.file, mode="profile", profile=prof, max_files=a.max_files, max_size_mb=a.max_size_mb)
+    if not getattr(a, "apply", False):
+        _print_json_or_text(out, getattr(a, "json", False))
+        return 0 if out.get("ok") else 2
+    return _zip_apply(a, mode="profile")
+
+
+def _text_quality_metrics(text: str) -> dict:
+    chars = len(text or "")
+    letters = sum(1 for c in text if c.isalpha())
+    vi_marks = sum(1 for c in text if c in _VIET_CHARS)
+    garbled = len(re.findall(r"[�\ufffd]", text or ""))
+    articles = len(re.findall(r"(?im)^\s*Điều\s+\d+[a-zA-Z]?\s*[\.:]", text or ""))
+    appendices = len(re.findall(r"(?im)^\s*Phụ\s*lục\b", text or ""))
+    lines = len((text or "").splitlines())
+    return {
+        "chars": chars,
+        "lines": lines,
+        "letters": letters,
+        "vietnamese_mark_density": round(vi_marks / max(letters, 1), 6),
+        "garbled_ratio": round(garbled / max(chars, 1), 6),
+        "article_count": articles,
+        "appendix_count": appendices,
+    }
+
+
+def _read_local_text_for_analysis(path: Path, max_chars: int = 500000) -> tuple[str, list[str]]:
+    warnings = []
+    ext = path.suffix.lower()
+    if ext in {".txt", ".md"}:
+        return path.read_text(encoding="utf-8", errors="replace")[:max_chars], warnings
+    if ext == ".pdf":
+        exe = shutil.which("pdftotext")
+        if not exe:
+            return "", ["PDFTOTEXT_NOT_AVAILABLE_TEXT_LAYER_UNKNOWN"]
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "out.txt"
+            try:
+                subprocess.run([exe, "-layout", str(path), str(out)], timeout=30, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if out.exists():
+                    return out.read_text(encoding="utf-8", errors="replace")[:max_chars], warnings
+            except Exception as e:
+                return "", [f"PDFTOTEXT_ERROR:{type(e).__name__}"]
+        return "", ["PDFTOTEXT_NO_OUTPUT"]
+    return "", ["TEXT_EXTRACTION_NOT_IMPLEMENTED_FOR_EXT:" + ext]
+
+
+def cmd_ocr_analyze(a) -> int:
+    path = Path(a.file)
+    out = {"ok": False, "schema": "ocr_analyze.v1", "file": str(path), "engine": "analyze-only", "warnings": [], "recommendations": []}
+    if not path.exists():
+        out["warnings"].append("FILE_NOT_FOUND")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    text, warns = _read_local_text_for_analysis(path)
+    out["warnings"].extend(warns)
+    out["metrics"] = _text_quality_metrics(text)
+    ext = path.suffix.lower()
+    out["text_layer_detected"] = out["metrics"]["chars"] >= 200
+    if ext == ".pdf" and not out["text_layer_detected"]:
+        out["recommendations"].append("PDF_SCAN_OR_NO_TEXT_LAYER: run OCR with Drive ocrLanguage=vi or OCRmyPDF vie+eng, then ocr-verify")
+    if out["metrics"]["garbled_ratio"] > 0.001:
+        out["recommendations"].append("GARBLED_TEXT_REVIEW_REQUIRED")
+    if out["metrics"]["vietnamese_mark_density"] < 0.005 and out["metrics"]["letters"] > 500:
+        out["recommendations"].append("LOW_VIETNAMESE_MARK_DENSITY_REVIEW_REQUIRED")
+    out["ok"] = bool(out["text_layer_detected"] or ext in {".txt", ".md"})
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+def cmd_ocr_verify(a) -> int:
+    path = Path(a.text_file)
+    out = {"ok": False, "schema": "ocr_verify.v2", "text_file": str(path), "source": getattr(a, "source", None), "mode": a.mode, "checks": [], "warnings": []}
+    if not path.exists():
+        out["warnings"].append("TEXT_FILE_NOT_FOUND")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    text = path.read_text(encoding="utf-8", errors="replace")
+    m = _text_quality_metrics(text)
+    out["metrics"] = m
+    def check(name, ok, detail=""):
+        out["checks"].append({"name": name, "ok": bool(ok), "detail": detail})
+    check("min_length", m["chars"] >= (500 if a.mode == "vbqppl" else 100), str(m["chars"]))
+    check("garbled_ratio", m["garbled_ratio"] <= 0.001, str(m["garbled_ratio"]))
+    check("vietnamese_mark_density", m["vietnamese_mark_density"] >= 0.005 or m["letters"] < 500, str(m["vietnamese_mark_density"]))
+    check("appendix_markers_counted", m.get("appendix_count", 0) >= 0, str(m.get("appendix_count", 0)))
+    source = getattr(a, "source", None) or ""
+    if source and Path(source).exists():
+        pr = _pdf_page_report(Path(source))
+        out["page_report"] = pr
+        if Path(source).suffix.lower() == ".pdf":
+            if pr.get("page_count") is None:
+                out["warnings"].append("PAGE_COUNT_UNKNOWN_REVIEW_REQUIRED")
+            page_markers = len(re.findall(r"(?im)^\s*(?:page|trang)\s+\d+\s*$", text))
+            out["page_coverage"] = {"source_page_count": pr.get("page_count"), "text_page_markers": page_markers, "status": "markers_present" if page_markers else "markers_absent_or_not_extracted"}
+    if a.mode == "vbqppl":
+        check("article_sequence_present", m["article_count"] > 0, str(m["article_count"]))
+        man, man_warns = _load_ocr_manifest_for_text(path)
+        out["manifest"] = man or None
+        out["warnings"].extend(man_warns)
+        man_ok, man_extra_warns, man_checks = _verify_ocr_manifest_contract(man, text_file=path, source=source, mode=a.mode)
+        out["warnings"].extend(man_extra_warns)
+        out["checks"].extend(man_checks)
+        check("vbqppl_manifest_verified_required", man_ok, "OCR VBQPPL canonical requires ocr_manifest.v1 verification")
+    else:
+        check("text_present", m["chars"] > 100, str(m["chars"]))
+        man, man_warns = _load_ocr_manifest_for_text(path)
+        if man:
+            out["manifest"] = man
+            man_ok, man_extra_warns, man_checks = _verify_ocr_manifest_contract(man, text_file=path, source=source, mode=a.mode)
+            out["warnings"].extend(man_extra_warns)
+            out["checks"].extend(man_checks)
+        else:
+            out["warnings"].extend(man_warns)
+    out["ok"] = all(c["ok"] for c in out["checks"])
+    out["recommendation"] = "Có thể dùng --ocr-verified nếu đã đối chiếu bổ sung bằng mắt/nguồn gốc." if out["ok"] else "Không dùng --ocr-verified; cần OCR lại hoặc kiểm thủ công."
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))
+    return 0 if out.get("ok") else 2
+
+
+
+# ───────────────────────── OCR run + deterministic chunk apply/verify ─────────────────────────
+def _ocr_out_paths(src: Path, out_dir: str | None) -> tuple[Path, Path, Path]:
+    base = src.stem
+    od = Path(out_dir) if out_dir else (src.parent / f"{base}_ocr_out")
+    od.mkdir(parents=True, exist_ok=True)
+    return od, od / f"{base}.ocr.txt", od / f"{base}.ocr.pdf"
+
+
+def _write_text_atomic(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8", errors="replace")
+    tmp.replace(path)
+
+
+def _extract_text_layer_to_file(src: Path, dest: Path) -> tuple[bool, list[str], dict]:
+    warnings: list[str] = []
+    text = ""
+    if src.suffix.lower() in {".txt", ".md"}:
+        text = src.read_text(encoding="utf-8", errors="replace")
+    elif src.suffix.lower() == ".pdf":
+        exe = shutil.which("pdftotext")
+        if not exe:
+            return False, ["PDFTOTEXT_NOT_AVAILABLE"], {}
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "out.txt"
+            try:
+                cp = subprocess.run([exe, "-layout", str(src), str(out)], timeout=60, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if cp.returncode != 0:
+                    warnings.append(f"PDFTOTEXT_RC_{cp.returncode}")
+                if out.exists():
+                    text = out.read_text(encoding="utf-8", errors="replace")
+            except Exception as e:  # noqa: BLE001
+                return False, [f"PDFTOTEXT_ERROR:{type(e).__name__}:{e}"], {}
+    else:
+        return False, ["TEXT_LAYER_EXTRACTION_UNSUPPORTED_EXT:" + src.suffix.lower()], {}
+    _write_text_atomic(dest, text)
+    return bool(text.strip()), warnings, _text_quality_metrics(text)
+
+
+def _sha256_bytes_file_local(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _ocr_manifest_path_for_text(text_file: Path) -> Path:
+    # foo.ocr.txt -> foo.ocr.manifest.json; fallback -> <stem>.manifest.json
+    name = text_file.name
+    if name.endswith(".ocr.txt"):
+        return text_file.with_name(name[:-4] + ".manifest.json")
+    return text_file.with_suffix(text_file.suffix + ".manifest.json")
+
+
+def _pdf_page_report(src: Path) -> dict:
+    if src.suffix.lower() != ".pdf":
+        return {"page_count": None, "method": "not_pdf", "ok": True, "warnings": []}
+    warnings = []
+    exe = shutil.which("pdfinfo")
+    if exe:
+        try:
+            cp = subprocess.run([exe, str(src)], timeout=20, check=False, text=True, capture_output=True)
+            m = re.search(r"(?im)^Pages:\s*(\d+)", cp.stdout or "")
+            if m:
+                return {"page_count": int(m.group(1)), "method": "pdfinfo", "ok": True, "warnings": []}
+            warnings.append("PDFINFO_PAGES_NOT_FOUND")
+        except Exception as e:  # noqa: BLE001
+            warnings.append(f"PDFINFO_ERROR:{type(e).__name__}")
+    try:
+        raw = src.read_bytes()[:20_000_000]
+        # Approximation fallback only. Good enough for warning when pdfinfo absent.
+        n = len(re.findall(rb"/Type\s*/Page\b", raw))
+        return {"page_count": (n or None), "method": "pdf_page_token_scan", "ok": bool(n), "warnings": warnings + ([] if n else ["PDF_PAGE_COUNT_UNKNOWN"])}
+    except Exception as e:  # noqa: BLE001
+        return {"page_count": None, "method": "fallback_failed", "ok": False, "warnings": warnings + [f"PDF_PAGE_COUNT_ERROR:{type(e).__name__}"]}
+
+
+def _ocr_engine_version(engine: str) -> str:
+    if engine == "none":
+        return "text-layer-extract"
+    exe = shutil.which(engine) if engine in {"ocrmypdf", "tesseract"} else None
+    if not exe:
+        return "unknown"
+    try:
+        cp = subprocess.run([exe, "--version"], timeout=10, check=False, text=True, capture_output=True)
+        first = ((cp.stdout or cp.stderr or "").splitlines() or [""])[0].strip()
+        return first[:120] or "unknown"
+    except Exception:
+        return "unknown"
+
+
+def _ocr_manifest_build(*, src: Path, text_file: Path, engine_used: str, engine_requested: str, lang: str, mode: str, ocr_pdf: Path | None, metrics: dict, verify: dict | None, warnings: list[str]) -> dict:
+    text_hash = _sha256_bytes_file_local(text_file) if text_file.exists() else ""
+    source_hash = _sha256_bytes_file_local(src) if src.exists() else ""
+    page_report = _pdf_page_report(src)
+    coverage = {
+        "source_page_count": page_report.get("page_count"),
+        "page_count_method": page_report.get("method"),
+        "text_has_page_markers": bool(re.search(r"(?im)^\s*(?:page|trang)\s+\d+\s*$", text_file.read_text(encoding="utf-8", errors="replace")[:1_000_000] if text_file.exists() else "")),
+        "page_coverage_status": "unknown" if page_report.get("page_count") else "not_available",
+    }
+    if coverage["source_page_count"] and coverage["text_has_page_markers"]:
+        coverage["page_coverage_status"] = "has_page_markers"
+    elif coverage["source_page_count"]:
+        coverage["page_coverage_status"] = "page_count_known_text_markers_absent"
+    verification_ok = bool((verify or {}).get("ok"))
+    status = "verified" if verification_ok else "unverified"
+    return {
+        "ok": verification_ok,
+        "schema": "ocr_manifest.v1",
+        "mode": mode,
+        "source_file": str(src),
+        "source_sha256": source_hash,
+        "source_size_bytes": src.stat().st_size if src.exists() else None,
+        "text_file": str(text_file),
+        "text_sha256": text_hash,
+        "text_size_bytes": text_file.stat().st_size if text_file.exists() else None,
+        "engine_requested": engine_requested,
+        "engine_used": engine_used,
+        "engine_version": _ocr_engine_version(engine_used),
+        "language": lang,
+        "outputs": {"text_file": str(text_file), "ocr_pdf": str(ocr_pdf) if ocr_pdf and ocr_pdf.exists() else None},
+        "page_report": page_report,
+        "page_coverage": coverage,
+        "metrics": metrics or {},
+        "verification_status": status,
+        "verification": verify or {},
+        "warnings": list(warnings or []) + list(page_report.get("warnings") or []),
+        "canonical_allowed": bool(verification_ok and mode != "vbqppl") or bool(verification_ok and mode == "vbqppl"),
+        "volatile": {"created_at_utc": "<created_at_runtime>"},
+    }
+
+
+def _load_ocr_manifest_for_text(text_file: Path) -> tuple[dict | None, list[str]]:
+    candidates = [_ocr_manifest_path_for_text(text_file), text_file.with_suffix(text_file.suffix + ".manifest.json")]
+    seen = set()
+    for mp in candidates:
+        if str(mp) in seen:
+            continue
+        seen.add(str(mp))
+        if mp.exists():
+            try:
+                return json.loads(mp.read_text(encoding="utf-8", errors="replace")), []
+            except Exception as e:  # noqa: BLE001
+                return None, [f"OCR_MANIFEST_INVALID:{type(e).__name__}"]
+    return None, ["OCR_MANIFEST_NOT_FOUND"]
+
+
+def _verify_ocr_manifest_contract(man: dict | None, *, text_file: Path, source: str = "", mode: str = "profile") -> tuple[bool, list[str], list[dict]]:
+    warnings: list[str] = []
+    checks: list[dict] = []
+    def check(name: str, ok: bool, detail: str = ""):
+        checks.append({"name": name, "ok": bool(ok), "detail": detail})
+    if not man:
+        check("manifest_present", False, "missing")
+        return False, warnings, checks
+    check("manifest_schema", man.get("schema") == "ocr_manifest.v1", str(man.get("schema")))
+    check("manifest_text_file_matches", Path(str(man.get("text_file") or "")).name == text_file.name, str(man.get("text_file") or ""))
+    if text_file.exists() and man.get("text_sha256"):
+        h = _sha256_bytes_file_local(text_file)
+        check("manifest_text_hash_matches", h == man.get("text_sha256"), h[:12])
+    else:
+        check("manifest_text_hash_present", bool(man.get("text_sha256")), str(man.get("text_sha256") or ""))
+    if source:
+        src = Path(source)
+        if src.exists() and man.get("source_sha256"):
+            h = _sha256_bytes_file_local(src)
+            check("manifest_source_hash_matches", h == man.get("source_sha256"), h[:12])
+        else:
+            warnings.append("SOURCE_HASH_CHECK_SKIPPED")
+    check("manifest_verification_status", man.get("verification_status") == "verified", str(man.get("verification_status")))
+    if mode == "vbqppl":
+        pr = man.get("page_report") or {}
+        if pr.get("method") != "not_pdf":
+            if pr.get("page_count") is None:
+                warnings.append("VBQPPL_PAGE_COUNT_UNKNOWN_REVIEW_REQUIRED")
+            cov = (man.get("page_coverage") or {}).get("page_coverage_status")
+            if cov in {"not_available", "unknown"}:
+                warnings.append("VBQPPL_PAGE_COVERAGE_UNKNOWN_REVIEW_REQUIRED")
+    return all(c.get("ok") for c in checks), warnings, checks
+
+
+def cmd_ocr_run(a) -> int:
+    """OCR/extract local sidecar text. Safe phase: local files only; Drive/Paddle/DocumentAI engines are guarded unless available."""
+    src = Path(a.file)
+    out = {"ok": False, "schema": "ocr_run.v1", "file": str(src), "engine_requested": a.engine, "warnings": [], "outputs": {}, "verify": None}
+    if not src.exists():
+        out["warnings"].append("FILE_NOT_FOUND")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    od, sidecar, ocr_pdf = _ocr_out_paths(src, getattr(a, "out_dir", None))
+    out["outputs"]["out_dir"] = str(od)
+    engine = a.engine
+    if engine == "auto":
+        text, warns = _read_local_text_for_analysis(src)
+        out["warnings"].extend(warns)
+        metrics = _text_quality_metrics(text)
+        if src.suffix.lower() in {".txt", ".md"} and metrics.get("chars", 0) > 0:
+            engine = "none"
+        elif metrics.get("chars", 0) >= 200:
+            engine = "none"
+        elif shutil.which("ocrmypdf") and src.suffix.lower() == ".pdf":
+            engine = "ocrmypdf"
+        else:
+            out["engine_used"] = "none"
+            out["warnings"].append("NO_TEXT_LAYER_AND_NO_LOCAL_OCR_ENGINE")
+            out["recommendations"] = [
+                "Cài OCRmyPDF + Tesseract vie để chạy local: ocr-run --engine ocrmypdf --lang vie+eng",
+                "Hoặc dùng Drive OCR với ocrLanguage=vi trong pipeline Drive live rồi chạy ocr-verify trên sidecar text.",
+                "Không dùng OCR chưa verify làm canonical VBQPPL.",
+            ]
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    out["engine_used"] = engine
+    if engine == "none":
+        ok, warns, metrics = _extract_text_layer_to_file(src, sidecar)
+        out["warnings"].extend(warns)
+        out["outputs"]["text_file"] = str(sidecar)
+        out["metrics"] = metrics
+        out["ok"] = bool(ok and metrics.get("chars", 0) >= 1)
+    elif engine == "ocrmypdf":
+        if src.suffix.lower() != ".pdf":
+            out["warnings"].append("OCRMYPDF_REQUIRES_PDF")
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+        exe = shutil.which("ocrmypdf")
+        if not exe:
+            out["warnings"].append("OCRMYPDF_NOT_AVAILABLE")
+            out["recommendations"] = ["Cài ocrmypdf và tesseract language pack vie, hoặc dùng engine drive/paddle ngoài CLI local."]
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+        cmd = [exe, "--language", a.lang or "vie+eng", "--sidecar", str(sidecar), str(src), str(ocr_pdf)]
+        if getattr(a, "force_ocr", False):
+            cmd.insert(1, "--force-ocr")
+        try:
+            cp = subprocess.run(cmd, timeout=getattr(a, "timeout", 600), check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out["returncode"] = cp.returncode
+            out["stdout_tail"] = cp.stdout.decode("utf-8", "replace")[-1200:]
+            out["stderr_tail"] = cp.stderr.decode("utf-8", "replace")[-1200:]
+            out["outputs"]["text_file"] = str(sidecar)
+            out["outputs"]["ocr_pdf"] = str(ocr_pdf)
+            if sidecar.exists():
+                txt = sidecar.read_text(encoding="utf-8", errors="replace")
+                out["metrics"] = _text_quality_metrics(txt)
+            out["ok"] = (cp.returncode == 0 and sidecar.exists() and out.get("metrics", {}).get("chars", 0) > 0)
+        except Exception as e:  # noqa: BLE001
+            out["warnings"].append(f"OCRMYPDF_ERROR:{type(e).__name__}:{e}")
+            out["ok"] = False
+    elif engine in {"drive", "paddle", "documentai"}:
+        out["warnings"].append(f"ENGINE_{engine.upper()}_NOT_ENABLED_IN_LOCAL_STAGE3")
+        out["recommendations"] = [
+            "Stage 3 chỉ mở local sidecar/text-layer an toàn. Engine này cần plugin live/config riêng.",
+            "Dùng route-task --task ocr_pdf_scan để xem workflow; sau khi tạo text sidecar thì chạy ocr-verify.",
+        ]
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    else:
+        out["warnings"].append("UNKNOWN_ENGINE")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    if out.get("outputs", {}).get("text_file") and Path(out["outputs"]["text_file"]).exists():
+        class _A: pass
+        va = _A(); va.text_file = out["outputs"]["text_file"]; va.source = str(src); va.mode = a.mode; va.json = True
+        txt = Path(va.text_file).read_text(encoding="utf-8", errors="replace")
+        m = _text_quality_metrics(txt)
+        checks = []
+        def check(name, ok, detail=""):
+            checks.append({"name": name, "ok": bool(ok), "detail": detail})
+        check("min_length", m["chars"] >= (500 if a.mode == "vbqppl" else 100), str(m["chars"]))
+        check("garbled_ratio", m["garbled_ratio"] <= 0.001, str(m["garbled_ratio"]))
+        check("vietnamese_mark_density", m["vietnamese_mark_density"] >= 0.005 or m["letters"] < 500, str(m["vietnamese_mark_density"]))
+        if a.mode == "vbqppl":
+            check("article_sequence_present", m["article_count"] > 0, str(m["article_count"]))
+        else:
+            check("text_present", m["chars"] > 100, str(m["chars"]))
+        out["verify"] = {"schema": "ocr_verify.inline.v1", "mode": a.mode, "metrics": m, "checks": checks, "ok": all(c["ok"] for c in checks)}
+        if not out["verify"]["ok"]:
+            out.setdefault("warnings", []).append("OCR_VERIFY_NOT_OK")
+        manifest = _ocr_manifest_build(src=src, text_file=Path(out["outputs"]["text_file"]), engine_used=out.get("engine_used") or engine, engine_requested=a.engine, lang=a.lang or "vi", mode=a.mode, ocr_pdf=ocr_pdf, metrics=m, verify=out.get("verify"), warnings=out.get("warnings", []))
+        manifest_path = _ocr_manifest_path_for_text(Path(out["outputs"]["text_file"]))
+        _write_text_atomic(manifest_path, json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
+        out["outputs"]["manifest"] = str(manifest_path)
+        out["manifest"] = {k: manifest.get(k) for k in ("schema", "ok", "verification_status", "source_sha256", "text_sha256", "engine_used", "engine_version", "language", "page_report", "page_coverage", "canonical_allowed")}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))
+    return 0 if out.get("ok") else 2
+
+
+def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[str, list[dict]]:
+    records: list[dict] = []
+    article_pat = re.compile(r"(?im)^\s*(Điều\s+\d+[a-zA-Z]?\s*[\.:].*)$")
+    matches = list(article_pat.finditer(text))
+    if matches:
+        boundaries = [(m.start(), (matches[i+1].start() if i+1 < len(matches) else len(text)), m.group(1).strip()) for i, m in enumerate(matches)]
+        group_start = None; group_end = None; group_title = None; start_dieu = None; end_dieu = None
+        for start, end, title in boundaries:
+            dm = re.search(r"Điều\s+(\d+)", title)
+            dno = int(dm.group(1)) if dm else None
+            if group_start is not None and (end - group_start) > max_chars:
+                chunk_text = text[group_start:group_end]
+                records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
+                group_start = None; group_end = None; group_title = None; start_dieu = None; end_dieu = None
+            if group_start is None:
+                group_start = start; group_title = title[:120]; start_dieu = dno
+            group_end = end; end_dieu = dno
+        if group_start is not None:
+            chunk_text = text[group_start:group_end]
+            records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
+        return "by_article", records
+    block_pat = re.compile(r".+?(?:\n\s*\n|\Z)", re.S)
+    blocks = [(m.start(), m.end(), m.group(0)) for m in block_pat.finditer(text) if m.group(0).strip()]
+    group_start = None; group_end = None
+    for start, end, block in blocks:
+        if group_start is not None and (end - group_start) > max_chars:
+            chunk_text = text[group_start:group_end]
+            records.append({"index": len(records)+1, "title": f"part{len(records)+1:02d}", "start_char": group_start, "end_char": group_end, "chars": len(chunk_text), "text": chunk_text})
+            group_start = None; group_end = None
+        if group_start is None:
+            group_start = start
+        group_end = end
+    if group_start is not None:
+        chunk_text = text[group_start:group_end]
+        records.append({"index": len(records)+1, "title": f"part{len(records)+1:02d}", "start_char": group_start, "end_char": group_end, "chars": len(chunk_text), "text": chunk_text})
+    return "by_paragraph_budget", records
+
+
+def _safe_chunk_stem(name: str) -> str:
+    s = unicodedata.normalize("NFKD", name or "chunk")
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    s = re.sub(r"[^A-Za-z0-9._-]+", "_", s).strip("._-")
+    return s[:100] or "chunk"
+
+
+def _chunk_plan_from_text(text: str, *, name: str, mode: str, max_chars: int) -> dict:
+    sha = hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
+    if mode == "vbqppl-canonical":
+        return {"ok": False, "schema": "chunk_plan.v2", "mode": mode, "source_hash": sha, "error": "DO_NOT_SPLIT_VBQPPL_CANONICAL", "chunks": [], "apply_enabled": False}
+    strategy, records = _chunk_records_from_text(text, name=name, max_chars=max_chars)
+    chunks = []
+    safe_base = _safe_chunk_stem(name)
+    for r in records:
+        c = {k: v for k, v in r.items() if k != "text"}
+        c["text_preview"] = r.get("text", "")[:160]
+        c["sha256"] = hashlib.sha256((r.get("text") or "").encode("utf-8", errors="replace")).hexdigest()
+        c["expected_name"] = f"{safe_base}__part{r['index']:02d}" + (f"__Dieu_{r.get('start_dieu')}-{r.get('end_dieu')}" if r.get("start_dieu") else "")
+        chunks.append(c)
+    return {"ok": bool(chunks), "schema": "chunk_plan.v2", "mode": mode, "source_hash": sha, "strategy": strategy, "max_chars": max_chars, "total_chars": len(text), "chunk_count": len(chunks), "chunks": chunks, "apply_enabled": True, "note": "chunk-apply local chỉ tạo chunk files + manifest; chưa ghi Drive/NLM."}
+
+
+def cmd_chunk_plan(a) -> int:
+    path = Path(a.file)
+    if not path.exists():
+        out = {"ok": False, "schema": "chunk_plan.v2", "error": "FILE_NOT_FOUND", "file": str(path)}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    text, warns = _read_local_text_for_analysis(path, max_chars=5_000_000)
+    if not text:
+        out = {"ok": False, "schema": "chunk_plan.v2", "error": "NO_TEXT_AVAILABLE", "warnings": warns, "file": str(path)}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    out = _chunk_plan_from_text(text, name=a.name or path.stem, mode=a.mode, max_chars=a.max_chars)
+    out["file"] = str(path)
+    out["warnings"] = warns
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+def cmd_chunk_apply(a) -> int:
+    path = Path(a.file)
+    out = {"ok": False, "schema": "chunk_apply.v1", "file": str(path), "mode": a.mode, "warnings": [], "chunks": []}
+    if a.mode == "vbqppl-canonical":
+        out["warnings"].append("DO_NOT_SPLIT_VBQPPL_CANONICAL")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    if not path.exists():
+        out["warnings"].append("FILE_NOT_FOUND")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    text, warns = _read_local_text_for_analysis(path, max_chars=10_000_000)
+    out["warnings"].extend(warns)
+    if not text:
+        out["warnings"].append("NO_TEXT_AVAILABLE")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    name = a.name or path.stem
+    source_hash = hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
+    if getattr(a, "expected_hash", None) and a.expected_hash != source_hash:
+        out["warnings"].append("SOURCE_HASH_CHANGED")
+        out["expected_hash"] = a.expected_hash; out["source_hash"] = source_hash
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    strategy, records = _chunk_records_from_text(text, name=name, max_chars=a.max_chars)
+    od = Path(a.out_dir) if getattr(a, "out_dir", None) else path.parent / f"{_safe_chunk_stem(name)}_chunks"
+    od.mkdir(parents=True, exist_ok=True)
+    manifest = {"schema": "chunk_manifest.v1", "source_file": str(path), "source_hash": source_hash, "mode": a.mode, "strategy": strategy, "name": name, "max_chars": a.max_chars, "chunk_count": len(records), "chunks": []}
+    safe_base = _safe_chunk_stem(name)
+    for r in records:
+        expected = f"{safe_base}__part{r['index']:02d}" + (f"__Dieu_{r.get('start_dieu')}-{r.get('end_dieu')}" if r.get("start_dieu") else "")
+        chunk_path = od / f"{expected}.md"
+        chunk_hash = hashlib.sha256((r.get("text") or "").encode("utf-8", errors="replace")).hexdigest()
+        header = {
+            "source_file": str(path), "source_hash": source_hash, "mode": a.mode, "chunk_index": r["index"],
+            "chunk_count": len(records), "start_char": r.get("start_char"), "end_char": r.get("end_char"),
+            "start_dieu": r.get("start_dieu"), "end_dieu": r.get("end_dieu"), "chunk_sha256": chunk_hash,
+            "canonical": False, "note": "VBQPPL chunks are helper sources for NLM only, not legal canonical." if a.mode.startswith("vbqppl") else "Profile chunk for query quality.",
+        }
+        body = "---\n" + json.dumps(header, ensure_ascii=False, indent=2) + "\n---\n\n" + (r.get("text") or "")
+        _write_text_atomic(chunk_path, body)
+        item = {k: v for k, v in r.items() if k != "text"}
+        item.update({"expected_name": expected, "path": str(chunk_path), "sha256": chunk_hash})
+        manifest["chunks"].append(item)
+        out["chunks"].append(item)
+    manifest_path = od / "chunk_manifest.json"
+    _write_text_atomic(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2))
+    out.update({"ok": True, "out_dir": str(od), "manifest": str(manifest_path), "source_hash": source_hash, "strategy": strategy, "chunk_count": len(records)})
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0
+
+
+def cmd_chunk_verify(a) -> int:
+    mp = Path(a.manifest)
+    out = {"ok": False, "schema": "chunk_verify.v1", "manifest": str(mp), "checks": [], "warnings": []}
+    if not mp.exists():
+        out["warnings"].append("MANIFEST_NOT_FOUND")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    try:
+        man = json.loads(mp.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        out["warnings"].append(f"MANIFEST_INVALID:{type(e).__name__}:{e}")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
+    def check(name, ok, detail=""):
+        out["checks"].append({"name": name, "ok": bool(ok), "detail": detail})
+    chunks = man.get("chunks") or []
+    check("manifest_schema", man.get("schema") == "chunk_manifest.v1", str(man.get("schema")))
+    check("chunk_count_match", int(man.get("chunk_count") or -1) == len(chunks), f"{man.get('chunk_count')} vs {len(chunks)}")
+    src = Path(man.get("source_file") or "")
+    if src.exists():
+        txt, _warns = _read_local_text_for_analysis(src, max_chars=10_000_000)
+        src_hash = hashlib.sha256(txt.encode("utf-8", errors="replace")).hexdigest() if txt else ""
+        check("source_hash_unchanged", src_hash == man.get("source_hash"), src_hash[:12])
+    else:
+        out["warnings"].append("SOURCE_FILE_NOT_FOUND_SKIP_HASH_CHECK")
+    for item in chunks:
+        cp = Path(item.get("path") or "")
+        exists = cp.exists()
+        check(f"chunk_{item.get('index')}_exists", exists, str(cp))
+        if exists:
+            raw = cp.read_text(encoding="utf-8", errors="replace")
+            parts = raw.split("---", 2)
+            content = parts[2] if len(parts) >= 3 else raw
+            if len(parts) >= 3:
+                if content.startswith("\n\n"):
+                    content = content[2:]
+                elif content.startswith("\n"):
+                    content = content[1:]
+            h = hashlib.sha256(content.encode("utf-8", errors="replace")).hexdigest()
+            check(f"chunk_{item.get('index')}_hash", h == item.get("sha256"), h[:12])
+    out["ok"] = all(c["ok"] for c in out["checks"])
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+
+# ───────────────────────── Stage 4 bridges: verified OCR/chunks -> existing ingest pipelines ─────────────────────────
+def _bridge_common_ocr_verify(text_file: str, *, mode: str, source: str = "") -> dict:
+    """Run ocr-verify as a child command and return its JSON envelope."""
+    args = ["ocr-verify", text_file, "--mode", mode, "--json"]
+    if source:
+        args += ["--source", source]
+    return _run_child_tl(args)
+
+
+def _bridge_confirm_apply(a, *, what: str) -> tuple[bool, dict]:
+    if not getattr(a, "apply", False):
+        return True, {}
+    if getattr(a, "confirm", "") != "yes":
+        return False, {"ok": False, "error": "CONFIRM_REQUIRED", "what": what,
+                       "note": "Bridge apply sẽ gọi lại pipeline ingest hiện có. Thêm --confirm yes sau khi đã xem dry-run/verify."}
+    return True, {}
+
+
+def _bridge_ocr_plan(a, *, mode: str) -> dict:
+    verify = _bridge_common_ocr_verify(a.text_file, mode=mode, source=getattr(a, "file", "") or "")
+    source = Path(a.file)
+    text = Path(a.text_file)
+    out = {
+        "ok": bool(verify.get("ok")),
+        "schema": "ocr_ingest_bridge.v1",
+        "mode": mode,
+        "file": str(source),
+        "text_file": str(text),
+        "apply": bool(getattr(a, "apply", False)),
+        "verification": verify,
+        "warnings": [],
+        "planned_child_command": [],
+        "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại ingest-local/profile-ingest hiện có với --source-quality ocr --ocr-verified.",
+        "idempotency": _idempotency_contract_for_workflow("ocr_ingest"),
+    }
+    if not source.exists():
+        out["ok"] = False; out["warnings"].append("SOURCE_FILE_NOT_FOUND")
+    if not text.exists():
+        out["ok"] = False; out["warnings"].append("TEXT_FILE_NOT_FOUND")
+    man = ((verify.get("json") or {}).get("manifest") if isinstance(verify.get("json"), dict) else None)
+    if mode == "vbqppl" and not (isinstance(man, dict) and man.get("verification_status") == "verified"):
+        out["ok"] = False
+        out["warnings"].append("VBQPPL_OCR_REQUIRES_VERIFIED_MANIFEST")
+    if mode == "vbqppl":
+        if not getattr(a, "cat", None):
+            out["ok"] = False; out["warnings"].append("CAT_REQUIRED_FOR_VBQPPL_OCR_INGEST")
+        child = ["ingest-local", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--auto-plan", "--json"]
+        for opt in ("name", "sohieu", "cat", "goc", "hieuluc", "loai"):
+            val = getattr(a, opt, None)
+            if val:
+                child += ["--" + opt.replace("_", "-"), str(val)]
+        for flag in ("force_cat", "allow_large", "skip_nlm_preflight", "skip_live_check"):
+            if getattr(a, flag, False):
+                child.append("--" + flag.replace("_", "-"))
+    else:
+        child = ["profile-ingest", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--json"]
+        for opt in ("name", "hieuluc"):
+            val = getattr(a, opt, None)
+            if val:
+                child += ["--" + opt.replace("_", "-"), str(val)]
+        if getattr(a, "chunk_max_chars", None):
+            child += ["--chunk-max-chars", str(a.chunk_max_chars)]
+        for flag in ("allow_default", "skip_live_check"):
+            if getattr(a, flag, False):
+                child.append("--" + flag.replace("_", "-"))
+        prof = getattr(a, "profile", None)
+        if prof:
+            child += ["--profile", prof]
+    if getattr(a, "apply", False):
+        child.append("--apply")
+    out["planned_child_command"] = child
+    return out
+
+
+def cmd_ingest_ocr(a) -> int:
+    ok, err = _bridge_confirm_apply(a, what="ingest-ocr")
+    if not ok:
+        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
+    plan = _bridge_ocr_plan(a, mode="vbqppl")
+    if not getattr(a, "apply", False):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
+    if not plan.get("ok"):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    child = _run_child_tl(plan["planned_child_command"])
+    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+def cmd_profile_ingest_ocr(a) -> int:
+    ok, err = _bridge_confirm_apply(a, what="profile-ingest-ocr")
+    if not ok:
+        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
+    plan = _bridge_ocr_plan(a, mode="profile")
+    if not getattr(a, "apply", False):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
+    if not plan.get("ok"):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    child = _run_child_tl(plan["planned_child_command"])
+    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+def _load_chunk_manifest(manifest_path: str) -> tuple[dict|None, list[str]]:
+    mp = Path(manifest_path)
+    if not mp.exists():
+        return None, ["MANIFEST_NOT_FOUND"]
+    try:
+        return json.loads(mp.read_text(encoding="utf-8", errors="replace")), []
+    except Exception as e:  # noqa: BLE001
+        return None, [f"MANIFEST_INVALID:{type(e).__name__}:{e}"]
+
+
+def _profile_ingest_chunks_plan(a) -> dict:
+    verify = _run_child_tl(["chunk-verify", a.manifest, "--json"])
+    man, warnings = _load_chunk_manifest(a.manifest)
+    out = {"ok": bool(verify.get("ok")) and man is not None, "schema": "chunk_ingest_bridge.v1", "manifest": a.manifest,
+           "apply": bool(getattr(a, "apply", False)), "verification": verify, "warnings": warnings, "planned_child_commands": [],
+           "idempotency": _idempotency_contract_for_workflow("chunk_ingest"),
+           "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại profile-ingest từng chunk đã verify."}
+    if not man:
+        return out
+    out.update({"manifest_mode": man.get("mode"), "source_file": man.get("source_file"), "source_hash": man.get("source_hash"), "chunk_count": len(man.get("chunks") or [])})
+    if man.get("mode") != "profile":
+        out["ok"] = False
+        out["warnings"].append("ONLY_PROFILE_CHUNKS_CAN_BE_INGESTED_IN_STAGE4")
+    profile = getattr(a, "profile", None)
+    for item in (man.get("chunks") or []):
+        cp = item.get("path")
+        expected = item.get("expected_name") or Path(cp or "chunk").stem
+        child = ["profile-ingest", str(cp), "--name", expected, "--source-quality", "digital", "--json"]
+        if profile:
+            child += ["--profile", profile]
+        if getattr(a, "allow_default", False):
+            child.append("--allow-default")
+        if getattr(a, "skip_live_check", False):
+            child.append("--skip-live-check")
+        if getattr(a, "apply", False):
+            child.append("--apply")
+        out["planned_child_commands"].append({"chunk_index": item.get("index"), "path": cp, "expected_name": expected, "command": child})
+    if not out["planned_child_commands"]:
+        out["ok"] = False; out["warnings"].append("NO_CHUNKS_IN_MANIFEST")
+    return out
+
+
+def cmd_profile_ingest_chunks(a) -> int:
+    ok, err = _bridge_confirm_apply(a, what="profile-ingest-chunks")
+    if not ok:
+        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
+    plan = _profile_ingest_chunks_plan(a)
+    if not getattr(a, "apply", False):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
+    if not plan.get("ok"):
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    results = []
+    for rec in plan.get("planned_child_commands", []):
+        r = _run_child_tl(rec["command"])
+        r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
+        results.append(r)
+        if not r.get("ok") and not getattr(a, "continue_on_error", False):
+            break
+    out = {**plan, "schema": "chunk_ingest_bridge_apply.v1", "results": results, "ok": bool(results) and all(r.get("ok") for r in results)}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if out.get("ok") else 2
+
+
+# ───────────────────────── deterministic release/audit helpers (stage5) ─────────────────────────
+_WORKFLOW_CARD_SCHEMA = "workflow_card.v1"
+_WORKFLOW_REQUIRED_FIELDS = {
+    "schema", "id", "title", "risk", "plan", "write_scope",
+    "dry_run_required", "confirm_required", "readback_required", "rollback_required", "live_state_required",
+    "volatile_fields",
+}
+_WORKFLOW_BOOL_FIELDS = {"dry_run_required", "confirm_required", "readback_required", "rollback_required", "live_state_required"}
+_WORKFLOW_RISKS = {"low", "medium", "high"}
+
+
+def _workflow_cards_audit() -> dict:
+    """Audit workflow cards and command references. Pure/read-only; catches drift between prose, router and CLI."""
+    cards = []
+    errors = []
+    warnings = []
+    available = set(_available_commands_from_parser())
+    for fp in _workflow_card_files():
+        try:
+            obj = json.loads(fp.read_text(encoding="utf-8", errors="replace"))
+        except Exception as e:  # noqa: BLE001
+            errors.append({"file": str(fp), "error": f"JSON_INVALID:{type(e).__name__}:{e}"})
+            continue
+        missing = sorted(_WORKFLOW_REQUIRED_FIELDS - set(obj.keys()))
+        if missing:
+            errors.append({"file": str(fp), "id": obj.get("id"), "error": "MISSING_REQUIRED_FIELDS", "missing": missing})
+        if obj.get("schema") != _WORKFLOW_CARD_SCHEMA:
+            errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "WORKFLOW_SCHEMA_MISMATCH", "expected": _WORKFLOW_CARD_SCHEMA, "actual": obj.get("schema")})
+        if obj.get("id") and obj.get("id") != fp.stem:
+            warnings.append({"file": str(fp), "warning": "ID_DIFFERS_FROM_FILENAME", "id": obj.get("id"), "filename": fp.stem})
+        risk = str(obj.get("risk") or "").lower()
+        if risk not in _WORKFLOW_RISKS:
+            errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "INVALID_RISK", "risk": obj.get("risk")})
+        if not isinstance(obj.get("plan"), list) or not obj.get("plan"):
+            errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "PLAN_MUST_BE_NONEMPTY_LIST"})
+        for b in sorted(_WORKFLOW_BOOL_FIELDS):
+            if b in obj and not isinstance(obj.get(b), bool):
+                errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "CONTRACT_FIELD_MUST_BE_BOOL", "field": b})
+        if "write_scope" in obj and not str(obj.get("write_scope") or "").strip():
+            errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "WRITE_SCOPE_EMPTY"})
+        if "volatile_fields" in obj and not isinstance(obj.get("volatile_fields"), list):
+            errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "VOLATILE_FIELDS_MUST_BE_LIST"})
+        rec = []
+        rec_missing = []
+        for cmd in obj.get("recommended_commands", []) or []:
+            token = str(cmd).split()[0]
+            rec.append({"command": cmd, "available": token in available})
+            if token not in available:
+                rec_missing.append(cmd)
+                warnings.append({"file": str(fp), "warning": "RECOMMENDED_COMMAND_NOT_AVAILABLE", "command": cmd})
+        if risk in {"medium", "high"}:
+            if not rec:
+                errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "RISKY_WORKFLOW_MISSING_RECOMMENDED_COMMANDS"})
+            if rec_missing:
+                errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "RISKY_WORKFLOW_RECOMMENDS_MISSING_COMMAND", "commands": rec_missing})
+            for field in ("verify", "stop_conditions"):
+                if not isinstance(obj.get(field), list) or not obj.get(field):
+                    errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "RISKY_WORKFLOW_MISSING_NONEMPTY_LIST", "field": field})
+        if risk == "high":
+            if str(obj.get("write_scope") or "none") == "none":
+                errors.append({"file": str(fp), "id": obj.get("id") or fp.stem, "error": "HIGH_RISK_WRITE_SCOPE_MUST_BE_EXPLICIT"})
+            if not obj.get("dry_run_required") and not obj.get("confirm_required"):
+                warnings.append({"file": str(fp), "id": obj.get("id") or fp.stem, "warning": "HIGH_RISK_WITHOUT_DRY_RUN_OR_CONFIRM_FLAG"})
+            if not obj.get("readback_required"):
+                warnings.append({"file": str(fp), "id": obj.get("id") or fp.stem, "warning": "HIGH_RISK_WITHOUT_READBACK_FLAG"})
+        cards.append({
+            "file": str(fp),
+            "id": obj.get("id") or fp.stem,
+            "schema": obj.get("schema"),
+            "risk": obj.get("risk"),
+            "write_scope": obj.get("write_scope"),
+            "contract": {k: obj.get(k) for k in sorted(_WORKFLOW_BOOL_FIELDS)},
+            "volatile_fields": obj.get("volatile_fields", []),
+            "recommended": rec,
+        })
+    card_ids = {c["id"] for c in cards}
+    for task, wf_id in sorted(_TASK_TO_WORKFLOW.items()):
+        if wf_id not in card_ids:
+            errors.append({"task": task, "workflow_id": wf_id, "error": "TASK_MAP_POINTS_TO_MISSING_WORKFLOW_CARD"})
+    groups = []
+    for gname, meta in _TOOL_GROUPS.items():
+        missing = []
+        raw_cmds = list(meta.get("commands", []) or [])
+        duplicate_cmds = sorted({cmd for cmd in raw_cmds if raw_cmds.count(cmd) > 1})
+        if duplicate_cmds:
+            warnings.append({"group": gname, "warning": "GROUP_COMMAND_DUPLICATE", "commands": duplicate_cmds})
+        for cmd in _unique_preserve_order(raw_cmds):
+            token = str(cmd).split()[0]
+            if token not in available:
+                missing.append(cmd)
+        groups.append({"name": gname, "missing_commands": missing, "command_count": len(_unique_preserve_order(raw_cmds))})
+        # Commands listed as planned are allowed to be missing; commands in commands should exist.
+        for cmd in missing:
+            warnings.append({"group": gname, "warning": "GROUP_COMMAND_NOT_AVAILABLE", "command": cmd})
+    ok = not errors
+    return {"ok": ok, "schema": "workflow_audit.v2", "card_schema": _WORKFLOW_CARD_SCHEMA, "cards": cards, "groups": groups, "errors": errors, "warnings": warnings,
+            "summary": {"cards": len(cards), "tasks": len(_TASK_TO_WORKFLOW), "groups": len(_TOOL_GROUPS), "available_commands": len(available)}}
+
+
+def cmd_workflow_audit(a) -> int:
+    out = _workflow_cards_audit()
+    if getattr(a, "strict", False):
+        out["strict"] = True
+        out["ok"] = bool(out.get("ok")) and not out.get("warnings")
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _run_tl_json(args: list[str], *, timeout: int = 60) -> dict:
+    env = os.environ.copy()
+    env["TL_DETERMINISTIC"] = "1"
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    env.setdefault("TZ", "UTC")
+    cmd = [sys.executable, str(HERE / "tl.py"), "--deterministic"] + list(args)
+    try:
+        cp = subprocess.run(cmd, text=True, encoding="utf-8", errors="replace", capture_output=True, timeout=timeout, env=env)
+    except subprocess.TimeoutExpired as e:
+        return {
+            "ok": False,
+            "cmd": cmd,
+            "returncode": 124,
+            "error": "TIMEOUT_EXPIRED",
+            "stdout_tail": (e.stdout or "")[-1200:] if isinstance(e.stdout, str) else "",
+            "stderr_tail": (e.stderr or "")[-1200:] if isinstance(e.stderr, str) else "",
+        }
+    stdout = (cp.stdout or "").strip()
+    data = None
+    parse_error = ""
+    if stdout:
+        try:
+            data = json.loads(stdout)
+        except Exception as e:  # noqa: BLE001
+            parse_error = f"{type(e).__name__}: {e}"
+    return {
+        "ok": cp.returncode == 0 and isinstance(data, dict),
+        "cmd": cmd,
+        "returncode": cp.returncode,
+        "data": data,
+        "parse_error": parse_error,
+        "stdout_tail": stdout[-1200:],
+        "stderr_tail": (cp.stderr or "")[-1200:],
+    }
+
+
+def _golden_dir() -> Path:
+    return HERE.parent / "references" / "golden"
+
+
+_GOLDEN_CASES = [
+    {"id": "route_task_ingest_zip", "file": "route_task_ingest_zip.json", "args": ["route-task", "--task", "ingest_zip", "--json"]},
+    {"id": "nlm_query_plan_3_sources", "file": "nlm_query_plan_3_sources.json", "args": ["nlm-query-plan", "Trích Điều 1 của văn bản mẫu", "--source-id", "src_A", "--source-id", "src_B", "--source-id", "src_C", "--json"]},
+    {"id": "workflow_audit", "file": "workflow_audit.json", "args": ["workflow-audit", "--json"]},
+    {"id": "tool_inventory_inventory_decision", "file": "tool_inventory_inventory_decision.json", "args": ["tool-inventory", "--group", "inventory_decision", "--json"]},
+    {"id": "route_task_ocr_ingest", "file": "route_task_ocr_ingest.json", "args": ["route-task", "--task", "ocr_ingest", "--json"]},
+    {"id": "route_task_profile_ingest_chunks", "file": "route_task_profile_ingest_chunks.json", "args": ["route-task", "--task", "profile_ingest_chunks", "--json"]},
+]
+
+
+def _first_text_diff(expected: str, actual: str) -> dict:
+    exp_lines = expected.splitlines()
+    act_lines = actual.splitlines()
+    for idx, (e, a) in enumerate(zip(exp_lines, act_lines), 1):
+        if e != a:
+            return {"line": idx, "expected": e[:240], "actual": a[:240]}
+    if len(exp_lines) != len(act_lines):
+        return {"line": min(len(exp_lines), len(act_lines)) + 1, "expected": "<EOF>" if len(exp_lines) < len(act_lines) else exp_lines[-1][:240], "actual": "<EOF>" if len(act_lines) < len(exp_lines) else act_lines[-1][:240]}
+    return {}
+
+
+def _golden_test(*, write: bool = False) -> dict:
+    gdir = _golden_dir()
+    if write:
+        gdir.mkdir(parents=True, exist_ok=True)
+    cases = []
+    for case in _GOLDEN_CASES:
+        path = gdir / case["file"]
+        run = _run_tl_json(case["args"])
+        rec = {"id": case["id"], "file": str(path), "command": case["args"], "ok": False, "mode": "write" if write else "verify"}
+        if not run.get("ok"):
+            rec.update({"error": "COMMAND_FAILED_OR_NON_JSON", "returncode": run.get("returncode"), "parse_error": run.get("parse_error"), "stderr_tail": run.get("stderr_tail")})
+            cases.append(rec)
+            continue
+        actual = _json_dumps(run.get("data"), deterministic=True) + "\n"
+        actual_hash = hashlib.sha256(actual.encode("utf-8")).hexdigest()
+        rec["actual_sha256"] = actual_hash
+        if write:
+            _write_text_atomic(path, actual)
+            rec.update({"ok": True, "written": True})
+        elif not path.exists():
+            rec.update({"error": "GOLDEN_FILE_MISSING", "expected_path": str(path)})
+        else:
+            expected = path.read_text(encoding="utf-8", errors="replace")
+            expected_hash = hashlib.sha256(expected.encode("utf-8")).hexdigest()
+            same = expected == actual
+            rec.update({"ok": same, "expected_sha256": expected_hash, "diff": {} if same else _first_text_diff(expected, actual)})
+            if not same:
+                rec["error"] = "GOLDEN_MISMATCH"
+        cases.append(rec)
+    ok = all(c.get("ok") for c in cases)
+    return {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+
+
+def cmd_golden_test(a) -> int:
+    out = _golden_test(write=bool(getattr(a, "write", False)))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
+    checks = []
+
+    def add(name: str, ok: bool, detail="", **extra):
+        rec = {"name": name, "ok": bool(ok), "detail": detail}
+        rec.update(extra)
+        checks.append(rec)
+
+    try:
+        wa = _workflow_cards_audit()
+        add(
+            "workflow_card_schema",
+            bool(wa.get("ok")) and (not strict or not wa.get("warnings")),
+            f"cards={wa.get('summary', {}).get('cards')} warnings={len(wa.get('warnings', []))}",
+            errors=wa.get("errors"),
+            warnings=wa.get("warnings")[:20],
+        )
+    except Exception as e:  # noqa: BLE001
+        add("workflow_card_schema", False, f"{type(e).__name__}: {e}")
+
+    try:
+        rm1 = _build_release_manifest(HERE.parent)
+        rm2 = _build_release_manifest(HERE.parent)
+        stable = rm1.get("package_hash") == rm2.get("package_hash") and rm1.get("file_count") == rm2.get("file_count")
+        add("release_manifest_stable", stable and bool(rm1.get("ok")), f"files={rm1.get('file_count')} package_hash={rm1.get('package_hash')}", required_missing=rm1.get("required_missing"))
+    except Exception as e:  # noqa: BLE001
+        add("release_manifest_stable", False, f"{type(e).__name__}: {e}")
+
+    smoke_cases = [
+        ["route-task", "--task", "ingest_zip", "--json"],
+        ["nlm-query-plan", "Trích Điều 1 của văn bản mẫu", "--source-id", "src_A", "--source-id", "src_B", "--json"],
+        ["workflow-audit", "--json"],
+    ]
+    for args in smoke_cases:
+        r1 = _run_tl_json(args)
+        r2 = _run_tl_json(args)
+        if not (r1.get("ok") and r2.get("ok")):
+            add(f"deterministic_child:{args[0]}", False, "child command failed", first={"returncode": r1.get("returncode"), "stderr_tail": r1.get("stderr_tail")}, second={"returncode": r2.get("returncode"), "stderr_tail": r2.get("stderr_tail")})
+            continue
+        t1 = _json_dumps(r1.get("data"), deterministic=True)
+        t2 = _json_dumps(r2.get("data"), deterministic=True)
+        same = t1 == t2
+        add(f"deterministic_child:{args[0]}", same, "stdout JSON stable across two runs", sha256=hashlib.sha256(t1.encode("utf-8")).hexdigest(), diff={} if same else _first_text_diff(t1, t2))
+
+    scrub_probe = {
+        "path": str(HERE.parent / "SKILL.md"),
+        "out_dir": str(Path(tempfile.gettempdir()) / "tl_probe_random"),
+        "seconds": 12.345,
+    }
+    scrubbed = _scrub_volatile(scrub_probe)
+    add("volatile_scrub_contract", scrubbed.get("path") == "SKILL.md" and scrubbed.get("out_dir") == "<volatile>" and scrubbed.get("seconds") == "<volatile>", json.dumps(scrubbed, ensure_ascii=False))
+
+    if strict or full:
+        try:
+            gt = _golden_test(write=False)
+            add("golden_test", bool(gt.get("ok")), f"cases={gt.get('case_count')}", cases=gt.get("cases"))
+        except Exception as e:  # noqa: BLE001
+            add("golden_test", False, f"{type(e).__name__}: {e}")
+
+    if strict or full:
+        with tempfile.TemporaryDirectory(prefix="tl_det_audit_") as td:
+            tdp = Path(td)
+            # Snapshot deterministic stability, including generatedEpoch in volatile.
+            s1 = _run_tl_json(["live-state-snapshot", "--no-contract", "--out", str(tdp / "before1.json"), "--json"], timeout=90)
+            s2 = _run_tl_json(["live-state-snapshot", "--no-contract", "--out", str(tdp / "before2.json"), "--json"], timeout=90)
+            if s1.get("ok") and s2.get("ok"):
+                t1 = _json_dumps(s1.get("data"), deterministic=True)
+                t2 = _json_dumps(s2.get("data"), deterministic=True)
+                add("live_state_snapshot_stable", t1 == t2, "snapshot JSON stable across two deterministic runs", diff={} if t1 == t2 else _first_text_diff(t1, t2))
+            else:
+                add("live_state_snapshot_stable", False, "snapshot child command failed", first={"rc": s1.get("returncode"), "stderr_tail": s1.get("stderr_tail")}, second={"rc": s2.get("returncode"), "stderr_tail": s2.get("stderr_tail")})
+            diff = _run_tl_json(["live-state-diff", str(tdp / "before1.json"), str(tdp / "before2.json"), "--json"], timeout=60)
+            add("live_state_diff_no_unexpected", bool(diff.get("ok")) and not ((diff.get("data") or {}).get("unexpected_changes")), "diff between two equivalent snapshots has no unexpected changes", diff=(diff.get("data") or {}))
+
+            sample = tdp / "sample_abs.txt"
+            sample.write_text("Điều 1. Mẫu kiểm thử deterministic.\n" + ("Nội dung tiếng Việt có dấu để đủ mật độ. " * 20), encoding="utf-8")
+            oa = _run_tl_json(["ocr-analyze", str(sample), "--json"], timeout=60)
+            od = _json_dumps(oa.get("data"), deterministic=True) if oa.get("data") else ""
+            add("ocr_analyze_path_scrub", bool(oa.get("ok")) and str(sample) not in od and "<tmp>" in od, "absolute tmp path scrubbed from deterministic ocr-analyze output")
+            cp = _run_tl_json(["chunk-plan", str(sample), "--mode", "profile", "--json"], timeout=60)
+            cd = _json_dumps(cp.get("data"), deterministic=True) if cp.get("data") else ""
+            add("chunk_plan_path_scrub", bool(cp.get("ok")) and str(sample) not in cd and "<tmp>" in cd, "absolute tmp path scrubbed from deterministic chunk-plan output")
+
+            # Same zip contents with different member order must produce same dry-run plan after scrub.
+            # Use in-process _zip_plan here to avoid nested CLI fan-out during strict audit; CLI path is covered by golden/smoke cases.
+            z1, z2 = tdp / "a.zip", tdp / "b.zip"
+            fitems = {"b.txt": "B", "a.txt": "A"}
+            for zp, order in [(z1, ["b.txt", "a.txt"]), (z2, ["a.txt", "b.txt"])]:
+                with zipfile.ZipFile(zp, "w") as zf:
+                    for name in order:
+                        zf.writestr(name, fitems[name])
+            zp1 = _zip_plan(str(z1), mode="vbqppl", cat="01")
+            zp2 = _zip_plan(str(z2), mode="vbqppl", cat="01")
+            zi1 = [(i.get("normalized_path"), i.get("status"), i.get("reason")) for i in (zp1.get("items") or [])]
+            zi2 = [(i.get("normalized_path"), i.get("status"), i.get("reason")) for i in (zp2.get("items") or [])]
+            add("zip_member_order_stable", bool(zp1.get("ok") and zp2.get("ok")) and zi1 == zi2 and [x[0] for x in zi1] == sorted([x[0] for x in zi1]), f"items={zi1}")
+
+            zdup = tdp / "dup.zip"
+            with zipfile.ZipFile(zdup, "w") as zf:
+                zf.writestr("a.txt", "one")
+                zf.writestr("./a.txt", "two")
+            zdata = _zip_plan(str(zdup), mode="vbqppl", cat="01")
+            add("zip_duplicate_normalized_guard", bool(zdata.get("errors")) and any("DUPLICATE_NORMALIZED_ZIP_PATH" in str(e) for e in zdata.get("errors", [])), "duplicate normalized zip paths rejected", errors=zdata.get("errors"))
+
+            rm_before = _build_release_manifest(HERE.parent)
+            runtime_art = HERE.parent / "before.json"
+            existed = runtime_art.exists()
+            old_bytes = runtime_art.read_bytes() if existed else None
+            try:
+                runtime_art.write_text("{\"runtime\": true}\n", encoding="utf-8")
+                rm_after = _build_release_manifest(HERE.parent)
+                add("release_manifest_ignores_runtime_artifacts", rm_before.get("package_hash") == rm_after.get("package_hash") and rm_before.get("file_count") == rm_after.get("file_count"), f"before={rm_before.get('package_hash')} after={rm_after.get('package_hash')}")
+            finally:
+                if existed:
+                    runtime_art.write_bytes(old_bytes or b"")
+                else:
+                    try: runtime_art.unlink()
+                    except FileNotFoundError: pass
+
+    ok = all(c.get("ok") for c in checks)
+    return {"ok": ok, "schema": "determinism_audit.v1", "strict": bool(strict), "full": bool(full), "checks": checks}
+
+
+def cmd_determinism_audit(a) -> int:
+    out = _determinism_audit(strict=bool(getattr(a, "strict", False)), full=bool(getattr(a, "full", False)))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _live_smoke_plan(profile: str = "", include_ocr: bool = False) -> dict:
+    """Produce a deterministic live acceptance plan. Does not call Drive/NLM."""
+    profile_arg = ["--profile", profile] if profile else []
+    steps = [
+        {"id": "readiness_3tier", "risk": "low", "command": ["live-readiness", "--json"], "expect": "env_ready=true; live_contract_ready=true; apply_ready=false nếu chưa có smoke proof"},
+        {"id": "contract_readonly", "risk": "low", "command": ["live-contract-check", "--json"], "expect": "webapp ping/info + NLM get/list read-only pass"},
+        {"id": "snapshot_before", "risk": "low", "command": ["live-state-snapshot", "--out", ".tl_state/before.json", "--json"], "expect": "baseline live state saved before smoke"},
+        {"id": "health", "risk": "low", "command": ["ping", "--json"], "expect": "ok=true; webapp version accepted"},
+        {"id": "doctor", "risk": "low", "command": ["doctor", "--json"], "expect": "config/profile/registry/notebook readable"},
+        {"id": "inventory", "risk": "low", "command": ["tool-inventory", "--json"], "expect": "inventory ok"},
+        {"id": "workflow_audit", "risk": "low", "command": ["workflow-audit", "--json"], "expect": "workflow cards and route map ok"},
+        {"id": "release_manifest", "risk": "low", "command": ["release-manifest", "--json", "--out", "RELEASE_MANIFEST.json"], "expect": "package manifest with SHA-256"},
+        {"id": "release_verify", "risk": "low", "command": ["release-verify", "RELEASE_MANIFEST.json", "--json"], "expect": "hashes and required files verified"},
+        {"id": "route_convert", "risk": "low", "command": ["route-task", "--task", "convert_rename", "--json"], "expect": "readback required"},
+        {"id": "zip_dry_run", "risk": "low", "command": ["ingest-zip", "<sample.zip>", "--cat", "01", "--json"], "expect": "batch plan only; no Drive write"},
+        {"id": "profile_zip_dry_run", "risk": "low", "command": ["profile-ingest-zip", "<sample.zip>", "--json"] + profile_arg, "expect": "profile batch plan only"},
+        {"id": "convert_live_docx", "risk": "high", "command": ["ingest-local", "<small.docx>", "--cat", "01", "--apply", "--json"], "expect": "upload→Drive convert→rename→readback→register/NLM; no binary add NLM"},
+        {"id": "profile_live_docx", "risk": "high", "command": ["profile-ingest", "<small.docx>", "--apply", "--json"] + profile_arg, "expect": "profile canonical GDoc verified before NLM"},
+        {"id": "zip_apply_guard", "risk": "medium", "command": ["ingest-zip", "<sample.zip>", "--cat", "01", "--apply", "--json"], "expect": "must fail without --confirm yes"},
+        {"id": "snapshot_after", "risk": "low", "command": ["live-state-snapshot", "--out", ".tl_state/after.json", "--json"], "expect": "state saved after smoke"},
+        {"id": "snapshot_diff", "risk": "low", "command": ["live-state-diff", ".tl_state/before.json", ".tl_state/after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count"], "expect": "unexpected_changes=[]"},
+    ]
+    if include_ocr:
+        steps.extend([
+            {"id": "ocr_analyze", "risk": "low", "command": ["ocr-analyze", "<scan.pdf>", "--json"], "expect": "detect text-layer or recommend OCR"},
+            {"id": "ocr_run_local", "risk": "medium", "command": ["ocr-run", "<scan.pdf>", "--engine", "auto", "--mode", "profile", "--json"], "expect": "sidecar text local only; no Drive write"},
+            {"id": "ocr_verify", "risk": "medium", "command": ["ocr-verify", "<sidecar.txt>", "--mode", "profile", "--json"], "expect": "verified before --ocr-verified"},
+        ])
+    return {"ok": True, "schema": "live_smoke_plan.v1", "profile": profile or None, "include_ocr": include_ocr,
+            "note": "READ-ONLY plan. Chạy từng bước trên máy có TL_WEBAPP/TL_TOKEN/GWS/NLM auth. Thay placeholder <...> bằng file mẫu thật.",
+            "steps": steps,
+            "stop_rule": "Dừng ngay khi bước high-risk fail; không chạy bước apply tiếp theo trước khi đọc report/readback."}
+
+
+def cmd_live_smoke_plan(a) -> int:
+    out = _live_smoke_plan(profile=getattr(a, "profile", None) or "", include_ocr=bool(getattr(a, "include_ocr", False)))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0
+
+
+def _safe_bool(v) -> bool:
+    return bool(str(v or "").strip())
+
+
+def _mask_secret(v: str | None) -> str:
+    s = str(v or "")
+    if not s:
+        return ""
+    if len(s) <= 8:
+        return "***"
+    return s[:4] + "…" + s[-4:]
+
+
+def _live_config_context(profile: str = "", config: str = "") -> dict:
+    """Read local config/profile context without printing secrets and without network calls."""
+    cfg_path, cfg = _read_config_record(config)
+    cfg = cfg if isinstance(cfg, dict) else {}
+    profiles = _profiles_from_config(cfg) if cfg else {}
+    selected0 = _selected_profile_name(profile, cfg)
+    selected, hit = _profile_lookup(profiles, selected0) if profiles else (selected0 or DEFAULT_PROFILE, None)
+    prof = hit or (profiles.get(DEFAULT_PROFILE) if selected == DEFAULT_PROFILE else {}) or {}
+    def val(*names, env: str = "") -> str:
+        if env and os.environ.get(env):
+            return str(os.environ.get(env) or "").strip()
+        for n in names:
+            v = prof.get(n) if isinstance(prof, dict) else None
+            if v:
+                return str(v).strip()
+        for n in names:
+            v = cfg.get(n) if isinstance(cfg, dict) else None
+            if v:
+                return str(v).strip()
+        return ""
+    webapp = os.environ.get("TL_WEBAPP") or cfg.get("webappUrl") or cfg.get("TL_WEBAPP") or cfg.get("webapp") or ""
+    token = os.environ.get("TL_TOKEN") or cfg.get("token") or cfg.get("TL_TOKEN") or ""
+    ids = {
+        "root_folder_id": val("rootFolderId", "root_id", "root", env="TL_ROOT_FOLDER_ID"),
+        "meta_folder_id": val("metaFolderId", env="TL_META_FOLDER_ID"),
+        "registry_doc_id": val("registryDocId", env="TL_REGISTRY_DOC_ID"),
+        "manifest_id": val("manifestId", "TL_MANIFEST_ID", env="TL_MANIFEST_ID"),
+        "notebook_id": val("notebookId", "notebookVbqpplId", "nlmNotebookId", env="TL_NOTEBOOK_ID"),
+        "overflow_notebook_id": val("overflowNotebookId", env="TL_OVERFLOW_NOTEBOOK_ID"),
+    }
+    return {
+        "config_path": cfg_path or "",
+        "config_present": bool(cfg_path and Path(cfg_path).exists()),
+        "config_readable": bool(cfg),
+        "config_schema": cfg.get("schema") if isinstance(cfg, dict) else None,
+        "default_profile": cfg.get("defaultProfile", DEFAULT_PROFILE) if isinstance(cfg, dict) else DEFAULT_PROFILE,
+        "active_profile": selected,
+        "profile_requested": profile or None,
+        "profile_found": bool(hit) or (selected == DEFAULT_PROFILE and bool(prof)),
+        "profile_names": sorted(profiles) if profiles else [],
+        "ids": ids,
+        "webapp_present": _safe_bool(webapp),
+        "webapp_masked": _mask_secret(webapp),
+        "token_present": _safe_bool(token),
+        "token_masked": _mask_secret(token),
+    }
+
+
+def _path_age_days(path: Path) -> float | None:
+    try:
+        if not path.exists():
+            return None
+        return round(max(0.0, (time.time() - path.stat().st_mtime) / 86400.0), 3)
+    except Exception:
+        return None
+
+
+def _file_auth_state(path: Path) -> dict:
+    return {"path": str(path), "exists": path.exists(), "age_days": _path_age_days(path)}
+
+
+def _cmd_version_probe(name: str, args: list[str] | None = None, *, timeout: int = 10) -> dict:
+    exe = shutil.which(name)
+    out = {"command": name, "path": exe or "", "ok": False, "version": "", "returncode": None}
+    if not exe:
+        out["error"] = "BINARY_NOT_FOUND"
+        return out
+    try:
+        cp = subprocess.run([exe] + (args or ["--version"]), text=True, encoding="utf-8", errors="replace",
+                            capture_output=True, timeout=timeout)
+        text = ((cp.stdout or "") + "\n" + (cp.stderr or "")).strip()
+        out.update({"ok": cp.returncode == 0, "returncode": cp.returncode, "version": text.splitlines()[0][:160] if text else ""})
+        if cp.returncode != 0:
+            out["error"] = text[-300:]
+    except Exception as e:  # noqa: BLE001
+        out.update({"error": f"{type(e).__name__}: {e}"})
+    return out
+
+
+def _live_env_report(profile: str = "", *, include_ocr: bool = False, config: str = "") -> dict:
+    """Pha 6: readiness layer 1. Local/env/auth only; no Drive/NLM network calls."""
+    home = Path.home()
+    ctx = _live_config_context(profile, config)
+    gws_cred = home / ".config" / "gws" / "credentials.json"
+    nlm_dir = home / ".notebooklm-mcp-cli"
+    nlm_cookie_candidates = [nlm_dir / "cookies.json", nlm_dir / "auth.json", nlm_dir / "storage_state.json"]
+    nlm_auth_file = next((x for x in nlm_cookie_candidates if x.exists()), None)
+    commands = {name: shutil.which(name) for name in ["gws", "nlm", "ocrmypdf", "tesseract"]}
+    required_files = ["VERSION", "SKILL.md", "scripts/tl.py", "scripts/gen_instructions.py", "references/API_CONTRACT.md"]
+    file_checks = [{"path": x, "exists": (HERE.parent / x).exists()} for x in required_files]
+    checks = [
+        {"id": "python_version", "ok": sys.version_info >= (3, 10), "detail": sys.version.split()[0], "tier": "offline"},
+        {"id": "skill_root", "ok": (HERE.parent / "SKILL.md").exists(), "detail": str(HERE.parent), "tier": "offline"},
+        {"id": "required_files", "ok": all(x["exists"] for x in file_checks), "detail": file_checks, "tier": "offline"},
+        {"id": "config_present", "ok": ctx["config_present"], "detail": ctx.get("config_path") or "missing", "tier": "env"},
+        {"id": "credential_source_present", "ok": ctx["config_present"] or (ctx["webapp_present"] and ctx["token_present"]), "detail": "config_or_env", "tier": "env"},
+        {"id": "webapp_present", "ok": ctx["webapp_present"], "detail": ctx["webapp_masked"], "tier": "env"},
+        {"id": "token_present", "ok": ctx["token_present"], "detail": ctx["token_masked"], "tier": "env"},
+        {"id": "gws_binary", "ok": bool(commands.get("gws")), "detail": commands.get("gws") or "missing", "tier": "env"},
+        {"id": "gws_credentials", "ok": gws_cred.exists(), "detail": _file_auth_state(gws_cred), "tier": "env"},
+        {"id": "nlm_binary", "ok": bool(commands.get("nlm")), "detail": commands.get("nlm") or "missing", "tier": "env"},
+        {"id": "nlm_auth_dir", "ok": nlm_dir.exists(), "detail": str(nlm_dir), "tier": "env"},
+        {"id": "nlm_auth_file", "ok": bool(nlm_auth_file), "detail": _file_auth_state(nlm_auth_file) if nlm_auth_file else "missing", "tier": "env"},
+    ]
+    if profile:
+        checks.append({"id": "profile_requested", "ok": True, "detail": profile, "tier": "env"})
+    if include_ocr:
+        checks.extend([
+            {"id": "ocrmypdf_binary", "ok": bool(commands.get("ocrmypdf")), "detail": commands.get("ocrmypdf") or "optional_missing", "tier": "optional_ocr"},
+            {"id": "tesseract_binary", "ok": bool(commands.get("tesseract")), "detail": commands.get("tesseract") or "optional_missing", "tier": "optional_ocr"},
+        ])
+    offline_ids = {"python_version", "skill_root", "required_files"}
+    env_ids = {"credential_source_present", "webapp_present", "token_present", "gws_binary", "gws_credentials", "nlm_binary", "nlm_auth_file"}
+    offline_fail = [c for c in checks if c["id"] in offline_ids and not c.get("ok")]
+    env_fail = [c for c in checks if c["id"] in env_ids and not c.get("ok")]
+    warnings = [c for c in checks if c["id"] not in offline_ids | env_ids and not c.get("ok")]
+    ready_for_offline_release = not offline_fail
+    env_ready = ready_for_offline_release and not env_fail
+    return {
+        "ok": True,
+        "schema": "live_env_report.v1",
+        "profile": profile or None,
+        "active_profile": ctx.get("active_profile"),
+        "include_ocr": include_ocr,
+        "env_ready": env_ready,
+        "ready_for_offline_release": ready_for_offline_release,
+        "checks": checks,
+        "offline_failures": offline_fail,
+        "env_failures": env_fail,
+        "warnings": warnings,
+        "profile_context": ctx,
+        "auth_state": {
+            "gws_credentials": _file_auth_state(gws_cred),
+            "nlm_auth_file": _file_auth_state(nlm_auth_file) if nlm_auth_file else {"path": "", "exists": False, "age_days": None},
+        },
+        "secret_policy": "Không in token/webapp đầy đủ; chỉ mask để xác nhận có cấu hình.",
+    }
+
+
+def _live_contract_check_report(profile: str = "", *, config: str = "", include_ocr: bool = False, timeout: int = 60) -> dict:
+    """Pha 6: readiness layer 2. READ-ONLY live calls only: ping/info/NLM get/list."""
+    env = _live_env_report(profile, include_ocr=include_ocr, config=config)
+    ctx = env.get("profile_context") or {}
+    contract_checks = []
+    def add(cid: str, ok: bool, detail=None, **extra):
+        rec = {"id": cid, "ok": bool(ok), "detail": detail if detail is not None else ""}
+        rec.update(extra)
+        contract_checks.append(rec)
+        return rec
+    if not env.get("env_ready"):
+        return {
+            "ok": True,
+            "command_ok": True,
+            "deployment_allowed": False,
+            "schema": "live_contract_check.v1",
+            "env_ready": False,
+            "live_contract_ready": False,
+            "apply_ready": False,
+            "profile": profile or None,
+            "active_profile": ctx.get("active_profile"),
+            "skipped": True,
+            "skip_reason": "ENV_NOT_READY",
+            "env_failures": env.get("env_failures", []),
+            "contract_checks": contract_checks,
+            "policy": "READ-ONLY only: webapp ping/info + NLM notebook get/source list. No upload/register/add source.",
+        }
+    try:
+        load_creds(config or None, profile or None)
+    except SystemExit as e:
+        add("load_creds", False, str(e))
+        return {"ok": True, "command_ok": True, "deployment_allowed": False, "schema": "live_contract_check.v1", "env_ready": True, "live_contract_ready": False,
+                "apply_ready": False, "profile": profile or None, "active_profile": ctx.get("active_profile"),
+                "contract_checks": contract_checks, "policy": "READ-ONLY only"}
+    g = _gas()
+    ping = {}
+    try:
+        ping = g.get("ping")
+        add("webapp_ping", bool(ping.get("version")), {"version": ping.get("version"), "expect": EXPECT_VERSION})
+        add("webapp_version_match", ping.get("version") == EXPECT_VERSION, {"version": ping.get("version"), "expect": EXPECT_VERSION})
+    except Exception as e:  # noqa: BLE001
+        add("webapp_ping", False, f"{type(e).__name__}: {e}")
+    ids = (ctx.get("ids") or {}).copy()
+    # load_creds/_apply_profile_env may have overlaid env values after ctx was built.
+    ids.update({
+        "root_folder_id": os.environ.get("TL_ROOT_FOLDER_ID") or ids.get("root_folder_id") or "",
+        "meta_folder_id": os.environ.get("TL_META_FOLDER_ID") or ids.get("meta_folder_id") or "",
+        "registry_doc_id": os.environ.get("TL_REGISTRY_DOC_ID") or ids.get("registry_doc_id") or "",
+        "manifest_id": os.environ.get("TL_MANIFEST_ID") or ids.get("manifest_id") or "",
+        "notebook_id": os.environ.get("TL_NOTEBOOK_ID") or ids.get("notebook_id") or "",
+    })
+    drive_info = {}
+    for kind in ["root_folder_id", "meta_folder_id", "registry_doc_id", "manifest_id"]:
+        fid = (ids.get(kind) or "").strip()
+        if not fid:
+            add(f"drive_info:{kind}", kind in {"meta_folder_id", "manifest_id"}, "MISSING_OPTIONAL" if kind in {"meta_folder_id", "manifest_id"} else "MISSING_REQUIRED")
+            continue
+        inf = _drive_info_file(g, fid)
+        f = inf.get("file") or {}
+        drive_info[kind] = {"ok": bool(inf.get("ok")), "id": fid, "name": f.get("name") or f.get("title"), "mimeType": f.get("mimeType") or f.get("mime")}
+        add(f"drive_info:{kind}", bool(inf.get("ok")), drive_info[kind])
+    nb = (ids.get("notebook_id") or "").strip()
+    if not nb:
+        try:
+            nb, nb_err = _resolve_nlm_notebook(None)
+            if nb_err:
+                add("nlm_notebook_resolve", False, nb_err)
+        except Exception as e:  # noqa: BLE001
+            add("nlm_notebook_resolve", False, f"{type(e).__name__}: {e}")
+    nlm = {"notebook_id": nb or "", "notebook_get": {}, "source_list": {}, "source_count": None}
+    if nb:
+        try:
+            nc = _imp("nlm_cli")
+            nget = nc.notebook_get(nb)
+            nlm["notebook_get"] = {k: nget.get(k) for k in ("ok", "source_count", "title", "via", "error", "fallback")}
+            add("nlm_notebook_get", bool(nget.get("ok")), nlm["notebook_get"])
+            sl = nc.source_list(nb, skip_freshness=True)
+            nlm["source_list"] = {k: sl.get(k) for k in ("ok", "count", "skip_freshness", "error")}
+            nlm["source_count"] = sl.get("count") if sl.get("ok") else nget.get("source_count")
+            add("nlm_source_list", bool(sl.get("ok")), nlm["source_list"])
+        except Exception as e:  # noqa: BLE001
+            add("nlm_readonly", False, f"{type(e).__name__}: {e}")
+    else:
+        add("nlm_notebook_id", False, "MISSING_REQUIRED")
+    required_prefixes = {"webapp_ping", "webapp_version_match", "drive_info:root_folder_id", "drive_info:registry_doc_id", "nlm_notebook_get", "nlm_source_list"}
+    failed_required = [c for c in contract_checks if c["id"] in required_prefixes and not c.get("ok")]
+    live_contract_ready = not failed_required and any(c["id"] == "webapp_version_match" and c.get("ok") for c in contract_checks)
+    return {
+        "ok": True,
+        "command_ok": True,
+        "deployment_allowed": False,
+        "schema": "live_contract_check.v1",
+        "env_ready": True,
+        "live_contract_ready": live_contract_ready,
+        "apply_ready": False,
+        "profile": profile or None,
+        "active_profile": os.environ.get("TL_PROFILE") or ctx.get("active_profile"),
+        "webapp": {"version": ping.get("version"), "expect": EXPECT_VERSION, "match": ping.get("version") == EXPECT_VERSION},
+        "ids": ids,
+        "drive_info": drive_info,
+        "nlm": nlm,
+        "contract_checks": contract_checks,
+        "failed_required": failed_required,
+        "policy": "READ-ONLY only: webapp ping/info + NLM notebook get/source list. No upload/register/add source.",
+        "timeout_seconds": timeout,
+    }
+
+
+def _smoke_proof_state(path: str = "") -> dict:
+    if not path:
+        return {"provided": False, "ok": False, "path": "", "reason": "SMOKE_PROOF_NOT_PROVIDED"}
+    p = Path(path).expanduser()
+    if not p.exists():
+        return {"provided": True, "ok": False, "path": str(p), "reason": "SMOKE_PROOF_NOT_FOUND"}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8", errors="replace"))
+        ok = bool(data.get("ok")) and not data.get("unexpected_changes")
+        return {"provided": True, "ok": ok, "path": str(p), "schema": data.get("schema"), "summary": data.get("summary")}
+    except Exception as e:  # noqa: BLE001
+        return {"provided": True, "ok": False, "path": str(p), "reason": f"{type(e).__name__}: {e}"}
+
+
+def _live_readiness_report(profile: str = "", *, include_ocr: bool = False, config: str = "", check_contract: bool = True, smoke_proof: str = "") -> dict:
+    """Pha 6: readiness report with explicit env/contract/apply tiers."""
+    env = _live_env_report(profile, include_ocr=include_ocr, config=config)
+    contract = {"schema": "live_contract_check.v1", "env_ready": env.get("env_ready"), "live_contract_ready": False,
+                "apply_ready": False, "skipped": True, "skip_reason": "CONTRACT_CHECK_SKIPPED"}
+    if check_contract and env.get("env_ready"):
+        contract = _live_contract_check_report(profile, config=config, include_ocr=include_ocr)
+    elif check_contract and not env.get("env_ready"):
+        contract["skip_reason"] = "ENV_NOT_READY"
+    smoke = _smoke_proof_state(smoke_proof)
+    env_ready = bool(env.get("env_ready"))
+    contract_ready = bool(contract.get("live_contract_ready"))
+    apply_ready = env_ready and contract_ready and bool(smoke.get("ok"))
+    return {
+        "ok": True,
+        "command_ok": True,
+        "deployment_allowed": apply_ready,
+        "schema": "live_readiness.v2",
+        "tiers": {
+            "env_ready": env_ready,
+            "live_contract_ready": contract_ready,
+            "apply_ready": apply_ready,
+        },
+        "env_ready": env_ready,
+        "live_contract_ready": contract_ready,
+        "apply_ready": apply_ready,
+        "ready_for_offline_release": bool(env.get("ready_for_offline_release")),
+        "ready_for_live_smoke": env_ready and contract_ready,
+        "profile": profile or None,
+        "active_profile": env.get("active_profile"),
+        "include_ocr": include_ocr,
+        "env_report": env,
+        "live_contract_report": contract,
+        "smoke_proof": smoke,
+        "checks": env.get("checks", []) + contract.get("contract_checks", []),
+        "hard_failures": env.get("offline_failures", []) + env.get("env_failures", []) + contract.get("failed_required", []),
+        "secret_policy": "Không in token/webapp đầy đủ; chỉ mask để xác nhận có cấu hình.",
+        "ok_semantics": "ok/command_ok chỉ nghĩa là lệnh chạy xong; deployment_allowed mới là quyền tiếp tục apply.",
+        "next": "Chạy `tl live-state-snapshot --out .tl_state/before.json --json`, smoke test, `tl live-state-snapshot --out .tl_state/after.json --json`, rồi `tl live-state-diff .tl_state/before.json .tl_state/after.json --json --allow <expected_path>` trước khi apply rộng.",
+    }
+
+
+def cmd_live_contract_check(a) -> int:
+    out = _live_contract_check_report(profile=getattr(a, "profile", None) or "",
+                                      config=getattr(a, "config_file", None) or getattr(a, "config", None) or "",
+                                      include_ocr=bool(getattr(a, "include_ocr", False)),
+                                      timeout=int(getattr(a, "timeout", 60) or 60))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 2 if getattr(a, "strict", False) and not out.get("live_contract_ready") else 0
+
+
+def cmd_live_readiness(a) -> int:
+    out = _live_readiness_report(profile=getattr(a, "profile", None) or "",
+                                 include_ocr=bool(getattr(a, "include_ocr", False)),
+                                 config=getattr(a, "config_file", None) or getattr(a, "config", None) or "",
+                                 check_contract=not bool(getattr(a, "skip_contract", False)),
+                                 smoke_proof=getattr(a, "smoke_proof", None) or "")
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 2 if getattr(a, "strict", False) and not out.get("ready_for_live_smoke") else 0
+
+
+def _live_state_snapshot(profile: str = "", *, config: str = "", include_contract: bool = True, include_ocr: bool = False) -> dict:
+    ctx = _live_config_context(profile, config)
+    manifest = _build_release_manifest(HERE.parent)
+    env = _live_env_report(profile, include_ocr=include_ocr, config=config)
+    contract = _live_contract_check_report(profile, config=config, include_ocr=include_ocr) if include_contract else {"live_contract_ready": False, "skipped": True}
+    ids = (contract.get("ids") or ctx.get("ids") or {}).copy()
+    gws_v = _cmd_version_probe("gws")
+    nlm_v = _cmd_version_probe("nlm")
+    auth = env.get("auth_state", {})
+    return {
+        "ok": True,
+        "schema": "live_state_snapshot.v1",
+        "skill": {"name": "tra-luat", "version": (HERE.parent / "VERSION").read_text(encoding="utf-8", errors="replace").strip() if (HERE.parent / "VERSION").exists() else VERSION,
+                  "package_hash": manifest.get("package_hash"), "file_count": manifest.get("file_count")},
+        "webapp": {"version": (contract.get("webapp") or {}).get("version"), "expect": EXPECT_VERSION,
+                   "match": (contract.get("webapp") or {}).get("match")},
+        "profile": {"active": contract.get("active_profile") or ctx.get("active_profile"), "requested": profile or None,
+                    "found": ctx.get("profile_found"), "config_path": ctx.get("config_path")},
+        "registry": {"id": ids.get("registry_doc_id") or "", "info": (contract.get("drive_info") or {}).get("registry_doc_id")},
+        "manifest": {"id": ids.get("manifest_id") or "", "info": (contract.get("drive_info") or {}).get("manifest_id")},
+        "folders": {"root_folder_id": ids.get("root_folder_id") or "", "meta_folder_id": ids.get("meta_folder_id") or "",
+                    "info": {k: v for k, v in (contract.get("drive_info") or {}).items() if k.endswith("folder_id")}},
+        "notebooks": {"primary": ids.get("notebook_id") or (contract.get("nlm") or {}).get("notebook_id") or "",
+                      "overflow": ids.get("overflow_notebook_id") or "",
+                      "get": (contract.get("nlm") or {}).get("notebook_get")},
+        "source_counts": {"nlm_live": (contract.get("nlm") or {}).get("source_count"),
+                          "nlm_source_list": ((contract.get("nlm") or {}).get("source_list") or {}).get("count")},
+        "auth": {"env_ready": env.get("env_ready"), "live_contract_ready": contract.get("live_contract_ready"),
+                 "gws_credentials": auth.get("gws_credentials"), "nlm_auth_file": auth.get("nlm_auth_file")},
+        "command_versions": {"python": sys.version.split()[0], "tl": VERSION, "gws": gws_v, "nlm": nlm_v},
+        "selected_command_versions": {"release_manifest_schema": "release_manifest.v1", "live_readiness_schema": "live_readiness.v2",
+                                      "live_contract_check_schema": "live_contract_check.v1"},
+        "live_contract_report": contract,
+        "volatile": {"generatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "generatedEpoch": time.time()},
+    }
+
+
+def cmd_live_state_snapshot(a) -> int:
+    out = _live_state_snapshot(profile=getattr(a, "profile", None) or "",
+                               config=getattr(a, "config_file", None) or getattr(a, "config", None) or "",
+                               include_contract=not bool(getattr(a, "no_contract", False)),
+                               include_ocr=bool(getattr(a, "include_ocr", False)))
+    if getattr(a, "out", None):
+        _out_path = Path(a.out)
+        try:
+            _rel = _out_path.expanduser().resolve().relative_to(HERE.parent.resolve())
+            if ".tl_state" not in _rel.parts:
+                out.setdefault("warnings", []).append("WARNING_RUNTIME_ARTIFACT_INSIDE_SKILL_ROOT: prefer .tl_state/<name>.json so release manifest/hash stays clean")
+        except Exception:
+            pass
+        _write_json_atomic(_out_path, out)
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0
+
+
+def _strip_snapshot_volatile(obj):
+    if isinstance(obj, dict):
+        return {k: _strip_snapshot_volatile(v) for k, v in obj.items() if k != "volatile"}
+    if isinstance(obj, list):
+        return [_strip_snapshot_volatile(x) for x in obj]
+    return obj
+
+
+def _flatten_snapshot(obj, prefix: str = "") -> dict:
+    out = {}
+    if isinstance(obj, dict):
+        for k in sorted(obj):
+            pfx = f"{prefix}.{k}" if prefix else str(k)
+            out.update(_flatten_snapshot(obj[k], pfx))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            out.update(_flatten_snapshot(v, f"{prefix}[{i}]"))
+        if not obj:
+            out[prefix] = []
+    else:
+        out[prefix] = obj
+    return out
+
+
+def _path_allowed(path: str, allowed: list[str]) -> bool:
+    for a in allowed:
+        a = str(a or "").strip()
+        if not a:
+            continue
+        if path == a or path.startswith(a + ".") or path.startswith(a + "["):
+            return True
+    return False
+
+
+def _live_state_diff(before_path: str, after_path: str, *, allowed: list[str] | None = None) -> dict:
+    allowed = ["volatile"] + list(allowed or [])
+    bp, ap = Path(before_path).expanduser(), Path(after_path).expanduser()
+    before = json.loads(bp.read_text(encoding="utf-8", errors="replace"))
+    after = json.loads(ap.read_text(encoding="utf-8", errors="replace"))
+    fb = _flatten_snapshot(_strip_snapshot_volatile(before))
+    fa = _flatten_snapshot(_strip_snapshot_volatile(after))
+    keys = sorted(set(fb) | set(fa))
+    changes = []
+    for k in keys:
+        if fb.get(k, "<MISSING>") != fa.get(k, "<MISSING>"):
+            changes.append({"path": k, "before": fb.get(k, "<MISSING>"), "after": fa.get(k, "<MISSING>"), "allowed": _path_allowed(k, allowed)})
+    unexpected = [c for c in changes if not c.get("allowed")]
+    return {
+        "ok": not unexpected,
+        "schema": "live_state_diff.v1",
+        "before": str(bp),
+        "after": str(ap),
+        "allowed_prefixes": allowed,
+        "summary": {"changed": len(changes), "unexpected": len(unexpected), "allowed": len(changes) - len(unexpected)},
+        "changes": changes,
+        "unexpected_changes": unexpected,
+        "policy": "Diff bỏ qua block volatile. Mọi thay đổi còn lại phải được khai báo bằng --allow <path_prefix> nếu là dự kiến.",
+    }
+
+
+def cmd_live_state_diff(a) -> int:
+    out = _live_state_diff(getattr(a, "before"), getattr(a, "after"), allowed=getattr(a, "allow", None) or [])
+    if getattr(a, "out", None):
+        _write_json_atomic(Path(a.out), out)
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _sha256_path_or_empty(path: str) -> str:
+    try:
+        p = Path(path).expanduser()
+        return _sha256_file(p) if p.exists() and p.is_file() else ""
+    except Exception:
+        return ""
+
+
+def _deploy_plan(bundle: str = "", target_dir: str = "", backup_dir: str = "", profile: str = "", include_ocr: bool = False) -> dict:
+    bundle_path = Path(bundle).expanduser().resolve() if bundle else None
+    target = Path(target_dir).expanduser().resolve() if target_dir else Path.cwd().resolve() / "tra-luat"
+    backup = Path(backup_dir).expanduser().resolve() if backup_dir else target.parent / "_tra_luat_backups"
+    steps = [
+        {"id": "verify_bundle_sha", "mode": "manual", "command": ["sha256sum", str(bundle_path) if bundle_path else "<bundle.zip>"], "expect": "so sánh với SHA-256 đã công bố"},
+        {"id": "extract_to_temp", "mode": "manual", "command": ["unzip", "-q", str(bundle_path) if bundle_path else "<bundle.zip>", "-d", "<temp_dir>"], "expect": "giải nén vào thư mục tạm, không ghi đè bản đang chạy"},
+        {"id": "verify_extracted_manifest", "mode": "manual", "command": ["python", "scripts/tl.py", "release-verify", "RELEASE_MANIFEST.json", "--json"], "expect": "ok=true trong thư mục đã giải nén"},
+        {"id": "backup_current", "mode": "manual", "command": ["cp", "-a", str(target), str(backup / "tra-luat-<timestamp>")], "expect": "có bản rollback trước khi thay"},
+        {"id": "replace_or_sync", "mode": "manual", "command": ["rsync", "-a", "--delete", "<temp_dir>/tra-luat/", str(target) + "/"], "expect": "chỉ thay sau khi verify extracted pass"},
+        {"id": "offline_release_check", "mode": "manual", "command": ["python", "scripts/tl.py", "release-check", "--json"], "expect": "ok=true tại target"},
+        {"id": "live_readiness", "mode": "manual", "command": ["python", "scripts/tl.py", "live-readiness", "--json"], "expect": "env_ready=true và live_contract_ready=true trước smoke"},
+        {"id": "snapshot_before", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-snapshot", "--out", "before.json", "--json"], "expect": "lưu baseline trạng thái live trước smoke"},
+        {"id": "live_smoke_plan", "mode": "manual", "command": ["python", "scripts/tl.py", "live-smoke-plan", "--json"] + (["--include-ocr"] if include_ocr else []), "expect": "chạy từng bước, dừng khi high-risk fail"},
+        {"id": "snapshot_after", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-snapshot", "--out", "after.json", "--json"], "expect": "lưu trạng thái sau smoke"},
+        {"id": "snapshot_diff", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-diff", "before.json", "after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count"], "expect": "chỉ có thay đổi dự kiến"},
+    ]
+    return {"ok": True, "schema": "deploy_plan.v1", "bundle": str(bundle_path) if bundle_path else None, "bundle_exists": bool(bundle_path and bundle_path.exists()), "bundle_sha256": _sha256_path_or_empty(str(bundle_path)) if bundle_path else "", "target_dir": str(target), "backup_dir": str(backup), "profile": profile or None, "include_ocr": include_ocr, "steps": steps, "stop_rule": "Không replace/sync nếu release-verify trong temp fail. Không chạy apply live nếu live-readiness chưa đạt env+contract hoặc snapshot diff có thay đổi ngoài dự kiến.", "note": "READ-ONLY plan; lệnh này không giải nén, không copy, không gọi Drive/NLM."}
+
+
+def cmd_deploy_plan(a) -> int:
+    out = _deploy_plan(bundle=getattr(a, "bundle", None) or "", target_dir=getattr(a, "target_dir", None) or "", backup_dir=getattr(a, "backup_dir", None) or "", profile=getattr(a, "profile", None) or "", include_ocr=bool(getattr(a, "include_ocr", False)))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0
+
+
+def _rollback_plan(target_dir: str = "", backup_path: str = "", bundle: str = "") -> dict:
+    target = Path(target_dir).expanduser().resolve() if target_dir else Path.cwd().resolve() / "tra-luat"
+    backup = Path(backup_path).expanduser().resolve() if backup_path else None
+    bundle_path = Path(bundle).expanduser().resolve() if bundle else None
+    source_desc = str(backup or bundle_path or "<backup_dir_or_previous_bundle.zip>")
+    steps = [
+        {"id": "stop_running_clients", "mode": "manual", "command": ["<close Claude/terminal sessions using this skill>"], "expect": "không còn process ghi vào skill dir"},
+        {"id": "snapshot_failed_state", "mode": "manual", "command": ["cp", "-a", str(target), str(target.parent / "_failed_tra_luat_<timestamp>")], "expect": "giữ lại bản lỗi để diff"},
+        {"id": "restore_backup", "mode": "manual", "command": ["rsync", "-a", "--delete", source_desc.rstrip('/') + "/", str(target) + "/"], "expect": "khôi phục từ backup đã pass"},
+        {"id": "verify_manifest", "mode": "manual", "command": ["python", "scripts/tl.py", "release-verify", "RELEASE_MANIFEST.json", "--json"], "expect": "ok=true nếu backup có manifest"},
+        {"id": "release_check", "mode": "manual", "command": ["python", "scripts/tl.py", "release-check", "--json"], "expect": "ok=true sau rollback"},
+        {"id": "live_readiness", "mode": "manual", "command": ["python", "scripts/tl.py", "live-readiness", "--json"], "expect": "cấu hình/auth vẫn còn"},
+    ]
+    return {"ok": True, "schema": "rollback_plan.v1", "target_dir": str(target), "backup_path": str(backup) if backup else None, "bundle": str(bundle_path) if bundle_path else None, "source_exists": bool((backup and backup.exists()) or (bundle_path and bundle_path.exists())), "steps": steps, "stop_rule": "Không xóa bản lỗi trước khi snapshot; không rollback từ nguồn chưa verify.", "note": "READ-ONLY plan; không copy/replace thật."}
+
+
+def cmd_rollback_plan(a) -> int:
+    out = _rollback_plan(target_dir=getattr(a, "target_dir", None) or "", backup_path=getattr(a, "backup_path", None) or "", bundle=getattr(a, "bundle", None) or "")
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0
+
+
+
+# ───────────────────────── final acceptance/runbook helpers (stage8) ─────────────────────────
+def _final_acceptance_report(profile: str = "", include_ocr: bool = False, *, strict_live: bool = False) -> dict:
+    """Final offline acceptance + live handoff status. Không gọi Drive/NLM, không ghi corpus."""
+    results = []
+    def add(name: str, ok: bool, detail: str = "", **extra):
+        rec = {"name": name, "ok": bool(ok), "detail": detail}
+        rec.update(extra)
+        results.append(rec)
+
+    try:
+        wa = _workflow_cards_audit()
+        add("workflow_audit", bool(wa.get("ok")), json.dumps(wa.get("summary", {}), ensure_ascii=False), errors=wa.get("errors"), warnings=(wa.get("warnings") or [])[:12])
+    except Exception as e:  # noqa: BLE001
+        add("workflow_audit", False, f"{type(e).__name__}: {e}")
+
+    try:
+        # Reuse the same in-process primitives as release-check, but avoid subprocess/selftest in final acceptance.
+        import py_compile
+        py_compile.compile(str(HERE / "tl.py"), doraise=True)
+        py_compile.compile(str(HERE / "gen_instructions.py"), doraise=True)
+        add("py_compile", True, "scripts/tl.py + scripts/gen_instructions.py")
+    except Exception as e:  # noqa: BLE001
+        add("py_compile", False, f"{type(e).__name__}: {e}")
+
+    try:
+        gi = _imp("gen_instructions")
+        pa = gi.audit(gi.generate("project", VERSION), "project")
+        na = gi.audit(gi.generate("nlm", VERSION), "nlm")
+        add("project_instruction_audit", bool(pa.get("ok")), json.dumps(pa, ensure_ascii=False)[:600])
+        add("nlm_instruction_audit", bool(na.get("ok")), json.dumps(na, ensure_ascii=False)[:600])
+    except Exception as e:  # noqa: BLE001
+        add("instruction_audit", False, f"{type(e).__name__}: {e}")
+
+    try:
+        rm = _build_release_manifest(HERE.parent)
+        rv = _verify_release_manifest(HERE.parent, rm, strict=False)
+        add("release_manifest_build", bool(rm.get("ok")) and not rm.get("required_missing"), f"files={rm.get('file_count')} hash={rm.get('package_hash')}", required_missing=rm.get("required_missing"))
+        add("release_verify_self", bool(rv.get("ok")) and bool(rv.get("package_hash_match")), f"checked={rv.get('checked_file_count')} match={rv.get('package_hash_match')}", failed=rv.get("failed"))
+    except Exception as e:  # noqa: BLE001
+        add("release_manifest_or_verify", False, f"{type(e).__name__}: {e}")
+
+    for task in ["write_new_tool", "nlm_query_quality", "convert_rename", "ingest_zip", "ocr_pdf_scan", "ocr_run", "large_doc_chunk", "chunk_apply", "live_readiness", "live_contract_check", "live_state_snapshot", "live_state_diff", "deploy_plan", "rollback_plan", "final_acceptance", "go_live_runbook"]:
+        try:
+            wf_id = _TASK_TO_WORKFLOW.get(task, task)
+            card = _load_workflow_card(wf_id)
+            add(f"route_task:{task}", bool(card.get("ok", True)), f"workflow={wf_id} risk={card.get('risk')}")
+        except Exception as e:  # noqa: BLE001
+            add(f"route_task:{task}", False, f"{type(e).__name__}: {e}")
+
+    lr = _live_readiness_report(profile=profile, include_ocr=include_ocr, check_contract=False)
+    live_ready = bool(lr.get("env_ready"))
+    lp = _live_smoke_plan(profile=profile, include_ocr=include_ocr)
+    dp = _deploy_plan(profile=profile, include_ocr=include_ocr)
+    rp = _rollback_plan()
+    add("live_readiness_report", (live_ready if strict_live else True), f"env_ready={live_ready}; contract skipped in offline final-acceptance; checks={len(lr.get('checks', []))}", readiness=lr)
+    add("live_smoke_plan", bool(lp.get("ok")) and len(lp.get("steps", [])) >= 8, f"steps={len(lp.get('steps', []))}")
+    add("deploy_plan", bool(dp.get("ok")) and len(dp.get("steps", [])) >= 6, f"steps={len(dp.get('steps', []))}")
+    add("rollback_plan", bool(rp.get("ok")) and len(rp.get("steps", [])) >= 4, f"steps={len(rp.get('steps', []))}")
+
+    offline_ok = all(r.get("ok") for r in results if r["name"] != "live_readiness_report")
+    ok = offline_ok and (live_ready if strict_live else True)
+    gate = "env_ready_contract_still_required" if live_ready else "offline_pass_live_auth_required"
+    if strict_live and not live_ready:
+        gate = "blocked_until_live_readiness_passes"
+    return {
+        "ok": ok,
+        "schema": "final_acceptance.v1",
+        "offline_ok": offline_ok,
+        "live_ready": live_ready,
+        "deployment_gate": gate,
+        "strict_live": bool(strict_live),
+        "profile": profile or None,
+        "include_ocr": include_ocr,
+        "results": results,
+        "next": "Copy bundle sang máy live rồi chạy tl live-readiness --json, tl live-contract-check --json, live-state-snapshot before/after, live-state-diff và live-smoke-plan trước khi apply rộng.",
+    }
+
+
+def cmd_final_acceptance(a) -> int:
+    out = _final_acceptance_report(profile=getattr(a, "profile", None) or "", include_ocr=bool(getattr(a, "include_ocr", False)), strict_live=bool(getattr(a, "strict_live", False)))
+    if getattr(a, "out", None):
+        _write_text_atomic(Path(a.out), json.dumps(out, ensure_ascii=False, indent=2))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _go_live_runbook_markdown(profile: str = "", include_ocr: bool = False) -> str:
+    smoke = _live_smoke_plan(profile=profile, include_ocr=include_ocr)
+    deploy = _deploy_plan(profile=profile, include_ocr=include_ocr)
+    rollback = _rollback_plan()
+    lines = [
+        "# tra-luat Go-live Runbook",
+        "",
+        "Mục tiêu: triển khai skill theo chuỗi có kiểm chứng, không ghi Drive/NLM trước khi readiness đạt.",
+        "",
+        "## 1. Kiểm tra offline trên bundle",
+        "",
+        "```bash",
+        "python scripts/tl.py release-check --json",
+        "python scripts/tl.py workflow-audit --json",
+        "python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json --json",
+        "python scripts/tl.py release-verify RELEASE_MANIFEST.json --json",
+        "python scripts/tl.py final-acceptance --json",
+        "```",
+        "",
+        "## 2. Kiểm tra readiness trên máy live",
+        "",
+        "```bash",
+        "python scripts/tl.py live-readiness --json" + (" --include-ocr" if include_ocr else ""),
+        "python scripts/tl.py live-contract-check --json",
+        "python scripts/tl.py live-state-snapshot --out before.json --json",
+        "python scripts/tl.py live-smoke-plan --json" + (" --include-ocr" if include_ocr else ""),
+        "python scripts/tl.py live-state-snapshot --out after.json --json",
+        "python scripts/tl.py live-state-diff before.json after.json --json --allow source_counts --allow notebooks.get.source_count",
+        "```",
+        "",
+        "Chỉ tiếp tục khi `env_ready=true` và `live_contract_ready=true`. `apply_ready` không được true nếu chưa có smoke proof/diff hợp lệ.",
+        "",
+        "## 3. Kế hoạch triển khai",
+        "",
+    ]
+    for step in deploy.get("steps", []):
+        lines.append(f"- `{step.get('id')}`: `{' '.join(map(str, step.get('command', [])))}` — {step.get('expect','')}")
+    lines += ["", "## 4. Smoke test live", ""]
+    for step in smoke.get("steps", []):
+        risk = step.get("risk")
+        lines.append(f"- **{risk}** `{step.get('id')}`: `{' '.join(map(str, step.get('command', [])))}` — {step.get('expect','')}")
+    lines += [
+        "",
+        "Quy tắc dừng: nếu bước `high` fail, dừng ngay, đọc report/readback, không chạy bước apply kế tiếp.",
+        "Sau smoke, bắt buộc có `before.json`/`after.json` và `live-state-diff` chỉ gồm thay đổi dự kiến.",
+        "",
+        "## 5. Rollback",
+        "",
+    ]
+    for step in rollback.get("steps", []):
+        lines.append(f"- `{step.get('id')}`: `{' '.join(map(str, step.get('command', [])))}` — {step.get('expect','')}")
+    lines += [
+        "",
+        "## 6. Tiêu chí hoàn thành",
+        "",
+        "- `release-check` ok=true.",
+        "- `release-verify` ok=true.",
+        "- `workflow-audit` ok=true.",
+        "- `live-readiness` có `env_ready=true` và `live_contract_ready=true` trên máy live.",
+        "- Có `live-state-snapshot` trước/sau smoke và `live-state-diff` không có unexpected_changes.",
+        "- Smoke test high-risk đầu tiên thành công với file mẫu nhỏ trước khi chạy dữ liệu thật.",
+        "- Có backup/rollback plan trước khi replace skill đang dùng.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def cmd_go_live_runbook(a) -> int:
+    md = _go_live_runbook_markdown(profile=getattr(a, "profile", None) or "", include_ocr=bool(getattr(a, "include_ocr", False)))
+    if getattr(a, "out", None):
+        _write_text_atomic(Path(a.out), md)
+    if getattr(a, "json", False):
+        out = {"ok": True, "schema": "go_live_runbook.v1", "profile": getattr(a, "profile", None) or None, "include_ocr": bool(getattr(a, "include_ocr", False)), "markdown": md}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    else:
+        print(md)
+    return 0
+
+def _run_release_child(args: list[str], *, timeout: int = 60) -> dict:
+    cmd = [sys.executable, str(HERE / "tl.py")] + args
+    t0 = time.time()
+    try:
+        cp = subprocess.run(cmd, text=True, encoding="utf-8", errors="replace", capture_output=True, timeout=timeout)
+        return {"cmd": args, "returncode": cp.returncode, "ok": cp.returncode == 0, "seconds": round(time.time() - t0, 3),
+                "stdout_tail": cp.stdout[-1500:], "stderr_tail": cp.stderr[-1500:]}
+    except subprocess.TimeoutExpired as e:
+        return {"cmd": args, "returncode": 124, "ok": False, "seconds": round(time.time() - t0, 3),
+                "timeout_seconds": timeout, "stdout_tail": (e.stdout or "")[-1500:] if isinstance(e.stdout, str) else "",
+                "stderr_tail": (e.stderr or "")[-1500:] if isinstance(e.stderr, str) else "", "error": "TIMEOUT_EXPIRED"}
+
+
+def cmd_release_check(a) -> int:
+    """Offline deterministic acceptance harness. No subprocess, no Drive/NLM writes."""
+    out_dir = Path(getattr(a, "out_dir", None) or tempfile.mkdtemp(prefix="tl_release_check_"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    results = []
+
+    def add(name: str, ok: bool, detail="", **extra):
+        rec = {"name": name, "ok": bool(ok), "detail": detail}
+        rec.update(extra)
+        results.append(rec)
+
+    try:
+        import py_compile
+        py_compile.compile(str(HERE / "tl.py"), doraise=True)
+        py_compile.compile(str(HERE / "gen_instructions.py"), doraise=True)
+        add("py_compile", True, "scripts/tl.py + scripts/gen_instructions.py")
+    except Exception as e:  # noqa: BLE001
+        add("py_compile", False, f"{type(e).__name__}: {e}")
+
+    try:
+        gi = _imp("gen_instructions")
+        project = gi.generate("project", VERSION)
+        nlm = gi.generate("nlm", VERSION)
+        pa = gi.audit(project, "project")
+        na = gi.audit(nlm, "nlm")
+        add("instruction_project_audit", bool(pa.get("ok")), json.dumps(pa, ensure_ascii=False)[:500])
+        add("instruction_nlm_audit", bool(na.get("ok")), json.dumps(na, ensure_ascii=False)[:500])
+        if getattr(a, "full", False):
+            import io, contextlib
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = gi.selftest()
+            add("gen_instructions_selftest", rc == 0, buf.getvalue()[-800:])
+    except Exception as e:  # noqa: BLE001
+        add("gen_instructions_import_or_audit", False, f"{type(e).__name__}: {e}")
+
+    try:
+        wa = _workflow_cards_audit()
+        add("workflow_audit", bool(wa.get("ok")), json.dumps(wa.get("summary", {}), ensure_ascii=False), errors=wa.get("errors"), warnings=wa.get("warnings")[:10])
+    except Exception as e:  # noqa: BLE001
+        add("workflow_audit", False, f"{type(e).__name__}: {e}")
+
+    if getattr(a, "strict_determinism", False):
+        try:
+            da = _determinism_audit(strict=True, full=False)
+            failed = [c for c in da.get("checks", []) if not c.get("ok")]
+            add("determinism_audit", bool(da.get("ok")), f"checks={len(da.get('checks', []))} failed={len(failed)}", failed=failed[:5])
+        except Exception as e:  # noqa: BLE001
+            add("determinism_audit", False, f"{type(e).__name__}: {e}")
+
+    for task in ["write_new_tool", "ingest_local", "ingest_zip", "ocr_ingest", "profile_ingest_ocr", "profile_ingest_chunks", "convert_rename", "ocr_pdf_scan", "large_doc_chunk", "workflow_audit", "determinism_audit", "golden_test", "release_check", "live_readiness", "live_contract_check", "live_state_snapshot", "live_state_diff", "live_smoke_plan", "deploy_plan", "rollback_plan", "final_acceptance", "go_live_runbook"]:
+        try:
+            wf_id = _TASK_TO_WORKFLOW.get(task, task)
+            card = _load_workflow_card(wf_id)
+            add(f"route_task:{task}", bool(card.get("ok", True)), f"workflow={wf_id} risk={card.get('risk')}")
+        except Exception as e:  # noqa: BLE001
+            add(f"route_task:{task}", False, f"{type(e).__name__}: {e}")
+
+    sample = out_dir / "sample_vb.txt"
+    sample.write_text(("Điều 1. Phạm vi điều chỉnh\nVăn bản này dùng để kiểm thử.\n\nĐiều 2. Đối tượng áp dụng\nCơ quan, tổ chức, cá nhân có liên quan.\n") * 6, encoding="utf-8")
+    try:
+        text, warns = _read_local_text_for_analysis(sample)
+        m = _text_quality_metrics(text)
+        add("ocr_text_quality_metrics", m.get("chars", 0) > 100 and m.get("article_count", 0) >= 2, json.dumps(m, ensure_ascii=False), warnings=warns)
+        class _OA: pass
+        oa = _OA(); oa.file = str(sample); oa.engine = "none"; oa.lang = "vi"; oa.mode = "vbqppl"; oa.out_dir = str(out_dir / "ocr_sidecar"); oa.force_ocr = False; oa.timeout = 60; oa.json = True; oa.deterministic = True
+        # Exercise manifest writer without relying on external OCR engines. Capture stdout to keep release JSON clean.
+        import io, contextlib
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc_ocr = cmd_ocr_run(oa)
+        ocr_payload = json.loads(buf.getvalue())
+        _od, _sidecar, _ocr_pdf = _ocr_out_paths(sample, str(out_dir / "ocr_sidecar"))
+        manifest_path = _ocr_manifest_path_for_text(_sidecar)
+        add("ocr_manifest_sidecar", rc_ocr == 0 and manifest_path.exists(), str(manifest_path))
+        va = _OA(); va.text_file = str(_sidecar); va.source = str(sample); va.mode = "vbqppl"; va.json = True; va.deterministic = True
+        buf2 = io.StringIO()
+        with contextlib.redirect_stdout(buf2):
+            rc_ver = cmd_ocr_verify(va)
+        ver_payload = json.loads(buf2.getvalue())
+        add("ocr_verify_manifest_contract", rc_ver == 0 and bool(ver_payload.get("ok")), json.dumps({"checks": len(ver_payload.get("checks", [])), "warnings": ver_payload.get("warnings", [])}, ensure_ascii=False))
+    except Exception as e:  # noqa: BLE001
+        add("ocr_text_quality_metrics", False, f"{type(e).__name__}: {e}")
+
+    try:
+        text = sample.read_text(encoding="utf-8")
+        plan = _chunk_plan_from_text(text, name="sample_vb", mode="profile", max_chars=80)
+        add("chunk_plan_profile", bool(plan.get("ok")) and plan.get("chunk_count", 0) >= 2, f"chunks={plan.get('chunk_count')} strategy={plan.get('strategy')}")
+        guard = _chunk_plan_from_text(text, name="sample_vb", mode="vbqppl-canonical", max_chars=80)
+        add("chunk_plan_vbqppl_canonical_guard", not guard.get("ok") and guard.get("error") == "DO_NOT_SPLIT_VBQPPL_CANONICAL", guard.get("error"))
+    except Exception as e:  # noqa: BLE001
+        add("chunk_plan", False, f"{type(e).__name__}: {e}")
+
+    try:
+        rm = _build_release_manifest(HERE.parent)
+        add("release_manifest", bool(rm.get("ok")) and rm.get("file_count", 0) > 0, f"files={rm.get('file_count')} package_hash={rm.get('package_hash')}", required_missing=rm.get("required_missing"))
+        rv = _verify_release_manifest(HERE.parent, rm, strict=False)
+        add("release_verify_self", bool(rv.get("ok")) and bool(rv.get("package_hash_match")), f"checked={rv.get('checked_file_count')} match={rv.get('package_hash_match')}", failed=rv.get("failed"))
+        lr = _live_readiness_report(profile=getattr(a, "profile", None) or "", include_ocr=True)
+        add("live_readiness_report", bool(lr.get("ok")) and "checks" in lr, f"ready={lr.get('ready_for_live_smoke')} checks={len(lr.get('checks', []))}")
+        lp = _live_smoke_plan(profile=getattr(a, "profile", None) or "", include_ocr=True)
+        add("live_smoke_plan", bool(lp.get("ok")) and len(lp.get("steps", [])) >= 8, f"steps={len(lp.get('steps', []))}")
+        dp = _deploy_plan(profile=getattr(a, "profile", None) or "", include_ocr=True)
+        add("deploy_plan", bool(dp.get("ok")) and len(dp.get("steps", [])) >= 6, f"steps={len(dp.get('steps', []))}")
+        rp = _rollback_plan()
+        add("rollback_plan", bool(rp.get("ok")) and len(rp.get("steps", [])) >= 4, f"steps={len(rp.get('steps', []))}")
+    except Exception as e:  # noqa: BLE001
+        add("live_smoke_plan", False, f"{type(e).__name__}: {e}")
+
+    ok = all(r.get("ok") for r in results)
+    report = {"ok": ok, "schema": "release_check.v2", "mode": "in_process_offline", "full": bool(getattr(a, "full", False)), "strict_determinism": bool(getattr(a, "strict_determinism", False)), "out_dir": str(out_dir), "results": results,
+              "note": "Offline only: không gọi Drive/NLM, không ghi registry. Dùng live-smoke-plan cho test live có auth."}
+    report_path = out_dir / "release_check_report.json"
+    _write_text_atomic(report_path, _json_dumps(report))
+    if getattr(a, "out", None):
+        _write_text_atomic(Path(a.out), _json_dumps(report))
+    _print_json_or_text(report, getattr(a, "json", False))
+    return 0 if ok else 2
+
+# ───────────────────────── release/package integrity ─────────────────────────
+_RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
+                         ".claude", ".githooks"}   # v1.33.54: dev-side (không vào zip skill — upload script cũng strip)
+_RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
+# v1.33.54: file local-only MỌI CẤP — config THẬT (chứa webappUrl/token) + CLAUDE.md dev. Phát hiện khi regen
+# manifest trên dev-tree: walk thư mục (không phải git ls-files) đã liệt kê + hash tra_luat_config.v2.json
+# vào RELEASE_MANIFEST (rò metadata + file_count lệch zip-set 115≠109 → release-verify trong gói FAIL).
+_RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json"}
+_RELEASE_EXCLUDE_NAMES = {
+    "RELEASE_MANIFEST.json",
+    "before.json", "after.json",
+    "live_state_before.json", "live_state_after.json", "live_state_diff.json",
+    "release_check_report.json", "determinism_report.json",
+}
+_RELEASE_REQUIRED_FILES = [
+    "VERSION",
+    "SKILL.md",
+    "CHANGELOG.md",
+    "scripts/tl.py",
+    "scripts/gen_instructions.py",
+    "references/API_CONTRACT.md",
+    "references/workflows/workflow_card.schema.json",
+    "references/golden/route_task_ingest_zip.json",
+    "references/golden/nlm_query_plan_3_sources.json",
+    "references/golden/workflow_audit.json",
+    "references/golden/tool_inventory_inventory_decision.json",
+    "references/golden/route_task_ocr_ingest.json",
+    "references/golden/route_task_profile_ingest_chunks.json",
+]
+_RELEASE_REQUIRED_WORKFLOWS = [
+    "references/workflows/write_new_tool.json",
+    "references/workflows/nlm_query_quality.json",
+    "references/workflows/ingest_local.json",
+    "references/workflows/convert_rename.json",
+    "references/workflows/ingest_zip.json",
+    "references/workflows/ocr_pdf_scan.json",
+    "references/workflows/large_doc_chunk.json",
+    "references/workflows/chunk_ingest.json",
+    "references/workflows/ocr_ingest.json",
+    "references/workflows/workflow_audit.json",
+    "references/workflows/release_check.json",
+    "references/workflows/live_readiness.json",
+    "references/workflows/live_contract_check.json",
+    "references/workflows/live_state_snapshot.json",
+    "references/workflows/live_state_diff.json",
+    "references/workflows/live_smoke_plan.json",
+    "references/workflows/deploy_plan.json",
+    "references/workflows/rollback_plan.json",
+    "references/workflows/release_manifest.json",
+    "references/workflows/release_verify.json",
+    "references/workflows/release_bundle.json",
+    "references/workflows/final_acceptance.json",
+    "references/workflows/go_live_runbook.json",
+]
+
+
+def _release_root_from_arg(p: str | None) -> Path:
+    root = Path(p).expanduser().resolve() if p else HERE.parent.resolve()
+    if root.name == "scripts" and (root.parent / "SKILL.md").exists():
+        root = root.parent.resolve()
+    return root
+
+
+def _release_should_include(path: Path, root: Path) -> bool:
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        return False
+    parts = set(rel.parts)
+    if parts & _RELEASE_EXCLUDE_DIRS:
+        return False
+    if path.suffix.lower() in _RELEASE_EXCLUDE_SUFFIXES:
+        return False
+    if len(rel.parts) == 1 and rel.name in _RELEASE_EXCLUDE_NAMES:
+        # Do not hash generated root-level manifests/snapshots/reports by default; release-bundle adds a fresh manifest.
+        return False
+    if rel.name in _RELEASE_EXCLUDE_NAMES_ANYWHERE:   # v1.33.54: config thật/CLAUDE.md ở MỌI cấp
+        return False
+    return path.is_file()
+
+
+def _sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        while True:
+            b = f.read(chunk_size)
+            if not b:
+                break
+            h.update(b)
+    return h.hexdigest()
+
+
+def _build_release_manifest(root: Path) -> dict:
+    root = root.resolve()
+    files = []
+    total = 0
+    for p in sorted(root.rglob("*"), key=lambda x: str(x.relative_to(root)).replace(os.sep, "/")):
+        if not _release_should_include(p, root):
+            continue
+        rel = str(p.relative_to(root)).replace(os.sep, "/")
+        size = p.stat().st_size
+        total += size
+        files.append({"path": rel, "size": size, "sha256": _sha256_file(p)})
+    by_path = {f["path"] for f in files}
+    required = list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)
+    missing_required = [x for x in required if x not in by_path]
+    version_text = ""
+    try:
+        version_text = (root / "VERSION").read_text(encoding="utf-8", errors="replace").strip()
+    except Exception:
+        version_text = VERSION
+    package_hash = hashlib.sha256("\n".join(f"{f['path']}\0{f['size']}\0{f['sha256']}" for f in files).encode("utf-8")).hexdigest()
+    return {
+        "ok": not missing_required,
+        "schema": "release_manifest.v1",
+        "skill": "tra-luat",
+        "skill_version": version_text or VERSION,
+        "webapp_target": globals().get("EXPECT_VERSION", ""),
+        "root_name": root.name,
+        "file_count": len(files),
+        "total_bytes": total,
+        "package_hash": package_hash,
+        "required_missing": missing_required,
+        "files": files,
+        "determinism_note": "Manifest không chứa timestamp hay đường dẫn tuyệt đối; package_hash tính từ path,size,sha256 đã sort.",
+    }
+
+
+def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
+    root = root.resolve()
+    expected = {f.get("path"): f for f in manifest.get("files", []) if f.get("path")}
+    checks = []
+    ok = True
+    for rel, meta in sorted(expected.items()):
+        p = root / rel
+        if not p.exists():
+            checks.append({"path": rel, "ok": False, "error": "MISSING"})
+            ok = False
+            continue
+        if not p.is_file():
+            checks.append({"path": rel, "ok": False, "error": "NOT_FILE"})
+            ok = False
+            continue
+        size = p.stat().st_size
+        sha = _sha256_file(p)
+        item_ok = (size == int(meta.get("size", -1)) and sha == meta.get("sha256"))
+        checks.append({"path": rel, "ok": item_ok, "expected_size": meta.get("size"), "actual_size": size,
+                       "expected_sha256": meta.get("sha256"), "actual_sha256": sha})
+        ok = ok and item_ok
+    current = _build_release_manifest(root)
+    current_paths = {f["path"] for f in current.get("files", [])}
+    expected_paths = set(expected)
+    extra = sorted(current_paths - expected_paths)
+    missing_from_current_manifest = sorted(expected_paths - current_paths)
+    if strict and extra:
+        ok = False
+    required_missing = [x for x in (list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)) if not (root / x).exists()]
+    if required_missing:
+        ok = False
+    return {
+        "ok": bool(ok),
+        "schema": "release_verify.v1",
+        "strict": bool(strict),
+        "root_name": root.name,
+        "manifest_schema": manifest.get("schema"),
+        "skill_version": manifest.get("skill_version"),
+        "expected_file_count": len(expected),
+        "checked_file_count": len(checks),
+        "failed": [c for c in checks if not c.get("ok")][:50],
+        "extra_files": extra[:200],
+        "missing_from_current_manifest": missing_from_current_manifest[:200],
+        "required_missing": required_missing,
+        "package_hash_expected": manifest.get("package_hash"),
+        "package_hash_current": current.get("package_hash"),
+        "package_hash_match": manifest.get("package_hash") == current.get("package_hash"),
+        "note": "strict=true coi file thừa là lỗi; strict=false chỉ cảnh báo extra_files.",
+    }
+
+
+def cmd_release_manifest(a) -> int:
+    root = _release_root_from_arg(getattr(a, "root", None))
+    m = _build_release_manifest(root)
+    if getattr(a, "out", None):
+        _write_text_atomic(Path(a.out), json.dumps(m, ensure_ascii=False, indent=2))
+    _print_json_or_text(m, getattr(a, "json", False))
+    return 0 if m.get("ok") else 2
+
+
+def cmd_release_verify(a) -> int:
+    root = _release_root_from_arg(getattr(a, "root", None))
+    mf = Path(getattr(a, "manifest", "")).expanduser()
+    try:
+        manifest = json.loads(mf.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        out = {"ok": False, "error": "MANIFEST_READ_FAILED", "detail": f"{type(e).__name__}: {e}", "manifest": str(mf)}
+        _print_json_or_text(out, getattr(a, "json", False))
+        return 2
+    out = _verify_release_manifest(root, manifest, strict=bool(getattr(a, "strict", False)))
+    _print_json_or_text(out, getattr(a, "json", False))
+    return 0 if out.get("ok") else 2
+
+
+def _zip_write_file_deterministic(zf, src: Path, arcname: str):
+    info = zipfile.ZipInfo(arcname)
+    info.date_time = (1980, 1, 1, 0, 0, 0)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    # 0644 regular file; keep deterministic permissions.
+    info.external_attr = 0o100644 << 16
+    zf.writestr(info, src.read_bytes())
+
+
+def _zip_write_bytes_deterministic(zf, data: bytes, arcname: str):
+    info = zipfile.ZipInfo(arcname)
+    info.date_time = (1980, 1, 1, 0, 0, 0)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.external_attr = 0o100644 << 16
+    zf.writestr(info, data)
+
+
+def cmd_release_bundle(a) -> int:
+    root = _release_root_from_arg(getattr(a, "root", None))
+    out_path = Path(getattr(a, "out", None) or f"{root.name}-release.zip").expanduser().resolve()
+    top = getattr(a, "top", None) or root.name
+    if not top or "/" in top or "\\" in top:
+        res = {"ok": False, "error": "INVALID_TOP_NAME", "top": top}
+        _print_json_or_text(res, getattr(a, "json", False)); return 2
+    manifest = _build_release_manifest(root)
+    if not manifest.get("ok"):
+        res = {"ok": False, "error": "MANIFEST_NOT_OK", "required_missing": manifest.get("required_missing"), "root": str(root)}
+        _print_json_or_text(res, getattr(a, "json", False)); return 2
+    tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    if tmp.exists():
+        tmp.unlink()
+    files = [root / f["path"] for f in manifest.get("files", [])]
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for p in sorted(files, key=lambda x: str(x.relative_to(root)).replace(os.sep, "/")):
+            rel = str(p.relative_to(root)).replace(os.sep, "/")
+            _zip_write_file_deterministic(zf, p, f"{top}/{rel}")
+        _zip_write_bytes_deterministic(zf, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
+    os.replace(tmp, out_path)
+    bundle_sha = _sha256_file(out_path)
+    res = {"ok": True, "schema": "release_bundle.v1", "out": str(out_path), "top": top,
+           "file_count": manifest.get("file_count"), "total_bytes": manifest.get("total_bytes"),
+           "package_hash": manifest.get("package_hash"), "bundle_sha256": bundle_sha,
+           "note": "Zip dùng thứ tự file sort + timestamp 1980-01-01 để giảm drift đóng gói."}
+    _print_json_or_text(res, getattr(a, "json", False))
+    return 0
 
 # ───────────────────────── selftest (offline) ─────────────────────────
 def selftest() -> int:
@@ -16948,6 +19974,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--config", help="file JSON webappUrl/token")
     ap.add_argument("--profile", help="corpus profile trong config v2: vbqppl, vbthuong, hoặc profile dự án")
     ap.add_argument("--timings", action="store_true", help="in thời gian từng call webapp ra stderr (=env TL_TIMINGS=1)")
+    ap.add_argument("--deterministic", action="store_true", help="chuẩn hoá JSON output: sort keys + scrub path/temp/time volatile (=env TL_DETERMINISTIC=1)")
     ap.add_argument("--selftest", action="store_true", help="logic thuần, không mạng")
     sub = ap.add_subparsers(dest="cmd")
     try:
@@ -17287,6 +20314,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--file", help="file Instruction/Project prompt cần kiểm")
     p.add_argument("--generate", action="store_true", help="generate bằng scripts/gen_instructions.py rồi audit")
     p.add_argument("--target", choices=["project", "nlm", "both", "config"], default="both")
+    p.add_argument("--skill-version", default=VERSION)
+    p.add_argument("--profile", help="profile corpus khi generate để audit (mặc định TL_PROFILE/default)")
+    p.add_argument("--notebook", "--notebook-id", dest="notebook", help="notebookId của profile dự án")
+    p.add_argument("--folder-name", dest="folder_name", help="tên folder trong Van_ban_thuong")
+    p.add_argument("--root-folder-id", dest="root_folder_id", help="rootFolderId nếu đã tạo folder")
     p.add_argument("--print-text", action="store_true")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_instruction_audit)
@@ -17839,6 +20871,252 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("query", nargs="?"); p.add_argument("--sohieu"); p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_find_doc)
 
+    p = sub.add_parser("tool-inventory", help="READ-ONLY: bản đồ tool/script/workflow dạng máy-đọc để Claude tra trước khi viết tool mới")
+    p.add_argument("--group", help="lọc nhóm tool, ví dụ ingest_convert/nlm_operations")
+    p.add_argument("--task", help="truy vấn theo tác vụ, ví dụ 'ocr pdf scan' hoặc write_new_tool")
+    p.add_argument("--scripts", action="store_true", help="kèm docstring scripts/*.py")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_tool_inventory)
+
+    p = sub.add_parser("route-task", help="READ-ONLY: định tuyến workflow chuẩn cho tác vụ rủi ro trước khi dry-run/apply")
+    p.add_argument("task_pos", nargs="?", metavar="task", help="tên tác vụ (positional — tương đương --task)")
+    p.add_argument("--task", help="write_new_tool|nlm_query_quality|ingest_local|convert_rename|ingest_zip|ocr_pdf_scan|large_doc_chunk")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_route_task)
+
+    p = sub.add_parser("nlm-query-plan", help="READ-ONLY: lập kế hoạch truy vấn NLM hẹp theo source_id trước khi gọi nlm-query/nlm-cross")
+    p.add_argument("question", nargs="?", help="câu hỏi dự kiến gửi NLM")
+    p.add_argument("--source-id", action="append", default=[], help="source_id đã chọn; có thể lặp lại")
+    p.add_argument("--source-ids", help="danh sách source_id cách nhau bằng dấu phẩy")
+    p.add_argument("--justification", help="bắt buộc khi dùng 4-5 nguồn trong một lượt hỏi")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_nlm_query_plan)
+
+
+    p = sub.add_parser("workflow-audit", help="READ-ONLY: audit workflow cards, route-task map và command inventory để bắt drift")
+    p.add_argument("--strict", action="store_true", help="fail cả khi có warnings")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_workflow_audit)
+
+    p = sub.add_parser("determinism-audit", help="READ-ONLY: audit schema, volatile scrub, output ổn định và golden fixtures")
+    p.add_argument("--strict", action="store_true", help="bắt warnings workflow và chạy golden-test")
+    p.add_argument("--full", action="store_true", help="chạy golden-test trong audit")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_determinism_audit)
+
+    p = sub.add_parser("golden-test", help="READ-ONLY mặc định: so JSON golden fixtures; --write để cập nhật fixtures")
+    p.add_argument("--write", action="store_true", help="ghi lại references/golden/*.json từ output deterministic hiện tại")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_golden_test)
+
+    p = sub.add_parser("live-smoke-plan", help="READ-ONLY: xuất kế hoạch test live Drive/NLM theo thứ tự an toàn; không gọi mạng")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_live_smoke_plan)
+
+    p = sub.add_parser("live-readiness", help="READ-ONLY: báo cáo 3 tầng env/contract/apply; không ghi Drive/NLM")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--config-file", help="file config để kiểm hiện diện webapp/token; không in secret")
+    p.add_argument("--skip-contract", action="store_true", help="chỉ kiểm env local, không gọi live read-only")
+    p.add_argument("--smoke-proof", help="file JSON diff/smoke proof; thiếu proof thì apply_ready=false")
+    p.add_argument("--strict", action="store_true", help="rc=2 nếu chưa ready_for_live_smoke")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_live_readiness)
+
+    p = sub.add_parser("live-contract-check", help="READ-ONLY: gọi webapp ping/info + NLM get/list tối thiểu; không upload/register/add")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--config-file", help="file config để nạp TL_WEBAPP/TL_TOKEN/profile")
+    p.add_argument("--timeout", type=int, default=60)
+    p.add_argument("--strict", action="store_true", help="rc=2 nếu live_contract_ready=false")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_live_contract_check)
+
+    p = sub.add_parser("live-state-snapshot", help="READ-ONLY: chụp trạng thái live trước/sau smoke để diff")
+    p.add_argument("--out", required=True, help="file JSON snapshot cần ghi")
+    p.add_argument("--config-file", help="file config để nạp TL_WEBAPP/TL_TOKEN/profile")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--no-contract", action="store_true", help="không gọi live-contract-check trong snapshot")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_live_state_snapshot)
+
+    p = sub.add_parser("live-state-diff", help="READ-ONLY: so before/after snapshot; fail nếu có thay đổi ngoài --allow")
+    p.add_argument("before")
+    p.add_argument("after")
+    p.add_argument("--allow", action="append", default=[], help="path prefix được phép thay đổi, ví dụ source_counts hoặc notebooks.get.source_count")
+    p.add_argument("--out", help="ghi diff JSON")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_live_state_diff)
+
+    p = sub.add_parser("deploy-plan", help="READ-ONLY: kế hoạch triển khai bundle an toàn có backup, verify, smoke test")
+    p.add_argument("--bundle", help="zip release cần triển khai")
+    p.add_argument("--target-dir", help="thư mục skill đích")
+    p.add_argument("--backup-dir", help="thư mục lưu backup")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_deploy_plan)
+
+    p = sub.add_parser("rollback-plan", help="READ-ONLY: kế hoạch rollback từ backup hoặc bundle trước đó")
+    p.add_argument("--target-dir", help="thư mục skill đích")
+    p.add_argument("--backup-path", help="thư mục backup đã biết")
+    p.add_argument("--bundle", help="bundle cũ dùng để rollback nếu không có backup dir")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_rollback_plan)
+
+    p = sub.add_parser("final-acceptance", help="OFFLINE: kiểm cuối trước bàn giao; tổng hợp release/workflow/live-readiness plan")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--strict-live", action="store_true", help="fail nếu live-readiness chưa đạt; mặc định offline pass vẫn ok")
+    p.add_argument("--out", help="ghi report JSON")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_final_acceptance)
+
+    p = sub.add_parser("go-live-runbook", help="READ-ONLY: xuất runbook triển khai live + smoke test + rollback dạng Markdown")
+    p.add_argument("--include-ocr", action="store_true")
+    p.add_argument("--out", help="ghi Markdown ra file")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_go_live_runbook)
+
+    p = sub.add_parser("release-check", help="OFFLINE: acceptance harness tất định trước khi đóng gói; không ghi Drive/NLM")
+    p.add_argument("--out-dir")
+    p.add_argument("--out")
+    p.add_argument("--full", action="store_true", help="chạy thêm tl --selftest nặng; mặc định release-check chỉ chạy harness nhanh")
+    p.add_argument("--strict-determinism", action="store_true", help="chạy thêm determinism-audit --strict, gồm golden-test")
+    p.add_argument("--verbose", action="store_true", help="in tiến độ từng bước ra stderr")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_release_check)
+
+    p = sub.add_parser("release-manifest", help="READ-ONLY: tạo RELEASE_MANIFEST SHA-256 tất định cho gói skill")
+    p.add_argument("--root", help="root gói skill; mặc định HERE.parent")
+    p.add_argument("--out", help="ghi manifest ra file JSON")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_release_manifest)
+
+    p = sub.add_parser("release-verify", help="READ-ONLY: verify RELEASE_MANIFEST với root hiện tại")
+    p.add_argument("manifest")
+    p.add_argument("--root", help="root gói skill; mặc định HERE.parent")
+    p.add_argument("--strict", action="store_true", help="coi file thừa là lỗi")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_release_verify)
+
+    p = sub.add_parser("release-bundle", help="OFFLINE: đóng gói zip tất định kèm RELEASE_MANIFEST.json; không gọi mạng")
+    p.add_argument("--root", help="root gói skill; mặc định HERE.parent")
+    p.add_argument("--out", required=True, help="đường dẫn zip output")
+    p.add_argument("--top", help="tên thư mục top-level trong zip; mặc định tên root")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_release_bundle)
+
+    p = sub.add_parser("convert-verify", help="READ-ONLY: verify/readback sau Drive convert/rename/move trước khi add NLM")
+    p.add_argument("--gdoc-id", required=True)
+    p.add_argument("--src-id", help="file gốc nhị phân nếu có")
+    p.add_argument("--expected-name", help="tên GDoc kỳ vọng")
+    p.add_argument("--expected-src-name", help="tên file gốc kỳ vọng")
+    p.add_argument("--expected-folder-id", help="folder đích kỳ vọng")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_convert_verify)
+
+    p = sub.add_parser("ingest-zip", help="DRY-RUN: giải nén zip an toàn và lập batch plan nạp VBQPPL; apply chưa bật ở pha an toàn")
+    p.add_argument("file")
+    p.add_argument("--cat", help="category VBQPPL dự kiến; thiếu cat sẽ cảnh báo")
+    p.add_argument("--max-files", type=int, default=200)
+    p.add_argument("--max-size-mb", type=int, default=100)
+    p.add_argument("--apply", action="store_true", help="thực thi batch sau dry-run; yêu cầu --confirm yes")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--continue-on-error", action="store_true", help="tiếp tục file sau nếu một file lỗi")
+    p.add_argument("--skip-nlm-preflight", action="store_true", help="truyền xuống ingest-local nếu cần tự vá NLM sau")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_ingest_zip)
+
+    p = sub.add_parser("profile-ingest-zip", help="DRY-RUN: giải nén zip an toàn và lập batch plan nạp profile; apply chưa bật ở pha an toàn")
+    p.add_argument("file")
+    p.add_argument("--max-files", type=int, default=200)
+    p.add_argument("--max-size-mb", type=int, default=100)
+    p.add_argument("--apply", action="store_true", help="thực thi batch sau dry-run; yêu cầu --confirm yes")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--continue-on-error", action="store_true", help="tiếp tục file sau nếu một file lỗi")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_profile_ingest_zip)
+
+    p = sub.add_parser("ingest-ocr", help="BRIDGE: verify OCR text rồi gọi lại ingest-local cho VBQPPL; không ghi trực tiếp")
+    p.add_argument("file")
+    p.add_argument("--text-file", dest="text_file", required=True)
+    p.add_argument("--cat", required=True)
+    p.add_argument("--name"); p.add_argument("--sohieu"); p.add_argument("--goc"); p.add_argument("--hieuluc"); p.add_argument("--loai")
+    p.add_argument("--force-cat", dest="force_cat", action="store_true")
+    p.add_argument("--allow-large", dest="allow_large", action="store_true")
+    p.add_argument("--skip-nlm-preflight", dest="skip_nlm_preflight", action="store_true")
+    p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true")
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_ingest_ocr)
+
+    p = sub.add_parser("profile-ingest-ocr", help="BRIDGE: verify OCR text rồi gọi lại profile-ingest; không ghi trực tiếp")
+    p.add_argument("file")
+    p.add_argument("--text-file", dest="text_file", required=True)
+    p.add_argument("--name"); p.add_argument("--hieuluc")
+    p.add_argument("--chunk-max-chars", dest="chunk_max_chars", type=int, default=100000)
+    p.add_argument("--allow-default", dest="allow_default", action="store_true")
+    p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true")
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_profile_ingest_ocr)
+
+    p = sub.add_parser("profile-ingest-chunks", help="BRIDGE: verify chunk_manifest rồi gọi lại profile-ingest từng chunk; không ghi trực tiếp")
+    p.add_argument("manifest")
+    p.add_argument("--allow-default", dest="allow_default", action="store_true")
+    p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true")
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--continue-on-error", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_profile_ingest_chunks)
+
+    p = sub.add_parser("ocr-analyze", help="READ-ONLY: phân tích text-layer/chất lượng text của file, ưu tiên PDF scan/OCR")
+    p.add_argument("file")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_ocr_analyze)
+
+    p = sub.add_parser("ocr-run", help="LOCAL: tạo sidecar text OCR/text-layer; Drive/Paddle/DocumentAI bị gate nếu chưa cấu hình")
+    p.add_argument("file")
+    p.add_argument("--engine", choices=["auto", "none", "ocrmypdf", "drive", "paddle", "documentai"], default="auto")
+    p.add_argument("--lang", default="vi", help="Drive/Paddle dùng vi; OCRmyPDF/Tesseract thường dùng vie+eng")
+    p.add_argument("--mode", choices=["vbqppl", "profile"], default="profile")
+    p.add_argument("--out-dir")
+    p.add_argument("--force-ocr", action="store_true")
+    p.add_argument("--timeout", type=int, default=600)
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_ocr_run)
+
+    p = sub.add_parser("ocr-verify", help="READ-ONLY: kiểm chất lượng text OCR trước khi cho phép --ocr-verified")
+    p.add_argument("text_file")
+    p.add_argument("--source")
+    p.add_argument("--mode", choices=["vbqppl", "profile"], default="profile")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_ocr_verify)
+
+    p = sub.add_parser("chunk-plan", help="READ-ONLY: lập kế hoạch tách văn bản lớn theo cấu trúc")
+    p.add_argument("file")
+    p.add_argument("--mode", choices=["profile", "vbqppl-helper", "vbqppl-canonical"], default="profile")
+    p.add_argument("--name")
+    p.add_argument("--max-chars", type=int, default=100000)
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_chunk_plan)
+
+    p = sub.add_parser("chunk-apply", help="LOCAL: tạo chunk files + manifest từ kế hoạch tách; chưa ghi Drive/NLM")
+    p.add_argument("file")
+    p.add_argument("--mode", choices=["profile", "vbqppl-helper", "vbqppl-canonical"], default="profile")
+    p.add_argument("--name")
+    p.add_argument("--max-chars", type=int, default=100000)
+    p.add_argument("--out-dir")
+    p.add_argument("--expected-hash")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_chunk_apply)
+
+    p = sub.add_parser("chunk-verify", help="READ-ONLY: verify manifest/files do chunk-apply tạo")
+    p.add_argument("manifest")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_chunk_verify)
+
     p = sub.add_parser("instructions", help="sinh Instruction/Project prompt; mặc định VBQPPL, --profile <tên> cho dự án văn bản thường")
     p.add_argument("--target", choices=["nlm", "project", "both", "config", "style-template"], default="both")
     p.add_argument("--skill-version", default=VERSION)
@@ -17993,6 +21271,9 @@ def build_parser() -> argparse.ArgumentParser:
             _sp.add_argument("--profile", default=argparse.SUPPRESS, help="corpus profile (nhận cả trước lẫn sau subcommand)")
         if "--config" not in _opts:
             _sp.add_argument("--config", default=argparse.SUPPRESS, help="file JSON webappUrl/token (nhận cả sau subcommand)")
+        if "--deterministic" not in _opts:
+            _sp.add_argument("--deterministic", action="store_true", default=argparse.SUPPRESS,
+                             help="chuẩn hoá JSON output (nhận cả sau subcommand)")
     return ap
 
 
@@ -18001,12 +21282,12 @@ def build_parser() -> argparse.ArgumentParser:
 # gws-ping/transport-info = chẩn đoán transport gws, KHÔNG cần webapp creds.
 _CREDS_LAZY_CMDS = frozenset({
     "boot", "locate", "exists", "source-map", "relation-check", "relation-backfill", "external-ingest",
-    "instructions", "instruction-audit", "link-priority", "profile-info", "config-pin-registry", "profile-list", "profile-use",
+    "instructions", "instruction-audit", "tool-inventory", "route-task", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook", "link-priority", "profile-info", "config-pin-registry", "profile-list", "profile-use",
     "profile-rename", "profile-delete", "profile-files", "profile-manifest", "profile-create", "profile-ingest",
-    "profile-file-add", "profile-file-remove",
+    "profile-file-add", "profile-file-remove", "ingest-ocr", "profile-ingest-ocr", "ingest-zip", "profile-ingest-zip", "profile-ingest-chunks", "ocr-analyze", "ocr-run", "ocr-verify", "chunk-plan", "chunk-apply", "chunk-verify",
     "slot-audit", "vbhn-check", "vbhn-verify", "vbhn-compare", "vbhn-normalize", "rasoat",
     "doctor", "cowork-plan", "ops-plan", "init-config", "hygiene", "reconcile", "registry-doctor", "xref", "dedup-check",
-    "ingest-route", "backfill-notebook", "cache-snapshot", "nlm-list", "nlm-reconcile",
+    "ingest-route", "backfill-notebook", "cache-snapshot", "nlm-list", "nlm-reconcile", "nlm-query-plan",
     "preflight", "push-overflow", "nlm-content", "nlm-query", "reg-delete", "bench", "tvpl-url",
     "fetch-route", "fetch-batch", "fetch-links", "find-doc", "footnote-map", "cluster",
     "rasoat-chongcheo", "frontier-expand", "rasoat-loop", "ingest-missing", "overflow-resolve", "nlm-orphans", "nlm-add", "ingest-local", "nlm-cross", "nlm-get", "cat-list",
@@ -18019,10 +21300,15 @@ _CREDS_LAZY_CMDS = frozenset({
 def main(argv) -> int:
     ap = build_parser()
     a = ap.parse_args(argv)
-    global _TIMING_ON
+    global _TIMING_ON, _DETERMINISTIC_ON
     if getattr(a, "timings", False):
         _TIMING_ON = True
         os.environ["TL_TIMINGS"] = "1"   # cho subprocess (boot) thừa hưởng
+    if _deterministic_enabled(a):
+        _DETERMINISTIC_ON = True
+        os.environ["TL_DETERMINISTIC"] = "1"
+        os.environ.setdefault("TZ", "UTC")
+        os.environ.setdefault("PYTHONHASHSEED", "0")   # child processes inherit; current process hash seed is already fixed/decided.
     if a.selftest:
         return selftest()
     if not getattr(a, "cmd", None):

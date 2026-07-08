@@ -1,0 +1,61 @@
+{
+  "id": "release_check",
+  "title": "Offline deterministic release check",
+  "risk": "low",
+  "applies_to": [
+    "before_packaging",
+    "after_patch",
+    "rollback_checkpoint"
+  ],
+  "apply": [
+    "read-only/offline local files only; no Drive/NLM writes"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_release_gate",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "recommended_commands": [
+    "release-check",
+    "workflow-audit",
+    "instructions --target project --check",
+    "instructions --target nlm --check",
+    "determinism-audit --strict --json",
+    "golden-test --json",
+    "release-check --strict-determinism --json"
+  ],
+  "plan": [
+    "compile scripts",
+    "run selftest",
+    "audit instructions",
+    "audit workflow cards",
+    "run local OCR/chunk/bridge dry-run samples",
+    "run determinism-audit --strict",
+    "compare golden deterministic fixtures"
+  ],
+  "verify": [
+    "release-check ok=true",
+    "report saved",
+    "expected guards fail with expected rc=2",
+    "determinism-audit ok=true",
+    "golden-test ok=true"
+  ],
+  "stop_conditions": [
+    "py_compile fails",
+    "selftest fails",
+    "instruction audit fails",
+    "workflow-audit fails",
+    "determinism-audit fails",
+    "golden fixture mismatch"
+  ]
+}

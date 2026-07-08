@@ -1,0 +1,79 @@
+{
+  "id": "ingest_local",
+  "title": "Nạp file local vào corpus/profile",
+  "risk": "high",
+  "applies_to": [
+    "vbqppl",
+    "profile"
+  ],
+  "recommended_commands": [
+    "ingest-route <file> --json",
+    "ingest-local <file> --auto-plan --json",
+    "profile-ingest <file> --json",
+    "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
+  ],
+  "plan": [
+    "classify file and destination profile",
+    "prefer TVPL/LuatVietnam/docx/text clean for VBQPPL",
+    "prepare standard name/category/profile",
+    "dry-run ingest route"
+  ],
+  "apply": [
+    "upload binary to Drive convert=false",
+    "Drive convert to GDoc",
+    "rename GDoc and source binary",
+    "move to target folder",
+    "register",
+    "add NLM only after verification"
+  ],
+  "verify": [
+    "GDoc exists",
+    "mime is Google Docs",
+    "name matches standard name",
+    "source binary retained with extension",
+    "registry links drive_id and src_id",
+    "NLM added only GDoc/chunk"
+  ],
+  "stop_conditions": [
+    "destination profile unclear",
+    "PDF scan without OCR/text layer",
+    "convert/readback failed",
+    "rename/readback failed"
+  ],
+  "rules": [
+    "Do not add raw binary to NLM as canonical",
+    "Use --apply only after dry-run/plan is clear"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "drive_registry_nlm",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "idempotency_contract": {
+    "schema": "idempotency_contract.v1",
+    "idempotency_key": "sha256(source_file_text_or_binary)+target_profile_or_cat+canonical_name",
+    "journal_key": "tl_journal/run_id for upload/convert/register/nlm-add",
+    "resume_behavior": "rerun same command with --resume when Drive/register succeeded but NLM/link step was interrupted",
+    "duplicate_guard": "convert/readback + registry drive_id/src_id + NLM dedup by drive_id/title before add",
+    "resume_command": "ingest-local <file> ... --resume --json",
+    "readback_command": "convert-verify --gdoc-id <id> --src-id <src_id> --expected-name <name> --json",
+    "rollback_hint": "journal <run_id> then undo <run_id> --apply --confirm yes for registry-safe rollback; Drive/NLM cleanup requires explicit source-delete/nlm-orphans review"
+  },
+  "idempotency_key": "sha256(source_file_text_or_binary)+target_profile_or_cat+canonical_name",
+  "journal_key": "tl_journal/run_id for upload/convert/register/nlm-add",
+  "resume_behavior": "rerun same command with --resume when Drive/register succeeded but NLM/link step was interrupted",
+  "duplicate_guard": "convert/readback + registry drive_id/src_id + NLM dedup by drive_id/title before add",
+  "resume_command": "ingest-local <file> ... --resume --json",
+  "readback_command": "convert-verify --gdoc-id <id> --src-id <src_id> --expected-name <name> --json",
+  "rollback_hint": "journal <run_id> then undo <run_id> --apply --confirm yes for registry-safe rollback; Drive/NLM cleanup requires explicit source-delete/nlm-orphans review"
+}

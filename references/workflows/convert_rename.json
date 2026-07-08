@@ -1,0 +1,61 @@
+{
+  "id": "convert_rename",
+  "title": "Drive convert và đổi tên có readback",
+  "risk": "high",
+  "applies_to": [
+    "doc",
+    "docx",
+    "pdf",
+    "profile_ingest",
+    "vbqppl_ingest"
+  ],
+  "recommended_commands": [
+    "ingest-local <file> --auto-plan --json",
+    "profile-ingest <file> --json",
+    "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
+  ],
+  "plan": [
+    "upload binary first",
+    "convert via Drive",
+    "standardize expected GDoc name",
+    "standardize source sidecar name"
+  ],
+  "apply": [
+    "copy_convert/organize convert=true",
+    "rename GDoc",
+    "rename source binary",
+    "move both files"
+  ],
+  "verify": [
+    "read Drive metadata after convert",
+    "mimeType == application/vnd.google-apps.document",
+    "GDoc name equals expected",
+    "source name retains true extension",
+    "folder placement is correct"
+  ],
+  "stop_conditions": [
+    "conversion produced non-GDoc",
+    "expected name not applied",
+    "source binary missing",
+    "folder mismatch"
+  ],
+  "rules": [
+    "Do not register/add NLM before convert and rename readback pass",
+    "For PDF/image OCR hint should be Vietnamese when Drive OCR is used"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "drive_convert_registry_nlm",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

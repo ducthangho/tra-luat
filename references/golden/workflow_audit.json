@@ -1,0 +1,1036 @@
+{
+  "card_schema": "workflow_card.v1",
+  "cards": [
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/chunk_ingest.json",
+      "id": "chunk_ingest",
+      "recommended": [
+        {
+          "available": true,
+          "command": "chunk-plan"
+        },
+        {
+          "available": true,
+          "command": "chunk-apply"
+        },
+        {
+          "available": true,
+          "command": "chunk-verify"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-chunks"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_chunks_profile_ingest"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/convert_rename.json",
+      "id": "convert_rename",
+      "recommended": [
+        {
+          "available": true,
+          "command": "ingest-local <file> --auto-plan --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest <file> --json"
+        },
+        {
+          "available": true,
+          "command": "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "drive_convert_registry_nlm"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/deploy_plan.json",
+      "id": "deploy_plan",
+      "recommended": [
+        {
+          "available": true,
+          "command": "deploy-plan --bundle <file.zip> --json"
+        },
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "release-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_deploy_plan"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/final_acceptance.json",
+      "id": "final_acceptance",
+      "recommended": [
+        {
+          "available": true,
+          "command": "final-acceptance --json"
+        },
+        {
+          "available": true,
+          "command": "workflow-audit --json"
+        },
+        {
+          "available": true,
+          "command": "release-check --json"
+        },
+        {
+          "available": true,
+          "command": "release-manifest --out RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        },
+        {
+          "available": true,
+          "command": "live-smoke-plan --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "none"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/go_live_runbook.json",
+      "id": "go_live_runbook",
+      "recommended": [
+        {
+          "available": true,
+          "command": "go-live-runbook --out GO_LIVE_RUNBOOK.md"
+        },
+        {
+          "available": true,
+          "command": "deploy-plan --json"
+        },
+        {
+          "available": true,
+          "command": "rollback-plan --json"
+        },
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        },
+        {
+          "available": true,
+          "command": "live-contract-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-snapshot --out before.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-diff before.json after.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-smoke-plan --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "none"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/ingest_local.json",
+      "id": "ingest_local",
+      "recommended": [
+        {
+          "available": true,
+          "command": "ingest-route <file> --json"
+        },
+        {
+          "available": true,
+          "command": "ingest-local <file> --auto-plan --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest <file> --json"
+        },
+        {
+          "available": true,
+          "command": "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "drive_registry_nlm"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/ingest_zip.json",
+      "id": "ingest_zip",
+      "recommended": [
+        {
+          "available": true,
+          "command": "ingest-zip <file.zip> --cat <NN> --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-zip <file.zip> --json"
+        },
+        {
+          "available": true,
+          "command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "drive_registry_nlm_batch"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/large_doc_chunk.json",
+      "id": "large_doc_chunk",
+      "recommended": [
+        {
+          "available": true,
+          "command": "chunk-plan <file> --mode profile --json"
+        },
+        {
+          "available": true,
+          "command": "chunk-apply <file> --mode profile --expected-hash <sha256> --json"
+        },
+        {
+          "available": true,
+          "command": "chunk-verify <chunk_manifest.json> --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-chunks <chunk_manifest.json> --json"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_chunks"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/live_contract_check.json",
+      "id": "live_contract_check",
+      "recommended": [
+        {
+          "available": true,
+          "command": "live-contract-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "write_scope": "none"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/live_readiness.json",
+      "id": "live_readiness",
+      "recommended": [
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        },
+        {
+          "available": true,
+          "command": "live-contract-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-snapshot --out before.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-smoke-plan --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "write_scope": "none"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/live_smoke_plan.json",
+      "id": "live_smoke_plan",
+      "recommended": [
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        },
+        {
+          "available": true,
+          "command": "live-contract-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-snapshot --out before.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-smoke-plan --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-snapshot --out after.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-diff before.json after.json --json"
+        },
+        {
+          "available": true,
+          "command": "ping"
+        },
+        {
+          "available": true,
+          "command": "doctor"
+        },
+        {
+          "available": true,
+          "command": "ingest-local"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest"
+        },
+        {
+          "available": true,
+          "command": "convert-verify"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "live_drive_nlm_smoke"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/live_state_diff.json",
+      "id": "live_state_diff",
+      "recommended": [
+        {
+          "available": true,
+          "command": "live-state-diff before.json after.json --json --allow source_counts --allow notebooks.get.source_count"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "write_scope": "local_diff_file_only"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/live_state_snapshot.json",
+      "id": "live_state_snapshot",
+      "recommended": [
+        {
+          "available": true,
+          "command": "live-state-snapshot --out before.json --json"
+        },
+        {
+          "available": true,
+          "command": "live-state-snapshot --out after.json --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "write_scope": "local_snapshot_file_only"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/nlm_query_quality.json",
+      "id": "nlm_query_quality",
+      "recommended": [
+        {
+          "available": true,
+          "command": "source-map --json"
+        },
+        {
+          "available": true,
+          "command": "reg-query --json"
+        },
+        {
+          "available": true,
+          "command": "nlm-query-plan <question> --source-id <id> --json"
+        },
+        {
+          "available": true,
+          "command": "nlm-query <question> --source-id <id> --json"
+        },
+        {
+          "available": true,
+          "command": "nlm-cross <question> --source-id <id> --json"
+        },
+        {
+          "available": true,
+          "command": "extract <query> --json"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "nlm_read_only"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/ocr_ingest.json",
+      "id": "ocr_ingest",
+      "recommended": [
+        {
+          "available": true,
+          "command": "ocr-run"
+        },
+        {
+          "available": true,
+          "command": "ocr-verify"
+        },
+        {
+          "available": true,
+          "command": "ingest-ocr"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-ocr"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_ocr_drive_registry_nlm"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/ocr_pdf_scan.json",
+      "id": "ocr_pdf_scan",
+      "recommended": [
+        {
+          "available": true,
+          "command": "ocr-analyze <scan.pdf> --json"
+        },
+        {
+          "available": true,
+          "command": "ocr-run <scan.pdf> --engine auto --mode profile --json"
+        },
+        {
+          "available": true,
+          "command": "ocr-verify <sidecar.txt> --mode profile --json"
+        },
+        {
+          "available": true,
+          "command": "ingest-ocr <scan.pdf> --text-file <sidecar.txt> --cat <NN> --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest-ocr <scan.pdf> --text-file <sidecar.txt> --json"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_ocr"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/release_bundle.json",
+      "id": "release_bundle",
+      "recommended": [
+        {
+          "available": true,
+          "command": "release-bundle --out <file.zip> --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_release_bundle"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/release_check.json",
+      "id": "release_check",
+      "recommended": [
+        {
+          "available": true,
+          "command": "release-check"
+        },
+        {
+          "available": true,
+          "command": "workflow-audit"
+        },
+        {
+          "available": true,
+          "command": "instructions --target project --check"
+        },
+        {
+          "available": true,
+          "command": "instructions --target nlm --check"
+        },
+        {
+          "available": true,
+          "command": "determinism-audit --strict --json"
+        },
+        {
+          "available": true,
+          "command": "golden-test --json"
+        },
+        {
+          "available": true,
+          "command": "release-check --strict-determinism --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_release_gate"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/release_manifest.json",
+      "id": "release_manifest",
+      "recommended": [
+        {
+          "available": true,
+          "command": "release-manifest --out RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_manifest"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/release_verify.json",
+      "id": "release_verify",
+      "recommended": [
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --strict --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_manifest_verify"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/rollback_plan.json",
+      "id": "rollback_plan",
+      "recommended": [
+        {
+          "available": true,
+          "command": "rollback-plan --json"
+        },
+        {
+          "available": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json"
+        },
+        {
+          "available": true,
+          "command": "release-check --json"
+        },
+        {
+          "available": true,
+          "command": "live-readiness --json"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "local_rollback_plan"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "file": "references/workflows/workflow_audit.json",
+      "id": "workflow_audit",
+      "recommended": [
+        {
+          "available": true,
+          "command": "workflow-audit"
+        },
+        {
+          "available": true,
+          "command": "tool-inventory"
+        },
+        {
+          "available": true,
+          "command": "route-task"
+        },
+        {
+          "available": true,
+          "command": "release-check"
+        },
+        {
+          "available": true,
+          "command": "workflow-audit --strict --json"
+        },
+        {
+          "available": true,
+          "command": "determinism-audit --json"
+        },
+        {
+          "available": true,
+          "command": "golden-test --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "none"
+    },
+    {
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "file": "references/workflows/write_new_tool.json",
+      "id": "write_new_tool",
+      "recommended": [
+        {
+          "available": true,
+          "command": "tool-inventory --json"
+        },
+        {
+          "available": true,
+          "command": "route-task --task <task> --json"
+        },
+        {
+          "available": true,
+          "command": "workflow-audit --json"
+        },
+        {
+          "available": true,
+          "command": "release-check --json"
+        },
+        {
+          "available": true,
+          "command": "edit-skill"
+        }
+      ],
+      "risk": "high",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "write_scope": "skill_code_local"
+    }
+  ],
+  "errors": [],
+  "groups": [
+    {
+      "command_count": 8,
+      "missing_commands": [],
+      "name": "bootstrap_health"
+    },
+    {
+      "command_count": 18,
+      "missing_commands": [],
+      "name": "inventory_decision"
+    },
+    {
+      "command_count": 8,
+      "missing_commands": [],
+      "name": "source_discovery"
+    },
+    {
+      "command_count": 9,
+      "missing_commands": [],
+      "name": "legal_verification"
+    },
+    {
+      "command_count": 14,
+      "missing_commands": [],
+      "name": "ingest_convert"
+    },
+    {
+      "command_count": 8,
+      "missing_commands": [],
+      "name": "ocr_text_quality"
+    },
+    {
+      "command_count": 9,
+      "missing_commands": [],
+      "name": "chunk_query_quality"
+    },
+    {
+      "command_count": 11,
+      "missing_commands": [],
+      "name": "nlm_operations"
+    },
+    {
+      "command_count": 11,
+      "missing_commands": [],
+      "name": "registry_profile_corpus"
+    },
+    {
+      "command_count": 13,
+      "missing_commands": [],
+      "name": "hygiene_maintenance"
+    },
+    {
+      "command_count": 22,
+      "missing_commands": [],
+      "name": "prompt_instruction_dev"
+    }
+  ],
+  "ok": true,
+  "schema": "workflow_audit.v2",
+  "summary": {
+    "available_commands": 159,
+    "cards": 23,
+    "groups": 11,
+    "tasks": 60
+  },
+  "warnings": []
+}

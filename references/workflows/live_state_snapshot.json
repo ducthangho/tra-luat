@@ -1,0 +1,54 @@
+{
+  "id": "live_state_snapshot",
+  "title": "Live state snapshot before/after smoke",
+  "risk": "low",
+  "applies_to": [
+    "authenticated machine",
+    "before smoke",
+    "after smoke",
+    "deploy audit"
+  ],
+  "recommended_commands": [
+    "live-state-snapshot --out before.json --json",
+    "live-state-snapshot --out after.json --json"
+  ],
+  "plan": [
+    "build deterministic skill package hash",
+    "record webapp/profile/registry/manifest/folder/notebook ids",
+    "record source counts and auth age/status when available",
+    "save JSON snapshot atomically to --out"
+  ],
+  "verify": [
+    "snapshot has schema live_state_snapshot.v1",
+    "snapshot contains skill.package_hash",
+    "snapshot records active profile and ids",
+    "snapshot does not expose secrets"
+  ],
+  "stop_conditions": [
+    "missing --out",
+    "snapshot write fails",
+    "unexpected live-contract failure before smoke"
+  ],
+  "rules": [
+    "READ-ONLY only",
+    "Snapshot file is local audit evidence",
+    "Use diff before declaring smoke pass"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_snapshot_file_only",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail",
+    "generatedAt",
+    "generatedEpoch"
+  ]
+}

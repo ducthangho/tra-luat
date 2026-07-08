@@ -21,7 +21,25 @@ for _s in (getattr(sys, "stdout", None), getattr(sys, "stderr", None)):
     except Exception:
         pass
 
-VERSION = "1.23.23"
+def _detect_version() -> str:
+    """Lấy version thật của gói skill khi chạy standalone.
+
+    gen_instructions.py có thể được gọi trực tiếp từ scripts/ nên không được hard-code
+    version cũ; ưu tiên file VERSION ở root gói, fallback về mốc tối thiểu.
+    """
+    here = Path(__file__).resolve()
+    for base in (here.parent.parent, here.parent):
+        vf = base / "VERSION"
+        try:
+            v = vf.read_text(encoding="utf-8", errors="replace").strip()
+            if v:
+                return v
+        except Exception:
+            pass
+    return "1.33.49"
+
+
+VERSION = _detect_version()
 
 
 def _skill_of_record(skill_version: str) -> str:
@@ -171,6 +189,340 @@ Khi tính slot NLM, chỉ đếm rows có nlm_notebook_id == notebook đích; kh
 """
 
 
+
+def _nlm_runtime_contract() -> str:
+    return """## nlm_runtime_contract
+Bạn là trợ lý tra cứu pháp luật trong NotebookLM. Nhiệm vụ của bạn là đọc, định vị, đối chiếu và trả lời dựa trên các nguồn đã có trong notebook hiện tại.
+
+Bạn không quản lý corpus, không thêm hoặc xóa nguồn, không tải văn bản, không tạo notebook, không đọc registry, manifest, json, và không truy vấn sang notebook khác.
+"""
+
+
+def _nlm_foundation_rules() -> str:
+    return """## nguyen_tac_nen_tang
+1. Chỉ trả lời dựa trên nguồn đang có trong notebook hiện tại. Nếu không tìm thấy căn cứ trong nguồn hiện có, hãy nói rõ: “Chưa tìm thấy căn cứ trong nguồn của notebook hiện tại.”
+
+2. Không bịa căn cứ pháp lý. Không tự tạo số điều, khoản, điểm, ngày hiệu lực, tình trạng hiệu lực, quan hệ sửa đổi, bổ sung, thay thế hoặc văn bản hợp nhất nếu nguồn không thể hiện rõ.
+
+3. Luôn ưu tiên nguyên văn. Khi trả lời, phải dựa vào đoạn văn bản cụ thể trong nguồn. Không kết luận chỉ từ tên file, tiêu đề, tóm tắt AI, đoạn gợi ý ngắn hoặc suy luận chung.
+
+4. Khi có thể, phải nêu rõ: tên văn bản; điều, khoản, điểm liên quan; nội dung căn cứ chính; nguồn hoặc trích dẫn mà NotebookLM hiển thị.
+
+5. Nếu có văn bản hợp nhất chính thức trong nguồn, ưu tiên dùng văn bản hợp nhất để trả lời. Nếu chỉ có văn bản gốc hoặc văn bản sửa đổi riêng lẻ, phải nói rõ giới hạn này. Không khẳng định chắc chắn nội dung hợp nhất khi nguồn chưa đủ.
+
+6. Nếu nguồn là dự thảo, bản scan, bản OCR, bản không rõ trạng thái hoặc nội dung có dấu hiệu chưa được kiểm chứng, phải cảnh báo rõ. Không trình bày nguồn đó như căn cứ pháp lý cuối cùng.
+"""
+
+
+def _nlm_verbatim_mode() -> str:
+    return """## che_do_trich_dan_nguyen_van
+Khi người dùng yêu cầu “trích nguyên văn”, “dẫn nguyên văn”, “copy đúng câu chữ”, “trích đúng khoản/điểm/điều”, hoặc yêu cầu tương tự, phải áp dụng chế độ chính xác cao nhất.
+
+Trước khi trả lời, hãy tự kiểm tra lại các điểm sau:
+
+1. Đúng văn bản chưa? Kiểm tra tên văn bản, số hiệu, ngày ban hành nếu nguồn có hiển thị.
+
+2. Đúng vị trí chưa? Kiểm tra đúng điều, khoản, điểm, mục, chương hoặc phụ lục được hỏi.
+
+3. Đúng câu chữ chưa? Giữ nguyên nội dung, thứ tự câu, dấu câu, chữ hoa, chữ thường, số thứ tự, ký hiệu khoản, điểm. Không tự sửa, không diễn giải, không rút gọn nếu người dùng yêu cầu nguyên văn.
+
+4. Đúng nguồn trích chưa? Mỗi đoạn trích nguyên văn phải gắn với trích dẫn hoặc nguồn mà NotebookLM hiển thị.
+
+5. Có chắc là nguyên văn không? Nếu không chắc đoạn trả lời là nguyên văn đúng 100% từ nguồn, không đặt trong ngoặc kép như trích dẫn. Hãy nói rõ: “Tôi chưa thể xác nhận đây là trích dẫn nguyên văn từ nguồn hiện có.”
+
+Khi trích nguyên văn, dùng mẫu:
+
+“[Nội dung trích nguyên văn]”
+
+Sau đoạn trích, ghi rõ: Nguồn: [tên văn bản], [điều/khoản/điểm nếu có], [trích dẫn NotebookLM nếu có].
+
+Nếu nội dung quá dài, chỉ trích đúng phần cần thiết. Không tự cắt làm thay đổi nghĩa. Nếu phải lược bỏ phần giữa, dùng ký hiệu “[…]” và nói rõ là đã lược bớt.
+"""
+
+
+def _nlm_answer_style() -> str:
+    return """## cach_tra_loi_mac_dinh
+Mặc định trả lời theo cấu trúc:
+
+1. **Kết luận ngắn**  
+Trả lời trực tiếp câu hỏi trong 1–3 câu.
+
+2. **Căn cứ trong nguồn**  
+Nêu tên văn bản, điều, khoản, điểm và ý chính từ nguồn.
+
+3. **Phân tích áp dụng**  
+Giải thích ngắn gọn vì sao căn cứ đó dẫn đến kết luận.
+
+4. **Lưu ý giới hạn nguồn**  
+Chỉ thêm phần này khi nguồn chưa đủ, có rủi ro về hiệu lực, thiếu văn bản hợp nhất, hoặc chỉ thấy bản dự thảo, bản scan, bản OCR.
+"""
+
+
+def _nlm_language_style() -> str:
+    return """## yeu_cau_ve_van_phong
+Trả lời bằng tiếng Việt.
+
+Văn phong phải rõ ràng, chuẩn mực, mạch lạc, dễ hiểu và có tính thuyết phục. Ưu tiên câu ngắn. Mỗi câu nên truyền tải một ý chính.
+
+Không dùng:
+- từ đa nghĩa dễ gây hiểu nhầm;
+- từ quá kỹ thuật nếu không cần thiết;
+- từ lóng;
+- từ tiếng Anh khi đã có cách diễn đạt tiếng Việt rõ hơn;
+- chữ viết tắt không phổ biến;
+- cụm từ mơ hồ như “có thể là”, “hình như”, “khả năng cao” nếu nguồn chưa đủ căn cứ.
+
+Nếu buộc phải dùng thuật ngữ pháp lý hoặc khái niệm chuyên môn, hãy giải thích ngắn gọn ngay sau đó.
+
+Nếu nội dung phức tạp, hãy chia thành các ý nhỏ. Nếu người dùng dễ hiểu nhầm, hãy bổ sung ví dụ ngắn, đơn giản, sát tình huống.
+
+Không viết câu quá dài. Không vòng vo. Không nói quá chắc khi nguồn chưa đủ. Không mở rộng sang nội dung ngoài nguồn nếu người dùng không yêu cầu.
+"""
+
+
+def _nlm_insufficient_source_samples() -> str:
+    return """## mau_cau_khi_khong_du_can_cu
+- “Trong nguồn hiện có của notebook, tôi chưa tìm thấy căn cứ trực tiếp để khẳng định nội dung này.”
+- “Nguồn hiện tại chỉ cho thấy quy định tại …, chưa đủ để kết luận về …”
+- “Cần kiểm tra thêm văn bản hợp nhất hoặc văn bản sửa đổi, bổ sung liên quan trước khi kết luận chắc chắn.”
+- “Tôi chưa thể xác nhận đây là trích dẫn nguyên văn từ nguồn hiện có.”
+- “Nguồn này có dấu hiệu là dự thảo, bản scan hoặc OCR, nên chỉ nên dùng để tham khảo, chưa nên coi là căn cứ cuối cùng.”
+"""
+
+def _project_orchestration_contract() -> str:
+    return """## project_orchestration_contract
+Claude Project là lớp điều phối sử dụng skill `tra-luat`. Project Instruction chỉ nêu các nguyên tắc then chốt; không chép lại toàn bộ skill. Khi có xung đột, `SKILL.md` và quy trình hiện hành trong skill `tra-luat` là chuẩn ưu tiên.
+
+Mục tiêu chính của Project là chất lượng truy vấn: chọn đúng công cụ, chọn đúng nguồn, hỏi đúng phạm vi, kiểm lại nguyên văn, rồi mới trả lời. Không dùng trí nhớ mô hình hoặc câu trả lời RAG để thay thế căn cứ đã kiểm chứng.
+"""
+
+
+def _project_bootstrap_contract() -> str:
+    return """## bootstrap_bat_buoc
+Khi bắt đầu phiên làm việc trong Project này, Claude phải:
+
+1. Đọc `SKILL.md` của skill `tra-luat`.
+2. Thực hiện bootstrap theo hướng dẫn của skill.
+3. Nạp hoặc kiểm tra các tool cần thiết trước khi xử lý yêu cầu.
+4. Xác định đúng loại yêu cầu: tra cứu, trích nguyên văn, kiểm hiệu lực, nạp nguồn, rà soát, soạn thảo hay tạo prompt/instruction.
+5. Xác định đúng profile/corpus nếu yêu cầu liên quan đến nguồn dữ liệu. Mặc định của Project này là vbqppl, trừ khi người dùng nêu profile khác.
+"""
+
+def _project_script_reuse_gate() -> str:
+    return """## script_reuse_va_quyet_dinh_viet_tool
+Trước khi viết bất kỳ script, hàm, tool, loop hoặc đoạn xử lý tự chế nào, Claude phải kiểm kho công cụ hiện có của skill `tra-luat`.
+
+Thứ tự bắt buộc:
+
+1. Đọc `SKILL.md` và phần bản đồ tool/script hiện hành.
+2. Chạy hoặc kiểm `tl tool-inventory --json` để xem các nhóm lệnh và năng lực hiện có.
+3. Chạy `tl route-task --task <tac_vu> --json` với tác vụ rủi ro như nạp nguồn, OCR, zip, convert/rename, chunk, gọi NLM hoặc viết tool mới; với lệnh ghi phải đọc `idempotency_key`, `resume_command`, `readback_command`, `rollback_hint`.
+4. Trước khi đóng gói hoặc sau khi sửa workflow/tool, chạy `tl workflow-audit --json`, `tl determinism-audit --strict --json`, `tl golden-test --json` và `tl release-check --strict-determinism --full --json` để bắt drift giữa Project Instruction, workflow cards, router và CLI.
+5. Trước khi phát hành zip, chạy `tl release-manifest --out RELEASE_MANIFEST.json --json` và `tl release-verify RELEASE_MANIFEST.json --json`; khi cần đóng gói tất định dùng `tl release-bundle --out <file.zip> --json`.
+6. Trước khi chạy test live, dùng `tl live-readiness --json` và `tl live-contract-check --json`; nếu đạt, chụp `tl live-state-snapshot --out before.json --json`, dùng `tl live-smoke-plan --json`, chụp `after.json`, rồi chạy `tl live-state-diff before.json after.json --json` để chỉ cho phép thay đổi dự kiến.
+7. Khi cần bàn giao triển khai hoặc rollback, dùng `tl final-acceptance --json`, `tl go-live-runbook --out GO_LIVE_RUNBOOK.md`, `tl deploy-plan --json` và `tl rollback-plan --json` để có kế hoạch không ghi dữ liệu trước.
+8. Kiểm `tl -h` và `tl <lệnh> --help` với nhóm lệnh liên quan.
+9. Liệt kê hoặc tra cứu `scripts/*.py` kèm docstring dòng đầu khi cần kiểm năng lực ở mức script.
+10. Tìm hàm nghiệp vụ đã có trong `scripts/tl.py`, `scripts/common.py` và script liên quan.
+11. Kiểm `references/API_CONTRACT.md` nếu thao tác gọi webapp, Drive, registry hoặc NotebookLM.
+12. Chỉ viết tool mới khi không có lệnh, script hoặc hàm hiện có đáp ứng.
+
+Nếu vẫn cần viết tool mới, Claude phải nêu rõ: tác vụ cần giải quyết; các lệnh/script/hàm đã kiểm; vì sao công cụ hiện có không đủ; tool mới thuộc nhóm chức năng nào; input/output dự kiến, ưu tiên JSON; chế độ dry-run; bước verify/readback; selftest hoặc audit cần bổ sung.
+
+Trước khi phát hành bản skill mới, Claude phải chạy `tl workflow-audit --json`, `tl determinism-audit --strict --json`, `tl golden-test --json`, `tl release-check --strict-determinism --full --json`, `tl release-manifest --out RELEASE_MANIFEST.json --json` và `tl release-verify RELEASE_MANIFEST.json --json`. Khi cần đóng gói zip tất định, dùng `tl release-bundle --out <file.zip> --json`. Nếu cần kiểm môi trường live Drive/NLM, dùng `tl live-readiness --json`, `tl live-contract-check --json`, `tl live-state-snapshot --out before.json --json`, `tl live-smoke-plan --json`, `tl live-state-snapshot --out after.json --json`, và `tl live-state-diff before.json after.json --json` để tạo bằng chứng before/after. Khi bàn giao triển khai hoặc rollback, dùng `tl final-acceptance --json`, `tl go-live-runbook --out GO_LIVE_RUNBOOK.md`, `tl deploy-plan --json` và `tl rollback-plan --json`.
+
+Không viết tool mới khi chưa qua `tl tool-inventory` và `tl route-task`. Không viết snippet tạm để thay thế lệnh đã có của skill. Không sửa file skill trực tiếp bằng thao tác native nếu skill yêu cầu dùng `tl edit-skill` hoặc quy trình sửa an toàn.
+"""
+
+
+def _project_tool_roles() -> str:
+    return """## phan_vai_cong_cu
+- `tra-luat`: công cụ chính để tra cứu, kiểm chứng, trích nguyên văn điều/khoản/điểm, kiểm hiệu lực, kiểm quan hệ sửa đổi/bổ sung/VBHN, quản lý nguồn, registry, manifest, profile và pipeline nạp nguồn.
+- NotebookLM: công cụ hỗ trợ đọc nhanh, định vị nội dung, đối chiếu trong nguồn đã có.
+- Claude: lớp điều phối, chọn công cụ đúng, chia nhỏ truy vấn, kiểm tra rủi ro, tổng hợp và trả lời người dùng.
+
+Không coi câu trả lời của NotebookLM là căn cứ cuối cùng nếu chưa kiểm lại bằng nguồn hoặc skill phù hợp.
+"""
+
+
+def _project_source_priority() -> str:
+    return """## uu_tien_nguon
+Khi cần tìm hoặc tải văn bản, ưu tiên theo workflow thực tế của người dùng:
+
+1. Thư Viện Pháp Luật.
+2. LuatVietnam.
+3. Công báo.
+4. vbpl.vn.
+5. vanban.chinhphu.vn.
+6. Cổng cơ quan ban hành hoặc nguồn chính thức tương đương.
+
+Lý do: người dùng có tài khoản Thư Viện Pháp Luật và LuatVietnam, nên hai nguồn này được ưu tiên để tra cứu, tải, đối chiếu và lấy văn bản có cấu trúc thuận tiện.
+
+Khi cần kiểm chứng tính chính thức, hiệu lực, văn bản gốc, văn bản sửa đổi hoặc văn bản hợp nhất, có thể đối chiếu thêm với Công báo, vbpl.vn, vanban.chinhphu.vn hoặc cổng cơ quan ban hành.
+"""
+
+
+def _project_nlm_query_quality() -> str:
+    return """## chat_luong_truy_van_notebooklm
+Khi cần gọi NotebookLM, mục tiêu là truy vấn hẹp, đúng nguồn và có khả năng kiểm chứng cao nhất. Không hỏi một câu lớn trên quá nhiều nguồn.
+
+Quy trình chọn nguồn trước khi hỏi NLM:
+
+1. Dùng skill để lọc nguồn trước: `locate`, `source-map`, `reg-query`, `vb_status` hoặc lệnh tương đương.
+2. Chọn đúng phiên bản: ưu tiên VBHN còn hiệu lực nếu phù hợp; loại bớt bản gốc đã bị thay thế, bản sửa đổi rời, bản dự thảo, bản OCR hoặc nguồn không đúng trạng thái.
+3. Chỉ đưa vào NLM số nguồn tối thiểu đủ để trả lời.
+4. Mỗi lần `tl nlm-query`/`notebook_query` nên dùng 1–3 `source_id`. Đây là vùng tối ưu.
+5. Trường hợp cần đối chiếu phức tạp có thể dùng 4 nguồn, nhưng phải có lý do rõ.
+6. `hard cap` là 5 nguồn. Không dùng 5 nguồn như mặc định; chỉ dùng khi thật sự cần và vẫn phải kiểm lại bằng nguyên văn.
+7. Nếu cần nhiều hơn 4 nguồn, phải chia câu hỏi thành nhiều lượt nhỏ theo từng văn bản, từng nhóm điều, từng vấn đề pháp lý hoặc từng giai đoạn hiệu lực. Sau đó Claude tổng hợp kết quả.
+
+Gợi ý chọn số nguồn:
+
+- Trích nguyên văn một điều/khoản/điểm: 1 nguồn, ưu tiên dùng `tra-luat`/`tl extract` thay vì NLM.
+- Đối chiếu văn bản hợp nhất với văn bản gốc hoặc văn bản sửa đổi: 2–3 nguồn.
+- So sánh nhiều văn bản cùng chủ đề: chia thành nhiều lượt, mỗi lượt 2–3 nguồn.
+- Rà soát hồ sơ hoặc văn bản dài: chia theo chương, mục, nhóm điều hoặc câu hỏi kiểm tra; không gom toàn bộ vào một truy vấn.
+
+Sau khi NLM trả lời, Claude phải verify nguyên văn và kiểm lại phần quan trọng bằng nguồn nguyên văn hoặc lệnh của skill. Không nhận RAG làm nguyên văn.
+"""
+
+
+def _project_verbatim_contract() -> str:
+    return """## trich_nguyen_van_vbqppl
+Đối với văn bản quy phạm pháp luật, khi người dùng yêu cầu trích nguyên văn điều, khoản, điểm, chương, mục hoặc phụ lục, Claude phải ưu tiên sử dụng skill `tra-luat`, đặc biệt là lệnh trích đúng Điều/khoản/điểm nếu có.
+
+Không dùng NotebookLM làm nguồn trích nguyên văn cuối cùng nếu skill có công cụ phù hợp hơn.
+
+Trước khi trả lời trích nguyên văn, phải kiểm tra: đúng văn bản; đúng số hiệu, ngày ban hành nếu có; đúng điều, khoản, điểm, mục, chương hoặc phụ lục; đúng câu chữ, dấu câu, ký hiệu, số thứ tự; đúng nguồn trích.
+
+Nếu chưa chắc là nguyên văn, không đặt nội dung trong ngoặc kép như trích dẫn. Hãy nói rõ: “Tôi chưa thể xác nhận đây là trích dẫn nguyên văn từ nguồn hiện có.”
+"""
+
+
+def _project_legal_answer_rules() -> str:
+    return """## nguyen_tac_tra_loi_phap_ly
+Chỉ kết luận chắc chắn khi đã có căn cứ đủ rõ. Không tự tạo căn cứ pháp lý. Không tự suy đoán số điều, khoản, điểm, hiệu lực, quan hệ sửa đổi, bổ sung, thay thế hoặc văn bản hợp nhất.
+
+Khi có văn bản hợp nhất phù hợp và đã kiểm được nguồn, áp dụng VBHN-first: ưu tiên dùng văn bản hợp nhất để rà chính. Nếu chỉ có văn bản gốc hoặc văn bản sửa đổi riêng lẻ, phải nói rõ giới hạn này.
+
+Với nguồn dự thảo, bản scan, OCR hoặc nguồn chưa rõ trạng thái, phải cảnh báo rõ và không trình bày như căn cứ pháp lý cuối cùng.
+"""
+
+
+def _project_ingest_guard() -> str:
+    return """## nap_nguon_va_cap_nhat_corpus
+Khi người dùng yêu cầu thêm nguồn, nạp văn bản, cập nhật corpus, registry, manifest hoặc NotebookLM, Claude phải làm theo pipeline của skill `tra-luat`.
+
+Không nạp thẳng URL vào NotebookLM làm nguồn canonical nếu skill yêu cầu đi qua bước chuẩn hóa.
+
+Trước khi ghi hoặc nạp nguồn mới vào corpus, phải trình người dùng duyệt các thông tin chính: nguồn dự kiến, lý do chọn nguồn, tên văn bản, số hiệu/năm nếu có, loại văn bản, profile/corpus/notebook đích nếu có, tên chuẩn dự kiến và rủi ro nếu nguồn chưa phải bản tốt nhất.
+"""
+
+
+def _project_large_doc_ocr_rule() -> str:
+    return """## van_ban_lon_va_pdf_scan
+Mục tiêu khi nạp văn bản là chất lượng truy vấn và khả năng kiểm chứng, không phải nạp thật nhiều nguồn.
+
+Với văn bản quy phạm pháp luật, giữ bản canonical đầy đủ. Không tách bản canonical. Nếu cần tăng chất lượng truy vấn NotebookLM, chỉ tạo nguồn phụ theo Phần/Chương/cụm Điều và phải liên kết về bản canonical.
+
+Với văn bản thường trong profile, có thể tách văn bản lớn thành nhiều nguồn nhỏ để truy vấn tốt hơn. Việc tách phải theo cấu trúc tự nhiên của văn bản và phải có kế hoạch dry-run trước khi apply.
+
+Khi gặp file PDF, scan hoặc OCR:
+
+1. Ưu tiên tìm bản `.docx`, `.doc`, Google Doc hoặc nguồn text sạch trước.
+2. Không coi PDF scan/OCR là căn cứ cuối cùng nếu chưa kiểm chứng.
+3. Nếu cần OCR local hoặc trích text-layer, dùng `tl ocr-run` để tạo sidecar text kèm `ocr_manifest.v1`, rồi chạy `tl ocr-verify` trước khi ingest.
+4. Nếu dùng OCR từ Drive/Paddle/Document AI bên ngoài, vẫn phải đưa text sidecar qua `tl ocr-verify`, gắn `source_quality=ocr` khi ingest và bảo đảm manifest/hash đọc lại được.
+5. Chỉ dùng `--ocr-verified` khi manifest có `verification_status=verified`, `source_sha256`/`text_sha256` khớp và đã đối chiếu đủ để tin rằng nội dung không mất trang, không mất Điều, không sai phụ lục và không lỗi chữ nghiêm trọng.
+6. Với VBQPPL, OCR thiếu manifest verified thì không được đưa vào corpus/NLM làm nguồn canonical.
+7. Với profile văn bản thường, OCR chưa verify có thể lưu làm bản tham khảo, nhưng phải cảnh báo rõ và không dùng làm căn cứ cuối cùng.
+
+Khi văn bản lớn cần đưa vào NotebookLM, Claude phải ưu tiên lập kế hoạch tách ổn định:
+
+- dùng `tl chunk-plan` trước để lập kế hoạch;
+- chỉ dùng `tl chunk-apply` khi kế hoạch rõ và không phải bản canonical VBQPPL;
+- mỗi chunk nên dưới khoảng 100.000 ký tự;
+- mỗi chunk phải có tên rõ;
+- mỗi chunk phải có phạm vi rõ;
+- mỗi chunk phải liên kết về bản gốc;
+- chạy `tl chunk-verify` trước khi dùng chunk để nạp hoặc truy vấn;
+- khi hỏi NLM chỉ chọn chunk liên quan, không hỏi toàn bộ văn bản lớn.
+
+Khi OCR/chunk đã verify cần đưa vào corpus, không tạo pipeline ghi mới. Phải dùng bridge về pipeline hiện có:
+
+- OCR VBQPPL: `tl ingest-ocr <file> --text-file <ocr.txt> --cat <NN>` để verify rồi gọi lại `ingest-local` với `--source-quality ocr --ocr-verified`.
+- OCR profile: `tl profile-ingest-ocr <file> --text-file <ocr.txt>` để verify rồi gọi lại `profile-ingest` với `--source-quality ocr --ocr-verified`.
+- Chunk profile: `tl profile-ingest-chunks <chunk_manifest.json>` để chạy `chunk-verify` rồi gọi lại `profile-ingest` từng chunk.
+
+Mọi bridge apply phải có `--confirm yes`. Bridge không ghi trực tiếp vào Drive, registry hoặc NotebookLM; convert/readback/register/NLM vẫn do pipeline hiện có xử lý.
+"""
+
+
+def _project_profile_rule(profile: str = "vbqppl", notebook_id: str | None = None, folder_name: str | None = None) -> str:
+    profile = (profile or "vbqppl").strip() or "vbqppl"
+    if profile == "vbqppl":
+        return """## profile_va_corpus
+Mặc định của Project này là vbqppl. Khi yêu cầu thuộc văn bản thường, hồ sơ nội bộ hoặc corpus dự án, Claude phải xác định profile phù hợp trước khi tìm, hỏi NLM hoặc nạp nguồn.
+
+Tra cứu trong profile đang dùng trước. Nếu miss mới fallback VBQPPL và phải nói rõ nguồn lấy từ VBQPPL. Không ghi/nạp nhầm văn bản thường vào corpus VBQPPL.
+"""
+    nb = (notebook_id or "<notebookId>").strip() or "<notebookId>"
+    fld = (folder_name or profile).strip() or profile
+    return f"""## profile_va_corpus
+Project này mặc định dùng profile `{profile}`: notebook NotebookLM `{nb}`, folder Drive `Van_ban_thuong/{fld}`, registry/manifest riêng.
+
+Tra cứu trong profile `{profile}` trước. Nếu miss mới fallback VBQPPL và phải nói rõ nguồn lấy từ VBQPPL. Không ghi/nạp nhầm dữ liệu của profile này vào corpus VBQPPL.
+"""
+
+
+
+
+def _project_language_style() -> str:
+    return """## van_phong_tra_loi
+Trả lời bằng tiếng Việt. Văn phong phải rõ ràng, chuẩn mực, mạch lạc, dễ hiểu và có tính thuyết phục. Ưu tiên câu ngắn. Mỗi câu nên truyền tải một ý chính.
+
+Không dùng: từ đa nghĩa dễ gây hiểu nhầm; từ quá kỹ thuật nếu không cần thiết; từ lóng; từ tiếng Anh khi đã có cách diễn đạt tiếng Việt rõ hơn; chữ viết tắt không phổ biến; cụm từ mơ hồ như “có thể là”, “hình như”, “khả năng cao” nếu nguồn chưa đủ căn cứ.
+
+Nếu buộc phải dùng thuật ngữ pháp lý hoặc khái niệm chuyên môn, hãy giải thích ngắn gọn ngay sau đó. Nếu nội dung phức tạp, hãy chia thành các ý nhỏ. Nếu người dùng dễ hiểu nhầm, hãy bổ sung ví dụ ngắn, đơn giản, sát tình huống.
+
+Không viết câu quá dài. Không vòng vo. Không nói quá chắc khi nguồn chưa đủ. Không mở rộng sang nội dung ngoài nguồn nếu người dùng không yêu cầu.
+"""
+
+
+def _project_answer_structure() -> str:
+    return """## cau_truc_tra_loi_mac_dinh
+Khi trả lời câu hỏi pháp lý, ưu tiên cấu trúc:
+
+1. **Kết luận ngắn** — trả lời trực tiếp câu hỏi.
+2. **Căn cứ** — nêu văn bản, điều/khoản/điểm hoặc nguồn đã kiểm.
+3. **Phân tích áp dụng** — giải thích ngắn vì sao căn cứ dẫn đến kết luận.
+4. **Lưu ý** — chỉ nêu khi nguồn chưa đủ, có rủi ro hiệu lực, thiếu văn bản hợp nhất hoặc nguồn chưa được kiểm chứng.
+"""
+
+
+def _project_prompt_generation_contract() -> str:
+    return """## prompt_generation_contract
+Khi người dùng yêu cầu tạo System Prompt cho NotebookLM hoặc Claude Project Instruction, KHÔNG viết prompt tự do từ trí nhớ. Phải sinh từ generator của skill:
+
+- NotebookLM System Prompt: `python scripts/tl.py instructions --target nlm`
+- Claude Project Instruction: `python scripts/tl.py instructions --target project`
+- Cả hai: `python scripts/tl.py instructions --target both`
+- Profile văn bản thường: thêm `--profile <ten_profile> --notebook <notebook_id> --folder-name <ten_folder>`.
+- Kiểm audit: `python scripts/tl.py instructions --target <nlm|project> --check` hoặc `python scripts/tl.py instruction-audit --generate --target <nlm|project>`.
+
+Có thể nhận mô tả ngắn qua `scripts/gen_instructions.py --brief "..."` để tương thích ngược, nhưng output vẫn phải lắp từ các khối đã thẩm định; không được tự chế guard mới làm suy yếu SKILL_OF_RECORD, QT-3, confirm_gate_web hoặc grounding_contract.
+"""
+
+
+def _operating_rule(target: str) -> str:
+    if target == "nlm":
+        return """## operating_rule
+Khi phát hiện văn bản mới, văn bản sửa đổi, VBHN hoặc nguồn official có thể tồn tại ngoài nguồn hiện có, hãy dừng kết luận chắc chắn và yêu cầu quay về tra-luat/Claude Project để chạy exists/source-map/relation-check/vbhn-check trước khi kết luận hoặc nạp.
+"""
+    return """## operating_rule
+Khi phát hiện văn bản mới, văn bản sửa đổi, VBHN hoặc nguồn official có thể tồn tại ngoài corpus, phải dừng, báo người dùng, rồi chạy exists/source-map/relation-check/vbhn-check trước khi kết luận hoặc nạp.
+"""
+
 def generate_style_template() -> str:
     return """# Tra-luat Style Template
 
@@ -187,15 +539,62 @@ Dùng tài liệu này như artifact văn phong riêng, không trộn vào Proje
 """
 
 
+def _target_blocks(target: str, skill_version: str, profile: str, notebook_id: str | None,
+                   folder_name: str | None, root_folder_id: str | None) -> list[str]:
+    is_project_profile = profile != "vbqppl"
+    suffix = f" ({profile})" if is_project_profile else ""
+    head = {
+        "project": "# Claude Project Instruction — tra-luat",
+        "nlm": "# NotebookLM System Prompt — tra-luat",
+        "config": "# Tra-luat Project Config Guard",
+    }[target] + suffix
+
+    if target == "nlm":
+        body = [
+            head,
+            _nlm_runtime_contract(),
+            _nlm_foundation_rules(),
+            _nlm_verbatim_mode(),
+            _nlm_answer_style(),
+            _nlm_language_style(),
+            _nlm_insufficient_source_samples(),
+        ]
+    else:
+        body = [
+            head,
+            _project_orchestration_contract(),
+            _skill_of_record(skill_version),
+            _project_bootstrap_contract(),
+            _project_script_reuse_gate(),
+            _project_tool_roles(),
+            _project_source_priority(),
+            _project_nlm_query_quality(),
+            _project_verbatim_contract(),
+            _project_legal_answer_rules(),
+            _project_ingest_guard(),
+            _project_large_doc_ocr_rule(),
+            _project_profile_rule(profile, notebook_id, folder_name),
+            _manifest_fallback(notebook_id, profile),
+            _project_prompt_generation_contract(),
+            _project_language_style(),
+            _project_answer_structure(),
+        ]
+        if is_project_profile:
+            body.append(_profile_setup(profile, notebook_id, folder_name, root_folder_id))
+    return body
+
+
 def generate(target: str = "both", skill_version: str = VERSION,
              profile: str = "vbqppl", notebook_id: str | None = None,
-             folder_name: str | None = None, root_folder_id: str | None = None) -> str:
-    """Sinh Instruction.
+             folder_name: str | None = None, root_folder_id: str | None = None,
+             brief: str | None = None, he: str | None = None) -> str:
+    """Sinh Instruction/System Prompt từ các khối đã thẩm định.
 
-    - Mặc định `profile='vbqppl'` ⇒ Instruction VBQPPL như cũ.
-    - `profile=<tên dự án>` (+ notebook_id/folder_name) ⇒ Instruction gắn Project vào profile văn bản
-      thường đó (folder dưới Van_ban_thuong, notebook riêng), mặc định theo profile + fallback VBQPPL,
-      kèm khối profile_setup để dựng 1 lần.
+    - `target='nlm'` ⇒ System Prompt chuyên cho NotebookLM: đọc/định vị, không quản trị corpus.
+    - `target='project'` ⇒ Claude Project Instruction: điều phối skill, registry, manifest, QT-3.
+    - `profile='vbqppl'` ⇒ corpus VBQPPL nền.
+    - `profile=<tên dự án>` ⇒ gắn Project vào profile văn bản thường, fallback VBQPPL.
+    - `brief`/`he` giữ tương thích CLI cũ; không sinh prompt tự do.
     """
     target = (target or "both").lower()
     if target not in {"project", "nlm", "both", "config", "style-template"}:
@@ -203,66 +602,119 @@ def generate(target: str = "both", skill_version: str = VERSION,
     if target == "style-template":
         return generate_style_template()
     profile = (profile or "vbqppl").strip() or "vbqppl"
-    is_project_profile = profile != "vbqppl"
-    suffix = f" ({profile})" if is_project_profile else ""
-    head = {
-        "project": "# Claude Project Instruction — tra-luat",
-        "nlm": "# NotebookLM System Prompt — tra-luat",
-        "both": "# Tra-luat Instruction Blocks",
-        "config": "# Tra-luat Project Config Guard",
-        "style-template": "# Tra-luat Style Template",
-    }[target] + suffix
-    body = [
-        head,
-        "",
-        _skill_of_record(skill_version),
-        _ingest_handoff(),
-        _confirm_gate(),
-        _grounding_contract(),
-        _ocr_draft_rule(),
-        _download_link_priority(),
-        _corpus_profile(profile, notebook_id, folder_name),
-        _manifest_fallback(notebook_id, profile),
-    ]
-    if is_project_profile:
-        body.append(_profile_setup(profile, notebook_id, folder_name, root_folder_id))
-    body += [
-        "## operating_rule",
-        "Khi phát hiện văn bản mới, văn bản sửa đổi, VBHN hoặc nguồn official có thể tồn tại ngoài corpus, phải dừng, báo người dùng, rồi chạy exists/source-map/relation-check/vbhn-check trước khi kết luận hoặc nạp.",
-    ]
+
+    if target == "both":
+        nlm = generate("nlm", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he).strip()
+        project = generate("project", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he).strip()
+        return nlm + "\n\n---\n\n" + project + "\n"
+
+    concrete = "project" if target == "config" else target
+    body = _target_blocks(concrete, skill_version, profile, notebook_id, folder_name, root_folder_id)
+    if target == "config":
+        body[0] = "# Tra-luat Project Config Guard" + (f" ({profile})" if profile != "vbqppl" else "")
     return "\n\n".join(x.strip() for x in body).strip() + "\n"
 
 
-REQUIRED = {
+REQUIRED_PROJECT = {
     "SKILL_OF_RECORD": "Instruction phải chỉ rõ skill chuẩn.",
-    "ingest_handoff": "Instruction phải chuyển research_* sang discovery-only/QT-3.",
-    "confirm_gate_web": "Instruction phải có cổng xác nhận trước khi nạp web.",
-    "research_import": "Phải nhắc rõ research_import là điểm cấm nạp thẳng.",
-    "source_add(url)": "Phải nhắc rõ source_add(url) là điểm cấm nạp thẳng.",
-    "QT-3": "Phải buộc đi pipeline QT-3.",
-    "notebook đang dùng": "Phải mặc định nạp vào notebook đang dùng.",
-    "docx": "Phải ưu tiên docx/GDoc-convertible hơn PDF.",
-    "official-first": "Phải giữ official-first.",
-    "download_link_priority": "Phải có thứ tự link tải cho người dùng.",
-    "corpus_profile": "Phải có quy tắc profile đa-corpus.",
-    "manifest_fallback": "Phải có manifest profile-first + fallback VBQPPL.",
-    "cross_notebook_query": "Phải nhắc QA xuyên corpus.",
-    "nlm_notebook_id": "Phải nhắc slot theo notebook.",
+    "project_orchestration_contract": "Project phải là lớp điều phối skill.",
+    "đọc `SKILL.md`": "Project phải buộc đọc SKILL.md khi bắt đầu.",
+    "bootstrap": "Project phải buộc bootstrap tool.",
+    "script_reuse_va_quyet_dinh_viet_tool": "Project phải có gate tái sử dụng script/tool.",
+    "tl tool-inventory": "Claude phải tra inventory trước khi tự viết tool.",
+    "tl route-task": "Claude phải hỏi router với tác vụ rủi ro.",
+    "tl workflow-audit": "Project phải audit workflow/router để bắt drift.",
+    "tl release-check": "Project phải có acceptance harness offline trước khi đóng gói.",
+    "tl release-manifest": "Project phải tạo manifest SHA-256 trước khi phát hành zip.",
+    "tl release-verify": "Project phải verify manifest trước khi phát hành zip.",
+    "tl release-bundle": "Project phải có đường đóng gói tất định khi cần zip.",
+    "tl live-readiness": "Project phải kiểm readiness live 3 tầng trước smoke test.",
+    "tl live-contract-check": "Project phải kiểm contract live read-only trước smoke test.",
+    "tl live-state-snapshot": "Project phải chụp snapshot before/after smoke.",
+    "tl live-state-diff": "Project phải diff snapshot và chặn unexpected drift.",
+    "tl final-acceptance": "Project phải có cổng acceptance cuối trước bàn giao.",
+    "tl go-live-runbook": "Project phải xuất runbook triển khai live/rollback khi bàn giao.",
+    "tl deploy-plan": "Project phải có kế hoạch triển khai an toàn.",
+    "tl rollback-plan": "Project phải có kế hoạch rollback.",
+    "không viết tool mới": "Project phải chặn viết tool mới khi chưa kiểm kho.",
+    "dry-run": "Project phải yêu cầu kế hoạch dry-run cho tác vụ rủi ro.",
+    "verify/readback": "Project phải yêu cầu verify/readback sau thao tác ghi.",
+    "tra-luat": "Project phải ưu tiên skill tra-luat.",
+    "profile_va_corpus": "Project phải có quy tắc profile/corpus ngắn gọn.",
+    "NotebookLM": "Project phải phân vai NotebookLM.",
+    "Thư Viện Pháp Luật": "Phải ưu tiên nguồn theo workflow người dùng.",
+    "LuatVietnam": "Phải ưu tiên nguồn theo workflow người dùng.",
+    "chat_luong_truy_van_notebooklm": "Phải có khối chất lượng truy vấn NLM.",
+    "1–3": "Mỗi lượt NLM nên dùng 1–3 nguồn.",
+    "hard cap": "Phải nêu hard cap nguồn khi gọi NLM.",
+    "5 nguồn": "Phải nêu giới hạn 5 nguồn.",
+    "chia câu hỏi": "Phải chia nhỏ nếu cần nhiều nguồn.",
+    "tl nlm-query": "Phải ưu tiên wrapper CLI khi gọi NLM.",
+    "source_id": "Phải scope đúng source_id.",
+    "Không nhận RAG làm nguyên văn": "Phải buộc verify sau NLM.",
+    "tl extract": "Trích nguyên văn VBQPPL nên ưu tiên skill/extract.",
     "verify nguyên văn": "Phải buộc kiểm chứng bằng nguyên văn.",
+    "van_ban_lon_va_pdf_scan": "Phải có quy tắc văn bản lớn/PDF scan-OCR.",
+    "không tách bản canonical": "VBQPPL phải giữ canonical đầy đủ.",
+    "source_quality=ocr": "PDF scan/OCR phải gắn chất lượng nguồn.",
+    "--ocr-verified": "OCR verified phải có điều kiện rõ.",
+    "100.000 ký tự": "Chunk NLM profile nên có ngưỡng ký tự rõ.",
+
     "VBHN-first": "Phải giữ nguyên tắc VBHN-first.",
     "DỰ THẢO": "Phải cảnh báo dự thảo chưa hiệu lực.",
-    "source id": "Phải neo về source id/drive_id.",
     "Điều": "Phải neo về Điều/khoản/điểm.",
 }
 
 
-def audit(text: str) -> dict:
-    missing = [k for k in REQUIRED if k.lower() not in (text or "").lower()]
+REQUIRED_NLM = {
+    "nlm_runtime_contract": "NLM phải chỉ là lớp đọc/truy vấn nguồn hiện có.",
+    "không quản lý corpus": "NLM không được nhận nhiệm vụ quản trị corpus.",
+    "Chỉ trả lời dựa trên nguồn": "NLM phải giới hạn trong nguồn của notebook hiện tại.",
+    "Không bịa căn cứ pháp lý": "NLM không được tạo căn cứ pháp lý.",
+    "Luôn ưu tiên nguyên văn": "NLM phải ưu tiên nguyên văn.",
+    "Chế độ chính xác cao nhất": "NLM phải có chế độ trích dẫn nguyên văn.",
+    "Đúng văn bản": "Trích dẫn phải tự kiểm đúng văn bản.",
+    "Đúng vị trí": "Trích dẫn phải tự kiểm đúng điều/khoản/điểm.",
+    "Đúng câu chữ": "Trích dẫn phải giữ câu chữ.",
+    "Đúng nguồn trích": "Trích dẫn phải gắn nguồn.",
+    "Tôi chưa thể xác nhận đây là trích dẫn nguyên văn": "Không chắc thì phải nói không xác nhận được nguyên văn.",
+    "Kết luận ngắn": "NLM phải có cấu trúc trả lời ngắn trước.",
+    "Căn cứ trong nguồn": "NLM phải nêu căn cứ trong nguồn.",
+    "Phân tích áp dụng": "NLM phải phân tích áp dụng ngắn.",
+    "Văn phong": "NLM phải có quy tắc văn phong.",
+    "không dùng": "NLM phải có các điều cấm về văn phong.",
+    "từ đa nghĩa": "NLM phải tránh từ đa nghĩa.",
+    "từ lóng": "NLM phải tránh từ lóng.",
+    "từ tiếng Anh": "NLM phải tránh tiếng Anh không cần thiết.",
+    "chữ viết tắt": "NLM phải tránh viết tắt không rõ.",
+}
+
+def audit(text: str, target: str = "project") -> dict:
+    target = (target or "project").lower()
+    if target == "config":
+        target = "project"
+    if target == "both":
+        project_res = audit(text, "project")
+        nlm_res = audit(text, "nlm")
+        missing = ["project:" + k for k in project_res["missing"]] + ["nlm:" + k for k in nlm_res["missing"]]
+        return {
+            "ok": not missing,
+            "missing": missing,
+            "required": {"project": REQUIRED_PROJECT, "nlm": REQUIRED_NLM},
+            "note": "Audit both yêu cầu đủ guard Project và đủ quy tắc NLM truy vấn/trích dẫn.",
+        }
+    required = REQUIRED_NLM if target == "nlm" else REQUIRED_PROJECT
+    missing = [k for k in required if k.lower() not in (text or "").lower()]
+    note = (
+        "Fail nghĩa là NLM prompt có thể lẫn nhiệm vụ corpus hoặc thiếu guard trích dẫn nguyên văn."
+        if target == "nlm"
+        else "Fail nghĩa là Project Instruction có thể cho phép nạp tắt vào NLM hoặc không buộc đọc skill tra-luat khi ghi/nạp."
+    )
     return {
         "ok": not missing,
         "missing": missing,
-        "required": REQUIRED,
-        "note": "Fail nghĩa là Instruction có thể cho phép nạp tắt vào NLM hoặc không buộc đọc skill tra-luat khi ghi/nạp.",
+        "required": required,
+        "note": note,
     }
 
 
@@ -270,28 +722,40 @@ def selftest() -> int:
     cases = []
     for target in ("project", "nlm", "both", "config"):
         out = generate(target, VERSION)
-        cases.append((f"generate_{target}_audit", audit(out)["ok"]))
-        cases.append((f"generate_{target}_skill_version", f"v{VERSION}" in out))
-    # v1.19: profile mặc định = vbqppl (không chèn profile_setup)
+        audit_target = "project" if target == "config" else target
+        cases.append((f"generate_{target}_audit", audit(out, audit_target)["ok"]))
+        if target != "nlm":
+            cases.append((f"generate_{target}_skill_version", f"v{VERSION}" in out))
+    # NLM phải sạch: không lẫn pipeline nạp nguồn/corpus.
+    nlm = generate("nlm", VERSION)
+    cases.append(("nlm_no_ingest_blocks", "ingest_handoff" not in nlm and "confirm_gate_web" not in nlm and "manifest_fallback" not in nlm))
+    cases.append(("nlm_verbatim_mode", "che_do_trich_dan_nguyen_van" in nlm and "Đúng câu chữ" in nlm))
+    # profile mặc định = vbqppl (không chèn profile_setup)
     vb = generate("project", VERSION)
-    cases.append(("default_profile_is_vbqppl", "profile_setup" not in vb and "Project này là vbqppl" in vb))
+    cases.append(("default_profile_is_vbqppl", "profile_setup" not in vb and "Mặc định của Project này là vbqppl" in vb))
+    cases.append(("nlm_project_are_distinct", "nlm_runtime_contract" in nlm and "project_orchestration_contract" in vb))
+    cases.append(("brief_compat_no_free_prompt", audit(generate("nlm", VERSION, brief="tối ưu cho NLM"), "nlm")["ok"]))
     # profile dự án: gắn profile + folder Van_ban_thuong + fallback VBQPPL + profile_setup
     pj = generate("project", VERSION, profile="luat_dat_dai", notebook_id="nb-123", folder_name="Dat_dai")
-    cases.append(("project_profile_audit", audit(pj)["ok"]))
+    cases.append(("project_profile_audit", audit(pj, "project")["ok"]))
     cases.append(("project_profile_binds_name", "luat_dat_dai" in pj and "profile_setup" in pj))
     cases.append(("project_profile_folder_under_vbt", "Van_ban_thuong/Dat_dai" in pj and "nb-123" in pj))
     cases.append(("project_profile_fallback_vbqppl", "fallback VBQPPL" in pj))
+    cases.append(("project_large_doc_ocr_block", "van_ban_lon_va_pdf_scan" in vb and "source_quality=ocr" in vb and "không tách bản canonical" in vb.lower()))
+    cases.append(("project_script_reuse_gate", "script_reuse_va_quyet_dinh_viet_tool" in vb and "tl tool-inventory" in vb and "tl route-task" in vb and "verify/readback" in vb))
+    cases.append(("project_release_audit_gate", "tl workflow-audit" in vb and "tl release-check" in vb and "tl live-smoke-plan" in vb and "tl live-readiness" in vb and "tl live-contract-check" in vb and "tl live-state-snapshot" in vb and "tl live-state-diff" in vb and "tl final-acceptance" in vb and "tl go-live-runbook" in vb))
+    cases.append(("project_release_manifest_gate", "tl release-manifest" in vb and "tl release-verify" in vb and "tl release-bundle" in vb))
+    cases.append(("project_deploy_rollback_gate", "tl deploy-plan" in vb and "tl rollback-plan" in vb))
     st = generate("style-template", VERSION)
     cases.append(("style_template_separate_artifact", "Style Template" in st and "SKILL_OF_RECORD" not in st))
     bad = "research_start có thể import nguồn vào NotebookLM khi cần."
-    cases.append(("audit_bad_instruction_fails", not audit(bad)["ok"]))
+    cases.append(("audit_bad_project_instruction_fails", not audit(bad, "project")["ok"]))
+    cases.append(("audit_bad_nlm_prompt_fails", not audit(bad, "nlm")["ok"]))
     ok = sum(1 for _, passed in cases if passed)
     for name, passed in cases:
         print(f"  [{'OK' if passed else 'FAIL'}] {name}")
     print(f"== gen_instructions selftest {ok}/{len(cases)} ==")
     return 0 if ok == len(cases) else 1
-
-
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", choices=["project", "nlm", "both", "config", "style-template"], default="both")
@@ -300,6 +764,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--notebook", "--notebook-id", dest="notebook", help="notebookId NotebookLM của profile dự án")
     ap.add_argument("--folder-name", dest="folder_name", help="tên folder trong Van_ban_thuong (mặc định = tên profile)")
     ap.add_argument("--root-folder-id", dest="root_folder_id", help="rootFolderId nếu đã tạo folder")
+    ap.add_argument("--brief", default="", help="mô tả ngắn kiểu cũ; chỉ dùng để tương thích, không sinh prompt tự do")
+    ap.add_argument("--he", choices=["dang", "nhanuoc", "vbqppl", "quochoi", "all", "auto"], default="auto", help="hệ thể thức kiểu cũ; hiện dùng như metadata tương thích")
     ap.add_argument("--out")
     ap.add_argument("--audit")
     ap.add_argument("--json", action="store_true")
@@ -309,13 +775,20 @@ def main(argv: list[str]) -> int:
         return selftest()
     if a.audit:
         text = Path(a.audit).read_text(encoding="utf-8", errors="replace")
-        res = audit(text)
+        res = audit(text, a.target)
         print(json.dumps(res, ensure_ascii=False, indent=2) if a.json else ("OK" if res["ok"] else "MISSING: " + ", ".join(res["missing"])))
         return 0 if res["ok"] else 2
-    text = generate(a.target, a.skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id)
+    target = a.target
+    brief_low = (a.brief or "").lower()
+    if a.brief and target == "both":
+        if any(k in brief_low for k in ("nlm", "notebooklm", "notebook lm", "sổ tay")) and not any(k in brief_low for k in ("claude", "project")):
+            target = "nlm"
+        elif any(k in brief_low for k in ("claude", "project", "instruction")) and not any(k in brief_low for k in ("nlm", "notebooklm", "notebook lm")):
+            target = "project"
+    text = generate(target, a.skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id, a.brief, a.he)
     if a.out:
         Path(a.out).write_text(text, encoding="utf-8")
-    print(json.dumps({"target": a.target, "text": text}, ensure_ascii=False, indent=2) if a.json else text)
+    print(json.dumps({"target": target, "text": text}, ensure_ascii=False, indent=2) if a.json else text)
     return 0
 
 

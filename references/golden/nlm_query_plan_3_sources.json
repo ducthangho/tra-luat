@@ -1,0 +1,36 @@
+{
+  "batches": [
+    {
+      "index": 1,
+      "source_ids": [
+        "src_A",
+        "src_B",
+        "src_C"
+      ]
+    }
+  ],
+  "default_source_window": "1-3",
+  "errors": [],
+  "hard_cap": 5,
+  "justification": null,
+  "ok": true,
+  "question": "Trích Điều 1 của văn bản mẫu",
+  "recommended_commands": [
+    "nlm-query <question> --source-id <id> --json",
+    "nlm-cross <question> --source-id <id> --json",
+    "extract <query> --json"
+  ],
+  "schema": "nlm_query_plan.v1",
+  "source_count": 3,
+  "source_ids": [
+    "src_A",
+    "src_B",
+    "src_C"
+  ],
+  "verify_after_nlm": [
+    "Không coi RAG là trích nguyên văn cuối cùng.",
+    "Với VBQPPL, kiểm lại bằng tl extract/source-verify hoặc nguồn canonical.",
+    "Nếu cần hơn 3 nguồn, chia câu hỏi theo batches thay vì hỏi một lượt rộng."
+  ],
+  "warnings": []
+}

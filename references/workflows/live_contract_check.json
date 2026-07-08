@@ -1,0 +1,56 @@
+{
+  "id": "live_contract_check",
+  "title": "Read-only live contract check",
+  "risk": "low",
+  "applies_to": [
+    "authenticated machine",
+    "pre-smoke",
+    "live contract validation"
+  ],
+  "recommended_commands": [
+    "live-contract-check --json",
+    "live-readiness --json"
+  ],
+  "plan": [
+    "require env_ready before live calls",
+    "call webapp ping and require expected API version",
+    "read registry/profile/folder metadata via Drive info",
+    "read NLM notebook get and source list minimally",
+    "return live_contract_ready=false on schema/version/read failures"
+  ],
+  "verify": [
+    "webapp version matches EXPECT_VERSION/API_CONTRACT",
+    "root folder and registry id are readable",
+    "NLM notebook get and source list are readable",
+    "no write action is issued"
+  ],
+  "stop_conditions": [
+    "env_ready=false",
+    "webapp ping/version mismatch",
+    "root folder or registry id unreadable",
+    "NLM get/list fails"
+  ],
+  "rules": [
+    "READ-ONLY only",
+    "No upload",
+    "No register/reg_bulk/reg_upsert",
+    "No NLM add source"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "none",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail",
+    "generatedAt",
+    "generatedEpoch"
+  ]
+}

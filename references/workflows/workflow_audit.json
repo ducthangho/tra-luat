@@ -1,0 +1,56 @@
+{
+  "id": "workflow_audit",
+  "title": "Audit workflow/router/tool inventory",
+  "risk": "low",
+  "applies_to": [
+    "release",
+    "skill_update",
+    "workflow_change"
+  ],
+  "apply": [
+    "read-only audit only"
+  ],
+  "stop_conditions": [
+    "invalid workflow JSON",
+    "task maps to missing workflow",
+    "required field missing"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "none",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "recommended_commands": [
+    "workflow-audit",
+    "tool-inventory",
+    "route-task",
+    "release-check",
+    "workflow-audit --strict --json",
+    "determinism-audit --json",
+    "golden-test --json"
+  ],
+  "plan": [
+    "load all references/workflows/*.json cards",
+    "check required schema fields",
+    "check task map points to existing cards",
+    "check tool groups reference available commands",
+    "validate workflow_card.v1 contract fields",
+    "verify deterministic audit and golden fixtures"
+  ],
+  "verify": [
+    "workflow-audit returns ok=true",
+    "release-check includes workflow-audit",
+    "schema=workflow_audit.v2",
+    "strict mode has no errors"
+  ]
+}

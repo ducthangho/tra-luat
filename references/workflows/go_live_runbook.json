@@ -1,0 +1,55 @@
+{
+  "id": "go_live_runbook",
+  "title": "Go-live runbook",
+  "risk": "low",
+  "purpose": "Xuất runbook Markdown cho triển khai live, smoke test và rollback.",
+  "recommended_commands": [
+    "go-live-runbook --out GO_LIVE_RUNBOOK.md",
+    "deploy-plan --json",
+    "rollback-plan --json",
+    "live-readiness --json",
+    "live-contract-check --json",
+    "live-state-snapshot --out before.json --json",
+    "live-state-diff before.json after.json --json",
+    "live-smoke-plan --json"
+  ],
+  "plan": [
+    "Create offline verification section",
+    "Create live readiness and contract section",
+    "Require before/after live state snapshots",
+    "Create deploy steps",
+    "Create smoke test steps",
+    "Create snapshot diff gate",
+    "Create rollback steps",
+    "Define completion criteria"
+  ],
+  "apply": [],
+  "verify": [
+    "Markdown contains release-check, live-readiness, live-contract-check, live-state-snapshot/diff, deploy and rollback sections"
+  ],
+  "stop_conditions": [
+    "Missing live-smoke-plan",
+    "Missing rollback section",
+    "Missing completion criteria"
+  ],
+  "rules": [
+    "Read-only output only",
+    "Do not run live writes",
+    "Use as handoff document for the machine with auth"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "none",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

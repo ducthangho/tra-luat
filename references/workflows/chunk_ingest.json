@@ -1,0 +1,70 @@
+{
+  "id": "chunk_ingest",
+  "title": "Nạp chunk đã verify vào profile qua profile-ingest",
+  "risk": "medium",
+  "applies_to": [
+    "profile"
+  ],
+  "not_supported_in_stage4": [
+    "vbqppl-helper apply",
+    "vbqppl-canonical"
+  ],
+  "recommended_commands": [
+    "chunk-plan",
+    "chunk-apply",
+    "chunk-verify",
+    "profile-ingest-chunks"
+  ],
+  "plan": [
+    "run chunk-verify on manifest",
+    "read chunk_manifest",
+    "build one profile-ingest child command per chunk"
+  ],
+  "apply": [
+    "call existing profile-ingest for each verified chunk",
+    "require --confirm yes"
+  ],
+  "verify": [
+    "chunk hashes verified before ingest",
+    "child pipeline handles Drive/NLM readback",
+    "snapshot before/after apply when ingesting chunks live"
+  ],
+  "stop_conditions": [
+    "chunk-verify failed",
+    "manifest mode is not profile",
+    "apply without confirm yes",
+    "no chunks"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_chunks_profile_ingest",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "idempotency_contract": {
+    "schema": "idempotency_contract.v1",
+    "idempotency_key": "chunk_manifest.source_hash+chunk.sha256+profile+expected_name",
+    "journal_key": "chunk manifest path + child profile-ingest result",
+    "resume_behavior": "rerun profile-ingest-chunks; chunk-verify prevents source drift and child commands are per chunk",
+    "duplicate_guard": "chunk_manifest hash verification + profile folder/name + NLM title/drive_id",
+    "resume_command": "profile-ingest-chunks <manifest> --apply --confirm yes --continue-on-error --json",
+    "readback_command": "chunk-verify <manifest> --json",
+    "rollback_hint": "rollback per child result; chunks are helper/profile sources, not VBQPPL canonical"
+  },
+  "idempotency_key": "chunk_manifest.source_hash+chunk.sha256+profile+expected_name",
+  "journal_key": "chunk manifest path + child profile-ingest result",
+  "resume_behavior": "rerun profile-ingest-chunks; chunk-verify prevents source drift and child commands are per chunk",
+  "duplicate_guard": "chunk_manifest hash verification + profile folder/name + NLM title/drive_id",
+  "resume_command": "profile-ingest-chunks <manifest> --apply --confirm yes --continue-on-error --json",
+  "readback_command": "chunk-verify <manifest> --json",
+  "rollback_hint": "rollback per child result; chunks are helper/profile sources, not VBQPPL canonical"
+}

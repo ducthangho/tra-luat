@@ -278,11 +278,11 @@ selftest 6/6. Các văn bản viện dẫn đã xác nhận có trong corpus (vb
 
 ## ★★★ v1.13.0 (2026-06-16) — TÍNH NĂNG: sinh INSTRUCTION / SYSTEM PROMPT / PROJECT_CONFIG từ mô tả ngắn
 
-`scripts/gen_instructions.py` — người dùng mô tả ngắn (vd "thể thức Đảng, không bịa, tối ưu cho NLM"), skill trả ra **System Prompt (NotebookLM)**, **Instruction (Claude Project)** hoặc **PROJECT_CONFIG** chi tiết, LẮP từ thư viện khối đã thẩm định — KHÔNG sinh prompt tự do.
+`scripts/gen_instructions.py` — người dùng mô tả ngắn (vd "thể thức Đảng, không bịa, tối ưu cho NLM"), skill trả ra **System Prompt (NotebookLM)**, **Instruction (Claude Project)** hoặc **PROJECT_CONFIG** chi tiết, LẮP từ thư viện khối đã thẩm định — KHÔNG sinh prompt tự do. Từ hotfix instruction v1.33.49, `nlm` và `project` là 02 template khác vai: NLM = lớp đọc/định vị/không quản trị corpus; Project = lớp điều phối tra-luat/QT-3/registry/manifest.
 
 **Kích hoạt:** "viết/soạn instruction cho Project", "system prompt cho NotebookLM/sổ tay", "tạo PROJECT.md config", "prompt theo thể thức Đảng/chính quyền", "tối ưu prompt để dùng với NLM"…
 
-**Lệnh:** `python scripts/gen_instructions.py --brief "<mô tả>" [--target nlm|project|both|config] [--he dang|nhanuoc|vbqppl|all|auto] [--out FILE]` · `--selftest` (5/5).
+**Lệnh:** `python scripts/tl.py instructions --target nlm|project|both|config [--out FILE]` là đường chuẩn. `python scripts/gen_instructions.py --brief "<mô tả>" [--target nlm|project|both|config] [--he dang|nhanuoc|vbqppl|quochoi|all|auto] [--out FILE]` được giữ tương thích ngược; `--brief` chỉ suy target khi rõ, không sinh prompt tự do. `--selftest` hiện kiểm cả phân tách NLM/Project và version thật của gói.
 
 **Đặc điểm:**
 - Đầu ra `nlm` theo khuôn ĐỊNH VỊ–PHÂN TÍCH–VERIFY (HARD RULES; trích NLM là TẠM THỜI, verify bằng cache/raw tra-luat; VBHN; phụ lục `-PL`; phân tầng giá trị; KHÔNG-LÀM gồm "không trả lời theo tên file"). Tách "miền phân tích" khỏi "ý định soạn thể thức" — khối thể thức CHỈ bật khi có "soạn/thể thức/trình bày…" hoặc `--he`.
@@ -1755,7 +1755,7 @@ mang `text_hash` + `document_variant` (đã bổ sung vào schema entry registry
   (`references/CONVERT_SHEETS_v2_13_5.md`); bản cũ đánh dấu `needs_sheet_convert`. exit 4 = có việc cần xử lý.
 - `nlm_sources.py` — **(v1.13.3) NLM client phía CLI (Cowork/host/container): `list` + `describe`**, tự dò dạng lệnh 0.7.6 (`nlm source list <nb> --drive --skip-freshness --json`) và cũ (`nlm list sources <nb> -d -S --json`); `--docker`/`--nlm-bin`/`--profile`/`--cmd`/`--reconcile`/`--emit-backfill`; `--selftest` (8/8). Chat dùng MCP, KHÔNG dùng script này.
 
-- `gen_instructions.py` — **(v1.13.0) sinh Instruction (Claude Project) / System Prompt (NotebookLM) / PROJECT_CONFIG từ mô tả ngắn**. `--brief "<mô tả>"` → tự suy `--target` + hệ thể thức + tuỳ chọn, ráp từ thư viện khối đã thẩm định (chống bịa, dẫn nguồn, thể thức NĐ 30 · QĐ 399/HD 05 · NĐ 78/2025, quy trình MCP 1–3 nguồn). `--target nlm|project|both|config`, `--he …`, `--out FILE`, `--selftest` (5/5). KHÔNG sinh tự do — sửa thể thức là sửa khối `tt_*`.
+- `gen_instructions.py` — **(v1.13.0; hotfix instruction v1.33.49) sinh Instruction (Claude Project) / System Prompt (NotebookLM) / PROJECT_CONFIG từ mô tả ngắn**. `--brief "<mô tả>"` được giữ tương thích ngược để suy target khi rõ, nhưng KHÔNG sinh prompt tự do; output vẫn ráp từ thư viện khối đã thẩm định. `--target nlm|project|both|config`, `--he …`, `--out FILE`, `--selftest`. NLM và Project đã tách vai: NLM đọc/định vị trong notebook; Project điều phối tra-luat/QT-3/registry/manifest. `tl instruction-audit --generate` truyền version thật từ `tl.py` để tránh drift version.
 - `registry_orchestrator.py` — **(v1.12.0; nâng v1.15.0) điều phối sổ cái theo THỜI ĐIỂM**: `boot`/`end`
   quyết định tự động khi nào `changes_pull` (rẻ) / `regen2` (cấu trúc) / `reg_bulk` (curate) /
   `backfill_keywords_live` (tukhoa) / `manifest_export` (chụp ảnh). Hàm thuần `decide()` test offline

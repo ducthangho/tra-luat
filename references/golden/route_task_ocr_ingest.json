@@ -1,0 +1,114 @@
+{
+  "idempotency": {
+    "duplicate_guard": "verified OCR manifest + child ingest duplicate guards; VBQPPL blocks canonical ingest if manifest is missing/unverified",
+    "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+cat_or_profile+canonical_name",
+    "journal_key": "ocr manifest path + child ingest journal",
+    "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+    "resume_behavior": "do not rerun OCR unless source hash changed; rerun bridge apply after ocr-verify manifest_status=verified",
+    "resume_command": "ingest-ocr <file> --text-file <text> --cat <NN> --apply --confirm yes --json",
+    "rollback_hint": "delete only local OCR sidecars freely; for Drive/registry/NLM use child pipeline journal/snapshot diff",
+    "schema": "idempotency_contract.v1"
+  },
+  "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+cat_or_profile+canonical_name",
+  "note": "Đây là router READ-ONLY. Không ghi Drive/registry/NLM. Dùng để chọn workflow trước khi thực thi.",
+  "ok": true,
+  "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+  "recommended_commands": [
+    "ocr-run",
+    "ocr-verify",
+    "ingest-ocr",
+    "profile-ingest-ocr"
+  ],
+  "requires_apply": true,
+  "requires_dry_run": true,
+  "requires_readback": true,
+  "resume_command": "ingest-ocr <file> --text-file <text> --cat <NN> --apply --confirm yes --json",
+  "risk": "high",
+  "rollback_hint": "delete only local OCR sidecars freely; for Drive/registry/NLM use child pipeline journal/snapshot diff",
+  "schema": "route_task.v1",
+  "stop_conditions": [
+    "ocr-verify failed",
+    "missing text_file",
+    "VBQPPL without cat",
+    "apply without confirm yes"
+  ],
+  "task": "ocr_ingest",
+  "workflow": {
+    "applies_to": [
+      "vbqppl",
+      "profile"
+    ],
+    "apply": [
+      "call existing ingest-local/profile-ingest with --source-quality ocr --ocr-verified",
+      "do not write Drive/registry/NLM directly"
+    ],
+    "confirm_required": true,
+    "dry_run_required": true,
+    "duplicate_guard": "verified OCR manifest + child ingest duplicate guards; VBQPPL blocks canonical ingest if manifest is missing/unverified",
+    "id": "ocr_ingest",
+    "idempotency_contract": {
+      "duplicate_guard": "verified OCR manifest + child ingest duplicate guards; VBQPPL blocks canonical ingest if manifest is missing/unverified",
+      "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+cat_or_profile+canonical_name",
+      "journal_key": "ocr manifest path + child ingest journal",
+      "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+      "resume_behavior": "do not rerun OCR unless source hash changed; rerun bridge apply after ocr-verify manifest_status=verified",
+      "resume_command": "ingest-ocr <file> --text-file <text> --cat <NN> --apply --confirm yes --json",
+      "rollback_hint": "delete only local OCR sidecars freely; for Drive/registry/NLM use child pipeline journal/snapshot diff",
+      "schema": "idempotency_contract.v1"
+    },
+    "idempotency_key": "source_file_sha256+text_sha256+ocr_manifest_sha256+cat_or_profile+canonical_name",
+    "journal_key": "ocr manifest path + child ingest journal",
+    "live_state_required": true,
+    "ok": true,
+    "path": "references/workflows/ocr_ingest.json",
+    "plan": [
+      "run ocr-verify on sidecar text",
+      "build child ingest-local/profile-ingest command",
+      "require confirm yes for apply"
+    ],
+    "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+    "readback_required": true,
+    "recommended_commands": [
+      "ocr-run",
+      "ocr-verify",
+      "ingest-ocr",
+      "profile-ingest-ocr"
+    ],
+    "resume_behavior": "do not rerun OCR unless source hash changed; rerun bridge apply after ocr-verify manifest_status=verified",
+    "resume_command": "ingest-ocr <file> --text-file <text> --cat <NN> --apply --confirm yes --json",
+    "risk": "high",
+    "rollback_hint": "delete only local OCR sidecars freely; for Drive/registry/NLM use child pipeline journal/snapshot diff",
+    "rollback_required": true,
+    "rules": [
+      "Bridge only; no parallel ingest pipeline",
+      "OCR is not canonical until child pipeline gates pass",
+      "ocr-run must write ocr_manifest.v1 next to sidecar text",
+      "ocr-verify must validate manifest hashes before OCR can be used for VBQPPL canonical ingest",
+      "VBQPPL OCR without verified manifest is blocked from canonical pipeline"
+    ],
+    "schema": "workflow_card.v1",
+    "stop_conditions": [
+      "ocr-verify failed",
+      "missing text_file",
+      "VBQPPL without cat",
+      "apply without confirm yes"
+    ],
+    "title": "Nạp OCR đã verify qua pipeline hiện có",
+    "verify": [
+      "child pipeline must perform convert/readback/register/NLM gates",
+      "ocr_manifest.v1 present",
+      "source_sha256 and text_sha256 match",
+      "verification_status=verified before canonical use"
+    ],
+    "volatile_fields": [
+      "path",
+      "file",
+      "out_dir",
+      "seconds",
+      "stdout_tail",
+      "stderr_tail"
+    ],
+    "write_scope": "local_ocr_drive_registry_nlm"
+  },
+  "workflow_id": "ocr_ingest"
+}

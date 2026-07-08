@@ -1,0 +1,61 @@
+{
+  "id": "write_new_tool",
+  "title": "Quyết định viết tool/script mới",
+  "risk": "high",
+  "applies_to": [
+    "development",
+    "workflow_extension"
+  ],
+  "recommended_commands": [
+    "tool-inventory --json",
+    "route-task --task <task> --json",
+    "workflow-audit --json",
+    "release-check --json",
+    "edit-skill"
+  ],
+  "plan": [
+    "read SKILL.md",
+    "run tool-inventory",
+    "route target task",
+    "check tl -h and command help",
+    "inspect scripts docstrings",
+    "grep existing functions",
+    "check API_CONTRACT if connector/webapp/Drive involved"
+  ],
+  "apply": [
+    "write the smallest patch only after missing capability is proven",
+    "prefer extending existing command over creating a parallel tool"
+  ],
+  "verify": [
+    "py_compile changed scripts",
+    "run gen_instructions selftest if prompts changed",
+    "run route-task/tool-inventory smoke tests",
+    "add or update selftest/audit when behavior changes"
+  ],
+  "stop_conditions": [
+    "equivalent command exists",
+    "existing function can be reused",
+    "no dry-run design",
+    "no verify/readback design"
+  ],
+  "rules": [
+    "Do not write snippets to replace an existing tl command",
+    "New tools must have JSON output when possible",
+    "New write operations must support dry-run or explicit --apply"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "skill_code_local",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

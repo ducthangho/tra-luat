@@ -1,3 +1,105 @@
+# ★ v1.33.54 — MERGE bundle determinism-hardening v1.33.50-53 (`tra-luat-skill-v1.33.53-determinism-hardening.zip`) + đánh giá tất định/drift + 2 fix khi gộp (2026-07-08)
+
+Bundle nhánh song song fork ĐÚNG từ canonical 78d6bfe (v1.33.49), +3320/−55 dòng tl.py + 30 file mới
+(references/workflows/*.json cards + references/golden/*.json fixtures + RELEASE_MANIFEST.json) + SKILL.md/
+gen_instructions/RUNBOOK/DOCTRINE_APPENDIX. −55 dòng chỉ là refactor `print(json.dumps(out))` → `_json_dumps`
+(mặc định KHÔNG sort/scrub — tương thích ngược) + VERSION/import. KHÔNG mất dòng canonical nào.
+
+## Đánh giá TẤT ĐỊNH (verified bằng chạy thật, không tin CHANGELOG bundle)
+- ✅ Repeat-run byte-identical (`tool-inventory --json --deterministic` ×2 cmp = identical).
+- ✅ Release zip dùng `ZipInfo.date_time=(1980,1,1)` cố định + member sort → zip reproducible.
+- ✅ `RELEASE_MANIFEST.json` tự-loại-mình (109/110), 0 volatile key, `package_hash` TÁI TẠO ĐƯỢC cross-platform
+  (regen trên Windows khớp hash bundle build nơi khác: dcca0cd7…).
+- ✅ Volatile scrub: namespace `volatile{}` + key-list (generatedAt/epoch/mtime/age_days/seconds/…) → `"<volatile>"`;
+  `_deterministic_enabled` = flag > hằng import-time > re-read env (3 tầng nhất quán — nghi vấn 2-cơ-chế là SAI).
+- ✅ Zip-slip guard (`..`→unsafe, chuẩn hoá `./`+backslash) + `DUPLICATE_NORMALIZED_ZIP_PATH` reject.
+- ✅ Tự-gate: `determinism-audit --strict` + `workflow-audit --strict` (60 task/159 lệnh) PASS; selftest 625/625 giữ.
+- ⚠ Quan sát 1 lần `determinism-audit` top ok:false ngay SAU khi sửa file hàng loạt — không tái hiện qua 5 lần
+  chạy (kể cả sau xoá __pycache__); __pycache__/.pyc ĐÃ nằm trong _RELEASE_EXCLUDE — xếp transient, theo dõi.
+
+## Đánh giá DRIFT
+- ✅ Doctrine GIỮ BẤT BIẾN: không tách canonical VBQPPL (chunk chỉ là nguồn phụ `row_kind=ref, corpus=false,
+  goc=<canonical>`); large_file_split_gate vẫn HỎI người dùng; OCR gate (VBQPPL thiếu manifest verified → chặn).
+- ✅ Cờ `--profile`/`--config` injection loop v1.33.48 tự phủ mọi subparser MỚI của bundle (parse-test PASS).
+- ⚠ Fix drift #1: bundle đổi `route-task <task>` (positional, như doc/log cũ) → BẮT BUỘC `--task` → gãy cách gọi
+  cũ (lớp S8/A1 doc↔CLI). Gộp: nhận CẢ HAI (positional + --task; thiếu cả hai → MISSING_TASK rc=2).
+- ⚠ Fix gap #2: bundle thêm ~3300 dòng mà 0 test trong gate `--selftest` (audit là lệnh RIÊNG, upload script
+  không tự chạy) → +5 `r59_*` khoá PURE helpers: `_zip_normalized_member_path` (slip/normalize),
+  `_zip_sorted_infos` (thứ tự tất định — lưu ý '.'(2E)<'/'(2F)), `_json_dumps` det (sort+scrub vs default giữ
+  nguyên), route-task positional+flag, release-exclude dev-local. **Selftest 630/630.**
+- 🔴 Fix #3 (lộ khi regen manifest trên dev-tree): `_release_should_include` walk THƯ MỤC (không phải git
+  ls-files) → LIỆT KÊ + HASH cả `tra_luat_config.v2.json` (config THẬT chứa webappUrl/token), `CLAUDE.md`,
+  `.claude/`, `.githooks/`, `.enc` vào RELEASE_MANIFEST (rò metadata + file_count 115≠109 → release-verify
+  trong gói giải nén FAIL). Vá: `_RELEASE_EXCLUDE_DIRS` += .claude/.githooks; SUFFIXES += .enc;
+  `_RELEASE_EXCLUDE_NAMES_ANYWHERE` (CLAUDE.md + tra_luat_config[.v2].json mọi cấp — GIỮ example).
+  Sau vá: dev-tree manifest == zip-set (109), hash tái lập.
+- 🟡 Fix #4: `_print_json_or_text` không --json chỉ biết render tool-inventory/route-task — lệnh MỚI khác
+  (release-manifest/verify/…) in nhầm `route-task ok=True task=None` → schema lạ fallback JSON đầy đủ.
+
+## v1.33.53 determinism hardening — volatile scrub + runtime artifact isolation + zip order guard (2026-07-08)
+
+- Sửa deterministic leak: bổ sung `generatedEpoch`, `age_days`, `mtime`, `modified_time` và các biến thể thời gian vào volatile scrub; `live-state-snapshot --deterministic` ổn định qua 2 lần chạy.
+- Release manifest nay loại `.tl_state/`, `tmp/`, `reports/`, `dist/` và các runtime artifact như `before.json`, `after.json`, `live_state_diff.json`, `release_check_report.json`, tránh package hash drift khi người vận hành tạo snapshot/report trong root skill.
+- `ingest-zip` sort member theo normalized path và chặn duplicate normalized path (`DUPLICATE_NORMALIZED_ZIP_PATH`) để cùng nội dung zip không phụ thuộc thứ tự đóng gói/không overwrite âm thầm.
+- `live-readiness`/`live-contract-check` thêm `command_ok` và `deployment_allowed`; `ok=true` chỉ còn nghĩa là command chạy xong, không phải quyền apply/deploy.
+- `determinism-audit --strict` mở rộng kiểm snapshot/diff, OCR/chunk path scrub, zip member order, duplicate zip path và release manifest runtime artifact isolation.
+
+## v1.33.52 determinism P8-P10 — OCR manifest + idempotency contract + release hardening (2026-07-08)
+
+- Pha 8: `ocr-run` nay sinh `ocr_manifest.v1` cạnh sidecar `.ocr.txt`, gồm engine/version/language, `source_sha256`, `text_sha256`, page report/coverage, metrics, verification status và output paths. Manifest được ghi ổn định để cùng đầu vào cho cùng hash.
+- `ocr-verify` nâng lên schema `ocr_verify.v2`: kiểm manifest/hash, page count/coverage nếu có, article count, appendix markers, Vietnamese mark density và garbled ratio. Với VBQPPL, thiếu manifest verified sẽ fail, không được đưa OCR vào canonical.
+- `ingest-ocr`/`profile-ingest-ocr` vẫn chỉ là bridge gọi lại pipeline hiện có, nhưng VBQPPL OCR nay bị chặn nếu verify JSON không có manifest `verification_status=verified`.
+- Pha 9: thêm idempotency contract cho `ingest_local`, `profile_ingest`, `ingest_zip`, `ocr_ingest`, `profile_ingest_ocr`, `profile_ingest_chunks`; `route-task` trả `idempotency_key`, `resume_command`, `readback_command`, `rollback_hint`.
+- Workflow schema/cards được mở rộng với `idempotency_contract`; cập nhật cards OCR/chunk/zip/ingest để mô tả journal key, duplicate guard, resume behavior và rollback/recovery path.
+- Pha 10: `release-check` thêm OCR manifest self-test, kiểm `ocr-run` sidecar + `ocr-verify` manifest contract; golden fixtures mở rộng cho `ocr_ingest` và `profile_ingest_chunks`.
+- Bản này tiếp tục giữ nguyên nguyên tắc: offline release pass không đồng nghĩa live ready; live apply vẫn cần `live-readiness`, `live-contract-check`, snapshot before/after và `live-state-diff`.
+
+## v1.33.51 determinism P6-P7 — live readiness contract + snapshot/diff gate (2026-07-08)
+
+- Pha 6: `live-readiness` nâng lên schema `live_readiness.v2` với 3 tầng rõ ràng: `env_ready`, `live_contract_ready`, `apply_ready`. Thiếu auth → `env_ready=false`; live read-only sai schema/version → `live_contract_ready=false`; chưa có smoke proof/diff → `apply_ready=false`.
+- Thêm `tl live-contract-check --json`: chỉ đọc webapp ping/version, Drive info cho root/registry/manifest/folder và NLM notebook get/source list. Không upload, không register, không add source.
+- Pha 7: thêm `tl live-state-snapshot --out before.json --json` và `tl live-state-diff before.json after.json --json --allow ...` để smoke test có bằng chứng before/after, không còn chỉ báo “pass” bằng lời.
+- Cập nhật `live-smoke-plan`, `deploy-plan`, `go-live-runbook`, workflow cards, `tool-inventory`, `route-task`, `workflow-audit`, golden fixtures và release required workflows cho các lệnh mới.
+- Siết hướng dẫn release: `release-check --strict-determinism --full` là gate trước khi đóng gói chính thức.
+
+
+## v1.33.49 deterministic-stage4-hotfix
+
+- Thêm bridge `ingest-ocr` và `profile-ingest-ocr`: chạy `ocr-verify`, sau đó gọi lại `ingest-local`/`profile-ingest` với `--source-quality ocr --ocr-verified`; không ghi trực tiếp Drive/registry/NLM.
+- Thêm bridge `profile-ingest-chunks`: chạy `chunk-verify`, sau đó gọi lại `profile-ingest` từng chunk profile; chặn manifest không phải profile.
+- Cập nhật `tool-inventory`, `route-task`, workflow cards `ocr_ingest` và `chunk_ingest`.
+- Mọi bridge apply yêu cầu `--confirm yes`; thiếu confirm bị chặn trước khi gọi pipeline ghi.
+
+# Stage 3 deterministic workflow hotfix (2026-07-08)
+
+- Added local `ocr-run` command: safe sidecar text extraction/OCR runner. `auto` uses text-layer when available, `ocrmypdf` only when local binary exists, and Drive/Paddle/DocumentAI remain gated until live plugin/config is provided.
+- Added `chunk-apply` and `chunk-verify`: deterministic local chunk files + manifest; no Drive/NLM write. VBQPPL canonical split is blocked.
+- Updated `tool-inventory`, `route-task`, workflow cards, `SKILL.md`, and Project Instruction generator to expose OCR/chunk commands as implemented safe-stage capabilities.
+- Kept Drive/NLM mutation behind existing ingest/readback pipelines.
+
+# tra-luat — deterministic stage 2 (2026-07-08)
+
+- Thêm `tl convert-verify` để readback sau Drive convert/rename/move: kiểm GDoc tồn tại, MIME là Google Docs, tên GDoc, source binary và folder nếu có.
+- Siết `ingest-local` và `profile-ingest`: sau `organize convert=true` bắt buộc chạy convert readback; fail thì dừng trước NLM add.
+- Mở `ingest-zip`/`profile-ingest-zip --apply` có kiểm soát: bắt buộc xem dry-run và dùng `--confirm yes`; zip được giải nén an toàn, từng file gọi lại pipeline hiện có, không upload zip nguyên.
+- `tool-inventory` nhóm ingest_convert nay coi `convert-verify` là lệnh hiện hữu; `route-task convert_rename` khuyến nghị `convert-verify`.
+
+
+## v1.33.49-deterministic-workflow-hotfix
+
+- Thêm `tl tool-inventory` READ-ONLY để xuất bản đồ nhóm tool/script/workflow dạng máy-đọc.
+- Thêm `tl route-task` READ-ONLY để định tuyến các tác vụ rủi ro trước khi dry-run/apply.
+- Thêm workflow cards JSON cho `write_new_tool`, `nlm_query_quality`, `ingest_local`, `convert_rename`, `ingest_zip`, `ocr_pdf_scan`, `large_doc_chunk`.
+- Cập nhật Claude Project Instruction: bắt buộc script-reuse gate, tool-inventory, route-task, dry-run, verify/readback trước khi viết tool mới hoặc thực hiện tác vụ rủi ro.
+- Cập nhật SKILL.md: chuẩn hóa luồng tất định `route-task → dry-run plan → apply → verify/readback → commit/report`.
+- Bật các lệnh READ-ONLY/DRY-RUN an toàn: `ingest-zip`, `profile-ingest-zip`, `ocr-analyze`, `ocr-verify`, `chunk-plan`; các nhánh apply/write vẫn bị chặn cho tới khi có readback batch đầy đủ.
+
+# ★ v1.33.49-query-quality+large-doc — NLM query quality + large-doc/OCR governance (hotfix, 2026-07-07)
+
+- `gen_instructions.py`: Project Instruction thêm khối `van_ban_lon_va_pdf_scan`; audit bắt buộc có quy tắc VBQPPL canonical không tách, profile chunk, OCR `source_quality=ocr` và `--ocr-verified`.
+- `SKILL.md`: chuẩn hóa nguyên tắc văn bản lớn: VBQPPL giữ canonical đầy đủ; chunk chỉ là nguồn phụ NLM (`row_kind=ref`, `corpus=false`, `goc=canonical`); profile được tách theo cấu trúc tự nhiên với `chunk_plan` dry-run.
+- `SKILL.md`: thêm cổng PDF scan/OCR, nêu rõ skill không có OCR engine nội bộ đầy đủ; dùng `--text-file`, `--source-quality ocr`, `--ocr-verified` và các lệnh verify trước khi đưa vào corpus/NLM.
+
 # ★ v1.33.49 — Vá log rà 34 Luật corpus (#2 status --amendment false-negative, #3 thiếu backfill-hieuluc) + gỡ tận gốc 'gws/nlm expire nhanh + login lỗi bước cuối' (2026-07-07)
 
 ## P1 — #2 `tl status <sohieu> --amendment` false-negative (2 LỚP vá)
@@ -4720,3 +4822,33 @@ Webapp đích sau khi áp patch: **2.21.1** (trước: 2.21.0). PATCH đổi tê
 - `_fallback/boot.py` thêm postcondition: nếu manifest có count/corpus_count nhưng `entries_indexed=0` thì lỗi, tránh boot xanh giả.
 - `tl rasoat` khi thiếu optional script in fallback plan có cấu trúc thay vì chỉ báo thiếu, giúp Claude chuyển sang webapp + NLM + legal MCP.
 - Giữ nguyên `_fallback` không-đè, `init-config`, `boot --config`, version gate 2.21.1.
+
+
+## Stage 5 — deterministic release/audit harness (2026-07-07)
+- Added `tl workflow-audit --json` to catch drift between workflow cards, route-task mappings and CLI command inventory.
+- Added `tl release-check --json` as an in-process offline acceptance harness: py_compile, instruction audit, workflow audit, route-card check, OCR text metrics, chunk guard and live-smoke plan generation. It does not call Drive/NLM and does not write registry.
+- Added `tl live-smoke-plan --json` to produce a safe ordered checklist for live Drive/NLM smoke tests on an authenticated machine.
+- Added workflow cards: `workflow_audit`, `release_check`, `live_smoke_plan`.
+- Project Instruction now requires `workflow-audit` and `release-check` before packaging/after workflow-tool changes; `live-smoke-plan` is used for live auth environment checks.
+
+
+## Stage 6 — deterministic release manifest/bundle (2026-07-07)
+- Added `tl release-manifest --json` to build timestamp-free SHA-256 manifests for every packaged file.
+- Added `tl release-verify RELEASE_MANIFEST.json --json` to detect missing/changed files before release.
+- Added `tl release-bundle --out <zip> --json` to create a deterministic zip with fixed timestamps and embedded manifest.
+- Added workflow cards `release_manifest`, `release_verify`, `release_bundle`; `release-check` now verifies release manifest generation and self-verification.
+
+## Stage 7 — live readiness and deployment handoff (2026-07-07)
+- Added `tl live-readiness --json` to check local live/auth readiness without calling Drive/NLM and without printing secrets.
+- Added `tl deploy-plan --json` to produce a read-only safe deployment checklist: bundle hash, extract, manifest verify, backup, sync, release-check, live-readiness and live-smoke-plan.
+- Added `tl rollback-plan --json` to produce a read-only rollback checklist from a known-good backup or previous bundle.
+- Added workflow cards `live_readiness`, `deploy_plan`, `rollback_plan`; `release-check` now covers these route/workflow cards and plan generation.
+- Project Instruction now requires live-readiness before live smoke tests and deploy/rollback plans for operator handoff.
+
+## v1.33.49-deterministic-stage8-hotfix
+
+- Thêm `tl final-acceptance` để tổng hợp workflow audit, instruction audit, release manifest/verify và live handoff status trước khi bàn giao.
+- Thêm `tl go-live-runbook` để xuất Markdown runbook triển khai live, smoke test và rollback.
+- Thêm workflow cards `final_acceptance.json`, `go_live_runbook.json` và đưa vào release manifest required workflows.
+- Cập nhật router/inventory để Claude phải đi qua final acceptance + go-live runbook trước khi coi gói là sẵn sàng triển khai.
+

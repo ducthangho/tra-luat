@@ -1,0 +1,90 @@
+{
+  "id": "ocr_pdf_scan",
+  "title": "OCR PDF scan tiếng Việt",
+  "risk": "high",
+  "applies_to": [
+    "pdf_scan",
+    "ocr_source",
+    "profile",
+    "vbqppl"
+  ],
+  "recommended_commands": [
+    "ocr-analyze <scan.pdf> --json",
+    "ocr-run <scan.pdf> --engine auto --mode profile --json",
+    "ocr-verify <sidecar.txt> --mode profile --json",
+    "ingest-ocr <scan.pdf> --text-file <sidecar.txt> --cat <NN> --json",
+    "profile-ingest-ocr <scan.pdf> --text-file <sidecar.txt> --json"
+  ],
+  "plan": [
+    "detect text layer with ocr-analyze",
+    "prefer clean doc/docx/GDoc source first",
+    "use ocr-run only for local sidecar/text-layer or ocrmypdf when available",
+    "produce sidecar text",
+    "run ocr-verify before ingest"
+  ],
+  "apply": [
+    "ocr-run --engine auto extracts text layer or uses local ocrmypdf if available",
+    "Drive/Paddle/DocumentAI are gated until live plugin/config exists",
+    "ingest with --text-file and source_quality=ocr after verification"
+  ],
+  "verify": [
+    "check OCR sidecar exists",
+    "check missing pages manually or via source verifier when available",
+    "check article sequence for VBQPPL",
+    "check appendices",
+    "check Vietnamese mark density",
+    "check garbled characters",
+    "only set --ocr-verified after confidence gate",
+    "ocr_manifest.v1 present",
+    "source_sha256 and text_sha256 match",
+    "verification_status=verified before canonical use"
+  ],
+  "stop_conditions": [
+    "OCR text missing",
+    "local OCR engine unavailable and no text layer",
+    "low quality OCR",
+    "missing articles/pages",
+    "unverified OCR for VBQPPL canonical"
+  ],
+  "rules": [
+    "OCR is not canonical until verified",
+    "Profile may keep unverified OCR as reference with warning",
+    "VBQPPL OCR should not be canonical unless verified deeply",
+    "ocr-run local does not write Drive/NLM",
+    "ocr-run must write ocr_manifest.v1 next to sidecar text",
+    "ocr-verify must validate manifest hashes before OCR can be used for VBQPPL canonical ingest",
+    "VBQPPL OCR without verified manifest is blocked from canonical pipeline"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_ocr",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "idempotency_contract": {
+    "schema": "idempotency_contract.v1",
+    "idempotency_key": "source_file_sha256+engine+language+mode",
+    "journal_key": "local ocr_manifest.v1 sidecar",
+    "resume_behavior": "reuse sidecar when source_sha256/text_sha256 unchanged; rerun ocr-run only when source changes or manifest unverified",
+    "duplicate_guard": "ocr-run writes deterministic text+manifest paths under out_dir",
+    "resume_command": "ocr-run <file> --engine auto --mode <mode> --json",
+    "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+    "rollback_hint": "remove local *_ocr_out directory; no Drive/NLM state is touched"
+  },
+  "idempotency_key": "source_file_sha256+engine+language+mode",
+  "journal_key": "local ocr_manifest.v1 sidecar",
+  "resume_behavior": "reuse sidecar when source_sha256/text_sha256 unchanged; rerun ocr-run only when source changes or manifest unverified",
+  "duplicate_guard": "ocr-run writes deterministic text+manifest paths under out_dir",
+  "resume_command": "ocr-run <file> --engine auto --mode <mode> --json",
+  "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
+  "rollback_hint": "remove local *_ocr_out directory; no Drive/NLM state is touched"
+}

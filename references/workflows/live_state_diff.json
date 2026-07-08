@@ -1,0 +1,51 @@
+{
+  "id": "live_state_diff",
+  "title": "Diff live snapshots and require expected changes only",
+  "risk": "low",
+  "applies_to": [
+    "after smoke",
+    "deploy audit",
+    "rollback decision"
+  ],
+  "recommended_commands": [
+    "live-state-diff before.json after.json --json --allow source_counts --allow notebooks.get.source_count"
+  ],
+  "plan": [
+    "load before/after snapshot JSON",
+    "drop volatile block",
+    "flatten deterministic fields",
+    "classify every changed path as allowed or unexpected"
+  ],
+  "verify": [
+    "unexpected_changes is empty before declaring smoke pass",
+    "allowed prefixes are explicit in command",
+    "diff report is saved when --out is used"
+  ],
+  "stop_conditions": [
+    "before/after missing",
+    "JSON invalid",
+    "unexpected_changes not empty"
+  ],
+  "rules": [
+    "READ-ONLY local diff",
+    "Do not broaden allow prefixes to hide real drift",
+    "Use rollback-plan when unexpected drift is found"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_diff_file_only",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail",
+    "generatedAt",
+    "generatedEpoch"
+  ]
+}

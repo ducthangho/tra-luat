@@ -1,0 +1,59 @@
+{
+  "id": "live_readiness",
+  "title": "Kiểm readiness live 3 tầng: env, contract, apply",
+  "risk": "low",
+  "applies_to": [
+    "pre-live",
+    "authenticated machine",
+    "release validation"
+  ],
+  "recommended_commands": [
+    "live-readiness --json",
+    "live-contract-check --json",
+    "live-state-snapshot --out before.json --json",
+    "live-smoke-plan --json"
+  ],
+  "requires_dry_run": false,
+  "requires_apply": false,
+  "requires_readback": false,
+  "plan": [
+    "check local env/auth: Python, skill root, masked webapp/token, GWS credential, NLM auth",
+    "when env_ready=true, run read-only live contract checks: webapp ping/info and NLM get/list",
+    "keep apply_ready=false unless smoke proof/diff is provided",
+    "do not upload/register/add source in readiness"
+  ],
+  "verify": [
+    "env_ready=false when auth is missing",
+    "live_contract_ready=false when live schema/version/read-only calls fail",
+    "apply_ready=false without smoke proof",
+    "secrets are masked in output"
+  ],
+  "stop_conditions": [
+    "env_ready=false",
+    "live_contract_ready=false",
+    "apply_ready=false when attempting broad apply",
+    "webapp version does not match API_CONTRACT"
+  ],
+  "rules": [
+    "live-readiness may call only read-only checks when env_ready=true",
+    "live-contract-check never uploads, registers or adds NLM source",
+    "Do not treat ok=true as apply-ready; use tiers.apply_ready"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "none",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail",
+    "generatedAt",
+    "generatedEpoch"
+  ]
+}

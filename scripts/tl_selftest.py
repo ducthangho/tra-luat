@@ -4849,6 +4849,57 @@ def run() -> int:
                   and _dr58("gws", False, True)[0] == "" and _dr58("gcloud", True, False)[0] == ""
                   and _dr58("gcloud", False, True)[0] == "gcloud"
                   and _ap58.parse_args(["drive-push", "x.zip", "--via", "gcloud"]).via == "gcloud"))
+
+    # ═══ v1.33.54 (MERGE bundle determinism-hardening 50-53) — r59_*: khoá PURE helpers determinism trong
+    # gate --selftest (bundle thêm ~3300 dòng nhưng 0 test ở đây; determinism-audit/workflow-audit là lệnh
+    # RIÊNG không chạy tự động lúc đóng gói — upload script chỉ chạy --selftest) ═══
+    # (a) zip member normalize: zip-slip (..) → rỗng=unsafe; ./ + backslash chuẩn hoá; dir-entry rỗng.
+    cases.append(("r59_zip_normalized_member_path",
+                  _zip_normalized_member_path("a/../b.txt") == ""
+                  and _zip_normalized_member_path("./x/./y.txt") == "x/y.txt"
+                  and _zip_normalized_member_path("a\\b\\c.txt") == "a/b/c.txt"
+                  and _zip_normalized_member_path("d/") == ""
+                  and _zip_normalized_member_path("") == ""))
+    # (b) zip member order tất định (độc lập thứ tự entry gốc) — dựng zip in-memory đảo thứ tự.
+    import io as _io59, zipfile as _zf59
+    _buf59 = _io59.BytesIO()
+    with _zf59.ZipFile(_buf59, "w") as _z59:
+        for _n in ("b.txt", "B/a.txt", "a.txt"):
+            _z59.writestr(_n, "x")
+    with _zf59.ZipFile(_buf59) as _z59:
+        _order59 = [i.filename for i in _zip_sorted_infos(_z59)]
+    cases.append(("r59_zip_sorted_infos_stable", _order59 == ["a.txt", "b.txt", "B/a.txt"]))   # '.'(2E)<'/'(2F)
+    # (c) _json_dumps deterministic: sort_keys + scrub volatile ("<volatile>"), default (det=False) GIỮ NGUYÊN.
+    _o59 = {"zeta": 1, "alpha": 2, "generatedAt": "2026-07-08T00:00:00Z", "seconds": 1.23}
+    _det59 = _json_dumps(_o59, deterministic=True)
+    _raw59 = _json_dumps(_o59, deterministic=False)
+    cases.append(("r59_json_dumps_det_scrub",
+                  _det59.index('"alpha"') < _det59.index('"zeta"')
+                  and '"<volatile>"' in _det59 and "2026-07-08" not in _det59
+                  and "2026-07-08T00:00:00Z" in _raw59))
+    # (d) route-task nhận CẢ positional lẫn --task (fix merge v1.33.54 — drift doc↔CLI lớp S8/A1).
+    _ap59 = build_parser()
+    _ns59a = _ap59.parse_args(["route-task", "ingest_local", "--json"])
+    _ns59b = _ap59.parse_args(["route-task", "--task", "ingest_local", "--json"])
+    cases.append(("r59_route_task_positional_and_flag",
+                  getattr(_ns59a, "task_pos", None) == "ingest_local"
+                  and getattr(_ns59b, "task", None) == "ingest_local"))
+    # (e) release-manifest exclude: config THẬT/.enc/CLAUDE.md/.claude KHÔNG vào manifest (rò metadata +
+    # file_count lệch zip-set → release-verify trong gói fail); example + file gói THẬT thì vào.
+    import tempfile as _tf59
+    with _tf59.TemporaryDirectory() as _d59:
+        _r59 = Path(_d59)
+        (_r59 / "scripts").mkdir(); (_r59 / ".claude").mkdir()
+        for _rel, _keep in (("SKILL.md", True), ("scripts/tl.py", True), ("tra_luat_config.example.json", True),
+                            ("tra_luat_config.v2.json", False), ("CLAUDE.md", False),
+                            ("scripts/tl_secrets.enc", False), (".claude/settings.json", False)):
+            _fp = _r59 / _rel
+            _fp.write_text("x", encoding="utf-8")
+            if _release_should_include(_fp, _r59) is not _keep:
+                cases.append((f"r59_release_exclude[{_rel}]", False))
+                break
+        else:
+            cases.append(("r59_release_exclude_dev_local_files", True))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

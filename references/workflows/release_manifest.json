@@ -1,0 +1,51 @@
+{
+  "id": "release_manifest",
+  "title": "Tạo release manifest SHA-256",
+  "risk": "low",
+  "applies_to": [
+    "packaging",
+    "release"
+  ],
+  "recommended_commands": [
+    "release-manifest --out RELEASE_MANIFEST.json --json",
+    "release-verify RELEASE_MANIFEST.json --json"
+  ],
+  "requires_dry_run": false,
+  "requires_apply": false,
+  "requires_readback": true,
+  "plan": [
+    "scan files sorted",
+    "exclude cache/build artifacts",
+    "compute sha256 per file",
+    "compute package_hash"
+  ],
+  "verify": [
+    "required files present",
+    "required workflow cards present",
+    "release-verify matches current tree"
+  ],
+  "stop_conditions": [
+    "missing VERSION/SKILL.md/scripts/tl.py",
+    "missing workflow cards",
+    "hash mismatch"
+  ],
+  "rules": [
+    "Manifest must not include absolute paths or timestamps",
+    "Manifest is generated before release bundle"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_manifest",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

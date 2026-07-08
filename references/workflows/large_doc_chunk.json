@@ -1,0 +1,82 @@
+{
+  "id": "large_doc_chunk",
+  "title": "Tách văn bản lớn có tính tất định",
+  "risk": "medium",
+  "applies_to": [
+    "profile_large_doc",
+    "nlm_query_helper",
+    "vbqppl_helper_chunks"
+  ],
+  "not_default_for": [
+    "vbqppl_canonical"
+  ],
+  "recommended_commands": [
+    "chunk-plan <file> --mode profile --json",
+    "chunk-apply <file> --mode profile --expected-hash <sha256> --json",
+    "chunk-verify <chunk_manifest.json> --json",
+    "profile-ingest-chunks <chunk_manifest.json> --json"
+  ],
+  "plan": [
+    "compute source hash",
+    "detect structure",
+    "prepare chunk boundaries with chunk-plan",
+    "name chunks deterministically",
+    "review chunk count and boundaries"
+  ],
+  "apply": [
+    "chunk-apply creates local chunk files and chunk_manifest.json only",
+    "do not write Drive/NLM in chunk-apply",
+    "link chunks to canonical in metadata",
+    "later ingest selected chunks through normal pipeline if needed"
+  ],
+  "verify": [
+    "chunk-verify checks manifest/files/hashes",
+    "same input gives same plan",
+    "boundaries do not split legal units badly",
+    "source hash unchanged"
+  ],
+  "stop_conditions": [
+    "vbqppl-canonical mode",
+    "uncertain boundaries",
+    "source hash changed",
+    "more than 3-4 chunks needed in one query without splitting question"
+  ],
+  "rules": [
+    "Do not split VBQPPL canonical",
+    "For profile documents split by natural structure",
+    "Prefer chunk under about 100000 characters",
+    "VBQPPL chunks are helper sources for NLM only, not legal canonical"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local_chunks",
+  "dry_run_required": true,
+  "confirm_required": false,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ],
+  "idempotency_contract": {
+    "schema": "idempotency_contract.v1",
+    "idempotency_key": "source_hash+mode+max_chars+name",
+    "journal_key": "chunk_manifest.v1 source_hash/chunk hashes",
+    "resume_behavior": "reuse chunk_manifest if source_hash unchanged; rerun chunk-apply with --expected-hash to detect drift",
+    "duplicate_guard": "chunk-verify hash checks before profile-ingest-chunks",
+    "resume_command": "chunk-apply <file> --expected-hash <source_hash> --json",
+    "readback_command": "chunk-verify <manifest> --json",
+    "rollback_hint": "delete local chunks; for ingested profile chunks rollback per profile-ingest child"
+  },
+  "idempotency_key": "source_hash+mode+max_chars+name",
+  "journal_key": "chunk_manifest.v1 source_hash/chunk hashes",
+  "resume_behavior": "reuse chunk_manifest if source_hash unchanged; rerun chunk-apply with --expected-hash to detect drift",
+  "duplicate_guard": "chunk-verify hash checks before profile-ingest-chunks",
+  "resume_command": "chunk-apply <file> --expected-hash <source_hash> --json",
+  "readback_command": "chunk-verify <manifest> --json",
+  "rollback_hint": "delete local chunks; for ingested profile chunks rollback per profile-ingest child"
+}

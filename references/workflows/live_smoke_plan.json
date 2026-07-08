@@ -1,0 +1,60 @@
+{
+  "id": "live_smoke_plan",
+  "title": "Live smoke test plan for Drive/NLM environment",
+  "risk": "high",
+  "applies_to": [
+    "machine_with_TL_WEBAPP",
+    "machine_with_GWS",
+    "machine_with_NLM_auth"
+  ],
+  "recommended_commands": [
+    "live-readiness --json",
+    "live-contract-check --json",
+    "live-state-snapshot --out before.json --json",
+    "live-smoke-plan --json",
+    "live-state-snapshot --out after.json --json",
+    "live-state-diff before.json after.json --json",
+    "ping",
+    "doctor",
+    "ingest-local",
+    "profile-ingest",
+    "convert-verify"
+  ],
+  "plan": [
+    "generate ordered live test plan with placeholders",
+    "start with readiness/contract/snapshot read-only checks",
+    "run one small docx through ingest-local/profile-ingest",
+    "confirm convert/readback before any broader batch",
+    "take after snapshot and diff expected changes only"
+  ],
+  "apply": [
+    "manual execution by user or operator on authenticated machine"
+  ],
+  "verify": [
+    "each high-risk command returns ok=true",
+    "convert readback checks pass",
+    "no binary source added to NLM",
+    "live-state-diff has unexpected_changes=[]"
+  ],
+  "stop_conditions": [
+    "ping/doctor fail",
+    "convert readback fails",
+    "NLM live dedup listing fails",
+    "registry verify fails"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "live_drive_nlm_smoke",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": true,
+  "live_state_required": true,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out_dir",
+    "seconds",
+    "stdout_tail",
+    "stderr_tail"
+  ]
+}

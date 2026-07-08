@@ -1,0 +1,116 @@
+{
+  "idempotency": {
+    "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+    "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+    "journal_key": "batch item path + child pipeline journal",
+    "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+    "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+    "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+    "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+    "schema": "idempotency_contract.v1"
+  },
+  "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+  "note": "Đây là router READ-ONLY. Không ghi Drive/registry/NLM. Dùng để chọn workflow trước khi thực thi.",
+  "ok": true,
+  "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+  "recommended_commands": [
+    "ingest-zip <file.zip> --cat <NN> --json",
+    "profile-ingest-zip <file.zip> --json",
+    "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json",
+    "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+  ],
+  "requires_apply": true,
+  "requires_dry_run": true,
+  "requires_readback": true,
+  "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+  "risk": "high",
+  "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+  "schema": "route_task.v1",
+  "stop_conditions": [
+    "unsafe path",
+    "too many files",
+    "unsupported extensions only",
+    "ambiguous cat/profile for VBQPPL"
+  ],
+  "task": "ingest_zip",
+  "workflow": {
+    "applies_to": [
+      "profile",
+      "vbqppl",
+      "overflow_shard"
+    ],
+    "apply": [
+      "ingest each accepted file separately",
+      "continue-on-error with per-file status",
+      "never upload zip itself as corpus/NLM source"
+    ],
+    "confirm_required": true,
+    "dry_run_required": true,
+    "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+    "id": "ingest_zip",
+    "idempotency_contract": {
+      "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
+      "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+      "journal_key": "batch item path + child pipeline journal",
+      "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+      "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+      "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+      "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+      "schema": "idempotency_contract.v1"
+    },
+    "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+    "journal_key": "batch item path + child pipeline journal",
+    "live_state_required": true,
+    "ok": true,
+    "path": "references/workflows/ingest_zip.json",
+    "plan": [
+      "extract zip to temp dir safely",
+      "block zip-slip",
+      "ignore system files",
+      "filter allowed extensions",
+      "build batch manifest",
+      "plan each file through normal ingest pipeline"
+    ],
+    "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
+    "readback_required": true,
+    "recommended_commands": [
+      "ingest-zip <file.zip> --cat <NN> --json",
+      "profile-ingest-zip <file.zip> --json",
+      "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json",
+      "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+    ],
+    "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
+    "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",
+    "risk": "high",
+    "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
+    "rollback_required": true,
+    "rules": [
+      "Zip is only input container",
+      "Dry-run is required before apply",
+      "Each file keeps its own identity"
+    ],
+    "schema": "workflow_card.v1",
+    "stop_conditions": [
+      "unsafe path",
+      "too many files",
+      "unsupported extensions only",
+      "ambiguous cat/profile for VBQPPL"
+    ],
+    "title": "Nạp file zip có batch plan",
+    "verify": [
+      "batch report accepted/skipped/succeeded/failed",
+      "each item has convert/rename/readback status",
+      "registry/NLM status per item"
+    ],
+    "volatile_fields": [
+      "path",
+      "file",
+      "out_dir",
+      "seconds",
+      "stdout_tail",
+      "stderr_tail"
+    ],
+    "write_scope": "drive_registry_nlm_batch"
+  },
+  "workflow_id": "ingest_zip"
+}

@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.33.54)
+# tra-luat — LÕI VẬN HÀNH (v1.33.55)
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2i`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -41,6 +41,8 @@ Mọi quy trình nạp/convert/rename/OCR/zip/chunk phải đi theo mẫu:
 `route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
 
 `tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit` và `golden-test` là READ-ONLY mặc định, không gọi Drive/NLM nặng và không ghi dữ liệu. Workflow chi tiết đặt tại `references/workflows/*.json`; schema ở `references/workflows/workflow_card.schema.json`; fixtures ổn định ở `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi để tránh drift.
+
+Từ v1.33.55, helper deterministic/json output tách sang `scripts/tl_core/deterministic.py` + `scripts/tl_core/jsonio.py`; `scripts/tl.py` vẫn là entrypoint public duy nhất (wrapper tương thích ngược — KHÔNG gọi tl_core trực tiếp từ ngoài).
 
 Stage an toàn hiện có thêm các lệnh local deterministic: `ocr-run` tạo sidecar text/OCR local khi engine có sẵn; `chunk-apply` tạo chunk files + manifest; `chunk-verify` kiểm manifest/files. Các lệnh này chưa ghi Drive/NLM. Muốn đưa kết quả vào corpus vẫn phải quay về pipeline ingest/verify/readback.
 

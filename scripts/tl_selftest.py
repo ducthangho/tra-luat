@@ -4900,6 +4900,39 @@ def run() -> int:
                 break
         else:
             cases.append(("r59_release_exclude_dev_local_files", True))
+    # ═══ v1.33.55 (MERGE Pha B core-json-determinism) — r60_*: PARITY wrapper tl.py ↔ tl_core (refactor
+    # không được đổi hành vi) + GIỮ fix #4 trong tl_core.jsonio (bundle fork từ 1.33.53 mang bug cũ trở lại) ═══
+    import tl_core.deterministic as _td60
+    import tl_core.jsonio as _tj60
+    _o60 = {"zeta": 1, "alpha": {"generatedAt": "x", "path": "C:\tmp\abc" if _hos.name == "nt" else "/tmp/abc"},
+            "seconds": 9, "note": "giữ nguyên"}
+    cases.append(("r60_wrapper_parity_tl_core",
+                  _json_dumps(_o60, deterministic=True) == _td60.json_dumps(_o60, deterministic=True, project_root=HERE.parent)
+                  and _json_dumps(_o60, deterministic=False) == _td60.json_dumps(_o60, deterministic=False, project_root=HERE.parent)
+                  and _scrub_volatile(_o60) == _td60.scrub_volatile(_o60, project_root=HERE.parent)
+                  and _VOLATILE_JSON_KEYS is _td60.VOLATILE_JSON_KEYS))
+    # fix #4 sống trong tl_core.jsonio: schema lạ (không groups/route_task) → in JSON, KHÔNG render route-task.
+    import io as _io60, contextlib as _cl60
+    _buf60 = _io60.StringIO()
+    with _cl60.redirect_stdout(_buf60):
+        _tj60.print_json_or_text({"ok": True, "schema": "release_manifest.v1", "file_count": 3}, False)
+    _txt60 = _buf60.getvalue()
+    cases.append(("r60_jsonio_unknown_schema_json_fallback",
+                  '"file_count": 3' in _txt60 and "route-task ok=" not in _txt60))
+    # deterministic_enabled 3 tầng: flag > default_on > env (env đọc ĐỘNG).
+    _sav60 = _hos.environ.pop("TL_DETERMINISTIC", None)
+    try:
+        _ok60 = (not _td60.deterministic_enabled(None, default_on=False)
+                 and _td60.deterministic_enabled(None, default_on=True)
+                 and _td60.deterministic_enabled(argparse.Namespace(deterministic=True), default_on=False))
+        _hos.environ["TL_DETERMINISTIC"] = "1"
+        _ok60 = _ok60 and _td60.deterministic_enabled(None, default_on=False)
+    finally:
+        if _sav60 is None:
+            _hos.environ.pop("TL_DETERMINISTIC", None)
+        else:
+            _hos.environ["TL_DETERMINISTIC"] = _sav60
+    cases.append(("r60_deterministic_enabled_precedence", _ok60))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

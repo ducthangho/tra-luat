@@ -1,3 +1,36 @@
+# ★ v1.33.55 — MERGE bundle Pha B `core-json-determinism` (nhánh kia tự đánh "1.33.54" — TRÙNG SỐ khác nội dung với canonical) + đánh giá kế hoạch nợ-kỹ-thuật A-H (2026-07-08)
+
+## Merge Pha B — tách tl_core (deterministic/jsonio)
+- Bundle fork từ 1.33.53 nhánh kia (KHÔNG có 4 fix canonical v1.33.54 — đã kiểm 0/0/0/0 marker). Delta thật
+  của Pha B nhỏ + sạch: `scripts/tl_core/{__init__,deterministic,jsonio}.py` mới; tl.py giữ 6 wrapper mỏng
+  (`_VOLATILE_JSON_KEYS`/`_deterministic_enabled`/`_stable_string_for_json`/`_scrub_volatile`/`_json_dumps`/
+  `_print_json_or_text`) — public CLI KHÔNG đổi; release-check py_compile + REQUIRED_FILES phủ tl_core.
+- Áp delta LÊN canonical (không lấy nguyên tl.py bundle — giữ đủ 4 fix v1.33.54 + r59). +bootstrap sys.path
+  phòng thủ trước import tl_core (ca tl.py nạp qua importlib từ cwd khác).
+- 🔴 PORT LẠI fix #4 vào `tl_core.jsonio.print_json_or_text`: bundle viết jsonio từ code 1.33.53 → bug
+  'schema lạ in nhầm route-task ok=True task=None' TÁI XUẤT — nay schema ∉ {tool-inventory, route_task*} →
+  fallback JSON đầy đủ (khoá bằng r60).
+- +3 `r60_*`: PARITY wrapper↔tl_core trên cùng payload (det/không-det/scrub/identity VOLATILE_JSON_KEYS),
+  jsonio unknown-schema fallback, `deterministic_enabled` 3 tầng (flag > default_on > env đọc động).
+  **Selftest 633/633.**
+
+## Gate kiểm cuối (theo kế hoạch, phần offline)
+- determinism-audit --strict ✅ · workflow-audit --strict ✅ · golden-test ✅ · gen_instructions --selftest
+  24/24 ✅ · release-manifest regen + release-verify ✅ · **release-bundle build ×2 CÙNG SHA-256 ✅**.
+
+## Đánh giá kế hoạch A-H (nhận + điều chỉnh)
+- Kế hoạch HỢP LÝ: thứ tự 'khóa determinism trước, refactor sau', giữ tl.py là entrypoint, mỗi pha có
+  acceptance. Pha A = ĐÃ XONG (merge v1.33.54); Pha B = bản này.
+- Điều chỉnh 1 — ĐÁNH SỐ: kế hoạch đề xuất 1.33.53→57 nhưng canonical đã dùng 1.33.54 cho merge-A → từ nay
+  Pha C=1.33.56, D=1.33.57, E=1.33.58, F=1.34.0, G/H giữ 1.34.1/1.34.2. Nhánh song song KHÔNG tự đánh số
+  version canonical — để canonical đánh khi merge (đã 2 lần trùng số: Codex-49, PhaB-54).
+- Điều chỉnh 2 — mỗi pha PHẢI kèm selftest trong gate `--selftest` (không chỉ audit rời — bài học 50-53
+  thêm 3300 dòng 0 test; PhaB cũng 0 test parity → r60 do canonical thêm).
+- Điều chỉnh 3 — Pha A3 exclude-list của kế hoạch còn THIẾU nhóm dev/local (.claude/.githooks/CLAUDE.md/
+  config THẬT/.enc — đã vá 🔴 ở v1.33.54); kế hoạch nên ghi rõ 'manifest regen SAU MỌI sửa file, TRƯỚC zip'.
+- Điều chỉnh 4 — Pha F (SKILL.md kernel): làm CUỐI như kế hoạch, và thêm bước RE-IMPORT zip vào Cowork
+  Settings→Capabilities + user duyệt (SKILL.md là bản agent đọc — đổi lớn phải có người rà).
+
 # ★ v1.33.54 — MERGE bundle determinism-hardening v1.33.50-53 (`tra-luat-skill-v1.33.53-determinism-hardening.zip`) + đánh giá tất định/drift + 2 fix khi gộp (2026-07-08)
 
 Bundle nhánh song song fork ĐÚNG từ canonical 78d6bfe (v1.33.49), +3320/−55 dòng tl.py + 30 file mới

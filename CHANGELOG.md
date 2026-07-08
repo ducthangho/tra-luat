@@ -1,3 +1,29 @@
+# ★ v1.33.58 — Pha E kế hoạch nợ-kỹ-thuật: command registry (2026-07-09)
+
+- **E1 `tl_core/command_registry.py`** (module THUẦN — không bind): metadata 52 lệnh (31 determinism-era +
+  21 legacy write high-risk): risk · read_only · write_scope · requires_confirm · supports_dry_run ·
+  deterministic_json_required · workflow_task · idempotency_contract · card_required · module · builtin_gate.
+- **E2 (incremental đúng kế hoạch):** 8 lệnh determinism đơn giản (tool-inventory/route-task/workflow-audit/
+  golden-test/determinism-audit/release-manifest/-verify/-bundle) SINH parser từ `GENERATED_SPECS` —
+  flags/help giữ NGUYÊN VĂN, handler qua stub tl, `--profile/--config/--deterministic` vẫn do vòng inject
+  phủ; build_parser bớt 8 block tay. Phần còn lại chuyển dần các pha sau.
+- **E3:** tool-inventory đính `registry` (registry_summary — counts + metadata từng lệnh, sort tất định).
+- **E4:** workflow-audit gọi `validate_registry`: lệnh-trong-registry phải có trong parser; handler generated
+  khớp; **lệnh GHI NGOÀI-repo (drive/registry/nlm/live) phải có ≥1 gate** (contract/confirm/dry-run/
+  builtin_gate — nlm-add=dedup-live-gate, drive-push=md5-verify-fixed-fileId; ghi artifact LOCAL miễn);
+  card_required → card phải load được; contract key phải tồn tại; **JSON-through-gate**: scan source handler
+  thật trong module — lệnh mới phải đi qua _json_dumps/_print_json_or_text/_emit_json_payload.
+- **Grandfather có kiểm soát:** 12 advisory (legacy write thiếu idempotency contract + contract chưa được
+  lệnh nào tham chiếu) nằm ở `registry.warnings` — KHÔNG merge vào warnings strict (nợ đã biết, Pha G siết).
+- Hiệu chỉnh theo thực tế khi validate lần đầu: determinism-audit card → workflow_audit (không có card riêng);
+  live-state-snapshot read_only=True (chỉ ghi report local).
+- Golden regen: tool_inventory (+registry section 531 dòng) + workflow_audit (+20). Hạ tầng phủ module mới:
+  canary + tl_boot preload + py_compile + REQUIRED_FILES + r36.
+- **Gate:** selftest **647/647** (+3 r64: validate-clean, generated-parser-behavior kể cả required/positional,
+  meta-invariants); workflow-audit --strict ✅ · golden-test ✅ · determinism-audit --strict ✅ ·
+  gen_instructions 24/24 ✅ · release-bundle ×2 CÙNG SHA ✅ · tl_boot smoke ✅. Kế hoạch: A-E ✓ → F (SKILL.md
+  kernel, v1.34.0 — cần user duyệt + re-import Cowork), G drift-test, H live-smoke.
+
 # ★ v1.33.57 — Pha D kế hoạch nợ-kỹ-thuật: tách tl_core/{zip_ingest,ocr,chunking} (2026-07-08)
 
 - tl.py **19.840 → 19.051 dòng** (−789; lũy kế từ Pha B: 21.312 → 19.051). Modules mới: `zip_ingest.py` (235 —

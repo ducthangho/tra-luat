@@ -197,7 +197,7 @@ def cmd_release_check(a) -> int:
         import py_compile
         py_compile.compile(str(HERE / "tl.py"), doraise=True)
         py_compile.compile(str(HERE / "gen_instructions.py"), doraise=True)
-        for _mod in ["__init__.py", "deterministic.py", "jsonio.py", "workflow.py", "release.py", "live.py", "zip_ingest.py", "ocr.py", "chunking.py"]:
+        for _mod in ["__init__.py", "deterministic.py", "jsonio.py", "workflow.py", "release.py", "live.py", "zip_ingest.py", "ocr.py", "chunking.py", "command_registry.py"]:
             py_compile.compile(str(HERE / "tl_core" / _mod), doraise=True)
         add("py_compile", True, "scripts/tl.py + scripts/gen_instructions.py + scripts/tl_core/*.py")
     except Exception as e:  # noqa: BLE001
@@ -333,6 +333,7 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/zip_ingest.py",
     "scripts/tl_core/ocr.py",
     "scripts/tl_core/chunking.py",
+    "scripts/tl_core/command_registry.py",
     "SKILL.md",
     "CHANGELOG.md",
     "scripts/tl.py",

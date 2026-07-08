@@ -211,6 +211,537 @@
   ],
   "missing_capabilities": [],
   "ok": true,
+  "registry": {
+    "commands": {
+      "backfill-hieuluc": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "backfill-loai": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "backfill-title-vn": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "chunk-apply": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": "large_doc_chunk",
+        "write_scope": "local"
+      },
+      "chunk-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "large_doc_chunk",
+        "write_scope": "none"
+      },
+      "chunk-verify": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "chunk_ingest",
+        "write_scope": "none"
+      },
+      "convert-verify": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "convert_rename",
+        "write_scope": "none"
+      },
+      "corpus-fix": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "dedup-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry_nlm"
+      },
+      "deploy-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "deploy_plan",
+        "write_scope": "none"
+      },
+      "determinism-audit": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      },
+      "drive-push": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
+      "final-acceptance": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "final_acceptance",
+        "write_scope": "none"
+      },
+      "go-live-runbook": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "go_live_runbook",
+        "write_scope": "none"
+      },
+      "golden-test": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": true,
+        "workflow_task": "workflow_audit",
+        "write_scope": "local"
+      },
+      "ingest-local": {
+        "generated": false,
+        "idempotency_contract": "ingest_local",
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ingest_local",
+        "write_scope": "drive_registry_nlm"
+      },
+      "ingest-ocr": {
+        "generated": false,
+        "idempotency_contract": "ocr_ingest",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ocr_ingest",
+        "write_scope": "drive_registry_nlm"
+      },
+      "ingest-zip": {
+        "generated": false,
+        "idempotency_contract": "ingest_zip",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ingest_zip",
+        "write_scope": "drive_registry_nlm"
+      },
+      "live-contract-check": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "live_contract_check",
+        "write_scope": "none"
+      },
+      "live-readiness": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "live_readiness",
+        "write_scope": "none"
+      },
+      "live-smoke-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "live_smoke_plan",
+        "write_scope": "none"
+      },
+      "live-state-diff": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "live_state_diff",
+        "write_scope": "none"
+      },
+      "live-state-snapshot": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "live_state_snapshot",
+        "write_scope": "local"
+      },
+      "missing-sohieu": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "nlm-add": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "nlm"
+      },
+      "nlm-query-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "nlm_query_quality",
+        "write_scope": "none"
+      },
+      "nlm-reconcile": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry_nlm"
+      },
+      "ocr-analyze": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "ocr_pdf_scan",
+        "write_scope": "none"
+      },
+      "ocr-run": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": "ocr_pdf_scan",
+        "write_scope": "local"
+      },
+      "ocr-verify": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "ocr_pdf_scan",
+        "write_scope": "none"
+      },
+      "profile-ingest": {
+        "generated": false,
+        "idempotency_contract": "profile_ingest",
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ingest_local",
+        "write_scope": "drive_registry_nlm"
+      },
+      "profile-ingest-chunks": {
+        "generated": false,
+        "idempotency_contract": "profile_ingest_chunks",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "chunk_ingest",
+        "write_scope": "drive_registry_nlm"
+      },
+      "profile-ingest-ocr": {
+        "generated": false,
+        "idempotency_contract": "profile_ingest_ocr",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ocr_ingest",
+        "write_scope": "drive_registry_nlm"
+      },
+      "profile-ingest-zip": {
+        "generated": false,
+        "idempotency_contract": "ingest_zip",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ingest_zip",
+        "write_scope": "drive_registry_nlm"
+      },
+      "push-overflow": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "nlm_registry"
+      },
+      "quarantine-fix": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "recat": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
+      },
+      "reg-delete": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "register": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "release-bundle": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "release_bundle",
+        "write_scope": "local"
+      },
+      "release-check": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "release_check",
+        "write_scope": "local"
+      },
+      "release-manifest": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": true,
+        "workflow_task": "release_manifest",
+        "write_scope": "local"
+      },
+      "release-verify": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "release_verify",
+        "write_scope": "none"
+      },
+      "rollback-plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": "rollback_plan",
+        "write_scope": "none"
+      },
+      "route-task": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      },
+      "shared-source-fix": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry_nlm"
+      },
+      "source-delete": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive_registry_nlm"
+      },
+      "source-rename": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry_nlm"
+      },
+      "source-update-corpus": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry_nlm"
+      },
+      "tool-inventory": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      },
+      "vbhn-year-fix": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "workflow-audit": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      }
+    },
+    "counts": {
+      "generated_parsers": 8,
+      "high_risk": 19,
+      "total": 52,
+      "write_commands": 32
+    },
+    "schema": "command_registry.v1"
+  },
   "schema": "tool_inventory.v1",
   "scripts": [],
   "workflow_cards": [

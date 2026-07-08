@@ -2388,7 +2388,8 @@ def run() -> int:
                       # v1.33.56 (tl_core/F3): canary phủ thêm tl_core — cây mock phải có đủ
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
-                      "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py"]:
+                      "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
+                      "tl_core/command_registry.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5033,6 +5034,33 @@ def run() -> int:
     # (g) P4-05: parser cha gọi trần (hygiene) → namespace không fn (guard main trả help+rc2, hết traceback).
     _ns63b = _ap63.parse_args(["hygiene"])
     cases.append(("r63_bare_parent_no_fn_attr", getattr(_ns63b, "fn", None) is None))
+    # ═══ v1.33.58 (Pha E) — r64_*: command registry ↔ parser ↔ cards ↔ contracts ═══
+    import tl_core.command_registry as _reg64
+    _ap64 = build_parser()
+    _rv64 = _reg64.validate_registry(_ap64, _TL_MODULE, load_card=_load_workflow_card,
+                                     contracts=_IDEMPOTENCY_CONTRACTS)
+    cases.append(("r64_registry_validate_clean", bool(_rv64.get("ok")) and _rv64.get("issues") == []))
+    # parser SINH từ spec parse y hệt hành vi cũ (positional + flags + required)
+    _ok64 = (_ap64.parse_args(["route-task", "ingest_local", "--json"]).task_pos == "ingest_local"
+             and _ap64.parse_args(["tool-inventory", "--group", "inventory_decision", "--json"]).group == "inventory_decision"
+             and _ap64.parse_args(["release-verify", "M.json", "--strict"]).manifest == "M.json"
+             and _ap64.parse_args(["golden-test", "--write"]).write is True
+             and _ap64.parse_args(["determinism-audit", "--strict", "--full"]).full is True)
+    try:
+        with _hush():
+            _ap64.parse_args(["release-bundle"])   # thiếu --out (required) → SystemExit(2)
+        _ok64 = False
+    except SystemExit as _e64:
+        _ok64 = _ok64 and _e64.code == 2
+    cases.append(("r64_generated_parsers_behavior", _ok64))
+    # meta invariants: mọi spec sinh đều có meta generated=True; counts nhất quán; summary schema chuẩn.
+    _sum64 = _reg64.registry_summary()
+    cases.append(("r64_registry_meta_invariants",
+                  all(_reg64.COMMAND_META.get(sp["name"], {}).get("generated") for sp in _reg64.GENERATED_SPECS)
+                  and _sum64["counts"]["generated_parsers"] == len(_reg64.GENERATED_SPECS)
+                  and _sum64["schema"] == "command_registry.v1"
+                  and _sum64["counts"]["total"] == len(_reg64.COMMAND_META)
+                  and all(m["risk"] in ("low", "medium", "high") for m in _reg64.COMMAND_META.values())))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

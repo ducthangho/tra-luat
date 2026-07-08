@@ -292,6 +292,11 @@ def cmd_tool_inventory(a) -> int:
             "workflow_cards": sorted(p.stem for p in _workflow_card_files()),
             "missing_capabilities": missing,
         }
+    try:   # v1.33.58 (Pha E - E3): inventory đọc metadata chuẩn từ registry thay vì tự scan rời rạc
+        import tl_core.command_registry as _reg
+        out["registry"] = _reg.registry_summary()
+    except Exception as _e:  # noqa: BLE001
+        out["registry"] = {"ok": False, "error": type(_e).__name__ + ": " + str(_e)}
     _print_json_or_text(out, getattr(a, "json", False))
     return 0 if out.get("ok", True) else 2
 
@@ -453,6 +458,18 @@ def _workflow_cards_audit() -> dict:
 
 def cmd_workflow_audit(a) -> int:
     out = _workflow_cards_audit()
+    # v1.33.58 (Pha E - E4): đối chiếu command registry <-> parser <-> cards <-> idempotency contracts.
+    try:
+        import tl_core.command_registry as _reg
+        _rv = _reg.validate_registry(build_parser(), _TL, load_card=_load_workflow_card,
+                                     contracts=_IDEMPOTENCY_CONTRACTS)
+        out["registry"] = _rv
+        out["ok"] = bool(out.get("ok")) and bool(_rv.get("ok"))
+        # warnings registry (grandfather legacy) là ADVISORY — giữ trong out["registry"]["warnings"],
+        # KHÔNG merge vào out["warnings"] để --strict không fail vì nợ đã biết (mục tiêu Pha G siết dần).
+    except Exception as _e:  # noqa: BLE001
+        out["registry"] = {"ok": False, "issues": ["REGISTRY_VALIDATE_CRASH:" + type(_e).__name__ + ":" + str(_e)]}
+        out["ok"] = False
     if getattr(a, "strict", False):
         out["strict"] = True
         out["ok"] = bool(out.get("ok")) and not out.get("warnings")

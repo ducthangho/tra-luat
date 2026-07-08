@@ -24,12 +24,13 @@ def print_json_or_text(obj: dict, as_json: bool, *, json_dumps_func: JsonDumps |
         print((json_dumps_func or json_dumps)(obj))
         return
     _schema = str(obj.get("schema") or "")
-    if not ("groups" in obj or _schema.startswith("route_task")):
+    _is_inventory = _schema.startswith("tool_inventory") or ("groups" in obj and "commands_available" in obj)
+    if not (_is_inventory or _schema.startswith("route_task")):
         # v1.33.55 (giữ fix #4 canonical v1.33.54): renderer text chỉ biết tool-inventory/route-task — schema
         # KHÁC (release_manifest/verify/…) từng in nhầm 'route-task ok=True task=None' → fallback JSON đầy đủ.
         print((json_dumps_func or json_dumps)(obj))
         return
-    if "groups" in obj:
+    if _is_inventory:   # v1.33.56 (review regression/F3): workflow_audit.v2 cũng có 'groups' — nhận diện theo schema
         print(f"tool-inventory ok={obj.get('ok')} commands={len(obj.get('commands_available', []))}")
         for g in obj.get("groups", []):
             print(f"- {g['name']}: {g.get('title','')} — {g.get('purpose','')}")

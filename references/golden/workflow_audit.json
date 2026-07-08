@@ -582,7 +582,7 @@
         },
         {
           "available": true,
-          "command": "nlm-cross <question> --source-id <id> --json"
+          "command": "nlm-cross <question> --notebooks <nb1,nb2> --json"
         },
         {
           "available": true,

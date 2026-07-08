@@ -2384,8 +2384,13 @@ def run() -> int:
     import pathlib as _pl36
     with _tmp36.TemporaryDirectory() as _td36:
         _base36 = _pl36.Path(_td36)
-        for _fn36 in ["tl.py", "tl_gws.py", "nlm_cli.py", "transport.py", "gas.py", "boot.py", "contract_check.py"]:
-            (_base36 / _fn36).write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
+        for _fn36 in ["tl.py", "tl_gws.py", "nlm_cli.py", "transport.py", "gas.py", "boot.py", "contract_check.py",
+                      # v1.33.56 (tl_core/F3): canary phủ thêm tl_core — cây mock phải có đủ
+                      "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
+                      "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py"]:
+            _fp36 = _base36 / _fn36
+            _fp36.parent.mkdir(parents=True, exist_ok=True)
+            _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
         cases.append(("r36_skill_package_integrity_ok", _skill_package_integrity(_base36)["ok"] is True))
         (_base36 / "tl_gws.py").write_bytes(b"x=1\x00")
         cases.append(("r36_skill_package_integrity_catches_nul", _skill_package_integrity(_base36)["ok"] is False))
@@ -4933,6 +4938,99 @@ def run() -> int:
         else:
             _hos.environ["TL_DETERMINISTIC"] = _sav60
     cases.append(("r60_deterministic_enabled_precedence", _ok60))
+    # ═══ v1.33.56 (Pha C) — r61_*: khoá facade tl ↔ tl_core.{workflow,release,live} ═══
+    # (a) bind copy-globals: hàm dùng chung trong module LÀ hàm tl (identity — không snapshot lệch);
+    #     tham chiếu CHÉO đi qua STUB tl (release._golden_test là stub tl, không phải def của workflow).
+    import tl_core.workflow as _w61, tl_core.release as _r61, tl_core.live as _l61
+    cases.append(("r61_bind_identity_and_cross_stub",
+                  _w61._json_dumps is _json_dumps
+                  and _l61._build_release_manifest is _build_release_manifest      # stub tl trong live
+                  and _r61._golden_test is _golden_test                            # stub tl trong release
+                  and _w61._golden_test is not _golden_test                        # def THẬT ở workflow
+                  and _TASK_TO_WORKFLOW is _w61._TASK_TO_WORKFLOW                  # const alias
+                  and _IDEMPOTENCY_CONTRACTS is _w61._IDEMPOTENCY_CONTRACTS))
+    # (b) facade dispatch: lệnh moved chạy qua stub tl (in-process, offline, _hush nuốt stdout).
+    with _hush():
+        _rc61a = cmd_tool_inventory(argparse.Namespace(json=True, deterministic=True))
+        _rc61b = cmd_route_task(argparse.Namespace(task="ingest_local", task_pos=None, json=True, deterministic=True))
+    cases.append(("r61_facade_dispatch_smoke", _rc61a == 0 and _rc61b == 0))
+    # (c) module KHÔNG đọc bare mutable-global của tl (chống snapshot-stale khi main() gán lại).
+    import io as _io61
+    _mut61 = []
+    for _mod61 in (_w61, _r61, _l61):
+        _src61 = _io61.open(_mod61.__file__, encoding="utf-8").read()
+        if "_DETERMINISTIC_ON" in _src61 or "_CRED_AUTH_DEAD" in _src61:
+            _mut61.append(_mod61.__name__)
+    cases.append(("r61_no_bare_mutable_globals_in_tl_core", not _mut61))
+    # ═══ v1.33.56 — r62: ROOT-CAUSE flake determinism-audit (age_days nhảy bucket 0.001-ngày giữa 2
+    # snapshot con → live-state-diff báo unexpected ~5%/lần). Khoá: diff bỏ key volatile ở LEAF. ═══
+    import tempfile as _tf62, json as _json62
+    with _tf62.TemporaryDirectory() as _d62:
+        _b62 = Path(_d62) / "b.json"; _a62 = Path(_d62) / "a.json"
+        _snap = lambda age, extra=None: {"auth": {"gws_credentials": {"present": True, "age_days": age}},
+                                         "volatile": {"generatedAt": "x"}, **({} if extra is None else extra)}
+        _b62.write_text(_json62.dumps(_snap(4.793)), encoding="utf-8")
+        _a62.write_text(_json62.dumps(_snap(4.794)), encoding="utf-8")
+        _dd62 = _tl_live._live_state_diff(str(_b62), str(_a62))
+        _a62.write_text(_json62.dumps(_snap(4.794, {"registry": {"rows": 746}})), encoding="utf-8")
+        _b62.write_text(_json62.dumps(_snap(4.793, {"registry": {"rows": 745}})), encoding="utf-8")
+        _dd62b = _tl_live._live_state_diff(str(_b62), str(_a62))
+    _strip62 = _tl_live._strip_snapshot_volatile({"volatile": {"x": 1}, "auth": {"age_days": 1.2, "present": True}, "seconds": 9})
+    cases.append(("r62_live_diff_ignores_volatile_leaf",
+                  _dd62["ok"] and _dd62["summary"]["changed"] == 0
+                  and (not _dd62b["ok"]) and _dd62b["unexpected_changes"][0]["path"] == "registry.rows"
+                  and _strip62 == {"auth": {"present": True}}))
+    # ═══ v1.33.56 — r63_*: khoá lô vá review 5-phân-hệ (PH2/P4/F-series) ═══
+    import tempfile as _tf63, zipfile as _zf63, json as _json63
+    # (a) PH2-03: tên member cấm trên Windows → unsafe ngay tại plan.
+    cases.append(("r63_zip_member_windows_forbidden",
+                  not _zip_is_safe_member("bao cao?.txt") and not _zip_is_safe_member("a<b>.docx")
+                  and not _zip_is_safe_member("xy.txt") and _zip_is_safe_member("thu-muc/van_ban.docx")))
+    # (b) PH2-02: extract tôn trọng max_size_mb như plan.
+    with _tf63.TemporaryDirectory() as _d63:
+        _zp63 = Path(_d63) / "t.zip"
+        with _zf63.ZipFile(_zp63, "w") as _z:
+            _z.writestr("big.txt", "x" * (2 * 1024 * 1024))
+            _z.writestr("small.txt", "ok")
+        _got63 = _safe_extract_zip_for_ingest(str(_zp63), str(Path(_d63) / "out"), max_size_mb=1)
+        cases.append(("r63_zip_extract_respects_size_cap",
+                      [x["normalized_path"] for x in _got63] == ["small.txt"]))
+    # (c) PH2-08: 'Điều N.' đầu dòng nhưng là THAM CHIẾU wrap dòng (dòng trước chưa kết câu) → KHÔNG phải heading.
+    _tx63 = "\n".join(["Điều 1. Phạm vi", "Nội dung theo quy định tại",
+                       "Điều 5. của Luật Xây dựng thì áp dụng.", "",
+                       "Điều 2. Đối tượng", "nội dung 2", ""])
+    _strat63, _recs63 = _chunk_records_from_text(_tx63, name="t", max_chars=10_000)
+    cases.append(("r63_dieu_heading_not_wrapped_reference",
+                  _strat63 == "by_article" and len(_recs63) == 1
+                  and _recs63[0]["start_dieu"] == 1 and _recs63[0]["end_dieu"] == 2))
+    # (d) PH2-06: OCR manifest là JSON hợp lệ nhưng KHÔNG phải object → lỗi sạch, không AttributeError.
+    with _tf63.TemporaryDirectory() as _d63b:
+        _tf = Path(_d63b) / "a.ocr.txt"; _tf.write_text("x", encoding="utf-8")
+        _mp63 = _ocr_manifest_path_for_text(_tf); _mp63.write_text('"tampered"', encoding="utf-8")
+        _man63, _warn63 = _load_ocr_manifest_for_text(_tf)
+        cases.append(("r63_ocr_manifest_nondict_clean_error",
+                      _man63 is None and any("NOT_A_JSON_OBJECT" in w for w in _warn63)))
+    # (e) PH2-07 end-to-end: đường dẫn nguồn chứa '---' → chunk-apply + chunk-verify vẫn khớp hash.
+    with _tf63.TemporaryDirectory() as _d63c:
+        _srcdir = Path(_d63c) / "ho-so---2026"; _srcdir.mkdir()
+        _sf63 = _srcdir / "vb.txt"
+        _sf63.write_text("\n".join(["Điều 1. Một", "nội dung một", "", "Điều 2. Hai", "nội dung hai", ""]),
+                         encoding="utf-8")
+        with _hush():
+            _rc63a = cmd_chunk_apply(argparse.Namespace(file=str(_sf63), mode="profile", name="vb",
+                                                        max_chars=40, out_dir=None, expected_hash=None,
+                                                        json=True, deterministic=False))
+            _rc63b = cmd_chunk_verify(argparse.Namespace(manifest=str(_srcdir / "vb_chunks" / "chunk_manifest.json"),
+                                                         json=True, deterministic=False))
+        cases.append(("r63_chunk_roundtrip_path_with_dashes", _rc63a == 0 and _rc63b == 0))
+    # (f) P4-03: --config/--profile root-position sống với subparser TỰ khai (doctor) — SUPPRESS hết đè None.
+    _ap63 = build_parser()
+    _ns63 = _ap63.parse_args(["--config", "/tmp/c63.json", "--profile", "P63", "doctor"])
+    cases.append(("r63_selfdeclared_flags_keep_root_position",
+                  getattr(_ns63, "config", None) == "/tmp/c63.json" and getattr(_ns63, "profile", None) == "P63"))
+    # (g) P4-05: parser cha gọi trần (hygiene) → namespace không fn (guard main trả help+rc2, hết traceback).
+    _ns63b = _ap63.parse_args(["hygiene"])
+    cases.append(("r63_bare_parent_no_fn_attr", getattr(_ns63b, "fn", None) is None))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

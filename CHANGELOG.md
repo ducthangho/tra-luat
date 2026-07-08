@@ -1,3 +1,72 @@
+# ★ v1.33.56 — Pha C kế hoạch nợ-kỹ-thuật: tách tl_core/{workflow,release,live} + rà lỗi tiềm ẩn (2026-07-08)
+
+## Tách module (tl.py 21.266 → 19.761 dòng, −1.505)
+- `tl_core/workflow.py` (513 dòng): _TOOL_GROUPS/_TASK_TO_WORKFLOW/_IDEMPOTENCY_CONTRACTS, cards/schema/golden,
+  tool-inventory, route-task, workflow-audit, golden-test.
+- `tl_core/release.py` (533+ dòng): determinism-audit, release-check/-manifest/-verify/-bundle, exclude rules,
+  zip-write deterministic, _run_release_child.
+- `tl_core/live.py` (680 dòng): live-readiness/contract-check/state-snapshot/state-diff, smoke-plan,
+  deploy-plan, rollback-plan, final-acceptance, go-live-runbook (+_mask_secret/_smoke_proof_state/… cụm-riêng).
+- **Cơ chế an toàn:** cắt NGUYÊN VĂN theo AST-span (kèm comment liền trước); `bind(tl)` copy-globals bỏ-tên-đã-có
+  (def riêng module thắng, hàm tl là hàm THẬT — không snapshot-stale); 26 stub hàm + 2 alias hằng trong tl cho
+  phần còn lại/selftest/parser; tham chiếu CHÉO giữa 3 module đi qua stub tl (release→workflow/live 6 tên,
+  live→release 1 tên); helper chỉ-moved-code-dùng tự móc theo (quy tắc referenced-only-by-one-module, 14 helper).
+  Public CLI KHÔNG đổi; module cấm đọc bare mutable-global của tl (khoá bằng r61).
+- Extraction bằng script AST tự sinh (assert mọi giả định: span, chồng lấn, 2-tên-1-statement, module-đơn-nhất).
+
+## Rà lỗi tiềm ẩn — workflow review 5 phân hệ (37 agent, adversarial verify): 31 CONFIRMED, vá 30, defer 1
+### 🔴 ROOT-CAUSE flake determinism-audit (3 lần 'ok:false không tái hiện') — CHỐT + TẮT
+- Wiring mới `reports/determinism_report.json` khi strict-fail BẮT ĐƯỢC flake ngay lần chạy chuỗi kế tiếp:
+  giữa 2 snapshot con, `auth.gws_credentials.age_days` nhảy bucket 0.001-ngày (86.4s) → live-state-diff báo
+  unexpected (~5%/lần — khớp tần suất 3 lần quan sát). Vá kép: (a) `_strip_snapshot_volatile` bỏ CẢ key
+  volatile ở LEAF (đúng luôn cho live-smoke thật với file snapshot raw); (b) snapshot `--out` ghi bản SCRUB
+  khi deterministic. Stress chuỗi ×5 sau fix: 5/5 PASS (+r62 khoá).
+### P0 (2, trùng nhau — 2 finder độc lập cùng bắt)
+- `_run_child_tl` decode stdout con bằng LOCALE (cp1258 máy VN) trong khi con LUÔN in UTF-8 → UnicodeDecodeError
+  → cp.stdout=None → TypeError KHÔNG được bắt: CẢ HỌ lệnh bridge (ingest-zip apply, ocr/chunk kể cả DRY-RUN)
+  chết trên chính máy user với bất kỳ output có 'Đ/ề/ố'; nạp dở Drive/NLM giữa batch. Verifier reproduce
+  end-to-end. Vá: encoding='utf-8' + errors='replace' + bắt TimeoutExpired (audit-path _run_tl_json vốn đúng
+  — bundle tự viết đúng ở gate, sai ở apply-path nên gate mù).
+### P1 đã vá (9)
+- ingest-zip --apply nạp CẢ file plan đã loại FILE_TOO_LARGE (extract tự suy tập file, không kiểm size) →
+  extract nhận max_size_mb (+r63). · Tên member zip chứa ký tự cấm Windows ('?<>|*:', control) lọt plan →
+  unsafe ngay tại plan (+r63). · --config (và --profile mode vbqppl) KHÔNG forward xuống child fan-out →
+  child đọc config MẶC ĐỊNH ở gốc → sai đích (đúng lớp 'ghi nhầm corpus' v1.33.48) → forward cả hai. ·
+  chunk-plan cap 5M ≠ apply/verify 10M → plan cắt cụt âm thầm → thống nhất 10M. · Cards/_nlm_query_plan/
+  contracts khuyên cờ KHÔNG TỒN TẠI (`ingest-local --json`, `nlm-cross --source-id`) → agent làm theo là rc=2:
+  +--json no-op 4 lệnh (tiền lệ nlm-get v1.33.18) + sửa chuỗi nlm-cross → --notebooks + regen 2 golden. ·
+  6 subparser tự khai --profile/--config default=None đè mất root-position → SUPPRESS (+r63). ·
+  live_contract_ready=true dù nhánh NLM fail ghi check-id NGOÀI required set (false-green deploy) → +3 id vào
+  required. · determinism-audit GHI ĐÈ before.json THẬT của user ở repo root (kill giữa write→restore = mất
+  baseline) → probe tên riêng `.__det_audit_probe__.json` excluded + từ chối nếu tồn tại. · tl_core = ĐIỂM-CHẾT-ĐƠN
+  mới không lớp self-heal nào phủ (tl_boot chỉ strip NUL tl.py; canary không liệt kê tl_core) → canary
+  _skill_package_integrity +6 file tl_core; tl_boot PRELOAD bản strip-NUL của tl_core vào sys.modules; import
+  tl_core trong tl.py qua helper in remediation rõ (rc=3) thay vì SyntaxError trần.
+### P2 đã vá (12)
+- OCR manifest JSON-hợp-lệ-nhưng-không-phải-object → lỗi sạch thay AttributeError (+r63). · chunk-verify
+  split('---',2) vỡ khi path chứa '---' → neo delimiter theo DÒNG (+r63 end-to-end). · Ranh giới 'Điều N.'
+  nhận cả THAM CHIẾU wrap dòng → heading chỉ khi dòng trước trống/kết câu (+r63). · `tl hygiene` trần
+  AttributeError traceback → guard fn=None in help + rc2 (+r63). · Vòng inject --profile/--config bỏ sót
+  NESTED subparsers → đệ quy. · tool-inventory/cards-audit IndexError trên chuỗi lệnh rỗng → guard. ·
+  Manifest walk đi xuyên symlink/junction → skip. · release-bundle TOCTOU (hash lúc manifest ≠ bytes lúc zip)
+  → đọc 1 lần + đối chiếu sha, lệch → RELEASE_BUNDLE_FILE_CHANGED. · Bundle mặc định rơi VÀO repo root (nhiễm
+  manifest, gói lồng gói) → tự chuyển ra cạnh root + warn + exclude '*-release.zip'. · Atomic-write tmp tên
+  CỐ ĐỊNH đụng nhau/AV → mkstemp duy nhất (3 writer). · jsonio nhận diện tool-inventory bằng key 'groups' đụng
+  workflow_audit.v2 → nhận diện theo schema. · --deterministic NO-OP âm thầm cho ~19 lệnh đường _emit_json_payload
+  → đi qua cổng _json_dumps (mặc định OFF giữ nguyên format cũ). · stable_string đổi '\'→'/' trong VĂN BẢN
+  thường → chỉ normalize chuỗi trông-như-path (không whitespace). · Deploy đè + zip mtime 1980 → __pycache__
+  STALE im lặng → tl_fetch.sh dọn pycache sau unzip.
+### Defer có chủ đích (1)
+- P4-06: golden-test/determinism-audit so JSON đã re-canonicalize (json.loads→dumps) thay vì stdout THÔ —
+  hạn chế thiết kế đã ghi nhận (drift formatting thuần sẽ không bị bắt); cân nhắc so raw-bytes ở Pha G.
+- (P4-01 'repo đổi giữa lúc review' = chính phiên này đang vá — không phải bug.)
+- py_compile trong release-check/determinism-audit + _RELEASE_REQUIRED_FILES phủ thêm workflow/release/live.py.
+
+## Gate
+Selftest **644/644** (+3 r61 bind/facade, +1 r62 root-cause diff-volatile-leaf, +7 r63 khoá lô vá);
+workflow-audit --strict ✅ · golden-test ✅ · determinism-audit --strict ✅ · gen_instructions 24/24 ✅ ·
+release-bundle ×2 CÙNG SHA-256 ✅.
+
 # ★ v1.33.55 — MERGE bundle Pha B `core-json-determinism` (nhánh kia tự đánh "1.33.54" — TRÙNG SỐ khác nội dung với canonical) + đánh giá kế hoạch nợ-kỹ-thuật A-H (2026-07-08)
 
 ## Merge Pha B — tách tl_core (deterministic/jsonio)

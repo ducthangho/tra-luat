@@ -12,7 +12,7 @@
     "reg-query --json",
     "nlm-query-plan <question> --source-id <id> --json",
     "nlm-query <question> --source-id <id> --json",
-    "nlm-cross <question> --source-id <id> --json",
+    "nlm-cross <question> --notebooks <nb1,nb2> --json",
     "extract <query> --json"
   ],
   "plan": [

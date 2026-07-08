@@ -17,7 +17,7 @@
   "question": "Trích Điều 1 của văn bản mẫu",
   "recommended_commands": [
     "nlm-query <question> --source-id <id> --json",
-    "nlm-cross <question> --source-id <id> --json",
+    "nlm-cross <question> --notebooks <nb1,nb2> --json",
     "extract <query> --json"
   ],
   "schema": "nlm_query_plan.v1",

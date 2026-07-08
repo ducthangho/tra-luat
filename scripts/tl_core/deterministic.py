@@ -69,7 +69,10 @@ def stable_string_for_json(s: str, *, project_root: str | os.PathLike | None = N
     except Exception:
         return s
     if not p.is_absolute():
-        return s.replace("\\", "/") if ("\\" in s and "/" not in s) else s
+        # v1.33.56 (review tl_core/F5): chỉ normalize separator khi chuỗi TRÔNG như path (không whitespace) —
+        # văn bản thường chứa backslash ('a\\b' trong nội dung pháp lý/ghi chú) không được sửa lệch.
+        return s.replace("\\", "/") if ("\\" in s and "/" not in s and " " not in s
+                                          and chr(10) not in s and chr(9) not in s) else s
     try:
         root = Path(project_root).resolve() if project_root is not None else _default_project_root().resolve()
         rel = p.resolve().relative_to(root)

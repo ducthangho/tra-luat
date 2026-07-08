@@ -77,6 +77,9 @@ TL=$(find "$OUT" -path '*/scripts/tl.py' 2>/dev/null | head -1)
 if [ -z "$TL" ] || [ ! -s "$TL" ]; then
   rm -rf "$OUT"; mkdir -p "$OUT"
   unzip -oq "$ZIP" -d "$OUT" 2>/dev/null || { echo "[tl_fetch] unzip LỖI (zip hỏng) → xoá $ZIP tải lại." >&2; rm -f "$ZIP"; exit 3; }
+  # v1.33.56 (review tl_core/F4): zip dùng mtime 1980 → giải nén ĐÈ bản cũ làm source mtime <= pyc cũ →
+  # Python dùng __pycache__ STALE im lặng (chạy code phiên trước). Dọn pycache sau mỗi lần unzip.
+  find "$OUT" -name '__pycache__' -type d -prune -exec rm -rf {} + 2>/dev/null || true
   TL=$(find "$OUT" -path '*/scripts/tl.py' 2>/dev/null | head -1)
   [ -n "$TL" ] || { echo "[tl_fetch] không thấy scripts/tl.py trong zip." >&2; exit 3; }
 fi

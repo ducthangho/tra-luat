@@ -2387,7 +2387,8 @@ def run() -> int:
         for _fn36 in ["tl.py", "tl_gws.py", "nlm_cli.py", "transport.py", "gas.py", "boot.py", "contract_check.py",
                       # v1.33.56 (tl_core/F3): canary phủ thêm tl_core — cây mock phải có đủ
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
-                      "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py"]:
+                      "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
+                      "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -4957,7 +4958,8 @@ def run() -> int:
     # (c) module KHÔNG đọc bare mutable-global của tl (chống snapshot-stale khi main() gán lại).
     import io as _io61
     _mut61 = []
-    for _mod61 in (_w61, _r61, _l61):
+    import tl_core.zip_ingest as _z61, tl_core.ocr as _o61x, tl_core.chunking as _c61
+    for _mod61 in (_w61, _r61, _l61, _z61, _o61x, _c61):
         _src61 = _io61.open(_mod61.__file__, encoding="utf-8").read()
         if "_DETERMINISTIC_ON" in _src61 or "_CRED_AUTH_DEAD" in _src61:
             _mut61.append(_mod61.__name__)

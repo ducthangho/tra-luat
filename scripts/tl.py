@@ -89,7 +89,7 @@ EXPECT_VERSION = "2.21.2i"
 # [lịch sử, đã gộp 1.24.0] 1.23.22: ROOT-CAUSE THẬT sự cố 2026-06-30 (ĐÍNH CHÍNH 1.23.21: KHÔNG mất data 766 dòng!). Thật ra config `registryDocId` trỏ NHẦM Doc legacy `1mATG` (vnd.google-apps.document) thay vì SHEET registry thật → webapp mở Doc-as-Sheet → đọc RỖNG → count=0 ẢO (data vẫn nguyên; corpus 552 là do dedup-plan −50). Template public init-config hay ghi đè về Doc legacy → tái diễn mỗi setup. FIX: (1) doctor CHẶN cứng `registryDocId == _LEGACY_REGISTRY_DOC_ID` (1mATG) → báo sửa về Sheet/để rỗng; (2) `init-config` AUTO-HEAL: blank registryDocId (base+profiles) nếu = Doc legacy → webapp auto-discover Sheet `tra_luat_registry`. (Giữ guard 1.23.21 cho ca profile registryDocId rỗng.) +1 test → 260/260. # 1.23.21: ⛔ GUARD CHỐNG CLOBBER REGISTRY NỀN (SỰ CỐ NGHIÊM TRỌNG 2026-06-30: profile dự án 'Khảo sát Luật XB' registryDocId RỖNG → webapp `regSS_` rơi nhánh BASE → manifest --touched-drive quét phình rồi profile-rebuild-registry XÓA SẠCH 766 dòng registry NỀN VBQPPL). FIX: `cmd_manifest` (--touched-drive) + `cmd_profile_rebuild_registry` CHẶN khi profile dự án có TL_REGISTRY_DOC_ID rỗng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — phải tạo registry RIÊNG trước. PHÁT HIỆN từ GS: registry base = Google SHEET `tra_luat_registry` (regSS_ tìm theo tên/TL_REGSHEET_ID_AUTO), KHÔNG phải Doc 1mATG (chỉ ping/display); khôi phục = restore SHEET đó (version history Sheets), cache `tl212_reg_*` TTL 600s. +1 test → 259/259. # 1.23.20: DETECTOR `infra_in_corpus` (phát hiện khi rà 106 Luật dump) — file HẠ TẦNG (.json/.enc/secrets/nlm_sources_delta/manifest/registry) lẫn corpus=true = RÁC (vd tl_secrets.enc, nlm_sources_delta_*.json đếm như văn bản). `_is_infra_entry` (module-level, BẢO VỆ GDoc/PDF/Word) + thêm vào `tl sweep` (cờ + NEXT ACTION set corpus=false). +1 test → 258/258. # 1.23.19: COMPOSITE `tl dedup-plan` (user yêu cầu) — kế hoạch dedup TOÀN CORPUS 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). Tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters `_cluster_same_doc` = CÙNG văn bản theo subject-sig + gộp sidecars .docx/.pdf cạnh GDoc). GIỮ canonical, set corpus=false bản dup (reversible). BẤT BIẾN AN TOÀN: không quarantine chính canonical / canonical của cụm khác / trùng lặp. DRY mặc định; --apply ghi reg_bulk corpus=false; review (thiếu canonical) + dups_on_nlm (còn nguồn NLM→cân nhắc xoá tay) chỉ BÁO. sweep NEXT ACTION trỏ dedup-plan. Pure `_dedup_plan`. +1 test → 257/257. # 1.23.18: FIX false-fire NLM_STATUS_MISMATCH (phát hiện khi nlm-orphans --fix-mismatch LIVE trả MISMATCH_LIVE=0 dù sweep báo 79). Whitelist status exact-match KHÔNG nhận biến thể `removed_*` (removed_superseded_by_VBHN, removed_dedup…) → false-fire + `_entry_on_nlm_live` coi NHẦM removed_* là sống (lệch still_on_nlm/ghost). FIX: `_nlm_status_known`/`_nlm_status_removed` nhận HỌ tiền tố (pushed*/synced/removed*/trash*/deleted), áp 4 site (doctor flag, _title_flags, _entry_on_nlm_live, vbhn-normalize removed). sweep NEXT ACTION: NLM_STATUS_MISMATCH = nhãn LẠ (registry hygiene) KHÔNG phải live desync. +2 test → 256/256. # 1.23.17: `tl sweep` NEXT ACTION nlm_drift TÁCH theo sub-type (phát hiện khi reconcile LIVE không giảm drift) — trước gộp 288 thành 'nlm-reconcile --apply' GÂY HIỂU NHẦM (reconcile chỉ chữa LINKAGE). Nay: NLM_NOTEBOOK_ID_MISSING→nlm-reconcile (linkage); NLM_STATUS_MISMATCH→nlm-orphans --fix-mismatch (đọc live); CORPUS_TRUE_NOT_ON_NLM→ingest-missing (job lớn, phần lớn CẤU TRÚC corpus>cap, KHÔNG về 0). # 1.23.16: DETECTOR `shared_source_id` (phát hiện khi dọn ghost NLM LIVE) — ≥2 drive_id KHÁC nhau CÙNG 1 nlm_source_id (backfill/reconcile gắn nhầm) = FALSE-LINK: xóa nguồn của row này GÃY link row kia (ca NQ42: canonical + ghost chung source_id → xóa ghost làm canonical mất NLM, phải re-push). Pure `_shared_source_id_groups` + thêm vào `tl sweep` (cờ + NEXT ACTION cảnh báo SỬA TRƯỚC nlm-reconcile/xóa nguồn). Dev cache thấy 4 nhóm. +1 test → 254/254. # 1.23.15: xử báo cáo rà 106 Luật (mục code còn lại; 5.1/5.3/5.6/4.B đã vá ở 1.23.11-14). 5.2 vbhn-check goc_hit cross-subject LỌT (14-2024 ATVSLĐ vào --goc 09-2017 Du lịch vì _disc_conflict không biết cặp) → `_vbhn_candidates`: khi ĐÃ biết subject, goc_hit phải TƯƠNG THÍCH chủ đề (sscore≥30) mới giữ. 5.5 Cowork /tmp sticky owner-nobody không ghi được → `_ensure_writable_tmpdir()` trỏ TMPDIR về CACHE/tmp ($HOME) lúc import (tempfile.* + script con kế thừa). 5.4 SKILL.md bootstrap options + cảnh báo 45s; 4.B thêm vbhn-normalize/sweep/quarantine-fix/vbhn-year-fix vào bảng CLI. +2 test → 253/253. # 1.23.14: COMPOSITE `tl quarantine-fix` (dọn nhóm B tất định) — phân loại dòng quarantine MÂU THUẪN: set_corpus_false (raw-dup .pdf/.docx gán nhầm corpus→false, AN TOÀN) + normalize_label (nhãn biến thể→QUARANTINE_CAT) tự động qua --apply; review_restore (GDoc corpus=true nghi canonical kẹt như A1/BLLĐ→KHÔNG auto, quyết tay) + ghost_nlm (quarantine còn nguồn NLM live→báo source_id, xoá tay sau verify). Pure `_quarantine_fix_items`. DRY mặc định. +1 test → 251/251. # 1.23.13: (1) MERGE HỘI TỤ bản Codex v1.23.11 (cùng vá report rà corpus) — PORT phần UNIQUE: A1 SUBJECT-GATE thật (`_name_subject_match`/`_name_subject_text`: source-map ghim canonical CHỈ trong hit KHỚP CHỦ ĐỀ, abbrev-aware BLLD/BHXH; hit generic→None+SUBJECT_MISMATCH) + `resolve_identity` +name_tokens (dedup-check 'Luật Thư viện') + vbhn-check SUBJECT_FILTER_WEAK + reg-query LIMIT_TRUNCATED rõ. GIỮ bản tôi đã verify cho A2-A5 + reg-query json-all. (2) GỠ `_parts` (chống mount-cắt-cụt — Cowork nay bootstrap qua tl_fetch zip sạch nên hết tác dụng): xoá scripts/_parts/ + build_parts.py + tl_rebuild.sh; tl_boot.py rút gọn (strip-NUL→compile→exec); `_reassemble_parts`→None (heal degrade về on-disk); edit-skill/verify-integrity bỏ build_parts. (3) COMPOSITE TẤT ĐỊNH `tl sweep`: 1 lệnh thay chuỗi 6 audit (hygiene+cat+slot+drift+vbhn-year+quarantine) → JSON/text + NEXT ACTIONS điền sẵn (pure `_sweep_report`). +4 test → selftest 250/250. # 1.23.12: 2 fix từ chạy B1 LIVE. (1) reg-query `--json` UNDERCOUNT âm thầm — mặc định cắt 60 rows → script đếm `len(rows)` thiếu (audit quarantine thấy 60/110). Nay `--json` trả TẤT CẢ rows mặc định (text vẫn cắt 60 + dòng '(hiện 60)') + cờ `truncated`. (2) hygiene scan thêm cờ TRẠNG THÁI MÂU THUẪN `quarantine_corpus_true` (trong quarantine nhưng corpus=true) + `quarantine_still_on_nlm` (quarantine nhưng còn nguồn NLM live = ghost) → surface để dọn. # 1.23.11: xử báo cáo rà corpus (nhóm A). A2: hằng `QUARANTINE_CAT` + `_is_quarantine_label_variant` + cờ hygiene scan `quarantine_label_variants` (audit hội tụ dù nhãn lệch QUARANTINE/_ZZZ — `_is_quarantine_cat` nhận mọi biến thể). A3: `slot-audit` TỰ neo `live_source_count` từ nlm CLI (+`--no-live`) → cảnh báo gap estimate↔live khỏi gọi `--physical` tay. A4: `doctor` in BREAKDOWN từng cờ (NLM_STATUS_MISMATCH/CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING) + lệnh `nlm-reconcile <nb> --apply` ĐIỀN SẴN notebook id. A5: help `vbhn-check --subject` thêm cảnh báo QUOTE. A1 (source-map ghim sai canonical 'Bộ luật Lao động'→'Dân chủ 87'): KHÔNG tái hiện trên v1.23.11 với dữ liệu đại diện — gate LOW_CONFIDENCE_NAME_MATCH gốc đã null canonical khi top không strong-match; giữ gate (thử thay bằng nhóm tail-key gây regression abbrev/quarantine → revert). Cần `source-map --json` LIVE để soi nếu còn. +3 test. # 1.23.10: GUARD cat (phát hiện khi nạp THADS 106/2025 LIVE) — `register`/reg_bulk KHÔNG validate `cat` → workaround gõ tay folder RÁC '30_To_chuc_bo_may_nha_nuoc' (số 30 + tên cat 35) lọt im lặng → registry lệch folder vật lý. Nay `_is_valid_cat_value` chặn cat không thuộc taxonomy 45+2 (cả nhánh --bulk lẫn reg_upsert), rc=2, nhắc dùng `tl recat --cat <số>`. +1 test. BÀI HỌC: đổi cat LUÔN dùng recat (resolve+validate folder), KHÔNG register --bulk tên gõ tay. # 1.23.9: 2 FIX (phát hiện khi chạy vbhn-year-fix LIVE Cowork). (A) vbhn-year-fix CHỈ quét entry corpus=true — sidecar/quarantine (corpus=false) KHÔNG year-fix → hết CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số; hygiene báo 'sạch' nhưng vbhn-year-fix báo conflict = mâu thuẫn do quét cả non-corpus). (B) HINT SAI: lệnh ghi in `MANIFEST_STALE_RUN_REGEN2` → `tl regen2` KHÔNG phải lệnh (chỉ có `tl manifest`; regen2 là action GAS qua `manifest --touched-drive`) → user chạy nhầm. Sửa 5 hint + dòng recat → `tl boot --refresh` (sau ghi registry sheet) / `tl manifest` (sau đổi cây Drive). +test corpus-skip. # 1.23.8: SAFEGUARD cho vbhn-year-fix (phát hiện khi soát DRY) — nếu ≥2 dòng suy ra CÙNG `NN-YYYY-VBHN-XXX` (dòng dup cùng văn bản, HOẶC 2 văn bản khác cùng số+năm) thì ghi sẽ TẠO collision MỚI → tách bucket `conflicts`, KHÔNG auto-apply (rc=1), in 🔴 CONFLICT để dedup/phân biệt tay. `_vbhn_year_fix_items` nay trả (fixable, needs_year, conflicts). +1 test. # 1.23.7: ★ BẤT BIẾN ĐẶT TÊN (user nhấn mạnh) — số hiệu VBQPPL PHẢI có NĂM; VBHN là thủ phạm (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH=ATTP 2025+Thuế TNDN 2026, 115/VBHN-VPQH=THADS 2025+Thi đua 2026). Lệnh MỚI `tl vbhn-year-fix [--with-name] [--apply]`: quét VBHN sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên qua `_entry_issue_year`) → đề xuất `NN-YYYY-VBHN-XXX`, GHI qua reg_upsert (KHÔNG reg_bulk — sohieu là khóa immutable); ca không suy được năm → needs_year (xác minh tay). Pure `_vbhn_sohieu_inject_year`/`_name_inject_vbhn_year`/`_vbhn_year_fix_items` (test offline). + `register` cảnh báo `VBHN_SOHIEU_NO_YEAR` khi ghi sohieu VBHN thiếu năm. +3 test. (Phát hiện đã có sẵn: cờ VBHN_BARE_NUMBER/MISSING_YEAR_OR_DATE/NAME_MISSING_YEAR.) # 1.23.6: FIX (phát hiện khi KH2 Pha 2.6 recat Cowork) — `recat --apply` báo `reg_patched:0` ÂM THẦM khi Drive đã move nhưng webapp index chưa thấy row mới thêm (registry cat KHÔNG cập nhật → user tưởng xong). Nay LOUD cảnh báo stderr + rc=1 khi reg_patched < moved, chỉ rõ KHẮC PHỤC (regen2 --refresh rồi reg_bulk lại). Cùng họ "ghi im lặng" với 1.23.5. +1 test. # 1.23.5: FIX BUG (phát hiện khi KH2 Pha 2.8 chạy Cowork) — `missing-sohieu --apply` ghi reg_bulk cột `so_hieu` (có gạch dưới) → webapp BỎ IM LẶNG (đúng gotcha API_CONTRACT mục 0: khóa phải `sohieu`); apply thẳng trả patched=0 mà KHÔNG báo lỗi. Sửa items key + cols → `sohieu` (line ~8061) + help/docstring. Workaround Cowork (cols="sohieu") đã ghi 193/193; nay code gốc đúng. +1 test. # 1.23.4: ★ KH1 HOÀN TẤT — `tl relation-backfill --base <sh> [--apply]` (Pha 1.5 cuối, cho KH2 Pha 2.3): GHI quan hệ sửa đổi mà relation-check ĐÃ phát hiện (missing_links từ `_relation_audit`, tái dùng cổng footnote chống dương-tính-giả) — set `goc` cho luật SỬA, append `sua_doi` cho luật GỐC (pure `_relation_backfill_items` HỢP NHẤT sua_doi cũ + dedup, KHÔNG đè). CHỈ direct/ref-linked; subject-only → review (xác minh tay). DRY mặc định. +1 test → selftest 237/237. → TOÀN BỘ lệnh KH1 đã dựng (3 cổng + vòng lặp + dọn-corpus + nlm-orphans + relation-backfill). CÒN: cập nhật RUNBOOK/API_CONTRACT (tài liệu), KH2/KH3 (corpus). # 1.23.3: FIX DEPLOY-DISPLAY — SKILL.md header ghi CỨNG '(v1.22.70)' qua MỌI bump 1.22.71→1.23.2 (tôi quên sed SKILL.md) → bản deploy HIỂN THỊ 'v1.22.70' dù runtime đúng. Sửa SKILL.md→(v1.23.3) + GUARD selftest `skill_md_version_matches_VERSION` (bump nào quên cập nhật SKILL.md = selftest FAIL → chặn deploy). LƯU Ý vận hành: Package live khi kiểm = 1.23.0 (1.23.1/1.23.2 CHƯA push thành công — drive-push cần gws auth); verify push bằng curl Package fileId. +1 test → selftest 236/236. # 1.23.2:`tl nlm-orphans <notebook> [--fix-mismatch] [--deep]` — TỰ ĐỘNG HOÁ điều tra ghost (thay 6 vòng soi tay): đọc nguồn NLM LIVE (`nlm_cli.source_list`) ↔ registry → phân `_classify_nlm_sources` (PURE, test offline) thành REGISTERED_ACTIVE / **STATUS_MISMATCH_LIVE** (dòng registry removed* nhưng nguồn còn SỐNG = gắn nhãn SAI, vd 8 văn bản đã vá tay) / UNREGISTERED (trên NLM, không dòng registry). REPORT-ONLY; --fix-mismatch in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (KHÔNG đụng NLM/KHÔNG xóa); --deep đọc nội dung NLM lấy SỐ HIỆU header thật (vá cả sohieu cụt như '66'→'66.18/2026/NQ-CP'). +1 test → selftest 235/235. (CÒN: relation-backfill Pha 1.5 live; root-cause pipeline gắn nhầm removed_from_drive; SKILL.md/RUNBOOK/API_CONTRACT.) # 1.23.1: vá sweep-finding — `overflow-resolve` ĐỐI CHIẾU LIVE (nlm-get) thay vì registry-only: dùng MAX(registry, physical) làm slot hiệu lực (`_overflow_status`) → KHÔNG báo 'còn chỗ' giả khi vật lý vượt cap (vd base registry 279 / LIVE 315); cờ `REGISTRY_BEHIND_LIVE` lộ nguồn add thẳng CHƯA đăng ký (gợi `tl nlm-reconcile`); sửa cosmetic flag (BASE_HAS_ROOM khi base còn chỗ). `--no-live` để registry-only. (ingest-missing --apply ĐÃ physical-safe sẵn qua nlm-get.) +1 test → selftest 234/234. # 1.23.0: ★ KH1 (sửa skill sau báo cáo rà 70 Luật) — PHÁT HÀNH. Pha 1.3/III.2: `tl slot-audit --all-shards` (II.5 đếm slot TỪNG shard + cảnh báo near-full ≥270/300, pure `_slot_count_all_shards`) + `tl overflow-resolve` (II.1 kiểm shard overflow SẴN CÓ → cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE, chống tạo notebook nhầm; reuse `_overflow_route`) + `tl edit-skill <file> --patch` (III.2 sửa skill an toàn: assert-đếm→py_compile→write_text→build_parts, né Edit/Write mount; DRY mặc định). manifest-stale (II.4): lệnh ghi MỚI phát MANIFEST_STALE_RUN_REGEN2. canonical-not-sidecar (II.3): ĐÃ xử qua deep-resolver `_resolve_deep_target`+`_is_source_sidecar`+phạt raw-300. +3 test → selftest 233/233. ★ TỔNG KH1 (1.22.71→1.23.0): H1/H2/UTF-8/instructions--out; 3 CỔNG G1(source-verify)/G2(header-verify)/G3(cat-verify+cat-audit/recat FIX); vòng lặp frontier-expand/ingest-missing(no-new-notebook)/rasoat-loop; dọn corpus backfill-loai/sohieu-conflict/missing-sohieu; slot-audit/overflow-resolve/edit-skill. CÒN (1.23.1): relation-backfill (live, Pha 1.5); cập nhật SKILL.md/RUNBOOK/API_CONTRACT + upload Package (user-side). # 1.22.76: KH1 Pha 1.5 — `tl missing-sohieu` (đề xuất số hiệu cho dòng registry thiếu sohieu, parse từ TÊN qua `_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục; DRY mặc định, --apply ghi reg_bulk so_hieu; ⚠ ĐỀ XUẤT theo tên — XÁC MINH bằng header-verify/G2; LIVE suy 194/307 dòng thiếu). +1 test → selftest 231/231. HOÀN TẤT Pha 1.5 quick-wins pure (backfill-loai+sohieu-conflict+missing-sohieu). CÒN (v1.23.0): Pha 1.5 relation-backfill (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + III.2 edit-skill. # 1.22.75: KH1 Pha 1.5 (quick-wins pure) — `tl backfill-loai` (suy `loai` chuẩn cho dòng trống từ tên+số hiệu qua pure `_infer_loai`; DRY mặc định, --apply ghi reg_bulk; idempotent; LIVE manifest suy được 191/769) + TÁCH `SOHIEU_CONFLICT_DIFFERENT_DOC` (≥2 chữ-ký-chủ-đề KHÁC cùng số hiệu = văn bản KHÁC, NGUY HIỂM) khỏi `SAME_DOC` (sidecar) trong registry-doctor (`_subject_sig`; thêm khóa `sohieu_conflict_groups` vào schema text=json; LIVE 22 conflict/6 same trong 28 dup). +3 test → selftest 230/230. CÒN (v1.23.0): Pha 1.5 relation-backfill/missing-sohieu (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit) + III.2 edit-skill. # 1.22.74: KH1 Pha 1.2 HOÀN TẤT P0 — `tl ingest-missing` (nạp backlog corpus chưa NLM → source_add+reg_bulk; IDEMPOTENT + checkpoint resume; DRY mặc định; định tuyến theo chỗ trống base→overflow shard SẴN CÓ; BẤT BIẾN `_overflow_route` KHÔNG BAO GIỜ tạo notebook (đầy→BLOCKED hỏi user); pure `_ingest_missing_select`/`_overflow_route` test offline) + `tl rasoat-loop` (orchestrator VÒNG LẶP KHÉP KÍN report-only: SEED→frontier-expand→mở rộng đệ quy in-corpus đọc nguyên-văn KHÔNG RAG→dedup seen chống lặp→hội tụ dry_rounds≥K; xuất GAP ngoài-corpus + in-corpus-chưa-NLM; pure `_rasoat_dedup_push`). +4 test → selftest 228/228. CÒN (v1.23.0): Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + Pha 1.5 (backfill-loai/sohieu-conflict/relation-backfill/missing-sohieu) + III.2 edit-skill. LƯU Ý: ingest-missing/rasoat-loop nhánh mutate/expand-live CHƯA test trên dev (không NLM cred) — lần --apply đầu chạy Cowork batch nhỏ. # 1.22.73: KH1 Pha 1.2 — `tl frontier-expand <gdoc|sohieu>` (vòng lặp rà soát): trích MỌI dẫn chiếu (xref+footnote+inline) → ứng viên FRONTIER dedup theo số hiệu + ưu tiên (amending>VBHN>dẫn-chiếu) + cờ in_corpus; `missing_in_corpus` = đầu vào ingest-missing. Pure `_frontier_candidates` (test offline) + `_frontier_doc_text` reader; DISCOVERY/REPORT-ONLY, KHÔNG RAG; --text-file offline. +2 test → selftest 225/225. CÒN (v1.23.0): ingest-missing (mutate NLM, no-new-notebook), rasoat-loop (orchestrator); Pha 1.3; Pha 1.5. # 1.22.72: KH1 Pha 1.2 — DỰNG 3 CỔNG XÁC MINH G1/G2/G3 (dựng SẠCH, KHÔNG dùng bản agent tiêm đã revert). G3: helper pure `_load_linhvuc`/`_cat_taxonomy`/`_infer_cats_text`(suy cat theo NỘI DUNG alias, whole-word)/`_cat_boundary_rule`(ép quy_tac_ranh_gioi: BHXH/BHYT→02, đầu-tư-công/hải-quan→26, sửa≥2 luật→46, điều-ước→23, Đảng→00) + `tl cat-verify <gdoc|sohieu>` (read-only, --text-file offline) + FIX `cat-audit` (confidence/RULE/taxonomy-45+2/--strict) + FIX `recat` (BOUNDARY_CONFLICT advisory + --force-cat). G2: `_extract_header_facts` (ngày+cơ quan, pure) + `tl header-verify [--all/--sohieu/--drive-id/--cat] [--fix-suggest] [--strict]` (batch _verify_header_match, READ-ONLY, bắt DRIFT 775 dòng; KHÁC title_mismatch=metadata nội bộ). G1: `_content_md5` (NFC, pure) + `_official_rank` + `_DISCOVERY_SITES` re-rank OFFICIAL-FIRST (vbpl>congbao>luatvietnam>thuvienphapluat) + `tl source-verify <sohieu|gdoc>` (content_md5 + SOURCE_DISCREPANCY + nguồn official-first đối chiếu, --text-file offline). +14 test → selftest 223/223. CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3; Pha 1.5. # 1.22.71: KH1 (Pha 1.1/1.4) thực thi sau báo cáo rà 70 Luật. H2 `registry-doctor` text=JSON schema (dòng text SINH TỪ `_DOCTOR_SUMMARY_KEYS` → `build_doctor_summary`/`format_doctor_text`, hết lệch nhãn duplicate_sohieu↔_groups/title_mismatch↔_candidates/rows↔count). H1 `reg-query --json` rc=0+envelope KHÓA bằng test (không tái hiện ở canonical; rc=1 trong log = confound redirect/&&/bản cũ). III.1 `os.environ PYTHONUTF8=1`/PYTHONIOENCODING truyền xuống MỌI script con (hết UnicodeEncodeError 'charmap' gen_instructions.py… console Windows) + gen_instructions.py reconfigure standalone. III.3 `tl instructions --out <file>` ghi UTF-8 ra file. +3 test → selftest 209/209. (LƯU Ý: workflow thiết kế v1.23 từng tiêm nhầm header-verify/cat-verify vào canonical → ĐÃ revert, sẽ dựng lại CÓ REVIEW.) CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3 overflow-resolve/canonical-sidecar/manifest-stale/slot-audit; Pha 1.5 backfill-loai/sohieu-conflict/relation-backfill; cổng G1/G2/G3. # 1.22.70: ★ HỢP NHẤT bản Codex v1.22.69 (CONVERGENT — 2 nhánh cùng vá 13 lỗi 2 báo cáo, KHÁC code) + vá LOG RÀ MỚI (Nhóm A-E đa-profile) + LARGE-FILE SPLIT. MERGE: GIỮ bản Claude làm base (verify 197/198, có H/D/G/2.2 mà Codex THIẾU) + PORT phần Codex MẠNH HƠN: (1) DEEP-RESOLVER `_resolve_deep_target`+`_entry_mime`/`_entry_google_doc`/`_entry_raw_no_gdoc`/`_deep_entry_rank` cho extract/xref/footnote-map (ưu tiên GDoc native theo MIME + corpus + NLM-live; tên DÀI toàn chữ-gạch-dưới KHÔNG bị nhận nhầm DriveId → bug C TRỌN VẸN); (2) `_classify_ref` kiểm VBHN-COVERAGE TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED); (3) ENTRY_RAW_NO_GDOC rc=2 + ok:false (đúng yêu cầu báo cáo: chỉ-raw → rc≠0). NHÓM A-E (log đa-profile): B(NGHIÊM TRỌNG) `_ingest_target`/`nlm-add`/`nlm-query` push/query nhắm NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID) — hết đẩy nhầm VBQPPL base khi `--profile NQ36` (+nlm-add/nlm-query nạp apply_profile_offline). A1 `profile-create --apply` GHI BỀN config.profiles.<name> (`_persist_profile_config` merge) → profile-info hết fallback VBQPPL. A2 next-steps cấm copy sheet VBQPPL tay (orphan), dùng `manifest` tạo registry rỗng. C1 `nlm-reconcile` BẮC CẦU gdoc↔source_id (`_nlm_source_drive_id` + link_candidates: nguồn live khớp drive_id/số hiệu của dòng registry thiếu source_id → backfill, hết 'unregistered' giả). C2 `register --nlm-notebook-id` (khỏi backfill-notebook riêng). C3 `backfill-notebook` khóa ĐÚNG NGUỒN: --src-ids→nlm_source_id, --drive-ids→drive_id (hết lệch khóa). D1 cảnh báo profile non-default + categories=inherit (văn bản vào cây chung VBQPPL). D2 `regen2` LOẠI registry/manifest/orphan (mime spreadsheet/json + tên + registryDocId/manifestId) khỏi scan own (hết 3 dòng corpus rác, count 8→5). D3 `reg-delete --force` (đã có) + thông điệp rõ. E1 `nlm_cli._strip_keyring` lọc 'Using keyring backend' khỏi stdout/stderr (hết vỡ json.loads). E2 `reg-query --refresh` (đã có) + help nhắc refresh sau khi ghi sheet. LARGE-FILE: `ingest-local` cổng HỎI TÁCH file > ~1.2MB (NLM_LARGE_SRC_BYTES, --large-threshold) → DỪNG gợi ý tách theo Phần/Chương/Điều (chất lượng RAG cao nhất), `--allow-large` để nạp nguyên (+SKILL.md doctrine). RÀ SOÁT ĐỐI KHÁNG (review+verify) gia cố 14 phát hiện: Group B `_resolve_nlm_notebook` (profile DỰ ÁN thiếu notebookId → ERROR, KHÔNG fallback VBQPPL base — vá GỐC bug B, guard cũ là dead-code vì base luôn truthy) áp nlm-add/query/get/reconcile/cross/ingest-local; C1 link theo số hiệu CHỈ khi DUY NHẤT (số VBHN tái dùng → bỏ qua, hết false-link); cmd_extract positional+--sohieu → ƯU TIÊN --sohieu; `_persist_profile_config` ghi NGUYÊN TỬ (temp+os.replace); `_is_infra_file` chặn false-positive (văn bản GDoc/PDF KHÔNG bao giờ là infra); `_strip_keyring` JSON-safe (chỉ bỏ dòng nhiễu THUẦN, không nuốt thân JSON có cụm keyring); large-file gate ra STDOUT. +6 test → selftest 206/206. # 1.22.69: vá 13 lỗi CÔNG CỤ từ 2 BÁO CÁO RÀ 71+105 LUẬT. A `tl status` verdict→rc=0 (REVIEW/ADD/SKIP = PHÁT HIỆN dữ liệu ≠ lỗi lệnh, hết phá &&/CI; +`--strict` mirror xref; preingest_gate.verdict_exit). C/P0-1 resolver đọc sâu: `_entry_score` PHẠT -300 file THÔ (.docx/.pdf/.html) → GDoc native THẮNG sidecar CÙNG số hiệu (hết xref/footnote im-lặng stdout-rỗng-rc0 bỏ sót ≥6 VBHN); ENTRY_RAW_NO_GDOC in STDOUT (caller agentic THẤY); `_resolve_base_gdoc` fallback drive_id khi sohieu rỗng. B+P1-3 xref: `extract_refs` DEDUP theo SỐ HIỆU (1 phán quyết/số hiệu/run — hết MISSING+MISMATCH mâu thuẫn + phantom 'DCHIẾU 258 này có hiệu lực…' do bắc-cầu mệnh-đề-chuyển-tiếp) + `_clean_ref_name_phrase` cắt prose (GIỮ tên luật thật 'Thi hành án dân sự'). P0-2 `DOC_TEXT_SOHIEU_TYPO` KHÔNG bắc cầu QUA HỌ loại VB (`_doctype_family`: QH≠NQ-TW≠KL-TW≠NĐ-CP — tái dùng số+năm hợp pháp; CÙNG họ QH14↔QH15 vẫn flag). P1-4 source-map: >1 VBHN CÙNG số hiệu KHÁC chủ đề → canonical=None + VBHN_REUSE_AMBIGUOUS_NO_CANONICAL (đòi --subject/năm; CÙNG chủ đề/nhiều version vẫn chốt). P1-5 amendment-detector: LOẠI văn bản PHI quy phạm (sohieu=∅ + 'góp ý/kiến nghị/ý kiến'); PAUSE_AND_ASK_USER CHỈ khi có ứng viên MANG SỐ HIỆU hợp lệ (sohieu=∅ vẫn liệt kê, confidence=low). P2-6 vbhn-check: CONTENT_VERIFY_REQUIRED chỉ khi collision CỦA CHÍNH số hiệu ứng viên (KHÔNG corpus-wide → hết 86 cờ máy móc); verified+năm+duy-nhất+không-tự-collision → VBHN_METADATA_OK. H `tl doctor` cảnh báo TRÔI registry↔NLM (đếm cờ OFFLINE từ cache → gợi ý `tl nlm-reconcile`, KHÔNG chặn/mạng). D `_read_doc_text`+`cmd_xref` TÁI DÙNG cache `extract_<gid>.txt` (Bộ luật Dân sự hết export lại 3 lần→timeout). E `standardize_name.normalize_name` bỏ đuôi .doc/.docx/.pdf khỏi tên CHUẨN (GIỮ ở tên FILE gốc). G `hygiene` bucket `sidecar_corpus_fix` (.docx cạnh GDoc mà corpus=true → đề xuất SET_CORPUS_FALSE). P2-7 chuẩn hoá ENUM `loai`/`hieuluc` lúc register (`_normalize_loai`/`_normalize_hieuluc`) + bucket hygiene `loai_noncanonical` (KHÔNG nhồi `_title_flags` → tránh nhiễu source-map). 2.2 nlm PATH: `nlm_cli` nối ~/.local/bin+user-base bin vào PATH (shutil.which + subprocess env); `doctor` dùng `nlm_exe()` (hết báo đỏ giả); `nlm-install` ghi PATH bền ~/.profile/~/.bashrc (POSIX). +14 test → selftest 194/194. HOÃN P2-8 (tách MISSING ngoài-phạm-vi-corpus vs resolver-trượt — cần enrich manifest). RÀ SOÁT ĐỐI KHÁNG (workflow review+verify) gia cố 9 phát hiện: cmd_status dùng inspect.signature thay except-mù + GIỮ ngữ nghĩa --strict ở fallback (rc=2→1); `_entry_score` chỉ phạt raw CHƯA-trên-NLM (raw đã-push NLM = canonical thật, không hạ oan); P1-4 `_subj_keys` chỉ đếm tail CHỦ-ĐỀ-RÕ (bản tên-trơ không gây false-ambiguity); P1-5 gate góp-ý theo SỐ HIỆU REGISTRY (file 'Góp ý Luật 64/2020' có số trong TÊN vẫn bị loại); `_normalize_loai` gộp mọi ký tự lạ (kể cả ngoặc); cmd_register log khi chuẩn hoá loai/hieuluc; preingest_gate main() thêm --strict. # 1.22.68: rà 133+81 LUẬT (2 log live) — vá robustness phần A. P1 RAW-ENTRY PRECONDITION (gốc chung log2 A1/A2/A3): xref+footnote-map gặp entry THÔ (.docx/.pdf/.html chưa convert GDoc) → ENTRY_RAW_NO_GDOC rc=0 + thông điệp gọn (thay rc=2/JSON-lỗi-thô/stdout-rỗng/rò "Export only…"); `_is_raw_no_gdoc_name`/`_raw_no_gdoc`/`_emit_raw_no_gdoc` THỐNG NHẤT .docx↔.pdf. P2 FOOTNOTE DEDUP (log1 A2): resolve_footnote_amendments GOM dieu_level_amendment_map theo (dieu,khoan,diem,amending_sohieu) — hết 47 dòng pending trùng (Đ73K1 ×3); footnote_defs giữ ĐỦ marker + footnote_raw_count. P3 BASE_NO_CLUSTER (log1 A1): rasoat-chongcheo CỜ RÕ khi base ngoài cụm E2 (61/133 trước no-op IM LẶNG) → dựa xref/footnote-map cấp Điều. P4 DEDUP related theo sohieu (log1 A6, hết 85-2015 ×4). P5 missing_in_corpus→`unresolved_refs`+note (log1 A5: CHƯA kết luận vắng mặt, khớp exists=UNKNOWN_NOT_ABSENT). A4 BASE_UNRESOLVED khi base tên/file thô không số hiệu. P7 strip keyring khỏi gws_bridge error (log2 A3). +2 test → selftest 179/179. CÒN (data/feature): mở rộng subject_clusters 45 chủ đề; parser khoản-điều-thêm (6a/16b, A3 log1 nhỏ); Cowork batch-checkpoint (A4 log2); GAS serial (A5 log2, frozen). + `drive-push --name`/`--rename-to-file` (đổi tên file Drive THEO TÊN FILE upload, GIỮ fileId — qua gws_bridge.rename có ASSERT). # 1.22.67: rà 59 LUẬT (log live) — vá 6/7 lỗi CÔNG CỤ (phần A). A1 `tl extract <số hiệu>` (vị trí) HẾT 404 giả: positional không-phải-gdoc-id(≥20 ký tự alnum)→tự định tuyến --sohieu (+SKILL.md). A2 vbhn-check suy subject SẠCH: `_clean_subject_text` bỏ hậu tố `_HL<ngày>`/goc/SuaDoi/ngày-trơ → query QT-5 web hết "thu do hl2026 07 01 hợp nhất" (đặt `_HL_SUFFIX_RE`, KHÔNG clobber `_HL_DATE_RE` thân-văn-bản — bắt được name-collision). A3 exit-code: xref/vbhn-check rc=0 khi CHẠY OK kể cả có MISSING/MISMATCH/no-hit (phát hiện ≠ lỗi lệnh, không phá &&/CI); `xref --strict` mới rc=1 (+SKILL.md). A4 extract cảnh báo chạm CAP export ~200k ký tự (văn bản dài có thể bị CẮT → cache-build). A6 `_strip_keyring_noise` lọc 'Using keyring backend' khỏi output gws subprocess. A7 `CONTENT_VERIFY_REQUIRED` CHỈ bật khi rủi-ro-tái-dùng-số/thiếu-metadata (>1 ứng viên/collision/bare-number/missing-year); metadata RÕ+DUY NHẤT → `VBHN_METADATA_OK` (giảm 37/59 cờ máy móc). A5 (GAS tuần-tự, không scale) = giới hạn webapp FROZEN, không sửa client. +4 test → selftest 177/177. # 1.22.66: HỢP NHẤT bản Codex v1.22.65 (cùng rẽ từ v1.22.64 — 2 nhánh CÙNG vá batch-2 run-log, KHÁC code). GIỮ bản Claude làm base (đã verify 173/173 + có `status_pending` PENDING_AMENDMENT_NOT_IN_VBHN + cụm `dau_tu_PPP` mà Codex THIẾU). PORT 2 cải tiến robustness CHỈ-CÓ-Ở-CODEX: (1) vbhn-check/vbhn-verify nhận POSITIONAL `target` (tương thích runbook cũ: `tl vbhn-verify "14/VBHN-VPQH"` tự định tuyến text-file/gdoc-id/sohieu qua `_read_verify_text`; `tl vbhn-check "84/2015/QH13"`→goc/subject); (2) reg-query --json ENVELOPE chuẩn {ok,schema:reg-query.v2,count,limit,rows,entries} (cả rows+entries cho mọi parser). Các fix batch-2 TRÙNG (doctype/PPP-alias/sidecar/issue_year-goc/dedup-VBHN-first/xref-typo/vbhn-verify-json/relation-check) GIỮ bản Claude đã verify-live (Codex impl khác nhưng chưa verify). Codex thiếu status_pending → giữ bản Claude. selftest 173/173. # 1.22.65: vá 6 RUN-LOG batch-2 (workflow điều tra+verify đối kháng trên COPY CÔ LẬP — canonical md5 NGUYÊN, agent KHÔNG đụng được). 10 fix: srcmap_name_resolution (query nêu "Luật/Bộ luật"→ƯU TIÊN hit tier≥Luật `_query_doctype_tier`, hết chốt NĐ/TT: "Luật Đầu tư"→VBHN_03 KHÔNG NĐ; PPP≡"đối tác công tư" vào _ABBREV_MAP→VBHN_123; LOW_CONFIDENCE hết over-fire khi có hit-strong tier-Luật); issue_year_goc_token (`_strip_goc_token`+reject năm-bản-gốc: VBHN_123 hết issue_year=2020 từ token goc_64-2020); dedup_vbhn_first (dedup áp VBHN-first qua goc-chain dù KHÁC số hiệu: 64/2020→canonical VBHN 123, gốc SUPERSEDED); relcheck_footnote_only_fp (chỉ giữ luật THỰC SỰ sửa base, hết bơm FOOTNOTE_AMENDMENT_NOT_IN_CORPUS từ dẫn-chiếu/chuyển-tiếp); status_pending_vbhn (preingest SKIP→USE_VBHN nay cảnh báo PENDING_AMENDMENT_NOT_IN_VBHN khi VBHN ra đời TRƯỚC sửa-pending); corpus_nlm_sidecar_fp (`_dup_of_live_sibling`: không flag CORPUS_TRUE_NOT_ON_NLM cho sidecar-raw khi anh-em GDoc đã trên NLM); relcheck_json_types (int→`amendment_candidates_subject_filtered_count`); vbhn_verify_json_schema (`_vbhn_verdict`→field verdict/official/provisional + populate head_sample); xref_sohieu_typo (`_classify_ref`→DOC_TEXT_SOHIEU_TYPO khi số hiệu near-match KHÁC mã cơ quan, vd 41/2024/QH14 vs QH15); cluster_ppp (THÊM cụm dau_tu_PPP base 123/VBHN). SKIP: xref_alias (false-alarm), regquery_json+skill_cli (ĐÃ đúng trên v1.22.64 — log là DEPLOY-LAG zip Drive v1.22.35). +10 test → selftest 173/173. # 1.22.64: vá 6 RUN-LOG (workflow điều tra+verify đối kháng 16 issue → áp 15 fix, 1 reject-trên-cơ-sở). name_rank_collision (CHÍNH): source-map/exists "Luật Dân số/Việc làm/Phí lệ phí/BLLĐ" HẾT chốt SAI canonical (Dân chủ/NLĐ-nước-ngoài/Học phí/ATVSLĐ) — `_name_strong_match` + gate `LOW_CONFIDENCE_NAME_MATCH` (canonical=None khi khớp-MỜ) + `_name_phrase_match` ≥2-token (reg-query --name hết match-all 87→2); LIVE 3/4 nay chốt ĐÚNG, 1 LOW_CONFIDENCE. cluster BHYT neo `y_te_kham_chua_benh` (subject_clusters.json, hết lao_dong). vbhn-verify: HEADER_NOT_CLEAR nhận số-hiệu "NN/VBHN-" + ASSEMBLED CHỈ soi TÊN (hết "không đúng" thân→ASSEMBLED giả). status→USE_VBHN (41/2024→19/VBHN). CORPUS_TRUE_NOT_ON_NLM suppress khi nlm_status=removed_*. footnote `_multi_diem` ("điểm c và d"). `_strip_font_runs` (bỏ dòng "Times New Roman"). relation-check --json preamble→stderr + skip backfill cho quarantine. `tl up` fallback init-config. `_scan_inline_amendments`+E1 LIEN_DOMAIN (Điều 53 sửa luật khác cụm). sohieu-exact ưu tiên fuzzy. REJECT đúng: vbhn_year (sẽ regress year-reuse). +13 test → selftest 164/164. (⚠ vài agent workflow vi phạm "no-edit" → ĐÃ revert clean v1.22.63 + áp lại CHỈ patch đã-verify thủ công.) # 1.22.63: ★ HỢP NHẤT 2 nhánh v1.22.62 (Codex ⊕ Claude, đổi xứng) — (A·Codex) vá log hygiene/NLM/pending: tên "Luật X"↔canonical, footnote-map body_effective_dates (pending hết 0 giả), hygiene lọc OMNIBUS_NARROW khỏi query hẹp + không emit cluster canonical=None, reg-query/summary nlm-live-aware + cờ CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. (B·Claude) `tl up` BOOTSTRAP TẤT ĐỊNH 1-lệnh (config→gws cred+binary→nlm→manifest→readiness; helper CHUNG `_ensure_gws_nlm` cho init-config+up) + `tl confirm`/`_verify_header_match` (ĐỌC HEADER xác minh sohieu/tiêu đề/loại/cat khớp tên+thư mục → nhãn registry.verified; source-map/dedup TIN entry confirm, bỏ DIRTY/WARN) + upload-flow `_upload_mime_ext` (.doc/.pdf upload MIME THẬT → Drive organize convert server-side). selftest 153/153 (147 Codex + 6 Claude). # 1.22.62: vá log hygiene/NLM/pending — tên luật dạng "Luật X" khớp canonical đuôi "X"; footnote-map đọc thêm Điều hiệu lực trong thân luật gốc (body_effective_dates, pending không còn 0 giả); hygiene plan lọc OMNIBUS_NARROW_TITLE_CHECK khỏi query chủ đề hẹp và không emit cluster apply với canonical=None; summary/reg-query phơi nlm_source_id+nlm_notebook_id live-aware, flag CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. 1.22.61: vá log Chat/Cowork — #2 (CHÍNH: "Chat không cài gws+nlm từ đầu") init-config --from-public GỘP gws BINARY (gws-bootstrap-cowork → find/GHI hết FALLBACK→GAS) + cờ --nlm (uv-install+auth) = 1 lệnh bootstrap đủ; SKILL.md startup MỌI env dùng `--from-public --nlm`; --no-binary để chỉ-cred. #1 (NGUY HIỂM) exists/source-map: VBHN-first redirect CHỈ khi query LÀ BẢN GỐC (base = năm nhỏ nhất chuỗi goc, `_vbhn_base_key`) — 114/2025 Phòng bệnh (luật-sửa NẰM TRONG chuỗi VBHN thuốc lá) hết bị chốt canonical=VBHN thuốc lá; thêm bucket `amends_vbhn` + cờ AMENDS_OTHER_VBHN/MULTIPLE_VBHN_BASE. #3 source-map dương-tính-giả: `_vb_tier_rank` chặn SAI THỨ BẬC — NĐ/TT (118/2016/NĐ-CP) KHÔNG thể 'sửa đổi' Luật → hết AMENDMENT_CANDIDATE+PAUSE giả (đọc loại cả từ TÊN khi sohieu rỗng; base=tier cao nhất nhóm). #5 source-map NỔI `PENDING_FUTURE_EFFECT` + pending_future_count (đếm VB hiệu-lực-tương-lai, rẻ-không-footnote-map). +7 test → selftest 140/140. # 1.22.60: log rà BHYT (workflow điều tra+verify đối kháng) — #5 extract --sohieu khớp entry sohieu-RỖNG qua _sohieu_key_entry (parse từ TÊN '114_2025_QH15_658530'); #1 gws_bridge.rename ASSERT đọc-lại-tên (hết nuốt-lỗi-im-lặng rename 200-nhưng-không-đổi); #4 footnote-map _footnote_rel_kind = CROSS_CUTTING (omnibus 35/2018) / PARTIAL_REPEAL (bãi-bỏ-cục-bộ 32/2013) → hạ ưu tiên; #3 preflight TỰ KHÁM PHÁ overflow notebook từ registry (row_kind=overflow) khi config trống/placeholder (phòng thủ; config canonical đã có id thật). #2 slot over-count: đã sạch sẵn (L5), "329" trong log là GAS server-side. selftest 133/133. 1.22.59: log rà BHYT — B1 subject_clusters.json THÊM cụm `y_te_kham_chua_benh` (base 40/VBHN-VPQH BHYT + KCB 15/2023 + Phòng bệnh 114/2025 + Dược + ATTP) → rasoat-chongcheo BHYT neo ĐÚNG cụm y tế (trước neo nhầm lao_dong_xa_hoi); B3 cờ OMNIBUS hết false-positive trên luật-sửa TÊN-SỐ-TRƠ (chỉ flag khi chủ đề RÕ + khác lĩnh vực, ≥2 token); B5 `_summ_entry.nlm` = LIVE (`_entry_on_nlm_live`, False nếu removed) → relation-check khớp reg-query; B6 message gws fallback PHÂN BIỆT thiếu-cred vs thiếu-binary. 1.22.58: B1 GWS — `_read_doc_text` ƯU TIÊN direct-media EXPORT text/plain bằng CRED (KHÔNG cần binary gws → extract/footnote-map hết rơi GAS ở Cowork khi đã gws-auth-load; B5 hết spam); init-config đổi thông điệp "gws cred ✓ (direct-media đọc; find/ghi cần gws-bootstrap-cowork)" hết hiểu nhầm "BẬT". locate FALLBACK webapp gắn LOW_CONFIDENCE/NO_EXACT_SOHIEU (Cowork: locate 58/2014 → fulltext lạc đề). `_entry_subject_text` BỎ `cat` (nhãn folder '02_Bao_hiem' làm mọi entry khớp 'bảo hiểm' giả) → relation-check vbhn_candidates 14→3 (BHXH/KDBH/ATVSLĐ). 1.22.57: ★ GỐC RỄ "subject filter quá lỏng" (phát hiện khi chạy mục B live) — `_subject_score` CHỐNG nhiễu từ-phổ-biến: token-overlap chỉ tính ĐỦ khi entry chứa CỤM-ĐẦU PHÂN BIỆT của chủ đề ('bảo hiểm'='baohiem'); nếu không (chỉ trùng 'bảo/hội' lẻ ở từ-khoá) → 0 điểm. → relation-check vbhn_candidates hết kéo Luật Xuất bản/Người cao tuổi/Thanh niên/Công đoàn (sscore 40→0); BHXH=140, BHYT=0(disc), giữ KDBH=60. 1.22.56: vá log rà BHXH (Chat+Cowork) — (regression) `locate` cụm danh từ ('bảo hiểm xã hội') KHÔNG còn bị coi là số hiệu → hết LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (gate `_looks_like_sohieu_query`); `tl rasoat worksheet` TỰ dựng cache nếu thiếu (`_rasoat_autocache_worksheet`→`cache-build`, resolve gdoc từ manifest; --no-auto-cache để tắt) + message worksheet trỏ `tl cache-build`; `_find_amendment_candidates` thêm loại-trừ-chéo `_disc_conflict` (BHYT/BHTN khác BHXH); SKILL.md BƯỚC 0 TÁCH `--setup` (core nhanh) khỏi nlm (né timeout 45s Cowork). 1.22.55: #8 HỢP NHẤT footnote-map vào relation-check + rasoat-chongcheo — TỰ đọc nguyên văn base VBHN (auto-footnote, `_resolve_base_gdoc`, tắt --no-auto-footnote) → 2 lệnh nêu footnote_amendments thay vì rỗng; #11 cờ OMNIBUS_CROSS_DOMAIN (`_omnibus_cross_domain_note`): luật sửa có tên khác lĩnh vực base (84/2025 Thanh tra sửa BHXH = sửa-nhiều-luật) → cảnh báo đọc nguyên văn, KHÔNG hiểu nhầm lỗi tên. +test omnibus_cross_domain_flag. 1.22.54: ★ GỐC RỄ tên VBHN VIẾT TẮT — `_expand_abbrev`/`_ABBREV_MAP` (BHXH≡bảo hiểm xã hội, BHYT/BHTN/BLHS/BLLĐ…) nối vào `_token_set`+`_disc_conflict` → source-map/relation-check/reg-query/locate khớp đúng VBHN_19…BHXH (trước nhặt nhầm bản gốc 41/2024 viết-đầy-đủ đã quarantine). #3 extract: phân biệt CẮT-CỤT (export cap ~200k) vs sai cấu trúc → chỉ `tl cache-build --gdoc-id` lấy toàn văn. #10 locate: cờ LOW_CONFIDENCE/NO_EXACT_SOHIEU khi truy vấn số hiệu chỉ khớp-mờ-tên (vd 142/2025→VBHN_74 Đấu thầu). 1.22.53: log rà BHXH — A3 relation-check `_vbhn_candidates` KHÔNG nhận VBHN trùng-NĂM khác lĩnh vực (year-một-mình cần subject≥30; +disc_conflict) → hết VBHN_43 Xuất bản lọt vào BHXH; A4 `_cluster_for_base` reverse-map qua THÀNH VIÊN cụm (số hiệu VBHN 19/VBHN-VPQH → cụm, trước trả ∅); B1 rasoat alias --sohieu→--so-hieu (worksheet) / --file→--in (phuluc); B2 `tl cache-build <sh>` wrapper ingest_to_cache.py (sinh docs/<sh>--consolidated.json); B3 ingest_to_cache.py tự nạp webappUrl/token từ config/env. 1.22.52: TRA-THEO-TÊN âm-tính-giả (log Cowork #2/#3) — `_name_subset_match` token-subset (bỏ doctype/sốhiệu) cho source-map/locate/reg-query: 'Luật Bảo hiểm xã hội' KHỚP 'VBHN_19-VPQH_Bao_hiem_xa_hoi' (substring liền thất bại vì luat/vbhn/19 chèn giữa); reg-query --name trước CHỈ substring CÓ DẤU → 0 kết quả, nay khử dấu+token-subset. `_disc_conflict` chuẩn hoá underscore (BHXH↔BHYT đúng cả tên file). `_nlm_display` status-aware (locate hết báo nlm=Y khi removed → khớp reg-query). +test name_subset_match_vbhn/source_map_name_finds_vbhn_not_quarantine. 1.22.51: (A) ENV THỐNG NHẤT Chat=Cowork=Code — gỡ doctrine "chat hạn chế": nlm CLI BẮT BUỘC mọi env, gws-bootstrap BỎ QUA tải binary nếu gws đã có (--force ép), Chat dùng uv+python≥3.11 sẵn (không tải Drive). (B) footnote-map nhận "Cụm từ '…' được BỎ/THAY THẾ theo…" (84/2025 hết vô hình, +test footnote_remove_phrase_amendment); subject-score LOẠI TRỪ CHÉO BHXH↔BHYT↔BHTN (chung "bảo hiểm" ≠ cùng chủ đề, +test subject_bhxh_not_bhyt). 1.22.50: vá log Chat — B1/B2 `gws-auth-load`/`nlm-auth-load` + `init-config --from-public` tự bật gws từ cred PUBLIC (public-curl, KHÔNG cần master key); B3 gom log [FALLBACK→GAS] 1 lần/phiên (hết spam mỗi read); relation-check LỌC ứng viên chỉ-trùng-chủ-đề khỏi amendment_candidates (giảm dương-tính-giả 108/2026); B5 xref OUTDATED nêu RÕ số hiệu VBHN thay thế + SOHIEU_MISMATCH→VBHN ghi "đúng, trỏ bản mới". (B4 phantom-217 đã có test footnote_citation_not_amendment.) 1.22.49: SKILL.md §1 BƯỚC 0 — Cowork dùng KHỐI INLINE (curl zip public + unzip + chạy tl_fetch.sh SẠCH TRONG ZIP) vì mount cắt cụt CẢ scripts/tl_fetch.sh → `sh scripts/tl_fetch.sh` đường-mount hỏng. CẤM inspect/confirm truncation/dig-recovery (đã biết mount cắt). 1.22.48: GHI RÕ gws Cowork = BINARY MUSL-STATIC (đã verify static-pie, không GLIBC dep → chạy glibc 2.35) qua `gws-bootstrap-cowork` public-curl; CẤM `npm i -g @googleworkspace/cli` (bản GNU cần GLIBC 2.39, Cowork glibc 2.35 → không chạy). SKILL.md + help string. 1.22.47: nlm-install HẾT STALL ASTRAL — `uv tool install --python 3.11` chạy với UV_PYTHON_DOWNLOADS=never (cấm tải python từ astral/GitHub CDN bị Cowork chặn): system có 3.11→dùng ngay, chỉ 3.10→FAIL TỨC THÌ→rơi Python public-curl Drive; bỏ `uv python install 3.11` thừa. 1.22.46: BOOTSTRAP TỐC ĐỘ — `_fast_drive_fetch` ưu tiên PUBLIC-CURL (drive.usercontent) → direct-media → GAS, có ĐO THỜI GIAN ([fetch] log); PY311 + gws binary tải public-curl (hết kẹt GAS 31MB); tl_fetch.sh cài uv TRƯỚC (pip PyPI, astral chặn) rồi gws/nlm; rút timeout astral uv-python 420→90s (fail nhanh → Drive-public). 1.22.45: SKILL.md §1 BƯỚC 0 — Cowork ƯU TIÊN `sh tl_fetch.sh --setup` LÀM LỆNH ĐẦU TIÊN (tải bản sạch, KHÔNG đụng mount/_parts); CẤM chạy tl_boot/verify-integrity/build_parts/_parts TRƯỚC khi tl_fetch lỗi; tách rõ đường LOCAL A1–A3. 1.22.44: PACKAGE PUBLIC BOOTSTRAP — config v2 + creds (gws/nlm/secrets/binary/py311) ở Drive/Package (anyone-with-link). `init-config --from-public` + tl_fetch.sh curl CONFIG(apps script)+gws cred TRƯỚC (KHÔNG cần Drive MCP); uv-first cho nlm; Cowork tải zip skill; tl_boot loud-fail exit≠0 khi cắt cụt (B2); tl_rebuild.sh OUT mặc định $HOME (B4). 1.22.43: `tl drive-push <zip> [--file-id]` — cập nhật NỘI DUNG file Drive GIỮ fileId (gws update_content) → đẩy bản ship mới mỗi lần mà KHÔNG đổi fileId; SKILL_FILEID baked. 1.22.42: BUNDLE skill+gws — `gws-bootstrap-cowork --local-tgz` (dùng gws.tgz từ bundle, khỏi tải Drive; md5 vẫn verify); tl_fetch.sh tự dò assets/gws.tgz. Cắt 1 download. 1.22.41: `nlm-install --uv` (egress mở → uv tự lo Python 3.11, python hệ thống nếu ≥3.11, KHÔNG tải 31MB Drive; fallback Drive); `tl_fetch.sh --setup --nlm` dùng --uv → bootstrap đủ GAS+direct-media+gws+nlm+boot 1 lệnh. (v1.23.0 spec rasoat-loop/overlap: roadmap riêng.) 1.22.40: bake NLM_CRED_FILEID (đã stage+verify) → `--setup --nlm` có nlm headless ngay. 1.22.39: nlm HEADLESS — `nlm-auth-stage` (Code, sau `nlm login`: cookie nlm → mã hoá khoá=webapp-token → Drive) + `nlm-auth-load` (Cowork: tải+giải mã bằng token → ~/.notebooklm-mcp-cli, KHÔNG cần master key); `--setup --nlm` tự nlm-auth-load (mirror gws-auth-stage/load). 1.22.38: tl_fetch.sh ROUTE TỐI ƯU (curl public, $HOME, --setup) + gws TRƯỚC nlm. 1.22.37: tl_fetch.sh webapp GAS. 1.22.36: tl_fetch.sh bỏ qua mount. 1.22.35: tl_rebuild.sh + MANIFEST.sha256 + tl_boot verify sha. 1.22.34: dọn references/ 63→24 file. 1.22.33: _parts ≤200 file. 1.22.32: verify-integrity + COWORK_EDIT_SAFETY. 1.22.32: `tl verify-integrity` + COWORK_EDIT_SAFETY (write-side fallback); 1.22.31: truncation-resilience (FORCE _parts; _healed_script_path; --rebuild) + doctor nlm/gws + reg-query khóa NLM; 1.22.27: #4/#3/#6/#9; 1.22.26: #1 relation-check footnote-gate
 # GĐ0 (tích hợp gws): PIN bản gws — KHÔNG `latest` (gws pre-v1.0 hay breaking). Nguồn-chân-lý
 # duy nhất cho boot-check `tl gws-ping` và (GĐ1) gws_bridge.is_available(). Bump có chủ đích.
-VERSION = "1.33.56"              # 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
+VERSION = "1.33.57"              # 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
 GWS_PINNED_VERSION = "0.22.5"   # @googleworkspace/cli; npm i -g @googleworkspace/cli@0.22.5
 # Bootstrap gws cho Cowork (sandbox chặn github + no root): binary MUSL STATIC (chạy mọi glibc, kể cả
 # Ubuntu 22.04/glibc 2.35 — bản gnu cần GLIBC_2.39 nên KHÔNG chạy). Stage sẵn trên Drive _HOP_NAP.
@@ -1537,7 +1537,8 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
     core = ["tl.py", "tl_gws.py", "nlm_cli.py", "transport.py", "gas.py", "boot.py", "contract_check.py",
             # v1.33.56 (review tl_core/F3): tl_core = điểm-chết-đơn sau Pha B/C — NUL-pad 1 file là sập CẢ CLI
             "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
-            "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py"]
+            "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
+            "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py"]   # Pha D v1.33.57
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []
@@ -17203,147 +17204,7 @@ def cmd_convert_verify(a) -> int:
     return 0 if out.get("ok") else 2
 
 
-# ───────────────────────── safe dry-run helpers: zip/OCR/chunk ─────────────────────────
-_ALLOWED_INGEST_EXTS = {".doc", ".docx", ".pdf", ".txt", ".md", ".rtf", ".odt"}
-_IGNORED_ZIP_NAMES = {".ds_store", "thumbs.db"}
 _VIET_CHARS = set("ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵĂÂĐÊÔƠƯÁÀẢÃẠẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴ")
-
-
-def _zip_is_safe_member(name: str) -> bool:
-    if not name or name.endswith("/"):
-        return False
-    n = name.replace("\\", "/")
-    parts = [p for p in n.split("/") if p]
-    if any(p == ".." for p in parts):
-        return False
-    if n.startswith("/") or re.match(r"^[A-Za-z]:", n):
-        return False
-    low_base = parts[-1].lower() if parts else ""
-    if low_base in _IGNORED_ZIP_NAMES or n.startswith("__MACOSX/"):
-        return False
-    # v1.33.56 (review PH2-03): ký tự cấm trên Windows (tên legacy/cp437 từ zip Linux) → unsafe TẠI PLAN,
-    # không để rơi tới extract mới nổ OSError/ghi tên rác.
-    if re.search(r'[<>:"|?*]|[\x00-\x1f]', n):
-        return False
-    return True
-
-
-def _zip_normalized_member_path(name: str) -> str:
-    """Stable normalized zip member path for sorting/duplicate detection. Empty means unsafe."""
-    n = (name or "").replace("\\", "/")
-    if not n or n.endswith("/"):
-        return ""
-    parts: list[str] = []
-    for part in n.split("/"):
-        if not part or part == ".":
-            continue
-        if part == "..":
-            return ""
-        parts.append(part)
-    if not parts:
-        return ""
-    return "/".join(parts)
-
-
-def _zip_sorted_infos(zf: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
-    """Return members in deterministic order independent of original zip entry order."""
-    return sorted(zf.infolist(), key=lambda i: (_zip_normalized_member_path(i.filename).lower(), i.filename.replace("\\", "/")))
-
-
-def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_files: int = 200, max_size_mb: int = 100) -> dict:
-    zpath = Path(path)
-    out = {"ok": False, "schema": "ingest_zip_plan.v1", "zip": str(zpath), "mode": mode, "profile": profile or None, "cat": cat or None,
-           "files_total": 0, "accepted": 0, "skipped": 0, "items": [], "errors": [], "requires_apply": True,
-           "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM."}
-    if not zpath.exists():
-        out["errors"].append("ZIP_NOT_FOUND")
-        return out
-    if not zipfile.is_zipfile(zpath):
-        out["errors"].append("NOT_A_ZIP_FILE")
-        return out
-    max_bytes = max(1, int(max_size_mb)) * 1024 * 1024
-    try:
-        with zipfile.ZipFile(zpath) as zf:
-            infos = _zip_sorted_infos(zf)
-            out["files_total"] = len([i for i in infos if not i.is_dir()])
-            seen_norm: dict[str, str] = {}
-            if out["files_total"] > max_files:
-                out["errors"].append(f"TOO_MANY_FILES:{out['files_total']}>{max_files}")
-            for info in infos:
-                if info.is_dir():
-                    continue
-                norm_path = _zip_normalized_member_path(info.filename)
-                item = {"path": info.filename, "normalized_path": norm_path or None, "size": info.file_size, "status": "planned"}
-                if not _zip_is_safe_member(info.filename) or not norm_path:
-                    item.update({"status": "skipped", "reason": "UNSAFE_OR_SYSTEM_PATH"})
-                    out["items"].append(item); continue
-                norm_key = norm_path.lower()
-                if norm_key in seen_norm:
-                    item.update({"status": "skipped", "reason": "DUPLICATE_NORMALIZED_ZIP_PATH", "duplicate_of": seen_norm[norm_key]})
-                    out["errors"].append(f"DUPLICATE_NORMALIZED_ZIP_PATH:{info.filename}->{seen_norm[norm_key]}")
-                    out["items"].append(item); continue
-                seen_norm[norm_key] = info.filename
-                ext = Path(norm_path).suffix.lower()
-                item["ext"] = ext
-                if ext not in _ALLOWED_INGEST_EXTS:
-                    item.update({"status": "skipped", "reason": "UNSUPPORTED_EXTENSION"})
-                elif info.file_size > max_bytes:
-                    item.update({"status": "skipped", "reason": f"FILE_TOO_LARGE>{max_size_mb}MB"})
-                else:
-                    action = "profile-ingest" if mode == "profile" else "ingest-local"
-                    convert = "drive_gdoc" if ext in {".doc", ".docx", ".pdf", ".rtf", ".odt"} else "text_source"
-                    item.update({
-                        "action": action,
-                        "convert": convert,
-                        "requires_ocr_review": ext == ".pdf",
-                        "expected_pipeline": ["extract_to_temp", "upload_binary", "drive_convert_gdoc", "standardize_name", "verify_readback", "register", "nlm_add_after_verify"],
-                        "status": "accepted",
-                    })
-                out["items"].append(item)
-    except Exception as e:
-        out["errors"].append(f"ZIP_READ_ERROR:{type(e).__name__}")
-        return out
-    out["accepted"] = sum(1 for i in out["items"] if i.get("status") == "accepted")
-    out["skipped"] = sum(1 for i in out["items"] if i.get("status") == "skipped")
-    out["ok"] = not out["errors"] and out["accepted"] > 0
-    if mode == "vbqppl" and not cat:
-        out["warnings"] = ["CAT_NOT_PROVIDED_FOR_VBQPPL_BATCH_REVIEW_REQUIRED"]
-    else:
-        out["warnings"] = []
-    try:
-        member_basis = ";".join(i.get("path", "") for i in out.get("items", []) if i.get("status") == "accepted")
-        out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
-        out["idempotency_key"] = hashlib.sha256(((_sha256_bytes_file_local(zpath) if zpath.exists() else "") + "|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8", errors="replace")).hexdigest()
-    except Exception:
-        out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
-    return out
-
-
-def _safe_extract_zip_for_ingest(zip_path: str, temp_dir: str, *, max_size_mb: int | None = None) -> list[dict]:
-    """Extract accepted members only. Caller phải đã chạy _zip_plan. Chống zip-slip.
-    v1.33.56 (review PH2-02): +max_size_mb — trước đây plan đánh dấu file quá cỡ 'skipped' nhưng extract
-    KHÔNG kiểm → apply vẫn nạp file plan đã loại."""
-    extracted = []
-    base = Path(temp_dir).resolve()
-    _cap = max(1, int(max_size_mb)) * 1024 * 1024 if max_size_mb else None
-    with zipfile.ZipFile(zip_path) as zf:
-        for info in _zip_sorted_infos(zf):
-            norm_path = _zip_normalized_member_path(info.filename)
-            if info.is_dir() or not _zip_is_safe_member(info.filename) or not norm_path:
-                continue
-            if _cap is not None and info.file_size > _cap:
-                continue
-            ext = Path(norm_path).suffix.lower()
-            if ext not in _ALLOWED_INGEST_EXTS:
-                continue
-            dest = (base / norm_path).resolve()
-            if not str(dest).startswith(str(base) + os.sep):
-                continue
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            with zf.open(info) as src, open(dest, "wb") as dst:
-                shutil.copyfileobj(src, dst)
-            extracted.append({"zip_path": info.filename, "normalized_path": norm_path, "path": str(dest), "size": info.file_size, "ext": ext})
-    return extracted
 
 
 def _run_child_tl(args: list[str]) -> dict:
@@ -17368,64 +17229,6 @@ def _run_child_tl(args: list[str]) -> dict:
         payload = None
     return {"cmd": " ".join(args), "returncode": cp.returncode, "ok": cp.returncode == 0,
             "json": payload, "stdout_tail": cp.stdout[-2000:], "stderr_tail": cp.stderr[-2000:]}
-
-
-def _zip_apply(a, *, mode: str) -> int:
-    cat = getattr(a, "cat", "") or ""
-    profile = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
-    if mode == "vbqppl" and not cat:
-        print(_json_dumps({"ok": False, "error": "CAT_REQUIRED_FOR_VBQPPL_ZIP_APPLY", "note": "Dùng --cat NN hoặc chạy dry-run để phân loại trước."}, deterministic=_deterministic_enabled(a)))
-        return 2
-    if getattr(a, "confirm", "") != "yes":
-        print(_json_dumps({"ok": False, "error": "CONFIRM_REQUIRED", "note": "Zip apply sẽ gọi ingest-local/profile-ingest từng file. Thêm --confirm yes sau khi đã xem dry-run."}, deterministic=_deterministic_enabled(a)))
-        return 2
-    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat, max_files=a.max_files, max_size_mb=a.max_size_mb)
-    if not plan.get("ok"):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    results = []
-    with tempfile.TemporaryDirectory(prefix="tl_zip_ingest_") as td:
-        extracted = _safe_extract_zip_for_ingest(a.file, td, max_size_mb=getattr(a, "max_size_mb", None))
-        for item in extracted:
-            if mode == "profile":
-                child = ["profile-ingest", item["path"], "--apply", "--json"]
-                if profile:
-                    child += ["--profile", profile]
-            else:
-                child = ["ingest-local", item["path"], "--cat", cat, "--apply", "--json"]
-            if getattr(a, "skip_nlm_preflight", False) and mode != "profile":
-                child.append("--skip-nlm-preflight")
-            if mode != "profile" and getattr(a, "profile", None):   # v1.33.56 (regression/F2)
-                child += ["--profile", a.profile]
-            if getattr(a, "config", None):   # v1.33.56 (PH2-04): child PHẢI thấy cùng config với parent
-                child += ["--config", str(Path(a.config).expanduser().resolve())]
-            r = _run_child_tl(child)
-            r.update({"zip_path": item["zip_path"], "file": item["path"]})
-            results.append(r)
-            if not r.get("ok") and not getattr(a, "continue_on_error", False):
-                break
-    out = {"ok": bool(results) and all(r.get("ok") for r in results), "schema": "ingest_zip_apply.v1",
-           "mode": mode, "profile": (profile if mode == "profile" else None), "cat": (cat if mode == "vbqppl" else None),
-           "dry_run_plan": {k: plan.get(k) for k in ("zip", "files_total", "accepted", "skipped", "warnings")},
-           "results": results, "note": "Apply gọi lại pipeline hiện có từng file; từng pipeline tự upload→convert→readback→register→NLM."}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_ingest_zip(a) -> int:
-    out = _zip_plan(a.file, mode="vbqppl", cat=getattr(a, "cat", "") or "", max_files=a.max_files, max_size_mb=a.max_size_mb)
-    if not getattr(a, "apply", False):
-        _print_json_or_text(out, getattr(a, "json", False))
-        return 0 if out.get("ok") else 2
-    return _zip_apply(a, mode="vbqppl")
-
-
-def cmd_profile_ingest_zip(a) -> int:
-    prof = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
-    out = _zip_plan(a.file, mode="profile", profile=prof, max_files=a.max_files, max_size_mb=a.max_size_mb)
-    if not getattr(a, "apply", False):
-        _print_json_or_text(out, getattr(a, "json", False))
-        return 0 if out.get("ok") else 2
-    return _zip_apply(a, mode="profile")
 
 
 def _text_quality_metrics(text: str) -> dict:
@@ -17468,116 +17271,12 @@ def _read_local_text_for_analysis(path: Path, max_chars: int = 500000) -> tuple[
     return "", ["TEXT_EXTRACTION_NOT_IMPLEMENTED_FOR_EXT:" + ext]
 
 
-def cmd_ocr_analyze(a) -> int:
-    path = Path(a.file)
-    out = {"ok": False, "schema": "ocr_analyze.v1", "file": str(path), "engine": "analyze-only", "warnings": [], "recommendations": []}
-    if not path.exists():
-        out["warnings"].append("FILE_NOT_FOUND")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    text, warns = _read_local_text_for_analysis(path)
-    out["warnings"].extend(warns)
-    out["metrics"] = _text_quality_metrics(text)
-    ext = path.suffix.lower()
-    out["text_layer_detected"] = out["metrics"]["chars"] >= 200
-    if ext == ".pdf" and not out["text_layer_detected"]:
-        out["recommendations"].append("PDF_SCAN_OR_NO_TEXT_LAYER: run OCR with Drive ocrLanguage=vi or OCRmyPDF vie+eng, then ocr-verify")
-    if out["metrics"]["garbled_ratio"] > 0.001:
-        out["recommendations"].append("GARBLED_TEXT_REVIEW_REQUIRED")
-    if out["metrics"]["vietnamese_mark_density"] < 0.005 and out["metrics"]["letters"] > 500:
-        out["recommendations"].append("LOW_VIETNAMESE_MARK_DENSITY_REVIEW_REQUIRED")
-    out["ok"] = bool(out["text_layer_detected"] or ext in {".txt", ".md"})
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_ocr_verify(a) -> int:
-    path = Path(a.text_file)
-    out = {"ok": False, "schema": "ocr_verify.v2", "text_file": str(path), "source": getattr(a, "source", None), "mode": a.mode, "checks": [], "warnings": []}
-    if not path.exists():
-        out["warnings"].append("TEXT_FILE_NOT_FOUND")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    text = path.read_text(encoding="utf-8", errors="replace")
-    m = _text_quality_metrics(text)
-    out["metrics"] = m
-    def check(name, ok, detail=""):
-        out["checks"].append({"name": name, "ok": bool(ok), "detail": detail})
-    check("min_length", m["chars"] >= (500 if a.mode == "vbqppl" else 100), str(m["chars"]))
-    check("garbled_ratio", m["garbled_ratio"] <= 0.001, str(m["garbled_ratio"]))
-    check("vietnamese_mark_density", m["vietnamese_mark_density"] >= 0.005 or m["letters"] < 500, str(m["vietnamese_mark_density"]))
-    check("appendix_markers_counted", m.get("appendix_count", 0) >= 0, str(m.get("appendix_count", 0)))
-    source = getattr(a, "source", None) or ""
-    if source and Path(source).exists():
-        pr = _pdf_page_report(Path(source))
-        out["page_report"] = pr
-        if Path(source).suffix.lower() == ".pdf":
-            if pr.get("page_count") is None:
-                out["warnings"].append("PAGE_COUNT_UNKNOWN_REVIEW_REQUIRED")
-            page_markers = len(re.findall(r"(?im)^\s*(?:page|trang)\s+\d+\s*$", text))
-            out["page_coverage"] = {"source_page_count": pr.get("page_count"), "text_page_markers": page_markers, "status": "markers_present" if page_markers else "markers_absent_or_not_extracted"}
-    if a.mode == "vbqppl":
-        check("article_sequence_present", m["article_count"] > 0, str(m["article_count"]))
-        man, man_warns = _load_ocr_manifest_for_text(path)
-        out["manifest"] = man or None
-        out["warnings"].extend(man_warns)
-        man_ok, man_extra_warns, man_checks = _verify_ocr_manifest_contract(man, text_file=path, source=source, mode=a.mode)
-        out["warnings"].extend(man_extra_warns)
-        out["checks"].extend(man_checks)
-        check("vbqppl_manifest_verified_required", man_ok, "OCR VBQPPL canonical requires ocr_manifest.v1 verification")
-    else:
-        check("text_present", m["chars"] > 100, str(m["chars"]))
-        man, man_warns = _load_ocr_manifest_for_text(path)
-        if man:
-            out["manifest"] = man
-            man_ok, man_extra_warns, man_checks = _verify_ocr_manifest_contract(man, text_file=path, source=source, mode=a.mode)
-            out["warnings"].extend(man_extra_warns)
-            out["checks"].extend(man_checks)
-        else:
-            out["warnings"].extend(man_warns)
-    out["ok"] = all(c["ok"] for c in out["checks"])
-    out["recommendation"] = "Có thể dùng --ocr-verified nếu đã đối chiếu bổ sung bằng mắt/nguồn gốc." if out["ok"] else "Không dùng --ocr-verified; cần OCR lại hoặc kiểm thủ công."
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))
-    return 0 if out.get("ok") else 2
-
-
-# ───────────────────────── OCR run + deterministic chunk apply/verify ─────────────────────────
-def _ocr_out_paths(src: Path, out_dir: str | None) -> tuple[Path, Path, Path]:
-    base = src.stem
-    od = Path(out_dir) if out_dir else (src.parent / f"{base}_ocr_out")
-    od.mkdir(parents=True, exist_ok=True)
-    return od, od / f"{base}.ocr.txt", od / f"{base}.ocr.pdf"
-
-
 def _write_text_atomic(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _fd, _tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
     with os.fdopen(_fd, "w", encoding="utf-8", errors="replace") as _f:   # v1.33.56 (F7): tmp duy nhất
         _f.write(text)
     os.replace(_tmp, str(path))
-
-
-def _extract_text_layer_to_file(src: Path, dest: Path) -> tuple[bool, list[str], dict]:
-    warnings: list[str] = []
-    text = ""
-    if src.suffix.lower() in {".txt", ".md"}:
-        text = src.read_text(encoding="utf-8", errors="replace")
-    elif src.suffix.lower() == ".pdf":
-        exe = shutil.which("pdftotext")
-        if not exe:
-            return False, ["PDFTOTEXT_NOT_AVAILABLE"], {}
-        with tempfile.TemporaryDirectory() as td:
-            out = Path(td) / "out.txt"
-            try:
-                cp = subprocess.run([exe, "-layout", str(src), str(out)], timeout=60, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                if cp.returncode != 0:
-                    warnings.append(f"PDFTOTEXT_RC_{cp.returncode}")
-                if out.exists():
-                    text = out.read_text(encoding="utf-8", errors="replace")
-            except Exception as e:  # noqa: BLE001
-                return False, [f"PDFTOTEXT_ERROR:{type(e).__name__}:{e}"], {}
-    else:
-        return False, ["TEXT_LAYER_EXTRACTION_UNSUPPORTED_EXT:" + src.suffix.lower()], {}
-    _write_text_atomic(dest, text)
-    return bool(text.strip()), warnings, _text_quality_metrics(text)
 
 
 def _sha256_bytes_file_local(path: Path) -> str:
@@ -17588,431 +17287,6 @@ def _sha256_bytes_file_local(path: Path) -> str:
     return h.hexdigest()
 
 
-def _ocr_manifest_path_for_text(text_file: Path) -> Path:
-    # foo.ocr.txt -> foo.ocr.manifest.json; fallback -> <stem>.manifest.json
-    name = text_file.name
-    if name.endswith(".ocr.txt"):
-        return text_file.with_name(name[:-4] + ".manifest.json")
-    return text_file.with_suffix(text_file.suffix + ".manifest.json")
-
-
-def _pdf_page_report(src: Path) -> dict:
-    if src.suffix.lower() != ".pdf":
-        return {"page_count": None, "method": "not_pdf", "ok": True, "warnings": []}
-    warnings = []
-    exe = shutil.which("pdfinfo")
-    if exe:
-        try:
-            cp = subprocess.run([exe, str(src)], timeout=20, check=False, text=True, capture_output=True)
-            m = re.search(r"(?im)^Pages:\s*(\d+)", cp.stdout or "")
-            if m:
-                return {"page_count": int(m.group(1)), "method": "pdfinfo", "ok": True, "warnings": []}
-            warnings.append("PDFINFO_PAGES_NOT_FOUND")
-        except Exception as e:  # noqa: BLE001
-            warnings.append(f"PDFINFO_ERROR:{type(e).__name__}")
-    try:
-        raw = src.read_bytes()[:20_000_000]
-        # Approximation fallback only. Good enough for warning when pdfinfo absent.
-        n = len(re.findall(rb"/Type\s*/Page\b", raw))
-        return {"page_count": (n or None), "method": "pdf_page_token_scan", "ok": bool(n), "warnings": warnings + ([] if n else ["PDF_PAGE_COUNT_UNKNOWN"])}
-    except Exception as e:  # noqa: BLE001
-        return {"page_count": None, "method": "fallback_failed", "ok": False, "warnings": warnings + [f"PDF_PAGE_COUNT_ERROR:{type(e).__name__}"]}
-
-
-def _ocr_engine_version(engine: str) -> str:
-    if engine == "none":
-        return "text-layer-extract"
-    exe = shutil.which(engine) if engine in {"ocrmypdf", "tesseract"} else None
-    if not exe:
-        return "unknown"
-    try:
-        cp = subprocess.run([exe, "--version"], timeout=10, check=False, text=True, capture_output=True)
-        first = ((cp.stdout or cp.stderr or "").splitlines() or [""])[0].strip()
-        return first[:120] or "unknown"
-    except Exception:
-        return "unknown"
-
-
-def _ocr_manifest_build(*, src: Path, text_file: Path, engine_used: str, engine_requested: str, lang: str, mode: str, ocr_pdf: Path | None, metrics: dict, verify: dict | None, warnings: list[str]) -> dict:
-    text_hash = _sha256_bytes_file_local(text_file) if text_file.exists() else ""
-    source_hash = _sha256_bytes_file_local(src) if src.exists() else ""
-    page_report = _pdf_page_report(src)
-    coverage = {
-        "source_page_count": page_report.get("page_count"),
-        "page_count_method": page_report.get("method"),
-        "text_has_page_markers": bool(re.search(r"(?im)^\s*(?:page|trang)\s+\d+\s*$", text_file.read_text(encoding="utf-8", errors="replace")[:1_000_000] if text_file.exists() else "")),
-        "page_coverage_status": "unknown" if page_report.get("page_count") else "not_available",
-    }
-    if coverage["source_page_count"] and coverage["text_has_page_markers"]:
-        coverage["page_coverage_status"] = "has_page_markers"
-    elif coverage["source_page_count"]:
-        coverage["page_coverage_status"] = "page_count_known_text_markers_absent"
-    verification_ok = bool((verify or {}).get("ok"))
-    status = "verified" if verification_ok else "unverified"
-    return {
-        "ok": verification_ok,
-        "schema": "ocr_manifest.v1",
-        "mode": mode,
-        "source_file": str(src),
-        "source_sha256": source_hash,
-        "source_size_bytes": src.stat().st_size if src.exists() else None,
-        "text_file": str(text_file),
-        "text_sha256": text_hash,
-        "text_size_bytes": text_file.stat().st_size if text_file.exists() else None,
-        "engine_requested": engine_requested,
-        "engine_used": engine_used,
-        "engine_version": _ocr_engine_version(engine_used),
-        "language": lang,
-        "outputs": {"text_file": str(text_file), "ocr_pdf": str(ocr_pdf) if ocr_pdf and ocr_pdf.exists() else None},
-        "page_report": page_report,
-        "page_coverage": coverage,
-        "metrics": metrics or {},
-        "verification_status": status,
-        "verification": verify or {},
-        "warnings": list(warnings or []) + list(page_report.get("warnings") or []),
-        "canonical_allowed": bool(verification_ok and mode != "vbqppl") or bool(verification_ok and mode == "vbqppl"),
-        "volatile": {"created_at_utc": "<created_at_runtime>"},
-    }
-
-
-def _load_ocr_manifest_for_text(text_file: Path) -> tuple[dict | None, list[str]]:
-    candidates = [_ocr_manifest_path_for_text(text_file), text_file.with_suffix(text_file.suffix + ".manifest.json")]
-    seen = set()
-    for mp in candidates:
-        if str(mp) in seen:
-            continue
-        seen.add(str(mp))
-        if mp.exists():
-            try:
-                _man = json.loads(mp.read_text(encoding="utf-8", errors="replace"))
-            except Exception as e:  # noqa: BLE001
-                return None, [f"OCR_MANIFEST_INVALID:{type(e).__name__}"]
-            if not isinstance(_man, dict):   # v1.33.56 (PH2-06): JSON string/list/number → không crash .get
-                return None, ["OCR_MANIFEST_INVALID:NOT_A_JSON_OBJECT"]
-            return _man, []
-    return None, ["OCR_MANIFEST_NOT_FOUND"]
-
-
-def _verify_ocr_manifest_contract(man: dict | None, *, text_file: Path, source: str = "", mode: str = "profile") -> tuple[bool, list[str], list[dict]]:
-    warnings: list[str] = []
-    checks: list[dict] = []
-    def check(name: str, ok: bool, detail: str = ""):
-        checks.append({"name": name, "ok": bool(ok), "detail": detail})
-    if not man:
-        check("manifest_present", False, "missing")
-        return False, warnings, checks
-    check("manifest_schema", man.get("schema") == "ocr_manifest.v1", str(man.get("schema")))
-    check("manifest_text_file_matches", Path(str(man.get("text_file") or "")).name == text_file.name, str(man.get("text_file") or ""))
-    if text_file.exists() and man.get("text_sha256"):
-        h = _sha256_bytes_file_local(text_file)
-        check("manifest_text_hash_matches", h == man.get("text_sha256"), h[:12])
-    else:
-        check("manifest_text_hash_present", bool(man.get("text_sha256")), str(man.get("text_sha256") or ""))
-    if source:
-        src = Path(source)
-        if src.exists() and man.get("source_sha256"):
-            h = _sha256_bytes_file_local(src)
-            check("manifest_source_hash_matches", h == man.get("source_sha256"), h[:12])
-        else:
-            warnings.append("SOURCE_HASH_CHECK_SKIPPED")
-    check("manifest_verification_status", man.get("verification_status") == "verified", str(man.get("verification_status")))
-    if mode == "vbqppl":
-        pr = man.get("page_report") or {}
-        if pr.get("method") != "not_pdf":
-            if pr.get("page_count") is None:
-                warnings.append("VBQPPL_PAGE_COUNT_UNKNOWN_REVIEW_REQUIRED")
-            cov = (man.get("page_coverage") or {}).get("page_coverage_status")
-            if cov in {"not_available", "unknown"}:
-                warnings.append("VBQPPL_PAGE_COVERAGE_UNKNOWN_REVIEW_REQUIRED")
-    return all(c.get("ok") for c in checks), warnings, checks
-
-
-def cmd_ocr_run(a) -> int:
-    """OCR/extract local sidecar text. Safe phase: local files only; Drive/Paddle/DocumentAI engines are guarded unless available."""
-    src = Path(a.file)
-    out = {"ok": False, "schema": "ocr_run.v1", "file": str(src), "engine_requested": a.engine, "warnings": [], "outputs": {}, "verify": None}
-    if not src.exists():
-        out["warnings"].append("FILE_NOT_FOUND")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    od, sidecar, ocr_pdf = _ocr_out_paths(src, getattr(a, "out_dir", None))
-    out["outputs"]["out_dir"] = str(od)
-    engine = a.engine
-    if engine == "auto":
-        text, warns = _read_local_text_for_analysis(src)
-        out["warnings"].extend(warns)
-        metrics = _text_quality_metrics(text)
-        if src.suffix.lower() in {".txt", ".md"} and metrics.get("chars", 0) > 0:
-            engine = "none"
-        elif metrics.get("chars", 0) >= 200:
-            engine = "none"
-        elif shutil.which("ocrmypdf") and src.suffix.lower() == ".pdf":
-            engine = "ocrmypdf"
-        else:
-            out["engine_used"] = "none"
-            out["warnings"].append("NO_TEXT_LAYER_AND_NO_LOCAL_OCR_ENGINE")
-            out["recommendations"] = [
-                "Cài OCRmyPDF + Tesseract vie để chạy local: ocr-run --engine ocrmypdf --lang vie+eng",
-                "Hoặc dùng Drive OCR với ocrLanguage=vi trong pipeline Drive live rồi chạy ocr-verify trên sidecar text.",
-                "Không dùng OCR chưa verify làm canonical VBQPPL.",
-            ]
-            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    out["engine_used"] = engine
-    if engine == "none":
-        ok, warns, metrics = _extract_text_layer_to_file(src, sidecar)
-        out["warnings"].extend(warns)
-        out["outputs"]["text_file"] = str(sidecar)
-        out["metrics"] = metrics
-        out["ok"] = bool(ok and metrics.get("chars", 0) >= 1)
-    elif engine == "ocrmypdf":
-        if src.suffix.lower() != ".pdf":
-            out["warnings"].append("OCRMYPDF_REQUIRES_PDF")
-            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-        exe = shutil.which("ocrmypdf")
-        if not exe:
-            out["warnings"].append("OCRMYPDF_NOT_AVAILABLE")
-            out["recommendations"] = ["Cài ocrmypdf và tesseract language pack vie, hoặc dùng engine drive/paddle ngoài CLI local."]
-            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-        cmd = [exe, "--language", a.lang or "vie+eng", "--sidecar", str(sidecar), str(src), str(ocr_pdf)]
-        if getattr(a, "force_ocr", False):
-            cmd.insert(1, "--force-ocr")
-        try:
-            cp = subprocess.run(cmd, timeout=getattr(a, "timeout", 600), check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out["returncode"] = cp.returncode
-            out["stdout_tail"] = cp.stdout.decode("utf-8", "replace")[-1200:]
-            out["stderr_tail"] = cp.stderr.decode("utf-8", "replace")[-1200:]
-            out["outputs"]["text_file"] = str(sidecar)
-            out["outputs"]["ocr_pdf"] = str(ocr_pdf)
-            if sidecar.exists():
-                txt = sidecar.read_text(encoding="utf-8", errors="replace")
-                out["metrics"] = _text_quality_metrics(txt)
-            out["ok"] = (cp.returncode == 0 and sidecar.exists() and out.get("metrics", {}).get("chars", 0) > 0)
-        except Exception as e:  # noqa: BLE001
-            out["warnings"].append(f"OCRMYPDF_ERROR:{type(e).__name__}:{e}")
-            out["ok"] = False
-    elif engine in {"drive", "paddle", "documentai"}:
-        out["warnings"].append(f"ENGINE_{engine.upper()}_NOT_ENABLED_IN_LOCAL_STAGE3")
-        out["recommendations"] = [
-            "Stage 3 chỉ mở local sidecar/text-layer an toàn. Engine này cần plugin live/config riêng.",
-            "Dùng route-task --task ocr_pdf_scan để xem workflow; sau khi tạo text sidecar thì chạy ocr-verify.",
-        ]
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    else:
-        out["warnings"].append("UNKNOWN_ENGINE")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    if out.get("outputs", {}).get("text_file") and Path(out["outputs"]["text_file"]).exists():
-        class _A: pass
-        va = _A(); va.text_file = out["outputs"]["text_file"]; va.source = str(src); va.mode = a.mode; va.json = True
-        txt = Path(va.text_file).read_text(encoding="utf-8", errors="replace")
-        m = _text_quality_metrics(txt)
-        checks = []
-        def check(name, ok, detail=""):
-            checks.append({"name": name, "ok": bool(ok), "detail": detail})
-        check("min_length", m["chars"] >= (500 if a.mode == "vbqppl" else 100), str(m["chars"]))
-        check("garbled_ratio", m["garbled_ratio"] <= 0.001, str(m["garbled_ratio"]))
-        check("vietnamese_mark_density", m["vietnamese_mark_density"] >= 0.005 or m["letters"] < 500, str(m["vietnamese_mark_density"]))
-        if a.mode == "vbqppl":
-            check("article_sequence_present", m["article_count"] > 0, str(m["article_count"]))
-        else:
-            check("text_present", m["chars"] > 100, str(m["chars"]))
-        out["verify"] = {"schema": "ocr_verify.inline.v1", "mode": a.mode, "metrics": m, "checks": checks, "ok": all(c["ok"] for c in checks)}
-        if not out["verify"]["ok"]:
-            out.setdefault("warnings", []).append("OCR_VERIFY_NOT_OK")
-        manifest = _ocr_manifest_build(src=src, text_file=Path(out["outputs"]["text_file"]), engine_used=out.get("engine_used") or engine, engine_requested=a.engine, lang=a.lang or "vi", mode=a.mode, ocr_pdf=ocr_pdf, metrics=m, verify=out.get("verify"), warnings=out.get("warnings", []))
-        manifest_path = _ocr_manifest_path_for_text(Path(out["outputs"]["text_file"]))
-        _write_text_atomic(manifest_path, json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
-        out["outputs"]["manifest"] = str(manifest_path)
-        out["manifest"] = {k: manifest.get(k) for k in ("schema", "ok", "verification_status", "source_sha256", "text_sha256", "engine_used", "engine_version", "language", "page_report", "page_coverage", "canonical_allowed")}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))
-    return 0 if out.get("ok") else 2
-
-
-def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[str, list[dict]]:
-    records: list[dict] = []
-    article_pat = re.compile(r"(?im)^\s*(Điều\s+\d+[a-zA-Z]?\s*[\.:].*)$")
-    def _is_heading(m):
-        # v1.33.56 (PH2-08): text pdftotext/wrap — tham chiếu 'quy định tại\nĐiều 5. của…' đứng đầu dòng
-        # nhưng KHÔNG phải heading. Heading thật: dòng trước trống hoặc kết thúc bằng dấu kết câu.
-        if m.start() == 0:
-            return True
-        prev = text[:m.start()].rstrip("\n")
-        if not prev:
-            return True
-        last = prev.rsplit("\n", 1)[-1].rstrip()
-        return (not last) or last[-1] in ".;:!?…)\u201d\u00bb"
-    matches = [m for m in article_pat.finditer(text) if _is_heading(m)]
-    if matches:
-        boundaries = [(m.start(), (matches[i+1].start() if i+1 < len(matches) else len(text)), m.group(1).strip()) for i, m in enumerate(matches)]
-        group_start = None; group_end = None; group_title = None; start_dieu = None; end_dieu = None
-        for start, end, title in boundaries:
-            dm = re.search(r"Điều\s+(\d+)", title)
-            dno = int(dm.group(1)) if dm else None
-            if group_start is not None and (end - group_start) > max_chars:
-                chunk_text = text[group_start:group_end]
-                records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
-                group_start = None; group_end = None; group_title = None; start_dieu = None; end_dieu = None
-            if group_start is None:
-                group_start = start; group_title = title[:120]; start_dieu = dno
-            group_end = end; end_dieu = dno
-        if group_start is not None:
-            chunk_text = text[group_start:group_end]
-            records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
-        return "by_article", records
-    block_pat = re.compile(r".+?(?:\n\s*\n|\Z)", re.S)
-    blocks = [(m.start(), m.end(), m.group(0)) for m in block_pat.finditer(text) if m.group(0).strip()]
-    group_start = None; group_end = None
-    for start, end, block in blocks:
-        if group_start is not None and (end - group_start) > max_chars:
-            chunk_text = text[group_start:group_end]
-            records.append({"index": len(records)+1, "title": f"part{len(records)+1:02d}", "start_char": group_start, "end_char": group_end, "chars": len(chunk_text), "text": chunk_text})
-            group_start = None; group_end = None
-        if group_start is None:
-            group_start = start
-        group_end = end
-    if group_start is not None:
-        chunk_text = text[group_start:group_end]
-        records.append({"index": len(records)+1, "title": f"part{len(records)+1:02d}", "start_char": group_start, "end_char": group_end, "chars": len(chunk_text), "text": chunk_text})
-    return "by_paragraph_budget", records
-
-
-def _safe_chunk_stem(name: str) -> str:
-    s = unicodedata.normalize("NFKD", name or "chunk")
-    s = "".join(c for c in s if not unicodedata.combining(c))
-    s = re.sub(r"[^A-Za-z0-9._-]+", "_", s).strip("._-")
-    return s[:100] or "chunk"
-
-
-def _chunk_plan_from_text(text: str, *, name: str, mode: str, max_chars: int) -> dict:
-    sha = hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
-    if mode == "vbqppl-canonical":
-        return {"ok": False, "schema": "chunk_plan.v2", "mode": mode, "source_hash": sha, "error": "DO_NOT_SPLIT_VBQPPL_CANONICAL", "chunks": [], "apply_enabled": False}
-    strategy, records = _chunk_records_from_text(text, name=name, max_chars=max_chars)
-    chunks = []
-    safe_base = _safe_chunk_stem(name)
-    for r in records:
-        c = {k: v for k, v in r.items() if k != "text"}
-        c["text_preview"] = r.get("text", "")[:160]
-        c["sha256"] = hashlib.sha256((r.get("text") or "").encode("utf-8", errors="replace")).hexdigest()
-        c["expected_name"] = f"{safe_base}__part{r['index']:02d}" + (f"__Dieu_{r.get('start_dieu')}-{r.get('end_dieu')}" if r.get("start_dieu") else "")
-        chunks.append(c)
-    return {"ok": bool(chunks), "schema": "chunk_plan.v2", "mode": mode, "source_hash": sha, "strategy": strategy, "max_chars": max_chars, "total_chars": len(text), "chunk_count": len(chunks), "chunks": chunks, "apply_enabled": True, "note": "chunk-apply local chỉ tạo chunk files + manifest; chưa ghi Drive/NLM."}
-
-
-def cmd_chunk_plan(a) -> int:
-    path = Path(a.file)
-    if not path.exists():
-        out = {"ok": False, "schema": "chunk_plan.v2", "error": "FILE_NOT_FOUND", "file": str(path)}
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    text, warns = _read_local_text_for_analysis(path, max_chars=10_000_000)   # v1.33.56 (PH2-05): = cap apply/verify
-    if not text:
-        out = {"ok": False, "schema": "chunk_plan.v2", "error": "NO_TEXT_AVAILABLE", "warnings": warns, "file": str(path)}
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    out = _chunk_plan_from_text(text, name=a.name or path.stem, mode=a.mode, max_chars=a.max_chars)
-    out["file"] = str(path)
-    out["warnings"] = warns
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_chunk_apply(a) -> int:
-    path = Path(a.file)
-    out = {"ok": False, "schema": "chunk_apply.v1", "file": str(path), "mode": a.mode, "warnings": [], "chunks": []}
-    if a.mode == "vbqppl-canonical":
-        out["warnings"].append("DO_NOT_SPLIT_VBQPPL_CANONICAL")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    if not path.exists():
-        out["warnings"].append("FILE_NOT_FOUND")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    text, warns = _read_local_text_for_analysis(path, max_chars=10_000_000)
-    out["warnings"].extend(warns)
-    if not text:
-        out["warnings"].append("NO_TEXT_AVAILABLE")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    name = a.name or path.stem
-    source_hash = hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
-    if getattr(a, "expected_hash", None) and a.expected_hash != source_hash:
-        out["warnings"].append("SOURCE_HASH_CHANGED")
-        out["expected_hash"] = a.expected_hash; out["source_hash"] = source_hash
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    strategy, records = _chunk_records_from_text(text, name=name, max_chars=a.max_chars)
-    od = Path(a.out_dir) if getattr(a, "out_dir", None) else path.parent / f"{_safe_chunk_stem(name)}_chunks"
-    od.mkdir(parents=True, exist_ok=True)
-    manifest = {"schema": "chunk_manifest.v1", "source_file": str(path), "source_hash": source_hash, "mode": a.mode, "strategy": strategy, "name": name, "max_chars": a.max_chars, "chunk_count": len(records), "chunks": []}
-    safe_base = _safe_chunk_stem(name)
-    for r in records:
-        expected = f"{safe_base}__part{r['index']:02d}" + (f"__Dieu_{r.get('start_dieu')}-{r.get('end_dieu')}" if r.get("start_dieu") else "")
-        chunk_path = od / f"{expected}.md"
-        chunk_hash = hashlib.sha256((r.get("text") or "").encode("utf-8", errors="replace")).hexdigest()
-        header = {
-            "source_file": str(path), "source_hash": source_hash, "mode": a.mode, "chunk_index": r["index"],
-            "chunk_count": len(records), "start_char": r.get("start_char"), "end_char": r.get("end_char"),
-            "start_dieu": r.get("start_dieu"), "end_dieu": r.get("end_dieu"), "chunk_sha256": chunk_hash,
-            "canonical": False, "note": "VBQPPL chunks are helper sources for NLM only, not legal canonical." if a.mode.startswith("vbqppl") else "Profile chunk for query quality.",
-        }
-        body = "---\n" + json.dumps(header, ensure_ascii=False, indent=2) + "\n---\n\n" + (r.get("text") or "")
-        _write_text_atomic(chunk_path, body)
-        item = {k: v for k, v in r.items() if k != "text"}
-        item.update({"expected_name": expected, "path": str(chunk_path), "sha256": chunk_hash})
-        manifest["chunks"].append(item)
-        out["chunks"].append(item)
-    manifest_path = od / "chunk_manifest.json"
-    _write_text_atomic(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2))
-    out.update({"ok": True, "out_dir": str(od), "manifest": str(manifest_path), "source_hash": source_hash, "strategy": strategy, "chunk_count": len(records)})
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0
-
-
-def cmd_chunk_verify(a) -> int:
-    mp = Path(a.manifest)
-    out = {"ok": False, "schema": "chunk_verify.v1", "manifest": str(mp), "checks": [], "warnings": []}
-    if not mp.exists():
-        out["warnings"].append("MANIFEST_NOT_FOUND")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    try:
-        man = json.loads(mp.read_text(encoding="utf-8"))
-    except Exception as e:  # noqa: BLE001
-        out["warnings"].append(f"MANIFEST_INVALID:{type(e).__name__}:{e}")
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-    def check(name, ok, detail=""):
-        out["checks"].append({"name": name, "ok": bool(ok), "detail": detail})
-    chunks = man.get("chunks") or []
-    check("manifest_schema", man.get("schema") == "chunk_manifest.v1", str(man.get("schema")))
-    check("chunk_count_match", int(man.get("chunk_count") or -1) == len(chunks), f"{man.get('chunk_count')} vs {len(chunks)}")
-    src = Path(man.get("source_file") or "")
-    if src.exists():
-        txt, _warns = _read_local_text_for_analysis(src, max_chars=10_000_000)
-        src_hash = hashlib.sha256(txt.encode("utf-8", errors="replace")).hexdigest() if txt else ""
-        check("source_hash_unchanged", src_hash == man.get("source_hash"), src_hash[:12])
-    else:
-        out["warnings"].append("SOURCE_FILE_NOT_FOUND_SKIP_HASH_CHECK")
-    for item in chunks:
-        cp = Path(item.get("path") or "")
-        exists = cp.exists()
-        check(f"chunk_{item.get('index')}_exists", exists, str(cp))
-        if exists:
-            raw = cp.read_text(encoding="utf-8", errors="replace")
-            # v1.33.56 (PH2-07): neo delimiter theo DÒNG '---' đứng riêng — split('---',2) trần vỡ khi
-            # source_file path trong header chứa chuỗi '---' (cắt ngay giữa JSON → hash sai oan).
-            _fm = re.match(r"\A---\n.*?\n---\n", raw, re.S)
-            content = raw[_fm.end():] if _fm else raw
-            if _fm:
-                if content.startswith("\n"):
-                    content = content[1:]
-            h = hashlib.sha256(content.encode("utf-8", errors="replace")).hexdigest()
-            check(f"chunk_{item.get('index')}_hash", h == item.get("sha256"), h[:12])
-    out["ok"] = all(c["ok"] for c in out["checks"])
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-# ───────────────────────── Stage 4 bridges: verified OCR/chunks -> existing ingest pipelines ─────────────────────────
-def _bridge_common_ocr_verify(text_file: str, *, mode: str, source: str = "") -> dict:
-    """Run ocr-verify as a child command and return its JSON envelope."""
-    args = ["ocr-verify", text_file, "--mode", mode, "--json"]
-    if source:
-        args += ["--source", source]
-    return _run_child_tl(args)
-
-
 def _bridge_confirm_apply(a, *, what: str) -> tuple[bool, dict]:
     if not getattr(a, "apply", False):
         return True, {}
@@ -18020,155 +17294,6 @@ def _bridge_confirm_apply(a, *, what: str) -> tuple[bool, dict]:
         return False, {"ok": False, "error": "CONFIRM_REQUIRED", "what": what,
                        "note": "Bridge apply sẽ gọi lại pipeline ingest hiện có. Thêm --confirm yes sau khi đã xem dry-run/verify."}
     return True, {}
-
-
-def _bridge_ocr_plan(a, *, mode: str) -> dict:
-    verify = _bridge_common_ocr_verify(a.text_file, mode=mode, source=getattr(a, "file", "") or "")
-    source = Path(a.file)
-    text = Path(a.text_file)
-    out = {
-        "ok": bool(verify.get("ok")),
-        "schema": "ocr_ingest_bridge.v1",
-        "mode": mode,
-        "file": str(source),
-        "text_file": str(text),
-        "apply": bool(getattr(a, "apply", False)),
-        "verification": verify,
-        "warnings": [],
-        "planned_child_command": [],
-        "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại ingest-local/profile-ingest hiện có với --source-quality ocr --ocr-verified.",
-        "idempotency": _idempotency_contract_for_workflow("ocr_ingest"),
-    }
-    if not source.exists():
-        out["ok"] = False; out["warnings"].append("SOURCE_FILE_NOT_FOUND")
-    if not text.exists():
-        out["ok"] = False; out["warnings"].append("TEXT_FILE_NOT_FOUND")
-    man = ((verify.get("json") or {}).get("manifest") if isinstance(verify.get("json"), dict) else None)
-    if mode == "vbqppl" and not (isinstance(man, dict) and man.get("verification_status") == "verified"):
-        out["ok"] = False
-        out["warnings"].append("VBQPPL_OCR_REQUIRES_VERIFIED_MANIFEST")
-    if mode == "vbqppl":
-        if not getattr(a, "cat", None):
-            out["ok"] = False; out["warnings"].append("CAT_REQUIRED_FOR_VBQPPL_OCR_INGEST")
-        child = ["ingest-local", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--auto-plan", "--json"]
-        for opt in ("name", "sohieu", "cat", "goc", "hieuluc", "loai"):
-            val = getattr(a, opt, None)
-            if val:
-                child += ["--" + opt.replace("_", "-"), str(val)]
-        for flag in ("force_cat", "allow_large", "skip_nlm_preflight", "skip_live_check"):
-            if getattr(a, flag, False):
-                child.append("--" + flag.replace("_", "-"))
-    else:
-        child = ["profile-ingest", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--json"]
-        for opt in ("name", "hieuluc"):
-            val = getattr(a, opt, None)
-            if val:
-                child += ["--" + opt.replace("_", "-"), str(val)]
-        if getattr(a, "chunk_max_chars", None):
-            child += ["--chunk-max-chars", str(a.chunk_max_chars)]
-        for flag in ("allow_default", "skip_live_check"):
-            if getattr(a, flag, False):
-                child.append("--" + flag.replace("_", "-"))
-        prof = getattr(a, "profile", None)
-        if prof:
-            child += ["--profile", prof]
-    if getattr(a, "apply", False):
-        child.append("--apply")
-    out["planned_child_command"] = child
-    return out
-
-
-def cmd_ingest_ocr(a) -> int:
-    ok, err = _bridge_confirm_apply(a, what="ingest-ocr")
-    if not ok:
-        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
-    plan = _bridge_ocr_plan(a, mode="vbqppl")
-    if not getattr(a, "apply", False):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
-    if not plan.get("ok"):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    child = _run_child_tl(plan["planned_child_command"])
-    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_profile_ingest_ocr(a) -> int:
-    ok, err = _bridge_confirm_apply(a, what="profile-ingest-ocr")
-    if not ok:
-        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
-    plan = _bridge_ocr_plan(a, mode="profile")
-    if not getattr(a, "apply", False):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
-    if not plan.get("ok"):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    child = _run_child_tl(plan["planned_child_command"])
-    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def _load_chunk_manifest(manifest_path: str) -> tuple[dict|None, list[str]]:
-    mp = Path(manifest_path)
-    if not mp.exists():
-        return None, ["MANIFEST_NOT_FOUND"]
-    try:
-        return json.loads(mp.read_text(encoding="utf-8", errors="replace")), []
-    except Exception as e:  # noqa: BLE001
-        return None, [f"MANIFEST_INVALID:{type(e).__name__}:{e}"]
-
-
-def _profile_ingest_chunks_plan(a) -> dict:
-    verify = _run_child_tl(["chunk-verify", a.manifest, "--json"])
-    man, warnings = _load_chunk_manifest(a.manifest)
-    out = {"ok": bool(verify.get("ok")) and man is not None, "schema": "chunk_ingest_bridge.v1", "manifest": a.manifest,
-           "apply": bool(getattr(a, "apply", False)), "verification": verify, "warnings": warnings, "planned_child_commands": [],
-           "idempotency": _idempotency_contract_for_workflow("chunk_ingest"),
-           "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại profile-ingest từng chunk đã verify."}
-    if not man:
-        return out
-    out.update({"manifest_mode": man.get("mode"), "source_file": man.get("source_file"), "source_hash": man.get("source_hash"), "chunk_count": len(man.get("chunks") or [])})
-    if man.get("mode") != "profile":
-        out["ok"] = False
-        out["warnings"].append("ONLY_PROFILE_CHUNKS_CAN_BE_INGESTED_IN_STAGE4")
-    profile = getattr(a, "profile", None)
-    for item in (man.get("chunks") or []):
-        cp = item.get("path")
-        expected = item.get("expected_name") or Path(cp or "chunk").stem
-        child = ["profile-ingest", str(cp), "--name", expected, "--source-quality", "digital", "--json"]
-        if profile:
-            child += ["--profile", profile]
-        if getattr(a, "allow_default", False):
-            child.append("--allow-default")
-        if getattr(a, "skip_live_check", False):
-            child.append("--skip-live-check")
-        if getattr(a, "apply", False):
-            child.append("--apply")
-        out["planned_child_commands"].append({"chunk_index": item.get("index"), "path": cp, "expected_name": expected, "command": child})
-    if not out["planned_child_commands"]:
-        out["ok"] = False; out["warnings"].append("NO_CHUNKS_IN_MANIFEST")
-    return out
-
-
-def cmd_profile_ingest_chunks(a) -> int:
-    ok, err = _bridge_confirm_apply(a, what="profile-ingest-chunks")
-    if not ok:
-        print(_json_dumps(err, deterministic=_deterministic_enabled(a))); return 2
-    plan = _profile_ingest_chunks_plan(a)
-    if not getattr(a, "apply", False):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
-    if not plan.get("ok"):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    results = []
-    for rec in plan.get("planned_child_commands", []):
-        r = _run_child_tl(rec["command"])
-        r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
-        results.append(r)
-        if not r.get("ok") and not getattr(a, "continue_on_error", False):
-            break
-    out = {**plan, "schema": "chunk_ingest_bridge_apply.v1", "results": results, "ok": bool(results) and all(r.get("ok") for r in results)}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
 
 
 def _run_tl_json(args: list[str], *, timeout: int = 60) -> dict:
@@ -19718,13 +18843,100 @@ def main(argv) -> int:
         return 0
 
 
-
-
 # ───────────────────────── Pha C (v1.33.56): tl_core.workflow/release/live ─────────────────────────
 # Nạp SAU khi mọi symbol tl đã định nghĩa; stub định nghĩa TRƯỚC bind để bind copy stub cho tham chiếu chéo.
 _tl_workflow = _tl_core_import("workflow")   # noqa: E402 — v1.33.56: qua helper cứu hộ (tl_core/F3)
 _tl_release = _tl_core_import("release")      # noqa: E402
 _tl_live = _tl_core_import("live")            # noqa: E402
+_tl_zip_ingest = _tl_core_import("zip_ingest")   # noqa: E402 — Pha D (v1.33.57)
+_tl_ocr = _tl_core_import("ocr")                 # noqa: E402
+_tl_chunking = _tl_core_import("chunking")       # noqa: E402
+
+def _chunk_plan_from_text(*_a, **_kw):
+    return _tl_chunking._chunk_plan_from_text(*_a, **_kw)
+
+
+def _chunk_records_from_text(*_a, **_kw):
+    return _tl_chunking._chunk_records_from_text(*_a, **_kw)
+
+
+def _load_ocr_manifest_for_text(*_a, **_kw):
+    return _tl_ocr._load_ocr_manifest_for_text(*_a, **_kw)
+
+
+def _ocr_manifest_path_for_text(*_a, **_kw):
+    return _tl_ocr._ocr_manifest_path_for_text(*_a, **_kw)
+
+
+def _ocr_out_paths(*_a, **_kw):
+    return _tl_ocr._ocr_out_paths(*_a, **_kw)
+
+
+def _safe_extract_zip_for_ingest(*_a, **_kw):
+    return _tl_zip_ingest._safe_extract_zip_for_ingest(*_a, **_kw)
+
+
+def _zip_is_safe_member(*_a, **_kw):
+    return _tl_zip_ingest._zip_is_safe_member(*_a, **_kw)
+
+
+def _zip_normalized_member_path(*_a, **_kw):
+    return _tl_zip_ingest._zip_normalized_member_path(*_a, **_kw)
+
+
+def _zip_plan(*_a, **_kw):
+    return _tl_zip_ingest._zip_plan(*_a, **_kw)
+
+
+def _zip_sorted_infos(*_a, **_kw):
+    return _tl_zip_ingest._zip_sorted_infos(*_a, **_kw)
+
+
+def cmd_chunk_apply(*_a, **_kw):
+    return _tl_chunking.cmd_chunk_apply(*_a, **_kw)
+
+
+def cmd_chunk_plan(*_a, **_kw):
+    return _tl_chunking.cmd_chunk_plan(*_a, **_kw)
+
+
+def cmd_chunk_verify(*_a, **_kw):
+    return _tl_chunking.cmd_chunk_verify(*_a, **_kw)
+
+
+def cmd_ingest_ocr(*_a, **_kw):
+    return _tl_ocr.cmd_ingest_ocr(*_a, **_kw)
+
+
+def cmd_ingest_zip(*_a, **_kw):
+    return _tl_zip_ingest.cmd_ingest_zip(*_a, **_kw)
+
+
+def cmd_ocr_analyze(*_a, **_kw):
+    return _tl_ocr.cmd_ocr_analyze(*_a, **_kw)
+
+
+def cmd_ocr_run(*_a, **_kw):
+    return _tl_ocr.cmd_ocr_run(*_a, **_kw)
+
+
+def cmd_ocr_verify(*_a, **_kw):
+    return _tl_ocr.cmd_ocr_verify(*_a, **_kw)
+
+
+def cmd_profile_ingest_chunks(*_a, **_kw):
+    return _tl_chunking.cmd_profile_ingest_chunks(*_a, **_kw)
+
+
+def cmd_profile_ingest_ocr(*_a, **_kw):
+    return _tl_ocr.cmd_profile_ingest_ocr(*_a, **_kw)
+
+
+def cmd_profile_ingest_zip(*_a, **_kw):
+    return _tl_zip_ingest.cmd_profile_ingest_zip(*_a, **_kw)
+
+
+
 
 def _build_release_manifest(*_a, **_kw):
     return _tl_release._build_release_manifest(*_a, **_kw)
@@ -19832,7 +19044,7 @@ def cmd_workflow_audit(*_a, **_kw):
 _IDEMPOTENCY_CONTRACTS = _tl_workflow._IDEMPOTENCY_CONTRACTS
 _TASK_TO_WORKFLOW = _tl_workflow._TASK_TO_WORKFLOW
 
-for _m in (_tl_workflow, _tl_release, _tl_live):
+for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking):
     _m.bind(sys.modules[__name__])
 
 

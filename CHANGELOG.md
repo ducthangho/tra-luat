@@ -1,3 +1,22 @@
+# ★ v1.33.57 — Pha D kế hoạch nợ-kỹ-thuật: tách tl_core/{zip_ingest,ocr,chunking} (2026-07-08)
+
+- tl.py **19.840 → 19.051 dòng** (−789; lũy kế từ Pha B: 21.312 → 19.051). Modules mới: `zip_ingest.py` (235 —
+  plan/safe-extract/zip-slip+dup guard/apply fan-out), `ocr.py` (470 — analyze/run/verify, manifest v1, page
+  report, bridges ingest-ocr/profile-ingest-ocr), `chunking.py` (276 — plan/apply/verify, ranh giới Điều,
+  profile-ingest-chunks).
+- Cùng máy Pha C (AST-span + bind copy-globals + 21 stub ủy quyền, CLI KHÔNG đổi) + nâng cấp: quét tham chiếu
+  tính CẢ `tl_core/*.py` (release.py đang gọi `_zip_plan`/`_zip_sorted_infos` qua bind → stub tự sinh đúng).
+- Helper dùng chung ≥2 module GIỮ Ở tl.py theo quy tắc an toàn: `_run_child_tl`, `_read_local_text_for_analysis`,
+  `_text_quality_metrics`, `_sha256_bytes_file_local`, `_VIET_CHARS`, `_bridge_confirm_apply`, `_write_text_atomic`.
+- **Điều chỉnh D4 (idempotency.py):** KHÔNG tạo module riêng — contracts đã nằm ở `workflow.py` từ Pha C
+  (tool-inventory/route-task tiêu thụ tại đó), key/resume/readback builders đi theo lệnh sở hữu; tách thêm
+  chỉ tạo churn không giảm rủi ro.
+- Hạ tầng self-heal phủ 3 module mới: canary `_skill_package_integrity` (+3), tl_boot preload strip-NUL (+3),
+  release-check py_compile (+3), `_RELEASE_REQUIRED_FILES` (+3), r36 mock + r61 no-bare-mutable (+3).
+- **Gate:** selftest 644/644 (r63 chunk-roundtrip/zip-caps chạy XUYÊN stub mới — parity tự chứng minh);
+  workflow-audit --strict ✅ · golden-test ✅ · determinism-audit --strict ✅ · gen_instructions 24/24 ✅ ·
+  release-bundle ×2 CÙNG SHA-256 ✅ · tl_boot smoke ✅. Kế hoạch: A✓ B✓ C✓ D✓ → E (command registry) = 1.33.58.
+
 # ★ v1.33.56 — Pha C kế hoạch nợ-kỹ-thuật: tách tl_core/{workflow,release,live} + rà lỗi tiềm ẩn (2026-07-08)
 
 ## Tách module (tl.py 21.266 → 19.761 dòng, −1.505)

@@ -1,3 +1,14 @@
+# v1.33.61 — CI-fix #2: khử nốt 2 lớp bug máy-phụ-thuộc (2026-07-09)
+
+- (a) `idempotency_key` ingest-zip hash bytes CONTAINER zip → `zipfile` 3.12 (CI) ≠ 3.13 (local) ghi header
+  khác → key lệch dù ZIP_STORED. Đổi **content-v2**: norm_path+CRC32+size từng member accepted (CRC sẵn
+  trong central directory — 0 IO; re-zip cùng nội dung = CÙNG key, đúng ngữ nghĩa idempotency hơn).
+  r66 khoá: STORED vs DEFLATED cùng nội dung → cùng key. Contract text cập nhật (dict + card + golden).
+- (b) 3 writer atomic thiếu `newline=` → Windows ghi CRLF (writer PHỤ THUỘC OS = bug determinism gốc) →
+  release-verify windows-CI fail (manifest hash CRLF vs checkout LF). +`newline` LF mọi OS (r66 khoá);
+  `.gitattributes` `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản; regen goldens LF.
+- Selftest 653/653 (+2 r66). Runtime-identical — không deploy riêng, ship cùng v1.34.0.
+
 # v1.33.60 — CI-fix: fixture zip ZIP_STORED (2026-07-09)
 
 - CI run #1 (ubuntu+windows) bắt đúng lớp bug nó sinh ra để bắt: DEFLATE bytes khác nhau giữa build zlib

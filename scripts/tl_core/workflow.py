@@ -185,7 +185,7 @@ _IDEMPOTENCY_CONTRACTS = {
     },
     "ingest_zip": {
         "schema": "idempotency_contract.v1",
-        "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+        "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
         "journal_key": "batch item path + child pipeline journal",
         "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
         "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",

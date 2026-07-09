@@ -2,18 +2,18 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.33.60",
+  "skill_version": "1.33.61",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 133,
-  "total_bytes": 3875294,
-  "package_hash": "e498e47edf03316b6268fa186d61f2a6f841d81012299e631850b61d71dc2b88",
+  "total_bytes": 3875698,
+  "package_hash": "0bc13624cd6b7bc426b5184b87ad2cef5d99aa05519c46538b49fed5ebe7329e",
   "required_missing": [],
   "files": [
     {
       "path": ".gitattributes",
-      "size": 267,
-      "sha256": "9f7e5c1ef666a2189ad4b1427a3008b5972e5f9db1215f53e55a3222e6270e5e"
+      "size": 388,
+      "sha256": "394543a917935fb9fd75d48868d78160a4f8597a41cbb9e4790826863855ff45"
     },
     {
       "path": ".gitignore",
@@ -22,8 +22,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 460621,
-      "sha256": "0736c5d07e2a2d32f640f46446bc638e4e1f280b96a389b8ad03a1851a82a493"
+      "size": 461581,
+      "sha256": "8585e721639ac916931e4083c652ce9844c770006ec3c8703f2ef23871be7514"
     },
     {
       "path": "CONTEXT.md",
@@ -48,12 +48,12 @@
     {
       "path": "SKILL.md",
       "size": 91978,
-      "sha256": "3bf291ff81d5b3c2c683242e8ebc223e22040ae344ba40a25efa6aa9a3a6dd27"
+      "sha256": "a5e4d1bd2f7babf06be2e2650e82491e13eaeac25b49daa9037aa825d2aeded1"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "3479cb196975006d8c2ebfd36ad4ef0791e7a2301d1c07929a134c9cf0147aa0"
+      "sha256": "35575b6f8dc528ac865f34601033b8215eb2d6a028e3148e34af8d6ef8e6d680"
     },
     {
       "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
@@ -202,63 +202,63 @@
     },
     {
       "path": "references/golden/chunk_plan_profile_fixture.json",
-      "size": 1530,
-      "sha256": "1e930f3fa66207138b1ae4b53c493024ac2bfdf9908429400e9ea64d41ecf355"
+      "size": 1490,
+      "sha256": "f733d2995028e7cc9629aa6a5beae9cc85a4790077c428ce6e8a0a70f543e107"
     },
     {
       "path": "references/golden/chunk_plan_vbqppl_canonical_blocked.json",
-      "size": 336,
-      "sha256": "ae1aadbca036db948f09aa3aedaefbb85dfc435ff6620e30df047c2e83dd0adc"
+      "size": 325,
+      "sha256": "6c736123833a4d4d689868f7033350d9a13561fb31f9eaa072b397688b5d3f30"
     },
     {
       "path": "references/golden/ingest_zip_dryrun_dup.json",
-      "size": 2062,
-      "sha256": "15e0b92e7ad5dcc826af296a064a24f863849da079287266223123af3be77450"
+      "size": 2089,
+      "sha256": "b32c30608c6e9882d561355f47ffb3e9cd826b569fde07590ee82880dbc24b85"
     },
     {
       "path": "references/golden/ingest_zip_dryrun_slip.json",
-      "size": 2166,
-      "sha256": "b124bc3e2031bbfa3bd4d2b6d05e557c7f0a24066500da85e4fdc1d1ea52bc6d"
+      "size": 2216,
+      "sha256": "39aec9e0459fe01075e9a1edbf69914655c166dade1c4ecabfa21f117b4455de"
     },
     {
       "path": "references/golden/live_state_diff_no_changes.json",
-      "size": 520,
-      "sha256": "15dd513faa0049db3de65b06eba9eec16835786848622ec09d5b85b17b433b47"
+      "size": 503,
+      "sha256": "1483aed73e920fb724e0a460b711c7de3026a90db9500e138c424da5bced8575"
     },
     {
       "path": "references/golden/nlm_query_plan_3_sources.json",
-      "size": 917,
-      "sha256": "39eedebc2c58a5f3dc15942f020e67d6588a438372cb4c2d9e7d6e7a38c6f65c"
+      "size": 881,
+      "sha256": "d138511002a4559f4c633c8721f31c3e27bc27752a89b735d7b842d6e82d2d88"
     },
     {
       "path": "references/golden/ocr_analyze_fixture.json",
-      "size": 415,
-      "sha256": "7c329baae1cf81f4bc2f4e66e8f103940f68f04b74cf2ebdf7780e489334819a"
+      "size": 397,
+      "sha256": "7ea1d9cd1588d2b8fe717b838bc36f2d746d3b760c6467baba129fc3beb511a9"
     },
     {
       "path": "references/golden/route_task_ingest_zip.json",
-      "size": 5457,
-      "sha256": "b941901428f404134072d9478b2f008865281e9b8839fa1403c06c6b270ff2ee"
+      "size": 5465,
+      "sha256": "ad2b3f871415a2b40b3c86169be45aaf77d461505c1d4dc0e7dc507963529e79"
     },
     {
       "path": "references/golden/route_task_ocr_ingest.json",
-      "size": 5386,
-      "sha256": "2e8f51fbff934ec1c5b284312d6d08fe07682e65c2427ea4dbdcaf725efec2cd"
+      "size": 5272,
+      "sha256": "85ab5a485cf0ccd26aceafc9c0b0b72bd4ad1a592a4ca5419c49a1745187f55a"
     },
     {
       "path": "references/golden/route_task_profile_ingest_chunks.json",
-      "size": 4633,
-      "sha256": "fac2b49ac0a44945a3b16734811dd9e60b39c5b76477afeb7cb482e79ca3c935"
+      "size": 4524,
+      "sha256": "570fa89001427719940d8fee125c4c346707667b3e24311a3b14eac490d6a0b8"
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 21844,
-      "sha256": "6f7324b612317f87ed728d4ddf061b93e2782d2eef5f43d738eec7aad26eaf3b"
+      "size": 21060,
+      "sha256": "40de50a2fc1489c2e88812ee142cdf25c9dbdf89554d934d46b66429f8faa642"
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 28030,
-      "sha256": "021ffbcd20432c997a9dc22ddfe45c59a339d04dc2b0ce18c0629784751a413d"
+      "size": 26952,
+      "sha256": "b4edcd1185750e2d9e67eeed560852c2d0d7a36f3a42c7f2eaa180a0841728a1"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -267,13 +267,13 @@
     },
     {
       "path": "references/phap_dien_45.json",
-      "size": 6873,
-      "sha256": "b997272dfc5dbfba369c3ea2cd63e4ece9e0ff1ef8706a81e104d61de2d373f5"
+      "size": 6629,
+      "sha256": "6c9a5071b34c063c3b8af9dde8f9ff3c39bb98ba8c255fbb5e1cbd143259b351"
     },
     {
       "path": "references/subject_clusters.json",
-      "size": 1968,
-      "sha256": "2ce00429161ea2be626f8c49a6e26db3e9e23f9740d017e69f07d195cffd3022"
+      "size": 1923,
+      "sha256": "3144c747e882e50c715cb7cb5f6511649fec06d471928fcf9c19d9f41304b0a4"
     },
     {
       "path": "references/workflows/bundle_export.json",
@@ -287,18 +287,18 @@
     },
     {
       "path": "references/workflows/convert_rename.json",
-      "size": 1611,
-      "sha256": "77ff567b6d7b3518b5bbdedcfe0f2320f4335d36adedf9c838b55dee163cbe37"
+      "size": 1550,
+      "sha256": "5e89b5f3b4ba47f62fbaf9ef89e18fdc7ad14b9af87d54a8ad6fe891660c3ae1"
     },
     {
       "path": "references/workflows/deploy_plan.json",
-      "size": 1783,
-      "sha256": "741d2f64bf4733b4fb4575aad4dc084aa93cef2a63932c89a621b04da98c4a7a"
+      "size": 1722,
+      "sha256": "5e8153cfc3c002eab1662f6a8a3cdac54cf5018eb07d057b97a742bfc95ade60"
     },
     {
       "path": "references/workflows/final_acceptance.json",
-      "size": 1592,
-      "sha256": "577d90e923973c5a5abfaf9da78235ea592ead65a676da938bd2c439974ffc5f"
+      "size": 1538,
+      "sha256": "6a2dd0b5ca9bfe2f52adb9f6c7ef959984943d337098c5507fb1ac514fcf873e"
     },
     {
       "path": "references/workflows/go_live_runbook.json",
@@ -312,8 +312,8 @@
     },
     {
       "path": "references/workflows/ingest_zip.json",
-      "size": 3129,
-      "sha256": "0f604c6f28eff238b480f439d6079de6cbc21f04aef0bd5bfac07036c33932f6"
+      "size": 3191,
+      "sha256": "151e674ac8bc5314cf2371ee2c3698997642e2f501031b0ad944cc7f53c6717d"
     },
     {
       "path": "references/workflows/large_doc_chunk.json",
@@ -362,33 +362,33 @@
     },
     {
       "path": "references/workflows/release_bundle.json",
-      "size": 1189,
-      "sha256": "2369df1b6db7d9202ae14447eadf20fe5a88ca678d02c5384d5da1e146a3661d"
+      "size": 1139,
+      "sha256": "04f396d41b80e0faf348208b725f3e0c2f2478811d785519c8e1248140ee95a1"
     },
     {
       "path": "references/workflows/release_check.json",
-      "size": 1559,
-      "sha256": "ecbf60eb2519145f06a76f807ef4e80f1e40d42b28479c5e5da93e18cffb1669"
+      "size": 1498,
+      "sha256": "cd28b91ef04736af9e60a7cbdc06f223322acdd200d06f29ca4eb09d56021b47"
     },
     {
       "path": "references/workflows/release_manifest.json",
-      "size": 1282,
-      "sha256": "3327c9e88fef72367cd9240f23c5d98a244f5b0c9edf3ec40c7c590e2f822fe2"
+      "size": 1231,
+      "sha256": "0857f923a2b5b677914bece39af388de3d4c8906b11fa8b8a84314190ca59dd8"
     },
     {
       "path": "references/workflows/release_verify.json",
-      "size": 1215,
-      "sha256": "ed2171b9ce6ba881b3fe7e2afc97f49d6fbeebeeaa7217953125600a804c84a7"
+      "size": 1163,
+      "sha256": "0b106d5f763c001212de62a96d462e430d6c2b23599d991e5e96c69ef22a0e98"
     },
     {
       "path": "references/workflows/rollback_plan.json",
-      "size": 1645,
-      "sha256": "80e9c0cf406f9beeb7e1a74d27fe0e0be7353ff44416988fb68d859803797339"
+      "size": 1587,
+      "sha256": "ad92490f95a76c7ece0852cafde031b5ca05c7ef90816aeb4618f403778ce441"
     },
     {
       "path": "references/workflows/workflow_audit.json",
-      "size": 1410,
-      "sha256": "7e0586b6d61c0a77575e90d55f59f37fa83f3c6bc2ab7f572b8df71333d9441b"
+      "size": 1354,
+      "sha256": "2ab701e737748aa2599f33c2884114fb32775e67c21baa6f79ddb240e1faac42"
     },
     {
       "path": "references/workflows/workflow_card.schema.json",
@@ -397,8 +397,8 @@
     },
     {
       "path": "references/workflows/write_new_tool.json",
-      "size": 1723,
-      "sha256": "a773f86ab8df0bc467ff6f7aa3cfc9ac7cfc6a8fe5bd749a7955cc24cf74cde8"
+      "size": 1662,
+      "sha256": "1a90debc4a03d8c38e6ea8f4c202261123ff92c0fb6503f45da2f6dbd69441fb"
     },
     {
       "path": "requirements.txt",
@@ -427,8 +427,8 @@
     },
     {
       "path": "scripts/_fallback/preingest_gate.py",
-      "size": 19345,
-      "sha256": "c0ddfa55f31aac982a920dedc9e8f92cd164247b30bdde1aada8365b8827fc2d"
+      "size": 19031,
+      "sha256": "89539da5e58b6e1915a9ffb06ca9a5756f91736b8f2e2f0c090339d09c9dcfd9"
     },
     {
       "path": "scripts/apply_gs_patches.py",
@@ -562,8 +562,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 1291579,
-      "sha256": "99926318fd8c087719ae3a7ddf578ef04903db8bf4cad71ab5ad4654c21b7ec1"
+      "size": 1292338,
+      "sha256": "0617d2d871120bc61d5082d4bf35d2655c53e6ddd8ae6533c2fafac16d109c75"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -612,13 +612,13 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 40505,
-      "sha256": "b8b20831be85fbb4afac4618113db94b1b04c5d5ab8df51f629ef8f8674ac7ca"
+      "size": 40536,
+      "sha256": "afea8db1ef687513a59147e8ee31a0a19016bc12c8e4d8ec543cbb1e3d931695"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",
-      "size": 12129,
-      "sha256": "7a4f32430c488c374b82645f86e9b2d87bbccb95423bebe13ec3a6269b540a67"
+      "size": 12636,
+      "sha256": "e0a75c299551f2a95845e57ab72fc8426a9e3a9ec380338dcb14bef79fca5599"
     },
     {
       "path": "scripts/tl_fetch.sh",
@@ -632,8 +632,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 420170,
-      "sha256": "da7cf49093efd0a6c0fd00db421aba4721a5eee17cf644b13ce3c454156e5eea"
+      "size": 421500,
+      "sha256": "f0dac824136743829004b03b2eeaf6283fb9b31a5964f3c9f2d86fb8ba3cdbce"
     },
     {
       "path": "scripts/tra_cuu.py",
@@ -672,8 +672,8 @@
     },
     {
       "path": "tra_luat_config.example.json",
-      "size": 3432,
-      "sha256": "8731187089df90c73a2c506be02d80de514e4cdf10cd818dbe5132e2501d2e30"
+      "size": 3356,
+      "sha256": "fedfb3d28c08171dfd7eebb239a2b3e6ca1f2da1fd8c54d30c1b6ccfe234d492"
     }
   ],
   "determinism_note": "Manifest không chứa timestamp hay đường dẫn tuyệt đối; package_hash tính từ path,size,sha256 đã sort."

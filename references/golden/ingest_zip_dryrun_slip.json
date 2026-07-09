@@ -5,7 +5,7 @@
   "files_total": 3,
   "idempotency": {
     "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
-    "idempotency_key": "sha256(zip_file)+mode+cat_or_profile+accepted_member_paths",
+    "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
     "journal_key": "batch item path + child pipeline journal",
     "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
     "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
@@ -13,9 +13,10 @@
     "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
     "schema": "idempotency_contract.v1"
   },
-  "idempotency_key": "798b1b01136ab1a7b7ca8bdeaeabaa3dbc9120e62dcfe5ee47952d27f68b2a3d",
+  "idempotency_key": "97f6001223d8fec0f7810577811685e879b688330a60eaa5f80b9792de4ed80c",
   "items": [
     {
+      "crc32": 4248388600,
       "normalized_path": null,
       "path": "../evil.docx",
       "reason": "UNSAFE_OR_SYSTEM_PATH",
@@ -23,6 +24,7 @@
       "status": "skipped"
     },
     {
+      "crc32": 2290619368,
       "normalized_path": "bao cao?.docx",
       "path": "bao cao?.docx",
       "reason": "UNSAFE_OR_SYSTEM_PATH",
@@ -32,6 +34,7 @@
     {
       "action": "ingest-local",
       "convert": "drive_gdoc",
+      "crc32": 418149425,
       "expected_pipeline": [
         "extract_to_temp",
         "upload_binary",

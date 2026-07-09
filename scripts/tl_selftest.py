@@ -5097,6 +5097,25 @@ def run() -> int:
     cases.append(("r65_golden_fixtures_substitution",
                   "{FIXTURES}" not in _sub65[1] and Path(_sub65[1]).exists()
                   and (_w65._golden_fixdir() / "slip.zip").exists() and (_w65._golden_fixdir() / "dup.zip").exists()))
+    # ═══ v1.33.61 — r66_*: CI run #1/#2 bắt 2 lớp bug máy-phụ-thuộc → khoá vĩnh viễn ═══
+    # (a) idempotency_key ĐỘC LẬP container: cùng nội dung, STORED vs DEFLATED → CÙNG key.
+    import tempfile as _tf66, zipfile as _zf66
+    import tl_core.zip_ingest as _zi66
+    with _tf66.TemporaryDirectory() as _d66:
+        _za, _zb = Path(_d66) / "a.zip", Path(_d66) / "b.zip"
+        for _pz, _comp in ((_za, _zf66.ZIP_STORED), (_zb, _zf66.ZIP_DEFLATED)):
+            with _zf66.ZipFile(_pz, "w", compression=_comp) as _z:
+                _z.writestr("van_ban.docx", "noi dung giong het nhau")
+        _ka = _zi66._zip_plan(str(_za), mode="vbqppl", cat="01")["idempotency_key"]
+        _kb = _zi66._zip_plan(str(_zb), mode="vbqppl", cat="01")["idempotency_key"]
+    cases.append(("r66_idempotency_key_container_independent", bool(_ka) and _ka == _kb))
+    # (b) writer atomic ghi LF trên MỌI OS (trước: Windows CRLF → manifest/golden hash lệch CI).
+    with _tf66.TemporaryDirectory() as _d66b:
+        _fp66 = Path(_d66b) / "t.txt"
+        _write_text_atomic(_fp66, "dong1" + chr(10) + "dong2" + chr(10))
+        _raw66 = _fp66.read_bytes()
+    cases.append(("r66_atomic_writer_lf_all_os",
+                  chr(13).encode() not in _raw66 and _raw66.count(chr(10).encode()) == 2))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -104,7 +104,8 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
                 if info.is_dir():
                     continue
                 norm_path = _zip_normalized_member_path(info.filename)
-                item = {"path": info.filename, "normalized_path": norm_path or None, "size": info.file_size, "status": "planned"}
+                item = {"path": info.filename, "normalized_path": norm_path or None, "size": info.file_size,
+                        "crc32": info.CRC, "status": "planned"}   # v1.33.61: CRC nội-dung cho idempotency_key content-v2
                 if not _zip_is_safe_member(info.filename) or not norm_path:
                     item.update({"status": "skipped", "reason": "UNSAFE_OR_SYSTEM_PATH"})
                     out["items"].append(item); continue
@@ -142,9 +143,14 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
     else:
         out["warnings"] = []
     try:
-        member_basis = ";".join(i.get("path", "") for i in out.get("items", []) if i.get("status") == "accepted")
+        # v1.33.61 (CI run #2): KHÔNG hash bytes CONTAINER zip — zipfile 3.12 vs 3.13 (và zlib build) ghi
+        # header khác nhau → key lệch cross-machine. Danh tính NỘI DUNG: norm_path+CRC32+size từng member
+        # accepted (CRC lấy từ central directory — 0 IO thêm; re-zip cùng nội dung = CÙNG key, đúng ngữ
+        # nghĩa idempotency hơn).
+        member_basis = ";".join(f"{i.get('path','')}:{i.get('crc32','')}:{i.get('size','')}"
+                                for i in out.get("items", []) if i.get("status") == "accepted")
         out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
-        out["idempotency_key"] = hashlib.sha256(((_sha256_bytes_file_local(zpath) if zpath.exists() else "") + "|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8", errors="replace")).hexdigest()
+        out["idempotency_key"] = hashlib.sha256(("content-v2|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8", errors="replace")).hexdigest()
     except Exception:
         out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
     return out

@@ -5506,6 +5506,89 @@ def run() -> int:
     _tl_src74 = Path(_ins69.getsourcefile(_g74["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r74_no_dual_definition",
                   all(_tl_src74.count(f"def {n}(") == 1 for n in _pm_names74)))
+    # ═══ v1.34.8 — r75a_*: I5 characterization TRƯỚC cut ingest_pipeline — wiring OFFLINE 5 cmd 0-hit ═══
+    _E75 = {"drive_id": "gdA75_12345678901234567890", "name": "Luat_BHXH_45_2019_QH14", "so_hieu": "45-2019-QH14",
+            "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "true", "nlm_source_id": "S75",
+            "nlm_notebook_id": "NB75", "nlm_status": "pushed", "row_kind": "own"}
+    _E75b = {"drive_id": "gdB75_12345678901234567890", "name": "Luat_BHXH_45_2019_QH14_ban_double", "so_hieu": "",
+             "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "true", "nlm_source_id": "S75",
+             "nlm_notebook_id": "NB75", "nlm_status": "pushed", "row_kind": "own"}
+    _keys75 = ("apply_profile_offline", "_manifest_entries", "_gas")
+    _sav75 = {k: getattr(_TL_MODULE, k) for k in _keys75}
+    _gas_calls75 = []
+    class _FkGRec75:
+        def get(self, action, **kw): _gas_calls75.append(("get", action)); return {"ok": True}
+        def post(self, action, **kw): _gas_calls75.append(("post", action)); return {"ok": True, "patched": 0}
+    def _cap75(fn, ns):
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+    try:
+        import tempfile as _tf75
+        with _tf75.TemporaryDirectory() as _d75:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: [_E75, _E75b]
+            _TL_MODULE._gas = lambda: _FkGRec75()
+            # (1) ingest-route: sohieu ĐÃ có corpus → ASK_USE_EXISTING; --thuong → PROFILE_OWN
+            _rc1, _o1 = _cap75(_TL_MODULE.cmd_ingest_route, argparse.Namespace(
+                config=None, profile=None, query="45/2019/QH14", vbqppl=False, thuong=False,
+                refresh=False, json=True, deterministic=False))
+            _j1 = json.loads(_o1)
+            _rc1b, _o1b = _cap75(_TL_MODULE.cmd_ingest_route, argparse.Namespace(
+                config=None, profile=None, query="bao cao tinh hinh", vbqppl=False, thuong=True,
+                refresh=False, json=True, deterministic=False))
+            _j1b = json.loads(_o1b)
+            cases.append(("r75a_ingest_route_decision_tree",
+                          _rc1 == 0 and _j1.get("route") == "ASK_USE_EXISTING"
+                          and _rc1b == 0 and _j1b.get("route") == "PROFILE_OWN"))
+            # (2) ingest-analyze --text-file: letterhead → đề xuất sohieu + lệnh ingest-local điền sẵn
+            _txt75 = Path(_d75) / "vb.txt"
+            _txt75.write_text("QUỐC HỘI\n--------\nLuật số: 45/2019/QH14\n\nLUẬT\nBẢO HIỂM XÃ HỘI\n\n"
+                              "Điều 1. Phạm vi điều chỉnh\nNội dung.", encoding="utf-8")
+            _rc2, _o2 = _cap75(_TL_MODULE.cmd_ingest_analyze, argparse.Namespace(
+                file=None, text_file=str(_txt75), cat="", source_quality="auto", ocr_verified=False))
+            _j2 = json.loads(_o2)
+            cases.append(("r75a_ingest_analyze_letterhead_plan",
+                          _rc2 == 0 and "45" in str(_j2.get("sohieu") or _j2.get("classification") or _j2)
+                          and "--auto-plan" in _j2.get("ingest_command", "")
+                          and "--text-file" in _j2.get("ingest_command", "")))
+            # (3) source-rename DRY: tìm theo sohieu, gợi ý tên chuẩn, không ghi gì
+            _n_calls_before75 = len(_gas_calls75)
+            _rc3, _o3 = _cap75(_TL_MODULE.cmd_source_rename, argparse.Namespace(
+                config=None, profile=None, target="45-2019-QH14", name="", sohieu="",
+                refresh=False, apply=False, rename_drive=False))
+            _j3 = json.loads(_o3)
+            cases.append(("r75a_source_rename_dry_suggest",
+                          _rc3 == 0 and _j3.get("mode") == "DRY" and bool(_j3.get("new_name"))
+                          and _j3.get("drive_id") == _E75["drive_id"] and len(_gas_calls75) == _n_calls_before75))
+            # (4) shared-source-fix DRY: 2 drive_id chung 1 nlm_source_id → 1 group report-only
+            _rc4, _o4 = _cap75(_TL_MODULE.cmd_shared_source_fix, argparse.Namespace(
+                config=None, profile=None, refresh=False, apply=False, confirm=""))
+            _j4 = json.loads(_o4)
+            cases.append(("r75a_shared_source_fix_dry_groups",
+                          _rc4 == 0 and _j4.get("groups") == 1
+                          and (_j4.get("plan") or [{}])[0].get("source_id") == "S75"))
+            # (5) register --bulk GUARDS (P0-1): drive_id cắt cụt → CHẶN; cat rác → CHẶN; đều KHÔNG ghi
+            _items_bad_did = Path(_d75) / "bad_did.json"
+            _items_bad_did.write_text(json.dumps([{"drive_id": "short123", "name": "x"}]), encoding="utf-8")
+            _items_bad_cat = Path(_d75) / "bad_cat.json"
+            _items_bad_cat.write_text(json.dumps([{"drive_id": _E75["drive_id"],
+                                                   "cat": "30_To_chuc_bo_may_nha_nuoc", "name": "y"}]),
+                                      encoding="utf-8")
+            _n_calls_before75b = len(_gas_calls75)
+            _rc5, _ = _cap75(_TL_MODULE.cmd_register, argparse.Namespace(
+                config=None, profile=None, bulk=str(_items_bad_did), force_insert=False, cols=None,
+                apply=True, confirm="yes"))
+            _rc5b, _ = _cap75(_TL_MODULE.cmd_register, argparse.Namespace(
+                config=None, profile=None, bulk=str(_items_bad_cat), force_insert=False, cols=None,
+                apply=True, confirm="yes"))
+            _posts75 = [c for c in _gas_calls75[_n_calls_before75b:] if c[0] == "post"]
+            cases.append(("r75a_register_bulk_guards_block",
+                          _rc5 == 2 and _rc5b == 2 and not _posts75))
+    finally:
+        for _k, _v in _sav75.items():
+            setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

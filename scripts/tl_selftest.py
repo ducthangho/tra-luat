@@ -5612,6 +5612,58 @@ def run() -> int:
     _tl_src75 = Path(_ins69.getsourcefile(_g75["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r75_no_dual_definition",
                   all(_tl_src75.count(f"def {n}(") == 1 for n in _io_names75)))
+    # ═══ v1.34.9 — r76a_*: I6 characterization TRƯỚC cut lookup cmds — wiring OFFLINE trên fixture manifest
+    # (_source_map_one Ở LẠI tl — engine đã có 59 điểm test; đây khoá SHELL cmd quanh nó) ═══
+    _E76 = [
+        {"drive_id": "gd_l45", "name": "Luat_Bao_hiem_xa_hoi_45-2019-QH14", "so_hieu": "45/2019/QH14",
+         "cat": "12_Lao_dong", "loai": "Luật", "corpus": "true", "nlm_source_id": "s45",
+         "nlm_notebook_id": "NBX", "nlm_status": "pushed", "row_kind": "own",
+         "mime": "application/vnd.google-apps.document", "title_vn": "Luật Bảo hiểm xã hội"},
+        {"drive_id": "gd_sd88", "name": "Luat_88-2025-QH15_Sua_doi_BHXH", "so_hieu": "88/2025/QH15",
+         "cat": "12_Lao_dong", "loai": "Luật", "corpus": "true", "nlm_source_id": "s88",
+         "nlm_notebook_id": "NBX", "nlm_status": "pushed", "row_kind": "own", "goc": "gd_l45",
+         "mime": "application/vnd.google-apps.document"},
+    ]
+    _keys76 = ("apply_profile_offline", "load_creds", "_manifest_entries", "_cache_file")
+    _sav76 = {k: getattr(_TL_MODULE, k) for k in _keys76}
+    try:
+        with _tf72.TemporaryDirectory() as _d76:
+            (Path(_d76) / "manifest.json").write_text("{}", encoding="utf-8")   # nhánh refresh-if-missing im lặng
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(_E76)
+            _TL_MODULE._cache_file = lambda name: Path(_d76) / name
+            # (1) source-map --json: canonical đúng + alias results==items + verdict có mặt + flags top-level
+            _rc1, _o1 = _cap71(_TL_MODULE.cmd_source_map, argparse.Namespace(
+                config=None, profile=None, queries=["45/2019/QH14"], refresh=False, json=True, out=None,
+                strict=False, base_also=False, no_base_also=True))
+            _j1 = json.loads(_o1)
+            _c1 = (_j1.get("items") or [{}])[0].get("canonical") or {}
+            cases.append(("r76a_source_map_canonical_shape",
+                          _rc1 == 0 and _j1.get("ok") is True
+                          and str(_c1.get("name", "")).startswith("Luat_Bao_hiem_xa_hoi")
+                          and _j1.get("results") == _j1.get("items")
+                          and "verdict" in _j1 and "qt5_queries" in _j1))
+            # (2) source-map MISS: không canonical, pipeline vẫn ok + rc=0 (verdict=PHÁT HIỆN, không phải lỗi lệnh)
+            _rc2, _o2 = _cap71(_TL_MODULE.cmd_source_map, argparse.Namespace(
+                config=None, profile=None, queries=["999/1999/QH99"], refresh=False, json=True, out=None,
+                strict=False, base_also=False, no_base_also=True))
+            _j2 = json.loads(_o2)
+            cases.append(("r76a_source_map_miss_rc0",
+                          _rc2 == 0 and _j2.get("ok") is True
+                          and not ((_j2.get("items") or [{}])[0].get("canonical"))))
+            # (3) status --amendment guard offline: sohieu ĐÃ corpus + NLM → SKIP + AMENDMENT_ALREADY_IN_CORPUS_ON_NLM
+            _rc3, _o3 = _cap71(_TL_MODULE.cmd_status, argparse.Namespace(
+                config=None, profile=None, sohieu="88/2025/QH15", targets="", amendment=True, vbhn=False,
+                json=True, strict=False, refresh=False))
+            _j3 = json.loads(_o3)
+            cases.append(("r76a_status_amendment_guard_skip",
+                          _rc3 == 0 and _j3.get("decision") == "SKIP"
+                          and _j3.get("surface") == "AMENDMENT_ALREADY_IN_CORPUS_ON_NLM"
+                          and "NO_DUPLICATE_INGEST" in (_j3.get("flags") or [])))
+    finally:
+        for _k, _v in _sav76.items():
+            setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

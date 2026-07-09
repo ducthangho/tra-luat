@@ -593,13 +593,16 @@ def _golden_ensure_fixtures() -> None:
     }, ensure_ascii=False, indent=1, sort_keys=True).encode("utf-8")
     snap_b = snap_a.replace(b"4.793", b"4.794").replace(b"00:00:00", b"11:11:11")
     def _zip_bytes(members):
+        # v1.34.0 (CI run #1 bắt được): DEFLATE cho output KHÁC NHAU giữa các build zlib (Ubuntu zlib-ng ≠
+        # Windows) → sha256(zip) trong idempotency_key lệch golden cross-platform. STORED = bytes chỉ phụ
+        # thuộc nội dung + metadata → máy-độc-lập thật sự.
         import io as _io
         buf = _io.BytesIO()
-        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_STORED) as zf:
             for name, data in members:
                 info = zipfile.ZipInfo(name)
                 info.date_time = (1980, 1, 1, 0, 0, 0)
-                info.compress_type = zipfile.ZIP_DEFLATED
+                info.compress_type = zipfile.ZIP_STORED
                 info.external_attr = 0o100644 << 16
                 zf.writestr(info, data)
         return buf.getvalue()

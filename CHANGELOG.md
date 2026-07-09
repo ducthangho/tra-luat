@@ -1,3 +1,10 @@
+# v1.33.60 — CI-fix: fixture zip ZIP_STORED (2026-07-09)
+
+- CI run #1 (ubuntu+windows) bắt đúng lớp bug nó sinh ra để bắt: DEFLATE bytes khác nhau giữa build zlib
+  (Ubuntu zlib-ng ≠ Windows) → sha256(zip fixture) trong idempotency_key lệch 2 golden `ingest_zip_dryrun_*`.
+- `_golden_ensure_fixtures` chuyển ZIP_STORED — bytes máy-độc-lập thật; regen 2 golden. Runtime-identical,
+  không deploy riêng (ship cùng v1.34.0).
+
 # ★ v1.33.59 — Pha G: drift-test expansion + siết gate (thực thi 9 quyết định grilling 2026-07-09)
 
 - **Siết-6 (quyết định #6):** contract idempotency THẬT cho nlm-add/recat/source-rename/source-delete/

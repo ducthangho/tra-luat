@@ -15,7 +15,7 @@
     "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
     "schema": "idempotency_contract.v1"
   },
-  "idempotency_key": "564c4915eb8bec657ed94c1bb85214e6be2dd31c89d2ad74c4f12ebb710b621c",
+  "idempotency_key": "d08f081a07580a0df7cfafde556ce00c615d42ddde8c4f84d9ffc16660f3d71a",
   "items": [
     {
       "action": "ingest-local",

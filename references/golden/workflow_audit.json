@@ -1052,6 +1052,14 @@
       "name": "prompt_instruction_dev"
     }
   ],
+  "kernel": {
+    "links_checked": 13,
+    "links_missing": [],
+    "links_ok": true,
+    "size_bytes": 42708,
+    "size_limit": 49152,
+    "size_ok": true
+  },
   "ok": true,
   "registry": {
     "checked_commands": 53,

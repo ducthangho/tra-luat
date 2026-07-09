@@ -1,3 +1,18 @@
+# ★ v1.34.7 — I4: tách profile_mgmt → tl_core/ + FIXTURE-CONFIG (golden ops-plan hồi sinh) (2026-07-09)
+
+- **FIXTURE-CONFIG tất định** (`fixtures/config_fixture.json` sinh-tại-chỗ, 2 profile, registryDocId pin sẵn) —
+  giải bài cách-ly-config từ CI I1: golden **ops-plan HỒI SINH** (`hygiene_ops_plan_fixture_config`: `--config`
+  fixture + xoá env `TL_*` per-case → cross-machine; không chứa path máy, ổn định ×2). Fixture dùng lại được
+  cho mọi case cần config.
+- **Characterization TRƯỚC cut**: +4 wiring `r74a_*` trên fixture config — profile-list; profile-info
+  **CHỊU-LỖI-GÕ** ('ho_so_74'→'Hồ sơ 74', khoá P2 v1.33.48); profile-use DRY-không-ghi-config +
+  PROFILE_NOT_FOUND rc=2; profile-rename DRY plan + cấm rename profile nền. PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 22 def (~967 dòng)** → `tl_core/profile_mgmt.py`. tl.py 15.743→**14.932** dòng.
+  Hạ tầng profile dùng chung (`_apply_profile_env`/`_profile_lookup`/`_read_config_record`/
+  `_persist_profile_config`/`_profile_policy_error`/`_active_profile`…) GIỮ Ở TL (đếm-tham-chiếu).
+  Test clobber-guard trỏ nguồn thật ở module. +r74 wired/no-dual → selftest **690/690**; golden 18/18
+  khớp nguyên trạng; audit strict xanh.
+
 # ★ v1.34.6 — vá 3 defect profile văn-bản-thường (log phiên hồ sơ Luật BHXH 2026-07-09) (2026-07-09)
 
 - **(#1 — ghi sai metadata âm thầm)** `_classify_doc_header` hết nhận số hiệu TRÍCH DẪN làm số hiệu tài liệu:

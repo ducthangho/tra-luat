@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -3784,7 +3784,8 @@ def run() -> int:
     # ───── GUARD chống clobber registry NỀN (sự cố 2026-06-30: profile registryDocId rỗng → xóa base) ─────
     try:
         import inspect as _insp3
-        _src_pr = _insp3.getsource(cmd_profile_rebuild_registry)
+        import tl_core.profile_mgmt as _pm3   # I4 v1.34.7: nguồn THẬT ở tl_core.profile_mgmt (tên tl là stub)
+        _src_pr = _insp3.getsource(_pm3.cmd_profile_rebuild_registry)
         _src_mf = _insp3.getsource(cmd_manifest)
         cases.append(("profile_registry_clobber_guard",
                       "PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE" in _src_pr
@@ -5489,6 +5490,22 @@ def run() -> int:
     finally:
         for _k, _v in _env74.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+    # ═══ v1.34.7 — r74_*: I4 parity wrapper↔module (kiểu r70-r72) ═══
+    import tl_core.profile_mgmt as _pm74
+    _pm_names74 = ["cmd_profile_info", "_profile_info_from_config", "cmd_profile_list", "cmd_profile_use",
+                   "cmd_profile_rename", "cmd_profile_delete", "cmd_profile_files", "cmd_profile_manifest",
+                   "cmd_profile_adopt", "_cmd_profile_adopt_impl", "cmd_profile_doctor", "_cmd_profile_doctor_impl",
+                   "cmd_profile_index", "_cmd_profile_index_impl", "_profile_index_rows", "_profile_index_csv",
+                   "cmd_profile_create", "cmd_profile_rebuild_registry", "_profile_rebuild_partition",
+                   "_profile_list_discover", "_profile_manifest_entries_for", "_create_profile_manifest_json"]
+    _g74 = globals()
+    cases.append(("r74_profile_mgmt_module_wired",
+                  all(callable(getattr(_pm74, n, None)) for n in _pm_names74)
+                  and all(f"_tl_profile_mgmt.{n}" in _ins69.getsource(_g74[n]) for n in _pm_names74)
+                  and _pm74._TL is not None))
+    _tl_src74 = Path(_ins69.getsourcefile(_g74["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r74_no_dual_definition",
+                  all(_tl_src74.count(f"def {n}(") == 1 for n in _pm_names74)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

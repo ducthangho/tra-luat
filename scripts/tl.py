@@ -89,7 +89,7 @@ EXPECT_VERSION = "2.21.2i"
 # [lịch sử, đã gộp 1.24.0] 1.23.22: ROOT-CAUSE THẬT sự cố 2026-06-30 (ĐÍNH CHÍNH 1.23.21: KHÔNG mất data 766 dòng!). Thật ra config `registryDocId` trỏ NHẦM Doc legacy `1mATG` (vnd.google-apps.document) thay vì SHEET registry thật → webapp mở Doc-as-Sheet → đọc RỖNG → count=0 ẢO (data vẫn nguyên; corpus 552 là do dedup-plan −50). Template public init-config hay ghi đè về Doc legacy → tái diễn mỗi setup. FIX: (1) doctor CHẶN cứng `registryDocId == _LEGACY_REGISTRY_DOC_ID` (1mATG) → báo sửa về Sheet/để rỗng; (2) `init-config` AUTO-HEAL: blank registryDocId (base+profiles) nếu = Doc legacy → webapp auto-discover Sheet `tra_luat_registry`. (Giữ guard 1.23.21 cho ca profile registryDocId rỗng.) +1 test → 260/260. # 1.23.21: ⛔ GUARD CHỐNG CLOBBER REGISTRY NỀN (SỰ CỐ NGHIÊM TRỌNG 2026-06-30: profile dự án 'Khảo sát Luật XB' registryDocId RỖNG → webapp `regSS_` rơi nhánh BASE → manifest --touched-drive quét phình rồi profile-rebuild-registry XÓA SẠCH 766 dòng registry NỀN VBQPPL). FIX: `cmd_manifest` (--touched-drive) + `cmd_profile_rebuild_registry` CHẶN khi profile dự án có TL_REGISTRY_DOC_ID rỗng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — phải tạo registry RIÊNG trước. PHÁT HIỆN từ GS: registry base = Google SHEET `tra_luat_registry` (regSS_ tìm theo tên/TL_REGSHEET_ID_AUTO), KHÔNG phải Doc 1mATG (chỉ ping/display); khôi phục = restore SHEET đó (version history Sheets), cache `tl212_reg_*` TTL 600s. +1 test → 259/259. # 1.23.20: DETECTOR `infra_in_corpus` (phát hiện khi rà 106 Luật dump) — file HẠ TẦNG (.json/.enc/secrets/nlm_sources_delta/manifest/registry) lẫn corpus=true = RÁC (vd tl_secrets.enc, nlm_sources_delta_*.json đếm như văn bản). `_is_infra_entry` (module-level, BẢO VỆ GDoc/PDF/Word) + thêm vào `tl sweep` (cờ + NEXT ACTION set corpus=false). +1 test → 258/258. # 1.23.19: COMPOSITE `tl dedup-plan` (user yêu cầu) — kế hoạch dedup TOÀN CORPUS 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). Tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters `_cluster_same_doc` = CÙNG văn bản theo subject-sig + gộp sidecars .docx/.pdf cạnh GDoc). GIỮ canonical, set corpus=false bản dup (reversible). BẤT BIẾN AN TOÀN: không quarantine chính canonical / canonical của cụm khác / trùng lặp. DRY mặc định; --apply ghi reg_bulk corpus=false; review (thiếu canonical) + dups_on_nlm (còn nguồn NLM→cân nhắc xoá tay) chỉ BÁO. sweep NEXT ACTION trỏ dedup-plan. Pure `_dedup_plan`. +1 test → 257/257. # 1.23.18: FIX false-fire NLM_STATUS_MISMATCH (phát hiện khi nlm-orphans --fix-mismatch LIVE trả MISMATCH_LIVE=0 dù sweep báo 79). Whitelist status exact-match KHÔNG nhận biến thể `removed_*` (removed_superseded_by_VBHN, removed_dedup…) → false-fire + `_entry_on_nlm_live` coi NHẦM removed_* là sống (lệch still_on_nlm/ghost). FIX: `_nlm_status_known`/`_nlm_status_removed` nhận HỌ tiền tố (pushed*/synced/removed*/trash*/deleted), áp 4 site (doctor flag, _title_flags, _entry_on_nlm_live, vbhn-normalize removed). sweep NEXT ACTION: NLM_STATUS_MISMATCH = nhãn LẠ (registry hygiene) KHÔNG phải live desync. +2 test → 256/256. # 1.23.17: `tl sweep` NEXT ACTION nlm_drift TÁCH theo sub-type (phát hiện khi reconcile LIVE không giảm drift) — trước gộp 288 thành 'nlm-reconcile --apply' GÂY HIỂU NHẦM (reconcile chỉ chữa LINKAGE). Nay: NLM_NOTEBOOK_ID_MISSING→nlm-reconcile (linkage); NLM_STATUS_MISMATCH→nlm-orphans --fix-mismatch (đọc live); CORPUS_TRUE_NOT_ON_NLM→ingest-missing (job lớn, phần lớn CẤU TRÚC corpus>cap, KHÔNG về 0). # 1.23.16: DETECTOR `shared_source_id` (phát hiện khi dọn ghost NLM LIVE) — ≥2 drive_id KHÁC nhau CÙNG 1 nlm_source_id (backfill/reconcile gắn nhầm) = FALSE-LINK: xóa nguồn của row này GÃY link row kia (ca NQ42: canonical + ghost chung source_id → xóa ghost làm canonical mất NLM, phải re-push). Pure `_shared_source_id_groups` + thêm vào `tl sweep` (cờ + NEXT ACTION cảnh báo SỬA TRƯỚC nlm-reconcile/xóa nguồn). Dev cache thấy 4 nhóm. +1 test → 254/254. # 1.23.15: xử báo cáo rà 106 Luật (mục code còn lại; 5.1/5.3/5.6/4.B đã vá ở 1.23.11-14). 5.2 vbhn-check goc_hit cross-subject LỌT (14-2024 ATVSLĐ vào --goc 09-2017 Du lịch vì _disc_conflict không biết cặp) → `_vbhn_candidates`: khi ĐÃ biết subject, goc_hit phải TƯƠNG THÍCH chủ đề (sscore≥30) mới giữ. 5.5 Cowork /tmp sticky owner-nobody không ghi được → `_ensure_writable_tmpdir()` trỏ TMPDIR về CACHE/tmp ($HOME) lúc import (tempfile.* + script con kế thừa). 5.4 SKILL.md bootstrap options + cảnh báo 45s; 4.B thêm vbhn-normalize/sweep/quarantine-fix/vbhn-year-fix vào bảng CLI. +2 test → 253/253. # 1.23.14: COMPOSITE `tl quarantine-fix` (dọn nhóm B tất định) — phân loại dòng quarantine MÂU THUẪN: set_corpus_false (raw-dup .pdf/.docx gán nhầm corpus→false, AN TOÀN) + normalize_label (nhãn biến thể→QUARANTINE_CAT) tự động qua --apply; review_restore (GDoc corpus=true nghi canonical kẹt như A1/BLLĐ→KHÔNG auto, quyết tay) + ghost_nlm (quarantine còn nguồn NLM live→báo source_id, xoá tay sau verify). Pure `_quarantine_fix_items`. DRY mặc định. +1 test → 251/251. # 1.23.13: (1) MERGE HỘI TỤ bản Codex v1.23.11 (cùng vá report rà corpus) — PORT phần UNIQUE: A1 SUBJECT-GATE thật (`_name_subject_match`/`_name_subject_text`: source-map ghim canonical CHỈ trong hit KHỚP CHỦ ĐỀ, abbrev-aware BLLD/BHXH; hit generic→None+SUBJECT_MISMATCH) + `resolve_identity` +name_tokens (dedup-check 'Luật Thư viện') + vbhn-check SUBJECT_FILTER_WEAK + reg-query LIMIT_TRUNCATED rõ. GIỮ bản tôi đã verify cho A2-A5 + reg-query json-all. (2) GỠ `_parts` (chống mount-cắt-cụt — Cowork nay bootstrap qua tl_fetch zip sạch nên hết tác dụng): xoá scripts/_parts/ + build_parts.py + tl_rebuild.sh; tl_boot.py rút gọn (strip-NUL→compile→exec); `_reassemble_parts`→None (heal degrade về on-disk); edit-skill/verify-integrity bỏ build_parts. (3) COMPOSITE TẤT ĐỊNH `tl sweep`: 1 lệnh thay chuỗi 6 audit (hygiene+cat+slot+drift+vbhn-year+quarantine) → JSON/text + NEXT ACTIONS điền sẵn (pure `_sweep_report`). +4 test → selftest 250/250. # 1.23.12: 2 fix từ chạy B1 LIVE. (1) reg-query `--json` UNDERCOUNT âm thầm — mặc định cắt 60 rows → script đếm `len(rows)` thiếu (audit quarantine thấy 60/110). Nay `--json` trả TẤT CẢ rows mặc định (text vẫn cắt 60 + dòng '(hiện 60)') + cờ `truncated`. (2) hygiene scan thêm cờ TRẠNG THÁI MÂU THUẪN `quarantine_corpus_true` (trong quarantine nhưng corpus=true) + `quarantine_still_on_nlm` (quarantine nhưng còn nguồn NLM live = ghost) → surface để dọn. # 1.23.11: xử báo cáo rà corpus (nhóm A). A2: hằng `QUARANTINE_CAT` + `_is_quarantine_label_variant` + cờ hygiene scan `quarantine_label_variants` (audit hội tụ dù nhãn lệch QUARANTINE/_ZZZ — `_is_quarantine_cat` nhận mọi biến thể). A3: `slot-audit` TỰ neo `live_source_count` từ nlm CLI (+`--no-live`) → cảnh báo gap estimate↔live khỏi gọi `--physical` tay. A4: `doctor` in BREAKDOWN từng cờ (NLM_STATUS_MISMATCH/CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING) + lệnh `nlm-reconcile <nb> --apply` ĐIỀN SẴN notebook id. A5: help `vbhn-check --subject` thêm cảnh báo QUOTE. A1 (source-map ghim sai canonical 'Bộ luật Lao động'→'Dân chủ 87'): KHÔNG tái hiện trên v1.23.11 với dữ liệu đại diện — gate LOW_CONFIDENCE_NAME_MATCH gốc đã null canonical khi top không strong-match; giữ gate (thử thay bằng nhóm tail-key gây regression abbrev/quarantine → revert). Cần `source-map --json` LIVE để soi nếu còn. +3 test. # 1.23.10: GUARD cat (phát hiện khi nạp THADS 106/2025 LIVE) — `register`/reg_bulk KHÔNG validate `cat` → workaround gõ tay folder RÁC '30_To_chuc_bo_may_nha_nuoc' (số 30 + tên cat 35) lọt im lặng → registry lệch folder vật lý. Nay `_is_valid_cat_value` chặn cat không thuộc taxonomy 45+2 (cả nhánh --bulk lẫn reg_upsert), rc=2, nhắc dùng `tl recat --cat <số>`. +1 test. BÀI HỌC: đổi cat LUÔN dùng recat (resolve+validate folder), KHÔNG register --bulk tên gõ tay. # 1.23.9: 2 FIX (phát hiện khi chạy vbhn-year-fix LIVE Cowork). (A) vbhn-year-fix CHỈ quét entry corpus=true — sidecar/quarantine (corpus=false) KHÔNG year-fix → hết CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số; hygiene báo 'sạch' nhưng vbhn-year-fix báo conflict = mâu thuẫn do quét cả non-corpus). (B) HINT SAI: lệnh ghi in `MANIFEST_STALE_RUN_REGEN2` → `tl regen2` KHÔNG phải lệnh (chỉ có `tl manifest`; regen2 là action GAS qua `manifest --touched-drive`) → user chạy nhầm. Sửa 5 hint + dòng recat → `tl boot --refresh` (sau ghi registry sheet) / `tl manifest` (sau đổi cây Drive). +test corpus-skip. # 1.23.8: SAFEGUARD cho vbhn-year-fix (phát hiện khi soát DRY) — nếu ≥2 dòng suy ra CÙNG `NN-YYYY-VBHN-XXX` (dòng dup cùng văn bản, HOẶC 2 văn bản khác cùng số+năm) thì ghi sẽ TẠO collision MỚI → tách bucket `conflicts`, KHÔNG auto-apply (rc=1), in 🔴 CONFLICT để dedup/phân biệt tay. `_vbhn_year_fix_items` nay trả (fixable, needs_year, conflicts). +1 test. # 1.23.7: ★ BẤT BIẾN ĐẶT TÊN (user nhấn mạnh) — số hiệu VBQPPL PHẢI có NĂM; VBHN là thủ phạm (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH=ATTP 2025+Thuế TNDN 2026, 115/VBHN-VPQH=THADS 2025+Thi đua 2026). Lệnh MỚI `tl vbhn-year-fix [--with-name] [--apply]`: quét VBHN sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên qua `_entry_issue_year`) → đề xuất `NN-YYYY-VBHN-XXX`, GHI qua reg_upsert (KHÔNG reg_bulk — sohieu là khóa immutable); ca không suy được năm → needs_year (xác minh tay). Pure `_vbhn_sohieu_inject_year`/`_name_inject_vbhn_year`/`_vbhn_year_fix_items` (test offline). + `register` cảnh báo `VBHN_SOHIEU_NO_YEAR` khi ghi sohieu VBHN thiếu năm. +3 test. (Phát hiện đã có sẵn: cờ VBHN_BARE_NUMBER/MISSING_YEAR_OR_DATE/NAME_MISSING_YEAR.) # 1.23.6: FIX (phát hiện khi KH2 Pha 2.6 recat Cowork) — `recat --apply` báo `reg_patched:0` ÂM THẦM khi Drive đã move nhưng webapp index chưa thấy row mới thêm (registry cat KHÔNG cập nhật → user tưởng xong). Nay LOUD cảnh báo stderr + rc=1 khi reg_patched < moved, chỉ rõ KHẮC PHỤC (regen2 --refresh rồi reg_bulk lại). Cùng họ "ghi im lặng" với 1.23.5. +1 test. # 1.23.5: FIX BUG (phát hiện khi KH2 Pha 2.8 chạy Cowork) — `missing-sohieu --apply` ghi reg_bulk cột `so_hieu` (có gạch dưới) → webapp BỎ IM LẶNG (đúng gotcha API_CONTRACT mục 0: khóa phải `sohieu`); apply thẳng trả patched=0 mà KHÔNG báo lỗi. Sửa items key + cols → `sohieu` (line ~8061) + help/docstring. Workaround Cowork (cols="sohieu") đã ghi 193/193; nay code gốc đúng. +1 test. # 1.23.4: ★ KH1 HOÀN TẤT — `tl relation-backfill --base <sh> [--apply]` (Pha 1.5 cuối, cho KH2 Pha 2.3): GHI quan hệ sửa đổi mà relation-check ĐÃ phát hiện (missing_links từ `_relation_audit`, tái dùng cổng footnote chống dương-tính-giả) — set `goc` cho luật SỬA, append `sua_doi` cho luật GỐC (pure `_relation_backfill_items` HỢP NHẤT sua_doi cũ + dedup, KHÔNG đè). CHỈ direct/ref-linked; subject-only → review (xác minh tay). DRY mặc định. +1 test → selftest 237/237. → TOÀN BỘ lệnh KH1 đã dựng (3 cổng + vòng lặp + dọn-corpus + nlm-orphans + relation-backfill). CÒN: cập nhật RUNBOOK/API_CONTRACT (tài liệu), KH2/KH3 (corpus). # 1.23.3: FIX DEPLOY-DISPLAY — SKILL.md header ghi CỨNG '(v1.22.70)' qua MỌI bump 1.22.71→1.23.2 (tôi quên sed SKILL.md) → bản deploy HIỂN THỊ 'v1.22.70' dù runtime đúng. Sửa SKILL.md→(v1.23.3) + GUARD selftest `skill_md_version_matches_VERSION` (bump nào quên cập nhật SKILL.md = selftest FAIL → chặn deploy). LƯU Ý vận hành: Package live khi kiểm = 1.23.0 (1.23.1/1.23.2 CHƯA push thành công — drive-push cần gws auth); verify push bằng curl Package fileId. +1 test → selftest 236/236. # 1.23.2:`tl nlm-orphans <notebook> [--fix-mismatch] [--deep]` — TỰ ĐỘNG HOÁ điều tra ghost (thay 6 vòng soi tay): đọc nguồn NLM LIVE (`nlm_cli.source_list`) ↔ registry → phân `_classify_nlm_sources` (PURE, test offline) thành REGISTERED_ACTIVE / **STATUS_MISMATCH_LIVE** (dòng registry removed* nhưng nguồn còn SỐNG = gắn nhãn SAI, vd 8 văn bản đã vá tay) / UNREGISTERED (trên NLM, không dòng registry). REPORT-ONLY; --fix-mismatch in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (KHÔNG đụng NLM/KHÔNG xóa); --deep đọc nội dung NLM lấy SỐ HIỆU header thật (vá cả sohieu cụt như '66'→'66.18/2026/NQ-CP'). +1 test → selftest 235/235. (CÒN: relation-backfill Pha 1.5 live; root-cause pipeline gắn nhầm removed_from_drive; SKILL.md/RUNBOOK/API_CONTRACT.) # 1.23.1: vá sweep-finding — `overflow-resolve` ĐỐI CHIẾU LIVE (nlm-get) thay vì registry-only: dùng MAX(registry, physical) làm slot hiệu lực (`_overflow_status`) → KHÔNG báo 'còn chỗ' giả khi vật lý vượt cap (vd base registry 279 / LIVE 315); cờ `REGISTRY_BEHIND_LIVE` lộ nguồn add thẳng CHƯA đăng ký (gợi `tl nlm-reconcile`); sửa cosmetic flag (BASE_HAS_ROOM khi base còn chỗ). `--no-live` để registry-only. (ingest-missing --apply ĐÃ physical-safe sẵn qua nlm-get.) +1 test → selftest 234/234. # 1.23.0: ★ KH1 (sửa skill sau báo cáo rà 70 Luật) — PHÁT HÀNH. Pha 1.3/III.2: `tl slot-audit --all-shards` (II.5 đếm slot TỪNG shard + cảnh báo near-full ≥270/300, pure `_slot_count_all_shards`) + `tl overflow-resolve` (II.1 kiểm shard overflow SẴN CÓ → cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE, chống tạo notebook nhầm; reuse `_overflow_route`) + `tl edit-skill <file> --patch` (III.2 sửa skill an toàn: assert-đếm→py_compile→write_text→build_parts, né Edit/Write mount; DRY mặc định). manifest-stale (II.4): lệnh ghi MỚI phát MANIFEST_STALE_RUN_REGEN2. canonical-not-sidecar (II.3): ĐÃ xử qua deep-resolver `_resolve_deep_target`+`_is_source_sidecar`+phạt raw-300. +3 test → selftest 233/233. ★ TỔNG KH1 (1.22.71→1.23.0): H1/H2/UTF-8/instructions--out; 3 CỔNG G1(source-verify)/G2(header-verify)/G3(cat-verify+cat-audit/recat FIX); vòng lặp frontier-expand/ingest-missing(no-new-notebook)/rasoat-loop; dọn corpus backfill-loai/sohieu-conflict/missing-sohieu; slot-audit/overflow-resolve/edit-skill. CÒN (1.23.1): relation-backfill (live, Pha 1.5); cập nhật SKILL.md/RUNBOOK/API_CONTRACT + upload Package (user-side). # 1.22.76: KH1 Pha 1.5 — `tl missing-sohieu` (đề xuất số hiệu cho dòng registry thiếu sohieu, parse từ TÊN qua `_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục; DRY mặc định, --apply ghi reg_bulk so_hieu; ⚠ ĐỀ XUẤT theo tên — XÁC MINH bằng header-verify/G2; LIVE suy 194/307 dòng thiếu). +1 test → selftest 231/231. HOÀN TẤT Pha 1.5 quick-wins pure (backfill-loai+sohieu-conflict+missing-sohieu). CÒN (v1.23.0): Pha 1.5 relation-backfill (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + III.2 edit-skill. # 1.22.75: KH1 Pha 1.5 (quick-wins pure) — `tl backfill-loai` (suy `loai` chuẩn cho dòng trống từ tên+số hiệu qua pure `_infer_loai`; DRY mặc định, --apply ghi reg_bulk; idempotent; LIVE manifest suy được 191/769) + TÁCH `SOHIEU_CONFLICT_DIFFERENT_DOC` (≥2 chữ-ký-chủ-đề KHÁC cùng số hiệu = văn bản KHÁC, NGUY HIỂM) khỏi `SAME_DOC` (sidecar) trong registry-doctor (`_subject_sig`; thêm khóa `sohieu_conflict_groups` vào schema text=json; LIVE 22 conflict/6 same trong 28 dup). +3 test → selftest 230/230. CÒN (v1.23.0): Pha 1.5 relation-backfill/missing-sohieu (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit) + III.2 edit-skill. # 1.22.74: KH1 Pha 1.2 HOÀN TẤT P0 — `tl ingest-missing` (nạp backlog corpus chưa NLM → source_add+reg_bulk; IDEMPOTENT + checkpoint resume; DRY mặc định; định tuyến theo chỗ trống base→overflow shard SẴN CÓ; BẤT BIẾN `_overflow_route` KHÔNG BAO GIỜ tạo notebook (đầy→BLOCKED hỏi user); pure `_ingest_missing_select`/`_overflow_route` test offline) + `tl rasoat-loop` (orchestrator VÒNG LẶP KHÉP KÍN report-only: SEED→frontier-expand→mở rộng đệ quy in-corpus đọc nguyên-văn KHÔNG RAG→dedup seen chống lặp→hội tụ dry_rounds≥K; xuất GAP ngoài-corpus + in-corpus-chưa-NLM; pure `_rasoat_dedup_push`). +4 test → selftest 228/228. CÒN (v1.23.0): Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + Pha 1.5 (backfill-loai/sohieu-conflict/relation-backfill/missing-sohieu) + III.2 edit-skill. LƯU Ý: ingest-missing/rasoat-loop nhánh mutate/expand-live CHƯA test trên dev (không NLM cred) — lần --apply đầu chạy Cowork batch nhỏ. # 1.22.73: KH1 Pha 1.2 — `tl frontier-expand <gdoc|sohieu>` (vòng lặp rà soát): trích MỌI dẫn chiếu (xref+footnote+inline) → ứng viên FRONTIER dedup theo số hiệu + ưu tiên (amending>VBHN>dẫn-chiếu) + cờ in_corpus; `missing_in_corpus` = đầu vào ingest-missing. Pure `_frontier_candidates` (test offline) + `_frontier_doc_text` reader; DISCOVERY/REPORT-ONLY, KHÔNG RAG; --text-file offline. +2 test → selftest 225/225. CÒN (v1.23.0): ingest-missing (mutate NLM, no-new-notebook), rasoat-loop (orchestrator); Pha 1.3; Pha 1.5. # 1.22.72: KH1 Pha 1.2 — DỰNG 3 CỔNG XÁC MINH G1/G2/G3 (dựng SẠCH, KHÔNG dùng bản agent tiêm đã revert). G3: helper pure `_load_linhvuc`/`_cat_taxonomy`/`_infer_cats_text`(suy cat theo NỘI DUNG alias, whole-word)/`_cat_boundary_rule`(ép quy_tac_ranh_gioi: BHXH/BHYT→02, đầu-tư-công/hải-quan→26, sửa≥2 luật→46, điều-ước→23, Đảng→00) + `tl cat-verify <gdoc|sohieu>` (read-only, --text-file offline) + FIX `cat-audit` (confidence/RULE/taxonomy-45+2/--strict) + FIX `recat` (BOUNDARY_CONFLICT advisory + --force-cat). G2: `_extract_header_facts` (ngày+cơ quan, pure) + `tl header-verify [--all/--sohieu/--drive-id/--cat] [--fix-suggest] [--strict]` (batch _verify_header_match, READ-ONLY, bắt DRIFT 775 dòng; KHÁC title_mismatch=metadata nội bộ). G1: `_content_md5` (NFC, pure) + `_official_rank` + `_DISCOVERY_SITES` re-rank OFFICIAL-FIRST (vbpl>congbao>luatvietnam>thuvienphapluat) + `tl source-verify <sohieu|gdoc>` (content_md5 + SOURCE_DISCREPANCY + nguồn official-first đối chiếu, --text-file offline). +14 test → selftest 223/223. CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3; Pha 1.5. # 1.22.71: KH1 (Pha 1.1/1.4) thực thi sau báo cáo rà 70 Luật. H2 `registry-doctor` text=JSON schema (dòng text SINH TỪ `_DOCTOR_SUMMARY_KEYS` → `build_doctor_summary`/`format_doctor_text`, hết lệch nhãn duplicate_sohieu↔_groups/title_mismatch↔_candidates/rows↔count). H1 `reg-query --json` rc=0+envelope KHÓA bằng test (không tái hiện ở canonical; rc=1 trong log = confound redirect/&&/bản cũ). III.1 `os.environ PYTHONUTF8=1`/PYTHONIOENCODING truyền xuống MỌI script con (hết UnicodeEncodeError 'charmap' gen_instructions.py… console Windows) + gen_instructions.py reconfigure standalone. III.3 `tl instructions --out <file>` ghi UTF-8 ra file. +3 test → selftest 209/209. (LƯU Ý: workflow thiết kế v1.23 từng tiêm nhầm header-verify/cat-verify vào canonical → ĐÃ revert, sẽ dựng lại CÓ REVIEW.) CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3 overflow-resolve/canonical-sidecar/manifest-stale/slot-audit; Pha 1.5 backfill-loai/sohieu-conflict/relation-backfill; cổng G1/G2/G3. # 1.22.70: ★ HỢP NHẤT bản Codex v1.22.69 (CONVERGENT — 2 nhánh cùng vá 13 lỗi 2 báo cáo, KHÁC code) + vá LOG RÀ MỚI (Nhóm A-E đa-profile) + LARGE-FILE SPLIT. MERGE: GIỮ bản Claude làm base (verify 197/198, có H/D/G/2.2 mà Codex THIẾU) + PORT phần Codex MẠNH HƠN: (1) DEEP-RESOLVER `_resolve_deep_target`+`_entry_mime`/`_entry_google_doc`/`_entry_raw_no_gdoc`/`_deep_entry_rank` cho extract/xref/footnote-map (ưu tiên GDoc native theo MIME + corpus + NLM-live; tên DÀI toàn chữ-gạch-dưới KHÔNG bị nhận nhầm DriveId → bug C TRỌN VẸN); (2) `_classify_ref` kiểm VBHN-COVERAGE TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED); (3) ENTRY_RAW_NO_GDOC rc=2 + ok:false (đúng yêu cầu báo cáo: chỉ-raw → rc≠0). NHÓM A-E (log đa-profile): B(NGHIÊM TRỌNG) `_ingest_target`/`nlm-add`/`nlm-query` push/query nhắm NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID) — hết đẩy nhầm VBQPPL base khi `--profile NQ36` (+nlm-add/nlm-query nạp apply_profile_offline). A1 `profile-create --apply` GHI BỀN config.profiles.<name> (`_persist_profile_config` merge) → profile-info hết fallback VBQPPL. A2 next-steps cấm copy sheet VBQPPL tay (orphan), dùng `manifest` tạo registry rỗng. C1 `nlm-reconcile` BẮC CẦU gdoc↔source_id (`_nlm_source_drive_id` + link_candidates: nguồn live khớp drive_id/số hiệu của dòng registry thiếu source_id → backfill, hết 'unregistered' giả). C2 `register --nlm-notebook-id` (khỏi backfill-notebook riêng). C3 `backfill-notebook` khóa ĐÚNG NGUỒN: --src-ids→nlm_source_id, --drive-ids→drive_id (hết lệch khóa). D1 cảnh báo profile non-default + categories=inherit (văn bản vào cây chung VBQPPL). D2 `regen2` LOẠI registry/manifest/orphan (mime spreadsheet/json + tên + registryDocId/manifestId) khỏi scan own (hết 3 dòng corpus rác, count 8→5). D3 `reg-delete --force` (đã có) + thông điệp rõ. E1 `nlm_cli._strip_keyring` lọc 'Using keyring backend' khỏi stdout/stderr (hết vỡ json.loads). E2 `reg-query --refresh` (đã có) + help nhắc refresh sau khi ghi sheet. LARGE-FILE: `ingest-local` cổng HỎI TÁCH file > ~1.2MB (NLM_LARGE_SRC_BYTES, --large-threshold) → DỪNG gợi ý tách theo Phần/Chương/Điều (chất lượng RAG cao nhất), `--allow-large` để nạp nguyên (+SKILL.md doctrine). RÀ SOÁT ĐỐI KHÁNG (review+verify) gia cố 14 phát hiện: Group B `_resolve_nlm_notebook` (profile DỰ ÁN thiếu notebookId → ERROR, KHÔNG fallback VBQPPL base — vá GỐC bug B, guard cũ là dead-code vì base luôn truthy) áp nlm-add/query/get/reconcile/cross/ingest-local; C1 link theo số hiệu CHỈ khi DUY NHẤT (số VBHN tái dùng → bỏ qua, hết false-link); cmd_extract positional+--sohieu → ƯU TIÊN --sohieu; `_persist_profile_config` ghi NGUYÊN TỬ (temp+os.replace); `_is_infra_file` chặn false-positive (văn bản GDoc/PDF KHÔNG bao giờ là infra); `_strip_keyring` JSON-safe (chỉ bỏ dòng nhiễu THUẦN, không nuốt thân JSON có cụm keyring); large-file gate ra STDOUT. +6 test → selftest 206/206. # 1.22.69: vá 13 lỗi CÔNG CỤ từ 2 BÁO CÁO RÀ 71+105 LUẬT. A `tl status` verdict→rc=0 (REVIEW/ADD/SKIP = PHÁT HIỆN dữ liệu ≠ lỗi lệnh, hết phá &&/CI; +`--strict` mirror xref; preingest_gate.verdict_exit). C/P0-1 resolver đọc sâu: `_entry_score` PHẠT -300 file THÔ (.docx/.pdf/.html) → GDoc native THẮNG sidecar CÙNG số hiệu (hết xref/footnote im-lặng stdout-rỗng-rc0 bỏ sót ≥6 VBHN); ENTRY_RAW_NO_GDOC in STDOUT (caller agentic THẤY); `_resolve_base_gdoc` fallback drive_id khi sohieu rỗng. B+P1-3 xref: `extract_refs` DEDUP theo SỐ HIỆU (1 phán quyết/số hiệu/run — hết MISSING+MISMATCH mâu thuẫn + phantom 'DCHIẾU 258 này có hiệu lực…' do bắc-cầu mệnh-đề-chuyển-tiếp) + `_clean_ref_name_phrase` cắt prose (GIỮ tên luật thật 'Thi hành án dân sự'). P0-2 `DOC_TEXT_SOHIEU_TYPO` KHÔNG bắc cầu QUA HỌ loại VB (`_doctype_family`: QH≠NQ-TW≠KL-TW≠NĐ-CP — tái dùng số+năm hợp pháp; CÙNG họ QH14↔QH15 vẫn flag). P1-4 source-map: >1 VBHN CÙNG số hiệu KHÁC chủ đề → canonical=None + VBHN_REUSE_AMBIGUOUS_NO_CANONICAL (đòi --subject/năm; CÙNG chủ đề/nhiều version vẫn chốt). P1-5 amendment-detector: LOẠI văn bản PHI quy phạm (sohieu=∅ + 'góp ý/kiến nghị/ý kiến'); PAUSE_AND_ASK_USER CHỈ khi có ứng viên MANG SỐ HIỆU hợp lệ (sohieu=∅ vẫn liệt kê, confidence=low). P2-6 vbhn-check: CONTENT_VERIFY_REQUIRED chỉ khi collision CỦA CHÍNH số hiệu ứng viên (KHÔNG corpus-wide → hết 86 cờ máy móc); verified+năm+duy-nhất+không-tự-collision → VBHN_METADATA_OK. H `tl doctor` cảnh báo TRÔI registry↔NLM (đếm cờ OFFLINE từ cache → gợi ý `tl nlm-reconcile`, KHÔNG chặn/mạng). D `_read_doc_text`+`cmd_xref` TÁI DÙNG cache `extract_<gid>.txt` (Bộ luật Dân sự hết export lại 3 lần→timeout). E `standardize_name.normalize_name` bỏ đuôi .doc/.docx/.pdf khỏi tên CHUẨN (GIỮ ở tên FILE gốc). G `hygiene` bucket `sidecar_corpus_fix` (.docx cạnh GDoc mà corpus=true → đề xuất SET_CORPUS_FALSE). P2-7 chuẩn hoá ENUM `loai`/`hieuluc` lúc register (`_normalize_loai`/`_normalize_hieuluc`) + bucket hygiene `loai_noncanonical` (KHÔNG nhồi `_title_flags` → tránh nhiễu source-map). 2.2 nlm PATH: `nlm_cli` nối ~/.local/bin+user-base bin vào PATH (shutil.which + subprocess env); `doctor` dùng `nlm_exe()` (hết báo đỏ giả); `nlm-install` ghi PATH bền ~/.profile/~/.bashrc (POSIX). +14 test → selftest 194/194. HOÃN P2-8 (tách MISSING ngoài-phạm-vi-corpus vs resolver-trượt — cần enrich manifest). RÀ SOÁT ĐỐI KHÁNG (workflow review+verify) gia cố 9 phát hiện: cmd_status dùng inspect.signature thay except-mù + GIỮ ngữ nghĩa --strict ở fallback (rc=2→1); `_entry_score` chỉ phạt raw CHƯA-trên-NLM (raw đã-push NLM = canonical thật, không hạ oan); P1-4 `_subj_keys` chỉ đếm tail CHỦ-ĐỀ-RÕ (bản tên-trơ không gây false-ambiguity); P1-5 gate góp-ý theo SỐ HIỆU REGISTRY (file 'Góp ý Luật 64/2020' có số trong TÊN vẫn bị loại); `_normalize_loai` gộp mọi ký tự lạ (kể cả ngoặc); cmd_register log khi chuẩn hoá loai/hieuluc; preingest_gate main() thêm --strict. # 1.22.68: rà 133+81 LUẬT (2 log live) — vá robustness phần A. P1 RAW-ENTRY PRECONDITION (gốc chung log2 A1/A2/A3): xref+footnote-map gặp entry THÔ (.docx/.pdf/.html chưa convert GDoc) → ENTRY_RAW_NO_GDOC rc=0 + thông điệp gọn (thay rc=2/JSON-lỗi-thô/stdout-rỗng/rò "Export only…"); `_is_raw_no_gdoc_name`/`_raw_no_gdoc`/`_emit_raw_no_gdoc` THỐNG NHẤT .docx↔.pdf. P2 FOOTNOTE DEDUP (log1 A2): resolve_footnote_amendments GOM dieu_level_amendment_map theo (dieu,khoan,diem,amending_sohieu) — hết 47 dòng pending trùng (Đ73K1 ×3); footnote_defs giữ ĐỦ marker + footnote_raw_count. P3 BASE_NO_CLUSTER (log1 A1): rasoat-chongcheo CỜ RÕ khi base ngoài cụm E2 (61/133 trước no-op IM LẶNG) → dựa xref/footnote-map cấp Điều. P4 DEDUP related theo sohieu (log1 A6, hết 85-2015 ×4). P5 missing_in_corpus→`unresolved_refs`+note (log1 A5: CHƯA kết luận vắng mặt, khớp exists=UNKNOWN_NOT_ABSENT). A4 BASE_UNRESOLVED khi base tên/file thô không số hiệu. P7 strip keyring khỏi gws_bridge error (log2 A3). +2 test → selftest 179/179. CÒN (data/feature): mở rộng subject_clusters 45 chủ đề; parser khoản-điều-thêm (6a/16b, A3 log1 nhỏ); Cowork batch-checkpoint (A4 log2); GAS serial (A5 log2, frozen). + `drive-push --name`/`--rename-to-file` (đổi tên file Drive THEO TÊN FILE upload, GIỮ fileId — qua gws_bridge.rename có ASSERT). # 1.22.67: rà 59 LUẬT (log live) — vá 6/7 lỗi CÔNG CỤ (phần A). A1 `tl extract <số hiệu>` (vị trí) HẾT 404 giả: positional không-phải-gdoc-id(≥20 ký tự alnum)→tự định tuyến --sohieu (+SKILL.md). A2 vbhn-check suy subject SẠCH: `_clean_subject_text` bỏ hậu tố `_HL<ngày>`/goc/SuaDoi/ngày-trơ → query QT-5 web hết "thu do hl2026 07 01 hợp nhất" (đặt `_HL_SUFFIX_RE`, KHÔNG clobber `_HL_DATE_RE` thân-văn-bản — bắt được name-collision). A3 exit-code: xref/vbhn-check rc=0 khi CHẠY OK kể cả có MISSING/MISMATCH/no-hit (phát hiện ≠ lỗi lệnh, không phá &&/CI); `xref --strict` mới rc=1 (+SKILL.md). A4 extract cảnh báo chạm CAP export ~200k ký tự (văn bản dài có thể bị CẮT → cache-build). A6 `_strip_keyring_noise` lọc 'Using keyring backend' khỏi output gws subprocess. A7 `CONTENT_VERIFY_REQUIRED` CHỈ bật khi rủi-ro-tái-dùng-số/thiếu-metadata (>1 ứng viên/collision/bare-number/missing-year); metadata RÕ+DUY NHẤT → `VBHN_METADATA_OK` (giảm 37/59 cờ máy móc). A5 (GAS tuần-tự, không scale) = giới hạn webapp FROZEN, không sửa client. +4 test → selftest 177/177. # 1.22.66: HỢP NHẤT bản Codex v1.22.65 (cùng rẽ từ v1.22.64 — 2 nhánh CÙNG vá batch-2 run-log, KHÁC code). GIỮ bản Claude làm base (đã verify 173/173 + có `status_pending` PENDING_AMENDMENT_NOT_IN_VBHN + cụm `dau_tu_PPP` mà Codex THIẾU). PORT 2 cải tiến robustness CHỈ-CÓ-Ở-CODEX: (1) vbhn-check/vbhn-verify nhận POSITIONAL `target` (tương thích runbook cũ: `tl vbhn-verify "14/VBHN-VPQH"` tự định tuyến text-file/gdoc-id/sohieu qua `_read_verify_text`; `tl vbhn-check "84/2015/QH13"`→goc/subject); (2) reg-query --json ENVELOPE chuẩn {ok,schema:reg-query.v2,count,limit,rows,entries} (cả rows+entries cho mọi parser). Các fix batch-2 TRÙNG (doctype/PPP-alias/sidecar/issue_year-goc/dedup-VBHN-first/xref-typo/vbhn-verify-json/relation-check) GIỮ bản Claude đã verify-live (Codex impl khác nhưng chưa verify). Codex thiếu status_pending → giữ bản Claude. selftest 173/173. # 1.22.65: vá 6 RUN-LOG batch-2 (workflow điều tra+verify đối kháng trên COPY CÔ LẬP — canonical md5 NGUYÊN, agent KHÔNG đụng được). 10 fix: srcmap_name_resolution (query nêu "Luật/Bộ luật"→ƯU TIÊN hit tier≥Luật `_query_doctype_tier`, hết chốt NĐ/TT: "Luật Đầu tư"→VBHN_03 KHÔNG NĐ; PPP≡"đối tác công tư" vào _ABBREV_MAP→VBHN_123; LOW_CONFIDENCE hết over-fire khi có hit-strong tier-Luật); issue_year_goc_token (`_strip_goc_token`+reject năm-bản-gốc: VBHN_123 hết issue_year=2020 từ token goc_64-2020); dedup_vbhn_first (dedup áp VBHN-first qua goc-chain dù KHÁC số hiệu: 64/2020→canonical VBHN 123, gốc SUPERSEDED); relcheck_footnote_only_fp (chỉ giữ luật THỰC SỰ sửa base, hết bơm FOOTNOTE_AMENDMENT_NOT_IN_CORPUS từ dẫn-chiếu/chuyển-tiếp); status_pending_vbhn (preingest SKIP→USE_VBHN nay cảnh báo PENDING_AMENDMENT_NOT_IN_VBHN khi VBHN ra đời TRƯỚC sửa-pending); corpus_nlm_sidecar_fp (`_dup_of_live_sibling`: không flag CORPUS_TRUE_NOT_ON_NLM cho sidecar-raw khi anh-em GDoc đã trên NLM); relcheck_json_types (int→`amendment_candidates_subject_filtered_count`); vbhn_verify_json_schema (`_vbhn_verdict`→field verdict/official/provisional + populate head_sample); xref_sohieu_typo (`_classify_ref`→DOC_TEXT_SOHIEU_TYPO khi số hiệu near-match KHÁC mã cơ quan, vd 41/2024/QH14 vs QH15); cluster_ppp (THÊM cụm dau_tu_PPP base 123/VBHN). SKIP: xref_alias (false-alarm), regquery_json+skill_cli (ĐÃ đúng trên v1.22.64 — log là DEPLOY-LAG zip Drive v1.22.35). +10 test → selftest 173/173. # 1.22.64: vá 6 RUN-LOG (workflow điều tra+verify đối kháng 16 issue → áp 15 fix, 1 reject-trên-cơ-sở). name_rank_collision (CHÍNH): source-map/exists "Luật Dân số/Việc làm/Phí lệ phí/BLLĐ" HẾT chốt SAI canonical (Dân chủ/NLĐ-nước-ngoài/Học phí/ATVSLĐ) — `_name_strong_match` + gate `LOW_CONFIDENCE_NAME_MATCH` (canonical=None khi khớp-MỜ) + `_name_phrase_match` ≥2-token (reg-query --name hết match-all 87→2); LIVE 3/4 nay chốt ĐÚNG, 1 LOW_CONFIDENCE. cluster BHYT neo `y_te_kham_chua_benh` (subject_clusters.json, hết lao_dong). vbhn-verify: HEADER_NOT_CLEAR nhận số-hiệu "NN/VBHN-" + ASSEMBLED CHỈ soi TÊN (hết "không đúng" thân→ASSEMBLED giả). status→USE_VBHN (41/2024→19/VBHN). CORPUS_TRUE_NOT_ON_NLM suppress khi nlm_status=removed_*. footnote `_multi_diem` ("điểm c và d"). `_strip_font_runs` (bỏ dòng "Times New Roman"). relation-check --json preamble→stderr + skip backfill cho quarantine. `tl up` fallback init-config. `_scan_inline_amendments`+E1 LIEN_DOMAIN (Điều 53 sửa luật khác cụm). sohieu-exact ưu tiên fuzzy. REJECT đúng: vbhn_year (sẽ regress year-reuse). +13 test → selftest 164/164. (⚠ vài agent workflow vi phạm "no-edit" → ĐÃ revert clean v1.22.63 + áp lại CHỈ patch đã-verify thủ công.) # 1.22.63: ★ HỢP NHẤT 2 nhánh v1.22.62 (Codex ⊕ Claude, đổi xứng) — (A·Codex) vá log hygiene/NLM/pending: tên "Luật X"↔canonical, footnote-map body_effective_dates (pending hết 0 giả), hygiene lọc OMNIBUS_NARROW khỏi query hẹp + không emit cluster canonical=None, reg-query/summary nlm-live-aware + cờ CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. (B·Claude) `tl up` BOOTSTRAP TẤT ĐỊNH 1-lệnh (config→gws cred+binary→nlm→manifest→readiness; helper CHUNG `_ensure_gws_nlm` cho init-config+up) + `tl confirm`/`_verify_header_match` (ĐỌC HEADER xác minh sohieu/tiêu đề/loại/cat khớp tên+thư mục → nhãn registry.verified; source-map/dedup TIN entry confirm, bỏ DIRTY/WARN) + upload-flow `_upload_mime_ext` (.doc/.pdf upload MIME THẬT → Drive organize convert server-side). selftest 153/153 (147 Codex + 6 Claude). # 1.22.62: vá log hygiene/NLM/pending — tên luật dạng "Luật X" khớp canonical đuôi "X"; footnote-map đọc thêm Điều hiệu lực trong thân luật gốc (body_effective_dates, pending không còn 0 giả); hygiene plan lọc OMNIBUS_NARROW_TITLE_CHECK khỏi query chủ đề hẹp và không emit cluster apply với canonical=None; summary/reg-query phơi nlm_source_id+nlm_notebook_id live-aware, flag CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. 1.22.61: vá log Chat/Cowork — #2 (CHÍNH: "Chat không cài gws+nlm từ đầu") init-config --from-public GỘP gws BINARY (gws-bootstrap-cowork → find/GHI hết FALLBACK→GAS) + cờ --nlm (uv-install+auth) = 1 lệnh bootstrap đủ; SKILL.md startup MỌI env dùng `--from-public --nlm`; --no-binary để chỉ-cred. #1 (NGUY HIỂM) exists/source-map: VBHN-first redirect CHỈ khi query LÀ BẢN GỐC (base = năm nhỏ nhất chuỗi goc, `_vbhn_base_key`) — 114/2025 Phòng bệnh (luật-sửa NẰM TRONG chuỗi VBHN thuốc lá) hết bị chốt canonical=VBHN thuốc lá; thêm bucket `amends_vbhn` + cờ AMENDS_OTHER_VBHN/MULTIPLE_VBHN_BASE. #3 source-map dương-tính-giả: `_vb_tier_rank` chặn SAI THỨ BẬC — NĐ/TT (118/2016/NĐ-CP) KHÔNG thể 'sửa đổi' Luật → hết AMENDMENT_CANDIDATE+PAUSE giả (đọc loại cả từ TÊN khi sohieu rỗng; base=tier cao nhất nhóm). #5 source-map NỔI `PENDING_FUTURE_EFFECT` + pending_future_count (đếm VB hiệu-lực-tương-lai, rẻ-không-footnote-map). +7 test → selftest 140/140. # 1.22.60: log rà BHYT (workflow điều tra+verify đối kháng) — #5 extract --sohieu khớp entry sohieu-RỖNG qua _sohieu_key_entry (parse từ TÊN '114_2025_QH15_658530'); #1 gws_bridge.rename ASSERT đọc-lại-tên (hết nuốt-lỗi-im-lặng rename 200-nhưng-không-đổi); #4 footnote-map _footnote_rel_kind = CROSS_CUTTING (omnibus 35/2018) / PARTIAL_REPEAL (bãi-bỏ-cục-bộ 32/2013) → hạ ưu tiên; #3 preflight TỰ KHÁM PHÁ overflow notebook từ registry (row_kind=overflow) khi config trống/placeholder (phòng thủ; config canonical đã có id thật). #2 slot over-count: đã sạch sẵn (L5), "329" trong log là GAS server-side. selftest 133/133. 1.22.59: log rà BHYT — B1 subject_clusters.json THÊM cụm `y_te_kham_chua_benh` (base 40/VBHN-VPQH BHYT + KCB 15/2023 + Phòng bệnh 114/2025 + Dược + ATTP) → rasoat-chongcheo BHYT neo ĐÚNG cụm y tế (trước neo nhầm lao_dong_xa_hoi); B3 cờ OMNIBUS hết false-positive trên luật-sửa TÊN-SỐ-TRƠ (chỉ flag khi chủ đề RÕ + khác lĩnh vực, ≥2 token); B5 `_summ_entry.nlm` = LIVE (`_entry_on_nlm_live`, False nếu removed) → relation-check khớp reg-query; B6 message gws fallback PHÂN BIỆT thiếu-cred vs thiếu-binary. 1.22.58: B1 GWS — `_read_doc_text` ƯU TIÊN direct-media EXPORT text/plain bằng CRED (KHÔNG cần binary gws → extract/footnote-map hết rơi GAS ở Cowork khi đã gws-auth-load; B5 hết spam); init-config đổi thông điệp "gws cred ✓ (direct-media đọc; find/ghi cần gws-bootstrap-cowork)" hết hiểu nhầm "BẬT". locate FALLBACK webapp gắn LOW_CONFIDENCE/NO_EXACT_SOHIEU (Cowork: locate 58/2014 → fulltext lạc đề). `_entry_subject_text` BỎ `cat` (nhãn folder '02_Bao_hiem' làm mọi entry khớp 'bảo hiểm' giả) → relation-check vbhn_candidates 14→3 (BHXH/KDBH/ATVSLĐ). 1.22.57: ★ GỐC RỄ "subject filter quá lỏng" (phát hiện khi chạy mục B live) — `_subject_score` CHỐNG nhiễu từ-phổ-biến: token-overlap chỉ tính ĐỦ khi entry chứa CỤM-ĐẦU PHÂN BIỆT của chủ đề ('bảo hiểm'='baohiem'); nếu không (chỉ trùng 'bảo/hội' lẻ ở từ-khoá) → 0 điểm. → relation-check vbhn_candidates hết kéo Luật Xuất bản/Người cao tuổi/Thanh niên/Công đoàn (sscore 40→0); BHXH=140, BHYT=0(disc), giữ KDBH=60. 1.22.56: vá log rà BHXH (Chat+Cowork) — (regression) `locate` cụm danh từ ('bảo hiểm xã hội') KHÔNG còn bị coi là số hiệu → hết LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (gate `_looks_like_sohieu_query`); `tl rasoat worksheet` TỰ dựng cache nếu thiếu (`_rasoat_autocache_worksheet`→`cache-build`, resolve gdoc từ manifest; --no-auto-cache để tắt) + message worksheet trỏ `tl cache-build`; `_find_amendment_candidates` thêm loại-trừ-chéo `_disc_conflict` (BHYT/BHTN khác BHXH); SKILL.md BƯỚC 0 TÁCH `--setup` (core nhanh) khỏi nlm (né timeout 45s Cowork). 1.22.55: #8 HỢP NHẤT footnote-map vào relation-check + rasoat-chongcheo — TỰ đọc nguyên văn base VBHN (auto-footnote, `_resolve_base_gdoc`, tắt --no-auto-footnote) → 2 lệnh nêu footnote_amendments thay vì rỗng; #11 cờ OMNIBUS_CROSS_DOMAIN (`_omnibus_cross_domain_note`): luật sửa có tên khác lĩnh vực base (84/2025 Thanh tra sửa BHXH = sửa-nhiều-luật) → cảnh báo đọc nguyên văn, KHÔNG hiểu nhầm lỗi tên. +test omnibus_cross_domain_flag. 1.22.54: ★ GỐC RỄ tên VBHN VIẾT TẮT — `_expand_abbrev`/`_ABBREV_MAP` (BHXH≡bảo hiểm xã hội, BHYT/BHTN/BLHS/BLLĐ…) nối vào `_token_set`+`_disc_conflict` → source-map/relation-check/reg-query/locate khớp đúng VBHN_19…BHXH (trước nhặt nhầm bản gốc 41/2024 viết-đầy-đủ đã quarantine). #3 extract: phân biệt CẮT-CỤT (export cap ~200k) vs sai cấu trúc → chỉ `tl cache-build --gdoc-id` lấy toàn văn. #10 locate: cờ LOW_CONFIDENCE/NO_EXACT_SOHIEU khi truy vấn số hiệu chỉ khớp-mờ-tên (vd 142/2025→VBHN_74 Đấu thầu). 1.22.53: log rà BHXH — A3 relation-check `_vbhn_candidates` KHÔNG nhận VBHN trùng-NĂM khác lĩnh vực (year-một-mình cần subject≥30; +disc_conflict) → hết VBHN_43 Xuất bản lọt vào BHXH; A4 `_cluster_for_base` reverse-map qua THÀNH VIÊN cụm (số hiệu VBHN 19/VBHN-VPQH → cụm, trước trả ∅); B1 rasoat alias --sohieu→--so-hieu (worksheet) / --file→--in (phuluc); B2 `tl cache-build <sh>` wrapper ingest_to_cache.py (sinh docs/<sh>--consolidated.json); B3 ingest_to_cache.py tự nạp webappUrl/token từ config/env. 1.22.52: TRA-THEO-TÊN âm-tính-giả (log Cowork #2/#3) — `_name_subset_match` token-subset (bỏ doctype/sốhiệu) cho source-map/locate/reg-query: 'Luật Bảo hiểm xã hội' KHỚP 'VBHN_19-VPQH_Bao_hiem_xa_hoi' (substring liền thất bại vì luat/vbhn/19 chèn giữa); reg-query --name trước CHỈ substring CÓ DẤU → 0 kết quả, nay khử dấu+token-subset. `_disc_conflict` chuẩn hoá underscore (BHXH↔BHYT đúng cả tên file). `_nlm_display` status-aware (locate hết báo nlm=Y khi removed → khớp reg-query). +test name_subset_match_vbhn/source_map_name_finds_vbhn_not_quarantine. 1.22.51: (A) ENV THỐNG NHẤT Chat=Cowork=Code — gỡ doctrine "chat hạn chế": nlm CLI BẮT BUỘC mọi env, gws-bootstrap BỎ QUA tải binary nếu gws đã có (--force ép), Chat dùng uv+python≥3.11 sẵn (không tải Drive). (B) footnote-map nhận "Cụm từ '…' được BỎ/THAY THẾ theo…" (84/2025 hết vô hình, +test footnote_remove_phrase_amendment); subject-score LOẠI TRỪ CHÉO BHXH↔BHYT↔BHTN (chung "bảo hiểm" ≠ cùng chủ đề, +test subject_bhxh_not_bhyt). 1.22.50: vá log Chat — B1/B2 `gws-auth-load`/`nlm-auth-load` + `init-config --from-public` tự bật gws từ cred PUBLIC (public-curl, KHÔNG cần master key); B3 gom log [FALLBACK→GAS] 1 lần/phiên (hết spam mỗi read); relation-check LỌC ứng viên chỉ-trùng-chủ-đề khỏi amendment_candidates (giảm dương-tính-giả 108/2026); B5 xref OUTDATED nêu RÕ số hiệu VBHN thay thế + SOHIEU_MISMATCH→VBHN ghi "đúng, trỏ bản mới". (B4 phantom-217 đã có test footnote_citation_not_amendment.) 1.22.49: SKILL.md §1 BƯỚC 0 — Cowork dùng KHỐI INLINE (curl zip public + unzip + chạy tl_fetch.sh SẠCH TRONG ZIP) vì mount cắt cụt CẢ scripts/tl_fetch.sh → `sh scripts/tl_fetch.sh` đường-mount hỏng. CẤM inspect/confirm truncation/dig-recovery (đã biết mount cắt). 1.22.48: GHI RÕ gws Cowork = BINARY MUSL-STATIC (đã verify static-pie, không GLIBC dep → chạy glibc 2.35) qua `gws-bootstrap-cowork` public-curl; CẤM `npm i -g @googleworkspace/cli` (bản GNU cần GLIBC 2.39, Cowork glibc 2.35 → không chạy). SKILL.md + help string. 1.22.47: nlm-install HẾT STALL ASTRAL — `uv tool install --python 3.11` chạy với UV_PYTHON_DOWNLOADS=never (cấm tải python từ astral/GitHub CDN bị Cowork chặn): system có 3.11→dùng ngay, chỉ 3.10→FAIL TỨC THÌ→rơi Python public-curl Drive; bỏ `uv python install 3.11` thừa. 1.22.46: BOOTSTRAP TỐC ĐỘ — `_fast_drive_fetch` ưu tiên PUBLIC-CURL (drive.usercontent) → direct-media → GAS, có ĐO THỜI GIAN ([fetch] log); PY311 + gws binary tải public-curl (hết kẹt GAS 31MB); tl_fetch.sh cài uv TRƯỚC (pip PyPI, astral chặn) rồi gws/nlm; rút timeout astral uv-python 420→90s (fail nhanh → Drive-public). 1.22.45: SKILL.md §1 BƯỚC 0 — Cowork ƯU TIÊN `sh tl_fetch.sh --setup` LÀM LỆNH ĐẦU TIÊN (tải bản sạch, KHÔNG đụng mount/_parts); CẤM chạy tl_boot/verify-integrity/build_parts/_parts TRƯỚC khi tl_fetch lỗi; tách rõ đường LOCAL A1–A3. 1.22.44: PACKAGE PUBLIC BOOTSTRAP — config v2 + creds (gws/nlm/secrets/binary/py311) ở Drive/Package (anyone-with-link). `init-config --from-public` + tl_fetch.sh curl CONFIG(apps script)+gws cred TRƯỚC (KHÔNG cần Drive MCP); uv-first cho nlm; Cowork tải zip skill; tl_boot loud-fail exit≠0 khi cắt cụt (B2); tl_rebuild.sh OUT mặc định $HOME (B4). 1.22.43: `tl drive-push <zip> [--file-id]` — cập nhật NỘI DUNG file Drive GIỮ fileId (gws update_content) → đẩy bản ship mới mỗi lần mà KHÔNG đổi fileId; SKILL_FILEID baked. 1.22.42: BUNDLE skill+gws — `gws-bootstrap-cowork --local-tgz` (dùng gws.tgz từ bundle, khỏi tải Drive; md5 vẫn verify); tl_fetch.sh tự dò assets/gws.tgz. Cắt 1 download. 1.22.41: `nlm-install --uv` (egress mở → uv tự lo Python 3.11, python hệ thống nếu ≥3.11, KHÔNG tải 31MB Drive; fallback Drive); `tl_fetch.sh --setup --nlm` dùng --uv → bootstrap đủ GAS+direct-media+gws+nlm+boot 1 lệnh. (v1.23.0 spec rasoat-loop/overlap: roadmap riêng.) 1.22.40: bake NLM_CRED_FILEID (đã stage+verify) → `--setup --nlm` có nlm headless ngay. 1.22.39: nlm HEADLESS — `nlm-auth-stage` (Code, sau `nlm login`: cookie nlm → mã hoá khoá=webapp-token → Drive) + `nlm-auth-load` (Cowork: tải+giải mã bằng token → ~/.notebooklm-mcp-cli, KHÔNG cần master key); `--setup --nlm` tự nlm-auth-load (mirror gws-auth-stage/load). 1.22.38: tl_fetch.sh ROUTE TỐI ƯU (curl public, $HOME, --setup) + gws TRƯỚC nlm. 1.22.37: tl_fetch.sh webapp GAS. 1.22.36: tl_fetch.sh bỏ qua mount. 1.22.35: tl_rebuild.sh + MANIFEST.sha256 + tl_boot verify sha. 1.22.34: dọn references/ 63→24 file. 1.22.33: _parts ≤200 file. 1.22.32: verify-integrity + COWORK_EDIT_SAFETY. 1.22.32: `tl verify-integrity` + COWORK_EDIT_SAFETY (write-side fallback); 1.22.31: truncation-resilience (FORCE _parts; _healed_script_path; --rebuild) + doctor nlm/gws + reg-query khóa NLM; 1.22.27: #4/#3/#6/#9; 1.22.26: #1 relation-check footnote-gate
 # GĐ0 (tích hợp gws): PIN bản gws — KHÔNG `latest` (gws pre-v1.0 hay breaking). Nguồn-chân-lý
 # duy nhất cho boot-check `tl gws-ping` và (GĐ1) gws_bridge.is_available(). Bump có chủ đích.
-VERSION = "1.34.6"              # 1.34.6: vá Nhóm 1+2 log phiên chạy thực 2026-07-09 (hồ sơ Luật BHXH — 3 defect profile văn-bản-thường): (#1) _classify_doc_header HẾT nhận số hiệu TRÍCH DẪN làm số hiệu tài liệu — sohieu CHỈ từ VÙNG TIÊU ĐỀ (head 1500, DÒNG NGẮN ≤80 ký tự kiểu letterhead, ưu tiên có Số: đứng trước — _sohieu_from_title_zone) + tên file; số trong CÂU VĂN DÀI = trích dẫn → BỎ (trước: báo cáo nhắc Luật 41/2024/QH15 bị gán loai=Luật+sohieu → ghi sai metadata âm thầm); nhánh VBHN N2a nay chạy CẢ khi sohieu title-zone rỗng (số VBHN ở khối ký cuối — quét sâu blob CHỈ dạng VBHN). (#3) _ingest_verify_gate bỏ vế OR-sohieu: requires_dieu CHỈ theo kind∈{vbqppl,draft,nq} — văn bản thường có số hiệu công văn không còn bị DIEU_STRUCTURE_NOT_VERIFIED chặn corpus_allowed (profile-ingest hết dừng nửa chừng phải nlm-add tay); +info flag DIEU_NOT_REQUIRED_NORMAL_DOC. (#2) bảng tính trọn đường ống: _MIME_BY_EXT +.xlsx/.xls (trước rơi về DOCX_MIME → convert fail); profile-ingest nhánh sheet = copy_convert toType=sheets → canonical Google SHEET + readback expected_gdoc_mime=_GSHEET_MIME (+param mới _verify_convert_readback) + NLM source_add doc_type=sheets nội bộ + skip text-gate (SPREADSHEET_TEXT_VERIFY_SKIPPED). TDD: 7 test r73a hành-vi-đúng viết TRƯỚC (4 đỏ đúng chỗ) → fix → 684/684. BACKLOG còn từ log: #4 nlm-add auto-detect --type sheets; #5 register clear cột thường (cần webapp GAS); #6 register auto-retry FIELDS_DROPPED; #7 ocr-run báo lệnh cài engine; #8 instruction-audit đồng bộ block-list từ gen_instructions; #9 user sửa Project Instruction version; #10 vbthuong categories=inherit→own (cần user duyệt). // 1.34.5: I3 — tách extract_cache (cmd_extract/cache-build/cache-snapshot, 3 def ~214d) + fetch_web (fetch-route/batch/links, find-doc, tvpl-url, external-ingest, link-priority, frontier + _fetch_plan/_external_ingest_plan, 12 def ~389d) sang tl_core/{extract_cache,fetch_web}.py; tl.py 16227→15743. Ranh giới đếm-tham-chiếu: hạ tầng đọc (_read_doc_text 16 site/_cache_file 13/_title_block_from_text 6/extract_dieu/extract_refs/_sanitize_export_text/_profile_cache_dir) + discovery QT-5 (_query_variants/_google_site_url/_discovery_links/_official_rank + _FETCH_SOURCES/_DISCOVERY_SITES/HOPNAP) GIỮ Ở TL. Characterization TRƯỚC cut: +5 r72a wiring (extract resolve+bóc Điều qua transport mock; tvpl-url pure; fetch-route VBHN-first+docx-rank; fetch-batch SKIP/REVIEW/FETCH+ckpt; fetch-links markdown+env) — PASS y nguyên sau cut; scanner default-param (bẫy I2) = 0 hit. +r72 wired/no-dual → 677/677. // 1.34.4: I2 — tách cụm nlm_wrappers/sharding sang tl_core/nlm_ops.py (28 def ~1.0k dòng NGUYÊN VĂN AST-cut: 13 cmd nlm-list/get/query/cross/content/add/orphans/reconcile/query-plan + preflight/push-overflow/overflow-resolve/slot-audit + 15 helper riêng-cụm reconcile-plan/dedup-gate/overflow-route+status/slot-count/sohieu-loose/preflight-invariants…); tl.py 17097→16227 dòng; bind REBASE __globals__ (khuôn I1). Helper ĐA-CỤM GIỮ Ở TL (_entry_on_nlm_live/_resolve_nlm_notebook/_nlm_display/_nlm_probe_summary/_nlm_status_known+removed/_gws_nlm_note/_entry_nlm_notebook_id — ranh giới đo bằng đếm-tham-chiếu-ngoài-cụm). Characterization TRƯỚC cut: +5 r71a wiring-test offline (mock _imp/_gas/registry-IO) khoá 5 cmd 0-hit: nlm-list shape, reconcile DRY 3 lớp desync/other/unregistered, preflight ⚠DUP-TL lỏng-năm + verify-LIVE slot, push-overflow verified-write, overflow-resolve MAX(reg,phys)+discover+gap — PASS y nguyên sau cut. ★Bẫy mới cho I3+: default-param `cap=NLM_SLOT_CAP` eval TRƯỚC bind → module cần MIRROR constant + r71_slot_cap_mirror drift-lock. +r71 wired/no-dual → 670/670. // 1.34.3: I1 — tách cụm hygiene_report sang tl_core/hygiene.py (29 def ~2.0k dòng NGUYÊN VĂN AST-cut: sweep/dedup-plan/missing-sohieu/vbhn-year-fix/ops-plan/corpus-audit/review-queue/backfill-loai+titlevn+hieuluc/hygiene/quarantine-fix/corpus-fix/consolidation-cleanup/cat-audit/registry-doctor + helper riêng-cụm); tl.py 19052→17097 dòng; tl giữ STUB ủy quyền mọi tên đã chuyển. ★ bind() hygiene KHÁC sibling: REBASE __globals__ từng hàm về namespace SỐNG của tl (monkeypatch selftest ăn ngay, helper không stale — copy-snapshot làm r54 gãy vì patch trên tl không thấm module). Characterization TRƯỚC cut: 6 golden hygiene_* trên FIXTURE MANIFEST (env per-case TL_CACHE_DIR — _run_tl_json +env_extra) KHỚP NGUYÊN TRẠNG sau cut; +bắt 1 bug thật: sweep phơi snapshot_age_s lọt deterministic mask (+snapshot_age_s/age_s/age_seconds vào VOLATILE_JSON_KEYS). Self-heal phủ module mới (canary/tl_boot preload/py_compile/REQUIRED/r36). +r70 parity (wired + no-dual-definition) → 662/662. // 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
+VERSION = "1.34.7"              # 1.34.7: I4 — tách cụm profile_mgmt sang tl_core/profile_mgmt.py (22 def ~967 dòng NGUYÊN VĂN AST-cut: profile-info/list/use/rename/delete/files/manifest/adopt/doctor/index/create/rebuild-registry + helper riêng-cụm); tl.py 15743→14932; bind REBASE __globals__ (khuôn I1-I3); scanner default-param 0 hit. Hạ tầng profile DÙNG CHUNG (_apply_profile_env/_profile_lookup/_read_config_record/_profiles_from_config/_persist_profile_config/_profile_policy_error/_active_profile) GIỮ Ở TL. ★FIXTURE-CONFIG tất định (references/golden/fixtures/config_fixture.json sinh-tại-chỗ, registryDocId pin sẵn) — cách ly trạng thái config máy (bài học CI I1): golden ops-plan HỒI SINH (hygiene_ops_plan_fixture_config: --config fixture + xoá env TL_* per-case, cross-machine). Characterization TRƯỚC cut: +4 r74a wiring trên fixture config (profile-list; profile-info CHỊU-LỖI-GÕ khoá P2 v1.33.48; profile-use DRY-không-ghi + PROFILE_NOT_FOUND; profile-rename DRY plan + cấm rename nền) — PASS y nguyên sau cut; test clobber-guard trỏ nguồn thật. +r74 wired/no-dual → 690/690. // 1.34.6: vá Nhóm 1+2 log phiên chạy thực 2026-07-09 (hồ sơ Luật BHXH — 3 defect profile văn-bản-thường): (#1) _classify_doc_header HẾT nhận số hiệu TRÍCH DẪN làm số hiệu tài liệu — sohieu CHỈ từ VÙNG TIÊU ĐỀ (head 1500, DÒNG NGẮN ≤80 ký tự kiểu letterhead, ưu tiên có Số: đứng trước — _sohieu_from_title_zone) + tên file; số trong CÂU VĂN DÀI = trích dẫn → BỎ (trước: báo cáo nhắc Luật 41/2024/QH15 bị gán loai=Luật+sohieu → ghi sai metadata âm thầm); nhánh VBHN N2a nay chạy CẢ khi sohieu title-zone rỗng (số VBHN ở khối ký cuối — quét sâu blob CHỈ dạng VBHN). (#3) _ingest_verify_gate bỏ vế OR-sohieu: requires_dieu CHỈ theo kind∈{vbqppl,draft,nq} — văn bản thường có số hiệu công văn không còn bị DIEU_STRUCTURE_NOT_VERIFIED chặn corpus_allowed (profile-ingest hết dừng nửa chừng phải nlm-add tay); +info flag DIEU_NOT_REQUIRED_NORMAL_DOC. (#2) bảng tính trọn đường ống: _MIME_BY_EXT +.xlsx/.xls (trước rơi về DOCX_MIME → convert fail); profile-ingest nhánh sheet = copy_convert toType=sheets → canonical Google SHEET + readback expected_gdoc_mime=_GSHEET_MIME (+param mới _verify_convert_readback) + NLM source_add doc_type=sheets nội bộ + skip text-gate (SPREADSHEET_TEXT_VERIFY_SKIPPED). TDD: 7 test r73a hành-vi-đúng viết TRƯỚC (4 đỏ đúng chỗ) → fix → 684/684. BACKLOG còn từ log: #4 nlm-add auto-detect --type sheets; #5 register clear cột thường (cần webapp GAS); #6 register auto-retry FIELDS_DROPPED; #7 ocr-run báo lệnh cài engine; #8 instruction-audit đồng bộ block-list từ gen_instructions; #9 user sửa Project Instruction version; #10 vbthuong categories=inherit→own (cần user duyệt). // 1.34.5: I3 — tách extract_cache (cmd_extract/cache-build/cache-snapshot, 3 def ~214d) + fetch_web (fetch-route/batch/links, find-doc, tvpl-url, external-ingest, link-priority, frontier + _fetch_plan/_external_ingest_plan, 12 def ~389d) sang tl_core/{extract_cache,fetch_web}.py; tl.py 16227→15743. Ranh giới đếm-tham-chiếu: hạ tầng đọc (_read_doc_text 16 site/_cache_file 13/_title_block_from_text 6/extract_dieu/extract_refs/_sanitize_export_text/_profile_cache_dir) + discovery QT-5 (_query_variants/_google_site_url/_discovery_links/_official_rank + _FETCH_SOURCES/_DISCOVERY_SITES/HOPNAP) GIỮ Ở TL. Characterization TRƯỚC cut: +5 r72a wiring (extract resolve+bóc Điều qua transport mock; tvpl-url pure; fetch-route VBHN-first+docx-rank; fetch-batch SKIP/REVIEW/FETCH+ckpt; fetch-links markdown+env) — PASS y nguyên sau cut; scanner default-param (bẫy I2) = 0 hit. +r72 wired/no-dual → 677/677. // 1.34.4: I2 — tách cụm nlm_wrappers/sharding sang tl_core/nlm_ops.py (28 def ~1.0k dòng NGUYÊN VĂN AST-cut: 13 cmd nlm-list/get/query/cross/content/add/orphans/reconcile/query-plan + preflight/push-overflow/overflow-resolve/slot-audit + 15 helper riêng-cụm reconcile-plan/dedup-gate/overflow-route+status/slot-count/sohieu-loose/preflight-invariants…); tl.py 17097→16227 dòng; bind REBASE __globals__ (khuôn I1). Helper ĐA-CỤM GIỮ Ở TL (_entry_on_nlm_live/_resolve_nlm_notebook/_nlm_display/_nlm_probe_summary/_nlm_status_known+removed/_gws_nlm_note/_entry_nlm_notebook_id — ranh giới đo bằng đếm-tham-chiếu-ngoài-cụm). Characterization TRƯỚC cut: +5 r71a wiring-test offline (mock _imp/_gas/registry-IO) khoá 5 cmd 0-hit: nlm-list shape, reconcile DRY 3 lớp desync/other/unregistered, preflight ⚠DUP-TL lỏng-năm + verify-LIVE slot, push-overflow verified-write, overflow-resolve MAX(reg,phys)+discover+gap — PASS y nguyên sau cut. ★Bẫy mới cho I3+: default-param `cap=NLM_SLOT_CAP` eval TRƯỚC bind → module cần MIRROR constant + r71_slot_cap_mirror drift-lock. +r71 wired/no-dual → 670/670. // 1.34.3: I1 — tách cụm hygiene_report sang tl_core/hygiene.py (29 def ~2.0k dòng NGUYÊN VĂN AST-cut: sweep/dedup-plan/missing-sohieu/vbhn-year-fix/ops-plan/corpus-audit/review-queue/backfill-loai+titlevn+hieuluc/hygiene/quarantine-fix/corpus-fix/consolidation-cleanup/cat-audit/registry-doctor + helper riêng-cụm); tl.py 19052→17097 dòng; tl giữ STUB ủy quyền mọi tên đã chuyển. ★ bind() hygiene KHÁC sibling: REBASE __globals__ từng hàm về namespace SỐNG của tl (monkeypatch selftest ăn ngay, helper không stale — copy-snapshot làm r54 gãy vì patch trên tl không thấm module). Characterization TRƯỚC cut: 6 golden hygiene_* trên FIXTURE MANIFEST (env per-case TL_CACHE_DIR — _run_tl_json +env_extra) KHỚP NGUYÊN TRẠNG sau cut; +bắt 1 bug thật: sweep phơi snapshot_age_s lọt deterministic mask (+snapshot_age_s/age_s/age_seconds vào VOLATILE_JSON_KEYS). Self-heal phủ module mới (canary/tl_boot preload/py_compile/REQUIRED/r36). +r70 parity (wired + no-dual-definition) → 662/662. // 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
 GWS_PINNED_VERSION = "0.22.5"   # @googleworkspace/cli; npm i -g @googleworkspace/cli@0.22.5
 # Bootstrap gws cho Cowork (sandbox chặn github + no root): binary MUSL STATIC (chạy mọi glibc, kể cả
 # Ubuntu 22.04/glibc 2.35 — bản gnu cần GLIBC_2.39 nên KHÔNG chạy). Stage sẵn trên Drive _HOP_NAP.
@@ -1504,7 +1504,7 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
             "tl_core/command_registry.py",   # Pha D v1.33.57 + Pha E v1.33.58
             "tl_core/hygiene.py",
             "tl_core/nlm_ops.py",
-            "tl_core/extract_cache.py", "tl_core/fetch_web.py"]   # I1..I3
+            "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py"]   # I1..I4
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []
@@ -5953,156 +5953,6 @@ def cmd_manifest(a) -> int:
     return 0 if r.get("ok") else 1
 
 
-def _profile_rebuild_partition(entries: list[dict], root_file_ids: set[str],
-                               keep_notebook: str) -> tuple[list[dict], list[dict], dict]:
-    """PURE: chia keep/drop cho recovery. Giữ file trong own-root, notebook đích, và mọi ref."""
-    keep, drop = [], []
-    reasons = {"root_tree": 0, "notebook": 0, "ref": 0}
-    for entry in entries:
-        drive_id = str(entry.get("drive_id") or entry.get("id") or entry.get("gdoc_id") or "").strip()
-        notebook_id = str(entry.get("nlm_notebook_id") or "").strip()
-        row_kind = str(entry.get("row_kind") or "own").strip().lower()
-        why = []
-        if drive_id in root_file_ids:
-            why.append("root_tree"); reasons["root_tree"] += 1
-        if notebook_id == keep_notebook:
-            why.append("notebook"); reasons["notebook"] += 1
-        if row_kind == "ref":
-            why.append("ref"); reasons["ref"] += 1
-        item = {"drive_id": drive_id, "name": entry.get("name") or "",
-                "nlm_notebook_id": notebook_id, "row_kind": row_kind}
-        if why:
-            item["keep_reason"] = why
-            keep.append(item)
-        elif drive_id:
-            drop.append(item)
-    return keep, drop, reasons
-
-
-def cmd_profile_rebuild_registry(a) -> int:
-    """Phục hồi registry profile bị phình.
-
-    Giữ hợp của: (1) file thật trong cây rootFolderId của profile; (2) dòng thuộc notebook cần giữ;
-    (3) row_kind=ref. DRY mặc định; apply cần --confirm yes. Không suy dòng own chỉ từ notebook.
-    """
-    profile = _active_profile()
-    if profile == DEFAULT_PROFILE:
-        print("[tl] profile-rebuild-registry chỉ dùng cho profile dự án, không dùng trên vbqppl.", file=sys.stderr)
-        return 2
-    _perr = _profile_policy_error(require_registry=True, require_manifest=False, forbid_inherit=True)
-    if _perr:
-        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
-    # ⛔ SỰ CỐ 2026-06-30: profile dự án registryDocId RỖNG → reg_delete rơi vào registry NỀN VBQPPL → XÓA SẠCH 766 dòng.
-    # CHẶN: profile-rebuild CHỈ chạy khi profile có registryDocId RIÊNG (scope != base), nếu không sẽ phá base.
-    _prof_reg = (os.environ.get("TL_REGISTRY_DOC_ID") or "").strip()
-    if not _prof_reg:
-        print("[tl] ⛔ PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE: profile dự án '%s' KHÔNG có registryDocId riêng → "
-              "reg_delete sẽ rơi vào registry NỀN VBQPPL và XÓA NHẦM. Tạo registry riêng + ghi registryDocId vào config "
-              "TRƯỚC. (KHÔNG chạy rebuild khi chưa tách registry.)" % profile, file=sys.stderr)
-        return 2
-    keep_notebook = (a.keep_notebook or os.environ.get("TL_NOTEBOOK_ID") or "").strip()
-    root_id = (os.environ.get("TL_ROOT_FOLDER_ID") or "").strip()
-    if not keep_notebook:
-        print("[tl] cần --keep-notebook <notebookId> hoặc notebookId trong profile config.", file=sys.stderr)
-        return 2
-    if not root_id:
-        print("[tl] profile thiếu rootFolderId; không thể xác định dòng own an toàn.", file=sys.stderr)
-        return 2
-    if a.apply and a.confirm != "yes":
-        print("[tl] --apply cần --confirm yes vì reg_delete là thao tác phá hủy.", file=sys.stderr)
-        return 2
-
-    g = _gas()
-    ping = g.get("ping")
-    if ping.get("version") != EXPECT_VERSION:
-        print(f"[tl] webapp version={ping.get('version')} ≠ {EXPECT_VERSION}; dừng phục hồi để tránh lệch contract.",
-              file=sys.stderr)
-        return 3
-
-    tree = g.get("list", folderId=root_id, recursive="true")
-    if tree.get("ok") is False:
-        print(json.dumps({"ok": False, "error": "PROFILE_ROOT_LIST_FAILED", "detail": tree},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    if tree.get("capped"):
-        print(json.dumps({"ok": False, "error": "PROFILE_ROOT_LIST_CAPPED", "count": tree.get("count"),
-                          "note": "Không xóa khi danh sách cây own chưa đầy đủ."},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    # D2 (log rà): LOẠI file HẠ TẦNG (registry sheet + manifest + bản registry orphan trùng) khỏi cây own —
-    # chúng nằm TRONG rootFolderId nhưng KHÔNG phải văn bản corpus; trước regen2 NUỐT thành dòng "corpus" rác
-    # (count 8 vs 5 thật). Loại theo: registryDocId (config), mime spreadsheet/json, tên chứa registry/manifest.
-    _reg_doc_id = (os.environ.get("TL_REGISTRY_DOC_ID") or "").strip()
-    def _is_infra_file(x: dict) -> bool:
-        mime = str(x.get("mimeType") or x.get("mime") or "").lower()
-        nm = _strip_accents(str(x.get("name") or "")).lower()
-        # VĂN BẢN THẬT (GDoc/PDF/Word) KHÔNG BAO GIỜ là infra → chặn false-positive dù tên lạ.
-        if any(t in mime for t in ("vnd.google-apps.document", "pdf", "wordprocessing", "msword")):
-            return False
-        # infra = Google Sheet (registry) / file .json (manifest) / tên rõ là registry/manifest (orphan copy).
-        if "spreadsheet" in mime or mime.endswith("/json") or nm.endswith(".json"):
-            return True
-        return any(t in nm for t in ("registry", "manifest", "reg_query"))
-    root_file_ids = {
-        str(x.get("id") or "") for x in (tree.get("items") or [])
-        if x.get("type") != "folder" and x.get("id")
-        and str(x.get("id")) != _reg_doc_id and not _is_infra_file(x)
-    }
-
-    me = g.get("manifest_export")
-    manifest_id = me.get("manifestId")
-    if not manifest_id:
-        print(json.dumps({"ok": False, "error": "PROFILE_MANIFEST_EXPORT_FAILED", "detail": me},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    root_file_ids.discard(manifest_id)   # D2: manifest file (nếu nằm trong rootFolder) KHÔNG phải corpus
-    downloaded = g.get("download", fileId=manifest_id)
-    try:
-        manifest = json.loads(base64.b64decode(downloaded.get("b64") or "").decode("utf-8"))
-        entries = manifest.get("entries") or manifest.get("files") or []
-    except Exception as exc:
-        print(json.dumps({"ok": False, "error": "PROFILE_MANIFEST_READ_FAILED", "detail": str(exc)},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-
-    keep, drop, reasons = _profile_rebuild_partition(entries, root_file_ids, keep_notebook)
-
-    plan = {
-        "ok": True,
-        "profile": profile,
-        "rootFolderId": root_id,
-        "keep_notebook": keep_notebook,
-        "manifest_entries": len(entries),
-        "root_files": len(root_file_ids),
-        "keep": len(keep),
-        "drop": len(drop),
-        "keep_reason_hits": reasons,
-        "drop_sample": [x["name"] for x in drop[:20]],
-        "mode": "APPLY" if a.apply else "DRY",
-    }
-    if not a.apply:
-        plan["note"] = "Kiểm tra plan; thực thi bằng --apply --confirm yes."
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-        return 0
-
-    results = []
-    drive_ids = [x["drive_id"] for x in drop]
-    for start in range(0, len(drive_ids), 200):
-        chunk = drive_ids[start:start + 200]
-        res = g.post("reg_delete", drive_ids=chunk, confirm="yes", require_removed="no")
-        results.append(res)
-        if res.get("ok") is False:
-            plan.update({"ok": False, "reg_delete_batches": results,
-                         "error": "PROFILE_REBUILD_PARTIAL_FAILURE"})
-            print(json.dumps(plan, ensure_ascii=False, indent=2))
-            return 1
-    refreshed = g.get("manifest_export")
-    plan.update({"applied": True, "reg_delete_batches": results, "manifest_export": refreshed,
-                 "ok": refreshed.get("ok") is not False})
-    print(json.dumps(plan, ensure_ascii=False, indent=2))
-    return 0 if plan["ok"] else 1
-
-
 def _rasoat_fallback_plan(sub: str, script: str, rest: list[str]) -> dict:
     """Kế hoạch đi vòng khi overlay thiếu script rà soát/backfill chuyên sâu.
     Đây không thay thế rasoat thật; nó giúp phiên trống không bị cụt workflow."""
@@ -6921,62 +6771,6 @@ def _download_link_plan(urls: list[str]) -> list[dict]:
     return rows
 
 
-def _profile_info_from_config(config_path: str | None, profile: str | None = None) -> dict:
-    cfg = {}
-    used = ""
-    for p in _config_candidates(config_path):
-        if Path(p).exists():
-            cfg = _read_json_file(p)
-            if cfg:
-                used = p
-                break
-    if not cfg:
-        return {
-            "ok": bool(os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN")),
-            "source": "env-only",
-            "profile": profile or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE,
-            "profile_found": False,
-            "note": "Không đọc được config v2; chỉ có thể dùng env hiện tại.",
-            "env": {
-                "TL_PROFILE": os.environ.get("TL_PROFILE", ""),
-                "TL_ROOT_FOLDER_ID": os.environ.get("TL_ROOT_FOLDER_ID", ""),
-                "TL_META_FOLDER_ID": os.environ.get("TL_META_FOLDER_ID", ""),
-                "TL_NOTEBOOK_ID": os.environ.get("TL_NOTEBOOK_ID", ""),
-                "TL_REGISTRY_DOC_ID": os.environ.get("TL_REGISTRY_DOC_ID", ""),
-                "TL_MANIFEST_ID": os.environ.get("TL_MANIFEST_ID", ""),
-                "TL_MANIFEST_SCOPE": os.environ.get("TL_MANIFEST_SCOPE", ""),
-            },
-        }
-    applied = _apply_profile_env(cfg, profile)
-    return {
-        "ok": True,
-        "source": used,
-        "schema": cfg.get("schema", 1),
-        "config_of_record": "Đọc tra_luat_config.json VBQPPL trước để lấy webappUrl/token, rồi overlay profile.",
-        "vbqppl_config_drive_id": VBQPPL_CONFIG_DRIVE_ID,
-        "defaultProfile": cfg.get("defaultProfile", DEFAULT_PROFILE),
-        "activeProfile": applied["profile"],
-        "profile_found": applied["profile_found"],
-        "profiles": applied["profiles"],
-        "profile": applied["profile_data"],
-        "env": {
-            "TL_PROFILE": os.environ.get("TL_PROFILE", ""),
-            "TL_ROOT_FOLDER_ID": os.environ.get("TL_ROOT_FOLDER_ID", ""),
-            "TL_META_FOLDER_ID": os.environ.get("TL_META_FOLDER_ID", ""),
-            "TL_NOTEBOOK_ID": os.environ.get("TL_NOTEBOOK_ID", ""),
-            "TL_REGISTRY_DOC_ID": os.environ.get("TL_REGISTRY_DOC_ID", ""),
-            "TL_MANIFEST_ID": os.environ.get("TL_MANIFEST_ID", ""),
-            "TL_MANIFEST_SCOPE": os.environ.get("TL_MANIFEST_SCOPE", ""),
-        },
-    }
-
-
-def cmd_profile_info(a) -> int:
-    out = _profile_info_from_config(getattr(a, "config", None), getattr(a, "profile", None))
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
 def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> str | None:
     """A1 (log rà): GHI BỀN config.profiles.<name> vào file config (MERGE — giữ profile khác + field cũ) →
     `tl profile-info`/`--profile <name>` resolve ĐÚNG thay vì fallback VBQPPL. Trả path đã ghi, None nếu không ghi được."""
@@ -7207,31 +7001,6 @@ def _profile_asset_ids(prof: dict) -> list[dict]:
     return out
 
 
-def _profile_manifest_entries_for(profile: str | None, config_path: str | None = None,
-                                  refresh: bool = False) -> tuple[list[dict], str | None]:
-    if refresh:
-        try:
-            load_creds(config_path, profile)
-        except SystemExit as e:
-            return [], str(e)
-    else:
-        apply_profile_offline(config_path, profile)
-    try:
-        return _manifest_entries(refresh=refresh), None
-    except SystemExit as e:
-        return [], str(e)
-    except Exception as e:  # noqa: BLE001
-        if refresh:
-            return [], str(e)
-        try:
-            load_creds(config_path, profile)
-            return _manifest_entries(refresh=False), None
-        except SystemExit as e2:
-            return [], str(e2)
-        except Exception as e2:  # noqa: BLE001
-            return [], str(e2)
-
-
 def _profile_live_source_ids(entries: list[dict]) -> list[str]:
     out, seen = [], set()
     for e in entries or []:
@@ -7342,226 +7111,6 @@ def _notebook_from_manifest_json(mj: dict, profile_name: str) -> tuple[str, str 
         return "", (f"MANIFEST_PROFILE_MISMATCH: manifest ghi profile='{mp}' ≠ '{profile_name}' — KHÔNG lấy "
                     f"notebookId từ manifest này; truyền --notebook tường minh nếu chắc chắn.")
     return nb, None
-
-
-def cmd_profile_list(a) -> int:
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    if getattr(a, "discover", False):   # B (v1.30.0): quét Drive LIVE đối chiếu config — xem _profile_list_discover
-        with _ProfileEnvGuard():        # ép scope NỀN bên trong nhưng KHÔNG nhiễm env caller cùng-process
-            return _profile_list_discover(a, path, cfg)
-    active = _selected_profile_name(getattr(a, "profile", None), cfg)
-    rows = _profile_config_rows(cfg, active)
-    out = {"ok": bool(cfg), "config": path, "defaultProfile": cfg.get("defaultProfile") or DEFAULT_PROFILE,
-           "activeProfile": active, "profiles": rows}
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        if not cfg:
-            print("[tl] Không thấy config; chạy `tl init-config --from-public` hoặc truyền --config.", file=sys.stderr)
-            return 2
-        print(f"== profiles · config={path} · default={out['defaultProfile']} · active={active} ==")
-        for r in rows:
-            mk = "*" if r["active"] else ("d" if r["default"] else " ")
-            print(f" {mk} {r['profile']:24s} nb={r['notebookId'] or '-'} root={r['rootFolderId'] or '-'} "
-                  f"registry={r['registryDocId'] or '-'} manifest={r['manifestId'] or '-'} "
-                  f"cat={r['categories'] or '-'} scope={r['manifestScope'] or '-'}")
-    return 0 if cfg else 2
-
-
-def cmd_profile_use(a) -> int:
-    name = (getattr(a, "name", None) or "").strip()
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    profs = _profiles_from_config(cfg)
-    plan = {"ok": name in profs, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-            "config": path, "profile": name, "currentDefault": cfg.get("defaultProfile") or DEFAULT_PROFILE,
-            "note": "DRY mặc định; --apply mới ghi defaultProfile vào config."}
-    if name not in profs:
-        plan["error"] = "PROFILE_NOT_FOUND"
-        print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    if not getattr(a, "apply", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-        return 0
-    out = _set_default_profile_config(getattr(a, "config", None), name)
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_profile_rename(a) -> int:
-    old, new = (a.old or "").strip(), (a.new or "").strip()
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    prof = (_profiles_from_config(cfg).get(old) or {}) if cfg else {}
-    plan = {"ok": bool(prof) and old != DEFAULT_PROFILE and bool(new),
-            "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-            "config": path, "old": old, "new": new,
-            "rename_assets": bool(getattr(a, "rename_assets", False)),
-            "assets": _profile_asset_ids(prof),
-            "note": "Đổi key config trước; --rename-assets mới đổi tên folder/registry/manifest trên Drive."}
-    if not plan["ok"]:
-        plan["error"] = "PROFILE_RENAME_PLAN_INVALID"
-        print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    if not getattr(a, "apply", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-        return 0
-    asset_results = []
-    if getattr(a, "rename_assets", False):
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
-        g = _gas()
-        slug = _profile_file_slug(new)
-        names = {"root": new, "registry": f"tra_luat_registry.{slug}", "manifest": f"tra_luat_manifest.{slug}.json"}
-        for it in plan["assets"]:
-            role, fid = it["role"], it["fileId"]
-            if role not in names:
-                continue
-            try:
-                r = g.get("rename", fileId=fid, name=names[role])
-            except Exception as e:  # noqa: BLE001
-                r = {"ok": False, "error": str(e)}
-            asset_results.append({"role": role, "fileId": fid, "targetName": names[role], "result": r})
-    out = _rename_profile_config(getattr(a, "config", None), old, new, getattr(a, "force", False))
-    out["asset_renames"] = asset_results
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_profile_delete(a) -> int:
-    name = (a.name or "").strip()
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    prof = (_profiles_from_config(cfg).get(name) or {}) if cfg else {}
-    entries, merr = _profile_manifest_entries_for(name, getattr(a, "config", None), getattr(a, "refresh", False)) if prof else ([], None)
-    source_ids = _profile_live_source_ids(entries)
-    # (MERGE Claude, an toàn) GUARD shared_source_id: KHÔNG xóa nguồn NLM dùng chung ≥2 drive_id (xóa 1 gãy link kia — đúng
-    # 2 FALSE-LINK hiện có). Tách deletable/blocked; chỉ xóa deletable, báo blocked để sửa shared trước.
-    nlm_deletable, nlm_blocked_shared = _profile_deletable_sources(entries, source_ids)
-    plan = {"ok": bool(prof) and name != DEFAULT_PROFILE,
-            "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-            "config": path, "profile": name, "assets": _profile_asset_ids(prof),
-            "manifest_error": merr, "manifest_rows": len(entries),
-            "nlm_source_count": len(source_ids), "nlm_source_ids": source_ids[:50],
-            "nlm_deletable": nlm_deletable[:50], "nlm_blocked_shared_source_id": nlm_blocked_shared,
-            "delete_nlm_sources": bool(getattr(a, "delete_nlm_sources", False)),
-            "trash_assets": bool(getattr(a, "trash_assets", False)),
-            "default_mode": "detach (gỡ config, GIỮ Drive+NLM) trừ khi có --delete-nlm-sources/--trash-assets",
-            "note": "DRY mặc định. --apply --confirm yes gỡ profile khỏi config (backup trước); NLM/Drive cần cờ riêng. "
-                    "Nguồn shared_source_id KHÔNG bị xóa (sửa map_set/reg_clear tách trước)."}
-    if nlm_blocked_shared:
-        plan["shared_warning"] = (f"⚠ {len(nlm_blocked_shared)} nguồn NLM DÙNG CHUNG source_id với văn bản KHÁC — "
-                                  "KHÔNG xóa (gãy link). Sửa shared_source_id trước khi purge.")
-    if not plan["ok"]:
-        plan["error"] = "PROFILE_DELETE_PLAN_INVALID"
-        print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    if not getattr(a, "apply", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-        return 0
-    if getattr(a, "confirm", "") != "yes":
-        print(json.dumps({**plan, "ok": False, "error": "CONFIRM_YES_REQUIRED"}, ensure_ascii=False, indent=2),
-              file=sys.stderr)
-        return 2
-    # (MERGE Claude) backup config TRƯỚC khi gỡ → hồi phục được
-    bkp = None
-    try:
-        if path and Path(path).exists():
-            bkp = str(Path(path).with_suffix(f".{_profile_file_slug(name)}.bak.json"))
-            _write_json_atomic(Path(bkp), cfg)
-    except Exception:
-        bkp = None
-    nlm_results = []
-    # v1.29.3 (AUDIT B1 #6): JOURNAL vòng xóa NLM (BẤT KHẢ NGHỊCH — forensic) + vòng trash Drive (restore được) —
-    # crash giữa vòng → `tl journal <run>` chỉ RÕ đã xóa/trash tới đâu (trước đây mất dấu). Op non-reg → resume/undo không đụng.
-    _pd_rid = None
-    if getattr(a, "delete_nlm_sources", False) or getattr(a, "trash_assets", False):
-        _pd_rid = _apply_journal_start("profile-delete-assets", {"profile": name,
-                                                                 "nlm": len(nlm_deletable) if getattr(a, "delete_nlm_sources", False) else 0,
-                                                                 "trash": len(plan.get("assets") or []) if getattr(a, "trash_assets", False) else 0})
-    if getattr(a, "delete_nlm_sources", False):
-        nc = _imp("nlm_cli")
-        for sid in nlm_deletable:       # CHỈ xóa nguồn KHÔNG shared
-            _journal_append(_pd_rid, {"t": "intent", "op": "nlm_source_delete", "key": sid, "set": {"irreversible": True}})
-            _dr = nc.source_delete(sid)
-            _journal_append(_pd_rid, {"t": "commit", "op": "nlm_source_delete", "key": sid, "ok": bool(_dr.get("ok"))})
-            nlm_results.append({"source_id": sid, "result": _dr})
-    trash_results = []
-    if getattr(a, "trash_assets", False):
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
-        g = _gas()
-        for it in plan["assets"]:
-            _journal_append(_pd_rid, {"t": "intent", "op": "drive_trash", "key": it["fileId"], "set": {"restore": "tl ... restore"}})
-            try:
-                r = g.get("trash", fileId=it["fileId"], confirm="yes")
-            except Exception as e:  # noqa: BLE001
-                r = {"ok": False, "error": str(e)}
-            _journal_append(_pd_rid, {"t": "commit", "op": "drive_trash", "key": it["fileId"], "ok": bool(r.get("ok"))})
-            trash_results.append({**it, "result": r})
-    out = _remove_profile_config(getattr(a, "config", None), name)
-    out["config_backup"] = bkp
-    out["nlm_deletes"] = nlm_results
-    out["nlm_blocked_shared_source_id"] = nlm_blocked_shared
-    out["asset_trash"] = trash_results
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
-
-
-def cmd_profile_files(a) -> int:
-    profile = getattr(a, "target_profile", None) or getattr(a, "profile", None)
-    entries, err = _profile_manifest_entries_for(profile, getattr(a, "config", None), getattr(a, "refresh", False))
-    if err:
-        print(json.dumps({"ok": False, "error": err, "profile": profile or _active_profile()}, ensure_ascii=False, indent=2),
-              file=sys.stderr)
-        return 2
-    rows = []
-    for e in entries:
-        if getattr(a, "row_kind", None) and _entry_row_kind(e) != str(a.row_kind).lower():
-            continue
-        if getattr(a, "nlm", False) and not _entry_nlm(e):
-            continue
-        if getattr(a, "no_nlm", False) and _entry_nlm(e):
-            continue
-        if getattr(a, "corpus", False) and not _entry_corpus_true(e):
-            continue
-        if getattr(a, "no_corpus", False) and _entry_corpus_true(e):
-            continue
-        q = _strip_accents(getattr(a, "name", "") or "").lower()
-        if q and q not in _strip_accents(_entry_name(e)).lower():
-            continue
-        rows.append({"drive_id": _entry_drive_id(e), "name": _entry_name(e), "sohieu": _entry_sohieu(e),
-                     "cat": _entry_cat(e), "row_kind": _entry_row_kind(e), "corpus": _entry_corpus_true(e),
-                     "nlm_source_id": _entry_nlm(e), "nlm_notebook_id": _entry_nlm_notebook_id(e),
-                     "hieuluc": e.get("hieuluc") or e.get("hieu_luc") or ""})
-    limit = getattr(a, "limit", None)
-    shown = rows[:limit] if limit else rows
-    out = {"ok": True, "profile": profile or _active_profile(), "count": len(rows), "shown": len(shown), "rows": shown}
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        print(f"== profile-files · profile={out['profile']} · {len(rows)} rows ==")
-        for r in shown:
-            print(f"  {r['drive_id'][:12]:12s} {r['row_kind']:4s} nlm={'Y' if r['nlm_source_id'] else '-'} "
-                  f"corpus={'Y' if r['corpus'] else '-'} {r['sohieu'] or '-':18s} {r['name'][:100]}")
-    return 0
-
-
-def cmd_profile_manifest(a) -> int:
-    profile = getattr(a, "target_profile", None) or getattr(a, "profile", None)
-    if getattr(a, "refresh", False):
-        load_creds(getattr(a, "config", None), profile)
-    else:
-        apply_profile_offline(getattr(a, "config", None), profile)
-    data = _load_manifest_full(refresh=getattr(a, "refresh", False))
-    if data.get("ok") is False:
-        print(json.dumps(data, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    if getattr(a, "out", None):
-        Path(a.out).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    entries = data.get("entries") or data.get("files") or data.get("rows") or []
-    summary = {"ok": True, "profile": profile or _active_profile(), "manifestId": data.get("manifestId"),
-               "count": len(entries), "out": getattr(a, "out", None)}
-    if getattr(a, "json", False):
-        print(json.dumps(data, ensure_ascii=False, indent=2))
-    else:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0
 
 
 def cmd_profile_file_add(a) -> int:
@@ -7765,16 +7314,6 @@ def _create_profile_registry_sheet(g, meta_id: str, profile: str) -> dict:
             "convert": cv, "verify": ver, "error": ver.get("error")}
 
 
-def _create_profile_manifest_json(g, meta_id: str, profile: str, root_id: str, notebook_id: str) -> dict:
-    slug = _profile_file_slug(profile)
-    body = json.dumps(_manifest_placeholder(profile, root_id, notebook_id), ensure_ascii=False, indent=2)
-    up = g.post("upload", b64=_b64_text(body), name=f"tra_luat_manifest.{slug}.json",
-                mime="application/json", folderId=meta_id, convert="false",
-                register="false", share="false", force="true")
-    mid = up.get("fileId") or up.get("id")
-    return {"ok": bool(mid), "manifestId": mid, "upload": up}
-
-
 # ============ v1.30.0 — PROFILE OPS: discover (B) / adopt (C) / doctor (D) / index (E) ============
 # BẤT BIẾN LAYOUT (D): registry + manifest của profile phải nằm TRONG thư mục profile (root hoặc _meta của nó).
 # Sổ cái _PROFILES_INDEX (E) là BẢN CHIẾU đọc-được từ config — nguồn sự thật DUY NHẤT vẫn là config
@@ -7892,52 +7431,6 @@ def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
             "capped": len(subfolders) > folder_cap, "folder_total": len(subfolders)}
 
 
-def _profile_list_discover(a, path, cfg) -> int:
-    """B (v1.30.0): `profile-list --discover` — quét Van_ban_thuong LIVE, đối chiếu config, cảnh báo profile-thật-
-    trên-Drive chưa đăng ký (kèm lệnh profile-adopt điền sẵn), vỏ rỗng, asset lạc gốc. READ-ONLY (không ghi gì)."""
-    try:
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)   # webapp NỀN (như profile-create) — KHÔNG forward scope profile
-        g = _gas()
-        boot = g.get("bootstrap")
-        vbt_id = boot.get("vanBanThuongId") if isinstance(boot, dict) else None
-        if not vbt_id:
-            print(json.dumps({"ok": False, "error": "NO_VAN_BAN_THUONG_ID", "bootstrap": boot},
-                             ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
-        scan = _discover_scan_vbthuong(g, vbt_id, folder_cap=int(getattr(a, "folder_cap", None) or 60))
-    except SystemExit as e:
-        print(f"[tl] profile-list --discover cần webapp LIVE (Cowork): {e}", file=sys.stderr)
-        return 2
-    except Exception as e:  # noqa: BLE001
-        print(json.dumps({"ok": False, "error": f"DISCOVER_SCAN_FAILED: {e}"}, ensure_ascii=False), file=sys.stderr)
-        return 2
-    rep = _discover_classify(scan.get("folders") or [], scan.get("root_files") or [],
-                             _profiles_from_config(cfg), vbt_id=vbt_id)
-    out = {"ok": True, "config": path, "vanBanThuongId": vbt_id,
-           "folder_total": scan.get("folder_total"), "scanned": len(scan.get("folders") or []),
-           "capped": bool(scan.get("capped")), **rep}
-    if scan.get("capped"):
-        out["warning"] = (f"CHỈ quét {out['scanned']}/{out['folder_total']} thư mục (cap) — chạy lại với "
-                          f"--folder-cap {out['folder_total']} để phủ đủ; kết luận 'config_only' có thể là giả khi cap.")
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 0
-    print(f"== profile-list --discover · Van_ban_thuong={vbt_id} · {out['scanned']}/{out['folder_total']} thư mục ==")
-    for r in rep["folders"]:
-        mark = {"in_config": "✅", "unregistered_profile": "🟠", "empty_folder": "⚪", "plain_folder": "·"}.get(r["status"], "?")
-        print(f" {mark} {str(r['folder_name'])[:44]:44s} {r['status']:22s} items={r['n_items']}"
-              + (f" profile={r['profile']}" if r.get("profile") else ""))
-        if r.get("suggest"):
-            print(f"      $ {r['suggest']}")
-    for m in rep["misplaced_root_assets"]:
-        print(f" 🔴 LẠC GỐC: {m['name']} ({m['kind']}) id={m['id']}\n      {m['note']}")
-    for c in rep["config_only"]:
-        print(f" ⚠ CONFIG-ONLY: {c['profile']} root={c['rootFolderId']} — {c['note']}")
-    if out.get("warning"):
-        print(f" ⚠ {out['warning']}")
-    return 0
-
-
 def _adopt_pick_assets(items: list[dict], reg_override: str = "", man_override: str = "") -> dict:
     """C (PURE, test offline): chọn registry Sheet + manifest JSON từ items (con folder + _meta). Override thắng.
     Nhiều ứng viên không override → AMBIGUOUS (bắt người chọn — KHÔNG đoán); tên-registry-nhưng-không-Sheet → chặn."""
@@ -7982,137 +7475,6 @@ def _adopt_pick_assets(items: list[dict], reg_override: str = "", man_override: 
     return out
 
 
-def cmd_profile_adopt(a) -> int:
-    with _ProfileEnvGuard():            # review v1.30.0: không nhiễm env profile của caller cùng-process
-        return _cmd_profile_adopt_impl(a)
-
-
-def _cmd_profile_adopt_impl(a) -> int:
-    """C (v1.30.0): SEED profile ĐÃ CÓ hạ tầng trên Drive vào config (khác profile-create = dựng MỚI từ đầu).
-    Dò registry Sheet + manifest JSON trong folder (+_meta); GUARD registry (mime Sheet thật / ≠ Doc legacy
-    1mATG / KHÔNG dùng-chung profile khác / schema REGISTRY_SCHEMA_COLS khi --apply); notebookId: --notebook >
-    manifest JSON (chỉ khi manifest đúng profile). Ghi qua _persist_profile_config (journaled). DRY mặc định."""
-    name = (getattr(a, "name", None) or "").strip()
-    folder = (getattr(a, "folder", None) or "").strip()
-    if not name or not folder:
-        print("[tl] profile-adopt cần --name và --folder", file=sys.stderr)
-        return 2
-    if name == DEFAULT_PROFILE:
-        print("[tl] REFUSE_ADOPT_DEFAULT_PROFILE: vbqppl là profile nền (webapp/token of-record).", file=sys.stderr)
-        return 2
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    existing = _profiles_from_config(cfg).get(name)
-    existing = existing if isinstance(existing, dict) else None
-    if existing and str(existing.get("rootFolderId") or "").strip() not in ("", folder):
-        print(json.dumps({"ok": False, "error": "PROFILE_EXISTS_DIFFERENT_FOLDER", "profile": name,
-                          "config_rootFolderId": existing.get("rootFolderId"), "requested_folder": folder,
-                          "note": "Đổi --name, hoặc profile-rename/profile-delete profile cũ trước."},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    try:
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)   # token NỀN, không forward scope profile
-    except SystemExit as e:
-        print(f"[tl] profile-adopt cần webapp LIVE (Cowork): {e}", file=sys.stderr)
-        return 2
-    g = _gas()
-    finfo = _gas_get_retry(g, "info", fileId=folder)
-    fmime = _mime_from_info(finfo) if isinstance(finfo, dict) else ""
-    if not fmime.endswith("apps.folder"):
-        print(json.dumps({"ok": False, "error": "FOLDER_ID_INVALID", "mime": fmime, "info": finfo},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    try:
-        items = _gas_get_retry(g, "list", folderId=folder).get("items") or []
-    except Exception as e:  # noqa: BLE001
-        print(json.dumps({"ok": False, "error": f"FOLDER_LIST_FAILED: {e}"}, ensure_ascii=False), file=sys.stderr)
-        return 2
-    meta = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
-    if meta:
-        try:
-            items = items + (_gas_get_retry(g, "list", folderId=meta.get("id")).get("items") or [])
-        except Exception:
-            pass
-    picked = _adopt_pick_assets(items, reg_override=(getattr(a, "registry", None) or "").strip(),
-                                man_override=(getattr(a, "manifest", None) or "").strip())
-    plan_errors = list(picked["errors"])
-    if getattr(a, "bootstrap_manifest", False):
-        plan_errors = [x for x in plan_errors if not x.startswith("MANIFEST_NOT_FOUND")]
-    reg_id = str((picked["registry"] or {}).get("id") or "")
-    _profs_all = _profiles_from_config(cfg)
-    if reg_id:
-        if reg_id == _LEGACY_REGISTRY_DOC_ID:
-            plan_errors.append("REGISTRY_LEGACY_DOC_FORBIDDEN: id trùng Doc legacy 1mATG… (đọc RỖNG count=0 ảo) — KHÔNG dùng.")
-        else:
-            # Review v1.30.0 (CONFIRMED): CHẶN adopt registry đang thuộc profile KHÁC — --apply sẽ reg_addcols
-            # (mutate Sheet) + 2 profile ghi chung 1 registry = phá doctrine own-assets.
-            _owners = [n for n in _profile_asset_owners(_profs_all, reg_id) if n != name]
-            if _owners:
-                plan_errors.append(f"REGISTRY_SHARED_WITH_OTHER_PROFILE: registry {reg_id} đang thuộc profile "
-                                   f"{_owners} — tách registry riêng (profile-create) thay vì dùng chung.")
-            rmime = _mime_from_info(_gas_get_retry(g, "info", fileId=reg_id))
-            if rmime and rmime != REGISTRY_SHEET_MIME:
-                plan_errors.append(f"REGISTRY_NOT_SHEET_MIME: mime='{rmime}' — registry PHẢI là Google Sheet.")
-    man_id = str((picked["manifest"] or {}).get("id") or "")
-    if man_id:
-        _mowners = [n for n in _profile_asset_owners(_profs_all, man_id) if n != name]
-        if _mowners:
-            plan_errors.append(f"MANIFEST_SHARED_WITH_OTHER_PROFILE: manifest {man_id} đang thuộc profile "
-                               f"{_mowners} — mỗi profile 1 manifest riêng.")
-    nb = (getattr(a, "notebook", None) or "").strip()
-    nb_src = "flag" if nb else None
-    _nb_warn = None
-    if not nb and man_id:
-        try:    # notebookId nằm sẵn trong manifest JSON của profile (schema _manifest_placeholder)
-            d = _gas_get_retry(g, "download", fileId=man_id)
-            if d.get("b64"):
-                mj = json.loads(base64.b64decode(d["b64"]).decode("utf-8"))
-                # Review v1.30.0 (CONFIRMED): manifest lạ (trường profile ≠ tên adopt) KHÔNG được cấp notebookId.
-                nb, _nb_warn = _notebook_from_manifest_json(mj, name)
-                nb_src = "manifest" if nb else None
-        except Exception:
-            pass
-    prof_block = {"rootFolderId": folder, "metaFolderId": (meta or {}).get("id"),
-                  "notebookId": nb, "registryDocId": reg_id, "manifestId": man_id,
-                  "manifestScope": "own", "categories": "own"}
-    plan = {"ok": not plan_errors, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-            "config": path, "profile": name, "folder": folder, "picked": picked,
-            "notebook_source": nb_src, "profile_block": prof_block, "errors": plan_errors,
-            "warnings": (([_nb_warn] if _nb_warn else [])
-                         + ([] if nb else ["NO_NOTEBOOK_ID: chưa xác định notebook — bổ sung --notebook hoặc config sau; "
-                                           "lệnh NLM sẽ chặn tới khi có (đúng thiết kế, không fallback base)."])),
-            "note": "DRY mặc định; --apply verify schema registry (reg_addcols idempotent) rồi ghi config.profiles "
-                    "(journaled config_write). Adopt lại cùng folder = idempotent merge."}
-    if plan_errors or not getattr(a, "apply", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr if plan_errors else sys.stdout)
-        return 2 if plan_errors else 0
-    ver = _verify_registry_sheet(g, reg_id)     # --apply: verify schema (heal cột thiếu — idempotent, cùng đường profile-create)
-    if not ver.get("ok"):
-        print(json.dumps({"ok": False, "step": "verify_registry_sheet", **ver}, ensure_ascii=False, indent=2),
-              file=sys.stderr)
-        return 2
-    if getattr(a, "bootstrap_manifest", False) and not man_id:
-        man = _create_profile_manifest_json(g, (meta or {}).get("id") or folder, name, folder, nb)
-        if not man.get("ok"):
-            print(json.dumps({"ok": False, "step": "bootstrap_manifest", **man}, ensure_ascii=False, indent=2),
-                  file=sys.stderr)
-            return 2
-        man_id = str(man.get("manifestId") or "")
-        prof_block["manifestId"] = man_id
-        try:
-            g.get("manifest_export", registryDocId=reg_id, manifestId=man_id)
-        except Exception as e:  # noqa: BLE001
-            plan["warnings"].append(f"manifest_export bootstrap bỏ qua: {e}")
-    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
-    out = {**plan, "ok": bool(cfgp), "registry_verify": ver, "config_written": cfgp,
-           "next_steps": [f"tl --profile {name} profile-info  (kiểm registry Sheet + categories='own')",
-                          f"tl --profile {name} boot --refresh",
-                          "tl profile-index --rebuild --apply  (cập nhật sổ cái _PROFILES_INDEX)"]}
-    if not cfgp:
-        out["errors"] = ["CONFIG_WRITE_FAILED: không tìm được file config ghi được — truyền --config."]
-    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if out["ok"] else sys.stderr)
-    return 0 if out["ok"] else 2
-
-
 def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
     """D (PURE, test offline): kiểm bất biến layout + hạ tầng 1 profile dự án. infos: {fileId: {mimeType, parents,
     trashed, name}} (từ action `info`, best-effort — thiếu info thì bỏ qua check phụ thuộc).
@@ -8154,140 +7516,8 @@ def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
     return finds
 
 
-def cmd_profile_doctor(a) -> int:
-    with _ProfileEnvGuard():            # review v1.30.0: không nhiễm env profile của caller cùng-process
-        return _cmd_profile_doctor_impl(a)
-
-
-def _cmd_profile_doctor_impl(a) -> int:
-    """D (v1.30.0): kiểm bất biến layout/hạ tầng mọi profile dự án trong config (hoặc --profile-name <p>).
-    --fix --apply: move asset lạc chỗ vào _meta của profile (tạo _meta nếu thiếu; action `move` — fileId GIỮ NGUYÊN
-    nên config KHÔNG phải đổi; journal drive_move). Asset dùng-chung ≥2 profile: KHÔNG auto-move (critical).
-    rc: 0 sạch / 1 có finding / 2 lỗi chạy."""
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    profs = _profiles_from_config(cfg)
-    target = (getattr(a, "target_profile", None) or "").strip()
-    names = [target] if target else [n for n in sorted(profs) if n != DEFAULT_PROFILE]
-    if target and target not in profs:
-        print(json.dumps({"ok": False, "error": "PROFILE_NOT_FOUND", "profile": target}, ensure_ascii=False),
-              file=sys.stderr)
-        return 2
-    try:
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
-    except SystemExit as e:
-        print(f"[tl] profile-doctor cần webapp LIVE (đọc parents/mime qua action info): {e}", file=sys.stderr)
-        return 2
-    g = _gas()
-    findings, infos_all = [], {}
-    for n in names:
-        prof = profs.get(n) if isinstance(profs.get(n), dict) else {}
-        infos = {}
-        for key in ("registryDocId", "manifestId"):
-            fid = str(prof.get(key) or "").strip()
-            if not fid:
-                continue
-            try:
-                fi = _gas_get_retry(g, "info", fileId=fid)
-                f = fi.get("file") if isinstance(fi.get("file"), dict) else {}
-                infos[fid] = {"mimeType": f.get("mimeType"), "parents": f.get("parents") or [],
-                              "trashed": bool(f.get("trashed")), "name": f.get("name")}
-            except Exception as e:  # noqa: BLE001
-                findings.append({"check": "INFO_FAILED", "severity": "warn", "profile": n, "fileId": fid,
-                                 "note": f"không đọc được info ({e}) — bỏ qua check layout/mime cho file này."})
-        infos_all.update(infos)
-        findings.extend(_doctor_check_profile(n, prof, infos))
-    # Review v1.30.0 (CONFIRMED): asset dùng chung ≥2 profile trong config → BỎ fix-move, nâng critical
-    # (move theo profile này phá layout profile kia). Soi trên TOÀN BỘ config, kể cả khi --profile-name 1 profile.
-    findings = _strip_shared_fixes(findings, profs)
-    fixes = [f for f in findings if f.get("fix")]
-    out = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY", "config": path,
-           "profiles_checked": names, "findings": findings,
-           "criticals": sum(1 for f in findings if f.get("severity") == "critical"),
-           "fixable": len(fixes),
-           "invariant": "LAYOUT: registry+manifest của profile nằm TRONG thư mục profile (root hoặc _meta).",
-           "note": "DRY mặc định; --fix --apply move asset lạc chỗ vào _meta (fileId giữ nguyên — config không đổi)."}
-    fix_results = []
-    if getattr(a, "fix", False) and getattr(a, "apply", False) and fixes:
-        rid = _apply_journal_start("profile-doctor-fix", {"fixes": len(fixes)})
-        for f in fixes:
-            n = f.get("profile")
-            prof = profs.get(n) if isinstance(profs.get(n), dict) else {}
-            dest = str(prof.get("metaFolderId") or "").strip()
-            if not dest:    # tạo/tìm _meta dưới root profile rồi ghi bền vào config (journaled)
-                mr = g.get("resolvefolder", name="_meta", parentId=str(prof.get("rootFolderId") or ""), create="true")
-                dest = str((mr or {}).get("folderId") or "")
-                if dest:
-                    _persist_profile_config(getattr(a, "config", None), n, {"metaFolderId": dest})
-            if not dest:
-                fix_results.append({**f, "result": {"ok": False, "error": "NO_DEST_META"}})
-                continue
-            # Review v1.30.0 (CONFIRMED ×2): (a) KHÔNG kèm 'before' — op non-reg theo hợp đồng journal v1.29.1
-            # (resume/undo CHỈ xử reg_*; kèm before sẽ làm undo sinh restore-op rác đẩy vào _journaled_reg_write);
-            # parents cũ lưu trong set.from_parents (forensic/undo TAY). (b) move idempotent (re-move cùng đích
-            # = no-op) → bọc _gas_get_retry chống timeout transient (trước đây 1 timeout = fix treo tới lần chạy sau).
-            _journal_append(rid, {"t": "intent", "op": "drive_move", "key": f["fileId"],
-                                  "set": {"toFolderId": dest, "from_parents": f.get("parents") or []}})
-            try:
-                mv = _gas_get_retry(g, "move", fileId=f["fileId"], toFolderId=dest)
-            except Exception as e:  # noqa: BLE001
-                mv = {"ok": False, "error": str(e)}
-            _journal_append(rid, {"t": "commit", "op": "drive_move", "key": f["fileId"], "ok": bool(mv.get("ok"))})
-            fix_results.append({**f, "result": mv, "moved_to": dest})
-        out["fix_results"] = fix_results
-        out["journal"] = rid
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        print(f"== profile-doctor · {len(names)} profile · findings={len(findings)} (critical={out['criticals']}) ==")
-        for f in findings:
-            sev = {"critical": "🔴", "warn": "🟠"}.get(f.get("severity"), "·")
-            print(f" {sev} [{f.get('profile')}] {f.get('check')}: {f.get('note')}")
-            if f.get("fix"):
-                print(f"      fix: move {f['fix']['fileId']} → {f['fix']['to'] or '_meta (sẽ tạo)'}")
-        for r in fix_results:
-            print(f" ▸ FIX {r.get('fileId')}: {'OK → ' + str(r.get('moved_to')) if (r.get('result') or {}).get('ok') else 'FAIL ' + str(r.get('result'))}")
-        if not findings:
-            print(" ✅ sạch — layout + hạ tầng profile đạt bất biến.")
-    return 0 if not findings else 1
-
-
 _PROFILES_INDEX_COLS = ["profile", "default", "rootFolderId", "folder_name", "notebookId", "registryDocId",
                         "manifestId", "categories", "manifestScope", "baseAlso", "note"]
-
-
-def _profile_index_rows(cfg: dict, folder_names: dict | None = None) -> list[dict]:
-    """E (PURE, test offline): sinh dòng sổ cái _PROFILES_INDEX từ config — BẢN CHIẾU đọc-được;
-    nguồn sự thật DUY NHẤT vẫn là config."""
-    default = (cfg or {}).get("defaultProfile") or DEFAULT_PROFILE
-    rows = []
-    for pname, prof in sorted(_profiles_from_config(cfg or {}).items()):
-        prof = prof if isinstance(prof, dict) else {}
-        cats = prof.get("categories")
-        rows.append({
-            "profile": pname,
-            "default": "yes" if pname == default else "",
-            "rootFolderId": str(prof.get("rootFolderId") or ""),
-            "folder_name": str((folder_names or {}).get(str(prof.get("rootFolderId") or "")) or ""),
-            "notebookId": str(prof.get("notebookId") or ""),
-            "registryDocId": str(prof.get("registryDocId") or ""),
-            "manifestId": str(prof.get("manifestId") or ""),
-            "categories": ("own-tree(45)" if isinstance(cats, dict) else str(cats or "")),
-            "manifestScope": str(prof.get("manifestScope") or ""),
-            "baseAlso": ("" if pname == DEFAULT_PROFILE else ("off" if prof.get("baseAlso") is False else "on")),
-            "note": ("nền VBQPPL — webapp/token of-record" if pname == DEFAULT_PROFILE else ""),
-        })
-    return rows
-
-
-def _profile_index_csv(rows: list[dict]) -> str:
-    import csv as _csv
-    import io as _io
-    buf = _io.StringIO()
-    w = _csv.DictWriter(buf, fieldnames=_PROFILES_INDEX_COLS, extrasaction="ignore")
-    w.writeheader()
-    for r in rows or []:
-        w.writerow(r)
-    return buf.getvalue()
 
 
 def _index_old_candidates(items: list[dict]) -> list[dict]:
@@ -8295,191 +7525,6 @@ def _index_old_candidates(items: list[dict]) -> list[dict]:
     `_PROFILES_INDEX.csv` — KHÔNG startswith (file người dùng đặt `_PROFILES_INDEX_backup…` từng có nguy cơ trash nhầm)."""
     keep = {_PROFILES_INDEX_NAME, f"{_PROFILES_INDEX_NAME}.csv"}
     return [x for x in (items or []) if str(x.get("name") or "") in keep]
-
-
-def cmd_profile_index(a) -> int:
-    with _ProfileEnvGuard():            # review v1.30.0: không nhiễm env profile của caller cùng-process
-        return _cmd_profile_index_impl(a)
-
-
-def _cmd_profile_index_impl(a) -> int:
-    """E (v1.30.0): SỔ CÁI profile trên Drive — `Van_ban_thuong/_PROFILES_INDEX` (Google Sheet, BẢN CHIẾU từ config).
-    DRY: in bảng/CSV. --rebuild --apply: upload CSV → copy_convert Sheet MỚI → trash bản cũ + CSV trung gian
-    (upload KHÔNG ghi-đè-tại-chỗ ⇒ fail-safe tạo-trước-dọn-sau; sheetId ĐỔI mỗi rebuild — mở qua folder, đừng bookmark id;
-    journal drive_trash)."""
-    path, cfg = _read_config_record(getattr(a, "config", None))
-    if not cfg:
-        print("[tl] Không thấy config; chạy `tl init-config --from-public` hoặc truyền --config.", file=sys.stderr)
-        return 2
-    rows = _profile_index_rows(cfg)
-    if not getattr(a, "apply", False):
-        out = {"ok": True, "mode": "DRY", "config": path, "count": len(rows), "rows": rows,
-               "note": "`--rebuild --apply` để ghi Van_ban_thuong/_PROFILES_INDEX (Sheet) trên Drive (cần webapp LIVE)."}
-        print(json.dumps(out, ensure_ascii=False, indent=2) if getattr(a, "json", False) else _profile_index_csv(rows))
-        return 0
-    if not getattr(a, "rebuild", False):
-        print("[tl] profile-index --apply cần --rebuild (xác nhận: tạo Sheet mới + trash bản cũ).", file=sys.stderr)
-        return 2
-    try:
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
-    except SystemExit as e:
-        print(f"[tl] profile-index --apply cần webapp LIVE (Cowork): {e}", file=sys.stderr)
-        return 2
-    g = _gas()
-    boot = g.get("bootstrap")
-    vbt_id = boot.get("vanBanThuongId") if isinstance(boot, dict) else None
-    if not vbt_id:
-        print(json.dumps({"ok": False, "error": "NO_VAN_BAN_THUONG_ID", "bootstrap": boot}, ensure_ascii=False),
-              file=sys.stderr)
-        return 2
-    olds = []
-    try:    # tên folder cho cột folder_name (best-effort) + tìm bản index cũ để dọn SAU khi tạo bản mới
-        top_items = _gas_get_retry(g, "list", folderId=vbt_id).get("items") or []
-        fmap = {str(x.get("id")): str(x.get("name")) for x in top_items if str(x.get("type")) == "folder"}
-        rows = _profile_index_rows(cfg, folder_names=fmap)
-        olds = _index_old_candidates(top_items)
-    except Exception:
-        pass
-    csv_text = _profile_index_csv(rows)
-    rid = _apply_journal_start("profile-index", {"rows": len(rows), "old": len(olds)})
-    up = g.post("upload", b64=_b64_text(csv_text), name=f"{_PROFILES_INDEX_NAME}.csv", mime="text/csv",
-                folderId=vbt_id, convert="false", register="false", share="false", force="true")
-    csv_id = up.get("fileId") or up.get("id")
-    if not csv_id:
-        print(json.dumps({"ok": False, "step": "upload_csv", "detail": up}, ensure_ascii=False, indent=2),
-              file=sys.stderr)
-        return 2
-    cv = g.get("copy_convert", fileId=csv_id, name=_PROFILES_INDEX_NAME, folderId=vbt_id, toType="sheets",
-               register="false", share="false")
-    sheet_id = cv.get("fileId") or cv.get("id")
-    if not sheet_id:
-        print(json.dumps({"ok": False, "step": "convert_sheet", "csvFileId": csv_id, "detail": cv},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    cleanup = []
-    for old in olds + [{"id": csv_id, "name": f"{_PROFILES_INDEX_NAME}.csv"}]:
-        oid = str(old.get("id") or "")
-        if not oid or oid == sheet_id:
-            continue
-        _journal_append(rid, {"t": "intent", "op": "drive_trash", "key": oid, "set": {"restore": "action restore"}})
-        try:
-            tr = g.get("trash", fileId=oid, confirm="yes")
-        except Exception as e:  # noqa: BLE001
-            tr = {"ok": False, "error": str(e)}
-        _journal_append(rid, {"t": "commit", "op": "drive_trash", "key": oid, "ok": bool(tr.get("ok"))})
-        cleanup.append({"fileId": oid, "name": old.get("name"), "result": tr})
-    out = {"ok": True, "sheetId": sheet_id, "vanBanThuongId": vbt_id, "rows": len(rows),
-           "replaced_old": cleanup, "journal": rid,
-           "note": "Sổ cái = BẢN CHIẾU từ config (nguồn sự thật duy nhất). Mỗi rebuild tạo Sheet MỚI (id đổi), "
-                   "bản cũ + CSV trung gian vào Trash (phục hồi được)."}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0
-
-
-def cmd_profile_create(a) -> int:
-    """Dựng profile văn bản thường: folder riêng + _meta + registry Sheet + manifest JSON + config own-scope."""
-    try:
-        import gen_instructions  # type: ignore
-    except Exception as e:
-        print(f"[tl] Không import được gen_instructions.py: {e}", file=sys.stderr)
-        return 2
-    name = (a.name or "").strip()
-    folder_name = (getattr(a, "folder_name", None) or name).strip()
-    nb = (a.notebook or "").strip()
-    if not name or not nb:
-        print("[tl] profile-create cần --name và --notebook", file=sys.stderr)
-        return 2
-    root_id = meta_id = registry_id = manifest_id = None
-    actions = []
-    if getattr(a, "apply", False):
-        # tạo folder dưới Van_ban_thuong qua webapp NỀN (VBQPPL token); KHÔNG forward profile registry.
-        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
-        gas = _gas()
-        boot = gas.get("bootstrap")
-        vbt_id = boot.get("vanBanThuongId") if isinstance(boot, dict) else None
-        if not vbt_id:
-            print(f"[tl] profile-create: không lấy được vanBanThuongId từ bootstrap: {boot}", file=sys.stderr)
-            return 2
-        r = gas.get("resolvefolder", name=folder_name, parentId=vbt_id, create="true")
-        root_id = r.get("folderId") if isinstance(r, dict) else None
-        if not root_id:
-            print(f"[tl] profile-create: tạo/tìm folder thất bại: {r}", file=sys.stderr)
-            return 2
-        actions.append(f"folder Van_ban_thuong/{folder_name} → rootFolderId={root_id}")
-        mr = gas.get("resolvefolder", name="_meta", parentId=root_id, create="true")
-        meta_id = mr.get("folderId") if isinstance(mr, dict) else None
-        if not meta_id:
-            print(f"[tl] profile-create: tạo/tìm _meta thất bại: {mr}", file=sys.stderr)
-            return 2
-        actions.append(f"folder Van_ban_thuong/{folder_name}/_meta → metaFolderId={meta_id}")
-        reg = _create_profile_registry_sheet(gas, meta_id, name)
-        if not reg.get("ok"):
-            print(json.dumps({"ok": False, "step": "create_registry_sheet", **reg}, ensure_ascii=False, indent=2),
-                  file=sys.stderr)
-            return 2
-        registry_id = reg.get("registryDocId")
-        actions.append(f"registry Sheet riêng → registryDocId={registry_id} ({len(REGISTRY_SCHEMA_COLS)} cột)")
-        man = _create_profile_manifest_json(gas, meta_id, name, root_id, nb)
-        if not man.get("ok"):
-            print(json.dumps({"ok": False, "step": "create_manifest_json", **man}, ensure_ascii=False, indent=2),
-                  file=sys.stderr)
-            return 2
-        manifest_id = man.get("manifestId")
-        actions.append(f"manifest JSON riêng → manifestId={manifest_id}")
-        try:
-            mex = gas.get("manifest_export", registryDocId=registry_id, manifestId=manifest_id)
-            if mex.get("ok"):
-                actions.append("manifest_export bootstrap OK (empty registry)")
-        except Exception as e:  # noqa: BLE001
-            actions.append(f"⚠ manifest_export bootstrap bỏ qua: {e}")
-        # GHI BỀN config.profiles.<name> ngay sau khi hạ tầng đã verify là Sheet thật.
-        _cfgp = _persist_profile_config(getattr(a, "config", None), name,
-                                        {"rootFolderId": root_id, "metaFolderId": meta_id, "notebookId": nb,
-                                         "registryDocId": registry_id, "manifestId": manifest_id,
-                                         "manifestScope": "own", "categories": "own"})
-        if _cfgp:
-            actions.append(f"config.profiles.{name} ĐÃ GHI vào {_cfgp} (own root+_meta+Sheet registry+manifest)")
-        else:
-            actions.append("⚠ KHÔNG ghi được config (thiếu file) — ghi TAY config_profiles_patch bên dưới rồi mới dùng --profile.")
-    text = gen_instructions.generate(getattr(a, "target", "project") or "project", VERSION,
-                                     name, nb, folder_name, root_id)
-    profile_patch = {name: {
-        "rootFolderId": root_id or "<TẠO: chạy lại với --apply>",
-        "metaFolderId": meta_id or "<TẠO: _meta>",
-        "notebookId": nb,
-        "registryDocId": registry_id or "<TẠO: Google Sheet tra_luat_registry.<profile>>",
-        "manifestId": manifest_id or "<TẠO: JSON tra_luat_manifest.<profile>.json>",
-        "manifestScope": "own",
-        "categories": "own",
-    }}
-    out = {
-        "ok": True, "profile": name, "folder_name": folder_name, "notebookId": nb,
-        "rootFolderId": root_id, "applied": bool(getattr(a, "apply", False)),
-        "metaFolderId": meta_id, "registryDocId": registry_id, "manifestId": manifest_id,
-        "config_profiles_patch": {"profiles": profile_patch},
-        "next_steps": [
-            ("A1: config.profiles." + name + " ĐÃ ghi tự động khi --apply (own root+_meta+registry Sheet+manifest)."
-             if root_id else "Ghi config_profiles_patch vào profiles của tra_luat_config.json (giữ vbqppl nền)."),
-            f"A2: dùng `tl --profile {name} profile-ingest <file>` để nạp flat vào root profile; không recat vào 45 chủ đề VBQPPL.",
-            f'Đặt defaultProfile="{name}" cho Project này (hoặc luôn chạy --profile {name}).',
-            f"Kiểm `tl --profile {name} profile-info` thấy registryDocId là Google Sheet và categories='own'.",
-        ],
-        "actions": actions, "instruction": text,
-    }
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        if not getattr(a, "apply", False):
-            print(f"[DRY] profile-create '{name}': chạy --apply để tạo folder Van_ban_thuong/{folder_name}.")
-        for ac in actions:
-            print("  - " + ac)
-        print("\n# config profiles patch (ghi vào tra_luat_config.json):")
-        print(json.dumps({"profiles": profile_patch}, ensure_ascii=False, indent=2))
-        print("\n# next steps:")
-        for s in out["next_steps"]:
-            print("  - " + s)
-        print("\n# Instruction (Claude Project):\n" + text)
-    return 0
 
 
 def cmd_vbhn_compare(a) -> int:
@@ -15291,6 +14336,7 @@ _tl_hygiene = _tl_core_import("hygiene")     # noqa: E402 — I1 v1.34.3
 _tl_nlm_ops = _tl_core_import("nlm_ops")    # noqa: E402 — I2 v1.34.4
 _tl_extract_cache = _tl_core_import("extract_cache")   # noqa: E402 — I3 v1.34.5
 _tl_fetch_web = _tl_core_import("fetch_web")            # noqa: E402 — I3 v1.34.5
+_tl_profile_mgmt = _tl_core_import("profile_mgmt")      # noqa: E402 — I4 v1.34.7
 _tl_zip_ingest = _tl_core_import("zip_ingest")   # noqa: E402 — Pha D (v1.33.57)
 _tl_ocr = _tl_core_import("ocr")                 # noqa: E402
 _tl_chunking = _tl_core_import("chunking")       # noqa: E402
@@ -15784,10 +14830,101 @@ def cmd_fetch_links(*_a, **_kw):
 def cmd_find_doc(*_a, **_kw):
     return _tl_fetch_web.cmd_find_doc(*_a, **_kw)
 
+
+# ── I4 (v1.34.7): stub ủy quyền cụm profile_mgmt → tl_core/profile_mgmt.py ──
+
+
+def _profile_rebuild_partition(*_a, **_kw):
+    return _tl_profile_mgmt._profile_rebuild_partition(*_a, **_kw)
+
+
+def cmd_profile_rebuild_registry(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_rebuild_registry(*_a, **_kw)
+
+
+def _profile_info_from_config(*_a, **_kw):
+    return _tl_profile_mgmt._profile_info_from_config(*_a, **_kw)
+
+
+def cmd_profile_info(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_info(*_a, **_kw)
+
+
+def _profile_manifest_entries_for(*_a, **_kw):
+    return _tl_profile_mgmt._profile_manifest_entries_for(*_a, **_kw)
+
+
+def cmd_profile_list(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_list(*_a, **_kw)
+
+
+def cmd_profile_use(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_use(*_a, **_kw)
+
+
+def cmd_profile_rename(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_rename(*_a, **_kw)
+
+
+def cmd_profile_delete(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_delete(*_a, **_kw)
+
+
+def cmd_profile_files(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_files(*_a, **_kw)
+
+
+def cmd_profile_manifest(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_manifest(*_a, **_kw)
+
+
+def _create_profile_manifest_json(*_a, **_kw):
+    return _tl_profile_mgmt._create_profile_manifest_json(*_a, **_kw)
+
+
+def _profile_list_discover(*_a, **_kw):
+    return _tl_profile_mgmt._profile_list_discover(*_a, **_kw)
+
+
+def cmd_profile_adopt(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_adopt(*_a, **_kw)
+
+
+def _cmd_profile_adopt_impl(*_a, **_kw):
+    return _tl_profile_mgmt._cmd_profile_adopt_impl(*_a, **_kw)
+
+
+def cmd_profile_doctor(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_doctor(*_a, **_kw)
+
+
+def _cmd_profile_doctor_impl(*_a, **_kw):
+    return _tl_profile_mgmt._cmd_profile_doctor_impl(*_a, **_kw)
+
+
+def _profile_index_rows(*_a, **_kw):
+    return _tl_profile_mgmt._profile_index_rows(*_a, **_kw)
+
+
+def _profile_index_csv(*_a, **_kw):
+    return _tl_profile_mgmt._profile_index_csv(*_a, **_kw)
+
+
+def cmd_profile_index(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_index(*_a, **_kw)
+
+
+def _cmd_profile_index_impl(*_a, **_kw):
+    return _tl_profile_mgmt._cmd_profile_index_impl(*_a, **_kw)
+
+
+def cmd_profile_create(*_a, **_kw):
+    return _tl_profile_mgmt.cmd_profile_create(*_a, **_kw)
+
 _IDEMPOTENCY_CONTRACTS = _tl_workflow._IDEMPOTENCY_CONTRACTS
 _TASK_TO_WORKFLOW = _tl_workflow._TASK_TO_WORKFLOW
 
-for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene, _tl_nlm_ops, _tl_extract_cache, _tl_fetch_web):
+for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene, _tl_nlm_ops, _tl_extract_cache, _tl_fetch_web, _tl_profile_mgmt):
     _m.bind(sys.modules[__name__])
 
 

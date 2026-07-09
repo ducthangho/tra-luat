@@ -338,6 +338,7 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/nlm_ops.py",
     "scripts/tl_core/extract_cache.py",
     "scripts/tl_core/fetch_web.py",
+    "scripts/tl_core/profile_mgmt.py",
     "scripts/tl_core/command_registry.py",
     "SKILL.md",
     "CHANGELOG.md",

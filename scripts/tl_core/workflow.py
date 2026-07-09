@@ -235,7 +235,7 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_behavior": "chạy lại CÙNG LỆNH — dedup-live gate pre-add + post-add re-list làm lệnh idempotent",
         "duplicate_guard": "dedup-live theo drive_id/sohieu/title TRƯỚC add (ALREADY_ON_NOTEBOOK rc=2) + post-add dup check",
         "readback_command": "nlm-get <notebook> --json (source_count + list) / reg-query --sohieu <sh> --json",
-        "resume_command": "nlm-add --drive-id <id> [--notebook-id <nb>] --json",
+        "resume_command": "nlm-add --drive-id <id> [--notebook-id <nb>] (in JSON sẵn, KHÔNG có cờ --json)",
         "rollback_hint": "xoá nguồn vừa add qua NLM UI/nlm source delete rồi reg_upsert clear nlm_source_id,nlm_status",
     },
     "recat": {
@@ -265,7 +265,7 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_behavior": "chạy lại an toàn: đã xoá → NOT_FOUND coi như done (idempotent theo trạng thái đích)",
         "duplicate_guard": "requires_confirm=yes; chặn xoá khi row đang corpus=true trừ khi cờ tường minh",
         "readback_command": "reg-query --drive-id <id> --json (status removed) + nlm-list không còn source",
-        "resume_command": "source-delete <drive_id> --confirm yes",
+        "resume_command": "source-delete <drive_id> --apply --confirm yes",
         "rollback_hint": "KHÔNG tự động: khôi phục từ Drive Trash (30 ngày) + nlm-add lại + reg_upsert khôi phục cột",
     },
     "reg_delete": {
@@ -275,7 +275,7 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_behavior": "chạy lại an toàn: row đã mất → done",
         "duplicate_guard": "requires_confirm=yes; chỉ xoá ROW registry — file Drive/nguồn NLM không đụng",
         "readback_command": "reg-query --drive-id <id> --json (miss = đã xoá)",
-        "resume_command": "reg-delete <drive_id> --confirm yes",
+        "resume_command": "reg-delete --drive-ids <id[,id...]> (guard require_removed; --force gỡ bất kể status)",
         "rollback_hint": "undo <run_id> --apply nếu journal có before-row; không thì reg_upsert dựng lại từ manifest cache",
     },
     "dedup_plan": {

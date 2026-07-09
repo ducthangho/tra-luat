@@ -56,7 +56,13 @@ def _live_smoke_plan(profile: str = "", include_ocr: bool = False) -> dict:
         {"id": "profile_live_docx", "risk": "high", "command": ["profile-ingest", "<small.docx>", "--apply", "--json"] + profile_arg, "expect": "profile canonical GDoc verified before NLM"},
         {"id": "zip_apply_guard", "risk": "medium", "command": ["ingest-zip", "<sample.zip>", "--cat", "01", "--apply", "--json"], "expect": "must fail without --confirm yes"},
         {"id": "snapshot_after", "risk": "low", "command": ["live-state-snapshot", "--out", ".tl_state/after.json", "--json"], "expect": "state saved after smoke"},
-        {"id": "snapshot_diff", "risk": "low", "command": ["live-state-diff", ".tl_state/before.json", ".tl_state/after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count"], "expect": "unexpected_changes=[]"},
+        {"id": "snapshot_diff", "risk": "low", "command": ["live-state-diff", ".tl_state/before.json", ".tl_state/after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count",
+                                                          # v1.34.2 (Pha H live bắt): path THẬT của source-count trong snapshot nằm dưới live_contract_report.*
+                                                          # (nlm.notebook_get.source_count + contract_checks[N].detail.*) — thiếu 2 prefix này thì mọi lần ghi
+                                                          # hợp lệ giữa 2 snapshot đều bị báo 'unexpected' oan. contract_checks được phép rộng vì bước 2
+                                                          # (live-contract-check) đã verify contract riêng TRƯỚC đó.
+                                                          "--allow", "live_contract_report.nlm.notebook_get.source_count",
+                                                          "--allow", "live_contract_report.contract_checks"], "expect": "unexpected_changes=[]"},
     ]
     if include_ocr:
         steps.extend([

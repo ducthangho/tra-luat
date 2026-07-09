@@ -5090,6 +5090,27 @@ def run() -> int:
     cases.append(("r68_confirm_meta_matches_code",
                   _reg65.COMMAND_META["shared-source-fix"]["requires_confirm"] is True
                   and _reg65.COMMAND_META["source-update-corpus"]["requires_confirm"] is True))
+    # ═══ v1.34.2 — r69_*: vá 4 phát hiện Pha H live-smoke ═══
+    # (a) reg-query --drive-id tồn tại trong parser (contract readback hết drift doc↔CLI)
+    _ns69 = build_parser().parse_args(["reg-query", "--drive-id", "x123"])
+    cases.append(("r69_reg_query_drive_id_flag", getattr(_ns69, "drive_id", None) == "x123"))
+    # (b) nlm-add có nhánh reg_link sau add (drift-lock: gỡ nhánh này là fail — đúng ca S14 nguồn 'unregistered')
+    import inspect as _ins69
+    _src69 = _ins69.getsource(cmd_nlm_add)
+    cases.append(("r69_nlm_add_reg_link_wired",
+                  "_journaled_reg_write" in _src69 and "nlm-add-link" in _src69 and "row xương" in _src69))
+    # (c) live-smoke-plan bước snapshot_diff mang ĐỦ allow-prefix path THẬT (thiếu → diff báo unexpected oan);
+    #     quét source tl_core.live (bước khai inline trong hàm plan) — gỡ prefix là fail.
+    import tl_core.live as _lv69
+    _src_lv69 = _ins69.getsource(_lv69)
+    cases.append(("r69_smoke_diff_allow_prefixes",
+                  "live_contract_report.nlm.notebook_get.source_count" in _src_lv69
+                  and "live_contract_report.contract_checks" in _src_lv69))
+    # (d) contract text khớp parser thật: source_delete resume có --apply; reg_delete resume dùng --drive-ids
+    import tl_core.workflow as _w69
+    cases.append(("r69_contract_resume_matches_parser",
+                  "--apply --confirm yes" in _w69._IDEMPOTENCY_CONTRACTS["source_delete"]["resume_command"]
+                  and "--drive-ids" in _w69._IDEMPOTENCY_CONTRACTS["reg_delete"]["resume_command"]))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

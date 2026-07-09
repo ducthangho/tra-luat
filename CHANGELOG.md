@@ -1,3 +1,21 @@
+# ★ v1.34.2 — Pha H live-smoke PASS (apply_ready=true LẦN ĐẦU) + vá 4 phát hiện smoke (2026-07-09)
+
+- **Pha H hoàn tất trên máy user**: 17/17 bước live-smoke-plan, rc thật từng bước. Ghi thật 2 bước HIGH
+  (ingest-local + profile-ingest --allow-default) rồi DỌN NET-ZERO: 3× source-delete --apply --confirm yes
+  (journal) + xoá NLM source mồ côi + trash sidecar docx → diff cuối so before `{changed:0, unexpected:0}`;
+  diff đó làm smoke-proof → `live-readiness --smoke-proof` = **apply_ready=true cả 3 tier, deployment_allowed=true**.
+  Tập sống thêm: ingest --resume nối journal sau đứt mạng; overflow-route khi shard chính ĐẦY THẬT (306/300);
+  guard chống-ghi-profile-nền; zip-apply CONFIRM_REQUIRED; nlm-reconcile DRY bắt đúng nguồn unregistered.
+- Vá 4 phát hiện smoke (chính sách grilling: lỗi nhỏ rõ nguyên nhân → vá ngay kèm test):
+  (a) `reg-query --drive-id` MỚI — 10 idempotency contract dặn readback `reg-query --drive-id` mà parser
+  thiếu cờ (drift doc↔CLI); (b) `nlm-add --drive-id`: add OK + row registry TỒN TẠI → **reg_link ngay**
+  (journaled+verified-write, chỉ cột nlm_*; không row → nhắc register/nlm-reconcile, không tạo row xương) —
+  hết ca nguồn 'unregistered' khi nlm-add đứng một mình (S14); (c) live-smoke-plan bước snapshot_diff
+  +2 allow-prefix đúng path thật snapshot (`live_contract_report.nlm.notebook_get.source_count`,
+  `live_contract_report.contract_checks`) — hết diff 'unexpected' oan; (d) contract text khớp parser:
+  source_delete resume +`--apply`, reg_delete dùng `--drive-ids`, nlm_add ghi rõ không có `--json`.
+- Selftest +4 r69 (flag/reg_link-wired/allow-prefix/contract-text) → **660/660**.
+
 # ★ v1.34.1 — siết-6 advisory: contract THẬT, HẾT grandfather (đúng deadline r65 'trước v1.34.1') (2026-07-09)
 
 - 6 contract `idempotency_contract.v1` mới (đủ 8 field, PHẢN ÁNH hành vi gate+journal+verified-write đã có

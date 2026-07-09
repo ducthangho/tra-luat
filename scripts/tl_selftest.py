@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5664,6 +5664,26 @@ def run() -> int:
     finally:
         for _k, _v in _sav76.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.9 — r76_*: I6 parity wrapper↔module (kiểu r70-r75) + engine Ở LẠI tl ═══
+    import tl_core.lookup_ops as _lo76
+    _lo_names76 = ["cmd_locate", "cmd_source_map", "cmd_status", "cmd_relation_check", "cmd_relation_backfill",
+                   "cmd_vbhn_check", "cmd_vbhn_verify", "cmd_vbhn_compare", "cmd_xref", "cmd_footnote_map",
+                   "cmd_cluster", "cmd_rasoat", "cmd_rasoat_loop", "cmd_rasoat_chongcheo", "cmd_header_verify",
+                   "cmd_dedup_check", "_status_amendment_registry_guard", "_qt5_queries", "_source_map_verdict",
+                   "_find_amendment_candidates", "_vbhn_bare_key", "_header_verify_infer_cats"]
+    _g76 = globals()
+    cases.append(("r76_lookup_ops_module_wired",
+                  all(callable(getattr(_lo76, n, None)) for n in _lo_names76)
+                  and all(f"_tl_lookup_ops.{n}" in _ins69.getsource(_g76[n]) for n in _lo_names76)
+                  and _lo76._TL is not None))
+    _tl_src76 = Path(_ins69.getsourcefile(_g76["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r76_no_dual_definition",
+                  all(_tl_src76.count(f"def {n}(") == 1 for n in _lo_names76)))
+    # ranh giới grilling I6: ĐỘNG CƠ + helper đa-module PHẢI Ở LẠI tl (def thật trong tl.py, KHÔNG stub hoá)
+    cases.append(("r76_engine_stays_in_tl",
+                  all((f"def {n}(" in _tl_src76 and f"_tl_lookup_ops.{n}" not in _tl_src76)
+                      for n in ("_source_map_one", "_dedup_status", "_classify_ref",
+                                "resolve_footnote_amendments", "_relation_audit", "_sohieu_query_hits_entry"))))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

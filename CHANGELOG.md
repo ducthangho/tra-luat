@@ -1,3 +1,18 @@
+# ★ v1.34.9 — I6: tách 16 cmd tra-cứu/quan-hệ → tl_core/lookup_ops.py (động cơ Ở LẠI tl) (2026-07-09)
+
+- **RANH GIỚI GRILLING (quyết định user)**: động cơ resolution `_source_map_one` (365 dòng, 59 điểm test,
+  amendment-gate A1/A2/A3) + helper đa-module (`_dedup_status`/`_classify_ref`/`resolve_footnote_amendments`/
+  `_relation_audit`/`_rq_relation_probe`/`_scan_inline_amendments`/`_sohieu_query_hits_entry`/`_nlm_status_*`)
+  **GIỮ Ở TL** — test mới `r76_engine_stays_in_tl` khoá cứng (def thật trong tl.py, không được stub hoá).
+- **Characterization TRƯỚC cut**: +3 wiring `r76a_*` khoá SHELL cmd quanh engine — source-map canonical shape
+  + alias results==items + verdict/qt5_queries top-level; MISS vẫn rc=0 (A3 rc-doctrine); status --amendment
+  guard offline SKIP + AMENDMENT_ALREADY_IN_CORPUS_ON_NLM. PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 41 def (~1.57k dòng)** → `tl_core/lookup_ops.py`: 16 lệnh (locate, source-map, status,
+  relation-check/backfill, vbhn-check/verify/compare, xref, footnote-map, cluster, rasoat/rasoat-loop/
+  rasoat-chongcheo, header-verify, dedup-check) + 25 helper riêng-cụm. tl.py 13.176→**11.602 dòng**.
+- Scanner default-param 0 hit; self-heal phủ module mới (canary/tl_boot/py_compile+REQUIRED/r36).
+  +r76 wired/no-dual/engine-stays → selftest **703/703**; golden 18/18 khớp nguyên trạng; audit strict xanh.
+
 # ★ v1.34.8 — I5: tách ingest_pipeline → tl_core/ingest_ops.py (test-first, cụm ghi chính) (2026-07-09)
 
 - **Characterization TRƯỚC cut**: +5 wiring `r75a_*` OFFLINE cho 5 cmd 0-hit — ingest-route cây quyết định

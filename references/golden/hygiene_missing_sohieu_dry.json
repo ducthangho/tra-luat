@@ -1,0 +1,19 @@
+{
+  "mode": "DRY",
+  "no_parse": 2,
+  "note": "ĐỀ XUẤT theo TÊN — chạy `tl header-verify` (G2) xác minh khớp HEADER trước khi tin tuyệt đối.",
+  "ok": true,
+  "suggested": [
+    {
+      "drive_id": "gd_no_sohieu",
+      "name": "114_2025_QH15_658530",
+      "sohieu_suggested": "114_2025_QH15"
+    },
+    {
+      "drive_id": "gd_ref_chunk",
+      "name": "Chunk_45_2019_QH14_phan_1",
+      "sohieu_suggested": "45_2019_QH14"
+    }
+  ],
+  "suggested_count": 2
+}

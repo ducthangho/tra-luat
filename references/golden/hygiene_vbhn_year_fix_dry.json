@@ -1,0 +1,16 @@
+{
+  "conflict_count": 0,
+  "conflicts": [],
+  "fixable": [],
+  "fixable_count": 0,
+  "mode": "DRY",
+  "needs_year": [
+    {
+      "drive_id": "gd_vbhn_bare",
+      "name": "VBHN_14_VBHN_BTC_Thue",
+      "sohieu": "14-VBHN-BTC"
+    }
+  ],
+  "needs_year_count": 1,
+  "ok": true
+}

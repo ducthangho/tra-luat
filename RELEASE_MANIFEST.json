@@ -5,9 +5,9 @@
   "skill_version": "1.34.2",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
-  "file_count": 133,
-  "total_bytes": 3811229,
-  "package_hash": "f297461b85ebdf82337246eeecd7fb8e13097d9c874c9d8e4e385d8732b63ab4",
+  "file_count": 139,
+  "total_bytes": 3834744,
+  "package_hash": "fff625daf136dcec52f70d383883b680869c70bfe8bf6f8a8fd993c6e1ecc9e8",
   "required_missing": [],
   "files": [
     {
@@ -209,6 +209,36 @@
       "path": "references/golden/chunk_plan_vbqppl_canonical_blocked.json",
       "size": 325,
       "sha256": "6c736123833a4d4d689868f7033350d9a13561fb31f9eaa072b397688b5d3f30"
+    },
+    {
+      "path": "references/golden/hygiene_dedup_plan_dry.json",
+      "size": 684,
+      "sha256": "4d515c0d3590f8615275021ed62e5792a84210bd422dac9cab3b71a502e4243e"
+    },
+    {
+      "path": "references/golden/hygiene_missing_sohieu_dry.json",
+      "size": 482,
+      "sha256": "2bc3341cca42776c51b1546c7d6ca22fa2cace4541cac3189094d61c84645ac0"
+    },
+    {
+      "path": "references/golden/hygiene_ops_plan.json",
+      "size": 3862,
+      "sha256": "62691d1dd166f37709a32ababb4fef219bfbc331d3075cc3eef511984473bdcf"
+    },
+    {
+      "path": "references/golden/hygiene_reg_query_corpus.json",
+      "size": 7396,
+      "sha256": "08b09324708b89366b18e4bcf6c38c42ea56d87fbe01852dc316132acb5d7e2e"
+    },
+    {
+      "path": "references/golden/hygiene_sweep_fixture.json",
+      "size": 4703,
+      "sha256": "c91624ec87a212a695119562083832bc72f534e84c9d4bf48c92bd7904c10e4a"
+    },
+    {
+      "path": "references/golden/hygiene_vbhn_year_fix_dry.json",
+      "size": 278,
+      "sha256": "9aaaf690c8bdc978a0577af431689dc6089b684857220fba9c7ea2cce2f8a59a"
     },
     {
       "path": "references/golden/ingest_zip_dryrun_dup.json",
@@ -562,8 +592,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 1297497,
-      "sha256": "c820bed3804ac0637d1059d5dd8d44cfa566bfaeaa749c94347eee2ed1f0c364"
+      "size": 1297735,
+      "sha256": "d1856bcb80c84a48fad0c12c32395943785b1b6ecc4f0e097c25cd12f813c5fa"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -587,8 +617,8 @@
     },
     {
       "path": "scripts/tl_core/deterministic.py",
-      "size": 4854,
-      "sha256": "d8c4fd8922c719946970aaf098f900e309ad5791cf2015a112fc008fe591b11b"
+      "size": 5112,
+      "sha256": "9fee4faa9abe638793dc8a5612d36c466c6bb2bc0d599f4a30aa44b530661ffd"
     },
     {
       "path": "scripts/tl_core/jsonio.py",
@@ -612,8 +642,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 47364,
-      "sha256": "897876019e139e8f7000b9de6aa35f2c35ab22cc6a0482ab54aa5dcd6af04cd8"
+      "size": 52978,
+      "sha256": "9def35cbe2a2b2160b7ee8e6a4467c2f732031231c2207a238c4a5604409c8f3"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",

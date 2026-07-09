@@ -1,0 +1,35 @@
+{
+  "dups_on_nlm": [],
+  "mode": "DRY",
+  "ok": true,
+  "ready": [],
+  "review": [
+    {
+      "dups": [
+        {
+          "corpus": true,
+          "drive_id": "gd_no_sohieu",
+          "name": "114_2025_QH15_658530",
+          "nlm_source_id": "src_114",
+          "on_nlm": true,
+          "sohieu": ""
+        }
+      ],
+      "key": "114-2025-QH15"
+    },
+    {
+      "dups": [
+        {
+          "corpus": true,
+          "drive_id": "gd_infra",
+          "name": "nlm_sources_delta_2026.json",
+          "nlm_source_id": "",
+          "on_nlm": false,
+          "sohieu": ""
+        }
+      ],
+      "key": "nlm sources delta 2026 json"
+    }
+  ],
+  "total_quarantine": 0
+}

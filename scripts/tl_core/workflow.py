@@ -640,6 +640,16 @@ _GOLDEN_CASES = [
     {"id": "ingest_zip_dryrun_slip", "file": "ingest_zip_dryrun_slip.json", "args": ["ingest-zip", "{FIXTURES}/slip.zip", "--cat", "01", "--json"]},
     {"id": "ingest_zip_dryrun_dup", "file": "ingest_zip_dryrun_dup.json", "args": ["ingest-zip", "{FIXTURES}/dup.zip", "--cat", "01", "--json"]},
     {"id": "live_state_diff_no_changes", "file": "live_state_diff_no_changes.json", "args": ["live-state-diff", "{FIXTURES}/snap_a.json", "{FIXTURES}/snap_a2.json", "--json"]},
+    # v1.34.3 (I1 characterization — TRƯỚC khi tách cụm hygiene sang tl_core/hygiene.py): 6 case offline trên
+    # FIXTURE MANIFEST (env TL_CACHE_DIR trỏ fixtures/cache_hygiene — cách ly trạng thái máy; fixture gài đủ
+    # defect: dup by_sohieu, VBHN thiếu năm, thiếu sohieu-tên-mang-số, tên thô, removed_*, overflow, ref-chunk,
+    # infra_in_corpus). Khóa byte-level hành vi hiện tại; sau AST-cut golden PHẢI khớp nguyên trạng.
+    {"id": "hygiene_sweep_fixture", "file": "hygiene_sweep_fixture.json", "args": ["sweep", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_dedup_plan_dry", "file": "hygiene_dedup_plan_dry.json", "args": ["dedup-plan", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_missing_sohieu_dry", "file": "hygiene_missing_sohieu_dry.json", "args": ["missing-sohieu", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_vbhn_year_fix_dry", "file": "hygiene_vbhn_year_fix_dry.json", "args": ["vbhn-year-fix", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_reg_query_corpus", "file": "hygiene_reg_query_corpus.json", "args": ["reg-query", "--corpus", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_ops_plan", "file": "hygiene_ops_plan.json", "args": ["ops-plan", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
 ]
 
 
@@ -685,15 +695,33 @@ def _golden_ensure_fixtures() -> None:
                 info.external_attr = 0o100644 << 16
                 zf.writestr(info, data)
         return buf.getvalue()
+    # v1.34.3 (I1): fixture manifest cho 6 golden hygiene — entries gài đủ defect để detector nổ:
+    # dup by_sohieu (45-2019-QH14 ×2), VBHN thiếu năm (14-VBHN-BTC), thiếu sohieu tên-mang-số, tên thô loai
+    # thuong, removed_by_user, row_kind overflow/ref (goc trỏ canonical), infra .json corpus=true.
+    _me = [
+        {"drive_id": "gd_luat45", "name": "Luat_Bao_hiem_xa_hoi_45_2019_QH14", "so_hieu": "45-2019-QH14", "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "true", "nlm_source_id": "src_45", "nlm_notebook_id": "nb_base", "nlm_status": "pushed", "row_kind": "own", "mime": "application/vnd.google-apps.document", "title_vn": "Luật Bảo hiểm xã hội"},
+        {"drive_id": "gd_luat45_dup", "name": "Luat_BHXH_45_2019_QH14_ban_trung", "so_hieu": "45-2019-QH14", "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "true", "nlm_source_id": "src_45b", "nlm_notebook_id": "nb_base", "nlm_status": "pushed", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_vbhn18", "name": "VBHN_18_2024_VBHN_VPQH_Bo_luat_Lao_dong", "so_hieu": "18-2024-VBHN-VPQH", "cat": "12_Lao_dong_BHXH", "loai": "Văn bản hợp nhất", "corpus": "true", "nlm_source_id": "src_18", "nlm_notebook_id": "nb_base", "nlm_status": "pushed", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_vbhn_bare", "name": "VBHN_14_VBHN_BTC_Thue", "so_hieu": "14-VBHN-BTC", "cat": "21_Thue_phi", "loai": "Văn bản hợp nhất", "corpus": "true", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_no_sohieu", "name": "114_2025_QH15_658530", "so_hieu": "", "cat": "03_To_chuc_bo_may", "loai": "Luật", "corpus": "true", "nlm_source_id": "src_114", "nlm_notebook_id": "nb_base", "nlm_status": "pushed", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_raw_name", "name": "bao cao tinh hinh 2026.docx", "so_hieu": "", "cat": "99_Van_ban_thuong", "loai": "thuong", "corpus": "", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own", "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        {"drive_id": "gd_removed", "name": "Nghi_dinh_cu_da_go_01_2020_ND_CP", "so_hieu": "01-2020-ND-CP", "cat": "05_Hanh_chinh", "loai": "Nghị định", "corpus": "false", "nlm_source_id": "src_rm", "nlm_notebook_id": "nb_base", "nlm_status": "removed_by_user", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_overflow", "name": "Thong_tu_02_2026_TT_BTC", "so_hieu": "02-2026-TT-BTC", "cat": "21_Thue_phi", "loai": "Thông tư", "corpus": "true", "nlm_source_id": "src_ovf", "nlm_notebook_id": "nb_ovf", "nlm_status": "pushed", "row_kind": "overflow", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_ref_chunk", "name": "Chunk_45_2019_QH14_phan_1", "so_hieu": "", "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "false", "nlm_source_id": "src_chunk", "nlm_notebook_id": "nb_base", "nlm_status": "pushed", "row_kind": "ref", "goc": "gd_luat45", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "gd_infra", "name": "nlm_sources_delta_2026.json", "so_hieu": "", "cat": "12_Lao_dong_BHXH", "loai": "", "corpus": "true", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own", "mime": "application/json"},
+    ]
+    manifest_fixture = json.dumps({"ok": True, "entries": _me}, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
     want = {
         "sample_profile.txt": sample,
         "snap_a.json": snap_a,
         "snap_a2.json": snap_b,
         "slip.zip": _zip_bytes([("../evil.docx", b"slip"), ("van_ban_hop_le.docx", b"binh thuong"), ("bao cao?.docx", b"ten cam win")]),
         "dup.zip": _zip_bytes([("a.docx", b"mot"), ("./a.docx", b"hai")]),
+        "cache_hygiene/manifest.json": manifest_fixture,
     }
     for name, data in want.items():
         fp = fd / name
+        fp.parent.mkdir(parents=True, exist_ok=True)
         if not fp.exists() or fp.read_bytes() != data:
             fp.write_bytes(data)
 
@@ -705,6 +733,15 @@ def _golden_args(case: dict) -> list[str]:
     return [a.replace("{FIXTURES}", fd) for a in case["args"]]
 
 
+def _golden_env(case: dict) -> dict | None:
+    """v1.34.3 (I1): env per-case (vd TL_CACHE_DIR → fixture manifest), thay {FIXTURES} như args."""
+    env = case.get("env")
+    if not env:
+        return None
+    fd = str(_golden_fixdir())
+    return {k: str(v).replace("{FIXTURES}", fd) for k, v in env.items()}
+
+
 def _golden_test(*, write: bool = False) -> dict:
     _golden_ensure_fixtures()
     gdir = _golden_dir()
@@ -714,7 +751,8 @@ def _golden_test(*, write: bool = False) -> dict:
     for case in _GOLDEN_CASES:
         path = gdir / case["file"]
         _args = _golden_args(case)
-        run = _run_tl_json(_args)
+        _env = _golden_env(case)
+        run = _run_tl_json(_args, env_extra=_env)
         rec = {"id": case["id"], "file": str(path), "command": _args, "ok": False, "mode": "write" if write else "verify"}
         # v1.33.59 (Pha G1): case NEGATIVE (vd DO_NOT_SPLIT, DUPLICATE_NORMALIZED) exit rc=2 CÓ CHỦ ĐÍCH —
         # golden chấp nhận mọi output là JSON dict (payload đã mang ok:false); chỉ fail khi KHÔNG parse được.
@@ -724,7 +762,7 @@ def _golden_test(*, write: bool = False) -> dict:
             continue
         # v1.33.59 (nợ P4-06, quyết định grilling #7 'canonical + raw-stability'): stdout THÔ chạy ×2 phải
         # trùng BYTE (bắt nondeterminism format thật); PASS/FAIL nội dung vẫn so bản canonical-hoá.
-        run2 = _run_tl_json(_args)
+        run2 = _run_tl_json(_args, env_extra=_env)
         _raw1, _raw2 = str(run.get("stdout") or ""), str(run2.get("stdout") or "")
         rec["raw_stable"] = (_raw1 == _raw2)
         rec["raw_sha256"] = hashlib.sha256(_raw1.encode("utf-8")).hexdigest()

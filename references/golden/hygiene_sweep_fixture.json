@@ -1,0 +1,132 @@
+{
+  "cat_label_variants": 0,
+  "cat_label_variants_rows": {},
+  "corpus": 7,
+  "corpus_basis": {
+    "corpus": "client: corpus=='true' (mọi row_kind, kể cả loai='thuong')",
+    "corpus_server_rule_equiv": "luật server GAS manifest_export.corpus_count: corpus∈{true,vbqppl} ∪ row_kind=overflow, trừ ref & loai='thuong' (Code.gs regIsCorpusCounted_)",
+    "note": "so với `tl boot` dùng corpus_server_rule_equiv; lệch còn lại = snapshot (GAS cache ~600s) → `tl boot --refresh` rồi `tl sweep --refresh` cùng phiên."
+  },
+  "corpus_server_rule_equiv": 7,
+  "duplicates": {
+    "by_md5": 0,
+    "by_name": 0,
+    "by_name_active": 0,
+    "by_sohieu": 1,
+    "by_sohieu_raw": 1,
+    "by_sohieu_raw_active": 1,
+    "identity": 1,
+    "same_document": 0
+  },
+  "goc_pollution": 0,
+  "goc_pollution_rows": [],
+  "infra_in_corpus": 1,
+  "infra_in_corpus_rows": [
+    {
+      "corpus": true,
+      "drive_id": "gd_infra",
+      "name": "nlm_sources_delta_2026.json",
+      "nlm_source_id": "",
+      "on_nlm": false,
+      "sohieu": ""
+    }
+  ],
+  "loai_noncanonical": 0,
+  "name_nonstandard": 3,
+  "name_nonstandard_basis": "headline = corpus=true, TRỪ loai='thuong' + quarantine (VBQPPL thật cần rename); _other = phần trừ ra (việc của tách profile vbthuong/quarantine-fix, không phải source-rename)",
+  "name_nonstandard_other": 0,
+  "name_nonstandard_rows": [
+    {
+      "drive_id": "gd_no_sohieu",
+      "issues": [
+        "UUID_TAIL",
+        "NO_TYPE_PREFIX",
+        "NO_SUBJECT_TOKENS"
+      ],
+      "name": "114_2025_QH15_658530"
+    },
+    {
+      "drive_id": "gd_overflow",
+      "issues": [
+        "NO_TYPE_PREFIX"
+      ],
+      "name": "Thong_tu_02_2026_TT_BTC"
+    },
+    {
+      "drive_id": "gd_infra",
+      "issues": [
+        "NO_TYPE_PREFIX",
+        "NO_SOHIEU_IN_NAME"
+      ],
+      "name": "nlm_sources_delta_2026.json"
+    }
+  ],
+  "next_actions": [
+    "1 file HẠ TẦNG (.json/.enc/secrets/delta) đang corpus=true = RÁC → set corpus=false (vd tl_secrets.enc, nlm_sources_delta*.json)",
+    "ℹ đối soát NLM/slot bằng LIVE: `tl sweep --live-nlm --json` hoặc `tl nlm-reconcile 743ed200-2e55-4673-b7a0-9bfd13b41ce6 --json` # sweep.nlm_drift là OFFLINE-only — 0 KHÔNG nghĩa NLM sạch; registry claim chỉ là ESTIMATE, KHÔNG dùng để chốt FULL/overflow (S-4/S-5 log rà 67: claim 546 vs vật lý 298/300)",
+    "tl ingest-missing --apply   # 2 chưa push NLM (JOB LỚN, cần slot/overflow — phần lớn CẤU TRÚC do corpus>cap 300/notebook, sẽ KHÔNG về 0)",
+    "tl dedup-plan --apply   # dedup toàn corpus 1 lệnh (GIỮ canonical, set dup corpus=false; gồm cả cụm ACTIVE by_sohieu_raw_active/by_name_active)",
+    "soát 3 tên phi-chuẩn (name_nonstandard_rows: .html/thiếu-sohieu/thiếu-chủ-đề) → chạy LÔ `tl corpus-audit --all --resume --limit 15 --workers 4 --json` (S11: Cowork 45s cần trang NHỎ — lặp CÙNG LỆNH tới rc=0), đọc rows[].fix_command rồi source-rename TỪNG FILE/lệnh; header-verify --fix-suggest chỉ cho ca đơn lẻ"
+  ],
+  "nlm_drift": {
+    "CORPUS_TRUE_NOT_ON_NLM": 2,
+    "NLM_NOTEBOOK_ID_MISSING": 0,
+    "NLM_STATUS_MISMATCH": 0
+  },
+  "nlm_drift_basis": "OFFLINE registry-only — 0 KHÔNG kết luận 'NLM sạch' (ca thật: sweep=0 nhưng nlm-reconcile live 24 dòng desync/removed); đối soát LIVE: tl nlm-reconcile <notebook>",
+  "nlm_drift_total": 2,
+  "ok": true,
+  "omnibus_title_advisory": 0,
+  "omnibus_title_advisory_rows": [],
+  "orphans": 2,
+  "party_docs": 0,
+  "quarantine": {
+    "corpus_true": 0,
+    "label_variants": 0,
+    "stale_nlm_ref": 0,
+    "still_on_nlm": 0,
+    "total": 0
+  },
+  "raw_dup_of_standard": 0,
+  "raw_dup_of_standard_rows": [],
+  "raw_on_nlm": 0,
+  "raw_on_nlm_rows": [],
+  "shared_source_id": 0,
+  "shared_source_id_groups": [],
+  "snapshot_age_s": "<volatile>",
+  "title_mismatch": 0,
+  "total": 10,
+  "treaties": 0,
+  "vbhn_metadata_advisory": 1,
+  "vbhn_metadata_advisory_rows": [
+    {
+      "cat": "21_Thue_phi",
+      "confirmed": "",
+      "corpus": "true",
+      "drive_id": "gd_vbhn_bare",
+      "flags": [
+        "CORPUS_TRUE_NOT_ON_NLM",
+        "VBHN_BARE_NUMBER",
+        "VBHN_MISSING_YEAR_OR_DATE",
+        "VBHN_MINISTRY_SCOPE",
+        "VBHN_MINISTRY_MISSING_YEAR"
+      ],
+      "hieuluc": "",
+      "issue_year": null,
+      "name": "VBHN_14_VBHN_BTC_Thue",
+      "nlm": false,
+      "nlm_notebook_id": "",
+      "nlm_source_id": "",
+      "nlm_status": "",
+      "row_kind": "own",
+      "score": 65,
+      "sohieu": "14-VBHN-BTC",
+      "sohieu_key": "14-VBHN-BTC"
+    }
+  ],
+  "vbhn_year": {
+    "conflicts": 0,
+    "fixable": 0,
+    "needs_year": 1
+  }
+}

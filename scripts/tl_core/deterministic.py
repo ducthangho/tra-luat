@@ -28,6 +28,9 @@ VOLATILE_JSON_KEYS = {
     "created_at", "createdAt", "created_time", "createdTime",
     "updated_at", "updatedAt", "modified_time", "modifiedTime",
     "timestamp", "time", "mtime", "age_days", "out_dir", "temp_dir", "tmp_dir",
+    # v1.34.3 (I1 characterization bắt): sweep phơi snapshot_age_s (tuổi cache theo GIÂY) → golden ×2 lệch byte
+    # ngay trên 1 máy — cùng lớp bug age_days v1.33.56. Mask cả họ age-giây.
+    "snapshot_age_s", "age_s", "age_seconds",
 }
 
 PATHISH_KEYS = {"path", "file", "root", "manifest", "report_path"}

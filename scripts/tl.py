@@ -17327,9 +17327,12 @@ def _bridge_confirm_apply(a, *, what: str) -> tuple[bool, dict]:
     return True, {}
 
 
-def _run_tl_json(args: list[str], *, timeout: int = 60) -> dict:
+def _run_tl_json(args: list[str], *, timeout: int = 60, env_extra: dict | None = None) -> dict:
     env = os.environ.copy()
     env["TL_DETERMINISTIC"] = "1"
+    if env_extra:
+        # v1.34.3 (I1): golden case tự mang env (vd TL_CACHE_DIR → fixture manifest) — cách ly trạng thái máy.
+        env.update({str(k): str(v) for k, v in env_extra.items()})
     env.setdefault("PYTHONUTF8", "1")
     env.setdefault("PYTHONIOENCODING", "utf-8")
     env.setdefault("TZ", "UTC")

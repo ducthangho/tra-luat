@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 147,
-  "total_bytes": 3956813,
-  "package_hash": "2287733ca4996ea200cf94e900809a867b0d63764c6dbe7bfc6a71bd8efdc1b1",
+  "total_bytes": 3956822,
+  "package_hash": "d2017bab842de5fb56ad355248acfba1abf3bd2a685657527f522df619ec35e9",
   "required_missing": [],
   "files": [
     {
@@ -17,8 +17,8 @@
     },
     {
       "path": ".gitignore",
-      "size": 525,
-      "sha256": "e4ab898639f4aba2f297b5424bbe9defcaecdd51e8fb004541baa039546a16a4"
+      "size": 534,
+      "sha256": "a54535b1e5399d5220a6ae9f2e3db9667e39a6aa0a02fcb16ca9838b2d04f360"
     },
     {
       "path": "CHANGELOG.md",

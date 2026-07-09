@@ -5,9 +5,9 @@
   "skill_version": "1.33.60",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
-  "file_count": 129,
-  "total_bytes": 3788070,
-  "package_hash": "7fce1a49103fbb0e5fd0844ec2999c54bfa125f9f6231f7c03c5cd8600692922",
+  "file_count": 133,
+  "total_bytes": 3875294,
+  "package_hash": "e498e47edf03316b6268fa186d61f2a6f841d81012299e631850b61d71dc2b88",
   "required_missing": [],
   "files": [
     {
@@ -81,6 +81,11 @@
       "sha256": "ca5cf0a8c8bf66978dff729d7584a8cf64b3df187045ef306b99a412fef4a930"
     },
     {
+      "path": "references/COMMANDS.md",
+      "size": 27985,
+      "sha256": "52c8308eb7eea27c6e28749a39f5c8b27f19fb5172d1729a681684aa20cfb9d5"
+    },
+    {
       "path": "references/COWORK_EDIT_SAFETY.md",
       "size": 5912,
       "sha256": "a27140be47722b0e07563bfc58016189cdea4761a65e6cade4ef7df8a83776bb"
@@ -99,6 +104,11 @@
       "path": "references/DELTA_v1.19.md",
       "size": 10933,
       "sha256": "9a783dea76e00a9ebb54994eb0eb7b8a91fe94b3062378cc66e0878a4315e6f6"
+    },
+    {
+      "path": "references/DEPENDENCIES.md",
+      "size": 13760,
+      "sha256": "4d4028c347f1af78650415d7ddd43eb79c3a134f8b0160fc491dba0566828a9e"
     },
     {
       "path": "references/DEV_TOOLING_GUIDE.md",
@@ -149,6 +159,16 @@
       "path": "references/RUNBOOK.md",
       "size": 51701,
       "sha256": "ac5a101569848baa2ea22b1fc4e727270897a78ce7da0db78cf62e667289258b"
+    },
+    {
+      "path": "references/SKILL_KERNEL_DRAFT.md",
+      "size": 42798,
+      "sha256": "3983f159bc354b344c0a504402e33ccfd2bef337f50a89f186e18f59be157cf2"
+    },
+    {
+      "path": "references/SKILL_KERNEL_MAPPING.md",
+      "size": 2681,
+      "sha256": "1cf485bfbb2eafb55d76818be0d6a0c8a7d00e1b9517fa940d5e889c9ead705c"
     },
     {
       "path": "references/STALE_RELATION_GUARD.md",

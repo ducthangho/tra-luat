@@ -1,3 +1,21 @@
+# ★ v1.34.3 — I1: tách cụm hygiene_report → tl_core/hygiene.py (test-first, golden khớp nguyên trạng) (2026-07-09)
+
+- **Characterization TRƯỚC cut** (commit riêng để bisect): 6 golden `hygiene_*` offline trên FIXTURE MANIFEST
+  (case golden nay mang env riêng — `_run_tl_json +env_extra`, `TL_CACHE_DIR` trỏ `fixtures/cache_hygiene`
+  sinh-tại-chỗ, gài đủ defect cho detector nổ). Bắt ngay 1 bug thật: sweep phơi `snapshot_age_s` lọt
+  deterministic mask → ×2 lệch byte cùng máy (cùng lớp age_days v1.33.56) → +`snapshot_age_s/age_s/age_seconds`
+  vào VOLATILE_JSON_KEYS.
+- **AST-cut NGUYÊN VĂN 29 def (~2.0k dòng)** → `tl_core/hygiene.py`: 16 lệnh (sweep, dedup-plan,
+  missing-sohieu, vbhn-year-fix, ops-plan, corpus-audit, review-queue, backfill-loai/title-vn/hieuluc,
+  hygiene, quarantine-fix, corpus-fix, consolidation-cleanup, cat-audit, registry-doctor) + helper riêng-cụm.
+  tl.py 19.052→17.097 dòng; tl giữ STUB ủy quyền mọi tên (mọi caller cũ + tl_selftest bind giữ nguyên).
+- ★ `bind()` của hygiene KHÁC sibling-module: **REBASE `__globals__` từng hàm về namespace SỐNG của tl** —
+  monkeypatch của selftest trên tl ăn ngay, helper không stale (copy-snapshot kiểu cũ làm r54 gãy: patch
+  `_manifest_entries` trên tl không thấm vào module). Bài học cho I2..In.
+- Golden 18/18 **KHỚP NGUYÊN TRẠNG** sau cut (không regen — bằng chứng cắt nguyên văn). Self-heal phủ module
+  mới: canary core list, tl_boot preload, py_compile + REQUIRED (release-check), r36. +r70 parity
+  (wired + no-dual-definition); test missing_sohieu_reg_bulk trỏ nguồn thật ở hygiene → selftest **662/662**.
+
 # ★ v1.34.2 — Pha H live-smoke PASS (apply_ready=true LẦN ĐẦU) + vá 4 phát hiện smoke (2026-07-09)
 
 - **Pha H hoàn tất trên máy user**: 17/17 bước live-smoke-plan, rc thật từng bước. Ghi thật 2 bước HIGH

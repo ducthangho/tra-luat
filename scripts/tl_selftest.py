@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -3667,7 +3667,8 @@ def run() -> int:
     # ───── REGRESSION 1.23.5 — missing-sohieu --apply PHẢI ghi cột `sohieu` (KHÔNG `so_hieu`, webapp bỏ im lặng) ─────
     try:
         import inspect as _insp
-        _ms_src = _insp.getsource(cmd_missing_sohieu)
+        import tl_core.hygiene as _hyg_ms   # I1 v1.34.3: nguồn THẬT ở tl_core.hygiene (tên trong tl là stub)
+        _ms_src = _insp.getsource(_hyg_ms.cmd_missing_sohieu)
         cases.append(("missing_sohieu_reg_bulk_col_sohieu",
                       'cols="sohieu"' in _ms_src and 'cols="so_hieu"' not in _ms_src
                       and '"sohieu": s["sohieu_suggested"]' in _ms_src))
@@ -5111,6 +5112,23 @@ def run() -> int:
     cases.append(("r69_contract_resume_matches_parser",
                   "--apply --confirm yes" in _w69._IDEMPOTENCY_CONTRACTS["source_delete"]["resume_command"]
                   and "--drive-ids" in _w69._IDEMPOTENCY_CONTRACTS["reg_delete"]["resume_command"]))
+    # ═══ v1.34.3 — r70_*: I1 tách cụm hygiene → tl_core/hygiene.py (parity wrapper↔module, kiểu r60/r61) ═══
+    import tl_core.hygiene as _hy70
+    _hy_names70 = ["cmd_sweep", "cmd_dedup_plan", "cmd_missing_sohieu", "cmd_vbhn_year_fix", "cmd_ops_plan",
+                   "cmd_corpus_audit", "cmd_review_queue", "cmd_backfill_loai", "cmd_backfill_titlevn",
+                   "cmd_backfill_hieuluc", "cmd_hygiene", "cmd_quarantine_fix", "cmd_corpus_fix",
+                   "cmd_consolidation_cleanup", "cmd_cat_audit", "cmd_registry_doctor",
+                   "_sweep_report", "_hygiene_groups", "_corpus_audit_row", "_review_queue_report", "_ops_plan_report"]
+    _g70 = globals()
+    # nguồn THẬT ở tl_core.hygiene; tên trong tl là STUB ủy quyền (source chứa _tl_hygiene.<name>); bind đã chạy.
+    cases.append(("r70_hygiene_module_wired",
+                  all(callable(getattr(_hy70, n, None)) for n in _hy_names70)
+                  and all(f"_tl_hygiene.{n}" in _ins69.getsource(_g70[n]) for n in _hy_names70)
+                  and _hy70._TL is not None))
+    # tl.py KHÔNG còn định nghĩa THẬT các hàm đã chuyển (đúng 1 `def <n>(` = stub; chống copy-đôi trôi dạt)
+    _tl_src70 = Path(_ins69.getsourcefile(_g70["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r70_no_dual_definition",
+                  all(_tl_src70.count(f"def {n}(") == 1 for n in _hy_names70)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

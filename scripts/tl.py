@@ -89,7 +89,7 @@ EXPECT_VERSION = "2.21.2i"
 # [lịch sử, đã gộp 1.24.0] 1.23.22: ROOT-CAUSE THẬT sự cố 2026-06-30 (ĐÍNH CHÍNH 1.23.21: KHÔNG mất data 766 dòng!). Thật ra config `registryDocId` trỏ NHẦM Doc legacy `1mATG` (vnd.google-apps.document) thay vì SHEET registry thật → webapp mở Doc-as-Sheet → đọc RỖNG → count=0 ẢO (data vẫn nguyên; corpus 552 là do dedup-plan −50). Template public init-config hay ghi đè về Doc legacy → tái diễn mỗi setup. FIX: (1) doctor CHẶN cứng `registryDocId == _LEGACY_REGISTRY_DOC_ID` (1mATG) → báo sửa về Sheet/để rỗng; (2) `init-config` AUTO-HEAL: blank registryDocId (base+profiles) nếu = Doc legacy → webapp auto-discover Sheet `tra_luat_registry`. (Giữ guard 1.23.21 cho ca profile registryDocId rỗng.) +1 test → 260/260. # 1.23.21: ⛔ GUARD CHỐNG CLOBBER REGISTRY NỀN (SỰ CỐ NGHIÊM TRỌNG 2026-06-30: profile dự án 'Khảo sát Luật XB' registryDocId RỖNG → webapp `regSS_` rơi nhánh BASE → manifest --touched-drive quét phình rồi profile-rebuild-registry XÓA SẠCH 766 dòng registry NỀN VBQPPL). FIX: `cmd_manifest` (--touched-drive) + `cmd_profile_rebuild_registry` CHẶN khi profile dự án có TL_REGISTRY_DOC_ID rỗng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — phải tạo registry RIÊNG trước. PHÁT HIỆN từ GS: registry base = Google SHEET `tra_luat_registry` (regSS_ tìm theo tên/TL_REGSHEET_ID_AUTO), KHÔNG phải Doc 1mATG (chỉ ping/display); khôi phục = restore SHEET đó (version history Sheets), cache `tl212_reg_*` TTL 600s. +1 test → 259/259. # 1.23.20: DETECTOR `infra_in_corpus` (phát hiện khi rà 106 Luật dump) — file HẠ TẦNG (.json/.enc/secrets/nlm_sources_delta/manifest/registry) lẫn corpus=true = RÁC (vd tl_secrets.enc, nlm_sources_delta_*.json đếm như văn bản). `_is_infra_entry` (module-level, BẢO VỆ GDoc/PDF/Word) + thêm vào `tl sweep` (cờ + NEXT ACTION set corpus=false). +1 test → 258/258. # 1.23.19: COMPOSITE `tl dedup-plan` (user yêu cầu) — kế hoạch dedup TOÀN CORPUS 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). Tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters `_cluster_same_doc` = CÙNG văn bản theo subject-sig + gộp sidecars .docx/.pdf cạnh GDoc). GIỮ canonical, set corpus=false bản dup (reversible). BẤT BIẾN AN TOÀN: không quarantine chính canonical / canonical của cụm khác / trùng lặp. DRY mặc định; --apply ghi reg_bulk corpus=false; review (thiếu canonical) + dups_on_nlm (còn nguồn NLM→cân nhắc xoá tay) chỉ BÁO. sweep NEXT ACTION trỏ dedup-plan. Pure `_dedup_plan`. +1 test → 257/257. # 1.23.18: FIX false-fire NLM_STATUS_MISMATCH (phát hiện khi nlm-orphans --fix-mismatch LIVE trả MISMATCH_LIVE=0 dù sweep báo 79). Whitelist status exact-match KHÔNG nhận biến thể `removed_*` (removed_superseded_by_VBHN, removed_dedup…) → false-fire + `_entry_on_nlm_live` coi NHẦM removed_* là sống (lệch still_on_nlm/ghost). FIX: `_nlm_status_known`/`_nlm_status_removed` nhận HỌ tiền tố (pushed*/synced/removed*/trash*/deleted), áp 4 site (doctor flag, _title_flags, _entry_on_nlm_live, vbhn-normalize removed). sweep NEXT ACTION: NLM_STATUS_MISMATCH = nhãn LẠ (registry hygiene) KHÔNG phải live desync. +2 test → 256/256. # 1.23.17: `tl sweep` NEXT ACTION nlm_drift TÁCH theo sub-type (phát hiện khi reconcile LIVE không giảm drift) — trước gộp 288 thành 'nlm-reconcile --apply' GÂY HIỂU NHẦM (reconcile chỉ chữa LINKAGE). Nay: NLM_NOTEBOOK_ID_MISSING→nlm-reconcile (linkage); NLM_STATUS_MISMATCH→nlm-orphans --fix-mismatch (đọc live); CORPUS_TRUE_NOT_ON_NLM→ingest-missing (job lớn, phần lớn CẤU TRÚC corpus>cap, KHÔNG về 0). # 1.23.16: DETECTOR `shared_source_id` (phát hiện khi dọn ghost NLM LIVE) — ≥2 drive_id KHÁC nhau CÙNG 1 nlm_source_id (backfill/reconcile gắn nhầm) = FALSE-LINK: xóa nguồn của row này GÃY link row kia (ca NQ42: canonical + ghost chung source_id → xóa ghost làm canonical mất NLM, phải re-push). Pure `_shared_source_id_groups` + thêm vào `tl sweep` (cờ + NEXT ACTION cảnh báo SỬA TRƯỚC nlm-reconcile/xóa nguồn). Dev cache thấy 4 nhóm. +1 test → 254/254. # 1.23.15: xử báo cáo rà 106 Luật (mục code còn lại; 5.1/5.3/5.6/4.B đã vá ở 1.23.11-14). 5.2 vbhn-check goc_hit cross-subject LỌT (14-2024 ATVSLĐ vào --goc 09-2017 Du lịch vì _disc_conflict không biết cặp) → `_vbhn_candidates`: khi ĐÃ biết subject, goc_hit phải TƯƠNG THÍCH chủ đề (sscore≥30) mới giữ. 5.5 Cowork /tmp sticky owner-nobody không ghi được → `_ensure_writable_tmpdir()` trỏ TMPDIR về CACHE/tmp ($HOME) lúc import (tempfile.* + script con kế thừa). 5.4 SKILL.md bootstrap options + cảnh báo 45s; 4.B thêm vbhn-normalize/sweep/quarantine-fix/vbhn-year-fix vào bảng CLI. +2 test → 253/253. # 1.23.14: COMPOSITE `tl quarantine-fix` (dọn nhóm B tất định) — phân loại dòng quarantine MÂU THUẪN: set_corpus_false (raw-dup .pdf/.docx gán nhầm corpus→false, AN TOÀN) + normalize_label (nhãn biến thể→QUARANTINE_CAT) tự động qua --apply; review_restore (GDoc corpus=true nghi canonical kẹt như A1/BLLĐ→KHÔNG auto, quyết tay) + ghost_nlm (quarantine còn nguồn NLM live→báo source_id, xoá tay sau verify). Pure `_quarantine_fix_items`. DRY mặc định. +1 test → 251/251. # 1.23.13: (1) MERGE HỘI TỤ bản Codex v1.23.11 (cùng vá report rà corpus) — PORT phần UNIQUE: A1 SUBJECT-GATE thật (`_name_subject_match`/`_name_subject_text`: source-map ghim canonical CHỈ trong hit KHỚP CHỦ ĐỀ, abbrev-aware BLLD/BHXH; hit generic→None+SUBJECT_MISMATCH) + `resolve_identity` +name_tokens (dedup-check 'Luật Thư viện') + vbhn-check SUBJECT_FILTER_WEAK + reg-query LIMIT_TRUNCATED rõ. GIỮ bản tôi đã verify cho A2-A5 + reg-query json-all. (2) GỠ `_parts` (chống mount-cắt-cụt — Cowork nay bootstrap qua tl_fetch zip sạch nên hết tác dụng): xoá scripts/_parts/ + build_parts.py + tl_rebuild.sh; tl_boot.py rút gọn (strip-NUL→compile→exec); `_reassemble_parts`→None (heal degrade về on-disk); edit-skill/verify-integrity bỏ build_parts. (3) COMPOSITE TẤT ĐỊNH `tl sweep`: 1 lệnh thay chuỗi 6 audit (hygiene+cat+slot+drift+vbhn-year+quarantine) → JSON/text + NEXT ACTIONS điền sẵn (pure `_sweep_report`). +4 test → selftest 250/250. # 1.23.12: 2 fix từ chạy B1 LIVE. (1) reg-query `--json` UNDERCOUNT âm thầm — mặc định cắt 60 rows → script đếm `len(rows)` thiếu (audit quarantine thấy 60/110). Nay `--json` trả TẤT CẢ rows mặc định (text vẫn cắt 60 + dòng '(hiện 60)') + cờ `truncated`. (2) hygiene scan thêm cờ TRẠNG THÁI MÂU THUẪN `quarantine_corpus_true` (trong quarantine nhưng corpus=true) + `quarantine_still_on_nlm` (quarantine nhưng còn nguồn NLM live = ghost) → surface để dọn. # 1.23.11: xử báo cáo rà corpus (nhóm A). A2: hằng `QUARANTINE_CAT` + `_is_quarantine_label_variant` + cờ hygiene scan `quarantine_label_variants` (audit hội tụ dù nhãn lệch QUARANTINE/_ZZZ — `_is_quarantine_cat` nhận mọi biến thể). A3: `slot-audit` TỰ neo `live_source_count` từ nlm CLI (+`--no-live`) → cảnh báo gap estimate↔live khỏi gọi `--physical` tay. A4: `doctor` in BREAKDOWN từng cờ (NLM_STATUS_MISMATCH/CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING) + lệnh `nlm-reconcile <nb> --apply` ĐIỀN SẴN notebook id. A5: help `vbhn-check --subject` thêm cảnh báo QUOTE. A1 (source-map ghim sai canonical 'Bộ luật Lao động'→'Dân chủ 87'): KHÔNG tái hiện trên v1.23.11 với dữ liệu đại diện — gate LOW_CONFIDENCE_NAME_MATCH gốc đã null canonical khi top không strong-match; giữ gate (thử thay bằng nhóm tail-key gây regression abbrev/quarantine → revert). Cần `source-map --json` LIVE để soi nếu còn. +3 test. # 1.23.10: GUARD cat (phát hiện khi nạp THADS 106/2025 LIVE) — `register`/reg_bulk KHÔNG validate `cat` → workaround gõ tay folder RÁC '30_To_chuc_bo_may_nha_nuoc' (số 30 + tên cat 35) lọt im lặng → registry lệch folder vật lý. Nay `_is_valid_cat_value` chặn cat không thuộc taxonomy 45+2 (cả nhánh --bulk lẫn reg_upsert), rc=2, nhắc dùng `tl recat --cat <số>`. +1 test. BÀI HỌC: đổi cat LUÔN dùng recat (resolve+validate folder), KHÔNG register --bulk tên gõ tay. # 1.23.9: 2 FIX (phát hiện khi chạy vbhn-year-fix LIVE Cowork). (A) vbhn-year-fix CHỈ quét entry corpus=true — sidecar/quarantine (corpus=false) KHÔNG year-fix → hết CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số; hygiene báo 'sạch' nhưng vbhn-year-fix báo conflict = mâu thuẫn do quét cả non-corpus). (B) HINT SAI: lệnh ghi in `MANIFEST_STALE_RUN_REGEN2` → `tl regen2` KHÔNG phải lệnh (chỉ có `tl manifest`; regen2 là action GAS qua `manifest --touched-drive`) → user chạy nhầm. Sửa 5 hint + dòng recat → `tl boot --refresh` (sau ghi registry sheet) / `tl manifest` (sau đổi cây Drive). +test corpus-skip. # 1.23.8: SAFEGUARD cho vbhn-year-fix (phát hiện khi soát DRY) — nếu ≥2 dòng suy ra CÙNG `NN-YYYY-VBHN-XXX` (dòng dup cùng văn bản, HOẶC 2 văn bản khác cùng số+năm) thì ghi sẽ TẠO collision MỚI → tách bucket `conflicts`, KHÔNG auto-apply (rc=1), in 🔴 CONFLICT để dedup/phân biệt tay. `_vbhn_year_fix_items` nay trả (fixable, needs_year, conflicts). +1 test. # 1.23.7: ★ BẤT BIẾN ĐẶT TÊN (user nhấn mạnh) — số hiệu VBQPPL PHẢI có NĂM; VBHN là thủ phạm (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH=ATTP 2025+Thuế TNDN 2026, 115/VBHN-VPQH=THADS 2025+Thi đua 2026). Lệnh MỚI `tl vbhn-year-fix [--with-name] [--apply]`: quét VBHN sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên qua `_entry_issue_year`) → đề xuất `NN-YYYY-VBHN-XXX`, GHI qua reg_upsert (KHÔNG reg_bulk — sohieu là khóa immutable); ca không suy được năm → needs_year (xác minh tay). Pure `_vbhn_sohieu_inject_year`/`_name_inject_vbhn_year`/`_vbhn_year_fix_items` (test offline). + `register` cảnh báo `VBHN_SOHIEU_NO_YEAR` khi ghi sohieu VBHN thiếu năm. +3 test. (Phát hiện đã có sẵn: cờ VBHN_BARE_NUMBER/MISSING_YEAR_OR_DATE/NAME_MISSING_YEAR.) # 1.23.6: FIX (phát hiện khi KH2 Pha 2.6 recat Cowork) — `recat --apply` báo `reg_patched:0` ÂM THẦM khi Drive đã move nhưng webapp index chưa thấy row mới thêm (registry cat KHÔNG cập nhật → user tưởng xong). Nay LOUD cảnh báo stderr + rc=1 khi reg_patched < moved, chỉ rõ KHẮC PHỤC (regen2 --refresh rồi reg_bulk lại). Cùng họ "ghi im lặng" với 1.23.5. +1 test. # 1.23.5: FIX BUG (phát hiện khi KH2 Pha 2.8 chạy Cowork) — `missing-sohieu --apply` ghi reg_bulk cột `so_hieu` (có gạch dưới) → webapp BỎ IM LẶNG (đúng gotcha API_CONTRACT mục 0: khóa phải `sohieu`); apply thẳng trả patched=0 mà KHÔNG báo lỗi. Sửa items key + cols → `sohieu` (line ~8061) + help/docstring. Workaround Cowork (cols="sohieu") đã ghi 193/193; nay code gốc đúng. +1 test. # 1.23.4: ★ KH1 HOÀN TẤT — `tl relation-backfill --base <sh> [--apply]` (Pha 1.5 cuối, cho KH2 Pha 2.3): GHI quan hệ sửa đổi mà relation-check ĐÃ phát hiện (missing_links từ `_relation_audit`, tái dùng cổng footnote chống dương-tính-giả) — set `goc` cho luật SỬA, append `sua_doi` cho luật GỐC (pure `_relation_backfill_items` HỢP NHẤT sua_doi cũ + dedup, KHÔNG đè). CHỈ direct/ref-linked; subject-only → review (xác minh tay). DRY mặc định. +1 test → selftest 237/237. → TOÀN BỘ lệnh KH1 đã dựng (3 cổng + vòng lặp + dọn-corpus + nlm-orphans + relation-backfill). CÒN: cập nhật RUNBOOK/API_CONTRACT (tài liệu), KH2/KH3 (corpus). # 1.23.3: FIX DEPLOY-DISPLAY — SKILL.md header ghi CỨNG '(v1.22.70)' qua MỌI bump 1.22.71→1.23.2 (tôi quên sed SKILL.md) → bản deploy HIỂN THỊ 'v1.22.70' dù runtime đúng. Sửa SKILL.md→(v1.23.3) + GUARD selftest `skill_md_version_matches_VERSION` (bump nào quên cập nhật SKILL.md = selftest FAIL → chặn deploy). LƯU Ý vận hành: Package live khi kiểm = 1.23.0 (1.23.1/1.23.2 CHƯA push thành công — drive-push cần gws auth); verify push bằng curl Package fileId. +1 test → selftest 236/236. # 1.23.2:`tl nlm-orphans <notebook> [--fix-mismatch] [--deep]` — TỰ ĐỘNG HOÁ điều tra ghost (thay 6 vòng soi tay): đọc nguồn NLM LIVE (`nlm_cli.source_list`) ↔ registry → phân `_classify_nlm_sources` (PURE, test offline) thành REGISTERED_ACTIVE / **STATUS_MISMATCH_LIVE** (dòng registry removed* nhưng nguồn còn SỐNG = gắn nhãn SAI, vd 8 văn bản đã vá tay) / UNREGISTERED (trên NLM, không dòng registry). REPORT-ONLY; --fix-mismatch in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (KHÔNG đụng NLM/KHÔNG xóa); --deep đọc nội dung NLM lấy SỐ HIỆU header thật (vá cả sohieu cụt như '66'→'66.18/2026/NQ-CP'). +1 test → selftest 235/235. (CÒN: relation-backfill Pha 1.5 live; root-cause pipeline gắn nhầm removed_from_drive; SKILL.md/RUNBOOK/API_CONTRACT.) # 1.23.1: vá sweep-finding — `overflow-resolve` ĐỐI CHIẾU LIVE (nlm-get) thay vì registry-only: dùng MAX(registry, physical) làm slot hiệu lực (`_overflow_status`) → KHÔNG báo 'còn chỗ' giả khi vật lý vượt cap (vd base registry 279 / LIVE 315); cờ `REGISTRY_BEHIND_LIVE` lộ nguồn add thẳng CHƯA đăng ký (gợi `tl nlm-reconcile`); sửa cosmetic flag (BASE_HAS_ROOM khi base còn chỗ). `--no-live` để registry-only. (ingest-missing --apply ĐÃ physical-safe sẵn qua nlm-get.) +1 test → selftest 234/234. # 1.23.0: ★ KH1 (sửa skill sau báo cáo rà 70 Luật) — PHÁT HÀNH. Pha 1.3/III.2: `tl slot-audit --all-shards` (II.5 đếm slot TỪNG shard + cảnh báo near-full ≥270/300, pure `_slot_count_all_shards`) + `tl overflow-resolve` (II.1 kiểm shard overflow SẴN CÓ → cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE, chống tạo notebook nhầm; reuse `_overflow_route`) + `tl edit-skill <file> --patch` (III.2 sửa skill an toàn: assert-đếm→py_compile→write_text→build_parts, né Edit/Write mount; DRY mặc định). manifest-stale (II.4): lệnh ghi MỚI phát MANIFEST_STALE_RUN_REGEN2. canonical-not-sidecar (II.3): ĐÃ xử qua deep-resolver `_resolve_deep_target`+`_is_source_sidecar`+phạt raw-300. +3 test → selftest 233/233. ★ TỔNG KH1 (1.22.71→1.23.0): H1/H2/UTF-8/instructions--out; 3 CỔNG G1(source-verify)/G2(header-verify)/G3(cat-verify+cat-audit/recat FIX); vòng lặp frontier-expand/ingest-missing(no-new-notebook)/rasoat-loop; dọn corpus backfill-loai/sohieu-conflict/missing-sohieu; slot-audit/overflow-resolve/edit-skill. CÒN (1.23.1): relation-backfill (live, Pha 1.5); cập nhật SKILL.md/RUNBOOK/API_CONTRACT + upload Package (user-side). # 1.22.76: KH1 Pha 1.5 — `tl missing-sohieu` (đề xuất số hiệu cho dòng registry thiếu sohieu, parse từ TÊN qua `_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục; DRY mặc định, --apply ghi reg_bulk so_hieu; ⚠ ĐỀ XUẤT theo tên — XÁC MINH bằng header-verify/G2; LIVE suy 194/307 dòng thiếu). +1 test → selftest 231/231. HOÀN TẤT Pha 1.5 quick-wins pure (backfill-loai+sohieu-conflict+missing-sohieu). CÒN (v1.23.0): Pha 1.5 relation-backfill (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + III.2 edit-skill. # 1.22.75: KH1 Pha 1.5 (quick-wins pure) — `tl backfill-loai` (suy `loai` chuẩn cho dòng trống từ tên+số hiệu qua pure `_infer_loai`; DRY mặc định, --apply ghi reg_bulk; idempotent; LIVE manifest suy được 191/769) + TÁCH `SOHIEU_CONFLICT_DIFFERENT_DOC` (≥2 chữ-ký-chủ-đề KHÁC cùng số hiệu = văn bản KHÁC, NGUY HIỂM) khỏi `SAME_DOC` (sidecar) trong registry-doctor (`_subject_sig`; thêm khóa `sohieu_conflict_groups` vào schema text=json; LIVE 22 conflict/6 same trong 28 dup). +3 test → selftest 230/230. CÒN (v1.23.0): Pha 1.5 relation-backfill/missing-sohieu (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit) + III.2 edit-skill. # 1.22.74: KH1 Pha 1.2 HOÀN TẤT P0 — `tl ingest-missing` (nạp backlog corpus chưa NLM → source_add+reg_bulk; IDEMPOTENT + checkpoint resume; DRY mặc định; định tuyến theo chỗ trống base→overflow shard SẴN CÓ; BẤT BIẾN `_overflow_route` KHÔNG BAO GIỜ tạo notebook (đầy→BLOCKED hỏi user); pure `_ingest_missing_select`/`_overflow_route` test offline) + `tl rasoat-loop` (orchestrator VÒNG LẶP KHÉP KÍN report-only: SEED→frontier-expand→mở rộng đệ quy in-corpus đọc nguyên-văn KHÔNG RAG→dedup seen chống lặp→hội tụ dry_rounds≥K; xuất GAP ngoài-corpus + in-corpus-chưa-NLM; pure `_rasoat_dedup_push`). +4 test → selftest 228/228. CÒN (v1.23.0): Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + Pha 1.5 (backfill-loai/sohieu-conflict/relation-backfill/missing-sohieu) + III.2 edit-skill. LƯU Ý: ingest-missing/rasoat-loop nhánh mutate/expand-live CHƯA test trên dev (không NLM cred) — lần --apply đầu chạy Cowork batch nhỏ. # 1.22.73: KH1 Pha 1.2 — `tl frontier-expand <gdoc|sohieu>` (vòng lặp rà soát): trích MỌI dẫn chiếu (xref+footnote+inline) → ứng viên FRONTIER dedup theo số hiệu + ưu tiên (amending>VBHN>dẫn-chiếu) + cờ in_corpus; `missing_in_corpus` = đầu vào ingest-missing. Pure `_frontier_candidates` (test offline) + `_frontier_doc_text` reader; DISCOVERY/REPORT-ONLY, KHÔNG RAG; --text-file offline. +2 test → selftest 225/225. CÒN (v1.23.0): ingest-missing (mutate NLM, no-new-notebook), rasoat-loop (orchestrator); Pha 1.3; Pha 1.5. # 1.22.72: KH1 Pha 1.2 — DỰNG 3 CỔNG XÁC MINH G1/G2/G3 (dựng SẠCH, KHÔNG dùng bản agent tiêm đã revert). G3: helper pure `_load_linhvuc`/`_cat_taxonomy`/`_infer_cats_text`(suy cat theo NỘI DUNG alias, whole-word)/`_cat_boundary_rule`(ép quy_tac_ranh_gioi: BHXH/BHYT→02, đầu-tư-công/hải-quan→26, sửa≥2 luật→46, điều-ước→23, Đảng→00) + `tl cat-verify <gdoc|sohieu>` (read-only, --text-file offline) + FIX `cat-audit` (confidence/RULE/taxonomy-45+2/--strict) + FIX `recat` (BOUNDARY_CONFLICT advisory + --force-cat). G2: `_extract_header_facts` (ngày+cơ quan, pure) + `tl header-verify [--all/--sohieu/--drive-id/--cat] [--fix-suggest] [--strict]` (batch _verify_header_match, READ-ONLY, bắt DRIFT 775 dòng; KHÁC title_mismatch=metadata nội bộ). G1: `_content_md5` (NFC, pure) + `_official_rank` + `_DISCOVERY_SITES` re-rank OFFICIAL-FIRST (vbpl>congbao>luatvietnam>thuvienphapluat) + `tl source-verify <sohieu|gdoc>` (content_md5 + SOURCE_DISCREPANCY + nguồn official-first đối chiếu, --text-file offline). +14 test → selftest 223/223. CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3; Pha 1.5. # 1.22.71: KH1 (Pha 1.1/1.4) thực thi sau báo cáo rà 70 Luật. H2 `registry-doctor` text=JSON schema (dòng text SINH TỪ `_DOCTOR_SUMMARY_KEYS` → `build_doctor_summary`/`format_doctor_text`, hết lệch nhãn duplicate_sohieu↔_groups/title_mismatch↔_candidates/rows↔count). H1 `reg-query --json` rc=0+envelope KHÓA bằng test (không tái hiện ở canonical; rc=1 trong log = confound redirect/&&/bản cũ). III.1 `os.environ PYTHONUTF8=1`/PYTHONIOENCODING truyền xuống MỌI script con (hết UnicodeEncodeError 'charmap' gen_instructions.py… console Windows) + gen_instructions.py reconfigure standalone. III.3 `tl instructions --out <file>` ghi UTF-8 ra file. +3 test → selftest 209/209. (LƯU Ý: workflow thiết kế v1.23 từng tiêm nhầm header-verify/cat-verify vào canonical → ĐÃ revert, sẽ dựng lại CÓ REVIEW.) CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3 overflow-resolve/canonical-sidecar/manifest-stale/slot-audit; Pha 1.5 backfill-loai/sohieu-conflict/relation-backfill; cổng G1/G2/G3. # 1.22.70: ★ HỢP NHẤT bản Codex v1.22.69 (CONVERGENT — 2 nhánh cùng vá 13 lỗi 2 báo cáo, KHÁC code) + vá LOG RÀ MỚI (Nhóm A-E đa-profile) + LARGE-FILE SPLIT. MERGE: GIỮ bản Claude làm base (verify 197/198, có H/D/G/2.2 mà Codex THIẾU) + PORT phần Codex MẠNH HƠN: (1) DEEP-RESOLVER `_resolve_deep_target`+`_entry_mime`/`_entry_google_doc`/`_entry_raw_no_gdoc`/`_deep_entry_rank` cho extract/xref/footnote-map (ưu tiên GDoc native theo MIME + corpus + NLM-live; tên DÀI toàn chữ-gạch-dưới KHÔNG bị nhận nhầm DriveId → bug C TRỌN VẸN); (2) `_classify_ref` kiểm VBHN-COVERAGE TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED); (3) ENTRY_RAW_NO_GDOC rc=2 + ok:false (đúng yêu cầu báo cáo: chỉ-raw → rc≠0). NHÓM A-E (log đa-profile): B(NGHIÊM TRỌNG) `_ingest_target`/`nlm-add`/`nlm-query` push/query nhắm NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID) — hết đẩy nhầm VBQPPL base khi `--profile NQ36` (+nlm-add/nlm-query nạp apply_profile_offline). A1 `profile-create --apply` GHI BỀN config.profiles.<name> (`_persist_profile_config` merge) → profile-info hết fallback VBQPPL. A2 next-steps cấm copy sheet VBQPPL tay (orphan), dùng `manifest` tạo registry rỗng. C1 `nlm-reconcile` BẮC CẦU gdoc↔source_id (`_nlm_source_drive_id` + link_candidates: nguồn live khớp drive_id/số hiệu của dòng registry thiếu source_id → backfill, hết 'unregistered' giả). C2 `register --nlm-notebook-id` (khỏi backfill-notebook riêng). C3 `backfill-notebook` khóa ĐÚNG NGUỒN: --src-ids→nlm_source_id, --drive-ids→drive_id (hết lệch khóa). D1 cảnh báo profile non-default + categories=inherit (văn bản vào cây chung VBQPPL). D2 `regen2` LOẠI registry/manifest/orphan (mime spreadsheet/json + tên + registryDocId/manifestId) khỏi scan own (hết 3 dòng corpus rác, count 8→5). D3 `reg-delete --force` (đã có) + thông điệp rõ. E1 `nlm_cli._strip_keyring` lọc 'Using keyring backend' khỏi stdout/stderr (hết vỡ json.loads). E2 `reg-query --refresh` (đã có) + help nhắc refresh sau khi ghi sheet. LARGE-FILE: `ingest-local` cổng HỎI TÁCH file > ~1.2MB (NLM_LARGE_SRC_BYTES, --large-threshold) → DỪNG gợi ý tách theo Phần/Chương/Điều (chất lượng RAG cao nhất), `--allow-large` để nạp nguyên (+SKILL.md doctrine). RÀ SOÁT ĐỐI KHÁNG (review+verify) gia cố 14 phát hiện: Group B `_resolve_nlm_notebook` (profile DỰ ÁN thiếu notebookId → ERROR, KHÔNG fallback VBQPPL base — vá GỐC bug B, guard cũ là dead-code vì base luôn truthy) áp nlm-add/query/get/reconcile/cross/ingest-local; C1 link theo số hiệu CHỈ khi DUY NHẤT (số VBHN tái dùng → bỏ qua, hết false-link); cmd_extract positional+--sohieu → ƯU TIÊN --sohieu; `_persist_profile_config` ghi NGUYÊN TỬ (temp+os.replace); `_is_infra_file` chặn false-positive (văn bản GDoc/PDF KHÔNG bao giờ là infra); `_strip_keyring` JSON-safe (chỉ bỏ dòng nhiễu THUẦN, không nuốt thân JSON có cụm keyring); large-file gate ra STDOUT. +6 test → selftest 206/206. # 1.22.69: vá 13 lỗi CÔNG CỤ từ 2 BÁO CÁO RÀ 71+105 LUẬT. A `tl status` verdict→rc=0 (REVIEW/ADD/SKIP = PHÁT HIỆN dữ liệu ≠ lỗi lệnh, hết phá &&/CI; +`--strict` mirror xref; preingest_gate.verdict_exit). C/P0-1 resolver đọc sâu: `_entry_score` PHẠT -300 file THÔ (.docx/.pdf/.html) → GDoc native THẮNG sidecar CÙNG số hiệu (hết xref/footnote im-lặng stdout-rỗng-rc0 bỏ sót ≥6 VBHN); ENTRY_RAW_NO_GDOC in STDOUT (caller agentic THẤY); `_resolve_base_gdoc` fallback drive_id khi sohieu rỗng. B+P1-3 xref: `extract_refs` DEDUP theo SỐ HIỆU (1 phán quyết/số hiệu/run — hết MISSING+MISMATCH mâu thuẫn + phantom 'DCHIẾU 258 này có hiệu lực…' do bắc-cầu mệnh-đề-chuyển-tiếp) + `_clean_ref_name_phrase` cắt prose (GIỮ tên luật thật 'Thi hành án dân sự'). P0-2 `DOC_TEXT_SOHIEU_TYPO` KHÔNG bắc cầu QUA HỌ loại VB (`_doctype_family`: QH≠NQ-TW≠KL-TW≠NĐ-CP — tái dùng số+năm hợp pháp; CÙNG họ QH14↔QH15 vẫn flag). P1-4 source-map: >1 VBHN CÙNG số hiệu KHÁC chủ đề → canonical=None + VBHN_REUSE_AMBIGUOUS_NO_CANONICAL (đòi --subject/năm; CÙNG chủ đề/nhiều version vẫn chốt). P1-5 amendment-detector: LOẠI văn bản PHI quy phạm (sohieu=∅ + 'góp ý/kiến nghị/ý kiến'); PAUSE_AND_ASK_USER CHỈ khi có ứng viên MANG SỐ HIỆU hợp lệ (sohieu=∅ vẫn liệt kê, confidence=low). P2-6 vbhn-check: CONTENT_VERIFY_REQUIRED chỉ khi collision CỦA CHÍNH số hiệu ứng viên (KHÔNG corpus-wide → hết 86 cờ máy móc); verified+năm+duy-nhất+không-tự-collision → VBHN_METADATA_OK. H `tl doctor` cảnh báo TRÔI registry↔NLM (đếm cờ OFFLINE từ cache → gợi ý `tl nlm-reconcile`, KHÔNG chặn/mạng). D `_read_doc_text`+`cmd_xref` TÁI DÙNG cache `extract_<gid>.txt` (Bộ luật Dân sự hết export lại 3 lần→timeout). E `standardize_name.normalize_name` bỏ đuôi .doc/.docx/.pdf khỏi tên CHUẨN (GIỮ ở tên FILE gốc). G `hygiene` bucket `sidecar_corpus_fix` (.docx cạnh GDoc mà corpus=true → đề xuất SET_CORPUS_FALSE). P2-7 chuẩn hoá ENUM `loai`/`hieuluc` lúc register (`_normalize_loai`/`_normalize_hieuluc`) + bucket hygiene `loai_noncanonical` (KHÔNG nhồi `_title_flags` → tránh nhiễu source-map). 2.2 nlm PATH: `nlm_cli` nối ~/.local/bin+user-base bin vào PATH (shutil.which + subprocess env); `doctor` dùng `nlm_exe()` (hết báo đỏ giả); `nlm-install` ghi PATH bền ~/.profile/~/.bashrc (POSIX). +14 test → selftest 194/194. HOÃN P2-8 (tách MISSING ngoài-phạm-vi-corpus vs resolver-trượt — cần enrich manifest). RÀ SOÁT ĐỐI KHÁNG (workflow review+verify) gia cố 9 phát hiện: cmd_status dùng inspect.signature thay except-mù + GIỮ ngữ nghĩa --strict ở fallback (rc=2→1); `_entry_score` chỉ phạt raw CHƯA-trên-NLM (raw đã-push NLM = canonical thật, không hạ oan); P1-4 `_subj_keys` chỉ đếm tail CHỦ-ĐỀ-RÕ (bản tên-trơ không gây false-ambiguity); P1-5 gate góp-ý theo SỐ HIỆU REGISTRY (file 'Góp ý Luật 64/2020' có số trong TÊN vẫn bị loại); `_normalize_loai` gộp mọi ký tự lạ (kể cả ngoặc); cmd_register log khi chuẩn hoá loai/hieuluc; preingest_gate main() thêm --strict. # 1.22.68: rà 133+81 LUẬT (2 log live) — vá robustness phần A. P1 RAW-ENTRY PRECONDITION (gốc chung log2 A1/A2/A3): xref+footnote-map gặp entry THÔ (.docx/.pdf/.html chưa convert GDoc) → ENTRY_RAW_NO_GDOC rc=0 + thông điệp gọn (thay rc=2/JSON-lỗi-thô/stdout-rỗng/rò "Export only…"); `_is_raw_no_gdoc_name`/`_raw_no_gdoc`/`_emit_raw_no_gdoc` THỐNG NHẤT .docx↔.pdf. P2 FOOTNOTE DEDUP (log1 A2): resolve_footnote_amendments GOM dieu_level_amendment_map theo (dieu,khoan,diem,amending_sohieu) — hết 47 dòng pending trùng (Đ73K1 ×3); footnote_defs giữ ĐỦ marker + footnote_raw_count. P3 BASE_NO_CLUSTER (log1 A1): rasoat-chongcheo CỜ RÕ khi base ngoài cụm E2 (61/133 trước no-op IM LẶNG) → dựa xref/footnote-map cấp Điều. P4 DEDUP related theo sohieu (log1 A6, hết 85-2015 ×4). P5 missing_in_corpus→`unresolved_refs`+note (log1 A5: CHƯA kết luận vắng mặt, khớp exists=UNKNOWN_NOT_ABSENT). A4 BASE_UNRESOLVED khi base tên/file thô không số hiệu. P7 strip keyring khỏi gws_bridge error (log2 A3). +2 test → selftest 179/179. CÒN (data/feature): mở rộng subject_clusters 45 chủ đề; parser khoản-điều-thêm (6a/16b, A3 log1 nhỏ); Cowork batch-checkpoint (A4 log2); GAS serial (A5 log2, frozen). + `drive-push --name`/`--rename-to-file` (đổi tên file Drive THEO TÊN FILE upload, GIỮ fileId — qua gws_bridge.rename có ASSERT). # 1.22.67: rà 59 LUẬT (log live) — vá 6/7 lỗi CÔNG CỤ (phần A). A1 `tl extract <số hiệu>` (vị trí) HẾT 404 giả: positional không-phải-gdoc-id(≥20 ký tự alnum)→tự định tuyến --sohieu (+SKILL.md). A2 vbhn-check suy subject SẠCH: `_clean_subject_text` bỏ hậu tố `_HL<ngày>`/goc/SuaDoi/ngày-trơ → query QT-5 web hết "thu do hl2026 07 01 hợp nhất" (đặt `_HL_SUFFIX_RE`, KHÔNG clobber `_HL_DATE_RE` thân-văn-bản — bắt được name-collision). A3 exit-code: xref/vbhn-check rc=0 khi CHẠY OK kể cả có MISSING/MISMATCH/no-hit (phát hiện ≠ lỗi lệnh, không phá &&/CI); `xref --strict` mới rc=1 (+SKILL.md). A4 extract cảnh báo chạm CAP export ~200k ký tự (văn bản dài có thể bị CẮT → cache-build). A6 `_strip_keyring_noise` lọc 'Using keyring backend' khỏi output gws subprocess. A7 `CONTENT_VERIFY_REQUIRED` CHỈ bật khi rủi-ro-tái-dùng-số/thiếu-metadata (>1 ứng viên/collision/bare-number/missing-year); metadata RÕ+DUY NHẤT → `VBHN_METADATA_OK` (giảm 37/59 cờ máy móc). A5 (GAS tuần-tự, không scale) = giới hạn webapp FROZEN, không sửa client. +4 test → selftest 177/177. # 1.22.66: HỢP NHẤT bản Codex v1.22.65 (cùng rẽ từ v1.22.64 — 2 nhánh CÙNG vá batch-2 run-log, KHÁC code). GIỮ bản Claude làm base (đã verify 173/173 + có `status_pending` PENDING_AMENDMENT_NOT_IN_VBHN + cụm `dau_tu_PPP` mà Codex THIẾU). PORT 2 cải tiến robustness CHỈ-CÓ-Ở-CODEX: (1) vbhn-check/vbhn-verify nhận POSITIONAL `target` (tương thích runbook cũ: `tl vbhn-verify "14/VBHN-VPQH"` tự định tuyến text-file/gdoc-id/sohieu qua `_read_verify_text`; `tl vbhn-check "84/2015/QH13"`→goc/subject); (2) reg-query --json ENVELOPE chuẩn {ok,schema:reg-query.v2,count,limit,rows,entries} (cả rows+entries cho mọi parser). Các fix batch-2 TRÙNG (doctype/PPP-alias/sidecar/issue_year-goc/dedup-VBHN-first/xref-typo/vbhn-verify-json/relation-check) GIỮ bản Claude đã verify-live (Codex impl khác nhưng chưa verify). Codex thiếu status_pending → giữ bản Claude. selftest 173/173. # 1.22.65: vá 6 RUN-LOG batch-2 (workflow điều tra+verify đối kháng trên COPY CÔ LẬP — canonical md5 NGUYÊN, agent KHÔNG đụng được). 10 fix: srcmap_name_resolution (query nêu "Luật/Bộ luật"→ƯU TIÊN hit tier≥Luật `_query_doctype_tier`, hết chốt NĐ/TT: "Luật Đầu tư"→VBHN_03 KHÔNG NĐ; PPP≡"đối tác công tư" vào _ABBREV_MAP→VBHN_123; LOW_CONFIDENCE hết over-fire khi có hit-strong tier-Luật); issue_year_goc_token (`_strip_goc_token`+reject năm-bản-gốc: VBHN_123 hết issue_year=2020 từ token goc_64-2020); dedup_vbhn_first (dedup áp VBHN-first qua goc-chain dù KHÁC số hiệu: 64/2020→canonical VBHN 123, gốc SUPERSEDED); relcheck_footnote_only_fp (chỉ giữ luật THỰC SỰ sửa base, hết bơm FOOTNOTE_AMENDMENT_NOT_IN_CORPUS từ dẫn-chiếu/chuyển-tiếp); status_pending_vbhn (preingest SKIP→USE_VBHN nay cảnh báo PENDING_AMENDMENT_NOT_IN_VBHN khi VBHN ra đời TRƯỚC sửa-pending); corpus_nlm_sidecar_fp (`_dup_of_live_sibling`: không flag CORPUS_TRUE_NOT_ON_NLM cho sidecar-raw khi anh-em GDoc đã trên NLM); relcheck_json_types (int→`amendment_candidates_subject_filtered_count`); vbhn_verify_json_schema (`_vbhn_verdict`→field verdict/official/provisional + populate head_sample); xref_sohieu_typo (`_classify_ref`→DOC_TEXT_SOHIEU_TYPO khi số hiệu near-match KHÁC mã cơ quan, vd 41/2024/QH14 vs QH15); cluster_ppp (THÊM cụm dau_tu_PPP base 123/VBHN). SKIP: xref_alias (false-alarm), regquery_json+skill_cli (ĐÃ đúng trên v1.22.64 — log là DEPLOY-LAG zip Drive v1.22.35). +10 test → selftest 173/173. # 1.22.64: vá 6 RUN-LOG (workflow điều tra+verify đối kháng 16 issue → áp 15 fix, 1 reject-trên-cơ-sở). name_rank_collision (CHÍNH): source-map/exists "Luật Dân số/Việc làm/Phí lệ phí/BLLĐ" HẾT chốt SAI canonical (Dân chủ/NLĐ-nước-ngoài/Học phí/ATVSLĐ) — `_name_strong_match` + gate `LOW_CONFIDENCE_NAME_MATCH` (canonical=None khi khớp-MỜ) + `_name_phrase_match` ≥2-token (reg-query --name hết match-all 87→2); LIVE 3/4 nay chốt ĐÚNG, 1 LOW_CONFIDENCE. cluster BHYT neo `y_te_kham_chua_benh` (subject_clusters.json, hết lao_dong). vbhn-verify: HEADER_NOT_CLEAR nhận số-hiệu "NN/VBHN-" + ASSEMBLED CHỈ soi TÊN (hết "không đúng" thân→ASSEMBLED giả). status→USE_VBHN (41/2024→19/VBHN). CORPUS_TRUE_NOT_ON_NLM suppress khi nlm_status=removed_*. footnote `_multi_diem` ("điểm c và d"). `_strip_font_runs` (bỏ dòng "Times New Roman"). relation-check --json preamble→stderr + skip backfill cho quarantine. `tl up` fallback init-config. `_scan_inline_amendments`+E1 LIEN_DOMAIN (Điều 53 sửa luật khác cụm). sohieu-exact ưu tiên fuzzy. REJECT đúng: vbhn_year (sẽ regress year-reuse). +13 test → selftest 164/164. (⚠ vài agent workflow vi phạm "no-edit" → ĐÃ revert clean v1.22.63 + áp lại CHỈ patch đã-verify thủ công.) # 1.22.63: ★ HỢP NHẤT 2 nhánh v1.22.62 (Codex ⊕ Claude, đổi xứng) — (A·Codex) vá log hygiene/NLM/pending: tên "Luật X"↔canonical, footnote-map body_effective_dates (pending hết 0 giả), hygiene lọc OMNIBUS_NARROW khỏi query hẹp + không emit cluster canonical=None, reg-query/summary nlm-live-aware + cờ CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. (B·Claude) `tl up` BOOTSTRAP TẤT ĐỊNH 1-lệnh (config→gws cred+binary→nlm→manifest→readiness; helper CHUNG `_ensure_gws_nlm` cho init-config+up) + `tl confirm`/`_verify_header_match` (ĐỌC HEADER xác minh sohieu/tiêu đề/loại/cat khớp tên+thư mục → nhãn registry.verified; source-map/dedup TIN entry confirm, bỏ DIRTY/WARN) + upload-flow `_upload_mime_ext` (.doc/.pdf upload MIME THẬT → Drive organize convert server-side). selftest 153/153 (147 Codex + 6 Claude). # 1.22.62: vá log hygiene/NLM/pending — tên luật dạng "Luật X" khớp canonical đuôi "X"; footnote-map đọc thêm Điều hiệu lực trong thân luật gốc (body_effective_dates, pending không còn 0 giả); hygiene plan lọc OMNIBUS_NARROW_TITLE_CHECK khỏi query chủ đề hẹp và không emit cluster apply với canonical=None; summary/reg-query phơi nlm_source_id+nlm_notebook_id live-aware, flag CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. 1.22.61: vá log Chat/Cowork — #2 (CHÍNH: "Chat không cài gws+nlm từ đầu") init-config --from-public GỘP gws BINARY (gws-bootstrap-cowork → find/GHI hết FALLBACK→GAS) + cờ --nlm (uv-install+auth) = 1 lệnh bootstrap đủ; SKILL.md startup MỌI env dùng `--from-public --nlm`; --no-binary để chỉ-cred. #1 (NGUY HIỂM) exists/source-map: VBHN-first redirect CHỈ khi query LÀ BẢN GỐC (base = năm nhỏ nhất chuỗi goc, `_vbhn_base_key`) — 114/2025 Phòng bệnh (luật-sửa NẰM TRONG chuỗi VBHN thuốc lá) hết bị chốt canonical=VBHN thuốc lá; thêm bucket `amends_vbhn` + cờ AMENDS_OTHER_VBHN/MULTIPLE_VBHN_BASE. #3 source-map dương-tính-giả: `_vb_tier_rank` chặn SAI THỨ BẬC — NĐ/TT (118/2016/NĐ-CP) KHÔNG thể 'sửa đổi' Luật → hết AMENDMENT_CANDIDATE+PAUSE giả (đọc loại cả từ TÊN khi sohieu rỗng; base=tier cao nhất nhóm). #5 source-map NỔI `PENDING_FUTURE_EFFECT` + pending_future_count (đếm VB hiệu-lực-tương-lai, rẻ-không-footnote-map). +7 test → selftest 140/140. # 1.22.60: log rà BHYT (workflow điều tra+verify đối kháng) — #5 extract --sohieu khớp entry sohieu-RỖNG qua _sohieu_key_entry (parse từ TÊN '114_2025_QH15_658530'); #1 gws_bridge.rename ASSERT đọc-lại-tên (hết nuốt-lỗi-im-lặng rename 200-nhưng-không-đổi); #4 footnote-map _footnote_rel_kind = CROSS_CUTTING (omnibus 35/2018) / PARTIAL_REPEAL (bãi-bỏ-cục-bộ 32/2013) → hạ ưu tiên; #3 preflight TỰ KHÁM PHÁ overflow notebook từ registry (row_kind=overflow) khi config trống/placeholder (phòng thủ; config canonical đã có id thật). #2 slot over-count: đã sạch sẵn (L5), "329" trong log là GAS server-side. selftest 133/133. 1.22.59: log rà BHYT — B1 subject_clusters.json THÊM cụm `y_te_kham_chua_benh` (base 40/VBHN-VPQH BHYT + KCB 15/2023 + Phòng bệnh 114/2025 + Dược + ATTP) → rasoat-chongcheo BHYT neo ĐÚNG cụm y tế (trước neo nhầm lao_dong_xa_hoi); B3 cờ OMNIBUS hết false-positive trên luật-sửa TÊN-SỐ-TRƠ (chỉ flag khi chủ đề RÕ + khác lĩnh vực, ≥2 token); B5 `_summ_entry.nlm` = LIVE (`_entry_on_nlm_live`, False nếu removed) → relation-check khớp reg-query; B6 message gws fallback PHÂN BIỆT thiếu-cred vs thiếu-binary. 1.22.58: B1 GWS — `_read_doc_text` ƯU TIÊN direct-media EXPORT text/plain bằng CRED (KHÔNG cần binary gws → extract/footnote-map hết rơi GAS ở Cowork khi đã gws-auth-load; B5 hết spam); init-config đổi thông điệp "gws cred ✓ (direct-media đọc; find/ghi cần gws-bootstrap-cowork)" hết hiểu nhầm "BẬT". locate FALLBACK webapp gắn LOW_CONFIDENCE/NO_EXACT_SOHIEU (Cowork: locate 58/2014 → fulltext lạc đề). `_entry_subject_text` BỎ `cat` (nhãn folder '02_Bao_hiem' làm mọi entry khớp 'bảo hiểm' giả) → relation-check vbhn_candidates 14→3 (BHXH/KDBH/ATVSLĐ). 1.22.57: ★ GỐC RỄ "subject filter quá lỏng" (phát hiện khi chạy mục B live) — `_subject_score` CHỐNG nhiễu từ-phổ-biến: token-overlap chỉ tính ĐỦ khi entry chứa CỤM-ĐẦU PHÂN BIỆT của chủ đề ('bảo hiểm'='baohiem'); nếu không (chỉ trùng 'bảo/hội' lẻ ở từ-khoá) → 0 điểm. → relation-check vbhn_candidates hết kéo Luật Xuất bản/Người cao tuổi/Thanh niên/Công đoàn (sscore 40→0); BHXH=140, BHYT=0(disc), giữ KDBH=60. 1.22.56: vá log rà BHXH (Chat+Cowork) — (regression) `locate` cụm danh từ ('bảo hiểm xã hội') KHÔNG còn bị coi là số hiệu → hết LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (gate `_looks_like_sohieu_query`); `tl rasoat worksheet` TỰ dựng cache nếu thiếu (`_rasoat_autocache_worksheet`→`cache-build`, resolve gdoc từ manifest; --no-auto-cache để tắt) + message worksheet trỏ `tl cache-build`; `_find_amendment_candidates` thêm loại-trừ-chéo `_disc_conflict` (BHYT/BHTN khác BHXH); SKILL.md BƯỚC 0 TÁCH `--setup` (core nhanh) khỏi nlm (né timeout 45s Cowork). 1.22.55: #8 HỢP NHẤT footnote-map vào relation-check + rasoat-chongcheo — TỰ đọc nguyên văn base VBHN (auto-footnote, `_resolve_base_gdoc`, tắt --no-auto-footnote) → 2 lệnh nêu footnote_amendments thay vì rỗng; #11 cờ OMNIBUS_CROSS_DOMAIN (`_omnibus_cross_domain_note`): luật sửa có tên khác lĩnh vực base (84/2025 Thanh tra sửa BHXH = sửa-nhiều-luật) → cảnh báo đọc nguyên văn, KHÔNG hiểu nhầm lỗi tên. +test omnibus_cross_domain_flag. 1.22.54: ★ GỐC RỄ tên VBHN VIẾT TẮT — `_expand_abbrev`/`_ABBREV_MAP` (BHXH≡bảo hiểm xã hội, BHYT/BHTN/BLHS/BLLĐ…) nối vào `_token_set`+`_disc_conflict` → source-map/relation-check/reg-query/locate khớp đúng VBHN_19…BHXH (trước nhặt nhầm bản gốc 41/2024 viết-đầy-đủ đã quarantine). #3 extract: phân biệt CẮT-CỤT (export cap ~200k) vs sai cấu trúc → chỉ `tl cache-build --gdoc-id` lấy toàn văn. #10 locate: cờ LOW_CONFIDENCE/NO_EXACT_SOHIEU khi truy vấn số hiệu chỉ khớp-mờ-tên (vd 142/2025→VBHN_74 Đấu thầu). 1.22.53: log rà BHXH — A3 relation-check `_vbhn_candidates` KHÔNG nhận VBHN trùng-NĂM khác lĩnh vực (year-một-mình cần subject≥30; +disc_conflict) → hết VBHN_43 Xuất bản lọt vào BHXH; A4 `_cluster_for_base` reverse-map qua THÀNH VIÊN cụm (số hiệu VBHN 19/VBHN-VPQH → cụm, trước trả ∅); B1 rasoat alias --sohieu→--so-hieu (worksheet) / --file→--in (phuluc); B2 `tl cache-build <sh>` wrapper ingest_to_cache.py (sinh docs/<sh>--consolidated.json); B3 ingest_to_cache.py tự nạp webappUrl/token từ config/env. 1.22.52: TRA-THEO-TÊN âm-tính-giả (log Cowork #2/#3) — `_name_subset_match` token-subset (bỏ doctype/sốhiệu) cho source-map/locate/reg-query: 'Luật Bảo hiểm xã hội' KHỚP 'VBHN_19-VPQH_Bao_hiem_xa_hoi' (substring liền thất bại vì luat/vbhn/19 chèn giữa); reg-query --name trước CHỈ substring CÓ DẤU → 0 kết quả, nay khử dấu+token-subset. `_disc_conflict` chuẩn hoá underscore (BHXH↔BHYT đúng cả tên file). `_nlm_display` status-aware (locate hết báo nlm=Y khi removed → khớp reg-query). +test name_subset_match_vbhn/source_map_name_finds_vbhn_not_quarantine. 1.22.51: (A) ENV THỐNG NHẤT Chat=Cowork=Code — gỡ doctrine "chat hạn chế": nlm CLI BẮT BUỘC mọi env, gws-bootstrap BỎ QUA tải binary nếu gws đã có (--force ép), Chat dùng uv+python≥3.11 sẵn (không tải Drive). (B) footnote-map nhận "Cụm từ '…' được BỎ/THAY THẾ theo…" (84/2025 hết vô hình, +test footnote_remove_phrase_amendment); subject-score LOẠI TRỪ CHÉO BHXH↔BHYT↔BHTN (chung "bảo hiểm" ≠ cùng chủ đề, +test subject_bhxh_not_bhyt). 1.22.50: vá log Chat — B1/B2 `gws-auth-load`/`nlm-auth-load` + `init-config --from-public` tự bật gws từ cred PUBLIC (public-curl, KHÔNG cần master key); B3 gom log [FALLBACK→GAS] 1 lần/phiên (hết spam mỗi read); relation-check LỌC ứng viên chỉ-trùng-chủ-đề khỏi amendment_candidates (giảm dương-tính-giả 108/2026); B5 xref OUTDATED nêu RÕ số hiệu VBHN thay thế + SOHIEU_MISMATCH→VBHN ghi "đúng, trỏ bản mới". (B4 phantom-217 đã có test footnote_citation_not_amendment.) 1.22.49: SKILL.md §1 BƯỚC 0 — Cowork dùng KHỐI INLINE (curl zip public + unzip + chạy tl_fetch.sh SẠCH TRONG ZIP) vì mount cắt cụt CẢ scripts/tl_fetch.sh → `sh scripts/tl_fetch.sh` đường-mount hỏng. CẤM inspect/confirm truncation/dig-recovery (đã biết mount cắt). 1.22.48: GHI RÕ gws Cowork = BINARY MUSL-STATIC (đã verify static-pie, không GLIBC dep → chạy glibc 2.35) qua `gws-bootstrap-cowork` public-curl; CẤM `npm i -g @googleworkspace/cli` (bản GNU cần GLIBC 2.39, Cowork glibc 2.35 → không chạy). SKILL.md + help string. 1.22.47: nlm-install HẾT STALL ASTRAL — `uv tool install --python 3.11` chạy với UV_PYTHON_DOWNLOADS=never (cấm tải python từ astral/GitHub CDN bị Cowork chặn): system có 3.11→dùng ngay, chỉ 3.10→FAIL TỨC THÌ→rơi Python public-curl Drive; bỏ `uv python install 3.11` thừa. 1.22.46: BOOTSTRAP TỐC ĐỘ — `_fast_drive_fetch` ưu tiên PUBLIC-CURL (drive.usercontent) → direct-media → GAS, có ĐO THỜI GIAN ([fetch] log); PY311 + gws binary tải public-curl (hết kẹt GAS 31MB); tl_fetch.sh cài uv TRƯỚC (pip PyPI, astral chặn) rồi gws/nlm; rút timeout astral uv-python 420→90s (fail nhanh → Drive-public). 1.22.45: SKILL.md §1 BƯỚC 0 — Cowork ƯU TIÊN `sh tl_fetch.sh --setup` LÀM LỆNH ĐẦU TIÊN (tải bản sạch, KHÔNG đụng mount/_parts); CẤM chạy tl_boot/verify-integrity/build_parts/_parts TRƯỚC khi tl_fetch lỗi; tách rõ đường LOCAL A1–A3. 1.22.44: PACKAGE PUBLIC BOOTSTRAP — config v2 + creds (gws/nlm/secrets/binary/py311) ở Drive/Package (anyone-with-link). `init-config --from-public` + tl_fetch.sh curl CONFIG(apps script)+gws cred TRƯỚC (KHÔNG cần Drive MCP); uv-first cho nlm; Cowork tải zip skill; tl_boot loud-fail exit≠0 khi cắt cụt (B2); tl_rebuild.sh OUT mặc định $HOME (B4). 1.22.43: `tl drive-push <zip> [--file-id]` — cập nhật NỘI DUNG file Drive GIỮ fileId (gws update_content) → đẩy bản ship mới mỗi lần mà KHÔNG đổi fileId; SKILL_FILEID baked. 1.22.42: BUNDLE skill+gws — `gws-bootstrap-cowork --local-tgz` (dùng gws.tgz từ bundle, khỏi tải Drive; md5 vẫn verify); tl_fetch.sh tự dò assets/gws.tgz. Cắt 1 download. 1.22.41: `nlm-install --uv` (egress mở → uv tự lo Python 3.11, python hệ thống nếu ≥3.11, KHÔNG tải 31MB Drive; fallback Drive); `tl_fetch.sh --setup --nlm` dùng --uv → bootstrap đủ GAS+direct-media+gws+nlm+boot 1 lệnh. (v1.23.0 spec rasoat-loop/overlap: roadmap riêng.) 1.22.40: bake NLM_CRED_FILEID (đã stage+verify) → `--setup --nlm` có nlm headless ngay. 1.22.39: nlm HEADLESS — `nlm-auth-stage` (Code, sau `nlm login`: cookie nlm → mã hoá khoá=webapp-token → Drive) + `nlm-auth-load` (Cowork: tải+giải mã bằng token → ~/.notebooklm-mcp-cli, KHÔNG cần master key); `--setup --nlm` tự nlm-auth-load (mirror gws-auth-stage/load). 1.22.38: tl_fetch.sh ROUTE TỐI ƯU (curl public, $HOME, --setup) + gws TRƯỚC nlm. 1.22.37: tl_fetch.sh webapp GAS. 1.22.36: tl_fetch.sh bỏ qua mount. 1.22.35: tl_rebuild.sh + MANIFEST.sha256 + tl_boot verify sha. 1.22.34: dọn references/ 63→24 file. 1.22.33: _parts ≤200 file. 1.22.32: verify-integrity + COWORK_EDIT_SAFETY. 1.22.32: `tl verify-integrity` + COWORK_EDIT_SAFETY (write-side fallback); 1.22.31: truncation-resilience (FORCE _parts; _healed_script_path; --rebuild) + doctor nlm/gws + reg-query khóa NLM; 1.22.27: #4/#3/#6/#9; 1.22.26: #1 relation-check footnote-gate
 # GĐ0 (tích hợp gws): PIN bản gws — KHÔNG `latest` (gws pre-v1.0 hay breaking). Nguồn-chân-lý
 # duy nhất cho boot-check `tl gws-ping` và (GĐ1) gws_bridge.is_available(). Bump có chủ đích.
-VERSION = "1.34.2"              # 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
+VERSION = "1.34.3"              # 1.34.3: I1 — tách cụm hygiene_report sang tl_core/hygiene.py (29 def ~2.0k dòng NGUYÊN VĂN AST-cut: sweep/dedup-plan/missing-sohieu/vbhn-year-fix/ops-plan/corpus-audit/review-queue/backfill-loai+titlevn+hieuluc/hygiene/quarantine-fix/corpus-fix/consolidation-cleanup/cat-audit/registry-doctor + helper riêng-cụm); tl.py 19052→17097 dòng; tl giữ STUB ủy quyền mọi tên đã chuyển. ★ bind() hygiene KHÁC sibling: REBASE __globals__ từng hàm về namespace SỐNG của tl (monkeypatch selftest ăn ngay, helper không stale — copy-snapshot làm r54 gãy vì patch trên tl không thấm module). Characterization TRƯỚC cut: 6 golden hygiene_* trên FIXTURE MANIFEST (env per-case TL_CACHE_DIR — _run_tl_json +env_extra) KHỚP NGUYÊN TRẠNG sau cut; +bắt 1 bug thật: sweep phơi snapshot_age_s lọt deterministic mask (+snapshot_age_s/age_s/age_seconds vào VOLATILE_JSON_KEYS). Self-heal phủ module mới (canary/tl_boot preload/py_compile/REQUIRED/r36). +r70 parity (wired + no-dual-definition) → 662/662. // 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
 GWS_PINNED_VERSION = "0.22.5"   # @googleworkspace/cli; npm i -g @googleworkspace/cli@0.22.5
 # Bootstrap gws cho Cowork (sandbox chặn github + no root): binary MUSL STATIC (chạy mọi glibc, kể cả
 # Ubuntu 22.04/glibc 2.35 — bản gnu cần GLIBC_2.39 nên KHÔNG chạy). Stage sẵn trên Drive _HOP_NAP.
@@ -1539,7 +1539,8 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
             "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
             "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
             "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-            "tl_core/command_registry.py"]   # Pha D v1.33.57 + Pha E v1.33.58
+            "tl_core/command_registry.py",   # Pha D v1.33.57 + Pha E v1.33.58
+            "tl_core/hygiene.py"]   # I1 v1.34.3
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []
@@ -4096,14 +4097,6 @@ _VBHN_NOYEAR_RE = re.compile(r"^(\d{1,5})-VBHN-([A-Z0-9D]+)$")            # NN-V
 _VBHN_WITHYEAR_RE = re.compile(r"^(\d{1,5})-(19\d{2}|20\d{2})-VBHN-([A-Z0-9D]+)$")
 
 
-def _vbhn_year_complete(e: dict) -> bool:
-    """B4 (v1.33.0): năm đã XÁC ĐỊNH ĐẦY ĐỦ — sohieu-key dạng NN-YYYY-VBHN-XXX VÀ năm đó có mặt trong TÊN.
-    Số VBHN tái dùng THEO NĂM ⇒ năm đủ ở cả hai nơi = hết rủi ro tái-dùng-số cho entry đó (chủ đề trơ nếu có
-    là vấn đề NAME hygiene riêng, không phải reuse)."""
-    m = _VBHN_WITHYEAR_RE.fullmatch(_sohieu_key_entry(e) or "")
-    return bool(m and re.search(rf"(?<!\d){m.group(2)}(?!\d)", _entry_name(e) or ""))
-
-
 def _vbhn_sohieu_inject_year(sohieu_key: str, year) -> str | None:
     """`61-VBHN-VPQH` + 2025 → `61-2025-VBHN-VPQH`. None nếu sohieu KHÔNG phải VBHN-thiếu-năm hoặc year rỗng/sai."""
     m = _VBHN_NOYEAR_RE.fullmatch(norm_sohieu(sohieu_key or ""))
@@ -4129,67 +4122,6 @@ def _name_inject_vbhn_year(name: str, number: str, year, agency: str) -> str:
     # dạng NGẮN 'NN-VPQH' (không có 'VBHN' giữa) → chuẩn hoá thẳng về NN-YYYY-VBHN-XXX
     pat2 = re.compile(rf"(?<!\d){re.escape(str(number))}([/_-]){re.escape(str(agency))}(?![A-Za-z0-9])")
     return pat2.sub(rf"{number}\g<1>{year}\g<1>VBHN\g<1>{agency}", name)
-
-
-def _vbhn_year_fix_items(entries: list) -> tuple[list, list, list]:
-    """Quét entry VBHN có SỐ HIỆU THIẾU NĂM. Trả (fixable, needs_year, conflicts):
-    - fixable: suy được năm + sohieu mới DUY NHẤT → an toàn ghi.
-    - needs_year: KHÔNG suy được năm offline → xác minh tay (đọc header/NLM).
-    - conflicts: ≥2 dòng suy ra CÙNG sohieu mới (`NN-YYYY-VBHN-XXX`) → ghi sẽ TẠO collision MỚI (dòng dup cùng
-      văn bản = phải dedup; hoặc 2 văn bản khác cùng số+năm = năm không đủ phân biệt) → KHÔNG auto-apply."""
-    cand, needs = [], []
-    seen = set()
-    for e in entries:
-        if not _is_vbhn_entry(e):
-            continue
-        # CHỈ sửa số hiệu của văn bản CORPUS (canonical). Sidecar/quarantine (corpus=false) KHÔNG year-fix —
-        # vừa không cần, vừa tránh CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số).
-        if str(e.get("corpus")).lower() != "true":
-            continue
-        key = norm_sohieu(_entry_sohieu(e) or "")
-        m = _VBHN_NOYEAR_RE.fullmatch(key)
-        if not m:
-            # B.5-residual (v1.33.21 — log rà v1.33.20: 15/17 title_mismatch là VBHN, 11 ca
-            # VBHN_NAME_MISSING_YEAR có sohieu ĐÃ year-fix nhưng TÊN FILE còn thiếu năm
-            # ['VBHN_34-VPQH_Luat_Luu_tru', '61-VBHN-VPQH_ATTP'] — KHÔNG fixer nào phủ lớp name-only →
-            # backlog treo vĩnh viễn, phải rename tay ×11): lane NAME-ONLY — sohieu chuẩn NN-YYYY-VBHN-XXX
-            # + tên thiếu năm-ban-hành → đề xuất đổi TÊN (mode='name_only', CHỈ ghi khi --with-name;
-            # sohieu giữ nguyên nên không thể tạo collision số hiệu).
-            m2 = _VBHN_WITHYEAR_RE.fullmatch(key)
-            if m2:
-                did2 = _entry_drive_id(e)
-                nm2 = _entry_name(e)
-                if did2 and did2 not in seen and str(m2.group(2)) not in (nm2 or ""):
-                    _new_nm = _name_inject_vbhn_year(nm2, m2.group(1), int(m2.group(2)), m2.group(3))
-                    if _new_nm and _new_nm != nm2:
-                        seen.add(did2)
-                        cand.append({"drive_id": did2, "old_sohieu": key, "new_sohieu": key,
-                                     "year": int(m2.group(2)), "name": nm2, "new_name": _new_nm,
-                                     "mode": "name_only"})
-            continue                                  # sohieu đã có năm / không phải dạng VBHN chuẩn → bỏ
-        did = _entry_drive_id(e)
-        if not did or did in seen:
-            continue
-        seen.add(did)
-        number, agency = m.group(1), m.group(2)
-        yr = _entry_issue_year(e)
-        nm = _entry_name(e)
-        if yr:
-            cand.append({"drive_id": did, "old_sohieu": key, "new_sohieu": _vbhn_sohieu_inject_year(key, yr),
-                         "year": yr, "name": nm, "new_name": _name_inject_vbhn_year(nm, number, yr, agency)})
-        else:
-            needs.append({"drive_id": did, "sohieu": key, "name": nm})
-    # safeguard: new_sohieu trùng nhau giữa ≥2 dòng → conflicts (ghi sẽ tạo collision mới)
-    by_new: dict = {}
-    for c in cand:
-        by_new.setdefault(c["new_sohieu"], []).append(c)
-    fixable, conflicts = [], []
-    for new_sh, group in by_new.items():
-        if len(group) == 1:
-            fixable.append(group[0])
-        else:
-            conflicts.extend(group)
-    return fixable, needs, conflicts
 
 
 _STOP_TOKENS = {
@@ -4697,56 +4629,6 @@ def _is_treaty_entry(e: dict) -> bool:
     return bool(re.match(r"^(cu[_\-]|cong[_ ]?uoc|dieu[_ ]?uoc|hiep[_ ]?dinh|cong[_ ]?ham|duqt[_\-]"
                          r"|cptpp|evfta|rcep|ukvfta|ilo[_\-]|unesco[_\-])", n)
                 or lo in ("cong uoc", "dieu uoc", "dieu uoc quoc te", "hiep dinh"))
-
-
-def _quarantine_fix_items(entries: list) -> dict:
-    """PURE (test offline): phân loại dòng quarantine MÂU THUẪN để dọn TẤT ĐỊNH (nhóm B report rà corpus):
-    - set_corpus_false: corpus=true NHƯNG file THÔ (.pdf/.docx/.doc — _entry_raw_no_gdoc) = dup định dạng gán nhầm
-      corpus → set corpus=false AN TOÀN (canonical GDoc nằm chỗ khác).
-    - review_restore: corpus=true NHƯNG là GDoc native → CÓ THỂ là canonical sống bị kẹt quarantine (như A1/BLLĐ) →
-      KHÔNG auto, người dùng quyết khôi phục (recat ra chủ đề) hay set false.
-    - normalize_label: nhãn quarantine biến thể (cat != QUARANTINE_CAT) → chuẩn hoá cat=QUARANTINE_CAT.
-    - clear_stale_nlm_ref (B3/B9 v1.33.22 — MERGE bundle-21): quarantine còn nlm_source_id nhưng KHÔNG live
-      (status removed*/deleted — _entry_on_nlm_live=False) → chỉ là REF TREO trong registry, clear an toàn
-      (log rà 67: 4 ca stale_nlm_ref đều đã removed khỏi NLM, trước phải reg_clear tay từng dòng).
-    - ghost_nlm: quarantine nhưng còn nguồn NLM LIVE → cần `nlm source delete` (verify nội dung trước, KHÔNG auto)."""
-    out = {"set_corpus_false": [], "review_restore": [], "normalize_label": [], "clear_stale_nlm_ref": [], "ghost_nlm": []}
-    for e in entries:
-        if not _is_quarantine_cat(_entry_cat(e)):
-            continue
-        did = _entry_drive_id(e)
-        if not did:
-            continue
-        row = {"drive_id": did, "sohieu": _entry_sohieu(e) or "", "name": _entry_name(e)[:60],
-               "nlm_source_id": e.get("nlm_source_id") or "",
-               "nlm_notebook_id": str(e.get("nlm_notebook_id") or "")}
-        if str(e.get("corpus")).lower() == "true":
-            (out["review_restore"] if _entry_google_doc(e) else out["set_corpus_false"]).append(row)
-        if _is_quarantine_label_variant(_entry_cat(e)):
-            out["normalize_label"].append(row)
-        if _entry_on_nlm_live(e):
-            out["ghost_nlm"].append(row)
-        elif _entry_nlm(e):
-            out["clear_stale_nlm_ref"].append(row)
-    return out
-
-
-def _quarantine_clear_stale(run_id: str, g, rows: list[dict]) -> tuple[int, list[dict]]:
-    """B3/B9 (v1.33.22 — MERGE bundle-21 SỬA PRIMITIVE): clear ref NLM treo trên dòng quarantine. Bundle-21
-    dùng `_journaled_reg_write` (reg_bulk) ghi giá trị RỖNG — VI PHẠM BẤT BIẾN 'ghi rỗng qua reg_bulk/upsert
-    bị webapp BỎ QUA im lặng' → báo cleared nhưng KHÔNG clear gì (false-success). Đường đúng duy nhất:
-    `_journaled_reg_clear` (action reg_clear keyed drive_id + confirm=yes server-side), từng dòng, kèm before
-    để `tl undo` khôi phục được."""
-    ok_n, fail = 0, []
-    for r in rows or []:
-        v = _journaled_reg_clear(run_id, g, r["drive_id"], "nlm_source_id,nlm_notebook_id",
-                                 before={"nlm_source_id": r.get("nlm_source_id") or "",
-                                         "nlm_notebook_id": r.get("nlm_notebook_id") or ""})
-        if v.get("verified"):
-            ok_n += 1
-        else:
-            fail.append({"drive_id": r["drive_id"], "error": v.get("error") or v.get("resp")})
-    return ok_n, fail
 
 
 def _entry_quarantined(e: dict) -> bool:
@@ -5511,121 +5393,6 @@ def _sohieu_dup_group_real(group: list[dict]) -> bool:
     return n_vbhn >= 2 or (len(core) - n_vbhn) >= 2
 
 
-def _hygiene_groups(entries: list[dict]) -> dict:
-    own_entries = [e for e in entries if _entry_row_kind(e) != "ref"]
-    hygiene_entries = [e for e in own_entries if not _entry_is_own_thuong(e)]
-    by_so, by_name, by_md5 = {}, {}, {}
-    for e in own_entries:
-        so = _sohieu_key_entry(e)
-        nk = _name_key(_entry_name(e))
-        md5 = e.get("md5") or e.get("md5Checksum") or ""
-        if so: by_so.setdefault(so, []).append(e)
-        if nk: by_name.setdefault(nk, []).append(e)
-        if md5: by_md5.setdefault(md5, []).append(e)
-    dup_so = {k:v for k,v in by_so.items() if len(v) > 1}
-    dup_name = {k:v for k,v in by_name.items() if len(v) > 1}
-    dup_md5 = {k:v for k,v in by_md5.items() if len(v) > 1}
-    # C4 (v1.33.0): trùng số hiệu THẬT (≥2 corpus=true cùng phía, loại gốc+VBHN/phụ-lục/sidecar/quarantine) —
-    # headline dùng số này; dup_so giữ nguyên làm số RAW tham khảo (dedup-plan/rà tay vẫn thấy đủ cụm).
-    dup_so_real = {k: v for k, v in dup_so.items() if _sohieu_dup_group_real(v)}
-    # P2-4 (v1.33.12 — log: sau dedup set corpus=false, counter raw KHÔNG đổi → tưởng 'dedup không chạy'):
-    # biến thể ACTIVE = cụm còn ≥2 dòng corpus=true — GIẢM theo tiến độ dedup; raw đếm mọi dòng (theo thiết kế).
-    def _grp_active(v):
-        return sum(1 for e in v if str(e.get("corpus")).lower() == "true") >= 2
-    dup_name_active = {k: v for k, v in dup_name.items() if _grp_active(v)}
-    dup_so_raw_active = {k: v for k, v in dup_so.items() if _grp_active(v)}
-    title_mismatch = []
-    orphans = []
-    treaties = []
-    party_docs = []                # B.7 v1.33.19: văn kiện Đảng (cat 00/VK_) — không số hiệu là HỢP LỆ
-    vbhn_metadata_advisory = []    # B.5-residual v1.33.22 (MERGE bundle-21): VBHN metadata — advisory, KHÔNG phải lệch tên
-    omnibus_title_advisory = []    # S-2 v1.33.31: OMNIBUS_NARROW một mình = advisory trên entry, KHÔNG phải lệch tên
-    sidecars = []
-    ghost_nlm = []
-    vbhn_reuse: dict[str, list[dict]] = {}
-    for e in hygiene_entries:
-        flags = _title_flags(e)
-        # B.5-residual (v1.33.22 — MERGE bundle-21, log verify v1.33.20: headline 17 title_mismatch mà 15 là
-        # VBHN hợp lệ theo quy ước [thiếu năm ở TÊN — việc của vbhn-year-fix --with-name, KHÔNG phải
-        # source-rename/recat]): headline `title_mismatch` CHỈ còn lệch tên/tiêu đề HÀNH ĐỘNG ĐƯỢC
-        # (OMNIBUS_NARROW/TITLE_METADATA); cờ VBHN metadata → bucket advisory riêng; drift NLM
-        # (NLM_STATUS_MISMATCH/NOTEBOOK_ID_MISSING/CORPUS_TRUE_NOT_ON_NLM) đã có nhóm `nlm_drift` — hết đếm kép.
-        # S-2 (v1.33.31 — log rà v1.33.28: 45-2019 BLLĐ đếm KÉP — cờ OMNIBUS_NARROW đã hiện ở bảng flags
-        # từng entry [source-map/review-queue/corpus-audit] RỒI lại vào title_mismatch của sweep → người rà
-        # tưởng 2 vấn đề; 'không sai dữ liệu' — tên hẹp vs BỊ luật sửa-nhiều-luật đụng tới, không có action
-        # rename): headline title_mismatch CHỈ giữ TITLE_METADATA_MISMATCH (lệch hành-động-được);
-        # OMNIBUS_NARROW một mình → bucket advisory riêng (mirror advisory-split v1.33.22 cho VBHN_*).
-        if "TITLE_METADATA_MISMATCH" in flags:
-            title_mismatch.append(e)
-        elif "OMNIBUS_NARROW_TITLE_CHECK" in flags:
-            omnibus_title_advisory.append(e)
-        elif _is_vbhn_entry(e) and any(f.startswith("VBHN_") for f in flags):
-            vbhn_metadata_advisory.append(e)
-        if "NLM_GHOST_SOURCE" in flags:
-            ghost_nlm.append(e)
-        cat = _entry_cat(e).lower()
-        nm = _entry_name(e)
-        is_template = _name_is_template_or_appendix(nm)
-        raw_name = (not is_template) and bool(re.search(r"(^|[/_ -])\d{2,4}[_-]\d{4}[_-]", nm))
-        if _is_source_sidecar(e, entries):   # sidecar (file gốc của GDoc) → bucket riêng, KHÔNG tính là document
-            sidecars.append(e)               # độc lập trong phân tích va chạm số hiệu (tránh false reuse/same-doc).
-            continue
-        if _is_vbhn_entry(e):
-            vk = _sohieu_key_entry(e)
-            if vk:
-                vbhn_reuse.setdefault(vk, []).append(e)
-        if (not is_template) and ((not _entry_sohieu(e)) or (not cat) or ("root" in cat) or (raw_name and not _entry_nlm(e))):
-            # P1-8 (v1.31.0 — log LIVE: orphans=46 gộp cả Công ước ILO): điều ước quốc tế sohieu RỖNG là HỢP LỆ
-            # → LỚP RIÊNG `treaties` (không đòi sohieu/tên Luat_*), KHÔNG tính orphan.
-            # B.7 (v1.33.19 — log rà v1.33.18: orphans=16 gộp cả VK_DH_XIV_* văn kiện Đảng): văn kiện Đảng
-            # (cat 00 / tên VK_/Van_kien) cũng KHÔNG có số hiệu VBQPPL → lớp riêng `party_docs`, không orphan.
-            _nm_low = _strip_accents(nm).lower()
-            if _is_treaty_entry(e):
-                treaties.append(e)
-            elif cat.startswith("00") or re.match(r"^(vk[_\-]|van[_ ]?kien)", _nm_low):
-                party_docs.append(e)
-            else:
-                orphans.append(e)
-    reuse_collisions = []
-    same_document_dups = []        # #4: CÙNG số hiệu, KHÔNG xung đột năm/goc = nhân đôi 1 văn bản → quarantine dup
-    for k, arr in vbhn_reuse.items():
-        if len(arr) <= 1:
-            continue
-        docs = _split_distinct_vbhn_docs(arr)         # tách theo XUNG ĐỘT năm/goc (reuse-thật vs nhân-đôi)
-        if len(docs) > 1:          # ≥2 văn bản KHÁC nhau dùng chung số → reuse-khác-doc (GIỮ, không quarantine)
-            reuse_collisions.append({"key": k, "subjects": sorted(_doc_subject_key(g[0]) for g in docs), "entries": arr})
-        for grp in docs:
-            if len(grp) > 1:        # ≥2 entry CÙNG văn bản → trùng THẬT: chọn canonical (NLM/điểm cao), còn lại = dup
-                canon = max(grp, key=_entry_score)
-                same_document_dups.append({"key": k, "subject": _doc_subject_key(canon), "canonical": canon,
-                                           "dups": [e for e in grp if e is not canon], "entries": grp})
-    # G (log rà 71 luật): FILE THÔ (.doc/.docx) cạnh GDoc canonical mà LẪN corpus=true → phải set corpus=false
-    # (sidecar = bản gốc bên cạnh GDoc, KHÔNG add NLM, KHÔNG tính là corpus). Bắt cặp .docx BHYT/.doc Phòng bệnh…
-    # (57/60/67-2024, 91-2015/2025) đang corpus=true lẫn vào corpus. KHÁC quarantine: chỉ cần FLIP cờ corpus.
-    sidecar_corpus_fix = [e for e in sidecars if _entry_corpus_true(e)]
-    # P2-7: `loai` có giá trị nhưng KHÁC enum chuẩn (Luat/VBHN/nd…) → đề xuất chuẩn hoá (bucket riêng, không nhồi
-    # _title_flags để tránh nhiễu source-map). Đếm để rà tay/regen2; register mới đã tự chuẩn hoá.
-    loai_noncanonical = [e for e in hygiene_entries if _loai_is_noncanonical(e)]
-    reconcile_clusters = _reconcile_clusters(hygiene_entries)
-    duplicate_identity_groups = [c for c in reconcile_clusters if len(c.get("entries") or []) > 1]
-    return {"duplicates_by_sohieu": dup_so, "duplicates_by_sohieu_real": dup_so_real,
-            "duplicates_by_sohieu_raw_active": dup_so_raw_active,
-            "duplicates_by_name_active": dup_name_active,
-            "duplicates_by_name": dup_name,
-            "duplicates_by_md5": dup_md5, "orphans": orphans, "treaties": treaties,
-            "party_docs": party_docs,
-            "vbhn_metadata_advisory": vbhn_metadata_advisory,
-            "omnibus_title_advisory": omnibus_title_advisory,
-            "sidecar_source_files": sidecars, "sidecar_corpus_fix": sidecar_corpus_fix,
-            "loai_noncanonical": loai_noncanonical,
-            "ghost_nlm_sources": ghost_nlm,
-            "vbhn_reuse_collisions": reuse_collisions,
-            "vbhn_same_document_dups": same_document_dups,
-            "duplicate_identity_groups": duplicate_identity_groups,
-            "title_mismatch": title_mismatch,
-            "reconcile_clusters": reconcile_clusters}
-
-
 def _summ_entry(e: dict|None) -> dict|None:
     if not e:
         return None
@@ -5738,112 +5505,6 @@ def _apply_quarantine(entries: list[dict], to_cat: str = "QUARANTINE") -> list[d
         if did:
             results.append({"drive_id": did, "name": _entry_name(e), "to_cat": dest, "move": g.get("move", fileId=did, cat=dest)})
     return results
-
-
-def cmd_hygiene(a) -> int:
-    """Registry hygiene: phát hiện duplicate/orphan kể cả dòng `sohieu` rỗng; lập kế hoạch QUARANTINE an toàn."""
-    # v1.19.4: always apply profile before choosing cache. Otherwise
-    # `--profile vbthuong hygiene scan` can still read the base VBQPPL cache.
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    # DRY-RUN/invalid-confirm phải đọc được cache offline; chỉ cần creds khi refresh, cache thiếu,
-    # hoặc apply đã xác nhận thật.
-    need_apply_creds = bool(getattr(a, "apply", False) and getattr(a, "confirm", None) == "yes")
-    if a.refresh or need_apply_creds or not (_cache_file("manifest.json")).exists():
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=a.refresh)
-    except Exception as e:
-        print(f"[tl] hygiene: không đọc được manifest: {e}", file=sys.stderr)
-        return 1
-    groups = _hygiene_groups(entries)
-    clusters = groups["reconcile_clusters"]
-    if a.hsub == "scan":
-        out = {"ok": True, "entries": len(entries),
-               # C4 v1.33.0: headline = trùng THẬT (cùng phía, corpus=true); raw = mọi cụm ≥2 (gồm gốc+VBHN/
-               # phụ-lục/quarantine lành) — trước đây 2 khóa cùng in raw → '93 trùng' báo động giả.
-               "duplicates_by_sohieu": len(groups["duplicates_by_sohieu_real"]),
-               "duplicate_sohieu_groups_raw": len(groups["duplicates_by_sohieu"]),
-               "duplicate_identity_groups": len(groups["duplicate_identity_groups"]),
-               "duplicates_by_name": len(groups["duplicates_by_name"]),
-               "duplicates_by_md5": len(groups["duplicates_by_md5"]),
-               "orphans": len(groups["orphans"]),
-               "sidecar_source_files": len(groups["sidecar_source_files"]),
-               "sidecar_corpus_fix": len(groups["sidecar_corpus_fix"]),
-               "loai_noncanonical": len(groups["loai_noncanonical"]),
-               "ghost_nlm_sources": len(groups["ghost_nlm_sources"]),
-               "vbhn_reuse_collisions": len(groups["vbhn_reuse_collisions"]),
-               "vbhn_same_document_dups": len(groups["vbhn_same_document_dups"]),
-               "title_mismatch_candidates": len(groups["title_mismatch"]),
-               "vbhn_metadata_advisory": len(groups.get("vbhn_metadata_advisory") or []),
-               "omnibus_title_advisory": len(groups.get("omnibus_title_advisory") or []),
-               "reconcile_clusters": len(clusters),
-               "quarantine_candidates": sum(len(c["quarantine"]) for c in clusters),
-               "quarantine_label_variants": sum(1 for e in entries if _is_quarantine_label_variant(_entry_cat(e))),
-               # TRẠNG THÁI MÂU THUẪN: dòng trong cat quarantine NHƯNG corpus=true (lẽ ra false) hoặc còn nlm live (ghost).
-               "quarantine_corpus_true": sum(1 for e in entries if _is_quarantine_cat(_entry_cat(e)) and str(e.get("corpus")).lower() == "true"),
-               "quarantine_still_on_nlm": sum(1 for e in entries if _is_quarantine_cat(_entry_cat(e)) and _entry_nlm(e)),
-               "samples": {"clusters": [{"key": c["key"], "canonical": _summ_entry(c.get("canonical")),
-                                            "quarantine": [_summ_entry(x) for x in c["quarantine"][:5]]}
-                                           for c in clusters[:10]],
-                           "duplicates_by_md5": {k:[_summ_entry(x) for x in v[:5]] for k,v in list(groups["duplicates_by_md5"].items())[:10]},
-                           "duplicate_identity_groups": [{"key": c.get("key"), "canonical": _summ_entry(c.get("canonical")),
-                                                          "entries": [_summ_entry(x) for x in (c.get("entries") or [])[:5]]}
-                                                         for c in groups["duplicate_identity_groups"][:10]],
-                           "title_mismatch": [_summ_entry(x) for x in groups["title_mismatch"][:20]],
-                           "vbhn_metadata_advisory": [_summ_entry(x) for x in (groups.get("vbhn_metadata_advisory") or [])[:20]],
-                           "ghost_nlm_sources": [_summ_entry(x) for x in groups["ghost_nlm_sources"][:20]],
-                           "vbhn_reuse_collisions": [{"key": c["key"], "subjects": c["subjects"], "entries": [_summ_entry(x) for x in c["entries"][:8]]} for c in groups["vbhn_reuse_collisions"][:20]],
-                           "vbhn_same_document_dups": [{"key": c["key"], "subject": c["subject"], "canonical": _summ_entry(c["canonical"]), "dups": [_summ_entry(x) for x in c["dups"][:5]]} for c in groups["vbhn_same_document_dups"][:20]],
-                           "sidecar_source_files": [_summ_entry(x) for x in groups["sidecar_source_files"][:20]],
-                           "sidecar_corpus_fix": [_summ_entry(x) for x in groups["sidecar_corpus_fix"][:20]],
-                           "loai_noncanonical": [(_summ_entry(x) or {}) | {"loai_raw": str(x.get("loai") or ""), "loai_suggested": _normalize_loai(x.get("loai"))} for x in groups["loai_noncanonical"][:20]],
-                           "orphans": [_summ_entry(x) for x in groups["orphans"][:20]]}}
-        if a.json:
-            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        else:
-            print(f"entries={out['entries']} dup_sohieu_raw={out['duplicate_sohieu_groups_raw']} dup_identity={out['duplicate_identity_groups']} dup_name={out['duplicates_by_name']} "
-                  f"dup_md5={out['duplicates_by_md5']} orphans={out['orphans']} reconcile_clusters={out['reconcile_clusters']} "
-                  f"title_mismatch={out['title_mismatch_candidates']} vbhn_advisory={out['vbhn_metadata_advisory']} "
-                  f"omnibus_advisory={out['omnibus_title_advisory']} "
-                  f"same_doc_dups={out['vbhn_same_document_dups']} quarantine_candidates={out['quarantine_candidates']}")
-            for d in groups["vbhn_same_document_dups"][:10]:   # #4: trùng CÙNG văn bản (cùng số hiệu) → cần dọn
-                print(f"  ⚠TRÙNG-CÙNG-VĂN-BẢN [{d['key']}] giữ «{_entry_name(d['canonical'])[:48]}» · dọn {len(d['dups'])}: "
-                      + "; ".join(_entry_name(x)[:36] for x in d["dups"][:4]))
-            _print_reconcile(clusters[:20])
-        return 0
-    # plan/query/reconcile
-    q = getattr(a, "query", "") or ""
-    selected, skipped = _select_hygiene_clusters(clusters, q)
-    # #4: bổ sung cụm TRÙNG-CÙNG-VĂN-BẢN (cùng số hiệu + cùng chủ đề) làm ứng viên quarantine — reconcile bỏ sót
-    for d in groups.get("vbhn_same_document_dups", []):
-        sdc = {"key": d["key"], "canonical": d["canonical"], "quarantine": d["dups"], "entries": d["entries"]}
-        if _cluster_matches(sdc, q) and not any(c.get("key") == d["key"] for c in selected):
-            selected.append(sdc)
-    quarantine = [e for c in selected for e in c.get("quarantine") or []]
-    # G: file thô .doc/.docx cạnh GDoc đang corpus=true → đề xuất SET_CORPUS_FALSE (KHÁC quarantine: chỉ flip cờ,
-    # KHÔNG move cat). Lọc theo query để khớp scope plan. DRY: chỉ trình hành động, KHÔNG tự ghi registry.
-    _sidecar_fix = [e for e in groups.get("sidecar_corpus_fix", [])
-                    if (not q) or _entry_query_match_safe_for_hygiene(q, e)]
-    out = {"ok": True, "query": q or None,
-           "clusters": [{"key": c["key"], "canonical": _summ_entry(c.get("canonical")),
-                         "quarantine_candidates": [_summ_entry(e) for e in c.get("quarantine") or []]}
-                        for c in selected],
-           "sidecar_corpus_fix": [(_summ_entry(e) or {}) | {"action": "SET_CORPUS_FALSE"} for e in _sidecar_fix],
-           "skipped_clusters": [{"key": c.get("key"), "skip_reason": c.get("skip_reason"),
-                                 "entries": [_summ_entry(e) for e in (c.get("entries") or [])[:5]]}
-                                for c in skipped],
-           "quarantine_candidates": [_summ_entry(e) for e in quarantine],
-           "note": "DRY-RUN. Dùng --apply --confirm yes để move cat=QUARANTINE; không trash. skipped_clusters=thiếu canonical, chỉ rà tay."}
-    if a.apply:
-        if a.confirm != "yes":
-            out["ok"] = False; out["error"] = "cần --confirm yes để apply"
-            print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
-        out["applied"] = _apply_quarantine(quarantine, getattr(a, "to_cat", None) or "QUARANTINE")
-    if a.json or a.hsub in ("plan", "reconcile"):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        _print_reconcile(selected)
-    return 0 if out.get("ok") else 1
 
 
 # ───────────────────────── external ingest gate + instruction binding ─────────────────────────
@@ -6794,23 +6455,6 @@ def cmd_vbhn_normalize(a) -> int:
                 print(f"- id={g['drive_id']} name={g['name'] or '∅'} sohieu={g['sohieu'] or '∅'} cat={g['cat'] or '∅'}")
     return 0
 
-def cmd_registry_doctor(a) -> int:
-    """Chạy registry_hygiene.py nếu có: báo duplicate/orphan/root/raw rows, không mutate Drive."""
-    script = HERE / "registry_hygiene.py"
-    if not script.exists():
-        print("[tl] thiếu scripts/registry_hygiene.py", file=sys.stderr)
-        return 2
-    # Nếu đã truyền --manifest local thì không cần credential/webapp.
-    if not getattr(a, "manifest", None):
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    cmd = [sys.executable, str(script)]
-    if getattr(a, "manifest", None):
-        cmd += ["--manifest", a.manifest]
-    if getattr(a, "json", False):
-        cmd += ["--json"]
-    if getattr(a, "limit", None):
-        cmd += ["--limit", str(a.limit)]
-    return subprocess.call(cmd)
 
 def _rasoat_map_positional(sub: str, rest) -> list:
     """#4: positional ĐẦU (số hiệu/file) → cờ chính của script rasoat đích (worksheet→--so-hieu, phuluc→--in),
@@ -13065,172 +12709,6 @@ def cmd_recat(a) -> int:
     return 0
 
 
-def cmd_cat_audit(a) -> int:
-    """AUDIT CẤP 2: rà mỗi doc corpus xem folder chủ đề có khớp suy luận từ TÊN (từ khóa → 45 chủ đề) không.
-    Gắn cờ khi tên gợi MẠNH một chủ đề khác folder hiện tại. Read-only (xuất lệnh recat đề xuất)."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] cat-audit: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    pd = _load_phapdien()
-    tax = _cat_taxonomy()
-    flags, tax_bad = [], []
-    for e in entries:
-        if str(e.get("corpus")).lower() != "true":
-            continue
-        ec = str(_entry_cat(e) or "")
-        fc = ec.split("_")[0] if re.match(r"\d", ec) else ""
-        nm = _entry_name(e); did = _entry_drive_id(e)
-        if fc and fc not in tax:                  # cat hiện tại NGOÀI 45+2 (G3: validate taxonomy)
-            tax_bad.append({"folder": fc, "drive_id": did, "name": nm})
-        if fc in ("", "00", "23"):                # bỏ root + Đảng + điều ước (nội dung khác lĩnh vực là bình thường)
-            continue
-        if fc == "46" and not _is_vbhn_entry(e) and _omnibus_name_evidence(e):
-            # S-3 (v1.33.15 — log rà 40: cat-audit gợi dời 57-2024 omnibus 46→34): rổ 46 = luật sửa nhiều luật
-            # (doctrine §13, PHI-pháp-điển) — heuristic đề-tài level-2 (_infer_cats/alias) là NHIỄU với omnibus.
-            # Bằng chứng omnibus lấy từ TÊN/REF (không lấy cat 46 làm bằng chứng cho chính nó — lập luận vòng).
-            continue
-        forced, rule = _cat_boundary_rule(nm)     # quy tắc ranh giới theo TÊN (tín hiệu MẠNH, ưu tiên)
-        inf = _infer_cats(nm)
-        if forced and forced != fc:
-            flags.append({"folder": fc, "suggest": [forced], "rule": rule, "confidence": "high", "drive_id": did, "name": nm})
-        elif inf and fc not in inf:
-            flags.append({"folder": fc, "suggest": inf, "rule": None,
-                          "confidence": "medium" if len(inf) == 1 else "low", "drive_id": did, "name": nm})
-        elif not forced and not inf and re.match(r"^(Luat|Bo_?luat|BL[A-Z]{2,})[_\-]", nm, re.I):
-            # N3 (v1.31.1 — cat_audit_strict phiên rà): tầng ALIAS pháp điển (giàu hơn _CAT_KEYWORDS) bắt cat
-            # SAI-có-giá-trị offline khi boundary + keyword-tên đều im — ca thật 143-2025 'Đầu tư' nằm 45 Y tế,
-            # 46-2024 'Công chứng' nằm 09. Precision-first: chỉ Luật/Bộ luật, alias ≥5 ký tự longest-match,
-            # subject = tail-pretty + title_vn (giàu thêm sau backfill-title-vn). REVIEW-tay, không auto.
-            _exp, _al = _expected_cat_from_alias(f"{_name_tail_pretty(nm)} {e.get('title_vn') or ''}")
-            if _exp and _exp != fc:
-                flags.append({"folder": fc, "suggest": [_exp], "rule": f"alias:{_al}", "confidence": "medium",
-                              "check": "CAT_LIKELY_WRONG", "drive_id": did, "name": nm})
-    flags.sort(key=lambda x: (x["confidence"] != "high", x["folder"]))
-    # v1.30.1 (#8 log): cat-audit CỐ Ý ít cờ (heuristic TÊN, precision-first) — tự khai độ phủ để không bị dùng
-    # nhầm làm audit duy nhất (log: 1 cờ/515 doc trong khi sweep thấy 77 loai + 29 title_mismatch — KHÁC CHIỀU đo).
-    _cov = ("cat-audit = heuristic TÊN level-2, precision-first (ít cờ là THIẾT KẾ, không phải corpus sạch). "
-            "Audit sâu đọc HEADER thật: `tl corpus-audit [--offset N]` (level-3, có SOHIEU/LOAI/NAME/CAT mismatch); "
-            "sức khoẻ tổng: `tl sweep`; nội dung từng file: `tl cat-verify <id>`.")
-    if getattr(a, "json", False):
-        # v1.33.7: +scanned — 0 finding với scanned lớn = precision-first thật; scanned nhỏ/0 = chưa quét gì
-        # (log rà v1.33.6 báo 'cat-audit 0 mismatch' trong khi canonical + cache flag đủ 2 ca — minh bạch để đối chiếu).
-        print(json.dumps({"ok": True, "gate": "G3", "scanned": sum(1 for e in entries if str(e.get("corpus")).lower() == "true"),
-                          "count": len(flags), "flags": flags,
-                          "taxonomy_violations": tax_bad, "coverage_note": _cov}, ensure_ascii=False, indent=2))
-    else:
-        print(f"== cat-audit: {len(flags)} doc NGHI sai chủ đề (quy tắc ranh giới + từ khóa tên) ==")
-        print(f"  ℹ {_cov}")
-        for fl in flags:
-            ten = "/".join((pd.get(c) or {}).get("ten", c) for c in fl["suggest"])
-            tag = "RULE" if fl["rule"] else fl["confidence"]
-            print(f"  [{tag:6s}] folder {fl['folder']} → {','.join(fl['suggest']):8s} | {fl['name'][:44]:44s} [{fl['drive_id'][:14]}] ({ten[:34]})")
-        if tax_bad:
-            print(f"  ⚠ {len(tax_bad)} doc cat NGOÀI 45+2: " + ", ".join(f"{t['folder']}({t['name'][:18]})" for t in tax_bad[:8]))
-        print("  (Khắc phục: tl cat-verify <drive_id> (đọc nội dung) → tl recat <drive_id> --cat <NN> [--force-cat] --apply. RULE=ranh giới cứng.)")
-    return 1 if (getattr(a, "strict", False) and (flags or tax_bad)) else 0
-
-
-def _backfill_loai_candidates(entries: list, normalize: bool = False) -> tuple[list[dict], int, list[dict]]:
-    """v1.30.1 (#4 log — PURE): ứng viên ghi cột `loai`. Mặc định: CHỈ dòng loai RỖNG (suy từ tên/sohieu — hành vi
-    cũ, idempotent). normalize=True: THÊM dòng loai PHI-CHUẨN map được TẤT ĐỊNH qua _normalize_loai (vd 'Luat'→
-    'Luật', 'nd'→'Nghị định') — trước đây sweep gợi `backfill-loai --apply` cho loai_noncanonical nhưng lệnh BỎ QUA
-    mọi dòng đã-có-loai ⇒ 77 dòng phi-chuẩn KHÔNG BAO GIỜ được sửa (gap log 2026-07-03 #4). Giá trị lạ không map
-    được → nonmappable (báo, KHÔNG đoán). Trả (sug, unsure_rỗng, nonmappable)."""
-    sug, unsure, nonmap = [], 0, []
-    for e in entries or []:
-        raw = str(e.get("loai") or "").strip()
-        if not raw:
-            loai = _infer_loai(_entry_name(e), _entry_sohieu(e))
-            if loai:
-                sug.append({"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e),
-                            "name": _entry_name(e)[:54], "loai": loai, "mode": "fill"})
-            else:
-                unsure += 1
-            continue
-        if normalize and raw not in _LOAI_CANON_VALUES:
-            fixed = _normalize_loai(raw)   # v1.33.14: nhãn KÉP 'A/B' đã tách VẾ ĐẦU ngay trong _normalize_loai
-            # P2-3b → MERGE nhánh-3 v1.33.14: tên prefix VBHN_ là bằng chứng ĐỦ MẠNH MỘT MÌNH (tên chuẩn hoá
-            # của CHÍNH TA đặt) — mọi nhãn khác 'Văn bản hợp nhất' trên dòng VBHN_ đều vô lý → conflict.
-            # Lịch sử nới dần có kiểm chứng: S3 v1.32.2 đòi 2 bằng chứng (tên+sohieu) → 2 ca THẬT lọt lưới
-            # (115 loai='Luật', 67-2025 loai='thuong' sohieu thiếu -VBHN-) → name-only; propose-only/DRY nên
-            # rủi ro nới = 0 ghi tự động.
-            if re.match(r"^VBHN[_\-]", str(_entry_name(e) or "")):
-                sug.append({"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e),
-                            "name": _entry_name(e)[:54], "loai": "Văn bản hợp nhất", "loai_raw": raw,
-                            "mode": "conflict"})
-                continue
-            if fixed in _LOAI_CANON_VALUES and fixed != raw:
-                sug.append({"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e),
-                            "name": _entry_name(e)[:54], "loai": fixed, "loai_raw": raw, "mode": "normalize"})
-            else:
-                nonmap.append({"drive_id": _entry_drive_id(e), "loai_raw": raw, "name": _entry_name(e)[:40]})
-            continue
-        if normalize and raw in _LOAI_CANON_VALUES and raw != "Văn bản hợp nhất":
-            # Nhánh enum-hợp-lệ nhưng VÔ LÝ trên dòng VBHN_ (ca 115 loai='Luật', 'Văn bản thường'…) — cùng
-            # trigger name-only v1.33.14 (thay điều kiện 2-bằng-chứng S3).
-            _nm = str(_entry_name(e) or "")
-            if re.match(r"^VBHN[_\-]", _nm):
-                sug.append({"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e),
-                            "name": _nm[:54], "loai": "Văn bản hợp nhất", "loai_raw": raw, "mode": "conflict"})
-    return sug, unsure, nonmap
-
-
-def cmd_backfill_loai(a) -> int:
-    """KH1 Pha 1.5: suy `loai` CHUẨN cho dòng registry ĐỂ TRỐNG (loai rỗng) từ tiền tố tên + mã số hiệu
-    (`_infer_loai`). ★ v1.30.1 `--normalize`: sửa CẢ dòng loai PHI-CHUẨN map tất định ('Luat'→'Luật') — đường sửa
-    77 dòng loai_noncanonical của sweep. DRY mặc định; --apply ghi reg_bulk cột loai. IDEMPOTENT; chỉ ghi khi CHẮC."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] backfill-loai: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    sug, unsure, nonmap = _backfill_loai_candidates(entries, normalize=getattr(a, "normalize", False))
-    lim = getattr(a, "limit", None) or len(sug)
-    sel = [s for s in sug[:lim] if s["drive_id"]]
-    if getattr(a, "apply", False):
-        _ok_gate, _ = _apply_gate(a, write_cols="loai")
-        if not _ok_gate:
-            return 2
-        try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (Exception, SystemExit):
-            pass
-        g = _gas()
-        run_id = _apply_journal_start("backfill-loai", {"n": len(sel)})
-        # Review v1.30.1 (CONFIRMED): kèm before{loai cũ} → `tl undo` khôi phục được (fill: rỗng; normalize: loai_raw).
-        _before = {s["drive_id"]: {"loai": s.get("loai_raw") or ""} for s in sel}
-        v = _journaled_reg_write(run_id, g, [{"drive_id": s["drive_id"], "loai": s["loai"]} for s in sel], "loai",
-                                 before_by_key=_before) if sel else {"patched": 0}
-        _invalidate_manifest_cache()
-        _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"applied": v.get("patched")}})
-        print(json.dumps({"ok": True, "applied": v.get("patched"), "suggested": len(sug), "unsure": unsure,
-                          "nonmappable": len(nonmap), "journal": run_id}, ensure_ascii=False))
-        print(f"[tl] backfill-loai: ghi {v.get('patched')}/{len(sel)}. journal={run_id}. MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
-        return 0
-    from collections import Counter
-    cnt = Counter(s["loai"] for s in sug)
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", "normalize": bool(getattr(a, "normalize", False)),
-                          "suggested_count": len(sug), "unsure": unsure,
-                          "nonmappable_count": len(nonmap), "nonmappable": nonmap[:20],
-                          "distribution": dict(cnt), "suggested": sel}, ensure_ascii=False, indent=2))
-    else:
-        print(f"== backfill-loai DRY{' +normalize' if getattr(a, 'normalize', False) else ''} · suy được {len(sug)} "
-              f"· không chắc {unsure} · phi-chuẩn-không-map-được {len(nonmap)} (--apply để ghi) ==")
-        print("  phân bố: " + ", ".join(f"{k}={v}" for k, v in cnt.most_common()))
-        for s in sel[:20]:
-            _m = "≪norm≫" if s.get("mode") == "normalize" else "      "
-            print(f"  {_m} {s['loai']:18s} {(s['sohieu'] or '(?)'):16s} {s['name']}"
-                  + (f"  (loai cũ: {s['loai_raw']})" if s.get("loai_raw") else ""))
-        for x in nonmap[:8]:
-            print(f"  ⚠ KHÔNG map được: loai='{x['loai_raw']}' — {x['name']} [{x['drive_id'][:12]}] (sửa tay qua register)")
-        if not getattr(a, "normalize", False):
-            print("  ℹ dòng loai PHI-CHUẨN (đã có giá trị nhưng sai enum) chỉ được sửa khi thêm `--normalize`.")
-    return 0
-
-
 _TITLE_BLOCK_KIND_RE = re.compile(r"^(BỘ\s*LUẬT|LUẬT|PHÁP\s*LỆNH|NGHỊ\s*QUYẾT|NGHỊ\s*ĐỊNH|THÔNG\s*TƯ)\s*$")
 _TITLE_BLOCK_STOP_RE = re.compile(r"^(Căn cứ|CĂN CỨ|CHƯƠNG|Chương|Điều|ĐIỀU|Luật này|Bộ luật này|Nghị định này|_{3,}|-{3,})", re.I)
 # v1.33.37 (MERGE bundle-14 — log rà: title_vn ca QD_671-QD-BTTTT ra 'Quyết định ﻿bộ thông tin và' lẫn BOM +
@@ -13376,352 +12854,6 @@ def _backfill_titlevn_candidates(entries: list, force: bool = False) -> list[dic
     return out
 
 
-def cmd_backfill_titlevn(a) -> int:
-    """P0-1 (v1.31.0 — log LIVE 2026-07-03): BACKFILL cột `title_vn` (TRÍCH YẾU CÓ DẤU — cột registry SẴN CÓ
-    v2.13.0, không cần đổi schema/GAS) từ HEADER thật. Sau backfill, QT-5 (_derive_subject_from_entries ưu tiên
-    _META_TITLE_KEYS) sinh query có dấu → site:vbpl/congbao recall đúng, hết literal-filename. Đọc header per-file
-    (heartbeat, --limit/--offset phân trang như corpus-audit); DRY mặc định; --apply journaled reg_bulk cột
-    title_vn (before→undo). Dòng KHÔNG tự tin (mất dấu/boilerplate) → skip LOUD, sửa tay `tl register --title-vn`."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] backfill-title-vn: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    cands = _backfill_titlevn_candidates(entries, force=getattr(a, "force_refresh", False))
-    _pool = len(cands)
-    _off = max(0, int(getattr(a, "offset", None) or 0))
-    # A2 (v1.33.43 — MERGE bundle-17, KẸT PAGINATION LIVE: ép _off=0 ở --apply + next_offset=None → khi lô đầu
-    # TOÀN skip [boilerplate] pool KHÔNG co ⇒ mọi lần chạy lặp đúng lô đầu, KHÔNG BAO GIỜ tới dòng sau — pool 79
-    # mà 0/79 quét được): thiết kế cũ 'pool tự co' chỉ đúng khi CÓ dòng ghi được. Nay HONOR --offset ở --apply;
-    # next_offset TIẾN QUA số dòng SKIP (dòng ghi được rời pool nên offset không nhảy cóc — xem nhánh apply dưới).
-    # N2 (v1.31.1): --from-tukhoa = tier-2 OFFLINE (bóc từ field tukhoa, 0 call/dòng — quét cả pool 1 phát);
-    # mặc định = tier-1 đọc HEADER thật (chậm, lô 40). Chạy tukhoa TRƯỚC cho phủ nhanh, header vét phần còn lại.
-    _src_tukhoa = bool(getattr(a, "from_tukhoa", False))
-    lim = getattr(a, "limit", None) or (len(cands) if _src_tukhoa else 40)
-    page = cands[_off:_off + lim]
-    _next = (_off + len(page)) if (_off + len(page)) < _pool else None
-    done, skipped, need_read, err = [], [], [], []
-    _read_fail_streak = 0
-    for _ci, c in enumerate(page, 1):
-        e = c["entry"]
-        if _src_tukhoa:
-            tv, why = _title_vn_from_tukhoa(e.get("tukhoa"), c["name"]), "TUKHOA_NO_CLEAN_TITLE"
-        else:
-            print(f"[backfill-title-vn] {_ci}/{len(page)} {c['name'][:48]}", file=sys.stderr, flush=True)
-            if _entry_raw_no_gdoc(e):
-                need_read.append({"drive_id": c["drive_id"], "name": c["name"][:55]}); continue
-            try:
-                txt = _read_doc_text(c["drive_id"], getattr(a, "config", None))
-            except Exception:  # noqa: BLE001
-                txt = ""
-            if not (txt or "").strip():
-                txt = _read_doc_text_via_nlm(e)     # P1 v1.32.1: Drive chết → thử NLM
-            if not (txt or "").strip():
-                err.append({"drive_id": c["drive_id"], "name": c["name"][:55], "error": "header rỗng (Drive+NLM)"})
-                _read_fail_streak += 1
-                if _read_fail_streak >= 3:          # P1 v1.32.1: fast-fail như corpus-audit — không cày pool all-error
-                    print("[tl] backfill-title-vn: 3 lỗi đọc LIÊN TIẾP (Drive+NLM) → READ_BACKEND_DOWN, dừng. "
-                          "Chẩn đoán `tl gws-ping`; khắc phục `gws auth login` → `tl secrets-set --gws`; "
-                          "tạm dùng --from-tukhoa (offline, không cần đọc Drive).", file=sys.stderr)
-                    return 2
-                continue
-            _read_fail_streak = 0
-            tv, why = _title_vn_from_header(txt, e)
-        if tv:
-            done.append({"drive_id": c["drive_id"], "name": c["name"][:54], "title_vn": tv,
-                         "title_vn_cur": c["title_vn_cur"]})
-        else:
-            skipped.append({"drive_id": c["drive_id"], "name": c["name"][:50], "reason": why})
-    summary = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-               "source": "tukhoa (tier-2 offline)" if _src_tukhoa else "header (tier-1)",
-               "pool_total": _pool, "offset": _off, "scanned": len(page), "next_offset": _next,
-               "coverage_complete": _next is None, "writable": len(done), "skipped": skipped,
-               "need_manual_read": need_read, "errors": err,
-               "note": "skip NO_DIACRITICS/BOILERPLATE = KHÔNG tự tin — sửa tay `tl register --drive-id <id> "
-                       "--title-vn \"<trích yếu có dấu>\"`; raw .docx/.pdf → Claude đọc header rồi register tay."}
-    if not getattr(a, "apply", False):
-        summary["rows"] = done
-        # MERGE bundle-45b (v1.33.47): --out ghi JSON summary atomic qua _emit_json_payload (đồng bộ doctor/
-        # sweep/counts/corpus-audit) — trước thiếu, Cowork phải `>` redirect vỡ trần output.
-        if getattr(a, "out", None) or getattr(a, "json", False):
-            _emit_json_payload(summary, getattr(a, "out", None))
-        if not (getattr(a, "json", False) or getattr(a, "out", None)):
-            print(f"== backfill-title-vn DRY · pool={_pool} · trang này ghi được {len(done)} · skip {len(skipped)} "
-                  f"· cần đọc tay {len(need_read)} · lỗi {len(err)} ==")
-            for d in done[:20]:
-                print(f"  {d['title_vn'][:70]:70s} ← {d['name'][:40]}")
-            for s in skipped[:10]:
-                print(f"  ⚠ SKIP {s['reason']:14s} {s['name']}")
-            if _next is not None:
-                print(f"  ⚠ CHƯA PHỦ HẾT — trang kế: --offset {_next} (mặc định lô 40 vì đọc header chậm)")
-            print("  --apply để ghi (journaled, undo được).")
-        return 0
-    _ok_gate, _ = _apply_gate(a, write_cols="title_vn")
-    if not _ok_gate:
-        return 2
-    try:
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    except (Exception, SystemExit):
-        pass
-    g = _gas()
-    run_id = _apply_journal_start("backfill-title-vn", {"n": len(done)})
-    _before = {d["drive_id"]: {"title_vn": d.get("title_vn_cur") or ""} for d in done}
-    v = _journaled_reg_write(run_id, g, [{"drive_id": d["drive_id"], "title_vn": d["title_vn"]} for d in done],
-                             "title_vn", before_by_key=_before) if done else {"patched": 0}
-    _invalidate_manifest_cache()
-    _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"applied": v.get("patched")}})
-    summary["applied"] = v.get("patched")
-    summary["journal"] = run_id
-    # A2 (v1.33.43 — MERGE bundle-17): dòng GHI ĐƯỢC rời pool (lần sau pool đã co); dòng SKIP/need_read/err CÒN
-    # trong pool → offset lần sau phải TIẾN QUA chúng, nếu không lô-đầu-toàn-skip kẹt vĩnh viễn (ca live 79 dòng).
-    _stay = len(skipped) + len(need_read) + len(err)
-    _adv = _off + _stay
-    summary["next_offset"] = _adv if (_stay > 0 and _adv < (_pool - len(done))) else None
-    summary["coverage_complete"] = summary["next_offset"] is None
-    summary["note_apply"] = ("dòng GHI ĐƯỢC rời pool; SKIP còn lại trong pool → trang kế chạy `--offset "
-                             "<next_offset>` để QUA chúng (next_offset=None = đã phủ hết); skip = sửa tay "
-                             "`tl register --title-vn`.")
-    _emit_json_payload(summary, getattr(a, "out", None))   # MERGE bundle-45b: --out atomic (không out → in stdout như cũ)
-    if summary["next_offset"] is not None:
-        print(f"[tl] backfill-title-vn: CHƯA PHỦ HẾT — trang kế: LẶP CÙNG LỆNH + --offset {summary['next_offset']}.",
-              file=sys.stderr)
-    elif v.get("patched"):
-        print("[tl] backfill-title-vn: đã phủ hết pool (coverage_complete).", file=sys.stderr)
-    print(f"[tl] backfill-title-vn: ghi {v.get('patched')}/{len(done)}. journal={run_id}. MANIFEST_STALE: `tl boot --refresh`.",
-          file=sys.stderr)
-    return 0
-
-
-def _backfill_hieuluc_candidates(entries: list, force: bool = False) -> list[dict]:
-    """Dòng cần backfill hieuluc: corpus=true, own/overflow, hieuluc rỗng; force cho phép refresh giá trị mơ hồ."""
-    vague = {"", "can_kiem_tra", "cần kiểm tra", "unknown", "không rõ", "chưa rõ"}
-    out = []
-    for e in entries or []:
-        if not _entry_corpus_true(e) or _entry_row_kind(e) == "ref":
-            continue
-        cur = str(e.get("hieuluc") or e.get("hieu_luc") or "").strip()
-        if cur and not force:
-            continue
-        if cur and force and _strip_accents(cur).lower() not in {_strip_accents(x).lower() for x in vague}:
-            continue
-        out.append({"drive_id": _entry_drive_id(e), "name": _entry_name(e), "hieuluc_cur": cur, "entry": e})
-    return out
-
-
-def cmd_backfill_hieuluc(a) -> int:
-    """BACKFILL cột `hieuluc` từ header/export text. DRY mặc định; --apply ghi journaled reg_bulk cột hieuluc."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] backfill-hieuluc: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    cands = _backfill_hieuluc_candidates(entries, force=getattr(a, "force_refresh", False))
-    pool = len(cands)
-    off = max(0, int(getattr(a, "offset", None) or 0))
-    lim = getattr(a, "limit", None) or 40
-    page = cands[off:off + lim]
-    next_off = (off + len(page)) if (off + len(page)) < pool else None
-    done, skipped, need_read, err = [], [], [], []
-    fail_streak = 0
-    for i, c in enumerate(page, 1):
-        e = c["entry"]
-        print(f"[backfill-hieuluc] {i}/{len(page)} {c['name'][:48]}", file=sys.stderr, flush=True)
-        if _entry_raw_no_gdoc(e):
-            need_read.append({"drive_id": c["drive_id"], "name": c["name"][:55]}); continue
-        try:
-            txt = _read_doc_text(c["drive_id"], getattr(a, "config", None))
-        except Exception:  # noqa: BLE001
-            txt = ""
-        if not (txt or "").strip():
-            txt = _read_doc_text_via_nlm(e)
-        if not (txt or "").strip():
-            err.append({"drive_id": c["drive_id"], "name": c["name"][:55], "error": "header rỗng (Drive+NLM)"})
-            fail_streak += 1
-            if fail_streak >= 3:
-                print("[tl] backfill-hieuluc: 3 lỗi đọc LIÊN TIẾP (Drive+NLM) → READ_BACKEND_DOWN; "
-                      "chẩn đoán `tl gws-ping` / `tl nlm-auth-load` rồi chạy lại.", file=sys.stderr)
-                return 2
-            continue
-        fail_streak = 0
-        hl, why = _hieuluc_from_header_text(txt, infer_from_date=getattr(a, "infer_from_date", False))
-        if hl:
-            done.append({"drive_id": c["drive_id"], "name": c["name"][:54], "hieuluc": hl,
-                         "hieuluc_cur": c["hieuluc_cur"]})
-        else:
-            skipped.append({"drive_id": c["drive_id"], "name": c["name"][:50], "reason": why})
-    summary = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-               "pool_total": pool, "offset": off, "scanned": len(page), "next_offset": next_off,
-               "coverage_complete": next_off is None, "writable": len(done), "rows": done,
-               "skipped": skipped, "need_manual_read": need_read, "errors": err,
-               "infer_from_date": bool(getattr(a, "infer_from_date", False)),
-               "note": "Mặc định chỉ ghi khi header có nhãn Còn/Hết/Chưa hiệu lực rõ; date-only cần --infer-from-date."}
-    if not getattr(a, "apply", False):
-        if getattr(a, "out", None) or getattr(a, "json", False):
-            _emit_json_payload(summary, getattr(a, "out", None))
-        if not (getattr(a, "json", False) or getattr(a, "out", None)):
-            print(f"== backfill-hieuluc DRY · pool={pool} · trang này ghi được {len(done)} · "
-                  f"skip {len(skipped)} · cần đọc tay {len(need_read)} · lỗi {len(err)} ==")
-            for d in done[:20]:
-                print(f"  {d['hieuluc'][:70]:70s} ← {d['name'][:40]}")
-            for s in skipped[:10]:
-                print(f"  ⚠ SKIP {s['reason']:18s} {s['name']}")
-            if next_off is not None:
-                print(f"  ⚠ CHƯA PHỦ HẾT — trang kế: --offset {next_off}")
-            print("  --apply để ghi (journaled, undo được).")
-        return 0
-    _ok_gate, _ = _apply_gate(a, write_cols="hieuluc")
-    if not _ok_gate:
-        return 2
-    try:
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    except (Exception, SystemExit):
-        pass
-    g = _gas()
-    run_id = _apply_journal_start("backfill-hieuluc", {"n": len(done)})
-    before = {d["drive_id"]: {"hieuluc": d.get("hieuluc_cur") or ""} for d in done}
-    v = _journaled_reg_write(run_id, g, [{"drive_id": d["drive_id"], "hieuluc": d["hieuluc"]} for d in done],
-                             "hieuluc", before_by_key=before) if done else {"patched": 0}
-    _invalidate_manifest_cache()
-    _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"applied": v.get("patched")}})
-    summary["applied"] = v.get("patched")
-    summary["journal"] = run_id
-    stay = len(skipped) + len(need_read) + len(err)
-    adv = off + stay
-    summary["next_offset"] = adv if (stay > 0 and adv < (pool - len(done))) else None
-    summary["coverage_complete"] = summary["next_offset"] is None
-    _emit_json_payload(summary, getattr(a, "out", None))
-    if summary["next_offset"] is not None:
-        print(f"[tl] backfill-hieuluc: CHƯA PHỦ HẾT — trang kế: LẶP CÙNG LỆNH + --offset {summary['next_offset']}.",
-              file=sys.stderr)
-    print(f"[tl] backfill-hieuluc: ghi {v.get('patched')}/{len(done)}. journal={run_id}. MANIFEST_STALE: `tl boot --refresh`.",
-          file=sys.stderr)
-    return 0
-
-
-def cmd_missing_sohieu(a) -> int:
-    """KH1 Pha 1.5: đề xuất SỐ HIỆU cho dòng registry THIẾU sohieu (field rỗng, 257 dòng) — parse từ TÊN
-    (`_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục). DRY mặc định; --apply ghi reg_bulk cột `sohieu` (KHÔNG `so_hieu` — webapp bỏ im lặng). ⚠ ĐỀ XUẤT theo TÊN —
-    XÁC MINH bằng `tl header-verify` (G2, đọc header thật) trước khi tin tuyệt đối. Idempotent (bỏ dòng đã có sohieu)."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] missing-sohieu: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    sug, no_parse = [], 0
-    for e in entries:
-        if str(_entry_sohieu(e) or "").strip():        # đã có sohieu field → bỏ (idempotent)
-            continue
-        sh = _parse_sohieu_from_name(_entry_name(e))
-        if sh:
-            sug.append({"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:54], "sohieu_suggested": sh})
-        else:
-            no_parse += 1
-    lim = getattr(a, "limit", None) or len(sug)
-    sel = [s for s in sug[:lim] if s["drive_id"]]
-    note = "ĐỀ XUẤT theo TÊN — chạy `tl header-verify` (G2) xác minh khớp HEADER trước khi tin tuyệt đối."
-    if getattr(a, "apply", False):
-        _ok_gate, _pfv = _apply_gate(a, write_cols="sohieu")   # (Pha 1) chống clobber/ghi-mù (cột 'sohieu' ĐÚNG, không 'so_hieu')
-        if not _ok_gate:
-            return 2
-        try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (Exception, SystemExit):
-            pass
-        g = _gas()
-        run_id = _apply_journal_start("missing-sohieu", {"n": len(sel)})
-        _before = {s["drive_id"]: {"sohieu": ""} for s in sel}   # trước: sohieu RỖNG → undo = clear lại
-        v = _journaled_reg_write(run_id, g, [{"drive_id": s["drive_id"], "sohieu": s["sohieu_suggested"]} for s in sel],
-                                 "sohieu", before_by_key=_before) if sel else {"patched": 0, "verified": True}
-        patched = v.get("patched") or 0
-        _ok_reg = v.get("verified", True)
-        _journal_append(run_id, {"t": "run_end", "ok": bool(_ok_reg), "counts": {"applied": patched, "missed": v.get("missed") or 0}})
-        print(json.dumps({"ok": bool(_ok_reg), "applied": patched, "suggested": len(sug), "no_parse": no_parse, "journal": run_id, "note": note}, ensure_ascii=False))
-        if sel and not _ok_reg:
-            print(f"[tl] ⚠ missing-sohieu: {v.get('missed') or 0} dòng KHÔNG khớp drive_id ({v.get('missed_ids')}) — thường row mới, webapp index chưa thấy → `tl boot --refresh` rồi lặp lại.", file=sys.stderr)
-        print(f"[tl] missing-sohieu: ghi {patched}/{len(sel)} (patched=0 mà không miss = đã có sohieu đúng). XÁC MINH G2 `header-verify`. journal={run_id}.", file=sys.stderr)
-        return 0 if (not sel or _ok_reg) else 1
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", "suggested_count": len(sug), "no_parse": no_parse, "suggested": sel, "note": note}, ensure_ascii=False, indent=2))
-    else:
-        print(f"== missing-sohieu DRY · suy được {len(sug)} · không parse được {no_parse} (--apply để ghi) ==")
-        for s in sel[:20]:
-            print(f"  {s['sohieu_suggested']:18s} {s['name']}  [{s['drive_id'][:14]}]")
-        print(f"  ⚠ {note}")
-    return 0
-
-
-def cmd_vbhn_year_fix(a) -> int:
-    """BẤT BIẾN ĐẶT TÊN: số hiệu VBHN PHẢI có NĂM (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH = ATTP 2025
-    + Thuế TNDN 2026). Quét registry các VBHN có sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên) →
-    đề xuất sohieu `NN-YYYY-VBHN-XXX` (+ tên có năm với --with-name). DRY mặc định; --apply GHI qua reg_upsert (KHÔNG
-    reg_bulk — sohieu là khóa immutable, reg_bulk bỏ im lặng). Ca không suy được năm → needs_year (xác minh tay)."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] vbhn-year-fix: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    fixable, needs, conflicts = _vbhn_year_fix_items(entries)
-    lim = getattr(a, "limit", None) or len(fixable)
-    sel = fixable[:lim]
-    with_name = getattr(a, "with_name", False)
-    # v1.33.21: lane name_only chỉ có nghĩa khi --with-name (sohieu giữ nguyên, chỉ đổi TÊN) — chạy không
-    # --with-name thì loại khỏi sel để khỏi upsert sohieu no-op, và nhắc LOUD.
-    _name_only_n = sum(1 for s in fixable if s.get("mode") == "name_only")
-    if not with_name and _name_only_n:
-        sel = [s for s in sel if s.get("mode") != "name_only"]
-        print(f"[tl] vbhn-year-fix: {_name_only_n} ca NAME-ONLY (sohieu đã có năm, TÊN thiếu năm) bị BỎ QUA "
-              f"vì thiếu --with-name — chạy lại kèm --with-name để sửa tên.", file=sys.stderr)
-    if getattr(a, "apply", False):
-        _ok_gate, _pfv = _apply_gate(a, write_cols=("sohieu,name" if with_name else "sohieu"))
-        if not _ok_gate:
-            return 2
-        try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (Exception, SystemExit):
-            pass
-        g = _gas()
-        run_id = _apply_journal_start("vbhn-year-fix", {"n": len(sel), "with_name": with_name})
-        ok_n, fail = 0, []
-        for s in sel:
-            payload = {"drive_id": s["drive_id"], "sohieu": s["new_sohieu"]}
-            before = {"sohieu": s.get("old_sohieu") or ""}
-            if with_name and s.get("new_name") and s["new_name"] != s["name"]:
-                payload["name"] = s["new_name"]; before["name"] = s.get("name") or ""
-            v = _journaled_reg_upsert(run_id, g, payload, before=before)   # journal intent{before sohieu/name}+verify updated
-            if v.get("verified"):
-                ok_n += 1
-            else:
-                fail.append({"drive_id": s["drive_id"], "new_sohieu": s["new_sohieu"], "resp": v.get("reg_upsert") or {"error": v.get("error")}})
-        _journal_append(run_id, {"t": "run_end", "ok": not fail, "counts": {"applied": ok_n, "failed": len(fail)}})
-        print(json.dumps({"ok": True, "applied": ok_n, "fixable": len(fixable), "needs_year": len(needs),
-                          "conflicts": len(conflicts), "failed": fail, "with_name": with_name, "journal": run_id}, ensure_ascii=False, indent=2))
-        msg = f"[tl] vbhn-year-fix: ghi {ok_n}/{len(sel)} sohieu (kèm năm)"
-        if fail:
-            msg += f" · {len(fail)} THẤT BẠI (xem failed; drive_id cắt? reg_upsert updated=False?)"
-        if needs:
-            msg += f" · {len(needs)} cần xác minh năm tay"
-        if conflicts:
-            msg += f" · {len(conflicts)} CONFLICT (new_sohieu trùng → KHÔNG ghi; dedup/phân biệt tay)"
-        print(msg + ". MANIFEST_STALE: chạy `tl boot --refresh` để cache thấy thay đổi.", file=sys.stderr)
-        return 1 if (fail or conflicts) else 0
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", "fixable_count": len(fixable), "needs_year_count": len(needs),
-                          "conflict_count": len(conflicts), "fixable": sel, "needs_year": needs, "conflicts": conflicts},
-                         ensure_ascii=False, indent=2))
-    else:
-        print(f"== vbhn-year-fix DRY · ghi-được {len(fixable)} · xác-minh-tay {len(needs)} · CONFLICT {len(conflicts)} (--apply ghi fixable; --with-name sửa cả tên) ==")
-        for s in sel[:30]:
-            tail = f"  TÊN→ {s['new_name']}" if (s.get('new_name') != s['name']) else ""
-            _mk = "📛NAME-ONLY " if s.get("mode") == "name_only" else ""
-            print(f"  {_mk}{s['old_sohieu']:20s} → {s['new_sohieu']:25s} (năm {s['year']}) [{s['drive_id'][:14]}]{tail}")
-        for c in conflicts[:20]:
-            print(f"  🔴 CONFLICT   {c['old_sohieu']:20s} → {c['new_sohieu']} (năm {c['year']}) [{c['drive_id'][:14]}] {c['name'][:40]}")
-        for n in needs[:20]:
-            print(f"  ⚠ NEEDS_YEAR  {n['sohieu']:20s} {n['name'][:50]} [{n['drive_id'][:14]}]")
-        print("  → fixable ghi qua reg_upsert (KHÔNG reg_bulk). CONFLICT = ≥2 dòng ra CÙNG sohieu mới → dedup (nếu trùng văn bản) HOẶC phân biệt tay (nếu khác văn bản cùng số+năm). NEEDS_YEAR: đọc header/NLM lấy ngày ban hành rồi `tl register --drive-id <id> --sohieu NN-YYYY-VBHN-XXX`.")
-    return 0
-
-
 def _shared_source_id_groups(entries: list) -> list:
     """PURE: FALSE-LINK NLM — ≥2 drive_id KHÁC nhau cùng 1 nlm_source_id (backfill/reconcile gắn nhầm). NGUY HIỂM:
     xóa nguồn của 1 row làm GÃY link của row kia (đúng ca NQ42 user gặp 2026-06-30). Trả [{source_id, rows[]}]."""
@@ -13819,50 +12951,6 @@ def _dedup_plan(entries: list) -> dict:
             "dups_on_nlm": dups_on_nlm}
 
 
-def cmd_dedup_plan(a) -> int:
-    """COMPOSITE: kế hoạch DEDUP toàn corpus 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). GIỮ canonical, set
-    corpus=false cho bản dup CÙNG văn bản (reversible). DRY mặc định; --apply ghi reg_bulk corpus=false. review (thiếu
-    canonical) + dups_on_nlm (còn nguồn NLM → cân nhắc xoá nguồn tay) chỉ BÁO."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] dedup-plan: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    p = _dedup_plan(entries)
-    if getattr(a, "apply", False):
-        _ok_gate, _ = _apply_gate(a, write_cols="corpus")
-        if not _ok_gate:
-            return 2
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        g = _gas()
-        run_id = _apply_journal_start("dedup-plan", {"clusters": len(p["ready"])})
-        items = [{"drive_id": d["drive_id"], "corpus": "false"} for it in p["ready"] for d in it["quarantine"]]
-        _before = {it2["drive_id"]: {"corpus": "true"} for it2 in items}
-        v = _journaled_reg_write(run_id, g, items, "corpus", before_by_key=_before) if items else {"patched": 0, "verified": True}
-        _invalidate_manifest_cache()
-        _journal_append(run_id, {"t": "run_end", "ok": bool(v.get("verified", True)), "counts": {"corpus_false": v.get("patched")}})
-        print(json.dumps({"ok": True, "corpus_false_patched": v.get("patched"), "clusters": len(p["ready"]), "journal": run_id,
-                          "quarantined": len(items), "review": len(p["review"]), "dups_on_nlm": len(p["dups_on_nlm"]),
-                          "dups_on_nlm_rows": p["dups_on_nlm"]}, ensure_ascii=False, indent=2))
-        print(f"[tl] dedup-plan: corpus=false {v.get('patched')}/{len(items)} bản dup ({len(p['ready'])} cụm, GIỮ canonical) · "
-              f"review {len(p['review'])} cụm thiếu canonical · {len(p['dups_on_nlm'])} dup CÒN trên NLM (cân nhắc xoá nguồn tay). "
-              f"MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
-        return 0
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", **p}, ensure_ascii=False, indent=2))
-    else:
-        print(f"== dedup-plan DRY · {len(p['ready'])} cụm sẽ dedup ({p['total_quarantine']} bản dup→corpus=false) · "
-              f"review {len(p['review'])} cụm thiếu canonical · {len(p['dups_on_nlm'])} dup còn NLM (--apply để ghi) ==")
-        for it in p["ready"][:25]:
-            print(f"  GIỮ {it['canonical']['sohieu'] or '∅':20s} {it['canonical']['name'][:42]}")
-            for d in it["quarantine"]:
-                print(f"    ✗ dup{' [NLM]' if d['on_nlm'] else ''}: {d['name'][:50]} [{d['drive_id'][:14]}]")
-        for r in p["review"][:15]:
-            print(f"  🟡 REVIEW (thiếu canonical) [{r['key']}] {len(r['dups'])} bản — quyết tay")
-        print("  → --apply: GIỮ canonical, set corpus=false bản dup (reversible). dup [NLM] → cân nhắc `nlm source delete` tay.")
-    return 0
-
-
 _RAW_LOOSE_SOHIEU_RE = re.compile(
     r"(?i)(?<![0-9A-Za-zĐđ])(ND|NĐ|TT|QD|QĐ|NQ|PL|CT|TTLT|BLDS|BLHS|L)?[\s_\-\.]*?(\d{1,4})[\s_\-\.]+((?:19|20)\d{2})(?![0-9])")
 
@@ -13950,269 +13038,6 @@ def _corpus_count_server_rule(entries: list) -> int:
             continue
         n += 1
     return n
-
-
-def _sweep_report(entries: list) -> dict:
-    """PURE (test offline): tổng hợp sức khoẻ corpus từ entries → dict đếm + next_actions điền sẵn. KHÔNG I/O/mạng."""
-    g = _hygiene_groups(entries)
-    shared_sid = _shared_source_id_groups(entries)
-    goc_pollution = _goc_pollution_groups(entries)
-    infra = [e for e in entries if str(e.get("corpus")).lower() == "true" and _is_infra_entry(e)]
-    _rawdup = _raw_dup_of_standard_rows(entries)   # v1.29.3 (#5): bản thô trùng bản chuẩn (propose-only)
-    # N4 (v1.31.1): tên phi-chuẩn offline (cùng guard corpus-audit: bỏ phụ lục/mẫu/điều ước, chỉ corpus=true)
-    _name_ns_all = [e for e in entries
-                    if _entry_corpus_true(e) and not _is_treaty_entry(e)
-                    and not re.match(r"^(PL|Mau|Phu_luc)[_\-]", str(_entry_name(e) or ""), re.I)
-                    and _name_structural_issues(_entry_name(e))]
-    # S12 (v1.33.44 — log 7A: sweep báo name_nonstandard=65 gây hiểu nhầm 'corpus bẩn' — thực VBQPPL corpus=true
-    # chỉ 8, còn lại là văn bản LÀM VIỆC loai='thuong' + dòng kẹt quarantine): HEADLINE = VBQPPL thật (trừ thuong/
-    # quarantine — nhóm nguồn rename); phần loại trừ đếm riêng name_nonstandard_other (không nuốt, không phồng ảo).
-    _name_ns = [e for e in _name_ns_all
-                if str(e.get("loai") or "").strip().lower() != "thuong" and not _is_quarantine_cat(_entry_cat(e))]
-    _name_ns_other = len(_name_ns_all) - len(_name_ns)
-    fixable, needs, conflicts = _vbhn_year_fix_items(entries)
-    _dk = ("NLM_STATUS_MISMATCH", "CORPUS_TRUE_NOT_ON_NLM", "NLM_NOTEBOOK_ID_MISSING")
-    drift = {k: 0 for k in _dk}
-    for e in entries:
-        _ef = set(_title_flags(e))
-        for k in _dk:
-            if k in _ef:
-                drift[k] += 1
-    _qcat = [e for e in entries if _is_quarantine_cat(_entry_cat(e))]
-    rep = {
-        "ok": True, "total": len(entries),
-        "corpus": sum(1 for e in entries if str(e.get("corpus")).lower() == "true"),
-        # v1.30.1 (#7): 2 THƯỚC ĐO in cạnh nhau trên CÙNG snapshot — 'corpus' (client, corpus=='true' thuần) vs
-        # 'corpus_server_rule_equiv' (đúng luật GAS corpus_count mà `tl boot` in). Lệch còn lại giữa lệnh = snapshot
-        # khác thời điểm (GAS đọc-cache ~600s), KHÔNG phải mất dữ liệu.
-        "corpus_server_rule_equiv": _corpus_count_server_rule(entries),
-        "corpus_basis": {
-            "corpus": "client: corpus=='true' (mọi row_kind, kể cả loai='thuong')",
-            "corpus_server_rule_equiv": "luật server GAS manifest_export.corpus_count: corpus∈{true,vbqppl} ∪ "
-                                        "row_kind=overflow, trừ ref & loai='thuong' (Code.gs regIsCorpusCounted_)",
-            "note": "so với `tl boot` dùng corpus_server_rule_equiv; lệch còn lại = snapshot (GAS cache ~600s) → "
-                    "`tl boot --refresh` rồi `tl sweep --refresh` cùng phiên.",
-        },
-        "quarantine": {
-            "total": len(_qcat),
-            "label_variants": sum(1 for e in _qcat if _is_quarantine_label_variant(_entry_cat(e))),
-            "corpus_true": sum(1 for e in _qcat if str(e.get("corpus")).lower() == "true"),
-            # P1-6 (v1.31.0 — log LIVE: hygiene=4 vs reg-query=0 bất đồng): still_on_nlm nay = LIVE-status
-            # (_entry_on_nlm_live — loại removed*/deleted, KHỚP định nghĩa reg-query --nlm); nlm_source_id sót
-            # trên dòng đã gỡ → tách `stale_nlm_ref` (rác metadata, dọn reg_clear — không phải nguồn sống).
-            "still_on_nlm": sum(1 for e in _qcat if _entry_on_nlm_live(e)),
-            "stale_nlm_ref": sum(1 for e in _qcat if _entry_nlm(e) and not _entry_on_nlm_live(e))},
-        # C4 v1.33.0: by_sohieu = trùng THẬT (≥2 corpus=true cùng phía); by_sohieu_raw = mọi cụm ≥2 entry cùng
-        # số (gồm cặp gốc+VBHN chỉ-mục-theo-số-gốc, phụ lục tách cố ý, sidecar, quarantine — LÀNH, không sửa).
-        "duplicates": {"by_sohieu": len(g["duplicates_by_sohieu_real"]),
-                       "by_sohieu_raw": len(g["duplicates_by_sohieu"]),
-                       # P2-4 v1.33.12: *_active = còn ≥2 dòng corpus=true — GIẢM theo tiến độ dedup (raw thì không, by design)
-                       "by_sohieu_raw_active": len(g["duplicates_by_sohieu_raw_active"]),
-                       "by_name_active": len(g["duplicates_by_name_active"]),
-                       "by_md5": len(g["duplicates_by_md5"]),
-                       "by_name": len(g["duplicates_by_name"]), "identity": len(g["duplicate_identity_groups"]),
-                       "same_document": len(g["vbhn_same_document_dups"])},
-        "orphans": len(g["orphans"]), "treaties": len(g.get("treaties") or []),
-        "party_docs": len(g.get("party_docs") or []),   # B.7 v1.33.19: văn kiện Đảng không-số-hiệu hợp lệ
-        "title_mismatch": len(g["title_mismatch"]),
-        # B.5-residual v1.33.22: VBHN metadata advisory (thiếu năm tên/bare-number…) — việc của vbhn-year-fix,
-        # tách khỏi headline title_mismatch để hàng rename/recat hết phồng ảo.
-        "vbhn_metadata_advisory": len(g.get("vbhn_metadata_advisory") or []),
-        "vbhn_metadata_advisory_rows": [_summ_entry(e) for e in (g.get("vbhn_metadata_advisory") or [])[:50]],
-        # S-2 v1.33.31: OMNIBUS_NARROW một mình — advisory (đã hiện ở flags từng entry), hết đếm kép với headline.
-        "omnibus_title_advisory": len(g.get("omnibus_title_advisory") or []),
-        "omnibus_title_advisory_rows": [_summ_entry(e) for e in (g.get("omnibus_title_advisory") or [])[:50]],
-        "loai_noncanonical": len(g["loai_noncanonical"]),
-        # N4 (v1.31.1 — name_audit.py phiên rà): tên phi-chuẩn OFFLINE toàn corpus (corpus-audit chỉ chấm dòng
-        # ĐÃ đọc được header → thiếu độ phủ; đây là tầng đếm rẻ dùng _name_structural_issues sẵn có).
-        "name_nonstandard": len(_name_ns),
-        # S12 (v1.33.44): *_other = corpus=true NHƯNG loai='thuong'/quarantine (văn bản làm việc/kẹt cách ly) —
-        # KHÔNG thuộc hàng rename VBQPPL; đếm riêng để headline hết phồng ảo (ca thật 65 báo vs 8 thật).
-        "name_nonstandard_other": _name_ns_other,
-        "name_nonstandard_basis": "headline = corpus=true, TRỪ loai='thuong' + quarantine (VBQPPL thật cần rename); "
-                                  "_other = phần trừ ra (việc của tách profile vbthuong/quarantine-fix, không phải source-rename)",
-        "name_nonstandard_rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:55],
-                                   "issues": _name_structural_issues(_entry_name(e))} for e in _name_ns[:25]],
-        "vbhn_year": {"fixable": len(fixable), "needs_year": len(needs), "conflicts": len(conflicts)},
-        "shared_source_id": len(shared_sid), "shared_source_id_groups": shared_sid[:20],
-        "goc_pollution": len(goc_pollution), "goc_pollution_rows": goc_pollution[:30],
-        "infra_in_corpus": len(infra), "infra_in_corpus_rows": [_dedup_lite(e) for e in infra[:20]],
-        "raw_dup_of_standard": len(_rawdup), "raw_dup_of_standard_rows": _rawdup[:20],
-        "nlm_drift": drift, "nlm_drift_total": sum(drift.values()),
-        # C1 (v1.33.4 — log: sweep nlm_drift=0 trong khi nlm-reconcile LIVE thấy 24 dòng desync/removed):
-        # sweep là OFFLINE registry-only — 0 KHÔNG có nghĩa 'NLM sạch'; phải đối soát ground-truth CLI.
-        "nlm_drift_basis": "OFFLINE registry-only — 0 KHÔNG kết luận 'NLM sạch' (ca thật: sweep=0 nhưng "
-                           "nlm-reconcile live 24 dòng desync/removed); đối soát LIVE: tl nlm-reconcile <notebook>",
-        "raw_on_nlm": len(_raw_on_nlm_rows(entries)),
-        "raw_on_nlm_rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:55],
-                             "nlm_source_id": _entry_nlm(e)} for e in _raw_on_nlm_rows(entries)[:15]],
-        # D (v1.33.6): mã chủ đề có CẢ nhãn trơ lẫn đủ tên (05 vs 05_Can_bo…) — phân mảnh folder/đếm.
-        "cat_label_variants": len(_cat_bare_full_variants(entries)),
-        "cat_label_variants_rows": _cat_bare_full_variants(entries)}
-    # NEXT ACTIONS — điền sẵn lệnh tất định theo cờ phát hiện.
-    nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
-    acts = []
-    if rep["shared_source_id"]:
-        acts.append(f"⚠ {rep['shared_source_id']} nlm_source_id DÙNG CHUNG ≥2 drive_id (FALSE-LINK) — sửa TRƯỚC nlm-reconcile/xóa nguồn (xóa 1 gãy link kia): map_set/reg_clear tách + re-push")
-    if rep["goc_pollution"]:
-        acts.append(f"🔴 {rep['goc_pollution']} VBHN registry.goc NHIỄM (tên goc_<X> ≠ goc registry) → source-map/status redirect SAI văn bản; sửa goc về suggested_goc qua `tl register` (reg_upsert), xem goc_pollution_rows")
-    if rep["infra_in_corpus"]:
-        acts.append(f"{rep['infra_in_corpus']} file HẠ TẦNG (.json/.enc/secrets/delta) đang corpus=true = RÁC → set corpus=false (vd tl_secrets.enc, nlm_sources_delta*.json)")
-    if rep["raw_dup_of_standard"]:
-        acts.append(f"⚠ {rep['raw_dup_of_standard']} bản TẢI THÔ nghi TRÙNG bản chuẩn (tên kiểu 'ND274_2025_…', sohieu không trích được, "
-                    f"đốt batch ingest-missing) → soát raw_dup_of_standard_rows rồi `tl source-update-corpus <id> false --apply` (undo được)")
-    if rep["raw_on_nlm"]:
-        acts.append(f"🔴 {rep['raw_on_nlm']} nguồn NLM là FILE THÔ (html/docx — trái 'chỉ push GDoc'; ca 22-2023 .html): "
-                    f"convert GDoc (copy_convert) → re-push → gỡ nguồn raw + reg_clear mapping (xem raw_on_nlm_rows)")
-    if rep["cat_label_variants"]:
-        acts.append(f"⚠ {rep['cat_label_variants']} mã chủ đề có CẢ nhãn TRƠ lẫn ĐỦ TÊN (05 vs 05_Can_bo…) → gộp bare "
-                    f"về folder đủ tên qua `tl recat <id> --cat NN` (xem cat_label_variants_rows; bare hay chứa văn bản làm việc lọt corpus)")
-    acts.append(f"ℹ đối soát NLM/slot bằng LIVE: `tl sweep --live-nlm --json` hoặc `tl nlm-reconcile {nb} --json` "
-                f"# sweep.nlm_drift là OFFLINE-only — 0 KHÔNG nghĩa NLM sạch; registry claim chỉ là ESTIMATE, "
-                f"KHÔNG dùng để chốt FULL/overflow (S-4/S-5 log rà 67: claim 546 vs vật lý 298/300)")
-    if rep["vbhn_year"]["fixable"]:
-        acts.append(f"tl vbhn-year-fix --with-name --apply   # {rep['vbhn_year']['fixable']} VBHN thiếu năm")
-    if rep["vbhn_year"]["conflicts"]:
-        acts.append(f"soát {rep['vbhn_year']['conflicts']} vbhn-year CONFLICT (dedup/phân biệt tay)")
-    if rep["quarantine"]["corpus_true"] or rep["quarantine"]["still_on_nlm"] or rep["quarantine"]["stale_nlm_ref"]:
-        # B3/B9 (v1.33.22 — MERGE bundle-21): stale_nlm_ref nay có fixer tất định (quarantine-fix reg_clear);
-        # still_on_nlm (nguồn LIVE) vẫn xoá tay sau verify.
-        acts.append(f"soát quarantine mâu thuẫn: corpus_true={rep['quarantine']['corpus_true']} "
-                    f"stale_nlm_ref={rep['quarantine']['stale_nlm_ref']} still_on_nlm={rep['quarantine']['still_on_nlm']} "
-                    f"→ `tl quarantine-fix --apply` (corpus-flip + nhãn + reg_clear stale-ref); ghost LIVE xoá NLM tay sau verify")
-    if rep["quarantine"]["label_variants"]:
-        acts.append(f"chuẩn hoá {rep['quarantine']['label_variants']} nhãn quarantine biến thể")
-    # nlm_drift TÁCH theo sub-type — mỗi cái lệnh KHÁC (reconcile chỉ chữa LINKAGE, không phải toàn bộ drift):
-    if drift.get("NLM_NOTEBOOK_ID_MISSING"):
-        acts.append(f"tl nlm-reconcile {nb} --apply   # {drift['NLM_NOTEBOOK_ID_MISSING']} thiếu notebook_id (LINKAGE; shard khác → reconcile từng shard)")
-    if drift.get("NLM_STATUS_MISMATCH"):
-        acts.append(f"{drift['NLM_STATUS_MISMATCH']} NLM_STATUS_MISMATCH = nhãn status LẠ ngoài họ pushed/synced/removed* (registry hygiene, KHÔNG phải live desync) → soát/chuẩn hoá nhãn; `tl nlm-orphans {nb} --fix-mismatch` CHỈ vá ca live-desync thật (MISMATCH_LIVE)")
-    if drift.get("CORPUS_TRUE_NOT_ON_NLM"):
-        acts.append(f"tl ingest-missing --apply   # {drift['CORPUS_TRUE_NOT_ON_NLM']} chưa push NLM (JOB LỚN, cần slot/overflow — phần lớn CẤU TRÚC do corpus>cap 300/notebook, sẽ KHÔNG về 0)")
-    # S-7 (v1.33.16 — MERGE nhánh-4): cụm ACTIVE raw/name (P2-4 v1.33.12 đo được nhưng CHƯA nối vào trigger) —
-    # log rà 67: 5 raw-active + 39 name-active cần dedup mà next-action im vì chỉ xét same_doc/md5/identity.
-    if (rep["duplicates"]["same_document"] or rep["duplicates"]["by_md5"] or rep["duplicates"]["identity"]
-            or rep["duplicates"]["by_sohieu_raw_active"] or rep["duplicates"]["by_name_active"]):
-        acts.append("tl dedup-plan --apply   # dedup toàn corpus 1 lệnh (GIỮ canonical, set dup corpus=false; "
-                    "gồm cả cụm ACTIVE by_sohieu_raw_active/by_name_active)")
-    if rep["loai_noncanonical"]:
-        acts.append(f"tl backfill-loai --normalize --apply   # {rep['loai_noncanonical']} loai phi-chuẩn (FIELD ngoài "
-                    f"enum — cần --normalize v1.30.1 vì mặc định CHỈ điền dòng RỖNG; khác LOAI_MISMATCH của "
-                    f"corpus-audit vốn đọc header; 2 thước đo khác nhau, đếm lệch là bình thường)")
-    if rep["name_nonstandard"]:
-        # S-6 (v1.33.16 — MERGE nhánh-4): 163 tên phi-chuẩn mà hướng dẫn cũ là lệnh TỪNG CA → chạy LÔ bằng
-        # corpus-audit (rows đã tự mô tả từ S-1 v1.33.15: đọc rows[].fix_command/command).
-        acts.append(f"soát {rep['name_nonstandard']} tên phi-chuẩn (name_nonstandard_rows: .html/thiếu-sohieu/"
-                    f"thiếu-chủ-đề) → chạy LÔ `tl corpus-audit --all --resume --limit 15 --workers 4 --json` "
-                    f"(S11: Cowork 45s cần trang NHỎ — lặp CÙNG LỆNH tới rc=0), đọc "
-                    f"rows[].fix_command rồi source-rename TỪNG FILE/lệnh; header-verify --fix-suggest chỉ cho ca đơn lẻ")
-    rep["next_actions"] = acts
-    return rep
-
-
-def cmd_sweep(a) -> int:
-    """COMPOSITE read-only (TẤT ĐỊNH) — 1 lệnh thay cả CHUỖI audit thường chạy: hygiene scan + cat-audit + slot-audit
-    + doctor-drift + vbhn-year-fix DRY + đếm quarantine/dup. KHÔNG mutate. In JSON (--json) hoặc text + NEXT ACTIONS
-    điền sẵn lệnh. Mục tiêu: chấm sức khoẻ corpus 1 phát, hết chạy 6 lệnh rời rạc."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] sweep: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    rep = _sweep_report(entries)
-    drift = rep["nlm_drift"]
-    acts = rep["next_actions"]
-    # P0-2 (v1.33.12 — log: sweep offline 0 ≠ NLM sạch, ca thật desync 76-2026 Dược chỉ lộ khi reconcile LIVE):
-    # `--live-nlm` = sweep TỰ đối soát ground-truth CLI 1 lượt (read-only, chậm hơn) — khi rà TOÀN corpus nên bật.
-    if getattr(a, "live_nlm", False):
-        try:
-            _nb_live = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
-            _nc = _imp("nlm_cli")
-            _live = _nc.source_list(_nb_live, skip_freshness=True)
-            if _live.get("ok"):
-                _plan = _nlm_reconcile_plan(_live.get("sources") or [], entries, _nb_live)
-                _live_count = len({s.get("id") for s in _live["sources"] if s.get("id")})
-                # S-4/S-5 (v1.33.16 — MERGE nhánh-4, SỬA key: plan dùng `unregistered`, bản nhánh-4 đọc
-                # `unregistered_on_nlm` không tồn tại → luôn 0): phơi ĐỦ các nhóm drift + gap máy-đọc — log rà
-                # 67: registry claim 546 vs vật lý 298/300, driver từng dùng claim để chốt FULL/overflow SAI.
-                rep["nlm_live"] = {"notebook": _nb_live,
-                                   "live_on_nlm": _live_count,
-                                   "desync_real": len(_plan["desync_real"]),
-                                   "already_removed": len(_plan["already_removed"]),
-                                   "other_notebook": len(_plan.get("other_notebook") or []),
-                                   "link_candidates": len(_plan.get("link_candidates") or []),
-                                   "unregistered_on_nlm": len(_plan.get("unregistered") or []),
-                                   "registry_rows_claiming_nlm": _plan["registry_on_nlm_rows"],
-                                   "registry_live_gap": _plan["registry_on_nlm_rows"] - _live_count,
-                                   "basis": "LIVE source_list là ground-truth slot; registry_rows_claiming_nlm "
-                                            "chỉ là estimate/offline claim (gồm shard khác + đã gỡ) — KHÔNG "
-                                            "dùng để chốt FULL/overflow"}
-                if _plan["desync_real"]:
-                    acts.insert(0, f"🔴 LIVE desync_real={len(_plan['desync_real'])} (registry pushed nhưng VẮNG NLM) "
-                                   f"→ tl nlm-reconcile {_nb_live} --apply --clear-stale (nếu gỡ chủ đích) hoặc re-push")
-            else:
-                rep["nlm_live"] = {"ok": False, "error": str(_live.get("error") or "")[:200]}
-        except Exception as _le:  # noqa: BLE001
-            rep["nlm_live"] = {"ok": False, "error": str(_le)[:200]}
-    # v1.30.1 (#7): kèm tuổi snapshot để người đọc biết số liệu tươi tới đâu (impure — thêm ở tầng lệnh, giữ _sweep_report PURE)
-    _age = _manifest_cache_age_seconds()
-    rep["snapshot_age_s"] = None if _age is None else int(_age)
-    if getattr(a, "json", False) or getattr(a, "out", None):
-        _emit_json_payload(rep, getattr(a, "out", None))
-    else:
-        # P1-7 (v1.31.0 — log LIVE: 3 con số corpus dễ đọc nhầm 'mất dữ liệu'): 1 CON SỐ HEADLINE duy nhất =
-        # server-rule (khớp `tl boot`); số client + giải thích định nghĩa lùi xuống 1 dòng phụ (đầy đủ khi --verbose).
-        _delta = rep["corpus"] - rep["corpus_server_rule_equiv"]
-        print(f"== tl sweep · {rep['total']} entry · CORPUS = {rep['corpus_server_rule_equiv']} (server-rule, khớp `tl boot`) "
-              f"· snapshot {rep['snapshot_age_s'] if rep['snapshot_age_s'] is not None else '?'}s ==")
-        if _delta:
-            if getattr(a, "verbose", False):
-                print(f"  ℹ client corpus=true = {rep['corpus']} (Δ{_delta:+d} là ĐỊNH NGHĨA, không phải mất dữ liệu: "
-                      f"server đếm thêm corpus='vbqppl'/overflow, trừ ref & loai='thuong' — corpus_basis trong --json).")
-            else:
-                print(f"  ℹ client corpus=true = {rep['corpus']} (Δ{_delta:+d} = khác định nghĩa — --verbose/--json để xem).")
-        print(f"  quarantine: {rep['quarantine']['total']} (corpus_true={rep['quarantine']['corpus_true']} "
-              f"still_on_nlm={rep['quarantine']['still_on_nlm']}[live] stale_nlm_ref={rep['quarantine']['stale_nlm_ref']} "
-              f"label_variants={rep['quarantine']['label_variants']})")
-        print(f"  dup: sohieu={rep['duplicates']['by_sohieu']} (raw={rep['duplicates']['by_sohieu_raw']}, "
-              f"raw-active={rep['duplicates']['by_sohieu_raw_active']} — active GIẢM theo dedup, raw thì không) "
-              f"md5={rep['duplicates']['by_md5']} name={rep['duplicates']['by_name']}"
-              f"(active={rep['duplicates']['by_name_active']}) identity={rep['duplicates']['identity']} "
-              f"same_doc={rep['duplicates']['same_document']}")
-        print(f"  orphans={rep['orphans']} (tách riêng hợp-lệ-không-số-hiệu: treaties={rep['treaties']} "
-              f"party_docs={rep.get('party_docs', 0)}) "
-              f"title_mismatch={rep['title_mismatch']} vbhn_advisory={rep.get('vbhn_metadata_advisory', 0)} "
-              f"omnibus_advisory={rep.get('omnibus_title_advisory', 0)} "
-              f"loai_noncanonical={rep['loai_noncanonical']} name_nonstandard={rep['name_nonstandard']}"
-              + (f" (+{rep['name_nonstandard_other']} thuong/quarantine — ngoài hàng rename)"
-                 if rep.get("name_nonstandard_other") else ""))
-        print(f"  vbhn_year: fixable={rep['vbhn_year']['fixable']} needs_year={rep['vbhn_year']['needs_year']} conflicts={rep['vbhn_year']['conflicts']}")
-        print(f"  nlm_drift: {rep['nlm_drift_total']} (" + " ".join(f"{k}={v}" for k, v in drift.items())
-              + ") [OFFLINE registry-only — live: tl nlm-reconcile / sweep --live-nlm]")
-        if isinstance(rep.get("nlm_live"), dict) and "desync_real" in rep.get("nlm_live", {}):
-            _nl = rep["nlm_live"]
-            print(f"  nlm LIVE: on_nlm={_nl['live_on_nlm']} desync_real={_nl['desync_real']} "
-                  f"already_removed={_nl['already_removed']} other_nb={_nl.get('other_notebook', 0)} "
-                  f"unregistered={_nl.get('unregistered_on_nlm', 0)} "
-                  f"claiming={_nl['registry_rows_claiming_nlm']} gap={_nl.get('registry_live_gap', 0)} "
-                  f"(claim=estimate, KHÔNG chốt FULL/overflow bằng số này)")
-        if rep["raw_on_nlm"]:
-            print(f"  🔴 raw_on_nlm: {rep['raw_on_nlm']} nguồn NLM là FILE THÔ (trái 'chỉ push GDoc') → convert GDoc + re-push (raw_on_nlm_rows)")
-        if rep["cat_label_variants"]:
-            print(f"  ⚠ cat_label_variants: {rep['cat_label_variants']} mã có cả nhãn TRƠ lẫn ĐỦ TÊN (05 vs 05_Can_bo…) → gộp qua recat (cat_label_variants_rows)")
-        if rep["shared_source_id"]:
-            print(f"  🔴 shared_source_id (FALSE-LINK): {rep['shared_source_id']} — xóa 1 nguồn gãy link kia! sửa TRƯỚC reconcile")
-        if rep["goc_pollution"]:
-            print(f"  🔴 goc_pollution: {rep['goc_pollution']} VBHN registry.goc NHIỄM (tên goc_<X> ≠ registry.goc) → redirect SAI; sửa goc qua reg_upsert")
-        if rep["infra_in_corpus"]:
-            print(f"  🔴 infra_in_corpus: {rep['infra_in_corpus']} file hạ tầng (.json/.enc/secrets) corpus=true = RÁC → set corpus=false")
-        if rep["raw_dup_of_standard"]:
-            print(f"  ⚠ raw_dup_of_standard: {rep['raw_dup_of_standard']} bản tải thô nghi trùng bản chuẩn (soát rows → source-update-corpus false)")
-        if acts:
-            print("  NEXT ACTIONS:")
-            for x in acts:
-                print(f"    • {x}")
-    return 0
 
 
 def _registry_claim_by_notebook(entries: list) -> dict:
@@ -14409,52 +13234,6 @@ def _corpus_fix_plan(entries: list) -> dict:
                     "--tier safe`. metadata/human_confirm/structural: chạy lệnh in sẵn, người duyệt (đọc header/xác minh)."}
 
 
-def cmd_corpus_fix(a) -> int:
-    """ORCHESTRATOR dọn/chỉnh lý corpus 1 lệnh: kế hoạch THEO THỨ TỰ PHỤ THUỘC + 2 tầng an toàn. DRY/report mặc định.
-    `--apply --tier safe`: CHỈ chạy thao tác REVERSIBLE (infra + dedup → corpus=false); còn lại LUÔN in lệnh, người duyệt."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] corpus-fix: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    plan = _corpus_fix_plan(entries)
-    if getattr(a, "apply", False):
-        if getattr(a, "tier", None) != "safe":
-            print(json.dumps({"ok": False, "error": "APPLY_REQUIRES_TIER_SAFE",
-                              "note": "corpus-fix --apply CHỈ chạy tier=safe (reversible: infra/dedup→corpus=false). "
-                                      "Các bước metadata/human_confirm/structural chạy lệnh riêng in trong plan."},
-                             ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
-        _ok_gate, _pfv = _apply_gate(a, write_cols="corpus")   # (Pha 1) chống clobber/ghi-mù TRƯỚC khi ghi
-        if not _ok_gate:
-            return 2
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        g = _gas()
-        run_id = _apply_journal_start("corpus-fix", {"tier": "safe"})
-        _sr = _corpus_safe_reversible(entries)
-        items = [{"drive_id": x, "corpus": "false"} for x in _sr["ids"]]
-        _before = {x: {"corpus": "true"} for x in _sr["ids"]}   # undo = trả corpus=true
-        v = _journaled_reg_write(run_id, g, items, "corpus", before_by_key=_before) if items else {"patched": 0, "verified": True}
-        _journal_append(run_id, {"t": "run_end", "ok": bool(v.get("verified", True)), "counts": {"corpus_false": v.get("patched")}})
-        print(json.dumps({"ok": True, "tier": "safe", "corpus_false_patched": v.get("patched"), "journal": run_id,
-                          "infra": _sr["infra"], "dedup": _sr["dedup"], "total_reversible": len(items),
-                          "next_human_steps": [s["id"] for s in plan["needs_human"]]}, ensure_ascii=False, indent=2))
-        print("[tl] corpus-fix (safe): reversible xong. Còn lại (metadata/human) chạy lệnh trong `corpus-fix` (DRY). "
-              "MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
-        return 0
-    if getattr(a, "json", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-    else:
-        print(f"== tl corpus-fix · {plan['total']} entry · corpus {plan['corpus']} · {plan['step_count']} bước "
-              f"(THEO THỨ TỰ) ==")
-        for s in plan["steps"]:
-            tag = {"safe_auto": "✅AUTO", "metadata_deterministic": "🟡META", "human_confirm": "🔴NGƯỜI", "structural": "🏗CẤU-TRÚC"}.get(s["tier"], s["tier"])
-            print(f"  {s['order']:2d}. [{tag}] {s['problem']} — {s['count']}")
-            print(f"       → {s['command']}")
-        print("  ✅AUTO=reversible (corpus=false) → `corpus-fix --apply --tier safe`. 🟡META/🔴NGƯỜI/🏗=chạy lệnh in sẵn, duyệt tay.")
-    return 0
-
-
 _LOOP_LIVE_FIELDS = ("corpus", "nlm_source_id", "nlm_status", "nlm_notebook_id")
 
 
@@ -14562,93 +13341,6 @@ def cmd_loop(a) -> int:
                       "note": f"Hoàn tác toàn bộ: `tl undo {run_id} --apply --confirm yes`. Còn metadata/human: `corpus-fix` DRY."},
                      ensure_ascii=False, indent=2))
     return 0 if status == "converged" else 1
-
-
-def _consolidation_cleanup_plan(entries: list) -> dict:
-    """PURE (Pha sau): 'có đồng thời VBHN + gốc/sửa đổi RỜI' → GIỮ VBHN, set THÀNH PHẦN (gốc/luật-sửa) corpus=false
-    (reversible) khi VBHN phủ chúng ĐÃ VERIFY (on NLM live). Khi tìm thành phần, source-map VBHN-first vẫn trả ra VBHN.
-    An toàn nhiều lớp:
-      • VBHN covering PHẢI on NLM live (đã verify), corpus=true; component KHÔNG phải VBHN + đang corpus=true.
-      • CORROBORATE goc (chống goc-pollution — cùng guard với source-map VBHN-first `_vbhn_goc_corroborated`): chỉ vào
-        'ready' (đủ điều kiện auto corpus=false) khi tồn tại VBHN phủ ĐƯỢC CORROBORATE cho component (tên VBHN mã hoá
-        base khớp/không mã hoá + chủ đề không xung khắc). Khớp goc NHƯNG không corroborate = NGHI goc-pollution → review
-        (cờ GOC_POLLUTION_SUSPECT), KHÔNG auto (đề phòng ẩn văn bản mà redirect VBHN-first lại không kích hoạt).
-      • Component CÒN trên NLM → review (cân nhắc gỡ nguồn tay), không auto."""
-    covered: dict = {}    # component_sohieu_key -> [vbhn phủ, đã on nlm]
-    for e in entries:
-        if _is_vbhn_entry(e) and _entry_corpus_true(e) and _entry_on_nlm_live(e):
-            for k in _goc_keys(e):
-                covered.setdefault(k, []).append(e)
-    ready, review = [], []
-    for e in entries:
-        if _is_vbhn_entry(e) or not _entry_corpus_true(e):
-            continue
-        sk = _sohieu_key_entry(e)
-        if not sk or sk not in covered:
-            continue
-        vbhns = covered[sk]
-        subj = _entry_subject_text(e)
-        corrob = [v for v in vbhns if _vbhn_goc_corroborated(v, sk, subj)]
-        show = corrob if corrob else vbhns
-        row = {"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:60], "sohieu": _entry_sohieu(e) or "",
-               "on_nlm": _entry_on_nlm_live(e), "nlm_source_id": _entry_nlm(e) or None,
-               "corroborated": bool(corrob),
-               "covered_by_vbhn": [{"sohieu": _entry_sohieu(v) or _sohieu_key_entry(v), "name": _entry_name(v)[:44]} for v in show[:3]]}
-        if _entry_on_nlm_live(e):
-            row["reason"] = "COMPONENT_STILL_ON_NLM"; review.append(row)
-        elif not corrob:
-            row["reason"] = "GOC_POLLUTION_SUSPECT"; review.append(row)   # khớp goc nhưng KHÔNG corroborate → nghi nhiễm
-        else:
-            ready.append(row)
-    return {"ready": ready, "review_on_nlm": review, "total_ready": len(ready)}
-
-
-def cmd_consolidation_cleanup(a) -> int:
-    """Pha sau: gộp 'cả VBHN + gốc/sửa đổi rời' về VBHN — set THÀNH PHẦN corpus=false (reversible) khi VBHN phủ ĐÃ VERIFY
-    (on NLM). Khi tìm thành phần vẫn trả VBHN (source-map VBHN-first). DRY mặc định; --apply ghi reg_bulk corpus=false.
-    Component CÒN trên NLM → review (gỡ nguồn tay bằng `source-update-corpus`/`shared-source-fix` nếu muốn)."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] consolidation-cleanup: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    p = _consolidation_cleanup_plan(entries)
-    if getattr(a, "apply", False):
-        _ok_gate, _ = _apply_gate(a, write_cols="corpus")   # (Pha 1+) precheck + journal + verified-write
-        if not _ok_gate:
-            return 2
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        g = _gas()
-        run_id = _apply_journal_start("consolidation-cleanup", {"components": len(p["ready"])})
-        items = [{"drive_id": r["drive_id"], "corpus": "false"} for r in p["ready"]]
-        _before = {r["drive_id"]: {"corpus": "true"} for r in p["ready"]}
-        v = _journaled_reg_write(run_id, g, items, "corpus", before_by_key=_before) if items else {"patched": 0, "verified": True}
-        _invalidate_manifest_cache()
-        patched = v.get("patched") or 0
-        under = bool(items) and not v.get("verified")   # HỤT THẬT = có dòng miss (drive_id không khớp); patched=0 do đã corpus=false sẵn = OK
-        _journal_append(run_id, {"t": "run_end", "ok": not under, "counts": {"corpus_false": patched, "missed": v.get("missed") or 0}})
-        print(json.dumps({"ok": not under, "corpus_false_patched": patched, "components": len(items), "journal": run_id,
-                          "review_on_nlm": len(p["review_on_nlm"]),
-                          "note": "Thành phần → corpus=false (reversible; undo: `tl undo <journal>`). Còn trên NLM (review) chưa đụng. `tl boot --refresh`."},
-                         ensure_ascii=False, indent=2))
-        if under:
-            print(f"[tl] ⚠ consolidation-cleanup: {v.get('missed') or 0} dòng KHÔNG khớp ({v.get('missed_ids')}) — `tl boot --refresh` rồi lặp lại.", file=sys.stderr)
-            return 1
-        return 0
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", **p}, ensure_ascii=False, indent=2))
-    else:
-        _nlm = [r for r in p["review_on_nlm"] if r.get("reason") == "COMPONENT_STILL_ON_NLM"]
-        _poll = [r for r in p["review_on_nlm"] if r.get("reason") == "GOC_POLLUTION_SUSPECT"]
-        print(f"== consolidation-cleanup DRY · {p['total_ready']} thành phần → corpus=false · {len(_nlm)} còn NLM · {len(_poll)} nghi goc-nhiễm (review) ==")
-        for r in p["ready"][:25]:
-            print(f"  ✗ {r['sohieu'] or '∅':18s} {r['name'][:44]} → phủ bởi VBHN {r['covered_by_vbhn'][0]['sohieu'] if r['covered_by_vbhn'] else '?'}")
-        for r in _nlm[:15]:
-            print(f"  🟡 CÒN NLM: {r['sohieu'] or '∅':18s} {r['name'][:40]} — gỡ nguồn tay nếu muốn")
-        for r in _poll[:15]:
-            print(f"  ⚠ NGHI GOC-NHIỄM: {r['sohieu'] or '∅':18s} {r['name'][:38]} → không auto (verify goc VBHN; xem `tl sweep` goc_pollution)")
-        print("  → --apply: set component corpus=false (GIỮ VBHN; reversible; CHỈ nhóm ✗ corroborated). Tìm thành phần vẫn ra VBHN (source-map VBHN-first).")
-    return 0
 
 
 def _shared_source_fix_plan(entries: list) -> list:
@@ -15011,61 +13703,6 @@ def cmd_source_update_corpus(a) -> int:
                       "note": "cache manifest đã xoá → `tl boot --refresh`. Undo cờ corpus: `tl undo <journal>`." + (" Đưa vào corpus: nhớ nlm-add/ingest." if (is_corpus and plan.get("needs_ingest")) else "")},
                      ensure_ascii=False, indent=2))
     return 0 if reg.get("ok") else 2
-
-
-def cmd_quarantine_fix(a) -> int:
-    """COMPOSITE dọn quarantine MÂU THUẪN (nhóm B): set_corpus_false (raw dup gán nhầm corpus) + normalize_label
-    (nhãn biến thể→QUARANTINE_CAT) TỰ ĐỘNG; review_restore (GDoc corpus=true nghi canonical kẹt) + ghost_nlm (còn
-    nguồn NLM live) chỉ BÁO (cần quyết/verify tay). DRY mặc định; --apply ghi reg_bulk 2 nhóm an toàn."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] quarantine-fix: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    b = _quarantine_fix_items(entries)
-    if getattr(a, "apply", False):
-        _ok_gate, _ = _apply_gate(a, write_cols="corpus,cat")   # reg_clear validate cols riêng (_REG_CLEARABLE_COLS)
-        if not _ok_gate:
-            return 2
-        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        g = _gas()
-        run_id = _apply_journal_start("quarantine-fix", {"corpus_false": len(b["set_corpus_false"]),
-                                                         "relabel": len(b["normalize_label"]),
-                                                         "clear_stale_nlm_ref": len(b["clear_stale_nlm_ref"])})
-        _cf_before = {r["drive_id"]: {"corpus": "true"} for r in b["set_corpus_false"]}
-        rc = _journaled_reg_write(run_id, g, [{"drive_id": r["drive_id"], "corpus": "false"} for r in b["set_corpus_false"]],
-                                  "corpus", before_by_key=_cf_before) if b["set_corpus_false"] else {"patched": 0}
-        rn = _journaled_reg_write(run_id, g, [{"drive_id": r["drive_id"], "cat": QUARANTINE_CAT} for r in b["normalize_label"]],
-                                  "cat") if b["normalize_label"] else {"patched": 0}
-        # B3/B9 (v1.33.22): ref NLM treo → reg_clear TỪNG DÒNG (KHÔNG reg_bulk giá trị rỗng — webapp bỏ qua).
-        _rs_ok, _rs_fail = _quarantine_clear_stale(run_id, g, b["clear_stale_nlm_ref"])
-        _invalidate_manifest_cache()
-        _journal_append(run_id, {"t": "run_end", "ok": not _rs_fail,
-                                 "counts": {"corpus_false": rc.get("patched"), "relabel": rn.get("patched"),
-                                            "clear_stale_nlm_ref": _rs_ok}})
-        print(json.dumps({"ok": True, "corpus_false_patched": rc.get("patched"), "label_normalized": rn.get("patched"),
-                          "stale_nlm_ref_cleared": _rs_ok, "stale_nlm_ref_failed": _rs_fail, "journal": run_id,
-                          "review_restore": len(b["review_restore"]), "ghost_nlm": len(b["ghost_nlm"]),
-                          "ghost_sources": b["ghost_nlm"]}, ensure_ascii=False, indent=2))
-        print(f"[tl] quarantine-fix: corpus=false {rc.get('patched')}/{len(b['set_corpus_false'])} · "
-              f"nhãn chuẩn {rn.get('patched')}/{len(b['normalize_label'])} · "
-              f"stale_ref_clear {_rs_ok}/{len(b['clear_stale_nlm_ref'])} · review_restore {len(b['review_restore'])} · "
-              f"ghost_nlm {len(b['ghost_nlm'])} (ghost LIVE: verify rồi `nlm source delete` tay). "
-              f"MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
-        return 1 if _rs_fail else 0
-    print(f"== quarantine-fix DRY · set_corpus_false {len(b['set_corpus_false'])} · normalize_label "
-          f"{len(b['normalize_label'])} · stale_nlm_ref {len(b['clear_stale_nlm_ref'])} · "
-          f"review_restore {len(b['review_restore'])} · ghost_nlm {len(b['ghost_nlm'])} "
-          f"(--apply ghi 3 nhóm an toàn đầu; ghost_nlm xoá nguồn tay) ==")
-    for r in b["clear_stale_nlm_ref"][:20]:
-        print(f"  ✅ STALE_NLM_REF (reg_clear an toàn) src={r['nlm_source_id'][:16]:16s} {r['sohieu'] or '∅':18s} {r['name']} [{r['drive_id'][:14]}]")
-    for r in b["review_restore"][:20]:
-        print(f"  🟡 REVIEW_RESTORE (GDoc corpus=true kẹt quarantine) {r['sohieu'] or '∅':20s} {r['name']} [{r['drive_id'][:14]}]")
-    for r in b["ghost_nlm"][:20]:
-        print(f"  🔴 GHOST_NLM (xoá nguồn tay) src={r['nlm_source_id'][:16]:16s} {r['sohieu'] or '∅':18s} {r['name']} [{r['drive_id'][:14]}]")
-    if getattr(a, "json", False):
-        print(json.dumps({"ok": True, "mode": "DRY", **{k: b[k] for k in b}}, ensure_ascii=False, indent=2))
-    return 0
 
 
 def cmd_cat_list(a) -> int:
@@ -15579,138 +14216,6 @@ def _declared_loai_from_header(text: str) -> str:
     return ""
 
 
-def _corpus_audit_row(entry: dict, header_text: str) -> dict:
-    """PURE, dùng CHUNG cho `header-verify --fix-suggest` (B, per-file) và `corpus-audit` (A, toàn corpus): đọc header →
-    SO registry → trả danh sách ĐỀ XUẤT {type, severity, current, suggested, fix_command}. PROPOSE-ONLY (không auto — nội
-    dung là phán đoán). Tái dùng _verify_header_match + _classify_doc_header + _vb_standard_doc_name + _vb_auto_cat_from_text."""
-    vr = _verify_header_match(entry, header_text)
-    info = _classify_doc_header(header_text, _entry_name(entry))
-    checks = vr.get("checks", {})
-    did = _entry_drive_id(entry)
-    name = _entry_name(entry)
-    reg_sh = _sohieu_key_entry(entry)
-    props: list[dict] = []
-
-    # 1) SỐ HIỆU — header có ĐÚNG 1 số hiệu rõ ≠ registry → source-rename --sohieu.
-    head_shs = [s for s in (vr.get("header_sohieu") or []) if s]
-    if checks.get("sohieu") is False and len(head_shs) == 1 and head_shs[0] != reg_sh:
-        # A1c (v1.33.9): KHÔNG BAO GIỜ đề xuất RỚT NĂM của VBHN đã year-fix (bất biến NN-YYYY-VBHN-XXX) chỉ vì
-        # header in dạng chính-thức không-năm — check sohieu đã nhận dạng không-năm là khớp, guard này chống sót.
-        _m_vy2 = _VBHN_WITHYEAR_RE.fullmatch(reg_sh or "")
-        _yearless2 = f"{_m_vy2.group(1)}-VBHN-{_m_vy2.group(3)}" if _m_vy2 else None
-        if head_shs[0] != _yearless2:
-            props.append({"type": "SOHIEU_MISMATCH", "current": reg_sh or "∅", "suggested": head_shs[0],
-                          "fix_command": f"tl source-rename {did} --sohieu {head_shs[0]} --apply"})
-
-    # VBHN số hiệu THIẾU NĂM: xử ở MISSING_YEAR TRƯỚC (đúng thứ tự phụ thuộc) — KHÔNG để NAME_TRICH_YEU dựng tên từ sohieu
-    # year-less (sẽ RỚT NĂM, vi phạm bất biến). vbhn-year-fix --with-name đã đổi CẢ tên khi thêm năm.
-    _vbhn_noyear = bool(_is_vbhn_entry(entry) and reg_sh and _VBHN_NOYEAR_RE.fullmatch(reg_sh))
-
-    # 2) TÊN / TRÍCH YẾU — CHỈ khi tên hiện tại HỎNG CẤU TRÚC (UUID/đuôi file/thiếu mã loại) — tên ĐÃ chuẩn KHÔNG đụng
-    # (trích yếu-từ-header quá nhiễu để đổi tên chuẩn, dễ SAI: rớt năm/nhặt cơ quan). GUARD: subject không boilerplate +
-    # phải CHIA SẺ ≥1 token với tên cũ (corroborate — chống Kế toán→Văn phòng quốc hội) + tên mới hợp lệ + KHÔNG VBHN-thiếu-năm.
-    if _name_looks_nonstandard(name) and not _vbhn_noyear:
-        merged = dict(info)
-        if reg_sh and not merged.get("sohieu"):
-            merged["sohieu"] = _entry_sohieu(entry); merged["sohieu_key"] = reg_sh
-        subj = _doc_subject_for_name(header_text, merged)
-        if subj and not _subject_is_boilerplate(subj):
-            merged["title"] = subj.capitalize() if subj.isupper() else subj
-            suggested_name = _vb_standard_doc_name(merged, name)
-            share = _token_set(subj) & _token_set(_name_tail_key(name))
-            # v1.29.4 (log LIVE i2c — ca đề xuất đổi KL_→NQ_ SAI loại): KHÔNG đề xuất tên ĐỔI MÃ LOẠI so với tên
-            # hiện tại khi prefix hiện tại là mã canonical — phân loại-từ-header quá nhiễu để đổi LOẠI qua rename;
-            # loại lệch THẬT đã có LOAI_MISMATCH riêng (trỏ header-verify tay).
-            _cur_pfx = _NAME_TYPE_PREFIX_RE.match(name or "")
-            _sug_pfx = _NAME_TYPE_PREFIX_RE.match(suggested_name or "")
-            # A2 v1.33.0: so theo HỌ loại — BLDS_↔Bo_luat_ là cùng họ, không phải 'đổi mã loại'.
-            _pfx_changed = bool(_cur_pfx and _sug_pfx and _name_prefix_family(_cur_pfx) != _name_prefix_family(_sug_pfx))
-            if (suggested_name and _name_key(suggested_name) != _name_key(name)
-                    and not _name_looks_nonstandard(suggested_name) and share and not _pfx_changed):
-                props.append({"type": "NAME_TRICH_YEU", "current": name[:60], "suggested": suggested_name,
-                              "fix_command": f"tl source-rename {did} --name {suggested_name} --apply"})
-
-    # 2b) P0-3 (v1.31.0): CẤU TRÚC TÊN — kiểm ĐỘC LẬP header (trước đây NAME_TRICH_YEU cần header-subject
-    # chia-sẻ-token → 4 ca tên hỏng lọt lưới 0 proposals). CHỈ cờ + trỏ lệnh; KHÔNG tự dựng tên (việc của
-    # NAME_TRICH_YEU/vbhn-year-fix). Bỏ qua: phụ lục/mẫu (PL_/Mau_ có quy ước riêng), điều ước quốc tế, non-corpus.
-    if (_entry_corpus_true(entry) and not _vbhn_noyear
-            and not any(p["type"] == "NAME_TRICH_YEU" for p in props)
-            and not _is_treaty_entry(entry)
-            and not re.match(r"^(PL|Mau|Phu_luc)[_\-]", name, re.I)):
-        _nsi = _name_structural_issues(name)
-        if _nsi:
-            props.append({"type": "NAME_NONSTANDARD", "current": name[:60],
-                          "suggested": "<Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay)", "issues": _nsi,
-                          "fix_command": f"tl header-verify --drive-id {did} --fix-suggest   # rồi source-rename theo đề xuất"})
-
-    # 3) THIẾU NĂM (VBHN corpus) — số hiệu dạng NN-VBHN-XXX không năm → vbhn-year-fix. ⚠ lệnh BATCH (sửa MỌI VBHN thiếu năm,
-    # idempotent — KHÔNG chỉ dòng này); dùng --limit nếu muốn nhỏ giọt.
-    if _vbhn_noyear and _entry_corpus_true(entry):
-        props.append({"type": "MISSING_YEAR", "current": reg_sh, "suggested": f"{reg_sh} + NĂM (suy từ ngày ban hành)",
-                      "fix_command": "tl vbhn-year-fix --with-name --apply   # BATCH: sửa MỌI VBHN thiếu năm"})
-
-    # 4) LOẠI — CHỈ khi header NHẬN RA 1 loại KHÁC bậc registry (xung khắc thật), KHÔNG phải chỉ THIẾU từ loại (header
-    # OCR/che khuyết → info.loai rỗng → BỎ, tránh nhiễu — review chỉ ra). Trỏ header-verify (review tay, không auto).
-    # v1.29.1 (log LIVE 2.5a): checks['loai'] chỉ là "header CÓ TỪ-LOẠI đúng bậc tier" — header cụt/OCR làm nó False dù
-    # loại THẬT khớp → từng đề xuất current==suggested GIỐNG HỆT. Guard: chỉ fire khi loai chuẩn hoá THỰC SỰ KHÁC.
-    if (checks.get("loai") is False and info.get("loai")
-            and _normalize_loai(str(info.get("loai"))) != _normalize_loai(str(entry.get("loai") or ""))):
-        props.append({"type": "LOAI_MISMATCH", "current": str(entry.get("loai") or "?"), "suggested": info.get("loai"),
-                      "fix_command": f"tl header-verify --drive-id {did}   # kiểm loại/tên thủ công"})
-    # 4b) A2 (v1.33.7 — log rà v1.33.6: BLHS 100/2015 + BLLĐ 45/2019 đăng ký loai='Luat' mà proposals=0):
-    # 'Bộ luật' và 'Luật' CÙNG tier-5 nên checks['loai'] pass khi header có 'luat' → nhánh trên câm.
-    # Đối chiếu RIÊNG cặp Bộ-luật↔Luật theo HEADER (ground-truth của corpus-audit; title-block đã ưu tiên
-    # 'BỘ LUẬT' trước 'LUẬT' từ v1.31.2).
-    if not any(p["type"] == "LOAI_MISMATCH" for p in props):
-        _hdr_lo = _normalize_loai(str(info.get("loai") or ""))
-        _reg_lo = _normalize_loai(str(entry.get("loai") or ""))
-        if {_hdr_lo, _reg_lo} == {"Bộ luật", "Luật"}:
-            props.append({"type": "LOAI_MISMATCH", "current": str(entry.get("loai") or "?"), "suggested": _hdr_lo,
-                          "fix_command": f"tl header-verify --drive-id {did}   # header={_hdr_lo}; sửa loai qua "
-                                         "tl register/reg_upsert (KHÔNG reg_bulk) — backfill-loai không đoán ca này"})
-    # 4c) S-2h (v1.33.16 — MERGE nhánh-4, detector viết lại): khối tiêu đề IN HOA khai 'BỘ LUẬT'/'VĂN BẢN HỢP
-    # NHẤT' ≠ registry → LOAI_MISMATCH (4/4b câm khi cùng tier-5 và _classify miss layout xen kẽ). GUARD kép:
-    # (a) entry VBHN (tên/loai/sohieu) KHÔNG qua đây — VBHN in tiêu đề luật GỐC 'BỘ LUẬT…' (đo thật ca 21-2026
-    # BLTTDS) và backfill-loai name-only đã own lớp đó; (b) chỉ tin khai báo MẠNH (Bộ luật/VBHN), 'LUẬT' trần
-    # không đủ đặc hiệu để đề xuất đổi loại.
-    if not any(p["type"] == "LOAI_MISMATCH" for p in props) and not _is_vbhn_entry(entry):
-        _decl_lo = _declared_loai_from_header(header_text)
-        _reg_lo3 = _normalize_loai(str(entry.get("loai") or ""))
-        if (_decl_lo in ("Bộ luật", "Văn bản hợp nhất") and _reg_lo3
-                and _decl_lo != _reg_lo3 and _reg_lo3 != "Văn bản hợp nhất"):
-            props.append({"type": "LOAI_MISMATCH", "current": str(entry.get("loai") or "?"), "suggested": _decl_lo,
-                          "fix_command": f"tl header-verify --drive-id {did}   # khối tiêu đề khai {_decl_lo}; "
-                                         "sửa loai qua tl register/reg_upsert (KHÔNG reg_bulk)"})
-
-    # 5) CAT — CHỈ fill-missing (cat hiện RỖNG/00), suggested là cat HỢP LỆ (≠00) + confident. KHÔNG override cat thật —
-    # auto-cat-từ-header quá nhiễu để đè cat đang đúng (vd đòi chuyển Hình sự 16→23); phát hiện cat SAI = dùng `cat-audit`.
-    cur_cat = re.sub(r"\D", "", str(_entry_cat(entry)))[:2]
-    if cur_cat in ("", "00"):
-        catp = _vb_auto_cat_from_text(header_text, name, "")
-        sug_cat = re.sub(r"\D", "", str(catp.get("cat") or ""))[:2]
-        if sug_cat and sug_cat != "00" and sug_cat != cur_cat and catp.get("confidence") == "high":
-            props.append({"type": "CAT_MISMATCH", "current": str(_entry_cat(entry)) or "∅", "suggested": str(catp.get("cat")),
-                          "fix_command": f"tl recat {did} --cat {sug_cat} --apply"})
-    else:
-        # 5b) P0-2 (v1.31.0) + SIẾT v1.33.0 (log rà 69/15 Luật — over-fire ~78%, BLHS→23, VBHN→46 hàng loạt):
-        # cat CÓ GIÁ TRỊ chỉ bị nghi SAI khi TIÊU ĐỀ (không phải 24KB thân văn bản) suy ra cat khác VÀ qua đủ
-        # cổng phủ định (VBHN/điều-ước/pin-19/cross-check alias) — xem _cat_likely_wrong_suggest. Ca thật GIỮ:
-        # 143-2025 'Đầu tư' ở cat 45 → 34 (alias đồng thuận); omnibus 57-2024 → 46.
-        _clw = _cat_likely_wrong_suggest(entry, header_text)
-        if _clw:
-            props.append(_clw)
-
-    for p in props:
-        sev, icon = _AUDIT_SEVERITY.get(p["type"], (9, "•"))
-        p["severity"] = sev; p["icon"] = icon
-    props.sort(key=lambda p: p["severity"])
-    # S-2g (v1.33.15 — log rà 40: 5 ca header_ok=False + 0 đề xuất chỉ trả {drive_id,name} CÂM — 'biết sai mà
-    # không nói sai Ở ĐÂU'): row mang LUÔN lý do lệch từ _verify_header_match → hàng need_manual_read tự giải thích.
-    return _audit_row_flatten({"drive_id": did, "name": name[:60], "sohieu": _entry_sohieu(entry) or "",
-                               "cat": _entry_cat(entry), "header_ok": vr.get("ok"), "proposals": props,
-                               "header_checks": checks, "header_mismatches": vr.get("mismatches") or []})
-
-
 def _audit_row_flatten(r: dict) -> dict:
     """S-1 (v1.33.15 — log rà 40: driver đọc rows[].type/severity/suggested_name/proposal = null trong khi
     summary đếm proposal_count=2 — chi tiết chỉ nằm LỒNG trong proposals[], schema summary↔row lệch nhau):
@@ -15730,245 +14235,6 @@ def _audit_row_flatten(r: dict) -> dict:
     r["proposal_count"] = len(ps)               # v1.33.16 (MERGE nhánh-4): đối soát nhanh không cần đếm proposals[]
     r["flags"] = [p.get("type") for p in ps]
     return r
-
-
-def cmd_corpus_audit(a) -> int:
-    """(A) ĐỌC HEADER toàn corpus → worklist SỬA XẾP HẠNG (số hiệu/tên-trích-yếu/năm/loại/cat/ngày) + LỆNH điền sẵn.
-    PROPOSE-ONLY (KHÔNG --apply — chỉ đề xuất; sửa chạy qua source-rename/vbhn-year-fix/recat). DRY. Dùng chung engine
-    `_corpus_audit_row` với `header-verify --fix-suggest`. --all|--full|--sohieu|--drive-id|--cat NN|--limit. --strict → rc=1 nếu có 🔴."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] corpus-audit: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    # A1 (v1.33.7 — log rà v1.33.6: `--all` cắt âm thầm ở 40, còn `--limit 600` thì cày 531 header 1 lượt ~9'
-    # vượt trần Cowork): `--all --resume` = CÀY TRỌN pool theo TRANG + checkpoint — idiom nlm-install:
-    # LẶP CÙNG LỆNH tới rc=0; rc=3 = PARTIAL (còn trang, KHÔNG phải lỗi). --limit = cỡ trang (mặc định 40).
-    # A3 (v1.33.18 — MERGE bundle-18 + tl_changes.patch, log rà 67: 530 doc ⇒ ~13 vòng --resume tay): `--all
-    # --full` = quét HẾT pool trong 1 lệnh (bỏ cap trang). LẤY NGỮ NGHĨA CỦA PATCH chứ không phải bundle:
-    # --full vẫn đi qua máy CHECKPOINT (_all_resume) — chết giữa chừng ở doc #500 không mất 499 header đã đọc,
-    # chạy tiếp bằng CÙNG lệnh (hoặc --all --resume) là nối; bundle-18 cho --full chạy trần không checkpoint =
-    # timeout là mất trắng. Cowork trần lệnh ngắn vẫn nên dùng --all --resume trang nhỏ.
-    _all_full = bool(getattr(a, "full", False) and getattr(a, "all", False)
-                     and not getattr(a, "sohieu_file", None))
-    _all_resume = bool(getattr(a, "all", False) and (getattr(a, "resume", False) or _all_full)
-                       and not getattr(a, "sohieu_file", None))
-    _page_size = 40
-    if _all_resume:
-        _page_size = 10 ** 9 if _all_full else int(getattr(a, "limit", None) or 40)
-        a.limit, a.offset = 10 ** 9, 0     # resolver trả TRỌN pool; trừ done + cắt trang bên dưới
-    targets = _resolve_headerverify_targets(a, entries)
-    if not targets:
-        print("[tl] corpus-audit: không có target — dùng --all / --sohieu / --sohieu-file / --drive-id / --cat NN (+--limit).", file=sys.stderr); return 2
-    rows, need_read, err = [], [], []
-    # B3 (v1.33.0 — log rà 69): batch --sohieu-file có CHECKPOINT resumable — trước đây timeout giữa lô ×69 là
-    # mất trắng tiến độ. State keyed theo md5 NỘI DUNG file (đổi danh sách = state mới); --resume nạp lại và bỏ
-    # target đã xử; chạy trọn vẹn thì tự xoá state.
-    _ckpt, _ck_done = None, set()
-    if getattr(a, "sohieu_file", None):
-        try:
-            import hashlib as _hl
-            _ckpt = _cache_file("corpus_audit_ckpt_" + _hl.md5(Path(a.sohieu_file).read_bytes()).hexdigest()[:12] + ".json")
-        except OSError:
-            _ckpt = None
-    elif _all_resume:
-        _ckpt = _cache_file("corpus_audit_ckpt_all.json")   # A1 v1.33.7: trang --all dùng chung máy checkpoint
-    if _ckpt is not None and (getattr(a, "resume", False) or _all_full) and _ckpt.exists():
-        try:
-            _st = json.loads(_ckpt.read_text(encoding="utf-8"))
-            _ck_done = set(_st.get("done") or [])
-            rows = list(_st.get("rows") or []); need_read = list(_st.get("need_read") or [])
-            err = list(_st.get("errors") or [])
-            targets = [e for e in targets if _entry_drive_id(e) not in _ck_done]
-            print(f"[corpus-audit] RESUME: {len(_ck_done)} target đã xử lượt trước → còn {len(targets)}.",
-                  file=sys.stderr, flush=True)
-        except Exception:  # noqa: BLE001
-            _ck_done = set()
-    # A1: cắt TRANG sau khi trừ done — mỗi lần gọi xử tối đa _page_size target rồi checkpoint.
-    _remaining_after = 0
-    if _all_resume:
-        _remaining_after = max(0, len(targets) - _page_size)
-        targets = targets[:_page_size]
-
-    def _ckpt_save():
-        if _ckpt is not None:
-            try:
-                _ckpt.write_text(json.dumps({"done": sorted(_ck_done), "rows": rows, "need_read": need_read,
-                                             "errors": err}, ensure_ascii=False), encoding="utf-8")
-            except OSError:
-                pass
-    _n_t = len(targets)
-    _scanned_ids, _hdr_bad = [], []      # A4/A5 (v1.33.7): phân biệt 'sạch' vs 'chưa quét'; header FAIL không câm
-    # A1b (v1.33.8 — log rà v1.33.6: '531 header × ~1s = ~9 phút, cần chế độ đọc song song'): PREFETCH text
-    # theo CHÙM bằng thread-pool (I/O-bound: direct-media/GAS/NLM đều là network round-trip), rồi XỬ TUẦN TỰ
-    # bên dưới — toàn bộ logic streak/fast-fail/checkpoint/heartbeat GIỮ NGUYÊN thứ tự. --workers 1 (mặc định)
-    # = hành vi cũ 100%; circuit-breaker auth-dead (v1.33.0) dùng chung cờ process nên worker sau tự skip.
-    _workers = max(1, int(getattr(a, "workers", None) or 1))
-    _prefetched: dict = {}
-    if _workers > 1:
-        _to_read = [(e2, _entry_drive_id(e2)) for e2 in targets if not _entry_raw_no_gdoc(e2)]
-        if _to_read:
-            print(f"[corpus-audit] prefetch SONG SONG {_workers} luồng × {len(_to_read)} target…",
-                  file=sys.stderr, flush=True)
-
-            def _pf_read(_pair):
-                _e2, _did2 = _pair
-                try:
-                    _t = _read_doc_text(_did2, getattr(a, "config", None))
-                except Exception:  # noqa: BLE001
-                    _t = ""
-                if not (_t or "").strip():
-                    _t = _read_doc_text_via_nlm(_e2)
-                return _did2, _t
-
-            import concurrent.futures as _cf
-            with _cf.ThreadPoolExecutor(max_workers=_workers) as _px:
-                for _did2, _t in _px.map(_pf_read, _to_read):
-                    _prefetched[_did2] = _t
-    # P1 (v1.32.1 — log rà 119): read-path Drive có thể CHẾT TOÀN BỘ (gws cred revoke + exporttext thiếu scope
-    # script.external_request) — trước lặp 531 target × ~22s toàn 'header rỗng' (~3.2h all-error). FAST-FAIL:
-    # ≥3 LỖI ĐỌC LIÊN TIẾP (đã thử cả đường NLM) → ABORT kèm remediation, không cày hết pool.
-    _read_fail_streak = 0
-    for _ci, e in enumerate(targets, 1):
-        did = _entry_drive_id(e); nm = _entry_name(e)
-        # v1.29.1 (log LIVE 2.5b): HEARTBEAT per-item — batch lớn từng "treo 0 output" (đọc header per-file có thể
-        # chậm/nghẽn webapp) → stream tiến độ để thấy đang ở item nào, không tưởng treo.
-        print(f"[corpus-audit] {_ci}/{_n_t} {nm[:48]}", file=sys.stderr, flush=True)
-        if _entry_raw_no_gdoc(e):
-            # A3 (v1.33.7 — log: 'luat-dau-thau-…-d1.html' KHÔNG bị corpus-audit flag trong khi tên chỉ-thiếu-sohieu
-            # lại bị): nhánh raw trước đây skip LUÔN cả check TÊN — mà NAME structural là check OFFLINE, không cần
-            # header. Ca nonstandard nặng nhất (slug .html) chính là raw → phải chạy tại đây.
-            if (_entry_corpus_true(e) and not _is_treaty_entry(e)
-                    and not re.match(r"^(PL|Mau|Phu_luc)[_\-]", nm, re.I)):
-                _nsi_raw = _name_structural_issues(nm)
-                if _nsi_raw:
-                    rows.append(_audit_row_flatten(
-                        {"drive_id": did, "name": nm[:60], "sohieu": _entry_sohieu(e) or "",
-                         "cat": _entry_cat(e), "header_ok": None,
-                         "proposals": [{"type": "NAME_NONSTANDARD", "current": nm[:60],
-                                        "suggested": "<Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay)",
-                                        "issues": _nsi_raw, "severity": 2, "icon": "🟠",
-                                        "fix_command": f"tl header-verify --drive-id {did} --fix-suggest   # rồi source-rename theo đề xuất"}]}))
-            need_read.append({"drive_id": did, "name": nm[:55]})
-            _ck_done.add(did); _ckpt_save()
-            continue   # .docx/.pdf/scan → Claude đọc header (ingest-analyze --text-file)
-        if did in _prefetched:                  # A1b v1.33.8: worker đã thử CẢ Drive lẫn NLM — không đọc lại
-            txt = _prefetched[did]
-        else:
-            try:
-                txt = _read_doc_text(did, getattr(a, "config", None))
-            except Exception:  # noqa: BLE001
-                txt = ""
-            if not (txt or "").strip():
-                txt = _read_doc_text_via_nlm(e)     # P1 v1.32.1: Drive chết → thử NLM (295 nguồn live vẫn đọc được)
-        if not (txt or "").strip():
-            err.append({"drive_id": did, "name": nm[:55], "error": "header rỗng (Drive + NLM đều không đọc được)"})
-            _ck_done.add(did); _ckpt_save()
-            _read_fail_streak += 1
-            if _read_fail_streak >= 3:
-                print(json.dumps({"ok": False, "error": "READ_BACKEND_DOWN", "scanned": _ci, "errors": err,
-                                  "note": "3 lỗi đọc LIÊN TIẾP (cả Drive lẫn NLM) → read-path chết, ABORT thay vì cày "
-                                          "hết pool all-error. Chẩn đoán: `tl gws-ping` (canary cred) / `tl doctor`. "
-                                          "Khắc phục: `gws auth login` → `tl secrets-set --gws`; webapp exporttext cần "
-                                          "scope script.external_request nếu muốn fallback GAS đọc được."
-                                          + (" Tiến độ đã CHECKPOINT — chạy lại CÙNG lệnh + --resume để tiếp."
-                                             if _ckpt is not None else "")},
-                                 ensure_ascii=False, indent=2), file=sys.stderr)
-                return 2
-            continue
-        _read_fail_streak = 0
-        ar = _corpus_audit_row(e, txt)
-        _scanned_ids.append(did)                      # A4: đã ĐỌC header thật (kể cả khi 0 đề xuất)
-        if ar["proposals"]:
-            rows.append(ar)
-        elif ar.get("header_ok") is False:
-            # A5 (v1.33.7 — log: 64-2006/71-2020 header_ok=False mà proposals=0 → biến mất câm): header verify
-            # FAIL không đề xuất được gì máy-tin-được → hàng đợi RÀ TAY riêng, không nuốt.
-            # S-2g (v1.33.15): kèm LÝ DO lệch (mismatches/checks) — người rà tay khỏi chạy lại header-verify.
-            _hdr_bad.append({"drive_id": did, "name": nm[:55],
-                             "mismatches": ar.get("header_mismatches") or [],
-                             "checks": ar.get("header_checks") or {}})
-        _ck_done.add(did); _ckpt_save()
-    _partial = bool(_all_resume and _remaining_after > 0)
-    if _ckpt is not None and _ckpt.exists() and not _partial:
-        try:
-            _ckpt.unlink()   # batch chạy TRỌN VẸN → dọn checkpoint (state chỉ sống qua lần chạy dở)
-        except OSError:
-            pass
-    flat = [(r, p) for r in rows for p in r["proposals"]]
-    flat.sort(key=lambda rp: rp[1]["severity"])
-    by_type: dict = {}
-    for _r, p in flat:
-        by_type[p["type"]] = by_type.get(p["type"], 0) + 1
-    has_red = any(p["type"] in ("SOHIEU_MISMATCH", "LOAI_MISMATCH") for _r, p in flat)
-    # v1.29.6 (P1): minh bạch phạm vi quét + phân trang; đối chiếu sweep (2 detector đo THỨ KHÁC NHAU — không phải lỗi):
-    # sweep.title_mismatch/loai_noncanonical = heuristic THEO TÊN/enum-FIELD (rẻ, rộng, nhiều nghi vấn);
-    # corpus-audit = đọc HEADER thật + guard chặt (đề xuất ÍT nhưng bằng chứng mạnh). Đếm lệch là BÌNH THƯỜNG.
-    _pool_total = getattr(a, "_targets_pool_total", None) or len(targets)
-    _off0 = max(0, int(getattr(a, "offset", None) or 0))
-    # A2 (v1.33.18 — MERGE bundle-18, log rà 67: `partial=true` nhưng `next_offset=None` MÂU THUẪN — driver
-    # phân trang theo next_offset DỪNG sau lô 1 → audit 40/530 âm thầm): chế độ resume tiến độ đi bằng
-    # CHECKPOINT chứ không offset, nên next_offset khi partial = PROGRESS MARKER (số drive_id đã checkpoint)
-    # + marker tường minh pagination_mode/resume_required/resume_command — driver hết đường hiểu nhầm.
-    _resume_next = len(_ck_done) if (_all_resume and _partial) else None
-    _next_off = _resume_next if _resume_next is not None else (
-        None if _all_resume else ((_off0 + len(targets)) if (_off0 + len(targets)) < _pool_total else None))
-    _clean_ids = [d for d in _scanned_ids
-                  if d not in {r["drive_id"] for r in rows} and d not in {h["drive_id"] for h in _hdr_bad}]
-    if getattr(a, "json", False) or getattr(a, "out", None):   # S-4 (v1.33.34): --out tự bật JSON
-        _audit_payload = ({"ok": True, "mode": "DRY_PROPOSE_ONLY", "scanned": len(targets),
-                          "pool_total": _pool_total, "offset": _off0, "next_offset": _next_off,
-                          "pagination_mode": ("full_checkpoint" if _all_full
-                                              else ("checkpoint_resume" if _all_resume else "offset")),
-                          # A1 (v1.33.7) + A2 (v1.33.18): PARTIAL máy-đọc — driver LẶP CÙNG LỆNH tới rc=0;
-                          # next_offset ở chế độ checkpoint chỉ là PROGRESS, KHÔNG phải tham số --offset.
-                          "partial": _partial, "remaining": _remaining_after,
-                          "resume_required": bool(_partial),
-                          # S11 (v1.33.44): resume_command GIỮ NGUYÊN cỡ trang người dùng đã chọn (--limit) —
-                          # trước đây bỏ --limit → lần lặp sau rơi về trang 40 mặc định, Cowork 45s lại timeout.
-                          "resume_command": (f"tl corpus-audit --all --resume --limit {_page_size} --json --workers 4"
-                                             if _partial else None),
-                          # A4 (v1.33.7): 'sạch' ≠ 'chưa quét' — ids đã ĐỌC header thật + ids sạch tường minh.
-                          "scanned_ids": _scanned_ids, "scanned_clean": len(_clean_ids), "clean_ids": _clean_ids,
-                          # A5 (v1.33.7): header verify FAIL nhưng 0 đề xuất → rà tay, không nuốt câm.
-                          "header_mismatch_no_proposal": _hdr_bad,
-                          "coverage_complete": (_next_off is None) and not _partial,
-                          "note_vs_sweep": "corpus-audit đọc HEADER thật (guard chặt, ít đề xuất, bằng chứng mạnh); "
-                                           "sweep.title_mismatch/loai_noncanonical = heuristic tên/enum-field (rộng, "
-                                           "nghi vấn) — 2 thước đo KHÁC NHAU, đếm lệch là bình thường. "
-                                           "CAT_LIKELY_WRONG (v1.33.0) CHỈ suy từ TIÊU ĐỀ (tên + khối tiêu đề + "
-                                           "title_vn) + cross-check alias pháp điển (đồng bộ cat-audit) — thân văn "
-                                           "bản KHÔNG còn là bằng chứng cat.",
-                          "rows_with_proposals": len(rows), "proposal_count": len(flat),
-                          "by_type": by_type, "need_manual_read": need_read, "errors": err,
-                          # S-1 (v1.33.15): flatten Ở ĐÂY nữa (idempotent) — row nạp lại từ CHECKPOINT đời cũ
-                          # (trước khi có mirror) cũng ra schema mới, không tuỳ lúc-có-lúc-không.
-                          "rows": [_audit_row_flatten(r) for r in rows]})
-        _emit_json_payload(_audit_payload, getattr(a, "out", None))   # S-4 (v1.33.34): atomic --out
-    else:
-        summ = " · ".join(f"{k}={v}" for k, v in sorted(by_type.items(), key=lambda kv: _AUDIT_SEVERITY.get(kv[0], (9,))[0]))
-        print(f"== corpus-audit (DRY, propose-only): {len(targets)}/{_pool_total} quét · {len(rows)} dòng có đề xuất · {len(flat)} đề xuất ==")
-        if _next_off is not None:
-            print(f"   ⚠ CHƯA PHỦ HẾT ({_pool_total - _off0 - len(targets)} còn lại) — trang kế: --offset {_next_off}")
-        print(f"   {summ or 'không có đề xuất'}   ({len(need_read)} cần đọc tay · {len(err)} không đọc được)")
-        for r, p in flat[:40]:
-            print(f"  {p['icon']} {p['type']:18s} {r['name'][:44]}")
-            print(f"        {p['current']}  →  {p['suggested']}")
-            print(f"        $ {p['fix_command']}")
-        if len(flat) > 40:
-            print(f"   … còn {len(flat) - 40} đề xuất (dùng --json để xem hết / --cat NN thu hẹp).")
-        for r in need_read[:12]:
-            print(f"  ⚠ CẦN ĐỌC TAY  {r['name'][:44]} — Claude đọc header → `tl ingest-analyze --text-file`")
-        for h in _hdr_bad[:12]:
-            _why = (h.get("mismatches") or ["?"])[0]
-            print(f"  ⚠ HEADER LỆCH (0 đề xuất máy) {h['name'][:44]} — {_why[:70]} → `tl header-verify --drive-id {h['drive_id']} --fix-suggest`")
-        if _partial:
-            print(f"  ⏭ PARTIAL: còn {_remaining_after} target — LẶP CÙNG LỆNH (--all --resume) tới rc=0 "
-                  f"(tiến độ: {_next_off}/{_pool_total} đã checkpoint).")
-        print("  → PROPOSE-ONLY: chạy lệnh `$` để sửa (mỗi lệnh DRY riêng, thêm --apply). Nội dung/trích yếu = người duyệt.")
-    if _partial:
-        return 3   # A1: PARTIAL — còn trang (mirror nlm-install --resume), KHÔNG phải lỗi
-    return 1 if (getattr(a, "strict", False) and has_red) else 0
 
 
 # B (v1.33.3): nhóm cờ → VIỆC-CẦN-LÀM cho review-queue (đối chiếu _source_map_verdict.review).
@@ -16018,345 +14284,6 @@ def _rq_relation_probe(entries: list[dict], e: dict) -> dict:
             "note": ("relation-check PHỦ ĐỊNH — không missing_links/subject_only/footnote-thiếu; "
                      "không đưa P0/backfill" if not actionable else
                      "relation-check còn tín hiệu cần soi — giữ INFO, không tự ghi")}
-
-
-def _review_queue_report(entries: list[dict], limit: int | None = None) -> dict:
-    """B (v1.33.3 — 3 log rà liên tiếp cùng kết luận: '~26 Luật cần lượt web LƯỢT-2 mới finalize' nhưng phải GOM
-    TAY từ 66-111 lần source-map rời): MỘT LỆNH offline gom HÀNG ĐỢI rà soát cho toàn bộ Luật/Bộ luật corpus —
-    source-map từng số hiệu → nhóm theo việc-cần-làm (web LƯỢT-2 ưu tiên HIGH_VELOCITY / relation-backfill /
-    PAUSE / sạch) + qt5_queries sẵn-dán cho phiên Chrome. KHÔNG thay thế bước verify official (QT-5 web +
-    `vbhn-verify --official-required` vẫn chạy tay) — chỉ diệt công đoạn gom-và-phân-loại. PURE/offline."""
-    laws, seen, no_sh, vbhn_base = [], set(), 0, 0
-    for e in entries:
-        if not _entry_corpus_true(e) or _entry_quarantined(e):
-            continue
-        _lo = _normalize_loai(str(e.get("loai") or ""))
-        _lawish = _lo in ("Luật", "Bộ luật") or bool(re.match(r"^(Luat|Bo_luat|BL[A-Z])", _entry_name(e) or ""))
-        if _is_vbhn_entry(e):
-            # VBHN rà theo luật gốc của nó, không phải mục hàng đợi riêng. v1.33.5 (log: 'corpus có 69 Luật
-            # nhưng laws_scanned=68' — phiên rà mất thời gian truy 1 dòng 'rớt'): VBHN ĐỘI LỐT Luật (loai='Luật'
-            # bẩn — ca 115-VBHN) lọt bộ lọc reg-query của người vận hành → đếm TƯỜNG MINH cho kế toán khớp.
-            if _lawish:
-                vbhn_base += 1
-            continue
-        if not _lawish:
-            continue
-        k = _sohieu_key_entry(e)
-        if not k:
-            no_sh += 1                     # dòng Luật thiếu sohieu (E3 log) — đếm LOUD, không nuốt câm
-            continue
-        if k in seen:
-            continue
-        seen.add(k); laws.append(e)
-    if limit:
-        laws = laws[:int(limit)]
-    web, rel, rel_low, rel_suppressed, pause, clean, other = [], [], [], [], [], [], []
-    neg_n = 0                       # S-1: đếm mọi row bị relation-check phủ định (kể cả row rơi bucket web)
-    for e in laws:
-        r = _source_map_one(_entry_sohieu(e) or _sohieu_key_entry(e), entries)
-        flags = set(r.get("flags") or _warning_codes(r.get("warnings") or []))
-        # A1 (v1.33.4): rel = CÓ VIỆC THẬT — verdict phải khác OK VÀ không cờ hoá-giải (COVERED/CONFIRMED/
-        # CONSOLIDATED/OMNIBUS); trước đây 19-2012 (OK+COVERED) và 90-2025 (OK+CONFIRMED) thành backfill khống.
-        _rel_cands_raw = (r.get("unlinked_amendment_candidates") or r.get("amendment_candidates") or [])
-        _in_rel_flags = (r.get("verdict") != "OK" and bool(flags & _RQ_REL_FLAGS)
-                         and not (flags & _RQ_REL_SUPPRESS))
-        # P2-2 (v1.33.12 — log: 3 Luật vào relation_backfill toàn ứng viên LOW-CONF mà `relation-check --base
-        # --subject` trả OK/missing_links=[] cả 3): bucket HÀNH ĐỘNG chỉ nhận ứng viên MẠNH (linked/strong/
-        # confidence≠low — cùng ngưỡng escalate v1.29.6); low-conf-only → nhóm INFO riêng, không phồng hàng đợi.
-        _in_rel = _in_rel_flags and _rq_rel_strong(_rel_cands_raw)
-        _in_rel_low = _in_rel_flags and not _in_rel
-        # S-1 (v1.33.31 + MERGE bundle-12 v1.33.32 — log rà LIVE v1.33.28: review-queue gắn 124/125-2025 cờ
-        # UNLINKED/LOW_CONFIDENCE → ops-plan đẩy P0, nhưng relation-check trả OK/candidates=[] — 2 engine BẤT
-        # ĐỒNG): cross-validate NGAY TẠI ĐÂY bằng `_rq_relation_probe` (cùng engine, cùng entries) cho MỌI row
-        # có cờ rel (strong LẪN low-conf — phạm vi ta, rộng hơn bundle chỉ-low-conf). Phủ định → cờ
-        # RELATION_CHECK_NEGATED + rơi bucket riêng `relation_probe_suppressed` (bundle) — KHÔNG còn trong hàng
-        # đợi hành động; audit còn tín hiệu (fixture 06/2022 subject-only) giữ nguyên.
-        _rel_probe = _rq_relation_probe(entries, e) if (_in_rel or _in_rel_low) else None
-        _rel_negated = bool(_rel_probe and _rel_probe.get("suppressed"))
-        if _rel_negated:
-            flags.add("RELATION_CHECK_NEGATED")
-            _in_rel = _in_rel_low = False
-            neg_n += 1
-        _in_web = bool(flags & _RQ_WEB_FLAGS)
-        _is_pause = r.get("verdict") == "PAUSE_AND_ASK_USER"
-        _buckets = [b for b, c in (("pause", _is_pause), ("relation_backfill", _in_rel),
-                                   ("web_round2", _in_web),
-                                   ("relation_low_confidence", _in_rel_low),
-                                   ("relation_probe_suppressed", _rel_negated)) if c] or \
-                   (["clean"] if r.get("verdict") == "OK" else ["review_other"])
-        # B.1 (v1.33.19 — log rà v1.33.18: 4/4 row review_other có flags=[] dù flags_all đầy — cờ REVIEW
-        # của nhóm này [TITLE_OR_REGISTRY_WARN/AMENDS_OTHER_VBHN/…] không thuộc các nhóm-việc nên bị lọc
-        # sạch → driver duyệt đồng nhất .flags thấy 'REVIEW không lý do'): lọc theo nhóm-việc TRƯỚC, nhưng
-        # lọc RỖNG thì mirror toàn bộ flags_all — .flags không bao giờ câm khi có cờ thật.
-        row = {"sohieu": _sohieu_key_entry(e), "name": _entry_name(e)[:55], "verdict": r.get("verdict"),
-               "flags": (sorted(flags & (_RQ_WEB_FLAGS | _RQ_REL_FLAGS | _RQ_REL_SUPPRESS
-                                         | {"PAUSE_AND_ASK_USER", "RELATION_CHECK_NEGATED"}))
-                         or sorted(flags)),
-               # P2-1 (v1.33.12 — log: review_other verdict=REVIEW mà flags=[] → REVIEW không nêu LÝ DO):
-               # flags_all = TOÀN BỘ cờ source-map (không lọc nhóm) — mọi REVIEW đều tự giải thích được.
-               "flags_all": sorted(flags),
-               "priority_high_velocity": "VBHN_HIGH_AMENDMENT_VELOCITY" in flags,
-               "buckets": _buckets,
-               "qt5_queries": (r.get("qt5_queries") or [])[:4]}
-        if _rel_probe:
-            # bundle-12: payload probe đầy đủ (verdict/flags/counts/note) đi kèm row — driver thấy NGAY vì sao
-            # phủ định/giữ, khỏi chạy lại relation-check tay; đi theo row cả khi row rơi bucket web.
-            row["relation_probe"] = _rel_probe
-        _cands = [f"{c.get('sohieu') or c.get('sohieu_key') or '?'}|{str(c.get('name') or '')[:38]}"
-                  f"|{c.get('confidence', 'low')}" for c in _rel_cands_raw[:3]]
-        # A2 (v1.33.4) + P2-2: bucket CHÍNH loại trừ lẫn nhau (pause > rel > web > rel_low > clean/other) →
-        # counts CỘNG ĐÚNG; việc kép vẫn đủ qua `buckets`.
-        if _is_pause:
-            pause.append(row)
-        elif _in_rel:
-            # C (v1.33.6): kèm TOP-3 ứng viên (số hiệu|tên|confidence) từ chính payload source-map.
-            rel.append(dict(row, candidates=_cands,
-                            fix_command=f"tl relation-check --base {_sohieu_key_entry(e)} --json   "
-                                        "# duyệt rồi backfill goc/sua_doi (hỏi user trước khi ghi)"))
-        elif _in_web:
-            web.append(row)
-        elif _in_rel_low:
-            rel_low.append(dict(row, candidates=_cands,
-                                fix_command=f"tl relation-check --base {_sohieu_key_entry(e)} --json   "
-                                            "# INFO: ứng viên đều low-conf — phủ định nhanh bằng relation-check trước khi tin"))
-        elif _rel_negated:
-            rel_suppressed.append(dict(row, candidates=_cands,
-                                       fix_command=f"tl relation-check --base {_sohieu_key_entry(e)} --json   "
-                                                   "# ĐÃ PHỦ ĐỊNH (S-1 probe): không missing_links/subject_only/"
-                                                   "footnote-thiếu — KHÔNG cần backfill; chỉ chạy lại nếu có dữ liệu mới"))
-        elif r.get("verdict") == "OK":
-            clean.append(row)
-        else:
-            row["reason"] = ", ".join(sorted(flags)) or "verdict REVIEW không kèm cờ — soi source-map --json"
-            # MERGE AUDIT 07/2026 (v1.33.13): review_reason dạng LIST máy-đọc (patch kia dùng key này).
-            row["review_reason"] = sorted(flags) or [str(r.get("verdict") or "REVIEW")]
-            other.append(row)   # REVIEW không rơi nhóm nào — flags_all/reason tự giải thích (P2-1)
-    web.sort(key=lambda x: (not x["priority_high_velocity"], x["sohieu"]))
-    return {"ok": True, "schema": "review_queue.v1",   # v1.33.7: driver kiểm marker trước khi tin payload (log: 1 lần nhận nhầm dump reg-query.v2 — không tái hiện)
-            "laws_scanned": len(laws), "skipped_no_sohieu": no_sh,
-            "skipped_vbhn_as_base": vbhn_base,   # v1.33.5: VBHN đội lốt loai='Luật' — rà theo luật gốc, kế toán khớp
-            "web_round2": web, "web_round2_count": len(web),
-            "web_priority_count": sum(1 for x in web if x["priority_high_velocity"]),
-            "relation_backfill": rel, "relation_low_confidence": rel_low,
-            "relation_probe_suppressed": rel_suppressed, "pause": pause,
-            # S-1: số row bị relation-check phủ định (cờ RELATION_CHECK_NEGATED trên row) — ≥ len(bucket
-            # relation_probe_suppressed) vì đếm cả row negated nhưng rơi bucket web. Driver/ops-plan loại các
-            # ca này khỏi hàng đợi hành động thay vì chạy relation-check tay từng số.
-            "relation_negated_count": neg_n,
-            "clean_count": len(clean),
-            "review_other": other,
-            # A2: counts LOẠI TRỪ lẫn nhau — tổng LUÔN bằng laws_scanned (đối soát máy được).
-            "counts": {"pause": len(pause), "relation_backfill": len(rel), "web_round2": len(web),
-                       "relation_low_confidence": len(rel_low),
-                       "relation_probe_suppressed": len(rel_suppressed),
-                       "clean": len(clean), "review_other": len(other)},
-            "note": "OFFLINE gom việc từ source-map. Bucket CHÍNH loại trừ nhau (counts cộng về laws_scanned); "
-                    "việc kép xem trường `buckets` từng dòng. Chốt VBHN MỚI NHẤT vẫn PHẢI lượt-2 web (Chrome, "
-                    "official-first, số VBHN tăng dần) + `tl vbhn-verify --official-required`; "
-                    "relation-backfill phải hỏi user trước khi ghi registry."}
-
-
-def _ops_plan_add(actions: list, priority: str, aid: str, title: str, command: str = "", count: int | None = None,
-                  confirm_required: bool = False, mode: str = "dry", reason: str = "", note: str = "",
-                  sample: list | None = None) -> None:
-    """PURE helper for ops-plan. Keep rows compact and machine-readable."""
-    row = {"priority": priority, "id": aid, "title": title, "mode": mode,
-           "confirm_required": bool(confirm_required)}
-    if count is not None:
-        row["count"] = int(count)
-    if command:
-        row["command"] = command
-    if reason:
-        row["reason"] = reason
-    if note:
-        row["note"] = note
-    if sample:
-        row["sample"] = sample[:10]
-    actions.append(row)
-
-
-def _ops_plan_report(entries: list[dict], config_path: str | None = None, profile: str | None = None,
-                     include_review: bool = True, include_sweep: bool = True) -> dict:
-    """v1.33.27: one machine-readable action plan for the recurring run-log.
-
-    It does NOT mutate. It turns the repeating A/B/C/D/E observations (pin registryDocId, nlm-reconcile, web QT-5,
-    low-confidence relation-check, dedup, name audit, loai normalize, slot preflight) into one prioritized queue so the
-    operator no longer has to parse a long prose log and manually derive commands.
-    """
-    cfg_path, cfg = _read_config_record(config_path)
-    prof_name = profile or (cfg.get("defaultProfile") if isinstance(cfg, dict) else None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
-    prof = (_profiles_from_config(cfg).get(prof_name) if isinstance(cfg, dict) else {}) or {}
-    reg_id = os.environ.get("TL_REGISTRY_DOC_ID") or prof.get("registryDocId") or (cfg.get("registryDocId") if isinstance(cfg, dict) else "") or ""
-    nb = os.environ.get("TL_NOTEBOOK_ID") or prof.get("notebookId") or NLM_BASE_NOTEBOOK
-    actions: list[dict] = []
-    if not reg_id:
-        _ops_plan_add(actions, "P0", "pin_registry_doc_id", "Pin registryDocId Sheet thật vào config",
-                      "tl config-pin-registry <SHEET_ID> --profile-name " + str(prof_name),
-                      confirm_required=True, mode="config", reason="registryDocId rỗng → auto-discover mỗi call, rủi ro bắt nhầm Sheet trùng tên")
-    elif reg_id == _LEGACY_REGISTRY_DOC_ID:
-        _ops_plan_add(actions, "P0", "fix_legacy_registry_doc_id", "Sửa registryDocId đang trỏ Doc legacy 1mATG",
-                      "tl config-pin-registry <SHEET_ID> --profile-name " + str(prof_name),
-                      confirm_required=True, mode="config", reason="Doc legacy không phải Sheet registry; có thể gây count=0 ảo")
-    review = _review_queue_report(entries) if include_review else {}
-    sweep = _sweep_report(entries) if include_sweep else {}
-    web_high = [x for x in (review.get("web_round2") or []) if x.get("priority_high_velocity")]
-    web_all = review.get("web_round2") or []
-    if web_high:
-        _ops_plan_add(actions, "P0", "web_round2_high_velocity", "Web lượt-2 cho luật HIGH_VELOCITY trước",
-                      "tl review-queue --json --out /tmp/review_queue.json  # lấy qt5_queries rồi Chrome official-first → tl vbhn-verify --official-required",
-                      count=len(web_high), confirm_required=True, mode="manual_web",
-                      reason="VBHN số hiệu tăng theo mỗi lần hợp nhất; không được chốt ở bản đầu tìm thấy",
-                      sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in web_high[:10]])
-    web_normal = [x for x in web_all if not x.get("priority_high_velocity")]
-    if web_normal:
-        _ops_plan_add(actions, "P1", "web_round2_remaining", "Web lượt-2 cho các luật còn lại cần chốt VBHN",
-                      "tl review-queue --json --out /tmp/review_queue.json",
-                      count=len(web_normal), confirm_required=True, mode="manual_web",
-                      reason="NO_VERIFIED_VBHN_IN_CORPUS/QT5_WEB_REQUIRED/VBHN_CANDIDATE_UNVERIFIED_LATEST")
-    # S-1 (v1.33.31 + MERGE bundle-12 v1.33.32 — log rà v1.33.28: 124/125-2025 vào P0 dù relation-check trả OK):
-    # ba tầng thay vì gộp hết vào P0 — P0 CHỈ ứng viên MẠNH chưa phủ định (bundle); low-conf còn tín hiệu →
-    # P2 probe READ-ONLY (bundle — LOW_CONF là INFO, không phải việc P0); ca ĐÃ phủ định → P3 info audit-trail
-    # (ta — bundle drop hẳn khỏi plan, mất dấu vết vì sao biến mất).
-    rel = [x for x in (review.get("relation_backfill") or [])
-           if "RELATION_CHECK_NEGATED" not in (x.get("flags_all") or [])]   # phòng-vệ kép; demote đã chuyển bucket
-    if rel:
-        _ops_plan_add(actions, "P0", "relation_check_before_backfill", "Xác minh ứng viên sửa đổi MẠNH trước khi backfill goc/sua_doi",
-                      "tl relation-check --base <SOHIEU> --json  # chỉ --apply sau khi người dùng duyệt",
-                      count=len(rel), confirm_required=True, mode="review_then_apply",
-                      reason="UNLINKED_AMENDMENT_CANDIDATE mạnh (linked/strong) không được tự ghi registry",
-                      sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in rel[:10]])
-    rel_low = review.get("relation_low_confidence") or []
-    if rel_low:
-        _ops_plan_add(actions, "P2", "relation_low_confidence_probe", "Soi lại ứng viên sửa đổi LOW_CONF còn tín hiệu sau probe",
-                      "tl relation-check --base <SOHIEU> --json  # read-only; chỉ nâng cấp hàng đợi khi có missing_links",
-                      count=len(rel_low), confirm_required=False, mode="read_only_probe",
-                      reason="LOW_CONF là INFO — probe relation-check đã lọc, phần còn lại vẫn còn subject_only/footnote cần soi",
-                      sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in rel_low[:10]])
-    rel_neg = review.get("relation_probe_suppressed") or []
-    neg_total = int(review.get("relation_negated_count") or len(rel_neg))
-    if neg_total:
-        _ops_plan_add(actions, "P3", "relation_candidates_negated",
-                      "Ứng viên sửa đổi ĐÃ bị relation-check phủ định — KHÔNG cần backfill",
-                      count=neg_total, confirm_required=False, mode="info",
-                      reason="review-queue probe qua _relation_audit: không missing_links/subject_only/footnote-thiếu — không đẩy P0 giả",
-                      sample=[f"{x.get('sohieu')}|{x.get('name')}" for x in rel_neg[:10]])
-    drift_total = int(sweep.get("nlm_drift_total") or 0) if isinstance(sweep, dict) else 0
-    if drift_total:
-        _ops_plan_add(actions, "P1", "nlm_reconcile_live", "Đối soát LIVE registry↔NLM trước khi kết luận slot/desync",
-                      f"tl nlm-reconcile {nb} --json --out /tmp/nlm_reconcile.json",
-                      count=drift_total, confirm_required=False, mode="read_live",
-                      reason="sweep nlm_drift là offline; registry_claim_nlm chỉ là estimate",
-                      note="Chỉ thêm --apply/--clear-stale sau khi đọc desync_real/link_candidates.")
-    dups = (sweep.get("duplicates") or {}) if isinstance(sweep, dict) else {}
-    dup_active = int(dups.get("by_sohieu_raw_active") or 0)
-    if dup_active or int(dups.get("identity") or 0) or int(dups.get("by_md5") or 0):
-        _ops_plan_add(actions, "P1", "dedup_active", "Dọn cụm trùng lặp active/raw/md5/identity",
-                      "tl dedup-plan --apply  # xem dry-run trước nếu chưa chắc canonical",
-                      count=dup_active or int(dups.get("identity") or 0), confirm_required=True,
-                      mode="apply_reversible", reason="giữ canonical, set bản dup corpus=false")
-    name_ns = int((sweep or {}).get("name_nonstandard") or 0) if isinstance(sweep, dict) else 0
-    if name_ns:
-        # S11 (v1.33.44 — log 7A: lệnh --all --full gợi ý ở đây KHÔNG chạy nổi trong Cowork 45s — 489 header,
-        # mới tới 20/40 đã bị cắt): gợi ý dạng PHÂN TRANG NHỎ + checkpoint (lặp CÙNG LỆNH tới rc=0; rc=3=PARTIAL
-        # là bình thường). --full chỉ dành cho shell không trần thời gian (local Code).
-        _ops_plan_add(actions, "P1", "name_nonstandard_batch", "Chuẩn hóa tên phi chuẩn theo lô",
-                      "tl corpus-audit --all --resume --limit 15 --workers 4 --json --out /tmp/corpus_audit_page.json"
-                      "  # Cowork 45s: lặp CÙNG LỆNH tới rc=0 (rc=3=PARTIAL còn trang); local không trần → --all --full",
-                      count=name_ns, confirm_required=True, mode="review_then_apply",
-                      reason="thiếu số hiệu/chủ đề/.html; cần đọc header thật trước khi rename")
-    loai_nc = int((sweep or {}).get("loai_noncanonical") or 0) if isinstance(sweep, dict) else 0
-    if loai_nc:
-        _ops_plan_add(actions, "P1", "loai_noncanonical", "Chuẩn hóa loai phi canonical",
-                      "tl backfill-loai --normalize --apply", count=loai_nc,
-                      confirm_required=True, mode="apply", reason="field loai ngoài enum")
-    quar = (sweep.get("quarantine") or {}) if isinstance(sweep, dict) else {}
-    q_stale = int(quar.get("stale_nlm_ref") or 0)
-    q_live = int(quar.get("still_on_nlm") or 0)
-    if q_stale:
-        _ops_plan_add(actions, "P2", "quarantine_stale_ref", "Clear stale NLM refs trong quarantine",
-                      "tl quarantine-fix --apply", count=q_stale, confirm_required=True,
-                      mode="apply_reversible", reason="quarantine đã removed/stale nhưng còn nlm_source_id/nlm_notebook_id")
-    if q_live:
-        _ops_plan_add(actions, "P2", "quarantine_still_on_nlm", "Xác minh rồi gỡ nguồn quarantine còn LIVE trên NLM",
-                      "tl quarantine-fix --json --out /tmp/quarantine_fix.json  # đọc ghost_nlm rồi xoá NLM thủ công nếu đúng",
-                      count=q_live, confirm_required=True, mode="manual_live_delete",
-                      reason="không tự source delete vì có thể xoá nhầm nguồn đang dùng")
-    _ops_plan_add(actions, "P2", "slot_preflight", "Kế toán slot NLM bằng nguồn LIVE trước mọi lần push",
-                  f"tl counts --live-nlm --notebook-id {nb} --json --out /tmp/counts_live.json",
-                  confirm_required=False, mode="read_live", reason="notebook nền có thể gần 300; registry_claim_nlm không phải ground truth")
-    _ops_plan_add(actions, "P3", "cowork_bootstrap_guard", "Dùng checklist Cowork thay vì đọc file mount trực tiếp",
-                  "tl cowork-plan --json --out /tmp/cowork_plan.json",
-                  confirm_required=False, mode="read_only", reason="mount có thể cắt cụt; gws cần MUSL; nlm-install phải --resume")
-    rank = {"P0": 0, "P1": 1, "P2": 2, "P3": 3}
-    actions.sort(key=lambda x: (rank.get(x.get("priority"), 9), x.get("id", "")))
-    return {"ok": True, "schema": "ops_plan.v1", "profile": prof_name, "config_path": cfg_path,
-            "registryDocId_pinned": bool(reg_id and reg_id != _LEGACY_REGISTRY_DOC_ID),
-            "notebook": nb, "review_counts": review.get("counts") or {},
-            "sweep_summary": {"name_nonstandard": name_ns, "loai_noncanonical": loai_nc,
-                              "nlm_drift_total": drift_total, "quarantine": quar, "duplicates": dups},
-            "actions": actions,
-            "note": "READ-ONLY plan. Các dòng confirm_required=true chỉ sinh lệnh/queue; không tự ghi registry/Drive/NLM."}
-
-
-def cmd_ops_plan(a) -> int:
-    """Read-only prioritized plan after sweep/review-queue; avoids re-parsing long run logs."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] ops-plan: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    rep = _ops_plan_report(entries, getattr(a, "config", None), getattr(a, "profile", None))
-    if getattr(a, "json", False) or getattr(a, "out", None):
-        _emit_json_payload(rep, getattr(a, "out", None)); return 0
-    print(f"== tl ops-plan · profile={rep['profile']} · actions={len(rep['actions'])} ==")
-    print(f"  registryDocId_pinned={rep['registryDocId_pinned']} · notebook={rep['notebook']}")
-    for x in rep["actions"]:
-        cnt = f" [{x.get('count')}]" if x.get("count") is not None else ""
-        mark = "⚠ duyệt" if x.get("confirm_required") else "read"
-        print(f"  {x['priority']} {x['id']}{cnt} — {x['title']} ({mark})")
-        if x.get("command"):
-            print(f"      $ {x['command']}")
-    print("  → --json/--out để driver lấy full sample/reason; lệnh này không ghi gì.")
-    return 0
-
-def cmd_review_queue(a) -> int:
-    """B (v1.33.3): `tl review-queue` — 1 lệnh thay vòng 66×source-map + gom tay: hàng đợi việc theo nhóm."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] review-queue: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    rep = _review_queue_report(entries, getattr(a, "limit", None))
-    if getattr(a, "json", False) or getattr(a, "out", None):
-        _emit_json_payload(rep, getattr(a, "out", None))
-        return 0
-    print(f"== review-queue · {rep['laws_scanned']} Luật · web LƯỢT-2: {rep['web_round2_count']} "
-          f"(ưu tiên HIGH_VELOCITY: {rep['web_priority_count']}) · relation-backfill: {len(rep['relation_backfill'])} "
-          f"· PAUSE: {len(rep['pause'])} · sạch: {rep['clean_count']}"
-          + (f" · rel-LOW-CONF(info): {len(rep['relation_low_confidence'])}" if rep.get("relation_low_confidence") else "")
-          + (f" · rel-ĐÃ-PHỦ-ĐỊNH: {rep['relation_negated_count']} (S-1 cross-check, bỏ khỏi hàng đợi)"
-             if rep.get("relation_negated_count") else "")
-          + (f" · REVIEW-khác: {len(rep['review_other'])}" if rep["review_other"] else "")
-          + (f" · VBHN-rà-theo-gốc: {rep['skipped_vbhn_as_base']}" if rep.get("skipped_vbhn_as_base") else "")
-          + (f" · ⚠ {rep['skipped_no_sohieu']} dòng Luật THIẾU sohieu (sửa registry)" if rep["skipped_no_sohieu"] else "")
-          + " ==   (bucket loại trừ nhau — cộng đủ về tổng; việc kép xem `buckets`)")
-    for x in rep["web_round2"][:40]:
-        _pri = "★" if x["priority_high_velocity"] else " "
-        print(f"  {_pri} {x['sohieu']:<18s} {x['name'][:44]}")
-        if x["qt5_queries"]:
-            print(f"      QT-5: {x['qt5_queries'][0]}")
-    if len(rep["web_round2"]) > 40:
-        print(f"   … còn {len(rep['web_round2']) - 40} (dùng --json xem hết).")
-    for x in rep["relation_backfill"][:12]:
-        _dual = " (+web lượt-2)" if "web_round2" in (x.get("buckets") or []) else ""
-        print(f"  🔗 {x['sohieu']:<18s} {x['name'][:40]}{_dual}")
-        for _c in (x.get("candidates") or [])[:3]:
-            print(f"      ↳ ứng viên: {_c}")
-        print(f"      $ {x['fix_command']}")
-    if rep["pause"]:
-        print(f"  ⏸ PAUSE: {', '.join(x['sohieu'] for x in rep['pause'][:10])}")
-    print("  → web LƯỢT-2 (Chrome official-first) chốt VBHN mới nhất; ★ = HIGH_VELOCITY làm trước. --json để lấy đủ qt5_queries.")
-    return 0
 
 
 def _dieu_sequence_stats(text: str) -> dict:
@@ -18843,6 +16770,7 @@ def main(argv) -> int:
 _tl_workflow = _tl_core_import("workflow")   # noqa: E402 — v1.33.56: qua helper cứu hộ (tl_core/F3)
 _tl_release = _tl_core_import("release")      # noqa: E402
 _tl_live = _tl_core_import("live")            # noqa: E402
+_tl_hygiene = _tl_core_import("hygiene")     # noqa: E402 — I1 v1.34.3
 _tl_zip_ingest = _tl_core_import("zip_ingest")   # noqa: E402 — Pha D (v1.33.57)
 _tl_ocr = _tl_core_import("ocr")                 # noqa: E402
 _tl_chunking = _tl_core_import("chunking")       # noqa: E402
@@ -18930,8 +16858,6 @@ def cmd_profile_ingest_ocr(*_a, **_kw):
 
 def cmd_profile_ingest_zip(*_a, **_kw):
     return _tl_zip_ingest.cmd_profile_ingest_zip(*_a, **_kw)
-
-
 
 
 def _build_release_manifest(*_a, **_kw):
@@ -19041,10 +16967,129 @@ def cmd_tool_inventory(*_a, **_kw):
 def cmd_workflow_audit(*_a, **_kw):
     return _tl_workflow.cmd_workflow_audit(*_a, **_kw)
 
+
+# ── I1 (v1.34.3): stub ủy quyền cụm hygiene → tl_core/hygiene.py (mọi caller cũ giữ nguyên) ──
+
+
+def _vbhn_year_complete(*_a, **_kw):
+    return _tl_hygiene._vbhn_year_complete(*_a, **_kw)
+
+
+def _vbhn_year_fix_items(*_a, **_kw):
+    return _tl_hygiene._vbhn_year_fix_items(*_a, **_kw)
+
+
+def _quarantine_fix_items(*_a, **_kw):
+    return _tl_hygiene._quarantine_fix_items(*_a, **_kw)
+
+
+def _quarantine_clear_stale(*_a, **_kw):
+    return _tl_hygiene._quarantine_clear_stale(*_a, **_kw)
+
+
+def _hygiene_groups(*_a, **_kw):
+    return _tl_hygiene._hygiene_groups(*_a, **_kw)
+
+
+def cmd_hygiene(*_a, **_kw):
+    return _tl_hygiene.cmd_hygiene(*_a, **_kw)
+
+
+def cmd_registry_doctor(*_a, **_kw):
+    return _tl_hygiene.cmd_registry_doctor(*_a, **_kw)
+
+
+def cmd_cat_audit(*_a, **_kw):
+    return _tl_hygiene.cmd_cat_audit(*_a, **_kw)
+
+
+def _backfill_loai_candidates(*_a, **_kw):
+    return _tl_hygiene._backfill_loai_candidates(*_a, **_kw)
+
+
+def cmd_backfill_loai(*_a, **_kw):
+    return _tl_hygiene.cmd_backfill_loai(*_a, **_kw)
+
+
+def cmd_backfill_titlevn(*_a, **_kw):
+    return _tl_hygiene.cmd_backfill_titlevn(*_a, **_kw)
+
+
+def _backfill_hieuluc_candidates(*_a, **_kw):
+    return _tl_hygiene._backfill_hieuluc_candidates(*_a, **_kw)
+
+
+def cmd_backfill_hieuluc(*_a, **_kw):
+    return _tl_hygiene.cmd_backfill_hieuluc(*_a, **_kw)
+
+
+def cmd_missing_sohieu(*_a, **_kw):
+    return _tl_hygiene.cmd_missing_sohieu(*_a, **_kw)
+
+
+def cmd_vbhn_year_fix(*_a, **_kw):
+    return _tl_hygiene.cmd_vbhn_year_fix(*_a, **_kw)
+
+
+def cmd_dedup_plan(*_a, **_kw):
+    return _tl_hygiene.cmd_dedup_plan(*_a, **_kw)
+
+
+def _sweep_report(*_a, **_kw):
+    return _tl_hygiene._sweep_report(*_a, **_kw)
+
+
+def cmd_sweep(*_a, **_kw):
+    return _tl_hygiene.cmd_sweep(*_a, **_kw)
+
+
+def cmd_corpus_fix(*_a, **_kw):
+    return _tl_hygiene.cmd_corpus_fix(*_a, **_kw)
+
+
+def _consolidation_cleanup_plan(*_a, **_kw):
+    return _tl_hygiene._consolidation_cleanup_plan(*_a, **_kw)
+
+
+def cmd_consolidation_cleanup(*_a, **_kw):
+    return _tl_hygiene.cmd_consolidation_cleanup(*_a, **_kw)
+
+
+def cmd_quarantine_fix(*_a, **_kw):
+    return _tl_hygiene.cmd_quarantine_fix(*_a, **_kw)
+
+
+def _corpus_audit_row(*_a, **_kw):
+    return _tl_hygiene._corpus_audit_row(*_a, **_kw)
+
+
+def cmd_corpus_audit(*_a, **_kw):
+    return _tl_hygiene.cmd_corpus_audit(*_a, **_kw)
+
+
+def _review_queue_report(*_a, **_kw):
+    return _tl_hygiene._review_queue_report(*_a, **_kw)
+
+
+def _ops_plan_add(*_a, **_kw):
+    return _tl_hygiene._ops_plan_add(*_a, **_kw)
+
+
+def _ops_plan_report(*_a, **_kw):
+    return _tl_hygiene._ops_plan_report(*_a, **_kw)
+
+
+def cmd_ops_plan(*_a, **_kw):
+    return _tl_hygiene.cmd_ops_plan(*_a, **_kw)
+
+
+def cmd_review_queue(*_a, **_kw):
+    return _tl_hygiene.cmd_review_queue(*_a, **_kw)
+
 _IDEMPOTENCY_CONTRACTS = _tl_workflow._IDEMPOTENCY_CONTRACTS
 _TASK_TO_WORKFLOW = _tl_workflow._TASK_TO_WORKFLOW
 
-for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking):
+for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene):
     _m.bind(sys.modules[__name__])
 
 

@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -3678,7 +3678,8 @@ def run() -> int:
     # khi patched=0 do cat đã đúng (idempotent). Cờ hụt = `not v.get("verified")` (verified nay dựa `missed`, KHÔNG patched).
     try:
         import inspect as _insp2
-        _rc_src = _insp2.getsource(cmd_recat)
+        import tl_core.ingest_ops as _io5   # I5 v1.34.8: nguồn THẬT ở tl_core.ingest_ops (tên tl là stub)
+        _rc_src = _insp2.getsource(_io5.cmd_recat)
         cases.append(("recat_warns_on_real_miss_not_idempotent",
                       'not v.get("verified")' in _rc_src and "return 1" in _rc_src
                       and "KHÔNG khớp drive_id" in _rc_src and "patched < len(ids)" not in _rc_src))
@@ -4639,7 +4640,8 @@ def run() -> int:
     # S4/S5/S6 — ingest-local ghi registry SẠCH ngay tại ingest: shape-lock nguồn (normalize loai + nhãn cat đủ +
     # corpus=true ở bước link cuối) + helper thật chạy offline đúng ('VBHN'→enum, '03'→nhãn đủ).
     import inspect as _ins55
-    _src55 = _ins55.getsource(_TL_MODULE.cmd_ingest_local)
+    import tl_core.ingest_ops as _io55   # I5 v1.34.8: nguồn THẬT ở tl_core.ingest_ops
+    _src55 = _ins55.getsource(_io55.cmd_ingest_local)
     cases.append(("r55_ingest_local_canonical_loai_cat_corpus",
                   "loai = _normalize_loai(loai)" in _src55
                   and "_cat_reg_label(cat)" in _src55
@@ -5589,6 +5591,27 @@ def run() -> int:
     finally:
         for _k, _v in _sav75.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.8 — r75_*: I5 parity wrapper↔module (kiểu r70-r74) ═══
+    import tl_core.ingest_ops as _io75
+    _io_names75 = ["cmd_ingest_local", "cmd_profile_ingest", "cmd_ingest", "cmd_ingest_analyze",
+                   "cmd_ingest_route", "cmd_ingest_missing", "cmd_register", "cmd_recat", "cmd_source_rename",
+                   "cmd_source_delete", "cmd_source_update_corpus", "cmd_shared_source_fix",
+                   "_classify_doc_header", "_sohieu_from_title_zone", "_ingest_verify_gate",
+                   "_split_by_dieu_chunks", "_chunk_summaries", "_profile_ingest_note",
+                   "_profile_read_probe_text", "_profile_source_quality", "_safe_profile_doc_name",
+                   "_upload_mime_ext", "_ingest_target", "_ingest_ckpt_load", "_ingest_ckpt_load_full",
+                   "_ingest_local_prev_state", "_ingest_local_cat_gate", "_ingest_missing_select",
+                   "_ingest_missing_partition", "_ingest_missing_dedup_live", "_ingest_dedup_title_key",
+                   "_verify_convert_readback", "_source_rename_plan", "_source_delete_plan",
+                   "_source_update_corpus_plan", "_shared_source_fix_plan", "_shared_source_id_groups"]
+    _g75 = globals()
+    cases.append(("r75_ingest_ops_module_wired",
+                  all(callable(getattr(_io75, n, None)) for n in _io_names75)
+                  and all(f"_tl_ingest_ops.{n}" in _ins69.getsource(_g75[n]) for n in _io_names75)
+                  and _io75._TL is not None))
+    _tl_src75 = Path(_ins69.getsourcefile(_g75["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r75_no_dual_definition",
+                  all(_tl_src75.count(f"def {n}(") == 1 for n in _io_names75)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

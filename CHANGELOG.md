@@ -1,3 +1,19 @@
+# ★ v1.34.8 — I5: tách ingest_pipeline → tl_core/ingest_ops.py (test-first, cụm ghi chính) (2026-07-09)
+
+- **Characterization TRƯỚC cut**: +5 wiring `r75a_*` OFFLINE cho 5 cmd 0-hit — ingest-route cây quyết định
+  (ASK_USE_EXISTING / PROFILE_OWN); ingest-analyze `--text-file` letterhead → plan + lệnh `ingest-local
+  --auto-plan` điền sẵn; source-rename DRY gợi ý tên chuẩn + không gọi gas; shared-source-fix DRY group;
+  **register --bulk GUARDS P0-1** (drive_id cắt cụt / cat rác → rc=2, KHÔNG post). PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 37 def (~1.76k dòng)** → `tl_core/ingest_ops.py`: 12 lệnh (ingest-local, profile-ingest,
+  ingest, ingest-analyze, ingest-route, ingest-missing, register, recat, source-rename/delete/update-corpus,
+  shared-source-fix) + 25 helper riêng-cụm (classification `_classify_doc_header`/`_sohieu_from_title_zone`
+  vừa vá v1.34.6, verify-gate, chunk, mime, checkpoint, plan-helper). tl.py 14.932→**13.176** dòng
+  (lũy kế chuỗi I: 19.052→13.176 qua 7 module).
+- **WRITE-INFRA đa-module GIỮ Ở TL** (đếm-tham-chiếu: hygiene+nlm_ops+profile_mgmt cùng dùng):
+  `_journaled_reg_write`/`_apply_gate`/`_verified_reg_upsert`/`_reg_before_from_manifest`.
+- 3 test getsource (recat 1.23.6, r55 ingest-local, clobber-guard đã sửa ở I4) trỏ nguồn thật ở module.
+  +r75 wired/no-dual → selftest **697/697**; golden 18/18 khớp nguyên trạng; audit strict xanh.
+
 # ★ v1.34.7 — I4: tách profile_mgmt → tl_core/ + FIXTURE-CONFIG (golden ops-plan hồi sinh) (2026-07-09)
 
 - **FIXTURE-CONFIG tất định** (`fixtures/config_fixture.json` sinh-tại-chỗ, 2 profile, registryDocId pin sẵn) —

@@ -215,7 +215,7 @@
   "registry": {
     "commands": {
       "backfill-hieuluc": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -225,7 +225,7 @@
         "write_scope": "registry"
       },
       "backfill-loai": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -235,7 +235,7 @@
         "write_scope": "registry"
       },
       "backfill-title-vn": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -255,7 +255,7 @@
         "write_scope": "local"
       },
       "chunk-apply": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -265,7 +265,7 @@
         "write_scope": "local"
       },
       "chunk-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -275,7 +275,7 @@
         "write_scope": "none"
       },
       "chunk-verify": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -285,7 +285,7 @@
         "write_scope": "none"
       },
       "convert-verify": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -295,7 +295,7 @@
         "write_scope": "none"
       },
       "corpus-fix": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -305,7 +305,7 @@
         "write_scope": "registry"
       },
       "dedup-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "dedup_plan",
         "read_only": false,
         "requires_confirm": false,
@@ -315,7 +315,7 @@
         "write_scope": "registry_nlm"
       },
       "deploy-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -345,7 +345,7 @@
         "write_scope": "drive"
       },
       "final-acceptance": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -355,7 +355,7 @@
         "write_scope": "none"
       },
       "go-live-runbook": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -385,7 +385,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "ingest-ocr": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "ocr_ingest",
         "read_only": false,
         "requires_confirm": true,
@@ -395,7 +395,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "ingest-zip": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "ingest_zip",
         "read_only": false,
         "requires_confirm": true,
@@ -405,7 +405,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "live-contract-check": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -415,7 +415,7 @@
         "write_scope": "none"
       },
       "live-readiness": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -425,7 +425,7 @@
         "write_scope": "none"
       },
       "live-smoke-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -435,7 +435,7 @@
         "write_scope": "none"
       },
       "live-state-diff": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -445,7 +445,7 @@
         "write_scope": "none"
       },
       "live-state-snapshot": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -455,7 +455,7 @@
         "write_scope": "local"
       },
       "missing-sohieu": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -475,7 +475,7 @@
         "write_scope": "nlm"
       },
       "nlm-query-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -495,7 +495,7 @@
         "write_scope": "registry_nlm"
       },
       "ocr-analyze": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -505,7 +505,7 @@
         "write_scope": "none"
       },
       "ocr-run": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -515,7 +515,7 @@
         "write_scope": "local"
       },
       "ocr-verify": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -535,7 +535,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "profile-ingest-chunks": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "profile_ingest_chunks",
         "read_only": false,
         "requires_confirm": true,
@@ -545,7 +545,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "profile-ingest-ocr": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "profile_ingest_ocr",
         "read_only": false,
         "requires_confirm": true,
@@ -555,7 +555,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "profile-ingest-zip": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "ingest_zip",
         "read_only": false,
         "requires_confirm": true,
@@ -565,7 +565,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "push-overflow": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "push_overflow",
         "read_only": false,
         "requires_confirm": false,
@@ -575,7 +575,7 @@
         "write_scope": "nlm_registry"
       },
       "quarantine-fix": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -585,7 +585,7 @@
         "write_scope": "registry"
       },
       "recat": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "recat",
         "read_only": false,
         "requires_confirm": false,
@@ -595,7 +595,7 @@
         "write_scope": "drive_registry"
       },
       "reg-delete": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "reg_delete",
         "read_only": false,
         "requires_confirm": true,
@@ -625,7 +625,7 @@
         "write_scope": "local"
       },
       "release-check": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -655,7 +655,7 @@
         "write_scope": "none"
       },
       "rollback-plan": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -675,7 +675,7 @@
         "write_scope": "none"
       },
       "shared-source-fix": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "shared_source_fix",
         "read_only": false,
         "requires_confirm": true,
@@ -685,7 +685,7 @@
         "write_scope": "registry_nlm"
       },
       "source-delete": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "source_delete",
         "read_only": false,
         "requires_confirm": true,
@@ -695,7 +695,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "source-rename": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "source_rename",
         "read_only": false,
         "requires_confirm": false,
@@ -705,7 +705,7 @@
         "write_scope": "drive_registry_nlm"
       },
       "source-update-corpus": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": "source_update_corpus",
         "read_only": false,
         "requires_confirm": true,
@@ -725,7 +725,7 @@
         "write_scope": "none"
       },
       "vbhn-year-fix": {
-        "generated": false,
+        "generated": true,
         "idempotency_contract": null,
         "read_only": false,
         "requires_confirm": false,
@@ -746,7 +746,7 @@
       }
     },
     "counts": {
-      "generated_parsers": 9,
+      "generated_parsers": 47,
       "high_risk": 19,
       "total": 53,
       "write_commands": 33

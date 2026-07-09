@@ -1,3 +1,21 @@
+# ★ v1.34.10 — I7 wave-1: 38 lệnh build_parser SINH TỪ GENERATED_SPECS + PARSER-SURFACE SNAPSHOT (2026-07-09)
+
+- **Characterization TRƯỚC chuyển (commit riêng)**: `r77a` PARSER-SURFACE SNAPSHOT — SHA256 per-command của
+  bề mặt parser đầy đủ (opts/dest/nargs/const/default/type/choices/required/help/metavar/kind + handler,
+  đệ quy nested subparsers; KHÔNG phụ thuộc thứ tự add_parser) tại `references/golden/parser_surface.json`
+  (~14KB; bản full 510KB không lưu repo). Regen có chủ đích: `TL_WRITE_PARSER_SURFACE=1 tl --selftest`
+  (kỷ luật như golden --write). **Drift-lock CLI vĩnh viễn — mạnh hơn r64 nhiều bậc.**
+- **Converter AST cơ học** chuyển 38 block `sub.add_parser` an-toàn → GENERATED_SPECS (flags/help NGUYÊN VĂN):
+  chỉ block kwargs literal + `fn=cmd_*` trên tl + KHÔNG comment nội khối (doctrine-comment giữ tại chỗ) +
+  ĐÃ có COMMAND_META 1-dòng (bất biến r64 spec⇒generated=True — flip 38 meta). tl.py **11.602→11.296** dòng.
+  `register_generated` nhận spec không help. Sau chuyển: **surface khớp TỪNG HASH** (r77a) — bằng chứng
+  bề mặt CLI không suy suyển.
+- Sửa nguồn-vỡ-theo-bump phát hiện khi verify: `instructions --skill-version default=VERSION` nhúng số version
+  vào surface → sentinel `<TL_VERSION>` trong extractor. Golden regen ĐÚNG 2 file kỳ vọng (tool-inventory
+  `generated:true` ×38 + workflow_audit kernel_size ±1 byte version-string).
+- **Wave-2+ còn lại** (113 block skip có lý do): 78 thiếu COMMAND_META (việc hoàn tất Pha E — thêm meta trước
+  rồi chuyển), 17 set_defaults phức, 9 kwarg non-literal, 6 foreign-stmt, 3 has-comment.
+
 # ★ v1.34.9 — I6: tách 16 cmd tra-cứu/quan-hệ → tl_core/lookup_ops.py (động cơ Ở LẠI tl) (2026-07-09)
 
 - **RANH GIỚI GRILLING (quyết định user)**: động cơ resolution `_source_map_one` (365 dòng, 59 điểm test,

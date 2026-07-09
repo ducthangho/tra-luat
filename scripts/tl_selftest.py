@@ -5702,9 +5702,11 @@ def run() -> int:
                         nested = act
                         acts.append({"kind": "subparsers", "dest": act.dest, "choices": sorted(act.choices)})
                         continue
+                    # default==VERSION (vd instructions --skill-version) → sentinel: snapshot KHÔNG vỡ theo mỗi bump
+                    _dflt = "'<TL_VERSION>'" if act.default == getattr(_TL_MODULE, "VERSION", None) else repr(act.default)
                     acts.append({
                         "kind": type(act).__name__, "opts": list(act.option_strings), "dest": act.dest,
-                        "nargs": repr(act.nargs), "const": repr(act.const), "default": repr(act.default),
+                        "nargs": repr(act.nargs), "const": repr(act.const), "default": _dflt,
                         "type": (getattr(act.type, "__name__", None) or repr(act.type)) if act.type is not None else None,
                         "choices": (list(act.choices) if act.choices is not None else None),
                         "required": bool(act.required), "help": act.help, "metavar": act.metavar})

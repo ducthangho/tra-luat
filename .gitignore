@@ -17,3 +17,4 @@ references/golden/fixtures/
 
 # v1.34.2 (doctrine v1.33.53/Z3-02): snapshot/report vận hành ghi .tl_state/ — runtime artifact, không vào repo/manifest
 .tl_state/
+reports/

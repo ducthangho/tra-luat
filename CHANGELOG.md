@@ -1,3 +1,22 @@
+# ★ v1.34.4 — I2: tách cụm nlm_wrappers/sharding → tl_core/nlm_ops.py (test-first) (2026-07-09)
+
+- **Characterization TRƯỚC cut** (commit riêng): +5 wiring-test `r71a_*` OFFLINE (mock `_imp`/`_gas`/registry-IO
+  trên tl — bind REBASE nên patch thấm cả sau cut) khoá 5 cmd 0-hit-selftest: nlm-list shape JSON; nlm-reconcile
+  DRY phân 3 lớp desync_real/other_notebook/unregistered; preflight ⚠DUP-TL lỏng-năm (L4) + verify-LIVE slot khi
+  FULL (L5); push-overflow verified-write; overflow-resolve MAX(registry,physical) + discover shard + gap.
+  PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 28 def (~1.0k dòng)** → `tl_core/nlm_ops.py`: 13 lệnh (nlm-list/get/query/cross/content/
+  add/orphans/reconcile/query-plan, preflight, push-overflow, overflow-resolve, slot-audit) + 15 helper riêng-cụm.
+  tl.py 17.097→16.227 dòng. **Ranh giới đo bằng đếm-tham-chiếu-ngoài-cụm**: helper đa-cụm GIỮ Ở TL
+  (`_entry_on_nlm_live` 16 site, `_resolve_nlm_notebook` 6, `_nlm_display`, `_nlm_probe_summary`,
+  `_nlm_status_known/removed`, `_gws_nlm_note`, `_entry_nlm_notebook_id`).
+- ★ **Bẫy mới cho I3+**: default-param (`cap=NLM_SLOT_CAP` của `_overflow_status`) eval lúc ĐỊNH NGHĨA module —
+  TRƯỚC bind → NameError khi import. Module cần MIRROR constant + drift-lock `r71_slot_cap_mirror`
+  (nlm_ops.NLM_SLOT_CAP == tl.NLM_SLOT_CAP).
+- Self-heal phủ module mới (canary/tl_boot preload/py_compile+REQUIRED/r36); r69 nlm-add source-check trỏ nguồn
+  thật ở nlm_ops. +r71 wired/no-dual/slot-cap-mirror → selftest **670/670**; golden 17/17 khớp nguyên trạng
+  (ổn định ×3); audit strict xanh.
+
 # ★ v1.34.3 — I1: tách cụm hygiene_report → tl_core/hygiene.py (test-first, golden khớp nguyên trạng) (2026-07-09)
 
 - **Characterization TRƯỚC cut** (commit riêng để bisect): 6 golden `hygiene_*` offline trên FIXTURE MANIFEST

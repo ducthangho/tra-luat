@@ -335,6 +335,7 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/ocr.py",
     "scripts/tl_core/chunking.py",
     "scripts/tl_core/hygiene.py",
+    "scripts/tl_core/nlm_ops.py",
     "scripts/tl_core/command_registry.py",
     "SKILL.md",
     "CHANGELOG.md",

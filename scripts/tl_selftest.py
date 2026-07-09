@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5097,7 +5097,8 @@ def run() -> int:
     cases.append(("r69_reg_query_drive_id_flag", getattr(_ns69, "drive_id", None) == "x123"))
     # (b) nlm-add có nhánh reg_link sau add (drift-lock: gỡ nhánh này là fail — đúng ca S14 nguồn 'unregistered')
     import inspect as _ins69
-    _src69 = _ins69.getsource(cmd_nlm_add)
+    import tl_core.nlm_ops as _no69   # I2 v1.34.4: nguồn THẬT ở tl_core.nlm_ops (tên trong tl là stub)
+    _src69 = _ins69.getsource(_no69.cmd_nlm_add)
     cases.append(("r69_nlm_add_reg_link_wired",
                   "_journaled_reg_write" in _src69 and "nlm-add-link" in _src69 and "row xương" in _src69))
     # (c) live-smoke-plan bước snapshot_diff mang ĐỦ allow-prefix path THẬT (thiếu → diff báo unexpected oan);
@@ -5223,6 +5224,25 @@ def run() -> int:
             setattr(_TL_MODULE, _k, _v)
         for _k, _v in _env71.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+    # ═══ v1.34.4 — r71_*: I2 parity wrapper↔module (kiểu r70) + drift-lock mirror constant ═══
+    _no_names71 = ["cmd_nlm_list", "cmd_nlm_reconcile", "cmd_preflight", "cmd_push_overflow",
+                   "cmd_overflow_resolve", "cmd_slot_audit", "cmd_nlm_add", "cmd_nlm_orphans",
+                   "cmd_nlm_cross", "cmd_nlm_get", "cmd_nlm_content", "cmd_nlm_query", "cmd_nlm_query_plan",
+                   "_nlm_reconcile_plan", "_nlm_source_drive_id", "_sohieu_loose",
+                   "_discover_overflow_from_registry", "_overflow_route", "_overflow_status",
+                   "_slot_count_all_shards", "_nlm_slot_count", "_classify_nlm_sources",
+                   "_nlm_post_add_dup_check", "_nlm_dedup_gate", "_nlm_query_plan",
+                   "_preflight_invariants", "_preflight_verdict", "_raw_on_nlm_rows"]
+    _g71 = globals()
+    cases.append(("r71_nlm_ops_module_wired",
+                  all(callable(getattr(_no69, n, None)) for n in _no_names71)
+                  and all(f"_tl_nlm_ops.{n}" in _ins69.getsource(_g71[n]) for n in _no_names71)
+                  and _no69._TL is not None))
+    _tl_src71 = Path(_ins69.getsourcefile(_g71["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r71_no_dual_definition",
+                  all(_tl_src71.count(f"def {n}(") == 1 for n in _no_names71)))
+    # mirror constant: default-param cap=NLM_SLOT_CAP eval trước bind → nlm_ops giữ bản sao; khoá không trôi
+    cases.append(("r71_slot_cap_mirror", _no69.NLM_SLOT_CAP == _TL_MODULE.NLM_SLOT_CAP))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

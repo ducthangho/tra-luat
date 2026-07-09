@@ -89,7 +89,7 @@ EXPECT_VERSION = "2.21.2i"
 # [lịch sử, đã gộp 1.24.0] 1.23.22: ROOT-CAUSE THẬT sự cố 2026-06-30 (ĐÍNH CHÍNH 1.23.21: KHÔNG mất data 766 dòng!). Thật ra config `registryDocId` trỏ NHẦM Doc legacy `1mATG` (vnd.google-apps.document) thay vì SHEET registry thật → webapp mở Doc-as-Sheet → đọc RỖNG → count=0 ẢO (data vẫn nguyên; corpus 552 là do dedup-plan −50). Template public init-config hay ghi đè về Doc legacy → tái diễn mỗi setup. FIX: (1) doctor CHẶN cứng `registryDocId == _LEGACY_REGISTRY_DOC_ID` (1mATG) → báo sửa về Sheet/để rỗng; (2) `init-config` AUTO-HEAL: blank registryDocId (base+profiles) nếu = Doc legacy → webapp auto-discover Sheet `tra_luat_registry`. (Giữ guard 1.23.21 cho ca profile registryDocId rỗng.) +1 test → 260/260. # 1.23.21: ⛔ GUARD CHỐNG CLOBBER REGISTRY NỀN (SỰ CỐ NGHIÊM TRỌNG 2026-06-30: profile dự án 'Khảo sát Luật XB' registryDocId RỖNG → webapp `regSS_` rơi nhánh BASE → manifest --touched-drive quét phình rồi profile-rebuild-registry XÓA SẠCH 766 dòng registry NỀN VBQPPL). FIX: `cmd_manifest` (--touched-drive) + `cmd_profile_rebuild_registry` CHẶN khi profile dự án có TL_REGISTRY_DOC_ID rỗng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — phải tạo registry RIÊNG trước. PHÁT HIỆN từ GS: registry base = Google SHEET `tra_luat_registry` (regSS_ tìm theo tên/TL_REGSHEET_ID_AUTO), KHÔNG phải Doc 1mATG (chỉ ping/display); khôi phục = restore SHEET đó (version history Sheets), cache `tl212_reg_*` TTL 600s. +1 test → 259/259. # 1.23.20: DETECTOR `infra_in_corpus` (phát hiện khi rà 106 Luật dump) — file HẠ TẦNG (.json/.enc/secrets/nlm_sources_delta/manifest/registry) lẫn corpus=true = RÁC (vd tl_secrets.enc, nlm_sources_delta_*.json đếm như văn bản). `_is_infra_entry` (module-level, BẢO VỆ GDoc/PDF/Word) + thêm vào `tl sweep` (cờ + NEXT ACTION set corpus=false). +1 test → 258/258. # 1.23.19: COMPOSITE `tl dedup-plan` (user yêu cầu) — kế hoạch dedup TOÀN CORPUS 1 lệnh (thay chạy `hygiene plan <q>` từng cụm). Tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters `_cluster_same_doc` = CÙNG văn bản theo subject-sig + gộp sidecars .docx/.pdf cạnh GDoc). GIỮ canonical, set corpus=false bản dup (reversible). BẤT BIẾN AN TOÀN: không quarantine chính canonical / canonical của cụm khác / trùng lặp. DRY mặc định; --apply ghi reg_bulk corpus=false; review (thiếu canonical) + dups_on_nlm (còn nguồn NLM→cân nhắc xoá tay) chỉ BÁO. sweep NEXT ACTION trỏ dedup-plan. Pure `_dedup_plan`. +1 test → 257/257. # 1.23.18: FIX false-fire NLM_STATUS_MISMATCH (phát hiện khi nlm-orphans --fix-mismatch LIVE trả MISMATCH_LIVE=0 dù sweep báo 79). Whitelist status exact-match KHÔNG nhận biến thể `removed_*` (removed_superseded_by_VBHN, removed_dedup…) → false-fire + `_entry_on_nlm_live` coi NHẦM removed_* là sống (lệch still_on_nlm/ghost). FIX: `_nlm_status_known`/`_nlm_status_removed` nhận HỌ tiền tố (pushed*/synced/removed*/trash*/deleted), áp 4 site (doctor flag, _title_flags, _entry_on_nlm_live, vbhn-normalize removed). sweep NEXT ACTION: NLM_STATUS_MISMATCH = nhãn LẠ (registry hygiene) KHÔNG phải live desync. +2 test → 256/256. # 1.23.17: `tl sweep` NEXT ACTION nlm_drift TÁCH theo sub-type (phát hiện khi reconcile LIVE không giảm drift) — trước gộp 288 thành 'nlm-reconcile --apply' GÂY HIỂU NHẦM (reconcile chỉ chữa LINKAGE). Nay: NLM_NOTEBOOK_ID_MISSING→nlm-reconcile (linkage); NLM_STATUS_MISMATCH→nlm-orphans --fix-mismatch (đọc live); CORPUS_TRUE_NOT_ON_NLM→ingest-missing (job lớn, phần lớn CẤU TRÚC corpus>cap, KHÔNG về 0). # 1.23.16: DETECTOR `shared_source_id` (phát hiện khi dọn ghost NLM LIVE) — ≥2 drive_id KHÁC nhau CÙNG 1 nlm_source_id (backfill/reconcile gắn nhầm) = FALSE-LINK: xóa nguồn của row này GÃY link row kia (ca NQ42: canonical + ghost chung source_id → xóa ghost làm canonical mất NLM, phải re-push). Pure `_shared_source_id_groups` + thêm vào `tl sweep` (cờ + NEXT ACTION cảnh báo SỬA TRƯỚC nlm-reconcile/xóa nguồn). Dev cache thấy 4 nhóm. +1 test → 254/254. # 1.23.15: xử báo cáo rà 106 Luật (mục code còn lại; 5.1/5.3/5.6/4.B đã vá ở 1.23.11-14). 5.2 vbhn-check goc_hit cross-subject LỌT (14-2024 ATVSLĐ vào --goc 09-2017 Du lịch vì _disc_conflict không biết cặp) → `_vbhn_candidates`: khi ĐÃ biết subject, goc_hit phải TƯƠNG THÍCH chủ đề (sscore≥30) mới giữ. 5.5 Cowork /tmp sticky owner-nobody không ghi được → `_ensure_writable_tmpdir()` trỏ TMPDIR về CACHE/tmp ($HOME) lúc import (tempfile.* + script con kế thừa). 5.4 SKILL.md bootstrap options + cảnh báo 45s; 4.B thêm vbhn-normalize/sweep/quarantine-fix/vbhn-year-fix vào bảng CLI. +2 test → 253/253. # 1.23.14: COMPOSITE `tl quarantine-fix` (dọn nhóm B tất định) — phân loại dòng quarantine MÂU THUẪN: set_corpus_false (raw-dup .pdf/.docx gán nhầm corpus→false, AN TOÀN) + normalize_label (nhãn biến thể→QUARANTINE_CAT) tự động qua --apply; review_restore (GDoc corpus=true nghi canonical kẹt như A1/BLLĐ→KHÔNG auto, quyết tay) + ghost_nlm (quarantine còn nguồn NLM live→báo source_id, xoá tay sau verify). Pure `_quarantine_fix_items`. DRY mặc định. +1 test → 251/251. # 1.23.13: (1) MERGE HỘI TỤ bản Codex v1.23.11 (cùng vá report rà corpus) — PORT phần UNIQUE: A1 SUBJECT-GATE thật (`_name_subject_match`/`_name_subject_text`: source-map ghim canonical CHỈ trong hit KHỚP CHỦ ĐỀ, abbrev-aware BLLD/BHXH; hit generic→None+SUBJECT_MISMATCH) + `resolve_identity` +name_tokens (dedup-check 'Luật Thư viện') + vbhn-check SUBJECT_FILTER_WEAK + reg-query LIMIT_TRUNCATED rõ. GIỮ bản tôi đã verify cho A2-A5 + reg-query json-all. (2) GỠ `_parts` (chống mount-cắt-cụt — Cowork nay bootstrap qua tl_fetch zip sạch nên hết tác dụng): xoá scripts/_parts/ + build_parts.py + tl_rebuild.sh; tl_boot.py rút gọn (strip-NUL→compile→exec); `_reassemble_parts`→None (heal degrade về on-disk); edit-skill/verify-integrity bỏ build_parts. (3) COMPOSITE TẤT ĐỊNH `tl sweep`: 1 lệnh thay chuỗi 6 audit (hygiene+cat+slot+drift+vbhn-year+quarantine) → JSON/text + NEXT ACTIONS điền sẵn (pure `_sweep_report`). +4 test → selftest 250/250. # 1.23.12: 2 fix từ chạy B1 LIVE. (1) reg-query `--json` UNDERCOUNT âm thầm — mặc định cắt 60 rows → script đếm `len(rows)` thiếu (audit quarantine thấy 60/110). Nay `--json` trả TẤT CẢ rows mặc định (text vẫn cắt 60 + dòng '(hiện 60)') + cờ `truncated`. (2) hygiene scan thêm cờ TRẠNG THÁI MÂU THUẪN `quarantine_corpus_true` (trong quarantine nhưng corpus=true) + `quarantine_still_on_nlm` (quarantine nhưng còn nguồn NLM live = ghost) → surface để dọn. # 1.23.11: xử báo cáo rà corpus (nhóm A). A2: hằng `QUARANTINE_CAT` + `_is_quarantine_label_variant` + cờ hygiene scan `quarantine_label_variants` (audit hội tụ dù nhãn lệch QUARANTINE/_ZZZ — `_is_quarantine_cat` nhận mọi biến thể). A3: `slot-audit` TỰ neo `live_source_count` từ nlm CLI (+`--no-live`) → cảnh báo gap estimate↔live khỏi gọi `--physical` tay. A4: `doctor` in BREAKDOWN từng cờ (NLM_STATUS_MISMATCH/CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING) + lệnh `nlm-reconcile <nb> --apply` ĐIỀN SẴN notebook id. A5: help `vbhn-check --subject` thêm cảnh báo QUOTE. A1 (source-map ghim sai canonical 'Bộ luật Lao động'→'Dân chủ 87'): KHÔNG tái hiện trên v1.23.11 với dữ liệu đại diện — gate LOW_CONFIDENCE_NAME_MATCH gốc đã null canonical khi top không strong-match; giữ gate (thử thay bằng nhóm tail-key gây regression abbrev/quarantine → revert). Cần `source-map --json` LIVE để soi nếu còn. +3 test. # 1.23.10: GUARD cat (phát hiện khi nạp THADS 106/2025 LIVE) — `register`/reg_bulk KHÔNG validate `cat` → workaround gõ tay folder RÁC '30_To_chuc_bo_may_nha_nuoc' (số 30 + tên cat 35) lọt im lặng → registry lệch folder vật lý. Nay `_is_valid_cat_value` chặn cat không thuộc taxonomy 45+2 (cả nhánh --bulk lẫn reg_upsert), rc=2, nhắc dùng `tl recat --cat <số>`. +1 test. BÀI HỌC: đổi cat LUÔN dùng recat (resolve+validate folder), KHÔNG register --bulk tên gõ tay. # 1.23.9: 2 FIX (phát hiện khi chạy vbhn-year-fix LIVE Cowork). (A) vbhn-year-fix CHỈ quét entry corpus=true — sidecar/quarantine (corpus=false) KHÔNG year-fix → hết CONFLICT GIẢ (sidecar corpus=false va sohieu với GDoc canonical cùng số; hygiene báo 'sạch' nhưng vbhn-year-fix báo conflict = mâu thuẫn do quét cả non-corpus). (B) HINT SAI: lệnh ghi in `MANIFEST_STALE_RUN_REGEN2` → `tl regen2` KHÔNG phải lệnh (chỉ có `tl manifest`; regen2 là action GAS qua `manifest --touched-drive`) → user chạy nhầm. Sửa 5 hint + dòng recat → `tl boot --refresh` (sau ghi registry sheet) / `tl manifest` (sau đổi cây Drive). +test corpus-skip. # 1.23.8: SAFEGUARD cho vbhn-year-fix (phát hiện khi soát DRY) — nếu ≥2 dòng suy ra CÙNG `NN-YYYY-VBHN-XXX` (dòng dup cùng văn bản, HOẶC 2 văn bản khác cùng số+năm) thì ghi sẽ TẠO collision MỚI → tách bucket `conflicts`, KHÔNG auto-apply (rc=1), in 🔴 CONFLICT để dedup/phân biệt tay. `_vbhn_year_fix_items` nay trả (fixable, needs_year, conflicts). +1 test. # 1.23.7: ★ BẤT BIẾN ĐẶT TÊN (user nhấn mạnh) — số hiệu VBQPPL PHẢI có NĂM; VBHN là thủ phạm (số VBHN tái dùng theo năm → collision, vd 61/VBHN-VPQH=ATTP 2025+Thuế TNDN 2026, 115/VBHN-VPQH=THADS 2025+Thi đua 2026). Lệnh MỚI `tl vbhn-year-fix [--with-name] [--apply]`: quét VBHN sohieu THIẾU năm (`NN-VBHN-XXX`) → suy năm (ngày ban hành/tên qua `_entry_issue_year`) → đề xuất `NN-YYYY-VBHN-XXX`, GHI qua reg_upsert (KHÔNG reg_bulk — sohieu là khóa immutable); ca không suy được năm → needs_year (xác minh tay). Pure `_vbhn_sohieu_inject_year`/`_name_inject_vbhn_year`/`_vbhn_year_fix_items` (test offline). + `register` cảnh báo `VBHN_SOHIEU_NO_YEAR` khi ghi sohieu VBHN thiếu năm. +3 test. (Phát hiện đã có sẵn: cờ VBHN_BARE_NUMBER/MISSING_YEAR_OR_DATE/NAME_MISSING_YEAR.) # 1.23.6: FIX (phát hiện khi KH2 Pha 2.6 recat Cowork) — `recat --apply` báo `reg_patched:0` ÂM THẦM khi Drive đã move nhưng webapp index chưa thấy row mới thêm (registry cat KHÔNG cập nhật → user tưởng xong). Nay LOUD cảnh báo stderr + rc=1 khi reg_patched < moved, chỉ rõ KHẮC PHỤC (regen2 --refresh rồi reg_bulk lại). Cùng họ "ghi im lặng" với 1.23.5. +1 test. # 1.23.5: FIX BUG (phát hiện khi KH2 Pha 2.8 chạy Cowork) — `missing-sohieu --apply` ghi reg_bulk cột `so_hieu` (có gạch dưới) → webapp BỎ IM LẶNG (đúng gotcha API_CONTRACT mục 0: khóa phải `sohieu`); apply thẳng trả patched=0 mà KHÔNG báo lỗi. Sửa items key + cols → `sohieu` (line ~8061) + help/docstring. Workaround Cowork (cols="sohieu") đã ghi 193/193; nay code gốc đúng. +1 test. # 1.23.4: ★ KH1 HOÀN TẤT — `tl relation-backfill --base <sh> [--apply]` (Pha 1.5 cuối, cho KH2 Pha 2.3): GHI quan hệ sửa đổi mà relation-check ĐÃ phát hiện (missing_links từ `_relation_audit`, tái dùng cổng footnote chống dương-tính-giả) — set `goc` cho luật SỬA, append `sua_doi` cho luật GỐC (pure `_relation_backfill_items` HỢP NHẤT sua_doi cũ + dedup, KHÔNG đè). CHỈ direct/ref-linked; subject-only → review (xác minh tay). DRY mặc định. +1 test → selftest 237/237. → TOÀN BỘ lệnh KH1 đã dựng (3 cổng + vòng lặp + dọn-corpus + nlm-orphans + relation-backfill). CÒN: cập nhật RUNBOOK/API_CONTRACT (tài liệu), KH2/KH3 (corpus). # 1.23.3: FIX DEPLOY-DISPLAY — SKILL.md header ghi CỨNG '(v1.22.70)' qua MỌI bump 1.22.71→1.23.2 (tôi quên sed SKILL.md) → bản deploy HIỂN THỊ 'v1.22.70' dù runtime đúng. Sửa SKILL.md→(v1.23.3) + GUARD selftest `skill_md_version_matches_VERSION` (bump nào quên cập nhật SKILL.md = selftest FAIL → chặn deploy). LƯU Ý vận hành: Package live khi kiểm = 1.23.0 (1.23.1/1.23.2 CHƯA push thành công — drive-push cần gws auth); verify push bằng curl Package fileId. +1 test → selftest 236/236. # 1.23.2:`tl nlm-orphans <notebook> [--fix-mismatch] [--deep]` — TỰ ĐỘNG HOÁ điều tra ghost (thay 6 vòng soi tay): đọc nguồn NLM LIVE (`nlm_cli.source_list`) ↔ registry → phân `_classify_nlm_sources` (PURE, test offline) thành REGISTERED_ACTIVE / **STATUS_MISMATCH_LIVE** (dòng registry removed* nhưng nguồn còn SỐNG = gắn nhãn SAI, vd 8 văn bản đã vá tay) / UNREGISTERED (trên NLM, không dòng registry). REPORT-ONLY; --fix-mismatch in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (KHÔNG đụng NLM/KHÔNG xóa); --deep đọc nội dung NLM lấy SỐ HIỆU header thật (vá cả sohieu cụt như '66'→'66.18/2026/NQ-CP'). +1 test → selftest 235/235. (CÒN: relation-backfill Pha 1.5 live; root-cause pipeline gắn nhầm removed_from_drive; SKILL.md/RUNBOOK/API_CONTRACT.) # 1.23.1: vá sweep-finding — `overflow-resolve` ĐỐI CHIẾU LIVE (nlm-get) thay vì registry-only: dùng MAX(registry, physical) làm slot hiệu lực (`_overflow_status`) → KHÔNG báo 'còn chỗ' giả khi vật lý vượt cap (vd base registry 279 / LIVE 315); cờ `REGISTRY_BEHIND_LIVE` lộ nguồn add thẳng CHƯA đăng ký (gợi `tl nlm-reconcile`); sửa cosmetic flag (BASE_HAS_ROOM khi base còn chỗ). `--no-live` để registry-only. (ingest-missing --apply ĐÃ physical-safe sẵn qua nlm-get.) +1 test → selftest 234/234. # 1.23.0: ★ KH1 (sửa skill sau báo cáo rà 70 Luật) — PHÁT HÀNH. Pha 1.3/III.2: `tl slot-audit --all-shards` (II.5 đếm slot TỪNG shard + cảnh báo near-full ≥270/300, pure `_slot_count_all_shards`) + `tl overflow-resolve` (II.1 kiểm shard overflow SẴN CÓ → cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE, chống tạo notebook nhầm; reuse `_overflow_route`) + `tl edit-skill <file> --patch` (III.2 sửa skill an toàn: assert-đếm→py_compile→write_text→build_parts, né Edit/Write mount; DRY mặc định). manifest-stale (II.4): lệnh ghi MỚI phát MANIFEST_STALE_RUN_REGEN2. canonical-not-sidecar (II.3): ĐÃ xử qua deep-resolver `_resolve_deep_target`+`_is_source_sidecar`+phạt raw-300. +3 test → selftest 233/233. ★ TỔNG KH1 (1.22.71→1.23.0): H1/H2/UTF-8/instructions--out; 3 CỔNG G1(source-verify)/G2(header-verify)/G3(cat-verify+cat-audit/recat FIX); vòng lặp frontier-expand/ingest-missing(no-new-notebook)/rasoat-loop; dọn corpus backfill-loai/sohieu-conflict/missing-sohieu; slot-audit/overflow-resolve/edit-skill. CÒN (1.23.1): relation-backfill (live, Pha 1.5); cập nhật SKILL.md/RUNBOOK/API_CONTRACT + upload Package (user-side). # 1.22.76: KH1 Pha 1.5 — `tl missing-sohieu` (đề xuất số hiệu cho dòng registry thiếu sohieu, parse từ TÊN qua `_parse_sohieu_from_name`, bỏ Mẫu/Phụ lục; DRY mặc định, --apply ghi reg_bulk so_hieu; ⚠ ĐỀ XUẤT theo tên — XÁC MINH bằng header-verify/G2; LIVE suy 194/307 dòng thiếu). +1 test → selftest 231/231. HOÀN TẤT Pha 1.5 quick-wins pure (backfill-loai+sohieu-conflict+missing-sohieu). CÒN (v1.23.0): Pha 1.5 relation-backfill (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + III.2 edit-skill. # 1.22.75: KH1 Pha 1.5 (quick-wins pure) — `tl backfill-loai` (suy `loai` chuẩn cho dòng trống từ tên+số hiệu qua pure `_infer_loai`; DRY mặc định, --apply ghi reg_bulk; idempotent; LIVE manifest suy được 191/769) + TÁCH `SOHIEU_CONFLICT_DIFFERENT_DOC` (≥2 chữ-ký-chủ-đề KHÁC cùng số hiệu = văn bản KHÁC, NGUY HIỂM) khỏi `SAME_DOC` (sidecar) trong registry-doctor (`_subject_sig`; thêm khóa `sohieu_conflict_groups` vào schema text=json; LIVE 22 conflict/6 same trong 28 dup). +3 test → selftest 230/230. CÒN (v1.23.0): Pha 1.5 relation-backfill/missing-sohieu (live) + Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit) + III.2 edit-skill. # 1.22.74: KH1 Pha 1.2 HOÀN TẤT P0 — `tl ingest-missing` (nạp backlog corpus chưa NLM → source_add+reg_bulk; IDEMPOTENT + checkpoint resume; DRY mặc định; định tuyến theo chỗ trống base→overflow shard SẴN CÓ; BẤT BIẾN `_overflow_route` KHÔNG BAO GIỜ tạo notebook (đầy→BLOCKED hỏi user); pure `_ingest_missing_select`/`_overflow_route` test offline) + `tl rasoat-loop` (orchestrator VÒNG LẶP KHÉP KÍN report-only: SEED→frontier-expand→mở rộng đệ quy in-corpus đọc nguyên-văn KHÔNG RAG→dedup seen chống lặp→hội tụ dry_rounds≥K; xuất GAP ngoài-corpus + in-corpus-chưa-NLM; pure `_rasoat_dedup_push`). +4 test → selftest 228/228. CÒN (v1.23.0): Pha 1.3 (overflow-resolve/canonical-sidecar/manifest-stale/slot-audit per-shard) + Pha 1.5 (backfill-loai/sohieu-conflict/relation-backfill/missing-sohieu) + III.2 edit-skill. LƯU Ý: ingest-missing/rasoat-loop nhánh mutate/expand-live CHƯA test trên dev (không NLM cred) — lần --apply đầu chạy Cowork batch nhỏ. # 1.22.73: KH1 Pha 1.2 — `tl frontier-expand <gdoc|sohieu>` (vòng lặp rà soát): trích MỌI dẫn chiếu (xref+footnote+inline) → ứng viên FRONTIER dedup theo số hiệu + ưu tiên (amending>VBHN>dẫn-chiếu) + cờ in_corpus; `missing_in_corpus` = đầu vào ingest-missing. Pure `_frontier_candidates` (test offline) + `_frontier_doc_text` reader; DISCOVERY/REPORT-ONLY, KHÔNG RAG; --text-file offline. +2 test → selftest 225/225. CÒN (v1.23.0): ingest-missing (mutate NLM, no-new-notebook), rasoat-loop (orchestrator); Pha 1.3; Pha 1.5. # 1.22.72: KH1 Pha 1.2 — DỰNG 3 CỔNG XÁC MINH G1/G2/G3 (dựng SẠCH, KHÔNG dùng bản agent tiêm đã revert). G3: helper pure `_load_linhvuc`/`_cat_taxonomy`/`_infer_cats_text`(suy cat theo NỘI DUNG alias, whole-word)/`_cat_boundary_rule`(ép quy_tac_ranh_gioi: BHXH/BHYT→02, đầu-tư-công/hải-quan→26, sửa≥2 luật→46, điều-ước→23, Đảng→00) + `tl cat-verify <gdoc|sohieu>` (read-only, --text-file offline) + FIX `cat-audit` (confidence/RULE/taxonomy-45+2/--strict) + FIX `recat` (BOUNDARY_CONFLICT advisory + --force-cat). G2: `_extract_header_facts` (ngày+cơ quan, pure) + `tl header-verify [--all/--sohieu/--drive-id/--cat] [--fix-suggest] [--strict]` (batch _verify_header_match, READ-ONLY, bắt DRIFT 775 dòng; KHÁC title_mismatch=metadata nội bộ). G1: `_content_md5` (NFC, pure) + `_official_rank` + `_DISCOVERY_SITES` re-rank OFFICIAL-FIRST (vbpl>congbao>luatvietnam>thuvienphapluat) + `tl source-verify <sohieu|gdoc>` (content_md5 + SOURCE_DISCREPANCY + nguồn official-first đối chiếu, --text-file offline). +14 test → selftest 223/223. CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3; Pha 1.5. # 1.22.71: KH1 (Pha 1.1/1.4) thực thi sau báo cáo rà 70 Luật. H2 `registry-doctor` text=JSON schema (dòng text SINH TỪ `_DOCTOR_SUMMARY_KEYS` → `build_doctor_summary`/`format_doctor_text`, hết lệch nhãn duplicate_sohieu↔_groups/title_mismatch↔_candidates/rows↔count). H1 `reg-query --json` rc=0+envelope KHÓA bằng test (không tái hiện ở canonical; rc=1 trong log = confound redirect/&&/bản cũ). III.1 `os.environ PYTHONUTF8=1`/PYTHONIOENCODING truyền xuống MỌI script con (hết UnicodeEncodeError 'charmap' gen_instructions.py… console Windows) + gen_instructions.py reconfigure standalone. III.3 `tl instructions --out <file>` ghi UTF-8 ra file. +3 test → selftest 209/209. (LƯU Ý: workflow thiết kế v1.23 từng tiêm nhầm header-verify/cat-verify vào canonical → ĐÃ revert, sẽ dựng lại CÓ REVIEW.) CÒN (v1.23.0): rasoat-loop/frontier-expand/ingest-missing; Pha 1.3 overflow-resolve/canonical-sidecar/manifest-stale/slot-audit; Pha 1.5 backfill-loai/sohieu-conflict/relation-backfill; cổng G1/G2/G3. # 1.22.70: ★ HỢP NHẤT bản Codex v1.22.69 (CONVERGENT — 2 nhánh cùng vá 13 lỗi 2 báo cáo, KHÁC code) + vá LOG RÀ MỚI (Nhóm A-E đa-profile) + LARGE-FILE SPLIT. MERGE: GIỮ bản Claude làm base (verify 197/198, có H/D/G/2.2 mà Codex THIẾU) + PORT phần Codex MẠNH HƠN: (1) DEEP-RESOLVER `_resolve_deep_target`+`_entry_mime`/`_entry_google_doc`/`_entry_raw_no_gdoc`/`_deep_entry_rank` cho extract/xref/footnote-map (ưu tiên GDoc native theo MIME + corpus + NLM-live; tên DÀI toàn chữ-gạch-dưới KHÔNG bị nhận nhầm DriveId → bug C TRỌN VẸN); (2) `_classify_ref` kiểm VBHN-COVERAGE TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED); (3) ENTRY_RAW_NO_GDOC rc=2 + ok:false (đúng yêu cầu báo cáo: chỉ-raw → rc≠0). NHÓM A-E (log đa-profile): B(NGHIÊM TRỌNG) `_ingest_target`/`nlm-add`/`nlm-query` push/query nhắm NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID) — hết đẩy nhầm VBQPPL base khi `--profile NQ36` (+nlm-add/nlm-query nạp apply_profile_offline). A1 `profile-create --apply` GHI BỀN config.profiles.<name> (`_persist_profile_config` merge) → profile-info hết fallback VBQPPL. A2 next-steps cấm copy sheet VBQPPL tay (orphan), dùng `manifest` tạo registry rỗng. C1 `nlm-reconcile` BẮC CẦU gdoc↔source_id (`_nlm_source_drive_id` + link_candidates: nguồn live khớp drive_id/số hiệu của dòng registry thiếu source_id → backfill, hết 'unregistered' giả). C2 `register --nlm-notebook-id` (khỏi backfill-notebook riêng). C3 `backfill-notebook` khóa ĐÚNG NGUỒN: --src-ids→nlm_source_id, --drive-ids→drive_id (hết lệch khóa). D1 cảnh báo profile non-default + categories=inherit (văn bản vào cây chung VBQPPL). D2 `regen2` LOẠI registry/manifest/orphan (mime spreadsheet/json + tên + registryDocId/manifestId) khỏi scan own (hết 3 dòng corpus rác, count 8→5). D3 `reg-delete --force` (đã có) + thông điệp rõ. E1 `nlm_cli._strip_keyring` lọc 'Using keyring backend' khỏi stdout/stderr (hết vỡ json.loads). E2 `reg-query --refresh` (đã có) + help nhắc refresh sau khi ghi sheet. LARGE-FILE: `ingest-local` cổng HỎI TÁCH file > ~1.2MB (NLM_LARGE_SRC_BYTES, --large-threshold) → DỪNG gợi ý tách theo Phần/Chương/Điều (chất lượng RAG cao nhất), `--allow-large` để nạp nguyên (+SKILL.md doctrine). RÀ SOÁT ĐỐI KHÁNG (review+verify) gia cố 14 phát hiện: Group B `_resolve_nlm_notebook` (profile DỰ ÁN thiếu notebookId → ERROR, KHÔNG fallback VBQPPL base — vá GỐC bug B, guard cũ là dead-code vì base luôn truthy) áp nlm-add/query/get/reconcile/cross/ingest-local; C1 link theo số hiệu CHỈ khi DUY NHẤT (số VBHN tái dùng → bỏ qua, hết false-link); cmd_extract positional+--sohieu → ƯU TIÊN --sohieu; `_persist_profile_config` ghi NGUYÊN TỬ (temp+os.replace); `_is_infra_file` chặn false-positive (văn bản GDoc/PDF KHÔNG bao giờ là infra); `_strip_keyring` JSON-safe (chỉ bỏ dòng nhiễu THUẦN, không nuốt thân JSON có cụm keyring); large-file gate ra STDOUT. +6 test → selftest 206/206. # 1.22.69: vá 13 lỗi CÔNG CỤ từ 2 BÁO CÁO RÀ 71+105 LUẬT. A `tl status` verdict→rc=0 (REVIEW/ADD/SKIP = PHÁT HIỆN dữ liệu ≠ lỗi lệnh, hết phá &&/CI; +`--strict` mirror xref; preingest_gate.verdict_exit). C/P0-1 resolver đọc sâu: `_entry_score` PHẠT -300 file THÔ (.docx/.pdf/.html) → GDoc native THẮNG sidecar CÙNG số hiệu (hết xref/footnote im-lặng stdout-rỗng-rc0 bỏ sót ≥6 VBHN); ENTRY_RAW_NO_GDOC in STDOUT (caller agentic THẤY); `_resolve_base_gdoc` fallback drive_id khi sohieu rỗng. B+P1-3 xref: `extract_refs` DEDUP theo SỐ HIỆU (1 phán quyết/số hiệu/run — hết MISSING+MISMATCH mâu thuẫn + phantom 'DCHIẾU 258 này có hiệu lực…' do bắc-cầu mệnh-đề-chuyển-tiếp) + `_clean_ref_name_phrase` cắt prose (GIỮ tên luật thật 'Thi hành án dân sự'). P0-2 `DOC_TEXT_SOHIEU_TYPO` KHÔNG bắc cầu QUA HỌ loại VB (`_doctype_family`: QH≠NQ-TW≠KL-TW≠NĐ-CP — tái dùng số+năm hợp pháp; CÙNG họ QH14↔QH15 vẫn flag). P1-4 source-map: >1 VBHN CÙNG số hiệu KHÁC chủ đề → canonical=None + VBHN_REUSE_AMBIGUOUS_NO_CANONICAL (đòi --subject/năm; CÙNG chủ đề/nhiều version vẫn chốt). P1-5 amendment-detector: LOẠI văn bản PHI quy phạm (sohieu=∅ + 'góp ý/kiến nghị/ý kiến'); PAUSE_AND_ASK_USER CHỈ khi có ứng viên MANG SỐ HIỆU hợp lệ (sohieu=∅ vẫn liệt kê, confidence=low). P2-6 vbhn-check: CONTENT_VERIFY_REQUIRED chỉ khi collision CỦA CHÍNH số hiệu ứng viên (KHÔNG corpus-wide → hết 86 cờ máy móc); verified+năm+duy-nhất+không-tự-collision → VBHN_METADATA_OK. H `tl doctor` cảnh báo TRÔI registry↔NLM (đếm cờ OFFLINE từ cache → gợi ý `tl nlm-reconcile`, KHÔNG chặn/mạng). D `_read_doc_text`+`cmd_xref` TÁI DÙNG cache `extract_<gid>.txt` (Bộ luật Dân sự hết export lại 3 lần→timeout). E `standardize_name.normalize_name` bỏ đuôi .doc/.docx/.pdf khỏi tên CHUẨN (GIỮ ở tên FILE gốc). G `hygiene` bucket `sidecar_corpus_fix` (.docx cạnh GDoc mà corpus=true → đề xuất SET_CORPUS_FALSE). P2-7 chuẩn hoá ENUM `loai`/`hieuluc` lúc register (`_normalize_loai`/`_normalize_hieuluc`) + bucket hygiene `loai_noncanonical` (KHÔNG nhồi `_title_flags` → tránh nhiễu source-map). 2.2 nlm PATH: `nlm_cli` nối ~/.local/bin+user-base bin vào PATH (shutil.which + subprocess env); `doctor` dùng `nlm_exe()` (hết báo đỏ giả); `nlm-install` ghi PATH bền ~/.profile/~/.bashrc (POSIX). +14 test → selftest 194/194. HOÃN P2-8 (tách MISSING ngoài-phạm-vi-corpus vs resolver-trượt — cần enrich manifest). RÀ SOÁT ĐỐI KHÁNG (workflow review+verify) gia cố 9 phát hiện: cmd_status dùng inspect.signature thay except-mù + GIỮ ngữ nghĩa --strict ở fallback (rc=2→1); `_entry_score` chỉ phạt raw CHƯA-trên-NLM (raw đã-push NLM = canonical thật, không hạ oan); P1-4 `_subj_keys` chỉ đếm tail CHỦ-ĐỀ-RÕ (bản tên-trơ không gây false-ambiguity); P1-5 gate góp-ý theo SỐ HIỆU REGISTRY (file 'Góp ý Luật 64/2020' có số trong TÊN vẫn bị loại); `_normalize_loai` gộp mọi ký tự lạ (kể cả ngoặc); cmd_register log khi chuẩn hoá loai/hieuluc; preingest_gate main() thêm --strict. # 1.22.68: rà 133+81 LUẬT (2 log live) — vá robustness phần A. P1 RAW-ENTRY PRECONDITION (gốc chung log2 A1/A2/A3): xref+footnote-map gặp entry THÔ (.docx/.pdf/.html chưa convert GDoc) → ENTRY_RAW_NO_GDOC rc=0 + thông điệp gọn (thay rc=2/JSON-lỗi-thô/stdout-rỗng/rò "Export only…"); `_is_raw_no_gdoc_name`/`_raw_no_gdoc`/`_emit_raw_no_gdoc` THỐNG NHẤT .docx↔.pdf. P2 FOOTNOTE DEDUP (log1 A2): resolve_footnote_amendments GOM dieu_level_amendment_map theo (dieu,khoan,diem,amending_sohieu) — hết 47 dòng pending trùng (Đ73K1 ×3); footnote_defs giữ ĐỦ marker + footnote_raw_count. P3 BASE_NO_CLUSTER (log1 A1): rasoat-chongcheo CỜ RÕ khi base ngoài cụm E2 (61/133 trước no-op IM LẶNG) → dựa xref/footnote-map cấp Điều. P4 DEDUP related theo sohieu (log1 A6, hết 85-2015 ×4). P5 missing_in_corpus→`unresolved_refs`+note (log1 A5: CHƯA kết luận vắng mặt, khớp exists=UNKNOWN_NOT_ABSENT). A4 BASE_UNRESOLVED khi base tên/file thô không số hiệu. P7 strip keyring khỏi gws_bridge error (log2 A3). +2 test → selftest 179/179. CÒN (data/feature): mở rộng subject_clusters 45 chủ đề; parser khoản-điều-thêm (6a/16b, A3 log1 nhỏ); Cowork batch-checkpoint (A4 log2); GAS serial (A5 log2, frozen). + `drive-push --name`/`--rename-to-file` (đổi tên file Drive THEO TÊN FILE upload, GIỮ fileId — qua gws_bridge.rename có ASSERT). # 1.22.67: rà 59 LUẬT (log live) — vá 6/7 lỗi CÔNG CỤ (phần A). A1 `tl extract <số hiệu>` (vị trí) HẾT 404 giả: positional không-phải-gdoc-id(≥20 ký tự alnum)→tự định tuyến --sohieu (+SKILL.md). A2 vbhn-check suy subject SẠCH: `_clean_subject_text` bỏ hậu tố `_HL<ngày>`/goc/SuaDoi/ngày-trơ → query QT-5 web hết "thu do hl2026 07 01 hợp nhất" (đặt `_HL_SUFFIX_RE`, KHÔNG clobber `_HL_DATE_RE` thân-văn-bản — bắt được name-collision). A3 exit-code: xref/vbhn-check rc=0 khi CHẠY OK kể cả có MISSING/MISMATCH/no-hit (phát hiện ≠ lỗi lệnh, không phá &&/CI); `xref --strict` mới rc=1 (+SKILL.md). A4 extract cảnh báo chạm CAP export ~200k ký tự (văn bản dài có thể bị CẮT → cache-build). A6 `_strip_keyring_noise` lọc 'Using keyring backend' khỏi output gws subprocess. A7 `CONTENT_VERIFY_REQUIRED` CHỈ bật khi rủi-ro-tái-dùng-số/thiếu-metadata (>1 ứng viên/collision/bare-number/missing-year); metadata RÕ+DUY NHẤT → `VBHN_METADATA_OK` (giảm 37/59 cờ máy móc). A5 (GAS tuần-tự, không scale) = giới hạn webapp FROZEN, không sửa client. +4 test → selftest 177/177. # 1.22.66: HỢP NHẤT bản Codex v1.22.65 (cùng rẽ từ v1.22.64 — 2 nhánh CÙNG vá batch-2 run-log, KHÁC code). GIỮ bản Claude làm base (đã verify 173/173 + có `status_pending` PENDING_AMENDMENT_NOT_IN_VBHN + cụm `dau_tu_PPP` mà Codex THIẾU). PORT 2 cải tiến robustness CHỈ-CÓ-Ở-CODEX: (1) vbhn-check/vbhn-verify nhận POSITIONAL `target` (tương thích runbook cũ: `tl vbhn-verify "14/VBHN-VPQH"` tự định tuyến text-file/gdoc-id/sohieu qua `_read_verify_text`; `tl vbhn-check "84/2015/QH13"`→goc/subject); (2) reg-query --json ENVELOPE chuẩn {ok,schema:reg-query.v2,count,limit,rows,entries} (cả rows+entries cho mọi parser). Các fix batch-2 TRÙNG (doctype/PPP-alias/sidecar/issue_year-goc/dedup-VBHN-first/xref-typo/vbhn-verify-json/relation-check) GIỮ bản Claude đã verify-live (Codex impl khác nhưng chưa verify). Codex thiếu status_pending → giữ bản Claude. selftest 173/173. # 1.22.65: vá 6 RUN-LOG batch-2 (workflow điều tra+verify đối kháng trên COPY CÔ LẬP — canonical md5 NGUYÊN, agent KHÔNG đụng được). 10 fix: srcmap_name_resolution (query nêu "Luật/Bộ luật"→ƯU TIÊN hit tier≥Luật `_query_doctype_tier`, hết chốt NĐ/TT: "Luật Đầu tư"→VBHN_03 KHÔNG NĐ; PPP≡"đối tác công tư" vào _ABBREV_MAP→VBHN_123; LOW_CONFIDENCE hết over-fire khi có hit-strong tier-Luật); issue_year_goc_token (`_strip_goc_token`+reject năm-bản-gốc: VBHN_123 hết issue_year=2020 từ token goc_64-2020); dedup_vbhn_first (dedup áp VBHN-first qua goc-chain dù KHÁC số hiệu: 64/2020→canonical VBHN 123, gốc SUPERSEDED); relcheck_footnote_only_fp (chỉ giữ luật THỰC SỰ sửa base, hết bơm FOOTNOTE_AMENDMENT_NOT_IN_CORPUS từ dẫn-chiếu/chuyển-tiếp); status_pending_vbhn (preingest SKIP→USE_VBHN nay cảnh báo PENDING_AMENDMENT_NOT_IN_VBHN khi VBHN ra đời TRƯỚC sửa-pending); corpus_nlm_sidecar_fp (`_dup_of_live_sibling`: không flag CORPUS_TRUE_NOT_ON_NLM cho sidecar-raw khi anh-em GDoc đã trên NLM); relcheck_json_types (int→`amendment_candidates_subject_filtered_count`); vbhn_verify_json_schema (`_vbhn_verdict`→field verdict/official/provisional + populate head_sample); xref_sohieu_typo (`_classify_ref`→DOC_TEXT_SOHIEU_TYPO khi số hiệu near-match KHÁC mã cơ quan, vd 41/2024/QH14 vs QH15); cluster_ppp (THÊM cụm dau_tu_PPP base 123/VBHN). SKIP: xref_alias (false-alarm), regquery_json+skill_cli (ĐÃ đúng trên v1.22.64 — log là DEPLOY-LAG zip Drive v1.22.35). +10 test → selftest 173/173. # 1.22.64: vá 6 RUN-LOG (workflow điều tra+verify đối kháng 16 issue → áp 15 fix, 1 reject-trên-cơ-sở). name_rank_collision (CHÍNH): source-map/exists "Luật Dân số/Việc làm/Phí lệ phí/BLLĐ" HẾT chốt SAI canonical (Dân chủ/NLĐ-nước-ngoài/Học phí/ATVSLĐ) — `_name_strong_match` + gate `LOW_CONFIDENCE_NAME_MATCH` (canonical=None khi khớp-MỜ) + `_name_phrase_match` ≥2-token (reg-query --name hết match-all 87→2); LIVE 3/4 nay chốt ĐÚNG, 1 LOW_CONFIDENCE. cluster BHYT neo `y_te_kham_chua_benh` (subject_clusters.json, hết lao_dong). vbhn-verify: HEADER_NOT_CLEAR nhận số-hiệu "NN/VBHN-" + ASSEMBLED CHỈ soi TÊN (hết "không đúng" thân→ASSEMBLED giả). status→USE_VBHN (41/2024→19/VBHN). CORPUS_TRUE_NOT_ON_NLM suppress khi nlm_status=removed_*. footnote `_multi_diem` ("điểm c và d"). `_strip_font_runs` (bỏ dòng "Times New Roman"). relation-check --json preamble→stderr + skip backfill cho quarantine. `tl up` fallback init-config. `_scan_inline_amendments`+E1 LIEN_DOMAIN (Điều 53 sửa luật khác cụm). sohieu-exact ưu tiên fuzzy. REJECT đúng: vbhn_year (sẽ regress year-reuse). +13 test → selftest 164/164. (⚠ vài agent workflow vi phạm "no-edit" → ĐÃ revert clean v1.22.63 + áp lại CHỈ patch đã-verify thủ công.) # 1.22.63: ★ HỢP NHẤT 2 nhánh v1.22.62 (Codex ⊕ Claude, đổi xứng) — (A·Codex) vá log hygiene/NLM/pending: tên "Luật X"↔canonical, footnote-map body_effective_dates (pending hết 0 giả), hygiene lọc OMNIBUS_NARROW khỏi query hẹp + không emit cluster canonical=None, reg-query/summary nlm-live-aware + cờ CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. (B·Claude) `tl up` BOOTSTRAP TẤT ĐỊNH 1-lệnh (config→gws cred+binary→nlm→manifest→readiness; helper CHUNG `_ensure_gws_nlm` cho init-config+up) + `tl confirm`/`_verify_header_match` (ĐỌC HEADER xác minh sohieu/tiêu đề/loại/cat khớp tên+thư mục → nhãn registry.verified; source-map/dedup TIN entry confirm, bỏ DIRTY/WARN) + upload-flow `_upload_mime_ext` (.doc/.pdf upload MIME THẬT → Drive organize convert server-side). selftest 153/153 (147 Codex + 6 Claude). # 1.22.62: vá log hygiene/NLM/pending — tên luật dạng "Luật X" khớp canonical đuôi "X"; footnote-map đọc thêm Điều hiệu lực trong thân luật gốc (body_effective_dates, pending không còn 0 giả); hygiene plan lọc OMNIBUS_NARROW_TITLE_CHECK khỏi query chủ đề hẹp và không emit cluster apply với canonical=None; summary/reg-query phơi nlm_source_id+nlm_notebook_id live-aware, flag CORPUS_TRUE_NOT_ON_NLM/NLM_NOTEBOOK_ID_MISSING. 1.22.61: vá log Chat/Cowork — #2 (CHÍNH: "Chat không cài gws+nlm từ đầu") init-config --from-public GỘP gws BINARY (gws-bootstrap-cowork → find/GHI hết FALLBACK→GAS) + cờ --nlm (uv-install+auth) = 1 lệnh bootstrap đủ; SKILL.md startup MỌI env dùng `--from-public --nlm`; --no-binary để chỉ-cred. #1 (NGUY HIỂM) exists/source-map: VBHN-first redirect CHỈ khi query LÀ BẢN GỐC (base = năm nhỏ nhất chuỗi goc, `_vbhn_base_key`) — 114/2025 Phòng bệnh (luật-sửa NẰM TRONG chuỗi VBHN thuốc lá) hết bị chốt canonical=VBHN thuốc lá; thêm bucket `amends_vbhn` + cờ AMENDS_OTHER_VBHN/MULTIPLE_VBHN_BASE. #3 source-map dương-tính-giả: `_vb_tier_rank` chặn SAI THỨ BẬC — NĐ/TT (118/2016/NĐ-CP) KHÔNG thể 'sửa đổi' Luật → hết AMENDMENT_CANDIDATE+PAUSE giả (đọc loại cả từ TÊN khi sohieu rỗng; base=tier cao nhất nhóm). #5 source-map NỔI `PENDING_FUTURE_EFFECT` + pending_future_count (đếm VB hiệu-lực-tương-lai, rẻ-không-footnote-map). +7 test → selftest 140/140. # 1.22.60: log rà BHYT (workflow điều tra+verify đối kháng) — #5 extract --sohieu khớp entry sohieu-RỖNG qua _sohieu_key_entry (parse từ TÊN '114_2025_QH15_658530'); #1 gws_bridge.rename ASSERT đọc-lại-tên (hết nuốt-lỗi-im-lặng rename 200-nhưng-không-đổi); #4 footnote-map _footnote_rel_kind = CROSS_CUTTING (omnibus 35/2018) / PARTIAL_REPEAL (bãi-bỏ-cục-bộ 32/2013) → hạ ưu tiên; #3 preflight TỰ KHÁM PHÁ overflow notebook từ registry (row_kind=overflow) khi config trống/placeholder (phòng thủ; config canonical đã có id thật). #2 slot over-count: đã sạch sẵn (L5), "329" trong log là GAS server-side. selftest 133/133. 1.22.59: log rà BHYT — B1 subject_clusters.json THÊM cụm `y_te_kham_chua_benh` (base 40/VBHN-VPQH BHYT + KCB 15/2023 + Phòng bệnh 114/2025 + Dược + ATTP) → rasoat-chongcheo BHYT neo ĐÚNG cụm y tế (trước neo nhầm lao_dong_xa_hoi); B3 cờ OMNIBUS hết false-positive trên luật-sửa TÊN-SỐ-TRƠ (chỉ flag khi chủ đề RÕ + khác lĩnh vực, ≥2 token); B5 `_summ_entry.nlm` = LIVE (`_entry_on_nlm_live`, False nếu removed) → relation-check khớp reg-query; B6 message gws fallback PHÂN BIỆT thiếu-cred vs thiếu-binary. 1.22.58: B1 GWS — `_read_doc_text` ƯU TIÊN direct-media EXPORT text/plain bằng CRED (KHÔNG cần binary gws → extract/footnote-map hết rơi GAS ở Cowork khi đã gws-auth-load; B5 hết spam); init-config đổi thông điệp "gws cred ✓ (direct-media đọc; find/ghi cần gws-bootstrap-cowork)" hết hiểu nhầm "BẬT". locate FALLBACK webapp gắn LOW_CONFIDENCE/NO_EXACT_SOHIEU (Cowork: locate 58/2014 → fulltext lạc đề). `_entry_subject_text` BỎ `cat` (nhãn folder '02_Bao_hiem' làm mọi entry khớp 'bảo hiểm' giả) → relation-check vbhn_candidates 14→3 (BHXH/KDBH/ATVSLĐ). 1.22.57: ★ GỐC RỄ "subject filter quá lỏng" (phát hiện khi chạy mục B live) — `_subject_score` CHỐNG nhiễu từ-phổ-biến: token-overlap chỉ tính ĐỦ khi entry chứa CỤM-ĐẦU PHÂN BIỆT của chủ đề ('bảo hiểm'='baohiem'); nếu không (chỉ trùng 'bảo/hội' lẻ ở từ-khoá) → 0 điểm. → relation-check vbhn_candidates hết kéo Luật Xuất bản/Người cao tuổi/Thanh niên/Công đoàn (sscore 40→0); BHXH=140, BHYT=0(disc), giữ KDBH=60. 1.22.56: vá log rà BHXH (Chat+Cowork) — (regression) `locate` cụm danh từ ('bảo hiểm xã hội') KHÔNG còn bị coi là số hiệu → hết LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (gate `_looks_like_sohieu_query`); `tl rasoat worksheet` TỰ dựng cache nếu thiếu (`_rasoat_autocache_worksheet`→`cache-build`, resolve gdoc từ manifest; --no-auto-cache để tắt) + message worksheet trỏ `tl cache-build`; `_find_amendment_candidates` thêm loại-trừ-chéo `_disc_conflict` (BHYT/BHTN khác BHXH); SKILL.md BƯỚC 0 TÁCH `--setup` (core nhanh) khỏi nlm (né timeout 45s Cowork). 1.22.55: #8 HỢP NHẤT footnote-map vào relation-check + rasoat-chongcheo — TỰ đọc nguyên văn base VBHN (auto-footnote, `_resolve_base_gdoc`, tắt --no-auto-footnote) → 2 lệnh nêu footnote_amendments thay vì rỗng; #11 cờ OMNIBUS_CROSS_DOMAIN (`_omnibus_cross_domain_note`): luật sửa có tên khác lĩnh vực base (84/2025 Thanh tra sửa BHXH = sửa-nhiều-luật) → cảnh báo đọc nguyên văn, KHÔNG hiểu nhầm lỗi tên. +test omnibus_cross_domain_flag. 1.22.54: ★ GỐC RỄ tên VBHN VIẾT TẮT — `_expand_abbrev`/`_ABBREV_MAP` (BHXH≡bảo hiểm xã hội, BHYT/BHTN/BLHS/BLLĐ…) nối vào `_token_set`+`_disc_conflict` → source-map/relation-check/reg-query/locate khớp đúng VBHN_19…BHXH (trước nhặt nhầm bản gốc 41/2024 viết-đầy-đủ đã quarantine). #3 extract: phân biệt CẮT-CỤT (export cap ~200k) vs sai cấu trúc → chỉ `tl cache-build --gdoc-id` lấy toàn văn. #10 locate: cờ LOW_CONFIDENCE/NO_EXACT_SOHIEU khi truy vấn số hiệu chỉ khớp-mờ-tên (vd 142/2025→VBHN_74 Đấu thầu). 1.22.53: log rà BHXH — A3 relation-check `_vbhn_candidates` KHÔNG nhận VBHN trùng-NĂM khác lĩnh vực (year-một-mình cần subject≥30; +disc_conflict) → hết VBHN_43 Xuất bản lọt vào BHXH; A4 `_cluster_for_base` reverse-map qua THÀNH VIÊN cụm (số hiệu VBHN 19/VBHN-VPQH → cụm, trước trả ∅); B1 rasoat alias --sohieu→--so-hieu (worksheet) / --file→--in (phuluc); B2 `tl cache-build <sh>` wrapper ingest_to_cache.py (sinh docs/<sh>--consolidated.json); B3 ingest_to_cache.py tự nạp webappUrl/token từ config/env. 1.22.52: TRA-THEO-TÊN âm-tính-giả (log Cowork #2/#3) — `_name_subset_match` token-subset (bỏ doctype/sốhiệu) cho source-map/locate/reg-query: 'Luật Bảo hiểm xã hội' KHỚP 'VBHN_19-VPQH_Bao_hiem_xa_hoi' (substring liền thất bại vì luat/vbhn/19 chèn giữa); reg-query --name trước CHỈ substring CÓ DẤU → 0 kết quả, nay khử dấu+token-subset. `_disc_conflict` chuẩn hoá underscore (BHXH↔BHYT đúng cả tên file). `_nlm_display` status-aware (locate hết báo nlm=Y khi removed → khớp reg-query). +test name_subset_match_vbhn/source_map_name_finds_vbhn_not_quarantine. 1.22.51: (A) ENV THỐNG NHẤT Chat=Cowork=Code — gỡ doctrine "chat hạn chế": nlm CLI BẮT BUỘC mọi env, gws-bootstrap BỎ QUA tải binary nếu gws đã có (--force ép), Chat dùng uv+python≥3.11 sẵn (không tải Drive). (B) footnote-map nhận "Cụm từ '…' được BỎ/THAY THẾ theo…" (84/2025 hết vô hình, +test footnote_remove_phrase_amendment); subject-score LOẠI TRỪ CHÉO BHXH↔BHYT↔BHTN (chung "bảo hiểm" ≠ cùng chủ đề, +test subject_bhxh_not_bhyt). 1.22.50: vá log Chat — B1/B2 `gws-auth-load`/`nlm-auth-load` + `init-config --from-public` tự bật gws từ cred PUBLIC (public-curl, KHÔNG cần master key); B3 gom log [FALLBACK→GAS] 1 lần/phiên (hết spam mỗi read); relation-check LỌC ứng viên chỉ-trùng-chủ-đề khỏi amendment_candidates (giảm dương-tính-giả 108/2026); B5 xref OUTDATED nêu RÕ số hiệu VBHN thay thế + SOHIEU_MISMATCH→VBHN ghi "đúng, trỏ bản mới". (B4 phantom-217 đã có test footnote_citation_not_amendment.) 1.22.49: SKILL.md §1 BƯỚC 0 — Cowork dùng KHỐI INLINE (curl zip public + unzip + chạy tl_fetch.sh SẠCH TRONG ZIP) vì mount cắt cụt CẢ scripts/tl_fetch.sh → `sh scripts/tl_fetch.sh` đường-mount hỏng. CẤM inspect/confirm truncation/dig-recovery (đã biết mount cắt). 1.22.48: GHI RÕ gws Cowork = BINARY MUSL-STATIC (đã verify static-pie, không GLIBC dep → chạy glibc 2.35) qua `gws-bootstrap-cowork` public-curl; CẤM `npm i -g @googleworkspace/cli` (bản GNU cần GLIBC 2.39, Cowork glibc 2.35 → không chạy). SKILL.md + help string. 1.22.47: nlm-install HẾT STALL ASTRAL — `uv tool install --python 3.11` chạy với UV_PYTHON_DOWNLOADS=never (cấm tải python từ astral/GitHub CDN bị Cowork chặn): system có 3.11→dùng ngay, chỉ 3.10→FAIL TỨC THÌ→rơi Python public-curl Drive; bỏ `uv python install 3.11` thừa. 1.22.46: BOOTSTRAP TỐC ĐỘ — `_fast_drive_fetch` ưu tiên PUBLIC-CURL (drive.usercontent) → direct-media → GAS, có ĐO THỜI GIAN ([fetch] log); PY311 + gws binary tải public-curl (hết kẹt GAS 31MB); tl_fetch.sh cài uv TRƯỚC (pip PyPI, astral chặn) rồi gws/nlm; rút timeout astral uv-python 420→90s (fail nhanh → Drive-public). 1.22.45: SKILL.md §1 BƯỚC 0 — Cowork ƯU TIÊN `sh tl_fetch.sh --setup` LÀM LỆNH ĐẦU TIÊN (tải bản sạch, KHÔNG đụng mount/_parts); CẤM chạy tl_boot/verify-integrity/build_parts/_parts TRƯỚC khi tl_fetch lỗi; tách rõ đường LOCAL A1–A3. 1.22.44: PACKAGE PUBLIC BOOTSTRAP — config v2 + creds (gws/nlm/secrets/binary/py311) ở Drive/Package (anyone-with-link). `init-config --from-public` + tl_fetch.sh curl CONFIG(apps script)+gws cred TRƯỚC (KHÔNG cần Drive MCP); uv-first cho nlm; Cowork tải zip skill; tl_boot loud-fail exit≠0 khi cắt cụt (B2); tl_rebuild.sh OUT mặc định $HOME (B4). 1.22.43: `tl drive-push <zip> [--file-id]` — cập nhật NỘI DUNG file Drive GIỮ fileId (gws update_content) → đẩy bản ship mới mỗi lần mà KHÔNG đổi fileId; SKILL_FILEID baked. 1.22.42: BUNDLE skill+gws — `gws-bootstrap-cowork --local-tgz` (dùng gws.tgz từ bundle, khỏi tải Drive; md5 vẫn verify); tl_fetch.sh tự dò assets/gws.tgz. Cắt 1 download. 1.22.41: `nlm-install --uv` (egress mở → uv tự lo Python 3.11, python hệ thống nếu ≥3.11, KHÔNG tải 31MB Drive; fallback Drive); `tl_fetch.sh --setup --nlm` dùng --uv → bootstrap đủ GAS+direct-media+gws+nlm+boot 1 lệnh. (v1.23.0 spec rasoat-loop/overlap: roadmap riêng.) 1.22.40: bake NLM_CRED_FILEID (đã stage+verify) → `--setup --nlm` có nlm headless ngay. 1.22.39: nlm HEADLESS — `nlm-auth-stage` (Code, sau `nlm login`: cookie nlm → mã hoá khoá=webapp-token → Drive) + `nlm-auth-load` (Cowork: tải+giải mã bằng token → ~/.notebooklm-mcp-cli, KHÔNG cần master key); `--setup --nlm` tự nlm-auth-load (mirror gws-auth-stage/load). 1.22.38: tl_fetch.sh ROUTE TỐI ƯU (curl public, $HOME, --setup) + gws TRƯỚC nlm. 1.22.37: tl_fetch.sh webapp GAS. 1.22.36: tl_fetch.sh bỏ qua mount. 1.22.35: tl_rebuild.sh + MANIFEST.sha256 + tl_boot verify sha. 1.22.34: dọn references/ 63→24 file. 1.22.33: _parts ≤200 file. 1.22.32: verify-integrity + COWORK_EDIT_SAFETY. 1.22.32: `tl verify-integrity` + COWORK_EDIT_SAFETY (write-side fallback); 1.22.31: truncation-resilience (FORCE _parts; _healed_script_path; --rebuild) + doctor nlm/gws + reg-query khóa NLM; 1.22.27: #4/#3/#6/#9; 1.22.26: #1 relation-check footnote-gate
 # GĐ0 (tích hợp gws): PIN bản gws — KHÔNG `latest` (gws pre-v1.0 hay breaking). Nguồn-chân-lý
 # duy nhất cho boot-check `tl gws-ping` và (GĐ1) gws_bridge.is_available(). Bump có chủ đích.
-VERSION = "1.34.3"              # 1.34.3: I1 — tách cụm hygiene_report sang tl_core/hygiene.py (29 def ~2.0k dòng NGUYÊN VĂN AST-cut: sweep/dedup-plan/missing-sohieu/vbhn-year-fix/ops-plan/corpus-audit/review-queue/backfill-loai+titlevn+hieuluc/hygiene/quarantine-fix/corpus-fix/consolidation-cleanup/cat-audit/registry-doctor + helper riêng-cụm); tl.py 19052→17097 dòng; tl giữ STUB ủy quyền mọi tên đã chuyển. ★ bind() hygiene KHÁC sibling: REBASE __globals__ từng hàm về namespace SỐNG của tl (monkeypatch selftest ăn ngay, helper không stale — copy-snapshot làm r54 gãy vì patch trên tl không thấm module). Characterization TRƯỚC cut: 6 golden hygiene_* trên FIXTURE MANIFEST (env per-case TL_CACHE_DIR — _run_tl_json +env_extra) KHỚP NGUYÊN TRẠNG sau cut; +bắt 1 bug thật: sweep phơi snapshot_age_s lọt deterministic mask (+snapshot_age_s/age_s/age_seconds vào VOLATILE_JSON_KEYS). Self-heal phủ module mới (canary/tl_boot preload/py_compile/REQUIRED/r36). +r70 parity (wired + no-dual-definition) → 662/662. // 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
+VERSION = "1.34.4"              # 1.34.4: I2 — tách cụm nlm_wrappers/sharding sang tl_core/nlm_ops.py (28 def ~1.0k dòng NGUYÊN VĂN AST-cut: 13 cmd nlm-list/get/query/cross/content/add/orphans/reconcile/query-plan + preflight/push-overflow/overflow-resolve/slot-audit + 15 helper riêng-cụm reconcile-plan/dedup-gate/overflow-route+status/slot-count/sohieu-loose/preflight-invariants…); tl.py 17097→16227 dòng; bind REBASE __globals__ (khuôn I1). Helper ĐA-CỤM GIỮ Ở TL (_entry_on_nlm_live/_resolve_nlm_notebook/_nlm_display/_nlm_probe_summary/_nlm_status_known+removed/_gws_nlm_note/_entry_nlm_notebook_id — ranh giới đo bằng đếm-tham-chiếu-ngoài-cụm). Characterization TRƯỚC cut: +5 r71a wiring-test offline (mock _imp/_gas/registry-IO) khoá 5 cmd 0-hit: nlm-list shape, reconcile DRY 3 lớp desync/other/unregistered, preflight ⚠DUP-TL lỏng-năm + verify-LIVE slot, push-overflow verified-write, overflow-resolve MAX(reg,phys)+discover+gap — PASS y nguyên sau cut. ★Bẫy mới cho I3+: default-param `cap=NLM_SLOT_CAP` eval TRƯỚC bind → module cần MIRROR constant + r71_slot_cap_mirror drift-lock. +r71 wired/no-dual → 670/670. // 1.34.3: I1 — tách cụm hygiene_report sang tl_core/hygiene.py (29 def ~2.0k dòng NGUYÊN VĂN AST-cut: sweep/dedup-plan/missing-sohieu/vbhn-year-fix/ops-plan/corpus-audit/review-queue/backfill-loai+titlevn+hieuluc/hygiene/quarantine-fix/corpus-fix/consolidation-cleanup/cat-audit/registry-doctor + helper riêng-cụm); tl.py 19052→17097 dòng; tl giữ STUB ủy quyền mọi tên đã chuyển. ★ bind() hygiene KHÁC sibling: REBASE __globals__ từng hàm về namespace SỐNG của tl (monkeypatch selftest ăn ngay, helper không stale — copy-snapshot làm r54 gãy vì patch trên tl không thấm module). Characterization TRƯỚC cut: 6 golden hygiene_* trên FIXTURE MANIFEST (env per-case TL_CACHE_DIR — _run_tl_json +env_extra) KHỚP NGUYÊN TRẠNG sau cut; +bắt 1 bug thật: sweep phơi snapshot_age_s lọt deterministic mask (+snapshot_age_s/age_s/age_seconds vào VOLATILE_JSON_KEYS). Self-heal phủ module mới (canary/tl_boot preload/py_compile/REQUIRED/r36). +r70 parity (wired + no-dual-definition) → 662/662. // 1.34.2: Pha H live-smoke HOÀN TẤT (17 bước máy user, corpus net-zero diff {changed:0,unexpected:0}, apply_ready=true 3-tier LẦN ĐẦU — proof .tl_state/smoke_18_finaldiff.json) + vá 4 phát hiện smoke: (a) reg-query +--drive-id (10 contract readback hết drift doc↔CLI); (b) nlm-add --drive-id sau add OK + row TỒN TẠI → reg_link ngay (journaled+verified, chỉ cột nlm_*; không row → nhắc register/reconcile, KHÔNG tạo row xương — đúng ca S14 'unregistered'); (c) live-smoke-plan snapshot_diff +2 allow-prefix path THẬT (live_contract_report.nlm.notebook_get.source_count + contract_checks — hết 'unexpected' oan khi ghi hợp lệ); (d) contract text khớp parser (source_delete resume +--apply; reg_delete --drive-ids; nlm_add bỏ --json). +4 r69 → 660/660. Smoke đã tập sống: resume sau đứt mạng, overflow-route khi shard đầy 306/300, guard profile-nền, CONFIRM_REQUIRED zip, nlm-reconcile DRY bắt unregistered. // 1.34.1: siết-6 advisory ĐÚNG DEADLINE r65 — contract THẬT (idempotency_contract.v1 đủ 8 field, phản ánh gate+journal+verified-write có sẵn) cho register/drive-push/nlm-reconcile/push-overflow/shared-source-fix/source-update-corpus; _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (HẾT grandfather); meta requires_confirm=True cho shared-source-fix + source-update-corpus (khớp code --apply --confirm yes); KHÔNG đổi bề mặt CLI (grilling 2026-07-09 #6). r65 drift-lock: advisory set == RỖNG; +r68 wired/complete/confirm-meta. Cùng đợt, đã vá doctrine-loss v1.34.0 trước deploy (khôi phục NGUYÊN VĂN old 164-185 vào kernel §1 — F1 MÔI TRƯỜNG THỐNG NHẤT/F5 NLM-CLI mọi-env/F4 điều-kiện-kép notebook_create/F3 ⚠DUP-TL; +luật golden-test --write & .tl_state; sửa claim cờ toàn cục --json/--out). // 1.34.0: Pha F — SKILL.md kernel 91KB→41.7KB (user duyệt (a): TRÍCH NGUYÊN VĂN bất biến §0/§1-BƯỚC-0/§2/GATES, KHÔNG viết lại lời; §4→references/COMMANDS.md 27KB; §9→references/DEPENDENCIES.md 13KB; mapping references/SKILL_KERNEL_MAPPING.md); CHANGELOG 458KB→23KB (8 version + archive references/changelog_archive/); workflow-audit +kernel_size≤48KB +kernel_links (r67); xoá DRAFT sau promotion (chống 2-bản-doctrine). SAU DEPLOY: user re-import Capabilities. // 1.33.61: CI-fix #2 (run 2 nền tảng bắt 2 lớp bug máy-phụ-thuộc): (a) idempotency_key ingest-zip hash bytes CONTAINER → zipfile 3.12≠3.13 header khác → key lệch; đổi content-v2 = norm_path+CRC32+size từng member accepted (CRC sẵn trong central directory, re-zip cùng nội dung = cùng key — đúng ngữ nghĩa idempotency; r66 khoá STORED-vs-DEFLATED cùng key); (b) 3 writer atomic (_write_text/_write_json/_emit_json_payload) thiếu newline= → Windows ghi CRLF → manifest/golden hash lệch CI; +newline LF mọi OS (r66 khoá); .gitattributes `* -text` khoá byte toàn repo; renormalize 27 file CRLF di sản + regen goldens LF. Runtime-identical — ship cùng v1.34.0. // 1.33.60: CI-fix (run #1 GitHub Actions bắt đúng bug cross-platform NGAY LẦN ĐẦU — giá trị CI tự chứng minh): fixture zip DEFLATE cho bytes KHÁC NHAU giữa build zlib (Ubuntu zlib-ng ≠ Windows) → sha256(zip) trong idempotency_key lệch 2 golden ingest_zip_dryrun_*; đổi _golden_ensure_fixtures sang ZIP_STORED (bytes chỉ phụ thuộc nội dung+metadata — máy-độc-lập thật) + regen 2 golden. Runtime-identical, KHÔNG deploy riêng — ship cùng v1.34.0. // 1.33.59: Pha G (drift-test + siết gate, theo 9 quyết định grilling 2026-07-09): (a) SIẾT-6 contract THẬT (nlm_add/recat/source_rename/source_delete/reg_delete/dedup_plan — journal/resume/readback/rollback đầy đủ) + _CONTRACT_REQUIRED fail-strict; 6 legacy còn lại advisory deadline trước v1.34.1 (r65 drift-lock đúng-set); (b) `tl bundle-export` (ADR-0001): zip giữ VERSION fork-point + BUNDLE_META.json TRONG zip; drive-push guard BLOCKED_BY_BUNDLE_META rc=3 (+--force); card bundle_export + registry meta + GENERATED spec; (c) golden nâng cấp: raw-stability (stdout thô ×2 trùng byte — nợ P4-06 đóng theo phương án canonical+raw), {FIXTURES} token, +6 case offline-thuần trên fixtures cố định (chunk profile/vbqppl-blocked, ocr-analyze, zip slip/dup NEGATIVE rc=2, live-diff no-changes), harness chấp nhận JSON dict bất kể rc (case negative có chủ đích); (d) CI GitHub Actions ubuntu+windows full-gate (autocrlf off — hash parity), .github excluded khỏi manifest/zip; .gitattributes khoá byte golden dir; BUNDLE_META vào .gitignore + EXCLUDE_NAMES. // 1.33.58: Pha E kế hoạch — tl_core/command_registry.py: metadata 52 lệnh (risk/read_only/write_scope/confirm/dry-run/det-json/workflow_task/idempotency_contract/card_required; legacy write GRANDFATHER card_required=False, advisory riêng không fail strict); E2 incremental: 8 lệnh determinism SINH parser từ GENERATED_SPECS (flags/help nguyên văn, handler qua stub tl); E3 tool-inventory đọc registry_summary; E4 workflow-audit validate_registry (cmd↔parser↔card↔contract + JSON-through-gate scan source); luật gate: ghi NGOÀI-repo phải có contract/confirm/dry-run/builtin_gate (nlm-add=dedup-live, drive-push=md5-verify), ghi local miễn. +3 r64. // 1.33.57: Pha D kế hoạch — tách tl_core/{zip_ingest,ocr,chunking}.py (~790 dòng rời tl.py; cùng máy Pha C: AST-span + bind + 21 stub; _run_child_tl/_read_local_text_for_analysis/_text_quality_metrics ở lại tl vì dùng chung ≥2 module — D4 idempotency: contracts đã ở workflow.py từ Pha C, builders đi theo lệnh sở hữu, KHÔNG tạo module riêng tránh churn); canary + tl_boot preload + py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.56: Pha C kế hoạch nợ-kỹ-thuật — tách tl_core/{workflow,release,live}.py (~1.5k dòng rời tl.py: tool-inventory/route-task/cards/golden · determinism-audit/release-manifest+verify+bundle+check · live-readiness/contract/snapshot/diff/deploy/rollback/final-acceptance/go-live). Cơ chế: cắt NGUYÊN VĂN theo AST-span + bind(tl) copy-globals (bỏ tên đã có — def riêng module thắng) + 28 stub ủy quyền trong tl (tham chiếu chéo giữa module đi qua stub tl); helper chỉ-moved-code-dùng tự móc theo module (quy tắc an toàn referenced-only-by-one-module); public CLI KHÔNG đổi. +wiring reports/determinism_report.json khi strict-fail (tên đã EXCLUDE sẵn từ bundle 50-53 mà chưa ai ghi — 2 lần flake ok:false không giữ được diff); py_compile + REQUIRED_FILES phủ 3 module mới. // 1.33.55: MERGE bundle Pha B core-json-determinism (nhánh kia TỰ ĐÁNH "1.33.54" — TRÙNG SỐ KHÁC NỘI DUNG với canonical 1.33.54, fork từ 1.33.53 nên THIẾU 4 fix merge): tách tl_core/{deterministic,jsonio}.py, tl.py giữ wrapper mỏng tương thích ngược (public CLI không đổi); PORT LẠI fix #4 vào tl_core.jsonio (schema lạ → fallback JSON — bundle mang bug cũ trở lại); +r60 parity test wrapper↔tl_core; release-check py_compile + REQUIRED_FILES phủ tl_core. // 1.33.54: MERGE bundle determinism-hardening v1.33.50-53 (fork từ 78d6bfe, +tool-inventory/route-task/workflow cards+golden/ingest-zip/ocr-run+verify/chunk/convert-verify/live-readiness+contract+snapshot/diff/release-manifest+check/determinism-audit; đánh giá: repeat-run byte-identical, release zip date_time cố định, manifest reproducible cross-platform hash khớp, zip-slip + duplicate-normalized guard, volatile scrub namespace; giữ bất biến KHÔNG tách canonical VBQPPL — chunk chỉ ref/corpus=false/goc=canonical) + 2 fix khi gộp: route-task nhận CẢ positional (bundle bắt buộc --task → gãy cách gọi cũ, drift doc↔CLI lớp S8/A1) + r59 selftest khoá PURE helpers determinism (bundle thêm ~3300 dòng mà 0 test trong gate --selftest của upload script — audit riêng không chạy tự động). // 1.33.53: deterministic hardening (volatile scrub, release artifact exclusions, zip order/duplicate guard, readiness deployment_allowed). // 1.33.52: OCR manifest determinism + idempotency contract + release hardening (Pha 8-10). // 1.33.51: live-readiness 3-tier + live-contract-check + live-state-snapshot/diff (Pha 6-7). // 1.33.50: deterministic mode + volatile JSON scrub + workflow_card.v1 schema + determinism-audit/golden-test + release-check --strict-determinism. // 1.33.49: status --amendment registry guard + backfill-hieuluc + auth script hardening. // 1.33.48: rà Instruction Project 'Luật BHXH' (profile văn bản thường tên CÓ DẤU + KHOẢNG TRẮNG) → 3 fix + 1 QoL: (P1) _apply_profile_env HẾT rơi-âm-thầm-về-nền — profile yêu cầu tường minh KHÔNG có trong config.profiles → scope RỖNG + cảnh báo PROFILE_NOT_FOUND loud (trước: prof=fallback vbqppl → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ NỀN trong khi TL_PROFILE=tên dự án → ghi/push NHẦM corpus VBQPPL, guard NO_NOTEBOOK_ID không bắt được vì env đã bị điền); (P2) _profile_lookup chịu-lỗi-gõ: khớp không-dấu/hoa-thường/space-_- khi DUY NHẤT 1 ứng viên ('luat_bhxh'→'Luật BHXH', TL_PROFILE set tên CANONICAL để cache-dir/scope nhất quán), ≥2 ứng viên mờ → không đoán; (P3) --profile/--config nhận Ở CẢ SAU subcommand cho MỌI lệnh (Instruction dặn 'mọi lệnh truyền --profile' nhưng flag chỉ ở root → `tl reg-query --profile X` gãy rc=2; default=SUPPRESS né bẫy namespace-con copy-đè của Python mới — root-position vẫn sống); (Q) counts +registry_claim_target_nb (nlm_notebook_id==đích + live-status, đúng luật Instruction 'không đếm mọi nlm_status') + registry_claim_by_notebook breakdown — registry_claim_nlm gộp mọi shard vô dụng cho slot per-notebook. +4 r57 (620/620). // 1.33.47: MERGE bundle-45 (`tra-luat_v1.33.45.zip`, nhánh song song fork từ v1.33.43, tự đánh 44/45) + ĐỐI CHIẾU fix v1.33.46 nhánh kia (đã publish Drive) + gói vá S5/S6 rời. (1) PORT bundle-45a: _qt5_search_hints subject ưu tiên title_vn/trich_yeu CÓ DẤU (+TINH CHỈNH guard _looks_like_filename_title — bài học P0-1 v1.31.0 bundle thiếu); 45b: backfill-title-vn --out atomic qua _emit_json_payload; 45c: _nlm_auth_alive retry ×3 backoff chống AUTH_EXPIRED oan do transient (+TINH CHỈNH GIỮ M1: auth_hint BỀN sau 3 lần → RED — bundle xếp clientauthentication vào transient-final → cookie chết thật thành INCONCLUSIVE vĩnh viễn = tái false-green). (2) REIMPLEMENT fix 46: bare-VBHN matcher 1 CHIỀU `_vbhn_bare_key`+`_sohieu_query_hits_entry` — web/footnote ghi số VBHN KHÔNG năm ('88/VBHN-VPQH') vs corpus year-qualified ('88-2025-VBHN-VPQH') → exact/substring miss (năm chèn giữa) = false-negative HỆ THỐNG 'VBHN đã có mà lần nào cũng báo thiếu' (ca thật 88 Quảng cáo); query có năm giữ CHẶT (collision 50-2025≠50-2026), chiều ngược không nới; áp 6 site: reg-query, source-map direct, locate, inline/footnote in_corpus, _classify_ref+frontier. (3) Gói vá S5/S6 rời = ĐÃ PHỦ bởi v1.33.44 canonical (S5 superset _normalize_loai mọi đầu vào; S6 tương đương _cat_reg_label). +6 r56 (616/616). // 1.33.44: vá lô 8 vấn đề vận hành skill từ log Cowork 7A (S4-S14): ingest-local ghi registry SẠCH ngay tại ingest (S5 loai enum chuẩn qua _normalize_loai, S6 reg_cat NHÃN ĐỦ qua _cat_reg_label, S4 bước link cuối kèm corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest); S7 `tl journal <run> --close` SELF-HEAL inflight đã được lệnh khác hoàn tất (đối chiếu intent.set↔registry, --force ép); S8 nlm-add alias --drive/--wait (drift doc↔CLI); S11 corpus-audit Cowork 45s: gợi ý + resume_command giữ `--limit` trang nhỏ (15/lệnh); S12 sweep name_nonstandard headline = VBQPPL thật (trừ loai='thuong'+quarantine → *_other, hết 65-vs-8 phồng ảo); S13 doc source-rename 1 file/lệnh Cowork; S14 gợi ý tên source-rename: chủ đề từ title_vn (bỏ từ-loại đầu, ≤10 từ) + số hiệu gạch-nối đủ + cảnh báo SOHIEU_MISSING. +5 r55 (611/611). // 1.32.2: (log rà 69 Luật — CHẠY TRÊN v1.32.x LIVE, xác nhận gate A1/A2 hoạt động: 90-2025 OK+SUPPRESSED_CONFIRMED, 115-2026 OK+CONSOLIDATED). 4 vá: S1 `tl ping` retry ×3 backoff 2s/5s CHỈ lỗi dạng COLD-START Apps Script (404/timeout 2-3 lần gọi đầu — từng kết luận sai 'webapp chết'). S3 backfill-loai --normalize +mode CONFLICT: loai hợp-lệ-enum nhưng mâu thuẫn 2 bằng chứng đồng thuận (tên VBHN_ + sohieu -VBHN-) → đề xuất 'Văn bản hợp nhất' (ca 115-2026-VBHN mang loai='Luật' lọt danh sách Luật; chỉ ca VBHN — prefix khác nhiều ngoại lệ). S5 `_is_omnibus_entry` +nhánh ĐỀ-TÀI-TRONG-TÊN so DẠNG NÉN ('SuaDoi_QuyHoach_DauTu' strip xong dính liền — 'dau tu' có-space không khớp; ca 57-2024 registry chưa backfill goc → nhánh ≥2-ref câm, vẫn REVIEW lặp). S4 tl_fetch.sh `--setup-step core|gws|boot|nlm` (Cowork 45s/lệnh giết --setup trọn gói; bước nlm lặp cùng lệnh tới hết PARTIAL). selftest 469/469 (+3 r12). // 1.32.1: canary cred + fast-fail + NLM-read fallback. // 1.32.0: amendment-gate A1/A2/A3. (log rà 119 Luật — read-path CHẾT TOÀN BỘ mà health-check FALSE-GREEN). P1a `_gws_cred_alive` CANARY đổi token THẬT (auth_method=oauth2 KHÔNG chứng minh cred sống — ca revoke): gws-ping + doctor nay ĐỎ + remediation khi invalid_grant (doctor --offline skip canary, ghi rõ). P1b corpus-audit + backfill-title-vn FAST-FAIL (≥3 lỗi đọc liên tiếp → ABORT READ_BACKEND_DOWN thay vì cày 531×22s all-error) + `_read_doc_text_via_nlm` đường đọc DỰ PHÒNG qua nlm-content (295 nguồn live; text đã-nạp vẫn verbatim — đủ cho header/audit). P0-msg sửa khẳng định SAI 'fallback GAS vẫn đúng': GAS chỉ cứu DOWNLOAD file; exporttext (đọc text) chết theo vì webapp thiếu scope script.external_request. selftest 467/467 (+1 r12). // 1.32.0: amendment-gate A1/A2/A3 + enum điều ước + sidecar noise. (log rà 77 Luật — 3 defect lớp AMENDMENT-GATE trong _source_map_one + enum + noise). A1 canonical CONFIRMED → suppress TOÀN BỘ escalation gate (UNLINKED/VBHN_RECHECK/PAUSE/LOW_CONF; cờ AMENDMENT_GATE_SUPPRESSED_CONFIRMED; action_required nhất quán — ca 90-2025 verified vẫn bị RECHECK). A2 canonical CHÍNH LÀ VBHN: refilter ứng viên thuộc chuỗi goc CỦA CHÍNH NÓ → consolidated (khối cũ chỉ gom goc related_vbhn — rỗng khi query thẳng số VBHN, ca 115-2026 bị đòi 'tìm VBHN cho VBHN'); còn lại → VBHN_GOC_VERIFY thay VBHN_RECHECK. A3 canonical OMNIBUS (_is_omnibus_entry: cat46/sua-doi-N-luat/sửa-đổi+≥2ref) → OMNIBUS_AMENDS_OTHER, bỏ UNLINKED/LOW_CONF (hết REVIEW lặp 4 luật omnibus). A4 _LOAI_CANON +'Điều ước quốc tế'/'Công ước' (hết 56 nonmappable giả công ước ILO). B3 RAW_NAME_NOT_NLM suppress khỏi risky khi là SIDECAR cạnh GDoc (_is_source_sidecar). selftest 466/466 (+7 r11_*). // 1.31.2: U1 _sanitize_export_text (byte hỏng vỡ capture driver) + U2 _title_block_from_text tier-1 trích yếu khối tiêu đề + GWS_CRED_EXPIRED tự-chẩn-đoán + _hush selftest noise. (log LIVE vòng 3 — 2 fix gốc, tham khảo script user đã thẩm định). **U1 sanitize export-text:** driver bash vỡ capture vì byte không hợp UTF-8 trong output extract → _sanitize_export_text (diệt lone-surrogate round-trip encode-replace + bỏ control-char, giữ newline/tab) bọc MỌI nhánh _read_doc_text + cmd_extract trước khi ghi đĩa/in (stdout reconfigure sẵn có KHÔNG cứu được file --out + text chui vào JSON driver). **U2 nguồn trích yếu = KHỐI TIÊU ĐỀ:** log chứng minh --dieu 1 trả nhầm khoản phạm-vi; _title_block_from_text bóc dòng LOẠI IN HOA đứng riêng (BỘ LUẬT ưu tiên trước LUẬT — script gốc match ngược làm 91/2015 thành Luật Dân sự SAI LOẠI) + gom ĐỦ các dòng chủ đề in hoa (script gốc cap 4 dòng → cụt HIV/AIDS, quy phạm pháp) + _title_sentence_case giữ token số/ngoặc (script gốc .lower() trần); làm TIER-1 trong _title_vn_from_header (tier-2 _doc_subject_for_name giữ nguyên fallback). KHÔNG import sidecar 34 mục của phiên kia (6+ mục cụt/sai lộ ngay trong file — backfill-title-vn tự re-derive từ nguồn, registry title_vn vẫn là nguồn duy nhất). selftest 458/458 (+7 r10_*).
 GWS_PINNED_VERSION = "0.22.5"   # @googleworkspace/cli; npm i -g @googleworkspace/cli@0.22.5
 # Bootstrap gws cho Cowork (sandbox chặn github + no root): binary MUSL STATIC (chạy mọi glibc, kể cả
 # Ubuntu 22.04/glibc 2.35 — bản gnu cần GLIBC_2.39 nên KHÔNG chạy). Stage sẵn trên Drive _HOP_NAP.
@@ -619,44 +619,6 @@ def _verified_reg_write(g, items: list, cols) -> dict:
     v = _verify_reg_result(rb, len(items))
     v["reg_bulk"] = rb
     return v
-
-
-def _preflight_invariants(state: dict) -> list:
-    """PURE (test offline): các BẤT BIẾN phải đúng TRƯỚC mọi ghi mutate — gom guard rải rác từ 18 sự cố thật.
-    state: {registryDocId, is_base_profile, profile_registry_id, write_cols?, snapshot_age_seconds?, stale_threshold?}.
-    Trả list {name, ok, severity(critical|warn), detail}. critical fail = ABORT (Pha 1 nhúng vào --apply)."""
-    checks = []
-
-    def add(name, ok, sev, detail):
-        checks.append({"name": name, "ok": bool(ok), "severity": sev, "detail": detail})
-
-    rid = str(state.get("registryDocId") or "").strip()
-    # (1) clobber/mispoint: registryDocId trỏ Doc legacy 1mATG → Doc-as-Sheet đọc rỗng count=0 ẢO.
-    add("REGISTRY_NOT_LEGACY_DOC", rid != _LEGACY_REGISTRY_DOC_ID, "critical",
-        "registryDocId trỏ Doc legacy 1mATG → sửa về Sheet tra_luat_registry / để rỗng auto-discover" if rid == _LEGACY_REGISTRY_DOC_ID else "OK")
-    # (2) CLOBBER 766 dòng: profile dự án registryDocId RỖNG → ghi/regen2 rơi nhánh BASE → xoá sạch registry nền.
-    if not state.get("is_base_profile", True):
-        add("PROFILE_REGISTRY_ID_NOT_EMPTY", bool(str(state.get("profile_registry_id") or "").strip()), "critical",
-            "profile dự án registryDocId RỖNG → ghi rơi nhánh BASE → CLOBBER registry nền (tạo registry riêng TRƯỚC)")
-    # (3) ghi mù: cột định ghi phải ∈ schema (so_hieu≠sohieu bị bỏ im lặng).
-    if state.get("write_cols") is not None:
-        ok_cols, bad = _reg_cols_valid(state["write_cols"])
-        add("WRITE_COLS_IN_SCHEMA", ok_cols, "critical",
-            f"Cột lạ {bad} → webapp BỎ IM LẶNG (patched=0 không báo)" if bad else "OK")
-    # (4) stale cache: snapshot quá cũ so với ngưỡng (GAS cache ~600s → nên >900s là đáng refresh).
-    if state.get("snapshot_age_seconds") is not None:
-        thr = int(state.get("stale_threshold") or 900)
-        age = int(state["snapshot_age_seconds"])
-        add("MANIFEST_FRESH", age <= thr, "warn",
-            f"snapshot {age}s (>{thr}s) — chạy `tl manifest` + `tl boot --refresh` trước khi ghi (GAS cache ~600s)" if age > thr else "OK")
-    return checks
-
-
-def _preflight_verdict(checks: list) -> dict:
-    """PURE: gộp verdict. ok = KHÔNG có critical fail. blockers/warnings = tên các check hỏng."""
-    blockers = [c["name"] for c in (checks or []) if not c["ok"] and c["severity"] == "critical"]
-    warnings = [c["name"] for c in (checks or []) if not c["ok"] and c["severity"] == "warn"]
-    return {"ok": not blockers, "blockers": blockers, "warnings": warnings}
 
 
 # ── PHA 1: bọc lệnh MUTATE qua precheck + journal + verified-write (bắt đầu ĐỔI hành vi: chặn ghi mù/clobber, resume/undo) ──
@@ -1540,7 +1502,8 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
             "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
             "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
             "tl_core/command_registry.py",   # Pha D v1.33.57 + Pha E v1.33.58
-            "tl_core/hygiene.py"]   # I1 v1.34.3
+            "tl_core/hygiene.py",
+            "tl_core/nlm_ops.py"]   # I1 v1.34.3 + I2 v1.34.4
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []
@@ -5363,14 +5326,6 @@ def _cat_bare_full_variants(entries: list[dict]) -> dict:
     return {p: sorted(v) for p, v in by_pfx.items() if len(v) > 1 and p in v}
 
 
-def _raw_on_nlm_rows(entries: list[dict]) -> list[dict]:
-    """C2 (v1.33.4 — log: 'luat-dau-thau-…-d1.html' mime text/html, corpus=true, nlm_status=pushed — file THÔ
-    đã bị đẩy thẳng làm nguồn NLM, trái quy tắc 'chỉ push GDoc'): gate #3 `_nlm_dedup_gate` chỉ chặn push MỚI —
-    hàng tồn CŨ phải có detector quét ra. Fix từng ca: convert GDoc (copy_convert) → re-push → gỡ nguồn raw
-    (source_delete) + dọn mapping (reg_clear) — xem hàng trong raw_on_nlm_rows."""
-    return [e for e in entries if _entry_raw_no_gdoc(e) and _entry_on_nlm_live(e)]
-
-
 def _sohieu_dup_group_real(group: list[dict]) -> bool:
     """C4 (v1.33.0 — log rà 15 Luật: sweep by_sohieu=93 'trùng' nhưng chỉ 4 cụm có ≥2 bản corpus=true và CẢ 4 là
     tách Phụ lục/Final CỐ Ý; 49 cụm còn lại là cặp gốc+VBHN/quarantine LÀNH — headline 93 = báo động giả, trái
@@ -8770,153 +8725,6 @@ def cmd_profile_create(a) -> int:
     return 0
 
 
-def _nlm_slot_count(entries: list[dict], notebook_id: str, base_notebook_id: str | None = None) -> dict:
-    active = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
-    base_notebook_id = (base_notebook_id or NLM_BASE_NOTEBOOK).strip()
-    is_base = notebook_id == base_notebook_id
-    total_status = 0
-    matching = 0
-    unknown_notebook = 0
-    for e in entries or []:
-        if _entry_row_kind(e) == "ref":
-            continue
-        status = str(e.get("nlm_status") or e.get("nlm") or "").strip().lower()
-        src = e.get("nlm_source_id") or e.get("source_id")
-        # L5 (26/6): dòng đã GỠ khỏi NLM (removed*/other_notebook) KHÔNG tính slot dù còn nlm_source_id sót
-        # (registry trước đếm cả removed_below_nd/superseded ⇒ used=322 > live 300).
-        if status.startswith("removed") or status in ("other_notebook", "deleted", "gone"):
-            continue
-        if not src and status not in active:
-            continue
-        if status in active or src:
-            total_status += 1
-            nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-            if nb == notebook_id:
-                matching += 1
-            elif not nb:
-                unknown_notebook += 1
-    # v1.18 base-fallback: dòng rỗng nlm_notebook_id quy về notebook nền (VBQPPL). Vì vậy slot HIỆU DỤNG
-    # của notebook nền = matching + rỗng; notebook dự án khác = matching (KHÔNG cộng dòng rỗng → hết full giả).
-    slots_effective = matching + (unknown_notebook if is_base else 0)
-    return {
-        "notebook_id": notebook_id,
-        "base_notebook_id": base_notebook_id,
-        "is_base_notebook": is_base,
-        "slots_for_notebook": matching,
-        "slots_effective": slots_effective,
-        "rows_with_nlm_status_any_notebook": total_status,
-        "rows_missing_nlm_notebook_id": unknown_notebook,
-        "rule": "nlm_slots/nlm_preflight chỉ đếm rows có nlm_notebook_id == notebookId; dòng rỗng quy về base_notebook_id (VBQPPL). slots_effective khớp Code.2.21.2i.gs.",
-        "warning": "Dòng rỗng nlm_notebook_id chỉ tính vào notebook nền (VBQPPL); notebook dự án nên backfill nlm_notebook_id hoặc dùng registry riêng theo profile.",
-    }
-
-
-def _slot_count_all_shards(entries: list) -> dict:
-    """KH1 Pha 1.3 (II.5, PURE): đếm slot HIỆU LỰC theo TỪNG shard (nlm_notebook_id) — base + mọi overflow. Bỏ
-    removed*/ref. Trả {notebook_id: count}. Dùng cảnh báo shard sắp đầy (>270/300) để chuẩn bị shard kế."""
-    from collections import Counter as _C
-    _active = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
-    c = _C()
-    for e in entries or []:
-        if _entry_row_kind(e) == "ref":
-            continue
-        status = str(e.get("nlm_status") or e.get("nlm") or "").strip().lower()
-        src = e.get("nlm_source_id") or e.get("source_id")
-        if status.startswith("removed") or status in ("other_notebook", "deleted", "gone"):
-            continue
-        if not src and status not in _active:
-            continue
-        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-        if nb:
-            c[nb] += 1
-    return dict(c)
-
-
-def cmd_slot_audit(a) -> int:
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    if a.manifest:
-        try:
-            data = json.loads(Path(a.manifest).read_text(encoding="utf-8", errors="replace"))
-        except Exception as e:
-            print(f"[tl] slot-audit lỗi đọc manifest: {e}", file=sys.stderr)
-            return 1
-        entries = data if isinstance(data, list) else (data.get("entries") or data.get("files") or [])
-    else:
-        try:
-            entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-        except Exception as e:
-            print(f"[tl] slot-audit: không đọc được manifest: {e}", file=sys.stderr)
-            return 1
-    if getattr(a, "all_shards", False):
-        # KH1 Pha 1.3 (II.5): đếm slot theo TỪNG shard + cảnh báo shard >ngưỡng (mặc định 270/300) để chuẩn bị shard kế.
-        near = getattr(a, "near_full", None) or 270
-        per = _slot_count_all_shards(entries)
-        rows = sorted(per.items(), key=lambda kv: (-kv[1], kv[0]))
-        warn = [{"notebook_id": nb, "count": n, "cap": NLM_SLOT_CAP} for nb, n in rows if n >= near]
-        res = {"ok": True, "gate": "slot-audit", "cap": NLM_SLOT_CAP, "near_full_threshold": near,
-               "shards": [{"notebook_id": nb, "count": n, "near_full": n >= near, "full": n >= NLM_SLOT_CAP} for nb, n in rows],
-               "near_full_shards": warn}
-        if getattr(a, "json", False):
-            print(json.dumps(res, ensure_ascii=False, indent=2))
-        else:
-            print(f"== slot-audit --all-shards · {len(rows)} shard · cap={NLM_SLOT_CAP} ngưỡng near-full={near} ==")
-            for nb, n in rows:
-                mk = "✗ FULL" if n >= NLM_SLOT_CAP else ("⚠ NEAR" if n >= near else "·")
-                print(f"  {mk:7s} {nb[:40]:40s} {n}/{NLM_SLOT_CAP}")
-            if warn:
-                print(f"  ⚠ {len(warn)} shard ≥{near} → chuẩn bị shard kế (đừng để ingest-missing chạm BLOCKED).")
-        return 0
-    notebook_id = a.notebook_id or os.environ.get("TL_NOTEBOOK_ID", "")
-    if not notebook_id:
-        print("[tl] slot-audit cần --notebook-id hoặc TL_NOTEBOOK_ID/profile config (hoặc --all-shards)", file=sys.stderr)
-        return 1
-    out = _nlm_slot_count(entries, notebook_id, getattr(a, "base_notebook_id", None))
-    # WS1: neo SỨC CHỨA VẬT LÝ từ `tl nlm-get` (CLI nlm notebook get; registry chỉ là ước lượng dedup).
-    # A3: TỰ neo live_source_count từ nlm CLI (khỏi gọi --physical tay); --no-live để bỏ qua (offline/không cred).
-    phys = getattr(a, "physical", None)
-    if phys is None and not getattr(a, "no_live", False):
-        try:
-            _nc = _imp("nlm_cli")
-            _ng = _nc.notebook_get(notebook_id)
-            # M2 (v1.33.35 — log rà 45 Luật: slot-audit lệch −288 GIẢ khi NLM auth hết hạn): notebook_get trả
-            # {ok:False, auth_hint} khi cookie chết — KHÔNG raise → cũ `.get("source_count") or 0` = 0 → gap
-            # = 0 − 288 = −288 giả. Nay kiểm .ok TRƯỚC: ok=False → live_read_failed, KHÔNG coi là 0 vật lý.
-            if _ng.get("ok"):
-                phys = int(_ng.get("source_count") or 0)
-                out["live_source_count"] = phys
-            else:
-                out["live_read_failed"] = True
-                out["live_note"] = ("KHÔNG đọc được live source_count (" + str(_ng.get("error") or "?")[:120] + ")"
-                                    + (" — 🔴 AUTH hết hạn: `nlm login`" if _ng.get("auth_hint") else "")
-                                    + " → KHÔNG suy gap (dùng `--physical N` neo tay nếu cần).")
-        except Exception as e:  # noqa: BLE001 — không có cred/offline → bỏ qua, KHÔNG chặn
-            out["live_read_failed"] = True
-            out["live_note"] = (f"không lấy được live source_count ({type(e).__name__}) — dùng `--physical N` để neo "
-                                f"thủ công, hoặc `--no-live` để tắt.")
-    if phys is not None:
-        reg = out.get("slots_effective", 0)
-        out["physical_source_count"] = phys
-        out["registry_estimate"] = reg
-        out["gap"] = phys - reg
-        out["ground_truth"] = "physical (tl nlm-get / nlm notebook get)"
-        if out["gap"] != 0:
-            out["warning"] = (f"Lệch {phys} vật lý vs {reg} registry ({out['gap']:+d}) — backfill nlm_notebook_id "
-                              f"(`tl backfill-notebook`) hoặc nguồn add thẳng chưa ghi registry.")
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        line = (f"notebook={out['notebook_id']} used={out['slots_effective']} "
-                f"matching={out['slots_for_notebook']} missing_nb={out['rows_missing_nlm_notebook_id']}")
-        if phys is not None:
-            line += f" | VẬT LÝ={phys} gap={out['gap']:+d}"
-        print(line)
-        if out.get("warning"):
-            print("  ⚠ " + out["warning"])
-        if out.get("live_read_failed"):   # M2: không im lặng nuốt lỗi đọc live thành 0-vật-lý
-            print("  ⚠ " + out.get("live_note", "không đọc được live source_count"))
-    return 0
-
-
 def cmd_vbhn_compare(a) -> int:
     """So bản chính thức với bản ứng viên/tự ghép để phát hiện sai khác quy phạm."""
     try:
@@ -10247,339 +10055,6 @@ def cmd_cache_snapshot(a) -> int:
     print("[tl] cache-snapshot cần: export | import", file=sys.stderr); return 2
 
 
-# ═════════════════ WS1 fast-lane: NLM CLI (nlm) ground-truth + reconcile ═════════════════
-def cmd_nlm_list(a) -> int:
-    """B: liệt kê nguồn live của notebook qua CLI `nlm` (fast-lane, ~4s, --skip-freshness) —
-    KHÔNG qua MCP source_list_drive (timeout ~4'). Gate: nlm trên PATH + auth OK; else fallback."""
-    nb = getattr(a, "notebook_id", None) or os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": f"không import được nlm_cli: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.source_list(nb, skip_freshness=not getattr(a, "no_skip_freshness", False))
-    if not r.get("ok"):
-        print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr)
-        print("[tl] nlm CLI không dùng được → fallback MCP `notebook_get` hoặc chạy `nlm login`.", file=sys.stderr)
-        return 2
-    if getattr(a, "json", False) or getattr(a, "out", None):
-        _emit_json_payload(r, getattr(a, "out", None))   # N5 v1.33.41: --out atomic (đối soát đủ, né trần 30s)
-    else:
-        print(f"notebook={nb} · {r['count']} nguồn live (nlm-cli, skip_freshness={r.get('skip_freshness')})")
-        # N5 (v1.33.41 — log rà VBHN-first: nlm-list cắt ~14 dòng IM LẶNG dù tổng đúng → không đối soát thành
-        # viên được, phải dùng `nlm source list -d` thô 2000+ dòng): --max 0 = TẤT CẢ; cắt thì báo LOUD.
-        _mx = getattr(a, "max", 15)
-        _mx = len(r["sources"]) if (_mx is not None and int(_mx) == 0) else (_mx or 15)
-        for s in r["sources"][:int(_mx)]:
-            print(f"  - {s.get('id')} | {str(s.get('title',''))[:60]} | {s.get('type','')}")
-        if len(r["sources"]) > int(_mx):
-            print(f"  … còn {len(r['sources']) - int(_mx)} nguồn BỊ CẮT hiển thị — xem hết: --max 0 / --json / --out <file>")
-    return 0
-
-
-def _nlm_source_drive_id(s: dict) -> str:
-    """C1 (log rà): trích Drive fileId mà 1 NLM drive-source trỏ tới — field trực tiếp HOẶC parse từ URL Google Docs."""
-    for k in ("drive_id", "driveId", "document_id", "documentId", "file_id", "fileId", "sourceFileId"):
-        v = str(s.get(k) or "").strip()
-        if v and re.fullmatch(r"[A-Za-z0-9_\-]{20,}", v):
-            return v
-    url = str(s.get("url") or s.get("source_url") or s.get("link") or "")
-    m = re.search(r"/d/([A-Za-z0-9_\-]{20,})", url) or re.search(r"[?&]id=([A-Za-z0-9_\-]{20,})", url)
-    return m.group(1) if m else ""
-
-
-def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
-    """PURE: phân loại registry rows so với ground-truth live của notebook.
-       backfill        = có nlm_source_id ∈ live nhưng nlm_notebook_id != notebook;
-       desync_real     = có nlm_source_id ∉ live VÀ status pushed/synced/… (claims trên NLM nhưng VẮNG) — cần xử lý;
-       already_removed = có nlm_source_id ∉ live nhưng status `removed*` (đã gỡ CÓ CHỦ ĐÍCH) — KHÔNG phải lỗi, chỉ báo;
-       link_candidates = (C1) nguồn live KHÔNG khớp source_id nào NHƯNG bắc cầu được qua Drive fileId / số hiệu sang
-                         1 dòng registry (registry khóa drive_id ≠ NLM khóa source_id) → backfill nlm_source_id;
-       unregistered    = live id không link được dòng nào (NLM có, registry thực sự thiếu).
-       v1.19.9: tách already_removed khỏi desync_real. C1: chấp nhận live_sources = list[dict] (mới) hoặc set ids (cũ)."""
-    if isinstance(live_sources, (set, frozenset)):
-        sources = [{"id": x} for x in live_sources]
-    else:
-        sources = list(live_sources or [])
-    live_ids = {str(s.get("id")) for s in sources if s.get("id")}
-    reg_ids = set()
-    by_drive: dict[str, dict] = {}
-    by_sohieu: dict[str, dict] = {}
-    n_rows, backfill, desync_real, already_removed, other_notebook = 0, [], [], [], []
-    for e in entries:
-        did = _entry_drive_id(e)
-        if did:
-            by_drive.setdefault(did, e)
-        shk = _sohieu_key_entry(e)
-        if shk:
-            by_sohieu.setdefault(shk, []).append(e)   # LIST: số hiệu VBHN có thể tái dùng → KHÔNG link nếu >1
-        sid = (_entry_nlm(e) or "").strip()
-        if not sid:
-            continue
-        reg_ids.add(sid); n_rows += 1
-        nb = str(e.get("nlm_notebook_id") or "").strip()
-        if sid in live_ids:
-            if nb != notebook_id:
-                backfill.append(e)
-        elif nb and nb != notebook_id:
-            other_notebook.append(e)   # v1.19.11: thuộc shard/notebook KHÁC (vd overflow VBQPPL-2) → KHÔNG phải desync
-        else:
-            st = str(e.get("nlm_status") or "").strip().lower()
-            (already_removed if st.startswith("removed") else desync_real).append(e)
-    # C1: bắc cầu gdoc↔source_id cho nguồn live 'chưa đăng ký' (id KHÔNG ∈ reg_ids).
-    link_candidates, still_unreg = [], []
-    for s in sources:
-        sid = str(s.get("id") or "")
-        if not sid or sid in reg_ids:
-            continue
-        did = _nlm_source_drive_id(s)
-        ent = by_drive.get(did) if did else None
-        by = "drive_id"
-        if ent is None:
-            shk = _sohieu_key_entry({"name": s.get("title") or "", "so_hieu": s.get("sohieu") or s.get("so_hieu") or ""})
-            _cands = by_sohieu.get(shk) or [] if shk else []
-            ent = _cands[0] if len(_cands) == 1 else None   # CHỈ link theo số hiệu khi DUY NHẤT (tránh false-link reuse)
-            by = "sohieu"
-        if ent is not None and (_entry_nlm(ent) or "").strip() != sid:
-            link_candidates.append({"entry": ent, "source_id": sid, "by": by, "title": s.get("title") or ""})
-        else:
-            still_unreg.append(sid)
-    return {"backfill": backfill, "desync_real": desync_real, "already_removed": already_removed,
-            "other_notebook": other_notebook,
-            "stale": desync_real,  # giữ khóa cũ = desync_real (tương thích ngược)
-            "link_candidates": link_candidates,
-            "unregistered": sorted(still_unreg),
-            "registry_on_nlm_rows": n_rows}
-
-
-def cmd_nlm_reconcile(a) -> int:
-    """C (WS1): đối soát registry↔NLM bằng ground-truth từ CLI nlm. Backfill nlm_notebook_id cho dòng
-    THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    nb, _nberr = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
-    if _nberr:
-        print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    try:
-        nc = _imp("nlm_cli")
-        live = nc.source_list(nb, skip_freshness=True)
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": f"nlm_cli lỗi: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
-    if not live.get("ok"):
-        print(json.dumps({**live, "note": "fallback: MCP notebook_get hoặc `nlm login`"}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    live_ids = {s.get("id") for s in live["sources"] if s.get("id")}
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] nlm-reconcile: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
-    # v1.29.7 (log NĐ131 #5): nguồn vừa thêm qua nlm-add báo 'unregistered' oan vì manifest CACHE CŨ (row registry
-    # đã có nhưng chưa vào cache) → bắc-cầu drive_id không thấy entry. SELF-HEAL: có unregistered mà chưa refresh
-    # → tự refresh manifest 1 LẦN + re-plan (nhiều ca unregistered → link_candidates ngay, --apply backfill được).
-    if plan["unregistered"] and not getattr(a, "refresh", False):
-        print(f"[tl] {len(plan['unregistered'])} nguồn 'unregistered' + manifest chưa refresh → tự refresh + đối soát lại "
-              f"(row vừa ingest thường chỉ thiếu trong cache)…", file=sys.stderr, flush=True)
-        try:
-            entries = _manifest_entries(refresh=True)
-            plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
-        except Exception as _re:  # noqa: BLE001
-            print(f"[tl] ⚠ refresh manifest lỗi ({_re}) — dùng plan cũ.", file=sys.stderr, flush=True)
-    from collections import Counter as _Counter
-    rm_by_status = dict(_Counter(str(e.get("nlm_status") or "").strip().lower() for e in plan["already_removed"]))
-    out = {"ok": True, "notebook": nb, "live_on_nlm": len(live_ids),
-           "registry_rows_claiming_nlm": plan["registry_on_nlm_rows"],
-           "backfill_nlm_notebook_id": len(plan["backfill"]),
-           "desync_real": len(plan["desync_real"]),          # status pushed/synced nhưng VẮNG NLM — đáng xử lý
-           "already_removed": len(plan["already_removed"]),  # status removed* — đã gỡ có chủ đích, KHÔNG phải lỗi
-           "already_removed_by_status": rm_by_status,
-           "other_notebook": len(plan.get("other_notebook") or []),  # thuộc shard/notebook khác (overflow) — không tính desync
-           "link_candidates": len(plan.get("link_candidates") or []),  # C1: nguồn live bắc cầu được sang registry (chỉ thiếu source_id)
-           "unregistered_on_nlm": len(plan["unregistered"]),
-           "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-           "backfill_sample": [f"{_entry_nlm(e)}|{_entry_sohieu(e) or _sohieu_key_entry(e)}|{_entry_name(e)[:40]}" for e in plan["backfill"][:10]],
-           "link_candidates_sample": [f"{c['source_id'][:12]}…→{_entry_drive_id(c['entry'])[:12]}… (by {c['by']}) | {(_entry_sohieu(c['entry']) or _entry_name(c['entry'])[:32])}" for c in (plan.get("link_candidates") or [])[:10]],
-           "desync_real_sample": [f"{_entry_sohieu(e)}|{_entry_name(e)[:40]}" for e in plan["desync_real"][:10]],
-           "unregistered_sample": plan["unregistered"][:8]}
-    if not getattr(a, "apply", False):
-        out["note"] = ("DRY. --apply: reg_bulk nlm_notebook_id cho backfill + LINK nlm_source_id cho link_candidates "
-                       "(bắc cầu gdoc↔source_id). --clear-stale: CHỈ clear desync_real (status pushed/synced nhưng vắng "
-                       "NLM); KHÔNG đụng already_removed (đã gỡ có chủ đích).")
-        _emit_json_payload(out, getattr(a, "out", None)); return 0
-    _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status")   # (Pha 1) chống clobber/ghi-mù
-    if not _ok_gate:
-        return 2
-    load_creds(getattr(a, "config", None), getattr(a, "profile", None))   # cần webapp để reg_bulk/reg_clear
-    g = _gas()
-    run_id = _apply_journal_start("nlm-reconcile", {"notebook": nb, "backfill": len(plan["backfill"]),
-                                                    "link": len(plan.get("link_candidates") or [])})
-    if plan["backfill"]:
-        items = [{"nlm_source_id": _entry_nlm(e), "nlm_notebook_id": nb} for e in plan["backfill"]]
-        _bf_before = {_entry_nlm(e): {"nlm_notebook_id": str(e.get("nlm_notebook_id") or "")} for e in plan["backfill"]}
-        v = _journaled_reg_write(run_id, g, items, "nlm_notebook_id", key_field="nlm_source_id", before_by_key=_bf_before)
-        rb = v.get("reg_bulk") or {}
-        out["reg_bulk"] = {"ok": rb.get("ok"), "patched": v.get("patched"), "missed": rb.get("missed"), "verified": v.get("verified")}
-    # C1: LINK nguồn live chưa-đăng-ký vào đúng dòng registry (khóa drive_id) → set nlm_source_id+notebook+status.
-    if plan.get("link_candidates"):
-        litems = [{"drive_id": _entry_drive_id(c["entry"]), "nlm_source_id": c["source_id"],
-                   "nlm_notebook_id": nb, "nlm_status": "pushed"} for c in plan["link_candidates"] if _entry_drive_id(c["entry"])]
-        _ln_before = {it["drive_id"]: {"nlm_source_id": ""} for it in litems}   # trước: chưa có source_id → undo = clear
-        vl = _journaled_reg_write(run_id, g, litems, "nlm_source_id,nlm_notebook_id,nlm_status", before_by_key=_ln_before)
-        rl = vl.get("reg_bulk") or {}
-        out["reg_bulk_link"] = {"ok": rl.get("ok"), "patched": vl.get("patched"), "missed": rl.get("missed"), "verified": vl.get("verified")}
-    # --clear-stale CHỈ áp desync_real (KHÔNG xoá mapping/ status của dòng already_removed).
-    if getattr(a, "clear_stale", False) and plan["desync_real"]:
-        ops = [{"action": "reg_clear", "drive_id": _entry_drive_id(e),
-                "cols": "nlm_source_id,nlm_status,nlm_pushed_at,nlm_title,nlm_notebook_id", "confirm": "yes"}
-               for e in plan["desync_real"] if _entry_drive_id(e)]
-        _journal_append(run_id, {"t": "intent", "op": "reg_clear", "key": "desync_batch",
-                                 "cols": "nlm_source_id,nlm_status,nlm_pushed_at,nlm_title,nlm_notebook_id",
-                                 "note": f"clear {len(ops)} dòng desync (KHÔNG reversible tự động)"})
-        rc = g.post("batch", ops=ops)
-        _journal_append(run_id, {"t": "commit", "op": "reg_clear", "key": "desync_batch", "ok": bool(rc.get("ok"))})
-        out["clear_desync_real"] = {"ok": rc.get("ok"), "summary": rc.get("summary"), "count": len(ops)}
-    _journal_append(run_id, {"t": "run_end", "ok": out["ok"],
-                             "counts": {"backfill": len(plan["backfill"]), "link": len(plan.get("link_candidates") or [])}})
-    out["journal"] = run_id
-    _emit_json_payload(out, getattr(a, "out", None))
-    return 0 if out["ok"] else 1
-
-
-# ═════════════════ Sharding VBQPPL (Option 1): preflight + push-overflow ═════════════════
-def _sohieu_loose(s: str) -> str:
-    """Khóa số hiệu LỎNG-NĂM: bỏ token năm để '72/NQ-TW' ≡ '72-2025-NQ-TW' (L4)."""
-    k = norm_sohieu(s or "")
-    return re.sub(r"-(19|20)\d{2}(?=-|$)", "", k)
-
-
-def _discover_overflow_from_registry(entries: list[dict], main_nb: str) -> str:
-    """Khám phá overflow notebook từ REGISTRY khi config để trống/placeholder: lấy nlm_notebook_id PHỔ BIẾN NHẤT
-    ở các dòng row_kind='overflow' (≠ notebook chính). Webapp nlm_preflight KHÔNG tự discover ⇒ client phải truyền vào."""
-    main_nb = (main_nb or "").strip()
-    counts: dict[str, int] = {}
-    for e in entries or []:
-        if _entry_row_kind(e) != "overflow":
-            continue
-        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-        if nb and nb != main_nb:
-            counts[nb] = counts.get(nb, 0) + 1
-    if not counts:
-        return ""
-    # nhiều nhất trước; hoà thì theo id (ổn định)
-    return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
-
-
-def cmd_preflight(a) -> int:
-    """Định tuyến nạp 1 VBQPPL mới: gọi GAS nlm_preflight(notebookId=shard chính, overflowNotebookId từ config).
-    decision=ADD ⇒ source_add vào notebookId; REVIEW+NOTEBOOK_NEAR_FULL_ROUTE_OVERFLOW ⇒ add vào overflow_route.notebookId
-    (rồi `tl push-overflow`); SKIP ⇒ trùng/đầy không overflow. KHÔNG ghi gì (advisory)."""
-    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    nb = getattr(a, "notebook_id", None) or os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
-    overflow = getattr(a, "overflow_notebook_id", None) or os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or ""
-    overflow_auto = False
-    # FIX: overflowNotebookId từ config RỖNG/placeholder (vd 'TL_OVERFLOW_NOTEBOOK_ID') ⇒ webapp KHÔNG tự discover,
-    # sẽ trả SKIP/NOTEBOOK_FULL với overflow_route=null. Tự KHÁM PHÁ từ registry (dòng row_kind=overflow phổ biến nhất).
-    # v1.29.3 (AUDIT B2 #4): nạp manifest 1 LẦN dùng chung (trước: 2 lần parse ~800KB JSON / invocation —
-    # discover-overflow + dedup-loose mỗi nơi tự gọi _manifest_entries).
-    _pf_entries = None
-    try:
-        _pf_entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception:
-        _pf_entries = None
-    if (not overflow) or overflow == "TL_OVERFLOW_NOTEBOOK_ID" or "-" not in overflow:
-        try:
-            disc = _discover_overflow_from_registry(_pf_entries or [], nb)
-        except Exception:
-            disc = ""
-        if disc:
-            overflow, overflow_auto = disc, True
-    q = getattr(a, "query", None) or getattr(a, "sohieu", None) or getattr(a, "name", None) or ""
-    if not q:
-        print("[tl] preflight cần <query> | --sohieu | --name", file=sys.stderr); return 2
-    g = _gas()
-    params = {"notebookId": nb, "normative": "true", "refresh": "true" if getattr(a, "refresh", False) else "false"}
-    if overflow:
-        params["overflowNotebookId"] = overflow
-    if getattr(a, "sohieu", None): params["soHieu"] = a.sohieu
-    if getattr(a, "name", None):   params["name"] = a.name
-    if getattr(a, "query", None):  params["q"] = a.query
-    if getattr(a, "drive_id", None): params["driveId"] = a.drive_id
-    if getattr(a, "md5", None):      params["md5"] = a.md5
-    r = g.get("nlm_preflight", **params)
-    # L4 (26/6): dedup PHÍA TL — webapp so literal tên/số hiệu → bỏ sót trùng KHÁC TÊN (72-NQ-TW ≡ 72-2025-NQ-TW).
-    tl_dups = []
-    sh_q = getattr(a, "sohieu", None) or (getattr(a, "query", None) if "/" in str(getattr(a, "query", "") or "") else None)
-    if sh_q:
-        try:
-            kq = _sohieu_loose(sh_q)
-            for e in (_pf_entries or []):     # tái dùng manifest đã nạp 1 lần ở trên (v1.29.3)
-                if kq and _entry_nlm(e) and _sohieu_loose(_entry_sohieu(e)) == kq:
-                    tl_dups.append({"sohieu": _entry_sohieu(e), "name": _entry_name(e)[:60], "drive_id": _entry_drive_id(e)[:16]})
-        except Exception:
-            pass
-    # L5 (26/6): verify-LIVE slot qua nlm-get (CLI) khi webapp báo FULL (registry có thể đếm cả removed_*).
-    slots = r.get("slots") or {}
-    live_cnt = None
-    if slots.get("full"):
-        try:
-            live_cnt = _imp("nlm_cli").notebook_get(nb).get("source_count")
-        except Exception:
-            pass
-    r["tl_dedup_loose"] = tl_dups
-    r["live_source_count"] = live_cnt
-    if overflow_auto:
-        r["overflow_auto_discovered"] = overflow
-    if getattr(a, "json", False):
-        print(json.dumps(r, ensure_ascii=False, indent=2)); return 0 if r.get("ok") else 1
-    print(f"== preflight · {q} ==")
-    print(f"  decision : {r.get('decision')}  reasons={r.get('reasons')}")
-    print(f"  notebook : {nb}  slots: used={slots.get('used')}/{slots.get('cap')} remaining={slots.get('remaining')} full={slots.get('full')} near_full={slots.get('near_full')}")
-    if overflow:
-        _osrc = "  (auto-discovered from registry: row_kind=overflow)" if overflow_auto else ""
-        print(f"  overflow : {overflow}{_osrc}" + (f"  → route={(r.get('overflow_route') or {}).get('notebookId')}" if r.get("overflow_route") else ""))
-    if (r.get("dedup") or {}).get("duplicate"):
-        print(f"  DUP      : {(r.get('dedup') or {}).get('hits')}")
-    if r.get("superseded_matches"):
-        print(f"  SUPERSEDED: {len(r['superseded_matches'])} bản cũ — cân nhắc VBHN-first")
-    if tl_dups:
-        print(f"  ⚠ DUP-TL  : {len(tl_dups)} bản CÙNG SỐ HIỆU (lỏng-năm) đã trên NLM — có thể KHÁC TÊN, ĐỪNG push lại:")
-        for d in tl_dups[:4]:
-            print(f"             {d['sohieu']} | {d['name']} | {d['drive_id']}")
-    if live_cnt is not None:
-        cap = slots.get("cap") or 300
-        if live_cnt < cap:
-            print(f"  ⚠ SLOT    : webapp báo FULL nhưng LIVE nlm-get={live_cnt}/{cap} → registry đếm cả removed_*; verify-live trước khi chốt FULL/overflow.")
-        else:
-            print(f"  ✓ SLOT    : LIVE nlm-get={live_cnt}/{cap} (đầy thật).")
-    print(f"  → {r.get('note','')}")
-    return 0 if r.get("ok") else 1
-
-
-def cmd_push_overflow(a) -> int:
-    """Sau khi source_add (MCP) văn bản VBQPPL vào shard overflow: cập nhật registry dòng tương ứng
-    nlm_notebook_id=<overflow>, row_kind='overflow', nlm_status='pushed', nlm_source_id=<mới>. KHÔNG tự source_add."""
-    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-    nb = getattr(a, "notebook_id", None) or os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or ""
-    if not (a.drive_id and a.source_id and nb):
-        print("[tl] push-overflow cần --drive-id --source-id (và overflow notebook trong config hoặc --notebook-id)", file=sys.stderr); return 2
-    g = _gas()
-    # v1.29.2 (AUDIT B1 #2): gate + journal + verified-write (trước reg_bulk TRẦN). Sửa luôn rc: trước đòi
-    # `patched>0` → chạy LẠI idempotent (giá trị đã đúng, patched=0) bị rc=1 SAI; doctrine v1.28.6: verified
-    # (ok + KHÔNG miss) = thành công, patched chỉ thông tin.
-    _cols = "nlm_source_id,nlm_notebook_id,row_kind,nlm_status"
-    ok_gate, _gv = _apply_gate(a, write_cols=_cols)
-    if not ok_gate:
-        return 2
-    run_id = _apply_journal_start("push-overflow", {"drive_id": a.drive_id, "notebook": nb})
-    _items = [{"drive_id": a.drive_id, "nlm_source_id": a.source_id,
-               "nlm_notebook_id": nb, "row_kind": "overflow", "nlm_status": "pushed"}]
-    v = _journaled_reg_write(run_id, g, _items, _cols,
-                             before_by_key=_reg_before_from_manifest(_items, _cols.split(",")))
-    rb = v.get("reg_bulk") or {}
-    print(json.dumps({"ok": bool(v.get("verified")), "patched": rb.get("patched"), "missed": rb.get("missed"),
-                      "journal": run_id, "notebook": nb, "row_kind": "overflow",
-                      **({"error": v.get("error")} if v.get("error") else {})}, ensure_ascii=False, indent=2))
-    return 0 if v.get("verified") else 1
-
-
 NLM_SLOT_CAP = 300   # cap nguồn/notebook NLM (khớp slots.cap webapp). Dùng cho ingest-missing/slot guard.
 
 
@@ -10659,160 +10134,6 @@ def _ingest_missing_dedup_live(targets: list, live_sources: list) -> tuple[list,
         else:
             to_add.append(e)
     return to_add, already_live, unresolved
-
-
-def _nlm_dedup_gate(nc, notebook_id: str, targets: list, skip: bool = False) -> tuple:
-    """(v1.29.3 — AUDIT B3 #3) CỔNG dedup-live BẮT BUỘC trước MỌI đường source_add (nlm-add / profile-ingest /
-    ingest-local): liệt kê nguồn LIVE notebook đích rồi khớp drive_id / exact-title.
-    v1.29.7 (log NĐ131 #4 — dương tính giả): BỎ tầng SOHIEU khỏi GATE — chính văn + PHỤ LỤC chia sẻ CÙNG số hiệu
-    (tên 'PL_131-2021…' parse ra key '131-2021-ND-CP' = key chính văn) → phụ lục hợp lệ bị chặn
-    TITLE_ALREADY_ON_NOTEBOOK trỏ nhầm source_id chính văn, phải --skip-live-check tay. Gate chống RE-PUSH CÙNG
-    MỘT TÀI LIỆU → chỉ drive_id (định danh cứng) + exact-title-duy-nhất (title tool tự đặt khi add) là đúng thước;
-    biến thể cùng-số-hiệu (phụ lục/bản tách) là nguồn RIÊNG hợp lệ. (ingest-missing GIỮ 3 tầng — backlog của nó
-    là bản chuẩn hoá 1-1 với sohieu, tier-sohieu ở đó là lưới cứu timeout.)
-    targets = list[{'drive_id','name'}]. Trả (verdict, dups): verdict ∈ {'clear','dup','list_failed','skipped'};
-    dups=[(pseudo, source_id)]. Doctrine S13: KHÔNG liệt kê được LIVE → caller DỪNG trừ --skip-live-check.
-    KHÔNG raise; KHÔNG ghi gì (read-only gate)."""
-    if skip:
-        return "skipped", []
-    try:
-        r = nc.source_list(notebook_id, skip_freshness=True, drive=True)
-        if not r.get("ok"):
-            return "list_failed", []
-        live_by_drive, live_by_title = {}, {}
-        for s in (r.get("sources") or []):
-            d = _nlm_source_drive_id(s)
-            if d:
-                live_by_drive.setdefault(d, s)
-            tk = _ingest_dedup_title_key(s.get("title"))
-            if tk:
-                live_by_title.setdefault(tk, []).append(s)
-        dups = []
-        for e in (targets or []):
-            s = live_by_drive.get(str(e.get("drive_id") or ""))
-            if s is None:
-                tk = _ingest_dedup_title_key(str(e.get("name") or "")[:120])
-                tc = (live_by_title.get(tk) or []) if tk else []
-                s = tc[0] if len(tc) == 1 else None
-            if s and s.get("id"):
-                dups.append((e, str(s.get("id"))))
-        return ("dup" if dups else "clear"), dups
-    except Exception:  # noqa: BLE001
-        return "list_failed", []
-
-
-def _nlm_post_add_dup_check(nc, notebook_id: str, drive_id: str, new_sid: str | None) -> dict | None:
-    """N1 (v1.33.41 — log rà VBHN-first: ingest-local vượt 45s Cowork, client BỊ GIẾT nhưng source_add server-side
-    vẫn XONG → nlm-add tường minh sau đó add LẦN 2 [130/135 mỗi cái 2 nguồn]; gate PRE-add thua cuộc đua
-    LẮNG-ĐỌNG-ASYNC — nguồn vừa add chưa hiện trong source_list / drive-metadata chưa expose, log ghi số nguồn
-    LIVE dao động 286→292→290→288): SELF-CHECK NGAY SAU add — re-list FRESH (skip_freshness=False, mirror
-    fresh-verify của ingest-missing), đếm nguồn CÙNG drive_id; ≥2 → trả payload 🔴 kèm lệnh xóa điền sẵn
-    (phát hiện TẠI CHỖ thay vì đợi nlm-reconcile lộ link_candidates). Best-effort read-only: KHÔNG raise,
-    KHÔNG tự xóa (xóa nguồn phải người duyệt). Trả None khi sạch/không kiểm được."""
-    try:
-        r = nc.source_list(notebook_id, skip_freshness=False, drive=True)
-        if not r.get("ok"):
-            return None
-        same = [s for s in (r.get("sources") or []) if _nlm_source_drive_id(s) == str(drive_id or "")]
-        if len(same) <= 1:
-            return None
-        others = [str(s.get("id")) for s in same if str(s.get("id")) != str(new_sid or "")]
-        return {"dup_after_add": True, "drive_id": drive_id, "count": len(same),
-                "source_ids": [str(s.get("id")) for s in same],
-                "fix": ("nlm source delete " + (others[0] if others else "<source_id_cũ>")
-                        + " -y   # xác minh title 2 nguồn rồi xóa 1 (giữ bản registry trỏ tới)"),
-                "note": "🔴 TRÙNG SAU ADD: cùng drive_id có ≥2 nguồn LIVE — lần add trước có thể client-timeout "
-                        "nhưng XONG server-side. Xóa 1 bản rồi `tl nlm-reconcile` link lại registry."}
-    except Exception:  # noqa: BLE001 — self-check phụ trợ không được làm hỏng add đã thành công
-        return None
-
-
-def _overflow_route(base_room: int, overflow_shard: str, overflow_room: int) -> tuple:
-    """PURE (test offline): định tuyến nạp THEO CHỖ TRỐNG, BẤT BIẾN KHÔNG BAO GIỜ tạo notebook. Trả (route, shard, reason).
-    route ∈ {base, overflow, blocked}; KHÔNG có 'create'. blocked = mọi shard đầy → caller HỎI người dùng duyệt shard mới."""
-    if base_room > 0:
-        return ("base", None, "base còn chỗ")
-    if overflow_shard and overflow_room > 0:
-        return ("overflow", overflow_shard, "OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE: base đầy → dùng shard overflow SẴN CÓ")
-    if overflow_shard:
-        return ("blocked", overflow_shard, "ALL_SHARDS_FULL: base+overflow đầy → HỎI người dùng duyệt shard mới (KHÔNG auto-create)")
-    return ("blocked", None, "NO_OVERFLOW_SHARD_ROOM: base đầy + chưa có shard overflow → HỎI người dùng (KHÔNG auto-create)")
-
-
-def _overflow_status(base_reg, base_phys, overflow, ov_reg, ov_phys, cap=NLM_SLOT_CAP) -> dict:
-    """PURE (test offline): trạng thái shard dùng MAX(registry, physical) làm slot HIỆU LỰC — AN TOÀN, không under-count
-    khi VẬT LÝ vượt registry (vd base registry 279 nhưng nlm-get 315 → dùng 315). Trả {base_used, overflow_used, route,
-    flag, registry_live_gap[]}. gap = shard có physical>registry (nguồn add thẳng CHƯA đăng ký → cần nlm-reconcile)."""
-    bu = max(int(base_reg or 0), int(base_phys or 0))
-    ou = max(int(ov_reg or 0), int(ov_phys or 0)) if overflow else 0
-    route, _shard, reason = _overflow_route(cap - bu, overflow, cap - ou)
-    if bu < cap:
-        flag = "BASE_HAS_ROOM"
-    elif overflow and ou < cap:
-        flag = "OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE"
-    else:
-        flag = "ALL_SHARDS_FULL_ASK_USER_BEFORE_CREATE"
-    gap = []
-    if base_phys is not None and int(base_phys) > int(base_reg or 0):
-        gap.append({"shard": "base", "registry": int(base_reg or 0), "physical": int(base_phys), "gap": int(base_phys) - int(base_reg or 0)})
-    if overflow and ov_phys is not None and int(ov_phys) > int(ov_reg or 0):
-        gap.append({"shard": "overflow", "registry": int(ov_reg or 0), "physical": int(ov_phys), "gap": int(ov_phys) - int(ov_reg or 0)})
-    return {"base_used": bu, "overflow_used": ou, "route": route, "flag": flag, "reason": reason, "registry_live_gap": gap}
-
-
-def cmd_overflow_resolve(a) -> int:
-    """KH1 Pha 1.3 (II.1): KIỂM shard overflow SẴN CÓ trước khi nghĩ tới tạo notebook mới. Đếm slot từng shard (registry
-    + overflowNotebookId (config/discover) → `_overflow_route`. Cờ OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE khi đã có shard còn
-    chỗ. ADVISORY, KHÔNG tạo/ghi gì. (Chống sự cố tạo nhầm 'VBQPPL_overflow_1' rỗng khi VBQPPL-2 đã có chỗ.)"""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:  # noqa: BLE001
-        print(f"[tl] overflow-resolve: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    base_nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
-    overflow = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
-    discovered = False
-    if not overflow or "-" not in overflow:
-        overflow = _discover_overflow_from_registry(entries, base_nb); discovered = bool(overflow)
-    per = _slot_count_all_shards(entries)
-    base_reg, ov_reg = per.get(base_nb, 0), (per.get(overflow, 0) if overflow else 0)
-    # LIVE physical cross-check (nlm-get) — registry có thể TỤT SAU vật lý (nguồn add thẳng chưa ghi registry).
-    # MAX(registry, physical) làm slot hiệu lực → KHÔNG báo "còn chỗ" giả khi vật lý đã vượt cap (vd base 279 reg / 315 live).
-    base_phys = ov_phys = None
-    if not getattr(a, "no_live", False):
-        try:
-            nc = _imp("nlm_cli")
-            base_phys = int(nc.notebook_get(base_nb).get("source_count") or 0)
-            if overflow:
-                ov_phys = int(nc.notebook_get(overflow).get("source_count") or 0)
-        except Exception:
-            base_phys = ov_phys = None
-    st = _overflow_status(base_reg, base_phys, overflow, ov_reg, ov_phys)
-    out = {"ok": True, "gate": "overflow-resolve", "base_notebook": base_nb,
-           "base_used": st["base_used"], "base_registry": base_reg, "base_physical": base_phys,
-           "overflow_shard": overflow or None, "overflow_discovered_from_registry": discovered,
-           "overflow_used": st["overflow_used"], "overflow_registry": ov_reg, "overflow_physical": ov_phys,
-           "cap": NLM_SLOT_CAP, "route": st["route"], "decision_flag": st["flag"], "reason": st["reason"],
-           "used_basis": "max(registry, physical-nlm-get)", "registry_live_gap": st["registry_live_gap"],
-           "note": "ADVISORY — KHÔNG tạo notebook. Chỉ `notebook create` khi MỌI shard đầy LIVE + người dùng duyệt."}
-    if st["registry_live_gap"]:
-        out["warning"] = "REGISTRY_BEHIND_LIVE: có nguồn vật lý CHƯA đăng ký registry → chạy `tl nlm-reconcile <notebook> --apply` để khớp LIVE TRƯỚC khi nạp thêm."
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        _bp = f" (LIVE {base_phys})" if base_phys is not None else " (registry-only — chạy với nlm để đối chiếu LIVE)"
-        print(f"== overflow-resolve · base={base_nb[:12]} {st['base_used']}/{NLM_SLOT_CAP}{_bp} · "
-              f"overflow={overflow or '(chưa có)'} {st['overflow_used']}/{NLM_SLOT_CAP} ==")
-        print(f"  route={st['route']} | {st['flag']} | {st['reason']}")
-        if st["registry_live_gap"]:
-            for g in st["registry_live_gap"]:
-                print(f"  ⚠ REGISTRY_BEHIND_LIVE [{g['shard']}]: registry {g['registry']} < vật lý {g['physical']} (+{g['gap']}) "
-                      f"→ `tl nlm-reconcile` đăng ký nguồn lạc TRƯỚC khi nạp.")
-        if st["flag"] == "OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE":
-            print("  ✓ base ĐẦY nhưng có shard overflow còn chỗ → DÙNG shard này, ĐỪNG tạo notebook mới.")
-        elif st["flag"] == "ALL_SHARDS_FULL_ASK_USER_BEFORE_CREATE":
-            print("  ⚠ MỌI shard đầy → HỎI người dùng duyệt tạo shard mới (KHÔNG auto-create).")
-    return 0
 
 
 def _ingest_ckpt_load(ckpt) -> dict:
@@ -11088,47 +10409,6 @@ def cmd_ingest_missing(a) -> int:
     print(f"[tl] ingest-missing: OK={ok_n} LINKED={link_n} SKIP={skip_n} FAIL={fail_n} REG_WRITE_FAIL={reg_fail_n} "
           f"no_sohieu={len(_skip_note)} → {target_nb} (route={route}). journal={run_id}.{_hint} MANIFEST_STALE: `tl manifest` rồi `tl boot --refresh`.", file=sys.stderr)
     return 0 if (fail_n == 0 and reg_fail_n == 0) else 1
-
-
-def cmd_nlm_content(a) -> int:
-    """NLM read qua CLI (fast-lane Claude Code/Cowork): toàn văn raw 1 source. Thay MCP source_get_content."""
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.source_content(a.source_id)
-    if not r.get("ok"):
-        print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
-    data = r.get("data") or {}
-    content = (data.get("content") if isinstance(data, dict) else None) or r.get("text", "") or ""
-    content = _strip_font_runs(content)   # lọc dòng rác tên font rò từ DOCX/GDoc nguồn
-    if getattr(a, "out", None):
-        Path(a.out).write_text(content, encoding="utf-8")
-        print(f"[tl] nlm-content → {a.out} ({len(content)} ký tự, via nlm-cli)")
-    elif getattr(a, "dieu", None):
-        print(_slice_dieu(content, a.dieu))
-    else:
-        print(content[: getattr(a, "max", 4000) or 4000])
-    return 0
-
-
-def cmd_nlm_query(a) -> int:
-    """RAG query qua CLI nlm (fast-lane). Thay MCP notebook_query. VẪN phải verify nguyên văn với cache/raw."""
-    # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-query nhắm VBQPPL base).
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
-    if _nberr:
-        print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.notebook_query(nb, a.query, source_ids=(a.source_id or None))
-    if not r.get("ok"):
-        print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
-    print(json.dumps(r.get("data"), ensure_ascii=False, indent=2) if r.get("data") is not None else r.get("text", ""))
-    print("[tl] LƯU Ý: RAG chỉ ĐỊNH VỊ; verify nguyên văn bằng cache/raw (KHÔNG nhận RAG làm nguyên văn).", file=sys.stderr)
-    return 0
 
 
 def _slice_dieu(text: str, dieu: str) -> str:
@@ -11886,211 +11166,6 @@ def _upload_mime_ext(path: str) -> tuple[str, str]:
     cho mọi file: upload .pdf/.doc giả .docx sẽ hỏng convert). Lạ đuôi → coi như .docx (giữ hành vi cũ)."""
     ext = Path(path).suffix.lower()
     return _MIME_BY_EXT.get(ext, _DOCX_MIME), (ext if ext in _MIME_BY_EXT else ".docx")
-
-
-def cmd_nlm_add(a) -> int:
-    """(1) Thêm nguồn NLM qua CLI `nlm source add` (thay MCP source_add) — đúng directive CLI-first."""
-    # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-add rơi về VBQPPL base).
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
-    if _nberr:
-        print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    # v1.29.3 (AUDIT B3 #3): CỔNG dedup-live BẮT BUỘC trước source_add — nlm-add là đường push TRẦN duy nhất còn lại
-    # (từng tạo trùng khi dùng làm recovery sau timeout). Khớp drive_id/title; url/file/text KHÔNG title → gate không
-    # khớp được (vẫn liệt kê để lộ list_failed). Ép bỏ: --skip-live-check.
-    _did, _title = getattr(a, "drive_id", None), getattr(a, "title", None)
-    if _did or _title:
-        _verd, _dups = _nlm_dedup_gate(nc, nb, [{"drive_id": _did or "", "name": _title or ""}],
-                                       skip=getattr(a, "skip_live_check", False))
-        if _verd == "dup":
-            print(json.dumps({"ok": False, "aborted": True, "reason": "ALREADY_ON_NOTEBOOK",
-                              "source_id": _dups[0][1], "notebook": nb,
-                              "note": "Nguồn ĐÃ có LIVE (khớp drive_id/sohieu/title) → KHÔNG add trùng. Link registry: "
-                                      "`tl nlm-reconcile` (hoặc register). Ép add: --skip-live-check."},
-                             ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
-        if _verd == "list_failed" and not getattr(a, "skip_live_check", False):
-            print(json.dumps({"ok": False, "aborted": True, "reason": "LIVE_SOURCE_LIST_FAILED",
-                              "note": "KHÔNG liệt kê được nguồn LIVE → không xác minh được trùng (S13) → DỪNG. "
-                                      "Sửa `nlm login` rồi chạy lại; HOẶC --skip-live-check nếu CHẮC không trùng."},
-                             ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
-    r = nc.source_add(nb, drive_id=getattr(a, "drive_id", None), url=getattr(a, "url", None),
-                      file=getattr(a, "file", None), doc_type=getattr(a, "type", None) or "doc",
-                      title=getattr(a, "title", None), wait=not getattr(a, "no_wait", False))
-    print(json.dumps(r, ensure_ascii=False, indent=2))
-    if not r.get("ok"):
-        print("[tl] nlm-add lỗi → fallback MCP source_add hoặc `nlm login`.", file=sys.stderr); return 2
-    # N1 (v1.33.41): self-check TRÙNG-SAU-ADD — gate pre-add thua cuộc đua async (add trước timeout client
-    # nhưng xong server-side, nguồn chưa hiện lúc gate list) → re-list FRESH ngay sau add, ≥2 nguồn cùng
-    # drive_id = báo 🔴 tại chỗ kèm lệnh xóa (thay vì đợi nlm-reconcile).
-    if getattr(a, "drive_id", None):
-        _dup = _nlm_post_add_dup_check(nc, nb, a.drive_id, r.get("source_id"))
-        if _dup:
-            print(json.dumps(_dup, ensure_ascii=False, indent=2), file=sys.stderr)
-    # v1.34.2 (Pha H live bắt): add OK mà dòng registry sẵn có vẫn trống nlm_source_id → nguồn thành 'unregistered'
-    # nếu agent quên nlm-reconcile (đúng ca S14 smoke). Nay --drive-id + add OK + row ĐÃ TỒN TẠI trong registry →
-    # reg_link NGAY (journaled+verified-write, cùng khuôn S4). CHỈ link cột nlm_* (không đụng corpus/row_kind —
-    # đó là việc của pipeline ingest); KHÔNG có row → không tự tạo row xương, chỉ nhắc register/nlm-reconcile;
-    # link lỗi → cảnh báo, KHÔNG fail add (nguồn đã lên NLM thật).
-    if getattr(a, "drive_id", None) and r.get("source_id"):
-        try:
-            _row_exists = any(str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)
-                              for e in _manifest_entries(refresh=True))
-        except Exception:
-            _row_exists = False
-        if _row_exists:
-            try:
-                load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-                _g = _gas()
-                _rid = _apply_journal_start("nlm-add-link", {"drive_id": a.drive_id, "source_id": r.get("source_id")})
-                _v = _journaled_reg_write(_rid, _g, [{"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
-                                                      "nlm_notebook_id": nb, "nlm_status": "pushed"}],
-                                          "nlm_source_id,nlm_notebook_id,nlm_status",
-                                          before_by_key={a.drive_id: {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}})
-                _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"OK": 1}})
-                print(json.dumps({"reg_link": {"ok": bool(_v.get("verified")), "journal": _rid}}, ensure_ascii=False), file=sys.stderr)
-            except Exception as _e:  # noqa: BLE001
-                print(f"[tl] nlm-add: add OK nhưng reg_link lỗi ({type(_e).__name__}: {_e}) → `tl nlm-reconcile --apply` để bắc cầu.", file=sys.stderr)
-        else:
-            print("[tl] nlm-add: add OK nhưng registry CHƯA có dòng cho drive_id này → `tl register --drive-id …` "
-                  "hoặc `tl nlm-reconcile --apply` để bắc cầu (không tự tạo row xương).", file=sys.stderr)
-    return 0
-
-
-def cmd_nlm_cross(a) -> int:
-    """Cross-shard query qua CLI `nlm cross query` (thay MCP cross_notebook_query). Verify nguyên văn sau."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))  # nạp TL_*NOTEBOOK_ID từ config (không cần webapp)
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    nbs = [x.strip() for x in (getattr(a, "notebooks", None) or "").split(",") if x.strip()]
-    # mặc định: các shard VBQPPL trong config (base + overflow) nếu không truyền --notebooks
-    if not nbs and not getattr(a, "all", False):
-        # Group B: shard mặc định theo PROFILE ĐANG DÙNG (TL_NOTEBOOK_ID) + overflow; default profile → VBQPPL base.
-        nbs = [x for x in [(os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK), os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")] if x]
-        # A (v1.30.0): profile CỘNG VBQPPL — nối thêm notebook NỀN (base+overflow+shards từ config), profile đứng TRƯỚC.
-        if _base_also_enabled(a):
-            _, _cfg = _read_config_record(getattr(a, "config", None))
-            for _nb in _vbqppl_notebooks(_cfg):
-                if _nb not in nbs:
-                    nbs.append(_nb)
-    r = nc.cross_query(a.query, notebooks=nbs or None, all_notebooks=getattr(a, "all", False))
-    print(json.dumps(r, ensure_ascii=False, indent=2))
-    return 0 if r.get("ok") else 2
-
-
-def _classify_nlm_sources(sources: list, entries: list) -> dict:
-    """KH1 1.23.2 (PURE, test offline): phân loại nguồn NLM LIVE (id,title) đối chiếu registry theo nlm_source_id →
-    REGISTERED_ACTIVE (lành) / STATUS_MISMATCH_LIVE (dòng registry status=removed* NHƯNG nguồn còn SỐNG trên NLM → GẮN
-    NHÃN SAI, cần vá metadata) / UNREGISTERED (trên NLM nhưng KHÔNG có dòng registry). Tự-động-hoá việc soi tay. KHÔNG mạng."""
-    by_src = {}
-    for e in entries or []:
-        sid = e.get("nlm_source_id") or e.get("source_id")
-        if sid:
-            by_src[sid] = e
-    _active = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
-    registered_active, mismatch_live, unregistered = 0, [], []
-    for s in sources or []:
-        sid = s.get("id") or s.get("source_id") or ""
-        title = s.get("title") or s.get("name") or ""
-        e = by_src.get(sid)
-        if e is None:
-            unregistered.append({"source_id": sid, "title": title})
-            continue
-        status = str(e.get("nlm_status") or "").strip().lower()
-        if status.startswith("removed") or status in ("other_notebook", "deleted", "gone"):
-            mismatch_live.append({"source_id": sid, "title": title, "drive_id": _entry_drive_id(e),
-                                  "registry_sohieu": _entry_sohieu(e), "registry_status": status, "name": _entry_name(e)})
-        else:
-            registered_active += 1
-    return {"live_count": len(sources or []), "registered_active": registered_active,
-            "status_mismatch_live": mismatch_live, "unregistered": unregistered,
-            "mismatch_count": len(mismatch_live), "unregistered_count": len(unregistered)}
-
-
-def cmd_nlm_orphans(a) -> int:
-    """KH1 1.23.2: PHÂN LOẠI nguồn NLM LIVE đối chiếu registry → tự bắt 'ghost gắn nhãn SAI' (STATUS_MISMATCH_LIVE:
-    registry removed* nhưng nguồn còn SỐNG) + UNREGISTERED (trên NLM, không dòng registry). Thay việc soi tay nhiều vòng.
-    REPORT-ONLY. --fix-mismatch: in bản vá metadata DRY (corpus=true,nlm_status=pushed) cho nhóm mislabel (an toàn — KHÔNG
-    đụng NLM, KHÔNG xóa). --deep: đọc nội dung NLM từng mismatch → trích SỐ HIỆU header thật (vá cả sohieu cụt)."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:  # noqa: BLE001
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    nb, nberr = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
-    if nberr:
-        print(json.dumps({"ok": False, "error": nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.source_list(nb)
-    if not r.get("ok"):
-        print(json.dumps({"ok": False, "error": r.get("error"), "fallback": r.get("fallback")}, ensure_ascii=False), file=sys.stderr); return 2
-    sources = r.get("sources", [])
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception:
-        entries = []
-    cls = _classify_nlm_sources(sources, entries)
-    if getattr(a, "deep", False):           # đọc nội dung NLM từng mismatch → số hiệu header thật (vá sohieu cụt)
-        for m in cls["status_mismatch_live"]:
-            try:
-                rc = nc.source_content(m["source_id"])
-                txt = (rc.get("text") or ((rc.get("data") or {}) if isinstance(rc.get("data"), dict) else {}).get("content") or "")[:2500]
-                shs = _SOHIEU_RE.findall(txt)
-                if shs:
-                    m["header_sohieu"] = shs[0]
-            except Exception:
-                pass
-    patch = []
-    if getattr(a, "fix_mismatch", False):
-        for m in cls["status_mismatch_live"]:
-            if m.get("drive_id"):
-                it = {"drive_id": m["drive_id"], "nlm_source_id": m["source_id"], "corpus": "true", "nlm_status": "pushed"}
-                if m.get("header_sohieu"):
-                    it["sohieu"] = m["header_sohieu"]      # --deep: vá cả số hiệu từ header
-                patch.append(it)
-    out = {"ok": True, "gate": "nlm-orphans", "notebook_id": nb, **cls,
-           "physical_vs_registry_active_gap": cls["live_count"] - cls["registered_active"],
-           "proposed_metadata_fix": patch,
-           "note": "REPORT-ONLY. STATUS_MISMATCH_LIVE → vá metadata (corpus/status[/sohieu nếu --deep]) qua "
-                   "`tl register --bulk <file> --cols corpus,nlm_status[,sohieu]`. UNREGISTERED → điều tra đăng ký/xóa "
-                   "(đọc `tl nlm-content <id>`). KHÔNG tự xóa nguồn NLM (mọi source_delete cần người duyệt)."}
-    if getattr(a, "json", False):
-        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    else:
-        print(f"== nlm-orphans {nb[:14]} · live={cls['live_count']} · active={cls['registered_active']} · "
-              f"MISMATCH_LIVE={cls['mismatch_count']} · UNREGISTERED={cls['unregistered_count']} ==")
-        for m in cls["status_mismatch_live"][:30]:
-            sh = m.get("header_sohieu") or m.get("registry_sohieu") or "(?)"
-            print(f"  ⚠ MISLABEL  {sh:18s} {(m.get('title') or m.get('name') or '')[:40]:40s} status={m['registry_status']} [{(m.get('drive_id') or '')[:12]}]")
-        for u in cls["unregistered"][:30]:
-            print(f"  ? UNREG     {(u.get('title') or '(Drive Document)'):46s} [{u['source_id'][:12]}]")
-        if patch:
-            print(f"  → bản vá metadata DRY: {len(patch)} dòng (corpus=true,nlm_status=pushed{',sohieu' if any('sohieu' in p for p in patch) else ''}). Ghi: tl register --bulk <file> --cols …")
-        print("  (REPORT-ONLY — KHÔNG xóa. UNREGISTERED: đọc nlm-content để định danh.)")
-    return 0
-
-
-def cmd_nlm_get(a) -> int:
-    """Chi tiết + SỐ NGUỒN VẬT LÝ notebook qua CLI `nlm notebook get -j` (thay MCP notebook_get) — dùng cho slot/preflight."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
-    try:
-        nc = _imp("nlm_cli")
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
-    nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
-    if _nberr:
-        print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.notebook_get(nb)
-    payload = {k: r.get(k) for k in ("ok", "source_count", "title", "via", "error", "fallback")}
-    payload["notebook"] = nb
-    _emit_json_payload(payload, getattr(a, "out", None))
-    return 0 if r.get("ok") else 2
 
 
 def _ingest_target(g, sohieu: str, name: str):
@@ -15019,67 +14094,6 @@ def _split_source_ids(values: list[str] | None, combined: str = "") -> list[str]
     return _unique_preserve_order([x.strip() for x in raw if x and x.strip()])
 
 
-def _nlm_query_plan(question: str, source_ids: list[str], *, justification: str = "") -> dict:
-    count = len(source_ids)
-    errors = []
-    warnings = []
-    if not question.strip():
-        warnings.append("QUESTION_EMPTY_OR_MISSING")
-    if count == 0:
-        errors.append("NO_SOURCE_IDS_SELECTED")
-    if count > 5:
-        errors.append("SOURCE_HARD_CAP_EXCEEDED")
-    elif count > 3 and not justification.strip():
-        errors.append("JUSTIFICATION_REQUIRED_FOR_4_OR_5_SOURCES")
-    elif count > 3:
-        warnings.append("SOURCE_COUNT_ABOVE_DEFAULT_1_TO_3")
-    batches = []
-    if count > 3:
-        for i in range(0, count, 3):
-            batches.append({"index": len(batches) + 1, "source_ids": source_ids[i:i+3]})
-    else:
-        batches.append({"index": 1, "source_ids": source_ids})
-    return {
-        "ok": not errors,
-        "schema": "nlm_query_plan.v1",
-        "question": question,
-        "source_ids": source_ids,
-        "source_count": count,
-        "default_source_window": "1-3",
-        "hard_cap": 5,
-        "justification": justification or None,
-        "errors": errors,
-        "warnings": warnings,
-        "recommended_commands": [
-            "nlm-query <question> --source-id <id> --json",
-            "nlm-cross <question> --notebooks <nb1,nb2> --json",
-            "extract <query> --json",
-        ],
-        "batches": batches,
-        "verify_after_nlm": [
-            "Không coi RAG là trích nguyên văn cuối cùng.",
-            "Với VBQPPL, kiểm lại bằng tl extract/source-verify hoặc nguồn canonical.",
-            "Nếu cần hơn 3 nguồn, chia câu hỏi theo batches thay vì hỏi một lượt rộng.",
-        ],
-    }
-
-
-def cmd_nlm_query_plan(a) -> int:
-    source_ids = _split_source_ids(getattr(a, "source_id", None), getattr(a, "source_ids", "") or "")
-    out = _nlm_query_plan(getattr(a, "question", "") or "", source_ids, justification=getattr(a, "justification", "") or "")
-    if getattr(a, "json", False):
-        print(_json_dumps(out))
-    else:
-        print(f"nlm-query-plan ok={out.get('ok')} sources={out.get('source_count')} hard_cap={out.get('hard_cap')}")
-        for e in out.get("errors", []):
-            print(f"ERROR: {e}")
-        for w in out.get("warnings", []):
-            print(f"WARN: {w}")
-        for b in out.get("batches", []):
-            print(f"batch {b['index']}: {', '.join(b.get('source_ids', []))}")
-    return 0 if out.get("ok") else 2
-
-
 # ───────────────────────── convert / rename readback verification ─────────────────────────
 _GDOC_MIME = "application/vnd.google-apps.document"
 
@@ -16771,6 +15785,7 @@ _tl_workflow = _tl_core_import("workflow")   # noqa: E402 — v1.33.56: qua help
 _tl_release = _tl_core_import("release")      # noqa: E402
 _tl_live = _tl_core_import("live")            # noqa: E402
 _tl_hygiene = _tl_core_import("hygiene")     # noqa: E402 — I1 v1.34.3
+_tl_nlm_ops = _tl_core_import("nlm_ops")    # noqa: E402 — I2 v1.34.4
 _tl_zip_ingest = _tl_core_import("zip_ingest")   # noqa: E402 — Pha D (v1.33.57)
 _tl_ocr = _tl_core_import("ocr")                 # noqa: E402
 _tl_chunking = _tl_core_import("chunking")       # noqa: E402
@@ -17086,10 +16101,125 @@ def cmd_ops_plan(*_a, **_kw):
 def cmd_review_queue(*_a, **_kw):
     return _tl_hygiene.cmd_review_queue(*_a, **_kw)
 
+
+# ── I2 (v1.34.4): stub ủy quyền cụm nlm_wrappers → tl_core/nlm_ops.py (mọi caller cũ giữ nguyên) ──
+
+
+def _preflight_invariants(*_a, **_kw):
+    return _tl_nlm_ops._preflight_invariants(*_a, **_kw)
+
+
+def _preflight_verdict(*_a, **_kw):
+    return _tl_nlm_ops._preflight_verdict(*_a, **_kw)
+
+
+def _raw_on_nlm_rows(*_a, **_kw):
+    return _tl_nlm_ops._raw_on_nlm_rows(*_a, **_kw)
+
+
+def _nlm_slot_count(*_a, **_kw):
+    return _tl_nlm_ops._nlm_slot_count(*_a, **_kw)
+
+
+def _slot_count_all_shards(*_a, **_kw):
+    return _tl_nlm_ops._slot_count_all_shards(*_a, **_kw)
+
+
+def cmd_slot_audit(*_a, **_kw):
+    return _tl_nlm_ops.cmd_slot_audit(*_a, **_kw)
+
+
+def cmd_nlm_list(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_list(*_a, **_kw)
+
+
+def _nlm_source_drive_id(*_a, **_kw):
+    return _tl_nlm_ops._nlm_source_drive_id(*_a, **_kw)
+
+
+def _nlm_reconcile_plan(*_a, **_kw):
+    return _tl_nlm_ops._nlm_reconcile_plan(*_a, **_kw)
+
+
+def cmd_nlm_reconcile(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_reconcile(*_a, **_kw)
+
+
+def _sohieu_loose(*_a, **_kw):
+    return _tl_nlm_ops._sohieu_loose(*_a, **_kw)
+
+
+def _discover_overflow_from_registry(*_a, **_kw):
+    return _tl_nlm_ops._discover_overflow_from_registry(*_a, **_kw)
+
+
+def cmd_preflight(*_a, **_kw):
+    return _tl_nlm_ops.cmd_preflight(*_a, **_kw)
+
+
+def cmd_push_overflow(*_a, **_kw):
+    return _tl_nlm_ops.cmd_push_overflow(*_a, **_kw)
+
+
+def _nlm_dedup_gate(*_a, **_kw):
+    return _tl_nlm_ops._nlm_dedup_gate(*_a, **_kw)
+
+
+def _nlm_post_add_dup_check(*_a, **_kw):
+    return _tl_nlm_ops._nlm_post_add_dup_check(*_a, **_kw)
+
+
+def _overflow_route(*_a, **_kw):
+    return _tl_nlm_ops._overflow_route(*_a, **_kw)
+
+
+def _overflow_status(*_a, **_kw):
+    return _tl_nlm_ops._overflow_status(*_a, **_kw)
+
+
+def cmd_overflow_resolve(*_a, **_kw):
+    return _tl_nlm_ops.cmd_overflow_resolve(*_a, **_kw)
+
+
+def cmd_nlm_content(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_content(*_a, **_kw)
+
+
+def cmd_nlm_query(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_query(*_a, **_kw)
+
+
+def cmd_nlm_add(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_add(*_a, **_kw)
+
+
+def cmd_nlm_cross(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_cross(*_a, **_kw)
+
+
+def _classify_nlm_sources(*_a, **_kw):
+    return _tl_nlm_ops._classify_nlm_sources(*_a, **_kw)
+
+
+def cmd_nlm_orphans(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_orphans(*_a, **_kw)
+
+
+def cmd_nlm_get(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_get(*_a, **_kw)
+
+
+def _nlm_query_plan(*_a, **_kw):
+    return _tl_nlm_ops._nlm_query_plan(*_a, **_kw)
+
+
+def cmd_nlm_query_plan(*_a, **_kw):
+    return _tl_nlm_ops.cmd_nlm_query_plan(*_a, **_kw)
+
 _IDEMPOTENCY_CONTRACTS = _tl_workflow._IDEMPOTENCY_CONTRACTS
 _TASK_TO_WORKFLOW = _tl_workflow._TASK_TO_WORKFLOW
 
-for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene):
+for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene, _tl_nlm_ops):
     _m.bind(sys.modules[__name__])
 
 

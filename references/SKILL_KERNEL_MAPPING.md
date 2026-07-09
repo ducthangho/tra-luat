@@ -6,7 +6,7 @@
 | 2 | DETERMINISTIC WORKFLOW GATES + PHÁT HÀNH & NHÁNH (27-50) | 3.6 | KERNEL | nguyên văn |
 | 3 | §0 NGUYÊN TẮC BẤT BIẾN (51-89) | 12.1 | KERNEL | nguyên văn — linh hồn skill |
 | 4 | §1 KHỞI ĐỘNG (90-155) | 7.2 | KERNEL | nguyên văn — BƯỚC 0 curl sống-còn |
-| 5 | §1 chú giải dài (156-185) | 4.4 | RUNBOOK §A (đã có sẵn nội dung tương đương) | thay bằng 2 dòng pointer |
+| 5 | §1 chú giải dài (156-185) | 4.4 | TÁCH ĐÔI (sửa sau doctrine-loss check 2026-07-09): khối lệnh A1-A3 → RUNBOOK §A (pointer); khối doctrine 164-185 (MÔI TRƯỜNG THỐNG NHẤT + nguyên tắc NLM-CLI mọi-env + Sharding/L4/L5/L6) → KHÔI PHỤC NGUYÊN VĂN vào kernel — RUNBOOK §A0/§A4 chứa bản CŨ đối nghịch, KHÔNG tương đương (finding F1/F3/F4/F5) | pointer + khối nguyên văn |
 | 6 | §2 CỔNG VẬN HÀNH (186-204) | 8.0 | KERNEL | nguyên văn |
 | 7 | §3 KẾT PHIÊN + mảnh profile (205-217) | 0.7 | KERNEL | nguyên văn |
 | 8 | §4 CLI 27KB (218-317) | 27.0 | references/COMMANDS.md | nguyên văn sang file mới; kernel giữ bảng nhóm ~2KB + pointer |

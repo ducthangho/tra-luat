@@ -158,10 +158,30 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 > 2) curl thất bại (chưa bật public) → Drive MCP tải `CONFIG_FILEID` → `cfg.json` ($HOME, KHÔNG /tmp) → `tl init-config --file cfg.json`.
 > 3) Có `TL_MASTER_KEY` → `tl bootstrap --secrets-file <s.enc>` (SECRETS public Package; token+gws+nlm); hoặc có gws cred → `tl init-config --from-drive`.
 >    Sau đó `tl boot` (A3) để nạp corpus.
-```bash
-
-> Chú giải chi tiết từng bước khởi động, biến thể môi trường (Code/Chat/local), lý do thiết kế:
+> Chú giải chi tiết từng bước khởi động (khối lệnh A1-A3), lý do thiết kế:
 > `references/RUNBOOK.md` §A (đã chuyển khỏi kernel — nội dung không đổi).
+
+> **MÔI TRƯỜNG THỐNG NHẤT (Chat = Cowork = Code):** cả ba nay đều có **uv + Python ≥3.11** sẵn → cài `nlm`/`gws` NHƯ THƯỜNG,
+> KHÔNG còn coi Chat là môi trường hạn chế. **Chat KHÔNG tải binary Python/gws từ Drive** (đã có sẵn runtime): `nlm` =
+> `tl nlm-install --uv` (uv tool install, system Python); `gws` = `tl gws-auth-load` (cred public) [+ `gws-bootstrap-cowork`
+> nếu chưa có gws binary — musl-static chạy mọi OS]. gws/direct-media/GAS dùng đầy đủ ở **mọi** env (gỡ mọi hạn chế "chat
+> chỉ MCP/GAS"). Khác biệt env CÒN LẠI **chỉ** ở login-gate fetch trình duyệt (§10b: code/cowork tự tải qua Claude-in-Chrome;
+> chat đưa link bấm-được) — KHÔNG liên quan nlm/gws/direct-media.
+Liệt kê nguồn NLM — **FAST-LANE (mọi env): `tl nlm-list <nb>`**
+(CLI `nlm source list -S -d`, ~4s, ground-truth) thay `source_list_drive`
+(MCP timeout ~4', không phơi `skip_freshness`). Thiếu CLI/auth → fallback MCP. Đối soát registry↔NLM:
+`tl nlm-reconcile`. **Nguyên tắc (BẮT BUỘC mọi env — Chat/Cowork/Code):** MỌI thao tác NLM (ĐỌC **lẫn GHI**) đi
+qua CLI `nlm`, KHÔNG qua MCP. Đọc: list→`tl nlm-list`, toàn văn→`tl nlm-content` (thay `source_get_content`),
+RAG→`tl nlm-query` (thay `notebook_query`), **xuyên shard→`tl nlm-cross` (thay `cross_notebook_query`)**, **số
+nguồn vật lý→`tl nlm-get` (thay `notebook_get`)**, get/describe→`nlm source get/describe`. **GHI:** thêm
+nguồn→`tl nlm-add`/`tl ingest-local` (`nlm source add --drive … --wait`, **thay MCP `source_add`**),
+xóa→`nlm source delete`, sync→`nlm source sync`. MCP CHỈ fallback khi thiếu CLI/auth
+(hoặc studio nếu CLI chưa hỗ trợ). Lợi ích then chốt: **pipeline ingest chạy trọn trong tl
+(không gãy bởi round-trip MCP)** + không tràn token/timeout.
+
+**Sharding VBQPPL (cap 300/notebook):** corpus VBQPPL trải NHIỀU notebook (shard); mỗi dòng registry mang `nlm_notebook_id` + `row_kind ∈ {own,ref,overflow}`. Nạp VBQPPL mới ⇒ `tl preflight <số hiệu>`: shard chính đầy → `overflow_route` sang shard phụ (`config.profiles.vbqppl.overflowNotebookId`; `shards[]` forward-compatible). Sau `source_add` vào shard phụ ⇒ `tl push-overflow --drive-id --source-id` (set `row_kind=overflow`). Tra cứu xuyên shard: registry/manifest hợp nhất + **`tl nlm-cross "<câu hỏi>"`** (CLI `nlm cross query`, mặc định base+overflow; thay MCP `cross_notebook_query`). KHÔNG `notebook_create` mới trừ khi tất cả shard đầy + người dùng duyệt.
+**(L4/L5 26/6) preflight đã cứng hóa:** `tl preflight` nay (a) **dedup phía tl lỏng-năm** — cảnh báo `⚠DUP-TL` khi số hiệu ĐÃ trên NLM dù KHÁC TÊN (vd `72/NQ-TW` ≡ `72/2025/NQ-TW` — đừng push lại kẻo nhân bản trong notebook đầy); (b) **verify-LIVE slot** qua `nlm-get` khi webapp báo FULL (registry từng đếm cả `removed_*` → used=322>300 ảo). **Luôn tin `nlm-get` LIVE hơn registry estimate trước khi chốt FULL/overflow/delete.**
+**(L6) Notebook ĐẦY thật (LIVE 300/300) → nạp mới cần GIẢI PHÓNG slot hoặc OVERFLOW.** Ứng viên giải phóng an toàn = **bản GỐC đã có VBHN thay thế còn nằm NLM** (vd Luật 45/2019←VBHN 18 BLLĐ; 84/2015←VBHN 14/2024; 69/2020←VBHN 8/BNV) — dùng `tl reg-query --no-... ` + `tl relation-check` để lập danh sách. `source_delete` **BẤT KHẢ NGHỊCH** ⇒ LUÔN lập danh sách + **chờ người dùng xác nhận** trước khi gỡ; ưu tiên overflow nếu còn shard.
 
 ## 2. CỔNG VẬN HÀNH (mệnh lệnh — chi tiết: RUNBOOK §B)
 - **Định tuyến tìm file:** TRONG corpus → webapp `find`/`search scope=corpus`/registry. NGOÀI corpus/shared/My Drive root → **Drive MCP `search_files`** (webapp `scope=all` quét thiếu). Wrapper Drive MCP chỉ hỗ trợ `fullText contains '...'` và `parentId = '...'`; KHÔNG dùng `name/title contains` vì sẽ lỗi `Unsupported query field: name`. Link-shared chưa add → theo ID.
@@ -213,7 +233,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
 
 Quy tắc chung mọi lệnh GHI: DRY mặc định → `--apply` (± `--confirm yes`) → verify/readback → journal (undo được).
-Cờ `--profile/--config/--deterministic/--json/--out` nhận ở mọi lệnh (trước hoặc sau subcommand).
+Cờ `--profile/--config/--deterministic` nhận ở mọi lệnh (trước hoặc sau subcommand); `--json`/`--out` KHÔNG toàn cục — chỉ những lệnh có khai, đặt SAU subcommand (tra `references/COMMANDS.md` hoặc `tl <lệnh> -h`).
 
 ## 5. HAI KIỂU CẤU TRÚC (tự nhận diện)
 - **Kiểu Điều** (Hiến pháp/Luật/Bộ luật/NĐ/TT/NQ): Phần/Chương/Mục/Điều/Khoản/Điểm. Tra "Điều 7 khoản 2 điểm a".
@@ -265,6 +285,10 @@ Live/post-deploy contract = **2.21.2i** (đã xác minh `ping.version=2.21.2i`, 
   gate đóng gói = selftest + workflow-audit/determinism-audit --strict + golden-test + bundle ×2 cùng SHA
   + release-verify trong gói giải nén. Workflow cards: `references/workflows/*.json` (schema v1);
   golden fixtures: `references/golden/` (fixtures sinh-tại-chỗ tất định).
+- Golden fixtures: use `golden-test --write` only after an intentional CLI/schema change and then rerun
+  `determinism-audit --strict` — CẤM `--write` để "xanh hóa" gate golden đỏ (che regression thật).
+- Từ v1.33.53, mọi snapshot/report vận hành phải ưu tiên ghi vào `.tl_state/`; `before.json`, `after.json`,
+  `reports/`, `dist/` và các runtime artifact không được tính vào release manifest.
 
 ## LỆNH KIỂM CUỐI TRƯỚC BÀN GIAO (mọi thay đổi skill)
 

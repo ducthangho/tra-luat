@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 133,
-  "total_bytes": 3787457,
-  "package_hash": "2382e8c4cbb90fd366dcaaa15c26ca737882c53832b14aca8dd16772efe3115f",
+  "total_bytes": 3793291,
+  "package_hash": "d2b555a991d486e0cea4c4406d100f74b77f7481c39d5f5cfa23c3455e4c5efe",
   "required_missing": [],
   "files": [
     {
@@ -22,8 +22,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 23385,
-      "sha256": "3ce7199c3184b67b80bf4bccb35ee3fdf42cefd5b965cabf528b4ae8b17bd9e2"
+      "size": 24722,
+      "sha256": "65d5b6bc3b5b8766a1e6749343647ae0c5b2da24b10fe870cb82fdd324f5219f"
     },
     {
       "path": "CONTEXT.md",
@@ -47,8 +47,8 @@
     },
     {
       "path": "SKILL.md",
-      "size": 42708,
-      "sha256": "15c87901fc6f0284bc03b0f80afd237dea5ea245c312bc300941bc4e1e8e6f01"
+      "size": 46903,
+      "sha256": "4f0491cdcec088424c2aac1311009eb1d8326254e9bacd46ee23ef779ea3fa90"
     },
     {
       "path": "VERSION",
@@ -162,8 +162,8 @@
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
-      "size": 2744,
-      "sha256": "178ef0d785bed444fe470baae80e4f1dc195aa6a176161c510b309c9ab14249e"
+      "size": 3046,
+      "sha256": "a9270c4efc31e4a14602380c03c77970886b079375f8193acfe4c0000d55a4ba"
     },
     {
       "path": "references/STALE_RELATION_GUARD.md",
@@ -258,7 +258,7 @@
     {
       "path": "references/golden/workflow_audit.json",
       "size": 27113,
-      "sha256": "fe59b86c95b09c0a4182d40cd6e306d5db4ddaf9315aaf3c4606979eded37fd8"
+      "sha256": "f82eaab27527d6b97d99d892b4fb6ad9f9923802fc0969194b01e14d0473db52"
     },
     {
       "path": "references/linhvuc_phapdien.json",

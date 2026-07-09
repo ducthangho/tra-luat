@@ -1,5 +1,20 @@
 # ★ v1.34.0 — Pha F: SKILL.md kernel (user duyệt phương án (a) 41.8KB — grilling #3 'draft-trước-duyệt-sau') (2026-07-09)
 
+## Vá doctrine-loss check (2026-07-09, TRƯỚC deploy — vẫn v1.34.0 vì chưa từng LIVE)
+
+- Workflow 3-reviewer + skeptic đối chiếu ad413e7:SKILL.md ↔ bộ mới: **6 finding CONFIRMED** (F1/Z3-01 P1;
+  F3/F4/F5/Z3-02 P2), 4 bị skeptic bẻ (F2/F6/Z3-03/V2-01-phần-loss). Nguyên nhân gốc: mapping hàng 5 khai
+  "RUNBOOK §A đã có nội dung tương đương" — SAI cho dải old 164-185 (RUNBOOK §A0/§A4 giữ bản CŨ đối nghịch:
+  'Chat SKIP/Drive MCP', header A4 thiếu Chat).
+- **KHÔI PHỤC NGUYÊN VĂN dải old 164-185 vào kernel §1** (F1 MÔI TRƯỜNG THỐNG NHẤT; F5 nguyên tắc NLM-CLI
+  BẮT BUỘC mọi env; F4 cấm notebook_create điều-kiện-kép; F3 ⚠DUP-TL lỏng-năm; L6 khôi phục kèm cho trọn khối)
+  + xoá fence ```bash mồ côi (F6 render bug). Kernel 41.7→46.6KB (trần 48KB).
+- Doctrine rút gọn +2 bullet nguyên văn: Z3-01 luật `golden-test --write` (CẤM xanh-hóa gate đỏ);
+  Z3-02 snapshot/report vận hành → `.tl_state/`.
+- V2-01: dòng "Quy tắc chung" kernel phóng đại `--json/--out` thành cờ toàn cục — SAI so parser (probe:
+  `tl --json …` rc=2, `exists --out` unrecognized) → sửa về đúng: chỉ `--profile/--config/--deterministic`
+  toàn cục. MAPPING hàng 5 cập nhật ghi rõ tách-đôi.
+
 - SKILL.md 91KB → **kernel 41.6KB**: lắp bằng TRÍCH NGUYÊN VĂN các khối bất biến (§0 Nguyên tắc, §1 Khởi động
   kèm BƯỚC-0 curl, §2 Cổng vận hành, GATES + PHÁT HÀNH & NHÁNH, v1.17.26 gate) + khối pointer viết tay.
   KHÔNG câu doctrine nào bị viết lại lời (lựa chọn (a) của user — an toàn ngữ nghĩa trên hết).

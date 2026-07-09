@@ -5129,6 +5129,100 @@ def run() -> int:
     _tl_src70 = Path(_ins69.getsourcefile(_g70["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r70_no_dual_definition",
                   all(_tl_src70.count(f"def {n}(") == 1 for n in _hy_names70)))
+    # ═══ v1.34.4 — r71a_*: I2 characterization TRƯỚC cut nlm_wrappers — wiring-test OFFLINE 5 cmd chưa phủ
+    # (monkeypatch _imp/_gas/registry-IO trên tl; sau cut bind REBASE __globals__ về tl nên patch vẫn thấm) ═══
+    _E71a = {"so_hieu": "72/2025/NQ-TW", "name": "NQ_72-2025-NQ-TW_X", "drive_id": "d71a",
+             "nlm_source_id": "s71a", "nlm_notebook_id": "NB1", "nlm_status": "pushed", "corpus": "true"}
+    _E71b = {"so_hieu": "10/2020/TT-BYT", "name": "TT_10-2020-TT-BYT_Y", "drive_id": "d71b",
+             "nlm_source_id": "s71b", "nlm_notebook_id": "NB1", "nlm_status": "pushed", "corpus": "true"}
+    _E71c = {"so_hieu": "5/2021/ND-CP", "name": "ND_5-2021-ND-CP_Z", "drive_id": "d71c",
+             "nlm_source_id": "s71c", "nlm_notebook_id": "NB2", "nlm_status": "pushed",
+             "row_kind": "overflow", "corpus": "true"}
+    class _FkNC71:
+        def source_list(self, nb, skip_freshness=True, **kw):
+            return {"ok": True, "count": 2, "skip_freshness": skip_freshness,
+                    "sources": [{"id": "s71a", "title": "NQ_72", "type": "drive"},
+                                {"id": "sX71", "title": "LA_LIVE_CHUA_DANG_KY", "url": "https://docs.google.com/d/dY71/edit"}]}
+        def notebook_get(self, nb, **kw):
+            return {"source_count": 315 if nb == "NB1" else 100}
+    class _FkGas71:
+        def get(self, action, **kw):
+            assert action == "nlm_preflight"
+            return {"ok": True, "decision": "REVIEW", "reasons": ["NOTEBOOK_NEAR_FULL_ROUTE_OVERFLOW"],
+                    "slots": {"used": 300, "cap": 300, "remaining": 0, "full": True, "near_full": True},
+                    "overflow_route": {"notebookId": "NB2"}, "dedup": {}, "note": "n71"}
+    _keys71 = ("_imp", "apply_profile_offline", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+               "_gas", "_apply_gate", "_apply_journal_start", "_journaled_reg_write", "_reg_before_from_manifest",
+               "_slot_count_all_shards")
+    _sav71 = {k: getattr(_TL_MODULE, k) for k in _keys71}
+    _env71 = {k: os.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID")}
+    def _cap71(fn, ns):
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+    try:
+        _TL_MODULE._imp = lambda name: _FkNC71() if name == "nlm_cli" else _sav71["_imp"](name)
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ((nb or "NB1"), None)
+        _TL_MODULE._manifest_entries = lambda refresh=False: [_E71a, _E71b, _E71c]
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: _FkGas71()
+        _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run71"
+        _TL_MODULE._journaled_reg_write = lambda *a, **k: {"verified": True, "patched": 1,
+                                                           "reg_bulk": {"ok": True, "patched": 1, "missed": []}}
+        _TL_MODULE._reg_before_from_manifest = lambda items, cols: {}
+        _TL_MODULE._slot_count_all_shards = lambda entries: {"NB1": 300, "NB2": 100}
+        os.environ["TL_NOTEBOOK_ID"] = "NB1"; os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
+        # (1) nlm-list --json: shape {ok,count,sources} nguyên vẹn qua _emit_json_payload
+        _rc1, _o1 = _cap71(_TL_MODULE.cmd_nlm_list, argparse.Namespace(notebook_id="NB1", no_skip_freshness=False,
+                                                                       json=True, out=None))
+        _j1 = json.loads(_o1)
+        cases.append(("r71a_nlm_list_json_shape",
+                      _rc1 == 0 and _j1.get("ok") is True and _j1.get("count") == 2 and len(_j1.get("sources")) == 2))
+        # (2) nlm-reconcile DRY: phân loại desync_real / other_notebook / unregistered đúng (refresh=True né self-heal)
+        _rc2, _o2 = _cap71(_TL_MODULE.cmd_nlm_reconcile, argparse.Namespace(
+            config=None, profile=None, notebook_id="NB1", refresh=True, apply=False, clear_stale=False, out=None))
+        _j2 = json.loads(_o2)
+        cases.append(("r71a_nlm_reconcile_dry_classes",
+                      _rc2 == 0 and _j2.get("mode") == "DRY" and _j2.get("live_on_nlm") == 2
+                      and _j2.get("desync_real") == 1 and _j2.get("other_notebook") == 1
+                      and _j2.get("unregistered_on_nlm") == 1 and "journal" not in _j2))
+        # (3) preflight --json: L4 dedup lỏng-năm (72/NQ-TW ≡ 72-2025-NQ-TW đã trên NLM) + L5 verify-LIVE khi FULL
+        _rc3, _o3 = _cap71(_TL_MODULE.cmd_preflight, argparse.Namespace(
+            config=None, profile=None, notebook_id="NB1", overflow_notebook_id="NB2", refresh=False,
+            query=None, sohieu="72/NQ-TW", name=None, drive_id=None, md5=None, json=True))
+        _j3 = json.loads(_o3)
+        cases.append(("r71a_preflight_dup_loose_and_live_slot",
+                      _rc3 == 0 and len(_j3.get("tl_dedup_loose") or []) == 1
+                      and _j3["tl_dedup_loose"][0]["sohieu"] == "72/2025/NQ-TW"
+                      and _j3.get("live_source_count") == 315
+                      and (_j3.get("overflow_route") or {}).get("notebookId") == "NB2"))
+        # (4) push-overflow: verified-write → ok:true + journal + row_kind=overflow (idempotent rc theo verified)
+        _rc4, _o4 = _cap71(_TL_MODULE.cmd_push_overflow, argparse.Namespace(
+            config=None, profile=None, notebook_id="NB2", drive_id="d71z", source_id="s71z",
+            apply=True, confirm="yes"))
+        _j4 = json.loads(_o4)
+        cases.append(("r71a_push_overflow_verified_write",
+                      _rc4 == 0 and _j4.get("ok") is True and _j4.get("journal") == "run71"
+                      and _j4.get("row_kind") == "overflow" and _j4.get("notebook") == "NB2"))
+        # (5) overflow-resolve --json: MAX(registry,physical), discover NB2 từ registry, gap báo REGISTRY_BEHIND_LIVE
+        _rc5, _o5 = _cap71(_TL_MODULE.cmd_overflow_resolve, argparse.Namespace(
+            config=None, profile=None, refresh=False, no_live=False, json=True, deterministic=False))
+        _j5 = json.loads(_o5)
+        cases.append(("r71a_overflow_resolve_route_and_gap",
+                      _rc5 == 0 and _j5.get("route") == "overflow"
+                      and _j5.get("decision_flag") == "OVERFLOW_SHARD_EXISTS_DO_NOT_CREATE"
+                      and _j5.get("base_used") == 315 and _j5.get("overflow_shard") == "NB2"
+                      and _j5.get("overflow_discovered_from_registry") is True
+                      and (_j5.get("registry_live_gap") or [{}])[0].get("gap") == 15
+                      and "REGISTRY_BEHIND_LIVE" in str(_j5.get("warning"))))
+    finally:
+        for _k, _v in _sav71.items():
+            setattr(_TL_MODULE, _k, _v)
+        for _k, _v in _env71.items():
+            (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

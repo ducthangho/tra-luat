@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 133,
-  "total_bytes": 3875698,
-  "package_hash": "0bc13624cd6b7bc426b5184b87ad2cef5d99aa05519c46538b49fed5ebe7329e",
+  "total_bytes": 3875376,
+  "package_hash": "2830e7f4912671e8f2824e7fe38368672b8212defa771aa8357843bda8b85735",
   "required_missing": [],
   "files": [
     {
@@ -67,8 +67,8 @@
     },
     {
       "path": "references/API_CONTRACT.md",
-      "size": 26212,
-      "sha256": "1a614a3d6df0087f0965c05a485b184d1c8d826d00d162e6833f24a75104ea32"
+      "size": 25890,
+      "sha256": "bd9748566dc1f0066f01acf723719e5670f30d6ac5003603aceb98e5fa860fa1"
     },
     {
       "path": "references/APPSSCRIPT_MANIFEST.open-egress.json",

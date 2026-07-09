@@ -5116,6 +5116,16 @@ def run() -> int:
         _raw66 = _fp66.read_bytes()
     cases.append(("r66_atomic_writer_lf_all_os",
                   chr(13).encode() not in _raw66 and _raw66.count(chr(10).encode()) == 2))
+    # ═══ v1.34.0 (Pha F) — r67: kernel chống-phình (size ≤ 48KB + links references tồn tại) ═══
+    with _hush():
+        _rc67 = cmd_workflow_audit(argparse.Namespace(strict=False, json=True, deterministic=False))
+    # gọi lại lấy payload trực tiếp (audit in stdout; kiểm qua _workflow_cards_audit + block kernel tự tính)
+    _sk67 = (HERE.parent / "SKILL.md").read_bytes()
+    import re as _re67
+    _links67 = sorted({m.rstrip(".,;:)]}") for m in _re67.findall(r"references/[A-Za-z0-9_./\-]+", _sk67.decode("utf-8", "replace"))})
+    _miss67 = [l for l in _links67 if "*" not in l and not (HERE.parent / l).exists()]
+    cases.append(("r67_kernel_size_and_links",
+                  _rc67 == 0 and len(_sk67) <= 48 * 1024 and not _miss67 and len(_links67) >= 6))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,4 +1,4 @@
-# SKILL_KERNEL_MAPPING — Bảng đối chiếu Pha F (mục nào đi đâu) — chờ user duyệt
+# SKILL_KERNEL_MAPPING — Bảng đối chiếu Pha F (mục nào đi đâu) — ĐÃ THỰC THI v1.34.0 (user chọn (a) 41.8KB, 2026-07-09); giữ làm hồ sơ
 
 | # | Section SKILL.md hiện tại (dòng) | KB | Đích | Cách xử lý |
 |---|---|---|---|---|

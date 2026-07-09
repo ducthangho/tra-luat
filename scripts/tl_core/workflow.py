@@ -536,6 +536,19 @@ def cmd_workflow_audit(a) -> int:
     except Exception as _e:  # noqa: BLE001
         out["registry"] = {"ok": False, "issues": ["REGISTRY_VALIDATE_CRASH:" + type(_e).__name__ + ":" + str(_e)]}
         out["ok"] = False
+    # v1.34.0 (Pha F — chống-phình kernel): SKILL.md phải ≤ 48KB và mọi đường references/ nhắc trong
+    # kernel phải tồn tại (kernel = bất biến + con trỏ; con trỏ gãy/kernel phình = doctrine-drift).
+    try:
+        _sk = HERE.parent / "SKILL.md"
+        _sk_b = _sk.read_bytes()
+        _links = sorted({m.rstrip(".,;:)]}»") for m in re.findall(r"references/[A-Za-z0-9_./\-]+", _sk_b.decode("utf-8", "replace"))})
+        _missing = [l for l in _links if "*" not in l and not (HERE.parent / l).exists()]
+        out["kernel"] = {"size_bytes": len(_sk_b), "size_limit": 48 * 1024, "size_ok": len(_sk_b) <= 48 * 1024,
+                         "links_checked": len(_links), "links_missing": _missing, "links_ok": not _missing}
+        out["ok"] = bool(out.get("ok")) and out["kernel"]["size_ok"] and out["kernel"]["links_ok"]
+    except Exception as _ke:  # noqa: BLE001
+        out["kernel"] = {"ok": False, "error": f"{type(_ke).__name__}: {_ke}"}
+        out["ok"] = False
     if getattr(a, "strict", False):
         out["strict"] = True
         out["ok"] = bool(out.get("ok")) and not out.get("warnings")

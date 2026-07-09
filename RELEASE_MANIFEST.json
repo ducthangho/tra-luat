@@ -5,9 +5,9 @@
   "skill_version": "1.34.9",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
-  "file_count": 146,
-  "total_bytes": 3933675,
-  "package_hash": "7c30f12195c31fa369d8bbb7e9af877f888e114dd2ff16b724706f30b775e450",
+  "file_count": 148,
+  "total_bytes": 4381581,
+  "package_hash": "8ceadf3059cf56e4149b0a6ac4369f5c5d085291ca2ff68ea16bace8886fc2ee",
   "required_missing": [],
   "files": [
     {
@@ -266,6 +266,11 @@
       "sha256": "7ea1d9cd1588d2b8fe717b838bc36f2d746d3b760c6467baba129fc3beb511a9"
     },
     {
+      "path": "references/golden/parser_surface.json",
+      "size": 13899,
+      "sha256": "b75a9193bd407b21676f27a2138ea76e6337c8cfe8d85d66b34fde8330d8e1e6"
+    },
+    {
       "path": "references/golden/route_task_ingest_zip.json",
       "size": 5465,
       "sha256": "ad2b3f871415a2b40b3c86169be45aaf77d461505c1d4dc0e7dc507963529e79"
@@ -294,6 +299,11 @@
       "path": "references/linhvuc_phapdien.json",
       "size": 13954,
       "sha256": "67ab72aad4e1044d7249891e7f69907834cee06b94c369d42d9baa7d46767dd4"
+    },
+    {
+      "path": "references/parser_shape.json",
+      "size": 430333,
+      "sha256": "ba5eac19bbaa1f22f651372cfdc16757d73a68da95e2ce2911164e20a09c816e"
     },
     {
       "path": "references/phap_dien_45.json",
@@ -697,8 +707,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 468605,
-      "sha256": "d4bcb52f251eb64dd7baae401a38a141582f3a39b0ceb5c9ac2db08ef58cebbc"
+      "size": 472279,
+      "sha256": "cfc70d7a8ba8fe88ed89ad14cbb2959679cc2efb7777f864efe8697b473f9cf9"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -5684,6 +5684,61 @@ def run() -> int:
                   all((f"def {n}(" in _tl_src76 and f"_tl_lookup_ops.{n}" not in _tl_src76)
                       for n in ("_source_map_one", "_dedup_status", "_classify_ref",
                                 "resolve_footnote_amendments", "_relation_audit", "_sohieu_query_hits_entry"))))
+    # ═══ v1.34.10 (I7) — r77a: PARSER-SURFACE SNAPSHOT — khoá byte-level bề mặt CLI trước khi chuyển
+    # build_parser → GENERATED_SPECS. Per-command (KHÔNG phụ thuộc THỨ TỰ add_parser — register_generated gom
+    # lệnh về 1 điểm); mỗi action giữ ĐỦ opts/dest/nargs/const/default/type/choices/required/help/metavar/kind
+    # + tên handler. Regen CÓ CHỦ ĐÍCH: TL_WRITE_PARSER_SURFACE=1 python scripts/tl.py --selftest (rồi
+    # release-manifest + xem diff) — cùng kỷ luật golden --write.
+    def _parser_surface_map(ap):
+        _subact = next(x for x in ap._actions if isinstance(x, argparse._SubParsersAction))
+        def _walk(subact, prefix=""):
+            helps = {ca.dest: ca.help for ca in subact._choices_actions}
+            m = {}
+            for nm, sp in subact.choices.items():
+                acts = []
+                nested = None
+                for act in sp._actions:
+                    if isinstance(act, argparse._SubParsersAction):
+                        nested = act
+                        acts.append({"kind": "subparsers", "dest": act.dest, "choices": sorted(act.choices)})
+                        continue
+                    acts.append({
+                        "kind": type(act).__name__, "opts": list(act.option_strings), "dest": act.dest,
+                        "nargs": repr(act.nargs), "const": repr(act.const), "default": repr(act.default),
+                        "type": (getattr(act.type, "__name__", None) or repr(act.type)) if act.type is not None else None,
+                        "choices": (list(act.choices) if act.choices is not None else None),
+                        "required": bool(act.required), "help": act.help, "metavar": act.metavar})
+                _fn = sp.get_default("fn")
+                m[prefix + nm] = {"help": helps.get(nm), "fn": getattr(_fn, "__name__", None), "actions": acts}
+                if nested is not None:
+                    m.update(_walk(nested, prefix + nm + " "))
+            return m
+        return _walk(_subact)
+    import hashlib as _hl77
+    _surface_full77 = _parser_surface_map(build_parser())
+    # per-command SHA256 của JSON canonical — khoá TƯƠNG ĐƯƠNG tuyệt đối, file nhỏ (~10KB thay vì 510KB full).
+    # Soi chi tiết khi lệch: chạy _parser_surface_map trực tiếp 2 phía và diff (surface đầy đủ không lưu repo).
+    _surface77 = {k: _hl77.sha256(json.dumps(v, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+                  for k, v in _surface_full77.items()}
+    _snap77_path = Path(_ins69.getsourcefile(_g76["build_parser"])).parent.parent / "references" / "golden" / "parser_surface.json"
+    if os.environ.get("TL_WRITE_PARSER_SURFACE") == "1":
+        _snap77_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(_snap77_path, "w", encoding="utf-8", newline="\n") as _f77:
+            json.dump(_surface77, _f77, ensure_ascii=False, sort_keys=True, indent=1)
+            _f77.write("\n")
+    try:
+        _snap77 = json.loads(_snap77_path.read_text(encoding="utf-8"))
+    except Exception:
+        _snap77 = None
+    _diff77 = []
+    if isinstance(_snap77, dict):
+        for _k in sorted(set(_snap77) | set(_surface77)):
+            if _snap77.get(_k) != _surface77.get(_k):
+                _diff77.append(_k)
+    cases.append(("r77a_parser_surface_matches_snapshot", _snap77 is not None and not _diff77))
+    if _diff77:
+        print(f"  [r77a] LỆCH bề mặt parser tại: {_diff77[:8]} — nếu ĐỔI CLI có chủ đích: "
+              f"TL_WRITE_PARSER_SURFACE=1 tl --selftest để regen snapshot.", file=sys.stderr)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

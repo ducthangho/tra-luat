@@ -2,12 +2,12 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.34.5",
+  "skill_version": "1.34.6",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 142,
-  "total_bytes": 3870845,
-  "package_hash": "e154f62f716dd2bd7b2d73eed4686d6d9aada9da9efbbd75f96c494630fbb801",
+  "total_bytes": 3886143,
+  "package_hash": "fc3931da0ddb13fecd1023818faaddd6407e5aeefa3996cfc26a65b490b4aa1a",
   "required_missing": [],
   "files": [
     {
@@ -22,8 +22,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 32937,
-      "sha256": "a7a5a82eba3ef5e3e1387e44a47dc30e15a67e713ee8731351466f483a455204"
+      "size": 35433,
+      "sha256": "20fe2d9e8cdf8dc248a29a6c3c36bf5f7bbcd089e021f8afa64f8f74f196fc56"
     },
     {
       "path": "CONTEXT.md",
@@ -48,12 +48,12 @@
     {
       "path": "SKILL.md",
       "size": 46903,
-      "sha256": "6961929dd649b6d7b37961eb10b78af18c575d2ba1871f625e7dd542942d4f6f"
+      "sha256": "720176086fd394262900470bb2f0038f4a9c981c9473ab2d3ebb3cf349281c2b"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "f203425b6121e3f68df5d5f739b6cc85bcef3e866f7c0d3ee98930fd8e1d336d"
+      "sha256": "4c325fc9a4240c013ec66e6532d1c1b3184af67fc8eb05558a338b93bef29374"
     },
     {
       "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
@@ -587,8 +587,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 1053463,
-      "sha256": "98ab060d52d9f12cf3b138fadae6337fd6567779a662d0e1bb820de1cfffceb9"
+      "size": 1059531,
+      "sha256": "38f61ccde108e808b9bafdca6af5d0c3066a09c8bbd26ab4fd8f77d80189e755"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -677,8 +677,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 442422,
-      "sha256": "660ca8364d8d2c80df71704d23f4cc25f33e639515d631b0252bdc5dbab6c115"
+      "size": 449156,
+      "sha256": "ccd31328e6e9a1da89c282643c558366a9dd6ba0e9d59ce7e049e07891b09890"
     },
     {
       "path": "scripts/tra_cuu.py",

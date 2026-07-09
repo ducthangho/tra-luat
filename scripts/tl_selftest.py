@@ -5332,6 +5332,98 @@ def run() -> int:
     _tl_src72 = Path(_ins69.getsourcefile(_g72["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r72_no_dual_definition",
                   all(_tl_src72.count(f"def {n}(") == 1 for n in _ec_names72 + _fw_names72)))
+    # ═══ v1.34.6 — r73a_*: vá 3 vấn đề Nhóm 1+2 log phiên chạy thực 2026-07-09 (TDD: test hành vi ĐÚNG) ═══
+    # (#1) số hiệu TRÍCH DẪN trong văn xuôi (dòng dài) KHÔNG thành sohieu của chính tài liệu
+    _bc73 = ("BÁO CÁO\nVề tình hình thực hiện chính sách bảo hiểm xã hội trên địa bàn tỉnh Thái Nguyên\n\n"
+             "Thực hiện Luật số 41/2024/QH15 của Quốc hội và Nghị định số 12/2022/NĐ-CP của Chính phủ về quản lý "
+             "bảo hiểm, Ủy ban nhân dân tỉnh báo cáo kết quả triển khai trên địa bàn như sau: nội dung chi tiết.")
+    _i73a = _classify_doc_header(_bc73, "Bao_cao_Thai_Nguyen_BHXH.docx")
+    cases.append(("r73a_citation_in_prose_not_own_sohieu",
+                  _i73a.get("sohieu") == "" and _i73a.get("kind") == "normal"))
+    # (#1) letterhead THẬT ('Số:' trên dòng ngắn vùng tiêu đề) vẫn nhận — không thụt lùi VBQPPL
+    _luat73 = ("QUỐC HỘI\n--------\nLuật số: 41/2024/QH15\n\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+               "Độc lập - Tự do - Hạnh phúc\n\nLUẬT\nPHÒNG CHÁY, CHỮA CHÁY VÀ CỨU NẠN, CỨU HỘ\n\n"
+               "Điều 1. Phạm vi điều chỉnh\nLuật này quy định về phòng cháy.")
+    _i73b = _classify_doc_header(_luat73, "")
+    cases.append(("r73a_real_law_letterhead_kept",
+                  _i73b.get("sohieu") == "41/2024/QH15" and _i73b.get("kind") == "vbqppl"))
+    # (#1) sohieu từ TÊN FILE vẫn nhận (đường cũ giữ nguyên)
+    _i73c = _classify_doc_header("Nội dung không có số hiệu trong vùng tiêu đề.", "ND_145-2020-ND-CP_Lao_dong.docx")
+    cases.append(("r73a_sohieu_from_filename_kept", bool(_i73c.get("sohieu"))))
+    # (#3) gate: văn bản kind=normal (kể cả CÓ số hiệu công văn) KHÔNG đòi cấu trúc Điều → corpus_allowed
+    _g73 = _ingest_verify_gate("Báo cáo quý về hoạt động bảo hiểm xã hội, không có điều khoản pháp quy nào.",
+                               {"kind": "normal", "sohieu": "123/BC-UBND"}, "digital", False)
+    cases.append(("r73a_gate_normal_doc_no_dieu_required",
+                  _g73["ok"] and _g73["corpus_allowed"] and not _g73["requires_dieu"]
+                  and "DIEU_STRUCTURE_NOT_VERIFIED" not in _g73["flags"]))
+    _g73v = _ingest_verify_gate("Văn bản thiếu cấu trúc.", {"kind": "vbqppl", "sohieu": "41/2024/QH15"}, "digital", False)
+    cases.append(("r73a_gate_vbqppl_still_strict",
+                  not _g73v["ok"] and "DIEU_STRUCTURE_NOT_VERIFIED" in _g73v["flags"]))
+    # (#2) MIME bảng tính
+    _m73, _e73 = _upload_mime_ext("Phu_luc_2_So_lieu.xlsx")
+    _m73b, _e73b = _upload_mime_ext("bang_cu.xls")
+    cases.append(("r73a_xlsx_xls_mime",
+                  "spreadsheetml" in _m73 and _e73 == ".xlsx" and _m73b == "application/vnd.ms-excel" and _e73b == ".xls"))
+    # (#2) pipeline profile-ingest .xlsx: copy_convert toType=sheets + NLM type=sheets + rc=0 (wiring mock)
+    _calls73 = {"convert": None, "add": None}
+    class _FkGas73:
+        def get(self, action, **kw):
+            if action == "bootstrap":
+                return {"ok": True, "inboxFolderId": "INBOX73"}
+            if action == "copy_convert":
+                _calls73["convert"] = kw
+                return {"ok": True, "fileId": "SHEET73", "srcFileId": "SRC73", "name": kw.get("name")}
+            return {"ok": True, "fileId": "SHEET73"}
+        def post(self, action, **kw):
+            if action == "upload":
+                return {"ok": True, "fileId": "UP73"}
+            return {"ok": True, "patched": 1}
+    class _FkNC73:
+        def source_add(self, nb, drive_id=None, doc_type="doc", wait=True, **kw):
+            _calls73["add"] = {"nb": nb, "drive_id": drive_id, "doc_type": doc_type}
+            return {"ok": True, "source_id": "SID73", "ready": True}
+        def source_list(self, nb, **kw):
+            return {"ok": True, "count": 0, "sources": []}
+    _keys73 = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds", "_gas",
+               "_resolve_nlm_notebook", "_imp", "_verify_convert_readback", "_read_doc_text",
+               "_profile_read_probe_text", "_profile_source_quality")
+    _sav73 = {k: getattr(_TL_MODULE, k) for k in _keys73}
+    _env73 = {k: os.environ.get(k) for k in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID")}
+    try:
+        import tempfile as _tf73
+        with _tf73.TemporaryDirectory() as _d73:
+            _xf73 = Path(_d73) / "Phu_luc_2_So_lieu.xlsx"
+            _xf73.write_bytes(b"PK\x03\x04fakexlsx")
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._active_profile = lambda: "p6"
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkGas73()
+            _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB73", None)
+            _TL_MODULE._imp = lambda name: _FkNC73() if name == "nlm_cli" else _sav73["_imp"](name)
+            _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
+            _TL_MODULE._read_doc_text = lambda *a, **k: ""
+            _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("", None)
+            _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
+            os.environ["TL_ROOT_FOLDER_ID"] = "ROOT73"; os.environ["TL_META_FOLDER_ID"] = "META73"
+            _b73 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b73), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc73 = _TL_MODULE.cmd_profile_ingest(argparse.Namespace(
+                    config=None, profile=None, file=str(_xf73), apply=True, allow_default=False,
+                    name=None, text_file=None, source_quality="auto", ocr_verified=False,
+                    large_threshold=None, chunk_max_chars=None, hieuluc=None,
+                    skip_live_check=False, json=True, deterministic=False))
+            _j73 = json.loads(_b73.getvalue())
+            cases.append(("r73a_profile_ingest_xlsx_pipeline",
+                          _rc73 == 0 and _j73.get("ok") is True
+                          and (_calls73["convert"] or {}).get("toType") == "sheets"
+                          and (_calls73["add"] or {}).get("doc_type") == "sheets"
+                          and (_calls73["add"] or {}).get("drive_id") == "SHEET73"))
+    finally:
+        for _k, _v in _sav73.items():
+            setattr(_TL_MODULE, _k, _v)
+        for _k, _v in _env73.items():
+            (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

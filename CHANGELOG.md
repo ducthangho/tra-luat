@@ -1,3 +1,26 @@
+# ★ v1.34.6 — vá 3 defect profile văn-bản-thường (log phiên hồ sơ Luật BHXH 2026-07-09) (2026-07-09)
+
+- **(#1 — ghi sai metadata âm thầm)** `_classify_doc_header` hết nhận số hiệu TRÍCH DẪN làm số hiệu tài liệu:
+  sohieu CHỈ lấy từ **vùng tiêu đề** (head 1500 — cùng vùng draft-marker N2b) trên **DÒNG NGẮN ≤80 ký tự** kiểu
+  letterhead (ưu tiên có `Số:` đứng trước — helper mới `_sohieu_from_title_zone`) + tên file. Số hiệu nằm trong
+  câu văn dài = trích dẫn văn bản khác → BỎ. Ca thật: báo cáo Thái Nguyên nhắc "Luật số 41/2024/QH15" bị gán
+  `loai=Luật, sohieu=41/2024/QH15`. Nhánh VBHN N2a nay chạy CẢ khi sohieu vùng-tiêu-đề rỗng (layout VPQH in số
+  ở khối ký cuối — quét sâu 16k CHỈ cho dạng số VBHN).
+- **(#3 — gate áp nhầm)** `_ingest_verify_gate`: bỏ vế `or có sohieu` — `requires_dieu` CHỈ theo
+  `kind ∈ {vbqppl, draft, nq}`. Văn bản thường (kể cả có số hiệu công văn 123/BC-UBND) không còn bị
+  `DIEU_STRUCTURE_NOT_VERIFIED` chặn `corpus_allowed` → profile-ingest đi trọn pipeline tự động (hết cảnh
+  nlm-add tay 6 nguồn). +info flag `DIEU_NOT_REQUIRED_NORMAL_DOC`. VBQPPL/draft/NQ giữ nguyên độ chặt.
+- **(#2 — .xlsx gãy convert)** bảng tính trọn đường ống: `_MIME_BY_EXT` +`.xlsx/.xls` (trước rơi về DOCX_MIME →
+  "Conversion ... not supported"); profile-ingest nhánh sheet: `copy_convert toType=sheets` → canonical =
+  **Google Sheet** + readback mime sheet (param mới `expected_gdoc_mime`) + NLM `source_add doc_type=sheets`
+  nội bộ + bỏ text-gate (`SPREADSHEET_TEXT_VERIFY_SKIPPED`). CLI `nlm-add --type` public không đổi (backlog #4).
+- TDD: 7 test `r73a_*` hành-vi-đúng viết TRƯỚC (4 đỏ đúng chỗ, 3 chống-thụt-lùi xanh) → fix → **684/684**.
+- **BACKLOG còn lại từ log phiên** (chưa vá đợt này): #4 nlm-add auto-detect type theo mime Drive; #5 register
+  clear cột thường (cần đổi webapp GAS + API_CONTRACT); #6 register auto-retry khi FIELDS_DROPPED_ON_WRITE;
+  #7 ocr-run báo rõ lệnh cài engine (ocrmypdf/ghostscript/tesseract-vie); #8 instruction-audit lấy block-list
+  từ gen_instructions (single source of truth); #9 user sửa Project Instruction (đang ghi 1.33.43, thực tế
+  1.34.6); #10 di trú `vbthuong categories: inherit→own` (cần user duyệt).
+
 # ★ v1.34.5 — I3: tách extract_cache + fetch_web → tl_core/ (test-first, 2 module) (2026-07-09)
 
 - **Characterization TRƯỚC cut**: +5 wiring-test `r72a_*` OFFLINE — extract resolve-canonical THẬT từ manifest

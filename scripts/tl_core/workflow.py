@@ -649,7 +649,9 @@ _GOLDEN_CASES = [
     {"id": "hygiene_missing_sohieu_dry", "file": "hygiene_missing_sohieu_dry.json", "args": ["missing-sohieu", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_vbhn_year_fix_dry", "file": "hygiene_vbhn_year_fix_dry.json", "args": ["vbhn-year-fix", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_reg_query_corpus", "file": "hygiene_reg_query_corpus.json", "args": ["reg-query", "--corpus", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
-    {"id": "hygiene_ops_plan", "file": "hygiene_ops_plan.json", "args": ["ops-plan", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    # (v1.34.3 CI bắt) KHÔNG golden hoá ops-plan: output phụ thuộc TRẠNG THÁI CONFIG máy (thiếu config →
+    # advisory 'config-pin-registry' đứng đầu) — TL_CACHE_DIR không cách ly đủ; case đã hoàn thành vai trò
+    # khoá cut trên máy dev. Muốn golden lại phải cách ly cả config (fixture --config) — để I2 nếu cần.
 ]
 
 

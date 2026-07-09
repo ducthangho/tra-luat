@@ -2,12 +2,12 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.34.10",
+  "skill_version": "1.34.11",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 147,
-  "total_bytes": 3965167,
-  "package_hash": "e4f301aa927f1ffb455891981e820c40266ca7d0d30531b147661e4e5f81f391",
+  "total_bytes": 3973101,
+  "package_hash": "d5c4e8279c46061c3b7c7ebe2e33e2a752a19b6c81e823eb70de8d488860f57a",
   "required_missing": [],
   "files": [
     {
@@ -22,8 +22,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 41439,
-      "sha256": "5d405aae51678c018cdf7ec0bde5f2d0f9c2d41bb53b3463c6f1e40b668aa680"
+      "size": 43274,
+      "sha256": "a99d3ae42c97cf68fc69b7c7f72350c9beb2befd54a0df37716bcc81096cc2c8"
     },
     {
       "path": "CONTEXT.md",
@@ -48,12 +48,12 @@
     {
       "path": "SKILL.md",
       "size": 46904,
-      "sha256": "ddf4ec2ba21bc696446caf8cb0e7ddc8ffbb74345ceed33f93eb901f0f5ddd53"
+      "sha256": "69bd55c1e897305742bbdfeee37d0538c0857259e3ce77fcaf2ce58379458336"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "e11d4c693004c4f58e4510c4b2fde64ec53202d73694fe14196089d75d975acf"
+      "sha256": "d8078636026243f1f7f5e5a16553479e1c918e6c9559ca954a4266564dca64c8"
     },
     {
       "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
@@ -597,8 +597,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 748695,
-      "sha256": "a6ea1bdfbacea8bd4e4479d8ee49404012d10042d2fbfdefc092764b3edc6965"
+      "size": 697206,
+      "sha256": "bbb72ff45455544738e92b40b463aa6e00e4d2b974e2de016b6b5c48b848d738"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -617,8 +617,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 54897,
-      "sha256": "a680a7765665c898bc4a08227596b91130037d2c5dac4573dfb7f09cb1e8b1c3"
+      "size": 112485,
+      "sha256": "c8cce4d9fc4165a8cfb92530896761d7da3f51f126af2cebfaed9b855be24377"
     },
     {
       "path": "scripts/tl_core/deterministic.py",

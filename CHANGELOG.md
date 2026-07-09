@@ -1,3 +1,22 @@
+# ★ v1.34.11 — I7 wave-2: HOÀN TẤT bề mặt lệnh — +78 meta + 78 lệnh sinh từ GENERATED_SPECS (2026-07-09)
+
+- **+78 COMMAND_META baseline bằng-chứng-cờ** (commit 1 riêng): chính sách grilling — `--apply` →
+  `supports_dry_run=True` (doctrine mọi-lệnh-GHI-DRY-mặc-định), `--confirm` → `requires_confirm`, ghi
+  ngoài-repo → `medium` + write_scope đúng đích (registry/nlm/drive), đọc-chỉ → low/none, cache/config →
+  local. **KHÔNG high mới** (r65 drift-lock nguyên vẹn); nâng high+contract cho nhóm nguy hiểm
+  (profile-rebuild-registry, ingest-missing, manifest --touched-drive…) = việc Pha-E-hoàn-thiện, có meta
+  làm nền. validate_registry: WRITE_CMD_NO_GATE = 0.
+- **Converter chạy lại: +78 lệnh → GENERATED_SPECS** (tổng 124 spec / 160 lệnh; tl.py 11.296→10.712 —
+  lũy kế chuỗi I: 19.052→10.712, −44%). **Parser-surface snapshot KHỚP KHÔNG REGEN** = bằng chứng
+  tương đương byte của toàn bộ 78 lệnh.
+- ★ **2 bẫy converter mới — r77a bắt CẢ HAI đúng vai trò** (không lọt CI, không lọt tay):
+  (a) `add_argument` HẬU-`set_defaults` (ca `sweep --live-nlm`) — block cũ gắn cờ sau set_defaults, converter
+  wave-1 dừng sớm → cờ mồ côi gắn nhầm parser kế; nay tiêu thụ tiếp sau set_defaults.
+  (b) `register_generated` LOẠI `dest` khỏi kwargs (schema Pha E coi `dest` = positional) → 4 cờ có `dest=`
+  tường minh (`--in dest=in_file`…) bị argparse tự suy dest khác; nay dest-passthrough khi entry có `flags`.
+- Còn **35 block tay CÓ CHỦ ĐÍCH**: 17 set_defaults phức (tlg.* / kwargs phụ), 9 kwarg-non-literal,
+  6 foreign-stmt, 3 has-comment (giữ doctrine-comment tại chỗ). Selftest 704/704; golden 18/18; audit strict xanh.
+
 # ★ v1.34.10 — I7 wave-1: 38 lệnh build_parser SINH TỪ GENERATED_SPECS + PARSER-SURFACE SNAPSHOT (2026-07-09)
 
 - **Characterization TRƯỚC chuyển (commit riêng)**: `r77a` PARSER-SURFACE SNAPSHOT — SHA256 per-command của

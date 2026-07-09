@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5315,6 +5315,23 @@ def run() -> int:
     finally:
         for _k, _v in _sav72.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.5 — r72_*: I3 parity wrapper↔module (kiểu r70/r71) ═══
+    import tl_core.extract_cache as _ec72
+    import tl_core.fetch_web as _fw72
+    _ec_names72 = ["cmd_extract", "cmd_cache_build", "cmd_cache_snapshot"]
+    _fw_names72 = ["_fetch_plan", "_external_ingest_plan", "cmd_external_ingest", "cmd_link_priority",
+                   "_frontier_candidates", "_frontier_doc_text", "cmd_frontier_expand", "cmd_tvpl_url",
+                   "cmd_fetch_route", "cmd_fetch_batch", "cmd_fetch_links", "cmd_find_doc"]
+    _g72 = globals()
+    cases.append(("r72_extract_fetch_modules_wired",
+                  all(callable(getattr(_ec72, n, None)) for n in _ec_names72)
+                  and all(callable(getattr(_fw72, n, None)) for n in _fw_names72)
+                  and all(f"_tl_extract_cache.{n}" in _ins69.getsource(_g72[n]) for n in _ec_names72)
+                  and all(f"_tl_fetch_web.{n}" in _ins69.getsource(_g72[n]) for n in _fw_names72)
+                  and _ec72._TL is not None and _fw72._TL is not None))
+    _tl_src72 = Path(_ins69.getsourcefile(_g72["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r72_no_dual_definition",
+                  all(_tl_src72.count(f"def {n}(") == 1 for n in _ec_names72 + _fw_names72)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

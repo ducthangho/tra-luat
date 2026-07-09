@@ -1,3 +1,21 @@
+# ★ v1.34.5 — I3: tách extract_cache + fetch_web → tl_core/ (test-first, 2 module) (2026-07-09)
+
+- **Characterization TRƯỚC cut**: +5 wiring-test `r72a_*` OFFLINE — extract resolve-canonical THẬT từ manifest
+  fixture + bóc đúng Điều (transport mock); tvpl-url pure (khoá hành vi `quote` giữ `/`); fetch-route VBHN-first
+  + docx-rank TVPL#1; fetch-batch phân SKIP_DEDUP/REVIEW_DEDUP/FETCH + checkpoint; fetch-links markdown bấm-được
+  + _HOP_NAP + env-aware. PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 15 def (~603 dòng)** → `tl_core/extract_cache.py` (cmd_extract/cache-build/cache-snapshot)
+  + `tl_core/fetch_web.py` (fetch-route/batch/links, find-doc, tvpl-url, external-ingest, link-priority,
+  frontier-expand + _fetch_plan/_external_ingest_plan/_frontier_*). tl.py 16.227→15.743 dòng.
+- **Ranh giới đếm-tham-chiếu (đúng khuôn I2)**: hạ tầng đọc (`_read_doc_text` 16 site, `_cache_file` 13,
+  `_title_block_from_text` 6, `extract_dieu`/`extract_refs`/`_extract_header_facts`/`_sanitize_export_text`/
+  `_profile_cache_dir`) và hạ tầng discovery QT-5 (`_query_variants`/`_google_site_url`/`_discovery_links`/
+  `_official_rank` + `_FETCH_SOURCES`/`_DISCOVERY_SITES`/`HOPNAP_FOLDER_ID`) **GIỮ Ở TL** — cụm extract thực chất
+  phần lớn là read-infra dùng chung, chỉ 3 lệnh CLI tách được.
+- Cut script nay có **SCANNER bẫy default-param** (bài học I2, quét AST defaults tham chiếu Name) — 0 hit đợt này.
+  Self-heal phủ 2 module mới (canary/tl_boot preload/py_compile+REQUIRED/r36). +r72 wired/no-dual → selftest
+  **677/677**; golden 17/17 khớp nguyên trạng; audit strict xanh.
+
 # ★ v1.34.4 — I2: tách cụm nlm_wrappers/sharding → tl_core/nlm_ops.py (test-first) (2026-07-09)
 
 - **Characterization TRƯỚC cut** (commit riêng): +5 wiring-test `r71a_*` OFFLINE (mock `_imp`/`_gas`/registry-IO

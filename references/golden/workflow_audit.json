@@ -1068,9 +1068,6 @@
     "schema": "registry_validate.v1",
     "warnings": [
       "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:drive-push",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:nlm-reconcile",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:push-overflow",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:register",
       "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:shared-source-fix",
       "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:source-update-corpus"
     ]

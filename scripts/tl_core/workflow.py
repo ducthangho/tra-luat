@@ -290,6 +290,42 @@ _IDEMPOTENCY_CONTRACTS.update({
     },
 })
 
+# v1.34.1 (siết-6 advisory — deadline r65 'trước v1.34.1' ĐÚNG HẠN): contract THẬT cho 6 lệnh ghi legacy
+# còn grandfather. Contract PHẢN ÁNH hành vi đã có trong code (gate+journal+verified-write từ v1.29.2),
+# không đổi bề mặt CLI (quyết định grilling 2026-07-09 #6: thêm cờ được, KHÔNG breaking).
+_IDEMPOTENCY_CONTRACTS.update({
+    "register": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+cols+values từng dòng (reg_upsert/reg_bulk idempotent — ghi lại cùng giá trị vô hại)",
+        "journal_key": "tl_journal/register-bulk_<run_id> (before theo key_field TỪNG BATCH — v1.29.2 B1#2)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — upsert theo drive_id, batch đã ghi giữ nguyên giá trị",
+        "duplicate_guard": "_apply_gate precheck write_cols + verified-write đối chiếu từng batch",
+        "readback_command": "reg-query --drive-id <id> --json (cols vừa ghi khớp giá trị)",
+        "resume_command": "register --drive-id <id> ... (cùng args; bulk: --bulk <file> --cols <cols>)",
+        "rollback_hint": "undo <run_id> --apply (journal giữ before theo key_field từng batch)",
+    },
+    "push_overflow": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+source_id+notebook_đích (set row_kind=overflow — ghi lại cùng giá trị vô hại)",
+        "journal_key": "tl_journal/push-overflow_<run_id>",
+        "resume_behavior": "chạy lại CÙNG LỆNH — reg_write verified; row đã overflow giữ nguyên",
+        "duplicate_guard": "_apply_gate precheck + verified-write; chỉ ghi cột row_kind/nlm_* của đúng drive_id",
+        "readback_command": "reg-query --drive-id <id> --json (row_kind=overflow + nlm_notebook_id=shard phụ)",
+        "resume_command": "push-overflow --drive-id <id> --source-id <sid> [--notebook-id <nb>]",
+        "rollback_hint": "undo <run_id> --apply (journal before); nguồn NLM trên shard phụ gỡ tay nếu cần",
+    },
+    "nlm_reconcile": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "notebook_id+drive_id+nlm_source_id từng dòng plan (backfill/link idempotent)",
+        "journal_key": "tl_journal/nlm-reconcile_<run_id> (before_by_key từng dòng ghi)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — DRY re-plan từ ground-truth CLI nlm-list rồi --apply phần còn thiếu",
+        "duplicate_guard": "plan từ nlm-list ground-truth; _apply_gate write_cols nlm_source_id,nlm_notebook_id,nlm_status chống clobber/ghi-mù",
+        "readback_command": "nlm-reconcile <nb> --json (desync_real=0) + reg-query --refresh",
+        "resume_command": "nlm-reconcile <nb> --apply [--clear-stale]",
+        "rollback_hint": "undo <run_id> --apply (before_by_key trong journal)",
+    },
+})
+
 
 
 def _workflow_dir() -> Path:

@@ -486,7 +486,7 @@
       },
       "nlm-reconcile": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "nlm_reconcile",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -566,7 +566,7 @@
       },
       "push-overflow": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "push_overflow",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -606,7 +606,7 @@
       },
       "register": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "register",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",

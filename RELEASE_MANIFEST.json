@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 133,
-  "total_bytes": 3793291,
-  "package_hash": "d2b555a991d486e0cea4c4406d100f74b77f7481c39d5f5cfa23c3455e4c5efe",
+  "total_bytes": 3796569,
+  "package_hash": "dc34c327927071583bbbe5056b2ef9efb9556831bb7478306de17693a88ed727",
   "required_missing": [],
   "files": [
     {
@@ -252,13 +252,13 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 21060,
-      "sha256": "40de50a2fc1489c2e88812ee142cdf25c9dbdf89554d934d46b66429f8faa642"
+      "size": 21088,
+      "sha256": "e808c2210144055a0a2bbb69a3e8d9e1aa567ab022102c5f504b77b61ae5ae2a"
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 27113,
-      "sha256": "f82eaab27527d6b97d99d892b4fb6ad9f9923802fc0969194b01e14d0473db52"
+      "size": 26929,
+      "sha256": "24bc14061ca3487110fb1a82e5048a080594ac64724007d83c288a4cbcf5483e"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -582,8 +582,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 18382,
-      "sha256": "aa2e8f39c9eaf02edd88bc04907ce359f7f8ee3834a6a244b7415644b466e6b4"
+      "size": 18410,
+      "sha256": "bb20746ee36c2800e938fbca26250dc23296288d576e2f156bb11a72c8362e1b"
     },
     {
       "path": "scripts/tl_core/deterministic.py",
@@ -612,8 +612,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 41547,
-      "sha256": "9df9f3122f3e2c954921fdb0b36b42536d56375b49a32d70c6b0105e691ba8e0"
+      "size": 44428,
+      "sha256": "a4ca549ce0174ae7c64b2aec4cd2c0694cae8c23807e597310b412408f553f25"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",
@@ -632,8 +632,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 422305,
-      "sha256": "531a09bf9768e3bab90de098b4ec62789fd93e366f31a6286db2f71658020c4f"
+      "size": 422830,
+      "sha256": "7f8cd5c333215585a3fdecae1b5c54bffa9efdbc960010d2329b62246208a2ca"
     },
     {
       "path": "scripts/tra_cuu.py",

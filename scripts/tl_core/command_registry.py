@@ -157,7 +157,7 @@ COMMAND_META = {
     "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None),
     "source-update-corpus": _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
     "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, "dedup_plan", False, None),
-    "register":             _m("high", False, "registry", False, True, False, None, None, False, None),
+    "register":             _m("high", False, "registry", False, True, False, None, "register", False, None),
     "backfill-loai":        _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-title-vn":    _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-hieuluc":     _m("medium", False, "registry", False, True, False, None, None, False, None),
@@ -168,8 +168,8 @@ COMMAND_META = {
     "quarantine-fix":       _m("medium", False, "registry", False, True, False, None, None, False, None),
     "shared-source-fix":    _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
     "corpus-fix":           _m("medium", False, "registry", False, True, False, None, None, False, None),
-    "push-overflow":        _m("high", False, "nlm_registry", False, True, False, None, None, False, None),
-    "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
+    "push-overflow":        _m("high", False, "nlm_registry", False, True, False, None, "push_overflow", False, None),
+    "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None),
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None),
 }
 

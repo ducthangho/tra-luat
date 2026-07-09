@@ -5068,11 +5068,17 @@ def run() -> int:
     cases.append(("r65_contract_required_six_wired",
                   _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan"}
                   and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
-    # drift-lock: nhóm advisory còn lại = ĐÚNG 6 lệnh đã biết (thêm lệnh ghi high-risk mới mà quên contract → lệch set → fail)
+    # drift-lock: nhóm advisory còn lại = ĐÚNG các lệnh đã biết (thêm lệnh ghi high-risk mới mà quên contract → lệch set → fail)
+    # v1.34.1 siết dần: register/push-overflow/nlm-reconcile đã có contract (đợt 1) — set co về 3.
     _adv65 = {n for n, m in _reg65.COMMAND_META.items()
               if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"] and n not in _six65}
     cases.append(("r65_grandfather_advisory_exact_set",
-                  _adv65 == {"drive-push", "nlm-reconcile", "push-overflow", "register", "shared-source-fix", "source-update-corpus"}))
+                  _adv65 == {"drive-push", "shared-source-fix", "source-update-corpus"}))
+    # đợt 1 siết-6 (v1.34.1): 3 contract mới phải được meta tham chiếu và tồn tại thật trong _IDEMPOTENCY_CONTRACTS
+    _new65a = {"register": "register", "push-overflow": "push_overflow", "nlm-reconcile": "nlm_reconcile"}
+    cases.append(("r68_contract_wave1_wired",
+                  all(_reg65.COMMAND_META[c]["idempotency_contract"] == k and k in _w65._IDEMPOTENCY_CONTRACTS
+                      for c, k in _new65a.items())))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

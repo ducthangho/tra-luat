@@ -1062,7 +1062,7 @@
   },
   "ok": true,
   "registry": {
-    "checked_commands": 53,
+    "checked_commands": 131,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",

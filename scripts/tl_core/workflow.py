@@ -649,9 +649,13 @@ _GOLDEN_CASES = [
     {"id": "hygiene_missing_sohieu_dry", "file": "hygiene_missing_sohieu_dry.json", "args": ["missing-sohieu", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_vbhn_year_fix_dry", "file": "hygiene_vbhn_year_fix_dry.json", "args": ["vbhn-year-fix", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_reg_query_corpus", "file": "hygiene_reg_query_corpus.json", "args": ["reg-query", "--corpus", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
-    # (v1.34.3 CI bắt) KHÔNG golden hoá ops-plan: output phụ thuộc TRẠNG THÁI CONFIG máy (thiếu config →
-    # advisory 'config-pin-registry' đứng đầu) — TL_CACHE_DIR không cách ly đủ; case đã hoàn thành vai trò
-    # khoá cut trên máy dev. Muốn golden lại phải cách ly cả config (fixture --config) — để I2 nếu cần.
+    # (v1.34.7 I4) ops-plan HỒI SINH golden nhờ FIXTURE CONFIG (bài học v1.34.3: output phụ thuộc trạng thái
+    # config máy — nay --config fixture + xoá env TL_* để fixture quyết định tất cả → cross-machine).
+    {"id": "hygiene_ops_plan_fixture_config", "file": "hygiene_ops_plan_fixture_config.json",
+     "args": ["ops-plan", "--config", "{FIXTURES}/config_fixture.json", "--json"],
+     "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene", "TL_REGISTRY_DOC_ID": "", "TL_NOTEBOOK_ID": "",
+             "TL_PROFILE": "", "TL_ROOT_FOLDER_ID": "", "TL_META_FOLDER_ID": "", "TL_MANIFEST_ID": "",
+             "TL_MANIFEST_SCOPE": "", "TL_WEBAPP": "", "TL_TOKEN": ""}},
 ]
 
 
@@ -713,6 +717,20 @@ def _golden_ensure_fixtures() -> None:
         {"drive_id": "gd_infra", "name": "nlm_sources_delta_2026.json", "so_hieu": "", "cat": "12_Lao_dong_BHXH", "loai": "", "corpus": "true", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own", "mime": "application/json"},
     ]
     manifest_fixture = json.dumps({"ok": True, "entries": _me}, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
+    # v1.34.7 (I4): FIXTURE CONFIG tất định — cách ly trạng thái config máy (mở khoá golden ops-plan; dùng
+    # chung cho mọi case cần --config). registryDocId ĐÃ pin (không phải Doc legacy) → không advisory P0 pin.
+    config_fixture = json.dumps({
+        "schema": 2, "webappUrl": "https://fixture.invalid/exec", "token": "tk_fixture",
+        "defaultProfile": "vbqppl",
+        "profiles": {
+            "vbqppl": {"notebookId": "nb_base", "rootFolderId": "root_fix", "metaFolderId": "meta_fix",
+                       "registryDocId": "regsheet_fixture_1234567890", "manifestId": "manifest_fix",
+                       "overflowNotebookId": "nb_ovf"},
+            "Hồ sơ 74": {"notebookId": "nb_p74", "rootFolderId": "root_p74", "metaFolderId": "meta_p74",
+                          "registryDocId": "regsheet_p74_1234567890", "manifestId": "manifest_p74",
+                          "categories": "own", "manifestScope": "own"},
+        },
+    }, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
     want = {
         "sample_profile.txt": sample,
         "snap_a.json": snap_a,
@@ -720,6 +738,7 @@ def _golden_ensure_fixtures() -> None:
         "slip.zip": _zip_bytes([("../evil.docx", b"slip"), ("van_ban_hop_le.docx", b"binh thuong"), ("bao cao?.docx", b"ten cam win")]),
         "dup.zip": _zip_bytes([("a.docx", b"mot"), ("./a.docx", b"hai")]),
         "cache_hygiene/manifest.json": manifest_fixture,
+        "config_fixture.json": config_fixture,
     }
     for name, data in want.items():
         fp = fd / name

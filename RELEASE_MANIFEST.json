@@ -5,9 +5,9 @@
   "skill_version": "1.34.6",
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
-  "file_count": 142,
-  "total_bytes": 3886143,
-  "package_hash": "fc3931da0ddb13fecd1023818faaddd6407e5aeefa3996cfc26a65b490b4aa1a",
+  "file_count": 143,
+  "total_bytes": 3895906,
+  "package_hash": "df734498a37979be2ed27c1736735e371ce69735d7621cc554fcf63a0ba00ef8",
   "required_missing": [],
   "files": [
     {
@@ -219,6 +219,11 @@
       "path": "references/golden/hygiene_missing_sohieu_dry.json",
       "size": 482,
       "sha256": "2bc3341cca42776c51b1546c7d6ca22fa2cace4541cac3189094d61c84645ac0"
+    },
+    {
+      "path": "references/golden/hygiene_ops_plan_fixture_config.json",
+      "size": 3798,
+      "sha256": "a77aaef574ec1b7b61985d6128f2f3026a10e6ca48e5dc51b6284581188fa499"
     },
     {
       "path": "references/golden/hygiene_reg_query_corpus.json",
@@ -657,8 +662,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 53199,
-      "sha256": "ebd55ae94c30e4301fc82b6f838ce84c8a2af9d1a78a65b6e633e4a9e54fb727"
+      "size": 54623,
+      "sha256": "f2e5536c244247b6a0813763cd46cf8c58205b1e4c8987a2d532ea009ff0a8fa"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",
@@ -677,8 +682,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 449156,
-      "sha256": "ccd31328e6e9a1da89c282643c558366a9dd6ba0e9d59ce7e049e07891b09890"
+      "size": 453697,
+      "sha256": "4b1b559b693e1f91c1d7e5932fb78b1d305988b5439438cb5e7e60d79de85a3e"
     },
     {
       "path": "scripts/tra_cuu.py",

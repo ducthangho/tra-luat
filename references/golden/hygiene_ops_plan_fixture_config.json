@@ -1,0 +1,104 @@
+{
+  "actions": [
+    {
+      "command": "tl review-queue --json --out /tmp/review_queue.json  # lấy qt5_queries rồi Chrome official-first → tl vbhn-verify --official-required",
+      "confirm_required": true,
+      "count": 1,
+      "id": "web_round2_high_velocity",
+      "mode": "manual_web",
+      "priority": "P0",
+      "reason": "VBHN số hiệu tăng theo mỗi lần hợp nhất; không được chốt ở bản đầu tìm thấy",
+      "sample": [
+        "45-2019-QH14|Luat_Bao_hiem_xa_hoi_45_2019_QH14"
+      ],
+      "title": "Web lượt-2 cho luật HIGH_VELOCITY trước"
+    },
+    {
+      "command": "tl dedup-plan --apply  # xem dry-run trước nếu chưa chắc canonical",
+      "confirm_required": true,
+      "count": 1,
+      "id": "dedup_active",
+      "mode": "apply_reversible",
+      "priority": "P1",
+      "reason": "giữ canonical, set bản dup corpus=false",
+      "title": "Dọn cụm trùng lặp active/raw/md5/identity"
+    },
+    {
+      "command": "tl corpus-audit --all --resume --limit 15 --workers 4 --json --out /tmp/corpus_audit_page.json  # Cowork 45s: lặp CÙNG LỆNH tới rc=0 (rc=3=PARTIAL còn trang); local không trần → --all --full",
+      "confirm_required": true,
+      "count": 3,
+      "id": "name_nonstandard_batch",
+      "mode": "review_then_apply",
+      "priority": "P1",
+      "reason": "thiếu số hiệu/chủ đề/.html; cần đọc header thật trước khi rename",
+      "title": "Chuẩn hóa tên phi chuẩn theo lô"
+    },
+    {
+      "command": "tl nlm-reconcile nb_base --json --out /tmp/nlm_reconcile.json",
+      "confirm_required": false,
+      "count": 2,
+      "id": "nlm_reconcile_live",
+      "mode": "read_live",
+      "note": "Chỉ thêm --apply/--clear-stale sau khi đọc desync_real/link_candidates.",
+      "priority": "P1",
+      "reason": "sweep nlm_drift là offline; registry_claim_nlm chỉ là estimate",
+      "title": "Đối soát LIVE registry↔NLM trước khi kết luận slot/desync"
+    },
+    {
+      "command": "tl counts --live-nlm --notebook-id nb_base --json --out /tmp/counts_live.json",
+      "confirm_required": false,
+      "id": "slot_preflight",
+      "mode": "read_live",
+      "priority": "P2",
+      "reason": "notebook nền có thể gần 300; registry_claim_nlm không phải ground truth",
+      "title": "Kế toán slot NLM bằng nguồn LIVE trước mọi lần push"
+    },
+    {
+      "command": "tl cowork-plan --json --out /tmp/cowork_plan.json",
+      "confirm_required": false,
+      "id": "cowork_bootstrap_guard",
+      "mode": "read_only",
+      "priority": "P3",
+      "reason": "mount có thể cắt cụt; gws cần MUSL; nlm-install phải --resume",
+      "title": "Dùng checklist Cowork thay vì đọc file mount trực tiếp"
+    }
+  ],
+  "config_path": "references/golden/fixtures/config_fixture.json",
+  "note": "READ-ONLY plan. Các dòng confirm_required=true chỉ sinh lệnh/queue; không tự ghi registry/Drive/NLM.",
+  "notebook": "nb_base",
+  "ok": true,
+  "profile": "vbqppl",
+  "registryDocId_pinned": true,
+  "review_counts": {
+    "clean": 0,
+    "pause": 0,
+    "relation_backfill": 0,
+    "relation_low_confidence": 0,
+    "relation_probe_suppressed": 0,
+    "review_other": 1,
+    "web_round2": 1
+  },
+  "schema": "ops_plan.v1",
+  "sweep_summary": {
+    "duplicates": {
+      "by_md5": 0,
+      "by_name": 0,
+      "by_name_active": 0,
+      "by_sohieu": 1,
+      "by_sohieu_raw": 1,
+      "by_sohieu_raw_active": 1,
+      "identity": 1,
+      "same_document": 0
+    },
+    "loai_noncanonical": 0,
+    "name_nonstandard": 3,
+    "nlm_drift_total": 2,
+    "quarantine": {
+      "corpus_true": 0,
+      "label_variants": 0,
+      "stale_nlm_ref": 0,
+      "still_on_nlm": 0,
+      "total": 0
+    }
+  }
+}

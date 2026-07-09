@@ -5424,6 +5424,71 @@ def run() -> int:
             setattr(_TL_MODULE, _k, _v)
         for _k, _v in _env73.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+    # ═══ v1.34.7 — r74a_*: I4 characterization TRƯỚC cut profile_mgmt — wiring OFFLINE trên FIXTURE CONFIG ═══
+    _PROF_ENV74 = ("TL_PROFILE", "TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID",
+                   "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_MANIFEST_SCOPE", "TL_WEBAPP", "TL_TOKEN")
+    _env74 = {k: os.environ.get(k) for k in _PROF_ENV74}
+    def _cap74(fn, ns):
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+    try:
+        import tempfile as _tf74
+        with _tf74.TemporaryDirectory() as _d74:
+            _cfg74 = Path(_d74) / "tra_luat_config.v2.json"
+            _cfg74.write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://fixture.invalid/exec", "token": "tk74",
+                "defaultProfile": "vbqppl",
+                "profiles": {
+                    "vbqppl": {"notebookId": "NBBASE74", "rootFolderId": "ROOTV74", "registryDocId": "REGV74",
+                               "manifestId": "MANV74"},
+                    "Hồ sơ 74": {"notebookId": "NB74", "rootFolderId": "ROOT74", "metaFolderId": "META74",
+                                  "registryDocId": "REG74", "manifestId": "MAN74",
+                                  "categories": "own", "manifestScope": "own"},
+                }}, ensure_ascii=False, indent=1), encoding="utf-8")
+            _cfgp74 = str(_cfg74)
+            # (1) profile-list --json: đọc config fixture, đủ 2 profile + default/active vbqppl
+            _rc1, _o1 = _cap74(_TL_MODULE.cmd_profile_list, argparse.Namespace(
+                config=_cfgp74, profile=None, discover=False, json=True, deterministic=False))
+            _j1 = json.loads(_o1)
+            _names1 = {r["profile"] for r in _j1.get("profiles", [])}
+            cases.append(("r74a_profile_list_fixture_config",
+                          _rc1 == 0 and _j1.get("ok") is True and _j1.get("defaultProfile") == "vbqppl"
+                          and {"vbqppl", "Hồ sơ 74"} <= _names1
+                          and any(r["profile"] == "Hồ sơ 74" and r.get("notebookId") == "NB74"
+                                  for r in _j1["profiles"])))
+            # (2) profile-info resolve CHỊU-LỖI-GÕ (P2 v1.33.48): 'ho_so_74' → canonical 'Hồ sơ 74' + đúng env
+            _rc2, _o2 = _cap74(_TL_MODULE.cmd_profile_info, argparse.Namespace(
+                config=_cfgp74, profile="ho_so_74", deterministic=False))
+            _j2 = json.loads(_o2)
+            cases.append(("r74a_profile_info_typo_tolerant",
+                          _rc2 == 0 and _j2.get("activeProfile") == "Hồ sơ 74" and _j2.get("profile_found") is True
+                          and (_j2.get("profile") or {}).get("notebookId") == "NB74"))
+            # (3) profile-use: DRY không ghi config; tên KHÔNG có → rc=2 PROFILE_NOT_FOUND
+            _bytes_before74 = _cfg74.read_bytes()
+            _rc3, _o3 = _cap74(_TL_MODULE.cmd_profile_use, argparse.Namespace(
+                config=_cfgp74, profile=None, name="Hồ sơ 74", apply=False, deterministic=False))
+            _j3 = json.loads(_o3)
+            _rc3b, _ = _cap74(_TL_MODULE.cmd_profile_use, argparse.Namespace(
+                config=_cfgp74, profile=None, name="khong_ton_tai_74", apply=False, deterministic=False))
+            cases.append(("r74a_profile_use_dry_and_notfound",
+                          _rc3 == 0 and _j3.get("mode") == "DRY" and _cfg74.read_bytes() == _bytes_before74
+                          and _rc3b == 2))
+            # (4) profile-rename DRY: plan hợp lệ + liệt kê assets; KHÔNG cho rename profile nền
+            _rc4, _o4 = _cap74(_TL_MODULE.cmd_profile_rename, argparse.Namespace(
+                config=_cfgp74, profile=None, old="Hồ sơ 74", new="Ho_so_74b", apply=False,
+                rename_assets=False, deterministic=False))
+            _j4 = json.loads(_o4)
+            _rc4b, _ = _cap74(_TL_MODULE.cmd_profile_rename, argparse.Namespace(
+                config=_cfgp74, profile=None, old="vbqppl", new="x", apply=False,
+                rename_assets=False, deterministic=False))
+            cases.append(("r74a_profile_rename_dry_plan",
+                          _rc4 == 0 and _j4.get("mode") == "DRY" and isinstance(_j4.get("assets"), list)
+                          and _rc4b == 2))
+    finally:
+        for _k, _v in _env74.items():
+            (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -324,6 +324,36 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_command": "nlm-reconcile <nb> --apply [--clear-stale]",
         "rollback_hint": "undo <run_id> --apply (before_by_key trong journal)",
     },
+    "drive_push": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "md5(zip local)+file_id đích (cùng bytes → PATCH cùng nội dung, vô hại; fileId GIỮ NGUYÊN)",
+        "journal_key": "n/a — 1 call REST PATCH; an toàn nhờ builtin_gate md5_verify_fixed_fileid + guard BUNDLE_META (ADR-0001), không nhờ journal",
+        "resume_behavior": "chạy lại CÙNG LỆNH — upload lại cùng bytes idempotent theo md5 verify sau push",
+        "duplicate_guard": "BLOCKED_BY_BUNDLE_META khi cây là bundle fork (--force thoát, ADR-0001); fileId cố định nên không sinh file mới",
+        "readback_command": "gws files get <file_id> (md5Checksum khớp local) / curl public download + so SHA256 với zip local",
+        "resume_command": "drive-push <zip> --via auto --rename-to-file",
+        "rollback_hint": "Drive version history của fileId (Manage versions) hoặc re-push zip bản trước — fileId không đổi",
+    },
+    "shared_source_fix": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "sha256(tập nhóm shared + winner được chọn) — plan/report trước, apply theo plan",
+        "journal_key": "tl_journal/shared-source-fix_<run_id> (groups + before per-loser)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — loser đã clear bị bỏ qua (reg_clear idempotent theo trạng thái đích)",
+        "duplicate_guard": "DRY/report mặc định; --apply đòi --confirm yes (gỡ link NLM = destructive); verify nlm-content xem source THỰC thuộc bản nào TRƯỚC apply",
+        "readback_command": "reg-query từng drive_id trong nhóm --json (chỉ winner còn nlm_source_id)",
+        "resume_command": "shared-source-fix [notebook_id] --apply --confirm yes",
+        "rollback_hint": "undo <run_id> --apply (before per-loser trong journal) — chỉ khôi phục cột link registry, không đụng NLM",
+    },
+    "source_update_corpus": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+corpus_đích (true/false — set lại cùng giá trị vô hại)",
+        "journal_key": "tl_journal/source-update-corpus_<run_id> (before row + ref_clear nếu có)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — trạng thái đích đã đạt → ghi lại cùng giá trị, vô hại",
+        "duplicate_guard": "DRY mặc định; --apply đòi --confirm yes; GUARD shared_source_id + clear refs nlm_source_id/nlm_notebook_id khi corpus=false",
+        "readback_command": "reg-query --drive-id <id> --json (corpus + nlm_status đúng đích)",
+        "resume_command": "source-update-corpus <target> <status> --apply --confirm yes",
+        "rollback_hint": "undo <run_id> --apply (before row) hoặc chạy lại với giá trị corpus ngược",
+    },
 })
 
 

@@ -5065,20 +5065,31 @@ def run() -> int:
     import tl_core.command_registry as _reg65
     import tl_core.workflow as _w65
     _six65 = _reg65._CONTRACT_REQUIRED
+    # v1.34.1: HẾT grandfather — _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (Pha G 6 + siết-6).
     cases.append(("r65_contract_required_six_wired",
-                  _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan"}
+                  _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+                             "register", "drive-push", "nlm-reconcile", "push-overflow",
+                             "shared-source-fix", "source-update-corpus"}
                   and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
-    # drift-lock: nhóm advisory còn lại = ĐÚNG các lệnh đã biết (thêm lệnh ghi high-risk mới mà quên contract → lệch set → fail)
-    # v1.34.1 siết dần: register/push-overflow/nlm-reconcile đã có contract (đợt 1) — set co về 3.
+    # drift-lock: KHÔNG còn lệnh ghi high-risk nào thiếu contract (lệnh MỚI quên contract → set ≠ rỗng → fail)
     _adv65 = {n for n, m in _reg65.COMMAND_META.items()
               if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"] and n not in _six65}
-    cases.append(("r65_grandfather_advisory_exact_set",
-                  _adv65 == {"drive-push", "shared-source-fix", "source-update-corpus"}))
-    # đợt 1 siết-6 (v1.34.1): 3 contract mới phải được meta tham chiếu và tồn tại thật trong _IDEMPOTENCY_CONTRACTS
-    _new65a = {"register": "register", "push-overflow": "push_overflow", "nlm-reconcile": "nlm_reconcile"}
-    cases.append(("r68_contract_wave1_wired",
-                  all(_reg65.COMMAND_META[c]["idempotency_contract"] == k and k in _w65._IDEMPOTENCY_CONTRACTS
-                      for c, k in _new65a.items())))
+    cases.append(("r65_grandfather_advisory_exact_set", _adv65 == set()))
+    # siết-6 (v1.34.1): 6 contract mới đúng key meta ↔ _IDEMPOTENCY_CONTRACTS và ĐỦ 8 field chuẩn v1
+    _new68 = {"register": "register", "push-overflow": "push_overflow", "nlm-reconcile": "nlm_reconcile",
+              "drive-push": "drive_push", "shared-source-fix": "shared_source_fix",
+              "source-update-corpus": "source_update_corpus"}
+    _fields68 = {"schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
+                 "readback_command", "resume_command", "rollback_hint"}
+    cases.append(("r68_contract_siet6_wired_and_complete",
+                  all(_reg65.COMMAND_META[c]["idempotency_contract"] == k
+                      and set(_w65._IDEMPOTENCY_CONTRACTS.get(k, {})) == _fields68
+                      and _w65._IDEMPOTENCY_CONTRACTS[k]["schema"] == "idempotency_contract.v1"
+                      for c, k in _new68.items())))
+    # v1.34.1: shared-source-fix / source-update-corpus meta requires_confirm khớp code (--apply --confirm yes)
+    cases.append(("r68_confirm_meta_matches_code",
+                  _reg65.COMMAND_META["shared-source-fix"]["requires_confirm"] is True
+                  and _reg65.COMMAND_META["source-update-corpus"]["requires_confirm"] is True))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

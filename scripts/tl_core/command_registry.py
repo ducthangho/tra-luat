@@ -147,7 +147,8 @@ COMMAND_META = {
     "profile-ingest-chunks": _m("high", False, "drive_registry_nlm", True, True, True, "chunk_ingest", "profile_ingest_chunks", True, "chunking"),
     "convert-verify":       _m("low", True, "none", False, False, True, "convert_rename", None, True, None),
     "nlm-query-plan":       _m("low", True, "none", False, False, True, "nlm_query_quality", None, True, None),
-    # ── legacy write high-risk (GRANDFATHER: card_required=False trừ khi card đã có; gate = --apply dry-run) ──
+    # ── legacy write high-risk (card_required=False trừ khi card đã có; gate = --apply dry-run;
+    #    v1.34.1: HẾT grandfather contract — mọi lệnh high-risk ghi đều có idempotency_contract) ──
     "ingest-local":         _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "ingest_local", True, None),
     "profile-ingest":       _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "profile_ingest", True, None),
     "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, "nlm_add", False, None),
@@ -155,18 +156,18 @@ COMMAND_META = {
     "recat":                _m("high", False, "drive_registry", False, True, False, None, "recat", False, None),
     "source-rename":        _m("high", False, "drive_registry_nlm", False, True, False, None, "source_rename", False, None),
     "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None),
-    "source-update-corpus": _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
+    "source-update-corpus": _m("high", False, "registry_nlm", True, True, False, None, "source_update_corpus", False, None),
     "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, "dedup_plan", False, None),
     "register":             _m("high", False, "registry", False, True, False, None, "register", False, None),
     "backfill-loai":        _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-title-vn":    _m("medium", False, "registry", False, True, False, None, None, False, None),
     "backfill-hieuluc":     _m("medium", False, "registry", False, True, False, None, None, False, None),
-    "drive-push":           dict(_m("high", False, "drive", False, False, False, None, None, False, None),
+    "drive-push":           dict(_m("high", False, "drive", False, False, False, None, "drive_push", False, None),
                                  builtin_gate="md5_verify_fixed_fileid"),
     "reg-delete":           _m("high", False, "registry", True, False, False, None, "reg_delete", False, None),
     "vbhn-year-fix":        _m("medium", False, "registry", False, True, False, None, None, False, None),
     "quarantine-fix":       _m("medium", False, "registry", False, True, False, None, None, False, None),
-    "shared-source-fix":    _m("high", False, "registry_nlm", False, True, False, None, None, False, None),
+    "shared-source-fix":    _m("high", False, "registry_nlm", True, True, False, None, "shared_source_fix", False, None),
     "corpus-fix":           _m("medium", False, "registry", False, True, False, None, None, False, None),
     "push-overflow":        _m("high", False, "nlm_registry", False, True, False, None, "push_overflow", False, None),
     "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None),
@@ -190,7 +191,10 @@ def registry_summary() -> dict:
     return {"schema": "command_registry.v1", "counts": counts, "commands": cmds}
 
 
-_CONTRACT_REQUIRED = {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan"}
+# v1.34.1: siết TOÀN BỘ lệnh ghi high-risk legacy — hết grandfather (deadline r65 'trước v1.34.1' đúng hạn).
+_CONTRACT_REQUIRED = {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+                      "register", "drive-push", "nlm-reconcile", "push-overflow",
+                      "shared-source-fix", "source-update-corpus"}
 
 
 def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> dict:
@@ -216,6 +220,8 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
         # high-risk ghi mà không có contract → warning (mục tiêu Pha G nâng thành fail)
         # v1.33.59 (Pha G — quyết định grilling #6): 6 lệnh ghi đụng Drive/NLM/registry-corpus PHẢI có
         # contract (fail-strict); nhóm còn lại advisory với deadline pha kế (trước v1.34.1).
+        # v1.34.1: deadline ĐÚNG HẠN — cả 12 lệnh ghi high-risk đều trong _CONTRACT_REQUIRED; nhánh
+        # warning giữ lại làm lưới cho lệnh ghi high-risk MỚI chưa kịp contract (drift-lock r65 bắt).
         if m["risk"] == "high" and not m["read_only"] and not m["idempotency_contract"]:
             if name in _CONTRACT_REQUIRED:
                 issues.append(f"CONTRACT_REQUIRED_MISSING:{name}")

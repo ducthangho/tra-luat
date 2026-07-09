@@ -1,3 +1,17 @@
+# ★ v1.34.1 — siết-6 advisory: contract THẬT, HẾT grandfather (đúng deadline r65 'trước v1.34.1') (2026-07-09)
+
+- 6 contract `idempotency_contract.v1` mới (đủ 8 field, PHẢN ÁNH hành vi gate+journal+verified-write đã có
+  trong code từ v1.29.2 — KHÔNG đổi bề mặt CLI, quyết định grilling 2026-07-09 #6): `register`, `drive_push`
+  (builtin_gate md5 + guard BUNDLE_META ADR-0001 ghi thành văn), `nlm_reconcile`, `push_overflow`,
+  `shared_source_fix`, `source_update_corpus`. Commit 2 đợt (3+3) để bisect được, mỗi đợt gate xanh.
+- `_CONTRACT_REQUIRED` = TRỌN 12 lệnh ghi high-risk (Pha G 6 + siết-6); registry.warnings advisory → RỖNG;
+  nhánh warning giữ làm lưới cho lệnh ghi high-risk MỚI quên contract.
+- COMMAND_META: `requires_confirm=True` cho `shared-source-fix`/`source-update-corpus` (khớp code
+  `--apply --confirm yes` — metadata nói thật).
+- Selftest: r65_contract_required_six_wired → 12-set; r65_grandfather_advisory_exact_set → set RỖNG
+  (drift-lock giữ nguyên ngữ nghĩa); +r68_contract_siet6_wired_and_complete (key meta↔contracts + đủ 8 field)
+  +r68_confirm_meta_matches_code → 656/656. Regen golden tool_inventory/workflow_audit (nhúng registry).
+
 # ★ v1.34.0 — Pha F: SKILL.md kernel (user duyệt phương án (a) 41.8KB — grilling #3 'draft-trước-duyệt-sau') (2026-07-09)
 
 ## Vá doctrine-loss check (2026-07-09, TRƯỚC deploy — vẫn v1.34.0 vì chưa từng LIVE)

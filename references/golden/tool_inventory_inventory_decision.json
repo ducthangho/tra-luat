@@ -336,7 +336,7 @@
       },
       "drive-push": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "drive_push",
         "read_only": false,
         "requires_confirm": false,
         "risk": "high",
@@ -676,9 +676,9 @@
       },
       "shared-source-fix": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "shared_source_fix",
         "read_only": false,
-        "requires_confirm": false,
+        "requires_confirm": true,
         "risk": "high",
         "supports_dry_run": true,
         "workflow_task": null,
@@ -706,9 +706,9 @@
       },
       "source-update-corpus": {
         "generated": false,
-        "idempotency_contract": null,
+        "idempotency_contract": "source_update_corpus",
         "read_only": false,
-        "requires_confirm": false,
+        "requires_confirm": true,
         "risk": "high",
         "supports_dry_run": true,
         "workflow_task": null,

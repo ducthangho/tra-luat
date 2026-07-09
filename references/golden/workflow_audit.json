@@ -1066,11 +1066,7 @@
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
-    "warnings": [
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:drive-push",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:shared-source-fix",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:source-update-corpus"
-    ]
+    "warnings": []
   },
   "schema": "workflow_audit.v2",
   "summary": {

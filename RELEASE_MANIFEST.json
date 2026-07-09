@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2i",
   "root_name": "tra-luat",
   "file_count": 147,
-  "total_bytes": 3956822,
-  "package_hash": "d2017bab842de5fb56ad355248acfba1abf3bd2a685657527f522df619ec35e9",
+  "total_bytes": 3965167,
+  "package_hash": "e4f301aa927f1ffb455891981e820c40266ca7d0d30531b147661e4e5f81f391",
   "required_missing": [],
   "files": [
     {
@@ -617,8 +617,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 46552,
-      "sha256": "bcdbfb0129390d12cb4aa456c50ee532ba0fc85f6f43487346a0768a0759d90d"
+      "size": 54897,
+      "sha256": "a680a7765665c898bc4a08227596b91130037d2c5dac4573dfb7f09cb1e8b1c3"
     },
     {
       "path": "scripts/tl_core/deterministic.py",

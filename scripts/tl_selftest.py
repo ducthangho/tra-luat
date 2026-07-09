@@ -5243,6 +5243,78 @@ def run() -> int:
                   all(_tl_src71.count(f"def {n}(") == 1 for n in _no_names71)))
     # mirror constant: default-param cap=NLM_SLOT_CAP eval trước bind → nlm_ops giữ bản sao; khoá không trôi
     cases.append(("r71_slot_cap_mirror", _no69.NLM_SLOT_CAP == _TL_MODULE.NLM_SLOT_CAP))
+    # ═══ v1.34.5 — r72a_*: I3 characterization TRƯỚC cut extract_cache + fetch_web — wiring-test OFFLINE ═══
+    _keys72 = ("_imp", "apply_profile_offline", "_dedup_status", "_cache_file",
+               "_manifest_entries", "_profile_cache_dir", "_gas")
+    _sav72 = {k: getattr(_TL_MODULE, k) for k in _keys72}
+    import tempfile as _tf72
+    class _FkCache72:
+        def find(self, sh): return None
+    class _FkTransport72:
+        def drive_op(self, op, file_id=None, limit=None, **kw):
+            return {"ok": True, "text": "LUẬT THUẾ THU NHẬP CÁ NHÂN\n\nĐiều 1. Phạm vi điều chỉnh một.\n\nĐiều 2. Nội dung hai đầy đủ."}
+    def _cap72(fn, ns):
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+    try:
+        with _tf72.TemporaryDirectory() as _d72:
+            _TL_MODULE._imp = lambda name: (_FkCache72() if name == "cache" else
+                                            _FkTransport72() if name == "transport" else _sav72["_imp"](name))
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._dedup_status = lambda q: (
+                {"in_corpus_active": "109/2025" in q, "likely_in_corpus": "Đầu tư" in q, "hits": []}, None)
+            _TL_MODULE._cache_file = lambda name: Path(_d72) / name
+            _TL_MODULE._profile_cache_dir = lambda: Path(_d72)
+            _E72 = {"so_hieu": "109/2025/QH15", "name": "Luat_109-2025-QH15_Thue_TNCN",
+                    "gdoc_id": "G1234567890123456789012345", "drive_id": "G1234567890123456789012345",
+                    "corpus": "true", "cat": "30_Thue_phi"}
+            _TL_MODULE._manifest_entries = lambda refresh=False: [_E72]
+            # (1) extract --sohieu: resolve canonical THẬT từ manifest fixture → transport read → bóc đúng Điều 2
+            _rc1, _o1 = _cap72(_TL_MODULE.cmd_extract, argparse.Namespace(
+                gdoc_id=None, sohieu="109-2025-QH15", refresh=False, out=str(Path(_d72) / "ex.txt"),
+                dieu=["2"], find=None, find_window=120, json=False, debug=False))
+            cases.append(("r72a_extract_resolves_and_cuts_dieu",
+                          _rc1 == 0 and "===== Điều 2 =====" in _o1 and "Nội dung hai đầy đủ" in _o1
+                          and "Điều 1" not in _o1.split("=====")[-1]))
+            # (2) tvpl-url: PURE — search_url encode đúng + flow đủ 5 bước
+            _rc2, _o2 = _cap72(_TL_MODULE.cmd_tvpl_url, argparse.Namespace(sohieu="17/VBHN-VPQH", query=None, deterministic=False))
+            _j2 = json.loads(_o2)
+            cases.append(("r72a_tvpl_url_shape",
+                          _rc2 == 0 and _j2.get("ok") is True and "keyword=17/VBHN-VPQH" in _j2.get("search_url", "")
+                          and len(_j2.get("flow_claude_code") or []) == 5))
+            # (3) fetch-route: VBHN-first variants + xếp nguồn docx trước (TVPL rank 1)
+            _rc3, _o3 = _cap72(_TL_MODULE.cmd_fetch_route, argparse.Namespace(
+                config=None, profile=None, query="Luật Xây dựng", sohieu=None, deterministic=False))
+            _j3 = json.loads(_o3)
+            _fp3 = _j3.get("fetch_plan") or {}
+            cases.append(("r72a_fetch_route_vbhn_first_docx_rank",
+                          _rc3 == 0 and _fp3.get("query_variants") == ["Luật Xây dựng hợp nhất", "Luật Xây dựng mới nhất", "Luật Xây dựng"]
+                          and (_fp3.get("sources") or [{}])[0].get("source") == "thuvienphapluat.vn"
+                          and (_fp3.get("sources") or [{}])[0].get("expected_format") == "docx"))
+            # (4) fetch-batch DRY: phân action SKIP_DEDUP/REVIEW_DEDUP/FETCH + checkpoint ghi file
+            _rc4, _o4 = _cap72(_TL_MODULE.cmd_fetch_batch, argparse.Namespace(
+                config=None, profile=None, items=["109/2025/QH15", "Luật Đầu tư", "77/2025/QH15"],
+                file=None, delay=4, jitter=2, json=True))
+            _j4 = json.loads(_o4)
+            _acts4 = [p["action"] for p in _j4.get("items", [])]
+            cases.append(("r72a_fetch_batch_actions_and_ckpt",
+                          _rc4 == 0 and _acts4 == ["SKIP_DEDUP", "REVIEW_DEDUP", "FETCH"]
+                          and _j4.get("to_fetch") == 1 and _j4.get("skip_dedup") == 1
+                          and (Path(_d72) / "fetch_queue.json").exists()
+                          and _j4["items"][0]["fetch_plan"] is None))
+            # (5) fetch-links env=chat: link markdown bấm-được + _HOP_NAP + ask_first=False (chat tự đưa link)
+            _rc5, _o5 = _cap72(_TL_MODULE.cmd_fetch_links, argparse.Namespace(
+                config=None, profile=None, query=None, sohieu="77/2025/QH15", env="chat", json=True))
+            _j5 = json.loads(_o5)
+            cases.append(("r72a_fetch_links_markdown_and_env",
+                          _rc5 == 0 and _j5.get("runtime_env") == "chat" and _j5.get("ask_first") is False
+                          and len(_j5.get("download_links_markdown") or []) >= 4
+                          and str(_j5.get("upload_link_markdown", "")).startswith("- [Mở thư mục _HOP_NAP")))
+    finally:
+        for _k, _v in _sav72.items():
+            setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

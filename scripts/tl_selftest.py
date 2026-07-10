@@ -5755,7 +5755,7 @@ def run() -> int:
          "corpus": "false", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own",
          "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
     ]
-    _keys78 = ("apply_profile_offline", "_manifest_entries", "_base_manifest_entries")
+    _keys78 = ("apply_profile_offline", "_manifest_entries", "_base_manifest_entries", "load_creds")
     _sav78 = {k: getattr(_TL_MODULE, k) for k in _keys78}
     _env78 = {k: os.environ.get(k) for k in ("TL_JOURNAL_DIR", "TL_NOTEBOOK_ID")}
     def _cap78(fn, ns):
@@ -5767,6 +5767,8 @@ def run() -> int:
         _TL_MODULE.apply_profile_offline = lambda *a, **k: None
         _TL_MODULE._manifest_entries = lambda refresh=False: list(_E78)
         _TL_MODULE._base_manifest_entries = lambda *a, **k: ([], "")
+        # CI máy-phụ-thuộc: cmd_exists gọi load_creds THẬT khi manifest cache VẮNG (máy dev có cache nên mù)
+        _TL_MODULE.load_creds = lambda *a, **k: None
         os.environ["TL_NOTEBOOK_ID"] = "NB1"
         # (1) reg-query: bare-VBHN 1-CHIỀU (v1.33.47) — query '88/VBHN-VPQH' KHÔNG năm khớp entry year-qualified
         _rc1, _o1 = _cap78(_TL_MODULE.cmd_reg_query, argparse.Namespace(

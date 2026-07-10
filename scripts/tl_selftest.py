@@ -5855,6 +5855,53 @@ def run() -> int:
     _tl_src79 = Path(_ins69.getsourcefile(_g79["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r79_no_dual_definition",
                   all(_tl_src79.count(f"def {n}(") == 1 for n in _cl_names79 + _pe_names79)))
+    # ═══ v1.34.14 (I9b) — r80a: characterization THÂN THẬT write-infra TRƯỚC cut resolve+regio
+    # (lâu nay r-test toàn MOCK các hàm này — thân thật chưa từng bị khoá) ═══
+    _keys80 = ("_journal_append", "_verified_reg_write", "_invalidate_manifest_cache",
+               "_apply_precheck", "_manifest_entries")
+    _sav80 = {k: getattr(_TL_MODULE, k) for k in _keys80}
+    try:
+        _recs80 = []
+        _inv80 = []
+        _TL_MODULE._journal_append = lambda rid, rec: _recs80.append((rid, dict(rec)))
+        _TL_MODULE._verified_reg_write = lambda g, items, cols: {
+            "reg_ok": True, "patched": 1, "expected": 2, "missed": 1, "missed_ids": ["d2"], "verified": False}
+        _TL_MODULE._invalidate_manifest_cache = lambda: _inv80.append(1)
+        _v80 = _TL_MODULE._journaled_reg_write(
+            "run80", object(), [{"drive_id": "d1", "nlm_status": "pushed", "row_kind": "own"},
+                                 {"drive_id": "d2", "nlm_status": "pushed"}],
+            "nlm_status,row_kind", before_by_key={"d1": {"nlm_status": ""}})
+        _ints80 = [r for _, r in _recs80 if r.get("t") == "intent"]
+        _cmts80 = {r["key"]: r for _, r in _recs80 if r.get("t") == "commit"}
+        cases.append(("r80a_journaled_reg_write_intent_commit",
+                      len(_ints80) == 2 and _ints80[0]["set"] == {"nlm_status": "pushed", "row_kind": "own"}
+                      and _ints80[0].get("before") == {"nlm_status": ""} and "before" not in _ints80[1]
+                      and _cmts80["d1"]["ok"] is True and _cmts80["d2"]["ok"] is False
+                      and len(_inv80) == 1 and _v80.get("verified") is False))
+        # commit ok=False TOÀN BỘ khi reg_ok=False/error (không tin patched)
+        _recs80.clear(); _inv80.clear()
+        _TL_MODULE._verified_reg_write = lambda g, items, cols: {"reg_ok": False, "error": "HTTP", "missed_ids": []}
+        _TL_MODULE._journaled_reg_write("run80b", object(), [{"drive_id": "d3", "nlm_status": "x"}], "nlm_status")
+        cases.append(("r80a_journaled_reg_write_error_all_uncommitted",
+                      all(not r["ok"] for _, r in _recs80 if r.get("t") == "commit")))
+        # _apply_gate: blocker critical chặn; --force-unsafe vượt (in cảnh báo); ok đi tiếp
+        _TL_MODULE._apply_precheck = lambda wc=None: {"ok": False, "blockers": ["REG_DOC_LEGACY"],
+                                                      "checks": [{"ok": False, "severity": "critical", "id": "REG_DOC_LEGACY"}]}
+        _ok80a, _ = _TL_MODULE._apply_gate(argparse.Namespace(force_unsafe=False), stream=False)
+        _ok80b, _ = _TL_MODULE._apply_gate(argparse.Namespace(force_unsafe=True), stream=False)
+        _TL_MODULE._apply_precheck = lambda wc=None: {"ok": True, "blockers": [], "checks": []}
+        _ok80c, _ = _TL_MODULE._apply_gate(argparse.Namespace(force_unsafe=False), stream=False)
+        cases.append(("r80a_apply_gate_block_force_pass", (not _ok80a) and _ok80b and _ok80c))
+        # _reg_before_from_manifest: map drive_id + dịch sohieu qua _entry_sohieu (so_hieu)
+        _TL_MODULE._manifest_entries = lambda refresh=False: [
+            {"drive_id": "d1", "so_hieu": "45-2019-QH14", "nlm_status": "pushed", "name": "X"}]
+        _b80 = _TL_MODULE._reg_before_from_manifest(
+            [{"drive_id": "d1"}, {"drive_id": "dMISS"}], ["sohieu", "nlm_status"])
+        cases.append(("r80a_reg_before_snapshot",
+                      _b80 == {"d1": {"sohieu": "45-2019-QH14", "nlm_status": "pushed"}}))
+    finally:
+        for _k, _v in _sav80.items():
+            setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -1781,3 +1781,279 @@ def cmd_rasoat_chongcheo(a) -> int:
         print(f"  → BƯỚC SO QUY PHẠM (OVERLAP/CONFLICT) nguyên văn 2 phía: `tl overlap {_ov_target} --with-source` "
               f"(trích Điều bị sửa + điều luật sửa; KHÔNG RAG).")
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _base_also_enabled(a=None) -> bool:
+    """A (v1.30.0): chế độ 'profile CỘNG VBQPPL' cho lệnh ĐỌC. Ưu tiên: cờ lệnh --base-also/--no-base-also >
+    env TL_BASE_ALSO (do _apply_profile_env set theo config.profiles.<p>.baseAlso) > TẮT ở profile nền vbqppl."""
+    v = getattr(a, "base_also", None) if a is not None else None
+    if v is not None:
+        return bool(v)
+    if _active_profile() == DEFAULT_PROFILE:
+        return False
+    return (os.environ.get("TL_BASE_ALSO") or "").strip().lower() in ("1", "true", "yes", "on")
+
+def _nlm_display(e: dict) -> str:
+    """Hiển thị NLM STATUS-AWARE (đồng bộ locate ↔ reg-query): '-' không có source; 'removed' có source nhưng đã gỡ;
+    'Y' đang sống. Trước đây locate in nlm=Y dù nlm_status=removed → lệch với reg-query (báo removed)."""
+    if not _entry_nlm(e):
+        return "-"
+    return "removed" if _nlm_status_removed(str(e.get("nlm_status") or "")) else "Y"
+
+def _flag_value(args: list, flag: str):
+    """Lấy giá trị đi sau cờ `flag` trong list args (hỗ trợ `--flag val` và `--flag=val`). None nếu không có."""
+    for i, x in enumerate(args):
+        if x == flag and i + 1 < len(args):
+            return args[i + 1]
+        if x.startswith(flag + "="):
+            return x.split("=", 1)[1]
+    return None
+
+def _read_verify_text(a) -> tuple[str, str]:
+    text_file = getattr(a, "text_file", None)
+    gdoc = getattr(a, "gdoc_id", None)
+    sohieu = getattr(a, "sohieu", None)
+    # vbhn positional-compat (tương thích runbook cũ): `tl vbhn-verify "<text-file|gdoc-id|số hiệu>"` → tự định tuyến.
+    target = getattr(a, "target", None)
+    if target and not (text_file or gdoc or sohieu):
+        tp = Path(target)
+        if tp.exists():
+            text_file = str(tp)
+        elif re.fullmatch(r"[A-Za-z0-9_\-]{20,}", target):
+            gdoc = target
+        else:
+            sohieu = target
+    if text_file:
+        p = Path(text_file)
+        return p.read_text(encoding="utf-8", errors="replace"), str(p)
+    if not gdoc and sohieu:
+        canon, _hits = _canonical_for_query(sohieu, refresh=getattr(a, "refresh", False))
+        if canon:
+            gdoc = _entry_drive_id(canon)
+    if not gdoc:
+        raise RuntimeError("cần --text-file hoặc --gdoc-id hoặc --sohieu resolve được")
+    load_creds(getattr(a, "config", None))
+    # A1 (v1.33.10 — log: xref/vbhn-verify chết 'thiếu scope script.external_request' TRONG KHI direct-media gws
+    # đang SỐNG): đường đọc phải GWS-FIRST như extract/corpus-audit — _read_doc_text = cache → direct-media →
+    # transport → exporttext CUỐI CÙNG; không gọi thẳng exporttext nữa.
+    _txt = _read_doc_text(gdoc, getattr(a, "config", None))
+    if not (_txt or "").strip():
+        raise RuntimeError("đọc nguyên văn thất bại MỌI đường (cache/direct-media/gws/exporttext) — kiểm `tl gws-ping`; "
+                           "webapp exporttext chỉ sống khi có scope script.external_request (fallback cuối).")
+    return _txt, gdoc
+
+def _norm_compare_text(s: str) -> str:
+    s = unicodedata.normalize("NFC", s or "")
+    s = re.sub(r"[ \t\r\f\v]+", " ", s)
+    s = re.sub(r"\s*\n\s*", "\n", s)
+    return s.strip()
+
+def _legal_refs(text: str) -> list[str]:
+    """Rút các tham chiếu kiểu 'khoản 1 Điều 90' để bắt stale-ref trong bản tự ghép."""
+    out = []
+    for m in re.finditer(r"(?iu)\b(?:khoản\s+\d+\s+)?Điều\s+\d+\b", text or ""):
+        ref = re.sub(r"\s+", " ", m.group(0).strip())
+        if ref not in out:
+            out.append(ref)
+    return out
+
+def _date_from_effect_match(m) -> str | None:
+    if not m:
+        return None
+    return f"{int(m.group(3)):04d}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+
+def _multi_diem(target_clause: str, single):
+    """footnote_multidiem: _POS_RE chỉ bắt 1 điểm (sát khoản) → "điểm c VÀ điểm d khoản 2 Điều 30" rơi mất "c".
+    Bắt CẢ DÃY điểm đích → trả "c và d"; không phải dãy → giữ `single` (1 điểm) như cũ."""
+    if not target_clause:
+        return single
+    s = _strip_accents(target_clause).lower()
+    m = _DIEMLIST_RE.search(s)
+    if m:
+        items, seen = re.findall(r"\b([a-z]{1,3}\d?)\b", m.group(1)), []
+        for x in items:
+            if x not in ("va",) and x not in seen:
+                seen.append(x)
+        if len(seen) >= 2:
+            return " và ".join(seen)
+    return single
+
+def _raw_no_gdoc(name: str = "", api_resp=None) -> bool:
+    """P1: nhận diện 'entry THÔ chưa có bản GDoc' — theo đuôi tên HOẶC lỗi API 'Export only supports Docs Editors files'."""
+    if _is_raw_no_gdoc_name(name):
+        return True
+    s = (json.dumps(api_resp, ensure_ascii=False).lower() if api_resp is not None else "")
+    return "export only" in s or "docs editors" in s
+
+def _emit_raw_no_gdoc(name: str, as_json: bool) -> int:
+    """ENTRY_RAW_NO_GDOC → rc=2 (TIỀN ĐIỀU KIỆN đọc sâu CHƯA ĐẠT: entry thô, không export GDoc được) + STDOUT rõ.
+    HỢP NHẤT P0-1: trước (bản Claude) rc=0 → caller agentic hiểu nhầm 'thành công, 0 dẫn chiếu' → bỏ sót luật;
+    nay rc=2 + ok:false (đúng yêu cầu báo cáo 'chỉ-raw → rc≠0 + thông điệp stdout'). Resolver đã ưu tiên GDoc trước
+    nên path này CHỈ chạy khi GENUINE raw-only (không có bản GDoc) → rc≠0 hợp lý, KHÔNG phá batch sai."""
+    note = (f"ENTRY_RAW_NO_GDOC: '{(name or '?')[:60]}' là file THÔ (chưa có bản GDoc Google-native) → "
+            f"`tl ingest-local`/convert sang GDoc trước khi rà sâu (xref/footnote-map/extract).")
+    if as_json:
+        print(json.dumps({"ok": False, "error": "ENTRY_RAW_NO_GDOC", "note": note}, ensure_ascii=False))
+    else:
+        print(f"[tl] {note}")
+    return 2
+
+def _read_doc_text(gdoc_id: str, config=None):
+    """Đọc nguyên văn GDoc → text. THỨ TỰ: (B1) direct-media EXPORT text/plain bằng gws CRED (KHÔNG cần binary gws —
+    chỉ cần ~/.config/gws/credentials.json → né GAS, hết spam FALLBACK) → transport→gws (binary) → webapp exporttext.
+    Trả str (rỗng nếu lỗi mọi đường). v1.31.2: mọi nhánh qua _sanitize_export_text (U1)."""
+    # (D — log rà: timeout văn bản lớn) TÁI DÙNG cache text mà cmd_extract/cmd_cache_build đã ghi ra đĩa
+    # (extract_<gdoc>.txt) TRƯỚC khi export lại → xref/footnote-map trên cùng văn bản (vd Bộ luật Dân sự)
+    # không phải export lần 2 (hết timeout > 20s). Chỉ dùng khi cache CÓ + đọc được.
+    try:
+        _cf = _cache_file(f"extract_{gdoc_id}.txt")
+        if _cf.exists():
+            _ct = _cf.read_text(encoding="utf-8", errors="replace")
+            if _ct.strip():
+                return _sanitize_export_text(_strip_font_runs(_ct))
+    except Exception:
+        pass
+    # (1) direct-media export bằng cred — cred-only đủ, không cần `gws-bootstrap-cowork`/binary.
+    # v1.33.0 (log rà 69 A3): cred đã chết auth (invalid_grant) 1 lần trong phiên → SKIP thẳng (circuit-breaker),
+    # không retry-fail per-doc (~2-20s/doc × 69 làm batch vượt timeout shell).
+    try:
+        _tlg = _imp("tl_gws")
+        _cred = _tlg._read_gws_cred()
+        if _cred and not getattr(_tlg, "_CRED_AUTH_DEAD", False):
+            with tempfile.TemporaryDirectory() as _d:
+                _dst = os.path.join(_d, "doc.txt")
+                _tlg._drive_media_download(gdoc_id, _dst, _cred, export_mime="text/plain")
+                _txt = open(_dst, encoding="utf-8", errors="replace").read()
+                if _txt.strip():
+                    return _sanitize_export_text(_strip_font_runs(_txt))
+    except Exception:
+        pass
+    # (2) transport→gws binary; (3) webapp exporttext (GAS).
+    try:
+        rr = _imp("transport").drive_op("read", file_id=gdoc_id, limit=2_000_000)
+        if isinstance(rr, dict) and rr.get("ok") and rr.get("text") is not None:
+            return _sanitize_export_text(_strip_font_runs(rr.get("text", "")))
+    except Exception:
+        pass
+    r = _gas().get("exporttext", fileId=gdoc_id)
+    return _sanitize_export_text(_strip_font_runs(r.get("text", ""))) if r.get("ok") is not False else ""
+
+def _cluster_lookup(q: str) -> dict:
+    """E2: 'pháp luật về X' / tên lĩnh vực → {sohieu canonical, cluster, base}. Khớp token chứa nhau."""
+    qn = _strip_accents(q or "").lower()
+    qn = re.sub(r"\b(phap luat ve|phap luat|bo luat|luat)\b", " ", qn)
+    qn = re.sub(r"\s+", " ", qn).strip()
+    hits, seen = [], set()
+    def _add(subject, sh, c, cname):
+        key = (cname, sh)
+        if sh and key not in seen:
+            seen.add(key)
+            hits.append({"subject": subject, "sohieu": sh, "cluster": cname,
+                         "base": c.get("base"), "base_name": c.get("base_name")})
+    for cname, c in (_load_subject_clusters().get("clusters") or {}).items():
+        # B7: khớp TÊN CỤM / base_name → trả BASE (canonical VBHN). Vd "lao động" → lao_dong_xa_hoi → 18/VBHN-VPQH.
+        cn = _strip_accents(cname.replace("_", " ")).lower()
+        bn = _strip_accents(c.get("base_name") or "").lower()
+        if qn and (qn in cn or cn in qn or (bn and (qn in bn or bn in qn))):
+            _add(c.get("base_name") or cname, c.get("base"), c, cname)
+        for subj, sh in (c.get("members") or {}).items():
+            sjn = _strip_accents(subj).lower()
+            if sjn and qn and (sjn in qn or qn in sjn):
+                _add(subj, sh, c, cname)
+    return {"query": q, "matches": hits}
+
+def _cluster_for_base(base_sh: str):
+    bn = norm_sohieu(base_sh or "").replace("/", "-")
+    if not bn:
+        return None, None
+    clusters = (_load_subject_clusters().get("clusters") or {})
+    for cname, c in clusters.items():
+        keys = [c.get("base", "")] + list(c.get("base_aliases") or [])   # khớp cả Luật GỐC (vd 45/2019→cụm BLLĐ)
+        if any(x and norm_sohieu(x).replace("/", "-") == bn for x in keys):
+            return cname, c
+    # A4: reverse-map qua THÀNH VIÊN cụm — input là số hiệu VBHN/thành viên (vd 19/VBHN-VPQH) cũng tìm ra cụm
+    # (trước đây chỉ khớp base=Luật gốc → truyền số hiệu VBHN vào rasoat-chongcheo trả cụm=∅ dù cluster-theo-tên đúng).
+    for cname, c in clusters.items():
+        for sh in (c.get("members") or {}).values():
+            if sh and norm_sohieu(sh).replace("/", "-") == bn:
+                return cname, c
+    return None, None
+
+def _resolve_cluster_member(sh: str, subj: str, entries: list[dict]) -> dict:
+    """Resolve số hiệu thành viên cụm → entry CỤ THỂ. Khi số hiệu TRÙNG (vd 14/VBHN-VPQH dùng cho CẢ ATVSLĐ
+    lẫn NLĐ-đi-nước-ngoài): ưu tiên TÊN khớp chủ đề (subj) > còn-hiệu-lực > là VBHN > năm mới. GIỮ VBHN-first
+    (chọn ĐÚNG bản hợp nhất của chủ đề, không tụt về Luật gốc)."""
+    k = norm_sohieu(sh)
+    cands = [e for e in entries if norm_sohieu(_entry_sohieu(e)) == k]
+    if not cands:
+        return {"in_corpus": False, "ambiguous": False}
+
+    def _alive(e) -> int:
+        hl = _strip_accents(str(e.get("hieuluc") or e.get("hieu_luc") or "")).lower()
+        return 1 if ("hieu luc" in hl and "het" not in hl and "khong" not in hl) else 0
+
+    def _yr(e) -> int:
+        ys = [int(y) for y in _entry_years(e) if str(y).isdigit()]
+        return max(ys) if ys else (_sohieu_year(_entry_sohieu(e)) or 0)
+
+    subj_toks = _token_set(_strip_accents(subj or "").lower())
+    best = max(cands, key=lambda e: (len(subj_toks & _token_set(_strip_accents(_entry_name(e)).lower())),
+                                     _alive(e), 1 if _is_vbhn_entry(e) else 0, _yr(e)))
+    # ambiguous CHỈ khi số hiệu trỏ ≥2 VĂN BẢN KHÁC NHAU thật (name-key khác nhau) — KHÔNG tính bản quarantine
+    # hay bản trùng-lặp cùng tên (vd canonical + bản NLM/Drive cùng văn bản). Tránh nhãn nhiễu cho mọi thành viên.
+    live = [e for e in cands if not _is_quarantine_cat(_entry_cat(e))] or cands
+    distinct = {_name_key(_entry_name(e)) for e in live}
+    return {"in_corpus": True, "name": _entry_name(best), "drive_id": _entry_drive_id(best),
+            "hieuluc": best.get("hieuluc") or best.get("hieu_luc") or "",
+            "ambiguous": len(distinct) > 1, "n_candidates": len(cands)}
+
+def _omnibus_cross_domain_note(amending_sh: str, base_subject: str, entries: list[dict]) -> str | None:
+    """#11: luật SỬA (amending_sh) có trong corpus nhưng TÊN/chủ đề khác hẳn base → nhiều khả năng là LUẬT SỬA-NHIỀU-LUẬT
+    (omnibus, vd 84/2025 Luật Thanh tra sửa cả Luật BHXH). Trả note cảnh báo để KHÔNG hiểu nhầm là lỗi tên/đối chiếu;
+    PHẢI đọc nguyên văn điều khoản sửa. None nếu cùng chủ đề (sửa-trong-lĩnh-vực bình thường) hoặc không có trong corpus."""
+    if not amending_sh or not base_subject:
+        return None
+    k = norm_sohieu(amending_sh).replace("/", "-")
+    hits = [e for e in entries if _sohieu_key_entry(e) == k]
+    if not hits:
+        return None                       # chưa có trong corpus → đã có cảnh báo khác (missing/QT-5)
+    e = hits[0]
+    # B3 (false-positive): CHỈ kết luận omnibus khi luật sửa CÓ chủ đề RÕ và KHÁC base. Tên số TRƠ
+    # ("51_2024_QH15_505750", "46_2014_QH13_238506") → _subject_tokens RỖNG → sscore 0 KHÔNG phải vì khác lĩnh vực
+    # mà vì THIẾU metadata → ĐỪNG gắn omnibus (51/2024, 46/2014 thực ra là luật sửa BHYT chuyên đề).
+    e_subj_tokens = _subject_tokens(_entry_subject_text(e))
+    if len(e_subj_tokens) < 2:
+        return None                            # chủ đề luật sửa KHÔNG RÕ → không kết luận cross-domain
+    if _subject_score(e, base_subject) < 30:   # CÓ chủ đề rõ NHƯNG khác lĩnh vực base → omnibus thật
+        return (f"OMNIBUS_CROSS_DOMAIN: luật sửa {amending_sh} trong corpus = '{_entry_name(e)[:48]}' — TÊN CHÍNH khác "
+                f"lĩnh vực base; nhiều khả năng là LUẬT SỬA-NHIỀU-LUẬT (sửa base trong số nhiều luật). ĐỪNG coi là lỗi "
+                f"tên/đối chiếu; ĐỌC NGUYÊN VĂN điều khoản sửa để xác nhận quan hệ.")
+    return None
+
+def _resolve_base_gdoc(base: str, entries: list[dict]):
+    """Resolve `base` (số hiệu|tên) → (entry canonical VBHN-first, gdoc_id, subject_text). Cho auto-footnote: đọc
+    nguyên văn VBHN base để chạy footnote-map mà KHÔNG cần truyền --target tay. (entry, gid, subject) hoặc (None,'','')."""
+    if not base:
+        return None, "", ""
+    item = _source_map_one(base, entries)
+    can = None
+    pool_ids = [c.get("drive_id") for c in [item.get("canonical")] if c]
+    if pool_ids and pool_ids[0]:
+        can = next((e for e in entries if _entry_drive_id(e) == pool_ids[0]), None)
+    if can is None:                       # fallback: khớp số hiệu trực tiếp, ưu tiên VBHN
+        k = norm_sohieu(base).replace("/", "-")
+        cands = [e for e in entries if _sohieu_key_entry(e) == k]
+        cands.sort(key=_entry_score, reverse=True)
+        can = cands[0] if cands else None
+    # C (log rà #70): entry có sohieu RỖNG nhưng corpus=true + có drive_id → fallback khớp trực tiếp theo
+    # tên/drive_id (thay vì 404/File-not-found). Đọc sâu vẫn chạy được dù registry chưa backfill số hiệu.
+    if can is None:
+        for e in entries:
+            if _entry_corpus_true(e) and _entry_drive_id(e) and base in (_entry_name(e), _entry_sohieu(e), _entry_drive_id(e)):
+                can = e
+                break
+    if can is None:
+        return None, "", ""
+    return can, (_entry_drive_id(can) or ""), _entry_name(can)

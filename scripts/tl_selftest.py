@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py", "tl_core/classify.py", "tl_core/profile_env.py", "tl_core/resolve.py", "tl_core/regio.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py", "tl_core/classify.py", "tl_core/profile_env.py", "tl_core/resolve.py", "tl_core/regio.py", "tl_core/cli.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")

@@ -1,3 +1,16 @@
+# ★ v1.34.18 — I11: VƯỢT ĐÍCH 2.500 — tl.py 3.576→1.394 dòng (−93% từ 19.052) (2026-07-10)
+
+- **(a) LEFTOVER-SWEEP**: 91 def ~1.5k dòng (hụt ngưỡng affinity 50% hồi I9) gán vào 14 module theo
+  **affinity-tốt-nhất ≥1-ref**; 10 def 0-affinity ở lại. **(b) `build_parser` 391d → `tl_core/cli.py`**
+  NGUYÊN VĂN (35 block tay + doctrine-comment giữ tại chỗ) — **parser-surface KHỚP KHÔNG REGEN** = bằng chứng
+  tương đương byte. **(c) 5 bảng hằng lớn** → module dùng nhiều nhất + re-export 1 dòng (hàm rebase đọc globals tl).
+- ★ 2 bẫy mới ghi sổ: (1) **hằng DẪN XUẤT top-level** (`_ABBREV_RE` compile từ `_ABBREV_MAP` lúc import,
+  TRƯỚC khối import tl_core) → dẫn xuất phải sống CÙNG FILE với map gốc; (2) sweep chuyển nhầm `_json_dumps`
+  (wrapper lõi jsonio đọc mutable-global `_DETERMINISTIC_ON`) vào ocr.py — **r61 chặn đúng thiết kế** →
+  trả về tl, bổ sung PLUMB-list máy cắt.
+- tl.py còn lại = plumbing/self-heal + spec-call + `_STUB_MAP` + re-export + `main` — đúng hình hài
+  "tl = facade mỏng" mà chuỗi I nhắm tới. Selftest **729/729**; golden 18/18; audit strict xanh.
+
 # ★ v1.34.17 — BACKLOG #4-#8 từ log phiên hồ sơ Luật BHXH (TDD) (2026-07-10)
 
 - **(#4) `nlm-add` tự nhận Google Sheet**: `--type` default None; `_nlm_add_doc_type` tra MIME manifest OFFLINE

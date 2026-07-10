@@ -847,3 +847,59 @@ def cmd_golden_test(a) -> int:
     out = _golden_test(write=bool(getattr(a, "write", False)))
     _print_json_or_text(out, getattr(a, "json", False))
     return 0 if out.get("ok") else 2
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _idempotency_contract_for_workflow(wf_id: str) -> dict:
+    key = wf_id
+    if wf_id == "chunk_ingest":
+        key = "profile_ingest_chunks"
+    if wf_id == "ocr_ingest":
+        key = "ocr_ingest"
+    if wf_id == "ingest_zip":
+        key = "ingest_zip"
+    return dict(_IDEMPOTENCY_CONTRACTS.get(key, {}))
+
+def _available_commands_from_parser() -> list[str]:
+    try:
+        ap = build_parser()
+        for act in ap._actions:
+            if isinstance(act, argparse._SubParsersAction):
+                return sorted(act.choices.keys())
+    except Exception:
+        pass
+    return []
+
+def _script_docstrings(limit: int = 200) -> list[dict]:
+    out = []
+    for sp in sorted(HERE.glob("*.py"))[:limit]:
+        try:
+            txt = sp.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r'^[uUrRfFbB]*(?:"""|\'\'\')(.*?)(?:"""|\'\'\')', txt, re.S)
+            doc = " ".join((m.group(1).strip().splitlines()[:2] if m else []))
+        except Exception as e:
+            doc = f"ERROR_READING:{type(e).__name__}"
+        out.append({"script": sp.name, "doc": doc[:240]})
+    return out
+
+def _unique_preserve_order(items) -> list[str]:
+    seen = set()
+    out = []
+    for item in items or []:
+        s = str(item)
+        if s in seen:
+            continue
+        seen.add(s)
+        out.append(s)
+    return out
+
+def _first_text_diff(expected: str, actual: str) -> dict:
+    exp_lines = expected.splitlines()
+    act_lines = actual.splitlines()
+    for idx, (e, a) in enumerate(zip(exp_lines, act_lines), 1):
+        if e != a:
+            return {"line": idx, "expected": e[:240], "actual": a[:240]}
+    if len(exp_lines) != len(act_lines):
+        return {"line": min(len(exp_lines), len(act_lines)) + 1, "expected": "<EOF>" if len(exp_lines) < len(act_lines) else exp_lines[-1][:240], "actual": "<EOF>" if len(act_lines) < len(exp_lines) else act_lines[-1][:240]}
+    return {}

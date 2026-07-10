@@ -2120,3 +2120,552 @@ def cmd_review_queue(a) -> int:
         print(f"  ⏸ PAUSE: {', '.join(x['sohieu'] for x in rep['pause'][:10])}")
     print("  → web LƯỢT-2 (Chrome official-first) chốt VBHN mới nhất; ★ = HIGH_VELOCITY làm trước. --json để lấy đủ qt5_queries.")
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _is_quarantine_cat(cat: str) -> bool:
+    """A1: nhận diện cat cách ly/loại bỏ (MỌI biến thể: code 'QUARANTINE', folder `_ZZZ_QUARANTINE_taluat`) →
+    KHÔNG cho thắng canonical + audit hội tụ bất kể nhãn."""
+    c = _strip_accents(str(cat or "")).lower()
+    return ("quarantine" in c) or ("zzz" in c)
+
+def _is_quarantine_label_variant(cat: str) -> bool:
+    """A2: dòng ĐÃ quarantine nhưng nhãn KHÁC chuẩn QUARANTINE_CAT (vd code 'QUARANTINE' trơ) → nên chuẩn hoá."""
+    c = str(cat or "").strip()
+    return _is_quarantine_cat(c) and c != QUARANTINE_CAT
+
+def _reconcile_clusters(entries: list[dict]) -> list[dict]:
+    """Gộp cụm registry theo khóa an toàn HOẶC md5.
+
+    VBHN không gom theo số hiệu trần vì VPQH có thể tái sử dụng cùng số ở năm/chủ đề khác nhau.
+    Đây là lớp bù cho vb_status vốn dedup theo số hiệu và bỏ lọt orphan `sohieu=''`."""
+    entries = [e for e in entries if _entry_row_kind(e) != "ref" and not _entry_is_own_thuong(e)]
+    n = len(entries)
+    parent = list(range(n))
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(x, y):
+        rx, ry = find(x), find(y)
+        if rx != ry:
+            parent[ry] = rx
+    for key_fn in (lambda e: _dedupe_key_entry(e), _entry_md5):
+        buckets: dict[str, list[int]] = {}
+        for i, e in enumerate(entries):
+            k = key_fn(e)
+            if k:
+                buckets.setdefault(k, []).append(i)
+        for idxs in buckets.values():
+            for j in idxs[1:]:
+                union(idxs[0], j)
+    groups: dict[int, list[dict]] = {}
+    for i, e in enumerate(entries):
+        groups.setdefault(find(i), []).append(e)
+    clusters = []
+    for group in groups.values():
+        # Cụm đáng quan tâm: có hơn 1 dòng, hoặc có orphan/root/số hiệu rỗng/tên thô.
+        # Nhưng tuyệt đối KHÔNG suy luận số hiệu/quarantine từ tài liệu làm việc kiểu Mẫu_/PL_:
+        # đây là số thứ tự biểu mẫu/phụ lục, không phải số hiệu VBQPPL.
+        if all(_name_is_template_or_appendix(_entry_name(e)) for e in group):
+            continue
+        def rawish(e):
+            return (not _name_is_template_or_appendix(_entry_name(e))) and bool(re.search(r"(^|[/_ -])\d{2,4}[_-]\d{4}[_-]", _entry_name(e)))
+        def orphanish(e):
+            return (not _name_is_template_or_appendix(_entry_name(e))) and ((not _entry_sohieu(e)) or _bad_cat(_entry_cat(e)) or (rawish(e) and not _entry_nlm(e) and not _is_source_sidecar(e, group)))
+        flagged = len(group) > 1 or any(orphanish(e) for e in group)
+        if not flagged:
+            continue
+        # Canonical = điểm cao nhất, nhưng ưu tiên có số hiệu + cat không root.
+        ordered = sorted(group, key=_entry_score, reverse=True)
+        canonical = ordered[0] if ordered else None
+
+        # 2026-06: chỉ đề xuất QUARANTINE bản THỰC SỰ trùng văn bản với canonical (cùng chữ ký chủ đề,
+        # hoặc một bên là tên thô/coded). Khác-cơ-quan (TT-BNV vs TT-BYT) hay phụ-lục-vs-chính (cùng số hiệu,
+        # chủ đề khác) → GIỮ cả hai (cụm vẫn hiện để rà tay, nhưng không tự xếp quarantine).
+        def _cluster_same_doc(e):
+            if not _entry_drive_id(e) or _is_source_sidecar(e, group, canonical):
+                return False
+            cs = _subject_sig(_entry_name(canonical)) if canonical else ""
+            es = _subject_sig(_entry_name(e))
+            return (not es) or (not cs) or (es == cs) or (es in cs) or (cs in es)
+        quarantine = [e for e in ordered[1:] if _cluster_same_doc(e)]
+        # Nếu cụm chỉ có 1 orphan không canonical rõ, vẫn đưa vào candidates để rà tay/quarantine.
+        if len(group) == 1 and orphanish(group[0]):
+            canonical = None
+            quarantine = [group[0]] if _entry_drive_id(group[0]) else []
+        key = _dedupe_key_entry(canonical or group[0]) or _sohieu_key_entry(canonical or group[0]) or _name_key(_entry_name(canonical or group[0]))
+        clusters.append({"key": key, "canonical": canonical, "entries": group, "quarantine": quarantine,
+                         "sidecars": [e for e in group if _is_source_sidecar(e, group, canonical)]})
+    clusters.sort(key=lambda c: (0 if c.get("canonical") else 1, c.get("key") or ""))
+    return clusters
+
+def _cluster_matches(c: dict, q: str) -> bool:
+    if not q:
+        return True
+    for e in c.get("entries") or []:
+        if _entry_query_match_safe_for_hygiene(q, e):
+            return True
+    return False
+
+def _select_hygiene_clusters(clusters: list[dict], q: str) -> tuple[list[dict], list[dict]]:
+    """Chọn cụm cho plan/apply.
+
+    Cụm thiếu canonical chỉ được báo ở `skipped_clusters`, không đưa vào tập có thể apply.
+    Như vậy consumer JSON không còn gặp object apply với `canonical: null`.
+    """
+    raw = [c for c in clusters if _cluster_matches(c, q)]
+    selected = [c for c in raw if c.get("canonical")]
+    skipped = []
+    for c in raw:
+        if c.get("canonical"):
+            continue
+        cc = dict(c)
+        cc["skip_reason"] = "MISSING_CANONICAL_REVIEW_ONLY"
+        skipped.append(cc)
+    return selected, skipped
+
+def _sohieu_dup_group_real(group: list[dict]) -> bool:
+    """C4 (v1.33.0 — log rà 15 Luật: sweep by_sohieu=93 'trùng' nhưng chỉ 4 cụm có ≥2 bản corpus=true và CẢ 4 là
+    tách Phụ lục/Final CỐ Ý; 49 cụm còn lại là cặp gốc+VBHN/quarantine LÀNH — headline 93 = báo động giả, trái
+    doctrine 'không gom VBHN theo số hiệu trần' v1.17.9/15): cụm trùng THẬT = ≥2 bản corpus=true CÙNG PHÍA
+    (≥2 VBHN hoặc ≥2 non-VBHN) sau khi loại sidecar/quarantine/template/phụ-lục. Cặp gốc+VBHN cùng số (row VBHN
+    chỉ mục theo số bản gốc) là quan hệ HỢP LỆ, không phải trùng."""
+    core = []
+    for e in group:
+        if not _entry_corpus_true(e) or _entry_quarantined(e):
+            continue
+        nm = _entry_name(e)
+        if _name_is_template_or_appendix(nm) or _is_source_sidecar(e, group):
+            continue
+        if "phuluc" in re.sub(r"[\s_-]", "", _ascii_lower(nm)):
+            continue                       # phụ lục tách riêng cố ý (PhuLuc/Phu_luc/phu-luc — cả dạng nén)
+        core.append(e)
+    if len(core) < 2:
+        return False
+    n_vbhn = sum(1 for e in core if _is_vbhn_entry(e))
+    return n_vbhn >= 2 or (len(core) - n_vbhn) >= 2
+
+def _print_reconcile(clusters: list[dict]) -> None:
+    print(f"== tl reconcile — cụm vấn đề: {len(clusters)} | ứng viên QUARANTINE: {sum(len(c['quarantine']) for c in clusters)} ==\n")
+    for c in clusters:
+        canon = c.get("canonical")
+        print(f"▸ cụm '{c.get('key') or '∅'}' ({len(c.get('entries') or [])} bản)")
+        if canon:
+            s = _summ_entry(canon)
+            print(f"    GIỮ: {s['name'][:70]} | cat={s['cat']} | sohieu={s['sohieu'] or '∅'} | id={s['drive_id']}")
+        else:
+            print("    ⚠ KHÔNG có canonical rõ — rà tay trước khi move.")
+        for e in c.get("quarantine") or []:
+            s = _summ_entry(e)
+            print(f"    → QUARANTINE? {s['name'][:70]} | cat={s['cat'] or '(root)'} | sohieu={s['sohieu'] or '∅'} | id={s['drive_id']}")
+    print("\n[tl] DRY-RUN — KHÔNG trash. Dùng hygiene plan/reconcile --apply --confirm yes sau khi duyệt.")
+
+def _apply_quarantine(entries: list[dict], to_cat: str = "QUARANTINE") -> list[dict]:
+    g = _gas(); results = []
+    dest = to_cat or "QUARANTINE"
+    for e in entries:
+        did = _entry_drive_id(e)
+        if did:
+            results.append({"drive_id": did, "name": _entry_name(e), "to_cat": dest, "move": g.get("move", fileId=did, cat=dest)})
+    return results
+
+def _resolve_headerverify_targets(a, entries: list[dict]) -> list[dict]:
+    """G2: target cho header-verify. --drive-id(1) / --sohieu(canonical) / --cat NN(corpus) / --all(mọi corpus).
+    KHÁC confirm: KHÔNG lọc 'chưa-confirm' (audit lại CẢ bản đã confirm để bắt DRIFT). Batch giới hạn --limit."""
+    did = getattr(a, "drive_id", None)
+    if did:
+        return [e for e in entries if _entry_drive_id(e) == did]
+    shf = getattr(a, "sohieu_file", None)
+    if shf:
+        # B3 (v1.33.0 — log rà 69: vòng `corpus-audit --sohieu X` ×69 PROCESS RỜI = 69 lần boot + retry gws
+        # per-doc, dễ vượt timeout shell): cả lô trong 1 PROCESS. Mỗi dòng 1 số hiệu, '#' comment; resolve
+        # canonical như --sohieu, dedup theo drive_id; dòng không resolve được báo LOUD (không nuốt câm).
+        try:
+            _lines = Path(shf).read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError as _ex:
+            print(f"[targets] --sohieu-file không đọc được: {_ex}", file=sys.stderr)
+            return []
+        out, seen = [], set()
+        for _ln in _lines:
+            q = _ln.split("#", 1)[0].strip()
+            if not q:
+                continue
+            canon, _hits = _canonical_for_query(q, refresh=False)
+            if canon is None:
+                print(f"[targets] ⚠ --sohieu-file: không resolve được '{q}' — bỏ qua (kiểm chính tả/`tl locate`).",
+                      file=sys.stderr)
+                continue
+            _cd = _entry_drive_id(canon)
+            if _cd and _cd not in seen:
+                seen.add(_cd); out.append(canon)
+        try:
+            a._targets_pool_total = len(out)
+        except Exception:  # noqa: BLE001
+            pass
+        # A6 (v1.33.2 — log rà 111: --limit bị BỎ QUA IM LẶNG ở nhánh --sohieu-file): mặc định (không --limit)
+        # = CẢ LÔ (đúng thiết kế 1-process + checkpoint --resume); truyền --limit/--offset → cắt LOUD như --all.
+        _off = max(0, int(getattr(a, "offset", None) or 0))
+        _lim = getattr(a, "limit", None)
+        if _off or _lim:
+            _end = min(_off + _lim, len(out)) if _lim else len(out)
+            print(f"[targets] ⚠ CẮT BATCH --sohieu-file: {_off}..{_end}/{len(out)}"
+                  + (f" — trang kế: --offset {_end}." if _end < len(out) else ".")
+                  + " (Bỏ --limit/--offset để chạy CẢ LÔ + --resume.)", file=sys.stderr, flush=True)
+            out = out[_off:_end]
+        return out
+    sh = getattr(a, "sohieu", None)
+    if sh:
+        canon, _hits = _canonical_for_query(sh, refresh=getattr(a, "refresh", False))
+        return [canon] if canon else []
+    cat = getattr(a, "cat", None)
+    if cat or getattr(a, "all", False):
+        cc = re.sub(r"\D", "", str(cat))[:2] if cat else ""
+        pool = [e for e in entries if _entry_drive_id(e) and str(e.get("corpus") or "").lower() != "false"
+                and not _entry_quarantined(e) and (not cc or re.sub(r"\D", "", str(_entry_cat(e)))[:2] == cc)]
+        # v1.29.4 (log LIVE i1): --offset PHÂN TRANG — trước đây mỗi lần gọi quét lại TỪ ĐẦU nên limit lớn (cat 45,
+        # limit 30-40) chạy quá dài → client-timeout giết = "treo im lặng". Nay: chạy lô nhỏ + --offset tiếp trang.
+        _off = max(0, int(getattr(a, "offset", None) or 0))
+        # A6 v1.33.2: corpus-audit --limit nay default=None (phân biệt explicit cho --sohieu-file) → fallback 40
+        # ở đây giữ NGUYÊN hành vi --all/--cat cũ (header-verify vẫn truyền default 20 tường minh của nó).
+        _lim = getattr(a, "limit", None) or 40
+        # v1.29.6 (log 118 Luật — P1: `--all` bị cap ÂM THẦM ở limit mặc định → scanned=40/515, 0 proposal → tưởng
+        # corpus SẠCH giả). KHÔNG bỏ cap (515 lần đọc-header = ~25' sẽ lại client-timeout như i1) — nhưng phải LOUD.
+        if len(pool) > _off + _lim:
+            print(f"[targets] ⚠ CẮT BATCH: quét {_off}..{min(_off + _lim, len(pool))}/{len(pool)} target "
+                  f"(limit={_lim}). CHƯA PHỦ HẾT — trang kế: --offset {_off + _lim} --limit {_lim}. "
+                  f"KHÔNG kết luận 'corpus sạch' khi chưa quét đủ.", file=sys.stderr, flush=True)
+        try:
+            a._targets_pool_total = len(pool)     # cho caller (corpus-audit) in pool_total/next_offset vào JSON
+        except Exception:
+            pass
+        return pool[_off: _off + _lim]
+    return []
+
+def _emit_json_payload(obj, out_path: str | None = None) -> None:
+    """Emit JSON consistently; --out writes atomically so Cowork scripts can parse a file instead of long stdout/heredoc."""
+    txt = _json_dumps(obj)   # v1.33.56 (review regression/F4): tôn trọng TL_DETERMINISTIC/--deterministic (mặc định OFF → output y cũ)
+    if out_path:
+        target = Path(out_path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _fd, _tmp = tempfile.mkstemp(prefix=target.name + ".", suffix=".tmp", dir=str(target.parent))
+        with os.fdopen(_fd, "w", encoding="utf-8", errors="replace", newline="\n") as _f:   # v1.33.56 (F7)
+            _f.write(txt + "\n")
+        os.replace(_tmp, str(target))
+        print(str(target))
+    else:
+        print(txt)
+
+def _hieuluc_from_header_text(text: str, today: str | None = None, infer_from_date: bool = False) -> tuple[str, str]:
+    """Bóc trạng thái hiệu lực từ header/text đã export. Mặc định chỉ tin nhãn trạng thái rõ; date-only cần opt-in."""
+    import datetime as _dt
+    today = today or _dt.date.today().isoformat()
+    head = unicodedata.normalize("NFC", text or "")
+    head = "\n".join(head.splitlines()[:160])
+    plain = _strip_accents(head).lower()
+    status = ""
+    if re.search(r"\b(khong\s+con\s+hieu\s+luc|het\s+hieu\s+luc|ngung\s+hieu\s+luc|da\s+het\s+hieu\s+luc)\b", plain):
+        status = "Hết hiệu lực"
+    elif re.search(r"\b(chua\s+co\s+hieu\s+luc|chua\s+hieu\s+luc|chua\s+den\s+hieu\s+luc)\b", plain):
+        status = "Chưa có hiệu lực"
+    elif re.search(r"\b(con\s+hieu\s+luc|dang\s+co\s+hieu\s+luc)\b", plain):
+        status = "Còn hiệu lực"
+    iso = _date_from_effect_match(_HL_DATE_RE.search(head)) or _date_from_effect_match(_HL_DATE_VN_RE.search(head))
+    if not iso:
+        body_dates = resolve_body_effective_dates(head, today=today)
+        iso = (body_dates[0].get("hieu_luc") if body_dates else None)
+    if status:
+        ds = _hieuluc_date_display(iso)
+        return (f"{status}; hiệu lực từ {ds}" if ds else status), ""
+    if infer_from_date and iso:
+        ds = _hieuluc_date_display(iso)
+        status = "Chưa có hiệu lực" if iso > today else "Còn hiệu lực"
+        return f"{status}; hiệu lực từ {ds}", ""
+    return "", "NO_EFFECTIVE_STATUS"
+
+def _read_doc_text_via_nlm(entry: dict) -> str:
+    """P1 (v1.32.1 — log rà 119: gws cred revoke + webapp exporttext thiếu scope script.external_request →
+    KHÔNG còn đường đọc Drive nào sống, corpus-audit 6/6 'header rỗng'): đường đọc DỰ PHÒNG qua NLM CLI
+    (nlm-content vẫn CHẠY — 295 nguồn live). Text = bản đã nạp NLM (vẫn verbatim nguồn) — đủ cho header/audit;
+    KHÔNG thay thế extract chính-văn khi cần byte-exact. Entry cần nlm_source_id live."""
+    sid = str(entry.get("nlm_source_id") or "").strip()
+    if not sid or not _entry_on_nlm_live(entry):
+        return ""
+    try:
+        nc = _imp("nlm_cli")
+        r = nc.source_content(sid)
+        txt = str(r.get("text") or ((r.get("data") or {}) if isinstance(r.get("data"), dict) else {}).get("content") or "")
+        return _sanitize_export_text(_strip_font_runs(txt))
+    except Exception:
+        return ""
+
+def _goc_pollution_groups(entries: list) -> list:
+    """PURE (§1.1 log rà 108 lần): VBHN có TÊN mã hoá base (token goc_<X>) NHƯNG registry.goc KHÔNG chứa X = goc NHIỄM.
+    Ca thật: VBHN_22 'Bảo vệ sức khỏe nhân dân' tên goc_21-LCT-HDNN8 nhưng registry.goc=113-2025 (Dân số) → source-map
+    redirect Dân số SANG VBHN Bảo vệ sức khỏe + webapp vb_status superseded_by sai. Trả [{drive_id,name,sohieu,
+    registry_goc, name_goc_base, suggested_goc}] để SỬA registry.goc qua reg_upsert (KHÔNG reg_bulk — goc là quan hệ)."""
+    out = []
+    for e in entries:
+        if not _is_vbhn_entry(e):
+            continue
+        nb = _name_goc_base_key(_entry_name(e))
+        if nb and nb not in _goc_keys(e):
+            out.append({"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:60],
+                        "sohieu": _entry_sohieu(e) or "", "registry_goc": _entry_goc(e),
+                        "name_goc_base": nb, "suggested_goc": nb})
+    return out
+
+def _is_infra_entry(e: dict) -> bool:
+    """File HẠ TẦNG (KHÔNG phải văn bản) lẫn vào corpus=true = RÁC: .json/.enc + tên nlm_sources/manifest/registry/
+    secrets/_delta/reg_query. BẢO VỆ văn bản thật (GDoc/PDF/Word) → KHÔNG false-positive (vd tl_secrets.enc,
+    nlm_sources_delta_2026-06-11.json bị đếm corpus)."""
+    mime = str(e.get("mimeType") or e.get("mime") or "").lower()
+    nm = _strip_accents(str(_entry_name(e) or "")).lower()
+    if any(t in mime for t in ("vnd.google-apps.document", "pdf", "wordprocessing", "msword")):
+        return False
+    if "spreadsheet" in mime or mime.endswith("/json") or nm.endswith(".json") or nm.endswith(".enc"):
+        return True
+    return any(t in nm for t in ("nlm_sources", "manifest", "registry", "reg_query", "secrets", "_delta"))
+
+def _dedup_lite(e: dict) -> dict:
+    return {"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e) or "", "name": _entry_name(e)[:50],
+            "corpus": str(e.get("corpus")).lower() == "true", "on_nlm": _entry_on_nlm_live(e),
+            "nlm_source_id": _entry_nlm(e) or ""}
+
+def _dedup_plan(entries: list) -> dict:
+    """PURE: kế hoạch DEDUP tất định, tái dùng canonical-picker của `_hygiene_groups` (reconcile_clusters dùng
+    `_cluster_same_doc` = CÙNG văn bản theo subject-sig, AN TOÀN). Mỗi cụm: GIỮ canonical, quarantine các bản dup.
+    BẤT BIẾN AN TOÀN: (1) không quarantine chính canonical; (2) không quarantine drive_id LÀ canonical của cụm khác;
+    (3) mỗi drive_id chỉ vào 1 lần. ready=cụm có canonical rõ; review=cụm thiếu canonical (quyết tay)."""
+    g = _hygiene_groups(entries)
+    canon_ids, seen = set(), set()
+    ready, review = [], []
+    for c in g["reconcile_clusters"]:
+        # gộp quarantine (same-doc dup) + sidecars (.docx/.pdf cạnh GDoc canonical = dup định dạng) — cả 2 đều là bản dư.
+        _qd, _q = {}, []
+        for e in (c.get("quarantine") or []) + (c.get("sidecars") or []):
+            did = _entry_drive_id(e)
+            if did and did not in _qd:
+                _qd[did] = e; _q.append(e)
+        q = _q
+        if not q:
+            continue
+        can = c.get("canonical")
+        if not can:
+            review.append({"key": c.get("key"), "dups": [_dedup_lite(e) for e in q]})
+            continue
+        cid = _entry_drive_id(can)
+        canon_ids.add(cid)
+        dups = [e for e in q if _entry_drive_id(e) != cid and _entry_drive_id(e) not in seen]
+        for e in dups:
+            seen.add(_entry_drive_id(e))
+        if dups:
+            ready.append({"key": c.get("key"), "canonical": _dedup_lite(can), "quarantine": [_dedup_lite(e) for e in dups]})
+    # BẤT BIẾN (2): loại khỏi quarantine mọi drive_id là canonical của 1 cụm khác
+    for it in ready:
+        it["quarantine"] = [d for d in it["quarantine"] if d["drive_id"] not in canon_ids]
+    ready = [it for it in ready if it["quarantine"]]
+    dups_on_nlm = [d for it in ready for d in it["quarantine"] if d["on_nlm"]]
+    return {"ready": ready, "review": review,
+            "total_quarantine": sum(len(it["quarantine"]) for it in ready),
+            "dups_on_nlm": dups_on_nlm}
+
+def _raw_dup_of_standard_rows(entries: list) -> list:
+    """PURE (v1.29.3 — AUDIT #5, log LIVE 2.3): bắt 'BẢN TẢI THÔ TRÙNG BẢN CHUẨN' — dòng corpus=true có tên thô KHÔNG
+    trích được sohieu chuẩn (vd 'ND274_2025_cham dong-tron dong BH.pdf' — mã loại DÍNH TRƯỚC số nên _RAW_SOHIEU_RE miss)
+    nhưng tên chứa <MÃ-LOẠI><số>_<năm> khớp LỎNG với ĐÚNG 1 bản CHUẨN corpus=true trong corpus → đề xuất corpus=false.
+    PROPOSE-ONLY (match lỏng KHÔNG đủ tin auto; regex lỏng CHỈ để dedup-match, KHÔNG bao giờ dùng gán sohieu).
+    An toàn: chỉ xét raw corpus=true + sohieu-key RỖNG; chỉ đề xuất khi match DUY NHẤT (num+năm[+family]); bản chuẩn
+    phải corpus=true (chuẩn đã tắt → raw có thể là bản duy nhất, KHÔNG đề xuất)."""
+    _fam_norm = {"NĐ": "ND", "QĐ": "QD"}
+    # Họ mã-loại CANONICAL — key trích ra family NGOÀI họ này (vd '274-2025-CHAM' từ tên thô 'ND274_2025_cham dong…',
+    # 'CHAM' = từ đầu trích yếu bị nhận nhầm) = trích SAI → vẫn là ứng viên raw (chính là ca 5 dòng LIVE lọt qua S12).
+    _canon_fams = {"ND", "TT", "QD", "NQ", "PL", "CT", "TTLT", "QH", "UBTVQH", "VBHN", "L", "LCT", "HDNN", "BTC",
+                   "NHNN", "BYT", "BCA", "BQP", "CP", "TW", "KL", "HD", "CD"}   # CD = Công điện (CĐ→CD sau norm)
+
+    def _key_fam(k: str) -> tuple:
+        m = re.match(r"^(\d{1,4})-((?:19|20)\d{2})-([A-ZĐ]+)", k or "")
+        # num chuẩn hoá str(int(...)) — số ZERO-PADDED ('06-2003-PL-UBTVQH11', đúng ca PL_06 log LIVE) phải khớp
+        # lookup lỏng int('06')→'6' phía raw; giữ raw '06' sẽ MISS.
+        return (str(int(m.group(1))), m.group(2), _fam_norm.get(m.group(3), m.group(3))) if m else (None, None, None)
+
+    std_by_numyear: dict[tuple, list] = {}
+    std_keys = set()
+    for e in entries or []:
+        if not _entry_corpus_true(e):
+            continue
+        k = _sohieu_key_entry(e)
+        num, yr, fam = _key_fam(k)
+        if fam and fam in _canon_fams:
+            std_by_numyear.setdefault((num, yr), []).append((fam, e))
+            std_keys.add(k)
+    rows = []
+    for e in entries or []:
+        if not _entry_corpus_true(e):
+            continue
+        _k = _sohieu_key_entry(e)
+        if _k:
+            _n, _y, _f = _key_fam(_k)
+            if (_f and _f in _canon_fams) or _k in std_keys:
+                continue                               # key chuẩn thật (hoặc trùng chuẩn → việc của dedup-plan)
+        nm = _entry_name(e)
+        # Ứng viên PHẢI trông như FILE THÔ: có đuôi file hoặc chứa SPACE — tên chuẩn hoá không bao giờ có cả hai
+        # (chống false-positive smoke LIVE: 'CD_32-2026-CD-TTg_…' tên CHUẨN loại hiếm bị ghép nhầm TT_32-2026).
+        if not (re.search(r"\.(docx?|pdf|html?)\b", nm or "", re.I) or " " in (nm or "")):
+            continue
+        lm = _RAW_LOOSE_SOHIEU_RE.search(nm or "")
+        if not lm:
+            continue
+        fam_raw = _fam_norm.get((lm.group(1) or "").upper(), (lm.group(1) or "").upper())
+        cands = std_by_numyear.get((str(int(lm.group(2))), lm.group(3))) or []
+        if fam_raw:
+            cands = [(f, s) for f, s in cands if f.startswith(fam_raw) or fam_raw.startswith(f)]
+        if len(cands) != 1:
+            continue                                   # 0 hoặc >1 → KHÔNG đủ tin, bỏ
+        _f, std = cands[0]
+        did = _entry_drive_id(e)
+        rows.append({"drive_id": did, "name": nm[:60],
+                     "loose_match": f"{fam_raw or '?'}{int(lm.group(2))}-{lm.group(3)}",
+                     "standard": {"drive_id": _entry_drive_id(std), "sohieu": _entry_sohieu(std) or _sohieu_key_entry(std),
+                                  "name": _entry_name(std)[:60]},
+                     "fix_command": f"tl source-update-corpus {did} false --apply"})
+    return rows
+
+def _corpus_count_server_rule(entries: list) -> int:
+    """v1.30.1 (#7 log — PURE): đếm corpus THEO ĐÚNG LUẬT SERVER GAS (manifestHashObjs_/regIsCorpusCounted_,
+    Code.2.21.2i.gs:2173-2183) trên CÙNG snapshot entries: corpus∈{true,vbqppl} HOẶC row_kind=overflow; TRỪ ref;
+    TRỪ loai='thuong'. Đây là con số `manifest_export.corpus_count` mà `tl boot` in ra — KHÁC `sweep.corpus`
+    (corpus=='true' thuần). In CẢ HAI cạnh nhau ⇒ hết 'chênh 12 dòng' bí ẩn giữa 2 lệnh (527 boot vs 515 sweep:
+    khác TIÊU CHÍ + khác snapshot GAS-cache ~600s, không phải mất dữ liệu). Profile có registryDocId riêng: server
+    đếm MỌI dòng có drive_id (nhánh _REQ_REGISTRY_ID_) — số này chỉ áp cho scope VBQPPL nền."""
+    n = 0
+    for e in entries or []:
+        rk = str(_entry_row_kind(e) or "own").lower()
+        if rk == "ref":
+            continue
+        c = str(e.get("corpus") or "").lower()
+        if not (c in ("true", "vbqppl") or rk == "overflow"):
+            continue
+        # Review v1.30.1 (CONFIRMED): GAS so `o.loai!=='thuong'` EXACT (không lower/strip — Code.gs:2183) →
+        # mirror NGUYÊN XI; 'Thuong' hoa server VẪN đếm. Lower hoá ở đây = tự tạo lệch mới với boot.
+        if str(e.get("loai") or "") == "thuong":
+            continue
+        n += 1
+    return n
+
+def _corpus_fix_plan(entries: list) -> dict:
+    """PURE (test offline): ĐIỀU PHỐI dọn/chỉnh lý corpus — gộp mọi detector (sweep) → kế hoạch THEO THỨ TỰ PHỤ THUỘC +
+    phân TẦNG an toàn. Thứ tự CỐ ĐỊNH: shared-link→goc-nhiễm→infra→dedup→year→loai→title/cat→nlm-relabel→ingest→
+    consolidation→quarantine. KHÔNG mutate; chỉ trả plan (mỗi step: order,id,tier,problem,count,command,reversible,note)."""
+    rep = _sweep_report(entries)
+    nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
+    d = rep["duplicates"]
+    dr = rep["nlm_drift"]
+    _vgoc = set()
+    for e in entries:
+        if _is_vbhn_entry(e):
+            _vgoc |= _goc_keys(e)
+    consol = sum(1 for e in entries if _entry_corpus_true(e) and not _is_vbhn_entry(e)
+                 and _sohieu_key_entry(e) and _sohieu_key_entry(e) in _vgoc)
+    steps = []
+
+    def add(order, sid, tier, problem, count, command, reversible, note, sample=None):
+        if count:
+            st = {"order": order, "id": sid, "tier": tier, "problem": problem, "count": count,
+                  "command": command, "reversible": reversible, "note": note}
+            if sample:
+                st["sample"] = sample[:5]
+            steps.append(st)
+
+    add(1, "shared_source_id", "human_confirm",
+        "Link NLM SAI (≥2 drive_id chung 1 source_id) — SỬA TRƯỚC mọi thao tác NLM (xóa 1 nguồn gãy link kia)",
+        rep["shared_source_id"], f"tl shared-source-fix {nb}", False,
+        "Tách: giữ link ở bản đúng, reg_clear link sai bản kia rồi re-push.", rep.get("shared_source_id_groups"))
+    add(2, "goc_pollution", "human_confirm",
+        "registry.goc NHIỄM → source-map/status redirect SAI văn bản",
+        rep["goc_pollution"], "tl register --drive-id <id> --goc <suggested_goc>", False,
+        "Sửa goc về suggested_goc (reg_upsert, KHÔNG reg_bulk). Xem sweep.goc_pollution_rows.", rep.get("goc_pollution_rows"))
+    add(3, "infra_in_corpus", "safe_auto",
+        "File HẠ TẦNG (.json/.enc/secrets) đánh dấu corpus=true = RÁC",
+        rep["infra_in_corpus"], "tl corpus-fix --apply --tier safe", True,
+        "REVERSIBLE: chỉ set corpus=false.", rep.get("infra_in_corpus_rows"))
+    add(4, "duplicates", "safe_auto",
+        "Trùng lặp thật (same-document / md5 / identity)",
+        d["same_document"] + d["by_md5"] + d["identity"], "tl dedup-plan --apply (hoặc corpus-fix --apply --tier safe)", True,
+        "REVERSIBLE: GIỮ canonical, bản dup → corpus=false.")
+    add(5, "vbhn_missing_year", "metadata_deterministic",
+        "VBHN sohieu/tên THIẾU năm (số tái dùng theo năm → collision)",
+        rep["vbhn_year"]["fixable"], "tl vbhn-year-fix --with-name --apply", False,
+        f"{rep['vbhn_year']['needs_year']} cần xác minh năm tay; {rep['vbhn_year']['conflicts']} conflict phân biệt tay.")
+    add(6, "loai_noncanonical", "metadata_deterministic",
+        "Trường `loai` phi chuẩn", rep["loai_noncanonical"], "tl backfill-loai --normalize --apply", False,
+        "Suy loai từ số hiệu/tên; --normalize sửa cả dòng loai SAI enum (map tất định 'Luat'→'Luật').")
+    add(7, "title_cat_mismatch", "human_confirm",
+        "Tên/cat/trích yếu LỆCH nội dung (cần ĐỌC header — cat-verify suy bừa khi GAS-fallback)",
+        rep["title_mismatch"], "tl corpus-audit  → tl source-rename/recat theo header-verify", False,
+        "KHÔNG auto: dùng `header-verify` ground-truth rồi sửa tay.")
+    # MERGE Codex v1.33.11: bước raw_on_nlm vào orchestrator (detector v1.33.4 đã đếm — plan phải có đường sửa).
+    add(8, "raw_on_nlm", "human_confirm",
+        "FILE THÔ (.html/.docx/.pdf) đang là nguồn NLM live — trái doctrine 'chỉ push GDoc'",
+        rep["raw_on_nlm"],
+        "tl sweep --json  # xem raw_on_nlm_rows; từng dòng: copy_convert → nlm-add GDoc mới → source-update-corpus raw false --apply --confirm yes",
+        False,
+        "KHÔNG auto: phải bảo đảm GDoc mới đã push thành công trước khi gỡ source raw cũ; ưu tiên Luật trước.",
+        rep.get("raw_on_nlm_rows"))
+    add(9, "raw_dup_of_standard", "human_confirm",
+        "Bản TẢI THÔ nghi TRÙNG bản chuẩn (tên thô không trích được sohieu, kẹt corpus=true, đốt batch ingest-missing)",
+        rep["raw_dup_of_standard"], "tl source-update-corpus <drive_id> false --apply   # per-row, undo được", True,
+        "PROPOSE-ONLY (match lỏng số+năm[+loại]): soát từng dòng raw_dup_of_standard_rows rồi tắt corpus bản thô.",
+        rep.get("raw_dup_of_standard_rows"))
+    add(10, "nlm_status_mismatch", "safe_auto",
+        "Nhãn nlm_status LẠ (hygiene, KHÔNG phải desync sống)",
+        dr.get("NLM_STATUS_MISMATCH", 0), f"tl nlm-orphans {nb} --fix-mismatch --apply", True,
+        "Vá nhãn metadata (removed*→pushed nếu nguồn sống).")
+    add(11, "corpus_not_on_nlm", "structural",
+        "corpus=true CHƯA trên NLM (phần lớn do cap 300/notebook)",
+        dr.get("CORPUS_TRUE_NOT_ON_NLM", 0), "tl ingest-missing --apply   (cần slot/overflow — JOB LỚN, KHÔNG về 0)", False,
+        "CẤU TRÚC: corpus>cap → cần sharding/overflow.")
+    add(12, "consolidation", "human_confirm",
+        "Cùng lúc CÓ VBHN + gốc/sửa đổi RỜI còn corpus=true → nên gộp về VBHN (khi tìm thành phần trả ra VBHN)",
+        consol, "tl consolidation-cleanup", True, "Set thành phần corpus=false khi VBHN verify phủ (reversible).")
+    add(13, "quarantine_conflict", "safe_auto",
+        "Quarantine MÂU THUẪN (corpus=true / stale NLM ref; nguồn LIVE xoá tay)",
+        rep["quarantine"]["corpus_true"] + rep["quarantine"]["stale_nlm_ref"] + rep["quarantine"]["still_on_nlm"],
+        "tl quarantine-fix --apply", True,
+        "REVERSIBLE: chuẩn nhãn + corpus=false + reg_clear stale nlm_source_id (B3/B9 v1.33.22); "
+        "still_on_nlm chỉ báo — xoá nguồn LIVE tay sau verify.")
+    steps.sort(key=lambda s: s["order"])
+    return {"ok": True, "total": rep["total"], "corpus": rep["corpus"], "step_count": len(steps), "steps": steps,
+            "safe_auto": [s for s in steps if s["tier"] == "safe_auto"],
+            "needs_human": [s for s in steps if s["tier"] != "safe_auto"],
+            "note": "CHẠY THEO `order` (sai thứ tự=hỏng thêm). safe_auto=reversible (corpus=false) → `corpus-fix --apply "
+                    "--tier safe`. metadata/human_confirm/structural: chạy lệnh in sẵn, người duyệt (đọc header/xác minh)."}
+
+def _audit_row_flatten(r: dict) -> dict:
+    """S-1 (v1.33.15 — log rà 40: driver đọc rows[].type/severity/suggested_name/proposal = null trong khi
+    summary đếm proposal_count=2 — chi tiết chỉ nằm LỒNG trong proposals[], schema summary↔row lệch nhau):
+    MIRROR đề xuất CHÍNH (proposals[0] — đã sort severity, nặng nhất) lên top-level row để driver phẳng đọc
+    được; proposals[] giữ nguyên là nguồn sự thật đầy đủ. Idempotent (gọi lại trên row đã flatten vô hại)."""
+    ps = r.get("proposals") or []
+    p0 = ps[0] if ps else {}
+    r["type"] = p0.get("type")
+    r["severity"] = p0.get("severity")
+    r["icon"] = p0.get("icon")
+    r["current"] = p0.get("current")
+    r["suggested"] = p0.get("suggested")
+    r["suggested_name"] = p0.get("suggested")   # alias — driver log rà 40 đọc key này
+    r["fix_command"] = p0.get("fix_command")
+    r["command"] = p0.get("fix_command")        # v1.33.16 (MERGE nhánh-4): alias `command` cho driver phẳng
+    r["proposal"] = p0 or None
+    r["proposal_count"] = len(ps)               # v1.33.16 (MERGE nhánh-4): đối soát nhanh không cần đếm proposals[]
+    r["flags"] = [p.get("type") for p in ps]
+    return r
+
+def _rq_rel_strong(cands: list[dict]) -> bool:
+    """P2-2 (v1.33.12): ứng viên đủ MẠNH cho bucket HÀNH ĐỘNG relation_backfill — linked/strong/confidence≠low
+    (cùng ngưỡng escalate v1.29.6). Toàn low-conf → relation_low_confidence (INFO), vì `relation-check --base
+    --subject` (chuẩn) thường phủ định các ca này (log: 3/3 trả OK, missing_links=[])."""
+    return any(bool(c.get("linked_to_query")) or bool(c.get("strong"))
+               or (str(c.get("confidence") or "low") != "low") for c in (cands or []))

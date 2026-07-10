@@ -389,3 +389,74 @@ def cmd_find_doc(a) -> int:
         print(f"Tìm '{q}' qua GOOGLE site: (VBHN-first — thử 'hợp nhất' trước):")
         print("\n".join(d["links_markdown"]))
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _external_format_class(fmt: str | None, url: str | None = None) -> str:
+    raw = (fmt or "").strip().lower()
+    u = (url or "").lower()
+    if not raw:
+        for ext in (".docx", ".doc", ".rtf", ".odt", ".pdf", ".html", ".htm"):
+            if ext in u.split("?")[0]:
+                raw = ext.lstrip(".")
+                break
+    if raw in {"gdoc", "google-doc", "google_docs", "google doc"}:
+        return "gdoc"
+    if raw in {"docx", "doc", "rtf", "odt"}:
+        return "docx_convertible"
+    if raw == "pdf":
+        return "pdf"
+    if raw in {"html", "htm", "text", "txt"}:
+        return "text_html"
+    return raw or "unknown"
+
+def extract_refs(text: str) -> list:
+    """Bóc các viện dẫn 'Luật/Bộ luật/… [số hiệu]' trong thân + footnote. NFC-normalize trước.
+    Trả [{raw, name_phrase, sohieu, loai}] — DEDUP theo SỐ HIỆU (P1-3: MỘT phán quyết / số hiệu / run; B: hết
+    'phantom' 1 số hiệu xuất hiện 2-3 lần do mệnh đề chuyển tiếp). name_phrase đã cắt prose; giữ bản SẠCH nhất."""
+    txt = unicodedata.normalize("NFC", text or "")
+    by_sh: dict[str, dict] = {}
+    for m in _REF_RE.finditer(txt):
+        sh = norm_sohieu(m.group("sh"))
+        if not sh:
+            continue
+        name = _clean_ref_name_phrase((m.group("name") or "").strip(" -–—\t"))
+        rec = {"raw": m.group(0).strip()[:90], "name_phrase": name, "sohieu": sh,
+               "loai": (m.group("loai") or "").strip()}
+        prev = by_sh.get(sh)
+        # Giữ MỘT bản / số hiệu: ưu tiên bản có name_phrase (sau khi cắt prose) hơn bản rỗng; giữa 2 tên → bản ĐẦU.
+        if prev is None or (not prev.get("name_phrase") and rec["name_phrase"]):
+            by_sh[sh] = rec
+    return list(by_sh.values())
+
+def _query_variants(q: str) -> list:
+    """VBHN-FIRST: với truy vấn theo TÊN luật → thử '<tên> hợp nhất' TRƯỚC, rồi '<tên> mới nhất', rồi tên gốc.
+    Truy vấn theo SỐ HIỆU → tìm thẳng số (không thêm keyword)."""
+    if _looks_like_sohieu_query(q):
+        return [q]
+    ql = _strip_accents(q).lower()
+    if "hop nhat" in ql or "moi nhat" in ql:
+        return [q]                     # người dùng đã nêu rõ → tôn trọng nguyên trạng
+    return [f"{q} hợp nhất", f"{q} mới nhất", q]   # VBHN-first
+
+def _google_site_url(query: str, site: str | None = None) -> str:
+    """Google search URL (ưu tiên dùng Google vì search nội bộ TVPL/LVN kém). site=None → Google toàn cục."""
+    import urllib.parse as _up
+    q = f"site:{site} {query}" if site else query
+    return "https://www.google.com/search?q=" + _up.quote(q)
+
+def _runtime_env(override: str | None = None) -> str:
+    """C3: RUNTIME_ENV ∈ {code, cowork, chat}. Heuristic env-var; KHÔNG chắc → 'chat' (an toàn = đưa link, không tự tải)."""
+    v = (override or "").strip().lower()
+    if v in ("code", "cowork", "chat"):
+        return v
+    import os
+    ev = (os.environ.get("TL_RUNTIME_ENV") or "").strip().lower()
+    if ev in ("code", "cowork", "chat"):
+        return ev
+    if os.environ.get("CLAUDE_COWORK") or os.environ.get("COWORK"):
+        return "cowork"
+    if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT") or os.environ.get("CLAUDE_CODE"):
+        return "code"
+    return "chat"   # mặc định an toàn (C3)

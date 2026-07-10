@@ -692,3 +692,57 @@ def cmd_go_live_runbook(a) -> int:
     else:
         print(md)
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _cmd_version_probe(name: str, args: list[str] | None = None, *, timeout: int = 10) -> dict:
+    exe = shutil.which(name)
+    out = {"command": name, "path": exe or "", "ok": False, "version": "", "returncode": None}
+    if not exe:
+        out["error"] = "BINARY_NOT_FOUND"
+        return out
+    try:
+        cp = subprocess.run([exe] + (args or ["--version"]), text=True, encoding="utf-8", errors="replace",
+                            capture_output=True, timeout=timeout)
+        text = ((cp.stdout or "") + "\n" + (cp.stderr or "")).strip()
+        out.update({"ok": cp.returncode == 0, "returncode": cp.returncode, "version": text.splitlines()[0][:160] if text else ""})
+        if cp.returncode != 0:
+            out["error"] = text[-300:]
+    except Exception as e:  # noqa: BLE001
+        out.update({"error": f"{type(e).__name__}: {e}"})
+    return out
+
+def _deploy_plan(bundle: str = "", target_dir: str = "", backup_dir: str = "", profile: str = "", include_ocr: bool = False) -> dict:
+    bundle_path = Path(bundle).expanduser().resolve() if bundle else None
+    target = Path(target_dir).expanduser().resolve() if target_dir else Path.cwd().resolve() / "tra-luat"
+    backup = Path(backup_dir).expanduser().resolve() if backup_dir else target.parent / "_tra_luat_backups"
+    steps = [
+        {"id": "verify_bundle_sha", "mode": "manual", "command": ["sha256sum", str(bundle_path) if bundle_path else "<bundle.zip>"], "expect": "so sánh với SHA-256 đã công bố"},
+        {"id": "extract_to_temp", "mode": "manual", "command": ["unzip", "-q", str(bundle_path) if bundle_path else "<bundle.zip>", "-d", "<temp_dir>"], "expect": "giải nén vào thư mục tạm, không ghi đè bản đang chạy"},
+        {"id": "verify_extracted_manifest", "mode": "manual", "command": ["python", "scripts/tl.py", "release-verify", "RELEASE_MANIFEST.json", "--json"], "expect": "ok=true trong thư mục đã giải nén"},
+        {"id": "backup_current", "mode": "manual", "command": ["cp", "-a", str(target), str(backup / "tra-luat-<timestamp>")], "expect": "có bản rollback trước khi thay"},
+        {"id": "replace_or_sync", "mode": "manual", "command": ["rsync", "-a", "--delete", "<temp_dir>/tra-luat/", str(target) + "/"], "expect": "chỉ thay sau khi verify extracted pass"},
+        {"id": "offline_release_check", "mode": "manual", "command": ["python", "scripts/tl.py", "release-check", "--json"], "expect": "ok=true tại target"},
+        {"id": "live_readiness", "mode": "manual", "command": ["python", "scripts/tl.py", "live-readiness", "--json"], "expect": "env_ready=true và live_contract_ready=true trước smoke"},
+        {"id": "snapshot_before", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-snapshot", "--out", "before.json", "--json"], "expect": "lưu baseline trạng thái live trước smoke"},
+        {"id": "live_smoke_plan", "mode": "manual", "command": ["python", "scripts/tl.py", "live-smoke-plan", "--json"] + (["--include-ocr"] if include_ocr else []), "expect": "chạy từng bước, dừng khi high-risk fail"},
+        {"id": "snapshot_after", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-snapshot", "--out", "after.json", "--json"], "expect": "lưu trạng thái sau smoke"},
+        {"id": "snapshot_diff", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-diff", "before.json", "after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count"], "expect": "chỉ có thay đổi dự kiến"},
+    ]
+    return {"ok": True, "schema": "deploy_plan.v1", "bundle": str(bundle_path) if bundle_path else None, "bundle_exists": bool(bundle_path and bundle_path.exists()), "bundle_sha256": _sha256_path_or_empty(str(bundle_path)) if bundle_path else "", "target_dir": str(target), "backup_dir": str(backup), "profile": profile or None, "include_ocr": include_ocr, "steps": steps, "stop_rule": "Không replace/sync nếu release-verify trong temp fail. Không chạy apply live nếu live-readiness chưa đạt env+contract hoặc snapshot diff có thay đổi ngoài dự kiến.", "note": "READ-ONLY plan; lệnh này không giải nén, không copy, không gọi Drive/NLM."}
+
+def _rollback_plan(target_dir: str = "", backup_path: str = "", bundle: str = "") -> dict:
+    target = Path(target_dir).expanduser().resolve() if target_dir else Path.cwd().resolve() / "tra-luat"
+    backup = Path(backup_path).expanduser().resolve() if backup_path else None
+    bundle_path = Path(bundle).expanduser().resolve() if bundle else None
+    source_desc = str(backup or bundle_path or "<backup_dir_or_previous_bundle.zip>")
+    steps = [
+        {"id": "stop_running_clients", "mode": "manual", "command": ["<close Claude/terminal sessions using this skill>"], "expect": "không còn process ghi vào skill dir"},
+        {"id": "snapshot_failed_state", "mode": "manual", "command": ["cp", "-a", str(target), str(target.parent / "_failed_tra_luat_<timestamp>")], "expect": "giữ lại bản lỗi để diff"},
+        {"id": "restore_backup", "mode": "manual", "command": ["rsync", "-a", "--delete", source_desc.rstrip('/') + "/", str(target) + "/"], "expect": "khôi phục từ backup đã pass"},
+        {"id": "verify_manifest", "mode": "manual", "command": ["python", "scripts/tl.py", "release-verify", "RELEASE_MANIFEST.json", "--json"], "expect": "ok=true nếu backup có manifest"},
+        {"id": "release_check", "mode": "manual", "command": ["python", "scripts/tl.py", "release-check", "--json"], "expect": "ok=true sau rollback"},
+        {"id": "live_readiness", "mode": "manual", "command": ["python", "scripts/tl.py", "live-readiness", "--json"], "expect": "cấu hình/auth vẫn còn"},
+    ]
+    return {"ok": True, "schema": "rollback_plan.v1", "target_dir": str(target), "backup_path": str(backup) if backup else None, "bundle": str(bundle_path) if bundle_path else None, "source_exists": bool((backup and backup.exists()) or (bundle_path and bundle_path.exists())), "steps": steps, "stop_rule": "Không xóa bản lỗi trước khi snapshot; không rollback từ nguồn chưa verify.", "note": "READ-ONLY plan; không copy/replace thật."}

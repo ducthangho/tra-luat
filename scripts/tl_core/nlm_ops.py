@@ -1051,3 +1051,43 @@ def cmd_nlm_query_plan(a) -> int:
         for b in out.get("batches", []):
             print(f"batch {b['index']}: {', '.join(b.get('source_ids', []))}")
     return 0 if out.get("ok") else 2
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _vbqppl_notebooks(cfg: dict) -> list[str]:
+    """A (v1.30.0, PURE): danh sách notebook NỀN VBQPPL từ config — base + overflow + shards (dedup, giữ thứ tự
+    base→overflow→shards). Dùng mở rộng đích nlm-cross khi TL_BASE_ALSO."""
+    prof = _profiles_from_config(cfg or {}).get(DEFAULT_PROFILE) or {}
+    shards = prof.get("shards") if isinstance(prof.get("shards"), list) else []
+    out, seen = [], set()
+    for x in [prof.get("notebookId") or NLM_BASE_NOTEBOOK, prof.get("overflowNotebookId"), *shards]:
+        x = str(x or "").strip()
+        if x and x not in seen:
+            seen.add(x)
+            out.append(x)
+    return out
+
+def _strip_font_runs(text: str) -> str:
+    """Lọc bỏ dòng RÁC chỉ chứa TÊN FONT ĐẦY ĐỦ (\"Times New Roman\", \"Arial\", \".VnTime\"...)
+    do bộ export DOCX/GDoc rò run-font của ô header bảng vào text trích. Chỉ xóa dòng mà TOÀN BỘ
+    nội dung là tên font ĐẦY ĐỦ (+ cỡ tùy chọn) → KHÔNG đụng nội dung pháp lý thật (\"Theo Times
+    báo\", \"Arial Group\", \"UTM 48N\", dòng \"Times\"/\"Symbol\" đơn lẻ vẫn giữ). Cố ý KHÔNG dùng
+    wildcard tiền-tố (UTM/VNI/SVN + .*) để tránh nuốt nội dung thật. Gọi SAU khi đọc, TRƯỚC khi trả."""
+    if not text or "\n" not in text:
+        return text
+    return "".join(ln for ln in text.splitlines(keepends=True)
+                   if not _FONT_RUN_RE.match(ln.rstrip("\r\n")))
+
+def _slice_dieu(text: str, dieu: str) -> str:
+    import re as _re
+    m = _re.search(rf"(?mi)^\s*Điều\s+{_re.escape(str(dieu))}\b.*?(?=^\s*Điều\s+\d+\b|\Z)", text or "", _re.S)
+    return m.group(0).strip() if m else f"[không thấy Điều {dieu}]"
+
+def _split_source_ids(values: list[str] | None, combined: str = "") -> list[str]:
+    raw = []
+    for val in values or []:
+        raw.extend(str(val).split(","))
+    if combined:
+        raw.extend(str(combined).split(","))
+    return _unique_preserve_order([x.strip() for x in raw if x and x.strip()])

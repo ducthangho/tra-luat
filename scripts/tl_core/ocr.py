@@ -470,3 +470,21 @@ def cmd_profile_ingest_ocr(a) -> int:
     out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _sha256_bytes_file_local(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def _bridge_confirm_apply(a, *, what: str) -> tuple[bool, dict]:
+    if not getattr(a, "apply", False):
+        return True, {}
+    if getattr(a, "confirm", "") != "yes":
+        return False, {"ok": False, "error": "CONFIRM_REQUIRED", "what": what,
+                       "note": "Bridge apply sẽ gọi lại pipeline ingest hiện có. Thêm --confirm yes sau khi đã xem dry-run/verify."}
+    return True, {}

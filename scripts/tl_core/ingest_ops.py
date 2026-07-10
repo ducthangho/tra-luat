@@ -1948,3 +1948,177 @@ def _verify_convert_readback(g, *, gdoc_id: str, expected_name: str = "", src_id
             "expected_folder_id": expected_folder_id or None, "checks": checks,
             "gdoc": {"name": gn, "mime": gm, "parents": _file_parents(gi)},
             "source": ({"name": _file_name(si), "mime": _file_mime(si), "parents": _file_parents(si)} if src_id else None)}
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _normalize_hieuluc(s: str) -> str:
+    """Map biến thể `hieuluc` → {Còn, Hết, Chưa} (giữ nguyên ngày/chuỗi khác nếu không nhận diện trạng thái trần)."""
+    raw = str(s or "").strip()
+    if not raw:
+        return raw
+    k = _strip_accents(raw).lower()
+    if k in ("con", "con hieu luc", "conhieuluc"):
+        return "Còn"
+    if k in ("het", "het hieu luc", "hethieuluc", "thay the", "da thay the", "bai bo", "het hl"):
+        return "Hết"
+    if k in ("chua", "chua hieu luc", "chuahieuluc", "pending"):
+        return "Chưa"
+    return raw      # ngày/chuỗi cụ thể (vd '01/07/2026') → giữ nguyên
+
+def _looks_like_drive_id(s: str) -> bool:
+    """P0-1 LỚP 1 (MERGE patch AUDIT 07/2026 → v1.33.13): Drive file ID thật luôn [A-Za-z0-9_-] và ≥20 ký tự
+    (thường 33/44) — id ngắn = gần như chắc chắn CẮT CỤT/typo khi copy-paste output rút gọn. Check OFFLINE rẻ,
+    chạy TRƯỚC lớp 2 existence-check (manifest/Drive live). Cho phép prefix 'nlm:' (khóa ghost hợp lệ)."""
+    s = (s or "").strip()
+    if s.startswith("nlm:"):
+        return len(s) > 10
+    return bool(re.fullmatch(r"[A-Za-z0-9_-]{20,}", s))
+
+def _register_bulk_missing(items: list, known_ids: set, live_prober, cap: int = 20) -> list:
+    """P0-1 bulk LỚP 2 (MERGE nhánh-3 v1.33.14 — PURE, testable): item drive_id đúng-dạng nhưng KHÔNG có trong
+    manifest → probe Drive live tối đa `cap` id (mỗi probe 1 round-trip); quá cap → coi là missing luôn (bulk
+    đăng-ký-file-mới hàng loạt là hiếm; muốn ép → --force-insert). Trả danh sách id thật sự không tồn tại."""
+    missing = [str((it or {}).get("drive_id")) for it in (items or [])
+               if (it or {}).get("drive_id") and (it or {}).get("drive_id") not in known_ids]
+    really = []
+    for did in missing[:cap]:
+        try:
+            if not live_prober(did):
+                really.append(did)
+        except Exception:  # noqa: BLE001
+            really.append(did)
+    really.extend(missing[cap:])
+    return really
+
+def _register_target_exists(drive_id: str, live_prober=None) -> bool:
+    """P0-1 (v1.33.12 — log phiên khắc phục: `register --drive-id <id CẮT CỤT>` → reg_upsert INSERT dòng registry
+    MỚI RỖNG, ok:true không báo, registry 746→747 sai mọi mẫu số): drive_id phải TỒN TẠI — trong manifest cache,
+    HOẶC trên Drive live (files_get — cho file VỪA upload chưa vào cache, luồng ingest hợp lệ). PURE-ish:
+    live_prober tiêm được để test offline."""
+    try:
+        if any(_entry_drive_id(e) == drive_id for e in _manifest_entries()):
+            return True
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        if live_prober is None:
+            def live_prober(fid):
+                _fg = _imp("transport").drive_op("files_get", file_id=fid, _quiet=True)
+                return bool(isinstance(_fg, dict) and _fg.get("ok") and (_fg.get("file") or {}).get("id"))
+        return bool(live_prober(drive_id))
+    except Exception:  # noqa: BLE001
+        return False
+
+def _valid_cats(config_path=None, profile=None) -> set:
+    """(4) Tập mã cat có FOLDER THỰC của profile, đọc từ config.profiles.<p>.categories."""
+    for p in _config_candidates(config_path):
+        if p and Path(p).exists():
+            cfg = _read_json_file(p)
+            if cfg:
+                prof = _profiles_from_config(cfg).get(_selected_profile_name(profile, cfg)) or {}
+                cats = prof.get("categories")
+                # MERGE nhánh-3 v1.33.14: profile categories='inherit' (doctrine §12) → tra cây của profile mặc định.
+                if isinstance(cats, str) and cats == "inherit":
+                    prof = _profiles_from_config(cfg).get(cfg.get("defaultProfile", DEFAULT_PROFILE)) or {}
+                    cats = prof.get("categories")
+                if isinstance(cats, dict):
+                    return set(cats.keys()) | {"QUARANTINE"}
+    return set()
+
+def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = "", sohieu: str = "",
+                         loai: str = "", cat: str = "", source_quality: str = "auto",
+                         ocr_verified: bool = False) -> dict:
+    probe_text, probe_source = _profile_read_probe_text(path, text_file)
+    _fname = Path(path).name    # (MERGE Claude) CHỈ tên file (KHÔNG full path) → tránh _RAW_SOHIEU_RE bắt nhầm fragment UUID trong đường dẫn
+    info = _classify_doc_header(probe_text, _fname)
+    fallback_info = _classify_doc_header("", _fname)
+    merged = dict(info)
+    for k in ("sohieu", "sohieu_key", "loai", "issue_year"):
+        if not merged.get(k) and fallback_info.get(k):
+            merged[k] = fallback_info.get(k)
+    if sohieu:
+        merged["sohieu"] = sohieu
+        merged["sohieu_key"] = norm_sohieu(sohieu)
+    if loai:
+        merged["loai"] = loai
+    # (MERGE Claude) CHỦ ĐỀ đặt tên lấy từ dòng tiêu đề THẬT (bỏ dòng số hiệu/DỰ THẢO, strip loại, ALL-CAPS→sentence)
+    # → chống tên Codex lặp số hiệu; dự thảo dùng _safe_profile_doc_name (DUTHAO_).
+    _subj = _doc_subject_for_name(probe_text, merged)
+    if _subj:
+        merged["title"] = _subj.capitalize() if _subj.isupper() else _subj
+    if (name or "").strip():
+        doc_name = name.strip()
+    elif merged.get("draft"):
+        doc_name = _safe_profile_doc_name(merged, Path(_fname).stem)
+    else:
+        doc_name = _vb_standard_doc_name(merged, Path(_fname).stem)
+    cat_plan = _vb_auto_cat_from_text(probe_text, doc_name + "\n" + Path(path).stem, cat)
+    warnings = []
+    # N2d (v1.33.41 — log rà VBHN-first: auto-plan gợi cat=00 [văn kiện Đảng] cho VBHN Luật giám sát QH): cat 00
+    # KHÔNG BAO GIỜ hợp lệ cho VBQPPL (mirror gate _CAT_PIN/_cat_likely_wrong 'Luật không→23, VBHN không→46') —
+    # thân luật nhắc 'Đảng' làm alias 00 thắng điểm. Hạ về rỗng + cảnh báo, KHÔNG ghi bừa.
+    if cat_plan.get("cat") == "00" and str(merged.get("loai") or "") in {
+            "Luật", "Bộ luật", "Pháp lệnh", "Văn bản hợp nhất", "Nghị định", "Thông tư", "Quyết định"}:
+        warnings.append("CAT_00_PARTY_BLOCKED_FOR_VBQPPL")
+        cat_plan = dict(cat_plan, cat="", confidence="low",
+                        note="cat 00 (văn kiện Đảng) không hợp lệ cho VBQPPL — truyền --cat tường minh")
+    # N2 (v1.33.41): VBHN auto-plan KHÔNG đáng tin bằng luật thường (số VBHN ở khối ký cuối, tên chủ đề dễ dính
+    # cơ quan) — nhắc tường minh để driver set --name/--sohieu/--cat theo bản hợp nhất.
+    if str(merged.get("loai") or "") == "Văn bản hợp nhất":
+        warnings.append("VBHN_AUTO_PLAN_VERIFY_EXPLICIT: đối chiếu --sohieu (số VBHN, KHÔNG phải số luật gốc) "
+                        "+ --name (chủ đề) + --cat trước khi --apply")
+    if not probe_text:
+        warnings.append("NO_PROBE_TEXT_FOR_AUTO_CAT")
+    if not merged.get("sohieu"):
+        warnings.append("SOHIEU_MISSING")
+    if cat_plan.get("confidence") in {"low", "missing"}:
+        warnings.append("CAT_AUTO_LOW_CONFIDENCE")
+    srcq = _profile_source_quality(path, source_quality)
+    if srcq == "ocr" and not ocr_verified:
+        warnings.append("OCR_UNVERIFIED_NOT_CORPUS")
+    return {
+        "ok": bool(doc_name and cat_plan.get("cat")),
+        "file": path,
+        "probe_text_source": probe_source or None,
+        "probe_chars": len(probe_text or ""),
+        "classification": merged,
+        "name": doc_name,
+        "sohieu": merged.get("sohieu") or "",
+        "loai": merged.get("loai") or "",
+        "cat": cat_plan.get("cat") or "",
+        "cat_plan": cat_plan,
+        "source_quality": srcq,
+        "ocr_verified": bool(ocr_verified),
+        "warnings": warnings,
+        "note": "Auto-plan chỉ đáng tin khi có probe text/OCR text; thiếu text thì cần --text-file, --cat hoặc --force-cat.",
+    }
+
+def _dieu_sequence_stats(text: str) -> dict:
+    nums = [int(x) for x in re.findall(r"(?mi)^\s*Điều\s+(\d+)\b", text or "")]
+    gaps = []
+    for a, b in zip(nums, nums[1:]):
+        if b > a + 1:
+            gaps.append({"after": a, "before": b})
+    return {"count": len(nums), "first": nums[0] if nums else None, "last": nums[-1] if nums else None,
+            "monotonic": all(b > a for a, b in zip(nums, nums[1:])), "gaps": gaps[:20]}
+
+def _drive_info_file(g, file_id: str) -> dict:
+    """Best-effort Drive metadata readback qua webapp action=info. Không raise."""
+    if not file_id:
+        return {"ok": False, "error": "EMPTY_FILE_ID", "file": {}}
+    try:
+        info = g.get("info", fileId=file_id)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"INFO_EXCEPTION:{type(e).__name__}:{e}", "file": {}}
+    if not isinstance(info, dict):
+        return {"ok": False, "error": "INFO_NON_DICT", "raw": str(info)[:200], "file": {}}
+    f = info.get("file") if isinstance(info.get("file"), dict) else info
+    return {"ok": bool(info.get("ok", True) and (f.get("id") or f.get("fileId") or file_id)), "raw": info, "file": f}
+
+def _file_parents(info: dict) -> list[str]:
+    f = info.get("file") or {}
+    parents = f.get("parents") or f.get("parentIds") or []
+    if isinstance(parents, str):
+        return [parents]
+    return [str(x.get("id") if isinstance(x, dict) else x) for x in parents if x]

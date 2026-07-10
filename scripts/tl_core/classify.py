@@ -1403,3 +1403,138 @@ def _declared_loai_from_header(text: str) -> str:
 def _file_name(info: dict) -> str:
     f = info.get("file") or {}
     return str(f.get("name") or f.get("title") or "").strip()
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _nlm_status_removed(status: str) -> bool:
+    """HỌ status 'đã gỡ': mọi biến thể tiền tố `removed*` (removed_superseded_by_VBHN, removed_dedup…) + deleted/trash*.
+    Trước đây check exact-set → biến thể removed_* bị coi NHẦM là 'còn sống' (lệch still_on_nlm/ghost)."""
+    s = (status or "").strip().lower()
+    return s.startswith("removed") or s.startswith("trash") or s == "deleted"
+
+def _expand_abbrev(text: str) -> str:
+    """Nối thêm dạng ĐẦY ĐỦ của viết tắt pháp lý vào text (KHÔNG thay thế → không phá token khác). 'Luat BHXH' →
+    'Luat BHXH bao hiem xa hoi'. Dùng trong _token_set + _disc_conflict để khớp chủ đề bất kể viết tắt/đầy đủ."""
+    low = _strip_accents(str(text or "")).lower()
+    extra = [_ABBREV_MAP[m] for m in dict.fromkeys(_ABBREV_RE.findall(low))]
+    return (str(text or "") + " " + " ".join(extra)) if extra else str(text or "")
+
+def _discover_item_kind(item: dict) -> str:
+    """B (PURE): phân loại 1 item Drive (shape action `list`: {id,name,mime,type}) cho discovery/adopt.
+    Nhận diện KHOAN DUNG các biến thể tên thật trên Drive: 'tra_luat_registry.LuatBHXH', 'Registry_NQ36',
+    'tra_luat_registry' trơ, '_manifest_DinhMucChi.json', 'tra_luat_manifest.NQ36.json'."""
+    name = str(item.get("name") or "")
+    mime = str(item.get("mime") or item.get("mimeType") or "")
+    if str(item.get("type") or "") == "folder" or mime.endswith("apps.folder"):
+        return "folder"
+    if name.startswith(_PROFILES_INDEX_NAME):
+        return "index"    # sổ cái (E) = hạ tầng, KHÔNG phải asset profile lạc chỗ
+    if re.match(r"^(tra_luat_registry|registry)([._\-]|$)", name, re.IGNORECASE):
+        if mime == REGISTRY_SHEET_MIME:
+            return "registry"
+        return "registry_csv" if name.lower().endswith(".csv") else "registry_nonsheet"
+    if re.search(r"manifest[\w.\-]*\.json$", name, re.IGNORECASE):
+        return "manifest"
+    return "other"
+
+# ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──
+_ABBREV_MAP = {
+    "bhxh": "bao hiem xa hoi", "bhyt": "bao hiem y te", "bhtn": "bao hiem that nghiep",
+    "bluat": "bo luat",   # P1-3 v1.33.12: prefix chuẩn sinh-tự-động của standardize_name
+    "blhs": "bo luat hinh su", "blld": "bo luat lao dong", "blds": "bo luat dan su",
+    "bltths": "bo luat to tung hinh su", "blttds": "bo luat to tung dan su",
+    "atvsld": "an toan ve sinh lao dong", "kdbh": "kinh doanh bao hiem",
+    "tnld": "tai nan lao dong", "bnn": "benh nghe nghiep", "nsnn": "ngan sach nha nuoc",
+    "ppp": "doi tac cong tu", "doi tac cong tu": "ppp",
+    # N2 (v1.31.1 — bài học #2 log phiên rà 68 Luật): viết tắt trong TÊN FILE làm cross-check token FALSE-REJECT
+    # bản đúng ('CNTT' ∌ token 'cong nghe thong tin') → bổ sung các viết tắt phổ biến còn thiếu.
+    "cntt": "cong nghe thong tin", "pcth": "phong chong tac hai", "pccc": "phong chay chua chay",
+    "hnvgd": "hon nhan va gia dinh", "gtvt": "giao thong van tai", "khcn": "khoa hoc cong nghe",
+    # D2 (v1.33.3 — log rà 66×3: 87/2015 'HD_giam_sat_QH_HDND' FAIL title-check vì 'hdnd' không bao giờ xuất
+    # hiện nguyên dạng trong header viết đầy đủ): viết tắt CƠ QUAN DÂN CỬ/đoàn thể còn thiếu.
+    "hdnd": "hoi dong nhan dan", "ubnd": "uy ban nhan dan", "mttq": "mat tran to quoc",
+    # S-2e (v1.33.15 — log rà 40: ND_47-2024 'CSDL_Quoc_gia' + TT_95-2025 'uu_dai_NCC' FAIL title-check vì
+    # viết tắt không có trong map): bổ sung viết tắt còn thiếu gặp trong corpus thật.
+    "csdl": "co so du lieu", "ncc": "nguoi co cong",
+    # B.2 (v1.33.19 — log rà v1.33.18: GDDH khớp 0/1, BH_VBQPPL khớp 0/1 — title-check fail oan dù
+    # sohieu/loai/cat đều PASS): viết tắt giáo dục + VBQPPL trong tên chuẩn.
+    "gddh": "giao duc dai hoc", "gdnn": "giao duc nghe nghiep",
+    "vbqppl": "van ban quy pham phap luat",
+    # v1.33.20 (MERGE bundle-20): thêm họ hàng cùng lớp — 'bh' đứng-một-mình theo quy ước tên corpus = Ban hành
+    # (bảo hiểm luôn viết BHXH/BHYT/KDBH dài hơn); expansion chỉ APPEND token nên rủi ro = 0 thay thế.
+    "gdpt": "giao duc pho thong", "bh": "ban hanh", "qppl": "quy pham phap luat",
+}
+
+# ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──
+_LOAI_CANON = {
+    "luat": "Luật", "bo luat": "Bộ luật", "bluat": "Bộ luật", "bo_luat": "Bộ luật",
+    "van ban hop nhat": "Văn bản hợp nhất", "vbhn": "Văn bản hợp nhất", "vanbanhopnhat": "Văn bản hợp nhất",
+    "nghi dinh": "Nghị định", "nd": "Nghị định", "nghidinh": "Nghị định",
+    "thong tu": "Thông tư", "tt": "Thông tư", "thongtu": "Thông tư",
+    "thong tu lien tich": "Thông tư liên tịch", "ttlt": "Thông tư liên tịch",
+    "nghi quyet": "Nghị quyết", "nq": "Nghị quyết", "nghiquyet": "Nghị quyết",
+    "quyet dinh": "Quyết định", "qd": "Quyết định", "quyetdinh": "Quyết định",
+    "phap lenh": "Pháp lệnh", "pl": "Pháp lệnh", "phaplenh": "Pháp lệnh",
+    "ket luan": "Kết luận", "kl": "Kết luận", "chi thi": "Chỉ thị", "ct": "Chỉ thị",
+    "hien phap": "Hiến pháp", "hp": "Hiến pháp", "lenh": "Lệnh",
+    # v1.30.1 (#4): Công điện = họ tên-chuẩn từ v1.29.4 (CD_32-2026-CD-TTg) nhưng THIẾU trong enum → dòng
+    # loai='Công điện' bị đếm phi-chuẩn vĩnh viễn + --normalize không map được. Review CONFIRMED: 'cd' trần
+    # CŨNG phải map (CD ∈ họ canonical dòng _canon_fams; nhất quán nd/tt/nq/qd/kl/ct đã có; 'CĐ'→'cd' sau norm).
+    "cong dien": "Công điện", "congdien": "Công điện", "cd": "Công điện",
+    # A4 (v1.32.0 — log rà 77 Luật): công ước ILO/điều ước mang loai='Điều ước quốc tế' HỢP LỆ nhưng thiếu trong
+    # enum → 56 dòng đếm nonmappable/loai_noncanonical GIẢ mỗi lần sweep/backfill. Thêm cả 2 giá trị canonical.
+    "dieu uoc quoc te": "Điều ước quốc tế", "dieu uoc": "Điều ước quốc tế", "dieuuoc": "Điều ước quốc tế",
+    "cong uoc": "Công ước", "conguoc": "Công ước",
+}
+
+# ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──
+_CAT_KEYWORDS = {
+    "01": ["an_ninh_quoc_gia", "xuat_canh", "nhap_canh", "qua_canh", "bi_mat_nha_nuoc", "an_ninh_mang", "co_yeu"],
+    "02": ["bao_hiem_xa_hoi", "bhxh", "bao_hiem_y_te", "bhyt", "kinh_doanh_bao_hiem", "bao_hiem_that_nghiep", "bao_hiem_tien_gui"],
+    "03": ["buu_chinh", "vien_thong", "cong_nghe_thong_tin", "cntt", "giao_dich_dien_tu", "du_lieu", "an_toan_thong_tin", "tan_so", "bao_ve_du_lieu_ca_nhan", "csdl"],
+    "05": ["can_bo", "cong_chuc", "vien_chuc", "cong_vu"],
+    "06": ["nguoi_cao_tuoi", "nguoi_khuyet_tat", "bao_tro_xa_hoi", "giam_ngheo", "nguoi_co_cong"],
+    "08": ["dan_so", "binh_dang_gioi", "bao_luc_gia_dinh", "tre_em", "nuoi_con_nuoi", "hon_nhan"],
+    "09": ["dan_su", "bo_luat_dan_su"],
+    "10": ["dan_toc"],
+    "11": ["dat_dai", "dia_chinh"],
+    "12": ["doanh_nghiep", "hop_tac_xa", "ho_kinh_doanh"],
+    "13": ["giao_duc", "dao_tao", "nha_giao", "giao_vien", "day_nghe", "nghe_nghiep", "dai_hoc"],
+    "14": ["giao_thong", "van_tai", "duong_bo", "duong_sat", "hang_khong", "hang_hai", "duong_thuy"],
+    "15": ["ho_tich", "quoc_tich", "ly_lich_tu_phap", "boi_thuong_nha_nuoc"],
+    "16": ["hinh_su", "thi_hanh_an_hinh_su", "dac_xa"],
+    "17": ["ke_toan", "kiem_toan"],
+    "18": ["khieu_nai", "to_cao", "tiep_cong_dan", "phong_chong_tham_nhung", "thanh_tra"],
+    "19": ["khoa_hoc", "so_huu_tri_tue", "tieu_chuan", "do_luong", "chat_luong_san_pham", "nang_luong_nguyen_tu", "chuyen_giao_cong_nghe"],
+    "20": ["lao_dong", "viec_lam", "an_toan_ve_sinh_lao_dong", "tien_luong"],
+    "21": ["moi_truong", "da_dang_sinh_hoc"],
+    "22": ["ngan_hang", "tien_te", "cac_tctd", "tin_dung", "ngoai_hoi"],
+    "23": ["ngoai_giao", "dieu_uoc_quoc_te", "lanh_su"],
+    "24": ["nong_nghiep", "nong_thon", "thuy_san", "lam_nghiep", "chan_nuoi", "thu_y", "bao_ve_thuc_vat", "thuy_loi", "de_dieu"],
+    "25": ["quoc_phong", "bien_phong", "dan_quan", "nghia_vu_quan_su", "sy_quan"],
+    "26": ["ngan_sach", "dau_tu_cong"],
+    "27": ["tai_nguyen", "khoang_san", "dia_chat", "bien_va_hai_dao"],
+    "28": ["tai_san_cong", "du_tru_nha_nuoc"],
+    "29": ["thi_dua", "khen_thuong", "danh_hieu_vinh_du"],
+    "30": ["thi_hanh_an_dan_su"],
+    "31": ["thong_ke"],
+    "32": ["bao_chi", "xuat_ban", "thu_vien"],
+    "33": ["thue", "le_phi", "hai_quan", "hoa_don"],
+    "34": ["thuong_mai", "chung_khoan", "canh_tranh", "nguoi_tieu_dung", "ppp", "dau_thau"],
+    "35": ["to_chuc_chinh_phu", "to_chuc_quoc_hoi", "chinh_quyen_dia_phuong", "to_chuc_toa_an", "to_chuc_vien_kiem_sat"],
+    "36": ["mat_tran_to_quoc", "thanh_nien", "cong_doan", "cuu_chien_binh"],
+    "37": ["to_tung", "trong_tai_thuong_mai", "hoa_giai"],
+    "38": ["ton_giao", "tin_nguong"],
+    "39": ["ma_tuy", "mai_dam", "phong_chay", "chua_chay", "vu_khi", "vat_lieu_no", "can_cuoc", "phong_chong_thien_tai"],
+    "40": ["tuong_tro_tu_phap"],
+    "41": ["van_hoa", "the_thao", "du_lich", "di_san", "dien_anh", "quang_cao", "the_duc"],
+    "42": ["van_thu", "luu_tru"],
+    "43": ["xay_dung", "nha_o", "do_thi", "quy_hoach", "kien_truc"],
+    "44": ["ban_hanh_van_ban", "vbqppl", "thi_hanh_phap_luat", "pho_bien_giao_duc_phap_luat", "phap_dien"],
+    "45": ["y_te", "kham_benh", "chua_benh", "an_toan_thuc_pham", "duoc_pham", "phong_chong_benh", "hien_mau", "hien_tang"],
+}
+
+# ── I11: hằng DẪN XUẤT theo map (compile lúc import — phải sống cùng file với map gốc, bài học _ABBREV_RE) ──
+_ABBREV_RE = re.compile(r"(?<![a-z])(" + "|".join(_ABBREV_MAP) + r")(?![a-z])")
+_LOAI_CANON_VALUES = set(_LOAI_CANON.values())

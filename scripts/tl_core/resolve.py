@@ -1392,3 +1392,123 @@ def _rq_relation_probe(entries: list[dict], e: dict) -> dict:
             "note": ("relation-check PHỦ ĐỊNH — không missing_links/subject_only/footnote-thiếu; "
                      "không đưa P0/backfill" if not actionable else
                      "relation-check còn tín hiệu cần soi — giữ INFO, không tự ghi")}
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _dedupe_key_entry(e: dict) -> str:
+    sh = _sohieu_key_entry(e)
+    if not sh:
+        return ""
+    if _is_vbhn_entry(e):
+        return "VBHN:" + sh + ":" + _vbhn_subject_key(e)
+    return sh
+
+def _is_source_sidecar(e: dict, group: list[dict], canonical: dict | None = None) -> bool:
+    """File .doc/.docx/.pdf gốc nằm cạnh GDoc là sidecar hợp lệ, không phải rác."""
+    name = _entry_name(e)
+    if _entry_nlm(e) or not re.search(r"\.(docx?|pdf)$", name or "", re.I):
+        return False
+    base = _name_key(re.sub(r"\.(docx?|pdf)$", "", name, flags=re.I))
+    for other in group:
+        if other is e:
+            continue
+        if canonical is not None and other is not canonical and not _entry_nlm(other):
+            continue
+        if _dedupe_key_entry(other) and _dedupe_key_entry(other) == _dedupe_key_entry(e):
+            return True
+        obase = _name_key(re.sub(r"\.(docx?|pdf)$", "", _entry_name(other), flags=re.I))
+        if base and obase and (base == obase or base in obase or obase in base):
+            return True
+    return False
+
+def _sohieu_num_typo(a: str, b: str) -> bool:
+    """True nếu số thứ tự a↔b chênh đúng 1 ký tự (thay 1 chữ số) hoặc đảo 2 chữ số liền kề."""
+    if len(a) != len(b) or a == b:
+        return False
+    diff = [i for i in range(len(a)) if a[i] != b[i]]
+    if len(diff) == 1:
+        return True
+    return (len(diff) == 2 and diff[1] == diff[0] + 1
+            and a[diff[0]] == b[diff[1]] and a[diff[1]] == b[diff[0]])
+
+def _doctype_family(agency: str) -> str:
+    """P0-2 (log rà 71 luật): HỌ loại văn bản theo mã cơ quan trong số hiệu. Dùng để CHẶN gợi ý
+    DOC_TEXT_SOHIEU_TYPO VƯỢT BIÊN họ — tái dùng SỐ+NĂM giữa Luật QH ↔ NQ-TW/KL-TW (Đảng) ↔ NĐ-CP (Chính phủ)
+    là HỢP PHÁP, KHÔNG phải gõ nhầm (vd 29/2013/QH13 ≠ 29/2013/NQ-TW). Chỉ flag typo trong CÙNG họ (QH14↔QH15)."""
+    a = _strip_accents(agency or "").upper().replace(" ", "")
+    if "TW" in a:                                   # NQ-TW/KL-TW/QD-TW/CT-TW — văn bản của Đảng
+        return "TW"
+    if "VPQH" in a or re.search(r"QH\d", a) or a in ("QH", "LCT-HDNN8") or "UBTVQH" in a or "-PL-" in a or a.startswith("PL-"):
+        return "QH"                                 # Quốc hội / UBTVQH / VBHN-VPQH / Pháp lệnh / Lệnh CTN
+    if "CP" in a:                                   # ND-CP / NQ-CP — Chính phủ
+        return "CP"
+    if "TTG" in a:                                  # QD-TTg — Thủ tướng
+        return "TTG"
+    if a.startswith("TT") or "TTLT" in a or re.search(r"-B[A-Z]{2,}", a):  # Thông tư / TTLT / QĐ-Bộ
+        return "TT"
+    return a or "?"                                 # mã lạ → chính nó (khác mọi họ trên → KHÔNG bắc cầu)
+
+def resolve_body_effective_dates(text: str, today: str | None = None) -> list[dict]:
+    """Parse mệnh đề hiệu lực trong THÂN văn bản, không chỉ footnote VBHN.
+
+    Dùng để bắt luật gốc mới có Điều hiệu lực tương lai (vd "Luật này có hiệu lực
+    từ ngày..." và ngoại lệ "điểm c, d khoản 1 Điều 14 có hiệu lực...").
+    """
+    import datetime as _dt
+    today = today or _dt.date.today().isoformat()
+    txt = unicodedata.normalize("NFC", text or "")
+    chunks = re.split(r"(?<=[.;])\s+|\n+", txt)
+    out, seen = [], set()
+    for raw in chunks:
+        clause = re.sub(r"\s+", " ", raw).strip()
+        if "hiệu lực" not in clause.lower():
+            continue
+        for dm in (_HL_DATE_RE.search(clause), _HL_DATE_VN_RE.search(clause)):
+            hl = _date_from_effect_match(dm)
+            if not hl:
+                continue
+            key = (hl, clause[:160])
+            if key in seen:
+                continue
+            seen.add(key)
+            positions = []
+            for pm in _POS_RE.finditer(clause):
+                positions.append(" ".join(p for p in [
+                    ("điểm " + pm.group(1)) if pm.group(1) else None,
+                    ("khoản " + pm.group(2)) if pm.group(2) else None,
+                    ("Điều " + pm.group(3)) if pm.group(3) else None,
+                ] if p))
+            out.append({
+                "scope": clause[:240],
+                "positions": positions,
+                "hieu_luc": hl,
+                "pending_effect": hl > today,
+                "source": "body_effective_clause",
+            })
+    return out
+
+# ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──
+_FLAG_REASONS = {
+    "RAW_NAME_NOT_NLM": "bản thô (chưa GDoc/NLM) cạnh bản canonical",
+    "CORPUS_TRUE_NOT_ON_NLM": "corpus=true nhưng chưa có nguồn NLM live",
+    "NLM_STATUS_MISMATCH": "nlm_status lệch trạng thái thực (registry hygiene)",
+    "NLM_NOTEBOOK_ID_MISSING": "trên NLM nhưng thiếu nlm_notebook_id",
+    "NLM_GHOST_SOURCE": "nguồn NLM rỗng (không tên/số hiệu)",
+    "ORPHAN_CAT": "thiếu folder chủ đề hợp lệ",
+    "MISSING_SOHIEU": "chưa có số hiệu chuẩn",
+    "DRAFT_NOT_EFFECTIVE": "là DỰ THẢO, chưa hiệu lực",
+    "OMNIBUS_NARROW_TITLE_CHECK": "tên hẹp nhưng quan hệ sửa nhiều luật (omnibus)",
+    "TITLE_METADATA_MISMATCH": "tên file lệch metadata quan hệ",
+    "VBHN_BARE_NUMBER": "VBHN tên trơ, thiếu năm/cơ quan",
+    "VBHN_MISSING_YEAR_OR_DATE": "VBHN thiếu năm trong số hiệu/tên",
+    "VBHN_NAME_MISSING_YEAR": "tên VBHN thiếu năm ban hành",
+    "VBHN_NAME_MISSING_SUBJECT": "tên VBHN thiếu chủ đề",
+    "VBHN_MINISTRY_SCOPE": "VBHN cấp Bộ — cần năm + xử lý riêng",
+    "VBHN_MINISTRY_MISSING_YEAR": "VBHN cấp Bộ thiếu năm trong số hiệu",
+    "VBHN_MINISTRY_NAME_MISSING_YEAR": "VBHN cấp Bộ thiếu năm trong tên",
+    "VBHN_SOHIEU_NORMALIZED_FROM_SHORT_VPQH": "số hiệu VBHN suy từ dạng rút gọn -VPQH",
+    "VBHN_YEAR_NOT_IN_METADATA": "năm VBHN không thấy trong metadata",
+    "SUBJECT_NOT_EVIDENT_IN_METADATA": "metadata không thể hiện rõ chủ đề",
+    "GOC_NOT_EVIDENT_IN_METADATA": "metadata không dẫn-chiếu văn bản gốc đã cho",
+}

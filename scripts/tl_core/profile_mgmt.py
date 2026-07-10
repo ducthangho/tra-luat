@@ -993,3 +993,96 @@ def cmd_profile_create(a) -> int:
             print("  - " + s)
         print("\n# Instruction (Claude Project):\n" + text)
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _strip_shared_fixes(findings: list[dict], profiles: dict) -> list[dict]:
+    """Review v1.30.0 (PURE, CONFIRMED): finding có fix-move nhưng fileId DÙNG CHUNG ≥2 profile → BỎ fix, nâng
+    thành SHARED_ASSET_MULTI_PROFILE critical (move theo profile này = phá layout profile kia — tách asset trước)."""
+    out = []
+    for f in findings or []:
+        if f.get("fix"):
+            owners = _profile_asset_owners(profiles, f.get("fileId") or "")
+            if len(owners) > 1:
+                f = {k: v for k, v in f.items() if k != "fix"}
+                f["check"] = "SHARED_ASSET_MULTI_PROFILE"
+                f["severity"] = "critical"
+                f["owners"] = owners
+                f["note"] = (f"asset dùng chung {len(owners)} profile ({', '.join(owners)}) — KHÔNG auto-move "
+                             "(phá layout profile kia); tách registry/manifest riêng trước (doctrine own-assets).")
+        out.append(f)
+    return out
+
+def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
+    """B: quét Van_ban_thuong 2 cấp read-only qua GAS `list` — con trực tiếp + trong `_meta` của từng thư mục con
+    (registry/manifest kiểu mới nằm trong _meta, kiểu cũ nằm thẳng trong folder). Cap thư mục quét, LOUD khi cắt."""
+    top = _gas_get_retry(g, "list", folderId=vbt_id)
+    items = top.get("items") or []
+    root_files = [x for x in items if str(x.get("type")) != "folder"]
+    subfolders = [x for x in items if str(x.get("type")) == "folder"]
+    out_folders = []
+    for fo in subfolders[:folder_cap]:
+        try:
+            sitems = _gas_get_retry(g, "list", folderId=fo.get("id")).get("items") or []
+        except Exception:
+            sitems = []
+        meta = next((x for x in sitems if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
+        if meta:
+            try:
+                sitems = sitems + (_gas_get_retry(g, "list", folderId=meta.get("id")).get("items") or [])
+            except Exception:
+                pass
+        out_folders.append({"id": fo.get("id"), "name": fo.get("name"), "items": sitems,
+                            "meta_folder_id": (meta or {}).get("id")})
+    return {"ok": True, "vbt_id": vbt_id, "folders": out_folders, "root_files": root_files,
+            "capped": len(subfolders) > folder_cap, "folder_total": len(subfolders)}
+
+def _adopt_pick_assets(items: list[dict], reg_override: str = "", man_override: str = "") -> dict:
+    """C (PURE, test offline): chọn registry Sheet + manifest JSON từ items (con folder + _meta). Override thắng.
+    Nhiều ứng viên không override → AMBIGUOUS (bắt người chọn — KHÔNG đoán); tên-registry-nhưng-không-Sheet → chặn."""
+    regs, mans, reg_nonsheet = [], [], []
+    for it in items or []:
+        k = _discover_item_kind(it)
+        if k == "registry":
+            regs.append(it)
+        elif k == "manifest":
+            mans.append(it)
+        elif k == "registry_nonsheet":
+            reg_nonsheet.append(it)
+    out = {"registry_candidates": [{"id": x.get("id"), "name": x.get("name")} for x in regs],
+           "manifest_candidates": [{"id": x.get("id"), "name": x.get("name")} for x in mans],
+           "registry_nonsheet": [{"id": x.get("id"), "name": x.get("name")} for x in reg_nonsheet],
+           "registry": None, "manifest": None, "errors": []}
+    if reg_override:
+        out["registry"] = {"id": reg_override, "name": "(override --registry)"}
+    elif len(regs) == 1:
+        out["registry"] = {"id": regs[0].get("id"), "name": regs[0].get("name")}
+    elif len(regs) > 1:
+        out["errors"].append("REGISTRY_AMBIGUOUS: nhiều registry Sheet trong thư mục — truyền --registry <id>.")
+    elif reg_nonsheet:
+        out["errors"].append("REGISTRY_NOT_SHEET: thấy file tên registry nhưng KHÔNG phải Google Sheet "
+                             "(Doc/legacy?) — bài học CLOBBER: Doc-as-Sheet đọc RỖNG. Truyền --registry <Sheet thật>.")
+    else:
+        out["errors"].append("REGISTRY_NOT_FOUND: không thấy tra_luat_registry*/Registry_* (Sheet) trong thư mục/_meta — "
+                             "truyền --registry <id> (vd asset lạc gốc từ --discover) hoặc dựng mới bằng profile-create.")
+    if man_override:
+        out["manifest"] = {"id": man_override, "name": "(override --manifest)"}
+    elif len(mans) == 1:
+        out["manifest"] = {"id": mans[0].get("id"), "name": mans[0].get("name")}
+    elif len(mans) > 1:
+        std = [m for m in mans if str(m.get("name") or "").lower().startswith("tra_luat_manifest")]
+        if len(std) == 1:
+            out["manifest"] = {"id": std[0].get("id"), "name": std[0].get("name")}
+        else:
+            out["errors"].append("MANIFEST_AMBIGUOUS: nhiều *manifest*.json — truyền --manifest <id>.")
+    else:
+        out["errors"].append("MANIFEST_NOT_FOUND: không thấy *manifest*.json — truyền --manifest <id>, "
+                             "hoặc --bootstrap-manifest để sinh mới từ registry sẵn có.")
+    return out
+
+def _index_old_candidates(items: list[dict]) -> list[dict]:
+    """Review v1.30.0 (PURE, CONFIRMED): bản index CŨ cần dọn = TÊN CHÍNH XÁC `_PROFILES_INDEX` (Sheet) /
+    `_PROFILES_INDEX.csv` — KHÔNG startswith (file người dùng đặt `_PROFILES_INDEX_backup…` từng có nguy cơ trash nhầm)."""
+    keep = {_PROFILES_INDEX_NAME, f"{_PROFILES_INDEX_NAME}.csv"}
+    return [x for x in (items or []) if str(x.get("name") or "") in keep]

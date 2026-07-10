@@ -346,6 +346,7 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/profile_env.py",
     "scripts/tl_core/resolve.py",
     "scripts/tl_core/regio.py",
+    "scripts/tl_core/cli.py",
     "scripts/tl_core/command_registry.py",
     "SKILL.md",
     "CHANGELOG.md",
@@ -660,3 +661,23 @@ def cmd_release_bundle(a) -> int:
            "note": "Zip dùng thứ tự file sort + timestamp 1980-01-01 để giảm drift đóng gói."}
     _print_json_or_text(res, getattr(a, "json", False))
     return 0
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _write_text_atomic(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _fd, _tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
+    with os.fdopen(_fd, "w", encoding="utf-8", errors="replace", newline="\n") as _f:   # v1.33.56 (F7): tmp duy nhất
+        _f.write(text)
+    os.replace(_tmp, str(path))
+
+def _sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        while True:
+            b = f.read(chunk_size)
+            if not b:
+                break
+            h.update(b)
+    return h.hexdigest()

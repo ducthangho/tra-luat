@@ -453,7 +453,7 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
             "tl_core/lookup_ops.py",
             "tl_core/ops_misc.py",
             "tl_core/classify.py", "tl_core/profile_env.py",
-            "tl_core/resolve.py", "tl_core/regio.py"]   # I1..I9b
+            "tl_core/resolve.py", "tl_core/regio.py", "tl_core/cli.py"]   # I1..I11
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []
@@ -2307,3 +2307,132 @@ def cmd_convert_verify(a) -> int:
                                    expected_folder_id=getattr(a, "expected_folder_id", "") or "")
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def _corpus_safe_reversible(entries: list) -> dict:
+    """Tập AN TOÀN ĐẢO-NGƯỢC cần set corpus=false: infra lẫn corpus (_sweep_report) + dup (dedup_plan ready). Dùng CHUNG
+    `corpus-fix --tier safe` và `loop`. Trả {ids, infra, dedup} (giữ breakdown cho output corpus-fix)."""
+    infra_ids = [r["drive_id"] for r in _sweep_report(entries)["infra_in_corpus_rows"] if r.get("drive_id")]
+    dp = _dedup_plan(entries)
+    dup_ids = [d["drive_id"] for it in dp["ready"] for d in it["quarantine"] if d.get("drive_id")]
+    return {"ids": list(dict.fromkeys(infra_ids + dup_ids)), "infra": len(infra_ids), "dedup": len(dup_ids)}
+
+def _reassemble_parts(name: str) -> str | None:
+    """ĐÃ BỎ cơ chế `_parts/` (chia nhỏ chống mount-cắt-cụt) — Cowork nay bootstrap qua `tl_fetch.sh` tải bản zip
+    SẠCH từ Drive (không qua mount nên không cắt cụt) → `_parts` hết tác dụng, đã xoá khỏi skill. Hàm GIỮ chữ ký
+    (luôn None) để mọi caller heal degrade an toàn về bản on-disk (strip-NUL nếu cần)."""
+    return None
+
+def _compiles(text) -> bool:
+    if text is None:
+        return False
+    try:
+        compile(text, "<integrity>", "exec"); return True
+    except SyntaxError:
+        return False
+
+def _nlm_probe_summary(env=None) -> dict:
+    """Canary NLM không mạng: tl dùng absolute path nội bộ, nhưng shell non-interactive có thể không thấy `nlm`."""
+    import shutil as _sh
+    try:
+        nc = _imp("nlm_cli")
+        tl_path = nc.nlm_exe() or ""
+    except Exception:
+        tl_path = ""
+    shell_path = _sh.which("nlm") or ""
+    try:
+        st = _imp("tl_gws")._nlm_install_probe(nlm_path=tl_path or shell_path or None)
+    except Exception as e:  # noqa: BLE001
+        st = {"next_step": "unknown", "error": f"{type(e).__name__}: {e}", "nlm": tl_path or shell_path}
+    return {"tl_nlm_path": tl_path, "shell_nlm_path": shell_path, "probe": st,
+            "path_note": ("OK: shell cũng thấy nlm" if shell_path else
+                          "shell non-interactive có thể chưa thấy nlm; dùng `tl nlm-*` hoặc export PATH=$HOME/.local/bin:$PATH")}
+
+def _doctor_exporttext_probe_target(entries: list[dict]) -> dict | None:
+    """MERGE Codex v1.33.10→v1.33.11: chọn một GDoc nhẹ để `doctor --deep` kiểm riêng GAS exporttext/scope.
+    Không dùng file thô vì lỗi raw không nói gì về OAuth scope."""
+    cands = [e for e in (entries or []) if _entry_google_doc(e) and _entry_corpus_true(e)]
+    if not cands:
+        cands = [e for e in (entries or []) if _entry_google_doc(e)]
+    cands.sort(key=_entry_score, reverse=True)
+    return cands[0] if cands else None
+
+def _canonical_for_query(q: str, refresh: bool=False) -> tuple[dict|None, list[dict]]:
+    key = norm_sohieu(q)
+    qn = _strip_accents(q).lower()
+    # EXACT-SỐ-HIỆU PRIORITY: khi query SUY RA được số hiệu THẬT (vd '45/2019/QH14', '18/VBHN-VPQH') thì khớp số hiệu
+    # CHÍNH XÁC LUÔN thắng fuzzy by-name — chống name-collision (1 VBHN/luật khác chỉ trùng cụm tên/dẫn-chiếu thắng nhờ
+    # _entry_score cao). KHÔNG đụng VBHN-first redirect (doctrine ở _source_map_one.related_vbhn).
+    shkey = norm_sohieu(q.replace("_", "-")) if _looks_like_sohieu_query(q) else ""
+    entries = _manifest_entries(refresh=refresh)
+    hits, exact = [], []
+    for e in entries:
+        sh = norm_sohieu(_entry_sohieu(e))
+        nm = _strip_accents(_entry_name(e)).lower()
+        # Fallback: entry có sohieu RỖNG trong registry nhưng TÊN mang số hiệu (vd '114_2025_QH15_658530').
+        # _sohieu_key_entry parse từ tên + .replace('_','-')→norm_sohieu (khớp '114-2025-QH15'); trả '' cho tên Mẫu_/PL_.
+        is_exact = bool(shkey) and (sh == shkey or _sohieu_key_entry(e) == shkey)
+        if is_exact or (key and sh == key) or (qn and qn in nm) or (key and _sohieu_key_entry(e) == key):
+            hits.append(e)
+            if is_exact:
+                exact.append(e)
+    hits.sort(key=_entry_score, reverse=True)
+    exact.sort(key=_entry_score, reverse=True)
+    # direct exact-sohieu LUÔN ưu tiên hơn by-name fuzzy; trong mỗi nhóm vẫn lấy _entry_score cao nhất.
+    canonical = exact[0] if exact else (hits[0] if hits else None)
+    return canonical, hits
+
+def _alias_terms(s: str) -> set:
+    """Trả tập term chuẩn hóa của s, MỞ RỘNG theo alias 2 chiều (BHXH↔bao hiem xa hoi…)."""
+    global _ALIAS_INDEX
+    if _ALIAS_INDEX is None:
+        _ALIAS_INDEX = {}
+        for canon, abbrs in _ALIASES:
+            members = set([canon] + abbrs)
+            for m in members:
+                _ALIAS_INDEX.setdefault(m, set()).update(members)
+    plain = _strip_accents(str(s or "")).lower()
+    terms = {plain}
+    for m, group in _ALIAS_INDEX.items():
+        if m and m in plain:
+            terms |= group
+    return {t for t in terms if t}
+
+def _official_rank(url: str) -> int:
+    """G1: hạng UY TÍN nguồn (NHỎ = chính thống hơn). 1=vbpl/congbao, 2=.gov.vn/.chinhphu.vn, 3=luatvietnam,
+    4=thuvienphapluat, 5=khác. Dùng xếp nguồn đối chiếu official-first + gate G1."""
+    u = (url or "").lower()
+    if "vbpl.vn" in u or "congbao.chinhphu.vn" in u:
+        return 1
+    if ".gov.vn" in u or "chinhphu.vn" in u:
+        return 2
+    if "luatvietnam.vn" in u:
+        return 3
+    if "thuvienphapluat.vn" in u:
+        return 4
+    return 5
+
+# ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──
+INSTRUCTION_REQUIRED = {
+    "SKILL_OF_RECORD": "Instruction phải nêu skill tra-luat là nguồn quy tắc cho phiên ghi/nạp.",
+    "ingest_handoff": "Instruction phải chuyển research_* thành discovery-only và handoff sang QT-3.",
+    "confirm_gate_web": "Instruction phải có cổng xác nhận riêng trước khi nạp web/corpus/NLM.",
+    "research_import": "Instruction phải nhắc rõ research_import không được nạp thẳng VBQPPL.",
+    "source_add(url)": "Instruction phải nhắc rõ source_add(url) không được nạp thẳng VBQPPL.",
+    "QT-3": "Instruction phải buộc tải/convert/đặt tên/sắp xếp/verify trước nlm_push.",
+    "notebook đang dùng": "Instruction phải mặc định dùng corpus/folder/notebook đang dùng.",
+    "docx": "Instruction phải ưu tiên docx/GDoc-convertible hơn PDF.",
+    "official-first": "Instruction phải giữ nguyên tắc nguồn chính thức trước.",
+    "download_link_priority": "Instruction phải phân biệt link tải người dùng với canonical official-first.",
+    "corpus_profile": "Instruction phải nêu profile đa-corpus và không mặc định VBQPPL cho văn bản thường.",
+    "manifest_fallback": "Instruction phải nêu manifest profile-first, fallback VBQPPL và cross_notebook_query.",
+    "cross_notebook_query": "Instruction phải nhắc QA xuyên corpus.",
+    "nlm_notebook_id": "Instruction phải nhắc slot theo notebook đích.",
+    "verify nguyên văn": "Instruction phải buộc kiểm chứng bằng nguyên văn.",
+    "VBHN-first": "Instruction phải giữ nguyên tắc VBHN-first.",
+    "DỰ THẢO": "Instruction phải cảnh báo dự thảo chưa hiệu lực.",
+    "source id": "Instruction phải neo về source id/drive_id.",
+    "Điều": "Instruction phải neo về Điều/khoản/điểm.",
+}

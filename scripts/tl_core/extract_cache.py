@@ -235,3 +235,53 @@ def cmd_cache_snapshot(a) -> int:
                          ensure_ascii=False, indent=2))
         return 0
     print("[tl] cache-snapshot cần: export | import", file=sys.stderr); return 2
+
+# ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
+
+
+def extract_dieu(text: str, n: int) -> str | None:
+    """Trích NGUYÊN VĂN Điều n: từ 'Điều n' tới 'Điều <kế tiếp>' (chịu số nhảy cóc)."""
+    m = _DIEU_HEAD(n).search(text or "")
+    if not m:
+        return None
+    end = len(text)
+    nxt = _DIEU_ANY.search(text, m.end())
+    if nxt:
+        end = nxt.start()
+    return text[m.start():end].strip()
+
+def _find_nfc(text: str, term: str, window: int = 120) -> list[dict]:
+    """Tìm chuỗi trong văn bản sau khi chuẩn hóa NFC + casefold.
+
+    Dùng thay `grep` trần để tránh âm tính giả với tiếng Việt có dấu / tổ hợp Unicode.
+    Trả về snippet từ văn bản đã NFC-normalize để phục vụ verify pháp lý.
+    """
+    hay = unicodedata.normalize("NFC", text or "")
+    needle = unicodedata.normalize("NFC", term or "")
+    if not needle:
+        return []
+    hay_cmp, needle_cmp = hay.casefold(), needle.casefold()
+    out, start = [], 0
+    while True:
+        i = hay_cmp.find(needle_cmp, start)
+        if i < 0:
+            break
+        a = max(0, i - window); b = min(len(hay), i + len(needle) + window)
+        snip = hay[a:b].replace("\r", " ").replace("\n", " ")
+        out.append({"pos": i, "snippet": snip})
+        start = i + max(1, len(needle_cmp))
+        if len(out) >= 50:
+            break
+    return out
+
+def _sanitize_export_text(s: str) -> str:
+    """U1 (v1.31.2 — log LIVE: driver bash vỡ capture vì 'byte không hợp UTF-8' trong output extract): làm sạch
+    text export TRƯỚC khi ghi đĩa/in — (a) diệt lone-surrogate (rò từ decode errors=surrogateescape của các đường
+    export/gws) bằng round-trip encode-replace; (b) bỏ control-char (giữ \\n \\t). stdout đã reconfigure
+    errors='replace' từ lâu nhưng KHÔNG cứu được file --out + text chui vào JSON của driver."""
+    s = str(s or "")
+    try:
+        s = s.encode("utf-8", errors="replace").decode("utf-8")
+    except Exception:
+        s = s.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
+    return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", s)

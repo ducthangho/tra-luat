@@ -1,3 +1,11 @@
+# ★ v1.34.19 — BACKLOG #11: _persist_profile_config ghi đúng config ACTIVE (2026-07-10)
+
+- Phát hiện từ ca thật #10: `profile-adopt` không `--config` ghi block vào `~/.tra_luat_config.json`
+  (hardcode) trong khi config ACTIVE là `tra_luat_config.v2.json` cạnh skill → ghi lạc chỗ IM LẶNG,
+  `profile-list` vẫn inherit không rõ vì sao.
+- Fix: ứng viên ghi = `_config_candidates(config_path)` — CÙNG thứ tự resolution với đường ĐỌC config
+  (cwd/skill-side v2 trước home); `--config` tường minh vẫn thắng. TDD `r84` viết trước (đỏ) → **730/730**.
+
 # ★ v1.34.18 — I11: VƯỢT ĐÍCH 2.500 — tl.py 3.576→1.394 dòng (−93% từ 19.052) (2026-07-10)
 
 - **(a) LEFTOVER-SWEEP**: 91 def ~1.5k dòng (hụt ngưỡng affinity 50% hồi I9) gán vào 14 module theo

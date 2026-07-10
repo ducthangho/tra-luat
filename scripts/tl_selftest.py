@@ -6045,6 +6045,34 @@ def run() -> int:
         _o83 = json.loads(_b83.getvalue())
         cases.append(("r83_instruction_audit_file_single_source",
                       _rc83 != 0 and set(_o83.get("missing") or []) == set(_gi83.REQUIRED_PROJECT)))
+    # ═══ v1.34.19 — r84: BACKLOG #11 — _persist_profile_config PHẢI ghi vào config ACTIVE theo
+    # _config_candidates (ca thật #10: adopt không --config ghi lạc ~/.tra_luat_config.json im lặng) ═══
+    _keys84 = ("_config_candidates", "_apply_journal_start", "_journal_append")
+    _sav84 = {k: getattr(_TL_MODULE, k) for k in _keys84}
+    import tempfile as _tf84
+    try:
+        with _tf84.TemporaryDirectory() as _d84:
+            _v2_84 = Path(_d84) / "tra_luat_config.v2.json"
+            _home84 = Path(_d84) / "home_config.json"
+            _v2_84.write_text('{"profiles": {}}', encoding="utf-8")
+            _home84.write_text('{"profiles": {}}', encoding="utf-8")
+            _TL_MODULE._config_candidates = lambda cp=None: (([cp] if cp else []) + [str(_v2_84), str(_home84)])
+            _TL_MODULE._apply_journal_start = lambda *a, **k: None
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _w84 = _TL_MODULE._persist_profile_config(None, "p84", {"notebookId": "NB84"})
+            _v2d = json.loads(_v2_84.read_text(encoding="utf-8"))
+            _hmd = json.loads(_home84.read_text(encoding="utf-8"))
+            _ok84a = (_w84 == str(_v2_84)
+                      and (_v2d.get("profiles") or {}).get("p84", {}).get("notebookId") == "NB84"
+                      and (_hmd.get("profiles") or {}) == {})
+            # --config tường minh vẫn thắng
+            _w84b = _TL_MODULE._persist_profile_config(str(_home84), "p84b", {"notebookId": "NB84B"})
+            _hmd2 = json.loads(_home84.read_text(encoding="utf-8"))
+            _ok84b = _w84b == str(_home84) and (_hmd2.get("profiles") or {}).get("p84b", {}).get("notebookId") == "NB84B"
+            cases.append(("r84_persist_config_active_candidates", _ok84a and _ok84b))
+    finally:
+        for _k, _v in _sav84.items():
+            setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

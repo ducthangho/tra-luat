@@ -364,7 +364,10 @@ def _download_link_plan(urls: list[str]) -> list[dict]:
 def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> str | None:
     """A1 (log rà): GHI BỀN config.profiles.<name> vào file config (MERGE — giữ profile khác + field cũ) →
     `tl profile-info`/`--profile <name>` resolve ĐÚNG thay vì fallback VBQPPL. Trả path đã ghi, None nếu không ghi được."""
-    cands = [Path(config_path)] if config_path else [Path.home() / ".tra_luat_config.json", Path("/tmp/tra_luat_config.json")]
+    # #11 (v1.34.19, ca thật #10): ứng viên = _config_candidates (CÙNG thứ tự resolution với ĐỌC config —
+    # cwd/skill-side v2 TRƯỚC ~/.tra_luat_config.json). Trước đây hardcode home-config → adopt/create không
+    # --config GHI LẠC vào file KHÔNG active, im lặng; profile-list vẫn inherit mà không ai biết vì sao.
+    cands = [Path(p) for p in _config_candidates(config_path)]
     target = next((p for p in cands if p and p.exists()), None) or (Path(config_path) if config_path else None)
     if target is None:
         return None

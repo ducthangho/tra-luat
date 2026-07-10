@@ -5741,6 +5741,77 @@ def run() -> int:
     if _diff77:
         print(f"  [r77a] LỆCH bề mặt parser tại: {_diff77[:8]} — nếu ĐỔI CLI có chủ đích: "
               f"TL_WRITE_PARSER_SURFACE=1 tl --selftest để regen snapshot.", file=sys.stderr)
+    # ═══ v1.34.12 (I8) — r78a: characterization TRƯỚC cut 62 def misc-cmd → tl_core/ops_misc.py ═══
+    _E78 = [
+        {"drive_id": "d78a", "name": "Luat_45-2019-QH14_BHXH", "so_hieu": "45-2019-QH14", "cat": "12_Lao_dong",
+         "loai": "Luật", "corpus": "true", "nlm_source_id": "s78a", "nlm_notebook_id": "NB1",
+         "nlm_status": "pushed", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "d78b", "name": "VBHN_88-2025-VBHN-VPQH_Quang_cao", "so_hieu": "88-2025-VBHN-VPQH",
+         "cat": "31_Van_hoa", "loai": "Văn bản hợp nhất", "corpus": "true", "nlm_source_id": "",
+         "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own", "mime": "application/vnd.google-apps.document"},
+        {"drive_id": "d78c", "name": "bao cao thuong 2026.docx", "so_hieu": "", "cat": "99", "loai": "thuong",
+         "corpus": "false", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": "", "row_kind": "own",
+         "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+    ]
+    _keys78 = ("apply_profile_offline", "_manifest_entries", "_base_manifest_entries")
+    _sav78 = {k: getattr(_TL_MODULE, k) for k in _keys78}
+    _env78 = {k: os.environ.get(k) for k in ("TL_JOURNAL_DIR", "TL_NOTEBOOK_ID")}
+    def _cap78(fn, ns):
+        _b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+    try:
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: list(_E78)
+        _TL_MODULE._base_manifest_entries = lambda *a, **k: ([], "")
+        os.environ["TL_NOTEBOOK_ID"] = "NB1"
+        # (1) reg-query: bare-VBHN 1-CHIỀU (v1.33.47) — query '88/VBHN-VPQH' KHÔNG năm khớp entry year-qualified
+        _rc1, _o1 = _cap78(_TL_MODULE.cmd_reg_query, argparse.Namespace(
+            config=None, profile=None, name=None, sohieu="88/VBHN-VPQH", cat=None, loai=None, nlm=None,
+            no_nlm=False, corpus=None, no_corpus=False, row_kind=None, mime=None, limit=None, refresh=False,
+            json=True, out=None, base_also=None, no_base_also=True, drive_id=None))
+        _j1 = json.loads(_o1)
+        cases.append(("r78a_reg_query_bare_vbhn_one_way",
+                      _rc1 == 0 and _j1.get("count") == 1
+                      and (_j1.get("entries") or [{}])[0].get("drive_id") == "d78b"))
+        # (2) counts: bảng mẫu số trên CÙNG snapshot — registry_rows=3, corpus_client=2, claim=1
+        _rc2, _o2 = _cap78(_TL_MODULE.cmd_counts, argparse.Namespace(
+            config=None, profile=None, refresh=False, notebook_id="NB1", json=True, out=None, live_nlm=False))
+        _j2 = json.loads(_o2)
+        _cnt2 = _j2.get("counts") or {}
+        cases.append(("r78a_counts_denominators",
+                      _rc2 == 0 and _cnt2.get("registry_rows") == 3 and _cnt2.get("corpus_client") == 2
+                      and _cnt2.get("registry_claim_nlm") == 1))
+        # (3) exists: A3-doctrine — FOUND rc=0; MISS rc=2 + KHÔNG kết luận vắng mặt
+        _rc3, _o3 = _cap78(_TL_MODULE.cmd_exists, argparse.Namespace(
+            config=None, profile=None, query="45/2019/QH14", refresh=False, json=True,
+            base_also=None, no_base_also=True))
+        _j3 = json.loads(_o3)
+        _rc3b, _o3b = _cap78(_TL_MODULE.cmd_exists, argparse.Namespace(
+            config=None, profile=None, query="999/2099/QH99", refresh=False, json=True,
+            base_also=None, no_base_also=True))
+        _j3b = json.loads(_o3b)
+        cases.append(("r78a_exists_a3_exit_doctrine",
+                      _rc3 == 0 and _j3.get("conclusion") == "FOUND_OR_RELATED"
+                      and _rc3b == 2 and _j3b.get("conclusion") == "UNKNOWN_NOT_ABSENT"
+                      and "NOT_FOUND_IN_MANIFEST_DO_NOT_CONCLUDE_ABSENT" in (_j3b.get("warnings") or [])))
+        # (4) journal list: đọc TL_JOURNAL_DIR fixture — run liệt kê đúng, READ-ONLY
+        import tempfile as _tf78
+        with _tf78.TemporaryDirectory() as _d78:
+            os.environ["TL_JOURNAL_DIR"] = _d78
+            (Path(_d78) / "t78run_1.jsonl").write_text(
+                json.dumps({"t": "run_start", "cmd": "x"}) + "\n", encoding="utf-8")
+            _rc4, _o4 = _cap78(_TL_MODULE.cmd_journal, argparse.Namespace(
+                run_id=None, json=True, close=False, force=False))
+            _j4 = json.loads(_o4)
+            cases.append(("r78a_journal_list_reads_dir",
+                          _rc4 == 0 and _j4.get("ok") is True and "t78run_1" in (_j4.get("runs") or [])))
+    finally:
+        for _k, _v in _sav78.items():
+            setattr(_TL_MODULE, _k, _v)
+        for _k, _v in _env78.items():
+            (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

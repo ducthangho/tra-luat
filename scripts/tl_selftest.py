@@ -2659,15 +2659,16 @@ def run() -> int:
                      "ghost": {"rootFolderId": "FX"}}
     _dc6 = _discover_classify(_fx6_folders, _fx6_root, _fx6_profiles, vbt_id="VBT")
     _st6 = {r["folder_id"]: r["status"] for r in _dc6["folders"]}
+    # v1.34.22 (P1 marker — ADR-0003): status đổi tên có chủ đích: in_config→configured, config_only→orphaned
     cases.append(("r6_discover_classify_buckets",
-                  _st6 == {"F1": "in_config", "F2": "unregistered_profile", "F3": "empty_folder", "F4": "plain_folder"}))
+                  _st6 == {"F1": "configured", "F2": "unregistered_profile", "F3": "empty_folder", "F4": "plain_folder"}))
     cases.append(("r6_discover_suggest_adopt",
                   len(_dc6["unregistered"]) == 1
                   and "profile-adopt --name Dinh_muc_chi --folder F2 --registry R2 --manifest M2" in _dc6["unregistered"][0]["suggest"]))
     cases.append(("r6_discover_misplaced_root_assets",
                   {m["id"] for m in _dc6["misplaced_root_assets"]} == {"RG36", "MN36"}))
     cases.append(("r6_discover_config_only_skips_vbt_root",
-                  [c["profile"] for c in _dc6["config_only"]] == ["ghost"]))
+                  [c["profile"] for c in _dc6["orphaned"]] == ["ghost"]))
     # (C) adopt: chọn asset đơn trị; nhiều registry → AMBIGUOUS; tên-registry-không-Sheet → chặn; override thắng.
     _pk6 = _adopt_pick_assets(_fx6_folders[0]["items"])
     cases.append(("r6_adopt_pick_single", (_pk6["registry"] or {}).get("id") == "R1"
@@ -6238,6 +6239,189 @@ def run() -> int:
     finally:
         for _k, _v in _sav85b.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.22 — r86: Profile P1 (ADR-0003) — marker + profile-sync + backfill + discover marker-first ═══
+    _MK = "tra_luat_profile.json"
+    _mk_beta_cfg = {"rootFolderId": "FB", "metaFolderId": "FBm", "notebookId": "nb-old",
+                    "registryDocId": "RB", "manifestId": "MB", "categories": "own", "manifestScope": "own"}
+    # (1) PURE: _marker_body sinh từ config block — schema/định danh/relations nền vbqppl/materialize_preferred
+    _mb86 = _TL_MODULE._marker_body("beta", _mk_beta_cfg)
+    cases.append(("r86_marker_body_defaults",
+                  _mb86.get("schema") == "tra_luat_profile.v1" and _mb86.get("profile") == "beta"
+                  and _mb86.get("rootFolderId") == "FB" and _mb86.get("notebookId") == "nb-old"
+                  and (_mb86.get("relations") or {}).get("base") == "vbqppl"
+                  and _mb86.get("source_policy") == "materialize_preferred"))
+    # existing marker → GIỮ description/style/relations/created_at (metadata mô tả sống trên marker)
+    _mb86b = _TL_MODULE._marker_body("beta", _mk_beta_cfg,
+                                     existing={"description": "hồ sơ BHXH", "style": "trang trọng",
+                                               "relations": {"base": "vbqppl", "see_also": ["duan_a"]},
+                                               "created_at": "2026-01-01T00:00:00"})
+    cases.append(("r86_marker_body_preserves_meta",
+                  _mb86b.get("description") == "hồ sơ BHXH" and _mb86b.get("style") == "trang trọng"
+                  and (_mb86b.get("relations") or {}).get("see_also") == ["duan_a"]
+                  and _mb86b.get("created_at") == "2026-01-01T00:00:00"))
+    # (2) PURE: validate + diff
+    _ok86, _err86 = _TL_MODULE._marker_validate(_mb86)
+    _ok86b, _err86b = _TL_MODULE._marker_validate({"schema": "tra_luat_profile.v1", "profile": ""})
+    _df86 = _TL_MODULE._marker_diff({**_mb86, "notebookId": "nb-new", "description": "x"}, _mk_beta_cfg)
+    cases.append(("r86_marker_validate_and_diff",
+                  _ok86 and not _err86 and (not _ok86b) and _err86b
+                  and [d["field"] for d in _df86] == ["notebookId"]
+                  and _df86[0]["marker"] == "nb-new" and _df86[0]["config"] == "nb-old"))
+    # (3) PURE: _discover_classify marker-first — adoptable (marker hợp lệ chưa vào config, gợi ý profile-sync) /
+    #     broken_marker / configured+marker_status drift / unregistered_profile (hạ tầng KHÔNG marker → adopt)
+    _fx86_folders = [
+        {"id": "FA", "name": "Du an A", "items": [], "marker": {"schema": "tra_luat_profile.v1", "profile": "duan_a",
+                                                                "rootFolderId": "FA", "notebookId": "nbA"}},
+        {"id": "FK", "name": "Hong marker", "items": [], "marker_error": "MARKER_PARSE_FAILED: boom"},
+        {"id": "FB", "name": "Beta", "items": [], "marker": {**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
+                                                             "notebookId": "nb-new"}},
+    ]
+    _dc86 = _TL_MODULE._discover_classify(_fx86_folders, [], {"vbqppl": {"rootFolderId": "r1"},
+                                                              "beta": {**_mk_beta_cfg}}, vbt_id="VBT")
+    _st86 = {r["folder_id"]: r for r in _dc86["folders"]}
+    cases.append(("r86_discover_marker_statuses",
+                  _st86["FA"]["status"] == "adoptable" and "profile-sync" in str(_st86["FA"].get("suggest", ""))
+                  and _st86["FK"]["status"] == "broken_marker"
+                  and _st86["FB"]["status"] == "configured" and _st86["FB"].get("marker_status") == "drift"))
+    # (4) WIRING: profile-sync (marker→config MỘT CHIỀU) + backfill markers — mock GAS + config THẬT ở tmp
+    import tempfile as _tf86
+    class _FkG86:
+        def __init__(self, tree, markers):
+            self.tree = tree          # folderId -> items
+            self.markers = markers    # fileId -> dict marker
+            self.calls = []
+            self.uploads = []         # (name, folderId, body_dict)
+            self.trashed = []
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "bootstrap":
+                return {"ok": True, "vanBanThuongId": "VBT"}
+            if action == "list":
+                return {"ok": True, "items": list(self.tree.get(str(kw.get("folderId")), []))}
+            if action == "download":
+                fid = str(kw.get("fileId"))
+                if fid in self.markers:
+                    return {"ok": True, "fileId": fid,
+                            "b64": _TL_MODULE._b64_text(json.dumps(self.markers[fid], ensure_ascii=False))}
+                return {"ok": False, "error": "NOT_FOUND"}
+            if action == "resolvefolder":
+                return {"ok": True, "folderId": f"{kw.get('parentId')}_meta", "created": True}
+            if action == "trash":
+                self.trashed.append(str(kw.get("fileId")))
+                return {"ok": True}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "upload":
+                import base64 as _b64
+                body = json.loads(_b64.b64decode(kw.get("b64") or "").decode("utf-8"))
+                fid = f"mk_new_{len(self.uploads)}"
+                self.uploads.append((kw.get("name"), str(kw.get("folderId")), body))
+                self.markers[fid] = body
+                return {"ok": True, "fileId": fid}
+            return {"ok": True}
+    _keys86 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append")
+    _sav86 = {k: getattr(_TL_MODULE, k) for k in _keys86}
+    _jrn86 = []
+    try:
+        with _tf86.TemporaryDirectory() as _d86:
+            _cfg86 = str(Path(_d86) / "tra_luat_config.v2.json")
+            Path(_cfg86).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"},
+                             "beta": dict(_mk_beta_cfg),
+                             "gamma": {"rootFolderId": "FC", "notebookId": "nbC"}}}, ensure_ascii=False),
+                encoding="utf-8")
+            _tree86 = {
+                "VBT": [{"id": "FA", "name": "Du an A", "type": "folder"},
+                        {"id": "FB", "name": "Beta", "type": "folder"},
+                        {"id": "FC", "name": "Gamma", "type": "folder"},
+                        {"id": "FD", "name": "Doc base", "type": "folder"}],
+                "FA": [{"id": "FAm", "name": "_meta", "type": "folder"}],
+                "FAm": [{"id": "mkA", "name": _MK, "mime": "application/json", "type": "file"}],
+                "FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
+                "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}],
+                "FC": [{"id": "doc1", "name": "ghichep.gdoc", "type": "file"}],
+                "FD": [{"id": "FDm", "name": "_meta", "type": "folder"}],
+                "FDm": [{"id": "mkD", "name": _MK, "mime": "application/json", "type": "file"}],
+            }
+            _markers86 = {
+                "mkA": {"schema": "tra_luat_profile.v1", "profile": "duan_a", "rootFolderId": "FA",
+                        "metaFolderId": "FAm", "notebookId": "nbA", "registryDocId": "RA", "manifestId": "MA",
+                        "categories": "own", "manifestScope": "own"},
+                "mkB": {**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "notebookId": "nb-new"},
+                "mkD": {"schema": "tra_luat_profile.v1", "profile": "vbqppl", "rootFolderId": "FD"},
+            }
+            _g86 = _FkG86(_tree86, dict(_markers86))
+            _TL_MODULE._gas = lambda: _g86
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run86"
+            _TL_MODULE._journal_append = lambda rid, rec: _jrn86.append(rec)
+            def _mkns86(**kw):
+                base = dict(config=_cfg86, profile=None, target_profile=None, folder_cap=60,
+                            force=False, apply=False, json=True)
+                base.update(kw)
+                return argparse.Namespace(**base)
+            # DRY: new_from_marker (duan_a) + drift (beta) + marker_missing (gamma) + refused_base (vbqppl marker)
+            _b86 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b86), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc86 = _TL_MODULE.cmd_profile_sync(_mkns86())
+            _o86 = json.loads(_b86.getvalue())
+            _by86 = {r.get("profile"): r for r in _o86.get("rows", [])}
+            cases.append(("r86_profile_sync_dry_report",
+                          _rc86 == 1
+                          and _by86.get("duan_a", {}).get("status") == "new_from_marker"
+                          and _by86.get("beta", {}).get("status") == "drift"
+                          and [d["field"] for d in _by86.get("beta", {}).get("diffs", [])] == ["notebookId"]
+                          and _by86.get("gamma", {}).get("status") == "marker_missing"
+                          and _by86.get("vbqppl", {}).get("status") == "refused_base"))
+            # APPLY: config được cập nhật theo marker (một chiều) — KHÔNG ghi marker nào
+            _b86b = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b86b), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc86b = _TL_MODULE.cmd_profile_sync(_mkns86(apply=True))
+            _cfg_after = json.loads(Path(_cfg86).read_text(encoding="utf-8"))
+            _profs_after = _cfg_after.get("profiles") or {}
+            cases.append(("r86_profile_sync_apply_one_way",
+                          _rc86b == 0
+                          and (_profs_after.get("duan_a") or {}).get("rootFolderId") == "FA"
+                          and (_profs_after.get("duan_a") or {}).get("notebookId") == "nbA"
+                          and (_profs_after.get("beta") or {}).get("notebookId") == "nb-new"
+                          and "vbqppl" in _profs_after and not _g86.uploads))
+            # BACKFILL: gamma thiếu marker → plan (DRY) rồi ghi (APPLY) + journal marker_write + readback verified
+            _jrn86.clear()
+            _b86c = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b86c), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc86c = _TL_MODULE.cmd_profile_backfill_markers(_mkns86())
+            _o86c = json.loads(_b86c.getvalue())
+            _byc = {r.get("profile"): r for r in _o86c.get("rows", [])}
+            cases.append(("r86_backfill_dry_plan",
+                          _rc86c == 0 and _byc.get("gamma", {}).get("status") == "planned"
+                          and _byc.get("beta", {}).get("status") == "has_marker" and not _g86.uploads))
+            _b86d = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b86d), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc86d = _TL_MODULE.cmd_profile_backfill_markers(_mkns86(apply=True))
+            _o86d = json.loads(_b86d.getvalue())
+            _byd = {r.get("profile"): r for r in _o86d.get("rows", [])}
+            _int86 = [r for r in _jrn86 if r.get("t") == "intent" and r.get("op") == "marker_write"]
+            cases.append(("r86_backfill_apply_journaled_verified",
+                          _rc86d == 0 and _byd.get("gamma", {}).get("status") == "written"
+                          and _byd.get("gamma", {}).get("verified") is True
+                          and len(_g86.uploads) == 1 and _g86.uploads[0][0] == _MK
+                          and _g86.uploads[0][2].get("profile") == "gamma"
+                          and _int86 and _int86[0].get("key") == "gamma"))
+    finally:
+        for _k, _v in _sav86.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (5) config-of-record report + parser surface
+    _ccr86 = _TL_MODULE._config_candidates_report(None)
+    cases.append(("r86_config_of_record_report",
+                  isinstance(_ccr86, dict) and "config_of_record" in _ccr86 and "candidates_on_disk" in _ccr86))
+    _ns86p = build_parser().parse_args(["profile-sync", "--folder-cap", "10", "--apply", "--json"])
+    _ns86q = build_parser().parse_args(["profile-backfill-markers", "--profile-name", "beta", "--force", "--apply"])
+    cases.append(("r86_parser_profile_sync_backfill",
+                  getattr(_ns86p, "folder_cap", None) == 10 and getattr(_ns86p, "apply", False) is True
+                  and getattr(_ns86q, "target_profile", None) == "beta" and getattr(_ns86q, "force", False) is True))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

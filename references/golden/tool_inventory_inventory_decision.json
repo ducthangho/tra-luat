@@ -97,6 +97,7 @@
     "precheck",
     "preflight",
     "profile-adopt",
+    "profile-backfill-markers",
     "profile-create",
     "profile-delete",
     "profile-doctor",
@@ -113,6 +114,7 @@
     "profile-manifest",
     "profile-rebuild-registry",
     "profile-rename",
+    "profile-sync",
     "profile-use",
     "push-overflow",
     "quarantine-fix",
@@ -984,6 +986,16 @@
         "workflow_task": null,
         "write_scope": "drive_local"
       },
+      "profile-backfill-markers": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_local"
+      },
       "profile-create": {
         "generated": true,
         "idempotency_contract": null,
@@ -1123,6 +1135,16 @@
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "drive_local"
+      },
+      "profile-sync": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "local"
       },
       "profile-use": {
         "generated": true,
@@ -1526,10 +1548,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 125,
+      "generated_parsers": 127,
       "high_risk": 22,
-      "total": 131,
-      "write_commands": 65
+      "total": 133,
+      "write_commands": 67
     },
     "schema": "command_registry.v1"
   },

@@ -686,18 +686,21 @@ def _subject_score(e: dict, subject: str) -> int:
 
 
 def _discover_classify(folders: list[dict], root_files: list[dict], profiles: dict, vbt_id: str = "") -> dict:
-    """B (PURE, test offline): đối chiếu thư-mục-thật-trên-Drive vs config.profiles → buckets:
-    in_config / unregistered_profile (có registry|manifest riêng nhưng CHƯA vào config → gợi ý profile-adopt) /
-    empty_folder (vỏ rỗng → gợi ý trash) / plain_folder (tài liệu con, KHÔNG phải profile) + misplaced_root_assets
-    (registry/manifest nằm Ở GỐC Van_ban_thuong — ca NQ36) + config_only (config có, Drive không thấy).
-    folders: [{id,name,items:[...]}] — items đã gộp con trực tiếp + con của _meta."""
+    """B (PURE, test offline) + P1 MARKER-FIRST (v1.34.22, ADR-0003): đối chiếu thư-mục-thật-trên-Drive vs
+    config.profiles + marker `tra_luat_profile.json` → buckets:
+    configured (trong config; kèm marker_status ok/missing/broken/drift) / adoptable (marker HỢP LỆ nhưng chưa
+    vào config → gợi ý `profile-sync --apply`, hết heuristic) / broken_marker (marker có nhưng đọc/validate lỗi)
+    / unregistered_profile (có registry|manifest riêng, KHÔNG marker → gợi ý profile-adopt) / empty_folder /
+    plain_folder + misplaced_root_assets (registry/manifest Ở GỐC Van_ban_thuong — ca NQ36) + orphaned
+    (config có, Drive không thấy — tên cũ config_only).
+    folders: [{id,name,items:[...], marker?, marker_error?}] — items đã gộp con trực tiếp + con của _meta."""
     profiles = profiles or {}
     by_root = {str((p or {}).get("rootFolderId") or "").strip(): n
                for n, p in profiles.items() if str((p or {}).get("rootFolderId") or "").strip()}
     known_asset_ids = {str((p or {}).get(k) or "").strip()
                        for p in profiles.values() for k in ("registryDocId", "manifestId")
                        if str((p or {}).get(k) or "").strip()}
-    rows, unregistered, empty, misplaced = [], [], [], []
+    rows, unregistered, empty, misplaced, adoptable, broken = [], [], [], [], [], []
     folder_ids = {str(f.get("id") or "") for f in (folders or [])}
     for f in folders or []:
         items = f.get("items") or []
@@ -706,9 +709,24 @@ def _discover_classify(folders: list[dict], root_files: list[dict], profiles: di
             kinds.setdefault(_discover_item_kind(it), []).append(it)
         reg = kinds.get("registry") or []
         man = kinds.get("manifest") or []
+        marker = f.get("marker") if isinstance(f.get("marker"), dict) else None
+        marker_err = f.get("marker_error")
+        m_ok, m_errs = (_marker_validate(marker) if marker else (False, []))
         in_cfg = by_root.get(str(f.get("id") or ""))
+        marker_status = None
         if in_cfg:
-            status = "in_config"
+            status = "configured"
+            if marker and m_ok:
+                _mdiffs = _marker_diff(marker, profiles.get(in_cfg) or {})
+                marker_status = "drift" if _mdiffs else "ok"
+            elif marker or marker_err:
+                marker_status = "broken"
+            else:
+                marker_status = "missing"
+        elif marker and m_ok:
+            status = "adoptable"
+        elif marker or marker_err:
+            status = "broken_marker"
         elif reg or man:
             status = "unregistered_profile"
         elif not items:
@@ -721,7 +739,21 @@ def _discover_classify(folders: list[dict], root_files: list[dict], profiles: di
                "manifest": [{"id": x.get("id"), "name": x.get("name")} for x in man],
                "registry_nonsheet": [{"id": x.get("id"), "name": x.get("name")}
                                      for x in (kinds.get("registry_nonsheet") or [])]}
-        if status == "unregistered_profile":
+        if marker_status:
+            row["marker_status"] = marker_status
+            if marker_status == "missing":
+                row["suggest"] = "tl profile-backfill-markers --apply  (sinh marker từ config — ADR-0003)"
+        if status == "adoptable":
+            row["marker_profile"] = str(marker.get("profile") or "")
+            row["suggest"] = (f"tl profile-sync --apply  (marker '{row['marker_profile']}' → config, "
+                              "một chiều — hết heuristic)")
+            adoptable.append(row)
+        elif status == "broken_marker":
+            row["marker_error"] = str(marker_err or ";".join(m_errs))
+            row["suggest"] = ("marker hỏng/thiếu field — nếu profile này có trong config: "
+                              "`tl profile-backfill-markers --profile-name <p> --force`; nếu không: sửa tay qua adopt.")
+            broken.append(row)
+        elif status == "unregistered_profile":
             slug = _profile_file_slug(str(f.get("name") or ""))
             row["suggest"] = (f"tl profile-adopt --name {slug} --folder {f.get('id')}"
                               + (f" --registry {reg[0]['id']}" if reg else "")
@@ -737,17 +769,17 @@ def _discover_classify(folders: list[dict], root_files: list[dict], profiles: di
             misplaced.append({"id": it.get("id"), "name": it.get("name"), "kind": kind,
                               "note": "registry/manifest nằm Ở GỐC Van_ban_thuong (lạc chỗ — vi phạm bất biến layout). "
                                       "Adopt bằng --registry/--manifest rồi `profile-doctor --fix` move vào thư mục profile."})
-    config_only = []
+    orphaned = []
     for n in sorted(profiles):
         if n == DEFAULT_PROFILE:
             continue
         rid = str((profiles.get(n) or {}).get("rootFolderId") or "").strip()
         if rid and rid != str(vbt_id or "") and rid not in folder_ids:
-            config_only.append({"profile": n, "rootFolderId": rid,
-                                "note": "profile trong config nhưng KHÔNG thấy thư mục tương ứng dưới Van_ban_thuong "
-                                        "(root ngoài VBT, đã trash, hoặc quét bị cap?)."})
-    return {"folders": rows, "unregistered": unregistered, "empty_folders": empty,
-            "misplaced_root_assets": misplaced, "config_only": config_only}
+            orphaned.append({"profile": n, "rootFolderId": rid,
+                             "note": "profile trong config nhưng KHÔNG thấy thư mục tương ứng dưới Van_ban_thuong "
+                                     "(root ngoài VBT, đã trash, hoặc quét bị cap?)."})
+    return {"folders": rows, "unregistered": unregistered, "empty_folders": empty, "adoptable": adoptable,
+            "broken_markers": broken, "misplaced_root_assets": misplaced, "orphaned": orphaned}
 
 
 def _clean_ref_name_phrase(name: str) -> str:

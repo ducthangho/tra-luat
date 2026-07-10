@@ -1,3 +1,30 @@
+# ★ v1.34.22 — PROFILE P1 (ADR-0003): marker là nguồn sự thật + profile-sync/backfill + discover marker-first (2026-07-10)
+
+- Thực thi Phase 1 lộ trình profile (grilling 2026-07-10 + hợp nhất nhánh song song): **marker
+  `_meta/tra_luat_profile.json`** (schema `tra_luat_profile.v1`: định danh rootFolderId/metaFolderId/
+  notebookId/registryDocId/manifestId/categories/manifestScope + mô tả description/style/relations{base:vbqppl}/
+  source_policy=materialize_preferred/created_at/updated_at) = **nguồn sự thật về TỒN TẠI + ĐỊNH DANH +
+  metadata mô tả**; config = lựa chọn runtime + cache; `_PROFILES_INDEX` = chỉ mục đọc nhanh.
+- **`tl profile-sync`** MỚI: đồng bộ MỘT CHIỀU marker→config (quét Van_ban_thuong; new_from_marker/drift/
+  marker_missing/broken_marker/root_conflict/orphaned/refused_base; --apply ghi config journaled + READBACK
+  từng field; KHÔNG bao giờ ghi marker; marker tự nhận vbqppl bị bỏ qua). **`tl profile-backfill-markers`**
+  MỚI: backfill một-lần config→marker (upload + readback + trash bản cũ, journal `marker_write`; tạo `_meta`
+  nếu thiếu + điền metaFolderId; --force ghi đè có chủ đích).
+- **profile-create/adopt --apply GHI LUÔN MARKER** (mutation ghi 2 nơi marker+config; marker fail không
+  rollback config — doctor/backfill vá). **discover MARKER-FIRST**: statuses mới `configured`(+marker_status
+  ok/missing/broken/drift)/`adoptable`(gợi ý profile-sync — HẾT heuristic)/`broken_marker`/`unregistered_profile`
+  (hạ tầng không marker)/`orphaned`(tên cũ config_only). **profile-doctor** +4 check marker (MISSING/INVALID/
+  READ_FAILED/CONFIG_DRIFT). **Observability**: `config_report` (config-of-record + cảnh báo
+  DUPLICATE_CONFIG_CANDIDATES) trong profile-list/info/sync.
+- Cơ chế ghi marker THUẦN GAS webapp sẵn có (upload POST + resolvefolder + list + download + trash) —
+  KHÔNG bump GAS; mọi env (Chat=Cowork=Code) dùng chung một đường.
+- TDD: +10 `r86` viết trước (PURE body/validate/diff + classify marker-first + wiring sync DRY/APPLY +
+  backfill DRY/APPLY journal-shape + config-of-record + parser) & r6 đổi status có chủ đích → **752/752**;
+  parser-surface regen (2 lệnh mới); golden tool_inventory/workflow_audit regen có chủ đích.
+- SKILL.md chỉ đổi số version header — kernel wording "config là nguồn sự thật" sẽ sửa ở **P2** (kernel-diff
+  cần user duyệt + re-import, kèm profile-load/Instruction Block). KẾ TIẾP: P2 profile-load + generator đọc
+  marker; P3 promote + notebook_create + system prompt; P4 from-nlm + nlm_only + materialize.
+
 # ★ v1.34.21 — HOTFIX resilience `register --clear-cols` + contract_check phân loại (2026-07-10)
 
 - Nguồn: thẩm định review nhánh Codex trên zip 1.34.20 — 4/4 finding CONFIRMED trên canonical; grilling

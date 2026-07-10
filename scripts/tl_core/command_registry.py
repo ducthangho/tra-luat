@@ -579,6 +579,24 @@ GENERATED_SPECS = [
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    {"name": 'profile-from-nlm', "handler": 'cmd_profile_from_nlm',
+     "help": '(v1.34.26, Q4) BIẾN NOTEBOOK NLM THÀNH PROFILE: folder riêng (mặc định tạo dưới Van_ban_thuong) + registry/manifest/marker/config own+own; seed row từ nguồn notebook (có file Drive → ref; còn lại → nlm_only sentinel, materialize=pending). KHÔNG ghi đè chat config notebook. DRY mặc định',
+     "args": [
+         {"flags": ['--name'], "required": True, "help": 'tên profile mới'},
+         {"flags": ['--notebook'], "required": True, "help": 'notebookId NLM sẵn có (nguồn sự thật danh sách nguồn)'},
+         {"flags": ['--folder'], "help": 'folder Drive sẵn có làm root (mặc định: tạo mới Van_ban_thuong/<name>)'},
+         {"flags": ['--apply'], "action": 'store_true'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'profile-materialize-sources', "handler": 'cmd_profile_materialize_sources',
+     "help": '(v1.34.26, materialize_preferred) nâng cấp nguồn nlm-only → GDoc trong folder profile + row own (createtext + reg_upsert + xoá sentinel, tạo-trước-xoá-sau, journaled); resumable --limit, chạy lặp tới pending=0; không xuất được → materialize=blocked (Ở LẠI nlm-only hợp lệ). DRY mặc định',
+     "args": [
+         {"flags": ['--profile-name'], "dest": 'target_profile', "help": 'profile đích; mặc định profile active (không phải vbqppl)'},
+         {"flags": ['--limit'], "type": int, "default": 10, "help": 'số nguồn xử tối đa mỗi run (resumable)'},
+         {"flags": ['--retry-blocked'], "dest": 'retry_blocked', "action": 'store_true', "help": 'thử lại cả nguồn đã đánh dấu blocked'},
+         {"flags": ['--apply'], "action": 'store_true'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'profile-load', "handler": 'cmd_profile_load',
      "help": '(v1.34.24, ADR-0003) "dùng profile X trong PHIÊN": xuất Instruction Block thống nhất mọi env (rẽ --target session|project); đọc marker best-effort, KHÔNG ghi config/marker (đổi mặc định máy = profile-use --apply)',
      "args": [
@@ -639,6 +657,7 @@ GENERATED_SPECS = [
      "help": '(v1.30.0) kiểm BẤT BIẾN LAYOUT (registry+manifest trong thư mục profile) + hạ tầng (legacy-Doc/mime/trashed/thiếu id); --fix --apply move asset lạc chỗ vào _meta',
      "args": [
          {"flags": ['--profile-name'], "dest": 'target_profile', "help": 'chỉ kiểm 1 profile; mặc định MỌI profile dự án trong config'},
+         {"flags": ['--deep'], "action": 'store_true', "help": '(v1.34.26) thêm chiều Drive↔NLM↔registry: nguồn notebook không có row / nlm-only pending|blocked / sentinel sót (cần NLM auth)'},
          {"flags": ['--fix'], "action": 'store_true', "help": 'lập kế hoạch move asset lạc chỗ (cần --apply để chạy)'},
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
@@ -1323,6 +1342,8 @@ COMMAND_META = {
     # promote = dựng hạ tầng 1-lần idempotent (họ profile-create/adopt = medium); ghi registry PROFILE MỚI rỗng,
     # notebook-create có confirm riêng. Contract thật → backlog pha siết kế (như grandfather-theo-lớp).
     "profile-promote":       _m("medium", False, "drive_registry_nlm", False, True, False, None, None, False, None, generated=True),
+    "profile-from-nlm":      _m("medium", False, "drive_registry_nlm", False, True, False, None, None, False, None, generated=True),
+    "profile-materialize-sources": _m("medium", False, "drive_registry", False, True, False, None, None, False, None, generated=True),
     "profile-sync":          _m("low", False, "local", False, True, False, None, None, False, None, generated=True),
     "profile-backfill-markers": _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "boot":                  _m("low", False, "local", False, False, False, None, None, False, None, generated=True),

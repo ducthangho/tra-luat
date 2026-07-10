@@ -785,6 +785,65 @@ def _cmd_profile_doctor_impl(a) -> int:
                                          "fields": [d["field"] for d in _mdiffs],
                                          "note": "marker ≠ config — marker là nguồn sự thật: `tl profile-sync "
                                                  "--apply`; marker SAI → profile-backfill-markers --force."})
+        # P4 (v1.34.26): --deep = chiều Drive↔NLM↔registry — đối chiếu nguồn LIVE trên notebook với row
+        # registry (theo nlm_source_id): unregistered / nlm-only pending|blocked / sentinel sót.
+        if getattr(a, "deep", False):
+            _nb_deep = str(prof.get("notebookId") or "").strip()
+            if not _nb_deep:
+                findings.append({"check": "NLM_DEEP_NO_NOTEBOOK", "severity": "warn", "profile": n,
+                                 "note": "profile thiếu notebookId — bỏ kiểm chiều NLM."})
+            else:
+                try:
+                    _nc_deep = _imp("nlm_cli")
+                    _sl_deep = _nc_deep.source_list(_nb_deep)
+                except Exception as e:  # noqa: BLE001
+                    _sl_deep = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+                if not _sl_deep.get("ok"):
+                    findings.append({"check": "NLM_DEEP_UNAVAILABLE", "severity": "warn", "profile": n,
+                                     "note": str(_sl_deep.get("error"))[:200]})
+                else:
+                    apply_profile_offline(getattr(a, "config", None), n)   # scope registry PROFILE cho reg_get
+                    _pend = _blk = 0
+                    for _s in (_sl_deep.get("sources") or []):
+                        _sid = str(_s.get("id") or "")
+                        if not _sid:
+                            continue
+                        try:
+                            _rr = (_gas_get_retry(g, "reg_get", nlm_source_id=_sid, refresh="false")
+                                   or {}).get("rows") or []
+                        except Exception:  # noqa: BLE001
+                            continue
+                        _own_d = [r for r in _rr if str(r.get("drive_id") or "")
+                                  and not str(r.get("drive_id")).startswith(_NLM_ONLY_SENTINEL_PREFIX)]
+                        _sent_d = [r for r in _rr if str(r.get("drive_id") or "")
+                                   .startswith(_NLM_ONLY_SENTINEL_PREFIX)]
+                        if not _rr:
+                            findings.append({"check": "NLM_SOURCE_UNREGISTERED", "severity": "warn",
+                                             "profile": n, "source_id": _sid,
+                                             "title": str(_s.get("title") or "")[:80],
+                                             "note": "nguồn trên notebook KHÔNG có row registry — chạy lại "
+                                                     "`tl profile-from-nlm` (idempotent) hoặc reg-upsert tay."})
+                        elif _own_d and _sent_d:
+                            findings.append({"check": "SENTINEL_STALE", "severity": "warn", "profile": n,
+                                             "source_id": _sid,
+                                             "note": "row own + sentinel nlm_only cùng tồn tại (đứt giữa "
+                                                     "materialize) — `profile-materialize-sources --apply` tự dọn."})
+                        elif _sent_d:
+                            if "materialize=blocked" in str(_sent_d[0].get("note") or ""):
+                                _blk += 1
+                            else:
+                                _pend += 1
+                    if _pend:
+                        findings.append({"check": "NLM_ONLY_PENDING", "severity": "info", "profile": n,
+                                         "count": _pend,
+                                         "note": f"{_pend} nguồn nlm-only chưa materialize → `tl profile-"
+                                                 f"materialize-sources --profile-name {n} --apply` "
+                                                 "(materialize_preferred)."})
+                    if _blk:
+                        findings.append({"check": "NLM_ONLY_BLOCKED", "severity": "warn", "profile": n,
+                                         "count": _blk,
+                                         "note": "nguồn không xuất được (URL/YouTube/rỗng) — Ở LẠI nlm-only "
+                                                 "là HỢP LỆ (Q4); thử lại: --retry-blocked."})
     # Review v1.30.0 (CONFIRMED): asset dùng chung ≥2 profile trong config → BỎ fix-move, nâng critical
     # (move theo profile này phá layout profile kia). Soi trên TOÀN BỘ config, kể cả khi --profile-name 1 profile.
     findings = _strip_shared_fixes(findings, profs)
@@ -1884,6 +1943,348 @@ def _cmd_profile_promote_impl(a) -> int:
            ]}
     print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if all_ok else sys.stderr)
     return 0 if all_ok else 1
+
+
+# ── P4 (v1.34.26, Q4 + materialize_preferred): NOTEBOOK NLM → PROFILE + nguồn nlm-only ──
+# Không bump GAS: row nlm-only dùng SENTINEL drive_id 'nlm:<source_id>' (registry key drive_id giữ chuẩn
+# journal/undo); materialize_status suy diễn: pending/blocked ghi cột `note`, done = row thật tồn tại.
+_NLM_ONLY_SENTINEL_PREFIX = "nlm:"
+
+
+def _nlm_only_sentinel(sid: str) -> str:
+    return _NLM_ONLY_SENTINEL_PREFIX + str(sid or "")
+
+
+def _from_nlm_row_payload(source: dict, notebook_id: str) -> dict:
+    """PURE (Q4): nguồn NLM → payload row registry. Nguồn CÓ file Drive (type=drive/url docs.google) →
+    row_kind=ref với drive_id THẬT (file ngoài cây profile); còn lại (text/url/YouTube) → nlm_only
+    với sentinel + note=materialize=pending (materialize_preferred sẽ nâng cấp sau)."""
+    source = source or {}
+    sid = str(source.get("id") or "")
+    title = str(source.get("title") or sid)[:120]
+    did = _nlm_source_drive_id(source)
+    base = {"name": title, "nlm_source_id": sid, "nlm_notebook_id": str(notebook_id or ""),
+            "nlm_title": title}
+    if did:
+        return {**base, "drive_id": str(did), "row_kind": "ref", "corpus": "false", "nlm_status": "pushed"}
+    return {**base, "drive_id": _nlm_only_sentinel(sid), "row_kind": "nlm_only", "corpus": "false",
+            "nlm_status": "nlm_only", "note": "materialize=pending"}
+
+
+def cmd_profile_from_nlm(a) -> int:
+    with _ProfileEnvGuard():
+        return _cmd_profile_from_nlm_impl(a)
+
+
+def _cmd_profile_from_nlm_impl(a) -> int:
+    """P4 (v1.34.26, Q4): BIẾN NOTEBOOK NLM THÀNH PROFILE THƯỜNG — dựng folder riêng (mặc định tạo mới
+    dưới Van_ban_thuong; --folder dùng folder sẵn có) + _meta/registry/manifest/marker/config own+own,
+    rồi SEED registry từ danh sách nguồn notebook: nguồn có file Drive → row ref; còn lại → row nlm_only
+    (sentinel, materialize=pending). KHÔNG tự áp System Prompt (notebook ĐANG DÙNG — không ghi đè cấu
+    hình chat sẵn có; khác promote tạo notebook mới). Materialize chạy SAU bằng lệnh riêng resumable
+    (chính sách mặc định materialize_preferred — CONTEXT.md). DRY mặc định. rc: 0 / 1 bước fail / 2 guard."""
+    name = (getattr(a, "name", None) or "").strip()
+    nb = (getattr(a, "notebook", None) or "").strip()
+    if not name or not nb:
+        print("[tl] profile-from-nlm cần --name và --notebook", file=sys.stderr)
+        return 2
+    if name == DEFAULT_PROFILE:
+        print("[tl] REFUSE_FROM_NLM_DEFAULT_PROFILE: vbqppl là profile nền.", file=sys.stderr)
+        return 2
+    folder = (getattr(a, "folder", None) or "").strip()
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    existing = _profiles_from_config(cfg).get(name) if cfg else None
+    existing = existing if isinstance(existing, dict) else None
+    if existing and str(existing.get("rootFolderId") or "").strip() and folder \
+            and str(existing.get("rootFolderId")) != folder:
+        print(json.dumps({"ok": False, "error": "PROFILE_EXISTS_DIFFERENT_FOLDER", "profile": name},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
+    except SystemExit as e:
+        print(f"[tl] profile-from-nlm cần webapp LIVE: {e}", file=sys.stderr)
+        return 2
+    g = _gas()
+    try:
+        nc = _imp("nlm_cli")
+        sl = nc.source_list(nb)
+    except Exception as e:  # noqa: BLE001
+        sl = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    if not sl.get("ok"):
+        print(json.dumps({"ok": False, "error": "NLM_SOURCE_LIST_FAILED", "detail": sl.get("error"),
+                          "auth_hint": sl.get("auth_hint")}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    sources = sl.get("sources") or []
+    payloads = [_from_nlm_row_payload(s, nb) for s in sources]
+    n_only = sum(1 for p in payloads if p["row_kind"] == "nlm_only")
+    n_ref = len(payloads) - n_only
+    # --folder sẵn có: kiểm marker (ALREADY_PROFILE) + dò asset reuse như promote
+    reuse_reg = reuse_man = ""
+    meta_id = ""
+    if folder:
+        try:
+            items = _gas_get_retry(g, "list", folderId=folder).get("items") or []
+        except Exception as e:  # noqa: BLE001
+            print(json.dumps({"ok": False, "error": f"FOLDER_LIST_FAILED: {e}"}, ensure_ascii=False),
+                  file=sys.stderr)
+            return 2
+        meta = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
+        meta_id = str((meta or {}).get("id") or "")
+        mitems = []
+        if meta_id:
+            try:
+                mitems = _gas_get_retry(g, "list", folderId=meta_id).get("items") or []
+            except Exception:
+                pass
+        if _marker_find_in_items(mitems):
+            print(json.dumps({"ok": False, "error": "ALREADY_PROFILE", "folder": folder,
+                              "note": "folder đã có marker — dùng profile-sync/adopt."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        picked = _adopt_pick_assets(items + mitems)
+        reuse_reg = str((picked.get("registry") or {}).get("id") or "")
+        _mc = str((picked.get("manifest") or {}).get("id") or "")
+        if _mc:
+            try:
+                _dm = _gas_get_retry(g, "download", fileId=_mc)
+                _mj = (json.loads(base64.b64decode(_dm.get("b64") or "").decode("utf-8"))
+                       if _dm.get("b64") else {})
+            except Exception:  # noqa: BLE001
+                _mj = {}
+            if str((_mj or {}).get("profile") or "") == name:
+                reuse_man = _mc
+    plan = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
+            "config": path, "profile": name, "notebook": nb, "folder": folder or "(tạo mới dưới Van_ban_thuong)",
+            "source_total": len(payloads), "nlm_only_count": n_only, "ref_count": n_ref,
+            "source_sample": [p["name"][:60] for p in payloads[:10]],
+            "system_prompt": "skipped_existing_notebook (không ghi đè chat config của notebook đang dùng — "
+                             "muốn áp: `nlm chat configure <nb> --goal custom --prompt <_meta/nlm_system_prompt.md>`)",
+            "note": "DRY — --apply dựng hạ tầng + seed row ref/nlm_only; materialize chạy SAU (lệnh riêng)."}
+    if not getattr(a, "apply", False):
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return 0
+    rid = _apply_journal_start("profile-from-nlm", {"profile": name, "notebook": nb, "sources": len(payloads)})
+    root_id = folder
+    if not root_id:
+        try:
+            vbt_id = str((g.get("bootstrap") or {}).get("vanBanThuongId") or "")
+            rr = g.get("resolvefolder", name=name, parentId=vbt_id, create="true")
+        except Exception as e:  # noqa: BLE001
+            rr = {"ok": False, "error": str(e)}
+        root_id = str((rr or {}).get("folderId") or "")
+    if not root_id:
+        print(json.dumps({**plan, "ok": False, "error": "ROOT_CREATE_FAILED"}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 1
+    if not meta_id:
+        try:
+            mr = g.get("resolvefolder", name="_meta", parentId=root_id, create="true")
+        except Exception as e:  # noqa: BLE001
+            mr = {"ok": False, "error": str(e)}
+        meta_id = str((mr or {}).get("folderId") or "")
+    if not meta_id:
+        print(json.dumps({**plan, "ok": False, "error": "META_CREATE_FAILED"}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 1
+    reg_id = reuse_reg
+    if not reg_id:
+        reg = _create_profile_registry_sheet(g, meta_id, name)
+        if not reg.get("ok"):
+            print(json.dumps({**plan, "ok": False, "step": "create_registry_sheet", **reg},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 1
+        reg_id = str(reg.get("registryDocId") or "")
+    man_id = reuse_man
+    if not man_id:
+        man = _create_profile_manifest_json(g, meta_id, name, root_id, nb)
+        if not man.get("ok"):
+            print(json.dumps({**plan, "ok": False, "step": "create_manifest_json", **man},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 1
+        man_id = str(man.get("manifestId") or "")
+    try:
+        g.get("manifest_export", registryDocId=reg_id, manifestId=man_id)
+    except Exception:  # noqa: BLE001
+        pass
+    prof_block = {"rootFolderId": root_id, "metaFolderId": meta_id, "notebookId": nb,
+                  "registryDocId": reg_id, "manifestId": man_id,
+                  "manifestScope": "own", "categories": "own"}
+    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
+    mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
+    all_ok = bool(cfgp) and bool(mkw.get("verified"))
+    seeded, seed_fail = 0, []
+    for p in payloads:
+        v = _journaled_reg_upsert(rid, g, p)
+        if v.get("verified"):
+            seeded += 1
+        else:
+            seed_fail.append(p.get("nlm_source_id"))
+    if seed_fail:
+        all_ok = False
+    out = {**plan, "ok": all_ok, "rootFolderId": root_id, "metaFolderId": meta_id,
+           "registryDocId": reg_id, "manifestId": man_id, "config_written": cfgp,
+           "marker": {"fileId": mkw.get("fileId"), "verified": mkw.get("verified")},
+           "seeded": seeded, "seed_failed": seed_fail[:20], "journal": rid,
+           "next_steps": [
+               f"tl profile-materialize-sources --profile-name {name} --apply   "
+               f"(lặp tới rc=0 & pending=0 — nâng cấp {n_only} nguồn nlm-only thành file Drive)",
+               f"tl profile-load {name}   (Instruction Block phiên — nói rõ nguồn nào chỉ có trên NLM)",
+               "tl profile-index --rebuild --apply",
+           ]}
+    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if all_ok else sys.stderr)
+    return 0 if all_ok else 1
+
+
+def cmd_profile_materialize_sources(a) -> int:
+    with _ProfileEnvGuard():
+        return _cmd_profile_materialize_sources_impl(a)
+
+
+def _cmd_profile_materialize_sources_impl(a) -> int:
+    """P4 (materialize_preferred — CONTEXT.md): nâng cấp nguồn nlm-only → file Drive + row thường.
+    RESUMABLE: mỗi run xử tối đa --limit nguồn, chạy lặp tới rc=0 & pending=0; blocked chỉ thử lại khi
+    --retry-blocked. TẠO-TRƯỚC-XOÁ-SAU: row own ghi verified xong mới reg_delete row sentinel (đứt giữa
+    chừng → doctor --deep thấy SENTINEL_STALE, run sau tự dọn). Nguồn không xuất được (URL/YouTube/rỗng)
+    → note=materialize=blocked:<reason> — Ở LẠI nlm-only là HỢP LỆ (Q4). DRY mặc định."""
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    if not cfg:
+        print("[tl] Không thấy config; truyền --config.", file=sys.stderr)
+        return 2
+    profs = _profiles_from_config(cfg)
+    name = (getattr(a, "target_profile", None) or "").strip() or _active_profile()
+    if name == DEFAULT_PROFILE:
+        print("[tl] profile-materialize-sources chỉ dùng cho profile dự án (--profile-name <p>).", file=sys.stderr)
+        return 2
+    name, prof = _profile_lookup(profs, name)
+    if not isinstance(prof, dict):
+        print(json.dumps({"ok": False, "error": "PROFILE_NOT_FOUND", "profile": name}, ensure_ascii=False),
+              file=sys.stderr)
+        return 2
+    nb = str(prof.get("notebookId") or "").strip()
+    root = str(prof.get("rootFolderId") or "").strip()
+    if not nb or not root:
+        print(json.dumps({"ok": False, "error": "PROFILE_INCOMPLETE", "notebookId": nb, "rootFolderId": root},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), name)   # Cách B: forward registryDocId của profile vào call
+    except SystemExit as e:
+        print(f"[tl] profile-materialize-sources cần webapp LIVE: {e}", file=sys.stderr)
+        return 2
+    g = _gas()
+    try:
+        nc = _imp("nlm_cli")
+        sl = nc.source_list(nb)
+    except Exception as e:  # noqa: BLE001
+        sl = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    if not sl.get("ok"):
+        print(json.dumps({"ok": False, "error": "NLM_SOURCE_LIST_FAILED", "detail": sl.get("error"),
+                          "auth_hint": sl.get("auth_hint")}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    rows, todo, stale = [], [], []
+    for s in (sl.get("sources") or []):
+        sid = str(s.get("id") or "")
+        title = str(s.get("title") or sid)[:120]
+        try:
+            rg = _gas_get_retry(g, "reg_get", nlm_source_id=sid, refresh="false")
+            rr = rg.get("rows") or []
+        except Exception as e:  # noqa: BLE001
+            rows.append({"nlm_source_id": sid, "title": title, "status": "read_failed", "error": str(e)})
+            continue
+        own = [r for r in rr if str(r.get("drive_id") or "")
+               and not str(r.get("drive_id")).startswith(_NLM_ONLY_SENTINEL_PREFIX)]
+        sent = [r for r in rr if str(r.get("drive_id") or "").startswith(_NLM_ONLY_SENTINEL_PREFIX)]
+        if own:
+            row = {"nlm_source_id": sid, "title": title, "status": "done", "drive_id": own[0].get("drive_id")}
+            if sent:
+                row["sentinel_stale"] = sent[0].get("drive_id")
+                stale.append({"sid": sid, "sentinel": str(sent[0].get("drive_id"))})
+            rows.append(row)
+        elif sent:
+            blocked = "materialize=blocked" in str(sent[0].get("note") or "")
+            row = {"nlm_source_id": sid, "title": title,
+                   "status": "blocked" if blocked else "pending",
+                   "sentinel": str(sent[0].get("drive_id"))}
+            if blocked:
+                row["note"] = str(sent[0].get("note") or "")
+            rows.append(row)
+            if not blocked or getattr(a, "retry_blocked", False):
+                todo.append({"sid": sid, "title": title, "sentinel": str(sent[0].get("drive_id"))})
+        else:
+            rows.append({"nlm_source_id": sid, "title": title, "status": "unregistered",
+                         "note": "không có row registry — chạy lại `tl profile-from-nlm` (idempotent)."})
+    lim = int(getattr(a, "limit", None) or 10)
+    batch = todo[:lim]
+    counts = {"done": sum(1 for r in rows if r["status"] == "done"),
+              "pending": sum(1 for r in rows if r["status"] == "pending"),
+              "blocked": sum(1 for r in rows if r["status"] == "blocked"),
+              "unregistered": sum(1 for r in rows if r["status"] == "unregistered")}
+    if not getattr(a, "apply", False):
+        out = {"ok": True, "mode": "DRY", "profile": name, "notebook": nb, "rows": rows, **counts,
+               "would_process": len(batch), "sentinel_stale": len(stale),
+               "note": "--apply: source_content → createtext GDoc vào folder profile → row own + xoá sentinel "
+                       "(tạo-trước-xoá-sau, journaled). Chạy lặp tới pending=0."}
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0
+    rid = _apply_journal_start("profile-materialize-sources", {"profile": name, "batch": len(batch)})
+    by_sid = {r.get("nlm_source_id"): r for r in rows}
+    failed = []
+    def _del_sentinel(sentinel: str, sid: str) -> bool:
+        _journal_append(rid, {"t": "intent", "op": "reg_delete", "key": sentinel,
+                              "set": {"reason": f"sentinel nlm_only đã materialize (sid={sid})"}})
+        try:
+            dr = g.post("reg_delete", drive_ids=[sentinel], confirm="yes", require_removed="no")
+        except Exception as e:  # noqa: BLE001
+            dr = {"ok": False, "error": str(e)}
+        _journal_append(rid, {"t": "commit", "op": "reg_delete", "key": sentinel, "ok": bool(dr.get("ok"))})
+        return bool(dr.get("ok"))
+    for st in stale:   # dọn sentinel sót từ run đứt giữa chừng (idempotent)
+        _del_sentinel(st["sentinel"], st["sid"])
+        by_sid.get(st["sid"], {})["sentinel_cleaned"] = True
+    for t in batch:
+        sid, title, sentinel = t["sid"], t["title"], t["sentinel"]
+        try:
+            cont = nc.source_content(sid)
+        except Exception as e:  # noqa: BLE001
+            cont = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+        d = cont.get("data") if isinstance(cont.get("data"), dict) else {}
+        text = str(d.get("content") or d.get("text") or cont.get("text") or "")
+        if cont.get("ok") and len(text.strip()) >= 40:
+            try:
+                up = g.post("createtext", text=text, name=title, folderId=root,
+                            register="false", share="false")
+            except Exception as e:  # noqa: BLE001
+                up = {"ok": False, "error": str(e)}
+            fid = str((up or {}).get("fileId") or (up or {}).get("id") or "")
+            if not fid:
+                by_sid[sid].update({"status": "failed", "error": str((up or {}).get("error") or "CREATETEXT_FAILED")})
+                failed.append(sid)
+                continue
+            newp = {"drive_id": fid, "name": title, "nlm_source_id": sid, "nlm_notebook_id": nb,
+                    "nlm_title": title, "row_kind": "own", "corpus": "true", "nlm_status": "pushed",
+                    "note": f"materialized_from=nlm:{sid}"}
+            v = _journaled_reg_upsert(rid, g, newp)
+            if v.get("verified"):
+                _del_sentinel(sentinel, sid)
+                by_sid[sid].update({"status": "materialized", "drive_id": fid, "chars": len(text)})
+            else:
+                by_sid[sid].update({"status": "failed", "error": "ROW_UPSERT_UNVERIFIED"})
+                failed.append(sid)
+        else:
+            reason = str(cont.get("error") or "EMPTY_CONTENT")[:120]
+            _journaled_reg_upsert(rid, g, {"drive_id": sentinel, "nlm_source_id": sid,
+                                           "nlm_notebook_id": nb, "row_kind": "nlm_only",
+                                           "note": f"materialize=blocked:{reason}"})
+            by_sid[sid].update({"status": "blocked", "note": f"materialize=blocked:{reason}"})
+    remaining = sum(1 for r in rows if r.get("status") == "pending")
+    out = {"ok": not failed, "mode": "APPLY", "profile": name, "notebook": nb, "rows": rows,
+           "processed": len(batch), "failed": failed, "pending_remaining": remaining, "journal": rid,
+           "resume_command": (f"tl profile-materialize-sources --profile-name {name} --apply"
+                              if remaining else None),
+           "note": "nguồn blocked Ở LẠI nlm-only là HỢP LỆ (Q4) — Instruction Block sẽ nói rõ chúng chỉ có trên NLM."}
+    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if not failed else sys.stderr)
+    return 0 if not failed else 1
 
 
 def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:

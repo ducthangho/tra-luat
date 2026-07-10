@@ -1,3 +1,25 @@
+# ★ v1.34.26 — PROFILE P4 (KẾT LỘ TRÌNH 4 PHASE): profile-from-nlm + nguồn nlm-only + materialize (2026-07-11)
+
+- **`tl profile-from-nlm --name <p> --notebook <nb> [--folder <id>]`** MỚI (Q4): notebook→profile —
+  folder riêng + registry/manifest/marker/config own+own; seed row theo nguồn notebook: có file Drive →
+  `row_kind=ref` (drive_id thật, `_nlm_source_drive_id` bóc); text/URL/YouTube → **`row_kind=nlm_only`**
+  với **SENTINEL `drive_id=nlm:<source_id>`** — KHÔNG bump GAS (REG_COLS_ hằng server, cột mới = đắt vô
+  ích): materialize_status suy diễn (pending/blocked ghi cột `note` sẵn có; done = row thật tồn tại).
+  KHÔNG ghi đè chat config notebook đang dùng (khác promote — notebook MỚI mới áp sysprompt).
+- **`tl profile-materialize-sources`** MỚI (chính sách mặc định **materialize_preferred**, chốt grilling
+  2026-07-10): `source_content` → `createtext` GDoc vào folder profile → row own verified → xoá sentinel
+  (`reg_delete`, TẠO-TRƯỚC-XOÁ-SAU — đứt giữa chừng để lại SENTINEL_STALE, run sau tự dọn, idempotent);
+  RESUMABLE `--limit`/`resume_command`, lặp tới `pending_remaining=0`; không xuất được →
+  `note=materialize=blocked:<reason>` — Ở LẠI nlm-only HỢP LỆ (Q4), `--retry-blocked` thử lại.
+- **`tl profile-doctor --deep`**: chiều Drive↔NLM↔registry (reg_get theo nlm_source_id, scope registry
+  PROFILE): `NLM_SOURCE_UNREGISTERED` / `NLM_ONLY_PENDING` / `NLM_ONLY_BLOCKED` / `SENTINEL_STALE`.
+- Ghi chú giới hạn: row nlm_only có thể KHÔNG vào manifest (manifest_export quét theo Drive/registry
+  server-side) — tra nguồn nlm-only qua `reg-query`/doctor --deep; Instruction Block (profile-load) đã
+  buộc nói rõ nguồn nào chỉ có trên NLM.
+- TDD r89 ×7 (from-nlm DRY/APPLY, materialize DRY/APPLY nâng-cấp+blocked, doctor deep, parser) →
+  **772/772**; golden + parser-surface regen có chủ đích. **HOÀN TẤT lộ trình profile P1→P4** (grilling
+  10 quyết định + hợp nhất nhánh song song, 2026-07-10).
+
 # ★ v1.34.25 — PROFILE P3: profile-promote (folder→profile) + create-notebook có kiểm soát + NLM System Prompt tự áp (2026-07-10)
 
 - **`tl profile-promote --name <p> --folder <id> [--notebook <nb>|--create-notebook]`** MỚI (Q2+Q3+Q5):

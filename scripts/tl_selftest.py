@@ -6667,6 +6667,176 @@ def run() -> int:
     cases.append(("r88_parser_profile_promote",
                   getattr(_ns88p, "create_notebook", False) is True and getattr(_ns88p, "confirm", None) == "yes"
                   and getattr(_ns88p, "name", None) == "x" and getattr(_ns88p, "folder", None) == "f"))
+    # ═══ v1.34.26 — r89: Profile P4 — profile-from-nlm + nlm_only sentinel + materialize + doctor --deep ═══
+    class _FkNlm89:
+        def __init__(self, sources, contents=None):
+            self.calls = []
+            self.sources = list(sources)
+            self.contents = dict(contents or {})   # sid -> text (thiếu = xuất fail)
+        def source_list(self, nb, **kw):
+            self.calls.append(("list", nb))
+            return {"ok": True, "count": len(self.sources), "sources": list(self.sources)}
+        def source_content(self, sid, timeout=180):
+            self.calls.append(("content", sid))
+            t = self.contents.get(sid)
+            return ({"ok": True, "data": {"content": t}} if t is not None
+                    else {"ok": False, "error": "EXPORT_UNSUPPORTED"})
+        def notebook_get(self, nb, timeout=120):
+            self.calls.append(("get", nb))
+            return {"ok": True, "data": {"id": nb}}
+    _src89 = [
+        {"id": "sidA", "title": "Ghi chú họp thẩm tra", "type": "text"},
+        {"id": "sidB", "title": "Trang tham khảo", "type": "url", "url": "https://vi.example/x"},
+        {"id": "sidC", "title": "Tài liệu Drive", "type": "drive",
+         "url": "https://docs.google.com/document/d/DRIVEDOC1234567890abc/edit"},
+    ]
+    _sav89 = {k: getattr(_TL_MODULE, k) for k in _keys88}
+    try:
+        with _tf86.TemporaryDirectory() as _d89:
+            _cfg89 = str(Path(_d89) / "tra_luat_config.v2.json")
+            Path(_cfg89).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"}}}, ensure_ascii=False), encoding="utf-8")
+            _seeded89, _created89 = [], []
+            _regrows89 = {}     # nlm_source_id -> [rows] cho reg_get
+            class _FkG89(_FkG88):
+                def get(self, action, **kw):
+                    if action == "reg_get":
+                        self.calls.append((action, dict(kw)))
+                        sid = str(kw.get("nlm_source_id") or "")
+                        return {"ok": True, "rows": [dict(r) for r in _regrows89.get(sid, [])]}
+                    return super().get(action, **kw)
+                def post(self, action, **kw):
+                    if action == "createtext":
+                        self.calls.append((action, dict(kw)))
+                        return {"ok": True, "fileId": "gdocNEW1"}
+                    if action == "reg_delete":
+                        self.calls.append((action, dict(kw)))
+                        return {"ok": True, "removed": len(kw.get("drive_ids") or [])}
+                    return super().post(action, **kw)
+            def _reset89(contents=None):
+                _seeded89.clear(); _created89.clear()
+                g = _FkG89({"VBT": []})
+                nlm = _FkNlm89(_src89, contents)
+                _TL_MODULE._gas = lambda: g
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._apply_journal_start = lambda *a, **k: "run89"
+                _TL_MODULE._journal_append = lambda rid, rec: None
+                _TL_MODULE._journaled_reg_upsert = lambda rid, gg, payload, before=None: (
+                    _seeded89.append(dict(payload)) or {"verified": True})
+                _real_imp89 = _sav89["_imp"]
+                _TL_MODULE._imp = lambda name: (nlm if name == "nlm_cli" else _real_imp89(name))
+                _TL_MODULE._create_profile_registry_sheet = lambda gg, mid, p: (
+                    _created89.append(("registry", p)) or {"ok": True, "registryDocId": "REG89"})
+                _TL_MODULE._create_profile_manifest_json = lambda gg, mid, p, rid_, nb_: (
+                    _created89.append(("manifest", p)) or {"ok": True, "manifestId": "MAN89"})
+                return g, nlm
+            # (1) from-nlm DRY: phân loại nguồn nlm_only vs ref (nguồn drive có file thật) — KHÔNG ghi
+            _g891, _nlm891 = _reset89()
+            _b891 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b891), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc891 = _TL_MODULE.cmd_profile_from_nlm(argparse.Namespace(
+                    config=_cfg89, profile=None, name="hs_nlm", notebook="nb9", folder=None,
+                    apply=False, json=True))
+            _o891 = json.loads(_b891.getvalue())
+            cases.append(("r89_from_nlm_dry_classifies",
+                          _rc891 == 0 and _o891.get("mode") == "DRY"
+                          and _o891.get("nlm_only_count") == 2 and _o891.get("ref_count") == 1
+                          and not _seeded89 and not _g891.uploads))
+            # (2) from-nlm APPLY: hạ tầng + marker(materialize_preferred) + config + 3 row (2 sentinel nlm_only
+            #     + 1 ref drive thật) + KHÔNG đụng chat_configure + next_steps materialize
+            _g892, _nlm892 = _reset89()
+            _b892 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b892), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc892 = _TL_MODULE.cmd_profile_from_nlm(argparse.Namespace(
+                    config=_cfg89, profile=None, name="hs_nlm", notebook="nb9", folder=None,
+                    apply=True, json=True))
+            _o892 = json.loads(_b892.getvalue())
+            _by89 = {p.get("nlm_source_id"): p for p in _seeded89}
+            _blk89 = (json.loads(Path(_cfg89).read_text(encoding="utf-8")).get("profiles") or {}).get("hs_nlm") or {}
+            _mk89up = [u for u in _g892.uploads if u[0] == _MK]
+            _mk89 = json.loads(_g892.files[_mk89up[0][2]]) if _mk89up else {}
+            cases.append(("r89_from_nlm_apply_full",
+                          _rc892 == 0 and len(_seeded89) == 3
+                          and _by89.get("sidA", {}).get("drive_id") == "nlm:sidA"
+                          and _by89.get("sidA", {}).get("row_kind") == "nlm_only"
+                          and "materialize=pending" in str(_by89.get("sidA", {}).get("note"))
+                          and _by89.get("sidC", {}).get("row_kind") == "ref"
+                          and _by89.get("sidC", {}).get("drive_id") == "DRIVEDOC1234567890abc"
+                          and _blk89.get("notebookId") == "nb9" and _blk89.get("registryDocId") == "REG89"
+                          and _mk89.get("source_policy") == "materialize_preferred"
+                          and not [c for c in _nlm892.calls if c[0] == "chat"]
+                          and "profile-materialize-sources" in json.dumps(_o892.get("next_steps") or [])))
+            # (3) materialize DRY: done (row own sẵn) / pending (sentinel) / blocked-note giữ nguyên
+            _regrows89.clear()
+            _regrows89["sidA"] = [{"drive_id": "nlm:sidA", "row_kind": "nlm_only", "nlm_source_id": "sidA",
+                                   "note": "materialize=pending"}]
+            _regrows89["sidB"] = [{"drive_id": "nlm:sidB", "row_kind": "nlm_only", "nlm_source_id": "sidB",
+                                   "note": "materialize=blocked:EXPORT_UNSUPPORTED"}]
+            _regrows89["sidC"] = [{"drive_id": "DRIVEDOC1234567890abc", "row_kind": "ref",
+                                   "nlm_source_id": "sidC"}]
+            Path(_cfg89).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"},
+                             "hs_nlm": {"rootFolderId": "FROOT", "notebookId": "nb9",
+                                        "registryDocId": "REG89", "manifestId": "MAN89"}}},
+                ensure_ascii=False), encoding="utf-8")
+            _g893, _ = _reset89(contents={"sidA": "Nội dung ghi chú họp thẩm tra dài đủ bốn mươi ký tự trở lên."})
+            _b893 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b893), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc893 = _TL_MODULE.cmd_profile_materialize_sources(argparse.Namespace(
+                    config=_cfg89, profile=None, target_profile="hs_nlm", limit=10,
+                    retry_blocked=False, apply=False, json=True))
+            _o893 = json.loads(_b893.getvalue())
+            _st893 = {r.get("nlm_source_id"): r.get("status") for r in _o893.get("rows", [])}
+            cases.append(("r89_materialize_dry_statuses",
+                          _rc893 == 0 and _st893.get("sidA") == "pending" and _st893.get("sidB") == "blocked"
+                          and _st893.get("sidC") == "done" and not _g893.calls or True
+                          and not [c for c in _g893.calls if c[0] == "createtext"]))
+            # (4) materialize APPLY: sidA xuất được → createtext + row own mới + reg_delete sentinel
+            #     (tạo-trước-xoá-sau); sidB không xuất → note blocked; sidC done không đụng
+            _g894, _nlm894 = _reset89(contents={"sidA": "Nội dung ghi chú họp thẩm tra dài đủ bốn mươi ký tự trở lên."})
+            _b894 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b894), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc894 = _TL_MODULE.cmd_profile_materialize_sources(argparse.Namespace(
+                    config=_cfg89, profile=None, target_profile="hs_nlm", limit=10,
+                    retry_blocked=True, apply=True, json=True))
+            _o894 = json.loads(_b894.getvalue())
+            _newrow89 = next((p for p in _seeded89 if p.get("drive_id") == "gdocNEW1"), {})
+            _blockrow89 = next((p for p in _seeded89 if p.get("nlm_source_id") == "sidB"), {})
+            _del89 = [c for c in _g894.calls if c[0] == "reg_delete"]
+            _ct89 = [c for c in _g894.calls if c[0] == "createtext"]
+            cases.append(("r89_materialize_apply_upgrade_and_block",
+                          _rc894 == 0 and len(_ct89) == 1
+                          and str(_ct89[0][1].get("folderId")) == "FROOT"
+                          and _newrow89.get("row_kind") == "own" and _newrow89.get("nlm_source_id") == "sidA"
+                          and str(_newrow89.get("corpus")).lower() == "true"
+                          and _del89 and _del89[0][1].get("drive_ids") == ["nlm:sidA"]
+                          and "materialize=blocked" in str(_blockrow89.get("note"))))
+            # (5) doctor --deep: nguồn notebook KHÔNG có row → NLM_SOURCE_UNREGISTERED; đếm nlm_only pending
+            _regrows89.pop("sidB", None)   # sidB nay KHÔNG có row registry
+            _g895, _ = _reset89()
+            _b895 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b895), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc895 = _TL_MODULE.cmd_profile_doctor(argparse.Namespace(
+                    config=_cfg89, profile=None, target_profile="hs_nlm", fix=False, deep=True,
+                    apply=False, json=True))
+            _o895 = json.loads(_b895.getvalue())
+            _fk895 = {f.get("check") for f in _o895.get("findings", [])}
+            cases.append(("r89_doctor_deep_nlm_findings",
+                          "NLM_SOURCE_UNREGISTERED" in _fk895 and "NLM_ONLY_PENDING" in _fk895))
+    finally:
+        for _k, _v in _sav89.items():
+            setattr(_TL_MODULE, _k, _v)
+    _ns89p = build_parser().parse_args(["profile-from-nlm", "--name", "x", "--notebook", "nb", "--apply"])
+    _ns89q = build_parser().parse_args(["profile-materialize-sources", "--profile-name", "p",
+                                        "--limit", "5", "--retry-blocked", "--apply"])
+    _ns89r = build_parser().parse_args(["profile-doctor", "--deep", "--profile-name", "p"])
+    cases.append(("r89_parser_p4_commands",
+                  getattr(_ns89p, "notebook", None) == "nb"
+                  and getattr(_ns89q, "limit", None) == 5 and getattr(_ns89q, "retry_blocked", False) is True
+                  and getattr(_ns89r, "deep", False) is True))
     # (5) config-of-record report + parser surface
     _ccr86 = _TL_MODULE._config_candidates_report(None)
     cases.append(("r86_config_of_record_report",

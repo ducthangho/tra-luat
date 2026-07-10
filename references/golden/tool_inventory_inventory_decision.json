@@ -104,6 +104,7 @@
     "profile-file-add",
     "profile-file-remove",
     "profile-files",
+    "profile-from-nlm",
     "profile-index",
     "profile-info",
     "profile-ingest",
@@ -113,6 +114,7 @@
     "profile-list",
     "profile-load",
     "profile-manifest",
+    "profile-materialize-sources",
     "profile-promote",
     "profile-rebuild-registry",
     "profile-rename",
@@ -1038,6 +1040,16 @@
         "workflow_task": null,
         "write_scope": "drive_registry"
       },
+      "profile-from-nlm": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry_nlm"
+      },
       "profile-index": {
         "generated": true,
         "idempotency_contract": null,
@@ -1127,6 +1139,16 @@
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "none"
+      },
+      "profile-materialize-sources": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
       },
       "profile-promote": {
         "generated": true,
@@ -1570,10 +1592,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 129,
+      "generated_parsers": 131,
       "high_risk": 22,
-      "total": 135,
-      "write_commands": 68
+      "total": 137,
+      "write_commands": 70
     },
     "schema": "command_registry.v1"
   },

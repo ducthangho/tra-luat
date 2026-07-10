@@ -279,8 +279,8 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
     # được qua reg_clear) — cảnh báo LOUD thay vì để người vận hành tưởng đã xoá (ca sohieu gán nhầm hồ sơ BHXH).
     _empty_ignored = sorted(k for k in fields if not str((payload or {}).get(k) or "").strip())
     _empty_extra = ({"empty_ignored": _empty_ignored,
-                     "note_empty": "giá trị RỖNG bị webapp BỎ QUA cho cột thường (by-design — chỉ nlm_*/note "
-                                   "clear được qua reg_clear); muốn đính chính: ghi giá trị mới hoặc chú thích note/title_vn."}
+                     "note_empty": "giá trị RỖNG bị webapp BỎ QUA (by-design) — muốn XOÁ TRẮNG: "
+                                   "`register --drive-id <id> --clear-cols <cols> --confirm yes` (server ≥2.21.2j, cột thường tự gắn force)."}
                     if _empty_ignored else {})
     # #6 backlog (v1.34.17): FIELDS_DROPPED → TỰ RETRY per-field ĐÚNG 1 VÒNG (ca thật: ghi nhiều trường 1 lượt
     # bị rớt, ghi lại lượt nhỏ thì verified) rồi re-readback; vẫn lệch → báo như cũ.

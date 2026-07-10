@@ -370,6 +370,11 @@ def build_parser() -> argparse.ArgumentParser:
     # N3 (v1.33.41 — log rà: agent quen tay `register … --apply` bị usage-error rc=2 giữa loop): register GHI
     # TRỰC TIẾP by-design (journaled+verified, không DRY) — nhận cờ --apply làm NO-OP để không vỡ muscle-memory.
     p.add_argument("--apply", action="store_true", help="(no-op compat) register luôn ghi trực tiếp — cờ này chỉ để khỏi vỡ script/agent-loop quen các lệnh DRY-mặc-định")
+    # #5 TRỌN (v1.34.20, server ≥2.21.2j): XOÁ TRẮNG giá trị cột có kiểm soát — trước đây giá trị rỗng bị webapp
+    # bỏ im lặng, không có đường đính chính sohieu/loai/goc gán nhầm (ca thật hồ sơ BHXH).
+    p.add_argument("--clear-cols", dest="clear_cols",
+                   help="CSV cột cần XOÁ TRẮNG (reg_clear 2-tầng: nlm_*/note tự do; cột thường server đòi force — tl tự gắn; drive_id/name BẢO VỆ). Cần --confirm yes.")
+    p.add_argument("--confirm", help="'yes' để xác nhận --clear-cols (thao tác xoá giá trị)")
     p.set_defaults(fn=cmd_register)
 
 

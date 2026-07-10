@@ -333,7 +333,7 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_behavior": "chạy lại CÙNG LỆNH — upsert theo drive_id, batch đã ghi giữ nguyên giá trị",
         "duplicate_guard": "_apply_gate precheck write_cols + verified-write đối chiếu từng batch",
         "readback_command": "reg-query --drive-id <id> --json (cols vừa ghi khớp giá trị)",
-        "resume_command": "register --drive-id <id> ... (cùng args; bulk: --bulk <file> --cols <cols>)",
+        "resume_command": "register --drive-id <id> ... (cùng args; bulk: --bulk <file> --cols <cols>; XOÁ TRẮNG: --clear-cols <cols> --confirm yes — server ≥2.21.2j)",
         "rollback_hint": "undo <run_id> --apply (journal giữ before theo key_field từng batch)",
     },
     "push_overflow": {

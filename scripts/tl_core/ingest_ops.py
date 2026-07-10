@@ -91,8 +91,59 @@ def cmd_ingest(a) -> int:
     return 0 if org.get("ok") else 1
 
 
+_REG_CLEAR_FREE_COLS = {"nlm_source_id", "nlm_status", "nlm_pushed_at", "nlm_title", "nlm_notebook_id", "note"}
+_REG_CLEAR_PROTECTED = {"drive_id", "name"}
+
+
+def _register_clear(a, g) -> int:
+    """#5 TRỌN (v1.34.20): register --clear-cols → webapp reg_clear 2-tầng (server ≥2.21.2j).
+    Journaled (before từ manifest cho undo tay) + readback field-level xác nhận đã RỖNG."""
+    cols = [c.strip() for c in str(a.clear_cols or "").split(",") if c.strip()]
+    did = (getattr(a, "drive_id", None) or "").strip()
+    if not did or not cols:
+        print("[tl] --clear-cols cần --drive-id và danh sách cột.", file=sys.stderr); return 2
+    if getattr(a, "confirm", None) != "yes":
+        print("[tl] --clear-cols là thao tác XOÁ GIÁ TRỊ → cần --confirm yes.", file=sys.stderr); return 2
+    bad = sorted(set(cols) & _REG_CLEAR_PROTECTED)
+    if bad:
+        print(json.dumps({"ok": False, "error": "REG_CLEAR_PROTECTED_COLS", "cols": bad,
+                          "note": "drive_id/name là khoá cấu trúc — không bao giờ clear."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    needs_force = [c for c in cols if c not in _REG_CLEAR_FREE_COLS]
+    run_id = _apply_journal_start("register-clear", {"drive_id": did, "cols": ",".join(cols)})
+    _journal_append(run_id, {"t": "intent", "op": "reg_clear", "key": did, "cols": ",".join(cols),
+                             "before": (_reg_before_from_manifest([{"drive_id": did}], cols) or {}).get(did, {})})
+    kw = {"drive_id": did, "cols": ",".join(cols), "confirm": "yes"}
+    if needs_force:
+        kw["force"] = "yes"   # server 2.21.2j: cột thường đòi force tường minh
+    r = g.get("reg_clear", **kw)
+    ok = bool(r.get("ok"))
+    verified, still = ok, []
+    if ok:
+        try:
+            rb = g.get("reg_get", drive_id=did, refresh="true")
+            row = ((rb.get("rows") or [{}])[0]) if isinstance(rb, dict) else {}
+            still = [c for c in cols if str(row.get(c) or "").strip()]
+            verified = not still
+        except Exception:  # noqa: BLE001
+            verified = ok
+    _journal_append(run_id, {"t": "commit", "op": "reg_clear", "key": did, "ok": verified})
+    _invalidate_manifest_cache()
+    out = {"ok": ok, "verified": verified, "cleared_cols": cols, "forced": bool(needs_force),
+           "journal": run_id, "reg_clear": r}
+    if still:
+        out["still_set"] = still
+    if not ok and "force" in str(r.get("error") or ""):
+        out["note"] = "Server chưa 2.21.2j? Kiểm `tl ping` version; deploy GAS mới rồi chạy lại."
+    print(json.dumps(out, ensure_ascii=False, indent=2))
+    return 0 if verified else 1
+
+
 def cmd_register(a) -> int:
     g = _gas()
+    if getattr(a, "clear_cols", None):
+        return _register_clear(a, g)
     if a.bulk:
         items = json.loads(Path(a.bulk).read_text(encoding="utf-8"))
         # P0-1 LỚP 1 cho --bulk (MERGE AUDIT 07/2026 — v1.33.12 ta chỉ guard đường đơn): item drive_id CẮT CỤT/

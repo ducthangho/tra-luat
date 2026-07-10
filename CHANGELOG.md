@@ -1,3 +1,17 @@
+# ★ v1.34.20 — #5 TRỌN VẸN: webapp GAS 2.21.2j reg_clear 2-tầng + `register --clear-cols` (2026-07-10)
+
+- **GAS 2.21.2j** (deploy clasp `gas-deploy.ps1`, GIỮ URL /exec, version 74): `doRegClear_` 2 TẦNG —
+  `nlm_*`/note như cũ (confirm=yes); **cột thường ∈ REG_COLS_ cần thêm `force='yes'`**; `drive_id`/`name`
+  BẢO VỆ tuyệt đối. Tương thích ngược 100% (call cũ không force vẫn chỉ nlm_*/note).
+- **tl-side**: `register --drive-id <id> --clear-cols <csv> --confirm yes` — tự gắn force cho cột thường,
+  journaled (intent{before-từ-manifest} cho undo tay) + **readback field-level xác nhận đã RỖNG**;
+  guards client-side (protected/confirm/thiếu-drive-id). `note_empty` (#5 v1.34.17) nay gợi ý đường mới.
+  Đóng ca thật hồ sơ BHXH: "sohieu gán nhầm không xoá trắng được".
+- **Đóng dấu version**: EXPECT_VERSION 2.21.2i→2.21.2j (`contract_check --bump` — nay sửa CẢ literal
+  tl_selftest; 17 chỗ SKILL/RUNBOOK; `references/Code.2.21.2j.gs` đổi tên theo + gas-deploy.ps1 5 chỗ).
+  **SKILL.md ĐỔI → user RE-IMPORT Capabilities sau deploy.**
+- TDD: +5 `r85` viết trước (parser/force-routing/guards/nlm-no-force/note) → **735/735**.
+
 # ★ v1.34.19 — BACKLOG #11: _persist_profile_config ghi đúng config ACTIVE (2026-07-10)
 
 - Phát hiện từ ca thật #10: `profile-adopt` không `--config` ghi block vào `~/.tra_luat_config.json`

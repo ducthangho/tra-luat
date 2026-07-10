@@ -81,6 +81,13 @@ def bump_after_deploy(new: str) -> int:
     t = TL_PY.read_text(encoding="utf-8")
     t = re.sub(r'(EXPECT_VERSION\s*=\s*")[^"]+(")', r"\g<1>" + new + r"\g<2>", t, count=1)
     t = t.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
+    # v1.34.20: literal expect_version SỐNG Ở tl_selftest.py (tách từ tl.py hồi I-series) — sửa cả đó
+    _st = HERE / "tl_selftest.py"
+    if _st.exists():
+        _t2 = _st.read_text(encoding="utf-8")
+        _t2n = _t2.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
+        if _t2n != _t2:
+            _st.write_text(_t2n, encoding="utf-8", newline="\n")
     TL_PY.write_text(t, encoding="utf-8")
 
     # v1.16.10: đồng bộ thêm SKILL.md + RUNBOOK.md để RUNBOOK/Claude không chặn nhầm ở version cũ

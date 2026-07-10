@@ -68,7 +68,7 @@
  *   v2.4.0: + upload base64 + exporttext/exportdocx + listChildren_/listTree_ phân trang dùng chung.
  */
 
-var APP_VERSION = '2.21.2i';   // regen2 profile own-scope + manifest blowup guard
+var APP_VERSION = '2.21.2j';   // reg_clear 2-tầng: cột thường + force=yes (#5); trước: regen2 own-scope
 
 var CONFIG = {
   // ⚠️ v2.8.0: DEFAULT_TOKEN đặt PLACEHOLDER — token thật nằm ở Script Property TL_TOKEN (đã rotateToken()
@@ -2428,10 +2428,22 @@ function doRegClear_(p){
   var keyDrive = String(p.drive_id || p.fileId || '').trim();
   var keyNlm = String(p.nlm_source_id || '').trim();
   if (!keyDrive && !keyNlm) return { ok:false, error:'Cần drive_id hoặc nlm_source_id' };
+  // v2.21.2j (#5 log hồ sơ BHXH): 2 TẦNG — nlm_*/note như cũ (confirm=yes); CỘT THƯỜNG (mọi cột REG_COLS_
+  // trừ PROTECTED drive_id/name) đòi THÊM force='yes' (đính chính sohieu/loai/goc... gán nhầm — trước đây
+  // giá trị rỗng bị bỏ im lặng, không có đường xoá chính danh). Tương thích ngược 100%: call cũ không force
+  // vẫn chỉ nlm_*/note.
   var allowed = { nlm_source_id:true, nlm_status:true, nlm_pushed_at:true, nlm_title:true, nlm_notebook_id:true, note:true };
+  var PROTECTED_ = { drive_id:true, name:true };
+  var force = String(p.force || '') === 'yes';
   var cols = String(p.cols || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
   if (!cols.length) return { ok:false, error:'Cần cols' };
-  for (var i=0;i<cols.length;i++) if (!allowed[cols[i]]) return { ok:false, error:'Không được clear cột: '+cols[i] };
+  for (var i=0;i<cols.length;i++){
+    var c = cols[i];
+    if (allowed[c]) continue;
+    if (PROTECTED_[c]) return { ok:false, error:'Cột BẢO VỆ không bao giờ clear: '+c };
+    if (REG_COLS_.indexOf(c) < 0) return { ok:false, error:'Cột không thuộc REG_COLS_: '+c };
+    if (!force) return { ok:false, error:'Cột thường cần force=yes (2.21.2j): '+c };
+  }
   var objs = regReadAll_(true), hits = [];
   objs.forEach(function(o){
     var ok = (keyDrive && o.drive_id === keyDrive) || (keyNlm && o.nlm_source_id === keyNlm);

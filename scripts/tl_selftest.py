@@ -3385,7 +3385,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2i"))
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2j"))
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -6007,7 +6007,7 @@ def run() -> int:
     _v83 = _TL_MODULE._verified_reg_upsert(_g83, {"drive_id": "d83", "goc": "GOC_OK", "sohieu": ""})
     cases.append(("r83_upsert_empty_value_warned",
                   _v83.get("verified") is True and _v83.get("empty_ignored") == ["sohieu"]
-                  and "nlm_*/note" in str(_v83.get("note_empty", ""))))
+                  and "--clear-cols" in str(_v83.get("note_empty", ""))))
     # (#6) FIELDS_DROPPED → tự retry per-field 1 vòng rồi re-readback; thành công → verified + fields_retried
     class _FkG83b:
         def __init__(self):
@@ -6072,6 +6072,72 @@ def run() -> int:
             cases.append(("r84_persist_config_active_candidates", _ok84a and _ok84b))
     finally:
         for _k, _v in _sav84.items():
+            setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.20 — r85: #5 TRỌN — register --clear-cols (server 2.21.2j reg_clear 2-tầng force) ═══
+    _ns85 = build_parser().parse_args(["register", "--drive-id", "d85", "--clear-cols", "sohieu", "--confirm", "yes"])
+    cases.append(("r85_register_clear_cols_parser",
+                  getattr(_ns85, "clear_cols", None) == "sohieu" and getattr(_ns85, "confirm", None) == "yes"))
+    class _FkG85:
+        def __init__(self, row):
+            self.calls = []
+            self.row = row
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "reg_clear":
+                return {"ok": True, "cleared": 1, "drive_ids": ["d85"], "cols": kw.get("cols", "").split(",")}
+            if action == "reg_get":
+                return {"ok": True, "rows": [dict(self.row)]}
+            return {"ok": True}
+    _keys85 = ("_gas", "_apply_journal_start", "_journal_append", "_reg_before_from_manifest",
+               "_invalidate_manifest_cache", "load_creds", "apply_profile_offline", "_manifest_entries")
+    _sav85 = {k: getattr(_TL_MODULE, k) for k in _keys85}
+    try:
+        _g85 = _FkG85({"drive_id": "d85", "sohieu": "", "nlm_status": ""})
+        _TL_MODULE._gas = lambda: _g85
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run85"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {"d85": {"sohieu": "12-2022-ND-CP"}}
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [{"drive_id": "d85", "sohieu": "12-2022-ND-CP"}]
+        def _mk85(**kw):
+            base = dict(config=None, profile=None, bulk=None, cols=None, drive_id=None, clear_cols=None,
+                        confirm=None, force_insert=False, force_unsafe=False, apply=False, row_kind=None)
+            for k in ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc", "sua_doi",
+                      "nlm_source_id", "nlm_notebook_id", "nlm_status", "nlm_title", "tukhoa", "corpus", "title_vn"):
+                base[k] = None
+            base.update(kw)
+            return argparse.Namespace(**base)
+        _b85 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b85), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc85 = _TL_MODULE.cmd_register(_mk85(drive_id="d85", clear_cols="sohieu,nlm_status", confirm="yes"))
+        _j85 = json.loads(_b85.getvalue())
+        _clr = [c for c in _g85.calls if c[0] == "reg_clear"]
+        cases.append(("r85_register_clear_cols_calls_server",
+                      _rc85 == 0 and len(_clr) == 1 and _clr[0][1].get("force") == "yes"
+                      and _clr[0][1].get("confirm") == "yes" and _clr[0][1].get("drive_id") == "d85"
+                      and _j85.get("verified") is True and _j85.get("journal") == "run85"
+                      and not [c for c in _g85.calls if c[0] == "reg_upsert"]))
+        # cột BẢO VỆ chặn client-side, KHÔNG gọi server; thiếu confirm cũng chặn
+        _g85.calls.clear()
+        with _hush():
+            _rc85b = _TL_MODULE.cmd_register(_mk85(drive_id="d85", clear_cols="drive_id", confirm="yes"))
+            _rc85c = _TL_MODULE.cmd_register(_mk85(drive_id="d85", clear_cols="sohieu"))
+        cases.append(("r85_register_clear_guards",
+                      _rc85b == 2 and _rc85c == 2 and not _g85.calls))
+        # chỉ cột nlm_* → KHÔNG cần force
+        _g85.calls.clear()
+        with _hush():
+            _rc85d = _TL_MODULE.cmd_register(_mk85(drive_id="d85", clear_cols="nlm_status", confirm="yes"))
+        _clr_d = [c for c in _g85.calls if c[0] == "reg_clear"]
+        cases.append(("r85_register_clear_nlm_no_force",
+                      _rc85d == 0 and len(_clr_d) == 1 and "force" not in _clr_d[0][1]))
+        # note_empty (#5) nay gợi ý --clear-cols
+        _v85 = _TL_MODULE._verified_reg_upsert(_FkG85({"drive_id": "d85", "goc": "G"}), {"drive_id": "d85", "goc": "G", "sohieu": ""})
+        cases.append(("r85_note_empty_suggests_clear_cols", "--clear-cols" in str(_v85.get("note_empty", ""))))
+    finally:
+        for _k, _v in _sav85.items():
             setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65

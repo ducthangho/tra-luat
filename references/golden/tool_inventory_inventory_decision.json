@@ -111,6 +111,7 @@
     "profile-ingest-ocr",
     "profile-ingest-zip",
     "profile-list",
+    "profile-load",
     "profile-manifest",
     "profile-rebuild-registry",
     "profile-rename",
@@ -1106,6 +1107,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "profile-load": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "profile-manifest": {
         "generated": true,
         "idempotency_contract": null,
@@ -1548,9 +1559,9 @@
       }
     },
     "counts": {
-      "generated_parsers": 127,
+      "generated_parsers": 128,
       "high_risk": 22,
-      "total": 133,
+      "total": 134,
       "write_commands": 67
     },
     "schema": "command_registry.v1"

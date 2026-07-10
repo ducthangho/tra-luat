@@ -1,3 +1,23 @@
+# ★ v1.34.24 — PROFILE P2: profile-load (Instruction Block từ marker) + KERNEL-DIFF ADR-0003 user duyệt (2026-07-10)
+
+- **`tl profile-load <p> [--target session|project] [--offline]`** MỚI (Q7 + ADR-0003): "dùng profile X
+  trong PHIÊN" = xuất **Instruction Block** sinh từ MARKER (định danh + description + style văn phong +
+  relations{base vbqppl luôn bật, see_also} + source_policy) — MỘT bản THỐNG NHẤT mọi môi trường
+  (Chat=Cowork=Code), chỉ rẽ `--target` đúng 1 dòng (thân block bằng nhau từng byte — selftest khoá).
+  READ-ONLY: không ghi config/marker. Marker best-effort LIVE; offline → config + `marker_note`;
+  marker↔config lệch → cảnh báo gợi ý `profile-sync`; profile chưa vào config → PROFILE_NOT_FOUND
+  kèm gợi ý `profile-sync --apply`. Block chứa guard không-bịa ("Chưa tìm thấy căn cứ…", "Không nhận
+  RAG làm nguyên văn"), tra-NLM-đúng-notebook (1–3 source, hard cap 5, canonical profile thắng),
+  scope ghi riêng + nlm-only/materialize_preferred. `profile-use --apply` nay in kèm block (offline).
+- `gen_instructions.generate_profile_load_block` + biến thể corpus nền vbqppl; +5 case selftest
+  gen_instructions (29/29); r87 ×7 TDD viết trước (marker-source/drift-warn/offline-fallback/not-found/
+  use-apply-emits/parser) → **758/758**; golden tool_inventory/workflow_audit + parser-surface regen.
+- **KERNEL-DIFF (USER ĐÃ DUYỆT nguyên văn)**: §1 bullet 9 — bỏ "nguồn sự thật duy nhất vẫn là config",
+  thay bằng khối "★ v1.34.22-24 (ADR-0003) — MARKER là nguồn sự thật" (+ profile-sync/backfill/
+  profile-load/discover marker-first). **SKILL.md ĐỔI DOCTRINE → USER RE-IMPORT Capabilities sau deploy.**
+- Live-smoke: `profile-load "Luật BHXH"` đọc marker THẬT (source=marker, đúng notebook 59e8d0de…,
+  không drift). KẾ TIẾP: P3 promote + notebook_create + NLM system prompt; P4 from-nlm/nlm_only/materialize.
+
 # ★ v1.34.23 — vá live-smoke P1: guard vbt_id + backfill marker THẬT cho Luật BHXH/NQ80 (2026-07-10)
 
 - Live-smoke `profile-sync` DRY trên Drive thật (13 folder) bắt ngay 1 bug: `vbthuong` (profile đặc biệt

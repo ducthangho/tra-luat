@@ -539,6 +539,72 @@ Dùng tài liệu này như artifact văn phong riêng, không trộn vào Proje
 """
 
 
+def generate_profile_load_block(meta: dict, target: str = "session", skill_version: str = VERSION) -> str:
+    """P2 (v1.34.24, ADR-0003 + Q7): Instruction Block của MỘT profile — sinh từ MARKER (định danh +
+    description/style/relations/source_policy), dùng làm doctrine PHIÊN hoặc dán Project Instruction.
+    MỘT bản THỐNG NHẤT cho mọi môi trường (Chat = Cowork = Code); chỉ rẽ theo `target` đúng 1 dòng đầu —
+    thân block bằng nhau từng byte (selftest khoá)."""
+    meta = meta or {}
+    p = str(meta.get("profile") or "vbqppl").strip() or "vbqppl"
+    tline = {
+        "session": "> DOCTRINE PHIÊN — áp dụng ngay trong phiên này; mọi môi trường (Chat = Cowork = Code) như nhau.",
+        "project": "> DÁN VÀO Claude Project Instruction — một bản thống nhất cho mọi môi trường (Chat = Cowork = Code).",
+    }.get((target or "session").lower(), "> DOCTRINE PHIÊN — áp dụng ngay trong phiên này; mọi môi trường (Chat = Cowork = Code) như nhau.")
+    if p == "vbqppl":
+        nb_lines = "\n".join(f"  - {nm}: `{nid}`" for nm, nid in VBQPPL_NOTEBOOKS)
+        head = f"# Instruction Block — corpus nền VBQPPL (tra-luat v{skill_version})"
+        body = [
+            f"""## dinh_danh_scope
+Đây là corpus nền VBQPPL (pháp điển 45 chủ đề, registry/manifest nền). Notebooks (đủ shard, đúng thứ tự):
+{nb_lines}""",
+            """## tra_cuu_nlm
+Ưu tiên `notebook_query`/`tl nlm-query` scope 1–3 source_id (hard cap 5) trong notebook VBQPPL đang dùng;
+chỉ khi MISS hoặc cần đối chiếu xuyên corpus mới `cross_notebook_query` đủ shard.""",
+            """## khong_bia
+Chỉ kết luận sau khi verify NGUYÊN VĂN từ nguồn đã nạp (neo source_id/drive_id + Điều/khoản/điểm khi có).
+Không bịa số điều/khoản/điểm, hiệu lực, quan hệ sửa đổi/VBHN. Không nhận RAG làm nguyên văn.
+Thiếu căn cứ → nói rõ: "Chưa tìm thấy căn cứ trong nguồn hiện có." """,
+            """## van_phong
+Trả lời tiếng Việt, rõ ràng, chuẩn mực, câu ngắn, mỗi câu một ý; không dùng cụm mơ hồ khi nguồn chưa đủ căn cứ.""",
+        ]
+        return head + "\n\n" + tline + "\n\n" + "\n\n".join(x.strip() for x in body).strip() + "\n"
+    nb = str(meta.get("notebookId") or "<notebookId>").strip() or "<notebookId>"
+    fld = str(meta.get("folder_name") or p).strip() or p
+    root = str(meta.get("rootFolderId") or "<rootFolderId>").strip() or "<rootFolderId>"
+    reg = str(meta.get("registryDocId") or "<registryDocId>").strip() or "<registryDocId>"
+    man = str(meta.get("manifestId") or "<manifestId>").strip() or "<manifestId>"
+    desc = str(meta.get("description") or "").strip()
+    style = str(meta.get("style") or "").strip()
+    rel = meta.get("relations") if isinstance(meta.get("relations"), dict) else {}
+    see_also = [str(x) for x in (rel.get("see_also") or []) if str(x).strip()]
+    policy = str(meta.get("source_policy") or "materialize_preferred").strip()
+    head = f"# Instruction Block — profile `{p}` (tra-luat v{skill_version})"
+    body = [
+        f"""## dinh_danh_scope
+Profile `{p}` (văn bản thường): notebook NotebookLM `{nb}`, folder Drive `Van_ban_thuong/{fld}`
+(rootFolderId `{root}`), registry Sheet `{reg}` + manifest `{man}` RIÊNG (manifestScope=own, categories=own).{(chr(10) + 'Mô tả phạm vi: ' + desc) if desc else ''}
+Nguồn sự thật định danh = marker `_meta/tra_luat_profile.json` (ADR-0003); kiểm nhanh: `tl --profile {p} profile-info`.""",
+        f"""## tra_cuu_nlm
+Tra cứu NLM của profile này đi ĐÚNG notebook `{nb}`: `notebook_query`/`tl nlm-query` scope 1–3 source_id
+(hard cap 5). Tìm trong notebook profile TRƯỚC; MISS mới `cross_notebook_query` sang nền VBQPPL (+shards)
+và báo rõ "lấy từ VBQPPL". Trùng nhau → canonical của profile THẮNG.""",
+        f"""## khong_bia
+Chỉ kết luận sau khi verify NGUYÊN VĂN từ nguồn đã nạp (neo source_id/drive_id + Điều/khoản/điểm khi có).
+Không bịa số điều/khoản/điểm, hiệu lực, quan hệ sửa đổi/VBHN. Không nhận RAG làm nguyên văn.
+Thiếu căn cứ → nói rõ: "Chưa tìm thấy căn cứ trong nguồn của profile `{p}`." """,
+        "## van_phong\n" + (style if style else
+                            "Trả lời tiếng Việt, rõ ràng, chuẩn mực, câu ngắn, mỗi câu một ý; "
+                            "không dùng cụm mơ hồ khi nguồn chưa đủ căn cứ."),
+        f"""## quan_he_corpus
+Nền VBQPPL LUÔN BẬT (base-also): đối chiếu căn cứ pháp lý dùng nền vbqppl, hit nền phải báo `scope=vbqppl`.{(chr(10) + 'Profile liên quan (tra chéo khi người dùng nhắc tới): ' + ', '.join('`' + x + '`' for x in see_also) + '.') if see_also else ''}""",
+        f"""## scope_ghi
+Ghi/nạp nguồn CHỈ vào registry/manifest/notebook của `{p}` (`tl --profile {p} profile-ingest ...`);
+KHÔNG ghi vào corpus nền VBQPPL. Nguồn chỉ-có-trên-NLM (nlm-only) phải nói rõ CHƯA có file Drive;
+chính sách nguồn: {policy} (ưu tiên materialize về Drive khi xuất được).""",
+    ]
+    return head + "\n\n" + tline + "\n\n" + "\n\n".join(x.strip() for x in body).strip() + "\n"
+
+
 def _target_blocks(target: str, skill_version: str, profile: str, notebook_id: str | None,
                    folder_name: str | None, root_folder_id: str | None) -> list[str]:
     is_project_profile = profile != "vbqppl"
@@ -748,6 +814,31 @@ def selftest() -> int:
     cases.append(("project_deploy_rollback_gate", "tl deploy-plan" in vb and "tl rollback-plan" in vb))
     st = generate("style-template", VERSION)
     cases.append(("style_template_separate_artifact", "Style Template" in st and "SKILL_OF_RECORD" not in st))
+    # P2 (v1.34.24, ADR-0003 + Q7): Instruction Block profile — sinh từ MARKER, THỐNG NHẤT mọi env,
+    # chỉ rẽ theo target (session | project) ở đúng 1 dòng; thân block phải bằng nhau từng byte.
+    _mt = {"profile": "beta", "notebookId": "nb-1", "rootFolderId": "FB", "folder_name": "Beta",
+           "registryDocId": "RB", "manifestId": "MB", "description": "Hồ sơ BHXH Thái Nguyên",
+           "style": "Văn phong trang trọng nội bộ.", "relations": {"base": "vbqppl", "see_also": ["duan_a"]},
+           "source_policy": "materialize_preferred"}
+    _bs = generate_profile_load_block(_mt, "session", VERSION)
+    _bp = generate_profile_load_block(_mt, "project", VERSION)
+    cases.append(("profile_block_binds_marker_meta",
+                  "nb-1" in _bs and "Văn phong trang trọng nội bộ." in _bs and "duan_a" in _bs
+                  and "Hồ sơ BHXH Thái Nguyên" in _bs and "materialize_preferred" in _bs
+                  and "Van_ban_thuong/Beta" in _bs))
+    cases.append(("profile_block_no_fabrication_guard",
+                  "Chưa tìm thấy căn cứ" in _bs and "Không nhận RAG làm nguyên văn" in _bs
+                  and "lấy từ VBQPPL" in _bs))
+    cases.append(("profile_block_unified_env_target_split",
+                  _bs != _bp and _bs.split("\n\n", 2)[2] == _bp.split("\n\n", 2)[2]
+                  and "phiên" in _bs.split("\n\n", 2)[1].lower()
+                  and "project instruction" in _bp.split("\n\n", 2)[1].lower()))
+    _bv = generate_profile_load_block({"profile": "vbqppl"}, "session", VERSION)
+    cases.append(("profile_block_vbqppl_base_variant",
+                  "corpus nền VBQPPL" in _bv and VBQPPL_NOTEBOOKS[0][1] in _bv))
+    _bd = generate_profile_load_block({"profile": "beta", "notebookId": "nb-1", "rootFolderId": "FB"},
+                                      "session", VERSION)
+    cases.append(("profile_block_default_style_when_empty", "## van_phong" in _bd and "tiếng Việt" in _bd))
     bad = "research_start có thể import nguồn vào NotebookLM khi cần."
     cases.append(("audit_bad_project_instruction_fails", not audit(bad, "project")["ok"]))
     cases.append(("audit_bad_nlm_prompt_fails", not audit(bad, "nlm")["ok"]))

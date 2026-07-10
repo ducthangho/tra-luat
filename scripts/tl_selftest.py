@@ -6418,6 +6418,74 @@ def run() -> int:
     finally:
         for _k, _v in _sav86.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.24 — r87: Profile P2 — profile-load (Instruction Block từ marker, không ghi) ═══
+    _sav87 = {k: getattr(_TL_MODULE, k) for k in _keys86}
+    try:
+        with _tf86.TemporaryDirectory() as _d87:
+            _cfg87 = str(Path(_d87) / "tra_luat_config.v2.json")
+            Path(_cfg87).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"},
+                             "beta": dict(_mk_beta_cfg)}}, ensure_ascii=False), encoding="utf-8")
+            _mk87 = {**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
+                     "description": "Hồ sơ BHXH Thái Nguyên", "style": "Văn phong trang trọng nội bộ."}
+            _g87 = _FkG86({"FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
+                           "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}]},
+                          {"mkB": dict(_mk87)})
+            _TL_MODULE._gas = lambda: _g87
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run87"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
+            _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {}
+            _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
+            def _ld87(**kw):
+                base = dict(config=_cfg87, profile=None, name=None, target="session",
+                            offline=False, json=True, apply=False)
+                base.update(kw)
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _TL_MODULE.cmd_profile_load(argparse.Namespace(**base))
+                try:
+                    return _rc, json.loads(_b.getvalue())
+                except Exception:
+                    return _rc, {}
+            # (1) LIVE marker: block mang style/description từ marker, source=marker, KHÔNG ghi gì
+            _rc87a, _o87a = _ld87(name="beta")
+            cases.append(("r87_load_from_marker",
+                          _rc87a == 0 and _o87a.get("source") == "marker"
+                          and "Văn phong trang trọng nội bộ." in str(_o87a.get("instruction"))
+                          and "Hồ sơ BHXH Thái Nguyên" in str(_o87a.get("instruction"))
+                          and not _g87.uploads and not _g87.trashed))
+            # (2) drift marker↔config → cảnh báo gợi ý profile-sync (marker vẫn thắng phần mô tả)
+            _g87.markers["mkB"] = {**_mk87, "notebookId": "nb-new"}
+            _rc87b, _o87b = _ld87(name="beta")
+            cases.append(("r87_load_drift_warns_sync",
+                          _rc87b == 0 and [d["field"] for d in _o87b.get("drift", [])] == ["notebookId"]
+                          and "profile-sync" in str(_o87b.get("warning", ""))))
+            # (3) offline (không creds) → fallback config, vẫn ra block, có marker_note
+            _TL_MODULE.load_creds = lambda *a, **k: (_ for _ in ()).throw(SystemExit("no creds"))
+            _rc87c, _o87c = _ld87(name="beta")
+            cases.append(("r87_load_offline_fallback_config",
+                          _rc87c == 0 and _o87c.get("source") == "config_offline"
+                          and "nb-old" in str(_o87c.get("instruction")) and _o87c.get("marker_note")))
+            # (4) chịu-lỗi-gõ + not-found
+            _rc87d, _ = _ld87(name="ghost9")
+            cases.append(("r87_load_not_found_rc2", _rc87d == 2))
+            # (5) profile-use --apply in kèm Instruction Block (doctrine phiên ngay sau khi đổi default)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _b87e = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b87e), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc87e = _TL_MODULE.cmd_profile_use(argparse.Namespace(
+                    name="beta", apply=True, json=True, config=_cfg87, profile=None))
+            _o87e = json.loads(_b87e.getvalue())
+            cases.append(("r87_profile_use_apply_emits_block",
+                          _rc87e == 0 and "Instruction Block" in str(_o87e.get("instruction", ""))
+                          and json.loads(Path(_cfg87).read_text(encoding="utf-8")).get("defaultProfile") == "beta"))
+    finally:
+        for _k, _v in _sav87.items():
+            setattr(_TL_MODULE, _k, _v)
     # (5) config-of-record report + parser surface
     _ccr86 = _TL_MODULE._config_candidates_report(None)
     cases.append(("r86_config_of_record_report",
@@ -6427,6 +6495,10 @@ def run() -> int:
     cases.append(("r86_parser_profile_sync_backfill",
                   getattr(_ns86p, "folder_cap", None) == 10 and getattr(_ns86p, "apply", False) is True
                   and getattr(_ns86q, "target_profile", None) == "beta" and getattr(_ns86q, "force", False) is True))
+    _ns87p = build_parser().parse_args(["profile-load", "beta", "--target", "project", "--offline", "--json"])
+    cases.append(("r87_parser_profile_load",
+                  getattr(_ns87p, "name", None) == "beta" and getattr(_ns87p, "target", None) == "project"
+                  and getattr(_ns87p, "offline", False) is True))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

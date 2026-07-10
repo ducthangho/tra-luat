@@ -314,6 +314,17 @@ def cmd_profile_use(a) -> int:
         print(json.dumps(plan, ensure_ascii=False, indent=2))
         return 0
     out = _set_default_profile_config(getattr(a, "config", None), name)
+    # P2 (v1.34.24): sau khi đổi default, in luôn Instruction Block (doctrine PHIÊN) — offline từ config;
+    # bản đầy-metadata (marker): `tl profile-load <p>`.
+    if out.get("ok"):
+        try:
+            import gen_instructions  # type: ignore
+            out["instruction"] = gen_instructions.generate_profile_load_block(
+                _profile_block_meta(name, profs.get(name) or {}), "session", VERSION)
+            out["instruction_note"] = ("Block trên sinh OFFLINE từ config — metadata mô tả đầy đủ (marker): "
+                                       f"`tl profile-load {name}`.")
+        except Exception:  # noqa: BLE001
+            pass
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
@@ -1290,6 +1301,97 @@ def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
                          "note": "config có profile nhưng scan Van_ban_thuong không thấy folder (root ngoài VBT/"
                                  "trash/cap?) — kiểm bằng profile-list --discover --folder-cap lớn hơn."})
     return rows
+
+
+def _profile_block_meta(name: str, prof: dict, marker: dict | None = None) -> dict:
+    """PURE (P2): hợp nhất định danh config + metadata MÔ TẢ từ marker (marker thắng phần mô tả —
+    description/style/relations/source_policy sống trên marker, ADR-0003)."""
+    prof = prof or {}
+    mm = marker if isinstance(marker, dict) else {}
+    return {"profile": name,
+            "notebookId": str(mm.get("notebookId") or prof.get("notebookId") or ""),
+            "rootFolderId": str(mm.get("rootFolderId") or prof.get("rootFolderId") or ""),
+            "folder_name": name,
+            "registryDocId": str(mm.get("registryDocId") or prof.get("registryDocId") or ""),
+            "manifestId": str(mm.get("manifestId") or prof.get("manifestId") or ""),
+            "description": str(mm.get("description") or ""),
+            "style": str(mm.get("style") or ""),
+            "relations": (mm.get("relations") if isinstance(mm.get("relations"), dict)
+                          else {"base": DEFAULT_PROFILE}),
+            "source_policy": str(mm.get("source_policy") or "materialize_preferred")}
+
+
+def cmd_profile_load(a) -> int:
+    with _ProfileEnvGuard():
+        return _cmd_profile_load_impl(a)
+
+
+def _cmd_profile_load_impl(a) -> int:
+    """P2 (v1.34.24, Q7 + ADR-0003): 'dùng profile X trong PHIÊN' — xuất Instruction Block THỐNG NHẤT
+    mọi môi trường (chỉ rẽ --target session|project), KHÔNG ghi config/marker (read-only; đổi mặc định
+    máy = profile-use --apply). Metadata mô tả đọc từ MARKER best-effort LIVE; offline → config + note.
+    Marker↔config lệch → cảnh báo gợi ý profile-sync. rc: 0 / 2 PROFILE_NOT_FOUND."""
+    try:
+        import gen_instructions  # type: ignore
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] Không import được gen_instructions.py: {e}", file=sys.stderr)
+        return 2
+    name0 = (getattr(a, "name", None) or "").strip()
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    profs = _profiles_from_config(cfg) if cfg else {}
+    name, prof = _profile_lookup(profs, name0) if name0 else (DEFAULT_PROFILE, profs.get(DEFAULT_PROFILE))
+    if name != DEFAULT_PROFILE and not isinstance(prof, dict):
+        print(json.dumps({"ok": False, "error": "PROFILE_NOT_FOUND", "profile": name0,
+                          "known": sorted(profs),
+                          "note": "profile có marker trên Drive nhưng chưa vào config? → "
+                                  "`tl profile-sync --apply` rồi load lại."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    prof = prof if isinstance(prof, dict) else {}
+    marker, source, drift, m_note = None, "config_offline", [], None
+    if name != DEFAULT_PROFILE and not getattr(a, "offline", False):
+        try:
+            load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
+            g = _gas()
+            mr = _marker_read(g, str(prof.get("rootFolderId") or ""),
+                              meta_id=str(prof.get("metaFolderId") or "") or None)
+            if mr.get("found"):
+                mok, merrs = _marker_validate(mr.get("marker") or {})
+                if mok:
+                    marker = mr["marker"]
+                    source = "marker"
+                    drift = _marker_diff(marker, prof)
+                else:
+                    m_note = "MARKER_INVALID:" + ";".join(merrs)
+            elif mr.get("error"):
+                m_note = str(mr["error"])
+            else:
+                m_note = "MARKER_MISSING — `tl profile-backfill-markers --apply` để có metadata mô tả."
+        except SystemExit as e:
+            m_note = f"OFFLINE ({e})"
+        except Exception as e:  # noqa: BLE001
+            m_note = f"MARKER_READ_FAILED:{type(e).__name__}"
+    meta = _profile_block_meta(name, prof, marker)
+    target = (getattr(a, "target", None) or "session").strip() or "session"
+    text = gen_instructions.generate_profile_load_block(meta, target, VERSION)
+    out = {"ok": True, "profile": name, "target": target, "source": source, "config": path,
+           "config_report": _config_candidates_report(getattr(a, "config", None))}
+    if drift:
+        out["drift"] = drift
+        out["warning"] = ("MARKER_CONFIG_DRIFT (" + ",".join(d["field"] for d in drift) +
+                          ") — chạy `tl profile-sync --apply` trước khi tin định danh; block dùng ĐỊNH DANH marker.")
+    if m_note:
+        out["marker_note"] = m_note + " — block sinh từ config (metadata mô tả có thể thiếu)."
+    if getattr(a, "json", False):
+        out["instruction"] = text
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    else:
+        if out.get("warning"):
+            print(f"[tl] ⚠ {out['warning']}", file=sys.stderr)
+        if m_note:
+            print(f"[tl] {out['marker_note']}", file=sys.stderr)
+        print(text)
+    return 0
 
 
 def cmd_profile_sync(a) -> int:

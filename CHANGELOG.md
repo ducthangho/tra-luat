@@ -1,3 +1,17 @@
+# ★ v1.34.16 — Pha-E-hoàn-thiện: nhóm lệnh NGUY HIỂM lên high + contract THẬT (2026-07-10)
+
+- **TDD**: r82 viết TRƯỚC (đỏ đúng 3 chỗ) → implement → 724/724. KHÔNG đổi CLI (parser-surface khớp).
+- **3 lệnh lên `risk=high` + idempotency_contract.v1 đủ 8 field, phản ánh TRUNG THỰC gate/journal có sẵn**:
+  - `profile-rebuild-registry` (tiền sự XÓA SẠCH 766 dòng 2026-06-30): contract ghi rõ KHÔNG WAL —
+    phá hủy chỉ sau `--apply --confirm yes`; CLOBBER-guard + `--keep-notebook` bắt buộc;
+    **rollback = Google Sheets version-history** (bài học 1.23.21) — r82 khoá riêng câu này.
+  - `ingest-missing`: WAL ckpt 4 khóa done/pending/linked/fails, pending-trước-add + FRESH-verify
+    (chống trùng VBHN_67×3), dedup-live tiered, overflow-route KHÔNG BAO GIỜ tạo notebook.
+  - `manifest`: dẫn-xuất-tất-định từ registry (export idempotent); `--touched-drive` confirm-gate
+    chống PROFILE_MANIFEST_SCOPE_BLOWUP.
+- `_CONTRACT_REQUIRED` 12→15 (r65 exact-set nâng theo — drift-lock giữ nguyên tính chất: thêm lệnh ghi
+  high thiếu contract là fail). Golden `tool_inventory` regen đúng 1 file (risk-counts 12→15).
+
 # ★ v1.34.15 — I10: NÉN STUB-FARM — 488 stub → bảng _STUB_MAP + factory (2026-07-10)
 
 - Bước 3/3 chiến-lược-chặng-cuối. **488 def ủy-quyền 2-dòng (18 module) → `_STUB_MAP` + `_make_tl_stub`**:

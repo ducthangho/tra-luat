@@ -666,10 +666,10 @@
       },
       "ingest-missing": {
         "generated": true,
-        "idempotency_contract": null,
+        "idempotency_contract": "ingest_missing",
         "read_only": false,
         "requires_confirm": false,
-        "risk": "medium",
+        "risk": "high",
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "nlm_registry"
@@ -796,10 +796,10 @@
       },
       "manifest": {
         "generated": true,
-        "idempotency_contract": null,
+        "idempotency_contract": "manifest",
         "read_only": false,
         "requires_confirm": true,
-        "risk": "medium",
+        "risk": "high",
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "drive_registry"
@@ -1106,10 +1106,10 @@
       },
       "profile-rebuild-registry": {
         "generated": true,
-        "idempotency_contract": null,
+        "idempotency_contract": "profile_rebuild_registry",
         "read_only": false,
         "requires_confirm": true,
-        "risk": "medium",
+        "risk": "high",
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "registry"
@@ -1527,7 +1527,7 @@
     },
     "counts": {
       "generated_parsers": 125,
-      "high_risk": 19,
+      "high_risk": 22,
       "total": 131,
       "write_commands": 65
     },

@@ -5072,10 +5072,12 @@ def run() -> int:
     import tl_core.workflow as _w65
     _six65 = _reg65._CONTRACT_REQUIRED
     # v1.34.1: HẾT grandfather — _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (Pha G 6 + siết-6).
+    # v1.34.16 (Pha-E-hoàn-thiện): +3 lệnh nguy hiểm — profile-rebuild-registry / ingest-missing / manifest
     cases.append(("r65_contract_required_six_wired",
                   _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
                              "register", "drive-push", "nlm-reconcile", "push-overflow",
-                             "shared-source-fix", "source-update-corpus"}
+                             "shared-source-fix", "source-update-corpus",
+                             "profile-rebuild-registry", "ingest-missing", "manifest"}
                   and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
     # drift-lock: KHÔNG còn lệnh ghi high-risk nào thiếu contract (lệnh MỚI quên contract → set ≠ rỗng → fail)
     _adv65 = {n for n, m in _reg65.COMMAND_META.items()
@@ -5954,6 +5956,22 @@ def run() -> int:
                     print(f"  [r81] LỆCH stub: {_mk81}.{_n81}", file=sys.stderr)
                     _ok81 = False
     cases.append(("r81_stub_farm_map_complete", _ok81 and _cnt81 >= 480))
+    # ═══ v1.34.16 — r82: Pha-E-hoàn-thiện — nhóm NGUY HIỂM lên high + contract THẬT (không đổi CLI) ═══
+    _dang82 = {"profile-rebuild-registry": "profile_rebuild_registry",
+               "ingest-missing": "ingest_missing", "manifest": "manifest"}
+    cases.append(("r82_dangerous_meta_high_and_contract",
+                  all(_reg65.COMMAND_META[c]["risk"] == "high"
+                      and _reg65.COMMAND_META[c]["idempotency_contract"] == k
+                      and set(_w65._IDEMPOTENCY_CONTRACTS.get(k, {})) == _fields68
+                      for c, k in _dang82.items())
+                  # cờ khớp CODE thật: rebuild+manifest đòi confirm; rebuild+ingest-missing DRY mặc định
+                  and _reg65.COMMAND_META["profile-rebuild-registry"]["requires_confirm"] is True
+                  and _reg65.COMMAND_META["manifest"]["requires_confirm"] is True
+                  and _reg65.COMMAND_META["profile-rebuild-registry"]["supports_dry_run"] is True
+                  and _reg65.COMMAND_META["ingest-missing"]["supports_dry_run"] is True))
+    # contract trung thực: rebuild KHÔNG WAL → rollback_hint PHẢI trỏ Sheets version-history (bài học 1.23.21)
+    cases.append(("r82_rebuild_rollback_via_version_history",
+                  "version-history" in _w65._IDEMPOTENCY_CONTRACTS.get("profile_rebuild_registry", {}).get("rollback_hint", "")))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -163,6 +163,38 @@ _TASK_TO_WORKFLOW = {
 
 
 _IDEMPOTENCY_CONTRACTS = {
+    # ── Pha-E-hoàn-thiện (v1.34.16): 3 lệnh NGUY HIỂM — contract THẬT phản ánh gate/journal có sẵn, KHÔNG đổi CLI ──
+    "profile_rebuild_registry": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "profile+keep_notebook (xoá-dựng-lại từ manifest profile — chạy lại cùng args cho cùng kết quả từ cùng manifest)",
+        "journal_key": "KHÔNG WAL riêng (reg_delete + regen tuần tự) — phá hủy CHỈ sau --apply --confirm yes; CLOBBER-guard chặn profile thiếu registryDocId riêng (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — dựng lại toàn bộ từ manifest hiện tại (regen idempotent theo nguồn)",
+        "duplicate_guard": "DRY mặc định in plan partition; --keep-notebook bắt buộc (không suy own từ notebook)",
+        "readback_command": "reg-query --profile <P> --json (đếm dòng own/ref khớp plan) + profile-doctor",
+        "resume_command": "profile-rebuild-registry --keep-notebook <id> --apply --confirm yes (cùng profile)",
+        "rollback_hint": "Google Sheets version-history của registry profile (bài học 1.23.21 — khôi phục Sheet), KHÔNG có undo journal",
+    },
+    "ingest_missing": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id từng nguồn (ckpt WAL 4 khóa done/pending/linked/fails — pending ghi TRƯỚC source_add)",
+        "journal_key": "tl_journal/ingest-missing_<run_id> + ckpt file (resume FRESH-verify skip_freshness=False trước khi add lại — chống trùng VBHN_67×3)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — done bỏ qua, pending FRESH-verify rồi mới add, fails thử lại",
+        "duplicate_guard": "dedup-live tiered (sohieu lỏng-năm + exact-title) + slot-guard overflow-route KHÔNG BAO GIỜ tạo notebook",
+        "readback_command": "nlm-list <nb> (đối chiếu source_id) + reg-query --nlm --json",
+        "resume_command": "ingest-missing --apply (cùng args; ckpt tự nối)",
+        "rollback_hint": "undo <run_id> --apply cho phần registry; nguồn NLM đã add → source-delete từng cái (bất khả nghịch, cần user duyệt)",
+    },
+    "manifest": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "manifest = DẪN XUẤT tất định từ registry state (export lại = cùng nội dung khi registry không đổi)",
+        "journal_key": "KHÔNG WAL — manifest_export ghi đè file manifest Drive; --touched-drive quét cây own CÓ confirm-gate (PROFILE_INHERITED_SCOPE/POLICY guard chặn inherit)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — export idempotent; --touched-drive quét lại từ đầu (an toàn, chỉ đắt thời gian)",
+        "duplicate_guard": "mặc định CHỈ manifest_export (không đụng cấu trúc); --touched-drive + profile inherit → BẮT --confirm yes (chống PROFILE_MANIFEST_SCOPE_BLOWUP)",
+        "readback_command": "boot (nạp lại manifest, đếm entries) + counts --json",
+        "resume_command": "manifest [--touched-drive --confirm yes] (cùng args)",
+        "rollback_hint": "manifest là dẫn xuất — regen từ registry là khôi phục; sự cố quét phình → profile-rebuild-registry (có guard riêng)",
+    },
+
     "ingest_local": {
         "schema": "idempotency_contract.v1",
         "idempotency_key": "sha256(source_file_text_or_binary)+target_profile_or_cat+canonical_name",

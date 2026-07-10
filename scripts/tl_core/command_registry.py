@@ -1313,7 +1313,7 @@ COMMAND_META = {
     "nlm-list":              _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "preflight":             _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "overflow-resolve":      _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
-    "ingest-missing":        _m("medium", False, "nlm_registry", False, True, False, None, None, False, None, generated=True),
+    "ingest-missing":        _m("high", False, "nlm_registry", False, True, False, None, "ingest_missing", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
     "nlm-orphans":           _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "sweep":                 _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "counts":                _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
@@ -1337,8 +1337,8 @@ COMMAND_META = {
     "profile-create":        _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "profile-file-remove":   _m("medium", False, "drive_registry", True, True, False, None, None, False, None, generated=True),
     "ingest":                _m("medium", False, "drive_registry_nlm", False, True, False, None, None, False, None, generated=True),
-    "manifest":              _m("medium", False, "drive_registry", True, False, False, None, None, False, None, generated=True),
-    "profile-rebuild-registry": _m("medium", False, "registry", True, True, False, None, None, False, None, generated=True),
+    "manifest":              _m("high", False, "drive_registry", True, False, False, None, "manifest", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
+    "profile-rebuild-registry": _m("high", False, "registry", True, True, False, None, "profile_rebuild_registry", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
     "vbhn-normalize":        _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "registry-doctor":       _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
 }
@@ -1362,6 +1362,7 @@ def registry_summary() -> dict:
 
 # v1.34.1: siết TOÀN BỘ lệnh ghi high-risk legacy — hết grandfather (deadline r65 'trước v1.34.1' đúng hạn).
 _CONTRACT_REQUIRED = {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+                      "profile-rebuild-registry", "ingest-missing", "manifest",   # Pha-E-hoàn-thiện v1.34.16
                       "register", "drive-push", "nlm-reconcile", "push-overflow",
                       "shared-source-fix", "source-update-corpus"}
 

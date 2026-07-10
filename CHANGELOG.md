@@ -1,3 +1,18 @@
+# ★ v1.34.13 — I9a: tách INFRA đợt 1 — classify + profile_env → tl_core/ (2026-07-10)
+
+- Bước 2/3 chiến-lược-chặng-cuối đã grill (I8 ✓ → **I9** → I10). **Đổi-luật-có-kiểm-soát**: infra đa-module
+  nay sống ở tl_core (tl giữ stub, bind REBASE __globals__ — khuôn đã chứng minh qua 9 module).
+- `tl_core/classify.py` (74 def ~1.22k dòng: loai/cat/title_vn/header-facts/strip-accents/sentence-case
+  + misc kéo theo affinity>50%) + `tl_core/profile_env.py` (36 def ~512 dòng: config/creds/profile-env/
+  GAS-webapp/transport-helper). **tl.py 8.684→7.177 (lũy kế 19.052→7.177, −62%; 11 module).**
+- ★ Máy cắt I9a thêm 2 SCANNER mới: (a) **top-level scanner** — hàm được statement top-level gọi TRƯỚC bind
+  phải ở lại (bắt `_ensure_writable_tmpdir`); (b) **affinity assignment** — def chưa-nhóm chỉ kéo theo khi
+  >50% tham chiếu đến từ nhóm đang cắt (tránh kéo nhầm đồ của resolve/regio sang I9b).
+- Characterization = 711 test HIỆN CÓ (classify/profile_env là vùng phủ dày nhất codebase — r10/r11
+  title-block, _infer_loai case-list, r57 profile-env, r73a title-zone, r74a fixture-config): PASS Y NGUYÊN
+  sau cut, KHÔNG sửa test nào — bằng chứng bind-rebase + stub đã trưởng thành. +r79 wired/no-dual → **713/713**;
+  golden 18/18; parser-surface khớp; audit strict xanh.
+
 # ★ v1.34.12 — I8: tách 56 def nhóm lệnh vận-hành/chẩn-đoán → tl_core/ops_misc.py (2026-07-10)
 
 - Bước 1/3 của **chiến lược chặng-cuối đã grill** (I8 misc-cmd → I9 infra-module → I10 nén stub, đích 2.500).

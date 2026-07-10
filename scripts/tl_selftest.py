@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py", "tl_core/classify.py", "tl_core/profile_env.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5837,6 +5837,24 @@ def run() -> int:
                   all(_tl_src78.count(f"def {n}(") == 1 for n in _om_names78)))
     # mirror constant (bẫy I2): default-param _entries_with_live_fields eval trước bind
     cases.append(("r78_loop_fields_mirror", _om78._LOOP_LIVE_FIELDS == _TL_MODULE._LOOP_LIVE_FIELDS))
+    # ═══ v1.34.13 — r79_*: I9a parity infra classify + profile_env (đổi-luật-có-kiểm-soát đã grill) ═══
+    import tl_core.classify as _cl79
+    import tl_core.profile_env as _pe79
+    _cl_names79 = ["_infer_loai", "_normalize_loai", "_title_block_from_text", "_title_vn_from_header",
+                   "_strip_accents", "_extract_header_facts", "_cat_reg_label", "_title_sentence_case",
+                   "_name_is_template_or_appendix", "_parse_sohieu_from_name"]
+    _pe_names79 = ["load_creds", "_apply_profile_env", "_profile_lookup", "_read_config_record",
+                   "_profiles_from_config", "_active_profile", "_gas", "_persist_profile_config"]
+    _g79 = globals()
+    cases.append(("r79_infra_modules_wired",
+                  all(callable(getattr(_cl79, n, None)) for n in _cl_names79)
+                  and all(callable(getattr(_pe79, n, None)) for n in _pe_names79)
+                  and all(f"_tl_classify.{n}" in _ins69.getsource(_g79[n]) for n in _cl_names79)
+                  and all(f"_tl_profile_env.{n}" in _ins69.getsource(_g79[n]) for n in _pe_names79)
+                  and _cl79._TL is not None and _pe79._TL is not None))
+    _tl_src79 = Path(_ins69.getsourcefile(_g79["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r79_no_dual_definition",
+                  all(_tl_src79.count(f"def {n}(") == 1 for n in _cl_names79 + _pe_names79)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -342,6 +342,8 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/ingest_ops.py",
     "scripts/tl_core/lookup_ops.py",
     "scripts/tl_core/ops_misc.py",
+    "scripts/tl_core/classify.py",
+    "scripts/tl_core/profile_env.py",
     "scripts/tl_core/command_registry.py",
     "SKILL.md",
     "CHANGELOG.md",

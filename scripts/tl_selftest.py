@@ -5129,12 +5129,12 @@ def run() -> int:
     # nguồn THẬT ở tl_core.hygiene; tên trong tl là STUB ủy quyền (source chứa _tl_hygiene.<name>); bind đã chạy.
     cases.append(("r70_hygiene_module_wired",
                   all(callable(getattr(_hy70, n, None)) for n in _hy_names70)
-                  and all(f"_tl_hygiene.{n}" in _ins69.getsource(_g70[n]) for n in _hy_names70)
+                  and all(getattr(_g70[n], "__tl_stub__", None) == ("hygiene", n) for n in _hy_names70)
                   and _hy70._TL is not None))
     # tl.py KHÔNG còn định nghĩa THẬT các hàm đã chuyển (đúng 1 `def <n>(` = stub; chống copy-đôi trôi dạt)
     _tl_src70 = Path(_ins69.getsourcefile(_g70["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r70_no_dual_definition",
-                  all(_tl_src70.count(f"def {n}(") == 1 for n in _hy_names70)))
+                  all(_tl_src70.count(f"def {n}(") == 0 for n in _hy_names70)))
     # ═══ v1.34.4 — r71a_*: I2 characterization TRƯỚC cut nlm_wrappers — wiring-test OFFLINE 5 cmd chưa phủ
     # (monkeypatch _imp/_gas/registry-IO trên tl; sau cut bind REBASE __globals__ về tl nên patch vẫn thấm) ═══
     _E71a = {"so_hieu": "72/2025/NQ-TW", "name": "NQ_72-2025-NQ-TW_X", "drive_id": "d71a",
@@ -5241,11 +5241,11 @@ def run() -> int:
     _g71 = globals()
     cases.append(("r71_nlm_ops_module_wired",
                   all(callable(getattr(_no69, n, None)) for n in _no_names71)
-                  and all(f"_tl_nlm_ops.{n}" in _ins69.getsource(_g71[n]) for n in _no_names71)
+                  and all(getattr(_g71[n], "__tl_stub__", None) == ("nlm_ops", n) for n in _no_names71)
                   and _no69._TL is not None))
     _tl_src71 = Path(_ins69.getsourcefile(_g71["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r71_no_dual_definition",
-                  all(_tl_src71.count(f"def {n}(") == 1 for n in _no_names71)))
+                  all(_tl_src71.count(f"def {n}(") == 0 for n in _no_names71)))
     # mirror constant: default-param cap=NLM_SLOT_CAP eval trước bind → nlm_ops giữ bản sao; khoá không trôi
     cases.append(("r71_slot_cap_mirror", _no69.NLM_SLOT_CAP == _TL_MODULE.NLM_SLOT_CAP))
     # ═══ v1.34.5 — r72a_*: I3 characterization TRƯỚC cut extract_cache + fetch_web — wiring-test OFFLINE ═══
@@ -5331,12 +5331,12 @@ def run() -> int:
     cases.append(("r72_extract_fetch_modules_wired",
                   all(callable(getattr(_ec72, n, None)) for n in _ec_names72)
                   and all(callable(getattr(_fw72, n, None)) for n in _fw_names72)
-                  and all(f"_tl_extract_cache.{n}" in _ins69.getsource(_g72[n]) for n in _ec_names72)
-                  and all(f"_tl_fetch_web.{n}" in _ins69.getsource(_g72[n]) for n in _fw_names72)
+                  and all(getattr(_g72[n], "__tl_stub__", None) == ("extract_cache", n) for n in _ec_names72)
+                  and all(getattr(_g72[n], "__tl_stub__", None) == ("fetch_web", n) for n in _fw_names72)
                   and _ec72._TL is not None and _fw72._TL is not None))
     _tl_src72 = Path(_ins69.getsourcefile(_g72["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r72_no_dual_definition",
-                  all(_tl_src72.count(f"def {n}(") == 1 for n in _ec_names72 + _fw_names72)))
+                  all(_tl_src72.count(f"def {n}(") == 0 for n in _ec_names72 + _fw_names72)))
     # ═══ v1.34.6 — r73a_*: vá 3 vấn đề Nhóm 1+2 log phiên chạy thực 2026-07-09 (TDD: test hành vi ĐÚNG) ═══
     # (#1) số hiệu TRÍCH DẪN trong văn xuôi (dòng dài) KHÔNG thành sohieu của chính tài liệu
     _bc73 = ("BÁO CÁO\nVề tình hình thực hiện chính sách bảo hiểm xã hội trên địa bàn tỉnh Thái Nguyên\n\n"
@@ -5505,11 +5505,11 @@ def run() -> int:
     _g74 = globals()
     cases.append(("r74_profile_mgmt_module_wired",
                   all(callable(getattr(_pm74, n, None)) for n in _pm_names74)
-                  and all(f"_tl_profile_mgmt.{n}" in _ins69.getsource(_g74[n]) for n in _pm_names74)
+                  and all(getattr(_g74[n], "__tl_stub__", None) == ("profile_mgmt", n) for n in _pm_names74)
                   and _pm74._TL is not None))
     _tl_src74 = Path(_ins69.getsourcefile(_g74["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r74_no_dual_definition",
-                  all(_tl_src74.count(f"def {n}(") == 1 for n in _pm_names74)))
+                  all(_tl_src74.count(f"def {n}(") == 0 for n in _pm_names74)))
     # ═══ v1.34.8 — r75a_*: I5 characterization TRƯỚC cut ingest_pipeline — wiring OFFLINE 5 cmd 0-hit ═══
     _E75 = {"drive_id": "gdA75_12345678901234567890", "name": "Luat_BHXH_45_2019_QH14", "so_hieu": "45-2019-QH14",
             "cat": "12_Lao_dong_BHXH", "loai": "Luật", "corpus": "true", "nlm_source_id": "S75",
@@ -5609,11 +5609,11 @@ def run() -> int:
     _g75 = globals()
     cases.append(("r75_ingest_ops_module_wired",
                   all(callable(getattr(_io75, n, None)) for n in _io_names75)
-                  and all(f"_tl_ingest_ops.{n}" in _ins69.getsource(_g75[n]) for n in _io_names75)
+                  and all(getattr(_g75[n], "__tl_stub__", None) == ("ingest_ops", n) for n in _io_names75)
                   and _io75._TL is not None))
     _tl_src75 = Path(_ins69.getsourcefile(_g75["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r75_no_dual_definition",
-                  all(_tl_src75.count(f"def {n}(") == 1 for n in _io_names75)))
+                  all(_tl_src75.count(f"def {n}(") == 0 for n in _io_names75)))
     # ═══ v1.34.9 — r76a_*: I6 characterization TRƯỚC cut lookup cmds — wiring OFFLINE trên fixture manifest
     # (_source_map_one Ở LẠI tl — engine đã có 59 điểm test; đây khoá SHELL cmd quanh nó) ═══
     _E76 = [
@@ -5676,11 +5676,11 @@ def run() -> int:
     _g76 = globals()
     cases.append(("r76_lookup_ops_module_wired",
                   all(callable(getattr(_lo76, n, None)) for n in _lo_names76)
-                  and all(f"_tl_lookup_ops.{n}" in _ins69.getsource(_g76[n]) for n in _lo_names76)
+                  and all(getattr(_g76[n], "__tl_stub__", None) == ("lookup_ops", n) for n in _lo_names76)
                   and _lo76._TL is not None))
     _tl_src76 = Path(_ins69.getsourcefile(_g76["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r76_no_dual_definition",
-                  all(_tl_src76.count(f"def {n}(") == 1 for n in _lo_names76)))
+                  all(_tl_src76.count(f"def {n}(") == 0 for n in _lo_names76)))
     # I9b ĐỔI LUẬT CÓ KIỂM SOÁT (grilling chiến-lược-chặng-cuối): engine-stays-in-tl → engine-CANONICAL
     # ở tl_core/resolve.py — vẫn khoá 1-định-nghĩa-duy-nhất: def THẬT ở resolve, tl chỉ stub _tl_resolve.
     import tl_core.resolve as _rs76
@@ -5688,8 +5688,8 @@ def run() -> int:
               "resolve_footnote_amendments", "_relation_audit", "_sohieu_query_hits_entry")
     _rs_src76 = _ins69.getsource(_rs76)
     cases.append(("r76_engine_canonical_in_resolve",
-                  all((f"def {n}(" in _rs_src76 and f"_tl_resolve.{n}" in _ins69.getsource(_g76[n])
-                       and _tl_src76.count(f"def {n}(") == 1)
+                  all((f"def {n}(" in _rs_src76 and getattr(_g76[n], "__tl_stub__", None) == ("resolve", n)
+                       and _tl_src76.count(f"def {n}(") == 0)
                       for n in _eng76) and _rs76._TL is not None))
     # ═══ v1.34.10 (I7) — r77a: PARSER-SURFACE SNAPSHOT — khoá byte-level bề mặt CLI trước khi chuyển
     # build_parser → GENERATED_SPECS. Per-command (KHÔNG phụ thuộc THỨ TỰ add_parser — register_generated gom
@@ -5835,11 +5835,11 @@ def run() -> int:
     _g78 = globals()
     cases.append(("r78_ops_misc_module_wired",
                   all(callable(getattr(_om78, n, None)) for n in _om_names78)
-                  and all(f"_tl_ops_misc.{n}" in _ins69.getsource(_g78[n]) for n in _om_names78)
+                  and all(getattr(_g78[n], "__tl_stub__", None) == ("ops_misc", n) for n in _om_names78)
                   and _om78._TL is not None))
     _tl_src78 = Path(_ins69.getsourcefile(_g78["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r78_no_dual_definition",
-                  all(_tl_src78.count(f"def {n}(") == 1 for n in _om_names78)))
+                  all(_tl_src78.count(f"def {n}(") == 0 for n in _om_names78)))
     # mirror constant (bẫy I2): default-param _entries_with_live_fields eval trước bind
     cases.append(("r78_loop_fields_mirror", _om78._LOOP_LIVE_FIELDS == _TL_MODULE._LOOP_LIVE_FIELDS))
     # ═══ v1.34.13 — r79_*: I9a parity infra classify + profile_env (đổi-luật-có-kiểm-soát đã grill) ═══
@@ -5854,12 +5854,12 @@ def run() -> int:
     cases.append(("r79_infra_modules_wired",
                   all(callable(getattr(_cl79, n, None)) for n in _cl_names79)
                   and all(callable(getattr(_pe79, n, None)) for n in _pe_names79)
-                  and all(f"_tl_classify.{n}" in _ins69.getsource(_g79[n]) for n in _cl_names79)
-                  and all(f"_tl_profile_env.{n}" in _ins69.getsource(_g79[n]) for n in _pe_names79)
+                  and all(getattr(_g79[n], "__tl_stub__", None) == ("classify", n) for n in _cl_names79)
+                  and all(getattr(_g79[n], "__tl_stub__", None) == ("profile_env", n) for n in _pe_names79)
                   and _cl79._TL is not None and _pe79._TL is not None))
     _tl_src79 = Path(_ins69.getsourcefile(_g79["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r79_no_dual_definition",
-                  all(_tl_src79.count(f"def {n}(") == 1 for n in _cl_names79 + _pe_names79)))
+                  all(_tl_src79.count(f"def {n}(") == 0 for n in _cl_names79 + _pe_names79)))
     # ═══ v1.34.14 (I9b) — r80a: characterization THÂN THẬT write-infra TRƯỚC cut resolve+regio
     # (lâu nay r-test toàn MOCK các hàm này — thân thật chưa từng bị khoá) ═══
     _keys80 = ("_journal_append", "_verified_reg_write", "_invalidate_manifest_cache",
@@ -5921,15 +5921,39 @@ def run() -> int:
     cases.append(("r80_resolve_regio_wired",
                   all(callable(getattr(_rv80, n, None)) for n in _rv_names80)
                   and all(callable(getattr(_rg80, n, None)) for n in _rg_names80)
-                  and all(f"_tl_resolve.{n}" in _ins69.getsource(_g80[n]) for n in _rv_names80)
-                  and all(f"_tl_regio.{n}" in _ins69.getsource(_g80[n]) for n in _rg_names80)
+                  and all(getattr(_g80[n], "__tl_stub__", None) == ("resolve", n) for n in _rv_names80)
+                  and all(getattr(_g80[n], "__tl_stub__", None) == ("regio", n) for n in _rg_names80)
                   and _rv80._TL is not None and _rg80._TL is not None))
     _tl_src80 = Path(_ins69.getsourcefile(_g80["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r80_no_dual_definition",
-                  all(_tl_src80.count(f"def {n}(") == 1 for n in _rv_names80 + _rg_names80)))
+                  all(_tl_src80.count(f"def {n}(") == 0 for n in _rv_names80 + _rg_names80)))
     # mirror (bẫy I2): sites=_DISCOVERY_SITES eval trước bind + cache module-level _LINHVUC_CACHE sống ở tl
     cases.append(("r80_discovery_sites_mirror", _rv80._DISCOVERY_SITES == _TL_MODULE._DISCOVERY_SITES))
     cases.append(("r80_linhvuc_cache_lives_in_tl", hasattr(_TL_MODULE, "_LINHVUC_CACHE")))
+    # ═══ v1.34.15 — r81: I10 STUB-FARM drift-lock — bảng _STUB_MAP ↔ module ↔ marker khớp TRỌN ═══
+    _sm81 = getattr(_TL_MODULE, "_STUB_MAP", None)
+    _ok81 = isinstance(_sm81, dict) and len(_sm81) >= 15
+    _cnt81 = 0
+    if _ok81:
+        _tl_src81 = Path(_ins69.getsourcefile(_g80["build_parser"])).read_text(encoding="utf-8", errors="replace")
+        import importlib as _il81
+        for _mk81, _ns81 in _sm81.items():
+            try:
+                _md81 = _il81.import_module(f"tl_core.{_mk81}")
+            except Exception:
+                _ok81 = False; break
+            _md_src81 = _ins69.getsource(_md81)
+            for _n81 in _ns81:
+                _cnt81 += 1
+                _fn81 = getattr(_TL_MODULE, _n81, None)
+                if not (callable(_fn81) and getattr(_fn81, "__tl_stub__", None) == (_mk81, _n81)
+                        and getattr(_fn81, "__name__", "") == _n81
+                        and callable(getattr(_md81, _n81, None))
+                        and f"def {_n81}(" in _md_src81
+                        and _tl_src81.count(f"def {_n81}(") == 0):
+                    print(f"  [r81] LỆCH stub: {_mk81}.{_n81}", file=sys.stderr)
+                    _ok81 = False
+    cases.append(("r81_stub_farm_map_complete", _ok81 and _cnt81 >= 480))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -1,3 +1,15 @@
+# ★ v1.34.15 — I10: NÉN STUB-FARM — 488 stub → bảng _STUB_MAP + factory (2026-07-10)
+
+- Bước 3/3 chiến-lược-chặng-cuối. **488 def ủy-quyền 2-dòng (18 module) → `_STUB_MAP` + `_make_tl_stub`**:
+  giữ `__name__` (parser-surface KHỚP KHÔNG REGEN — bằng chứng bề mặt CLI bất biến), gắn `__tl_stub__ =
+  (module, name)` làm định danh máy-đọc. **tl.py 5.381→3.576 (lũy kế 19.052→3.576, −81%; 15 file).**
+- **Đổi cơ chế kiểm theo**: 12 wired-check r7x (getsource tìm `_tl_X.{n}`) + 9 no-dual (`count == 1`) →
+  marker `__tl_stub__` + `count == 0` (tl không còn def cho tên đã stub-hoá). +`r81_stub_farm_map_complete`
+  quét TRỌN map: mỗi entry phải có def thật trong module + marker đúng + __name__ đúng + không def ở tl.
+- Phần còn lại của tl.py là wiring THẬT (plumbing tl_core/self-heal 611 + 35 block parser tay có chủ đích +
+  spec-call + bảng hằng + main) — đích 2.500 chạm ở mức 3.6k; ép tiếp là I11 tuỳ chọn, cân nhắc lợi/hại.
+- Selftest **722/722**; golden 18/18; parser-surface khớp nguyên trạng; audit strict xanh.
+
 # ★ v1.34.14 — I9b: HOÀN TẤT I9 — resolve + regio → tl_core/ (đổi luật engine có kiểm soát) (2026-07-10)
 
 - **`tl_core/resolve.py`** (39 def ~1.28k): ĐỘNG CƠ `_source_map_one` + amendment-gate A1/A2/A3, dedup-status,

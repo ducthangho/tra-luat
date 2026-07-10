@@ -32,7 +32,7 @@ if os.path.isdir(_core_dir):
     _pkg.__path__ = [_core_dir]
     _pkg.__package__ = "tl_core"
     sys.modules.setdefault("tl_core", _pkg)
-    for _mn in ("deterministic", "jsonio", "workflow", "release", "live", "zip_ingest", "ocr", "chunking", "command_registry", "hygiene", "nlm_ops", "extract_cache", "fetch_web", "profile_mgmt", "ingest_ops", "lookup_ops"):
+    for _mn in ("deterministic", "jsonio", "workflow", "release", "live", "zip_ingest", "ocr", "chunking", "command_registry", "hygiene", "nlm_ops", "extract_cache", "fetch_web", "profile_mgmt", "ingest_ops", "lookup_ops", "ops_misc"):
         _mp = os.path.join(_core_dir, _mn + ".py")
         if not os.path.exists(_mp):
             continue

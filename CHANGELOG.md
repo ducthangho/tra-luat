@@ -1,3 +1,21 @@
+# ★ v1.34.12 — I8: tách 56 def nhóm lệnh vận-hành/chẩn-đoán → tl_core/ops_misc.py (2026-07-10)
+
+- Bước 1/3 của **chiến lược chặng-cuối đã grill** (I8 misc-cmd → I9 infra-module → I10 nén stub, đích 2.500).
+- **Characterization TRƯỚC cut** (commit riêng): +4 `r78a_*` — reg-query **bare-VBHN 1-chiều** (v1.33.47);
+  counts bảng-mẫu-số cùng-snapshot; exists **A3-exit-doctrine** (FOUND rc=0 / MISS rc=2 +
+  NOT_FOUND_DO_NOT_CONCLUDE_ABSENT); journal đọc TL_JOURNAL_DIR. PASS y nguyên sau cut.
+- **AST-cut NGUYÊN VĂN 56 def (~2.0k dòng)**: 32 cmd (doctor/ping/precheck/boot/up/perf/bench · reg-query/
+  counts/exists/registry-map/cat-* · journal/undo/resume/confirm · manifest/backfill-notebook/vbhn-normalize/
+  reg-delete · init-config/config-pin-registry/edit-skill/verify-integrity/instructions/instruction-audit/
+  loop/cowork-plan/source-verify/profile-file-remove/convert-verify) + 24 helper riêng-nhóm.
+  **tl.py 10.712→8.684 dòng (lũy kế chuỗi I: 19.052→8.684, −54%).**
+- ★ Bẫy mới ghi sổ: (a) canary REQUIRED-list nằm TRONG `_skill_package_integrity` — hàm bị move nên vá canary
+  trong NỘI DUNG MODULE, không phải tl.py; (b) mirror `_LOOP_LIVE_FIELDS` (bẫy default-param I2,
+  drift-lock `r78_loop_fields_mirror`); (c) converter tự LOẠI def đã-ủy-quyền (thân chứa `_tl_` — 6 wrapper,
+  tránh phá r7x wired-check của module trước).
+- 2 guard test lịch sử (legacy-registry-doc, clobber-guard) trỏ nguồn thật ở ops_misc. +r78 wired/no-dual/mirror
+  → selftest **711/711**; golden 18/18; audit strict xanh; parser-surface khớp nguyên trạng.
+
 # ★ v1.34.11 — I7 wave-2: HOÀN TẤT bề mặt lệnh — +78 meta + 78 lệnh sinh từ GENERATED_SPECS (2026-07-09)
 
 - **+78 COMMAND_META baseline bằng-chứng-cờ** (commit 1 riêng): chính sách grilling — `--apply` →

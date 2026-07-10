@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -3776,10 +3776,11 @@ def run() -> int:
     # ───── GUARD registryDocId Doc-legacy 1mATG (sự cố 2026-06-30: config trỏ Doc → webapp đọc rỗng count=0 ẢO) ─────
     try:
         import inspect as _insp4
+        import tl_core.ops_misc as _om_i8   # I8 v1.34.12: nguồn THẬT ở tl_core.ops_misc (tên tl là stub)
         cases.append(("legacy_registry_doc_guard",
                       _LEGACY_REGISTRY_DOC_ID.startswith("1mATG")
-                      and "_LEGACY_REGISTRY_DOC_ID" in _insp4.getsource(cmd_doctor)
-                      and "AUTO-HEAL" in _insp4.getsource(cmd_init_config)))
+                      and "_LEGACY_REGISTRY_DOC_ID" in _insp4.getsource(_om_i8.cmd_doctor)
+                      and "AUTO-HEAL" in _insp4.getsource(_om_i8.cmd_init_config)))
     except Exception:
         cases.append(("legacy_registry_doc_guard", False))
     # ───── GUARD chống clobber registry NỀN (sự cố 2026-06-30: profile registryDocId rỗng → xóa base) ─────
@@ -3787,7 +3788,8 @@ def run() -> int:
         import inspect as _insp3
         import tl_core.profile_mgmt as _pm3   # I4 v1.34.7: nguồn THẬT ở tl_core.profile_mgmt (tên tl là stub)
         _src_pr = _insp3.getsource(_pm3.cmd_profile_rebuild_registry)
-        _src_mf = _insp3.getsource(cmd_manifest)
+        import tl_core.ops_misc as _om3   # I8 v1.34.12: cmd_manifest đã sang ops_misc
+        _src_mf = _insp3.getsource(_om3.cmd_manifest)
         cases.append(("profile_registry_clobber_guard",
                       "PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE" in _src_pr
                       and "PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE" in _src_mf
@@ -5812,6 +5814,27 @@ def run() -> int:
             setattr(_TL_MODULE, _k, _v)
         for _k, _v in _env78.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+    # ═══ v1.34.12 — r78_*: I8 parity wrapper↔module (kiểu r70-r76) + mirror drift-lock ═══
+    import tl_core.ops_misc as _om78
+    _om_names78 = ["cmd_doctor", "cmd_reg_query", "cmd_manifest", "cmd_counts", "cmd_loop", "cmd_cat_verify",
+                   "cmd_init_config", "cmd_journal", "cmd_profile_file_remove", "cmd_precheck", "cmd_bench",
+                   "cmd_instruction_audit", "cmd_confirm", "cmd_backfill_notebook", "cmd_source_verify",
+                   "cmd_up", "cmd_edit_skill", "cmd_exists", "cmd_perf", "cmd_instructions", "cmd_undo",
+                   "cmd_resume", "cmd_boot", "cmd_vbhn_normalize", "cmd_cowork_plan", "cmd_ping",
+                   "cmd_verify_integrity", "cmd_registry_map", "cmd_cat_list", "cmd_reg_delete",
+                   "cmd_config_pin_registry", "cmd_convert_verify",
+                   "_skill_package_integrity", "_journal_read", "_journal_undo_ops", "_loop_controller",
+                   "_reg_query_row", "gas_parallel", "_instruction_audit_text"]
+    _g78 = globals()
+    cases.append(("r78_ops_misc_module_wired",
+                  all(callable(getattr(_om78, n, None)) for n in _om_names78)
+                  and all(f"_tl_ops_misc.{n}" in _ins69.getsource(_g78[n]) for n in _om_names78)
+                  and _om78._TL is not None))
+    _tl_src78 = Path(_ins69.getsourcefile(_g78["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r78_no_dual_definition",
+                  all(_tl_src78.count(f"def {n}(") == 1 for n in _om_names78)))
+    # mirror constant (bẫy I2): default-param _entries_with_live_fields eval trước bind
+    cases.append(("r78_loop_fields_mirror", _om78._LOOP_LIVE_FIELDS == _TL_MODULE._LOOP_LIVE_FIELDS))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

@@ -328,21 +328,32 @@ def _journaled_reg_upsert(run_id: str, g, payload: dict, before: dict | None = N
     return v
 
 
-def _journaled_reg_clear(run_id: str, g, drive_id: str, cols, before: dict | None = None) -> dict:
+def _journaled_reg_clear(run_id: str, g, drive_id: str, cols, before: dict | None = None, force: bool = False) -> dict:
     """v1.29.4: XÓA giá trị cột registry CÓ NHẬT KÝ qua action `reg_clear` (keyed drive_id + confirm=yes server-side).
     intent{op:reg_clear, before=giá trị cũ → UNDO khôi phục được qua `tl undo` (restore đi reg_bulk giá trị non-empty)}
-    → gọi reg_clear → commit{ok = cleared≥1}. Validate cols ∈ _REG_CLEARABLE_COLS TRƯỚC. Trả {verified, cleared, resp}."""
+    → gọi reg_clear → commit{ok = cleared≥1}. Validate cols ∈ _REG_CLEARABLE_COLS TRƯỚC. Trả {verified, cleared, resp}.
+    v1.34.21: +force (server 2.21.2j reg_clear 2-tầng) — force=True gửi force='yes' cho cột thường, validate đổi
+    sang chặn khoá cấu trúc (_REG_CLEAR_PROTECTED). LƯU Ý idempotency: commit ở đây vẫn đòi cleared≥1; caller cần
+    verdict đã-rỗng-là-thành-công (register --clear-cols) tự READBACK rồi ghi commit đè theo kết quả đọc lại."""
     _cols_list = [c.strip() for c in cols.split(",")] if isinstance(cols, str) else [str(c) for c in (cols or [])]
-    bad = [c for c in _cols_list if c not in _REG_CLEARABLE_COLS]
-    if bad:
-        return {"verified": False, "cleared": 0, "error": f"COLS_NOT_CLEARABLE:{','.join(bad)}"}
+    if force:
+        bad = [c for c in _cols_list if c in _REG_CLEAR_PROTECTED]
+        if bad:
+            return {"verified": False, "cleared": 0, "error": f"COLS_PROTECTED:{','.join(bad)}"}
+    else:
+        bad = [c for c in _cols_list if c not in _REG_CLEARABLE_COLS]
+        if bad:
+            return {"verified": False, "cleared": 0, "error": f"COLS_NOT_CLEARABLE:{','.join(bad)}"}
     rec = {"t": "intent", "op": "reg_clear", "key": str(drive_id), "key_field": "drive_id",
            "cols": ",".join(_cols_list), "set": {c: "" for c in _cols_list}}
     if before:
         rec["before"] = before
     _journal_append(run_id, rec)
+    _kw = {"drive_id": drive_id, "cols": ",".join(_cols_list), "confirm": "yes"}
+    if force:
+        _kw["force"] = "yes"
     try:
-        r = g.get("reg_clear", drive_id=drive_id, cols=",".join(_cols_list), confirm="yes")
+        r = g.get("reg_clear", **_kw)
     except Exception as e:  # noqa: BLE001
         r = {"ok": False, "error": f"REG_CLEAR_RAISED:{type(e).__name__}"}
     cleared = int(r.get("cleared") or 0) if isinstance(r, dict) else 0

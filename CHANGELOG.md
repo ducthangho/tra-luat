@@ -1,3 +1,27 @@
+# ★ v1.34.21 — HOTFIX resilience `register --clear-cols` + contract_check phân loại (2026-07-10)
+
+- Nguồn: thẩm định review nhánh Codex trên zip 1.34.20 — 4/4 finding CONFIRMED trên canonical; grilling
+  chốt 2 quyết định (verify theo precheck+readback, KHÔNG dùng cleared>=1 vì phá idempotency; hotfix riêng
+  TRƯỚC Profile P1). KHÔNG bump GAS (client tự kiểm bằng reg_get).
+- **P1 hết thành-công-giả**: `_register_clear` PRECHECK `reg_get` — drive_id không khớp dòng nào →
+  `NO_SUCH_ROW` rc=2 KHÔNG ghi (trước: GAS `ok:true, cleared:0` + readback no-row → `verified:true` GIẢ).
+  Verified = dòng CÒN TỒN TẠI + cột RỖNG sau readback; dòng tồn tại + `cleared=0` = `already_empty`
+  THÀNH CÔNG idempotent (re-run sau đứt mạng vẫn rc=0). Precheck/readback raise → `REG_PRECHECK_FAILED`/
+  `READBACK_FAILED` rc=1, không traceback.
+- **P1 về primitive chung**: `--clear-cols` nay đi `_journaled_reg_clear(force=)` (mở rộng: force='yes'
+  cho cột thường server 2.21.2j; validate chặn `_REG_CLEAR_PROTECTED`) — được miễn phí: try/except quanh
+  `reg_clear`, journal intent{`key_field`,`set`,`before`} đúng khuôn `_journal_undo_ops`/`_journal_resume_ops`
+  (trước đây intent thiếu set/key_field → undo/resume MÙ với clear). `before` lấy từ dòng LIVE precheck
+  (chuẩn hơn manifest stale). Commit CUỐI ghi theo READBACK (re-run đã-rỗng không treo inflight).
+  `_apply_gate(write_cols=...)` chặn như mọi đường ghi registry.
+- **contract_check**: classifier thuần `live_verdict` — `LIVE_PING_FAILED` rc=4 (mạng/auth/runtime,
+  kèm detail; ping raise cũng bắt) TÁCH KHỎI `VERSION_DRIFT` rc=3 (trước: ping hỏng in
+  'deploy = None ≠ hợp đồng' như drift thật); selftest 2→6 case.
+- TDD: +7 `r85b` VIẾT TRƯỚC (đỏ xác nhận bằng chính traceback boom-clear làm sập selftest — bằng chứng
+  sống finding thiếu-try/except) → **742/742**. Backlog nhận thêm từ review: log config-of-record +
+  cảnh báo duplicate config candidates (ghép Profile P1); smoke `--clear-cols` fixture an toàn → smoke-plan.
+- SKILL.md chỉ đổi số version header — KHÔNG đổi doctrine → không cần re-import.
+
 # ★ v1.34.20 — #5 TRỌN VẸN: webapp GAS 2.21.2j reg_clear 2-tầng + `register --clear-cols` (2026-07-10)
 
 - **GAS 2.21.2j** (deploy clasp `gas-deploy.ps1`, GIỮ URL /exec, version 74): `doRegClear_` 2 TẦNG —

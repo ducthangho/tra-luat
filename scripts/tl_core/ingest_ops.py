@@ -96,8 +96,13 @@ _REG_CLEAR_PROTECTED = {"drive_id", "name"}
 
 
 def _register_clear(a, g) -> int:
-    """#5 TRỌN (v1.34.20): register --clear-cols → webapp reg_clear 2-tầng (server ≥2.21.2j).
-    Journaled (before từ manifest cho undo tay) + readback field-level xác nhận đã RỖNG."""
+    """#5 TRỌN (v1.34.20) + v1.34.21 resilience (thẩm định review Codex, grilling 2026-07-10):
+    register --clear-cols → primitive `_journaled_reg_clear(force=)` (server ≥2.21.2j 2-tầng) — journal
+    intent{key_field,set,before} chuẩn undo/resume + try/except quanh reg_clear. PRECHECK reg_get: drive_id
+    không khớp dòng nào → NO_SUCH_ROW rc=2 KHÔNG ghi (trước v1.34.21: readback no-row → verified:true GIẢ).
+    Verified = dòng CÒN TỒN TẠI và cột RỖNG sau readback; dòng tồn tại + cleared=0 = already_empty THÀNH CÔNG
+    idempotent (chạy lại sau đứt mạng vẫn rc=0 — KHÔNG dùng cleared>=1 làm điều kiện). Qua _apply_gate như
+    mọi đường ghi registry."""
     cols = [c.strip() for c in str(a.clear_cols or "").split(",") if c.strip()]
     did = (getattr(a, "drive_id", None) or "").strip()
     if not did or not cols:
@@ -111,30 +116,67 @@ def _register_clear(a, g) -> int:
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     needs_force = [c for c in cols if c not in _REG_CLEAR_FREE_COLS]
+    ok_gate, _gv = _apply_gate(a, write_cols=",".join(cols))
+    if not ok_gate:
+        return 2
+
+    def _rb_row():
+        rb = g.get("reg_get", drive_id=did, refresh="true")
+        rows = rb.get("rows") if isinstance(rb, dict) else None
+        for row in (rows or []):
+            if isinstance(row, dict) and str(row.get("drive_id") or "").strip() == did:
+                return row
+        # reg_get keyed theo drive_id — nhận hàng đầu nếu server không echo cột drive_id
+        if rows and isinstance(rows[0], dict) and "drive_id" not in rows[0]:
+            return rows[0]
+        return None
+
+    try:
+        pre = _rb_row()
+    except Exception as e:  # noqa: BLE001
+        print(json.dumps({"ok": False, "error": f"REG_PRECHECK_FAILED:{type(e).__name__}",
+                          "note": "Không đọc được dòng registry để đối chiếu (mạng/auth?) — KHÔNG ghi."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
+    if pre is None:
+        print(json.dumps({"ok": False, "error": "NO_SUCH_ROW", "drive_id": did,
+                          "note": "drive_id không khớp dòng registry nào — kiểm `tl reg-query --json`. KHÔNG ghi."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     run_id = _apply_journal_start("register-clear", {"drive_id": did, "cols": ",".join(cols)})
-    _journal_append(run_id, {"t": "intent", "op": "reg_clear", "key": did, "cols": ",".join(cols),
-                             "before": (_reg_before_from_manifest([{"drive_id": did}], cols) or {}).get(did, {})})
-    kw = {"drive_id": did, "cols": ",".join(cols), "confirm": "yes"}
-    if needs_force:
-        kw["force"] = "yes"   # server 2.21.2j: cột thường đòi force tường minh
-    r = g.get("reg_clear", **kw)
-    ok = bool(r.get("ok"))
-    verified, still = ok, []
+    _before = {c: (pre.get(c) or "") for c in cols}   # before từ dòng LIVE (chuẩn hơn manifest có-thể-stale)
+    _clr = _journaled_reg_clear(run_id, g, did, ",".join(cols), before=_before, force=bool(needs_force))
+    resp = _clr.get("resp") if isinstance(_clr.get("resp"), dict) else {}
+    ok = bool(resp.get("ok"))
+    still, rb_err, row2 = [], None, None
     if ok:
         try:
-            rb = g.get("reg_get", drive_id=did, refresh="true")
-            row = ((rb.get("rows") or [{}])[0]) if isinstance(rb, dict) else {}
-            still = [c for c in cols if str(row.get(c) or "").strip()]
-            verified = not still
-        except Exception:  # noqa: BLE001
-            verified = ok
-    _journal_append(run_id, {"t": "commit", "op": "reg_clear", "key": did, "ok": verified})
-    _invalidate_manifest_cache()
+            row2 = _rb_row()
+        except Exception as e:  # noqa: BLE001
+            rb_err = f"READBACK_FAILED:{type(e).__name__}"
+    if row2 is not None:
+        still = [c for c in cols if str(row2.get(c) or "").strip()]
+        verified = not still
+    else:
+        verified = False
+        if ok and not rb_err:
+            rb_err = "ROW_GONE_AFTER_CLEAR"
+    # commit CUỐI theo READBACK — resume/close-plan tôn trọng verdict này (đè commit cleared>=1 của primitive
+    # để re-run đã-rỗng không bị treo inflight).
+    _journal_append(run_id, {"t": "commit", "op": "reg_clear", "key": did, "ok": verified,
+                             "verify": {"cleared": _clr.get("cleared"), "still_set": still,
+                                        "error": _clr.get("error") or rb_err or resp.get("error")}})
     out = {"ok": ok, "verified": verified, "cleared_cols": cols, "forced": bool(needs_force),
-           "journal": run_id, "reg_clear": r}
+           "cleared": _clr.get("cleared"), "journal": run_id, "reg_clear": resp}
+    if verified and int(_clr.get("cleared") or 0) == 0:
+        out["already_empty"] = True
     if still:
         out["still_set"] = still
-    if not ok and "force" in str(r.get("error") or ""):
+    if rb_err:
+        out["readback_error"] = rb_err
+    if _clr.get("error"):
+        out["clear_error"] = _clr.get("error")
+    if not ok and "force" in str(resp.get("error") or ""):
         out["note"] = "Server chưa 2.21.2j? Kiểm `tl ping` version; deploy GAS mới rồi chạy lại."
     print(json.dumps(out, ensure_ascii=False, indent=2))
     return 0 if verified else 1

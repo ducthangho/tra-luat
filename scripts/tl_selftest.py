@@ -6089,10 +6089,12 @@ def run() -> int:
                 return {"ok": True, "rows": [dict(self.row)]}
             return {"ok": True}
     _keys85 = ("_gas", "_apply_journal_start", "_journal_append", "_reg_before_from_manifest",
-               "_invalidate_manifest_cache", "load_creds", "apply_profile_offline", "_manifest_entries")
+               "_invalidate_manifest_cache", "load_creds", "apply_profile_offline", "_manifest_entries",
+               "_apply_gate")   # v1.34.21: _register_clear nay qua gate như mọi đường ghi
     _sav85 = {k: getattr(_TL_MODULE, k) for k in _keys85}
     try:
         _g85 = _FkG85({"drive_id": "d85", "sohieu": "", "nlm_status": ""})
+        _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
         _TL_MODULE._gas = lambda: _g85
         _TL_MODULE._apply_journal_start = lambda *a, **k: "run85"
         _TL_MODULE._journal_append = lambda *a, **k: None
@@ -6138,6 +6140,103 @@ def run() -> int:
         cases.append(("r85_note_empty_suggests_clear_cols", "--clear-cols" in str(_v85.get("note_empty", ""))))
     finally:
         for _k, _v in _sav85.items():
+            setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.21 — r85b: resilience --clear-cols (thẩm định review Codex 2026-07-10) ═══
+    # Chuẩn chốt grilling: precheck NO_SUCH_ROW rc=2 TRƯỚC khi ghi (hết thành-công-giả); verified =
+    # dòng CÒN TỒN TẠI + cột RỖNG sau readback; cleared=0 trên dòng tồn tại = already_empty (idempotent);
+    # server raise được bắt (không traceback); journal intent chuẩn key_field+set+before (undo/resume đọc được);
+    # _apply_gate chặn như mọi đường ghi registry.
+    class _FkG85b:
+        def __init__(self, pre_row, post_row=None, clear_resp=None, raise_clear=False, raise_get=False):
+            self.calls = []
+            self.pre_row = pre_row                     # None = drive_id không khớp dòng nào
+            self.post_row = pre_row if post_row is None else post_row
+            self.clear_resp = clear_resp or {"ok": True, "cleared": 1}
+            self.raise_clear = raise_clear
+            self.raise_get = raise_get
+            self._cleared_once = False
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "reg_get":
+                if self.raise_get:
+                    raise RuntimeError("boom-get")
+                row = self.post_row if self._cleared_once else self.pre_row
+                return {"ok": True, "rows": ([dict(row)] if row is not None else [])}
+            if action == "reg_clear":
+                if self.raise_clear:
+                    raise RuntimeError("boom-clear")
+                self._cleared_once = True
+                return dict(self.clear_resp)
+            return {"ok": True}
+    _keys85b = ("_gas", "_apply_journal_start", "_journal_append", "_invalidate_manifest_cache",
+                "_apply_gate", "load_creds", "apply_profile_offline", "_manifest_entries",
+                "_reg_before_from_manifest")
+    _sav85b = {k: getattr(_TL_MODULE, k) for k in _keys85b}
+    _jrn85b = []
+    def _run85b(gobj, gate_ok=True, **ns):
+        _jrn85b.clear()
+        _TL_MODULE._gas = lambda: gobj
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run85b"
+        _TL_MODULE._journal_append = lambda rid, rec: _jrn85b.append(rec)
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (gate_ok, {"ok": gate_ok})
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {}
+        _buf = _io27.StringIO()
+        with _ctx27.redirect_stdout(_buf), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc = _TL_MODULE.cmd_register(_mk85(**ns))
+        try:
+            _out = json.loads(_buf.getvalue())
+        except Exception:
+            _out = {}
+        return _rc, _out
+    try:
+        # (1) drive_id không khớp dòng nào → NO_SUCH_ROW rc=2, KHÔNG gọi reg_clear (hết verified:true giả)
+        _gb1 = _FkG85b(pre_row=None)
+        _rcb1, _ = _run85b(_gb1, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_no_such_row_blocked",
+                      _rcb1 == 2 and not [c for c in _gb1.calls if c[0] == "reg_clear"]))
+        # (2) dòng tồn tại, cột ĐÃ rỗng, server cleared=0 → idempotent: rc=0 verified + already_empty
+        _gb2 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": ""}, clear_resp={"ok": True, "cleared": 0})
+        _rcb2, _ob2 = _run85b(_gb2, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_already_empty_idempotent",
+                      _rcb2 == 0 and _ob2.get("verified") is True and _ob2.get("already_empty") is True))
+        # (3) readback cột VẪN còn giá trị → verified:false rc=1 + still_set
+        _gb3 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": "X"})
+        _rcb3, _ob3 = _run85b(_gb3, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_readback_still_set",
+                      _rcb3 == 1 and _ob3.get("verified") is False and _ob3.get("still_set") == ["sohieu"]))
+        # (4) g.get('reg_clear') RAISE → bắt được (không traceback), rc=1, lỗi REG_CLEAR_RAISED trong output
+        _gb4 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": "X"}, raise_clear=True)
+        _rcb4, _ob4 = _run85b(_gb4, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_server_raise_caught",
+                      _rcb4 == 1 and _ob4.get("verified") is False and "REG_CLEAR_RAISED" in json.dumps(_ob4)))
+        # (5) precheck reg_get RAISE → REG_PRECHECK_FAILED rc=1, KHÔNG gọi reg_clear
+        _gb5 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": "X"}, raise_get=True)
+        _rcb5, _ = _run85b(_gb5, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_precheck_raise_no_write",
+                      _rcb5 == 1 and not [c for c in _gb5.calls if c[0] == "reg_clear"]))
+        # (6) _apply_gate blocker → rc=2, KHÔNG đụng server (cả reg_get lẫn reg_clear)
+        _gb6 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": "X"})
+        _rcb6, _ = _run85b(_gb6, gate_ok=False, drive_id="d85", clear_cols="sohieu", confirm="yes")
+        cases.append(("r85b_gate_blocked",
+                      _rcb6 == 2 and not [c for c in _gb6.calls if c[0] in ("reg_get", "reg_clear")]))
+        # (7) journal chuẩn resume/undo: intent{key_field,set,before} + commit-ok cuối theo READBACK
+        _gb7 = _FkG85b(pre_row={"drive_id": "d85", "sohieu": "OLD", "nlm_status": ""},
+                       post_row={"drive_id": "d85", "sohieu": "", "nlm_status": ""})
+        _rcb7, _ob7 = _run85b(_gb7, drive_id="d85", clear_cols="sohieu,nlm_status", confirm="yes")
+        _int7 = next((r for r in _jrn85b if r.get("t") == "intent"), {})
+        _cok7 = [r for r in _jrn85b if r.get("t") == "commit" and r.get("ok")]
+        cases.append(("r85b_journal_resume_shape",
+                      _rcb7 == 0 and _ob7.get("forced") is True
+                      and _int7.get("key_field") == "drive_id"
+                      and _int7.get("set") == {"sohieu": "", "nlm_status": ""}
+                      and (_int7.get("before") or {}).get("sohieu") == "OLD"
+                      and bool(_cok7)))
+    finally:
+        for _k, _v in _sav85b.items():
             setattr(_TL_MODULE, _k, _v)
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65

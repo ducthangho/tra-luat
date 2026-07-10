@@ -156,17 +156,39 @@ def _imp(name):
     return importlib.import_module(name)
 
 
+def live_verdict(resp, expect: str) -> dict:
+    """PURE (v1.34.21 — thẩm định Codex): phân loại kết quả ping TRƯỚC khi so version.
+    LIVE_PING_FAILED (không lấy được version: lỗi mạng/auth/runtime/response lạ) KHÁC VERSION_DRIFT
+    (lấy được version nhưng lệch hợp đồng) — trước đây ping hỏng in 'deploy = None ≠ hợp đồng' như drift thật.
+    rc: 0 khớp · 3 drift · 4 ping-failed."""
+    if not isinstance(resp, dict) or not resp.get("version"):
+        detail = resp.get("error") if isinstance(resp, dict) else repr(resp)
+        return {"ok": False, "rc": 4, "error": "LIVE_PING_FAILED", "detail": detail,
+                "live": None, "expect": expect}
+    live = resp.get("version")
+    if live == expect:
+        return {"ok": True, "rc": 0, "live": live, "expect": expect}
+    return {"ok": False, "rc": 3, "error": "VERSION_DRIFT", "live": live, "expect": expect}
+
+
 def selftest() -> int:
     import tempfile
     txt = "> **Phiên bản deploy đã đóng dấu: `2.20.0`** · đối chiếu..."
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
         f.write(txt); p = Path(f.name)
-    ok1 = contract_version(p) == "2.20.0"
-    ok2 = contract_version(Path("/nonexistent.md")) is None
-    print(f"  [{'OK' if ok1 else 'FAIL'}] parse_version")
-    print(f"  [{'OK' if ok2 else 'FAIL'}] missing_file")
-    print(f"== contract_check selftest {int(ok1)+int(ok2)}/2 ==")
-    return 0 if ok1 and ok2 else 1
+    checks = [
+        ("parse_version", contract_version(p) == "2.20.0"),
+        ("missing_file", contract_version(Path("/nonexistent.md")) is None),
+        ("verdict_match", live_verdict({"version": "2.20.0"}, "2.20.0") == {"ok": True, "rc": 0, "live": "2.20.0", "expect": "2.20.0"}),
+        ("verdict_drift", (lambda v: v["rc"] == 3 and v["error"] == "VERSION_DRIFT" and v["live"] == "2.19")(live_verdict({"version": "2.19"}, "2.20.0"))),
+        ("verdict_ping_failed_error", (lambda v: v["rc"] == 4 and v["error"] == "LIVE_PING_FAILED" and v["detail"] == "HTTP 401")(live_verdict({"ok": False, "error": "HTTP 401"}, "2.20.0"))),
+        ("verdict_ping_failed_nondict", live_verdict(None, "2.20.0")["rc"] == 4),
+    ]
+    for name, ok in checks:
+        print(f"  [{'OK' if ok else 'FAIL'}] {name}")
+    n_ok = sum(1 for _, ok in checks if ok)
+    print(f"== contract_check selftest {n_ok}/{len(checks)} ==")
+    return 0 if n_ok == len(checks) else 1
 
 
 def main(argv) -> int:
@@ -195,19 +217,25 @@ def main(argv) -> int:
     except ModuleNotFoundError:
         sys.exit("[contract_check] không tìm thấy gas.py (scripts/ gốc lẫn _fallback/). "
                  "Cài overlay lên bộ skill đầy đủ, hoặc dùng --audit/--selftest/--bump (offline).")
-    r = gas.get("ping")
-    live = r.get("version")
-    ok = (live == expect)
+    try:
+        r = gas.get("ping")
+    except Exception as e:  # noqa: BLE001 — ping raise (auth/mạng/runtime) KHÔNG phải drift
+        r = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    v = live_verdict(r, expect)
     if a.json:
-        print(json.dumps({"ok": ok, "live": live, "expect": expect}, ensure_ascii=False))
+        print(json.dumps(v, ensure_ascii=False))
     else:
-        if ok:
-            print(f"✓ webapp version {live} KHỚP hợp đồng.")
+        if v["ok"]:
+            print(f"✓ webapp version {v['live']} KHỚP hợp đồng.")
+        elif v.get("error") == "LIVE_PING_FAILED":
+            print(f"✗ LIVE_PING_FAILED: không lấy được version từ webapp ({v.get('detail')}).\n"
+                  f"  → Đây là lỗi ping/auth/mạng/runtime — KHÔNG kết luận drift. "
+                  f"Kiểm `tl ping --json`/creds rồi chạy lại.")
         else:
-            print(f"✗ TRÔI: webapp deploy = {live} ≠ hợp đồng {expect}.\n"
+            print(f"✗ TRÔI: webapp deploy = {v['live']} ≠ hợp đồng {expect}.\n"
                   f"  → Đối chiếu lại references/API_CONTRACT.md trước khi gọi action; "
                   f"cập nhật bảng + dòng 'Phiên bản deploy' nếu webapp đã đổi đúng ý.")
-    return 0 if ok else 3
+    return v["rc"]
 
 
 if __name__ == "__main__":

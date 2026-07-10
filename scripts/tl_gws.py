@@ -1174,7 +1174,21 @@ def _stage_enc_upload(name: str, blob: bytes, folder: str, fid_inplace: str | No
         with open(fp, "wb") as f:
             f.write(blob)
         if fid_inplace and not force_new:
-            g.update_content(fid_inplace, fp, mime="application/octet-stream")
+            try:
+                g.update_content(fid_inplace, fp, mime="application/octet-stream")
+            except Exception as e:  # noqa: BLE001  gws chết (vd rc=5 HTTP request failed) → FALLBACK gcloud (OAuth production, GIỮ fileId, verify md5)
+                gtok, gerr = _gcloud_access_token()
+                if not gtok:
+                    raise RuntimeError(
+                        f"stage-enc: gws update_content lỗi ({type(e).__name__}: {e}) và gcloud fallback KHÔNG sẵn ({gerr})"
+                    ) from e
+                print(f"[stage-enc] ⚠ gws update lỗi ({type(e).__name__}: {e}) → [FALLBACK→gcloud] giữ fileId {fid_inplace}…", file=sys.stderr)
+                r = _gcloud_drive_update(gtok, fid_inplace, fp, "application/octet-stream")
+                if not r.get("ok"):
+                    raise RuntimeError(
+                        f"stage-enc: gcloud fallback lỗi: {r.get('error')}" + (f" — {r.get('fix')}" if r.get('fix') else "")
+                    ) from e
+                print(f"[stage-enc] ✓ [gcloud] cập nhật {fid_inplace} (md5 verified).", file=sys.stderr)
             return fid_inplace, True
         r = g.upload(name, fp, parents=[folder], mime="application/octet-stream")
         return (r.get("file") or {}).get("id"), False

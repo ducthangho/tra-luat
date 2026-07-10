@@ -8,7 +8,8 @@
   (văn phong, quan hệ profile, mô tả phạm vi) để sinh Instruction; thêm profile ở một máy đòi re-stage
   config thủ công ở mọi nơi khác.
 - **Quyết định:**
-  1. Mỗi profile có **marker** `profile.json` trong `_meta` của folder profile — schema cố định
+  1. Mỗi profile có **marker** `tra_luat_profile.json` trong `_meta` của folder profile (tên theo
+     convention `tra_luat_*` sẵn có để discover khỏi đoán) — schema cố định
      (`schema_version`, định danh: name/rootFolderId/notebookId/registryDocId/manifestId/categories/
      manifestScope; metadata mô tả chuẩn: `description`, `style`, `relations`, `created_at`/`updated_at`).
   2. **Marker = nguồn sự thật về TỒN TẠI + ĐỊNH DANH + metadata mô tả** của profile.

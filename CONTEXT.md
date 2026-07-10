@@ -49,7 +49,12 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Nguồn nlm-only** — nguồn của profile chỉ tồn tại trên notebook NLM (URL/YouTube/text/nguồn chưa xuất),
   không có file Drive tương ứng; định danh bằng nlm_source_id.
 - **Materialize (nguồn)** — xuất nội dung một nguồn nlm-only thành file trong folder profile trên Drive,
-  nâng cấp nó thành nguồn thường. Tùy chọn, không bắt buộc; nguồn không xuất được ở lại nlm-only là hợp lệ.
+  nâng cấp nó thành nguồn thường. Chính sách mặc định (chốt 2026-07-10): **materialize_preferred** —
+  ưu tiên materialize mọi nguồn xuất được, chạy bằng lệnh riêng resumable (không trộn vào lệnh adopt);
+  nguồn không xuất được (URL/YouTube/text) ở lại nlm-only với materialize_status tường minh — hợp lệ,
+  và Instruction phải nói rõ nguồn nào chỉ có trên NLM để Claude không tưởng nhầm đã có file Drive.
+- **Nền VBQPPL luôn bật** — mọi profile nghiệp vụ mặc định ĐỌC cộng nền vbqppl (base-also), không phụ
+  thuộc khai báo relations; profile không phải "đảo riêng" — luôn có nền pháp lý để đối chiếu.
 - **Instruction Block (profile)** — khối instruction generator-sinh từ marker của một profile (tra NLM
   đúng notebook, luật không-bịa, văn phong, quan hệ với vbqppl/profile khác, scope đọc/ghi). MỘT bản
   thống nhất cho mọi môi trường (Chat=Cowork=Code); chỉ rẽ theo TARGET artifact (session | project).

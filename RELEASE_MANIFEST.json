@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2j",
   "root_name": "tra-luat",
   "file_count": 154,
-  "total_bytes": 4070441,
-  "package_hash": "fb6bc717f47fd73a274f941fdcc3323a2873b6c3311d4f9f533a13e4db7bbb36",
+  "total_bytes": 4071137,
+  "package_hash": "7836f52ecb307e867487118040fadadd7ac1101d21657e51812c712fba81524f",
   "required_missing": [],
   "files": [
     {
@@ -27,8 +27,8 @@
     },
     {
       "path": "CONTEXT.md",
-      "size": 6185,
-      "sha256": "a646d081b45fafe725bc19a6d29e026fa8287753ba802c8766826403fd9a2ed9"
+      "size": 6792,
+      "sha256": "336988ba80cd3d4d5ef8b12e029706202394842ea56e0183c2a055dfe774975e"
     },
     {
       "path": "INSTALL.md",
@@ -67,8 +67,8 @@
     },
     {
       "path": "docs/adr/0003-profile-marker-nguon-su-that-tren-drive.md",
-      "size": 3049,
-      "sha256": "1aa1ba12509ee74b46efe65a14a5b74e14a3d1312a2fcb972b2d0087bd630b7e"
+      "size": 3138,
+      "sha256": "1464b3ff90ef44d66ba9a1f49676dfd98747c131214c07b3996e30f737224440"
     },
     {
       "path": "references/API_CONTRACT.md",

@@ -5972,6 +5972,79 @@ def run() -> int:
     # contract trung thực: rebuild KHÔNG WAL → rollback_hint PHẢI trỏ Sheets version-history (bài học 1.23.21)
     cases.append(("r82_rebuild_rollback_via_version_history",
                   "version-history" in _w65._IDEMPOTENCY_CONTRACTS.get("profile_rebuild_registry", {}).get("rollback_hint", "")))
+    # ═══ v1.34.17 — r83: BACKLOG #4-#8 log phiên chạy (TDD viết trước) ═══
+    import tl_core.nlm_ops as _no83
+    # (#4) nlm-add --type: parser default None; auto-detect GSheet từ MIME manifest (offline), explicit thắng
+    _ns83 = build_parser().parse_args(["nlm-add", "--drive-id", "x83"])
+    _sav83 = {"_manifest_entries": _TL_MODULE._manifest_entries}
+    try:
+        _TL_MODULE._manifest_entries = lambda refresh=False: [
+            {"drive_id": "dsheet83", "mime": "application/vnd.google-apps.spreadsheet", "name": "PL_bang"},
+            {"drive_id": "ddoc83", "mime": "application/vnd.google-apps.document", "name": "VB"}]
+        _dt1 = _no83._nlm_add_doc_type(None, "dsheet83")
+        _dt2 = _no83._nlm_add_doc_type(None, "ddoc83")
+        _dt3 = _no83._nlm_add_doc_type("doc", "dsheet83")
+        _dt4 = _no83._nlm_add_doc_type(None, "dkhongco83")
+        cases.append(("r83_nlm_add_type_autodetect_sheet",
+                      getattr(_ns83, "type", "SENTINEL") is None
+                      and _dt1[0] == "sheets" and _dt1[1].startswith("auto")
+                      and _dt2[0] == "doc" and _dt3 == ("doc", "explicit") and _dt4[0] == "doc"))
+    finally:
+        _TL_MODULE._manifest_entries = _sav83["_manifest_entries"]
+    # (#5) upsert giá-trị-rỗng cột thường: webapp bỏ im lặng by-design → PHẢI cảnh báo empty_ignored
+    class _FkG83:
+        def __init__(self):
+            self.upserts = []
+            self.gets = 0
+        def get(self, action, **kw):
+            if action == "reg_upsert":
+                self.upserts.append(dict(kw)); return {"ok": True, "updated": True}
+            if action == "reg_get":
+                self.gets += 1
+                return {"ok": True, "rows": [{"drive_id": "d83", "goc": "GOC_OK", "sohieu": "CU_KHONG_XOA"}]}
+            return {"ok": True}
+    _g83 = _FkG83()
+    _v83 = _TL_MODULE._verified_reg_upsert(_g83, {"drive_id": "d83", "goc": "GOC_OK", "sohieu": ""})
+    cases.append(("r83_upsert_empty_value_warned",
+                  _v83.get("verified") is True and _v83.get("empty_ignored") == ["sohieu"]
+                  and "nlm_*/note" in str(_v83.get("note_empty", ""))))
+    # (#6) FIELDS_DROPPED → tự retry per-field 1 vòng rồi re-readback; thành công → verified + fields_retried
+    class _FkG83b:
+        def __init__(self):
+            self.upserts = []
+            self.gets = 0
+        def get(self, action, **kw):
+            if action == "reg_upsert":
+                self.upserts.append(dict(kw)); return {"ok": True, "updated": True}
+            if action == "reg_get":
+                self.gets += 1
+                if self.gets == 1:   # lượt đầu: goc bị webapp DROP im lặng
+                    return {"ok": True, "rows": [{"drive_id": "d83b", "goc": "", "title_vn": "T"}]}
+                return {"ok": True, "rows": [{"drive_id": "d83b", "goc": "G2", "title_vn": "T"}]}
+    _g83b = _FkG83b()
+    _v83b = _TL_MODULE._verified_reg_upsert(_g83b, {"drive_id": "d83b", "goc": "G2", "title_vn": "T"})
+    cases.append(("r83_upsert_retry_dropped_fields",
+                  _v83b.get("verified") is True and _v83b.get("fields_retried") == ["goc"]
+                  and len(_g83b.upserts) == 2 and _g83b.upserts[1].get("goc") == "G2"
+                  and _g83b.gets == 2))
+    # (#7) ocr-run báo LỆNH CÀI cụ thể khi thiếu engine (pip/apt/tesseract vie)
+    import tl_core.ocr as _ocr83
+    _ocr_src83 = _ins69.getsource(_ocr83)
+    cases.append(("r83_ocr_install_cmds_in_message",
+                  "pip install ocrmypdf" in _ocr_src83 and "tesseract-ocr-vie" in _ocr_src83))
+    # (#8) instruction-audit --file dùng CÙNG nguồn-chân-lý gen_instructions.audit (hết lệch block-list)
+    import tempfile as _tf83
+    import gen_instructions as _gi83
+    with _tf83.TemporaryDirectory() as _d83:
+        _f83 = Path(_d83) / "ins.md"
+        _f83.write_text("noi dung thieu moi khoi bat buoc", encoding="utf-8")
+        _b83 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b83), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc83 = _TL_MODULE.cmd_instruction_audit(argparse.Namespace(
+                generate=False, file=str(_f83), target="project", json=True))
+        _o83 = json.loads(_b83.getvalue())
+        cases.append(("r83_instruction_audit_file_single_source",
+                      _rc83 != 0 and set(_o83.get("missing") or []) == set(_gi83.REQUIRED_PROJECT)))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

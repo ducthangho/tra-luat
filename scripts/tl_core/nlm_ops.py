@@ -766,6 +766,24 @@ def cmd_nlm_query(a) -> int:
     return 0
 
 
+def _nlm_add_doc_type(explicit, drive_id) -> tuple:
+    """#4 backlog log-phiên (v1.34.17): --type KHÔNG truyền → tự nhận từ MIME manifest (OFFLINE, không gọi mạng):
+    Google Sheet → 'sheets' (trước default cứng 'doc' → 'Could not add drive source' với phụ lục bảng tính).
+    explicit LUÔN thắng; drive_id không có trong manifest → 'doc' (hành vi cũ). Trả (doc_type, nguồn-quyết-định)."""
+    if explicit:
+        return explicit, "explicit"
+    if drive_id:
+        try:
+            for e in _manifest_entries(refresh=False):
+                if _entry_drive_id(e) == str(drive_id):
+                    if "spreadsheet" in str(e.get("mime") or "").lower():
+                        return "sheets", "auto:manifest-mime-spreadsheet"
+                    break
+        except Exception:  # noqa: BLE001 — manifest thiếu/hỏng → giữ hành vi cũ
+            pass
+    return "doc", "default"
+
+
 def cmd_nlm_add(a) -> int:
     """(1) Thêm nguồn NLM qua CLI `nlm source add` (thay MCP source_add) — đúng directive CLI-first."""
     # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-add rơi về VBQPPL base).
@@ -797,8 +815,11 @@ def cmd_nlm_add(a) -> int:
                                       "Sửa `nlm login` rồi chạy lại; HOẶC --skip-live-check nếu CHẮC không trùng."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
+    _dt, _dt_src = _nlm_add_doc_type(getattr(a, "type", None), getattr(a, "drive_id", None))
+    if _dt_src.startswith("auto"):
+        print(f"[tl] nlm-add: tự nhận --type {_dt} ({_dt_src}) — ép kiểu khác bằng --type.", file=sys.stderr)
     r = nc.source_add(nb, drive_id=getattr(a, "drive_id", None), url=getattr(a, "url", None),
-                      file=getattr(a, "file", None), doc_type=getattr(a, "type", None) or "doc",
+                      file=getattr(a, "file", None), doc_type=_dt,
                       title=getattr(a, "title", None), wait=not getattr(a, "no_wait", False))
     print(json.dumps(r, ensure_ascii=False, indent=2))
     if not r.get("ok"):

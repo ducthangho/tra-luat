@@ -302,6 +302,8 @@ def cmd_ocr_run(a) -> int:
             out["warnings"].append("NO_TEXT_LAYER_AND_NO_LOCAL_OCR_ENGINE")
             out["recommendations"] = [
                 "Cài OCRmyPDF + Tesseract vie để chạy local: ocr-run --engine ocrmypdf --lang vie+eng",
+                "Lệnh cài (Linux/Cowork): pip install ocrmypdf && sudo apt-get install -y ghostscript tesseract-ocr tesseract-ocr-vie",
+                "Lệnh cài (Windows): pip install ocrmypdf + cài Ghostscript & Tesseract (kèm gói ngôn ngữ Vietnamese) từ installer chính thức",
                 "Hoặc dùng Drive OCR với ocrLanguage=vi trong pipeline Drive live rồi chạy ocr-verify trên sidecar text.",
                 "Không dùng OCR chưa verify làm canonical VBQPPL.",
             ]

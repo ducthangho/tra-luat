@@ -275,12 +275,40 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
                 readback = "NO_ROW"   # reg_get không trả row → KHÔNG kết luận (không phủ nhận write đã ok)
         except Exception as e:  # noqa: BLE001
             readback = f"FAILED:{type(e).__name__}"
+    # #5 backlog (v1.34.17): giá trị RỖNG cho cột thường bị webapp BỎ IM LẶNG by-design (chỉ nlm_*/note clear
+    # được qua reg_clear) — cảnh báo LOUD thay vì để người vận hành tưởng đã xoá (ca sohieu gán nhầm hồ sơ BHXH).
+    _empty_ignored = sorted(k for k in fields if not str((payload or {}).get(k) or "").strip())
+    _empty_extra = ({"empty_ignored": _empty_ignored,
+                     "note_empty": "giá trị RỖNG bị webapp BỎ QUA cho cột thường (by-design — chỉ nlm_*/note "
+                                   "clear được qua reg_clear); muốn đính chính: ghi giá trị mới hoặc chú thích note/title_vn."}
+                    if _empty_ignored else {})
+    # #6 backlog (v1.34.17): FIELDS_DROPPED → TỰ RETRY per-field ĐÚNG 1 VÒNG (ca thật: ghi nhiều trường 1 lượt
+    # bị rớt, ghi lại lượt nhỏ thì verified) rồi re-readback; vẫn lệch → báo như cũ.
+    _retried = []
+    if dropped and _did:
+        for d in dropped:
+            try:
+                g.get("reg_upsert", drive_id=_did, **{d["col"]: d["want"]})
+                _retried.append(d["col"])
+            except Exception:  # noqa: BLE001
+                pass
+        if _retried:
+            try:
+                rb2 = g.get("reg_get", drive_id=_did, refresh="true")
+                _rows2 = (rb2.get("rows") or []) if isinstance(rb2, dict) else []
+                if _rows2:
+                    _row2 = _rows2[0] or {}
+                    dropped = [d for d in dropped
+                               if str(_row2.get(d["col"]) or "").strip() != str(d["want"]).strip()]
+            except Exception:  # noqa: BLE001
+                pass
     if dropped:
         return {"verified": False, "changed": changed, "reg_upsert": r, "error": "FIELDS_DROPPED_ON_WRITE",
-                "fields_dropped": dropped,
-                "note": "reg_upsert ok NHƯNG read-back thấy field LỆCH — webapp bỏ cột im lặng "
-                        "(kiểm tên cột ∈ REG_COLS_ / GAS version; KHÔNG tin updated:true suông)."}
+                "fields_dropped": dropped, **({"fields_retried": _retried} if _retried else {}), **_empty_extra,
+                "note": "reg_upsert ok NHƯNG read-back thấy field LỆCH (đã tự retry per-field 1 vòng) — webapp bỏ cột "
+                        "im lặng (kiểm tên cột ∈ REG_COLS_ / GAS version; KHÔNG tin updated:true suông)."}
     return {"verified": ok, "changed": changed, "reg_upsert": r,
+            **({"fields_retried": _retried} if _retried else {}), **_empty_extra,
             **({"readback": readback} if readback != "OK" else {})}
 
 

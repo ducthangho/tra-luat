@@ -1686,7 +1686,14 @@ def cmd_instruction_audit(a) -> int:
         except Exception as e:
             print(f"[tl] instruction-audit lỗi đọc file: {e}", file=sys.stderr)
             return 1
-        out = _instruction_audit_text(text)
+        # #8 backlog (v1.34.17): --file dùng CÙNG nguồn-chân-lý gen_instructions.audit như nhánh --generate
+        # (trước: list block riêng trong tl → lệch bản sinh thật → báo 'thiếu khối' GIẢ). Fallback khi thiếu module.
+        try:
+            import gen_instructions as _gi
+            _tgt = getattr(a, "target", "project") or "project"
+            out = _gi.audit(text, "project" if _tgt in ("both", "config") else _tgt)
+        except Exception:  # noqa: BLE001
+            out = _instruction_audit_text(text)
     if a.json:
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:

@@ -1,3 +1,19 @@
+# ★ v1.34.17 — BACKLOG #4-#8 từ log phiên hồ sơ Luật BHXH (TDD) (2026-07-10)
+
+- **(#4) `nlm-add` tự nhận Google Sheet**: `--type` default None; `_nlm_add_doc_type` tra MIME manifest OFFLINE
+  → spreadsheet ⇒ `sheets` (hết "Could not add drive source" với phụ lục bảng tính); explicit luôn thắng.
+  Parser-surface regen CÓ CHỦ ĐÍCH đúng 1 lệnh.
+- **(#5) cảnh báo giá-trị-rỗng**: `_verified_reg_upsert` trả `empty_ignored` + note — webapp BỎ IM LẶNG giá trị
+  rỗng cho cột thường (by-design; chỉ `nlm_*`/note clear được qua reg_clear). Đổi hành-vi-clear thật cần sửa
+  webapp GAS — NGOÀI phạm vi đợt này, ghi nhận tại đây.
+- **(#6) tự retry FIELDS_DROPPED**: rớt cột khi ghi nhiều trường → tự ghi lại per-field đúng 1 vòng +
+  re-readback (`fields_retried`) — hết phải ghi lại tay từng lượt nhỏ.
+- **(#7) `ocr-run` thiếu engine** → recommendations kèm LỆNH CÀI cụ thể (pip ocrmypdf + apt ghostscript
+  tesseract-ocr-vie / hướng dẫn Windows).
+- **(#8) `instruction-audit --file`** dùng CÙNG nguồn-chân-lý `gen_instructions.audit` như `--generate` —
+  hết lệch block-list giữa 2 module (báo "thiếu khối" giả).
+- TDD: +5 `r83` viết trước → **729/729**; golden 18/18; audit strict xanh.
+
 # ★ v1.34.16 — Pha-E-hoàn-thiện: nhóm lệnh NGUY HIỂM lên high + contract THẬT (2026-07-10)
 
 - **TDD**: r82 viết TRƯỚC (đỏ đúng 3 chỗ) → implement → 724/724. KHÔNG đổi CLI (parser-surface khớp).

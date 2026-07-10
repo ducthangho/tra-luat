@@ -568,6 +568,17 @@ GENERATED_SPECS = [
          {"flags": ['--folder-cap'], "dest": 'folder_cap', "type": int, "default": 60, "help": 'trần số thư mục con quét (mặc định 60, LOUD khi cắt)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    {"name": 'profile-promote', "handler": 'cmd_profile_promote',
+     "help": '(v1.34.25, Q2+Q3+Q5) BIẾN FOLDER DRIVE THƯỜNG THÀNH PROFILE: dựng hạ tầng còn thiếu (_meta/registry/manifest/notebook/marker/config, asset sẵn có DÙNG LẠI) + seed registry từ nội dung folder + NLM System Prompt generator-sinh tự áp; nạp NLM đi ingest-missing --allow-no-sohieu SAU. DRY mặc định',
+     "args": [
+         {"flags": ['--name'], "required": True, "help": 'tên profile mới'},
+         {"flags": ['--folder'], "required": True, "help": 'folder id Drive thường cần promote'},
+         {"flags": ['--notebook'], "help": 'notebookId NLM sẵn có (loại trừ với --create-notebook)'},
+         {"flags": ['--create-notebook'], "dest": 'create_notebook', "action": 'store_true', "help": 'tạo notebook NLM MỚI (điều-kiện-kép nới có kiểm soát — cần --confirm yes khi --apply; journaled + readback notebook_get)'},
+         {"flags": ['--confirm'], "choices": ['yes'], "help": 'bắt buộc khi --apply --create-notebook'},
+         {"flags": ['--apply'], "action": 'store_true'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'profile-load', "handler": 'cmd_profile_load',
      "help": '(v1.34.24, ADR-0003) "dùng profile X trong PHIÊN": xuất Instruction Block thống nhất mọi env (rẽ --target session|project); đọc marker best-effort, KHÔNG ghi config/marker (đổi mặc định máy = profile-use --apply)',
      "args": [
@@ -1309,6 +1320,9 @@ COMMAND_META = {
     "profile-doctor":        _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "profile-index":         _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "profile-load":          _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
+    # promote = dựng hạ tầng 1-lần idempotent (họ profile-create/adopt = medium); ghi registry PROFILE MỚI rỗng,
+    # notebook-create có confirm riêng. Contract thật → backlog pha siết kế (như grandfather-theo-lớp).
+    "profile-promote":       _m("medium", False, "drive_registry_nlm", False, True, False, None, None, False, None, generated=True),
     "profile-sync":          _m("low", False, "local", False, True, False, None, None, False, None, generated=True),
     "profile-backfill-markers": _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "boot":                  _m("low", False, "local", False, False, False, None, None, False, None, generated=True),

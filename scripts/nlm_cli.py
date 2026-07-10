@@ -221,6 +221,19 @@ def source_sync(source_id: str, timeout: int = 240) -> dict:
     return {"ok": rc == 0, "rc": rc, "via": "nlm-cli", "raw": (out or err).strip()[-200:]} if rc == 0 else _auth_fail(rc, out, err)
 
 
+def notebook_create(title: str, timeout: int = 180) -> dict:
+    """P3 (v1.34.25): tạo notebook NLM — CHỈ dùng trong ngữ cảnh TẠO PROFILE (điều-kiện-kép nới CÓ KIỂM SOÁT,
+    grilling 2026-07-10: --create-notebook --confirm yes); caller PHẢI journal + readback notebook_get."""
+    return _run_json(["notebook", "create", title, "--json"], timeout=timeout)
+
+
+def chat_configure(notebook_id: str, prompt: str, goal: str = "custom", timeout: int = 180) -> dict:
+    """P3 (Q5): đặt System Prompt cho notebook (`nlm chat configure <nb> --goal custom --prompt ...`,
+    prompt ≤10000 chars theo CLI). Fail → caller ghi manual_required, KHÔNG chặn promote."""
+    return _run_json(["chat", "configure", notebook_id, "--goal", goal, "--prompt", prompt],
+                     timeout=timeout)
+
+
 def notebook_get(notebook_id: str, timeout: int = 120) -> dict:
     """Chi tiết notebook qua CLI `nlm notebook get -j` (thay MCP notebook_get). Trả {ok, source_count, title, raw}.
     Dùng lấy SỐ NGUỒN VẬT LÝ cho slot/preflight trước khi source_add."""

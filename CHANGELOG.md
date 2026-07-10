@@ -1,3 +1,34 @@
+# ★ v1.34.25 — PROFILE P3: profile-promote (folder→profile) + create-notebook có kiểm soát + NLM System Prompt tự áp (2026-07-10)
+
+- **`tl profile-promote --name <p> --folder <id> [--notebook <nb>|--create-notebook]`** MỚI (Q2+Q3+Q5):
+  biến folder Drive THƯỜNG thành profile — dựng hạ tầng CÒN THIẾU (_meta/registry Sheet/manifest JSON/
+  marker/config own+own), asset sẵn có DÙNG LẠI (idempotent, khuôn adopt); **manifest chỉ reuse khi JSON
+  tự nhận đúng profile** (file tên manifest nhưng của profile khác/lạc → `MANIFEST_FOREIGN_IGNORED`,
+  tạo mới — TDD bắt được trước khi thành bug); SEED registry từ file trong folder (`row_kind=own,
+  corpus=true`, per-row `_journaled_reg_upsert`, bỏ asset hạ tầng). Nạp NLM KHÔNG trộn vào promote —
+  next_steps: `ingest-missing --allow-no-sohieu` (idempotent/resume, văn bản thường không có số hiệu).
+- **`--create-notebook`** = nới điều-kiện-kép notebook_create CÓ KIỂM SOÁT (quyết định Q2): chỉ trong
+  ngữ cảnh tạo profile, `--apply` đòi `--confirm yes`, journal intent/commit `nlm_notebook_create` +
+  READBACK `notebook_get` canary; id ghi vào config + marker. `nlm_cli` +2 wrapper `notebook_create`/
+  `chat_configure`.
+- **NLM System Prompt (Q5)**: generator-sinh (`generate('nlm')`, KHÔNG viết tự do, 4.6k chars) → LƯU
+  `_meta/nlm_system_prompt.md` (bản-đã-áp/bản-cần-dán) → TỰ ÁP `nlm chat configure <nb> --goal custom
+  --prompt …`; CLI fail/quá 10000 chars → `manual_required` kèm chỉ dẫn dán tay, KHÔNG chặn promote.
+- Guards: `ALREADY_PROFILE` (folder có marker → profile-sync/adopt), `PROFILE_EXISTS_DIFFERENT_FOLDER`,
+  `REFUSE_PROMOTE_VBT_ROOT`, `--notebook`⊕`--create-notebook`. COMMAND_META medium/drive_registry_nlm
+  (contract thật → backlog pha siết; drift-lock r65 giữ nguyên tắc high-phải-có-contract).
+- TDD r88 ×8 viết trước (confirm-guard/already-profile/DRY-plan/apply-full/sysprompt-fallback/
+  reuse-assets/seed-dedup-gdoc-raw/parser) → **766/766**; golden + parser-surface regen có chủ đích.
+  Live-smoke DRY folder thật 'Khảo sát Luật Xuất bản' bắt 2 nâng cấp: seed quét ĐỆ QUY (file lồng
+  subfolder chủ đề) + dedup cặp GDoc↔raw cùng tên (16 item → seed 8). ★Bẫy I11 lặp: hằng module mới
+  (_SEED_RAW_EXT_RE) quên re-export ở tl → NameError; đã vá + ghi khuôn.
+- **MERGE từ _patch-inbox-2026-07-10 (THẨM ĐỊNH XONG)**: `tl_gws._stage_enc_upload` fallback gws→gcloud
+  khi `update_content` lỗi (giữ fileId, verify md5 — cùng khuôn drive-push --via v1.33.49; diff +15 dòng,
+  dùng helper sẵn có; gate 766/766 xanh với patch). Patch được install-patch.ps1 áp thẳng vào canonical
+  lúc 00:42/01:07 (11-07) — 4 file .bak/refresh-tokens.ps1 lạc vào repo (ĐÃ nhiễm RELEASE_MANIFEST một
+  nhịp) → dọn về `_patch-inbox-2026-07-10/applied-20260711/` + regen manifest. refresh-tokens.ps1 bản
+  patched nằm ở đó — user tự đối chiếu/thay bản local D:\Quốc hội\ (file local-only, không thuộc repo).
+
 # ★ v1.34.24 — PROFILE P2: profile-load (Instruction Block từ marker) + KERNEL-DIFF ADR-0003 user duyệt (2026-07-10)
 
 - **`tl profile-load <p> [--target session|project] [--offline]`** MỚI (Q7 + ADR-0003): "dùng profile X

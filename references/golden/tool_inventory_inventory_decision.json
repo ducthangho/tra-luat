@@ -113,6 +113,7 @@
     "profile-list",
     "profile-load",
     "profile-manifest",
+    "profile-promote",
     "profile-rebuild-registry",
     "profile-rename",
     "profile-sync",
@@ -1127,6 +1128,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "profile-promote": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry_nlm"
+      },
       "profile-rebuild-registry": {
         "generated": true,
         "idempotency_contract": "profile_rebuild_registry",
@@ -1559,10 +1570,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 128,
+      "generated_parsers": 129,
       "high_risk": 22,
-      "total": 134,
-      "write_commands": 67
+      "total": 135,
+      "write_commands": 68
     },
     "schema": "command_registry.v1"
   },

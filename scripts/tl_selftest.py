@@ -6486,6 +6486,187 @@ def run() -> int:
     finally:
         for _k, _v in _sav87.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.25 — r88: Profile P3 — profile-promote (folder→profile, Q2+Q3+Q5 grilling 2026-07-10) ═══
+    class _FkG88:
+        def __init__(self, tree, files=None):
+            self.tree = {k: list(v) for k, v in (tree or {}).items()}
+            self.files = dict(files or {})     # fileId -> text (download trả b64 của text)
+            self.calls = []
+            self.uploads = []                  # (name, folderId, fileId)
+            self.trashed = []
+            self._n = 0
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "bootstrap":
+                return {"ok": True, "vanBanThuongId": "VBT"}
+            if action == "info":
+                fid = str(kw.get("fileId"))
+                mime = ("application/vnd.google-apps.folder" if fid in self.tree
+                        else "application/pdf")
+                return {"ok": True, "file": {"id": fid, "mimeType": mime, "parents": ["VBT"]}}
+            if action == "list":
+                return {"ok": True, "items": list(self.tree.get(str(kw.get("folderId")), []))}
+            if action == "download":
+                t = self.files.get(str(kw.get("fileId")))
+                return ({"ok": True, "b64": _TL_MODULE._b64_text(t)} if t is not None
+                        else {"ok": False, "error": "NOT_FOUND"})
+            if action == "resolvefolder":
+                self._n += 1
+                fid = f"meta{self._n}"
+                self.tree.setdefault(fid, [])
+                return {"ok": True, "folderId": fid, "created": True}
+            if action == "trash":
+                self.trashed.append(str(kw.get("fileId")))
+                return {"ok": True}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "upload":
+                import base64 as _b88
+                self._n += 1
+                fid = f"up{self._n}"
+                self.files[fid] = _b88.b64decode(kw.get("b64") or "").decode("utf-8")
+                self.uploads.append((str(kw.get("name")), str(kw.get("folderId")), fid))
+                return {"ok": True, "fileId": fid}
+            return {"ok": True}
+    class _FkNlm88:
+        def __init__(self, chat_ok=True):
+            self.calls = []
+            self.chat_ok = chat_ok
+        def notebook_create(self, title, timeout=180):
+            self.calls.append(("create", title))
+            return {"ok": True, "data": {"id": "nb-new-88", "title": title}}
+        def notebook_get(self, nb, timeout=120):
+            self.calls.append(("get", nb))
+            return {"ok": True, "data": {"id": nb, "title": "x"}}
+        def chat_configure(self, nb, prompt, goal="custom", timeout=180):
+            self.calls.append(("chat", nb, goal, len(prompt)))
+            return ({"ok": True, "data": {"ok": True}} if self.chat_ok
+                    else {"ok": False, "error": "nlm rc=2: unsupported"})
+    _keys88 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append",
+               "_journaled_reg_upsert", "_imp", "_create_profile_registry_sheet", "_create_profile_manifest_json")
+    _sav88 = {k: getattr(_TL_MODULE, k) for k in _keys88}
+    try:
+        with _tf86.TemporaryDirectory() as _d88:
+            _cfg88 = str(Path(_d88) / "tra_luat_config.v2.json")
+            Path(_cfg88).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"},
+                             "khac": {"rootFolderId": "FZ"}}}, ensure_ascii=False), encoding="utf-8")
+            _tree88 = {
+                "VBT": [{"id": "FC", "name": "Du an C", "type": "folder"}],
+                "FC": [{"id": "doc1", "name": "Bao_cao_khao_sat.gdoc", "type": "file", "mime": "application/vnd.google-apps.document"},
+                       {"id": "doc2", "name": "Ghi_chep.docx", "type": "file", "mime": "application/x-docx"},
+                       {"id": "mj1", "name": "tra_luat_manifest.cu.json", "mime": "application/json", "type": "file"}],
+                "FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
+                "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}],
+                "FD": [{"id": "RD", "name": "tra_luat_registry.dd", "mime": REGISTRY_SHEET_MIME, "type": "file"},
+                       {"id": "MD", "name": "tra_luat_manifest.dd.json", "mime": "application/json", "type": "file"},
+                       {"id": "doc3", "name": "Tai_lieu.gdoc", "type": "file", "mime": "application/vnd.google-apps.document"}],
+            }
+            _seeded88, _created88 = [], []
+            def _reset88(chat_ok=True):
+                _seeded88.clear(); _created88.clear()
+                g = _FkG88(_tree88, {"mkB": json.dumps({"schema": "tra_luat_profile.v1", "profile": "beta",
+                                                        "rootFolderId": "FB"}, ensure_ascii=False),
+                                     # manifest FD tự nhận ĐÚNG profile duan_d → được reuse (case 6);
+                                     # mj1 ở FC không đọc được/lạ → MANIFEST_FOREIGN_IGNORED (case 4)
+                                     "MD": json.dumps({"profile": "duan_d", "rootFolderId": "FD"},
+                                                      ensure_ascii=False)})
+                nlm = _FkNlm88(chat_ok=chat_ok)
+                _TL_MODULE._gas = lambda: g
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._apply_journal_start = lambda *a, **k: "run88"
+                _TL_MODULE._journal_append = lambda rid, rec: None
+                _TL_MODULE._journaled_reg_upsert = lambda rid, gg, payload, before=None: (
+                    _seeded88.append(dict(payload)) or {"verified": True, "reg_upsert": {"ok": True}})
+                _real_imp88 = _sav88["_imp"]
+                _TL_MODULE._imp = lambda name: (nlm if name == "nlm_cli" else _real_imp88(name))
+                _TL_MODULE._create_profile_registry_sheet = lambda gg, mid, p: (
+                    _created88.append(("registry", p)) or {"ok": True, "registryDocId": "REGNEW"})
+                _TL_MODULE._create_profile_manifest_json = lambda gg, mid, p, rid_, nb_: (
+                    _created88.append(("manifest", p)) or {"ok": True, "manifestId": "MANNEW"})
+                return g, nlm
+            def _pr88(**kw):
+                base = dict(config=_cfg88, profile=None, name="duan_c", folder="FC", notebook=None,
+                            create_notebook=False, confirm=None, apply=False, json=True)
+                base.update(kw)
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _TL_MODULE.cmd_profile_promote(argparse.Namespace(**base))
+                try:
+                    return _rc, json.loads(_b.getvalue())
+                except Exception:
+                    return _rc, {}
+            # (1) --create-notebook --apply THIẾU --confirm yes → chặn, KHÔNG đụng NLM/Drive
+            _g881, _nlm881 = _reset88()
+            _rc881, _ = _pr88(create_notebook=True, apply=True)
+            cases.append(("r88_promote_create_nb_needs_confirm",
+                          _rc881 == 2 and not _nlm881.calls and not _g881.uploads))
+            # (2) folder ĐÃ là profile (có marker) → ALREADY_PROFILE rc=2
+            _g882, _ = _reset88()
+            _rc882, _ = _pr88(name="beta2", folder="FB")
+            cases.append(("r88_promote_already_profile_blocked", _rc882 == 2))
+            # (3) DRY plan: seed 2 doc (loại file infra manifest.json), notebook plan=create, KHÔNG ghi gì
+            _g883, _nlm883 = _reset88()
+            _rc883, _o883 = _pr88(create_notebook=True)
+            cases.append(("r88_promote_dry_plan",
+                          _rc883 == 0 and _o883.get("mode") == "DRY"
+                          and _o883.get("seed_count") == 2 and not _g883.uploads
+                          and not _seeded88 and not _nlm883.calls
+                          and (_o883.get("notebook_plan") or {}).get("mode") == "create"))
+            # (4) APPLY trọn: notebook create+readback, registry/manifest tạo, marker + sysprompt upload,
+            #     config ghi, seed 2 row own/corpus, next_steps có ingest-missing --allow-no-sohieu
+            _g884, _nlm884 = _reset88()
+            _rc884, _o884 = _pr88(create_notebook=True, confirm="yes", apply=True)
+            _cfg88d = json.loads(Path(_cfg88).read_text(encoding="utf-8"))
+            _blk88 = (_cfg88d.get("profiles") or {}).get("duan_c") or {}
+            _upnames88 = [u[0] for u in _g884.uploads]
+            cases.append(("r88_promote_apply_full",
+                          _rc884 == 0
+                          and ("create", "duan_c") in _nlm884.calls
+                          and any(c[0] == "get" and c[1] == "nb-new-88" for c in _nlm884.calls)
+                          and any(c[0] == "chat" and c[1] == "nb-new-88" and c[2] == "custom" for c in _nlm884.calls)
+                          and ("registry", "duan_c") in _created88 and ("manifest", "duan_c") in _created88
+                          and _MK in _upnames88 and "nlm_system_prompt.md" in _upnames88
+                          and _blk88.get("notebookId") == "nb-new-88" and _blk88.get("registryDocId") == "REGNEW"
+                          and len(_seeded88) == 2
+                          and all(p.get("row_kind") == "own" and str(p.get("corpus")).lower() == "true"
+                                  for p in _seeded88)
+                          and "--allow-no-sohieu" in json.dumps(_o884.get("next_steps") or [])))
+            # (5) chat configure FAIL → system_prompt.status=manual_required, vẫn rc=0 + file đã lưu _meta
+            _g885, _nlm885 = _reset88(chat_ok=False)
+            _rc885, _o885 = _pr88(name="duan_c2", create_notebook=True, confirm="yes", apply=True)
+            cases.append(("r88_promote_sysprompt_manual_fallback",
+                          _rc885 == 0 and (_o885.get("system_prompt") or {}).get("status") == "manual_required"
+                          and "nlm_system_prompt.md" in [u[0] for u in _g885.uploads]))
+            # (6) folder ĐÃ có registry/manifest → DÙNG LẠI (idempotent), không tạo mới
+            _g886, _ = _reset88()
+            _rc886, _o886 = _pr88(name="duan_d", folder="FD", notebook="nb-x", apply=True, confirm="yes")
+            _blk88d = (json.loads(Path(_cfg88).read_text(encoding="utf-8")).get("profiles") or {}).get("duan_d") or {}
+            cases.append(("r88_promote_reuse_existing_assets",
+                          _rc886 == 0 and not _created88
+                          and _blk88d.get("registryDocId") == "RD" and _blk88d.get("manifestId") == "MD"
+                          and _blk88d.get("notebookId") == "nb-x" and len(_seeded88) == 1))
+    finally:
+        for _k, _v in _sav88.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (7) PURE: seed đệ-quy dedup cặp GDoc↔raw cùng tên (doctrine 'file gốc đặt cạnh GDoc') — ưu tiên GDoc,
+    #     raw đơn lẻ vẫn giữ; live-smoke 2026-07-10 bắt: folder thật có file lồng subfolder + sibling đôi.
+    _sd88 = _TL_MODULE._promote_seed_candidates([
+        {"id": "s1", "name": "BC khảo sát NXB", "type": "file", "mime": "application/vnd.google-apps.document"},
+        {"id": "s2", "name": "BC khảo sát NXB.docx", "type": "file", "mime": "application/x-docx"},
+        {"id": "s3", "name": "Khac.pdf", "type": "file", "mime": "application/pdf"},
+        {"id": "s4", "name": "32_Thong_tin", "type": "folder"},
+    ])
+    cases.append(("r88_seed_dedup_gdoc_raw_sibling",
+                  [c["drive_id"] for c in _sd88] == ["s1", "s3"]))
+    _ns88p = build_parser().parse_args(["profile-promote", "--name", "x", "--folder", "f",
+                                        "--create-notebook", "--confirm", "yes", "--apply"])
+    cases.append(("r88_parser_profile_promote",
+                  getattr(_ns88p, "create_notebook", False) is True and getattr(_ns88p, "confirm", None) == "yes"
+                  and getattr(_ns88p, "name", None) == "x" and getattr(_ns88p, "folder", None) == "f"))
     # (5) config-of-record report + parser surface
     _ccr86 = _TL_MODULE._config_candidates_report(None)
     cases.append(("r86_config_of_record_report",

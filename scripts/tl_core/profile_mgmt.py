@@ -1569,6 +1569,323 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
     return 0 if all_ok else 1
 
 
+_PROFILE_SYSPROMPT_NAME = "nlm_system_prompt.md"
+
+
+_SEED_RAW_EXT_RE = re.compile(r"\.(docx?|pdf|html?|txt|rtf|odt)$", re.IGNORECASE)
+
+
+def _promote_seed_candidates(items: list) -> list:
+    """PURE (P3, Q3): lọc file NGUỒN trong folder promote (items có thể ĐỆ QUY) để seed registry —
+    bỏ folder, bỏ asset hạ tầng (registry/manifest/marker/sysprompt/CSV trung gian). Cặp sibling
+    GDoc↔raw CÙNG TÊN (doctrine 'file gốc đặt cạnh GDoc') → chỉ seed GDoc; raw đơn lẻ giữ nguyên.
+    Trả [{drive_id, name}] giữ thứ tự gốc."""
+    prelim = []
+    for it in items or []:
+        if str(it.get("type")) == "folder":
+            continue
+        nm = str(it.get("name") or "")
+        if nm in (_PROFILE_MARKER_NAME, _PROFILE_SYSPROMPT_NAME):
+            continue
+        if _discover_item_kind(it) in ("registry", "manifest", "registry_nonsheet"):
+            continue
+        if nm.lower().endswith(".csv") and "tra_luat_registry" in nm:
+            continue
+        did = str(it.get("id") or "")
+        if did:
+            prelim.append({"drive_id": did, "name": nm,
+                           "mime": str(it.get("mime") or it.get("mimeType") or "")})
+
+    def _basekey(nm: str) -> str:
+        return re.sub(r"[\s_\-]+", " ",
+                      _strip_accents(_SEED_RAW_EXT_RE.sub("", nm)).lower()).strip()
+
+    def _is_gdoc(c: dict) -> bool:
+        return "vnd.google-apps" in (c.get("mime") or "") or not _SEED_RAW_EXT_RE.search(c["name"])
+
+    groups = {}
+    for c in prelim:
+        groups.setdefault(_basekey(c["name"]), []).append(c)
+    keep = set()
+    for grp in groups.values():
+        if len(grp) == 1:
+            keep.add(grp[0]["drive_id"])
+            continue
+        gd = [c for c in grp if _is_gdoc(c)]
+        for c in (gd or grp[:1]):        # có GDoc → chỉ GDoc; toàn raw trùng tên → giữ 1 (chống double-seed)
+            keep.add(c["drive_id"])
+    return [{"drive_id": c["drive_id"], "name": c["name"]} for c in prelim if c["drive_id"] in keep]
+
+
+def _nlm_system_prompt_apply(g, meta_id: str, notebook_id: str, run_id: str | None = None) -> dict:
+    """P3 (Q5): sinh NLM System Prompt từ generator (KHÔNG viết tự do) → LƯU `_meta/nlm_system_prompt.md`
+    (bản-đã-áp/bản-cần-dán, readback artifact) → TỰ ÁP qua `nlm chat configure --goal custom`.
+    CLI fail/quá 10000 chars → status=manual_required (kèm chỉ dẫn dán tay), KHÔNG chặn promote."""
+    try:
+        import gen_instructions  # type: ignore
+        text = gen_instructions.generate("nlm", VERSION)
+    except Exception as e:  # noqa: BLE001
+        return {"status": "generator_failed", "error": str(e)}
+    out = {"chars": len(text)}
+    try:    # lưu Drive TRƯỚC (kể cả khi áp fail — bản cần-dán nằm cạnh profile)
+        up = g.post("upload", b64=_b64_text(text), name=_PROFILE_SYSPROMPT_NAME,
+                    mime="text/markdown", folderId=str(meta_id), convert="false",
+                    register="false", share="false", force="true")
+        out["file"] = str((up or {}).get("fileId") or (up or {}).get("id") or "")
+    except Exception as e:  # noqa: BLE001
+        out["file_error"] = str(e)
+    if not notebook_id:
+        out["status"] = "skipped_no_notebook"
+        return out
+    if len(text) > 10000:
+        out["status"] = "manual_required"
+        out["note"] = ("TOO_LONG: prompt vượt trần 10000 chars của `nlm chat configure` — rút gọn hoặc "
+                       "dán tay phần lõi vào NotebookLM chat settings.")
+        return out
+    if run_id:
+        _journal_append(run_id, {"t": "intent", "op": "nlm_chat_configure", "key": str(notebook_id),
+                                 "set": {"goal": "custom", "chars": len(text)}})
+    try:
+        nc = _imp("nlm_cli")
+        r = nc.chat_configure(str(notebook_id), text)
+    except Exception as e:  # noqa: BLE001
+        r = {"ok": False, "error": f"CHAT_CONFIGURE_RAISED:{type(e).__name__}"}
+    ok = bool((r or {}).get("ok"))
+    if run_id:
+        _journal_append(run_id, {"t": "commit", "op": "nlm_chat_configure", "key": str(notebook_id),
+                                 "ok": ok, "verify": {"error": (r or {}).get("error")}})
+    out["status"] = "applied" if ok else "manual_required"
+    if not ok:
+        out["error"] = (r or {}).get("error")
+        out["note"] = (f"Dán tay: `nlm chat configure {notebook_id} --goal custom --prompt <nội dung "
+                       f"_meta/{_PROFILE_SYSPROMPT_NAME}>` (hoặc NotebookLM UI → chat settings).")
+    return out
+
+
+def cmd_profile_promote(a) -> int:
+    with _ProfileEnvGuard():
+        return _cmd_profile_promote_impl(a)
+
+
+def _cmd_profile_promote_impl(a) -> int:
+    """P3 (v1.34.25, Q2+Q3+Q5 grilling 2026-07-10): BIẾN FOLDER DRIVE THƯỜNG THÀNH PROFILE.
+    Promote CHỈ dựng hạ tầng còn thiếu (_meta/registry/manifest/notebook/marker/config) + SEED registry
+    từ nội dung folder; việc nạp NLM đi đường `ingest-missing --allow-no-sohieu` (idempotent/resume) —
+    KHÔNG nạp trọn gói trong lệnh này. Idempotent: asset sẵn có được DÙNG LẠI (khuôn adopt).
+    Notebook: --notebook <id> HOẶC --create-notebook (nới điều-kiện-kép CÓ KIỂM SOÁT: chỉ ngữ cảnh tạo
+    profile, --apply --confirm yes, journaled + readback notebook_get). NLM System Prompt generator-sinh
+    TỰ ÁP + lưu _meta (Q5, fallback manual_required). DRY mặc định. rc: 0 / 1 bước fail / 2 guard."""
+    name = (getattr(a, "name", None) or "").strip()
+    folder = (getattr(a, "folder", None) or "").strip()
+    if not name or not folder:
+        print("[tl] profile-promote cần --name và --folder", file=sys.stderr)
+        return 2
+    if name == DEFAULT_PROFILE:
+        print("[tl] REFUSE_PROMOTE_DEFAULT_PROFILE: vbqppl là profile nền.", file=sys.stderr)
+        return 2
+    nb_flag = (getattr(a, "notebook", None) or "").strip()
+    create_nb = bool(getattr(a, "create_notebook", False))
+    if nb_flag and create_nb:
+        print("[tl] --notebook và --create-notebook loại trừ nhau — chọn một.", file=sys.stderr)
+        return 2
+    if create_nb and getattr(a, "apply", False) and getattr(a, "confirm", None) != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_YES_REQUIRED",
+                          "note": "--create-notebook tạo notebook NLM MỚI (điều-kiện-kép nới có kiểm soát) "
+                                  "→ --apply cần --confirm yes."}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    existing = _profiles_from_config(cfg).get(name) if cfg else None
+    existing = existing if isinstance(existing, dict) else None
+    if existing and str(existing.get("rootFolderId") or "").strip() not in ("", folder):
+        print(json.dumps({"ok": False, "error": "PROFILE_EXISTS_DIFFERENT_FOLDER", "profile": name,
+                          "config_rootFolderId": existing.get("rootFolderId"), "requested_folder": folder},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
+    except SystemExit as e:
+        print(f"[tl] profile-promote cần webapp LIVE: {e}", file=sys.stderr)
+        return 2
+    g = _gas()
+    try:
+        vbt_id = str((g.get("bootstrap") or {}).get("vanBanThuongId") or "")
+    except Exception:  # noqa: BLE001
+        vbt_id = ""
+    if vbt_id and folder == vbt_id:
+        print("[tl] REFUSE_PROMOTE_VBT_ROOT: không promote CHÍNH Van_ban_thuong.", file=sys.stderr)
+        return 2
+    finfo = _gas_get_retry(g, "info", fileId=folder)
+    fmime = _mime_from_info(finfo) if isinstance(finfo, dict) else ""
+    if not fmime.endswith("apps.folder"):
+        print(json.dumps({"ok": False, "error": "FOLDER_ID_INVALID", "mime": fmime},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    try:
+        items = _gas_get_retry(g, "list", folderId=folder).get("items") or []
+    except Exception as e:  # noqa: BLE001
+        print(json.dumps({"ok": False, "error": f"FOLDER_LIST_FAILED: {e}"}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    meta = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
+    meta_items = []
+    if meta:
+        try:
+            meta_items = _gas_get_retry(g, "list", folderId=meta.get("id")).get("items") or []
+        except Exception:
+            pass
+    if _marker_find_in_items(meta_items):
+        print(json.dumps({"ok": False, "error": "ALREADY_PROFILE", "folder": folder,
+                          "note": "folder đã có marker tra_luat_profile.json — dùng `tl profile-sync --apply` "
+                                  "(đưa vào config) hoặc profile-adopt, KHÔNG promote lại."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    picked = _adopt_pick_assets(items + meta_items)
+    reuse_reg = str((picked.get("registry") or {}).get("id") or "")
+    # Manifest chỉ DÙNG LẠI khi JSON tự nhận ĐÚNG profile này — file tên manifest nhưng của profile khác/
+    # lạc (ca mj "cu") mà reuse là gán nhầm sổ cái (bài học manifest-lạ của adopt v1.30.0).
+    reuse_man, man_warn = "", None
+    _man_cand = str((picked.get("manifest") or {}).get("id") or "")
+    if _man_cand:
+        try:
+            _dm = _gas_get_retry(g, "download", fileId=_man_cand)
+            _mj = (json.loads(base64.b64decode(_dm.get("b64") or "").decode("utf-8"))
+                   if _dm.get("b64") else {})
+        except Exception:  # noqa: BLE001
+            _mj = {}
+        if str((_mj or {}).get("profile") or "") == name:
+            reuse_man = _man_cand
+        else:
+            man_warn = (f"MANIFEST_FOREIGN_IGNORED: {_man_cand} (profile="
+                        f"'{(_mj or {}).get('profile')}' ≠ '{name}') — tạo manifest mới riêng.")
+    # Seed quét ĐỆ QUY (live-smoke 2026-07-10: folder thường hay lồng subfolder chủ đề) — capped thì LOUD.
+    seed_capped = False
+    try:
+        _rl = _gas_get_retry(g, "list", folderId=folder, recursive="true")
+        _ritems = _rl.get("items") or []
+        seed_capped = bool(_rl.get("capped"))
+    except Exception:  # noqa: BLE001
+        _ritems = items
+    seeds = _promote_seed_candidates(_ritems)
+    nb_plan = {"mode": ("create" if create_nb else ("use" if nb_flag else "missing")),
+               "notebookId": nb_flag or None}
+    plan = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
+            "config": path, "profile": name, "folder": folder,
+            "vbt_parent": bool(vbt_id and vbt_id in ((finfo.get("file") or {}).get("parents") or [])),
+            "steps": {"_meta": "reuse" if meta else "create",
+                      "registry": "reuse" if reuse_reg else "create",
+                      "manifest": "reuse" if reuse_man else "create",
+                      "notebook": nb_plan["mode"], "marker": "create",
+                      "config": "write", "seed": len(seeds), "system_prompt": "generate+apply"},
+            "notebook_plan": nb_plan, "seed_count": len(seeds),
+            "seed_sample": [s["name"][:60] for s in seeds[:10]],
+            "reuse": {"registryDocId": reuse_reg or None, "manifestId": reuse_man or None}}
+    if man_warn:
+        plan.setdefault("warnings", []).append(man_warn)
+    if seed_capped:
+        plan.setdefault("warnings", []).append(
+            "SEED_LIST_CAPPED: danh sách đệ quy bị cắt — seed CHƯA đủ; chạy lại promote sau khi giảm "
+            "số file hoặc seed bổ sung bằng `register` tay.")
+    if nb_plan["mode"] == "missing":
+        plan.setdefault("warnings", []).append(
+            "NO_NOTEBOOK: không --notebook/--create-notebook — lệnh NLM sẽ chặn tới khi có "
+            "(bổ sung sau qua config/marker + backfill --force).")
+    if not getattr(a, "apply", False):
+        plan["note"] = ("DRY — --apply dựng hạ tầng + seed registry (journaled). Nạp NLM chạy SAU bằng "
+                        "ingest-missing (xem next_steps khi apply).")
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return 0
+    rid = _apply_journal_start("profile-promote", {"profile": name, "folder": folder, "seed": len(seeds)})
+    results, all_ok = {}, True
+    meta_id = str((meta or {}).get("id") or "")
+    if not meta_id:
+        try:
+            mr = g.get("resolvefolder", name="_meta", parentId=folder, create="true")
+        except Exception as e:  # noqa: BLE001
+            mr = {"ok": False, "error": str(e)}
+        meta_id = str((mr or {}).get("folderId") or "")
+    results["meta_folder_id"] = meta_id
+    if not meta_id:
+        print(json.dumps({**plan, "ok": False, "error": "META_CREATE_FAILED"}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 1
+    reg_id = reuse_reg
+    if not reg_id:
+        reg = _create_profile_registry_sheet(g, meta_id, name)
+        if not reg.get("ok"):
+            print(json.dumps({**plan, "ok": False, "step": "create_registry_sheet", **reg},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 1
+        reg_id = str(reg.get("registryDocId") or "")
+    results["registryDocId"] = reg_id
+    nb = nb_flag
+    if create_nb:
+        _journal_append(rid, {"t": "intent", "op": "nlm_notebook_create", "key": name,
+                              "set": {"title": name}})
+        try:
+            nc = _imp("nlm_cli")
+            cr = nc.notebook_create(name)
+        except Exception as e:  # noqa: BLE001
+            cr = {"ok": False, "error": f"NOTEBOOK_CREATE_RAISED:{type(e).__name__}"}
+        d = cr.get("data") if isinstance(cr.get("data"), dict) else {}
+        nb = str(d.get("id") or d.get("notebook_id") or (d.get("notebook") or {}).get("id") or "")
+        nb_ok = bool(cr.get("ok")) and bool(nb)
+        if nb_ok:    # readback ĐIỀU-KIỆN-KÉP: notebook_get canary xác nhận id sống
+            try:
+                nb_ok = bool((nc.notebook_get(nb) or {}).get("ok"))
+            except Exception:  # noqa: BLE001
+                nb_ok = False
+        _journal_append(rid, {"t": "commit", "op": "nlm_notebook_create", "key": name, "ok": nb_ok,
+                              "verify": {"notebookId": nb, "error": cr.get("error")}})
+        if not nb_ok:
+            print(json.dumps({**plan, "ok": False, "error": "NOTEBOOK_CREATE_FAILED", "detail": cr,
+                              "note": "Kiểm auth NLM (`nlm login` + canary notebook_get) rồi chạy lại — "
+                                      "promote idempotent, hạ tầng đã tạo sẽ được dùng lại."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 1
+    results["notebookId"] = nb or None
+    man_id = reuse_man
+    if not man_id:
+        man = _create_profile_manifest_json(g, meta_id, name, folder, nb)
+        if not man.get("ok"):
+            print(json.dumps({**plan, "ok": False, "step": "create_manifest_json", **man},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 1
+        man_id = str(man.get("manifestId") or "")
+    results["manifestId"] = man_id
+    try:
+        g.get("manifest_export", registryDocId=reg_id, manifestId=man_id)
+    except Exception as e:  # noqa: BLE001
+        results["manifest_export_note"] = f"bootstrap bỏ qua: {e}"
+    prof_block = {"rootFolderId": folder, "metaFolderId": meta_id, "notebookId": nb,
+                  "registryDocId": reg_id, "manifestId": man_id,
+                  "manifestScope": "own", "categories": "own"}
+    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
+    results["config_written"] = cfgp
+    all_ok = all_ok and bool(cfgp)
+    mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
+    results["marker"] = {"fileId": mkw.get("fileId"), "verified": mkw.get("verified")}
+    all_ok = all_ok and bool(mkw.get("verified"))
+    seeded, seed_fail = [], []
+    for s in seeds:
+        payload = {"drive_id": s["drive_id"], "name": s["name"], "row_kind": "own", "corpus": "true"}
+        v = _journaled_reg_upsert(rid, g, payload)
+        (seeded if v.get("verified") else seed_fail).append(s["drive_id"])
+    results["seeded"] = len(seeded)
+    if seed_fail:
+        results["seed_failed"] = seed_fail[:20]
+        all_ok = False
+    results["system_prompt"] = _nlm_system_prompt_apply(g, meta_id, nb, run_id=rid)
+    out = {**plan, "ok": all_ok, **results, "journal": rid,
+           "system_prompt": results["system_prompt"],
+           "next_steps": [
+               f"tl --profile {name} ingest-missing --allow-no-sohieu --limit 15 --apply   "
+               f"(lặp tới rc=0 — nạp {len(seeds)} nguồn lên notebook, idempotent/resume)",
+               f"tl profile-load {name}   (Instruction Block phiên)",
+               "tl profile-index --rebuild --apply   (cập nhật sổ cái)",
+           ]}
+    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if all_ok else sys.stderr)
+    return 0 if all_ok else 1
+
+
 def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
     """B: quét Van_ban_thuong 2 cấp read-only qua GAS `list` — con trực tiếp + trong `_meta` của từng thư mục con
     (registry/manifest kiểu mới nằm trong _meta, kiểu cũ nằm thẳng trong folder). Cap thư mục quét, LOUD khi cắt.

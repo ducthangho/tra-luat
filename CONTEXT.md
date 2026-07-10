@@ -32,6 +32,30 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   nguồn sự thật cho tool-inventory/workflow-audit. KHÁC **registry corpus** (Google Sheet `tra_luat_registry`
   — sổ cái văn bản pháp luật). Nói trần "registry" trong ngữ cảnh vận hành corpus = registry corpus.
 
+## Profile
+
+- **Profile** — không gian corpus tự chủ (folder Drive + notebook NLM + registry Sheet riêng + manifest JSON riêng,
+  own/own), tách khỏi corpus nền vbqppl nhưng ĐỌC cộng nền (base-also).
+- **Profile marker** — file tự mô tả của một profile trên Drive (trong `_meta` của folder profile). Là nguồn
+  sự thật về TỒN TẠI + ĐỊNH DANH + metadata mô tả của profile (đã chốt 2026-07-10, thay heuristic discover).
+- **Config (profile)** — bản materialize cây profile về local + nguồn sự thật về LỰA CHỌN runtime
+  (defaultProfile, token, webapp). KHÔNG còn là nguồn sự thật duy nhất về tồn tại profile.
+- **profile-sync** — đồng bộ MỘT CHIỀU marker Drive → config. Ghi marker chỉ qua lệnh tl (journaled);
+  cấm sync hai chiều.
+- **Adopt** — seed vào config một profile ĐÃ có hạ tầng Drive (registry/manifest sẵn). KHÁC **Promote**.
+- **Promote (folder→profile)** — biến một folder Drive thường thành profile: dựng phần hạ tầng còn thiếu
+  (marker, registry, manifest, notebook) rồi seed registry từ nội dung folder; việc nạp NLM đi đường
+  ingest chuẩn, không nạp trọn gói trong lệnh promote.
+- **Nguồn nlm-only** — nguồn của profile chỉ tồn tại trên notebook NLM (URL/YouTube/text/nguồn chưa xuất),
+  không có file Drive tương ứng; định danh bằng nlm_source_id.
+- **Materialize (nguồn)** — xuất nội dung một nguồn nlm-only thành file trong folder profile trên Drive,
+  nâng cấp nó thành nguồn thường. Tùy chọn, không bắt buộc; nguồn không xuất được ở lại nlm-only là hợp lệ.
+- **Instruction Block (profile)** — khối instruction generator-sinh từ marker của một profile (tra NLM
+  đúng notebook, luật không-bịa, văn phong, quan hệ với vbqppl/profile khác, scope đọc/ghi). MỘT bản
+  thống nhất cho mọi môi trường (Chat=Cowork=Code); chỉ rẽ theo TARGET artifact (session | project).
+- **profile-load** — hành vi "dùng profile X trong phiên": xuất Instruction Block làm doctrine PHIÊN,
+  không ghi config. Khác **profile-use** (đổi defaultProfile — trạng thái máy, cần --apply).
+
 ## Kiến trúc skill
 
 - **Kernel (SKILL.md)** — doctrine agent đọc mỗi phiên; đích Pha F: 20-35KB, chỉ bất biến + con trỏ references.

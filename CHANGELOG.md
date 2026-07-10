@@ -1,3 +1,20 @@
+# ★ v1.34.14 — I9b: HOÀN TẤT I9 — resolve + regio → tl_core/ (đổi luật engine có kiểm soát) (2026-07-10)
+
+- **`tl_core/resolve.py`** (39 def ~1.28k): ĐỘNG CƠ `_source_map_one` + amendment-gate A1/A2/A3, dedup-status,
+  classify-ref, footnote/VBHN, qt5/discovery. **`tl_core/regio.py`** (63 def ~741): manifest-entries/`_entry_*`/
+  norm_sohieu/`_cache_file` + journal primitives + `_journaled_reg_write`/`_verified_reg_*`/`_apply_gate`.
+  **tl.py 7.177→5.381 (lũy kế 19.052→5.381, −72%; 13 module).**
+- ★ **ĐỔI LUẬT CÓ KIỂM SOÁT** (đúng cam kết grilling): `r76_engine_stays_in_tl` → `r76_engine_canonical_in_resolve`
+  — def THẬT ở resolve.py, tl chỉ stub, vẫn khoá 1-định-nghĩa-duy-nhất.
+- **Characterization TRƯỚC cut**: +4 `r80a` khoá THÂN THẬT write-infra (lâu nay r-test toàn MOCK):
+  intent{set,before} + commit-per-row theo `missed_ids` + bust-cache 1 lần; `reg_ok=False` → all-uncommitted;
+  `_apply_gate` block/force-unsafe/pass; before-snapshot dịch sohieu. PASS y nguyên sau cut.
+- ★ 2 bẫy mới: (a) **OFF-BY-ONE máy cắt tồn tại từ I1** — xoá từ `a-1` nuốt dòng SÁT def (lần đầu gây hại:
+  `_LINHVUC_CACHE = None` → NameError; trước giờ dòng đó luôn trống nên vô hại) → fix xoá từ đúng dòng def +
+  khôi phục cache ở tl + `r80_linhvuc_cache_lives_in_tl` (biến cache module-level PHẢI sống ở tl vì hàm rebase
+  về globals tl); (b) mirror `_DISCOVERY_SITES` (`r80_discovery_sites_mirror`).
+- +r80 wired/no-dual/mirror → selftest **721/721**; golden 18/18; parser-surface khớp; audit strict xanh.
+
 # ★ v1.34.13 — I9a: tách INFRA đợt 1 — classify + profile_env → tl_core/ (2026-07-10)
 
 - Bước 2/3 chiến-lược-chặng-cuối đã grill (I8 ✓ → **I9** → I10). **Đổi-luật-có-kiểm-soát**: infra đa-module

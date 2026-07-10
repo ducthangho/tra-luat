@@ -2389,7 +2389,7 @@ def run() -> int:
                       "tl_core/__init__.py", "tl_core/deterministic.py", "tl_core/jsonio.py",
                       "tl_core/workflow.py", "tl_core/release.py", "tl_core/live.py",
                       "tl_core/zip_ingest.py", "tl_core/ocr.py", "tl_core/chunking.py",
-                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py", "tl_core/classify.py", "tl_core/profile_env.py"]:
+                      "tl_core/command_registry.py", "tl_core/hygiene.py", "tl_core/nlm_ops.py", "tl_core/extract_cache.py", "tl_core/fetch_web.py", "tl_core/profile_mgmt.py", "tl_core/ingest_ops.py", "tl_core/lookup_ops.py", "tl_core/ops_misc.py", "tl_core/classify.py", "tl_core/profile_env.py", "tl_core/resolve.py", "tl_core/regio.py"]:
             _fp36 = _base36 / _fn36
             _fp36.parent.mkdir(parents=True, exist_ok=True)
             _fp36.write_text("# ok\n" + "x=1\n" * 100, encoding="utf-8")
@@ -5681,11 +5681,16 @@ def run() -> int:
     _tl_src76 = Path(_ins69.getsourcefile(_g76["build_parser"])).read_text(encoding="utf-8", errors="replace")
     cases.append(("r76_no_dual_definition",
                   all(_tl_src76.count(f"def {n}(") == 1 for n in _lo_names76)))
-    # ranh giới grilling I6: ĐỘNG CƠ + helper đa-module PHẢI Ở LẠI tl (def thật trong tl.py, KHÔNG stub hoá)
-    cases.append(("r76_engine_stays_in_tl",
-                  all((f"def {n}(" in _tl_src76 and f"_tl_lookup_ops.{n}" not in _tl_src76)
-                      for n in ("_source_map_one", "_dedup_status", "_classify_ref",
-                                "resolve_footnote_amendments", "_relation_audit", "_sohieu_query_hits_entry"))))
+    # I9b ĐỔI LUẬT CÓ KIỂM SOÁT (grilling chiến-lược-chặng-cuối): engine-stays-in-tl → engine-CANONICAL
+    # ở tl_core/resolve.py — vẫn khoá 1-định-nghĩa-duy-nhất: def THẬT ở resolve, tl chỉ stub _tl_resolve.
+    import tl_core.resolve as _rs76
+    _eng76 = ("_source_map_one", "_dedup_status", "_classify_ref",
+              "resolve_footnote_amendments", "_relation_audit", "_sohieu_query_hits_entry")
+    _rs_src76 = _ins69.getsource(_rs76)
+    cases.append(("r76_engine_canonical_in_resolve",
+                  all((f"def {n}(" in _rs_src76 and f"_tl_resolve.{n}" in _ins69.getsource(_g76[n])
+                       and _tl_src76.count(f"def {n}(") == 1)
+                      for n in _eng76) and _rs76._TL is not None))
     # ═══ v1.34.10 (I7) — r77a: PARSER-SURFACE SNAPSHOT — khoá byte-level bề mặt CLI trước khi chuyển
     # build_parser → GENERATED_SPECS. Per-command (KHÔNG phụ thuộc THỨ TỰ add_parser — register_generated gom
     # lệnh về 1 điểm); mỗi action giữ ĐỦ opts/dest/nargs/const/default/type/choices/required/help/metavar/kind
@@ -5902,6 +5907,29 @@ def run() -> int:
     finally:
         for _k, _v in _sav80.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.14 — r80_*: I9b parity resolve + regio + mirror drift-lock ═══
+    import tl_core.resolve as _rv80
+    import tl_core.regio as _rg80
+    _rv_names80 = ["_source_map_one", "_dedup_status", "_classify_ref", "resolve_footnote_amendments",
+                   "_relation_audit", "_sohieu_query_hits_entry", "_qt5_search_hints",
+                   "_discovery_links", "_resolve_deep_target", "_aggregate_verdict"]
+    _rg_names80 = ["_manifest_entries", "_journaled_reg_write", "_verified_reg_write", "_verified_reg_upsert",
+                   "_apply_gate", "_apply_precheck", "_reg_before_from_manifest", "_journal_append",
+                   "_apply_journal_start", "_invalidate_manifest_cache", "norm_sohieu", "_entry_drive_id",
+                   "_entry_sohieu", "_cache_file", "_load_linhvuc"]
+    _g80 = globals()
+    cases.append(("r80_resolve_regio_wired",
+                  all(callable(getattr(_rv80, n, None)) for n in _rv_names80)
+                  and all(callable(getattr(_rg80, n, None)) for n in _rg_names80)
+                  and all(f"_tl_resolve.{n}" in _ins69.getsource(_g80[n]) for n in _rv_names80)
+                  and all(f"_tl_regio.{n}" in _ins69.getsource(_g80[n]) for n in _rg_names80)
+                  and _rv80._TL is not None and _rg80._TL is not None))
+    _tl_src80 = Path(_ins69.getsourcefile(_g80["build_parser"])).read_text(encoding="utf-8", errors="replace")
+    cases.append(("r80_no_dual_definition",
+                  all(_tl_src80.count(f"def {n}(") == 1 for n in _rv_names80 + _rg_names80)))
+    # mirror (bẫy I2): sites=_DISCOVERY_SITES eval trước bind + cache module-level _LINHVUC_CACHE sống ở tl
+    cases.append(("r80_discovery_sites_mirror", _rv80._DISCOVERY_SITES == _TL_MODULE._DISCOVERY_SITES))
+    cases.append(("r80_linhvuc_cache_lives_in_tl", hasattr(_TL_MODULE, "_LINHVUC_CACHE")))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
     with _tf65.TemporaryDirectory() as _d65:

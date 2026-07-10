@@ -452,7 +452,8 @@ def _skill_package_integrity(root: str | os.PathLike | None = None) -> dict:
             "tl_core/ingest_ops.py",
             "tl_core/lookup_ops.py",
             "tl_core/ops_misc.py",
-            "tl_core/classify.py", "tl_core/profile_env.py"]   # I1..I9a
+            "tl_core/classify.py", "tl_core/profile_env.py",
+            "tl_core/resolve.py", "tl_core/regio.py"]   # I1..I9b
     optional = ["backfill_keywords_live.py", "backfill_nlm_title.py", "registry_orchestrator.py",
                 "tra_cuu.py", "vb_status.py", "vbhn_query.py"]
     rows, bad = [], []

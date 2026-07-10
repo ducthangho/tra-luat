@@ -6330,7 +6330,8 @@ def run() -> int:
                 "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
                 "profiles": {"vbqppl": {"rootFolderId": "r1"},
                              "beta": dict(_mk_beta_cfg),
-                             "gamma": {"rootFolderId": "FC", "notebookId": "nbC"}}}, ensure_ascii=False),
+                             "gamma": {"rootFolderId": "FC", "notebookId": "nbC"},
+                             "vbt_self": {"rootFolderId": "VBT", "notebookId": "nbVBT"}}}, ensure_ascii=False),
                 encoding="utf-8")
             _tree86 = {
                 "VBT": [{"id": "FA", "name": "Du an A", "type": "folder"},
@@ -6375,7 +6376,9 @@ def run() -> int:
                           and _by86.get("beta", {}).get("status") == "drift"
                           and [d["field"] for d in _by86.get("beta", {}).get("diffs", [])] == ["notebookId"]
                           and _by86.get("gamma", {}).get("status") == "marker_missing"
-                          and _by86.get("vbqppl", {}).get("status") == "refused_base"))
+                          and _by86.get("vbqppl", {}).get("status") == "refused_base"
+                          # v1.34.23 (live-smoke bắt): profile root == chính VBT (vbthuong) KHÔNG bị báo orphaned oan
+                          and "vbt_self" not in _by86))
             # APPLY: config được cập nhật theo marker (một chiều) — KHÔNG ghi marker nào
             _b86b = _io27.StringIO()
             with _ctx27.redirect_stdout(_b86b), _ctx27.redirect_stderr(_io27.StringIO()):
@@ -6397,7 +6400,9 @@ def run() -> int:
             _byc = {r.get("profile"): r for r in _o86c.get("rows", [])}
             cases.append(("r86_backfill_dry_plan",
                           _rc86c == 0 and _byc.get("gamma", {}).get("status") == "planned"
-                          and _byc.get("beta", {}).get("status") == "has_marker" and not _g86.uploads))
+                          and _byc.get("beta", {}).get("status") == "has_marker" and not _g86.uploads
+                          # v1.34.23: root == VBT gốc → skip (marker ở _meta của VBT sẽ nhiễu discover)
+                          and _byc.get("vbt_self", {}).get("status") == "skipped_vbt_root"))
             _b86d = _io27.StringIO()
             with _ctx27.redirect_stdout(_b86d), _ctx27.redirect_stderr(_io27.StringIO()):
                 _rc86d = _TL_MODULE.cmd_profile_backfill_markers(_mkns86(apply=True))

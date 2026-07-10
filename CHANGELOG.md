@@ -1,3 +1,14 @@
+# ★ v1.34.23 — vá live-smoke P1: guard vbt_id + backfill marker THẬT cho Luật BHXH/NQ80 (2026-07-10)
+
+- Live-smoke `profile-sync` DRY trên Drive thật (13 folder) bắt ngay 1 bug: `vbthuong` (profile đặc biệt
+  root == CHÍNH Van_ban_thuong) bị báo `orphaned` OAN — `_profile_sync_rows` thiếu guard `vbt_id` mà
+  `_discover_classify` có. Vá: +tham số `vbt_id`; backfill thêm `skipped_vbt_root` (không đặt marker vào
+  `_meta` của VBT gốc — sẽ nhiễu discover; vbthuong định danh qua config, xử lý ở P2). TDD: r86 mở rộng
+  2 assert viết trước → **752/752**.
+- **DATA-OPS THẬT (hoàn tất rollout P1)**: `profile-backfill-markers --apply` LIVE — marker `Luật BHXH`
+  (1dLahha4…) + `NQ80` (12HV4iCF…) written + readback verified, journaled; chạy lại `profile-sync` →
+  **in_sync ×2, rc=0**. Vòng marker→sync→config khép kín trên hạ tầng thật.
+
 # ★ v1.34.22 — PROFILE P1 (ADR-0003): marker là nguồn sự thật + profile-sync/backfill + discover marker-first (2026-07-10)
 
 - Thực thi Phase 1 lộ trình profile (grilling 2026-07-10 + hợp nhất nhánh song song): **marker

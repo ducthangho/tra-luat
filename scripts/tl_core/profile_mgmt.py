@@ -1229,10 +1229,11 @@ def _config_candidates_report(config_path: str | None = None) -> dict:
     return out
 
 
-def _profile_sync_rows(folders: list, profiles: dict) -> list:
+def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
     """PURE (ADR-0003): từ scan Van_ban_thuong (folders kèm marker) + config.profiles → dòng trạng thái
     sync MỘT CHIỀU marker→config: in_sync / drift{diffs} / new_from_marker{block} / marker_missing /
-    broken_marker / refused_base (marker tự nhận vbqppl) / root_conflict / orphaned (config có, scan không thấy)."""
+    broken_marker / refused_base (marker tự nhận vbqppl) / root_conflict / orphaned (config có, scan không thấy).
+    v1.34.23 (live-smoke bắt): profile có root == chính vbt_id (vbthuong) KHÔNG bị báo orphaned oan."""
     profiles = profiles or {}
     by_root = {str((p or {}).get("rootFolderId") or "").strip(): n
                for n, p in profiles.items() if str((p or {}).get("rootFolderId") or "").strip()}
@@ -1284,7 +1285,7 @@ def _profile_sync_rows(folders: list, profiles: dict) -> list:
         if n == DEFAULT_PROFILE or n in seen:
             continue
         rid = str((profiles.get(n) or {}).get("rootFolderId") or "").strip()
-        if rid and rid not in folder_ids:
+        if rid and rid != str(vbt_id or "") and rid not in folder_ids:
             rows.append({"profile": n, "folder_id": rid, "status": "orphaned",
                          "note": "config có profile nhưng scan Van_ban_thuong không thấy folder (root ngoài VBT/"
                                  "trash/cap?) — kiểm bằng profile-list --discover --folder-cap lớn hơn."})
@@ -1323,7 +1324,7 @@ def _cmd_profile_sync_impl(a) -> int:
     except Exception as e:  # noqa: BLE001
         print(json.dumps({"ok": False, "error": f"SYNC_SCAN_FAILED: {e}"}, ensure_ascii=False), file=sys.stderr)
         return 2
-    rows = _profile_sync_rows(scan.get("folders") or [], profs)
+    rows = _profile_sync_rows(scan.get("folders") or [], profs, vbt_id=str(vbt_id))
     if target:
         rows = [r for r in rows if str(r.get("profile") or "") == target]
     actionable = [r for r in rows if r.get("status") in ("new_from_marker", "drift")]
@@ -1391,6 +1392,10 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
         print(f"[tl] profile-backfill-markers cần webapp LIVE: {e}", file=sys.stderr)
         return 2
     g = _gas()
+    try:    # v1.34.23 (live-smoke bắt): cần vbt_id để KHÔNG đặt marker vào _meta của chính Van_ban_thuong
+        _vbt = str((g.get("bootstrap") or {}).get("vanBanThuongId") or "")
+    except Exception:  # noqa: BLE001
+        _vbt = ""
     rows, plans = [], []
     for n in names:
         if n == DEFAULT_PROFILE:
@@ -1400,6 +1405,11 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
         if not root:
             rows.append({"profile": n, "status": "no_root",
                          "note": "profile thiếu rootFolderId trong config — sửa config/adopt trước."})
+            continue
+        if _vbt and root == _vbt:
+            rows.append({"profile": n, "status": "skipped_vbt_root",
+                         "note": "root là CHÍNH Van_ban_thuong (vbthuong) — marker đặt ở _meta của VBT gốc "
+                                 "sẽ nhiễu discover; profile đặc biệt này định danh qua config (xử lý ở P2)."})
             continue
         mr = _marker_read(g, root, meta_id=str(prof.get("metaFolderId") or "") or None)
         if mr.get("error"):

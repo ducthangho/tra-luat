@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2j",
   "root_name": "tra-luat",
   "file_count": 154,
-  "total_bytes": 4332571,
-  "package_hash": "487e0b7c4c983f57c146dcb8e506f7485716660517665065d62827cbc3e3e02c",
+  "total_bytes": 4332888,
+  "package_hash": "15e0d29c152d8d64a3a596ff9b7a2bfc84674958e7e850a8ca0257bc5c2a6b06",
   "required_missing": [],
   "files": [
     {
@@ -292,13 +292,13 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 45242,
-      "sha256": "86e49769c4bb61e7e8138e7186eb80d7052a37ca32a37e34f0d382a0b5d35322"
+      "size": 45559,
+      "sha256": "567c86024a7860367a8b63fd925bf7e16af11f119e61f0d21308a0be15f45827"
     },
     {
       "path": "references/golden/workflow_audit.json",
       "size": 26729,
-      "sha256": "caaf768aee4356939c6636c9c2822c37be4f664e39c52ccb17fe4757c597aed7"
+      "sha256": "66a32aa81f79f33f431050b1936e5623cbd19e4cdc42304f583b20664a973132"
     },
     {
       "path": "references/linhvuc_phapdien.json",

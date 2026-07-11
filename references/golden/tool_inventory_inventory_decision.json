@@ -23,6 +23,7 @@
     "convert-verify",
     "corpus-audit",
     "corpus-fix",
+    "corpus-relation-sweep",
     "counts",
     "cowork-plan",
     "dedup-check",
@@ -430,6 +431,16 @@
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "registry"
+      },
+      "corpus-relation-sweep": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
       },
       "counts": {
         "generated": true,
@@ -1603,9 +1614,9 @@
       }
     },
     "counts": {
-      "generated_parsers": 132,
+      "generated_parsers": 133,
       "high_risk": 22,
-      "total": 138,
+      "total": 139,
       "write_commands": 71
     },
     "schema": "command_registry.v1"

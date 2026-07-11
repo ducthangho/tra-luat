@@ -1,3 +1,26 @@
+# ★ v1.34.32 — VBHN-FIRST TẤT ĐỊNH cho corpus-relation-sweep (2026-07-11)
+
+> User bắt lỗi doctrine trên kết quả sweep v1.34.31: đề xuất đi lấy Luật GỐC (77-2006 TDTT, 21-2017 Quy hoạch,
+> 16-2012 Quảng cáo, 75-2015 MTTQ) trong khi **VBHN đã có trong corpus phủ trọn chuỗi** — trái nguyên tắc §0.1
+> VBHN-first (4/7 đề xuất sai). Kèm 46% vbhn false-positive (VBHN Thư viện gán cho Luật Thủ đô/Viễn thông…)
+> do matcher fuzzy subject của relation-check khi sweep không có `--subject` tường minh.
+
+- **(1) `_vbhn_goc_map` (PURE)** — map `norm_sohieu(gốc/luật-sửa) → [VBHN corpus SẠCH phủ]` từ 3 nguồn TẤT ĐỊNH
+  trên registry: field `goc` (';'-cách) + `sua_doi` dạng 'Hợp nhất từ: a, b' + pattern tên `goc_<sohieu>`
+  (phủ 67/72 VBHN corpus; VBHN quarantine/non-corpus bị loại). KHÔNG fuzzy.
+- **(2) `covered_by_vbhn`** — amendment thiếu-corpus NHƯNG chuỗi đã có VBHN phủ → xếp `covered_by_vbhn` (kèm số
+  VBHN), KHÔNG vào `sources_to_add`. Đúng VBHN-first: có VBHN thì không đi lấy bản gốc/sửa-đổi rời.
+- **(3) `vbhn_broken` goc-tie** — CHỈ giữ VBHN ứng viên hỏng khi goc của nó GIAO chuỗi `{base ∪ mọi luật-sửa
+  inline}` (tra `goc` theo drive_id + pattern tên); không tie → drop (`vbhn_dropped_no_tie` đếm). Diệt trọn lớp
+  VBHN-Thư-viện→Luật-Thủ-đô.
+- **(4) `vbhn_first_self`** — chính base nằm trong chuỗi hợp nhất của VBHN corpus → advisory bản-rời-redundant
+  (đúng chiều thứ hai của VBHN-first: giữ VBHN, bản gốc/sửa-đổi rời cân nhắc loại; chỉ báo, không tự xoá).
+- Verify LIVE ca 26-2018 (sửa TDTT): `77-2006 → covered_by_vbhn [64-2025-VBHN-VPQH]`, `vbhn_first_self=[64-2025]`,
+  0 sources_to_add (trước: đề xuất sai đi lấy 77-2006). r94 ×3 + r93 asserts đổi có chủ đích → **807/807**.
+- KHÔNG bump GAS, KHÔNG đổi kernel doctrine (§0.1 vốn đã ghi VBHN-first — đây là vá TRIỂN KHAI cho đúng doctrine).
+
+---
+
 # ★ v1.34.31 — RÀ CORPUS VBQPPL: mở rộng suy loại + tool corpus-relation-sweep (2026-07-11)
 
 > Sinh từ phiên `grill-with-docs` rà toàn bộ Luật/NQ corpus (749 dòng · 471 corpus · 33 Luật + 44 NQ + 72 VBHN).

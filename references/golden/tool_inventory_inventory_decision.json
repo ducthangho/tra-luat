@@ -118,6 +118,7 @@
     "profile-promote",
     "profile-rebuild-registry",
     "profile-rename",
+    "profile-set-meta",
     "profile-sync",
     "profile-use",
     "push-overflow",
@@ -1180,6 +1181,16 @@
         "workflow_task": null,
         "write_scope": "drive_local"
       },
+      "profile-set-meta": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_local"
+      },
       "profile-sync": {
         "generated": true,
         "idempotency_contract": null,
@@ -1592,10 +1603,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 131,
+      "generated_parsers": 132,
       "high_risk": 22,
-      "total": 137,
-      "write_commands": 70
+      "total": 138,
+      "write_commands": 71
     },
     "schema": "command_registry.v1"
   },

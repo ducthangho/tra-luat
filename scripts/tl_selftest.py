@@ -6841,6 +6841,80 @@ def run() -> int:
                   getattr(_ns89p, "notebook", None) == "nb"
                   and getattr(_ns89q, "limit", None) == 5 and getattr(_ns89q, "retry_blocked", False) is True
                   and getattr(_ns89r, "deep", False) is True))
+    # ═══ v1.34.29 — r91: profile-set-meta — cửa ghi CHÍNH THỨC phần mô tả trên marker (ADR-0003) ═══
+    _sav91 = {k: getattr(_TL_MODULE, k) for k in _keys86}
+    try:
+        with _tf86.TemporaryDirectory() as _d91:
+            _cfg91 = str(Path(_d91) / "tra_luat_config.v2.json")
+            Path(_cfg91).write_text(json.dumps({
+                "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"rootFolderId": "r1"},
+                             "beta": dict(_mk_beta_cfg),
+                             "gamma": {"rootFolderId": "FC", "notebookId": "nbC"}}}, ensure_ascii=False),
+                encoding="utf-8")
+            _old91 = {**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "description": "mô tả cũ"}
+            _g91 = _FkG88({"FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
+                           "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}],
+                           "FC": [{"id": "doc1", "name": "x.gdoc", "type": "file"}]},
+                          {"mkB": json.dumps(_old91, ensure_ascii=False)})
+            _TL_MODULE._gas = lambda: _g91
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run91"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            def _sm91(**kw):
+                base = dict(config=_cfg91, profile=None, target_profile="beta", description=None,
+                            style=None, see_also=None, source_policy=None, apply=False, json=True)
+                base.update(kw)
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _TL_MODULE.cmd_profile_set_meta(argparse.Namespace(**base))
+                try:
+                    return _rc, json.loads(_b.getvalue())
+                except Exception:
+                    return _rc, {}
+            # (1) guards: không field nào → rc2; profile lạ → rc2; profile CHƯA có marker → rc2 gợi ý backfill
+            _rc91a, _ = _sm91()
+            _rc91b, _ = _sm91(target_profile="ghost")
+            _rc91c, _o91c = _sm91(target_profile="gamma", description="x")
+            cases.append(("r91_set_meta_guards",
+                          _rc91a == 2 and _rc91b == 2 and _rc91c == 2 and not _g91.uploads))
+            # (2) DRY: plan changes old→new, KHÔNG ghi
+            _rc91d, _o91d = _sm91(description="Hồ sơ chỉ đạo điều hành", style="Văn phong nội bộ chặt.")
+            cases.append(("r91_set_meta_dry_plan",
+                          _rc91d == 0 and _o91d.get("mode") == "DRY"
+                          and (_o91d.get("changes") or {}).get("description", {}).get("old") == "mô tả cũ"
+                          and (_o91d.get("changes") or {}).get("style", {}).get("new") == "Văn phong nội bộ chặt."
+                          and not _g91.uploads))
+            # (3) APPLY: marker MỚI mang mô tả mới + GIỮ identity/created_at; trash bản cũ; readback verified
+            _rc91e, _o91e = _sm91(description="Hồ sơ chỉ đạo điều hành", style="Văn phong nội bộ chặt.",
+                                  see_also="Luật BHXH, NQ80", apply=True)
+            _new91 = json.loads(_g91.files[_g91.uploads[-1][2]]) if _g91.uploads else {}
+            cases.append(("r91_set_meta_apply_marker_write",
+                          _rc91e == 0 and (_o91e.get("marker") or {}).get("verified") is True
+                          and _new91.get("description") == "Hồ sơ chỉ đạo điều hành"
+                          and _new91.get("style") == "Văn phong nội bộ chặt."
+                          and (_new91.get("relations") or {}).get("see_also") == ["Luật BHXH", "NQ80"]
+                          and (_new91.get("relations") or {}).get("base") == "vbqppl"
+                          and _new91.get("rootFolderId") == "FB"
+                          and _new91.get("created_at") == _old91.get("created_at")
+                          and "mkB" in _g91.trashed))
+            # (4) xoá field bằng chuỗi rỗng (marker mới vẫn đọc được, description="")
+            _g91.tree["FBm"] = [{"id": _g91.uploads[-1][2], "name": _MK, "mime": "application/json", "type": "file"}]
+            _rc91f, _ = _sm91(description="", apply=True)
+            _new91f = json.loads(_g91.files[_g91.uploads[-1][2]])
+            cases.append(("r91_set_meta_clear_with_empty",
+                          _rc91f == 0 and _new91f.get("description") == ""
+                          and _new91f.get("style") == "Văn phong nội bộ chặt."))
+    finally:
+        for _k, _v in _sav91.items():
+            setattr(_TL_MODULE, _k, _v)
+    _ns91 = build_parser().parse_args(["profile-set-meta", "--profile-name", "beta",
+                                       "--description", "d", "--style", "s",
+                                       "--see-also", "a,b", "--source-policy", "materialize_preferred", "--apply"])
+    cases.append(("r91_parser_profile_set_meta",
+                  getattr(_ns91, "target_profile", None) == "beta" and getattr(_ns91, "see_also", None) == "a,b"
+                  and getattr(_ns91, "source_policy", None) == "materialize_preferred"))
     # ═══ v1.34.27 — r90: vá 7 lỗi thực-chiến profile-ingest (log phiên tạo profile + nạp 4 file, 2026-07-11) ═══
     # (1) DRIFT-LOCK GENERIC cho bẫy bind/rebase (I11 lặp lần 3 — _nlm_add_doc_type NameError): mọi tên
     #     TOP-LEVEL của một module tl_core được function TRONG CHÍNH module đó tham chiếu PHẢI resolve được

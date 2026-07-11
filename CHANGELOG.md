@@ -1,3 +1,15 @@
+# ★ v1.34.29 — `profile-set-meta`: cửa ghi chính thức phần MÔ TẢ trên marker (2026-07-11)
+
+- Gap lộ ra khi `profile-load "Chỉ thị"`: marker do luồng tự động tạo không có description/style —
+  mà ADR-0003 định marker là NGUỒN SỰ THẬT phần mô tả nhưng CHƯA có lệnh nào ghi được các field đó
+  (backfill chỉ build từ config vốn không mang mô tả).
+- **`tl profile-set-meta [--profile-name <p>] --description/--style/--see-also/--source-policy`**:
+  DRY mặc định (plan changes old→new); `--apply` ghi marker journaled + readback + trash bản cũ;
+  identity lấy từ CHÍNH marker (không phải config); `created_at` giữ; XOÁ field = truyền chuỗi rỗng;
+  `see_also` tên lạ chỉ warning (relations là MÔ TẢ, không mở scope); marker thiếu/hỏng → chặn với
+  gợi ý backfill. KHÔNG đụng config (profile-sync một chiều không mang field mô tả).
+- TDD r91 ×6 viết trước → **784/784**; parser-surface + golden regen có chủ đích.
+
 # ★ v1.34.28 — vá bug máy-phụ-thuộc #5: r77a parser-surface lệch theo version Python (2026-07-11)
 
 - Phiên kiểm chứng zip 1.34.27 (Python 3.11) báo selftest 778/779 — `r77a_parser_surface_matches_snapshot`

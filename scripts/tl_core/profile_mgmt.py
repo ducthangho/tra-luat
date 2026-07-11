@@ -2287,6 +2287,112 @@ def _cmd_profile_materialize_sources_impl(a) -> int:
     return 0 if not failed else 1
 
 
+def cmd_profile_set_meta(a) -> int:
+    with _ProfileEnvGuard():
+        return _cmd_profile_set_meta_impl(a)
+
+
+def _cmd_profile_set_meta_impl(a) -> int:
+    """v1.34.29 (gap lộ ra khi profile-load 'Chỉ thị' thiếu mô tả/văn phong): CỬA GHI CHÍNH THỨC cho
+    phần metadata MÔ TẢ của profile trên MARKER — description / style / relations.see_also /
+    source_policy. ADR-0003: marker là nguồn sự thật phần mô tả, ghi CHỈ qua lệnh tl (journaled +
+    readback + trash bản cũ); KHÔNG đụng config (sync một chiều không mang field mô tả). DRY mặc định.
+    XOÁ field = truyền chuỗi rỗng. Marker chưa có → chặn (chạy profile-backfill-markers trước)."""
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    if not cfg:
+        print("[tl] Không thấy config; truyền --config.", file=sys.stderr)
+        return 2
+    profs = _profiles_from_config(cfg)
+    name0 = (getattr(a, "target_profile", None) or "").strip() or _active_profile()
+    if name0 == DEFAULT_PROFILE:
+        print("[tl] profile-set-meta chỉ dùng cho profile dự án (--profile-name <p>).", file=sys.stderr)
+        return 2
+    name, prof = _profile_lookup(profs, name0)
+    if not isinstance(prof, dict):
+        print(json.dumps({"ok": False, "error": "PROFILE_NOT_FOUND", "profile": name0,
+                          "known": sorted(profs)}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    desc = getattr(a, "description", None)
+    style = getattr(a, "style", None)
+    see_also = getattr(a, "see_also", None)
+    policy = getattr(a, "source_policy", None)
+    if desc is None and style is None and see_also is None and policy is None:
+        print("[tl] cần ít nhất một --description/--style/--see-also/--source-policy "
+              "(xoá field = truyền chuỗi rỗng).", file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
+    except SystemExit as e:
+        print(f"[tl] profile-set-meta cần webapp LIVE (marker trên Drive): {e}", file=sys.stderr)
+        return 2
+    g = _gas()
+    mr = _marker_read(g, str(prof.get("rootFolderId") or ""),
+                      meta_id=str(prof.get("metaFolderId") or "") or None)
+    if mr.get("error"):
+        print(json.dumps({"ok": False, "error": mr["error"]}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    if not mr.get("found"):
+        print(json.dumps({"ok": False, "error": "MARKER_MISSING", "profile": name,
+                          "note": "profile chưa có _meta/tra_luat_profile.json — chạy "
+                                  "`tl profile-backfill-markers --apply` TRƯỚC rồi set-meta."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    old = mr.get("marker") or {}
+    _mok, _merrs = _marker_validate(old)
+    if not _mok:
+        print(json.dumps({"ok": False, "error": "MARKER_INVALID", "detail": _merrs,
+                          "note": "tái tạo marker: profile-backfill-markers --force rồi set-meta."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    old_rel = old.get("relations") if isinstance(old.get("relations"), dict) else {}
+    changes, warnings = {}, []
+    if desc is not None and str(desc) != str(old.get("description") or ""):
+        changes["description"] = {"old": str(old.get("description") or ""), "new": str(desc)}
+    if style is not None and str(style) != str(old.get("style") or ""):
+        changes["style"] = {"old": str(old.get("style") or ""), "new": str(style)}
+    new_see = None
+    if see_also is not None:
+        new_see = [x.strip() for x in str(see_also).split(",") if x.strip()]
+        cur_see = [str(x) for x in (old_rel.get("see_also") or [])]
+        if new_see != cur_see:
+            changes["see_also"] = {"old": cur_see, "new": new_see}
+        for _sa in new_see:   # relations chỉ MÔ TẢ — tên lạ không chặn, chỉ nhắc
+            if _profile_lookup(profs, _sa)[1] is None:
+                warnings.append(f"see_also '{_sa}' không có trong config máy này (có thể ở máy khác — chỉ mô tả).")
+    if policy is not None and str(policy) != str(old.get("source_policy") or ""):
+        changes["source_policy"] = {"old": str(old.get("source_policy") or ""), "new": str(policy)}
+    out = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
+           "profile": name, "marker_fileId": mr.get("fileId"), "changes": changes, "warnings": warnings}
+    if not changes:
+        out["note"] = "không có gì đổi — giá trị đã như vậy."
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0
+    if not getattr(a, "apply", False):
+        out["note"] = "DRY — --apply ghi marker (upload mới + readback + trash bản cũ, journaled)."
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0
+    rid = _apply_journal_start("profile-set-meta", {"profile": name, "fields": sorted(changes)})
+    existing = dict(old)
+    if desc is not None:
+        existing["description"] = str(desc)
+    if style is not None:
+        existing["style"] = str(style)
+    if new_see is not None:
+        existing["relations"] = {**old_rel, "see_also": new_see}
+    if policy is not None:
+        existing["source_policy"] = str(policy)
+    _identity = {k: old.get(k) for k in _MARKER_IDENTITY_KEYS}   # identity từ MARKER (nguồn sự thật)
+    body = _marker_body(name, _identity, existing=existing)
+    w = _marker_write(g, mr.get("meta_folder_id") or str(prof.get("metaFolderId") or ""),
+                      body, old_id=mr.get("fileId") or "", run_id=rid)
+    out.update({"ok": bool(w.get("verified")), "journal": rid,
+                "marker": {"fileId": w.get("fileId"), "verified": w.get("verified"),
+                           "trashed_old": w.get("trashed_old")},
+                "next_steps": [f"tl profile-load {name}   (block phiên sẽ mang mô tả/văn phong mới)"]})
+    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if out["ok"] else sys.stderr)
+    return 0 if out["ok"] else 1
+
+
 def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
     """B: quét Van_ban_thuong 2 cấp read-only qua GAS `list` — con trực tiếp + trong `_meta` của từng thư mục con
     (registry/manifest kiểu mới nằm trong _meta, kiểu cũ nằm thẳng trong folder). Cap thư mục quét, LOUD khi cắt.

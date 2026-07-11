@@ -2024,17 +2024,27 @@ def cmd_ingest_local(a) -> int:
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
         if not src:
-            _step("nlm_source_add", gdoc, notebook=target, title=name[:120])
-            add = nc.source_add(target, drive_id=gdoc, doc_type="doc", wait=True)
-            _step_ok("nlm_source_add", gdoc, add.get("ok"), source_id=add.get("source_id"))
+            # v1.34.33 (#2 benchmark 2026-07-12): settle-wait chiếm ~50% tổng 238s/file — `--nlm-no-wait` bỏ chờ
+            # settle (source_id có NGAY từ add-response → reg_link phía dưới vẫn ghi ĐỦ; settle chạy ngầm phía NLM).
+            _no_wait = bool(getattr(a, "nlm_no_wait", False))
+            _step("nlm_source_add", gdoc, notebook=target, title=name[:120], wait=(not _no_wait))
+            add = nc.source_add(target, drive_id=gdoc, doc_type="doc", wait=(not _no_wait))
+            _step_ok("nlm_source_add", gdoc, add.get("ok"), source_id=add.get("source_id"), wait=(not _no_wait))
             if not add.get("ok"):
                 print(json.dumps({"ok": False, "step": "nlm_add(cli)", "journal": run_id, "gdoc": gdoc, "target": target, "detail": add,
                                   "note": "Drive+register XONG; chỉ NLM add lỗi → chạy lại CÙNG LỆNH + --resume, hoặc `tl nlm-add`."}, ensure_ascii=False, indent=2), file=sys.stderr)
                 return 2
             src = add.get("source_id")
-            _dup_after = _nlm_post_add_dup_check(nc, target, gdoc, src)   # N1 v1.33.41: bắt trùng-sau-add tại chỗ
-            if _dup_after:
-                print(json.dumps(_dup_after, ensure_ascii=False, indent=2), file=sys.stderr)
+            if _no_wait:
+                # Post-add dup-check cần source_list — nguồn CHƯA settle có thể chưa liệt kê → âm tính giả + tốn
+                # thêm ~18s (trái mục đích no-wait). BỎ QUA có chủ đích; lưới sau = `tl nlm-reconcile` cuối lô.
+                print("[tl] --nlm-no-wait: bỏ chờ settle + bỏ post-add dup-check — nạp lô xong chạy "
+                      "`tl nlm-reconcile` xác nhận settle/link; truy vấn NLM nội dung này cần chờ vài phút.",
+                      file=sys.stderr, flush=True)
+            else:
+                _dup_after = _nlm_post_add_dup_check(nc, target, gdoc, src)   # N1 v1.33.41: bắt trùng-sau-add tại chỗ
+                if _dup_after:
+                    print(json.dumps(_dup_after, ensure_ascii=False, indent=2), file=sys.stderr)
     # v1.29.7 (log NĐ131 #6): trước đây `target != NLM_BASE_NOTEBOOK → overflow` — SAI cho profile own (notebook
     # profile ≠ base VBQPPL toàn cục → mọi tài liệu profile bị gán overflow dù preflight nói 'không overflow → base').
     # ĐÚNG: overflow CHỈ khi target == overflow-shard ĐÃ CẤU HÌNH của profile đang chạy; còn lại (base VBQPPL hoặc
@@ -2057,6 +2067,8 @@ def cmd_ingest_local(a) -> int:
            "cat_ten": (official or {}).get("ten"), "folder_created": need_mkdir, "preflight": pf,
            "target_notebook": target, "row_kind": rk, "nlm_source_id": src, "reg_pushed": rb.get("patched"),
            "reg_verified": bool(v.get("verified")), "via": "nlm-cli",
+           **({"nlm_settle": "not_waited", "next_step": "tl nlm-reconcile (cuối lô) — xác nhận nguồn settle + link đủ"}
+              if getattr(a, "nlm_no_wait", False) else {}),
            "sidecar": "src_id=docx gắn vào dòng GDoc (register atomic; regen2 cũng tự ghép cặp cùng base-name)"}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0

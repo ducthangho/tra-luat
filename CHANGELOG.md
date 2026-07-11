@@ -1,3 +1,21 @@
+# ★ v1.34.33 — `ingest-local --nlm-no-wait`: nạp lô nhanh −55% (2026-07-12)
+
+> Benchmark từ 3 lần nạp thật + micro-bench từng op (`D:\Quốc hội\benchmark-ingest-2026-07-12.md`):
+> ingest-local **~238s/file HẰNG SỐ bất kể size** (24-61KB). Cổ chai = **NLM 71%** (settle-wait sau
+> `source_add` ~115-125s = 50%; mỗi NLM CLI call 11-18s = spawn 2s + batchexecute API 10-16s vốn có),
+> GAS chỉ 19% (upload 24KB = 2.6s — không phải nút). `ingest-zip` không amortize (spawn child per-file).
+
+- **`--nlm-no-wait`**: bỏ chờ nguồn settle sau `nlm source add` — `source_id` có NGAY từ add-response nên
+  bước reg_link vẫn ghi ĐỦ (nlm_* + corpus=true); settle chạy ngầm phía NLM. Post-add dup-check BỎ khi
+  no-wait (nguồn chưa settle → source_list âm tính giả + tốn thêm ~18s). Output thêm `nlm_settle=not_waited`
+  + `next_step` nlm-reconcile. Ước **−55%: 238s → ~90-120s/file**.
+- **Công thức nạp LÔ** (ghi COMMANDS.md): `--nlm-no-wait --skip-nlm-preflight --skip-live-check` (2 cờ sau
+  CÓ SẴN, an toàn khi đã dedup trước bằng reg-query) + chạy 2-3 file song song → **~35-50s/file wall**;
+  **cuối lô PHẢI `tl nlm-reconcile`** xác nhận settle + link đủ; truy vấn NLM nội dung vừa nạp cần chờ vài phút.
+- r95 ×3 (parser + shape-lock khuôn r55 + PURE `_add_args` bỏ `--wait`) → **810/810**. KHÔNG bump GAS, KHÔNG đổi kernel.
+
+---
+
 # ★ v1.34.32 — VBHN-FIRST TẤT ĐỊNH cho corpus-relation-sweep (2026-07-11)
 
 > User bắt lỗi doctrine trên kết quả sweep v1.34.31: đề xuất đi lấy Luật GỐC (77-2006 TDTT, 21-2017 Quy hoạch,

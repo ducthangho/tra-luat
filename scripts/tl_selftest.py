@@ -7556,6 +7556,30 @@ def run() -> int:
     finally:
         for _k, _v in _sav94.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.33 — r95: ingest-local --nlm-no-wait (benchmark 2026-07-12: settle-wait = ~50% của 238s/file) ═══
+    # (1) parser: cờ mới, mặc định False
+    _ns95 = build_parser().parse_args(["ingest-local", "f.docx", "--apply", "--nlm-no-wait"])
+    _ns95b = build_parser().parse_args(["ingest-local", "f.docx", "--apply"])
+    cases.append(("r95_parser_nlm_no_wait",
+                  getattr(_ns95, "nlm_no_wait", False) is True
+                  and getattr(_ns95b, "nlm_no_wait", True) is False))
+    # (2) shape-lock (khuôn r55 — hàm quá nhiều dependency để mock full): wait truyền theo cờ (KHÔNG hardcode
+    # True) + post-add dup-check CHỈ ở nhánh có-wait + output/next_step nêu nlm-reconcile khi no-wait.
+    import inspect as _ins95
+    import tl_core.ingest_ops as _io95
+    _src95 = _ins95.getsource(_io95.cmd_ingest_local)
+    cases.append(("r95_ingest_local_no_wait_shape",
+                  "wait=(not _no_wait)" in _src95
+                  and "wait=True" not in _src95                       # hết hardcode chờ settle
+                  and "if _no_wait:" in _src95
+                  and "_nlm_post_add_dup_check" in _src95.split("if _no_wait:")[1]   # dup-check nằm SAU nhánh rẽ (else)
+                  and "nlm_settle" in _src95 and "nlm-reconcile" in _src95))
+    # (3) PURE: nlm_cli._add_args bỏ --wait khi wait=False (đường CLI thật sự không chờ)
+    _nc95 = _imp("nlm_cli")
+    _aw = _nc95._add_args("nb95", drive_id="d95", wait=True)
+    _anw = _nc95._add_args("nb95", drive_id="d95", wait=False)
+    cases.append(("r95_add_args_wait_flag",
+                  "--wait" in _aw and "--wait" not in _anw and "--wait-timeout" not in _anw))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

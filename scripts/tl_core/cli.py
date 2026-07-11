@@ -286,6 +286,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.29.7) BỎ kiểm NLM sẵn-sàng trước upload (mặc định DỪNG sớm nếu NLM chưa cài/auth — tránh chuỗi dở dang)")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
+    # v1.34.33 (benchmark 2026-07-12: settle-wait = ~50% của 238s/file): KHÔNG chờ nguồn settle sau `nlm source add`
+    # — source_id có NGAY từ response nên reg_link vẫn ghi đủ; settle diễn ra ngầm phía NLM. Post-add dup-check bị
+    # BỎ QUA khi no-wait (nguồn có thể chưa liệt kê được — check sẽ âm tính giả). Nạp LÔ xong chạy `tl nlm-reconcile`
+    # xác nhận settle + link đủ. Truy vấn NLM ngay sau nạp no-wait có thể CHƯA thấy nội dung (chờ vài phút).
+    p.add_argument("--nlm-no-wait", dest="nlm_no_wait", action="store_true",
+                   help="(v1.34.33) KHÔNG chờ nguồn NLM settle sau add (−~50% thời gian; source_id vẫn ghi registry đủ; bỏ post-add dup-check; nạp lô xong chạy `tl nlm-reconcile`)")
     p.set_defaults(fn=cmd_ingest_local)
 
 

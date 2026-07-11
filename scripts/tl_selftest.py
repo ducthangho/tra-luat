@@ -7398,6 +7398,88 @@ def run() -> int:
     finally:
         for _k, _v in _savMD.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.31 — r93: rà corpus VBQPPL — mở rộng _infer_loai (điều ước/Đảng) + #T1 corpus-relation-sweep ═══
+    _il93 = _TL_MODULE._infer_loai
+    cases.append(("r93_infer_loai_treaty_dang",
+                  _il93("CU_ILO-105_x", "") == "Công ước"
+                  and _il93("CPTPP_Ch19", "") == "Điều ước quốc tế"
+                  and _il93("EVFTA_Ch13", "") == "Điều ước quốc tế"
+                  and _il93("KL_51-2019-KL-TW", "") == "Kết luận"
+                  and _il93("CT_10-2011-CT-TW", "") == "Chỉ thị"
+                  and _il93("HD_05-HD-VPTW", "") == "Hướng dẫn"
+                  and _il93("VK_DH_XIV_Bao_cao", "") == ""      # dị thể → để manual (không đoán bừa)
+                  and _il93("Luat_80-2025", "80-2025-QH15") == "Luật"))   # cũ không hồi quy
+    # sohieu-fallback cho VB Đảng (tên không match nhưng số hiệu có -KL-/-CT-/-HD-)
+    cases.append(("r93_infer_loai_dang_sohieu",
+                  _il93("random_name", "51-2019-KL-TW") == "Kết luận"
+                  and _il93("random_name", "10-2011-CT-TW") == "Chỉ thị"
+                  and _il93("random_name", "05-HD-VPTW") == "Hướng dẫn"))
+    # #T1 parser
+    _ns93 = build_parser().parse_args(["corpus-relation-sweep", "--loai", "Luật", "--deep", "--limit", "5", "--skip", "2", "--out", "x.json", "--json"])
+    cases.append(("r93_parser_corpus_relation_sweep",
+                  getattr(_ns93, "loai", None) == "Luật" and getattr(_ns93, "deep", False) is True
+                  and getattr(_ns93, "limit", None) == 5 and getattr(_ns93, "skip", None) == 2
+                  and getattr(_ns93, "out", None) == "x.json"))
+    # #T1 aggregation offline (mock cmd_relation_check + manifest)
+    _keys93 = ("_manifest_entries", "load_creds", "cmd_relation_check")
+    _sav93 = {k: getattr(_TL_MODULE, k) for k in _keys93}
+    try:
+        _E93 = [
+            {"drive_id": "d57", "name": "Luat_57-2024-QH15_SuaDoi", "so_hieu": "57-2024-QH15", "loai": "Luật",
+             "corpus": "true", "row_kind": "overflow", "cat": "46_Luat_sua_doi"},
+            {"drive_id": "d88", "name": "NQ_88-2014-QH13_SGK", "so_hieu": "88-2014-QH13", "loai": "Nghị quyết",
+             "corpus": "true", "row_kind": "own", "cat": "37_Giao_duc"},
+            {"drive_id": "dref", "name": "Luat_09-2017_ref", "so_hieu": "09-2017-QH14", "loai": "Luật",
+             "corpus": "true", "row_kind": "ref", "cat": "31"},      # ref → BỎ
+            {"drive_id": "dtt", "name": "TT_10-2024_x", "so_hieu": "10-2024-TT-BYT", "loai": "Thông tư",
+             "corpus": "true", "row_kind": "own", "cat": "22"},      # loai ngoài lọc → BỎ
+            {"drive_id": "dnc", "name": "Luat_x_noncorpus", "so_hieu": "99-2024-QH15", "loai": "Luật",
+             "corpus": "false", "row_kind": "own", "cat": "31"},     # !corpus → BỎ
+        ]
+        _TL_MODULE._manifest_entries = lambda refresh=False: [dict(e) for e in _E93]
+        _TL_MODULE.load_creds = lambda *a, **k: None
+
+        def _fake_rc93(ns):
+            base = getattr(ns, "base", "")
+            if base == "57-2024-QH15":
+                print(json.dumps({"ok": True, "inline_amendments": [{"amended_sohieu": "21-2017-QH14", "in_corpus": False}],
+                                  "vbhn_candidates": [{"entry": {"sohieu": "09-VBHN-VPQH", "name": "VBHN Dau tu",
+                                                                 "cat": "_ZZZ_QUARANTINE_taluat", "corpus": "false"},
+                                                       "flags": ["VBHN_MISSING_YEAR_OR_DATE"]}],
+                                  "missing_links": [], "google_discovery": ["- [g1]", "- [g2]"]}, ensure_ascii=False))
+            else:
+                print(json.dumps({"ok": True, "inline_amendments": [], "vbhn_candidates": [], "missing_links": []},
+                                 ensure_ascii=False))
+            return 0
+        _TL_MODULE.cmd_relation_check = _fake_rc93
+        _b93 = _io27.StringIO()
+        _e93 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b93), _ctx27.redirect_stderr(_e93):
+            _rc93 = _TL_MODULE.cmd_corpus_relation_sweep(argparse.Namespace(
+                config=None, profile=None, loai="Luật,Nghị quyết", cat=None, deep=True,
+                limit=0, skip=0, out=None, refresh=False, json=True))
+        _o93 = json.loads(_b93.getvalue())
+        _err93 = _e93.getvalue()
+        _needed = {s.get("needed_sohieu") for s in (_o93.get("sources_to_add") or [])}
+        cases.append(("r93_sweep_selects_and_aggregates",
+                      _rc93 == 0 and _o93.get("total") == 2 and _o93.get("swept") == 2      # chỉ 57 + 88 (ref/TT/noncorpus bỏ)
+                      and _o93.get("docs_with_gaps") == 1
+                      and _needed == {"21-2017-QH14", "09-VBHN-VPQH"}
+                      and _o93.get("sources_to_add_count") == 2
+                      and _err93.count("[sweep]") == 2))
+        # --limit/--skip + resume_command
+        _b93b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b93b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _TL_MODULE.cmd_corpus_relation_sweep(argparse.Namespace(
+                config=None, profile=None, loai="Luật,Nghị quyết", cat=None, deep=False,
+                limit=1, skip=0, out=None, refresh=False, json=True))
+        _o93b = json.loads(_b93b.getvalue())
+        cases.append(("r93_sweep_resume",
+                      _o93b.get("swept") == 1 and _o93b.get("remaining") == 1
+                      and "--skip 1" in str(_o93b.get("resume_command", ""))))
+    finally:
+        for _k, _v in _sav93.items():
+            setattr(_TL_MODULE, _k, _v)
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -686,6 +686,109 @@ def cmd_relation_check(a) -> int:
     return 0
 
 
+def cmd_corpus_relation_sweep(a) -> int:
+    """#T1 (v1.34.31, rà corpus): BATCH `relation-check` trên toàn bộ Luật/NQ corpus (hoặc --loai/--cat lọc) —
+    GỘP 'nguồn liên quan cần bổ sung' vào 1 báo cáo: mỗi văn bản → vbhn_broken (VBHN liên quan quarantine/removed/
+    thiếu-năm), missing_links, và (chỉ --deep) amendments_missing (inline_amendments in_corpus=false, đọc nguyên văn
+    base). STREAM per-doc ra stderr (timeout không mất trắng) + resumable --skip + --out. READ-ONLY (đi qua chính
+    cmd_relation_check — SCRIPT-REUSE #15). Mặc định FAST (--no-auto-footnote, registry-only); --deep chậm hơn."""
+    import argparse as _ap, io as _io, contextlib as _ctx
+    if getattr(a, "refresh", False) or not (_cache_file("manifest.json")).exists():
+        load_creds(getattr(a, "config", None))
+    try:
+        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] corpus-relation-sweep: không đọc được manifest: {e}", file=sys.stderr)
+        return 1
+    loai_raw = getattr(a, "loai", None) or "Luật,Nghị quyết"
+    loai_norm = {_normalize_loai(x.strip()) for x in re.split(r"[;,|]+", loai_raw) if x.strip()}
+    cat_filter = (getattr(a, "cat", None) or "").strip()
+    seen, base_docs = set(), []
+    for e in entries:
+        if not _entry_corpus_true(e) or _entry_row_kind(e) == "ref":
+            continue
+        sh = _entry_sohieu(e)
+        if not sh:
+            continue
+        if loai_norm and _normalize_loai(str(e.get("loai") or "")) not in loai_norm:
+            continue
+        if cat_filter and not str(_entry_cat(e)).startswith(cat_filter):
+            continue
+        k = norm_sohieu(sh)
+        if k in seen:
+            continue
+        seen.add(k)
+        base_docs.append(e)
+    base_docs.sort(key=lambda e: _entry_sohieu(e))
+    total = len(base_docs)
+    skip = max(0, int(getattr(a, "skip", 0) or 0))
+    limit = int(getattr(a, "limit", 0) or 0)
+    run = base_docs[skip:(skip + limit)] if limit > 0 else base_docs[skip:]
+    deep = bool(getattr(a, "deep", False))
+    results = []
+    for idx, e in enumerate(run, 1):
+        sh = _entry_sohieu(e)
+        ns = _ap.Namespace(config=getattr(a, "config", None), profile=getattr(a, "profile", None),
+                           base=sh, subject=str(e.get("title_vn") or ""), amendment=None,
+                           footnote_source=None, footnote_file=None, no_auto_footnote=(not deep),
+                           refresh=False, json=True, deterministic=False)
+        buf = _io.StringIO()
+        try:
+            with _ctx.redirect_stdout(buf), _ctx.redirect_stderr(_io.StringIO()):
+                cmd_relation_check(ns)
+            rc = json.loads(buf.getvalue() or "{}")
+        except Exception as ex:  # noqa: BLE001
+            rc = {"ok": False, "error": f"{type(ex).__name__}: {ex}"}
+        amend_missing = [ia for ia in (rc.get("inline_amendments") or []) if ia.get("in_corpus") is False]
+        vbhn_broken = []
+        for vc in (rc.get("vbhn_candidates") or []):
+            fl = vc.get("flags") or []
+            ent = vc.get("entry") or {}
+            if (any(f in ("RAW_NAME_NOT_NLM", "VBHN_MISSING_YEAR_OR_DATE") for f in fl)
+                    or str(ent.get("corpus")) != "true" or "_ZZZ_QUARANTINE" in str(ent.get("cat") or "")):
+                vbhn_broken.append({"sohieu": ent.get("sohieu"), "name": str(ent.get("name") or "")[:60], "flags": fl})
+        missing_links = rc.get("missing_links") or []
+        has_gap = bool(amend_missing or vbhn_broken or missing_links)
+        results.append({"sohieu": sh, "loai": str(e.get("loai") or ""), "name": str(_entry_name(e) or "")[:60],
+                        "amendments_missing": amend_missing, "vbhn_broken": vbhn_broken,
+                        "missing_links": missing_links,
+                        "google_discovery": (rc.get("google_discovery") or [])[:3] if has_gap else [],
+                        **({"error": rc["error"]} if rc.get("error") else {})})
+        print(f"[sweep] ({skip + idx}/{total}) {sh}: "
+              f"{len(amend_missing) + len(vbhn_broken) + len(missing_links)} gap(s)", file=sys.stderr, flush=True)
+    to_add = []
+    for r in results:
+        for ia in r["amendments_missing"]:
+            to_add.append({"needed_sohieu": ia.get("amended_sohieu"), "reason": "amended_base_not_in_corpus",
+                           "for": r["sohieu"]})
+        for vb in r["vbhn_broken"]:
+            to_add.append({"needed_sohieu": vb.get("sohieu"), "reason": "vbhn_broken_or_quarantine",
+                           "for": r["sohieu"], "flags": vb.get("flags")})
+    done = skip + len(run)
+    out = {"ok": True, "action": "corpus-relation-sweep", "mode": "DEEP" if deep else "FAST",
+           "loai_filter": sorted(loai_norm), "total": total, "swept": len(run),
+           "docs_with_gaps": sum(1 for r in results if r["amendments_missing"] or r["vbhn_broken"] or r["missing_links"]),
+           "sources_to_add_count": len(to_add), "sources_to_add": to_add, "per_doc": results,
+           "note": "amendments_missing = VB bị base sửa nhưng chưa có corpus (CHỈ khi --deep đọc nguyên văn base); "
+                   "vbhn_broken = VBHN liên quan quarantine/removed/thiếu-năm; google_discovery kèm để đi lấy về."}
+    if done < total:
+        _flags = ((" --deep" if deep else "")
+                  + (f' --loai "{loai_raw}"' if getattr(a, "loai", None) else "")
+                  + (f" --cat {cat_filter}" if cat_filter else ""))
+        out["remaining"] = total - done
+        out["resume_command"] = f"tl corpus-relation-sweep{_flags} --limit {limit or len(run)} --skip {done} --json"
+    _o = getattr(a, "out", None)
+    if _o:
+        Path(_o).write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+        print(json.dumps({"ok": True, "out": _o, "total": total, "swept": len(run),
+                          "sources_to_add_count": len(to_add), "docs_with_gaps": out["docs_with_gaps"],
+                          **({"resume_command": out["resume_command"]} if out.get("resume_command") else {})},
+                         ensure_ascii=False))
+    else:
+        print(json.dumps(out, ensure_ascii=False))
+    return 0
+
+
 def _amendments_covered_by_vbhn_date(vbhn: dict | None, amendments: list[dict]) -> tuple[bool, str | None, list[dict]]:
     """(port Codex hotfix) True khi VBHN ban hành ≥ TẤT CẢ luật-sửa. Cổng PHỤ hạ PAUSE cho luật-sửa CHƯA nằm trong
     chuỗi goc VBHN nhưng VBHN ra đời SAU (đã phản ánh) — bổ trợ cổng consolidation goc-chain.

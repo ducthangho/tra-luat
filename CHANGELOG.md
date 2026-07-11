@@ -1,3 +1,23 @@
+# ★ v1.34.31 — RÀ CORPUS VBQPPL: mở rộng suy loại + tool corpus-relation-sweep (2026-07-11)
+
+> Sinh từ phiên `grill-with-docs` rà toàn bộ Luật/NQ corpus (749 dòng · 471 corpus · 33 Luật + 44 NQ + 72 VBHN).
+
+- **(a) `_infer_loai` mở rộng — vá 38 dòng corpus loai RỖNG:** trước đây `backfill-loai` bỏ trống điều ước quốc tế
+  (`CU_`/`CPTPP_`/`EVFTA_`) + văn kiện Đảng (`KL_`/`CT_`/`HD_`) vì thiếu prefix trong inference. Nay: `CU_`→Công ước;
+  `CPTPP_`/`EVFTA_`→Điều ước quốc tế; `KL_`→Kết luận; `CT_`→Chỉ thị; `HD_`→Hướng dẫn (+thêm "Hướng dẫn" vào enum
+  `_LOAI_CANON`); +sohieu-fallback `-KL-`/`-CT-`/`-HD-`. `VK_` (văn kiện Đại hội, dị thể: Báo cáo/NQ/Chương trình) ở
+  lại manual (không đoán bừa). ⇒ ~30/38 dòng nay suy được loại; 6 VK_ chờ curate tay.
+- **(b) TOOL MỚI `corpus-relation-sweep` (#T1) — trả lời "liệt kê nguồn liên quan cần bổ sung":** BATCH `relation-check`
+  trên toàn bộ Luật/NQ corpus (hoặc `--loai`/`--cat` lọc) bằng cách **tái dùng chính `cmd_relation_check`** (SCRIPT-REUSE
+  #15, capture JSON per-doc) → GỘP 1 báo cáo: mỗi VB → `vbhn_broken` (VBHN liên quan quarantine/removed/thiếu-năm) +
+  `missing_links` + (chỉ `--deep`, đọc nguyên văn base) `amendments_missing` (VB gốc bị sửa nhưng chưa có corpus) +
+  `google_discovery` kèm để đi lấy về. STREAM per-doc ra stderr (`[sweep] (i/N)` — timeout không mất trắng) + resumable
+  `--limit`/`--skip` + `--out`. READ-ONLY. Lấp gap skill: `relation-check` chỉ chạy 1 `--base`/lần nên trước đây không
+  có cách 1-lệnh liệt kê "mọi nguồn còn thiếu" toàn corpus.
+- r93 ×5 TDD → 804/804. **KHÔNG bump GAS (2.21.2j), KHÔNG đổi kernel doctrine → re-import không bắt buộc.**
+
+---
+
 # ★ v1.34.30 — vá 7 lỗi log grill: register/from-nlm/doctor/marker (2026-07-11)
 
 > Grill chốt (cây quyết định): register `--row-kind` choices GIỮ `own/overflow/ref` — KHÔNG mở `nlm_only`

@@ -466,6 +466,18 @@ def _infer_loai(name: str, sohieu: str = "") -> str:
         return "Hiến pháp"
     if nm.startswith("LUAT_") or nm.startswith("LUAT "):
         return "Luật"
+    # v1.34.31 (rà corpus 2026-07-11): điều ước quốc tế + văn kiện Đảng KHÔNG có số hiệu VN chuẩn → suy từ TIỀN TỐ
+    # tên chuẩn (CU_/CPTPP_/EVFTA_ và KL_/CT_/HD_). backfill-loai cũ bỏ trống 38 dòng corpus vì thiếu các prefix này.
+    if nm.startswith("CU_") or "CONG_UOC" in nm or "CONG UOC" in nm:
+        return "Công ước"
+    if nm.startswith("CPTPP") or nm.startswith("EVFTA") or "DIEU_UOC" in nm or "DIEU UOC" in nm:
+        return "Điều ước quốc tế"
+    if nm.startswith("KL_") or "KET_LUAN" in nm:
+        return "Kết luận"
+    if nm.startswith("CT_") or "CHI_THI" in nm:
+        return "Chỉ thị"
+    if nm.startswith("HD_") or "HUONG_DAN" in nm:
+        return "Hướng dẫn"
     # 2) fallback: mã cơ quan trong SỐ HIỆU
     if "ND-CP" in sh:
         return "Nghị định"
@@ -477,6 +489,12 @@ def _infer_loai(name: str, sohieu: str = "") -> str:
         return "Nghị quyết"
     if "QD-" in sh:
         return "Quyết định"
+    if "-KL-" in sh:      # v1.34.31: văn kiện Đảng theo số hiệu (NN-KL-TW / NN-CT-TW / NN-HD-VPTW)
+        return "Kết luận"
+    if "-CT-" in sh:
+        return "Chỉ thị"
+    if "-HD-" in sh:
+        return "Hướng dẫn"
     if "PL-" in sh or "/UBTVQH" in sh:
         return "Pháp lệnh"
     if re.search(r"QH\d", sh) or "/QH" in sh or "LCT-HDNN" in sh:
@@ -1509,6 +1527,7 @@ _LOAI_CANON = {
     "quyet dinh": "Quyết định", "qd": "Quyết định", "quyetdinh": "Quyết định",
     "phap lenh": "Pháp lệnh", "pl": "Pháp lệnh", "phaplenh": "Pháp lệnh",
     "ket luan": "Kết luận", "kl": "Kết luận", "chi thi": "Chỉ thị", "ct": "Chỉ thị",
+    "huong dan": "Hướng dẫn", "huongdan": "Hướng dẫn",   # v1.34.31 (rà corpus): Hướng dẫn (VB Đảng HD_) — thiếu enum
     "hien phap": "Hiến pháp", "hp": "Hiến pháp", "lenh": "Lệnh",
     # v1.30.1 (#4): Công điện = họ tên-chuẩn từ v1.29.4 (CD_32-2026-CD-TTg) nhưng THIẾU trong enum → dòng
     # loai='Công điện' bị đếm phi-chuẩn vĩnh viễn + --normalize không map được. Review CONFIRMED: 'cd' trần

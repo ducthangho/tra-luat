@@ -1,3 +1,16 @@
+# ★ v1.34.28 — vá bug máy-phụ-thuộc #5: r77a parser-surface lệch theo version Python (2026-07-11)
+
+- Phiên kiểm chứng zip 1.34.27 (Python 3.11) báo selftest 778/779 — `r77a_parser_surface_matches_snapshot`
+  FAIL tại `cache-build`/`fetch-batch`/`rasoat`, trong khi canonical (3.13) + CI (3.12) đều xanh.
+  TÁI HIỆN được bằng Python 3.11 local → ROOT CAUSE: snapshot hash CẢ field `required` của POSITIONAL
+  action — giá trị DẪN XUẤT theo version Python (positional nargs='*': 3.11 đặt required=True,
+  3.12+ đặt False — thay đổi argparse thượng nguồn), KHÔNG phải bề mặt CLI thật.
+- Fix: `_parser_surface_map` chỉ hash `required` cho OPTIONAL (positional → None; ngữ nghĩa đã nằm trọn
+  trong `nargs`); regen snapshot; **verify cross-Python 3.13 + 3.11 cùng 779/779**.
+- Bài học nhập sổ **máy-phụ-thuộc #5** (nối #1 zip-container-hash, #2 CRLF-writer, #3 w/mixed-eol,
+  #4 load_creds-cache-vắng): snapshot/golden KHÔNG được hash field mà runtime DẪN XUẤT theo
+  version/OS/env — chỉ hash bề mặt do MÌNH khai báo.
+
 # ★ v1.34.27 — HOTFIX 7 lỗi thực-chiến từ log phiên tạo profile + nạp 4 file (2026-07-11)
 
 - Nguồn: báo cáo phiên thật (Chỉ thị/Tờ trình/2 Công văn) — thẩm định 7/7 CONFIRMED trên canonical.

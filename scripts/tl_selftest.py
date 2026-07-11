@@ -5719,7 +5719,11 @@ def run() -> int:
                         "nargs": repr(act.nargs), "const": repr(act.const), "default": _dflt,
                         "type": (getattr(act.type, "__name__", None) or repr(act.type)) if act.type is not None else None,
                         "choices": (list(act.choices) if act.choices is not None else None),
-                        "required": bool(act.required), "help": act.help, "metavar": act.metavar})
+                        # v1.34.28 (bug máy-phụ-thuộc #5, phiên kia bắt trên zip 1.34.27): positional
+                        # `required` là DẪN XUẤT theo version Python (nargs='*': 3.11=True, 3.12+=False)
+                        # → KHÔNG hash cho positional (nargs đã mô tả đủ ngữ nghĩa); optional giữ nguyên.
+                        "required": (bool(act.required) if act.option_strings else None),
+                        "help": act.help, "metavar": act.metavar})
                 _fn = sp.get_default("fn")
                 m[prefix + nm] = {"help": helps.get(nm), "fn": getattr(_fn, "__name__", None), "actions": acts}
                 if nested is not None:

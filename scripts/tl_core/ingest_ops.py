@@ -182,6 +182,19 @@ def _register_clear(a, g) -> int:
     return 0 if verified else 1
 
 
+def _reg_row_present(g, drive_id) -> bool | None:
+    """#3 (v1.34.30, log grill): CÓ dòng registry khớp drive_id này KHÔNG? Dùng để phân biệt 'vừa INSERT dòng mới'
+    vs 'khớp giá trị cũ, không đổi' — cả hai đều cho reg_upsert `updated:false` (ảo giác ghi-hụt). reg_get refresh=true
+    né cache 600s. Trả True/False; None khi KHÔNG xác định được (reg_get lỗi mạng) → caller bỏ qua field inserted."""
+    try:
+        rb = g.get("reg_get", drive_id=str(drive_id), refresh="true")
+    except Exception:  # noqa: BLE001
+        return None
+    if not isinstance(rb, dict):
+        return None
+    return bool(rb.get("rows") or [])
+
+
 def cmd_register(a) -> int:
     g = _gas()
     if getattr(a, "clear_cols", None):
@@ -241,17 +254,34 @@ def cmd_register(a) -> int:
             return 2
         run_id = _apply_journal_start("register-bulk", {"items": len(items), "cols": _cols_str})
         _cols_list = [c.strip() for c in _cols_str.split(",") if c.strip()]
-        _verified_all, _rbs = True, []
+        _verified_all, _rbs, _missed_all = True, [], []
         for _kf, _batch in (("drive_id", _b_drive), ("nlm_source_id", _b_src)):
             if not _batch:
                 continue
             v = _journaled_reg_write(run_id, g, _batch, _cols_str, key_field=_kf,
                                      before_by_key=_reg_before_from_manifest(_batch, _cols_list, _kf))
             rb = v.get("reg_bulk") or {}
+            _mids = [str(m) for m in (v.get("missed_ids") or [])]
+            _missed_all.extend(_mids)
             _verified_all = _verified_all and bool(v.get("verified"))
             _rbs.append({**rb, "key_field": _kf, "verified": bool(v.get("verified")),
+                         "patched": v.get("patched"), "missed": v.get("missed"),
+                         **({"missed_ids": _mids} if _mids else {}),
                          **({"error": v.get("error")} if v.get("error") else {})})
-        print(json.dumps({"ok": _verified_all, "batches": _rbs, "journal": run_id}, ensure_ascii=False))
+        _out = {"ok": _verified_all, "batches": _rbs, "journal": run_id}
+        # #1 (v1.34.30, log grill): reg_bulk chỉ UPDATE dòng ĐÃ TỒN TẠI. Dòng key không khớp = `missed` — TRƯỚC đây
+        # chỉ nằm chìm trong batches[].miss → operator tưởng 'patched:0' là thành công. Nay SURFACE top-level LOUD.
+        if _missed_all:
+            _out["missed_count"] = len(_missed_all)
+            _out["missed_ids"] = _missed_all[:20]
+            _out["note_missed"] = ("reg_bulk KHÔNG insert — các key trên không khớp dòng registry nào nên bị BỎ. "
+                                   "Tạo dòng MỚI: đường đơn `register --drive-id <id> --force-insert` (reg_upsert "
+                                   "insert-if-absent), hoặc `profile-from-nlm --add-missing` cho nguồn nlm_only.")
+        # cờ đặt-tên gây hiểu lầm: --force-insert trên --bulk CHỈ bỏ qua kiểm client, KHÔNG khiến reg_bulk insert.
+        if getattr(a, "force_insert", False):
+            _out["force_insert_note"] = ("--force-insert trên --bulk chỉ BỎ QUA kiểm client (drive_id format/tồn tại) "
+                                         "— reg_bulk vẫn UPDATE-only, KHÔNG insert. Muốn insert: đường đơn / from-nlm --add-missing.")
+        print(json.dumps(_out, ensure_ascii=False))
         return 0 if _verified_all else 1
     if not a.drive_id:
         print("[tl] cần --drive-id (reg_upsert) hoặc --bulk items.json (reg_bulk)", file=sys.stderr)
@@ -321,6 +351,9 @@ def cmd_register(a) -> int:
     run_id = _apply_journal_start("register", {"drive_id": a.drive_id, "cols": ",".join(_fields + _clear_cols)})
     v = {"verified": True}
     r = {}
+    # #3 (v1.34.30, log grill): reg_upsert trả `updated:false` cho CẢ 'vừa insert dòng mới' LẪN 'khớp giá trị cũ,
+    # không đổi' → operator tưởng ghi hụt, phải reg-query lại. Precheck reg_get TRƯỚC ghi để phát cờ `inserted` rõ.
+    _existed_before = _reg_row_present(g, a.drive_id) if _fields else None
     if _fields:
         _before = (_reg_before_from_manifest([payload], _fields) or {}).get(str(a.drive_id))
         v = _journaled_reg_upsert(run_id, g, payload, before=_before)
@@ -330,7 +363,9 @@ def cmd_register(a) -> int:
         _cbefore = (_reg_before_from_manifest([{"drive_id": a.drive_id}], _clear_cols) or {}).get(str(a.drive_id))
         _clr = _journaled_reg_clear(run_id, g, a.drive_id, ",".join(_clear_cols), before=_cbefore)
     _all_ok = bool(v.get("verified")) and (bool(_clr.get("verified")) if _clr is not None else True)
+    _inserted = (not _existed_before) if (_fields and _existed_before is not None) else None
     print(json.dumps({**r, "verified": _all_ok, "journal": run_id,
+                      **({"inserted": _inserted} if _inserted is not None else {}),
                       **({"cleared_cols": _clear_cols, "cleared": _clr.get("cleared"),
                           **({"clear_error": _clr.get("error") or (_clr.get("resp") or {}).get("error")}
                              if not _clr.get("verified") else {})} if _clr is not None else {}),

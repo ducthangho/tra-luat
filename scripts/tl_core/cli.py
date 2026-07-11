@@ -377,6 +377,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--clear-cols", dest="clear_cols",
                    help="CSV cột cần XOÁ TRẮNG (reg_clear 2-tầng: nlm_*/note tự do; cột thường server đòi force — tl tự gắn; drive_id/name BẢO VỆ). Cần --confirm yes.")
     p.add_argument("--confirm", help="'yes' để xác nhận --clear-cols (thao tác xoá giá trị)")
+    p.add_argument("--json", action="store_true",
+                   help="(no-op v1.34.30 #4 — register vốn LUÔN in JSON; nhận cờ để đồng bộ bề mặt CLI, hết rc=2 usage-error + hết đổ danh sách lệnh top-level. Nhất quán nlm-add #6)")
     p.set_defaults(fn=cmd_register)
 
 

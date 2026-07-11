@@ -743,8 +743,17 @@ def _cmd_profile_doctor_impl(a) -> int:
         print(f"[tl] profile-doctor cần webapp LIVE (đọc parents/mime qua action info): {e}", file=sys.stderr)
         return 2
     g = _gas()
+    # #5 (v1.34.30, log grill): scan-all GIỮ mặc định (KHÔNG breaking ops-sweep/caller) NHƯNG --limit/--skip cắt lô
+    # + STREAM per-profile ra stderr (progress + JSONL) → timeout không mất trắng phần đã kiểm, thấy profile nào chậm.
+    # Resume bằng --skip (stateless, offset). stdout GIỮ 1 JSON tổng hợp (tương thích contract/caller).
+    _total = len(names)
+    _skip = max(0, int(getattr(a, "skip", 0) or 0))
+    _limit = int(getattr(a, "limit", 0) or 0)
+    _names_run = names[_skip:(_skip + _limit)] if _limit > 0 else names[_skip:]
+    _run_total = len(_names_run)
     findings, infos_all = [], {}
-    for n in names:
+    for _idx, n in enumerate(_names_run, 1):
+        _before_len = len(findings)
         prof = profs.get(n) if isinstance(profs.get(n), dict) else {}
         infos = {}
         for key in ("registryDocId", "manifestId"):
@@ -766,6 +775,14 @@ def _cmd_profile_doctor_impl(a) -> int:
         _root = str(prof.get("rootFolderId") or "").strip()
         if _root:
             _mr = _marker_read(g, _root, meta_id=str(prof.get("metaFolderId") or "") or None)
+            # #7 (v1.34.30): ≥2 file marker cùng tên trong _meta = dấu vết retry đứt (create/from-nlm/promote) →
+            # bản mồ côi trỏ registry/manifest khác. profile-sync/backfill --force nay TỰ trash bản dư (self-heal).
+            if len(_mr.get("marker_file_ids") or []) > 1:
+                findings.append({"check": "MARKER_DUPLICATE", "severity": "warn", "profile": n,
+                                 "count": len(_mr["marker_file_ids"]), "fileIds": _mr["marker_file_ids"],
+                                 "note": "≥2 file marker cùng tên trong _meta (dấu vết retry đứt) — dọn: "
+                                         "`tl profile-sync --apply` hoặc `profile-backfill-markers --force` "
+                                         "(marker-write TỰ trash bản dư sau khi bản đúng verified)."})
             if _mr.get("error"):
                 findings.append({"check": "MARKER_READ_FAILED", "severity": "warn", "profile": n,
                                  "note": str(_mr["error"])})
@@ -844,16 +861,28 @@ def _cmd_profile_doctor_impl(a) -> int:
                                          "count": _blk,
                                          "note": "nguồn không xuất được (URL/YouTube/rỗng) — Ở LẠI nlm-only "
                                                  "là HỢP LỆ (Q4); thử lại: --retry-blocked."})
+        _pf = findings[_before_len:]
+        print(f"[doctor] ({_idx}/{_run_total}) {n}: {len(_pf)} finding(s)", file=sys.stderr, flush=True)
+        print("[doctor-jsonl] " + json.dumps({"profile": n, "findings": _pf}, ensure_ascii=False),
+              file=sys.stderr, flush=True)
     # Review v1.30.0 (CONFIRMED): asset dùng chung ≥2 profile trong config → BỎ fix-move, nâng critical
     # (move theo profile này phá layout profile kia). Soi trên TOÀN BỘ config, kể cả khi --profile-name 1 profile.
     findings = _strip_shared_fixes(findings, profs)
     fixes = [f for f in findings if f.get("fix")]
     out = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY", "config": path,
-           "profiles_checked": names, "findings": findings,
+           "profiles_checked": _names_run, "profiles_total": _total, "findings": findings,
            "criticals": sum(1 for f in findings if f.get("severity") == "critical"),
            "fixable": len(fixes),
            "invariant": "LAYOUT: registry+manifest của profile nằm TRONG thư mục profile (root hoặc _meta).",
            "note": "DRY mặc định; --fix --apply move asset lạc chỗ vào _meta (fileId giữ nguyên — config không đổi)."}
+    # #5: còn profile chưa kiểm (do --limit) → resume_command offset qua --skip (stateless, giữ cờ deep/fix/apply).
+    _done = _skip + _run_total
+    if _done < _total:
+        _rc_flags = ("" + (" --deep" if getattr(a, "deep", False) else "")
+                     + (" --fix" if getattr(a, "fix", False) else "")
+                     + (" --apply" if getattr(a, "apply", False) else ""))
+        out["remaining_count"] = _total - _done
+        out["resume_command"] = f"tl profile-doctor{_rc_flags} --limit {_limit or _run_total} --skip {_done} --json"
     fix_results = []
     if getattr(a, "fix", False) and getattr(a, "apply", False) and fixes:
         rid = _apply_journal_start("profile-doctor-fix", {"fixes": len(fixes)})
@@ -886,7 +915,7 @@ def _cmd_profile_doctor_impl(a) -> int:
     if getattr(a, "json", False):
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
-        print(f"== profile-doctor · {len(names)} profile · findings={len(findings)} (critical={out['criticals']}) ==")
+        print(f"== profile-doctor · {_run_total}/{_total} profile · findings={len(findings)} (critical={out['criticals']}) ==")
         for f in findings:
             sev = {"critical": "🔴", "warn": "🟠"}.get(f.get("severity"), "·")
             print(f" {sev} [{f.get('profile')}] {f.get('check')}: {f.get('note')}")
@@ -1218,7 +1247,8 @@ def _marker_find_in_items(items: list) -> dict | None:
 def _marker_read(g, root_id: str, meta_id: str | None = None) -> dict:
     """Đọc marker của một folder profile: xác định _meta (theo meta_id hoặc list root tìm tên) → list _meta →
     download JSON. Trả {found, fileId, marker, meta_folder_id, error} — lỗi mạng/parse KHÔNG raise."""
-    out = {"found": False, "fileId": "", "marker": None, "meta_folder_id": str(meta_id or ""), "error": None}
+    out = {"found": False, "fileId": "", "marker": None, "meta_folder_id": str(meta_id or ""),
+           "marker_file_ids": [], "error": None}
     try:
         mid = str(meta_id or "")
         if not mid:
@@ -1229,6 +1259,9 @@ def _marker_read(g, root_id: str, meta_id: str | None = None) -> dict:
         if not mid:
             return out
         mitems = (_gas_get_retry(g, "list", folderId=mid) or {}).get("items") or []
+        # #7 (v1.34.30): phơi MỌI file marker cùng tên → doctor phát hiện DUPLICATE (retry đứt tạo 2 bản).
+        out["marker_file_ids"] = [str(x.get("id") or "") for x in mitems
+                                  if str(x.get("type")) != "folder" and str(x.get("name")) == _PROFILE_MARKER_NAME]
         it = _marker_find_in_items(mitems)
         if not it:
             return out
@@ -1266,13 +1299,29 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
                            for k in ("schema", "profile", "rootFolderId"))
         except Exception:  # noqa: BLE001
             verified = False
+    # #7 (v1.34.30, log grill — ROOT CAUSE marker trùng): upload force=true LUÔN tạo fileId MỚI (Drive cho trùng
+    # tên). TRƯỚC đây chỉ trash `old_id` do caller truyền → create/from-nlm/promote (old_id="") gặp marker cũ của
+    # LẦN RETRY ĐỨT → sót DUPLICATE mồ côi. Nay SELF-HEAL: sau khi bản mới verified, quét _meta trash MỌI marker
+    # cùng tên khác fileId mới (không chỉ old_id) → marker-write idempotent về số-lượng.
     trashed = []
-    if verified and old_id and str(old_id) != fid:
+    _to_trash = {str(old_id)} if (old_id and str(old_id) != fid) else set()
+    if verified and fid:
         try:
-            tr = g.get("trash", fileId=str(old_id), confirm="yes")
-            trashed.append({"fileId": str(old_id), "ok": bool(tr.get("ok"))})
-        except Exception as e:  # noqa: BLE001
-            trashed.append({"fileId": str(old_id), "ok": False, "error": str(e)})
+            _mitems = (_gas_get_retry(g, "list", folderId=str(meta_id)) or {}).get("items") or []
+            for _it in _mitems:
+                if str(_it.get("type")) != "folder" and str(_it.get("name")) == _PROFILE_MARKER_NAME:
+                    _oid = str(_it.get("id") or "")
+                    if _oid and _oid != fid:
+                        _to_trash.add(_oid)
+        except Exception:  # noqa: BLE001
+            pass
+    if verified:
+        for _oid in sorted(_to_trash):
+            try:
+                tr = g.get("trash", fileId=_oid, confirm="yes")
+                trashed.append({"fileId": _oid, "ok": bool(tr.get("ok"))})
+            except Exception as e:  # noqa: BLE001
+                trashed.append({"fileId": _oid, "ok": False, "error": str(e)})
     if run_id:
         _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key, "ok": verified,
                                  "verify": {"fileId": fid, "trashed_old": trashed,
@@ -1678,8 +1727,12 @@ def _promote_seed_candidates(items: list) -> list:
 
 def _nlm_system_prompt_apply(g, meta_id: str, notebook_id: str, run_id: str | None = None) -> dict:
     """P3 (Q5): sinh NLM System Prompt từ generator (KHÔNG viết tự do) → LƯU `_meta/nlm_system_prompt.md`
-    (bản-đã-áp/bản-cần-dán, readback artifact) → TỰ ÁP qua `nlm chat configure --goal custom`.
-    CLI fail/quá 10000 chars → status=manual_required (kèm chỉ dẫn dán tay), KHÔNG chặn promote."""
+    (ARTIFACT cục bộ = bản-đã-áp/bản-cần-dán) → TỰ ÁP qua `nlm chat configure --goal custom`.
+    CLI fail/quá 10000 chars → status=manual_required (kèm chỉ dẫn dán tay), KHÔNG chặn promote.
+    ⚠ #6 (v1.34.30, log grill — SỬA cách diễn đạt): KHÔNG có 'readback' cấu hình chat LIVE ở đây. `nlm chat`
+    chỉ có configure(ghi)/start(tương tác), KHÔNG có lệnh ĐỌC cấu hình chat hiện hành của notebook. Cái xác nhận
+    được CHỈ là: (a) file _meta/nlm_system_prompt.md đã ghi Drive; (b) API chat_configure trả ok:true. KHÔNG bao giờ
+    xác nhận được NỘI DUNG đang thực sự chi phối notebook → out['verification'] nói rõ mức xác minh thật có."""
     try:
         import gen_instructions  # type: ignore
         text = gen_instructions.generate("nlm", VERSION)
@@ -1714,6 +1767,12 @@ def _nlm_system_prompt_apply(g, meta_id: str, notebook_id: str, run_id: str | No
         _journal_append(run_id, {"t": "commit", "op": "nlm_chat_configure", "key": str(notebook_id),
                                  "ok": ok, "verify": {"error": (r or {}).get("error")}})
     out["status"] = "applied" if ok else "manual_required"
+    # #6 (v1.34.30): field trung thực về MỨC xác minh — 'applied' KHÔNG có nghĩa đã đọc lại được cấu hình LIVE.
+    out["verification"] = "local_artifact_and_api_ok_only" if ok else "not_applied"
+    out["verification_note"] = ("`nlm chat` chỉ có configure(ghi)/start(tương tác), KHÔNG có lệnh ĐỌC lại cấu hình "
+                                "chat LIVE của notebook. 'applied' = file _meta/" + _PROFILE_SYSPROMPT_NAME +
+                                " đã ghi + API chat_configure trả ok:true; KHÔNG xác nhận được nội dung ĐANG chi phối "
+                                "notebook. Đối chiếu thật: mở NotebookLM UI → chat settings.")
     if not ok:
         out["error"] = (r or {}).get("error")
         out["note"] = (f"Dán tay: `nlm chat configure {notebook_id} --goal custom --prompt <nội dung "
@@ -1971,12 +2030,99 @@ def _from_nlm_row_payload(source: dict, notebook_id: str) -> dict:
             "nlm_status": "nlm_only", "note": "materialize=pending"}
 
 
+def _profile_from_nlm_add_missing(a) -> int:
+    """#2 (v1.34.30, log grill): profile ĐÃ TỒN TẠI — seed CHỈ nguồn notebook CÒN THIẾU (khóa nlm_source_id)
+    vào registry của profile. KHÔNG đụng marker/config/chat/system-prompt (hạ tầng đã có). Lấp khoảng trống:
+    trước đây from-nlm từ chối ALREADY_PROFILE nên không có đường sanctioned để phản ánh nguồn NLM mới → phải
+    hand-craft sentinel qua register. DRY mặc định; --apply ghi qua _journaled_reg_upsert (insert-if-absent, journaled)."""
+    name = (getattr(a, "name", None) or "").strip()
+    if not name:
+        print("[tl] profile-from-nlm --add-missing cần --name (profile đã tồn tại)", file=sys.stderr)
+        return 2
+    if name == DEFAULT_PROFILE:
+        print("[tl] REFUSE_ADD_MISSING_DEFAULT_PROFILE: vbqppl là profile nền.", file=sys.stderr)
+        return 2
+    path, cfg = _read_config_record(getattr(a, "config", None))
+    profs = _profiles_from_config(cfg) if cfg else {}
+    name, prof = _profile_lookup(profs, name)
+    if not isinstance(prof, dict):
+        print(json.dumps({"ok": False, "error": "PROFILE_NOT_FOUND", "profile": name,
+                          "note": "--add-missing CHỈ cho profile ĐÃ có trong config; tạo mới thì bỏ --add-missing."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    nb = (getattr(a, "notebook", None) or "").strip() or str(prof.get("notebookId") or "").strip()
+    if not nb:
+        print(json.dumps({"ok": False, "error": "NO_NOTEBOOK", "profile": name,
+                          "note": "profile chưa có notebookId — truyền --notebook."}, ensure_ascii=False),
+              file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), name)   # scope registry PROFILE cho reg_get/reg_upsert
+    except SystemExit as e:
+        print(f"[tl] profile-from-nlm --add-missing cần webapp LIVE: {e}", file=sys.stderr)
+        return 2
+    g = _gas()
+    try:
+        nc = _imp("nlm_cli")
+        sl = nc.source_list(nb)
+    except Exception as e:  # noqa: BLE001
+        sl = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    if not sl.get("ok"):
+        print(json.dumps({"ok": False, "error": "NLM_SOURCE_LIST_FAILED", "detail": sl.get("error"),
+                          "auth_hint": sl.get("auth_hint")}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    sources = sl.get("sources") or []
+    missing, read_failed = [], []
+    for s in sources:
+        sid = str(s.get("id") or "")
+        if not sid:
+            continue
+        try:
+            rg = _gas_get_retry(g, "reg_get", nlm_source_id=sid, refresh="false")
+            rr = rg.get("rows") or []
+        except Exception:  # noqa: BLE001
+            read_failed.append(sid)   # đọc lỗi → KHÔNG seed (an toàn, tránh nhân đôi dòng)
+            continue
+        if not rr:
+            missing.append(s)
+    payloads = [_from_nlm_row_payload(s, nb) for s in missing]
+    n_only = sum(1 for p in payloads if p["row_kind"] == "nlm_only")
+    n_ref = len(payloads) - n_only
+    plan = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY", "action": "add-missing",
+            "profile": name, "notebook": nb, "source_total": len(sources),
+            "missing_count": len(payloads), "nlm_only_count": n_only, "ref_count": n_ref,
+            "missing_sample": [p["name"][:60] for p in payloads[:10]],
+            **({"read_failed": read_failed} if read_failed else {}),
+            "note": "add-missing: CHỈ seed nguồn thiếu (khóa nlm_source_id); KHÔNG đụng marker/config/chat/system-prompt. "
+                    "Sau đó: `tl profile-materialize-sources --profile-name {n} --apply` nếu muốn nâng nlm-only → file Drive.".format(n=name)}
+    if not getattr(a, "apply", False):
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return 0
+    if not payloads:
+        print(json.dumps({**plan, "seeded": 0}, ensure_ascii=False, indent=2))
+        return 0
+    rid = _apply_journal_start("profile-from-nlm-add-missing",
+                               {"profile": name, "notebook": nb, "missing": len(payloads)})
+    seeded, seed_fail = 0, []
+    for p in payloads:
+        v = _journaled_reg_upsert(rid, g, p)
+        if v.get("verified"):
+            seeded += 1
+        else:
+            seed_fail.append({"nlm_source_id": p.get("nlm_source_id"), "error": v.get("error")})
+    out = {**plan, "ok": not seed_fail, "journal": rid, "seeded": seeded, "seed_failed": seed_fail[:20]}
+    print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if not seed_fail else sys.stderr)
+    return 0 if not seed_fail else 1
+
+
 def cmd_profile_from_nlm(a) -> int:
     with _ProfileEnvGuard():
         return _cmd_profile_from_nlm_impl(a)
 
 
 def _cmd_profile_from_nlm_impl(a) -> int:
+    if getattr(a, "add_missing", False):
+        return _profile_from_nlm_add_missing(a)
     """P4 (v1.34.26, Q4): BIẾN NOTEBOOK NLM THÀNH PROFILE THƯỜNG — dựng folder riêng (mặc định tạo mới
     dưới Van_ban_thuong; --folder dùng folder sẵn có) + _meta/registry/manifest/marker/config own+own,
     rồi SEED registry từ danh sách nguồn notebook: nguồn có file Drive → row ref; còn lại → row nlm_only
@@ -2039,7 +2185,9 @@ def _cmd_profile_from_nlm_impl(a) -> int:
                 pass
         if _marker_find_in_items(mitems):
             print(json.dumps({"ok": False, "error": "ALREADY_PROFILE", "folder": folder,
-                              "note": "folder đã có marker — dùng profile-sync/adopt."},
+                              "note": "folder đã có marker (profile tồn tại) — dùng profile-sync/adopt. Muốn PHẢN ÁNH "
+                                      "nguồn NLM mới vào registry profile này: `tl profile-from-nlm --name <p> --add-missing` "
+                                      "(seed nguồn thiếu, không đụng marker/config)."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
         picked = _adopt_pick_assets(items + mitems)

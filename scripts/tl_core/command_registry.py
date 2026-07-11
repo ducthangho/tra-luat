@@ -583,8 +583,9 @@ GENERATED_SPECS = [
      "help": '(v1.34.26, Q4) BIẾN NOTEBOOK NLM THÀNH PROFILE: folder riêng (mặc định tạo dưới Van_ban_thuong) + registry/manifest/marker/config own+own; seed row từ nguồn notebook (có file Drive → ref; còn lại → nlm_only sentinel, materialize=pending). KHÔNG ghi đè chat config notebook. DRY mặc định',
      "args": [
          {"flags": ['--name'], "required": True, "help": 'tên profile mới'},
-         {"flags": ['--notebook'], "required": True, "help": 'notebookId NLM sẵn có (nguồn sự thật danh sách nguồn)'},
+         {"flags": ['--notebook'], "help": 'notebookId NLM sẵn có (nguồn sự thật danh sách nguồn). Bắt buộc khi TẠO mới; --add-missing mặc định lấy từ config profile'},
          {"flags": ['--folder'], "help": 'folder Drive sẵn có làm root (mặc định: tạo mới Van_ban_thuong/<name>)'},
+         {"flags": ['--add-missing'], "dest": 'add_missing', "action": 'store_true', "help": '(v1.34.30) profile ĐÃ TỒN TẠI: seed CHỈ nguồn notebook CÒN THIẾU (khóa nlm_source_id) vào registry — KHÔNG đụng marker/config/chat/system-prompt. Không cờ + folder đã có marker → ALREADY_PROFILE'},
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
@@ -669,6 +670,8 @@ GENERATED_SPECS = [
      "args": [
          {"flags": ['--profile-name'], "dest": 'target_profile', "help": 'chỉ kiểm 1 profile; mặc định MỌI profile dự án trong config'},
          {"flags": ['--deep'], "action": 'store_true', "help": '(v1.34.26) thêm chiều Drive↔NLM↔registry: nguồn notebook không có row / nlm-only pending|blocked / sentinel sót (cần NLM auth)'},
+         {"flags": ['--limit'], "type": int, "default": 0, "help": '(v1.34.30) CHỈ kiểm N profile mỗi run (0=tất cả) — cho --deep khỏi timeout khi nhiều profile; giữ scan-all mặc định; kèm resume_command khi còn dư'},
+         {"flags": ['--skip'], "type": int, "default": 0, "help": '(v1.34.30) bỏ qua N profile đầu (offset resume, dùng với --limit)'},
          {"flags": ['--fix'], "action": 'store_true', "help": 'lập kế hoạch move asset lạc chỗ (cần --apply để chạy)'},
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},

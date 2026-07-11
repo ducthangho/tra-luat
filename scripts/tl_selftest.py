@@ -7098,6 +7098,306 @@ def run() -> int:
     _miss67 = [l for l in _links67 if "*" not in l and not (HERE.parent / l).exists()]
     cases.append(("r67_kernel_size_and_links",
                   _rc67 == 0 and len(_sk67) <= 48 * 1024 and not _miss67 and len(_links67) >= 6))
+    # ═══ v1.34.30 — r92: vá 7 lỗi log grill (register bulk/json/inserted, from-nlm --add-missing, ═══
+    # doctor --deep stream, readback wording, marker dup). Grill chốt: register choices GIỮ own/overflow/ref
+    # (KHÔNG mở nlm_only — sentinel đi qua from-nlm --add-missing để ép đủ bó bất biến).
+    # (#4) register nhận --json no-op (đồng bộ bề mặt CLI; hết đổ 150 lệnh top-level khi gõ arg lạ)
+    _ns92j = build_parser().parse_args(["register", "--drive-id", "d92", "--json"])
+    cases.append(("r92_register_json_noop",
+                  getattr(_ns92j, "json", False) is True and getattr(_ns92j, "drive_id", None) == "d92"))
+    _keys92 = ("_gas", "_apply_gate", "_apply_journal_start", "_journal_append", "_invalidate_manifest_cache",
+               "load_creds", "apply_profile_offline", "_manifest_entries", "_reg_before_from_manifest",
+               "_register_target_exists", "_looks_like_drive_id")
+    _sav92 = {k: getattr(_TL_MODULE, k) for k in _keys92}
+    def _mk92(**kw):
+        base = dict(config=None, profile=None, bulk=None, cols=None, drive_id=None, clear_cols=None,
+                    confirm=None, force_insert=False, force_unsafe=False, apply=False, row_kind=None, json=False)
+        for k in ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc", "sua_doi",
+                  "nlm_source_id", "nlm_notebook_id", "nlm_status", "nlm_title", "tukhoa", "corpus", "title_vn"):
+            base[k] = None
+        base.update(kw)
+        return argparse.Namespace(**base)
+    class _FkG92:
+        # present=False → reg_get rỗng (row CHƯA có) → inserted:true; echo payload để readback khớp (né FIELDS_DROPPED)
+        def __init__(self, present, bulk_resp=None):
+            self.calls = []
+            self.present = present
+            self.bulk_resp = bulk_resp
+            self.last_upsert = {}
+        def get(self, action, **kw):
+            self.calls.append(("get", action, dict(kw)))
+            if action == "reg_get":
+                if self.present or self.last_upsert:
+                    row = {"drive_id": kw.get("drive_id")}
+                    row.update(self.last_upsert)
+                    return {"ok": True, "rows": [row]}
+                return {"ok": True, "rows": []}
+            if action == "reg_upsert":
+                self.last_upsert = {k: v for k, v in kw.items() if k != "drive_id"}
+                return {"ok": True, "updated": False}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append(("post", action, dict(kw)))
+            if action == "reg_bulk":
+                return dict(self.bulk_resp) if self.bulk_resp is not None else {"ok": True, "patched": len(kw.get("items") or [])}
+            return {"ok": True}
+    try:
+        _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run92"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {}
+        _TL_MODULE._register_target_exists = lambda did: True
+        _TL_MODULE._looks_like_drive_id = lambda s: True
+        # (#3a) row CHƯA tồn tại (sentinel force-insert) → inserted:true
+        _g92a = _FkG92(present=False)
+        _TL_MODULE._gas = lambda: _g92a
+        _b92 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b92), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc92a = _TL_MODULE.cmd_register(_mk92(drive_id="nlm:sidZ", force_insert=True, name="X"))
+        _o92a = json.loads(_b92.getvalue())
+        cases.append(("r92_register_inserted_true", _rc92a == 0 and _o92a.get("inserted") is True))
+        # (#3b) row ĐÃ tồn tại → inserted:false
+        _g92b = _FkG92(present=True)
+        _TL_MODULE._gas = lambda: _g92b
+        _b92 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b92), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc92b = _TL_MODULE.cmd_register(_mk92(drive_id="d92", name="X"))
+        _o92b = json.loads(_b92.getvalue())
+        cases.append(("r92_register_inserted_false", _rc92b == 0 and _o92b.get("inserted") is False))
+        # (#1) bulk: missed>0 → missed_count/missed_ids LOUD + rc=1 + note_missed + force_insert_note
+        import tempfile as _tf92
+        with _tf92.TemporaryDirectory() as _d92:
+            _items92 = Path(_d92) / "items.json"
+            _items92.write_text(json.dumps([{"drive_id": "nlm:sidA", "nlm_title": "A"},
+                                            {"drive_id": "nlm:sidB", "nlm_title": "B"}]), encoding="utf-8")
+            _g92c = _FkG92(present=False, bulk_resp={"ok": True, "patched": 0, "miss": ["nlm:sidA", "nlm:sidB"]})
+            _TL_MODULE._gas = lambda: _g92c
+            _b92 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b92), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc92c = _TL_MODULE.cmd_register(_mk92(bulk=str(_items92), force_insert=True, apply=True, confirm="yes"))
+            _o92c = json.loads(_b92.getvalue())
+        cases.append(("r92_bulk_missed_loud",
+                      _rc92c == 1 and _o92c.get("ok") is False and _o92c.get("missed_count") == 2
+                      and set(_o92c.get("missed_ids") or []) == {"nlm:sidA", "nlm:sidB"}
+                      and "insert" in str(_o92c.get("note_missed", "")).lower()
+                      and bool(_o92c.get("force_insert_note"))))
+    finally:
+        for _k, _v in _sav92.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (#2) profile-from-nlm --add-missing: profile ĐÃ TỒN TẠI → seed CHỈ nguồn thiếu (khóa nlm_source_id)
+    _ns92am = build_parser().parse_args(["profile-from-nlm", "--name", "P", "--add-missing", "--apply", "--json"])
+    cases.append(("r92_parser_from_nlm_add_missing",
+                  getattr(_ns92am, "add_missing", False) is True and getattr(_ns92am, "name", None) == "P"
+                  and getattr(_ns92am, "notebook", "SENTINEL") is None))   # --notebook nay KHÔNG bắt buộc
+    class _FkGAM:
+        def __init__(self, have_sids):
+            self.calls = []
+            self.have = set(have_sids)
+            self.store = {}
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "reg_get":
+                if "nlm_source_id" in kw:
+                    sid = kw["nlm_source_id"]
+                    return {"ok": True, "rows": ([{"drive_id": "d_" + sid, "nlm_source_id": sid}] if sid in self.have else [])}
+                did = kw.get("drive_id")
+                row = self.store.get(did)
+                return {"ok": True, "rows": ([dict(row, drive_id=did)] if row else [])}
+            if action == "reg_upsert":
+                did = kw.get("drive_id")
+                self.store[did] = {k: v for k, v in kw.items() if k != "drive_id"}
+                return {"ok": True, "updated": False}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            return {"ok": True}
+    class _FakeNlmCliAM:
+        @staticmethod
+        def source_list(nb):
+            return {"ok": True, "sources": [{"id": "sidHave", "title": "Have", "type": "text"},
+                                            {"id": "sidMiss", "title": "Miss", "type": "text"}]}
+    _keysAM = ("_gas", "_read_config_record", "_profiles_from_config", "_profile_lookup", "load_creds",
+               "_gas_get_retry", "_imp", "_apply_journal_start", "_journal_append", "_invalidate_manifest_cache")
+    _savAM = {k: getattr(_TL_MODULE, k) for k in _keysAM}
+    _realimpAM = _TL_MODULE._imp
+    try:
+        _TL_MODULE._read_config_record = lambda cp=None: ("cfgAM", {"profiles": {"P": {}}})
+        _TL_MODULE._profiles_from_config = lambda cfg: {"P": {"notebookId": "NBam", "rootFolderId": "rootAM", "registryDocId": "regAM"}}
+        _TL_MODULE._profile_lookup = lambda profs, n: ("P", profs.get("P"))
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas_get_retry = lambda gobj, action, **kw: gobj.get(action, **kw)
+        _TL_MODULE._imp = lambda name: (_FakeNlmCliAM if name == "nlm_cli" else _realimpAM(name))
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "runAM"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        def _mkAM(apply):
+            return argparse.Namespace(config=None, profile=None, name="P", notebook=None, folder=None,
+                                      add_missing=True, apply=apply, json=True)
+        # DRY: sidHave đã có row, sidMiss thiếu → missing_count=1, KHÔNG reg_upsert
+        _gAM1 = _FkGAM(have_sids=["sidHave"])
+        _TL_MODULE._gas = lambda: _gAM1
+        _bAM = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bAM), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcAM1 = _TL_MODULE.cmd_profile_from_nlm(_mkAM(False))
+        _oAM1 = json.loads(_bAM.getvalue())
+        cases.append(("r92_add_missing_dry",
+                      _rcAM1 == 0 and _oAM1.get("mode") == "DRY" and _oAM1.get("missing_count") == 1
+                      and _oAM1.get("nlm_only_count") == 1
+                      and not [c for c in _gAM1.calls if c[0] == "reg_upsert"]))
+        # APPLY: seed sidMiss (nlm_only sentinel), seeded=1, reg_upsert đúng 1 lần cho nlm:sidMiss
+        _gAM2 = _FkGAM(have_sids=["sidHave"])
+        _TL_MODULE._gas = lambda: _gAM2
+        _bAM = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bAM), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcAM2 = _TL_MODULE.cmd_profile_from_nlm(_mkAM(True))
+        _oAM2 = json.loads(_bAM.getvalue())
+        _ups = [c for c in _gAM2.calls if c[0] == "reg_upsert"]
+        cases.append(("r92_add_missing_apply_seeds",
+                      _rcAM2 == 0 and _oAM2.get("seeded") == 1 and _oAM2.get("action") == "add-missing"
+                      and len(_ups) == 1 and _ups[0][1].get("drive_id") == "nlm:sidMiss"
+                      and _ups[0][1].get("row_kind") == "nlm_only"))
+        # profile không có trong config → PROFILE_NOT_FOUND (không tạo mới ngầm)
+        _TL_MODULE._profiles_from_config = lambda cfg: {}
+        _TL_MODULE._profile_lookup = lambda profs, n: (n, None)
+        _gAM3 = _FkGAM(have_sids=[])
+        _TL_MODULE._gas = lambda: _gAM3
+        with _hush():
+            _rcAM3 = _TL_MODULE.cmd_profile_from_nlm(_mkAM(True))
+        cases.append(("r92_add_missing_profile_not_found", _rcAM3 == 2))
+    finally:
+        for _k, _v in _savAM.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (#5) profile-doctor --deep: --limit/--skip cắt lô + stream per-profile stderr + resume_command (giữ scan-all mặc định)
+    _ns92d = build_parser().parse_args(["profile-doctor", "--deep", "--limit", "2", "--skip", "1", "--json"])
+    cases.append(("r92_parser_doctor_limit_skip",
+                  getattr(_ns92d, "limit", None) == 2 and getattr(_ns92d, "skip", None) == 1
+                  and getattr(_ns92d, "deep", False) is True))
+    _keysDR = ("_read_config_record", "_profiles_from_config", "load_creds", "_gas",
+               "_doctor_check_profile", "_strip_shared_fixes")
+    _savDR = {k: getattr(_TL_MODULE, k) for k in _keysDR}
+    try:
+        _TL_MODULE._read_config_record = lambda cp=None: ("cfgDR", {"profiles": {}})
+        _TL_MODULE._profiles_from_config = lambda cfg: {"P1": {}, "P2": {}, "P3": {}}
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: object()
+        _TL_MODULE._doctor_check_profile = lambda n, prof, infos: []
+        _TL_MODULE._strip_shared_fixes = lambda f, profs: f
+        def _mkDR(**kw):
+            base = dict(config=None, profile=None, target_profile=None, deep=False, fix=False, apply=False,
+                        json=True, limit=0, skip=0)
+            base.update(kw)
+            return argparse.Namespace(**base)
+        _boutDR = _io27.StringIO()
+        _berrDR = _io27.StringIO()
+        with _ctx27.redirect_stdout(_boutDR), _ctx27.redirect_stderr(_berrDR):
+            _rcDR = _TL_MODULE.cmd_profile_doctor(_mkDR(limit=2, skip=0))   # deep=False → prof rỗng không đẻ finding
+        _oDR = json.loads(_boutDR.getvalue())
+        _errDR = _berrDR.getvalue()
+        cases.append(("r92_doctor_limit_resume",
+                      _rcDR == 0 and _oDR.get("profiles_checked") == ["P1", "P2"]
+                      and _oDR.get("profiles_total") == 3 and _oDR.get("remaining_count") == 1
+                      and "--skip 2" in str(_oDR.get("resume_command", ""))))
+        cases.append(("r92_doctor_stream_stderr",
+                      _errDR.count("[doctor-jsonl]") == 2 and "P1" in _errDR and "P2" in _errDR
+                      and "P3" not in _errDR))
+        # scan-all mặc định GIỮ nguyên: không --limit → kiểm cả 3, không resume_command
+        _boutDR2 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_boutDR2), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcDR2 = _TL_MODULE.cmd_profile_doctor(_mkDR())
+        _oDR2 = json.loads(_boutDR2.getvalue())
+        cases.append(("r92_doctor_scan_all_default",
+                      _rcDR2 == 0 and _oDR2.get("profiles_checked") == ["P1", "P2", "P3"]
+                      and "resume_command" not in _oDR2))
+    finally:
+        for _k, _v in _savDR.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (#6) _nlm_system_prompt_apply: field 'verification' trung thực (KHÔNG readback chat config LIVE)
+    class _FkGSP:
+        def post(self, action, **kw):
+            return {"ok": True, "fileId": "spF"}
+    class _FakeNlmCliSP:
+        @staticmethod
+        def chat_configure(nb, text):
+            return {"ok": True}
+    _savSP = {"_imp": _TL_MODULE._imp, "_journal_append": _TL_MODULE._journal_append}
+    _realimpSP = _TL_MODULE._imp
+    try:
+        _TL_MODULE._imp = lambda name: (_FakeNlmCliSP if name == "nlm_cli" else _realimpSP(name))
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _spOut = _TL_MODULE._nlm_system_prompt_apply(_FkGSP(), "metaSP", "NBsp", run_id=None)
+        cases.append(("r92_sysprompt_verification_honest",
+                      _spOut.get("status") == "applied"
+                      and _spOut.get("verification") == "local_artifact_and_api_ok_only"
+                      and "KHÔNG" in str(_spOut.get("verification_note", ""))
+                      and "đọc" in str(_spOut.get("verification_note", "")).lower()))
+    finally:
+        for _k, _v in _savSP.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (#7a) _marker_write SELF-HEAL: sau verified, trash MỌI marker cùng tên khác fid mới (kể cả old_id="")
+    class _FkGMK:
+        def __init__(self, body):
+            self.calls = []
+            self.body = body
+        def post(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            return {"ok": True, "fileId": "fidNew"} if action == "upload" else {"ok": True}
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "download":
+                import base64 as _b64mk
+                return {"b64": _b64mk.b64encode(json.dumps(self.body).encode("utf-8")).decode("ascii")}
+            if action == "list":
+                return {"items": [{"type": "file", "name": "tra_luat_profile.json", "id": "fidOld"},
+                                  {"type": "file", "name": "tra_luat_profile.json", "id": "fidNew"},
+                                  {"type": "folder", "name": "sub", "id": "fZ"}]}
+            if action == "trash":
+                return {"ok": True}
+            return {"ok": True}
+    _bodyMK = {"schema": "tra_luat_profile.v1", "profile": "P", "rootFolderId": "root"}
+    _savMK = {"_journal_append": _TL_MODULE._journal_append}
+    try:
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _gMK = _FkGMK(_bodyMK)
+        _resMK = _TL_MODULE._marker_write(_gMK, "metaMK", _bodyMK, old_id="", run_id=None)
+        _trashedMK = {t["fileId"] for t in (_resMK.get("trashed_old") or [])}
+        cases.append(("r92_marker_write_self_heal_dup",
+                      _resMK.get("verified") is True and _trashedMK == {"fidOld"}
+                      and not [c for c in _gMK.calls if c[0] == "trash" and c[1].get("fileId") == "fidNew"]))
+    finally:
+        for _k, _v in _savMK.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (#7b) doctor phát hiện MARKER_DUPLICATE khi _marker_read trả marker_file_ids > 1
+    _keysMD = ("_read_config_record", "_profiles_from_config", "load_creds", "_gas",
+               "_doctor_check_profile", "_strip_shared_fixes", "_marker_read", "_marker_validate", "_marker_diff")
+    _savMD = {k: getattr(_TL_MODULE, k) for k in _keysMD}
+    try:
+        _TL_MODULE._read_config_record = lambda cp=None: ("cfgMD", {"profiles": {}})
+        _TL_MODULE._profiles_from_config = lambda cfg: {"P": {"rootFolderId": "rootP"}}
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: object()
+        _TL_MODULE._doctor_check_profile = lambda n, prof, infos: []
+        _TL_MODULE._strip_shared_fixes = lambda f, profs: f
+        _TL_MODULE._marker_read = lambda g, root, meta_id=None: {
+            "found": True, "error": None, "meta_folder_id": "meta", "marker_file_ids": ["m1", "m2"],
+            "marker": {"schema": "tra_luat_profile.v1", "profile": "P", "rootFolderId": "rootP"}}
+        _TL_MODULE._marker_validate = lambda m: (True, [])
+        _TL_MODULE._marker_diff = lambda m, prof: []
+        _boutMD = _io27.StringIO()
+        with _ctx27.redirect_stdout(_boutMD), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcMD = _TL_MODULE.cmd_profile_doctor(argparse.Namespace(
+                config=None, profile=None, target_profile=None, deep=False, fix=False, apply=False,
+                json=True, limit=0, skip=0))
+        _oMD = json.loads(_boutMD.getvalue())
+        _dupMD = [f for f in _oMD.get("findings", []) if f.get("check") == "MARKER_DUPLICATE"]
+        cases.append(("r92_doctor_marker_duplicate",
+                      len(_dupMD) == 1 and _dupMD[0].get("count") == 2 and _dupMD[0].get("profile") == "P"))
+    finally:
+        for _k, _v in _savMD.items():
+            setattr(_TL_MODULE, _k, _v)
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

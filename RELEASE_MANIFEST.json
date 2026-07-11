@@ -2,12 +2,12 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.34.29",
+  "skill_version": "1.34.30",
   "webapp_target": "2.21.2j",
   "root_name": "tra-luat",
   "file_count": 154,
-  "total_bytes": 4275914,
-  "package_hash": "e4a7e0c6c3a49bd55724ea334fdb470c973a38828cb42b2ae866bccfc6c46584",
+  "total_bytes": 4314604,
+  "package_hash": "d7957b9ccb5e23d6a7953d81128d17d56e1e4570cebf55752e240db3748dfa20",
   "required_missing": [],
   "files": [
     {
@@ -22,8 +22,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 73079,
-      "sha256": "03555b3be72f00dc576665c9f1b0970187ebefdbcee41e3c49a21cd2ceeb8740"
+      "size": 76450,
+      "sha256": "086e1feee7035367d7d7345f94e4e577a91d5c98fdda3c50adf63f9f1ec6b4cd"
     },
     {
       "path": "CONTEXT.md",
@@ -48,12 +48,12 @@
     {
       "path": "SKILL.md",
       "size": 47931,
-      "sha256": "e14d9df62e6a0ce5d828351eedda73560578cb1ec0b98b16e2513f3ee6cf226c"
+      "sha256": "c38677d972ec767139e29c9dc579c065abd57de46cdfaf5e45eff37fd4ebf0bc"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "d7342a9ce19d2de4c29773cb4f05a20c8543a66ffd45f60b5f19137f602f61a2"
+      "sha256": "dace5a45cee1c7e74aba2b5bb0f2c5df777424a246a4364c2a6998f31b593004"
     },
     {
       "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
@@ -87,8 +87,8 @@
     },
     {
       "path": "references/COMMANDS.md",
-      "size": 33947,
-      "sha256": "8e66edc0646ddb70c8dcf24a191c6982e15680203a4580bf60fdfea4c5d2fbd2"
+      "size": 34773,
+      "sha256": "88147ba62cba067e42d9e1c56b9eacf8edceb9516cbadb19ea6ca3212d3b3b03"
     },
     {
       "path": "references/COWORK_EDIT_SAFETY.md",
@@ -273,7 +273,7 @@
     {
       "path": "references/golden/parser_surface.json",
       "size": 14532,
-      "sha256": "0ea08dc7988035e815954e7287fd6bdf5e48f8d97570b5b5e4638afdb3417be7"
+      "sha256": "c29d3810a724f57d55aada1cb67c63bb40ff8a7f4f6a12edc98201521c9a2ef5"
     },
     {
       "path": "references/golden/route_task_ingest_zip.json",
@@ -602,8 +602,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 177240,
-      "sha256": "1f8ea8a0a66a06229770d1bf798617eeaf66c62a482df434d9a7ff31d9ad1663"
+      "size": 179189,
+      "sha256": "8663bb034fea7608194fe11902d26987c6960ad1efee11b5410aafc5511d3c59"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -627,13 +627,13 @@
     },
     {
       "path": "scripts/tl_core/cli.py",
-      "size": 37832,
-      "sha256": "73fce782aa00911ec36c80f70c1bd3897bf1fdee46e2bc752209788dc6b3b8eb"
+      "size": 38100,
+      "sha256": "9c2a42e7ecc1c025afd12b82f8cc42fa19173b312c953370740623a9bff4d6cb"
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 120720,
-      "sha256": "93d270c61a09c62e755e04477cc973600894ff38e535039c65d8318125796a1b"
+      "size": 121496,
+      "sha256": "7180b562f2905e5999439c573313091a69cb326c92208f5461d81193ce621e17"
     },
     {
       "path": "scripts/tl_core/deterministic.py",
@@ -657,8 +657,8 @@
     },
     {
       "path": "scripts/tl_core/ingest_ops.py",
-      "size": 150070,
-      "sha256": "f8eabc7b3229e41943bf190f56853f4bbb7e6e2db3c4715e3983afbba686867a"
+      "size": 152806,
+      "sha256": "b9505cb1708d2f7507d132a23c3494c67eae0b774a4aa40036653b51ae64d691"
     },
     {
       "path": "scripts/tl_core/jsonio.py",
@@ -697,8 +697,8 @@
     },
     {
       "path": "scripts/tl_core/profile_mgmt.py",
-      "size": 141673,
-      "sha256": "0473b3690ca2f1a0759ae3da16adfc4b81ccdf7dd76107d3af1f2cd3c6b000f5"
+      "size": 151846,
+      "sha256": "dd01c6bafd532fd9dd516972afe9428a69d64ad772132902304ee27a31a0ee75"
     },
     {
       "path": "scripts/tl_core/regio.py",
@@ -737,8 +737,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 563542,
-      "sha256": "b9eb922ce6b46c1cf135c4a96bfa72f857018bf529321588b756f2b355bf5e85"
+      "size": 582133,
+      "sha256": "5fce3b5249c6db66da5ac0b78c5412a18bc8fece08cd1fe157fa14e2f8575198"
     },
     {
       "path": "scripts/tra_cuu.py",

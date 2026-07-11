@@ -1,3 +1,34 @@
+# ★ v1.34.30 — vá 7 lỗi log grill: register/from-nlm/doctor/marker (2026-07-11)
+
+> Grill chốt (cây quyết định): register `--row-kind` choices GIỮ `own/overflow/ref` — KHÔNG mở `nlm_only`
+> (đề xuất #2 gốc) vì sentinel cần cả bó bất biến `_from_nlm_row_payload` set; sentinel đi qua đường sanctioned mới.
+
+- **#1 `register --bulk` không insert được (cờ `--force-insert` gây hiểu lầm):** `reg_bulk` là UPDATE-only theo
+  thiết kế; `--force-insert` trên `--bulk` chỉ BỎ QUA kiểm client (drive_id format/tồn tại), KHÔNG khiến insert.
+  Trước đây dòng key không khớp = `missed` báo IM LẶNG (operator tưởng `patched:0` là thành công). Nay SURFACE
+  `missed_count`/`missed_ids` top-level + rc=1 khi missed>0 + `force_insert_note` chỉ đường đơn / `from-nlm --add-missing`.
+- **#2→ `profile-from-nlm --add-missing` (lấp khoảng trống):** trước đây KHÔNG có đường sanctioned để thêm nguồn
+  `nlm_only` vào profile ĐÃ TỒN TẠI (`profile-from-nlm` từ chối `ALREADY_PROFILE`; `reconcile` chỉ báo) → phải
+  hand-craft sentinel qua `register`. Cờ mới seed CHỈ nguồn còn thiếu (khóa `nlm_source_id`; reuse `_from_nlm_row_payload`
+  → ép đủ bó bất biến sentinel; journaled+verified; DRY mặc định; KHÔNG đụng marker/config/chat/system-prompt).
+  Không cờ + folder có marker → `ALREADY_PROFILE` kèm hint. `--notebook` nay optional (mặc định lấy từ config profile).
+- **#3 `register` đơn báo `updated:false` cả khi vừa INSERT dòng mới:** webapp không phát cờ phân biệt insert;
+  nay precheck `reg_get` TRƯỚC upsert → field `inserted:true/false` (hết ngộ nhận ghi hụt, khỏi reg-query lại tay).
+- **#4 `register` thiếu `--json`:** thêm no-op (nhất quán `nlm-add` #6) — gõ `register … --json` hết đổ ~150 lệnh top-level.
+- **#5 `profile-doctor --deep` chậm + mất trắng khi timeout:** thêm `--limit`/`--skip` cắt lô + STREAM per-profile ra
+  stderr (`[doctor]` progress + `[doctor-jsonl]` findings → timeout giữ phần đã xong) + `resume_command`; GIỮ scan-all
+  mặc định (KHÔNG breaking ops-sweep/caller); stdout vẫn 1 JSON tổng hợp cho contract.
+- **#6 wording "readback" system prompt gây ngộ nhận:** `nlm chat` chỉ có configure(ghi)/start, KHÔNG đọc được cấu
+  hình chat LIVE. Sửa docstring `_nlm_system_prompt_apply` + thêm field runtime `verification=local_artifact_and_api_ok_only`
+  + `verification_note` (operator thấy ngay mức xác minh thật, không tưởng 'applied' = đã xác nhận nội dung LIVE).
+- **#7 ROOT-CAUSE marker "Chỉ thị" trùng tên/mồ côi:** `_marker_write` upload `force=true` LUÔN tạo `fileId` mới (Drive
+  cho trùng tên) và TRƯỚC đây chỉ trash `old_id` do caller truyền → create/from-nlm/promote (`old_id=''`) gặp marker của
+  lần retry đứt = DUPLICATE mồ côi (trỏ registry/manifest khác). SELF-HEAL: sau khi bản mới verified, quét `_meta` trash
+  MỌI marker cùng tên khác `fileId` mới. Doctor +check `MARKER_DUPLICATE`. (Dọn bản mồ côi LIVE = data-op confirm riêng.)
+- TDD r92 ×13 → 799/799. **KHÔNG bump GAS (2.21.2j), KHÔNG đổi kernel doctrine → re-import không bắt buộc.**
+
+---
+
 # ★ v1.34.29 — `profile-set-meta`: cửa ghi chính thức phần MÔ TẢ trên marker (2026-07-11)
 
 - Gap lộ ra khi `profile-load "Chỉ thị"`: marker do luồng tự động tạo không có description/style —

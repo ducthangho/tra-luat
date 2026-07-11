@@ -302,13 +302,37 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
                                if str(_row2.get(d["col"]) or "").strip() != str(d["want"]).strip()]
             except Exception:  # noqa: BLE001
                 pass
+    # v1.34.27 #5 (log phiên nạp 4 file — tukhoa tiếng Việt dài rớt LẶP): retry-GET vẫn rớt → FALLBACK
+    # POST reg_bulk per-field (né giới hạn/encoding query GET) + readback lần cuối; còn rớt mới báo lỗi.
+    _retried_post = []
+    if dropped and _did:
+        for d in dropped:
+            try:
+                _pb = g.post("reg_bulk", items=[{"drive_id": _did, d["col"]: d["want"]}], cols=d["col"])
+                if isinstance(_pb, dict) and _pb.get("ok"):
+                    _retried_post.append(d["col"])
+            except Exception:  # noqa: BLE001
+                pass
+        if _retried_post:
+            try:
+                rb3 = g.get("reg_get", drive_id=_did, refresh="true")
+                _rows3 = (rb3.get("rows") or []) if isinstance(rb3, dict) else []
+                if _rows3:
+                    _row3 = _rows3[0] or {}
+                    dropped = [d for d in dropped
+                               if str(_row3.get(d["col"]) or "").strip() != str(d["want"]).strip()]
+            except Exception:  # noqa: BLE001
+                pass
     if dropped:
         return {"verified": False, "changed": changed, "reg_upsert": r, "error": "FIELDS_DROPPED_ON_WRITE",
-                "fields_dropped": dropped, **({"fields_retried": _retried} if _retried else {}), **_empty_extra,
-                "note": "reg_upsert ok NHƯNG read-back thấy field LỆCH (đã tự retry per-field 1 vòng) — webapp bỏ cột "
-                        "im lặng (kiểm tên cột ∈ REG_COLS_ / GAS version; KHÔNG tin updated:true suông)."}
+                "fields_dropped": dropped, **({"fields_retried": _retried} if _retried else {}),
+                **({"fields_retried_post": _retried_post} if _retried_post else {}), **_empty_extra,
+                "note": "reg_upsert ok NHƯNG read-back thấy field LỆCH (đã retry GET per-field + fallback POST "
+                        "reg_bulk) — webapp bỏ cột im lặng (kiểm tên cột ∈ REG_COLS_ / GAS version; cột nào "
+                        "trong fields_dropped là CÒN rớt sau cả 2 vòng)."}
     return {"verified": ok, "changed": changed, "reg_upsert": r,
-            **({"fields_retried": _retried} if _retried else {}), **_empty_extra,
+            **({"fields_retried": _retried} if _retried else {}),
+            **({"fields_retried_post": _retried_post} if _retried_post else {}), **_empty_extra,
             **({"readback": readback} if readback != "OK" else {})}
 
 
@@ -844,7 +868,7 @@ def _manifest_placeholder(profile: str, root_id: str = "", notebook_id: str = ""
         "profile": profile,
         "rootFolderId": root_id,
         "notebookId": notebook_id,
-        "generatedAt": _dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+        "generatedAt": _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat() + "Z",
         "treeHash": "",
         "count": 0,
         "corpus_count": 0,

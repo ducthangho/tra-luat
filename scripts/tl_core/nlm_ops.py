@@ -318,6 +318,18 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             st = str(e.get("nlm_status") or "").strip().lower()
             (already_removed if st.startswith("removed") else desync_real).append(e)
     # C1: bắc cầu gdoc↔source_id cho nguồn live 'chưa đăng ký' (id KHÔNG ∈ reg_ids).
+    # v1.34.27 #4 (log phiên nạp 4 file): nguồn add qua `nlm source add --drive` KHÔNG phơi url/drive_id
+    # trong source_list → tier drive_id MISS; văn bản thường không số hiệu → tier sohieu MISS → báo
+    # unregistered OAN dù registry đã có dòng đúng drive_id. Thêm TIER 3 EXACT-TITLE duy nhất (chuẩn hoá
+    # _ingest_dedup_title_key — cùng khoá dedup-live S13; title do CHÍNH tool đặt khi add = định danh mạnh).
+    by_title: dict[str, list] = {}
+    for e in entries:
+        for _tt in (str(e.get("name") or ""), str(e.get("nlm_title") or "")):
+            _tk = _ingest_dedup_title_key(_tt)
+            if _tk:
+                by_title.setdefault(_tk, [])
+                if e not in by_title[_tk]:
+                    by_title[_tk].append(e)
     link_candidates, still_unreg = [], []
     for s in sources:
         sid = str(s.get("id") or "")
@@ -331,6 +343,11 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             _cands = by_sohieu.get(shk) or [] if shk else []
             ent = _cands[0] if len(_cands) == 1 else None   # CHỈ link theo số hiệu khi DUY NHẤT (tránh false-link reuse)
             by = "sohieu"
+        if ent is None:
+            _tk = _ingest_dedup_title_key(str(s.get("title") or ""))
+            _tcands = by_title.get(_tk) or [] if _tk else []
+            ent = _tcands[0] if len(_tcands) == 1 else None  # tier 3: title CHUẨN HOÁ duy nhất mới link
+            by = "title"
         if ent is not None and (_entry_nlm(ent) or "").strip() != sid:
             link_candidates.append({"entry": ent, "source_id": sid, "by": by, "title": s.get("title") or ""})
         else:

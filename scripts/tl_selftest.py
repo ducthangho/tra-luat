@@ -6837,6 +6837,123 @@ def run() -> int:
                   getattr(_ns89p, "notebook", None) == "nb"
                   and getattr(_ns89q, "limit", None) == 5 and getattr(_ns89q, "retry_blocked", False) is True
                   and getattr(_ns89r, "deep", False) is True))
+    # ═══ v1.34.27 — r90: vá 7 lỗi thực-chiến profile-ingest (log phiên tạo profile + nạp 4 file, 2026-07-11) ═══
+    # (1) DRIFT-LOCK GENERIC cho bẫy bind/rebase (I11 lặp lần 3 — _nlm_add_doc_type NameError): mọi tên
+    #     TOP-LEVEL của một module tl_core được function TRONG CHÍNH module đó tham chiếu PHẢI resolve được
+    #     trong namespace tl (vì bind REBASE __globals__). Bắt cả lớp lỗi thay vì vá lẻ từng tên.
+    import ast as _ast90
+    _core90 = Path(_TL_MODULE.__file__).resolve().parent / "tl_core"
+    _missing90 = []
+    for _pf90 in sorted(_core90.glob("*.py")):
+        _src90 = _pf90.read_text(encoding="utf-8", errors="replace")
+        if "def bind(" not in _src90 or "types.FunctionType(" not in _src90:
+            continue        # chỉ module REBASE __globals__ mới cần re-export; copy-globals (Pha C/D) tự resolve
+        _tree90 = _ast90.parse(_src90)
+        _top90 = set()
+        for _nd90 in _tree90.body:
+            if isinstance(_nd90, (_ast90.FunctionDef, _ast90.AsyncFunctionDef, _ast90.ClassDef)):
+                _top90.add(_nd90.name)
+            elif isinstance(_nd90, _ast90.Assign):
+                for _t90 in _nd90.targets:
+                    if isinstance(_t90, _ast90.Name):
+                        _top90.add(_t90.id)
+            elif isinstance(_nd90, _ast90.AnnAssign) and isinstance(_nd90.target, _ast90.Name):
+                _top90.add(_nd90.target.id)
+        _top90 -= {"bind", "_TL"}
+        for _nd90 in _tree90.body:
+            if not isinstance(_nd90, (_ast90.FunctionDef, _ast90.AsyncFunctionDef)) or _nd90.name == "bind":
+                continue
+            _loaded90, _stored90 = set(), set()
+            for _x90 in _ast90.walk(_nd90):
+                if isinstance(_x90, _ast90.Name):
+                    (_loaded90 if isinstance(_x90.ctx, _ast90.Load) else _stored90).add(_x90.id)
+                elif isinstance(_x90, _ast90.arg):
+                    _stored90.add(_x90.arg)
+            for _nm90 in sorted((_loaded90 & _top90) - _stored90):
+                if not hasattr(_TL_MODULE, _nm90):
+                    _missing90.append(f"{_pf90.name}:{_nd90.name}→{_nm90}")
+    if _missing90:
+        print(f"  [r90] tên module KHÔNG resolve qua tl (bẫy rebase): {_missing90[:12]}", file=sys.stderr)
+    cases.append(("r90_rebase_module_names_resolvable", _missing90 == []))
+    # (2) verify_gate: profile VĂN BẢN THƯỜNG không đòi cấu trúc Điều (Chỉ thị/Tờ trình/Công văn kiểu Mục);
+    #     corpus NỀN vbqppl giữ nguyên đòi Điều với vbqppl/draft/nq.
+    _savAP90 = _TL_MODULE._active_profile
+    try:
+        _TL_MODULE._active_profile = lambda: "beta"
+        _g90a = _TL_MODULE._ingest_verify_gate("Muc 1. Noi dung chi thi khong co Dieu.", {"kind": "draft"})
+        _TL_MODULE._active_profile = lambda: "vbqppl"
+        _g90b = _TL_MODULE._ingest_verify_gate("van ban khong co Dieu", {"kind": "draft"})
+        _g90c = _TL_MODULE._ingest_verify_gate("van ban khong co Dieu", {"kind": "nq"}, base_profile=False)
+    finally:
+        _TL_MODULE._active_profile = _savAP90
+    cases.append(("r90_gate_profile_thuong_khong_doi_dieu",
+                  _g90a["requires_dieu"] is False and _g90a["corpus_allowed"] is True
+                  and "PROFILE_DOC_DIEU_NOT_REQUIRED" in (_g90a.get("info") or [])
+                  and _g90b["requires_dieu"] is True and _g90b["corpus_allowed"] is False
+                  and _g90c["requires_dieu"] is False and _g90c["corpus_allowed"] is True))
+    # (3) DRY trung thực: probe đọc được text .docx CỤC BỘ (zip word/document.xml) — hết probe_text_source=null
+    import zipfile as _zf90
+    with _tf86.TemporaryDirectory() as _d90:
+        _fx90 = Path(_d90) / "to_trinh.docx"
+        with _zf90.ZipFile(_fx90, "w") as _z90:
+            _z90.writestr("word/document.xml",
+                          "<?xml version='1.0'?><w:document xmlns:w='x'><w:body>"
+                          "<w:p><w:r><w:t>TỜ TRÌNH</w:t></w:r></w:p>"
+                          "<w:p><w:r><w:t>Về dự thảo Chỉ thị tăng cường lãnh đạo</w:t></w:r></w:p>"
+                          "</w:body></w:document>")
+        _pt90, _ps90 = _TL_MODULE._profile_read_probe_text(str(_fx90))
+    cases.append(("r90_probe_docx_local_text",
+                  "TỜ TRÌNH" in _pt90 and "Chỉ thị" in _pt90 and "docx" in str(_ps90)))
+    # (4) nlm-reconcile: bắc cầu tier-3 EXACT-TITLE duy nhất (nguồn Drive-add không phơi url/drive_id);
+    #     title trùng ≥2 dòng → KHÔNG link (an toàn, như tier sohieu)
+    _pl90 = _TL_MODULE._nlm_reconcile_plan(
+        [{"id": "s-t1", "title": "Bao cao khao sat NXB"}],
+        [{"drive_id": "D90", "name": "Báo cáo khảo sát NXB"}], "NB1")
+    _pl90b = _TL_MODULE._nlm_reconcile_plan(
+        [{"id": "s-t2", "title": "Bao cao"}],
+        [{"drive_id": "D1", "name": "Bao cao"}, {"drive_id": "D2", "name": "Bao_cao"}], "NB1")
+    cases.append(("r90_reconcile_title_bridge_unique_only",
+                  len(_pl90["link_candidates"]) == 1 and _pl90["link_candidates"][0]["by"] == "title"
+                  and not _pl90["unregistered"]
+                  and not _pl90b["link_candidates"] and _pl90b["unregistered"] == ["s-t2"]))
+    # (5) register: FIELDS_DROPPED sau retry-GET vẫn rớt → FALLBACK POST reg_bulk per-field + readback
+    #     (ca thật: tukhoa tiếng Việt dài rớt lặp qua GET)
+    class _FkG90:
+        def __init__(self):
+            self.row = {"drive_id": "d90", "goc": "", "tukhoa": ""}
+            self.calls = []
+        def get(self, action, **kw):
+            self.calls.append(("get", action, dict(kw)))
+            if action == "reg_upsert":
+                for k, v in kw.items():
+                    if k not in ("drive_id", "tukhoa"):
+                        self.row[k] = v            # GET luôn RỚT tukhoa; cột khác ghi ok
+                return {"ok": True, "updated": True}
+            if action == "reg_get":
+                return {"ok": True, "rows": [dict(self.row)]}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append(("post", action, dict(kw)))
+            if action == "reg_bulk":
+                for it in (kw.get("items") or []):
+                    for k, v in it.items():
+                        if k != "drive_id":
+                            self.row[k] = v        # POST ghi được (né giới hạn GET)
+                return {"ok": True, "patched": 1, "missed": 0}
+            return {"ok": True}
+    _g90r = _FkG90()
+    _v90 = _TL_MODULE._verified_reg_upsert(_g90r, {"drive_id": "d90", "goc": "G1",
+                                                   "tukhoa": "an sinh; bảo hiểm xã hội; quỹ hưu trí"})
+    cases.append(("r90_register_dropped_field_post_retry",
+                  _v90.get("verified") is True and "tukhoa" in (_v90.get("fields_retried_post") or [])
+                  and any(c[:2] == ("post", "reg_bulk") for c in _g90r.calls)))
+    # (6) nlm-add nhận --json no-op (đồng bộ bề mặt CLI)
+    _ns90 = build_parser().parse_args(["nlm-add", "--drive-id", "d1", "--json"])
+    cases.append(("r90_parser_nlm_add_json_noop", getattr(_ns90, "drive_id", None) == "d1"))
+    # (7) hết datetime.utcnow() deprecated (lẫn DeprecationWarning vào stderr khi capture JSON)
+    _utc90 = [str(p.name) for p in sorted(_core90.glob("*.py"))
+              if "utcnow(" in p.read_text(encoding="utf-8", errors="replace")]
+    cases.append(("r90_no_utcnow_deprecated", _utc90 == []))
     # (5) config-of-record report + parser surface
     _ccr86 = _TL_MODULE._config_candidates_report(None)
     cases.append(("r86_config_of_record_report",

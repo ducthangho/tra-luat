@@ -241,6 +241,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="no-op: mặc định ĐÃ wait tới khi nguồn settle; nhận cờ cho tương thích ghi chú cũ (tắt: --no-wait)")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước add (mặc định DỪNG nếu nguồn đã LIVE / không liệt kê được)")
+    p.add_argument("--json", action="store_true",
+                   help="(no-op v1.34.27 #6 — output vốn đã JSON; nhận cờ để đồng bộ bề mặt CLI, hết rc=2 usage-error)")
     p.set_defaults(fn=cmd_nlm_add)
 
     p = sub.add_parser("nlm-cross", help="cross-shard query qua CLI `nlm cross query` (thay MCP cross_notebook_query)")

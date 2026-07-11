@@ -1236,11 +1236,26 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
 
 
 def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[str, str]:
+    """v1.34.27 #3 (log phiên nạp 4 file): DRY phải TRUNG THỰC — trước đây .docx local không probe được
+    (probe_text_source=null) → phân loại rơi về tên file, DRY báo kind=normal nhưng --apply (đọc text sau
+    convert) lại thành draft và chặn ở cổng Điều. Nay trích text .docx CỤC BỘ (zip word/document.xml,
+    strip tag — không cần lib ngoài) để DRY dự báo đúng kết quả apply."""
     if text_file:
         return Path(text_file).read_text(encoding="utf-8", errors="replace"), str(text_file)
     ext = Path(path).suffix.lower()
     if ext in {".txt", ".md", ".csv", ".html", ".htm", ".json"}:
         return Path(path).read_text(encoding="utf-8", errors="replace"), str(path)
+    if ext == ".docx":
+        try:
+            import zipfile as _zf
+            with _zf.ZipFile(path) as z:
+                xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+            xml = re.sub(r"</w:p>", "\n", xml)
+            txt = re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
+            if txt:
+                return txt, f"{path}#docx-local"
+        except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → giữ hành vi cũ (probe rỗng)
+            pass
     return "", ""
 
 
@@ -1342,13 +1357,19 @@ def _safe_profile_doc_name(info: dict, fallback_name: str = "") -> str:
 
 
 def _ingest_verify_gate(text: str, classification: dict | None = None,
-                        source_quality: str = "digital", ocr_verified: bool = False) -> dict:
+                        source_quality: str = "digital", ocr_verified: bool = False,
+                        base_profile: bool | None = None) -> dict:
     info = classification or {}
     stats = _dieu_sequence_stats(text or "")
     # (v1.34.6 #3 — log phiên 2026-07-09): đòi cấu trúc Điều CHỈ theo kind (vbqppl/draft/nq). Bỏ vế
     # 'or có sohieu' — văn bản thường CÓ số hiệu (công văn/báo cáo 123/BC-UBND) không có Điều là bản chất,
     # không phải lỗi; trước đây gate chặn corpus_allowed làm profile-ingest dừng nửa chừng, phải nlm-add tay.
-    requires_dieu = info.get("kind") in {"vbqppl", "draft", "nq"}
+    # v1.34.27 #2 (log phiên nạp 4 file): đòi Điều CHỈ trên corpus NỀN vbqppl — profile VĂN BẢN THƯỜNG
+    # (categories=own) chứa văn kiện KIỂU MỤC (Chỉ thị/Tờ trình/Công văn, kể cả bản DỰ THẢO của chúng)
+    # không bao giờ có Điều → dương-tính-giả DIEU_STRUCTURE_NOT_VERIFIED chặn cả 4 file, phải nlm-add tay.
+    if base_profile is None:
+        base_profile = (_active_profile() == DEFAULT_PROFILE)
+    requires_dieu = (info.get("kind") in {"vbqppl", "draft", "nq"}) and bool(base_profile)
     dieu_ok = (stats["count"] > 0) if requires_dieu else True
     norm = _strip_accents(text or "").lower()
     has_phuluc = "phu luc" in norm
@@ -1368,6 +1389,8 @@ def _ingest_verify_gate(text: str, classification: dict | None = None,
     info_flags = []
     if not requires_dieu and stats["count"] == 0:
         info_flags.append("DIEU_NOT_REQUIRED_NORMAL_DOC")   # trace v1.34.6 #3: thường-không-Điều là hợp lệ
+    if (info.get("kind") in {"vbqppl", "draft", "nq"}) and not base_profile:
+        info_flags.append("PROFILE_DOC_DIEU_NOT_REQUIRED")  # trace v1.34.27 #2: profile thường tắt đòi-Điều
     return {"ok": ok, "dieu_ok": dieu_ok, "phuluc_ok": phuluc_ok, "ocr_ok": ocr_ok,
             "source_quality": source_quality, "ocr_verified": bool(ocr_verified),
             "requires_dieu": requires_dieu, "dieu_stats": stats, "flags": flags, "info": info_flags,

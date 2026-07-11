@@ -1,3 +1,30 @@
+# ★ v1.34.27 — HOTFIX 7 lỗi thực-chiến từ log phiên tạo profile + nạp 4 file (2026-07-11)
+
+- Nguồn: báo cáo phiên thật (Chỉ thị/Tờ trình/2 Công văn) — thẩm định 7/7 CONFIRMED trên canonical.
+- **(#1 nghiêm trọng) `nlm-add` NameError `_nlm_add_doc_type`**: helper thêm v1.34.17 THIẾU stub tl
+  (bẫy rebase I11 lặp lần 3) → đường add chuẩn chết, phải add tay. Vá stub + **r90 DRIFT-LOCK GENERIC**:
+  AST-scan mọi module REBASE — mọi tên top-level được function trong module tham chiếu PHẢI resolve qua
+  tl namespace (khoá CẢ LỚP bẫy; scan xác nhận không còn tên nào khác sót; module copy-globals Pha C/D
+  tự resolve nên miễn).
+- **(#2 nghiêm trọng) verify_gate đòi Điều sai với văn bản thường**: cả 4 file dừng
+  `DIEU_STRUCTURE_NOT_VERIFIED` vì kind=draft/nq — nhưng văn kiện KIỂU MỤC (Chỉ thị/Tờ trình/Công văn,
+  kể cả bản DỰ THẢO của Chỉ thị Đảng) không bao giờ có Điều. Vá: `requires_dieu` CHỈ khi corpus NỀN
+  vbqppl (`base_profile` param, mặc định tự đọc `_active_profile()`); profile thường → info flag
+  `PROFILE_DOC_DIEU_NOT_REQUIRED`, corpus_allowed đi tiếp. Corpus nền GIỮ NGUYÊN đòi Điều.
+- **(#3) DRY/apply lệch phân loại**: probe không đọc được .docx local (`probe_text_source=null`) →
+  phân loại rơi về tên file. Vá: `_profile_read_probe_text` trích text .docx CỤC BỘ (zip
+  word/document.xml, strip tag, không cần lib) → DRY dự báo đúng kết quả apply.
+- **(#4) reconcile không link nguồn Drive-add**: source_list không phơi url/drive_id cho nguồn add qua
+  `--drive` → tier drive_id/sohieu đều MISS → unregistered OAN. Vá: TIER 3 EXACT-TITLE duy nhất
+  (khoá `_ingest_dedup_title_key` — cùng chuẩn dedup-live S13; trùng ≥2 dòng → KHÔNG link).
+- **(#5) FIELDS_DROPPED không tự phục hồi**: retry-GET per-field (v1.34.17 #6) vẫn rớt lặp với giá trị
+  tiếng Việt dài (nghi giới hạn/encoding GET query — ca thật cột `tukhoa`). Vá: FALLBACK **POST
+  reg_bulk per-field** + readback lần cuối (`fields_retried_post`); còn rớt mới báo lỗi.
+- **(#6)** `nlm-add` +`--json` no-op (hết rc=2 usage-error, đồng bộ bề mặt CLI). **(#7)** hết
+  `datetime.utcnow()` deprecated (regio manifest_export — DeprecationWarning lẫn vào JSON capture).
+- TDD r90 ×7 viết trước (đỏ xác nhận: scan bắt đúng 1 tên thiếu + gate TypeError) → **779/779**;
+  parser-surface regen (nlm-add +--json).
+
 # ★ v1.34.26 — PROFILE P4 (KẾT LỘ TRÌNH 4 PHASE): profile-from-nlm + nguồn nlm-only + materialize (2026-07-11)
 
 - **`tl profile-from-nlm --name <p> --notebook <nb> [--folder <id>]`** MỚI (Q4): notebook→profile —

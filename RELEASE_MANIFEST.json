@@ -6,8 +6,8 @@
   "webapp_target": "2.21.2j",
   "root_name": "tra-luat",
   "file_count": 154,
-  "total_bytes": 4353264,
-  "package_hash": "4ecbce0d4d3deeef3cdab6c340fe43f63bd211ac088d96ac0c64efb80e02c256",
+  "total_bytes": 4353905,
+  "package_hash": "5693f63a53f6f8d847a056969a37362b67ab732a1aa7c98881bd164e6f68ac9b",
   "required_missing": [],
   "files": [
     {
@@ -87,8 +87,8 @@
     },
     {
       "path": "references/COMMANDS.md",
-      "size": 36036,
-      "sha256": "fe8c59d917053df5aa00d2b558db70087273548e45b3feede6c70ca31175a25d"
+      "size": 36677,
+      "sha256": "e6987394b3cba4ad09c76ae921dd312feca6ab94386c20ee1b6bc5623fa28e3e"
     },
     {
       "path": "references/COWORK_EDIT_SAFETY.md",

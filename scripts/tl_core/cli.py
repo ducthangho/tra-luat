@@ -296,6 +296,13 @@ def build_parser() -> argparse.ArgumentParser:
     # xác nhận settle + link đủ. Truy vấn NLM ngay sau nạp no-wait có thể CHƯA thấy nội dung (chờ vài phút).
     p.add_argument("--nlm-no-wait", dest="nlm_no_wait", action="store_true",
                    help="(v1.34.33) KHÔNG chờ nguồn NLM settle sau add (−~50% thời gian; source_id vẫn ghi registry đủ; bỏ post-add dup-check; nạp lô xong chạy `tl nlm-reconcile`)")
+    # v1.34.35 (quy trình ADD-TAY — user chốt sau benchmark 2026-07-12): dừng ở Drive+registry, KHÔNG đụng NLM
+    # (né hẳn cookie ~1h — hôm nay chết 2 lần giữa lô). Output in URL GDoc + notebook đích gợi ý + next_steps
+    # điền sẵn: user add tay trên UI (Drive-picker chọn nhiều file, session browser) → nlm-reconcile --apply
+    # link (bắc cầu exact-title) → register --corpus true. corpus KHÔNG set ở bước này (doctrine S4: corpus=true
+    # chỉ khi đã lên NLM).
+    p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
+                   help="(v1.34.35) DỪNG ở Drive+registry (không add NLM — né cookie; cho quy trình add tay trên UI): in gdoc_url + notebook gợi ý + next_steps (reconcile link + set corpus)")
     p.set_defaults(fn=cmd_ingest_local)
 
 

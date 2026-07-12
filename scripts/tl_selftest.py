@@ -7662,6 +7662,82 @@ def run() -> int:
             os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
         else:
             os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _env96
+    # ═══ v1.34.35 — r97: ingest-local --no-nlm-add (quy trình ADD-TAY trên UI — né cookie ~1h) ═══
+    _ns97 = build_parser().parse_args(["ingest-local", "f.docx", "--apply", "--no-nlm-add"])
+    cases.append(("r97_parser_no_nlm_add", getattr(_ns97, "no_nlm_add", False) is True))
+    class _NlmBoom97:   # nlm_cli KHÔNG được đụng tới trong nhánh --no-nlm-add
+        def __getattr__(self, n):
+            raise AssertionError("nlm_cli called in --no-nlm-add: " + n)
+    class _FkG97:
+        def __init__(self):
+            self.calls = []
+        def get(self, action, **kw):
+            self.calls.append(("get", action))
+            if action == "bootstrap":
+                return {"inboxFolderId": "inbox97"}
+            if action == "organize":
+                return {"ok": True, "fileId": "gdoc97", "srcId": "src97"}
+            if action == "reg_get":
+                return {"ok": True, "rows": [{"drive_id": "gdoc97", "sohieu": "01-2026-QH16", "title_vn": "x"}]}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append(("post", action))
+            return {"ok": True, "fileId": "up97"}
+    _keys97 = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
+               "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
+               "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+    _sav97 = {k: getattr(_TL_MODULE, k) for k in _keys97}
+    _realimp97 = _TL_MODULE._imp
+    import tempfile as _tf97
+    try:
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._profile_policy_error = lambda **k: None
+        _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
+        _TL_MODULE._load_phapdien = lambda: {}
+        _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+            "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
+            "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
+        _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb97", None)
+        _g97 = _FkG97()
+        _TL_MODULE._gas = lambda: _g97
+        _TL_MODULE._ingest_target = lambda g, sh, nm: ("nb97", {"decision": "OK"})
+        _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run97"
+        _jr97 = []
+        _TL_MODULE._journal_append = lambda rid, rec: _jr97.append(rec)
+        _TL_MODULE._imp = lambda name: (_NlmBoom97() if name == "nlm_cli" else _realimp97(name))
+        with _tf97.NamedTemporaryFile(suffix=".docx", delete=False) as _f97:
+            _f97.write(b"PK\x03\x04test97")
+            _fp97 = _f97.name
+        _ns = argparse.Namespace(
+            file=_fp97, name="Luat_01-2026-QH16_Test", sohieu="01-2026-QH16", cat="01", goc="", hieuluc="",
+            loai="Luật", apply=True, resume=False, auto_plan=False, text_file=None, source_quality="auto",
+            ocr_verified=False, force_cat=False, allow_large=False, large_threshold=None,
+            skip_nlm_preflight=False, skip_live_check=False, nlm_no_wait=False, no_nlm_add=True,
+            config=None, profile=None, json=True)
+        _b97 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b97), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc97 = _TL_MODULE.cmd_ingest_local(_ns)
+        _o97 = json.loads(_b97.getvalue())
+        os.unlink(_fp97)
+        cases.append(("r97_no_nlm_add_stops_at_drive_registry",
+                      _rc97 == 0 and _o97.get("nlm") == "SKIPPED_BY_FLAG" and _o97.get("corpus") is False
+                      and _o97.get("gdoc_url") == "https://docs.google.com/document/d/gdoc97"
+                      and _o97.get("suggested_notebook") == "nb97"
+                      and "notebooklm.google.com/notebook/nb97" in str(_o97.get("notebook_url"))
+                      and len(_o97.get("next_steps") or []) == 3
+                      and "nlm-reconcile" in _o97["next_steps"][1]
+                      and "--corpus true" in _o97["next_steps"][2]))
+        # journal run_end đánh dấu no_nlm_add + KHÔNG có op nlm_source_add / reg_bulk link
+        _ops97 = [r.get("op") for r in _jr97]
+        _end97 = [r for r in _jr97 if r.get("t") == "run_end"]
+        cases.append(("r97_no_nlm_add_journal_clean",
+                      _end97 and _end97[0].get("no_nlm_add") is True
+                      and "nlm_source_add" not in _ops97 and "reg_bulk" not in _ops97))
+    finally:
+        for _k, _v in _sav97.items():
+            setattr(_TL_MODULE, _k, _v)
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

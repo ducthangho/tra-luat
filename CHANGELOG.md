@@ -1,3 +1,21 @@
+# ★ v1.34.35 — `ingest-local --no-nlm-add`: quy trình ADD-TAY trên UI (2026-07-12)
+
+> User hỏi đúng chỗ: "file đã GDoc trên Drive mà add lâu là lạ". Benchmark GDoc-add THẬT xác nhận + **đính chính
+> phân rã v1 (residual 'settle ~115s' phân bổ sai)**: API `nlm source add` GDoc chỉ **11.0s no-wait / 11.2s wait
+> (settle GDoc-đã-index ≈ 0) / 18.7s doc lớn**. 238s hôm trước = 4×NLM-call lúc API chậm + chuỗi GAS + settle
+> GDoc mới-convert (caveat cache). **Bottleneck THẬT = cookie NLM ~1h (chết 2 lần/ngày giữa lô), không phải add.**
+
+- **`--no-nlm-add`**: dừng ở Drive+registry (organize register xong), KHÔNG đụng NLM — né hẳn cookie. corpus
+  KHÔNG set (doctrine S4). Output: `gdoc_url` + `suggested_notebook` (routing GAS `nlm_preflight` vẫn chạy —
+  không cần cookie) + `notebook_url` + `next_steps` 3 bước điền sẵn. Journal `run_end +no_nlm_add`.
+- **Quy trình khép kín bằng tool sẵn có**: add tay trên UI NotebookLM (Drive-picker chọn NHIỀU GDoc 1 lần,
+  session browser bền) → `nlm-reconcile --all-notebooks` (nguồn add tay = link_candidates bắc cầu EXACT-TITLE
+  vì tên GDoc = tên nguồn) → per-notebook `--apply` link registry → `register --drive-id <gdoc> --corpus true`.
+- r97 ×3 (parser + full-mock dừng-đúng-chỗ + journal sạch, nlm_cli Boom-guard chứng minh 0 đụng NLM) → **819/819**.
+- KHÔNG bump GAS (2.21.2j), KHÔNG đổi kernel doctrine.
+
+---
+
 # ★ v1.34.34 — vá 2 bài học THỰC CHỨNG lô song song: race reg_bulk + reconcile overflow (2026-07-12)
 
 > Nạp lô thực chứng 2 VBHN (`--nlm-no-wait` + skip-flags + 2 process song song): **~63s/file kể cả sự cố**

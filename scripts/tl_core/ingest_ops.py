@@ -1851,7 +1851,7 @@ def cmd_ingest_local(a) -> int:
     # `boot --setup` cố tình bỏ NLM (né timeout) → bước CUỐI `nlm add` gãy sau khi upload+organize+register ĐÃ xong
     # (chuỗi dở dang phải vá tay). Kiểm binary + notebook_get LIVE (~2s) NGAY ĐÂY; fail → DỪNG với hướng dẫn,
     # CHƯA đụng Drive/registry. Ép bỏ (biết NLM sẽ tự lo sau): --skip-nlm-preflight.
-    if not getattr(a, "skip_nlm_preflight", False):
+    if not getattr(a, "skip_nlm_preflight", False) and not getattr(a, "no_nlm_add", False):
         _nlm_ok, _nlm_why = False, ""
         try:
             _nc0 = _imp("nlm_cli")
@@ -1987,6 +1987,25 @@ def cmd_ingest_local(a) -> int:
             print(f"[tl] {'⚠ organize KHÔNG persist sohieu → ' if _need_sh else ''}backfill reg_upsert"
                   f"{' (+title_vn at-ingest)' if _need_tv else ''}: "
                   f"{'OK' if _vbf.get('verified') else 'FAIL ' + str(_vbf.get('error'))}", file=sys.stderr, flush=True)
+    # v1.34.35 (quy trình ADD-TAY): --no-nlm-add DỪNG tại đây — Drive + registry (organize register) ĐÃ xong,
+    # KHÔNG đụng NLM (né cookie ~1h). corpus KHÔNG set (doctrine S4: corpus=true chỉ khi đã lên NLM). In next_steps
+    # điền sẵn: add tay URL trên UI notebook → nlm-reconcile --apply (link bắc cầu exact-title: tên GDoc = tên
+    # nguồn) → register --corpus true. Journal run_end đánh dấu no_nlm_add để --resume/journal-close hiểu đúng.
+    if getattr(a, "no_nlm_add", False):
+        _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"OK": 1}, "no_nlm_add": True})
+        _gdoc_url = f"https://docs.google.com/document/d/{gdoc}"
+        _nb_url = f"https://notebooklm.google.com/notebook/{target}"
+        out = {"ok": True, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,
+               "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None,
+               "corpus": False, "nlm": "SKIPPED_BY_FLAG", "preflight": pf,
+               "gdoc_url": _gdoc_url, "suggested_notebook": target, "notebook_url": _nb_url,
+               "next_steps": [
+                   f"1) Add tay trên UI: mở {_nb_url} → Add source → Google Drive → chọn '{name}' (Drive-picker chọn được NHIỀU file 1 lần cho cả lô)",
+                   "2) tl nlm-reconcile --all-notebooks   (nguồn add tay hiện thành link_candidates bắc cầu exact-title → chạy per-notebook --apply để link registry)",
+                   f"3) tl register --drive-id {gdoc} --corpus true   (đưa vào corpus SAU khi đã link NLM)",
+               ]}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+        return 0
     nc = _imp("nlm_cli")
     src = _prev.get("nlm_source_id") or ""
     if src:

@@ -140,9 +140,17 @@ def _verify_reg_result(rb: dict, expected: int) -> dict:
             "no_change": reg_ok and missed == 0 and patched < int(expected)}
 
 
+_REG_BULK_READBACK_MAX = 3   # v1.34.34: batch ≤N item mới readback field-level (cost +1 reg_get/item ~2-3s)
+
+
 def _verified_reg_write(g, items: list, cols) -> dict:
     """Bọc reg_bulk AN TOÀN (Pha 1 sẽ thay mọi g.post('reg_bulk',...) trực tiếp): (1) validate cột ∈ schema TRƯỚC ghi
-    (chống cột lạ bị bỏ im lặng); (2) sau ghi đối chiếu patched==len(items). Trả verify dict. KHÔNG raise."""
+    (chống cột lạ bị bỏ im lặng); (2) sau ghi đối chiếu patched==len(items). Trả verify dict. KHÔNG raise.
+    v1.34.34 (THỰC CHỨNG lô song song 2026-07-12): 2 process reg_bulk CÙNG LÚC → race last-write-wins trên Sheet
+    NUỐT 1 bản DÙ patched=1 (ca VBHN 06 registry trống dù journal verified). Với batch NHỎ (≤_REG_BULK_READBACK_MAX,
+    = đường reg_link ingest 1 item): READBACK field-level từng item (reg_get refresh=true, khuôn reg_upsert N3);
+    lệch → RETRY reg_bulk per-item đúng 1 vòng (ghi-lại sau khi process kia xong là bền) → re-readback; vẫn lệch →
+    verified=False + fields_dropped LOUD. Batch lớn giữ patched-check (cost); lưới sau = nlm-reconcile/backfill."""
     items = list(items or [])
     ok_cols, bad = _reg_cols_valid(cols)
     if not ok_cols:
@@ -154,6 +162,40 @@ def _verified_reg_write(g, items: list, cols) -> dict:
         return {"verified": False, "error": f"REG_BULK_RAISED:{type(e).__name__}", "patched": 0, "expected": len(items)}
     v = _verify_reg_result(rb, len(items))
     v["reg_bulk"] = rb
+    _cols_list = [c.strip() for c in cols.split(",")] if isinstance(cols, str) else [str(c) for c in (cols or [])]
+    if v.get("verified") and 0 < len(items) <= _REG_BULK_READBACK_MAX:
+        dropped, retried = [], []
+        for it in items:
+            _did = str((it or {}).get("drive_id") or "")
+            if not _did:
+                continue   # item khóa nlm_source_id: reg_get theo drive_id không áp — giữ patched-check
+            def _mismatch():
+                try:
+                    _rg = g.get("reg_get", drive_id=_did, refresh="true")
+                    _row = ((_rg.get("rows") or [{}])[0]) if isinstance(_rg, dict) else {}
+                except Exception:  # noqa: BLE001
+                    return None   # đọc lỗi mạng → KHÔNG kết luận (không phủ nhận write đã ok)
+                return [c for c in _cols_list
+                        if str((it or {}).get(c) or "").strip()
+                        and str(_row.get(c) or "").strip() != str(it.get(c)).strip()]
+            _mm = _mismatch()
+            if _mm:
+                try:   # retry per-item 1 vòng — race đã qua, lần ghi này bền
+                    g.post("reg_bulk", items=[dict(it)], cols=cols)
+                    retried.append(_did)
+                except Exception:  # noqa: BLE001
+                    pass
+                _mm = _mismatch()
+                if _mm:
+                    dropped.append({"drive_id": _did, "cols": _mm})
+        if retried:
+            v["races_retried"] = retried
+        if dropped:
+            v["verified"] = False
+            v["error"] = "REG_BULK_FIELDS_DROPPED"
+            v["fields_dropped"] = dropped
+            v["note"] = ("reg_bulk patched OK nhưng READBACK thấy field lệch (nghi race ghi song song / webapp drop) "
+                         "— đã retry per-item 1 vòng vẫn lệch. Vá tay: `tl register --drive-id <id> ...`.")
     return v
 
 

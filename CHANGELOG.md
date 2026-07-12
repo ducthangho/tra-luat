@@ -1,3 +1,26 @@
+# ★ v1.34.34 — vá 2 bài học THỰC CHỨNG lô song song: race reg_bulk + reconcile overflow (2026-07-12)
+
+> Nạp lô thực chứng 2 VBHN (`--nlm-no-wait` + skip-flags + 2 process song song): **~63s/file kể cả sự cố**
+> (vs 238s baseline, ~3.8×). Sự cố thật lộ 2 lỗ hổng: ca VBHN 06 registry TRỐNG dù journal patched=1+verified
+> (race), và reconcile báo "sạch" trong khi nguồn nằm ở overflow (ngoài phạm vi quét).
+
+- **(a) Race `reg_bulk` concurrent** — 2 process ghi Sheet cùng lúc → last-write-wins NUỐT 1 bản dù server trả
+  patched=1. `_verified_reg_write` nay với batch ≤`_REG_BULK_READBACK_MAX`(3): READBACK field-level per-item
+  (reg_get refresh=true, khuôn N3 của reg_upsert) → lệch → RETRY reg_bulk per-item đúng 1 vòng (sau race,
+  lần ghi lại là bền — tự chữa đúng ca lô song song) → vẫn lệch → `REG_BULK_FIELDS_DROPPED` loud (rc caller ≠ 0).
+  Batch lớn giữ patched-check (backfill 33-dòng không phình thời gian). Đường reg_link ingest (1 item) nay an toàn race.
+- **(b) `nlm-reconcile --all-notebooks`** — lưới cuối lô quét CẢ base + overflow shard (TL_OVERFLOW_NOTEBOOK_ID)
+  1 lệnh, stream per-notebook, gộp `per_notebook`; DRY-only (apply vẫn per-notebook — chặn loud). Dogfood LIVE
+  bắt ngay 2 finding thật trên overflow mà lưới cũ mù: link_candidate `76-2026-VBHN` Luật Dược (→ `--apply`
+  backfilled) + 1 nguồn unregistered `VBHN_73-82-ND-CP_Phu_luc` (chờ user quyết).
+- **DATA-OP cùng phiên**: `63-2025-VBHN-VPQH` XLVPHC → corpus=false (superseded bởi `90-2026-VBHN-VPQH` vừa nạp;
+  nguồn NLM bản cũ còn live trên notebook chính — gỡ hay giữ do user quyết).
+- r96 ×6 TDD + r3 mock cập nhật theo hành vi mới → **816/816**. ★Bẫy I11 biến thể mới ghi sổ: HẰNG cho vào
+  `_STUB_MAP` thành function stub → so sánh int nổ; hằng PHẢI re-export trực tiếp `X = _tl_mod.X`.
+- KHÔNG bump GAS (2.21.2j), KHÔNG đổi kernel doctrine.
+
+---
+
 # ★ v1.34.33 — `ingest-local --nlm-no-wait`: nạp lô nhanh −55% (2026-07-12)
 
 > Benchmark từ 3 lần nạp thật + micro-bench từng op (`D:\Quốc hội\benchmark-ingest-2026-07-12.md`):

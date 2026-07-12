@@ -313,10 +313,13 @@ def run() -> int:
         _os3.environ["TL_PROFILE"] = "selftest-r3"          # cô lập cache-dir + precheck theo profile GIẢ
         _os3.environ.pop("TL_REGISTRY_DOC_ID", None)
         # (1) verified-write: OK / idempotent / miss THẬT / cột sai (chặn TRƯỚC post) / post raise
-        _g = _FakeG(post_r={"ok": True, "patched": 2, "missed": 0, "miss": []})
+        # v1.34.34: batch ≤3 nay READBACK field-level (race-guard) → fake get phải trả rows KHỚP giá trị ghi.
+        _g = _FakeG(post_r={"ok": True, "patched": 2, "missed": 0, "miss": []},
+                    get_r={"ok": True, "rows": [{"corpus": "false"}]})
         cases.append(("r3_verified_write_ok", _verified_reg_write(_g, [{"drive_id": "d1", "corpus": "false"},
                                                                        {"drive_id": "d2", "corpus": "false"}], "corpus").get("verified") is True))
-        _g = _FakeG(post_r={"ok": True, "patched": 0, "missed": 0, "miss": []})
+        _g = _FakeG(post_r={"ok": True, "patched": 0, "missed": 0, "miss": []},
+                    get_r={"ok": True, "rows": [{"corpus": "false"}]})
         cases.append(("r3_verified_write_idempotent",
                       _verified_reg_write(_g, [{"drive_id": "d1", "corpus": "false"}], "corpus").get("verified") is True))
         _g = _FakeG(post_r={"ok": True, "patched": 1, "missed": 1, "miss": ["dX"]})
@@ -7580,6 +7583,85 @@ def run() -> int:
     _anw = _nc95._add_args("nb95", drive_id="d95", wait=False)
     cases.append(("r95_add_args_wait_flag",
                   "--wait" in _aw and "--wait" not in _anw and "--wait-timeout" not in _anw))
+    # ═══ v1.34.34 — r96: vá 2 bài học THỰC CHỨNG lô song song 2026-07-12 ═══
+    # (a) _verified_reg_write batch nhỏ READBACK field-level — race 2 process reg_bulk nuốt 1 bản dù patched=1
+    class _FkG96:
+        def __init__(self, row_states):
+            # row_states: list các dict row mà reg_get trả LẦN LƯỢT (mô phỏng race rồi bền sau retry)
+            self.calls = []
+            self.row_states = list(row_states)
+        def post(self, action, **kw):
+            self.calls.append(("post", action, {k: v for k, v in kw.items() if k != "items"}))
+            return {"ok": True, "patched": len(kw.get("items") or [])}
+        def get(self, action, **kw):
+            self.calls.append(("get", action, dict(kw)))
+            if action == "reg_get":
+                row = self.row_states.pop(0) if self.row_states else {}
+                return {"ok": True, "rows": ([row] if row is not None else [])}
+            return {"ok": True}
+    _item96 = {"drive_id": "g96", "nlm_source_id": "s96", "corpus": "true"}
+    # (a1) race: readback lần 1 THIẾU field → retry reg_bulk → readback lần 2 ĐÚNG → verified + races_retried
+    _g96a = _FkG96([{"drive_id": "g96", "nlm_source_id": "", "corpus": ""},
+                    {"drive_id": "g96", "nlm_source_id": "s96", "corpus": "true"}])
+    _v96a = _TL_MODULE._verified_reg_write(_g96a, [_item96], "nlm_source_id,corpus")
+    cases.append(("r96_regbulk_race_retry_heals",
+                  _v96a.get("verified") is True and _v96a.get("races_retried") == ["g96"]
+                  and len([c for c in _g96a.calls if c[0] == "post"]) == 2))     # bulk gốc + retry per-item
+    # (a2) retry vẫn lệch → verified=False + REG_BULK_FIELDS_DROPPED loud
+    _g96b = _FkG96([{"drive_id": "g96", "nlm_source_id": "", "corpus": ""},
+                    {"drive_id": "g96", "nlm_source_id": "", "corpus": ""}])
+    _v96b = _TL_MODULE._verified_reg_write(_g96b, [_item96], "nlm_source_id,corpus")
+    cases.append(("r96_regbulk_race_still_dropped_loud",
+                  _v96b.get("verified") is False and _v96b.get("error") == "REG_BULK_FIELDS_DROPPED"
+                  and _v96b.get("fields_dropped")))
+    # (a3) batch LỚN (> _REG_BULK_READBACK_MAX) → giữ patched-check, KHÔNG reg_get (không phình thời gian backfill)
+    _g96c = _FkG96([])
+    _items96c = [{"drive_id": f"g{i}", "corpus": "true"} for i in range(_TL_MODULE._REG_BULK_READBACK_MAX + 1)]
+    _v96c = _TL_MODULE._verified_reg_write(_g96c, _items96c, "corpus")
+    cases.append(("r96_regbulk_large_batch_no_readback",
+                  _v96c.get("verified") is True
+                  and not [c for c in _g96c.calls if c[0] == "get" and c[1] == "reg_get"]))
+    # (b) nlm-reconcile --all-notebooks: parser + quét base+overflow gộp per_notebook; apply bị chặn DRY-only
+    _ns96 = build_parser().parse_args(["nlm-reconcile", "--all-notebooks", "--json"])
+    cases.append(("r96_parser_reconcile_all_notebooks", getattr(_ns96, "all_notebooks", False) is True))
+    _keys96 = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries")
+    _sav96 = {k: getattr(_TL_MODULE, k) for k in _keys96}
+    _env96 = os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")
+    _realimp96 = _TL_MODULE._imp
+    class _FakeNC96:
+        @staticmethod
+        def source_list(nb, skip_freshness=True):
+            return {"ok": True, "sources": []}
+    try:
+        os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = "ovf96"
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or "base96"), None)
+        _TL_MODULE._imp = lambda name: (_FakeNC96 if name == "nlm_cli" else _realimp96(name))
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        def _mk96(**kw):
+            base = dict(config=None, profile=None, notebook_id=None, apply=False, clear_stale=False,
+                        force_unsafe=False, refresh=True, json=True, out=None, all_notebooks=True)
+            base.update(kw)
+            return argparse.Namespace(**base)
+        _b96 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b96), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc96 = _TL_MODULE.cmd_nlm_reconcile(_mk96())
+        _o96 = json.loads(_b96.getvalue())
+        _nbs96 = [p.get("notebook") for p in (_o96.get("per_notebook") or [])]
+        cases.append(("r96_reconcile_all_notebooks_sweeps_both",
+                      _rc96 == 0 and _o96.get("all_notebooks") is True
+                      and _o96.get("notebooks_swept") == 2 and _nbs96 == ["base96", "ovf96"]
+                      and all(p.get("ok") for p in _o96.get("per_notebook"))))
+        with _hush():
+            _rc96b = _TL_MODULE.cmd_nlm_reconcile(_mk96(apply=True))
+        cases.append(("r96_reconcile_all_notebooks_apply_refused", _rc96b == 2))
+    finally:
+        for _k, _v in _sav96.items():
+            setattr(_TL_MODULE, _k, _v)
+        if _env96 is None:
+            os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
+        else:
+            os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _env96
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

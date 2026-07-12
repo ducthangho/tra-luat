@@ -362,8 +362,56 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
 
 def cmd_nlm_reconcile(a) -> int:
     """C (WS1): đối soát registry↔NLM bằng ground-truth từ CLI nlm. Backfill nlm_notebook_id cho dòng
-    THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định."""
+    THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định.
+    v1.34.34 --all-notebooks: quét base + overflow shard 1 lệnh (DRY — thực chứng 2026-07-12: nguồn nạp vào
+    overflow lọt lưới reconcile mặc định). Tái dùng chính hàm này per-notebook (capture JSON), gộp báo cáo."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    if getattr(a, "all_notebooks", False):
+        import argparse as _ap, io as _io, contextlib as _ctx
+        if getattr(a, "apply", False) or getattr(a, "clear_stale", False):
+            print(json.dumps({"ok": False, "error": "ALL_NOTEBOOKS_IS_DRY_ONLY",
+                              "note": "--all-notebooks chỉ QUÉT (DRY). Sửa: chạy per-notebook "
+                                      "`tl nlm-reconcile <notebook_id> --apply`."}, ensure_ascii=False),
+                  file=sys.stderr)
+            return 2
+        _base, _nberr0 = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
+        if _nberr0:
+            print(json.dumps({"ok": False, "error": _nberr0}, ensure_ascii=False), file=sys.stderr); return 2
+        _ovf = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
+        _nbs = [_base] + ([_ovf] if _ovf and _ovf != _base else [])
+        _per, _all_ok = [], True
+        for _nb_i in _nbs:
+            _buf = _io.StringIO()
+            _ns_i = _ap.Namespace(config=getattr(a, "config", None), profile=getattr(a, "profile", None),
+                                  notebook_id=_nb_i, apply=False, clear_stale=False,
+                                  force_unsafe=getattr(a, "force_unsafe", False),
+                                  refresh=getattr(a, "refresh", False), json=True, out=None, all_notebooks=False)
+            try:
+                with _ctx.redirect_stdout(_buf):
+                    _rc_i = cmd_nlm_reconcile(_ns_i)
+                _r_i = json.loads(_buf.getvalue() or "{}")
+            except Exception as _e_i:  # noqa: BLE001
+                _rc_i, _r_i = 1, {"ok": False, "error": f"{type(_e_i).__name__}: {_e_i}"}
+            _all_ok = _all_ok and (_rc_i == 0) and bool(_r_i.get("ok"))
+            _per.append({"notebook": _nb_i, "rc": _rc_i,
+                         **{k: _r_i.get(k) for k in ("ok", "live_on_nlm", "desync_real", "unregistered_on_nlm",
+                                                     "link_candidates", "backfill_nlm_notebook_id",
+                                                     "already_removed", "error") if k in _r_i}})
+            print(f"[reconcile] {_nb_i[:8]}…: desync={_r_i.get('desync_real')} unregistered="
+                  f"{_r_i.get('unregistered_on_nlm')} link_candidates={_r_i.get('link_candidates')}",
+                  file=sys.stderr, flush=True)
+        _out_all = {"ok": _all_ok, "mode": "DRY", "all_notebooks": True, "notebooks_swept": len(_nbs),
+                    "per_notebook": _per,
+                    "note": "Lưới cuối lô: mọi notebook sạch (desync=0, unregistered=0) = lô settle+link đủ. "
+                            "Có finding → chạy per-notebook `tl nlm-reconcile <nb> --apply`."}
+        _o = getattr(a, "out", None)
+        if _o:
+            Path(_o).write_text(json.dumps(_out_all, ensure_ascii=False, indent=1) + "\n",
+                                encoding="utf-8", newline="\n")
+            print(json.dumps({"ok": _all_ok, "out": _o, "notebooks_swept": len(_nbs)}, ensure_ascii=False))
+        else:
+            print(json.dumps(_out_all, ensure_ascii=False, indent=1))
+        return 0 if _all_ok else 1
     nb, _nberr = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
     if _nberr:
         print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2

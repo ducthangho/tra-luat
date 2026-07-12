@@ -228,6 +228,10 @@ def build_parser() -> argparse.ArgumentParser:
     # đều nhận): output vốn ĐÃ là JSON — nhận cờ cho đồng bộ CLI (no-op), driver batch không phải case riêng.
     p.add_argument("--json", action="store_true", help="chấp nhận cho đồng bộ CLI (output vốn đã JSON)")
     p.add_argument("--out", help="ghi JSON ra file atomically; tự bật JSON")
+    # v1.34.34 (THỰC CHỨNG lô 2026-07-12): nguồn nạp vào OVERFLOW shard KHÔNG được reconcile mặc định (chỉ quét
+    # notebook chính) → ca VBHN 06 mất reg_link mà reconcile báo sạch. --all-notebooks quét base + overflow 1 lệnh.
+    p.add_argument("--all-notebooks", dest="all_notebooks", action="store_true",
+                   help="(v1.34.34) DRY quét CẢ base + overflow shard (TL_OVERFLOW_NOTEBOOK_ID) 1 lệnh — lưới cuối lô no-wait; --apply vẫn chạy per-notebook qua notebook_id")
     p.set_defaults(fn=cmd_nlm_reconcile)
 
 

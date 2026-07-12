@@ -751,6 +751,7 @@ def _cmd_profile_doctor_impl(a) -> int:
     _limit = int(getattr(a, "limit", 0) or 0)
     _names_run = names[_skip:(_skip + _limit)] if _limit > 0 else names[_skip:]
     _run_total = len(_names_run)
+    _vbt_root_id = None   # v1.34.36 (backlog #2 handoff 2026-07-11): lazy bootstrap 1 lần cho check root==VBT
     findings, infos_all = [], {}
     for _idx, n in enumerate(_names_run, 1):
         _before_len = len(findings)
@@ -773,6 +774,16 @@ def _cmd_profile_doctor_impl(a) -> int:
         # P1 (v1.34.22, ADR-0003): kiểm MARKER — thiếu/hỏng/lệch-config đều là finding (drift 3 chiều
         # marker↔config; chiều index kiểm bằng profile-index DRY).
         _root = str(prof.get("rootFolderId") or "").strip()
+        # v1.34.36 (backlog #2 handoff 2026-07-11 — dứt known-noise ops-sweep): profile có root == CHÍNH thư mục
+        # Van_ban_thuong gốc (vbthuong) CỐ Ý không đặt marker (_meta của VBT gốc dùng chung index/sổ; marker ở đó
+        # sẽ nhận VBT làm 1 profile thường — sai bản thể). Skip TRỌN khối marker-check cho profile này.
+        if _root and _vbt_root_id is None:
+            try:
+                _vbt_root_id = str((g.get("bootstrap") or {}).get("vanBanThuongId") or "")
+            except Exception:  # noqa: BLE001
+                _vbt_root_id = ""
+        if _root and _vbt_root_id and _root == _vbt_root_id:
+            _root = ""   # tắt marker-check; các check layout/deep phía dưới không phụ thuộc _root
         if _root:
             _mr = _marker_read(g, _root, meta_id=str(prof.get("metaFolderId") or "") or None)
             # #7 (v1.34.30): ≥2 file marker cùng tên trong _meta = dấu vết retry đứt (create/from-nlm/promote) →

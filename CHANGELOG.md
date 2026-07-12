@@ -1,3 +1,16 @@
+# ★ v1.34.36 — doctor skip marker-check cho profile root==VBT gốc (2026-07-12)
+
+- Backlog #2 (handoff 2026-07-11): profile `vbthuong` có rootFolderId == CHÍNH thư mục Van_ban_thuong gốc,
+  CỐ Ý không đặt marker (marker ở `_meta` VBT gốc sẽ nhận VBT làm 1 profile thường — sai bản thể) → doctor
+  nay lazy-bootstrap `vanBanThuongId` 1 lần và SKIP trọn khối marker-check cho profile đó. Dứt known-noise
+  `[vbthuong] MARKER_MISSING` lặp mỗi sáng trong ops-sweep. r98 → **820/820**.
+- Kèm 2 fix `ops-sweep.ps1` local (ngoài repo, đã vào bundle chuyển giao): B5 dùng `2>$null` (doctor
+  v1.34.30+ stream tiến độ ra stderr — `2>&1` cũ trộn làm hỏng parse JSON); B6 thêm `--refresh` (manifest
+  cache stale sau data-ops làm desync/unregistered báo OAN).
+- KHÔNG bump GAS, KHÔNG đổi kernel doctrine.
+
+---
+
 # ★ v1.34.35 — `ingest-local --no-nlm-add`: quy trình ADD-TAY trên UI (2026-07-12)
 
 > User hỏi đúng chỗ: "file đã GDoc trên Drive mà add lâu là lạ". Benchmark GDoc-add THẬT xác nhận + **đính chính

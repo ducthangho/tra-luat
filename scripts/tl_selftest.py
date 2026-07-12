@@ -7738,6 +7738,38 @@ def run() -> int:
     finally:
         for _k, _v in _sav97.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.36 — r98: doctor SKIP marker-check cho profile root==VBT gốc (backlog #2 — dứt known-noise) ═══
+    _keys98 = ("_read_config_record", "_profiles_from_config", "load_creds", "_gas",
+               "_doctor_check_profile", "_strip_shared_fixes", "_marker_read")
+    _sav98 = {k: getattr(_TL_MODULE, k) for k in _keys98}
+    try:
+        class _FkG98:
+            def get(self, action, **kw):
+                if action == "bootstrap":
+                    return {"vanBanThuongId": "vbtROOT98"}
+                return {"ok": True}
+        _TL_MODULE._read_config_record = lambda cp=None: ("cfg98", {"profiles": {}})
+        _TL_MODULE._profiles_from_config = lambda cfg: {
+            "vbthuong": {"rootFolderId": "vbtROOT98"},      # root == VBT gốc → skip marker-check
+            "Q98": {"rootFolderId": "otherRoot98"}}          # profile thường → vẫn check
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._gas = lambda: _FkG98()
+        _TL_MODULE._doctor_check_profile = lambda n, prof, infos: []
+        _TL_MODULE._strip_shared_fixes = lambda f, profs: f
+        _TL_MODULE._marker_read = lambda g, root, meta_id=None: {"found": False, "error": None,
+                                                                 "meta_folder_id": "", "marker_file_ids": []}
+        _b98 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_b98), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rc98 = _TL_MODULE.cmd_profile_doctor(argparse.Namespace(
+                config=None, profile=None, target_profile=None, deep=False, fix=False, apply=False,
+                json=True, limit=0, skip=0))
+        _o98 = json.loads(_b98.getvalue())
+        _mm98 = [f for f in _o98.get("findings", []) if f.get("check") == "MARKER_MISSING"]
+        cases.append(("r98_doctor_skips_vbt_root_marker",
+                      len(_mm98) == 1 and _mm98[0].get("profile") == "Q98"))   # CHỈ Q98 bị flag, vbthuong skip
+    finally:
+        for _k, _v in _sav98.items():
+            setattr(_TL_MODULE, _k, _v)
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

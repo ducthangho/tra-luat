@@ -1484,8 +1484,27 @@ def cmd_profile_ingest(a) -> int:
     if _perr:
         return _emit_profile_policy_error(_perr, getattr(a, "json", False))
     f = getattr(a, "file", None)
+    # v1.34.37: --drive-id = file ĐÃ Ở TRONG THƯ MỤC PROFILE → bỏ upload, CHỈ convert→GDoc + đổi tên chuẩn (giữ
+    # PHẲNG trong root profile, KHÔNG xếp cat). Tải NHỊ PHÂN về temp để probe/verify chạy y như đường local.
+    _from_drive = ""
+    _drive_id = (getattr(a, "drive_id", None) or "").strip()
+    if _drive_id:
+        if f:
+            print(json.dumps({"ok": False, "step": "drive_id_args",
+                              "error": "CHỈ MỘT trong <file> (local) HOẶC --drive-id (đã ở Drive) — không cả hai."},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        _dsrc = _resolve_drive_id_source(_gas(), _drive_id)
+        if not _dsrc.get("ok"):
+            print(json.dumps({"ok": False, "step": "drive_id_resolve", **_dsrc}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        f = _dsrc.get("local_path") or ""
+        _from_drive = _drive_id
     if not (f and Path(f).exists()):
-        print(f"[tl] profile-ingest: không thấy file {f}", file=sys.stderr)
+        print(f"[tl] profile-ingest: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở thư mục profile)",
+              file=sys.stderr)
         return 2
     source_quality = _profile_source_quality(f, getattr(a, "source_quality", "auto"))
     # v1.34.6 #2: bảng tính đi đường riêng — canonical = Google SHEET (copy_convert toType=sheets),
@@ -1541,15 +1560,19 @@ def cmd_profile_ingest(a) -> int:
         print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
         return 2
     g = _gas()
-    inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
     up_mime, up_ext = _upload_mime_ext(f)
-    import base64
-    up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode("ascii"), name=Path(f).stem + up_ext,
-                mime=up_mime, parentId=inbox, convert="false", register="false", share="false", force="true")
-    fid = up.get("fileId") or up.get("id")
-    if not fid:
-        print(json.dumps({"ok": False, "step": "upload", "detail": up}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+    if _from_drive:
+        # v1.34.37: dùng chính file Drive có sẵn làm nguồn convert (KHÔNG re-upload).
+        fid = _from_drive
+    else:
+        inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
+        import base64
+        up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode("ascii"), name=Path(f).stem + up_ext,
+                    mime=up_mime, parentId=inbox, convert="false", register="false", share="false", force="true")
+        fid = up.get("fileId") or up.get("id")
+        if not fid:
+            print(json.dumps({"ok": False, "step": "upload", "detail": up}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     hieuluc = DRAFT_WARNING if info.get("draft") else (getattr(a, "hieuluc", None) or "Còn")
     if _is_sheet:
         # v1.34.6 #2: organize chỉ convert→GDoc; bảng tính phải copy_convert toType=sheets (API_CONTRACT).
@@ -1746,8 +1769,32 @@ def cmd_ingest_local(a) -> int:
     if _perr:
         return _emit_profile_policy_error(_perr, getattr(a, "json", False))
     f = getattr(a, "file", None)
+    # v1.34.37: --drive-id = file ĐÃ Ở TRÊN DRIVE (người dùng kéo-thả _HOP_NAP qua UI) → bỏ upload, organize
+    # ngay trên file đó. Tải NHỊ PHÂN về temp để auto-plan/size chạy Y NHƯ đường local; fid = drive_id gốc.
+    _from_drive = ""
+    _drive_id = (getattr(a, "drive_id", None) or "").strip()
+    if _drive_id:
+        if f:
+            print(json.dumps({"ok": False, "step": "drive_id_args",
+                              "error": "CHỈ MỘT trong <file> (local) HOẶC --drive-id (đã ở Drive) — không cả hai."},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        _dsrc = _resolve_drive_id_source(_gas(), _drive_id)
+        if not _dsrc.get("ok"):
+            print(json.dumps({"ok": False, "step": "drive_id_resolve", **_dsrc}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        if _dsrc.get("is_sheet"):
+            print(json.dumps({"ok": False, "step": "drive_id_sheet", "drive_id": _drive_id,
+                              "error": "Bảng tính (.xlsx/.xls) không đi đường ingest-local (canonical vbqppl = Google Doc). "
+                                       "Bảng tính thuộc profile riêng → dùng `tl profile-ingest --drive-id`."},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        f = _dsrc.get("local_path") or ""
+        _from_drive = _drive_id
     if not (f and Path(f).exists()):
-        print(f"[tl] ingest-local: không thấy file {f}", file=sys.stderr); return 2
+        print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
+              file=sys.stderr); return 2
     explicit_name = getattr(a, "name", None)
     explicit_cat = getattr(a, "cat", None)
     sohieu = (getattr(a, "sohieu", None) or "").strip()
@@ -1815,9 +1862,13 @@ def cmd_ingest_local(a) -> int:
             "large_file": _large_file, "large_threshold": _large_threshold, "large_note": _large_note,
             "inherit_tree_warn": _inherit_warn,
             "src_ext": _src_ext, "convert": "Drive organize convert=true (server-side)", "format_warn": _fmt_warn,
+            "from_drive_id": _from_drive or None,
             "auto_plan": auto_plan}
     if not getattr(a, "apply", False):
-        plan["mode"] = "DRY"; plan["note"] = "--apply để chạy: [mkdir nếu cần]→upload→organize(convert/cat/stamp/register)→preflight→nlm add (CLI)→push."
+        plan["mode"] = "DRY"
+        plan["note"] = (("--apply để chạy: dùng file Drive có sẵn (bỏ upload)→organize(convert/cat/stamp/register)"
+                         "→preflight→nlm add (CLI)→push.") if _from_drive else
+                        "--apply để chạy: [mkdir nếu cần]→upload→organize(convert/cat/stamp/register)→preflight→nlm add (CLI)→push.")
         print(json.dumps(plan, ensure_ascii=False, indent=2)); return 0
     if auto_plan and not explicit_cat and not getattr(a, "force_cat", False):
         auto_flags = set(auto_plan.get("warnings") or [])
@@ -1909,6 +1960,12 @@ def cmd_ingest_local(a) -> int:
         fid = _prev["upload_fid"]
         _step_ok("upload", name + up_ext, True, fileId=fid, resumed=True)
         print(f"[tl] --resume: skip upload (fileId={fid}).", file=sys.stderr)
+    elif _from_drive:
+        # v1.34.37: file ĐÃ Ở TRÊN DRIVE → dùng chính fileId đó làm nguồn organize (KHÔNG re-upload). Journal
+        # dưới op 'upload' (kèm from_drive) để --resume tái dùng fileId y như đường local.
+        fid = _from_drive
+        _step_ok("upload", name + up_ext, True, fileId=fid, from_drive=True)
+        print(f"[tl] --drive-id: dùng file có sẵn trên Drive (fileId={fid}), bỏ bước upload.", file=sys.stderr)
     else:
         _step("upload", name + up_ext, mime=up_mime)
         up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode(), name=name + up_ext,
@@ -2284,6 +2341,59 @@ def _dieu_sequence_stats(text: str) -> dict:
             gaps.append({"after": a, "before": b})
     return {"count": len(nums), "first": nums[0] if nums else None, "last": nums[-1] if nums else None,
             "monotonic": all(b > a for a, b in zip(nums, nums[1:])), "gaps": gaps[:20]}
+
+def _resolve_drive_id_source(g, drive_id: str, *, download: bool = True) -> dict:
+    """v1.34.37: phân giải file ĐÃ Ở TRÊN DRIVE (drive_id) thành nguồn ingest — thay bước upload local.
+    Dùng cho `ingest-local --drive-id` (file người dùng tự để _HOP_NAP qua UI) + `profile-ingest --drive-id`
+    (file đã ở thư mục profile): skill convert→GDoc + tên chuẩn + (vbqppl) xếp cat / (profile) giữ phẳng +
+    register + NLM, KHÔNG re-upload từ máy.
+      • Đọc metadata (action=info); TỪ CHỐI: không thấy / trashed / Google-native (đã là GDoc/Sheet — convert=true
+        sẽ NHÂN ĐÔI vì doCopyConvert_ copy GDoc→GDoc).
+      • Đuôi/MIME suy từ tên hiện có (nếu khớp _MIME_BY_EXT) hoặc từ MIME thật (reverse-map) — để `organize
+        convert=true` convert ĐÚNG định dạng và readback tên src khớp.
+      • download=True → tải NHỊ PHÂN về temp (đường _fast_drive_fetch: public-curl→direct-media→GAS) để auto-plan/
+        probe-text/verify-gate chạy Y NHƯ đường local. `organize` vẫn dùng CHÍNH drive_id gốc (không re-upload).
+    KHÔNG raise — trả {ok:False, reason} khi lỗi."""
+    drive_id = (drive_id or "").strip()
+    if not drive_id:
+        return {"ok": False, "reason": "EMPTY_DRIVE_ID"}
+    info = _drive_info_file(g, drive_id)
+    if not info.get("ok"):
+        return {"ok": False, "reason": "DRIVE_FILE_NOT_FOUND", "drive_id": drive_id, "detail": info.get("error")}
+    f = info.get("file") or {}
+    if str(f.get("trashed")).strip().lower() == "true":
+        return {"ok": False, "reason": "DRIVE_FILE_TRASHED", "drive_id": drive_id}
+    mime = _file_mime(info)
+    cur_name = str(f.get("name") or "").strip()
+    if mime.startswith("application/vnd.google-apps"):
+        return {"ok": False, "reason": "ALREADY_GOOGLE_NATIVE", "drive_id": drive_id, "mime": mime, "name": cur_name,
+                "note": "File đã là Google Doc/Sheet (không cần convert). Đưa vào registry/NLM bằng "
+                        "`tl register --drive-id <id>` + `tl nlm-add --drive-id <id>`; hoặc chọn file NHỊ PHÂN gốc "
+                        "(.docx/.doc/.pdf/.xlsx) trong Drive để ingest đầy đủ (convert + chuẩn hoá tên/cat)."}
+    _ext_by_mime = {_v: _k for _k, _v in _MIME_BY_EXT.items()}
+    _name_ext = Path(cur_name).suffix.lower()
+    ext = _name_ext if _name_ext in _MIME_BY_EXT else _ext_by_mime.get(mime, ".docx")
+    try:
+        size_bytes = int(f.get("size") or f.get("fileSize") or 0)
+    except (TypeError, ValueError):
+        size_bytes = 0
+    stem = Path(cur_name).stem or (cur_name or drive_id)
+    out = {"ok": True, "drive_id": drive_id, "name": cur_name, "stem": stem, "mime": mime, "ext": ext,
+           "size_bytes": size_bytes, "is_sheet": ext in _SPREADSHEET_EXTS}
+    if download:
+        try:
+            _td = tempfile.mkdtemp(prefix="tl_driveid_")
+            _lp = os.path.join(_td, (stem or "drive_src") + ext)
+            _imp("tl_gws")._fast_drive_fetch(drive_id, _lp, label="ingest --drive-id", verbose=False)
+            if os.path.getsize(_lp) <= 0:
+                raise RuntimeError("tải về 0 byte")
+            out["local_path"] = _lp
+        except Exception as _e:  # noqa: BLE001
+            out["ok"] = False
+            out["reason"] = "DRIVE_DOWNLOAD_FAILED"
+            out["detail"] = f"{type(_e).__name__}: {_e}"
+    return out
+
 
 def _drive_info_file(g, file_id: str) -> dict:
     """Best-effort Drive metadata readback qua webapp action=info. Không raise."""

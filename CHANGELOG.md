@@ -1,3 +1,25 @@
+# ★ v1.34.37 — ingest `--drive-id`: nạp file ĐÃ Ở TRÊN DRIVE (bỏ bước upload) (2026-07-13)
+
+- **Nhu cầu (user):** người dùng tự tải file lên Drive (kéo-thả `_HOP_NAP` qua UI, điện thoại, shared
+  drive) rồi muốn skill tự organize+register — KHÔNG phải re-upload từ máy Claude. Trước đây `ingest-local`/
+  `profile-ingest` CHỈ nhận file local; chỉ `register`/`nlm-add` nhận drive_id nhưng bỏ qua convert/chuẩn-hoá.
+- **`ingest-local --drive-id <fid>`** (vbqppl 45-cat): LOẠI TRỪ `<file>`. Bỏ upload, organize (convert→GDoc +
+  tên chuẩn + xếp cat + stamp + register) NGAY trên file Drive đó → preflight → nlm add → push. Tải nhị phân
+  về temp (đường `_fast_drive_fetch`: public-curl→direct-media→GAS) để `--auto-plan`/probe/size chạy Y NHƯ
+  đường local; `organize` vẫn dùng CHÍNH drive_id gốc (không re-upload). `--resume` tái dùng fileId qua journal.
+- **`profile-ingest --drive-id <fid>`** (profile phẳng): CHỈ convert→GDoc + đổi tên chuẩn, GIỮ PHẲNG trong
+  root profile (KHÔNG xếp 45-cat) + register + NLM. Verify-gate đọc text SAU convert (`_read_doc_text`) quyết
+  corpus. Bảng tính (.xlsx) → copy_convert Google Sheet.
+- **Cổng an toàn** (helper chung `_resolve_drive_id_source`): TỪ CHỐI file Google-native (đã là GDoc/Sheet —
+  `convert=true` nhân đôi vì `doCopyConvert_` copy GDoc→GDoc), trashed, không thấy; đuôi/MIME suy từ tên hiện
+  có hoặc reverse-map MIME (readback tên src khớp); loại trừ `<file>` + `--drive-id`.
+- Parser: `<file>` positional nay `nargs="?"` (bỏ khi dùng `--drive-id`) cho ingest-local/profile-ingest/
+  profile-file-add → parser-surface snapshot regen (r77a). r99 ×3 (parser + `_resolve_drive_id_source` phân
+  loại + stub-wired). **823/823.** Verify LIVE: từ chối GDoc thật + DRY file nhị phân thật (download temp +
+  auto-plan đọc text) + loại-trừ. KHÔNG bump GAS, KHÔNG đổi kernel doctrine → re-import KHÔNG bắt buộc.
+
+---
+
 # ★ v1.34.36 — doctor skip marker-check cho profile root==VBT gốc (2026-07-12)
 
 - Backlog #2 (handoff 2026-07-11): profile `vbthuong` có rootFolderId == CHÍNH thư mục Van_ban_thuong gốc,

@@ -268,7 +268,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("ingest-local", help="(2)+(3) ingest 1 file local → upload→organize→preflight→nlm add (CLI)→push (DRY mặc định, --apply để chạy; timeout giữa chừng → chạy lại CÙNG LỆNH + --resume)")
     p.add_argument("--json", action="store_true", help="(no-op v1.33.56 — output vốn đã JSON/verbatim; nhận để tương thích workflow cards)")
-    p.add_argument("file")
+    p.add_argument("file", nargs="?", help="file NHỊ PHÂN local (.docx/.doc/.pdf); BỎ QUA nếu dùng --drive-id")
+    p.add_argument("--drive-id", dest="drive_id",
+                   help="(v1.34.37) file ĐÃ Ở TRÊN DRIVE (vd đã kéo-thả _HOP_NAP qua UI) — bỏ bước upload, organize "
+                        "(convert→GDoc + tên chuẩn + xếp cat) ngay trên file đó. LOẠI TRỪ <file>. File NHỊ PHÂN, "
+                        "KHÔNG phải GDoc đã convert.")
     p.add_argument("--name"); p.add_argument("--sohieu"); p.add_argument("--cat"); p.add_argument("--goc")
     p.add_argument("--hieuluc"); p.add_argument("--loai"); p.add_argument("--apply", action="store_true")
     p.add_argument("--resume", action="store_true",
@@ -342,7 +346,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
     p = sub.add_parser("profile-ingest", help="profile own-scope: upload→GDoc canonical flat→verify draft/OCR→registry→NLM chunks (DRY mặc định)")
-    p.add_argument("file")
+    p.add_argument("file", nargs="?", help="file NHỊ PHÂN local; BỎ QUA nếu dùng --drive-id")
+    p.add_argument("--drive-id", dest="drive_id",
+                   help="(v1.34.37) file ĐÃ Ở TRONG THƯ MỤC PROFILE — bỏ upload, CHỈ convert→GDoc + đổi tên chuẩn "
+                        "(giữ PHẲNG trong root profile, KHÔNG xếp cat như vbqppl). LOẠI TRỪ <file>.")
     p.add_argument("--text-file", dest="text_file", help="file text đã OCR/extract để verify và lập split plan trước khi upload")
     p.add_argument("--name", help="tên canonical GDoc (mặc định suy từ header)")
     p.add_argument("--source-quality", choices=["auto", "digital", "ocr"], default="auto")
@@ -358,7 +365,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(fn=cmd_profile_ingest)
 
     p = sub.add_parser("profile-file-add", help="alias rõ nghĩa của profile-ingest: thêm file local vào profile + NLM")
-    p.add_argument("file")
+    p.add_argument("file", nargs="?", help="file NHỊ PHÂN local; BỎ QUA nếu dùng --drive-id")
+    p.add_argument("--drive-id", dest="drive_id",
+                   help="(v1.34.37) file ĐÃ Ở TRONG THƯ MỤC PROFILE — bỏ upload, CHỈ convert→GDoc + đổi tên (giữ phẳng, không xếp cat). LOẠI TRỪ <file>.")
     p.add_argument("--text-file", dest="text_file", help="file text đã OCR/extract để verify và lập split plan trước khi upload")
     p.add_argument("--name", help="tên canonical GDoc (mặc định suy từ header)")
     p.add_argument("--source-quality", choices=["auto", "digital", "ocr"], default="auto")

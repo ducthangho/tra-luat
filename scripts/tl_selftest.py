@@ -7770,6 +7770,53 @@ def run() -> int:
     finally:
         for _k, _v in _sav98.items():
             setattr(_TL_MODULE, _k, _v)
+    # ═══ v1.34.37 — r99: ingest --drive-id (nạp file ĐÃ Ở TRÊN DRIVE, bỏ bước upload) ═══
+    _p99 = _TL_MODULE.build_parser()
+    _ns99a = _p99.parse_args(["ingest-local", "--drive-id", "DID99"])
+    _ns99b = _p99.parse_args(["ingest-local", "x.docx"])
+    _ns99c = _p99.parse_args(["profile-ingest", "--drive-id", "DID99", "--profile", "P99"])
+    _ns99d = _p99.parse_args(["profile-file-add", "--drive-id", "DID99", "--profile", "P99"])
+    cases.append(("r99_parser_drive_id",
+                  getattr(_ns99a, "drive_id", None) == "DID99" and getattr(_ns99a, "file", "X") is None
+                  and getattr(_ns99b, "file", None) == "x.docx" and getattr(_ns99b, "drive_id", "X") is None
+                  and getattr(_ns99c, "drive_id", None) == "DID99" and getattr(_ns99c, "file", "X") is None
+                  and getattr(_ns99d, "drive_id", None) == "DID99"))
+    # stub wired (r81/r90 phủ tổng; giữ assertion tường minh cho helper mới)
+    cases.append(("r99_resolve_stub_wired",
+                  getattr(getattr(_TL_MODULE, "_resolve_drive_id_source", None), "__tl_stub__", None)
+                  == ("ingest_ops", "_resolve_drive_id_source")))
+    _GDOC99 = _TL_MODULE._GDOC_MIME
+    _DOCX99 = _TL_MODULE._DOCX_MIME
+    _XLSX99 = _TL_MODULE._XLSX_MIME
+    class _FkGID99:
+        def __init__(self, file=None, ok=True):
+            self._file = file or {}
+            self._ok = ok
+        def get(self, action, **kw):
+            if action == "info":
+                return {"ok": self._ok, "file": dict(self._file)} if self._ok else {"ok": False, "error": "NF"}
+            return {"ok": True}
+    _rslv99 = _TL_MODULE._resolve_drive_id_source
+    # (a) không thấy → DRIVE_FILE_NOT_FOUND
+    _r99_nf = _rslv99(_FkGID99(ok=False), "d99", download=False)
+    # (b) Google-native (đã là GDoc) → TỪ CHỐI (convert=true nhân đôi)
+    _r99_gd = _rslv99(_FkGID99({"id": "d99", "name": "X", "mimeType": _GDOC99}), "d99", download=False)
+    # (c) trashed → TỪ CHỐI
+    _r99_tr = _rslv99(_FkGID99({"id": "d99", "name": "X.docx", "mimeType": _DOCX99, "trashed": True}), "d99", download=False)
+    # (d) docx nhị phân → ok, ext .docx, stem, size
+    _r99_dx = _rslv99(_FkGID99({"id": "d99", "name": "Luat_ABC.docx", "mimeType": _DOCX99, "size": "1234"}), "d99", download=False)
+    # (e) xlsx → is_sheet True
+    _r99_xl = _rslv99(_FkGID99({"id": "d99", "name": "Bang.xlsx", "mimeType": _XLSX99}), "d99", download=False)
+    # (f) tên KHÔNG có đuôi → suy ext từ MIME
+    _r99_nm = _rslv99(_FkGID99({"id": "d99", "name": "Luat khong duoi", "mimeType": _DOCX99}), "d99", download=False)
+    cases.append(("r99_resolve_drive_id_source",
+                  (not _r99_nf.get("ok")) and _r99_nf.get("reason") == "DRIVE_FILE_NOT_FOUND"
+                  and (not _r99_gd.get("ok")) and _r99_gd.get("reason") == "ALREADY_GOOGLE_NATIVE"
+                  and (not _r99_tr.get("ok")) and _r99_tr.get("reason") == "DRIVE_FILE_TRASHED"
+                  and _r99_dx.get("ok") and _r99_dx.get("ext") == ".docx" and _r99_dx.get("is_sheet") is False
+                  and _r99_dx.get("stem") == "Luat_ABC" and _r99_dx.get("size_bytes") == 1234
+                  and _r99_xl.get("ok") and _r99_xl.get("ext") == ".xlsx" and _r99_xl.get("is_sheet") is True
+                  and _r99_nm.get("ok") and _r99_nm.get("ext") == ".docx"))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

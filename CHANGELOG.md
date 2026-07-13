@@ -1,3 +1,29 @@
+# ★ v1.34.39 — vá heuristic `_cat_likely_wrong` pin-từ-khóa: 12/20 FP corpus-audit 2026-07-13 (2026-07-13)
+
+> TDD r101 ×9 — fixture = CHÍNH các ca thật từ audit; 3 control giữ true-positive.
+
+- **(A) Pin `dân tộc = 10` né TÊN CƠ QUAN:** lookbehind `(?<!hoi dong )` — "Hội đồng Dân tộc" là cơ quan
+  Quốc hội (tổ chức bộ máy 35), không phải chính sách dân tộc (ca thật: NQ_71-2025-UBTVQH15 về nhiệm vụ/cơ
+  cấu HĐDT bị đề xuất 35→10). "Công tác/chính sách dân tộc" thật vẫn pin bình thường.
+- **(B) `_CAT_KEYWORDS["19"]` gỡ `tieu_chuan` TRẦN** (va chạm "tiêu chuẩn sức khỏe/chức danh nghề nghiệp" —
+  10+ TT BYT/BQP/BCA ở cat 45 bị suy 19 GIẢ trong audit): đề mục 19 pháp điển là "Tiêu chuẩn, ĐO LƯỜNG,
+  CHẤT LƯỢNG" → thay bằng cụm dài `tieu_chuan_do_luong`/`quy_chuan_ky_thuat`; `do_luong`/
+  `chat_luong_san_pham` sẵn có phủ phần còn lại.
+- **(C) Boundary "Luật sửa ≥2 luật → 46" hết đếm token lặp:** điều kiện cũ `count('luat') ≥ 3` chạy trên
+  scope GHÉP nhiều biến thể tiêu đề của CÙNG một luật (tail + title_vn + khối tiêu đề) → văn bản sửa MỘT
+  luật cũng thoả (ca thật: Luat_26-2018 TDTT + Luat_75-2025 Quảng cáo bị 41→46). Nay: helper PURE
+  `_distinct_target_luat_subjects` đếm CHỦ ĐỀ PHÂN BIỆT sau token 'luat' (strip stopword sửa-đổi/bổ-sung,
+  lấy 2 từ đầu để biến thể dài-ngắn gộp một) ≥ 2; + tín hiệu tường minh `cac/nhieu luat`, `sua doi N luat`.
+  **+Guard đề-xuất-46 CHỈ cho Luật/Bộ luật** — NĐ/TT/QĐ sửa nhiều văn bản cùng cấp vẫn cat theo lĩnh vực
+  đích (ca thật: ND_187-2025 sửa ND78+ND79 bị 44→46; rổ 46 pháp điển = "LUẬT sửa đổi, bổ sung nhiều LUẬT").
+- **(D) Điều ước đang ở 23 → im:** entry là điều ước/công ước (loai hoặc prefix CU_/CPTPP_/EVFTA_) đang ở
+  cat 23 → KHÔNG đề xuất tách theo chủ đề nội dung (quy ước corpus GOM MỌI ĐƯQT ở 23 — CU_ILO-168 chống
+  thất nghiệp cũng 23; ca thật: CPTPP_Chuong_19_Lao_dong bị 23→20 vì alias 'lao dong').
+- Control giữ nguyên: pin dân-tộc thật, omnibus thật (`Luật A, Luật B và Luật C` → 46), true-positive
+  nợ công 26→28 (ca VBHN_59 đã recat đúng sáng nay). r101 ×9 → **844/844**. KHÔNG bump GAS/kernel.
+
+---
+
 # ★ v1.34.38 — vá 4 lỗi log phiên Chỉ thị: phuluc-gate / chunk by_heading / _LOAI_CANON / hygiene-chunk (2026-07-13)
 
 - **(#1) Gate `PHULUC_MENTION_WITHOUT_HEADING` hết dương-tính-giả** (chặn oan corpus HD 09-HD/VPTW, PL01,

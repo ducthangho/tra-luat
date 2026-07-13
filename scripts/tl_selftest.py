@@ -7876,6 +7876,52 @@ def run() -> int:
     _cl100 = _TL_MODULE._reconcile_clusters(_chunks100)
     cases.append(("r100_hygiene_reconcile_chunk_cluster_silent",
                   all(len(c.get("entries") or []) <= 1 for c in _cl100)))
+    # ═══ v1.34.39 — r101: vá heuristic _cat_likely_wrong pin-từ-khóa (12/20 FP audit 2026-07-13) ═══
+    _sug101 = _TL_MODULE._cat_likely_wrong_suggest
+    # (A) pin 'dân tộc=10' KHÔNG bắn cho tên cơ quan 'Hội đồng Dân tộc' (ca NQ_71-2025-UBTVQH15, đúng cat 35)
+    _e101a = {"drive_id": "dA_2345678901234567890", "name": "NQ_71-2025-UBTVQH15_Nhiem_vu_co_cau_HDDT_UB",
+              "cat": "35_To_chuc_bo_may_nha_nuoc", "loai": "Nghị quyết",
+              "title_vn": "Về nhiệm vụ, quyền hạn cụ thể và cơ cấu tổ chức của hội đồng dân tộc, các ủy ban"}
+    _pA = _sug101(_e101a, "")
+    cases.append(("r101_pin_dantoc_skips_hoidong_dantoc",
+                  not (_pA and _pA.get("suggested") == "10")))
+    # pin dân tộc THẬT vẫn bắn (chính sách dân tộc, đang cat sai)
+    _e101a2 = {"drive_id": "dA2_345678901234567890", "name": "ND_05-2011-ND-CP_Cong_tac_dan_toc",
+               "cat": "35_To_chuc_bo_may_nha_nuoc", "loai": "Nghị định", "title_vn": "Về công tác dân tộc"}
+    _pA2 = _sug101(_e101a2, "")
+    cases.append(("r101_pin_dantoc_real_still_fires", bool(_pA2) and _pA2.get("suggested") == "10"))
+    # (B) keyword 19 'tieu_chuan' trần đã gỡ — tên 'Tieu_Chuan_Suc_Khoe' KHÔNG suy 19; đo lường vẫn 19
+    _ic101 = _TL_MODULE._infer_cats
+    cases.append(("r101_keyword19_tieuchuan_domain_not_khcn",
+                  "19" not in _ic101("TT_105-2023-TT-BQP_Tieu_Chuan_Suc_Khoe_Kham_Suc_Khoe")
+                  and "19" in _ic101("TT_XX_Do_luong_chat_luong")))
+    # (C) boundary 46: sửa MỘT luật (scope lặp biến thể tiêu đề) KHÔNG ép 46; omnibus thật VẪN 46
+    _br101 = _TL_MODULE._cat_boundary_rule
+    _one_law = ("suadoi the duc the thao · sua doi, bo sung mot so dieu cua luat the duc, the thao · "
+                "luat sua doi, bo sung mot so dieu cua luat the duc, the thao")
+    _multi_law = "luat sua doi, bo sung mot so dieu cua luat quy hoach, luat dau tu, luat dau thau"
+    cases.append(("r101_boundary46_single_law_repeated_scope_no_fire", _br101(_one_law)[0] != "46"))
+    cases.append(("r101_boundary46_true_omnibus_still_fires", _br101(_multi_law)[0] == "46"))
+    cases.append(("r101_distinct_luat_subjects_counts",
+                  _TL_MODULE._distinct_target_luat_subjects(_one_law) == 1
+                  and _TL_MODULE._distinct_target_luat_subjects(_multi_law) >= 2))
+    # (C2) 46 chỉ dành cho LUẬT — NĐ sửa 2 NĐ không bị đề xuất 46 (ca ND_187-2025, đúng cat 44)
+    _e101c = {"drive_id": "dC_2345678901234567890", "name": "ND_187-2025-ND-CP_SuaDoi_ND78_ND79",
+              "cat": "44_Xay_dung_phap_luat_va_thi_hanh_phap_luat", "loai": "Nghị định",
+              "title_vn": "Sửa đổi, bổ sung một số điều của nghị định số 78/2025/NĐ-CP và nghị định số 79/2025/NĐ-CP "
+                          "quy định chi tiết luật ban hành văn bản quy phạm pháp luật"}
+    _pC = _sug101(_e101c, "")
+    cases.append(("r101_sug46_not_for_nghi_dinh", not (_pC and _pC.get("suggested") == "46")))
+    # (D) điều ước đang ở 23 → KHÔNG đề xuất tách theo chủ đề nội dung (ca CPTPP_Chuong_19_Lao_dong 23→20)
+    _e101d = {"drive_id": "dD_2345678901234567890", "name": "CPTPP_Chuong_19_Lao_dong",
+              "cat": "23_Ngoai_giao_dieu_uoc_quoc_te", "loai": "Điều ước quốc tế",
+              "title_vn": "Luật lao động là các qui chế về quan hệ lao động trong hiệp định CPTPP"}
+    cases.append(("r101_treaty_stays_23", _sug101(_e101d, "") is None))
+    # (E) control TRUE-POSITIVE giữ nguyên: nợ công 26→28 (ca VBHN_59 đã recat đúng)
+    _e101e = {"drive_id": "dE_2345678901234567890", "name": "VBHN_59-2026-VBHN-VPQH_Quan_ly_no_cong",
+              "cat": "26_Tai_chinh", "loai": "Văn bản hợp nhất", "title_vn": "Luật Về quản lý nợ công"}
+    _pE = _sug101(_e101e, "")
+    cases.append(("r101_true_positive_no_cong_kept", bool(_pE) and _pE.get("suggested") == "28"))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

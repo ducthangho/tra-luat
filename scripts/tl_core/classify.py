@@ -934,6 +934,20 @@ def _infer_cats_text(text: str, top: int = 5) -> list:
     return scored[:top]
 
 
+def _distinct_target_luat_subjects(s: str) -> int:
+    """v1.34.39 (audit 2026-07-13 FP: Luat_26-2018 SuaDoi TDTT + Luat_75-2025 SuaDoi Quảng cáo bị đề xuất →46):
+    scope suy-cat GHÉP nhiều biến thể tiêu đề của CÙNG một luật (tail + title_vn + khối tiêu đề) → đếm token
+    `luat` ≥3 luôn thoả dù chỉ sửa MỘT luật đích. Đếm đúng = số CHỦ ĐỀ PHÂN BIỆT đứng sau token 'luat'
+    (bỏ stopword sửa-đổi/bổ-sung, lấy 2 từ đầu để các biến thể dài-ngắn của cùng chủ đề gộp một). PURE."""
+    subs = set()
+    for m in re.finditer(r"\bluat\s+((?:[a-z]+\s+){0,3}[a-z]+)", s or ""):
+        w = re.sub(r"\b(sua|doi|bo|sung|mot|so|dieu|cua|nay|va|hien|hanh|khac|lien|quan)\b", " ", m.group(1))
+        w = " ".join(re.sub(r"\s+", " ", w).strip().split()[:2])
+        if w:                       # stopword đã strip — còn gì là chủ đề (kể cả tên ngắn 'Luật A/B' fixture)
+            subs.add(w)
+    return len(subs)
+
+
 def _cat_boundary_rule(text: str) -> tuple:
     """G3: ÉP quy_tac_ranh_gioi (linhvuc_phapdien.quy_tac_ranh_gioi) cho các trường hợp BẮT BUỘC dễ gán nhầm.
     Trả (code, rule_text) hoặc (None, None). Chạy trên TÊN+NỘI DUNG đã gộp (ascii). Thứ tự ưu tiên: Đảng →
@@ -947,8 +961,14 @@ def _cat_boundary_rule(text: str) -> tuple:
     # S-3b (v1.33.16 — MERGE nhánh-4): nhận CẢ dạng NÉN 'SuaDoi_QuyHoach_DauTu_PPP_DauThau' (_omnibus_name_text)
     # → cat-audit đề xuất ĐƯA VÀO 46 khi omnibus nằm nhầm folder khác. GUARD hơn nhánh-4: VBHN KHÔNG BAO GIỜ
     # ép 46 (VBHN cat theo LUẬT ĐÍCH — kể cả VBHN của luật-sửa, tên có SuaDoi + nhiều đề tài).
+    # v1.34.39: `len(findall 'luat')>=3` cũ đếm token LẶP trên scope ghép nhiều biến thể tiêu đề của CÙNG 1 luật
+    # → sửa-MỘT-luật cũng bị ép 46 (FP audit 2026-07-13: 26-2018 TDTT, 75-2025 Quảng cáo). Nay: tín hiệu dương
+    # tường minh ('cac/nhieu luat', 'sua doi N luat') HOẶC ≥2 CHỦ ĐỀ LUẬT PHÂN BIỆT sau token 'luat'.
     if (not s.lstrip().startswith("vbhn")) and ("van ban hop nhat" not in s) \
-            and (_omnibus_name_text(s) or ("sua doi" in s and ("cac luat" in s or len(re.findall(r"\bluat\b", s)) >= 3))):
+            and (_omnibus_name_text(s) or ("sua doi" in s and (
+                "cac luat" in s or "nhieu luat" in s
+                or re.search(r"sua doi\D{0,25}\b\d+\s+luat\b", s)
+                or _distinct_target_luat_subjects(s) >= 2))):
         return ("46", "Luật sửa ≥2 luật → 46 (xác minh số luật ở Điều 1; linhvuc theo luật đích)")
     if any(k in s for k in ("bao hiem xa hoi", "bao hiem y te", "bao hiem that nghiep")):
         return ("02", "BHXH/BHYT → 02 (Bảo hiểm), KHÔNG vào 20 dù gắn lao động")
@@ -1363,6 +1383,11 @@ def _cat_likely_wrong_suggest(entry: dict, header_text: str) -> dict | None:
     cur_cat = re.sub(r"\D", "", str(_entry_cat(entry)))[:2]
     name = _entry_name(entry)
     did = _entry_drive_id(entry)
+    # v1.34.39 (audit 2026-07-13 FP: CPTPP_Chuong_19_Lao_dong bị đề xuất 23→20 vì alias 'lao dong'): quy ước
+    # corpus GOM MỌI điều ước/công ước ở 23 (CU_ILO-168 chống thất nghiệp cũng 23) — chương/công ước CHUYÊN ĐỀ
+    # không tách theo chủ đề nội dung; đang ở 23 + là điều ước → im.
+    if cur_cat == "23" and (_is_treaty_entry(entry) or re.match(r"^(CU|CPTPP|EVFTA|DUQT)_", name or "")):
+        return None
     _kind_tb, _subj_tb = _title_block_from_text(header_text or "")
     subject = " · ".join(x for x in (_name_tail_pretty(name), _subj_tb, str(entry.get("title_vn") or "")) if x)
     _scope = _ascii_lower((name or "") + " " + subject)
@@ -1398,6 +1423,13 @@ def _cat_likely_wrong_suggest(entry: dict, header_text: str) -> dict | None:
         return None
     if sug_cat == "46" and _is_vbhn:
         return None                                                    # (2) VBHN ≠ omnibus
+    if sug_cat == "46":
+        # v1.34.39 (audit 2026-07-13 FP: ND_187-2025 sửa 2 NGHỊ ĐỊNH bị đề xuất 44→46): rổ 46 pháp điển =
+        # 'LUẬT sửa đổi, bổ sung nhiều LUẬT' — NĐ/TT/QĐ sửa nhiều văn bản cùng cấp vẫn cat theo lĩnh vực đích.
+        _loai46 = _normalize_loai(str(entry.get("loai") or ""))
+        if _loai46 in ("Nghị định", "Thông tư", "Thông tư liên tịch", "Quyết định", "Công điện") \
+                or re.match(r"^(ND|TT|TTLT|QD|CD)_", name or ""):
+            return None
     if sug_cat != "46" and catp.get("confidence") != "high":
         return None
     if sug_cat == "23" and not _is_treaty_entry(entry):
@@ -1570,7 +1602,10 @@ _CAT_KEYWORDS = {
     "16": ["hinh_su", "thi_hanh_an_hinh_su", "dac_xa"],
     "17": ["ke_toan", "kiem_toan"],
     "18": ["khieu_nai", "to_cao", "tiep_cong_dan", "phong_chong_tham_nhung", "thanh_tra"],
-    "19": ["khoa_hoc", "so_huu_tri_tue", "tieu_chuan", "do_luong", "chat_luong_san_pham", "nang_luong_nguyen_tu", "chuyen_giao_cong_nghe"],
+    # v1.34.39 (audit 2026-07-13: 10+ TT 'Tiêu_chuẩn_sức_khỏe/chức_danh' BYT-BQP-BCA ở cat 45 bị suy 19 GIẢ):
+    # 'tieu_chuan' TRẦN va chạm mọi 'tiêu chuẩn <ngành>' — đề mục 19 pháp điển là 'Tiêu chuẩn, ĐO LƯỜNG, CHẤT
+    # LƯỢNG' → chỉ giữ cụm dài đặc thù; 'do_luong'/'chat_luong_san_pham' sẵn có phủ phần còn lại.
+    "19": ["khoa_hoc", "so_huu_tri_tue", "tieu_chuan_do_luong", "quy_chuan_ky_thuat", "do_luong", "chat_luong_san_pham", "nang_luong_nguyen_tu", "chuyen_giao_cong_nghe"],
     "20": ["lao_dong", "viec_lam", "an_toan_ve_sinh_lao_dong", "tien_luong"],
     "21": ["moi_truong", "da_dang_sinh_hoc"],
     "22": ["ngan_hang", "tien_te", "cac_tctd", "tin_dung", "ngoai_hoi"],

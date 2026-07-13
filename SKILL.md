@@ -16,7 +16,7 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.38 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.39 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 

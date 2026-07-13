@@ -134,6 +134,29 @@ def _nlm_slot_count(entries: list[dict], notebook_id: str, base_notebook_id: str
     }
 
 
+def _nlm_ref_slot_count(entries: list, notebook_id: str, base_notebook_id: str | None = None) -> int:
+    """v1.34.40 B.1 (PURE, test offline): đếm dòng row_kind=ref ĐANG chiếm slot vật lý trên notebook —
+    ref bị _nlm_slot_count skip by-design (ước lượng corpus) nhưng đã nlm-add nên vẫn chiếm slot thật.
+    Cùng luật active/removed/blank-về-base với _nlm_slot_count để 2 số cộng được với nhau."""
+    active = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
+    base_notebook_id = (base_notebook_id or NLM_BASE_NOTEBOOK).strip()
+    is_base = notebook_id == base_notebook_id
+    n = 0
+    for e in entries or []:
+        if _entry_row_kind(e) != "ref":
+            continue
+        status = str(e.get("nlm_status") or e.get("nlm") or "").strip().lower()
+        src = e.get("nlm_source_id") or e.get("source_id")
+        if status.startswith("removed") or status in ("other_notebook", "deleted", "gone"):
+            continue
+        if not src and status not in active:
+            continue
+        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if nb == notebook_id or (not nb and is_base):
+            n += 1
+    return n
+
+
 def _slot_count_all_shards(entries: list) -> dict:
     """KH1 Pha 1.3 (II.5, PURE): đếm slot HIỆU LỰC theo TỪNG shard (nlm_notebook_id) — base + mọi overflow. Bỏ
     removed*/ref. Trả {notebook_id: count}. Dùng cảnh báo shard sắp đầy (>270/300) để chuẩn bị shard kế."""
@@ -216,15 +239,29 @@ def cmd_slot_audit(a) -> int:
             out["live_read_failed"] = True
             out["live_note"] = (f"không lấy được live source_count ({type(e).__name__}) — dùng `--physical N` để neo "
                                 f"thủ công, hoặc `--no-live` để tắt.")
+    # v1.34.40 B.1 (log Chỉ thị — slot-audit mâu thuẫn nlm-reconcile + XÚI backfill dựa gap sai): slots_effective
+    # SKIP row_kind=ref by-design (ước lượng slot corpus) nhưng ref ĐÃ nlm-add nên CHIẾM slot vật lý thật →
+    # gap cũ (phys − corpus_rows) luôn dương giả khi profile có ref. Nay tách 3 số ĐỒNG ĐỊNH NGHĨA với
+    # nlm-reconcile: nlm_claim_rows = corpus_estimate + ref_rows; gap tính trên claim; gợi ý backfill
+    # (lệnh GHI) CHỈ in khi gap CÒN LẠI sau khi trừ ref ≠ 0.
+    _ref_rows = _nlm_ref_slot_count(entries, notebook_id, getattr(a, "base_notebook_id", None))
     if phys is not None:
         reg = out.get("slots_effective", 0)
         out["physical_source_count"] = phys
         out["registry_estimate"] = reg
-        out["gap"] = phys - reg
+        out["ref_rows"] = _ref_rows
+        out["nlm_claim_rows"] = reg + _ref_rows
+        out["gap_vs_corpus_estimate"] = phys - reg
+        out["gap"] = phys - out["nlm_claim_rows"]
         out["ground_truth"] = "physical (tl nlm-get / nlm notebook get)"
         if out["gap"] != 0:
-            out["warning"] = (f"Lệch {phys} vật lý vs {reg} registry ({out['gap']:+d}) — backfill nlm_notebook_id "
-                              f"(`tl backfill-notebook`) hoặc nguồn add thẳng chưa ghi registry.")
+            out["warning"] = (f"Lệch {phys} vật lý vs {out['nlm_claim_rows']} registry-claim (corpus {reg} + ref "
+                              f"{_ref_rows}) ({out['gap']:+d}) — backfill nlm_notebook_id (`tl backfill-notebook`) "
+                              f"hoặc nguồn add thẳng chưa ghi registry; đối chiếu `tl nlm-reconcile` trước khi ghi.")
+        elif out["gap_vs_corpus_estimate"] != 0:
+            out["note_ref"] = (f"Chênh {out['gap_vs_corpus_estimate']:+d} vs corpus-estimate giải thích TRỌN bằng "
+                               f"{_ref_rows} dòng row_kind=ref (hợp lệ theo thiết kế — canonical VBQPPL add vào "
+                               f"notebook để RAG). KHÔNG cần backfill.")
     if getattr(a, "json", False):
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:

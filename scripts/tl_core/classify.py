@@ -478,6 +478,23 @@ def _infer_loai(name: str, sohieu: str = "") -> str:
         return "Chỉ thị"
     if nm.startswith("HD_") or "HUONG_DAN" in nm:
         return "Hướng dẫn"
+    # v1.34.40 B.2: prefix loại VĂN BẢN THƯỜNG (profile) — thiếu thì blank-over-guess không nhận được bằng
+    # chứng name_prefix. CHỈ PREFIX ĐẦU TÊN (không substring giữa tên — 'VK_DH_XIV_Bao_cao' dị thể phải để
+    # manual, doctrine r93). PL_ giữ nguyên = Pháp lệnh (quy ước corpus).
+    if nm.startswith(("KH_", "KE_HOACH")):
+        return "Kế hoạch"
+    if nm.startswith(("TB_", "THONG_BAO")):
+        return "Thông báo"
+    if nm.startswith(("CV_", "CONG_VAN")):
+        return "Công văn"
+    if nm.startswith(("TTR_", "TO_TRINH")):
+        return "Tờ trình"
+    if nm.startswith(("DA_", "DE_AN")):
+        return "Đề án"
+    if nm.startswith(("BC_", "BAO_CAO")):
+        return "Báo cáo"
+    if nm.startswith(("PHU_LUC", "PHULUC")):
+        return "Phụ lục"
     # 2) fallback: mã cơ quan trong SỐ HIỆU
     if "ND-CP" in sh:
         return "Nghị định"

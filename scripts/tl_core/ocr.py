@@ -64,10 +64,28 @@ def cmd_ocr_verify(a) -> int:
         out["warnings"].append("TEXT_FILE_NOT_FOUND")
         print(_json_dumps(out, deterministic=_deterministic_enabled(a))); return 2
     text = path.read_text(encoding="utf-8", errors="replace")
-    m = _text_quality_metrics(text)
-    out["metrics"] = m
     def check(name, ok, detail=""):
         out["checks"].append({"name": name, "ok": bool(ok), "detail": detail})
+    # v1.34.40 A.3 (log Chỉ thị — 'ocr-verify PASS với đầu vào rác'): đưa nhầm file JSON (vd chính
+    # .ocr.manifest.json) từng được ĐO NHƯ TEXT tiếng Việt rồi kết luận PASS. Văn bản pháp luật/OCR không bao
+    # giờ là JSON hợp lệ → parse được thành dict/list = chắc chắn sai file → FAIL rc=2 kèm gợi ý.
+    try:
+        _as_json = json.loads(text)
+    except Exception:  # noqa: BLE001 — không phải JSON = đầu vào text bình thường
+        _as_json = None
+    if isinstance(_as_json, (dict, list)):
+        _schema = str(_as_json.get("schema") or "") if isinstance(_as_json, dict) else ""
+        check("input_is_text_not_json", False,
+              f"đầu vào là JSON{' (schema=' + _schema + ')' if _schema else ''} — không phải text OCR")
+        out["warnings"].append("INPUT_IS_JSON_NOT_TEXT")
+        if _schema.startswith("ocr_manifest"):
+            out["hint"] = "Bạn đưa nhầm FILE MANIFEST; file text đúng là bản `<tên>.ocr.txt` nằm cạnh."
+        out["ok"] = False
+        out["recommendation"] = "Không dùng --ocr-verified; truyền đúng file text OCR (.ocr.txt)."
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))
+        return 2
+    m = _text_quality_metrics(text)
+    out["metrics"] = m
     check("min_length", m["chars"] >= (500 if a.mode == "vbqppl" else 100), str(m["chars"]))
     check("garbled_ratio", m["garbled_ratio"] <= 0.001, str(m["garbled_ratio"]))
     check("vietnamese_mark_density", m["vietnamese_mark_density"] >= 0.005 or m["letters"] < 500, str(m["vietnamese_mark_density"]))
@@ -100,6 +118,12 @@ def cmd_ocr_verify(a) -> int:
             out["checks"].extend(man_checks)
         else:
             out["warnings"].extend(man_warns)
+            # v1.34.40 A.3: KHÔNG manifest = KHÔNG đối chiếu được hash = chưa verify gì → FAIL mặc định (trước
+            # đây chỉ warning chôn trong output, cổng vẫn PASS). Đo chất-lượng-thô cố ý (text tự extract,
+            # không qua ocr-run) → opt-in tường minh `--no-manifest`.
+            check("manifest_present", bool(getattr(a, "no_manifest", False)),
+                  "skipped_by_flag --no-manifest" if getattr(a, "no_manifest", False)
+                  else "OCR_MANIFEST_NOT_FOUND — không có manifest thì không verify được hash; đo thô cố ý: --no-manifest")
     out["ok"] = all(c["ok"] for c in out["checks"])
     out["recommendation"] = "Có thể dùng --ocr-verified nếu đã đối chiếu bổ sung bằng mắt/nguồn gốc." if out["ok"] else "Không dùng --ocr-verified; cần OCR lại hoặc kiểm thủ công."
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False) or _deterministic_enabled(a) else json.dumps(out, ensure_ascii=False, indent=2))

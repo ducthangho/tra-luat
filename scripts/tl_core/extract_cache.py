@@ -54,23 +54,20 @@ def cmd_extract(a) -> int:
     if gdoc_id and a.sohieu:
         print(f"[tl] có cả positional '{gdoc_id[:14]}…' lẫn --sohieu '{a.sohieu}' → dùng --sohieu.", file=sys.stderr)
         gdoc_id = None
-    # (HỢP NHẤT Codex) positional CÓ-DẠNG-gdocId nhưng thực ra là số hiệu/tên DÀI → deep-resolve về canonical;
-    # nếu canonical là entry THÔ → ENTRY_RAW_NO_GDOC rc=2 (không export vô ích).
-    if gdoc_id and not a.sohieu:
+    # v1.34.40 A.1 (log Chỉ thị — extract TRẢ SAI VĂN BẢN im lặng, ca PL01): positional DẠNG-ID KHÔNG deep-resolve
+    # trước export nữa — id thật LUÔN thắng (resolver cũ coi id hợp lệ như query fuzzy → ghi đè id → export nhầm
+    # văn bản khác + cache bẩn, mà rc=0). Trước export CHỈ tra EXACT drive_id trong manifest lấy metadata
+    # (draft-warning + sohieu cho cache consolidated) — exact-match tất định, không bao giờ đổi id.
+    # Ca tên-giống-id (false-404 cũ 'Luat_113-2025-QH15_Dan_so') xử SAU: export NOT_FOUND → deep-resolve fallback.
+    _id_positional = bool(gdoc_id and not a.sohieu)
+    if _id_positional:
         try:
             _ents = _manifest_entries(refresh=a.refresh)
-            _canon, _did, _nm, _hits = _resolve_deep_target(gdoc_id, _ents)
-            if _canon is not None and _entry_raw_no_gdoc(_canon):
-                return _emit_raw_no_gdoc(_entry_name(_canon), getattr(a, "json", False))
-            if _canon is not None:
-                _extract_canon = _canon
-            if _canon is not None and _did and _did != gdoc_id:
-                gdoc_id = _did
-                print(f"[tl] canonical: { _entry_name(_canon) } | sohieu={_entry_sohieu(_canon)} | "
-                      f"cat={_entry_cat(_canon)} | nlm={bool(_entry_nlm(_canon))} | candidates={len(_hits)}",
-                      file=sys.stderr)
-        except Exception:
-            pass
+            _exact = next((e for e in _ents if str(_entry_drive_id(e) or "").strip() == gdoc_id), None)
+            if _exact is not None:
+                _extract_canon = _exact
+        except Exception as _me:  # noqa: BLE001 — metadata best-effort, KHÔNG nuốt im lặng
+            print(f"[tl] ⚠ không đọc được manifest (bỏ metadata canonical, export vẫn chạy): {_me}", file=sys.stderr)
     if not gdoc_id and a.sohieu:
         try:
             _ents = _manifest_entries(refresh=a.refresh)
@@ -114,23 +111,58 @@ def cmd_extract(a) -> int:
             text = None
     # Đọc nguyên văn: ƯU TIÊN transport→gws (export GDoc→text trực tiếp, BỎ QUA webapp `exporttext` vốn
     # lỗi OAuth scope `script.external_request`). Fallback webapp exporttext nếu transport/gws không sẵn.
-    if text is None:
+    def _read_fulltext(_fid):
+        """Trả (text, src, err) — err gộp cả 2 tầng để phân loại NOT_FOUND vs lỗi mạng/auth (A.1 v1.34.40)."""
+        _t, _s, _e = None, None, ""
         try:
-            rr = _imp("transport").drive_op("read", file_id=gdoc_id, limit=2_000_000)
+            rr = _imp("transport").drive_op("read", file_id=_fid, limit=2_000_000)
             if isinstance(rr, dict) and rr.get("ok") and rr.get("text") is not None:
-                text, src = rr.get("text", ""), "gws/transport"
-        except Exception as e:  # noqa: BLE001
+                _t, _s = rr.get("text", ""), "gws/transport"
+            elif isinstance(rr, dict):
+                _e = str(rr.get("error") or "")
+        except Exception as ex:  # noqa: BLE001
+            _e = f"{type(ex).__name__}: {ex}"
             if getattr(a, "debug", False):
-                print(f"[tl] transport read lỗi (sẽ thử exporttext): {e}", file=sys.stderr)
+                print(f"[tl] transport read lỗi (sẽ thử exporttext): {ex}", file=sys.stderr)
+        if _t is None:
+            r = _gas().get("exporttext", fileId=_fid)
+            if r.get("ok"):
+                _t, _s = r.get("text", ""), "webapp exporttext"
+            else:
+                _e = (_e + " | " if _e else "") + str(r.get("error") or "")
+        return _t, _s, _e
+
     if text is None:
-        r = _gas().get("exporttext", fileId=gdoc_id)
-        if not r.get("ok"):
-            print(f"[tl] đọc nguyên văn LỖI (gws/transport + webapp exporttext): {r.get('error')}\n"
+        text, src, _err = _read_fulltext(gdoc_id)
+        # v1.34.40 A.1 fallback false-404: positional dạng-id nhưng Drive báo NOT_FOUND (= chắc chắn KHÔNG phải
+        # id thật, ví dụ tên file 'Luat_113-2025-QH15_Dan_so' ≥20 ký tự) → deep-resolve MỘT lần như trước.
+        # CHỈ khi NOT_FOUND — lỗi mạng/auth/scope KHÔNG resolve (resolve lúc đó là đoán mò trên input hợp lệ).
+        if text is None and _id_positional and re.search(
+                r"not\s*found|404|khong tim thay|no such file", _strip_accents(_err or "").lower()):
+            try:
+                _ents = _manifest_entries(refresh=a.refresh)
+                _canon, _did, _nm, _hits = _resolve_deep_target(gdoc_id, _ents)
+            except Exception as _re:  # noqa: BLE001
+                _canon, _did, _hits = None, None, []
+                print(f"[tl] ⚠ deep-resolve fallback lỗi: {_re}", file=sys.stderr)
+            if _canon is not None and _entry_raw_no_gdoc(_canon):
+                return _emit_raw_no_gdoc(_entry_name(_canon), getattr(a, "json", False))
+            if _canon is not None and _did and _did != gdoc_id:
+                print(f"[tl] positional KHÔNG phải Drive-id thật (NOT_FOUND) → coi là tên/số hiệu, canonical: "
+                      f"{ _entry_name(_canon) } | sohieu={_entry_sohieu(_canon)} | cat={_entry_cat(_canon)} | "
+                      f"nlm={bool(_entry_nlm(_canon))} | candidates={len(_hits)}", file=sys.stderr)
+                _extract_canon = _canon
+                gdoc_id = _did
+                if _entry_is_draft(_canon):
+                    print(f"[tl] ⚠ {DRAFT_WARNING}: nguồn đang đọc là dự thảo, không được viện dẫn như văn bản "
+                          f"có hiệu lực.", file=sys.stderr)
+                text, src, _err = _read_fulltext(gdoc_id)
+        if text is None:
+            print(f"[tl] đọc nguyên văn LỖI (gws/transport + webapp exporttext): {_err}\n"
                   f"     → webapp exporttext thiếu OAuth scope → cần gws (transport): bootstrap + gws auth ở "
                   f"Code/Cowork (tl gws-ping).\n"
                   f"     → hoặc file .docx/.pdf: copy_convert sang Google Doc trước.", file=sys.stderr)
             return 1
-        text, src = r.get("text", ""), "webapp exporttext"
     text = _sanitize_export_text(_strip_font_runs(text))   # U1 v1.31.2: + diệt surrogate/control-byte (lọc dòng rác font như cũ)
     _profile_cache_dir().mkdir(parents=True, exist_ok=True)
     disk = Path(a.out) if a.out else _cache_file(f"extract_{gdoc_id}.txt")

@@ -424,6 +424,8 @@ GENERATED_SPECS = [
          {"dest": 'text_file'},
          {"flags": ['--source']},
          {"flags": ['--mode'], "choices": ['vbqppl', 'profile'], "default": 'profile'},
+         {"flags": ['--no-manifest'], "action": 'store_true',
+          "help": '(v1.34.40 A.3) đo chất-lượng-thô CỐ Ý không có ocr_manifest (text tự extract, không qua ocr-run) — mặc định thiếu manifest = FAIL vì không đối chiếu được hash'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'chunk-plan', "handler": 'cmd_chunk_plan',

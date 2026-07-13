@@ -1,3 +1,46 @@
+# ★ v1.34.40 — vá 7 lỗi BÁO CÁO 13/7 (lớp "sai mà báo thành công") + LUẬT negative-input test (2026-07-13)
+
+> grill-with-docs chốt 7 quyết định thiết kế; TDD **r102 ×10 NEGATIVE-INPUT tests** (đầu vào sai cố ý →
+> bắt buộc fail rõ) — fixture mô phỏng CHÍNH các ca thật trong `BAO_CAO_LOI_SKILL_v1.34.38.md`.
+
+- **(A.1 🔴) `extract` hết TRẢ SAI VĂN BẢN im lặng** (ca PL01 → Công văn 386, rc=0 + cache bẩn): positional
+  dạng-ID → **export THẲNG, id thật LUÔN thắng** (bỏ deep-resolve-trước-export từng coi id hợp lệ như query
+  fuzzy rồi GHI ĐÈ); trước export chỉ tra EXACT drive_id trong manifest lấy metadata (draft-warning + cache
+  sohieu — exact-match tất định). Ca tên-giống-id (false-404 v70) giữ nguyên đường sống: export trả
+  **NOT_FOUND** (phân biệt với lỗi auth/mạng — các lỗi khác KHÔNG resolve) → deep-resolve fallback MỘT lần
+  + in canonical + retry. Bỏ `except: pass` → cảnh báo stderr.
+- **(A.2 🔴) `register --clear-cols` + field set → rc=2 TỪ CHỐI** kèm hướng dẫn "2 lệnh riêng" (trước: VỨT
+  LẶNG LẼ mọi `--loai/--title-vn/…` mà vẫn báo `verified:true`). Không ghi gì khi từ chối.
+- **(A.3 🔴) `ocr-verify` hết PASS với đầu vào rác**: input parse được thành JSON (nhất là schema
+  `ocr_manifest`) → rc=2 + gợi ý file `.ocr.txt` đúng (từng đo file manifest JSON như text tiếng Việt rồi
+  PASS); **manifest-missing → ok=false rc=2 MẶC ĐỊNH** (không manifest = không đối chiếu được hash = chưa
+  verify gì); cờ mới `--no-manifest` opt-in cho đo-chất-lượng-thô cố ý (text tự extract không qua ocr-run).
+- **(B.1) `slot-audit` hết mâu thuẫn `nlm-reconcile` + hết xúi lệnh ghi trên gap sai**: `slots_effective`
+  skip `row_kind=ref` by-design nhưng ref ĐÃ nlm-add nên chiếm slot vật lý thật → tách 3 số
+  `registry_estimate` / `ref_rows` / `nlm_claim_rows` (đồng định nghĩa reconcile); `gap` tính trên claim;
+  gợi ý `backfill-notebook` CHỈ khi gap còn lại sau khi trừ ref ≠ 0 (helper PURE `_nlm_ref_slot_count`).
+- **(B.2) BLANK-OVER-GUESS metadata cho profile văn bản thường** (ca HD 09-HD/VPTW bị đoán kind=vbqppl,
+  loai='Luật', ghi thẳng registry): profile ≠ vbqppl chỉ persist `loai` có bằng chứng TƯỜNG MINH — (a) cờ
+  `--loai`, (b) letterhead khai báo (`_declared_loai_from_header` — **+12 loại VB thường**), (c) prefix tên
+  (`_infer_loai` — **+7 prefix KH_/TB_/CV_/TTR_/DA_/BC_/PHU_LUC, prefix-only** không đụng VK_ dị thể r93);
+  heuristic thân-văn-bản → ĐỂ TRỐNG + hướng dẫn điền (helper PURE `_profile_loai_evidence`). Corpus nền
+  vbqppl KHÔNG qua gate. **Giai đoạn 2 (sửa tận gốc bộ suy `_classify_doc_header`) = backlog có kế hoạch.**
+- **(B.3) `profile-ingest-chunks --apply` STREAM tiến độ**: `[chunks] (i/n)` + JSONL per-chunk ra stderr +
+  `resume_command` khi đứt giữa chừng (khuôn profile-doctor --deep v1.34.30) — 9 chunk >600s từng buffer
+  đến cuối, timeout tưởng thất bại dù 9/9 đã lên Drive.
+- **(C.1) `by_heading` REDESIGN (lỗi mới từ bản vá 1.34.38)**: heading CẤP CAO NHẤT xuất hiện (PHẦN >
+  Chương > Mục) **không bao giờ gộp** — 1 section = 1 chunk (Phần V hết bị nuốt vào chunk IV); section vượt
+  `max-chars` → **tách CON đệ quy** theo heading cấp dưới (Chương/Mục/numbered `1.`/`1.1.`), cấp dưới gộp
+  liên tiếp theo budget; hết cấp → cắt paragraph-budget title `X (i/n)`; mọi mảnh từ section vượt mang flag
+  **`CHUNK_SPLIT_OVER_BUDGET`** (chunk 191k từng lọt qua max 90k im lặng, phải tách tay).
+- **★LUẬT ĐỨNG MỚI (từ báo cáo — 3 lỗi Đỏ cùng khuôn "thao tác thất bại nhưng trả tín hiệu thành công"):**
+  lệnh ghi/verify MỚI phải kèm **≥1 negative-input test** (đầu vào sai cố ý: sai file/sai id/sai kết hợp cờ
+  → bắt buộc fail rõ ràng, không im lặng). Ghi tại đây + memory; bộ r102 là mẫu khuôn.
+- D.1 (nhãn lỗi `nlm login --check`) = upstream nlm CLI, watchlist. r102 ×10 + parser-surface regen
+  (ocr-verify +--no-manifest) → **854/854**. KHÔNG bump GAS, KHÔNG đổi kernel → re-import KHÔNG bắt buộc.
+
+---
+
 # ★ v1.34.39 — vá heuristic `_cat_likely_wrong` pin-từ-khóa: 12/20 FP corpus-audit 2026-07-13 (2026-07-13)
 
 > TDD r101 ×9 — fixture = CHÍNH các ca thật từ audit; 3 control giữ true-positive.

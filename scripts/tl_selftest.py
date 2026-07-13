@@ -7922,6 +7922,131 @@ def run() -> int:
               "cat": "26_Tai_chinh", "loai": "Văn bản hợp nhất", "title_vn": "Luật Về quản lý nợ công"}
     _pE = _sug101(_e101e, "")
     cases.append(("r101_true_positive_no_cong_kept", bool(_pE) and _pE.get("suggested") == "28"))
+    # ═══ v1.34.40 — r102: NEGATIVE-INPUT tests (báo cáo lỗi 13/7 — lớp 'sai mà báo thành công') ═══
+    import tempfile as _tf102
+    # (A.1) extract: id-shaped positional KHÔNG resolve trước export; NOT_FOUND → fallback resolve; lỗi AUTH → KHÔNG resolve
+    _keys102 = ("_manifest_entries", "_resolve_deep_target", "_gas", "_imp", "load_creds", "apply_profile_offline")
+    _sav102 = {k: getattr(_TL_MODULE, k) for k in _keys102}
+    _resolve_calls102 = []
+    try:
+        _GOOD_ID = "1GoodDriveId_234567890123456789012"
+        _OTHER_ID = "1OtherDoc_2345678901234567890123456"
+        _ENT_G = {"drive_id": _GOOD_ID, "name": "PL_01_Phu_luc_dung", "so_hieu": "", "cat": "own", "corpus": "true"}
+        _ENT_O = {"drive_id": _OTHER_ID, "name": "CONG_VAN_386_khac", "so_hieu": "386-UBKHCNMT16", "cat": "own", "corpus": "true"}
+        _TL_MODULE.load_creds = lambda *x, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *x, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [_ENT_G, _ENT_O]
+        def _fk_resolve102(q, ents):
+            _resolve_calls102.append(q)
+            return _ENT_O, _OTHER_ID, _ENT_O["name"], [_ENT_O, _ENT_G]   # resolver LUÔN trỏ văn bản KHÁC (mô phỏng bug)
+        _TL_MODULE._resolve_deep_target = _fk_resolve102
+        class _FkTransport102:
+            texts = {_GOOD_ID: "PHỤ LỤC 01\nNội dung đúng của phụ lục.", _OTHER_ID: "CÔNG VĂN 386\nvăn bản khác."}
+            err = "not found"
+            def drive_op(self, op, **kw):
+                fid = kw.get("file_id")
+                if fid in self.texts:
+                    return {"ok": True, "text": self.texts[fid]}
+                return {"ok": False, "error": f"File {self.err}: {fid}"}
+        _fk_tr102 = _FkTransport102()
+        class _FkCache102:
+            def find(self, sh): return None
+        _real_imp102 = _sav102["_imp"]
+        _TL_MODULE._imp = lambda n: (_fk_tr102 if n == "transport" else (_FkCache102() if n == "cache" else _real_imp102(n)))
+        class _FkG102:
+            def get(self, action, **kw): return {"ok": False, "error": "exporttext disabled in test"}
+        _TL_MODULE._gas = lambda: _FkG102()
+        with _tf102.TemporaryDirectory() as _d102:
+            _out102 = str(Path(_d102) / "o.txt")
+            # (a) id THẬT (có trong transport) → export thẳng, KHÔNG gọi resolver, text ĐÚNG văn bản
+            _rc_a, _ = _cap75(_TL_MODULE.cmd_extract, argparse.Namespace(
+                gdoc_id=_GOOD_ID, sohieu=None, refresh=False, out=_out102, find=None, dieu=None,
+                json=False, debug=False, deterministic=False, config=None, profile=None))
+            _txt_a = Path(_out102).read_text(encoding="utf-8")
+            cases.append(("r102_extract_real_id_no_resolve_no_override",
+                          _rc_a == 0 and "PHỤ LỤC 01" in _txt_a and _resolve_calls102 == []))
+            # (b) positional KHÔNG phải id thật (NOT_FOUND) → fallback resolve MỘT lần → export canonical
+            _rc_b, _ = _cap75(_TL_MODULE.cmd_extract, argparse.Namespace(
+                gdoc_id="Luat_113_2025_QH15_Dan_so_x", sohieu=None, refresh=False, out=_out102, find=None,
+                dieu=None, json=False, debug=False, deterministic=False, config=None, profile=None))
+            _txt_b = Path(_out102).read_text(encoding="utf-8")
+            cases.append(("r102_extract_notfound_falls_back_resolve",
+                          _rc_b == 0 and "CÔNG VĂN 386" in _txt_b and _resolve_calls102 == ["Luat_113_2025_QH15_Dan_so_x"]))
+            # (c) lỗi KHÔNG phải NOT_FOUND (auth/mạng) → KHÔNG resolve (không đoán mò trên input hợp lệ), rc=1
+            _fk_tr102.err = "authentication expired"
+            _resolve_calls102.clear()
+            _rc_c, _ = _cap75(_TL_MODULE.cmd_extract, argparse.Namespace(
+                gdoc_id="1UnknownButValidId_23456789012345", sohieu=None, refresh=False, out=_out102, find=None,
+                dieu=None, json=False, debug=False, deterministic=False, config=None, profile=None))
+            cases.append(("r102_extract_auth_error_no_resolve", _rc_c == 1 and _resolve_calls102 == []))
+    finally:
+        for _k, _v in _sav102.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (A.2) register: --clear-cols + field set → rc=2, KHÔNG chạm GAS
+    _sav102b = {"_gas": _TL_MODULE._gas}
+    _gas_calls102 = []
+    try:
+        class _FkGRec102:
+            def get(self, action, **kw): _gas_calls102.append(("get", action)); return {"ok": True}
+            def post(self, action, **kw): _gas_calls102.append(("post", action)); return {"ok": True}
+        _TL_MODULE._gas = lambda: _FkGRec102()
+        _ns102 = argparse.Namespace(
+            config=None, profile=None, drive_id="d102_345678901234567890", bulk=None, cols=None,
+            clear_cols="sohieu", loai="Phụ lục", title_vn="Tên", goc=None, sohieu=None, name=None, cat=None,
+            linhvuc=None, hieuluc=None, sua_doi=None, nlm_source_id=None, nlm_notebook_id=None, nlm_status=None,
+            nlm_title=None, tukhoa=None, corpus=None, row_kind=None, force_insert=False, force_unsafe=False,
+            apply=True, confirm="yes", json=False, deterministic=False)
+        _rc102b, _ = _cap75(_TL_MODULE.cmd_register, _ns102)
+        cases.append(("r102_register_mixed_clear_set_rejected",
+                      _rc102b == 2 and not [c for c in _gas_calls102 if c[0] == "post"]))
+    finally:
+        _TL_MODULE._gas = _sav102b["_gas"]
+    # (A.3) ocr-verify: JSON input → rc=2; manifest missing → FAIL mặc định; --no-manifest → pass thô
+    with _tf102.TemporaryDirectory() as _d102c:
+        _man102 = Path(_d102c) / "x.ocr.manifest.json"
+        _man102.write_text(json.dumps({"schema": "ocr_manifest.v1", "chunks": []}), encoding="utf-8")
+        _rc_j, _o_j = _cap75(_TL_MODULE.cmd_ocr_verify, argparse.Namespace(
+            text_file=str(_man102), source=None, mode="profile", no_manifest=False, json=True, deterministic=False))
+        _j_j = json.loads(_o_j)
+        cases.append(("r102_ocr_verify_json_input_fails",
+                      _rc_j == 2 and _j_j.get("ok") is False and "INPUT_IS_JSON_NOT_TEXT" in _j_j.get("warnings", [])))
+        _txt102 = Path(_d102c) / "y.ocr.txt"
+        _txt102.write_text("Văn bản tiếng Việt đủ dài để qua ngưỡng min một trăm ký tự. " * 5, encoding="utf-8")
+        _rc_m, _o_m = _cap75(_TL_MODULE.cmd_ocr_verify, argparse.Namespace(
+            text_file=str(_txt102), source=None, mode="profile", no_manifest=False, json=True, deterministic=False))
+        _rc_n, _o_n = _cap75(_TL_MODULE.cmd_ocr_verify, argparse.Namespace(
+            text_file=str(_txt102), source=None, mode="profile", no_manifest=True, json=True, deterministic=False))
+        cases.append(("r102_ocr_verify_manifest_missing_fails_default", _rc_m == 2 and json.loads(_o_m).get("ok") is False))
+        cases.append(("r102_ocr_verify_no_manifest_optin_passes", _rc_n == 0 and json.loads(_o_n).get("ok") is True))
+    # (B.1) slot-audit: ref rows đếm riêng + cộng vào claim
+    _E102 = [{"drive_id": f"o{i}_345678901234567890", "row_kind": "own", "nlm_source_id": f"s{i}",
+              "nlm_notebook_id": "NB102", "nlm_status": "pushed", "corpus": "true"} for i in range(3)]
+    _E102 += [{"drive_id": f"r{i}_345678901234567890", "row_kind": "ref", "nlm_source_id": f"t{i}",
+               "nlm_notebook_id": "NB102", "nlm_status": "pushed", "corpus": "false"} for i in range(2)]
+    _E102 += [{"drive_id": "rrm_345678901234567890", "row_kind": "ref", "nlm_source_id": "trm",
+               "nlm_notebook_id": "NB102", "nlm_status": "removed_by_user", "corpus": "false"}]
+    cases.append(("r102_slot_audit_ref_counted_separately",
+                  _TL_MODULE._nlm_ref_slot_count(_E102, "NB102") == 2
+                  and _TL_MODULE._nlm_slot_count(_E102, "NB102").get("slots_effective") == 3))
+    # (B.2) blank-over-guess: heuristic loai KHÔNG bằng chứng → trống; letterhead/prefix/explicit → giữ
+    _ple = _TL_MODULE._profile_loai_evidence
+    cases.append(("r102_loai_blank_over_guess",
+                  _ple("Luật", "Nội dung nhắc pháp luật lung tung không letterhead", "Tai_lieu_x", False)[0] == ""
+                  and _ple("Hướng dẫn", "HƯỚNG DẪN\nxử lý văn bản điện tử", "x", False) == ("Hướng dẫn", "letterhead")
+                  and _ple("Kế hoạch", "", "KH_05_trien_khai", False)[1] in ("name_prefix",)
+                  and _ple("Luật", "", "x", True) == ("Luật", "explicit")))
+    # (C.1) by_heading: section vượt max → TÁCH (không lọt chunk quá khổ), top-level KHÔNG gộp, flag LOUD
+    _tx102 = ("ĐỀ ÁN LỚN\nmở đầu.\n\nPHẦN I\nngắn gọn. " + "a" * 200 +
+              "\n\nPHẦN II\ndài. " + ("đoạn văn dài. " * 30 + "\n\n") * 8 +
+              "\nPHẦN III\ncuối. " + "c" * 150)
+    _st102, _rc102c = _TL_MODULE._chunk_records_from_text(_tx102, name="dean", max_chars=900)
+    _oversize102 = [r for r in _rc102c if r["chars"] > 900 * 2]
+    _titles102 = [r["title"] for r in _rc102c]
+    _p2parts = [r for r in _rc102c if r["title"].startswith("PHẦN II")]
+    cases.append(("r102_by_heading_enforces_max_chars",
+                  _st102 == "by_heading" and not _oversize102 and len(_p2parts) >= 2
+                  and "PHẦN I" in _titles102 and "PHẦN III" in _titles102   # top-level là chunk RIÊNG, không gộp
+                  and any("CHUNK_SPLIT_OVER_BUDGET" in (r.get("flags") or []) for r in _p2parts)))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

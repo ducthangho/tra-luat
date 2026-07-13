@@ -198,6 +198,20 @@ def _reg_row_present(g, drive_id) -> bool | None:
 def cmd_register(a) -> int:
     g = _gas()
     if getattr(a, "clear_cols", None):
+        # v1.34.40 A.2 (log Chỉ thị — 'sai mà báo verified:true'): --clear-cols đi kèm field set từng bị VỨT
+        # LẶNG LẼ (early-return bỏ mọi --loai/--title-vn/… mà vẫn báo verified). Nay TỪ CHỐI lệnh hỗn hợp rc=2
+        # — 2 thao tác khác cơ chế ghi (reg_clear force-gate vs reg_upsert), tách 2 lệnh là tất định nhất.
+        _set_fields = [k for k in ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc", "sua_doi",
+                                   "nlm_source_id", "nlm_notebook_id", "nlm_status", "nlm_title", "tukhoa",
+                                   "corpus", "title_vn", "row_kind")
+                       if getattr(a, k, None) not in (None, "")]
+        if _set_fields:
+            print(json.dumps({"ok": False, "step": "clear_cols_mixed_with_set", "rejected_fields": _set_fields,
+                              "error": "--clear-cols KHÔNG đi cùng field set (trước đây field set bị bỏ im lặng). "
+                                       "Chạy 2 lệnh riêng: (1) register --drive-id … --clear-cols …; "
+                                       "(2) register --drive-id … --loai …/--title-vn …"},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
         return _register_clear(a, g)
     if a.bulk:
         items = json.loads(Path(a.bulk).read_text(encoding="utf-8"))
@@ -1391,6 +1405,26 @@ def _safe_profile_doc_name(info: dict, fallback_name: str = "") -> str:
     return re.sub(r"_+", "_", "_".join(parts)).strip("_")[:160]
 
 
+def _profile_loai_evidence(loai: str, text: str, name: str, explicit: bool) -> tuple[str, str]:
+    """v1.34.40 B.2 (log Chỉ thị — HD 09-HD/VPTW bị đoán loai='Luật' rồi ghi thẳng registry): profile VĂN BẢN
+    THƯỜNG chỉ persist loai có BẰNG CHỨNG TƯỜNG MINH — (a) cờ --loai user truyền; (b) letterhead khai báo
+    (dòng IN HOA đứng riêng, _declared_loai_from_header); (c) prefix tên file (_infer_loai). Suy diễn heuristic
+    thân-văn-bản → ĐỂ TRỐNG ('blank-over-guess' — thà user điền còn hơn ghi sai). Corpus nền vbqppl KHÔNG qua
+    gate này (heuristic đang đúng cho VBQPPL). Trả (loai_để_ghi, nguồn_bằng_chứng). PURE, test offline."""
+    if explicit:
+        return loai, "explicit"
+    canon = _normalize_loai(str(loai or ""))
+    if not canon:
+        return "", ""
+    dec = _normalize_loai(_declared_loai_from_header(text or ""))
+    if dec and dec == canon:
+        return canon, "letterhead"
+    inf = _normalize_loai(_infer_loai(name or "", "") or "")
+    if inf and inf == canon:
+        return canon, "name_prefix"
+    return "", "suppressed"
+
+
 def _ingest_verify_gate(text: str, classification: dict | None = None,
                         source_quality: str = "digital", ocr_verified: bool = False,
                         base_profile: bool | None = None) -> dict:
@@ -1594,7 +1628,15 @@ def cmd_profile_ingest(a) -> int:
         if info.get("sohieu"):
             okw["sohieu"] = info["sohieu"]
         if info.get("loai"):
-            okw["loai"] = info["loai"]
+            # v1.34.40 B.2 blank-over-guess: profile thường chỉ ghi loai có bằng chứng tường minh
+            # (letterhead/prefix tên) — heuristic thân-văn-bản → để trống, user điền qua register.
+            _lv, _lsrc = _profile_loai_evidence(info["loai"], probe_text, doc_name, False)
+            if _lv:
+                okw["loai"] = _lv
+            else:
+                print(f"[tl] B.2 blank-over-guess: loai '{info['loai']}' suy heuristic (không letterhead/prefix) "
+                      f"→ ĐỂ TRỐNG; điền sau: tl register --drive-id <gdoc> --loai \"{info['loai']}\"",
+                      file=sys.stderr)
         org = g.get("organize", **okw)
     gdoc = org.get("fileId")
     if not gdoc:
@@ -1841,6 +1883,15 @@ def cmd_ingest_local(a) -> int:
     # 'Văn bản hợp nhất') — trước đây mỗi ingest xong phải `backfill-loai --normalize` vá lại (drift lặp mãi).
     if loai:
         loai = _normalize_loai(loai)
+    # v1.34.40 B.2 blank-over-guess: profile thường + loai KHÔNG tường minh (từ auto-plan heuristic) → đòi
+    # bằng chứng letterhead/prefix; thiếu → để trống thay vì ghi sai (ca HD 09-HD/VPTW bị đoán 'Luật').
+    if loai and not str(getattr(a, "loai", None) or "").strip() and _active_profile() != DEFAULT_PROFILE:
+        _pt_b2, _ = _profile_read_probe_text(f, getattr(a, "text_file", None))
+        _lv_b2, _lsrc_b2 = _profile_loai_evidence(loai, _pt_b2, name, False)
+        if not _lv_b2:
+            print(f"[tl] B.2 blank-over-guess: loai '{loai}' suy heuristic (không letterhead/prefix) — ĐỂ TRỐNG "
+                  f"cho profile thường; điền sau: tl register --drive-id <gdoc> --loai \"{loai}\"", file=sys.stderr)
+            loai = ""
     # (4) validate cat theo ĐỦ 45 chủ đề pháp điển (không chỉ folder đang có)
     folders_now = _valid_cats(getattr(a, "config", None), getattr(a, "profile", None))   # folder THỰC
     pd = _load_phapdien()                                                                # 45 chủ đề + 00/46

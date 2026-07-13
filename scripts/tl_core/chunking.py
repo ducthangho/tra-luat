@@ -66,42 +66,79 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
             chunk_text = text[group_start:group_end]
             records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
         return "by_article", records
-    # v1.34.38 (#2 log phiên Chỉ thị): văn kiện Đảng/Đề án dài KHÔNG có Điều → trước đây rơi thẳng về cắt mù
-    # by_paragraph_budget (có thể cắt GIỮA một Phần/Mục — phải dò tay ranh giới rồi tự dựng manifest). Nay thêm
-    # strategy by_heading: nhận diện heading kiểu Mục (PHẦN thứ nhất/I/1 · Chương I/1 · Mục 1/I) đứng đầu dòng,
-    # cùng guard _is_heading (dòng trước trống/kết câu — né trích dẫn 'tại Mục 3 của…' wrap đầu dòng); cần ≥2
-    # heading mới dùng (1 heading = cả file, budget xử tốt hơn). Gộp heading liên tiếp theo max_chars như by_article.
-    # [ \t] thay \s trong pattern: \s nuốt newline → title dính cả dòng sau (bug bắt khi viết r100).
-    heading_pat = re.compile(
-        r"(?im)^[ \t]*((?:phần[ \t]+(?:thứ[ \t]+\S+|[ivxlcd]+|\d+)|chương[ \t]+[ivxlcd\d]+|mục[ \t]+[ivxlcd\d]+)\b[ \t]*[\.:—-]?[^\n]*)$")
-    def _is_muc_heading(m):
-        # Heading kiểu Mục nhận thêm tín hiệu DÒNG TRỐNG ngay trước (đề án/văn kiện hay kết đoạn bằng
-        # bảng/số liệu không dấu chấm — guard kết-câu của by_article một mình sẽ loại oan).
-        if m.start() == 0 or re.search(r"\n[ \t]*\n\Z", text[:m.start()]):
-            return True
-        return _is_heading(m)
-    hmatches = [m for m in heading_pat.finditer(text) if _is_muc_heading(m)]
-    if len(hmatches) >= 2:
-        boundaries = [(m.start(), (hmatches[i+1].start() if i+1 < len(hmatches) else len(text)), m.group(1).strip())
-                      for i, m in enumerate(hmatches)]
-        # preamble (tên đề án/quốc hiệu trước heading đầu) đi cùng chunk 1 — mất nó là mất tiêu đề văn kiện trong RAG
-        boundaries[0] = (0, boundaries[0][1], boundaries[0][2])
-        group_start = None; group_end = None; group_title = None
-        for start, end, title in boundaries:
-            if group_start is not None and (end - group_start) > max_chars:
-                chunk_text = text[group_start:group_end]
-                records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}",
-                                "start_char": group_start, "end_char": group_end,
-                                "chars": len(chunk_text), "text": chunk_text})
-                group_start = None; group_end = None; group_title = None
-            if group_start is None:
-                group_start = start; group_title = title[:120]
-            group_end = end
-        if group_start is not None:
-            chunk_text = text[group_start:group_end]
-            records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}",
-                            "start_char": group_start, "end_char": group_end,
-                            "chars": len(chunk_text), "text": chunk_text})
+    # v1.34.38 (#2 log Chỉ thị) + v1.34.40 C.1 REDESIGN (log: chunk 191k lọt qua max-chars 90k + Phần V bị gộp
+    # mất ranh giới): strategy by_heading cho văn kiện Đảng/Đề án KHÔNG có Điều. LUẬT MỚI (grill 2026-07-13):
+    #   (1) heading CẤP CAO NHẤT xuất hiện (PHẦN > Chương > Mục) KHÔNG BAO GIỜ gộp với nhau — 1 section/chunk
+    #       (ranh giới tự nhiên thắng budget-packing; RAG trích dẫn theo Phần);
+    #   (2) section VƯỢT max_chars → tách CON theo heading cấp dưới trong section (đệ quy xuống numbered `1.`);
+    #       cấp dưới gộp liên tiếp theo budget như cũ; hết cấp → cắt paragraph-budget, title 'X (i/n)';
+    #   (3) mọi mảnh sinh từ section vượt budget mang flag CHUNK_SPLIT_OVER_BUDGET (không im lặng).
+    # Guard heading: dòng-trống-ngay-trước HOẶC kết-câu (khuôn _is_heading); [ \t] thay \s (né nuốt newline).
+    _HEAD_LEVELS = (
+        re.compile(r"(?im)^[ \t]*(phần[ \t]+(?:thứ[ \t]+\S+|[ivxlcd]+|\d+)\b[ \t]*[\.:—-]?[^\n]*)$"),
+        re.compile(r"(?im)^[ \t]*(chương[ \t]+[ivxlcd\d]+\b[ \t]*[\.:—-]?[^\n]*)$"),
+        re.compile(r"(?im)^[ \t]*(mục[ \t]+[ivxlcd\d]+\b[ \t]*[\.:—-]?[^\n]*)$"),
+        re.compile(r"(?m)^[ \t]*(\d+(?:\.\d+)*[\.\)][ \t]+\S[^\n]*)$"),   # numbered 1. / 1.1. / 2) — CHỈ làm cấp tách con
+    )
+
+    def _guarded(pat, lo, hi):
+        out = []
+        for m in pat.finditer(text, lo, hi):
+            if m.start() == lo or re.search(r"\n[ \t]*\n\Z", text[lo:m.start()]) or _is_heading(m):
+                out.append((m.start(), m.group(1).strip()))
+        return out
+
+    def _emit(lo, hi, title, flags):
+        rec = {"index": len(records) + 1, "title": (title or f"part{len(records)+1}")[:120],
+               "start_char": lo, "end_char": hi, "chars": hi - lo, "text": text[lo:hi]}
+        if flags:
+            rec["flags"] = list(flags)
+        records.append(rec)
+
+    def _budget_cut(lo, hi, title, flags):
+        # hết cấp heading → cắt theo đoạn văn trong [lo,hi), title 'X (i/n)' — không bao giờ cắt giữa đoạn
+        spans, gs = [], lo
+        for bm in re.finditer(r".+?(?:\n\s*\n|\Z)", text[lo:hi], re.S):
+            be = lo + bm.end()
+            if be - gs > max_chars and gs < lo + bm.start():
+                spans.append((gs, lo + bm.start())); gs = lo + bm.start()
+        spans.append((gs, hi))
+        for i, (s0, s1) in enumerate(spans, 1):
+            _emit(s0, s1, f"{title} ({i}/{len(spans)})" if len(spans) > 1 else title, flags)
+
+    def _emit_section(lo, hi, title, lvl, over):
+        flags = ("CHUNK_SPLIT_OVER_BUDGET",) if over else ()
+        if hi - lo <= max_chars:
+            _emit(lo, hi, title, flags); return
+        for nxt in range(lvl + 1, len(_HEAD_LEVELS)):
+            subs = _guarded(_HEAD_LEVELS[nxt], lo, hi)
+            if subs:
+                bounds = [(lo, subs[0][0], title)] if subs[0][0] > lo else []
+                bounds += [(s, (subs[i+1][0] if i+1 < len(subs) else hi), f"{title} · {t}"[:120])
+                           for i, (s, t) in enumerate(subs)]
+                # cấp dưới GỘP liên tiếp theo budget (chỉ cấp cao nhất mới cấm gộp)
+                gs, ge, gt = None, None, None
+                for s0, s1, t in bounds:
+                    if gs is not None and s1 - gs > max_chars:
+                        _emit_section(gs, ge, gt, nxt, True); gs = None
+                    if gs is None:
+                        gs, gt = s0, t
+                    ge = s1
+                if gs is not None:
+                    _emit_section(gs, ge, gt, nxt, True)
+                return
+        _budget_cut(lo, hi, title, ("CHUNK_SPLIT_OVER_BUDGET",))
+
+    _top_lvl, _tops = None, []
+    for _lv in range(3):                       # numbered (idx 3) KHÔNG làm cấp cao nhất
+        _tops = _guarded(_HEAD_LEVELS[_lv], 0, len(text))
+        if len(_tops) >= 2:
+            _top_lvl = _lv; break
+    if _top_lvl is not None:
+        _sects = [(s, (_tops[i+1][0] if i+1 < len(_tops) else len(text)), t) for i, (s, t) in enumerate(_tops)]
+        _sects[0] = (0, _sects[0][1], _sects[0][2])   # preamble (tên đề án) đi cùng chunk 1
+        for s0, s1, t in _sects:
+            _emit_section(s0, s1, t, _top_lvl, s1 - s0 > max_chars)
         return "by_heading", records
     block_pat = re.compile(r".+?(?:\n\s*\n|\Z)", re.S)
     blocks = [(m.start(), m.end(), m.group(0)) for m in block_pat.finditer(text) if m.group(0).strip()]
@@ -301,13 +338,28 @@ def cmd_profile_ingest_chunks(a) -> int:
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
     if not plan.get("ok"):
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    # v1.34.40 B.3 (log Chỉ thị — nạp 9 chunk >600s buffer đến cuối → timeout tưởng thất bại dù 9/9 đã lên
+    # Drive): STREAM tiến độ per-chunk ra stderr (khuôn profile-doctor --deep v1.34.30) + resume_command khi
+    # đứt giữa chừng — child profile-ingest có dedup-gate nên chạy lại an toàn (chunk đã lên bị chặn trùng).
     results = []
-    for rec in plan.get("planned_child_commands", []):
+    _cmds = plan.get("planned_child_commands", [])
+    _n = len(_cmds)
+    _resume_note = None
+    for _i, rec in enumerate(_cmds, 1):
+        print(f"[chunks] ({_i}/{_n}) {rec.get('expected_name')} …", file=sys.stderr, flush=True)
         r = _run_child_tl(rec["command"])
         r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
         results.append(r)
+        print("[chunks-jsonl] " + json.dumps({"i": _i, "n": _n, "ok": bool(r.get("ok")),
+                                              "name": rec.get("expected_name")}, ensure_ascii=False),
+              file=sys.stderr, flush=True)
         if not r.get("ok") and not getattr(a, "continue_on_error", False):
+            _resume_note = (f"Đứt ở chunk {_i}/{_n}. Chạy lại CÙNG LỆNH — child profile-ingest có dedup-gate "
+                            f"(chunk đã lên bị chặn trùng, an toàn); hoặc thêm --continue-on-error để bỏ qua lỗi lẻ.")
             break
-    out = {**plan, "schema": "chunk_ingest_bridge_apply.v1", "results": results, "ok": bool(results) and all(r.get("ok") for r in results)}
+    out = {**plan, "schema": "chunk_ingest_bridge_apply.v1", "results": results,
+           "ok": bool(results) and len(results) == _n and all(r.get("ok") for r in results)}
+    if _resume_note:
+        out["resume_command"] = _resume_note
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2

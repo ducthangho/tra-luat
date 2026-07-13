@@ -79,6 +79,11 @@ python scripts/tl.py gws-ping            # env tự dò; ép bằng --env code|c
 > Cowork **chưa cài gws** vẫn DÙNG ĐƯỢC: op A/B/C tự `[FALLBACK→GAS]` (chỉ `upload` cần gws). Muốn đi đường
 > Drive MCP như Chat: `export TL_RUNTIME_ENV=chat`.
 
+> **⚠ BẪY gws thao tác GHI trực tiếp (`gws drive files update` — log phiên Chỉ thị 2026-07-13):** `--params`
+> CHỈ nhận **query params**; REQUEST BODY (vd `{"trashed":true}`) PHẢI qua `--json`. Truyền body nhầm chỗ →
+> HTTP 200 "thành công" nhưng KHÔNG đổi gì (**im lặng thất bại**). Mọi write qua gws trần PHẢI readback
+> (`files.get`) xác minh field đã đổi — hoặc tốt hơn: dùng lệnh `tl` tương đương (đã bọc verified-write).
+
 **A0.3 — Auth (KHÔNG service-account — SA vỡ ownership folder My-Drive; dùng EXPORTED USER CREDENTIAL).**
 - **Code** (có trình duyệt): `gws auth login` (OAuth tương tác) → `gws auth status` thấy `auth_method != "none"`.
 - **Cowork** (headless): KHÔNG login được → NẠP credential đã xuất từ Code (A0.4).

@@ -1,3 +1,32 @@
+# ★ v1.34.38 — vá 4 lỗi log phiên Chỉ thị: phuluc-gate / chunk by_heading / _LOAI_CANON / hygiene-chunk (2026-07-13)
+
+- **(#1) Gate `PHULUC_MENTION_WITHOUT_HEADING` hết dương-tính-giả** (chặn oan corpus HD 09-HD/VPTW, PL01,
+  9 chunk Đề án CĐS QH — PL01 chính LÀ phụ lục mà không được nhận): (a) heading dò trên bản STRIP-ACCENT
+  (regex có-dấu cũ miss 'PHỤ LỤC 01' dạng NFD/hoa); (b) CHỈ nghi khi nhắc 'phụ lục' KÈM SỐ — văn xuôi
+  'kèm theo phụ lục' không phải bằng chứng; (c) gate CHẶN corpus chỉ trên corpus NỀN vbqppl — profile văn
+  bản thường hạ về info-flag `PHULUC_MENTION_PROFILE_INFO` (mirror doctrine requires_dieu v1.34.27 #2).
+- **(#2) chunk-plan/chunk-apply + strategy `by_heading`** cho văn kiện Đảng/Đề án KHÔNG có cấu trúc Điều
+  (trước rơi thẳng cắt mù `by_paragraph_budget`, có thể cắt giữa một Phần/Mục — phải dò tay + tự dựng
+  manifest): nhận diện `PHẦN thứ-nhất/I/1` · `Chương I/1` · `Mục 1/I` đầu dòng; guard heading = dòng-trống-
+  ngay-trước HOẶC kết-câu (khuôn `_is_heading` by_article); preamble (tên đề án) đi cùng chunk 1; cần ≥2
+  heading. ★2 bug tự bắt khi TDD: `\s` trong pattern NUỐT newline (title dính dòng sau) → `[ \t]`; guard
+  kết-câu một mình loại oan heading đứng sau đoạn không dấu chấm (bảng/số liệu).
+- **(#3) `_LOAI_CANON` +10 loại văn bản thường** (log: loai_noncanonical=26/53 — gần nửa registry profile
+  đếm phi-chuẩn GIẢ): Kế hoạch, Đề án, Thông báo, Phụ lục, Công văn, Phát biểu, Tờ trình (+Biểu mẫu, Báo
+  cáo, Tài liệu — dùng ở 2 profile mới 2026-07-13). Alias ngắn né khóa cũ: `pl`=Pháp lệnh GIỮ (Phụ lục
+  không alias 2 chữ), `ttr`=Tờ trình, `tb`/`cv`/`kh`/`bc` thêm mới.
+- **(#4) hygiene scan hết báo nhầm chunk là trùng lặp**: chunk `<base>__partNN` (profile-ingest-chunks)
+  dùng chung sohieu văn bản gốc BY DESIGN (link qua `goc`) — helper PURE `_is_chunk_part_name` loại chunk
+  khỏi `_sohieu_dup_group_real` + ngưỡng flag `_reconcile_clusters` (9 chunk Đề án CĐS hết bị gom
+  `duplicate_identity_groups` + gợi nhãn quarantine giả; `dedup-plan` — công cụ ra quyết định thật — vốn
+  không mắc).
+- **(#5 doc)** RUNBOOK §A0.3: bẫy `gws drive files update` — `--params` chỉ nhận query params, request body
+  (`{"trashed":true}`) PHẢI qua `--json`; sai chỗ = HTTP 200 nhưng KHÔNG đổi gì (im lặng thất bại) → mọi
+  write gws trần phải readback `files.get`.
+- TDD r100 ×12 → **835/835**. KHÔNG bump GAS, KHÔNG đổi kernel doctrine → re-import KHÔNG bắt buộc.
+
+---
+
 # ★ v1.34.37 — ingest `--drive-id`: nạp file ĐÃ Ở TRÊN DRIVE (bỏ bước upload) (2026-07-13)
 
 - **Nhu cầu (user):** người dùng tự tải file lên Drive (kéo-thả `_HOP_NAP` qua UI, điện thoại, shared

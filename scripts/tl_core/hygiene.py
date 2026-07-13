@@ -2175,7 +2175,12 @@ def _reconcile_clusters(entries: list[dict]) -> list[dict]:
             return (not _name_is_template_or_appendix(_entry_name(e))) and bool(re.search(r"(^|[/_ -])\d{2,4}[_-]\d{4}[_-]", _entry_name(e)))
         def orphanish(e):
             return (not _name_is_template_or_appendix(_entry_name(e))) and ((not _entry_sohieu(e)) or _bad_cat(_entry_cat(e)) or (rawish(e) and not _entry_nlm(e) and not _is_source_sidecar(e, group)))
-        flagged = len(group) > 1 or any(orphanish(e) for e in group)
+        # v1.34.38 (#4 log phiên Chỉ thị): CHUNK tách cố ý (<base>__partNN — profile-ingest-chunks) dùng chung
+        # sohieu văn bản gốc BY DESIGN (liên kết qua goc) → 9 chunk Đề án CĐS từng bị gom thành
+        # duplicate_identity_groups + gợi nhãn quarantine GIẢ (dedup-plan không mắc — chỉ hygiene scan). Chunk
+        # KHÔNG tính vào ngưỡng flag; cụm chỉ-toàn-chunk (+tối đa 1 bản gốc lành) bỏ qua.
+        non_chunk = [e for e in group if not _is_chunk_part_name(_entry_name(e))]
+        flagged = len(non_chunk) > 1 or any(orphanish(e) for e in non_chunk)
         if not flagged:
             continue
         # Canonical = điểm cao nhất, nhưng ưu tiên có số hiệu + cat không root.
@@ -2227,6 +2232,12 @@ def _select_hygiene_clusters(clusters: list[dict], q: str) -> tuple[list[dict], 
         skipped.append(cc)
     return selected, skipped
 
+def _is_chunk_part_name(nm: str) -> bool:
+    """v1.34.38 (#4): tên chunk tách cố ý theo quy ước profile-ingest-chunks (`<base>__partNN`) — các dòng này
+    chung sohieu/goc văn bản mẹ BY DESIGN, không bao giờ là 'bản trùng'. PURE, test offline."""
+    return bool(re.search(r"__part\d+", str(nm or ""), re.I))
+
+
 def _sohieu_dup_group_real(group: list[dict]) -> bool:
     """C4 (v1.33.0 — log rà 15 Luật: sweep by_sohieu=93 'trùng' nhưng chỉ 4 cụm có ≥2 bản corpus=true và CẢ 4 là
     tách Phụ lục/Final CỐ Ý; 49 cụm còn lại là cặp gốc+VBHN/quarantine LÀNH — headline 93 = báo động giả, trái
@@ -2242,6 +2253,8 @@ def _sohieu_dup_group_real(group: list[dict]) -> bool:
             continue
         if "phuluc" in re.sub(r"[\s_-]", "", _ascii_lower(nm)):
             continue                       # phụ lục tách riêng cố ý (PhuLuc/Phu_luc/phu-luc — cả dạng nén)
+        if _is_chunk_part_name(nm):
+            continue                       # v1.34.38 #4: chunk __partNN chung sohieu gốc = thiết kế, không phải trùng
         core.append(e)
     if len(core) < 2:
         return False

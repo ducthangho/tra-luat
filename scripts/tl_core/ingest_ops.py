@@ -1407,8 +1407,15 @@ def _ingest_verify_gate(text: str, classification: dict | None = None,
     requires_dieu = (info.get("kind") in {"vbqppl", "draft", "nq"}) and bool(base_profile)
     dieu_ok = (stats["count"] > 0) if requires_dieu else True
     norm = _strip_accents(text or "").lower()
-    has_phuluc = "phu luc" in norm
-    phuluc_ok = (not has_phuluc) or bool(re.search(r"(?mi)^\s*phụ\s*lục\b|^\s*phu\s*luc\b", text or ""))
+    # v1.34.38 (#1 log phiên Chỉ thị — 3 dương-tính-giả chặn corpus HD 09-HD/VPTW + PL01 + 9 chunk Đề án CĐS):
+    # (a) heading dò trên BẢN STRIP-ACCENT (regex có-dấu cũ miss 'PHỤ LỤC 01' dạng NFD/hoa — PL01 chính LÀ
+    #     phụ lục mà không được nhận); (b) CHỈ nghi khi nhắc 'phụ lục' KÈM SỐ (văn xuôi 'kèm theo phụ lục'
+    #     không phải bằng chứng thiếu ruột); (c) gate CHẶN corpus chỉ trên corpus NỀN vbqppl — profile văn bản
+    #     thường hạ về info-flag (mirror doctrine requires_dieu v1.34.27 #2).
+    mention_num = re.search(r"phu\s*luc\s*(?:so\s*)?[0-9ivx]{1,4}\b", norm)
+    heading_pl = re.search(r"(?m)^\s*phu\s*luc\b", norm)
+    phuluc_raw_ok = (not mention_num) or bool(heading_pl)
+    phuluc_ok = phuluc_raw_ok if base_profile else True
     source_quality = (source_quality or "digital").lower()
     ocr_ok = source_quality != "ocr" or bool(ocr_verified)
     ok = bool(text) and dieu_ok and phuluc_ok and ocr_ok
@@ -1426,6 +1433,8 @@ def _ingest_verify_gate(text: str, classification: dict | None = None,
         info_flags.append("DIEU_NOT_REQUIRED_NORMAL_DOC")   # trace v1.34.6 #3: thường-không-Điều là hợp lệ
     if (info.get("kind") in {"vbqppl", "draft", "nq"}) and not base_profile:
         info_flags.append("PROFILE_DOC_DIEU_NOT_REQUIRED")  # trace v1.34.27 #2: profile thường tắt đòi-Điều
+    if not phuluc_raw_ok and not base_profile:
+        info_flags.append("PHULUC_MENTION_PROFILE_INFO")    # trace v1.34.38 #1: profile thường không chặn corpus
     return {"ok": ok, "dieu_ok": dieu_ok, "phuluc_ok": phuluc_ok, "ocr_ok": ocr_ok,
             "source_quality": source_quality, "ocr_verified": bool(ocr_verified),
             "requires_dieu": requires_dieu, "dieu_stats": stats, "flags": flags, "info": info_flags,

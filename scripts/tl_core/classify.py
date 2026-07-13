@@ -1537,6 +1537,19 @@ _LOAI_CANON = {
     # enum → 56 dòng đếm nonmappable/loai_noncanonical GIẢ mỗi lần sweep/backfill. Thêm cả 2 giá trị canonical.
     "dieu uoc quoc te": "Điều ước quốc tế", "dieu uoc": "Điều ước quốc tế", "dieuuoc": "Điều ước quốc tế",
     "cong uoc": "Công ước", "conguoc": "Công ước",
+    # v1.34.38 (#3 log phiên Chỉ thị: loai_noncanonical=26/53 — GẦN NỬA registry profile đếm phi-chuẩn GIẢ):
+    # 7 loại văn bản THƯỜNG hợp lệ dùng suốt các profile nhưng thiếu enum (khuôn bổ sung như Hướng dẫn/Công điện).
+    # Alias ngắn CHỈ thêm khi không đụng khóa đã có ('pl'=Pháp lệnh, 'tt'=Thông tư → Phụ lục/Tờ trình không alias 2 chữ).
+    "ke hoach": "Kế hoạch", "kehoach": "Kế hoạch", "kh": "Kế hoạch",
+    "de an": "Đề án", "dean": "Đề án",
+    "thong bao": "Thông báo", "thongbao": "Thông báo", "tb": "Thông báo",
+    "phu luc": "Phụ lục", "phuluc": "Phụ lục",
+    "cong van": "Công văn", "congvan": "Công văn", "cv": "Công văn",
+    "phat bieu": "Phát biểu", "phatbieu": "Phát biểu",
+    "to trinh": "Tờ trình", "totrinh": "Tờ trình", "ttr": "Tờ trình",
+    "bieu mau": "Biểu mẫu", "bieumau": "Biểu mẫu",   # dùng ở profile 'Biểu mẫu DMVB' 2026-07-13
+    "bao cao": "Báo cáo", "baocao": "Báo cáo", "bc": "Báo cáo",   # profile 'Thẩm tra Luật Xuất bản'
+    "tai lieu": "Tài liệu", "tailieu": "Tài liệu",
 }
 
 # ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──

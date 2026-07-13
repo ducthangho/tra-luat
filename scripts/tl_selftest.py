@@ -7817,6 +7817,65 @@ def run() -> int:
                   and _r99_dx.get("stem") == "Luat_ABC" and _r99_dx.get("size_bytes") == 1234
                   and _r99_xl.get("ok") and _r99_xl.get("ext") == ".xlsx" and _r99_xl.get("is_sheet") is True
                   and _r99_nm.get("ok") and _r99_nm.get("ext") == ".docx"))
+    # ═══ v1.34.38 — r100: vá 4 lỗi log phiên Chỉ thị (phuluc-gate/by_heading/_LOAI_CANON/hygiene-chunk) ═══
+    # (1) PHULUC gate: heading strip-accent + chỉ-nghi-khi-kèm-số + profile thường info-only
+    _g100 = _TL_MODULE._ingest_verify_gate
+    _t_pl_no_head = "Báo cáo tổng kết.\nChi tiết tại phụ lục 01 kèm theo.\nHết."
+    _t_pl_head = "PHỤ LỤC 01\nDANH MỤC VĂN BẢN\nxem phụ lục 01 dòng trên."
+    _t_pl_prose = "Đề án dài.\nCác nội dung kèm theo phụ lục đính kèm.\nHết."
+    _r1 = _g100(_t_pl_no_head, {"kind": "normal"}, base_profile=True)
+    _r2 = _g100(_t_pl_head, {"kind": "normal"}, base_profile=True)
+    _r3 = _g100(_t_pl_prose, {"kind": "normal"}, base_profile=True)
+    _r4 = _g100(_t_pl_no_head, {"kind": "normal"}, base_profile=False)
+    cases.append(("r100_phuluc_gate_base_mention_num_blocks",
+                  (not _r1["phuluc_ok"]) and "PHULUC_MENTION_WITHOUT_HEADING" in _r1["flags"]))
+    cases.append(("r100_phuluc_gate_heading_strip_accent_ok",
+                  _r2["phuluc_ok"] and _r2["corpus_allowed"]))
+    cases.append(("r100_phuluc_gate_prose_no_number_ok", _r3["phuluc_ok"]))
+    cases.append(("r100_phuluc_gate_profile_info_only",
+                  _r4["phuluc_ok"] and _r4["corpus_allowed"]
+                  and "PHULUC_MENTION_PROFILE_INFO" in _r4["info"]
+                  and "PHULUC_MENTION_WITHOUT_HEADING" not in _r4["flags"]))
+    # (2) chunk-plan strategy by_heading (PHẦN/Chương/Mục) — văn kiện không Điều hết cắt mù
+    _tx100 = ("ĐỀ ÁN CHUYỂN ĐỔI SỐ\nMở đầu tổng quan.\n\nPHẦN I\nBối cảnh chung. " + "x" * 300 +
+              "\n\nPHẦN II\nMục tiêu. " + "y" * 300 + "\n\nMục 1\nGiải pháp. " + "z" * 300 +
+              "\n\nChương 2\nTổ chức thực hiện. " + "w" * 300)
+    _st100, _rc100 = _TL_MODULE._chunk_records_from_text(_tx100, name="dean", max_chars=500)
+    cases.append(("r100_chunk_by_heading_strategy",
+                  _st100 == "by_heading" and len(_rc100) >= 2
+                  and _rc100[0]["start_char"] == 0                      # preamble đi cùng chunk 1
+                  and _rc100[0]["title"].upper().startswith("PHẦN")))
+    _st100b, _ = _TL_MODULE._chunk_records_from_text("Điều 1. A\nnội dung.\nĐiều 2. B\nnội dung.", name="l", max_chars=10000)
+    cases.append(("r100_chunk_article_still_wins", _st100b == "by_article"))
+    _st100c, _ = _TL_MODULE._chunk_records_from_text("đoạn một.\n\nđoạn hai.\n\nđoạn ba.", name="p", max_chars=10000)
+    cases.append(("r100_chunk_no_heading_paragraph_fallback", _st100c == "by_paragraph_budget"))
+    # trích dẫn 'tại Mục 3 của…' wrap đầu dòng KHÔNG phải heading (guard _is_heading)
+    _tx100d = "Căn cứ quy định nêu\ntại Mục 3 của văn bản dẫn trên và các nội dung khác trong cùng đoạn văn xuôi liền mạch"
+    _st100d, _ = _TL_MODULE._chunk_records_from_text(_tx100d + "\n\nnội dung.", name="q", max_chars=10000)
+    cases.append(("r100_chunk_heading_guard_prose_ref", _st100d == "by_paragraph_budget"))
+    # (3) _LOAI_CANON +7 loại văn bản thường; khóa cũ KHÔNG bị đè
+    _nl100 = _TL_MODULE._normalize_loai
+    cases.append(("r100_loai_canon_van_ban_thuong",
+                  _nl100("Kế hoạch") == "Kế hoạch" and _nl100("de an") == "Đề án"
+                  and _nl100("Thông báo") == "Thông báo" and _nl100("phu luc") == "Phụ lục"
+                  and _nl100("cong van") == "Công văn" and _nl100("Phát biểu") == "Phát biểu"
+                  and _nl100("to trinh") == "Tờ trình" and _nl100("ttr") == "Tờ trình"
+                  and _nl100("bc") == "Báo cáo" and _nl100("bieu mau") == "Biểu mẫu"
+                  and _nl100("pl") == "Pháp lệnh" and _nl100("tt") == "Thông tư"))   # khóa cũ giữ nguyên
+    # (4) hygiene: chunk __partNN chung sohieu = thiết kế, KHÔNG phải duplicate/quarantine
+    def _mk100(nm, did):
+        return {"drive_id": did + "_2345678901234567890", "name": nm, "so_hieu": "99-2026-DA-QH",
+                "cat": "own", "corpus": "true", "row_kind": "own", "mime": "application/vnd.google-apps.document"}
+    _chunks100 = [_mk100(f"De_an_CDS__part{i:02d}", f"c{i}") for i in range(1, 10)]
+    cases.append(("r100_hygiene_chunks_not_duplicate",
+                  _TL_MODULE._is_chunk_part_name("De_an_CDS__part03") is True
+                  and _TL_MODULE._is_chunk_part_name("Luat_45-2019_QH14") is False
+                  and _TL_MODULE._sohieu_dup_group_real(_chunks100) is False))
+    _dups100 = [_mk100("Luat_A_ban1", "d1"), _mk100("Luat_A_ban2", "d2")]
+    cases.append(("r100_hygiene_real_dup_still_flagged", _TL_MODULE._sohieu_dup_group_real(_dups100) is True))
+    _cl100 = _TL_MODULE._reconcile_clusters(_chunks100)
+    cases.append(("r100_hygiene_reconcile_chunk_cluster_silent",
+                  all(len(c.get("entries") or []) <= 1 for c in _cl100)))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -66,6 +66,43 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
             chunk_text = text[group_start:group_end]
             records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
         return "by_article", records
+    # v1.34.38 (#2 log phiên Chỉ thị): văn kiện Đảng/Đề án dài KHÔNG có Điều → trước đây rơi thẳng về cắt mù
+    # by_paragraph_budget (có thể cắt GIỮA một Phần/Mục — phải dò tay ranh giới rồi tự dựng manifest). Nay thêm
+    # strategy by_heading: nhận diện heading kiểu Mục (PHẦN thứ nhất/I/1 · Chương I/1 · Mục 1/I) đứng đầu dòng,
+    # cùng guard _is_heading (dòng trước trống/kết câu — né trích dẫn 'tại Mục 3 của…' wrap đầu dòng); cần ≥2
+    # heading mới dùng (1 heading = cả file, budget xử tốt hơn). Gộp heading liên tiếp theo max_chars như by_article.
+    # [ \t] thay \s trong pattern: \s nuốt newline → title dính cả dòng sau (bug bắt khi viết r100).
+    heading_pat = re.compile(
+        r"(?im)^[ \t]*((?:phần[ \t]+(?:thứ[ \t]+\S+|[ivxlcd]+|\d+)|chương[ \t]+[ivxlcd\d]+|mục[ \t]+[ivxlcd\d]+)\b[ \t]*[\.:—-]?[^\n]*)$")
+    def _is_muc_heading(m):
+        # Heading kiểu Mục nhận thêm tín hiệu DÒNG TRỐNG ngay trước (đề án/văn kiện hay kết đoạn bằng
+        # bảng/số liệu không dấu chấm — guard kết-câu của by_article một mình sẽ loại oan).
+        if m.start() == 0 or re.search(r"\n[ \t]*\n\Z", text[:m.start()]):
+            return True
+        return _is_heading(m)
+    hmatches = [m for m in heading_pat.finditer(text) if _is_muc_heading(m)]
+    if len(hmatches) >= 2:
+        boundaries = [(m.start(), (hmatches[i+1].start() if i+1 < len(hmatches) else len(text)), m.group(1).strip())
+                      for i, m in enumerate(hmatches)]
+        # preamble (tên đề án/quốc hiệu trước heading đầu) đi cùng chunk 1 — mất nó là mất tiêu đề văn kiện trong RAG
+        boundaries[0] = (0, boundaries[0][1], boundaries[0][2])
+        group_start = None; group_end = None; group_title = None
+        for start, end, title in boundaries:
+            if group_start is not None and (end - group_start) > max_chars:
+                chunk_text = text[group_start:group_end]
+                records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}",
+                                "start_char": group_start, "end_char": group_end,
+                                "chars": len(chunk_text), "text": chunk_text})
+                group_start = None; group_end = None; group_title = None
+            if group_start is None:
+                group_start = start; group_title = title[:120]
+            group_end = end
+        if group_start is not None:
+            chunk_text = text[group_start:group_end]
+            records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}",
+                            "start_char": group_start, "end_char": group_end,
+                            "chars": len(chunk_text), "text": chunk_text})
+        return "by_heading", records
     block_pat = re.compile(r".+?(?:\n\s*\n|\Z)", re.S)
     blocks = [(m.start(), m.end(), m.group(0)) for m in block_pat.finditer(text) if m.group(0).strip()]
     group_start = None; group_end = None

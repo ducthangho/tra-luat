@@ -58,7 +58,12 @@ def _sohieu_query_hits_entry(shq_key: str, entry_key: str, substring: bool = Fal
     if (q in ek) if substring else (q == ek):
         return True
     bq = _vbhn_bare_key(q)
-    return bool(bq) and bq == q and _vbhn_bare_key(ek) == bq
+    if bq and bq == q and _vbhn_bare_key(ek) == bq:
+        return True
+    # v1.34.41 B.2 GĐ2 (grill D5): cùng phép nới 1 CHIỀU cho số Đảng/hành chính — query bare '04-CT-TW' khớp
+    # entry year-qualified '04-2026-CT-TW' mọi năm; query CÓ năm vẫn so CHẶT (giữ phân biệt collision qua khóa).
+    dq = _dang_bare_key(q)
+    return bool(dq) and dq == q and _dang_bare_key(ek) == dq
 
 
 def _sohieu_base_sort_year(s: str) -> int:

@@ -495,6 +495,10 @@ def _infer_loai(name: str, sohieu: str = "") -> str:
         return "Báo cáo"
     if nm.startswith(("PHU_LUC", "PHULUC")):
         return "Phụ lục"
+    # v1.34.41 B.2 GĐ2 (grill D7): CTr_ đã sống trên corpus (CTr_02-2026-CTr-BCDTW) — 'CTR_' không đụng 'CT_'
+    # (ký tự thứ 3 khác). Các mã mới khác (QDi/QC/TTri/DL) CHƯA gặp tên thật → gặp thật mới thêm (nếp D6).
+    if nm.startswith(("CTR_", "CHUONG_TRINH")):
+        return "Chương trình"
     # 2) fallback: mã cơ quan trong SỐ HIỆU
     if "ND-CP" in sh:
         return "Nghị định"
@@ -1599,6 +1603,14 @@ _LOAI_CANON = {
     "bieu mau": "Biểu mẫu", "bieumau": "Biểu mẫu",   # dùng ở profile 'Biểu mẫu DMVB' 2026-07-13
     "bao cao": "Báo cáo", "baocao": "Báo cáo", "bc": "Báo cáo",   # profile 'Thẩm tra Luật Xuất bản'
     "tai lieu": "Tài liệu", "tailieu": "Tài liệu",
+    # v1.34.41 B.2 GĐ2 (grill D8): +5 loại hệ văn bản ĐẢNG — ca thật QĐ 383-QĐ/TW letterhead 'QUY ĐỊNH'
+    # (≠ Quyết định dù cùng mã QĐ) + CTr_02 'Chương trình' đếm noncanonical giả ở profile Chỉ thị.
+    # 'qd' GIỮ = Quyết định (Quy định KHÔNG alias 2 chữ — mơ hồ thì blank-over-guess, D8).
+    "quy dinh": "Quy định", "quydinh": "Quy định",
+    "chuong trinh": "Chương trình", "chuongtrinh": "Chương trình", "ctr": "Chương trình",
+    "quy che": "Quy chế", "quyche": "Quy chế",
+    "dieu le": "Điều lệ", "dieule": "Điều lệ",
+    "thong tri": "Thông tri", "thongtri": "Thông tri",
 }
 
 # ── I11: bảng hằng chuyển từ tl.py (tl re-export giữ globals) ──

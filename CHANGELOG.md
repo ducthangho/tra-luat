@@ -1,3 +1,48 @@
+# ★ v1.34.41 — B.2 GĐ2: sửa TẬN GỐC `_classify_doc_header` nhận diện văn kiện ĐẢNG + VB HÀNH CHÍNH (2026-07-13)
+
+> Đóng backlog "Giai đoạn 2" của v1.34.40 B.2. Grill 9 quyết định D1-D9 (user duyệt) trên fixture CA THẬT
+> Pha 0 (3 văn kiện Đảng cat 00 + HD 09-HD/VPTW + TB/KH/TTr/CTr profile Chỉ thị). TDD **r103 ×15** (kèm
+> negative-input theo luật đứng); **harness file thật bắt 2 bug mà fixture rút gọn che** → 2 vòng đỏ-vá thêm.
+> Kế hoạch + kết quả grill: `D:\Quốc hội\ke-hoach-B2-giai-doan-2-classify-doc-header-2026-07-13.md` (ngoài repo).
+
+- **(D2+G4) `kind` mới `dang` + `hanhchinh`** — nhận diện TRƯỚC nhánh vbqppl (không thì sohieu Đảng vừa bắt
+  được kích `elif sohieu` → vbqppl → Điều-gate chặn oan cat 00); cả hai KHÔNG đòi cấu trúc Điều kể cả corpus
+  nền (info-flag `DANG_DOC_DIEU_NOT_REQUIRED`/`HANHCHINH_…`); `dang` thắng cả `draft` (văn kiện Đảng không
+  bao giờ đòi Điều — cờ draft giữ ở field riêng). Consumer kind duy nhất = Điều-gate (khảo sát Pha 0) → additive-safe.
+- **(D3) `_is_dang_title_zone` (PURE)**: dang khi BẤT KỲ 1/3 tín hiệu TRONG TITLE-ZONE 1500 — (a) dòng mở đầu
+  banner 'ĐẢNG CỘNG SẢN VIỆT NAM' (không quốc hiệu CHXHCN trong zone); (b) sohieu dạng Đảng …/TW|VPTW|TU*|ĐU*;
+  (c) cơ quan Đảng (BCH TW/Bộ Chính trị/Ban Bí thư/VPTW/BCĐ TW/đảng-tỉnh-thành ủy). Nhắc trong câu văn KHÔNG tính (N2b).
+- **(D1) `_SOHIEU_NOYEAR_RE` RIÊNG** (không đụng `_RAW_SOHIEU_RE` dùng chung — 'Bao_cao_2024-2025' không bao giờ
+  thành sohieu): số Đảng `NN-XX/CQ` (04-CT/TW; Đđ trong mã CQ — ca 20-TB/CQTTBCĐ) + hành chính `NN/XX-CQ`
+  (123/BC-UBND), CHỈ trong `_sohieu_from_title_zone`, CHỈ dòng ≤80 có pre-text **'Số'/'Số:' THUẦN (fullmatch)**.
+  ★Harness file thật QĐ 383 bắt: pre-text dạng-CÓ-NĂM cũng phải siết fullmatch `[loại] số:` — check ends-with cũ
+  dính trích dẫn ngắn '- Căn cứ Luật Lưu trữ số 33/2024/QH15, ngày…' (≤80, kết bằng 'số') CƯỚP sohieu; thứ tự mới:
+  năm-letterhead > không-năm-letterhead > best-trôi-nổi.
+- **(D4) loai LETTERHEAD-FIRST toàn cục**: `_declared_loai_from_header` (ruột văn bản) > prefix tên file >
+  mã sohieu — ca thật QĐ 383-QĐ/TW file `QD_` nói 'Quyết định', letterhead nói 'QUY ĐỊNH' → Quy định thắng
+  (gốc ca HD 09-HD/VPTW bị filename-first đoán 'Luật'). VBHN-override giữ trên cùng. ★Harness VBHN 19 BHXH bắt:
+  layout VPQH KHÔNG banner 'VĂN BẢN HỢP NHẤT' → declared 'LUẬT' đè mất suy-VBHN-từ-sohieu → `_is_vbhn_doc`
+  +suy THẲNG từ dạng số hiệu (mã VBHN đứng riêng / NN/VPQH bare; KHÔNG substring 'VPQH' trần — NQ-VPQH là VB thường);
+  nhánh hanhchinh loại trừ VBHN (NN/VBHN-VPQH cũng khớp shape NN/XX-CQ).
+- **(G3) fallback 'nghi quyet'/'du thao…luat' thu về TITLE-ZONE 1500 + tên file** (trước quét cả 16k — tài liệu
+  nhắc nghị quyết sâu trong thân bị nhuộm loai='Nghị quyết').
+- **(D5) sohieu_key YEAR-QUALIFIED `NN-YYYY-XX-TW`** cho dang/hanhchinh (năm từ issue_date — số Đảng KHÔNG năm,
+  tái dùng qua khóa = cùng lớp collision VBHN, bất biến phải-có-năm); sohieu NGUYÊN VĂN giữ field riêng.
+  **`_dang_bare_key`** (khuôn `_vbhn_bare_key` y hệt, loại trừ khóa VBHN) + `_sohieu_query_hits_entry` nới
+  1 CHIỀU: query bare '04-CT-TW' khớp entry year-qualified mọi năm; query có năm giữ so CHẶT.
+- **(D8) `_LOAI_CANON` +5 loại hệ Đảng**: Quy định / Chương trình / Quy chế / Điều lệ / Thông tri (+alias không-dấu;
+  'qd' GIỮ = Quyết định — QĐ/TW mơ hồ không letterhead → blank-over-guess để trống). `_DECLARED_LOAI_MAP` +5 tương ứng.
+- **(D6) `_HEADER_AGENCY_PATS` +9**: BCH TW→TW, Bộ Chính trị→BCT, Ban Bí thư→BBT, VPTW, BCĐTW, đảng ủy→DU,
+  tỉnh/thành ủy→TU, UBND, HĐND (nhóm Đảng đứng trước — đặc thù hơn; dài-trước-ngắn giữ).
+- **(D7) `_safe_profile_doc_name` +18 mã loại** theo quy ước SỐNG trên corpus (CT/KL/HD/KH/TB/CV/TTr/DA/BC/PB/
+  CTr/Mau/CD/TL + Phụ lục=PL chung sống Pháp lệnh + Quy định=QDi/Quy chế=QC/Thông tri=TTri/Điều lệ=DL);
+  **năm BẮT BUỘC trong tên khi sohieu_key không năm** (khớp tên thật KL_121-KL-TW_2025). `_infer_loai` +CTr_
+  (đã sống trên corpus; QDi/QC/TTri/DL chưa gặp tên thật — gặp thật mới thêm).
+- **Verify**: selftest 869/869 (854 cũ + r103 ×15 — control r52/r73a/r100-102 xanh NGUYÊN, không sửa expectation);
+  harness 8 file Đảng/hành chính THẬT + 6 control VBQPPL/VBHN thật đều đúng. KHÔNG bump GAS/kernel doctrine
+  (chỉ version header) → re-import KHÔNG bắt buộc. Data-op backfill (sohieu/loai 121 dòng cũ + KL_121 dup 2 drive_id +
+  QĐ 383 loai 'Quyết định'→'Quy định' + 2 loai sai profile Chỉ thị) = Pha 5 riêng, DRY trước, chờ user duyệt.
+
 # ★ v1.34.40 — vá 7 lỗi BÁO CÁO 13/7 (lớp "sai mà báo thành công") + LUẬT negative-input test (2026-07-13)
 
 > grill-with-docs chốt 7 quyết định thiết kế; TDD **r102 ×10 NEGATIVE-INPUT tests** (đầu vào sai cố ý →

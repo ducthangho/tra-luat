@@ -8047,6 +8047,127 @@ def run() -> int:
                   _st102 == "by_heading" and not _oversize102 and len(_p2parts) >= 2
                   and "PHẦN I" in _titles102 and "PHẦN III" in _titles102   # top-level là chunk RIÊNG, không gộp
                   and any("CHUNK_SPLIT_OVER_BUDGET" in (r.get("flags") or []) for r in _p2parts)))
+    # ═══ v1.34.41 — r103: B.2 GĐ2 classifier văn kiện Đảng/hành chính (grill D1-D9 2026-07-13; fixture = ca thật) ═══
+    # (D2+D3) kind='dang': banner ĐCSVN / số Đảng …/TW / agency Đảng — đều TITLE-ZONE; sohieu Đảng bắt được,
+    # sohieu_key year-qualified NN-YYYY-XX-TW (D5, năm từ issue_date vì số Đảng không năm)
+    _ct04 = ("BAN CHẤP HÀNH TRUNG ƯƠNG\n*\nSố 04-CT/TW\n\tĐẢNG CỘNG SẢN VIỆT NAM\n_________________\n"
+             "Hà Nội, ngày 17 tháng 3 năm 2026\n\nCHỈ THỊ\nCỦA BAN BÍ THƯ\ntăng cường sự lãnh đạo của Đảng "
+             "đối với hoạt động xuất bản\n trong tình hình mới\n_____\n\nSau hơn 70 năm xây dựng và phát triển, "
+             "xuất bản cách mạng Việt Nam đã đạt được những kết quả quan trọng.")
+    _i103a = _classify_doc_header(_ct04, "")
+    cases.append(("r103_dang_ct04_header_classify",
+                  _i103a["kind"] == "dang" and _i103a["loai"] == "Chỉ thị" and _i103a["sohieu"] == "04-CT/TW"
+                  and _i103a["sohieu_key"] == "04-2026-CT-TW" and _i103a["issue_year"] == 2026))
+    # (D4) letterhead THẮNG tên file — ca thật QĐ 383-QĐ/TW: file QD_ nói 'Quyết định', ruột nói 'QUY ĐỊNH'
+    _kl121 = ("BAN CHẤP HÀNH TRUNG ƯƠNG \n*\n\tĐẢNG CỘNG SẢN VIỆT NAM \n---------------\n\tSố 121-KL/TW\n"
+              "\tHà Nội, ngày 24 tháng 01 năm 2025 \n\t \nKẾT LUẬN\nCỦA BAN CHẤP HÀNH TRUNG ƯƠNG ĐẢNG KHÓA XIII "
+              "VỀ TỔNG KẾT NGHỊ QUYẾT SỐ 18-NQ/TW\nI- TÌNH HÌNH\nQua hơn 7 năm thực hiện.")
+    _i103b = _classify_doc_header(_kl121, "KL_121-KL-TW_2025_Tong_ket_NQ_18.docx")
+    # ⚠dòng 'Căn cứ Luật Lưu trữ số 33/2024/QH15…' là CA THẬT (≤80 ký tự, kết bằng 'số') — bản vá đầu bị nó
+    # cướp sohieu ở nhánh CÓ-NĂM vì check ends-with 'số' (harness file thật bắt); pre-text phải là letterhead THUẦN.
+    _qd383 = ("BAN CHẤP HÀNH TRUNG ƯƠNG\n*\n\tĐẢNG CỘNG SẢN VIỆT NAM\n---------------\n\tSố 383-QĐ/TW\n"
+              "\tHà Nội, ngày 19 tháng 11 năm 2025 \n\t \nQUY ĐỊNH\nVỀ PHÔNG LƯU TRỮ ĐẢNG CỘNG SẢN VIỆT NAM\n-----\n"
+              "- Căn cứ Điều lệ Đảng;\n- Căn cứ Luật Lưu trữ số 33/2024/QH15, ngày 21/6/2024 của Quốc hội;\n"
+              "- Xét đề nghị của Chánh Văn phòng Trung ương Đảng,\n"
+              "Điều 1. Phông lưu trữ Đảng Cộng sản Việt Nam là toàn bộ tài liệu.")
+    _i103c = _classify_doc_header(_qd383, "QD_383-QD-TW_2025_Phong_luu_tru_Dang.docx")
+    cases.append(("r103_dang_kl121_qd383_letterhead_wins",
+                  _i103b["kind"] == "dang" and _i103b["loai"] == "Kết luận" and _i103b["sohieu_key"] == "121-2025-KL-TW"
+                  and _i103c["kind"] == "dang" and _i103c["loai"] == "Quy định"
+                  and _i103c["sohieu_key"] == "383-2025-QD-TW"))
+    # layout convert lộn xộn (ca gốc HD 09-HD/VPTW): banner dính đuôi ngày tháng, agency đảo chữ — vẫn dang qua số Đảng
+    _hd09 = ("BAN CHẤP HÀNH TRUNG ƯƠNG VĂN PHÒNG \n* \nSố 09-HD/VPTW \n"
+             "ĐẢNG CỘNG SẢN VIỆT NAM ________________________________ Hà Nội, ngày 03 tháng 6 năm 2026 \n"
+             "HƯỚNG DẪN \nxử lý văn bản điện tử trên hệ thống thông tin  \nđiều hành tác nghiệp trong các cơ quan đảng \n"
+             "----- \nVăn phòng Trung ương Đảng hướng dẫn xử lý văn bản điện tử như sau:")
+    _i103d = _classify_doc_header(_hd09, "")
+    # mã cơ quan CÓ Đ CÓ DẤU (ca thật TB 20-TB/CQTTBCĐ) — regex phải nhận Đđ, norm ra CQTTBCD
+    _tb20 = ("BAN CHỈ ĐẠO TRUNG ƯƠNG VỀ PHÁT TRIỂN KHOA HỌC, CÔNG NGHỆ, ĐỔI MỚI SÁNG TẠO VÀ CHUYỂN ĐỔI SỐ "
+             "CƠ QUAN THƯỜNG TRỰC BAN CHỈ ĐẠO \nSố 20-TB/CQTTBCĐ \nĐẢNG CỘNG SẢN VIỆT NAM \n"
+             "Hà Nội, ngày 16 tháng 3 năm 2026 \nTHÔNG BÁO KẾT LUẬN \nCỦA ĐỒNG CHÍ TỔNG BÍ THƯ TÔ LÂM,\n"
+             "tại Phiên họp lần thứ nhất năm 2026.")
+    _i103e = _classify_doc_header(_tb20, "")
+    cases.append(("r103_dang_hd09_tb20_layouts",
+                  _i103d["kind"] == "dang" and _i103d["loai"] == "Hướng dẫn" and _i103d["sohieu"] == "09-HD/VPTW"
+                  and _i103e["kind"] == "dang" and _i103e["loai"] == "Thông báo"
+                  and _i103e["sohieu"] == "20-TB/CQTTBCĐ" and _i103e["sohieu_key"] == "20-2026-TB-CQTTBCD"))
+    # (D2) kind='hanhchinh': VB nhà nước số KHÔNG-NĂM NN/LOẠI-CQ + banner CHXHCN (không phải dang, không phải vbqppl)
+    _bc103 = ("ỦY BAN NHÂN DÂN TỈNH THÁI NGUYÊN\n-------\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+              "Độc lập - Tự do - Hạnh phúc\n---------------\nSố: 123/BC-UBND\nThái Nguyên, ngày 15 tháng 4 năm 2025\n\n"
+              "BÁO CÁO\nKết quả triển khai chính sách bảo hiểm xã hội trên địa bàn\n\nNội dung báo cáo chi tiết.")
+    _i103f = _classify_doc_header(_bc103, "")
+    cases.append(("r103_hanhchinh_bc_ubnd",
+                  _i103f["kind"] == "hanhchinh" and _i103f["loai"] == "Báo cáo"
+                  and _i103f["sohieu"] == "123/BC-UBND" and _i103f["sohieu_key"] == "123-2025-BC-UBND"))
+    # (D2) gate: dang/hanhchinh KHÔNG đòi Điều KỂ CẢ corpus nền (khác vbqppl/draft/nq) + trace flag
+    _g103a = _ingest_verify_gate("Nội dung chỉ thị của Ban Bí thư, không có điều khoản pháp quy.",
+                                 {"kind": "dang"}, base_profile=True)
+    _g103b = _ingest_verify_gate("Báo cáo hành chính thường kỳ.", {"kind": "hanhchinh"}, base_profile=True)
+    cases.append(("r103_gate_dang_hanhchinh_no_dieu",
+                  _g103a["ok"] and not _g103a["requires_dieu"] and "DANG_DOC_DIEU_NOT_REQUIRED" in _g103a["info"]
+                  and _g103b["ok"] and not _g103b["requires_dieu"]))
+    # (D8) enum +5 loại Đảng; khóa cũ KHÔNG đổi ('qd' vẫn Quyết định — Quy định KHÔNG alias 2 chữ)
+    cases.append(("r103_loai_canon_dang_types",
+                  _normalize_loai("quy dinh") == "Quy định" and _normalize_loai("chuong trinh") == "Chương trình"
+                  and _normalize_loai("quy che") == "Quy chế" and _normalize_loai("dieu le") == "Điều lệ"
+                  and _normalize_loai("thong tri") == "Thông tri" and _normalize_loai("qd") == "Quyết định"))
+    # (D7) prefix mới CTr_ nhận Chương trình; PL_ GIỮ Pháp lệnh (quy ước corpus — Phụ lục cần letterhead/explicit)
+    cases.append(("r103_infer_loai_new_prefixes",
+                  _infer_loai("CTr_02-2026-CTr-BCDTW_Chuong_trinh_cong_tac") == "Chương trình"
+                  and _infer_loai("PL_01_De_an_CDS_Quoc_hoi") == "Pháp lệnh"))
+    # (D7) tên sinh: prefix theo loai + NĂM BẮT BUỘC khi sohieu không năm (key year-qualified đã chứa năm;
+    # key CHƯA year-qualified → append issue_year sau key)
+    _n103a = _safe_profile_doc_name({"loai": "Chỉ thị", "sohieu": "04-CT/TW", "sohieu_key": "04-2026-CT-TW",
+                                     "issue_year": 2026, "title": "tăng cường lãnh đạo xuất bản", "draft": False})
+    _n103b = _safe_profile_doc_name({"loai": "Kết luận", "sohieu": "121-KL/TW", "sohieu_key": "121-KL-TW",
+                                     "issue_year": 2025, "title": "Tổng kết Nghị quyết 18", "draft": False})
+    cases.append(("r103_safe_name_dang_prefix_year",
+                  _n103a.startswith("CT_04_2026_CT_TW") and _n103b.startswith("KL_121_KL_TW_2025")))
+    # NEGATIVE-INPUT (luật đứng v1.34.40) — (a) số Đảng trong CÂU VĂN ngắn ('theo Chỉ thị số 04-CT/TW.') KHÔNG
+    # phải số hiệu của mình: dòng-Số phải là dòng letterhead THUẦN (chỉ 'Số'/'Số:' đứng trước)
+    _cit103 = ("ĐẢNG ỦY QUỐC HỘI\n*\n\tĐẢNG CỘNG SẢN VIỆT NAM\nHà Nội, ngày 05 tháng 5 năm 2026\n"
+               "KẾ HOẠCH\ntriển khai công tác tuyên truyền\ntheo Chỉ thị số 04-CT/TW.\nNội dung chi tiết như sau.")
+    _i103g = _classify_doc_header(_cit103, "")
+    cases.append(("r103_neg_citation_short_prose_not_sohieu",
+                  _i103g["sohieu"] == "" and _i103g["kind"] == "dang" and _i103g["loai"] == "Kế hoạch"))
+    # (b) draft chưa cấp số 'Số      -TTr/…' (ca thật Tờ trình BTGDVĐU) → sohieu rỗng, không crash, loai từ letterhead
+    _ttr103 = ("ĐẢNG ỦY QUỐC HỘI\nBAN TUYÊN GIÁO VÀ DÂN VẬN\n*\nSố      -TTr/BTGDVĐU\n\n\tĐẢNG CỘNG SẢN VIỆT NAM\n"
+               "Hà Nội, ngày      tháng 6  năm 2026\n\tTỜ TRÌNH\nVề việc xây dựng Chỉ thị của Ban Thường vụ "
+               "Đảng ủy Quốc hội\nKính gửi: Đồng chí Bí thư.")
+    _i103h = _classify_doc_header(_ttr103, "")
+    cases.append(("r103_neg_blank_number_no_crash",
+                  _i103h["sohieu"] == "" and _i103h["kind"] == "dang" and _i103h["loai"] == "Tờ trình"))
+    # (c) tên file khoảng-năm KHÔNG phải số hiệu (bảo vệ D1: regex không-năm KHÔNG áp cho tên file)
+    _i103i = _classify_doc_header("", "Bao_cao_2024-2025.docx")
+    cases.append(("r103_neg_filename_yearrange_not_sohieu",
+                  _i103i["sohieu"] == "" and _i103i["kind"] == "normal" and _i103i["loai"] == "Báo cáo"))
+    # (d) G3: 'nghị quyết' nhắc SÂU trong thân (>1500) KHÔNG còn nhuộm loai (fallback thu về title-zone)
+    _far103 = ("TÀI LIỆU THAM KHẢO\nphục vụ phiên họp toàn thể\n" + ("nội dung trung tính. " * 120) +
+               "\nphần cuối nhắc nghị quyết của Quốc hội và một nghị quyết khác.")
+    _i103j = _classify_doc_header(_far103, "Tai_lieu_tham_khao.docx")
+    cases.append(("r103_neg_nq_mention_deep_body_ignored", _i103j["loai"] != "Nghị quyết"))
+    # CONTROL: letterhead thắng tên file SAI trên VBQPPL nền — kind vẫn vbqppl, Điều-gate giữ nguyên
+    _nd103 = ("CHÍNH PHỦ\n-------\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n---------------\n"
+              "Số: 100/2025/NĐ-CP\nHà Nội, ngày 01 tháng 6 năm 2025\n\nNGHỊ ĐỊNH\nQuy định chi tiết một số điều\n\n"
+              "Điều 1. Phạm vi điều chỉnh\nNghị định này quy định chi tiết.")
+    _i103k = _classify_doc_header(_nd103, "TT_100-2025_saitenfile.docx")
+    cases.append(("r103_control_letterhead_beats_wrong_filename",
+                  _i103k["loai"] == "Nghị định" and _i103k["kind"] == "vbqppl"))
+    # CONTROL (harness file thật VBHN 19 BHXH bắt): layout VPQH KHÔNG banner 'VĂN BẢN HỢP NHẤT' — declared
+    # 'LUẬT' không được đè suy-VBHN-từ-sohieu; và sohieu 19/VBHN-VPQH KHÔNG được coi là hành chính
+    _vbhn103 = ("VĂN PHÒNG QUỐC HỘI\n--------\n\tCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc \n"
+                "---------------\n\tSố: 19/VBHN-VPQH\n\tHà Nội, ngày 12 tháng 02 năm 2026\n\t \nLUẬT\nBẢO HIỂM XÃ HỘI\n"
+                "Luật Bảo hiểm xã hội số 41/2024/QH15 ngày 29 tháng 6 năm 2024 của Quốc hội, có hiệu lực "
+                "kể từ ngày 01 tháng 7 năm 2025.\nĐiều 1. Phạm vi điều chỉnh.")
+    _i103l = _classify_doc_header(_vbhn103, "")
+    cases.append(("r103_control_vbhn_vpqh_layout_no_banner",
+                  _i103l["loai"] == "Văn bản hợp nhất" and _i103l["kind"] == "vbqppl"
+                  and _i103l["sohieu"] == "19/VBHN-VPQH"))
+    # (D5) matcher bare-query 1 CHIỀU cho số Đảng (khuôn _vbhn_bare_key); VBHN + chiều-có-năm giữ CHẶT
+    cases.append(("r103_bare_query_dang_one_way",
+                  _sohieu_query_hits_entry("04-CT-TW", "04-2026-CT-TW") is True
+                  and _sohieu_query_hits_entry("04-2026-CT-TW", "04-2027-CT-TW") is False
+                  and _sohieu_query_hits_entry("88-VBHN-VPQH", "88-2025-VBHN-VPQH") is True))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -55,6 +55,20 @@ def _vbhn_bare_key(key: str) -> str:
     return k if _VBHN_NOYEAR_RE.fullmatch(k) else ""
 
 
+def _dang_bare_key(key: str) -> str:
+    """v1.34.41 B.2 GĐ2 (grill D5 — khuôn `_vbhn_bare_key` y hệt): dạng BARE `NN-LOẠI-CƠQUAN` của khóa số
+    Đảng/hành chính — bỏ NĂM nếu year-qualified (04-2026-CT-TW → 04-CT-TW), giữ nguyên nếu vốn không năm;
+    '' nếu không phải khóa dạng này (khóa VBHN loại trừ — họ đó có bare-key riêng). CHỈ dùng KHỚP TRUY VẤN
+    1 CHIỀU — TUYỆT ĐỐI không thay khóa canonical/registry (collision-detect qua khóa cần năm)."""
+    k = norm_sohieu(key or "")
+    if _VBHN_WITHYEAR_RE.fullmatch(k) or _VBHN_NOYEAR_RE.fullmatch(k):
+        return ""
+    m = re.fullmatch(r"(\d{1,5})-(?:20\d\d|19\d\d)-([A-Z][A-Z0-9]{1,5}-[A-Z0-9]{2,15})", k)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}"
+    return k if re.fullmatch(r"\d{1,5}-[A-Z][A-Z0-9]{1,5}-[A-Z0-9]{2,15}", k) else ""
+
+
 def cmd_locate(a) -> int:
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     q = a.query

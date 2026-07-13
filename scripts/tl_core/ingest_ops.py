@@ -1313,6 +1313,11 @@ def _sohieu_from_title_zone(zone: str) -> str:
     kiểu letterhead ('Số: 41/2024/QH15', 'Luật số: …' ≤80 ký tự) — ƯU TIÊN dòng có 'Số:' đứng trước. Số hiệu
     trong CÂU VĂN DÀI là TRÍCH DẪN văn bản khác (báo cáo/tài liệu thường nhắc luật) → BỎ. Trước đây quét cả
     16k ký tự đầu nên báo cáo nhắc 'Luật số 41/2024/QH15' bị gán loai=Luật + sohieu=41/2024/QH15."""
+    # v1.34.41 B.2 GĐ2 (harness file thật QĐ 383 bắt): pre-text 'Số' phải là DÒNG LETTERHEAD THUẦN — fullmatch
+    # '[<loại>] số[:.]' — check ends-with cũ dính trích dẫn NGẮN kết bằng 'số' ('- Căn cứ Luật Lưu trữ số
+    # 33/2024/QH15, ngày…' ≤80 ký tự cướp sohieu của chính văn bản). Letterhead thật chỉ có các dạng
+    # 'Số:', 'Luật số:', 'Bộ luật số:', 'Nghị quyết/Nghị định/Pháp lệnh/Thông tư/Quyết định/Lệnh số:'.
+    _LETTERHEAD_SO = r"\s*(?:(?:bo\s+luat|luat|nghi\s+quyet|nghi\s+dinh|phap\s+lenh|thong\s+tu|quyet\s+dinh|lenh)\s+)?so\s*[:.]?\s*"
     best = ""
     for _c in _RAW_SOHIEU_RE.finditer(zone or ""):
         _ls = zone.rfind("\n", 0, _c.start()) + 1
@@ -1321,10 +1326,41 @@ def _sohieu_from_title_zone(zone: str) -> str:
         if _le - _ls > 80:
             continue                                   # dòng dài = văn xuôi → trích dẫn, không phải letterhead
         _pre = _strip_accents(zone[_ls:_c.start()]).lower()
-        if re.search(r"\bso\s*[:.]?\s*$", _pre):
-            return _c.group(0)                          # 'Số:' ngay trước — chắc chắn nhất
+        if re.fullmatch(_LETTERHEAD_SO, _pre):
+            return _c.group(0)                          # 'Số:' letterhead thuần — chắc chắn nhất
         best = best or _c.group(0)
+    # (grill D1): số KHÔNG-NĂM (Đảng NN-XX/CQ, hành chính NN/XX-CQ) — CHỈ dòng letterhead thuần 'Số …'
+    # (fullmatch, không ends-with — 'theo Chỉ thị số 04-CT/TW.' câu văn ngắn cũng kết bằng 'số', r103 negative).
+    # Ưu tiên TRÊN `best`: letterhead-có-Số thắng số-năm-trôi-nổi (ca QĐ 383: 'Số 383-QĐ/TW' vs '33/2024/QH15' thân).
+    for _c in _SOHIEU_NOYEAR_RE.finditer(zone or ""):
+        _ls = zone.rfind("\n", 0, _c.start()) + 1
+        _le = zone.find("\n", _c.end())
+        _le = len(zone) if _le < 0 else _le
+        if _le - _ls > 80:
+            continue
+        _pre = _strip_accents(zone[_ls:_c.start()]).lower()
+        if re.fullmatch(r"\s*so\s*[:.]?\s*", _pre):
+            return _c.group(0)
     return best
+
+
+def _is_dang_title_zone(zone: str, sohieu: str = "") -> bool:
+    """v1.34.41 B.2 GĐ2 (grill D3, PURE): văn kiện ĐẢNG khi BẤT KỲ 1/3 tín hiệu — đều trong TITLE-ZONE
+    (doctrine N2b: nhắc trong câu văn/thân không phải bằng chứng): (a) dòng MỞ ĐẦU bằng banner 'ĐẢNG CỘNG SẢN
+    VIỆT NAM' (VB Đảng không có quốc hiệu CHXHCN — có quốc hiệu thì (a)/(c) tắt); (b) số hiệu dạng Đảng
+    NN-XX/CQ với cơ quan TW/VPTW/TU*/ĐU* (bắt cả ca .DOC convert rác mất banner); (c) cơ quan Đảng trong zone."""
+    z = _strip_accents(zone or "").lower()
+    if "cong hoa xa hoi chu nghia viet nam" not in z:
+        if any(ln.strip().startswith("dang cong san viet nam") for ln in z.splitlines()[:40]):
+            return True
+        if any(p in z for p in ("ban chap hanh trung uong", "bo chinh tri", "ban bi thu",
+                                "van phong trung uong", "ban chi dao trung uong", "dang uy",
+                                "tinh uy", "thanh uy")):
+            return True
+    if sohieu and _SOHIEU_DANG_FULL_RE.fullmatch(str(sohieu).strip()):
+        _cq = _strip_accents(str(sohieu).split("/")[-1]).upper()
+        return _cq in ("TW", "VPTW") or _cq.startswith(("TU", "DU"))
+    return False
 
 
 def _classify_doc_header(text: str, filename: str = "") -> dict:
@@ -1338,18 +1374,32 @@ def _classify_doc_header(text: str, filename: str = "") -> dict:
     # mà match đầu KHÔNG phải dạng VBHN → quét tìm match VBHN ưu tiên; không thấy trong probe → sohieu RỖNG
     # (SOHIEU_MISSING sẽ bắn — ép --sohieu tường minh, KHÔNG đăng ký nhầm số gốc cho bản hợp nhất).
     _is_vbhn_doc = ("van ban hop nhat" in norm) or ("vbhn" in _strip_accents(filename or "").lower())
+    # v1.34.41 B.2 GĐ2 (control VBHN 19 BHXH — harness file thật bắt): layout VPQH KHÔNG có banner 'VĂN BẢN
+    # HỢP NHẤT' lẫn cụm trong text probe → trước đây _infer_loai cứu qua mã sohieu, nay declared-first (D4)
+    # 'LUẬT' sẽ đè mất → nhận VBHN THẲNG từ dạng số hiệu (mã VBHN đứng riêng, hoặc NN/VPQH bare — KHÔNG dùng
+    # substring 'VPQH' trần vì NQ-VPQH là văn bản thường của VPQH).
+    if sohieu and not _is_vbhn_doc:
+        _shu = str(sohieu).upper().strip()
+        _is_vbhn_doc = bool(re.search(r"(?:^|[-_/])VBHN(?:[-_/]|$)", _shu)
+                            or re.fullmatch(r"\d{1,5}[-_/]VPQH", _shu))
     # v1.34.6 #1: chạy quét-VBHN cả khi sohieu title-zone RỖNG — layout VPQH in số VBHN ở KHỐI KÝ CUỐI
     # (ngoài vùng tiêu đề), quét sâu blob 16k CHỈ cho dạng số VBHN (không nhận số thường trong thân).
     if _is_vbhn_doc and (not sohieu or ("VBHN" not in sohieu.upper() and "VPQH" not in sohieu.upper())):
         _mv = re.search(r"\d+[-_/](?:\d+[-_/])?VBHN[-_/][A-Za-zĐđ0-9]+|\d+[-_/](?:VPQH|VBHN)\b", blob, re.I)
         sohieu = _mv.group(0) if _mv else ""
-    loai = _infer_loai(filename or head[:200], sohieu)
+    # v1.34.41 B.2 GĐ2 (grill D4): LETTERHEAD KHAI BÁO là bằng chứng bậc nhất — ruột văn bản là sự thật, tên file
+    # là fallback (ca thật QĐ 383-QĐ/TW: file QD_ nói 'Quyết định', letterhead nói 'QUY ĐỊNH'; ca gốc HD 09-HD/VPTW
+    # bị filename-first đoán 'Luật'). Không đọc được text (.DOC rác/sheet) → _declared rỗng → đường cũ giữ nguyên.
+    loai = _declared_loai_from_header(head) or _infer_loai(filename or head[:200], sohieu)
     if _is_vbhn_doc:
         loai = "Văn bản hợp nhất"    # N2a: header VBHN in 'BỘ LUẬT'/'LUẬT' to → _infer_loai đoán nhầm loại gốc
     if not loai:
-        if "nghi quyet" in norm:
+        # v1.34.41 B.2 GĐ2 (G3, cùng khuôn N2b): fallback marker CHỈ có nghĩa ở VÙNG TIÊU ĐỀ + tên file —
+        # 'nghị quyết' nhắc sâu trong thân từng nhuộm loai cho tài liệu thường (r103 negative bắt).
+        _tz_norm = _strip_accents((head[:1500] or "") + "\n" + (filename or "")).lower()
+        if "nghi quyet" in _tz_norm:
             loai = "Nghị quyết"
-        elif "du thao" in norm and "luat" in norm:
+        elif "du thao" in _tz_norm and "luat" in _tz_norm:
             loai = "Luật"
     facts = _extract_header_facts(head)
     year = _sohieu_year(norm_sohieu(sohieu)) if sohieu else None
@@ -1363,18 +1413,32 @@ def _classify_doc_header(text: str, filename: str = "") -> dict:
     # file); VBHN là văn bản ĐÃ ban hành — không bao giờ draft.
     _draft_zone = _strip_accents((head[:1500] or "") + "\n" + (filename or "")).lower()
     draft = (not _is_vbhn_doc) and any(k in _draft_zone for k in ("du thao", "draft", "lay y kien", "gop y du thao"))
+    # v1.34.41 B.2 GĐ2 (grill D2 — G4 PHẢI vá cùng G1): văn kiện ĐẢNG/VB HÀNH CHÍNH nhận diện TRƯỚC nhánh
+    # vbqppl — nếu không, sohieu Đảng vừa bắt được sẽ kích 'elif sohieu' → vbqppl → Điều-gate chặn oan cat 00.
+    # dang thắng CẢ draft (văn kiện Đảng không bao giờ đòi Điều, draft hay không; cờ draft vẫn giữ ở field riêng).
+    _is_dang = (not _is_vbhn_doc) and _is_dang_title_zone(head[:1500], sohieu)
     kind = "normal"
-    if draft:
+    if _is_dang:
+        kind = "dang"
+    elif draft:
         kind = "draft"
+    elif (not _is_vbhn_doc) and sohieu and _SOHIEU_HC_FULL_RE.fullmatch(str(sohieu).strip()):
+        kind = "hanhchinh"    # NN/VBHN-VPQH cũng khớp shape NN/XX-CQ → phải loại trừ VBHN trước
     elif loai == "Nghị quyết":
         kind = "nq"
     elif sohieu or loai in {"Luật", "Bộ luật", "Nghị định", "Thông tư", "Quyết định", "Pháp lệnh", "Văn bản hợp nhất"}:
         kind = "vbqppl"
+    # v1.34.41 B.2 GĐ2 (grill D5): số Đảng/hành chính KHÔNG NĂM tái dùng qua khóa/năm — cùng lớp collision VBHN
+    # → sohieu_key year-qualified NN-YYYY-… (năm từ issue_date; bất biến [[vbqppl-sohieu-must-have-year]]).
+    # sohieu NGUYÊN VĂN giữ riêng; khóa canonical registry mới year-qualified.
+    _shk = norm_sohieu(sohieu) if sohieu else ""
+    if _shk and kind in ("dang", "hanhchinh") and year and not _sohieu_year(_shk):
+        _shk = re.sub(r"^(\d{1,5})-", rf"\g<1>-{year}-", _shk, count=1)
     return {
         "kind": kind,
         "draft": draft,
         "sohieu": sohieu or "",
-        "sohieu_key": norm_sohieu(sohieu) if sohieu else "",
+        "sohieu_key": _shk,
         "loai": loai,
         "issue_year": year,
         "issue_date": facts.get("issue_date") or "",
@@ -1385,9 +1449,16 @@ def _classify_doc_header(text: str, filename: str = "") -> dict:
 
 
 def _safe_profile_doc_name(info: dict, fallback_name: str = "") -> str:
+    # v1.34.41 B.2 GĐ2 (grill D7): mã theo quy ước ĐANG SỐNG trên corpus (CT_/KL_/KH_… đã dùng thật);
+    # Phụ lục=PL chung sống với Pháp lệnh (ngữ cảnh profile ≠ corpus nền — _infer_loai PL_ vẫn = Pháp lệnh,
+    # Phụ lục cần bằng chứng letterhead/explicit); Quy định=QDi vì QD đã là Quyết định.
     loai_code = {
         "Luật": "Luat", "Bộ luật": "Bo_luat", "Nghị quyết": "NQ", "Nghị định": "ND",
         "Thông tư": "TT", "Quyết định": "QD", "Pháp lệnh": "PL", "Văn bản hợp nhất": "VBHN",
+        "Chỉ thị": "CT", "Kết luận": "KL", "Hướng dẫn": "HD", "Kế hoạch": "KH", "Thông báo": "TB",
+        "Công văn": "CV", "Tờ trình": "TTr", "Đề án": "DA", "Báo cáo": "BC", "Phát biểu": "PB",
+        "Chương trình": "CTr", "Biểu mẫu": "Mau", "Công điện": "CD", "Phụ lục": "PL", "Tài liệu": "TL",
+        "Quy định": "QDi", "Quy chế": "QC", "Thông tri": "TTri", "Điều lệ": "DL",
     }.get(str(info.get("loai") or ""), "VB")
     title = info.get("title") or fallback_name or "van_ban"
     title = re.sub(r"\.[A-Za-z0-9]{1,8}$", "", str(title))
@@ -1399,6 +1470,10 @@ def _safe_profile_doc_name(info: dict, fallback_name: str = "") -> str:
     parts.append(loai_code)
     if info.get("sohieu_key"):
         parts.append(str(info["sohieu_key"]).replace("-", "_"))
+        # v1.34.41 B.2 GĐ2 (grill D7): key CHƯA year-qualified (số Đảng/hành chính không năm) → NĂM BẮT BUỘC
+        # trong tên (bất biến chống collision — số Đảng tái dùng qua khóa; khớp tên thật KL_121-KL-TW_2025 đang có).
+        if info.get("issue_year") and not _sohieu_year(str(info["sohieu_key"])):
+            parts.append(str(info["issue_year"]))
     elif info.get("issue_year"):
         parts.append(str(info["issue_year"]))
     parts.append(title_slug)
@@ -1467,6 +1542,10 @@ def _ingest_verify_gate(text: str, classification: dict | None = None,
         info_flags.append("DIEU_NOT_REQUIRED_NORMAL_DOC")   # trace v1.34.6 #3: thường-không-Điều là hợp lệ
     if (info.get("kind") in {"vbqppl", "draft", "nq"}) and not base_profile:
         info_flags.append("PROFILE_DOC_DIEU_NOT_REQUIRED")  # trace v1.34.27 #2: profile thường tắt đòi-Điều
+    if info.get("kind") == "dang":
+        info_flags.append("DANG_DOC_DIEU_NOT_REQUIRED")     # trace v1.34.41 B.2 GĐ2: văn kiện Đảng không đòi Điều
+    elif info.get("kind") == "hanhchinh":
+        info_flags.append("HANHCHINH_DOC_DIEU_NOT_REQUIRED")
     if not phuluc_raw_ok and not base_profile:
         info_flags.append("PHULUC_MENTION_PROFILE_INFO")    # trace v1.34.38 #1: profile thường không chặn corpus
     return {"ok": ok, "dieu_ok": dieu_ok, "phuluc_ok": phuluc_ok, "ocr_ok": ocr_ok,

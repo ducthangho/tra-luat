@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tra Luật"
+  short_description: "Tra cứu và quản trị kho văn bản pháp luật"
+  default_prompt: "Use $tra-luat to tra cứu nguyên văn và quản trị profile văn bản an toàn."

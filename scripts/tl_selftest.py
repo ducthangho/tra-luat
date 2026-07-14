@@ -6390,10 +6390,13 @@ def run() -> int:
             _b86b = _io27.StringIO()
             with _ctx27.redirect_stdout(_b86b), _ctx27.redirect_stderr(_io27.StringIO()):
                 _rc86b = _TL_MODULE.cmd_profile_sync(_mkns86(apply=True))
+            _o86b = json.loads(_b86b.getvalue())
             _cfg_after = json.loads(Path(_cfg86).read_text(encoding="utf-8"))
             _profs_after = _cfg_after.get("profiles") or {}
             cases.append(("r86_profile_sync_apply_one_way",
-                          _rc86b == 0
+                          _rc86b == 1 and _o86b.get("ok") is False
+                          and any(r.get("profile") == "gamma" and r.get("status") == "marker_missing"
+                                  for r in (_o86b.get("unresolved") or []))
                           and (_profs_after.get("duan_a") or {}).get("rootFolderId") == "FA"
                           and (_profs_after.get("duan_a") or {}).get("notebookId") == "nbA"
                           and (_profs_after.get("beta") or {}).get("notebookId") == "nb-new"
@@ -7059,7 +7062,9 @@ def run() -> int:
             _meta65 = json.loads(_z65.read([n for n in _names65 if n.endswith("BUNDLE_META.json")][0]).decode("utf-8"))
         (Path(_d65) / "BUNDLE_META.json").write_text("{}", encoding="utf-8")
         _blocks65 = _imp("tl_gws")._bundle_meta_blocks_push(Path(_d65))
-        _noblock65 = _imp("tl_gws")._bundle_meta_blocks_push(HERE.parent)
+        _clean65 = Path(_d65) / "clean"
+        _clean65.mkdir()
+        _noblock65 = _imp("tl_gws")._bundle_meta_blocks_push(_clean65)
     cases.append(("r65_bundle_export_meta_and_guard",
                   _rc65 == 0 and _meta65.get("version_forked") == VERSION
                   and _meta65.get("schema") == "bundle_meta.v1"
@@ -8223,8 +8228,202 @@ def run() -> int:
     finally:
         _TL_MODULE.load_creds, _TL_MODULE.apply_profile_offline, _TL_MODULE._resolve_nlm_notebook = _o_lc5, _o_apo5, _o_rnb5
     cases.append(("r105_nlm_reconcile_refresh_loads_creds", len(_creds105) >= 1 and _rc105 == 2))
+    # ═══ audit profile v1.34.43 — regression tests cho scope/config/marker/report ═══
+    _env_keys106 = ("TL_PROFILE", "TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID",
+                    "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_OVERFLOW_NOTEBOOK_ID",
+                    "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_WEBAPP", "TL_TOKEN")
+    _env_saved106 = {k: _hos.environ.get(k) for k in _env_keys106}
+    try:
+        # Empty block là profile có thật và scope rỗng; tuyệt đối không kế thừa registry/notebook nền.
+        _e106 = _TL_MODULE._apply_profile_env(
+            {"profiles": {"vbqppl": {"registryDocId": "BASE_REG", "notebookId": "BASE_NB"}, "empty": {}}},
+            "empty")
+        cases.append(("r106_empty_profile_never_inherits_base",
+                      _e106.get("profile_found") is True
+                      and not _hos.environ.get("TL_REGISTRY_DOC_ID")
+                      and not _hos.environ.get("TL_NOTEBOOK_ID")))
+
+        # Block profile sai kiểu phải fail-closed thành PROFILE_NOT_FOUND, không AttributeError.
+        _bad106 = None
+        try:
+            _bad106 = _TL_MODULE._apply_profile_env(
+                {"profiles": {"vbqppl": {}, "bad": "not-a-dict"}}, "bad")
+        except Exception as _exc106:  # noqa: BLE001
+            _bad106 = {"raised": type(_exc106).__name__}
+        cases.append(("r106_malformed_profile_fails_closed",
+                      _bad106.get("raised") is None and _bad106.get("profile_found") is False
+                      and not _hos.environ.get("TL_REGISTRY_DOC_ID")))
+
+        # Chuyển profile chỉ bằng env phải ưu tiên profile mới và xóa overlay cũ nếu không tìm được config.
+        _hos.environ.update({"TL_WEBAPP": "u", "TL_TOKEN": "t", "TL_PROFILE": "old",
+                             "TL_ROOT_FOLDER_ID": "OLD_ROOT", "TL_NOTEBOOK_ID": "OLD_NB",
+                             "TL_REGISTRY_DOC_ID": "OLD_REG", "TL_MANIFEST_ID": "OLD_MAN"})
+        _oc106 = _TL_MODULE._config_candidates
+        try:
+            _TL_MODULE._config_candidates = lambda _=None: []
+            _TL_MODULE.load_creds(None, "new")
+        finally:
+            _TL_MODULE._config_candidates = _oc106
+        cases.append(("r106_env_only_switch_clears_stale_scope",
+                      _hos.environ.get("TL_PROFILE") == "new"
+                      and not any(_hos.environ.get(k) for k in
+                                  ("TL_ROOT_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID"))))
+
+        # Tên profile không được thoát khỏi cache root hoặc tạo component Windows bất hợp lệ.
+        _cache106 = _TL_MODULE.CACHE
+        with _TL_MODULE.tempfile.TemporaryDirectory() as _td106:
+            _base106 = Path(_td106) / "cache"
+            _TL_MODULE.CACHE = _base106
+            _hos.environ["TL_PROFILE"] = "..\\escape"
+            _got106 = _TL_MODULE._profile_cache_dir().resolve()
+            _cache_ok106 = _base106.resolve() in _got106.parents and _got106.parent == _base106.resolve()
+        _TL_MODULE.CACHE = _cache106
+        cases.append(("r106_profile_cache_path_confined", _cache_ok106))
+
+        # Mutation phải ghi đúng config-of-record mà resolver đọc, kể cả không truyền --config.
+        with _TL_MODULE.tempfile.TemporaryDirectory() as _td106b:
+            _cfg106 = Path(_td106b) / "tra_luat_config.json"
+            _cfg106.write_text(json.dumps({"profiles": {"vbqppl": {}, "p": {}}}), encoding="utf-8")
+            _oc106b = _TL_MODULE._config_candidates
+            try:
+                _TL_MODULE._config_candidates = lambda _=None: [str(_cfg106)]
+                _t106, _d106, _er106 = _TL_MODULE._mutable_config_target(None)
+            finally:
+                _TL_MODULE._config_candidates = _oc106b
+        cases.append(("r106_mutation_uses_active_config", _er106 is None and _t106 == _cfg106
+                      and isinstance(_d106, dict)))
+
+        # Hai marker cùng profile ở hai root là xung đột định danh, không được last-write-wins.
+        _m106a = _TL_MODULE._marker_body("dup", {"rootFolderId": "R1"}, now="2026-01-01T00:00:00Z")
+        _m106b = _TL_MODULE._marker_body("dup", {"rootFolderId": "R2"}, now="2026-01-01T00:00:00Z")
+        _rows106 = _TL_MODULE._profile_sync_rows(
+            [{"id": "R1", "marker": _m106a}, {"id": "R2", "marker": _m106b}], {"vbqppl": {}})
+        cases.append(("r106_duplicate_marker_profile_blocked",
+                      any(r.get("status") == "duplicate_marker_profile" for r in _rows106)))
+        import contextlib as _ctx106
+
+        # Create phải chặn tên đã tồn tại trước khi dựng thêm hạ tầng Drive.
+        _orc106 = _TL_MODULE._read_config_record
+        try:
+            _TL_MODULE._read_config_record = lambda _=None: (
+                "cfg.json", {"profiles": {"vbqppl": {}, "Existing": {"rootFolderId": "R"}}})
+            with _ctx106.redirect_stdout(_hio.StringIO()), _ctx106.redirect_stderr(_hio.StringIO()):
+                _crc106 = _TL_MODULE.cmd_profile_create(
+                    _ap104.Namespace(name="Existing", folder_name="Existing", notebook="NB", config=None,
+                                     apply=False, target="project", json=True))
+        finally:
+            _TL_MODULE._read_config_record = _orc106
+        cases.append(("r106_profile_create_rejects_duplicate", _crc106 == 2))
+
+        # Rename phải cập nhật marker cùng config; marker fail thì rollback key config.
+        with _TL_MODULE.tempfile.TemporaryDirectory() as _td106c:
+            _rcfg106 = Path(_td106c) / "cfg.json"
+            _rcfg106.write_text(json.dumps({"profiles": {"vbqppl": {}, "old": {
+                "rootFolderId": "R", "metaFolderId": "M", "notebookId": "N",
+                "registryDocId": "RG", "manifestId": "MF", "categories": "own",
+                "manifestScope": "own"}}}), encoding="utf-8")
+            _oldmark106 = _TL_MODULE._marker_body("old", {
+                "rootFolderId": "R", "metaFolderId": "M", "notebookId": "N",
+                "registryDocId": "RG", "manifestId": "MF", "categories": "own",
+                "manifestScope": "own"}, now="2026-01-01T00:00:00Z")
+            _writes106 = []
+            _or106 = (_TL_MODULE.load_creds, _TL_MODULE._gas,
+                      _TL_MODULE._marker_read, _TL_MODULE._marker_write)
+            try:
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: object()
+                _TL_MODULE._marker_read = lambda *a, **k: {
+                    "found": True, "marker": _oldmark106, "fileId": "MK", "meta_folder_id": "M"}
+                _TL_MODULE._marker_write = lambda _g, _m, body, **_k: (
+                    _writes106.append(body) or {"ok": True, "verified": True, "fileId": "MK2"})
+                with _ctx106.redirect_stdout(_hio.StringIO()), _ctx106.redirect_stderr(_hio.StringIO()):
+                    _rrc106 = _TL_MODULE.cmd_profile_rename(
+                        _ap104.Namespace(old="old", new="new", config=str(_rcfg106), apply=True,
+                                         rename_assets=False, force=False))
+            finally:
+                (_TL_MODULE.load_creds, _TL_MODULE._gas,
+                 _TL_MODULE._marker_read, _TL_MODULE._marker_write) = _or106
+            _rd106 = json.loads(_rcfg106.read_text(encoding="utf-8"))
+        cases.append(("r106_profile_rename_updates_marker",
+                      _rrc106 == 0 and "new" in (_rd106.get("profiles") or {})
+                      and "old" not in (_rd106.get("profiles") or {})
+                      and len(_writes106) == 1 and _writes106[0].get("profile") == "new"))
+
+        with _TL_MODULE.tempfile.TemporaryDirectory() as _td106d:
+            _rcfg106b = Path(_td106d) / "cfg.json"
+            _rcfg106b.write_text(json.dumps({"profiles": {"vbqppl": {}, "old": {
+                "rootFolderId": "R", "metaFolderId": "M", "categories": "own",
+                "manifestScope": "own"}}}), encoding="utf-8")
+            _or106b = (_TL_MODULE.load_creds, _TL_MODULE._gas,
+                       _TL_MODULE._marker_read, _TL_MODULE._marker_write)
+            try:
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: object()
+                _TL_MODULE._marker_read = lambda *a, **k: {
+                    "found": True, "marker": _oldmark106, "fileId": "MK", "meta_folder_id": "M"}
+                _TL_MODULE._marker_write = lambda *a, **k: {
+                    "ok": False, "verified": False, "fileId": "", "upload": {"error": "DENIED"}}
+                with _ctx106.redirect_stdout(_hio.StringIO()), _ctx106.redirect_stderr(_hio.StringIO()):
+                    _rrc106b = _TL_MODULE.cmd_profile_rename(
+                        _ap104.Namespace(old="old", new="new", config=str(_rcfg106b), apply=True,
+                                         rename_assets=False, force=False))
+            finally:
+                (_TL_MODULE.load_creds, _TL_MODULE._gas,
+                 _TL_MODULE._marker_read, _TL_MODULE._marker_write) = _or106b
+            _rd106b = json.loads(_rcfg106b.read_text(encoding="utf-8"))
+        cases.append(("r106_profile_rename_rolls_back_on_marker_failure",
+                      _rrc106b == 1 and "old" in (_rd106b.get("profiles") or {})
+                      and "new" not in (_rd106b.get("profiles") or {})))
+
+        # Backfill apply có no_root phải trả partial failure thay vì ok:true/rc0.
+        class _G106:
+            def get(self, action, **_kw):
+                return {"vanBanThuongId": "VBT"} if action == "bootstrap" else {}
+        _old106 = (_TL_MODULE._read_config_record, _TL_MODULE.load_creds, _TL_MODULE._gas)
+        try:
+            _TL_MODULE._read_config_record = lambda _=None: (
+                "cfg.json", {"profiles": {"vbqppl": {}, "broken": {}}})
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G106()
+            _buf106 = _hio.StringIO()
+            with _ctx106.redirect_stdout(_buf106):
+                _rc106 = _TL_MODULE._cmd_profile_backfill_markers_impl(
+                    _ap104.Namespace(config=None, target_profile="", force=False, apply=True, json=True))
+            _out106 = json.loads(_buf106.getvalue())
+        finally:
+            _TL_MODULE._read_config_record, _TL_MODULE.load_creds, _TL_MODULE._gas = _old106
+        cases.append(("r106_backfill_apply_reports_unresolved",
+                      _rc106 == 1 and _out106.get("ok") is False
+                      and any(r.get("status") == "no_root" for r in (_out106.get("unresolved") or []))))
+
+        # Report-only auth probe phải biến PermissionError thành dữ liệu thay vì làm crash determinism-audit.
+        class _Denied106:
+            def __str__(self):
+                return "denied"
+            def exists(self):
+                raise PermissionError("denied")
+        try:
+            _auth106 = _TL_MODULE._file_auth_state(_Denied106())
+        except Exception as _exc106b:  # noqa: BLE001
+            _auth106 = {"raised": type(_exc106b).__name__}
+        cases.append(("r106_auth_permission_error_is_data",
+                      _auth106.get("raised") is None and _auth106.get("exists") is False
+                      and _auth106.get("error") == "PermissionError"))
+        cases.append(("r106_bundle_export_is_credential_lazy",
+                      "bundle-export" in _TL_MODULE._CREDS_LAZY_CMDS))
+    finally:
+        for _k106, _v106 in _env_saved106.items():
+            if _v106 is None:
+                _hos.environ.pop(_k106, None)
+            else:
+                _hos.environ[_k106] = _v106
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")
     print(f"== tl selftest {ok}/{len(cases)} ==")
     return 0 if ok == len(cases) else 1
+
+
+if __name__ == "__main__":
+    import tl as _tl_entry
+    raise SystemExit(_tl_entry.selftest())

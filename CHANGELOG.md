@@ -1,3 +1,28 @@
+# ★ v1.34.44 — MERGE bundle audit-profile từ phiên song song (ADR-0001) (2026-07-14)
+
+> Phiên song song (Codex) audit v1.34.43 trọng tâm PROFILE, giao bundle 16 fix P-01..P-16 + báo cáo + patch.
+> Canonical review theo đúng nếp ADR-0001 TRƯỚC khi merge: workflow 6 reviewer read-only song song
+> (profile_env / profile_mgmt / tl+live / selftest / docs-kernel / security+claims-check) + adversarial verify
+> → **0 blocker, 0 major; 16/16 claim có code tương ứng; security sạch (0 mạng mới/exec/eval, guards SIẾT thêm,
+> bỏ candidate ghi /tmp); bẫy I11 xử đúng; r104/r105 nguyên vẹn.**
+>
+> Nội dung merge: **(P-01..05)** cách ly scope/config profile — block rỗng không kế thừa vbqppl, malformed
+> fail-closed, env-switch xóa scope stale (fix tận gốc họ hàng bài học scope-leak 2026-07-13), cache path slug
+> an toàn Windows + chống traversal, mutation ghi ĐÚNG file config đã đọc; **(P-06..11)** giao dịch danh tính
+> profile — marker-first cho create/adopt/promote/from-nlm, rename cập nhật marker + rollback config,
+> duplicate-marker detection, sync/backfill hết false-success (unresolved tường minh), delete giữ config khi
+> remote lỗi một phần; **(P-12..14)** PermissionError→data ở đường report-only, selftest hermetic
+> (TL_CACHE_DIR tạm — hết đụng cache thật), `tl_selftest.py` chạy trực tiếp được, bundle-export
+> credential-lazy; **(P-15..16)** docs sync (ADR-0003 key marker `schema`/`profile` đúng code; SKILL.md mục 9
+> liệt kê đủ lệnh ghi marker + detach semantics; COMMANDS.md) + `agents/openai.yaml` (metadata hiển thị; file
+> inert — không code nào đọc). **+12 test r106** → selftest 874→**886**.
+>
+> Hành vi biên đổi CÓ CHỦ ĐÍCH (đã review, ghi nhận): (a) `--config` trỏ file KHÔNG tồn tại không còn là đích
+> ghi authoritative — rơi về config phát hiện được (nhất quán read=write); (b) config implicit rỗng `{}` →
+> CONFIG_WRITE_FAILED thay vì ghi đè. Promote sau-timeout vẫn re-run được (exact-match đi thẳng);
+> `_nlm_system_prompt_apply` không đổi; ops-sweep B4 parse không vỡ.
+> Kernel SKILL.md đổi (1 câu mục 9 + header version) ⇒ theo deploy policy: **nhắc user re-import Capabilities**.
+
 # ★ v1.34.43 — hoàn tất BUG2 cho `nlm-reconcile --refresh` (ops-sweep dogfood bắt gap) (2026-07-14)
 
 > Ngay sau v1.34.42, chạy `ops-sweep` (L1) → **warn 2**: `nlm-reconcile --profile "Luật BHXH" --refresh` chết

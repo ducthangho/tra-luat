@@ -102,7 +102,7 @@ def _live_config_context(profile: str = "", config: str = "") -> dict:
     profiles = _profiles_from_config(cfg) if cfg else {}
     selected0 = _selected_profile_name(profile, cfg)
     selected, hit = _profile_lookup(profiles, selected0) if profiles else (selected0 or DEFAULT_PROFILE, None)
-    prof = hit or (profiles.get(DEFAULT_PROFILE) if selected == DEFAULT_PROFILE else {}) or {}
+    prof = hit if hit is not None else ((profiles.get(DEFAULT_PROFILE) if selected == DEFAULT_PROFILE else {}) or {})
     def val(*names, env: str = "") -> str:
         if env and os.environ.get(env):
             return str(os.environ.get(env) or "").strip()
@@ -127,13 +127,13 @@ def _live_config_context(profile: str = "", config: str = "") -> dict:
     }
     return {
         "config_path": cfg_path or "",
-        "config_present": bool(cfg_path and Path(cfg_path).exists()),
+        "config_present": bool(cfg_path and _path_exists_safe(cfg_path)),
         "config_readable": bool(cfg),
         "config_schema": cfg.get("schema") if isinstance(cfg, dict) else None,
         "default_profile": cfg.get("defaultProfile", DEFAULT_PROFILE) if isinstance(cfg, dict) else DEFAULT_PROFILE,
         "active_profile": selected,
         "profile_requested": profile or None,
-        "profile_found": bool(hit) or (selected == DEFAULT_PROFILE and bool(prof)),
+        "profile_found": isinstance(hit, dict) or (selected == DEFAULT_PROFILE and selected in profiles),
         "profile_names": sorted(profiles) if profiles else [],
         "ids": ids,
         "webapp_present": _safe_bool(webapp),
@@ -150,7 +150,9 @@ def _live_env_report(profile: str = "", *, include_ocr: bool = False, config: st
     gws_cred = home / ".config" / "gws" / "credentials.json"
     nlm_dir = home / ".notebooklm-mcp-cli"
     nlm_cookie_candidates = [nlm_dir / "cookies.json", nlm_dir / "auth.json", nlm_dir / "storage_state.json"]
-    nlm_auth_file = next((x for x in nlm_cookie_candidates if x.exists()), None)
+    gws_cred_state = _file_auth_state(gws_cred)
+    nlm_dir_state = _file_auth_state(nlm_dir)
+    nlm_auth_file = next((x for x in nlm_cookie_candidates if _file_auth_state(x).get("exists")), None)
     commands = {name: shutil.which(name) for name in ["gws", "nlm", "ocrmypdf", "tesseract"]}
     required_files = ["VERSION", "SKILL.md", "scripts/tl.py", "scripts/gen_instructions.py", "references/API_CONTRACT.md"]
     file_checks = [{"path": x, "exists": (HERE.parent / x).exists()} for x in required_files]
@@ -163,9 +165,9 @@ def _live_env_report(profile: str = "", *, include_ocr: bool = False, config: st
         {"id": "webapp_present", "ok": ctx["webapp_present"], "detail": ctx["webapp_masked"], "tier": "env"},
         {"id": "token_present", "ok": ctx["token_present"], "detail": ctx["token_masked"], "tier": "env"},
         {"id": "gws_binary", "ok": bool(commands.get("gws")), "detail": commands.get("gws") or "missing", "tier": "env"},
-        {"id": "gws_credentials", "ok": gws_cred.exists(), "detail": _file_auth_state(gws_cred), "tier": "env"},
+        {"id": "gws_credentials", "ok": bool(gws_cred_state.get("exists")), "detail": gws_cred_state, "tier": "env"},
         {"id": "nlm_binary", "ok": bool(commands.get("nlm")), "detail": commands.get("nlm") or "missing", "tier": "env"},
-        {"id": "nlm_auth_dir", "ok": nlm_dir.exists(), "detail": str(nlm_dir), "tier": "env"},
+        {"id": "nlm_auth_dir", "ok": bool(nlm_dir_state.get("exists")), "detail": nlm_dir_state, "tier": "env"},
         {"id": "nlm_auth_file", "ok": bool(nlm_auth_file), "detail": _file_auth_state(nlm_auth_file) if nlm_auth_file else "missing", "tier": "env"},
     ]
     if profile:
@@ -318,7 +320,7 @@ def _smoke_proof_state(path: str = "") -> dict:
     if not path:
         return {"provided": False, "ok": False, "path": "", "reason": "SMOKE_PROOF_NOT_PROVIDED"}
     p = Path(path).expanduser()
-    if not p.exists():
+    if not _path_exists_safe(p):
         return {"provided": True, "ok": False, "path": str(p), "reason": "SMOKE_PROOF_NOT_FOUND"}
     try:
         data = json.loads(p.read_text(encoding="utf-8", errors="replace"))
@@ -730,7 +732,7 @@ def _deploy_plan(bundle: str = "", target_dir: str = "", backup_dir: str = "", p
         {"id": "snapshot_after", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-snapshot", "--out", "after.json", "--json"], "expect": "lưu trạng thái sau smoke"},
         {"id": "snapshot_diff", "mode": "manual", "command": ["python", "scripts/tl.py", "live-state-diff", "before.json", "after.json", "--json", "--allow", "source_counts", "--allow", "notebooks.get.source_count"], "expect": "chỉ có thay đổi dự kiến"},
     ]
-    return {"ok": True, "schema": "deploy_plan.v1", "bundle": str(bundle_path) if bundle_path else None, "bundle_exists": bool(bundle_path and bundle_path.exists()), "bundle_sha256": _sha256_path_or_empty(str(bundle_path)) if bundle_path else "", "target_dir": str(target), "backup_dir": str(backup), "profile": profile or None, "include_ocr": include_ocr, "steps": steps, "stop_rule": "Không replace/sync nếu release-verify trong temp fail. Không chạy apply live nếu live-readiness chưa đạt env+contract hoặc snapshot diff có thay đổi ngoài dự kiến.", "note": "READ-ONLY plan; lệnh này không giải nén, không copy, không gọi Drive/NLM."}
+    return {"ok": True, "schema": "deploy_plan.v1", "bundle": str(bundle_path) if bundle_path else None, "bundle_exists": bool(bundle_path and _path_exists_safe(bundle_path)), "bundle_sha256": _sha256_path_or_empty(str(bundle_path)) if bundle_path else "", "target_dir": str(target), "backup_dir": str(backup), "profile": profile or None, "include_ocr": include_ocr, "steps": steps, "stop_rule": "Không replace/sync nếu release-verify trong temp fail. Không chạy apply live nếu live-readiness chưa đạt env+contract hoặc snapshot diff có thay đổi ngoài dự kiến.", "note": "READ-ONLY plan; lệnh này không giải nén, không copy, không gọi Drive/NLM."}
 
 def _rollback_plan(target_dir: str = "", backup_path: str = "", bundle: str = "") -> dict:
     target = Path(target_dir).expanduser().resolve() if target_dir else Path.cwd().resolve() / "tra-luat"
@@ -745,4 +747,4 @@ def _rollback_plan(target_dir: str = "", backup_path: str = "", bundle: str = ""
         {"id": "release_check", "mode": "manual", "command": ["python", "scripts/tl.py", "release-check", "--json"], "expect": "ok=true sau rollback"},
         {"id": "live_readiness", "mode": "manual", "command": ["python", "scripts/tl.py", "live-readiness", "--json"], "expect": "cấu hình/auth vẫn còn"},
     ]
-    return {"ok": True, "schema": "rollback_plan.v1", "target_dir": str(target), "backup_path": str(backup) if backup else None, "bundle": str(bundle_path) if bundle_path else None, "source_exists": bool((backup and backup.exists()) or (bundle_path and bundle_path.exists())), "steps": steps, "stop_rule": "Không xóa bản lỗi trước khi snapshot; không rollback từ nguồn chưa verify.", "note": "READ-ONLY plan; không copy/replace thật."}
+    return {"ok": True, "schema": "rollback_plan.v1", "target_dir": str(target), "backup_path": str(backup) if backup else None, "bundle": str(bundle_path) if bundle_path else None, "source_exists": bool((backup and _path_exists_safe(backup)) or (bundle_path and _path_exists_safe(bundle_path))), "steps": steps, "stop_rule": "Không xóa bản lỗi trước khi snapshot; không rollback từ nguồn chưa verify.", "note": "READ-ONLY plan; không copy/replace thật."}

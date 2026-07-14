@@ -194,7 +194,7 @@ def _profile_info_from_config(config_path: str | None, profile: str | None = Non
     cfg = {}
     used = ""
     for p in _config_candidates(config_path):
-        if Path(p).exists():
+        if _path_exists_safe(p):
             cfg = _read_json_file(p)
             if cfg:
                 used = p
@@ -300,14 +300,17 @@ def cmd_profile_list(a) -> int:
 
 
 def cmd_profile_use(a) -> int:
-    name = (getattr(a, "name", None) or "").strip()
+    name0 = (getattr(a, "name", None) or "").strip()
     path, cfg = _read_config_record(getattr(a, "config", None))
     profs = _profiles_from_config(cfg)
-    plan = {"ok": name in profs, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
+    name, prof = _profile_lookup(profs, name0)
+    found = isinstance(prof, dict)
+    plan = {"ok": found, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
             "config": path, "profile": name, "currentDefault": cfg.get("defaultProfile") or DEFAULT_PROFILE,
             "note": "DRY mặc định; --apply mới ghi defaultProfile vào config."}
-    if name not in profs:
+    if not found:
         plan["error"] = "PROFILE_NOT_FOUND"
+        plan["requested_profile"] = name0
         print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     if not getattr(a, "apply", False):
@@ -330,26 +333,75 @@ def cmd_profile_use(a) -> int:
 
 
 def cmd_profile_rename(a) -> int:
-    old, new = (a.old or "").strip(), (a.new or "").strip()
+    old0, new = (a.old or "").strip(), (a.new or "").strip()
     path, cfg = _read_config_record(getattr(a, "config", None))
-    prof = (_profiles_from_config(cfg).get(old) or {}) if cfg else {}
-    plan = {"ok": bool(prof) and old != DEFAULT_PROFILE and bool(new),
+    profs = _profiles_from_config(cfg) if cfg else {}
+    old, prof = _profile_lookup(profs, old0)
+    prof = prof if isinstance(prof, dict) else None
+    target_name, target_prof = _profile_lookup(profs, new) if new else (new, None)
+    collision = isinstance(target_prof, dict) and target_name != old
+    plan = {"ok": prof is not None and old != DEFAULT_PROFILE and bool(new) and old != new and not collision,
             "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
             "config": path, "old": old, "new": new,
             "rename_assets": bool(getattr(a, "rename_assets", False)),
-            "assets": _profile_asset_ids(prof),
-            "note": "Đổi key config trước; --rename-assets mới đổi tên folder/registry/manifest trên Drive."}
+            "assets": _profile_asset_ids(prof or {}),
+            "note": "Giao dịch định danh: preflight marker → đổi key config → ghi/readback marker; marker lỗi "
+                    "thì rollback config. --rename-assets chạy sau khi định danh đã commit."}
     if not plan["ok"]:
-        plan["error"] = "PROFILE_RENAME_PLAN_INVALID"
+        plan["error"] = ("PROFILE_TARGET_EXISTS" if collision else "PROFILE_RENAME_PLAN_INVALID")
+        if collision:
+            plan["target_profile"] = target_name
+            plan["note"] = "Tên đích đã tồn tại (kể cả khớp chịu-lỗi-gõ); không merge hai profile bằng --force."
         print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     if not getattr(a, "apply", False):
         print(json.dumps(plan, ensure_ascii=False, indent=2))
         return 0
-    asset_results = []
-    if getattr(a, "rename_assets", False):
+
+    try:
         load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
         g = _gas()
+    except SystemExit as e:
+        print(json.dumps({**plan, "ok": False, "error": f"PROFILE_RENAME_NEEDS_LIVE_MARKER: {e}"},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    root_id = str((prof or {}).get("rootFolderId") or "")
+    meta_id = str((prof or {}).get("metaFolderId") or "")
+    mr = _marker_read(g, root_id, meta_id=meta_id or None)
+    marker = mr.get("marker") if isinstance(mr.get("marker"), dict) else None
+    mok, merrs = _marker_validate(marker) if marker else (False, [mr.get("error") or "MARKER_MISSING"])
+    if (not mok or str((marker or {}).get("profile") or "") != old
+            or len(set(mr.get("marker_file_ids") or [])) > 1):
+        out = {**plan, "ok": False, "error": "PROFILE_RENAME_MARKER_PREFLIGHT_FAILED",
+               "marker": mr, "marker_errors": merrs,
+               "note": "Sửa marker bằng profile-doctor/backfill trước; rename không được phép chỉ đổi config."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
+
+    cfg_result = _rename_profile_config(getattr(a, "config", None), old, new, False)
+    if not cfg_result.get("ok"):
+        out = {**plan, "ok": False, "error": "PROFILE_RENAME_CONFIG_FAILED", "config_result": cfg_result}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
+
+    marker_prof = {k: ((marker or {}).get(k) if (marker or {}).get(k) not in (None, "") else (prof or {}).get(k))
+                   for k in _MARKER_IDENTITY_KEYS}
+    rid = _apply_journal_start("profile-rename-marker", {"old": old, "new": new})
+    marker_result = _marker_write(
+        g, str(mr.get("meta_folder_id") or meta_id),
+        _marker_body(new, marker_prof, existing=marker), old_id=str(mr.get("fileId") or ""), run_id=rid)
+    marker_complete = bool(marker_result.get("verified")) and bool(marker_result.get("cleanup_ok", True))
+    if not marker_complete:
+        rollback = _rename_profile_config(getattr(a, "config", None), new, old, False)
+        out = {**plan, "ok": False, "error": "PROFILE_RENAME_MARKER_FAILED",
+               "config_result": cfg_result, "marker": marker_result, "rollback": rollback,
+               "partial": not bool(rollback.get("ok")),
+               "note": "Marker không commit; đã rollback config về tên cũ khi có thể."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 1
+
+    asset_results = []
+    if getattr(a, "rename_assets", False):
         slug = _profile_file_slug(new)
         names = {"root": new, "registry": f"tra_luat_registry.{slug}", "manifest": f"tra_luat_manifest.{slug}.json"}
         for it in plan["assets"]:
@@ -361,22 +413,30 @@ def cmd_profile_rename(a) -> int:
             except Exception as e:  # noqa: BLE001
                 r = {"ok": False, "error": str(e)}
             asset_results.append({"role": role, "fileId": fid, "targetName": names[role], "result": r})
-    out = _rename_profile_config(getattr(a, "config", None), old, new, getattr(a, "force", False))
-    out["asset_renames"] = asset_results
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if out.get("ok") else 2
+    assets_ok = all(bool((x.get("result") or {}).get("ok")) for x in asset_results)
+    out = {**plan, "ok": assets_ok, "identity_committed": True, "config_result": cfg_result,
+           "marker": marker_result, "asset_renames": asset_results}
+    if not assets_ok:
+        out["error"] = "PROFILE_RENAME_ASSET_RENAME_PARTIAL"
+        out["note"] = "Định danh marker+config đã đổi; một số display-name Drive chưa đổi, có thể retry --rename-assets."
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stdout if assets_ok else sys.stderr)
+    return 0 if assets_ok else 1
 
 
 def cmd_profile_delete(a) -> int:
-    name = (a.name or "").strip()
+    name0 = (a.name or "").strip()
     path, cfg = _read_config_record(getattr(a, "config", None))
-    prof = (_profiles_from_config(cfg).get(name) or {}) if cfg else {}
-    entries, merr = _profile_manifest_entries_for(name, getattr(a, "config", None), getattr(a, "refresh", False)) if prof else ([], None)
+    profs = _profiles_from_config(cfg) if cfg else {}
+    name, prof = _profile_lookup(profs, name0)
+    found = isinstance(prof, dict)
+    prof = prof if found else {}
+    entries, merr = (_profile_manifest_entries_for(
+        name, getattr(a, "config", None), getattr(a, "refresh", False)) if prof else ([], None))
     source_ids = _profile_live_source_ids(entries)
     # (MERGE Claude, an toàn) GUARD shared_source_id: KHÔNG xóa nguồn NLM dùng chung ≥2 drive_id (xóa 1 gãy link kia — đúng
     # 2 FALSE-LINK hiện có). Tách deletable/blocked; chỉ xóa deletable, báo blocked để sửa shared trước.
     nlm_deletable, nlm_blocked_shared = _profile_deletable_sources(entries, source_ids)
-    plan = {"ok": bool(prof) and name != DEFAULT_PROFILE,
+    plan = {"ok": found and name != DEFAULT_PROFILE,
             "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
             "config": path, "profile": name, "assets": _profile_asset_ids(prof),
             "manifest_error": merr, "manifest_rows": len(entries),
@@ -386,6 +446,7 @@ def cmd_profile_delete(a) -> int:
             "trash_assets": bool(getattr(a, "trash_assets", False)),
             "default_mode": "detach (gỡ config, GIỮ Drive+NLM) trừ khi có --delete-nlm-sources/--trash-assets",
             "note": "DRY mặc định. --apply --confirm yes gỡ profile khỏi config (backup trước); NLM/Drive cần cờ riêng. "
+                    "Detach giữ marker nên profile vẫn tồn tại trên Drive và profile-sync có thể materialize lại config. "
                     "Nguồn shared_source_id KHÔNG bị xóa (sửa map_set/reg_clear tách trước)."}
     if nlm_blocked_shared:
         plan["shared_warning"] = (f"⚠ {len(nlm_blocked_shared)} nguồn NLM DÙNG CHUNG source_id với văn bản KHÁC — "
@@ -401,10 +462,15 @@ def cmd_profile_delete(a) -> int:
         print(json.dumps({**plan, "ok": False, "error": "CONFIRM_YES_REQUIRED"}, ensure_ascii=False, indent=2),
               file=sys.stderr)
         return 2
+    if getattr(a, "delete_nlm_sources", False) and nlm_blocked_shared:
+        out = {**plan, "ok": False, "error": "SHARED_NLM_SOURCES_BLOCK_DELETE",
+               "note": "Chưa xóa gì. Tách shared_source_id trước rồi chạy lại để tránh purge một phần."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
     # (MERGE Claude) backup config TRƯỚC khi gỡ → hồi phục được
     bkp = None
     try:
-        if path and Path(path).exists():
+        if path and _path_exists_safe(path):
             bkp = str(Path(path).with_suffix(f".{_profile_file_slug(name)}.bak.json"))
             _write_json_atomic(Path(bkp), cfg)
     except Exception:
@@ -421,14 +487,27 @@ def cmd_profile_delete(a) -> int:
         nc = _imp("nlm_cli")
         for sid in nlm_deletable:       # CHỈ xóa nguồn KHÔNG shared
             _journal_append(_pd_rid, {"t": "intent", "op": "nlm_source_delete", "key": sid, "set": {"irreversible": True}})
-            _dr = nc.source_delete(sid)
+            try:
+                _dr = nc.source_delete(sid)
+            except Exception as e:  # noqa: BLE001
+                _dr = {"ok": False, "error": f"{type(e).__name__}: {e}"}
             _journal_append(_pd_rid, {"t": "commit", "op": "nlm_source_delete", "key": sid, "ok": bool(_dr.get("ok"))})
             nlm_results.append({"source_id": sid, "result": _dr})
+    nlm_ok = all(bool((x.get("result") or {}).get("ok")) for x in nlm_results)
+    if not nlm_ok:
+        out = {**plan, "ok": False, "error": "PROFILE_DELETE_NLM_PARTIAL",
+               "config_backup": bkp, "nlm_deletes": nlm_results, "config_preserved": True,
+               "note": "Có nguồn NLM xóa lỗi; giữ config và chưa trash Drive để có thể kiểm tra/retry."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 1
     trash_results = []
     if getattr(a, "trash_assets", False):
         load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
         g = _gas()
-        for it in plan["assets"]:
+        # Trash children/misplaced assets first and root last. If any step fails,
+        # preserve config so the partial operation remains discoverable/retryable.
+        _trash_order = {"registry": 0, "manifest": 0, "meta": 1, "root": 2}
+        for it in sorted(plan["assets"], key=lambda x: _trash_order.get(str(x.get("role")), 1)):
             _journal_append(_pd_rid, {"t": "intent", "op": "drive_trash", "key": it["fileId"], "set": {"restore": "tl ... restore"}})
             try:
                 r = g.get("trash", fileId=it["fileId"], confirm="yes")
@@ -436,11 +515,23 @@ def cmd_profile_delete(a) -> int:
                 r = {"ok": False, "error": str(e)}
             _journal_append(_pd_rid, {"t": "commit", "op": "drive_trash", "key": it["fileId"], "ok": bool(r.get("ok"))})
             trash_results.append({**it, "result": r})
+    trash_ok = all(bool((x.get("result") or {}).get("ok")) for x in trash_results)
+    if not trash_ok:
+        out = {**plan, "ok": False, "error": "PROFILE_DELETE_DRIVE_PARTIAL",
+               "config_backup": bkp, "nlm_deletes": nlm_results, "asset_trash": trash_results,
+               "config_preserved": True,
+               "note": "Trash Drive chưa hoàn tất; giữ config để doctor/retry và có thể restore từ journal."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 1
     out = _remove_profile_config(getattr(a, "config", None), name)
     out["config_backup"] = bkp
     out["nlm_deletes"] = nlm_results
     out["nlm_blocked_shared_source_id"] = nlm_blocked_shared
     out["asset_trash"] = trash_results
+    out["marker_preserved"] = not bool(getattr(a, "trash_assets", False))
+    if out["marker_preserved"]:
+        out["warning"] = ("DETACH_ONLY: marker Drive vẫn là nguồn sự thật; profile-sync có thể thêm profile lại. "
+                          "Muốn xóa profile thật sự phải dùng --trash-assets sau khi đã xác nhận backup.")
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
@@ -583,7 +674,14 @@ def _cmd_profile_adopt_impl(a) -> int:
         print("[tl] REFUSE_ADOPT_DEFAULT_PROFILE: vbqppl là profile nền (webapp/token of-record).", file=sys.stderr)
         return 2
     path, cfg = _read_config_record(getattr(a, "config", None))
-    existing = _profiles_from_config(cfg).get(name)
+    _profs_cfg = _profiles_from_config(cfg)
+    existing_name, existing = _profile_lookup(_profs_cfg, name)
+    if isinstance(existing, dict) and existing_name != name:
+        print(json.dumps({"ok": False, "error": "PROFILE_NAME_COLLISION", "profile": existing_name,
+                          "requested_profile": name,
+                          "note": "Tên khớp chịu-lỗi-gõ với profile đã có; dùng đúng tên canonical hoặc đổi tên."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     existing = existing if isinstance(existing, dict) else None
     if existing and str(existing.get("rootFolderId") or "").strip() not in ("", folder):
         print(json.dumps({"ok": False, "error": "PROFILE_EXISTS_DIFFERENT_FOLDER", "profile": name,
@@ -620,7 +718,7 @@ def _cmd_profile_adopt_impl(a) -> int:
     if getattr(a, "bootstrap_manifest", False):
         plan_errors = [x for x in plan_errors if not x.startswith("MANIFEST_NOT_FOUND")]
     reg_id = str((picked["registry"] or {}).get("id") or "")
-    _profs_all = _profiles_from_config(cfg)
+    _profs_all = _profs_cfg
     if reg_id:
         if reg_id == _LEGACY_REGISTRY_DOC_ID:
             plan_errors.append("REGISTRY_LEGACY_DOC_FORBIDDEN: id trùng Doc legacy 1mATG… (đọc RỖNG count=0 ảo) — KHÔNG dùng.")
@@ -684,9 +782,7 @@ def _cmd_profile_adopt_impl(a) -> int:
             g.get("manifest_export", registryDocId=reg_id, manifestId=man_id)
         except Exception as e:  # noqa: BLE001
             plan["warnings"].append(f"manifest_export bootstrap bỏ qua: {e}")
-    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
-    # P1 (v1.34.22, ADR-0003): adopt --apply GHI LUÔN MARKER (mutation phải ghi 2 nơi marker+config);
-    # thiếu _meta → tạo. Marker fail KHÔNG rollback config — doctor/backfill vá sau (finding MARKER_MISSING).
+    # ADR-0003: commit marker first (source of truth), then materialize config cache.
     _meta_id = str((meta or {}).get("id") or "")
     if not _meta_id:
         try:
@@ -696,27 +792,40 @@ def _cmd_profile_adopt_impl(a) -> int:
         _meta_id = str((_mr2 or {}).get("folderId") or "")
         if _meta_id:
             prof_block["metaFolderId"] = _meta_id
-            _persist_profile_config(getattr(a, "config", None), name, {"metaFolderId": _meta_id})
     _marker_result = None
     if _meta_id:
         _old_mk = _marker_read(g, folder, meta_id=_meta_id)
-        _marker_result = _marker_write(g, _meta_id,
-                                       _marker_body(name, {**prof_block, "metaFolderId": _meta_id},
-                                                    existing=_old_mk.get("marker")),
-                                       old_id=_old_mk.get("fileId") or "",
-                                       run_id=_apply_journal_start("profile-adopt-marker", {"profile": name}))
-    out = {**plan, "ok": bool(cfgp), "registry_verify": ver, "config_written": cfgp,
+        if _old_mk.get("error"):
+            _marker_result = {"ok": False, "verified": False, "error": _old_mk.get("error")}
+        elif len(set(_old_mk.get("marker_file_ids") or [])) > 1:
+            _marker_result = {"ok": False, "verified": False, "error": "MARKER_DUPLICATE",
+                              "fileIds": _old_mk.get("marker_file_ids")}
+        elif (_old_mk.get("found") and str((_old_mk.get("marker") or {}).get("profile") or "")
+              not in ("", name)):
+            _marker_result = {"ok": False, "verified": False, "error": "PROFILE_MARKER_NAME_CONFLICT",
+                              "existing_profile": (_old_mk.get("marker") or {}).get("profile")}
+        else:
+            _marker_result = _marker_write(g, _meta_id,
+                                           _marker_body(name, {**prof_block, "metaFolderId": _meta_id},
+                                                        existing=_old_mk.get("marker")),
+                                           old_id=_old_mk.get("fileId") or "",
+                                           run_id=_apply_journal_start("profile-adopt-marker", {"profile": name}))
+    marker_complete = bool(_marker_result and _marker_result.get("verified")
+                           and _marker_result.get("cleanup_ok", True))
+    cfgp = (_persist_profile_config(getattr(a, "config", None), name, prof_block)
+            if marker_complete else None)
+    final_ok = marker_complete and bool(cfgp)
+    out = {**plan, "ok": final_ok, "registry_verify": ver, "config_written": cfgp,
            "marker": _marker_result,
            "next_steps": [f"tl --profile {name} profile-info  (kiểm registry Sheet + categories='own')",
                           f"tl --profile {name} boot --refresh",
                           "tl profile-index --rebuild --apply  (cập nhật sổ cái _PROFILES_INDEX)"]}
-    if _marker_result and not _marker_result.get("verified"):
-        out.setdefault("warnings", []).append("MARKER_WRITE_UNVERIFIED: marker chưa ghi được — chạy "
-                                              "`tl profile-backfill-markers --apply` sau.")
-    if not cfgp:
-        out["errors"] = ["CONFIG_WRITE_FAILED: không tìm được file config ghi được — truyền --config."]
+    if not marker_complete:
+        out["errors"] = ["MARKER_WRITE_UNVERIFIED: không ghi config để tránh config tồn tại mà marker vắng/lệch."]
+    elif not cfgp:
+        out["errors"] = ["CONFIG_WRITE_FAILED: marker đã hợp lệ; truyền --config hoặc chạy profile-sync --apply."]
     print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if out["ok"] else sys.stderr)
-    return 0 if out["ok"] else 2
+    return 0 if out["ok"] else 1
 
 
 def cmd_profile_doctor(a) -> int:
@@ -940,8 +1049,8 @@ def _cmd_profile_doctor_impl(a) -> int:
 
 
 def _profile_index_rows(cfg: dict, folder_names: dict | None = None) -> list[dict]:
-    """E (PURE, test offline): sinh dòng sổ cái _PROFILES_INDEX từ config — BẢN CHIẾU đọc-được;
-    nguồn sự thật DUY NHẤT vẫn là config."""
+    """E (PURE, test offline): sinh _PROFILES_INDEX từ config cache — BẢN CHIẾU đọc nhanh.
+    Marker vẫn là nguồn sự thật về tồn tại/định danh; config giữ lựa chọn runtime (ADR-0003)."""
     default = (cfg or {}).get("defaultProfile") or DEFAULT_PROFILE
     rows = []
     for pname, prof in sorted(_profiles_from_config(cfg or {}).items()):
@@ -1045,12 +1154,14 @@ def _cmd_profile_index_impl(a) -> int:
             tr = {"ok": False, "error": str(e)}
         _journal_append(rid, {"t": "commit", "op": "drive_trash", "key": oid, "ok": bool(tr.get("ok"))})
         cleanup.append({"fileId": oid, "name": old.get("name"), "result": tr})
-    out = {"ok": True, "sheetId": sheet_id, "vanBanThuongId": vbt_id, "rows": len(rows),
+    cleanup_ok = all(bool((x.get("result") or {}).get("ok")) for x in cleanup)
+    out = {"ok": cleanup_ok, "sheetId": sheet_id, "vanBanThuongId": vbt_id, "rows": len(rows),
            "replaced_old": cleanup, "journal": rid,
-           "note": "Sổ cái = BẢN CHIẾU từ config (nguồn sự thật duy nhất). Mỗi rebuild tạo Sheet MỚI (id đổi), "
+           "note": "Sổ cái = BẢN CHIẾU từ config cache; marker mới là nguồn sự thật định danh. "
+                   "Mỗi rebuild tạo Sheet MỚI (id đổi), "
                    "bản cũ + CSV trung gian vào Trash (phục hồi được)."}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0
+    return 0 if cleanup_ok else 1
 
 
 def cmd_profile_create(a) -> int:
@@ -1066,7 +1177,22 @@ def cmd_profile_create(a) -> int:
     if not name or not nb:
         print("[tl] profile-create cần --name và --notebook", file=sys.stderr)
         return 2
+    if name == DEFAULT_PROFILE:
+        print("[tl] REFUSE_CREATE_DEFAULT_PROFILE: vbqppl là profile nền.", file=sys.stderr)
+        return 2
+    cfg_path, cfg = _read_config_record(getattr(a, "config", None))
+    known = _profiles_from_config(cfg) if cfg else {}
+    existing_name, existing = _profile_lookup(known, name)
+    if isinstance(existing, dict):
+        print(json.dumps({"ok": False, "error": "PROFILE_ALREADY_EXISTS", "profile": existing_name,
+                          "requested_profile": name, "config": cfg_path,
+                          "note": "Dùng profile-info/profile-doctor; không tạo thêm hạ tầng cùng định danh."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     root_id = meta_id = registry_id = manifest_id = None
+    _cfgp = None
+    _mkw = None
+    apply_error = None
     actions = []
     if getattr(a, "apply", False):
         # tạo folder dưới Van_ban_thuong qua webapp NỀN (VBQPPL token); KHÔNG forward profile registry.
@@ -1089,6 +1215,29 @@ def cmd_profile_create(a) -> int:
             print(f"[tl] profile-create: tạo/tìm _meta thất bại: {mr}", file=sys.stderr)
             return 2
         actions.append(f"folder Van_ban_thuong/{folder_name}/_meta → metaFolderId={meta_id}")
+        # resolvefolder may reuse an existing folder. Never layer a second profile
+        # over marker/registry/manifest already present there; adopt is the safe path.
+        existing_marker = _marker_read(gas, root_id, meta_id=meta_id)
+        if existing_marker.get("error"):
+            print(json.dumps({"ok": False, "error": "PROFILE_CREATE_PREFLIGHT_FAILED",
+                              "marker": existing_marker}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        root_list = _gas_get_retry(gas, "list", folderId=root_id)
+        meta_list = _gas_get_retry(gas, "list", folderId=meta_id)
+        if ((isinstance(root_list, dict) and root_list.get("ok") is False)
+                or (isinstance(meta_list, dict) and meta_list.get("ok") is False)):
+            print(json.dumps({"ok": False, "error": "PROFILE_CREATE_PREFLIGHT_LIST_FAILED",
+                              "root_list": root_list, "meta_list": meta_list},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        existing_assets = _adopt_pick_assets((root_list.get("items") or []) + (meta_list.get("items") or []))
+        if (existing_marker.get("found") or existing_assets.get("registry") or existing_assets.get("manifest")):
+            print(json.dumps({"ok": False, "error": "PROFILE_INFRA_EXISTS_USE_ADOPT",
+                              "profile": name, "rootFolderId": root_id, "marker": existing_marker,
+                              "picked": existing_assets,
+                              "note": "Folder đã có hạ tầng profile; dùng profile-adopt/profile-sync thay vì tạo trùng."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
         reg = _create_profile_registry_sheet(gas, meta_id, name)
         if not reg.get("ok"):
             print(json.dumps({"ok": False, "step": "create_registry_sheet", **reg}, ensure_ascii=False, indent=2),
@@ -1109,26 +1258,25 @@ def cmd_profile_create(a) -> int:
                 actions.append("manifest_export bootstrap OK (empty registry)")
         except Exception as e:  # noqa: BLE001
             actions.append(f"⚠ manifest_export bootstrap bỏ qua: {e}")
-        # GHI BỀN config.profiles.<name> ngay sau khi hạ tầng đã verify là Sheet thật.
-        _cfgp = _persist_profile_config(getattr(a, "config", None), name,
-                                        {"rootFolderId": root_id, "metaFolderId": meta_id, "notebookId": nb,
-                                         "registryDocId": registry_id, "manifestId": manifest_id,
-                                         "manifestScope": "own", "categories": "own"})
-        if _cfgp:
-            actions.append(f"config.profiles.{name} ĐÃ GHI vào {_cfgp} (own root+_meta+Sheet registry+manifest)")
-        else:
-            actions.append("⚠ KHÔNG ghi được config (thiếu file) — ghi TAY config_profiles_patch bên dưới rồi mới dùng --profile.")
-        # P1 (v1.34.22, ADR-0003): create --apply GHI LUÔN MARKER vào _meta (nguồn sự thật tồn tại/định danh).
+        prof_block = {"rootFolderId": root_id, "metaFolderId": meta_id, "notebookId": nb,
+                      "registryDocId": registry_id, "manifestId": manifest_id,
+                      "manifestScope": "own", "categories": "own"}
+        # Marker is the source of truth. Commit and read it back before materializing config.
         _mkw = _marker_write(gas, meta_id,
-                             _marker_body(name, {"rootFolderId": root_id, "metaFolderId": meta_id,
-                                                 "notebookId": nb, "registryDocId": registry_id,
-                                                 "manifestId": manifest_id, "manifestScope": "own",
-                                                 "categories": "own"}),
+                             _marker_body(name, prof_block),
                              run_id=_apply_journal_start("profile-create-marker", {"profile": name}))
-        if _mkw.get("verified"):
+        marker_complete = bool(_mkw.get("verified")) and bool(_mkw.get("cleanup_ok", True))
+        if marker_complete:
             actions.append(f"marker _meta/{_PROFILE_MARKER_NAME} → {_mkw.get('fileId')} (readback OK)")
+            _cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
+            if _cfgp:
+                actions.append(f"config.profiles.{name} ĐÃ GHI vào {_cfgp} (cache runtime từ marker)")
+            else:
+                apply_error = "CONFIG_WRITE_FAILED"
+                actions.append("⚠ CONFIG_WRITE_FAILED — marker đã hợp lệ; chạy profile-sync --apply hoặc truyền --config.")
         else:
-            actions.append("⚠ MARKER_WRITE_UNVERIFIED — chạy `tl profile-backfill-markers --apply` sau.")
+            apply_error = "MARKER_WRITE_UNVERIFIED"
+            actions.append("⚠ MARKER_WRITE_UNVERIFIED — KHÔNG ghi config; sửa quyền/Drive rồi retry hoặc doctor.")
     text = gen_instructions.generate(getattr(a, "target", "project") or "project", VERSION,
                                      name, nb, folder_name, root_id)
     profile_patch = {name: {
@@ -1140,10 +1288,14 @@ def cmd_profile_create(a) -> int:
         "manifestScope": "own",
         "categories": "own",
     }}
+    final_ok = (not getattr(a, "apply", False)) or (bool(_cfgp) and bool(_mkw)
+                                                     and bool(_mkw.get("verified"))
+                                                     and bool(_mkw.get("cleanup_ok", True)))
     out = {
-        "ok": True, "profile": name, "folder_name": folder_name, "notebookId": nb,
+        "ok": final_ok, "profile": name, "folder_name": folder_name, "notebookId": nb,
         "rootFolderId": root_id, "applied": bool(getattr(a, "apply", False)),
         "metaFolderId": meta_id, "registryDocId": registry_id, "manifestId": manifest_id,
+        "config_written": _cfgp, "marker": _mkw, "error": apply_error,
         "config_profiles_patch": {"profiles": profile_patch},
         "next_steps": [
             ("A1: config.profiles." + name + " ĐÃ ghi tự động khi --apply (own root+_meta+registry Sheet+manifest)."
@@ -1167,7 +1319,7 @@ def cmd_profile_create(a) -> int:
         for s in out["next_steps"]:
             print("  - " + s)
         print("\n# Instruction (Claude Project):\n" + text)
-    return 0
+    return 0 if final_ok else 1
 
 # ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
 
@@ -1333,11 +1485,14 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
                 trashed.append({"fileId": _oid, "ok": bool(tr.get("ok"))})
             except Exception as e:  # noqa: BLE001
                 trashed.append({"fileId": _oid, "ok": False, "error": str(e)})
+    cleanup_ok = all(bool(x.get("ok")) for x in trashed)
     if run_id:
-        _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key, "ok": verified,
+        _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key,
+                                 "ok": verified and cleanup_ok,
                                  "verify": {"fileId": fid, "trashed_old": trashed,
                                             "error": (up or {}).get("error")}})
-    return {"ok": bool((up or {}).get("ok")) and bool(fid), "verified": verified, "fileId": fid,
+    return {"ok": bool((up or {}).get("ok")) and bool(fid) and verified and cleanup_ok,
+            "verified": verified, "cleanup_ok": cleanup_ok, "fileId": fid,
             "trashed_old": trashed, "upload": up}
 
 
@@ -1345,10 +1500,10 @@ def _config_candidates_report(config_path: str | None = None) -> dict:
     """Observability P1: config-of-record (file THẬT được đọc) + mọi ứng viên đang tồn tại trên đĩa.
     Cảnh báo DUPLICATE khi có file khác of-record — sửa file không-được-đọc là 'sửa mà không ăn' im lặng."""
     cands = _config_candidates(config_path)
-    on_disk = [p for p in cands if Path(p).exists()]
+    on_disk = [p for p in cands if _path_exists_safe(p)]
     used = ""
     for p in cands:
-        if Path(p).exists() and _read_json_file(p):
+        if _path_exists_safe(p) and _read_json_file(p):
             used = p
             break
     out = {"config_of_record": used, "candidates_on_disk": on_disk}
@@ -1364,10 +1519,18 @@ def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
     sync MỘT CHIỀU marker→config: in_sync / drift{diffs} / new_from_marker{block} / marker_missing /
     broken_marker / refused_base (marker tự nhận vbqppl) / root_conflict / orphaned (config có, scan không thấy).
     v1.34.23 (live-smoke bắt): profile có root == chính vbt_id (vbthuong) KHÔNG bị báo orphaned oan."""
-    profiles = profiles or {}
-    by_root = {str((p or {}).get("rootFolderId") or "").strip(): n
-               for n, p in profiles.items() if str((p or {}).get("rootFolderId") or "").strip()}
-    rows, seen = [], set()
+    profiles = {str(n): p for n, p in (profiles or {}).items() if isinstance(p, dict)}
+    by_root = {str(p.get("rootFolderId") or "").strip(): n
+               for n, p in profiles.items() if str(p.get("rootFolderId") or "").strip()}
+    marker_roots = {}
+    for f in folders or []:
+        marker = f.get("marker") if isinstance(f.get("marker"), dict) else None
+        ok, _errs = _marker_validate(marker) if marker else (False, [])
+        name = str((marker or {}).get("profile") or "").strip()
+        if ok and name and name != DEFAULT_PROFILE:
+            marker_roots.setdefault(name, []).append(str(f.get("id") or ""))
+    duplicates = {n: sorted(set(ids)) for n, ids in marker_roots.items() if len(set(ids)) > 1}
+    rows, seen, duplicate_emitted = [], set(), set()
     for f in folders or []:
         fid = str(f.get("id") or "")
         marker = f.get("marker") if isinstance(f.get("marker"), dict) else None
@@ -1381,7 +1544,9 @@ def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
             continue
         if merr:
             rows.append({"profile": by_root.get(fid) or "", "folder_id": fid,
-                         "status": "broken_marker", "error": str(merr)})
+                         "status": ("duplicate_marker_files" if str(merr).startswith("MARKER_DUPLICATE")
+                                    else "broken_marker"), "error": str(merr),
+                         "fileIds": f.get("marker_file_ids") or []})
             continue
         ok, errs = _marker_validate(marker)
         name = str(marker.get("profile") or "").strip()
@@ -1391,6 +1556,15 @@ def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
         if name == DEFAULT_PROFILE:
             rows.append({"profile": name, "folder_id": fid, "status": "refused_base",
                          "note": "vbqppl là profile nền (webapp/token of-record) — marker này bị BỎ QUA."})
+            continue
+        if name in duplicates:
+            seen.add(name)
+            if name not in duplicate_emitted:
+                rows.append({"profile": name, "folder_id": fid, "folder_ids": duplicates[name],
+                             "status": "duplicate_marker_profile",
+                             "note": "Hai folder Drive cùng tự nhận một profile — từ chối sync để tránh "
+                                     "last-write-wins. Đổi tên/xóa marker qua lệnh mutation sau khi xác minh."})
+                duplicate_emitted.add(name)
             continue
         seen.add(name)
         block = {k: marker.get(k) for k in _MARKER_IDENTITY_KEYS
@@ -1414,7 +1588,7 @@ def _profile_sync_rows(folders: list, profiles: dict, vbt_id: str = "") -> list:
     for n in sorted(profiles):
         if n == DEFAULT_PROFILE or n in seen:
             continue
-        rid = str((profiles.get(n) or {}).get("rootFolderId") or "").strip()
+        rid = str(profiles[n].get("rootFolderId") or "").strip()
         if rid and rid != str(vbt_id or "") and rid not in folder_ids:
             rows.append({"profile": n, "folder_id": rid, "status": "orphaned",
                          "note": "config có profile nhưng scan Van_ban_thuong không thấy folder (root ngoài VBT/"
@@ -1474,7 +1648,9 @@ def _cmd_profile_load_impl(a) -> int:
             g = _gas()
             mr = _marker_read(g, str(prof.get("rootFolderId") or ""),
                               meta_id=str(prof.get("metaFolderId") or "") or None)
-            if mr.get("found"):
+            if len(set(mr.get("marker_file_ids") or [])) > 1:
+                m_note = "MARKER_DUPLICATE — chạy profile-doctor rồi backfill-markers --force."
+            elif mr.get("found"):
                 mok, merrs = _marker_validate(mr.get("marker") or {})
                 if mok:
                     marker = mr["marker"]
@@ -1568,11 +1744,18 @@ def _cmd_profile_sync_impl(a) -> int:
                             "written": sorted(block or {}), "verified": ver})
             all_ok = all_ok and ver
             r["applied"] = ver
-    out = {"ok": (all_ok if getattr(a, "apply", False) else not findings),
+    is_apply = bool(getattr(a, "apply", False))
+    unresolved = [r for r in rows
+                  if r.get("status") not in ("in_sync", "refused_base")
+                  and not (is_apply and r.get("status") in ("new_from_marker", "drift")
+                           and r.get("applied") is True)]
+    final_ok = ((all_ok and not unresolved and not scan.get("capped")) if is_apply
+                else (not findings and not scan.get("capped")))
+    out = {"ok": final_ok,
            "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
            "config": path, "vanBanThuongId": vbt_id, "scanned": len(scan.get("folders") or []),
            "capped": bool(scan.get("capped")), "rows": rows,
-           "actionable": len(actionable), "applied": applied,
+           "actionable": len(actionable), "applied": applied, "unresolved": unresolved,
            "config_report": _config_candidates_report(getattr(a, "config", None)),
            "note": "MỘT CHIỀU marker→config (ADR-0003). Marker sai → sửa qua lệnh mutation hoặc "
                    "profile-backfill-markers --force; marker_missing → profile-backfill-markers --apply."}
@@ -1581,9 +1764,7 @@ def _cmd_profile_sync_impl(a) -> int:
                           f"chạy lại với --folder-cap {scan.get('folder_total')}.")
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False)
           else json.dumps(out, ensure_ascii=False, indent=2))
-    if getattr(a, "apply", False):
-        return 0 if all_ok else 1
-    return 0 if not findings else 1
+    return 0 if final_ok else 1
 
 
 def cmd_profile_backfill_markers(a) -> int:
@@ -1636,10 +1817,17 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
         if mr.get("error"):
             rows.append({"profile": n, "status": "read_failed", "error": mr["error"]})
             continue
+        marker_ids = [x for x in (mr.get("marker_file_ids") or []) if x]
+        if len(set(marker_ids)) > 1 and not getattr(a, "force", False):
+            rows.append({"profile": n, "status": "duplicate_marker_files", "fileIds": marker_ids,
+                         "note": "Có nhiều tra_luat_profile.json trong cùng _meta; chạy --force để ghi một "
+                                 "marker chuẩn và dọn bản trùng qua marker-write self-heal."})
+            continue
         if mr.get("found") and not getattr(a, "force", False):
             row = {"profile": n, "status": "has_marker", "fileId": mr["fileId"]}
             diffs = _marker_diff(mr.get("marker") or {}, prof)
             if diffs:
+                row["status"] = "marker_drift"
                 row["diffs"] = diffs
                 row["note"] = ("marker ≠ config — marker là NGUỒN SỰ THẬT: `tl profile-sync --apply`; "
                                "marker SAI thật sự → chạy lại với --force (ghi đè theo config).")
@@ -1661,6 +1849,7 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
     all_ok = True
     for p in plans:
         meta_id = p["meta_id"]
+        meta_config_ok = True
         if not meta_id:
             try:
                 mr2 = g.get("resolvefolder", name="_meta", parentId=p["root"], create="true")
@@ -1668,24 +1857,33 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
                 mr2 = {"ok": False, "error": str(e)}
             meta_id = str((mr2 or {}).get("folderId") or "")
             if meta_id:
-                _persist_profile_config(getattr(a, "config", None), p["profile"], {"metaFolderId": meta_id})
+                meta_config_ok = bool(_persist_profile_config(
+                    getattr(a, "config", None), p["profile"], {"metaFolderId": meta_id}))
         if not meta_id:
             p["row"].update({"status": "failed", "error": "NO_META_FOLDER"})
             all_ok = False
             continue
         body = _marker_body(p["profile"], {**p["prof"], "metaFolderId": meta_id}, existing=p["existing"])
         w = _marker_write(g, meta_id, body, old_id=p["old_id"], run_id=rid)
-        p["row"].update({"status": "written" if w["verified"] else "failed",
-                         "verified": w["verified"], "fileId": w["fileId"],
+        complete = bool(w.get("verified")) and bool(w.get("cleanup_ok", True)) and meta_config_ok
+        p["row"].update({"status": "written" if complete else "failed",
+                         "verified": bool(w.get("verified")), "cleanup_ok": bool(w.get("cleanup_ok", True)),
+                         "config_updated": meta_config_ok, "fileId": w.get("fileId"),
                          "trashed_old": w["trashed_old"]})
-        if not w["verified"]:
-            p["row"]["error"] = str((w.get("upload") or {}).get("error") or "READBACK_MISMATCH")
-        all_ok = all_ok and w["verified"]
-    out = {"ok": all_ok, "mode": "APPLY", "config": path, "rows": rows, "journal": rid,
+        if not complete:
+            p["row"]["error"] = str((w.get("upload") or {}).get("error")
+                                          or ("MARKER_CLEANUP_FAILED" if not w.get("cleanup_ok", True)
+                                              else "CONFIG_UPDATE_FAILED" if not meta_config_ok
+                                              else "READBACK_MISMATCH"))
+        all_ok = all_ok and complete
+    unresolved = [r for r in rows if r.get("status") not in ("written", "has_marker", "skipped_vbt_root")]
+    final_ok = all_ok and not unresolved
+    out = {"ok": final_ok, "mode": "APPLY", "config": path, "rows": rows, "journal": rid,
+           "unresolved": unresolved,
            "note": "marker đã ghi qua upload+readback+trash-bản-cũ; config.metaFolderId được điền khi phải tạo _meta."}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False)
           else json.dumps(out, ensure_ascii=False, indent=2))
-    return 0 if all_ok else 1
+    return 0 if final_ok else 1
 
 
 _PROFILE_SYSPROMPT_NAME = "nlm_system_prompt.md"
@@ -1823,7 +2021,12 @@ def _cmd_profile_promote_impl(a) -> int:
                                   "→ --apply cần --confirm yes."}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     path, cfg = _read_config_record(getattr(a, "config", None))
-    existing = _profiles_from_config(cfg).get(name) if cfg else None
+    _profs_promote = _profiles_from_config(cfg) if cfg else {}
+    existing_name, existing = _profile_lookup(_profs_promote, name)
+    if isinstance(existing, dict) and existing_name != name:
+        print(json.dumps({"ok": False, "error": "PROFILE_NAME_COLLISION", "profile": existing_name,
+                          "requested_profile": name}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     existing = existing if isinstance(existing, dict) else None
     if existing and str(existing.get("rootFolderId") or "").strip() not in ("", folder):
         print(json.dumps({"ok": False, "error": "PROFILE_EXISTS_DIFFERENT_FOLDER", "profile": name,
@@ -1987,12 +2190,24 @@ def _cmd_profile_promote_impl(a) -> int:
     prof_block = {"rootFolderId": folder, "metaFolderId": meta_id, "notebookId": nb,
                   "registryDocId": reg_id, "manifestId": man_id,
                   "manifestScope": "own", "categories": "own"}
+    mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
+    marker_complete = bool(mkw.get("verified")) and bool(mkw.get("cleanup_ok", True))
+    results["marker"] = {"fileId": mkw.get("fileId"), "verified": mkw.get("verified"),
+                         "cleanup_ok": mkw.get("cleanup_ok", True)}
+    if not marker_complete:
+        out = {**plan, "ok": False, **results, "journal": rid,
+               "error": "MARKER_WRITE_UNVERIFIED",
+               "note": "Không ghi config/seed registry khi marker nguồn-sự-thật chưa commit."}
+        print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
     cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
     results["config_written"] = cfgp
-    all_ok = all_ok and bool(cfgp)
-    mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
-    results["marker"] = {"fileId": mkw.get("fileId"), "verified": mkw.get("verified")}
-    all_ok = all_ok and bool(mkw.get("verified"))
+    if not cfgp:
+        out = {**plan, "ok": False, **results, "journal": rid,
+               "error": "CONFIG_WRITE_FAILED",
+               "note": "Marker đã hợp lệ; chạy profile-sync --apply hoặc truyền --config trước khi seed."}
+        print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
     seeded, seed_fail = [], []
     for s in seeds:
         payload = {"drive_id": s["drive_id"], "name": s["name"], "row_kind": "own", "corpus": "true"}
@@ -2003,6 +2218,9 @@ def _cmd_profile_promote_impl(a) -> int:
         results["seed_failed"] = seed_fail[:20]
         all_ok = False
     results["system_prompt"] = _nlm_system_prompt_apply(g, meta_id, nb, run_id=rid)
+    if seed_capped:
+        all_ok = False
+        results["incomplete"] = "SEED_LIST_CAPPED"
     out = {**plan, "ok": all_ok, **results, "journal": rid,
            "system_prompt": results["system_prompt"],
            "next_steps": [
@@ -2150,7 +2368,12 @@ def _cmd_profile_from_nlm_impl(a) -> int:
         return 2
     folder = (getattr(a, "folder", None) or "").strip()
     path, cfg = _read_config_record(getattr(a, "config", None))
-    existing = _profiles_from_config(cfg).get(name) if cfg else None
+    _profs_from_nlm = _profiles_from_config(cfg) if cfg else {}
+    existing_name, existing = _profile_lookup(_profs_from_nlm, name)
+    if isinstance(existing, dict) and existing_name != name:
+        print(json.dumps({"ok": False, "error": "PROFILE_NAME_COLLISION", "profile": existing_name,
+                          "requested_profile": name}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     existing = existing if isinstance(existing, dict) else None
     if existing and str(existing.get("rootFolderId") or "").strip() and folder \
             and str(existing.get("rootFolderId")) != folder:
@@ -2269,9 +2492,27 @@ def _cmd_profile_from_nlm_impl(a) -> int:
     prof_block = {"rootFolderId": root_id, "metaFolderId": meta_id, "notebookId": nb,
                   "registryDocId": reg_id, "manifestId": man_id,
                   "manifestScope": "own", "categories": "own"}
-    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
     mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
-    all_ok = bool(cfgp) and bool(mkw.get("verified"))
+    marker_complete = bool(mkw.get("verified")) and bool(mkw.get("cleanup_ok", True))
+    if not marker_complete:
+        out = {**plan, "ok": False, "rootFolderId": root_id, "metaFolderId": meta_id,
+               "registryDocId": reg_id, "manifestId": man_id, "config_written": None,
+               "marker": {"fileId": mkw.get("fileId"), "verified": mkw.get("verified"),
+                          "cleanup_ok": mkw.get("cleanup_ok", True)},
+               "error": "MARKER_WRITE_UNVERIFIED", "journal": rid}
+        print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
+    cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
+    if not cfgp:
+        out = {**plan, "ok": False, "rootFolderId": root_id, "metaFolderId": meta_id,
+               "registryDocId": reg_id, "manifestId": man_id, "config_written": None,
+               "marker": {"fileId": mkw.get("fileId"), "verified": True,
+                          "cleanup_ok": mkw.get("cleanup_ok", True)},
+               "error": "CONFIG_WRITE_FAILED", "journal": rid,
+               "note": "Marker đã hợp lệ; chạy profile-sync --apply trước khi seed nguồn."}
+        print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
+    all_ok = True
     seeded, seed_fail = 0, []
     for p in payloads:
         v = _journaled_reg_upsert(rid, g, p)
@@ -2283,7 +2524,8 @@ def _cmd_profile_from_nlm_impl(a) -> int:
         all_ok = False
     out = {**plan, "ok": all_ok, "rootFolderId": root_id, "metaFolderId": meta_id,
            "registryDocId": reg_id, "manifestId": man_id, "config_written": cfgp,
-           "marker": {"fileId": mkw.get("fileId"), "verified": mkw.get("verified")},
+           "marker": {"fileId": mkw.get("fileId"), "verified": mkw.get("verified"),
+                      "cleanup_ok": mkw.get("cleanup_ok", True)},
            "seeded": seeded, "seed_failed": seed_fail[:20], "journal": rid,
            "next_steps": [
                f"tl profile-materialize-sources --profile-name {name} --apply   "
@@ -2399,8 +2641,10 @@ def _cmd_profile_materialize_sources_impl(a) -> int:
         _journal_append(rid, {"t": "commit", "op": "reg_delete", "key": sentinel, "ok": bool(dr.get("ok"))})
         return bool(dr.get("ok"))
     for st in stale:   # dọn sentinel sót từ run đứt giữa chừng (idempotent)
-        _del_sentinel(st["sentinel"], st["sid"])
-        by_sid.get(st["sid"], {})["sentinel_cleaned"] = True
+        _cleaned = _del_sentinel(st["sentinel"], st["sid"])
+        by_sid.get(st["sid"], {})["sentinel_cleaned"] = _cleaned
+        if not _cleaned:
+            failed.append(st["sid"])
     for t in batch:
         sid, title, sentinel = t["sid"], t["title"], t["sentinel"]
         try:
@@ -2425,8 +2669,11 @@ def _cmd_profile_materialize_sources_impl(a) -> int:
                     "note": f"materialized_from=nlm:{sid}"}
             v = _journaled_reg_upsert(rid, g, newp)
             if v.get("verified"):
-                _del_sentinel(sentinel, sid)
-                by_sid[sid].update({"status": "materialized", "drive_id": fid, "chars": len(text)})
+                _cleaned = _del_sentinel(sentinel, sid)
+                by_sid[sid].update({"status": ("materialized" if _cleaned else "materialized_sentinel_stale"),
+                                    "drive_id": fid, "chars": len(text), "sentinel_cleaned": _cleaned})
+                if not _cleaned:
+                    failed.append(sid)
             else:
                 by_sid[sid].update({"status": "failed", "error": "ROW_UPSERT_UNVERIFIED"})
                 failed.append(sid)
@@ -2496,6 +2743,12 @@ def _cmd_profile_set_meta_impl(a) -> int:
                                   "`tl profile-backfill-markers --apply` TRƯỚC rồi set-meta."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
+    if len(set(mr.get("marker_file_ids") or [])) > 1:
+        print(json.dumps({"ok": False, "error": "MARKER_DUPLICATE", "profile": name,
+                          "fileIds": mr.get("marker_file_ids"),
+                          "note": "Không chọn ngẫu nhiên marker để sửa metadata; doctor/backfill --force trước."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     old = mr.get("marker") or {}
     _mok, _merrs = _marker_validate(old)
     if not _mok:
@@ -2544,8 +2797,9 @@ def _cmd_profile_set_meta_impl(a) -> int:
     body = _marker_body(name, _identity, existing=existing)
     w = _marker_write(g, mr.get("meta_folder_id") or str(prof.get("metaFolderId") or ""),
                       body, old_id=mr.get("fileId") or "", run_id=rid)
-    out.update({"ok": bool(w.get("verified")), "journal": rid,
+    out.update({"ok": bool(w.get("verified")) and bool(w.get("cleanup_ok", True)), "journal": rid,
                 "marker": {"fileId": w.get("fileId"), "verified": w.get("verified"),
+                           "cleanup_ok": w.get("cleanup_ok", True),
                            "trashed_old": w.get("trashed_old")},
                 "next_steps": [f"tl profile-load {name}   (block phiên sẽ mang mô tả/văn phong mới)"]})
     print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if out["ok"] else sys.stderr)
@@ -2573,7 +2827,10 @@ def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
             except Exception:
                 pass
         marker, merr, mfid = None, None, ""
-        mit = _marker_find_in_items(sitems)
+        marker_items = [x for x in sitems if str(x.get("type")) != "folder"
+                        and str(x.get("name")) == _PROFILE_MARKER_NAME]
+        marker_file_ids = [str(x.get("id") or "") for x in marker_items if str(x.get("id") or "")]
+        mit = marker_items[0] if marker_items else None
         if mit:
             mfid = str(mit.get("id") or "")
             try:
@@ -2581,9 +2838,12 @@ def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
                 marker = json.loads(base64.b64decode(d.get("b64") or "").decode("utf-8"))
             except Exception as e:  # noqa: BLE001
                 merr = f"MARKER_PARSE_FAILED: {e}"
+        if len(set(marker_file_ids)) > 1:
+            merr = f"MARKER_DUPLICATE:{','.join(marker_file_ids)}"
         out_folders.append({"id": fo.get("id"), "name": fo.get("name"), "items": sitems,
                             "meta_folder_id": (meta or {}).get("id"),
-                            "marker": marker, "marker_error": merr, "marker_file_id": mfid})
+                            "marker": marker, "marker_error": merr, "marker_file_id": mfid,
+                            "marker_file_ids": marker_file_ids})
     return {"ok": True, "vbt_id": vbt_id, "folders": out_folders, "root_files": root_files,
             "capped": len(subfolders) > folder_cap, "folder_total": len(subfolders)}
 

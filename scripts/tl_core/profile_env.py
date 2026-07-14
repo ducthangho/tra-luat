@@ -45,6 +45,18 @@ def _read_json_file(path: str | None) -> dict:
         return {}
 
 
+def _path_exists_safe(path) -> bool:
+    """Best-effort existence check for report/config discovery paths.
+
+    Sandboxed Windows environments can raise PermissionError even for ``exists()``.
+    Discovery must treat that path as unavailable instead of crashing a read-only command.
+    """
+    try:
+        return bool(Path(path).exists())
+    except (OSError, PermissionError):
+        return False
+
+
 def _config_candidates(config_path: str | None = None) -> list[str]:
     cands = [config_path] if config_path else []
     # B1: nhận file Context tên `tra_luat_config.v2.json`/`tra_luat_config.json` ở cwd / gốc skill / scripts/
@@ -62,7 +74,10 @@ def _config_candidates(config_path: str | None = None) -> list[str]:
 
 
 def _profiles_from_config(cfg: dict) -> dict:
-    profiles = cfg.get("profiles") if isinstance(cfg.get("profiles"), dict) else {}
+    raw = cfg.get("profiles") if isinstance(cfg.get("profiles"), dict) else {}
+    # Malformed blocks are not profiles. Keep an empty dict value: it deliberately
+    # represents a known profile whose write scope has not been materialized yet.
+    profiles = {str(k): v for k, v in raw.items() if isinstance(v, dict)}
     if profiles:
         return profiles
     return {
@@ -108,7 +123,9 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
               f"— KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm "
               f"block profiles vào config (xem SKILL.md corpus_profile).", file=sys.stderr)
     else:
-        prof = _hit or profiles.get(DEFAULT_PROFILE) or {}
+        # An empty dict is a valid, explicitly configured profile. Truthiness here
+        # used to fall back to vbqppl and could redirect writes into the base corpus.
+        prof = _hit if _hit is not None else (profiles.get(DEFAULT_PROFILE) or {})
     os.environ["TL_PROFILE"] = name
     mapping = {
         "rootFolderId": "TL_ROOT_FOLDER_ID",
@@ -139,9 +156,9 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     # vbqppl nền: KHÔNG set (không tự quét chính mình 2 lần). GHI/ingest KHÔNG đụng cờ này (scope profile giữ nguyên).
     # Review v1.30.0 (CONFIRMED): CHỈ set khi profile THẬT có trong config — tên KHÔNG tồn tại rơi về data NỀN
     # (prof=fallback vbqppl ở trên) mà vẫn set cờ ⇒ nền tự quét mình 2 lần (vô hại nhờ dedup drive_id nhưng tốn IO + sai doctrine).
-    if name != DEFAULT_PROFILE and profiles.get(name):
+    if name != DEFAULT_PROFILE and name in profiles:
         os.environ["TL_BASE_ALSO"] = "0" if prof.get("baseAlso") is False else "1"
-    return {"profile": name, "profile_found": bool(profiles.get(name)), "profile_data": prof, "profiles": sorted(profiles)}
+    return {"profile": name, "profile_found": name in profiles, "profile_data": prof, "profiles": sorted(profiles)}
 
 
 def _active_profile() -> str:
@@ -217,9 +234,41 @@ def _emit_profile_policy_error(err: dict, json_mode: bool = False) -> int:
     return 2
 
 
+def _profile_cache_component(profile: str) -> str:
+    """Map an arbitrary profile name to one safe, stable cache-directory component."""
+    raw = str(profile or "").strip()
+    reserved = {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)),
+                *(f"LPT{i}" for i in range(1, 10))}
+    invalid = (not raw or raw in (".", "..") or raw.endswith((" ", "."))
+               or any(ord(ch) < 32 or ch in '<>:"/\\|?*' for ch in raw)
+               or raw.split(".", 1)[0].upper() in reserved
+               or Path(raw).name != raw)
+    if not invalid:
+        return raw
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", _strip_accents(raw)).strip("._-")[:48] or "profile"
+    digest = hashlib.sha256(raw.encode("utf-8", errors="replace")).hexdigest()[:12]
+    return f"{slug}-{digest}"
+
+
 def _profile_cache_dir() -> Path:
     prof = _active_profile()
-    return CACHE if prof == DEFAULT_PROFILE else CACHE / prof
+    return CACHE if prof == DEFAULT_PROFILE else CACHE / _profile_cache_component(prof)
+
+
+def _apply_unconfigured_profile_env(profile: str | None) -> None:
+    """Switch an explicit env-only profile without carrying scope from the prior one."""
+    name = str(profile or "").strip()
+    if not name:
+        return
+    previous = os.environ.get("TL_PROFILE", "")
+    if previous and previous != name:
+        for key in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_REGISTRY_DOC_ID",
+                    "TL_MANIFEST_ID", "TL_OVERFLOW_NOTEBOOK_ID", "TL_CATEGORIES_MODE",
+                    "TL_MANIFEST_SCOPE", "TL_BASE_ALSO"):
+            os.environ.pop(key, None)
+        print(f"[tl] ⚠ PROFILE_CONFIG_NOT_FOUND: chuyển '{previous}' → '{name}' bằng env; "
+              "đã xóa scope cũ để tránh ghi nhầm đích.", file=sys.stderr)
+    os.environ["TL_PROFILE"] = name
 
 
 def load_creds(config_path: str | None = None, profile: str | None = None) -> None:
@@ -228,16 +277,19 @@ def load_creds(config_path: str | None = None, profile: str | None = None) -> No
     lấy qua TL_REGISTRY_DOC_ID/TL_MANIFEST_ID/… (env) hoặc config mặc định nếu tình cờ có."""
     if os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN") and not config_path:
         if profile:
-            os.environ.setdefault("TL_PROFILE", profile)
+            applied = False
             for p in _config_candidates(None):            # best-effort áp scope từ config mặc định nếu có
-                if p and Path(p).exists():
+                if p and _path_exists_safe(p):
                     cfg = _read_json_file(p)
                     if cfg:
                         _apply_profile_env(cfg, profile)
+                        applied = True
                         break
+            if not applied:
+                _apply_unconfigured_profile_env(profile)
         return
     for p in _config_candidates(config_path):
-        if p and Path(p).exists():
+        if p and _path_exists_safe(p):
             cfg = _read_json_file(p)
             if not cfg:
                 continue
@@ -262,13 +314,13 @@ def load_creds(config_path: str | None = None, profile: str | None = None) -> No
 def apply_profile_offline(config_path: str | None = None, profile: str | None = None) -> None:
     """Apply TL_PROFILE/cache scope without requiring webapp credentials."""
     for p in _config_candidates(config_path):
-        if p and Path(p).exists():
+        if p and _path_exists_safe(p):
             cfg = _read_json_file(p)
             if cfg:
                 _apply_profile_env(cfg, profile)
                 return
     if profile:
-        os.environ["TL_PROFILE"] = profile
+        _apply_unconfigured_profile_env(profile)
 
 
 def _gas():
@@ -367,12 +419,10 @@ def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> s
     # #11 (v1.34.19, ca thật #10): ứng viên = _config_candidates (CÙNG thứ tự resolution với ĐỌC config —
     # cwd/skill-side v2 TRƯỚC ~/.tra_luat_config.json). Trước đây hardcode home-config → adopt/create không
     # --config GHI LẠC vào file KHÔNG active, im lặng; profile-list vẫn inherit mà không ai biết vì sao.
-    cands = [Path(p) for p in _config_candidates(config_path)]
-    target = next((p for p in cands if p and p.exists()), None) or (Path(config_path) if config_path else None)
-    if target is None:
+    target, data, err = _mutable_config_target(config_path)
+    if target is None or err:
         return None
     try:
-        data = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
         if not isinstance(data, dict):
             return None
         profs = data.get("profiles") if isinstance(data.get("profiles"), dict) else {}
@@ -392,9 +442,7 @@ def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> s
         except Exception:
             _rid = None
         # Ghi NGUYÊN TỬ (temp cùng thư mục + os.replace) → crash giữa chừng KHÔNG làm hỏng config.
-        _tmp = target.with_suffix(target.suffix + ".tmp")
-        _tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        os.replace(str(_tmp), str(target))
+        _write_json_atomic(target, data)
         if _rid:
             try:                                            # verify READ-BACK: block trên đĩa == block định ghi
                 _rb = json.loads(target.read_text(encoding="utf-8"))
@@ -411,7 +459,7 @@ def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> s
 def _read_config_record(config_path: str | None = None) -> tuple[str | None, dict]:
     """Đọc config-of-record theo cùng thứ tự load_creds, nhưng KHÔNG đòi webapp token."""
     for p in _config_candidates(config_path):
-        if p and Path(p).exists():
+        if p and _path_exists_safe(p):
             cfg = _read_json_file(p)
             if isinstance(cfg, dict) and cfg:
                 return str(p), cfg
@@ -427,21 +475,32 @@ def _write_json_atomic(target: Path, data: dict) -> None:
 
 
 def _mutable_config_target(config_path: str | None = None) -> tuple[Path | None, dict, str | None]:
-    """Chọn file config có thể ghi để thao tác profile. Không ghi đè template trong bundle nếu thiếu --config."""
-    cands = [Path(config_path)] if config_path else [Path.home() / ".tra_luat_config.json",
-                                                     Path("/tmp/tra_luat_config.json")]
-    target = next((p for p in cands if p and p.exists()), None) or (Path(config_path) if config_path else None)
-    if target is None:
-        return None, {}, "CONFIG_NOT_FOUND: truyền --config hoặc chạy `tl init-config --from-public` trước."
-    data = {}
-    if target.exists():
+    """Choose the same config-of-record used for reads, then mutate that exact file.
+
+    Invalid implicit candidates are skipped just like ``_read_config_record``. An
+    explicit invalid file is reported, and an explicit new path is allowed only
+    when no existing valid candidate wins the normal resolution order.
+    """
+    explicit = Path(config_path) if config_path else None
+    for raw in _config_candidates(config_path):
+        target = Path(raw)
+        if not _path_exists_safe(target):
+            continue
         try:
             data = json.loads(target.read_text(encoding="utf-8"))
         except Exception as e:  # noqa: BLE001
-            return target, {}, f"CONFIG_JSON_INVALID: {e}"
-    if not isinstance(data, dict):
-        return target, {}, "CONFIG_JSON_NOT_OBJECT"
-    return target, data, None
+            if explicit is not None and target == explicit:
+                return target, {}, f"CONFIG_JSON_INVALID: {e}"
+            continue
+        if not isinstance(data, dict):
+            if explicit is not None and target == explicit:
+                return target, {}, "CONFIG_JSON_NOT_OBJECT"
+            continue
+        if data or (explicit is not None and target == explicit):
+            return target, data, None
+    if explicit is not None:
+        return explicit, {}, None
+    return None, {}, "CONFIG_NOT_FOUND: truyền --config hoặc chạy `tl init-config --from-public` trước."
 
 
 def _profile_config_rows(cfg: dict, active: str | None = None) -> list[dict]:

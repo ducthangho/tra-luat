@@ -8210,6 +8210,19 @@ def run() -> int:
     finally:
         _TL_MODULE.load_creds, _TL_MODULE._manifest_entries, _TL_MODULE.apply_profile_offline = _o_lc, _o_me, _o_apo
     cases.append(("r104_reg_query_refresh_loads_creds", len(_creds104) >= 1 and _rc104 == 0))
+    # ═══ v1.34.43 — r105: hoàn tất BUG2 cho nlm-reconcile --refresh (ops-sweep dogfood bắt gap) ═══
+    _creds105 = []
+    _o_lc5, _o_apo5, _o_rnb5 = _TL_MODULE.load_creds, _TL_MODULE.apply_profile_offline, _TL_MODULE._resolve_nlm_notebook
+    try:
+        _TL_MODULE.load_creds = lambda *a, **k: _creds105.append(1)
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._resolve_nlm_notebook = lambda *a, **k: ("", "STUB_EARLY_EXIT")   # exit SAU load_creds (đầu hàm)
+        _ns105 = _ap104.Namespace(refresh=True, all_notebooks=False, config=None, profile=None, notebook_id=None,
+                                  apply=False, clear_stale=False, force_unsafe=False, json=True, out=None)
+        _rc105 = _TL_MODULE.cmd_nlm_reconcile(_ns105)
+    finally:
+        _TL_MODULE.load_creds, _TL_MODULE.apply_profile_offline, _TL_MODULE._resolve_nlm_notebook = _o_lc5, _o_apo5, _o_rnb5
+    cases.append(("r105_nlm_reconcile_refresh_loads_creds", len(_creds105) >= 1 and _rc105 == 2))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

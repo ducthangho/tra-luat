@@ -426,6 +426,15 @@ def cmd_nlm_reconcile(a) -> int:
     v1.34.34 --all-notebooks: quét base + overflow shard 1 lệnh (DRY — thực chứng 2026-07-12: nguồn nạp vào
     overflow lọt lưới reconcile mặc định). Tái dùng chính hàm này per-notebook (capture JSON), gộp báo cáo."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    # v1.34.43 (hoàn tất BUG2 v1.34.42 — ops-sweep dogfood bắt): `--refresh` cần creds LIVE (TL_WEBAPP) để fetch
+    # manifest, mà apply_profile_offline KHÔNG đảm bảo có → trước đây `nlm-reconcile --refresh` chết 'Thiếu TL_WEBAPP'
+    # (khuôn load_creds-on-refresh của reg-query/locate/status đã có, nlm-reconcile BỎ SÓT). Nạp ở ĐẦU hàm phủ CẢ
+    # plain lẫn --all-notebooks (self-heal từ config). TL_WEBAPP cho GAS/registry; NLM cookie riêng.
+    if getattr(a, "refresh", False):
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (SystemExit, Exception):  # noqa: BLE001 — thiếu creds → rơi xuống thông điệp NEEDS_BOOT bên dưới
+            pass
     if getattr(a, "all_notebooks", False):
         import argparse as _ap, io as _io, contextlib as _ctx
         if getattr(a, "apply", False) or getattr(a, "clear_stale", False):
@@ -434,13 +443,14 @@ def cmd_nlm_reconcile(a) -> int:
                                       "`tl nlm-reconcile <notebook_id> --apply`."}, ensure_ascii=False),
                   file=sys.stderr)
             return 2
-        # v1.34.42 (BUG1): tự nạp creds + đảm bảo manifest cache MỘT LẦN trước vòng lặp — self-heal khi có creds
-        # (config), báo NEEDS_BOOT_PROFILE RÕ khi không, thay vì để mỗi inner reconcile fail rc=2 (in stderr, bị
-        # nuốt khỏi per_notebook) rồi note khẳng định 'sạch' oan.
-        try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (SystemExit, Exception):  # noqa: BLE001 — load_creds có thể sys.exit khi thiếu cred; không giết audit
-            pass
+        # v1.34.42 (BUG1): đảm bảo manifest cache MỘT LẦN trước vòng lặp — self-heal khi có creds (load_creds đã nạp
+        # ở đầu hàm khi --refresh; v1.34.43), báo NEEDS_BOOT_PROFILE RÕ khi không, thay vì để mỗi inner reconcile fail
+        # rc=2 (in stderr, bị nuốt khỏi per_notebook) rồi note khẳng định 'sạch' oan.
+        if not getattr(a, "refresh", False):   # --refresh đã nạp creds ở đầu hàm; nếu không, thử nạp cho self-heal cache
+            try:
+                load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            except (SystemExit, Exception):  # noqa: BLE001 — load_creds có thể sys.exit khi thiếu cred; không giết audit
+                pass
         try:
             _manifest_entries(refresh=getattr(a, "refresh", False))
         except Exception:  # noqa: BLE001 — chưa có cache → thử build 1 lần (cần creds LIVE)

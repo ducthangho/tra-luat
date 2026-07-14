@@ -1,3 +1,17 @@
+# ★ v1.34.43 — hoàn tất BUG2 cho `nlm-reconcile --refresh` (ops-sweep dogfood bắt gap) (2026-07-14)
+
+> Ngay sau v1.34.42, chạy `ops-sweep` (L1) → **warn 2**: `nlm-reconcile --profile "Luật BHXH" --refresh` chết
+> rc=2 "Thiếu TL_WEBAPP". Chẩn đoán: BUG2 v1.34.42 (load_creds-on-refresh) tôi CHỈ vá `reg-query`, **bỏ sót
+> `nlm-reconcile`** — cùng lớp gap (`locate`/`status`/`reg-query` đều gọi load_creds khi refresh; nlm-reconcile
+> không). File `~/.tra_luat_config.json` xóa phiên trước làm lộ ra (trước nằm trong candidate-path mặc định nên che).
+> **Vá:** `cmd_nlm_reconcile` nạp `load_creds` ở ĐẦU hàm khi `--refresh` (phủ cả plain lẫn `--all-notebooks`;
+> TL_WEBAPP cho GAS/registry, NLM cookie riêng); gỡ bản load_creds trùng trong nhánh --all-notebooks (giữ
+> self-heal `_manifest_entries`). **TDD r105** (negative-input: stub `_resolve_nlm_notebook` early-exit SAU load_creds
+> → assert load_creds được gọi + rc=2). Verify LIVE: `nlm-reconcile --refresh` fresh (không boot) → ok=true, 41 nguồn,
+> hết "Thiếu TL_WEBAPP". Selftest 873→**874**. KHÔNG bump GAS/kernel → re-import không bắt buộc.
+> **DATA-OP kèm:** adopt marker profile **"Khảo sát Luật Xuất bản"** (130 items, registry+manifest đầy đủ, phiên
+> khác tạo) vào config local qua `profile-sync --apply` (ADR-0003 marker→config một chiều) — clear warn 1 ops-sweep.
+
 # ★ v1.34.42 — vá 3 bug audit-tool phát hiện khi chạy thật (data-op + audit corpus 2026-07-13)
 
 > Nguồn: phiên Pha 5 (backfill sohieu/loai) + audit corpus 15 profile bắt 3 trục trặc CỦA CHÍNH CÔNG CỤ audit.

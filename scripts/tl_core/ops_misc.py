@@ -948,10 +948,11 @@ def cmd_doctor(a) -> int:
         report.append((name, bool(ok), detail))
         if not _json:
             print(f"{'✓' if ok else '✗'} {name}{(' — ' + detail) if detail else ''}")
+    topology_report = {"ok": None, "shards": 0, "row_kind_findings": 0, "config_findings": []}   # v1.34.49
     def _emit_json(rc):
         _emit_json_payload({"ok": rc == 0, "rc": rc,
                             "checks": [{"name": n, "ok": o, "detail": d} for n, o, d in report],
-                            "registry_nlm_drift": drift}, getattr(a, "out", None))
+                            "registry_nlm_drift": drift, "topology": topology_report}, getattr(a, "out", None))
         return rc
     fb = HERE / "_fallback"
     def where(fn):
@@ -1061,6 +1062,33 @@ def cmd_doctor(a) -> int:
                       f"(backfill nlm_notebook_id + link gdoc↔source_id; gợi ý, KHÔNG chặn).")
     except Exception:
         pass
+    # v1.34.49 (F-06/F-09 doctor — ADVISORY/REPORT-ONLY theo grill, KHÔNG đổi rc): bất biến notebook↔row_kind
+    # theo TOPOLOGY (primary⇔own/blank, overflow⇔overflow, notebook lạ) + findings resolver (alias lệch declared,
+    # shard lạ trong registry) + stamp F-09. Sửa: `tl nlm-reconcile <nb> --apply` (nay ghi row_kind theo topology).
+    _topo_doc = None
+    try:
+        _ents_t = _manifest_entries(refresh=False)
+    except Exception:  # noqa: BLE001
+        _ents_t = []
+    try:
+        _base_t = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
+        _topo_doc = _resolve_shard_topology(_ents_t, _base_t)
+        _rkf_doc = _topology_row_kind_findings(_ents_t, _topo_doc)
+        topology_report.update({"ok": _topo_doc.get("ok"), "error": _topo_doc.get("error"),
+                                "shards": len(_topo_doc.get("shards") or []),
+                                "config_findings": _topo_doc.get("findings") or [],
+                                "row_kind_findings": len(_rkf_doc), "row_kind_sample": _rkf_doc[:8],
+                                "stamp": _topology_stamp(None, _ents_t)})
+        if not _json:
+            if _topo_doc.get("ok") is False:
+                print(f"  ⚠ topology CONFIG CONFLICT: {_topo_doc.get('error')} — đường ghi/route sẽ fail-closed (D5).")
+            if _rkf_doc:
+                print(f"  ⚠ topology row_kind lệch: {len(_rkf_doc)} dòng (primary⇔own, overflow⇔overflow, notebook lạ)"
+                      f" → mẫu trong --json; sửa: `tl nlm-reconcile <nb> --apply`.")
+            for _f_d in (_topo_doc.get("findings") or [])[:4]:
+                print(f"  ⚠ topology: {_f_d}")
+    except Exception:  # noqa: BLE001 — advisory không được làm hỏng doctor
+        pass
     if a.offline:
         rc = 0 if all(ok for n, ok, _ in report if not n.startswith("optional")) else 2
         return _emit_json(rc) if _json else rc
@@ -1084,6 +1112,26 @@ def cmd_doctor(a) -> int:
         add("webapp ping", False, str(e))
     except Exception as e:
         add("webapp ping", False, f"{type(e).__name__}: {e}")
+    # v1.34.49 (minor handoff #1): LIVENESS shard overflow — 1 notebook_get/shard (ADVISORY, KHÔNG đổi rc):
+    # shard trashed/renamed/mất quyền lộ ngay ở doctor thay vì chết giữa ingest/reconcile.
+    if _topo_doc:
+        try:
+            _nc_d = _imp("nlm_cli")
+            _hl_d = {"healed": True}   # doctor chỉ BÁO, không tự heal
+            _ovl = []
+            for _s_d in (_topo_doc.get("shards") or []):
+                if _s_d.get("role") == "primary" or not _s_d.get("enabled"):
+                    continue
+                _c_d, _ok_d, _err_d = _live_source_count(_nc_d, _s_d.get("id"), _hl_d)
+                _ovl.append({"notebook_id": _s_d.get("id"), "alive": bool(_ok_d), "source_count": _c_d,
+                             **({"error": str(_err_d)[:120]} if not _ok_d else {})})
+                if not _ok_d and not _json:
+                    print(f"  ⚠ overflow liveness: {str(_s_d.get('id'))[:16]}… KHÔNG đọc được "
+                          f"({str(_err_d)[:80]}) — kiểm shard còn sống / `nlm login`.")
+            if _ovl:
+                topology_report["overflow_liveness"] = _ovl
+        except Exception:  # noqa: BLE001 — advisory best-effort
+            pass
     fail_core = [x for x in report if not x[1] and not x[0].startswith("optional")]
     rc = 0 if not fail_core else 2
     return _emit_json(rc) if _json else rc
@@ -1399,6 +1447,14 @@ def cmd_manifest(a) -> int:
     if a.touched_drive and (r.get("treeHash_match") is False or r.get("corpus_count_match") is False):
         r["ok"] = False
         r["error"] = "regen2 và manifest_export không khớp treeHash/corpus_count"
+    # v1.34.49 (F-09): stamp topology dẫn xuất CLIENT-SIDE (topology_hash + routing_epoch + registry_digest) —
+    # chứng minh snapshot theo topology/registry nào (server-side stamp = đợt 50 GAS 2.21.2l). Best-effort.
+    try:
+        _cfg_m = _read_config_record(getattr(a, "config", None))[1]
+        _ents_m = _manifest_entries(refresh=False)
+        r["topology"] = _topology_stamp(_cfg_m, _ents_m, profile=profile)
+    except Exception:  # noqa: BLE001 — stamp không được làm hỏng manifest
+        pass
     if a.json:
         print(json.dumps(r, ensure_ascii=False))
     else:
@@ -1630,11 +1686,36 @@ def cmd_registry_map(a) -> int:
         ov = p.get("overflowNotebookId")
         if ov and "-" in str(ov):
             out.append({"role": "overflow_shard", "id": ov})
+        # v1.34.49 (F-03): shards[] KHAI BÁO (dict {id,role,capacity,enabled,priority} hoặc str legacy) — trước
+        # đây registry-map BỎ QUA hoàn toàn phần tử sau overflow đầu tiên ⇒ không phải bản đồ N-shard.
+        _seen = {x["id"] for x in out}
+        for s in (p.get("shards") if isinstance(p.get("shards"), list) else []):
+            if isinstance(s, dict):
+                sid = str(s.get("id") or "").strip()
+                row = {"role": ("primary" if s.get("role") == "primary" else "overflow_shard"), "id": sid,
+                       "capacity": s.get("capacity"), "enabled": s.get("enabled", True) is not False,
+                       "priority": s.get("priority")}
+            else:
+                sid = str(s or "").strip()
+                row = {"role": "overflow_shard", "id": sid}
+            if sid and sid not in _seen:
+                _seen.add(sid)
+                out.append(row)
         return out
 
     base = profs.get(DEFAULT_PROFILE) or {}
     vbqppl = {"profile": DEFAULT_PROFILE, "rootFolderId": base.get("rootFolderId"),
               "registryDocId": base.get("registryDocId"), "manifestId": base.get("manifestId"), "notebooks": _nbs(base, True)}
+    # v1.34.49 (F-09): topology view + hash cho scope nền (declared+env; registry-observed cần manifest — xem doctor)
+    try:
+        _topo_rm = _resolve_shard_topology([], str(base.get("notebookId") or NLM_BASE_NOTEBOOK),
+                                           cfg=cfg, profile=DEFAULT_PROFILE)
+        vbqppl["topology"] = {"ok": _topo_rm.get("ok"), "error": _topo_rm.get("error"),
+                              "declared": _topo_rm.get("declared"),
+                              "topology_hash": _topology_hash(DEFAULT_PROFILE, _topo_rm.get("shards") or []),
+                              "findings": _topo_rm.get("findings") or []}
+    except Exception:  # noqa: BLE001 — view best-effort
+        pass
     others = [{"profile": n, "rootFolderId": p.get("rootFolderId"), "registryDocId": p.get("registryDocId"),
                "manifestId": p.get("manifestId"),
                "categories": (p.get("categories") if isinstance(p.get("categories"), str) else ("own" if p.get("categories") else None)),

@@ -426,7 +426,7 @@ TVPL chặn fetch server-side (403/CORS) → Apps Script/WebFetch KHÔNG tải �
 2. Claude in Chrome: navigate `tim-van-ban.aspx?keyword=<số hiệu>` → mở đúng `/van-ban/...aspx` → tab **"Tải về"** → link **"Tải Văn bản tiếng Việt (docx)"** (HỎI người dùng trước khi tải — tải file là hành động cần xác nhận).
 3. Bash: `*.docx` mới nhất trong `~/Downloads`.
 4. Upload `_HOP_NAP`: Drive `create_file` (docx→convert GDoc) hoặc webapp `importext`.
-5. Chuẩn hóa tên → cat → `tl preflight` → `source_add` (VBQPPL-2 nếu base đầy) → `tl push-overflow` → verify.
+5. Chuẩn hóa tên → cat → `tl preflight` → `source_add` (shard overflow topology nếu base đầy — v1.34.49: `_ingest_target` duyệt MỌI shard enabled, đọc slot fail-closed) → `tl push-overflow` (validate đích ∈ topology) → verify. Batch: `ingest-missing` failover trong-run; partial → làm theo `resume_command` (rc=2 = còn backlog, KHÔNG phải lệnh hỏng).
 Văn bản Đảng (NQ-TW…) thường KHÔNG có trang /van-ban/ tải được trên TVPL → dùng nguồn official khác / tải thủ công.
 
 **B1g-bis. BÀI HỌC THỰC CHIẾN tải qua Claude in Chrome (đã kiểm chứng) — `tl fetch-route`/`fetch-links`/`find-doc`:**

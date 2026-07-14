@@ -47,8 +47,8 @@
         "17": "1gCXZpCbnOlK898Mc3ZzwfrJNYVvDMQlF"
       },
       "shards": [
-        "743ed200-2e55-4673-b7a0-9bfd13b41ce6",
-        "45739ff7-347a-45c7-8066-0f2f3b55f76a"
+        {"id": "743ed200-2e55-4673-b7a0-9bfd13b41ce6", "role": "primary", "capacity": 300, "enabled": true, "priority": 1},
+        {"id": "45739ff7-347a-45c7-8066-0f2f3b55f76a", "role": "overflow", "capacity": 300, "enabled": true, "priority": 2}
       ],
       "overflowNotebookId": "45739ff7-347a-45c7-8066-0f2f3b55f76a"
     },

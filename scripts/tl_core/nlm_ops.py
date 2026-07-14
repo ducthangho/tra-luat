@@ -204,20 +204,35 @@ def cmd_slot_audit(a) -> int:
         near = getattr(a, "near_full", None) or 270
         _base_sa = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
         per = _slot_count_all_shards(entries, _base_sa)
+        # v1.34.49 (F-03/F-07): phủ shard DECLARED chưa có dòng registry (count=0 — VBQPPL-3 mới duyệt vẫn hiện)
+        # + capacity PER-SHARD theo topology (shards[].capacity > TL_NLM_SOURCE_CAP > 300); lộ topology findings.
+        _topo_sa = _resolve_shard_topology(entries, _base_sa)
+        _caps_sa = {str(s.get("id") or ""): int(s.get("capacity") or NLM_SLOT_CAP)
+                    for s in (_topo_sa.get("shards") or [])}
+        for _sid_sa in _caps_sa:
+            if _sid_sa:
+                per.setdefault(_sid_sa, 0)
+        _cap_of = lambda nb: _caps_sa.get(nb, NLM_SLOT_CAP)   # noqa: E731
         rows = sorted(per.items(), key=lambda kv: (-kv[1], kv[0]))
-        warn = [{"notebook_id": nb, "count": n, "cap": NLM_SLOT_CAP} for nb, n in rows if n >= near]
+        warn = [{"notebook_id": nb, "count": n, "cap": _cap_of(nb)} for nb, n in rows
+                if n >= min(near, _cap_of(nb))]
         res = {"ok": True, "gate": "slot-audit", "cap": NLM_SLOT_CAP, "near_full_threshold": near,
-               "shards": [{"notebook_id": nb, "count": n, "near_full": n >= near, "full": n >= NLM_SLOT_CAP} for nb, n in rows],
+               "topology_ok": _topo_sa.get("ok"),
+               "shards": [{"notebook_id": nb, "count": n, "cap": _cap_of(nb),
+                           "near_full": n >= min(near, _cap_of(nb)), "full": n >= _cap_of(nb)} for nb, n in rows],
                "near_full_shards": warn}
+        if _topo_sa.get("findings"):
+            res["topology_findings"] = _topo_sa.get("findings")
         if getattr(a, "json", False):
             print(json.dumps(res, ensure_ascii=False, indent=2))
         else:
-            print(f"== slot-audit --all-shards · {len(rows)} shard · cap={NLM_SLOT_CAP} ngưỡng near-full={near} ==")
+            print(f"== slot-audit --all-shards · {len(rows)} shard · cap default={NLM_SLOT_CAP} ngưỡng near-full={near} ==")
             for nb, n in rows:
-                mk = "✗ FULL" if n >= NLM_SLOT_CAP else ("⚠ NEAR" if n >= near else "·")
-                print(f"  {mk:7s} {nb[:40]:40s} {n}/{NLM_SLOT_CAP}")
+                _c = _cap_of(nb)
+                mk = "✗ FULL" if n >= _c else ("⚠ NEAR" if n >= min(near, _c) else "·")
+                print(f"  {mk:7s} {nb[:40]:40s} {n}/{_c}")
             if warn:
-                print(f"  ⚠ {len(warn)} shard ≥{near} → chuẩn bị shard kế (đừng để ingest-missing chạm BLOCKED).")
+                print(f"  ⚠ {len(warn)} shard chạm ngưỡng → chuẩn bị shard kế (đừng để ingest-missing chạm partial).")
         return 0
     notebook_id = a.notebook_id or os.environ.get("TL_NOTEBOOK_ID", "")
     if not notebook_id:
@@ -559,27 +574,68 @@ def cmd_nlm_reconcile(a) -> int:
                        "(bắc cầu gdoc↔source_id). --clear-stale: CHỈ clear desync_real (status pushed/synced nhưng vắng "
                        "NLM); KHÔNG đụng already_removed (đã gỡ có chủ đích).")
         _emit_json_payload(out, getattr(a, "out", None)); return 0
-    _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status")   # (Pha 1) chống clobber/ghi-mù
+    # v1.34.49 (F-06): +row_kind vào gate-cols (superset — backfill/link trên shard overflow nay ghi row_kind)
+    _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status,row_kind")   # (Pha 1) chống clobber/ghi-mù
     if not _ok_gate:
         return 2
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))   # cần webapp để reg_bulk/reg_clear
     g = _gas()
     run_id = _apply_journal_start("nlm-reconcile", {"notebook": nb, "backfill": len(plan["backfill"]),
                                                     "link": len(plan.get("link_candidates") or [])})
+    # v1.34.49 (F-06 — grill D-F6): recovery/link/backfill SUY row_kind TỪ TOPOLOGY cho notebook nb — trước đây
+    # reconcile chỉ ghi nlm_* ⇒ nguồn recovery trên VBQPPL-2 để row_kind=own ⇒ sweep v1.34.47 (discover shard qua
+    # row_kind=overflow) MẤT DẤU shard. primary → GIỮ blank (=own convention, tránh churn); kind bảo hộ
+    # (ref/thuong) KHÔNG BAO GIỜ clobber; notebook ngoài topology → không ghi row_kind (doctor lộ UNKNOWN).
+    _topo_rc = _resolve_shard_topology(entries, (os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK or "").strip())
+    _rk_rc = _shard_row_kind(nb, _topo_rc)
+
+    def _split_rk(pairs, key_of, before_of):
+        # pairs: list[(entry, item)] → (plain, rked, before_plain, before_rk); rked chỉ khi nb=overflow + kind không bảo hộ
+        _plain, _rked, _bp, _brk = [], [], {}, {}
+        for _e, _it in pairs:
+            _cur_rk = str((_e or {}).get("row_kind") or "").strip().lower()
+            if _rk_rc == "overflow" and _cur_rk not in _ROW_KIND_PROTECTED:
+                _rked.append({**_it, "row_kind": "overflow"})
+                _brk[key_of(_e, _it)] = {**before_of(_e), "row_kind": _cur_rk}
+            else:
+                _plain.append(_it)
+                _bp[key_of(_e, _it)] = before_of(_e)
+        return _plain, _rked, _bp, _brk
+
+    def _merge_writes(vs, rk_n):
+        return {"ok": (all(bool((x.get("reg_bulk") or {}).get("ok")) for x in vs) if vs else None),
+                "patched": sum(int(x.get("patched") or 0) for x in vs),
+                "verified": (all(bool(x.get("verified")) for x in vs) if vs else None),
+                "row_kind_written": rk_n}
     if plan["backfill"]:
-        items = [{"nlm_source_id": _entry_nlm(e), "nlm_notebook_id": nb} for e in plan["backfill"]]
-        _bf_before = {_entry_nlm(e): {"nlm_notebook_id": str(e.get("nlm_notebook_id") or "")} for e in plan["backfill"]}
-        v = _journaled_reg_write(run_id, g, items, "nlm_notebook_id", key_field="nlm_source_id", before_by_key=_bf_before)
-        rb = v.get("reg_bulk") or {}
-        out["reg_bulk"] = {"ok": rb.get("ok"), "patched": v.get("patched"), "missed": rb.get("missed"), "verified": v.get("verified")}
+        _pairs_bf = [(e, {"nlm_source_id": _entry_nlm(e), "nlm_notebook_id": nb}) for e in plan["backfill"]]
+        _pl_bf, _rk_bf, _bp_bf, _brk_bf = _split_rk(
+            _pairs_bf, key_of=lambda e, it: _entry_nlm(e),
+            before_of=lambda e: {"nlm_notebook_id": str(e.get("nlm_notebook_id") or "")})
+        _vs_bf = []
+        if _pl_bf:
+            _vs_bf.append(_journaled_reg_write(run_id, g, _pl_bf, "nlm_notebook_id",
+                                               key_field="nlm_source_id", before_by_key=_bp_bf))
+        if _rk_bf:
+            _vs_bf.append(_journaled_reg_write(run_id, g, _rk_bf, "nlm_notebook_id,row_kind",
+                                               key_field="nlm_source_id", before_by_key=_brk_bf))
+        out["reg_bulk"] = _merge_writes(_vs_bf, len(_rk_bf))
     # C1: LINK nguồn live chưa-đăng-ký vào đúng dòng registry (khóa drive_id) → set nlm_source_id+notebook+status.
     if plan.get("link_candidates"):
-        litems = [{"drive_id": _entry_drive_id(c["entry"]), "nlm_source_id": c["source_id"],
-                   "nlm_notebook_id": nb, "nlm_status": "pushed"} for c in plan["link_candidates"] if _entry_drive_id(c["entry"])]
-        _ln_before = {it["drive_id"]: {"nlm_source_id": ""} for it in litems}   # trước: chưa có source_id → undo = clear
-        vl = _journaled_reg_write(run_id, g, litems, "nlm_source_id,nlm_notebook_id,nlm_status", before_by_key=_ln_before)
-        rl = vl.get("reg_bulk") or {}
-        out["reg_bulk_link"] = {"ok": rl.get("ok"), "patched": vl.get("patched"), "missed": rl.get("missed"), "verified": vl.get("verified")}
+        _pairs_ln = [(c["entry"], {"drive_id": _entry_drive_id(c["entry"]), "nlm_source_id": c["source_id"],
+                                   "nlm_notebook_id": nb, "nlm_status": "pushed"})
+                     for c in plan["link_candidates"] if _entry_drive_id(c["entry"])]
+        _pl_ln, _rk_ln, _bp_ln, _brk_ln = _split_rk(
+            _pairs_ln, key_of=lambda e, it: it["drive_id"],
+            before_of=lambda e: {"nlm_source_id": ""})   # trước: chưa có source_id → undo = clear
+        _vs_ln = []
+        if _pl_ln:
+            _vs_ln.append(_journaled_reg_write(run_id, g, _pl_ln, "nlm_source_id,nlm_notebook_id,nlm_status",
+                                               before_by_key=_bp_ln))
+        if _rk_ln:
+            _vs_ln.append(_journaled_reg_write(run_id, g, _rk_ln, "nlm_source_id,nlm_notebook_id,nlm_status,row_kind",
+                                               before_by_key=_brk_ln))
+        out["reg_bulk_link"] = _merge_writes(_vs_ln, len(_rk_ln))
     # --clear-stale CHỈ áp desync_real (KHÔNG xoá mapping/ status của dòng already_removed).
     if getattr(a, "clear_stale", False) and plan["desync_real"]:
         ops = [{"action": "reg_clear", "drive_id": _entry_drive_id(e),
@@ -621,22 +677,109 @@ def _discover_overflow_from_registry(entries: list[dict], main_nb: str) -> str:
     return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
 
 
-def _resolve_overflow_shards(entries: list[dict], base_nb: str) -> list[str]:
-    """v1.34.47: NGUỒN SỰ THẬT DUY NHẤT cho 'mọi shard overflow ngoài base' — dùng CHUNG cho MỌI đường
-    ĐỌC/AUDIT/QUERY (reconcile --all-notebooks, nlm-cross, nlm-query) để ĐỐI XỨNG với đường ghi/định-tuyến
-    (vốn đã auto-discover từ registry khi config trống). Trước v1.34.47 các đường đọc chỉ lấy env
-    TL_OVERFLOW_NOTEBOOK_ID → config trống ⇒ BỎ shard ⇒ reconcile 'sạch' oan / cross thiếu nguồn.
-    Gộp: (1) env overflow (nếu hợp lệ, ≠ base, có '-', ≠ placeholder) + (2) MỌI nlm_notebook_id ở dòng
-    row_kind='overflow' trong registry (đủ multi-shard, ≠ base). Trả list dedup, env trước rồi registry
-    theo phổ-biến-giảm→id."""
+def _shard_capacity_default() -> int:
+    """v1.34.49 (F-07/D6): capacity mặc định — env TL_NLM_SOURCE_CAP (toàn cục, cho edition 50/100/400/600)
+    thắng hằng NLM_SLOT_CAP=300 (bảo thủ, đúng account hiện tại). Per-shard: shards[].capacity thắng cả hai."""
+    try:
+        v = int(str(os.environ.get("TL_NLM_SOURCE_CAP") or "").strip() or 0)
+        if v > 0:
+            return v
+    except (TypeError, ValueError):
+        pass
+    return NLM_SLOT_CAP
+
+
+def _resolve_shard_topology(entries: list[dict], base_nb: str, cfg: dict | None = None,
+                            profile: str | None = None) -> dict:
+    """v1.34.49 (D5 — grill 2026-07-15): TOPOLOGY declared+observed HỢP NHẤT, resolver DUY NHẤT cho mọi đường.
+    Declared = config profiles.<p>.shards[] (dict {id,role,capacity,enabled,priority} HOẶC list[str] legacy) —
+    nơi khai ý định vận hành (capacity/priority/enabled). Observed = env TL_OVERFLOW_NOTEBOOK_ID + registry
+    row_kind='overflow'. Trả {ok, shards:[{id,role,capacity,enabled,priority,source}...], findings, declared, error}.
+    Bất biến: (a) alias legacy (notebookId/overflowNotebookId/env) LỆCH declared → ok=False
+    TOPOLOGY_CONFIG_CONFLICT (đường GHI/ROUTE phải rc=2; đường ĐỌC dùng union qua `_resolve_overflow_shards`);
+    (b) declared CÓ → notebook lạ trong registry KHÔNG vào route (enabled=False, role='observed'), lộ findings
+    UNDECLARED_REGISTRY_SHARD (doctor); declared VẮNG → materialize từ alias+env+registry (KHÔNG bắt sửa config).
+    Capacity: shards[].capacity > TL_NLM_SOURCE_CAP > NLM_SLOT_CAP (live count vẫn là ground truth khi route)."""
     base_nb = (base_nb or "").strip()
-    out: list[str] = []
+    if cfg is None:
+        _, cfg = _read_config_record(None)
+    prof_name = (profile or _active_profile() or DEFAULT_PROFILE)
+    prof = (_profiles_from_config(cfg or {}) or {}).get(prof_name) or {}
+    cap_def = _shard_capacity_default()
+    raw_shards = prof.get("shards") if isinstance(prof.get("shards"), list) else []
+    findings: list[dict] = []
+    declared: list[dict] = []
     seen: set[str] = set()
+    _prof_nb = str(prof.get("notebookId") or "").strip()
+    for i, s in enumerate(raw_shards):
+        if isinstance(s, str):
+            # schema cũ: list[str] = DANH SÁCH notebook base→overflow (ngữ nghĩa _vbqppl_notebooks — config live
+            # thật có ["<base>", "<overflow>"]) → phần tử trùng notebookId/base = PRIMARY, còn lại overflow.
+            sid = s.strip()
+            role = "primary" if sid and sid in (_prof_nb, base_nb) else "overflow"
+            cap, en, pri = None, True, i + 1
+        elif isinstance(s, dict):
+            sid = str(s.get("id") or "").strip()
+            role = str(s.get("role") or "overflow").strip().lower()
+            cap = s.get("capacity")
+            en = s.get("enabled") is not False
+            pri = s.get("priority") if isinstance(s.get("priority"), int) else i + 1
+        else:
+            findings.append({"finding": "SHARD_ENTRY_INVALID", "index": i}); continue
+        if not sid:
+            findings.append({"finding": "SHARD_ID_EMPTY", "index": i}); continue
+        if sid in seen:
+            return {"ok": False, "error": f"TOPOLOGY_CONFIG_CONFLICT: shard id trùng '{sid}'",
+                    "shards": [], "findings": findings, "declared": True}
+        try:
+            cap_i = int(cap) if cap is not None else None
+            if cap_i is not None and cap_i <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return {"ok": False, "error": f"TOPOLOGY_CONFIG_CONFLICT: capacity không hợp lệ ở shard '{sid}'",
+                    "shards": [], "findings": findings, "declared": True}
+        seen.add(sid)
+        declared.append({"id": sid, "role": ("primary" if role == "primary" else "overflow"),
+                         "capacity": (cap_i if cap_i else cap_def), "enabled": bool(en),
+                         "priority": pri, "source": "declared"})
     env_ovf = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
-    # Chấp nhận GIÁ TRỊ config đã đặt (đường ĐỌC nới hơn đường ghi) — chỉ loại literal placeholder chưa điền;
-    # id sai (≠ placeholder) vẫn được sweep để lộ lỗi RÕ (source_list fail) thay vì im lặng bỏ shard.
-    if env_ovf and env_ovf != base_nb and env_ovf != "TL_OVERFLOW_NOTEBOOK_ID":
-        out.append(env_ovf); seen.add(env_ovf)
+    env_ok = bool(env_ovf and env_ovf != base_nb and env_ovf != "TL_OVERFLOW_NOTEBOOK_ID")
+    alias_ovf = str(prof.get("overflowNotebookId") or "").strip()
+    if declared:
+        declared.sort(key=lambda s: (0 if s["role"] == "primary" else 1, s["priority"], s["id"]))
+        prim = [s for s in declared if s["role"] == "primary"]
+        # primary khai báo phải KHỚP base đang dùng (alias notebookId/TL_NOTEBOOK_ID) — lệch = config conflict.
+        if prim and base_nb and prim[0]["id"] != base_nb:
+            return {"ok": False, "error": f"TOPOLOGY_CONFIG_CONFLICT: primary khai báo '{prim[0]['id']}' ≠ notebook "
+                                          f"đang dùng '{base_nb}'", "shards": declared, "findings": findings,
+                    "declared": True}
+        if not prim and base_nb and base_nb not in seen:    # declared chỉ khai overflow → prepend primary (không dup)
+            declared.insert(0, {"id": base_nb, "role": "primary", "capacity": cap_def, "enabled": True,
+                                "priority": 0, "source": "alias"})
+        dec_ids = {s["id"] for s in declared}
+        for src, val in (("overflowNotebookId", alias_ovf), ("TL_OVERFLOW_NOTEBOOK_ID", env_ovf if env_ok else "")):
+            if val and val not in dec_ids:
+                return {"ok": False, "error": f"TOPOLOGY_CONFIG_CONFLICT: alias {src}='{val}' không thuộc shards[] "
+                                              f"khai báo", "shards": declared, "findings": findings, "declared": True}
+        # registry-observed KHÔNG khai báo → enabled=False + finding (doctor lộ drift; route KHÔNG tự nhận).
+        for e in entries or []:
+            if _entry_row_kind(e) != "overflow":
+                continue
+            nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+            if nb and nb != base_nb and nb not in dec_ids:
+                dec_ids.add(nb)
+                findings.append({"finding": "UNDECLARED_REGISTRY_SHARD", "notebook_id": nb})
+                declared.append({"id": nb, "role": "observed", "capacity": cap_def, "enabled": False,
+                                 "priority": 10_000, "source": "registry"})
+        return {"ok": True, "error": None, "shards": declared, "findings": findings, "declared": True}
+    # ── declared VẮNG → materialize observed (giữ nguyên hành vi v1.34.47, thêm capacity/priority) ──
+    out: list[dict] = []
+    if base_nb:
+        out.append({"id": base_nb, "role": "primary", "capacity": cap_def, "enabled": True,
+                    "priority": 0, "source": "alias"})
+    if env_ok:
+        out.append({"id": env_ovf, "role": "overflow", "capacity": cap_def, "enabled": True,
+                    "priority": 1, "source": "env"})
     counts: dict[str, int] = {}
     for e in entries or []:
         if _entry_row_kind(e) != "overflow":
@@ -644,9 +787,152 @@ def _resolve_overflow_shards(entries: list[dict], base_nb: str) -> list[str]:
         nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
         if nb and nb != base_nb:
             counts[nb] = counts.get(nb, 0) + 1
-    for nb, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
-        if nb not in seen:
-            out.append(nb); seen.add(nb)
+    have = {s["id"] for s in out}
+    for i, (nb, _n) in enumerate(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))):
+        if nb not in have:
+            have.add(nb)
+            out.append({"id": nb, "role": "overflow", "capacity": cap_def, "enabled": True,
+                        "priority": 2 + i, "source": "registry"})
+    return {"ok": True, "error": None, "shards": out, "findings": findings, "declared": False}
+
+
+def _topology_hash(profile: str, shards: list[dict]) -> str:
+    """v1.34.49 (F-09): hash TẤT ĐỊNH của topology — sha256(json canonical {profile, shards[{capacity,enabled,
+    id,priority,role}]}). Khớp golden references/golden/topology_vectors.json (adopt bundle Codex c98321f0) để
+    GAS 2.21.2l (đợt 50) đối chiếu chéo client↔server."""
+    import hashlib as _hl
+    norm = [{"id": str(s.get("id") or ""), "role": str(s.get("role") or ""),
+             "capacity": int(s.get("capacity") or 0), "enabled": bool(s.get("enabled", True)),
+             "priority": int(s.get("priority") or 0)} for s in (shards or [])]
+    blob = json.dumps({"profile": str(profile or ""), "shards": norm},
+                      ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return _hl.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _topology_stamp(cfg: dict | None, entries: list[dict], profile: str | None = None) -> dict:
+    """v1.34.49 (F-09): stamp dẫn xuất cho manifest/registry-map — {topology_hash, routing_epoch, registry_digest,
+    shard_count}. registry_digest = sha256 các tuple định danh dòng (drive_id, nlm_source_id, nlm_notebook_id,
+    row_kind) đã sort → chứng minh snapshot theo topology/registry NÀO (client-side; server-side = đợt 50)."""
+    import hashlib as _hl
+    prof = profile or _active_profile()
+    base = (os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK or "").strip()
+    topo = _resolve_shard_topology(entries or [], base, cfg=cfg, profile=prof)
+    rows = sorted((str(e.get("drive_id") or e.get("gdoc_id") or ""), str(e.get("nlm_source_id") or ""),
+                   str(e.get("nlm_notebook_id") or ""), str(e.get("row_kind") or ""))
+                  for e in (entries or []))
+    dig = _hl.sha256(json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return {"topology_hash": _topology_hash(prof, topo.get("shards") or []),
+            "topology_ok": topo.get("ok"), "shard_count": len(topo.get("shards") or []),
+            "routing_epoch": int((cfg or {}).get("routingEpoch") or 0),
+            "registry_digest": dig}
+
+
+def _shard_row_kind(nb: str, topo: dict) -> str | None:
+    """v1.34.49 (F-06): row_kind SUY TỪ TOPOLOGY cho dòng corpus theo notebook chứa nguồn — primary→'own',
+    overflow (declared/env/registry-observed)→'overflow', ngoài topology→None (caller lộ UNKNOWN_NOTEBOOK,
+    KHÔNG đoán). KHÔNG áp cho row_kind bảo hộ (ref/thuong) — caller phải giữ nguyên các kind đó."""
+    nb = (nb or "").strip()
+    if not nb:
+        return None
+    for s in (topo or {}).get("shards") or []:
+        if s.get("id") == nb:
+            return "own" if s.get("role") == "primary" else "overflow"
+    return None
+
+
+_ROW_KIND_PROTECTED = ("ref", "thuong")   # kind NGHIỆP VỤ — không suy từ topology, không bao giờ clobber
+
+
+def _topology_row_kind_findings(entries: list[dict], topo: dict) -> list[dict]:
+    """v1.34.49 (F-06 doctor, PURE): bất biến `notebook==primary ⇔ row_kind∈{own,''}` và `notebook∈overflow ⇔
+    row_kind=='overflow'` cho dòng ĐÃ có nlm_notebook_id. Bỏ qua kind bảo hộ (ref/thuong) + dòng chưa lên NLM.
+    Trả findings [{drive_id, notebook_id, row_kind, finding}] — REPORT-ONLY (sửa: nlm-reconcile --apply / reg_upsert)."""
+    out: list[dict] = []
+    for e in entries or []:
+        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if not nb:
+            continue
+        rk = str(e.get("row_kind") or "").strip().lower()
+        if rk in _ROW_KIND_PROTECTED:
+            continue
+        kind = _shard_row_kind(nb, topo)
+        did = str(e.get("drive_id") or e.get("gdoc_id") or "")
+        if kind is None:
+            out.append({"drive_id": did, "notebook_id": nb, "row_kind": rk,
+                        "finding": "UNKNOWN_NOTEBOOK_NOT_IN_TOPOLOGY"})
+        elif kind == "own" and rk == "overflow":
+            out.append({"drive_id": did, "notebook_id": nb, "row_kind": rk,
+                        "finding": "PRIMARY_ROW_MARKED_OVERFLOW"})
+        elif kind == "overflow" and rk != "overflow":
+            out.append({"drive_id": did, "notebook_id": nb, "row_kind": rk,
+                        "finding": "OVERFLOW_ROW_NOT_MARKED_OVERFLOW"})
+    return out
+
+
+def _live_source_count(nc, notebook_id: str, heal_state: dict | None = None) -> tuple:
+    """v1.34.49 (F-05/D4, dùng CHUNG): đọc source_count LIVE fail-closed — notebook_get {ok:False} KHÔNG BAO GIỜ
+    thành 0 (mẫu đúng slot-audit M2 v1.33.35). Đường GHI/ROUTE: ok=False → self-heal load_creds ĐÚNG 1 LẦN/run
+    (doctrine v1.34.43; heal_state={'healed':bool} chia sẻ cả run) → retry → vẫn fail → caller DỪNG rc=2, ZERO
+    side-effect. Trả (count|None, ok, error)."""
+    hs = heal_state if isinstance(heal_state, dict) else {"healed": True}   # không heal_state → không tự heal
+    for _attempt in (0, 1):
+        try:
+            r = nc.notebook_get(notebook_id)
+        except Exception as e:  # noqa: BLE001 — lỗi vận chuyển = read-fail, KHÔNG phải 0 nguồn
+            r = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+        if r.get("ok"):
+            return int(r.get("source_count") or 0), True, ""
+        if hs.get("healed"):
+            return None, False, str(r.get("error") or "notebook_get !ok") + \
+                (" — 🔴 AUTH: `nlm login`" if r.get("auth_hint") else "")
+        hs["healed"] = True
+        try:
+            load_creds(None, None)
+        except (SystemExit, Exception):  # noqa: BLE001 — heal best-effort; vòng retry quyết định
+            pass
+    return None, False, "notebook_get !ok"
+
+
+def _nlm_add_capacity_error(err) -> bool:
+    """v1.34.49 (F-02 drift, PURE): lỗi source_add có phải SHARD ĐẦY (→ được reroute shard kế cùng run, KHÔNG
+    upload lại) hay không. QUOTA account/lỗi khác → False (dừng/đếm FAIL như cũ — reroute không cứu được)."""
+    s = str(err or "").lower()
+    if not s or "quota" in s:
+        return False
+    return any(k in s for k in ("full", "limit", "capacity", "maximum number of sources", "max sources"))
+
+
+def _resolve_overflow_shards(entries: list[dict], base_nb: str, cfg: dict | None = None) -> list[str]:
+    """v1.34.47 (giữ nguyên hợp đồng list[str] cho 47 call-site ĐỌC/AUDIT/QUERY) — v1.34.49: wrapper UNION trên
+    `_resolve_shard_topology` (D5): declared shards[] (kể cả disabled — sweep nhìn thấy để lộ lệch) + env +
+    registry-observed. Đường ĐỌC dùng union AN TOÀN (không bỏ sót nguồn kể cả khi config conflict — conflict
+    được resolver ghi findings, doctor/route mới fail-closed); thứ tự: declared theo priority → env → registry."""
+    base_nb = (base_nb or "").strip()
+    topo = _resolve_shard_topology(entries, base_nb, cfg=cfg)
+    out: list[str] = []
+    seen: set[str] = set()
+    for s in topo.get("shards") or []:
+        sid = s.get("id") or ""
+        if sid and sid != base_nb and sid not in seen:
+            seen.add(sid); out.append(sid)
+    # conflict (ok=False) có thể chặn materialize alias/env trong resolver → bù trực tiếp cho sweep-safety.
+    env_ovf = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
+    if env_ovf and env_ovf != base_nb and env_ovf != "TL_OVERFLOW_NOTEBOOK_ID" and env_ovf not in seen:
+        seen.add(env_ovf); out.append(env_ovf)
+    try:   # alias config (đường đọc nới hơn đường ghi): sweep cả overflowNotebookId dù lệch declared
+        _cfg2 = cfg if cfg is not None else _read_config_record(None)[1]
+        _prof = (_profiles_from_config(_cfg2 or {}) or {}).get(_active_profile() or DEFAULT_PROFILE) or {}
+        _al = str(_prof.get("overflowNotebookId") or "").strip()
+        if _al and _al != base_nb and "-" in _al and _al not in seen:
+            seen.add(_al); out.append(_al)
+    except Exception:  # noqa: BLE001
+        pass
+    for e in entries or []:
+        if _entry_row_kind(e) != "overflow":
+            continue
+        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if nb and nb != base_nb and nb not in seen:
+            seen.add(nb); out.append(nb)
     return out
 
 
@@ -703,9 +989,15 @@ def cmd_preflight(a) -> int:
     live_cnt = None
     if slots.get("full"):
         try:
-            live_cnt = _imp("nlm_cli").notebook_get(nb).get("source_count")
+            # v1.34.49 (F-05): đọc CHECKED — auth-fail hết bị hiểu thành live=0 (advisory nhưng người đọc tin số này)
+            _pc, _pok, _perr = _live_source_count(_imp("nlm_cli"), nb, None)
+            if _pok:
+                live_cnt = _pc
+            else:
+                r["live_read_failed"] = True
+                r["live_note"] = _perr
         except Exception:
-            pass
+            r["live_read_failed"] = True
     r["tl_dedup_loose"] = tl_dups
     r["live_source_count"] = live_cnt
     if overflow_auto:
@@ -743,6 +1035,27 @@ def cmd_push_overflow(a) -> int:
     nb = getattr(a, "notebook_id", None) or os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or ""
     if not (a.drive_id and a.source_id and nb):
         print("[tl] push-overflow cần --drive-id --source-id (và overflow notebook trong config hoặc --notebook-id)", file=sys.stderr); return 2
+    # v1.34.49 (minor handoff #2): validate nb ∈ shard overflow TOPOLOGY (declared/env/registry) TRƯỚC gate/ghi —
+    # chặn ghi row_kind='overflow' cho notebook lạ/nhầm id (registry trỏ notebook ngoài cấu hình = drift khó lần).
+    # Bootstrap (topology CHƯA biết shard overflow nào) → cho qua + cảnh báo (không deadlock lần push đầu).
+    if not getattr(a, "force_unsafe", False):
+        try:
+            _ent_po = _manifest_entries(refresh=False)
+        except Exception:  # noqa: BLE001 — chưa boot → validate theo config/env
+            _ent_po = []
+        _base_po = (os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK or "").strip()
+        _topo_po = _resolve_shard_topology(_ent_po, _base_po)
+        _known_po = {str(s.get("id") or "") for s in (_topo_po.get("shards") or [])} - {_base_po, ""}
+        if _known_po and nb not in _known_po:
+            print(json.dumps({"ok": False, "error": "TARGET_NOT_IN_TOPOLOGY", "notebook": nb,
+                              "known_overflow": sorted(_known_po)[:6],
+                              "note": "--notebook-id không thuộc shard overflow topology (config shards[]/env/"
+                                      "registry) — chặn ghi nhãn overflow nhầm notebook. Cố ý: --force-unsafe."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        if not _known_po:
+            print("[tl] ⚠ push-overflow: topology chưa biết shard overflow nào (bootstrap) — tin --notebook-id/config như cũ.",
+                  file=sys.stderr)
     g = _gas()
     # v1.29.2 (AUDIT B1 #2): gate + journal + verified-write (trước reg_bulk TRẦN). Sửa luôn rc: trước đòi
     # `patched>0` → chạy LẠI idempotent (giá trị đã đúng, patched=0) bị rc=1 SAI; doctrine v1.28.6: verified
@@ -881,14 +1194,21 @@ def cmd_overflow_resolve(a) -> int:
     # LIVE physical cross-check (nlm-get) — registry có thể TỤT SAU vật lý (nguồn add thẳng chưa ghi registry).
     # MAX(registry, physical) làm slot hiệu lực → KHÔNG báo "còn chỗ" giả khi vật lý đã vượt cap (vd base 279 reg / 315 live).
     base_phys = ov_phys = None
+    _live_read_failed_or = False
     if not getattr(a, "no_live", False):
         try:
             nc = _imp("nlm_cli")
-            base_phys = int(nc.notebook_get(base_nb).get("source_count") or 0)
+            # v1.34.49 (F-05): đọc CHECKED — {ok:False} KHÔNG thành 0 vật lý (0 giả che gap + shard đầy thành 'trống')
+            _bc, _bok, _ = _live_source_count(nc, base_nb, None)
+            base_phys = _bc if _bok else None
+            _live_read_failed_or = _live_read_failed_or or (not _bok)
             if overflow:
-                ov_phys = int(nc.notebook_get(overflow).get("source_count") or 0)
+                _oc, _ook, _ = _live_source_count(nc, overflow, None)
+                ov_phys = _oc if _ook else None
+                _live_read_failed_or = _live_read_failed_or or (not _ook)
         except Exception:
             base_phys = ov_phys = None
+            _live_read_failed_or = True
     st = _overflow_status(base_reg, base_phys, overflow, ov_reg, ov_phys)
     out = {"ok": True, "gate": "overflow-resolve", "base_notebook": base_nb,
            "base_used": st["base_used"], "base_registry": base_reg, "base_physical": base_phys,
@@ -897,6 +1217,9 @@ def cmd_overflow_resolve(a) -> int:
            "cap": NLM_SLOT_CAP, "route": st["route"], "decision_flag": st["flag"], "reason": st["reason"],
            "used_basis": "max(registry, physical-nlm-get)", "registry_live_gap": st["registry_live_gap"],
            "note": "ADVISORY — KHÔNG tạo notebook. Chỉ `notebook create` khi MỌI shard đầy LIVE + người dùng duyệt."}
+    if _live_read_failed_or:
+        out["live_read_failed"] = True
+        out["live_note"] = "KHÔNG đọc được live source_count (auth/mạng) — route chỉ dựa registry, KHÔNG suy 0 vật lý (F-05). `nlm login` rồi chạy lại để đối chiếu LIVE."
     if st["registry_live_gap"]:
         out["warning"] = "REGISTRY_BEHIND_LIVE: có nguồn vật lý CHƯA đăng ký registry → chạy `tl nlm-reconcile <notebook> --apply` để khớp LIVE TRƯỚC khi nạp thêm."
     if getattr(a, "json", False):
@@ -1041,21 +1364,39 @@ def cmd_nlm_add(a) -> int:
     # link lỗi → cảnh báo, KHÔNG fail add (nguồn đã lên NLM thật).
     if getattr(a, "drive_id", None) and r.get("source_id"):
         try:
-            _row_exists = any(str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)
-                              for e in _manifest_entries(refresh=True))
+            _ents_na = _manifest_entries(refresh=True)
+            _row_e = next((e for e in _ents_na
+                           if str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)), None)
+            _row_exists = _row_e is not None
         except Exception:
-            _row_exists = False
+            _ents_na, _row_e, _row_exists = [], None, False
         if _row_exists:
             try:
                 load_creds(getattr(a, "config", None), getattr(a, "profile", None))
                 _g = _gas()
                 _rid = _apply_journal_start("nlm-add-link", {"drive_id": a.drive_id, "source_id": r.get("source_id")})
-                _v = _journaled_reg_write(_rid, _g, [{"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
-                                                      "nlm_notebook_id": nb, "nlm_status": "pushed"}],
-                                          "nlm_source_id,nlm_notebook_id,nlm_status",
-                                          before_by_key={a.drive_id: {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}})
+                # v1.34.49 (F-06): link nay ghi CẢ row_kind suy từ topology khi nb là shard overflow (trước đây
+                # cố ý bỏ → recovery add-tay vào VBQPPL-2 để row_kind=own, sweep mất dấu shard). Kind bảo hộ
+                # (ref/thuong) giữ nguyên; corpus vẫn không đụng (việc của pipeline ingest).
+                _it_na = {"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
+                          "nlm_notebook_id": nb, "nlm_status": "pushed"}
+                _cols_na = "nlm_source_id,nlm_notebook_id,nlm_status"
+                _bef_na = {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}
+                try:
+                    _topo_na = _resolve_shard_topology(_ents_na, (os.environ.get("TL_NOTEBOOK_ID")
+                                                                  or NLM_BASE_NOTEBOOK or "").strip())
+                except Exception:  # noqa: BLE001
+                    _topo_na = {"shards": []}
+                _cur_rk_na = str((_row_e or {}).get("row_kind") or "").strip().lower()
+                if _shard_row_kind(nb, _topo_na) == "overflow" and _cur_rk_na not in _ROW_KIND_PROTECTED:
+                    _it_na["row_kind"] = "overflow"
+                    _cols_na += ",row_kind"
+                    _bef_na["row_kind"] = _cur_rk_na
+                _v = _journaled_reg_write(_rid, _g, [_it_na], _cols_na,
+                                          before_by_key={a.drive_id: _bef_na})
                 _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"OK": 1}})
-                print(json.dumps({"reg_link": {"ok": bool(_v.get("verified")), "journal": _rid}}, ensure_ascii=False), file=sys.stderr)
+                print(json.dumps({"reg_link": {"ok": bool(_v.get("verified")), "journal": _rid,
+                                               "row_kind": _it_na.get("row_kind")}}, ensure_ascii=False), file=sys.stderr)
             except Exception as _e:  # noqa: BLE001
                 print(f"[tl] nlm-add: add OK nhưng reg_link lỗi ({type(_e).__name__}: {_e}) → `tl nlm-reconcile --apply` để bắc cầu.", file=sys.stderr)
         else:

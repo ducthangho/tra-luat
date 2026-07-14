@@ -16,7 +16,7 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.48 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.49 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 
@@ -179,7 +179,7 @@ xóa→`nlm source delete`, sync→`nlm source sync`. MCP CHỈ fallback khi thi
 (hoặc studio nếu CLI chưa hỗ trợ). Lợi ích then chốt: **pipeline ingest chạy trọn trong tl
 (không gãy bởi round-trip MCP)** + không tràn token/timeout.
 
-**Sharding VBQPPL (cap 300/notebook):** corpus VBQPPL trải NHIỀU notebook (shard); mỗi dòng registry mang `nlm_notebook_id` + `row_kind ∈ {own,ref,overflow}`. Nạp VBQPPL mới ⇒ `tl preflight <số hiệu>`: shard chính đầy → `overflow_route` sang shard phụ (`config.profiles.vbqppl.overflowNotebookId`; `shards[]` forward-compatible). Sau `source_add` vào shard phụ ⇒ `tl push-overflow --drive-id --source-id` (set `row_kind=overflow`). Tra cứu xuyên shard: registry/manifest hợp nhất + **`tl nlm-cross "<câu hỏi>"`** (CLI `nlm cross query`, mặc định base+overflow; thay MCP `cross_notebook_query`). KHÔNG `notebook_create` mới trừ khi tất cả shard đầy + người dùng duyệt.
+**Sharding VBQPPL (cap mặc định 300/notebook — cấu hình được):** corpus VBQPPL trải NHIỀU notebook (shard); mỗi dòng registry mang `nlm_notebook_id` + `row_kind ∈ {own,ref,overflow}`. **(v1.34.49) TOPOLOGY = declared+observed hợp nhất, MỘT resolver cho mọi lệnh**: `config.profiles.vbqppl.shards[]` (dict `{id,role,capacity,enabled,priority}` hoặc list id legacy) là Ý ĐỊNH khai báo; registry+env là QUAN SÁT; alias (`overflowNotebookId`) lệch declared → lệnh ghi/route DỪNG fail-closed `TOPOLOGY_CONFIG_CONFLICT`. Capacity per-shard: `shards[].capacity` > env `TL_NLM_SOURCE_CAP` > 300; live count là ground truth. Nạp VBQPPL mới ⇒ `tl preflight <số hiệu>`: shard chính đầy → `overflow_route` shard phụ. Batch `ingest-missing` tự **failover shard kế TRONG CÙNG RUN** khi shard đầy giữa chừng (không upload lại); CẠN mọi shard → `partial=true + remaining + resume_command + rc=2` (KHÔNG còn "ok" giả — kể cả blocked upfront). Đọc slot LIVE fail-closed: auth-fail ⇒ `LIVE_READ_FAILED` DỪNG trước side-effect, KHÔNG coi là 0 nguồn. Sau `source_add` tay vào shard phụ ⇒ `tl push-overflow --drive-id --source-id` (set `row_kind=overflow`; validate đích ∈ topology). Recovery `nlm-reconcile --apply`/`nlm-add` nay tự ghi `row_kind` theo topology (kind `ref`/`thuong` không bao giờ bị clobber); doctor kiểm bất biến notebook↔row_kind (report-only). Tra cứu xuyên shard: registry/manifest hợp nhất + **`tl nlm-cross "<câu hỏi>"`** (mặc định TOÀN topology enabled; thay MCP `cross_notebook_query`). KHÔNG `notebook_create` mới trừ khi tất cả shard đầy + người dùng duyệt.
 **(L4/L5 26/6) preflight đã cứng hóa:** `tl preflight` nay (a) **dedup phía tl lỏng-năm** — cảnh báo `⚠DUP-TL` khi số hiệu ĐÃ trên NLM dù KHÁC TÊN (vd `72/NQ-TW` ≡ `72/2025/NQ-TW` — đừng push lại kẻo nhân bản trong notebook đầy); (b) **verify-LIVE slot** qua `nlm-get` khi webapp báo FULL (registry từng đếm cả `removed_*` → used=322>300 ảo). **Luôn tin `nlm-get` LIVE hơn registry estimate trước khi chốt FULL/overflow/delete.**
 **(L6) Notebook ĐẦY thật (LIVE 300/300) → nạp mới cần GIẢI PHÓNG slot hoặc OVERFLOW.** Ứng viên giải phóng an toàn = **bản GỐC đã có VBHN thay thế còn nằm NLM** (vd Luật 45/2019←VBHN 18 BLLĐ; 84/2015←VBHN 14/2024; 69/2020←VBHN 8/BNV) — dùng `tl reg-query --no-... ` + `tl relation-check` để lập danh sách. `source_delete` **BẤT KHẢ NGHỊCH** ⇒ LUÔN lập danh sách + **chờ người dùng xác nhận** trước khi gỡ; ưu tiên overflow nếu còn shard.
 

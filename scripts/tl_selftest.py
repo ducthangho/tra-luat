@@ -5182,7 +5182,8 @@ def run() -> int:
                     "sources": [{"id": "s71a", "title": "NQ_72", "type": "drive"},
                                 {"id": "sX71", "title": "LA_LIVE_CHUA_DANG_KY", "url": "https://docs.google.com/d/dY71/edit"}]}
         def notebook_get(self, nb, **kw):
-            return {"source_count": 315 if nb == "NB1" else 100}
+            # v1.34.49: contract thật LUÔN có 'ok' (F-05 checked-read đòi hỏi — fake cũ thiếu ok bị coi là read-fail)
+            return {"ok": True, "source_count": 315 if nb == "NB1" else 100}
     class _FkGas71:
         def get(self, action, **kw):
             assert action == "nlm_preflight"
@@ -5191,7 +5192,7 @@ def run() -> int:
                     "overflow_route": {"notebookId": "NB2"}, "dedup": {}, "note": "n71"}
     _keys71 = ("_imp", "apply_profile_offline", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
                "_gas", "_apply_gate", "_apply_journal_start", "_journaled_reg_write", "_reg_before_from_manifest",
-               "_slot_count_all_shards")
+               "_slot_count_all_shards", "_read_config_record")   # v1.34.49: topology đọc config-of-record → hermetic
     _sav71 = {k: getattr(_TL_MODULE, k) for k in _keys71}
     _env71 = {k: os.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID")}
     def _cap71(fn, ns):
@@ -5212,6 +5213,7 @@ def run() -> int:
                                                            "reg_bulk": {"ok": True, "patched": 1, "missed": []}}
         _TL_MODULE._reg_before_from_manifest = lambda items, cols: {}
         _TL_MODULE._slot_count_all_shards = lambda entries, base_nb=None: {"NB1": 300, "NB2": 100}
+        _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
         os.environ["TL_NOTEBOOK_ID"] = "NB1"; os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
         # (1) nlm-list --json: shape {ok,count,sources} nguyên vẹn qua _emit_json_payload
         _rc1, _o1 = _cap71(_TL_MODULE.cmd_nlm_list, argparse.Namespace(notebook_id="NB1", no_skip_freshness=False,
@@ -7669,7 +7671,8 @@ def run() -> int:
     # (b) nlm-reconcile --all-notebooks: parser + quét base+overflow gộp per_notebook; apply bị chặn DRY-only
     _ns96 = build_parser().parse_args(["nlm-reconcile", "--all-notebooks", "--json"])
     cases.append(("r96_parser_reconcile_all_notebooks", getattr(_ns96, "all_notebooks", False) is True))
-    _keys96 = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries")
+    _keys96 = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries",
+               "_read_config_record")   # v1.34.49: resolver đọc config-of-record → hermetic
     _sav96 = {k: getattr(_TL_MODULE, k) for k in _keys96}
     _env96 = os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")
     _realimp96 = _TL_MODULE._imp
@@ -7683,6 +7686,7 @@ def run() -> int:
         _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or "base96"), None)
         _TL_MODULE._imp = lambda name: (_FakeNC96 if name == "nlm_cli" else _realimp96(name))
         _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
         def _mk96(**kw):
             base = dict(config=None, profile=None, notebook_id=None, apply=False, clear_stale=False,
                         force_unsafe=False, refresh=True, json=True, out=None, all_notebooks=True)
@@ -8713,13 +8717,16 @@ def run() -> int:
         {"nlm_notebook_id": "", "row_kind": "own", "nlm_source_id": "s5", "nlm_status": "pushed"},
     ]
     _prev_ov109 = os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
+    _sav_rcr109 = _TL_MODULE._read_config_record   # v1.34.49: wrapper nay đọc config-of-record → test phải HERMETIC
     try:
+        _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
         _rs_blank = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)     # config trống → registry vẫn thấy shard
         os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _ov2
         _rs_env = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)       # env trước, dedup
         os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = "TL_OVERFLOW_NOTEBOOK_ID"       # placeholder → bỏ
         _rs_ph = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)
     finally:
+        _TL_MODULE._read_config_record = _sav_rcr109
         (os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None) if _prev_ov109 is None
          else os.environ.__setitem__("TL_OVERFLOW_NOTEBOOK_ID", _prev_ov109))
     cases.append(("r109_resolve_overflow_shards_env_and_registry",
@@ -8736,12 +8743,14 @@ def run() -> int:
             return {"ok": True, "decision": "REVIEW", "slots": {"used": 300, "cap": 300, "full": True},
                     "overflow_route": {"notebookId": _ov2}}
     class _FkNC109full:
-        def notebook_get(self, nb, **kw): return {"source_count": 300}
+        def notebook_get(self, nb, **kw): return {"ok": True, "source_count": 300}   # v1.34.49: contract có 'ok'
     class _FkNC109room:
-        def notebook_get(self, nb, **kw): return {"source_count": 100}
+        def notebook_get(self, nb, **kw): return {"ok": True, "source_count": 100}   # v1.34.49: contract có 'ok'
     _sav_imp109, _sav_me109 = _TL_MODULE._imp, _TL_MODULE._manifest_entries
+    _sav_rcr109b = _TL_MODULE._read_config_record   # v1.34.49: _ingest_target nay resolve topology → hermetic
     _env_t109 = {k: os.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID")}
     try:
+        _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
         _TL_MODULE._manifest_entries = lambda refresh=False: _ent109
         os.environ["TL_NOTEBOOK_ID"] = _base109
         os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _ov2
@@ -8751,6 +8760,7 @@ def run() -> int:
         _tgt_ovf, _meta_ovf = _TL_MODULE._ingest_target(_FkGas109(), "1/2020/QH14", "x")
     finally:
         _TL_MODULE._imp, _TL_MODULE._manifest_entries = _sav_imp109, _sav_me109
+        _TL_MODULE._read_config_record = _sav_rcr109b
         for _k, _v in _env_t109.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     cases.append(("r109_ingest_target_blocked_when_all_full",
@@ -8759,6 +8769,486 @@ def run() -> int:
                   (not _rel107._portable_release_component("a/b"))
                   and (not _rel107._portable_release_component("a\\b"))
                   and _rel107._portable_release_component("tra-luat")))
+    # ═══ v1.34.49 — r110_*: topology declared+observed (D5) + live-count fail-closed/self-heal (F-05/D4) + allocator
+    # đa-shard ingest-missing failover-trong-run + partial trung thực (F-02/D3) + row_kind theo topology (F-06) +
+    # capacity policy (F-07/D6) + validator/stamp (F-09) + push-overflow validate (minor handoff). TDD RED trước —
+    # bundle Codex c98321f0 làm SPEC, code VIẾT LẠI trên canonical (ke-hoach-overflow-sharding 2026-07-15, D1-D7). ═══
+    import io as _io110, contextlib as _ctx110, tempfile as _tf110
+    from pathlib import Path as _P110
+
+    def _t110(name, fn):
+        try:
+            cases.append((name, bool(fn())))
+        except Exception:
+            if os.environ.get("TL_SELFTEST_DEBUG"):
+                import traceback as _tb110; _tb110.print_exc()
+            cases.append((name, False))
+
+    _b110 = "743ed200-aaaa-bbbb-cccc-000000000001"
+    _v1_110 = "11111111-1111-4111-8111-111111111111"
+    _v2_110 = "22222222-2222-4222-8222-222222222222"
+    _v3_110 = "33333333-3333-4333-8333-333333333333"
+    _cfg_vec110 = {"profiles": {"vbqppl": {"notebookId": _v1_110, "overflowNotebookId": _v2_110, "shards": [
+        {"id": _v1_110, "role": "primary", "capacity": 300, "enabled": True, "priority": 1},
+        {"id": _v2_110, "role": "overflow", "capacity": 175, "enabled": False, "priority": 2},
+        {"id": _v3_110, "role": "overflow", "capacity": 450, "enabled": True, "priority": 3}]}}}
+
+    def _env110(pairs):
+        sav = {k: os.environ.get(k) for k in pairs}
+        for k, v in pairs.items():
+            (os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, str(v)))
+        return sav
+
+    def _env110_restore(sav):
+        for k, v in sav.items():
+            (os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v))
+
+    # (1) declared shards[]: enabled filter + capacity per-shard + thứ tự priority + role.
+    def _c110_declared():
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_NLM_SOURCE_CAP": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=_cfg_vec110, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        sh = topo.get("shards") or []
+        en = [s["id"] for s in sh if s.get("enabled")]
+        caps = {s["id"]: s.get("capacity") for s in sh}
+        roles = {s["id"]: s.get("role") for s in sh}
+        return (topo.get("ok") is True and en == [_v1_110, _v3_110]
+                and caps.get(_v1_110) == 300 and caps.get(_v2_110) == 175 and caps.get(_v3_110) == 450
+                and roles.get(_v1_110) == "primary" and roles.get(_v3_110) == "overflow"
+                and [s["id"] for s in sh[:3]] == [_v1_110, _v2_110, _v3_110])
+    _t110("r110_topology_declared_enabled_capacity_order", _c110_declared)
+
+    # (2) topology_hash khớp GOLDEN VECTOR (references/golden/topology_vectors.json — adopt từ bundle Codex,
+    # tương thích chéo cho GAS 2.21.2l đợt 50).
+    def _c110_hash():
+        _gv = json.loads((_P110(_TL_MODULE.__file__).resolve().parent.parent / "references" / "golden"
+                          / "topology_vectors.json").read_text(encoding="utf-8"))
+        vec = _gv["vectors"][0]
+        h = _TL_MODULE._topology_hash(vec["profile"], vec["shards"])
+        return h == vec["topology_hash"] and len(h) == 64
+    _t110("r110_topology_hash_matches_golden_vector", _c110_hash)
+
+    # (3) alias legacy LỆCH declared → fail-closed (ok=False) trên đường ROUTE; wrapper ĐỌC vẫn trả UNION (sweep-safe).
+    def _c110_conflict():
+        cfgc = {"profiles": {"vbqppl": {"notebookId": _v1_110, "overflowNotebookId": "rogue-ovf-110",
+                                        "shards": [{"id": _v1_110, "role": "primary"},
+                                                   {"id": _v2_110, "role": "overflow"}]}}}
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=cfgc, profile="vbqppl")
+            union = _TL_MODULE._resolve_overflow_shards([], _v1_110, cfg=cfgc)
+        finally:
+            _env110_restore(_sv)
+        return (topo.get("ok") is False and "TOPOLOGY_CONFIG_CONFLICT" in str(topo.get("error"))
+                and _v2_110 in union and "rogue-ovf-110" in union)
+    _t110("r110_topology_alias_conflict_fail_closed", _c110_conflict)
+
+    # (4) tương thích schema CŨ: shards = list[str] — CẢ hai biến thể: (a) chỉ overflow ids; (b) DẠNG CONFIG LIVE
+    # THẬT ["<base>", "<overflow>"] (phần tử trùng notebookId = PRIMARY, không nhân đôi base thành overflow).
+    def _c110_legacy():
+        cfgl = {"profiles": {"vbqppl": {"notebookId": _v1_110, "overflowNotebookId": "nb-legacy-2",
+                                        "shards": ["nb-legacy-2", "nb-legacy-3"]}}}
+        cfgl2 = {"profiles": {"vbqppl": {"notebookId": _v1_110, "overflowNotebookId": _v2_110,
+                                         "shards": [_v1_110, _v2_110]}}}   # dạng tra_luat_config.v2.json live
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_NLM_SOURCE_CAP": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=cfgl, profile="vbqppl")
+            topo2 = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=cfgl2, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        ov = [s for s in (topo.get("shards") or []) if s.get("role") != "primary" and s.get("enabled")]
+        sh2 = topo2.get("shards") or []
+        roles2 = [(s["id"], s.get("role")) for s in sh2]
+        return (topo.get("ok") is True and [s["id"] for s in ov] == ["nb-legacy-2", "nb-legacy-3"]
+                and all(s.get("capacity") == 300 for s in ov)
+                and topo2.get("ok") is True and len(sh2) == 2
+                and roles2 == [(_v1_110, "primary"), (_v2_110, "overflow")])
+    _t110("r110_topology_legacy_string_shards_compat", _c110_legacy)
+
+    # (5) declared VẮNG → observed (env+registry) như v1.34.47; declared CÓ → shard lạ trong registry KHÔNG vào
+    # route (enabled), lộ qua findings UNDECLARED; wrapper đọc trả union cả hai chiều.
+    def _c110_observed():
+        entR = [{"nlm_notebook_id": "ov-reg-110", "row_kind": "overflow", "nlm_source_id": "s1"}]
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            tA = _TL_MODULE._resolve_shard_topology(entR, _b110, cfg={}, profile="vbqppl")
+            tB = _TL_MODULE._resolve_shard_topology(entR, _v1_110, cfg={"profiles": {"vbqppl": {
+                "notebookId": _v1_110, "shards": [{"id": _v1_110, "role": "primary"},
+                                                  {"id": _v2_110, "role": "overflow"}]}}}, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        a_ids = [s["id"] for s in (tA.get("shards") or []) if s.get("enabled")]
+        b_en = [s["id"] for s in (tB.get("shards") or []) if s.get("enabled")]
+        return (tA.get("ok") is True and "ov-reg-110" in a_ids
+                and tB.get("ok") is True and "ov-reg-110" not in b_en
+                and any("UNDECLARED" in str(f) for f in (tB.get("findings") or [])))
+    _t110("r110_topology_observed_vs_declared_findings", _c110_observed)
+
+    # (6) F-05/D4: đọc live-count kiểm .ok — fail → self-heal load_creds ĐÚNG 1 LẦN → vẫn fail → (None, False).
+    def _c110_livecount():
+        class _NCok:
+            @staticmethod
+            def notebook_get(nb, **kw): return {"ok": True, "source_count": 123}
+        class _NCbad:
+            @staticmethod
+            def notebook_get(nb, **kw): return {"ok": False, "error": "AUTH_EXPIRED", "auth_hint": True, "source_count": 0}
+        class _NCheal:
+            def __init__(self): self.n = 0
+            def notebook_get(self, nb, **kw):
+                self.n += 1
+                return ({"ok": False, "error": "AUTH_EXPIRED", "source_count": 0} if self.n == 1
+                        else {"ok": True, "source_count": 7})
+        _sav_lc = _TL_MODULE.load_creds
+        _calls = []
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: _calls.append(1)
+            n1, ok1, _ = _TL_MODULE._live_source_count(_NCok(), "nb", {"healed": False})
+            hs2 = {"healed": False}
+            n2, ok2, e2 = _TL_MODULE._live_source_count(_NCbad(), "nb", hs2)
+            hs3 = {"healed": False}
+            n3, ok3, _ = _TL_MODULE._live_source_count(_NCheal(), "nb", hs3)
+            hs4 = {"healed": True}   # đã heal rồi → KHÔNG gọi load_creds lần 2
+            _pre = len(_calls)
+            n4, ok4, _ = _TL_MODULE._live_source_count(_NCbad(), "nb", hs4)
+        finally:
+            _TL_MODULE.load_creds = _sav_lc
+        return (ok1 is True and n1 == 123
+                and ok2 is False and n2 is None and "AUTH" in str(e2)
+                and ok3 is True and n3 == 7 and hs3.get("healed") is True and _calls
+                and ok4 is False and len(_calls) == _pre)
+    _t110("r110_live_count_fail_closed_and_heal", _c110_livecount)
+
+    # (7) F-07/D6: precedence capacity — declared > env TL_NLM_SOURCE_CAP > default 300.
+    def _c110_cap():
+        cfgc = {"profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [
+            {"id": _v1_110, "role": "primary"},
+            {"id": _v2_110, "role": "overflow", "capacity": 175}]}}}
+        _sv = _env110({"TL_NLM_SOURCE_CAP": "50", "TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            t1 = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=cfgc, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        _sv2 = _env110({"TL_NLM_SOURCE_CAP": None, "TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            t2 = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg=cfgc, profile="vbqppl")
+        finally:
+            _env110_restore(_sv2)
+        c1 = {s["id"]: s.get("capacity") for s in (t1.get("shards") or [])}
+        c2 = {s["id"]: s.get("capacity") for s in (t2.get("shards") or [])}
+        return (c1.get(_v2_110) == 175 and c1.get(_v1_110) == 50
+                and c2.get(_v1_110) == 300 and c2.get(_v2_110) == 175)
+    _t110("r110_capacity_env_and_declared_precedence", _c110_cap)
+
+    # (8) phân loại lỗi source_add: SHARD ĐẦY (full/limit/capacity) → reroute được; QUOTA account/lỗi khác → KHÔNG.
+    def _c110_caperr():
+        f = _TL_MODULE._nlm_add_capacity_error
+        return (f("Notebook is full (300 sources max)") is True
+                and f("SOURCE LIMIT reached") is True and f("capacity exceeded") is True
+                and f("Daily quota exceeded for account") is False
+                and f("network timeout") is False and f("") is False and f(None) is False)
+    _t110("r110_nlm_add_capacity_error_classifier", _c110_caperr)
+
+    # ── runner dùng chung cho cmd_ingest_missing (F-02/D3) ──
+    def _run_im110(counts, n_targets, add_script=None, cap_env=None):
+        class _NC110:
+            def __init__(self):
+                self.adds = []
+            def notebook_get(self, nb, **kw):
+                v = counts.get(nb)
+                if v is None:
+                    return {"ok": False, "error": "AUTH_EXPIRED", "auth_hint": True, "source_count": 0}
+                return {"ok": True, "source_count": int(v)}
+            def source_list(self, nb, **kw): return {"ok": True, "sources": []}
+            def source_add(self, nb, drive_id=None, title=None, wait=True, **kw):
+                self.adds.append((nb, drive_id))
+                r = (add_script or {}).get((nb, drive_id))
+                if r is not None:
+                    return dict(r)
+                return {"ok": True, "source_id": "sid-" + str(drive_id)}
+        _nc = _NC110()
+        targets = [{"drive_id": f"d{i}", "sohieu": f"{i:02d}-2020-QH14", "name": f"Luat_{i:02d}_x"}
+                   for i in range(1, n_targets + 1)]
+        _reg_items, _lc = [], []
+        _keys = ("apply_profile_offline", "load_creds", "_load_manifest_full", "_manifest_cache_age_seconds",
+                 "_ingest_missing_select", "_apply_gate", "_apply_journal_start", "_journal_append",
+                 "_imp", "_gas", "_journaled_reg_write", "_read_config_record")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _tmp = _tf110.mkdtemp(prefix="tl110_")
+        _sv_env = _env110({"TL_NOTEBOOK_ID": "base110", "TL_OVERFLOW_NOTEBOOK_ID": "ov110",
+                           "TL_NLM_SOURCE_CAP": cap_env, "USERPROFILE": _tmp, "HOME": _tmp,
+                           "TL_PROFILE": None})
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: _lc.append(1)
+            _TL_MODULE._load_manifest_full = lambda refresh=False: {"ok": True, "entries": [], "generatedAt": "t110"}
+            _TL_MODULE._manifest_cache_age_seconds = lambda: 5
+            _TL_MODULE._ingest_missing_select = lambda entries, cat=None: list(targets)
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, {})
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run110"
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_nc if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._gas = lambda: None
+            def _fk_jrw(run_id, g, items, cols, **kw):
+                _reg_items.extend([dict(x) for x in items])
+                return {"verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
+            _TL_MODULE._journaled_reg_write = _fk_jrw
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
+            _ns = argparse.Namespace(config=None, profile=None, apply=True, refresh=False, cat=None, limit=25,
+                                     allow_no_sohieu=False, skip_live_check=False, relink=False,
+                                     retry_failed=False, json=True, out=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                rc = _TL_MODULE.cmd_ingest_missing(_ns)
+            try:
+                out = json.loads(_bo.getvalue() or "{}")
+            except Exception:
+                out = {}
+            return rc, out, _nc.adds, _reg_items, _be.getvalue(), _lc
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv_env)
+
+    # (9) F-02: base còn 1 chỗ + overflow còn chỗ + batch 4 → FAILOVER TRONG-RUN đủ 4/4, rc=0, KHÔNG partial.
+    def _c110_failover():
+        rc, out, adds, regs, _err, _ = _run_im110({"base110": 299, "ov110": 100}, 4)
+        nbs = [nb for nb, _d in adds]
+        ov_regs = [r for r in regs if r.get("nlm_notebook_id") == "ov110"]
+        return (rc == 0 and out.get("ok") is True and not out.get("partial")
+                and len(adds) == 4 and nbs == ["base110", "ov110", "ov110", "ov110"]
+                and int(out.get("OK") or 0) == 4 and int(out.get("remaining") or 0) == 0
+                and all(r.get("row_kind") == "overflow" for r in ov_regs) and len(ov_regs) == 3
+                and all(r.get("row_kind") != "overflow" for r in regs if r.get("nlm_notebook_id") == "base110"))
+    _t110("r110_ingest_missing_failover_in_run", _c110_failover)
+
+    # (10) F-02: MỌI shard cạn giữa batch → partial trung thực: ok=false, partial=true, remaining, resume_command, rc=2.
+    def _c110_partial():
+        rc, out, adds, _regs, _err, _ = _run_im110({"base110": 299, "ov110": 299}, 4)
+        return (rc == 2 and out.get("ok") is False and out.get("partial") is True
+                and int(out.get("remaining") or 0) == 2 and len(adds) == 2
+                and "ingest-missing" in str(out.get("resume_command") or ""))
+    _t110("r110_ingest_missing_exhausted_partial_rc2", _c110_partial)
+
+    # (11) F-05 NEGATIVE-INPUT: auth-fail đọc live-count → self-heal 1 lần rồi DỪNG rc=2, ZERO source_add.
+    def _c110_authfail():
+        rc, out, adds, regs, err, lc = _run_im110({}, 4)
+        return (rc == 2 and len(adds) == 0 and not regs and len(lc) >= 1
+                and ("LIVE_READ_FAILED" in err or "LIVE_READ_FAILED" in json.dumps(out)))
+    _t110("r110_ingest_missing_authfail_no_side_effect", _c110_authfail)
+
+    # (12) F-02 drift: plan nói base còn 2 chỗ nhưng source_add thứ 2 báo FULL → reroute item sang shard kế
+    # TRONG CÙNG RUN (không upload lại — ingest-missing dùng chính drive_id), không đếm là FAIL.
+    def _c110_drift():
+        rc, out, adds, _regs, _err, _ = _run_im110(
+            {"base110": 298, "ov110": 100}, 2,
+            add_script={("base110", "d2"): {"ok": False, "error": "Notebook is full (300 sources max)"}})
+        return (rc == 0 and out.get("ok") is True and int(out.get("OK") or 0) == 2
+                and adds == [("base110", "d1"), ("base110", "d2"), ("ov110", "d2")]
+                and int(out.get("FAIL") or 0) == 0)
+    _t110("r110_ingest_missing_capacity_drift_reroute", _c110_drift)
+
+    # (13) F-03: reconcile --all-notebooks quét UNION declared+observed (shard khai báo CHƯA có dòng registry vẫn quét).
+    def _c110_recon_union():
+        _keys = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries",
+                 "_read_config_record", "load_creds")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        class _NC:
+            @staticmethod
+            def source_list(nb, skip_freshness=True):
+                return {"ok": True, "sources": []}
+        _entU = [{"nlm_notebook_id": "ov-reg-110", "row_kind": "overflow", "nlm_source_id": "s1"}]
+        cfgU = {"profiles": {"vbqppl": {"notebookId": "base96", "shards": [
+            {"id": "base96", "role": "primary"}, {"id": _v2_110, "role": "overflow"}]}}}
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or "base96"), None)
+            _TL_MODULE._imp = lambda name: (_NC if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: _entU
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, cfgU)
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id=None, apply=False, clear_stale=False,
+                                     force_unsafe=False, refresh=True, json=True, out=None, all_notebooks=True)
+            _bo = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            o = json.loads(_bo.getvalue() or "{}")
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv)
+        nbs = [p.get("notebook") for p in (o.get("per_notebook") or [])]
+        return (rc == 0 and o.get("notebooks_swept") == 3
+                and nbs[0] == "base96" and set(nbs) == {"base96", _v2_110, "ov-reg-110"})
+    _t110("r110_reconcile_all_notebooks_declared_union", _c110_recon_union)
+
+    # (14) F-06: _shard_row_kind theo topology + doctor findings (primary⇔own, overflow⇔overflow, notebook lạ).
+    def _c110_rowkind():
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology([], _v1_110, cfg={"profiles": {"vbqppl": {
+                "notebookId": _v1_110, "shards": [{"id": _v1_110, "role": "primary"},
+                                                  {"id": _v2_110, "role": "overflow"}]}}}, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        ents = [
+            {"drive_id": "e1", "nlm_notebook_id": _v1_110, "row_kind": "own"},
+            {"drive_id": "e2", "nlm_notebook_id": _v1_110, "row_kind": "overflow"},
+            {"drive_id": "e3", "nlm_notebook_id": _v2_110, "row_kind": "own"},
+            {"drive_id": "e4", "nlm_notebook_id": _v2_110, "row_kind": ""},
+            {"drive_id": "e5", "nlm_notebook_id": "nb-l4-110", "row_kind": "overflow"},
+        ]
+        f = _TL_MODULE._topology_row_kind_findings(ents, topo)
+        kinds = {x.get("drive_id"): str(x.get("finding") or "") for x in f}
+        return (_TL_MODULE._shard_row_kind(_v1_110, topo) == "own"
+                and _TL_MODULE._shard_row_kind(_v2_110, topo) == "overflow"
+                and _TL_MODULE._shard_row_kind("nb-l4-110", topo) is None
+                and len(f) == 4 and "e1" not in kinds
+                and "PRIMARY_ROW_MARKED_OVERFLOW" in kinds.get("e2", "")
+                and "OVERFLOW_ROW_NOT_MARKED" in kinds.get("e3", "")
+                and "OVERFLOW_ROW_NOT_MARKED" in kinds.get("e4", "")
+                and "UNKNOWN_NOTEBOOK" in kinds.get("e5", ""))
+    _t110("r110_shard_row_kind_doctor_findings", _c110_rowkind)
+
+    # (15) minor handoff: push-overflow --notebook-id NGOÀI topology → CHẶN rc=2 TRƯỚC _apply_gate/ghi.
+    def _c110_pushovf():
+        _keys = ("load_creds", "_apply_gate", "_apply_journal_start", "_journaled_reg_write",
+                 "_reg_before_from_manifest", "_manifest_entries", "_read_config_record", "_gas")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _gate_calls = []
+        cfgP = {"profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [
+            {"id": _v1_110, "role": "primary"}, {"id": _v2_110, "role": "overflow"}]}}}
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_NOTEBOOK_ID": _v1_110, "TL_PROFILE": None})
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (_gate_calls.append(1) or (True, {}))
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "runP110"
+            _TL_MODULE._journaled_reg_write = lambda *a, **k: {"verified": True, "reg_bulk": {"patched": 1}}
+            _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {}
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, cfgP)
+            _TL_MODULE._gas = lambda: None
+            def _mkP(nb):
+                return argparse.Namespace(config=None, profile=None, drive_id="dP", source_id="sP",
+                                          notebook_id=nb, force_unsafe=False, json=True, out=None)
+            _be = _io110.StringIO()
+            with _ctx110.redirect_stdout(_io110.StringIO()), _ctx110.redirect_stderr(_be):
+                rc_bad = _TL_MODULE.cmd_push_overflow(_mkP("rogue-nb-110"))
+            _gate_after_bad = len(_gate_calls)
+            with _ctx110.redirect_stdout(_io110.StringIO()), _ctx110.redirect_stderr(_io110.StringIO()):
+                rc_ok = _TL_MODULE.cmd_push_overflow(_mkP(_v2_110))
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv)
+        return (rc_bad == 2 and _gate_after_bad == 0 and rc_ok == 0
+                and "TARGET_NOT_IN_TOPOLOGY" in _be.getvalue())
+    _t110("r110_push_overflow_target_outside_topology_blocked", _c110_pushovf)
+
+    # (16) slot-audit --all-shards: shard DECLARED chưa có dòng registry vẫn hiện (count=0) + capacity per-shard.
+    def _c110_slotaudit():
+        _keys = ("apply_profile_offline", "_manifest_entries", "_read_config_record")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        entS = [{"nlm_notebook_id": _v1_110, "row_kind": "own", "nlm_source_id": "s1", "nlm_status": "pushed"}]
+        cfgS = {"profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [
+            {"id": _v1_110, "role": "primary"},
+            {"id": _v3_110, "role": "overflow", "capacity": 450}]}}}
+        _sv = _env110({"TL_NOTEBOOK_ID": _v1_110, "TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: entS
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, cfgS)
+            _ns = argparse.Namespace(config=None, profile=None, manifest=None, refresh=False, all_shards=True,
+                                     near_full=None, json=True, notebook_id=None, base_notebook_id=None,
+                                     physical=None, no_live=True, out=None)
+            _bo = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                rc = _TL_MODULE.cmd_slot_audit(_ns)
+            o = json.loads(_bo.getvalue() or "{}")
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv)
+        sh = {s.get("notebook_id"): s for s in (o.get("shards") or [])}
+        return (rc == 0 and _v3_110 in sh and int(sh[_v3_110].get("count", -1)) == 0   # KHÔNG dùng `or` (0 falsy!)
+                and int(sh[_v3_110].get("cap") or 0) == 450 and _v1_110 in sh)
+    _t110("r110_slot_audit_includes_declared_zero_row_shard", _c110_slotaudit)
+
+    # (17) F-09: stamp topology cho manifest/registry-map — hash khớp resolver, registry_digest đổi theo entries,
+    # routing_epoch từ config (default 0).
+    def _c110_stamp():
+        entT = [{"drive_id": "t1", "nlm_source_id": "s1", "nlm_notebook_id": _v1_110, "row_kind": "own"}]
+        cfgT = {"routingEpoch": 7, "profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [
+            {"id": _v1_110, "role": "primary"}, {"id": _v2_110, "role": "overflow"}]}}}
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            st1 = _TL_MODULE._topology_stamp(cfgT, entT, profile="vbqppl")
+            st2 = _TL_MODULE._topology_stamp(cfgT, entT + [{"drive_id": "t2", "nlm_source_id": "s2"}], profile="vbqppl")
+            topo = _TL_MODULE._resolve_shard_topology(entT, _v1_110, cfg=cfgT, profile="vbqppl")
+            hh = _TL_MODULE._topology_hash("vbqppl", topo.get("shards") or [])
+        finally:
+            _env110_restore(_sv)
+        return (st1.get("topology_hash") == hh and int(st1.get("routing_epoch")) == 7
+                and len(str(st1.get("registry_digest") or "")) == 64
+                and st1.get("registry_digest") != st2.get("registry_digest")
+                and st1.get("topology_hash") == st2.get("topology_hash"))
+    _t110("r110_manifest_stamp_topology", _c110_stamp)
+
+    # (18) F-06 wiring: reconcile --apply trên shard OVERFLOW — backfill ghi row_kind='overflow' cho dòng thường;
+    # NEGATIVE: dòng kind bảo hộ (ref) KHÔNG bị clobber (đi write riêng KHÔNG có cột row_kind).
+    def _c110_recon_rowkind():
+        _keys = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries",
+                 "_read_config_record", "load_creds", "_apply_gate", "_apply_journal_start",
+                 "_journal_append", "_gas", "_journaled_reg_write")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _writes = []
+        class _NCR:
+            @staticmethod
+            def source_list(nb, skip_freshness=True):
+                return {"ok": True, "sources": [{"id": "s1"}, {"id": "s2"}]}
+        entsR = [
+            {"drive_id": "d1", "nlm_source_id": "s1", "nlm_notebook_id": "", "row_kind": "", "nlm_status": "pushed"},
+            {"drive_id": "d2", "nlm_source_id": "s2", "nlm_notebook_id": "", "row_kind": "ref", "nlm_status": "pushed"},
+        ]
+        cfgR = {"profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [
+            {"id": _v1_110, "role": "primary"}, {"id": _v2_110, "role": "overflow"}]}}}
+        _sv = _env110({"TL_NOTEBOOK_ID": _v1_110, "TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or _v2_110), None)
+            _TL_MODULE._imp = lambda name: (_NCR if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: entsR
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, cfgR)
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, {})
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "runR110"
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: None
+            def _fk_w(run_id, g, items, cols, key_field="drive_id", before_by_key=None):
+                _writes.append((cols, [dict(x) for x in items]))
+                return {"verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
+            _TL_MODULE._journaled_reg_write = _fk_w
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id=_v2_110, apply=True, clear_stale=False,
+                                     force_unsafe=False, refresh=False, json=True, out=None, all_notebooks=False)
+            with _ctx110.redirect_stdout(_io110.StringIO()), _ctx110.redirect_stderr(_io110.StringIO()):
+                rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv)
+        _rk_w = [w for w in _writes if "row_kind" in w[0]]
+        _pl_w = [w for w in _writes if "row_kind" not in w[0]]
+        _rk_keys = {it.get("nlm_source_id") for _c, _its in _rk_w for it in _its}
+        _pl_keys = {it.get("nlm_source_id") for _c, _its in _pl_w for it in _its}
+        return (rc == 0 and _rk_keys == {"s1"} and "s2" in _pl_keys and "s1" not in _pl_keys
+                and all(it.get("row_kind") == "overflow" for _c, _its in _rk_w for it in _its))
+    _t110("r110_reconcile_apply_writes_row_kind_protected_ref", _c110_recon_rowkind)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,3 +1,52 @@
+# ★ v1.34.49 — ĐỢT 1 audit overflow-sharding: topology declared+observed, allocator đa-shard, fail-closed live-count (2026-07-15)
+
+> Xử lý audit overflow/sharding v1.34.46 (9 finding; ý tưởng theo bundle Codex `c98321f0…a6ca` — nền v1.34.46 LỖI THỜI
+> + GAS "2.21.2k" đụng độ định danh với bản live nên **code VIẾT LẠI trên canonical v1.34.48**, KHÔNG merge file).
+> Grill-with-docs 7 quyết định D1–D7 user duyệt (`D:\Quốc hội\ke-hoach-overflow-sharding-v1.34.49-50-2026-07-15.md`).
+> **Python-only — KHÔNG đụng GAS/webapp live (EXPECT_VERSION giữ 2.21.2k).** Đợt 50 (+GAS 2.21.2l): F-04 ingest_claim
+> xuyên host, F-08 reg_get_bulk micro-batch, manifest stamp server-side, export bỏ default row_kind='own'.
+
+- **[D5/F-03/F-09] `_resolve_shard_topology()` — resolver topology DUY NHẤT declared+observed** (nlm_ops): config
+  `profiles.<p>.shards[]` (dict `{id,role,capacity,enabled,priority}` HOẶC list[str] legacy — phần tử trùng
+  notebookId = PRIMARY, đúng dạng config live) hợp nhất env + registry (`row_kind=overflow`). Alias legacy
+  (`notebookId`/`overflowNotebookId`/env) LỆCH declared → `TOPOLOGY_CONFIG_CONFLICT` **fail-closed đường GHI/ROUTE**;
+  shard lạ trong registry khi ĐÃ declared → `enabled=false` + finding `UNDECLARED_REGISTRY_SHARD` (KHÔNG tự route).
+  `_resolve_overflow_shards` thành wrapper UNION (47 call-site đọc/audit/query nâng đa-shard declared MIỄN PHÍ,
+  sweep-safe kể cả khi config conflict). +`_topology_hash` (sha256 canonical — golden
+  `references/golden/topology_vectors.json` adopt từ bundle, tương thích chéo GAS 2.21.2l) + `_topology_stamp`
+  (topology_hash/routing_epoch/registry_digest) stamp vào `tl manifest` + `registry-map` (client-side).
+- **[D3/F-02 BLOCKER] `ingest-missing` hết "sai mà báo thành công"**: allocator đa-shard plan theo live-room MỌI
+  shard enabled ngay từ đầu; shard đầy giữa run (drift, `_nlm_add_capacity_error` phân biệt SHARD-FULL vs QUOTA) →
+  **failover shard kế TRONG CÙNG RUN** với chính drive_id (không upload lại); cạn mọi shard → `ok=false,
+  partial=true, remaining[], remaining_targets, resume_command, rc=2` (blocked upfront cũng rc=2 — **ĐỔI HÀNH VI**
+  từ rc=0 'gate có chủ đích': orchestrator phải THẤY backlog chưa xử lý). Dedup live trên UNION mọi shard (F-04
+  read-side — nguồn nằm shard khác hết bị add trùng); WAL fresh-verify quét union; ckpt key theo BASE + merge
+  read-only ckpt legacy per-shard; `_apply_gate` cols + `row_kind` (superset).
+- **[D4/F-05 HIGH] `_live_source_count()` fail-closed dùng CHUNG**: `notebook_get {ok:false}` KHÔNG BAO GIỜ thành
+  0 nguồn/phantom-room (mẫu slot-audit M2 nâng thành helper). Đường GHI (ingest-missing, `_ingest_target`): fail →
+  self-heal `load_creds` ĐÚNG 1 lần/run (doctrine v1.34.43) → vẫn fail → `LIVE_READ_FAILED` rc=2 ZERO side-effect.
+  Đường ĐỌC (preflight L5, overflow-resolve): `live_read_failed=true`, không suy 0. `_ingest_target` nay duyệt MỌI
+  shard overflow topology (không chỉ 1 overflow đơn).
+- **[F-06 HIGH] row_kind SUY TỪ TOPOLOGY trên mọi đường recovery/link**: `nlm-reconcile --apply`
+  (backfill+link_candidates, tách 2 write) + `nlm-add` auto-link nay ghi `row_kind='overflow'` khi notebook đích là
+  shard overflow — **kind bảo hộ `ref`/`thuong` KHÔNG BAO GIỜ clobber** (`_ROW_KIND_PROTECTED`; primary giữ blank=own,
+  tránh churn). +doctor invariant REPORT-ONLY (`_topology_row_kind_findings`: PRIMARY_ROW_MARKED_OVERFLOW /
+  OVERFLOW_ROW_NOT_MARKED_OVERFLOW / UNKNOWN_NOTEBOOK_NOT_IN_TOPOLOGY) + payload `topology` + liveness shard
+  overflow (advisory, minor handoff #1).
+- **[D6/F-07] capacity hết hard-code 300**: ưu tiên `shards[].capacity` > env `TL_NLM_SOURCE_CAP` > default 300
+  (`NLM_SLOT_CAP` giữ làm default + mirror-lock). `slot-audit --all-shards` phủ shard DECLARED chưa có dòng registry
+  (count=0 — VBQPPL-3 mới duyệt hiện ngay) + cap per-shard + topology findings.
+- **[minor handoff #2] `push-overflow` validate `--notebook-id` ∈ topology overflow** → `TARGET_NOT_IN_TOPOLOGY`
+  rc=2 TRƯỚC gate/ghi (bootstrap chưa biết shard nào → cho qua + cảnh báo; ép: `--force-unsafe`). `registry-map`
+  hết bỏ `shards[]` sau overflow đầu tiên (bản đồ N-shard thật) + topology view/hash.
+- **TDD r110 ×18** (RED trước — 8 probe harness Codex chuyển thể + negative-input): 3-shard thấy đủ ở
+  reconcile/map/audit; failover/partial/authfail/drift của ingest-missing; alias conflict; capacity precedence;
+  golden topology-hash; reconcile không clobber `ref`; push-overflow chặn ngoài topology. Selftest **915→933/933**.
+  ★Fake `notebook_get` thiếu key `ok` (contract thật LUÔN có) được hiện đại hoá; test đụng resolver phải HERMETIC
+  (`_read_config_record` patch) — resolver nay đọc config-of-record thật.
+- ★Bẫy I11 lặp lại đúng kịch bản: hằng `_ROW_KIND_PROTECTED` mới phải re-export TRỰC TIẾP ở tl.py (hàm rebase đọc
+  globals tl); 8 hàm mới vào `_STUB_MAP` (note CUỐI dòng).
+
 # ★ v1.34.48 — GAS 2.21.2k: doNlmPreflight_ đếm slot SHARD OVERFLOW trước khi route (2026-07-14)
 
 > Đóng backlog webapp của audit v1.34.46 (server-side defense-in-depth; client v1.34.47 đã fail-closed).

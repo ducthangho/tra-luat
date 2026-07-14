@@ -640,7 +640,8 @@ def cmd_ingest_missing(a) -> int:
             print("  → --apply để nạp (per-item + đối chiếu LIVE chống trùng + guard no-new-notebook).")
         return 0
     # --apply: PHA 1 — cổng precheck (chống clobber/ghi-mù) + mở nhật ký WAL + cred + đếm slot LIVE + guard no-create
-    _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status")
+    # v1.34.49: +row_kind vào gate-cols (superset — link shard overflow ghi row_kind, trước đây gate thiếu cột này)
+    _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status,row_kind")
     if not _ok_gate:
         return 2
     run_id = _apply_journal_start("ingest-missing", {"snapshot": snapshot_ts, "profile": _active_profile(), "targets": len(targets)})
@@ -650,30 +651,72 @@ def cmd_ingest_missing(a) -> int:
         pass
     try:
         nc = _imp("nlm_cli")
-        base_room = NLM_SLOT_CAP - int(nc.notebook_get(base_nb).get("source_count") or 0)
-        overflow_room = (NLM_SLOT_CAP - int(nc.notebook_get(overflow_shard).get("source_count") or 0)) if overflow_shard else 0
     except Exception as e:  # noqa: BLE001
-        print(f"[tl] ingest-missing --apply: không đếm được slot LIVE ({e}) — DỪNG (an toàn).", file=sys.stderr); return 2
-    route, shard, reason = _overflow_route(base_room, overflow_shard, overflow_room)
-    if _apply_ing:   # HEARTBEAT: log timeout 43s → in ROUTE ngay khi biết (base đầy → overflow) để thấy đang chạy đúng.
-        print(f"[tl]   ✓ slot LIVE: base {NLM_SLOT_CAP - base_room}/{NLM_SLOT_CAP}, overflow {(NLM_SLOT_CAP - overflow_room) if overflow_shard else '-'}/{NLM_SLOT_CAP} → route={route} — tiếp: dedup LIVE…", file=sys.stderr, flush=True)
+        print(f"[tl] ingest-missing --apply: nlm_cli lỗi ({e}) — DỪNG (an toàn).", file=sys.stderr); return 2
+    # v1.34.49 (F-02/D3 + F-05/D4 + F-03 write-path — grill 2026-07-15): TOPOLOGY TOÀN CỤC thay cặp
+    # base+1-overflow. Plan per-item theo live-count MỌI shard enabled (đọc FAIL-CLOSED + self-heal load_creds
+    # 1 lần — {ok:False} KHÔNG BAO GIỜ thành 0/phantom-room); shard đầy giữa run (drift) → FAILOVER shard kế
+    # TRONG CÙNG RUN với chính drive_id (KHÔNG upload lại); cạn mọi shard → partial TRUNG THỰC (ok=false +
+    # remaining + resume_command + rc=2 — hết 'sai mà báo thành công' F-02). BẤT BIẾN GIỮ: không tạo notebook.
+    topo = _resolve_shard_topology(entries, base_nb, profile=_active_profile())
+    if not topo.get("ok"):
+        print(json.dumps({"ok": False, "error": topo.get("error"), "gate": "ingest-missing",
+                          "note": "Topology config conflict → DỪNG fail-closed (D5). Sửa shards[]/alias trong config."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    shard_plan = [s for s in (topo.get("shards") or []) if s.get("enabled")]
+    if base_nb and base_nb not in [s.get("id") for s in shard_plan]:
+        shard_plan.insert(0, {"id": base_nb, "role": "primary", "capacity": _shard_capacity_default(),
+                              "enabled": True, "priority": 0})
+    order = [s["id"] for s in shard_plan]
+    _heal = {"healed": False}
+    rooms: dict[str, int] = {}
+    for s in shard_plan:
+        _cnt, _okc, _errc = _live_source_count(nc, s["id"], _heal)
+        if not _okc:
+            print(json.dumps({"ok": False, "error": "LIVE_READ_FAILED", "notebook": s["id"], "detail": _errc,
+                              "note": "KHÔNG đếm được slot LIVE (auth/mạng) — DỪNG TRƯỚC mọi side-effect "
+                                      "(F-05 fail-closed: {ok:false} KHÔNG coi là 0 nguồn/phantom-room). "
+                                      "Sửa `nlm login` rồi chạy lại."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        rooms[s["id"]] = max(0, int(s.get("capacity") or NLM_SLOT_CAP) - int(_cnt))
+    route = "base" if rooms.get(base_nb, 0) > 0 else ("overflow" if any(
+        rooms.get(x, 0) > 0 for x in order if x != base_nb) else "blocked")
+    reason = "topology multi-shard v1.34.49 (plan theo live-room từng shard)"
+    if _apply_ing:   # HEARTBEAT: log timeout 43s → in ROOMS ngay khi biết để thấy đang chạy đúng.
+        print("[tl]   ✓ slot LIVE: " + ", ".join(f"{x[:12]}…room={rooms[x]}" for x in order)
+              + f" → route={route} — tiếp: dedup LIVE…", file=sys.stderr, flush=True)
     if route == "blocked":
-        print(json.dumps({"ok": False, "blocked": True, "reason": reason, "base_room": base_room,
-                          "overflow_room": overflow_room}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 0    # GATE có chủ đích (không tạo notebook), KHÔNG phải lỗi lệnh
-    target_nb = base_nb if route == "base" else shard
-    # S13: đối chiếu nguồn LIVE trên notebook đích → tách target ĐÃ có nguồn (LINK/reconcile) khỏi target cần add.
+        _resume0 = ("tl" + ((" --profile " + _active_profile()) if _active_profile() != DEFAULT_PROFILE else "")
+                    + f" ingest-missing --apply --limit {lim}")
+        print(json.dumps({"ok": False, "blocked": True, "partial": True, "remaining": len(targets),
+                          "reason": "ALL_SHARDS_FULL_ASK_USER (mọi shard topology đầy — KHÔNG auto-create notebook)",
+                          "rooms": rooms, "resume_command": _resume0}, ensure_ascii=False, indent=2))
+        return 2    # v1.34.49: hết rc=0 'gate có chủ đích' — orchestrator phải THẤY backlog chưa xử lý (F-02)
+    target_nb = base_nb if route == "base" else next((x for x in order if rooms.get(x, 0) > 0), base_nb)
+    # S13: đối chiếu nguồn LIVE → tách target ĐÃ có nguồn (LINK/reconcile) khỏi target cần add.
+    # v1.34.49 (F-04 read-side): dedup trên UNION MỌI shard topology (trước: chỉ notebook đích → nguồn đã nằm
+    # shard khác vẫn bị add trùng sang shard mới). Reservation xuyên host (ghi) = đợt 50 GAS 2.21.2l.
     # (review#3) KHÔNG liệt kê được LIVE = KHÔNG xác minh trùng → DỪNG (an toàn) trừ khi --skip-live-check (checkpoint vẫn chống trùng trong-phiên).
     skip_live = getattr(a, "skip_live_check", False)
     to_add, already_live, unresolved = targets, [], 0
-    _live, _live_ok = {}, False
-    try:
-        _live = nc.source_list(target_nb, skip_freshness=True, drive=True)
-        _live_ok = bool(_live.get("ok"))
-        if _live_ok:
-            to_add, already_live, unresolved = _ingest_missing_dedup_live(targets, _live.get("sources") or [])
-    except Exception as _le:  # noqa: BLE001
-        _live = {"error": str(_le)}
+    _live, _live_ok = {}, True
+    _live_union, _live_shard_by_sid = [], {}
+    for _nbq in order:
+        try:
+            _lv = nc.source_list(_nbq, skip_freshness=True, drive=True)
+        except Exception as _le:  # noqa: BLE001
+            _lv = {"ok": False, "error": str(_le)}
+        if not _lv.get("ok"):
+            _live, _live_ok = _lv, False
+            break
+        for _s in (_lv.get("sources") or []):
+            _live_union.append(_s)
+            if _s.get("id"):
+                _live_shard_by_sid[str(_s.get("id"))] = _nbq
+    if _live_ok:
+        to_add, already_live, unresolved = _ingest_missing_dedup_live(targets, _live_union)
     if not _live_ok:
         if not skip_live:
             print(json.dumps({"ok": False, "aborted": True, "reason": "LIVE_SOURCE_LIST_FAILED",
@@ -687,10 +730,26 @@ def cmd_ingest_missing(a) -> int:
         print(f"[tl] ⚠ {unresolved} nguồn LIVE không trích được drive_id/sohieu → dedup có thể SÓT các nguồn đó (soi `nlm-orphans`).", file=sys.stderr)
     if _apply_ing:
         print(f"[tl]   ✓ dedup LIVE: {len(to_add)} cần add, {len(already_live)} đã có (reconcile) — BẮT ĐẦU (journal run={run_id}) …", file=sys.stderr, flush=True)
-    _ck_key = re.sub(r"[^A-Za-z0-9_-]", "", str(target_nb))[:64] or "base"    # (review#4) checkpoint PER-NOTEBOOK (không collide đa-profile/shard)
+    # v1.34.49: ckpt key theo BASE/primary (run nay đa-shard, không còn 1 notebook đích duy nhất); vẫn không
+    # collide đa-profile (base mỗi profile khác nhau). MERGE READ-ONLY ckpt legacy key-theo-shard (run cũ chọn
+    # target_nb=overflow) để không mất trạng thái done/linked; ghi mới CHỈ vào file base.
+    _ck_key = re.sub(r"[^A-Za-z0-9_-]", "", str(base_nb))[:64] or "base"    # (review#4) checkpoint không collide đa-profile
     ckpt = Path(os.path.expanduser("~")) / f".tl_ingest_missing_ckpt_{_ck_key}.json"
     _ckf = _ingest_ckpt_load_full(ckpt)   # v1.29.1: {done, pending, linked, fails} — WAL-hoá (xử log LIVE 2026-07-02)
     done, pending, linked, fails = _ckf["done"], _ckf["pending"], _ckf["linked"], _ckf["fails"]
+    for _nbq in order:
+        _k2 = re.sub(r"[^A-Za-z0-9_-]", "", str(_nbq))[:64]
+        if not _k2 or _k2 == _ck_key:
+            continue
+        _p2 = Path(os.path.expanduser("~")) / f".tl_ingest_missing_ckpt_{_k2}.json"
+        if _p2.exists():
+            try:
+                _c2 = _ingest_ckpt_load_full(_p2)
+                for _fld, _dst in (("done", done), ("pending", pending), ("linked", linked), ("fails", fails)):
+                    for _k3, _v3 in (_c2.get(_fld) or {}).items():
+                        _dst.setdefault(_k3, _v3)
+            except Exception:  # noqa: BLE001 — merge best-effort; ckpt hỏng không chặn run
+                pass
 
     def _ck_flush():
         try:
@@ -705,16 +764,24 @@ def cmd_ingest_missing(a) -> int:
     _pend_dids = ({_entry_drive_id(e) for e in to_add} & set(pending.keys())) if pending else set()
     if _pend_dids and _live_ok:
         try:
-            _fresh = nc.source_list(target_nb, skip_freshness=False, drive=True)
-            if _fresh.get("ok"):
-                _ta2, _al2, _u2 = _ingest_missing_dedup_live(
-                    [e for e in to_add if _entry_drive_id(e) in _pend_dids], _fresh.get("sources") or [])
-                if _al2:
-                    _found = {_entry_drive_id(e) for e, _sid in _al2}
-                    already_live.extend(_al2)
-                    to_add = [e for e in to_add if _entry_drive_id(e) not in _found]
-                    print(f"[tl]   ⚠ WAL-pending: {len(_al2)} nguồn add DỞ ở run trước ĐÃ có LIVE (fresh) → LINK, KHÔNG add lại.",
-                          file=sys.stderr, flush=True)
+            # v1.34.49: fresh-verify trên UNION mọi shard (run trước có thể add dở vào shard KHÁC lựa chọn nay).
+            _fresh_union = []
+            for _nbq in order:
+                _fresh = nc.source_list(_nbq, skip_freshness=False, drive=True)
+                if not _fresh.get("ok"):
+                    raise RuntimeError(str(_fresh.get("error") or "source_list !ok"))
+                for _s in (_fresh.get("sources") or []):
+                    _fresh_union.append(_s)
+                    if _s.get("id"):
+                        _live_shard_by_sid.setdefault(str(_s.get("id")), _nbq)
+            _ta2, _al2, _u2 = _ingest_missing_dedup_live(
+                [e for e in to_add if _entry_drive_id(e) in _pend_dids], _fresh_union)
+            if _al2:
+                _found = {_entry_drive_id(e) for e, _sid in _al2}
+                already_live.extend(_al2)
+                to_add = [e for e in to_add if _entry_drive_id(e) not in _found]
+                print(f"[tl]   ⚠ WAL-pending: {len(_al2)} nguồn add DỞ ở run trước ĐÃ có LIVE (fresh) → LINK, KHÔNG add lại.",
+                      file=sys.stderr, flush=True)
         except Exception as _pe:  # noqa: BLE001
             print(f"[tl]   ⚠ WAL-pending: fresh-verify lỗi ({_pe}) — vẫn tiếp (dedup thường + title-tier đã chạy).",
                   file=sys.stderr, flush=True)
@@ -726,17 +793,27 @@ def cmd_ingest_missing(a) -> int:
               file=sys.stderr, flush=True)
     g = _gas()
     ok_n, link_n, skip_n, fail_n, reg_fail_n, results = 0, 0, 0, 0, 0, []
-    room = base_room if route == "base" else overflow_room
-    cols = "nlm_source_id,nlm_notebook_id,nlm_status" + (",row_kind" if route == "overflow" else "")
+    # v1.34.49 (F-06): row_kind SUY TỪ TOPOLOGY per-notebook (own→không ghi, overflow→ghi 'overflow'); kind
+    # bảo hộ (ref/thuong) trên dòng sẵn có KHÔNG BAO GIỜ bị clobber. cols per-link theo item.
+    _rk_by_did = {}
+    for _e0 in entries or []:
+        _d0 = str(_e0.get("drive_id") or _e0.get("gdoc_id") or "")
+        if _d0:
+            _rk_by_did[_d0] = str(_e0.get("row_kind") or "").strip().lower()
 
-    def _reg_link(did, sid) -> bool:
+    def _reg_link(did, sid, nb_link=None) -> bool:
         # (Pha 1) qua `_journaled_reg_write`: journal intent{before}+commit{verify} + validate cột + patched≥1. reg_bulk có
         # thể lỗi (GAS down/quota) / patched=0 (dòng chưa index) → KHÔNG crash batch (source_id ĐÃ ở checkpoint → reconcile).
         nonlocal reg_fail_n
-        item = {"drive_id": did, "nlm_source_id": sid, "nlm_notebook_id": target_nb, "nlm_status": "pushed"}
-        if route == "overflow":
+        _nb = (nb_link or _live_shard_by_sid.get(str(sid)) or target_nb)
+        item = {"drive_id": did, "nlm_source_id": sid, "nlm_notebook_id": _nb, "nlm_status": "pushed"}
+        _cols_l = "nlm_source_id,nlm_notebook_id,nlm_status"
+        _before = {"nlm_source_id": "", "nlm_status": ""}
+        if (_shard_row_kind(_nb, topo) == "overflow") and (_rk_by_did.get(did) not in _ROW_KIND_PROTECTED):
             item["row_kind"] = "overflow"
-        v = _journaled_reg_write(run_id, g, [item], cols, before_by_key={did: {"nlm_source_id": "", "nlm_status": ""}})
+            _cols_l += ",row_kind"
+            _before["row_kind"] = _rk_by_did.get(did, "")
+        v = _journaled_reg_write(run_id, g, [item], _cols_l, before_by_key={did: _before})
         ok = bool(v.get("verified"))
         if not ok:
             _emsg = v.get("error") or f"patched={v.get('patched')}/{v.get('expected')}"
@@ -763,15 +840,28 @@ def cmd_ingest_missing(a) -> int:
             results.append({"drive_id": did, "ok": True, "already_linked": True, "source_id": sid})
             continue
         _reg_link(did, sid); link_n += 1
-        results.append({"drive_id": did, "ok": True, "linked": True, "source_id": sid, "notebook": target_nb})
+        results.append({"drive_id": did, "ok": True, "linked": True, "source_id": sid,
+                        "notebook": _live_shard_by_sid.get(str(sid)) or target_nb})
         print(f"  [link] {(_entry_sohieu(e) or '(?)')[:18]:18s} đã có LIVE → reconcile (không tạo trùng)", file=sys.stderr, flush=True)
     if al_skip_n:
         print(f"  [skip] {al_skip_n} mục ĐÃ link verified trước đó (ckpt) → bỏ relink lặp (GAS cache 600s; ép: --relink).",
               file=sys.stderr, flush=True)
     # (2) Nạp mới per-item. v1.29.1 WAL: pending ghi TRƯỚC source_add (subprocess wait tới 630s — client-timeout giết ở
     # đây là gốc trùng VBHN_67); done ghi NGAY SAU; fails đếm FAIL liên tiếp (≥3 → SKIP đỡ đốt batch, --retry-failed ép).
+    # v1.34.49 (F-02/D3): ALLOCATOR đa-shard — con trỏ shard chạy theo `order`, hết chỗ/drift-FULL → shard kế
+    # TRONG CÙNG RUN (chính drive_id, KHÔNG upload lại); cạn mọi shard → phần còn lại vào `remaining` (partial).
     _total = len(to_add)
     pf_skip_n = 0
+    remaining_entries: list = []
+    _shard_used: dict[str, int] = {}
+    _sh_i = 0                    # con trỏ shard hiện hành trong `order`
+
+    def _next_shard_with_room(_start: int) -> int:
+        for _j in range(_start, len(order)):
+            if rooms.get(order[_j], 0) > 0:
+                return _j
+        return -1
+
     for _i, e in enumerate(to_add, 1):
         did = _entry_drive_id(e)
         if did in done:      # done chỉ chứa source_id THẬT → LINK (idempotent), KHÔNG add lại
@@ -783,16 +873,37 @@ def cmd_ingest_missing(a) -> int:
                   f"Soi: `tl header-verify --drive-id {did}`; bản-thô-trùng → `tl source-update-corpus {did} false --apply`.",
                   file=sys.stderr, flush=True)
             continue
-        if room <= 0:
-            print("  ⚠ HẾT CHỖ giữa chừng → DỪNG (KHÔNG tạo notebook). Chạy lại sau khi duyệt shard mới.", file=sys.stderr); break
-        print(f"  [{_i}/{_total}] + {(_entry_sohieu(e) or '(?)')[:18]:18s} {_entry_name(e)[:40]} …", file=sys.stderr, flush=True)
+        _sh_i = _next_shard_with_room(_sh_i if _sh_i >= 0 else 0)
+        if _sh_i < 0:
+            remaining_entries = to_add[_i - 1:]
+            print(f"  ⚠ HẾT CHỖ mọi shard topology giữa chừng → DỪNG partial ({len(remaining_entries)} mục còn lại; "
+                  f"KHÔNG tạo notebook — duyệt shard mới rồi resume).", file=sys.stderr)
+            break
+        _cur_nb = order[_sh_i]
+        print(f"  [{_i}/{_total}] + {(_entry_sohieu(e) or '(?)')[:18]:18s} {_entry_name(e)[:40]} → {_cur_nb[:12]}… …", file=sys.stderr, flush=True)
         pending[did] = _entry_name(e)[:120]   # WAL-pending TRƯỚC add — timeout giữa add → run sau fresh-verify, không add mù
         _ck_flush()
-        r = nc.source_add(target_nb, drive_id=did, title=_entry_name(e)[:120], wait=True)
+        r = nc.source_add(_cur_nb, drive_id=did, title=_entry_name(e)[:120], wait=True)
+        while (not r.get("ok")) and _nlm_add_capacity_error(r.get("error")):
+            # drift: shard báo ĐẦY dù plan còn chỗ (nguồn khác chen giữa) → tin SERVER, đóng shard, thử shard kế
+            # với CHÍNH drive_id (ingest-missing không upload gì — file đã trên Drive). KHÔNG đếm FAIL.
+            rooms[_cur_nb] = 0
+            _j2 = _next_shard_with_room(_sh_i)
+            if _j2 < 0:
+                break
+            _sh_i = _j2; _cur_nb = order[_sh_i]
+            print(f"        ↪ shard đầy (drift) → reroute {_cur_nb[:12]}… (cùng run, không upload lại)", file=sys.stderr, flush=True)
+            r = nc.source_add(_cur_nb, drive_id=did, title=_entry_name(e)[:120], wait=True)
         if not r.get("ok"):
+            pending.pop(did, None)            # add fail THẬT (CLI trả lỗi) = không tạo source → bỏ dấu pending
+            if _nlm_add_capacity_error(r.get("error")):
+                _ck_flush()
+                remaining_entries = to_add[_i - 1:]
+                print(f"  ⚠ MỌI shard đầy (server xác nhận) → DỪNG partial ({len(remaining_entries)} mục còn lại).",
+                      file=sys.stderr)
+                break
             fail_n += 1
             fails[did] = int(fails.get(did) or 0) + 1
-            pending.pop(did, None)            # add fail THẬT (CLI trả lỗi) = không tạo source → bỏ dấu pending
             _ck_flush()
             results.append({"drive_id": did, "ok": False, "error": r.get("error"), "fails": fails[did]})
             print(f"        FAIL ({fails[did]}×): {r.get('error')}", file=sys.stderr, flush=True); continue
@@ -801,20 +912,37 @@ def cmd_ingest_missing(a) -> int:
         pending.pop(did, None)
         fails.pop(did, None)
         _ck_flush()
-        _reg_link(did, sid)
-        ok_n += 1; room -= 1
-        results.append({"drive_id": did, "ok": True, "source_id": sid, "notebook": target_nb})
+        _live_shard_by_sid[str(sid)] = _cur_nb
+        _reg_link(did, sid, _cur_nb)
+        ok_n += 1
+        rooms[_cur_nb] = max(0, rooms.get(_cur_nb, 0) - 1)
+        _shard_used[_cur_nb] = _shard_used.get(_cur_nb, 0) + 1
+        results.append({"drive_id": did, "ok": True, "source_id": sid, "notebook": _cur_nb})
         print(f"        OK → {sid}", file=sys.stderr, flush=True)
-    _journal_append(run_id, {"t": "run_end", "ok": (fail_n == 0 and reg_fail_n == 0),
+    _partial = bool(remaining_entries)
+    _resume_cmd = ("tl" + ((" --profile " + _active_profile()) if _active_profile() != DEFAULT_PROFILE else "")
+                   + f" ingest-missing --apply --limit {lim}") if _partial else None
+    _ok_all = (not _partial) and fail_n == 0 and reg_fail_n == 0
+    _journal_append(run_id, {"t": "run_end", "ok": _ok_all, "partial": _partial, "remaining": len(remaining_entries),
                              "counts": {"OK": ok_n, "LINKED": link_n, "SKIP": skip_n, "FAIL": fail_n, "REG_WRITE_FAIL": reg_fail_n,
                                         "ALREADY_LINKED": al_skip_n, "PUSH_FAIL_SKIPPED": pf_skip_n}})
-    print(json.dumps({"ok": True, "route": route, "notebook": target_nb, "reason": reason, "manifest_snapshot": snapshot_ts, "journal": run_id,
+    print(json.dumps({"ok": _ok_all, "partial": _partial, "remaining": len(remaining_entries),
+                      "remaining_targets": [{"drive_id": _entry_drive_id(x), "sohieu": _entry_sohieu(x),
+                                             "name": _entry_name(x)[:60]} for x in remaining_entries[:20]],
+                      "resume_command": _resume_cmd,
+                      "route": ("multi" if len(_shard_used) > 1 else route), "notebook": target_nb,
+                      "shards_used": [{"notebook_id": k, "added": v} for k, v in _shard_used.items()],
+                      "reason": reason, "manifest_snapshot": snapshot_ts, "journal": run_id,
                       "OK": ok_n, "LINKED": link_n, "SKIP": skip_n, "FAIL": fail_n, "REG_WRITE_FAIL": reg_fail_n,
                       "ALREADY_LINKED": al_skip_n, "PUSH_FAIL_SKIPPED": pf_skip_n,
                       "unresolved_live": unresolved, "skipped_no_sohieu": len(_skip_note), "results": results}, ensure_ascii=False, indent=2))
     _hint = " ⚠ REG_WRITE_FAIL>0 → chạy `tl nlm-reconcile <nb> --apply` để khớp registry↔NLM." if reg_fail_n else ""
+    _hint += f" ⚠ PARTIAL: còn {len(remaining_entries)} mục — duyệt shard mới rồi `{_resume_cmd}`." if _partial else ""
     print(f"[tl] ingest-missing: OK={ok_n} LINKED={link_n} SKIP={skip_n} FAIL={fail_n} REG_WRITE_FAIL={reg_fail_n} "
-          f"no_sohieu={len(_skip_note)} → {target_nb} (route={route}). journal={run_id}.{_hint} MANIFEST_STALE: `tl manifest` rồi `tl boot --refresh`.", file=sys.stderr)
+          f"no_sohieu={len(_skip_note)} partial={_partial} → shards={list(_shard_used) or [target_nb]} (route={route}). "
+          f"journal={run_id}.{_hint} MANIFEST_STALE: `tl manifest` rồi `tl boot --refresh`.", file=sys.stderr)
+    if _partial:
+        return 2    # partial = KHÔNG phải success hoàn chỉnh (D3) — orchestrator phải thấy backlog còn
     return 0 if (fail_n == 0 and reg_fail_n == 0) else 1
 
 
@@ -851,21 +979,39 @@ def _ingest_target(g, sohieu: str, name: str):
         # base còn chỗ → base (giữ nhanh đường thường; KHÔNG gọi nlm-get overflow trừ khi base đầy)
         return base, {"decision": pf.get("decision"), "slots_full": False,
                       "used": slots.get("used"), "cap": slots.get("cap")}
-    # v1.34.47 (M1 fix): base ĐẦY → tính overflow_room LIVE + `_overflow_route` fail-closed (KHỚP batch
-    # `ingest-missing`). Trước đây `route_overflow = slots.full or …` đẩy overflow MÙ bất kể shard còn chỗ →
-    # both-full thì `source_add` vào shard đầy SAU khi đã upload Drive + ghi registry. Nay both-full → 'blocked'
-    # để caller DỪNG TRƯỚC mọi side-effect (KHÔNG auto-create notebook — ADR).
+    # v1.34.47 (M1 fix): base ĐẦY → tính overflow_room LIVE fail-closed (KHỚP batch `ingest-missing`); both-full
+    # → 'blocked' để caller DỪNG TRƯỚC mọi side-effect (KHÔNG auto-create notebook — ADR).
+    # v1.34.49 (F-03 write + F-05): duyệt MỌI shard overflow topology theo thứ tự (không chỉ 1 overflow đơn);
+    # đọc slot CHECKED + self-heal 1 lần — auth-fail KHÔNG thành phantom-room.
     try:
         nc = _imp("nlm_cli")
-        overflow_room = NLM_SLOT_CAP - int(nc.notebook_get(overflow).get("source_count") or 0)
     except Exception as e:  # noqa: BLE001
         return base, {"blocked": True, "overflow_shard": overflow,
-                      "reason": f"OVERFLOW_ROOM_UNKNOWN: base đầy nhưng không đếm được slot overflow ({e}) — DỪNG an toàn."}
-    route, shard, reason = _overflow_route(0, overflow, overflow_room)
-    if route == "blocked":
-        return base, {"blocked": True, "overflow_shard": overflow, "overflow_room": overflow_room, "reason": reason}
-    return shard, {"decision": pf.get("decision"), "slots_full": True, "route": "overflow",
-                   "overflow_shard": shard, "overflow_room": overflow_room}
+                      "reason": f"OVERFLOW_ROOM_UNKNOWN: nlm_cli lỗi ({e}) — DỪNG an toàn."}
+    try:
+        _ent_t = _manifest_entries(refresh=False)
+    except Exception:  # noqa: BLE001
+        _ent_t = []
+    _topo_t = _resolve_shard_topology(_ent_t, base)
+    if not _topo_t.get("ok"):
+        return base, {"blocked": True, "overflow_shard": overflow,
+                      "reason": f"{_topo_t.get('error')} — DỪNG fail-closed (D5)."}
+    _cands_t = [s for s in (_topo_t.get("shards") or []) if s.get("enabled") and s.get("id") != base]
+    if overflow and overflow not in [s.get("id") for s in _cands_t]:
+        _cands_t.append({"id": overflow, "capacity": _shard_capacity_default()})   # overflow đơn chưa vào topology (bootstrap)
+    _heal_t = {"healed": False}
+    for _s_t in _cands_t:
+        _cnt_t, _ok_t, _err_t = _live_source_count(nc, _s_t["id"], _heal_t)
+        if not _ok_t:
+            return base, {"blocked": True, "overflow_shard": _s_t["id"],
+                          "reason": f"OVERFLOW_ROOM_UNKNOWN: base đầy, không đếm được slot shard {str(_s_t['id'])[:12]}… "
+                                    f"({_err_t}) — DỪNG an toàn (F-05: KHÔNG coi là 0 nguồn)."}
+        _room_t = int(_s_t.get("capacity") or NLM_SLOT_CAP) - int(_cnt_t)
+        if _room_t > 0:
+            return _s_t["id"], {"decision": pf.get("decision"), "slots_full": True, "route": "overflow",
+                                "overflow_shard": _s_t["id"], "overflow_room": _room_t}
+    return base, {"blocked": True, "overflow_shard": overflow,
+                  "reason": "ALL_SHARDS_FULL: base + mọi shard overflow topology đầy → HỎI người dùng duyệt shard mới (KHÔNG auto-create)"}
 
 
 def cmd_recat(a) -> int:

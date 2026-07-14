@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2j",
   "root_name": "tra-luat",
   "file_count": 161,
-  "total_bytes": 4654746,
-  "package_hash": "7ed449f6236f950224ac0dabf857043830c5e78da57785a998d124d75ee28664",
-  "content_hash": "7ed449f6236f950224ac0dabf857043830c5e78da57785a998d124d75ee28664",
+  "total_bytes": 4655228,
+  "package_hash": "e83a7595073f71bdee33d84bb187b0fda5e11e3219ab6de463ea3729c663cf79",
+  "content_hash": "e83a7595073f71bdee33d84bb187b0fda5e11e3219ab6de463ea3729c663cf79",
   "required_missing": [],
   "files": [
     {
@@ -279,12 +279,12 @@
     {
       "path": "references/golden/ingest_zip_dryrun_dup.json",
       "size": 2522,
-      "sha256": "b44d136a90696301ab45edda6151fad97c5c12d8c67203c5af4d4d98c61f61a4"
+      "sha256": "4fca5fe78bcfec335689b02c83a3c1d01d909f34c136377dc347832edbeaf641"
     },
     {
       "path": "references/golden/ingest_zip_dryrun_slip.json",
       "size": 2726,
-      "sha256": "9614d4b02687c1941a83500cd4a31989da591f200dc344909998457d7607b4e2"
+      "sha256": "46bf53c98b371daf29acebab9071fad0d0c9806765d92078cc50d01b3edfcfdb"
     },
     {
       "path": "references/golden/live_state_diff_no_changes.json",
@@ -753,8 +753,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 61395,
-      "sha256": "a4397025ac55c31829e3be69a5de506e1436dfc32cf020d9193db2ac404fe31c"
+      "size": 61877,
+      "sha256": "d012a2761021a933ab95ab65c2d2a57b9ab65b09fcc0870a87865d35ee809a34"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",

@@ -724,6 +724,9 @@ def _golden_ensure_fixtures() -> None:
         # v1.34.0 (CI run #1 bắt được): DEFLATE cho output KHÁC NHAU giữa các build zlib (Ubuntu zlib-ng ≠
         # Windows) → sha256(zip) trong idempotency_key lệch golden cross-platform. STORED = bytes chỉ phụ
         # thuộc nội dung + metadata → máy-độc-lập thật sự.
+        # v1.34.45 (CI ubuntu bắt): STORED CHƯA đủ — ZipInfo.create_system mặc định = 0 (Windows) / 3 (Linux)
+        # → "version made by" khác byte → archive_sha256 (ingest_zip golden) lệch Windows↔ubuntu. Pin create_system=3
+        # + extra/comment rỗng (khớp release._zip_write_bytes_deterministic) để fixture zip máy-độc-lập THẬT.
         import io as _io
         buf = _io.BytesIO()
         with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_STORED) as zf:
@@ -731,6 +734,9 @@ def _golden_ensure_fixtures() -> None:
                 info = zipfile.ZipInfo(name)
                 info.date_time = (1980, 1, 1, 0, 0, 0)
                 info.compress_type = zipfile.ZIP_STORED
+                info.create_system = 3
+                info.extra = b""
+                info.comment = b""
                 info.external_attr = 0o100644 << 16
                 zf.writestr(info, data)
         return buf.getvalue()

@@ -1,6 +1,6 @@
 {
   "accepted": 1,
-  "archive_sha256": "6fcaba8588a4593030daec7bf24fcc368bbcd7231b52db6655dac91035276ed8",
+  "archive_sha256": "8305e99ced093a74adede58b13d257cbee7e9a84deb5d947ba7e82696008c6ab",
   "cat": "01",
   "errors": [
     "UNSAFE_ZIP_PATH:../evil.docx",
@@ -67,7 +67,7 @@
   "mode": "vbqppl",
   "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
   "ok": false,
-  "plan_hash": "b396816464730cf056eeeae3c5721d20640b69f919615355726ceee5e434d219",
+  "plan_hash": "0436d9c454ab1158017d75fdefd086f1b715ae638c31826247569f6b02df72f7",
   "profile": null,
   "requires_apply": true,
   "schema": "ingest_zip_plan.v1",

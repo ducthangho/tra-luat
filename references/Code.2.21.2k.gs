@@ -68,7 +68,7 @@
  *   v2.4.0: + upload base64 + exporttext/exportdocx + listChildren_/listTree_ phân trang dùng chung.
  */
 
-var APP_VERSION = '2.21.2j';   // reg_clear 2-tầng: cột thường + force=yes (#5); trước: regen2 own-scope
+var APP_VERSION = '2.21.2k';   // doNlmPreflight_ đếm slot SHARD OVERFLOW trước khi route (ALL_SHARDS_FULL_ASK_USER); trước 2.21.2j: reg_clear 2-tầng
 
 var CONFIG = {
   // ⚠️ v2.8.0: DEFAULT_TOKEN đặt PLACEHOLDER — token thật nằm ở Script Property TL_TOKEN (đã rotateToken()
@@ -3428,6 +3428,19 @@ function doNlmPreflight_(p){
                      .filter(function(r){ return r.flag === 'EXISTING_SUPERSEDED'; });
   if (superseded.length) reasons.push('EXISTING_SUPERSEDED_PRESENT');
 
+  // v2.21.2k: khi ĐỊNH TUYẾN overflow (base đầy/gần-đầy + overflow cấu hình), ĐẾM SLOT CHÍNH SHARD OVERFLOW để
+  // KHÔNG khuyên add vào shard ĐÃ ĐẦY (trước đây chỉ đếm base rồi route overflow MÙ — Code.gs bug audit v1.34.46).
+  // Chỉ đếm khi THỰC route overflow (reason NEAR_FULL_ROUTE_OVERFLOW) → tiết kiệm 1 lượt regReadAll khi base còn chỗ.
+  var overflowSlots = null;
+  if (overflowNotebookId && reasons.indexOf('NOTEBOOK_NEAR_FULL_ROUTE_OVERFLOW') !== -1) {
+    overflowSlots = doNlmSlots_({ notebookId: overflowNotebookId, cap: cap, refresh: refresh ? 'true' : 'false' });
+    if (overflowSlots.full && decision === 'REVIEW') {
+      // MỌI shard (base + overflow) đầy → GIỮ REVIEW (agent HỎI người dùng duyệt shard mới), KHÔNG khuyên add
+      // vào shard đầy. Khớp client `_overflow_route` (blocked → ask user) + fail-closed `_ingest_target` v1.34.47.
+      reasons.push('ALL_SHARDS_FULL_ASK_USER');
+    }
+  }
+
   return {
     ok: true,
     decision: decision,           // ADD | SKIP | REVIEW
@@ -3440,8 +3453,12 @@ function doNlmPreflight_(p){
       row_kind: 'overflow',
       corpus: 'VBQPPL',
       profile: overflowProfile || null,
-      notebookId: overflowNotebookId || null
+      notebookId: overflowNotebookId || null,
+      slots: overflowSlots,                                             // v2.21.2k: slot LIVE của shard overflow (null nếu chưa route)
+      has_room: overflowSlots ? (overflowSlots.remaining > 0) : null,   // v2.21.2k
+      full: overflowSlots ? overflowSlots.full : null                   // v2.21.2k
     } : null,
+    overflow_slots: overflowSlots,   // v2.21.2k: tiện client đọc trực tiếp (used/remaining/full/near_full shard overflow)
     find: found,
     superseded_matches: superseded,
     note: 'decision=ADD ⇒ source_add. SKIP ⇒ không add (đã trùng/đầy). ' +

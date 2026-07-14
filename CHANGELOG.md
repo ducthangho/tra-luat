@@ -1,3 +1,17 @@
+# ★ v1.34.48 — GAS 2.21.2k: doNlmPreflight_ đếm slot SHARD OVERFLOW trước khi route (2026-07-14)
+
+> Đóng backlog webapp của audit v1.34.46 (server-side defense-in-depth; client v1.34.47 đã fail-closed).
+
+- **GAS `doNlmPreflight_` (Code.2.21.2k.gs)**: khi route overflow (base đầy/gần-đầy + overflow cấu hình), nay gọi
+  `doNlmSlots_` cho CHÍNH shard overflow → trả `overflow_slots` + `overflow_route.{slots,has_room,full}`. Base+overflow
+  ĐỀU đầy → reason `ALL_SHARDS_FULL_ASK_USER` (GIỮ decision=REVIEW: hỏi user duyệt shard mới, KHÔNG khuyên add vào
+  shard đầy). Trước 2.21.2j chỉ đếm base rồi route overflow MÙ.
+- Bump webapp **2.21.2j → 2.21.2k**: rename `Code.2.21.2j.gs`→`Code.2.21.2k.gs`, APP_VERSION, EXPECT_VERSION (tl.py +
+  selftest literal), API_CONTRACT (stamp + doc field mới), SKILL/RUNBOOK 17 chỗ, webapp_target manifest.
+- **⚠ CẦN DEPLOY GAS THỦ CÔNG (skill KHÔNG deploy được):** mở `references/Code.2.21.2k.gs` → Apps Script → New
+  version (giữ URL+token) → `tl ping` phải ra `2.21.2k` → `contract_check.py --audit`. EXPECT_VERSION đã = 2.21.2k
+  nên `tl ping` sẽ báo LỆCH tới khi deploy — deploy CÙNG NGÀY. **⚠ SKILL.md kernel đổi ⇒ RE-IMPORT.**
+
 # ★ v1.34.47 — vá bất nhất shard overflow (VBQPPL-2) + đóng 3 dư release verifier (2026-07-14)
 
 > Canonical audit v1.34.46 (adopt verifier F-01..F-05) + rà sâu shard overflow (yêu cầu user). Gốc rễ mọi lỗi

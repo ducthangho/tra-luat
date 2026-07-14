@@ -1918,10 +1918,31 @@ def cmd_reg_query(a) -> int:
     """Truy vấn registry/manifest OFFLINE với bộ lọc (thay ~chục snippet json.load+filter tay).
     Lọc: --name (substring), --sohieu, --cat (mã/tiền tố), --nlm/--no-nlm, --row-kind, --corpus/--no-corpus, --mime."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    # v1.34.42 (BUG2 — grill-with-docs): `--refresh` cần creds LIVE (TL_WEBAPP) để fetch — apply_profile_offline
+    # KHÔNG đảm bảo có. Trước đây thiếu bước này → `--refresh` chết 'Thiếu TL_WEBAPP' làm tưởng MẤT token (thực ra
+    # chỉ chưa nạp creds LIVE). Khuôn y locate/status: nạp load_creds TRƯỚC refresh (self-heal từ config).
+    if getattr(a, "refresh", False):
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (SystemExit, Exception):  # noqa: BLE001 — thiếu creds → rơi xuống thông điệp cụ thể bên dưới
+            pass
     try:
         entries = _manifest_entries(refresh=getattr(a, "refresh", False))
     except Exception as e:
-        print(f"[tl] reg-query: cần `tl boot`/`manifest` trước ({e}).", file=sys.stderr); return 2
+        _hint = (" `--refresh` cần webapp LIVE — chạy `tl --profile <P> boot --refresh` (hoặc bỏ `--refresh` để "
+                 "đọc cache).") if getattr(a, "refresh", False) else ""
+        print(f"[tl] reg-query: cần `tl boot`/`manifest` trước ({e}).{_hint}", file=sys.stderr); return 2
+    # v1.34.42 (BUG3): nhắc `--corpus true` là LITERAL cột — audit 'corpus như server' phải dùng --corpus-effective.
+    if getattr(a, "corpus", False) and not getattr(a, "corpus_effective", False):
+        print("[tl] ⚠ `--corpus true` = literal cột corpus=='true' (mọi row_kind, kể cả overflow/blank-trên-NLM bị "
+              "BỎ SÓT). Muốn corpus theo LUẬT SERVER (như `tl boot` đếm) dùng `--corpus-effective`.", file=sys.stderr)
+    # v1.34.42 (BUG3, live-smoke bắt): luật server corpus (corpus∈{true,vbqppl}∪overflow − ref − thuong) CHỈ đúng cho
+    # scope NỀN vbqppl; profile riêng đếm khác (server: mọi dòng có drive_id) → --corpus-effective trên profile có thể
+    # ra 0/sai (ca Luật BHXH: 14 dòng corpus=true đều row_kind=ref → effective=0). Cảnh báo, không chặn.
+    if getattr(a, "corpus_effective", False) and _active_profile() != DEFAULT_PROFILE:
+        print(f"[tl] ⚠ `--corpus-effective` dùng LUẬT SERVER NỀN (vbqppl) nhưng scope hiện tại = profile "
+              f"'{_active_profile()}' (đếm khác: mọi dòng có drive_id). Kết quả có thể LỆCH/BẰNG 0 — với profile "
+              f"dùng `--nlm` hoặc reg-query toàn dòng rồi lọc tay.", file=sys.stderr)
     nm = (getattr(a, "name", None) or "").lower()
     shq = norm_sohieu(getattr(a, "sohieu", None) or "") if getattr(a, "sohieu", None) else ""
     cat = (getattr(a, "cat", None) or "").strip()
@@ -1963,6 +1984,11 @@ def cmd_reg_query(a) -> int:
         if getattr(a, "corpus", False) and str(e.get("corpus")).lower() != "true":
             return False
         if getattr(a, "no_corpus", False) and str(e.get("corpus")).lower() == "true":
+            return False
+        # v1.34.42 (BUG3): `--corpus-effective` lọc theo ĐÚNG LUẬT SERVER (corpus∈{true,vbqppl}∪overflow − ref −
+        # thuong) — KHÁC `--corpus true` literal (bỏ sót vbqppl/overflow/blank-trên-NLM → audit thiếu, ca Luật BHXH
+        # 14 vs 41). Dùng khi cần 'corpus như boot/server đếm'.
+        if getattr(a, "corpus_effective", False) and not _entry_is_corpus_effective(e):
             return False
         if rk and _entry_row_kind(e) != rk:
             return False

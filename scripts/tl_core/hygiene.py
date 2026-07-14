@@ -2553,20 +2553,25 @@ def _corpus_count_server_rule(entries: list) -> int:
     (corpus=='true' thuần). In CẢ HAI cạnh nhau ⇒ hết 'chênh 12 dòng' bí ẩn giữa 2 lệnh (527 boot vs 515 sweep:
     khác TIÊU CHÍ + khác snapshot GAS-cache ~600s, không phải mất dữ liệu). Profile có registryDocId riêng: server
     đếm MỌI dòng có drive_id (nhánh _REQ_REGISTRY_ID_) — số này chỉ áp cho scope VBQPPL nền."""
-    n = 0
-    for e in entries or []:
-        rk = str(_entry_row_kind(e) or "own").lower()
-        if rk == "ref":
-            continue
-        c = str(e.get("corpus") or "").lower()
-        if not (c in ("true", "vbqppl") or rk == "overflow"):
-            continue
-        # Review v1.30.1 (CONFIRMED): GAS so `o.loai!=='thuong'` EXACT (không lower/strip — Code.gs:2183) →
-        # mirror NGUYÊN XI; 'Thuong' hoa server VẪN đếm. Lower hoá ở đây = tự tạo lệch mới với boot.
-        if str(e.get("loai") or "") == "thuong":
-            continue
-        n += 1
-    return n
+    return sum(1 for e in (entries or []) if _entry_is_corpus_effective(e))
+
+
+def _entry_is_corpus_effective(e: dict) -> bool:
+    """v1.34.42 (BUG3 — grill-with-docs): predicate PURE 'corpus theo ĐÚNG LUẬT SERVER GAS' cho 1 entry (tách từ
+    _corpus_count_server_rule để reg-query --corpus-effective dùng chung): corpus∈{true,vbqppl} HOẶC row_kind=overflow;
+    TRỪ ref; TRỪ loai='thuong' (exact — mirror GAS regIsCorpusCounted_, KHÔNG lower/strip). KHÁC `--corpus true`
+    literal (chỉ cột corpus=='true', mọi row_kind). Test offline được."""
+    rk = str(_entry_row_kind(e) or "own").lower()
+    if rk == "ref":
+        return False
+    c = str(e.get("corpus") or "").lower()
+    if not (c in ("true", "vbqppl") or rk == "overflow"):
+        return False
+    # Review v1.30.1 (CONFIRMED): GAS so `o.loai!=='thuong'` EXACT (không lower/strip — Code.gs:2183) →
+    # mirror NGUYÊN XI; 'Thuong' hoa server VẪN đếm. Lower hoá ở đây = tự tạo lệch mới với boot.
+    if str(e.get("loai") or "") == "thuong":
+        return False
+    return True
 
 def _corpus_fix_plan(entries: list) -> dict:
     """PURE (test offline): ĐIỀU PHỐI dọn/chỉnh lý corpus — gộp mọi detector (sweep) → kế hoạch THEO THỨ TỰ PHỤ THUỘC +

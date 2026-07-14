@@ -8168,6 +8168,48 @@ def run() -> int:
                   _sohieu_query_hits_entry("04-CT-TW", "04-2026-CT-TW") is True
                   and _sohieu_query_hits_entry("04-2026-CT-TW", "04-2027-CT-TW") is False
                   and _sohieu_query_hits_entry("88-VBHN-VPQH", "88-2025-VBHN-VPQH") is True))
+    # ═══ v1.34.42 — r104: vá 3 bug audit-tool (grill-with-docs; TDD negative-input) ═══
+    # (BUG3) predicate corpus-EFFECTIVE (luật server GAS) — PURE, tách từ _corpus_count_server_rule
+    _ce = _TL_MODULE._entry_is_corpus_effective
+    cases.append(("r104_corpus_effective_predicate",
+                  _ce({"corpus": "true", "row_kind": "own"}) is True
+                  and _ce({"corpus": "vbqppl", "row_kind": "own"}) is True
+                  and _ce({"corpus": "false", "row_kind": "overflow"}) is True     # overflow đếm dù corpus≠true
+                  and _ce({"corpus": "true", "row_kind": "ref"}) is False           # ref loại
+                  and _ce({"corpus": "true", "loai": "thuong", "row_kind": "own"}) is False   # thuong loại
+                  and _ce({"corpus": "false", "row_kind": "own"}) is False
+                  and _ce({"corpus": "", "row_kind": "own"}) is False))
+    _ents104 = [{"corpus": "true", "row_kind": "own"}, {"corpus": "vbqppl", "row_kind": "own"},
+                {"corpus": "false", "row_kind": "overflow"}, {"corpus": "true", "row_kind": "ref"},
+                {"corpus": "true", "loai": "thuong", "row_kind": "own"}, {"corpus": "false", "row_kind": "own"}]
+    cases.append(("r104_corpus_count_matches_predicate",
+                  _TL_MODULE._corpus_count_server_rule(_ents104) == sum(1 for e in _ents104 if _ce(e)) == 3))
+    # (BUG1) note builder ĐIỀU KIỆN — all_ok=True → 'sạch'; rc=2/finding → KHÔNG 'sạch' + nhắc boot/per-notebook
+    _rsn = _TL_MODULE._reconcile_sweep_note
+    _note_ok = _rsn(True, [{"notebook": "nb1", "rc": 0, "desync_real": 0, "unregistered_on_nlm": 0}])
+    _note_boot = _rsn(False, [{"notebook": "nbXbootcase", "rc": 2}])
+    _note_find = _rsn(False, [{"notebook": "nbYfinding", "rc": 0, "desync_real": 3, "unregistered_on_nlm": 0}])
+    cases.append(("r104_reconcile_note_conditional",
+                  "sach" in _strip_accents(_note_ok).lower()
+                  and "sach" not in _strip_accents(_note_boot).lower()      # KHÔNG báo sạch khi rc=2 (bug cũ)
+                  and "boot" in _note_boot.lower() and "nbXbootcase" in _note_boot
+                  and "sach" not in _strip_accents(_note_find).lower() and "nbYfinding" in _note_find))
+    # (BUG2) reg-query --refresh PHẢI gọi load_creds (negative-input: bug cũ = chỉ apply_profile_offline → 'Thiếu TL_WEBAPP')
+    import argparse as _ap104
+    _creds104, _apo104 = [], []
+    _o_lc, _o_me, _o_apo = _TL_MODULE.load_creds, _TL_MODULE._manifest_entries, _TL_MODULE.apply_profile_offline
+    try:
+        _TL_MODULE.load_creds = lambda *a, **k: _creds104.append((a, k))
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: _apo104.append(1)
+        _TL_MODULE._manifest_entries = lambda **k: []
+        _ns104 = _ap104.Namespace(refresh=True, config=None, profile=None, json=True, out=None,
+                                  name=None, sohieu=None, cat=None, loai=None, nlm=False, no_nlm=False,
+                                  corpus=False, no_corpus=False, corpus_effective=False, row_kind=None,
+                                  mime=None, drive_id=None, limit=None, base_also=False, no_base_also=True)
+        _rc104 = _TL_MODULE.cmd_reg_query(_ns104)
+    finally:
+        _TL_MODULE.load_creds, _TL_MODULE._manifest_entries, _TL_MODULE.apply_profile_offline = _o_lc, _o_me, _o_apo
+    cases.append(("r104_reg_query_refresh_loads_creds", len(_creds104) >= 1 and _rc104 == 0))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

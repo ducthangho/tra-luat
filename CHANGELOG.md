@@ -1,3 +1,29 @@
+# ★ v1.34.42 — vá 3 bug audit-tool phát hiện khi chạy thật (data-op + audit corpus 2026-07-13)
+
+> Nguồn: phiên Pha 5 (backfill sohieu/loai) + audit corpus 15 profile bắt 3 trục trặc CỦA CHÍNH CÔNG CỤ audit.
+> Grill-with-docs chốt phương án (BUG3 A vs B; BUG1 tối thiểu vs sâu). TDD r104 ×4 negative-input (luật đứng v1.34.40).
+> **Xác minh code TRƯỚC khi kết luận — loại 2 nghi vấn oan** (manifest `so_hieu`/`id` vs registry `sohieu`/`drive_id`:
+> có helper `_entry_sohieu`/`_entry_drive_id` phủ, lỗi script audit của tôi; infra tự-đăng-ký: guard `_is_infra_file`
+> ĐÃ CÓ, 2 dòng BHXH là legacy đã reg-delete). Không bump GAS/kernel → re-import không bắt buộc.
+
+- **(BUG1 — lớp 'sai mà báo thành công') `nlm-reconcile --all-notebooks`**: dòng `note` trước là CHUỖI CỨNG "mọi
+  notebook sạch" in KỂ CẢ khi `ok=false`; rc=2 (thiếu cache/scope) in ra stderr → `_r_i={}` → `per_notebook` NUỐT lý
+  do. Chính công cụ audit tự báo sai. Vá: (a) `_reconcile_sweep_note(all_ok, per_notebook)` PURE — note ĐIỀU KIỆN
+  (liệt kê notebook rc≠0/finding + hướng dẫn boot/per-notebook); (b) upfront `load_creds` + `_manifest_entries()`
+  MỘT LẦN trước vòng lặp: self-heal khi có creds (config), báo `NEEDS_BOOT_PROFILE` rõ khi không — thay vì lặp rc=2
+  im lặng. Live-smoke: xóa cache ISO → --all-notebooks tự nạp+build cache → reconcile thật ok:true (không note oan).
+- **(BUG2) `reg-query --refresh` chết "Thiếu TL_WEBAPP" gây tưởng MẤT token**: `cmd_reg_query` chỉ gọi
+  `apply_profile_offline` (creds offline — không đảm bảo TL_WEBAPP) rồi `_manifest_entries(refresh=True)` cần LIVE.
+  `locate`/`status` ĐỀU gọi `load_creds` trước refresh — reg-query thiếu. Vá: gọi `load_creds` khi `--refresh`
+  (self-heal từ config) + thông điệp lỗi refresh cụ thể (chỉ `tl boot --refresh`). Live: xóa manifest → --refresh
+  rc=0, JSON hợp lệ, hết lỗi creds.
+- **(BUG3) `reg-query --corpus true` literal ≠ luật corpus server → audit sai lệch**: filter cũ chỉ khớp
+  `corpus=='true'` (bỏ sót vbqppl/overflow → base 486 vs `tl boot` 521). Vá: `_entry_is_corpus_effective(e)` PURE
+  (tách từ `_corpus_count_server_rule`: corpus∈{true,vbqppl}∪overflow − ref − thuong) + cờ `--corpus-effective`
+  (base KHỚP boot 521) + cảnh báo `--corpus true` là literal. **Live-smoke BẮT giới hạn**: luật server CHỈ đúng scope
+  NỀN vbqppl — profile đếm khác (server: mọi dòng có drive_id); ca Luật BHXH 14 dòng corpus=true đều `row_kind=ref`
+  → effective=0 → **cảnh báo khi --corpus-effective dùng trên profile** (không chặn).
+
 # ★ v1.34.41 — B.2 GĐ2: sửa TẬN GỐC `_classify_doc_header` nhận diện văn kiện ĐẢNG + VB HÀNH CHÍNH (2026-07-13)
 
 > Đóng backlog "Giai đoạn 2" của v1.34.40 B.2. Grill 9 quyết định D1-D9 (user duyệt) trên fixture CA THẬT

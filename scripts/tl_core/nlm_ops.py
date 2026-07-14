@@ -397,6 +397,29 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             "registry_on_nlm_rows": n_rows}
 
 
+def _reconcile_sweep_note(all_ok: bool, per_notebook: list) -> str:
+    """v1.34.42 (BUG1 — grill-with-docs): note ĐIỀU KIỆN cho `nlm-reconcile --all-notebooks`. Trước đây là CHUỖI
+    CỨNG 'mọi notebook sạch' in ra KỂ CẢ khi ok=false (lớp 'sai mà báo thành công' — chính công cụ audit tự báo sai).
+    all_ok=True → khẳng định sạch; ngược lại → liệt kê notebook rc≠0/finding + hướng dẫn (boot cho rc=2, per-notebook
+    --apply cho finding). PURE, test offline."""
+    if all_ok:
+        return "Lưới cuối lô: mọi notebook SẠCH (desync=0, unregistered=0) = lô settle+link đủ."
+    probs = []
+    for p in per_notebook or []:
+        nb = str(p.get("notebook") or "?")
+        _find = [f"{k}={p.get(k)}" for k in ("desync_real", "unregistered_on_nlm", "link_candidates",
+                                             "backfill_nlm_notebook_id") if p.get(k)]
+        if _find:
+            probs.append(f"{nb}({', '.join(_find)})")
+        elif p.get("rc") not in (0, None):
+            _er = f", {p['error']}" if p.get("error") else ""
+            probs.append(f"{nb}(rc={p.get('rc')}{_er})")
+    body = "; ".join(probs) if probs else "(không rõ — xem per_notebook)"
+    return ("CÓ VẤN ĐỀ — chưa đồng bộ: " + body + ". "
+            "rc=2 thường do thiếu cache/scope → chạy `tl --profile <P> boot` trước. "
+            "Finding (desync/unregistered/link) → per-notebook `tl nlm-reconcile <nb> --apply`.")
+
+
 def cmd_nlm_reconcile(a) -> int:
     """C (WS1): đối soát registry↔NLM bằng ground-truth từ CLI nlm. Backfill nlm_notebook_id cho dòng
     THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định.
@@ -411,6 +434,24 @@ def cmd_nlm_reconcile(a) -> int:
                                       "`tl nlm-reconcile <notebook_id> --apply`."}, ensure_ascii=False),
                   file=sys.stderr)
             return 2
+        # v1.34.42 (BUG1): tự nạp creds + đảm bảo manifest cache MỘT LẦN trước vòng lặp — self-heal khi có creds
+        # (config), báo NEEDS_BOOT_PROFILE RÕ khi không, thay vì để mỗi inner reconcile fail rc=2 (in stderr, bị
+        # nuốt khỏi per_notebook) rồi note khẳng định 'sạch' oan.
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (SystemExit, Exception):  # noqa: BLE001 — load_creds có thể sys.exit khi thiếu cred; không giết audit
+            pass
+        try:
+            _manifest_entries(refresh=getattr(a, "refresh", False))
+        except Exception:  # noqa: BLE001 — chưa có cache → thử build 1 lần (cần creds LIVE)
+            try:
+                _manifest_entries(refresh=True)
+            except Exception as _me0:  # noqa: BLE001
+                print(json.dumps({"ok": False, "error": "NEEDS_BOOT_PROFILE", "detail": str(_me0),
+                                  "note": "Chạy `tl --profile <P> boot` (hoặc `boot --refresh`) trước "
+                                          "`nlm-reconcile --all-notebooks` — chưa có manifest cache cho scope này."},
+                                 ensure_ascii=False), file=sys.stderr)
+                return 2
         _base, _nberr0 = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
         if _nberr0:
             print(json.dumps({"ok": False, "error": _nberr0}, ensure_ascii=False), file=sys.stderr); return 2
@@ -439,8 +480,7 @@ def cmd_nlm_reconcile(a) -> int:
                   file=sys.stderr, flush=True)
         _out_all = {"ok": _all_ok, "mode": "DRY", "all_notebooks": True, "notebooks_swept": len(_nbs),
                     "per_notebook": _per,
-                    "note": "Lưới cuối lô: mọi notebook sạch (desync=0, unregistered=0) = lô settle+link đủ. "
-                            "Có finding → chạy per-notebook `tl nlm-reconcile <nb> --apply`."}
+                    "note": _reconcile_sweep_note(_all_ok, _per)}   # v1.34.42 (BUG1): note ĐIỀU KIỆN, hết 'sạch' oan
         _o = getattr(a, "out", None)
         if _o:
             Path(_o).write_text(json.dumps(_out_all, ensure_ascii=False, indent=1) + "\n",

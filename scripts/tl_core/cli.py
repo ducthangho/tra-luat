@@ -319,6 +319,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--corpus", nargs="?", const=True, default=False, type=_optional_bool_flag,
                    help="lọc corpus=true (cờ trần; nhận cả '--corpus true/false' — v1.29.6 P2.3)")
     p.add_argument("--no-corpus", dest="no_corpus", action="store_true")
+    p.add_argument("--corpus-effective", dest="corpus_effective", action="store_true",
+                   help="(v1.34.42) lọc corpus theo ĐÚNG LUẬT SERVER (corpus∈{true,vbqppl}∪overflow − ref − thuong; = số `tl boot` đếm) — KHÁC `--corpus true` literal vốn bỏ sót vbqppl/overflow/blank-trên-NLM")
     p.add_argument("--row-kind", dest="row_kind"); p.add_argument("--mime"); p.add_argument("--limit", type=int)
     p.add_argument("--drive-id", dest="drive_id",
                    help="(v1.34.2) lọc ĐÚNG 1 file theo drive_id/gdoc_id — readback chuẩn của các idempotency contract (Pha H bắt drift: contract dặn `reg-query --drive-id` mà parser thiếu cờ)")

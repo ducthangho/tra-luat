@@ -1,3 +1,31 @@
+# ★ v1.34.47 — vá bất nhất shard overflow (VBQPPL-2) + đóng 3 dư release verifier (2026-07-14)
+
+> Canonical audit v1.34.46 (adopt verifier F-01..F-05) + rà sâu shard overflow (yêu cầu user). Gốc rễ mọi lỗi
+> overflow nặng: đường GHI/ĐỊNH-TUYẾN auto-discover shard từ registry khi config trống, nhưng đường ĐỌC/AUDIT/QUERY
+> chỉ đọc env → config trống ⇒ BỎ shard. Vá bằng một `_resolve_overflow_shards()` DÙNG CHUNG (env + registry, đa-shard).
+
+- **[BLOCKER] `nlm-reconcile --all-notebooks` báo "mọi notebook SẠCH" oan** khi config overflow trống (chỉ quét base,
+  bỏ shard chưa quét — "sai mà báo thành công"). Nay quét đủ shard registry-biết qua `_resolve_overflow_shards`.
+- **[MAJOR] `ingest-local` (single-file) route overflow khi base đầy mà KHÔNG check overflow-room** → both-full thì
+  add vào shard đầy SAU side-effect. Nay `_ingest_target` tính overflow_room LIVE + `_overflow_route` fail-closed
+  (both-full → BLOCKED trước upload/register, KHÔNG auto-create) — khớp batch `ingest-missing`. +guard placeholder.
+- **[MAJOR] `nlm-cross` bỏ overflow cho profile DEFAULT** khi config trống (block `_base_also_enabled`=False). Nay
+  LUÔN nối shard overflow của scope từ registry. `nlm-query` thêm cảnh báo dùng `nlm-cross` khi corpus đã sharded.
+- **[MODERATE] `slot-audit --all-shards` under-count base**: dòng blank-nlm_notebook_id nay quy về base (khớp
+  `_nlm_slot_count`) → cảnh báo base gần-đầy không còn kích trễ. `_resolve_overflow_shards` đa-shard (không chỉ 1).
+- **Release verifier 3 dư (v1.34.46 audit):** `release-bundle --top a/b` (separator) nay bị từ chối; `release-verify`
+  bắt 2 root khác-hoa (ROOT_NOT_SINGLE); repro-rebuild lỗi dọn CẢ tmp chính (hết rò + hết propagate uncaught).
+- Test: +4 r109 (resolve-overflow env+registry, slot fold, ingest-target blocked both-full, top-separator). selftest
+  **915/915**, golden 18/18, workflow/determinism strict. **⚠ SKILL.md kernel đổi (version + release gate) ⇒ RE-IMPORT.**
+  GAS `doNlmPreflight_` (đếm slot overflow trước route) = backlog webapp riêng (chưa bump GAS).
+
+# ★ v1.34.46 — kết hợp hậu kiểm v1.34.45 + đóng kín release archive verifier (2026-07-14)
+
+- Lấy ZIP v1.34.45 hậu kiểm làm nền vì giữ nguyên 143/162 tệp và bổ sung đúng các vá Windows lock, SSRF/HTTPS-default, golden location/cross-platform, archive verification, cache conflict và tài liệu hợp đồng apply.
+- Negative test độc lập phát hiện `release-verify --archive` vẫn false-pass ba dạng ZIP không canonical: entry trùng, metadata ngoài root và `RELEASE_MANIFEST.json` nhúng bị thay nội dung. Verifier mới duyệt một lượt O(n), chặn duplicate Unicode/casefold, path/root không portable, directory/special entry, metadata ZIP không cố định, size/SHA lệch và manifest/BUNDLE_META không khớp.
+- `release-bundle --top` từ chối `.`/`..`, tên Windows reserved, trailing dot/space, ký tự cấm và Unicode không NFC. Bundle chỉ được publish ra `--out` sau khi hai build tạm cho cùng SHA-256; gate thất bại không ghi đè gói hợp lệ cũ.
+- Thêm 4 negative tests r108 cho duplicate/root-meta/manifest-binding/top-portability; giữ một lượt hash/member và không thêm chi phí vào ingest file/local/ZIP runtime.
+
 # ★ v1.34.45 — hardening ingest/local/cache/ZIP + determinism (2026-07-14)
 
 - Mọi đường ingest ghi ra Drive/registry/NLM nay fail-closed: `ok` thiếu/rỗng không còn được coi là thành công; readback sai dừng pipeline. Lệnh `ingest` cũ chỉ còn là adapter sang engine `ingest-local` chung.

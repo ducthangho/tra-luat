@@ -157,11 +157,15 @@ def _nlm_ref_slot_count(entries: list, notebook_id: str, base_notebook_id: str |
     return n
 
 
-def _slot_count_all_shards(entries: list) -> dict:
+def _slot_count_all_shards(entries: list, base_nb: str | None = None) -> dict:
     """KH1 Pha 1.3 (II.5, PURE): đếm slot HIỆU LỰC theo TỪNG shard (nlm_notebook_id) — base + mọi overflow. Bỏ
-    removed*/ref. Trả {notebook_id: count}. Dùng cảnh báo shard sắp đầy (>270/300) để chuẩn bị shard kế."""
+    removed*/ref. Trả {notebook_id: count}. Dùng cảnh báo shard sắp đầy (>270/300) để chuẩn bị shard kế.
+    v1.34.47 (Mod5 fix): khi có base_nb, dòng blank-nlm_notebook_id được quy về BASE (khớp _nlm_slot_count
+    fold `matching + unknown_notebook if is_base`) — trước đây bỏ hẳn blank-nb ⇒ base UNDER-count so với
+    slot-audit đơn-notebook ⇒ cảnh báo base gần-đầy kích trễ/không kích."""
     from collections import Counter as _C
     _active = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
+    _base = (base_nb or "").strip()
     c = _C()
     for e in entries or []:
         if _entry_row_kind(e) == "ref":
@@ -175,6 +179,8 @@ def _slot_count_all_shards(entries: list) -> dict:
         nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
         if nb:
             c[nb] += 1
+        elif _base:
+            c[_base] += 1
     return dict(c)
 
 
@@ -196,7 +202,8 @@ def cmd_slot_audit(a) -> int:
     if getattr(a, "all_shards", False):
         # KH1 Pha 1.3 (II.5): đếm slot theo TỪNG shard + cảnh báo shard >ngưỡng (mặc định 270/300) để chuẩn bị shard kế.
         near = getattr(a, "near_full", None) or 270
-        per = _slot_count_all_shards(entries)
+        _base_sa = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
+        per = _slot_count_all_shards(entries, _base_sa)
         rows = sorted(per.items(), key=lambda kv: (-kv[1], kv[0]))
         warn = [{"notebook_id": nb, "count": n, "cap": NLM_SLOT_CAP} for nb, n in rows if n >= near]
         res = {"ok": True, "gate": "slot-audit", "cap": NLM_SLOT_CAP, "near_full_threshold": near,
@@ -451,11 +458,12 @@ def cmd_nlm_reconcile(a) -> int:
                 load_creds(getattr(a, "config", None), getattr(a, "profile", None))
             except (SystemExit, Exception):  # noqa: BLE001 — load_creds có thể sys.exit khi thiếu cred; không giết audit
                 pass
+        _ent = []
         try:
-            _manifest_entries(refresh=getattr(a, "refresh", False))
+            _ent = _manifest_entries(refresh=getattr(a, "refresh", False))
         except Exception:  # noqa: BLE001 — chưa có cache → thử build 1 lần (cần creds LIVE)
             try:
-                _manifest_entries(refresh=True)
+                _ent = _manifest_entries(refresh=True)
             except Exception as _me0:  # noqa: BLE001
                 print(json.dumps({"ok": False, "error": "NEEDS_BOOT_PROFILE", "detail": str(_me0),
                                   "note": "Chạy `tl --profile <P> boot` (hoặc `boot --refresh`) trước "
@@ -465,8 +473,11 @@ def cmd_nlm_reconcile(a) -> int:
         _base, _nberr0 = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
         if _nberr0:
             print(json.dumps({"ok": False, "error": _nberr0}, ensure_ascii=False), file=sys.stderr); return 2
-        _ovf = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
-        _nbs = [_base] + ([_ovf] if _ovf and _ovf != _base else [])
+        # v1.34.47 (B1 fix): resolve MỌI shard overflow từ env + REGISTRY (đối xứng đường ghi/định-tuyến).
+        # Trước đây chỉ đọc env → config trống ⇒ chỉ quét base ⇒ _reconcile_sweep_note báo 'mọi notebook
+        # SẠCH' oan trên shard chưa quét ('sai mà báo thành công'). Nay quét đủ shard registry-biết.
+        _shards = _resolve_overflow_shards(_ent, _base)
+        _nbs = [_base] + [s for s in _shards if s != _base]
         _per, _all_ok = [], True
         for _nb_i in _nbs:
             _buf = _io.StringIO()
@@ -608,6 +619,35 @@ def _discover_overflow_from_registry(entries: list[dict], main_nb: str) -> str:
         return ""
     # nhiều nhất trước; hoà thì theo id (ổn định)
     return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+
+
+def _resolve_overflow_shards(entries: list[dict], base_nb: str) -> list[str]:
+    """v1.34.47: NGUỒN SỰ THẬT DUY NHẤT cho 'mọi shard overflow ngoài base' — dùng CHUNG cho MỌI đường
+    ĐỌC/AUDIT/QUERY (reconcile --all-notebooks, nlm-cross, nlm-query) để ĐỐI XỨNG với đường ghi/định-tuyến
+    (vốn đã auto-discover từ registry khi config trống). Trước v1.34.47 các đường đọc chỉ lấy env
+    TL_OVERFLOW_NOTEBOOK_ID → config trống ⇒ BỎ shard ⇒ reconcile 'sạch' oan / cross thiếu nguồn.
+    Gộp: (1) env overflow (nếu hợp lệ, ≠ base, có '-', ≠ placeholder) + (2) MỌI nlm_notebook_id ở dòng
+    row_kind='overflow' trong registry (đủ multi-shard, ≠ base). Trả list dedup, env trước rồi registry
+    theo phổ-biến-giảm→id."""
+    base_nb = (base_nb or "").strip()
+    out: list[str] = []
+    seen: set[str] = set()
+    env_ovf = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
+    # Chấp nhận GIÁ TRỊ config đã đặt (đường ĐỌC nới hơn đường ghi) — chỉ loại literal placeholder chưa điền;
+    # id sai (≠ placeholder) vẫn được sweep để lộ lỗi RÕ (source_list fail) thay vì im lặng bỏ shard.
+    if env_ovf and env_ovf != base_nb and env_ovf != "TL_OVERFLOW_NOTEBOOK_ID":
+        out.append(env_ovf); seen.add(env_ovf)
+    counts: dict[str, int] = {}
+    for e in entries or []:
+        if _entry_row_kind(e) != "overflow":
+            continue
+        nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if nb and nb != base_nb:
+            counts[nb] = counts.get(nb, 0) + 1
+    for nb, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+        if nb not in seen:
+            out.append(nb); seen.add(nb)
+    return out
 
 
 def cmd_preflight(a) -> int:
@@ -836,7 +876,7 @@ def cmd_overflow_resolve(a) -> int:
     discovered = False
     if not overflow or "-" not in overflow:
         overflow = _discover_overflow_from_registry(entries, base_nb); discovered = bool(overflow)
-    per = _slot_count_all_shards(entries)
+    per = _slot_count_all_shards(entries, base_nb)
     base_reg, ov_reg = per.get(base_nb, 0), (per.get(overflow, 0) if overflow else 0)
     # LIVE physical cross-check (nlm-get) — registry có thể TỤT SAU vật lý (nguồn add thẳng chưa ghi registry).
     # MAX(registry, physical) làm slot hiệu lực → KHÔNG báo "còn chỗ" giả khi vật lý đã vượt cap (vd base 279 reg / 315 live).
@@ -910,6 +950,17 @@ def cmd_nlm_query(a) -> int:
     nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
     if _nberr:
         print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
+    # v1.34.47 (Mod6): nlm-query CHỈ quét 1 notebook. Nếu scope đã sharded (base + shard overflow) và không
+    # ghim source_id → nhắc dùng nlm-cross để phủ overflow (tránh lặng lẽ thiếu nguồn đã overflow).
+    if not getattr(a, "notebook_id", None) and not (a.source_id or None):
+        try:
+            _q_shards = _resolve_overflow_shards(_manifest_entries(refresh=False), nb)
+        except Exception:  # noqa: BLE001
+            _q_shards = []
+        if _q_shards:
+            print(f"[tl] ⚠ corpus đã SHARDED (base {nb[:8]}… + {len(_q_shards)} shard overflow) — nlm-query chỉ quét 1 "
+                  f"notebook, nguồn đã overflow KHÔNG hiện. Dùng `tl nlm-cross \"<câu hỏi>\"` để phủ base+overflow.",
+                  file=sys.stderr)
     r = nc.notebook_query(nb, a.query, source_ids=(a.source_id or None))
     if not r.get("ok"):
         print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
@@ -1025,6 +1076,16 @@ def cmd_nlm_cross(a) -> int:
     if not nbs and not getattr(a, "all", False):
         # Group B: shard mặc định theo PROFILE ĐANG DÙNG (TL_NOTEBOOK_ID) + overflow; default profile → VBQPPL base.
         nbs = [x for x in [(os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK), os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")] if x]
+        # v1.34.47 (M2 fix): LUÔN nối shard overflow của scope hiện tại từ REGISTRY (đối xứng đường ghi).
+        # Trước đây chỉ env + block _base_also_enabled (=False cho DEFAULT profile) ⇒ base VBQPPL đã overflow
+        # bị BỎ nguồn khỏi tra-cứu khi config overflow trống. Best-effort (cross không boot đầy đủ).
+        _cur_base = (os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK)
+        try:
+            for _nb in _resolve_overflow_shards(_manifest_entries(refresh=False), _cur_base):
+                if _nb not in nbs:
+                    nbs.append(_nb)
+        except Exception:  # noqa: BLE001 — chưa có cache → giữ env-only, không chặn cross
+            pass
         # A (v1.30.0): profile CỘNG VBQPPL — nối thêm notebook NỀN (base+overflow+shards từ config), profile đứng TRƯỚC.
         if _base_also_enabled(a):
             _, _cfg = _read_config_record(getattr(a, "config", None))

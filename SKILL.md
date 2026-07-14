@@ -16,7 +16,7 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.45 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.47 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 
@@ -283,7 +283,8 @@ Live/post-deploy contract = **2.21.2j** (đã xác minh `ping.version=2.21.2j`, 
   KHÔNG tách bản canonical (chunk chỉ là nguồn phụ `row_kind=ref, corpus=false, goc=<canonical>`).
 - Release: sau MỌI sửa file → `release-manifest --out RELEASE_MANIFEST.json` trước khi đóng zip;
   gate đóng gói = selftest + workflow-audit/determinism-audit --strict + golden-test + bundle ×2 cùng SHA
-  + release-verify trong gói giải nén. Workflow cards: `references/workflows/*.json` (schema v1);
+  + `release-verify --archive` (topology/metadata/manifest nhúng/member hash) + verify trong gói giải nén.
+  Workflow cards: `references/workflows/*.json` (schema v1);
   golden fixtures: `references/golden/` (fixtures sinh-tại-chỗ tất định).
 - Golden fixtures: use `golden-test --write` only after an intentional CLI/schema change and then rerun
   `determinism-audit --strict` — CẤM `--write` để "xanh hóa" gate golden đỏ (che regression thật).
@@ -298,7 +299,8 @@ python scripts/tl.py workflow-audit --strict --json
 python scripts/tl.py golden-test --json
 python scripts/tl.py determinism-audit --strict --json
 python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json
-python scripts/tl.py release-verify RELEASE_MANIFEST.json --json
+python scripts/tl.py release-bundle --out ../tra-luat-release.zip --json
+python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../tra-luat-release.zip --json
 ```
 
 ## DANH MỤC REFERENCES

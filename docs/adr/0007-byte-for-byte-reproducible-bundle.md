@@ -10,9 +10,13 @@
      metadata; loại cache, tệp tạm và thời gian build khỏi nội dung được hash.
   3. Release gate build hai lần và yêu cầu SHA-256 giống nhau. Mismatch manifest/package/archive luôn thất bại;
      chế độ strict chỉ quyết định việc chấp nhận tệp thừa, không được nới kiểm tra hash.
+  4. Verifier archive ràng buộc cả topology và manifest nhúng: đúng một root portable, không entry trùng/collision,
+     không directory/special entry, metadata ZIP đúng canonical, mọi size/SHA khớp và `RELEASE_MANIFEST.json`
+     trong ZIP phải bằng manifest dùng để verify. Duyệt một lượt O(n); không giải nén ra filesystem.
 - **Phương án đã loại:**
   - *Giữ DEFLATE và chỉ cố định timestamp/thứ tự* — compressed bytes vẫn phụ thuộc implementation/runtime.
   - *Chỉ công bố content hash* — không chứng minh file ZIP được giao không bị đổi metadata hoặc thay byte.
   - *Cho non-strict bỏ qua package hash* — biến kiểm tra toàn vẹn thành advisory và đã tạo thành công giả.
 - **Hệ quả:** Bundle lớn hơn nhưng đóng/mở nhanh hơn, dễ so sánh và tái tạo xuyên môi trường. Kênh phân phối phải
-  lưu/công bố cả hai hash; mọi thay đổi metadata archive có chủ ý cũng tạo archive hash mới.
+  lưu/công bố cả hai hash; mọi thay đổi metadata archive có chủ ý cũng tạo archive hash mới. ZIP được đóng lại
+  bằng công cụ khác dù giữ nguyên nội dung sẽ không còn được coi là artifact canonical.

@@ -831,17 +831,41 @@ def _ingest_target(g, sohieu: str, name: str):
     Group B (log rà, NGHIÊM TRỌNG): trước hard-code NLM_BASE_NOTEBOOK (743ed200 = VBQPPL) → `ingest-local
     --profile NQ36` ĐẨY NHẦM về VBQPPL thay vì notebook NQ36 → 'Could not add drive source'. Nay theo profile."""
     base = (os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK or "").strip()
-    overflow = os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or ""
+    overflow = (os.environ.get("TL_OVERFLOW_NOTEBOOK_ID") or "").strip()
+    # v1.34.47 (Mod2): guard placeholder/id-không-hợp-lệ + discovery fallback (ĐỐI XỨNG 3 site kia:
+    # preflight/ingest-missing/overflow-resolve). Trước đây chỉ `if not overflow`, nên config để literal
+    # 'TL_OVERFLOW_NOTEBOOK_ID' bị đẩy thẳng làm target → LIVE_SOURCE_LIST_FAILED/'nlm login' oan SAU side-effect.
+    if (not overflow) or overflow == "TL_OVERFLOW_NOTEBOOK_ID" or "-" not in overflow:
+        try:
+            overflow = _discover_overflow_from_registry(_manifest_entries(refresh=False), base)
+        except Exception:  # noqa: BLE001
+            overflow = ""
     if not overflow:
-        return base, {"note": "không cấu hình overflow → base"}
+        return base, {"note": "không cấu hình/không phát hiện overflow → base"}
     params = {"notebookId": base, "overflowNotebookId": overflow, "normative": "true"}
     if sohieu: params["soHieu"] = sohieu
     else: params["name"] = name
     pf = g.get("nlm_preflight", **params)
     slots = pf.get("slots") or {}
-    route_overflow = bool(slots.get("full") or (pf.get("overflow_route") and pf.get("decision") == "REVIEW"))
-    return (overflow if route_overflow else base), {"decision": pf.get("decision"), "slots_full": slots.get("full"),
-                                                    "used": slots.get("used"), "cap": slots.get("cap")}
+    if not slots.get("full"):
+        # base còn chỗ → base (giữ nhanh đường thường; KHÔNG gọi nlm-get overflow trừ khi base đầy)
+        return base, {"decision": pf.get("decision"), "slots_full": False,
+                      "used": slots.get("used"), "cap": slots.get("cap")}
+    # v1.34.47 (M1 fix): base ĐẦY → tính overflow_room LIVE + `_overflow_route` fail-closed (KHỚP batch
+    # `ingest-missing`). Trước đây `route_overflow = slots.full or …` đẩy overflow MÙ bất kể shard còn chỗ →
+    # both-full thì `source_add` vào shard đầy SAU khi đã upload Drive + ghi registry. Nay both-full → 'blocked'
+    # để caller DỪNG TRƯỚC mọi side-effect (KHÔNG auto-create notebook — ADR).
+    try:
+        nc = _imp("nlm_cli")
+        overflow_room = NLM_SLOT_CAP - int(nc.notebook_get(overflow).get("source_count") or 0)
+    except Exception as e:  # noqa: BLE001
+        return base, {"blocked": True, "overflow_shard": overflow,
+                      "reason": f"OVERFLOW_ROOM_UNKNOWN: base đầy nhưng không đếm được slot overflow ({e}) — DỪNG an toàn."}
+    route, shard, reason = _overflow_route(0, overflow, overflow_room)
+    if route == "blocked":
+        return base, {"blocked": True, "overflow_shard": overflow, "overflow_room": overflow_room, "reason": reason}
+    return shard, {"decision": pf.get("decision"), "slots_full": True, "route": "overflow",
+                   "overflow_shard": shard, "overflow_room": overflow_room}
 
 
 def cmd_recat(a) -> int:
@@ -2232,6 +2256,16 @@ def cmd_ingest_local(a) -> int:
         if not mk.get("ok"):
             print(json.dumps({"ok": False, "step": "mkdir_cat", "journal": run_id, "detail": mk}, ensure_ascii=False), file=sys.stderr); return 2
     target, pf = _ingest_target(g, sohieu, name)
+    # v1.34.47 (M1 fix): MỌI shard đầy → DỪNG TRƯỚC upload/register (chưa side-effect nào), KHÔNG add mù vào
+    # shard đầy. Khớp gate 'blocked' của batch ingest-missing (KHÔNG auto-create notebook — ADR).
+    if pf.get("blocked"):
+        print(json.dumps({"ok": False, "blocked": True, "step": "nlm_target", "journal": run_id,
+                          "reason": pf.get("reason"), "overflow_shard": pf.get("overflow_shard"),
+                          "overflow_room": pf.get("overflow_room"),
+                          "note": "MỌI shard (base+overflow) đầy — chưa upload/ghi gì. Duyệt/chuẩn bị shard mới "
+                                  "(cập nhật overflowNotebookId hoặc tạo shard) rồi chạy lại."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
     inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
     # convert=false + register=false: GIỮ file NHỊ PHÂN làm src (KHÔNG để upload tự convert→GDoc + tự register,
     # nếu không organize convert sẽ tạo GDoc THỨ HAI → trùng. Chỉ organize tạo 1 GDoc + 1 dòng registry.)

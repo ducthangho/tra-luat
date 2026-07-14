@@ -15,6 +15,7 @@ import json       # noqa: F401
 import os         # noqa: F401
 import re         # noqa: F401
 import shutil     # noqa: F401
+import stat       # noqa: F401
 import subprocess # noqa: F401
 import sys        # noqa: F401
 import tempfile   # noqa: F401
@@ -340,6 +341,34 @@ _RELEASE_EXCLUDE_NAMES = {
     "release_check_report.json", "determinism_report.json",
 }
 
+_RELEASE_WINDOWS_RESERVED = {
+    "con", "prn", "aux", "nul",
+    *(f"com{i}" for i in range(1, 10)),
+    *(f"lpt{i}" for i in range(1, 10)),
+}
+
+
+def _portable_release_component(name: str) -> bool:
+    """Return whether one path component is safe on Windows/macOS/Linux."""
+    if not isinstance(name, str) or not name or name in {".", ".."}:
+        return False
+    if unicodedata.normalize("NFC", name) != name:
+        return False
+    # v1.34.47: cấm CẢ '/' và '\\' — một component portable KHÔNG chứa separator (F-01 residual:
+    # trước đó `release-bundle --top a/b` lọt gate publish rồi fail chính release-verify của nó).
+    if name.endswith((" ", ".")) or re.search(r'[<>:"|?*/\\]|[\x00-\x1f]', name):
+        return False
+    return name.split(".", 1)[0].casefold() not in _RELEASE_WINDOWS_RESERVED
+
+
+def _portable_release_relpath(rel: str) -> bool:
+    if not isinstance(rel, str) or not rel or "\\" in rel or rel.startswith("/"):
+        return False
+    if re.match(r"^[A-Za-z]:", rel):
+        return False
+    parts = rel.split("/")
+    return bool(parts) and all(_portable_release_component(part) for part in parts)
+
 _RELEASE_REQUIRED_FILES = [
     "VERSION",
     "scripts/tl_core/__init__.py",
@@ -602,8 +631,7 @@ def cmd_release_manifest(a) -> int:
 
 
 def _verify_release_archive(zip_path: Path, manifest: dict, *, expected_archive_sha256: str = "") -> dict:
-    """v1.34.45 (audit merge): open the .zip and verify archive bytes + every member against the
-    manifest (was asserted at build time but never gate-checked). Fail closed on any mismatch."""
+    """Verify canonical ZIP topology, metadata, embedded manifest, and member bytes in O(n)."""
     out = {"archive": str(zip_path), "archive_ok": False, "errors": []}
     if not zip_path.is_file():
         out["errors"].append("ARCHIVE_NOT_FOUND")
@@ -615,34 +643,143 @@ def _verify_release_archive(zip_path: Path, manifest: dict, *, expected_archive_
         out["archive_sha256_expected"] = exp
         if exp != actual_sha:
             out["errors"].append(f"ARCHIVE_SHA256_MISMATCH:{actual_sha}!={exp}")
-    sha_by_rel = {f["path"]: f.get("sha256") for f in manifest.get("files", [])}
-    meta_names = {"RELEASE_MANIFEST.json", "BUNDLE_META.json"}
+    expected = {}
+    expected_keys = {}
+    for record in manifest.get("files", []):
+        rel = str(record.get("path") or "")
+        if not _portable_release_relpath(rel):
+            out["errors"].append(f"ARCHIVE_MANIFEST_PATH_UNSAFE:{rel}")
+            continue
+        key = rel.casefold()
+        if key in expected_keys:
+            out["errors"].append(f"ARCHIVE_MANIFEST_PATH_DUPLICATE:{rel}->{expected_keys[key]}")
+            continue
+        expected_keys[key] = rel
+        expected[rel] = record
+
+    def _metadata_errors(info) -> list[str]:
+        errors = []
+        if info.compress_type != zipfile.ZIP_STORED:
+            errors.append("COMPRESSION_NOT_STORED")
+        if info.date_time != (1980, 1, 1, 0, 0, 0):
+            errors.append("TIMESTAMP_NOT_FIXED")
+        if info.create_system != 3:
+            errors.append("CREATE_SYSTEM_NOT_FIXED")
+        if info.extra or info.comment:
+            errors.append("ENTRY_EXTRA_OR_COMMENT_PRESENT")
+        mode = (int(info.external_attr) >> 16) & 0xFFFF
+        kind = stat.S_IFMT(mode)
+        if kind and kind != stat.S_IFREG:
+            errors.append("SPECIAL_ENTRY")
+        if mode != 0o100644:
+            errors.append("PERMISSION_NOT_FIXED")
+        if info.compress_size != info.file_size:
+            errors.append("STORED_SIZE_MISMATCH")
+        return errors
+
+    def _member_sha256(zf, info) -> str:
+        digest = hashlib.sha256()
+        with zf.open(info, "r") as stream:
+            while True:
+                chunk = stream.read(1024 * 1024)
+                if not chunk:
+                    break
+                digest.update(chunk)
+        return digest.hexdigest()
+
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
-            names = [n for n in zf.namelist() if not n.endswith("/")]
-            roots = {n.split("/", 1)[0] for n in names if "/" in n}
-            if len(roots) != 1:
-                out["errors"].append(f"ARCHIVE_ROOT_NOT_SINGLE:{sorted(roots)}")
-            top = sorted(roots)[0] if roots else ""
+            if zf.comment:
+                out["errors"].append("ARCHIVE_COMMENT_PRESENT")
+            infos = zf.infolist()
+            if len(infos) > len(expected) + 2:
+                out["errors"].append(f"ARCHIVE_ENTRY_COUNT_EXCESS:{len(infos)}>{len(expected) + 2}")
+            roots = {}
+            seen_full = {}
             seen = set()
-            for n in names:
-                rel = n[len(top) + 1:] if (top and n.startswith(top + "/")) else n
-                if rel in meta_names:
+            manifest_infos = []
+            bundle_meta_infos = []
+            for info in infos:
+                name = info.filename
+                if info.is_dir() or name.endswith("/"):
+                    out["errors"].append(f"ARCHIVE_UNEXPECTED_DIRECTORY:{name}")
                     continue
-                parts = Path(rel).parts
-                if ".." in parts or rel.startswith("/") or (len(rel) > 1 and rel[1] == ":"):
-                    out["errors"].append(f"ARCHIVE_UNSAFE_PATH:{n}")
+                if not _portable_release_relpath(name) or "/" not in name:
+                    out["errors"].append(f"ARCHIVE_UNSAFE_PATH:{name}")
                     continue
-                got = hashlib.sha256(zf.read(n)).hexdigest()
-                want = sha_by_rel.get(rel)
+                top, rel = name.split("/", 1)
+                # v1.34.47: key theo top CHÍNH XÁC (không casefold) — 2 root khác-hoa (tra-luat + TRA-LUAT)
+                # là mơ hồ trên fs không-phân-biệt-hoa và LÀ 2 thư mục trên fs phân-biệt-hoa → phải bắt ROOT_NOT_SINGLE.
+                roots[top] = top
+                full_key = name.casefold()
+                if full_key in seen_full:
+                    out["errors"].append(f"ARCHIVE_DUPLICATE_PATH:{name}->{seen_full[full_key]}")
+                    continue
+                seen_full[full_key] = name
+                for err in _metadata_errors(info):
+                    out["errors"].append(f"ARCHIVE_METADATA_INVALID:{name}:{err}")
+                if rel == "RELEASE_MANIFEST.json":
+                    manifest_infos.append(info)
+                    continue
+                if rel == "BUNDLE_META.json":
+                    bundle_meta_infos.append(info)
+                    continue
+                want = expected.get(rel)
                 if want is None:
                     out["errors"].append(f"ARCHIVE_EXTRA_FILE:{rel}")
-                elif got != want:
-                    out["errors"].append(f"ARCHIVE_MEMBER_SHA_MISMATCH:{rel}")
+                    continue
                 seen.add(rel)
-            for miss in sorted(set(sha_by_rel) - seen):
+                try:
+                    declared_size = int(want.get("size"))
+                except (TypeError, ValueError):
+                    out["errors"].append(f"ARCHIVE_MANIFEST_SIZE_INVALID:{rel}")
+                    continue
+                if info.file_size != declared_size:
+                    out["errors"].append(f"ARCHIVE_MEMBER_SIZE_MISMATCH:{rel}:{info.file_size}!={declared_size}")
+                    continue
+                got = _member_sha256(zf, info)
+                if got != str(want.get("sha256") or "").lower():
+                    out["errors"].append(f"ARCHIVE_MEMBER_SHA_MISMATCH:{rel}")
+
+            if len(roots) != 1:
+                out["errors"].append(f"ARCHIVE_ROOT_NOT_SINGLE:{sorted(roots.values())}")
+            else:
+                out["root"] = next(iter(roots.values()))
+            for miss in sorted(set(expected) - seen):
                 out["errors"].append(f"ARCHIVE_MISSING_FILE:{miss}")
-    except (zipfile.BadZipFile, OSError, KeyError) as e:
+
+            if len(manifest_infos) != 1:
+                out["errors"].append(f"ARCHIVE_EMBEDDED_MANIFEST_COUNT:{len(manifest_infos)}")
+            elif manifest_infos[0].file_size > 8 * 1024 * 1024:
+                out["errors"].append("ARCHIVE_EMBEDDED_MANIFEST_TOO_LARGE")
+            else:
+                try:
+                    embedded_manifest = json.loads(zf.read(manifest_infos[0]).decode("utf-8"))
+                    if embedded_manifest != manifest:
+                        out["errors"].append("ARCHIVE_EMBEDDED_MANIFEST_MISMATCH")
+                except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                    out["errors"].append(f"ARCHIVE_EMBEDDED_MANIFEST_INVALID:{type(exc).__name__}")
+
+            if len(bundle_meta_infos) > 1:
+                out["errors"].append(f"ARCHIVE_BUNDLE_META_COUNT:{len(bundle_meta_infos)}")
+            elif bundle_meta_infos:
+                info = bundle_meta_infos[0]
+                if info.file_size > 1024 * 1024:
+                    out["errors"].append("ARCHIVE_BUNDLE_META_TOO_LARGE")
+                else:
+                    try:
+                        bundle_meta = json.loads(zf.read(info).decode("utf-8"))
+                        if bundle_meta.get("schema") != "bundle_meta.v1":
+                            out["errors"].append("ARCHIVE_BUNDLE_META_SCHEMA_INVALID")
+                        if bundle_meta.get("package_hash") != manifest.get("package_hash"):
+                            out["errors"].append("ARCHIVE_BUNDLE_META_PACKAGE_HASH_MISMATCH")
+                        if bundle_meta.get("file_count") != manifest.get("file_count"):
+                            out["errors"].append("ARCHIVE_BUNDLE_META_FILE_COUNT_MISMATCH")
+                        if bundle_meta.get("version_forked") != manifest.get("skill_version"):
+                            out["errors"].append("ARCHIVE_BUNDLE_META_VERSION_MISMATCH")
+                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        out["errors"].append(f"ARCHIVE_BUNDLE_META_INVALID:{type(exc).__name__}")
+    except (zipfile.BadZipFile, OSError, KeyError, RuntimeError) as e:
         out["errors"].append(f"ARCHIVE_READ_FAILED:{type(e).__name__}:{e}")
     out["archive_ok"] = not out["errors"]
     return out
@@ -764,7 +901,7 @@ def cmd_release_bundle(a) -> int:
     except ValueError:
         pass
     top = getattr(a, "top", None) or "tra-luat"
-    if not top or "/" in top or "\\" in top:
+    if not _portable_release_component(top):
         res = {"ok": False, "error": "INVALID_TOP_NAME", "top": top}
         _print_json_or_text(res, getattr(a, "json", False)); return 2
     manifest = _build_release_manifest(root)
@@ -795,8 +932,7 @@ def cmd_release_bundle(a) -> int:
                 return 2
             _zip_write_bytes_deterministic(zf, data, f"{top}/{rel}")
         _zip_write_bytes_deterministic(zf, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
-    os.replace(tmp, out_path)
-    bundle_sha = _sha256_file(out_path)
+    bundle_sha = _sha256_file(tmp)
     # v1.34.45 (audit merge, ADR-0007): prove byte-for-byte reproducibility AT THE GATE — build the
     # bundle a second time and require an identical archive SHA-256. Prior releases only asserted
     # reproducibility by construction; this makes it a fail-closed check.
@@ -810,17 +946,37 @@ def cmd_release_bundle(a) -> int:
                 _zip_write_bytes_deterministic(zf2, p.read_bytes(), f"{top}/{rel}")
             _zip_write_bytes_deterministic(zf2, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
         rebuild_sha = _sha256_file(_verify_tmp)
+    except Exception as _rex:  # noqa: BLE001
+        # v1.34.47 (F-05 residual): rebuild lỗi (vd source đổi giữa 2 lần build) → dọn CẢ tmp chính
+        # (chưa os.replace) lẫn verify tmp, KHÔNG rò file + KHÔNG propagate uncaught.
+        for _t in (tmp, _verify_tmp):
+            try:
+                _t.unlink()
+            except FileNotFoundError:
+                pass
+        res = {"ok": False, "error": "RELEASE_BUNDLE_REBUILD_FAILED",
+               "detail": f"{type(_rex).__name__}: {_rex}",
+               "note": "Lần build thứ 2 (repro-gate) lỗi — cây có thể đang bị ghi; chạy lại khi ổn định."}
+        _print_json_or_text(res, getattr(a, "json", False))
+        return 2
     finally:
         try:
             _verify_tmp.unlink()
         except FileNotFoundError:
             pass
     if rebuild_sha != bundle_sha:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
         res = {"ok": False, "error": "RELEASE_BUNDLE_NOT_REPRODUCIBLE", "out": str(out_path),
                "archive_sha256": bundle_sha, "archive_sha256_rebuild": rebuild_sha,
                "note": "Hai lần build cho SHA-256 khác nhau — bundle KHÔNG tái lập byte-for-byte (ADR-0007)."}
         _print_json_or_text(res, getattr(a, "json", False))
         return 2
+    # Publish only after both independent builds agree. A failed reproducibility gate never
+    # overwrites a previously valid release at ``out_path``.
+    os.replace(tmp, out_path)
     res = {"ok": True, "schema": "release_bundle.v1", "out": str(out_path), "top": top,
            "file_count": manifest.get("file_count"), "total_bytes": manifest.get("total_bytes"),
            "package_hash": manifest.get("package_hash"), "bundle_sha256": bundle_sha,

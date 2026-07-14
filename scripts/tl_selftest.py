@@ -5211,7 +5211,7 @@ def run() -> int:
         _TL_MODULE._journaled_reg_write = lambda *a, **k: {"verified": True, "patched": 1,
                                                            "reg_bulk": {"ok": True, "patched": 1, "missed": []}}
         _TL_MODULE._reg_before_from_manifest = lambda items, cols: {}
-        _TL_MODULE._slot_count_all_shards = lambda entries: {"NB1": 300, "NB2": 100}
+        _TL_MODULE._slot_count_all_shards = lambda entries, base_nb=None: {"NB1": 300, "NB2": 100}
         os.environ["TL_NOTEBOOK_ID"] = "NB1"; os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
         # (1) nlm-list --json: shape {ok,count,sources} nguyên vẹn qua _emit_json_payload
         _rc1, _o1 = _cap71(_TL_MODULE.cmd_nlm_list, argparse.Namespace(notebook_id="NB1", no_skip_freshness=False,
@@ -5266,7 +5266,7 @@ def run() -> int:
                    "cmd_overflow_resolve", "cmd_slot_audit", "cmd_nlm_add", "cmd_nlm_orphans",
                    "cmd_nlm_cross", "cmd_nlm_get", "cmd_nlm_content", "cmd_nlm_query", "cmd_nlm_query_plan",
                    "_nlm_reconcile_plan", "_nlm_source_drive_id", "_sohieu_loose",
-                   "_discover_overflow_from_registry", "_overflow_route", "_overflow_status",
+                   "_discover_overflow_from_registry", "_resolve_overflow_shards", "_overflow_route", "_overflow_status",
                    "_slot_count_all_shards", "_nlm_slot_count", "_classify_nlm_sources",
                    "_nlm_post_add_dup_check", "_nlm_dedup_gate", "_nlm_query_plan",
                    "_preflight_invariants", "_preflight_verdict", "_raw_on_nlm_rows"]
@@ -8651,17 +8651,114 @@ def run() -> int:
     with _tf107.TemporaryDirectory() as _d107d:
         _d107d = Path(_d107d)
         _z107d = _d107d / "b.zip"
-        _mani107d = {"files": [{"path": "a.txt", "sha256": _cache107.hashlib.sha256(b"good").hexdigest()}]}
-        with _zf107.ZipFile(_z107d, "w") as _z107x:
-            _z107x.writestr("tra-luat/a.txt", b"TAMPERED")
+        _mani107d = {
+            "schema": "release_manifest.v1", "root_name": "tra-luat", "skill_version": "test",
+            "file_count": 1, "package_hash": "f" * 64,
+            "files": [{"path": "a.txt", "size": 4,
+                       "sha256": _cache107.hashlib.sha256(b"good").hexdigest()}],
+        }
+        _mani_bytes107d = json.dumps(_mani107d, ensure_ascii=False, indent=2).encode("utf-8")
+
+        def _write_release_test107(path, member=b"good", *, duplicate=False, root_meta=False,
+                                   embedded_manifest=_mani_bytes107d):
+            import warnings as _warnings107d
+            with _warnings107d.catch_warnings():
+                _warnings107d.simplefilter("ignore", UserWarning)
+                with _zf107.ZipFile(path, "w", compression=_zf107.ZIP_STORED) as _z107x:
+                    _rel107._zip_write_bytes_deterministic(_z107x, member, "tra-luat/a.txt")
+                    _rel107._zip_write_bytes_deterministic(
+                        _z107x, embedded_manifest, "tra-luat/RELEASE_MANIFEST.json")
+                    if duplicate:
+                        _rel107._zip_write_bytes_deterministic(_z107x, member, "tra-luat/a.txt")
+                    if root_meta:
+                        _rel107._zip_write_bytes_deterministic(_z107x, b"{}", "BUNDLE_META.json")
+
+        _write_release_test107(_z107d, b"evil")
         _avbad107 = _rel107._verify_release_archive(_z107d, _mani107d)
-        with _zf107.ZipFile(_z107d, "w") as _z107x:
-            _z107x.writestr("tra-luat/a.txt", b"good")
+        _write_release_test107(_z107d)
         _avgood107 = _rel107._verify_release_archive(_z107d, _mani107d)
         cases.append(("r107b_release_archive_member_tamper",
                       _avbad107.get("archive_ok") is False
                       and any("ARCHIVE_MEMBER_SHA_MISMATCH" in _e for _e in _avbad107.get("errors", []))
                       and _avgood107.get("archive_ok") is True))
+        _write_release_test107(_z107d, duplicate=True)
+        _avdup107 = _rel107._verify_release_archive(_z107d, _mani107d)
+        cases.append(("r108_release_archive_duplicate_rejected",
+                      not _avdup107.get("archive_ok")
+                      and any("ARCHIVE_DUPLICATE_PATH" in _e for _e in _avdup107.get("errors", []))))
+        _write_release_test107(_z107d, root_meta=True)
+        _avroot107 = _rel107._verify_release_archive(_z107d, _mani107d)
+        cases.append(("r108_release_archive_root_meta_rejected",
+                      not _avroot107.get("archive_ok")
+                      and any("ARCHIVE_UNSAFE_PATH:BUNDLE_META.json" in _e
+                              for _e in _avroot107.get("errors", []))))
+        _write_release_test107(_z107d, embedded_manifest=b"{}")
+        _avmanifest107 = _rel107._verify_release_archive(_z107d, _mani107d)
+        cases.append(("r108_release_archive_embedded_manifest_bound",
+                      not _avmanifest107.get("archive_ok")
+                      and "ARCHIVE_EMBEDDED_MANIFEST_MISMATCH" in _avmanifest107.get("errors", [])))
+        cases.append(("r108_release_top_portable",
+                      _rel107._portable_release_component("tra-luat")
+                      and not _rel107._portable_release_component("..")
+                      and not _rel107._portable_release_component("CON")))
+
+    # ═══ v1.34.47 — r109_*: đối xứng discovery overflow (B1/M2) + router fail-closed (M1) + slot fold (Mod5) + release residual (R1) ═══
+    _base109 = "743ed200-aaaa-bbbb-cccc-000000000001"
+    _ov2, _ov3 = "SHARD-OVERFLOW-2", "SHARD-OVERFLOW-3"
+    _ent109 = [
+        {"nlm_notebook_id": _base109, "row_kind": "own", "nlm_source_id": "s1"},
+        {"nlm_notebook_id": _ov2, "row_kind": "overflow", "nlm_source_id": "s2"},
+        {"nlm_notebook_id": _ov2, "row_kind": "overflow", "nlm_source_id": "s3"},
+        {"nlm_notebook_id": _ov3, "row_kind": "overflow", "nlm_source_id": "s4"},
+        {"nlm_notebook_id": "", "row_kind": "own", "nlm_source_id": "s5", "nlm_status": "pushed"},
+    ]
+    _prev_ov109 = os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
+    try:
+        _rs_blank = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)     # config trống → registry vẫn thấy shard
+        os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _ov2
+        _rs_env = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)       # env trước, dedup
+        os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = "TL_OVERFLOW_NOTEBOOK_ID"       # placeholder → bỏ
+        _rs_ph = _TL_MODULE._resolve_overflow_shards(_ent109, _base109)
+    finally:
+        (os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None) if _prev_ov109 is None
+         else os.environ.__setitem__("TL_OVERFLOW_NOTEBOOK_ID", _prev_ov109))
+    cases.append(("r109_resolve_overflow_shards_env_and_registry",
+                  set(_rs_blank) == {_ov2, _ov3} and _rs_env[0] == _ov2
+                  and set(_rs_env) == {_ov2, _ov3} and set(_rs_ph) == {_ov2, _ov3}))
+    _sc_base = _TL_MODULE._slot_count_all_shards(_ent109, _base109)
+    _sc_nobase = _TL_MODULE._slot_count_all_shards(_ent109)
+    cases.append(("r109_slot_count_folds_blank_into_base",
+                  _sc_base.get(_base109) == 2 and _sc_nobase.get(_base109) == 1
+                  and _sc_base.get(_ov2) == 2 and _sc_base.get(_ov3) == 1))
+
+    class _FkGas109:
+        def get(self, action, **kw):
+            return {"ok": True, "decision": "REVIEW", "slots": {"used": 300, "cap": 300, "full": True},
+                    "overflow_route": {"notebookId": _ov2}}
+    class _FkNC109full:
+        def notebook_get(self, nb, **kw): return {"source_count": 300}
+    class _FkNC109room:
+        def notebook_get(self, nb, **kw): return {"source_count": 100}
+    _sav_imp109, _sav_me109 = _TL_MODULE._imp, _TL_MODULE._manifest_entries
+    _env_t109 = {k: os.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID")}
+    try:
+        _TL_MODULE._manifest_entries = lambda refresh=False: _ent109
+        os.environ["TL_NOTEBOOK_ID"] = _base109
+        os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _ov2
+        _TL_MODULE._imp = lambda name: _FkNC109full() if name == "nlm_cli" else _sav_imp109(name)
+        _tgt_blk, _meta_blk = _TL_MODULE._ingest_target(_FkGas109(), "1/2020/QH14", "x")
+        _TL_MODULE._imp = lambda name: _FkNC109room() if name == "nlm_cli" else _sav_imp109(name)
+        _tgt_ovf, _meta_ovf = _TL_MODULE._ingest_target(_FkGas109(), "1/2020/QH14", "x")
+    finally:
+        _TL_MODULE._imp, _TL_MODULE._manifest_entries = _sav_imp109, _sav_me109
+        for _k, _v in _env_t109.items():
+            (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+    cases.append(("r109_ingest_target_blocked_when_all_full",
+                  _meta_blk.get("blocked") is True and _tgt_ovf == _ov2 and not _meta_ovf.get("blocked")))
+    cases.append(("r109_release_top_rejects_separator",
+                  (not _rel107._portable_release_component("a/b"))
+                  and (not _rel107._portable_release_component("a\\b"))
+                  and _rel107._portable_release_component("tra-luat")))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

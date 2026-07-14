@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """Deterministic JSON/path helpers for ``tl.py``.
 
-This module is intentionally small and dependency-light.  It centralizes the
-rules that make read-only JSON output stable across repeated runs:
-
-* volatile time/duration fields are masked;
-* absolute paths are made project-relative where possible;
-* temp paths are normalized to ``<tmp>``;
-* JSON is emitted with sorted keys when deterministic mode is enabled.
+This module is intentionally small and dependency-light.  Deterministic JSON
+emission canonicalizes structure and Unicode but preserves business values.
+Audits that need to compare volatile timestamps or typed paths must call
+``audit_projection`` explicitly with the schema fields they own.
 
 The public CLI remains ``scripts/tl.py``; this module is an internal helper.
 """
@@ -16,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +31,14 @@ VOLATILE_JSON_KEYS = {
     "snapshot_age_s", "age_s", "age_seconds",
 }
 
-PATHISH_KEYS = {"path", "file", "root", "manifest", "report_path"}
+PATHISH_KEYS = {
+    # Explicit path-typed fields used by CLI/report schemas.  Values under
+    # other keys remain untouched even if they happen to look like paths.
+    "path", "file", "root", "manifest", "report_path",
+    "before", "after", "config_path", "cache_file",
+    "input", "output", "out", "out_dir",
+    "archive", "archive_path", "zip", "zip_path", "local_path", "source_path", "target_path",
+}
 
 
 def deterministic_enabled(args: Any = None, *, default_on: bool = False) -> bool:
@@ -96,30 +101,65 @@ def stable_string_for_json(s: str, *, project_root: str | os.PathLike | None = N
     return "<abs-path>"
 
 
-def scrub_volatile(obj: Any, *, project_root: str | os.PathLike | None = None) -> Any:
-    """Return a copy of ``obj`` with volatile fields/path-like values normalized."""
+def canonicalize_json(obj: Any) -> Any:
+    """Canonicalize structure and Unicode without rewriting business values."""
+    if isinstance(obj, dict):
+        return {unicodedata.normalize("NFC", str(k)): canonicalize_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [canonicalize_json(x) for x in obj]
+    if isinstance(obj, str):
+        return unicodedata.normalize("NFC", obj)
+    if isinstance(obj, os.PathLike):
+        return unicodedata.normalize("NFC", str(obj))
+    return obj
+
+
+def audit_projection(obj: Any, *, volatile_keys=None, path_keys=None,
+                     project_root: str | os.PathLike | None = None) -> Any:
+    """Build an explicitly-declared comparison projection for an audit.
+
+    This function is never used implicitly by :func:`json_dumps`.  Callers
+    must declare which schema fields are volatile or typed as paths.
+    """
+    volatile = {str(k) for k in (volatile_keys or ())}
+    paths = {str(k) for k in (path_keys or ())}
     if isinstance(obj, dict):
         out = {}
         for k, v in obj.items():
             key = str(k)
-            if key in VOLATILE_JSON_KEYS:
+            if key in volatile:
                 out[key] = "<volatile>"
-            elif key.endswith("_path") or key in PATHISH_KEYS:
-                out[key] = stable_string_for_json(str(v), project_root=project_root) if isinstance(v, (str, os.PathLike)) else scrub_volatile(v, project_root=project_root)
+            elif key in paths:
+                out[key] = (stable_string_for_json(str(v), project_root=project_root)
+                            if isinstance(v, (str, os.PathLike))
+                            else audit_projection(v, volatile_keys=volatile, path_keys=paths,
+                                                  project_root=project_root))
             else:
-                out[key] = scrub_volatile(v, project_root=project_root)
+                out[key] = audit_projection(v, volatile_keys=volatile, path_keys=paths,
+                                            project_root=project_root)
         return out
     if isinstance(obj, list):
-        return [scrub_volatile(x, project_root=project_root) for x in obj]
+        return [audit_projection(x, volatile_keys=volatile, path_keys=paths,
+                                 project_root=project_root) for x in obj]
     if isinstance(obj, tuple):
-        return [scrub_volatile(x, project_root=project_root) for x in obj]
-    if isinstance(obj, (str, os.PathLike)):
-        return stable_string_for_json(str(obj), project_root=project_root)
-    return obj
+        return [audit_projection(x, volatile_keys=volatile, path_keys=paths,
+                                 project_root=project_root) for x in obj]
+    return canonicalize_json(obj)
+
+
+def scrub_volatile(obj: Any, *, project_root: str | os.PathLike | None = None,
+                   volatile_keys=None, path_keys=None) -> Any:
+    """Compatibility alias for an explicit audit projection.
+
+    With no declared fields it preserves all semantic values.  This prevents
+    a generic JSON serializer from hiding undeclared instability.
+    """
+    return audit_projection(obj, volatile_keys=volatile_keys, path_keys=path_keys,
+                            project_root=project_root)
 
 
 def json_dumps(obj: Any, *, deterministic: bool | None = None, default_on: bool = False,
                project_root: str | os.PathLike | None = None) -> str:
     det = deterministic_enabled(default_on=default_on) if deterministic is None else bool(deterministic)
-    payload = scrub_volatile(obj, project_root=project_root) if det else obj
+    payload = canonicalize_json(obj) if det else obj
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=det)

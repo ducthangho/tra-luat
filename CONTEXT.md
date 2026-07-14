@@ -22,6 +22,39 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 
 - **Gate xanh** — đủ bộ: `--selftest` + `workflow-audit --strict` + `golden-test` + `determinism-audit --strict`
   + `gen_instructions --selftest` + `release-bundle` ×2 cùng SHA-256 + `release-verify` trong gói giải nén.
+- **Ingest thành công** — mọi hậu điều bắt buộc của phạm vi đã chọn đều được đọc lại và xác nhận đúng. Kết quả
+  thiếu, mơ hồ hoặc chỉ hoàn tất một phần là ingest thất bại có thể nối tiếp; ngoại lệ chủ ý dừng trước NLM chỉ
+  thành công khi phần Drive/registry đã được xác nhận và tài liệu chưa được nhận là corpus.
+- **Kế hoạch ingest** — bản mô tả bất biến của một lần ingest, ràng buộc byte nguồn, đích, tên canonical và toàn
+  bộ tùy chọn bằng một dấu vân tay. Apply chỉ là quyền thực thi đúng kế hoạch đã xác nhận; nguồn hoặc cấu hình
+  thay đổi thì phải lập và xác nhận kế hoạch mới. Resume có thể dùng kế hoạch đã ghi trong journal nhưng vẫn phải
+  kiểm tra lại dấu vân tay trước khi tiếp tục.
+- **Kết quả tất định** — cùng dữ liệu và cấu hình tạo ra cùng nội dung nghiệp vụ, không sửa giá trị để che khác
+  biệt. Canonical hóa chỉ áp dụng cho cấu trúc và các trường có kiểu được khai báo; biến động hợp lệ phải được
+  schema từng lệnh chỉ rõ và chỉ bị loại trong bản chiếu audit. Khác biệt thô không được khai báo là lỗi.
+- **Ingest engine** — bộ điều phối dùng chung cho mọi đường ingest, sở hữu state machine, kế hoạch, journal,
+  identity, idempotency và hậu điều; adapter chỉ thực hiện I/O với Drive, registry, NLM hoặc cache. Engine phải
+  tránh đọc lại trùng lặp, hỗ trợ batch có thứ tự kết quả tất định và được kiểm soát bằng ngân sách hiệu năng.
+- **Ngân sách hiệu năng ingest** — giới hạn có thể kiểm thử cho số lần đọc nguồn, số API call, concurrency và
+  thời gian chạy. Hash nguồn một lần mỗi run; mỗi resource tối đa một write và một readback bắt buộc cho mỗi
+  giai đoạn thành công; benchmark local không được chậm hơn baseline quá 15% ở median. Không được bỏ hậu điều
+  an toàn để đạt ngân sách.
+- **Source policy** — quyền quyết định nguồn/host/scheme nào được phép, do môi trường chạy cung cấp qua policy
+  hoặc fetch adapter; skill không hard-code danh sách domain. Ingest engine luôn giữ các bất biến độc lập với
+  host: giới hạn tài nguyên, streaming, xác minh loại và hash, không rò credential, dọn tệp tạm và audit provider.
+- **Identity ingest** — tổ hợp `content_hash + target scope + canonical name + profile` dùng cho idempotency,
+  deduplicate và resume. Tên file đơn lẻ không phải identity; cùng identity là no-op đã xác minh, còn cùng tên
+  nhưng khác hash là conflict và chỉ được thay thế bằng một kế hoạch chỉ rõ source ID cũ.
+- **Cache staged / verified** — `staged` là dữ liệu đã thu nhận nhưng chưa đạt đủ schema, provenance và quality
+  gate; `verified` chỉ được đặt sau khi mọi gate này đọc lại thành công. Fallback hoặc candidate được suy đoán
+  không bao giờ được tự nâng thành verified.
+- **ZIP portable-safe** — profile archive dùng path Unicode NFC với dấu `/`, từ chối traversal, special entry,
+  tên không portable và mọi collision sau canonical hóa kể cả khác hoa thường. Kế hoạch ZIP ràng buộc hash toàn
+  archive cùng `normalized_path + member_hash + size`; giới hạn tài nguyên do môi trường cấu hình và apply luôn
+  giải nén vào staging riêng trước khi chuyển từng member qua ingest engine.
+- **Reproducible bundle** — gói phát hành có `content_hash` từ manifest canonical và `archive_sha256` từ byte
+  ZIP. Exporter dùng ZIP không nén với root, thứ tự, timestamp, permission và metadata cố định để cùng nội dung
+  tạo đúng cùng byte trên mọi lần build; mọi hash mismatch luôn là lỗi.
 - **Golden** — fixture JSON tất định tại `references/golden/`. Độ chặt đã chốt: PASS/FAIL so bản canonical-hoá,
   cộng check **raw-stability** (stdout thô chạy ×2 phải trùng byte) — không so raw-bytes với fixture.
 - **Characterization test** — test đặc tả hành vi hiện có của một cụm lõi cũ, viết TRƯỚC khi tách cụm đó

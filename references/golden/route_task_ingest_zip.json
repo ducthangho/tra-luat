@@ -16,8 +16,8 @@
   "recommended_commands": [
     "ingest-zip <file.zip> --cat <NN> --json",
     "profile-ingest-zip <file.zip> --json",
-    "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json",
-    "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+    "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+    "profile-ingest-zip <file.zip> --apply --confirm yes --expected-plan-hash <plan_hash> --json"
   ],
   "requires_apply": true,
   "requires_dry_run": true,
@@ -41,16 +41,28 @@
     ],
     "apply": [
       "ingest each accepted file separately",
-      "continue-on-error with per-file status",
+      "run bounded parallel workers with per-file status and a parent journal",
       "never upload zip itself as corpus/NLM source"
     ],
+    "command_contracts": {
+      "ingest-zip": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "plan_hash_required": true
+      },
+      "profile-ingest-zip": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "plan_hash_required": true
+      }
+    },
     "confirm_required": true,
     "dry_run_required": true,
     "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
     "id": "ingest_zip",
     "idempotency_contract": {
       "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
-      "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
+      "idempotency_key": "sha256(content-v3: NFC portable_path+sha256+size từng member accepted, sort)+mode+cat_or_profile",
       "journal_key": "batch item path + child pipeline journal",
       "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
       "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
@@ -58,13 +70,14 @@
       "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
       "schema": "idempotency_contract.v1"
     },
-    "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
+    "idempotency_key": "sha256(content-v3: NFC portable_path+sha256+size từng member accepted, sort)+mode+cat_or_profile",
     "journal_key": "batch item path + child pipeline journal",
     "live_state_required": true,
     "ok": true,
     "path": "references/workflows/ingest_zip.json",
     "plan": [
-      "extract zip to temp dir safely",
+      "hash archive and members, then build a plan bound to the exact ZIP bytes",
+      "extract zip to temp dir safely only after plan authorization",
       "block zip-slip",
       "ignore system files",
       "filter allowed extensions",
@@ -76,8 +89,8 @@
     "recommended_commands": [
       "ingest-zip <file.zip> --cat <NN> --json",
       "profile-ingest-zip <file.zip> --json",
-      "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json",
-      "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+      "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+      "profile-ingest-zip <file.zip> --apply --confirm yes --expected-plan-hash <plan_hash> --json"
     ],
     "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
     "resume_command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --continue-on-error --json",

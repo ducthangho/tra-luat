@@ -676,7 +676,8 @@ _GOLDEN_CASES = [
     # FIXTURE MANIFEST (env TL_CACHE_DIR trỏ fixtures/cache_hygiene — cách ly trạng thái máy; fixture gài đủ
     # defect: dup by_sohieu, VBHN thiếu năm, thiếu sohieu-tên-mang-số, tên thô, removed_*, overflow, ref-chunk,
     # infra_in_corpus). Khóa byte-level hành vi hiện tại; sau AST-cut golden PHẢI khớp nguyên trạng.
-    {"id": "hygiene_sweep_fixture", "file": "hygiene_sweep_fixture.json", "args": ["sweep", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    {"id": "hygiene_sweep_fixture", "file": "hygiene_sweep_fixture.json", "args": ["sweep", "--json"],
+     "volatile_keys": ["snapshot_age_s"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_dedup_plan_dry", "file": "hygiene_dedup_plan_dry.json", "args": ["dedup-plan", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_missing_sohieu_dry", "file": "hygiene_missing_sohieu_dry.json", "args": ["missing-sohieu", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_vbhn_year_fix_dry", "file": "hygiene_vbhn_year_fix_dry.json", "args": ["vbhn-year-fix", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
@@ -796,6 +797,7 @@ def _golden_env(case: dict) -> dict | None:
 
 
 def _golden_test(*, write: bool = False) -> dict:
+    from tl_core.deterministic import PATHISH_KEYS, audit_projection
     _golden_ensure_fixtures()
     gdir = _golden_dir()
     if write:
@@ -813,17 +815,36 @@ def _golden_test(*, write: bool = False) -> dict:
             rec.update({"error": "COMMAND_FAILED_OR_NON_JSON", "returncode": run.get("returncode"), "parse_error": run.get("parse_error"), "stderr_tail": run.get("stderr_tail")})
             cases.append(rec)
             continue
-        # v1.33.59 (nợ P4-06, quyết định grilling #7 'canonical + raw-stability'): stdout THÔ chạy ×2 phải
-        # trùng BYTE (bắt nondeterminism format thật); PASS/FAIL nội dung vẫn so bản canonical-hoá.
+        # So sánh trên projection do case khai báo.  Raw output vẫn được báo
+        # để quan sát, nhưng giá trị nghiệp vụ/volatile không bị serializer
+        # sửa ngầm chỉ nhằm làm test xanh.
         run2 = _run_tl_json(_args, env_extra=_env)
         _raw1, _raw2 = str(run.get("stdout") or ""), str(run2.get("stdout") or "")
         rec["raw_stable"] = (_raw1 == _raw2)
         rec["raw_sha256"] = hashlib.sha256(_raw1.encode("utf-8")).hexdigest()
-        if not rec["raw_stable"]:
-            rec.update({"error": "RAW_STDOUT_UNSTABLE", "diff": _first_text_diff(_raw1, _raw2)})
+        if not isinstance(run2.get("data"), dict):
+            rec.update({"error": "SECOND_RUN_FAILED_OR_NON_JSON", "returncode": run2.get("returncode"),
+                        "parse_error": run2.get("parse_error"), "stderr_tail": run2.get("stderr_tail")})
             cases.append(rec)
             continue
-        actual = _json_dumps(run.get("data"), deterministic=True) + "\n"
+        volatile_keys = set(case.get("volatile_keys") or [])
+        path_keys = set(case.get("path_keys") or PATHISH_KEYS)
+        projected1 = audit_projection(run.get("data"), volatile_keys=volatile_keys, path_keys=path_keys,
+                                      project_root=HERE.parent)
+        projected2 = audit_projection(run2.get("data"), volatile_keys=volatile_keys, path_keys=path_keys,
+                                      project_root=HERE.parent)
+        projected_text1 = _json_dumps(projected1, deterministic=True) + "\n"
+        projected_text2 = _json_dumps(projected2, deterministic=True) + "\n"
+        rec["projection_stable"] = projected_text1 == projected_text2
+        rec["projection_schema"] = {"volatile_keys": sorted(volatile_keys), "path_keys": sorted(path_keys)}
+        if not rec["projection_stable"]:
+            rec.update({"error": "AUDIT_PROJECTION_UNSTABLE",
+                        "diff": _first_text_diff(projected_text1, projected_text2)})
+            cases.append(rec)
+            continue
+        if not rec["raw_stable"]:
+            rec["raw_diff"] = _first_text_diff(_raw1, _raw2)
+        actual = projected_text1
         actual_hash = hashlib.sha256(actual.encode("utf-8")).hexdigest()
         rec["actual_sha256"] = actual_hash
         if write:

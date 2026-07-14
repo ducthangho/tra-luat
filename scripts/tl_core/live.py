@@ -441,7 +441,9 @@ def cmd_live_state_snapshot(a) -> int:
                 out.setdefault("warnings", []).append("WARNING_RUNTIME_ARTIFACT_INSIDE_SKILL_ROOT: prefer .tl_state/<name>.json so release manifest/hash stays clean")
         except Exception:
             pass
-        _write_json_atomic(_out_path, _scrub_volatile(out) if _deterministic_enabled(a) else out)   # v1.33.56 FIX B
+        # Persist the real snapshot.  Volatile removal belongs to the
+        # schema-aware diff/audit projection, never to production output.
+        _write_json_atomic(_out_path, out)
     _print_json_or_text(out, getattr(a, "json", False))
     return 0
 

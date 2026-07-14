@@ -275,6 +275,9 @@ def build_parser() -> argparse.ArgumentParser:
                         "KHÔNG phải GDoc đã convert.")
     p.add_argument("--name"); p.add_argument("--sohieu"); p.add_argument("--cat"); p.add_argument("--goc")
     p.add_argument("--hieuluc"); p.add_argument("--loai"); p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--expected-plan-hash", dest="expected_plan_hash",
+                   help="SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi")
     p.add_argument("--resume", action="store_true",
                    help="(N6 v1.33.42) NỐI TIẾP tất định sau timeout/đứt giữa chừng: đọc journal run trước cho CÙNG file "
                         "→ skip bước đã xong (tái dùng fileId/gdoc/source_id), nguồn NLM đã live → LINK thay vì abort. "
@@ -361,6 +364,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--chunk-max-chars", dest="chunk_max_chars", type=int, default=100000, help="kích thước chunk text tối đa cho NLM")
     p.add_argument("--allow-default", dest="allow_default", action="store_true", help="cho phép chạy trên profile vbqppl (mặc định chặn)")
     p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--expected-plan-hash", dest="expected_plan_hash",
+                   help="SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
     p.add_argument("--json", action="store_true")
@@ -379,6 +385,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--chunk-max-chars", dest="chunk_max_chars", type=int, default=100000, help="kích thước chunk text tối đa cho NLM")
     p.add_argument("--allow-default", dest="allow_default", action="store_true", help="cho phép chạy trên profile vbqppl (mặc định chặn)")
     p.add_argument("--apply", action="store_true")
+    p.add_argument("--confirm", choices=["yes"], help="bắt buộc khi --apply")
+    p.add_argument("--expected-plan-hash", dest="expected_plan_hash",
+                   help="SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
     p.add_argument("--json", action="store_true")

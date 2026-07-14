@@ -16,7 +16,7 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.44 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.45 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 
@@ -76,7 +76,7 @@ Hàm: `tl fetch-links` (MANUAL: link Google site: cho người dùng bấm/login
      - **code/cowork:** HỎI "Bạn có muốn tôi tự động tải các file này về không?" (kèm danh sách file+nguồn) trước; đồng ý → tải bằng cơ chế sẵn có (Claude in Chrome đã login) → `_HOP_NAP`; muốn tự làm → nhánh chat.
      - **chat (hoặc người dùng tự làm):** ĐƯA **LINK BẤM-ĐƯỢC** (markdown `[nhãn](url)`) — **TUYỆT ĐỐI không URL trần / không bắt copy-paste**: mỗi nguồn gated 1 link tải xuống + 1 link mở `_HOP_NAP` (`drive.google.com/drive/folders/1bNSAKGACtk0x0cqX5QRVEGT12udi2g67`). Người dùng báo tải lên xong → tiếp `tl ingest-local`.
      - Tiện ích chuẩn hoá: **`tl fetch-links --sohieu … [--env code|cowork|chat]`** xuất sẵn bộ link tải-xuống (C4) + link `_HOP_NAP`; mặc định auto-detect env, không chắc→chat (an toàn = chỉ đưa link, không tự tải).
-     - **★ HOẶC — UPLOAD TRỰC TIẾP file vào môi trường Claude (đường gọn, đỡ phải tự mở _HOP_NAP):** người dùng đính/kéo-thả file raw (**.docx ưu tiên; .doc/.pdf cũng nhận**) vào phiên → Claude chạy **`tl ingest-local <đường-dẫn-local> --name … --sohieu … --cat NN --apply`**: tự **convert (Drive `organize convert=true`, SERVER-SIDE — KHÔNG cần libreoffice local) → rename chuẩn → upload Drive đúng folder chủ đề → organize/stamp/register → `nlm source add`** trong 1 lệnh. DRY mặc định (xem kế hoạch) → `--apply` mới chạy. (.pdf = HẠ SÁCH: convert ~OCR dễ lệch → verify nguyên văn sau; ưu tiên .docx official.)
+     - **★ HOẶC — UPLOAD TRỰC TIẾP file vào môi trường Claude (đường gọn, đỡ phải tự mở _HOP_NAP):** người dùng đính/kéo-thả file raw (**.docx ưu tiên; .doc/.pdf cũng nhận**) vào phiên → Claude chạy **BẮT TAY 2 BƯỚC fail-closed (v1.34.45)**: (1) DRY-RUN `tl ingest-local <đường-dẫn-local> --name … --sohieu … --cat NN --json` → đọc `plan_hash` (+`apply_requires`); (2) APPLY khớp plan `tl ingest-local … --apply --confirm yes --expected-plan-hash <plan_hash>`. **Thiếu `--confirm yes` hoặc hash sai/nguồn đổi → rc=2, KHÔNG ghi** (chống TOCTOU). Pipeline tự **convert (Drive `organize convert=true`, SERVER-SIDE — KHÔNG cần libreoffice local) → rename chuẩn → upload Drive đúng folder chủ đề → organize/stamp/register → `nlm source add`**. (.pdf = HẠ SÁCH: convert ~OCR dễ lệch → verify nguyên văn sau; ưu tiên .docx official.)
 11. **Slot theo notebook** — khi tính `nlm_slots/nlm_preflight`, chỉ đếm rows có `nlm_notebook_id == notebook đích`; dòng RỖNG quy về notebook nền (VBQPPL) nên VBQPPL vẫn đếm đúng, notebook dự án hết `NOTEBOOK_FULL` giả. Dòng registry phải có `row_kind=own|ref|overflow`; `ref` không làm đầy notebook trừ khi `countRefs=true`, `overflow` vẫn là VBQPPL host trong profile. Trước khi thêm nguồn, lấy số vật lý qua **`tl nlm-get <nb>`** (CLI `nlm notebook get`, thay MCP `notebook_get`); registry slot chỉ là estimate/dedup. Đẩy nguồn phải `map_set notebookId=…`. Đối chiếu registry: `tl slot-audit`.
 12. **`categories=inherit` không sở hữu cây VBQPPL** — chỉ dùng chung category để ORGANIZE/tra cứu fallback; KHÔNG dùng để populate registry/manifest của profile. Registry/manifest profile chỉ gồm dòng `own` + `ref` (+ `overflow` khi profile host VBQPPL).
 13. **Cat = 45 chủ đề pháp điển CHÍNH THỨC** (Pháp lệnh pháp điển 2012 + QĐ 843/QĐ-TTg) — mã `01`–`45`, tra

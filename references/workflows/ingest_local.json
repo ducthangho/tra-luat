@@ -10,8 +10,15 @@
     "ingest-route <file> --json",
     "ingest-local <file> --auto-plan --json",
     "profile-ingest <file> --json",
+    "ingest-local <file> --auto-plan --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+    "profile-ingest <file> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
     "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
   ],
+  "command_contracts": {
+    "ingest": {"dry_run_required": true, "confirm_required": true, "plan_hash_required": true},
+    "ingest-local": {"dry_run_required": true, "confirm_required": true, "plan_hash_required": true},
+    "profile-ingest": {"dry_run_required": true, "confirm_required": true, "plan_hash_required": true}
+  },
   "plan": [
     "classify file and destination profile",
     "prefer TVPL/LuatVietnam/docx/text clean for VBQPPL",
@@ -69,9 +76,9 @@
     "readback_command": "convert-verify --gdoc-id <id> --src-id <src_id> --expected-name <name> --json",
     "rollback_hint": "journal <run_id> then undo <run_id> --apply --confirm yes for registry-safe rollback; Drive/NLM cleanup requires explicit source-delete/nlm-orphans review"
   },
-  "idempotency_key": "sha256(source_file_text_or_binary)+target_profile_or_cat+canonical_name",
+  "idempotency_key": "sha256(source_bytes)+target_scope+canonical_name+profile+committed_options",
   "journal_key": "tl_journal/run_id for upload/convert/register/nlm-add",
-  "resume_behavior": "rerun same command with --resume when Drive/register succeeded but NLM/link step was interrupted",
+  "resume_behavior": "rerun same command with --resume; only an exact identity_hash+plan_hash journal may be reused",
   "duplicate_guard": "convert/readback + registry drive_id/src_id + NLM dedup by drive_id/title before add",
   "resume_command": "ingest-local <file> ... --resume --json",
   "readback_command": "convert-verify --gdoc-id <id> --src-id <src_id> --expected-name <name> --json",

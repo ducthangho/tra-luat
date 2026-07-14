@@ -41,54 +41,62 @@ def bind(tl_module) -> None:
 
 
 def cmd_ingest(a) -> int:
-    """QT-2 gate → (--apply) copy_convert + standardize + organize. Mặc định DRY (an toàn)."""
+    """Legacy Drive-id adapter for the shared ingest-local engine.
+
+    QT-2 remains a pre-plan policy gate, but every accepted source is downloaded,
+    validated and content-hashed by ``cmd_ingest_local``.  The legacy command no
+    longer owns an independent, weakly verified write path.
+    """
     pg = _need_base('preingest_gate')
+    gate = None
     # 1) QT-2 nếu là sửa đổi/VBHN/nghi bị thay
     if a.sohieu and (a.amendment or a.vbhn or a.check):
         targets = [t for t in re.split(r"[;,]", a.targets or "") if t.strip()]
-        gate = pg.decide(_gas().get("vb_status", q=a.sohieu),
-                         [dict(_gas().get("vb_status", q=t), sohieu=t) for t in targets],
+        g = _gas()
+        gate = pg.decide(g.get("vb_status", q=a.sohieu),
+                         [dict(g.get("vb_status", q=t), sohieu=t) for t in targets],
                          is_amendment=a.amendment or pg.is_amendment_name(a.sohieu),
                          is_vbhn=a.vbhn or pg.is_vbhn_name(a.sohieu))
-        print(f"[QT-2] {gate['decision']} ({gate['reason']}): {gate['surface']}")
-        for act in gate["actions"]:
-            print(f"   - {act}")
         if gate["decision"] == "SKIP":
-            print("[tl] DỪNG: cổng QT-2 = SKIP (ưu tiên VBHN/đã có). Không nạp.")
+            out = {"ok": True, "skipped": True, "step": "qt2_gate", "gate": gate,
+                   "note": "QT-2=SKIP; không thực hiện ghi."}
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
             return 0
         if gate["decision"] == "REVIEW":
-            print("[tl] REVIEW: cần HỎI người dùng quyết trước khi nạp.")
-            if not a.apply:
-                return 2
-    # 2) kế hoạch / thực thi
-    if not a.apply:
-        print(f"[tl] DRY. Kế hoạch nạp fileId={a.fileId}:")
-        print(f"   1) copy_convert fileId={a.fileId} cat={a.cat or '(?)'} → GDoc (khóa trả: fileId)")
-        print(f"   2) standardize_name --type {a.loai or '?'} --number {a.sohieu or '?'} --name {a.ten or '?'}")
-        print(f"   3) organize: rename+move(cat={a.cat or '?'})+stamp+register (1 RTT)")
-        print(f"   4) verify: list cat={a.cat or '?'}  (ĐỪNG tin response của move)")
-        print(f"   5) NLM: source_add(drive,doc, fileId) qua MCP + map_set (Claude làm, KHÔNG webapp)")
-        print("   → thêm --apply để chạy bước 1+3.")
-        return 0
-    if not a.ten and not (HERE / "standardize_name.py").exists():
-        print("[tl] overlay thiếu standardize_name.py; hãy truyền --ten tên chuẩn hoặc cài base skill đầy đủ trước khi --apply.", file=sys.stderr)
-        return 2
-    g = _gas()
-    cv = g.get("copy_convert", fileId=a.fileId, **({"cat": a.cat} if a.cat else {}),
-               **({"name": a.ten} if a.ten else {}))
-    if not cv.get("ok"):
-        print(f"[tl] copy_convert lỗi: {cv.get('error')}", file=sys.stderr)
-        return 1
-    gdoc = cv["fileId"]
-    print(f"[tl] copy_convert ok → GDoc {gdoc}")
-    org = g.post("organize", fileId=gdoc, register="true",
-                 **({"cat": a.cat} if a.cat else {}),
-                 **({"name": a.ten} if a.ten else {}),
-                 **({"sohieu": a.sohieu} if a.sohieu else {}),
-                 **({"loai": a.loai} if a.loai else {}))
-    print(json.dumps(org, ensure_ascii=False))
-    print(f"[tl] organize xong. Bước NLM (source_add + map_set) làm qua MCP, KHÔNG webapp.")
-    return 0 if org.get("ok") else 1
+            out = {"ok": False, "step": "qt2_gate", "gate": gate,
+                   "error": "QT2_REVIEW_REQUIRED",
+                   "note": "Phải giải quyết trạng thái pháp lý trước khi lập/apply plan ingest."}
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+            return 2
+
+    # 2) Forward to the one content-addressed implementation.  Keep this
+    # adapter intentionally small; advanced switches belong to ingest-local.
+    child = dict(vars(a))
+    child.update({
+        "file": None,
+        "drive_id": a.fileId,
+        "name": a.ten,
+        "auto_plan": True,
+        "json": True,
+    })
+    defaults = {
+        "goc": None,
+        "hieuluc": None,
+        "resume": False,
+        "text_file": None,
+        "source_quality": "auto",
+        "ocr_verified": False,
+        "force_cat": False,
+        "allow_large": False,
+        "large_threshold": None,
+        "skip_nlm_preflight": False,
+        "skip_live_check": False,
+        "nlm_no_wait": False,
+        "no_nlm_add": False,
+    }
+    for key, value in defaults.items():
+        child.setdefault(key, value)
+    return cmd_ingest_local(argparse.Namespace(**child))
 
 
 _REG_CLEAR_FREE_COLS = {"nlm_source_id", "nlm_status", "nlm_pushed_at", "nlm_title", "nlm_notebook_id", "note"}
@@ -400,16 +408,21 @@ def cmd_ingest_analyze(a) -> int:
     plan = _vb_ingest_auto_plan(f or tf, text_file=tf, cat=_norm_cat(getattr(a, "cat", "") or ""),
                                 source_quality=getattr(a, "source_quality", "auto"),
                                 ocr_verified=getattr(a, "ocr_verified", False))
-    cmd = f'tl ingest-local --file "{f or tf}" --auto-plan'
+    cmd = f'tl ingest-local "{f or tf}" --auto-plan --json'
     if tf:
         cmd += f' --text-file "{tf}"'
     if plan.get("cat"):
         cmd += f" --cat {plan['cat']}"
-    cmd += " --apply"
-    plan["ingest_command"] = cmd
-    plan["hint"] = "SUGGESTION — verify sohieu/cat/tên (`cat-verify`/`header-verify`) TRƯỚC khi `--apply`."
+    plan["dry_run_command"] = cmd
+    plan["apply_command_template"] = (
+        cmd + " --apply --confirm yes --expected-plan-hash <plan_hash_from_dry_run>"
+    )
+    plan["hint"] = (
+        "SUGGESTION — verify sohieu/cat/tên (`cat-verify`/`header-verify`), chạy dry-run, "
+        "rồi gắn đúng plan_hash vào lệnh apply."
+    )
     print(json.dumps({"ok": plan.get("ok", True), **plan}, ensure_ascii=False, indent=2))
-    return 0
+    return 0 if plan.get("ok", True) else 2
 
 
 def cmd_ingest_route(a) -> int:
@@ -1597,6 +1610,7 @@ def _profile_ingest_note(info: dict, gate: dict, source_quality: str, split_coun
 
 
 def cmd_profile_ingest(a) -> int:
+    from tl_core.ingest_contract import authorize_apply, build_ingest_plan, validate_source_file
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     profile = _active_profile()
     if profile == DEFAULT_PROFILE and not getattr(a, "allow_default", False):
@@ -1609,6 +1623,7 @@ def cmd_profile_ingest(a) -> int:
     # v1.34.37: --drive-id = file ĐÃ Ở TRONG THƯ MỤC PROFILE → bỏ upload, CHỈ convert→GDoc + đổi tên chuẩn (giữ
     # PHẲNG trong root profile, KHÔNG xếp cat). Tải NHỊ PHÂN về temp để probe/verify chạy y như đường local.
     _from_drive = ""
+    _source_sha256 = ""
     _drive_id = (getattr(a, "drive_id", None) or "").strip()
     if _drive_id:
         if f:
@@ -1624,9 +1639,18 @@ def cmd_profile_ingest(a) -> int:
             return 2
         f = _dsrc.get("local_path") or ""
         _from_drive = _drive_id
+        _source_sha256 = str(_dsrc.get("sha256") or "")
     if not (f and Path(f).exists()):
         print(f"[tl] profile-ingest: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở thư mục profile)",
               file=sys.stderr)
+        return 2
+    _source_check = validate_source_file(
+        f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt", ".xlsx", ".xls"},
+        direct_upload=(not bool(_from_drive)),
+    )
+    if not _source_check.get("ok"):
+        print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
         return 2
     source_quality = _profile_source_quality(f, getattr(a, "source_quality", "auto"))
     # v1.34.6 #2: bảng tính đi đường riêng — canonical = Google SHEET (copy_convert toType=sheets),
@@ -1664,9 +1688,34 @@ def cmd_profile_ingest(a) -> int:
         "registry": {"row_kind": "own", "cat": "own", "corpus": bool(gate.get("corpus_allowed"))},
         "note": "DRY mặc định. --apply tạo canonical GDoc flat trong root profile; nếu tách, chunk NLM nằm trong _meta.",
     }
+    _contract = build_ingest_plan(
+        f, target_scope=f"profile-root:{profile}", canonical_name=doc_name, profile=profile,
+        source_kind=("drive" if _from_drive else "local"), source_id=_from_drive,
+        source_sha256=_source_sha256,
+        options={"source_quality": source_quality,
+                 "ocr_verified": bool(getattr(a, "ocr_verified", False)),
+                 "hieuluc": getattr(a, "hieuluc", None) or "",
+                 "large_threshold": large_threshold, "chunk_max_chars": chunk_max,
+                 "allow_default": bool(getattr(a, "allow_default", False)),
+                 "skip_live_check": bool(getattr(a, "skip_live_check", False))},
+    )
+    if not _contract.get("ok"):
+        print(_json_dumps({"ok": False, "step": "plan_build", "detail": _contract},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
+    plan.update({"schema": _contract.get("schema"), "source_sha256": _contract.get("source", {}).get("sha256"),
+                 "identity_hash": _contract.get("identity_hash"), "plan_hash": _contract.get("plan_hash")})
     if not getattr(a, "apply", False):
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        plan["apply_requires"] = ["--apply", "--confirm yes", f"--expected-plan-hash {_contract['plan_hash']}"]
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a)))
         return 0
+    _auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
+                            expected_plan_hash=getattr(a, "expected_plan_hash", None),
+                            actual_plan_hash=_contract["plan_hash"])
+    if not _auth.get("ok"):
+        print(_json_dumps({"ok": False, "step": "apply_authorization", **_auth},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
 
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
@@ -1742,25 +1791,47 @@ def cmd_profile_ingest(a) -> int:
             actual_text = _read_doc_text(gdoc, getattr(a, "config", None)) or ""
         except Exception:
             actual_text = ""
-    verify_text = actual_text or probe_text
+    if not _is_sheet and not actual_text.strip():
+        _stage_v = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "corpus": "false",
+                                            "row_kind": "own", "note": "canonical_readback_failed",
+                                            "hieuluc": hieuluc}],
+                                       "name,corpus,row_kind,note,hieuluc")
+        print(_json_dumps({"ok": False, "step": "canonical_text_readback", "gdoc": gdoc,
+                           "registry_verified": bool(_stage_v.get("verified")),
+                           "note": "Không dùng probe trước upload thay cho canonical readback; tài liệu giữ staged."},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
+    verify_text = actual_text if not _is_sheet else probe_text
     if verify_text:
         info = _classify_doc_header(verify_text, doc_name)
         if info.get("draft") and not doc_name.upper().startswith("DUTHAO_"):
             doc_name = "DUTHAO_" + doc_name
             try:
-                g.get("rename", fileId=gdoc, name=doc_name)
-            except Exception:
-                pass
+                _ren = g.get("rename", fileId=gdoc, name=doc_name)
+            except Exception as _ren_exc:  # noqa: BLE001
+                _ren = {"ok": False, "error": f"{type(_ren_exc).__name__}: {_ren_exc}"}
+            _ren_rb = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=doc_name,
+                                                src_id="", expected_src_name="",
+                                                expected_folder_id=root_id)
+            _ren_reg = (_verified_reg_upsert(g, {"drive_id": gdoc, "name": doc_name,
+                                                 "hieuluc": DRAFT_WARNING})
+                        if _ren.get("ok") and _ren_rb.get("ok") else {"verified": False})
+            if not (_ren.get("ok") and _ren_rb.get("ok") and _ren_reg.get("verified")):
+                print(_json_dumps({"ok": False, "step": "late_draft_rename_readback", "rename": _ren,
+                                   "drive_readback": _ren_rb, "registry": _ren_reg},
+                                  deterministic=_deterministic_enabled(a)), file=sys.stderr)
+                return 2
             hieuluc = DRAFT_WARNING
         gate = _ingest_verify_gate(verify_text, info, source_quality, getattr(a, "ocr_verified", False))
         chunks = _split_by_dieu_chunks(verify_text, chunk_max) if (len(verify_text) > chunk_max or size_bytes > large_threshold) else []
     note = _profile_ingest_note(info, gate, source_quality, len(chunks))
     if not gate.get("ok"):
-        rb = g.post("reg_bulk", items=[{"drive_id": gdoc, "name": doc_name, "corpus": "false", "row_kind": "own",
-                                        "note": note, "hieuluc": hieuluc}],
-                    cols="name,corpus,row_kind,note,hieuluc")
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "corpus": "false", "row_kind": "own",
+                                      "note": note, "hieuluc": hieuluc}],
+                                 "name,corpus,row_kind,note,hieuluc")
         out = {"ok": False, "step": "verify_gate", "gdoc": gdoc, "src_id": fid, "gate": gate,
-               "registry_patched": rb.get("patched"), "note": "Canonical đã tạo nhưng chưa corpus/NLM; cần verify/OCR lại."}
+               "registry_verified": bool(rb.get("verified")),
+               "note": "Canonical đã tạo nhưng chưa corpus/NLM; cần verify/OCR lại."}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 2
 
@@ -1796,35 +1867,49 @@ def cmd_profile_ingest(a) -> int:
                 continue
             add = nc.source_add(notebook_id, drive_id=chunk_id, doc_type="doc", wait=True)
             src = add.get("source_id") if add.get("ok") else ""
-            g.post("reg_upsert", drive_id=chunk_id, src_id=gdoc, sohieu=info.get("sohieu") or "",
-                   loai=info.get("loai") or "thuong", name=cname, cat="own",
-                   mime="application/vnd.google-apps.document", goc=gdoc,
-                   nlm_source_id=src, nlm_notebook_id=notebook_id,
-                   nlm_status=("pushed" if src else "error"), corpus="false", row_kind="ref",
-                   note=(note + f"; chunk_part={c['part']}; dieu={c.get('start_dieu')}-{c.get('end_dieu')}")[:500])
-            nlm_sources.append({"ok": bool(src), "part": c["part"], "chunk_gdoc": chunk_id,
-                                "nlm_source_id": src, "chars": c.get("chars")})
-        rb = g.post("reg_bulk", items=[{"drive_id": gdoc, "name": doc_name, "corpus": "true", "row_kind": "own",
-                                        "note": note, "hieuluc": hieuluc}],
-                    cols="name,corpus,row_kind,note,hieuluc")
+            if not src:
+                nlm_sources.append({"ok": False, "part": c["part"], "chunk_gdoc": chunk_id,
+                                    "step": "nlm_add_missing_source_id", "detail": add})
+                continue
+            _chunk_reg = _verified_reg_upsert(
+                g, {"drive_id": chunk_id, "src_id": gdoc, "sohieu": info.get("sohieu") or "",
+                    "loai": info.get("loai") or "thuong", "name": cname, "cat": "own",
+                    "mime": "application/vnd.google-apps.document", "goc": gdoc,
+                    "nlm_source_id": src, "nlm_notebook_id": notebook_id,
+                    "nlm_status": "pushed", "corpus": "false", "row_kind": "ref",
+                    "note": (note + f"; chunk_part={c['part']}; dieu={c.get('start_dieu')}-{c.get('end_dieu')}")[:500]})
+            nlm_sources.append({"ok": bool(_chunk_reg.get("verified")), "part": c["part"],
+                                "chunk_gdoc": chunk_id, "nlm_source_id": src, "chars": c.get("chars"),
+                                "registry_verified": bool(_chunk_reg.get("verified"))})
+        _children_ok = bool(nlm_sources) and all(x.get("ok") for x in nlm_sources) and len(nlm_sources) == len(chunks)
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name,
+                                      "corpus": ("true" if _children_ok else "false"), "row_kind": "own",
+                                      "note": note, "hieuluc": hieuluc}],
+                                 "name,corpus,row_kind,note,hieuluc")
+        _final_ok = bool(_children_ok and rb.get("verified"))
     else:
         add = nc.source_add(notebook_id, drive_id=gdoc, doc_type=("sheets" if _is_sheet else "doc"), wait=True)
-        if not add.get("ok"):
+        if not (add.get("ok") and add.get("source_id")):
             print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
             return 2
         src = add.get("source_id")
-        rb = g.post("reg_bulk", items=[{"drive_id": gdoc, "name": doc_name, "nlm_source_id": src, "nlm_notebook_id": notebook_id,
-                                        "row_kind": "own", "nlm_status": "pushed", "corpus": "true",
-                                        "note": note, "hieuluc": hieuluc}],
-                    cols="name,nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus,note,hieuluc")
-        nlm_sources.append({"ok": True, "canonical": True, "gdoc": gdoc, "nlm_source_id": src})
-    out = {"ok": True, "profile": profile, "gdoc": gdoc, "src_id": fid, "doc_name": doc_name,
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "nlm_source_id": src,
+                                      "nlm_notebook_id": notebook_id, "row_kind": "own",
+                                      "nlm_status": "pushed", "corpus": "true", "note": note,
+                                      "hieuluc": hieuluc}],
+                                 "name,nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus,note,hieuluc")
+        _final_ok = bool(rb.get("verified"))
+        nlm_sources.append({"ok": _final_ok, "canonical": True, "gdoc": gdoc, "nlm_source_id": src,
+                            "registry_verified": _final_ok})
+    out = {"ok": _final_ok, "profile": profile, "gdoc": gdoc, "src_id": fid, "doc_name": doc_name,
+           "plan_hash": _contract["plan_hash"], "identity_hash": _contract["identity_hash"],
            "classification": info, "verify_gate": gate, "split_count": len(chunks),
-           "nlm_sources": nlm_sources, "registry_patched": rb.get("patched"),
+           "nlm_sources": nlm_sources, "registry_verified": bool(rb.get("verified")),
+           "registry_patched": (rb.get("reg_bulk") or {}).get("patched"),
            "target_notebook": notebook_id, "hieuluc": hieuluc}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if all(x.get("ok") for x in nlm_sources) else 2
+    return 0 if _final_ok else 2
 
 
 def _ingest_local_cat_gate(cat: str, folders_now, pd: dict) -> dict:
@@ -1847,12 +1932,14 @@ def _ingest_local_cat_gate(cat: str, folders_now, pd: dict) -> dict:
             "cat_note": cat_note}
 
 
-def _ingest_local_prev_state(file_path: str, name: str) -> dict:
-    """N6 (v1.33.42 — TĂNG TÍNH TẤT ĐỊNH, log rà VBHN-first: pipeline vượt 45s Cowork bị cắt giữa chừng → agent
-    phải TỰ SUY 'còn bước nào' rồi tự chạy register/nlm-add tay, 4-5 round-trip/file): đọc journal các run
-    ingest-local TRƯỚC cho CÙNG file (match meta.file, fallback meta.name) → trạng thái bước ĐÃ XONG
-    {upload_fid, gdoc, src_docx, nlm_source_id, journal_prev}. `--resume` dùng để NỐI TIẾP tất định: bước xong
-    → skip (tái dùng id từ journal), bước dở → chạy tiếp. Run MỚI NHẤT thắng. Best-effort, KHÔNG raise."""
+def _ingest_local_prev_state(file_path: str, name: str, *, identity_hash: str = "", plan_hash: str = "") -> dict:
+    """Return resumable state only for the exact content-addressed plan.
+
+    ``file_path`` and ``name`` remain in the signature for compatibility but
+    are never identity.  Legacy journals without plan/identity hashes are
+    deliberately not resumed because matching them by name can reuse IDs from
+    different source bytes.
+    """
     out: dict = {}
     try:
         runs = sorted(_journal_dir().glob("ingest-local_*.jsonl"))
@@ -1866,7 +1953,9 @@ def _ingest_local_prev_state(file_path: str, name: str) -> dict:
         if not recs or recs[0].get("cmd") != "ingest-local":
             continue
         head = recs[0]
-        if str(head.get("file") or "") != str(file_path) and str(head.get("name") or "") != str(name or ""):
+        if not plan_hash or str(head.get("plan_hash") or "") != str(plan_hash):
+            continue
+        if identity_hash and str(head.get("identity_hash") or "") != str(identity_hash):
             continue
         st: dict = {}
         for r in recs:
@@ -1881,6 +1970,8 @@ def _ingest_local_prev_state(file_path: str, name: str) -> dict:
                 st["nlm_source_id"] = vf["source_id"]
         if st:
             st["journal_prev"] = p.stem
+            st["plan_hash"] = str(head.get("plan_hash") or "")
+            st["identity_hash"] = str(head.get("identity_hash") or "")
             out = st
     return out
 
@@ -1894,6 +1985,7 @@ def cmd_ingest_local(a) -> int:
     v1.33.44 (log 7A S4/S5/S6): registry sạch NGAY tại ingest — loai chuẩn enum (_normalize_loai), reg_cat NHÃN ĐỦ
     (_cat_reg_label), bước link cuối ghi KÈM corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest."""
     import base64
+    from tl_core.ingest_contract import authorize_apply, build_ingest_plan, validate_source_file
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=False, forbid_inherit=True)
     if _perr:
@@ -1902,6 +1994,7 @@ def cmd_ingest_local(a) -> int:
     # v1.34.37: --drive-id = file ĐÃ Ở TRÊN DRIVE (người dùng kéo-thả _HOP_NAP qua UI) → bỏ upload, organize
     # ngay trên file đó. Tải NHỊ PHÂN về temp để auto-plan/size chạy Y NHƯ đường local; fid = drive_id gốc.
     _from_drive = ""
+    _source_sha256 = ""
     _drive_id = (getattr(a, "drive_id", None) or "").strip()
     if _drive_id:
         if f:
@@ -1922,9 +2015,17 @@ def cmd_ingest_local(a) -> int:
             return 2
         f = _dsrc.get("local_path") or ""
         _from_drive = _drive_id
+        _source_sha256 = str(_dsrc.get("sha256") or "")
     if not (f and Path(f).exists()):
         print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
               file=sys.stderr); return 2
+    _source_check = validate_source_file(
+        f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt"}, direct_upload=(not bool(_from_drive))
+    )
+    if not _source_check.get("ok"):
+        print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
     explicit_name = getattr(a, "name", None)
     explicit_cat = getattr(a, "cat", None)
     sohieu = (getattr(a, "sohieu", None) or "").strip()
@@ -2003,12 +2104,52 @@ def cmd_ingest_local(a) -> int:
             "src_ext": _src_ext, "convert": "Drive organize convert=true (server-side)", "format_warn": _fmt_warn,
             "from_drive_id": _from_drive or None,
             "auto_plan": auto_plan}
+    _contract = build_ingest_plan(
+        f,
+        target_scope=f"drive:{_active_profile()}:{cat}",
+        canonical_name=name,
+        profile=_active_profile(),
+        source_kind=("drive" if _from_drive else "local"),
+        source_id=_from_drive,
+        source_sha256=_source_sha256,
+        options={
+            "sohieu": sohieu, "cat": cat, "goc": goc, "hieuluc": hieuluc, "loai": loai,
+            "auto_plan": bool(getattr(a, "auto_plan", False)),
+            "source_quality": getattr(a, "source_quality", "auto"),
+            "ocr_verified": bool(getattr(a, "ocr_verified", False)),
+            "force_cat": bool(getattr(a, "force_cat", False)),
+            "allow_large": bool(getattr(a, "allow_large", False)),
+            "large_threshold": _large_threshold,
+            "skip_nlm_preflight": bool(getattr(a, "skip_nlm_preflight", False)),
+            "skip_live_check": bool(getattr(a, "skip_live_check", False)),
+            "nlm_no_wait": bool(getattr(a, "nlm_no_wait", False)),
+            "no_nlm_add": bool(getattr(a, "no_nlm_add", False)),
+        },
+    )
+    if not _contract.get("ok"):
+        print(_json_dumps({"ok": False, "step": "plan_build", "detail": _contract},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
+    plan.update({"schema": _contract.get("schema"), "source_sha256": _contract.get("source", {}).get("sha256"),
+                 "identity_hash": _contract.get("identity_hash"), "plan_hash": _contract.get("plan_hash")})
+    _prev = (_ingest_local_prev_state(str(f), name, identity_hash=_contract["identity_hash"],
+                                      plan_hash=_contract["plan_hash"])
+             if getattr(a, "resume", False) else {})
     if not getattr(a, "apply", False):
         plan["mode"] = "DRY"
         plan["note"] = (("--apply để chạy: dùng file Drive có sẵn (bỏ upload)→organize(convert/cat/stamp/register)"
                          "→preflight→nlm add (CLI)→push.") if _from_drive else
                         "--apply để chạy: [mkdir nếu cần]→upload→organize(convert/cat/stamp/register)→preflight→nlm add (CLI)→push.")
-        print(json.dumps(plan, ensure_ascii=False, indent=2)); return 0
+        plan["apply_requires"] = ["--apply", "--confirm yes", f"--expected-plan-hash {_contract['plan_hash']}"]
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0
+    _auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
+                            expected_plan_hash=getattr(a, "expected_plan_hash", None),
+                            actual_plan_hash=_contract["plan_hash"],
+                            resume_plan_hash=(_prev.get("plan_hash") if _prev else None))
+    if not _auth.get("ok"):
+        print(_json_dumps({"ok": False, "step": "apply_authorization", **_auth},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
     if auto_plan and not explicit_cat and not getattr(a, "force_cat", False):
         auto_flags = set(auto_plan.get("warnings") or [])
         if "NO_PROBE_TEXT_FOR_AUTO_CAT" in auto_flags or "CAT_AUTO_LOW_CONFIDENCE" in auto_flags:
@@ -2067,12 +2208,14 @@ def cmd_ingest_local(a) -> int:
     # chừng → `tl journal <run>` chỉ RÕ bước dở + việc còn lại (ca Luật Dược 76/VBHN phải dò tay). Intent các bước
     # non-registry KHÔNG kèm `before` + op ∉ {reg_bulk,reg_upsert} → resume/undo (chỉ reapply op reg) KHÔNG đụng.
     # N6 (v1.33.42): --resume đọc trạng thái run trước TỪ JOURNAL (tất định — không đoán) TRƯỚC khi mở run mới.
-    _prev = _ingest_local_prev_state(str(f), name) if getattr(a, "resume", False) else {}
     if _prev:
         print(f"[tl] ingest-local --resume: nối từ journal {_prev.get('journal_prev')} — đã xong: "
               + (",".join(k for k in ("upload_fid", "gdoc", "nlm_source_id") if _prev.get(k)) or "(chưa bước nào)"),
               file=sys.stderr)
     run_id = _apply_journal_start("ingest-local", {"file": str(f), "name": name, "cat": cat, "profile": _active_profile(),
+                                                   "source_sha256": _contract["source"]["sha256"],
+                                                   "identity_hash": _contract["identity_hash"],
+                                                   "plan_hash": _contract["plan_hash"],
                                                    **({"resumed_from": _prev.get("journal_prev")} if _prev else {})})
 
     def _step(op, key, **kw):
@@ -2183,15 +2326,48 @@ def cmd_ingest_local(a) -> int:
             print(f"[tl] {'⚠ organize KHÔNG persist sohieu → ' if _need_sh else ''}backfill reg_upsert"
                   f"{' (+title_vn at-ingest)' if _need_tv else ''}: "
                   f"{'OK' if _vbf.get('verified') else 'FAIL ' + str(_vbf.get('error'))}", file=sys.stderr, flush=True)
+            if not _vbf.get("verified"):
+                _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
+                print(_json_dumps({"ok": False, "step": "registry_backfill_readback", "journal": run_id,
+                                   "detail": _vbf}, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+                return 2
+    # Registry is a required postcondition of organize, including the
+    # intentional --no-nlm-add path.  Never infer it from the write response.
+    try:
+        _reg_read = g.get("reg_get", drive_id=gdoc, refresh="true")
+        _reg_rows = (_reg_read.get("rows") or []) if isinstance(_reg_read, dict) and _reg_read.get("ok") is True else []
+    except Exception as _reg_exc:  # noqa: BLE001
+        _reg_read, _reg_rows = {"error": f"{type(_reg_exc).__name__}: {_reg_exc}"}, []
+    _registry_row = (_reg_rows[0] or {}) if _reg_rows else {}
+    _registry_checks = {
+        "row_exists": bool(_registry_row),
+        "drive_id": str(_registry_row.get("drive_id") or _registry_row.get("gdoc_id") or "") == str(gdoc),
+        "source_id": str(_registry_row.get("src_id") or "") == str(_src_for_rb),
+        "name": str(_registry_row.get("name") or "") == str(name),
+        "cat": (not cat) or str(_registry_row.get("cat") or "") == str(_cat_reg_label(cat)),
+    }
+    if not all(_registry_checks.values()):
+        _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
+        print(_json_dumps({"ok": False, "step": "registry_readback", "journal": run_id,
+                           "checks": _registry_checks, "readback": _reg_read},
+                          deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
     # v1.34.35 (quy trình ADD-TAY): --no-nlm-add DỪNG tại đây — Drive + registry (organize register) ĐÃ xong,
     # KHÔNG đụng NLM (né cookie ~1h). corpus KHÔNG set (doctrine S4: corpus=true chỉ khi đã lên NLM). In next_steps
     # điền sẵn: add tay URL trên UI notebook → nlm-reconcile --apply (link bắc cầu exact-title: tên GDoc = tên
     # nguồn) → register --corpus true. Journal run_end đánh dấu no_nlm_add để --resume/journal-close hiểu đúng.
     if getattr(a, "no_nlm_add", False):
+        if str(_registry_row.get("corpus") or "").strip().lower() in {"1", "true", "yes", "vbqppl"}:
+            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
+            print(_json_dumps({"ok": False, "step": "no_nlm_registry_readback", "journal": run_id,
+                               "error": "CORPUS_MUST_BE_FALSE_BEFORE_NLM", "registry_row": _registry_row},
+                              deterministic=_deterministic_enabled(a)), file=sys.stderr)
+            return 2
         _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"OK": 1}, "no_nlm_add": True})
         _gdoc_url = f"https://docs.google.com/document/d/{gdoc}"
         _nb_url = f"https://notebooklm.google.com/notebook/{target}"
         out = {"ok": True, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,
+               "plan_hash": _contract["plan_hash"], "identity_hash": _contract["identity_hash"],
                "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None,
                "corpus": False, "nlm": "SKIPPED_BY_FLAG", "preflight": pf,
                "gdoc_url": _gdoc_url, "suggested_notebook": target, "notebook_url": _nb_url,
@@ -2244,10 +2420,11 @@ def cmd_ingest_local(a) -> int:
             _no_wait = bool(getattr(a, "nlm_no_wait", False))
             _step("nlm_source_add", gdoc, notebook=target, title=name[:120], wait=(not _no_wait))
             add = nc.source_add(target, drive_id=gdoc, doc_type="doc", wait=(not _no_wait))
-            _step_ok("nlm_source_add", gdoc, add.get("ok"), source_id=add.get("source_id"), wait=(not _no_wait))
-            if not add.get("ok"):
+            _add_verified = bool(add.get("ok") and add.get("source_id"))
+            _step_ok("nlm_source_add", gdoc, _add_verified, source_id=add.get("source_id"), wait=(not _no_wait))
+            if not _add_verified:
                 print(json.dumps({"ok": False, "step": "nlm_add(cli)", "journal": run_id, "gdoc": gdoc, "target": target, "detail": add,
-                                  "note": "Drive+register XONG; chỉ NLM add lỗi → chạy lại CÙNG LỆNH + --resume, hoặc `tl nlm-add`."}, ensure_ascii=False, indent=2), file=sys.stderr)
+                                  "note": "NLM add phải trả source_id; Drive+registry đã xong, chạy lại CÙNG LỆNH + --resume."}, ensure_ascii=False, indent=2), file=sys.stderr)
                 return 2
             src = add.get("source_id")
             if _no_wait:
@@ -2260,6 +2437,8 @@ def cmd_ingest_local(a) -> int:
                 _dup_after = _nlm_post_add_dup_check(nc, target, gdoc, src)   # N1 v1.33.41: bắt trùng-sau-add tại chỗ
                 if _dup_after:
                     print(json.dumps(_dup_after, ensure_ascii=False, indent=2), file=sys.stderr)
+                    _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
+                    return 2
     # v1.29.7 (log NĐ131 #6): trước đây `target != NLM_BASE_NOTEBOOK → overflow` — SAI cho profile own (notebook
     # profile ≠ base VBQPPL toàn cục → mọi tài liệu profile bị gán overflow dù preflight nói 'không overflow → base').
     # ĐÚNG: overflow CHỈ khi target == overflow-shard ĐÃ CẤU HÌNH của profile đang chạy; còn lại (base VBQPPL hoặc
@@ -2277,8 +2456,10 @@ def cmd_ingest_local(a) -> int:
                              before_by_key={gdoc: {"nlm_source_id": "", "nlm_status": "", "corpus": ""}})
     rb = v.get("reg_bulk") or {}
     _journal_append(run_id, {"t": "run_end", "ok": bool(v.get("verified")), "counts": {"OK": 1}})
-    out = {"ok": True, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,
-           "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None, "corpus": True,
+    _final_ok = bool(v.get("verified"))
+    out = {"ok": _final_ok, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,
+           "plan_hash": _contract["plan_hash"], "identity_hash": _contract["identity_hash"],
+            "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None, "corpus": _final_ok,
            "cat_ten": (official or {}).get("ten"), "folder_created": need_mkdir, "preflight": pf,
            "target_notebook": target, "row_kind": rk, "nlm_source_id": src, "reg_pushed": rb.get("patched"),
            "reg_verified": bool(v.get("verified")), "via": "nlm-cli",
@@ -2286,7 +2467,7 @@ def cmd_ingest_local(a) -> int:
               if getattr(a, "nlm_no_wait", False) else {}),
            "sidecar": "src_id=docx gắn vào dòng GDoc (register atomic; regen2 cũng tự ghép cặp cùng base-name)"}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0
+    return 0 if _final_ok else 2
 
 
 def _verify_convert_readback(g, *, gdoc_id: str, expected_name: str = "", src_id: str = "", expected_src_name: str = "", expected_folder_id: str = "", expected_gdoc_mime: str | None = None) -> dict:
@@ -2511,23 +2692,51 @@ def _resolve_drive_id_source(g, drive_id: str, *, download: bool = True) -> dict
                         "(.docx/.doc/.pdf/.xlsx) trong Drive để ingest đầy đủ (convert + chuẩn hoá tên/cat)."}
     _ext_by_mime = {_v: _k for _k, _v in _MIME_BY_EXT.items()}
     _name_ext = Path(cur_name).suffix.lower()
-    ext = _name_ext if _name_ext in _MIME_BY_EXT else _ext_by_mime.get(mime, ".docx")
+    ext = _name_ext if _name_ext in _MIME_BY_EXT else _ext_by_mime.get(mime, "")
     try:
         size_bytes = int(f.get("size") or f.get("fileSize") or 0)
     except (TypeError, ValueError):
         size_bytes = 0
+    if not cur_name or not mime or size_bytes <= 0:
+        return {"ok": False, "reason": "DRIVE_METADATA_INCOMPLETE", "drive_id": drive_id,
+                "name": cur_name, "mime": mime, "size_bytes": size_bytes}
+    try:
+        max_source_bytes = int(os.environ.get("TL_SOURCE_MAX_BYTES") or 100 * 1024 * 1024)
+    except (TypeError, ValueError):
+        max_source_bytes = 100 * 1024 * 1024
+    if size_bytes > max_source_bytes:
+        return {"ok": False, "reason": "SOURCE_SIZE_LIMIT_EXCEEDED", "drive_id": drive_id,
+                "name": cur_name, "size_bytes": size_bytes, "max_bytes": max_source_bytes,
+                "note": "Môi trường có thể đặt TL_SOURCE_MAX_BYTES; giới hạn ingest trực tiếp vẫn là 35 MiB."}
+    if not ext:
+        return {"ok": False, "reason": "DRIVE_MIME_UNSUPPORTED", "drive_id": drive_id,
+                "name": cur_name, "mime": mime}
+    _expected_mime = _MIME_BY_EXT.get(ext)
+    if _expected_mime and mime != _expected_mime:
+        return {"ok": False, "reason": "DRIVE_EXTENSION_MIME_MISMATCH", "drive_id": drive_id,
+                "name": cur_name, "ext": ext, "mime": mime, "expected_mime": _expected_mime}
     stem = Path(cur_name).stem or (cur_name or drive_id)
     out = {"ok": True, "drive_id": drive_id, "name": cur_name, "stem": stem, "mime": mime, "ext": ext,
            "size_bytes": size_bytes, "is_sheet": ext in _SPREADSHEET_EXTS}
     if download:
         try:
+            import atexit
             _td = tempfile.mkdtemp(prefix="tl_driveid_")
+            atexit.register(shutil.rmtree, _td, ignore_errors=True)
             _lp = os.path.join(_td, (stem or "drive_src") + ext)
             _imp("tl_gws")._fast_drive_fetch(drive_id, _lp, label="ingest --drive-id", verbose=False)
-            if os.path.getsize(_lp) <= 0:
+            _downloaded_size = os.path.getsize(_lp)
+            if _downloaded_size <= 0:
                 raise RuntimeError("tải về 0 byte")
+            if _downloaded_size != size_bytes:
+                raise RuntimeError(f"download size mismatch: metadata={size_bytes}, local={_downloaded_size}")
+            from tl_core.ingest_contract import sha256_file
             out["local_path"] = _lp
+            out["sha256"] = sha256_file(_lp)
+            out["cleanup"] = "atexit"
         except Exception as _e:  # noqa: BLE001
+            if locals().get("_td"):
+                shutil.rmtree(_td, ignore_errors=True)
             out["ok"] = False
             out["reason"] = "DRIVE_DOWNLOAD_FAILED"
             out["detail"] = f"{type(_e).__name__}: {_e}"
@@ -2545,7 +2754,10 @@ def _drive_info_file(g, file_id: str) -> dict:
     if not isinstance(info, dict):
         return {"ok": False, "error": "INFO_NON_DICT", "raw": str(info)[:200], "file": {}}
     f = info.get("file") if isinstance(info.get("file"), dict) else info
-    return {"ok": bool(info.get("ok", True) and (f.get("id") or f.get("fileId") or file_id)), "raw": info, "file": f}
+    actual_id = str(f.get("id") or f.get("fileId") or "").strip()
+    ok = info.get("ok") is True and bool(actual_id) and actual_id == str(file_id)
+    return {"ok": ok, "error": (None if ok else "INFO_READBACK_INCOMPLETE_OR_ID_MISMATCH"),
+            "raw": info, "file": f}
 
 def _file_parents(info: dict) -> list[str]:
     f = info.get("file") or {}

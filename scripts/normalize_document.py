@@ -10,7 +10,7 @@ Hỗ trợ input: .txt/.md (utf-8), .html (strip thẻ), .docx (python-docx nế
 .pdf (pdftotext — KHÔNG convert OCR; trang scan sẽ thiếu và bị verify bắt), .doc (antiword nếu có).
 Parse Điều chịu dính dòng (cùng regex verify_deep). Tự chạy T1 verify; coverage ghi trung thực.
 """
-import argparse, hashlib, json, re, subprocess, sys, datetime, html as _html
+import argparse, hashlib, json, os, re, subprocess, sys, tempfile, unicodedata, html as _html
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -100,14 +100,14 @@ def read_input(p: str) -> str:
         return _docx_to_text(str(path))
     if ext == ".pdf":
         r = subprocess.run(["pdftotext", "-layout", str(path), "-"],
-                           capture_output=True, text=True, timeout=120)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
         if r.returncode != 0:
             raise RuntimeError("pdftotext lỗi: " + r.stderr[:300])
         return r.stdout
     if ext == ".doc":
         for cmd in (["antiword", str(path)], ["catdoc", str(path)]):
             try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+                r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
                 if r.returncode == 0 and len(r.stdout) > 200:
                     return r.stdout
             except FileNotFoundError:
@@ -118,6 +118,22 @@ def read_input(p: str) -> str:
 
 def doc_key_of(so_hieu: str, variant: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", so_hieu.lower()).strip("-") + "--" + variant
+
+
+def _write_json_atomic(path: Path, value: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(value, fh, ensure_ascii=False, indent=1, sort_keys=True)
+            fh.write("\n")
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def main():
@@ -140,9 +156,11 @@ def main():
     ap.add_argument("--aliases", default="", help="Số hiệu tra cứu bổ sung, phân tách ';'")
     ap.add_argument("--as-appendix", action="store_true",
                     help="Văn bản CHỈ là phụ lục/mẫu: lưu nguyên khối phu_luc, không ép thành Điều, không FATAL.")
+    ap.add_argument("--recorded-at", default="",
+                    help="timestamp provenance tường minh; mặc định bỏ để cùng input tạo cùng cache bytes")
     a = ap.parse_args()
 
-    raw = read_input(a.input).replace("\r\n", "\n")
+    raw = unicodedata.normalize("NFC", read_input(a.input).replace("\r\n", "\n").replace("\r", "\n"))
     if a.as_appendix:
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
@@ -175,7 +193,6 @@ def main():
             "partial: " + " | ".join(rep["flags"])[:400])
 
     nums = sorted(arts)
-    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     norm = re.sub(r"[ \t]+", " ", raw).strip()
     so_hieu = a.number_symbol or "UNKNOWN"
     key = doc_key_of(so_hieu, a.document_variant)
@@ -194,29 +211,36 @@ def main():
                       "has_phu_luc": bool(phu_luc), "phu_luc_chars": len(phu_luc),
                       "is_appendix": bool(getattr(a, "as_appendix", False))},
         "coverage": coverage, "verify_flags": rep["flags"],
-        "verified_at": now, "ingested_at": now,
         "articles": {str(n): arts[n] for n in nums},
         "has_phu_luc": bool(phu_luc),
         "phu_luc": phu_luc,
     }
+    if a.recorded_at:
+        record["verified_at"] = a.recorded_at
+        record["ingested_at"] = a.recorded_at
     # v1.13.4: MÓC CHỦ ĐỀ tất định (Chương/Điều) — KHÔNG AI, idempotent. Để Claude lọc-thô
     # chọn nguồn trước khi notebook_query. Danh tính (so_hieu/loai/linhvuc) đã là cột riêng.
     record["tukhoa"] = extract_keywords(record)
-    Path(a.out).write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
+    _write_json_atomic(Path(a.out), record)
 
     if a.cache:
         cd = Path(a.cache_dir); (cd / "docs").mkdir(parents=True, exist_ok=True)
-        (cd / "docs" / f"{key}.json").write_text(
-            json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
+        _write_json_atomic(cd / "docs" / f"{key}.json", record)
         bi_p = cd / "bundle_index.json"
         bi = json.loads(bi_p.read_text(encoding="utf-8")) if bi_p.exists() else \
             {"schema": "tra-luat-bundle/1.9", "docs": []}
         bi["docs"] = [d for d in bi["docs"] if d.get("doc_key") != key]
-        bi["docs"].append({k: record[k] for k in
-                           ("doc_key", "so_hieu", "title", "variant", "text_hash",
-                            "coverage", "verified_at")} | {"aliases": record["aliases"]})
-        bi["generatedAt"] = now
-        bi_p.write_text(json.dumps(bi, ensure_ascii=False, indent=1), encoding="utf-8")
+        _idx = {k: record[k] for k in ("doc_key", "so_hieu", "title", "variant", "text_hash", "coverage")}
+        _idx["aliases"] = record["aliases"]
+        if a.recorded_at:
+            _idx["verified_at"] = a.recorded_at
+        bi["docs"].append(_idx)
+        bi["docs"] = sorted(bi["docs"], key=lambda d: str(d.get("doc_key") or ""))
+        if a.recorded_at:
+            bi["generatedAt"] = a.recorded_at
+        else:
+            bi.pop("generatedAt", None)
+        _write_json_atomic(bi_p, bi)
     print(json.dumps({"ok": True, "doc_key": key, "articles": len(nums),
                       "coverage": coverage}, ensure_ascii=False))
 

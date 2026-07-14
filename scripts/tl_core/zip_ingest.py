@@ -12,6 +12,7 @@ import hashlib    # noqa: F401
 import json       # noqa: F401
 import os         # noqa: F401
 import re         # noqa: F401
+import stat       # noqa: F401
 import shutil     # noqa: F401
 import subprocess # noqa: F401
 import sys        # noqa: F401
@@ -38,30 +39,48 @@ def bind(tl_module) -> None:
 _ALLOWED_INGEST_EXTS = {".doc", ".docx", ".pdf", ".txt", ".md", ".rtf", ".odt"}
 
 _IGNORED_ZIP_NAMES = {".ds_store", "thumbs.db"}
+_WINDOWS_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)),
+                     *(f"lpt{i}" for i in range(1, 10))}
+
+
+def _zip_is_ignored_member(name: str) -> bool:
+    n = unicodedata.normalize("NFC", (name or "").replace("\\", "/"))
+    parts = [p for p in n.split("/") if p and p != "."]
+    if not parts:
+        return False
+    return bool(parts and (parts[-1].lower() in _IGNORED_ZIP_NAMES or parts[0].lower() == "__macosx"))
 
 
 def _zip_is_safe_member(name: str) -> bool:
     if not name or name.endswith("/"):
         return False
-    n = name.replace("\\", "/")
-    parts = [p for p in n.split("/") if p]
+    n = unicodedata.normalize("NFC", name.replace("\\", "/"))
+    parts = [p for p in n.split("/") if p and p != "."]
+    if not parts:
+        return False
     if any(p == ".." for p in parts):
         return False
     if n.startswith("/") or re.match(r"^[A-Za-z]:", n):
         return False
     low_base = parts[-1].lower() if parts else ""
-    if low_base in _IGNORED_ZIP_NAMES or n.startswith("__MACOSX/"):
+    if low_base in _IGNORED_ZIP_NAMES or (parts and parts[0].lower() == "__macosx"):
         return False
     # v1.33.56 (review PH2-03): ký tự cấm trên Windows (tên legacy/cp437 từ zip Linux) → unsafe TẠI PLAN,
     # không để rơi tới extract mới nổ OSError/ghi tên rác.
     if re.search(r'[<>:"|?*]|[\x00-\x1f]', n):
         return False
+    for part in parts:
+        if part.endswith((" ", ".")):
+            return False
+        stem = part.split(".", 1)[0].casefold()
+        if stem in _WINDOWS_RESERVED:
+            return False
     return True
 
 
 def _zip_normalized_member_path(name: str) -> str:
     """Stable normalized zip member path for sorting/duplicate detection. Empty means unsafe."""
-    n = (name or "").replace("\\", "/")
+    n = unicodedata.normalize("NFC", (name or "").replace("\\", "/"))
     if not n or n.endswith("/"):
         return ""
     parts: list[str] = []
@@ -78,14 +97,44 @@ def _zip_normalized_member_path(name: str) -> str:
 
 def _zip_sorted_infos(zf: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
     """Return members in deterministic order independent of original zip entry order."""
-    return sorted(zf.infolist(), key=lambda i: (_zip_normalized_member_path(i.filename).lower(), i.filename.replace("\\", "/")))
+    return sorted(zf.infolist(), key=lambda i: (_zip_normalized_member_path(i.filename).casefold(),
+                                                 unicodedata.normalize("NFC", i.filename.replace("\\", "/"))))
 
 
-def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_files: int = 200, max_size_mb: int = 100) -> dict:
+def _zip_info_is_special(info: zipfile.ZipInfo) -> bool:
+    mode = (int(info.external_attr) >> 16) & 0xFFFF
+    if not mode:
+        return False
+    # ``ZipInfo.writestr`` commonly stores only permission bits (0600) and no
+    # POSIX file-type bits.  Treat that as an ordinary file; otherwise every
+    # ZIP produced by Python on Windows is falsely rejected as "special".
+    kind = stat.S_IFMT(mode)
+    return bool(kind and kind not in {stat.S_IFREG, stat.S_IFDIR})
+
+
+def _zip_member_sha256(zf: zipfile.ZipFile, info: zipfile.ZipInfo) -> str:
+    h = hashlib.sha256()
+    count = 0
+    with zf.open(info, "r") as stream:
+        while True:
+            chunk = stream.read(1024 * 1024)
+            if not chunk:
+                break
+            count += len(chunk)
+            h.update(chunk)
+    if count != info.file_size:
+        raise ValueError(f"ZIP_MEMBER_SIZE_MISMATCH:{info.filename}:{count}!={info.file_size}")
+    return h.hexdigest()
+
+
+def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_files: int = 200,
+              max_size_mb: int = 100, max_total_mb: int = 500, max_ratio: float = 100.0) -> dict:
     zpath = Path(path)
     out = {"ok": False, "schema": "ingest_zip_plan.v1", "zip": str(zpath), "mode": mode, "profile": profile or None, "cat": cat or None,
            "files_total": 0, "accepted": 0, "skipped": 0, "items": [], "errors": [], "requires_apply": True,
-           "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM."}
+           "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
+           "limits": {"max_files": int(max_files), "max_size_mb": int(max_size_mb),
+                      "max_total_mb": int(max_total_mb), "max_ratio": float(max_ratio)}}
     if not zpath.exists():
         out["errors"].append("ZIP_NOT_FOUND")
         return out
@@ -93,6 +142,8 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
         out["errors"].append("NOT_A_ZIP_FILE")
         return out
     max_bytes = max(1, int(max_size_mb)) * 1024 * 1024
+    max_total_bytes = max(1, int(max_total_mb)) * 1024 * 1024
+    total_accepted_bytes = 0
     try:
         with zipfile.ZipFile(zpath) as zf:
             infos = _zip_sorted_infos(zf)
@@ -106,10 +157,18 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
                 norm_path = _zip_normalized_member_path(info.filename)
                 item = {"path": info.filename, "normalized_path": norm_path or None, "size": info.file_size,
                         "crc32": info.CRC, "status": "planned"}   # v1.33.61: CRC nội-dung cho idempotency_key content-v2
+                if _zip_is_ignored_member(info.filename):
+                    item.update({"status": "skipped", "reason": "IGNORED_SYSTEM_PATH"})
+                    out["items"].append(item); continue
+                if _zip_info_is_special(info):
+                    item.update({"status": "skipped", "reason": "SPECIAL_ZIP_ENTRY"})
+                    out["errors"].append(f"SPECIAL_ZIP_ENTRY:{info.filename}")
+                    out["items"].append(item); continue
                 if not _zip_is_safe_member(info.filename) or not norm_path:
                     item.update({"status": "skipped", "reason": "UNSAFE_OR_SYSTEM_PATH"})
+                    out["errors"].append(f"UNSAFE_ZIP_PATH:{info.filename}")
                     out["items"].append(item); continue
-                norm_key = norm_path.lower()
+                norm_key = norm_path.casefold()
                 if norm_key in seen_norm:
                     item.update({"status": "skipped", "reason": "DUPLICATE_NORMALIZED_ZIP_PATH", "duplicate_of": seen_norm[norm_key]})
                     out["errors"].append(f"DUPLICATE_NORMALIZED_ZIP_PATH:{info.filename}->{seen_norm[norm_key]}")
@@ -122,6 +181,18 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
                 elif info.file_size > max_bytes:
                     item.update({"status": "skipped", "reason": f"FILE_TOO_LARGE>{max_size_mb}MB"})
                 else:
+                    ratio = (float("inf") if info.compress_size == 0 and info.file_size
+                             else (info.file_size / max(info.compress_size, 1)))
+                    item["compression_ratio"] = round(ratio, 3) if ratio != float("inf") else "inf"
+                    if ratio > float(max_ratio):
+                        item.update({"status": "skipped", "reason": f"COMPRESSION_RATIO>{max_ratio}"})
+                        out["errors"].append(f"ZIP_BOMB_RATIO:{info.filename}")
+                        out["items"].append(item); continue
+                    total_accepted_bytes += int(info.file_size)
+                    if total_accepted_bytes > max_total_bytes:
+                        item.update({"status": "skipped", "reason": f"TOTAL_SIZE>{max_total_mb}MB"})
+                        out["errors"].append(f"ZIP_TOTAL_SIZE_EXCEEDED:{total_accepted_bytes}>{max_total_bytes}")
+                        out["items"].append(item); continue
                     action = "profile-ingest" if mode == "profile" else "ingest-local"
                     convert = "drive_gdoc" if ext in {".doc", ".docx", ".pdf", ".rtf", ".odt"} else "text_source"
                     item.update({
@@ -130,6 +201,7 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
                         "requires_ocr_review": ext == ".pdf",
                         "expected_pipeline": ["extract_to_temp", "upload_binary", "drive_convert_gdoc", "standardize_name", "verify_readback", "register", "nlm_add_after_verify"],
                         "status": "accepted",
+                        "sha256": _zip_member_sha256(zf, info),
                     })
                 out["items"].append(item)
     except Exception as e:
@@ -137,6 +209,7 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
         return out
     out["accepted"] = sum(1 for i in out["items"] if i.get("status") == "accepted")
     out["skipped"] = sum(1 for i in out["items"] if i.get("status") == "skipped")
+    out["total_uncompressed_bytes"] = total_accepted_bytes
     out["ok"] = not out["errors"] and out["accepted"] > 0
     if mode == "vbqppl" and not cat:
         out["warnings"] = ["CAT_NOT_PROVIDED_FOR_VBQPPL_BATCH_REVIEW_REQUIRED"]
@@ -147,85 +220,183 @@ def _zip_plan(path: str, *, mode: str, profile: str = "", cat: str = "", max_fil
         # header khác nhau → key lệch cross-machine. Danh tính NỘI DUNG: norm_path+CRC32+size từng member
         # accepted (CRC lấy từ central directory — 0 IO thêm; re-zip cùng nội dung = CÙNG key, đúng ngữ
         # nghĩa idempotency hơn).
-        member_basis = ";".join(f"{i.get('path','')}:{i.get('crc32','')}:{i.get('size','')}"
+        member_basis = ";".join(f"{i.get('normalized_path','')}:{i.get('sha256','')}:{i.get('size','')}"
                                 for i in out.get("items", []) if i.get("status") == "accepted")
+        from tl_core.ingest_contract import canonical_json_bytes, sha256_file
+        out["archive_sha256"] = sha256_file(zpath)
         out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
-        out["idempotency_key"] = hashlib.sha256(("content-v2|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8", errors="replace")).hexdigest()
+        out["idempotency_key"] = hashlib.sha256(("content-v3|" + mode + "|" + (cat or profile or "") + "|" + member_basis).encode("utf-8")).hexdigest()
+        _commit = {"schema": out["schema"], "mode": mode, "profile": profile or "", "cat": cat or "",
+                   "archive_sha256": out["archive_sha256"], "members": [
+                       {k: i.get(k) for k in ("normalized_path", "sha256", "size")}
+                       for i in out.get("items", []) if i.get("status") == "accepted"],
+                   "limits": out["limits"]}
+        out["plan_hash"] = hashlib.sha256(canonical_json_bytes(_commit)).hexdigest()
     except Exception:
         out["idempotency"] = _idempotency_contract_for_workflow("ingest_zip")
     return out
 
 
-def _safe_extract_zip_for_ingest(zip_path: str, temp_dir: str, *, max_size_mb: int | None = None) -> list[dict]:
+def _safe_extract_zip_for_ingest(zip_path: str, temp_dir: str, *, plan: dict | None = None,
+                                 max_size_mb: int | None = None, max_total_mb: int | None = None,
+                                 max_ratio: float | None = None) -> list[dict]:
     """Extract accepted members only. Caller phải đã chạy _zip_plan. Chống zip-slip.
     v1.33.56 (review PH2-02): +max_size_mb — trước đây plan đánh dấu file quá cỡ 'skipped' nhưng extract
     KHÔNG kiểm → apply vẫn nạp file plan đã loại."""
     extracted = []
     base = Path(temp_dir).resolve()
     _cap = max(1, int(max_size_mb)) * 1024 * 1024 if max_size_mb else None
+    _total_cap = max(1, int(max_total_mb)) * 1024 * 1024 if max_total_mb else None
+    _expected = {i.get("normalized_path"): i for i in ((plan or {}).get("items") or [])
+                 if i.get("status") == "accepted"}
+    if plan:
+        from tl_core.ingest_contract import sha256_file
+        if sha256_file(zip_path) != plan.get("archive_sha256"):
+            raise ValueError("ZIP_ARCHIVE_HASH_MISMATCH")
+    _total = 0
     with zipfile.ZipFile(zip_path) as zf:
         for info in _zip_sorted_infos(zf):
             norm_path = _zip_normalized_member_path(info.filename)
-            if info.is_dir() or not _zip_is_safe_member(info.filename) or not norm_path:
+            if info.is_dir() or _zip_info_is_special(info) or not _zip_is_safe_member(info.filename) or not norm_path:
+                continue
+            if _expected and norm_path not in _expected:
                 continue
             if _cap is not None and info.file_size > _cap:
-                continue
+                raise ValueError(f"ZIP_MEMBER_EXCEEDS_APPLY_LIMIT:{norm_path}")
+            _ratio = (float("inf") if info.compress_size == 0 and info.file_size
+                      else info.file_size / max(info.compress_size, 1))
+            if max_ratio is not None and _ratio > float(max_ratio):
+                raise ValueError(f"ZIP_MEMBER_RATIO_EXCEEDS_APPLY_LIMIT:{norm_path}")
+            _total += int(info.file_size)
+            if _total_cap is not None and _total > _total_cap:
+                raise ValueError("ZIP_TOTAL_EXCEEDS_APPLY_LIMIT")
             ext = Path(norm_path).suffix.lower()
             if ext not in _ALLOWED_INGEST_EXTS:
                 continue
             dest = (base / norm_path).resolve()
-            if not str(dest).startswith(str(base) + os.sep):
-                continue
+            try:
+                dest.relative_to(base)
+            except ValueError as exc:
+                raise ValueError(f"ZIP_PATH_ESCAPES_STAGING:{norm_path}") from exc
             dest.parent.mkdir(parents=True, exist_ok=True)
-            with zf.open(info) as src, open(dest, "wb") as dst:
-                shutil.copyfileobj(src, dst)
-            extracted.append({"zip_path": info.filename, "normalized_path": norm_path, "path": str(dest), "size": info.file_size, "ext": ext})
+            h = hashlib.sha256()
+            written = 0
+            with zf.open(info) as src, open(dest, "xb") as dst:
+                while True:
+                    chunk = src.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    written += len(chunk)
+                    h.update(chunk)
+                    dst.write(chunk)
+            digest = h.hexdigest()
+            expected = _expected.get(norm_path) or {}
+            if written != info.file_size or (expected.get("sha256") and digest != expected.get("sha256")):
+                dest.unlink(missing_ok=True)
+                raise ValueError(f"ZIP_MEMBER_CHANGED_OR_CORRUPT:{norm_path}")
+            extracted.append({"zip_path": info.filename, "normalized_path": norm_path, "path": str(dest),
+                              "size": info.file_size, "sha256": digest, "ext": ext})
+    if _expected and len(extracted) != len(_expected):
+        raise ValueError(f"ZIP_ACCEPTED_MEMBER_COUNT_MISMATCH:{len(extracted)}!={len(_expected)}")
     return extracted
 
 
 def _zip_apply(a, *, mode: str) -> int:
+    from concurrent.futures import ThreadPoolExecutor
+    from tl_core.ingest_contract import authorize_apply
     cat = getattr(a, "cat", "") or ""
     profile = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
     if mode == "vbqppl" and not cat:
         print(_json_dumps({"ok": False, "error": "CAT_REQUIRED_FOR_VBQPPL_ZIP_APPLY", "note": "Dùng --cat NN hoặc chạy dry-run để phân loại trước."}, deterministic=_deterministic_enabled(a)))
         return 2
-    if getattr(a, "confirm", "") != "yes":
-        print(_json_dumps({"ok": False, "error": "CONFIRM_REQUIRED", "note": "Zip apply sẽ gọi ingest-local/profile-ingest từng file. Thêm --confirm yes sau khi đã xem dry-run."}, deterministic=_deterministic_enabled(a)))
-        return 2
-    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat, max_files=a.max_files, max_size_mb=a.max_size_mb)
+    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
+                     max_files=a.max_files, max_size_mb=a.max_size_mb,
+                     max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
     if not plan.get("ok"):
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+    auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
+                           expected_plan_hash=getattr(a, "expected_plan_hash", None),
+                           actual_plan_hash=plan.get("plan_hash") or "")
+    if not auth.get("ok"):
+        print(_json_dumps({"ok": False, "step": "apply_authorization", **auth},
+                          deterministic=_deterministic_enabled(a)))
+        return 2
     results = []
+    run_id = _apply_journal_start("profile-ingest-zip" if mode == "profile" else "ingest-zip",
+                                  {"file": str(a.file), "plan_hash": plan.get("plan_hash"),
+                                   "archive_sha256": plan.get("archive_sha256"), "profile": profile, "cat": cat})
     with tempfile.TemporaryDirectory(prefix="tl_zip_ingest_") as td:
-        extracted = _safe_extract_zip_for_ingest(a.file, td, max_size_mb=getattr(a, "max_size_mb", None))
-        for item in extracted:
+        try:
+            extracted = _safe_extract_zip_for_ingest(
+                a.file, td, plan=plan, max_size_mb=getattr(a, "max_size_mb", None),
+                max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+        except Exception as exc:  # noqa: BLE001
+            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
+            print(_json_dumps({"ok": False, "step": "zip_extract_verify", "journal": run_id,
+                               "error": f"{type(exc).__name__}: {exc}"}, deterministic=_deterministic_enabled(a)))
+            return 2
+
+        def _run_member(item):
             if mode == "profile":
-                child = ["profile-ingest", item["path"], "--apply", "--json"]
+                child = ["profile-ingest", item["path"], "--json"]
                 if profile:
                     child += ["--profile", profile]
             else:
-                child = ["ingest-local", item["path"], "--cat", cat, "--apply", "--json"]
+                child = ["ingest-local", item["path"], "--cat", cat, "--json"]
             if getattr(a, "skip_nlm_preflight", False) and mode != "profile":
                 child.append("--skip-nlm-preflight")
             if mode != "profile" and getattr(a, "profile", None):   # v1.33.56 (regression/F2)
                 child += ["--profile", a.profile]
             if getattr(a, "config", None):   # v1.33.56 (PH2-04): child PHẢI thấy cùng config với parent
                 child += ["--config", str(Path(a.config).expanduser().resolve())]
-            r = _run_child_tl(child)
-            r.update({"zip_path": item["zip_path"], "file": item["path"]})
-            results.append(r)
-            if not r.get("ok") and not getattr(a, "continue_on_error", False):
-                break
+            dry = _run_child_tl(child)
+            child_plan_hash = str(((dry.get("json") or {}).get("plan_hash") or ""))
+            if not (dry.get("ok") and child_plan_hash):
+                return {"ok": False, "step": "child_plan", "zip_path": item["normalized_path"],
+                        "returncode": dry.get("returncode"), "stderr_tail": dry.get("stderr_tail"),
+                        "stdout_tail": dry.get("stdout_tail")}
+            applied = _run_child_tl(child + ["--apply", "--confirm", "yes",
+                                             "--expected-plan-hash", child_plan_hash])
+            applied_ok = bool(applied.get("ok") and isinstance(applied.get("json"), dict)
+                              and applied["json"].get("ok") is True)
+            return {"ok": applied_ok, "step": "child_apply", "zip_path": item["normalized_path"],
+                    "member_sha256": item.get("sha256"), "plan_hash": child_plan_hash,
+                    "returncode": applied.get("returncode"), "result": applied.get("json"),
+                    **({"stderr_tail": applied.get("stderr_tail"), "stdout_tail": applied.get("stdout_tail")}
+                       if not applied_ok else {})}
+
+        workers = max(1, min(int(getattr(a, "workers", 4) or 4), 8, len(extracted) or 1))
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="tl-zip-ingest") as pool:
+            results = list(pool.map(_run_member, extracted))
+        results.sort(key=lambda r: str(r.get("zip_path") or "").casefold())
+        for r in results:
+            _journal_append(run_id, {"t": "commit", "op": "ingest_member", "key": r.get("zip_path"),
+                                     "ok": bool(r.get("ok")), "verify": {"plan_hash": r.get("plan_hash"),
+                                                                            "member_sha256": r.get("member_sha256")}})
+    _applied_ok = sum(1 for r in results if r.get("ok"))
+    _applied_fail = sum(1 for r in results if not r.get("ok"))
     out = {"ok": bool(results) and all(r.get("ok") for r in results), "schema": "ingest_zip_apply.v1",
            "mode": mode, "profile": (profile if mode == "profile" else None), "cat": (cat if mode == "vbqppl" else None),
-           "dry_run_plan": {k: plan.get(k) for k in ("zip", "files_total", "accepted", "skipped", "warnings")},
-           "results": results, "note": "Apply gọi lại pipeline hiện có từng file; từng pipeline tự upload→convert→readback→register→NLM."}
+           # v1.34.45 (audit merge): ingest-zip apply ALWAYS processes every accepted member (children are
+           # independent + idempotent), then reports partial explicitly. There is no fail-fast; `--continue-on-error`
+           # does not change ingest-zip behavior. `ok` is true only when every member applied.
+           "counts": {"applied": _applied_ok, "failed": _applied_fail, "total": len(results)},
+           "partial": bool(_applied_fail) and bool(_applied_ok),
+           "journal": run_id, "plan_hash": plan.get("plan_hash"), "archive_sha256": plan.get("archive_sha256"),
+           "workers": workers,
+           "dry_run_plan": {k: plan.get(k) for k in ("zip", "files_total", "accepted", "skipped", "warnings", "limits")},
+           "results": results, "note": "Apply xử lý MỌI member (child độc lập+idempotent); ok=all(member). Xem counts/partial. Từng pipeline tự upload→convert→readback→register→NLM."}
+    _journal_append(run_id, {"t": "run_end", "ok": bool(out["ok"]),
+                             "counts": {"OK": sum(1 for r in results if r.get("ok")),
+                                        "FAILED": sum(1 for r in results if not r.get("ok"))}})
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
 
 def cmd_ingest_zip(a) -> int:
-    out = _zip_plan(a.file, mode="vbqppl", cat=getattr(a, "cat", "") or "", max_files=a.max_files, max_size_mb=a.max_size_mb)
+    out = _zip_plan(a.file, mode="vbqppl", cat=getattr(a, "cat", "") or "", max_files=a.max_files,
+                    max_size_mb=a.max_size_mb, max_total_mb=getattr(a, "max_total_mb", 500),
+                    max_ratio=getattr(a, "max_ratio", 100.0))
     if not getattr(a, "apply", False):
         _print_json_or_text(out, getattr(a, "json", False))
         return 0 if out.get("ok") else 2
@@ -234,7 +405,8 @@ def cmd_ingest_zip(a) -> int:
 
 def cmd_profile_ingest_zip(a) -> int:
     prof = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
-    out = _zip_plan(a.file, mode="profile", profile=prof, max_files=a.max_files, max_size_mb=a.max_size_mb)
+    out = _zip_plan(a.file, mode="profile", profile=prof, max_files=a.max_files, max_size_mb=a.max_size_mb,
+                    max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
     if not getattr(a, "apply", False):
         _print_json_or_text(out, getattr(a, "json", False))
         return 0 if out.get("ok") else 2

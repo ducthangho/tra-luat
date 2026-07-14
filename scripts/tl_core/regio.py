@@ -124,9 +124,12 @@ def _verify_reg_result(rb: dict, expected: int) -> dict:
     dòng VẪN khớp (idempotent) → thành công, KHÔNG phải lỗi. (Sự cố báo động GIẢ 'REG_WRITE_FAIL' khi loop ghi lại giá
     trị đã đúng — log 2026-07-02.) Silent-write cột-sai đã bị `_reg_cols_valid` CHẶN TRƯỚC ghi nên không cần patched ở đây.
     Trả `missed_ids` (miss[] từ API) để commit per-row + `no_change` (patched<expected nhưng không miss = idempotent)."""
-    rb = rb or {}
+    rb = rb if isinstance(rb, dict) else {}
     patched = int(rb.get("patched") or 0)
-    reg_ok = bool(rb.get("ok", True))
+    # Fail closed: an empty/malformed response is not evidence that a write
+    # happened.  Older code defaulted missing ``ok`` to True and therefore
+    # marked ``{}`` as verified.
+    reg_ok = rb.get("ok") is True
     miss_ids = rb.get("miss") if isinstance(rb.get("miss"), (list, tuple)) else None
     _missed_raw = rb.get("missed")
     if miss_ids is not None:
@@ -172,9 +175,11 @@ def _verified_reg_write(g, items: list, cols) -> dict:
             def _mismatch():
                 try:
                     _rg = g.get("reg_get", drive_id=_did, refresh="true")
-                    _row = ((_rg.get("rows") or [{}])[0]) if isinstance(_rg, dict) else {}
+                    if not (isinstance(_rg, dict) and _rg.get("ok") is True and _rg.get("rows")):
+                        return ["<readback_failed>"]
+                    _row = (_rg.get("rows") or [{}])[0]
                 except Exception:  # noqa: BLE001
-                    return None   # đọc lỗi mạng → KHÔNG kết luận (không phủ nhận write đã ok)
+                    return ["<readback_failed>"]
                 return [c for c in _cols_list
                         if str((it or {}).get(c) or "").strip()
                         and str(_row.get(c) or "").strip() != str(it.get(c)).strip()]
@@ -305,7 +310,7 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
     if ok and fields and _did:
         try:
             rb = g.get("reg_get", drive_id=_did, refresh="true")
-            _rows = (rb.get("rows") or []) if isinstance(rb, dict) else []
+            _rows = (rb.get("rows") or []) if isinstance(rb, dict) and rb.get("ok") is True else []
             if _rows:
                 _row = _rows[0] or {}
                 for k in fields:
@@ -314,7 +319,7 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
                     if want and got != want:
                         dropped.append({"col": k, "want": want[:80], "got": got[:80]})
             else:
-                readback = "NO_ROW"   # reg_get không trả row → KHÔNG kết luận (không phủ nhận write đã ok)
+                readback = "NO_ROW"
         except Exception as e:  # noqa: BLE001
             readback = f"FAILED:{type(e).__name__}"
     # #5 backlog (v1.34.17): giá trị RỖNG cho cột thường bị webapp BỎ IM LẶNG by-design (chỉ nlm_*/note clear
@@ -337,7 +342,7 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
         if _retried:
             try:
                 rb2 = g.get("reg_get", drive_id=_did, refresh="true")
-                _rows2 = (rb2.get("rows") or []) if isinstance(rb2, dict) else []
+                _rows2 = (rb2.get("rows") or []) if isinstance(rb2, dict) and rb2.get("ok") is True else []
                 if _rows2:
                     _row2 = _rows2[0] or {}
                     dropped = [d for d in dropped
@@ -358,7 +363,7 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
         if _retried_post:
             try:
                 rb3 = g.get("reg_get", drive_id=_did, refresh="true")
-                _rows3 = (rb3.get("rows") or []) if isinstance(rb3, dict) else []
+                _rows3 = (rb3.get("rows") or []) if isinstance(rb3, dict) and rb3.get("ok") is True else []
                 if _rows3:
                     _row3 = _rows3[0] or {}
                     dropped = [d for d in dropped
@@ -371,7 +376,10 @@ def _verified_reg_upsert(g, payload: dict) -> dict:
                 **({"fields_retried_post": _retried_post} if _retried_post else {}), **_empty_extra,
                 "note": "reg_upsert ok NHƯNG read-back thấy field LỆCH (đã retry GET per-field + fallback POST "
                         "reg_bulk) — webapp bỏ cột im lặng (kiểm tên cột ∈ REG_COLS_ / GAS version; cột nào "
-                        "trong fields_dropped là CÒN rớt sau cả 2 vòng)."}
+                         "trong fields_dropped là CÒN rớt sau cả 2 vòng)."}
+    if fields and _did and readback != "OK":
+        return {"verified": False, "changed": changed, "reg_upsert": r,
+                "error": "REG_UPSERT_READBACK_FAILED", "readback": readback, **_empty_extra}
     return {"verified": ok, "changed": changed, "reg_upsert": r,
             **({"fields_retried": _retried} if _retried else {}),
             **({"fields_retried_post": _retried_post} if _retried_post else {}), **_empty_extra,

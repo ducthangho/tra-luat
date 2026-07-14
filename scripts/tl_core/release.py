@@ -19,6 +19,7 @@ import subprocess # noqa: F401
 import sys        # noqa: F401
 import tempfile   # noqa: F401
 import time       # noqa: F401
+import unicodedata # noqa: F401
 import zipfile    # noqa: F401
 from pathlib import Path  # noqa: F401
 
@@ -37,6 +38,7 @@ def bind(tl_module) -> None:
 
 
 def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
+    from tl_core.deterministic import PATHISH_KEYS, VOLATILE_JSON_KEYS, audit_projection, json_dumps as _raw_det_json
     checks = []
 
     def add(name: str, ok: bool, detail="", **extra):
@@ -85,8 +87,13 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
         "out_dir": str(Path(tempfile.gettempdir()) / "tl_probe_random"),
         "seconds": 12.345,
     }
-    scrubbed = _scrub_volatile(scrub_probe)
-    add("volatile_scrub_contract", scrubbed.get("path") == "SKILL.md" and scrubbed.get("out_dir") == "<volatile>" and scrubbed.get("seconds") == "<volatile>", json.dumps(scrubbed, ensure_ascii=False))
+    scrubbed = audit_projection(scrub_probe, volatile_keys={"out_dir", "seconds"}, path_keys={"path"},
+                                  project_root=HERE.parent)
+    add("declared_audit_projection", scrubbed.get("path") == "SKILL.md" and scrubbed.get("out_dir") == "<volatile>" and scrubbed.get("seconds") == "<volatile>", json.dumps(scrubbed, ensure_ascii=False))
+    semantic_probe = {"regex": r"\d+\w", "legal_code": r"A\B", "created_at": "2020-01-01"}
+    semantic_roundtrip = json.loads(_raw_det_json(semantic_probe, deterministic=True))
+    add("deterministic_preserves_business_values", semantic_roundtrip == semantic_probe,
+        json.dumps(semantic_roundtrip, ensure_ascii=False))
 
     if strict or full:
         try:
@@ -102,8 +109,12 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
             s1 = _run_tl_json(["live-state-snapshot", "--no-contract", "--out", str(tdp / "before1.json"), "--json"], timeout=90)
             s2 = _run_tl_json(["live-state-snapshot", "--no-contract", "--out", str(tdp / "before2.json"), "--json"], timeout=90)
             if s1.get("ok") and s2.get("ok"):
-                t1 = _json_dumps(s1.get("data"), deterministic=True)
-                t2 = _json_dumps(s2.get("data"), deterministic=True)
+                p1 = audit_projection(s1.get("data"), volatile_keys=VOLATILE_JSON_KEYS,
+                                      path_keys=PATHISH_KEYS, project_root=HERE.parent)
+                p2 = audit_projection(s2.get("data"), volatile_keys=VOLATILE_JSON_KEYS,
+                                      path_keys=PATHISH_KEYS, project_root=HERE.parent)
+                t1 = _raw_det_json(p1, deterministic=True)
+                t2 = _raw_det_json(p2, deterministic=True)
                 add("live_state_snapshot_stable", t1 == t2, "snapshot JSON stable across two deterministic runs", diff={} if t1 == t2 else _first_text_diff(t1, t2))
             else:
                 add("live_state_snapshot_stable", False, "snapshot child command failed", first={"rc": s1.get("returncode"), "stderr_tail": s1.get("stderr_tail")}, second={"rc": s2.get("returncode"), "stderr_tail": s2.get("stderr_tail")})
@@ -113,10 +124,14 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
             sample = tdp / "sample_abs.txt"
             sample.write_text("Điều 1. Mẫu kiểm thử deterministic.\n" + ("Nội dung tiếng Việt có dấu để đủ mật độ. " * 20), encoding="utf-8")
             oa = _run_tl_json(["ocr-analyze", str(sample), "--json"], timeout=60)
-            od = _json_dumps(oa.get("data"), deterministic=True) if oa.get("data") else ""
+            od = (_raw_det_json(audit_projection(oa.get("data"), path_keys=PATHISH_KEYS,
+                                                 project_root=HERE.parent), deterministic=True)
+                  if oa.get("data") else "")
             add("ocr_analyze_path_scrub", bool(oa.get("ok")) and str(sample) not in od and "<tmp>" in od, "absolute tmp path scrubbed from deterministic ocr-analyze output")
             cp = _run_tl_json(["chunk-plan", str(sample), "--mode", "profile", "--json"], timeout=60)
-            cd = _json_dumps(cp.get("data"), deterministic=True) if cp.get("data") else ""
+            cd = (_raw_det_json(audit_projection(cp.get("data"), path_keys=PATHISH_KEYS,
+                                                 project_root=HERE.parent), deterministic=True)
+                  if cp.get("data") else "")
             add("chunk_plan_path_scrub", bool(cp.get("ok")) and str(sample) not in cd and "<tmp>" in cd, "absolute tmp path scrubbed from deterministic chunk-plan output")
 
             # Same zip contents with different member order must produce same dry-run plan after scrub.
@@ -131,7 +146,9 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
             zp2 = _zip_plan(str(z2), mode="vbqppl", cat="01")
             zi1 = [(i.get("normalized_path"), i.get("status"), i.get("reason")) for i in (zp1.get("items") or [])]
             zi2 = [(i.get("normalized_path"), i.get("status"), i.get("reason")) for i in (zp2.get("items") or [])]
-            add("zip_member_order_stable", bool(zp1.get("ok") and zp2.get("ok")) and zi1 == zi2 and [x[0] for x in zi1] == sorted([x[0] for x in zi1]), f"items={zi1}")
+            add("zip_member_order_stable", bool(zp1.get("ok") and zp2.get("ok")) and zi1 == zi2
+                and [x[0] for x in zi1] == sorted([x[0] for x in zi1])
+                and zp1.get("idempotency_key") == zp2.get("idempotency_key"), f"items={zi1}")
 
             zdup = tdp / "dup.zip"
             with zipfile.ZipFile(zdup, "w") as zf:
@@ -340,6 +357,7 @@ _RELEASE_REQUIRED_FILES = [
     "scripts/tl_core/fetch_web.py",
     "scripts/tl_core/profile_mgmt.py",
     "scripts/tl_core/ingest_ops.py",
+    "scripts/tl_core/ingest_contract.py",
     "scripts/tl_core/lookup_ops.py",
     "scripts/tl_core/ops_misc.py",
     "scripts/tl_core/classify.py",
@@ -450,10 +468,11 @@ def _build_release_manifest(root: Path) -> dict:
         "skill": "tra-luat",
         "skill_version": version_text or VERSION,
         "webapp_target": globals().get("EXPECT_VERSION", ""),
-        "root_name": root.name,
+        "root_name": "tra-luat",
         "file_count": len(files),
         "total_bytes": total,
         "package_hash": package_hash,
+        "content_hash": package_hash,
         "required_missing": missing_required,
         "files": files,
         "determinism_note": "Manifest không chứa timestamp hay đường dẫn tuyệt đối; package_hash tính từ path,size,sha256 đã sort.",
@@ -462,11 +481,61 @@ def _build_release_manifest(root: Path) -> dict:
 
 def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
     root = root.resolve()
-    expected = {f.get("path"): f for f in manifest.get("files", []) if f.get("path")}
+    raw_files = manifest.get("files") if isinstance(manifest, dict) else None
     checks = []
-    ok = True
+    errors = []
+    ok = isinstance(raw_files, list) and manifest.get("schema") == "release_manifest.v1"
+    if not isinstance(raw_files, list):
+        raw_files = []
+        errors.append("MANIFEST_FILES_NOT_LIST")
+    if manifest.get("schema") != "release_manifest.v1":
+        errors.append("MANIFEST_SCHEMA_INVALID")
+    expected = {}
+    for meta in raw_files:
+        if not isinstance(meta, dict):
+            errors.append("MANIFEST_FILE_ENTRY_NOT_OBJECT")
+            ok = False
+            continue
+        rel = str((meta or {}).get("path") or "").replace("\\", "/")
+        parts = rel.split("/") if rel else []
+        if (not rel or rel.startswith("/") or re.match(r"^[A-Za-z]:", rel)
+                or any(p in {"", ".", ".."} for p in parts)):
+            errors.append(f"MANIFEST_PATH_UNSAFE:{rel}")
+            ok = False
+            continue
+        try:
+            declared_size = int(meta.get("size", -1))
+        except (TypeError, ValueError):
+            errors.append(f"MANIFEST_SIZE_INVALID:{rel}")
+            ok = False
+            continue
+        declared_sha = str(meta.get("sha256") or "")
+        if declared_size < 0 or not re.fullmatch(r"[0-9a-f]{64}", declared_sha):
+            errors.append(f"MANIFEST_FILE_METADATA_INVALID:{rel}")
+            ok = False
+            continue
+        portable_key = unicodedata.normalize("NFC", rel).casefold()
+        if any(unicodedata.normalize("NFC", prior).casefold() == portable_key for prior in expected):
+            errors.append(f"MANIFEST_PATH_DUPLICATE:{rel}")
+            ok = False
+            continue
+        expected[rel] = {**meta, "size": declared_size, "sha256": declared_sha}
+    manifest_basis = "\n".join(
+        f"{rel}\0{int(meta.get('size', -1))}\0{meta.get('sha256')}" for rel, meta in sorted(expected.items())
+    )
+    manifest_package_hash = hashlib.sha256(manifest_basis.encode("utf-8")).hexdigest()
+    package_hash_self_match = bool(expected) and manifest.get("package_hash") == manifest_package_hash
+    if not package_hash_self_match:
+        errors.append("MANIFEST_PACKAGE_HASH_MISMATCH")
+        ok = False
     for rel, meta in sorted(expected.items()):
-        p = root / rel
+        p = (root / rel).resolve()
+        try:
+            p.relative_to(root)
+        except ValueError:
+            checks.append({"path": rel, "ok": False, "error": "PATH_ESCAPES_ROOT"})
+            ok = False
+            continue
         if not p.exists():
             checks.append({"path": rel, "ok": False, "error": "MISSING"})
             ok = False
@@ -477,7 +546,7 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
             continue
         size = p.stat().st_size
         sha = _sha256_file(p)
-        item_ok = (size == int(meta.get("size", -1)) and sha == meta.get("sha256"))
+        item_ok = (size == meta.get("size") and sha == meta.get("sha256"))
         checks.append({"path": rel, "ok": item_ok, "expected_size": meta.get("size"), "actual_size": size,
                        "expected_sha256": meta.get("sha256"), "actual_sha256": sha})
         ok = ok and item_ok
@@ -491,11 +560,20 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
     required_missing = [x for x in (list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)) if not (root / x).exists()]
     if required_missing:
         ok = False
+    package_hash_current_expected = hashlib.sha256("\n".join(
+        f"{c['path']}\0{c.get('actual_size', -1)}\0{c.get('actual_sha256')}"
+        for c in checks if c.get("actual_sha256")
+    ).encode("utf-8")).hexdigest()
+    package_hash_match = (not any(not c.get("ok") for c in checks)
+                          and package_hash_self_match
+                          and package_hash_current_expected == manifest.get("package_hash"))
+    if not package_hash_match:
+        ok = False
     return {
         "ok": bool(ok),
         "schema": "release_verify.v1",
         "strict": bool(strict),
-        "root_name": root.name,
+        "root_name": "tra-luat",
         "manifest_schema": manifest.get("schema"),
         "skill_version": manifest.get("skill_version"),
         "expected_file_count": len(expected),
@@ -504,9 +582,12 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         "extra_files": extra[:200],
         "missing_from_current_manifest": missing_from_current_manifest[:200],
         "required_missing": required_missing,
+        "errors": errors,
         "package_hash_expected": manifest.get("package_hash"),
-        "package_hash_current": current.get("package_hash"),
-        "package_hash_match": manifest.get("package_hash") == current.get("package_hash"),
+        "package_hash_current": package_hash_current_expected,
+        "package_hash_full_tree": current.get("package_hash"),
+        "package_hash_self_match": package_hash_self_match,
+        "package_hash_match": package_hash_match,
         "note": "strict=true coi file thừa là lỗi; strict=false chỉ cảnh báo extra_files.",
     }
 
@@ -520,6 +601,53 @@ def cmd_release_manifest(a) -> int:
     return 0 if m.get("ok") else 2
 
 
+def _verify_release_archive(zip_path: Path, manifest: dict, *, expected_archive_sha256: str = "") -> dict:
+    """v1.34.45 (audit merge): open the .zip and verify archive bytes + every member against the
+    manifest (was asserted at build time but never gate-checked). Fail closed on any mismatch."""
+    out = {"archive": str(zip_path), "archive_ok": False, "errors": []}
+    if not zip_path.is_file():
+        out["errors"].append("ARCHIVE_NOT_FOUND")
+        return out
+    actual_sha = _sha256_file(zip_path)
+    out["archive_sha256"] = actual_sha
+    exp = str(expected_archive_sha256 or "").strip().lower()
+    if exp:
+        out["archive_sha256_expected"] = exp
+        if exp != actual_sha:
+            out["errors"].append(f"ARCHIVE_SHA256_MISMATCH:{actual_sha}!={exp}")
+    sha_by_rel = {f["path"]: f.get("sha256") for f in manifest.get("files", [])}
+    meta_names = {"RELEASE_MANIFEST.json", "BUNDLE_META.json"}
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            names = [n for n in zf.namelist() if not n.endswith("/")]
+            roots = {n.split("/", 1)[0] for n in names if "/" in n}
+            if len(roots) != 1:
+                out["errors"].append(f"ARCHIVE_ROOT_NOT_SINGLE:{sorted(roots)}")
+            top = sorted(roots)[0] if roots else ""
+            seen = set()
+            for n in names:
+                rel = n[len(top) + 1:] if (top and n.startswith(top + "/")) else n
+                if rel in meta_names:
+                    continue
+                parts = Path(rel).parts
+                if ".." in parts or rel.startswith("/") or (len(rel) > 1 and rel[1] == ":"):
+                    out["errors"].append(f"ARCHIVE_UNSAFE_PATH:{n}")
+                    continue
+                got = hashlib.sha256(zf.read(n)).hexdigest()
+                want = sha_by_rel.get(rel)
+                if want is None:
+                    out["errors"].append(f"ARCHIVE_EXTRA_FILE:{rel}")
+                elif got != want:
+                    out["errors"].append(f"ARCHIVE_MEMBER_SHA_MISMATCH:{rel}")
+                seen.add(rel)
+            for miss in sorted(set(sha_by_rel) - seen):
+                out["errors"].append(f"ARCHIVE_MISSING_FILE:{miss}")
+    except (zipfile.BadZipFile, OSError, KeyError) as e:
+        out["errors"].append(f"ARCHIVE_READ_FAILED:{type(e).__name__}:{e}")
+    out["archive_ok"] = not out["errors"]
+    return out
+
+
 def cmd_release_verify(a) -> int:
     root = _release_root_from_arg(getattr(a, "root", None))
     mf = Path(getattr(a, "manifest", "")).expanduser()
@@ -530,6 +658,13 @@ def cmd_release_verify(a) -> int:
         _print_json_or_text(out, getattr(a, "json", False))
         return 2
     out = _verify_release_manifest(root, manifest, strict=bool(getattr(a, "strict", False)))
+    archive_arg = getattr(a, "archive", None)
+    if archive_arg:
+        arch = _verify_release_archive(Path(archive_arg).expanduser(), manifest,
+                                       expected_archive_sha256=getattr(a, "expected_archive_sha256", "") or "")
+        out["archive_verification"] = arch
+        if not arch.get("archive_ok"):
+            out["ok"] = False
     _print_json_or_text(out, getattr(a, "json", False))
     return 0 if out.get("ok") else 2
 
@@ -537,7 +672,10 @@ def cmd_release_verify(a) -> int:
 def _zip_write_file_deterministic(zf, src: Path, arcname: str):
     info = zipfile.ZipInfo(arcname)
     info.date_time = (1980, 1, 1, 0, 0, 0)
-    info.compress_type = zipfile.ZIP_DEFLATED
+    info.compress_type = zipfile.ZIP_STORED
+    info.create_system = 3
+    info.extra = b""
+    info.comment = b""
     # 0644 regular file; keep deterministic permissions.
     info.external_attr = 0o100644 << 16
     zf.writestr(info, src.read_bytes())
@@ -546,7 +684,10 @@ def _zip_write_file_deterministic(zf, src: Path, arcname: str):
 def _zip_write_bytes_deterministic(zf, data: bytes, arcname: str):
     info = zipfile.ZipInfo(arcname)
     info.date_time = (1980, 1, 1, 0, 0, 0)
-    info.compress_type = zipfile.ZIP_DEFLATED
+    info.compress_type = zipfile.ZIP_STORED
+    info.create_system = 3
+    info.extra = b""
+    info.comment = b""
     info.external_attr = 0o100644 << 16
     zf.writestr(info, data)
 
@@ -564,7 +705,7 @@ def cmd_bundle_export(a) -> int:
             out_path = (root.parent / out_path.name).resolve()
     except ValueError:
         pass
-    top = root.name
+    top = "tra-luat"
     manifest = _build_release_manifest(root)
     if not manifest.get("ok"):
         res = {"ok": False, "error": "MANIFEST_NOT_OK", "required_missing": manifest.get("required_missing")}
@@ -584,7 +725,7 @@ def cmd_bundle_export(a) -> int:
     if tmp.exists():
         tmp.unlink()
     _sha_by_rel = {f["path"]: f.get("sha256") for f in manifest.get("files", [])}
-    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_STORED) as zf:
         for f in manifest.get("files", []):
             p = root / f["path"]
             data = p.read_bytes()
@@ -599,9 +740,11 @@ def cmd_bundle_export(a) -> int:
         _zip_write_bytes_deterministic(zf, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
         _zip_write_bytes_deterministic(zf, json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"), f"{top}/BUNDLE_META.json")
     os.replace(tmp, out_path)
+    _bundle_sha = _sha256_file(out_path)
     res = {"ok": True, "schema": "bundle_export.v1", "out": str(out_path), "version_forked": version_forked,
-           "package_hash": manifest.get("package_hash"), "file_count": manifest.get("file_count"),
-           "bundle_sha256": _sha256_file(out_path),
+           "package_hash": manifest.get("package_hash"), "content_hash": manifest.get("content_hash"),
+           "file_count": manifest.get("file_count"),
+           "bundle_sha256": _bundle_sha, "archive_sha256": _bundle_sha,
            "note": "Giao zip này cho canonical merge. KHÔNG tự đánh version, KHÔNG drive-push (ADR-0001)."}
     _print_json_or_text(res, getattr(a, "json", False))
     return 0
@@ -620,7 +763,7 @@ def cmd_release_bundle(a) -> int:
             out_path = (root.parent / out_path.name).resolve()
     except ValueError:
         pass
-    top = getattr(a, "top", None) or root.name
+    top = getattr(a, "top", None) or "tra-luat"
     if not top or "/" in top or "\\" in top:
         res = {"ok": False, "error": "INVALID_TOP_NAME", "top": top}
         _print_json_or_text(res, getattr(a, "json", False)); return 2
@@ -634,7 +777,7 @@ def cmd_release_bundle(a) -> int:
         tmp.unlink()
     _sha_by_rel = {f["path"]: f.get("sha256") for f in manifest.get("files", [])}
     files = [root / f["path"] for f in manifest.get("files", [])]
-    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_STORED) as zf:
         for p in sorted(files, key=lambda x: str(x.relative_to(root)).replace(os.sep, "/")):
             rel = str(p.relative_to(root)).replace(os.sep, "/")
             data = p.read_bytes()
@@ -654,11 +797,37 @@ def cmd_release_bundle(a) -> int:
         _zip_write_bytes_deterministic(zf, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
     os.replace(tmp, out_path)
     bundle_sha = _sha256_file(out_path)
+    # v1.34.45 (audit merge, ADR-0007): prove byte-for-byte reproducibility AT THE GATE — build the
+    # bundle a second time and require an identical archive SHA-256. Prior releases only asserted
+    # reproducibility by construction; this makes it a fail-closed check.
+    _verify_tmp = out_path.with_suffix(out_path.suffix + ".verify.tmp")
+    try:
+        if _verify_tmp.exists():
+            _verify_tmp.unlink()
+        with zipfile.ZipFile(_verify_tmp, "w", compression=zipfile.ZIP_STORED) as zf2:
+            for p in sorted(files, key=lambda x: str(x.relative_to(root)).replace(os.sep, "/")):
+                rel = str(p.relative_to(root)).replace(os.sep, "/")
+                _zip_write_bytes_deterministic(zf2, p.read_bytes(), f"{top}/{rel}")
+            _zip_write_bytes_deterministic(zf2, json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"), f"{top}/RELEASE_MANIFEST.json")
+        rebuild_sha = _sha256_file(_verify_tmp)
+    finally:
+        try:
+            _verify_tmp.unlink()
+        except FileNotFoundError:
+            pass
+    if rebuild_sha != bundle_sha:
+        res = {"ok": False, "error": "RELEASE_BUNDLE_NOT_REPRODUCIBLE", "out": str(out_path),
+               "archive_sha256": bundle_sha, "archive_sha256_rebuild": rebuild_sha,
+               "note": "Hai lần build cho SHA-256 khác nhau — bundle KHÔNG tái lập byte-for-byte (ADR-0007)."}
+        _print_json_or_text(res, getattr(a, "json", False))
+        return 2
     res = {"ok": True, "schema": "release_bundle.v1", "out": str(out_path), "top": top,
            "file_count": manifest.get("file_count"), "total_bytes": manifest.get("total_bytes"),
            "package_hash": manifest.get("package_hash"), "bundle_sha256": bundle_sha,
            "warnings": ([_warn_redirect] if _warn_redirect else []),
-           "note": "Zip dùng thứ tự file sort + timestamp 1980-01-01 để giảm drift đóng gói."}
+           "content_hash": manifest.get("content_hash"),
+           "archive_sha256": bundle_sha, "archive_sha256_rebuild": rebuild_sha, "reproducible": True,
+           "note": "ZIP_STORED root/thứ tự/timestamp/permission cố định; build ×2 cùng SHA (ADR-0007)."}
     _print_json_or_text(res, getattr(a, "json", False))
     return 0
 

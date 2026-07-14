@@ -216,7 +216,18 @@ def main():
     cache_meta = {}
     if args.cache_id:
         from cache import get_doc, get_record
-        doc = get_doc(args.cache_id, args.cache_dir)
+        try:
+            doc = get_doc(args.cache_id, args.cache_dir)
+        except RuntimeError as e:
+            # v1.34.45 (audit merge): find() raises CACHE_IDENTITY_CONFLICT when >1 cached doc shares
+            # the query so_hieu (e.g. gốc + VBHN both cached). Fail closed with a clean message/exit
+            # code — never a raw traceback, and never guess which verbatim text to return.
+            if str(e).startswith("CACHE_IDENTITY_CONFLICT"):
+                print(f"CACHE_IDENTITY_CONFLICT cho '{args.cache_id}': cache có nhiều bản trùng số hiệu "
+                      f"— không trả nguyên văn khi mơ hồ. Dọn bản trùng hoặc truyền --cache-id chính xác hơn. "
+                      f"({e})", file=sys.stderr)
+                sys.exit(2)
+            raise
         if doc is None:
             print(f"MISS cache cho '{args.cache_id}' — cần tải & chuẩn hóa nguồn trước.",
                   file=sys.stderr)

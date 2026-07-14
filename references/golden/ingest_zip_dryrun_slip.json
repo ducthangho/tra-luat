@@ -1,7 +1,11 @@
 {
   "accepted": 1,
+  "archive_sha256": "6fcaba8588a4593030daec7bf24fcc368bbcd7231b52db6655dac91035276ed8",
   "cat": "01",
-  "errors": [],
+  "errors": [
+    "UNSAFE_ZIP_PATH:../evil.docx",
+    "UNSAFE_ZIP_PATH:bao cao?.docx"
+  ],
   "files_total": 3,
   "idempotency": {
     "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
@@ -13,7 +17,7 @@
     "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
     "schema": "idempotency_contract.v1"
   },
-  "idempotency_key": "97f6001223d8fec0f7810577811685e879b688330a60eaa5f80b9792de4ed80c",
+  "idempotency_key": "1e84094d29cb5c08f5f72f075a5b7ef58d3bf14d6a4b6bee58c3cc9e80c4bfa9",
   "items": [
     {
       "crc32": 4248388600,
@@ -33,6 +37,7 @@
     },
     {
       "action": "ingest-local",
+      "compression_ratio": 1.0,
       "convert": "drive_gdoc",
       "crc32": 418149425,
       "expected_pipeline": [
@@ -48,17 +53,26 @@
       "normalized_path": "van_ban_hop_le.docx",
       "path": "van_ban_hop_le.docx",
       "requires_ocr_review": false,
+      "sha256": "4401a362630ea944911a6d327df52a646e51253cedf468769437a9a0f32fd6ff",
       "size": 11,
       "status": "accepted"
     }
   ],
+  "limits": {
+    "max_files": 200,
+    "max_ratio": 100.0,
+    "max_size_mb": 100,
+    "max_total_mb": 500
+  },
   "mode": "vbqppl",
   "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
-  "ok": true,
+  "ok": false,
+  "plan_hash": "b396816464730cf056eeeae3c5721d20640b69f919615355726ceee5e434d219",
   "profile": null,
   "requires_apply": true,
   "schema": "ingest_zip_plan.v1",
   "skipped": 2,
+  "total_uncompressed_bytes": 11,
   "warnings": [],
   "zip": "references/golden/fixtures/slip.zip"
 }

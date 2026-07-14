@@ -1,5 +1,6 @@
 {
   "accepted": 1,
+  "archive_sha256": "759f3a86996ddf85fd58b9579d4e2acbd3e5e87b9396c380f5942e8693ff588c",
   "cat": "01",
   "errors": [
     "DUPLICATE_NORMALIZED_ZIP_PATH:a.docx->./a.docx"
@@ -15,10 +16,11 @@
     "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
     "schema": "idempotency_contract.v1"
   },
-  "idempotency_key": "eac08dfc48f001d1fc34e15958dc8928e2b7ec64089d78493bac18b038689d39",
+  "idempotency_key": "531d8f10136626b029ac7e03e399c8447d53a161a612a10dd255d76ee1763ea3",
   "items": [
     {
       "action": "ingest-local",
+      "compression_ratio": 1.0,
       "convert": "drive_gdoc",
       "crc32": 4044210320,
       "expected_pipeline": [
@@ -34,6 +36,7 @@
       "normalized_path": "a.docx",
       "path": "./a.docx",
       "requires_ocr_review": false,
+      "sha256": "739b9d664d77db3ee3cab40737c6386fb7b6ef9e00b31a434fd7680e69482ba0",
       "size": 3,
       "status": "accepted"
     },
@@ -47,13 +50,21 @@
       "status": "skipped"
     }
   ],
+  "limits": {
+    "max_files": 200,
+    "max_ratio": 100.0,
+    "max_size_mb": 100,
+    "max_total_mb": 500
+  },
   "mode": "vbqppl",
   "note": "DRY-RUN only: zip là container đầu vào; không upload zip nguyên vào Drive/NLM.",
   "ok": false,
+  "plan_hash": "53ce2493cfb9d16e088ef671bd4f426d1ebaed5780a2782ec248950174e265cf",
   "profile": null,
   "requires_apply": true,
   "schema": "ingest_zip_plan.v1",
   "skipped": 1,
+  "total_uncompressed_bytes": 3,
   "warnings": [],
   "zip": "references/golden/fixtures/dup.zip"
 }

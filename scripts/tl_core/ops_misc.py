@@ -1768,6 +1768,10 @@ def cmd_backfill_notebook(a) -> int:
 def cmd_reg_delete(a) -> int:
     """Vá D: gỡ dòng registry theo drive_ids (mảng) — bọc reg_delete đúng tham số. Mặc định BẢO VỆ dòng
     chưa removed* (require_removed); --force để gỡ bất kể status. Chỉ xóa DÒNG registry, KHÔNG đụng Drive/NLM."""
+    if getattr(a, "confirm", None) != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED", "expected": "yes"},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     ids = [x.strip() for x in (a.drive_ids or "").split(",") if x.strip()]
     if not ids:

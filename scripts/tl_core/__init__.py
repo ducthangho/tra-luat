@@ -5,4 +5,4 @@ contains shared implementation helpers so refactors can happen without
 changing the CLI contract.
 """
 
-__all__ = ["deterministic", "jsonio"]
+__all__ = ["deterministic", "jsonio", "ingest_contract"]

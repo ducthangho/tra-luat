@@ -278,6 +278,14 @@
         },
         {
           "available": true,
+          "command": "ingest-local <file> --auto-plan --apply --confirm yes --expected-plan-hash <plan_hash> --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest <file> --apply --confirm yes --expected-plan-hash <plan_hash> --json"
+        },
+        {
+          "available": true,
           "command": "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json"
         }
       ],
@@ -314,11 +322,11 @@
         },
         {
           "available": true,
-          "command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --json"
+          "command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --expected-plan-hash <plan_hash> --json"
         },
         {
           "available": true,
-          "command": "profile-ingest-zip <file.zip> --apply --confirm yes --json"
+          "command": "profile-ingest-zip <file.zip> --apply --confirm yes --expected-plan-hash <plan_hash> --json"
         }
       ],
       "risk": "high",
@@ -1056,7 +1064,7 @@
     "links_checked": 13,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 47705,
+    "size_bytes": 47930,
     "size_limit": 49152,
     "size_ok": true
   },

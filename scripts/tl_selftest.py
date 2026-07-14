@@ -356,7 +356,15 @@ def run() -> int:
         _marker.write_text("{}", encoding="utf-8")
         _rid2 = _apply_journal_start("selftest-r3-upsert", {})
         _r3_runs.append(_rid2)
-        _g = _FakeG(get_r={"ok": True, "updated": False})
+        class _FakeGUpsertR3(_FakeG):
+            def get(self, action, **kw):
+                self.gets.append((action, kw))
+                if action == "reg_upsert":
+                    return {"ok": True, "updated": False}
+                if action == "reg_get":
+                    return {"ok": True, "rows": [{"drive_id": "d9", "sohieu": "1-2025-ND-CP"}]}
+                return {"ok": False}
+        _g = _FakeGUpsertR3()
         _vu = _journaled_reg_upsert(_rid2, _g, {"drive_id": "d9", "sohieu": "1-2025-ND-CP"}, before={"sohieu": "1-ND-CP"})
         cases.append(("r3_journaled_upsert_idempotent_ok", _vu.get("verified") is True and _vu.get("changed") is False
                       and not _marker.exists()))
@@ -628,6 +636,7 @@ def run() -> int:
 
     class _FGjrw:
         def post(self, action, **kw): return {"ok": True, "patched": len(kw.get("items", []))}
+        def get(self, action, **kw): return {"ok": True, "rows": [{"drive_id": "dX", "cat": "16"}]}
     _test_run = "selftest_jrw_" + str(_os2.getpid())
     _jrw_pass = False
     try:
@@ -663,6 +672,7 @@ def run() -> int:
     # (log 2026-07-02) idempotent: reg_bulk patched=0 + KHÔNG miss = ghi lại giá trị đã đúng → THÀNH CÔNG (không báo động giả)
     class _FGidem:
         def post(self, action, **kw): return {"ok": True, "patched": 0, "miss": []}   # 0 đổi, 0 miss
+        def get(self, action, **kw): return {"ok": True, "rows": [{"drive_id": "dZ", "cat": "1"}]}
     _run_id2 = "selftest_idem_" + str(_os2.getpid())
     _idem_pass = False
     try:
@@ -677,8 +687,14 @@ def run() -> int:
     cases.append(("reg_bulk_idempotent_patched0_ok", _idem_pass))
     # reg_upsert: updated=False (giá trị đã đúng) = idempotent SUCCESS (verified True, changed False); cột lạ vẫn CHẶN
     class _FGups:
-        def __init__(self, changed=True): self.changed = changed
-        def get(self, action, **kw): return {"ok": True, "updated": self.changed}
+        def __init__(self, changed=True): self.changed, self.row = changed, {}
+        def get(self, action, **kw):
+            if action == "reg_upsert":
+                self.row.update({k: v for k, v in kw.items() if k not in {"confirm", "merge"}})
+                return {"ok": True, "updated": self.changed}
+            if action == "reg_get":
+                return {"ok": True, "rows": [dict(self.row)]}
+            return {"ok": False}
     _vu_ok = _verified_reg_upsert(_FGups(True), {"drive_id": "d", "sohieu": "1-2025-VBHN-VPQH"})
     _vu_no = _verified_reg_upsert(_FGups(False), {"drive_id": "d", "sohieu": "x"})     # updated=False → idempotent = OK
     _vu_bad = _verified_reg_upsert(_FGups(True), {"drive_id": "d", "so_hieu": "x"})    # cột lạ → CHẶN trước khi gọi
@@ -756,6 +772,7 @@ def run() -> int:
     class _FakeGas:
         def __init__(self): self.calls = []
         def post(self, action, **kw): self.calls.append((action, kw)); return {"ok": True, "patched": len(kw.get("items", []))}
+        def get(self, action, **kw): return {"ok": True, "rows": [{"drive_id": "d", "sohieu": "1/2025"}]}
     _fg = _FakeGas()
     _vw_bad = _verified_reg_write(_fg, [{"drive_id": "d", "so_hieu": "1/2025"}], "so_hieu")   # cột lạ → KHÔNG post
     _vw_ok = _verified_reg_write(_fg, [{"drive_id": "d", "sohieu": "1/2025"}], "sohieu")       # hợp lệ → post 1 lần
@@ -4581,15 +4598,19 @@ def run() -> int:
             _j53 = _os38.path.join(_d53, "ingest-local_100_1.jsonl")
             with open(_j53, "w", encoding="utf-8") as _fh53:
                 _fh53.write(json.dumps({"t": "run_start", "cmd": "ingest-local", "run_id": "ingest-local_100_1",
-                                        "file": "C:/in/f53.docx", "name": "Luat_53"}) + "\n")
+                                        "file": "C:/in/f53.docx", "name": "Luat_53",
+                                        "identity_hash": "IDENTITY53", "plan_hash": "PLAN53"}) + "\n")
                 _fh53.write(json.dumps({"t": "commit", "op": "upload", "key": "Luat_53.docx", "ok": True,
                                         "verify": {"fileId": "FID53"}}) + "\n")
                 _fh53.write(json.dumps({"t": "commit", "op": "organize", "key": "FID53", "ok": True,
                                         "verify": {"gdoc": "GD53", "srcId": "SRC53"}}) + "\n")
                 _fh53.write(json.dumps({"t": "commit", "op": "nlm_source_add", "key": "GD53", "ok": False,
                                         "verify": {"source_id": None}}) + "\n")   # add FAIL → không nhặt
-            _st53 = _TL_MODULE._ingest_local_prev_state("C:/in/f53.docx", "Luat_53")
-            _st53_miss = _TL_MODULE._ingest_local_prev_state("C:/in/khac.docx", "Luat_khac")
+            _st53 = _TL_MODULE._ingest_local_prev_state(
+                "C:/in/f53.docx", "Luat_53", identity_hash="IDENTITY53", plan_hash="PLAN53")
+            _st53_miss = _TL_MODULE._ingest_local_prev_state(
+                "C:/in/f53.docx", "Luat_53", identity_hash="IDENTITY_DIFFERENT", plan_hash="PLAN53")
+            _st53_legacy_unsafe = _TL_MODULE._ingest_local_prev_state("C:/in/f53.docx", "Luat_53")
         finally:
             if _o_env53 is None:
                 _os38.environ.pop("TL_JOURNAL_DIR", None)
@@ -4604,7 +4625,7 @@ def run() -> int:
                   _st53.get("upload_fid") == "FID53" and _st53.get("gdoc") == "GD53"
                   and _st53.get("src_docx") == "SRC53" and "nlm_source_id" not in _st53
                   and _st53.get("journal_prev") == "ingest-local_100_1"
-                  and _st53_miss == {} and _p53_ok))
+                  and _st53_miss == {} and _st53_legacy_unsafe == {} and _p53_ok))
 
     # ═══ v1.33.43 (MERGE bundle-17 — A2 backfill-title-vn KẸT pagination: ép offset=0 ở --apply + next_offset=
     # None ⇒ lô đầu TOÀN skip lặp vĩnh viễn, pool 79 mà 0/79 quét được) — r54_* ═══
@@ -4886,13 +4907,13 @@ def run() -> int:
     with _zf59.ZipFile(_buf59) as _z59:
         _order59 = [i.filename for i in _zip_sorted_infos(_z59)]
     cases.append(("r59_zip_sorted_infos_stable", _order59 == ["a.txt", "b.txt", "B/a.txt"]))   # '.'(2E)<'/'(2F)
-    # (c) _json_dumps deterministic: sort_keys + scrub volatile ("<volatile>"), default (det=False) GIỮ NGUYÊN.
+    # (c) _json_dumps deterministic chỉ canonical/sort; KHÔNG được che giá trị nghiệp vụ.
     _o59 = {"zeta": 1, "alpha": 2, "generatedAt": "2026-07-08T00:00:00Z", "seconds": 1.23}
     _det59 = _json_dumps(_o59, deterministic=True)
     _raw59 = _json_dumps(_o59, deterministic=False)
     cases.append(("r59_json_dumps_det_scrub",
                   _det59.index('"alpha"') < _det59.index('"zeta"')
-                  and '"<volatile>"' in _det59 and "2026-07-08" not in _det59
+                  and '"<volatile>"' not in _det59 and "2026-07-08T00:00:00Z" in _det59
                   and "2026-07-08T00:00:00Z" in _raw59))
     # (d) route-task nhận CẢ positional lẫn --task (fix merge v1.33.54 — drift doc↔CLI lớp S8/A1).
     _ap59 = build_parser()
@@ -5005,9 +5026,14 @@ def run() -> int:
         with _zf63.ZipFile(_zp63, "w") as _z:
             _z.writestr("big.txt", "x" * (2 * 1024 * 1024))
             _z.writestr("small.txt", "ok")
-        _got63 = _safe_extract_zip_for_ingest(str(_zp63), str(Path(_d63) / "out"), max_size_mb=1)
+        _err63 = ""
+        try:
+            _safe_extract_zip_for_ingest(str(_zp63), str(Path(_d63) / "out"), max_size_mb=1)
+        except ValueError as _exc63:
+            _err63 = str(_exc63)
         cases.append(("r63_zip_extract_respects_size_cap",
-                      [x["normalized_path"] for x in _got63] == ["small.txt"]))
+                      _err63 == "ZIP_MEMBER_EXCEEDS_APPLY_LIMIT:big.txt"
+                      and not (Path(_d63) / "out" / "big.txt").exists()))
     # (c) PH2-08: 'Điều N.' đầu dòng nhưng là THAM CHIẾU wrap dòng (dòng trước chưa kết câu) → KHÔNG phải heading.
     _tx63 = "\n".join(["Điều 1. Phạm vi", "Nội dung theo quy định tại",
                        "Điều 5. của Luật Xây dựng thì áp dụng.", "",
@@ -5076,9 +5102,9 @@ def run() -> int:
     import tl_core.workflow as _w65
     _six65 = _reg65._CONTRACT_REQUIRED
     # v1.34.1: HẾT grandfather — _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (Pha G 6 + siết-6).
-    # v1.34.16 (Pha-E-hoàn-thiện): +3 lệnh nguy hiểm — profile-rebuild-registry / ingest-missing / manifest
+    # v1.34.16 (Pha-E-hoàn-thiện): +3 lệnh nguy hiểm; audit ingest: + legacy adapter
     cases.append(("r65_contract_required_six_wired",
-                  _six65 == {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+                  _six65 == {"ingest", "nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
                              "register", "drive-push", "nlm-reconcile", "push-overflow",
                              "shared-source-fix", "source-update-corpus",
                              "profile-rebuild-registry", "ingest-missing", "manifest"}
@@ -5397,14 +5423,16 @@ def run() -> int:
             return {"ok": True, "count": 0, "sources": []}
     _keys73 = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds", "_gas",
                "_resolve_nlm_notebook", "_imp", "_verify_convert_readback", "_read_doc_text",
-               "_profile_read_probe_text", "_profile_source_quality")
+               "_profile_read_probe_text", "_profile_source_quality", "_verified_reg_write")
     _sav73 = {k: getattr(_TL_MODULE, k) for k in _keys73}
     _env73 = {k: os.environ.get(k) for k in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID")}
     try:
         import tempfile as _tf73
         with _tf73.TemporaryDirectory() as _d73:
             _xf73 = Path(_d73) / "Phu_luc_2_So_lieu.xlsx"
-            _xf73.write_bytes(b"PK\x03\x04fakexlsx")
+            with _zf63.ZipFile(_xf73, "w") as _zx73:
+                _zx73.writestr("[Content_Types].xml", "<Types/>")
+                _zx73.writestr("xl/workbook.xml", "<workbook/>")
             _TL_MODULE.apply_profile_offline = lambda *a, **k: None
             _TL_MODULE._active_profile = lambda: "p6"
             _TL_MODULE._profile_policy_error = lambda **k: None
@@ -5416,17 +5444,27 @@ def run() -> int:
             _TL_MODULE._read_doc_text = lambda *a, **k: ""
             _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("", None)
             _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
+            _TL_MODULE._verified_reg_write = lambda *a, **k: {"verified": True, "reg_bulk": {"patched": 1}}
             os.environ["TL_ROOT_FOLDER_ID"] = "ROOT73"; os.environ["TL_META_FOLDER_ID"] = "META73"
+            _ns73 = argparse.Namespace(
+                config=None, profile=None, file=str(_xf73), drive_id=None, apply=False, allow_default=False,
+                name=None, text_file=None, source_quality="auto", ocr_verified=False,
+                large_threshold=None, chunk_max_chars=None, hieuluc=None,
+                skip_live_check=False, json=True, deterministic=False, confirm=None,
+                expected_plan_hash=None)
+            _bp73 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bp73), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rp73 = _TL_MODULE.cmd_profile_ingest(_ns73)
+            _plan73 = json.loads(_bp73.getvalue())
+            _ns73.apply = True
+            _ns73.confirm = "yes"
+            _ns73.expected_plan_hash = _plan73.get("plan_hash")
             _b73 = _io27.StringIO()
             with _ctx27.redirect_stdout(_b73), _ctx27.redirect_stderr(_io27.StringIO()):
-                _rc73 = _TL_MODULE.cmd_profile_ingest(argparse.Namespace(
-                    config=None, profile=None, file=str(_xf73), apply=True, allow_default=False,
-                    name=None, text_file=None, source_quality="auto", ocr_verified=False,
-                    large_threshold=None, chunk_max_chars=None, hieuluc=None,
-                    skip_live_check=False, json=True, deterministic=False))
+                _rc73 = _TL_MODULE.cmd_profile_ingest(_ns73)
             _j73 = json.loads(_b73.getvalue())
             cases.append(("r73a_profile_ingest_xlsx_pipeline",
-                          _rc73 == 0 and _j73.get("ok") is True
+                          _rp73 == 0 and _rc73 == 0 and _j73.get("ok") is True
                           and (_calls73["convert"] or {}).get("toType") == "sheets"
                           and (_calls73["add"] or {}).get("doc_type") == "sheets"
                           and (_calls73["add"] or {}).get("drive_id") == "SHEET73"))
@@ -5561,8 +5599,10 @@ def run() -> int:
             _j2 = json.loads(_o2)
             cases.append(("r75a_ingest_analyze_letterhead_plan",
                           _rc2 == 0 and "45" in str(_j2.get("sohieu") or _j2.get("classification") or _j2)
-                          and "--auto-plan" in _j2.get("ingest_command", "")
-                          and "--text-file" in _j2.get("ingest_command", "")))
+                          and "--auto-plan" in _j2.get("dry_run_command", "")
+                          and "--text-file" in _j2.get("dry_run_command", "")
+                          and "--confirm yes" in _j2.get("apply_command_template", "")
+                          and "--expected-plan-hash" in _j2.get("apply_command_template", "")))
             # (3) source-rename DRY: tìm theo sohieu, gợi ý tên chuẩn, không ghi gì
             _n_calls_before75 = len(_gas_calls75)
             _rc3, _o3 = _cap75(_TL_MODULE.cmd_source_rename, argparse.Namespace(
@@ -7683,7 +7723,10 @@ def run() -> int:
             if action == "organize":
                 return {"ok": True, "fileId": "gdoc97", "srcId": "src97"}
             if action == "reg_get":
-                return {"ok": True, "rows": [{"drive_id": "gdoc97", "sohieu": "01-2026-QH16", "title_vn": "x"}]}
+                return {"ok": True, "rows": [{"drive_id": "gdoc97", "src_id": "src97",
+                                                "name": "Luat_01-2026-QH16_Test",
+                                                "cat": _TL_MODULE._cat_reg_label("01"), "corpus": "false",
+                                                "sohieu": "01-2026-QH16", "title_vn": "x"}]}
             return {"ok": True}
         def post(self, action, **kw):
             self.calls.append(("post", action))
@@ -7713,21 +7756,31 @@ def run() -> int:
         _TL_MODULE._journal_append = lambda rid, rec: _jr97.append(rec)
         _TL_MODULE._imp = lambda name: (_NlmBoom97() if name == "nlm_cli" else _realimp97(name))
         with _tf97.NamedTemporaryFile(suffix=".docx", delete=False) as _f97:
-            _f97.write(b"PK\x03\x04test97")
             _fp97 = _f97.name
+        with _zf63.ZipFile(_fp97, "w") as _z97:
+            _z97.writestr("[Content_Types].xml", "<Types/>")
+            _z97.writestr("word/document.xml", "<document>test97</document>")
         _ns = argparse.Namespace(
             file=_fp97, name="Luat_01-2026-QH16_Test", sohieu="01-2026-QH16", cat="01", goc="", hieuluc="",
-            loai="Luật", apply=True, resume=False, auto_plan=False, text_file=None, source_quality="auto",
+            loai="Luật", apply=False, resume=False, auto_plan=False, text_file=None, source_quality="auto",
             ocr_verified=False, force_cat=False, allow_large=False, large_threshold=None,
             skip_nlm_preflight=False, skip_live_check=False, nlm_no_wait=False, no_nlm_add=True,
-            config=None, profile=None, json=True)
+            config=None, profile=None, json=True, deterministic=False, drive_id=None,
+            confirm=None, expected_plan_hash=None)
+        _bp97 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bp97), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rp97 = _TL_MODULE.cmd_ingest_local(_ns)
+        _plan97 = json.loads(_bp97.getvalue())
+        _ns.apply = True
+        _ns.confirm = "yes"
+        _ns.expected_plan_hash = _plan97.get("plan_hash")
         _b97 = _io27.StringIO()
         with _ctx27.redirect_stdout(_b97), _ctx27.redirect_stderr(_io27.StringIO()):
             _rc97 = _TL_MODULE.cmd_ingest_local(_ns)
         _o97 = json.loads(_b97.getvalue())
         os.unlink(_fp97)
         cases.append(("r97_no_nlm_add_stops_at_drive_registry",
-                      _rc97 == 0 and _o97.get("nlm") == "SKIPPED_BY_FLAG" and _o97.get("corpus") is False
+                      _rp97 == 0 and _rc97 == 0 and _o97.get("nlm") == "SKIPPED_BY_FLAG" and _o97.get("corpus") is False
                       and _o97.get("gdoc_url") == "https://docs.google.com/document/d/gdoc97"
                       and _o97.get("suggested_notebook") == "nb97"
                       and "notebooklm.google.com/notebook/nb97" in str(_o97.get("notebook_url"))
@@ -7811,9 +7864,9 @@ def run() -> int:
     # (d) docx nhị phân → ok, ext .docx, stem, size
     _r99_dx = _rslv99(_FkGID99({"id": "d99", "name": "Luat_ABC.docx", "mimeType": _DOCX99, "size": "1234"}), "d99", download=False)
     # (e) xlsx → is_sheet True
-    _r99_xl = _rslv99(_FkGID99({"id": "d99", "name": "Bang.xlsx", "mimeType": _XLSX99}), "d99", download=False)
+    _r99_xl = _rslv99(_FkGID99({"id": "d99", "name": "Bang.xlsx", "mimeType": _XLSX99, "size": "2048"}), "d99", download=False)
     # (f) tên KHÔNG có đuôi → suy ext từ MIME
-    _r99_nm = _rslv99(_FkGID99({"id": "d99", "name": "Luat khong duoi", "mimeType": _DOCX99}), "d99", download=False)
+    _r99_nm = _rslv99(_FkGID99({"id": "d99", "name": "Luat khong duoi", "mimeType": _DOCX99, "size": "1024"}), "d99", download=False)
     cases.append(("r99_resolve_drive_id_source",
                   (not _r99_nf.get("ok")) and _r99_nf.get("reason") == "DRIVE_FILE_NOT_FOUND"
                   and (not _r99_gd.get("ok")) and _r99_gd.get("reason") == "ALREADY_GOOGLE_NATIVE"
@@ -8417,6 +8470,198 @@ def run() -> int:
                 _hos.environ.pop(_k106, None)
             else:
                 _hos.environ[_k106] = _v106
+
+    # ═══ v1.34.45 audit hardening — r107: negative-input cho ingest/cache/ZIP/determinism/release ═══
+    import tl_core.ingest_contract as _ic107
+    import tl_core.deterministic as _det107
+    import tl_core.zip_ingest as _zip107
+    import tl_core.release as _rel107
+    import ingest_to_cache as _cache107
+    import tempfile as _tf107, zipfile as _zf107
+
+    _auth107a = _ic107.authorize_apply(apply=True, confirm=None, expected_plan_hash=None,
+                                       actual_plan_hash="a" * 64)
+    _auth107b = _ic107.authorize_apply(apply=True, confirm="yes", expected_plan_hash="b" * 64,
+                                       actual_plan_hash="a" * 64)
+    _auth107c = _ic107.authorize_apply(apply=True, confirm="yes", expected_plan_hash="a" * 64,
+                                       actual_plan_hash="a" * 64)
+    cases.append(("r107_plan_confirm_hash_fail_closed",
+                  _auth107a.get("error") == "CONFIRM_REQUIRED"
+                  and _auth107b.get("error") == "PLAN_HASH_MISMATCH" and _auth107c.get("ok") is True))
+
+    with _tf107.TemporaryDirectory() as _d107:
+        _bad_docx107 = Path(_d107) / "bad.docx"
+        _bad_docx107.write_bytes(b"PK\x03\x04not-a-real-docx")
+        _bad_source107 = _ic107.validate_source_file(_bad_docx107, allowed_exts={".docx"})
+        _good_docx107 = Path(_d107) / "good.docx"
+        with _zf107.ZipFile(_good_docx107, "w") as _z107:
+            _z107.writestr("[Content_Types].xml", "<Types/>")
+            _z107.writestr("word/document.xml", "<document/>")
+        _good_source107 = _ic107.validate_source_file(_good_docx107, allowed_exts={".docx"})
+        cases.append(("r107_source_magic_and_structure",
+                      _bad_source107.get("ok") is False and _good_source107.get("ok") is True))
+
+        _z1_107, _z2_107 = Path(_d107) / "one.zip", Path(_d107) / "two.zip"
+        with _zf107.ZipFile(_z1_107, "w") as _z107:
+            _z107.writestr("./a.txt", "same")
+        with _zf107.ZipFile(_z2_107, "w") as _z107:
+            _z107.writestr("a.txt", "same")
+        _zp1_107 = _zip107._zip_plan(str(_z1_107), mode="vbqppl", cat="01")
+        _zp2_107 = _zip107._zip_plan(str(_z2_107), mode="vbqppl", cat="01")
+        cases.append(("r107_zip_content_identity_normalized",
+                      _zp1_107.get("ok") and _zp2_107.get("ok")
+                      and _zp1_107.get("idempotency_key") == _zp2_107.get("idempotency_key")
+                      and _zp1_107.get("plan_hash") != _zp2_107.get("plan_hash")))
+        cases.append(("r107_zip_portable_reserved_rejected",
+                      not _zip107._zip_is_safe_member("CON.txt")
+                      and not _zip107._zip_is_safe_member("folder/name. ")))
+        with _zf107.ZipFile(_z1_107, "w") as _z107:
+            _z107.writestr("a.txt", "tampered-after-plan")
+        _tamper107 = ""
+        try:
+            _zip107._safe_extract_zip_for_ingest(str(_z1_107), str(Path(_d107) / "out"), plan=_zp1_107)
+        except ValueError as _e107:
+            _tamper107 = str(_e107)
+        cases.append(("r107_zip_plan_binds_archive_bytes", "ZIP_ARCHIVE_HASH_MISMATCH" in _tamper107))
+
+        _lock_err107 = ""
+        try:
+            with _cache107._cache_lock(_d107, "01/2026/QH16", "original", timeout_s=0):
+                with _cache107._cache_lock(_d107, "01/2026/QH16", "original", timeout_s=0):
+                    pass
+        except RuntimeError as _e107b:
+            _lock_err107 = str(_e107b)
+        cases.append(("r107_cache_same_identity_lock", _lock_err107.startswith("CACHE_WRITE_LOCK_TIMEOUT:")))
+        _lock_identity107 = _cache107.unicodedata.normalize("NFC", "02/2026/qh16\0original")
+        _lock_token107 = _cache107.hashlib.sha256(_lock_identity107.encode("utf-8")).hexdigest()
+        _abandoned107 = Path(_d107) / ".ingest-locks" / f"{_lock_token107}.lock"
+        _abandoned107.parent.mkdir(exist_ok=True)
+        _abandoned107.write_text(json.dumps({"host": _cache107.platform.node(), "pid": -1}), encoding="utf-8")
+        _recovered107 = False
+        with _cache107._cache_lock(_d107, "02/2026/QH16", "original", timeout_s=0):
+            _recovered107 = True
+        cases.append(("r107_cache_abandoned_lock_recovered", _recovered107 and not _abandoned107.exists()))
+
+        _cache_root107 = Path(_d107) / "cache-exact"
+        _docs107 = _cache_root107 / "docs"
+        _docs107.mkdir(parents=True)
+        _base_cache107 = {"so_hieu": "01/2026/QH16", "number_symbol": "01/2026/QH16",
+                          "full_text": "Nội dung", "articles": {"1": "Điều 1"}}
+        for _dk107, _var107 in (("01-2026-qh16--original", "original"),
+                                ("01-2026-qh16--consolidated", "consolidated")):
+            (_docs107 / f"{_dk107}.json").write_text(
+                json.dumps({**_base_cache107, "doc_key": _dk107, "variant": _var107}, ensure_ascii=False),
+                encoding="utf-8")
+        _patched107 = _cache107.patch_cache_metadata(
+            str(_cache_root107), "01-2026-qh16--original", "01/2026/QH16", "exportdocx",
+            "", "", "", source_sha256="a" * 64, source_policy="public-https",
+            source_provider="selftest")
+        _orig107 = json.loads(Path(_patched107).read_text(encoding="utf-8"))
+        _cons107 = json.loads((_docs107 / "01-2026-qh16--consolidated.json").read_text(encoding="utf-8"))
+        cases.append(("r107_cache_patch_exact_doc_key",
+                      _orig107.get("evidence_status") == "verified" and "source" not in _cons107))
+
+    _business107 = {"created_at": "2020-01-01", "regex": r"\d+\w", "path": "not/a/path value"}
+    _round107 = json.loads(_det107.json_dumps(_business107, deterministic=True))
+    _proj107 = _det107.audit_projection({**_business107, "seconds": 1.5}, volatile_keys={"seconds"})
+    cases.append(("r107_determinism_preserves_business_values",
+                  _round107 == _business107 and _proj107.get("created_at") == "2020-01-01"
+                  and _proj107.get("seconds") == "<volatile>"))
+    cases.append(("r107_registry_empty_response_not_verified",
+                  _TL_MODULE._verify_reg_result({}, 1).get("verified") is False))
+
+    class _EmptyInfo107:
+        def get(self, action, **kw):
+            return {}
+    cases.append(("r107_drive_empty_info_not_exists",
+                  _TL_MODULE._drive_info_file(_EmptyInfo107(), "D107").get("ok") is False))
+
+    _scheme107 = ""
+    try:
+        _cache107.fetch_url("file:///tmp/not-network.docx", source_policy="environment")
+    except RuntimeError as _e107c:
+        _scheme107 = str(_e107c)
+    cases.append(("r107_cache_file_scheme_rejected", "SOURCE_SCHEME_NOT_ALLOWED:file" in _scheme107))
+    cases.append(("r107_environment_host_policy",
+                  _cache107._host_allowed("vanban.example.vn", ["*.example.vn"])
+                  and _cache107._host_allowed("example.vn", ["example.vn"])
+                  and not _cache107._host_allowed("evil-example.vn", ["*.example.vn"])))
+
+    _root107 = Path(_TL_MODULE.HERE).parent
+    _manifest107 = _rel107._build_release_manifest(_root107)
+    _manifest107["package_hash"] = "0" * 64
+    _verify107 = _rel107._verify_release_manifest(_root107, _manifest107, strict=False)
+    cases.append(("r107_release_package_hash_mismatch_fails",
+                  _verify107.get("ok") is False and not _verify107.get("package_hash_match")
+                  and "MANIFEST_PACKAGE_HASH_MISMATCH" in (_verify107.get("errors") or [])))
+
+    # ═══ v1.34.45 MERGE-REVIEW fixes — r107b: negative tests cho lock-Windows/SSRF/http/find/release-archive ═══
+    import subprocess as _sp107b, sys as _sys107b, cache as _cachemod107b
+    _dead107b = _sp107b.Popen([_sys107b.executable, "-c", ""])
+    _dead107b.wait()
+    _dead_pid107b = _dead107b.pid
+    cases.append(("r107b_pid_alive_dead_vs_self",
+                  _cache107._pid_alive(_dead_pid107b) is False
+                  and _cache107._pid_alive(os.getpid()) is True))
+    with _tf107.TemporaryDirectory() as _d107b:
+        _id107b = _cache107.unicodedata.normalize("NFC", "03/2026/qh16\0original")
+        _tok107b = _cache107.hashlib.sha256(_id107b.encode("utf-8")).hexdigest()
+        _lk107b = Path(_d107b) / ".ingest-locks" / f"{_tok107b}.lock"
+        _lk107b.parent.mkdir(parents=True, exist_ok=True)
+        _lk107b.write_text(json.dumps({"host": _cache107.platform.node(), "pid": _dead_pid107b}), encoding="utf-8")
+        _rec107b = False
+        with _cache107._cache_lock(_d107b, "03/2026/QH16", "original", timeout_s=0):
+            _rec107b = True
+        cases.append(("r107b_abandoned_lock_real_dead_pid_recovered", _rec107b and not _lk107b.exists()))
+    cases.append(("r107b_ssrf_blocks_non_global",
+                  _cache107._url_host_public_ok("127.0.0.1")[0] is False
+                  and _cache107._url_host_public_ok("10.0.0.5")[0] is False
+                  and _cache107._url_host_public_ok("169.254.169.254")[0] is False
+                  and _cache107._url_host_public_ok("8.8.8.8")[0] is True))
+    _httpsch107b = ""
+    _prevsch107b = os.environ.pop("TL_SOURCE_SCHEMES", None)
+    try:
+        _cache107.fetch_url("http://vbpl.example.gov.vn/x.docx", source_policy="environment")
+    except RuntimeError as _e107d:
+        _httpsch107b = str(_e107d)
+    finally:
+        if _prevsch107b is not None:
+            os.environ["TL_SOURCE_SCHEMES"] = _prevsch107b
+    cases.append(("r107b_http_scheme_off_by_default", "SOURCE_SCHEME_NOT_ALLOWED:http" in _httpsch107b))
+    _loop107b = ""
+    try:
+        _cache107.fetch_url("https://127.0.0.1/x.docx", source_policy="public-https")
+    except RuntimeError as _e107e:
+        _loop107b = str(_e107e)
+    cases.append(("r107b_ssrf_fetch_url_blocks_loopback", "SOURCE_HOST_BLOCKED" in _loop107b))
+    with _tf107.TemporaryDirectory() as _d107c:
+        (_d107c := Path(_d107c))
+        _cfdocs107 = _d107c / "docs"
+        _cfdocs107.mkdir(parents=True)
+        for _n107c in ("goc", "vbhn"):
+            (_cfdocs107 / f"{_n107c}.json").write_text(
+                json.dumps({"so_hieu": "89/2025/QH15", "aliases": ["89/2025/QH15"], "articles": {}}, ensure_ascii=False),
+                encoding="utf-8")
+        _conf107b = ""
+        try:
+            _cachemod107b.find("89/2025/QH15", str(_d107c))
+        except RuntimeError as _e107f:
+            _conf107b = str(_e107f)
+        cases.append(("r107b_cache_find_conflict_raises", _conf107b.startswith("CACHE_IDENTITY_CONFLICT")))
+    with _tf107.TemporaryDirectory() as _d107d:
+        _d107d = Path(_d107d)
+        _z107d = _d107d / "b.zip"
+        _mani107d = {"files": [{"path": "a.txt", "sha256": _cache107.hashlib.sha256(b"good").hexdigest()}]}
+        with _zf107.ZipFile(_z107d, "w") as _z107x:
+            _z107x.writestr("tra-luat/a.txt", b"TAMPERED")
+        _avbad107 = _rel107._verify_release_archive(_z107d, _mani107d)
+        with _zf107.ZipFile(_z107d, "w") as _z107x:
+            _z107x.writestr("tra-luat/a.txt", b"good")
+        _avgood107 = _rel107._verify_release_archive(_z107d, _mani107d)
+        cases.append(("r107b_release_archive_member_tamper",
+                      _avbad107.get("archive_ok") is False
+                      and any("ARCHIVE_MEMBER_SHA_MISMATCH" in _e for _e in _avbad107.get("errors", []))
+                      and _avgood107.get("archive_ok") is True))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

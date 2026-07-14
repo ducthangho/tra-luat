@@ -1,3 +1,31 @@
+# ★ v1.34.45 — hardening ingest/local/cache/ZIP + determinism (2026-07-14)
+
+- Mọi đường ingest ghi ra Drive/registry/NLM nay fail-closed: `ok` thiếu/rỗng không còn được coi là thành công; readback sai dừng pipeline. Lệnh `ingest` cũ chỉ còn là adapter sang engine `ingest-local` chung.
+- Thêm hợp đồng `plan → --confirm yes → --expected-plan-hash`: plan gắn với SHA-256 byte nguồn, đích và tùy chọn; resume chỉ dùng journal cùng identity/plan.
+- Ingest local/Drive/URL xác minh extension + magic + cấu trúc container DOCX/XLSX/ODT, giới hạn byte/timeout/redirect, cleanup temp. Host allowlist không hard-code: môi trường có thể cấp `TL_SOURCE_ALLOW_HOSTS`, `TL_SOURCE_SCHEMES`, `TL_SOURCE_MAX_BYTES`, `TL_SOURCE_TIMEOUT_S`.
+- Cache vá đúng `doc_key` vừa normalize (không quét/chọn theo tên hay bản mới nhất), ghi atomic, staged/verified có quality checks, lock theo identity và tự thu hồi lock bị bỏ lại.
+- ZIP chặn traversal, tên reserved/trailing-dot-space, symlink/special entry, collision Unicode/casefold, zip bomb theo tổng size/tỉ lệ nén; apply bị khóa bởi archive SHA-256 + member SHA-256; mặc định 4 worker (trần cứng 8), xử lý MỌI member rồi báo `counts{applied,failed}`+`partial` (ok=all).
+- JSON deterministic không còn tự thay giá trị nghiệp vụ; audit dùng projection khai báo field volatile/path. Release ZIP dùng `ZIP_STORED` + metadata cố định; package/content/archive hash đều được verify fail-closed.
+- Kiểm thử: selftest 900/900, golden 18/18, workflow strict và determinism strict đều đạt. Benchmark dry-run ZIP 10,49 MB: +1,09% end-to-end; cache 1.000 record: 275,4 ms → 6,58 ms.
+
+> **MERGE-REVIEW canonical (ADR-0001) — bản audit v1.34.45 do phiên song song (Codex) giao, review + vá TRƯỚC merge.**
+> Provenance sạch (zip khớp SHA byte-for-byte; baseline = LIVE v1.34.44). Gate offline chạy lại đạt. Review 6-chiều
+> read-only + adversarial verify bắt và VÁ tại canonical trước khi merge:
+> - **[BLOCKER gate] golden ingest-zip dryrun** nhúng path tuyệt đối (`PATHISH_KEYS` thiếu khóa `"zip"`) → golden-test
+>   ĐỎ ngoài thư mục capture → thêm `"zip"` vào PATHISH_KEYS + regen 2 golden (đã kiểm chứng location-independent).
+> - **[MAJOR] lock cache Windows**: `_pid_alive` dùng `os.kill(pid,0)` (=CTRL_C_EVENT trên Windows) → không phá được
+>   lock chủ-chết → kẹt ingest tới stale_s → thêm nhánh `_pid_alive_windows` (OpenProcess+GetExitCodeProcess, mặc định
+>   "sống" khi bất định).
+> - **[MAJOR] ingest-zip `--continue-on-error`** thành no-op + mất fail-fast: chốt ngữ nghĩa "xử lý mọi member rồi báo
+>   partial", thêm `counts`+`partial` vào output, sửa help cờ + doc cho trung thực (KHÔNG khôi phục fail-fast).
+> - **[MODERATE] SSRF**: thêm lọc địa-chỉ (chặn IP non-global/loopback/RFC1918/link-local) trên đường fetch URL tùy ý
+>   (`TL_SOURCE_ALLOW_PRIVATE=1` để opt-out); **http phẳng**: `TL_SOURCE_SCHEMES` mặc định chỉ `https` (http phải opt-in).
+> - **[MODERATE] release-verify không kiểm archive**: `--archive`/`--expected-archive-sha256` mở .zip đối chiếu từng
+>   member vs manifest + đường-dẫn-an-toàn; `release-bundle` build ×2 yêu cầu cùng SHA-256 (gate ADR-0007).
+> - **[MODERATE] find() ném traceback thô**: `tra_cuu` bắt `CACHE_IDENTITY_CONFLICT` → thoát sạch rc=2 (không đoán nguyên văn).
+> - **[MODERATE] doc/kernel**: SKILL.md + COMMANDS.md phản ánh hợp đồng apply fail-closed + `reg-delete --confirm yes` +
+>   ingest-zip. **⚠ SKILL.md kernel đổi ⇒ USER CẦN RE-IMPORT Capabilities.** Minor: gỡ VERSION gán trùng ở tl.py; PDF magic nhận BOM.
+
 # ★ v1.34.44 — MERGE bundle audit-profile từ phiên song song (ADR-0001) (2026-07-14)
 
 > Phiên song song (Codex) audit v1.34.43 trọng tâm PROFILE, giao bundle 16 fix P-01..P-16 + báo cáo + patch.
@@ -1138,4 +1166,3 @@ gen_instructions/RUNBOOK/DOCTRINE_APPENDIX. −55 dòng chỉ là refactor `prin
   Sau vá: dev-tree manifest == zip-set (109), hash tái lập.
 - 🟡 Fix #4: `_print_json_or_text` không --json chỉ biết render tool-inventory/route-task — lệnh MỚI khác
   (release-manifest/verify/…) in nhầm `route-task ok=True task=None` → schema lạ fallback JSON đầy đủ.
-

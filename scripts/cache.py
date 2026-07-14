@@ -21,7 +21,8 @@ def _norm(s: str) -> str:
 def find(so_hieu: str, d=None):
     """→ doc record đầy đủ (kèm articles) khớp so_hieu/number_symbol/aliases, hoặc None."""
     key = _norm(so_hieu)
-    for f in Path(cache_dir(d), "docs").glob("*.json"):
+    matches = []
+    for f in sorted(Path(cache_dir(d), "docs").glob("*.json"), key=lambda p: p.as_posix()):
         try:
             doc = json.loads(f.read_text(encoding="utf-8"))
         except Exception:
@@ -29,8 +30,10 @@ def find(so_hieu: str, d=None):
         cands = [doc.get("so_hieu", ""), doc.get("number_symbol", "")] + \
                 list(doc.get("aliases", []) or [])
         if any(_norm(c) == key for c in cands if c):
-            return doc
-    return None
+            matches.append((f, doc))
+    if len(matches) > 1:
+        raise RuntimeError(f"CACHE_IDENTITY_CONFLICT:{key}:{[p.name for p, _ in matches]}")
+    return matches[0][1] if matches else None
 
 
 def get_article(so_hieu: str, n, d=None):

@@ -62,11 +62,14 @@ GENERATED_SPECS = [
          {"flags": ["--json"], "action": "store_true"},
      ]},
     {"name": "release-verify", "handler": "cmd_release_verify",
-     "help": "READ-ONLY: verify RELEASE_MANIFEST với root hiện tại",
+     "help": "READ-ONLY: verify RELEASE_MANIFEST với root hiện tại (tùy chọn kiểm cả .zip qua --archive)",
      "args": [
          {"dest": "manifest"},
          {"flags": ["--root"], "help": "root gói skill; mặc định HERE.parent"},
          {"flags": ["--strict"], "action": "store_true", "help": "coi file thừa là lỗi"},
+         {"flags": ["--archive"], "help": "kiểm bytes .zip: mở archive, đối chiếu từng member vs manifest + đường dẫn an toàn"},
+         {"flags": ["--expected-archive-sha256"], "dest": "expected_archive_sha256",
+          "help": "SHA-256 archive mong đợi (dùng với --archive) để chốt byte đã giao"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
     {"name": "bundle-export", "handler": "cmd_bundle_export",
@@ -223,11 +226,13 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'reg-delete', "handler": 'cmd_reg_delete',
-     "help": 'gỡ dòng registry theo drive_ids (bọc reg_delete); --force bỏ bảo vệ removed*',
-     "args": [
-         {"flags": ['--drive-ids'], "dest": 'drive_ids', "required": True, "help": 'id1,id2,...'},
-         {"flags": ['--force'], "action": 'store_true', "help": 'gỡ bất kể nlm_status (bỏ require_removed)'},
-     ]},
+       "help": 'gỡ dòng registry theo drive_ids (bọc reg_delete); --force bỏ bảo vệ removed*',
+       "args": [
+           {"flags": ['--drive-ids'], "dest": 'drive_ids', "required": True, "help": 'id1,id2,...'},
+           {"flags": ['--force'], "action": 'store_true', "help": 'gỡ bất kể nlm_status (bỏ require_removed)'},
+           {"flags": ['--confirm'], "choices": ['yes'], "required": True,
+            "help": 'xác nhận tường minh trước khi xóa dòng registry'},
+       ]},
     {"name": 'nlm-query-plan', "handler": 'cmd_nlm_query_plan',
      "help": 'READ-ONLY: lập kế hoạch truy vấn NLM hẹp theo source_id trước khi gọi nlm-query/nlm-cross',
      "args": [
@@ -339,9 +344,13 @@ GENERATED_SPECS = [
          {"flags": ['--cat'], "help": 'category VBQPPL dự kiến; thiếu cat sẽ cảnh báo'},
          {"flags": ['--max-files'], "type": int, "default": 200},
          {"flags": ['--max-size-mb'], "type": int, "default": 100},
+         {"flags": ['--max-total-mb'], "dest": 'max_total_mb', "type": int, "default": 500},
+         {"flags": ['--max-ratio'], "dest": 'max_ratio', "type": float, "default": 100.0},
+         {"flags": ['--workers'], "type": int, "default": 4},
          {"flags": ['--apply'], "action": 'store_true', "help": 'thực thi batch sau dry-run; yêu cầu --confirm yes'},
          {"flags": ['--confirm'], "choices": ['yes'], "help": 'bắt buộc khi --apply'},
-         {"flags": ['--continue-on-error'], "action": 'store_true', "help": 'tiếp tục file sau nếu một file lỗi'},
+         {"flags": ['--expected-plan-hash'], "dest": 'expected_plan_hash', "help": 'plan_hash từ dry-run'},
+         {"flags": ['--continue-on-error'], "action": 'store_true', "help": 'không đổi hành vi ingest-zip (LUÔN xử lý mọi member rồi báo counts/partial, ok=all); giữ để tương thích'},
          {"flags": ['--skip-nlm-preflight'], "action": 'store_true', "help": 'truyền xuống ingest-local nếu cần tự vá NLM sau'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
@@ -351,9 +360,13 @@ GENERATED_SPECS = [
          {"dest": 'file'},
          {"flags": ['--max-files'], "type": int, "default": 200},
          {"flags": ['--max-size-mb'], "type": int, "default": 100},
+         {"flags": ['--max-total-mb'], "dest": 'max_total_mb', "type": int, "default": 500},
+         {"flags": ['--max-ratio'], "dest": 'max_ratio', "type": float, "default": 100.0},
+         {"flags": ['--workers'], "type": int, "default": 4},
          {"flags": ['--apply'], "action": 'store_true', "help": 'thực thi batch sau dry-run; yêu cầu --confirm yes'},
          {"flags": ['--confirm'], "choices": ['yes'], "help": 'bắt buộc khi --apply'},
-         {"flags": ['--continue-on-error'], "action": 'store_true', "help": 'tiếp tục file sau nếu một file lỗi'},
+         {"flags": ['--expected-plan-hash'], "dest": 'expected_plan_hash', "help": 'plan_hash từ dry-run'},
+         {"flags": ['--continue-on-error'], "action": 'store_true', "help": 'không đổi hành vi ingest-zip (LUÔN xử lý mọi member rồi báo counts/partial, ok=all); giữ để tương thích'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'ingest-ocr', "handler": 'cmd_ingest_ocr',
@@ -1211,6 +1224,7 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'ingest', "handler": 'cmd_ingest',
+     "help": 'legacy adapter: file Drive nhị phân → engine ingest-local chung (DRY mặc định)',
      "args": [
          {"dest": 'fileId'},
          {"flags": ['--cat']},
@@ -1220,9 +1234,13 @@ GENERATED_SPECS = [
          {"flags": ['--targets'], "default": ''},
          {"flags": ['--amendment'], "action": 'store_true'},
          {"flags": ['--vbhn'], "action": 'store_true'},
-         {"flags": ['--check'], "action": 'store_true', "help": 'ép chạy QT-2 dù không gắn cờ amendment/vbhn'},
-         {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI (mặc định DRY)'},
-     ]},
+          {"flags": ['--check'], "action": 'store_true', "help": 'ép chạy QT-2 dù không gắn cờ amendment/vbhn'},
+          {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI (mặc định DRY)'},
+          {"flags": ['--confirm'], "choices": ['yes'], "help": 'bắt buộc khi --apply'},
+          {"flags": ['--expected-plan-hash'], "dest": 'expected_plan_hash',
+           "help": 'SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi'},
+          {"flags": ['--json'], "action": 'store_true'},
+      ]},
     {"name": 'manifest', "handler": 'cmd_manifest',
      "args": [
          {"flags": ['--touched-drive'], "dest": 'touched_drive', "action": 'store_true'},
@@ -1319,8 +1337,8 @@ COMMAND_META = {
     "nlm-query-plan":       _m("low", True, "none", False, False, True, "nlm_query_quality", None, True, None, generated=True),
     # ── legacy write high-risk (card_required=False trừ khi card đã có; gate = --apply dry-run;
     #    v1.34.1: HẾT grandfather contract — mọi lệnh high-risk ghi đều có idempotency_contract) ──
-    "ingest-local":         _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "ingest_local", True, None),
-    "profile-ingest":       _m("high", False, "drive_registry_nlm", False, True, False, "ingest_local", "profile_ingest", True, None),
+    "ingest-local":         _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "ingest_local", True, None),
+    "profile-ingest":       _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "profile_ingest", True, None),
     "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, "nlm_add", False, None),
                                  builtin_gate="nlm_dedup_live_gate"),
     "recat":                _m("high", False, "drive_registry", False, True, False, None, "recat", False, None, generated=True),
@@ -1428,7 +1446,7 @@ COMMAND_META = {
     "find-doc":              _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "profile-create":        _m("medium", False, "drive_local", False, True, False, None, None, False, None, generated=True),
     "profile-file-remove":   _m("medium", False, "drive_registry", True, True, False, None, None, False, None, generated=True),
-    "ingest":                _m("medium", False, "drive_registry_nlm", False, True, False, None, None, False, None, generated=True),
+    "ingest":                _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "ingest_local", True, None, generated=True),
     "manifest":              _m("high", False, "drive_registry", True, False, False, None, "manifest", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
     "profile-rebuild-registry": _m("high", False, "registry", True, True, False, None, "profile_rebuild_registry", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
     "vbhn-normalize":        _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
@@ -1453,7 +1471,7 @@ def registry_summary() -> dict:
 
 
 # v1.34.1: siết TOÀN BỘ lệnh ghi high-risk legacy — hết grandfather (deadline r65 'trước v1.34.1' đúng hạn).
-_CONTRACT_REQUIRED = {"nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
+_CONTRACT_REQUIRED = {"ingest", "nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
                       "profile-rebuild-registry", "ingest-missing", "manifest",   # Pha-E-hoàn-thiện v1.34.16
                       "register", "drive-push", "nlm-reconcile", "push-overflow",
                       "shared-source-fix", "source-update-corpus"}
@@ -1473,6 +1491,9 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
             spec = next(s for s in GENERATED_SPECS if s["name"] == name)
             if getattr(fn, "__name__", "") != spec["handler"]:
                 issues.append(f"GENERATED_HANDLER_MISMATCH:{name}:{getattr(fn, '__name__', fn)}")
+        option_strings = set(p._option_string_actions)
+        if m["requires_confirm"] and "--confirm" not in option_strings:
+            issues.append(f"REQUIRES_CONFIRM_FLAG_MISSING:{name}")
         # lệnh GHI NGOÀI-repo (drive/registry/nlm/live) phải có ÍT NHẤT một gate:
         # contract / confirm / dry-run / builtin_gate; ghi artifact LOCAL (zip/report/golden) miễn.
         _external = any(t in str(m["write_scope"]) for t in ("drive", "registry", "nlm", "live"))
@@ -1494,6 +1515,16 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
             card = load_card(m["workflow_task"])
             if not (isinstance(card, dict) and card.get("ok", True) and (card.get("id") or card.get("workflow_id"))):
                 issues.append(f"CARD_MISSING_FOR:{name}:{m['workflow_task']}")
+            elif isinstance(card.get("command_contracts"), dict) and name in card["command_contracts"]:
+                cc = card["command_contracts"][name]
+                if bool(cc.get("confirm_required")) != bool(m["requires_confirm"]):
+                    issues.append(f"CARD_CONFIRM_META_MISMATCH:{name}")
+                if bool(cc.get("dry_run_required")) != bool(m["supports_dry_run"]):
+                    issues.append(f"CARD_DRY_RUN_META_MISMATCH:{name}")
+                if cc.get("confirm_required") and "--confirm" not in option_strings:
+                    issues.append(f"CARD_CONFIRM_FLAG_MISSING:{name}")
+                if cc.get("plan_hash_required") and "--expected-plan-hash" not in option_strings:
+                    issues.append(f"CARD_PLAN_HASH_FLAG_MISSING:{name}")
         # contract khai trong meta phải tồn tại trong _IDEMPOTENCY_CONTRACTS
         if m["idempotency_contract"] and isinstance(contracts, dict) and m["idempotency_contract"] not in contracts:
             issues.append(f"CONTRACT_KEY_UNKNOWN:{name}:{m['idempotency_contract']}")

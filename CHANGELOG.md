@@ -1,3 +1,29 @@
+# ★ v1.34.50 — hoàn tất BUG1 reconcile-note "SẠCH" oan (smoke v1.34.49 bắt) + data-op row_kind drift (2026-07-15)
+
+> Smoke read-only v1.34.49 (sau `nlm login`) tự bắt 2 việc: (1) `nlm-reconcile --all-notebooks` báo "mọi notebook
+> SẠCH" oan trong khi overflow desync=1 — lớp "sai mà báo thành công"; (2) 17 dòng registry lệch row_kind theo
+> topology (F-06 tồn đọng). Python-only, KHÔNG đụng GAS live (EXPECT giữ 2.21.2k).
+
+- **BUG1 hoàn tất** (`nlm_ops._reconcile_sweep_note`): v1.34.42 vá nhánh `ok=false` nhưng vẫn TIN `all_ok`; DRY
+  reconcile luôn trả `ok:true` → `desync>0` với `rc=0` VẪN bị gọi "SẠCH". Nay tách `_reconcile_sweep_problems`
+  (PURE) + `_reconcile_sweep_clean`; note TỰ soi finding từ `per_notebook` (KHÔNG tin cờ `all_ok`), thêm khoá
+  MÁY `clean` vào output `--all-notebooks` (orchestrator kiểm `clean` không chỉ `ok`; `ok`=scan-chạy-được giữ rc=0
+  theo doctrine A3, `clean`=không-lệch). Dogfood live: overflow desync=1 nay note "CÓ VẤN ĐỀ — chưa đồng bộ:
+  …(desync_real=1, link_candidates=1)", `clean:false`. +r111 ×3 negative-input (936/936). ★Bẫy I11 lặp: hằng
+  module `_RECONCILE_FINDING_KEYS` không vào globals tl rebase → NameError → INLINE tuple trong hàm (không dùng
+  hằng module).
+- **Data-op row_kind cleanup** (registry live, journaled + verified per-row qua `_journaled_reg_upsert`; KHÔNG đổi
+  code): sửa **12 dòng** lệch bất biến notebook↔row_kind trên SHARD VBQPPL DECLARED — 11 nguồn trên VBQPPL-2 mang
+  `own` → `overflow`, 1 dòng (21-VBHN-VPQH Bộ luật TTDS) trên base mang `overflow` → `own`. **OK=12 FAIL=0**
+  (journal `rowkind-drift-fix-v13450_…7188`). ★BÀI HỌC: doctor đọc MANIFEST — sau `reconcile` self-heal refresh,
+  finding phình 13→70 GỒM NHIỄU: 3 điều ước (WCT/TRIPS/WIPO) registry ĐÃ `overflow` đúng (manifest stale nói `own`)
+  + 55 dòng Xuất bản notebook `80742228` (corpus=false) lọt manifest scan của base. **Xác minh authoritative qua
+  `reg_get refresh=true` TRƯỚC ghi**, lọc CHỈ shard declared → đúng 12 dòng thật. Sau data-op: drift vbqppl = 0.
+- **CÒN MỞ (backlog, cần user quyết — KHÔNG đụng):** (1) 55 dòng notebook `80742228` (profile "Khảo sát Luật Xuất
+  bản", corpus=false) hiện trong base manifest scan → câu hỏi SCOPING (base registry chứa row profile khác?);
+  (2) `_topology_row_kind_findings` khi chạy base-scope FLAG nhầm row profile-lạ thành overflow drift (report-only,
+  vô hại) — refinement: chỉ tin shard DECLARED, notebook lạ → UNKNOWN. Cả hai chờ quyết định corpus của user.
+
 # ★ v1.34.49 — ĐỢT 1 audit overflow-sharding: topology declared+observed, allocator đa-shard, fail-closed live-count (2026-07-15)
 
 > Xử lý audit overflow/sharding v1.34.46 (9 finding; ý tưởng theo bundle Codex `c98321f0…a6ca` — nền v1.34.46 LỖI THỜI

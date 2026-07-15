@@ -9249,6 +9249,29 @@ def run() -> int:
                 and all(it.get("row_kind") == "overflow" for _c, _its in _rk_w for it in _its))
     _t110("r110_reconcile_apply_writes_row_kind_protected_ref", _c110_recon_rowkind)
 
+    # ═══ v1.34.50 — r111_*: BUG1 hoàn tất — reconcile-sweep note/clean KHÔNG tin all_ok đơn thuần (smoke v1.34.49
+    # bắt: DRY ok:true + desync=1 báo 'SẠCH' oan). NEGATIVE-INPUT (luật đứng). ═══
+    def _c111_note_hides_desync():
+        # all_ok=True (DRY rc=0/ok=true) NHƯNG desync=1 → KHÔNG được nói 'SẠCH'
+        n = _TL_MODULE._reconcile_sweep_note(True, [{"notebook": "nbX", "rc": 0, "desync_real": 1}])
+        return "SẠCH" not in n and "desync_real=1" in n and "CÓ VẤN ĐỀ" in n
+    _t110("r111_sweep_note_all_ok_but_desync_not_clean", _c111_note_hides_desync)
+
+    def _c111_note_truly_clean():
+        n = _TL_MODULE._reconcile_sweep_note(True, [{"notebook": "nbX", "rc": 0},
+                                                    {"notebook": "nbY", "rc": 0}])
+        return "SẠCH" in n
+    _t110("r111_sweep_note_truly_clean_says_sach", _c111_note_truly_clean)
+
+    def _c111_clean_flag():
+        f = _TL_MODULE._reconcile_sweep_clean
+        return (f(True, [{"notebook": "a", "rc": 0}]) is True
+                and f(True, [{"notebook": "a", "rc": 0, "unregistered_on_nlm": 2}]) is False
+                and f(True, [{"notebook": "a", "rc": 0, "link_candidates": 1}]) is False
+                and f(False, [{"notebook": "a", "rc": 2}]) is False
+                and f(True, []) is True)
+    _t110("r111_sweep_clean_flag_honest", _c111_clean_flag)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

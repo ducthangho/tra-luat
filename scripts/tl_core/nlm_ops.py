@@ -419,27 +419,42 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             "registry_on_nlm_rows": n_rows}
 
 
-def _reconcile_sweep_note(all_ok: bool, per_notebook: list) -> str:
-    """v1.34.42 (BUG1 — grill-with-docs): note ĐIỀU KIỆN cho `nlm-reconcile --all-notebooks`. Trước đây là CHUỖI
-    CỨNG 'mọi notebook sạch' in ra KỂ CẢ khi ok=false (lớp 'sai mà báo thành công' — chính công cụ audit tự báo sai).
-    all_ok=True → khẳng định sạch; ngược lại → liệt kê notebook rc≠0/finding + hướng dẫn (boot cho rc=2, per-notebook
-    --apply cho finding). PURE, test offline."""
-    if all_ok:
-        return "Lưới cuối lô: mọi notebook SẠCH (desync=0, unregistered=0) = lô settle+link đủ."
+# v1.34.50 (BUG1 hoàn tất — smoke v1.34.49 bắt): DRY reconcile trả ok:true bất kể finding → all_ok chỉ tính
+# rc+ok KHÔNG đủ để khẳng định "sạch". Khoá "clean" = all_ok VÀ KHÔNG shard nào có finding thật.
+# (Bẫy I11/bind: giữ tuple keys INLINE trong hàm — hằng module KHÔNG vào globals tl rebase → NameError.)
+def _reconcile_sweep_problems(per_notebook: list) -> list[str]:
+    """PURE (test offline): liệt kê shard có finding thật (desync/unregistered/link/backfill) HOẶC rc≠0."""
+    _keys = ("desync_real", "unregistered_on_nlm", "link_candidates", "backfill_nlm_notebook_id")
     probs = []
     for p in per_notebook or []:
         nb = str(p.get("notebook") or "?")
-        _find = [f"{k}={p.get(k)}" for k in ("desync_real", "unregistered_on_nlm", "link_candidates",
-                                             "backfill_nlm_notebook_id") if p.get(k)]
+        _find = [f"{k}={p.get(k)}" for k in _keys if p.get(k)]
         if _find:
             probs.append(f"{nb}({', '.join(_find)})")
         elif p.get("rc") not in (0, None):
             _er = f", {p['error']}" if p.get("error") else ""
             probs.append(f"{nb}(rc={p.get('rc')}{_er})")
+    return probs
+
+
+def _reconcile_sweep_clean(all_ok: bool, per_notebook: list) -> bool:
+    """PURE: 'sạch' THẬT = all_ok VÀ KHÔNG finding. Dùng cho khoá `clean` (đường máy) + note (đường người)."""
+    return bool(all_ok) and not _reconcile_sweep_problems(per_notebook)
+
+
+def _reconcile_sweep_note(all_ok: bool, per_notebook: list) -> str:
+    """v1.34.42 (BUG1) → v1.34.50 (hoàn tất): note ĐIỀU KIỆN cho `nlm-reconcile --all-notebooks`. Trước v1.34.42 là
+    CHUỖI CỨNG 'mọi notebook sạch' in kể cả ok=false; v1.34.42 vá nhánh ok=false NHƯNG vẫn tin `all_ok` — DRY luôn
+    ok:true nên desync>0 (rc=0) VẪN bị gọi 'SẠCH' (smoke v1.34.49 bắt: overflow desync=1 báo sạch oan — đúng lớp
+    'sai mà báo thành công'). Nay KHÔNG tin all_ok đơn thuần: tự soi finding từ per_notebook. PURE, test offline."""
+    probs = _reconcile_sweep_problems(per_notebook)
+    if all_ok and not probs:
+        return "Lưới cuối lô: mọi notebook SẠCH (desync=0, unregistered=0) = lô settle+link đủ."
     body = "; ".join(probs) if probs else "(không rõ — xem per_notebook)"
     return ("CÓ VẤN ĐỀ — chưa đồng bộ: " + body + ". "
             "rc=2 thường do thiếu cache/scope → chạy `tl --profile <P> boot` trước. "
-            "Finding (desync/unregistered/link) → per-notebook `tl nlm-reconcile <nb> --apply`.")
+            "Finding (desync/unregistered/link) → per-notebook `tl nlm-reconcile <nb> --apply` "
+            "(desync stale: thêm `--clear-stale`).")
 
 
 def cmd_nlm_reconcile(a) -> int:
@@ -514,9 +529,12 @@ def cmd_nlm_reconcile(a) -> int:
             print(f"[reconcile] {_nb_i[:8]}…: desync={_r_i.get('desync_real')} unregistered="
                   f"{_r_i.get('unregistered_on_nlm')} link_candidates={_r_i.get('link_candidates')}",
                   file=sys.stderr, flush=True)
-        _out_all = {"ok": _all_ok, "mode": "DRY", "all_notebooks": True, "notebooks_swept": len(_nbs),
-                    "per_notebook": _per,
-                    "note": _reconcile_sweep_note(_all_ok, _per)}   # v1.34.42 (BUG1): note ĐIỀU KIỆN, hết 'sạch' oan
+        # v1.34.50: `clean` = tín hiệu MÁY trung thực (all_ok VÀ 0 finding) — orchestrator kiểm `clean` KHÔNG chỉ
+        # `ok` (ok=DRY-scan-chạy-được, giữ rc=0 theo doctrine A3; clean=không-lệch). note = tín hiệu NGƯỜI.
+        _sweep_clean = _reconcile_sweep_clean(_all_ok, _per)
+        _out_all = {"ok": _all_ok, "clean": _sweep_clean, "mode": "DRY", "all_notebooks": True,
+                    "notebooks_swept": len(_nbs), "per_notebook": _per,
+                    "note": _reconcile_sweep_note(_all_ok, _per)}   # v1.34.42/50 (BUG1): note ĐIỀU KIỆN, hết 'sạch' oan
         _o = getattr(a, "out", None)
         if _o:
             Path(_o).write_text(json.dumps(_out_all, ensure_ascii=False, indent=1) + "\n",

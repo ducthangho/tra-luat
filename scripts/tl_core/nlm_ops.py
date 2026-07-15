@@ -707,6 +707,26 @@ def _shard_capacity_default() -> int:
     return NLM_SLOT_CAP
 
 
+def _foreign_profile_notebooks(cfg: dict | None, current_profile: str | None) -> set:
+    """v1.34.51 (điều tra live 2026-07-15): tập notebook (notebookId + shards[] ids) của MỌI profile KHÁC
+    profile hiện tại. Dùng để resolver KHÔNG nhận nhầm notebook profile-khác thành vbqppl overflow-shard —
+    ca 92 dòng dual-registered (base ⊕ Khảo sát Luật Xuất bản, notebook 80742228, corpus=false) lọt base scan
+    do manifest lỡ gắn row_kind='overflow' vài dòng → v1.34.49 flag oan 55 drift. PURE."""
+    cur = str(current_profile or "")
+    out: set = set()
+    for name, p in (_profiles_from_config(cfg or {}) or {}).items():
+        if str(name) == cur or not isinstance(p, dict):
+            continue
+        nb = str(p.get("notebookId") or "").strip()
+        if nb:
+            out.add(nb)
+        for s in (p.get("shards") if isinstance(p.get("shards"), list) else []):
+            sid = str((s.get("id") if isinstance(s, dict) else s) or "").strip()
+            if sid:
+                out.add(sid)
+    return out
+
+
 def _resolve_shard_topology(entries: list[dict], base_nb: str, cfg: dict | None = None,
                             profile: str | None = None) -> dict:
     """v1.34.49 (D5 — grill 2026-07-15): TOPOLOGY declared+observed HỢP NHẤT, resolver DUY NHẤT cho mọi đường.
@@ -723,6 +743,7 @@ def _resolve_shard_topology(entries: list[dict], base_nb: str, cfg: dict | None 
         _, cfg = _read_config_record(None)
     prof_name = (profile or _active_profile() or DEFAULT_PROFILE)
     prof = (_profiles_from_config(cfg or {}) or {}).get(prof_name) or {}
+    foreign_nbs = _foreign_profile_notebooks(cfg, prof_name)   # v1.34.51: notebook profile-khác → KHÔNG là vbqppl shard
     cap_def = _shard_capacity_default()
     raw_shards = prof.get("shards") if isinstance(prof.get("shards"), list) else []
     findings: list[dict] = []
@@ -780,16 +801,27 @@ def _resolve_shard_topology(entries: list[dict], base_nb: str, cfg: dict | None 
                 return {"ok": False, "error": f"TOPOLOGY_CONFIG_CONFLICT: alias {src}='{val}' không thuộc shards[] "
                                               f"khai báo", "shards": declared, "findings": findings, "declared": True}
         # registry-observed KHÔNG khai báo → enabled=False + finding (doctor lộ drift; route KHÔNG tự nhận).
+        # v1.34.51: notebook của PROFILE KHÁC (dual-registered) → 1 finding FOREIGN_PROFILE_NOTEBOOK (advisory),
+        # KHÔNG thành observed vbqppl shard (né flag oan 92 dòng); notebook lạ KHÔNG-của-profile-nào = shard vbqppl
+        # thật chưa declared → giữ observed như cũ.
+        _foreign_seen: set = set()
         for e in entries or []:
             if _entry_row_kind(e) != "overflow":
                 continue
             nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-            if nb and nb != base_nb and nb not in dec_ids:
-                dec_ids.add(nb)
-                findings.append({"finding": "UNDECLARED_REGISTRY_SHARD", "notebook_id": nb})
-                declared.append({"id": nb, "role": "observed", "capacity": cap_def, "enabled": False,
-                                 "priority": 10_000, "source": "registry"})
-        return {"ok": True, "error": None, "shards": declared, "findings": findings, "declared": True}
+            if not nb or nb == base_nb or nb in dec_ids:
+                continue
+            if nb in foreign_nbs:
+                if nb not in _foreign_seen:
+                    _foreign_seen.add(nb)
+                    findings.append({"finding": "FOREIGN_PROFILE_NOTEBOOK", "notebook_id": nb})
+                continue
+            dec_ids.add(nb)
+            findings.append({"finding": "UNDECLARED_REGISTRY_SHARD", "notebook_id": nb})
+            declared.append({"id": nb, "role": "observed", "capacity": cap_def, "enabled": False,
+                             "priority": 10_000, "source": "registry"})
+        return {"ok": True, "error": None, "shards": declared, "findings": findings, "declared": True,
+                "foreign_notebooks": sorted(foreign_nbs)}
     # ── declared VẮNG → materialize observed (giữ nguyên hành vi v1.34.47, thêm capacity/priority) ──
     out: list[dict] = []
     if base_nb:
@@ -799,19 +831,27 @@ def _resolve_shard_topology(entries: list[dict], base_nb: str, cfg: dict | None 
         out.append({"id": env_ovf, "role": "overflow", "capacity": cap_def, "enabled": True,
                     "priority": 1, "source": "env"})
     counts: dict[str, int] = {}
+    _foreign_seen2: set = set()
     for e in entries or []:
         if _entry_row_kind(e) != "overflow":
             continue
         nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-        if nb and nb != base_nb:
-            counts[nb] = counts.get(nb, 0) + 1
+        if not nb or nb == base_nb:
+            continue
+        if nb in foreign_nbs:   # v1.34.51: notebook profile-khác KHÔNG là vbqppl overflow (kể cả khi config chưa có shards[])
+            if nb not in _foreign_seen2:
+                _foreign_seen2.add(nb)
+                findings.append({"finding": "FOREIGN_PROFILE_NOTEBOOK", "notebook_id": nb})
+            continue
+        counts[nb] = counts.get(nb, 0) + 1
     have = {s["id"] for s in out}
     for i, (nb, _n) in enumerate(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))):
         if nb not in have:
             have.add(nb)
             out.append({"id": nb, "role": "overflow", "capacity": cap_def, "enabled": True,
                         "priority": 2 + i, "source": "registry"})
-    return {"ok": True, "error": None, "shards": out, "findings": findings, "declared": False}
+    return {"ok": True, "error": None, "shards": out, "findings": findings, "declared": False,
+            "foreign_notebooks": sorted(foreign_nbs)}
 
 
 def _topology_hash(profile: str, shards: list[dict]) -> str:
@@ -866,9 +906,10 @@ def _topology_row_kind_findings(entries: list[dict], topo: dict) -> list[dict]:
     row_kind=='overflow'` cho dòng ĐÃ có nlm_notebook_id. Bỏ qua kind bảo hộ (ref/thuong) + dòng chưa lên NLM.
     Trả findings [{drive_id, notebook_id, row_kind, finding}] — REPORT-ONLY (sửa: nlm-reconcile --apply / reg_upsert)."""
     out: list[dict] = []
+    _foreign = set((topo or {}).get("foreign_notebooks") or [])   # v1.34.51: dòng notebook profile-khác → KHÔNG flag
     for e in entries or []:
         nb = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
-        if not nb:
+        if not nb or nb in _foreign:
             continue
         rk = str(e.get("row_kind") or "").strip().lower()
         if rk in _ROW_KIND_PROTECTED:
@@ -927,8 +968,9 @@ def _resolve_overflow_shards(entries: list[dict], base_nb: str, cfg: dict | None
     được resolver ghi findings, doctor/route mới fail-closed); thứ tự: declared theo priority → env → registry."""
     base_nb = (base_nb or "").strip()
     topo = _resolve_shard_topology(entries, base_nb, cfg=cfg)
+    _foreign = set(topo.get("foreign_notebooks") or [])   # v1.34.51: KHÔNG sweep notebook profile-khác vào vbqppl overflow
     out: list[str] = []
-    seen: set[str] = set()
+    seen: set[str] = set(_foreign)   # loại foreign khỏi mọi nguồn (topo/env/alias/registry-fallback)
     for s in topo.get("shards") or []:
         sid = s.get("id") or ""
         if sid and sid != base_nb and sid not in seen:

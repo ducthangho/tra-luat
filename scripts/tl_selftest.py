@@ -9272,6 +9272,71 @@ def run() -> int:
                 and f(True, []) is True)
     _t110("r111_sweep_clean_flag_honest", _c111_clean_flag)
 
+    # ═══ v1.34.51 — r112_*: doctor KHÔNG nhận nhầm notebook PROFILE-KHÁC thành vbqppl overflow-shard (điều tra live
+    # 2026-07-15: 92 dòng dual-registered Khảo sát 80742228 corpus=false lọt base scan → v1.34.49 flag oan 55 drift).
+    # NEGATIVE-INPUT (luật đứng). foreign = notebook của profile khác; genuine-undeclared vbqppl shard KHÔNG bị loại. ═══
+    _v1_112 = "11111111-1111-4111-8111-111111111111"   # vbqppl base
+    _v2_112 = "22222222-2222-4222-8222-222222222222"   # vbqppl overflow (declared)
+    _foreign_112 = "99999999-9999-4999-8999-999999999999"   # notebook của profile KHÁC (proj)
+    _genuine_112 = "55555555-5555-4555-8555-555555555555"   # vbqppl overflow-shard THẬT chưa declared (KHÔNG của profile nào)
+    _cfg_112 = {"profiles": {
+        "vbqppl": {"notebookId": _v1_112, "shards": [{"id": _v1_112, "role": "primary"},
+                                                     {"id": _v2_112, "role": "overflow"}]},
+        "proj":   {"notebookId": _foreign_112}}}
+    _ents_112 = [
+        {"drive_id": "fa", "nlm_notebook_id": _foreign_112, "row_kind": "overflow", "nlm_source_id": "sfa"},  # foreign, manifest lỡ 'overflow'
+        {"drive_id": "fb", "nlm_notebook_id": _foreign_112, "row_kind": "own", "nlm_source_id": "sfb"},        # foreign own (dual-reg)
+        {"drive_id": "ga", "nlm_notebook_id": _genuine_112, "row_kind": "overflow", "nlm_source_id": "sga"},   # vbqppl shard thật chưa declared
+        {"drive_id": "ba", "nlm_notebook_id": _v2_112, "row_kind": "own", "nlm_source_id": "sba"},             # DRIFT thật (overflow declared mang own)
+    ]
+
+    def _c112_foreign_helper():
+        f = _TL_MODULE._foreign_profile_notebooks(_cfg_112, "vbqppl")
+        return _foreign_112 in f and _v1_112 not in f and _v2_112 not in f and _genuine_112 not in f
+    _t110("r112_foreign_profile_notebooks_helper", _c112_foreign_helper)
+
+    def _c112_topology_excludes_foreign():
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology(_ents_112, _v1_112, cfg=_cfg_112, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        ids = {s["id"] for s in (topo.get("shards") or [])}
+        # foreign KHÔNG vào topo; genuine-undeclared vbqppl shard VẪN vào (observed)
+        return (topo.get("ok") is True and _foreign_112 not in ids and _genuine_112 in ids
+                and _foreign_112 in (topo.get("foreign_notebooks") or [])
+                and any("FOREIGN_PROFILE_NOTEBOOK" in str(x) for x in (topo.get("findings") or []))
+                and _TL_MODULE._shard_row_kind(_foreign_112, topo) is None
+                and _TL_MODULE._shard_row_kind(_genuine_112, topo) == "overflow")
+    _t110("r112_topology_excludes_foreign_keeps_genuine", _c112_topology_excludes_foreign)
+
+    def _c112_findings_skip_foreign():
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        try:
+            topo = _TL_MODULE._resolve_shard_topology(_ents_112, _v1_112, cfg=_cfg_112, profile="vbqppl")
+            f = _TL_MODULE._topology_row_kind_findings(_ents_112, topo)
+        finally:
+            _env110_restore(_sv)
+        dids = {x.get("drive_id"): str(x.get("finding") or "") for x in f}
+        # foreign rows (fa/fb) KHÔNG flag; drift thật (ba) VẪN flag; genuine shard row (ga) đúng overflow → không flag
+        return ("fa" not in dids and "fb" not in dids
+                and "OVERFLOW_ROW_NOT_MARKED" in dids.get("ba", "")
+                and "ga" not in dids and len(f) == 1)
+    _t110("r112_row_kind_findings_skip_foreign_profile", _c112_findings_skip_foreign)
+
+    def _c112_wrapper_excludes_foreign():
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+        _sav_rcr = _TL_MODULE._read_config_record
+        try:
+            _TL_MODULE._read_config_record = lambda *a, **k: (None, _cfg_112)
+            shards = _TL_MODULE._resolve_overflow_shards(_ents_112, _v1_112, cfg=_cfg_112)
+        finally:
+            _TL_MODULE._read_config_record = _sav_rcr
+            _env110_restore(_sv)
+        # wrapper (đường đọc): loại foreign, GIỮ declared overflow + genuine-undeclared vbqppl shard
+        return (_foreign_112 not in shards and _v2_112 in shards and _genuine_112 in shards)
+    _t110("r112_resolve_overflow_shards_excludes_foreign", _c112_wrapper_excludes_foreign)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,3 +1,24 @@
+# ★ v1.34.51 — doctor KHÔNG nhận nhầm notebook profile-khác thành vbqppl overflow-shard (điều tra live 2026-07-15)
+
+> Điều tra 55 finding row_kind "drift" còn lại sau v1.34.50 (user chọn "fix doctor code, giữ data"): READ-ONLY 2
+> scope + reg_get authoritative → **92 dòng dual-registered** (base VBQPPL ⊕ profile "Khảo sát Luật Xuất bản",
+> notebook 80742228, corpus=false: phụ lục CPTPP làm `ref` + hồ sơ khảo sát) — **CÓ CHỦ ĐÍCH, không phải rác**.
+> Gốc noise: manifest lỡ gắn `row_kind='overflow'` vài dòng trên 80742228 → `_resolve_shard_topology` nhận nhầm
+> notebook PROFILE-KHÁC thành vbqppl overflow-shard → flag oan 55 dòng. Python-only, KHÔNG đụng data, GAS giữ 2.21.2k.
+
+- **`_foreign_profile_notebooks(cfg, current_profile)`** (PURE): tập notebook (notebookId + shards[] ids) của MỌI
+  profile KHÁC. `_resolve_shard_topology` dùng để: notebook profile-khác có registry row `overflow` → **1 finding
+  advisory `FOREIGN_PROFILE_NOTEBOOK`** (KHÔNG thành observed vbqppl shard), notebook lạ KHÔNG-của-profile-nào =
+  shard vbqppl thật chưa declared → GIỮ `UNDECLARED_REGISTRY_SHARD` như cũ. Trả thêm khoá `foreign_notebooks`.
+- **`_topology_row_kind_findings`**: bỏ qua dòng có notebook ∈ foreign (doctor hết flag oan 92 dòng dual-registered
+  — dogfood live: **55 → 0** row_kind findings, chỉ còn 1 advisory).
+- **`_resolve_overflow_shards`** (wrapper đọc/reconcile/cross/query): loại foreign khỏi MỌI nguồn (topo/env/alias/
+  registry) → **vá luôn LỖI TIỀM ẨN**: trước đây vbqppl reconcile/cross có thể rò sang notebook profile-khác nếu
+  registry có overflow row trên đó (dogfood: wrapper nay chỉ trả `[45739ff7]` = shard vbqppl thật, loại 80742228).
+- TDD **r112 ×4** negative-input (foreign helper; topology loại foreign GIỮ genuine-undeclared; findings skip foreign;
+  wrapper loại foreign). Selftest **936→940/940**. I11: stub `_foreign_profile_notebooks` vào `_STUB_MAP`.
+- ★KHÔNG đụng 92 dòng dual-registered (hợp lệ theo user); corpus-count không đổi.
+
 # ★ v1.34.50 — hoàn tất BUG1 reconcile-note "SẠCH" oan (smoke v1.34.49 bắt) + data-op row_kind drift (2026-07-15)
 
 > Smoke read-only v1.34.49 (sau `nlm login`) tự bắt 2 việc: (1) `nlm-reconcile --all-notebooks` báo "mọi notebook

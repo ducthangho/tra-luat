@@ -1,3 +1,46 @@
+# ★ v1.34.55 + GAS 2.21.2m (CHƯA DEPLOY — chờ xác nhận) — ĐỢT 3: row_kind export RAW + claim ingest-local + profile-ingest --resume (2026-07-15)
+
+> Đợt 3 kế hoạch grill Q1–Q10 (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`): D3→D2→D1 + C4+C5+C7.
+> TDD r116 ×9; 979/979 selftest; node harness GAS ×2 (rowkind 9/9 + claim 19/19 trên 2.21.2m). **GAS 2.21.2m
+> ĐÃ VIẾT + TEST nhưng CHƯA `clasp deploy`** (auto-mode chặn đúng gate production — cần user xác nhận; tới lúc
+> đó ping LIVE vẫn 2.21.2l, chỉ lệch version-match, KHÔNG lệnh nào fail-closed). Client EXPECT_VERSION=2.21.2m.
+
+- **[D3] GAS 2.21.2m — export `row_kind` RAW** (`references/Code.2.21.2m.gs`): `entryOf_` (manifest) +
+  `nlmCompactRow_` bỏ default `||'own'` — dòng blank/legacy hết bị export che thành 'own' (gốc bất nhất 37
+  CPTPP manifest↔registry + backlog v1.34.49); các hàm ĐẾM (`regIsCorpusCounted_`/`profileOwnCount_`/
+  `doNlmSlots_`) GIỮ doctrine blank→own (v2.21.2e). Node harness MỚI `references/gas_rowkind_test.js` (9 case:
+  export raw, đếm giữ default, assert mức nguồn) + gas_claim_test 19/19 chạy lại trên 2.21.2m. Deploy khi user
+  duyệt: `cp references/Code.2.21.2m.gs gas-project/Code.gs && (cd gas-project && clasp push -f) && clasp
+  deploy -i <deploymentId LIVE — xem memory gas-clasp-deploy / `clasp deployments`> -d "2.21.2m"` → `tl ping`.
+- **[D2] Điều tra 92 dòng base trỏ notebook Khảo sát Luật Xuất bản (80742228)** — read-only, TRÌNH USER QUYẾT
+  (không tự chọn): (i) **37 CPTPP** cat 23, corpus=TRUE, row_kind=OVERFLOW, pushed — được ĐẾM corpus nhưng
+  notebook đích là notebook PROFILE (foreign từ v1.34.51) → `nlm-cross` vbqppl KHÔNG tra được các phụ lục này;
+  VBQPPL-2 thật (45739ff7, 243 claim) còn ~57 chỗ = đủ di dời. (ii) **54 hồ sơ khảo sát** corpus=false,
+  row_kind=own → vô hại với đếm, dual-registered CHỦ ĐÍCH. (iii) **1 dòng 04-CT/TW** (Đảng) corpus=true nhưng
+  on_nlm=FALSE — trỏ notebook khảo sát mà không live ở đó → cần nạp lại đúng notebook. (iv) 2 dòng row_kind=
+  overflow nhưng nlm_notebook_id RỖNG — drift nhỏ, backfill-notebook. Phương án chi tiết ở cuối phiên.
+- **[D1] Claim F-04 cho `ingest-local`** (nối scope-cut v1.34.52; Q6=a target_scope GIỮ trục Drive-folder):
+  acquire 1-key sau journal-start TRƯỚC cửa sổ upload→dedup→add (MANDATORY client-side: endpoint lỗi →
+  `INGEST_CLAIM_FAILED` rc=2 trước side-effect; denied → `CLAIMED_ELSEWHERE`); BỎ QUA khi --no-nlm-add
+  (không có cửa sổ add); COMMIT GỘP vào 1 call `reg_get_bulk` sau reg_link verified (best-effort, TTL 5' heal).
+- **[C4+C5] `profile-ingest --resume --name <tên> --apply --confirm yes`**: NỐI THEO REGISTRY sau khi chết
+  giữa chừng — dò canonical + chunk `__partNN` đã có, re-split text canonical TỪ DRIVE (tất định), CHỈ làm
+  part thiếu (`_profile_push_chunks` tách chung với đường thường, done_parts skip); cuối cùng ghi corpus
+  canonical theo children_ok → name đã đủ part mà corpus kẹt false = chạy resume là TỰ SỬA (C5 — data-op cho
+  4 canonical kẹt của phiên OCR: BaocaoTienDo/TongHopYKien/SoSanhLuat/DuThaoLuatSuaDoi). Nguồn đơn: thiếu sid
+  → add, có sid → chỉ repair corpus. Guards: RESUME_NEEDS_NAME/CONFIRM_REQUIRED/RESUME_NOT_FOUND/
+  RESUME_TEXT_UNAVAILABLE (fail trước side-effect).
+- **[C7] `profile-list --discover`**: 0 kết quả hành-động-được → note RÕ (json `note_zero_actionable` +
+  stderr) nêu giới hạn quét (chỉ thư mục con trực tiếp Van_ban_thuong) + lệnh kiểm thẳng — hết im lặng sai.
+  Live-check: ATVSLĐ nay hiện `configured` (scan 18/18) — ca sót cũ không tái hiện; guard vẫn cần.
+- Test r116 ×9: claim granted→commit (bắt commit_claims kèm source_id/run_id) / denied 0-side-effect /
+  endpoint-fail dừng / no-nlm-add bỏ claim; resume chỉ-làm-phần-thiếu / sửa-corpus-kẹt / nguồn-đơn / 3 guard
+  negative; discover 0-kết-quả note. ★harness: `_nlm_post_add_dup_check` truthy=DUP (stub phải trả None).
+- EXPECT_VERSION 2.21.2l→2.21.2m; SKILL.md §8 cập nhật target + doctrine deploy clasp (bác 'KHÔNG deploy từ
+  skill được' — gas-clasp-deploy); kernel 49000B (< trần 48KB=49152).
+- Backlog còn: E2 header-cache/E3 registry-first (chưa đủ số đo TL_PERF thực chiến — đo qua vài phiên nạp lô
+  rồi quyết); A7b source-audit --dup-dieu; data-op WCT trộn Berne (chờ user quyết cùng D2).
+
 # ★ v1.34.54 — ĐỢT 2 kế hoạch nâng cấp: batch-link NLM (nlm-links/ingest-inbox) + preflight 2 tầng + plan-artifact reconcile (2026-07-15)
 
 > Tiếp grill Q1–Q10 (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`) — đợt 2 trọn: B1+B2+A1/C8+A3+A7a+C6.

@@ -3406,7 +3406,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2l"))
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2m"))
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -10221,6 +10221,288 @@ def run() -> int:
                 setattr(_TL_MODULE, _k, _v)
             _env110_restore(_sv_env)
     _t110("r115_ingest_inbox_dry_diff_confirm_apply", _c115_ingest_inbox_dry_and_apply)
+
+    # ═══ v1.34.55 — r116_*: ĐỢT 3 (D1 claim ingest-local, C4+C5 profile-ingest --resume, C7 discover
+    # 0-kết-quả). NEGATIVE-INPUT (luật đứng r102). ═══
+    def _mk_il116(claim_resp=None, deny=False):
+        # Harness D1: cmd_ingest_local FULL PATH tới nlm add + reg link — bắt ingest_claim/upload/commit_claims.
+        _calls = {"claim": None, "upload": 0, "commit_claims": None}
+
+        class _G116:
+            def get(self, action, **kw):
+                if action == "ingest_claim":
+                    _calls["claim"] = dict(kw)
+                    if claim_resp is not None:
+                        return claim_resp
+                    ih = json.loads(kw.get("keys") or "[]")[0]
+                    return {"ok": True, "results": [{"identity_hash": ih, "granted": (not deny),
+                                                     "reason": "HELD_BY_OTHER" if deny else "NEW"}]}
+                if action == "reg_get_bulk":
+                    _calls["commit_claims"] = json.loads(kw.get("commit_claims") or "null")
+                    keys = json.loads(kw.get("keys") or "[]")
+                    return {"ok": True, "rows": [{"drive_id": k} for k in keys],
+                            "committed": [c["identity_hash"] for c in (_calls["commit_claims"] or [])],
+                            "commit_failed": []}
+                if action == "bootstrap":
+                    return {"inboxFolderId": "inb116"}
+                if action == "organize":
+                    return {"ok": True, "fileId": "gd116", "srcId": "sr116"}
+                if action == "reg_get":
+                    return {"ok": True, "rows": [{"drive_id": "gd116", "src_id": "sr116",
+                                                   "name": "Luat_02-2026-QH16_Test116",
+                                                   "cat": _TL_MODULE._cat_reg_label("01"), "corpus": "false",
+                                                   "sohieu": "02-2026-QH16", "title_vn": "x"}]}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "upload":
+                    _calls["upload"] += 1
+                return {"ok": True, "fileId": "up116"}
+
+        class _NC116:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb, **kw):
+                return {"ok": True, "source_count": 5}
+
+            def source_add(self, nb, **kw):
+                return {"ok": True, "source_id": "sid116", "ready": True}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+        return _G116, _NC116, _calls
+
+    def _run_il116(claim_resp=None, deny=False, no_nlm_add=False):
+        _G, _NC, _calls = _mk_il116(claim_resp, deny)
+        _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
+                 "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+                 "_nlm_dedup_gate", "_journaled_reg_write", "_read_doc_text", "_nlm_post_add_dup_check")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        import tempfile as _tf
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
+            _TL_MODULE._load_phapdien = lambda: {}
+            _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+                "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
+                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb116", None)
+            _TL_MODULE._gas = lambda: _G()
+            _TL_MODULE._ingest_target = lambda g, sh, nm: ("nb116", {"decision": "OK"})
+            _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run116"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._imp = lambda name: (_NC() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._nlm_dedup_gate = lambda nc, nb, targets, skip=False: ("clear", [])
+            _TL_MODULE._journaled_reg_write = lambda run_id, g, items, cols, **kw: {
+                "verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
+            _TL_MODULE._read_doc_text = lambda *a, **k: "Điều 1. Nội dung một.\nĐiều 2. Nội dung hai.\n" * 3
+            _TL_MODULE._nlm_post_add_dup_check = lambda *a, **k: None   # None = KHÔNG trùng (truthy = dup → abort)
+            with _tf.NamedTemporaryFile(suffix=".docx", delete=False) as _f:
+                _fp = _f.name
+            with _zf63.ZipFile(_fp, "w") as _z:
+                _z.writestr("[Content_Types].xml", "<Types/>")
+                _z.writestr("word/document.xml", "<document>t116</document>")
+            _ns = argparse.Namespace(
+                file=_fp, name="Luat_02-2026-QH16_Test116", sohieu="02-2026-QH16", cat="01", goc="", hieuluc="",
+                loai="Luật", apply=False, resume=False, auto_plan=False, text_file=None, source_quality="auto",
+                ocr_verified=False, force_cat=False, allow_large=False, large_threshold=None,
+                skip_nlm_preflight=True, skip_live_check=True, nlm_no_wait=False, no_nlm_add=no_nlm_add,
+                config=None, profile=None, json=True, deterministic=False, drive_id=None,
+                confirm=None, expected_plan_hash=None)
+            _bd = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcd = _TL_MODULE.cmd_ingest_local(_ns)
+            _pl = json.loads(_bd.getvalue())
+            _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rca = _TL_MODULE.cmd_ingest_local(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            _err = _be.getvalue()
+            os.unlink(_fp)
+            return _rca, _out, _err, _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c116_claim_granted_add_and_commit():
+        _rca, _out, _err, _calls = _run_il116()
+        _cc = _calls["commit_claims"] or []
+        return (_rca == 0 and _out.get("ok") is True and _calls["claim"] is not None
+                and len(_cc) == 1 and _cc[0]["source_id"] == "sid116" and _cc[0]["run_id"] == "run116"
+                and _calls["upload"] == 1)
+    _t110("r116_ingest_local_claim_granted_add_commit", _c116_claim_granted_add_and_commit)
+
+    def _c116_claim_denied_stops_before_upload():
+        _rca, _out, _err, _calls = _run_il116(deny=True)
+        return _rca == 2 and "CLAIMED_ELSEWHERE" in _err and _calls["upload"] == 0
+    _t110("r116_ingest_local_claim_denied_no_side_effect", _c116_claim_denied_stops_before_upload)
+
+    def _c116_claim_endpoint_fail_stops():
+        _rca, _out, _err, _calls = _run_il116(claim_resp={"ok": False, "error": "boom116"})
+        return _rca == 2 and "INGEST_CLAIM_FAILED" in _err and _calls["upload"] == 0
+    _t110("r116_ingest_local_claim_endpoint_fail_stops", _c116_claim_endpoint_fail_stops)
+
+    def _c116_no_nlm_add_skips_claim():
+        _rca, _out, _err, _calls = _run_il116(no_nlm_add=True)
+        return _rca == 0 and _calls["claim"] is None and _out.get("nlm") == "SKIPPED_BY_FLAG"
+    _t110("r116_ingest_local_no_nlm_add_skips_claim", _c116_no_nlm_add_skips_claim)
+
+    def _run_resume116(rows, doc_text, chunk_max=10000, name="BC_Resume116"):
+        # Harness C4+C5: cmd_profile_ingest --resume — bắt createtext/source_add/final write.
+        _calls = {"createtext": 0, "source_add": 0, "final_write": None, "upserts": []}
+
+        class _G116r:
+            def get(self, action, **kw):
+                if action == "reg_get":
+                    return {"ok": True, "rows": rows}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "createtext":
+                    _calls["createtext"] += 1
+                    return {"ok": True, "fileId": f"ck116_{_calls['createtext']}"}
+                return {"ok": True}
+
+        class _NC116r:
+            def source_add(self, nb, **kw):
+                _calls["source_add"] += 1
+                return {"ok": True, "source_id": f"sid116_{_calls['source_add']}", "ready": True}
+        _keys = ("load_creds", "_profile_policy_error", "_resolve_nlm_notebook", "_gas", "_imp",
+                 "_read_doc_text", "_verified_reg_write", "_verified_reg_upsert", "apply_profile_offline")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _sv_env = _env110({"TL_META_FOLDER_ID": "META116", "TL_ROOT_FOLDER_ID": "ROOT116"})
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb116r", None)
+            _TL_MODULE._gas = lambda: _G116r()
+            _TL_MODULE._imp = lambda n: _NC116r() if n == "nlm_cli" else _sav["_imp"](n)
+            _TL_MODULE._read_doc_text = lambda *a, **k: doc_text
+
+            def _fk_write(g, items, cols, **kw):
+                _calls["final_write"] = {"items": [dict(x) for x in items], "cols": cols}
+                return {"verified": True, "reg_bulk": {"ok": True, "patched": len(items)}}
+            _TL_MODULE._verified_reg_write = _fk_write
+            _TL_MODULE._verified_reg_upsert = lambda g, item, **kw: (_calls["upserts"].append(dict(item))
+                                                                     or {"verified": True})
+            _ns = argparse.Namespace(config=None, profile="p116", file=None, drive_id=None, apply=True,
+                                     allow_default=False, name=name, text_file=None, source_quality="auto",
+                                     ocr_verified=False, large_threshold=None, chunk_max_chars=chunk_max,
+                                     hieuluc=None, skip_live_check=False, allow_dup_name=False, no_nlm_add=False,
+                                     resume=True, json=True, deterministic=False, confirm="yes",
+                                     expected_plan_hash=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_profile_ingest(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            return _rc, _out, _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv_env)
+
+    _TXT116 = "".join(f"Điều {i}. Nội dung điều số {i} " + "x" * 700 + "\n" for i in range(1, 41))   # ~29KB — floor splitter 10000
+
+    def _c116_resume_pushes_only_missing():
+        # C4: part01 ĐÃ có row+sid → skip; các part còn thiếu mới createtext+add; corpus=true khi đủ.
+        _exp = len(_TL_MODULE._split_by_dieu_chunks(_TXT116, 10000))
+        if _exp < 3:
+            return False
+        rows = [{"drive_id": "GD116", "name": "BC_Resume116", "corpus": "false", "row_kind": "own",
+                 "nlm_source_id": "", "hieuluc": "Còn", "note": "n", "sohieu": "", "loai": "thuong"},
+                {"drive_id": "CK01", "name": "BC_Resume116__part01", "nlm_source_id": "sOLD1"}]
+        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116)
+        return (_rc == 0 and _out.get("ok") is True and _out.get("parts_total") == _exp
+                and _out.get("parts_skipped_done") == 1 and _calls["createtext"] == _exp - 1
+                and _calls["source_add"] == _exp - 1
+                and (_calls["final_write"] or {}).get("items", [{}])[0].get("corpus") == "true")
+    _t110("r116_resume_pushes_only_missing_parts", _c116_resume_pushes_only_missing)
+
+    def _c116_resume_repairs_stuck_corpus():
+        # C5: MỌI part đã xong mà canonical corpus=false (chết trước bước cuối) → resume 0 createtext,
+        # chỉ ghi lại corpus=true. Đây chính là data-op sửa 4 canonical kẹt của phiên OCR.
+        _exp = len(_TL_MODULE._split_by_dieu_chunks(_TXT116, 10000))
+        rows = [{"drive_id": "GD116", "name": "BC_Resume116", "corpus": "false", "row_kind": "own",
+                 "nlm_source_id": "", "hieuluc": "Còn", "note": "n", "sohieu": "", "loai": "thuong"}]
+        rows += [{"drive_id": f"CK{i:02d}", "name": f"BC_Resume116__part{i:02d}", "nlm_source_id": f"s{i}"}
+                 for i in range(1, _exp + 1)]
+        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116)
+        return (_rc == 0 and _calls["createtext"] == 0 and _calls["source_add"] == 0
+                and _out.get("corpus_written") == "true" and _out.get("parts_skipped_done") == _exp)
+    _t110("r116_resume_repairs_stuck_corpus_false", _c116_resume_repairs_stuck_corpus)
+
+    def _c116_resume_single_source_repair():
+        # Nguồn đơn (text ngắn không chunk): có sid → không add lại, chỉ ghi corpus=true.
+        rows = [{"drive_id": "GD116", "name": "BC_Resume116", "corpus": "false", "row_kind": "own",
+                 "nlm_source_id": "sCANON", "hieuluc": "Còn", "note": "n"}]
+        _rc, _out, _err, _calls = _run_resume116(rows, "Nội dung ngắn " * 10)
+        return (_rc == 0 and _calls["source_add"] == 0 and _out.get("single_source") is True
+                and _out.get("nlm_source_id") == "sCANON" and _out.get("corpus_written") == "true")
+    _t110("r116_resume_single_source_repair", _c116_resume_single_source_repair)
+
+    def _c116_resume_guards():
+        # NEGATIVE: thiếu name → RESUME_NEEDS_NAME; thiếu confirm → CONFIRM_REQUIRED; không có canonical →
+        # RESUME_NOT_FOUND (cả 3 rc=2, không side-effect).
+        _rc1, _o1, _e1, _c1 = _run_resume116([], "x", name="")
+        _sav_lc = _TL_MODULE.load_creds
+        _rc3, _o3, _e3, _c3 = _run_resume116([{"drive_id": "d", "name": "KHAC"}], "x")
+        _ns2 = argparse.Namespace(config=None, profile=None, name="X116", resume=True, apply=True, confirm=None,
+                                  json=True, deterministic=False)
+        _be2 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be2):
+            _rc2 = _TL_MODULE.cmd_profile_ingest(_ns2)
+        return (_rc1 == 2 and "RESUME_NEEDS_NAME" in _e1
+                and _rc2 == 2 and "CONFIRM_REQUIRED" in _be2.getvalue()
+                and _rc3 == 2 and "RESUME_NOT_FOUND" in _e3
+                and _c1["createtext"] == 0 and _c3["createtext"] == 0)
+    _t110("r116_resume_guards_negative", _c116_resume_guards)
+
+    def _c116_discover_zero_actionable_note():
+        # C7: 0 kết quả hành-động-được → note RÕ (json key + stderr), hết im lặng.
+        _keys = ("load_creds", "_gas", "_discover_scan_vbthuong", "_discover_classify",
+                 "_profiles_from_config", "_read_config_record")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+
+        class _G116d:
+            def get(self, action, **kw):
+                return {"vanBanThuongId": "VBT116"} if action == "bootstrap" else {"ok": True}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G116d()
+            _TL_MODULE._discover_scan_vbthuong = lambda g, vbt, folder_cap=60: {
+                "folders": [], "root_files": [], "folder_total": 0, "capped": False}
+            _TL_MODULE._discover_classify = lambda folders, root_files, profiles, vbt_id=None: {
+                "folders": [], "unregistered": [], "empty_folders": [], "adoptable": [],
+                "broken_markers": [], "misplaced_root_assets": [], "orphaned": []}
+            _TL_MODULE._profiles_from_config = lambda cfg: {}
+            _TL_MODULE._read_config_record = lambda *a, **k: ("p116", {})
+            _ns = argparse.Namespace(config=None, profile=None, discover=True, folder_cap=60, json=True,
+                                     deterministic=False)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_profile_list(_ns)
+            _o = json.loads(_bo.getvalue())
+            return (_rc == 0 and "note_zero_actionable" in _o
+                    and "profile-adopt" in _o["note_zero_actionable"]
+                    and "0 kết quả" in _be.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r116_discover_zero_actionable_note", _c116_discover_zero_actionable_note)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

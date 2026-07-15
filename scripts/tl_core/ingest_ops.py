@@ -1907,6 +1907,8 @@ def _profile_ingest_note(info: dict, gate: dict, source_quality: str, split_coun
 
 
 def cmd_profile_ingest(a) -> int:
+    if getattr(a, "resume", False):   # v1.34.55 C4+C5: RESUME theo registry — không upload/organize lại
+        return cmd_profile_ingest_resume(a)
     from tl_core.ingest_contract import authorize_apply, build_ingest_plan, validate_source_file
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     profile = _active_profile()
@@ -2209,30 +2211,7 @@ def cmd_profile_ingest(a) -> int:
         return 2
     nlm_sources = []
     if len(chunks) > 1:
-        for c in chunks:
-            cname = f"{doc_name}__part{int(c['part']):02d}"
-            cr = g.post("createtext", text=c["text"], name=cname, folderId=meta_id,
-                        register="false", share="false", sourceUrl=f"profile-ingest:{gdoc}")
-            chunk_id = cr.get("fileId")
-            if not chunk_id:
-                nlm_sources.append({"ok": False, "part": c["part"], "step": "createtext", "detail": cr})
-                continue
-            add = nc.source_add(notebook_id, drive_id=chunk_id, doc_type="doc", wait=True)
-            src = add.get("source_id") if add.get("ok") else ""
-            if not src:
-                nlm_sources.append({"ok": False, "part": c["part"], "chunk_gdoc": chunk_id,
-                                    "step": "nlm_add_missing_source_id", "detail": add})
-                continue
-            _chunk_reg = _verified_reg_upsert(
-                g, {"drive_id": chunk_id, "src_id": gdoc, "sohieu": info.get("sohieu") or "",
-                    "loai": info.get("loai") or "thuong", "name": cname, "cat": "own",
-                    "mime": "application/vnd.google-apps.document", "goc": gdoc,
-                    "nlm_source_id": src, "nlm_notebook_id": notebook_id,
-                    "nlm_status": "pushed", "corpus": "false", "row_kind": "ref",
-                    "note": (note + f"; chunk_part={c['part']}; dieu={c.get('start_dieu')}-{c.get('end_dieu')}")[:500]})
-            nlm_sources.append({"ok": bool(_chunk_reg.get("verified")), "part": c["part"],
-                                "chunk_gdoc": chunk_id, "nlm_source_id": src, "chars": c.get("chars"),
-                                "registry_verified": bool(_chunk_reg.get("verified"))})
+        nlm_sources = _profile_push_chunks(g, nc, notebook_id, gdoc, doc_name, info, note, meta_id, chunks)
         _children_ok = bool(nlm_sources) and all(x.get("ok") for x in nlm_sources) and len(nlm_sources) == len(chunks)
         rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name,
                                       "corpus": ("true" if _children_ok else "false"), "row_kind": "own",
@@ -2260,6 +2239,149 @@ def cmd_profile_ingest(a) -> int:
            "nlm_sources": nlm_sources, "registry_verified": bool(rb.get("verified")),
            "registry_patched": (rb.get("reg_bulk") or {}).get("patched"),
            "target_notebook": notebook_id, "hieuluc": hieuluc}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if _final_ok else 2
+
+
+def _profile_push_chunks(g, nc, notebook_id: str, gdoc: str, doc_name: str, info: dict, note: str,
+                         meta_id: str, chunks: list, done_parts: dict | None = None) -> list:
+    """v1.34.55 (C4 — tách NGUYÊN VĂN từ cmd_profile_ingest để --resume dùng CHUNG): đẩy từng chunk lên NLM +
+    registry (createtext → source_add → reg_upsert row_kind=ref). done_parts: {part → row registry ĐÃ xong} —
+    resume bỏ qua part đó (vẫn tính ok để _children_ok trung thực trên TOÀN bộ part)."""
+    nlm_sources = []
+    for c in chunks:
+        _p = int(c["part"])
+        if done_parts and _p in done_parts:
+            _r0 = done_parts[_p]
+            nlm_sources.append({"ok": True, "part": _p, "chunk_gdoc": str(_r0.get("drive_id") or ""),
+                                "nlm_source_id": str(_r0.get("nlm_source_id") or ""), "resumed_skip": True})
+            continue
+        cname = f"{doc_name}__part{_p:02d}"
+        cr = g.post("createtext", text=c["text"], name=cname, folderId=meta_id,
+                    register="false", share="false", sourceUrl=f"profile-ingest:{gdoc}")
+        chunk_id = cr.get("fileId")
+        if not chunk_id:
+            nlm_sources.append({"ok": False, "part": c["part"], "step": "createtext", "detail": cr})
+            continue
+        add = nc.source_add(notebook_id, drive_id=chunk_id, doc_type="doc", wait=True)
+        src = add.get("source_id") if add.get("ok") else ""
+        if not src:
+            nlm_sources.append({"ok": False, "part": c["part"], "chunk_gdoc": chunk_id,
+                                "step": "nlm_add_missing_source_id", "detail": add})
+            continue
+        _chunk_reg = _verified_reg_upsert(
+            g, {"drive_id": chunk_id, "src_id": gdoc, "sohieu": info.get("sohieu") or "",
+                "loai": info.get("loai") or "thuong", "name": cname, "cat": "own",
+                "mime": "application/vnd.google-apps.document", "goc": gdoc,
+                "nlm_source_id": src, "nlm_notebook_id": notebook_id,
+                "nlm_status": "pushed", "corpus": "false", "row_kind": "ref",
+                "note": (note + f"; chunk_part={c['part']}; dieu={c.get('start_dieu')}-{c.get('end_dieu')}")[:500]})
+        nlm_sources.append({"ok": bool(_chunk_reg.get("verified")), "part": c["part"],
+                            "chunk_gdoc": chunk_id, "nlm_source_id": src, "chars": c.get("chars"),
+                            "registry_verified": bool(_chunk_reg.get("verified"))})
+    return nlm_sources
+
+
+_RESUME_PART_RE = re.compile(r"__part(\d{1,3})$")
+
+
+def cmd_profile_ingest_resume(a) -> int:
+    """v1.34.55 (C4+C5 — log phiên OCR: bị giết giữa lúc add chunk → phải reg-query dò tay, xóa sạch canonical
+    lẫn chunk mồ côi rồi chạy lại TỪ ĐẦU ×2; + 4 canonical corpus=''/false dù chunk con pushed đủ): RESUME theo
+    REGISTRY — KHÔNG upload/organize lại. Dò canonical (tên y hệt) + chunk `__partNN` hiện có; re-split text
+    canonical TỪ DRIVE (tất định, cùng chunk_max) → CHỈ làm part còn thiếu; cuối cùng ghi corpus canonical theo
+    _children_ok — nghĩa là chạy resume trên name đã-đủ-part cũng TỰ SỬA ca corpus kẹt false (C5). Nguồn đơn
+    (không chunk): thiếu nlm_source_id → add; có rồi → chỉ repair corpus. Cần --name + --apply --confirm yes
+    (không plan-hash — không có file nguồn local; xác nhận tường minh thay thế)."""
+    name = (getattr(a, "name", None) or "").strip()
+    if not name:
+        print(json.dumps({"ok": False, "error": "RESUME_NEEDS_NAME",
+                          "note": "Truyền --name '<tên canonical y hệt registry>' (lấy từ NAME_ALREADY_IN_REGISTRY "
+                                  "hoặc reg-query --name)."}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    if not getattr(a, "apply", False) or str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED", "expected": "yes",
+                          "note": "--resume ghi NLM/registry → cần --apply --confirm yes (không có plan-hash vì "
+                                  "không có file nguồn local)."}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
+    if _perr:
+        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+    notebook_id, nb_err = _resolve_nlm_notebook(None)
+    if nb_err:
+        print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    g = _gas()
+    try:
+        _rg = g.get("reg_get", name_contains=name, refresh="true")
+    except Exception as _e:  # noqa: BLE001
+        _rg = {"ok": False, "error": str(_e)}
+    if not _rg.get("ok"):
+        print(json.dumps({"ok": False, "error": "RESUME_REGISTRY_READ_FAILED", "detail": _rg.get("error")},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    rows = _rg.get("rows") or []
+    canon = next((r for r in rows if str(r.get("name") or "").strip() == name), None)
+    if not canon:
+        print(json.dumps({"ok": False, "error": "RESUME_NOT_FOUND", "name": name,
+                          "note": "Không có dòng canonical tên này — chạy profile-ingest thường (chưa có gì để nối)."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    gdoc = str(canon.get("drive_id") or canon.get("gdoc_id") or "")
+    hieuluc = str(canon.get("hieuluc") or "") or "Còn"
+    note = (str(canon.get("note") or "") or f"resume:{name}")[:300]
+    info = {"sohieu": str(canon.get("sohieu") or ""), "loai": str(canon.get("loai") or "")}
+    done_parts: dict[int, dict] = {}
+    for r in rows:
+        _nm = str(r.get("name") or "").strip()
+        if not _nm.startswith(name + "__part"):
+            continue
+        m = _RESUME_PART_RE.search(_nm)
+        if m and (str(r.get("nlm_source_id") or "").strip()):
+            done_parts[int(m.group(1))] = r
+    text = _read_doc_text(gdoc) or ""
+    if not text:
+        print(json.dumps({"ok": False, "error": "RESUME_TEXT_UNAVAILABLE", "gdoc": gdoc,
+                          "note": "Không đọc được text canonical từ Drive để re-split — kiểm gdoc/export."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    chunk_max = int(getattr(a, "chunk_max_chars", None) or 100000)
+    chunks = _split_by_dieu_chunks(text, chunk_max) if len(text) > chunk_max else []
+    nc = _imp("nlm_cli")
+    meta_id = os.environ.get("TL_META_FOLDER_ID", "").strip() or os.environ.get("TL_ROOT_FOLDER_ID", "").strip()
+    if len(chunks) > 1:
+        nlm_sources = _profile_push_chunks(g, nc, notebook_id, gdoc, name, info, note, meta_id, chunks,
+                                           done_parts=done_parts)
+        _children_ok = bool(nlm_sources) and all(x.get("ok") for x in nlm_sources) and len(nlm_sources) == len(chunks)
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": name,
+                                      "corpus": ("true" if _children_ok else "false"), "row_kind": "own",
+                                      "note": note, "hieuluc": hieuluc}],
+                                 "name,corpus,row_kind,note,hieuluc")
+        _final_ok = bool(_children_ok and rb.get("verified"))
+        out = {"ok": _final_ok, "resumed": True, "gdoc": gdoc, "name": name,
+               "parts_total": len(chunks), "parts_skipped_done": len(done_parts),
+               "parts_pushed_now": sum(1 for x in nlm_sources if x.get("ok") and not x.get("resumed_skip")),
+               "children_ok": _children_ok, "corpus_written": "true" if _children_ok else "false",
+               "registry_verified": bool(rb.get("verified")), "nlm_sources": nlm_sources}
+    else:
+        _sid = str(canon.get("nlm_source_id") or "").strip()
+        if not _sid:
+            add = nc.source_add(notebook_id, drive_id=gdoc, doc_type="doc", wait=True)
+            if not (add.get("ok") and add.get("source_id")):
+                print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add},
+                                 ensure_ascii=False, indent=2), file=sys.stderr)
+                return 2
+            _sid = add.get("source_id")
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": name, "nlm_source_id": _sid,
+                                      "nlm_notebook_id": notebook_id, "row_kind": "own",
+                                      "nlm_status": "pushed", "corpus": "true", "note": note,
+                                      "hieuluc": hieuluc}],
+                                 "name,nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus,note,hieuluc")
+        out = {"ok": bool(rb.get("verified")), "resumed": True, "gdoc": gdoc, "name": name,
+               "parts_total": 0, "single_source": True, "nlm_source_id": _sid,
+               "corpus_written": "true", "registry_verified": bool(rb.get("verified"))}
+        _final_ok = out["ok"]
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if _final_ok else 2
 
@@ -2572,6 +2694,36 @@ def cmd_ingest_local(a) -> int:
                                                    "identity_hash": _contract["identity_hash"],
                                                    "plan_hash": _contract["plan_hash"],
                                                    **({"resumed_from": _prev.get("journal_prev")} if _prev else {})})
+    # v1.34.55 (D1 — nối scope-cut v1.34.52 F-04; Q6=a: target_scope GIỮ trục Drive-folder của build_ingest_plan,
+    # claim = khóa chống race per-cửa-sổ chứ không phải định danh toàn cục): ACQUIRE claim identity TRƯỚC cửa sổ
+    # upload→dedup-live→source_add — chặn 2 host cùng ingest 1 nội dung. MANDATORY client-side như ingest-missing
+    # (webapp <2.21.2l → DỪNG rc=2 TRƯỚC side-effect); denied → CLAIMED_ELSEWHERE (đơn file — không có gì để skip).
+    # BỎ QUA khi --no-nlm-add (không có cửa sổ add NLM; Drive+registry đã có dup-guard C2 + organize idempotent).
+    _claim_ih55 = None
+    if not getattr(a, "no_nlm_add", False):
+        _claim_ih55 = str(_contract["identity_hash"])
+        try:
+            _cl55 = g.get("ingest_claim", keys=json.dumps([_claim_ih55]), run_id=run_id,
+                          drive_ids=json.dumps([str(getattr(a, "drive_id", None) or "")]))
+        except Exception as _cle55:  # noqa: BLE001
+            _cl55 = {"ok": False, "error": str(_cle55)}
+        if not _cl55.get("ok"):
+            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
+            print(json.dumps({"ok": False, "error": "INGEST_CLAIM_FAILED", "detail": _cl55.get("error"),
+                              "journal": run_id,
+                              "note": "Không xin được claim xuyên host (F-04, webapp cần ≥2.21.2l) — DỪNG an toàn "
+                                      "TRƯỚC upload (chưa side-effect)."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        _gr55 = next((r for r in (_cl55.get("results") or []) if r.get("identity_hash") == _claim_ih55), None)
+        if not (_gr55 or {}).get("granted"):
+            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
+            print(json.dumps({"ok": False, "error": "CLAIMED_ELSEWHERE", "journal": run_id,
+                              "reason": (_gr55 or {}).get("reason"),
+                              "note": "Host khác đang ingest CÙNG nội dung/scope (claim F-04) — không phải lỗi; "
+                                      "thử lại sau ~5' (TTL) hoặc để host kia xong."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
 
     def _step(op, key, **kw):
         _journal_append(run_id, {"t": "intent", "op": op, "key": key, "set": dict(kw)})
@@ -2827,6 +2979,15 @@ def cmd_ingest_local(a) -> int:
                              "nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus",
                              before_by_key={gdoc: {"nlm_source_id": "", "nlm_status": "", "corpus": ""}})
     rb = v.get("reg_bulk") or {}
+    if _claim_ih55 and v.get("verified"):
+        # v1.34.55 (D1/F-08): COMMIT claim GỘP vào 1 call reg_get_bulk (vừa đóng claim vừa readback) — best-effort,
+        # lô lỗi tự heal qua TTL 5' (khớp dung sai ingest-missing D3/D7; kết quả run KHÔNG phụ thuộc commit).
+        try:
+            g.get("reg_get_bulk", keys=json.dumps([gdoc]), key_field="drive_id",
+                  commit_claims=json.dumps([{"identity_hash": _claim_ih55, "source_id": src, "run_id": run_id}]))
+        except Exception:  # noqa: BLE001
+            print("[tl]   ⚠ claim commit chưa xác nhận — tự hết hạn sau 5' (F-04 TTL), không chặn kết quả.",
+                  file=sys.stderr, flush=True)
     _journal_append(run_id, {"t": "run_end", "ok": bool(v.get("verified")), "counts": {"OK": 1}})
     _final_ok = bool(v.get("verified"))
     out = {"ok": _final_ok, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,

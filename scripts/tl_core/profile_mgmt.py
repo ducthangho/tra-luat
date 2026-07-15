@@ -634,6 +634,16 @@ def _profile_list_discover(a, path, cfg) -> int:
     if scan.get("capped"):
         out["warning"] = (f"CHỈ quét {out['scanned']}/{out['folder_total']} thư mục (cap) — chạy lại với "
                           f"--folder-cap {out['folder_total']} để phủ đủ; kết luận 'config_only' có thể là giả khi cap.")
+    # v1.34.55 (C7 — log phiên OCR: --discover trả rỗng dù profile ATVSLĐ có marker thật, KHÔNG một cảnh báo nào):
+    # 0 kết quả hành-động-được → nói RÕ giới hạn quét thay vì im lặng (folder NGOÀI root Van_ban_thuong không bao
+    # giờ vào scan; marker chỉ dò ở cấp con trực tiếp). Không đổi kết quả — chỉ hết im lặng sai.
+    if not ((rep.get("adoptable") or []) + (rep.get("unregistered") or []) + (rep.get("broken_markers") or [])):
+        out["note_zero_actionable"] = (
+            "0 kết quả hành-động-được (adoptable/unregistered/broken đều rỗng). KHÔNG đồng nghĩa không còn profile: "
+            "scan CHỈ phủ thư mục con TRỰC TIẾP của Van_ban_thuong — folder nằm NGOÀI root này không bao giờ xuất "
+            "hiện ở đây. Nghi sót: kiểm thẳng `tl profile-adopt --folder <id>` / `tl profile-doctor --profile <P>`; "
+            "hoặc bootstrap vanBanThuongId sai → `tl doctor`.")
+        print(f"[tl] ⚠ {out['note_zero_actionable']}", file=sys.stderr)
     if getattr(a, "json", False):
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 0

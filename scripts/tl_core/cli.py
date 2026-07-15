@@ -379,6 +379,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
                    help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
+    p.add_argument("--resume", action="store_true",
+                   help="(v1.34.55 C4+C5) NỐI THEO REGISTRY sau khi chết giữa chừng: --name <tên canonical> + --apply --confirm yes — dò chunk __partNN đã có, chỉ làm phần thiếu; name đã đủ part → tự SỬA corpus kẹt false")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_ingest)
 
@@ -404,6 +406,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
                    help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
+    p.add_argument("--resume", action="store_true",
+                   help="(v1.34.55 C4+C5) NỐI THEO REGISTRY sau khi chết giữa chừng: --name <tên canonical> + --apply --confirm yes — dò chunk __partNN đã có, chỉ làm phần thiếu; name đã đủ part → tự SỬA corpus kẹt false")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_file_add)
 

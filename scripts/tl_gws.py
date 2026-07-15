@@ -1622,6 +1622,14 @@ def cmd_gws_bootstrap_cowork(a) -> int:
 def cmd_download(a) -> int:
     """Tải file Drive → đĩa qua transport (gws PRIMARY cho binary, tự FALLBACK→GAS cho text/JSON raw).
     Nhanh nhất: gws ghi raw (1 hop, không b64, không cap 9MB). Google-native: --export-mime để export."""
+    # v1.34.53 (A5): nhận positional lẫn --file-id (đồng bộ extract/nlm-get); --file-id thắng khi đưa cả 2.
+    if not getattr(a, "file_id", None):
+        a.file_id = getattr(a, "file_id_pos", None)
+    if not a.file_id:
+        print(json.dumps({"ok": False, "error": "FILE_ID_REQUIRED",
+                          "note": "tl download <fileId> hoặc tl download --file-id <fileId>"}, ensure_ascii=False),
+              file=sys.stderr)
+        return 2
     tr = _imp("transport")
     dest = a.out or (a.file_id + ".bin")
     kw = {"file_id": a.file_id, "dest": dest}

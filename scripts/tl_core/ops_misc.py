@@ -2038,7 +2038,10 @@ def cmd_reg_query(a) -> int:
 
     nm_q = getattr(a, "name", None) or ""
     did = (getattr(a, "drive_id", None) or "").strip()
+    _nbq = str(getattr(a, "notebook", None) or "").strip()   # v1.34.53 (A6): lọc theo nlm_notebook_id
     def ok(e):
+        if _nbq and str(e.get("nlm_notebook_id") or "").strip() != _nbq:
+            return False
         if did and did not in (str(e.get("drive_id") or ""), str(e.get("gdoc_id") or ""), str(e.get("gdoc") or "")):
             return False
         if nm:

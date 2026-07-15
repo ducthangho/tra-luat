@@ -9390,6 +9390,406 @@ def run() -> int:
                 and sum(1 for r in out.get("results") or [] if r.get("skipped") == "CLAIMED_ELSEWHERE") == 2)
     _t110("r113_claim_all_denied_zero_added_no_side_effect_rc0", _c113_all_denied_zero_added_still_rc0)
 
+    # ═══ v1.34.53 — r114_*: A2 OWNERSHIP GUARD reconcile (log phiên 80742228 2026-07-15: reconcile profile-notebook
+    # match TRIPS/WCT theo title → PATCH nlm_notebook_id dòng corpus VBQPPL-2 sang notebook profile — clobber chéo
+    # shard). NEGATIVE-INPUT (luật đứng): dòng trỏ notebook KHÁC không bao giờ thành link candidate. ═══
+    _NBP_114, _NBC_114 = "NB_PROF_114", "NB_CORPUS_114"
+    _DID_114 = "DRVownrow0123456789abcd"
+
+    def _c114_foreign_title_not_clobbered():
+        # Dòng corpus ĐÃ trỏ shard khác (nb=NB_CORPUS, có source_id) + nguồn live trùng title duy nhất trong
+        # notebook đang reconcile → TRƯỚC v1.34.53 thành link_candidate (bug clobber); NAY foreign_skipped.
+        _ents = [{"id": "e1", "name": "Hiep dinh TRIPS 1994", "drive_id": _DID_114,
+                  "nlm_notebook_id": _NBC_114, "nlm_source_id": "s-corpus", "nlm_status": "pushed"}]
+        _src = [{"id": "s-new", "title": "Hiep dinh TRIPS 1994"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return (len(pl["link_candidates"]) == 0 and len(pl.get("foreign_skipped") or []) == 1
+                and pl["foreign_skipped"][0]["by"] == "title"
+                and pl["foreign_skipped"][0]["registry_notebook"] == _NBC_114
+                and pl["unregistered"] == ["s-new"])
+    _t110("r114_reconcile_foreign_title_not_clobbered", _c114_foreign_title_not_clobbered)
+
+    def _c114_foreign_drive_id_not_clobbered():
+        # Cả tier CỨNG drive_id cũng không được re-point dòng của notebook khác (ca dual-registered CÓ CHỦ ĐÍCH).
+        _ents = [{"id": "e1", "name": "x", "drive_id": _DID_114,
+                  "nlm_notebook_id": _NBC_114, "nlm_source_id": "s-corpus", "nlm_status": "pushed"}]
+        _src = [{"id": "s-new", "title": "y", "url": f"https://docs.google.com/document/d/{_DID_114}/edit"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return (len(pl["link_candidates"]) == 0 and len(pl.get("foreign_skipped") or []) == 1
+                and pl["foreign_skipped"][0]["by"] == "drive_id")
+    _t110("r114_reconcile_foreign_drive_id_not_clobbered", _c114_foreign_drive_id_not_clobbered)
+
+    def _c114_weak_tier_never_repoints_linked_row():
+        # Tier YẾU (title) KHÔNG re-point dòng đã có nlm_source_id dù nb rỗng (chỉ link dòng CHƯA link).
+        _ents = [{"id": "e1", "name": "Cong uoc WCT 1996", "drive_id": _DID_114,
+                  "nlm_notebook_id": "", "nlm_source_id": "s-old", "nlm_status": "pushed"}]
+        _src = [{"id": "s-new", "title": "Cong uoc WCT 1996"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return (len(pl["link_candidates"]) == 0 and pl["unregistered"] == ["s-new"]
+                and len(pl.get("foreign_skipped") or []) == 0)   # nb rỗng = KHÔNG foreign, chỉ là không-link-được
+    _t110("r114_reconcile_weak_tier_never_repoints_linked_row", _c114_weak_tier_never_repoints_linked_row)
+
+    def _c114_dual_registered_drive_id_picks_own():
+        # Dual-registered (2 dòng cùng drive_id, 1 foreign 1 own-chưa-link) → drive_id tier chọn ĐÚNG dòng own.
+        _ents = [{"id": "ef", "name": "a", "drive_id": _DID_114, "nlm_notebook_id": _NBC_114,
+                  "nlm_source_id": "s-corpus", "nlm_status": "pushed"},
+                 {"id": "eo", "name": "b", "drive_id": _DID_114, "nlm_notebook_id": "", "nlm_source_id": ""}]
+        _src = [{"id": "s-new", "title": "c", "url": f"https://docs.google.com/document/d/{_DID_114}/edit"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return (len(pl["link_candidates"]) == 1 and pl["link_candidates"][0]["entry"]["id"] == "eo"
+                and pl["link_candidates"][0]["by"] == "drive_id")
+    _t110("r114_reconcile_dual_registered_drive_id_picks_own", _c114_dual_registered_drive_id_picks_own)
+
+    def _c114_own_title_link_still_works():
+        # POSITIVE CONTROL: hành vi C1 v1.34.27 giữ nguyên — dòng chưa link, title duy nhất → link bình thường.
+        _ents = [{"id": "e1", "name": "Nghi dinh thu Madrid", "drive_id": _DID_114,
+                  "nlm_notebook_id": "", "nlm_source_id": ""}]
+        _src = [{"id": "s-new", "title": "Nghi dinh thu Madrid"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return len(pl["link_candidates"]) == 1 and pl["link_candidates"][0]["by"] == "title"
+    _t110("r114_reconcile_own_title_link_still_works", _c114_own_title_link_still_works)
+
+    def _run_bridge114(dry_json):
+        # Harness C1: stub _run_child_tl — bắt argv 3 child (ocr-verify, DRY, apply); trả (rc, out, calls).
+        # ★ ocr.py bind = COPY-một-lần (KHÔNG rebase __globals__ như ingest_ops) → phải patch MODULE ocr,
+        # patch _TL_MODULE._run_child_tl không ăn (bài học harness r114).
+        _ocrmod = _TL_MODULE._tl_ocr
+        _sav_rct = _ocrmod._run_child_tl
+        import tempfile as _tfb
+        _calls = []
+
+        def _fake_child(args):
+            _calls.append(list(args))
+            if args and args[0] == "ocr-verify":
+                return {"ok": True, "returncode": 0, "json": {"ok": True}}
+            if "--apply" not in args:
+                return {"ok": True, "returncode": 0, "json": dry_json}
+            return {"ok": True, "returncode": 0, "json": {"ok": True}}
+        try:
+            _ocrmod._run_child_tl = _fake_child
+            with _tfb.NamedTemporaryFile(suffix=".pdf", delete=False) as _fs:
+                _src = _fs.name
+            with _tfb.NamedTemporaryFile(suffix=".txt", delete=False) as _ft:
+                _ft.write("Noi dung van ban thuong du dai de qua verify." .encode("utf-8") * 20)
+                _txt = _ft.name
+            _ns = argparse.Namespace(file=_src, text_file=_txt, apply=True, confirm="yes",
+                                     name=None, hieuluc=None, chunk_max_chars=None, allow_default=False,
+                                     skip_live_check=False, profile="bhxh", json=True, deterministic=False,
+                                     expected_plan_hash=None)
+            _buf = _io27.StringIO()
+            with _ctx27.redirect_stdout(_buf), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_profile_ingest_ocr(_ns)
+            _out = json.loads(_buf.getvalue())
+            os.unlink(_src); os.unlink(_txt)
+            return _rc, _out, _calls
+        finally:
+            _ocrmod._run_child_tl = _sav_rct
+
+    def _run_pi114(reg_get_resp, allow_dup=False):
+        # Harness C2: cmd_profile_ingest apply với FkGas — bắt reg_get/upload/organize; trả (rc, stderr_json, calls).
+        _calls = {"reg_get": None, "upload": 0, "organize": 0}
+
+        class _FkGas114:
+            def get(self, action, **kw):
+                if action == "bootstrap":
+                    return {"ok": True, "inboxFolderId": "INBOX114"}
+                if action == "reg_get":
+                    _calls["reg_get"] = dict(kw)
+                    return reg_get_resp
+                if action == "organize":
+                    _calls["organize"] += 1
+                    return {"ok": True, "fileId": "GD114", "srcId": "SRC114"}
+                return {"ok": True, "fileId": "GD114"}
+
+            def post(self, action, **kw):
+                if action == "upload":
+                    _calls["upload"] += 1
+                return {"ok": True, "fileId": "UP114", "patched": 1}
+
+        class _FkNC114:
+            def source_add(self, nb, **kw):
+                return {"ok": True, "source_id": "SID114", "ready": True}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+        _keys = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds", "_gas",
+                 "_resolve_nlm_notebook", "_imp", "_verify_convert_readback", "_read_doc_text",
+                 "_profile_read_probe_text", "_profile_source_quality", "_verified_reg_write")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _env = {k: os.environ.get(k) for k in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID")}
+        try:
+            import tempfile as _tfp
+            with _tfp.TemporaryDirectory() as _d:
+                _xf = Path(_d) / "bao_cao_114.docx"
+                with _zf63.ZipFile(_xf, "w") as _z:
+                    _z.writestr("[Content_Types].xml", "<Types/>")
+                    _z.writestr("word/document.xml", "<document>bc114</document>")
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._active_profile = lambda: "p114"
+                _TL_MODULE._profile_policy_error = lambda **k: None
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: _FkGas114()
+                _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB114", None)
+                _TL_MODULE._imp = lambda name: _FkNC114() if name == "nlm_cli" else _sav["_imp"](name)
+                _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
+                _TL_MODULE._read_doc_text = lambda *a, **k: ""
+                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("", None)
+                _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
+                _TL_MODULE._verified_reg_write = lambda *a, **k: {"verified": True, "reg_bulk": {"patched": 1}}
+                os.environ["TL_ROOT_FOLDER_ID"] = "ROOT114"; os.environ["TL_META_FOLDER_ID"] = "META114"
+                _ns = argparse.Namespace(
+                    config=None, profile=None, file=str(_xf), drive_id=None, apply=False, allow_default=False,
+                    name="Bao_cao_Test_114", text_file=None, source_quality="auto", ocr_verified=False,
+                    large_threshold=None, chunk_max_chars=None, hieuluc=None, skip_live_check=False,
+                    allow_dup_name=allow_dup, json=True, deterministic=False, confirm=None, expected_plan_hash=None)
+                _bd = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rcd = _TL_MODULE.cmd_profile_ingest(_ns)
+                _pl = json.loads(_bd.getvalue())
+                _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+                _bo, _be = _io27.StringIO(), _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                    _rca = _TL_MODULE.cmd_profile_ingest(_ns)
+                _errj = None
+                try:
+                    _errj = json.loads(_be.getvalue())
+                except Exception:
+                    pass
+                return _rcd, _rca, _errj, _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _k, _v in _env.items():
+                (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+
+    def _c114_dup_name_gate_stops_before_upload():
+        # C2 NEGATIVE-INPUT: tên y hệt đã có dòng registry (drive_id khác) → DỪNG rc=2 TRƯỚC upload/organize
+        # (log phiên OCR: timeout giữa lô → chạy lại tạo 6 dòng trùng tên, phải hygiene scan + xóa tay).
+        _rcd, _rca, _errj, _calls = _run_pi114(
+            {"ok": True, "rows": [{"name": "Bao_cao_Test_114", "drive_id": "OLD114", "src_id": "S1",
+                                    "nlm_source_id": ""}]})
+        return (_rcd == 0 and _rca == 2 and (_errj or {}).get("error") == "NAME_ALREADY_IN_REGISTRY"
+                and _calls["upload"] == 0 and _calls["organize"] == 0
+                and (_calls["reg_get"] or {}).get("name_contains") == "Bao_cao_Test_114")
+    _t110("r114_dup_name_gate_stops_before_upload", _c114_dup_name_gate_stops_before_upload)
+
+    def _c114_dup_name_gate_failclosed_and_bypass():
+        # (a) reg_get lỗi → DỪNG rc=2 REGISTRY_DUP_CHECK_FAILED (fail-closed); (b) --allow-dup-name → đi tiếp.
+        _rcd1, _rca1, _errj1, _calls1 = _run_pi114({"ok": False, "error": "boom114"})
+        _rcd2, _rca2, _errj2, _calls2 = _run_pi114(
+            {"ok": True, "rows": [{"name": "Bao_cao_Test_114", "drive_id": "OLD114"}]}, allow_dup=True)
+        # (b) chỉ assert GATE bị bỏ (reg_get không gọi) + upload ĐÃ chạy — bước sau (canonical readback) fail do
+        # stub _read_doc_text rỗng, ngoài phạm vi C2.
+        return (_rca1 == 2 and (_errj1 or {}).get("error") == "REGISTRY_DUP_CHECK_FAILED"
+                and _calls1["upload"] == 0
+                and _calls2["upload"] == 1 and _calls2["reg_get"] is None)
+    _t110("r114_dup_name_gate_failclosed_and_bypass", _c114_dup_name_gate_failclosed_and_bypass)
+
+    def _c114_bridge_forwards_confirm_and_hash():
+        # C1: apply = child DRY lấy plan_hash → child apply PHẢI mang --apply --confirm yes --expected-plan-hash
+        # (trước v1.34.53 thiếu --confirm → child CONFIRM_REQUIRED 100%, luồng OCR profile chết hoàn toàn).
+        _rc, _out, _calls = _run_bridge114({"plan_hash": "H114"})
+        if _rc != 0 or len(_calls) != 3:
+            return False
+        _dry, _ap = _calls[1], _calls[2]
+        return (_dry[0] == "profile-ingest" and "--apply" not in _dry and "--confirm" not in _dry
+                and "--apply" in _ap and "--confirm" in _ap and _ap[_ap.index("--confirm") + 1] == "yes"
+                and "--expected-plan-hash" in _ap and _ap[_ap.index("--expected-plan-hash") + 1] == "H114"
+                and _out.get("ok") is True)
+    _t110("r114_bridge_forwards_confirm_and_hash", _c114_bridge_forwards_confirm_and_hash)
+
+    def _c114_bridge_dry_no_hash_stops_before_apply():
+        # NEGATIVE-INPUT: child DRY không trả plan_hash → DỪNG rc=2 TRƯỚC child apply (không side-effect mù).
+        _rc, _out, _calls = _run_bridge114({"note": "no hash"})
+        return (_rc == 2 and len(_calls) == 2
+                and str((_out.get("child_result") or {}).get("error")) == "CHILD_DRY_PLAN_FAILED")
+    _t110("r114_bridge_dry_no_hash_stops_before_apply", _c114_bridge_dry_no_hash_stops_before_apply)
+
+    def _c114_no_nlm_add_never_counts_slots():
+        # A4 NEGATIVE-INPUT: --no-nlm-add + _ingest_target BOOM (mô phỏng base đầy + cookie chết = mọi đường đếm
+        # slot nổ) → ingest-local PHẢI xong Drive+registry KHÔNG gọi _ingest_target/nlm_preflight (trước v1.34.53
+        # chặn oan OVERFLOW_ROOM_UNKNOWN).
+        _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
+                 "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        import tempfile as _tf114
+
+        class _Boom114:
+            def __getattr__(self, n):
+                raise AssertionError("nlm_cli in --no-nlm-add: " + n)
+
+        class _G114:
+            def get(self, action, **kw):
+                if action == "nlm_preflight":
+                    raise AssertionError("nlm_preflight GAS in --no-nlm-add (A4)")
+                if action == "bootstrap":
+                    return {"inboxFolderId": "inb114"}
+                if action == "organize":
+                    return {"ok": True, "fileId": "gd114", "srcId": "sr114"}
+                if action == "reg_get":
+                    return {"ok": True, "rows": [{"drive_id": "gd114", "src_id": "sr114",
+                                                   "name": "Luat_01-2026-QH16_Test",
+                                                   "cat": _TL_MODULE._cat_reg_label("01"), "corpus": "false",
+                                                   "sohieu": "01-2026-QH16", "title_vn": "x"}]}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                return {"ok": True, "fileId": "up114"}
+
+        def _boom_target(*_a, **_k):
+            raise AssertionError("_ingest_target called in --no-nlm-add (A4)")
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
+            _TL_MODULE._load_phapdien = lambda: {}
+            _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+                "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
+                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb114", None)
+            _TL_MODULE._gas = lambda: _G114()
+            _TL_MODULE._ingest_target = _boom_target
+            _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run114"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._imp = lambda name: (_Boom114() if name == "nlm_cli" else _realimp(name))
+            with _tf114.NamedTemporaryFile(suffix=".docx", delete=False) as _f:
+                _fp = _f.name
+            with _zf63.ZipFile(_fp, "w") as _z:
+                _z.writestr("[Content_Types].xml", "<Types/>")
+                _z.writestr("word/document.xml", "<document>test114</document>")
+            _ns = argparse.Namespace(
+                file=_fp, name="Luat_01-2026-QH16_Test", sohieu="01-2026-QH16", cat="01", goc="", hieuluc="",
+                loai="Luật", apply=False, resume=False, auto_plan=False, text_file=None, source_quality="auto",
+                ocr_verified=False, force_cat=False, allow_large=False, large_threshold=None,
+                skip_nlm_preflight=False, skip_live_check=False, nlm_no_wait=False, no_nlm_add=True,
+                config=None, profile=None, json=True, deterministic=False, drive_id=None,
+                confirm=None, expected_plan_hash=None)
+            _bpd = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bpd), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcd = _TL_MODULE.cmd_ingest_local(_ns)
+            _pl = json.loads(_bpd.getvalue())
+            _ns.apply = True
+            _ns.confirm = "yes"
+            _ns.expected_plan_hash = _pl.get("plan_hash")
+            _ba = _io27.StringIO()
+            with _ctx27.redirect_stdout(_ba), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rca = _TL_MODULE.cmd_ingest_local(_ns)
+            _oa = json.loads(_ba.getvalue())
+            os.unlink(_fp)
+            return (_rcd == 0 and _rca == 0 and _oa.get("nlm") == "SKIPPED_BY_FLAG"
+                    and _oa.get("suggested_notebook") == "nb114")
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r114_no_nlm_add_never_counts_slots", _c114_no_nlm_add_never_counts_slots)
+
+    def _c114_sohieu_foreign_filtered_own_links():
+        # Số hiệu trùng giữa 1 dòng foreign + 1 dòng own-chưa-link → foreign bị LOẠI khỏi ứng viên, own link được
+        # (trước: 2 ứng viên = mơ hồ = bỏ; reuse THẬT giữa 2 dòng own vẫn bỏ — r-cũ nlm_reconcile_no_falselink giữ).
+        _ents = [{"id": "ef", "name": "NSNN", "so_hieu": "89/VBHN-VPQH", "drive_id": "D1foreign0123456789ab",
+                  "nlm_notebook_id": _NBC_114, "nlm_source_id": "s-x", "nlm_status": "pushed"},
+                 {"id": "eo", "name": "MTTQ", "so_hieu": "89/VBHN-VPQH", "drive_id": "D2own0123456789abcdef",
+                  "nlm_notebook_id": "", "nlm_source_id": ""}]
+        _src = [{"id": "s1", "title": "zz", "sohieu": "89/VBHN-VPQH"}]
+        pl = _TL_MODULE._nlm_reconcile_plan(_src, _ents, _NBP_114)
+        return (len(pl["link_candidates"]) == 1 and pl["link_candidates"][0]["entry"]["id"] == "eo"
+                and pl["link_candidates"][0]["by"] == "sohieu")
+    _t110("r114_reconcile_sohieu_foreign_filtered_own_links", _c114_sohieu_foreign_filtered_own_links)
+
+    def _c114_json_noop_everywhere():
+        # C3: --json không được làm crash lệnh chưa tự khai (log: `source-delete <id> --json` chết
+        # unrecognized arguments dù output vốn JSON). Sweep generic-flag pass thêm no-op SUPPRESS.
+        _ap = build_parser()
+        _n1 = _ap.parse_args(["source-delete", "DRV114", "--json"])
+        _n2 = _ap.parse_args(["download", "F114", "--json"])
+        _n3 = _ap.parse_args(["reg-query", "--json"])   # lệnh tự khai --json vẫn nguyên
+        return (getattr(_n1, "json", False) is True and getattr(_n2, "json", False) is True
+                and getattr(_n3, "json", False) is True)
+    _t110("r114_json_noop_everywhere", _c114_json_noop_everywhere)
+
+    def _c114_download_positional():
+        # A5: download nhận positional lẫn --file-id (đồng bộ extract/nlm-get); thiếu cả hai → rc=2 rõ nghĩa.
+        _ap = build_parser()
+        _n1 = _ap.parse_args(["download", "FPOS114"])
+        _ok_parse = getattr(_n1, "file_id_pos", None) == "FPOS114" and getattr(_n1, "file_id", None) is None
+        import tempfile as _tfd
+
+        class _FT114:
+            def drive_op(self, op, env=None, **kw):
+                return {"ok": True, "path": kw.get("dest"), "bytes": 7}
+        _gwsmod = sys.modules.get("tl_gws")
+        _sav_imp_tl = _TL_MODULE._imp
+        _sav_imp_gws = getattr(_gwsmod, "_imp", None) if _gwsmod else None
+        try:
+            _fk = lambda n: _FT114() if n == "transport" else _sav_imp_tl(n)   # noqa: E731
+            _TL_MODULE._imp = _fk
+            if _gwsmod is not None and _sav_imp_gws is not None:
+                _gwsmod._imp = _fk
+            with _tfd.TemporaryDirectory() as _d:
+                _nsd = argparse.Namespace(file_id=None, file_id_pos="FPOS114", out=str(Path(_d) / "o.bin"),
+                                          export_mime=None, env=None)
+                _bo = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc1 = _TL_MODULE.cmd_download(_nsd) if hasattr(_TL_MODULE, "cmd_download") else \
+                        sys.modules["tl_gws"].cmd_download(_nsd)
+                _nsn = argparse.Namespace(file_id=None, file_id_pos=None, out=None, export_mime=None, env=None)
+                _be = _io27.StringIO()
+                with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be):
+                    _rc2 = _TL_MODULE.cmd_download(_nsn) if hasattr(_TL_MODULE, "cmd_download") else \
+                        sys.modules["tl_gws"].cmd_download(_nsn)
+            return (_ok_parse and _rc1 == 0 and _nsd.file_id == "FPOS114"
+                    and _rc2 == 2 and "FILE_ID_REQUIRED" in _be.getvalue())
+        finally:
+            _TL_MODULE._imp = _sav_imp_tl
+            if _gwsmod is not None and _sav_imp_gws is not None:
+                _gwsmod._imp = _sav_imp_gws
+    _t110("r114_download_positional_and_required", _c114_download_positional)
+
+    def _c114_reg_query_notebook_filter():
+        # A6: --notebook lọc theo nlm_notebook_id (log: reg-query trả lẫn dòng shard/profile khác, phải lọc tay).
+        _ents = [{"drive_id": "d1", "name": "A114", "nlm_source_id": "s1", "nlm_notebook_id": "NB_X114",
+                  "nlm_status": "pushed", "corpus": "true"},
+                 {"drive_id": "d2", "name": "B114", "nlm_source_id": "s2", "nlm_notebook_id": "NB_Y114",
+                  "nlm_status": "pushed", "corpus": "true"}]
+        _sav_me = _TL_MODULE._manifest_entries
+        _sav_ap = _TL_MODULE.apply_profile_offline
+        try:
+            _TL_MODULE._manifest_entries = lambda refresh=False: _ents
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _ns = argparse.Namespace(config=None, profile=None, refresh=False, name=None, sohieu=None, cat=None,
+                                     loai=None, nlm=False, no_nlm=False, corpus=False, no_corpus=False,
+                                     corpus_effective=False, row_kind=None, mime=None, drive_id=None,
+                                     notebook="NB_Y114", limit=None, out=None, json=True, deterministic=False)
+            _bo = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_reg_query(_ns)
+            _o = json.loads(_bo.getvalue())
+            return (_rc == 0 and _o.get("count") == 1 and _o["rows"][0]["drive_id"] == "d2"
+                    and _o["rows"][0]["nlm_notebook_id"] == "NB_Y114")
+        finally:
+            _TL_MODULE._manifest_entries = _sav_me
+            _TL_MODULE.apply_profile_offline = _sav_ap
+    _t110("r114_reg_query_notebook_filter", _c114_reg_query_notebook_filter)
+
+    def _c114_timing_summary():
+        # E1 (grill Q5 = đo trước, cache sau): tổng kết baseline cuối run — tổng call/ms + top action.
+        _sav_log = list(_TL_MODULE._TIMING_LOG)
+        try:
+            _TL_MODULE._TIMING_LOG[:] = [{"action": "reg_get", "wall_ms": 100}, {"action": "reg_get", "wall_ms": 300},
+                                         {"action": "upload", "wall_ms": 50}]
+            _ls = _TL_MODULE._timing_summary_lines()
+            _TL_MODULE._TIMING_LOG[:] = []
+            _empty = _TL_MODULE._timing_summary_lines()
+            return (len(_ls) == 3 and "3 GAS call" in _ls[0] and "450ms" in _ls[0]
+                    and "reg_get" in _ls[1] and "n=  2" in _ls[1] and _empty == [])
+        finally:
+            _TL_MODULE._TIMING_LOG[:] = _sav_log
+    _t110("r114_timing_summary_lines", _c114_timing_summary)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

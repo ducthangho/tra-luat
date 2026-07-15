@@ -345,7 +345,9 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
        already_removed = có nlm_source_id ∉ live nhưng status `removed*` (đã gỡ CÓ CHỦ ĐÍCH) — KHÔNG phải lỗi, chỉ báo;
        link_candidates = (C1) nguồn live KHÔNG khớp source_id nào NHƯNG bắc cầu được qua Drive fileId / số hiệu sang
                          1 dòng registry (registry khóa drive_id ≠ NLM khóa source_id) → backfill nlm_source_id;
-       unregistered    = live id không link được dòng nào (NLM có, registry thực sự thiếu).
+       unregistered    = live id không link được dòng nào (NLM có, registry thực sự thiếu);
+       foreign_skipped = (v1.34.53 A2) live id match được dòng registry NHƯNG dòng đã trỏ notebook KHÁC →
+                         KHÔNG BAO GIỜ ghi (ownership guard — chống clobber con trỏ chéo shard), chỉ báo cáo.
        v1.19.9: tách already_removed khỏi desync_real. C1: chấp nhận live_sources = list[dict] (mới) hoặc set ids (cũ)."""
     if isinstance(live_sources, (set, frozenset)):
         sources = [{"id": x} for x in live_sources]
@@ -353,13 +355,15 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
         sources = list(live_sources or [])
     live_ids = {str(s.get("id")) for s in sources if s.get("id")}
     reg_ids = set()
-    by_drive: dict[str, dict] = {}
+    by_drive: dict[str, list] = {}   # v1.34.53 (A2): LIST — dòng dual-registered (cùng drive_id, 2 notebook) phải lọc theo chủ quyền, không lấy dòng-đầu mù
     by_sohieu: dict[str, dict] = {}
     n_rows, backfill, desync_real, already_removed, other_notebook = 0, [], [], [], []
     for e in entries:
         did = _entry_drive_id(e)
         if did:
-            by_drive.setdefault(did, e)
+            by_drive.setdefault(did, [])
+            if e not in by_drive[did]:
+                by_drive[did].append(e)
         shk = _sohieu_key_entry(e)
         if shk:
             by_sohieu.setdefault(shk, []).append(e)   # LIST: số hiệu VBHN có thể tái dùng → KHÔNG link nếu >1
@@ -389,30 +393,54 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
                 by_title.setdefault(_tk, [])
                 if e not in by_title[_tk]:
                     by_title[_tk].append(e)
-    link_candidates, still_unreg = [], []
+    # v1.34.53 (A2 — log phiên 80742228: reconcile profile-notebook match TRIPS/WCT theo title rồi PATCH
+    # nlm_notebook_id của dòng corpus VBQPPL-2 sang notebook đang reconcile → dòng corpus trỏ SAI shard, phải
+    # reconcile lại đúng shard mới nắn về): OWNERSHIP GUARD — dòng registry đã trỏ notebook KHÁC không bao giờ
+    # thành link candidate (mọi tier, kể cả drive_id: ca dual-registered là CÓ CHỦ ĐÍCH — v1.34.51); tier YẾU
+    # (sohieu/title) chỉ được link dòng CHƯA có nlm_source_id (không re-point con trỏ sẵn có bằng định danh yếu).
+    def _ent_foreign(_e: dict) -> bool:
+        _nb = str(_e.get("nlm_notebook_id") or "").strip()
+        return bool(_nb) and _nb != str(notebook_id)
+    link_candidates, still_unreg, foreign_skipped = [], [], []
     for s in sources:
         sid = str(s.get("id") or "")
         if not sid or sid in reg_ids:
             continue
+        _foreign_hit = None   # ent foreign đầu tiên bị guard chặn (để báo cáo, KHÔNG ghi)
         did = _nlm_source_drive_id(s)
-        ent = by_drive.get(did) if did else None
+        _dcands = (by_drive.get(did) or []) if did else []
+        _down = [e for e in _dcands if not _ent_foreign(e)]
+        if _dcands and not _down:
+            _foreign_hit = (_dcands[0], "drive_id")
+        ent = _down[0] if len(_down) == 1 else None   # >1 dòng own cùng drive_id = mơ hồ → bỏ qua
         by = "drive_id"
         if ent is None:
             shk = _sohieu_key_entry({"name": s.get("title") or "", "so_hieu": s.get("sohieu") or s.get("so_hieu") or ""})
             _cands = by_sohieu.get(shk) or [] if shk else []
-            ent = _cands[0] if len(_cands) == 1 else None   # CHỈ link theo số hiệu khi DUY NHẤT (tránh false-link reuse)
+            _own = [e for e in _cands if not _ent_foreign(e) and not (_entry_nlm(e) or "").strip()]
+            if _cands and not _own and _foreign_hit is None and any(_ent_foreign(e) for e in _cands):
+                _foreign_hit = (next(e for e in _cands if _ent_foreign(e)), "sohieu")
+            ent = _own[0] if len(_own) == 1 else None   # CHỈ link theo số hiệu khi DUY NHẤT (tránh false-link reuse)
             by = "sohieu"
         if ent is None:
             _tk = _ingest_dedup_title_key(str(s.get("title") or ""))
             _tcands = by_title.get(_tk) or [] if _tk else []
-            ent = _tcands[0] if len(_tcands) == 1 else None  # tier 3: title CHUẨN HOÁ duy nhất mới link
+            _town = [e for e in _tcands if not _ent_foreign(e) and not (_entry_nlm(e) or "").strip()]
+            if _tcands and not _town and _foreign_hit is None and any(_ent_foreign(e) for e in _tcands):
+                _foreign_hit = (next(e for e in _tcands if _ent_foreign(e)), "title")
+            ent = _town[0] if len(_town) == 1 else None  # tier 3: title CHUẨN HOÁ duy nhất mới link
             by = "title"
         if ent is not None and (_entry_nlm(ent) or "").strip() != sid:
             link_candidates.append({"entry": ent, "source_id": sid, "by": by, "title": s.get("title") or ""})
         else:
+            if _foreign_hit is not None:
+                foreign_skipped.append({"source_id": sid, "by": _foreign_hit[1], "title": s.get("title") or "",
+                                        "registry_notebook": str(_foreign_hit[0].get("nlm_notebook_id") or ""),
+                                        "drive_id": _entry_drive_id(_foreign_hit[0])})
             still_unreg.append(sid)
     return {"backfill": backfill, "desync_real": desync_real, "already_removed": already_removed,
             "other_notebook": other_notebook,
+            "foreign_skipped": foreign_skipped,   # v1.34.53 (A2): match được NHƯNG dòng thuộc notebook khác → KHÔNG ghi, chỉ báo
             "stale": desync_real,  # giữ khóa cũ = desync_real (tương thích ngược)
             "link_candidates": link_candidates,
             "unregistered": sorted(still_unreg),
@@ -581,11 +609,13 @@ def cmd_nlm_reconcile(a) -> int:
            "already_removed_by_status": rm_by_status,
            "other_notebook": len(plan.get("other_notebook") or []),  # thuộc shard/notebook khác (overflow) — không tính desync
            "link_candidates": len(plan.get("link_candidates") or []),  # C1: nguồn live bắc cầu được sang registry (chỉ thiếu source_id)
+           "foreign_skipped": len(plan.get("foreign_skipped") or []),  # v1.34.53 (A2): match dòng notebook KHÁC → guard chặn ghi, chỉ báo
            "unregistered_on_nlm": len(plan["unregistered"]),
            "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
            "backfill_sample": [f"{_entry_nlm(e)}|{_entry_sohieu(e) or _sohieu_key_entry(e)}|{_entry_name(e)[:40]}" for e in plan["backfill"][:10]],
            "link_candidates_sample": [f"{c['source_id'][:12]}…→{_entry_drive_id(c['entry'])[:12]}… (by {c['by']}) | {(_entry_sohieu(c['entry']) or _entry_name(c['entry'])[:32])}" for c in (plan.get("link_candidates") or [])[:10]],
            "desync_real_sample": [f"{_entry_sohieu(e)}|{_entry_name(e)[:40]}" for e in plan["desync_real"][:10]],
+           "foreign_skipped_sample": [f"{c['source_id'][:12]}…↛{(c.get('registry_notebook') or '?')[:12]}… (by {c['by']}) | {str(c.get('title') or '')[:32]}" for c in (plan.get("foreign_skipped") or [])[:10]],
            "unregistered_sample": plan["unregistered"][:8]}
     if not getattr(a, "apply", False):
         out["note"] = ("DRY. --apply: reg_bulk nlm_notebook_id cho backfill + LINK nlm_source_id cho link_candidates "

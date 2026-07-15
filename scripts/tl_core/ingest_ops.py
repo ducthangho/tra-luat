@@ -1962,6 +1962,36 @@ def cmd_profile_ingest(a) -> int:
         print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
         return 2
     g = _gas()
+    # v1.34.53 (C2 — log phiên OCR 2026-07-15: lệnh loạt timeout giữa chừng, chạy lại → 6 dòng registry trùng TÊN
+    # y hệt, phải hygiene scan + xóa tay): DUP-GUARD THEO TÊN trong REGISTRY (live, refresh) TRƯỚC upload/tạo GDoc —
+    # SỚM HƠN gate TITLE_ALREADY_ON_NOTEBOOK (gate đó chỉ chặn trước NLM add, khi GDoc+registry ĐÃ tạo = dup rồi).
+    # Fail-closed: không đọc được registry → DỪNG (đằng nào bước sau cũng cần GAS). Cùng file Drive (--drive-id)
+    # chạy lại = organize upsert cùng dòng, KHÔNG phải dup → bỏ qua dòng trùng drive_id nguồn.
+    if not getattr(a, "allow_dup_name", False):
+        try:
+            _rg_dup = g.get("reg_get", name_contains=doc_name, refresh="true")
+        except Exception as _dge:  # noqa: BLE001
+            _rg_dup = {"ok": False, "error": str(_dge)}
+        if not _rg_dup.get("ok"):
+            print(json.dumps({"ok": False, "step": "registry_dup_name_gate", "aborted": True,
+                              "error": "REGISTRY_DUP_CHECK_FAILED", "detail": _rg_dup.get("error"),
+                              "note": "Không đọc được registry để kiểm tên trùng — DỪNG an toàn TRƯỚC upload."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        _dup_rows = [r for r in (_rg_dup.get("rows") or [])
+                     if str(r.get("name") or "").strip() == doc_name
+                     and str(r.get("drive_id") or r.get("gdoc_id") or "") != str(_from_drive or "")]
+        if _dup_rows:
+            print(json.dumps({"ok": False, "step": "registry_dup_name_gate", "aborted": True,
+                              "error": "NAME_ALREADY_IN_REGISTRY", "name": doc_name,
+                              "existing": [{"drive_id": str(r.get("drive_id") or r.get("gdoc_id") or ""),
+                                            "src_id": str(r.get("src_id") or ""),
+                                            "nlm_source_id": str(r.get("nlm_source_id") or "")} for r in _dup_rows[:5]],
+                              "note": "DỪNG TRƯỚC upload/GDoc (chưa side-effect). Chạy lại sau timeout thường rơi "
+                                      "vào đây — dòng cũ ĐÃ có: dùng dòng cũ / `tl source-delete` dòng hỏng rồi chạy "
+                                      "lại; trùng tên hợp lệ (hiếm): --allow-dup-name."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     up_mime, up_ext = _upload_mime_ext(f)
     if _from_drive:
         # v1.34.37: dùng chính file Drive có sẵn làm nguồn convert (KHÔNG re-upload).
@@ -2462,7 +2492,14 @@ def cmd_ingest_local(a) -> int:
         _step_ok("mkdir_cat", cat, mk.get("ok"))
         if not mk.get("ok"):
             print(json.dumps({"ok": False, "step": "mkdir_cat", "journal": run_id, "detail": mk}, ensure_ascii=False), file=sys.stderr); return 2
-    target, pf = _ingest_target(g, sohieu, name)
+    # v1.34.53 (A4 — log phiên 2026-07-15: cookie chết + base đầy → `--no-nlm-add` vẫn bị chặn
+    # OVERFLOW_ROOM_UNKNOWN, phải thêm --skip-nlm-preflight --skip-live-check oan): --no-nlm-add KHÔNG đụng
+    # NLM trong run này → BỎ _ingest_target (nlm_preflight GAS + đếm slot live); target chỉ còn dùng in URL
+    # next-steps, notebook thật do add-tay UI + nlm-reconcile sau quyết (quy trình ADD-TAY v1.34.35).
+    if getattr(a, "no_nlm_add", False):
+        target, pf = _nb_check, {"note": "no_nlm_add: bỏ nlm_preflight/đếm slot — notebook thật do reconcile sau quyết"}
+    else:
+        target, pf = _ingest_target(g, sohieu, name)
     # v1.34.47 (M1 fix): MỌI shard đầy → DỪNG TRƯỚC upload/register (chưa side-effect nào), KHÔNG add mù vào
     # shard đầy. Khớp gate 'blocked' của batch ingest-missing (KHÔNG auto-create notebook — ADR).
     if pf.get("blocked"):

@@ -1,3 +1,49 @@
+# ★ v1.34.53 — ĐỢT 1 kế hoạch nâng cấp (grill Q1–Q10): ownership-guard reconcile + 6 fix chặn-oan/false-success (2026-07-15)
+
+> Grill-with-docs 10 quyết định (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`) từ 2 log phiên thật
+> (7 vấn đề phiên NLM + 8 vấn đề phiên OCR/profile). Đợt 1 = Python thuần, KHÔNG đụng GAS/data. TDD r114 ×12
+> (negative-input theo luật đứng r102). 958/958 selftest; golden/workflow-audit/determinism-audit strict xanh.
+
+- **[A2 — BLOCKER, sửa SAI DỮ LIỆU ÂM THẦM] `nlm-reconcile` ownership guard** (`_nlm_reconcile_plan`): dòng
+  registry đã trỏ `nlm_notebook_id` notebook KHÁC không bao giờ thành link candidate nữa (mọi tier, kể cả
+  drive_id — ca dual-registered là có chủ đích); tier YẾU (sohieu/title) chỉ link dòng CHƯA có `nlm_source_id`.
+  `by_drive` thành LIST lọc theo chủ quyền (dual-registered chọn đúng dòng own). Khóa mới `foreign_skipped`
+  (count + sample) trong output — match-nhưng-của-notebook-khác được BÁO, không GHI. Log gốc: reconcile
+  profile-notebook 80742228 match TRIPS/WCT theo title rồi patch con trỏ dòng corpus VBQPPL-2 sang notebook
+  profile → dòng corpus trỏ sai shard. Bonus đúng-hơn: sohieu/title trùng giữa 1 dòng foreign + 1 dòng own
+  chưa-link → foreign bị loại khỏi ứng viên, own link được (trước: mơ hồ → bỏ).
+- **[A4 — chặn oan] `ingest-local --no-nlm-add`** bỏ hẳn `_ingest_target` (nlm_preflight GAS + đếm slot live):
+  cookie chết + base đầy hết bị `OVERFLOW_ROOM_UNKNOWN` chặn dù không đụng NLM; target chỉ để in URL
+  next-steps, notebook thật do add-tay + reconcile quyết (v1.34.35).
+- **[C1 — luồng OCR chết 100%] bridge `ingest-ocr`/`profile-ingest-ocr`** forward xác nhận xuống child: apply
+  chạy child 2 BƯỚC (`planned_child_dry` lấy `plan_hash` → apply kèm `--apply --confirm yes
+  --expected-plan-hash <hash>`, helper `_bridge_run_child_apply`). Trước: thiếu `--confirm yes` →
+  child `CONFIRM_REQUIRED` mọi lần apply, phải bypass bridge. DRY child không trả hash → DỪNG rc=2
+  `CHILD_DRY_PLAN_FAILED` TRƯỚC side-effect.
+- **[C2 — dup 6 dòng khi timeout giữa lô] `profile-ingest`/`profile-file-add` dup-guard TÊN trong registry**
+  (live `reg_get name_contains`, exact-match, fail-closed) TRƯỚC upload/tạo GDoc — sớm hơn
+  `TITLE_ALREADY_ON_NOTEBOOK` (gate đó chạy khi GDoc+registry đã tạo). `NAME_ALREADY_IN_REGISTRY` liệt kê dòng
+  cũ; cùng drive_id nguồn (`--drive-id` chạy lại) không tính dup; thoát chủ đích: `--allow-dup-name`.
+- **[C3] `--json` NO-OP toàn cục** (generic-flag pass, SUPPRESS): cờ thừa không làm crash lệnh vốn in JSON
+  (log: `source-delete <id> --json` chết unrecognized arguments).
+- **[A5] `download`** nhận positional lẫn `--file-id` (đồng bộ extract/nlm-get); thiếu cả hai →
+  `FILE_ID_REQUIRED` rc=2.
+- **[A6] `reg-query --notebook <id>`** lọc theo `nlm_notebook_id` — hết lọc tay bằng Python khi dòng nhiều
+  shard/profile lẫn nhau (projection JSON đã phơi `nlm_notebook_id` từ trước).
+- **[E1 — đo trước, cache sau (Q5)] tổng kết hiệu năng cuối run**: `--timings`/`TL_TIMINGS=1`/**`TL_PERF=1`
+  (alias mới)** in thêm TỔNG số GAS call + tổng ms + top-5 action chậm nhất (`_timing_summary_lines`, PURE) —
+  baseline cho quyết định header-cache/registry-first đợt 3.
+- Test: r114 ×12 — 6 reconcile guard (foreign title/drive_id không clobber, weak-tier không re-point dòng đã
+  link, dual-registered chọn own, positive-control title/sohieu) + no-nlm-add BOOM-harness (slot count = nổ
+  nếu bị gọi) + 2 bridge (confirm+hash forwarded; DRY-no-hash dừng trước apply) + 2 dup-guard (chặn trước
+  upload; fail-closed + bypass) + json-noop/download-positional/reg-query-notebook/timing-summary. Parser
+  surface snapshot regen (đổi CLI có chủ đích). ★Bài học harness: `ocr.bind` = COPY-một-lần (KHÔNG rebase
+  `__globals__` như ingest_ops) → stub phải patch MODULE `_tl_ocr`, patch `_TL_MODULE` không ăn.
+- Backlog đợt 2/3 (kế hoạch đã chốt): B1 `nlm-links` + ngưỡng batch-link, B2 `ingest-inbox`, A1+C8 preflight
+  2 tầng + `nlm-auth-status --wait`, A3 plan-artifact reconcile, A7a gate dup-Điều, C6 hợp nhất text-probe;
+  D3 GAS 2.21.2m (manifest_export đọc cột row_kind) → D2 điều tra 55 dòng 80742228 → D1 claim ingest-local;
+  C4 resume profile-ingest, C5 corpus canonical/chunks, C7 discover 0-kết-quả, E2/E3 theo số đo E1.
+
 # ★ v1.34.52 + GAS 2.21.2l (CHƯA DEPLOY) — F-04 ingest_claim + F-08 reg_get_bulk (2026-07-15)
 
 > Grill-with-docs 12 quyết định D1–D12 (`D:\Quốc hội\ke-hoach-gas-2.21.2l-ingest-claim-2026-07-15.md`), ý tưởng

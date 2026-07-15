@@ -60,7 +60,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=tlg.cmd_gws_ping)
     p = sub.add_parser("download", help="Tải file Drive → đĩa (gws raw-fast cho binary, tự fallback GAS cho text/JSON raw)")
-    p.add_argument("--file-id", dest="file_id", required=True)
+    # v1.34.53 (A5 — log phiên 2026-07-15: `tl download <id>` gãy vì --file-id required, LỆCH extract/nlm-get
+    # vốn nhận positional — mất 1 vòng thử-lỗi): nhận CẢ positional lẫn --file-id (--file-id thắng nếu đưa cả 2).
+    p.add_argument("file_id_pos", nargs="?", help="Drive fileId (positional — tương đương --file-id)")
+    p.add_argument("--file-id", dest="file_id")
     p.add_argument("--out", help="đường dẫn lưu (mặc định <fileId>.bin)")
     p.add_argument("--export-mime", dest="export_mime", help="MIME export cho Google-native (vd application/pdf)")
     p.add_argument("--env", choices=["code", "cowork", "chat"], help="ép runtime env")
@@ -324,6 +327,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-corpus", dest="no_corpus", action="store_true")
     p.add_argument("--corpus-effective", dest="corpus_effective", action="store_true",
                    help="(v1.34.42) lọc corpus theo ĐÚNG LUẬT SERVER (corpus∈{true,vbqppl}∪overflow − ref − thuong; = số `tl boot` đếm) — KHÁC `--corpus true` literal vốn bỏ sót vbqppl/overflow/blank-trên-NLM")
+    p.add_argument("--notebook", help="(v1.34.53 A6) lọc dòng theo nlm_notebook_id — hết phải lọc tay bằng Python khi dòng nhiều shard/profile lẫn nhau")
     p.add_argument("--row-kind", dest="row_kind"); p.add_argument("--mime"); p.add_argument("--limit", type=int)
     p.add_argument("--drive-id", dest="drive_id",
                    help="(v1.34.2) lọc ĐÚNG 1 file theo drive_id/gdoc_id — readback chuẩn của các idempotency contract (Pha H bắt drift: contract dặn `reg-query --drive-id` mà parser thiếu cờ)")
@@ -369,6 +373,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
+    p.add_argument("--allow-dup-name", dest="allow_dup_name", action="store_true",
+                   help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_ingest)
 
@@ -390,6 +396,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="SHA-256 plan_hash từ dry-run; apply từ chối nếu nguồn/tùy chọn đã đổi")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
+    p.add_argument("--allow-dup-name", dest="allow_dup_name", action="store_true",
+                   help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_file_add)
 
@@ -465,4 +473,10 @@ def build_parser() -> argparse.ArgumentParser:
         if "--deterministic" not in _opts:
             _sp.add_argument("--deterministic", action="store_true", default=argparse.SUPPRESS,
                              help="chuẩn hoá JSON output (nhận cả sau subcommand)")
+        if "--json" not in _opts:
+            # v1.34.53 (C3 — log phiên OCR 2026-07-15: `tl source-delete <id> --json` chết `unrecognized
+            # arguments` dù output vốn là JSON): --json NO-OP ở MỌI subcommand chưa tự khai — cờ thừa không
+            # được làm crash lệnh. SUPPRESS: không truyền = không set attr (hành vi cũ nguyên vẹn).
+            _sp.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
+                             help="(no-op nếu lệnh vốn in JSON) nhận cờ để không gãy vì cờ thừa")
     return ap

@@ -460,10 +460,26 @@ def _bridge_ocr_plan(a, *, mode: str) -> dict:
         prof = getattr(a, "profile", None)
         if prof:
             child += ["--profile", prof]
+    # v1.34.53 (C1 — log phiên OCR 2026-07-15: bridge gọi với --apply --confirm yes nhưng planned_child_command
+    # THIẾU --confirm yes → child authorize_apply chết CONFIRM_REQUIRED 100%, phải bypass bridge gọi thẳng):
+    # forward --confirm yes; child còn đòi --expected-plan-hash CHÍNH plan con (bridge không biết trước) →
+    # apply chạy child 2 BƯỚC: planned_child_dry lấy plan_hash → planned_child_command + hash (chèn runtime).
+    out["planned_child_dry"] = list(child)
     if getattr(a, "apply", False):
-        child.append("--apply")
+        child = child + ["--apply", "--confirm", "yes"]
     out["planned_child_command"] = child
     return out
+
+
+def _bridge_run_child_apply(plan: dict) -> tuple[dict, dict | None]:
+    """v1.34.53 (C1): chạy child DRY lấy plan_hash rồi APPLY kèm --expected-plan-hash. Trả (child_result, dry_result
+    khi fail-ở-DRY). plan_hash con tất định theo nội dung → DRY/apply cùng input ra cùng hash."""
+    dry = _run_child_tl(plan["planned_child_dry"])
+    ph = str(((dry.get("json") or {}) or {}).get("plan_hash") or "")
+    if not dry.get("ok") or not ph:
+        return {"ok": False, "error": "CHILD_DRY_PLAN_FAILED",
+                "note": "child DRY không trả plan_hash — không có hash để authorize apply (fail TRƯỚC side-effect)."}, dry
+    return _run_child_tl(list(plan["planned_child_command"]) + ["--expected-plan-hash", ph]), None
 
 
 def cmd_ingest_ocr(a) -> int:
@@ -475,8 +491,9 @@ def cmd_ingest_ocr(a) -> int:
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
     if not plan.get("ok"):
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    child = _run_child_tl(plan["planned_child_command"])
-    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
+    child, _dry_fail = _bridge_run_child_apply(plan)   # v1.34.53 (C1): DRY→hash→apply, confirm forwarded
+    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1",
+           **({"child_dry_result": _dry_fail} if _dry_fail else {})}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 
@@ -490,8 +507,9 @@ def cmd_profile_ingest_ocr(a) -> int:
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0 if plan.get("ok") else 2
     if not plan.get("ok"):
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    child = _run_child_tl(plan["planned_child_command"])
-    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1"}
+    child, _dry_fail = _bridge_run_child_apply(plan)   # v1.34.53 (C1): DRY→hash→apply, confirm forwarded
+    out = {**plan, "child_result": child, "ok": bool(child.get("ok")), "schema": "ocr_ingest_bridge_apply.v1",
+           **({"child_dry_result": _dry_fail} if _dry_fail else {})}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if out.get("ok") else 2
 

@@ -398,6 +398,21 @@ _IDEMPOTENCY_CONTRACTS.update({
     },
 })
 
+# v1.34.56 (A-#12 — kế hoạch 13-vấn-đề 2026-07-16): contract cho lệnh mới nlm-source-remove (gỡ nguồn
+# KHỎI notebook NLM, KHÔNG trash Drive/đụng dòng registry — wrapper ngữ nghĩa của `nlm source delete`).
+_IDEMPOTENCY_CONTRACTS.update({
+    "nlm_source_remove": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "source_id (sid toàn cục — gỡ khỏi notebook, không cần notebook-id)",
+        "journal_key": "tl_journal/nlm-source-remove_<run_id> (intent nlm_source_delete irreversible per-sid)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — sid đã gỡ trả deleted_count=0/not-found → noop OK (idempotent theo trạng thái đích, không FAIL)",
+        "duplicate_guard": "DRY mặc định + --confirm yes; GUARD POINTER_STILL_ATTACHED (manifest + reg_get authoritative fail-closed) chặn sid còn con trỏ registry — --force thoát",
+        "readback_command": "nlm-list <nb> --json (sid không còn) + reg-query --json (không dòng nào trỏ sid)",
+        "resume_command": "nlm-source-remove <sid...> --apply --confirm yes",
+        "rollback_hint": "KHÔNG tự động: nguồn chỉ bị gỡ khỏi notebook (file Drive còn nguyên) — nlm-add --drive-id lại rồi nlm-reconcile link",
+    },
+})
+
 
 
 def _workflow_dir() -> Path:

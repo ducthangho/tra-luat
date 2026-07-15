@@ -1,3 +1,39 @@
+# ★ v1.34.56 — ĐỢT A kế hoạch 13-vấn-đề: nlm-add an toàn (verify-then-link + claim F-04) + nlm-source-remove (2026-07-16)
+
+> Đợt A/3 kế hoạch grill 11 quyết định (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): A-#1 + A-#2
+> + A-#12. TDD r117 ×12 (negative-input trước — luật đứng r102); 991/991 selftest. Python-only, GAS giữ 2.21.2m.
+> Doctrine kernel mới (bất biến 16): *Registry chỉ ghi sự thật ĐÃ XÁC MINH vật lý; nghi ngờ → để stale, KHÔNG
+> ghi trước-xác-minh-sau.*
+
+- **[A-#1] `nlm-add` VERIFY-THEN-LINK (Q2=a — chống con trỏ treo)**: nhánh reg_link sau add nay (a) `--no-wait`
+  → BỎ HẲN reg_link + note lưới `nlm-reconcile --apply` cuối lô (sid chưa settle — probe sẽ âm tính giả;
+  stale-an-toàn); (b) có wait → PROBE live 1 nhịp TRƯỚC khi ghi registry (`source_get` nếu nlm_cli có, fallback
+  re-list FRESH — list của dedup-gate chụp TRƯỚC add nên không tái dùng); probe fail → `SID_NOT_LIVE_YET`,
+  KHÔNG ghi registry, rc vẫn 0 (add đã thành công; link là bước phụ stale-an-toàn). Gốc: ca canary dbe706a0
+  NOT_FOUND phải revert tay (memory NLM-MIGRATION 2026-07-16).
+- **[A-#2] Claim F-04 cho `nlm-add` (Q3=b)**: acquire `ingest_claim` NGAY SAU dedup-live gate, TRƯỚC
+  `source_add` — CHỈ khi có `--drive-id` (url/file/text không có drive identity); `--skip-live-check` KHÔNG bỏ
+  claim; MANDATORY client-side khớp D1 (endpoint lỗi → `INGEST_CLAIM_FAILED` rc=2 TRƯỚC add; denied →
+  `CLAIMED_ELSEWHERE` rc=2 + note "lần add trước/host khác có thể ĐÃ xong server-side — verify nlm-list/
+  nlm-reconcile TRƯỚC khi retry; TTL 5'; sau timeout chờ ≥60s settle"). Journal mới `nlm-add_<run_id>` cấp
+  run_id TRƯỚC add; COMMIT claim GỘP `reg_get_bulk` sau reg_link verified (best-effort TTL heal — no-wait/
+  sid-not-live thì KHÔNG commit). Gốc: add timeout nhưng server-side xong → retry tạo 3 bản Phu_luc_I trùng.
+- **[A-#12] Lệnh MỚI `nlm-source-remove <sid...> [--apply --confirm yes] [--force]`** (Q4=a): gỡ nguồn KHỎI
+  notebook NLM (wrapper ngữ nghĩa `nlm source delete` — nlm_cli.source_delete có sẵn được tái dùng, KHÔNG
+  trash Drive, KHÔNG đụng dòng registry; khác `source-delete` xóa cứng 3 tầng). DRY liệt kê con trỏ; GUARD
+  `POINTER_STILL_ATTACHED` (manifest refresh + `reg_get` authoritative fail-closed — bài học manifest-không-
+  đáng-tin v1.34.50) chặn sid còn con trỏ, thoát `--force`; sid đã gỡ → `deleted_count=0`/not-found = noop OK
+  (idempotent, re-run không FAIL — helper PURE `_source_remove_delete_verdict`); batch N sid / 1 process;
+  rc=2 khi toàn bộ chặn/có fail. COMMAND_META high/nlm/confirm/dry-run + contract `nlm_source_remove` +
+  GENERATED_SPECS + stub I11; parser-surface snapshot regen có chủ đích.
+- Kernel SKILL.md: +bất biến 16 (doctrine physical-first 1 dòng); §8 sửa note stale "2.21.2l LIVE tới khi
+  deploy" → 2.21.2m ĐÃ LIVE. `references/COMMANDS.md`: nlm-add cập nhật hành vi mới + dòng mới
+  nlm-source-remove.
+- TDD r117 ×12: no_wait_skips_reg_link / verify_fail_no_link / verify_ok_links (positive control F-06) /
+  claim_denied_stops_before_add / claim_endpoint_fail_stops / claim_granted_commit / url_path_no_claim /
+  source_remove {pointer_guard_blocks, batch_and_noop, dry_lists_pointers, confirm_required,
+  parser_meta_contract}.
+
 # ★ v1.34.55 + GAS 2.21.2m (CHƯA DEPLOY — chờ xác nhận) — ĐỢT 3: row_kind export RAW + claim ingest-local + profile-ingest --resume (2026-07-15)
 
 > Đợt 3 kế hoạch grill Q1–Q10 (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`): D3→D2→D1 + C4+C5+C7.

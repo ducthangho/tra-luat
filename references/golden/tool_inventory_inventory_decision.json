@@ -90,6 +90,7 @@
     "nlm-query",
     "nlm-query-plan",
     "nlm-reconcile",
+    "nlm-source-remove",
     "ocr-analyze",
     "ocr-run",
     "ocr-verify",
@@ -935,6 +936,16 @@
         "workflow_task": null,
         "write_scope": "registry_nlm"
       },
+      "nlm-source-remove": {
+        "generated": true,
+        "idempotency_contract": "nlm_source_remove",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "nlm"
+      },
       "ocr-analyze": {
         "generated": true,
         "idempotency_contract": null,
@@ -1647,10 +1658,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 136,
-      "high_risk": 24,
-      "total": 142,
-      "write_commands": 72
+      "generated_parsers": 137,
+      "high_risk": 25,
+      "total": 143,
+      "write_commands": 73
     },
     "schema": "command_registry.v1"
   },

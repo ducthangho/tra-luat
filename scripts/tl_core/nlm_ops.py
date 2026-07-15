@@ -1719,6 +1719,47 @@ def cmd_nlm_add(a) -> int:
                                       "Sửa `nlm login` rồi chạy lại; HOẶC --skip-live-check nếu CHẮC không trùng."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
+    # v1.34.56 (A-#2 — kế hoạch 13-vấn-đề 2026-07-16, Q3=b): CLAIM F-04 TRƯỚC source_add — nlm-add là đường
+    # push trần CUỐI chưa có claim (timeout client nhưng add server-side vẫn xong → retry tạo 3 bản Phu_luc_I
+    # trùng). CHỈ claim khi có --drive-id (url/file/text không có drive identity → giữ nguyên, chỉ dedup-gate);
+    # --skip-live-check KHÔNG bỏ claim. MANDATORY client-side (khớp D1 ingest-local): endpoint lỗi → rc=2 TRƯỚC add.
+    _claim56, _run56 = None, None
+    if getattr(a, "drive_id", None):
+        from tl_core.ingest_contract import identity_hash_for_drive_source
+        try:
+            _row_nm56 = next((str(e.get("name") or "") for e in _manifest_entries(refresh=False)
+                              if str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)), "")
+        except Exception:  # noqa: BLE001
+            _row_nm56 = ""
+        _claim56 = identity_hash_for_drive_source(str(a.drive_id), target_scope=nb,
+                                                  canonical_name=(getattr(a, "title", None) or _row_nm56 or ""),
+                                                  profile=_active_profile())
+        _run56 = _apply_journal_start("nlm-add", {"drive_id": a.drive_id, "notebook_id": nb,
+                                                  "identity_hash": _claim56})
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            _cl56 = _gas().get("ingest_claim", keys=json.dumps([_claim56]), run_id=_run56,
+                               drive_ids=json.dumps([str(a.drive_id)]))
+        except Exception as _ce56:  # noqa: BLE001
+            _cl56 = {"ok": False, "error": str(_ce56)}
+        if not _cl56.get("ok"):
+            _journal_append(_run56, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
+            print(json.dumps({"ok": False, "error": "INGEST_CLAIM_FAILED", "detail": _cl56.get("error"),
+                              "journal": _run56,
+                              "note": "Không xin được claim xuyên host (F-04, webapp ≥2.21.2l) — DỪNG an toàn "
+                                      "TRƯỚC add (chưa side-effect)."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        _gr56 = next((r0 for r0 in (_cl56.get("results") or []) if r0.get("identity_hash") == _claim56), None)
+        if not (_gr56 or {}).get("granted"):
+            _journal_append(_run56, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
+            print(json.dumps({"ok": False, "error": "CLAIMED_ELSEWHERE", "journal": _run56,
+                              "reason": (_gr56 or {}).get("reason"),
+                              "note": "Lần add trước/host khác có thể ĐÃ thành công server-side — `tl nlm-list "
+                                      "<nb>` hoặc `tl nlm-reconcile` xác minh TRƯỚC khi retry; claim TTL 5'. "
+                                      "Sau timeout NLM: chờ ≥60s cho settle rồi mới kiểm."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     _dt, _dt_src = _nlm_add_doc_type(getattr(a, "type", None), getattr(a, "drive_id", None))
     if _dt_src.startswith("auto"):
         print(f"[tl] nlm-add: tự nhận --type {_dt} ({_dt_src}) — ép kiểu khác bằng --type.", file=sys.stderr)
@@ -1727,6 +1768,8 @@ def cmd_nlm_add(a) -> int:
                       title=getattr(a, "title", None), wait=not getattr(a, "no_wait", False))
     print(json.dumps(r, ensure_ascii=False, indent=2))
     if not r.get("ok"):
+        if _run56:
+            _journal_append(_run56, {"t": "run_end", "ok": False, "counts": {"FAIL": 1}})
         print("[tl] nlm-add lỗi → fallback MCP source_add hoặc `nlm login`.", file=sys.stderr); return 2
     # N1 (v1.33.41): self-check TRÙNG-SAU-ADD — gate pre-add thua cuộc đua async (add trước timeout client
     # nhưng xong server-side, nguồn chưa hiện lúc gate list) → re-list FRESH ngay sau add, ≥2 nguồn cùng
@@ -1740,47 +1783,206 @@ def cmd_nlm_add(a) -> int:
     # reg_link NGAY (journaled+verified-write, cùng khuôn S4). CHỈ link cột nlm_* (không đụng corpus/row_kind —
     # đó là việc của pipeline ingest); KHÔNG có row → không tự tạo row xương, chỉ nhắc register/nlm-reconcile;
     # link lỗi → cảnh báo, KHÔNG fail add (nguồn đã lên NLM thật).
+    # v1.34.56 (A-#1, Q2=a): VERIFY-THEN-LINK — registry chỉ ghi sự thật ĐÃ XÁC MINH vật lý (ca canary dbe706a0:
+    # reg_link ghi sid NOT_FOUND → con trỏ treo phải revert tay). --no-wait → BỎ HẲN reg_link (sid chưa settle,
+    # probe sẽ âm tính giả — stale-an-toàn, reconcile chữa); ngược lại probe live 1 nhịp TRƯỚC khi link.
     if getattr(a, "drive_id", None) and r.get("source_id"):
-        try:
-            _ents_na = _manifest_entries(refresh=True)
-            _row_e = next((e for e in _ents_na
-                           if str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)), None)
-            _row_exists = _row_e is not None
-        except Exception:
-            _ents_na, _row_e, _row_exists = [], None, False
-        if _row_exists:
-            try:
-                load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-                _g = _gas()
-                _rid = _apply_journal_start("nlm-add-link", {"drive_id": a.drive_id, "source_id": r.get("source_id")})
-                # v1.34.49 (F-06): link nay ghi CẢ row_kind suy từ topology khi nb là shard overflow (trước đây
-                # cố ý bỏ → recovery add-tay vào VBQPPL-2 để row_kind=own, sweep mất dấu shard). Kind bảo hộ
-                # (ref/thuong) giữ nguyên; corpus vẫn không đụng (việc của pipeline ingest).
-                _it_na = {"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
-                          "nlm_notebook_id": nb, "nlm_status": "pushed"}
-                _cols_na = "nlm_source_id,nlm_notebook_id,nlm_status"
-                _bef_na = {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}
-                try:
-                    _topo_na = _resolve_shard_topology(_ents_na, (os.environ.get("TL_NOTEBOOK_ID")
-                                                                  or NLM_BASE_NOTEBOOK or "").strip())
-                except Exception:  # noqa: BLE001
-                    _topo_na = {"shards": []}
-                _cur_rk_na = str((_row_e or {}).get("row_kind") or "").strip().lower()
-                if _shard_row_kind(nb, _topo_na) == "overflow" and _cur_rk_na not in _ROW_KIND_PROTECTED:
-                    _it_na["row_kind"] = "overflow"
-                    _cols_na += ",row_kind"
-                    _bef_na["row_kind"] = _cur_rk_na
-                _v = _journaled_reg_write(_rid, _g, [_it_na], _cols_na,
-                                          before_by_key={a.drive_id: _bef_na})
-                _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"OK": 1}})
-                print(json.dumps({"reg_link": {"ok": bool(_v.get("verified")), "journal": _rid,
-                                               "row_kind": _it_na.get("row_kind")}}, ensure_ascii=False), file=sys.stderr)
-            except Exception as _e:  # noqa: BLE001
-                print(f"[tl] nlm-add: add OK nhưng reg_link lỗi ({type(_e).__name__}: {_e}) → `tl nlm-reconcile --apply` để bắc cầu.", file=sys.stderr)
+        if getattr(a, "no_wait", False):
+            print("[tl] nlm-add --no-wait: sid chưa settle — KHÔNG ghi registry; "
+                  "lưới cuối lô: tl nlm-reconcile <nb> --apply", file=sys.stderr)
         else:
-            print("[tl] nlm-add: add OK nhưng registry CHƯA có dòng cho drive_id này → `tl register --drive-id …` "
-                  "hoặc `tl nlm-reconcile --apply` để bắc cầu (không tự tạo row xương).", file=sys.stderr)
+            # Probe rẻ: source_get nếu nlm_cli có; fallback re-list FRESH (list của dedup-gate chụp TRƯỚC add
+            # — KHÔNG tái dùng được). Probe fail → KHÔNG ghi registry, rc vẫn 0 (add đã thành công; link là
+            # bước phụ stale-an-toàn — nlm-reconcile --apply link khi nguồn đã live).
+            _live56 = False
+            try:
+                if hasattr(nc, "source_get"):
+                    _live56 = bool((nc.source_get(r["source_id"]) or {}).get("ok"))
+                else:
+                    _pl56 = nc.source_list(nb, skip_freshness=True)
+                    _live56 = bool(_pl56.get("ok")) and any(
+                        str(s.get("id") or "") == str(r["source_id"]) for s in (_pl56.get("sources") or []))
+            except Exception:  # noqa: BLE001
+                _live56 = False
+            if not _live56:
+                print(json.dumps({"reg_link": {"ok": False, "reason": "SID_NOT_LIVE_YET",
+                                               "note": "add có thể đang settle — chạy tl nlm-reconcile <nb> "
+                                                       "--apply để link khi đã live"}},
+                                 ensure_ascii=False), file=sys.stderr)
+            else:
+                try:
+                    _ents_na = _manifest_entries(refresh=True)
+                    _row_e = next((e for e in _ents_na
+                                   if str(e.get("drive_id") or e.get("gdoc_id") or "") == str(a.drive_id)), None)
+                    _row_exists = _row_e is not None
+                except Exception:
+                    _ents_na, _row_e, _row_exists = [], None, False
+                if _row_exists:
+                    try:
+                        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+                        _g = _gas()
+                        _rid = _apply_journal_start("nlm-add-link", {"drive_id": a.drive_id, "source_id": r.get("source_id")})
+                        # v1.34.49 (F-06): link nay ghi CẢ row_kind suy từ topology khi nb là shard overflow (trước đây
+                        # cố ý bỏ → recovery add-tay vào VBQPPL-2 để row_kind=own, sweep mất dấu shard). Kind bảo hộ
+                        # (ref/thuong) giữ nguyên; corpus vẫn không đụng (việc của pipeline ingest).
+                        _it_na = {"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
+                                  "nlm_notebook_id": nb, "nlm_status": "pushed"}
+                        _cols_na = "nlm_source_id,nlm_notebook_id,nlm_status"
+                        _bef_na = {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}
+                        try:
+                            _topo_na = _resolve_shard_topology(_ents_na, (os.environ.get("TL_NOTEBOOK_ID")
+                                                                          or NLM_BASE_NOTEBOOK or "").strip())
+                        except Exception:  # noqa: BLE001
+                            _topo_na = {"shards": []}
+                        _cur_rk_na = str((_row_e or {}).get("row_kind") or "").strip().lower()
+                        if _shard_row_kind(nb, _topo_na) == "overflow" and _cur_rk_na not in _ROW_KIND_PROTECTED:
+                            _it_na["row_kind"] = "overflow"
+                            _cols_na += ",row_kind"
+                            _bef_na["row_kind"] = _cur_rk_na
+                        _v = _journaled_reg_write(_rid, _g, [_it_na], _cols_na,
+                                                  before_by_key={a.drive_id: _bef_na})
+                        _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"OK": 1}})
+                        print(json.dumps({"reg_link": {"ok": bool(_v.get("verified")), "journal": _rid,
+                                                       "row_kind": _it_na.get("row_kind")}}, ensure_ascii=False), file=sys.stderr)
+                        # v1.34.56 (A-#2): COMMIT claim GỘP reg_get_bulk sau link verified (best-effort, mẫu D1
+                        # v1.34.55 — lỗi tự heal TTL 5'). no-wait / sid-not-live → KHÔNG commit (TTL tự heal).
+                        if _claim56 and bool(_v.get("verified")):
+                            try:
+                                _g.get("reg_get_bulk", keys=json.dumps([str(a.drive_id)]), key_field="drive_id",
+                                       commit_claims=json.dumps([{"identity_hash": _claim56,
+                                                                  "source_id": r.get("source_id"),
+                                                                  "run_id": _run56}]))
+                            except Exception:  # noqa: BLE001
+                                print("[tl]   ⚠ claim commit chưa xác nhận — tự hết hạn sau 5' (F-04 TTL), "
+                                      "không chặn kết quả.", file=sys.stderr)
+                    except Exception as _e:  # noqa: BLE001
+                        print(f"[tl] nlm-add: add OK nhưng reg_link lỗi ({type(_e).__name__}: {_e}) → `tl nlm-reconcile --apply` để bắc cầu.", file=sys.stderr)
+                else:
+                    print("[tl] nlm-add: add OK nhưng registry CHƯA có dòng cho drive_id này → `tl register --drive-id …` "
+                          "hoặc `tl nlm-reconcile --apply` để bắc cầu (không tự tạo row xương).", file=sys.stderr)
+    if _run56:
+        _journal_append(_run56, {"t": "run_end", "ok": True, "counts": {"OK": 1}})
     return 0
+
+
+def _nlm_source_remove_plan(entries: list, sids: list) -> dict:
+    """v1.34.56 (A-#12) PURE: đối chiếu sid ↔ con trỏ registry (nlm_source_id). Dòng còn TRỎ sid mà vẫn gỡ
+    nguồn = tự tạo con trỏ treo (không tự lành — bài học canary dbe706a0) → POINTER_STILL_ATTACHED."""
+    rows = []
+    for sid in sids:
+        _s = str(sid)
+        att = [{"drive_id": str(e.get("drive_id") or e.get("gdoc_id") or ""),
+                "name": str(e.get("name") or ""),
+                "nlm_notebook_id": str(e.get("nlm_notebook_id") or "")}
+               for e in (entries or []) if str(e.get("nlm_source_id") or "") == _s]
+        rows.append({"source_id": _s, "pointer_attached": bool(att), "pointers": att})
+    return {"rows": rows,
+            "attached": [r0["source_id"] for r0 in rows if r0["pointer_attached"]],
+            "clean": [r0["source_id"] for r0 in rows if not r0["pointer_attached"]]}
+
+
+def _source_remove_delete_verdict(r: dict) -> str:
+    """v1.34.56 (A-#12) PURE: verdict sau nlm_cli.source_delete — 'deleted' (ok, count≥1 hoặc không rõ count),
+    'noop' (sid đã gỡ từ trước: deleted_count=0 / not-found → idempotent theo trạng thái đích, KHÔNG FAIL), 'fail'."""
+    raw = str((r or {}).get("raw") or (r or {}).get("error") or "").lower()
+    m = re.search(r"deleted[_\s]*(?:count)?\D*?(\d+)", raw)
+    if (r or {}).get("ok"):
+        return "noop" if (m and m.group(1) == "0") else "deleted"
+    return "noop" if ("not found" in raw or "not_found" in raw or (m and m.group(1) == "0")) else "fail"
+
+
+def cmd_nlm_source_remove(a) -> int:
+    """(A-#12 v1.34.56) Gỡ nguồn KHỎI notebook NLM theo source_id (batch N sid / 1 process) — KHÔNG trash
+    Drive, KHÔNG đụng dòng registry (khác source-delete; dòng stale là việc của nlm-reconcile/--clear-stale).
+    GUARD: sid còn con trỏ registry → CHẶN (POINTER_STILL_ATTACHED), thoát --force. DRY mặc định."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    try:
+        nc = _imp("nlm_cli")
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
+    sids = [str(s).strip() for s in (getattr(a, "source_id", None) or []) if str(s).strip()]
+    if not sids:
+        print(json.dumps({"ok": False, "error": "NO_SOURCE_ID"}, ensure_ascii=False), file=sys.stderr); return 2
+    do_apply = bool(getattr(a, "apply", False))
+    # Đối chiếu con trỏ qua manifest; apply/--refresh ÉP refresh (bài học v1.34.50: manifest KHÔNG đáng tin
+    # khi stale) + double-check reg_get authoritative bên dưới cho sid manifest bảo 'sạch'.
+    try:
+        entries = _manifest_entries(refresh=bool(getattr(a, "refresh", False) or do_apply))
+    except Exception:  # noqa: BLE001
+        entries = []
+    plan = _nlm_source_remove_plan(entries, sids)
+    if not do_apply:
+        print(json.dumps({"ok": True, "dry_run": True, "rows": plan["rows"],
+                          "attached": plan["attached"], "clean": plan["clean"],
+                          "note": "DRY — chưa gỡ gì. Gỡ: --apply --confirm yes (KHÔNG trash Drive, KHÔNG đụng "
+                                  "dòng registry; dòng stale: nlm-reconcile --apply / --clear-stale)."},
+                         ensure_ascii=False, indent=2))
+        return 0
+    if str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED",
+                          "note": "gỡ nguồn NLM là bất khả nghịch phía notebook — thêm --confirm yes"},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    force = bool(getattr(a, "force", False))
+    run_id = _apply_journal_start("nlm-source-remove", {"sids": sids, "force": force})
+    _g_sr = None
+    if not force and plan["clean"]:
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            _g_sr = _gas()
+        except Exception:  # noqa: BLE001
+            _g_sr = None
+    results, blocked, failed = [], 0, 0
+    by_sid = {r0["source_id"]: r0 for r0 in plan["rows"]}
+    for sid in sids:
+        row = by_sid.get(sid) or {"pointer_attached": False, "pointers": []}
+        att = bool(row.get("pointer_attached"))
+        if not att and not force:
+            # Fail-closed: manifest 'sạch' phải qua reg_get authoritative; không xác minh được → skip (không gỡ mù).
+            if _g_sr is None:
+                results.append({"source_id": sid, "action": "skipped", "reason": "REGISTRY_VERIFY_UNAVAILABLE",
+                                "note": "không xác minh được con trỏ (creds/webapp) — fail-closed; --force bỏ guard"})
+                blocked += 1
+                continue
+            try:
+                _rg = _g_sr.get("reg_get", nlm_source_id=sid, refresh="false")
+                if (_rg or {}).get("rows"):
+                    att = True
+                    row = {"pointer_attached": True,
+                           "pointers": [{"drive_id": str(x.get("drive_id") or ""),
+                                         "name": str(x.get("name") or ""),
+                                         "nlm_notebook_id": str(x.get("nlm_notebook_id") or "")}
+                                        for x in (_rg.get("rows") or [])]}
+            except Exception:  # noqa: BLE001
+                results.append({"source_id": sid, "action": "skipped", "reason": "REGISTRY_VERIFY_UNAVAILABLE",
+                                "note": "reg_get lỗi — fail-closed; --force bỏ guard"})
+                blocked += 1
+                continue
+        if att and not force:
+            results.append({"source_id": sid, "action": "skipped", "reason": "POINTER_STILL_ATTACHED",
+                            "pointers": row.get("pointers"),
+                            "note": "dòng registry còn trỏ sid — gỡ sẽ tạo con trỏ treo; repoint/clear trước hoặc --force"})
+            blocked += 1
+            continue
+        _journal_append(run_id, {"t": "intent", "op": "nlm_source_delete", "key": sid, "set": {"irreversible": True}})
+        _dr = nc.source_delete(sid)
+        verdict = _source_remove_delete_verdict(_dr)
+        _journal_append(run_id, {"t": "commit", "op": "nlm_source_delete", "key": sid,
+                                 "ok": verdict in ("deleted", "noop"), "verify": {"verdict": verdict}})
+        if verdict == "fail":
+            failed += 1
+            results.append({"source_id": sid, "action": "fail", "detail": _dr.get("error") or _dr.get("raw")})
+        else:
+            results.append({"source_id": sid, "action": verdict})
+    counts = {"deleted": sum(1 for r0 in results if r0["action"] == "deleted"),
+              "noop": sum(1 for r0 in results if r0["action"] == "noop"),
+              "skipped": blocked, "fail": failed}
+    ok = failed == 0 and blocked < len(sids)
+    _journal_append(run_id, {"t": "run_end", "ok": ok, "counts": counts})
+    print(json.dumps({"ok": ok, "journal": run_id, "results": results, "counts": counts,
+                      "note": "KHÔNG đụng Drive/dòng registry — dòng stale: nlm-reconcile --apply / --clear-stale."},
+                     ensure_ascii=False, indent=2))
+    return 0 if ok else 2
 
 
 def cmd_nlm_cross(a) -> int:

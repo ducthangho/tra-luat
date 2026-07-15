@@ -1075,6 +1075,16 @@ GENERATED_SPECS = [
          {"flags": ['--timeout'], "type": int, "default": 300, "help": 'tổng giây chờ tối đa khi --wait (mặc định 300)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    {"name": 'nlm-source-remove', "handler": 'cmd_nlm_source_remove',
+     "help": '(v1.34.56 A-#12) GỠ nguồn KHỎI notebook NLM theo source_id (batch; KHÔNG trash Drive, KHÔNG đụng dòng registry — khác source-delete). GUARD chặn sid còn con trỏ registry (POINTER_STILL_ATTACHED — tránh con trỏ treo); DRY mặc định; --apply --confirm yes; --force bỏ guard',
+     "args": [
+         {"dest": 'source_id', "nargs": '+', "help": 'một hoặc nhiều nlm_source_id cần gỡ (sid toàn cục — không cần notebook-id)'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI gỡ (mặc định DRY liệt kê con trỏ)'},
+         {"flags": ['--confirm'], "default": '', "help": 'bắt buộc "yes" khi --apply'},
+         {"flags": ['--force'], "action": 'store_true', "help": 'gỡ CẢ sid còn con trỏ registry (rủi ro con trỏ treo — tự chịu)'},
+         {"flags": ['--refresh'], "action": 'store_true', "help": 'ép tải lại manifest trước khi đối chiếu con trỏ'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'nlm-orphans', "handler": 'cmd_nlm_orphans',
      "help": '1.23.2: phân loại nguồn NLM live ↔ registry → bắt STATUS_MISMATCH_LIVE (removed* nhưng nguồn sống = gắn nhãn sai) + UNREGISTERED; --fix-mismatch vá metadata DRY; --deep lấy sohieu header. Thay soi tay',
      "args": [
@@ -1393,6 +1403,7 @@ COMMAND_META = {
     "nlm-links":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 B1 read-only
     "ingest-inbox":         _m("high", False, "drive_registry", True, True, False, None, "ingest_inbox", False, "ingest_ops", generated=True),   # v1.34.54 B2 (KHÔNG đụng NLM — nlm-links cuối lô)
     "nlm-auth-status":      _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 C8 read-only (probe live, không ghi)
+    "nlm-source-remove":    _m("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", generated=True),   # v1.34.56 A-#12 (gỡ nguồn khỏi notebook — guard con trỏ)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     # ── I7 wave-2 (v1.34.11): meta BASELINE bằng-chứng-cờ cho 78 lệnh chuyển GENERATED_SPECS —
     # chính sách grilling: --apply→supports_dry_run (doctrine DRY-mặc-định), --confirm→requires_confirm,

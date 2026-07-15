@@ -10504,6 +10504,231 @@ def run() -> int:
                 setattr(_TL_MODULE, _k, _v)
     _t110("r116_discover_zero_actionable_note", _c116_discover_zero_actionable_note)
 
+    # ═══ v1.34.56 — r117_*: ĐỢT A kế hoạch 13-vấn-đề 2026-07-16 (A-#1 nlm-add verify-then-link,
+    # A-#2 claim F-04 cho nlm-add, A-#12 nlm-source-remove). NEGATIVE-INPUT TRƯỚC (luật đứng r102). ═══
+    def _mk_na117(sid_live=True, deny=False, claim_resp=None, add_sid="sidNA117"):
+        # Harness A-#1/#2: cmd_nlm_add full path — bắt ingest_claim/source_add/probe/reg_write/commit_claims.
+        _calls = {"claim": None, "add": 0, "commit_claims": None, "reg_writes": [], "probe_get": 0, "probe_list": 0}
+
+        class _G117:
+            def get(self, action, **kw):
+                if action == "ingest_claim":
+                    _calls["claim"] = dict(kw)
+                    if claim_resp is not None:
+                        return claim_resp
+                    ih = json.loads(kw.get("keys") or "[]")[0]
+                    return {"ok": True, "results": [{"identity_hash": ih, "granted": (not deny),
+                                                     "reason": "HELD_BY_OTHER" if deny else "NEW"}]}
+                if action == "reg_get_bulk":
+                    _calls["commit_claims"] = json.loads(kw.get("commit_claims") or "null")
+                    return {"ok": True, "rows": [], "committed": [], "commit_failed": []}
+                return {"ok": True}
+
+        class _NC117:
+            def nlm_available(self):
+                return True
+
+            def source_add(self, nb, **kw):
+                _calls["add"] += 1
+                return {"ok": True, "source_id": add_sid, "ready": True}
+
+            def source_get(self, sid, timeout=120):
+                _calls["probe_get"] += 1
+                return {"ok": True, "data": {"id": sid}} if sid_live else {"ok": False, "error": "NOT_FOUND"}
+
+            def source_list(self, nb, **kw):
+                _calls["probe_list"] += 1
+                return {"ok": True, "count": 1 if sid_live else 0,
+                        "sources": ([{"id": add_sid, "title": "t117"}] if sid_live else [])}
+        return _G117, _NC117, _calls
+
+    def _run_na117(no_wait=False, sid_live=True, deny=False, claim_resp=None, use_url=False):
+        _G, _NC, _calls = _mk_na117(sid_live=sid_live, deny=deny, claim_resp=claim_resp)
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_nlm_preflight_report",
+                 "_nlm_dedup_gate", "_nlm_post_add_dup_check", "_manifest_entries", "load_creds",
+                 "_gas", "_apply_journal_start", "_journal_append", "_journaled_reg_write",
+                 "_resolve_shard_topology", "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb117", None)
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {"warn": []}
+            _TL_MODULE._nlm_dedup_gate = lambda nc, nb, targets, skip=False: ("clear", [])
+            _TL_MODULE._nlm_post_add_dup_check = lambda *a, **k: None   # None = KHÔNG trùng (truthy=DUP → abort)
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": "dNA117", "name": "Luat_Test117", "row_kind": "", "nlm_source_id": ""}]
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run117_" + str(name)
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._journaled_reg_write = (lambda run_id, g, items, cols, **kw:
+                (_calls["reg_writes"].append({"items": items, "cols": cols}),
+                 {"verified": True, "reg_bulk": {"ok": True, "patched": 1}})[1])
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {"shards": []}
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _ns = argparse.Namespace(
+                notebook_id=None, drive_id=(None if use_url else "dNA117"), url=("http://x117" if use_url else None),
+                file=None, type="doc", title=None, no_wait=no_wait, wait=False, skip_live_check=False,
+                json=False, config=None, profile=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_add(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c117_no_wait_skips_reg_link():
+        # A-#1 NEGATIVE: --no-wait → BỎ HẲN reg_link (stale-an-toàn) + note lưới nlm-reconcile; không probe.
+        _rc, _o, _e, _calls = _run_na117(no_wait=True)
+        return (_rc == 0 and _calls["add"] == 1 and not _calls["reg_writes"]
+                and "nlm-reconcile" in _e and _calls["probe_get"] == 0 and _calls["probe_list"] == 0)
+    _t110("r117_nlm_add_no_wait_skips_reg_link", _c117_no_wait_skips_reg_link)
+
+    def _c117_verify_fail_no_link():
+        # A-#1 NEGATIVE: sid trả về nhưng KHÔNG live-bền (ca canary dbe706a0) → KHÔNG ghi registry, rc vẫn 0.
+        _rc, _o, _e, _calls = _run_na117(sid_live=False)
+        return (_rc == 0 and _calls["add"] == 1 and not _calls["reg_writes"]
+                and "SID_NOT_LIVE_YET" in _e and _calls["commit_claims"] is None)
+    _t110("r117_nlm_add_verify_fail_no_link", _c117_verify_fail_no_link)
+
+    def _c117_verify_ok_links():
+        # A-#1 POSITIVE control: probe OK → reg_link đủ cols như cũ (giữ hành vi F-06).
+        _rc, _o, _e, _calls = _run_na117()
+        _w = (_calls["reg_writes"] or [{}])[0]
+        return (_rc == 0 and len(_calls["reg_writes"]) == 1
+                and (_w.get("items") or [{}])[0].get("nlm_source_id") == "sidNA117"
+                and "nlm_source_id" in _w.get("cols", "") and "nlm_status" in _w.get("cols", ""))
+    _t110("r117_nlm_add_verify_ok_links", _c117_verify_ok_links)
+
+    def _c117_claim_denied_stops_before_add():
+        # A-#2 NEGATIVE: claim denied → rc=2 TRƯỚC source_add + hướng dẫn verify-trước-retry.
+        _rc, _o, _e, _calls = _run_na117(deny=True)
+        return _rc == 2 and _calls["add"] == 0 and "CLAIMED_ELSEWHERE" in _e and "nlm-list" in _e
+    _t110("r117_nlm_add_claim_denied_stops_before_add", _c117_claim_denied_stops_before_add)
+
+    def _c117_claim_endpoint_fail_stops():
+        # A-#2 NEGATIVE: endpoint claim lỗi → rc=2 TRƯỚC add (mandatory client-side, khớp D1).
+        _rc, _o, _e, _calls = _run_na117(claim_resp={"ok": False, "error": "boom117"})
+        return _rc == 2 and _calls["add"] == 0 and "INGEST_CLAIM_FAILED" in _e
+    _t110("r117_nlm_add_claim_endpoint_fail_stops", _c117_claim_endpoint_fail_stops)
+
+    def _c117_claim_granted_commit():
+        # A-#2 POSITIVE: granted → add chạy; sau link verified → commit claim GỘP reg_get_bulk (sid + run_id).
+        _rc, _o, _e, _calls = _run_na117()
+        _cc = _calls["commit_claims"] or []
+        return (_rc == 0 and _calls["claim"] is not None and len(_cc) == 1
+                and _cc[0]["source_id"] == "sidNA117" and _cc[0]["run_id"] == "run117_nlm-add")
+    _t110("r117_nlm_add_claim_granted_commit", _c117_claim_granted_commit)
+
+    def _c117_url_path_no_claim():
+        # A-#2: đường --url (không drive identity) → KHÔNG gọi ingest_claim (giữ nguyên đường cũ).
+        _rc, _o, _e, _calls = _run_na117(use_url=True)
+        return _rc == 0 and _calls["claim"] is None and _calls["add"] == 1
+    _t110("r117_nlm_add_url_path_no_claim", _c117_url_path_no_claim)
+
+    def _run_sr117(sids, apply=False, confirm="", force=False, entries=None, delete_results=None, reg_rows=None):
+        # Harness A-#12: cmd_nlm_source_remove — bắt source_delete/reg_get; registry qua manifest stub.
+        _calls = {"deletes": [], "reg_get": 0}
+        _dr = delete_results or {}
+
+        class _G117r:
+            def get(self, action, **kw):
+                if action == "reg_get":
+                    _calls["reg_get"] += 1
+                    return {"ok": True, "rows": list(reg_rows or [])}
+                return {"ok": True}
+
+        class _NC117r:
+            def nlm_available(self):
+                return True
+
+            def source_delete(self, sid, timeout=120):
+                _calls["deletes"].append(sid)
+                return _dr.get(sid, {"ok": True, "raw": "Deleted 1 source"})
+        _keys = ("apply_profile_offline", "_imp", "_manifest_entries", "load_creds", "_gas",
+                 "_apply_journal_start", "_journal_append")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC117r() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(entries or [])
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G117r()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run117_sr"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _ns = argparse.Namespace(source_id=list(sids), apply=apply, confirm=confirm, force=force,
+                                     refresh=False, json=True, config=None, profile=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_source_remove(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            return _rc, _out, _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    _ent_sr117 = [{"drive_id": "dSR117", "name": "Luat_SR117", "nlm_source_id": "sidA117", "nlm_notebook_id": "nbX"}]
+
+    def _c117_sr_pointer_guard_blocks():
+        # A-#12 NEGATIVE: sid còn con trỏ registry → apply KHÔNG gọi delete, rc=2 (toàn bộ chặn); --force → gọi.
+        _rc, _out, _e, _calls = _run_sr117(["sidA117"], apply=True, confirm="yes", entries=_ent_sr117)
+        _blocked = _rc == 2 and not _calls["deletes"] and "POINTER_STILL_ATTACHED" in (json.dumps(_out) + _e)
+        _rcf, _outf, _ef, _callsf = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True, entries=_ent_sr117)
+        return _blocked and _rcf == 0 and _callsf["deletes"] == ["sidA117"]
+    _t110("r117_source_remove_pointer_guard_blocks", _c117_sr_pointer_guard_blocks)
+
+    def _c117_sr_batch_and_noop():
+        # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
+        _rc, _out, _e, _calls = _run_sr117(
+            ["s1x117", "s2x117"], apply=True, confirm="yes", entries=_ent_sr117,
+            delete_results={"s1x117": {"ok": True, "raw": "Deleted 1 source"},
+                            "s2x117": {"ok": True, "raw": "deleted_count: 0"}})
+        _acts = {r0.get("source_id"): r0.get("action") for r0 in (_out.get("results") or [])}
+        return (_rc == 0 and _calls["deletes"] == ["s1x117", "s2x117"]
+                and _acts.get("s1x117") == "deleted" and _acts.get("s2x117") == "noop")
+    _t110("r117_source_remove_batch_and_noop", _c117_sr_batch_and_noop)
+
+    def _c117_sr_dry_lists_pointers():
+        # A-#12: DRY mặc định — KHÔNG side-effect, liệt kê pointer-attached kèm drive_id/name.
+        _rc, _out, _e, _calls = _run_sr117(["sidA117", "s3x117"], entries=_ent_sr117)
+        _rows = {r0.get("source_id"): r0 for r0 in (_out.get("rows") or [])}
+        return (_rc == 0 and not _calls["deletes"]
+                and _rows.get("sidA117", {}).get("pointer_attached") is True
+                and _rows.get("s3x117", {}).get("pointer_attached") is False
+                and (_rows.get("sidA117", {}).get("pointers") or [{}])[0].get("drive_id") == "dSR117")
+    _t110("r117_source_remove_dry_lists_pointers", _c117_sr_dry_lists_pointers)
+
+    def _c117_sr_confirm_required():
+        # A-#12 NEGATIVE: --apply thiếu --confirm yes → rc=2, không side-effect.
+        _rc, _out, _e, _calls = _run_sr117(["s1x117"], apply=True, confirm="", entries=[])
+        return _rc == 2 and not _calls["deletes"] and "CONFIRM_REQUIRED" in (json.dumps(_out) + _e)
+    _t110("r117_source_remove_confirm_required", _c117_sr_confirm_required)
+
+    # A-#12 wiring: parser + COMMAND_META + contract (validate_registry đối chiếu — drift-lock bề mặt).
+    try:
+        _nsp117 = build_parser().parse_args(["nlm-source-remove", "sidZ117", "--apply", "--confirm", "yes", "--force"])
+    except SystemExit:
+        _nsp117 = argparse.Namespace(source_id=None, apply=False, confirm="", force=False)
+    import tl_core.command_registry as _reg117
+    import tl_core.workflow as _w117
+    _m117 = _reg117.COMMAND_META.get("nlm-source-remove") or {}
+    cases.append(("r117_source_remove_parser_meta_contract",
+                  _nsp117.source_id == ["sidZ117"] and _nsp117.apply and _nsp117.confirm == "yes"
+                  and _nsp117.force is True
+                  and _m117.get("risk") == "high" and _m117.get("requires_confirm") is True
+                  and _m117.get("supports_dry_run") is True and _m117.get("write_scope") == "nlm"
+                  and _m117.get("idempotency_contract") == "nlm_source_remove"
+                  and set(_w117._IDEMPOTENCY_CONTRACTS.get("nlm_source_remove", {})) == {
+                      "schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
+                      "readback_command", "resume_command", "rollback_hint"}))
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

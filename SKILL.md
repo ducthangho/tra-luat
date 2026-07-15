@@ -16,12 +16,12 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.51 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.52 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
-> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2k`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
+> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2l`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
 > - **`references/RUNBOOK.md`** — trình tự khởi động + cổng vận hành (đánh số, tất định).
 > - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
 >
@@ -252,13 +252,13 @@ Cờ `--profile/--config/--deterministic` nhận ở mọi lệnh (trước ho�
 - **Tra cứu/Instruction:** `tra_cuu.py` · `keywords.py` · `verify_deep.py` · `gen_instructions.py` (sinh/audit Instruction có `SKILL_OF_RECORD` + external-ingest gate).
 
 ## 8. APPS SCRIPT WEBAPP
-Live/post-deploy contract = **2.21.2k** (đã xác minh `ping.version=2.21.2k`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Bản `.gs` hiện hành = **`references/Code.2.21.2k.gs`**. Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
-- **`references/Code.2.21.2k.gs`:** giữ toàn bộ Cách B/`row_kind` của 2.21.2h, đồng thời thêm `manifestScope=own|inherited`, quét đệ quy đúng `rootFolderId` của profile, giữ nguyên dòng `ref`, và chặn ghi với `PROFILE_MANIFEST_SCOPE_BLOWUP` nếu số dòng own tăng quá `max(2×old, old+50)`.
+Live/post-deploy contract = **2.21.2l** (đã xác minh `ping.version=2.21.2l`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Bản `.gs` hiện hành = **`references/Code.2.21.2l.gs`**. Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
+- **`references/Code.2.21.2l.gs`:** giữ toàn bộ Cách B/`row_kind` của 2.21.2h, đồng thời thêm `manifestScope=own|inherited`, quét đệ quy đúng `rootFolderId` của profile, giữ nguyên dòng `ref`, và chặn ghi với `PROFILE_MANIFEST_SCOPE_BLOWUP` nếu số dòng own tăng quá `max(2×old, old+50)`.
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
-- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill (gọn gói ≤200 file) — chỉ giữ bản LIVE `Code.2.21.2k.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.
-- Deploy `Code.2.21.2k.gs` → New version (giữ URL+token), `tl ping` phải ra `2.21.2k`, rồi `contract_check.py --audit`. **KHÔNG deploy từ skill được.**
+- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill (gọn gói ≤200 file) — chỉ giữ bản LIVE `Code.2.21.2l.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.
+- Deploy `Code.2.21.2l.gs` → New version (giữ URL+token), `tl ping` phải ra `2.21.2l`, rồi `contract_check.py --audit`. **KHÔNG deploy từ skill được.**
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
-- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2k. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2k`.
+- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2l`.
 
 
 ## 9. PHỤ THUỘC

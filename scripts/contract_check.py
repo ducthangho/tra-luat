@@ -77,7 +77,10 @@ def bump_after_deploy(new: str) -> int:
                f"✓ `find` tầng-3 + `meta_find` đã vá ở {new} (driveSearch_).", c)
     c = re.sub(r"⚠ HỎNG ở deploy [0-9][0-9A-Za-z._-]*[^|\n]*?cần vá [A-Za-z0-9/.]+\)?",
                f"✓ đã vá ở {new}", c)
-    CONTRACT.write_text(c, encoding="utf-8")
+    # v1.34.52 (bẫy bắt khi chạy THẬT — r67 kernel-size đỏ oan): .gitattributes khóa `* -text` (byte thật,
+    # không eol-normalize) NHƯNG write_text mặc định trên Windows dịch \n→\r\n → MỌI dòng phình +1 byte
+    # (SKILL.md 49121→49440B, vượt trần 48KB). newline="\n" ép LF tường minh cho MỌI write_text ở hàm này.
+    CONTRACT.write_text(c, encoding="utf-8", newline="\n")
     t = TL_PY.read_text(encoding="utf-8")
     t = re.sub(r'(EXPECT_VERSION\s*=\s*")[^"]+(")', r"\g<1>" + new + r"\g<2>", t, count=1)
     t = t.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
@@ -88,7 +91,7 @@ def bump_after_deploy(new: str) -> int:
         _t2n = _t2.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
         if _t2n != _t2:
             _st.write_text(_t2n, encoding="utf-8", newline="\n")
-    TL_PY.write_text(t, encoding="utf-8")
+    TL_PY.write_text(t, encoding="utf-8", newline="\n")
 
     # v1.16.10: đồng bộ thêm SKILL.md + RUNBOOK.md để RUNBOOK/Claude không chặn nhầm ở version cũ
     #           (tái lập được — không còn sửa tay một lần như v1.16.9).
@@ -99,7 +102,7 @@ def bump_after_deploy(new: str) -> int:
             d = pdoc.read_text(encoding="utf-8")
             if old and old in d:
                 doc_hits += d.count(old); d = d.replace(old, new)
-                pdoc.write_text(d, encoding="utf-8")
+                pdoc.write_text(d, encoding="utf-8", newline="\n")
         except OSError:
             pass
     cv, tv = contract_version(), tl_expect_version()

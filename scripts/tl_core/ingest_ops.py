@@ -793,6 +793,46 @@ def cmd_ingest_missing(a) -> int:
               file=sys.stderr, flush=True)
     g = _gas()
     ok_n, link_n, skip_n, fail_n, reg_fail_n, results = 0, 0, 0, 0, 0, []
+    # v1.34.52 (F-04/D9 — grill GAS 2.21.2l 2026-07-15): ACQUIRE claim identity_hash cho TOÀN BỘ to_add
+    # TRƯỚC vòng lặp add — chặn 2 host cùng add 1 identity trong cửa sổ race giữa preflight-dedup (xong ở
+    # trên) và source_add thật (sắp chạy). Optional server-side (D8): webapp cũ (<2.21.2l) không có action
+    # này → lỗi gọi được BẮT và DỪNG an toàn (KHÔNG âm thầm bỏ qua bảo vệ — client MỚI bắt buộc có claim).
+    # Đơn giản hoá CÓ CHỦ ĐÍCH (ghi rõ, không giấu): KHÔNG release tường minh khi item fail — dựa TTL 5' tự
+    # heal (đủ AN TOÀN vì claim che đúng cửa sổ add, không phải toàn bộ vòng đời item).
+    from tl_core.ingest_contract import identity_hash_for_drive_source
+    _profile_now = _active_profile()
+    _hash_by_did: dict[str, str] = {}
+    for _e0c in to_add:
+        _did0c = _entry_drive_id(_e0c)
+        if _did0c:
+            _hash_by_did[_did0c] = identity_hash_for_drive_source(
+                _did0c, target_scope=target_nb, canonical_name=_entry_name(_e0c), profile=_profile_now)
+    _hash_to_did = {v: k for k, v in _hash_by_did.items()}
+    _committed_candidates: list[tuple] = []   # [(identity_hash, drive_id, source_id)] — commit theo lô sau vòng lặp
+    if _hash_by_did:
+        try:
+            _cl = g.get("ingest_claim", keys=json.dumps(list(_hash_by_did.values())),
+                        run_id=run_id, drive_ids=json.dumps(list(_hash_by_did.keys())))
+        except Exception as _cle:  # noqa: BLE001
+            _cl = {"ok": False, "error": str(_cle)}
+        if not _cl.get("ok"):
+            print(json.dumps({"ok": False, "error": "INGEST_CLAIM_FAILED", "detail": _cl.get("error"),
+                              "note": "Không xin được claim xuyên host (F-04, webapp cần ≥2.21.2l) — DỪNG "
+                                      "an toàn thay vì add mù không bảo vệ race."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
+        _denied_dids = set()
+        for _rr in (_cl.get("results") or []):
+            if not _rr.get("granted"):
+                _dd = _hash_to_did.get(_rr.get("identity_hash"))
+                if _dd:
+                    _denied_dids.add(_dd)
+                    results.append({"drive_id": _dd, "ok": False, "skipped": "CLAIMED_ELSEWHERE",
+                                    "reason": _rr.get("reason")})
+        if _denied_dids:
+            to_add = [e for e in to_add if _entry_drive_id(e) not in _denied_dids]
+            print(f"[tl]   ⚠ {len(_denied_dids)} mục đang bị host khác giữ claim (F-04) → SKIP trong run này "
+                  f"(không phải lỗi — thử lại sau khi claim hết hạn/host kia xong).", file=sys.stderr, flush=True)
     # v1.34.49 (F-06): row_kind SUY TỪ TOPOLOGY per-notebook (own→không ghi, overflow→ghi 'overflow'); kind
     # bảo hộ (ref/thuong) trên dòng sẵn có KHÔNG BAO GIỜ bị clobber. cols per-link theo item.
     _rk_by_did = {}
@@ -914,11 +954,32 @@ def cmd_ingest_missing(a) -> int:
         _ck_flush()
         _live_shard_by_sid[str(sid)] = _cur_nb
         _reg_link(did, sid, _cur_nb)
+        _ih0 = _hash_by_did.get(did)
+        if _ih0:
+            _committed_candidates.append((_ih0, did, sid))
         ok_n += 1
         rooms[_cur_nb] = max(0, rooms.get(_cur_nb, 0) - 1)
         _shard_used[_cur_nb] = _shard_used.get(_cur_nb, 0) + 1
         results.append({"drive_id": did, "ok": True, "source_id": sid, "notebook": _cur_nb})
         print(f"        OK → {sid}", file=sys.stderr, flush=True)
+    # v1.34.52 (F-08/D3/D7 — grill GAS 2.21.2l): COMMIT claim theo lô (hằng số batch=10) qua `reg_get_bulk`
+    # — 1 round-trip vừa readback xác minh registry vừa đóng claim (gộp, KHÔNG round-trip riêng). Best-effort:
+    # lô lỗi/claim không commit được → tự heal qua TTL 5' (KHÔNG chặn kết quả run, khớp dung sai reg_fail_n
+    # đã có — reconcile sau vẫn thấy nlm_source_id đúng dù claim GAS chưa kịp đóng).
+    _CLAIM_COMMIT_BATCH = 10   # D7: hằng số, không config env
+    if _committed_candidates:
+        for _bi in range(0, len(_committed_candidates), _CLAIM_COMMIT_BATCH):
+            _chunk = _committed_candidates[_bi:_bi + _CLAIM_COMMIT_BATCH]
+            _commit_claims = [{"identity_hash": ih, "source_id": sid, "run_id": run_id} for ih, _did, sid in _chunk]
+            try:
+                _rgb = g.get("reg_get_bulk", keys=json.dumps([did for _ih, did, _sid in _chunk]),
+                            key_field="drive_id", commit_claims=json.dumps(_commit_claims))
+            except Exception as _rgbe:  # noqa: BLE001
+                _rgb = {"ok": False, "error": str(_rgbe)}
+            if not _rgb.get("ok") or (_rgb.get("commit_failed")):
+                print(f"[tl]   ⚠ claim commit chưa xác nhận cho {len(_rgb.get('commit_failed') or _chunk)} mục "
+                      f"({_rgb.get('error') or 'commit_failed'}) — tự hết hạn sau 5' (F-04 TTL), không chặn kết quả.",
+                      file=sys.stderr, flush=True)
     _partial = bool(remaining_entries)
     _resume_cmd = ("tl" + ((" --profile " + _active_profile()) if _active_profile() != DEFAULT_PROFILE else "")
                    + f" ingest-missing --apply --limit {lim}") if _partial else None

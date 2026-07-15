@@ -99,6 +99,23 @@ def build_ingest_plan(
     }
 
 
+def identity_hash_for_drive_source(
+    drive_id: str, *, target_scope: str, canonical_name: str, profile: str
+) -> str:
+    """v1.34.52 (F-04/D2 — grill GAS 2.21.2l 2026-07-15): identity_hash cho nguồn ĐÃ TRÊN DRIVE
+    (ingest-missing — không có bytes cục bộ để hash trực tiếp). Dùng CHUNG payload shape + hàm hash
+    với :func:`build_ingest_plan` (content_hash = sha256(drive_id) thay vì sha256(bytes)) — MỘT khái
+    niệm identity_hash cho mọi đường ingest, không thêm thuật toán hash mới."""
+    content_hash = sha256_bytes(str(drive_id or "").strip().encode("utf-8"))
+    identity_payload = {
+        "content_hash": content_hash,
+        "target_scope": str(target_scope or ""),
+        "canonical_name": str(canonical_name or ""),
+        "profile": str(profile or ""),
+    }
+    return _hash_payload(identity_payload)
+
+
 def build_remote_plan(
     source_id: str,
     *,

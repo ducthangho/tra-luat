@@ -3406,7 +3406,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2k"))
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2l"))
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -8951,7 +8951,7 @@ def run() -> int:
     _t110("r110_nlm_add_capacity_error_classifier", _c110_caperr)
 
     # ── runner dùng chung cho cmd_ingest_missing (F-02/D3) ──
-    def _run_im110(counts, n_targets, add_script=None, cap_env=None):
+    def _run_im110(counts, n_targets, add_script=None, cap_env=None, claim_deny_dids=None, claim_ok=True):
         class _NC110:
             def __init__(self):
                 self.adds = []
@@ -8968,6 +8968,34 @@ def run() -> int:
                     return dict(r)
                 return {"ok": True, "source_id": "sid-" + str(drive_id)}
         _nc = _NC110()
+
+        class _FkGasClaim110:
+            # v1.34.52: fake tối thiểu cho ingest_claim/reg_get_bulk (F-04/F-08). Mặc định CẤP MỌI claim +
+            # COMMIT mọi thứ (test F-02 allocator không nhắm test gate F-04). `claim_deny_dids` (khớp theo
+            # drive_id gửi kèm keys — test không cần biết identity_hash thật) mô phỏng host khác đang giữ;
+            # `claim_ok=False` mô phỏng webapp cũ/lỗi mạng (ingest_claim tự thất bại).
+            def get(self, action, **kw):
+                if action == "ingest_claim":
+                    if not claim_ok:
+                        return {"ok": False, "error": "SIMULATED_CLAIM_ENDPOINT_FAILURE"}
+                    keys = json.loads(kw.get("keys") or "[]")
+                    dids = json.loads(kw.get("drive_ids") or "[]")
+                    deny = set(claim_deny_dids or [])
+                    results = []
+                    for i, k in enumerate(keys):
+                        _did = dids[i] if i < len(dids) else None
+                        _granted = _did not in deny
+                        results.append({"identity_hash": k, "granted": _granted,
+                                       "reason": "NEW" if _granted else "HELD_BY_OTHER"})
+                    return {"ok": True, "run_id": kw.get("run_id"), "results": results,
+                            "granted": sum(1 for r in results if r["granted"]),
+                            "denied": sum(1 for r in results if not r["granted"])}
+                if action == "reg_get_bulk":
+                    keys = json.loads(kw.get("keys") or "[]")
+                    cc = json.loads(kw.get("commit_claims") or "[]")
+                    return {"ok": True, "rows": [None] * len(keys),
+                            "committed": [c["identity_hash"] for c in cc], "commit_failed": []}
+                return {"ok": True}
         targets = [{"drive_id": f"d{i}", "sohieu": f"{i:02d}-2020-QH14", "name": f"Luat_{i:02d}_x"}
                    for i in range(1, n_targets + 1)]
         _reg_items, _lc = [], []
@@ -8990,7 +9018,7 @@ def run() -> int:
             _TL_MODULE._apply_journal_start = lambda *a, **k: "run110"
             _TL_MODULE._journal_append = lambda *a, **k: None
             _TL_MODULE._imp = lambda name: (_nc if name == "nlm_cli" else _realimp(name))
-            _TL_MODULE._gas = lambda: None
+            _TL_MODULE._gas = lambda: _FkGasClaim110()
             def _fk_jrw(run_id, g, items, cols, **kw):
                 _reg_items.extend([dict(x) for x in items])
                 return {"verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
@@ -9336,6 +9364,31 @@ def run() -> int:
         # wrapper (đường đọc): loại foreign, GIỮ declared overflow + genuine-undeclared vbqppl shard
         return (_foreign_112 not in shards and _v2_112 in shards and _genuine_112 in shards)
     _t110("r112_resolve_overflow_shards_excludes_foreign", _c112_wrapper_excludes_foreign)
+
+    # ═══ v1.34.52 — r113_*: F-04 ingest_claim wiring trong cmd_ingest_missing (GAS 2.21.2l, grill D1-D12
+    # 2026-07-15). NEGATIVE-INPUT (luật đứng). ═══
+    def _c113_claim_denied_skips_not_fail():
+        rc, out, adds, _regs, _err, _lc = _run_im110({"base110": 298, "ov110": 100}, 2, claim_deny_dids={"d1"})
+        _dids_added = [d for _nb, d in adds]
+        return (rc == 0 and out.get("ok") is True and int(out.get("OK") or 0) == 1
+                and "d1" not in _dids_added and "d2" in _dids_added
+                and any(r.get("drive_id") == "d1" and r.get("skipped") == "CLAIMED_ELSEWHERE"
+                        for r in out.get("results") or []))
+    _t110("r113_claim_denied_skips_not_fail", _c113_claim_denied_skips_not_fail)
+
+    def _c113_claim_endpoint_failure_stops_before_add():
+        # v1.34.52: lỗi ingest_claim in ra STDERR (cùng khuôn LIVE_READ_FAILED/blocked ở trên trong hàm này).
+        rc, _out, adds, _regs, _err, _lc = _run_im110({"base110": 298, "ov110": 100}, 2, claim_ok=False)
+        return rc == 2 and "INGEST_CLAIM_FAILED" in _err and len(adds) == 0
+    _t110("r113_claim_endpoint_failure_stops_before_add_zero_side_effect", _c113_claim_endpoint_failure_stops_before_add)
+
+    def _c113_all_denied_zero_added_still_rc0():
+        # Cạn hết vì host khác giữ TOÀN BỘ (không phải shard đầy) → KHÔNG phải partial/lỗi, chỉ 0 mục nạp được.
+        rc, out, adds, _regs, _err, _lc = _run_im110({"base110": 298, "ov110": 100}, 2,
+                                                       claim_deny_dids={"d1", "d2"})
+        return (rc == 0 and out.get("ok") is True and int(out.get("OK") or 0) == 0 and len(adds) == 0
+                and sum(1 for r in out.get("results") or [] if r.get("skipped") == "CLAIMED_ELSEWHERE") == 2)
+    _t110("r113_claim_all_denied_zero_added_no_side_effect_rc0", _c113_all_denied_zero_added_still_rc0)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

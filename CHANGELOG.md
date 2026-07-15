@@ -1,3 +1,46 @@
+# ★ v1.34.52 + GAS 2.21.2l (CHƯA DEPLOY) — F-04 ingest_claim + F-08 reg_get_bulk (2026-07-15)
+
+> Grill-with-docs 12 quyết định D1–D12 (`D:\Quốc hội\ke-hoach-gas-2.21.2l-ingest-claim-2026-07-15.md`), ý tưởng
+> tham khảo bundle Codex NHƯNG code viết lại từ đầu. **ĐỤNG WEBAPP LIVE PRODUCTION** — GAS `Code.2.21.2l.gs` đã
+> viết + test node harness xanh, nhưng **CHƯA `clasp deploy`** (chờ xác nhận riêng trước khi ghi đè deployment
+> live — xem việc tiếp theo). Client v1.34.52 đã đòi `EXPECT_VERSION=2.21.2l`; `tl ping` LIVE vẫn 2.21.2k cho
+> tới khi deploy — mọi lệnh `--apply` cần webapp mới sẽ tự DỪNG rc=2 với lỗi rõ ràng cho tới lúc đó.
+
+- **[F-04] `ingest_claim`** (Sheet tab `claims` riêng, cùng Spreadsheet với `files`, `LockService` — D1):
+  reservation identity xuyên host. `identity_hash` THỐNG NHẤT cho mọi đường ingest (D2) — hàm mới
+  `ingest_contract.identity_hash_for_drive_source()` dùng LẠI `_hash_payload` sẵn có (không thêm thuật toán
+  hash). Acquire hàng loạt 1 action (D9), commit GỘP vào `reg_get_bulk` (D3, không thêm round-trip), release
+  tường minh khi fail vĩnh viễn (D3). TTL 5 phút (D4); contested claim → skip + báo cáo, KHÔNG retry trong run
+  (D5); lazy GC ngay trong acquire (D10, dọn `committed`/`released`>24h).
+- **[F-08] `reg_get_bulk`**: đọc N key 1 lần, trả TOÀN BỘ 27 `REG_COLS_` (D6), commit claim gộp cùng round-trip.
+- **Client `cmd_ingest_missing` (v1.34.52)**: acquire claim cho TOÀN BỘ `to_add` TRƯỚC vòng lặp add (D9); item bị
+  host khác giữ → `CLAIMED_ELSEWHERE` vào `results`, loại khỏi batch, **KHÔNG tính FAIL** (rc vẫn 0 nếu phần còn
+  lại ổn); webapp cũ (<2.21.2l)/lỗi mạng khi gọi `ingest_claim` → `INGEST_CLAIM_FAILED` DỪNG rc=2 TRƯỚC mọi
+  side-effect (D8: claim optional server-side, mandatory client-side). Commit theo lô hằng số 10 (D7) qua
+  `reg_get_bulk` SAU vòng lặp add — best-effort, lô lỗi tự heal qua TTL 5' (không chặn kết quả run).
+  ★**Scope cut tường minh (không giấu)**: `ingest-local` (single-file, đã có `identity_hash`/confirm/plan_hash
+  riêng, cửa sổ race hẹp hơn ingest-missing theo batch) **CHƯA wiring claim** — để đợt sau.
+  ★**Scope cut khác**: KHÔNG release tường minh khi item fail tạm thời trong `ingest-missing` (dựa TTL 5' tự
+  heal — đủ an toàn vì claim chỉ che đúng cửa sổ add, không phải toàn vòng đời item).
+- **Test lần đầu cho GAS**: `references/gas_claim_test.js` — Node harness nạp `.gs` qua `vm` với stub GAS
+  services tối thiểu, gọi thẳng 4 hàm PURE (`_claimGcFilter_`/`_claimAcquireDecide_`/`_claimCommitDecide_`/
+  `_claimReleaseDecide_`) — test RACE THẬT (2 host cùng key, ai trước thắng), TTL reclaim, GC, double-commit
+  chặn qua `run_id` mismatch (D12). **19/19**. `node --check` cú pháp toàn file (copy `.js` tạm — `.gs` không
+  phải extension Node nhận trực tiếp).
+- TDD Python: r113 ×3 negative-input (claim denied → skip không FAIL; claim-endpoint-lỗi → rc=2 zero
+  side-effect; mọi claim bị từ chối → rc=0 zero-added). Selftest **940→943/943**.
+- ★**Bug bắt khi chạy thật**: `contract_check.py --bump` ghi CRLF trên Windows (`write_text` thiếu
+  `newline="\n"`) trong khi `.gitattributes` khóa `* -text` (byte thật, không eol-normalize) → SKILL.md
+  49121→49440B, VƯỢT trần 48KB (r67 kernel-size đỏ). Vá 4 chỗ `write_text` thiếu `newline="\n"` trong
+  `bump_after_deploy` (API_CONTRACT.md/tl.py/SKILL.md/RUNBOOK.md).
+
+## Việc tiếp theo (KHÔNG tự làm — cần xác nhận riêng)
+1. `clasp push -f` (an toàn, chưa đổi live) rồi **HỎI XÁC NHẬN** trước `clasp deploy -i <LIVE_DEPLOYMENT_ID>`
+   (ghi đè deployment production).
+2. Verify `tl ping`==2.21.2l, `contract_check.py --audit` khớp.
+3. Canary LIVE 1 tài liệu identity biết trước: claim acquire → source_add → commit qua `reg_get_bulk` → verify
+   registry đúng → thử race giả (2 acquire liên tiếp cùng key) trước khi mở rộng.
+
 # ★ v1.34.51 — doctor KHÔNG nhận nhầm notebook profile-khác thành vbqppl overflow-shard (điều tra live 2026-07-15)
 
 > Điều tra 55 finding row_kind "drift" còn lại sau v1.34.50 (user chọn "fix doctor code, giữ data"): READ-ONLY 2

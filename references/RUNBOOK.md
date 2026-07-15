@@ -287,7 +287,7 @@ python scripts/tl.py --profile vbthuong profile-info --json
 ```bash
 python scripts/tl.py ping        # hoặc: python scripts/gas.py
 ```
-- LIVE/EXPECT = `2.21.2k` (đã xác minh). `version == 2.21.2k` và `registry_schema == reg_cols_row_kind_v1` → tiếp. **KHÁC** → DỪNG, đối chiếu deploy. (Doctrine: **regen2 trên profile** chỉ chạy khi `version == 2.21.2k`; version-gate tự CHẶN nếu server trôi xuống thấp hơn — an toàn, không phình.)
+- LIVE/EXPECT = `2.21.2l` (đã xác minh). `version == 2.21.2l` và `registry_schema == reg_cols_row_kind_v1` → tiếp. **KHÁC** → DỪNG, đối chiếu deploy. (Doctrine: **regen2 trên profile** chỉ chạy khi `version == 2.21.2l`; version-gate tự CHẶN nếu server trôi xuống thấp hơn — an toàn, không phình.)
 - Ưu tiên `tl.py`. Nếu cần client fallback tối thiểu: `python scripts/_fallback/gas.py ACTION key=value`.
 - Lỗi "Sai token" → kiểm `TL_WEBAPP/TL_TOKEN` hoặc chạy `tl init-config`; mirror token có thể private nên không trông chờ tải tự động mơ hồ.
 
@@ -509,7 +509,7 @@ python scripts/tl.py manifest --touched-drive --confirm yes # chỉ khi cần qu
 - `regen2` GIỮ cột curate `REG_NLM_KEEP_`; cột mới muốn sống qua regen2 phải khai báo + Deploy + `reg_addcols`.
 - Profile khác `vbqppl` mặc định `manifestScope=own`; tuyệt đối không đi vào folder category kế thừa.
 - Guard dừng trước ghi nếu `new_own_count > max(2×old_own_count, old_own_count+50)`; chỉ override bằng `--confirm-blowup yes` sau khi đã kiểm scope.
-- Regen profile chỉ chạy khi `ping.version=2.21.2k`; server cũ bị chặn trước khi ghi.
+- Regen profile chỉ chạy khi `ping.version=2.21.2l`; server cũ bị chặn trước khi ghi.
 - KHÔNG chèn `changes_init` ở END (sửa lệch v1.12.0).
 
 Nếu registry profile đã bị phình:
@@ -589,8 +589,8 @@ Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + 
 
 
 ### v1.17.19 safe issue_year parser
-- (Lịch sử) parser `issue_year` an toàn của manifest (từ bản 2.21.2d) tránh lấy nhầm năm từ `tukhoa/keywords` chứa số hiệu luật gốc — giữ qua tới bản LIVE `Code.2.21.2k.gs`.
-- Gói khớp LIVE/EXPECT `2.21.2k` (đã xác minh `ping.version`). `Code.2.21.2k.gs` = regen2 own-scope + guard + row_kind; nếu ping khác thì dừng và đối chiếu deploy.
+- (Lịch sử) parser `issue_year` an toàn của manifest (từ bản 2.21.2d) tránh lấy nhầm năm từ `tukhoa/keywords` chứa số hiệu luật gốc — giữ qua tới bản LIVE `Code.2.21.2l.gs`.
+- Gói khớp LIVE/EXPECT `2.21.2l` (đã xác minh `ping.version`). `Code.2.21.2l.gs` = regen2 own-scope + guard + row_kind; nếu ping khác thì dừng và đối chiếu deploy.
 
 
 ## v1.17.26 combined external-ingest + instruction-audit gate

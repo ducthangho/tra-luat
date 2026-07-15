@@ -1,14 +1,14 @@
 # tra-luat — HỢP ĐỒNG API SỐNG (webapp Apps Script)
 
-> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2k`** · đã xác minh `ping.version=2.21.2k`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · regen2 profile-own scope + blowup guard + row_kind; `tl.py EXPECT_VERSION=2.21.2k`.
+> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2l`** · đã xác minh `ping.version=2.21.2l`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · regen2 profile-own scope + blowup guard + row_kind; `tl.py EXPECT_VERSION=2.21.2l`.
 > **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema`. Nếu KHÁC
-> `2.21.2k`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2k` thì thiếu regen2 own-scope/guard → deploy lại
-> `Code.2.21.2k.gs`; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
+> `2.21.2l`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
+> `Code.2.21.2l.gs`; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
 > nhãn cũ, KHÔNG phải phiên bản deploy; nguồn sự thật = `ping.version`.)
 >
 > **Slot theo notebook (LIVE từ 2.21.2g):** `nlm_slots`/`nlm_preflight`/`nlm_dedup` đếm theo
 > `nlm_notebook_id == notebookId`; dòng RỖNG quy về `baseNotebookId`=VBQPPL nền (VBQPPL vẫn đếm đúng không
-> cần backfill; notebook dự án hết `NOTEBOOK_FULL` giả). **(Cần 2.21.2k)** `row_kind=ref` bị loại khỏi registry
+> cần backfill; notebook dự án hết `NOTEBOOK_FULL` giả). **(Cần 2.21.2l)** `row_kind=ref` bị loại khỏi registry
 > slot mặc định; truyền `countRefs=true`/`count_refs=true` để ước lượng gồm tham chiếu. Trước khi `source_add`,
 > số vật lý của notebook phải lấy từ `notebook_get.source_count`; registry slot chỉ là estimate/dedup.
 >
@@ -65,7 +65,7 @@
 
 | action | GET/POST | params bắt buộc | params tùy chọn | response (khóa chính) |
 |---|---|---|---|---|
-| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2k', schema_version:'2.21.2k', registry_schema:'reg_cols_row_kind_v1', registry_cols` |
+| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2l', schema_version:'2.21.2l', registry_schema:'reg_cols_row_kind_v1', registry_cols` |
 | `config` | GET | — | — | `ok, version:'2.11.0', config, rootFolderId` (không lộ token) |
 | `readconfig` | GET | — | — | `ok, mirrored, configFileId?, updated?, downloadUrl?, config` |
 | `writeconfig` | GET | — | `webappUrl` | `ok, configFileId, name, rootFolderId, downloadUrl, config` |
@@ -173,12 +173,21 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `reg_upsert` | GET | `drive_id` | **bất kỳ cột REG_COLS_** (dùng `sohieu`, KHÔNG `so_hieu`) | `ok, drive_id, updated` |
 | `reg_bulk` | **POST** | `items[]` (`[{drive_id\|nlm_source_id, <cột>}]`) | `cols` (mặc định `'nlm_title'`) | `ok, total, patched, missed, miss[], cols[]` |
 | `reg_delete` | **POST** | **`confirm='yes'`**, `drive_ids[]` | `require_removed` (mặc định `'yes'`) | `ok, requested, removed, skipped_live, not_found` |
-| `reg_clear` | GET | `drive_id`\|`nlm_source_id` | `cols` (nlm_*/note tự do; **2.21.2k: cột thường ∈ REG_COLS_ cần thêm `force='yes'`; drive_id/name BẢO VỆ**), `confirm='yes'` | `ok, cleared, drive_ids[], cols[]` |
+| `reg_clear` | GET | `drive_id`\|`nlm_source_id` | `cols` (nlm_*/note tự do; **2.21.2l: cột thường ∈ REG_COLS_ cần thêm `force='yes'`; drive_id/name BẢO VỆ**), `confirm='yes'` | `ok, cleared, drive_ids[], cols[]` |
 | `reg_addcols` | GET | **`confirm='yes'`** | — | `ok, cols, header[]` (ghi lại header sheet — chạy 1 lần sau khi thêm cột) |
 | `map_set` | GET | `drive_id`\|`sohieu` | `nlm_source_id, status, notebookId`(=`nlm_notebook_id`\|`notebook`)`, nlm_title` | `ok, drive_id, updated` (gọi SAU mỗi `source_add` ok; **v1.18: LUÔN truyền `notebookId` để slot đếm đúng theo notebook**) |
 | `map_unpushed` | GET | — | `includeStale, refresh` | `ok, count, rows[], nlm_quota{tier,cap,pushed,slots_free}` |
 | `map_mark_stale` | GET | `drive_id` | — | `ok, drive_id, updated` |
 | `register` | GET | `fileId` | `name, mime, sha256` | `ok, fileId, registered` (chữ ký cũ; ghi vào sheet) |
+| `ingest_claim` | **POST** | `run_id`; `keys[]` (mảng `identity_hash`) và/hoặc `release_keys[]` | `drive_ids[]` (song song `keys`, chỉ để lưu tham khảo) | `ok, run_id, results:[{identity_hash,granted,reason,source_id?}], granted, denied, released[], release_failed[]` |
+| `reg_get_bulk` | GET/POST | `keys[]` | `key_field` (`'drive_id'`\|`'nlm_source_id'`, mặc định `drive_id`), `commit_claims[]` (`[{identity_hash,source_id,run_id}]`) | `ok, key_field, count, rows[]` (NGUYÊN THỨ TỰ `keys`, không khớp → `null`; TOÀN BỘ 27 `REG_COLS_`/dòng) + `committed[], commit_failed[]` nếu có `commit_claims` |
+
+> **v2.21.2l (F-04/F-08 — CHƯA DEPLOY tại thời điểm viết, xem CHANGELOG v1.34.52):** `ingest_claim` là
+> reservation identity XUYÊN HOST (Sheet tab `claims` riêng, TTL 5 phút) — acquire TRƯỚC `source_add`, chống 2
+> host cùng nạp 1 nội dung. `granted=false` với `reason='ALREADY_COMMITTED'` kèm `source_id` → LINK thay vì add
+> lại; `reason='HELD_BY_OTHER'` → thử lại sau (không phải lỗi). `reg_get_bulk.commit_claims` GỘP commit claim
+> vào cùng round-trip readback (không round-trip riêng) — `commit_failed[].reason='RUN_ID_MISMATCH'` nghĩa là
+> claim đã bị host khác reclaim (đã hết TTL) SAU khi bạn acquire — đừng ghi đè, chạy lại từ đầu cho item đó.
 
 > `reg_bulk` AN TOÀN: mặc định CHỈ vá cột `nlm_title`; mở rộng có kiểm soát qua `cols='nlm_title,nlm_status'`
 > (chỉ nhận cột thuộc REG_COLS_); chuỗi rỗng KHÔNG ghi đè; item không khớp → `miss` (tín hiệu mồ côi).
@@ -208,11 +217,11 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 > nghi bị thay thế → chạy `vb_status` (hoặc `nlm_preflight`) cho số hiệu chính + số hiệu đích bị sửa.
 > `nlm_preflight.decision`: ADD → source_add · SKIP → trùng/đầy · REVIEW → HỎI người dùng.
 >
-> **v2.21.2k — ĐẾM SLOT SHARD OVERFLOW TRƯỚC KHI ROUTE:** khi route overflow (base đầy/gần-đầy + overflow
+> **v2.21.2l — ĐẾM SLOT SHARD OVERFLOW TRƯỚC KHI ROUTE:** khi route overflow (base đầy/gần-đầy + overflow
 > cấu hình), `nlm_preflight` gọi `nlm_slots` cho chính shard overflow → trả `overflow_slots` (used/remaining/
 > full/near_full) + `overflow_route.{slots,has_room,full}`. Base+overflow ĐỀU đầy → reason
 > `ALL_SHARDS_FULL_ASK_USER` (GIỮ decision=REVIEW: HỎI người dùng duyệt shard mới, KHÔNG khuyên add vào shard
-> đầy). Trước 2.21.2k chỉ đếm base rồi route overflow MÙ (audit v1.34.46). Client v1.34.47 đã fail-closed độc lập.
+> đầy). Trước 2.21.2l chỉ đếm base rồi route overflow MÙ (audit v1.34.46). Client v1.34.47 đã fail-closed độc lập.
 >
 > **v1.18/v1.19 — ĐẾM SLOT THEO NOTEBOOK (sửa `NOTEBOOK_FULL` giả, GS ≥ 2.21.2h):** `nlm_slots`/`nlm_preflight`/
 > `nlm_dedup` chỉ đếm/đối chiếu dòng có `nlm_notebook_id == notebookId`. Dòng RỖNG `nlm_notebook_id`
@@ -245,7 +254,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 > loai, linhvuc, goc, src_id, title_vn, linhvuc_list, hieuluc, sua_doi, nlm_title, nlm_notebook_id, tukhoa`
 > (KI-21). Cột MỚI muốn sống qua regen2 → thêm vào CẢ `REG_COLS_` lẫn `REG_NLM_KEEP_` rồi Deploy +
 > `reg_addcols&confirm=yes`.
-> **Scope profile (2.21.2k):** profile khác `vbqppl` mặc định `manifestScope=own`, chỉ quét `rootFolderId`
+> **Scope profile (2.21.2l):** profile khác `vbqppl` mặc định `manifestScope=own`, chỉ quét `rootFolderId`
 > và mọi subfolder của chính profile. `categoriesMode=inherit` không cấp quyền quét cây category VBQPPL.
 > Dòng `row_kind=ref` được giữ nguyên khi quét own. Trước `regWriteAll_`, guard chặn nếu
 > `new_own_count > max(2×old_own_count, old_own_count+50)`; override có chủ ý bằng `confirmBlowup=yes`.

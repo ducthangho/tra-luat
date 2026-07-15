@@ -55,6 +55,7 @@
     "hygiene",
     "ingest",
     "ingest-analyze",
+    "ingest-inbox",
     "ingest-local",
     "ingest-missing",
     "ingest-ocr",
@@ -78,10 +79,12 @@
     "nlm-auth-load",
     "nlm-auth-pull",
     "nlm-auth-stage",
+    "nlm-auth-status",
     "nlm-content",
     "nlm-cross",
     "nlm-get",
     "nlm-install",
+    "nlm-links",
     "nlm-list",
     "nlm-orphans",
     "nlm-query",
@@ -672,6 +675,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "ingest-inbox": {
+        "generated": true,
+        "idempotency_contract": "ingest_inbox",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
+      },
       "ingest-local": {
         "generated": false,
         "idempotency_contract": "ingest_local",
@@ -842,7 +855,27 @@
         "workflow_task": null,
         "write_scope": "nlm"
       },
+      "nlm-auth-status": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "nlm-content": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
+      "nlm-links": {
         "generated": true,
         "idempotency_contract": null,
         "read_only": true,
@@ -1614,10 +1647,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 133,
-      "high_risk": 23,
-      "total": 139,
-      "write_commands": 71
+      "generated_parsers": 136,
+      "high_risk": 24,
+      "total": 142,
+      "write_commands": 72
     },
     "schema": "command_registry.v1"
   },

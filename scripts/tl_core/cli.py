@@ -235,6 +235,8 @@ def build_parser() -> argparse.ArgumentParser:
     # notebook chính) → ca VBHN 06 mất reg_link mà reconcile báo sạch. --all-notebooks quét base + overflow 1 lệnh.
     p.add_argument("--all-notebooks", dest="all_notebooks", action="store_true",
                    help="(v1.34.34) DRY quét CẢ base + overflow shard (TL_OVERFLOW_NOTEBOOK_ID) 1 lệnh — lưới cuối lô no-wait; --apply vẫn chạy per-notebook qua notebook_id")
+    p.add_argument("--from-plan", dest="from_plan", nargs="?", const="auto",
+                   help="(v1.34.54 A3) --apply nạp plan-artifact sweep DRY vừa ghi (mặc định .tl_state/reconcile_plan_<nb>.json) — BỎ re-scan NLM; an toàn: TTL 15' + freshness reg_get_bulk trên dòng sắp ghi")
     p.set_defaults(fn=cmd_nlm_reconcile)
 
 
@@ -375,6 +377,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
     p.add_argument("--allow-dup-name", dest="allow_dup_name", action="store_true",
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
+    p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
+                   help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_ingest)
 
@@ -398,6 +402,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
     p.add_argument("--allow-dup-name", dest="allow_dup_name", action="store_true",
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
+    p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
+                   help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_file_add)
 

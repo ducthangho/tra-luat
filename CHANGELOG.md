@@ -1,3 +1,46 @@
+# ★ v1.34.54 — ĐỢT 2 kế hoạch nâng cấp: batch-link NLM (nlm-links/ingest-inbox) + preflight 2 tầng + plan-artifact reconcile (2026-07-15)
+
+> Tiếp grill Q1–Q10 (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`) — đợt 2 trọn: B1+B2+A1/C8+A3+A7a+C6.
+> TDD r115 ×12; 970/970 selftest; kernel SKILL.md giữ đúng trần 48KB (49151B — nén doctrine mới thành pointer).
+
+- **[B1] `tl nlm-links`** (read-only): stdout = CHỈ link Drive (mỗi dòng 1 — dán BATCH vào Add source → Websites;
+  UI nhận nhiều link cách nhau xuống dòng [docs Google], link Docs nhận thành nguồn Drive [user thực chứng]);
+  notebook-URL/đếm/hướng dẫn/tuổi cookie ở stderr; --json envelope. Lọc dòng chưa-trên-NLM (scope nền loại
+  ref/thuong; profile giữ chunk ref). **Ngưỡng batch-link** `NLM_BATCH_LINKS_THRESHOLD=2` (hằng số):
+  `ingest-missing --apply` pending>2 ∨ cookie chết → mode BATCH_LINKS (in links, KHÔNG add API; ép:
+  `--force-api-add`); `ingest-local` cookie chết → TỰ CHUYỂN add-tay --no-nlm-add (hết abort NLM_NOT_READY).
+- **[B2] `tl ingest-inbox`**: quét folder Drive (nền=inbox _HOP_NAP, profile=rootFolderId, hoặc --folder) qua
+  GAS list (né bẫy Drive MCP parentId folder share), diff registry reg_get_bulk 1 call, GDoc-native skip;
+  per-file child 2-BƯỚC DRY→plan_hash→apply (khuôn C1): nền `ingest-local --drive-id --auto-plan --no-nlm-add`,
+  profile `profile-ingest --drive-id --no-nlm-add` (MỚI — dừng sau Drive+registry, GIỮ PHẲNG); profile nghi
+  VBQPPL chất lượng cao (sohieu từ tên + docx/doc/pdf) → `vbqppl_candidate` + ask_user (KHÔNG tự nạp corpus).
+  Idempotency contract `ingest_inbox` (drift-lock r65 bắt đúng thiết kế). DRY mặc định; --apply --confirm yes.
+- **[A1+C8] preflight NLM 2 tầng + `tl nlm-auth-status [--wait]`**: `_nlm_preflight_report` = probe LIVE
+  notebook_get (M1) + tuổi cookie từ metadata.json last_validated (đời ~60'; >45' → WARN khuyên re-auth/
+  nlm-links); hasattr-guard cả 2 method (client fake không bị kết luận chết oan — bắt khi r113 hồi quy).
+  Warn nối vào ingest-local preflight + nlm-add + reconcile --apply. auth-status --wait poll 20s/300s.
+  Dogfood live: alive=true, age 40.5', est_remaining 19.5'.
+- **[A3] reconcile sweep plan-artifact + `--from-plan`**: --all-notebooks DRY ghi
+  `.tl_state/reconcile_plan_<nb>.json` (slim rows đủ dữ liệu ghi) + in `apply_commands` copy-paste;
+  `--all-notebooks --apply` vẫn chặn nhưng message ACTIONABLE (danh sách lệnh per-notebook đúng profile);
+  per-notebook `--apply --from-plan` BỎ re-scan NLM (source_list) — TTL 15' (PLAN_STALE), freshness
+  reg_get_bulk trên ĐÚNG dòng sắp ghi (đổi so plan → DROP + báo cáo), cấm kèm --clear-stale. Docs đã đúng
+  từ v1.34.50 (COMMANDS.md ghi DRY-only) — bổ sung mô tả mới.
+- **[A7a] gate dup-Điều tại ingest** (`_dup_dieu_scan` PURE): đếm Điều trùng số + letterhead thứ 2 sau dòng 80;
+  `_vb_ingest_auto_plan` cat 23 → warning `MIXED_DOCUMENT_SUSPECT_DUP_DIEU` (ca WCT trộn Berne), cat khác →
+  `DUP_DIEU_INFO`; profile-ingest in info stderr. KHÔNG chặn (VBHN lặp Điều hợp lệ).
+- **[C6] probe PDF dùng CHUNG extractor ocr-run** (`_read_local_text_for_analysis`/pdftotext, ngưỡng ≥200
+  chars): hết false-negative NO_TEXT_FOR_VERIFY trên PDF có text-layer (7/7 ca phiên OCR).
+- Test r115 ×12 (probe PDF, preflight 2 tầng + fake-guard, links rows/URL/stdout-thuần, force-api-add,
+  dup-Điều scan + auto-plan flags, from-plan fresh/DROP/STALE/clear-stale, all-notebooks actionable,
+  dead-cookie autoswitch, profile --no-nlm-add, ingest-inbox DRY/confirm/apply). Parser snapshot regen.
+- ★Bài học: kernel 48KB đã đầy 99.94% — doctrine mới phải là POINTER vài dòng (chi tiết COMMANDS.md), và
+  edit tool bị kẹt classifier giữa chừng → LUÔN chạy lại selftest xác nhận cả cặp edit đã vào (1 edit rơi
+  làm NameError doc_text).
+- Backlog đợt 3 (v1.34.55 + GAS 2.21.2m): D3 manifest_export đọc cột row_kind → D2 điều tra 55 dòng 80742228
+  (user quyết) → D1 claim ingest-local; C4 resume profile-ingest; C5 corpus canonical/chunks; C7 discover
+  0-kết-quả; E2 header-cache/E3 registry-first theo số đo TL_PERF; data-op WCT; A7b source-audit --dup-dieu.
+
 # ★ v1.34.53 — ĐỢT 1 kế hoạch nâng cấp (grill Q1–Q10): ownership-guard reconcile + 6 fix chặn-oan/false-success (2026-07-15)
 
 > Grill-with-docs 10 quyết định (`D:\Quốc hội\ke-hoach-nang-cap-tra-luat-2026-07-15.md`) từ 2 log phiên thật

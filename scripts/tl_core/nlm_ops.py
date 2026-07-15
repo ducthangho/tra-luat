@@ -502,12 +502,7 @@ def cmd_nlm_reconcile(a) -> int:
             pass
     if getattr(a, "all_notebooks", False):
         import argparse as _ap, io as _io, contextlib as _ctx
-        if getattr(a, "apply", False) or getattr(a, "clear_stale", False):
-            print(json.dumps({"ok": False, "error": "ALL_NOTEBOOKS_IS_DRY_ONLY",
-                              "note": "--all-notebooks chỉ QUÉT (DRY). Sửa: chạy per-notebook "
-                                      "`tl nlm-reconcile <notebook_id> --apply`."}, ensure_ascii=False),
-                  file=sys.stderr)
-            return 2
+        _blocked_apply = getattr(a, "apply", False) or getattr(a, "clear_stale", False)
         # v1.34.42 (BUG1): đảm bảo manifest cache MỘT LẦN trước vòng lặp — self-heal khi có creds (load_creds đã nạp
         # ở đầu hàm khi --refresh; v1.34.43), báo NEEDS_BOOT_PROFILE RÕ khi không, thay vì để mỗi inner reconcile fail
         # rc=2 (in stderr, bị nuốt khỏi per_notebook) rồi note khẳng định 'sạch' oan.
@@ -536,13 +531,27 @@ def cmd_nlm_reconcile(a) -> int:
         # SẠCH' oan trên shard chưa quét ('sai mà báo thành công'). Nay quét đủ shard registry-biết.
         _shards = _resolve_overflow_shards(_ent, _base)
         _nbs = [_base] + [s for s in _shards if s != _base]
+        _prof_pfx = f"tl --profile {_active_profile()} " if _active_profile() != DEFAULT_PROFILE else "tl "
+        _apply_cmds = [f"{_prof_pfx}nlm-reconcile {_n} --apply --from-plan" for _n in _nbs]
+        if _blocked_apply:
+            # v1.34.54 (A3/Q7=b — grill: 'chặn nhưng thông báo mơ hồ, docs lệch'): GIỮ DRY-only (apply diện rộng
+            # 1 lệnh đi ngược nếp apply-per-scope) nhưng thông báo ACTIONABLE — in sẵn lệnh per-notebook đúng
+            # profile, đúng thứ tự base→overflow, copy-paste được. --from-plan tái dùng plan sweep vừa ghi.
+            print(json.dumps({"ok": False, "error": "ALL_NOTEBOOKS_IS_DRY_ONLY",
+                              "notebooks": _nbs, "run_per_notebook": _apply_cmds,
+                              "note": "--all-notebooks chỉ QUÉT (DRY) — chạy sweep DRY trước (ghi plan-artifact) "
+                                      "rồi apply per-notebook bằng các lệnh trên (--from-plan bỏ re-scan; bỏ "
+                                      "--from-plan nếu muốn re-scan tươi)."}, ensure_ascii=False, indent=2),
+                  file=sys.stderr)
+            return 2
         _per, _all_ok = [], True
         for _nb_i in _nbs:
             _buf = _io.StringIO()
             _ns_i = _ap.Namespace(config=getattr(a, "config", None), profile=getattr(a, "profile", None),
                                   notebook_id=_nb_i, apply=False, clear_stale=False,
                                   force_unsafe=getattr(a, "force_unsafe", False),
-                                  refresh=getattr(a, "refresh", False), json=True, out=None, all_notebooks=False)
+                                  refresh=getattr(a, "refresh", False), json=True, out=None, all_notebooks=False,
+                                  plan_out=str(HERE / ".tl_state" / f"reconcile_plan_{_nb_i}.json"))
             try:
                 with _ctx.redirect_stdout(_buf):
                     _rc_i = cmd_nlm_reconcile(_ns_i)
@@ -562,6 +571,8 @@ def cmd_nlm_reconcile(a) -> int:
         _sweep_clean = _reconcile_sweep_clean(_all_ok, _per)
         _out_all = {"ok": _all_ok, "clean": _sweep_clean, "mode": "DRY", "all_notebooks": True,
                     "notebooks_swept": len(_nbs), "per_notebook": _per,
+                    "plan_artifacts": [str(HERE / ".tl_state" / f"reconcile_plan_{_n}.json") for _n in _nbs],
+                    "apply_commands": _apply_cmds,   # v1.34.54 A3: copy-paste per-notebook (--from-plan bỏ re-scan)
                     "note": _reconcile_sweep_note(_all_ok, _per)}   # v1.34.42/50 (BUG1): note ĐIỀU KIỆN, hết 'sạch' oan
         _o = getattr(a, "out", None)
         if _o:
@@ -574,31 +585,109 @@ def cmd_nlm_reconcile(a) -> int:
     nb, _nberr = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
     if _nberr:
         print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
-    try:
-        nc = _imp("nlm_cli")
-        live = nc.source_list(nb, skip_freshness=True)
-    except Exception as e:
-        print(json.dumps({"ok": False, "error": f"nlm_cli lỗi: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
-    if not live.get("ok"):
-        print(json.dumps({**live, "note": "fallback: MCP notebook_get hoặc `nlm login`"}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
-    live_ids = {s.get("id") for s in live["sources"] if s.get("id")}
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        print(f"[tl] nlm-reconcile: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
-    # v1.29.7 (log NĐ131 #5): nguồn vừa thêm qua nlm-add báo 'unregistered' oan vì manifest CACHE CŨ (row registry
-    # đã có nhưng chưa vào cache) → bắc-cầu drive_id không thấy entry. SELF-HEAL: có unregistered mà chưa refresh
-    # → tự refresh manifest 1 LẦN + re-plan (nhiều ca unregistered → link_candidates ngay, --apply backfill được).
-    if plan["unregistered"] and not getattr(a, "refresh", False):
-        print(f"[tl] {len(plan['unregistered'])} nguồn 'unregistered' + manifest chưa refresh → tự refresh + đối soát lại "
-              f"(row vừa ingest thường chỉ thiếu trong cache)…", file=sys.stderr, flush=True)
+    # v1.34.54 (A3/Q7b — 'lần 2 phải nhanh hơn sau DRY'): --apply --from-plan [path] nạp PLAN ARTIFACT sweep DRY
+    # vừa ghi → BỎ re-scan (source_list NLM + manifest refresh = phần đắt nhất); an toàn bằng TTL 15' + freshness
+    # reg_get_bulk trên ĐÚNG các dòng sắp ghi (dòng đổi so plan → DROP, báo cáo — không ghi mù theo plan cũ).
+    _from_plan = None
+    _fp_arg = getattr(a, "from_plan", None)
+    if _fp_arg is not None and getattr(a, "apply", False):
+        if getattr(a, "clear_stale", False):
+            print(json.dumps({"ok": False, "error": "FROM_PLAN_NO_CLEAR_STALE",
+                              "note": "--clear-stale đòi trạng thái LIVE tươi — chạy không --from-plan."},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        _fp = _fp_arg if str(_fp_arg) not in ("", "auto") else str(HERE / ".tl_state" / f"reconcile_plan_{nb}.json")
         try:
-            entries = _manifest_entries(refresh=True)
-            plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
-        except Exception as _re:  # noqa: BLE001
-            print(f"[tl] ⚠ refresh manifest lỗi ({_re}) — dùng plan cũ.", file=sys.stderr, flush=True)
+            _art = json.loads(Path(_fp).read_text(encoding="utf-8"))
+        except Exception as _fpe:  # noqa: BLE001
+            print(json.dumps({"ok": False, "error": "PLAN_NOT_FOUND", "path": str(_fp), "detail": str(_fpe),
+                              "note": "Chạy `tl nlm-reconcile --all-notebooks` (DRY, ghi plan) trước; hoặc bỏ "
+                                      "--from-plan để re-scan tươi."}, ensure_ascii=False), file=sys.stderr)
+            return 2
+        import time as _t54
+        _age_s = _t54.time() - float(_art.get("created_ts") or 0)
+        if _art.get("schema") != "reconcile_plan.v1" or str(_art.get("notebook")) != str(nb):
+            print(json.dumps({"ok": False, "error": "PLAN_MISMATCH", "path": str(_fp),
+                              "plan_notebook": _art.get("notebook"), "notebook": nb}, ensure_ascii=False),
+                  file=sys.stderr)
+            return 2
+        if _age_s > 900:
+            print(json.dumps({"ok": False, "error": "PLAN_STALE", "age_s": round(_age_s), "ttl_s": 900,
+                              "note": "Plan quá 15' — chạy lại sweep DRY (hoặc bỏ --from-plan)."},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        _from_plan = {"path": str(_fp), "age_s": round(_age_s, 1), "art": _art}
+    if _from_plan is None:
+        try:
+            nc = _imp("nlm_cli")
+            live = nc.source_list(nb, skip_freshness=True)
+        except Exception as e:
+            print(json.dumps({"ok": False, "error": f"nlm_cli lỗi: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
+        if not live.get("ok"):
+            print(json.dumps({**live, "note": "fallback: MCP notebook_get hoặc `nlm login`"}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        live_ids = {s.get("id") for s in live["sources"] if s.get("id")}
+        try:
+            entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+        except Exception as e:
+            print(f"[tl] nlm-reconcile: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
+        plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
+        # v1.29.7 (log NĐ131 #5): nguồn vừa thêm qua nlm-add báo 'unregistered' oan vì manifest CACHE CŨ (row registry
+        # đã có nhưng chưa vào cache) → bắc-cầu drive_id không thấy entry. SELF-HEAL: có unregistered mà chưa refresh
+        # → tự refresh manifest 1 LẦN + re-plan (nhiều ca unregistered → link_candidates ngay, --apply backfill được).
+        if plan["unregistered"] and not getattr(a, "refresh", False):
+            print(f"[tl] {len(plan['unregistered'])} nguồn 'unregistered' + manifest chưa refresh → tự refresh + đối soát lại "
+                  f"(row vừa ingest thường chỉ thiếu trong cache)…", file=sys.stderr, flush=True)
+            try:
+                entries = _manifest_entries(refresh=True)
+                plan = _nlm_reconcile_plan(live.get("sources") or list(live_ids), entries, nb)
+            except Exception as _re:  # noqa: BLE001
+                print(f"[tl] ⚠ refresh manifest lỗi ({_re}) — dùng plan cũ.", file=sys.stderr, flush=True)
+    else:
+        live_ids = set()
+        try:
+            entries = _manifest_entries(refresh=False)   # cache LOCAL (rẻ) — chỉ cho topology row_kind bên dưới
+        except Exception:  # noqa: BLE001
+            entries = []
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        g0 = _gas()
+        _artd = _from_plan["art"]
+        _rows_ln, _rows_bf = list(_artd.get("link_candidates") or []), list(_artd.get("backfill") or [])
+        _dids54 = [r.get("drive_id") for r in (_rows_ln + _rows_bf) if r.get("drive_id")]
+        _dropped54 = []
+        if _dids54:
+            try:
+                _rgb54 = g0.get("reg_get_bulk", keys=json.dumps(_dids54), key_field="drive_id")
+            except Exception as _rge54:  # noqa: BLE001
+                _rgb54 = {"ok": False, "error": str(_rge54)}
+            if not _rgb54.get("ok"):
+                print(json.dumps({"ok": False, "error": "FRESHNESS_CHECK_FAILED", "detail": _rgb54.get("error"),
+                                  "note": "Không đọc được registry để đối chiếu plan — DỪNG (bỏ --from-plan để "
+                                          "re-scan, hoặc thử lại)."}, ensure_ascii=False), file=sys.stderr)
+                return 2
+            _cur_by_did = {str((r or {}).get("drive_id") or ""): (r or {}) for r in (_rgb54.get("rows") or []) if r}
+            def _fresh_ln(r):
+                _cur = _cur_by_did.get(str(r.get("drive_id")))
+                _sid = str((_cur or {}).get("nlm_source_id") or "").strip()
+                _cnb = str((_cur or {}).get("nlm_notebook_id") or "").strip()
+                return _cur is not None and (not _sid or _sid == str(r.get("source_id"))) and (not _cnb or _cnb == str(nb))
+            def _fresh_bf(r):
+                _cur = _cur_by_did.get(str(r.get("drive_id")))
+                return _cur is not None and str((_cur or {}).get("nlm_source_id") or "").strip() == str(r.get("nlm_source_id"))
+            _keep_ln = [r for r in _rows_ln if _fresh_ln(r)]
+            _keep_bf = [r for r in _rows_bf if _fresh_bf(r)]
+            _dropped54 = ([{"drive_id": r.get("drive_id"), "kind": "link", "reason": "CHANGED_SINCE_PLAN"}
+                           for r in _rows_ln if r not in _keep_ln]
+                          + [{"drive_id": r.get("drive_id"), "kind": "backfill", "reason": "CHANGED_SINCE_PLAN"}
+                             for r in _rows_bf if r not in _keep_bf])
+            _rows_ln, _rows_bf = _keep_ln, _keep_bf
+        plan = {"backfill": _rows_bf, "desync_real": [], "already_removed": [], "other_notebook": [],
+                "foreign_skipped": [], "stale": [], "unregistered": [], "registry_on_nlm_rows": None,
+                "link_candidates": [{"entry": r, "source_id": r.get("source_id"), "by": r.get("by") or "plan",
+                                     "title": r.get("name") or ""} for r in _rows_ln]}
+        print(f"[tl] nlm-reconcile --from-plan: {_from_plan['path']} (tuổi {_from_plan['age_s']}s) — "
+              f"link={len(_rows_ln)} backfill={len(_rows_bf)} dropped={len(_dropped54)} (bỏ re-scan NLM).",
+              file=sys.stderr, flush=True)
     from collections import Counter as _Counter
     rm_by_status = dict(_Counter(str(e.get("nlm_status") or "").strip().lower() for e in plan["already_removed"]))
     out = {"ok": True, "notebook": nb, "live_on_nlm": len(live_ids),
@@ -617,11 +706,39 @@ def cmd_nlm_reconcile(a) -> int:
            "desync_real_sample": [f"{_entry_sohieu(e)}|{_entry_name(e)[:40]}" for e in plan["desync_real"][:10]],
            "foreign_skipped_sample": [f"{c['source_id'][:12]}…↛{(c.get('registry_notebook') or '?')[:12]}… (by {c['by']}) | {str(c.get('title') or '')[:32]}" for c in (plan.get("foreign_skipped") or [])[:10]],
            "unregistered_sample": plan["unregistered"][:8]}
+    if _from_plan is not None:   # v1.34.54 A3: chỉ số live lấy từ artifact (run này KHÔNG gọi NLM)
+        out["live_on_nlm"] = _from_plan["art"].get("live_on_nlm")
+        out["from_plan"] = {"path": _from_plan["path"], "age_s": _from_plan["age_s"],
+                            "dropped": _dropped54, "note": "re-scan NLM đã bỏ — freshness check reg_get_bulk trên dòng sắp ghi"}
     if not getattr(a, "apply", False):
         out["note"] = ("DRY. --apply: reg_bulk nlm_notebook_id cho backfill + LINK nlm_source_id cho link_candidates "
                        "(bắc cầu gdoc↔source_id). --clear-stale: CHỈ clear desync_real (status pushed/synced nhưng vắng "
                        "NLM); KHÔNG đụng already_removed (đã gỡ có chủ đích).")
+        _plan_out = getattr(a, "plan_out", None)
+        if _plan_out:
+            # v1.34.54 (A3 — yêu cầu hiệu năng Q7b: 'lần apply sau phải nhanh hơn sau khi đã DRY'): ghi PLAN
+            # ARTIFACT đủ dữ liệu ghi (slim rows) để `--apply --from-plan` BỎ re-scan (source_list + manifest =
+            # phần đắt nhất); apply chỉ còn freshness-check reg_get_bulk trên đúng các dòng sắp ghi + verify write.
+            import time as _t
+            _slim = lambda e: {"drive_id": _entry_drive_id(e), "nlm_source_id": (_entry_nlm(e) or "").strip(),   # noqa: E731
+                               "nlm_notebook_id": str(e.get("nlm_notebook_id") or ""),
+                               "row_kind": str(e.get("row_kind") or ""), "name": _entry_name(e)}
+            _art = {"schema": "reconcile_plan.v1", "notebook": nb, "created_ts": _t.time(),
+                    "live_on_nlm": len(live_ids),
+                    "backfill": [_slim(e) for e in plan["backfill"]],
+                    "link_candidates": [{**_slim(c["entry"]), "source_id": c["source_id"], "by": c["by"]}
+                                        for c in (plan.get("link_candidates") or [])],
+                    "desync_real": [_slim(e) for e in plan["desync_real"]]}
+            try:
+                Path(_plan_out).parent.mkdir(parents=True, exist_ok=True)
+                Path(_plan_out).write_text(json.dumps(_art, ensure_ascii=False, indent=1) + "\n",
+                                           encoding="utf-8", newline="\n")
+                out["plan_artifact"] = str(_plan_out)
+            except Exception as _pae:  # noqa: BLE001 — artifact best-effort, DRY vẫn trọn vẹn
+                out["plan_artifact_error"] = str(_pae)
         _emit_json_payload(out, getattr(a, "out", None)); return 0
+    for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tuổi cookie trước lô ghi (WARN; tầng-1 live đã nằm ở source_list phía trên)
+        print(f"[tl] ⚠ {_w54}", file=sys.stderr)
     # v1.34.49 (F-06): +row_kind vào gate-cols (superset — backfill/link trên shard overflow nay ghi row_kind)
     _ok_gate, _pfv = _apply_gate(a, write_cols="nlm_source_id,nlm_notebook_id,nlm_status,row_kind")   # (Pha 1) chống clobber/ghi-mù
     if not _ok_gate:
@@ -1400,6 +1517,175 @@ def _nlm_add_doc_type(explicit, drive_id) -> tuple:
     return "doc", "default"
 
 
+# ── v1.34.54 (A1+C8+B1 — grill Q3/Q8 2026-07-15): tuổi cookie + preflight 2 tầng + batch-link ──
+_NLM_COOKIE_LIFE_MIN = 60      # hồ sơ DBSC 2026-07-12: đời cookie ~1h, `nlm login` là đủ
+_NLM_COOKIE_WARN_AGE_MIN = 45  # tuổi vượt ngưỡng → khuyên re-auth trước lô dài / chuyển nlm-links
+NLM_BATCH_LINKS_THRESHOLD = 2  # grill Q3(a): >2 file → đường batch-link (hằng số, KHÔNG config env — D7)
+
+
+def _nlm_auth_age_minutes():
+    """v1.34.54 (A1/C8): tuổi cookie NLM local (PHÚT). Tín hiệu tươi THẬT = profiles/default/metadata.json
+    .last_validated (mirror `_nlm_auth_age_days` tl_gws — root auth.json.extracted_at không được nlm CLI mới
+    ghi lại); fallback auth.json.extracted_at (epoch). None = không đọc được (chưa login máy này)."""
+    from datetime import datetime as _dt
+    base = Path.home() / ".notebooklm-mcp-cli"
+    try:
+        meta = json.loads((base / "profiles" / "default" / "metadata.json").read_text(encoding="utf-8"))
+        lv = meta.get("last_validated")
+        if lv:
+            return (_dt.now() - _dt.fromisoformat(lv)).total_seconds() / 60.0
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        ts = json.loads((base / "auth.json").read_text(encoding="utf-8")).get("extracted_at")
+        if ts:
+            import time as _t
+            return (_t.time() - float(ts)) / 60.0
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def _nlm_preflight_report(notebook_id: str, *, probe: bool = True) -> dict:
+    """v1.34.54 (A1+C8, doctrine M1): tầng 1 = probe LIVE `notebook_get` (login --check KHÔNG chứng minh cookie
+    sống — M1 v1.33.35); tầng 2 = tuổi cookie + ước lượng còn lại (đời thường ~60'). warn[] chỉ CẢNH BÁO,
+    caller tự quyết chặn/không. probe=False khi caller đã tự probe (không gọi NLM 2 lần)."""
+    rep = {"alive": None, "why": "", "age_min": None, "est_remaining_min": None, "warn": []}
+    age = _nlm_auth_age_minutes()
+    if age is not None:
+        rep["age_min"] = round(age, 1)
+        rep["est_remaining_min"] = round(max(0.0, _NLM_COOKIE_LIFE_MIN - age), 1)
+        if age > _NLM_COOKIE_WARN_AGE_MIN:
+            rep["warn"].append(f"COOKIE_AGE_HIGH: cookie ~{age:.0f}' tuổi (đời thường ~{_NLM_COOKIE_LIFE_MIN}') "
+                               f"— nên `nlm login` trước lô dài, hoặc chuyển đường `tl nlm-links` (batch dán tay).")
+    if probe:
+        try:
+            nc = _imp("nlm_cli")
+            # hasattr-guard CẢ 2 method: client fake trong harness/driver tối giản (chỉ source_add/source_list)
+            # KHÔNG bị kết luận 'chết' oan — thiếu method probe thì alive giữ None (không probe được ≠ chết).
+            if hasattr(nc, "nlm_available") and not nc.nlm_available():
+                rep["alive"], rep["why"] = False, "nlm CLI không có trên PATH"
+            elif hasattr(nc, "notebook_get"):
+                r = nc.notebook_get(notebook_id)
+                rep["alive"] = bool(r.get("ok"))
+                if not rep["alive"]:
+                    rep["why"] = str(r.get("error") or "")[:120]
+        except Exception as e:  # noqa: BLE001
+            rep["alive"], rep["why"] = False, f"{type(e).__name__}: {e}"
+    return rep
+
+
+def cmd_nlm_auth_status(a) -> int:
+    """C8 (v1.34.54): trạng thái phiên NLM — probe live + tuổi cookie; `--wait` poll (mặc định 20s/lần, timeout
+    300s) tới khi SỐNG — dùng ngay sau khi login trình duyệt/`nlm login` để biết credential đã chảy vào chưa,
+    khỏi đoán thời điểm thử lại. rc=0 sống; rc=2 chết/hết timeout."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    nb, _nberr = _resolve_nlm_notebook(getattr(a, "notebook_id", None))
+    if _nberr:
+        nb = NLM_BASE_NOTEBOOK   # auth-status chỉ cần 1 notebook BẤT KỲ đọc được để probe — base là đủ
+    _interval = max(5, int(getattr(a, "interval", None) or 20))
+    _deadline = None
+    if getattr(a, "wait", False):
+        import time as _t
+        _deadline = _t.time() + max(_interval, int(getattr(a, "timeout", None) or 300))
+    _n = 0
+    while True:
+        _n += 1
+        rep = _nlm_preflight_report(nb)
+        out = {"ok": bool(rep.get("alive")), "schema": "nlm_auth_status.v1", "notebook_probed": nb,
+               "attempt": _n, **rep}
+        if rep.get("alive") or _deadline is None:
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+            return 0 if rep.get("alive") else 2
+        import time as _t
+        if _t.time() + _interval > _deadline:
+            out["timeout"] = True
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+            return 2
+        print(f"[tl] nlm-auth-status: chưa sống (lần {_n}: {rep.get('why') or '?'}) — thử lại sau {_interval}s…",
+              file=sys.stderr, flush=True)
+        _t.sleep(_interval)
+
+
+def _entry_links_url(e: dict) -> str:
+    """B1: URL dán-được cho 1 dòng registry — Docs mặc định; Sheets theo mime."""
+    did = _entry_drive_id(e)
+    if "spreadsheet" in str(e.get("mime") or "").lower():
+        return f"https://docs.google.com/spreadsheets/d/{did}"
+    return f"https://docs.google.com/document/d/{did}"
+
+
+def _nlm_links_rows(entries: list, *, profile_scope: bool) -> list:
+    """PURE (v1.34.54 B1): dòng CẦN NẠP NLM = có drive_id + CHƯA có nlm_source_id + không removed*.
+    Scope NỀN vbqppl loại row_kind ref/thuong (dòng tham khảo không thuộc notebook luật); profile giữ nguyên
+    (chunk con row_kind=ref của profile VẪN lên NLM)."""
+    out = []
+    for e in entries:
+        if not _entry_drive_id(e) or (_entry_nlm(e) or "").strip():
+            continue
+        if str(e.get("nlm_status") or "").strip().lower().startswith("removed"):
+            continue
+        if not profile_scope and _entry_row_kind(e) in {"ref", "thuong"}:
+            continue
+        out.append(e)
+    return out
+
+
+def cmd_nlm_links(a) -> int:
+    """B1 (v1.34.54, grill Q2/Q3=a): in DANH SÁCH LINK Drive để NẠP BATCH TAY vào NotebookLM — né cookie ~1h
+    khi lô dài. STDOUT = CHỈ LINK (mỗi dòng 1 — dán thẳng vào ô Websites/Links của UI; NLM nhận nhiều link cách
+    nhau xuống dòng [docs Google], link Docs được nhận thành nguồn Drive [user thực chứng 2026-07-15]).
+    Mọi chú thích (notebook URL, đếm, hướng dẫn, tuổi cookie) ở STDERR. OFFLINE đọc cache manifest (--refresh
+    khi cần tươi). Sau khi dán xong: `tl nlm-reconcile <notebook> --apply` để link registry (exact-title/A2-guard)."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    if getattr(a, "refresh", False):
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (SystemExit, Exception):  # noqa: BLE001
+            pass
+    try:
+        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] nlm-links: cần `tl boot`/`manifest` trước ({e}).", file=sys.stderr)
+        return 2
+    nb = (getattr(a, "notebook", None) or "").strip()
+    if not nb:
+        nb, _nberr = _resolve_nlm_notebook(None)
+        if _nberr:
+            print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr)
+            return 2
+    rows = _nlm_links_rows(entries, profile_scope=_active_profile() != DEFAULT_PROFILE)
+    _cat = (getattr(a, "cat", None) or "").strip()
+    if _cat:
+        rows = [e for e in rows if str(_entry_cat(e) or "").startswith(_cat) or str(_entry_cat(e) or "").split("_")[0] == _cat]
+    _lim = getattr(a, "limit", None)
+    _total = len(rows)
+    if _lim:
+        rows = rows[:int(_lim)]
+    links = [_entry_links_url(e) for e in rows]
+    nb_url = f"https://notebooklm.google.com/notebook/{nb}"
+    rep = _nlm_preflight_report(nb, probe=False)   # chỉ tuổi cookie — lệnh này OFFLINE, không gọi NLM
+    if getattr(a, "json", False) or getattr(a, "out", None):
+        payload = {"ok": True, "schema": "nlm_links.v1", "notebook": nb, "notebook_url": nb_url,
+                   "count": len(links), "total_pending": _total, "links": links,
+                   "rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e), "cat": _entry_cat(e)} for e in rows],
+                   "cookie_age_min": rep.get("age_min"),
+                   "next_steps": [f"Dán links vào Add source → Websites của {nb_url}",
+                                   f"tl nlm-reconcile {nb} --apply   # link registry (exact-title, ownership-guard A2)",
+                                   "tl register --drive-id <id> --corpus true  # từng dòng sau khi link (scope nền)"]}
+        _emit_json_payload(payload, getattr(a, "out", None))
+        return 0
+    for ln in links:
+        print(ln)
+    print(f"[tl] nlm-links: {len(links)}/{_total} dòng chưa-trên-NLM (scope {_active_profile()}).", file=sys.stderr)
+    print(f"[tl]   Notebook: {nb_url}", file=sys.stderr)
+    print("[tl]   Dán TOÀN BỘ stdout vào Add source → Websites (nhiều link/lần, cách nhau xuống dòng).", file=sys.stderr)
+    print(f"[tl]   Xong: tl nlm-reconcile {nb} --apply  (link exact-title; đã có ownership-guard).", file=sys.stderr)
+    for w in rep.get("warn") or []:
+        print(f"[tl]   ⚠ {w}", file=sys.stderr)
+    return 0
+
+
 def cmd_nlm_add(a) -> int:
     """(1) Thêm nguồn NLM qua CLI `nlm source add` (thay MCP source_add) — đúng directive CLI-first."""
     # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-add rơi về VBQPPL base).
@@ -1411,6 +1697,8 @@ def cmd_nlm_add(a) -> int:
     nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
     if _nberr:
         print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
+    for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tầng-2 tuổi cookie (WARN, không chặn; tầng-1 live = gate dedup bên dưới)
+        print(f"[tl] ⚠ {_w54}", file=sys.stderr)
     # v1.29.3 (AUDIT B3 #3): CỔNG dedup-live BẮT BUỘC trước source_add — nlm-add là đường push TRẦN duy nhất còn lại
     # (từng tạo trùng khi dùng làm recovery sau timeout). Khớp drive_id/title; url/file/text KHÔNG title → gate không
     # khớp được (vẫn liệt kê để lộ list_failed). Ép bỏ: --skip-live-check.

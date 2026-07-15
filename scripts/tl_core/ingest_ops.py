@@ -793,6 +793,30 @@ def cmd_ingest_missing(a) -> int:
               file=sys.stderr, flush=True)
     g = _gas()
     ok_n, link_n, skip_n, fail_n, reg_fail_n, results = 0, 0, 0, 0, 0, []
+    # v1.34.54 (B1/Q3=a — grill 2026-07-15): NGƯỠNG BATCH-LINK — (cookie chết ∨ pending > NLM_BATCH_LINKS_THRESHOLD)
+    # → KHÔNG add API từng file (11-19s/file + rủi ro chết giữa lô ~1h cookie) mà in DANH SÁCH LINK để dán batch
+    # vào UI notebook (1 lần), sau đó `tl nlm-reconcile --apply` link registry. Đường API cũ: --force-api-add.
+    if to_add and not getattr(a, "force_api_add", False):
+        _thr_over = len(to_add) > NLM_BATCH_LINKS_THRESHOLD
+        _rep54 = _nlm_preflight_report(target_nb, probe=not _thr_over)   # >ngưỡng thì khỏi tốn probe
+        _dead54 = (_rep54.get("alive") is False)
+        if _thr_over or _dead54:
+            _why54 = (f"pending={len(to_add)} > {NLM_BATCH_LINKS_THRESHOLD}" if _thr_over
+                      else f"cookie NLM chết ({_rep54.get('why') or '?'})")
+            _links54 = [_entry_links_url(e) for e in to_add]
+            _nb_url54 = f"https://notebooklm.google.com/notebook/{target_nb}"
+            print(f"[tl] ingest-missing → BATCH-LINK ({_why54}): KHÔNG add API. Dán {len(_links54)} link vào "
+                  f"Add source → Websites của {_nb_url54} rồi chạy `tl nlm-reconcile {target_nb} --apply`. "
+                  f"(Ép add API: --force-api-add; danh sách link thuần: `tl nlm-links`)", file=sys.stderr, flush=True)
+            for _w54 in (_rep54.get("warn") or []):
+                print(f"[tl]   ⚠ {_w54}", file=sys.stderr)
+            print(json.dumps({"ok": True, "mode": "BATCH_LINKS", "reason": _why54, "notebook": target_nb,
+                              "notebook_url": _nb_url54, "count": len(_links54), "links": _links54,
+                              "note": "Chưa add gì qua API — dán links vào UI (batch), xong reconcile --apply "
+                                      "để link registry (ownership-guard A2). Base đầy → dán vào shard overflow "
+                                      "rồi reconcile --all-notebooks (DRY) xem hướng dẫn per-notebook."},
+                             ensure_ascii=False, indent=2))
+            return 0
     # v1.34.52 (F-04/D9 — grill GAS 2.21.2l 2026-07-15): ACQUIRE claim identity_hash cho TOÀN BỘ to_add
     # TRƯỚC vòng lặp add — chặn 2 host cùng add 1 identity trong cửa sổ race giữa preflight-dedup (xong ở
     # trên) và source_add thật (sắp chạy). Optional server-side (D8): webapp cũ (<2.21.2l) không có action
@@ -1549,6 +1573,18 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
                 return txt, f"{path}#docx-local"
         except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → giữ hành vi cũ (probe rỗng)
             pass
+    if ext == ".pdf":
+        # v1.34.54 (C6 — log phiên OCR 2026-07-15: 7/7 PDF bị DRY báo NO_TEXT_FOR_VERIFY/OCR_UNVERIFIED nhưng
+        # `ocr-run --engine auto` lại engine_used=none tức CÓ text-layer — 2 bộ trích text lệch nhau): probe dùng
+        # CHUNG extractor với ocr-run (`_read_local_text_for_analysis` — pdftotext) thay vì bó tay với PDF.
+        # Ngưỡng ≥200 chars = cùng ngưỡng ocr-run coi là có text-layer; dưới ngưỡng giữ probe rỗng (trung thực —
+        # PDF scan thật vẫn phải đi đường OCR).
+        try:
+            _pdf_txt, _pdf_warns = _read_local_text_for_analysis(Path(path))
+        except Exception:  # noqa: BLE001 — pdftotext lỗi → giữ hành vi cũ (probe rỗng)
+            _pdf_txt, _pdf_warns = "", []
+        if len(_pdf_txt or "") >= 200:
+            return _pdf_txt, f"{path}#pdf-text-layer"
     return "", ""
 
 
@@ -1744,6 +1780,36 @@ def _profile_loai_evidence(loai: str, text: str, name: str, explicit: bool) -> t
     return "", "suppressed"
 
 
+_DUP_DIEU_HEAD_RE = re.compile(r"(?im)^\s*Điều\s+(\d{1,3}[a-zđ]?)\s*[.:]")
+_SECOND_LETTERHEAD_RE = re.compile(r"(?im)^\s*(CỘNG\s*H[OÒ]A\s*XÃ\s*HỘI|Số\s*:\s*\d{1,5}\s*/)")
+
+
+def _dup_dieu_scan(text: str) -> dict:
+    """PURE (v1.34.54 A7a — ca WCT_HOP_NAP trộn toàn văn Berne: 1 file điều ước chứa 2 văn bản nối nhau, 'Điều 8'
+    xuất hiện 2 lần nội dung khác → NLM/RAG trả nhầm điều khoản): đếm số hiệu Điều LẶP + dò letterhead THỨ HAI
+    sau dòng 80. KHÔNG kết luận thay người — caller quyết WARN (cat 23 điều ước) / info (VBHN/phụ lục sửa đổi
+    lặp Điều là BÌNH THƯỜNG — không chặn để khỏi false-positive)."""
+    counts: dict[str, int] = {}
+    for m in _DUP_DIEU_HEAD_RE.finditer(text or ""):
+        k = m.group(1).lower()
+        counts[k] = counts.get(k, 0) + 1
+    dups = {k: v for k, v in counts.items() if v >= 2}
+    second = None
+    for i, ln in enumerate((text or "").splitlines()[80:], start=81):
+        if _SECOND_LETTERHEAD_RE.match(ln):
+            second = i
+            break
+    return {"dup_articles": dups, "dup_count": len(dups), "second_header_line": second,
+            "suspect": bool(dups and second is not None)}
+
+
+def _dup_dieu_note(scan: dict) -> str:
+    """PURE: 1 dòng mô tả kết quả _dup_dieu_scan cho stderr/warning."""
+    _sample = ", ".join(f"Điều {k}×{v}" for k, v in list((scan.get("dup_articles") or {}).items())[:5])
+    _sh = scan.get("second_header_line")
+    return _sample + (f" + letterhead thứ 2 ~dòng {_sh}" if _sh else "")
+
+
 def _ingest_verify_gate(text: str, classification: dict | None = None,
                         source_quality: str = "digital", ocr_verified: bool = False,
                         base_profile: bool | None = None) -> dict:
@@ -1899,6 +1965,10 @@ def cmd_profile_ingest(a) -> int:
                 "info": ["SPREADSHEET_TEXT_VERIFY_SKIPPED"]}
     else:
         gate = _ingest_verify_gate(probe_text, info, source_quality, getattr(a, "ocr_verified", False))
+        _dd54 = _dup_dieu_scan(probe_text)   # v1.34.54 A7a: profile = info-only (VBHN/mục lục lặp Điều bình thường)
+        if _dd54.get("dup_count"):
+            print(f"[tl] ℹ dup-Điều (A7a): {_dup_dieu_note(_dd54)} — info; nghi file trộn nhiều văn bản thì soi tay.",
+                  file=sys.stderr)
     size_bytes = Path(f).stat().st_size
     large_threshold = int(getattr(a, "large_threshold", None) or NLM_LARGE_SRC_BYTES)
     chunk_max = int(getattr(a, "chunk_max_chars", None) or 100000)
@@ -2084,6 +2154,10 @@ def cmd_profile_ingest(a) -> int:
                 return 2
             hieuluc = DRAFT_WARNING
         gate = _ingest_verify_gate(verify_text, info, source_quality, getattr(a, "ocr_verified", False))
+        _dd54a = _dup_dieu_scan(verify_text)   # v1.34.54 A7a: apply đọc text canonical — info-only cho profile
+        if _dd54a.get("dup_count"):
+            print(f"[tl] ℹ dup-Điều (A7a): {_dup_dieu_note(_dd54a)} — info; nghi file trộn nhiều văn bản thì soi tay.",
+                  file=sys.stderr)
         chunks = _split_by_dieu_chunks(verify_text, chunk_max) if (len(verify_text) > chunk_max or size_bytes > large_threshold) else []
     note = _profile_ingest_note(info, gate, source_quality, len(chunks))
     if not gate.get("ok"):
@@ -2096,6 +2170,23 @@ def cmd_profile_ingest(a) -> int:
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 2
 
+    if getattr(a, "no_nlm_add", False):
+        # v1.34.54 (B2 — trình tự grill Q4: Drive + sắp xếp TRƯỚC, NLM CUỐI LÔ qua nlm-links/batch dán tay):
+        # dừng sau Drive+registry, mirror `ingest-local --no-nlm-add` (v1.34.35). corpus KHÔNG set (S4).
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "corpus": "false", "row_kind": "own",
+                                      "note": note, "hieuluc": hieuluc}],
+                                 "name,corpus,row_kind,note,hieuluc")
+        out = {"ok": bool(rb.get("verified")), "nlm": "SKIPPED_BY_FLAG", "gdoc": gdoc, "src_id": fid,
+               "name": doc_name, "gdoc_url": f"https://docs.google.com/document/d/{gdoc}",
+               "notebook_url": f"https://notebooklm.google.com/notebook/{notebook_id}",
+               "registry_verified": bool(rb.get("verified")),
+               "next_steps": [f"tl --profile {_active_profile()} nlm-links   # stdout = link dán batch vào notebook",
+                              f"tl --profile {_active_profile()} nlm-reconcile {notebook_id} --apply   # link registry sau khi dán"]}
+        if len(chunks) > 1:
+            out["note"] = ("File LỚN cần chunk khi lên NLM — đường add-tay KHÔNG tự tạo chunk GDoc; khi nạp NLM "
+                           "chạy lại profile-ingest KHÔNG --no-nlm-add (pipeline chunk+add đầy đủ).")
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+        return 0 if rb.get("verified") else 2
     nc = _imp("nlm_cli")
     # v1.29.3 (AUDIT B3 #3): dedup-live gate TRƯỚC source_add — ca thật: re-run profile-ingest sau fail giữa chừng tạo
     # GDoc MỚI nhưng TITLE CŨ → nguồn trùng nội dung trên notebook. Gate khớp title canonical + mọi chunk-title.
@@ -2457,13 +2548,16 @@ def cmd_ingest_local(a) -> int:
         except Exception as _ne:  # noqa: BLE001
             _nlm_why = f"{type(_ne).__name__}: {_ne}"
         if not _nlm_ok:
-            print(json.dumps({"ok": False, "step": "nlm_preflight", "aborted": True, "reason": "NLM_NOT_READY",
-                              "detail": _nlm_why, "notebook": _nb_check,
-                              "note": "DỪNG TRƯỚC upload (chưa đụng Drive/registry — không có chuỗi dở dang). "
-                                      "Sửa: `tl up --nlm` (cài + auth NLM) rồi chạy lại; HOẶC --skip-nlm-preflight "
-                                      "nếu chấp nhận tự vá bước nlm add sau (`tl nlm-add` + `tl nlm-reconcile`)."},
-                             ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            # v1.34.54 (B1/Q3=a — TRƯỚC: abort NLM_NOT_READY rc=2, user phải tự chạy lại với --no-nlm-add):
+            # cookie chết → TỰ CHUYỂN quy trình ADD-TAY (v1.34.35): vẫn hoàn tất Drive+registry, KHÔNG đụng NLM,
+            # output kèm link dán tay + next_steps reconcile. Muốn ép thử API add bất chấp: --skip-nlm-preflight.
+            print(f"[tl] ⚠ NLM chết ({_nlm_why}) → TỰ CHUYỂN --no-nlm-add (ADD-TAY): xong Drive+registry, "
+                  f"dán link vào notebook rồi `tl nlm-reconcile --apply`. (Kiểm phiên: tl nlm-auth-status --wait)",
+                  file=sys.stderr, flush=True)
+            a.no_nlm_add = True
+        else:
+            for _w54 in (_nlm_preflight_report(_nb_check, probe=False).get("warn") or []):   # v1.34.54 A1 tầng-2
+                print(f"[tl] ⚠ {_w54}", file=sys.stderr)
     g = _gas()
     # v1.29.1 (log LIVE 2.4): JOURNAL bao trùm CHUỖI composite (mkdir→upload→organize→nlm_add→reg_link) — ngắt giữa
     # chừng → `tl journal <run>` chỉ RÕ bước dở + việc còn lại (ca Luật Dược 76/VBHN phải dò tay). Intent các bước
@@ -2914,9 +3008,17 @@ def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = ""
     srcq = _profile_source_quality(path, source_quality)
     if srcq == "ocr" and not ocr_verified:
         warnings.append("OCR_UNVERIFIED_NOT_CORPUS")
+    # v1.34.54 (A7a — grill Q9=c): gate dup-Điều tại ingest, chi phí ≈0 (text đã có). Cat 23 (điều ước) → WARN
+    # nghi file TRỘN nhiều văn bản (ca WCT lẫn Berne); cat khác → info (VBHN lặp Điều hợp lệ). KHÔNG chặn.
+    _dd = _dup_dieu_scan(probe_text)
+    if _dd.get("dup_count"):
+        _eff_cat = str(cat or cat_plan.get("cat") or "")
+        warnings.append(("MIXED_DOCUMENT_SUSPECT_DUP_DIEU: " if _eff_cat.split("_")[0] == "23"
+                         else "DUP_DIEU_INFO: ") + _dup_dieu_note(_dd))
     return {
         "ok": bool(doc_name and cat_plan.get("cat")),
         "file": path,
+        "dup_dieu": _dd,
         "probe_text_source": probe_source or None,
         "probe_chars": len(probe_text or ""),
         "classification": merged,
@@ -2939,6 +3041,117 @@ def _dieu_sequence_stats(text: str) -> dict:
             gaps.append({"after": a, "before": b})
     return {"count": len(nums), "first": nums[0] if nums else None, "last": nums[-1] if nums else None,
             "monotonic": all(b > a for a, b in zip(nums, nums[1:])), "gaps": gaps[:20]}
+
+_INBOX_INFRA_NAME_RE = re.compile(r"(?i)^(registry|manifest|\.tl_|__tl_)|\.(json|enc)$")
+
+
+def cmd_ingest_inbox(a) -> int:
+    """B2 (v1.34.54, grill Q4=a): QUÉT FOLDER Drive tìm file user vừa upload tay CHƯA có trong registry rồi chạy
+    pipeline sẵn có per-file. Trình tự chuẩn (doctrine): skill đưa link folder (scope nền = inbox _HOP_NAP,
+    profile = root profile phẳng) + link tải nguồn (ưu tiên TVPL/LuatVietnam) → user tự tải + upload → lệnh này
+    convert/đổi tên/(vbqppl) xếp cat/register — KHÔNG đụng NLM (--no-nlm-add; NLM cuối lô qua `nlm-links` dán
+    batch + `nlm-reconcile --apply`). Đối chiếu registry bằng reg_get_bulk (1 call); list qua GAS (KHÔNG Drive
+    MCP — search_files parentId không liệt kê được folder share người khác). Child chạy 2 BƯỚC DRY→plan_hash→
+    apply (khuôn C1). Profile: file trông như VBQPPL chất lượng cao (sohieu year-qualified từ tên + mime
+    docx/doc/pdf) → cờ `vbqppl_candidate` + câu hỏi cho USER quyết (KHÔNG tự nạp corpus; profile KHÔNG move
+    file). DRY mặc định; --apply --confirm yes."""
+    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    g = _gas()
+    _prof = _active_profile()
+    _profile_scope = _prof != DEFAULT_PROFILE
+    folder = (getattr(a, "folder", None) or "").strip()
+    if not folder:
+        folder = (os.environ.get("TL_ROOT_FOLDER_ID", "").strip() if _profile_scope
+                  else str((g.get("bootstrap") or {}).get("inboxFolderId") or ""))
+    if not folder:
+        print(json.dumps({"ok": False, "error": "NO_INBOX_FOLDER",
+                          "note": "Không suy được folder quét — truyền --folder <id> (scope nền cần bootstrap "
+                                  "inboxFolderId; profile cần rootFolderId)."}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    ls = g.get("list", folderId=folder)
+    if not ls.get("ok"):
+        print(json.dumps({"ok": False, "error": "LIST_FOLDER_FAILED", "folder": folder, "detail": ls},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    items = [it for it in (ls.get("items") or [])
+             if str(it.get("type") or "") != "folder" and not _INBOX_INFRA_NAME_RE.search(str(it.get("name") or ""))
+             and "google-apps.folder" not in str(it.get("mime") or "")]
+    # Google-native (đã là GDoc/Sheet) → _resolve_drive_id_source từ chối convert=true (nhân đôi) — loại khỏi
+    # kế hoạch, báo riêng để user biết (file GDoc thả tay vào inbox thường là đã-convert/không cần ingest lại).
+    _gnative = [it for it in items if "google-apps" in str(it.get("mime") or "")]
+    items = [it for it in items if "google-apps" not in str(it.get("mime") or "")]
+    ids = [str(it.get("id")) for it in items if it.get("id")]
+    reg_known: set = set()
+    if ids:
+        try:
+            _rgb = g.get("reg_get_bulk", keys=json.dumps(ids), key_field="drive_id")
+        except Exception as _e:  # noqa: BLE001
+            _rgb = {"ok": False, "error": str(_e)}
+        if not _rgb.get("ok"):
+            print(json.dumps({"ok": False, "error": "REGISTRY_DIFF_FAILED", "detail": _rgb.get("error"),
+                              "note": "Không đối chiếu được registry (cần webapp ≥2.21.2l) — DỪNG an toàn, "
+                                      "không đoán file nào mới."}, ensure_ascii=False), file=sys.stderr)
+            return 2
+        for _i, _r in enumerate(_rgb.get("rows") or []):
+            if _r:
+                reg_known.add(ids[_i])
+    new_items = [it for it in items if str(it.get("id")) not in reg_known]
+    _lim = int(getattr(a, "limit", None) or 20)
+    plan_items = []
+    for it in new_items[:_lim]:
+        did, nm, mime = str(it.get("id")), str(it.get("name") or ""), str(it.get("mime") or "")
+        if _profile_scope:
+            child = ["--profile", _prof, "profile-ingest", "--drive-id", did, "--no-nlm-add", "--json"]
+            try:
+                _sh = _parse_sohieu_from_name(nm) or ""
+            except Exception:  # noqa: BLE001
+                _sh = ""
+            _quality = any(x in mime for x in ("wordprocessingml", "msword", "pdf"))
+            _extra = {}
+            if _sh and _quality:
+                _extra = {"vbqppl_candidate": True, "sohieu_from_name": _sh,
+                          "ask_user": (f"File trông như VBQPPL chất lượng cao (sohieu {_sh}, {mime.split('.')[-1]}) "
+                                       f"— có nạp thêm vào corpus/notebook VBQPPL/shard overflow không? CHỈ nạp nếu "
+                                       f"KHÔNG trùng: kiểm `tl reg-query --sohieu \"{_sh}\"` (scope nền) trước; nạp: "
+                                       f"`tl ingest-local --drive-id {did} --auto-plan --no-nlm-add --apply …` (scope nền).")}
+        else:
+            child = ["ingest-local", "--drive-id", did, "--auto-plan", "--no-nlm-add", "--json"]
+            _extra = {}
+        plan_items.append({"drive_id": did, "name": nm, "mime": mime, "child_dry": child, **_extra})
+    out = {"ok": True, "schema": "ingest_inbox.v1", "folder": folder,
+           "folder_url": f"https://drive.google.com/drive/folders/{folder}", "profile": _prof,
+           "files_seen": len(items) + len(_gnative), "google_native_skipped": len(_gnative),
+           "already_registered": len(items) - len(new_items), "new_files": len(new_items),
+           "planned": len(plan_items), "limit": _lim, "items": plan_items,
+           "mode": "APPLY" if getattr(a, "apply", False) else "DRY"}
+    if not getattr(a, "apply", False):
+        out["note"] = ("DRY — --apply --confirm yes chạy per-file pipeline (child DRY→plan_hash→apply, không đụng "
+                       "NLM). Sau lô: `tl nlm-links` (link dán batch) → dán vào notebook → `nlm-reconcile --apply`.")
+        _emit_json_payload(out, getattr(a, "out", None))
+        return 0
+    if str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED", "expected": "yes"}, ensure_ascii=False),
+              file=sys.stderr)
+        return 2
+    results, _ok_n, _fail_n = [], 0, 0
+    for pi in plan_items:
+        _pair = {"planned_child_dry": list(pi["child_dry"]),
+                 "planned_child_command": list(pi["child_dry"]) + ["--apply", "--confirm", "yes"]}
+        _res, _dry_fail = _bridge_run_child_apply(_pair)
+        _okf = bool(_res.get("ok"))
+        _ok_n += 1 if _okf else 0
+        _fail_n += 0 if _okf else 1
+        results.append({"drive_id": pi["drive_id"], "name": pi["name"], "ok": _okf,
+                        **({"error": _res.get("error"), "child_dry_result": _dry_fail} if not _okf else {}),
+                        **({"vbqppl_candidate": True, "ask_user": pi.get("ask_user")} if pi.get("vbqppl_candidate") else {})})
+        print(f"[tl] ingest-inbox: {pi['name'][:50]} → {'OK' if _okf else 'FAIL'}", file=sys.stderr, flush=True)
+    out.update({"ok": _fail_n == 0, "results": results, "counts": {"OK": _ok_n, "FAIL": _fail_n},
+                "next_steps": [f"tl{(' --profile ' + _prof) if _profile_scope else ''} nlm-links   # stdout = link dán batch",
+                                "dán links vào Add source → Websites của notebook",
+                                f"tl{(' --profile ' + _prof) if _profile_scope else ''} nlm-reconcile --all-notebooks   # DRY xem hướng dẫn per-notebook"]})
+    _emit_json_payload(out, getattr(a, "out", None))
+    return 0 if _fail_n == 0 else 2
+
 
 def _resolve_drive_id_source(g, drive_id: str, *, download: bool = True) -> dict:
     """v1.34.37: phân giải file ĐÃ Ở TRÊN DRIVE (drive_id) thành nguồn ingest — thay bước upload local.

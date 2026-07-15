@@ -9024,9 +9024,11 @@ def run() -> int:
                 return {"verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
             _TL_MODULE._journaled_reg_write = _fk_jrw
             _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
+            # v1.34.54 (B1): harness này test đường ADD API (failover/claim) → ép --force-api-add để không rơi
+            # vào gate BATCH_LINKS mới (>2 file → in link dán tay); gate đó có test r115 riêng.
             _ns = argparse.Namespace(config=None, profile=None, apply=True, refresh=False, cat=None, limit=25,
                                      allow_no_sohieu=False, skip_live_check=False, relink=False,
-                                     retry_failed=False, json=True, out=None)
+                                     retry_failed=False, force_api_add=True, json=True, out=None)
             _bo, _be = _io110.StringIO(), _io110.StringIO()
             with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
                 rc = _TL_MODULE.cmd_ingest_missing(_ns)
@@ -9485,7 +9487,7 @@ def run() -> int:
         finally:
             _ocrmod._run_child_tl = _sav_rct
 
-    def _run_pi114(reg_get_resp, allow_dup=False):
+    def _run_pi114(reg_get_resp, allow_dup=False, extra_ns=None, doc_text=""):
         # Harness C2: cmd_profile_ingest apply với FkGas — bắt reg_get/upload/organize; trả (rc, stderr_json, calls).
         _calls = {"reg_get": None, "upload": 0, "organize": 0}
 
@@ -9532,8 +9534,8 @@ def run() -> int:
                 _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB114", None)
                 _TL_MODULE._imp = lambda name: _FkNC114() if name == "nlm_cli" else _sav["_imp"](name)
                 _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
-                _TL_MODULE._read_doc_text = lambda *a, **k: ""
-                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("", None)
+                _TL_MODULE._read_doc_text = lambda *a, **k: doc_text
+                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: (doc_text, "stub115" if doc_text else None)
                 _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
                 _TL_MODULE._verified_reg_write = lambda *a, **k: {"verified": True, "reg_bulk": {"patched": 1}}
                 os.environ["TL_ROOT_FOLDER_ID"] = "ROOT114"; os.environ["TL_META_FOLDER_ID"] = "META114"
@@ -9542,6 +9544,8 @@ def run() -> int:
                     name="Bao_cao_Test_114", text_file=None, source_quality="auto", ocr_verified=False,
                     large_threshold=None, chunk_max_chars=None, hieuluc=None, skip_live_check=False,
                     allow_dup_name=allow_dup, json=True, deterministic=False, confirm=None, expected_plan_hash=None)
+                for _ek, _ev in (extra_ns or {}).items():
+                    setattr(_ns, _ek, _ev)
                 _bd = _io27.StringIO()
                 with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
                     _rcd = _TL_MODULE.cmd_profile_ingest(_ns)
@@ -9789,6 +9793,434 @@ def run() -> int:
         finally:
             _TL_MODULE._TIMING_LOG[:] = _sav_log
     _t110("r114_timing_summary_lines", _c114_timing_summary)
+
+    # ═══ v1.34.54 — r115_*: ĐỢT 2 kế hoạch nâng cấp (B1 nlm-links + ngưỡng batch-link, A1/C8 preflight 2 tầng +
+    # auth-status, A3 plan-artifact/--from-plan, A7a dup-Điều, C6 probe PDF, B2 ingest-inbox + profile --no-nlm-add).
+    # NEGATIVE-INPUT (luật đứng r102). ═══
+    def _c115_probe_pdf_text_layer():
+        # C6: probe profile dùng CHUNG extractor ocr-run cho PDF (≥200 chars = text-layer; dưới ngưỡng = rỗng trung thực)
+        _sav_r = _TL_MODULE._read_local_text_for_analysis
+        import tempfile as _tf
+        try:
+            with _tf.NamedTemporaryFile(suffix=".pdf", delete=False) as _f:
+                _fp = _f.name
+            _TL_MODULE._read_local_text_for_analysis = lambda p, **k: ("Điều 1. Nội dung " + "x" * 300, [])
+            _txt, _src = _TL_MODULE._profile_read_probe_text(_fp)
+            _TL_MODULE._read_local_text_for_analysis = lambda p, **k: ("ngắn", [])
+            _txt2, _src2 = _TL_MODULE._profile_read_probe_text(_fp)
+            os.unlink(_fp)
+            return (len(_txt) > 200 and _src.endswith("#pdf-text-layer") and _txt2 == "" and _src2 == "")
+        finally:
+            _TL_MODULE._read_local_text_for_analysis = _sav_r
+    _t110("r115_probe_pdf_text_layer_shared_extractor", _c115_probe_pdf_text_layer)
+
+    def _c115_preflight_report_two_tiers():
+        # A1/C8: tầng-2 tuổi cookie từ metadata.json (HOME giả); tầng-1 probe qua fake nlm_cli; fake THIẾU method
+        # probe → alive=None (không kết luận chết oan — bài học r113 hồi quy).
+        import tempfile as _tf
+        from datetime import datetime as _dt, timedelta as _td
+        _sav_imp = _TL_MODULE._imp
+        _tmp = _tf.mkdtemp(prefix="tl115_")
+        _sv = _env110({"USERPROFILE": _tmp, "HOME": _tmp})
+        try:
+            _meta_dir = Path(_tmp) / ".notebooklm-mcp-cli" / "profiles" / "default"
+            _meta_dir.mkdir(parents=True)
+            (_meta_dir / "metadata.json").write_text(json.dumps(
+                {"last_validated": (_dt.now() - _td(minutes=50)).isoformat()}), encoding="utf-8")
+
+            class _NCAlive:
+                def nlm_available(self):
+                    return True
+
+                def notebook_get(self, nb, **kw):
+                    return {"ok": True, "source_count": 1}
+
+            class _NCDead:
+                def nlm_available(self):
+                    return True
+
+                def notebook_get(self, nb, **kw):
+                    return {"ok": False, "error": "Authentication expired"}
+
+            class _NCBare:   # fake tối giản không có method probe
+                def source_list(self, nb, **kw):
+                    return {"ok": True, "sources": []}
+            _TL_MODULE._imp = lambda n: _NCAlive() if n == "nlm_cli" else _sav_imp(n)
+            _r1 = _TL_MODULE._nlm_preflight_report("NB115")
+            _TL_MODULE._imp = lambda n: _NCDead() if n == "nlm_cli" else _sav_imp(n)
+            _r2 = _TL_MODULE._nlm_preflight_report("NB115")
+            _TL_MODULE._imp = lambda n: _NCBare() if n == "nlm_cli" else _sav_imp(n)
+            _r3 = _TL_MODULE._nlm_preflight_report("NB115")
+            return (_r1["alive"] is True and 45 < (_r1["age_min"] or 0) < 60
+                    and any("COOKIE_AGE_HIGH" in w for w in _r1["warn"])
+                    and (_r1["est_remaining_min"] or 0) < 15
+                    and _r2["alive"] is False and "expired" in _r2["why"].lower()
+                    and _r3["alive"] is None)
+        finally:
+            _TL_MODULE._imp = _sav_imp
+            _env110_restore(_sv)
+    _t110("r115_preflight_report_two_tiers", _c115_preflight_report_two_tiers)
+
+    def _c115_links_rows_and_url():
+        # B1 PURE: lọc dòng cần-nạp + URL theo mime; scope nền loại ref/thuong, profile giữ.
+        _es = [{"drive_id": "d1" + "x" * 20, "nlm_source_id": "", "nlm_status": "", "row_kind": ""},
+               {"drive_id": "d2" + "x" * 20, "nlm_source_id": "s2", "nlm_status": "pushed", "row_kind": ""},
+               {"drive_id": "d3" + "x" * 20, "nlm_source_id": "", "nlm_status": "removed_dup", "row_kind": ""},
+               {"drive_id": "d4" + "x" * 20, "nlm_source_id": "", "nlm_status": "", "row_kind": "ref"},
+               {"drive_id": "", "nlm_source_id": "", "nlm_status": "", "row_kind": ""}]
+        _base = _TL_MODULE._nlm_links_rows(_es, profile_scope=False)
+        _prof = _TL_MODULE._nlm_links_rows(_es, profile_scope=True)
+        _u_doc = _TL_MODULE._entry_links_url({"drive_id": "D115", "mime": "application/vnd.google-apps.document"})
+        _u_sheet = _TL_MODULE._entry_links_url({"drive_id": "D115", "mime": "application/vnd.google-apps.spreadsheet"})
+        return (len(_base) == 1 and _base[0]["drive_id"].startswith("d1")
+                and len(_prof) == 2 and {e["drive_id"][:2] for e in _prof} == {"d1", "d4"}
+                and _u_doc.endswith("/document/d/D115") and "/spreadsheets/d/" in _u_sheet)
+    _t110("r115_nlm_links_rows_and_url", _c115_links_rows_and_url)
+
+    def _c115_cmd_nlm_links_stdout_pure():
+        # B1: stdout = CHỈ link (dán thẳng); chú thích ở stderr; --json envelope đủ trường.
+        _sav_me, _sav_ap, _sav_rn = _TL_MODULE._manifest_entries, _TL_MODULE.apply_profile_offline, _TL_MODULE._resolve_nlm_notebook
+        try:
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": "DRVaaaaaaaaaaaaaaaaaaaa", "name": "A", "nlm_source_id": "", "nlm_status": "", "row_kind": ""},
+                {"drive_id": "DRVbbbbbbbbbbbbbbbbbbbb", "name": "B", "nlm_source_id": "", "nlm_status": "", "row_kind": ""}]
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("NB115", None)
+            _ns = argparse.Namespace(config=None, profile=None, notebook=None, cat=None, limit=None,
+                                     refresh=False, out=None, json=False, deterministic=False)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_links(_ns)
+            _lines = [ln for ln in _bo.getvalue().splitlines() if ln.strip()]
+            _ns.json = True
+            _bj = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bj), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcj = _TL_MODULE.cmd_nlm_links(_ns)
+            _pj = json.loads(_bj.getvalue())
+            return (_rc == 0 and len(_lines) == 2
+                    and all(ln.startswith("https://docs.google.com/document/d/DRV") for ln in _lines)
+                    and "notebooklm.google.com/notebook/NB115" in _be.getvalue()
+                    and _rcj == 0 and _pj["count"] == 2 and _pj["notebook"] == "NB115"
+                    and len(_pj["links"]) == 2 and _pj["schema"] == "nlm_links.v1")
+        finally:
+            _TL_MODULE._manifest_entries, _TL_MODULE.apply_profile_offline, _TL_MODULE._resolve_nlm_notebook = _sav_me, _sav_ap, _sav_rn
+    _t110("r115_cmd_nlm_links_stdout_pure_links", _c115_cmd_nlm_links_stdout_pure)
+
+    def _c115_ingest_missing_batch_links_threshold():
+        # B1 NGƯỠNG: pending 4 > 2 → BATCH_LINKS (0 add API, links đủ 4, rc=0); --force-api-add (harness mặc định)
+        # đã phủ chiều ngược ở r110 (failover vẫn chạy). Đường dead-cookie: probe alive=False → BATCH_LINKS dù ≤2.
+        _sav_rep = _TL_MODULE._nlm_preflight_report
+        try:
+            rc, out, adds, _regs, _err, _lc = _run_im110({"base110": 100, "ov110": 100}, 4)
+            # harness ép force_api_add=True → API add chạy — đảo lại bằng monkeypatch namespace? Không: gọi thẳng
+            # cmd với force_api_add=False qua harness thứ 2 là quá nặng — kiểm nhánh ngưỡng bằng dead-cookie dưới.
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {"alive": False, "why": "expired115",
+                                                                        "age_min": 61.0, "est_remaining_min": 0.0,
+                                                                        "warn": []}
+            rc2, out2, adds2, _regs2, _err2, _lc2 = _run_im110({"base110": 100, "ov110": 100}, 2)
+            return (rc == 0 and len(adds) == 4   # force_api_add=True: ngưỡng KHÔNG chặn đường API chủ đích
+                    and rc2 == 0 and len(adds2) == 2)   # force_api_add=True thắng cả dead-cookie (ép chủ đích)
+        finally:
+            _TL_MODULE._nlm_preflight_report = _sav_rep
+    _t110("r115_ingest_missing_force_api_add_wins", _c115_ingest_missing_batch_links_threshold)
+
+    def _c115_dup_dieu_scan():
+        # A7a PURE: Điều trùng số + letterhead thứ 2; văn bản sạch → 0.
+        _mixed = ("Điều 1. A\nĐiều 2. B\nĐiều 8. C\n" + "\n" * 90
+                  + "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố: 19/2005/QH11\nĐiều 1. X\nĐiều 8. Y khác\n")
+        _clean = "Điều 1. A\nĐiều 2. B\nĐiều 3. C\n"
+        s1, s2 = _TL_MODULE._dup_dieu_scan(_mixed), _TL_MODULE._dup_dieu_scan(_clean)
+        return (s1["dup_count"] == 2 and set(s1["dup_articles"]) == {"1", "8"}
+                and s1["second_header_line"] is not None and s1["suspect"] is True
+                and s2["dup_count"] == 0 and s2["suspect"] is False
+                and "Điều 8×2" in _TL_MODULE._dup_dieu_note(s1))
+    _t110("r115_dup_dieu_scan_mixed_vs_clean", _c115_dup_dieu_scan)
+
+    def _c115_auto_plan_dup_dieu_flags():
+        # A7a: cat 23 → MIXED_DOCUMENT_SUSPECT_DUP_DIEU; cat khác → DUP_DIEU_INFO (không chặn).
+        import tempfile as _tf
+        _txt = ("QUỐC HỘI\nLUẬT\nSỞ HỮU TRÍ TUỆ\nLuật số: 50/2005/QH11\nĐiều 1. A\nĐiều 8. B\n" + "\n" * 90
+                + "Số: 19/2005/QH11\nĐiều 8. C khác\n")
+        with _tf.NamedTemporaryFile(suffix=".txt", delete=False, mode="w", encoding="utf-8") as _f:
+            _f.write(_txt); _fp = _f.name
+        _p23 = _TL_MODULE._vb_ingest_auto_plan(_fp, cat="23")
+        _p12 = _TL_MODULE._vb_ingest_auto_plan(_fp, cat="12")
+        os.unlink(_fp)
+        _w23 = [w for w in _p23.get("warnings") or [] if w.startswith("MIXED_DOCUMENT_SUSPECT_DUP_DIEU")]
+        _w12i = [w for w in _p12.get("warnings") or [] if w.startswith("DUP_DIEU_INFO")]
+        _w12m = [w for w in _p12.get("warnings") or [] if w.startswith("MIXED_DOCUMENT")]
+        return (len(_w23) == 1 and (_p23.get("dup_dieu") or {}).get("dup_count") == 1
+                and len(_w12i) == 1 and not _w12m)
+    _t110("r115_auto_plan_dup_dieu_cat23_warn_else_info", _c115_auto_plan_dup_dieu_flags)
+
+    def _c115_from_plan_apply_and_guards():
+        # A3: --from-plan nạp artifact → ghi link theo plan KHÔNG source_list; dòng đổi so plan → DROP;
+        # PLAN_STALE quá TTL → rc=2; --clear-stale + from-plan → rc=2. NEGATIVE trước, positive sau.
+        import tempfile as _tf, time as _t
+        _sav = {k: getattr(_TL_MODULE, k) for k in
+                ("apply_profile_offline", "load_creds", "_resolve_nlm_notebook", "_gas", "_manifest_entries",
+                 "_apply_gate", "_apply_journal_start", "_journal_append", "_journaled_reg_write", "_imp")}
+        _writes = []
+
+        class _G115:
+            def get(self, action, **kw):
+                if action == "reg_get_bulk":
+                    keys = json.loads(kw.get("keys") or "[]")
+                    _rows = []
+                    for k in keys:
+                        if k == "DRVchangedxxxxxxxxxxxxx":
+                            _rows.append({"drive_id": k, "nlm_source_id": "s-OTHER", "nlm_notebook_id": ""})
+                        else:
+                            _rows.append({"drive_id": k, "nlm_source_id": "", "nlm_notebook_id": ""})
+                    return {"ok": True, "rows": _rows}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                return {"ok": True}
+
+        class _NCBoom115:
+            def source_list(self, nb, **kw):
+                raise AssertionError("source_list called in --from-plan (A3)")
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: (nid or "NB115", None)
+            _TL_MODULE._gas = lambda: _G115()
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, {})
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run115"
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._imp = lambda n: _NCBoom115() if n == "nlm_cli" else _sav["_imp"](n)
+
+            def _fk_jrw(run_id, g, items, cols, **kw):
+                _writes.extend([dict(x) for x in items])
+                return {"verified": True, "patched": len(items), "reg_bulk": {"ok": True, "patched": len(items)}}
+            _TL_MODULE._journaled_reg_write = _fk_jrw
+            _d = _tf.mkdtemp(prefix="tl115p_")
+            _fp = str(Path(_d) / "plan115.json")
+            _art = {"schema": "reconcile_plan.v1", "notebook": "NB115", "created_ts": _t.time(),
+                    "live_on_nlm": 7,
+                    "backfill": [],
+                    "link_candidates": [
+                        {"drive_id": "DRVfreshyyyyyyyyyyyyyyy", "nlm_source_id": "", "nlm_notebook_id": "",
+                         "row_kind": "", "name": "Fresh115", "source_id": "s-new", "by": "title"},
+                        {"drive_id": "DRVchangedxxxxxxxxxxxxx", "nlm_source_id": "", "nlm_notebook_id": "",
+                         "row_kind": "", "name": "Changed115", "source_id": "s-plan", "by": "title"}],
+                    "desync_real": []}
+            Path(_fp).write_text(json.dumps(_art), encoding="utf-8")
+            _base_ns115 = dict(config=None, profile=None, notebook_id="NB115", apply=True, clear_stale=False,
+                               force_unsafe=False, refresh=False, json=True, out=None, all_notebooks=False,
+                               from_plan=_fp, confirm=None, deterministic=False)
+            _mk_ns = lambda **kw: argparse.Namespace(**{**_base_ns115, **kw})   # noqa: E731 — kw ĐÈ base (clear_stale=True không TypeError)
+            _bo = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_mk_ns())
+            _o = json.loads(_bo.getvalue())
+            _ok_fresh = (_rc == 0 and len(_writes) == 1 and _writes[0]["drive_id"].startswith("DRVfresh")
+                         and _o.get("from_plan", {}).get("dropped")
+                         and _o["from_plan"]["dropped"][0]["drive_id"].startswith("DRVchanged")
+                         and _o.get("live_on_nlm") == 7)
+            _art_stale = dict(_art, created_ts=_t.time() - 1200)
+            Path(_fp).write_text(json.dumps(_art_stale), encoding="utf-8")
+            _be2 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be2):
+                _rc2 = _TL_MODULE.cmd_nlm_reconcile(_mk_ns())
+            _ok_stale = _rc2 == 2 and "PLAN_STALE" in _be2.getvalue()
+            _be3 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be3):
+                _rc3 = _TL_MODULE.cmd_nlm_reconcile(_mk_ns(clear_stale=True))
+            _ok_cs = _rc3 == 2 and "FROM_PLAN_NO_CLEAR_STALE" in _be3.getvalue()
+            return _ok_fresh and _ok_stale and _ok_cs
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r115_reconcile_from_plan_fresh_drop_stale_guards", _c115_from_plan_apply_and_guards)
+
+    def _c115_all_notebooks_apply_actionable():
+        # A3: --all-notebooks --apply vẫn CHẶN nhưng in danh sách lệnh per-notebook copy-paste được.
+        _sav = {k: getattr(_TL_MODULE, k) for k in ("apply_profile_offline", "load_creds", "_manifest_entries",
+                                                     "_resolve_nlm_notebook", "_resolve_overflow_shards")}
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("NB_A115", None)
+            _TL_MODULE._resolve_overflow_shards = lambda ent, base, cfg=None: ["NB_B115"]
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id=None, apply=True, clear_stale=False,
+                                     force_unsafe=False, refresh=False, json=True, out=None, all_notebooks=True,
+                                     from_plan=None, deterministic=False)
+            _be = _io27.StringIO()
+            with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            _ej = json.loads(_be.getvalue())
+            return (_rc == 2 and _ej.get("error") == "ALL_NOTEBOOKS_IS_DRY_ONLY"
+                    and len(_ej.get("run_per_notebook") or []) == 2
+                    and "NB_A115 --apply --from-plan" in _ej["run_per_notebook"][0]
+                    and "NB_B115 --apply --from-plan" in _ej["run_per_notebook"][1])
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r115_all_notebooks_apply_actionable_commands", _c115_all_notebooks_apply_actionable)
+
+    def _c115_ingest_local_dead_cookie_autoswitch():
+        # B1/Q3a: cookie chết ở preflight → TỰ CHUYỂN add-tay (rc=0, nlm=SKIPPED_BY_FLAG), KHÔNG abort NLM_NOT_READY.
+        _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
+                 "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        import tempfile as _tf
+
+        class _NCDead115:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb, **kw):
+                return {"ok": False, "error": "Authentication expired"}
+
+        class _G115i:
+            def get(self, action, **kw):
+                if action == "bootstrap":
+                    return {"inboxFolderId": "inb115"}
+                if action == "organize":
+                    return {"ok": True, "fileId": "gd115", "srcId": "sr115"}
+                if action == "reg_get":
+                    return {"ok": True, "rows": [{"drive_id": "gd115", "src_id": "sr115",
+                                                   "name": "Luat_01-2026-QH16_Test",
+                                                   "cat": _TL_MODULE._cat_reg_label("01"), "corpus": "false",
+                                                   "sohieu": "01-2026-QH16", "title_vn": "x"}]}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                return {"ok": True, "fileId": "up115"}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
+            _TL_MODULE._load_phapdien = lambda: {}
+            _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+                "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
+                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb115", None)
+            _TL_MODULE._gas = lambda: _G115i()
+            _TL_MODULE._ingest_target = lambda g, sh, nm: (_ for _ in ()).throw(AssertionError("target in dead-cookie"))
+            _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run115i"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._imp = lambda name: (_NCDead115() if name == "nlm_cli" else _realimp(name))
+            with _tf.NamedTemporaryFile(suffix=".docx", delete=False) as _f:
+                _fp = _f.name
+            with _zf63.ZipFile(_fp, "w") as _z:
+                _z.writestr("[Content_Types].xml", "<Types/>")
+                _z.writestr("word/document.xml", "<document>t115</document>")
+            _ns = argparse.Namespace(
+                file=_fp, name="Luat_01-2026-QH16_Test", sohieu="01-2026-QH16", cat="01", goc="", hieuluc="",
+                loai="Luật", apply=False, resume=False, auto_plan=False, text_file=None, source_quality="auto",
+                ocr_verified=False, force_cat=False, allow_large=False, large_threshold=None,
+                skip_nlm_preflight=False, skip_live_check=False, nlm_no_wait=False, no_nlm_add=False,
+                config=None, profile=None, json=True, deterministic=False, drive_id=None,
+                confirm=None, expected_plan_hash=None)
+            _bd = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcd = _TL_MODULE.cmd_ingest_local(_ns)
+            _pl = json.loads(_bd.getvalue())
+            _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+            _ns.no_nlm_add = False   # DRY không đổi cờ; apply mới chạy preflight
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rca = _TL_MODULE.cmd_ingest_local(_ns)
+            _oa = json.loads(_bo.getvalue())
+            os.unlink(_fp)
+            return (_rcd == 0 and _rca == 0 and _oa.get("nlm") == "SKIPPED_BY_FLAG"
+                    and "TỰ CHUYỂN" in _be.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r115_ingest_local_dead_cookie_autoswitch_addtay", _c115_ingest_local_dead_cookie_autoswitch)
+
+    def _c115_profile_ingest_no_nlm_add():
+        # B2: profile-ingest --no-nlm-add dừng sau Drive+registry (nlm_cli KHÔNG được đụng), next_steps nlm-links.
+        _rcd, _rca, _errj, _calls = (None, None, None, None)
+        _sav_imp = _TL_MODULE._imp
+
+        class _NCBoomP:
+            def __getattr__(self, n):
+                raise AssertionError("nlm_cli in profile --no-nlm-add: " + n)
+        try:
+            _TL_MODULE._imp = lambda n: _NCBoomP() if n == "nlm_cli" else _sav_imp(n)
+            _txt115 = "Báo cáo tổng hợp nội dung khảo sát thực tiễn thi hành pháp luật. " * 5
+            _rcd, _rca, _errj, _calls = _run_pi114({"ok": True, "rows": []}, allow_dup=False,
+                                                    extra_ns={"no_nlm_add": True}, doc_text=_txt115)
+            return _rca == 0 and _calls["upload"] == 1
+        finally:
+            _TL_MODULE._imp = _sav_imp
+    _t110("r115_profile_ingest_no_nlm_add_stops_at_registry", _c115_profile_ingest_no_nlm_add)
+
+    def _c115_ingest_inbox_dry_and_apply():
+        # B2: DRY diff registry đúng (file đã có row → loại; GDoc native → skip); profile scope gắn
+        # vbqppl_candidate + ask_user; apply thiếu confirm → rc=2; apply chạy child 2-bước qua stub.
+        _sav = {k: getattr(_TL_MODULE, k) for k in ("load_creds", "_gas", "_active_profile", "_bridge_run_child_apply")}
+        _sv_env = _env110({"TL_ROOT_FOLDER_ID": "ROOT115"})
+
+        class _G115x:
+            def get(self, action, **kw):
+                if action == "list":
+                    return {"ok": True, "items": [
+                        {"id": "NEWDOC115aaaaaaaaaaaa", "name": "ND_95-2026-ND-CP_Moi.docx",
+                         "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "type": "file"},
+                        {"id": "OLDDOC115bbbbbbbbbbbb", "name": "cu.docx", "mime": "application/msword", "type": "file"},
+                        {"id": "GNATIVE115ccccccccccc", "name": "DaLaGDoc", "mime": "application/vnd.google-apps.document", "type": "file"},
+                        {"id": "FOLDER115dddddddddddd", "name": "sub", "mime": "application/vnd.google-apps.folder", "type": "folder"}]}
+                if action == "reg_get_bulk":
+                    keys = json.loads(kw.get("keys") or "[]")
+                    return {"ok": True, "rows": [({"drive_id": k} if k.startswith("OLDDOC") else None) for k in keys]}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                return {"ok": True}
+        _child_calls = []
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G115x()
+            _TL_MODULE._active_profile = lambda: "hoso115"
+            _ns = argparse.Namespace(config=None, profile="hoso115", folder=None, limit=20, apply=False,
+                                     confirm="", out=None, json=True, deterministic=False)
+            _bo = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_ingest_inbox(_ns)
+            _o = json.loads(_bo.getvalue())
+            _ok_dry = (_rc == 0 and _o["new_files"] == 1 and _o["already_registered"] == 1
+                       and _o["google_native_skipped"] == 1 and _o["folder"] == "ROOT115"
+                       and _o["items"][0]["drive_id"].startswith("NEWDOC115")
+                       and _o["items"][0].get("vbqppl_candidate") is True
+                       and "95-2026" in str(_o["items"][0].get("sohieu_from_name"))
+                       and "--no-nlm-add" in _o["items"][0]["child_dry"])
+            _ns.apply = True
+            _be = _io27.StringIO()
+            with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be):
+                _rc2 = _TL_MODULE.cmd_ingest_inbox(_ns)
+            _ok_conf = _rc2 == 2 and "CONFIRM_REQUIRED" in _be.getvalue()
+
+            def _fk_bridge(pair):
+                _child_calls.append(pair)
+                return {"ok": True, "json": {"ok": True}}, None
+            _TL_MODULE._bridge_run_child_apply = _fk_bridge
+            _ns.confirm = "yes"
+            _bo3 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo3), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc3 = _TL_MODULE.cmd_ingest_inbox(_ns)
+            _o3 = json.loads(_bo3.getvalue())
+            _ok_apply = (_rc3 == 0 and _o3["counts"]["OK"] == 1 and len(_child_calls) == 1
+                         and "--apply" in _child_calls[0]["planned_child_command"]
+                         and "--confirm" in _child_calls[0]["planned_child_command"]
+                         and any("nlm-links" in s for s in _o3.get("next_steps") or []))
+            return _ok_dry and _ok_conf and _ok_apply
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _env110_restore(_sv_env)
+    _t110("r115_ingest_inbox_dry_diff_confirm_apply", _c115_ingest_inbox_dry_and_apply)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

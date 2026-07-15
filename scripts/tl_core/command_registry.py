@@ -1042,6 +1042,37 @@ GENERATED_SPECS = [
          {"flags": ['--refresh'], "action": 'store_true', "help": 'ép tải lại manifest (nhưng field corpus vẫn qua GAS cache ~600s — sửa corpus xong nên `manifest`+`boot --refresh` rồi đợi)'},
          {"flags": ['--retry-failed'], "dest": 'retry_failed', "action": 'store_true', "help": '(v1.29.1) THỬ LẠI cả mục đã FAIL ≥3 lần (mặc định SKIP đỡ đốt batch — soi header-verify/source-update-corpus trước)'},
          {"flags": ['--relink'], "action": 'store_true', "help": '(v1.29.1) ÉP reg_link lại cả mục ckpt ghi ĐÃ-link-verified (mặc định SKIP — GAS cache 600s hay che nlm_source_id)'},
+         {"flags": ['--force-api-add'], "dest": 'force_api_add', "action": 'store_true',
+          "help": '(v1.34.54 B1) ÉP add API từng file kể cả khi pending>2/cookie chết (mặc định chuyển BATCH_LINKS: in link dán tay + reconcile)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'ingest-inbox', "handler": 'cmd_ingest_inbox',
+     "help": '(v1.34.54 B2) QUÉT folder Drive (inbox _HOP_NAP / root profile / --folder) tìm file upload-tay CHƯA có registry → per-file pipeline convert/rename/(vbqppl xếp cat)/register, KHÔNG đụng NLM (nlm-links cuối lô). DRY mặc định; profile phát hiện VBQPPL chất lượng cao → HỎI user',
+     "args": [
+         {"flags": ['--folder'], "help": 'folder Drive quét (mặc định: scope nền = inbox _HOP_NAP; profile = rootFolderId)'},
+         {"flags": ['--limit'], "type": int, "default": 20, "help": 'trần số file xử lý mỗi lần (mặc định 20)'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI per-file (child DRY→plan_hash→apply)'},
+         {"flags": ['--confirm'], "default": '', "help": 'bắt buộc "yes" khi --apply'},
+         {"flags": ['--out'], "help": 'ghi JSON ra file (atomic)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'nlm-links', "handler": 'cmd_nlm_links',
+     "help": '(v1.34.54 B1) IN DANH SÁCH LINK Drive các dòng CHƯA trên NLM để dán BATCH vào UI notebook (stdout = CHỈ link, mỗi dòng 1; chú thích ở stderr). OFFLINE cache; sau khi dán: nlm-reconcile --apply',
+     "args": [
+         {"flags": ['--notebook'], "help": 'notebook đích (mặc định theo profile/scope)'},
+         {"flags": ['--cat'], "help": 'lọc nhóm cat NN (scope nền)'},
+         {"flags": ['--limit'], "type": int, "help": 'trần số link in ra'},
+         {"flags": ['--refresh'], "action": 'store_true', "help": 'ép tải lại manifest trước khi liệt kê'},
+         {"flags": ['--out'], "help": 'ghi JSON ra file (atomic)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'nlm-auth-status', "handler": 'cmd_nlm_auth_status',
+     "help": '(v1.34.54 C8) trạng thái phiên NLM: probe LIVE notebook_get (M1 — login --check không đủ) + tuổi cookie/ước lượng còn lại (~60 phút đời thường); --wait poll tới khi sống (sau khi login trình duyệt/nlm login)',
+     "args": [
+         {"dest": 'notebook_id', "nargs": '?', "help": 'notebook probe (mặc định base/profile)'},
+         {"flags": ['--wait'], "action": 'store_true', "help": 'poll tới khi sống / hết timeout'},
+         {"flags": ['--interval'], "type": int, "default": 20, "help": 'giây giữa 2 lần probe (mặc định 20)'},
+         {"flags": ['--timeout'], "type": int, "default": 300, "help": 'tổng giây chờ tối đa khi --wait (mặc định 300)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'nlm-orphans', "handler": 'cmd_nlm_orphans',
@@ -1359,6 +1390,9 @@ COMMAND_META = {
     "corpus-fix":           _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "push-overflow":        _m("high", False, "nlm_registry", False, True, False, None, "push_overflow", False, None, generated=True),
     "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None),
+    "nlm-links":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 B1 read-only
+    "ingest-inbox":         _m("high", False, "drive_registry", True, True, False, None, "ingest_inbox", False, "ingest_ops", generated=True),   # v1.34.54 B2 (KHÔNG đụng NLM — nlm-links cuối lô)
+    "nlm-auth-status":      _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 C8 read-only (probe live, không ghi)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     # ── I7 wave-2 (v1.34.11): meta BASELINE bằng-chứng-cờ cho 78 lệnh chuyển GENERATED_SPECS —
     # chính sách grilling: --apply→supports_dry_run (doctrine DRY-mặc-định), --confirm→requires_confirm,

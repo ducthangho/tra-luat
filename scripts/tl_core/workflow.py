@@ -245,6 +245,16 @@ _IDEMPOTENCY_CONTRACTS = {
         "resume_command": "profile-ingest-ocr <file> --text-file <text> --apply --confirm yes --json",
         "rollback_hint": "remove profile source only after snapshot diff identifies created item"
     },
+    "ingest_inbox": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id per-file (diff registry qua reg_get_bulk — file đã có row KHÔNG vào kế hoạch)",
+        "journal_key": "per-child journal (ingest-local/profile-ingest tự journal từng file)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — diff registry tự loại file đã xong; child 2-bước DRY→plan_hash→apply",
+        "duplicate_guard": "reg_get_bulk diff + child guards (C2 dup-name registry, dedup-live title, contract plan_hash)",
+        "readback_command": "reg-query --drive-id <id> --json",
+        "resume_command": "ingest-inbox --apply --confirm yes --json",
+        "rollback_hint": "per-file theo journal child (tl journal <run> / undo); lệnh cha không ghi gì ngoài child"
+    },
     "profile_ingest_chunks": {
         "schema": "idempotency_contract.v1",
         "idempotency_key": "chunk_manifest.source_hash+chunk.sha256+profile+expected_name",

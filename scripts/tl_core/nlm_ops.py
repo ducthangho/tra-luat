@@ -1491,6 +1491,10 @@ def cmd_nlm_content(a) -> int:
                 _row60 = None
             _fid60 = str((_row60 or {}).get("gdoc_id") or (_row60 or {}).get("drive_id") or "").strip()
             if _fid60:
+                try:   # lazy-creds: nạp token best-effort cho đường GAS trong _doc_text_any
+                    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+                except (SystemExit, Exception):  # noqa: BLE001
+                    pass
                 _txt60, _src60 = _doc_text_any(_fid60, entry=_row60)
                 if _txt60:
                     print(json.dumps({"nlm_status": "offline", "fallback": "corpus_read",
@@ -1788,6 +1792,13 @@ def _nlm_query_corpus_fallback(a, question: str, *, cmd: str = "nlm-query", why:
     """E1 (ADR-1/6 — verbatim-return): NLM chết → CLI (KHÔNG phải LLM) trả NGUYÊN VĂN ≤5 văn bản corpus
     (+ Điều đã cắt nếu câu hỏi nêu) + ứng viên; AGENT gọi lệnh tự tổng hợp trong context — KHÔNG máy sinh
     RAG (bất biến #2). >5/mơ hồ → hạ an toàn: chỉ ứng viên + gợi ý tra tiếp. Mọi kết cục rc=0 (ADR-6)."""
+    # nlm-query/cross là lệnh LAZY-CREDS (main không load) — fallback đọc corpus cần webapp/token cho đường
+    # GAS exporttext: best-effort load_creds (live-smoke 2026-07-16 bắt 'Thiếu TL_WEBAPP/TL_TOKEN' giữa
+    # fallback); máy không config → nuốt, đường gws-cred/cache vẫn tự chạy.
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001
+        pass
     try:
         entries = _manifest_entries(refresh=False)
     except Exception as e:  # noqa: BLE001

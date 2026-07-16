@@ -2218,7 +2218,12 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
         kind = ""
     text, src = "", ""
     if kind in ("gdoc", ""):
-        t = _read_doc_text(fid, config)
+        # live-smoke 2026-07-16 bắt: máy lazy-creds → GAS trong _read_doc_text RAISE 'Thiếu TL_WEBAPP/
+        # TL_TOKEN' — KHÔNG được xuyên thủng; nuốt để còn thử đường binary (gws cred direct không cần token).
+        try:
+            t = _read_doc_text(fid, config)
+        except (SystemExit, Exception):  # noqa: BLE001
+            t = ""
         if t and not _text_looks_binary(t):
             text, src = t, "gdoc"
     if not text and kind in ("docx", "pdf", ""):
@@ -2264,6 +2269,10 @@ def cmd_doc_text(a) -> int:
     # được chặn đường đọc CACHE vốn không cần creds; export/download phía sau tự fail sạch.
     try:
         apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001
+        pass
+    try:   # lazy-creds: có config thì nạp token cho đường GAS export; không config → cache/gws-cred vẫn chạy
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     except (SystemExit, Exception):  # noqa: BLE001
         pass
     fid = str(getattr(a, "file_id", "") or "").strip()

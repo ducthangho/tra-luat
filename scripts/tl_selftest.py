@@ -11553,12 +11553,14 @@ def run() -> int:
             def cross_query(self, q, notebooks=None, all_notebooks=False):
                 return {"ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
         _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_manifest_entries",
-                 "_doc_text_any", "_resolve_overflow_shards")
+                 "_doc_text_any", "_resolve_overflow_shards", "load_creds")
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         _senv = _env110(dict(env or {}))
+        _lc121 = {"n": 0}
         try:
             _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: _lc121.__setitem__("n", _lc121["n"] + 1)
             _TL_MODULE._imp = lambda name: (_NCQ121() if name == "nlm_cli" else _realimp(name))
             _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nbQ121", None)
             _TL_MODULE._manifest_entries = lambda refresh=False: list(_ENTRIES121)
@@ -11575,7 +11577,7 @@ def run() -> int:
             _bo, _be = _io110.StringIO(), _io110.StringIO()
             with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
                 _rc = (_TL_MODULE.cmd_nlm_cross(_ns) if cross else _TL_MODULE.cmd_nlm_query(_ns))
-            return _rc, _bo.getvalue(), _be.getvalue()
+            return _rc, _bo.getvalue(), _be.getvalue(), _lc121["n"]
         finally:
             _env110(_senv)
             for _k, _v in _sav.items():
@@ -11585,23 +11587,25 @@ def run() -> int:
     def _c121_query_fallback_verbatim_le5():
         # E1 (ADR-1/6): NLM chết + câu hỏi resolve exact-sohieu → VERBATIM-RETURN: nguyên văn Điều đã cắt,
         # envelope offline/corpus_read, rc=0, banner stderr. KHÔNG máy-sinh-RAG (text là _doc_text_any trả).
-        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15")
+        _rc, _o, _e, _lc = _run_q121("tra Điều 1 của Luật 60/2024/QH15")
         try:
             _j = json.loads(_o)
         except Exception:
             return False
         _d0 = (_j.get("docs") or [{}])[0]
+        # _lc ≥ 1: fallback PHẢI best-effort load_creds (live-smoke 2026-07-16 bắt: nlm-query là lệnh
+        # lazy-creds → GAS exporttext chết 'Thiếu TL_WEBAPP/TL_TOKEN' giữa fallback).
         return (_rc == 0 and _j.get("nlm_status") == "offline" and _j.get("fallback") == "corpus_read"
                 and _j.get("confidence") == "exact" and _j.get("resolved") == 1 and _j.get("dieu") == "1"
                 and _d0.get("sohieu") == "60/2024/QH15"
                 and "Nội dung điều một fallback 121" in (_d0.get("text") or "")
-                and "Điều 2" not in (_d0.get("text") or "") and "NLM OFFLINE" in _e)
+                and "Điều 2" not in (_d0.get("text") or "") and "NLM OFFLINE" in _e and _lc >= 1)
     _t110("r121_nlm_query_fallback_verbatim_le5", _c121_query_fallback_verbatim_le5)
 
     def _c121_query_fallback_ambiguous_candidates():
         # NEGATIVE (ADR-1 hạ an toàn): >5 ứng viên → KHÔNG đọc/tổng hợp mù — docs RỖNG, chỉ liệt kê ứng viên
         # + gợi ý tra tiếp; vẫn rc=0 (chuỗi chạy tiếp).
-        _rc, _o, _e = _run_q121("pháp luật về thuế giá trị gia tăng")
+        _rc, _o, _e, _lc = _run_q121("pháp luật về thuế giá trị gia tăng")
         try:
             _j = json.loads(_o)
         except Exception:
@@ -11612,19 +11616,19 @@ def run() -> int:
 
     def _c121_query_no_fallback_failcloses():
         # NEGATIVE control-surface: --no-fallback → GIỮ hành vi dừng cũ (rc=2, lỗi ra stderr, KHÔNG envelope).
-        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", no_fallback=True)
+        _rc, _o, _e, _lc = _run_q121("tra Điều 1 của Luật 60/2024/QH15", no_fallback=True)
         return _rc == 2 and "corpus_read" not in _o and "401" in _e
     _t110("r121_nlm_query_no_fallback_flag_failcloses", _c121_query_no_fallback_failcloses)
 
     def _c121_query_env_disables_fallback():
         # NEGATIVE control-surface: TL_NLM_FALLBACK=0 (CI strict) → fail-closed toàn cục.
-        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", env={"TL_NLM_FALLBACK": "0"})
+        _rc, _o, _e, _lc = _run_q121("tra Điều 1 của Luật 60/2024/QH15", env={"TL_NLM_FALLBACK": "0"})
         return _rc == 2 and "corpus_read" not in _o and "401" in _e
     _t110("r121_env_disables_fallback", _c121_query_env_disables_fallback)
 
     def _c121_cross_fallback_same_envelope():
         # E1: nlm-cross NLM chết → CÙNG đường verbatim-return (corpus không shard) — envelope cmd=nlm-cross.
-        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", cross=True)
+        _rc, _o, _e, _lc = _run_q121("tra Điều 1 của Luật 60/2024/QH15", cross=True)
         try:
             _j = json.loads(_o)
         except Exception:
@@ -11643,13 +11647,14 @@ def run() -> int:
 
             def source_content(self, s):
                 return {"ok": False, "error": "401 unauthorized", "auth_hint": "nlm login"}
-        _keys = ("_imp", "_manifest_entries", "_doc_text_any")
+        _keys = ("_imp", "_manifest_entries", "_doc_text_any", "load_creds")
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         try:
             _TL_MODULE._imp = lambda name: (_NCC121() if name == "nlm_cli" else _realimp(name))
             _TL_MODULE._manifest_entries = lambda refresh=False: list(_ENTRIES121)
             _TL_MODULE._doc_text_any = lambda fid, **k: (_TEXT121, f"cache:{fid}")
+            _TL_MODULE.load_creds = lambda *a, **k: None   # fallback best-effort load_creds không đụng mạng
             _TL_MODULE._NLM_PROBE_CACHE.clear()
             _ns = argparse.Namespace(source_id=sid, out=None, dieu=None, max=4000, no_fallback=no_fallback,
                                      config=None, profile=None)
@@ -11832,7 +11837,8 @@ def run() -> int:
                       "mime": "application/vnd.google-apps.document"},
                      {"drive_id": "pPDF121", "name": "VB_P121.pdf", "mime": "application/pdf"}]
             _keys = ("_manifest_entries", "_doc_text_fetch_binary", "_read_doc_text",
-                     "_read_local_text_for_analysis", "apply_profile_offline", "_active_profile", "CACHE")
+                     "_read_local_text_for_analysis", "apply_profile_offline", "_active_profile", "CACHE",
+                     "load_creds")
             _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
             def _apo_ci121(*_a, **_k):
                 # mô phỏng máy CI KHÔNG config (bug 2026-07-16 CI bắt): apply_profile_offline in recovery
@@ -11842,6 +11848,7 @@ def run() -> int:
                 _TL_MODULE.CACHE = _cache121
                 _TL_MODULE._active_profile = lambda: _TL_MODULE.DEFAULT_PROFILE
                 _TL_MODULE.apply_profile_offline = _apo_ci121
+                _TL_MODULE.load_creds = _apo_ci121   # máy CI không config: load_creds cũng exit — phải sống sót
                 _TL_MODULE._manifest_entries = lambda refresh=False: list(_ents)
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (
                     _dx if fid == "dDOCX121" else (_pdf if fid == "pPDF121" else None))
@@ -11868,6 +11875,24 @@ def run() -> int:
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None
                 _t3, _ = _TL_MODULE._doc_text_any("dGHOST121")
                 _ok_neg = _t3 == ""
+                # live-smoke 2026-07-16 bắt: row RAW không mime → kind="" đi đường export trước; export
+                # RAISE (creds/mạng) KHÔNG được xuyên thủng — phải nuốt rồi thử binary-sniff → docx thật.
+                # (_doc_text_any unlink file tạm sau đọc → cấp bản docx RIÊNG cho case này.)
+                _dx2 = _P110(_td) / "vb121_raw.docx"
+                with _zf121.ZipFile(_dx2, "w") as _z2:
+                    _z2.writestr("word/document.xml",
+                                 '<?xml version="1.0"?><w:document><w:body>'
+                                 '<w:p><w:r><w:t>Điều 1. Nội dung docx thật 121</w:t></w:r></w:p>'
+                                 '</w:body></w:document>')
+
+                def _rdt_raise121(fid, config=None):
+                    raise RuntimeError("Thiếu TL_WEBAPP/TL_TOKEN (mô phỏng máy lazy-creds)")
+                _TL_MODULE._read_doc_text = _rdt_raise121
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (_dx2 if fid == "rRAW121" else None)
+                _tr, _sr = _TL_MODULE._doc_text_any("rRAW121")   # không có entry → sniff PK → unzip
+                _ok_raise = "Nội dung docx thật 121" in _tr and _sr == "docx"
+                _TL_MODULE._read_doc_text = lambda fid, config=None: ""
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None
                 _ns = argparse.Namespace(file_id="dDOCX121", out=None, dieu="1", max=0, refresh=False,
                                          json=True, config=None, profile=None, deterministic=False)
                 _bo, _be = _io110.StringIO(), _io110.StringIO()
@@ -11885,7 +11910,7 @@ def run() -> int:
                 with _ctx110.redirect_stdout(_bo2), _ctx110.redirect_stderr(_be2):
                     _rc2 = _TL_MODULE.cmd_doc_text(_ns2)
                 return (_ok_txt and _ok_cache and _ok_c2 and _ok_g and _ok_p and _ok_bin and _ok_neg
-                        and _ok_cmd and _rc2 == 2)
+                        and _ok_raise and _ok_cmd and _rc2 == 2)
             finally:
                 for _k, _v in _sav.items():
                     setattr(_TL_MODULE, _k, _v)

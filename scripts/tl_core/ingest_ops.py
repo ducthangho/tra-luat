@@ -1552,6 +1552,29 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
     return "ocr" if ext in {".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"} else "digital"
 
 
+_PDF_BROKEN_FONT_WARN = ("PDF_TEXT_LAYER_BROKEN_FONT: text-layer mất dấu (density<0.005) — Google-convert "
+                         "thường xử được; apply verify bằng text GDoc sau convert; KHÔNG vội OCR")
+
+
+def _probe_pdf_quality(path: str) -> dict:
+    """v1.34.58 (C-#9 — Q8=a): probe PDF đo MẬT ĐỘ DẤU tiếng Việt trên text-layer (tái dùng ngưỡng 0.005
+    + letters>500 của LOW_VIETNAMESE_MARK_DENSITY trong ocr.py). Text ≥200 chars nhưng MẤT DẤU (font hỏng/
+    CID không map — ca 7 phụ lục CPTPP pdftotext ra text không dấu) → broken_font=True + text RỖNG (KHÔNG
+    đem text hỏng đi phân loại; quyết định corpus DỜI sang apply: text GDoc sau convert). <200 chars →
+    broken_font=False, text rỗng (PDF scan thật — giữ đường OCR cũ). Trả {text, source, broken_font};
+    hàm cũ `_profile_read_probe_text` giữ nguyên chữ ký cho các đuôi khác."""
+    try:
+        _txt, _ = _read_local_text_for_analysis(Path(path))
+    except Exception:  # noqa: BLE001 — pdftotext lỗi → như probe rỗng (đường cũ)
+        _txt = ""
+    if len(_txt or "") < 200:
+        return {"text": "", "source": "", "broken_font": False}
+    _m = _text_quality_metrics(_txt)
+    if _m["vietnamese_mark_density"] < 0.005 and _m["letters"] > 500:
+        return {"text": "", "source": "", "broken_font": True}
+    return {"text": _txt, "source": f"{path}#pdf-text-layer", "broken_font": False}
+
+
 def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[str, str]:
     """v1.34.27 #3 (log phiên nạp 4 file): DRY phải TRUNG THỰC — trước đây .docx local không probe được
     (probe_text_source=null) → phân loại rơi về tên file, DRY báo kind=normal nhưng --apply (đọc text sau
@@ -1574,17 +1597,12 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
         except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → giữ hành vi cũ (probe rỗng)
             pass
     if ext == ".pdf":
-        # v1.34.54 (C6 — log phiên OCR 2026-07-15: 7/7 PDF bị DRY báo NO_TEXT_FOR_VERIFY/OCR_UNVERIFIED nhưng
-        # `ocr-run --engine auto` lại engine_used=none tức CÓ text-layer — 2 bộ trích text lệch nhau): probe dùng
-        # CHUNG extractor với ocr-run (`_read_local_text_for_analysis` — pdftotext) thay vì bó tay với PDF.
-        # Ngưỡng ≥200 chars = cùng ngưỡng ocr-run coi là có text-layer; dưới ngưỡng giữ probe rỗng (trung thực —
-        # PDF scan thật vẫn phải đi đường OCR).
-        try:
-            _pdf_txt, _pdf_warns = _read_local_text_for_analysis(Path(path))
-        except Exception:  # noqa: BLE001 — pdftotext lỗi → giữ hành vi cũ (probe rỗng)
-            _pdf_txt, _pdf_warns = "", []
-        if len(_pdf_txt or "") >= 200:
-            return _pdf_txt, f"{path}#pdf-text-layer"
+        # v1.34.54 (C6): probe dùng CHUNG extractor với ocr-run (pdftotext, ngưỡng ≥200 chars).
+        # v1.34.58 (C-#9): qua _probe_pdf_quality — text-layer MẤT DẤU (broken_font) trả probe RỖNG
+        # (không phân loại trên text hỏng; caller cần flag thì gọi _probe_pdf_quality trực tiếp).
+        _q9 = _probe_pdf_quality(path)
+        if _q9["text"]:
+            return _q9["text"], _q9["source"]
     return "", ""
 
 
@@ -1955,7 +1973,15 @@ def cmd_profile_ingest(a) -> int:
     # v1.34.6 #2: bảng tính đi đường riêng — canonical = Google SHEET (copy_convert toType=sheets),
     # không probe text/không gate Điều (không có văn bản pháp quy dạng bảng tính), NLM add type=sheets.
     _is_sheet = Path(f).suffix.lower() in _SPREADSHEET_EXTS
-    probe_text, probe_source = ("", None) if _is_sheet else _profile_read_probe_text(f, getattr(a, "text_file", None))
+    # v1.34.58 (C-#9): .pdf probe qua _probe_pdf_quality — lấy flag broken_font cho gate DRY bên dưới.
+    _pdf_q9p = None
+    if _is_sheet:
+        probe_text, probe_source = "", None
+    elif not getattr(a, "text_file", None) and Path(f).suffix.lower() == ".pdf":
+        _pdf_q9p = _probe_pdf_quality(f)
+        probe_text, probe_source = _pdf_q9p["text"], (_pdf_q9p["source"] or None)
+    else:
+        probe_text, probe_source = _profile_read_probe_text(f, getattr(a, "text_file", None))
     info = _classify_doc_header(probe_text, f)
     doc_name = getattr(a, "name", None) or _safe_profile_doc_name(info, Path(f).stem)
     if info.get("draft") and not doc_name.upper().startswith("DUTHAO_"):
@@ -1967,6 +1993,12 @@ def cmd_profile_ingest(a) -> int:
                 "info": ["SPREADSHEET_TEXT_VERIFY_SKIPPED"]}
     else:
         gate = _ingest_verify_gate(probe_text, info, source_quality, getattr(a, "ocr_verified", False))
+        if _pdf_q9p and _pdf_q9p.get("broken_font"):
+            # v1.34.58 (C-#9): DRY báo đúng bệnh — thay NO_TEXT/OCR_UNVERIFIED bằng flag broken-font
+            # (gate không chặn từ probe local; apply giữ nguyên: _read_doc_text(gdoc) sau convert quyết corpus).
+            gate["flags"] = [x for x in (gate.get("flags") or [])
+                             if x not in ("NO_TEXT_FOR_VERIFY", "OCR_UNVERIFIED_NOT_CORPUS")]
+            gate["flags"].append(_PDF_BROKEN_FONT_WARN)
         _dd54 = _dup_dieu_scan(probe_text)   # v1.34.54 A7a: profile = info-only (VBHN/mục lục lặp Điều bình thường)
         if _dd54.get("dup_count"):
             print(f"[tl] ℹ dup-Điều (A7a): {_dup_dieu_note(_dd54)} — info; nghi file trộn nhiều văn bản thì soi tay.",
@@ -3121,7 +3153,14 @@ def _valid_cats(config_path=None, profile=None) -> set:
 def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = "", sohieu: str = "",
                          loai: str = "", cat: str = "", source_quality: str = "auto",
                          ocr_verified: bool = False) -> dict:
-    probe_text, probe_source = _profile_read_probe_text(path, text_file)
+    # v1.34.58 (C-#9): .pdf probe qua _probe_pdf_quality để LẤY CẢ flag broken_font (text-layer mất dấu
+    # ≠ scan — cảnh báo đúng bệnh thay vì dọa OCR oan); các đuôi khác giữ nguyên đường cũ.
+    _pdf_q9 = None
+    if not text_file and Path(path).suffix.lower() == ".pdf":
+        _pdf_q9 = _probe_pdf_quality(path)
+        probe_text, probe_source = _pdf_q9["text"], (_pdf_q9["source"] or "")
+    else:
+        probe_text, probe_source = _profile_read_probe_text(path, text_file)
     _fname = Path(path).name    # (MERGE Claude) CHỈ tên file (KHÔNG full path) → tránh _RAW_SOHIEU_RE bắt nhầm fragment UUID trong đường dẫn
     info = _classify_doc_header(probe_text, _fname)
     fallback_info = _classify_doc_header("", _fname)
@@ -3160,14 +3199,17 @@ def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = ""
     if str(merged.get("loai") or "") == "Văn bản hợp nhất":
         warnings.append("VBHN_AUTO_PLAN_VERIFY_EXPLICIT: đối chiếu --sohieu (số VBHN, KHÔNG phải số luật gốc) "
                         "+ --name (chủ đề) + --cat trước khi --apply")
+    _broken9 = bool(_pdf_q9 and _pdf_q9.get("broken_font"))
     if not probe_text:
-        warnings.append("NO_PROBE_TEXT_FOR_AUTO_CAT")
+        # v1.34.58 (C-#9, Q8=a): text-layer mất dấu ≠ không có text — cảnh báo đúng bệnh (Google-convert
+        # thường xử được), KHÔNG dọa NO_PROBE_TEXT/OCR; gate không chặn từ probe local, apply verify GDoc.
+        warnings.append(_PDF_BROKEN_FONT_WARN if _broken9 else "NO_PROBE_TEXT_FOR_AUTO_CAT")
     if not merged.get("sohieu"):
         warnings.append("SOHIEU_MISSING")
     if cat_plan.get("confidence") in {"low", "missing"}:
         warnings.append("CAT_AUTO_LOW_CONFIDENCE")
     srcq = _profile_source_quality(path, source_quality)
-    if srcq == "ocr" and not ocr_verified:
+    if srcq == "ocr" and not ocr_verified and not _broken9:
         warnings.append("OCR_UNVERIFIED_NOT_CORPUS")
     # v1.34.54 (A7a — grill Q9=c): gate dup-Điều tại ingest, chi phí ≈0 (text đã có). Cat 23 (điều ước) → WARN
     # nghi file TRỘN nhiều văn bản (ca WCT lẫn Berne); cat khác → info (VBHN lặp Điều hợp lệ). KHÔNG chặn.

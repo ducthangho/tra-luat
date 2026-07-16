@@ -307,7 +307,12 @@ def cmd_nlm_list(a) -> int:
         nc = _imp("nlm_cli")
     except Exception as e:
         print(json.dumps({"ok": False, "error": f"không import được nlm_cli: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
-    r = nc.source_list(nb, skip_freshness=not getattr(a, "no_skip_freshness", False))
+    if getattr(a, "cached", False):
+        # v1.34.58 (C-#8 — Q10): opt-in đọc cache TTL 10' (chung helper với nlm-audit-physical);
+        # mặc định GIỮ list tươi như cũ — cached chỉ dùng khi đối soát lặp trong 10'.
+        r = _nlm_source_list_cached(nc, nb)
+    else:
+        r = nc.source_list(nb, skip_freshness=not getattr(a, "no_skip_freshness", False))
     if not r.get("ok"):
         print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr)
         print("[tl] nlm CLI không dùng được → fallback MCP `notebook_get` hoặc chạy `nlm login`.", file=sys.stderr)

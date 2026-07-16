@@ -1006,6 +1006,7 @@ GENERATED_SPECS = [
      "args": [
          {"dest": 'notebook_id', "nargs": '?'},
          {"flags": ['--no-skip-freshness'], "action": 'store_true', "help": 'bật lại freshness (chậm)'},
+         {"flags": ['--cached'], "action": 'store_true', "help": '(v1.34.58 C-#8) opt-in đọc cache TTL 10 phút (chung helper nlm-audit-physical) — mặc định vẫn list tươi'},
          {"flags": ['--max'], "type": int, "default": 15, "help": '(N5 v1.33.41) số dòng hiển thị; 0 = TẤT CẢ (đối soát thành viên)'},
          {"flags": ['--json'], "action": 'store_true'},
          {"flags": ['--out'], "help": '(N5 v1.33.41) ghi JSON đầy đủ ra file atomically; tự bật JSON'},

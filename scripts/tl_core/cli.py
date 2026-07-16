@@ -334,6 +334,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--drive-id", dest="drive_id",
                    help="(v1.34.2) lọc ĐÚNG 1 file theo drive_id/gdoc_id — readback chuẩn của các idempotency contract (Pha H bắt drift: contract dặn `reg-query --drive-id` mà parser thiếu cờ)")
     p.add_argument("--refresh", action="store_true", help="tải LẠI manifest/registry LIVE trước khi lọc (dùng sau khi vừa ghi sheet)"); p.add_argument("--json", action="store_true")
+    p.add_argument("--live", action="store_true",
+                   help="(v1.34.58 C-#11) đọc AUTHORITATIVE qua reg_get thay manifest cache — CHỈ hợp lệ kèm bộ lọc hẹp (--drive-id|--sohieu|--name; thiếu → LIVE_NEEDS_FILTER rc=2); filter còn lại áp tiếp phía client; envelope thêm source='live'")
     p.add_argument("--out", help="(S-4 v1.33.34) ghi JSON envelope ra file atomically; tự bật JSON (né stdout/heredoc timeout Cowork)")
     _add_base_also_flags(p)
     p.set_defaults(fn=cmd_reg_query)

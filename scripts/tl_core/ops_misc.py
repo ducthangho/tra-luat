@@ -2007,20 +2007,54 @@ def cmd_reg_query(a) -> int:
     """Truy vấn registry/manifest OFFLINE với bộ lọc (thay ~chục snippet json.load+filter tay).
     Lọc: --name (substring), --sohieu, --cat (mã/tiền tố), --nlm/--no-nlm, --row-kind, --corpus/--no-corpus, --mime."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    # v1.34.58 (C-#11 — Q9=a): --live đọc AUTHORITATIVE qua reg_get (né manifest cache stale — bài học
+    # 'manifest không đáng tin' v1.34.50) — CHỈ hợp lệ kèm bộ lọc HẸP (--drive-id | --sohieu | --name);
+    # không lọc → LIVE_NEEDS_FILTER rc=2 (reg_get toàn bảng đắt/vô nghĩa; đọc rộng dùng manifest/--refresh).
+    _live_mode = bool(getattr(a, "live", False))
+    if _live_mode:
+        _did_lv = str(getattr(a, "drive_id", None) or "").strip()
+        _sh_lv = str(getattr(a, "sohieu", None) or "").strip()
+        _nm_lv = str(getattr(a, "name", None) or "").strip()
+        if not (_did_lv or _sh_lv or _nm_lv):
+            print(json.dumps({"ok": False, "error": "LIVE_NEEDS_FILTER",
+                              "note": "--live cần bộ lọc hẹp: --drive-id | --sohieu | --name "
+                                      "(đọc rộng: bỏ --live, dùng manifest cache / --refresh)"},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            _g_lv = _gas()
+            if _did_lv:
+                _rg_lv = _g_lv.get("reg_get", drive_id=_did_lv, refresh="true")
+            elif _sh_lv:
+                _rg_lv = _g_lv.get("reg_get", sohieu=norm_sohieu(_sh_lv), refresh="true")
+            else:
+                _rg_lv = _g_lv.get("reg_get", name_contains=_nm_lv, refresh="true")
+        except (SystemExit, Exception) as _e_lv:  # noqa: BLE001
+            print(json.dumps({"ok": False, "error": f"LIVE_REG_GET_FAILED: {_e_lv}"},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        if isinstance(_rg_lv, dict) and _rg_lv.get("ok") is False:
+            print(json.dumps({"ok": False, "error": "LIVE_REG_GET_FAILED",
+                              "detail": str(_rg_lv.get("error") or "")[:200]},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        entries = list((_rg_lv or {}).get("rows") or [])
     # v1.34.42 (BUG2 — grill-with-docs): `--refresh` cần creds LIVE (TL_WEBAPP) để fetch — apply_profile_offline
     # KHÔNG đảm bảo có. Trước đây thiếu bước này → `--refresh` chết 'Thiếu TL_WEBAPP' làm tưởng MẤT token (thực ra
     # chỉ chưa nạp creds LIVE). Khuôn y locate/status: nạp load_creds TRƯỚC refresh (self-heal từ config).
-    if getattr(a, "refresh", False):
+    if not _live_mode:
+        if getattr(a, "refresh", False):
+            try:
+                load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            except (SystemExit, Exception):  # noqa: BLE001 — thiếu creds → rơi xuống thông điệp cụ thể bên dưới
+                pass
         try:
-            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-        except (SystemExit, Exception):  # noqa: BLE001 — thiếu creds → rơi xuống thông điệp cụ thể bên dưới
-            pass
-    try:
-        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
-    except Exception as e:
-        _hint = (" `--refresh` cần webapp LIVE — chạy `tl --profile <P> boot --refresh` (hoặc bỏ `--refresh` để "
-                 "đọc cache).") if getattr(a, "refresh", False) else ""
-        print(f"[tl] reg-query: cần `tl boot`/`manifest` trước ({e}).{_hint}", file=sys.stderr); return 2
+            entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+        except Exception as e:
+            _hint = (" `--refresh` cần webapp LIVE — chạy `tl --profile <P> boot --refresh` (hoặc bỏ `--refresh` "
+                     "để đọc cache).") if getattr(a, "refresh", False) else ""
+            print(f"[tl] reg-query: cần `tl boot`/`manifest` trước ({e}).{_hint}", file=sys.stderr); return 2
     # v1.34.42 (BUG3): nhắc `--corpus true` là LITERAL cột — audit 'corpus như server' phải dùng --corpus-effective.
     if getattr(a, "corpus", False) and not getattr(a, "corpus_effective", False):
         print("[tl] ⚠ `--corpus true` = literal cột corpus=='true' (mọi row_kind, kể cả overflow/blank-trên-NLM bị "
@@ -2090,8 +2124,9 @@ def cmd_reg_query(a) -> int:
 
     hits = [e for e in entries if ok(e)]
     # A (v1.30.0): profile CỘNG VBQPPL — hợp nhất thêm hit từ manifest NỀN (profile trước, nền bổ sung, dedup drive_id).
+    # v1.34.58 (C-#11): live mode KHÔNG merge nền từ cache (authoritative không trộn stale).
     _base_note = None
-    if _base_also_enabled(a):
+    if not _live_mode and _base_also_enabled(a):
         _b_entries, _b_err = _base_manifest_entries(getattr(a, "config", None))
         _n0 = len(hits)
         hits = _merge_base_entries(hits, [e for e in _b_entries if ok(e)])
@@ -2108,6 +2143,8 @@ def cmd_reg_query(a) -> int:
                 _r["scope"] = _e["_scope"]      # hit bổ sung từ nền VBQPPL (base-also)
         _env = {"ok": True, "schema": "reg-query.v2", "count": len(hits), "limit": lim,
                 "truncated": len(hits) > lim, "rows": _rows, "entries": _rows}
+        if _live_mode:
+            _env["source"] = "live"   # v1.34.58 (C-#11): rows từ reg_get authoritative, không phải manifest cache
         if _base_note:
             _env["base_also"] = _base_note
         _emit_json_payload(_env, getattr(a, "out", None))   # S-4 (v1.33.34): atomic --out, mirror doctor/sweep

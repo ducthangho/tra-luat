@@ -908,6 +908,21 @@ def cmd_release_bundle(a) -> int:
     if not manifest.get("ok"):
         res = {"ok": False, "error": "MANIFEST_NOT_OK", "required_missing": manifest.get("required_missing"), "root": str(root)}
         _print_json_or_text(res, getattr(a, "json", False)); return 2
+    # v1.34.58 (C-#13 — Q10): NLM import Capabilities nhận ≤200 file/zip — vượt là gói KHÔNG import được
+    # (suýt dính 205 file khi `zip -r` tay cuốn .tl_state/golden/reports). FAIL sớm TRƯỚC khi ghi zip;
+    # liệt kê 20 entry MỚI NHẤT theo mtime để lộ thủ phạm (thường artifact/report lọt vào cây).
+    _n_entries = len(manifest.get("files") or []) + 1   # +1 = RELEASE_MANIFEST.json ghi thêm vào zip
+    if _n_entries > 200:
+        _newest = sorted((manifest.get("files") or []),
+                         key=lambda f: ((root / f["path"]).stat().st_mtime
+                                        if (root / f["path"]).exists() else 0.0),
+                         reverse=True)[:20]
+        res = {"ok": False, "error": "IMPORT_LIMIT_EXCEEDED", "entries": _n_entries, "limit": 200,
+               "newest_20": [f["path"] for f in _newest],
+               "note": "NLM import Capabilities nhận ≤200 file/zip — dọn file lạ khỏi cây skill (xem "
+                       "newest_20) hoặc archive bớt references/ rồi build lại. KHÔNG ghi zip."}
+        _print_json_or_text(res, getattr(a, "json", False))
+        return 2
     tmp = out_path.with_suffix(out_path.suffix + ".tmp")
     tmp.parent.mkdir(parents=True, exist_ok=True)
     if tmp.exists():

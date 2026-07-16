@@ -1,3 +1,39 @@
+# ★ v1.34.58 — ĐỢT C kế hoạch 13-vấn-đề: chất lượng + UX (PDF broken-font, reg-query --live, cache, guard 200) (2026-07-16)
+
+> Đợt C/3 — CHỐT kế hoạch grill (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): C-#9 (Q8=a) +
+> C-#11 (Q9=a) + C-#8/#10/#13 (Q10) + sửa lệch tài liệu API_CONTRACT (user yêu cầu). TDD r119 ×10
+> (negative-input trước); 1016/1016 selftest. Python-only, GAS giữ 2.21.2m. **CẢ 13 VẤN ĐỀ ĐÃ XỬ TRỌN.**
+
+- **[C-#9] `PDF_TEXT_LAYER_BROKEN_FONT`**: helper mới `_probe_pdf_quality` (KHÔNG đổi chữ ký
+  `_profile_read_probe_text`) — text-layer ≥200 chars nhưng MẤT DẤU (density<0.005 + letters>500, tái dùng
+  ngưỡng LOW_VIETNAMESE_MARK_DENSITY; ca 7 phụ lục CPTPP pdftotext ra text không dấu) → probe RỖNG + flag
+  đúng bệnh *"Google-convert thường xử được; apply verify bằng text GDoc sau convert; KHÔNG vội OCR"* thay vì
+  dọa NO_PROBE_TEXT/OCR_UNVERIFIED oan; `_vb_ingest_auto_plan` + profile-ingest DRY nối flag (gate không
+  chặn từ probe local; apply giữ nguyên: `_read_doc_text(gdoc)` sau convert quyết corpus); PDF scan thật
+  (<200 chars) giữ đường OCR cũ; text có dấu giữ nguyên đường C6.
+- **[C-#11] `reg-query --live` (Q9=a)**: đọc AUTHORITATIVE qua `reg_get` (né manifest cache stale — bài học
+  v1.34.50) — CHỈ hợp lệ kèm bộ lọc hẹp `--drive-id`|`--sohieu`|`--name` (thiếu → `LIVE_NEEDS_FILTER` rc=2);
+  dịch: drive-id/sohieu(norm)/name_contains; rows qua đúng projection `_reg_query_row` + envelope v2, thêm
+  `source='live'`; filter còn lại (cat/loai/nlm/corpus/row-kind/notebook) áp TIẾP phía client; KHÔNG merge
+  base-also từ cache khi live.
+- **[C-#8] `nlm-list --cached`** (opt-in, chung helper `_nlm_source_list_cached` TTL 10' với audit; mặc định
+  vẫn list tươi) + test TTL-quá-hạn tự gọi lại.
+- **[C-#10] pdftotext path phi-ASCII**: `_read_local_text_for_analysis` phát hiện path không encode ASCII
+  được (`D:\Dữ liệu\…` — build Git Bash/cp1258 nhận arg hỏng, im lặng 0 output) → copy sang temp ASCII rồi
+  chạy trên bản copy (tự xoá); +RUNBOOK B5b bẫy path Việt.
+- **[C-#13] `release-bundle` guard trần import**: >200 entry (kể cả RELEASE_MANIFEST.json ghi thêm) → FAIL
+  `IMPORT_LIMIT_EXCEEDED` TRƯỚC khi ghi zip, liệt kê `newest_20` theo mtime để lộ thủ phạm (suýt dính 205
+  file khi zip -r tay); hiện 169/200 pass.
+- **Sửa lệch tài liệu (user yêu cầu)**: `references/API_CONTRACT.md` dấu LIVE `2.21.2l`→`2.21.2m` (+ ping
+  literal + note F-04/F-08 "CHƯA DEPLOY"→ĐÃ LIVE trong 2.21.2m) — kèm **drift-lock r119**: con dấu đầu file
+  PHẢI khớp `tl.py EXPECT_VERSION`, trôi là selftest đỏ (hết lệch tài liệu âm thầm).
+- ★Bài học harness lặp lại đúng dự báo: HẰNG mới `_PDF_BROKEN_FONT_WARN` phải re-export TRỰC TIẾP trong tl
+  (bẫy I11 biến thể); `release.bind` = COPY-một-lần (như ocr) → stub test vá module `tl_core.release`,
+  không phải `_TL_MODULE`.
+- TDD r119 ×10: broken-font (flag thay OCR-scare / có-dấu đường cũ / scan<200 OCR cũ) + LIVE_NEEDS_FILTER +
+  live-name-qua-reg_get-không-đụng-manifest + nlm-list --cached + cache TTL hết hạn + pdftotext non-ASCII
+  temp-copy + IMPORT_LIMIT_EXCEEDED + drift-lock API_CONTRACT↔EXPECT_VERSION.
+
 # ★ v1.34.57 — ĐỢT B kế hoạch 13-vấn-đề: bộ di dời physical-first (nlm-audit-physical + nlm-migrate) (2026-07-16)
 
 > Đợt B/3 kế hoạch grill (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): B-#3 + B-#4..#7 (Q5=a,

@@ -491,6 +491,8 @@ python scripts/tl.py status 187/2025/NĐ-CP --amendment --targets 78-2025-ND-CP,
 1 RTT) → verify bằng `list cat=<NN>` (ĐỪNG tin response của `move`). File gốc .docx/.pdf nằm CẠNH GDoc, KHÔNG add NLM.
 Khi khớp `.docx/.pdf` sidecar vào canonical, đọc nội dung để xác minh số hiệu thật + ngày ban hành; không quarantine theo tên file đơn thuần. Sau rename/move, nếu manifest còn tên cũ do Drive trễ, chạy `tl manifest` export-only và verify bằng registry/`source-map`.
 
+**B5b. Bẫy path phi-ASCII (`D:\Dữ liệu\…`)**: pdftotext build Git Bash/cp1258 nhận arg tiếng Việt HỎNG (im lặng không output) — từ v1.34.58 `_read_local_text_for_analysis` tự copy-temp-ASCII; thao tác file path Việt bằng tay thì dùng PowerShell hoặc copy sang temp trước, ĐỪNG đưa path thẳng cho tool CLI cũ.
+
 **B6. Link cho người dùng = markdown click-mở-được** (QT-1). Cung cấp ĐỦ cả link UPLOAD (`_HOP_NAP`)
 lẫn link DOWNLOAD click-thẳng-tải-được. Với link để người dùng tự tải, ưu tiên:
 `thuvienphapluat.vn` → `luatvietnam.vn` → `congbao.chinhphu.vn` → cổng official khác (`vbpl.vn`, `vanban.chinhphu.vn`) → trang khác.

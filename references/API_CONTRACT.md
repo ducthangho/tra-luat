@@ -1,9 +1,9 @@
 # tra-luat — HỢP ĐỒNG API SỐNG (webapp Apps Script)
 
-> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2l`** · đã xác minh `ping.version=2.21.2l`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · regen2 profile-own scope + blowup guard + row_kind; `tl.py EXPECT_VERSION=2.21.2l`.
+> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2m`** · đã xác minh `ping.version=2.21.2m`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2l (regen2 profile-own scope + blowup guard + row_kind + claims F-04/F-08) ⊕ export `row_kind` RAW (D3 v1.34.55); `tl.py EXPECT_VERSION=2.21.2m`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
 > **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema`. Nếu KHÁC
-> `2.21.2l`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
-> `Code.2.21.2l.gs`; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
+> `2.21.2m`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
+> `Code.2.21.2m.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
 > nhãn cũ, KHÔNG phải phiên bản deploy; nguồn sự thật = `ping.version`.)
 >
 > **Slot theo notebook (LIVE từ 2.21.2g):** `nlm_slots`/`nlm_preflight`/`nlm_dedup` đếm theo
@@ -65,7 +65,7 @@
 
 | action | GET/POST | params bắt buộc | params tùy chọn | response (khóa chính) |
 |---|---|---|---|---|
-| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2l', schema_version:'2.21.2l', registry_schema:'reg_cols_row_kind_v1', registry_cols` |
+| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2m', schema_version:'2.21.2m', registry_schema:'reg_cols_row_kind_v1', registry_cols` |
 | `config` | GET | — | — | `ok, version:'2.11.0', config, rootFolderId` (không lộ token) |
 | `readconfig` | GET | — | — | `ok, mirrored, configFileId?, updated?, downloadUrl?, config` |
 | `writeconfig` | GET | — | `webappUrl` | `ok, configFileId, name, rootFolderId, downloadUrl, config` |
@@ -182,7 +182,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `ingest_claim` | **POST** | `run_id`; `keys[]` (mảng `identity_hash`) và/hoặc `release_keys[]` | `drive_ids[]` (song song `keys`, chỉ để lưu tham khảo) | `ok, run_id, results:[{identity_hash,granted,reason,source_id?}], granted, denied, released[], release_failed[]` |
 | `reg_get_bulk` | GET/POST | `keys[]` | `key_field` (`'drive_id'`\|`'nlm_source_id'`, mặc định `drive_id`), `commit_claims[]` (`[{identity_hash,source_id,run_id}]`) | `ok, key_field, count, rows[]` (NGUYÊN THỨ TỰ `keys`, không khớp → `null`; TOÀN BỘ 27 `REG_COLS_`/dòng) + `committed[], commit_failed[]` nếu có `commit_claims` |
 
-> **v2.21.2l (F-04/F-08 — CHƯA DEPLOY tại thời điểm viết, xem CHANGELOG v1.34.52):** `ingest_claim` là
+> **v2.21.2l (F-04/F-08 — ĐÃ DEPLOY, LIVE trong 2.21.2m; xem CHANGELOG v1.34.52/55):** `ingest_claim` là
 > reservation identity XUYÊN HOST (Sheet tab `claims` riêng, TTL 5 phút) — acquire TRƯỚC `source_add`, chống 2
 > host cùng nạp 1 nội dung. `granted=false` với `reason='ALREADY_COMMITTED'` kèm `source_id` → LINK thay vì add
 > lại; `reason='HELD_BY_OTHER'` → thử lại sau (không phải lỗi). `reg_get_bulk.commit_claims` GỘP commit claim

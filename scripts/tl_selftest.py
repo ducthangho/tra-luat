@@ -11130,6 +11130,251 @@ def run() -> int:
                       "readback_command", "resume_command", "rollback_hint"}
                   and "nlm-audit-physical" in _ins69.getsource(_om118.cmd_doctor)))
 
+    # ═══ v1.34.58 — r119_*: ĐỢT C kế hoạch 13-vấn-đề (C-#9 PDF broken-font, C-#11 reg-query --live,
+    # C-#8 nlm-list --cached + TTL, C-#10 pdftotext path phi-ASCII, C-#13 release-bundle guard 200,
+    # + drift-lock API_CONTRACT↔EXPECT_VERSION). NEGATIVE-INPUT TRƯỚC (luật đứng r102). ═══
+    def _run_ap119(extract_text, path="C:\\fake119\\Doc_Thu_Nghiem_119.pdf"):
+        # Harness C-#9: _vb_ingest_auto_plan trên .pdf — stub extractor pdftotext dùng chung.
+        _sav = {"_read_local_text_for_analysis": _TL_MODULE._read_local_text_for_analysis}
+        try:
+            _TL_MODULE._read_local_text_for_analysis = lambda p, max_chars=500000: (extract_text, [])
+            return _TL_MODULE._vb_ingest_auto_plan(path)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c119_pdf_broken_font():
+        # NEGATIVE: text-layer dài nhưng MẤT DẤU (font hỏng, ca 7 phụ lục CPTPP) → flag broken-font,
+        # probe RỖNG (không phân loại trên text hỏng), KHÔNG dọa NO_PROBE_TEXT/OCR oan.
+        _txt = ("Hiep dinh Doi tac Toan dien va Tien bo xuyen Thai Binh Duong. "
+                "Dieu 1. Pham vi dieu chinh cua chuong nay ap dung cho cac ben. ") * 20
+        _q = _TL_MODULE._probe_pdf_quality("C:\\fake119\\x.pdf") if False else None   # gọi qua harness dưới
+        _sav = {"_read_local_text_for_analysis": _TL_MODULE._read_local_text_for_analysis}
+        try:
+            _TL_MODULE._read_local_text_for_analysis = lambda p, max_chars=500000: (_txt, [])
+            _q = _TL_MODULE._probe_pdf_quality("C:\\fake119\\x.pdf")
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+        _plan = _run_ap119(_txt)
+        _w = _plan.get("warnings") or []
+        return (_q["broken_font"] is True and _q["text"] == ""
+                and any(str(x).startswith("PDF_TEXT_LAYER_BROKEN_FONT") for x in _w)
+                and "NO_PROBE_TEXT_FOR_AUTO_CAT" not in _w
+                and "OCR_UNVERIFIED_NOT_CORPUS" not in _w
+                and not _plan.get("probe_text_source"))
+    _t110("r119_pdf_broken_font_flag_replaces_ocr_scare", _c119_pdf_broken_font)
+
+    def _c119_pdf_diacritics_old_path():
+        # POSITIVE control: text-layer CÓ DẤU → probe như cũ, không flag.
+        _txt = ("Điều 1. Phạm vi điều chỉnh. Luật này quy định về việc thử nghiệm chất lượng văn bản. "
+                "Điều 2. Đối tượng áp dụng gồm cơ quan, tổ chức, cá nhân liên quan. ") * 10
+        _plan = _run_ap119(_txt)
+        _w = _plan.get("warnings") or []
+        return (not any(str(x).startswith("PDF_TEXT_LAYER_BROKEN_FONT") for x in _w)
+                and "NO_PROBE_TEXT_FOR_AUTO_CAT" not in _w
+                and str(_plan.get("probe_text_source") or "").endswith("#pdf-text-layer"))
+    _t110("r119_pdf_diacritics_keeps_old_path", _c119_pdf_diacritics_old_path)
+
+    def _c119_pdf_scan_ocr_path():
+        # PDF scan thật (<200 chars) → vẫn đường OCR cũ (NO_PROBE_TEXT + OCR_UNVERIFIED, không flag font).
+        _plan = _run_ap119("ngan")
+        _w = _plan.get("warnings") or []
+        return ("NO_PROBE_TEXT_FOR_AUTO_CAT" in _w and "OCR_UNVERIFIED_NOT_CORPUS" in _w
+                and not any(str(x).startswith("PDF_TEXT_LAYER_BROKEN_FONT") for x in _w))
+    _t110("r119_pdf_scan_under_200_keeps_ocr_path", _c119_pdf_scan_ocr_path)
+
+    def _run_rq119(live=False, name=None, drive_id=None, sohieu=None, reg_rows=None, manifest_boom=False):
+        # Harness C-#11: cmd_reg_query --live — bắt reg_get; manifest cấm đụng khi live.
+        _calls = {"reg_get": None}
+
+        class _G119:
+            def get(self, action, **kw):
+                if action == "reg_get":
+                    _calls["reg_get"] = dict(kw)
+                    return {"ok": True, "rows": list(reg_rows or [])}
+                return {"ok": True}
+        _keys = ("apply_profile_offline", "load_creds", "_gas", "_manifest_entries",
+                 "_base_also_enabled", "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G119()
+            _TL_MODULE._manifest_entries = ((lambda refresh=False: (_ for _ in ()).throw(AssertionError("manifest touched in --live")))
+                                            if manifest_boom else (lambda refresh=False: []))
+            _TL_MODULE._base_also_enabled = lambda a: False
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _ns = argparse.Namespace(live=live, name=name, drive_id=drive_id, sohieu=sohieu, cat=None,
+                                     loai=None, nlm=False, no_nlm=False, corpus=False, no_corpus=False,
+                                     corpus_effective=False, notebook=None, row_kind=None, mime=None,
+                                     limit=None, refresh=False, json=True, out=None, config=None, profile=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_reg_query(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            return _rc, _out, _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c119_reg_query_live_needs_filter():
+        # NEGATIVE: --live không bộ lọc hẹp → LIVE_NEEDS_FILTER rc=2, KHÔNG gọi reg_get.
+        _rc, _out, _e, _calls = _run_rq119(live=True)
+        return _rc == 2 and "LIVE_NEEDS_FILTER" in (json.dumps(_out) + _e) and _calls["reg_get"] is None
+    _t110("r119_reg_query_live_needs_filter", _c119_reg_query_live_needs_filter)
+
+    def _c119_reg_query_live_name_reg_get():
+        # --live --name → reg_get(name_contains) AUTHORITATIVE, KHÔNG đụng manifest; envelope v2 + source=live.
+        _row = {"drive_id": "d" * 24, "name": "Luat_Thu_119", "cat": "23_Ngoai_giao", "corpus": "true",
+                "nlm_source_id": "sL119", "nlm_notebook_id": "nb119", "nlm_status": "pushed"}
+        _rc, _out, _e, _calls = _run_rq119(live=True, name="Thu_119", reg_rows=[_row], manifest_boom=True)
+        return (_rc == 0 and (_calls["reg_get"] or {}).get("name_contains") == "Thu_119"
+                and _out.get("schema") == "reg-query.v2" and _out.get("source") == "live"
+                and _out.get("count") == 1
+                and (_out.get("rows") or [{}])[0].get("drive_id") == "d" * 24)
+    _t110("r119_reg_query_live_name_via_reg_get_no_manifest", _c119_reg_query_live_name_reg_get)
+
+    def _c119_nlm_list_cached_flag():
+        # C-#8: nlm-list --cached opt-in dùng helper cache; KHÔNG gọi source_list trực tiếp.
+        _calls = {"cached": 0}
+
+        class _NC119:
+            def nlm_available(self):
+                return True
+
+            def source_list(self, nb, **kw):
+                raise AssertionError("source_list direct trong --cached")
+        _keys = ("_imp", "_nlm_source_list_cached")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE._imp = lambda name: (_NC119() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._nlm_source_list_cached = (lambda nc, nb, **k:
+                (_calls.__setitem__("cached", _calls["cached"] + 1),
+                 {"ok": True, "count": 1, "sources": [{"id": "sC119", "title": "t"}], "cached": True})[1])
+            _ns = argparse.Namespace(notebook_id="nb119c", no_skip_freshness=False, max=15, cached=True,
+                                     json=True, out=None, config=None, profile=None)
+            _bo = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_nlm_list(_ns)
+            _out = json.loads(_bo.getvalue())
+            _nsp = build_parser().parse_args(["nlm-list", "nbX", "--cached"])
+            return (_rc == 0 and _calls["cached"] == 1 and _out.get("cached") is True
+                    and getattr(_nsp, "cached", False) is True)
+        except SystemExit:
+            return False
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r119_nlm_list_cached_flag_uses_helper", _c119_nlm_list_cached_flag)
+
+    def _c119_cache_ttl_expiry():
+        # C-#8: cache QUÁ TTL → gọi lại source_list (r118 đã test hit/refresh; đây là nhánh hết hạn).
+        import tempfile as _tf119
+        _calls = {"n": 0}
+
+        class _NC119t:
+            def source_list(self, nb, skip_freshness=True, **kw):
+                _calls["n"] += 1
+                return {"ok": True, "count": 0, "sources": []}
+        with _tf119.TemporaryDirectory() as _td:
+            _fp = Path(_td) / "nlm_list_cache_nbTTL119.json"
+            _fp.write_text(json.dumps({"fetched_at": time.time() - 700, "count": 0, "sources": []}),
+                           encoding="utf-8")
+            _r = _TL_MODULE._nlm_source_list_cached(_NC119t(), "nbTTL119", cache_dir=_td)
+        return _calls["n"] == 1 and _r.get("ok") and not _r.get("cached")
+    _t110("r119_nlm_list_cache_ttl_expiry_refetches", _c119_cache_ttl_expiry)
+
+    def _c119_pdftotext_nonascii():
+        # C-#10 NEGATIVE: path chứa 'Dữ liệu' → pdftotext phải chạy trên BẢN COPY temp ASCII (Git Bash
+        # cp1258 đọc hỏng arg phi-ASCII); path ASCII → giữ nguyên (positive control).
+        import shutil as _real_sh
+        import subprocess as _real_sp
+        import tempfile as _tf119b
+        _calls = {"args": None}
+
+        class _ShProxy119:
+            def __getattr__(self, n):
+                return getattr(_real_sh, n)
+
+            def which(self, name):
+                return "C:\\fake119\\pdftotext.exe"
+
+        class _SpProxy119:
+            def __getattr__(self, n):
+                return getattr(_real_sp, n)
+
+            def run(self, args, **kw):
+                _calls["args"] = [str(x) for x in args]
+                return None
+        _sav = {"shutil": _TL_MODULE.shutil, "subprocess": _TL_MODULE.subprocess}
+        try:
+            _TL_MODULE.shutil = _ShProxy119()
+            _TL_MODULE.subprocess = _SpProxy119()
+            with _tf119b.TemporaryDirectory() as _td:
+                _dvn = Path(_td) / "Dữ liệu 119"
+                _dvn.mkdir()
+                _pv = _dvn / "van_ban_119.pdf"
+                _pv.write_bytes(b"%PDF-1.4 fake119")
+                _TL_MODULE._read_local_text_for_analysis(_pv)
+                _arg_v = (_calls["args"] or ["", "", ""])[2]
+                _pa = Path(_td) / "ascii_119.pdf"
+                _pa.write_bytes(b"%PDF-1.4 fake119")
+                _calls["args"] = None
+                _TL_MODULE._read_local_text_for_analysis(_pa)
+                _arg_a = (_calls["args"] or ["", "", ""])[2]
+            try:
+                _arg_v.encode("ascii")
+                _ascii_ok = True
+            except UnicodeEncodeError:
+                _ascii_ok = False
+            return (_ascii_ok and _arg_v != str(_pv) and _arg_v.lower().endswith(".pdf")
+                    and _arg_a == str(_pa))
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r119_pdftotext_nonascii_path_temp_copy", _c119_pdftotext_nonascii)
+
+    def _c119_release_bundle_import_limit():
+        # C-#13 NEGATIVE: >200 entry → FAIL IMPORT_LIMIT_EXCEEDED TRƯỚC khi ghi zip + lộ 20 entry mới nhất.
+        # release.bind = COPY-một-lần (như ocr) → stub phải vá MODULE tl_core.release, không phải _TL_MODULE.
+        import tempfile as _tf119c
+        import tl_core.release as _rel119
+        _sav = {"_build_release_manifest": _rel119._build_release_manifest}
+        try:
+            _rel119._build_release_manifest = lambda root: {
+                "ok": True, "files": [{"path": f"docs/f{i:03d}.txt", "sha256": None} for i in range(210)]}
+            with _tf119c.TemporaryDirectory() as _td:
+                _out_z = Path(_td) / "over119.zip"
+                _ns = argparse.Namespace(root=None, out=str(_out_z), top="tra-luat", json=True)
+                _bo, _be = _io27.StringIO(), _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                    _rc = _TL_MODULE.cmd_release_bundle(_ns)
+                _blob = _bo.getvalue() + _be.getvalue()
+                try:
+                    _out_j = json.loads(_bo.getvalue())
+                except Exception:
+                    _out_j = {}
+                return (_rc == 2 and "IMPORT_LIMIT_EXCEEDED" in _blob and not _out_z.exists()
+                        and _out_j.get("entries") == 211
+                        and len(_out_j.get("newest_20") or []) == 20)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_rel119, _k, _v)
+    _t110("r119_release_bundle_import_limit_exceeded", _c119_release_bundle_import_limit)
+
+    # Drift-lock tài liệu ↔ code (sửa lệch 2026-07-16: API_CONTRACT ghi 2.21.2l trong khi live 2.21.2m):
+    # con dấu LIVE đầu file API_CONTRACT.md PHẢI khớp EXPECT_VERSION của tl — trôi là fail.
+    _api119 = (Path(_ins69.getsourcefile(_g70["build_parser"])).parent.parent
+               / "references" / "API_CONTRACT.md").read_text(encoding="utf-8", errors="replace")
+    cases.append(("r119_api_contract_version_stamp_matches_expect",
+                  f"`{_TL_MODULE.EXPECT_VERSION}`" in _api119[:400]
+                  and "CHƯA DEPLOY" not in _api119[:12000]))
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

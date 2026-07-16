@@ -10729,6 +10729,407 @@ def run() -> int:
                       "schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
                       "readback_command", "resume_command", "rollback_hint"}))
 
+    # ═══ v1.34.57 — r118_*: ĐỢT B kế hoạch 13-vấn-đề (B-#3 nlm-audit-physical + cache listing,
+    # B-#4..#7 nlm-migrate physical-first idempotent, + vá before-thật nhánh link nlm-add từ phát hiện
+    # smoke A). NEGATIVE-INPUT TRƯỚC (luật đứng r102). ═══
+    _nbA118 = "aaaa1118-0000-4000-8000-00000000000a"
+    _nbB118 = "bbbb1118-0000-4000-8000-00000000000b"
+
+    def _src118(sid, did="", title=""):
+        s = {"id": sid, "title": title}
+        if did:
+            s["url"] = f"https://docs.google.com/document/d/{did}/edit"
+        return s
+
+    def _c118_audit_mismatch():
+        # B-#3: pointer trỏ nb A, vật lý match ở nb B (cả 2 trong scope) → POINTER_MISMATCH, KHÔNG dead.
+        rows = [{"drive_id": "d" * 24, "name": "Doc_Mismatch118", "nlm_source_id": "sOLD118",
+                 "nlm_notebook_id": _nbA118, "nlm_status": "pushed"}]
+        phys = {_nbA118: [], _nbB118: [_src118("sNEW118", "d" * 24)]}
+        r = _TL_MODULE._physical_audit_classify(rows, phys)
+        f = r["findings"]["pointer_mismatch"]
+        return (len(f) == 1 and f[0]["physical_nb"] == _nbB118 and f[0]["physical_sid"] == "sNEW118"
+                and not r["findings"]["pointer_dead"] and r["clean"] is False)
+    _t110("r118_audit_classify_pointer_mismatch", _c118_audit_mismatch)
+
+    def _c118_audit_dead_vs_unverified():
+        # B-#3 NEGATIVE: dead CHỈ khi scope quét ⊇ notebook pointer trỏ (hoặc nb rỗng); nb ngoài scope →
+        # UNVERIFIED_SCOPE (advisory, không oan).
+        rows = [{"drive_id": "e" * 24, "name": "Doc_Dead118", "nlm_source_id": "sDEAD118",
+                 "nlm_notebook_id": _nbA118, "nlm_status": "pushed"},
+                {"drive_id": "f" * 24, "name": "Doc_Foreign118", "nlm_source_id": "sFOR118",
+                 "nlm_notebook_id": "zzzz1118-0000-4000-8000-00000000000z", "nlm_status": "pushed"},
+                {"drive_id": "g" * 24, "name": "Doc_EmptyNb118", "nlm_source_id": "sGONE118",
+                 "nlm_notebook_id": "", "row_kind": "overflow", "nlm_status": "pushed"}]
+        phys = {_nbA118: [], _nbB118: []}
+        r = _TL_MODULE._physical_audit_classify(rows, phys)
+        dead = {x["drive_id"] for x in r["findings"]["pointer_dead"]}
+        return (dead == {"e" * 24, "g" * 24} and not r["findings"]["pointer_mismatch"]
+                and len(r["unverified_scope"]) == 1
+                and r["unverified_scope"][0]["drive_id"] == "f" * 24)
+    _t110("r118_audit_classify_dead_vs_unverified_scope", _c118_audit_dead_vs_unverified)
+
+    def _c118_audit_unregistered_and_dup():
+        # B-#3: ≥2 nguồn cùng identity 1 notebook → DUP_PHYSICAL (keep = sid registry đang trỏ);
+        # nguồn không match dòng nào → UNREGISTERED_PHYSICAL.
+        rows = [{"drive_id": "h" * 24, "name": "Doc_Reg118", "nlm_source_id": "sREG118",
+                 "nlm_notebook_id": _nbA118, "nlm_status": "pushed"}]
+        phys = {_nbA118: [_src118("sREG118", "h" * 24), _src118("sDUP118", "h" * 24),
+                          _src118("sORPH118", "i" * 24)]}
+        r = _TL_MODULE._physical_audit_classify(rows, phys)
+        dup = r["findings"]["dup_physical"]
+        unreg = r["findings"]["unregistered_physical"]
+        return (len(dup) == 1 and set(dup[0]["sids"]) == {"sREG118", "sDUP118"}
+                and dup[0].get("keep") == "sREG118"
+                and len(unreg) == 1 and unreg[0]["source_id"] == "sORPH118"
+                and any("nlm-source-remove" in c for c in r["suggested_commands"]))
+    _t110("r118_audit_classify_unregistered_and_dup", _c118_audit_unregistered_and_dup)
+
+    def _c118_audit_clean():
+        # B-#3 positive control: pointer == vật lý → 0 finding; dòng removed* bỏ qua (tombstone, không oan).
+        rows = [{"drive_id": "k" * 24, "name": "Doc_OK118", "nlm_source_id": "sOK118",
+                 "nlm_notebook_id": _nbA118, "nlm_status": "pushed"},
+                {"drive_id": "m" * 24, "name": "Doc_Removed118", "nlm_source_id": "sREM118",
+                 "nlm_notebook_id": _nbA118, "nlm_status": "removed_by_user"}]
+        phys = {_nbA118: [_src118("sOK118", "k" * 24)]}
+        r = _TL_MODULE._physical_audit_classify(rows, phys)
+        return r["clean"] is True and all(not v for v in r["findings"].values()) and not r["unverified_scope"]
+    _t110("r118_audit_classify_clean_and_removed_skipped", _c118_audit_clean)
+
+    def _c118_cache_hit_skips_source_list():
+        # C-#8 (kéo lên B vì audit dùng): cache-hit KHÔNG gọi source_list; refresh ép gọi.
+        import tempfile as _tf118
+        _calls = {"n": 0}
+
+        class _NC118c:
+            def source_list(self, nb, skip_freshness=True, **kw):
+                _calls["n"] += 1
+                return {"ok": True, "count": 1, "sources": [{"id": "sC118", "title": "t"}]}
+        with _tf118.TemporaryDirectory() as _td:
+            r1 = _TL_MODULE._nlm_source_list_cached(_NC118c(), "nbCACHE118", cache_dir=_td)
+            r2 = _TL_MODULE._nlm_source_list_cached(_NC118c(), "nbCACHE118", cache_dir=_td)
+            r3 = _TL_MODULE._nlm_source_list_cached(_NC118c(), "nbCACHE118", cache_dir=_td, refresh=True)
+        return (_calls["n"] == 2 and r1.get("ok") and r2.get("ok") and r2.get("cached") is True
+                and r3.get("ok") and not r3.get("cached"))
+    _t110("r118_nlm_list_cache_hit_and_refresh", _c118_cache_hit_skips_source_list)
+
+    def _c118_migrate_plan_three_groups():
+        # B-#4..#7 PURE: POINTER_OK / REPOINT (sid VẬT LÝ thắng sid registry; tier title khi không url) / ADD;
+        # cleanup candidates từ --from CHỈ cho doc POINTER_OK.
+        rows = [
+            {"drive_id": "p" * 24, "name": "Doc_PointerOK118", "nlm_source_id": "sP118",
+             "nlm_notebook_id": _nbB118, "nlm_status": "pushed"},
+            {"drive_id": "q" * 24, "name": "Doc_Repoint118", "nlm_source_id": "sOLDQ118",
+             "nlm_notebook_id": _nbA118, "nlm_status": "pushed"},
+            {"drive_id": "r" * 24, "name": "Doc_Add118", "nlm_source_id": "", "nlm_notebook_id": "",
+             "nlm_status": ""},
+            {"drive_id": "t" * 24, "name": "Doc Title118", "nlm_source_id": "", "nlm_notebook_id": "",
+             "nlm_status": ""},
+            # tier-0 (live-smoke B 2026-07-16, ca CPTPP Ch22/25): pointer sid SỐNG tại đích nhưng listing
+            # không lộ drive-URL VÀ title bị DUP (không duy nhất) → vẫn POINTER_OK (nhất quán audit),
+            # KHÔNG rơi vào ADD (dedup-gate sẽ chặn nhưng phân loại phải đúng từ plan).
+            {"drive_id": "x" * 24, "name": "Doc Sid118", "nlm_source_id": "sSID118",
+             "nlm_notebook_id": _nbB118, "nlm_status": "pushed"},
+        ]
+        phys_t = [_src118("sP118", "p" * 24), _src118("sPHYSQ118", "q" * 24),
+                  _src118("sTITLE118", "", "Doc_Title118"),
+                  _src118("sSID118", "", "Doc_Sid118"), _src118("sSID118b", "", "Doc_Sid118")]
+        phys_f = [_src118("sFROMP118", "p" * 24)]
+        pl = _TL_MODULE._migrate_plan(rows, phys_t, _nbB118, phys_from=phys_f)
+        _rp = {x["phys_sid"]: x for x in pl["repoint"]}
+        return (sorted(x["drive_id"] for x in pl["pointer_ok"]) == sorted(["p" * 24, "x" * 24])
+                and set(_rp) == {"sPHYSQ118", "sTITLE118"}
+                and _rp["sPHYSQ118"]["before"]["nlm_source_id"] == "sOLDQ118"
+                and [x["drive_id"] for x in pl["add"]] == ["r" * 24]
+                and len(pl["cleanup"]) == 1 and pl["cleanup"][0]["source_id"] == "sFROMP118")
+    _t110("r118_migrate_plan_three_groups_phys_sid_wins", _c118_migrate_plan_three_groups)
+
+    def _run_mg118(rows, phys_by_nb, verify_rows=None, api_add=False, apply=False, confirm="",
+                   name_contains="118", drive_ids=None, cat=None, from_nb=None, json_mode=True):
+        # Harness B-#4..#7: cmd_nlm_migrate — bắt reg_upsert/bulk-verify/nlm-add-inprocess/delete/list.
+        _calls = {"upserts": [], "bulk": [], "adds": [], "deletes": 0, "lists": []}
+        _vr = dict(verify_rows or {})
+
+        class _G118m:
+            def get(self, action, **kw):
+                if action == "reg_get_bulk":
+                    _calls["bulk"].append(dict(kw))
+                    keys = json.loads(kw.get("keys") or "[]")
+                    return {"ok": True, "rows": [dict(_vr.get(k) or {"drive_id": k}) for k in keys]}
+                return {"ok": True}
+
+        class _NC118m:
+            def nlm_available(self):
+                return True
+
+            def source_list(self, nb, skip_freshness=True, **kw):
+                _calls["lists"].append(nb)
+                return {"ok": True, "count": len(phys_by_nb.get(nb) or []),
+                        "sources": list(phys_by_nb.get(nb) or [])}
+
+            def source_delete(self, sid, timeout=120):
+                _calls["deletes"] += 1
+                return {"ok": True}
+        _keys = ("apply_profile_offline", "_imp", "_manifest_entries", "load_creds", "_gas",
+                 "_apply_journal_start", "_journal_append", "_journaled_reg_upsert",
+                 "_resolve_nlm_notebook", "_resolve_shard_topology", "_active_profile",
+                 "cmd_nlm_add", "_nlm_source_list_cached")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC118m() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(rows)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G118m()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run118_" + str(name)
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._journaled_reg_upsert = (lambda run_id, g, payload, before=None:
+                (_calls["upserts"].append({"payload": dict(payload), "before": dict(before or {})}),
+                 {"verified": True, "changed": True})[1])
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or _nbB118), None)
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {"shards": []}
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _TL_MODULE.cmd_nlm_add = lambda ns: (_calls["adds"].append(ns), 0)[1]
+            _TL_MODULE._nlm_source_list_cached = (lambda nc, nb, **k:
+                {"ok": True, "sources": list(phys_by_nb.get(nb) or []), "cached": True})
+            _ns = argparse.Namespace(to=_nbB118, from_nb=from_nb, name_contains=name_contains, cat=cat,
+                                     drive_ids=drive_ids, api_add=api_add, limit=None, apply=apply,
+                                     confirm=confirm, json=json_mode, out=None, config=None, profile=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_migrate(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            return _rc, _out, _bo.getvalue(), _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    _rows_mg118 = [
+        {"drive_id": "q" * 24, "name": "Doc_Repoint118", "nlm_source_id": "sOLDQ118",
+         "nlm_notebook_id": _nbA118, "nlm_status": "pushed"},
+        {"drive_id": "u" * 24, "name": "Doc_Add1_118", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""},
+        {"drive_id": "v" * 24, "name": "Doc_Add2_118", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""},
+        {"drive_id": "w" * 24, "name": "Doc_Add3_118", "nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""},
+    ]
+    _phys_mg118 = {_nbB118: [_src118("sPHYSQ118", "q" * 24)], _nbA118: [_src118("sOLDQ118", "q" * 24)]}
+
+    def _c118_migrate_filter_required():
+        # NEGATIVE: không bộ lọc → FILTER_REQUIRED rc=2; 2 bộ lọc → cũng rc=2 (ĐÚNG 1).
+        _rc1, _o1, _so1, _e1, _c1 = _run_mg118(_rows_mg118, _phys_mg118, name_contains=None)
+        _rc2, _o2, _so2, _e2, _c2 = _run_mg118(_rows_mg118, _phys_mg118, name_contains="118", cat="23")
+        return (_rc1 == 2 and "FILTER_REQUIRED" in (json.dumps(_o1) + _e1) and not _c1["lists"]
+                and _rc2 == 2 and "FILTER_REQUIRED" in (json.dumps(_o2) + _e2))
+    _t110("r118_migrate_filter_required", _c118_migrate_filter_required)
+
+    def _c118_migrate_dry_no_writes():
+        # DRY re-plan: phân loại đúng, KHÔNG ghi gì (reg_upsert/add/delete = 0); đích list TƯƠI (không cache).
+        _rc, _o, _so, _e, _c = _run_mg118(_rows_mg118, _phys_mg118, from_nb=_nbA118)
+        return (_rc == 0 and _o.get("dry_run") is True
+                and _o["counts"]["repoint"] == 1 and _o["counts"]["add"] == 3 and _o["counts"]["pointer_ok"] == 0
+                and not _c["upserts"] and not _c["adds"] and _c["deletes"] == 0
+                and _nbB118 in _c["lists"])
+    _t110("r118_migrate_dry_no_writes", _c118_migrate_dry_no_writes)
+
+    def _c118_migrate_apply_repoint_verify():
+        # APPLY REPOINT: reg_upsert in-process (sid vật lý, nb đích, pushed) + before THẬT + verify bulk cuối.
+        _vr = {"q" * 24: {"drive_id": "q" * 24, "nlm_source_id": "sPHYSQ118", "nlm_notebook_id": _nbB118}}
+        _rows1 = [_rows_mg118[0]]
+        _rc, _o, _so, _e, _c = _run_mg118(_rows1, _phys_mg118, verify_rows=_vr, apply=True, confirm="yes")
+        _up = (_calls_up := _c["upserts"]) and _calls_up[0]
+        return (_rc == 0 and len(_c["upserts"]) == 1
+                and _up["payload"].get("nlm_source_id") == "sPHYSQ118"
+                and _up["payload"].get("nlm_notebook_id") == _nbB118
+                and _up["payload"].get("nlm_status") == "pushed"
+                and _up["before"].get("nlm_source_id") == "sOLDQ118"
+                and _up["before"].get("nlm_notebook_id") == _nbA118
+                and len(_c["bulk"]) == 1 and _o.get("repoint_verified") is True)
+    _t110("r118_migrate_apply_repoint_and_verify_bulk", _c118_migrate_apply_repoint_verify)
+
+    def _c118_migrate_batch_links_stdout():
+        # ADD >2 doc không --api-add → BATCH_LINKS: stdout CHỈ link (mẫu r115 nlm-links); stderr hướng dẫn
+        # 'CHẠY LẠI'; KHÔNG side-effect thêm.
+        _rows_add = [r0 for r0 in _rows_mg118 if not r0["nlm_source_id"]]
+        _rc, _o, _so, _e, _c = _run_mg118(_rows_add, _phys_mg118, apply=True, confirm="yes", json_mode=False)
+        _lines = [ln for ln in _so.splitlines() if ln.strip()]
+        return (_rc == 0 and len(_lines) == 3
+                and all(ln.startswith("https://docs.google.com/") for ln in _lines)
+                and "CHẠY LẠI" in _e and not _c["adds"] and not _c["upserts"] and _c["deletes"] == 0)
+    _t110("r118_migrate_add_over_threshold_batch_links", _c118_migrate_batch_links_stdout)
+
+    def _c118_migrate_api_add_inprocess():
+        # ADD ≤2 (hoặc --api-add) → per-doc qua cmd_nlm_add IN-PROCESS (claim + verify-then-link đường A);
+        # truyền title (bịt lỗ dedup-gate thiếu title — phát hiện smoke A).
+        _rows_one = [_rows_mg118[1]]
+        _rc, _o, _so, _e, _c = _run_mg118(_rows_one, _phys_mg118, apply=True, confirm="yes")
+        _ns_add = (_c["adds"] or [None])[0]
+        _rc3, _o3, _so3, _e3, _c3 = _run_mg118([_rows_mg118[1], _rows_mg118[2], _rows_mg118[3]],
+                                               _phys_mg118, apply=True, confirm="yes", api_add=True)
+        return (_rc == 0 and len(_c["adds"]) == 1 and _ns_add is not None
+                and getattr(_ns_add, "notebook_id", None) == _nbB118
+                and getattr(_ns_add, "drive_id", None) == "u" * 24
+                and (getattr(_ns_add, "title", "") or "").startswith("Doc_Add1_118")
+                and _rc3 == 0 and len(_c3["adds"]) == 3)
+    _t110("r118_migrate_api_add_calls_nlm_add_inprocess", _c118_migrate_api_add_inprocess)
+
+    def _c118_migrate_cleanup_text_only():
+        # Q7=a NEGATIVE: cleanup candidates CHỈ nằm trong output (lệnh nlm-source-remove điền sẵn) —
+        # KHÔNG call delete nào, kể cả --apply.
+        _vr = {"q" * 24: {"drive_id": "q" * 24, "nlm_source_id": "sPHYSQ118", "nlm_notebook_id": _nbB118}}
+        _rows_ok = [{"drive_id": "p" * 24, "name": "Doc_PointerOK118", "nlm_source_id": "sP118",
+                     "nlm_notebook_id": _nbB118, "nlm_status": "pushed"}]
+        _phys = {_nbB118: [_src118("sP118", "p" * 24)], _nbA118: [_src118("sFROMP118", "p" * 24)]}
+        _rc, _o, _so, _e, _c = _run_mg118(_rows_ok, _phys, verify_rows=_vr, apply=True, confirm="yes",
+                                          from_nb=_nbA118)
+        _txt = json.dumps(_o, ensure_ascii=False) + _e
+        return (_rc == 0 and _c["deletes"] == 0 and "nlm-source-remove" in _txt and "sFROMP118" in _txt)
+    _t110("r118_migrate_cleanup_candidates_text_only", _c118_migrate_cleanup_text_only)
+
+    def _c118_nlm_add_link_before_real():
+        # Vá phát hiện smoke A (2026-07-16): nhánh link nlm-add ĐÈ dòng đã có pointer → before_by_key phải
+        # mang sid/nb CŨ THẬT (trước hardcode "" → journal undo không khôi phục được).
+        _bef_seen = {}
+
+        class _G118b:
+            def get(self, action, **kw):
+                if action == "ingest_claim":
+                    ih = json.loads(kw.get("keys") or "[]")[0]
+                    return {"ok": True, "results": [{"identity_hash": ih, "granted": True}]}
+                return {"ok": True, "rows": [], "committed": [], "commit_failed": []}
+
+        class _NC118b:
+            def nlm_available(self):
+                return True
+
+            def source_add(self, nb, **kw):
+                return {"ok": True, "source_id": "sidNEW118", "ready": True}
+
+            def source_get(self, sid, timeout=120):
+                return {"ok": True, "data": {"id": sid}}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 1, "sources": [{"id": "sidNEW118"}]}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_nlm_preflight_report",
+                 "_nlm_dedup_gate", "_nlm_post_add_dup_check", "_manifest_entries", "load_creds",
+                 "_gas", "_apply_journal_start", "_journal_append", "_journaled_reg_write",
+                 "_resolve_shard_topology", "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC118b() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb118b", None)
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {"warn": []}
+            _TL_MODULE._nlm_dedup_gate = lambda nc, nb, targets, skip=False: ("clear", [])
+            _TL_MODULE._nlm_post_add_dup_check = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": "dNA118", "name": "X118", "nlm_source_id": "sOLD118x",
+                 "nlm_notebook_id": "nbOLD118", "nlm_status": "pushed", "row_kind": ""}]
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G118b()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run118b_" + str(name)
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._journaled_reg_write = (lambda run_id, g, items, cols, **kw:
+                (_bef_seen.update(kw.get("before_by_key") or {}),
+                 {"verified": True, "reg_bulk": {"ok": True, "patched": 1}})[1])
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {"shards": []}
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _ns = argparse.Namespace(notebook_id=None, drive_id="dNA118", url=None, file=None, type="doc",
+                                     title=None, no_wait=False, wait=False, skip_live_check=False,
+                                     json=False, config=None, profile=None)
+            with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_nlm_add(_ns)
+            _b = _bef_seen.get("dNA118") or {}
+            return (_rc == 0 and _b.get("nlm_source_id") == "sOLD118x"
+                    and _b.get("nlm_notebook_id") == "nbOLD118" and _b.get("nlm_status") == "pushed")
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r118_nlm_add_link_before_real_values", _c118_nlm_add_link_before_real)
+
+    def _run_ap118(rows, phys_by_nb, notebooks=None, all_profiles=False):
+        # Harness B-#3 wiring: cmd_nlm_audit_physical — stub cache-helper (không đụng .tl_state thật).
+        _calls = {"listed": []}
+
+        class _NC118a:
+            def nlm_available(self):
+                return True
+        _keys = ("apply_profile_offline", "_imp", "_manifest_entries", "load_creds",
+                 "_resolve_nlm_notebook", "_resolve_overflow_shards", "_nlm_source_list_cached",
+                 "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC118a() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(rows)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: (_nbA118, None)
+            _TL_MODULE._resolve_overflow_shards = lambda ents, base, cfg=None: [_nbB118]
+            _TL_MODULE._nlm_source_list_cached = (lambda nc, nb, **k:
+                (_calls["listed"].append(nb),
+                 {"ok": True, "sources": list(phys_by_nb.get(nb) or []), "cached": not k.get("refresh")})[1])
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _ns = argparse.Namespace(notebooks=notebooks, all_profiles=all_profiles, refresh_live=False,
+                                     out=None, json=True, config=None, profile=None)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_audit_physical(_ns)
+            try:
+                _out = json.loads(_bo.getvalue())
+            except Exception:
+                _out = {}
+            return _rc, _out, _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c118_audit_cmd_wiring():
+        # rc=1 khi có finding + scope topology (base + overflow) qua cache-helper; sạch → rc=0.
+        _rows_bad = [{"drive_id": "d" * 24, "name": "Doc_Mismatch118", "nlm_source_id": "sOLD118",
+                      "nlm_notebook_id": _nbA118, "nlm_status": "pushed"}]
+        _phys = {_nbA118: [], _nbB118: [_src118("sNEW118", "d" * 24)]}
+        _rc1, _o1, _c1 = _run_ap118(_rows_bad, _phys)
+        _rows_ok = [{"drive_id": "k" * 24, "name": "Doc_OK118", "nlm_source_id": "sOK118",
+                     "nlm_notebook_id": _nbA118, "nlm_status": "pushed"}]
+        _rc2, _o2, _c2 = _run_ap118(_rows_ok, {_nbA118: [_src118("sOK118", "k" * 24)], _nbB118: []})
+        return (_rc1 == 1 and _o1.get("clean") is False and set(_c1["listed"]) == {_nbA118, _nbB118}
+                and len(_o1["findings"]["pointer_mismatch"]) == 1
+                and _rc2 == 0 and _o2.get("clean") is True)
+    _t110("r118_audit_cmd_wiring_scope_and_rc", _c118_audit_cmd_wiring)
+
+    # Wiring bề mặt: parser + meta + contract + doctor advisory (drift-lock).
+    try:
+        _nsm118 = build_parser().parse_args(["nlm-migrate", "--to", "nbX118", "--name-contains", "CPTPP",
+                                             "--apply", "--confirm", "yes", "--api-add"])
+    except SystemExit:
+        _nsm118 = argparse.Namespace(to=None)
+    try:
+        _nsa118 = build_parser().parse_args(["nlm-audit-physical", "--notebooks", "n1,n2", "--refresh-live"])
+    except SystemExit:
+        _nsa118 = argparse.Namespace(notebooks=None)
+    import tl_core.command_registry as _reg118
+    import tl_core.workflow as _w118
+    import tl_core.ops_misc as _om118
+    _mm118 = _reg118.COMMAND_META.get("nlm-migrate") or {}
+    _ma118 = _reg118.COMMAND_META.get("nlm-audit-physical") or {}
+    cases.append(("r118_wiring_parser_meta_contract_doctor",
+                  getattr(_nsm118, "to", None) == "nbX118" and getattr(_nsm118, "name_contains", None) == "CPTPP"
+                  and getattr(_nsm118, "api_add", False) is True and getattr(_nsm118, "confirm", "") == "yes"
+                  and getattr(_nsa118, "notebooks", None) == "n1,n2"
+                  and getattr(_nsa118, "refresh_live", False) is True
+                  and _mm118.get("risk") == "high" and _mm118.get("requires_confirm") is True
+                  and _mm118.get("supports_dry_run") is True
+                  and _mm118.get("idempotency_contract") == "nlm_migrate"
+                  and _ma118.get("read_only") is True and _ma118.get("risk") == "low"
+                  and set(_w118._IDEMPOTENCY_CONTRACTS.get("nlm_migrate", {})) == {
+                      "schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
+                      "readback_command", "resume_command", "rollback_hint"}
+                  and "nlm-audit-physical" in _ins69.getsource(_om118.cmd_doctor)))
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

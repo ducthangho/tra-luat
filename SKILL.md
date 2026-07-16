@@ -16,7 +16,7 @@ description: >-
 ---
 
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.56 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.57 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 
@@ -228,7 +228,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | Tìm & xác minh nguồn | `find-doc` · `exists` · `locate` · `source-map` · `status` · `relation-check` · `vbhn-check/verify/compare` · `extract` |
 | Nạp & convert (GHI — dry-run trước) | `ingest-local` · `profile-ingest` · `ingest-inbox` · `ingest-zip` · `ingest-ocr` · `profile-ingest-chunks` · `convert-verify` · `nlm-add` |
 | OCR & chunk (local an toàn) | `ocr-analyze/run/verify` · `chunk-plan/apply/verify` |
-| NLM | `nlm-list/get/query/cross/content/links/auth-status` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
+| NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
 | Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc` · `sweep` · `dedup-plan` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
 | Audit & release | `workflow-audit` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
 | Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
@@ -257,7 +257,7 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 Target contract = **2.21.2m** (`Code.2.21.2m.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
 - **`references/Code.2.21.2m.gs`:** như 2.21.2l (Cách B/`row_kind`, manifestScope, claims F-04/F-08) + export `row_kind` RAW (bỏ default 'own' — manifest == Sheet == reg_get; ĐẾM corpus/own GIỮ blank→own).
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
-- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill (gọn gói ≤200 file) — chỉ giữ bản LIVE + target `Code.2.21.2*.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.
+- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE + target `Code.2.21.2*.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.
 - Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2m`, rồi `contract_check.py --audit`.
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
 - Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2m`.

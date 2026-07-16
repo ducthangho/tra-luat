@@ -411,6 +411,17 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_command": "nlm-source-remove <sid...> --apply --confirm yes",
         "rollback_hint": "KHÔNG tự động: nguồn chỉ bị gỡ khỏi notebook (file Drive còn nguyên) — nlm-add --drive-id lại rồi nlm-reconcile link",
     },
+    # v1.34.57 (B-#4..#7 — kế hoạch 13-vấn-đề Q6=a/Q7=a): contract cho lệnh di dời physical-first.
+    "nlm_migrate": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+notebook_đích (re-plan physical-first mỗi lần chạy — lặp lại vô hại)",
+        "journal_key": "tl_journal/nlm-migrate_<run_id> (intent reg_upsert per-doc kèm before nb/sid THẬT)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — plan tái tạo từ VẬT LÝ đích (luôn list tươi): đã xong → POINTER_OK; dán link xong → ADD tự chuyển REPOINT (harvest, không state file)",
+        "duplicate_guard": "DRY mặc định + --confirm yes; đích LUÔN list tươi; ADD qua cmd_nlm_add (claim F-04 + dedup-gate + verify-then-link); repoint idempotent (ghi lại cùng giá trị vô hại); KHÔNG tự gỡ nguồn cũ (Q7 — chỉ in nlm-source-remove)",
+        "readback_command": "reg_get_bulk verify CUỐI ngay trong lệnh (so nb+sid) + nlm-audit-physical / reg-query --drive-id <id> --json",
+        "resume_command": "nlm-migrate --to <nb> (--name-contains X | --cat NN | --drive-ids f) --apply --confirm yes",
+        "rollback_hint": "undo <run_id> --apply (journal before nb/sid per-doc); nguồn đã add trên đích gỡ bằng nlm-source-remove <sid> --apply --confirm yes",
+    },
 })
 
 

@@ -76,6 +76,7 @@
     "manifest",
     "missing-sohieu",
     "nlm-add",
+    "nlm-audit-physical",
     "nlm-auth-load",
     "nlm-auth-pull",
     "nlm-auth-stage",
@@ -86,6 +87,7 @@
     "nlm-install",
     "nlm-links",
     "nlm-list",
+    "nlm-migrate",
     "nlm-orphans",
     "nlm-query",
     "nlm-query-plan",
@@ -856,6 +858,16 @@
         "workflow_task": null,
         "write_scope": "nlm"
       },
+      "nlm-audit-physical": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "nlm-auth-status": {
         "generated": true,
         "idempotency_contract": null,
@@ -895,6 +907,16 @@
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "none"
+      },
+      "nlm-migrate": {
+        "generated": true,
+        "idempotency_contract": "nlm_migrate",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry_nlm"
       },
       "nlm-orphans": {
         "generated": true,
@@ -1658,10 +1680,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 137,
-      "high_risk": 25,
-      "total": 143,
-      "write_commands": 73
+      "generated_parsers": 139,
+      "high_risk": 26,
+      "total": 145,
+      "write_commands": 74
     },
     "schema": "command_registry.v1"
   },

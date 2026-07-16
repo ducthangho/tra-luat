@@ -1828,7 +1828,11 @@ def cmd_nlm_add(a) -> int:
                         _it_na = {"drive_id": a.drive_id, "nlm_source_id": r.get("source_id"),
                                   "nlm_notebook_id": nb, "nlm_status": "pushed"}
                         _cols_na = "nlm_source_id,nlm_notebook_id,nlm_status"
-                        _bef_na = {"nlm_source_id": "", "nlm_notebook_id": "", "nlm_status": ""}
+                        # v1.34.57 (phát hiện smoke A 2026-07-16): before THẬT từ row hiện tại — link có thể
+                        # ĐÈ dòng đã có pointer (hardcode "" cũ → journal undo không khôi phục được sid cũ).
+                        _bef_na = {"nlm_source_id": str((_row_e or {}).get("nlm_source_id") or ""),
+                                   "nlm_notebook_id": str((_row_e or {}).get("nlm_notebook_id") or ""),
+                                   "nlm_status": str((_row_e or {}).get("nlm_status") or "")}
                         try:
                             _topo_na = _resolve_shard_topology(_ents_na, (os.environ.get("TL_NOTEBOOK_ID")
                                                                           or NLM_BASE_NOTEBOOK or "").strip())
@@ -1983,6 +1987,473 @@ def cmd_nlm_source_remove(a) -> int:
                       "note": "KHÔNG đụng Drive/dòng registry — dòng stale: nlm-reconcile --apply / --clear-stale."},
                      ensure_ascii=False, indent=2))
     return 0 if ok else 2
+
+
+def _nlm_source_list_cached(nc, nb: str, *, ttl_s: int = 600, refresh: bool = False, cache_dir=None) -> dict:
+    """v1.34.57 (B-#3/#8 — Q10): cache client-side TTL 10' chồng lên listing `-S` (skip_freshness mặc định).
+    nlm-audit-physical dùng mặc định; nlm-migrate KHÔNG dùng cho notebook ĐÍCH (physical-first cần tươi);
+    --refresh-live ép tươi. File: scripts/.tl_state/nlm_list_cache_<nb>.json {fetched_at, count, sources}
+    (write_bytes — giữ LF, bài học kernel CRLF)."""
+    _dir = Path(cache_dir) if cache_dir else (HERE / ".tl_state")
+    fp = _dir / f"nlm_list_cache_{nb}.json"
+    if not refresh:
+        try:
+            data = json.loads(fp.read_text(encoding="utf-8"))
+            age = time.time() - float(data.get("fetched_at") or 0)
+            if 0 <= age <= ttl_s and isinstance(data.get("sources"), list):
+                return {"ok": True, "count": len(data["sources"]), "sources": data["sources"],
+                        "cached": True, "age_s": int(age), "via": "cache"}
+        except Exception:  # noqa: BLE001 — cache thiếu/hỏng → coi như miss, list tươi
+            pass
+    r = nc.source_list(nb, skip_freshness=True)
+    if r.get("ok"):
+        try:
+            _dir.mkdir(parents=True, exist_ok=True)
+            fp.write_bytes(json.dumps({"fetched_at": time.time(), "count": r.get("count"),
+                                       "sources": r.get("sources") or []},
+                                      ensure_ascii=False).encode("utf-8"))
+        except Exception:  # noqa: BLE001 — ghi cache best-effort, không chặn kết quả
+            pass
+    return r
+
+
+def _physical_audit_classify(reg_rows: list, phys_by_nb: dict) -> dict:
+    """v1.34.57 (B-#3 — Q5=a) PURE: đối soát registry ↔ VẬT LÝ (physical-first — bài học 32/40 CPTPP:
+    nlm_notebook_id CHỈ là nơi registry NGHĨ). Match 2 tầng như reconcile: drive_id (cứng) → title-key
+    chuẩn hóa (chỉ khi DUY NHẤT); KHÔNG BAO GIỜ dùng is_stale. 4 finding: POINTER_MISMATCH /
+    UNREGISTERED_PHYSICAL / DUP_PHYSICAL / POINTER_DEAD — dead CHỈ kết luận khi scope quét ⊇ notebook
+    pointer trỏ (hoặc pointer nb RỖNG = row nhận topology làm nhà); nb ngoài scope → unverified_scope
+    (advisory, tránh oan — 37 CPTPP tham chiếu là CÓ CHỦ ĐÍCH). Dòng nlm_status removed* = tombstone, bỏ qua."""
+    scanned = sorted(str(nb) for nb in (phys_by_nb or {}))
+    sid_at: dict = {}
+    by_did: dict = {}
+    by_title: dict = {}
+    for nb in scanned:
+        d1, t1 = {}, {}
+        for s in (phys_by_nb.get(nb) or []):
+            sid = str(s.get("id") or s.get("source_id") or "")
+            if sid:
+                sid_at.setdefault(sid, set()).add(nb)
+            did = _nlm_source_drive_id(s)
+            if did:
+                d1.setdefault(did, []).append(s)
+            tk = _ingest_dedup_title_key(s.get("title") or "")
+            if tk:
+                t1.setdefault(tk, []).append(s)
+        by_did[nb] = d1
+        by_title[nb] = t1
+
+    def _phys_match(row):
+        did = str(row.get("drive_id") or row.get("gdoc_id") or "").strip()
+        tk = _ingest_dedup_title_key(row.get("name") or "")
+        out = []
+        for nb in scanned:
+            hits = list(by_did[nb].get(did) or []) if did else []
+            if not hits and tk:
+                cand = by_title[nb].get(tk) or []
+                if len(cand) == 1:
+                    hits = cand
+            for s in hits:
+                out.append((nb, s))
+        return out
+
+    mismatch, dead, unverified = [], [], []
+    rows_use = [r0 for r0 in (reg_rows or [])
+                if not str(r0.get("nlm_status") or "").strip().lower().startswith("removed")]
+    for r0 in rows_use:
+        p_sid = str(r0.get("nlm_source_id") or "").strip()
+        if not p_sid:
+            continue   # chưa có pointer = stale-an-toàn (nlm-links/reconcile lo) — KHÔNG phải drift
+        p_nb = str(r0.get("nlm_notebook_id") or "").strip()
+        if p_nb and p_nb in set(scanned) and p_nb in (sid_at.get(p_sid) or set()):
+            continue   # pointer khớp vật lý
+        if p_nb and p_nb not in set(scanned):
+            unverified.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+                               "nlm_source_id": p_sid, "nlm_notebook_id": p_nb,
+                               "note": "pointer trỏ notebook NGOÀI scope quét — thêm --notebooks/--all-profiles để verify"})
+            continue
+        hits = _phys_match(r0)
+        if hits:
+            nb_hit, s_hit = hits[0]
+            mismatch.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+                             "pointer_nb": p_nb, "pointer_sid": p_sid, "physical_nb": nb_hit,
+                             "physical_sid": str(s_hit.get("id") or s_hit.get("source_id") or "")})
+        else:
+            dead.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+                         "nlm_source_id": p_sid, "nlm_notebook_id": p_nb})
+    row_sids = {str(r0.get("nlm_source_id") or "").strip() for r0 in (reg_rows or []) if r0.get("nlm_source_id")}
+    row_dids = {str(r0.get("drive_id") or r0.get("gdoc_id") or "").strip() for r0 in (reg_rows or [])}
+    row_title_counts: dict = {}
+    for r0 in (reg_rows or []):
+        tk = _ingest_dedup_title_key(r0.get("name") or "")
+        if tk:
+            row_title_counts[tk] = row_title_counts.get(tk, 0) + 1
+    unreg, dups = [], []
+    for nb in scanned:
+        for did in sorted(by_did[nb]):
+            group = by_did[nb][did]
+            if len(group) >= 2:
+                sids = [str(s.get("id") or s.get("source_id") or "") for s in group]
+                keep = next((x for x in sids if x in row_sids), sids[0])
+                dups.append({"notebook_id": nb, "drive_id": did, "sids": sids, "keep": keep,
+                             "titles": [str(s.get("title") or "") for s in group]})
+        for tk in sorted(by_title[nb]):
+            group = [s for s in by_title[nb][tk] if not _nlm_source_drive_id(s)]
+            if len(group) >= 2:   # identity theo title khi KHÔNG có drive-URL nào trong nhóm
+                sids = [str(s.get("id") or s.get("source_id") or "") for s in group]
+                keep = next((x for x in sids if x in row_sids), sids[0])
+                dups.append({"notebook_id": nb, "drive_id": "", "title_key": tk, "sids": sids, "keep": keep,
+                             "titles": [str(s.get("title") or "") for s in group]})
+        for s in (phys_by_nb.get(nb) or []):
+            sid = str(s.get("id") or s.get("source_id") or "")
+            did = _nlm_source_drive_id(s)
+            tk = _ingest_dedup_title_key(s.get("title") or "")
+            if sid and sid in row_sids:
+                continue
+            if did and did in row_dids:
+                continue
+            if tk and row_title_counts.get(tk) == 1:
+                continue
+            unreg.append({"notebook_id": nb, "source_id": sid, "title": str(s.get("title") or ""),
+                          **({"drive_id": did} if did else {})})
+    sugg = []
+    for f in mismatch:
+        sugg.append(f"tl nlm-migrate --to {f['physical_nb']} --drive-ids {f['drive_id']} --apply --confirm yes"
+                    "   # repoint theo VẬT LÝ (physical-first)")
+    for nb in sorted({u["notebook_id"] for u in unreg}):
+        sugg.append(f"tl nlm-reconcile {nb} --apply   # link bắc cầu / register nguồn chưa đăng ký")
+    for d in dups:
+        extras = [x for x in d["sids"] if x != d["keep"]]
+        if extras:
+            sugg.append("tl nlm-source-remove " + " ".join(extras)
+                        + f" --apply --confirm yes   # gỡ bản THỪA trên {d['notebook_id'][:16]}… (giữ {d['keep']})")
+    for f in dead:
+        sugg.append(f"tl nlm-reconcile --all-notebooks   # dò lại {f['drive_id']}; mất thật → nlm-links/nlm-migrate nạp lại")
+    findings = {"pointer_mismatch": mismatch, "unregistered_physical": unreg,
+                "dup_physical": dups, "pointer_dead": dead}
+    return {"clean": not any(findings.values()), "findings": findings,
+            "unverified_scope": unverified, "suggested_commands": sugg}
+
+
+def cmd_nlm_audit_physical(a) -> int:
+    """(B-#3 v1.34.57, Q5=a) READ-ONLY đối soát VẬT LÝ ↔ con trỏ registry (physical-first). Scope mặc định:
+    topology VBQPPL (base + overflow shards) — foreign profile KHÔNG quét mặc định; --notebooks thêm đích;
+    --all-profiles quét mọi notebookId config (đắt ~90s/notebook lớn). Listing qua cache TTL 10'
+    (--refresh-live ép tươi). rc=0 sạch / 1 có finding / 2 lỗi chạy. Doctor chỉ advisory nhắc, KHÔNG tự chạy."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    try:
+        nc = _imp("nlm_cli")
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
+    try:
+        entries = _manifest_entries(refresh=False)
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] nlm-audit-physical: cần `tl boot`/`manifest` trước ({e}).", file=sys.stderr)
+        return 2
+    base, _nberr = _resolve_nlm_notebook(None)
+    if _nberr:
+        print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
+    scope = [base] + [s for s in _resolve_overflow_shards(entries, base) if s and s != base]
+    for nb_x in str(getattr(a, "notebooks", None) or "").split(","):
+        nb_x = nb_x.strip()
+        if nb_x and nb_x not in scope:
+            scope.append(nb_x)
+    if getattr(a, "all_profiles", False):
+        try:
+            _, cfg = _read_config_record(None)
+            for _pname in sorted((_profiles_from_config(cfg or {}) or {})):
+                p = (_profiles_from_config(cfg or {}) or {}).get(_pname)
+                if not isinstance(p, dict):
+                    continue
+                _ids = [str(p.get("notebookId") or "").strip()]
+                for s in (p.get("shards") if isinstance(p.get("shards"), list) else []):
+                    _ids.append(str((s.get("id") if isinstance(s, dict) else s) or "").strip())
+                for nb_x in _ids:
+                    if nb_x and nb_x not in scope:
+                        scope.append(nb_x)
+        except Exception as e:  # noqa: BLE001
+            print(f"[tl] ⚠ --all-profiles: không đọc được config ({e}) — giữ scope topology.", file=sys.stderr)
+    phys_by_nb, nb_meta, fails = {}, [], []
+    for nb in scope:
+        r = _nlm_source_list_cached(nc, nb, refresh=bool(getattr(a, "refresh_live", False)))
+        if r.get("ok"):
+            phys_by_nb[nb] = r.get("sources") or []
+            nb_meta.append({"notebook_id": nb, "count": len(phys_by_nb[nb]), "cached": bool(r.get("cached"))})
+        else:
+            fails.append({"notebook_id": nb, "error": str(r.get("error") or "")[:160]})
+            print(f"[tl] ⚠ không list được {str(nb)[:16]}… ({str(r.get('error') or '')[:80]}) — notebook RA KHỎI "
+                  "scope (POINTER_DEAD sẽ không kết luận trên nó).", file=sys.stderr)
+    if not phys_by_nb:
+        print(json.dumps({"ok": False, "error": "NO_NOTEBOOK_LISTED", "failed": fails},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    res = _physical_audit_classify(entries, phys_by_nb)
+    counts = {k: len(v) for k, v in res["findings"].items()}
+    payload = {"ok": True, "schema": "nlm_audit_physical.v1", "clean": res["clean"],
+               "notebooks": nb_meta, "list_failed": fails, "counts": counts,
+               "findings": res["findings"],
+               "unverified_scope": {"count": len(res["unverified_scope"]),
+                                    "sample": res["unverified_scope"][:10]},
+               "suggested_commands": res["suggested_commands"],
+               "note": "physical-first: kết luận từ listing VẬT LÝ; nlm_notebook_id chỉ là nơi registry NGHĨ."}
+    if getattr(a, "json", False) or getattr(a, "out", None):
+        _emit_json_payload(payload, getattr(a, "out", None))
+    else:
+        print(("SẠCH — pointer khớp vật lý toàn scope." if res["clean"]
+               else "CÓ FINDING: " + " · ".join(f"{k}={v}" for k, v in counts.items() if v)))
+        for c in res["suggested_commands"][:12]:
+            print(f"  → {c}")
+        if res["unverified_scope"]:
+            print(f"  ℹ {len(res['unverified_scope'])} pointer trỏ notebook ngoài scope (unverified — không oan).")
+    return 0 if res["clean"] else 1
+
+
+def _migrate_plan(reg_rows: list, phys_target: list, target_nb: str, phys_from: list | None = None) -> dict:
+    """v1.34.57 (B-#4..#7, Q6=a) PURE: phân loại per-doc theo VẬT LÝ ĐÍCH — POINTER_OK (vật lý ở đích +
+    pointer đúng) / REPOINT (vật lý ở đích, pointer sai — sid VẬT LÝ là chân lý, chỉ ghi registry) /
+    ADD (thiếu ở đích). Match tier-0 sid-pointer-sống-tại-đích (nhất quán audit — ca live CPTPP Ch22/25:
+    listing không lộ drive-URL + title dup → did/title đều câm nhưng sid live = VẬT LÝ ở đích) → drive_id →
+    title-key duy nhất. cleanup = nguồn cũ ở --from cho doc đã POINTER_OK (Q7=a: CHỈ IN, không bao giờ tự gỡ)."""
+    t_by_did, t_by_title, f_by_did = {}, {}, {}
+    t_sids = {str(s.get("id") or s.get("source_id") or "") for s in (phys_target or [])}
+    t_sids.discard("")
+    for s in (phys_target or []):
+        did = _nlm_source_drive_id(s)
+        if did:
+            t_by_did.setdefault(did, []).append(s)
+        tk = _ingest_dedup_title_key(s.get("title") or "")
+        if tk:
+            t_by_title.setdefault(tk, []).append(s)
+    for s in (phys_from or []):
+        did = _nlm_source_drive_id(s)
+        if did:
+            f_by_did.setdefault(did, []).append(s)
+    pointer_ok, repoint, add, cleanup = [], [], [], []
+    for r0 in (reg_rows or []):
+        did = str(r0.get("drive_id") or r0.get("gdoc_id") or "").strip()
+        if not did:
+            continue
+        name = str(r0.get("name") or "")
+        _p_sid0 = str(r0.get("nlm_source_id") or "").strip()
+        _p_nb0 = str(r0.get("nlm_notebook_id") or "").strip()
+        if _p_sid0 and _p_sid0 in t_sids and _p_nb0 == str(target_nb):
+            # tier-0: pointer sid SỐNG tại đích + nb đúng = POINTER_OK (cùng quy tắc audit OK-check)
+            pointer_ok.append({"drive_id": did, "name": name, "phys_sid": _p_sid0})
+            for s_f in (f_by_did.get(did) or []):
+                sid_f = str(s_f.get("id") or s_f.get("source_id") or "")
+                if sid_f and sid_f != _p_sid0:
+                    cleanup.append({"drive_id": did, "name": name, "source_id": sid_f})
+            continue
+        hits = list(t_by_did.get(did) or [])
+        if not hits:
+            tk = _ingest_dedup_title_key(r0.get("name") or "")
+            cand = t_by_title.get(tk) or []
+            if tk and len(cand) == 1:
+                hits = cand
+        if not hits:
+            add.append({"drive_id": did, "name": name, "row": r0})
+            continue
+        phys_sid = str(hits[0].get("id") or hits[0].get("source_id") or "")
+        p_sid = str(r0.get("nlm_source_id") or "").strip()
+        p_nb = str(r0.get("nlm_notebook_id") or "").strip()
+        if p_sid == phys_sid and p_nb == str(target_nb):
+            pointer_ok.append({"drive_id": did, "name": name, "phys_sid": phys_sid})
+            for s_f in (f_by_did.get(did) or []):
+                sid_f = str(s_f.get("id") or s_f.get("source_id") or "")
+                if sid_f and sid_f != phys_sid:
+                    cleanup.append({"drive_id": did, "name": name, "source_id": sid_f})
+        else:
+            repoint.append({"drive_id": did, "name": name, "phys_sid": phys_sid,
+                            "before": {"nlm_source_id": p_sid, "nlm_notebook_id": p_nb,
+                                       "nlm_status": str(r0.get("nlm_status") or "")},
+                            "row_kind_before": str(r0.get("row_kind") or ""), "row": r0})
+    return {"pointer_ok": pointer_ok, "repoint": repoint, "add": add, "cleanup": cleanup}
+
+
+def cmd_nlm_migrate(a) -> int:
+    """(B-#4..#7 v1.34.57, Q6=a/Q7=a) DI DỜI physical-first idempotent: PLAN re-tạo từ VẬT LÝ ĐÍCH (luôn
+    list TƯƠI, không cache) mỗi lần chạy → POINTER_OK / REPOINT (in-process batch ~2s/dòng) / ADD (mặc định
+    BATCH_LINKS khi >NLM_BATCH_LINKS_THRESHOLD doc — user dán link; --api-add ép API per-doc qua cmd_nlm_add
+    đường đã vá A-#1/#2: claim + verify-then-link). KHÔNG bao giờ tự gỡ nguồn cũ — in sẵn nlm-source-remove
+    (Q7). Dán xong: CHẠY LẠI đúng lệnh này (ADD tự thành REPOINT = harvest, không cờ riêng/state file).
+    Danh sách tường minh — KHÔNG đi qua matcher reconcile (không đụng ownership-guard A2)."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    _filters = [x for x in (("name_contains", getattr(a, "name_contains", None)),
+                            ("cat", getattr(a, "cat", None)),
+                            ("drive_ids", getattr(a, "drive_ids", None))) if str(x[1] or "").strip()]
+    if len(_filters) != 1:
+        print(json.dumps({"ok": False, "error": "FILTER_REQUIRED",
+                          "note": "chọn ĐÚNG 1 bộ lọc: --name-contains X | --cat NN | --drive-ids <file|csv>"},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    try:
+        nc = _imp("nlm_cli")
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
+    to_nb, _nberr = _resolve_nlm_notebook(getattr(a, "to", None))
+    if _nberr or not to_nb:
+        print(json.dumps({"ok": False, "error": _nberr or "TO_REQUIRED"}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001 — DRY vẫn plan được từ manifest cache offline
+        pass
+    try:
+        entries = _manifest_entries(refresh=False)
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] nlm-migrate: cần `tl boot`/`manifest` trước ({e}).", file=sys.stderr)
+        return 2
+    fk, fv = _filters[0]
+    rows = [e for e in entries if str(e.get("drive_id") or e.get("gdoc_id") or "").strip()
+            and not str(e.get("nlm_status") or "").strip().lower().startswith("removed")]
+    if fk == "name_contains":
+        rows = [e for e in rows if str(fv).lower() in str(e.get("name") or "").lower()]
+    elif fk == "cat":
+        rows = [e for e in rows if str(_entry_cat(e) or "").startswith(str(fv))
+                or str(_entry_cat(e) or "").split("_")[0] == str(fv)]
+    else:
+        try:
+            _p_ids = Path(str(fv))
+            _raw_ids = _p_ids.read_text(encoding="utf-8") if _p_ids.is_file() else str(fv)
+        except Exception:  # noqa: BLE001
+            _raw_ids = str(fv)
+        _want = {x.strip() for x in re.split(r"[,\s]+", _raw_ids) if x.strip()}
+        rows = [e for e in rows if str(e.get("drive_id") or e.get("gdoc_id") or "").strip() in _want]
+    if getattr(a, "limit", None):
+        rows = rows[:int(a.limit)]
+    if not rows:
+        print(json.dumps({"ok": False, "error": "NO_ROWS_MATCH_FILTER", "filter": {fk: str(fv)}},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    # (2) VẬT LÝ ĐÍCH — LUÔN TƯƠI (physical-first; fail-closed nếu không list được); --from → cache OK.
+    _lt = nc.source_list(to_nb, skip_freshness=True)
+    if not _lt.get("ok"):
+        print(json.dumps({"ok": False, "error": "LIVE_SOURCE_LIST_FAILED", "notebook": to_nb,
+                          "detail": str(_lt.get("error") or "")[:200],
+                          "note": "physical-first cần ground truth ĐÍCH — `nlm login` rồi chạy lại."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    phys_t = _lt.get("sources") or []
+    from_nb = str(getattr(a, "from_nb", None) or "").strip()
+    phys_f = None
+    if from_nb:
+        _lf = _nlm_source_list_cached(nc, from_nb)
+        phys_f = (_lf.get("sources") or []) if _lf.get("ok") else []
+    plan = _migrate_plan(rows, phys_t, to_nb, phys_from=phys_f)
+    counts = {"pointer_ok": len(plan["pointer_ok"]), "repoint": len(plan["repoint"]), "add": len(plan["add"])}
+    cleanup_cmds = ([("tl nlm-source-remove " + " ".join(c["source_id"] for c in plan["cleanup"])
+                      + " --apply --confirm yes   # nguồn cũ ở --from cho doc đã POINTER_OK — Q7: CHỈ IN, user duyệt")]
+                    if plan["cleanup"] else [])
+
+    def _mk(its, keys):
+        return [{k: it.get(k) for k in keys if k in it} for it in its]
+    groups_out = {"pointer_ok": _mk(plan["pointer_ok"], ("drive_id", "name", "phys_sid")),
+                  "repoint": _mk(plan["repoint"], ("drive_id", "name", "phys_sid", "before")),
+                  "add": _mk(plan["add"], ("drive_id", "name")),
+                  "cleanup": plan["cleanup"]}
+    if not getattr(a, "apply", False):
+        payload = {"ok": True, "schema": "nlm_migrate.v1", "dry_run": True, "to": to_nb,
+                   "filter": {fk: str(fv)}, "counts": counts, "plan": groups_out,
+                   "cleanup_commands": cleanup_cmds,
+                   "note": "DRY re-plan từ vật lý đích (luôn tươi). ADD >"
+                           f"{NLM_BATCH_LINKS_THRESHOLD} doc → BATCH_LINKS khi apply (--api-add ép API). "
+                           "Apply: thêm --apply --confirm yes. Dán link xong: CHẠY LẠI đúng lệnh (harvest)."}
+        _emit_json_payload(payload, getattr(a, "out", None))
+        return 0
+    if str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+        print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED",
+                          "note": "nlm-migrate ghi registry (repoint) / add NLM — thêm --confirm yes"},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    run_id = _apply_journal_start("nlm-migrate", {"to": to_nb, "filter": {fk: str(fv)}, "counts": counts})
+    results = {"repoint": [], "add": [], "repoint_verified": None}
+    ok_all = True
+    if plan["repoint"]:
+        try:
+            g = _gas()
+        except Exception as e:  # noqa: BLE001
+            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
+            print(json.dumps({"ok": False, "error": f"GAS_UNAVAILABLE: {e}", "journal": run_id},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        try:
+            _topo_m = _resolve_shard_topology(entries, (os.environ.get("TL_NOTEBOOK_ID")
+                                                        or NLM_BASE_NOTEBOOK or "").strip())
+        except Exception:  # noqa: BLE001
+            _topo_m = {"shards": []}
+        _rk_target = _shard_row_kind(to_nb, _topo_m)
+        for it in plan["repoint"]:
+            payload_u = {"drive_id": it["drive_id"], "nlm_source_id": it["phys_sid"],
+                         "nlm_notebook_id": to_nb, "nlm_status": "pushed"}
+            before_u = dict(it.get("before") or {})
+            _cur_rk = str(it.get("row_kind_before") or "").strip().lower()
+            if _rk_target == "overflow" and _cur_rk not in _ROW_KIND_PROTECTED:
+                payload_u["row_kind"] = "overflow"
+                before_u["row_kind"] = _cur_rk
+            v = _journaled_reg_upsert(run_id, g, payload_u, before=before_u)
+            _ok_i = bool(v.get("verified"))
+            ok_all = ok_all and _ok_i
+            results["repoint"].append({"drive_id": it["drive_id"], "phys_sid": it["phys_sid"], "ok": _ok_i,
+                                       **({"error": v.get("error")} if not _ok_i else {})})
+        try:
+            _keys_v = [it["drive_id"] for it in plan["repoint"]]
+            _sid_by_did = {it["drive_id"]: it["phys_sid"] for it in plan["repoint"]}
+            _rgb = g.get("reg_get_bulk", keys=json.dumps(_keys_v), key_field="drive_id")
+            _rows_v = {str(x.get("drive_id") or ""): x for x in (_rgb.get("rows") or [])}
+            _bad_v = [k for k in _keys_v
+                      if str((_rows_v.get(k) or {}).get("nlm_source_id") or "") != _sid_by_did[k]
+                      or str((_rows_v.get(k) or {}).get("nlm_notebook_id") or "") != to_nb]
+            results["repoint_verified"] = not _bad_v
+            if _bad_v:
+                ok_all = False
+                results["repoint_verify_failed"] = _bad_v
+        except Exception as _ev:  # noqa: BLE001
+            results["repoint_verified"] = False
+            results["repoint_verify_error"] = f"{type(_ev).__name__}: {_ev}"[:160]
+            ok_all = False
+    add_mode = None
+    links = []
+    if plan["add"]:
+        if len(plan["add"]) > NLM_BATCH_LINKS_THRESHOLD and not getattr(a, "api_add", False):
+            add_mode = "BATCH_LINKS"
+            links = [_entry_links_url(it.get("row") or {"drive_id": it["drive_id"]}) for it in plan["add"]]
+        else:
+            add_mode = "API"
+            for it in plan["add"]:
+                _ns_add = argparse.Namespace(notebook_id=to_nb, drive_id=it["drive_id"], url=None, file=None,
+                                             type=None, title=(str(it.get("name") or "")[:120] or None),
+                                             no_wait=False, wait=False, skip_live_check=False, json=False,
+                                             config=getattr(a, "config", None),
+                                             profile=getattr(a, "profile", None))
+                _rc_add = cmd_nlm_add(_ns_add)
+                _ok_a = _rc_add == 0
+                ok_all = ok_all and _ok_a
+                results["add"].append({"drive_id": it["drive_id"], "ok": _ok_a, "rc": _rc_add})
+    _journal_append(run_id, {"t": "run_end", "ok": ok_all,
+                             "counts": {**counts, "add_fail": sum(1 for x in results["add"] if not x["ok"])},
+                             "add_mode": add_mode})
+    payload = {"ok": ok_all, "schema": "nlm_migrate.v1", "to": to_nb, "journal": run_id, "counts": counts,
+               "mode": add_mode, "repoint": results["repoint"], "repoint_verified": results["repoint_verified"],
+               **({"repoint_verify_failed": results.get("repoint_verify_failed")} if results.get("repoint_verify_failed") else {}),
+               **({"repoint_verify_error": results.get("repoint_verify_error")} if results.get("repoint_verify_error") else {}),
+               "add": results["add"], **({"links": links} if links else {}),
+               "cleanup": plan["cleanup"], "cleanup_commands": cleanup_cmds,
+               "next": "CHẠY LẠI đúng lệnh này sau khi dán links / để harvest (ADD → REPOINT → POINTER_OK)."}
+    if add_mode == "BATCH_LINKS" and not (getattr(a, "json", False) or getattr(a, "out", None)):
+        for ln in links:
+            print(ln)
+        print(f"[tl] nlm-migrate BATCH_LINKS: {len(links)} link — dán TOÀN BỘ stdout vào Add source → Websites "
+              f"của https://notebooklm.google.com/notebook/{to_nb}", file=sys.stderr)
+        print("[tl]   Dán xong: CHẠY LẠI đúng lệnh này (plan mới tự thấy nguồn ở đích → REPOINT/harvest).",
+              file=sys.stderr)
+        if results["repoint"]:
+            print(f"[tl]   repoint: {len(results['repoint'])} dòng, verified={results['repoint_verified']}",
+                  file=sys.stderr)
+        for c in cleanup_cmds:
+            print(f"[tl]   {c}", file=sys.stderr)
+    else:
+        _emit_json_payload(payload, getattr(a, "out", None))
+    return 0 if ok_all else 2
 
 
 def cmd_nlm_cross(a) -> int:

@@ -1078,8 +1078,12 @@ def cmd_doctor(a) -> int:
                                 "shards": len(_topo_doc.get("shards") or []),
                                 "config_findings": _topo_doc.get("findings") or [],
                                 "row_kind_findings": len(_rkf_doc), "row_kind_sample": _rkf_doc[:8],
-                                "stamp": _topology_stamp(None, _ents_t)})
+                                "stamp": _topology_stamp(None, _ents_t),
+                                # v1.34.57 (B-#3 — advisory TĨNH, doctor KHÔNG tự chạy vì tốn list live)
+                                "audit_physical_hint": "tl nlm-audit-physical — chạy sau LÔ di dời/ingest lớn "
+                                                       "(đối soát VẬT LÝ↔con trỏ, physical-first)"})
         if not _json:
+            print("  ℹ sau LÔ di dời/ingest lớn: `tl nlm-audit-physical` (đối soát VẬT LÝ↔con trỏ — physical-first).")
             if _topo_doc.get("ok") is False:
                 print(f"  ⚠ topology CONFIG CONFLICT: {_topo_doc.get('error')} — đường ghi/route sẽ fail-closed (D5).")
             if _rkf_doc:

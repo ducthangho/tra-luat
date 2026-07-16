@@ -1075,6 +1075,30 @@ GENERATED_SPECS = [
          {"flags": ['--timeout'], "type": int, "default": 300, "help": 'tổng giây chờ tối đa khi --wait (mặc định 300)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    {"name": 'nlm-audit-physical', "handler": 'cmd_nlm_audit_physical',
+     "help": '(v1.34.57 B-#3) READ-ONLY đối soát VẬT LÝ↔con trỏ registry (physical-first): mặc định quét topology VBQPPL (base+overflow); 4 finding POINTER_MISMATCH/UNREGISTERED_PHYSICAL/DUP_PHYSICAL/POINTER_DEAD (+unverified_scope advisory cho pointer ngoài scope) + suggested_commands điền sẵn. Listing cache TTL 10 phút; rc=1 khi có finding',
+     "args": [
+         {"flags": ['--notebooks'], "help": 'csv notebook id THÊM vào scope quét'},
+         {"flags": ['--all-profiles'], "dest": 'all_profiles', "action": 'store_true', "help": 'quét MỌI notebookId trong config (đắt ~90s/notebook lớn)'},
+         {"flags": ['--refresh-live'], "dest": 'refresh_live', "action": 'store_true', "help": 'ép list tươi (bỏ cache TTL 10 phút)'},
+         {"flags": ['--out'], "help": 'ghi JSON ra file (atomic)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'nlm-migrate', "handler": 'cmd_nlm_migrate',
+     "help": '(v1.34.57 B-#4..#7) DI DỜI physical-first idempotent: re-plan từ VẬT LÝ đích (luôn list tươi) mỗi lần chạy — POINTER_OK / REPOINT (sid vật lý thắng, chỉ ghi registry) / ADD (>2 doc → BATCH_LINKS dán tay; --api-add ép API qua nlm-add claim+verify-then-link); KHÔNG bao giờ tự gỡ nguồn cũ (in sẵn nlm-source-remove). DRY mặc định; dán xong CHẠY LẠI đúng lệnh (harvest)',
+     "args": [
+         {"flags": ['--to'], "required": True, "help": 'notebook ĐÍCH'},
+         {"flags": ['--from'], "dest": 'from_nb', "help": 'notebook NGUỒN (để in cleanup candidates — không bắt buộc)'},
+         {"flags": ['--name-contains'], "dest": 'name_contains', "help": 'bộ lọc dòng registry theo tên (chọn ĐÚNG 1 bộ lọc)'},
+         {"flags": ['--cat'], "help": 'bộ lọc nhóm cat NN (chọn ĐÚNG 1 bộ lọc)'},
+         {"flags": ['--drive-ids'], "dest": 'drive_ids', "help": 'file (mỗi dòng 1 id) hoặc csv drive_id (chọn ĐÚNG 1 bộ lọc)'},
+         {"flags": ['--api-add'], "dest": 'api_add', "action": 'store_true', "help": 'ép nhóm ADD qua API nlm-add per-doc (mặc định >2 doc = BATCH_LINKS)'},
+         {"flags": ['--limit'], "type": int, "help": 'trần số dòng xử lý'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI (mặc định DRY re-plan)'},
+         {"flags": ['--confirm'], "default": '', "help": 'bắt buộc "yes" khi --apply'},
+         {"flags": ['--out'], "help": 'ghi JSON ra file (atomic)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'nlm-source-remove', "handler": 'cmd_nlm_source_remove',
      "help": '(v1.34.56 A-#12) GỠ nguồn KHỎI notebook NLM theo source_id (batch; KHÔNG trash Drive, KHÔNG đụng dòng registry — khác source-delete). GUARD chặn sid còn con trỏ registry (POINTER_STILL_ATTACHED — tránh con trỏ treo); DRY mặc định; --apply --confirm yes; --force bỏ guard',
      "args": [
@@ -1404,6 +1428,8 @@ COMMAND_META = {
     "ingest-inbox":         _m("high", False, "drive_registry", True, True, False, None, "ingest_inbox", False, "ingest_ops", generated=True),   # v1.34.54 B2 (KHÔNG đụng NLM — nlm-links cuối lô)
     "nlm-auth-status":      _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 C8 read-only (probe live, không ghi)
     "nlm-source-remove":    _m("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", generated=True),   # v1.34.56 A-#12 (gỡ nguồn khỏi notebook — guard con trỏ)
+    "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.57 B-#3 read-only (cache .tl_state local)
+    "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True),   # v1.34.57 B-#4..#7 (repoint registry + add qua nlm-add)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     # ── I7 wave-2 (v1.34.11): meta BASELINE bằng-chứng-cờ cho 78 lệnh chuyển GENERATED_SPECS —
     # chính sách grilling: --apply→supports_dry_run (doctrine DRY-mặc-định), --confirm→requires_confirm,

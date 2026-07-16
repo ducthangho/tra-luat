@@ -1,3 +1,54 @@
+# ★ v1.34.57 — ĐỢT B kế hoạch 13-vấn-đề: bộ di dời physical-first (nlm-audit-physical + nlm-migrate) (2026-07-16)
+
+> Đợt B/3 kế hoạch grill (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): B-#3 + B-#4..#7 (Q5=a,
+> Q6=a, Q7=a) + cache listing (Q10, kéo lên vì audit dùng) + vá before-thật nhánh link nlm-add (phát hiện
+> smoke A). TDD r118 ×15 (negative-input trước); 1006/1006 selftest. Python-only, GAS giữ 2.21.2m.
+
+- **[B-#3] Lệnh MỚI `nlm-audit-physical` (READ-ONLY)**: đối soát VẬT LÝ ↔ con trỏ registry (physical-first —
+  bài học 32/40 CPTPP: `nlm_notebook_id` chỉ là nơi registry NGHĨ). Scope mặc định topology VBQPPL
+  (base + overflow, foreign profile KHÔNG quét — tham chiếu chủ đích không thành noise); `--notebooks` /
+  `--all-profiles` mở rộng. Match 2 tầng như reconcile (drive_id → title-key DUY NHẤT; KHÔNG dùng is_stale).
+  4 finding POINTER_MISMATCH / UNREGISTERED_PHYSICAL / DUP_PHYSICAL (keep = sid registry trỏ) /
+  POINTER_DEAD (CHỈ khi scope ⊇ notebook pointer trỏ hoặc nb rỗng; ngoài scope → `unverified_scope`
+  advisory, không oan); dòng removed* = tombstone bỏ qua; `suggested_commands` điền sẵn; rc=0 sạch/1 finding.
+  Classifier PURE `_physical_audit_classify`. Doctor +1 advisory TĨNH nhắc chạy sau lô di dời/ingest lớn.
+- **[B-#8→B] Cache listing `_nlm_source_list_cached`** (TTL 10', `scripts/.tl_state/nlm_list_cache_<nb>.json`,
+  ghi bytes LF): audit dùng mặc định (`--refresh-live` ép tươi); nlm-migrate KHÔNG dùng cho notebook ĐÍCH
+  (physical-first cần tươi). Bề mặt `nlm-list --cached` để đợt C (r119).
+- **[B-#4..#7] Lệnh MỚI `nlm-migrate`** — MỘT lệnh di dời idempotent, re-plan TỪ VẬT LÝ mỗi lần chạy:
+  PLAN (DRY mặc định): ĐÚNG 1 bộ lọc (--name-contains | --cat | --drive-ids file/csv; sai → FILTER_REQUIRED
+  rc=2) → list ĐÍCH luôn TƯƠI (fail-closed LIVE_SOURCE_LIST_FAILED) → 3 nhóm POINTER_OK / REPOINT (sid vật
+  lý thắng sid registry) / ADD + cleanup candidates (nguồn cũ ở --from cho doc POINTER_OK) dưới dạng lệnh
+  `nlm-source-remove` điền sẵn — Q7: CHỈ IN, không bao giờ tự gỡ. APPLY: REPOINT in-process batch
+  `_journaled_reg_upsert` (~2s/dòng, before nb/sid THẬT → undo được, row_kind suy topology mẫu F-06) +
+  verify CUỐI `reg_get_bulk` toàn bộ drive_ids (so nb+sid); ADD >NLM_BATCH_LINKS_THRESHOLD (2) không
+  --api-add → BATCH_LINKS (stdout = CHỈ link mỗi dòng 1 — mẫu nlm-links; stderr = notebook URL + "dán xong
+  CHẠY LẠI đúng lệnh này"), rc=0 không side-effect thêm; --api-add/≤2 doc → per-doc qua `cmd_nlm_add`
+  IN-PROCESS (đường A-#1/#2: claim F-04 + dedup-gate + verify-then-link; TRUYỀN title — bịt lỗ gate thiếu
+  title phát hiện smoke A). Chạy lại sau dán: ADD tự chuyển REPOINT = harvest (không cờ riêng/state file).
+  KHÔNG đi qua matcher reconcile (không đụng ownership-guard A2). Contract `nlm_migrate` + COMMAND_META
+  high/registry_nlm/confirm/dry-run.
+- **Vá phát hiện smoke A (2026-07-16)**: nhánh link `nlm-add` nay ghi journal `before_by_key` bằng sid/nb/status
+  CŨ THẬT từ row hiện tại (trước hardcode "" → undo lần link-ĐÈ không khôi phục được sid cũ — đúng ca dup
+  CPTPP 4e2bc585 đè a1322194).
+- Kernel SKILL.md: bảng NLM +audit-physical/migrate/source-remove (49.142/49.152B — trim note archive §8);
+  `references/COMMANDS.md` +2 dòng lệnh mới. Parser-surface + golden regen có chủ đích.
+- TDD r118 ×15: audit classifier (mismatch / dead-vs-unverified-scope / unregistered+dup / clean+removed-skip)
+  + cache hit/refresh + migrate plan PURE (3 nhóm, phys-sid thắng, title-tier, cleanup) + wiring (filter-
+  required, DRY-no-writes, apply repoint+verify bulk, batch-links stdout thuần, api-add in-process + title,
+  cleanup text-only-no-delete) + before-thật nlm-add + audit cmd wiring scope/rc + parser/meta/contract/doctor.
+- **Fix giữa live-smoke (có test khoá)**: `_migrate_plan` +tier-0 sid-pointer-sống-tại-đích = POINTER_OK
+  (nhất quán audit OK-check) — ca thật CPTPP Ch22/25 dup vật lý trên đích: listing không lộ drive-URL +
+  title dup → did/title câm nhưng sid live; trước fix 2 doc rơi nhầm ADD (dedup-gate vẫn chặn nhưng phân
+  loại sai). **Live-smoke B ĐẠT**: `nlm-migrate --to VBQPPL-2 --name-contains CPTPP` DRY = 40×POINTER_OK /
+  0 ADD / 0 REPOINT (kỳ vọng §4); `nlm-audit-physical` topology (base 293 + VBQPPL-2 243) bắt drift THẬT:
+  2 POINTER_MISMATCH di sản ca A2 (QD_100-2023-TW + HU_WCT vật lý ở Khảo sát 80742228), 4 DUP_PHYSICAL
+  (CPTPP Ch22/25 ×2 trên VBQPPL-2 + TRIPS/WCT ×2 trên 80742228), 17 POINTER_DEAD (TT BGDĐT/BYT/BKHCN +
+  EVFTA + HD_36…), 54 pointer khảo sát → unverified_scope advisory (không oan) rồi 0 khi thêm --notebooks;
+  cache hit round-2 ✓. 2 dòng row_kind=overflow nb rỗng (Luat_57-2014/Luat_87-2015) có sid RỖNG → đúng
+  doctrine KHÔNG phải pointer-drift (lộ qua doctor row_kind, không qua audit — nuance so kỳ vọng kế hoạch).
+  Data-op backlog (USER QUYẾT): gỡ dup + repoint 2 mismatch + xử 17 dead theo suggested_commands.
+
 # ★ v1.34.56 — ĐỢT A kế hoạch 13-vấn-đề: nlm-add an toàn (verify-then-link + claim F-04) + nlm-source-remove (2026-07-16)
 
 > Đợt A/3 kế hoạch grill 11 quyết định (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): A-#1 + A-#2

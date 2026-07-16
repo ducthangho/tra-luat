@@ -1064,13 +1064,13 @@
     "links_checked": 13,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 49130,
+    "size_bytes": 49142,
     "size_limit": 49152,
     "size_ok": true
   },
   "ok": true,
   "registry": {
-    "checked_commands": 143,
+    "checked_commands": 145,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
@@ -1078,7 +1078,7 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 172,
+    "available_commands": 174,
     "cards": 24,
     "groups": 11,
     "tasks": 60

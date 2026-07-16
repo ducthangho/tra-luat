@@ -1,3 +1,17 @@
+# ★ v1.34.59 — vá cosmetic: audit finding-output drive_id fallback gdoc_id (2026-07-16)
+
+> Bug lộ khi dogfood data-op backlog 2026-07-16: `_physical_audit_classify` in `drive_id` RỖNG cho dòng
+> registry key BẰNG gdoc_id (logic match đã fallback `drive_id or gdoc_id` nhưng OUTPUT thì không) →
+> `suggested_commands` "tl nlm-migrate --drive-ids <rỗng>" vô dụng. TDD r120; selftest 1016→1017.
+
+- **Vá**: 3 trường `drive_id` trong findings (pointer_mismatch/pointer_dead) + unverified_scope nay dùng
+  `str(r0.get("drive_id") or r0.get("gdoc_id") or "")` ĐỒNG BỘ với logic match (`_phys_match` + `row_dids`);
+  `suggested_commands` `--drive-ids <id>` kế thừa giá trị đúng. `_migrate_plan` vốn ĐÃ fallback — không đụng.
+- **Test r120**: fixture 3 ca (mismatch/dead/unverified_scope) row CHỈ có gdoc_id → finding.drive_id = gdoc_id
+  (không rỗng) + suggested_command mang gdoc_id. PURE, không cần NLM live.
+- Chỉ đổi output cosmetic — KHÔNG đổi phân loại/hành vi ghi; scan thật KHÔNG lệch (data-op vừa qua match
+  đúng vì logic đã fallback, chỉ hiển thị/lệnh-gợi-ý thiếu id).
+
 # ★ v1.34.58 — ĐỢT C kế hoạch 13-vấn-đề: chất lượng + UX (PDF broken-font, reg-query --live, cache, guard 200) (2026-07-16)
 
 > Đợt C/3 — CHỐT kế hoạch grill (`D:\Quốc hội\ke-hoach-sua-skill-13-van-de-2026-07-16.md`): C-#9 (Q8=a) +

@@ -2028,7 +2028,9 @@ def _physical_audit_classify(reg_rows: list, phys_by_nb: dict) -> dict:
     chuẩn hóa (chỉ khi DUY NHẤT); KHÔNG BAO GIỜ dùng is_stale. 4 finding: POINTER_MISMATCH /
     UNREGISTERED_PHYSICAL / DUP_PHYSICAL / POINTER_DEAD — dead CHỈ kết luận khi scope quét ⊇ notebook
     pointer trỏ (hoặc pointer nb RỖNG = row nhận topology làm nhà); nb ngoài scope → unverified_scope
-    (advisory, tránh oan — 37 CPTPP tham chiếu là CÓ CHỦ ĐÍCH). Dòng nlm_status removed* = tombstone, bỏ qua."""
+    (advisory, tránh oan — 37 CPTPP tham chiếu là CÓ CHỦ ĐÍCH). Dòng nlm_status removed* = tombstone, bỏ qua.
+    v1.34.59: OUTPUT drive_id (findings + unverified_scope + suggested_commands) fallback gdoc_id ĐỒNG BỘ với
+    logic match (dòng key gdoc_id trước đây in drive_id RỖNG → suggested `--drive-ids <rỗng>` vô dụng)."""
     scanned = sorted(str(nb) for nb in (phys_by_nb or {}))
     sid_at: dict = {}
     by_did: dict = {}
@@ -2073,18 +2075,18 @@ def _physical_audit_classify(reg_rows: list, phys_by_nb: dict) -> dict:
         if p_nb and p_nb in set(scanned) and p_nb in (sid_at.get(p_sid) or set()):
             continue   # pointer khớp vật lý
         if p_nb and p_nb not in set(scanned):
-            unverified.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+            unverified.append({"drive_id": str(r0.get("drive_id") or r0.get("gdoc_id") or ""), "name": str(r0.get("name") or ""),
                                "nlm_source_id": p_sid, "nlm_notebook_id": p_nb,
                                "note": "pointer trỏ notebook NGOÀI scope quét — thêm --notebooks/--all-profiles để verify"})
             continue
         hits = _phys_match(r0)
         if hits:
             nb_hit, s_hit = hits[0]
-            mismatch.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+            mismatch.append({"drive_id": str(r0.get("drive_id") or r0.get("gdoc_id") or ""), "name": str(r0.get("name") or ""),
                              "pointer_nb": p_nb, "pointer_sid": p_sid, "physical_nb": nb_hit,
                              "physical_sid": str(s_hit.get("id") or s_hit.get("source_id") or "")})
         else:
-            dead.append({"drive_id": str(r0.get("drive_id") or ""), "name": str(r0.get("name") or ""),
+            dead.append({"drive_id": str(r0.get("drive_id") or r0.get("gdoc_id") or ""), "name": str(r0.get("name") or ""),
                          "nlm_source_id": p_sid, "nlm_notebook_id": p_nb})
     row_sids = {str(r0.get("nlm_source_id") or "").strip() for r0 in (reg_rows or []) if r0.get("nlm_source_id")}
     row_dids = {str(r0.get("drive_id") or r0.get("gdoc_id") or "").strip() for r0 in (reg_rows or [])}

@@ -11375,6 +11375,36 @@ def run() -> int:
                   f"`{_TL_MODULE.EXPECT_VERSION}`" in _api119[:400]
                   and "CHƯA DEPLOY" not in _api119[:12000]))
 
+    # ═══ v1.34.59 — r120: OUTPUT drive_id fallback gdoc_id trong _physical_audit_classify (vá cosmetic
+    # data-op 2026-07-16: dòng registry key BẰNG gdoc_id → finding + suggested_command in drive_id RỖNG). ═══
+    def _c120_audit_output_uses_gdoc_id():
+        _nbA = "aaaa1120-0000-4000-8000-00000000000a"
+        _nbB = "bbbb1120-0000-4000-8000-00000000000b"
+        # (1) MISMATCH: row CHỈ có gdoc_id, vật lý ở nb khác → finding.drive_id = gdoc_id (không rỗng);
+        #     suggested_command --drive-ids mang gdoc_id.
+        _rows_mm = [{"gdoc_id": "g" * 24, "name": "Doc_GdocKey120", "nlm_source_id": "sOLD120",
+                     "nlm_notebook_id": _nbA, "nlm_status": "pushed"}]
+        _phys_mm = {_nbA: [], _nbB: [{"id": "sNEW120",
+                                      "url": "https://docs.google.com/document/d/" + "g" * 24 + "/edit"}]}
+        _r1 = _TL_MODULE._physical_audit_classify(_rows_mm, _phys_mm)
+        _mm = _r1["findings"]["pointer_mismatch"]
+        _ok_mm = (len(_mm) == 1 and _mm[0]["drive_id"] == "g" * 24
+                  and any(("--drive-ids " + "g" * 24) in c for c in _r1["suggested_commands"]))
+        # (2) DEAD: row CHỈ gdoc_id, pointer chết → finding.drive_id = gdoc_id.
+        _rows_dd = [{"gdoc_id": "h" * 24, "name": "Doc_DeadGdoc120", "nlm_source_id": "sDEAD120",
+                     "nlm_notebook_id": _nbA, "nlm_status": "pushed"}]
+        _r2 = _TL_MODULE._physical_audit_classify(_rows_dd, {_nbA: []})
+        _dd = _r2["findings"]["pointer_dead"]
+        _ok_dd = len(_dd) == 1 and _dd[0]["drive_id"] == "h" * 24
+        # (3) UNVERIFIED_SCOPE: row gdoc_id trỏ nb ngoài scope → unverified.drive_id = gdoc_id.
+        _rows_uv = [{"gdoc_id": "k" * 24, "name": "Doc_UnverGdoc120", "nlm_source_id": "sFOR120",
+                     "nlm_notebook_id": "zzzz1120-0000-4000-8000-00000000000z", "nlm_status": "pushed"}]
+        _r3 = _TL_MODULE._physical_audit_classify(_rows_uv, {_nbA: []})
+        _uv = _r3["unverified_scope"]
+        _ok_uv = len(_uv) == 1 and _uv[0]["drive_id"] == "k" * 24
+        return _ok_mm and _ok_dd and _ok_uv
+    _t110("r120_audit_output_drive_id_fallback_gdoc_id", _c120_audit_output_uses_gdoc_id)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

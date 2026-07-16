@@ -1192,6 +1192,7 @@ _CREDS_LAZY_CMDS = frozenset({
     "rasoat-chongcheo", "frontier-expand", "rasoat-loop", "ingest-missing", "overflow-resolve", "nlm-orphans", "nlm-add", "ingest-local", "nlm-cross", "nlm-get", "cat-list",
     "reg-query", "cat-audit", "cat-verify", "source-verify", "backfill-loai", "backfill-hieuluc", "missing-sohieu", "vbhn-year-fix", "sweep", "quarantine-fix", "dedup-plan", "gws-ping", "transport-info", "bootstrap", "cache-build",
     "nlm-install", "nlm-auth-pull", "nlm-auth-stage", "nlm-auth-load", "overlap", "verify-integrity", "edit-skill", "drive-push",   # tự lo cred (--secrets-file / direct-media / _read_doc_text)
+    "doc-text",   # v1.34.60 A1 (bug CI bắt: thiếu → main() load_creds sys.exit TRƯỚC handler dù cache không cần token) — offline-first, export/download tự lo cred
     "up",   # tl up TỰ bootstrap cred (init-config --from-public) → KHÔNG để main() sys.exit khi phiên trống; cmd_up tự gọi load_creds
 })
 

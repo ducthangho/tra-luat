@@ -11436,7 +11436,10 @@ def run() -> int:
                _p(["nlm-list", "--no-fallback"])]
         _p6 = _p(["doc-text", "fid121", "--dieu", "2", "--json"])
         _ok_parse = all(x is not None and x.get("no_fallback") for x in _ps) and _p6 is not None
-        return _ok_meta and _ok_default and _ok_doctext and _ok_parse
+        # drift-lock (bug CI 2026-07-16): doc-text PHẢI ở _CREDS_LAZY_CMDS — thiếu → main() load_creds
+        # sys.exit trước handler trên máy KHÔNG config dù đọc cache không cần token.
+        _ok_lazy = "doc-text" in getattr(_TL_MODULE, "_CREDS_LAZY_CMDS", frozenset())
+        return _ok_meta and _ok_default and _ok_doctext and _ok_parse and _ok_lazy
     _t110("r121_wiring_command_meta_and_no_fallback_flags", _c121_wiring_meta_flags)
 
     def _c121_env_flag_disable_unit():

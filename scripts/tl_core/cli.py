@@ -237,6 +237,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.34) DRY quét CẢ base + overflow shard (TL_OVERFLOW_NOTEBOOK_ID) 1 lệnh — lưới cuối lô no-wait; --apply vẫn chạy per-notebook qua notebook_id")
     p.add_argument("--from-plan", dest="from_plan", nargs="?", const="auto",
                    help="(v1.34.54 A3) --apply nạp plan-artifact sweep DRY vừa ghi (mặc định .tl_state/reconcile_plan_<nb>.json) — BỎ re-scan NLM; an toàn: TTL 15' + freshness reg_get_bulk trên dòng sắp ghi")
+    p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
+                   help="(v1.34.61 E2) NLM chết + --apply → GIỮ rc=2 như cũ thay vì DEFERRED_NLM_OFFLINE rc=0")
     p.set_defaults(fn=cmd_nlm_reconcile)
 
 

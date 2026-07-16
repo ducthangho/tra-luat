@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.60 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.61 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -35,7 +35,7 @@ Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự
 4. Kiểm `scripts/*.py` và `references/API_CONTRACT.md` trước khi gọi webapp/Drive/registry/NLM hoặc thêm tool mới.
 5. Khi sửa skill/workflow/release gate, chạy deterministic mode: `python scripts/tl.py --deterministic workflow-audit --strict --json`, `python scripts/tl.py --deterministic determinism-audit --strict --json`, và trước khi đóng gói `python scripts/tl.py --deterministic release-check --strict-determinism --full --json`.
 
-PHÁT HÀNH & NHÁNH (ADR-0001, chốt grilling 2026-07-09): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Phiên/nhánh song song giao nộp bằng `tl bundle-export --note "<mục đích>" --json` (zip GIỮ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version, KHÔNG publish; drive-push tự TỪ CHỐI cây có BUNDLE_META.json (BLOCKED_BY_BUNDLE_META). Deploy policy: canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
+PHÁT HÀNH & NHÁNH (ADR-0001): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Nhánh song song giao nộp `tl bundle-export --note "…" --json` (zip giữ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version/publish; drive-push TỪ CHỐI cây có BUNDLE_META.json. Canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
 
 Chỉ viết tool mới khi lệnh/script/hàm hiện có không đáp ứng; tool mới: input/output rõ (ưu tiên JSON), dry-run nếu ghi, verify/readback, selftest/audit phù hợp.
 
@@ -43,7 +43,7 @@ Mọi quy trình nạp/convert/rename/OCR/zip/chunk theo mẫu: `route-task → 
 
 `tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
 
-Từ v1.33.55–58 (Pha B–E), helper tách sang `scripts/tl_core/*.py` (deterministic/jsonio/workflow/release/live/zip_ingest/ocr/chunking/command_registry — metadata lệnh risk/gates/card/contract; `workflow-audit` tự đối chiếu registry↔parser↔cards); `scripts/tl.py` vẫn là entrypoint public DUY NHẤT (stub ủy quyền, tương thích ngược — KHÔNG gọi tl_core trực tiếp từ ngoài).
+Helper tách sang `scripts/tl_core/*.py` (Pha B–E v1.33.55–58; command_registry = metadata lệnh risk/gates/card/contract, `workflow-audit` đối chiếu registry↔parser↔cards); `scripts/tl.py` = entrypoint public DUY NHẤT (stub ủy quyền — KHÔNG gọi tl_core trực tiếp từ ngoài).
 
 Stage local deterministic: `ocr-run` (sidecar text/OCR khi engine sẵn), `chunk-apply` (chunk files+manifest), `chunk-verify` — chưa ghi Drive/NLM; đưa vào corpus vẫn phải qua pipeline ingest/verify/readback.
 
@@ -86,7 +86,7 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 14. **DÙNG LỆNH CÓ SẴN — đừng viết snippet `json.load(manifest)`/`g.get("move")` tay** (bài học 26/6). Tra/lọc registry → **`tl reg-query`**; tìm trùng + kế hoạch quarantine → **`tl hygiene scan/plan/apply`** (đã subject-aware: KHÔNG gộp khác-cơ-quan/phụ-lục); rà sai chủ đề → **`tl cat-audit`** → sửa bằng **`tl recat … --cat NN [--apply]`** (hoặc `--quarantine`); đếm/đối soát NLM → `tl nlm-get/-list/-reconcile/-cross`; check trùng 1 văn bản → `tl dedup-check`. Chỉ viết Python tay khi KHÔNG lệnh nào phủ.
 15. **SCRIPT-REUSE GATE — KIỂM KHO TRƯỚC KHI VIẾT MỚI (bắt buộc; mở rộng #14).** Trước khi viết BẤT KỲ script/hàm/loop mới, PHẢI kiểm kho sẵn có theo 3 bước: (a) **subcommand** — `tl -h` / `tl <lệnh> --help`; (b) **script + mục đích** — liệt kê `scripts/*.py` kèm docstring dòng đầu (§7 BẢN ĐỒ SCRIPT là mục lục); (c) **hàm nghiệp vụ** — `grep -nE "def .*<từ khoá>" scripts/tl.py scripts/common.py`. CHỈ viết mới khi KHÔNG lệnh/script/hàm nào phủ chức năng. Có sẵn thì DÙNG bản của skill (đã xử ca biên + có journal/undo), KHÔNG hand-roll — vd: bóc **TRÍCH YẾU** = `tl backfill-title-vn` (`_title_block_from_text`/`_title_vn_from_header`, đã xử BỘ-LUẬT-trước-LUẬT + trích yếu đa dòng); lọc registry = `tl reg-query`; dedup = `tl dedup-plan`/`hygiene`; chuẩn tên = `standardize_name.py`/`tl source-rename`; đọc toàn văn = `tl extract`. **Bài học 2026-07-06:** suýt viết lại loop bóc trích yếu tay trong khi `tl backfill-title-vn` đã có và tốt hơn. **Enforcement:** bước kiểm-kho là TIỀN-ĐIỀU-KIỆN của mọi việc viết/loop; SỬA hoặc THÊM file skill CHỈ qua `tl edit-skill` (DRY + py_compile/assert) rồi `tl verify-integrity` — KHÔNG Edit/Write native (mount Cowork cắt cụt). Instruction/loop phải khai khối `SCRIPT_REUSE_GATE` (bổ sung vào `tl instruction-audit`/selftest).
 16. **Registry chỉ ghi sự thật ĐÃ XÁC MINH vật lý** — nghi ngờ → để stale (reconcile chữa), KHÔNG ghi trước-xác-minh-sau.
-17. **NLM chết ≠ dừng (v1.34.60)** — hard-dead (probe 1 lần+cache; transient retry): đường ĐỌC `nlm-content/query/cross` tự fallback CORPUS — content đọc GDoc theo sid (lossless); query/cross VERBATIM-RETURN ≤5 văn bản (+Điều cắt) cho agent tự tổng hợp, KHÔNG máy sinh RAG; >5/mơ hồ → chỉ ứng viên. Đường ĐẨY `nlm-add`/ingest-* → DEFER (`nlm_status=deferred`+batch-link; corpus KHÔNG true — chống corpus-ảo); `nlm-list` → STALE_CACHE advisory (≠ bằng chứng vật lý). Fallback rc=0 + cảnh báo stderr + `nlm_status:offline`; tắt: `--no-fallback`/`TL_NLM_FALLBACK=0`. Text mọi định dạng: `tl doc-text <id> [--dieu N]` (.docx unzip THẬT, hết binary).
+17. **NLM chết ≠ dừng (v1.34.60/61)** — hard-dead (probe 1 lần+cache; transient retry): đường ĐỌC `nlm-content/query/cross` tự fallback CORPUS — content đọc GDoc theo sid (lossless); query/cross VERBATIM-RETURN ≤5 văn bản (+Điều cắt) cho agent tự tổng hợp, KHÔNG máy sinh RAG; >5/mơ hồ → chỉ ứng viên. Đường ĐẨY `nlm-add`/ingest-* → DEFER (`nlm_status=deferred`+batch-link; corpus KHÔNG true — chống corpus-ảo); `nlm-list` → STALE_CACHE advisory (≠ bằng chứng vật lý). Audit/DRY → tiếp trên cache stale cờ `UNVERIFIED_NLM_STATE` (belief, không xử theo); GHI-cần-vật-lý (migrate/reconcile --apply) → DEFER + resume-artifact `--from-plan` — KHÔNG ghi trên belief. Fallback rc=0 + cảnh báo stderr + `nlm_status:offline`; tắt: `--no-fallback`/`TL_NLM_FALLBACK=0`. Text mọi định dạng: `tl doc-text <id> [--dieu N]` (.docx unzip THẬT, hết binary).
 
 ## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
 > ## ★★ BƯỚC 0 — CHỌN ĐÚNG 1 ĐƯỜNG THEO MÔI TRƯỜNG (ĐỪNG TRỘN, ĐỪNG ĐỤNG `_parts` SỚM) ★★

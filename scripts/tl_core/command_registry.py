@@ -1087,11 +1087,14 @@ GENERATED_SPECS = [
          {"flags": ['--refresh-live'], "dest": 'refresh_live', "action": 'store_true', "help": 'ép list tươi (bỏ cache TTL 10 phút)'},
          {"flags": ['--out'], "help": 'ghi JSON ra file (atomic)'},
          {"flags": ['--json'], "action": 'store_true'},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.61 E2) NLM chết → GIỮ NO_NOTEBOOK_LISTED rc=2 thay vì audit tiếp trên cache stale cờ UNVERIFIED_NLM_STATE'},
      ]},
     {"name": 'nlm-migrate', "handler": 'cmd_nlm_migrate',
-     "help": '(v1.34.57 B-#4..#7) DI DỜI physical-first idempotent: re-plan từ VẬT LÝ đích (luôn list tươi) mỗi lần chạy — POINTER_OK / REPOINT (sid vật lý thắng, chỉ ghi registry) / ADD (>2 doc → BATCH_LINKS dán tay; --api-add ép API qua nlm-add claim+verify-then-link); KHÔNG bao giờ tự gỡ nguồn cũ (in sẵn nlm-source-remove). DRY mặc định; dán xong CHẠY LẠI đúng lệnh (harvest)',
+     "help": '(v1.34.57 B-#4..#7) DI DỜI physical-first idempotent: re-plan từ VẬT LÝ đích (luôn list tươi) mỗi lần chạy — POINTER_OK / REPOINT (sid vật lý thắng, chỉ ghi registry) / ADD (>2 doc → BATCH_LINKS dán tay; --api-add ép API qua nlm-add claim+verify-then-link); KHÔNG bao giờ tự gỡ nguồn cũ (in sẵn nlm-source-remove). DRY mặc định; dán xong CHẠY LẠI đúng lệnh (harvest). (v1.34.61 E2) --apply NLM-chết → DEFERRED + resume-artifact; NLM sống lại: --from-plan chạy nốt',
      "args": [
-         {"flags": ['--to'], "required": True, "help": 'notebook ĐÍCH'},
+         {"flags": ['--to'], "help": 'notebook ĐÍCH (bắt buộc trừ khi --from-plan mang sẵn trong artifact)'},
+         {"flags": ['--from-plan'], "dest": 'from_plan', "nargs": '?', "const": 'auto', "help": '(v1.34.61 E2) nạp resume-artifact .tl_state/migrate_resume_<to>.json (THAM SỐ — plan vẫn re-tạo TƯƠI physical-first, không TTL); "auto" cần --to để tìm file'},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.61 E2) NLM chết → GIỮ LIVE_SOURCE_LIST_FAILED rc=2 (không defer/artifact/stale-plan)'},
          {"flags": ['--from'], "dest": 'from_nb', "help": 'notebook NGUỒN (để in cleanup candidates — không bắt buộc)'},
          {"flags": ['--name-contains'], "dest": 'name_contains', "help": 'bộ lọc dòng registry theo tên (chọn ĐÚNG 1 bộ lọc)'},
          {"flags": ['--cat'], "help": 'bộ lọc nhóm cat NN (chọn ĐÚNG 1 bộ lọc)'},
@@ -1446,13 +1449,13 @@ COMMAND_META = {
     "shared-source-fix":    _m("high", False, "registry_nlm", True, True, False, None, "shared_source_fix", False, None, generated=True),
     "corpus-fix":           _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "push-overflow":        _m("high", False, "nlm_registry", False, True, False, None, "push_overflow", False, None, generated=True),
-    "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None),
+    "nlm-reconcile":        _m("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None, nlm_fallback="unverified"),   # v1.34.61 E2: --apply NLM-chết → DEFER trỏ artifact A3 (DRY giữ rc=2 — verify-tool cần live)
     "nlm-links":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 B1 read-only
     "ingest-inbox":         _m("high", False, "drive_registry", True, True, False, None, "ingest_inbox", False, "ingest_ops", generated=True),   # v1.34.54 B2 (KHÔNG đụng NLM — nlm-links cuối lô)
     "nlm-auth-status":      _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 C8 read-only (probe live, không ghi)
     "nlm-source-remove":    _m("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", generated=True, nlm_fallback="none"),   # v1.34.56 A-#12 (gỡ nguồn khỏi notebook — guard con trỏ; v1.34.60: offline chỉ báo, KHÔNG defer xoá)
-    "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.57 B-#3 read-only (cache .tl_state local)
-    "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True),   # v1.34.57 B-#4..#7 (repoint registry + add qua nlm-add; nlm_fallback defer = Release 2/E2)
+    "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True, nlm_fallback="unverified"),   # v1.34.57 B-#3 read-only; v1.34.61 E2: NLM-chết → stale-cache + cờ UNVERIFIED_NLM_STATE
+    "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True, nlm_fallback="defer"),   # v1.34.57 B-#4..#7; v1.34.61 E2: --apply NLM-chết → DEFERRED + resume-artifact --from-plan
     "nlm-cross":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", nlm_fallback="corpus_read"),   # v1.34.60 E1 (meta mới — lệnh cũ ở cli.py chưa từng có meta)
     "doc-text":             _m("low", True, "local", False, False, False, None, None, False, "lookup_ops", generated=True),   # v1.34.60 A1 (read-only; ghi cache extract local)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),

@@ -1,3 +1,38 @@
+# ★ v1.34.61 — NLM-DEATH RESILIENCE Release 2: E2 unverified-continue + defer/resume-artifact (2026-07-17)
+
+> Release 2/2 CHỐT kế hoạch grill-with-docs (`D:\Quốc hội\ke-hoach-nlm-fallback-E1-E3-2026-07-16.md`,
+> ADR-3): audit/DRY → UNVERIFIED-CONTINUE (cờ, không xử theo belief); đường GHI-cần-vật-lý → DEFER +
+> resume-artifact `--from-plan`. TDD r122 ×10 negative-input trước; selftest 1034→1044. Python-only.
+
+- **[E2 audit] `nlm-audit-physical`**: notebook list fail + NLM hard-dead → dùng cache stale BẤT KỂ TTL
+  (`_nlm_list_stale_read`) — audit CHẠY TIẾP; verdict fallback tính 1 lần/loop (banner không spam); BẤT KỲ
+  notebook stale → gắn `unverified_nlm_state` TOÀN BỘ finding (bảo thủ: 1 phần scope stale = cả bức tranh
+  không chắc) + envelope `nlm_status:offline/fallback:unverified/stale_notebooks/source`; rc GIỮ 0/1.
+  Không cache → notebook ra khỏi scope như cũ (pointer trỏ nó = unverified_scope advisory — không bịa
+  tầng vật lý); `--no-fallback` → NO_NOTEBOOK_LISTED rc=2 như cũ.
+- **[E2 migrate] `nlm-migrate`**: listing đích fail + hard-dead → (i) có cache stale: plan CHẠY TIẾP cờ
+  `UNVERIFIED_NLM_STATE` — DRY trả plan flagged; `--apply` KHÔNG ghi registry/API-add trên belief, CHỈ
+  BATCH_LINKS (in link dán tay không cần NLM — reconcile bắt trùng sau nếu stale lệch) + resume-artifact;
+  (ii) không cache + `--apply`: `DEFERRED_NLM_OFFLINE` + resume-artifact, rc=0; (iii) không cache + DRY:
+  LIVE_SOURCE_LIST_FAILED rc=2 (không ground truth nào). **Resume-artifact `.tl_state/migrate_resume_
+  <to>.json`** (`_migrate_resume_write`, schema migrate_resume.v1) = THAM SỐ (to/filter/from/api_add/limit)
+  — KHÁC A3 reconcile (plan-rows TTL 15'): plan LUÔN re-tạo TƯƠI lúc resume nên KHÔNG TTL. **`--from-plan
+  [path|auto]`** nạp tham số rồi đi đường thường (fresh listing → re-plan → apply = chạy nốt repoint/verify);
+  `auto` cần `--to`; artifact/CLI `--to` lệch → PLAN_MISMATCH. `--to` hết required=True ở parser (nhường
+  from-plan) + guard TO_REQUIRED tường minh (không rơi về base mặc định).
+- **[E2 reconcile] `nlm-reconcile`**: `--apply` + hard-dead → `DEFERRED_NLM_OFFLINE` rc=0 (KHÔNG ghi trên
+  belief — physical-first), trỏ plan-artifact A3 (path/tuổi/fresh≤15') cho `--apply --from-plan`; DRY +
+  dead GIỮ rc=2 (reconcile là VERIFY-TOOL — unverified-continue thuộc audit, không thuộc đây);
+  `--no-fallback` giữ rc=2.
+- Meta: `nlm-audit-physical`/`nlm-reconcile` nlm_fallback="unverified", `nlm-migrate`="defer" (đúng phân
+  loại §2.2 kế hoạch); +`--no-fallback` cho cả 3 lệnh.
+- **Test r122 ×10** (offline, fake nlm_cli/gas): wiring meta+from-plan parse; audit unverified flag +
+  negative no-fallback/no-cache; migrate defer-artifact (KHÔNG upsert/claim/add) + no-fallback + BATCH_LINKS
+  khi dead + DRY-stale-unverified (repoint 1/add 2 từ stale) + from-plan resume THẬT (writer thật temp-dir,
+  artifact schema, repoint verify reg_get_bulk); reconcile apply-defer (GAS 0 call) + DRY/no-fallback rc=2.
+- Docs: SKILL.md bất biến 17 mở rộng E2 (nén PHÁT HÀNH & NHÁNH + module-history giữ ≤48KB — 49138B)
+  ⚠ **kernel đổi → user RE-IMPORT Capabilities**; COMMANDS.md 3 lệnh; parser_surface regen.
+
 # ★ v1.34.60 — NLM-DEATH RESILIENCE Release 1: A1 doc-text + resolver fallback + E1 đọc + E3 đẩy (2026-07-16)
 
 > Release 1/2 kế hoạch grill-with-docs (`D:\Quốc hội\ke-hoach-nlm-fallback-E1-E3-2026-07-16.md`, 7 ADR):

@@ -11965,6 +11965,287 @@ def run() -> int:
         return _ok1 and _ok2 and _ok3 and _ok4 and _ok5
     _t110("r121_corpus_question_resolve_pure", _c121_corpus_question_resolve_pure)
 
+    # ═══ v1.34.61 — r122: NLM-DEATH RESILIENCE Release 2 (E2 — ADR-3): audit/DRY = UNVERIFIED-CONTINUE
+    # (cờ UNVERIFIED_NLM_STATE, KHÔNG ghi trên belief — physical-first); đường GHI-cần-vật-lý (migrate --apply,
+    # reconcile --apply) = DEFER + resume-artifact (--from-plan khi NLM sống). NEGATIVE-INPUT TRƯỚC (r102). ═══
+    _DID122 = "dAUD122" + "0" * 17          # 24 ký tự — đủ regex drive-id
+    _DIDM122 = ["dMIG122" + c * 17 for c in "abc"]
+
+    def _c122_wiring_meta_from_plan():
+        from tl_core.command_registry import COMMAND_META as _CM122
+        _ok_meta = ((_CM122.get("nlm-audit-physical") or {}).get("nlm_fallback") == "unverified"
+                    and (_CM122.get("nlm-reconcile") or {}).get("nlm_fallback") == "unverified"
+                    and (_CM122.get("nlm-migrate") or {}).get("nlm_fallback") == "defer")
+        _ap122 = _TL_MODULE.build_parser()
+        try:
+            _ns = _ap122.parse_args(["nlm-migrate", "--from-plan", "x122.json", "--apply", "--confirm", "yes"])
+            _ok_parse = getattr(_ns, "from_plan", None) == "x122.json" and getattr(_ns, "to", None) is None
+        except SystemExit:
+            _ok_parse = False
+        return _ok_meta and _ok_parse
+    _t110("r122_wiring_meta_unverified_defer_from_plan", _c122_wiring_meta_from_plan)
+
+    def _run_aud122(no_fallback=False, stale=True):
+        class _NCU122:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+        _keys = ("apply_profile_offline", "_imp", "_manifest_entries", "_resolve_nlm_notebook",
+                 "_resolve_overflow_shards", "_nlm_source_list_cached", "_nlm_list_stale_read")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _nbA = "aaaa1220-0000-4000-8000-00000000000a"
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCU122() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": _DID122, "name": "Luat_Audit122", "nlm_source_id": "sOLD122",
+                 "nlm_notebook_id": _nbA, "nlm_status": "pushed"}]
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: (_nbA, None)
+            _TL_MODULE._resolve_overflow_shards = lambda entries, nb: []
+            _TL_MODULE._nlm_source_list_cached = lambda nc, nb, **k: {
+                "ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
+            _TL_MODULE._nlm_list_stale_read = lambda nb, cache_dir=None: ({
+                "ok": True, "count": 1, "cached": True, "stale": True, "age_s": 7200, "via": "cache_stale",
+                "sources": [{"id": "sNEW122",
+                             "url": "https://docs.google.com/document/d/" + _DID122 + "/edit"}]}
+                if stale else None)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(notebooks=None, all_profiles=False, refresh_live=False, out=None,
+                                     json=True, no_fallback=no_fallback, config=None, profile=None,
+                                     deterministic=False)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_audit_physical(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue()
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c122_audit_unverified_flag():
+        # E2 unverified-continue: NLM chết + CÓ cache stale → audit CHẠY TIẾP trên stale, finding
+        # POINTER_MISMATCH gắn unverified_nlm_state, envelope offline/unverified, rc GIỮ 1 (có finding),
+        # KHÔNG ghi gì (audit read-only sẵn).
+        _rc, _o, _e = _run_aud122()
+        try:
+            _j = json.loads(_o)
+        except Exception:
+            return False
+        _mm = (_j.get("findings") or {}).get("pointer_mismatch") or []
+        return (_rc == 1 and _j.get("nlm_status") == "offline" and _j.get("fallback") == "unverified"
+                and _j.get("unverified_nlm_state") is True and len(_mm) == 1
+                and _mm[0].get("unverified_nlm_state") is True
+                and _mm[0].get("drive_id") == _DID122
+                and "UNVERIFIED" in (_j.get("note") or "").upper())
+    _t110("r122_audit_physical_nlm_dead_unverified_flag", _c122_audit_unverified_flag)
+
+    def _c122_audit_no_fallback_or_no_cache_failcloses():
+        # NEGATIVE: --no-fallback → giữ NO_NOTEBOOK_LISTED rc=2; fallback bật nhưng KHÔNG có cache stale →
+        # cũng rc=2 (không còn notebook nào list được — không bịa tầng vật lý).
+        _rc1, _o1, _e1 = _run_aud122(no_fallback=True)
+        _rc2, _o2, _e2 = _run_aud122(stale=False)
+        return (_rc1 == 2 and "NO_NOTEBOOK_LISTED" in _e1
+                and _rc2 == 2 and "NO_NOTEBOOK_LISTED" in _e2)
+    _t110("r122_audit_no_fallback_or_no_cache_failcloses", _c122_audit_no_fallback_or_no_cache_failcloses)
+
+    def _run_mig122(apply=True, stale=None, list_ok=False, from_plan=None, to="nbT122",
+                    no_fallback=False, phys=None, json_out=True, state_dir=None):
+        _calls = {"upserts": [], "resume_writes": [], "add": 0}
+
+        class _NCM122:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_list(self, nb, **k):
+                if list_ok:
+                    return {"ok": True, "count": len(phys or []), "sources": list(phys or [])}
+                return {"ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
+
+        class _GM122:
+            def get(self, action, **kw):
+                if action == "reg_get_bulk":
+                    return {"ok": True, "rows": [{"drive_id": d, "nlm_source_id": "sPH122",
+                                                  "nlm_notebook_id": "nbT122"} for d in _DIDM122]}
+                return {"ok": True}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "load_creds", "_manifest_entries",
+                 "_gas", "_apply_journal_start", "_journal_append", "_journaled_reg_upsert",
+                 "_resolve_shard_topology", "_nlm_list_stale_read", "_migrate_resume_write", "_active_profile",
+                 "cmd_nlm_add")
+        _sav = {k: getattr(_TL_MODULE, k, None) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _real_rw = getattr(_TL_MODULE, "_migrate_resume_write", None)
+        try:
+            _TL_MODULE.cmd_nlm_add = lambda ns: (_calls.__setitem__("add", _calls["add"] + 1), 0)[1]
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCM122() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ((nid or "nbT122"), None)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": d, "name": f"VB_M122_{i}", "nlm_source_id": "", "nlm_notebook_id": "",
+                 "nlm_status": ""} for i, d in enumerate(_DIDM122)]
+            _TL_MODULE._gas = lambda: _GM122()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "runM122"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._journaled_reg_upsert = (lambda run_id, g, payload, before=None, **kw:
+                                                (_calls["upserts"].append(dict(payload)),
+                                                 {"verified": True})[1])
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {"shards": []}
+            _TL_MODULE._nlm_list_stale_read = lambda nb, cache_dir=None: stale
+            if state_dir is None:
+                _TL_MODULE._migrate_resume_write = (lambda to_nb, fk, fv, ns, **kw:
+                                                    (_calls["resume_writes"].append({"to": to_nb, fk: fv}),
+                                                     f"FAKE_RESUME_{to_nb}.json")[1])
+            elif _real_rw is not None:
+                _TL_MODULE._migrate_resume_write = (lambda to_nb, fk, fv, ns, **kw:
+                                                    _real_rw(to_nb, fk, fv, ns, state_dir=state_dir))
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(to=to, from_nb=None, name_contains=("VB_M122" if not from_plan else None),
+                                     cat=None, drive_ids=None, api_add=False, limit=None,
+                                     apply=apply, confirm=("yes" if apply else None), json=json_out, out=None,
+                                     from_plan=from_plan, no_fallback=no_fallback, config=None, profile=None,
+                                     deterministic=False)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_migrate(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                if _v is not None or _k in ("_migrate_resume_write",):
+                    setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c122_migrate_apply_dead_defers_artifact():
+        # E2 defer: --apply + NLM chết + KHÔNG cache stale → DEFERRED_NLM_OFFLINE + GHI resume-artifact
+        # (tham số), KHÔNG reg_upsert, KHÔNG add API, rc=0 (chuỗi chạy tiếp).
+        _rc, _o, _e, _calls = _run_mig122(apply=True, stale=None)
+        return (_rc == 0 and "DEFERRED_NLM_OFFLINE" in _o and '"fallback": "deferred"' in _o
+                and not _calls["upserts"] and len(_calls["resume_writes"]) == 1
+                and _calls["resume_writes"][0].get("to") == "nbT122"
+                and _calls["resume_writes"][0].get("name_contains") == "VB_M122"
+                and "--from-plan" in _o)
+    _t110("r122_migrate_apply_nlm_dead_defers_artifact", _c122_migrate_apply_dead_defers_artifact)
+
+    def _c122_migrate_no_fallback_failcloses():
+        # NEGATIVE: --no-fallback → giữ fail-closed LIVE_SOURCE_LIST_FAILED rc=2, KHÔNG artifact.
+        _rc, _o, _e, _calls = _run_mig122(apply=True, stale=None, no_fallback=True)
+        return _rc == 2 and "LIVE_SOURCE_LIST_FAILED" in _e and not _calls["resume_writes"]
+    _t110("r122_migrate_no_fallback_failcloses", _c122_migrate_no_fallback_failcloses)
+
+    def _c122_migrate_batch_links_dead():
+        # E2: NLM chết + CÓ cache stale (3 doc đều thiếu ở đích) → BATCH_LINKS vẫn IN LINK stdout (dán tay
+        # không cần NLM) + cờ UNVERIFIED (plan từ stale) + artifact + KHÔNG ghi registry; rc=0.
+        _rc, _o, _e, _calls = _run_mig122(
+            apply=True, json_out=False,
+            stale={"ok": True, "count": 0, "sources": [], "stale": True, "age_s": 3600, "via": "cache_stale"})
+        return (_rc == 0 and all(f"docs.google.com/document/d/{d}" in _o for d in _DIDM122)
+                and "UNVERIFIED" in (_o + _e).upper() and not _calls["upserts"]
+                and len(_calls["resume_writes"]) == 1 and _calls["add"] == 0)
+    _t110("r122_migrate_batch_links_works_nlm_dead", _c122_migrate_batch_links_dead)
+
+    def _c122_migrate_dry_dead_stale_unverified():
+        # E2 unverified-continue: DRY + chết + stale (1 doc ĐÃ ở đích qua drive-url) → plan chạy tiếp,
+        # cờ unverified_nlm_state, phân loại từ stale; rc=0; KHÔNG artifact (DRY không side-effect).
+        _st = {"ok": True, "count": 1, "stale": True, "age_s": 3600, "via": "cache_stale",
+               "sources": [{"id": "sPH122",
+                            "url": "https://docs.google.com/document/d/" + _DIDM122[0] + "/edit"}]}
+        _rc, _o, _e, _calls = _run_mig122(apply=False, stale=_st)
+        try:
+            _j = json.loads(_o)
+        except Exception:
+            return False
+        return (_rc == 0 and _j.get("dry_run") is True and _j.get("unverified_nlm_state") is True
+                and (_j.get("counts") or {}).get("repoint") == 1 and (_j.get("counts") or {}).get("add") == 2
+                and not _calls["resume_writes"])
+    _t110("r122_migrate_dry_dead_stale_unverified", _c122_migrate_dry_dead_stale_unverified)
+
+    def _c122_migrate_from_plan_resume():
+        # E2 resume: artifact THẬT (writer thật, temp state-dir) → NLM sống lại → --from-plan (không --to,
+        # không filter CLI) nạp THAM SỐ + re-plan TƯƠI (physical-first, không TTL vì không ghi theo plan-rows)
+        # → repoint chạy nốt + verify reg_get_bulk. rc=0.
+        with _tf110.TemporaryDirectory() as _td:
+            _ns_w = argparse.Namespace(from_nb=None, api_add=False, limit=None)
+            _p = _TL_MODULE._migrate_resume_write("nbT122", "name_contains", "VB_M122", _ns_w, state_dir=_td)
+            try:
+                _art = json.loads(_P110(_p).read_text(encoding="utf-8"))
+            except Exception:
+                return False
+            _ok_art = (_art.get("schema") == "migrate_resume.v1" and _art.get("to") == "nbT122"
+                       and (_art.get("filter") or {}).get("name_contains") == "VB_M122")
+            _phys = [{"id": "sPH122", "url": "https://docs.google.com/document/d/" + _DIDM122[0] + "/edit"}]
+            _rc, _o, _e, _calls = _run_mig122(apply=True, list_ok=True, phys=_phys, from_plan=str(_p), to=None)
+            try:
+                _j = json.loads(_o)
+            except Exception:
+                return False
+            return (_ok_art and _rc == 0 and (_j.get("counts") or {}).get("repoint") == 1
+                    and _j.get("repoint_verified") is True and len(_calls["upserts"]) == 1
+                    and _calls["upserts"][0].get("nlm_source_id") == "sPH122"
+                    and _calls["upserts"][0].get("nlm_notebook_id") == "nbT122")
+    _t110("r122_migrate_from_plan_resume", _c122_migrate_from_plan_resume)
+
+    def _run_rec122(apply=True, no_fallback=False):
+        _calls = {"gas": 0}
+
+        class _NCR122:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_list(self, nb, **k):
+                return {"ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
+
+        class _GR122:
+            def get(self, action, **kw):
+                _calls["gas"] += 1
+                return {"ok": True}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_gas", "load_creds")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCR122() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nbR122", None)
+            _TL_MODULE._gas = lambda: _GR122()
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(notebook_id="nbR122", apply=apply, clear_stale=False, force_unsafe=False,
+                                     refresh=False, json=True, out=None, all_notebooks=False, from_plan=None,
+                                     no_fallback=no_fallback, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c122_reconcile_apply_dead_defers():
+        # E2: --apply + NLM chết → DEFERRED (KHÔNG ghi trên belief — physical-first) + trỏ đường
+        # --from-plan A3, rc=0; GAS không bị gọi để ghi.
+        _rc, _o, _e, _calls = _run_rec122(apply=True)
+        return (_rc == 0 and "DEFERRED_NLM_OFFLINE" in _o and '"fallback": "deferred"' in _o
+                and "--from-plan" in _o and _calls["gas"] == 0)
+    _t110("r122_reconcile_apply_nlm_dead_defers", _c122_reconcile_apply_dead_defers)
+
+    def _c122_reconcile_dry_dead_and_no_fallback_keep_rc2():
+        # NEGATIVE: DRY + chết → GIỮ rc=2 (reconcile là công-cụ-verify, không có live thì không kết luận);
+        # --apply --no-fallback → cũng rc=2 như cũ.
+        _rc1, _o1, _e1, _c1 = _run_rec122(apply=False)
+        _rc2, _o2, _e2, _c2 = _run_rec122(apply=True, no_fallback=True)
+        return _rc1 == 2 and _rc2 == 2 and "DEFERRED_NLM_OFFLINE" not in (_o1 + _o2)
+    _t110("r122_reconcile_dry_dead_and_no_fallback_keep_rc2", _c122_reconcile_dry_dead_and_no_fallback_keep_rc2)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

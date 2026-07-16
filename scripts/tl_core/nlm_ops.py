@@ -643,6 +643,29 @@ def cmd_nlm_reconcile(a) -> int:
         except Exception as e:
             print(json.dumps({"ok": False, "error": f"nlm_cli lỗi: {e}"}, ensure_ascii=False), file=sys.stderr); return 2
         if not live.get("ok"):
+            # v1.34.61 (E2 — ADR-3): --apply + NLM hard-dead → DEFER rc=0 (KHÔNG ghi trên belief —
+            # physical-first), trỏ đường A3: plan-artifact sweep DRY còn tươi (≤15') thì --from-plan, không
+            # thì chạy lại khi NLM sống. DRY + dead GIỮ rc=2 — reconcile là VERIFY-TOOL, không live thì
+            # không kết luận (unverified-continue của E2 nằm ở nlm-audit-physical, không phải đây).
+            _v62r = _nlm_or_corpus("nlm-reconcile", a, notebook_id=nb, err=live)
+            if _v62r["route"] == "unverified" and getattr(a, "apply", False):
+                _fp62 = HERE / ".tl_state" / f"reconcile_plan_{nb}.json"
+                _art62 = None
+                try:
+                    _a62 = json.loads(_fp62.read_text(encoding="utf-8"))
+                    _age62 = round(time.time() - float(_a62.get("created_ts") or 0))
+                    _art62 = {"path": str(_fp62), "age_s": _age62, "fresh": _age62 <= 900}
+                except Exception:  # noqa: BLE001 — chưa có plan-artifact → chỉ hướng dẫn chạy lại
+                    pass
+                print(json.dumps({"ok": True, "mode": "DEFERRED_NLM_OFFLINE", "nlm_status": "offline",
+                                  "fallback": "deferred", "notebook": nb, "applied": 0,
+                                  "why": _v62r["why"][:120],
+                                  **({"plan_artifact": _art62} if _art62 else {}),
+                                  "note": "NLM offline → KHÔNG ghi registry trên belief (physical-first). "
+                                          "Khi NLM sống: chạy lại lệnh này; plan-artifact A3 còn tươi (≤15') "
+                                          f"thì `tl nlm-reconcile {nb} --apply --from-plan` (bỏ re-scan)."},
+                                 ensure_ascii=False, indent=2))
+                return 0
             print(json.dumps({**live, "note": "fallback: MCP notebook_get hoặc `nlm login`"}, ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
         live_ids = {s.get("id") for s in live["sources"] if s.get("id")}
@@ -2464,6 +2487,24 @@ def _physical_audit_classify(reg_rows: list, phys_by_nb: dict) -> dict:
             "unverified_scope": unverified, "suggested_commands": sugg}
 
 
+def _migrate_resume_write(to_nb: str, filter_kind: str, filter_value, a, *, state_dir=None) -> str:
+    """E2 (v1.34.61 — ADR-3): ghi resume-artifact cho nlm-migrate khi NLM chết giữa --apply. KHÁC A3
+    reconcile (plan-rows, TTL 15'): artifact này CHỈ chứa THAM SỐ — plan LUÔN re-tạo TƯƠI từ vật lý đích
+    lúc --from-plan (physical-first) nên KHÔNG cần TTL. File: .tl_state/migrate_resume_<to>.json (LF)."""
+    _dir = Path(state_dir) if state_dir else (HERE / ".tl_state")
+    _dir.mkdir(parents=True, exist_ok=True)
+    fp = _dir / f"migrate_resume_{to_nb}.json"
+    art = {"schema": "migrate_resume.v1", "created_ts": time.time(), "to": str(to_nb),
+           "filter": {str(filter_kind): str(filter_value)},
+           "from_nb": str(getattr(a, "from_nb", None) or ""),
+           "api_add": bool(getattr(a, "api_add", False)),
+           "limit": int(getattr(a, "limit", None) or 0),
+           "note": "THAM SỐ resume nlm-migrate (NLM offline lúc apply) — chạy nốt khi NLM sống: "
+                   f"tl nlm-migrate --from-plan {fp} --apply --confirm yes (plan re-tạo tươi, không TTL)."}
+    fp.write_bytes((json.dumps(art, ensure_ascii=False, indent=1) + "\n").encode("utf-8"))
+    return str(fp)
+
+
 def cmd_nlm_audit_physical(a) -> int:
     """(B-#3 v1.34.57, Q5=a) READ-ONLY đối soát VẬT LÝ ↔ con trỏ registry (physical-first). Scope mặc định:
     topology VBQPPL (base + overflow shards) — foreign profile KHÔNG quét mặc định; --notebooks thêm đích;
@@ -2502,12 +2543,27 @@ def cmd_nlm_audit_physical(a) -> int:
                         scope.append(nb_x)
         except Exception as e:  # noqa: BLE001
             print(f"[tl] ⚠ --all-profiles: không đọc được config ({e}) — giữ scope topology.", file=sys.stderr)
-    phys_by_nb, nb_meta, fails = {}, [], []
+    phys_by_nb, nb_meta, fails, stale_nbs = {}, [], [], []
+    _v62 = None   # verdict fallback tính 1 LẦN cho cả loop (banner không spam per-notebook)
     for nb in scope:
         r = _nlm_source_list_cached(nc, nb, refresh=bool(getattr(a, "refresh_live", False)))
         if r.get("ok"):
             phys_by_nb[nb] = r.get("sources") or []
             nb_meta.append({"notebook_id": nb, "count": len(phys_by_nb[nb]), "cached": bool(r.get("cached"))})
+            continue
+        # v1.34.61 (E2 unverified-continue — ADR-3): NLM hard-dead → dùng cache stale BẤT KỂ TTL cho notebook
+        # này (audit CHẠY TIẾP, mọi finding gắn UNVERIFIED_NLM_STATE); KHÔNG cache → giữ hành vi cũ: notebook
+        # RA KHỎI scope (pointer trỏ nó → unverified_scope advisory tự nhiên — không bịa tầng vật lý).
+        if _v62 is None:
+            _v62 = _nlm_or_corpus("nlm-audit-physical", a, notebook_id=nb, err=r)
+        _st62 = _nlm_list_stale_read(nb) if _v62["route"] == "unverified" else None
+        if _st62:
+            phys_by_nb[nb] = _st62.get("sources") or []
+            stale_nbs.append(nb)
+            nb_meta.append({"notebook_id": nb, "count": len(phys_by_nb[nb]), "cached": True,
+                            "stale": True, "age_s": _st62.get("age_s")})
+            print(f"[tl] ⚠ UNVERIFIED_NLM_STATE: {str(nb)[:16]}… dùng cache STALE tuổi {_st62.get('age_s')}s "
+                  f"(NLM offline) — finding CHỈ là belief, chạy lại khi NLM sống để verify.", file=sys.stderr)
         else:
             fails.append({"notebook_id": nb, "error": str(r.get("error") or "")[:160]})
             print(f"[tl] ⚠ không list được {str(nb)[:16]}… ({str(r.get('error') or '')[:80]}) — notebook RA KHỎI "
@@ -2518,13 +2574,24 @@ def cmd_nlm_audit_physical(a) -> int:
         return 2
     res = _physical_audit_classify(entries, phys_by_nb)
     counts = {k: len(v) for k, v in res["findings"].items()}
+    # E2: BẤT KỲ notebook nào chạy trên stale → gắn unverified TOÀN BỘ finding (bảo thủ: 1 phần scope stale
+    # là cả bức tranh vật lý không còn chắc — vd doc 'dead' ở nb tươi có thể sống ở nb stale lệch).
+    if stale_nbs:
+        for _fl in res["findings"].values():
+            for _f in _fl:
+                _f["unverified_nlm_state"] = True
     payload = {"ok": True, "schema": "nlm_audit_physical.v1", "clean": res["clean"],
                "notebooks": nb_meta, "list_failed": fails, "counts": counts,
                "findings": res["findings"],
                "unverified_scope": {"count": len(res["unverified_scope"]),
                                     "sample": res["unverified_scope"][:10]},
                "suggested_commands": res["suggested_commands"],
-               "note": "physical-first: kết luận từ listing VẬT LÝ; nlm_notebook_id chỉ là nơi registry NGHĨ."}
+               **({"nlm_status": "offline", "fallback": "unverified", "unverified_nlm_state": True,
+                   "stale_notebooks": stale_nbs, "source": "stale_cache+registry_belief"} if stale_nbs else {}),
+               "note": ("UNVERIFIED_NLM_STATE: một phần scope chạy trên cache STALE (NLM offline) — finding là "
+                        "belief, KHÔNG ghi/xử lý theo nó; chạy lại khi NLM sống để verify (physical-first)."
+                        if stale_nbs else
+                        "physical-first: kết luận từ listing VẬT LÝ; nlm_notebook_id chỉ là nơi registry NGHĨ.")}
     if getattr(a, "json", False) or getattr(a, "out", None):
         _emit_json_payload(payload, getattr(a, "out", None))
     else:
@@ -2607,6 +2674,52 @@ def cmd_nlm_migrate(a) -> int:
     (Q7). Dán xong: CHẠY LẠI đúng lệnh này (ADD tự thành REPOINT = harvest, không cờ riêng/state file).
     Danh sách tường minh — KHÔNG đi qua matcher reconcile (không đụng ownership-guard A2)."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    # v1.34.61 (E2 — ADR-3): --from-plan nạp THAM SỐ từ resume-artifact (ghi lúc --apply gặp NLM chết).
+    # KHÁC A3 reconcile: artifact KHÔNG chứa dòng ghi — plan LUÔN re-tạo TƯƠI từ vật lý đích ngay dưới
+    # (physical-first) nên KHÔNG cần TTL; chỉ validate schema + khớp --to nếu user đưa cả hai.
+    _fp_m = getattr(a, "from_plan", None)
+    if _fp_m is not None:
+        _fpp = str(_fp_m)
+        if _fpp in ("", "auto"):
+            _to_h = str(getattr(a, "to", None) or "").strip()
+            if not _to_h:
+                print(json.dumps({"ok": False, "error": "FROM_PLAN_NEEDS_TO_OR_PATH",
+                                  "note": "--from-plan auto cần --to <nb> để tìm .tl_state/migrate_resume_<to>"
+                                          ".json; hoặc đưa thẳng đường dẫn artifact."},
+                                 ensure_ascii=False), file=sys.stderr)
+                return 2
+            _fpp = str(HERE / ".tl_state" / f"migrate_resume_{_to_h}.json")
+        try:
+            _art_m = json.loads(Path(_fpp).read_text(encoding="utf-8"))
+        except Exception as _fe_m:  # noqa: BLE001
+            print(json.dumps({"ok": False, "error": "PLAN_NOT_FOUND", "path": _fpp, "detail": str(_fe_m)[:120]},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        if _art_m.get("schema") != "migrate_resume.v1" or (
+                str(getattr(a, "to", None) or "").strip()
+                and str(getattr(a, "to")).strip() != str(_art_m.get("to"))):
+            print(json.dumps({"ok": False, "error": "PLAN_MISMATCH", "path": _fpp,
+                              "plan_to": _art_m.get("to"), "to": getattr(a, "to", None)},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        a.to = str(_art_m.get("to") or "")
+        for _k_m in ("name_contains", "cat", "drive_ids"):
+            if (_art_m.get("filter") or {}).get(_k_m) and not getattr(a, _k_m, None):
+                setattr(a, _k_m, (_art_m.get("filter") or {})[_k_m])
+        if not getattr(a, "from_nb", None) and _art_m.get("from_nb"):
+            a.from_nb = _art_m["from_nb"]
+        if _art_m.get("api_add"):
+            a.api_add = True
+        if _art_m.get("limit") and not getattr(a, "limit", None):
+            a.limit = int(_art_m["limit"])
+        print(f"[tl] nlm-migrate --from-plan: tham số từ {_fpp} (to={a.to}) — plan vẫn re-tạo TƯƠI từ vật lý "
+              f"đích (physical-first, không TTL).", file=sys.stderr)
+    elif not str(getattr(a, "to", None) or "").strip():
+        # --to hết required=True ở parser (nhường --from-plan) → giữ guard tường minh, KHÔNG rơi về base mặc định
+        print(json.dumps({"ok": False, "error": "TO_REQUIRED",
+                          "note": "nlm-migrate cần --to <nb> (hoặc --from-plan <artifact>)."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
     _filters = [x for x in (("name_contains", getattr(a, "name_contains", None)),
                             ("cat", getattr(a, "cat", None)),
                             ("drive_ids", getattr(a, "drive_ids", None))) if str(x[1] or "").strip()]
@@ -2656,12 +2769,36 @@ def cmd_nlm_migrate(a) -> int:
         return 2
     # (2) VẬT LÝ ĐÍCH — LUÔN TƯƠI (physical-first; fail-closed nếu không list được); --from → cache OK.
     _lt = nc.source_list(to_nb, skip_freshness=True)
+    _unver62 = None   # E2: meta stale khi plan buộc chạy trên cache STALE (NLM offline)
     if not _lt.get("ok"):
-        print(json.dumps({"ok": False, "error": "LIVE_SOURCE_LIST_FAILED", "notebook": to_nb,
-                          "detail": str(_lt.get("error") or "")[:200],
-                          "note": "physical-first cần ground truth ĐÍCH — `nlm login` rồi chạy lại."},
-                         ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        # v1.34.61 (E2 — ADR-3): NLM hard-dead → (i) có cache STALE của đích: plan CHẠY TIẾP trên stale, cờ
+        # UNVERIFIED_NLM_STATE (apply sẽ DEFER phần ghi, chỉ BATCH_LINKS chạy — nhánh dưới); (ii) không cache
+        # + --apply: DEFER + resume-artifact THAM SỐ, rc=0; (iii) không cache + DRY: giữ rc=2 (không ground
+        # truth nào để plan). --no-fallback/TL_NLM_FALLBACK=0/transient → fail-closed như cũ.
+        _v62m = _nlm_or_corpus("nlm-migrate", a, notebook_id=to_nb, err=_lt)
+        _st62m = _nlm_list_stale_read(to_nb) if _v62m["route"] == "deferred" else None
+        if _st62m:
+            _unver62 = {"age_s": _st62m.get("age_s")}
+            _lt = _st62m
+            print(f"[tl] ⚠ UNVERIFIED_NLM_STATE: plan từ cache STALE tuổi {_st62m.get('age_s')}s (NLM "
+                  f"offline) — apply sẽ DEFER repoint/API-add, chỉ BATCH_LINKS (dán tay) chạy.", file=sys.stderr)
+        elif _v62m["route"] == "deferred" and getattr(a, "apply", False):
+            _fp62m = _migrate_resume_write(to_nb, fk, fv, a)
+            print(json.dumps({"ok": True, "schema": "nlm_migrate.v1", "mode": "DEFERRED_NLM_OFFLINE",
+                              "nlm_status": "offline", "fallback": "deferred", "to": to_nb,
+                              "filter": {fk: str(fv)}, "why": _v62m["why"][:120],
+                              "resume_artifact": _fp62m,
+                              "note": "NLM offline + không có cache listing đích → CHƯA làm gì (không ghi "
+                                      "trên belief). Chạy nốt khi NLM sống: `tl nlm-migrate --from-plan "
+                                      f"{_fp62m} --apply --confirm yes` (plan re-tạo tươi)."},
+                             ensure_ascii=False, indent=2))
+            return 0
+        else:
+            print(json.dumps({"ok": False, "error": "LIVE_SOURCE_LIST_FAILED", "notebook": to_nb,
+                              "detail": str(_lt.get("error") or "")[:200],
+                              "note": "physical-first cần ground truth ĐÍCH — `nlm login` rồi chạy lại."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     phys_t = _lt.get("sources") or []
     from_nb = str(getattr(a, "from_nb", None) or "").strip()
     phys_f = None
@@ -2684,7 +2821,11 @@ def cmd_nlm_migrate(a) -> int:
         payload = {"ok": True, "schema": "nlm_migrate.v1", "dry_run": True, "to": to_nb,
                    "filter": {fk: str(fv)}, "counts": counts, "plan": groups_out,
                    "cleanup_commands": cleanup_cmds,
-                   "note": "DRY re-plan từ vật lý đích (luôn tươi). ADD >"
+                   **({"nlm_status": "offline", "unverified_nlm_state": True,
+                       "stale_age_s": _unver62.get("age_s")} if _unver62 else {}),
+                   "note": (("UNVERIFIED_NLM_STATE: plan từ cache STALE (NLM offline) — phân loại là belief, "
+                             "chạy lại khi NLM sống để chốt. ") if _unver62 else "")
+                           + "DRY re-plan từ vật lý đích (luôn tươi). ADD >"
                            f"{NLM_BATCH_LINKS_THRESHOLD} doc → BATCH_LINKS khi apply (--api-add ép API). "
                            "Apply: thêm --apply --confirm yes. Dán link xong: CHẠY LẠI đúng lệnh (harvest)."}
         _emit_json_payload(payload, getattr(a, "out", None))
@@ -2694,6 +2835,36 @@ def cmd_nlm_migrate(a) -> int:
                           "note": "nlm-migrate ghi registry (repoint) / add NLM — thêm --confirm yes"},
                          ensure_ascii=False), file=sys.stderr)
         return 2
+    if _unver62:
+        # v1.34.61 (E2 — ADR-3): apply trên plan STALE → KHÔNG ghi registry / KHÔNG API-add trên belief
+        # (physical-first); CHỈ BATCH_LINKS (in link, dán tay không cần NLM — reconcile bắt trùng sau nếu
+        # stale lệch) + resume-artifact để chạy nốt repoint/API khi NLM sống. rc=0 (ADR-6).
+        _fp62m = _migrate_resume_write(to_nb, fk, fv, a)
+        links62 = ([_entry_links_url(it.get("row") or {"drive_id": it["drive_id"]}) for it in plan["add"]]
+                   if (plan["add"] and len(plan["add"]) > NLM_BATCH_LINKS_THRESHOLD
+                       and not getattr(a, "api_add", False)) else [])
+        payload62 = {"ok": True, "schema": "nlm_migrate.v1", "mode": "DEFERRED_NLM_OFFLINE",
+                     "nlm_status": "offline", "fallback": "deferred", "unverified_nlm_state": True,
+                     "stale_age_s": _unver62.get("age_s"), "to": to_nb, "filter": {fk: str(fv)},
+                     "counts": counts,
+                     "deferred": {"repoint": len(plan["repoint"]),
+                                  "add_api": (0 if links62 else len(plan["add"]))},
+                     **({"links": links62} if links62 else {}),
+                     "resume_artifact": _fp62m,
+                     "note": "NLM offline: plan từ cache STALE (UNVERIFIED) — repoint/API-add DEFER, links "
+                             "dán tay được ngay. Chạy nốt khi NLM sống: `tl nlm-migrate --from-plan "
+                             f"{_fp62m} --apply --confirm yes`."}
+        if links62 and not (getattr(a, "json", False) or getattr(a, "out", None)):
+            for ln in links62:
+                print(ln)
+            print(f"[tl] nlm-migrate BATCH_LINKS (UNVERIFIED — plan stale, NLM offline): {len(links62)} link "
+                  f"— dán vào Add source → Websites của https://notebooklm.google.com/notebook/{to_nb}; "
+                  f"repoint/API-add DEFER.", file=sys.stderr)
+            print(f"[tl]   chạy nốt khi NLM sống: tl nlm-migrate --from-plan {_fp62m} --apply --confirm yes",
+                  file=sys.stderr)
+        else:
+            _emit_json_payload(payload62, getattr(a, "out", None))
+        return 0
     run_id = _apply_journal_start("nlm-migrate", {"to": to_nb, "filter": {fk: str(fv)}, "counts": counts})
     results = {"repoint": [], "add": [], "repoint_verified": None}
     ok_all = True

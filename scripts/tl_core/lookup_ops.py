@@ -2121,14 +2121,168 @@ def _read_doc_text(gdoc_id: str, config=None):
     except Exception:
         pass
     # (2) transport→gws binary; (3) webapp exporttext (GAS).
+    # v1.34.60 (A1 footgun-fix — bài học dedup 2026-07-16): file KHÔNG Docs-native (.docx) qua đường 'read'
+    # có thể trả NGUYÊN BINARY zip ('PK\x03\x04…') như thể text → caller so char-count/verify trên rác binary.
+    # Guard _text_looks_binary: payload binary → coi như KHÔNG đọc được (""); đường đúng cho .docx/.pdf là
+    # `tl doc-text` (_doc_text_any: download + unzip word/document.xml / pdftotext).
     try:
         rr = _imp("transport").drive_op("read", file_id=gdoc_id, limit=2_000_000)
         if isinstance(rr, dict) and rr.get("ok") and rr.get("text") is not None:
-            return _sanitize_export_text(_strip_font_runs(rr.get("text", "")))
+            if not _text_looks_binary(rr.get("text", "")):
+                return _sanitize_export_text(_strip_font_runs(rr.get("text", "")))
     except Exception:
         pass
     r = _gas().get("exporttext", fileId=gdoc_id)
-    return _sanitize_export_text(_strip_font_runs(r.get("text", ""))) if r.get("ok") is not False else ""
+    if r.get("ok") is False or _text_looks_binary(r.get("text", "")):
+        return ""
+    return _sanitize_export_text(_strip_font_runs(r.get("text", "")))
+
+
+def _text_looks_binary(s: str) -> bool:
+    """PURE (A1 v1.34.60): payload 'text' thực chất là BINARY — zip .docx ('PK\\x03\\x04'), PDF ('%PDF')
+    hoặc chứa NUL trong 4KB đầu. Dùng làm guard mọi đường export-text trước khi trao cho caller."""
+    if not s:
+        return False
+    return s[:4].startswith("PK\x03\x04") or s[:5].startswith("%PDF") or ("\x00" in s[:4096])
+
+
+def _doc_text_fetch_binary(file_id: str, *, suffix: str = ".bin"):
+    """A1 (v1.34.60): tải BINARY Drive → file tạm, trả Path hoặc None. Ưu tiên gws cred direct-media
+    (1 hop, không b64, không cap 9MB — mẫu _read_doc_text B1); fallback transport download. Caller tự dọn."""
+    dst = Path(tempfile.mkdtemp(prefix="tl_doctext_")) / f"doc{suffix}"
+    try:
+        _tlg = _imp("tl_gws")
+        _cred = _tlg._read_gws_cred()
+        if _cred and not getattr(_tlg, "_CRED_AUTH_DEAD", False):
+            _tlg._drive_media_download(file_id, str(dst), _cred)
+            if dst.exists() and dst.stat().st_size > 0:
+                return dst
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        rr = _imp("transport").drive_op("download", file_id=file_id, out=str(dst))
+        if isinstance(rr, dict) and rr.get("ok") and dst.exists() and dst.stat().st_size > 0:
+            return dst
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def _docx_unzip_text(path) -> str:
+    """PURE-ish (A1): bóc text THẬT từ .docx local = unzip word/document.xml + strip tag (mẫu
+    _profile_read_probe_text v1.34.27 — không cần lib ngoài). </w:p> → newline giữ cấu trúc Điều."""
+    import zipfile as _zf
+    try:
+        with _zf.ZipFile(path) as z:
+            xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+        xml = re.sub(r"</w:p>", "\n", xml)
+        return re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
+    except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → coi như không đọc được
+        return ""
+
+
+def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None) -> tuple:
+    """A1 (v1.34.60 — kế hoạch NLM-fallback E1–E3, TIỀN ĐỀ E1): MỘT đường đọc text cho MỌI định dạng.
+    Route theo mime/tên (manifest entry): GDoc→export (_read_doc_text, giữ đường cũ); .docx→download+unzip
+    word/document.xml; .pdf→download+pdftotext (_read_local_text_for_analysis). Không rõ định dạng → thử
+    export rồi sniff binary. Đọc được → ghi cache extract_<id>.txt (chung khoá với extract/cache-build —
+    lần sau khỏi export). Trả (text, source) với source ∈ {cache,gdoc,docx,pdf}; fail mọi đường → ("", "")."""
+    fid = str(file_id or "").strip()
+    if not fid:
+        return "", ""
+    if not refresh:
+        try:
+            _cf = _cache_file(f"extract_{fid}.txt")
+            if _cf.exists():
+                _ct = _cf.read_text(encoding="utf-8", errors="replace")
+                if _ct.strip():
+                    return _ct, "cache"
+        except Exception:  # noqa: BLE001
+            pass
+    e = entry
+    if e is None:
+        try:
+            e = next((x for x in _manifest_entries(refresh=False)
+                      if str(x.get("drive_id") or x.get("gdoc_id") or "") == fid), None)
+        except Exception:  # noqa: BLE001 — chưa boot/manifest → sniff mù vẫn chạy
+            e = None
+    mime = str((e or {}).get("mime") or "").lower()
+    name = str((e or {}).get("name") or "").lower()
+    if "google-apps" in mime:
+        kind = "gdoc"
+    elif "wordprocessingml" in mime or name.endswith(".docx"):
+        kind = "docx"
+    elif "pdf" in mime or name.endswith(".pdf"):
+        kind = "pdf"
+    else:
+        kind = ""
+    text, src = "", ""
+    if kind in ("gdoc", ""):
+        t = _read_doc_text(fid, config)
+        if t and not _text_looks_binary(t):
+            text, src = t, "gdoc"
+    if not text and kind in ("docx", "pdf", ""):
+        p = _doc_text_fetch_binary(fid, suffix={"docx": ".docx", "pdf": ".pdf"}.get(kind, ".bin"))
+        if p is not None:
+            try:
+                with open(p, "rb") as _fh:
+                    head = _fh.read(8)
+                if kind == "docx" or (kind == "" and head.startswith(b"PK\x03\x04")):
+                    t = _docx_unzip_text(p)
+                    if t:
+                        text, src = t, "docx"
+                elif kind == "pdf" or (kind == "" and head.startswith(b"%PDF")):
+                    t, _w = _read_local_text_for_analysis(Path(p))
+                    if t:
+                        text, src = t, "pdf"
+            except Exception:  # noqa: BLE001
+                pass
+            finally:
+                try:
+                    os.unlink(p)
+                    os.rmdir(Path(p).parent)
+                except Exception:  # noqa: BLE001 — temp OS tự dọn
+                    pass
+    if not text:
+        return "", ""
+    text = _strip_font_runs(text)
+    try:
+        _cf = _cache_file(f"extract_{fid}.txt")
+        _cf.parent.mkdir(parents=True, exist_ok=True)
+        _cf.write_text(text, encoding="utf-8")
+    except Exception:  # noqa: BLE001 — cache best-effort, không chặn kết quả
+        pass
+    return text, src
+
+
+def cmd_doc_text(a) -> int:
+    """A1 (v1.34.60): `tl doc-text <fileId>` — MỘT lệnh đọc text mọi định dạng (GDoc/.docx/.pdf), cache
+    extract_<id>.txt; --dieu cắt Điều; --out né tràn stdout; --refresh bỏ cache. Nền cho E1 corpus-fallback."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    fid = str(getattr(a, "file_id", "") or "").strip()
+    text, src = _doc_text_any(fid, refresh=getattr(a, "refresh", False))
+    if not text:
+        print(json.dumps({"ok": False, "error": "DOC_TEXT_UNAVAILABLE", "file_id": fid,
+                          "note": "Không đọc được text (cache/GDoc-export/docx-unzip/pdftotext đều fail) — "
+                                  "kiểm fileId/quyền, hoặc `tl download <id>` soi tay."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    body = _slice_dieu(text, a.dieu) if getattr(a, "dieu", None) else text
+    _mx = int(getattr(a, "max", 0) or 0)
+    if getattr(a, "out", None):
+        Path(a.out).write_text(body, encoding="utf-8")
+        print(f"[tl] doc-text → {a.out} ({len(body)} ký tự, via {src})")
+        return 0
+    if getattr(a, "json", False):
+        print(_json_dumps({"ok": True, "schema": "doc_text.v1", "file_id": fid, "source": src,
+                           "chars": len(body), "dieu": getattr(a, "dieu", None) or None,
+                           "truncated": bool(_mx and len(body) > _mx),
+                           "text": body[:_mx] if _mx else body},
+                          deterministic=_deterministic_enabled(a)))
+        return 0
+    print(body[:_mx] if _mx else body)
+    return 0
+
 
 def _cluster_lookup(q: str) -> dict:
     """E2: 'pháp luật về X' / tên lĩnh vực → {sohieu canonical, cluster, base}. Khớp token chứa nhau."""

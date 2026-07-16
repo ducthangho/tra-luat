@@ -1,3 +1,45 @@
+# ★ v1.34.60 — NLM-DEATH RESILIENCE Release 1: A1 doc-text + resolver fallback + E1 đọc + E3 đẩy (2026-07-16)
+
+> Release 1/2 kế hoạch grill-with-docs (`D:\Quốc hội\ke-hoach-nlm-fallback-E1-E3-2026-07-16.md`, 7 ADR):
+> *"NLM chết → KHÔNG dừng, fallback bằng văn bản TƯƠNG ỨNG trong corpus"*. TDD r121 ×17 negative-input
+> trước; selftest 1017→1034. Python-only (GAS giữ 2.21.2m). Release 2 (E2 audit/migrate defer) = v1.34.61.
+
+- **[A1] lệnh MỚI `tl doc-text <fileId> [--dieu N|--out|--max|--refresh|--json]`** — MỘT đường đọc text mọi
+  định dạng (GENERATED_SPECS + meta + stub I11 + golden `doc_text_cache_fixture` offline): GDoc→export cũ;
+  **.docx→download+unzip `word/document.xml` (text THẬT)**; .pdf→pdftotext; cache `extract_<id>.txt` chung
+  khoá extract. **Footgun-fix `_read_doc_text`**: transport/GAS trả BINARY zip ('PK\x03\x04') → guard
+  `_text_looks_binary` trả "" (hết so char-count trên rác binary — bài học dedup 2026-07-16).
+- **[Resolver+control] `_nlm_or_corpus` (ADR-5/6/7)**: probe 1 lần/notebook/process (`_NLM_PROBE_CACHE` ở
+  tl.py — bẫy I11 mutable), tái dùng `_nlm_preflight_report`; **hard-dead-only** (`_nlm_hard_dead`: auth/
+  cookie/401; transient timeout/mạng/rate → retry 1 nhịp RỒI mới kết luận, không âm thầm rẽ). MẶC ĐỊNH BẬT +
+  cảnh báo LỚN stderr mỗi lần rẽ; escape `--no-fallback` per-lệnh + `TL_NLM_FALLBACK=0` toàn cục (CI strict);
+  phân loại per-lệnh qua field MỚI `COMMAND_META.nlm_fallback` (kwarg `_m()` default None; corpus_read=
+  content/query/cross; defer=nlm-add/ingest-local/profile-ingest/ingest-missing; stale_cache=nlm-list;
+  none=nlm-source-remove; +meta mới cho `nlm-cross` vốn chưa có meta).
+- **[E1 đọc — ADR-1/2] `nlm-content`**: fail + hard-dead → resolve sid→registry→GDoc → `_doc_text_any` =
+  NỘI DUNG Y HỆT (lossless), envelope stderr `nlm_status:offline/fallback:corpus_read`, rc=0; sid không
+  resolve → giữ lỗi cũ rc=2 (không đọc mù). **`nlm-query`/`nlm-cross`**: hard-dead → **VERBATIM-RETURN ≤5**
+  (`_corpus_question_resolve` PURE: tier exact-sohieu qua `_sohieu_query_hits_entry` → tier token-overlap;
+  Điều trong câu hỏi → `_slice_dieu`) — CLI trả nguyên văn cho AGENT tự tổng hợp, KHÔNG máy sinh RAG;
+  >5/mơ hồ → HẠ AN TOÀN chỉ ứng viên; `--out` né tràn stdout; mọi kết cục rc=0 (ADR-6).
+- **[E3 đẩy — ADR-4] `nlm-add`**: probe TRƯỚC gate/claim/add — dead → `_nlm_add_deferred`: KHÔNG add mù/
+  claim; registry `nlm_status=deferred` (KHÔNG corpus=true — chống corpus-ảo; row đã có sid → KHÔNG đè,
+  stale-an-toàn; journaled+before thật) + in batch-link + rc=0; reconcile set pointer/corpus SAU.
+  **ingest-local/ingest-missing**: nhánh tự-chuyển B1 (v1.34.54) nay chịu control-surface (`--no-fallback`
+  → khôi phục fail-closed NLM_NOT_READY; ngưỡng pending>2 BATCH_LINKS giữ nguyên — không phải fallback).
+  **profile-ingest**: MỚI tự chuyển `--no-nlm-add` khi hard-dead (mirror ingest-local; trước chết ở
+  dedup-gate). **`nlm-list`**: dead → phục vụ cache C-#8 BẤT KỂ TTL + cờ `STALE_CACHE` rc=0 (advisory —
+  KHÔNG phải bằng chứng vật lý; audit/migrate physical-first không đi đường này).
+- **Test r121 ×17** (harness offline fake nlm_cli/gas/manifest): wiring meta+flags; env/flag disable unit;
+  detection probe-once/hard-dead-only/transient-retry/no-probe-khi-tắt; query verbatim ≤5 + >5 hạ ứng viên +
+  no-fallback + env-disable; cross envelope; content lossless + sid-lạ fail-closed; add deferred (không
+  corpus/sid, claim=0, add=0) + no-fallback LIVE_SOURCE_LIST_FAILED + pointer-cũ không đè; list stale unit+
+  wiring; doc-text docx-unzip/gdoc/pdf routing + cache + binary-guard + PURE resolver 5 ca.
+- **Docs/goldens**: SKILL.md +bất biến 17 (NLM chết ≠ dừng) — nén history Pha B–E/prose giữ ≤48KB kernel
+  (49141B) ⚠ **kernel đổi → user RE-IMPORT Capabilities**; parser_surface regen (doc-text + 8 lệnh thêm cờ);
+  workflow_audit/tool_inventory golden regen (147 lệnh có meta); +golden doc_text_cache_fixture;
+  COMMANDS.md cập nhật.
+
 # ★ v1.34.59 — vá cosmetic: audit finding-output drive_id fallback gdoc_id (2026-07-16)
 
 > Bug lộ khi dogfood data-op backlog 2026-07-16: `_physical_audit_classify` in `drive_id` RỖNG cho dòng

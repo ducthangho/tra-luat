@@ -718,6 +718,11 @@ _GOLDEN_CASES = [
     {"id": "hygiene_missing_sohieu_dry", "file": "hygiene_missing_sohieu_dry.json", "args": ["missing-sohieu", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_vbhn_year_fix_dry", "file": "hygiene_vbhn_year_fix_dry.json", "args": ["vbhn-year-fix", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     {"id": "hygiene_reg_query_corpus", "file": "hygiene_reg_query_corpus.json", "args": ["reg-query", "--corpus", "--json"], "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
+    # v1.34.60 (A1 — golden CÓ CHỦ ĐÍCH cho lệnh mới doc-text): offline thuần qua cache extract_<id>.txt
+    # trong fixture TL_CACHE_DIR (không mạng, không Drive) — khoá envelope doc_text.v1 + đường cắt --dieu.
+    {"id": "doc_text_cache_fixture", "file": "doc_text_cache_fixture.json",
+     "args": ["doc-text", "gd_doctext60", "--dieu", "2", "--json"],
+     "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     # (v1.34.7 I4) ops-plan HỒI SINH golden nhờ FIXTURE CONFIG (bài học v1.34.3: output phụ thuộc trạng thái
     # config máy — nay --config fixture + xoá env TL_* để fixture quyết định tất cả → cross-machine).
     {"id": "hygiene_ops_plan_fixture_config", "file": "hygiene_ops_plan_fixture_config.json",
@@ -813,6 +818,8 @@ def _golden_ensure_fixtures() -> None:
         "slip.zip": _zip_bytes([("../evil.docx", b"slip"), ("van_ban_hop_le.docx", b"binh thuong"), ("bao cao?.docx", b"ten cam win")]),
         "dup.zip": _zip_bytes([("a.docx", b"mot"), ("./a.docx", b"hai")]),
         "cache_hygiene/manifest.json": manifest_fixture,
+        # v1.34.60 (A1): cache extract cho golden doc-text — cùng nội dung sample (Điều 1..3 ổn định).
+        "cache_hygiene/extract_gd_doctext60.txt": sample,
         "config_fixture.json": config_fixture,
     }
     for name, data in want.items():

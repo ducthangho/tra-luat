@@ -314,13 +314,27 @@ def cmd_nlm_list(a) -> int:
     else:
         r = nc.source_list(nb, skip_freshness=not getattr(a, "no_skip_freshness", False))
     if not r.get("ok"):
-        print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr)
-        print("[tl] nlm CLI không dùng được → fallback MCP `notebook_get` hoặc chạy `nlm login`.", file=sys.stderr)
-        return 2
+        # v1.34.60 (E3 — ADR-5/6): NLM hard-dead → phục vụ cache C-#8 BẤT KỂ TTL kèm cờ STALE_CACHE rc=0
+        # (advisory hiển thị — KHÔNG phải bằng chứng vật lý; audit/migrate physical-first không đi đường này).
+        _v60l = _nlm_or_corpus("nlm-list", a, err=r)
+        _st60 = _nlm_list_stale_read(nb) if _v60l["route"] == "stale_cache" else None
+        if _st60:
+            _st60.update({"nlm_status": "offline", "fallback": "stale_cache", "flag": "STALE_CACHE"})
+            print(f"[tl] ⚠ STALE_CACHE: listing từ cache cũ {_st60.get('age_s')}s (NLM offline) — CHỈ tham khảo "
+                  f"hiển thị, KHÔNG dùng làm bằng chứng vật lý; chạy lại khi NLM sống để list tươi.",
+                  file=sys.stderr)
+            r = _st60
+        else:
+            print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr)
+            print("[tl] nlm CLI không dùng được → fallback MCP `notebook_get` hoặc chạy `nlm login`.", file=sys.stderr)
+            return 2
     if getattr(a, "json", False) or getattr(a, "out", None):
         _emit_json_payload(r, getattr(a, "out", None))   # N5 v1.33.41: --out atomic (đối soát đủ, né trần 30s)
     else:
-        print(f"notebook={nb} · {r['count']} nguồn live (nlm-cli, skip_freshness={r.get('skip_freshness')})")
+        if r.get("stale"):
+            print(f"notebook={nb} · {r['count']} nguồn STALE_CACHE tuổi {r.get('age_s')}s (NLM offline — KHÔNG phải live)")
+        else:
+            print(f"notebook={nb} · {r['count']} nguồn live (nlm-cli, skip_freshness={r.get('skip_freshness')})")
         # N5 (v1.33.41 — log rà VBHN-first: nlm-list cắt ~14 dòng IM LẶNG dù tổng đúng → không đối soát thành
         # viên được, phải dùng `nlm source list -d` thô 2000+ dòng): --max 0 = TẤT CẢ; cắt thì báo LOUD.
         _mx = getattr(a, "max", 15)
@@ -1459,10 +1473,35 @@ def cmd_nlm_content(a) -> int:
     except Exception as e:
         print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False), file=sys.stderr); return 2
     r = nc.source_content(a.source_id)
-    if not r.get("ok"):
-        print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
-    data = r.get("data") or {}
-    content = (data.get("content") if isinstance(data, dict) else None) or r.get("text", "") or ""
+    content = None
+    if r.get("ok"):
+        data = r.get("data") or {}
+        content = (data.get("content") if isinstance(data, dict) else None) or r.get("text", "") or ""
+    else:
+        # v1.34.60 (E1 lossless-read — ADR-1/6): nguồn NLM chính là bản GDoc corpus → NLM hard-dead thì đọc
+        # thẳng GDoc theo sid→registry (NỘI DUNG Y HỆT, không mất mát). Transient/--no-fallback → lỗi cũ rc=2;
+        # sid không resolve được dòng registry → KHÔNG fallback mù, giữ lỗi cũ.
+        _v60 = _nlm_or_corpus("nlm-content", a, err=r)
+        if _v60["route"] == "corpus_read":
+            _sid60 = str(a.source_id or "").strip()
+            try:
+                _row60 = next((e for e in _manifest_entries(refresh=False)
+                               if str(e.get("nlm_source_id") or "").strip() == _sid60), None)
+            except Exception:  # noqa: BLE001
+                _row60 = None
+            _fid60 = str((_row60 or {}).get("gdoc_id") or (_row60 or {}).get("drive_id") or "").strip()
+            if _fid60:
+                _txt60, _src60 = _doc_text_any(_fid60, entry=_row60)
+                if _txt60:
+                    print(json.dumps({"nlm_status": "offline", "fallback": "corpus_read",
+                                      "source": f"corpus:{_src60}:{_fid60}", "source_id": _sid60},
+                                     ensure_ascii=False), file=sys.stderr)
+                    content = _txt60
+            if content is None:
+                print(f"[tl] nlm-content fallback: sid {_sid60} KHÔNG resolve được dòng registry/GDoc "
+                      f"→ giữ lỗi cũ (không đọc mù).", file=sys.stderr)
+        if content is None:
+            print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
     content = _strip_font_runs(content)   # lọc dòng rác tên font rò từ DOCX/GDoc nguồn
     if getattr(a, "out", None):
         Path(a.out).write_text(content, encoding="utf-8")
@@ -1498,6 +1537,11 @@ def cmd_nlm_query(a) -> int:
                   file=sys.stderr)
     r = nc.notebook_query(nb, a.query, source_ids=(a.source_id or None))
     if not r.get("ok"):
+        # v1.34.60 (E1 — ADR-1/2/6): NLM hard-dead → verbatim-return ≤5 văn bản corpus (manifest/webapp sống
+        # độc lập cookie). Transient (probe xác nhận còn sống) / --no-fallback / TL_NLM_FALLBACK=0 → lỗi cũ rc=2.
+        _v60 = _nlm_or_corpus("nlm-query", a, notebook_id=nb, err=r)
+        if _v60["route"] == "corpus_read":
+            return _nlm_query_corpus_fallback(a, a.query, cmd="nlm-query", why=_v60["why"])
         print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
     print(json.dumps(r.get("data"), ensure_ascii=False, indent=2) if r.get("data") is not None else r.get("text", ""))
     print("[tl] LƯU Ý: RAG chỉ ĐỊNH VỊ; verify nguyên văn bằng cache/raw (KHÔNG nhận RAG làm nguyên văn).", file=sys.stderr)
@@ -1578,6 +1622,267 @@ def _nlm_preflight_report(notebook_id: str, *, probe: bool = True) -> dict:
         except Exception as e:  # noqa: BLE001
             rep["alive"], rep["why"] = False, f"{type(e).__name__}: {e}"
     return rep
+
+
+# ── v1.34.60 (NLM-DEATH RESILIENCE R1 — kế hoạch E1–E3 grill 2026-07-16, ADR-1..7): lớp resolver
+# _nlm_or_corpus + control surface. Bất biến giữ nguyên: physical-first (không ghi "verified" trên belief),
+# nguyên văn #2 (corpus/cache đã xác minh — KHÔNG máy sinh RAG), corpus=true chỉ khi đã trên NLM. ──
+
+def _nlm_fallback_enabled(a=None) -> bool:
+    """(ADR-5) fallback MẶC ĐỊNH BẬT; tắt per-lệnh `--no-fallback` hoặc toàn cục TL_NLM_FALLBACK=0 (CI strict)."""
+    if a is not None and getattr(a, "no_fallback", False):
+        return False
+    return str(os.environ.get("TL_NLM_FALLBACK", "") or "").strip().lower() not in {"0", "false", "off", "no"}
+
+
+def _nlm_hard_dead(why: str) -> bool:
+    """PURE (ADR-7): phân loại lỗi NLM. HARD-DEAD (auth/cookie chết, CLI vắng — trạng thái BỀN) mới được rẽ
+    fallback; transient (mạng/timeout/rate-limit) KHÔNG — retry rồi mới kết luận, không âm thầm rẽ corpus."""
+    low = (why or "").lower()
+    if any(t in low for t in ("timeout", "timed out", "rate limit", "rate-limit", "429", "connection",
+                              "network", "temporar", "unavailable", "503", "502", "500")):
+        return False
+    return any(t in low for t in ("auth", "401", "login", "unauthor", "credential", "cookie", "expired",
+                                  "csrf", "invalid_grant", "403", "forbidden", "trên path", "not on path"))
+
+
+def _nlm_verdict(notebook_id: str, *, refresh: bool = False) -> dict:
+    """(ADR-7) probe LIVE đúng 1 LẦN/notebook/process (cache _NLM_PROBE_CACHE — hằng ở tl.py, bẫy I11), tái
+    dùng _nlm_preflight_report. Hard-dead chốt ngay; lỗi transient retry 1 nhịp RỒI MỚI kết luận dead.
+    alive=None (không probe được ≠ chết — client fake thiếu method) → coi như sống, KHÔNG rẽ fallback oan."""
+    key = str(notebook_id or "").strip() or "_default"
+    if not refresh and key in _NLM_PROBE_CACHE:
+        return _NLM_PROBE_CACHE[key]
+    rep = _nlm_preflight_report(notebook_id)
+    alive, why = rep.get("alive"), str(rep.get("why") or "")
+    if alive is False and not _nlm_hard_dead(why):
+        rep2 = _nlm_preflight_report(notebook_id)
+        alive, why = rep2.get("alive"), str(rep2.get("why") or why)
+    v = {"alive": True if alive is None else bool(alive), "why": why, "age_min": rep.get("age_min")}
+    _NLM_PROBE_CACHE[key] = v
+    return v
+
+
+def _nlm_fallback_banner(cmd: str, why: str, route: str) -> None:
+    """(ADR-5) cảnh báo LỚN stderr MỖI LẦN rẽ fallback — thông báo, KHÔNG chặn."""
+    print(f"[tl] ⚠⚠⚠ NLM OFFLINE ({(why or 'auth expired')[:100]}) — `{cmd}` KHÔNG dừng: rẽ fallback `{route}` "
+          f"(corpus/webapp sống độc lập cookie NLM). Tắt: --no-fallback (per-lệnh) / TL_NLM_FALLBACK=0 (toàn cục). "
+          f"Hồi phục: `nlm login` → `tl nlm-auth-status --wait` → `tl nlm-reconcile <nb> --apply`.",
+          file=sys.stderr, flush=True)
+
+
+def _nlm_or_corpus(cmd_name: str, a=None, *, notebook_id=None, err=None, probe: bool = False) -> dict:
+    """Lớp resolver E (ADR-5/6/7): quyết định route khi thao tác NLM có nguy cơ chết.
+    - err=<resp lỗi nlm_cli>: phân loại từ lỗi thật (auth_hint / fallback:mcp / marker hard) — hard → dead
+      ngay (seed cache); transient → xác nhận bằng _nlm_verdict (probe cache 1 lần/run).
+    - probe=True (đường GHI như nlm-add): probe chủ động TRƯỚC side-effect.
+    Trả {"nlm_alive", "route", "mode", "why"}; route ∈ nlm | fail_closed | corpus_read | deferred |
+    stale_cache | unverified | none — lệnh coi mọi route ∉ {corpus_read,deferred,stale_cache,unverified}
+    là ĐƯỜNG CŨ (fail-closed giữ nguyên hành vi trước v1.34.60)."""
+    from tl_core.command_registry import COMMAND_META
+    mode = (COMMAND_META.get(cmd_name) or {}).get("nlm_fallback")
+    out = {"nlm_alive": True, "route": "nlm", "mode": mode, "why": ""}
+    if not mode:
+        return out
+    if not _nlm_fallback_enabled(a):
+        out["route"] = "fail_closed"
+        return out
+    nb = str(notebook_id or os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK or "").strip()
+    dead, why = False, ""
+    if err is not None:
+        why = str((err or {}).get("error") or (err or {}).get("why") or "")[:160]
+        if (err or {}).get("auth_hint") or (err or {}).get("fallback") == "mcp" or _nlm_hard_dead(why):
+            dead = True
+            _NLM_PROBE_CACHE[nb or "_default"] = {"alive": False, "why": why, "age_min": None}
+        else:
+            v = _nlm_verdict(nb)
+            dead, why = (not v["alive"]), (v["why"] or why)
+    elif probe:
+        v = _nlm_verdict(nb)
+        dead, why = (not v["alive"]), v["why"]
+    if not dead:
+        return out
+    out["nlm_alive"], out["why"] = False, why
+    out["route"] = {"corpus_read": "corpus_read", "defer": "deferred", "stale_cache": "stale_cache",
+                    "unverified": "unverified"}.get(mode, "none")
+    _nlm_fallback_banner(cmd_name, why, out["route"])
+    return out
+
+
+def _nlm_list_stale_read(nb: str, *, cache_dir=None):
+    """E3 (v1.34.60): đọc cache listing C-#8 BẤT KỂ TTL (stale) khi NLM chết — kèm age để caller in cờ
+    STALE_CACHE. Không có/hỏng cache → None (caller giữ đường lỗi cũ). CHỈ advisory — không phải bằng
+    chứng vật lý (physical-first của audit/migrate KHÔNG dùng đường này)."""
+    _dir = Path(cache_dir) if cache_dir else (HERE / ".tl_state")
+    fp = _dir / f"nlm_list_cache_{nb}.json"
+    try:
+        data = json.loads(fp.read_text(encoding="utf-8"))
+        srcs = data.get("sources")
+        if not isinstance(srcs, list):
+            return None
+        age = max(0, int(time.time() - float(data.get("fetched_at") or 0)))
+        return {"ok": True, "count": len(srcs), "sources": srcs, "cached": True, "stale": True,
+                "age_s": age, "via": "cache_stale"}
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _corpus_question_resolve(question: str, entries: list, k: int = 5) -> dict:
+    """PURE (ADR-1/2): resolve câu hỏi → ≤k văn bản corpus cho VERBATIM-RETURN. Tier EXACT-SOHIEU (số hiệu
+    trong câu hỏi, khớp qua _sohieu_query_hits_entry như locate) → tier tên (token-overlap ≥2 sau strip-accent,
+    tất định); >k hoặc 0 → HẠ AN TOÀN (docs rỗng + candidates — KHÔNG tổng hợp mù). Dòng removed* = tombstone
+    bỏ qua; row_kind ref/thuong (không thuộc corpus luật) bỏ qua; thiếu drive/gdoc id bỏ qua."""
+    q = str(question or "")
+    m = re.search(r"[ĐđDd]iều\s+(\d+[a-zA-Z]?)", q)
+    dieu = m.group(1) if m else None
+    keys = []
+    for s in (_SOHIEU_RE.findall(q) + re.findall(r"\b\d{1,4}/VBHN-[A-ZĐ][A-Z0-9Đ\-]*", q)):
+        kk = norm_sohieu(s)
+        if kk and kk not in keys:
+            keys.append(kk)
+    rows = []
+    for e in entries or []:
+        if not str(e.get("drive_id") or e.get("gdoc_id") or "").strip():
+            continue
+        if str(e.get("nlm_status") or "").strip().lower().startswith("removed"):
+            continue
+        if _entry_row_kind(e) in {"ref", "thuong"}:
+            continue
+        rows.append(e)
+
+    def _rid(e):
+        return str(e.get("drive_id") or e.get("gdoc_id") or "")
+
+    docs, seen, conf = [], set(), "none"
+    if keys:
+        for kk in keys:
+            for e in rows:
+                sh = norm_sohieu(_entry_sohieu(e))
+                if (kk == sh or _sohieu_query_hits_entry(kk, sh)
+                        or _sohieu_query_hits_entry(kk, _sohieu_key_entry(e))):
+                    if _rid(e) not in seen:
+                        seen.add(_rid(e))
+                        docs.append(e)
+        if docs:
+            conf = "exact"
+    if not docs:
+        qn = _strip_accents(q).lower()
+        _stop = {"phap", "luat", "bo", "va", "cua", "ve", "tra", "dieu", "khoan", "diem", "muc", "cho",
+                 "trong", "theo", "la", "gi", "nao", "the", "cac", "nhung", "mot", "so", "sanh", "hoi",
+                 "voi", "den", "tu", "khi", "nay", "toan", "van", "noi", "dung"}
+        qtok = [t for t in re.findall(r"[a-z0-9]{2,}", qn) if t not in _stop and not t.isdigit()]
+        for e in rows:
+            ntok = set(re.findall(r"[a-z0-9]{2,}", _strip_accents(_entry_name(e)).lower()))
+            if sum(1 for t in qtok if t in ntok) >= 2 and _rid(e) not in seen:
+                seen.add(_rid(e))
+                docs.append(e)
+        if docs:
+            conf = "name"
+    docs.sort(key=lambda e: (bool(_entry_corpus_true(e)), _entry_score(e)), reverse=True)
+    if docs and len(docs) > k:
+        return {"docs": [], "dieu": dieu, "confidence": "ambiguous", "candidates": docs[:max(2 * k, 10)]}
+    return {"docs": docs, "dieu": dieu, "confidence": (conf if docs else "none"), "candidates": []}
+
+
+def _nlm_query_corpus_fallback(a, question: str, *, cmd: str = "nlm-query", why: str = "") -> int:
+    """E1 (ADR-1/6 — verbatim-return): NLM chết → CLI (KHÔNG phải LLM) trả NGUYÊN VĂN ≤5 văn bản corpus
+    (+ Điều đã cắt nếu câu hỏi nêu) + ứng viên; AGENT gọi lệnh tự tổng hợp trong context — KHÔNG máy sinh
+    RAG (bất biến #2). >5/mơ hồ → hạ an toàn: chỉ ứng viên + gợi ý tra tiếp. Mọi kết cục rc=0 (ADR-6)."""
+    try:
+        entries = _manifest_entries(refresh=False)
+    except Exception as e:  # noqa: BLE001
+        print(json.dumps({"ok": False, "error": "FALLBACK_UNAVAILABLE_NO_MANIFEST", "detail": str(e)[:120],
+                          "note": "NLM offline VÀ chưa có cache manifest — chạy `tl boot`/`tl manifest` "
+                                  "(webapp độc lập cookie) rồi thử lại."}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 2
+    res = _corpus_question_resolve(question, entries, k=5)
+    docs_out = []
+    for e in res["docs"]:
+        fid = str(e.get("gdoc_id") or "").strip() or _entry_drive_id(e)
+        text, src = _doc_text_any(fid, entry=e)
+        item = {"sohieu": _entry_sohieu(e), "name": _entry_name(e), "drive_id": _entry_drive_id(e),
+                "source": src}
+        if not text:
+            item["text_error"] = "DOC_TEXT_UNAVAILABLE"
+            item["text"] = ""
+        elif res["dieu"]:
+            item["dieu"] = res["dieu"]
+            item["text"] = _slice_dieu(text, res["dieu"])
+        else:
+            _mx = int(getattr(a, "max", None) or 4000)
+            full = bool(getattr(a, "out", None))
+            item["text"] = text if full else text[:_mx]
+            item["truncated"] = (not full) and len(text) > _mx
+        docs_out.append(item)
+    if docs_out:
+        note = ("NLM offline — CLI trả NGUYÊN VĂN từ corpus (verbatim-return, ADR-1): agent tự tổng hợp; "
+                "KHÔNG phải RAG. Toàn văn dài: --out <file> hoặc `tl doc-text <drive_id>`.")
+    else:
+        note = (f"NLM offline + {len(res['candidates'])} ứng viên (confidence={res['confidence']}) — "
+                "KHÔNG tổng hợp mù. Tra tiếp: `tra Điều <X> của <sohieu>` hoặc "
+                "`tl doc-text <drive_id> --dieu <n>`.")
+    out = {"ok": True, "schema": "nlm_query_fallback.v1", "cmd": cmd, "nlm_status": "offline",
+           "fallback": "corpus_read", "source": "corpus", "why": (why or "")[:120], "question": question,
+           "dieu": res["dieu"], "confidence": res["confidence"], "resolved": len(res["docs"]),
+           "docs": docs_out,
+           "candidates": [{"sohieu": _entry_sohieu(e), "name": _entry_name(e),
+                           "drive_id": _entry_drive_id(e)} for e in res["candidates"]],
+           "note": note}
+    if getattr(a, "out", None):
+        _emit_json_payload(out, a.out)
+    else:
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0
+
+
+def _nlm_add_deferred(a, nb: str, *, why: str = "") -> int:
+    """E3 (ADR-4 — push-defer): NLM chết → KHÔNG source_add mù, KHÔNG claim; hoàn tất mức registry:
+    nlm_status=deferred (KHÔNG đụng corpus — chống corpus-ảo; KHÔNG bịa nlm_source_id) + in batch-link để
+    dán tay; `tl nlm-reconcile --apply` set pointer/corpus SAU khi NLM sống. rc=0 (chuỗi chạy tiếp)."""
+    did = str(getattr(a, "drive_id", None) or "").strip()
+    if not did:
+        print(json.dumps({"ok": False, "error": "NLM_OFFLINE_NO_DEFER_FOR_URL", "nlm_status": "offline",
+                          "note": "nlm-add --url/--file không có drive identity để defer — chạy lại khi NLM "
+                                  "sống (`tl nlm-auth-status --wait`)."}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 2
+    try:
+        _row = next((e for e in _manifest_entries(refresh=False)
+                     if str(e.get("drive_id") or e.get("gdoc_id") or "") == did), None)
+    except Exception:  # noqa: BLE001
+        _row = None
+    _reg_deferred, _note_reg = False, ""
+    if _row is None:
+        _note_reg = "registry CHƯA có dòng cho drive_id — `tl register` trước; defer chỉ in link."
+    elif str(_row.get("nlm_source_id") or "").strip():
+        _note_reg = ("dòng registry ĐÃ có nlm_source_id — KHÔNG ghi đè deferred (stale-an-toàn); "
+                     "`tl nlm-reconcile --apply` xử khi NLM sống.")
+    else:
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+            _rid = _apply_journal_start("nlm-add-deferred", {"drive_id": did, "notebook_id": nb})
+            _bef = {"nlm_notebook_id": str(_row.get("nlm_notebook_id") or ""),
+                    "nlm_status": str(_row.get("nlm_status") or "")}
+            _v = _journaled_reg_write(_rid, _gas(), [{"drive_id": did, "nlm_notebook_id": nb,
+                                                      "nlm_status": "deferred"}],
+                                      "nlm_notebook_id,nlm_status", before_by_key={did: _bef})
+            _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"DEFERRED": 1}})
+            _reg_deferred = bool(_v.get("verified"))
+        except Exception as _e:  # noqa: BLE001
+            _note_reg = f"reg-write deferred lỗi ({type(_e).__name__}) — vẫn in link, reconcile xử sau."
+    _url = _entry_links_url(_row or {"drive_id": did})
+    print(json.dumps({"ok": True, "mode": "DEFERRED_NLM_OFFLINE", "nlm_status": "offline",
+                      "fallback": "deferred", "source": "registry", "notebook": nb,
+                      "notebook_url": f"https://notebooklm.google.com/notebook/{nb}",
+                      "links": [_url], "registry_deferred": _reg_deferred,
+                      **({"note_registry": _note_reg} if _note_reg else {}),
+                      "why": (why or "")[:120],
+                      "note": "NLM offline → CHƯA add gì (không claim, không corpus=true — chống corpus-ảo). "
+                              "Dán link vào Add source → Websites của notebook rồi chạy "
+                              f"`tl nlm-reconcile {nb} --apply`; hoặc nlm-add lại khi NLM sống."},
+                     ensure_ascii=False, indent=2))
+    return 0
 
 
 def cmd_nlm_auth_status(a) -> int:
@@ -1702,6 +2007,12 @@ def cmd_nlm_add(a) -> int:
     nb, _nberr = _resolve_nlm_notebook(a.notebook_id)
     if _nberr:
         print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr); return 2
+    # v1.34.60 (E3 push-defer — ADR-4): probe chủ động TRƯỚC mọi side-effect (gate/claim/add). NLM hard-dead
+    # + fallback bật → defer: registry nlm_status=deferred + batch-link, KHÔNG add mù, rc=0. --no-fallback/
+    # TL_NLM_FALLBACK=0 → đường cũ (gate dedup sẽ fail-closed LIVE_SOURCE_LIST_FAILED như trước).
+    _v60a = _nlm_or_corpus("nlm-add", a, notebook_id=nb, probe=True)
+    if _v60a["route"] == "deferred":
+        return _nlm_add_deferred(a, nb, why=_v60a["why"])
     for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tầng-2 tuổi cookie (WARN, không chặn; tầng-1 live = gate dedup bên dưới)
         print(f"[tl] ⚠ {_w54}", file=sys.stderr)
     # v1.29.3 (AUDIT B3 #3): CỔNG dedup-live BẮT BUỘC trước source_add — nlm-add là đường push TRẦN duy nhất còn lại
@@ -2492,6 +2803,11 @@ def cmd_nlm_cross(a) -> int:
                 if _nb not in nbs:
                     nbs.append(_nb)
     r = nc.cross_query(a.query, notebooks=nbs or None, all_notebooks=getattr(a, "all", False))
+    if not r.get("ok"):
+        # v1.34.60 (E1): cross NLM hard-dead → CÙNG đường verbatim-return (corpus không shard — 1 manifest).
+        _v60 = _nlm_or_corpus("nlm-cross", a, notebook_id=(nbs[0] if nbs else None), err=r)
+        if _v60["route"] == "corpus_read":
+            return _nlm_query_corpus_fallback(a, a.query, cmd="nlm-cross", why=_v60["why"])
     print(json.dumps(r, ensure_ascii=False, indent=2))
     return 0 if r.get("ok") else 2
 

@@ -15,10 +15,8 @@ description: >-
   Drive MCP.
 ---
 
-
-# tra-luat — LÕI VẬN HÀNH (v1.34.59 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.60 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
-
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
 > - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2m`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
@@ -26,7 +24,6 @@ description: >-
 > - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
 >
 > Khi mâu thuẫn: LÕI + API_CONTRACT + RUNBOOK **thắng** phụ lục.
-
 
 ## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
 
@@ -40,18 +37,15 @@ Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự
 
 PHÁT HÀNH & NHÁNH (ADR-0001, chốt grilling 2026-07-09): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Phiên/nhánh song song giao nộp bằng `tl bundle-export --note "<mục đích>" --json` (zip GIỮ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version, KHÔNG publish; drive-push tự TỪ CHỐI cây có BUNDLE_META.json (BLOCKED_BY_BUNDLE_META). Deploy policy: canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
 
-Chỉ viết tool mới khi đã chứng minh lệnh/script/hàm hiện có không đáp ứng. Tool mới phải có input/output rõ, ưu tiên JSON, có dry-run nếu ghi dữ liệu, có verify/readback, và có selftest/audit phù hợp.
+Chỉ viết tool mới khi lệnh/script/hàm hiện có không đáp ứng; tool mới: input/output rõ (ưu tiên JSON), dry-run nếu ghi, verify/readback, selftest/audit phù hợp.
 
-Mọi quy trình nạp/convert/rename/OCR/zip/chunk phải đi theo mẫu:
+Mọi quy trình nạp/convert/rename/OCR/zip/chunk theo mẫu: `route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
 
-`route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
+`tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
 
-`tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit` và `golden-test` là READ-ONLY mặc định, không gọi Drive/NLM nặng và không ghi dữ liệu. Workflow chi tiết đặt tại `references/workflows/*.json`; schema ở `references/workflows/workflow_card.schema.json`; fixtures ổn định ở `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi để tránh drift.
+Từ v1.33.55–58 (Pha B–E), helper tách sang `scripts/tl_core/*.py` (deterministic/jsonio/workflow/release/live/zip_ingest/ocr/chunking/command_registry — metadata lệnh risk/gates/card/contract; `workflow-audit` tự đối chiếu registry↔parser↔cards); `scripts/tl.py` vẫn là entrypoint public DUY NHẤT (stub ủy quyền, tương thích ngược — KHÔNG gọi tl_core trực tiếp từ ngoài).
 
-Từ v1.33.55, helper deterministic/json output tách sang `scripts/tl_core/deterministic.py` + `scripts/tl_core/jsonio.py`; `scripts/tl.py` vẫn là entrypoint public duy nhất (wrapper tương thích ngược — KHÔNG gọi tl_core trực tiếp từ ngoài). Từ v1.33.56 (Pha C), thêm `tl_core/workflow.py` (tool-inventory/route-task/cards/golden), `tl_core/release.py` (release-*/determinism-audit), `tl_core/live.py` (live-*/deploy/rollback/final-acceptance) — vẫn CHỈ gọi qua `scripts/tl.py`. Từ v1.33.57 (Pha D): thêm `tl_core/zip_ingest.py`, `tl_core/ocr.py`, `tl_core/chunking.py`. Từ v1.33.58 (Pha E): `tl_core/command_registry.py` — metadata lệnh (risk/gates/card/contract); `workflow-audit` tự đối chiếu registry↔parser↔cards; 8 lệnh determinism sinh parser từ spec.
-
-Stage an toàn hiện có thêm các lệnh local deterministic: `ocr-run` tạo sidecar text/OCR local khi engine có sẵn; `chunk-apply` tạo chunk files + manifest; `chunk-verify` kiểm manifest/files. Các lệnh này chưa ghi Drive/NLM. Muốn đưa kết quả vào corpus vẫn phải quay về pipeline ingest/verify/readback.
-
+Stage local deterministic: `ocr-run` (sidecar text/OCR khi engine sẵn), `chunk-apply` (chunk files+manifest), `chunk-verify` — chưa ghi Drive/NLM; đưa vào corpus vẫn phải qua pipeline ingest/verify/readback.
 
 ## 0. NGUYÊN TẮC BẤT BIẾN
 1. **VBHN-first + LATEST-VBHN** — có VBHN còn hiệu lực → dùng VBHN, không bản gốc/sửa đổi rời. **Khi TRA/TÌM Luật theo tên:** thử keyword **'<tên> hợp nhất' TRƯỚC** (vd "Luật PPP hợp nhất") → rồi **'<tên> mới nhất'** → cuối cùng tên gốc; truy vấn theo SỐ HIỆU thì tìm thẳng. **MỌI tìm-văn-bản-trên-web dùng GOOGLE `site:` (VBHN-first), KHÔNG dùng search nội bộ TVPL/LVN (kém)** — áp cho `fetch-route`/`fetch-links`/`find-doc` VÀ QT-5 (`vbhn-check`/`status`/`relation-check` đều xuất `google_discovery`). **⚠ S9/S11 (log 🔴 2026-07-01): KHÔNG chốt ở VBHN ĐẦU TIÊN tìm thấy — số hiệu VBHN TĂNG theo mỗi lần hợp nhất (Bộ luật Hình sự: 01/VBHN 2017 → 11/VBHN → 135/VBHN 2025; KHÔNG phải semver).** Bắt buộc LƯỢT-2: tìm SỐ VBHN LỚN HƠN / NGÀY MỚI HƠN cùng cơ quan (VPQH) qua `'<tên> hợp nhất mới nhất <năm>'` + `site:congbao.chinhphu.vn`. Ứng viên VBHN chưa xác minh là mới nhất → cờ `VBHN_CANDIDATE_UNVERIFIED_LATEST`; NGOẠI LỆ v1.33.15: VBHN duy nhất RẤT MỚI (năm ≥ năm-nay−1) + không luật-sửa nào mới hơn đã biết + không thuộc nhóm S10 → hạ thành cờ INFO `VBHN_LATEST_RECENT_COVERED` (rời hàng web lượt-2; vẫn `vbhn-verify --official-required` trước khi trích dẫn). **S10:** luật cải cách cao 2024-2026 (Hình sự/tố tụng/phí-lệ-phí/đất đai/doanh nghiệp/đầu tư/đấu thầu/thuế…) → cờ `VBHN_HIGH_AMENDMENT_VELOCITY`, PHẢI kiểm bản hợp nhất mới nhất trước khi trả.
@@ -89,10 +83,10 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 **AI/Trí tuệ nhân tạo, Chuyển đổi số, Công nghiệp công nghệ số** (134/2025, 148/2025, 71/2025, các NĐ AI…)
 **TẠM giữ cat 19 (KHCN)** — pháp điển CHƯA có đề mục riêng → KHÔNG tự chuyển 03/tạo rổ mới/flag là misfile.
 (Dữ liệu/CSDL/CNTT/GDĐT thì ĐÃ về 03 vì đề mục CNTT = chủ đề 3, đã xác minh phapdien.)
-14. **DÙNG LỆNH CÓ SẴN — đừng viết snippet `json.load(manifest)`/`g.get("move")` tay** (bài học 26/6: nhiều thao tác ad-hoc trùng lệnh sẵn có). Tra/lọc registry → **`tl reg-query`**; tìm trùng + kế hoạch quarantine → **`tl hygiene scan/plan/apply`** (đã subject-aware: KHÔNG gộp khác-cơ-quan/phụ-lục); rà sai chủ đề → **`tl cat-audit`** → sửa bằng **`tl recat … --cat NN [--apply]`** (hoặc `--quarantine`); đếm/đối soát NLM → `tl nlm-get/-list/-reconcile/-cross`; check trùng 1 văn bản → `tl dedup-check`. Chỉ viết Python tay khi KHÔNG lệnh nào phủ.
+14. **DÙNG LỆNH CÓ SẴN — đừng viết snippet `json.load(manifest)`/`g.get("move")` tay** (bài học 26/6). Tra/lọc registry → **`tl reg-query`**; tìm trùng + kế hoạch quarantine → **`tl hygiene scan/plan/apply`** (đã subject-aware: KHÔNG gộp khác-cơ-quan/phụ-lục); rà sai chủ đề → **`tl cat-audit`** → sửa bằng **`tl recat … --cat NN [--apply]`** (hoặc `--quarantine`); đếm/đối soát NLM → `tl nlm-get/-list/-reconcile/-cross`; check trùng 1 văn bản → `tl dedup-check`. Chỉ viết Python tay khi KHÔNG lệnh nào phủ.
 15. **SCRIPT-REUSE GATE — KIỂM KHO TRƯỚC KHI VIẾT MỚI (bắt buộc; mở rộng #14).** Trước khi viết BẤT KỲ script/hàm/loop mới, PHẢI kiểm kho sẵn có theo 3 bước: (a) **subcommand** — `tl -h` / `tl <lệnh> --help`; (b) **script + mục đích** — liệt kê `scripts/*.py` kèm docstring dòng đầu (§7 BẢN ĐỒ SCRIPT là mục lục); (c) **hàm nghiệp vụ** — `grep -nE "def .*<từ khoá>" scripts/tl.py scripts/common.py`. CHỈ viết mới khi KHÔNG lệnh/script/hàm nào phủ chức năng. Có sẵn thì DÙNG bản của skill (đã xử ca biên + có journal/undo), KHÔNG hand-roll — vd: bóc **TRÍCH YẾU** = `tl backfill-title-vn` (`_title_block_from_text`/`_title_vn_from_header`, đã xử BỘ-LUẬT-trước-LUẬT + trích yếu đa dòng); lọc registry = `tl reg-query`; dedup = `tl dedup-plan`/`hygiene`; chuẩn tên = `standardize_name.py`/`tl source-rename`; đọc toàn văn = `tl extract`. **Bài học 2026-07-06:** suýt viết lại loop bóc trích yếu tay trong khi `tl backfill-title-vn` đã có và tốt hơn. **Enforcement:** bước kiểm-kho là TIỀN-ĐIỀU-KIỆN của mọi việc viết/loop; SỬA hoặc THÊM file skill CHỈ qua `tl edit-skill` (DRY + py_compile/assert) rồi `tl verify-integrity` — KHÔNG Edit/Write native (mount Cowork cắt cụt). Instruction/loop phải khai khối `SCRIPT_REUSE_GATE` (bổ sung vào `tl instruction-audit`/selftest).
 16. **Registry chỉ ghi sự thật ĐÃ XÁC MINH vật lý** — nghi ngờ → để stale (reconcile chữa), KHÔNG ghi trước-xác-minh-sau.
-
+17. **NLM chết ≠ dừng (v1.34.60)** — hard-dead (probe 1 lần+cache; transient retry): đường ĐỌC `nlm-content/query/cross` tự fallback CORPUS — content đọc GDoc theo sid (lossless); query/cross VERBATIM-RETURN ≤5 văn bản (+Điều cắt) cho agent tự tổng hợp, KHÔNG máy sinh RAG; >5/mơ hồ → chỉ ứng viên. Đường ĐẨY `nlm-add`/ingest-* → DEFER (`nlm_status=deferred`+batch-link; corpus KHÔNG true — chống corpus-ảo); `nlm-list` → STALE_CACHE advisory (≠ bằng chứng vật lý). Fallback rc=0 + cảnh báo stderr + `nlm_status:offline`; tắt: `--no-fallback`/`TL_NLM_FALLBACK=0`. Text mọi định dạng: `tl doc-text <id> [--dieu N]` (.docx unzip THẬT, hết binary).
 
 ## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
 > ## ★★ BƯỚC 0 — CHỌN ĐÚNG 1 ĐƯỜNG THEO MÔI TRƯỜNG (ĐỪNG TRỘN, ĐỪNG ĐỤNG `_parts` SỚM) ★★
@@ -216,7 +210,6 @@ python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id>
 python scripts/tl.py --profile <P> profile-rebuild-registry --keep-notebook <id> --apply --confirm yes
 ```
 
-
 ## 4. CLI `tl` — nhóm lệnh chính (bảng đầy đủ: `references/COMMANDS.md`)
 
 Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metadata risk/gate/card/contract) và
@@ -262,7 +255,6 @@ Target contract = **2.21.2m** (`Code.2.21.2m.gs`, ĐÃ LIVE — verify `ping.ver
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
 - Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2m`.
 
-
 ## 9. PHỤ THUỘC
 `pip install -r requirements.txt`. Cần env `TL_WEBAPP` / `TL_TOKEN` (mirror `tra_luat_config.json`).
 
@@ -275,8 +267,6 @@ Target contract = **2.21.2m** (`Code.2.21.2m.gs`, ĐÃ LIVE — verify `ping.ver
 - Trước mọi nạp nguồn web/NLM-native, chạy `tl external-ingest <url> ... --json` để kiểm kế hoạch. Lệnh này chỉ kiểm, không ghi Drive/NLM.
 - `research_start/research_status` chỉ dùng để phát hiện URL; `research_import/source_add(url)` không được dùng để nạp VBQPPL làm nguồn canonical.
 - Instruction dùng cho Claude Project/NLM phải qua `tl instruction-audit` hoặc sinh bằng `tl instructions`/`scripts/gen_instructions.py`; thiếu `SKILL_OF_RECORD`, `ingest_handoff`, `confirm_gate_web` thì không dùng.
-
-
 
 ## OCR / CHUNK / RELEASE — doctrine rút gọn (chi tiết: workflow cards + DOCTRINE_APPENDIX)
 

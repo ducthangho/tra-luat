@@ -1010,6 +1010,7 @@ GENERATED_SPECS = [
          {"flags": ['--max'], "type": int, "default": 15, "help": '(N5 v1.33.41) số dòng hiển thị; 0 = TẤT CẢ (đối soát thành viên)'},
          {"flags": ['--json'], "action": 'store_true'},
          {"flags": ['--out'], "help": '(N5 v1.33.41) ghi JSON đầy đủ ra file atomically; tự bật JSON'},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.60 ADR-5) NLM chết → GIỮ rc=2 như cũ, không phục vụ cache STALE_CACHE'},
      ]},
     {"name": 'preflight', "handler": 'cmd_preflight',
      "help": 'sharding: định tuyến nạp VBQPPL mới (nlm_preflight + overflow khi notebook đầy)',
@@ -1045,6 +1046,8 @@ GENERATED_SPECS = [
          {"flags": ['--relink'], "action": 'store_true', "help": '(v1.29.1) ÉP reg_link lại cả mục ckpt ghi ĐÃ-link-verified (mặc định SKIP — GAS cache 600s hay che nlm_source_id)'},
          {"flags": ['--force-api-add'], "dest": 'force_api_add', "action": 'store_true',
           "help": '(v1.34.54 B1) ÉP add API từng file kể cả khi pending>2/cookie chết (mặc định chuyển BATCH_LINKS: in link dán tay + reconcile)'},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true',
+          "help": '(v1.34.60 ADR-5) NLM chết → KHÔNG tự chuyển BATCH_LINKS theo nhánh cookie-chết (fail-closed; ngưỡng pending>2 vẫn chạy như cũ)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'ingest-inbox', "handler": 'cmd_ingest_inbox',
@@ -1208,20 +1211,34 @@ GENERATED_SPECS = [
          {"flags": ['--strict', '--fail-on-finding'], "action": 'store_true', "help": 'rc=1 nếu có cờ nghi sai cat / cat ngoài 45+2'},
      ]},
     {"name": 'nlm-content', "handler": 'cmd_nlm_content',
-     "help": 'NLM read qua CLI: toàn văn raw 1 source (thay MCP source_get_content)',
+     "help": 'NLM read qua CLI: toàn văn raw 1 source (thay MCP source_get_content). NLM chết → tự đọc bản GDoc corpus theo sid→registry (lossless, cờ corpus_read; tắt: --no-fallback)',
      "args": [
          {"dest": 'source_id'},
          {"flags": ['--out']},
          {"flags": ['--dieu']},
          {"flags": ['--max'], "type": int, "default": 4000},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.60 ADR-5) NLM chết → GIỮ dừng rc=2 như cũ (fail-closed), không rẽ corpus'},
      ]},
     {"name": 'nlm-query', "handler": 'cmd_nlm_query',
-     "help": 'NLM RAG query qua CLI (thay MCP notebook_query); verify nguyên văn sau',
+     "help": 'NLM RAG query qua CLI (thay MCP notebook_query); verify nguyên văn sau. NLM chết → verbatim-return ≤5 văn bản corpus cho agent tự tổng hợp (KHÔNG máy sinh RAG; tắt: --no-fallback)',
      "args": [
          {"flags": ['--json'], "action": 'store_true', "help": '(no-op v1.33.56 — output vốn đã JSON/verbatim; nhận để tương thích workflow cards)'},
          {"dest": 'query'},
          {"flags": ['--notebook-id'], "dest": 'notebook_id'},
          {"flags": ['--source-id'], "dest": 'source_id', "action": 'append', "help": 'scope source_id (lặp được)'},
+         {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.60 ADR-5) NLM chết → GIỮ dừng rc=2 như cũ, không verbatim-return'},
+         {"flags": ['--out'], "help": '(v1.34.60 ADR-6) ghi envelope fallback (toàn văn không cắt --max) ra file — né tràn stdout'},
+         {"flags": ['--max'], "type": int, "default": 4000, "help": '(v1.34.60) trần ký tự/văn bản khi fallback in stdout (0/âm → 4000); --out bỏ trần'},
+     ]},
+    {"name": 'doc-text', "handler": 'cmd_doc_text',
+     "help": '(v1.34.60 A1) MỘT đường đọc text mọi định dạng: GDoc→export; .docx→download+unzip word/document.xml (text THẬT, hết footgun binary); .pdf→pdftotext; cache extract_<id>.txt. --dieu cắt Điều; nền cho fallback NLM-chết',
+     "args": [
+         {"dest": 'file_id'},
+         {"flags": ['--out'], "help": 'ghi text ra file (né tràn stdout với văn bản lớn)'},
+         {"flags": ['--dieu'], "help": 'chỉ in Điều N (cắt _slice_dieu)'},
+         {"flags": ['--max'], "type": int, "default": 0, "help": 'trần ký tự in stdout; 0 = toàn văn'},
+         {"flags": ['--refresh'], "action": 'store_true', "help": 'bỏ qua cache extract_<id>.txt, đọc lại từ nguồn'},
+         {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'bench', "handler": 'cmd_bench',
      "help": 'đo hiệu năng các tính năng tính-toán-trong-code (offline) trên manifest hiện có',
@@ -1359,12 +1376,17 @@ def register_generated(sub, tl_module) -> list[str]:
 
 
 # ───────────────────────── E1: metadata ─────────────────────────
-def _m(risk, read_only, write_scope, confirm, dry_run, det_json, task, contract, card_required, module, generated=False):
+def _m(risk, read_only, write_scope, confirm, dry_run, det_json, task, contract, card_required, module, generated=False,
+       nlm_fallback=None):
+    # nlm_fallback (v1.34.60 — kế hoạch NLM-death resilience E1–E3, ADR-5): phân loại per-lệnh cho lớp
+    # _nlm_or_corpus khi NLM chết: corpus_read (đường ĐỌC — nlm-content/query/cross) | defer (đường ĐẨY —
+    # nlm-add/ingest-*) | stale_cache (nlm-list) | unverified (audit/reconcile — Release 2) | none (chỉ báo
+    # offline, không rẽ) | None (mặc định — lệnh không dính NLM). Kwarg default → không phải sửa call cũ.
     return {"risk": risk, "read_only": read_only, "write_scope": write_scope,
             "requires_confirm": confirm, "supports_dry_run": dry_run,
             "deterministic_json_required": det_json, "workflow_task": task,
             "idempotency_contract": contract, "card_required": card_required,
-            "module": module, "generated": generated}
+            "module": module, "generated": generated, "nlm_fallback": nlm_fallback}
 
 
 COMMAND_META = {
@@ -1403,9 +1425,9 @@ COMMAND_META = {
     "nlm-query-plan":       _m("low", True, "none", False, False, True, "nlm_query_quality", None, True, None, generated=True),
     # ── legacy write high-risk (card_required=False trừ khi card đã có; gate = --apply dry-run;
     #    v1.34.1: HẾT grandfather contract — mọi lệnh high-risk ghi đều có idempotency_contract) ──
-    "ingest-local":         _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "ingest_local", True, None),
-    "profile-ingest":       _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "profile_ingest", True, None),
-    "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, "nlm_add", False, None),
+    "ingest-local":         _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "ingest_local", True, None, nlm_fallback="defer"),
+    "profile-ingest":       _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "profile_ingest", True, None, nlm_fallback="defer"),
+    "nlm-add":              dict(_m("high", False, "nlm", False, False, False, None, "nlm_add", False, None, nlm_fallback="defer"),
                                  builtin_gate="nlm_dedup_live_gate"),
     "recat":                _m("high", False, "drive_registry", False, True, False, None, "recat", False, None, generated=True),
     "source-rename":        _m("high", False, "drive_registry_nlm", False, True, False, None, "source_rename", False, None, generated=True),
@@ -1428,9 +1450,11 @@ COMMAND_META = {
     "nlm-links":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 B1 read-only
     "ingest-inbox":         _m("high", False, "drive_registry", True, True, False, None, "ingest_inbox", False, "ingest_ops", generated=True),   # v1.34.54 B2 (KHÔNG đụng NLM — nlm-links cuối lô)
     "nlm-auth-status":      _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.54 C8 read-only (probe live, không ghi)
-    "nlm-source-remove":    _m("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", generated=True),   # v1.34.56 A-#12 (gỡ nguồn khỏi notebook — guard con trỏ)
+    "nlm-source-remove":    _m("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", generated=True, nlm_fallback="none"),   # v1.34.56 A-#12 (gỡ nguồn khỏi notebook — guard con trỏ; v1.34.60: offline chỉ báo, KHÔNG defer xoá)
     "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True),   # v1.34.57 B-#3 read-only (cache .tl_state local)
-    "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True),   # v1.34.57 B-#4..#7 (repoint registry + add qua nlm-add)
+    "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True),   # v1.34.57 B-#4..#7 (repoint registry + add qua nlm-add; nlm_fallback defer = Release 2/E2)
+    "nlm-cross":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", nlm_fallback="corpus_read"),   # v1.34.60 E1 (meta mới — lệnh cũ ở cli.py chưa từng có meta)
+    "doc-text":             _m("low", True, "local", False, False, False, None, None, False, "lookup_ops", generated=True),   # v1.34.60 A1 (read-only; ghi cache extract local)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     # ── I7 wave-2 (v1.34.11): meta BASELINE bằng-chứng-cờ cho 78 lệnh chuyển GENERATED_SPECS —
     # chính sách grilling: --apply→supports_dry_run (doctrine DRY-mặc-định), --confirm→requires_confirm,
@@ -1492,10 +1516,10 @@ COMMAND_META = {
     "ingest-route":          _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "backfill-notebook":     _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "cache-snapshot":        _m("low", False, "local", False, False, False, None, None, False, None, generated=True),
-    "nlm-list":              _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
+    "nlm-list":              _m("low", True, "none", False, False, False, None, None, False, None, generated=True, nlm_fallback="stale_cache"),
     "preflight":             _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "overflow-resolve":      _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
-    "ingest-missing":        _m("high", False, "nlm_registry", False, True, False, None, "ingest_missing", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
+    "ingest-missing":        _m("high", False, "nlm_registry", False, True, False, None, "ingest_missing", False, None, generated=True, nlm_fallback="defer"),   # Pha-E-hoàn-thiện v1.34.16
     "nlm-orphans":           _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "sweep":                 _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "counts":                _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
@@ -1508,8 +1532,8 @@ COMMAND_META = {
     "cat-verify":            _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "source-verify":         _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "cat-audit":             _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
-    "nlm-content":           _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
-    "nlm-query":             _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
+    "nlm-content":           _m("low", True, "none", False, False, False, None, None, False, None, generated=True, nlm_fallback="corpus_read"),
+    "nlm-query":             _m("low", True, "none", False, False, False, None, None, False, None, generated=True, nlm_fallback="corpus_read"),
     "bench":                 _m("low", False, "local", False, False, False, None, None, False, None, generated=True),
     "tvpl-url":              _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "fetch-route":           _m("low", True, "none", False, False, False, None, None, False, None, generated=True),

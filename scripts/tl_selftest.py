@@ -11405,6 +11405,534 @@ def run() -> int:
         return _ok_mm and _ok_dd and _ok_uv
     _t110("r120_audit_output_drive_id_fallback_gdoc_id", _c120_audit_output_uses_gdoc_id)
 
+    # ═══ v1.34.60 — r121: NLM-DEATH RESILIENCE Release 1 (kế hoạch E1–E3 grill 2026-07-16, ADR-1..7):
+    # A1 doc-text (bóc .docx thật — hết footgun binary) + resolver _nlm_or_corpus + control surface
+    # (mặc định BẬT, --no-fallback, TL_NLM_FALLBACK=0, COMMAND_META.nlm_fallback) + E1 corpus_read
+    # (nlm-content lossless, nlm-query/cross verbatim-return ≤5) + E3 defer (nlm-add) + stale (nlm-list).
+    # NEGATIVE-INPUT TRƯỚC (luật đứng r102). Mọi test OFFLINE — nlm_cli/gas/manifest đều fake. ═══
+    import time as _tm121
+    import zipfile as _zf121
+
+    def _c121_wiring_meta_flags():
+        from tl_core.command_registry import COMMAND_META as _CM121
+        _want = {"nlm-content": "corpus_read", "nlm-query": "corpus_read", "nlm-cross": "corpus_read",
+                 "nlm-add": "defer", "ingest-local": "defer", "profile-ingest": "defer",
+                 "ingest-missing": "defer", "nlm-list": "stale_cache", "nlm-source-remove": "none"}
+        _ok_meta = all((_CM121.get(k) or {}).get("nlm_fallback") == v for k, v in _want.items())
+        # field có mặt MỌI lệnh (qua _m default) nhưng mặc định None — lệnh thường không dính fallback.
+        _ok_default = ("nlm_fallback" in (_CM121.get("ping") or {})
+                       and (_CM121.get("ping") or {}).get("nlm_fallback") is None)
+        _mdt = _CM121.get("doc-text") or {}
+        _ok_doctext = _mdt.get("read_only") is True and _mdt.get("module") == "lookup_ops"
+        _ap121 = _TL_MODULE.build_parser()
+
+        def _p(argv):
+            try:
+                return vars(_ap121.parse_args(argv))
+            except SystemExit:
+                return None
+        _ps = [_p(["nlm-query", "q121", "--no-fallback"]), _p(["nlm-content", "sid121", "--no-fallback"]),
+               _p(["nlm-cross", "q121", "--no-fallback"]), _p(["nlm-add", "--no-fallback"]),
+               _p(["nlm-list", "--no-fallback"])]
+        _p6 = _p(["doc-text", "fid121", "--dieu", "2", "--json"])
+        _ok_parse = all(x is not None and x.get("no_fallback") for x in _ps) and _p6 is not None
+        return _ok_meta and _ok_default and _ok_doctext and _ok_parse
+    _t110("r121_wiring_command_meta_and_no_fallback_flags", _c121_wiring_meta_flags)
+
+    def _c121_env_flag_disable_unit():
+        # NEGATIVE control-surface: --no-fallback (per-lệnh) + TL_NLM_FALLBACK=0 (toàn cục) đều tắt.
+        _fe = _TL_MODULE._nlm_fallback_enabled
+        _senv = _env110({"TL_NLM_FALLBACK": None})
+        try:
+            _a = _fe(argparse.Namespace(no_fallback=False)) is True and _fe(None) is True
+            _b = _fe(argparse.Namespace(no_fallback=True)) is False
+            _env110({"TL_NLM_FALLBACK": "0"})
+            _c = _fe(argparse.Namespace(no_fallback=False)) is False
+            _env110({"TL_NLM_FALLBACK": "false"})
+            _d = _fe(None) is False
+            _env110({"TL_NLM_FALLBACK": "1"})
+            _e = _fe(None) is True
+            return _a and _b and _c and _d and _e
+        finally:
+            _env110(_senv)
+    _t110("r121_env_flag_disable_fallback_unit", _c121_env_flag_disable_unit)
+
+    def _mk_nc121(seq):
+        # fake nlm_cli tối giản: notebook_get lấy phần tử theo lượt (kẹt ở phần tử cuối); đếm probe.
+        _cnt = {"probe": 0}
+
+        class _NC121p:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                _cnt["probe"] += 1
+                return seq[min(_cnt["probe"] - 1, len(seq) - 1)]
+        return _NC121p(), _cnt
+
+    def _with_nc121(nc, fn):
+        _sav_imp = _TL_MODULE._imp
+        try:
+            _TL_MODULE._imp = lambda name: (nc if name == "nlm_cli" else _sav_imp(name))
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            return fn()
+        finally:
+            _TL_MODULE._imp = _sav_imp
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c121_detection_probe_once_hard_dead_only():
+        # NEGATIVE (ADR-7): 1 lỗi TRANSIENT không kích fallback — retry 1 nhịp, sống lại → alive; verdict cache
+        # (probe đúng 2 lần dù hỏi verdict 2 lần).
+        _nc1, _c1 = _mk_nc121([{"ok": False, "error": "timeout: connection reset by peer"}, {"ok": True}])
+
+        def _case1():
+            _v = _TL_MODULE._nlm_verdict("nb121")
+            _vb = _TL_MODULE._nlm_verdict("nb121")
+            return _v["alive"] is True and _vb["alive"] is True and _c1["probe"] == 2
+        _r1 = _with_nc121(_nc1, _case1)
+        # POSITIVE trigger: auth-expired (HARD) → dead sau ĐÚNG 1 probe (không retry), cache; route corpus_read
+        # + banner stderr có hướng tắt --no-fallback.
+        _nc2, _c2 = _mk_nc121([{"ok": False, "error": "401 unauthorized: auth expired — run nlm login"}])
+
+        def _case2():
+            _v = _TL_MODULE._nlm_verdict("nb121")
+            _vb = _TL_MODULE._nlm_verdict("nb121")
+            _be = _io110.StringIO()
+            with _ctx110.redirect_stderr(_be):
+                _rt = _TL_MODULE._nlm_or_corpus("nlm-query", argparse.Namespace(no_fallback=False),
+                                                notebook_id="nb121", probe=True)
+            return (_v["alive"] is False and _vb["alive"] is False and _c2["probe"] == 1
+                    and _rt["route"] == "corpus_read" and _rt["nlm_alive"] is False
+                    and "NLM OFFLINE" in _be.getvalue() and "--no-fallback" in _be.getvalue())
+        _r2 = _with_nc121(_nc2, _case2)
+        # TRANSIENT BỀN: retry vẫn transient → mới coi là dead (grill ADR-7 'retry rồi mới coi là dead').
+        _nc3, _c3 = _mk_nc121([{"ok": False, "error": "timeout"}, {"ok": False, "error": "timeout again"}])
+
+        def _case3():
+            _v = _TL_MODULE._nlm_verdict("nb121")
+            return _v["alive"] is False and _c3["probe"] == 2
+        _r3 = _with_nc121(_nc3, _case3)
+        # --no-fallback: KHÔNG probe, KHÔNG banner — trả fail_closed để lệnh giữ nguyên đường lỗi cũ.
+        _nc4, _c4 = _mk_nc121([{"ok": False, "error": "401 unauthorized"}])
+
+        def _case4():
+            _rt = _TL_MODULE._nlm_or_corpus("nlm-query", argparse.Namespace(no_fallback=True),
+                                            notebook_id="nb121", probe=True)
+            return _rt["route"] == "fail_closed" and _c4["probe"] == 0
+        _r4 = _with_nc121(_nc4, _case4)
+        return _r1 and _r2 and _r3 and _r4
+    _t110("r121_detection_probe_once_hard_dead_only", _c121_detection_probe_once_hard_dead_only)
+
+    _ENTRIES121 = [
+        {"drive_id": "dLUAT60", "name": "Luat_60-2024-QH15_Du_lieu", "sohieu": "60/2024/QH15",
+         "corpus": "true", "nlm_source_id": "sid60", "nlm_notebook_id": "nbQ121", "nlm_status": "pushed",
+         "hieuluc": "Còn"},
+        {"drive_id": "dLUAT57", "name": "Luat_57-2024-QH15_Sua_doi", "sohieu": "57/2024/QH15",
+         "corpus": "true", "nlm_source_id": "sid57", "nlm_notebook_id": "nbQ121", "nlm_status": "pushed",
+         "hieuluc": "Còn"},
+    ] + [{"drive_id": f"dTHUE{_i}", "name": f"TT_{_i:02d}-2020-BTC_Thue_gia_tri_gia_tang_{_i}",
+          "sohieu": f"{_i:02d}/2020/TT-BTC", "corpus": "true", "nlm_source_id": f"sidT{_i}",
+          "nlm_notebook_id": "nbQ121", "nlm_status": "pushed", "hieuluc": "Còn"} for _i in range(1, 8)]
+    _TEXT121 = ("Điều 1. Phạm vi điều chỉnh\nNội dung điều một fallback 121.\n\n"
+                "Điều 2. Đối tượng\nNội dung điều hai.\n")
+
+    def _run_q121(query, no_fallback=False, env=None, cross=False):
+        class _NCQ121:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def notebook_query(self, nb, q, source_ids=None):
+                return {"ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
+
+            def cross_query(self, q, notebooks=None, all_notebooks=False):
+                return {"ok": False, "error": "401 unauthorized auth expired", "auth_hint": "nlm login"}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_manifest_entries",
+                 "_doc_text_any", "_resolve_overflow_shards")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _senv = _env110(dict(env or {}))
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCQ121() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nbQ121", None)
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(_ENTRIES121)
+            _TL_MODULE._doc_text_any = lambda fid, **k: (_TEXT121, f"cache:{fid}")
+            _TL_MODULE._resolve_overflow_shards = lambda entries, nb: []
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            if cross:
+                _ns = argparse.Namespace(query=query, notebooks="nbQ121", all=False, json=False, out=None,
+                                         no_fallback=no_fallback, config=None, profile=None, deterministic=False)
+            else:
+                _ns = argparse.Namespace(query=query, notebook_id=None, source_id=None, json=False, out=None,
+                                         max=4000, no_fallback=no_fallback, config=None, profile=None,
+                                         deterministic=False)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = (_TL_MODULE.cmd_nlm_cross(_ns) if cross else _TL_MODULE.cmd_nlm_query(_ns))
+            return _rc, _bo.getvalue(), _be.getvalue()
+        finally:
+            _env110(_senv)
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c121_query_fallback_verbatim_le5():
+        # E1 (ADR-1/6): NLM chết + câu hỏi resolve exact-sohieu → VERBATIM-RETURN: nguyên văn Điều đã cắt,
+        # envelope offline/corpus_read, rc=0, banner stderr. KHÔNG máy-sinh-RAG (text là _doc_text_any trả).
+        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15")
+        try:
+            _j = json.loads(_o)
+        except Exception:
+            return False
+        _d0 = (_j.get("docs") or [{}])[0]
+        return (_rc == 0 and _j.get("nlm_status") == "offline" and _j.get("fallback") == "corpus_read"
+                and _j.get("confidence") == "exact" and _j.get("resolved") == 1 and _j.get("dieu") == "1"
+                and _d0.get("sohieu") == "60/2024/QH15"
+                and "Nội dung điều một fallback 121" in (_d0.get("text") or "")
+                and "Điều 2" not in (_d0.get("text") or "") and "NLM OFFLINE" in _e)
+    _t110("r121_nlm_query_fallback_verbatim_le5", _c121_query_fallback_verbatim_le5)
+
+    def _c121_query_fallback_ambiguous_candidates():
+        # NEGATIVE (ADR-1 hạ an toàn): >5 ứng viên → KHÔNG đọc/tổng hợp mù — docs RỖNG, chỉ liệt kê ứng viên
+        # + gợi ý tra tiếp; vẫn rc=0 (chuỗi chạy tiếp).
+        _rc, _o, _e = _run_q121("pháp luật về thuế giá trị gia tăng")
+        try:
+            _j = json.loads(_o)
+        except Exception:
+            return False
+        return (_rc == 0 and _j.get("resolved") == 0 and not _j.get("docs")
+                and len(_j.get("candidates") or []) >= 6 and "ứng viên" in (_j.get("note") or ""))
+    _t110("r121_nlm_query_fallback_gt5_downgrades_candidates", _c121_query_fallback_ambiguous_candidates)
+
+    def _c121_query_no_fallback_failcloses():
+        # NEGATIVE control-surface: --no-fallback → GIỮ hành vi dừng cũ (rc=2, lỗi ra stderr, KHÔNG envelope).
+        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", no_fallback=True)
+        return _rc == 2 and "corpus_read" not in _o and "401" in _e
+    _t110("r121_nlm_query_no_fallback_flag_failcloses", _c121_query_no_fallback_failcloses)
+
+    def _c121_query_env_disables_fallback():
+        # NEGATIVE control-surface: TL_NLM_FALLBACK=0 (CI strict) → fail-closed toàn cục.
+        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", env={"TL_NLM_FALLBACK": "0"})
+        return _rc == 2 and "corpus_read" not in _o and "401" in _e
+    _t110("r121_env_disables_fallback", _c121_query_env_disables_fallback)
+
+    def _c121_cross_fallback_same_envelope():
+        # E1: nlm-cross NLM chết → CÙNG đường verbatim-return (corpus không shard) — envelope cmd=nlm-cross.
+        _rc, _o, _e = _run_q121("tra Điều 1 của Luật 60/2024/QH15", cross=True)
+        try:
+            _j = json.loads(_o)
+        except Exception:
+            return False
+        return (_rc == 0 and _j.get("cmd") == "nlm-cross" and _j.get("fallback") == "corpus_read"
+                and _j.get("resolved") == 1)
+    _t110("r121_nlm_cross_fallback_verbatim", _c121_cross_fallback_same_envelope)
+
+    def _run_c121(sid="sid60", no_fallback=False):
+        class _NCC121:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_content(self, s):
+                return {"ok": False, "error": "401 unauthorized", "auth_hint": "nlm login"}
+        _keys = ("_imp", "_manifest_entries", "_doc_text_any")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE._imp = lambda name: (_NCC121() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(_ENTRIES121)
+            _TL_MODULE._doc_text_any = lambda fid, **k: (_TEXT121, f"cache:{fid}")
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(source_id=sid, out=None, dieu=None, max=4000, no_fallback=no_fallback,
+                                     config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_content(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue()
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c121_content_fallback_corpus():
+        # E1 lossless-read: source_content fail + NLM chết → đọc bản GDoc corpus theo sid→registry;
+        # NỘI DUNG Y HỆT (_TEXT121 nguyên vẹn trên stdout), cờ corpus_read + offline ở stderr, rc=0.
+        _rc, _o, _e = _run_c121()
+        return _rc == 0 and _TEXT121.strip() in _o and "corpus_read" in _e and "offline" in _e
+    _t110("r121_nlm_content_fallback_corpus", _c121_content_fallback_corpus)
+
+    def _c121_content_unknown_sid_failcloses():
+        # NEGATIVE: sid KHÔNG có dòng registry khớp → KHÔNG fallback mù → rc=2 giữ lỗi cũ
+        # (banner offline vẫn in stderr nhưng KHÔNG có envelope fallback thành công).
+        _rc, _o, _e = _run_c121(sid="sidGHOST121")
+        return _rc == 2 and '"fallback": "corpus_read"' not in _e and "resolve" in _e
+    _t110("r121_nlm_content_unknown_sid_failcloses", _c121_content_unknown_sid_failcloses)
+
+    def _run_ad121(no_fallback=False, row=True, row_sid=""):
+        _calls = {"add": 0, "claim": 0, "reg_writes": []}
+
+        class _GA121:
+            def get(self, action, **kw):
+                if action == "ingest_claim":
+                    _calls["claim"] += 1
+                return {"ok": True, "results": []}
+
+        class _NCA121:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_add(self, nb, **kw):
+                _calls["add"] += 1
+                return {"ok": True, "source_id": "sX121"}
+
+            def source_list(self, nb, **kw):
+                return {"ok": False, "error": "401 unauthorized", "auth_hint": "nlm login"}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+                 "_gas", "_apply_journal_start", "_journal_append", "_journaled_reg_write", "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCA121() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nbA121", None)
+            _TL_MODULE._manifest_entries = lambda refresh=False: ([
+                {"drive_id": "dNA121", "name": "Luat_Add121", "nlm_source_id": row_sid,
+                 "nlm_notebook_id": "", "nlm_status": ""}] if row else [])
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _GA121()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "runAD121"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._journaled_reg_write = (lambda run_id, g, items, cols, **kw:
+                                               (_calls["reg_writes"].append({"items": items, "cols": cols}),
+                                                {"verified": True})[1])
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(notebook_id=None, drive_id="dNA121", url=None, file=None, type="doc",
+                                     title=None, no_wait=False, wait=False, skip_live_check=False, json=False,
+                                     no_fallback=no_fallback, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_add(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue(), _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c121_add_deferred_no_corpus_true():
+        # E3 push-defer (ADR-4): NLM chết → KHÔNG source_add mù, KHÔNG claim; registry ghi nlm_status=deferred
+        # (KHÔNG đụng corpus, KHÔNG bịa nlm_source_id — chống corpus-ảo); in batch-link; rc=0.
+        _rc, _o, _e, _calls = _run_ad121()
+        _w = (_calls["reg_writes"] or [{}])[0]
+        _cols = str(_w.get("cols") or "")
+        _it = (_w.get("items") or [{}])[0]
+        return (_rc == 0 and _calls["add"] == 0 and _calls["claim"] == 0 and len(_calls["reg_writes"]) == 1
+                and _it.get("nlm_status") == "deferred" and "corpus" not in _cols
+                and "nlm_source_id" not in _cols
+                and "docs.google.com/document/d/dNA121" in _o and '"deferred"' in _o and "offline" in _o)
+    _t110("r121_nlm_add_deferred_no_corpus_true", _c121_add_deferred_no_corpus_true)
+
+    def _c121_add_no_fallback_failcloses():
+        # NEGATIVE: --no-fallback → giữ nguyên đường cũ: dedup-gate không list được → LIVE_SOURCE_LIST_FAILED rc=2.
+        _rc, _o, _e, _calls = _run_ad121(no_fallback=True)
+        return _rc == 2 and _calls["add"] == 0 and not _calls["reg_writes"] and "LIVE_SOURCE_LIST_FAILED" in _e
+    _t110("r121_nlm_add_no_fallback_failcloses", _c121_add_no_fallback_failcloses)
+
+    def _c121_add_deferred_pointer_untouched():
+        # NEGATIVE (stale-an-toàn): dòng ĐÃ có nlm_source_id → KHÔNG ghi đè status=deferred (con trỏ sống
+        # do nlm-reconcile xử khi NLM sống lại); vẫn in link + rc=0.
+        _rc, _o, _e, _calls = _run_ad121(row_sid="sidOLD121")
+        return _rc == 0 and not _calls["reg_writes"] and "docs.google.com/document/d/dNA121" in _o
+    _t110("r121_nlm_add_deferred_existing_pointer_untouched", _c121_add_deferred_pointer_untouched)
+
+    def _c121_list_stale_cache():
+        # E3 nlm-list: (a) unit _nlm_list_stale_read — cache QUÁ TTL vẫn đọc được kèm stale/age; thiếu → None.
+        with _tf110.TemporaryDirectory() as _td:
+            (_P110(_td) / "nlm_list_cache_nbL121.json").write_bytes(json.dumps(
+                {"fetched_at": _tm121.time() - 7200, "count": 2,
+                 "sources": [{"id": "sA121", "title": "A121"}, {"id": "sB121", "title": "B121"}]},
+                ensure_ascii=False).encode("utf-8"))
+            _st = _TL_MODULE._nlm_list_stale_read("nbL121", cache_dir=_td)
+            _miss = _TL_MODULE._nlm_list_stale_read("nbKHONGCO121", cache_dir=_td)
+        _u1 = bool(_st) and _st.get("ok") and _st.get("stale") and _st.get("age_s", 0) >= 7000 and _st.get("count") == 2
+        _u2 = _miss is None
+
+        # (b) wiring cmd_nlm_list: list live fail + NLM chết → phục vụ cache + cờ STALE_CACHE, rc=0
+        # (thay vì rỗng/rc=2); --no-fallback → rc=2 như cũ.
+        class _NCL121:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_list(self, nb, skip_freshness=True):
+                return {"ok": False, "error": "401 unauthorized", "auth_hint": "nlm login"}
+        _keys = ("_imp", "_nlm_list_stale_read")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE._imp = lambda name: (_NCL121() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._nlm_list_stale_read = lambda nb, cache_dir=None: {
+                "ok": True, "count": 2, "sources": [{"id": "sA121", "title": "A121"},
+                                                    {"id": "sB121", "title": "B121"}],
+                "cached": True, "stale": True, "age_s": 7200, "via": "cache_stale"}
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+            def _ns_l(nf):
+                return argparse.Namespace(notebook_id="nbL121", no_skip_freshness=False, cached=False, max=15,
+                                          json=False, out=None, no_fallback=nf, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_list(_ns_l(False))
+            _all = _bo.getvalue() + _be.getvalue()
+            _w1 = _rc == 0 and "STALE_CACHE" in _all and "A121" in _bo.getvalue()
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _bo2, _be2 = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo2), _ctx110.redirect_stderr(_be2):
+                _rc2 = _TL_MODULE.cmd_nlm_list(_ns_l(True))
+            _w2 = _rc2 == 2
+            return _u1 and _u2 and _w1 and _w2
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+    _t110("r121_nlm_list_stale_cache", _c121_list_stale_cache)
+
+    def _c121_doc_text_docx_unzip():
+        # A1: (a) .docx → download + unzip word/document.xml → TEXT THẬT (hết footgun binary); ghi cache
+        # extract_<id>.txt; lần 2 đọc cache. (b) GDoc giữ đường export cũ; .pdf giữ pdftotext.
+        # (c) NEGATIVE: mọi đường fail → ("",""); cmd_doc_text id hỏng → rc=2.
+        with _tf110.TemporaryDirectory() as _td:
+            _cache121 = _P110(_td) / "cache121"
+            _cache121.mkdir()
+            _dx = _P110(_td) / "vb121.docx"
+            with _zf121.ZipFile(_dx, "w") as _z:
+                _z.writestr("word/document.xml",
+                            '<?xml version="1.0"?><w:document><w:body>'
+                            '<w:p><w:r><w:t>Điều 1. Nội dung docx thật 121</w:t></w:r></w:p>'
+                            '<w:p><w:r><w:t>Điều 2. Đoạn hai docx</w:t></w:r></w:p>'
+                            '</w:body></w:document>')
+            _pdf = _P110(_td) / "vb121.pdf"
+            _pdf.write_bytes(b"%PDF-1.4 fake 121")
+            _ents = [{"drive_id": "dDOCX121", "name": "VB_Test121.docx",
+                      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+                     {"drive_id": "gGDOC121", "name": "VB_G121",
+                      "mime": "application/vnd.google-apps.document"},
+                     {"drive_id": "pPDF121", "name": "VB_P121.pdf", "mime": "application/pdf"}]
+            _keys = ("_manifest_entries", "_doc_text_fetch_binary", "_read_doc_text",
+                     "_read_local_text_for_analysis", "apply_profile_offline", "_active_profile", "CACHE")
+            _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+            try:
+                _TL_MODULE.CACHE = _cache121
+                _TL_MODULE._active_profile = lambda: _TL_MODULE.DEFAULT_PROFILE
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._manifest_entries = lambda refresh=False: list(_ents)
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (
+                    _dx if fid == "dDOCX121" else (_pdf if fid == "pPDF121" else None))
+                # đường export cũ với .docx trả BINARY zip — _doc_text_any KHÔNG được dùng nó cho .docx
+                _TL_MODULE._read_doc_text = lambda fid, config=None: (
+                    "GDOC TEXT 121" if fid == "gGDOC121" else "PK\x03\x04BINARYZIPRAC")
+                _TL_MODULE._read_local_text_for_analysis = lambda p, max_chars=500000: ("PDF TEXT 121", [])
+                _txt, _src = _TL_MODULE._doc_text_any("dDOCX121")
+                _ok_txt = ("Nội dung docx thật 121" in _txt and "Đoạn hai docx" in _txt
+                           and "PK\x03\x04" not in _txt and "docx" in _src)
+                _cf = _cache121 / "extract_dDOCX121.txt"
+                _ok_cache = _cf.exists() and "Nội dung docx thật 121" in _cf.read_text(encoding="utf-8")
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None   # fetch hỏng — lần 2 phải ăn cache
+                _t2, _s2 = _TL_MODULE._doc_text_any("dDOCX121")
+                _ok_c2 = "Nội dung docx thật 121" in _t2 and _s2 == "cache"
+                _tg, _sg = _TL_MODULE._doc_text_any("gGDOC121")
+                _ok_g = _tg == "GDOC TEXT 121" and "gdoc" in _sg
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (_pdf if fid == "pPDF121" else None)
+                _tp, _sp = _TL_MODULE._doc_text_any("pPDF121")
+                _ok_p = _tp == "PDF TEXT 121" and "pdf" in _sp
+                _ok_bin = (_TL_MODULE._text_looks_binary("PK\x03\x04abc121")
+                           and not _TL_MODULE._text_looks_binary("Điều 1. text thường 121"))
+                _TL_MODULE._read_doc_text = lambda fid, config=None: ""
+                _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None
+                _t3, _ = _TL_MODULE._doc_text_any("dGHOST121")
+                _ok_neg = _t3 == ""
+                _ns = argparse.Namespace(file_id="dDOCX121", out=None, dieu="1", max=0, refresh=False,
+                                         json=True, config=None, profile=None, deterministic=False)
+                _bo, _be = _io110.StringIO(), _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                    _rc = _TL_MODULE.cmd_doc_text(_ns)
+                try:
+                    _j = json.loads(_bo.getvalue())
+                except Exception:
+                    _j = {}
+                _ok_cmd = (_rc == 0 and _j.get("ok") is True and "Nội dung docx thật 121" in (_j.get("text") or "")
+                           and "Đoạn hai docx" not in (_j.get("text") or ""))
+                _ns2 = argparse.Namespace(file_id="dGHOST121", out=None, dieu=None, max=0, refresh=False,
+                                          json=True, config=None, profile=None, deterministic=False)
+                _bo2, _be2 = _io110.StringIO(), _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo2), _ctx110.redirect_stderr(_be2):
+                    _rc2 = _TL_MODULE.cmd_doc_text(_ns2)
+                return (_ok_txt and _ok_cache and _ok_c2 and _ok_g and _ok_p and _ok_bin and _ok_neg
+                        and _ok_cmd and _rc2 == 2)
+            finally:
+                for _k, _v in _sav.items():
+                    setattr(_TL_MODULE, _k, _v)
+    _t110("r121_doc_text_docx_unzip", _c121_doc_text_docx_unzip)
+
+    def _c121_read_doc_text_binary_guard():
+        # A1 footgun-fix: _read_doc_text nhận payload BINARY (zip .docx rò qua transport/GAS) → trả "" thay vì
+        # tuồn rác binary cho caller (so char-count/verify trên binary là SAI — bài học 2026-07-16).
+        _keys = ("_imp", "_gas")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+
+        class _TLG121:
+            def _read_gws_cred(self):
+                return None
+
+        class _TR121:
+            def drive_op(self, op, **kw):
+                return {"ok": True, "text": "PK\x03\x04ZIPBINARY121\x00\x00rác"}
+
+        class _GAS121:
+            def get(self, action, **kw):
+                return {"ok": True, "text": "PK\x03\x04ZIPBINARY121\x00\x00rác"}
+        try:
+            _TL_MODULE._imp = lambda name: (_TLG121() if name == "tl_gws"
+                                            else (_TR121() if name == "transport" else _realimp(name)))
+            _TL_MODULE._gas = lambda: _GAS121()
+            _r = _TL_MODULE._read_doc_text("dBIN121KHONGCACHE")
+            return _r == ""
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r121_read_doc_text_binary_guard", _c121_read_doc_text_binary_guard)
+
+    def _c121_corpus_question_resolve_pure():
+        # PURE resolver (ADR-2): exact-sohieu → docs ≤5 conf exact; token-mờ >5 → ambiguous + candidates;
+        # không match → none; dòng removed*/thiếu id bị loại.
+        _ents = list(_ENTRIES121) + [{"drive_id": "dREM121", "name": "Luat_Removed", "sohieu": "99/2020/QH14",
+                                      "nlm_status": "removed_by_user"},
+                                     {"drive_id": "", "name": "Luat_NoId", "sohieu": "98/2020/QH14"}]
+        _r1 = _TL_MODULE._corpus_question_resolve("tra Điều 2 của Luật 60/2024/QH15", _ents, k=5)
+        _ok1 = (_r1["confidence"] == "exact" and len(_r1["docs"]) == 1 and _r1["dieu"] == "2"
+                and _r1["docs"][0].get("sohieu") == "60/2024/QH15")
+        _r2 = _TL_MODULE._corpus_question_resolve("pháp luật về thuế giá trị gia tăng", _ents, k=5)
+        _ok2 = _r2["confidence"] == "ambiguous" and not _r2["docs"] and len(_r2["candidates"]) >= 6
+        _r3 = _TL_MODULE._corpus_question_resolve("nội dung hoàn toàn không liên quan zzz121", _ents, k=5)
+        _ok3 = _r3["confidence"] == "none" and not _r3["docs"]
+        _r4 = _TL_MODULE._corpus_question_resolve("so sánh Luật 60/2024/QH15 và Luật 57/2024/QH15", _ents, k=5)
+        _ok4 = _r4["confidence"] == "exact" and len(_r4["docs"]) == 2 and _r4["dieu"] is None
+        _r5 = _TL_MODULE._corpus_question_resolve("tra Điều 1 của 99/2020/QH14", _ents, k=5)
+        _ok5 = not _r5["docs"]   # removed* = tombstone, không hồi sinh qua fallback
+        return _ok1 and _ok2 and _ok3 and _ok4 and _ok5
+    _t110("r121_corpus_question_resolve_pure", _c121_corpus_question_resolve_pure)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

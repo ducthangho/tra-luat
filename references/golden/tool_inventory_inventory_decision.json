@@ -30,6 +30,7 @@
     "dedup-plan",
     "deploy-plan",
     "determinism-audit",
+    "doc-text",
     "doctor",
     "download",
     "drive-parity",
@@ -508,6 +509,16 @@
         "workflow_task": "workflow_audit",
         "write_scope": "none"
       },
+      "doc-text": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "doctor": {
         "generated": true,
         "idempotency_contract": null,
@@ -880,6 +891,16 @@
       },
       "nlm-content": {
         "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
+      "nlm-cross": {
+        "generated": false,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -1680,9 +1701,9 @@
       }
     },
     "counts": {
-      "generated_parsers": 139,
+      "generated_parsers": 140,
       "high_risk": 26,
-      "total": 145,
+      "total": 147,
       "write_commands": 74
     },
     "schema": "command_registry.v1"

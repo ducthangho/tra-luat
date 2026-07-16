@@ -252,6 +252,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.29.3) BỎ cổng dedup-live trước add (mặc định DỪNG nếu nguồn đã LIVE / không liệt kê được)")
     p.add_argument("--json", action="store_true",
                    help="(no-op v1.34.27 #6 — output vốn đã JSON; nhận cờ để đồng bộ bề mặt CLI, hết rc=2 usage-error)")
+    p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
+                   help="(v1.34.60 ADR-4/5) NLM chết → GIỮ dừng rc=2 như cũ (mặc định: defer — registry "
+                        "nlm_status=deferred + in batch-link, KHÔNG add mù, rc=0)")
     p.set_defaults(fn=cmd_nlm_add)
 
     p = sub.add_parser("nlm-cross", help="cross-shard query qua CLI `nlm cross query` (thay MCP cross_notebook_query)")
@@ -259,6 +262,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("query")
     p.add_argument("--notebooks", help="csv id/tên shard (mặc định: base+overflow VBQPPL trong config)")
     p.add_argument("--all", action="store_true", help="query MỌI notebook (rate-limit)")
+    p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
+                   help="(v1.34.60 ADR-5) NLM chết → GIỮ dừng rc=2 như cũ, không verbatim-return từ corpus")
+    p.add_argument("--out", help="(v1.34.60 ADR-6) ghi envelope fallback ra file — né tràn stdout")
     _add_base_also_flags(p)
     p.set_defaults(fn=cmd_nlm_cross)
 
@@ -300,6 +306,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--large-threshold", dest="large_threshold", type=int, help=f"ngưỡng byte coi là 'lớn' (mặc định {NLM_LARGE_SRC_BYTES})")
     p.add_argument("--skip-nlm-preflight", dest="skip_nlm_preflight", action="store_true",
                    help="(v1.29.7) BỎ kiểm NLM sẵn-sàng trước upload (mặc định DỪNG sớm nếu NLM chưa cài/auth — tránh chuỗi dở dang)")
+    p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
+                   help="(v1.34.60 ADR-5) NLM chết → DỪNG rc=2 (fail-closed) thay vì tự chuyển --no-nlm-add (v1.34.54)")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
     # v1.34.33 (benchmark 2026-07-12: settle-wait = ~50% của 238s/file): KHÔNG chờ nguồn settle sau `nlm source add`
@@ -381,6 +389,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
                    help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
+    p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
+                   help="(v1.34.60 ADR-5) NLM chết → GIỮ dừng ở dedup-gate như cũ thay vì tự chuyển --no-nlm-add")
     p.add_argument("--resume", action="store_true",
                    help="(v1.34.55 C4+C5) NỐI THEO REGISTRY sau khi chết giữa chừng: --name <tên canonical> + --apply --confirm yes — dò chunk __partNN đã có, chỉ làm phần thiếu; name đã đủ part → tự SỬA corpus kẹt false")
     p.add_argument("--json", action="store_true")

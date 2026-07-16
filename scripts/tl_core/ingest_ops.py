@@ -799,7 +799,10 @@ def cmd_ingest_missing(a) -> int:
     if to_add and not getattr(a, "force_api_add", False):
         _thr_over = len(to_add) > NLM_BATCH_LINKS_THRESHOLD
         _rep54 = _nlm_preflight_report(target_nb, probe=not _thr_over)   # >ngưỡng thì khỏi tốn probe
-        _dead54 = (_rep54.get("alive") is False)
+        # v1.34.60 (E3 control-surface, ADR-5): nhánh cookie-chết→BATCH_LINKS chịu điều khiển fallback
+        # (--no-fallback/TL_NLM_FALLBACK=0 → không tự rẽ, đi tiếp đường API rồi fail-closed như trước
+        # v1.34.54); ngưỡng pending>2 là tối ưu batch bình thường, KHÔNG phải fallback — giữ nguyên.
+        _dead54 = (_rep54.get("alive") is False) and _nlm_fallback_enabled(a)
         if _thr_over or _dead54:
             _why54 = (f"pending={len(to_add)} > {NLM_BATCH_LINKS_THRESHOLD}" if _thr_over
                       else f"cookie NLM chết ({_rep54.get('why') or '?'})")
@@ -2204,6 +2207,14 @@ def cmd_profile_ingest(a) -> int:
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 2
 
+    # v1.34.60 (E3 — tổng quát hoá B1 sang profile-ingest, ADR-4): NLM hard-dead → TỰ CHUYỂN --no-nlm-add
+    # (mirror ingest-local v1.34.54) thay vì chết ở dedup-gate LIVE_SOURCE_LIST_FAILED phía dưới; Drive+registry
+    # vẫn hoàn tất, corpus KHÔNG set, nạp NLM cuối lô qua nlm-links + reconcile. Tắt: --no-fallback/TL_NLM_FALLBACK=0.
+    if not getattr(a, "no_nlm_add", False) and _nlm_fallback_enabled(a):
+        _v60p = _nlm_verdict(notebook_id)
+        if not _v60p["alive"]:
+            _nlm_fallback_banner("profile-ingest", _v60p.get("why") or "", "deferred")
+            a.no_nlm_add = True
     if getattr(a, "no_nlm_add", False):
         # v1.34.54 (B2 — trình tự grill Q4: Drive + sắp xếp TRƯỚC, NLM CUỐI LÔ qua nlm-links/batch dán tay):
         # dừng sau Drive+registry, mirror `ingest-local --no-nlm-add` (v1.34.35). corpus KHÔNG set (S4).
@@ -2705,6 +2716,15 @@ def cmd_ingest_local(a) -> int:
             # v1.34.54 (B1/Q3=a — TRƯỚC: abort NLM_NOT_READY rc=2, user phải tự chạy lại với --no-nlm-add):
             # cookie chết → TỰ CHUYỂN quy trình ADD-TAY (v1.34.35): vẫn hoàn tất Drive+registry, KHÔNG đụng NLM,
             # output kèm link dán tay + next_steps reconcile. Muốn ép thử API add bất chấp: --skip-nlm-preflight.
+            # v1.34.60 (E3 control-surface, ADR-5): --no-fallback / TL_NLM_FALLBACK=0 → KHÔI PHỤC fail-closed
+            # (NLM_NOT_READY rc=2 như trước v1.34.54) — CI strict/user muốn dừng cứng.
+            if not _nlm_fallback_enabled(a):
+                print(json.dumps({"ok": False, "error": "NLM_NOT_READY", "why": _nlm_why,
+                                  "note": "--no-fallback/TL_NLM_FALLBACK=0: DỪNG trước mọi side-effect. "
+                                          "Sửa `nlm login` rồi chạy lại; hoặc bỏ --no-fallback để tự chuyển "
+                                          "--no-nlm-add (ADD-TAY)."}, ensure_ascii=False, indent=2),
+                      file=sys.stderr)
+                return 2
             print(f"[tl] ⚠ NLM chết ({_nlm_why}) → TỰ CHUYỂN --no-nlm-add (ADD-TAY): xong Drive+registry, "
                   f"dán link vào notebook rồi `tl nlm-reconcile --apply`. (Kiểm phiên: tl nlm-auth-status --wait)",
                   file=sys.stderr, flush=True)

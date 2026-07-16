@@ -2258,7 +2258,13 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
 def cmd_doc_text(a) -> int:
     """A1 (v1.34.60): `tl doc-text <fileId>` — MỘT lệnh đọc text mọi định dạng (GDoc/.docx/.pdf), cache
     extract_<id>.txt; --dieu cắt Điều; --out né tràn stdout; --refresh bỏ cache. Nền cho E1 corpus-fallback."""
-    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    # OFFLINE-FIRST (bug máy-phụ-thuộc CI bắt 2026-07-16): máy KHÔNG config → apply_profile_offline in
+    # recovery + SystemExit(1), nhưng doc-text đọc CACHE không cần creds — nuốt lỗi để thiếu config vẫn
+    # phục vụ cache (đường export/download phía sau tự fail sạch nếu thật sự cần mạng/token).
+    try:
+        apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001
+        pass
     fid = str(getattr(a, "file_id", "") or "").strip()
     text, src = _doc_text_any(fid, refresh=getattr(a, "refresh", False))
     if not text:

@@ -11831,10 +11831,14 @@ def run() -> int:
             _keys = ("_manifest_entries", "_doc_text_fetch_binary", "_read_doc_text",
                      "_read_local_text_for_analysis", "apply_profile_offline", "_active_profile", "CACHE")
             _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+            def _apo_ci121(*_a, **_k):
+                # mô phỏng máy CI KHÔNG config (bug 2026-07-16 CI bắt): apply_profile_offline in recovery
+                # + SystemExit(1) — doc-text offline-first PHẢI sống sót (cache không cần creds).
+                raise SystemExit(1)
             try:
                 _TL_MODULE.CACHE = _cache121
                 _TL_MODULE._active_profile = lambda: _TL_MODULE.DEFAULT_PROFILE
-                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE.apply_profile_offline = _apo_ci121
                 _TL_MODULE._manifest_entries = lambda refresh=False: list(_ents)
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (
                     _dx if fid == "dDOCX121" else (_pdf if fid == "pPDF121" else None))

@@ -17,8 +17,10 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 2. Sửa tối thiểu, giữ idiom comment "vX.Y.Z (bằng chứng) — fix"
 3. `python -m ruff check --select F scripts/tl.py` (tl.py phải 0 F821; tl_selftest có ~1.1k F821 BY DESIGN — bind())
 4. `python scripts/tl.py --selftest` (phải N/N, thêm test rXX_ cho mỗi fix)
-5. `git diff` → CHANGELOG.md (mục ★ vX.Y.Z) → commit
-6. Deploy = user double-click `upload-skill-to-Package.cmd` (KHÔNG tự chạy)
+5. Output DÀI (selftest N case, audit/golden JSON, gate logs) → giao agent `tl-auditor` (read-only) tiêu hoá,
+   phiên chính chỉ nhận kết luận — giữ context sạch (G5 §11 kế hoạch guard-va-boc-tl-core).
+6. `git diff` → CHANGELOG.md (mục ★ vX.Y.Z) → commit
+7. Deploy = user double-click `upload-skill-to-Package.cmd` (KHÔNG tự chạy)
 
 ## Bài học đắt giá (đã trả giá, không lặp lại)
 - **Đối chiếu nhánh/patch ngoài: BẮT BUỘC test HÀNH VI 2 CHIỀU** (fixture họ chạy trên ta + phản chứng bơm vào

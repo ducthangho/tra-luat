@@ -15,6 +15,10 @@ RISKY = [
     (r"\bclasp\s+push\b", "deploy Apps Script"),
     (r"gas-deploy", "deploy Apps Script"),
     (r"--force-insert\b", "register bo qua existence-check"),
+    # G4 (ke-hoach-guard-va-boc-tl-core §11, 2026-07-18): golden diff = BUG cua thay doi (R6/§6.5) —
+    # regen fixtures phai la hanh dong CHU DICH user duyet (ask, khong deny cung: van co nep
+    # SKILL.md-header hop le cuoi release).
+    (r"golden-test\s+--write\b", "regen golden fixtures (CAM §6.5/R6 — golden 0-diff la GATE cua move)"),
 ]
 
 

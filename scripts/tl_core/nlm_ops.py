@@ -1901,8 +1901,28 @@ def _nlm_add_deferred(a, nb: str, *, why: str = "") -> int:
             _v = _journaled_reg_write(_rid, _gas(), [{"drive_id": did, "nlm_notebook_id": nb,
                                                       "nlm_status": "deferred"}],
                                       "nlm_notebook_id,nlm_status", before_by_key={did: _bef})
-            _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"DEFERRED": 1}})
             _reg_deferred = bool(_v.get("verified"))
+            if not _reg_deferred:
+                # v1.34.62 (live-smoke 2026-07-17 bắt OAN): readback field-level trong _verified_reg_write
+                # (reg_get refresh=true + retry) có thể ÂM TÍNH GIẢ dù write ĐÃ vào — reg-query --live thấy
+                # deferred ngay sau đó. RE-CHECK AUTHORITATIVE qua reg_get_bulk (cùng khuôn verify CUỐI của
+                # nlm-migrate/claim-commit) TRƯỚC khi kết luận; chỉ giữ False khi authoritative CŨNG không
+                # thấy (write thật fail) — không báo láo cả hai chiều.
+                try:
+                    _rgb62 = _gas().get("reg_get_bulk", keys=json.dumps([did]), key_field="drive_id")
+                    _row62 = next((x for x in (_rgb62.get("rows") or [])
+                                   if str(x.get("drive_id") or "") == did), None)
+                    if (str((_row62 or {}).get("nlm_status") or "").strip().lower() == "deferred"
+                            and str((_row62 or {}).get("nlm_notebook_id") or "").strip() == str(nb)):
+                        _reg_deferred = True
+                        _note_reg = ("verified qua reg_get_bulk AUTHORITATIVE (readback journaled âm tính "
+                                     "giả — GAS cache; write đã vào).")
+                except Exception:  # noqa: BLE001 — re-check best-effort, không nổ lệnh
+                    pass
+                if not _reg_deferred:
+                    _note_reg = (f"reg-write deferred CHƯA xác minh được (readback + reg_get_bulk đều không "
+                                 f"thấy) — kiểm `tl reg-query --live --drive-id {did}` rồi chạy lại nếu thiếu.")
+            _journal_append(_rid, {"t": "run_end", "ok": _reg_deferred, "counts": {"DEFERRED": 1}})
         except Exception as _e:  # noqa: BLE001
             _note_reg = f"reg-write deferred lỗi ({type(_e).__name__}) — vẫn in link, reconcile xử sau."
     _url = _entry_links_url(_row or {"drive_id": did})

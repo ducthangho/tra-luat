@@ -12246,6 +12246,113 @@ def run() -> int:
         return _rc1 == 2 and _rc2 == 2 and "DEFERRED_NLM_OFFLINE" not in (_o1 + _o2)
     _t110("r122_reconcile_dry_dead_and_no_fallback_keep_rc2", _c122_reconcile_dry_dead_and_no_fallback_keep_rc2)
 
+    # ═══ v1.34.62 — r123: vá `registry_deferred=false` OAN (live-smoke 2026-07-17 bắt: readback field-level
+    # trong _verified_reg_write âm tính giả dù write ĐÃ vào — reg-query --live thấy deferred ngay sau).
+    # Fix: verified=False → RE-CHECK AUTHORITATIVE reg_get_bulk (khuôn verify migrate/claim-commit) TRƯỚC
+    # khi kết luận; journal run_end phản ánh verdict CUỐI. NEGATIVE trước (r102). ═══
+    def _run_ad123(jw_verified=False, auth_row="deferred", auth_raise=False):
+        _calls = {"add": 0, "rgb": 0, "run_end": []}
+
+        class _GA123:
+            def get(self, action, **kw):
+                if action == "reg_get_bulk":
+                    _calls["rgb"] += 1
+                    if auth_raise:
+                        raise RuntimeError("boom123")
+                    if auth_row == "deferred":
+                        return {"ok": True, "rows": [{"drive_id": "dNA123", "nlm_status": "deferred",
+                                                      "nlm_notebook_id": "nbA123"}]}
+                    if auth_row == "old":
+                        return {"ok": True, "rows": [{"drive_id": "dNA123", "nlm_status": "",
+                                                      "nlm_notebook_id": ""}]}
+                    return {"ok": True, "rows": []}
+                return {"ok": True, "results": []}
+
+        class _NCA123:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": "401 unauthorized auth expired"}
+
+            def source_add(self, nb, **kw):
+                _calls["add"] += 1
+                return {"ok": True}
+
+            def source_list(self, nb, **kw):
+                return {"ok": False, "error": "401 unauthorized", "auth_hint": "nlm login"}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+                 "_gas", "_apply_journal_start", "_journal_append", "_journaled_reg_write", "_active_profile")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NCA123() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nbA123", None)
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": "dNA123", "name": "Luat_Add123", "nlm_source_id": "",
+                 "nlm_notebook_id": "", "nlm_status": ""}]
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _GA123()
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "runAD123"
+            _TL_MODULE._journal_append = (lambda rid, rec:
+                                          _calls["run_end"].append(rec) if rec.get("t") == "run_end" else None)
+            _TL_MODULE._journaled_reg_write = (lambda run_id, g, items, cols, **kw:
+                                               {"verified": bool(jw_verified)})
+            _TL_MODULE._active_profile = lambda: "vbqppl"
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+            _ns = argparse.Namespace(notebook_id=None, drive_id="dNA123", url=None, file=None, type="doc",
+                                     title=None, no_wait=False, wait=False, skip_live_check=False, json=False,
+                                     no_fallback=False, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_add(_ns)
+            try:
+                _j = json.loads(_bo.getvalue())
+            except Exception:
+                _j = {}
+            return _rc, _j, _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _TL_MODULE._NLM_PROBE_CACHE.clear()
+
+    def _c123_auth_confirms_false():
+        # NEGATIVE (trước — r102): readback False + AUTHORITATIVE cũng thấy giá trị CŨ (write thật fail) →
+        # GIỮ registry_deferred=false (không báo láo thành true) + note rõ hướng kiểm; run_end ok=False; rc=0.
+        _rc, _j, _calls = _run_ad123(jw_verified=False, auth_row="old")
+        _re = [r for r in _calls["run_end"] if "DEFERRED" in (r.get("counts") or {})]
+        return (_rc == 0 and _j.get("registry_deferred") is False and _calls["rgb"] == 1
+                and "CHƯA xác minh" in (_j.get("note_registry") or "")
+                and len(_re) == 1 and _re[0].get("ok") is False)
+    _t110("r123_add_deferred_auth_confirms_false_stays_false", _c123_auth_confirms_false)
+
+    def _c123_auth_error_keeps_false():
+        # NEGATIVE: re-check authoritative RAISE (mạng/GAS lỗi) → không nổ lệnh, giữ false + note; rc=0.
+        _rc, _j, _calls = _run_ad123(jw_verified=False, auth_raise=True)
+        return (_rc == 0 and _j.get("registry_deferred") is False and _calls["rgb"] == 1
+                and "CHƯA xác minh" in (_j.get("note_registry") or ""))
+    _t110("r123_add_deferred_auth_error_keeps_false", _c123_auth_error_keeps_false)
+
+    def _c123_auth_recheck_flips_true():
+        # FIX CHÍNH: readback âm tính giả (verified=False) nhưng reg_get_bulk AUTHORITATIVE thấy ĐÚNG
+        # nlm_status=deferred + nb → registry_deferred=true + note 'AUTHORITATIVE'; run_end ok=True (verdict
+        # CUỐI, không phải verdict readback); rc=0.
+        _rc, _j, _calls = _run_ad123(jw_verified=False, auth_row="deferred")
+        _re = [r for r in _calls["run_end"] if "DEFERRED" in (r.get("counts") or {})]
+        return (_rc == 0 and _j.get("registry_deferred") is True and _calls["rgb"] == 1
+                and "AUTHORITATIVE" in (_j.get("note_registry") or "").upper()
+                and len(_re) == 1 and _re[0].get("ok") is True)
+    _t110("r123_add_deferred_authoritative_recheck_flips_true", _c123_auth_recheck_flips_true)
+
+    def _c123_verified_true_skips_recheck():
+        # Control: readback verified=True → KHÔNG tốn call reg_get_bulk; run_end ok=True.
+        _rc, _j, _calls = _run_ad123(jw_verified=True)
+        _re = [r for r in _calls["run_end"] if "DEFERRED" in (r.get("counts") or {})]
+        return (_rc == 0 and _j.get("registry_deferred") is True and _calls["rgb"] == 0
+                and len(_re) == 1 and _re[0].get("ok") is True)
+    _t110("r123_add_deferred_verified_true_skips_recheck", _c123_verified_true_skips_recheck)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

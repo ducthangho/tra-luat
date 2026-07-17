@@ -1,3 +1,20 @@
+# ★ v1.34.62 — vá `registry_deferred=false` OAN: re-check authoritative reg_get_bulk (2026-07-17)
+
+> Live-smoke dead-path 2026-07-17 bắt: `nlm-add` deferred ghi registry THÀNH CÔNG (reg-query --live thấy
+> `nlm_status=deferred` ngay sau) nhưng envelope báo `registry_deferred=false` — readback field-level trong
+> `_verified_reg_write` (reg_get refresh=true + retry) ÂM TÍNH GIẢ (GAS cache che). TDD r123 ×4
+> negative-input trước; selftest 1044→1048. Python-only.
+
+- **Vá `_nlm_add_deferred`**: `_journaled_reg_write` verified=False → RE-CHECK AUTHORITATIVE qua
+  `reg_get_bulk` (cùng khuôn verify CUỐI của nlm-migrate/claim-commit) TRƯỚC khi kết luận: row thấy đúng
+  `nlm_status=deferred` + nb → `registry_deferred=true` + note "AUTHORITATIVE (readback âm tính giả)";
+  authoritative CŨNG không thấy → GIỮ false + note hướng kiểm `reg-query --live` (không báo láo cả 2 chiều);
+  re-check RAISE → nuốt, giữ false. **Journal run_end nay phản ánh verdict CUỐI** (sau re-check) thay vì
+  verdict readback — undo/resume đọc đúng sự thật.
+- **Test r123 ×4**: auth-confirms-false giữ false + note "CHƯA xác minh" + run_end ok=False (NEGATIVE trước);
+  auth-error giữ false không nổ lệnh; recheck-flips-true + note AUTHORITATIVE + run_end ok=True; verified=True
+  bỏ re-check (0 call reg_get_bulk). Đường verified=True + hành vi r121 giữ nguyên byte.
+
 # ★ v1.34.61 — NLM-DEATH RESILIENCE Release 2: E2 unverified-continue + defer/resume-artifact (2026-07-17)
 
 > Release 2/2 CHỐT kế hoạch grill-with-docs (`D:\Quốc hội\ke-hoach-nlm-fallback-E1-E3-2026-07-16.md`,

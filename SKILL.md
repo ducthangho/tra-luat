@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.62 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.63 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -222,7 +222,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | Nạp & convert (GHI — dry-run trước) | `ingest-local` · `profile-ingest` · `ingest-inbox` · `ingest-zip` · `ingest-ocr` · `profile-ingest-chunks` · `convert-verify` · `nlm-add` |
 | OCR & chunk (local an toàn) | `ocr-analyze/run/verify` · `chunk-plan/apply/verify` |
 | NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
-| Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc` · `sweep` · `dedup-plan` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
+| Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc` · `sweep` · `dedup-plan/corpus` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
 | Audit & release | `workflow-audit` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
 | Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
 

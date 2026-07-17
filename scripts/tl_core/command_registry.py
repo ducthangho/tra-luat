@@ -161,6 +161,21 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
          {"flags": ['--force-unsafe'], "dest": 'force_unsafe', "action": 'store_true', "help": '(Pha 1+) bỏ qua precheck blocker (rủi ro)'},
      ]},
+    {"name": 'dedup-corpus', "handler": 'cmd_dedup_corpus',
+     "help": '(v1.34.63 B1) dedup TRỤC NỘI DUNG (md5-first → content-hash → BoW-Jaccard; COEXIST dedup-plan trục chủ đề): 7 classification DUP_EXACT/MISLABEL_RESOLVED/_UNRESOLVED/PHYSICAL_DUP/NEAR_DUP_REVIEW/JUNK/CROSS_PROFILE_DUAL_REG; docx-gốc+GDoc-convert KHÔNG dup; picker on-NLM-first. DRY mặc định; --apply --confirm yes: mode corpus-false (reversible) | delete (opt-in)',
+     "args": [
+         {"flags": ['--apply'], "action": 'store_true'},
+         {"flags": ['--confirm'], "default": '', "help": "gõ 'yes' xác nhận apply (contract high-risk)"},
+         {"flags": ['--mode'], "choices": ['corpus-false', 'delete'], "default": 'corpus-false', "help": 'corpus-false = reversible (mặc định); delete = source-delete trash Drive (OPT-IN, ADR-5)'},
+         {"flags": ['--only-md5'], "dest": 'only_md5', "help": 'chỉ apply nhóm có key/md5 này (duyệt từng bước — ADR-7)'},
+         {"flags": ['--limit'], "type": int, "help": 'trần số NHÓM apply mỗi lần'},
+         {"flags": ['--near-threshold'], "dest": 'near_threshold', "type": float, "default": 0.95, "help": 'ngưỡng Jaccard dải NEAR (ADR-A2-3, mặc định 0.95)'},
+         {"flags": ['--all-profiles'], "dest": 'all_profiles', "action": 'store_true', "help": 'quét XUYÊN profile — FLAG-ONLY (CROSS_PROFILE_DUAL_REG, không apply — ADR-6)'},
+         {"flags": ['--refresh'], "action": 'store_true', "help": 'bỏ cache manifest + content-hash, đọc lại từ nguồn'},
+         {"flags": ['--out'], "help": 'ghi envelope JSON ra file (kế hoạch lớn — né tràn stdout)'},
+         {"flags": ['--json'], "action": 'store_true'},
+         {"flags": ['--force-unsafe'], "dest": 'force_unsafe', "action": 'store_true', "help": '(Pha 1+) bỏ qua precheck blocker (rủi ro)'},
+     ]},
     {"name": 'vbhn-year-fix', "handler": 'cmd_vbhn_year_fix',
      "help": 'BẤT BIẾN ĐẶT TÊN: số hiệu VBHN PHẢI có NĂM (số tái dùng theo năm→collision). Quét VBHN sohieu THIẾU năm → suy năm (ngày ban hành) → reg_upsert sohieu NN-YYYY-VBHN-XXX. DRY mặc định; --apply ghi; --with-name sửa cả tên',
      "args": [
@@ -1243,6 +1258,16 @@ GENERATED_SPECS = [
          {"flags": ['--refresh'], "action": 'store_true', "help": 'bỏ qua cache extract_<id>.txt, đọc lại từ nguồn'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    {"name": 'doc-compare', "handler": 'cmd_doc_compare',
+     "help": '(v1.34.63 A2) so-cặp identity NỘI DUNG 2 văn bản: <a> <b> = drive_id | sohieu | name | LOCAL-PATH (auto-detect; local×local = pre-ingest dedup, không cần boot). Tín hiệu md5/content-hash/BoW-Jaccard/same_type/sohieu_differs → verdict IDENTICAL/NEAR/DIFFERENT. NLM-độc-lập; rc=0 mọi verdict',
+     "args": [
+         {"dest": 'ref_a'},
+         {"dest": 'ref_b'},
+         {"flags": ['--near-threshold'], "dest": 'near_threshold', "type": float, "default": 0.95, "help": 'ngưỡng Jaccard verdict NEAR (ADR-A2-3, mặc định 0.95)'},
+         {"flags": ['--refresh'], "action": 'store_true', "help": 'bỏ cache extract, đọc lại text từ nguồn'},
+         {"flags": ['--out'], "help": 'ghi envelope JSON ra file'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'bench', "handler": 'cmd_bench',
      "help": 'đo hiệu năng các tính năng tính-toán-trong-code (offline) trên manifest hiện có',
      "args": [
@@ -1437,6 +1462,7 @@ COMMAND_META = {
     "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None, generated=True),
     "source-update-corpus": _m("high", False, "registry_nlm", True, True, False, None, "source_update_corpus", False, None, generated=True),
     "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, "dedup_plan", False, None, generated=True),
+    "dedup-corpus":         _m("high", False, "drive_registry_nlm", True, True, False, None, "dedup_corpus", False, "hygiene", generated=True, nlm_fallback="none"),   # v1.34.63 B1 (trục NỘI DUNG; apply ủy quyền source-update-corpus/source-delete; ghi → none)
     "register":             _m("high", False, "registry", False, True, False, None, "register", False, None),
     "backfill-loai":        _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "backfill-title-vn":    _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
@@ -1458,6 +1484,7 @@ COMMAND_META = {
     "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True, nlm_fallback="defer"),   # v1.34.57 B-#4..#7; v1.34.61 E2: --apply NLM-chết → DEFERRED + resume-artifact --from-plan
     "nlm-cross":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", nlm_fallback="corpus_read"),   # v1.34.60 E1 (meta mới — lệnh cũ ở cli.py chưa từng có meta)
     "doc-text":             _m("low", True, "local", False, False, False, None, None, False, "lookup_ops", generated=True),   # v1.34.60 A1 (read-only; ghi cache extract local)
+    "doc-compare":          _m("low", True, "local", False, False, False, None, None, False, "doc_identity", generated=True, nlm_fallback="corpus_read"),   # v1.34.63 A2 (read-only; đọc corpus — chạy khi NLM chết; ghi cache extract local)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     # ── I7 wave-2 (v1.34.11): meta BASELINE bằng-chứng-cờ cho 78 lệnh chuyển GENERATED_SPECS —
     # chính sách grilling: --apply→supports_dry_run (doctrine DRY-mặc-định), --confirm→requires_confirm,
@@ -1573,7 +1600,8 @@ def registry_summary() -> dict:
 _CONTRACT_REQUIRED = {"ingest", "nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
                       "profile-rebuild-registry", "ingest-missing", "manifest",   # Pha-E-hoàn-thiện v1.34.16
                       "register", "drive-push", "nlm-reconcile", "push-overflow",
-                      "shared-source-fix", "source-update-corpus"}
+                      "shared-source-fix", "source-update-corpus",
+                      "dedup-corpus"}   # v1.34.63 B1 (apply high-risk — contract dedup_corpus)
 
 
 def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> dict:

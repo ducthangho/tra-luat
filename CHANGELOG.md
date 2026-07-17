@@ -1,3 +1,46 @@
+# ★ v1.34.63 — A2 `doc-compare` + B1 `dedup-corpus`: dedup TRỤC NỘI DUNG (2026-07-18)
+
+> Kế hoạch `D:\Quốc hội\ke-hoach-dedup-corpus-B1-2026-07-18.md` (grill chốt, ADR-1..7 + ADR-A2-1..4) —
+> đóng nỗi đau data-op 2026-07-16 (dedup sweep phải viết ~10 script tay). TDD r124 ×19 negative-input
+> trước; selftest 1048→1067. Python-only (GAS giữ 2.21.2m).
+
+- **Module identity DÙNG CHUNG `tl_core/doc_identity.py` (ADR-A2-1/A2-2)** — 1 nguồn sự thật, B1 gọi CÙNG
+  helper qua stub tl (drift-lock r124 cấm copy): `_doc_norm` = NFC + `_strip_font_runs` + lowercase + gộp
+  whitespace, **GIỮ dấu + dấu câu**; `_content_hash` = sha256 (rỗng → '' — không sha-rỗng giả identical);
+  `_bow_tokens`/`_bow_jaccard` (GIỮ dấu, bỏ dấu câu; rỗng → 0.0); `_compare_signals` → verdict
+  IDENTICAL (md5 bytes | content-hash, đòi giá trị không-rỗng) / NEAR (jaccard ≥ T=0.95 `--near-threshold`)
+  / DIFFERENT + `sohieu_differs` (raw signal — A2 KHÔNG kết luận tên đúng).
+- **`tl doc-compare <a> <b>` (A2, ADR-A2-3/A2-4)** — CLI mỏng: input auto-detect drive_id | sohieu | name |
+  **local-path** (local×local = pre-ingest dedup, KHÔNG cần manifest/boot); đọc text `_doc_text_any` (A1);
+  NLM-độc-lập; rc=0 mọi verdict, rc=2 chỉ khi không resolve/không đọc được (fail-closed). Read-only,
+  `nlm_fallback=corpus_read`, lazy-creds (khuôn doc-text — CI offline không gãy).
+- **`tl dedup-corpus` (B1, ADR-1..7)** — dedup TRỤC NỘI DUNG, COEXIST `dedup-plan` (trục chủ đề):
+  - Candidate-gen FREE md5-group + sohieu-group; **md5-first perf (ADR-7)**: dòng md5-unique KHÔNG BAO GIỜ
+    đọc text; md5-group cùng-sohieu chốt DUP_EXACT bằng BYTES (0 lần doc-text); sohieu-group so content
+    qua ĐẠI DIỆN cụm-md5; cache `.tl_state/content_hash_<did>.json` (tin CHỈ khi md5 khớp).
+  - Classifier PURE `_dedup_corpus_classify` 7 loại, ưu tiên: CROSS_PROFILE_DUAL_REG (ADR-6, `--all-profiles`
+    flag-only — dual-reg chủ đích) > PHYSICAL_DUP (ADR-4 lằn ranh: ≥2 on-NLM-live → đẩy `nlm-audit-physical`/
+    `nlm-source-remove`, B1 KHÔNG tự đụng — bất biến #16) > JUNK (SMOKE_TEST/KhongPhaiVanBan) >
+    MISLABEL_RESOLVED/_UNRESOLVED (ADR-3: content-verify header `_classify_doc_header` với filename RỖNG —
+    ruột văn bản phân xử, khớp DUY NHẤT 1 → resolved, 0/>1/không đọc được → fail-closed) > DUP_EXACT
+    (ADR-2: **CÙNG TYPE** — docx-gốc + GDoc-convert cùng content-hash = KHÔNG trùng → `legit_convert_pairs`,
+    định nghĩa user 2026-07-16). Cặp không-exact Jaccard ≥ T → NEAR_DUP_REVIEW kèm jaccard + Δ số-Điều/
+    độ-dài, **KHÔNG BAO GIỜ auto** (bất biến #6 gốc-vs-sửa-đổi).
+  - Canonical-picker RIÊNG (ADR-1/ADR-4 — KHÔNG kế thừa bug picker-chọn-ngược của dedup-plan): on-NLM-live+
+    corpus → corpus → tên chuẩn (phạt `_v2`/tên thô) → drive_id sort tất định.
+  - Apply (ADR-5): `--apply --confirm yes`; mặc định `--mode corpus-false` ỦY QUYỀN `source-update-corpus
+    <id> false` TỪNG id (tái dùng guard shared-source + gỡ NLM + journal-undo); `--mode delete` OPT-IN ủy
+    quyền `source-delete` (trash Drive + reg row) cho file Drive dư/JUNK; guards fail-closed đè MỌI mode;
+    `--only-md5`/`--limit` duyệt từng bước (ADR-7); dòng đã corpus=false bỏ qua (idempotent); journal
+    dedup-corpus run_end = verdict cuối; `--all-profiles` + `--apply` → rc=2 (flag-only).
+- **Wiring**: GENERATED_SPECS + COMMAND_META (`doc-compare` low/read-only/corpus_read; `dedup-corpus`
+  high/confirm/dry-run/`drive_registry_nlm`/nlm_fallback=none) + contract `dedup_corpus` đủ 8 field +
+  `_CONTRACT_REQUIRED` +dedup-corpus (drift-lock r65 cập nhật CÓ CHỦ ĐÍCH) + stub I11 (module mới
+  `doc_identity` vào `_STUB_MAP`/bind; hằng `_DEDUP_JUNK_NAME_RE` re-export tl) + `_CREDS_LAZY_CMDS`
+  +2 lệnh (bài học CI v1.34.60) + parser-surface regen (+2 lệnh, có chủ đích) + golden regen.
+- **SKILL.md kernel**: bảng lệnh Registry & corpus `dedup-plan` → `dedup-plan/corpus` (49145B ≤ 48K limit
+  49152B) → **đổi kernel ⇒ user re-import Capabilities khi tiện**; COMMANDS.md +2 dòng lệnh đầy đủ.
+
 # ★ v1.34.62 — vá `registry_deferred=false` OAN: re-check authoritative reg_get_bulk (2026-07-17)
 
 > Live-smoke dead-path 2026-07-17 bắt: `nlm-add` deferred ghi registry THÀNH CÔNG (reg-query --live thấy

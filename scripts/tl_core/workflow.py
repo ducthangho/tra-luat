@@ -330,6 +330,17 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_command": "dedup-plan --apply",
         "rollback_hint": "undo <run_id> --apply — apply chỉ set corpus=false nên đảo lại được toàn phần",
     },
+    # ── B1 (v1.34.63): dedup-corpus — trục NỘI DUNG (md5/content-hash/BoW), coexist dedup-plan (trục chủ đề) ──
+    "dedup_corpus": {
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "nhóm content (key = md5 | content-hash) + tập act drive_id — re-plan tươi mỗi lần chạy; nhóm đã xử hết act tự biến mất",
+        "journal_key": "tl_journal/dedup-corpus_<run_id> (plan+counts) + journal RIÊNG từng act ủy quyền source-update-corpus/source-delete (undo theo id)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — classifier re-plan từ manifest tươi (idempotent theo nguồn); dòng đã corpus=false bị bỏ qua (skipped_already_false)",
+        "duplicate_guard": "DRY mặc định; --apply --confirm yes + _apply_gate; guards fail-closed NEAR/UNRESOLVED/PHYSICAL/CROSS_PROFILE đè MỌI mode; --only-md5/--limit duyệt từng bước; --all-profiles flag-only",
+        "readback_command": "dedup-corpus --json (DRY re-plan phải hết nhóm đã xử) + reg-query <drive_id> --json từng act",
+        "resume_command": "dedup-corpus --apply --confirm yes [--only-md5 <hash>] (re-plan tươi, không cần artifact)",
+        "rollback_hint": "mode corpus-false: tl undo <journal source-update-corpus từng id> (reversible); mode delete: Drive trash restore + snapshot dòng trong journal source-delete",
+    },
 })
 
 # v1.34.1 (siết-6 advisory — deadline r65 'trước v1.34.1' ĐÚNG HẠN): contract THẬT cho 6 lệnh ghi legacy

@@ -5103,11 +5103,13 @@ def run() -> int:
     _six65 = _reg65._CONTRACT_REQUIRED
     # v1.34.1: HẾT grandfather — _CONTRACT_REQUIRED = TRỌN 12 lệnh ghi high-risk (Pha G 6 + siết-6).
     # v1.34.16 (Pha-E-hoàn-thiện): +3 lệnh nguy hiểm; audit ingest: + legacy adapter
+    # v1.34.63 (B1): +dedup-corpus (apply high-risk trục nội dung — contract dedup_corpus)
     cases.append(("r65_contract_required_six_wired",
                   _six65 == {"ingest", "nlm-add", "recat", "source-rename", "source-delete", "reg-delete", "dedup-plan",
                              "register", "drive-push", "nlm-reconcile", "push-overflow",
                              "shared-source-fix", "source-update-corpus",
-                             "profile-rebuild-registry", "ingest-missing", "manifest"}
+                             "profile-rebuild-registry", "ingest-missing", "manifest",
+                             "dedup-corpus"}
                   and all(_reg65.COMMAND_META[n]["idempotency_contract"] in _w65._IDEMPOTENCY_CONTRACTS for n in _six65)))
     # drift-lock: KHÔNG còn lệnh ghi high-risk nào thiếu contract (lệnh MỚI quên contract → set ≠ rỗng → fail)
     _adv65 = {n for n, m in _reg65.COMMAND_META.items()
@@ -12352,6 +12354,429 @@ def run() -> int:
         return (_rc == 0 and _j.get("registry_deferred") is True and _calls["rgb"] == 0
                 and len(_re) == 1 and _re[0].get("ok") is True)
     _t110("r123_add_deferred_verified_true_skips_recheck", _c123_verified_true_skips_recheck)
+
+    # ═══ v1.34.63 — r124: A2 doc-compare (module identity doc_identity) + B1 dedup-corpus (trục NỘI DUNG).
+    # Kế hoạch `ke-hoach-dedup-corpus-B1-2026-07-18.md` ADR-1..7 + ADR-A2-1..4. NEGATIVE-INPUT TRƯỚC:
+    # docx+GDoc KHÔNG dup (ADR-2), mislabel-unresolved fail-closed (ADR-3), near KHÔNG auto (bất biến #6),
+    # physical-dup defer (ADR-4), cross-profile flag-only (ADR-6). ═══
+    def _c124_doc_norm_recipe():
+        # ADR-A2-2: NFC + lowercase + strip-font-run + gộp whitespace; GIỮ DẤU + DẤU CÂU (không strip accents).
+        _n = _TL_MODULE._doc_norm
+        _a = _n("ĐƯỢC  BAN\tHÀNH,\r\nkèm theo.")
+        _ok_ws = _a == "được ban hành,\nkèm theo."
+        _ok_dau = _n("được") == _n("ĐƯỢC") and _n("được") != "duoc"          # GIỮ dấu — không về ASCII
+        _ok_font = _n("Times New Roman\nĐiều 1. Phạm vi") == "điều 1. phạm vi"  # dòng font-run bị lọc
+        _ok_keep = "theo times" in _n("Theo Times báo cáo")                   # câu THẬT chứa tên font: GIỮ
+        _ok_punct = "," in _a and "." in _a                                   # GIỮ dấu câu
+        return _ok_ws and _ok_dau and _ok_font and _ok_keep and _ok_punct
+    _t110("r124_doc_norm_recipe", _c124_doc_norm_recipe)
+
+    def _c124_content_hash_two_gdoc_identical():
+        # 2 GDoc convert cùng nội dung: khác case/markup-font/whitespace → CÙNG content_hash (bắt dup khi md5 khác).
+        _h = _TL_MODULE._content_hash
+        _t1 = "ĐIỀU 1. Phạm vi điều chỉnh\nLuật này quy định về dữ liệu."
+        _t2 = "Times New Roman\nđiều 1. phạm vi   điều chỉnh\n\n\nLuật này quy định về dữ liệu."
+        return (_h(_t1) and _h(_t1) == _h(_t2) and _h(_t1) != _h(_t1 + " bổ sung")
+                and _h("") == "" and _h("  \n ") == "")   # NEGATIVE: rỗng → "" (không sha-rỗng giả identical)
+    _t110("r124_content_hash_two_gdoc_identical", _c124_content_hash_two_gdoc_identical)
+
+    def _c124_bow_jaccard_values():
+        _bt, _bj = _TL_MODULE._bow_tokens, _TL_MODULE._bow_jaccard
+        _base = " ".join(f"từkhóa{i}" for i in range(40)) + " được ban hành theo quy định"
+        _v2 = _base + " sửa nhỏ"                                   # ca 155-2018 _v2 / 25-2021 _MyPham
+        _other = "quốc hội ban hành theo quy định điều luật này có hiệu lực thi hành"  # chỉ chung boilerplate
+        _tok = _bt("ĐƯỢC ban-hành, kèm.")
+        return (_bj(_base, _v2) >= 0.95 and _bj(_base, _other) < 0.95
+                and "được" in _tok and "duoc" not in _tok          # BoW GIỮ dấu (ADR-A2-2)
+                and "," not in " ".join(_tok)                      # bỏ dấu câu khi tách từ
+                and _bj("", "") == 0.0 and _bj("x", "") == 0.0)    # NEGATIVE: rỗng → 0.0 (không giả NEAR)
+    _t110("r124_bow_jaccard_values", _c124_bow_jaccard_values)
+
+    def _c124_compare_verdict_thresholds():
+        _cs = _TL_MODULE._compare_signals
+        _ta = " ".join(f"w{i}" for i in range(96)) + " a1 a2"      # 96 chung + 2 riêng
+        _tb = " ".join(f"w{i}" for i in range(96)) + " b1 b2"      # jaccard = 96/100 = 0.96
+        _r1 = _cs("x", "y", md5_a="m1", md5_b="m1")                # md5 bytes = sự thật → IDENTICAL
+        _r2 = _cs(_ta, _tb)                                        # 0.96 ≥ T=0.95 mặc định → NEAR
+        _r3 = _cs("một hai ba bốn", "năm sáu bảy tám chín mười")   # ~0 → DIFFERENT
+        _r4 = _cs(_ta, _tb, T=0.99)                                # --near-threshold custom → DIFFERENT
+        _r5 = _cs("", "", md5_a=None, md5_b=None)                  # NEGATIVE: rỗng → KHÔNG identical
+        return (_r1["verdict"] == "IDENTICAL" and _r1["md5_same"] is True
+                and _r2["verdict"] == "NEAR" and 0.95 <= _r2["jaccard"] <= 0.97
+                and _r2["threshold"] == 0.95
+                and _r3["verdict"] == "DIFFERENT"
+                and _r4["verdict"] == "DIFFERENT" and _r4["threshold"] == 0.99
+                and _r5["verdict"] == "DIFFERENT" and _r5["content_hash_same"] is False)
+    _t110("r124_compare_verdict_thresholds", _c124_compare_verdict_thresholds)
+
+    def _run_dc124(ref_a, ref_b, entries=None, doc_text=None, near=0.95, manifest_raise=False):
+        """Chạy cmd_doc_compare với stub offline (KHÔNG NLM, KHÔNG mạng). Trả (rc, json, nlm_loads)."""
+        _keys = ("apply_profile_offline", "load_creds", "_manifest_entries", "_doc_text_any", "_imp")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _nlm_loads = []
+        _realimp = _TL_MODULE._imp
+        def _imp124(name):
+            if name == "nlm_cli":
+                _nlm_loads.append(name)
+            return _realimp(name)
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            if manifest_raise:
+                def _me(refresh=False):
+                    raise RuntimeError("no boot")
+                _TL_MODULE._manifest_entries = _me
+            else:
+                _TL_MODULE._manifest_entries = lambda refresh=False: list(entries or [])
+            if doc_text is not None:
+                _TL_MODULE._doc_text_any = doc_text
+            _TL_MODULE._imp = _imp124
+            _ns = argparse.Namespace(ref_a=ref_a, ref_b=ref_b, near_threshold=near, refresh=False,
+                                     out=None, json=True, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_doc_compare(_ns)
+            try:
+                _j = json.loads(_bo.getvalue())
+            except Exception:
+                _j = {}
+            return _rc, _j, _nlm_loads
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    _DID124A = "DriveIdAAAAAAAAAAAAA1"
+    _DID124B = "DriveIdBBBBBBBBBBBBB2"
+    def _ents_dc124():
+        return [{"drive_id": _DID124A, "name": "Luat_01-2025-QH15_Du_lieu", "so_hieu": "01/2025/QH15",
+                 "mime": "application/vnd.google-apps.document", "corpus": "true", "md5": ""},
+                {"drive_id": _DID124B, "name": "Luat_02-2025-QH15_Dau_tu", "so_hieu": "02/2025/QH15",
+                 "mime": "application/vnd.google-apps.document", "corpus": "true", "md5": ""}]
+
+    def _c124_doc_compare_inputs_autodetect():
+        # (a) local-path ×2 (pre-ingest dedup, ADR-A2-4): KHÔNG cần manifest (patch raise) — offline thuần.
+        with _tf110.TemporaryDirectory() as _td:
+            _p1, _p2 = _hos.path.join(_td, "a124.txt"), _hos.path.join(_td, "b124.txt")
+            for _p in (_p1, _p2):
+                with open(_p, "w", encoding="utf-8") as _fh:
+                    _fh.write("Điều 1. Nội dung giống nhau hoàn toàn.")
+            _rc1, _j1, _nl1 = _run_dc124(_p1, _p2, manifest_raise=True)
+        _ok_local = (_rc1 == 0 and _j1.get("verdict") == "IDENTICAL" and _j1.get("md5_same") is True
+                     and (_j1.get("a") or {}).get("kind") == "local" and (_j1.get("b") or {}).get("kind") == "local"
+                     and not _nl1)                                  # NLM-độc-lập: không nạp nlm_cli
+        # (b) drive_id (≥20 ký tự) + (c) sohieu → resolve manifest; text stub theo fid → DIFFERENT.
+        _dt = lambda fid, **kw: ("điều 1 nội dung riêng " + fid, "gdoc")
+        _rc2, _j2, _nl2 = _run_dc124(_DID124A, _DID124B, entries=_ents_dc124(), doc_text=_dt)
+        _rc3, _j3, _nl3 = _run_dc124("01/2025/QH15", "02/2025/QH15", entries=_ents_dc124(), doc_text=_dt)
+        _ok_drive = (_rc2 == 0 and (_j2.get("a") or {}).get("kind") == "drive" and _j2.get("verdict") in ("NEAR", "DIFFERENT")
+                     and not _nl2)
+        _ok_sohieu = (_rc3 == 0 and (_j3.get("a") or {}).get("id") == _DID124A
+                      and (_j3.get("b") or {}).get("id") == _DID124B and not _nl3)
+        # NEGATIVE: ref không resolve được → rc=2 fail-closed (không đoán mò).
+        _rc4, _j4, _ = _run_dc124("999/9999/KHONGCO", "01/2025/QH15", entries=_ents_dc124(), doc_text=_dt)
+        return _ok_local and _ok_drive and _ok_sohieu and _rc4 == 2
+    _t110("r124_doc_compare_inputs_autodetect", _c124_doc_compare_inputs_autodetect)
+
+    def _c124_doc_compare_sohieu_differs_signal():
+        # Cùng md5 (bytes hệt) nhưng sohieu đăng ký KHÁC → sohieu_differs=true (raw signal); A2 KHÔNG kết luận
+        # tên nào đúng (không có keep/correct — việc của B1 mislabel content-verify).
+        _ents = _ents_dc124()
+        _ents[0]["md5"] = _ents[1]["md5"] = "cafe124cafe124"
+        _dt = lambda fid, **kw: ("điều 1 nội dung hệt nhau", "gdoc")
+        _rc, _j, _ = _run_dc124(_DID124A, _DID124B, entries=_ents, doc_text=_dt)
+        return (_rc == 0 and _j.get("verdict") == "IDENTICAL" and _j.get("md5_same") is True
+                and _j.get("sohieu_differs") is True
+                and "keep" not in _j and "correct_sohieu" not in _j and "mislabel" not in json.dumps(_j).lower())
+    _t110("r124_doc_compare_sohieu_differs_signal", _c124_doc_compare_sohieu_differs_signal)
+
+    def _c124_b1_reuses_identity_module():
+        # Drift-lock (ADR-A2-1): 1 NGUỒN SỰ THẬT — helper identity sống ở tl_core/doc_identity.py; B1/hygiene
+        # KHÔNG copy lại (gọi qua stub tl). Stub-map + quét nguồn hygiene không tự định nghĩa.
+        _ok_stub = all(getattr(getattr(_TL_MODULE, _n, None), "__tl_stub__", None) == ("doc_identity", _n)
+                       for _n in ("_doc_norm", "_content_hash", "_bow_tokens", "_bow_jaccard", "_compare_signals"))
+        _hy = (HERE / "tl_core" / "hygiene.py").read_text(encoding="utf-8")
+        _ok_nocopy = ("def _content_hash" not in _hy and "def _bow_jaccard" not in _hy
+                      and "def _doc_norm" not in _hy and "_content_hash(" in _hy and "_bow_jaccard(" in _hy)
+        return _ok_stub and _ok_nocopy
+    _t110("r124_b1_reuses_identity_module", _c124_b1_reuses_identity_module)
+
+    # ── B1 classifier (PURE — _dedup_corpus_classify(entries, content_by_did)) ──
+    def _e124(did, name, sohieu, *, corpus="true", nlm="", nlm_status="", md5="", mime="application/vnd.google-apps.document", profile=None):
+        _e = {"drive_id": did, "name": name, "so_hieu": sohieu, "corpus": corpus, "md5": md5,
+              "mime": mime, "nlm_source_id": nlm, "nlm_status": nlm_status, "row_kind": "own"}
+        if profile:
+            _e["_tl_profile"] = profile
+        return _e
+
+    def _cnt124(h, typ, *, chars=1000, dieu=3, header="", bow=None, empty=False):
+        return {"content_hash": h, "type": typ, "chars": chars, "dieu_count": dieu,
+                "header_text": header, "bow": bow, "text_empty": empty}
+
+    _DOCXM124 = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+    def _c124_classify_docx_gdoc_not_dup():
+        # NEGATIVE (ADR-2 — định nghĩa user 2026-07-16): docx GỐC + GDoc CONVERT cùng nội dung = KHÔNG trùng
+        # (cả 2 hợp lệ: lưu trữ + bản đưa NLM) → 0 group, ghi nhận legit_convert_pairs.
+        _ents = [_e124("dDx124", "Luat_135-2020-QH14_Goc.docx", "135/2020/QH14", md5="md5docx135", mime=_DOCXM124),
+                 _e124("dGd124", "Luat_135-2020-QH14_Goc", "135/2020/QH14", nlm="sid135")]
+        _cnt = {"dDx124": _cnt124("H135", "docx"), "dGd124": _cnt124("H135", "gdoc")}
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, _cnt)
+        return (_rep["groups"] == [] and len(_rep.get("legit_convert_pairs") or []) == 1
+                and (_rep["counts"].get("DUP_EXACT") or 0) == 0)
+    _t110("r124_classify_docx_gdoc_not_dup", _c124_classify_docx_gdoc_not_dup)
+
+    def _c124_classify_two_gdoc_same_content_dup():
+        # 2 GDoc CÙNG TYPE cùng content-hash (md5 trống — GDoc) → DUP_EXACT; picker giữ bản on-NLM (ADR-4).
+        _ents = [_e124("dG1x124", "Luat_106-2025-QH15_A", "106/2025/QH15", nlm="sid106"),
+                 _e124("dG2x124", "Luat_106-2025-QH15_B", "106/2025/QH15")]
+        _cnt = {"dG1x124": _cnt124("H106", "gdoc"), "dG2x124": _cnt124("H106", "gdoc")}
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, _cnt)
+        _gs = [g for g in _rep["groups"] if g["classification"] == "DUP_EXACT"]
+        return (len(_gs) == 1 and (_gs[0]["keep"] or {}).get("drive_id") == "dG1x124"
+                and [x["drive_id"] for x in _gs[0]["act"]] == ["dG2x124"]
+                and _gs[0].get("type") == "gdoc")
+    _t110("r124_classify_two_gdoc_same_content_dup", _c124_classify_two_gdoc_same_content_dup)
+
+    def _c124_classify_mislabel_resolved_and_unresolved():
+        # ADR-3: cùng md5 NHƯNG khác sohieu → content-verify header. Khớp DUY NHẤT 1 → RESOLVED (giữ đúng,
+        # act sai); NEGATIVE: header không đọc ra số → UNRESOLVED fail-closed (act rỗng, KHÔNG hành động).
+        _hdr = ("QUỐC HỘI\nLuật số: 57/2024/QH15\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                "LUẬT\nSửa đổi, bổ sung một số điều của Luật Quy hoạch")
+        _ents = [_e124("dM1x124", "Luat_57-2024-QH15_Dung.docx", "57/2024/QH15", md5="MM10", mime=_DOCXM124),
+                 _e124("dM2x124", "Luat_67-2006-QH11_Sai.docx", "67/2006/QH11", md5="MM10", mime=_DOCXM124)]
+        _cnt_ok = {"dM1x124": _cnt124("HM", "docx", header=_hdr)}
+        _rep1 = _TL_MODULE._dedup_corpus_classify(_ents, _cnt_ok)
+        _g1 = [g for g in _rep1["groups"] if g["classification"] == "MISLABEL_RESOLVED"]
+        _ok_res = (len(_g1) == 1 and (_g1[0]["keep"] or {}).get("drive_id") == "dM1x124"
+                   and [x["drive_id"] for x in _g1[0]["act"]] == ["dM2x124"]
+                   and "57" in str((_g1[0].get("evidence") or {}).get("sohieu_header") or ""))
+        _cnt_bad = {"dM1x124": _cnt124("HM", "docx", header="VĂN BẢN KHÔNG RÕ\nkhông thấy số hiệu")}
+        _rep2 = _TL_MODULE._dedup_corpus_classify(_ents, _cnt_bad)
+        _g2 = [g for g in _rep2["groups"] if g["classification"] == "MISLABEL_UNRESOLVED"]
+        _ok_unres = len(_g2) == 1 and _g2[0]["act"] == [] and _g2[0]["keep"] is None
+        return _ok_res and _ok_unres
+    _t110("r124_classify_mislabel_resolved_and_unresolved", _c124_classify_mislabel_resolved_and_unresolved)
+
+    def _c124_classify_physical_dup_defers():
+        # NEGATIVE (ADR-4 lằn ranh / bất biến #16): ≥2 bản on-NLM-live cùng nội dung = dup VẬT LÝ → B1 KHÔNG
+        # tự đụng (act rỗng), đẩy nlm-audit-physical/nlm-source-remove.
+        _ents = [_e124("dP1x124", "Hiep_dinh_CPTPP_Ch22", "22/CPTPP", md5="PP11", nlm="sidP1"),
+                 _e124("dP2x124", "Hiep_dinh_CPTPP_Ch22_b", "22/CPTPP", md5="PP11", nlm="sidP2")]
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, {})
+        _gs = [g for g in _rep["groups"] if g["classification"] == "PHYSICAL_DUP"]
+        return (len(_gs) == 1 and _gs[0]["act"] == []
+                and any("nlm-audit-physical" in c for c in (_gs[0].get("suggested_commands") or [])))
+    _t110("r124_classify_physical_dup_defers", _c124_classify_physical_dup_defers)
+
+    def _c124_near_dup_review_no_auto():
+        # NEGATIVE (ADR-2 / bất biến #6 gốc-vs-sửa-đổi): Jaccard 0.96 ∈ [0.95,1) nhưng KHÔNG exact →
+        # NEAR_DUP_REVIEW kèm jaccard + Δ; act RỖNG (không bao giờ auto). Cặp xa (0.5) → KHÔNG group.
+        _bowA = {f"t{i}" for i in range(98)} | {"x1", "x2"}
+        _bowB = {f"t{i}" for i in range(98)} | {"y1", "y2"}          # ∩=98, ∪=102 → 0.9608
+        _bowC = {f"z{i}" for i in range(50)} | {f"t{i}" for i in range(10)}
+        _ents = [_e124("dN1x124", "Luat_155-2018-QH14_MT", "155/2018/QH14"),
+                 _e124("dN2x124", "Luat_155-2018-QH14_MT_v2", "155/2018/QH14"),
+                 _e124("dN3x124", "Luat_155-2018-QH14_MT_khac", "155/2018/QH14")]
+        _cnt = {"dN1x124": _cnt124("HN1", "gdoc", chars=5000, dieu=30, bow=_bowA),
+                "dN2x124": _cnt124("HN2", "gdoc", chars=4900, dieu=29, bow=_bowB),
+                "dN3x124": _cnt124("HN3", "gdoc", chars=2000, dieu=5, bow=_bowC)}
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, _cnt)
+        _gs = [g for g in _rep["groups"] if g["classification"] == "NEAR_DUP_REVIEW"]
+        _ev = (_gs[0].get("evidence") or {}) if _gs else {}
+        return (len(_gs) == 1 and _gs[0]["act"] == []
+                and 0.95 <= (_ev.get("jaccard") or 0) < 1.0
+                and "delta_dieu" in _ev and "delta_chars" in _ev
+                and {x["drive_id"] for x in _gs[0].get("members") or []} == {"dN1x124", "dN2x124"})
+    _t110("r124_near_dup_review_no_auto", _c124_near_dup_review_no_auto)
+
+    def _c124_picker_order():
+        # ADR-1/ADR-4: canonical-picker RIÊNG — (1) on-NLM+corpus → (2) corpus → (3) tên chuẩn (loại _v2/thô)
+        # → (4) drive_id sort tất định. KHÔNG bao giờ chọn bản thô/_v2 ngược (bug dedup-plan cũ).
+        _pk = _TL_MODULE._dedup_corpus_pick_canonical
+        _A = _e124("dPk1", "Luat_59-2023-QH15_Chuan", "59/2023/QH15", nlm="sidK")
+        _B = _e124("dPk2", "Luat_59-2023-QH15_Chuan_b", "59/2023/QH15")
+        _C = _e124("dPk3", "Luat_59-2023-QH15_Chuan_v2", "59/2023/QH15")
+        _k1, _a1 = _pk([_C, _B, _A])
+        _k2, _a2 = _pk([_C, _B])
+        _D1 = _e124("dPk4", "ND274_2025_download_tho.docx", "274/2025/ND-CP", md5="DD13", mime=_DOCXM124)
+        _D2 = _e124("dPk5", "ND_274-2025-ND-CP_Chuan.docx", "274/2025/ND-CP", md5="DD13", mime=_DOCXM124, nlm="sidD2")
+        _k3, _a3 = _pk([_D1, _D2])
+        _ents = [_D1, _D2]
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, {})
+        _gs = [g for g in _rep["groups"] if g["classification"] == "DUP_EXACT"]
+        return (_entry_drive_id(_k1) == "dPk1" and {_entry_drive_id(x) for x in _a1} == {"dPk2", "dPk3"}
+                and _entry_drive_id(_k2) == "dPk2"                     # tên chuẩn thắng _v2
+                and _entry_drive_id(_k3) == "dPk5"                     # KHÔNG chọn .docx thô ngược
+                and len(_gs) == 1 and (_gs[0]["keep"] or {}).get("drive_id") == "dPk5"
+                and _entry_drive_id(_k1) not in {_entry_drive_id(x) for x in _a1})
+    _t110("r124_picker_order", _c124_picker_order)
+
+    def _run_ddc124(ents, cnt, *, apply=False, confirm="", mode="corpus-false", only_md5=None, limit=None,
+                    all_profiles=False, near=0.95):
+        """Chạy cmd_dedup_corpus với stub (KHÔNG I/O): trả (rc, json, suc_calls, del_calls, run_end)."""
+        _keys = ("apply_profile_offline", "load_creds", "_manifest_entries", "_dedup_corpus_content",
+                 "cmd_source_update_corpus", "cmd_source_delete", "_apply_gate",
+                 "_apply_journal_start", "_journal_append")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _suc, _del, _runend = [], [], []
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(ents)
+            _TL_MODULE._dedup_corpus_content = lambda cand, **kw: dict(cnt)
+            _TL_MODULE.cmd_source_update_corpus = (lambda ns:
+                                                   (_suc.append((ns.target, ns.status)), 0)[1])
+            _TL_MODULE.cmd_source_delete = lambda ns: (_del.append(ns.target), 0)[1]
+            _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "runDDC124"
+            _TL_MODULE._journal_append = (lambda rid, rec:
+                                          _runend.append(rec) if rec.get("t") == "run_end" else None)
+            _ns = argparse.Namespace(apply=apply, confirm=confirm, mode=mode, only_md5=only_md5, limit=limit,
+                                     near_threshold=near, all_profiles=all_profiles, refresh=False,
+                                     out=None, json=True, force_unsafe=False, config=None, profile=None)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_dedup_corpus(_ns)
+            try:
+                _j = json.loads(_bo.getvalue())
+            except Exception:
+                _j = {}
+            return _rc, _j, _suc, _del, _runend
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _ents_apply124():
+        # DUP_EXACT eligible (sohieu-pair GDoc) + JUNK (md5) + NEAR + PHYSICAL (md5) + MISLABEL_UNRESOLVED (md5).
+        _bowA = {f"t{i}" for i in range(98)} | {"x1", "x2"}
+        _bowB = {f"t{i}" for i in range(98)} | {"y1", "y2"}
+        _ents = [_e124("dK1x124", "Luat_10-2020-QH14_A", "10/2020/QH14", nlm="sidK1"),
+                 _e124("dK2x124", "Luat_10-2020-QH14_B", "10/2020/QH14"),
+                 _e124("dJ1x124", "SMOKE_TEST_KhongPhaiVanBan_1.docx", "", md5="JJ124", mime=_DOCXM124, corpus="false"),
+                 _e124("dJ2x124", "SMOKE_TEST_KhongPhaiVanBan_2.docx", "", md5="JJ124", mime=_DOCXM124, corpus="false"),
+                 _e124("dN1y124", "Luat_155-2018-QH14_MT", "155/2018/QH14"),
+                 _e124("dN2y124", "Luat_155-2018-QH14_MT_v2", "155/2018/QH14"),
+                 _e124("dP1y124", "CPTPP_Ch25_a", "25/CPTPP", md5="PP124", nlm="sidPa"),
+                 _e124("dP2y124", "CPTPP_Ch25_b", "25/CPTPP", md5="PP124", nlm="sidPb"),
+                 _e124("dX1x124", "Luat_60-2024-QH15_M1.docx", "60/2024/QH15", md5="XX124", mime=_DOCXM124),
+                 _e124("dX2x124", "Luat_64-2020-QH14_M2.docx", "64/2020/QH14", md5="XX124", mime=_DOCXM124)]
+        _cnt = {"dK1x124": _cnt124("HK124", "gdoc"), "dK2x124": _cnt124("HK124", "gdoc"),
+                "dN1y124": _cnt124("HN1y", "gdoc", chars=5000, dieu=30, bow=_bowA),
+                "dN2y124": _cnt124("HN2y", "gdoc", chars=4900, dieu=29, bow=_bowB),
+                "dX1x124": _cnt124("HX124", "docx", header="VĂN BẢN KHÔNG RÕ\nkhông thấy số hiệu")}
+        return _ents, _cnt
+
+    def _c124_apply_default_corpus_false_reversible():
+        # ADR-5: mặc định --mode corpus-false (reversible, journal, GIỮ Drive) — CHỈ nhóm auto-eligible
+        # (DUP_EXACT); JUNK mặc định KHÔNG xóa; guards loại NEAR/PHYSICAL/UNRESOLVED. KHÔNG trash Drive.
+        _ents, _cnt = _ents_apply124()
+        _rc, _j, _suc, _del, _re = _run_ddc124(_ents, _cnt, apply=True, confirm="yes")
+        return (_rc == 0 and _suc == [("dK2x124", "false")] and _del == []
+                and len(_re) == 1 and _re[0].get("ok") is True)
+    _t110("r124_apply_default_corpus_false_reversible", _c124_apply_default_corpus_false_reversible)
+
+    def _c124_apply_delete_mode_opt_in():
+        # ADR-5: --mode delete OPT-IN (file Drive dư) → source-delete cho DUP_EXACT act + JUNK; guards VẪN
+        # loại unresolved/physical/near (fail-closed đè mọi mode).
+        _ents, _cnt = _ents_apply124()
+        _rc, _j, _suc, _del, _re = _run_ddc124(_ents, _cnt, apply=True, confirm="yes", mode="delete")
+        return (_rc == 0 and _suc == [] and set(_del) == {"dK2x124", "dJ1x124", "dJ2x124"}
+                and not ({"dN1y124", "dN2y124", "dP1y124", "dP2y124", "dX1x124", "dX2x124"} & set(_del)))
+    _t110("r124_apply_delete_mode_opt_in", _c124_apply_delete_mode_opt_in)
+
+    def _c124_apply_only_md5_subset():
+        # ADR-7: --only-md5 <hash> → CHỈ nhóm đó; --limit N → chặn số nhóm (duyệt từng bước).
+        _ents = [_e124("dA1x124", "Luat_11-2020-QH14_A1.docx", "11/2020/QH14", md5="AAA111", mime=_DOCXM124, nlm="sidA1"),
+                 _e124("dA2x124", "Luat_11-2020-QH14_A2.docx", "11/2020/QH14", md5="AAA111", mime=_DOCXM124),
+                 _e124("dB1x124", "Luat_12-2020-QH14_B1.docx", "12/2020/QH14", md5="BBB222", mime=_DOCXM124, nlm="sidB1"),
+                 _e124("dB2x124", "Luat_12-2020-QH14_B2.docx", "12/2020/QH14", md5="BBB222", mime=_DOCXM124)]
+        _rc1, _j1, _suc1, _del1, _ = _run_ddc124(_ents, {}, apply=True, confirm="yes", only_md5="AAA111")
+        _rc2, _j2, _suc2, _del2, _ = _run_ddc124(_ents, {}, apply=True, confirm="yes", limit=1)
+        return (_rc1 == 0 and _suc1 == [("dA2x124", "false")] and _del1 == []
+                and _rc2 == 0 and len(_suc2) == 1)
+    _t110("r124_apply_only_md5_subset", _c124_apply_only_md5_subset)
+
+    def _c124_cross_profile_flag_only():
+        # NEGATIVE (ADR-6): --all-profiles → same-content XUYÊN profile = CROSS_PROFILE_DUAL_REG flag-only
+        # (dual-reg chủ đích — bài học 54 hồ sơ khảo sát); apply+--all-profiles → rc=2 KHÔNG hành động.
+        _ents = [_e124("dC1x124", "Hiep_dinh_CPTPP_PL_II", "02/CPTPP", md5="CC124", profile="vbqppl"),
+                 _e124("dC2x124", "Hiep_dinh_CPTPP_PL_II_ks", "02/CPTPP", md5="CC124", profile="khaosat")]
+        _rep = _TL_MODULE._dedup_corpus_classify(_ents, {}, all_profiles=True)
+        _gs = [g for g in _rep["groups"] if g["classification"] == "CROSS_PROFILE_DUAL_REG"]
+        _ok_cls = len(_gs) == 1 and _gs[0]["act"] == [] and set(_gs[0].get("profiles") or []) == {"vbqppl", "khaosat"}
+        _rc, _j, _suc, _del, _ = _run_ddc124(_ents, {}, apply=True, confirm="yes", all_profiles=True)
+        return _ok_cls and _rc == 2 and _suc == [] and _del == []
+    _t110("r124_cross_profile_flag_only", _c124_cross_profile_flag_only)
+
+    def _c124_wiring_meta_contract():
+        import tl_core.command_registry as _reg124
+        import tl_core.workflow as _w124
+        _mm = _reg124.COMMAND_META.get("dedup-corpus") or {}
+        _md = _reg124.COMMAND_META.get("doc-compare") or {}
+        _ok_meta = (_mm.get("risk") == "high" and _mm.get("read_only") is False
+                    and _mm.get("requires_confirm") is True and _mm.get("supports_dry_run") is True
+                    and _mm.get("idempotency_contract") == "dedup_corpus" and _mm.get("generated") is True
+                    and _md.get("risk") == "low" and _md.get("read_only") is True
+                    and _md.get("generated") is True and _md.get("nlm_fallback") == "corpus_read")
+        _fields = {"schema", "idempotency_key", "journal_key", "resume_behavior", "duplicate_guard",
+                   "readback_command", "resume_command", "rollback_hint"}
+        _ok_contract = ("dedup-corpus" in _reg124._CONTRACT_REQUIRED
+                        and set(_w124._IDEMPOTENCY_CONTRACTS.get("dedup_corpus", {})) == _fields)
+        _ap = _TL_MODULE.build_parser()
+        _sub = next(x for x in _ap._actions if isinstance(x, argparse._SubParsersAction))
+        _pd = _sub.choices.get("dedup-corpus")
+        _pc = _sub.choices.get("doc-compare")
+        _ok_parser = (_pd is not None and _pc is not None
+                      and {"--apply", "--confirm", "--mode", "--only-md5", "--limit", "--near-threshold",
+                           "--all-profiles", "--json"} <= set(_pd._option_string_actions)
+                      and {"--near-threshold", "--json"} <= set(_pc._option_string_actions))
+        _ok_stub = (getattr(_TL_MODULE.cmd_dedup_corpus, "__tl_stub__", None) == ("hygiene", "cmd_dedup_corpus")
+                    and getattr(_TL_MODULE.cmd_doc_compare, "__tl_stub__", None) == ("doc_identity", "cmd_doc_compare")
+                    and getattr(_TL_MODULE._dedup_corpus_classify, "__tl_stub__", None) == ("hygiene", "_dedup_corpus_classify"))
+        _ok_lazy = ("doc-compare" in _TL_MODULE._CREDS_LAZY_CMDS and "dedup-corpus" in _TL_MODULE._CREDS_LAZY_CMDS)
+        _ok_const = hasattr(_TL_MODULE, "_DEDUP_JUNK_NAME_RE")   # bẫy I11: HẰNG mới re-export tl
+        return _ok_meta and _ok_contract and _ok_parser and _ok_stub and _ok_lazy and _ok_const
+    _t110("r124_wiring_meta_contract", _c124_wiring_meta_contract)
+
+    def _c124_md5_first_perf():
+        # ADR-7 perf: KHÔNG doc-text cho dòng md5-unique; md5-group cùng-sohieu = DUP_EXACT bằng BYTES (0 đọc);
+        # CHỈ ứng viên sohieu-group cần content mới đọc (mỗi did đúng 1 lần).
+        _calls = []
+        _keys = ("apply_profile_offline", "load_creds", "_manifest_entries", "_doc_text_any")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _ents = [_e124("dU1x124", "Luat_01-2021-QH15_U1", "01/2021/QH15", md5="U1"),
+                 _e124("dU2x124", "Luat_02-2021-QH15_U2", "02/2021/QH15", md5="U2"),
+                 _e124("dM1y124", "Luat_10-2020-QH14_M1.docx", "10/2020/QH14", md5="MM124", mime=_DOCXM124, nlm="sidM1"),
+                 _e124("dM2y124", "Luat_10-2020-QH14_M2.docx", "10/2020/QH14", md5="MM124", mime=_DOCXM124),
+                 _e124("dS1x124", "Luat_20-2021-QH15_S1", "20/2021/QH15"),
+                 _e124("dS2x124", "Luat_20-2021-QH15_S2", "20/2021/QH15")]
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False: list(_ents)
+            _TL_MODULE._doc_text_any = (lambda fid, **kw:
+                                        (_calls.append(fid), ("điều 1 nội dung riêng biệt " + fid, "gdoc"))[1])
+            with _tf110.TemporaryDirectory() as _td:
+                _hos.environ["TL_DEDUP_STATE_DIR"] = _td
+                try:
+                    _ns = argparse.Namespace(apply=False, confirm="", mode="corpus-false", only_md5=None,
+                                             limit=None, near_threshold=0.95, all_profiles=False, refresh=False,
+                                             out=None, json=True, force_unsafe=False, config=None, profile=None)
+                    _bo, _be = _io110.StringIO(), _io110.StringIO()
+                    with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                        _rc = _TL_MODULE.cmd_dedup_corpus(_ns)
+                    try:
+                        _j = json.loads(_bo.getvalue())
+                    except Exception:
+                        _j = {}
+                finally:
+                    _hos.environ.pop("TL_DEDUP_STATE_DIR", None)
+            return (_rc == 0 and set(_calls) == {"dS1x124", "dS2x124"} and len(_calls) == 2
+                    and (_j.get("counts") or {}).get("DUP_EXACT") == 1)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r124_md5_first_perf", _c124_md5_first_perf)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

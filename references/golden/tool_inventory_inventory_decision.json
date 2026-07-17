@@ -27,9 +27,11 @@
     "counts",
     "cowork-plan",
     "dedup-check",
+    "dedup-corpus",
     "dedup-plan",
     "deploy-plan",
     "determinism-audit",
+    "doc-compare",
     "doc-text",
     "doctor",
     "download",
@@ -479,6 +481,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "dedup-corpus": {
+        "generated": true,
+        "idempotency_contract": "dedup_corpus",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry_nlm"
+      },
       "dedup-plan": {
         "generated": true,
         "idempotency_contract": "dedup_plan",
@@ -508,6 +520,16 @@
         "supports_dry_run": false,
         "workflow_task": "workflow_audit",
         "write_scope": "none"
+      },
+      "doc-compare": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
       },
       "doc-text": {
         "generated": true,
@@ -1701,10 +1723,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 140,
-      "high_risk": 26,
-      "total": 147,
-      "write_commands": 74
+      "generated_parsers": 142,
+      "high_risk": 27,
+      "total": 149,
+      "write_commands": 75
     },
     "schema": "command_registry.v1"
   },

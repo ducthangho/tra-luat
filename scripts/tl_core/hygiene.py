@@ -960,6 +960,463 @@ def cmd_dedup_plan(a) -> int:
     return 0
 
 
+# ── B1 (v1.34.63 — kế hoạch `ke-hoach-dedup-corpus-B1-2026-07-18.md` ADR-1..7): `tl dedup-corpus` —
+# dedup TRỤC NỘI DUNG (md5 + content-hash + BoW), COEXIST `dedup-plan` (trục chủ đề). Helper identity
+# (`_content_hash`/`_bow_jaccard`/`_bow_tokens`/`_doc_type_kind`) sống ở tl_core/doc_identity.py —
+# gọi qua stub tl, KHÔNG copy (drift-lock r124_b1_reuses_identity_module). ──
+_DEDUP_JUNK_NAME_RE = re.compile(r"SMOKE_TEST|KhongPhaiVanBan|JUNK_TEST", re.I)
+
+
+def _dedup_sohieu_reps(members: list) -> list:
+    """PURE: đại diện so-content của 1 sohieu-group — gom CỤM theo md5 (cùng md5 = cùng BYTES, đã chứng
+    minh trùng ở tầng md5, khỏi đọc text), mỗi cụm 1 đại diện (drive_id nhỏ nhất, tất định); dòng không
+    md5 (GDoc) = cụm đơn. md5-first ADR-7: chỉ đại diện mới cần content-hash."""
+    clusters = {}
+    for e in members:
+        key = _entry_md5(e) or ("~" + _entry_drive_id(e))
+        clusters.setdefault(key, []).append(e)
+    return [sorted(v, key=_entry_drive_id)[0] for _k, v in sorted(clusters.items())]
+
+
+def _dedup_md5_cluster(members: list, rep) -> list:
+    """PURE: từ đại diện → TOÀN CỤM cùng-md5 của nó trong group (mở rộng nhóm content đủ mọi bản bytes-hệt)."""
+    m = _entry_md5(rep)
+    if not m:
+        return [rep]
+    return [e for e in members if _entry_md5(e) == m]
+
+
+def _dedup_corpus_candidates(entries: list) -> dict:
+    """PURE (B1 §2.2 bước 1 — candidate-gen FREE): md5-group + sohieu-group (≥2) từ manifest, scope own-row.
+    `need_content` (md5-first ADR-7): (a) đại diện cụm của sohieu-group có ≥2 đại diện (content-hash/BoW);
+    (b) 1 đại diện/md5-group KHÁC sohieu (header content-verify mislabel — cùng bytes nên 1 bản đủ).
+    Dòng md5-unique không thuộc group nào KHÔNG BAO GIỜ bị đọc text."""
+    own = [e for e in entries if _entry_drive_id(e) and _entry_row_kind(e) == "own"]
+    by_md5, by_so = {}, {}
+    for e in own:
+        m = _entry_md5(e)
+        if m:
+            by_md5.setdefault(m, []).append(e)
+        k = _sohieu_key_entry(e)
+        if k:
+            by_so.setdefault(k, []).append(e)
+    md5_groups = {k: sorted(v, key=_entry_drive_id) for k, v in by_md5.items() if len(v) > 1}
+    so_groups = {k: sorted(v, key=_entry_drive_id) for k, v in by_so.items() if len(v) > 1}
+    need, _seen = [], set()
+
+    def _need(e):
+        d = _entry_drive_id(e)
+        if d not in _seen:
+            _seen.add(d)
+            need.append(e)
+    for _k, v in sorted(so_groups.items()):
+        reps = _dedup_sohieu_reps(v)
+        if len(reps) >= 2:
+            for e in reps:
+                _need(e)
+    for _m5, v in sorted(md5_groups.items()):
+        if len({_sohieu_key_entry(e) for e in v if _sohieu_key_entry(e)}) >= 2:
+            _need(v[0])
+    return {"scoped": len(own), "md5_groups": md5_groups, "sohieu_groups": so_groups, "need_content": need}
+
+
+def _dedup_corpus_content(cands: dict, *, refresh: bool = False, state_dir=None) -> dict:
+    """I/O (B1 §2.2 bước 2): đọc text ứng viên qua `_doc_text_any` (A1 — tự cache extract_<id>.txt) →
+    content-hash (doc_identity) + BoW + header; memo `.tl_state/content_hash_<did>.json` — TIN CHỈ khi
+    md5 khớp (md5 đổi = file đổi; GDoc không md5 → luôn đọc lại từ extract-cache, không tin mù TTL).
+    Mỗi did đọc TỐI ĐA 1 lần/lượt chạy (memo in-run)."""
+    _dir = Path(state_dir) if state_dir else Path(os.environ.get("TL_DEDUP_STATE_DIR") or (HERE / ".tl_state"))
+    out, _texts = {}, {}
+
+    def _read(e):
+        did = _entry_drive_id(e)
+        if did not in _texts:
+            t, _src = _doc_text_any(did, entry=e, refresh=refresh)
+            _texts[did] = t or ""
+        return _texts[did]
+
+    def _fill(e, *, want_text: bool):
+        did = _entry_drive_id(e)
+        if did not in out:
+            rec = None
+            m = _entry_md5(e)
+            typ = _doc_type_kind(str(e.get("mime") or ""), _entry_name(e))
+            cp = _dir / f"content_hash_{did}.json"
+            if not refresh and m and cp.exists():
+                try:
+                    c = json.loads(cp.read_text(encoding="utf-8"))
+                    if str(c.get("md5") or "") == m and c.get("content_hash"):
+                        rec = {"content_hash": str(c["content_hash"]), "type": str(c.get("type") or typ),
+                               "chars": int(c.get("chars") or 0), "dieu_count": int(c.get("dieu_count") or 0),
+                               "header_text": "", "bow": None, "text_empty": False, "from_cache": True}
+                except Exception:  # noqa: BLE001 — cache hỏng = coi như không có cache
+                    rec = None
+            if rec is None:
+                t = _read(e)
+                rec = {"content_hash": _content_hash(t), "type": typ, "chars": len(t),
+                       "dieu_count": len(re.findall(r"(?m)^\s*Điều\s+\d+", t)),
+                       "header_text": t[:16000], "bow": (_bow_tokens(t) if t else set()),
+                       "text_empty": not bool(t.strip()), "from_cache": False}
+                try:
+                    _dir.mkdir(parents=True, exist_ok=True)
+                    cp.write_text(json.dumps({"schema": "dedup_content_hash.v1", "drive_id": did, "md5": m,
+                                              "content_hash": rec["content_hash"], "type": rec["type"],
+                                              "chars": rec["chars"], "dieu_count": rec["dieu_count"]},
+                                             ensure_ascii=False), encoding="utf-8")
+                except Exception:  # noqa: BLE001 — memo best-effort, không chặn kết quả
+                    pass
+            out[did] = rec
+        if want_text and out[did].get("bow") is None and not out[did].get("text_empty"):
+            t = _read(e)   # cache-hit chỉ có hash → nhóm cần so-mềm phải đọc text thật (extract-cache rẻ)
+            out[did].update({"header_text": t[:16000], "bow": (_bow_tokens(t) if t else set()),
+                             "chars": len(t) or out[did]["chars"], "text_empty": not bool(t.strip())})
+        return out[did]
+
+    for e in cands.get("need_content") or []:
+        _fill(e, want_text=False)
+    for _sk, mem in sorted((cands.get("sohieu_groups") or {}).items()):
+        reps = _dedup_sohieu_reps(mem)
+        if len(reps) < 2:
+            continue
+        hs = {}
+        for r in reps:
+            rec = out.get(_entry_drive_id(r))
+            if rec and rec.get("content_hash") and not rec.get("text_empty"):
+                hs.setdefault(rec["content_hash"], []).append(r)
+        for _h, rl in sorted(hs.items()):
+            if len(rl) == 1:
+                _fill(rl[0], want_text=True)   # hash không khớp ai trong group → ứng viên NEAR → cần BoW
+    for _m5, mem in sorted((cands.get("md5_groups") or {}).items()):
+        if len({_sohieu_key_entry(e) for e in mem if _sohieu_key_entry(e)}) >= 2:
+            _fill(mem[0], want_text=True)      # mislabel: header content-verify (ADR-3) — 1 bản đủ (cùng bytes)
+    return out
+
+
+def _dedup_corpus_pick_canonical(members: list) -> tuple:
+    """PURE (ADR-4 — picker RIÊNG, KHÔNG kế thừa bug picker-chọn-ngược của dedup-plan): thứ tự GIỮ
+    (1) on-NLM-live + corpus=true → (2) corpus=true → (3) tên CHUẨN (phạt hậu tố _v2/_vN + tên phi chuẩn
+    thô) → (4) tie-break tất định drive_id sort. Trả (keep, act_list)."""
+    def _badname(e):
+        n = str(_entry_name(e) or "")
+        try:
+            issues = len(_name_structural_issues(n) or [])
+        except Exception:  # noqa: BLE001 — checker tên lỗi thì không phạt (tie-break lo phần còn lại)
+            issues = 0
+        return issues + (2 if re.search(r"[_\-]v\d+(?:[_.\-]|$)", n, re.I) else 0)
+
+    def _key(e):
+        return (0 if (_entry_on_nlm_live(e) and _entry_corpus_true(e)) else 1,
+                0 if _entry_corpus_true(e) else 1,
+                _badname(e), _entry_drive_id(e))
+    ms = sorted(members, key=_key)
+    return ms[0], ms[1:]
+
+
+def _dedup_corpus_classify(entries: list, content_by_did: dict, *, T: float = 0.95,
+                           all_profiles: bool = False) -> dict:
+    """PURE (B1 §2.2 bước 3 — test offline): phân loại nhóm ứng viên → 7 classification. Ưu tiên quyết định:
+    CROSS_PROFILE_DUAL_REG (ADR-6, flag-only) > PHYSICAL_DUP (ADR-4 lằn ranh — ≥2 on-NLM-live, đẩy layer
+    NLM bất biến #16) > JUNK > MISLABEL_RESOLVED/_UNRESOLVED (ADR-3 content-verify header, fail-closed) >
+    DUP_EXACT (ADR-2: CÙNG TYPE + exact). docx-gốc+GDoc-convert cùng hash → legit_convert_pairs (KHÔNG
+    dup). Cặp không-exact Jaccard ≥ T → NEAR_DUP_REVIEW (bất biến #6 — KHÔNG BAO GIỜ auto, act rỗng)."""
+    cands = _dedup_corpus_candidates(entries)
+    content_by_did = dict(content_by_did or {})
+    groups, legit, counts, emitted = [], [], {}, set()
+
+    def _summ_c(e):
+        s = dict(_summ_entry(e) or {})
+        s["corpus"] = str(e.get("corpus") or "")
+        return s
+
+    def _emit(cls, key, kind, typ, members, keep=None, act=None, evidence=None, suggested=None, profiles=None):
+        counts[cls] = counts.get(cls, 0) + 1
+        g = {"classification": cls, "key": str(key), "group_kind": kind, "type": typ or "",
+             "members": [_summ_c(e) for e in members],
+             "keep": (_summ_c(keep) if keep is not None else None),
+             "act": [_summ_c(e) for e in (act or [])],
+             "evidence": evidence or {}, "suggested_commands": suggested or []}
+        if profiles is not None:
+            g["profiles"] = profiles
+        groups.append(g)
+
+    def _cls_group(members, key, kind, typ):
+        members = sorted(members, key=_entry_drive_id)
+        profs = sorted({str(e.get("_tl_profile") or "") for e in members})
+        if all_profiles and len(profs) > 1:
+            _emit("CROSS_PROFILE_DUAL_REG", key, kind, typ, members, evidence={"profiles": profs},
+                  suggested=["# dual-reg CHỦ ĐÍCH (ADR-6 — bài học 54 hồ sơ khảo sát): KHÔNG auto-dedup "
+                             "xuyên profile; muốn gộp thì quyết TAY trong từng profile"],
+                  profiles=[p for p in profs if p] or profs)
+            return
+        live = [e for e in members if _entry_on_nlm_live(e)]
+        if len(live) >= 2:
+            _emit("PHYSICAL_DUP", key, kind, typ, members,
+                  evidence={"on_nlm_live": [_entry_nlm(e) for e in live]},
+                  suggested=["tl nlm-audit-physical --json   # đối soát vật lý trước (bất biến #16)",
+                             "tl nlm-source-remove <source_id> --apply --confirm yes   # gỡ nguồn NLM dư sau audit"])
+            return
+        if members and all(_DEDUP_JUNK_NAME_RE.search(str(_entry_name(e) or "")) for e in members):
+            _emit("JUNK", key, kind, typ, members, keep=None, act=list(members),
+                  evidence={"junk_names": [_entry_name(e) for e in members]},
+                  suggested=["# JUNK: đề xuất `--mode delete` (mặc định corpus-false KHÔNG tự xóa — ADR-5)"])
+            return
+        so_keys = {_sohieu_key_entry(e) for e in members if _sohieu_key_entry(e)}
+        if len(so_keys) >= 2:
+            rec = next((content_by_did.get(_entry_drive_id(e)) for e in members
+                        if (content_by_did.get(_entry_drive_id(e)) or {}).get("header_text")), None)
+            hd_sohieu = ""
+            if rec:
+                try:   # filename ĐỂ TRỐNG có chủ đích: tên file là thứ đang bị nghi — CHỈ ruột văn bản phân xử
+                    hd_sohieu = str((_classify_doc_header(str(rec.get("header_text") or ""), "") or {}).get("sohieu") or "")
+                except Exception:  # noqa: BLE001 — header lỗi = không đọc được → fail-closed
+                    hd_sohieu = ""
+            khd = norm_sohieu(hd_sohieu.replace("_", "-")) if hd_sohieu else ""
+            matches = [e for e in members if khd and _sohieu_key_entry(e) == khd]
+            if len(matches) == 1:
+                keep = matches[0]
+                act = [e for e in members if _entry_drive_id(e) != _entry_drive_id(keep)]
+                _emit("MISLABEL_RESOLVED", key, kind, typ, members, keep=keep, act=act,
+                      evidence={"sohieu_header": hd_sohieu, "sohieu_registered": sorted(so_keys)},
+                      suggested=[f"# header khai '{hd_sohieu}' → GIỮ {_entry_name(keep)}; act = bản gán nhãn "
+                                 f"SAI (ca data-op 57-2024/67-2006/64-2020/60-2024)"])
+            else:
+                _emit("MISLABEL_UNRESOLVED", key, kind, typ, members,
+                      evidence={"sohieu_header": hd_sohieu, "sohieu_registered": sorted(so_keys),
+                                "matches": len(matches)},
+                      suggested=["# fail-closed (ADR-3): header khớp 0/>1 hoặc không đọc được — phân xử TAY: "
+                                 "tl doc-text <id> soi header rồi register sửa sohieu"])
+            return
+        keep, act = _dedup_corpus_pick_canonical(members)
+        _emit("DUP_EXACT", key, kind, typ, members, keep=keep, act=act,
+              evidence=({"md5": str(key)} if kind == "md5" else {"content_hash": str(key)}))
+
+    for m5, mem in sorted(cands["md5_groups"].items()):
+        typ = _doc_type_kind(str(mem[0].get("mime") or ""), _entry_name(mem[0]))
+        _cls_group(mem, m5, "md5", typ)
+        emitted.add(frozenset(_entry_drive_id(e) for e in mem))
+    for _sk, mem in sorted(cands["sohieu_groups"].items()):
+        reps = _dedup_sohieu_reps(mem)
+        recs = []
+        for r in reps:
+            rec = content_by_did.get(_entry_drive_id(r)) or {}
+            h = str(rec.get("content_hash") or "")
+            if not h or rec.get("text_empty"):
+                continue   # không đọc được text → KHÔNG bằng chứng → không nhóm (fail-closed)
+            t = str(rec.get("type") or "") or _doc_type_kind(str(r.get("mime") or ""), _entry_name(r))
+            recs.append((r, h, t, rec))
+        by_ht = {}
+        for r, h, t, _rec in recs:
+            by_ht.setdefault((h, t), []).append(r)
+        for (h, t), rlist in sorted(by_ht.items()):
+            if len(rlist) < 2:
+                continue
+            full = []
+            for r in rlist:
+                full.extend(_dedup_md5_cluster(mem, r))
+            fkey = frozenset(_entry_drive_id(e) for e in full)
+            if fkey in emitted:
+                continue
+            emitted.add(fkey)
+            _cls_group(full, h, "content", t)
+        hs = {}
+        for r, h, t, _rec in recs:
+            hs.setdefault(h, []).append((r, t))
+        for h, lst in sorted(hs.items()):
+            if len(lst) >= 2 and len({t for _r, t in lst}) >= 2:
+                legit.append({"content_hash": h, "sohieu_key": _sk,
+                              "members": [{"drive_id": _entry_drive_id(r), "name": _entry_name(r), "type": t}
+                                          for r, t in sorted(lst, key=lambda x: _entry_drive_id(x[0]))],
+                              "note": "docx/pdf GỐC + GDoc CONVERT cùng nội dung = KHÔNG trùng "
+                                      "(định nghĩa user 2026-07-16 — lưu trữ gốc + bản đưa NLM, cả 2 hợp lệ)"})
+        for i in range(len(recs)):
+            for j in range(i + 1, len(recs)):
+                ra, ha, ta, reca = recs[i]
+                rb, hb, tb, recb = recs[j]
+                if ha == hb:
+                    continue
+                ba, bb = reca.get("bow"), recb.get("bow")
+                if not ba or not bb:
+                    continue
+                jac = _bow_jaccard(ba, bb)
+                if jac < T:
+                    continue
+                pair = sorted([ra, rb], key=_entry_drive_id)
+                pkey = frozenset(_entry_drive_id(e) for e in pair)
+                if pkey in emitted:
+                    continue
+                emitted.add(pkey)
+                _emit("NEAR_DUP_REVIEW", "~".join(_entry_drive_id(e) for e in pair), "near",
+                      (ta if ta == tb else f"{ta}|{tb}"), pair, keep=None, act=[],
+                      evidence={"jaccard": round(jac, 4),
+                                "delta_dieu": abs(int(reca.get("dieu_count") or 0) - int(recb.get("dieu_count") or 0)),
+                                "delta_chars": abs(int(reca.get("chars") or 0) - int(recb.get("chars") or 0))},
+                      suggested=["# bất biến #6 gốc-vs-sửa-đổi: GIỮ CẢ HAI — chỉ dedup sau khi RÀ TAY xác "
+                                 "nhận trùng thật (ca 155-2018 _v2 0.983 / 25-2021 _MyPham 0.992)"])
+    groups.sort(key=lambda g: (g["classification"], str(g.get("key") or "")))
+    return {"groups": groups, "counts": counts, "legit_convert_pairs": legit,
+            "scoped": cands["scoped"], "md5_group_count": len(cands["md5_groups"]),
+            "sohieu_group_count": len(cands["sohieu_groups"])}
+
+
+def cmd_dedup_corpus(a) -> int:
+    """B1 (v1.34.63): `tl dedup-corpus` — dedup TRỤC NỘI DUNG toàn corpus (md5-first → content-hash →
+    BoW-Jaccard), 7 classification, canonical-picker on-NLM-first RIÊNG. DRY mặc định; `--apply --confirm
+    yes` mặc định `--mode corpus-false` (reversible — ủy quyền `source-update-corpus` TỪNG id: guard
+    shared-source + gỡ NLM + journal-undo có sẵn); `--mode delete` OPT-IN (ủy quyền `source-delete` —
+    trash Drive + reg row) cho file Drive dư/JUNK; guards fail-closed đè MỌI mode (ADR-5); `--only-md5`/
+    `--limit` duyệt từng bước (ADR-7); `--all-profiles` FLAG-ONLY (ADR-6)."""
+    try:
+        apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001
+        pass
+    try:   # lazy-creds best-effort NGAY ĐẦU (khuôn doc-text A1): máy có config nhưng chưa boot-cache vẫn
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))   # tự nạp manifest; thiếu → fail sạch dưới
+    except (SystemExit, Exception):  # noqa: BLE001
+        pass
+    _mode = str(getattr(a, "mode", "corpus-false") or "corpus-false")
+    _apply = bool(getattr(a, "apply", False))
+    _allp = bool(getattr(a, "all_profiles", False))
+    try:
+        T = float(getattr(a, "near_threshold", 0.95) or 0.95)
+    except (TypeError, ValueError):
+        T = 0.95
+    if _apply and _allp:
+        print(json.dumps({"ok": False, "error": "APPLY_ALL_PROFILES_UNSUPPORTED",
+                          "note": "--all-profiles là chế độ FLAG-ONLY (ADR-6: cross-profile = dual-reg chủ "
+                                  "đích, KHÔNG auto-dedup) — bỏ --all-profiles rồi apply trong TỪNG profile."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    profiles_loaded, profile_errors = [], []
+    if _allp:
+        cfg = None
+        for p in _config_candidates(getattr(a, "config", None) or os.environ.get("TL_CONFIG_PATH")):
+            if p and Path(p).exists():
+                cfg = _read_json_file(p)
+                if cfg:
+                    break
+        if not cfg:
+            print("[tl] dedup-corpus --all-profiles: không đọc được config (danh sách profiles).", file=sys.stderr)
+            return 2
+        try:
+            _orig = _active_profile()
+        except Exception:  # noqa: BLE001
+            _orig = None
+        entries = []
+        try:
+            for pname in sorted(_profiles_from_config(cfg)):
+                try:
+                    apply_profile_offline(getattr(a, "config", None), pname)
+                    for e in _manifest_entries(refresh=getattr(a, "refresh", False)):
+                        entries.append({**e, "_tl_profile": pname})
+                    profiles_loaded.append(pname)
+                except Exception as pe:  # noqa: BLE001 — profile chưa boot: báo, không chặn profile khác
+                    profile_errors.append({"profile": pname, "error": str(pe)[:160]})
+        finally:
+            try:
+                apply_profile_offline(getattr(a, "config", None), _orig)
+            except Exception:  # noqa: BLE001
+                pass
+        if not entries:
+            print(json.dumps({"ok": False, "error": "NO_PROFILE_MANIFEST", "profile_errors": profile_errors,
+                              "note": "không nạp được manifest profile nào — `tl boot` từng profile trước."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+    else:
+        try:
+            entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+        except Exception as e:  # noqa: BLE001
+            print(f"[tl] dedup-corpus: cần `tl boot` trước ({e}).", file=sys.stderr)
+            return 2
+    cands = _dedup_corpus_candidates(entries)
+    if cands.get("need_content"):
+        try:   # lazy-creds best-effort (khuôn doc-text A1): ứng viên chưa có extract-cache cần export/download
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (SystemExit, Exception):  # noqa: BLE001
+            pass
+    content = _dedup_corpus_content(cands, refresh=getattr(a, "refresh", False))
+    rep = _dedup_corpus_classify(entries, content, T=T, all_profiles=_allp)
+    _AUTO = {"DUP_EXACT", "MISLABEL_RESOLVED"} | ({"JUNK"} if _mode == "delete" else set())
+    _GUARD = {"MISLABEL_UNRESOLVED", "PHYSICAL_DUP", "NEAR_DUP_REVIEW", "CROSS_PROFILE_DUAL_REG"}
+    sel = [g for g in rep["groups"] if g["classification"] in _AUTO and g["act"]]
+    _only = str(getattr(a, "only_md5", "") or "")
+    if _only:
+        sel = [g for g in sel if str(g.get("key") or "") == _only
+               or str((g.get("evidence") or {}).get("md5") or "") == _only]
+    _lim = getattr(a, "limit", None)
+    if _lim:
+        sel = sel[:max(0, int(_lim))]
+    env = {"ok": True, "schema": "dedup_corpus.v1", "mode": "DRY", "apply_mode": _mode, "threshold": T,
+           "scoped": rep["scoped"], "counts": rep["counts"], "groups": rep["groups"],
+           "legit_convert_pairs": rep["legit_convert_pairs"],
+           "auto_eligible": sorted(_AUTO), "guards_fail_closed": sorted(_GUARD),
+           "eligible_groups": len(sel)}
+    if _allp:
+        env["profiles_loaded"] = profiles_loaded
+        env["profile_errors"] = profile_errors
+
+    def _emit_env(rc_note=""):
+        body = _json_dumps(env, deterministic=_deterministic_enabled(a))
+        if getattr(a, "out", None):
+            Path(a.out).write_text(body + "\n", encoding="utf-8")
+            print(f"[tl] dedup-corpus → {a.out} ({env['mode']}, {len(rep['groups'])} nhóm)", file=sys.stderr)
+        if getattr(a, "json", False):
+            print(body)
+            return
+        _c = rep["counts"]
+        print(f"== dedup-corpus {env['mode']}({_mode}) · scoped {rep['scoped']} · "
+              + (" · ".join(f"{k}={_c[k]}" for k in sorted(_c)) or "0 nhóm") + f" · eligible {len(sel)} ==")
+        for g in rep["groups"][:25]:
+            _kp = (g.get("keep") or {}).get("name") or "∅"
+            print(f"  [{g['classification']}] {str(g.get('key'))[:16]} type={g.get('type') or '?'} "
+                  f"GIỮ {_kp[:40]} act={len(g.get('act') or [])}")
+        if rep["legit_convert_pairs"]:
+            print(f"  ℹ {len(rep['legit_convert_pairs'])} cặp gốc+convert HỢP LỆ (không trùng — ADR-2)")
+        if rc_note:
+            print(rc_note)
+
+    if not _apply or str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+        if _apply:
+            env["confirm_required"] = "--apply --confirm yes"
+        _emit_env("" if not _apply else "  → thiếu --confirm yes: mới chỉ in kế hoạch (DRY).")
+        return 0
+    _ok_gate, _ = _apply_gate(a, write_cols=("corpus" if _mode == "corpus-false" else None))
+    if not _ok_gate:
+        return 2
+    run_id = _apply_journal_start("dedup-corpus", {"mode": _mode, "groups": len(sel),
+                                                   "acts": sum(len(g["act"]) for g in sel)})
+    results, all_ok, skipped_false = [], True, 0
+    for g in sel:
+        for m in g["act"]:
+            did = str(m.get("drive_id") or "")
+            if not did:
+                continue
+            if _mode == "corpus-false" and str(m.get("corpus") or "").strip().lower() != "true":
+                skipped_false += 1   # đã ngoài corpus → không ghi lại (idempotent, đỡ call)
+                continue
+            if _mode == "corpus-false":
+                _ns = argparse.Namespace(target=did, status="false", apply=True, confirm="yes", refresh=False,
+                                         config=getattr(a, "config", None), profile=getattr(a, "profile", None),
+                                         force_unsafe=bool(getattr(a, "force_unsafe", False)), json=False)
+                rc_i = cmd_source_update_corpus(_ns)
+            else:
+                _ns = argparse.Namespace(target=did, apply=True, confirm="yes", refresh=False,
+                                         config=getattr(a, "config", None), profile=getattr(a, "profile", None),
+                                         force_unsafe=bool(getattr(a, "force_unsafe", False)), json=False)
+                rc_i = cmd_source_delete(_ns)
+            results.append({"drive_id": did, "classification": g["classification"], "rc": rc_i})
+            all_ok = all_ok and rc_i == 0
+    _journal_append(run_id, {"t": "run_end", "ok": all_ok,
+                             "counts": {"applied": len(results), "skipped_already_false": skipped_false,
+                                        "mode": _mode}})
+    env.update({"ok": all_ok, "mode": "APPLY", "applied": results,
+                "skipped_already_false": skipped_false, "journal": run_id})
+    _emit_env()
+    print(f"[tl] dedup-corpus APPLY({_mode}): {len(results)} act (ok={all_ok}), bỏ qua {skipped_false} dòng "
+          f"đã corpus=false. Undo: theo journal TỪNG id (source-update-corpus/source-delete) — "
+          f"`tl undo <journal-con>`. MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
+    return 0 if all_ok else 2
+
+
 def _sweep_report(entries: list) -> dict:
     """PURE (test offline): tổng hợp sức khoẻ corpus từ entries → dict đếm + next_actions điền sẵn. KHÔNG I/O/mạng."""
     g = _hygiene_groups(entries)

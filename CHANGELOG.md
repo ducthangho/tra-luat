@@ -1,3 +1,38 @@
+# ★ v1.34.71 — Profile TEMPLATES: "trình bày theo mẫu người dùng đưa" per-profile (2026-07-18)
+
+> Kế hoạch `ke-hoach-profile-templates-2026-07-18.md` (grill 11 câu Q0–Q8 + Q2b/Q2c chốt cùng ngày;
+> Phương án B của review thể-thức-văn-bản). TDD r132 ×5 negative-trước; selftest 1085→1090; gen 37→38.
+> Kernel SKILL.md CHỈ đổi header → re-import khi tiện. Mục (4) THE_THUC_TRINH_BAY.md = DEFER backlog
+> data-op (Q0 — phải verify nguyên văn NĐ 30/2020 qua corpus trước khi neo).
+
+- **Marker `templates`** (Q1): list `{id, drive_id, name, scope, note, added_at}` trong
+  `_meta/tra_luat_profile.json` — KHÔNG bump schema v1. ⚠ `_marker_body` là WHITELIST (đính chính grill):
+  pass-through `templates` TƯỜNG MINH (r132a khóa — thiếu là mọi đường rewrite marker NUỐT field).
+- **`profile-set-meta` +7 flags** (Q2c/Q3/Q5): `--template-add <id>` (kèm `--template-drive-id`; THAM
+  CHIẾU — hợp lệ không-WARN = cây profile hoặc KHO CHUNG `_meta/templates` VBQPPL) | `--template-upload
+  <file.docx>` (≤35MB, upload vào `_meta/templates/` profile qua `resolvefolder` find-or-create + action
+  `upload` b64 sẵn có; id = slug tên file; trùng tên → `TEMPLATE_FILE_NAME_EXISTS` không ghi đè) |
+  `--template-remove <id>`; kèm `--template-name/scope/note`. ĐÚNG 1 op/lần (`TEMPLATE_ONE_OP_ONLY`);
+  probe BẮT BUỘC khi `--apply` (LIST-first 2 vị trí hợp lệ → `download` fallback; fail →
+  `TEMPLATE_NOT_FOUND` fail-closed, KHÔNG cờ bypass); DRY chỉ lập plan (không resolvefolder — không tạo
+  folder ngoài apply); journal step `template_upload` riêng.
+- **Kho mẫu chung** (Q2b): folder `_meta/templates/` dưới metaFolder VBQPPL — **folder-là-danh-mục**
+  (nguồn sự thật = LISTING, không marker vbqppl); profile dùng mẫu chung bằng `--template-add` DẪN CHIẾU
+  CHỦ ĐÍCH từng mẫu, KHÔNG auto-inherit.
+- **`profile-list --templates`** (Q6): read-only LIVE — liệt kho chung + entries marker từng profile
+  (kho chưa dựng → note hướng dẫn, rc=0). **`profile-doctor --deep`** +2 hạng mục: `TEMPLATE_MISSING`
+  (warn, probe 404) / `TEMPLATE_OUTSIDE_TREE` (info advisory Q2).
+- **Khối Instruction `## trinh_bay_theo_mau`** (Q4, `generate_profile_load_block`): CHỈ hiện khi marker
+  có templates (profile cũ block Y NGUYÊN); liệt kê mẫu + vế điều kiện "**CHỈ KHI <scope>**"; 4 mệnh
+  lệnh: đọc khung `tl doc-text` / GIỮ NGUYÊN khung, chỉ điền nội dung / căn cứ verify NGUYÊN VĂN /
+  dựng .docx bằng công cụ docx MÔI TRƯỜNG (tra-luat KHÔNG sinh docx). Thân session==project byte-equal giữ.
+- **TDD r132 ×5** (marker pass-through; `_templates_apply_change`/`_template_id_norm` PURE + inject
+  `now`; parser 7+1 flags bọc SystemExit; block gen conditional; `_template_findings` PURE) + 1 ca gen.
+  Wiring `_STUB_MAP` +4 tên (bẫy bind-REBASE: helper mới thiếu bảng → NameError runtime, r90 bắt).
+  Golden `parser_surface` regen CHỦ ĐÍCH đúng 2 lệnh; COMMANDS.md 2 row (CRLF) + RUNBOOK §D +1 dòng.
+- **Bàn giao**: live-smoke ĐỌC/DRY phiên này (không ghi marker); smoke GHI thật ở phiên sau deploy;
+  seed kho chung + THE_THUC = backlog.
+
 # ★ v1.34.70 — Sửa help zip-ingest lỗi-thời + nhãn TÀI LIỆU LỊCH SỬ 2 references (2026-07-18)
 
 > Hai fix doc. TDD r131 ×2; selftest 1083→1085. SKILL.md chỉ đổi header version ⇒ re-import KHÔNG bắt buộc

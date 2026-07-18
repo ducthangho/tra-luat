@@ -617,6 +617,25 @@ Ghi/nạp nguồn CHỈ vào registry/manifest/notebook của `{p}` (`tl --profi
 KHÔNG ghi vào corpus nền VBQPPL. Nguồn chỉ-có-trên-NLM (nlm-only) phải nói rõ CHƯA có file Drive;
 chính sách nguồn: {policy} (ưu tiên materialize về Drive khi xuất được).""",
     ]
+    # v1.34.71 (ke-hoach-profile-templates Q4): khối trinh_bay_theo_mau — CHỈ khi marker có templates
+    # (không templates → block VẮNG, giữ y nguyên profile cũ). Nội dung entry từ marker (Q1); scope dùng
+    # tiền tố điều kiện "CHỈ KHI" (nếp Q4 kế hoạch instruction-refactor). Thân session==project byte-equal.
+    tpls = [t for t in (meta.get("templates") or []) if isinstance(t, dict) and str(t.get("drive_id") or "").strip()]
+    if tpls:
+        _tl_lines = []
+        for t in tpls:
+            _tid = str(t.get("id") or "").strip() or "<id>"
+            _seg = f"  - `{_tid}` — {str(t.get('name') or '').strip() or _tid}: `{str(t.get('drive_id') or '').strip()}`."
+            if str(t.get("scope") or "").strip():
+                _seg += f" **CHỈ KHI {str(t.get('scope') or '').strip()}.**"
+            if str(t.get("note") or "").strip():
+                _seg += f" {str(t.get('note') or '').strip()}"
+            _tl_lines.append(_seg)
+        body.append("## trinh_bay_theo_mau\nProfile có mẫu trình bày riêng (đọc khung bằng `tl doc-text <drive_id>`):\n"
+                    + "\n".join(_tl_lines)
+                    + "\n\nKhi soạn theo mẫu: GIỮ NGUYÊN khung/đề mục/trật tự phần của mẫu, chỉ điền nội dung; "
+                      "mọi căn cứ pháp lý phải verify NGUYÊN VĂN trước khi đưa vào; văn phong theo khối van_phong; "
+                      "dựng file .docx thành phẩm bằng công cụ docx của MÔI TRƯỜNG (tra-luat KHÔNG sinh docx).")
     return head + "\n\n" + tline + "\n\n" + "\n\n".join(x.strip() for x in body).strip() + "\n"
 
 
@@ -915,6 +934,15 @@ def selftest() -> int:
     _bd = generate_profile_load_block({"profile": "beta", "notebookId": "nb-1", "rootFolderId": "FB"},
                                       "session", VERSION)
     cases.append(("profile_block_default_style_when_empty", "## van_phong" in _bd and "tiếng Việt" in _bd))
+    # v1.34.71 (ke-hoach-profile-templates Q4): khối trinh_bay_theo_mau CHỈ hiện khi marker có templates;
+    # đủ 4 mệnh lệnh (doc-text / giữ khung / verify nguyên văn / phân vai docx môi trường).
+    _bt = generate_profile_load_block({**_mt, "templates": [
+        {"id": "phieu-trinh", "drive_id": "DTPL", "name": "Phiếu trình", "scope": "soạn phiếu trình",
+         "note": ""}]}, "session", VERSION)
+    cases.append(("profile_block_templates_conditional",
+                  "## trinh_bay_theo_mau" in _bt and "`DTPL`" in _bt and "tl doc-text" in _bt
+                  and "GIỮ NGUYÊN khung" in _bt and "verify NGUYÊN VĂN" in _bt
+                  and "KHÔNG sinh docx" in _bt and "trinh_bay_theo_mau" not in _bs))
     bad = "research_start có thể import nguồn vào NotebookLM khi cần."
     cases.append(("audit_bad_project_instruction_fails", not audit(bad, "project")["ok"]))
     cases.append(("audit_bad_nlm_prompt_fails", not audit(bad, "nlm")["ok"]))

@@ -546,6 +546,7 @@ Không nêu profile ⇒ `defaultProfile` (hiện `vbqppl`).
 | Tạo profile dự án mới | "tạo profile <tên> cho dự án …, folder <id>, notebook <id>" | dựng profile mới như `DELTA_v1.19.md §C` |
 | **Tạo Instruction (mặc định VBQPPL)** | "tạo Instruction" / "tạo prompt cho Project" | `tl instructions --target project` (profile vbqppl, KHÔNG có profile_setup) |
 | **Tạo Instruction văn bản thường** | "tạo Project văn bản thường tên <X>, notebook <id>" | `tl profile-create --name <X> --notebook <id> --apply` → tạo folder `Van_ban_thuong/<X>` + config patch + Instruction gắn profile `<X>` (fallback VBQPPL) |
+| **Soạn theo mẫu trình bày của profile (v1.34.71)** | "vbthuong: soạn <văn bản> theo mẫu <tên mẫu>" | mẫu quản trên MARKER: `profile-set-meta --template-add <id> --template-drive-id <fid>` \| `--template-upload <file.docx>` \| `--template-remove <id>` (1 op/lần, probe fail-closed, DRY mặc định); xem kho: `profile-list --templates`; block phiên `profile-load <p>` mang khối `trinh_bay_theo_mau` (đọc khung `tl doc-text`, GIỮ NGUYÊN khung/đề mục, căn cứ verify nguyên văn; dựng .docx bằng công cụ docx MÔI TRƯỜNG — tra-luat không sinh docx) |
 
 Mặc định khi KHÔNG nêu profile = `defaultProfile` (hiện `vbqppl`). **Tạo Instruction mà không nêu corpus ⇒ VBQPPL.**
 

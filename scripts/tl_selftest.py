@@ -13201,6 +13201,87 @@ def run() -> int:
                 and set(_j.get("required") or {}) == set(_gi129.REQUIRED_FULL))
     _t110("r129_instruction_audit_cli_tier_wired", _c129_cli_tier_wired)
 
+    # ═══ v1.34.71 — r132: profile TEMPLATES "trình bày theo mẫu người dùng đưa" (ke-hoach-profile-
+    # templates-2026-07-18, grill Q0–Q8): marker.templates [{id,drive_id,name,scope,note,added_at}].
+    # ⚠ _marker_body là WHITELIST (đính chính grill): PHẢI pass-through templates tường minh — không thì
+    # MỌI đường rewrite marker (set-meta/backfill --force/rename) NUỐT field (r132a khóa). Khối instruction
+    # trinh_bay_theo_mau CHỈ hiện khi có templates; thân session==project giữ byte-equal. Đỏ-trước. ═══
+    def _c132_marker_body_templates_passthrough():
+        import tl_core.profile_mgmt as _pm132
+        _idn = {k: f"V_{k}" for k in _pm132._MARKER_IDENTITY_KEYS}
+        _tpl = [{"id": "phieu-trinh", "drive_id": "D1", "name": "Phiếu trình", "scope": "soạn phiếu trình",
+                 "note": "", "added_at": "2026-07-18T00:00:00Z"}]
+        _b = _pm132._marker_body("p1", _idn, existing={"style": "x", "templates": _tpl})
+        _ok = _b.get("templates") == _tpl and _b["style"] == "x"
+        _b2 = _pm132._marker_body("p1", _idn, existing={"style": "x"})          # marker cũ không templates
+        _ok = _ok and _b2.get("templates") == []
+        _b3 = _pm132._marker_body("p1", _idn, existing={"templates": "hỏng"})   # kiểu sai → [] fail-safe
+        return _ok and _b3.get("templates") == []
+    _t110("r132_marker_body_templates_passthrough", _c132_marker_body_templates_passthrough)
+
+    def _c132_templates_apply_change_pure():
+        import tl_core.profile_mgmt as _pm132
+        _f = _pm132._templates_apply_change
+        _e1 = {"id": "mau-a", "drive_id": "D1", "name": "Mẫu A", "scope": "", "note": ""}
+        _new, _err = _f([], add=_e1, now="TS")
+        _ok = _err is None and len(_new) == 1 and _new[0]["id"] == "mau-a" and _new[0]["added_at"] == "TS"
+        _ok = _ok and _f(_new, add=dict(_e1), now="TS")[1] == "TEMPLATE_ID_EXISTS"
+        _rm, _err3 = _f(_new, remove="mau-a")
+        _ok = _ok and _err3 is None and _rm == []
+        _ok = _ok and _f(_new, remove="khong-co")[1] == "TEMPLATE_ID_NOT_FOUND"
+        return _ok and _pm132._template_id_norm("Phiếu Trình 02") == "phieu-trinh-02"
+    _t110("r132_templates_apply_change_pure", _c132_templates_apply_change_pure)
+
+    def _c132_parser_template_flags():
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ns = _ap.parse_args(["profile-set-meta", "--profile-name", "p1",
+                                      "--template-add", "mau-a", "--template-drive-id", "D1",
+                                      "--template-name", "Mẫu A", "--template-scope", "soạn phiếu",
+                                      "--template-note", "ghi chú"])
+                _ok = (_ns.template_add == "mau-a" and _ns.template_drive_id == "D1"
+                       and _ns.template_name == "Mẫu A" and _ns.template_scope == "soạn phiếu"
+                       and _ns.template_note == "ghi chú")
+                _ok = _ok and _ap.parse_args(["profile-set-meta", "--template-upload",
+                                              "C:/x/mau.docx"]).template_upload == "C:/x/mau.docx"
+                _ok = _ok and _ap.parse_args(["profile-set-meta", "--template-remove",
+                                              "mau-a"]).template_remove == "mau-a"
+                _ok = _ok and getattr(_ap.parse_args(["profile-list", "--templates"]), "templates", None) is True
+        except SystemExit:   # cờ CHƯA có → exit(2) (BaseException — bài học r129)
+            return False
+        return _ok
+    _t110("r132_parser_template_flags", _c132_parser_template_flags)
+
+    def _c132_profile_load_block_templates():
+        import gen_instructions as _gi132
+        _mt = {"profile": "beta", "notebookId": "nb-1", "rootFolderId": "FB",
+               "templates": [{"id": "phieu-trinh", "drive_id": "DTPL", "name": "Phiếu trình",
+                              "scope": "soạn phiếu trình", "note": "mẫu 2026"}]}
+        _b = _gi132.generate_profile_load_block(_mt, "session", _gi132.VERSION)
+        _ok = ("## trinh_bay_theo_mau" in _b and "`DTPL`" in _b and "CHỈ KHI soạn phiếu trình." in _b
+               and "tl doc-text" in _b and "GIỮ NGUYÊN khung" in _b and "mẫu 2026" in _b
+               and "verify NGUYÊN VĂN" in _b and "KHÔNG sinh docx" in _b)
+        _b0 = _gi132.generate_profile_load_block({"profile": "beta", "notebookId": "nb-1",
+                                                  "rootFolderId": "FB"}, "session", _gi132.VERSION)
+        _ok = _ok and "trinh_bay_theo_mau" not in _b0                    # không templates → block VẮNG
+        _bp = _gi132.generate_profile_load_block(_mt, "project", _gi132.VERSION)
+        return _ok and _b.split("\n\n", 2)[2] == _bp.split("\n\n", 2)[2]   # thân byte-equal giữ
+    _t110("r132_profile_load_block_templates", _c132_profile_load_block_templates)
+
+    def _c132_template_findings_pure():
+        import tl_core.profile_mgmt as _pm132
+        _es = [{"id": "a", "drive_id": "D1"}, {"id": "b", "drive_id": "D2"}, {"id": "c", "drive_id": "D3"}]
+        _probe = {"D1": {"exists": True, "location": "profile_templates"},
+                  "D2": {"exists": True, "location": "outside"},
+                  "D3": {"exists": False, "location": "unknown"}}
+        _fs = _pm132._template_findings(_es, _probe)
+        _by = {f.get("id"): f for f in _fs}
+        return (_by.get("c", {}).get("finding") == "TEMPLATE_MISSING"
+                and _by.get("b", {}).get("finding") == "TEMPLATE_OUTSIDE_TREE"
+                and "a" not in _by)
+    _t110("r132_template_findings_pure", _c132_template_findings_pure)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -277,6 +277,51 @@ def cmd_profile_list(a) -> int:
     if getattr(a, "discover", False):   # B (v1.30.0): quét Drive LIVE đối chiếu config — xem _profile_list_discover
         with _ProfileEnvGuard():        # ép scope NỀN bên trong nhưng KHÔNG nhiễm env caller cùng-process
             return _profile_list_discover(a, path, cfg)
+    if getattr(a, "templates", False):
+        # v1.34.71 (Q6/Q2b): READ-ONLY — kho mẫu chung (_meta/templates VBQPPL, folder-là-danh-mục:
+        # nguồn sự thật = LISTING) + entries templates trong marker từng profile dự án. Cần webapp LIVE.
+        try:
+            load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
+        except SystemExit as e:
+            print(f"[tl] profile-list --templates cần webapp LIVE (đọc Drive/marker): {e}", file=sys.stderr)
+            return 2
+        g = _gas()
+        profs = _profiles_from_config(cfg)
+        base_meta = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+        shared = {"folder_id": "", "items": [], "note": ""}
+        try:
+            if base_meta:
+                _items_b = (_gas_get_retry(g, "list", folderId=base_meta) or {}).get("items") or []
+                _tf_b = next((x for x in _items_b if str(x.get("type")) == "folder"
+                              and str(x.get("name")) == "templates"), None)
+                if _tf_b is not None:
+                    shared["folder_id"] = str(_tf_b.get("id") or "")
+                    shared["items"] = [{"drive_id": str(x.get("id") or ""), "name": str(x.get("name") or "")}
+                                       for x in ((_gas_get_retry(g, "list", folderId=shared["folder_id"]) or {})
+                                                 .get("items") or []) if str(x.get("type")) != "folder"]
+                else:
+                    shared["note"] = ("kho chung CHƯA dựng — tạo folder `templates` trong _meta VBQPPL rồi kéo "
+                                      "mẫu vào (Q2b: folder-là-danh-mục); profile dẫn chiếu bằng --template-add.")
+            else:
+                shared["note"] = "config thiếu metaFolderId nền vbqppl — không xác định được kho chung."
+        except Exception as e:  # noqa: BLE001
+            shared["note"] = f"lỗi đọc kho chung: {type(e).__name__}: {e}"
+        per = {}
+        for pn in sorted(profs):
+            pv = profs.get(pn)
+            if pn == DEFAULT_PROFILE or not isinstance(pv, dict):
+                continue
+            mr = _marker_read(g, str(pv.get("rootFolderId") or ""),
+                              meta_id=str(pv.get("metaFolderId") or "") or None)
+            mk = mr.get("marker") or {}
+            per[pn] = {"marker_found": bool(mr.get("found")),
+                       "templates": mk.get("templates") if isinstance(mk.get("templates"), list) else []}
+        out_t = {"ok": True, "shared": shared, "profiles": per,
+                 "note": "Q2b: profile dùng mẫu chung = --template-add DẪN CHIẾU CHỦ ĐÍCH từng mẫu "
+                         "(KHÔNG auto-inherit cả kho)."}
+        print(_json_dumps(out_t, deterministic=_deterministic_enabled(a)) if getattr(a, "json", False)
+              else json.dumps(out_t, ensure_ascii=False, indent=2))
+        return 0
     active = _selected_profile_name(getattr(a, "profile", None), cfg)
     rows = _profile_config_rows(cfg, active)
     _ccr = _config_candidates_report(getattr(a, "config", None))   # P1: config-of-record + cảnh báo duplicate
@@ -991,6 +1036,24 @@ def _cmd_profile_doctor_impl(a) -> int:
                                          "count": _blk,
                                          "note": "nguồn không xuất được (URL/YouTube/rỗng) — Ở LẠI nlm-only "
                                                  "là HỢP LỆ (Q4); thử lại: --retry-blocked."})
+        # v1.34.71 (ke-hoach-profile-templates Q6): --deep + marker có templates → probe từng mẫu.
+        # TEMPLATE_MISSING (404/mất quyền) = warn; TEMPLATE_OUTSIDE_TREE (Q2) = info advisory.
+        if getattr(a, "deep", False) and _root:
+            _mk_t = (_mr.get("marker") or {}) if isinstance(_mr, dict) else {}
+            _tpls_d = _mk_t.get("templates") if isinstance(_mk_t.get("templates"), list) else []
+            if _tpls_d:
+                _shared_meta_d = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+                _prof_meta_d = str(_mk_t.get("metaFolderId") or prof.get("metaFolderId") or "")
+                _probe_d = {}
+                for _t_d in _tpls_d:
+                    _did_d = str((_t_d or {}).get("drive_id") or "")
+                    if _did_d and _did_d not in _probe_d:
+                        _probe_d[_did_d] = _template_probe(g, _did_d, _prof_meta_d, _shared_meta_d)
+                for _f_d in _template_findings(_tpls_d, _probe_d):
+                    findings.append({"check": _f_d["finding"],
+                                     "severity": "warn" if _f_d["finding"] == "TEMPLATE_MISSING" else "info",
+                                     "profile": n, "template_id": _f_d.get("id"),
+                                     "drive_id": _f_d.get("drive_id"), "note": _f_d.get("note")})
         _pf = findings[_before_len:]
         print(f"[doctor] ({_idx}/{_run_total}) {n}: {len(_pf)} finding(s)", file=sys.stderr, flush=True)
         print("[doctor-jsonl] " + json.dumps({"profile": n, "findings": _pf}, ensure_ascii=False),
@@ -1375,6 +1438,11 @@ def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str |
     rel.setdefault("base", DEFAULT_PROFILE)   # nền VBQPPL luôn bật (CONTEXT.md) — relations chỉ MÔ TẢ, không mở scope
     body["relations"] = rel
     body["source_policy"] = str(ex.get("source_policy") or "materialize_preferred")
+    # v1.34.71 (ke-hoach-profile-templates Q1): danh sách mẫu trình bày per-profile. Pass-through
+    # TƯỜNG MINH — body là WHITELIST: thiếu dòng này thì MỌI đường rewrite marker (set-meta/backfill
+    # --force/rename/create/adopt) NUỐT templates (r132a khóa). Kiểu sai → [] fail-safe.
+    _tpl = ex.get("templates")
+    body["templates"] = [dict(t) for t in _tpl if isinstance(t, dict)] if isinstance(_tpl, list) else []
     body["created_at"] = str(ex.get("created_at") or ts)
     body["updated_at"] = ts
     body["updated_by"] = f"tl v{VERSION}"
@@ -1393,6 +1461,92 @@ def _marker_validate(d) -> tuple:
     if not str(d.get("rootFolderId") or "").strip():
         errs.append("ROOT_FOLDER_ID_EMPTY")
     return (not errs), errs
+
+
+def _template_id_norm(s: str) -> str:
+    """PURE (v1.34.71 Q3): chuẩn hoá id mẫu thành slug ascii-thường (bỏ dấu, đ→d, [a-z0-9-])."""
+    import unicodedata as _ud
+    t = _ud.normalize("NFD", str(s or "")).replace("đ", "d").replace("Đ", "D")
+    t = "".join(c for c in t if _ud.category(c) != "Mn").lower()
+    return re.sub(r"-{2,}", "-", re.sub(r"[^a-z0-9]+", "-", t)).strip("-")
+
+
+def _templates_apply_change(old, add: dict | None = None, remove: str | None = None,
+                            now: str | None = None) -> tuple:
+    """PURE (v1.34.71 Q1/Q3): áp ĐÚNG 1 thay đổi templates lên list cũ → (new_list, error|None).
+    add = entry {id, drive_id, name, scope, note} (added_at tự đóng dấu — inject `now` cho test tất định);
+    remove = id. Trùng id khi add → TEMPLATE_ID_EXISTS; remove id không có → TEMPLATE_ID_NOT_FOUND."""
+    cur = [dict(t) for t in (old or []) if isinstance(t, dict)]
+    if add is not None:
+        tid = _template_id_norm(add.get("id") or "")
+        if not tid:
+            return cur, "TEMPLATE_ID_EMPTY"
+        if any(_template_id_norm(t.get("id") or "") == tid for t in cur):
+            return cur, "TEMPLATE_ID_EXISTS"
+        did = str(add.get("drive_id") or "").strip()
+        if not did:
+            return cur, "TEMPLATE_DRIVE_ID_REQUIRED"
+        ts = now or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        return cur + [{"id": tid, "drive_id": did, "name": str(add.get("name") or "").strip() or tid,
+                       "scope": str(add.get("scope") or "").strip(), "note": str(add.get("note") or "").strip(),
+                       "added_at": ts}], None
+    if remove is not None:
+        tid = _template_id_norm(remove)
+        keep = [t for t in cur if _template_id_norm(t.get("id") or "") != tid]
+        if len(keep) == len(cur):
+            return cur, "TEMPLATE_ID_NOT_FOUND"
+        return keep, None
+    return cur, None
+
+
+def _template_findings(entries, probe: dict) -> list:
+    """PURE (v1.34.71 Q6): phân loại finding doctor --deep từ probe {drive_id: {exists, location}}.
+    exists=False → TEMPLATE_MISSING; location='outside' → TEMPLATE_OUTSIDE_TREE (advisory Q2). OK → bỏ qua."""
+    out = []
+    for t in entries or []:
+        if not isinstance(t, dict):
+            continue
+        did = str(t.get("drive_id") or "")
+        p = (probe or {}).get(did) or {}
+        if not p.get("exists"):
+            out.append({"id": str(t.get("id") or ""), "drive_id": did, "finding": "TEMPLATE_MISSING",
+                        "note": "probe không thấy file (404/mất quyền) — sửa hoặc gỡ entry (--template-remove)."})
+        elif str(p.get("location") or "") == "outside":
+            out.append({"id": str(t.get("id") or ""), "drive_id": did, "finding": "TEMPLATE_OUTSIDE_TREE",
+                        "note": "file ngoài cây profile và ngoài kho chung — advisory (Q2); cân nhắc dời vào _meta/templates."})
+    return out
+
+
+def _template_probe(g, did: str, prof_meta_id: str, shared_meta_id: str) -> dict:
+    """(v1.34.71 Q5) Probe THẬT 1 drive_id mẫu: LIST-FIRST 2 vị trí hợp lệ (templates của profile + kho
+    chung `_meta/templates` VBQPPL — rẻ, đồng thời xác định location) → không thấy mới `download` fileId
+    (tồn tại?). Trả {exists, location, name}; location ∈ profile_templates|shared|outside|unknown.
+    Lỗi mạng/404 → exists=False (fail-closed — caller Q5 quyết)."""
+    did = str(did or "").strip()
+    def _scan(meta_id):
+        if not meta_id:
+            return None
+        items = (_gas_get_retry(g, "list", folderId=str(meta_id)) or {}).get("items") or []
+        tf = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "templates"), None)
+        if not tf:
+            return None
+        fs = (_gas_get_retry(g, "list", folderId=str(tf.get("id") or "")) or {}).get("items") or []
+        return next((x for x in fs if str(x.get("id") or "") == did), None)
+    try:
+        if not did:
+            return {"exists": False, "location": "unknown", "name": ""}
+        it = _scan(prof_meta_id)
+        if it is not None:
+            return {"exists": True, "location": "profile_templates", "name": str(it.get("name") or "")}
+        it = _scan(shared_meta_id)
+        if it is not None:
+            return {"exists": True, "location": "shared", "name": str(it.get("name") or "")}
+        d = _gas_get_retry(g, "download", fileId=did)
+        if d and d.get("b64"):
+            return {"exists": True, "location": "outside", "name": str(d.get("name") or "")}
+        return {"exists": False, "location": "unknown", "name": ""}
+    except Exception:  # noqa: BLE001
+        return {"exists": False, "location": "unknown", "name": ""}
 
 
 def _marker_diff(marker: dict, prof: dict) -> list:
@@ -2732,9 +2886,35 @@ def _cmd_profile_set_meta_impl(a) -> int:
     style = getattr(a, "style", None)
     see_also = getattr(a, "see_also", None)
     policy = getattr(a, "source_policy", None)
-    if desc is None and style is None and see_also is None and policy is None:
-        print("[tl] cần ít nhất một --description/--style/--see-also/--source-policy "
-              "(xoá field = truyền chuỗi rỗng).", file=sys.stderr)
+    # ── v1.34.71 templates (ke-hoach-profile-templates Q2c/Q3/Q5): ĐÚNG 1 op/lần chạy ──
+    t_add = getattr(a, "template_add", None)
+    t_upload = getattr(a, "template_upload", None)
+    t_remove = getattr(a, "template_remove", None)
+    _t_ops = [x for x in (t_add, t_upload, t_remove) if x]
+    if len(_t_ops) > 1:
+        print(json.dumps({"ok": False, "error": "TEMPLATE_ONE_OP_ONLY",
+                          "note": "chỉ 1 trong --template-add/--template-upload/--template-remove mỗi lần chạy."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    if t_add is not None and not str(getattr(a, "template_drive_id", None) or "").strip():
+        print(json.dumps({"ok": False, "error": "TEMPLATE_DRIVE_ID_REQUIRED",
+                          "note": "--template-add cần --template-drive-id <fileId> (mẫu ĐÃ trên Drive; "
+                                  "upload file local = --template-upload)."}, ensure_ascii=False), file=sys.stderr)
+        return 2
+    if t_upload is not None:
+        _fp_pre = Path(str(t_upload))
+        if not _fp_pre.is_file():
+            print(json.dumps({"ok": False, "error": "TEMPLATE_UPLOAD_FILE_NOT_FOUND", "path": str(t_upload)},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        if _fp_pre.stat().st_size > 35 * 1024 * 1024:   # trần upload b64 webapp (API_CONTRACT)
+            print(json.dumps({"ok": False, "error": "TEMPLATE_UPLOAD_TOO_LARGE", "path": str(t_upload),
+                              "bytes": _fp_pre.stat().st_size, "limit": 35 * 1024 * 1024},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+    if desc is None and style is None and see_also is None and policy is None and not _t_ops:
+        print("[tl] cần ít nhất một --description/--style/--see-also/--source-policy/"
+              "--template-add/--template-upload/--template-remove (xoá field = truyền chuỗi rỗng).", file=sys.stderr)
         return 2
     try:
         load_creds(getattr(a, "config", None), DEFAULT_PROFILE)
@@ -2783,6 +2963,81 @@ def _cmd_profile_set_meta_impl(a) -> int:
                 warnings.append(f"see_also '{_sa}' không có trong config máy này (có thể ở máy khác — chỉ mô tả).")
     if policy is not None and str(policy) != str(old.get("source_policy") or ""):
         changes["source_policy"] = {"old": str(old.get("source_policy") or ""), "new": str(policy)}
+    # ── v1.34.71 templates: tính new_tpl + probe (Q5) / upload-plan (Q2c) — DRY chỉ LẬP KẾ HOẠCH, không tạo folder ──
+    old_tpl = old.get("templates") if isinstance(old.get("templates"), list) else []
+    new_tpl = None
+    _shared_meta = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+    _prof_meta = str(old.get("metaFolderId") or prof.get("metaFolderId") or "")
+    if t_remove is not None:
+        new_tpl, _terr = _templates_apply_change(old_tpl, remove=str(t_remove))
+        if _terr:
+            print(json.dumps({"ok": False, "error": _terr, "id": _template_id_norm(str(t_remove)),
+                              "known_ids": [str(t.get("id") or "") for t in old_tpl]},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        changes["templates"] = {"op": "remove", "id": _template_id_norm(str(t_remove)),
+                                "old_ids": [str(t.get("id") or "") for t in old_tpl],
+                                "new_ids": [str(t.get("id") or "") for t in new_tpl]}
+    if t_add is not None:
+        _did = str(getattr(a, "template_drive_id", None) or "").strip()
+        probe = _template_probe(g, _did, _prof_meta, _shared_meta)
+        if getattr(a, "apply", False) and not probe.get("exists"):
+            print(json.dumps({"ok": False, "error": "TEMPLATE_NOT_FOUND", "drive_id": _did, "probe": probe,
+                              "note": "probe Drive không thấy file (Q5 fail-closed, không cờ bypass) — "
+                                      "kiểm fileId/quyền rồi chạy lại."}, ensure_ascii=False), file=sys.stderr)
+            return 2
+        _ent = {"id": str(t_add), "drive_id": _did,
+                "name": str(getattr(a, "template_name", None) or "") or str(probe.get("name") or ""),
+                "scope": str(getattr(a, "template_scope", None) or ""),
+                "note": str(getattr(a, "template_note", None) or "")}
+        new_tpl, _terr = _templates_apply_change(old_tpl, add=_ent)
+        if _terr:
+            print(json.dumps({"ok": False, "error": _terr, "id": _template_id_norm(str(t_add))},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        changes["templates"] = {"op": "add", "id": _template_id_norm(str(t_add)), "drive_id": _did,
+                                "probe": probe, "old_ids": [str(t.get("id") or "") for t in old_tpl],
+                                "new_ids": [str(t.get("id") or "") for t in new_tpl]}
+        if not probe.get("exists"):
+            warnings.append("PROBE_FAIL — DRY ghi nhận; --apply sẽ TỪ CHỐI (TEMPLATE_NOT_FOUND, Q5).")
+        elif str(probe.get("location") or "") == "outside":
+            warnings.append("TEMPLATE_OUTSIDE_TREE — file ngoài cây profile và ngoài kho chung (Q2 advisory; "
+                            "cân nhắc dời vào _meta/templates).")
+    if t_upload is not None:
+        _fp_u = Path(str(t_upload))
+        _tpl_folder = ""
+        _dup_name = False
+        try:   # best-effort DRY: chỉ LIST (không resolvefolder — tránh find-or-CREATE khi chưa apply)
+            _items_u = ((_gas_get_retry(g, "list", folderId=_prof_meta) or {}).get("items") or []) if _prof_meta else []
+            _tf_u = next((x for x in _items_u if str(x.get("type")) == "folder"
+                          and str(x.get("name")) == "templates"), None)
+            if _tf_u is not None:
+                _tpl_folder = str(_tf_u.get("id") or "")
+                _fs_u = (_gas_get_retry(g, "list", folderId=_tpl_folder) or {}).get("items") or []
+                _dup_name = any(str(x.get("name") or "") == _fp_u.name for x in _fs_u
+                                if str(x.get("type")) != "folder")
+        except Exception:  # noqa: BLE001
+            pass
+        if _dup_name:
+            print(json.dumps({"ok": False, "error": "TEMPLATE_FILE_NAME_EXISTS", "name": _fp_u.name,
+                              "note": "_meta/templates của profile đã có file TRÙNG TÊN — đổi tên file local "
+                                      "hoặc gỡ bản cũ trước (KHÔNG ghi đè)."}, ensure_ascii=False), file=sys.stderr)
+            return 2
+        _ent_u = {"id": _fp_u.stem, "drive_id": "PENDING_UPLOAD",
+                  "name": str(getattr(a, "template_name", None) or "") or _fp_u.stem,
+                  "scope": str(getattr(a, "template_scope", None) or ""),
+                  "note": str(getattr(a, "template_note", None) or "")}
+        new_tpl, _terr = _templates_apply_change(old_tpl, add=_ent_u)
+        if _terr:
+            print(json.dumps({"ok": False, "error": _terr, "id": _template_id_norm(_fp_u.stem)},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        changes["templates"] = {"op": "upload", "id": _template_id_norm(_fp_u.stem),
+                                "upload": {"file": str(_fp_u), "bytes": _fp_u.stat().st_size,
+                                           "target": "_meta/templates/" + _fp_u.name,
+                                           "templates_folder_id": _tpl_folder or "(tạo khi --apply — resolvefolder find-or-create)"},
+                                "old_ids": [str(t.get("id") or "") for t in old_tpl],
+                                "new_ids": [str(t.get("id") or "") for t in new_tpl]}
     out = {"ok": True, "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
            "profile": name, "marker_fileId": mr.get("fileId"), "changes": changes, "warnings": warnings}
     if not changes:
@@ -2803,6 +3058,38 @@ def _cmd_profile_set_meta_impl(a) -> int:
         existing["relations"] = {**old_rel, "see_also": new_see}
     if policy is not None:
         existing["source_policy"] = str(policy)
+    if new_tpl is not None:
+        if t_upload is not None:
+            # v1.34.71 (Q2c) APPLY upload THẬT: resolvefolder(create) → recheck trùng tên → upload b64 →
+            # gắn fileId vào entry PENDING_UPLOAD. Journal step riêng để undo/truy vết.
+            _fp_u2 = Path(str(t_upload))
+            rf = _gas_get_retry(g, "resolvefolder", name="templates", parentId=_prof_meta, create="true")
+            _tpl_fid = str((rf or {}).get("folderId") or "")
+            if not _tpl_fid:
+                print(json.dumps({"ok": False, "error": "TEMPLATE_FOLDER_CREATE_FAILED", "journal": rid,
+                                  "detail": rf}, ensure_ascii=False), file=sys.stderr)
+                return 1
+            _fs_u2 = (_gas_get_retry(g, "list", folderId=_tpl_fid) or {}).get("items") or []
+            if any(str(x.get("name") or "") == _fp_u2.name for x in _fs_u2 if str(x.get("type")) != "folder"):
+                print(json.dumps({"ok": False, "error": "TEMPLATE_FILE_NAME_EXISTS", "name": _fp_u2.name,
+                                  "journal": rid}, ensure_ascii=False), file=sys.stderr)
+                return 1
+            _mime_u = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                       if _fp_u2.suffix.lower() == ".docx" else "application/octet-stream")
+            up_u = g.post("upload", b64=base64.b64encode(_fp_u2.read_bytes()).decode("ascii"),
+                          name=_fp_u2.name, mime=_mime_u, folderId=_tpl_fid)
+            _fid_u = str((up_u or {}).get("fileId") or "")
+            if not _fid_u:
+                print(json.dumps({"ok": False, "error": "TEMPLATE_UPLOAD_FAILED", "journal": rid,
+                                  "detail": up_u}, ensure_ascii=False), file=sys.stderr)
+                return 1
+            _journal_append(rid, {"t": "step", "op": "template_upload", "fileId": _fid_u,
+                                  "name": _fp_u2.name, "folderId": _tpl_fid})
+            for _t2 in new_tpl:
+                if str(_t2.get("drive_id") or "") == "PENDING_UPLOAD":
+                    _t2["drive_id"] = _fid_u
+            changes["templates"]["drive_id"] = _fid_u
+        existing["templates"] = new_tpl
     _identity = {k: old.get(k) for k in _MARKER_IDENTITY_KEYS}   # identity từ MARKER (nguồn sự thật)
     body = _marker_body(name, _identity, existing=existing)
     w = _marker_write(g, mr.get("meta_folder_id") or str(prof.get("metaFolderId") or ""),

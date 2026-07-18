@@ -319,7 +319,7 @@ def build_parser() -> argparse.ArgumentParser:
     # BỎ QUA khi no-wait (nguồn có thể chưa liệt kê được — check sẽ âm tính giả). Nạp LÔ xong chạy `tl nlm-reconcile`
     # xác nhận settle + link đủ. Truy vấn NLM ngay sau nạp no-wait có thể CHƯA thấy nội dung (chờ vài phút).
     p.add_argument("--nlm-no-wait", dest="nlm_no_wait", action="store_true",
-                   help="(v1.34.33) KHÔNG chờ nguồn NLM settle sau add (−~50% thời gian; source_id vẫn ghi registry đủ; bỏ post-add dup-check; nạp lô xong chạy `tl nlm-reconcile`)")
+                   help="(v1.34.33) KHÔNG chờ nguồn NLM settle sau add (−~50%% thời gian; source_id vẫn ghi registry đủ; bỏ post-add dup-check; nạp lô xong chạy `tl nlm-reconcile`)")
     # v1.34.35 (quy trình ADD-TAY — user chốt sau benchmark 2026-07-12): dừng ở Drive+registry, KHÔNG đụng NLM
     # (né hẳn cookie ~1h — hôm nay chết 2 lần giữa lô). Output in URL GDoc + notebook đích gợi ý + next_steps
     # điền sẵn: user add tay trên UI (Drive-picker chọn nhiều file, session browser) → nlm-reconcile --apply

@@ -1,3 +1,15 @@
+# ★ v1.34.72 — Vá crash `tl ingest-local -h` (help chứa `%` chưa escape) + guard format_help mọi lệnh (2026-07-19)
+
+> Lỗi lộ khi data-op nạp thể thức (rà backlog THE_THUC): `tl ingest-local -h` CRASH. TDD r133 ×1;
+> selftest 1090→1091. Kernel SKILL.md chỉ đổi header → re-import khi tiện.
+
+- **Bug**: help của `--nlm-no-wait` (cli.py:322) chứa `−~50% thời gian`; argparse dùng %-formatting cho
+  help → `% t` bị hiểu là format-spec `%t` → `ValueError: unsupported format character 't' at index 53`
+  khi `print_help()`. Sửa `%` → `%%` (giữ nguyên hiển thị "−~50%").
+- **Guard chống tái diễn** (r133): selftest quét MỌI subparser `format_help()` không ném — bắt lớp bug
+  help-`%` cho mọi lệnh hiện tại lẫn tương lai (TL_SELFTEST_DEBUG in danh sách lệnh crash). Golden
+  `parser_surface` regen chủ đích đúng 1 dòng (ingest-local — raw help đổi `%`→`%%`).
+
 # ★ v1.34.71 — Profile TEMPLATES: "trình bày theo mẫu người dùng đưa" per-profile (2026-07-18)
 
 > Kế hoạch `ke-hoach-profile-templates-2026-07-18.md` (grill 11 câu Q0–Q8 + Q2b/Q2c chốt cùng ngày;

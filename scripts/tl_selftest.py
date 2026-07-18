@@ -13282,6 +13282,24 @@ def run() -> int:
                 and "a" not in _by)
     _t110("r132_template_findings_pure", _c132_template_findings_pure)
 
+    # ═══ v1.34.72 — r133: MỌI subparser phải format_help() được (không ném). Bắt lớp bug help chứa `%`
+    # chưa escape (argparse dùng %-formatting cho help) — ca thật: `ingest-local --nlm-no-wait` help có
+    # '−~50% thời gian' → '% t' bị hiểu là format spec → `tl ingest-local -h` CRASH ValueError. Sửa `%`→`%%`.
+    # Test quét TẤT ĐỊNH toàn bộ lệnh (chống tái diễn cho mọi help tương lai). ═══
+    def _c133_all_subparsers_help_ok():
+        _ap133 = build_parser()
+        _sub133 = next(x for x in _ap133._actions if isinstance(x, argparse._SubParsersAction))
+        _bad = []
+        for _nm, _sp in _sub133.choices.items():
+            try:
+                _sp.format_help()
+            except Exception as _e:  # noqa: BLE001
+                _bad.append((_nm, type(_e).__name__))
+        if _bad and os.environ.get("TL_SELFTEST_DEBUG"):
+            print("  [r133] format_help CRASH:", _bad, file=sys.stderr)
+        return not _bad
+    _t110("r133_all_subparsers_help_ok", _c133_all_subparsers_help_ok)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

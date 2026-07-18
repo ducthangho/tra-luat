@@ -324,14 +324,16 @@ def cmd_release_check(a) -> int:
 # ───────────────────────── release/package integrity ─────────────────────────
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
                          ".claude", ".githooks", ".github",
-                         "claude-code-best-practice"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1 — lọt bundle là vỡ trần 200 file)
+                         "claude-code-best-practice",
+                         "changelog_archive"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim)
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 
 # v1.33.54: file local-only MỌI CẤP — config THẬT (chứa webappUrl/token) + CLAUDE.md dev. Phát hiện khi regen
 # manifest trên dev-tree: walk thư mục (không phải git ls-files) đã liệt kê + hash tra_luat_config.v2.json
 # vào RELEASE_MANIFEST (rò metadata + file_count lệch zip-set 115≠109 → release-verify trong gói FAIL).
-_RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json"}
+_RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json",
+                                   "Code.2.21.2k.gs"}   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim; GIỮ 2.21.2m (current)/2.21.2l (còn ref)
 
 _RELEASE_EXCLUDE_NAMES = {
     "RELEASE_MANIFEST.json",

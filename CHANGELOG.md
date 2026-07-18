@@ -1,3 +1,20 @@
+# ★ v1.34.69 — Trim dead-weight khỏi bundle deploy: Code.2.21.2k.gs (0-ref) + changelog_archive (2026-07-18)
+
+> Best-practice review (rà kho shanraisshan vừa clone) — P1 "0-ref dead weight". TDD r130 ×1; selftest
+> 1082→1083. SKILL.md đổi (header + annotate 1 dòng) ⇒ **RE-IMPORT CAPABILITIES BẮT BUỘC**.
+
+- **Loại 2 file khỏi bundle** (~632KB, runtime agent claude.ai không cần): `references/Code.2.21.2k.gs`
+  193KB (GAS bản cũ, **0 reference** toàn skill — thêm vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE`) +
+  `references/changelog_archive/` 439KB (CHANGELOG cũ ≤v1.33.53, deep-history — thêm `changelog_archive`
+  vào `_RELEASE_EXCLUDE_DIRS`). **GIỮ** `Code.2.21.2m.gs` (current, 6 ref) + `Code.2.21.2l.gs` (9 ref).
+- **SKILL.md:302** annotate con trỏ changelog_archive = "DEV-ONLY, KHÔNG trong bundle deploy" — bundle
+  deploy KHÔNG có pointer chết; dev-side link-check (`links_ok`) vẫn xanh vì cây dev còn thư mục
+  (`links_checked` giữ 14, token `references/changelog_archive/` giữ nguyên).
+- **TDD r130** (khuôn r129/r59 temp-dir): `_release_should_include` loại 2.21.2k + changelog_archive/,
+  GIỮ 2.21.2m/2.21.2l/API_CONTRACT + membership 2 hằng exclude. Golden `workflow_audit` regen CHỦ ĐÍCH
+  đúng 1 dòng (`size_bytes` 46.946→46.987B do annotate; vẫn WARN-clear <47KB). Bundle ×2 same-SHA
+  (byte-match) **171 file** (173→171, −2); nội dung 5.785.185→5.154.925B (−630KB), zip ~5.21MB.
+
 # ★ v1.34.68 — Kho tham chiếu Claude Code (dev-only) + generator instruction tier CORE/FULL (2026-07-18)
 
 > Kế hoạch `ke-hoach-instruction-refactor-va-kho-tham-chieu-2026-07-18.md` (grill Q1–Q6 chốt 2026-07-18),

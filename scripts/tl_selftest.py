@@ -13121,6 +13121,30 @@ def run() -> int:
         return _ok and _gi129.generate("nlm", _gi129.VERSION, tier="full") == _nlm
     _t110("r129_instructions_nlm_byte_frozen", _c129_nlm_byte_frozen)
 
+    # ═══ v1.34.69 — r130: trim dead-weight khỏi bundle deploy (best-practice review 2026-07-18):
+    # `references/Code.2.21.2k.gs` (0-ref, GAS bản cũ 193KB) + `references/changelog_archive/` (439KB,
+    # deep-history dev-only) KHÔNG cần cho runtime agent trên claude.ai. Loại: Code.2.21.2k.gs qua
+    # _RELEASE_EXCLUDE_NAMES_ANYWHERE (name mọi cấp); changelog_archive qua _RELEASE_EXCLUDE_DIRS (dir
+    # mọi cấp). GIỮ Code.2.21.2m.gs (current, 6 ref) + Code.2.21.2l.gs (9 ref). SKILL.md:302 annotate
+    # changelog_archive dev-only (không pointer chết trong deploy). Khuôn r129/r59 temp-dir, đỏ trước. ═══
+    def _c130_release_trim_dead_weight():
+        import tl_core.release as _rel130
+        with _tf110.TemporaryDirectory() as _d:
+            _r = _P110(_d)
+            (_r / "references" / "changelog_archive").mkdir(parents=True)
+            for _rel, _keep in (("references/Code.2.21.2k.gs", False),
+                                ("references/changelog_archive/CHANGELOG-den-1.33.53.md", False),
+                                ("references/Code.2.21.2m.gs", True),
+                                ("references/Code.2.21.2l.gs", True),
+                                ("references/API_CONTRACT.md", True)):
+                _fp = _r / _rel
+                _fp.write_text("x", encoding="utf-8")
+                if _release_should_include(_fp, _r) is not _keep:
+                    return False
+        return ("Code.2.21.2k.gs" in _rel130._RELEASE_EXCLUDE_NAMES_ANYWHERE
+                and "changelog_archive" in _rel130._RELEASE_EXCLUDE_DIRS)
+    _t110("r130_release_trim_dead_weight", _c130_release_trim_dead_weight)
+
     def _c129_cli_tier_wired():
         import gen_instructions as _gi129
         _ap = build_parser()

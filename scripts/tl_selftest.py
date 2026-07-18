@@ -5137,7 +5137,8 @@ def run() -> int:
     # (b) nlm-add có nhánh reg_link sau add (drift-lock: gỡ nhánh này là fail — đúng ca S14 nguồn 'unregistered')
     import inspect as _ins69
     import tl_core.nlm_ops as _no69   # I2 v1.34.4: nguồn THẬT ở tl_core.nlm_ops (tên trong tl là stub)
-    _src69 = _ins69.getsource(_no69.cmd_nlm_add)
+    import tl_core.nlm_admin_ops as _na69   # ĐỢT B v1.34.65: cmd_nlm_add nay ở nlm_admin_ops (§5 — cập nhật CÓ CHỦ ĐÍCH; _no69 giữ cho r71 đường ĐỌC)
+    _src69 = _ins69.getsource(_na69.cmd_nlm_add)
     cases.append(("r69_nlm_add_reg_link_wired",
                   "_journaled_reg_write" in _src69 and "nlm-add-link" in _src69 and "row xương" in _src69))
     # (c) live-smoke-plan bước snapshot_diff mang ĐỦ allow-prefix path THẬT (thiếu → diff báo unexpected oan);
@@ -5266,13 +5267,16 @@ def run() -> int:
         for _k, _v in _env71.items():
             (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
     # ═══ v1.34.4 — r71_*: I2 parity wrapper↔module (kiểu r70) + drift-lock mirror constant ═══
-    _no_names71 = ["cmd_nlm_list", "cmd_nlm_reconcile", "cmd_preflight", "cmd_push_overflow",
-                   "cmd_overflow_resolve", "cmd_slot_audit", "cmd_nlm_add", "cmd_nlm_orphans",
+    # v1.34.65 ĐỢT B (kế hoạch guard-va-boc-tl-core §5 — cập nhật CÓ CHỦ ĐÍCH, bước TDD §6.2/R3):
+    # 7 tên GHI/audit chuyển residency ("nlm_ops",·) → ("nlm_admin_ops",·) — nay pin ở r126;
+    # r71 GIỮ đường ĐỌC + fallback E1 Ở LẠI nlm_ops (ranh giới module = ranh giới quyền GHI/ĐỌC).
+    _no_names71 = ["cmd_nlm_list", "cmd_preflight",
+                   "cmd_slot_audit", "cmd_nlm_orphans",
                    "cmd_nlm_cross", "cmd_nlm_get", "cmd_nlm_content", "cmd_nlm_query", "cmd_nlm_query_plan",
-                   "_nlm_reconcile_plan", "_nlm_source_drive_id", "_sohieu_loose",
+                   "_sohieu_loose",
                    "_discover_overflow_from_registry", "_resolve_overflow_shards", "_overflow_route", "_overflow_status",
                    "_slot_count_all_shards", "_nlm_slot_count", "_classify_nlm_sources",
-                   "_nlm_post_add_dup_check", "_nlm_dedup_gate", "_nlm_query_plan",
+                   "_nlm_dedup_gate", "_nlm_query_plan",
                    "_preflight_invariants", "_preflight_verdict", "_raw_on_nlm_rows"]
     _g71 = globals()
     cases.append(("r71_nlm_ops_module_wired",
@@ -6026,7 +6030,7 @@ def run() -> int:
     cases.append(("r82_rebuild_rollback_via_version_history",
                   "version-history" in _w65._IDEMPOTENCY_CONTRACTS.get("profile_rebuild_registry", {}).get("rollback_hint", "")))
     # ═══ v1.34.17 — r83: BACKLOG #4-#8 log phiên chạy (TDD viết trước) ═══
-    import tl_core.nlm_ops as _no83
+    import tl_core.nlm_admin_ops as _no83   # ĐỢT B v1.34.65: _nlm_add_doc_type nay ở nlm_admin_ops (§5 — cập nhật CÓ CHỦ ĐÍCH)
     # (#4) nlm-add --type: parser default None; auto-detect GSheet từ MIME manifest (offline), explicit thắng
     _ns83 = build_parser().parse_args(["nlm-add", "--drive-id", "x83"])
     _sav83 = {"_manifest_entries": _TL_MODULE._manifest_entries}
@@ -12880,6 +12884,76 @@ def run() -> int:
             _ok = _ok and _p125 is not None and getattr(_p125.get_default("fn"), "__name__", "") == _h
         return _ok
     _t110("r125_source_ops_wiring_moved_15_names", _c125_source_ops_wiring_moved_15_names)
+
+    # ═══ v1.34.65 — r126: ĐỢT B kế hoạch guard-va-boc-tl-core §5 — tách tl_core/nlm_admin_ops.py
+    # (đường GHI + audit vật lý; RANH GIỚI MODULE = RANH GIỚI QUYỀN GHI/ĐỌC). TDD negative-trước (§6.2):
+    # residency mới + chiều ngược đường ĐỌC ở lại + COMMAND_META Y NGUYÊN (kể cả nlm_fallback §5 +
+    # module-hint giữ 'nlm_ops' — chỉ dùng cho det_json scan, False ở cả 7 lệnh). ═══
+    def _c126_nlm_admin_ops_wiring_moved_18_names():
+        import tl_core.nlm_admin_ops as _na126
+        import tl_core.nlm_ops as _no126
+        import tl_core.command_registry as _reg126
+        _moved = ["cmd_nlm_add", "cmd_nlm_migrate", "cmd_nlm_reconcile", "cmd_nlm_source_remove",
+                  "cmd_push_overflow", "cmd_overflow_resolve", "cmd_nlm_audit_physical",
+                  "_nlm_add_deferred", "_nlm_add_doc_type", "_shard_row_kind", "_migrate_plan",
+                  "_nlm_reconcile_plan", "_physical_audit_classify", "_migrate_resume_write",
+                  "_nlm_post_add_dup_check", "_nlm_source_drive_id", "_nlm_source_list_cached",
+                  "_nlm_list_stale_read"]
+        _no_src = (HERE / "tl_core" / "nlm_ops.py").read_text(encoding="utf-8", errors="replace")
+        _na_src = (HERE / "tl_core" / "nlm_admin_ops.py").read_text(encoding="utf-8", errors="replace")
+        _tl_src = (HERE / "tl.py").read_text(encoding="utf-8", errors="replace")
+        _ok = _na126._TL is not None
+        for _n in _moved:
+            _fn = getattr(_TL_MODULE, _n, None)
+            _ok = (_ok and callable(_fn) and getattr(_fn, "__tl_stub__", None) == ("nlm_admin_ops", _n)
+                   and callable(getattr(_na126, _n, None)) and not hasattr(_no126, _n)
+                   and _na_src.count(f"def {_n}(") == 1 and _no_src.count(f"def {_n}(") == 0
+                   and _tl_src.count(f"def {_n}(") == 0)
+        # CHIỀU NGƯỢC: đường ĐỌC + fallback E1 + plan-helper theo danh-sách-tên Ở LẠI nlm_ops (R2 —
+        # không sweep: _nlm_source_remove_plan/_source_remove_delete_verdict/_nlm_dedup_gate/
+        # _nlm_add_capacity_error KHÔNG thuộc member-list §5 → ở lại)
+        for _n in ("cmd_nlm_list", "cmd_nlm_query", "cmd_nlm_cross", "cmd_nlm_get", "cmd_nlm_content",
+                   "_nlm_or_corpus", "_nlm_hard_dead", "_nlm_source_remove_plan",
+                   "_source_remove_delete_verdict", "_nlm_dedup_gate", "_nlm_add_capacity_error"):
+            _ok = _ok and (f"def {_n}(" in _no_src) and (f"def {_n}(" not in _na_src)
+        # HẰNG nlm_ops Ở LẠI (không move — re-export tl giữ nguồn cũ)
+        _ok = (_ok and "_ROW_KIND_PROTECTED = " in _no_src and "_ROW_KIND_PROTECTED = " not in _na_src
+               and "NLM_BATCH_LINKS_THRESHOLD = " in _no_src
+               and "_tl_nlm_ops._ROW_KIND_PROTECTED" in _tl_src
+               and "_tl_nlm_ops.NLM_BATCH_LINKS_THRESHOLD" in _tl_src)
+        # COMMAND_META snapshot ĐỦ 12 field ×7 lệnh Y NGUYÊN (v1.34.64 — kể cả nlm_fallback §5 GIỮ:
+        # add/migrate=defer, reconcile/audit=unverified, source-remove=none; module-hint GIỮ 'nlm_ops')
+        _CM = _reg126.COMMAND_META
+        _snap = {
+            "nlm-add":            ("high", False, "nlm", False, False, False, None, "nlm_add", False, None, False, "defer"),
+            "nlm-migrate":        ("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", True, "defer"),
+            "nlm-reconcile":      ("high", False, "registry_nlm", False, True, False, None, "nlm_reconcile", False, None, False, "unverified"),
+            "nlm-source-remove":  ("high", False, "nlm", True, True, False, None, "nlm_source_remove", False, "nlm_ops", True, "none"),
+            "push-overflow":      ("high", False, "nlm_registry", False, True, False, None, "push_overflow", False, None, True, None),
+            "overflow-resolve":   ("low", True, "none", False, False, False, None, None, False, None, True, None),
+            "nlm-audit-physical": ("low", True, "local", False, False, False, None, None, False, "nlm_ops", True, "unverified"),
+        }
+        _keys = ("risk", "read_only", "write_scope", "requires_confirm", "supports_dry_run",
+                 "deterministic_json_required", "workflow_task", "idempotency_contract",
+                 "card_required", "module", "generated", "nlm_fallback")
+        for _cli, _want in _snap.items():
+            _m126 = _CM.get(_cli) or {}
+            _ok = _ok and tuple(_m126.get(_k) for _k in _keys) == _want
+        # lazy-creds membership Y NGUYÊN (R4 — pin từ trạng thái v1.34.64)
+        _lz = set(_TL_MODULE._CREDS_LAZY_CMDS)
+        _ok = (_ok and {"nlm-add", "nlm-reconcile", "push-overflow", "overflow-resolve"} <= _lz
+               and not ({"nlm-migrate", "nlm-source-remove", "nlm-audit-physical"} & _lz))
+        # parser resolve nguyên vẹn (kể cả nlm-add KHÔNG-generated — parser tay cli.py qua stub)
+        _ap126 = _TL_MODULE.build_parser()
+        _sub126 = next(x for x in _ap126._actions if isinstance(x, argparse._SubParsersAction))
+        for _cli, _h in (("nlm-add", "cmd_nlm_add"), ("nlm-migrate", "cmd_nlm_migrate"),
+                         ("nlm-reconcile", "cmd_nlm_reconcile"), ("nlm-source-remove", "cmd_nlm_source_remove"),
+                         ("push-overflow", "cmd_push_overflow"), ("overflow-resolve", "cmd_overflow_resolve"),
+                         ("nlm-audit-physical", "cmd_nlm_audit_physical")):
+            _p126 = _sub126.choices.get(_cli)
+            _ok = _ok and _p126 is not None and getattr(_p126.get_default("fn"), "__name__", "") == _h
+        return _ok
+    _t110("r126_nlm_admin_ops_wiring_moved_18_names", _c126_nlm_admin_ops_wiring_moved_18_names)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

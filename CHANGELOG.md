@@ -1,3 +1,37 @@
+# ★ v1.34.65 — ĐỢT B tách tl_core/nlm_admin_ops.py: ranh giới GHI/ĐỌC (2026-07-18)
+
+> Kế hoạch `D:\Quốc hội\ke-hoach-guard-va-boc-tl-core-2026-07-18.md` §5 (ĐÓNG TRỌN kế hoạch 2 đợt).
+> TDD r126 ×1 negative-trước (18-tên wiring composite); selftest 1070→1071. Python-only (GAS 2.21.2m).
+
+- **Tách `tl_core/nlm_admin_ops.py` §5 — MOVE NGUYÊN VĂN 11 zone** (nlm_ops.py 208.652B/61% trần →
+  **94.843B/28%**; nlm_admin_ops.py 116.354B/34%): **RANH GIỚI MODULE = RANH GIỚI QUYỀN GHI/ĐỌC** —
+  7 cmd GHI/audit (`nlm-add/nlm-migrate/nlm-reconcile/nlm-source-remove/push-overflow/overflow-resolve/
+  nlm-audit-physical`) + 11 helper (`_nlm_add_deferred/_nlm_add_doc_type/_shard_row_kind/_migrate_plan/
+  _nlm_reconcile_plan/_physical_audit_classify/_migrate_resume_write/_nlm_post_add_dup_check/
+  _nlm_source_drive_id/_nlm_source_list_cached/_nlm_list_stale_read`). Đường ĐỌC + fallback E1 Ở LẠI
+  nlm_ops; plan-helper NGOÀI danh-sách-tên Ở LẠI theo R2 — không sweep (`_nlm_source_remove_plan/
+  _source_remove_delete_verdict/_nlm_dedup_gate/_nlm_add_capacity_error`); HẰNG Ở LẠI nlm_ops
+  (`_ROW_KIND_PROTECTED/NLM_BATCH_LINKS_THRESHOLD/_NLM_COOKIE_*` — re-export tl giữ nguồn cũ, bẫy I11).
+  `COMMAND_META` Y NGUYÊN đủ 12 field ×7 lệnh (kể cả `nlm_fallback` §5: add/migrate=defer, reconcile/
+  audit=unverified, source-remove=none; module-hint giữ 'nlm_ops' — chỉ dùng cho det_json scan, False cả 7).
+- **BẰNG CHỨNG MOVE THUẦN (§6.5/R6):** selftest 1071/1071; golden diff DUY NHẤT ĐÚNG KẾ HOẠCH =
+  `workflow_audit.py_size.files_scanned` 63→64 (+1 file mới — regen CÓ CHỦ ĐÍCH 1 dòng); 18 golden khác
+  0-DIFF; charact §6.1 **31/31 cmd BYTE-MATCH TRỌN** post-vs-pre (`.tl_state/charact_pre_B`, capture tươi
+  cùng phiên). Sau 2 đợt: **mọi .py runtime < WARN 280KB** (max còn lại: ingest_ops 182.775B) — nghiệm thu §7.
+- **SMOKE B (Q5/§6.6) ĐẠT TRỌN — KHÔNG ghi sống:** [dead-path fake-home] audit-physical (GAS sống, NLM
+  chết) → UNVERIFIED_NLM_STATE ×2 notebook cache stale, topology CLEAN 0/0/0/0, rc=0 read-only; migrate
+  `--apply --confirm yes --name-contains CPTPP` → `DEFERRED_NLM_OFFLINE` deferred{repoint:0,add_api:0}
+  (KHÔNG ghi by-design E2) + resume-artifact `migrate_resume.v1` local, rc=0; guard `FILTER_REQUIRED`
+  fail-closed chứng kiến; nlm-add (GAS+NLM đều chết — 0 ghi tuyệt đối) → defer, note 'registry CHƯA có
+  dòng' đúng, rc=0. [1 vòng đọc-sống DRY] cookie SỐNG: nlm-list **293 nguồn LIVE tươi** + audit vật lý
+  **CLEAN 0/0/0/0 VERIFIED** (0 UNVERIFIED) — khớp trạng thái corpus đã biết.
+- **Wiring cập nhật CÓ CHỦ ĐÍCH (§6.2/R3):** `r71_nlm_ops_module_wired` trim 7 tên (residency sang r126);
+  `r126_nlm_admin_ops_wiring_moved_18_names` pin residency + chiều-ngược STAY-READ + hằng-ở-lại +
+  meta snapshot + lazy y nguyên (add/reconcile/push-overflow/overflow-resolve lazy; migrate/source-remove/
+  audit không) + parser resolve (kể cả `nlm-add` KHÔNG-generated); 2 tham chiếu lớp-getsource đổi nguồn
+  theo (bài học Đợt A — quét TRƯỚC move bắt đủ: r69 `_no69.cmd_nlm_add` → alias `_na69` mới [giữ `_no69`
+  cho r71 đường ĐỌC], r83 `_no83._nlm_add_doc_type` ×4 → import đổi module); `r81` tự thích nghi (0 sửa).
+
 # ★ v1.34.64 — ĐỢT A guard trần-mount + tách tl_core/source_ops.py (2026-07-18)
 
 > Kế hoạch `D:\Quốc hội\ke-hoach-guard-va-boc-tl-core-2026-07-18.md` §3+§4 (grill Q0–Q7 chốt 2026-07-18;

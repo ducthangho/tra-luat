@@ -1,3 +1,20 @@
+# ★ v1.34.73 — PERF nạp lô: perf_hint trong DRY plan + GOTCHAS §10 + RUNBOOK §D (2026-07-19)
+
+> Mổ xẻ "30 phút / 3 file" (journal đo ~260s/file apply): **chờ NLM settle mặc định ăn ≈NỬA thời gian
+> mỗi ingest** (help --nlm-no-wait v1.34.33 đã ghi −~50%); phần còn lại = chuỗi GAS (upload b64→convert
+> →organize, ~80–110s "công việc thật") + chạy TUẦN TỰ + overhead agent (DRY rời, readback --refresh
+> nhiều lần) + sự cố dedup 399/05. Đường 3-file-3-phút: `--nlm-no-wait` ×3 SONG SONG + reconcile 1 lần.
+> selftest 1091→1092 (r134 viết CÙNG LÚC implement — doc+hint patch, không pha đỏ đúng nghĩa; ghi thật).
+
+- **`_ingest_perf_hint` PURE** (ingest_ops) + wire DRY plan `perf_hint`: nhắc đường nạp-lô nhanh NGAY
+  nơi người vận hành đọc plan; đã dùng `--nlm-no-wait`/`--no-nlm-add` → im. KHÔNG đổi default
+  (verify-then-link giữ — an toàn v1.34.56). _STUB_MAP +1 tên (bind-REBASE).
+- **GOTCHAS §10 PERF nạp lô**: quy tắc lô ≥2 (song song + reconcile cuối + readback 1 lần, không
+  --refresh giữa chừng) + giải đáp b64: **upload b64 qua webapp là BẮT BUỘC** (Apps Script doPost không
+  nhận multipart binary, trần 35MB); file <1MB b64 không phải bottleneck (+33% ≈ <1s) — độ trễ ở Apps
+  Script runtime + convert GDoc; file rất lớn → cân nhắc gws CLI (backlog). **RUNBOOK §D** +1 dòng
+  "Nạp LÔ ≥2 file".
+
 # ★ v1.34.72 — Vá crash `tl ingest-local -h` (help chứa `%` chưa escape) + guard format_help mọi lệnh (2026-07-19)
 
 > Lỗi lộ khi data-op nạp thể thức (rà backlog THE_THUC): `tl ingest-local -h` CRASH. TDD r133 ×1;

@@ -13300,6 +13300,21 @@ def run() -> int:
         return not _bad
     _t110("r133_all_subparsers_help_ok", _c133_all_subparsers_help_ok)
 
+    # ═══ v1.34.73 — r134: PERF nạp lô (mổ xẻ 30'/3-file 2026-07-19, journal ~260s/file — chờ NLM settle
+    # ăn ≈nửa): DRY plan ingest-local phải NHẮC đường nhanh (--nlm-no-wait + reconcile cuối lô) ngay nơi
+    # người vận hành đọc; đã dùng cờ nhanh → im (không lải nhải). + GOTCHAS §10 PERF có anchor. ═══
+    def _c134_ingest_perf_hint():
+        import tl_core.ingest_ops as _io134
+        _h = _io134._ingest_perf_hint(False, False)
+        _ok = (_h is not None and "--nlm-no-wait" in _h and "nlm-reconcile" in _h
+               and "--no-nlm-add" in _h and "SONG SONG" in _h)
+        _ok = _ok and _io134._ingest_perf_hint(True, False) is None
+        _ok = _ok and _io134._ingest_perf_hint(False, True) is None
+        _g = (HERE.parent / "references" / "GOTCHAS.md").read_text(encoding="utf-8", errors="replace")
+        _rb = (HERE.parent / "references" / "RUNBOOK.md").read_text(encoding="utf-8", errors="replace")
+        return _ok and "PERF nạp lô" in _g and "--nlm-no-wait" in _g and "Nạp LÔ ≥2 file (PERF" in _rb
+    _t110("r134_ingest_perf_hint", _c134_ingest_perf_hint)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

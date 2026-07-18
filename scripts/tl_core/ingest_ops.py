@@ -738,6 +738,17 @@ def cmd_ingest_missing(a) -> int:
     return 0 if (fail_n == 0 and reg_fail_n == 0) else 1
 
 
+def _ingest_perf_hint(nlm_no_wait: bool, no_nlm_add: bool):
+    """PURE (v1.34.73 — mổ xẻ 30' nạp 3 file 2026-07-19, journal đo ~260s/file): chờ NLM settle mặc định
+    ăn ≈NỬA thời gian mỗi ingest. Nạp LÔ ≥2 file → nhắc đường nhanh ngay trong DRY plan; chạy đơn lẻ giữ
+    mặc định verify-then-link (an toàn v1.34.56). Trả None khi đã dùng cờ nhanh (không lải nhải)."""
+    if nlm_no_wait or no_nlm_add:
+        return None
+    return ("PERF nạp LÔ ≥2 file: thêm --nlm-no-wait (−~50%/file; 3 lệnh chạy SONG SONG được) + "
+            "`tl nlm-reconcile <notebook> --apply` MỘT lần cuối lô; lô lớn: --no-nlm-add (dừng sau "
+            "Drive+registry) rồi nlm-links batch + reconcile. Đơn lẻ: giữ mặc định (verify-then-link).")
+
+
 def _upload_mime_ext(path: str) -> tuple[str, str]:
     """MIME + đuôi THẬT cho file local upload (để Drive `organize convert=true` convert ĐÚNG định dạng — KHÔNG ép .docx
     cho mọi file: upload .pdf/.doc giả .docx sẽ hỏng convert). Lạ đuôi → coi như .docx (giữ hành vi cũ)."""
@@ -1917,6 +1928,9 @@ def cmd_ingest_local(a) -> int:
                          "→preflight→nlm add (CLI)→push.") if _from_drive else
                         "--apply để chạy: [mkdir nếu cần]→upload→organize(convert/cat/stamp/register)→preflight→nlm add (CLI)→push.")
         plan["apply_requires"] = ["--apply", "--confirm yes", f"--expected-plan-hash {_contract['plan_hash']}"]
+        _ph = _ingest_perf_hint(bool(getattr(a, "nlm_no_wait", False)), bool(getattr(a, "no_nlm_add", False)))
+        if _ph:
+            plan["perf_hint"] = _ph   # v1.34.73: nhắc đường nạp-lô nhanh ngay tại DRY (nơi người vận hành đọc plan)
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0
     _auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
                             expected_plan_hash=getattr(a, "expected_plan_hash", None),

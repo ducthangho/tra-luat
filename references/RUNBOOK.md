@@ -538,6 +538,7 @@ Không nêu profile ⇒ `defaultProfile` (hiện `vbqppl`).
 | Ý định | Prompt mẫu | Lệnh tl chạy ngầm |
 |---|---|---|
 | Nạp vb mới không trùng | "vbthuong: nạp các văn bản mới không trùng trong `_HOP_NAP` vào notebook dự án" | `--profile vbthuong` ingest/preingest → dedup theo registry vbthuong → `map_set notebookId=$NB` |
+| **Nạp LÔ ≥2 file (PERF v1.34.73)** | "nạp nhanh 3 file này" | reg-query MỌI số hiệu trước (dedup) → `ingest-local --nlm-no-wait` ×N SONG SONG (−~50%/file — bỏ chờ settle) → `tl nlm-reconcile <nb> --apply` MỘT lần cuối → readback 1 lần. Chi tiết: `references/GOTCHAS.md §10` |
 | Tra nguyên văn | "vbthuong: tra nguyên văn Điều X của <văn bản>" | query notebook `fec6c125` + verify; miss → fallback vbqppl |
 | Rà soát đối chiếu VBQPPL | "vbthuong: rà soát Điều X, đối chiếu thêm VBQPPL" | `tl nlm-cross --notebooks fec6c125,743ed200` |
 | Kiểm slot trước khi nạp | "vbthuong: kiểm slot notebook dự án" | `--profile vbthuong slot-audit --notebook-id $NB` |

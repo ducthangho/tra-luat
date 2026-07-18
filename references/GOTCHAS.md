@@ -98,3 +98,14 @@
   corpus-ảo); audit/plan trên cache stale = **belief** (`UNVERIFIED_NLM_STATE`) — không xử theo.
 - `nlm-migrate --apply` cần đúng 1 bộ lọc (`FILTER_REQUIRED` fail-closed); NLM chết → KHÔNG ghi trên
   belief, chỉ BATCH_LINKS + resume-artifact (`--from-plan` chạy nốt khi sống).
+
+## 10. PERF nạp lô (mổ xẻ 30 phút / 3 file — 2026-07-19)
+
+- **Chờ NLM settle mặc định ăn ≈NỬA thời gian mỗi `ingest-local --apply`** (journal đo ~260s/file).
+  Nạp LÔ ≥2 file: `--nlm-no-wait` (−~50%/file) + `tl nlm-reconcile <nb> --apply` MỘT lần cuối lô;
+  3 lệnh chạy SONG SONG được (upload/organize stateless, reg_bulk nguyên tử). Lô lớn: `--no-nlm-add`
+  → `nlm-links` batch → reconcile. Đơn lẻ giữ mặc định verify-then-link (an toàn v1.34.56).
+- **Upload đi b64 qua webapp là BẮT BUỘC** (Apps Script doPost không nhận multipart binary; trần 35MB).
+  Với file <1MB b64 KHÔNG phải bottleneck (phình +33% ≈ <1s mạng) — độ trễ nằm ở Apps Script runtime
+  + convert GDoc. File rất lớn → cân nhắc đường gws CLI (backlog), KHÔNG đổi đường ingest chuẩn.
+- Readback sau lô: `reg-query` 1 LẦN cuối (KHÔNG `--refresh` giữa chừng — mỗi refresh kéo registry đầy).

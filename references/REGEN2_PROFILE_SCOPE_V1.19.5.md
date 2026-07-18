@@ -1,5 +1,9 @@
 # Regen2 profile scope — best-combined v1.19.5
 
+> **[TÀI LIỆU LỊCH SỬ — đúng theo thời điểm viết.]** Các nhắc server/version-gate trong file
+> (ví dụ `2.21.2i`) là lịch sử. Version-gate/contract HIỆN HÀNH: `references/API_CONTRACT.md`
+> (webapp **2.21.2m**) + `references/RUNBOOK.md`. Nội dung dưới đây giữ nguyên văn, KHÔNG cập nhật.
+
 ## Quyết định hợp nhất
 
 Giữ `Code.2.21.2i.gs` làm server mục tiêu:

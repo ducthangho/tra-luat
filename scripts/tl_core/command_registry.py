@@ -353,7 +353,7 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'ingest-zip', "handler": 'cmd_ingest_zip',
-     "help": 'DRY-RUN: giải nén zip an toàn và lập batch plan nạp VBQPPL; apply chưa bật ở pha an toàn',
+     "help": 'DRY mặc định: giải nén zip an toàn và lập batch plan nạp VBQPPL; --apply --confirm yes chạy thật từng member (child_apply, journal ingest_zip_apply.v1)',
      "args": [
          {"dest": 'file'},
          {"flags": ['--cat'], "help": 'category VBQPPL dự kiến; thiếu cat sẽ cảnh báo'},
@@ -370,7 +370,7 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'profile-ingest-zip', "handler": 'cmd_profile_ingest_zip',
-     "help": 'DRY-RUN: giải nén zip an toàn và lập batch plan nạp profile; apply chưa bật ở pha an toàn',
+     "help": 'DRY mặc định: giải nén zip an toàn và lập batch plan nạp profile; --apply --confirm yes chạy thật từng member (child_apply, journal ingest_zip_apply.v1)',
      "args": [
          {"dest": 'file'},
          {"flags": ['--max-files'], "type": int, "default": 200},

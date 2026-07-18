@@ -1,3 +1,19 @@
+# ★ v1.34.70 — Sửa help zip-ingest lỗi-thời + nhãn TÀI LIỆU LỊCH SỬ 2 references (2026-07-18)
+
+> Hai fix doc. TDD r131 ×2; selftest 1083→1085. SKILL.md chỉ đổi header version ⇒ re-import KHÔNG bắt buộc
+> (khi tiện).
+
+- **Help `ingest-zip` + `profile-ingest-zip`** (`tl_core/command_registry.py` GENERATED_SPECS): bỏ câu
+  "apply chưa bật ở pha an toàn" — SAI từ v1.34.45 (zip_ingest có nhánh `child_apply` chạy thật, journal
+  `ingest_zip_apply.v1`, meta supports_dry_run/confirm đầy đủ). Help mới: "DRY mặc định … --apply
+  --confirm yes chạy thật từng member". Help thuộc parser_surface → golden regen CHỦ ĐÍCH
+  (`TL_WRITE_PARSER_SURFACE=1`), đúng 2 dòng help đổi.
+- **Nhãn TÀI LIỆU LỊCH SỬ** đầu 2 file: `references/REGEN2_PROFILE_SCOPE_V1.19.5.md` (nhắc server
+  2.21.2i) + `references/MULTI_CORPUS_PROFILE_V1_18.md` (nhắc webapp 2.21.2g) — blockquote trỏ contract
+  HIỆN HÀNH `references/API_CONTRACT.md` (2.21.2m) + RUNBOOK; nội dung lịch sử GIỮ NGUYÊN VĂN.
+- **TDD r131**: (a) help 2 lệnh zip hết câu lỗi-thời + có "DRY"/"--apply --confirm yes" + parser thật có
+  cờ tương ứng; (b) nhãn nằm trong 700 ký tự đầu, trỏ API_CONTRACT 2.21.2m, file giữ LF.
+
 # ★ v1.34.69 — Trim dead-weight khỏi bundle deploy: Code.2.21.2k.gs (0-ref) + changelog_archive (2026-07-18)
 
 > Best-practice review (rà kho shanraisshan vừa clone) — P1 "0-ref dead weight". TDD r130 ×1; selftest

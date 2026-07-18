@@ -1,5 +1,10 @@
 # MULTI-CORPUS PROFILE v1.18
 
+> **[TÀI LIỆU LỊCH SỬ — đúng theo thời điểm viết.]** Các nhắc webapp/version-gate trong file
+> (ví dụ `2.21.2g`, "nếu chưa deploy .gs sửa slot") là lịch sử. Version-gate/contract HIỆN HÀNH:
+> `references/API_CONTRACT.md` (webapp **2.21.2m**) + `references/RUNBOOK.md`. Nội dung dưới đây
+> giữ nguyên văn, KHÔNG cập nhật.
+
 Ngày: 2026-06-22 (cập nhật trạng thái v1.19.1)  
 Contract live: webapp **2.21.2g** (Cách B registry/manifest riêng theo profile + writeconfig giữ profiles, đã deploy). Doctrine backfill: xem `DELTA_v1.19.md §C.1` (KHÔNG xoá VBQPPL canonical; thêm dòng tham chiếu). Không tự deploy Apps Script.
 

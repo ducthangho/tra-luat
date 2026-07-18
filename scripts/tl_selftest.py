@@ -13145,6 +13145,40 @@ def run() -> int:
                 and "changelog_archive" in _rel130._RELEASE_EXCLUDE_DIRS)
     _t110("r130_release_trim_dead_weight", _c130_release_trim_dead_weight)
 
+    # ═══ v1.34.70 — r131: hai fix doc. (a) help ingest-zip/profile-ingest-zip còn câu 'apply chưa bật
+    # ở pha an toàn' — SAI từ v1.34.45 (zip_ingest có nhánh child_apply chạy THẬT, journal
+    # ingest_zip_apply.v1); help phải phản ánh: DRY mặc định, --apply --confirm yes chạy thật từng
+    # member. Help nằm trong GENERATED_SPECS → đổi help = đổi parser_surface → regen CHỦ ĐÍCH.
+    # (b) REGEN2_PROFILE_SCOPE_V1.19.5.md (server 2.21.2i) + MULTI_CORPUS_PROFILE_V1_18.md (webapp
+    # 2.21.2g) là TÀI LIỆU LỊCH SỬ — gắn nhãn đầu file trỏ contract hiện hành (API_CONTRACT 2.21.2m)
+    # để agent tiêu thụ không hiểu nhầm version-gate; KHÔNG viết lại nội dung lịch sử. ═══
+    def _c131_zip_help_reflects_apply():
+        import tl_core.command_registry as _reg131
+        _ok = True
+        for _n in ("ingest-zip", "profile-ingest-zip"):
+            _sp = next(s for s in _reg131.GENERATED_SPECS if s["name"] == _n)
+            _h = _sp["help"]
+            _ok = _ok and "apply chưa bật" not in _h                      # câu lỗi-thời phải biến mất
+            _ok = _ok and "DRY" in _h and "--apply --confirm yes" in _h   # hành vi thật từ v1.34.45
+            _fl = {f for a in _sp["args"] for f in (a.get("flags") or ())}
+            _ok = _ok and {"--apply", "--confirm"} <= _fl                 # help không hứa quá parser
+        return _ok
+    _t110("r131_zip_help_reflects_apply", _c131_zip_help_reflects_apply)
+
+    def _c131_historical_refs_labeled():
+        _ok = True
+        for _rel in ("REGEN2_PROFILE_SCOPE_V1.19.5.md", "MULTI_CORPUS_PROFILE_V1_18.md"):
+            _p = HERE.parent / "references" / _rel
+            if not _p.exists():
+                return False
+            _t = _p.read_text(encoding="utf-8", errors="replace")
+            _head = _t[:700]                                              # nhãn phải nằm ĐẦU file
+            _ok = _ok and "TÀI LIỆU LỊCH SỬ" in _head
+            _ok = _ok and "references/API_CONTRACT.md" in _head and "2.21.2m" in _head
+            _ok = _ok and "\r" not in _t                                  # repo LF
+        return _ok
+    _t110("r131_historical_refs_labeled", _c131_historical_refs_labeled)
+
     def _c129_cli_tier_wired():
         import gen_instructions as _gi129
         _ap = build_parser()

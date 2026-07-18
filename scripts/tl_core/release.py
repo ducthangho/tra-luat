@@ -323,7 +323,8 @@ def cmd_release_check(a) -> int:
 
 # ───────────────────────── release/package integrity ─────────────────────────
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
-                         ".claude", ".githooks", ".github"}   # v1.33.54 dev-side; v1.33.59: +.github (CI)
+                         ".claude", ".githooks", ".github",
+                         "claude-code-best-practice"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1 — lọt bundle là vỡ trần 200 file)
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 

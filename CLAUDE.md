@@ -40,3 +40,12 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 ## Khi đóng gói
 Bump VERSION (3 chỗ) → CHANGELOG → selftest N/N → user tự chạy cmd (script tự loại .git/.claude/.githooks/
 CLAUDE.md/config/enc + quét token). Verify sau deploy: Package trả VERSION mới.
+
+<important if="phát triển Claude Code artifacts">
+## Kho tham chiếu Claude Code
+Khi cần best practice về Claude Code (agents, commands, skills, hooks,
+memory, subagents...), ĐỌC trong ./claude-code-best-practice/best-practice/
+TRƯỚC khi dùng kiến thức huấn luyện. Repo này là nguồn ưu tiên.
+Cập nhật kho: cd claude-code-best-practice && git pull
+(Clone dev-only local — .gitignore + loại bundle qua _RELEASE_EXCLUDE_DIRS; KHÔNG có trong gói deploy.)
+</important>

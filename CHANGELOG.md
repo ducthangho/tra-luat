@@ -1,3 +1,45 @@
+# ★ v1.34.68 — Kho tham chiếu Claude Code (dev-only) + generator instruction tier CORE/FULL (2026-07-18)
+
+> Kế hoạch `ke-hoach-instruction-refactor-va-kho-tham-chieu-2026-07-18.md` (grill Q1–Q6 chốt 2026-07-18),
+> MỘT release 2 nhánh. TDD r129 ×6 negative-trước; selftest 1076→1082; gen_instructions selftest 29→37.
+> Kernel SKILL.md CHỈ đổi header version — re-import Capabilities KHÔNG bắt buộc.
+
+- **Nhánh I — Kho tham chiếu Claude Code (dev-only local, Q1/Q2)**: clone `--depth 1`
+  `shanraisshan/claude-code-best-practice` tại skill-root `claude-code-best-practice/` (132MB, 454 file —
+  CHỈ máy canonical); `.gitignore` + `_RELEASE_EXCLUDE_DIRS` +`"claude-code-best-practice"`
+  (release.py:325 — r129 khoá loại MỌI CẤP, đỏ-trước); khối `## Kho tham chiếu Claude Code` vào
+  `CLAUDE.md` bọc `<important if="phát triển Claude Code artifacts">` (dev-context, CLAUDE.md vốn bị
+  loại bundle) + con trỏ 1 dòng đầu `references/DEV_TOOLING_GUIDE.md`. KHÔNG đụng kernel.
+- **Nhánh II — `gen_instructions.py` tier `--tier core|full` (①–⑥, Q3–Q5)**:
+  - ① **MẶC ĐỊNH = CORE (breaking CÓ CHỦ ĐÍCH)**: `tl instructions --target project` không cờ nay ra
+    CORE **9.158 ký tự** (trước 15.126 — cắt 39%); 2 khối dev `script_reuse_va_quyet_dinh_viet_tool`
+    (3.435 ký tự) + `van_ban_lon_va_pdf_scan` (2.712) chuyển tier FULL, CORE thay bằng con trỏ
+    `## chi_khi_dev_release_ocr` ("**CHỈ KHI** nạp/ghi, đóng gói/release, live/deploy, OCR/chunk: theo
+    `SKILL.md` + `references/RUNBOOK.md`/`DEV_TOOLING_GUIDE.md`; KHÔNG viết tool mới khi chưa qua
+    `tl tool-inventory` + `tl route-task`; dry-run + verify/readback"). Bản cũ = `--tier full`
+    (14.328 ký tự). Bootstrap CORE rút gọn 1 đoạn (giữ nguyên nghĩa 5 bước); FULL giữ bản đánh số.
+  - ② **Khử trùng lặp**: litany release/live/deploy trong `script_reuse` LẶP 2 lần (steps 4–7 + đoạn
+    kết) → đoạn kết còn 1 câu trỏ bước 4–7 (FULL 15.126→14.328). Cặp khối văn phong + cấu trúc trả lời
+    Project↔NLM (near-identical) gộp 1 NGUỒN dùng chung (`_STYLE_*`/`_ANSWER_PARTS` +
+    `_language_style_block`/`_answer_structure_block`) — output 2 phía GIỮ NGUYÊN BYTE.
+  - ③ Cơ chế điều kiện trong prompt = tiền tố "**CHỈ KHI …:**" (Q4); `<important if>` CHỈ ở CLAUDE.md.
+  - ④ **Size-guard CORE** `_core_size_findings` (khuôn `_kernel_size_findings`) đo **KÝ TỰ** (đơn vị đo
+    instruction của kế hoạch; ô Instruction claude.ai đếm ký tự): WARN >9.216 advisory / FAIL >12.288
+    (selftest đỏ). Hiện trạng CORE 9.158 = WARN-clear, đệm 58 ký tự.
+  - ⑤ **audit() tách tier**: `REQUIRED_PROJECT` = 27 khóa CORE (guard tra-cứu + write-safety);
+    19 khóa dev/release/live/deploy/OCR dời sang `_REQUIRED_FULL_EXTRA` → `REQUIRED_FULL` (46 khóa,
+    target audit `"full"`); wrapper `tl instructions`/`tl instruction-audit` +`--tier`, tier=full ⇒
+    audit theo REQUIRED_FULL. `prompt_generation_contract` GIỮ CORE, cập nhật tài liệu `--tier`.
+  - ⑥ **NLM prompt GIỮ NGUYÊN BYTE** (drift-lock r129 pin sha256 `8d576ecf…` baseline v1.34.67 +
+    `tier_nlm_unaffected_by_tier`); KHÔNG rút `chat_luong_truy_van_notebooklm`/`mau_cau_khi_khong_du_can_cu`.
+- **TDD/wiring**: r129 ×6 (exclude clone; tier core default; tier full gates + litany-1-lần + negative
+  CORE-fails-full-audit; size-guard biên 9K/12K; NLM sha256 pin; CLI --tier wired + audit full 46 khóa);
+  5 ca selftest gen cũ đổi sang `tier="full"`; bẫy mới ghi nhận: `parse_args` cờ chưa tồn tại ném
+  `SystemExit` (BaseException — `_t110` không bắt) → test CLI mới phải bọc SystemExit. Golden
+  `parser_surface.json` regen CHỦ ĐÍCH đúng 2 lệnh (`instructions`/`instruction-audit` +--tier);
+  `references/COMMANDS.md` row instructions cập nhật (CRLF giữ). **Re-paste CORE Project Instruction
+  BẮT BUỘC** (`tl instructions --target project` → dán ô Instruction Claude Project).
+
 # ★ v1.34.67 — G1b KERNEL-DIET: trích 3 khối nguyên văn → references/KERNEL_APPENDIX.md (2026-07-18)
 
 > §11 G1b kế hoạch `ke-hoach-guard-va-boc-tl-core-2026-07-18.md` (user duyệt riêng). Kernel ĐỔI RUỘT ⇒

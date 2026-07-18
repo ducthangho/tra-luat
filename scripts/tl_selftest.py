@@ -13050,6 +13050,99 @@ def run() -> int:
         return _ok
     _t110("r128_kernel_appendix_verbatim_pointers", _c128_kernel_appendix_verbatim_pointers)
 
+    # ═══ v1.34.68 — r129: Nhánh I kho tham chiếu Claude Code (ke-hoach-instruction-refactor-va-kho-
+    # tham-chieu-2026-07-18 Q1): clone shanraisshan/claude-code-best-practice tại skill-root là DEV-ONLY
+    # LOCAL — PHẢI bị loại khỏi manifest/bundle Ở MỌI CẤP (clone ~1.495 commit + GIF/video; lọt bundle
+    # là vỡ trần 200 file import). Khuôn r59 temp-dir trên _release_should_include; đỏ trước release.py. ═══
+    def _c129_release_exclude_best_practice_clone():
+        with _tf110.TemporaryDirectory() as _d:
+            _r = _P110(_d)
+            (_r / "claude-code-best-practice" / "best-practice").mkdir(parents=True)
+            (_r / "scripts").mkdir()
+            for _rel, _keep in (("claude-code-best-practice/README.md", False),
+                                ("claude-code-best-practice/best-practice/skills.md", False),
+                                ("scripts/tl.py", True)):
+                _fp = _r / _rel
+                _fp.write_text("x", encoding="utf-8")
+                if _release_should_include(_fp, _r) is not _keep:
+                    return False
+        import tl_core.release as _rel129
+        return "claude-code-best-practice" in _rel129._RELEASE_EXCLUDE_DIRS
+    _t110("r129_release_exclude_best_practice_clone", _c129_release_exclude_best_practice_clone)
+
+    # ═══ v1.34.68 — r129b..f: Nhánh II refactor generator tier CORE/FULL (①–⑥ kế hoạch instruction-refactor):
+    # `--tier core|full` mặc định CORE (Q3 — breaking CÓ CHỦ ĐÍCH: `tl instructions --target project` không cờ
+    # nay ra CORE); script_reuse+van_ban_lon → FULL, CORE thay bằng con trỏ "CHỈ KHI" (Q4); size-guard CORE đo
+    # KÝ TỰ (đơn vị kế hoạch: Project cũ 15.127 ký tự) WARN>9K/FAIL>12K khuôn _kernel_size_findings (Q5);
+    # audit tách REQUIRED_FULL (dời khóa release/live/deploy/OCR khỏi REQUIRED_PROJECT — ⑤); NLM GIỮ NGUYÊN
+    # BYTE (⑥ — sha256 pin baseline v1.34.67, tier không đụng NLM). ═══
+    def _c129_tier_core_default():
+        import gen_instructions as _gi129
+        _core = _gi129.generate("project", _gi129.VERSION)               # KHÔNG cờ → CORE (Q3)
+        _ok = "script_reuse_va_quyet_dinh_viet_tool" not in _core and "van_ban_lon_va_pdf_scan" not in _core
+        _ok = _ok and "CHỈ KHI" in _core and "tl tool-inventory" in _core and "tl route-task" in _core
+        _ok = _ok and "--tier full" in _core                             # con trỏ chỉ đường lấy bản FULL
+        _ok = _ok and _gi129.audit(_core, "project")["ok"] is True       # audit CORE pass trên CORE text
+        return _ok and _core == _gi129.generate("project", _gi129.VERSION, tier="core")
+    _t110("r129_instructions_tier_core_default", _c129_tier_core_default)
+
+    def _c129_tier_full_dev_gates():
+        import gen_instructions as _gi129
+        _full = _gi129.generate("project", _gi129.VERSION, tier="full")
+        _ok = "script_reuse_va_quyet_dinh_viet_tool" in _full and "van_ban_lon_va_pdf_scan" in _full
+        _ok = _ok and _gi129.audit(_full, "full")["ok"] is True
+        _ok = _ok and _gi129.audit(_full, "project")["ok"] is True       # FULL ⊇ CORE
+        # ② litany release chỉ còn 1 lần trong script_reuse (trước LẶP 2: steps 4–7 + đoạn kết)
+        _ok = _ok and _full.count("tl release-manifest --out RELEASE_MANIFEST.json --json") == 1
+        _core = _gi129.generate("project", _gi129.VERSION)
+        _res = _gi129.audit(_core, "full")                               # negative: CORE thiếu khóa FULL
+        return _ok and _res["ok"] is False and any("release" in k for k in _res["missing"])
+    _t110("r129_instructions_tier_full_dev_gates", _c129_tier_full_dev_gates)
+
+    def _c129_core_size_guard():
+        import gen_instructions as _gi129
+        _f = _gi129._core_size_findings
+        _r = _f(9 * 1024)
+        _ok = (_r["size_warn_limit"] == 9 * 1024 and _r["size_limit"] == 12 * 1024
+               and _r["size_warn"] is False and _r["size_ok"] is True)   # biên: đúng 9K chưa warn
+        _ok = _ok and _f(9 * 1024 + 1)["size_warn"] is True and _f(9 * 1024 + 1)["size_ok"] is True
+        _r2 = _f(12 * 1024 + 1)
+        _ok = _ok and _r2["size_ok"] is False and _r2["size_warn"] is True
+        _n = len(_gi129.generate("project", _gi129.VERSION))             # KÝ TỰ, CORE vbqppl mặc định
+        return _ok and _f(_n)["size_ok"] is True                         # vượt FAIL 12K ⇒ selftest đỏ
+    _t110("r129_instructions_core_size_guard", _c129_core_size_guard)
+
+    def _c129_nlm_byte_frozen():
+        import hashlib as _hl129
+        import gen_instructions as _gi129
+        _nlm = _gi129.generate("nlm", _gi129.VERSION)
+        _ok = _hl129.sha256(_nlm.encode("utf-8")).hexdigest() == \
+            "8d576ecfa445407307d0eef0c69ffdc52a9e78a51cdc3d6381eac1d0b2b326e3"   # baseline v1.34.67
+        return _ok and _gi129.generate("nlm", _gi129.VERSION, tier="full") == _nlm
+    _t110("r129_instructions_nlm_byte_frozen", _c129_nlm_byte_frozen)
+
+    def _c129_cli_tier_wired():
+        import gen_instructions as _gi129
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ok = getattr(_ap.parse_args(["instructions", "--target", "project", "--tier", "full"]), "tier", None) == "full"
+                _ok = _ok and getattr(_ap.parse_args(["instructions", "--target", "project"]), "tier", None) == "core"
+                _ok = _ok and getattr(_ap.parse_args(["instruction-audit", "--generate", "--target", "project",
+                                                      "--tier", "full"]), "tier", None) == "full"
+        except SystemExit:   # argparse CHƯA có --tier → exit(2) (BaseException, _t110 không bắt) — coi là FAIL
+            return False
+        _bo = _io110.StringIO()
+        with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+            _rc = _TL_MODULE.cmd_instruction_audit(argparse.Namespace(
+                generate=True, file=None, target="project", tier="full", json=True,
+                skill_version=None, profile=None, notebook=None, folder_name=None, root_folder_id=None,
+                print_text=False))
+        _j = json.loads(_bo.getvalue())
+        return (_ok and _rc == 0 and _j.get("ok") is True
+                and set(_j.get("required") or {}) == set(_gi129.REQUIRED_FULL))
+    _t110("r129_instruction_audit_cli_tier_wired", _c129_cli_tier_wired)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

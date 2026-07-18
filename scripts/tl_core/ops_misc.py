@@ -1260,15 +1260,18 @@ def cmd_instructions(a) -> int:
     fld = getattr(a, "folder_name", None) or None
     root = getattr(a, "root_folder_id", None) or os.environ.get("TL_ROOT_FOLDER_ID") or None
     target = getattr(a, "target", "both") or "both"
+    tier = (getattr(a, "tier", None) or "core").lower()   # v1.34.68 Q3: mặc định CORE (breaking chủ đích)
     if hasattr(gen_instructions, "generate"):
         try:
             text = gen_instructions.generate(target,
                                              getattr(a, "skill_version", VERSION) or VERSION,
-                                             prof, nb, fld, root)
-        except TypeError:  # tương thích ngược nếu generate() bản cũ chưa nhận profile
+                                             prof, nb, fld, root, tier=tier)
+        except TypeError:  # tương thích ngược nếu generate() bản cũ chưa nhận profile/tier
             text = gen_instructions.generate(target,
                                              getattr(a, "skill_version", VERSION) or VERSION)
         audit_target = "project" if target == "config" else target
+        if tier == "full" and audit_target == "project":
+            audit_target = "full"                          # ⑤ audit theo bộ khóa REQUIRED_FULL
         audit = {"ok": True, "missing": []} if target == "style-template" else (
             gen_instructions.audit(text, audit_target) if hasattr(gen_instructions, "audit") else {"ok": True, "missing": []})
         ok, missing = bool(audit.get("ok")), audit.get("missing", [])
@@ -1753,10 +1756,13 @@ def cmd_instruction_audit(a) -> int:
             nb = getattr(a, "notebook", None) or os.environ.get("TL_NOTEBOOK_ID") or None
             fld = getattr(a, "folder_name", None) or None
             root = getattr(a, "root_folder_id", None) or os.environ.get("TL_ROOT_FOLDER_ID") or None
+            tier = (getattr(a, "tier", None) or "core").lower()   # v1.34.68 Q3
             text = gen_instructions.generate(getattr(a, "target", "both") or "both",
                                              getattr(a, "skill_version", VERSION) or VERSION,
-                                             prof, nb, fld, root)
+                                             prof, nb, fld, root, tier=tier)
             audit_target = "project" if (getattr(a, "target", "both") or "both") == "config" else (getattr(a, "target", "both") or "both")
+            if tier == "full" and audit_target == "project":
+                audit_target = "full"                              # ⑤ audit theo REQUIRED_FULL
             out = gen_instructions.audit(text, audit_target) if hasattr(gen_instructions, "audit") else _instruction_audit_text(text)
             out["generated"] = text
         except Exception as e:
@@ -1776,7 +1782,10 @@ def cmd_instruction_audit(a) -> int:
         try:
             import gen_instructions as _gi
             _tgt = getattr(a, "target", "project") or "project"
-            out = _gi.audit(text, "project" if _tgt in ("both", "config") else _tgt)
+            _tgt = "project" if _tgt in ("both", "config") else _tgt
+            if _tgt == "project" and (getattr(a, "tier", None) or "core").lower() == "full":
+                _tgt = "full"                                      # v1.34.68 ⑤: --file + --tier full
+            out = _gi.audit(text, _tgt)
         except Exception:  # noqa: BLE001
             out = _instruction_audit_text(text)
     if a.json:

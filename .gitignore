@@ -18,3 +18,7 @@ references/golden/fixtures/
 # v1.34.2 (doctrine v1.33.53/Z3-02): snapshot/report vận hành ghi .tl_state/ — runtime artifact, không vào repo/manifest
 .tl_state/
 reports/
+
+# v1.34.68 (Q1 kế hoạch instruction-refactor-va-kho-tham-chieu): kho tham chiếu Claude Code clone dev-only
+# local (~1.495 commit + media) — KHÔNG commit vào skill git, KHÔNG vào bundle (đã loại ở _RELEASE_EXCLUDE_DIRS)
+claude-code-best-practice/

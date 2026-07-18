@@ -2,6 +2,7 @@
 
 > Tham chiếu nhanh cho các gói vừa cài: git, gh, clasp/gas-deploy, ruff, pyright, hypothesis, gas-fakes, ccusage,
 > claude-code-log. Chạy từ `D:\Quốc hội\tra-luat\` trừ khi ghi khác.
+> Best-practice Claude Code: đọc `./claude-code-best-practice/best-practice/` (kho clone dev-only trên máy canonical, `git pull` cập nhật — KHÔNG có trong bundle) TRƯỚC kiến thức huấn luyện.
 
 ---
 

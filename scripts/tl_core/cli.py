@@ -208,6 +208,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--file", help="file Instruction/Project prompt cần kiểm")
     p.add_argument("--generate", action="store_true", help="generate bằng scripts/gen_instructions.py rồi audit")
     p.add_argument("--target", choices=["project", "nlm", "both", "config"], default="both")
+    p.add_argument("--tier", choices=["core", "full"], default="core",
+                   help="(v1.34.68 ⑤) core: audit bộ khóa CORE (MẶC ĐỊNH); full: audit REQUIRED_FULL (thêm khóa dev/release/live/OCR)")
     p.add_argument("--skill-version", default=VERSION)
     p.add_argument("--profile", help="profile corpus khi generate để audit (mặc định TL_PROFILE/default)")
     p.add_argument("--notebook", "--notebook-id", dest="notebook", help="notebookId của profile dự án")
@@ -359,6 +361,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("instructions", help="sinh Instruction/Project prompt; mặc định VBQPPL, --profile <tên> cho dự án văn bản thường")
     p.add_argument("--target", choices=["nlm", "project", "both", "config", "style-template"], default="both")
+    p.add_argument("--tier", choices=["core", "full"], default="core",
+                   help="(v1.34.68 Q3 — breaking chủ đích) core: Project tra cứu thường ngày, 2 khối dev thay bằng con trỏ CHỈ KHI (MẶC ĐỊNH); full: thêm đủ gate dev/release/OCR (bản cũ). NLM không đổi theo tier")
     p.add_argument("--skill-version", default=VERSION)
     p.add_argument("--notebook", "--notebook-id", dest="notebook", help="notebookId của profile dự án (văn bản thường)")
     p.add_argument("--folder-name", dest="folder_name", help="tên folder trong Van_ban_thuong (mặc định = tên profile)")

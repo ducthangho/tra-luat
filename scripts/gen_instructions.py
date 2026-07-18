@@ -240,44 +240,61 @@ Nếu nội dung quá dài, chỉ trích đúng phần cần thiết. Không t�
 """
 
 
+# ② v1.34.68: cặp khối văn phong (van_phong_tra_loi ↔ yeu_cau_ve_van_phong) và cấu trúc trả lời
+# (cau_truc_tra_loi_mac_dinh ↔ cach_tra_loi_mac_dinh) near-identical giữa Project↔NLM → nội dung giữ
+# 1 NGUỒN dùng chung, chỉ khác cách trình bày (NLM: bullet + đoạn tách; Project: gộp đoạn/1 dòng mỗi mục).
+# NLM output GIỮ NGUYÊN BYTE (drift-lock sha256 r129 + tier_nlm_unaffected_by_tier).
+_STYLE_INTRO = "Trả lời bằng tiếng Việt."
+_STYLE_TONE = "Văn phong phải rõ ràng, chuẩn mực, mạch lạc, dễ hiểu và có tính thuyết phục. Ưu tiên câu ngắn. Mỗi câu nên truyền tải một ý chính."
+_STYLE_BANNED = [
+    "từ đa nghĩa dễ gây hiểu nhầm",
+    "từ quá kỹ thuật nếu không cần thiết",
+    "từ lóng",
+    "từ tiếng Anh khi đã có cách diễn đạt tiếng Việt rõ hơn",
+    "chữ viết tắt không phổ biến",
+    "cụm từ mơ hồ như “có thể là”, “hình như”, “khả năng cao” nếu nguồn chưa đủ căn cứ",
+]
+_STYLE_TERMS = "Nếu buộc phải dùng thuật ngữ pháp lý hoặc khái niệm chuyên môn, hãy giải thích ngắn gọn ngay sau đó."
+_STYLE_SPLIT = "Nếu nội dung phức tạp, hãy chia thành các ý nhỏ. Nếu người dùng dễ hiểu nhầm, hãy bổ sung ví dụ ngắn, đơn giản, sát tình huống."
+_STYLE_CLOSE = "Không viết câu quá dài. Không vòng vo. Không nói quá chắc khi nguồn chưa đủ. Không mở rộng sang nội dung ngoài nguồn nếu người dùng không yêu cầu."
+
+_ANSWER_PARTS = [
+    # (tiêu đề NLM, mô tả NLM, tiêu đề Project, mô tả Project) — cặp near-identical đặt CẠNH NHAU chống drift.
+    ("Kết luận ngắn", "Trả lời trực tiếp câu hỏi trong 1–3 câu.",
+     "Kết luận ngắn", "trả lời trực tiếp câu hỏi."),
+    ("Căn cứ trong nguồn", "Nêu tên văn bản, điều, khoản, điểm và ý chính từ nguồn.",
+     "Căn cứ", "nêu văn bản, điều/khoản/điểm hoặc nguồn đã kiểm."),
+    ("Phân tích áp dụng", "Giải thích ngắn gọn vì sao căn cứ đó dẫn đến kết luận.",
+     "Phân tích áp dụng", "giải thích ngắn vì sao căn cứ dẫn đến kết luận."),
+    ("Lưu ý giới hạn nguồn", "Chỉ thêm phần này khi nguồn chưa đủ, có rủi ro về hiệu lực, thiếu văn bản hợp nhất, hoặc chỉ thấy bản dự thảo, bản scan, bản OCR.",
+     "Lưu ý", "chỉ nêu khi nguồn chưa đủ, có rủi ro hiệu lực, thiếu văn bản hợp nhất hoặc nguồn chưa được kiểm chứng."),
+]
+
+
+def _language_style_block(for_nlm: bool) -> str:
+    if for_nlm:
+        banned = "\n".join("- " + x + ";" for x in _STYLE_BANNED[:-1]) + "\n- " + _STYLE_BANNED[-1] + "."
+        return ("## yeu_cau_ve_van_phong\n" + _STYLE_INTRO + "\n\n" + _STYLE_TONE + "\n\n"
+                + "Không dùng:\n" + banned + "\n\n" + _STYLE_TERMS + "\n\n" + _STYLE_SPLIT + "\n\n" + _STYLE_CLOSE + "\n")
+    return ("## van_phong_tra_loi\n" + _STYLE_INTRO + " " + _STYLE_TONE + "\n\n"
+            + "Không dùng: " + "; ".join(_STYLE_BANNED) + ".\n\n"
+            + _STYLE_TERMS + " " + _STYLE_SPLIT + "\n\n" + _STYLE_CLOSE + "\n")
+
+
+def _answer_structure_block(for_nlm: bool) -> str:
+    if for_nlm:
+        items = "\n\n".join(f"{i}. **{t}**  \n{d}" for i, (t, d, _pt, _pd) in enumerate(_ANSWER_PARTS, 1))
+        return "## cach_tra_loi_mac_dinh\nMặc định trả lời theo cấu trúc:\n\n" + items + "\n"
+    items = "\n".join(f"{i}. **{pt}** — {pd}" for i, (_t, _d, pt, pd) in enumerate(_ANSWER_PARTS, 1))
+    return "## cau_truc_tra_loi_mac_dinh\nKhi trả lời câu hỏi pháp lý, ưu tiên cấu trúc:\n\n" + items + "\n"
+
+
 def _nlm_answer_style() -> str:
-    return """## cach_tra_loi_mac_dinh
-Mặc định trả lời theo cấu trúc:
-
-1. **Kết luận ngắn**  
-Trả lời trực tiếp câu hỏi trong 1–3 câu.
-
-2. **Căn cứ trong nguồn**  
-Nêu tên văn bản, điều, khoản, điểm và ý chính từ nguồn.
-
-3. **Phân tích áp dụng**  
-Giải thích ngắn gọn vì sao căn cứ đó dẫn đến kết luận.
-
-4. **Lưu ý giới hạn nguồn**  
-Chỉ thêm phần này khi nguồn chưa đủ, có rủi ro về hiệu lực, thiếu văn bản hợp nhất, hoặc chỉ thấy bản dự thảo, bản scan, bản OCR.
-"""
+    return _answer_structure_block(for_nlm=True)
 
 
 def _nlm_language_style() -> str:
-    return """## yeu_cau_ve_van_phong
-Trả lời bằng tiếng Việt.
-
-Văn phong phải rõ ràng, chuẩn mực, mạch lạc, dễ hiểu và có tính thuyết phục. Ưu tiên câu ngắn. Mỗi câu nên truyền tải một ý chính.
-
-Không dùng:
-- từ đa nghĩa dễ gây hiểu nhầm;
-- từ quá kỹ thuật nếu không cần thiết;
-- từ lóng;
-- từ tiếng Anh khi đã có cách diễn đạt tiếng Việt rõ hơn;
-- chữ viết tắt không phổ biến;
-- cụm từ mơ hồ như “có thể là”, “hình như”, “khả năng cao” nếu nguồn chưa đủ căn cứ.
-
-Nếu buộc phải dùng thuật ngữ pháp lý hoặc khái niệm chuyên môn, hãy giải thích ngắn gọn ngay sau đó.
-
-Nếu nội dung phức tạp, hãy chia thành các ý nhỏ. Nếu người dùng dễ hiểu nhầm, hãy bổ sung ví dụ ngắn, đơn giản, sát tình huống.
-
-Không viết câu quá dài. Không vòng vo. Không nói quá chắc khi nguồn chưa đủ. Không mở rộng sang nội dung ngoài nguồn nếu người dùng không yêu cầu.
-"""
+    return _language_style_block(for_nlm=True)
 
 
 def _nlm_insufficient_source_samples() -> str:
@@ -297,8 +314,10 @@ Mục tiêu chính của Project là chất lượng truy vấn: chọn đúng c
 """
 
 
-def _project_bootstrap_contract() -> str:
-    return """## bootstrap_bat_buoc
+def _project_bootstrap_contract(tier: str = "core") -> str:
+    """① v1.34.68: CORE rút gọn (1 đoạn, giữ nguyên nghĩa 5 bước); FULL giữ bản 5 bước đánh số cũ."""
+    if tier == "full":
+        return """## bootstrap_bat_buoc
 Khi bắt đầu phiên làm việc trong Project này, Claude phải:
 
 1. Đọc `SKILL.md` của skill `tra-luat`.
@@ -306,6 +325,19 @@ Khi bắt đầu phiên làm việc trong Project này, Claude phải:
 3. Nạp hoặc kiểm tra các tool cần thiết trước khi xử lý yêu cầu.
 4. Xác định đúng loại yêu cầu: tra cứu, trích nguyên văn, kiểm hiệu lực, nạp nguồn, rà soát, soạn thảo hay tạo prompt/instruction.
 5. Xác định đúng profile/corpus nếu yêu cầu liên quan đến nguồn dữ liệu. Mặc định của Project này là vbqppl, trừ khi người dùng nêu profile khác.
+"""
+    return """## bootstrap_bat_buoc
+Khi bắt đầu phiên làm việc trong Project này, Claude phải: đọc `SKILL.md` của skill `tra-luat`; bootstrap và nạp/kiểm tool theo hướng dẫn của skill; xác định đúng loại yêu cầu (tra cứu, trích nguyên văn, kiểm hiệu lực, nạp nguồn, rà soát, soạn thảo, tạo prompt/instruction) và profile/corpus tương ứng. Mặc định của Project này là vbqppl, trừ khi người dùng nêu profile khác.
+"""
+
+
+def _project_dev_gate_pointer() -> str:
+    """① v1.34.68 (Q4): CORE thay 2 khối dev (script_reuse + van_ban_lon) bằng con trỏ điều kiện
+    "CHỈ KHI" — chi tiết sống ở SKILL.md/references, bản đầy đủ lấy qua --tier full."""
+    return """## chi_khi_dev_release_ocr
+**CHỈ KHI nạp/ghi nguồn, đóng gói/release, live-smoke/deploy hoặc OCR/chunk văn bản lớn:** làm theo `SKILL.md` + `references/RUNBOOK.md`/`references/DEV_TOOLING_GUIDE.md`; bản đầy đủ các gate dev: `tl instructions --target project --tier full`.
+
+KHÔNG viết tool mới khi chưa qua `tl tool-inventory` và `tl route-task`; lệnh ghi phải có dry-run và verify/readback theo skill.
 """
 
 def _project_script_reuse_gate() -> str:
@@ -329,7 +361,7 @@ Thứ tự bắt buộc:
 
 Nếu vẫn cần viết tool mới, Claude phải nêu rõ: tác vụ cần giải quyết; các lệnh/script/hàm đã kiểm; vì sao công cụ hiện có không đủ; tool mới thuộc nhóm chức năng nào; input/output dự kiến, ưu tiên JSON; chế độ dry-run; bước verify/readback; selftest hoặc audit cần bổ sung.
 
-Trước khi phát hành bản skill mới, Claude phải chạy `tl workflow-audit --json`, `tl determinism-audit --strict --json`, `tl golden-test --json`, `tl release-check --strict-determinism --full --json`, `tl release-manifest --out RELEASE_MANIFEST.json --json` và `tl release-verify RELEASE_MANIFEST.json --json`. Khi cần đóng gói zip tất định, dùng `tl release-bundle --out <file.zip> --json`. Nếu cần kiểm môi trường live Drive/NLM, dùng `tl live-readiness --json`, `tl live-contract-check --json`, `tl live-state-snapshot --out before.json --json`, `tl live-smoke-plan --json`, `tl live-state-snapshot --out after.json --json`, và `tl live-state-diff before.json after.json --json` để tạo bằng chứng before/after. Khi bàn giao triển khai hoặc rollback, dùng `tl final-acceptance --json`, `tl go-live-runbook --out GO_LIVE_RUNBOOK.md`, `tl deploy-plan --json` và `tl rollback-plan --json`.
+Trước khi phát hành bản skill mới hoặc bàn giao triển khai/rollback, chạy lại ĐÚNG trình tự audit → release → live → bàn giao ở các bước 4–7 nêu trên; không bỏ bước, không thay bằng lệnh tự chế.
 
 Không viết tool mới khi chưa qua `tl tool-inventory` và `tl route-task`. Không viết snippet tạm để thay thế lệnh đã có của skill. Không sửa file skill trực tiếp bằng thao tác native nếu skill yêu cầu dùng `tl edit-skill` hoặc quy trình sửa an toàn.
 """
@@ -478,37 +510,20 @@ Tra cứu trong profile `{profile}` trước. Nếu miss mới fallback VBQPPL v
 
 
 def _project_language_style() -> str:
-    return """## van_phong_tra_loi
-Trả lời bằng tiếng Việt. Văn phong phải rõ ràng, chuẩn mực, mạch lạc, dễ hiểu và có tính thuyết phục. Ưu tiên câu ngắn. Mỗi câu nên truyền tải một ý chính.
-
-Không dùng: từ đa nghĩa dễ gây hiểu nhầm; từ quá kỹ thuật nếu không cần thiết; từ lóng; từ tiếng Anh khi đã có cách diễn đạt tiếng Việt rõ hơn; chữ viết tắt không phổ biến; cụm từ mơ hồ như “có thể là”, “hình như”, “khả năng cao” nếu nguồn chưa đủ căn cứ.
-
-Nếu buộc phải dùng thuật ngữ pháp lý hoặc khái niệm chuyên môn, hãy giải thích ngắn gọn ngay sau đó. Nếu nội dung phức tạp, hãy chia thành các ý nhỏ. Nếu người dùng dễ hiểu nhầm, hãy bổ sung ví dụ ngắn, đơn giản, sát tình huống.
-
-Không viết câu quá dài. Không vòng vo. Không nói quá chắc khi nguồn chưa đủ. Không mở rộng sang nội dung ngoài nguồn nếu người dùng không yêu cầu.
-"""
+    return _language_style_block(for_nlm=False)
 
 
 def _project_answer_structure() -> str:
-    return """## cau_truc_tra_loi_mac_dinh
-Khi trả lời câu hỏi pháp lý, ưu tiên cấu trúc:
-
-1. **Kết luận ngắn** — trả lời trực tiếp câu hỏi.
-2. **Căn cứ** — nêu văn bản, điều/khoản/điểm hoặc nguồn đã kiểm.
-3. **Phân tích áp dụng** — giải thích ngắn vì sao căn cứ dẫn đến kết luận.
-4. **Lưu ý** — chỉ nêu khi nguồn chưa đủ, có rủi ro hiệu lực, thiếu văn bản hợp nhất hoặc nguồn chưa được kiểm chứng.
-"""
+    return _answer_structure_block(for_nlm=False)
 
 
 def _project_prompt_generation_contract() -> str:
     return """## prompt_generation_contract
 Khi người dùng yêu cầu tạo System Prompt cho NotebookLM hoặc Claude Project Instruction, KHÔNG viết prompt tự do từ trí nhớ. Phải sinh từ generator của skill:
 
-- NotebookLM System Prompt: `python scripts/tl.py instructions --target nlm`
-- Claude Project Instruction: `python scripts/tl.py instructions --target project`
-- Cả hai: `python scripts/tl.py instructions --target both`
+- `python scripts/tl.py instructions --target nlm|project|both` (Project mặc định tier CORE; bản đầy đủ gate dev/release/OCR: thêm `--tier full`).
 - Profile văn bản thường: thêm `--profile <ten_profile> --notebook <notebook_id> --folder-name <ten_folder>`.
-- Kiểm audit: `python scripts/tl.py instructions --target <nlm|project> --check` hoặc `python scripts/tl.py instruction-audit --generate --target <nlm|project>`.
+- Kiểm audit: thêm `--check`, hoặc `python scripts/tl.py instruction-audit --generate --target <nlm|project> [--tier core|full]`.
 
 Có thể nhận mô tả ngắn qua `scripts/gen_instructions.py --brief "..."` để tương thích ngược, nhưng output vẫn phải lắp từ các khối đã thẩm định; không được tự chế guard mới làm suy yếu SKILL_OF_RECORD, QT-3, confirm_gate_web hoặc grounding_contract.
 """
@@ -606,7 +621,7 @@ chính sách nguồn: {policy} (ưu tiên materialize về Drive khi xuất đư
 
 
 def _target_blocks(target: str, skill_version: str, profile: str, notebook_id: str | None,
-                   folder_name: str | None, root_folder_id: str | None) -> list[str]:
+                   folder_name: str | None, root_folder_id: str | None, tier: str = "core") -> list[str]:
     is_project_profile = profile != "vbqppl"
     suffix = f" ({profile})" if is_project_profile else ""
     head = {
@@ -626,19 +641,26 @@ def _target_blocks(target: str, skill_version: str, profile: str, notebook_id: s
             _nlm_insufficient_source_samples(),
         ]
     else:
+        # ① v1.34.68 (Q3): tier CORE (mặc định — Project tra cứu thường ngày) bỏ 2 khối dev
+        # script_reuse_va_quyet_dinh_viet_tool + van_ban_lon_va_pdf_scan (41% bloat), thay bằng con trỏ
+        # "CHỈ KHI"; tier FULL giữ đủ gate cho Project bảo trì skill. NLM không có tier.
+        full = tier == "full"
         body = [
             head,
             _project_orchestration_contract(),
             _skill_of_record(skill_version),
-            _project_bootstrap_contract(),
-            _project_script_reuse_gate(),
+            _project_bootstrap_contract("full" if full else "core"),
+            _project_script_reuse_gate() if full else _project_dev_gate_pointer(),
             _project_tool_roles(),
             _project_source_priority(),
             _project_nlm_query_quality(),
             _project_verbatim_contract(),
             _project_legal_answer_rules(),
             _project_ingest_guard(),
-            _project_large_doc_ocr_rule(),
+        ]
+        if full:
+            body.append(_project_large_doc_ocr_rule())
+        body += [
             _project_profile_rule(profile, notebook_id, folder_name),
             _manifest_fallback(notebook_id, profile),
             _project_prompt_generation_contract(),
@@ -653,11 +675,14 @@ def _target_blocks(target: str, skill_version: str, profile: str, notebook_id: s
 def generate(target: str = "both", skill_version: str = VERSION,
              profile: str = "vbqppl", notebook_id: str | None = None,
              folder_name: str | None = None, root_folder_id: str | None = None,
-             brief: str | None = None, he: str | None = None) -> str:
+             brief: str | None = None, he: str | None = None, tier: str = "core") -> str:
     """Sinh Instruction/System Prompt từ các khối đã thẩm định.
 
     - `target='nlm'` ⇒ System Prompt chuyên cho NotebookLM: đọc/định vị, không quản trị corpus.
     - `target='project'` ⇒ Claude Project Instruction: điều phối skill, registry, manifest, QT-3.
+    - `tier='core'` (MẶC ĐỊNH từ v1.34.68 — breaking Q3 có chủ đích) ⇒ Project tra cứu thường ngày,
+      2 khối dev thay bằng con trỏ "CHỈ KHI"; `tier='full'` ⇒ thêm đủ gate dev/release/OCR (bản cũ).
+      NLM không có tier (output như nhau).
     - `profile='vbqppl'` ⇒ corpus VBQPPL nền.
     - `profile=<tên dự án>` ⇒ gắn Project vào profile văn bản thường, fallback VBQPPL.
     - `brief`/`he` giữ tương thích CLI cũ; không sinh prompt tự do.
@@ -665,43 +690,35 @@ def generate(target: str = "both", skill_version: str = VERSION,
     target = (target or "both").lower()
     if target not in {"project", "nlm", "both", "config", "style-template"}:
         raise ValueError(f"unknown target: {target}")
+    tier = (tier or "core").lower()
+    if tier not in {"core", "full"}:
+        raise ValueError(f"unknown tier: {tier}")
     if target == "style-template":
         return generate_style_template()
     profile = (profile or "vbqppl").strip() or "vbqppl"
 
     if target == "both":
-        nlm = generate("nlm", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he).strip()
-        project = generate("project", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he).strip()
+        nlm = generate("nlm", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he, tier).strip()
+        project = generate("project", skill_version, profile, notebook_id, folder_name, root_folder_id, brief, he, tier).strip()
         return nlm + "\n\n---\n\n" + project + "\n"
 
     concrete = "project" if target == "config" else target
-    body = _target_blocks(concrete, skill_version, profile, notebook_id, folder_name, root_folder_id)
+    body = _target_blocks(concrete, skill_version, profile, notebook_id, folder_name, root_folder_id, tier)
     if target == "config":
         body[0] = "# Tra-luat Project Config Guard" + (f" ({profile})" if profile != "vbqppl" else "")
     return "\n\n".join(x.strip() for x in body).strip() + "\n"
 
 
+# ⑤ v1.34.68: REQUIRED_PROJECT = bộ khóa tier CORE — CHỈ guard tra-cứu + write-safety. Các khóa
+# dev/release/live/deploy/OCR dời sang _REQUIRED_FULL_EXTRA (audit target "full"). Đổi ĐỒNG BỘ với ①
+# (CORE bỏ 2 khối dev) — nếu thêm khóa mới ở đây phải chắc khối CORE tương ứng có chữ đó.
 REQUIRED_PROJECT = {
     "SKILL_OF_RECORD": "Instruction phải chỉ rõ skill chuẩn.",
     "project_orchestration_contract": "Project phải là lớp điều phối skill.",
     "đọc `SKILL.md`": "Project phải buộc đọc SKILL.md khi bắt đầu.",
     "bootstrap": "Project phải buộc bootstrap tool.",
-    "script_reuse_va_quyet_dinh_viet_tool": "Project phải có gate tái sử dụng script/tool.",
     "tl tool-inventory": "Claude phải tra inventory trước khi tự viết tool.",
     "tl route-task": "Claude phải hỏi router với tác vụ rủi ro.",
-    "tl workflow-audit": "Project phải audit workflow/router để bắt drift.",
-    "tl release-check": "Project phải có acceptance harness offline trước khi đóng gói.",
-    "tl release-manifest": "Project phải tạo manifest SHA-256 trước khi phát hành zip.",
-    "tl release-verify": "Project phải verify manifest trước khi phát hành zip.",
-    "tl release-bundle": "Project phải có đường đóng gói tất định khi cần zip.",
-    "tl live-readiness": "Project phải kiểm readiness live 3 tầng trước smoke test.",
-    "tl live-contract-check": "Project phải kiểm contract live read-only trước smoke test.",
-    "tl live-state-snapshot": "Project phải chụp snapshot before/after smoke.",
-    "tl live-state-diff": "Project phải diff snapshot và chặn unexpected drift.",
-    "tl final-acceptance": "Project phải có cổng acceptance cuối trước bàn giao.",
-    "tl go-live-runbook": "Project phải xuất runbook triển khai live/rollback khi bàn giao.",
-    "tl deploy-plan": "Project phải có kế hoạch triển khai an toàn.",
-    "tl rollback-plan": "Project phải có kế hoạch rollback.",
     "không viết tool mới": "Project phải chặn viết tool mới khi chưa kiểm kho.",
     "dry-run": "Project phải yêu cầu kế hoạch dry-run cho tác vụ rủi ro.",
     "verify/readback": "Project phải yêu cầu verify/readback sau thao tác ghi.",
@@ -720,16 +737,52 @@ REQUIRED_PROJECT = {
     "Không nhận RAG làm nguyên văn": "Phải buộc verify sau NLM.",
     "tl extract": "Trích nguyên văn VBQPPL nên ưu tiên skill/extract.",
     "verify nguyên văn": "Phải buộc kiểm chứng bằng nguyên văn.",
+    "VBHN-first": "Phải giữ nguyên tắc VBHN-first.",
+    "DỰ THẢO": "Phải cảnh báo dự thảo chưa hiệu lực.",
+    "Điều": "Phải neo về Điều/khoản/điểm.",
+}
+
+# ⑤ Khóa CHỈ bắt buộc ở tier FULL (Project bảo trì skill: dev/release/live/deploy/OCR-chunk).
+_REQUIRED_FULL_EXTRA = {
+    "script_reuse_va_quyet_dinh_viet_tool": "Project phải có gate tái sử dụng script/tool.",
+    "tl workflow-audit": "Project phải audit workflow/router để bắt drift.",
+    "tl release-check": "Project phải có acceptance harness offline trước khi đóng gói.",
+    "tl release-manifest": "Project phải tạo manifest SHA-256 trước khi phát hành zip.",
+    "tl release-verify": "Project phải verify manifest trước khi phát hành zip.",
+    "tl release-bundle": "Project phải có đường đóng gói tất định khi cần zip.",
+    "tl live-readiness": "Project phải kiểm readiness live 3 tầng trước smoke test.",
+    "tl live-contract-check": "Project phải kiểm contract live read-only trước smoke test.",
+    "tl live-state-snapshot": "Project phải chụp snapshot before/after smoke.",
+    "tl live-state-diff": "Project phải diff snapshot và chặn unexpected drift.",
+    "tl final-acceptance": "Project phải có cổng acceptance cuối trước bàn giao.",
+    "tl go-live-runbook": "Project phải xuất runbook triển khai live/rollback khi bàn giao.",
+    "tl deploy-plan": "Project phải có kế hoạch triển khai an toàn.",
+    "tl rollback-plan": "Project phải có kế hoạch rollback.",
     "van_ban_lon_va_pdf_scan": "Phải có quy tắc văn bản lớn/PDF scan-OCR.",
     "không tách bản canonical": "VBQPPL phải giữ canonical đầy đủ.",
     "source_quality=ocr": "PDF scan/OCR phải gắn chất lượng nguồn.",
     "--ocr-verified": "OCR verified phải có điều kiện rõ.",
     "100.000 ký tự": "Chunk NLM profile nên có ngưỡng ký tự rõ.",
-
-    "VBHN-first": "Phải giữ nguyên tắc VBHN-first.",
-    "DỰ THẢO": "Phải cảnh báo dự thảo chưa hiệu lực.",
-    "Điều": "Phải neo về Điều/khoản/điểm.",
 }
+
+REQUIRED_FULL = {**REQUIRED_PROJECT, **_REQUIRED_FULL_EXTRA}
+
+# ④ Size-budget CORE (Q5): đo KÝ TỰ — đơn vị đo instruction của kế hoạch (Project cũ 15.127 ký tự;
+# ô Instruction claude.ai đếm ký tự, không phải byte; bytes UTF-8 tiếng Việt ~1.2× ký tự).
+# WARN >9K advisory, FAIL >12K (selftest đỏ). Khuôn _kernel_size_findings (workflow.py).
+_CORE_SIZE_WARN_CHARS = 9 * 1024
+_CORE_SIZE_FAIL_CHARS = 12 * 1024
+
+
+def _core_size_findings(n_chars: int) -> dict:
+    n = int(n_chars)
+    return {
+        "size_chars": n,
+        "size_warn_limit": _CORE_SIZE_WARN_CHARS,
+        "size_limit": _CORE_SIZE_FAIL_CHARS,
+        "size_warn": n > _CORE_SIZE_WARN_CHARS,
+        "size_ok": n <= _CORE_SIZE_FAIL_CHARS,
+    }
 
 
 REQUIRED_NLM = {
@@ -756,6 +809,8 @@ REQUIRED_NLM = {
 }
 
 def audit(text: str, target: str = "project") -> dict:
+    """⑤ v1.34.68: target "project" = bộ khóa CORE; target "full" = CORE + khóa dev/release/OCR
+    (REQUIRED_FULL) cho Instruction tier FULL. "config"→project; "both" = project(CORE) + nlm."""
     target = (target or "project").lower()
     if target == "config":
         target = "project"
@@ -769,7 +824,7 @@ def audit(text: str, target: str = "project") -> dict:
             "required": {"project": REQUIRED_PROJECT, "nlm": REQUIRED_NLM},
             "note": "Audit both yêu cầu đủ guard Project và đủ quy tắc NLM truy vấn/trích dẫn.",
         }
-    required = REQUIRED_NLM if target == "nlm" else REQUIRED_PROJECT
+    required = REQUIRED_NLM if target == "nlm" else (REQUIRED_FULL if target == "full" else REQUIRED_PROJECT)
     missing = [k for k in required if k.lower() not in (text or "").lower()]
     note = (
         "Fail nghĩa là NLM prompt có thể lẫn nhiệm vụ corpus hoặc thiếu guard trích dẫn nguyên văn."
@@ -807,11 +862,32 @@ def selftest() -> int:
     cases.append(("project_profile_binds_name", "luat_dat_dai" in pj and "profile_setup" in pj))
     cases.append(("project_profile_folder_under_vbt", "Van_ban_thuong/Dat_dai" in pj and "nb-123" in pj))
     cases.append(("project_profile_fallback_vbqppl", "fallback VBQPPL" in pj))
-    cases.append(("project_large_doc_ocr_block", "van_ban_lon_va_pdf_scan" in vb and "source_quality=ocr" in vb and "không tách bản canonical" in vb.lower()))
-    cases.append(("project_script_reuse_gate", "script_reuse_va_quyet_dinh_viet_tool" in vb and "tl tool-inventory" in vb and "tl route-task" in vb and "verify/readback" in vb))
-    cases.append(("project_release_audit_gate", "tl workflow-audit" in vb and "tl release-check" in vb and "tl live-smoke-plan" in vb and "tl live-readiness" in vb and "tl live-contract-check" in vb and "tl live-state-snapshot" in vb and "tl live-state-diff" in vb and "tl final-acceptance" in vb and "tl go-live-runbook" in vb))
-    cases.append(("project_release_manifest_gate", "tl release-manifest" in vb and "tl release-verify" in vb and "tl release-bundle" in vb))
-    cases.append(("project_deploy_rollback_gate", "tl deploy-plan" in vb and "tl rollback-plan" in vb))
+    # v1.34.68 ①: gate dev/release/OCR nay thuộc tier FULL — 5 ca dưới đổi sang generate(tier="full").
+    def _gen_tier(*a, **kw):
+        try:
+            return generate(*a, **kw)
+        except TypeError:   # đỏ-trước / hồi quy signature: bản chưa có tier → ca tier FAIL thay vì crash
+            return ""
+    vbf = _gen_tier("project", VERSION, tier="full")
+    cases.append(("project_large_doc_ocr_block", "van_ban_lon_va_pdf_scan" in vbf and "source_quality=ocr" in vbf and "không tách bản canonical" in vbf.lower()))
+    cases.append(("project_script_reuse_gate", "script_reuse_va_quyet_dinh_viet_tool" in vbf and "tl tool-inventory" in vbf and "tl route-task" in vbf and "verify/readback" in vbf))
+    cases.append(("project_release_audit_gate", "tl workflow-audit" in vbf and "tl release-check" in vbf and "tl live-smoke-plan" in vbf and "tl live-readiness" in vbf and "tl live-contract-check" in vbf and "tl live-state-snapshot" in vbf and "tl live-state-diff" in vbf and "tl final-acceptance" in vbf and "tl go-live-runbook" in vbf))
+    cases.append(("project_release_manifest_gate", "tl release-manifest" in vbf and "tl release-verify" in vbf and "tl release-bundle" in vbf))
+    cases.append(("project_deploy_rollback_gate", "tl deploy-plan" in vbf and "tl rollback-plan" in vbf))
+    # v1.34.68 tier CORE/FULL (Q3–Q5 kế hoạch instruction-refactor): mặc định CORE (breaking chủ đích);
+    # CORE thay 2 khối dev bằng con trỏ "CHỈ KHI"; FULL giữ đủ gates + litany release đã khử lặp (②);
+    # size budget CORE đo KÝ TỰ (đơn vị kế hoạch — Project cũ 15.127 ký tự) WARN>9K/FAIL>12K (④);
+    # audit tách target "full" (⑤); NLM không bị tier đụng tới (⑥).
+    cases.append(("tier_default_is_core", vb != "" and vb == _gen_tier("project", VERSION, tier="core")))
+    cases.append(("tier_core_drops_dev_blocks", "script_reuse_va_quyet_dinh_viet_tool" not in vb
+                  and "van_ban_lon_va_pdf_scan" not in vb and "CHỈ KHI" in vb and "--tier full" in vb))
+    cases.append(("tier_core_audit_ok", audit(vb, "project")["ok"]))
+    cases.append(("tier_full_audit_ok", vbf != "" and audit(vbf, "full")["ok"] and audit(vbf, "project")["ok"]))
+    cases.append(("tier_core_fails_full_audit", not audit(vb, "full")["ok"]))
+    cases.append(("tier_full_litany_deduped", vbf != "" and vbf.count("tl release-manifest --out RELEASE_MANIFEST.json --json") == 1))
+    _csf = globals().get("_core_size_findings")
+    cases.append(("tier_core_size_budget", bool(_csf) and _csf(len(vb))["size_ok"] and len(vb) <= 12 * 1024))
+    cases.append(("tier_nlm_unaffected_by_tier", _gen_tier("nlm", VERSION, tier="full") == nlm))
     st = generate("style-template", VERSION)
     cases.append(("style_template_separate_artifact", "Style Template" in st and "SKILL_OF_RECORD" not in st))
     # P2 (v1.34.24, ADR-0003 + Q7): Instruction Block profile — sinh từ MARKER, THỐNG NHẤT mọi env,
@@ -857,6 +933,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--root-folder-id", dest="root_folder_id", help="rootFolderId nếu đã tạo folder")
     ap.add_argument("--brief", default="", help="mô tả ngắn kiểu cũ; chỉ dùng để tương thích, không sinh prompt tự do")
     ap.add_argument("--he", choices=["dang", "nhanuoc", "vbqppl", "quochoi", "all", "auto"], default="auto", help="hệ thể thức kiểu cũ; hiện dùng như metadata tương thích")
+    ap.add_argument("--tier", choices=["core", "full"], default="core",
+                    help="(v1.34.68 Q3) core (MẶC ĐỊNH — Project tra cứu, con trỏ CHỈ KHI) | full (thêm gate dev/release/OCR)")
     ap.add_argument("--out")
     ap.add_argument("--audit")
     ap.add_argument("--json", action="store_true")
@@ -866,7 +944,8 @@ def main(argv: list[str]) -> int:
         return selftest()
     if a.audit:
         text = Path(a.audit).read_text(encoding="utf-8", errors="replace")
-        res = audit(text, a.target)
+        _audit_target = "full" if (a.tier == "full" and a.target in ("project", "config")) else a.target
+        res = audit(text, _audit_target)
         print(json.dumps(res, ensure_ascii=False, indent=2) if a.json else ("OK" if res["ok"] else "MISSING: " + ", ".join(res["missing"])))
         return 0 if res["ok"] else 2
     target = a.target
@@ -876,7 +955,7 @@ def main(argv: list[str]) -> int:
             target = "nlm"
         elif any(k in brief_low for k in ("claude", "project", "instruction")) and not any(k in brief_low for k in ("nlm", "notebooklm", "notebook lm")):
             target = "project"
-    text = generate(target, a.skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id, a.brief, a.he)
+    text = generate(target, a.skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id, a.brief, a.he, a.tier)
     if a.out:
         Path(a.out).write_text(text, encoding="utf-8")
     print(json.dumps({"target": target, "text": text}, ensure_ascii=False, indent=2) if a.json else text)

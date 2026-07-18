@@ -1069,6 +1069,18 @@
     "size_ok": true
   },
   "ok": true,
+  "py_size": {
+    "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)",
+    "fail": [],
+    "fail_limit": 327680,
+    "files_scanned": 63,
+    "size_ok": true,
+    "waived": [
+      "scripts/tl_selftest.py"
+    ],
+    "warn": [],
+    "warn_limit": 286720
+  },
   "registry": {
     "checked_commands": 149,
     "issues": [],

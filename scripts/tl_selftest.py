@@ -3699,7 +3699,7 @@ def run() -> int:
     # khi patched=0 do cat đã đúng (idempotent). Cờ hụt = `not v.get("verified")` (verified nay dựa `missed`, KHÔNG patched).
     try:
         import inspect as _insp2
-        import tl_core.ingest_ops as _io5   # I5 v1.34.8: nguồn THẬT ở tl_core.ingest_ops (tên tl là stub)
+        import tl_core.source_ops as _io5   # ĐỢT A v1.34.64: nguồn THẬT cmd_recat nay ở tl_core.source_ops (§4 — cập nhật CÓ CHỦ ĐÍCH; trước I5 v1.34.8 ở ingest_ops)
         _rc_src = _insp2.getsource(_io5.cmd_recat)
         cases.append(("recat_warns_on_real_miss_not_idempotent",
                       'not v.get("verified")' in _rc_src and "return 1" in _rc_src
@@ -5645,17 +5645,18 @@ def run() -> int:
             setattr(_TL_MODULE, _k, _v)
     # ═══ v1.34.8 — r75_*: I5 parity wrapper↔module (kiểu r70-r74) ═══
     import tl_core.ingest_ops as _io75
+    # v1.34.64 ĐỢT A (kế hoạch guard-va-boc-tl-core §4 — cập nhật CÓ CHỦ ĐÍCH, bước TDD §6.2/R3):
+    # 11 tên source-CRUD chuyển residency ("ingest_ops",·) → ("source_ops",·) — nay pin ở r125;
+    # r75 GIỮ phần Ở LẠI ingest_ops.
     _io_names75 = ["cmd_ingest_local", "cmd_profile_ingest", "cmd_ingest", "cmd_ingest_analyze",
-                   "cmd_ingest_route", "cmd_ingest_missing", "cmd_register", "cmd_recat", "cmd_source_rename",
-                   "cmd_source_delete", "cmd_source_update_corpus", "cmd_shared_source_fix",
+                   "cmd_ingest_route", "cmd_ingest_missing",
                    "_classify_doc_header", "_sohieu_from_title_zone", "_ingest_verify_gate",
                    "_split_by_dieu_chunks", "_chunk_summaries", "_profile_ingest_note",
                    "_profile_read_probe_text", "_profile_source_quality", "_safe_profile_doc_name",
                    "_upload_mime_ext", "_ingest_target", "_ingest_ckpt_load", "_ingest_ckpt_load_full",
                    "_ingest_local_prev_state", "_ingest_local_cat_gate", "_ingest_missing_select",
                    "_ingest_missing_partition", "_ingest_missing_dedup_live", "_ingest_dedup_title_key",
-                   "_verify_convert_readback", "_source_rename_plan", "_source_delete_plan",
-                   "_source_update_corpus_plan", "_shared_source_fix_plan", "_shared_source_id_groups"]
+                   "_verify_convert_readback"]
     _g75 = globals()
     cases.append(("r75_ingest_ops_module_wired",
                   all(callable(getattr(_io75, n, None)) for n in _io_names75)
@@ -12777,6 +12778,108 @@ def run() -> int:
             for _k, _v in _sav.items():
                 setattr(_TL_MODULE, _k, _v)
     _t110("r124_md5_first_perf", _c124_md5_first_perf)
+
+    # ═══ v1.34.64 — r125: ĐỢT A kế hoạch `ke-hoach-guard-va-boc-tl-core-2026-07-18.md` (§3 guard size
+    # + §4 tách tl_core/source_ops.py). TDD negative-trước (§6.2): wiring residency MỚI + guard trần mount
+    # (lớp sự cố #5 — tl.py từng CẮT CỤT >343KB; self-heal không cứu cắt cụt). ═══
+    def _c125_py_size_guard_thresholds_waiver():
+        # §3/Q1: WARN >280KB (đệm ~60KB) / FAIL --strict >320KB (chặn TRƯỚC vách 343KB); WAIVER
+        # tl_selftest.py (không bước Cowork nào import — hỏng thì fail ỒN ÀO, không âm thầm).
+        _f = _TL_MODULE._py_size_findings
+        _r = _f({"scripts/a.py": 281 * 1024, "scripts/tl_core/b.py": 321 * 1024,
+                 "scripts/tl_selftest.py": 936 * 1024, "scripts/c.py": 279 * 1024})
+        _warn = {x["path"] for x in _r["warn"]}
+        _fail = {x["path"] for x in _r["fail"]}
+        return (_r["warn_limit"] == 280 * 1024 and _r["fail_limit"] == 320 * 1024
+                and _warn == {"scripts/a.py", "scripts/tl_core/b.py"}     # >280 đều WARN (kể cả file fail)
+                and _fail == {"scripts/tl_core/b.py"}                     # chỉ >320 mới FAIL-strict
+                and _r["waived"] == ["scripts/tl_selftest.py"]            # waiver theo BASENAME, có ghi nhận
+                and "scripts/c.py" not in _warn and _r["size_ok"] is False    # có file >320KB → size_ok=False
+                and _f({"scripts/c.py": 279 * 1024})["size_ok"] is True   # sạch → True
+                and _f({"scripts/x.py": 320 * 1024})["fail"] == []        # biên: đúng 320KB chưa fail
+                and _f({"scripts/x.py": 320 * 1024 + 1})["fail"] != []    # 320KB+1 → fail
+                and _f({"scripts/tl_selftest.py": 999 * 1024})["size_ok"] is True)   # waiver không fail
+    _t110("r125_py_size_guard_thresholds_waiver", _c125_py_size_guard_thresholds_waiver)
+
+    def _c125_py_size_guard_wired_in_audit():
+        # Guard sống ở workflow-audit (tiền lệ kernel_size ≤48KB): mục py_size đủ trường, quét ≥25 file
+        # runtime (.py scripts/ + tl_core/ + _fallback/), hiện trạng DƯỚI WARN (không nợ kỹ thuật giả),
+        # waiver ghi nhận tl_selftest; advisory KHÔNG merge vào out["warnings"] (tiền lệ registry-warnings
+        # — --strict không fail vì WARN-đệm, chỉ fail khi >320KB).
+        _ns = argparse.Namespace(json=True, strict=False)
+        _bo, _be = _io110.StringIO(), _io110.StringIO()
+        with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+            _rc = _TL_MODULE.cmd_workflow_audit(_ns)
+        try:
+            _j = json.loads(_bo.getvalue())
+        except Exception:
+            _j = {}
+        _ps = _j.get("py_size") or {}
+        _warn_txt = json.dumps(_j.get("warnings") or [], ensure_ascii=False)
+        return (_rc == 0 and _ps.get("files_scanned", 0) >= 25
+                and _ps.get("warn_limit") == 280 * 1024 and _ps.get("fail_limit") == 320 * 1024
+                and _ps.get("fail") == [] and _ps.get("warn") == []
+                and any("tl_selftest.py" in str(w) for w in (_ps.get("waived") or []))
+                and _ps.get("size_ok") is True
+                and "PY_SIZE" not in _warn_txt)   # advisory không rơi vào warnings (strict-safe)
+    _t110("r125_py_size_guard_wired_in_audit", _c125_py_size_guard_wired_in_audit)
+
+    def _c125_source_ops_wiring_moved_15_names():
+        # §4: 15 tên + 2 hằng MOVE NGUYÊN VĂN sang tl_core/source_ops.py (khuôn I5) — stub residency mới,
+        # KHÔNG dual-definition ở nguồn cũ/tl.py; hằng re-export TRỰC TIẾP đổi nguồn (bẫy I11);
+        # COMMAND_META Y NGUYÊN từng field (snapshot v1.34.63); _CREDS_LAZY_CMDS membership Y NGUYÊN.
+        import tl_core.source_ops as _so125
+        import tl_core.ingest_ops as _io125
+        import tl_core.command_registry as _reg125
+        _moved = ["cmd_register", "cmd_recat", "cmd_source_rename", "cmd_source_delete",
+                  "cmd_source_update_corpus", "cmd_shared_source_fix",
+                  "_register_clear", "_register_bulk_missing", "_register_target_exists", "_reg_row_present",
+                  "_source_delete_plan", "_source_rename_plan", "_source_update_corpus_plan",
+                  "_shared_source_fix_plan", "_shared_source_id_groups"]
+        _io_src = (HERE / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8", errors="replace")
+        _so_src = (HERE / "tl_core" / "source_ops.py").read_text(encoding="utf-8", errors="replace")
+        _tl_src = (HERE / "tl.py").read_text(encoding="utf-8", errors="replace")
+        _ok = _so125._TL is not None
+        for _n in _moved:
+            _fn = getattr(_TL_MODULE, _n, None)
+            _ok = (_ok and callable(_fn) and getattr(_fn, "__tl_stub__", None) == ("source_ops", _n)
+                   and callable(getattr(_so125, _n, None)) and not hasattr(_io125, _n)
+                   and _so_src.count(f"def {_n}(") == 1 and _io_src.count(f"def {_n}(") == 0
+                   and _tl_src.count(f"def {_n}(") == 0)
+        _ok = (_ok and _TL_MODULE._REG_CLEAR_FREE_COLS == _so125._REG_CLEAR_FREE_COLS
+               and _TL_MODULE._REG_CLEAR_PROTECTED == _so125._REG_CLEAR_PROTECTED
+               and "_REG_CLEAR_FREE_COLS = " in _so_src and "_REG_CLEAR_FREE_COLS = " not in _io_src
+               and "_tl_source_ops._REG_CLEAR_FREE_COLS" in _tl_src)   # re-export đổi nguồn CÙNG commit
+        # COMMAND_META snapshot ĐỦ field (v1.34.63) — move KHÔNG đổi meta (kể cả nlm_fallback/generated)
+        _CM = _reg125.COMMAND_META
+        _snap = {
+            "register":             ("high", False, "registry", False, True, False, None, "register", False, None, False, None),
+            "recat":                ("high", False, "drive_registry", False, True, False, None, "recat", False, None, True, None),
+            "source-rename":        ("high", False, "drive_registry_nlm", False, True, False, None, "source_rename", False, None, True, None),
+            "source-delete":        ("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None, True, None),
+            "source-update-corpus": ("high", False, "registry_nlm", True, True, False, None, "source_update_corpus", False, None, True, None),
+            "shared-source-fix":    ("high", False, "registry_nlm", True, True, False, None, "shared_source_fix", False, None, True, None),
+        }
+        _keys = ("risk", "read_only", "write_scope", "requires_confirm", "supports_dry_run",
+                 "deterministic_json_required", "workflow_task", "idempotency_contract",
+                 "card_required", "module", "generated", "nlm_fallback")
+        for _cli, _want in _snap.items():
+            _m125 = _CM.get(_cli) or {}
+            _ok = _ok and tuple(_m125.get(_k) for _k in _keys) == _want
+        # lazy-creds membership Y NGUYÊN (R4): 6 lệnh vốn KHÔNG lazy → vẫn không
+        _ok = _ok and not ({"register", "recat", "source-rename", "source-delete",
+                            "source-update-corpus", "shared-source-fix"} & set(_TL_MODULE._CREDS_LAZY_CMDS))
+        # parser resolve nguyên vẹn (kể cả `register` KHÔNG-generated — parser tay cli.py qua stub)
+        _ap125 = _TL_MODULE.build_parser()
+        _sub125 = next(x for x in _ap125._actions if isinstance(x, argparse._SubParsersAction))
+        for _cli, _h in (("register", "cmd_register"), ("recat", "cmd_recat"),
+                         ("source-rename", "cmd_source_rename"), ("source-delete", "cmd_source_delete"),
+                         ("source-update-corpus", "cmd_source_update_corpus"),
+                         ("shared-source-fix", "cmd_shared_source_fix")):
+            _p125 = _sub125.choices.get(_cli)
+            _ok = _ok and _p125 is not None and getattr(_p125.get_default("fn"), "__name__", "") == _h
+        return _ok
+    _t110("r125_source_ops_wiring_moved_15_names", _c125_source_ops_wiring_moved_15_names)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

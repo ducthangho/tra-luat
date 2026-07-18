@@ -1,3 +1,40 @@
+# ★ v1.34.64 — ĐỢT A guard trần-mount + tách tl_core/source_ops.py (2026-07-18)
+
+> Kế hoạch `D:\Quốc hội\ke-hoach-guard-va-boc-tl-core-2026-07-18.md` §3+§4 (grill Q0–Q7 chốt 2026-07-18;
+> Đợt 0 harness 2026-07-18: baseline KHÔNG drift, charact 31/31 cmd ×2 byte-hệt, probe bind-REBASE 3/3
+> byte-identical). TDD r125 ×3 negative-trước; selftest 1067→1070. Python-only (GAS giữ 2.21.2m).
+
+- **Guard TRẦN MOUNT §3** (lớp sự cố #5 — tl.py từng CẮT CỤT >~343KB; self-heal không cứu cắt cụt):
+  `_py_size_findings` PURE trong workflow.py — **WARN >280KB** (đệm ~60KB, advisory KHÔNG merge vào
+  `warnings` theo tiền lệ registry-warnings → `--strict` không fail vì đệm) / **FAIL --strict >320KB**
+  (chặn release TRƯỚC vách); scope mọi `.py` runtime bundle (scripts/ + tl_core/ + _fallback/ — 63 file);
+  **WAIVER `tl_selftest.py`** (936KB — không bước runbook nào import trên Cowork; hỏng → fail ỒN ÀO).
+  Sống ở `workflow-audit` (mục `py_size`, tiền lệ kernel_size ≤48KB) + case selftest r125. Hiện trạng
+  khi thêm: mọi file dưới WARN → guard XANH ngay, không nợ kỹ thuật giả.
+- **Tách `tl_core/source_ops.py` §4 — MOVE NGUYÊN VĂN** (ingest_ops.py 237.603B/69% trần → **182.775B**;
+  source_ops.py 56.801B): 6 cmd `register/recat/source-rename/source-delete/source-update-corpus/
+  shared-source-fix` + 9 helper riêng-cụm (`_register_clear/_register_bulk_missing/_register_target_exists/
+  _reg_row_present/_source_delete_plan/_source_rename_plan/_source_update_corpus_plan/
+  _shared_source_fix_plan/_shared_source_id_groups`) + 2 hằng `_REG_CLEAR_FREE_COLS/_REG_CLEAR_PROTECTED`
+  (re-export TRỰC TIẾP tl.py đổi nguồn `_tl_ingest_ops`→`_tl_source_ops` CÙNG commit — bẫy I11: hằng
+  KHÔNG vào _STUB_MAP). Khuôn I5 (docstring nguồn gốc + stdlib noqa + bind REBASE); helper dùng chung
+  2 phía Ở LẠI ingest_ops; WRITE-INFRA đa-module ở tl.py. Wiring: `_tl_core_import("source_ops")` + key
+  `_STUB_MAP` CHUYỂN 15 tên + bind tuple.
+- **BẰNG CHỨNG MOVE THUẦN (§6.5 — R6):** golden **19/19 PASS 0-DIFF, 0 file đổi, KHÔNG --write** ở pha
+  move; charact §6.1 **31/31 cmd BYTE-MATCH TRỌN** post-move vs pre-move (`.tl_state/charact_pre_A`,
+  capture tươi cùng phiên); live-smoke offline: source-update-corpus DRY row thật (plan đúng, không ghi)
+  + shared-source-fix report thật + register guard chặn id giả P0-1 rc=2. Golden `workflow_audit` regen
+  CÓ CHỦ ĐÍCH riêng pha guard (đúng 1 file, diff = khối `py_size`).
+- **Wiring test cập nhật CÓ CHỦ ĐÍCH (§6.2/R3):** `r75_ingest_ops_module_wired` trim 11 tên (residency
+  chuyển sang r125); `r125_source_ops_wiring_moved_15_names` pin residency mới + KHÔNG dual-definition +
+  COMMAND_META snapshot ĐỦ 12 field/6 lệnh Y NGUYÊN (kể cả `register` KHÔNG-generated, `source-delete`
+  supports_dry_run=False) + `_CREDS_LAZY_CMDS` membership y nguyên + parser resolve nguyên vẹn;
+  1 tham chiếu residency `inspect.getsource(_io5.cmd_recat)` (test recat 1.23.6) đổi nguồn theo;
+  `r81` stub-farm TỰ thích nghi (không sửa); `r99` giữ nguyên (helper ở lại).
+- Bài học Đợt A: quét drift-check theo `__tl_stub__` tuple là chưa đủ — còn lớp tham chiếu
+  `inspect.getsource(<module>.<fn>)` trỏ thẳng module nguồn (1 ca recat); trailing-blank cuối file mới
+  trim về 1 newline (whitespace-EOF, không tính đổi nguyên văn).
+
 # ★ v1.34.63 — A2 `doc-compare` + B1 `dedup-corpus`: dedup TRỤC NỘI DUNG (2026-07-18)
 
 > Kế hoạch `D:\Quốc hội\ke-hoach-dedup-corpus-B1-2026-07-18.md` (grill chốt, ADR-1..7 + ADR-A2-1..4) —

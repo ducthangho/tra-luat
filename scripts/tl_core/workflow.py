@@ -667,6 +667,27 @@ def _workflow_cards_audit() -> dict:
             "summary": {"cards": len(cards), "tasks": len(_TASK_TO_WORKFLOW), "groups": len(_TOOL_GROUPS), "available_commands": len(available)}}
 
 
+def _py_size_findings(sizes: dict, *, warn_limit: int = 280 * 1024, fail_limit: int = 320 * 1024,
+                      waiver: tuple = ("tl_selftest.py",)) -> dict:
+    """PURE (ĐỢT A v1.34.64 — kế hoạch guard-va-boc-tl-core §3/Q1): guard TRẦN MOUNT ~343KB/file (lớp sự
+    cố #5 — tl.py từng CẮT CỤT khi vượt; self-heal chỉ cứu NUL-pad, KHÔNG cứu cắt cụt). WARN >280KB
+    (đệm ~60KB — vài release để xử lý); FAIL --strict >320KB (chặn release TRƯỚC vách — ép bóc trước
+    cliff). WAIVER theo BASENAME: tl_selftest.py (936KB) — không bước runbook nào import nó trên Cowork;
+    nếu hỏng → fail ỒN ÀO (không âm thầm); xét lại nếu có ngày selftest phải chạy trên Cowork."""
+    warn, fail, waived = [], [], []
+    for p in sorted(sizes):
+        b = int(sizes[p] or 0)
+        if p.replace("\\", "/").rsplit("/", 1)[-1] in waiver:
+            waived.append(p)
+            continue
+        if b > warn_limit:
+            warn.append({"path": p, "bytes": b})
+        if b > fail_limit:
+            fail.append({"path": p, "bytes": b})
+    return {"warn_limit": warn_limit, "fail_limit": fail_limit, "files_scanned": len(sizes),
+            "warn": warn, "fail": fail, "waived": waived, "size_ok": not fail}
+
+
 def cmd_workflow_audit(a) -> int:
     out = _workflow_cards_audit()
     # v1.33.58 (Pha E - E4): đối chiếu command registry <-> parser <-> cards <-> idempotency contracts.
@@ -694,9 +715,26 @@ def cmd_workflow_audit(a) -> int:
     except Exception as _ke:  # noqa: BLE001
         out["kernel"] = {"ok": False, "error": f"{type(_ke).__name__}: {_ke}"}
         out["ok"] = False
+    # ĐỢT A v1.34.64 (kế hoạch guard-va-boc-tl-core §3): guard size .py RUNTIME bundle (scripts/ +
+    # tl_core/ + _fallback/) — WARN >280KB advisory (KHÔNG merge vào out["warnings"], tiền lệ
+    # registry-warnings :679 để --strict không fail vì đệm); FAIL >320KB chỉ chặn ở --strict.
+    try:
+        _pyfiles = {}
+        for _d, _pref in ((HERE, "scripts"), (HERE / "tl_core", "scripts/tl_core"),
+                          (HERE / "_fallback", "scripts/_fallback")):
+            if _d.is_dir():
+                for _f in sorted(_d.glob("*.py")):
+                    _pyfiles[f"{_pref}/{_f.name}"] = _f.stat().st_size
+        out["py_size"] = dict(_py_size_findings(_pyfiles),
+                              basis="trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, "
+                                    "FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)")
+    except Exception as _pe:  # noqa: BLE001
+        out["py_size"] = {"size_ok": False, "error": f"{type(_pe).__name__}: {_pe}"}
+        out["ok"] = False
     if getattr(a, "strict", False):
         out["strict"] = True
-        out["ok"] = bool(out.get("ok")) and not out.get("warnings")
+        out["ok"] = (bool(out.get("ok")) and not out.get("warnings")
+                     and bool((out.get("py_size") or {}).get("size_ok")))
     _print_json_or_text(out, getattr(a, "json", False))
     return 0 if out.get("ok") else 2
 

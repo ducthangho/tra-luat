@@ -667,6 +667,16 @@ def _workflow_cards_audit() -> dict:
             "summary": {"cards": len(cards), "tasks": len(_TASK_TO_WORKFLOW), "groups": len(_TOOL_GROUPS), "available_commands": len(available)}}
 
 
+def _kernel_size_findings(size_bytes: int, *, warn_limit: int = 47 * 1024, fail_limit: int = 48 * 1024) -> dict:
+    """PURE (G1a v1.34.66 — §11 kế hoạch guard-va-boc-tl-core, khuôn WARN/FAIL của §3): kernel SKILL.md
+    là trần SÁT NHẤT toàn hệ (49.145/49.152B — đệm 7B); gate cũ CHỈ FAIL ≤48K, KHÔNG WARN. WARN >47KB
+    advisory (KHÔNG vào out["warnings"] — strict không fail vì đệm; tín hiệu sớm cho kernel-diet G1b);
+    FAIL >48KB GIỮ NGUYÊN ngữ nghĩa cũ (chặn cả hai mode qua size_ok)."""
+    b = int(size_bytes or 0)
+    return {"size_bytes": b, "size_limit": fail_limit, "size_warn_limit": warn_limit,
+            "size_ok": b <= fail_limit, "size_warn": b > warn_limit}
+
+
 def _py_size_findings(sizes: dict, *, warn_limit: int = 280 * 1024, fail_limit: int = 320 * 1024,
                       waiver: tuple = ("tl_selftest.py",)) -> dict:
     """PURE (ĐỢT A v1.34.64 — kế hoạch guard-va-boc-tl-core §3/Q1): guard TRẦN MOUNT ~343KB/file (lớp sự
@@ -709,7 +719,8 @@ def cmd_workflow_audit(a) -> int:
         _sk_b = _sk.read_bytes()
         _links = sorted({m.rstrip(".,;:)]}»") for m in re.findall(r"references/[A-Za-z0-9_./\-]+", _sk_b.decode("utf-8", "replace"))})
         _missing = [l for l in _links if "*" not in l and not (HERE.parent / l).exists()]
-        out["kernel"] = {"size_bytes": len(_sk_b), "size_limit": 48 * 1024, "size_ok": len(_sk_b) <= 48 * 1024,
+        # G1a v1.34.66: +WARN 47KB qua helper PURE (khuôn §3 — advisory, không đổi ngữ nghĩa FAIL 48K)
+        out["kernel"] = {**_kernel_size_findings(len(_sk_b)),
                          "links_checked": len(_links), "links_missing": _missing, "links_ok": not _missing}
         out["ok"] = bool(out.get("ok")) and out["kernel"]["size_ok"] and out["kernel"]["links_ok"]
     except Exception as _ke:  # noqa: BLE001

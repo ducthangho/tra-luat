@@ -1,3 +1,26 @@
+# ★ v1.34.66 — G1a WARN-kernel 47KB + G2 references/GOTCHAS.md (2026-07-18)
+
+> §11 kế hoạch `ke-hoach-guard-va-boc-tl-core-2026-07-18.md` — 2 mục user duyệt ghép 1 release
+> dev-tối-ưu skill. TDD r127 ×3 negative-trước; selftest 1071→1074. Python-only (GAS 2.21.2m).
+
+- **G1a — WARN kernel >47KB** (kernel 49.145/49.152B = trần SÁT NHẤT toàn hệ, đệm 7B; gate cũ CHỈ FAIL
+  ≤48K không WARN): helper PURE `_kernel_size_findings` (workflow.py, khuôn WARN/FAIL của §3) — WARN
+  advisory KHÔNG vào `out["warnings"]` (strict không fail vì đệm), FAIL >48K GIỮ NGUYÊN ngữ nghĩa;
+  kernel block audit dùng helper (+`size_warn_limit`/`size_warn`). **Hiện trạng `size_warn=TRUE` NGAY
+  từ release này — ĐÚNG CHỦ ĐÍCH** (báo sớm cần kernel-diet G1b, việc riêng chờ duyệt). Stub I11 +
+  r127 pin biên 47K/47K+1/48K/48K+1.
+- **G2 — `references/GOTCHAS.md` 7.715B** (5–8KB đúng ước §11): gom bẫy ĐÃ TRẢ GIÁ nhóm 9 CHỦ ĐỀ —
+  trần mount/size (343KB, kernel 48K, bundle 200); I11/stub/bind (hằng re-export, no-sweep R2, drift
+  2 lớp __tl_stub__ + getsource); nghi thức release (manifest `--out` dry, golden nhúng size, LF vs
+  CRLF COMMANDS.md, commit -F, gate rc-thật); lazy-creds; journal-HOME + `.tl_state` repo-relative +
+  fake-home 2 tầng; ghi registry (reg_bulk rỗng bị bỏ qua → reg_clear, readback âm tính giả → re-check
+  authoritative, claim=ESTIMATE, key `gdoc_id`/`id`); dedup data-op (md5 mislabel, picker ngược,
+  docx binary, sohieu-năm, gốc+convert không trùng); Windows console/heredoc (cp1258/PYTHONUTF8,
+  chr(92), path tuyệt đối, junction C:\qh); NLM (cookie DBSC ~1h, fallback đọc/ghi/audit-belief,
+  FILTER_REQUIRED). **Con trỏ đặt trong RUNBOOK.md (+2 dòng blockquote) — kernel 0 byte** (kernel đã
+  trỏ RUNBOOK sẵn); bundle 171→172 (<200 guard ✓). Drift-lock r127 kiểu bài-học-handoff: kiểm POINTER
+  ĐÍCH (RUNBOOK chứa đường dẫn + GOTCHAS chứa đủ anchor bẫy + LF).
+
 # ★ v1.34.65 — ĐỢT B tách tl_core/nlm_admin_ops.py: ranh giới GHI/ĐỌC (2026-07-18)
 
 > Kế hoạch `D:\Quốc hội\ke-hoach-guard-va-boc-tl-core-2026-07-18.md` §5 (ĐÓNG TRỌN kế hoạch 2 đợt).

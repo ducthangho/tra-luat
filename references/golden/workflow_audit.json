@@ -1066,7 +1066,9 @@
     "links_ok": true,
     "size_bytes": 49145,
     "size_limit": 49152,
-    "size_ok": true
+    "size_ok": true,
+    "size_warn": true,
+    "size_warn_limit": 48128
   },
   "ok": true,
   "py_size": {

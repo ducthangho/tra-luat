@@ -12955,6 +12955,60 @@ def run() -> int:
         return _ok
     _t110("r126_nlm_admin_ops_wiring_moved_18_names", _c126_nlm_admin_ops_wiring_moved_18_names)
 
+    # ═══ v1.34.66 — r127: G1a WARN-kernel ~47KB + G2 references/GOTCHAS.md (§11 kế hoạch
+    # guard-va-boc-tl-core, user duyệt ghép 1 release dev-tối-ưu). Khuôn WARN/FAIL của §3:
+    # WARN advisory KHÔNG vào out["warnings"] (strict không fail vì đệm); FAIL giữ ≤48K như cũ. ═══
+    def _c127_kernel_warn_thresholds():
+        # G1a: kernel 49.145/49.152B — trần sát nhất toàn hệ, gate cũ CHỈ FAIL 48K không WARN.
+        _f = _TL_MODULE._kernel_size_findings
+        _r = _f(47 * 1024)
+        _ok = (_r["size_warn_limit"] == 47 * 1024 and _r["size_limit"] == 48 * 1024
+               and _r["size_warn"] is False and _r["size_ok"] is True)          # biên: đúng 47K chưa warn
+        _ok = _ok and _f(47 * 1024 + 1)["size_warn"] is True                    # 47K+1 → warn
+        _ok = _ok and _f(48 * 1024)["size_ok"] is True                          # đúng 48K chưa fail
+        _r2 = _f(48 * 1024 + 1)
+        _ok = _ok and _r2["size_ok"] is False and _r2["size_warn"] is True      # 48K+1 → fail (warn kèm)
+        _ok = _ok and _f(1000)["size_warn"] is False and _f(1000)["size_bytes"] == 1000
+        return _ok
+    _t110("r127_kernel_warn_thresholds", _c127_kernel_warn_thresholds)
+
+    def _c127_kernel_warn_wired_in_audit():
+        # Wired ở workflow-audit mục kernel (tiền lệ py_size §3): hiện trạng SKILL.md 49.145B > 47K →
+        # size_warn=TRUE NGAY (đúng chủ đích G1a — báo đệm 7B sát trần, kernel-diet G1b là việc riêng);
+        # advisory KHÔNG rơi vào out["warnings"] (strict-safe); size_ok vẫn True (≤48K) → ok tổng không đổi.
+        _ns = argparse.Namespace(json=True, strict=False)
+        _bo, _be = _io110.StringIO(), _io110.StringIO()
+        with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+            _rc = _TL_MODULE.cmd_workflow_audit(_ns)
+        try:
+            _j = json.loads(_bo.getvalue())
+        except Exception:
+            _j = {}
+        _k = _j.get("kernel") or {}
+        _warn_txt = json.dumps(_j.get("warnings") or [], ensure_ascii=False)
+        return (_rc == 0 and _k.get("size_warn_limit") == 47 * 1024
+                and _k.get("size_limit") == 48 * 1024
+                and _k.get("size_warn") is True and _k.get("size_ok") is True
+                and "KERNEL" not in _warn_txt)
+    _t110("r127_kernel_warn_wired_in_audit", _c127_kernel_warn_wired_in_audit)
+
+    def _c127_gotchas_doc_pointer_driftlock():
+        # G2: bẫy nóng phân mảnh CHANGELOG/memory → agent tiêu thụ skill KHÔNG thấy. GOTCHAS.md nhóm
+        # theo CHỦ ĐỀ + con trỏ trong RUNBOOK (kernel đã trỏ RUNBOOK → 0 byte kernel). Drift-lock kiểu
+        # bài học handoff: refactor doc phải kiểm POINTER ĐÍCH.
+        _gp = HERE.parent / "references" / "GOTCHAS.md"
+        if not _gp.exists():
+            return False
+        _g = _gp.read_text(encoding="utf-8", errors="replace")
+        _rb = (HERE.parent / "references" / "RUNBOOK.md").read_text(encoding="utf-8", errors="replace")
+        _anchors = ("I11", "343", "--out", "golden", "journal", "_CREDS_LAZY_CMDS", "DBSC",
+                    "reg_clear", "getsource", "CRLF", "gdoc_id")
+        return (4 * 1024 <= len(_g.encode("utf-8")) <= 12 * 1024
+                and "references/GOTCHAS.md" in _rb
+                and all(a in _g for a in _anchors)
+                and "\r" not in _g)   # repo LF
+    _t110("r127_gotchas_doc_pointer_driftlock", _c127_gotchas_doc_pointer_driftlock)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

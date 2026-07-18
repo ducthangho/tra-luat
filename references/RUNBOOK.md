@@ -2,6 +2,8 @@
 
 > Thay cho doctrine rải rác trong văn xuôi. Mỗi bước là MỆNH LỆNH + cổng (gate). Làm đúng
 > thứ tự. Tham số/khóa response webapp: tra `references/API_CONTRACT.md` — KHÔNG đoán.
+> Bẫy vận hành ĐÃ TRẢ GIÁ (nhóm theo chủ đề, trích từ CHANGELOG/hồ sơ sự cố): `references/GOTCHAS.md`
+> — đọc TRƯỚC khi release / sửa registry / viết script mới / move-tách module (G2 v1.34.66).
 
 ---
 

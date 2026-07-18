@@ -1432,7 +1432,7 @@ _STUB_MAP = {
         '_profile_block_meta', '_cmd_profile_load_impl', 'cmd_profile_load',   # P2 (v1.34.24)
         '_promote_seed_candidates', '_nlm_system_prompt_apply', '_cmd_profile_promote_impl', 'cmd_profile_promote',   # P3 (v1.34.25)
         'cmd_profile_set_meta', '_cmd_profile_set_meta_impl',   # v1.34.29
-        '_template_id_norm', '_templates_apply_change', '_template_findings', '_template_probe',   # v1.34.71 templates (Q1/Q3/Q5/Q6)
+        '_template_id_norm', '_templates_apply_change', '_template_findings', '_template_probe', '_base_meta_folder_id',   # v1.34.71 templates (Q1/Q3/Q5/Q6)
         '_nlm_only_sentinel', '_from_nlm_row_payload', '_cmd_profile_from_nlm_impl', 'cmd_profile_from_nlm',   # P4 (v1.34.26)
         '_profile_from_nlm_add_missing',   # v1.34.30 #2 (from-nlm --add-missing)
         '_cmd_profile_materialize_sources_impl', 'cmd_profile_materialize_sources',

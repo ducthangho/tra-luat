@@ -32,6 +32,12 @@
   Golden `parser_surface` regen CHỦ ĐÍCH đúng 2 lệnh; COMMANDS.md 2 row (CRLF) + RUNBOOK §D +1 dòng.
 - **Bàn giao**: live-smoke ĐỌC/DRY phiên này (không ghi marker); smoke GHI thật ở phiên sau deploy;
   seed kho chung + THE_THUC = backlog.
+- **Smoke DRY lộ gap → vá trong-release** (`_base_meta_folder_id`): block `profiles.vbqppl` KHÔNG có
+  `metaFolderId` và root nền nằm trong block (không top-level) → resolver kho chung: config-first
+  (block → top-level) → LIST root nền tìm `_meta` (khuôn `_marker_read`); root nền HIỆN CHƯA CÓ `_meta`
+  → note phân biệt rõ "kho chung CHƯA DỰNG (tạo `_meta/templates` trong root nền)" ≠ "config hỏng".
+  Smoke sống: 15 profile marker đọc OK (templates đều [] đúng kỳ vọng); DRY --template-add id-giả →
+  probe exists=false + warning "PROBE_FAIL — --apply sẽ TỪ CHỐI" + KHÔNG ghi (fail-closed Q5 ✓).
 
 # ★ v1.34.70 — Sửa help zip-ingest lỗi-thời + nhãn TÀI LIỆU LỊCH SỬ 2 references (2026-07-18)
 

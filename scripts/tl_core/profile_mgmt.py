@@ -287,7 +287,9 @@ def cmd_profile_list(a) -> int:
             return 2
         g = _gas()
         profs = _profiles_from_config(cfg)
-        base_meta = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+        base_meta = _base_meta_folder_id(g, profs, cfg)
+        _base_root = (str((profs.get(DEFAULT_PROFILE) or {}).get("rootFolderId") or "")
+                      or str(cfg.get("rootFolderId") or cfg.get("root_id") or cfg.get("root") or ""))
         shared = {"folder_id": "", "items": [], "note": ""}
         try:
             if base_meta:
@@ -300,10 +302,13 @@ def cmd_profile_list(a) -> int:
                                        for x in ((_gas_get_retry(g, "list", folderId=shared["folder_id"]) or {})
                                                  .get("items") or []) if str(x.get("type")) != "folder"]
                 else:
-                    shared["note"] = ("kho chung CHƯA dựng — tạo folder `templates` trong _meta VBQPPL rồi kéo "
-                                      "mẫu vào (Q2b: folder-là-danh-mục); profile dẫn chiếu bằng --template-add.")
+                    shared["note"] = ("kho chung CHƯA dựng — tạo folder `templates` trong `_meta` nền VBQPPL rồi "
+                                      "kéo mẫu vào (Q2b: folder-là-danh-mục); profile dẫn chiếu bằng --template-add.")
+            elif _base_root:
+                shared["note"] = ("kho chung CHƯA DỰNG — root nền VBQPPL chưa có folder `_meta`: tạo "
+                                  "`_meta/templates` trong root nền rồi kéo mẫu vào (Q2b: folder-là-danh-mục).")
             else:
-                shared["note"] = "config thiếu metaFolderId nền vbqppl — không xác định được kho chung."
+                shared["note"] = "không xác định được root nền vbqppl từ config — kiểm tra config v2."
         except Exception as e:  # noqa: BLE001
             shared["note"] = f"lỗi đọc kho chung: {type(e).__name__}: {e}"
         per = {}
@@ -1042,7 +1047,7 @@ def _cmd_profile_doctor_impl(a) -> int:
             _mk_t = (_mr.get("marker") or {}) if isinstance(_mr, dict) else {}
             _tpls_d = _mk_t.get("templates") if isinstance(_mk_t.get("templates"), list) else []
             if _tpls_d:
-                _shared_meta_d = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+                _shared_meta_d = _base_meta_folder_id(g, profs, cfg)
                 _prof_meta_d = str(_mk_t.get("metaFolderId") or prof.get("metaFolderId") or "")
                 _probe_d = {}
                 for _t_d in _tpls_d:
@@ -1515,6 +1520,27 @@ def _template_findings(entries, probe: dict) -> list:
             out.append({"id": str(t.get("id") or ""), "drive_id": did, "finding": "TEMPLATE_OUTSIDE_TREE",
                         "note": "file ngoài cây profile và ngoài kho chung — advisory (Q2); cân nhắc dời vào _meta/templates."})
     return out
+
+
+def _base_meta_folder_id(g, profs: dict, cfg: dict | None = None) -> str:
+    """(v1.34.71 — smoke DRY lộ gap ×2: block vbqppl trong profiles có thể KHÔNG có metaFolderId, và
+    rootFolderId NỀN thường nằm TOP-LEVEL config chứ không trong profiles.vbqppl) Lấy metaFolder của NỀN
+    cho kho mẫu chung Q2b: config-first (block → top-level), thiếu → list rootFolderId nền tìm folder
+    `_meta` (khuôn _marker_read). Trả '' nếu không xác định được (caller ghi note, không raise)."""
+    base = profs.get(DEFAULT_PROFILE) or {}
+    mid = str(base.get("metaFolderId") or "") or str((cfg or {}).get("metaFolderId") or "")
+    if mid:
+        return mid
+    root = (str(base.get("rootFolderId") or "")
+            or str((cfg or {}).get("rootFolderId") or (cfg or {}).get("root_id") or (cfg or {}).get("root") or ""))
+    if not root:
+        return ""
+    try:
+        items = (_gas_get_retry(g, "list", folderId=root) or {}).get("items") or []
+        meta = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
+        return str((meta or {}).get("id") or "")
+    except Exception:  # noqa: BLE001
+        return ""
 
 
 def _template_probe(g, did: str, prof_meta_id: str, shared_meta_id: str) -> dict:
@@ -2966,7 +2992,7 @@ def _cmd_profile_set_meta_impl(a) -> int:
     # ── v1.34.71 templates: tính new_tpl + probe (Q5) / upload-plan (Q2c) — DRY chỉ LẬP KẾ HOẠCH, không tạo folder ──
     old_tpl = old.get("templates") if isinstance(old.get("templates"), list) else []
     new_tpl = None
-    _shared_meta = str((profs.get(DEFAULT_PROFILE) or {}).get("metaFolderId") or "")
+    _shared_meta = _base_meta_folder_id(g, profs, cfg) if _t_ops else ""
     _prof_meta = str(old.get("metaFolderId") or prof.get("metaFolderId") or "")
     if t_remove is not None:
         new_tpl, _terr = _templates_apply_change(old_tpl, remove=str(t_remove))

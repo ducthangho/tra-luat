@@ -1061,13 +1061,13 @@
     }
   ],
   "kernel": {
-    "links_checked": 13,
+    "links_checked": 14,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 49145,
+    "size_bytes": 46946,
     "size_limit": 49152,
     "size_ok": true,
-    "size_warn": true,
+    "size_warn": false,
     "size_warn_limit": 48128
   },
   "ok": true,

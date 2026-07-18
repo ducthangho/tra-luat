@@ -12973,9 +12973,9 @@ def run() -> int:
     _t110("r127_kernel_warn_thresholds", _c127_kernel_warn_thresholds)
 
     def _c127_kernel_warn_wired_in_audit():
-        # Wired ở workflow-audit mục kernel (tiền lệ py_size §3): hiện trạng SKILL.md 49.145B > 47K →
-        # size_warn=TRUE NGAY (đúng chủ đích G1a — báo đệm 7B sát trần, kernel-diet G1b là việc riêng);
-        # advisory KHÔNG rơi vào out["warnings"] (strict-safe); size_ok vẫn True (≤48K) → ok tổng không đổi.
+        # Wired ở workflow-audit mục kernel (tiền lệ py_size §3); advisory KHÔNG rơi vào out["warnings"]
+        # (strict-safe); size_ok True. Lịch sử CÓ CHỦ ĐÍCH: v1.34.66 pin size_warn=TRUE (kernel 49.145B
+        # — báo đệm 7B); v1.34.67 G1b kernel-diet trích 3 khối → size_warn=FALSE (r128 pin ≤47K).
         _ns = argparse.Namespace(json=True, strict=False)
         _bo, _be = _io110.StringIO(), _io110.StringIO()
         with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
@@ -12988,7 +12988,7 @@ def run() -> int:
         _warn_txt = json.dumps(_j.get("warnings") or [], ensure_ascii=False)
         return (_rc == 0 and _k.get("size_warn_limit") == 47 * 1024
                 and _k.get("size_limit") == 48 * 1024
-                and _k.get("size_warn") is True and _k.get("size_ok") is True
+                and _k.get("size_warn") is False and _k.get("size_ok") is True
                 and "KERNEL" not in _warn_txt)
     _t110("r127_kernel_warn_wired_in_audit", _c127_kernel_warn_wired_in_audit)
 
@@ -13008,6 +13008,47 @@ def run() -> int:
                 and all(a in _g for a in _anchors)
                 and "\r" not in _g)   # repo LF
     _t110("r127_gotchas_doc_pointer_driftlock", _c127_gotchas_doc_pointer_driftlock)
+
+    # ═══ v1.34.67 — r128: G1b KERNEL-DIET (§11 kế hoạch guard-va-boc-tl-core, user duyệt riêng):
+    # trích NGUYÊN VĂN 3 khối chi-tiết (~3.7KB net) sang references/KERNEL_APPENDIX.md theo nếp Pha F
+    # (kernel = bất biến + con trỏ; 'đã chuyển khỏi kernel — nội dung không đổi'). Kernel ⇒ RE-IMPORT
+    # BẮT BUỘC. Drift-lock 2 chiều kiểu r127: con trỏ đích + anchor nguyên văn + phủ định trong kernel. ═══
+    def _c128_kernel_diet_under_warn():
+        # Sau diet: kernel ≤ 47KB (size_warn=False — hết cảnh báo thường trực G1a), size_ok giữ True.
+        _ns = argparse.Namespace(json=True, strict=False)
+        _bo, _be = _io110.StringIO(), _io110.StringIO()
+        with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+            _rc = _TL_MODULE.cmd_workflow_audit(_ns)
+        try:
+            _j = json.loads(_bo.getvalue())
+        except Exception:
+            _j = {}
+        _k = _j.get("kernel") or {}
+        return (_rc == 0 and _k.get("size_warn") is False and _k.get("size_ok") is True
+                and _k.get("links_ok") is True                      # con trỏ mới không gãy links-check
+                and int(_k.get("size_bytes") or 0) <= 47 * 1024)
+    _t110("r128_kernel_diet_under_warn", _c128_kernel_diet_under_warn)
+
+    def _c128_kernel_appendix_verbatim_pointers():
+        # Trích NGUYÊN VĂN: appendix chứa anchor ĐẶC TRƯNG từng khối; kernel KHÔNG còn các anchor đó
+        # (chống trích-nửa-vời/copy-đôi) nhưng PHẢI có con trỏ tới appendix + bất biến tóm còn nguyên.
+        _ap = HERE.parent / "references" / "KERNEL_APPENDIX.md"
+        if not _ap.exists():
+            return False
+        _a = _ap.read_text(encoding="utf-8", errors="replace")
+        _sk = (HERE.parent / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        _anchors = ("GLIBC_2.39 not found",            # khối A — bảng route Cowork + bẫy NPM
+                    "bwrap --unshare-pid",             # khối B — chi tiết Cowork 45s / nlm-install --resume
+                    "TOPOLOGY_CONFIG_CONFLICT")        # khối C — sharding topology chi tiết v1.34.49
+        _ok = all(x in _a for x in _anchors) and all(x not in _sk for x in _anchors)
+        _ok = _ok and "references/KERNEL_APPENDIX.md" in _sk           # con trỏ trong kernel
+        _ok = _ok and "KERNEL_APPENDIX" in (HERE.parent / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        # bất biến TÓM phải còn trong kernel (diet không được nuốt mệnh lệnh sống còn)
+        for _must in ("tl preflight", "nlm-cross", "notebook_create", "45s"):
+            _ok = _ok and _must in _sk
+        _ok = _ok and ("trích NGUYÊN VĂN" in _a or "nguyên văn" in _a) and "\r" not in _a
+        return _ok
+    _t110("r128_kernel_appendix_verbatim_pointers", _c128_kernel_appendix_verbatim_pointers)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

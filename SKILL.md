@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.66 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.67 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -113,19 +113,8 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 > - **LOCAL / mount lành (vd máy Windows) →** chạy thẳng khối **A1–A3** bên dưới. `tl_boot.py ping` ở local KHÔNG đụng `_parts`
 >   (on-disk khớp MANIFEST → chạy thẳng; chỉ ghép `_parts` khi thật sự cắt cụt).
 >
-> **COWORK — chi tiết đường tải-về (mount HAY CẮT CỤT FILE #51435/#53940). ROUTE TỐI ƯU (egress = proxy
-> allowlist: `drive.usercontent.google.com` + `script.google.com` MỞ; `google.com`/GitHub/astral CDN CHẶN):**
-> **(v1.22.44) MỌI artifact bootstrap nay PUBLIC ở Drive/Package (anyone-with-link) → curl HẾT, KHÔNG cần Drive MCP.**
-> | File (Package) | Visibility | Tool nhanh nhất |
-> |---|---|---|
-> | zip skill | public | **curl** `drive.usercontent` (off-context, không token) — **Cowork TẢI BẮT BUỘC** (mount cắt cụt) |
-> | **config (apps script + token)** | **public** | **curl** `drive.usercontent` (LOAD ĐẦU TIÊN; fallback Drive MCP nếu chưa bật public) |
-> | gws cred, nlm cred, secrets.enc | public | **curl** / GAS / direct-media |
-> | **gws binary (MUSL-static)** | public | **`tl gws-bootstrap-cowork`** (public-curl binary→chmod). ⛔ KHÔNG `npm i -g @googleworkspace/cli` |
-> | Python 3.11 | public | **public-curl** binary (`_fast_drive_fetch`); uv chỉ nếu system≥3.11 |
-> | nlm CLI | PyPI | **uv** (`nlm-install --uv` → `uv tool install --python 3.11 notebooklm-mcp-cli`; PyPI MỞ) |
-> - ⛔ **gws trên Cowork = BINARY MUSL-STATIC tải từ Drive** (chạy mọi glibc). **NPM `@googleworkspace/cli` LÀ BẪY**: bản GNU
->   yêu cầu **GLIBC 2.39**, Cowork (Ubuntu 22, glibc 2.35) → `GLIBC_2.39 not found`, KHÔNG chạy. Luôn `tl gws-bootstrap-cowork`.
+> **COWORK — chi tiết đường tải-về (bảng artifact public/curl-route + ⛔ bẫy NPM-GLIBC gws): trích NGUYÊN VĂN →**
+> **`references/KERNEL_APPENDIX.md` §A** — route chuẩn đã nằm TRỌN trong khối BƯỚC 0 trên; gws Cowork LUÔN `tl gws-bootstrap-cowork`, ⛔ KHÔNG npm.
 > ```sh
 > # 1 LỆNH DUY NHẤT — tự curl config(public)+zip+gws+creds, KHÔNG cần Drive MCP:
 > sh scripts/tl_fetch.sh --setup --nlm
@@ -149,7 +138,7 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 >    trạng thái từng bước. **MỌI env (Chat/Cowork/Code) NÊN chạy `tl up --nlm` ĐẦU PHIÊN** để cài gws+nlm + nạp corpus NGAY.
 >    (Chỉ token, không binary: `--no-binary`; bỏ nlm: bỏ `--nlm`.) Tương đương thủ công: `tl init-config --from-public --nlm`
 >    rồi `tl boot`. Hoặc shell: `sh scripts/tl_fetch.sh --setup --nlm`.
->    ⚠ **COWORK TIMEOUT 45s/lệnh:** `--nlm` (uv/nlm-install) THƯỜNG vượt 45s → TÁCH BƯỚC: `sh tl_fetch.sh --setup` (core <45s, KHÔNG nlm) → rồi **LẶP `tl nlm-install --resume` tới rc=0** (★v1.30.1 #1: mỗi lần gọi chạy ĐÚNG 1 bước fetch→extract→install, trạng thái dò từ đĩa — tarball bền + uv cache; rc=3=PARTIAL còn bước, KHÔNG phải lỗi; thường ≤5 lần) → `tl nlm-auth-load` riêng. KHÔNG dùng nohup/setsid vờ chạy nền — bwrap --unshare-pid kill tiến trình con giữa 2 lần bash. `tl up` (không --nlm) ~30s. Mount Cowork cắt cụt → curl zip sạch TRƯỚC (BƯỚC 0). Temp ghi `$HOME` (1.23.15 tự trỏ TMPDIR khỏi /tmp).
+>    ⚠ **COWORK TIMEOUT 45s/lệnh:** `--nlm` THƯỜNG vượt 45s → TÁCH BƯỚC: `sh tl_fetch.sh --setup` (core <45s) → LẶP `tl nlm-install --resume` tới rc=0 (rc=3=PARTIAL còn bước, KHÔNG phải lỗi) → `tl nlm-auth-load` riêng. `tl up` (không --nlm) ~30s. Chi tiết nguyên văn (uv/tarball/no-nohup/temp-$HOME): `references/KERNEL_APPENDIX.md` §B.
 > 2) curl thất bại (chưa bật public) → Drive MCP tải `CONFIG_FILEID` → `cfg.json` ($HOME, KHÔNG /tmp) → `tl init-config --file cfg.json`.
 > 3) Có `TL_MASTER_KEY` → `tl bootstrap --secrets-file <s.enc>` (SECRETS public Package; token+gws+nlm); hoặc có gws cred → `tl init-config --from-drive`.
 >    Sau đó `tl boot` (A3) để nạp corpus.
@@ -174,7 +163,8 @@ xóa→`nlm source delete`, sync→`nlm source sync`. MCP CHỈ fallback khi thi
 (hoặc studio nếu CLI chưa hỗ trợ). Lợi ích then chốt: **pipeline ingest chạy trọn trong tl
 (không gãy bởi round-trip MCP)** + không tràn token/timeout.
 
-**Sharding VBQPPL (cap mặc định 300/notebook — cấu hình được):** corpus VBQPPL trải NHIỀU notebook (shard); mỗi dòng registry mang `nlm_notebook_id` + `row_kind ∈ {own,ref,overflow}`. **(v1.34.49) TOPOLOGY = declared+observed hợp nhất, MỘT resolver cho mọi lệnh**: `config.profiles.vbqppl.shards[]` (dict `{id,role,capacity,enabled,priority}` hoặc list id legacy) là Ý ĐỊNH khai báo; registry+env là QUAN SÁT; alias (`overflowNotebookId`) lệch declared → lệnh ghi/route DỪNG fail-closed `TOPOLOGY_CONFIG_CONFLICT`. Capacity per-shard: `shards[].capacity` > env `TL_NLM_SOURCE_CAP` > 300; live count là ground truth. Nạp VBQPPL mới ⇒ `tl preflight <số hiệu>`: shard chính đầy → `overflow_route` shard phụ. Batch `ingest-missing` tự **failover shard kế TRONG CÙNG RUN** khi shard đầy giữa chừng (không upload lại); CẠN mọi shard → `partial=true + remaining + resume_command + rc=2` (KHÔNG còn "ok" giả — kể cả blocked upfront). Đọc slot LIVE fail-closed: auth-fail ⇒ `LIVE_READ_FAILED` DỪNG trước side-effect, KHÔNG coi là 0 nguồn. Sau `source_add` tay vào shard phụ ⇒ `tl push-overflow --drive-id --source-id` (set `row_kind=overflow`; validate đích ∈ topology). Recovery `nlm-reconcile --apply`/`nlm-add` nay tự ghi `row_kind` theo topology (kind `ref`/`thuong` không bao giờ bị clobber); doctor kiểm bất biến notebook↔row_kind (report-only). Tra cứu xuyên shard: registry/manifest hợp nhất + **`tl nlm-cross "<câu hỏi>"`** (mặc định TOÀN topology enabled; thay MCP `cross_notebook_query`). KHÔNG `notebook_create` mới trừ khi tất cả shard đầy + người dùng duyệt.
+**Sharding VBQPPL (cap mặc định 300/notebook — cấu hình được):** corpus trải NHIỀU notebook (shard); mỗi dòng registry mang `nlm_notebook_id` + `row_kind ∈ {own,ref,overflow}`. Nạp VBQPPL mới ⇒ `tl preflight <số hiệu>` (shard chính đầy → `overflow_route` shard phụ); slot LIVE là ground-truth (LUÔN tin `nlm-get` LIVE hơn registry estimate trước khi chốt FULL/overflow/delete); tra cứu xuyên shard → **`tl nlm-cross "<câu hỏi>"`**. KHÔNG `notebook_create` mới trừ khi tất cả shard đầy + người dùng duyệt.
+  Chi tiết topology (declared+observed hợp nhất — 1 resolver, fail-closed khi config lệch; capacity per-shard; failover-trong-run + partial/resume; `push-overflow`; recovery tự ghi `row_kind`): trích NGUYÊN VĂN → `references/KERNEL_APPENDIX.md` §C.
 **(L4/L5 26/6) preflight đã cứng hóa:** `tl preflight` nay (a) **dedup phía tl lỏng-năm** — cảnh báo `⚠DUP-TL` khi số hiệu ĐÃ trên NLM dù KHÁC TÊN (vd `72/NQ-TW` ≡ `72/2025/NQ-TW` — đừng push lại kẻo nhân bản trong notebook đầy); (b) **verify-LIVE slot** qua `nlm-get` khi webapp báo FULL (registry từng đếm cả `removed_*` → used=322>300 ảo). **Luôn tin `nlm-get` LIVE hơn registry estimate trước khi chốt FULL/overflow/delete.**
 **(L6) Notebook ĐẦY thật (LIVE 300/300) → nạp mới cần GIẢI PHÓNG slot hoặc OVERFLOW.** Ứng viên giải phóng an toàn = **bản GỐC đã có VBHN thay thế còn nằm NLM** (vd Luật 45/2019←VBHN 18 BLLĐ; 84/2015←VBHN 14/2024; 69/2020←VBHN 8/BNV) — dùng `tl reg-query --no-... ` + `tl relation-check` để lập danh sách. `source_delete` **BẤT KHẢ NGHỊCH** ⇒ LUÔN lập danh sách + **chờ người dùng xác nhận** trước khi gỡ; ưu tiên overflow nếu còn shard.
 
@@ -303,6 +293,7 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/DEPENDENCIES.md` | Phụ thuộc + runtime-overlay (nguyên văn §9 cũ) |
 | `references/RUNBOOK.md` | Khởi động chi tiết theo môi trường, vận hành LIVE |
 | `references/API_CONTRACT.md` | Hợp đồng webapp GAS (action/param/version) |
+| `references/KERNEL_APPENDIX.md` | Trích NGUYÊN VĂN từ kernel (G1b): Cowork route tải-về §A · 45s tách-bước §B · sharding topology §C — hiệu lực như kernel |
 | `references/DOCTRINE_APPENDIX.md` | Toàn bộ doctrine mở rộng + lý do thiết kế |
 | `references/workflows/*.json` | Workflow cards máy-đọc (schema, risk, idempotency) |
 | `references/golden/*.json` | Golden fixtures tất định |

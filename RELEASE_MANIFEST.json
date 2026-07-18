@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.34.66",
+  "skill_version": "1.34.67",
   "webapp_target": "2.21.2m",
   "root_name": "tra-luat",
-  "file_count": 172,
-  "total_bytes": 5758848,
-  "package_hash": "0353aef3ee570447425b347fe96ae7858894a2dc9a0a67fb0cd3e02f704c637e",
-  "content_hash": "0353aef3ee570447425b347fe96ae7858894a2dc9a0a67fb0cd3e02f704c637e",
+  "file_count": 173,
+  "total_bytes": 5766566,
+  "package_hash": "c3e25f6c2a887a9ca7347cd964cc5099fdcc3c766e9f1a4098afaf253373676c",
+  "content_hash": "c3e25f6c2a887a9ca7347cd964cc5099fdcc3c766e9f1a4098afaf253373676c",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 183448,
-      "sha256": "d0ee4035bcc4228197d1f79f84d48ef439d5833b55ce202653182d0ce438aaf2"
+      "size": 185588,
+      "sha256": "0e27a3792c17c376822efbd32288f9611f5faf2e1ed5d2d164650a6bd90c48bb"
     },
     {
       "path": "CONTEXT.md",
@@ -48,13 +48,13 @@
     },
     {
       "path": "SKILL.md",
-      "size": 49145,
-      "sha256": "dca22241add046f5cccca63c3065319a7f1d82638ee03282bd9bc3f53327d74c"
+      "size": 46946,
+      "sha256": "aa63609c68a6453434aa20403684b3538b4eac4d9880a69d179aa78c5684f534"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "055ea05ad7e9745ccffd0e48e90be8a51642f97dfcf5f3156694d445c5aaabf2"
+      "sha256": "0fa702160c629949e5348e01eb18b1b687efb36ed56aca6160eb76c1e10e50a7"
     },
     {
       "path": "agents/openai.yaml",
@@ -180,6 +180,11 @@
       "path": "references/GOTCHAS.md",
       "size": 7715,
       "sha256": "3b49b673b305c2609172a92db23b670b4cd56c0fef198b9571f39dc174407c83"
+    },
+    {
+      "path": "references/KERNEL_APPENDIX.md",
+      "size": 4823,
+      "sha256": "13306661181043f95782689d376f7a282fcf23bc16d4e85dacca01bda5b502a4"
     },
     {
       "path": "references/MULTI_CORPUS_PROFILE_V1_18.md",
@@ -368,8 +373,8 @@
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 27551,
-      "sha256": "30fd7d18f6197a27a2c5d87b04cb59de13f910a7bb055853066394f186a4cf23"
+      "size": 27552,
+      "sha256": "1627f1b615b2a908a2639cbbca06c0c24edbbbf7432dfc1f702373c438d0d8d3"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -674,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 206540,
-      "sha256": "8dc754233f44e7c5b90fc50c7241f29419c9fa362bc217a7256e374edb35aae2"
+      "sha256": "342b3906a3d5562064f89cb871e9e3d45fd6763e580a8f40275b626abd647d8a"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -828,8 +833,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 954706,
-      "sha256": "2d708559ab4176e81c5e1b4b44f0cd402e315a42fc5736ee27fdf0e864e5fb52"
+      "size": 957659,
+      "sha256": "5e0cb962c2ed8b5f7784233ef464d071ab2a7773520ff36b984a7343e00c83c8"
     },
     {
       "path": "scripts/tra_cuu.py",

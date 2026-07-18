@@ -1,3 +1,26 @@
+# ★ v1.34.67 — G1b KERNEL-DIET: trích 3 khối nguyên văn → references/KERNEL_APPENDIX.md (2026-07-18)
+
+> §11 G1b kế hoạch `ke-hoach-guard-va-boc-tl-core-2026-07-18.md` (user duyệt riêng). Kernel ĐỔI RUỘT ⇒
+> **RE-IMPORT CAPABILITIES BẮT BUỘC**. TDD r128 ×2 negative-trước; selftest 1074→1076.
+
+- **Kernel 49.145B → 46.946B** (net −2.199B, đúng dải 2–4KB §11; đệm 1.182B tới WARN 47K + 2.206B tới
+  FAIL 48K — `size_warn` G1a tắt, hết cảnh báo thường trực). Nếp Pha F: kernel = bất biến + con trỏ,
+  nội dung chuyển **NGUYÊN VĂN** ("đã chuyển khỏi kernel — nội dung không đổi").
+- **`references/KERNEL_APPENDIX.md` MỚI 4.823B — hiệu lực như kernel**, 3 khối trích nguyên văn:
+  **§A** bảng COWORK route tải-về (artifact public/curl + ⛔ bẫy NPM-GLIBC gws `GLIBC_2.39 not found`);
+  **§B** chi tiết COWORK TIMEOUT 45s (nlm-install --resume từng-bước, uv/tarball, no-nohup
+  bwrap --unshare-pid, temp $HOME); **§C** sharding topology chi tiết v1.34.49 (declared+observed 1
+  resolver, TOPOLOGY_CONFIG_CONFLICT fail-closed, capacity, failover-trong-run, push-overflow, recovery
+  row_kind). Kernel GIỮ mệnh lệnh sống còn dạng tóm: khối BƯỚC 0 curl nguyên vẹn; `⛔ KHÔNG npm`;
+  45s tách-bước + `--resume` tới rc=0; sharding bất biến (preflight, tin nlm-get LIVE, nlm-cross,
+  KHÔNG notebook_create) + con trỏ §A/§B/§C; DANH MỤC REFERENCES +1 dòng.
+- **Drift-lock r128** (khuôn r127 pointer-đích 2 chiều): appendix chứa anchor đặc trưng từng khối
+  (`GLIBC_2.39 not found`/`bwrap --unshare-pid`/`TOPOLOGY_CONFIG_CONFLICT`) + kernel KHÔNG còn các
+  anchor đó (chống copy-đôi/trích-nửa-vời) + kernel có con trỏ + bất biến tóm còn nguyên + links-check
+  xanh + LF; r128 pin kernel ≤47K/size_warn=False. **r127 cập nhật CÓ CHỦ ĐÍCH**: pin hiện-trạng đổi
+  TRUE→FALSE (lịch sử ghi trong comment test). Golden `workflow_audit` regen chủ đích (size_bytes/
+  size_warn/links_checked). Bundle 172→173 (<200 ✓).
+
 # ★ v1.34.66 — G1a WARN-kernel 47KB + G2 references/GOTCHAS.md (2026-07-18)
 
 > §11 kế hoạch `ke-hoach-guard-va-boc-tl-core-2026-07-18.md` — 2 mục user duyệt ghép 1 release

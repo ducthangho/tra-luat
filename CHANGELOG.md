@@ -1,3 +1,23 @@
+# ★ v1.34.78 — R4 the-thuc: lệnh `tl the-thuc-normalize` (chuẩn hoá khung mẫu) (2026-07-19)
+
+> R4/4 — MẢNH CODE CUỐI của kế hoạch the-thuc (r138 ×3 đỏ-trước, selftest 1104→**1107**).
+> `the-thuc-normalize <in> <out> [--he]`: sectPr portrait → A4 + lề **20/20/30/15 mm** (bộ giá trị nằm
+> trong dải CẢ 3 hệ, trùng lề cố định VB Đảng — §2 kế hoạch); docDefaults → TNR + sz hệ (nhà nước
+> 13pt/Đảng 14pt); style Normal BỎ rFonts/sz/szCs đè (ca ND250 Normal=Arial đè docDefaults=TNR);
+> KHÔNG đụng run-level rPr; section landscape giữ nguyên trọn. Sửa bằng REGEX TARGETED trên string XML
+> (không parse-serialize toàn bộ — tránh vỡ namespace); zip repack date cố định 1980 → deterministic,
+> normalize(normalize(x)) == normalize(x) byte-equal (test khoá). **Self-gate: the_thuc_check(out)
+> phải hết FAIL nhóm T1** — file có run-format sai (vd HD05 run 10pt) không cứu được là CHỦ ĐÍCH
+> fail-closed. in==out chặn IN_OUT_SAME.
+
+- Smoke thật: BIEU_MAU_ND187 (Arial 100% + lề 10mm + no-sz) → normalize → **t1_fail 0** (sections_fixed
+  1, docdefaults_replaced); còn lại chỉ finding T2 của file-phụ-lục-trộn (ngoài phạm vi khung).
+- GENERATED_SPECS + COMMAND_META (low/write local — không Drive/registry/NLM) + _STUB_MAP +2; golden
+  parser_surface regen chủ đích +1 hash; workflow_audit/tool_inventory counters +1 lệnh (regen chủ
+  đích). COMMANDS.md +1 row. Kernel CHỈ đổi header — re-import không bắt buộc.
+- Data-op seed 10 mẫu kho chung `_meta/templates` chạy NGAY SAU release này (cắt mẫu từ file gộp bằng
+  script scratchpad khuôn extract.py; mỗi mẫu normalize + check T1-clean trước upload).
+
 # ★ v1.34.77 — R3 the-thuc: T2 cấu trúc + T3 khuyến nghị cho `the-thuc-check` (2026-07-19)
 
 > R3/4 kế hoạch the-thuc (TDD r137 ×5 đỏ-trước, selftest 1099→**1104**). **T2 — hiện diện CẤU TRÚC**

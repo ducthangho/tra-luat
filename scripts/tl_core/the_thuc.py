@@ -528,6 +528,125 @@ def the_thuc_check(path, he=None, strict=False):
             "can_cu_nguon": "references/THE_THUC_TRINH_BAY.md"}
 
 
+def the_thuc_normalize(in_path, out_path, he=None):
+    """R4 v1.34.78 — chuẩn hoá KHUNG mẫu docx trước khi seed kho chung (kế hoạch §5 R4):
+    sectPr PORTRAIT → A4 (11906×16838) + lề 20/20/30/15 mm (1134/1134/1701/850 twips — bộ giá trị nằm
+    trong dải CẢ 3 hệ, trùng lề cố định VB Đảng); docDefaults → Times New Roman + sz theo hệ (nhà nước
+    26 half-pt = 13pt / Đảng 28 = 14pt); style Normal BỎ rFonts/sz/szCs đè (ca ND250: Normal=Arial đè
+    docDefaults=TNR); KHÔNG đụng run-level rPr (giữ format cục bộ); section LANDSCAPE giữ nguyên trọn
+    (bảng khổ rộng hợp lệ — NĐ30/NĐ187 Mục I.2). Sửa bằng REGEX TARGETED trên string XML (không
+    parse-serialize toàn bộ — tránh vỡ namespace); zip repack date cố định 1980 → deterministic +
+    idempotent bytes. Self-gate: the_thuc_check(out) phải HẾT FAIL nhóm T1; còn → ok=False rc=2."""
+    import os
+    import re
+    import zipfile
+    if os.path.abspath(str(in_path)) == os.path.abspath(str(out_path)):
+        return {"ok": False, "schema": "the_thuc_normalize.v1", "error": "IN_OUT_SAME",
+                "in": os.path.basename(str(in_path)), "out": os.path.basename(str(out_path))}
+    with zipfile.ZipFile(in_path) as z:
+        names = z.namelist()
+        data = {n: z.read(n) for n in names}
+    doc = data.get("word/document.xml", b"").decode("utf-8", "replace")
+    sty = data.get("word/styles.xml", b"").decode("utf-8", "replace") if "word/styles.xml" in data else ""
+    if he in (None, "auto"):
+        plain = re.sub(r"<[^>]+>", "", doc)[:6000]
+        he_eff = ("dang" if ("ĐẢNG CỘNG SẢN VIỆT NAM" in plain
+                            and "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in plain) else "nha_nuoc")
+    else:
+        he_eff = str(he).replace("-", "_")
+    sz = "28" if he_eff == "dang" else "26"
+    n_fixed = [0]
+
+    def _fix_sect(m):
+        blk = m.group(0)
+        land = 'w:orient="landscape"' in blk
+        if not land:
+            m2 = re.search(r'<w:pgSz\b[^>]*w:w="(\d+)"[^>]*w:h="(\d+)"', blk)
+            if m2 and int(m2.group(1)) > int(m2.group(2)):
+                land = True                            # w>h không khai orient — vẫn là trang ngang
+        if land:
+            return blk
+        new = blk
+        m3 = re.search(r"<w:pgMar\b([^>]*)/>", new)
+        if m3:
+            attrs = m3.group(1)
+
+            def _keep(name, dflt):
+                mm = re.search(rf'w:{name}="(-?\d+)"', attrs)
+                return mm.group(1) if mm else dflt
+            gut = re.search(r'w:gutter="(-?\d+)"', attrs)
+            new_mar = ('<w:pgMar w:top="1134" w:right="850" w:bottom="1134" w:left="1701"'
+                       f' w:header="{_keep("header", "720")}" w:footer="{_keep("footer", "720")}"'
+                       + (f' w:gutter="{gut.group(1)}"' if gut else "") + "/>")
+            new = new.replace(m3.group(0), new_mar, 1)
+        m4 = re.search(r"<w:pgSz\b[^>]*/>", new)
+        if m4 and m4.group(0) != '<w:pgSz w:w="11906" w:h="16838"/>':
+            new = new.replace(m4.group(0), '<w:pgSz w:w="11906" w:h="16838"/>', 1)
+        if new != blk:
+            n_fixed[0] += 1
+        return new
+
+    doc2 = re.sub(r"<w:sectPr\b.*?</w:sectPr>", _fix_sect, doc, flags=re.S)
+    DD = ("<w:docDefaults><w:rPrDefault><w:rPr>"
+          '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>'
+          f'<w:sz w:val="{sz}"/><w:szCs w:val="{sz}"/>'
+          "</w:rPr></w:rPrDefault><w:pPrDefault/></w:docDefaults>")
+    if "<w:docDefaults>" in sty:
+        sty2 = re.sub(r"<w:docDefaults>.*?</w:docDefaults>", DD, sty, count=1, flags=re.S)
+    elif sty:
+        sty2 = re.sub(r"(<w:styles\b[^>]*>)", lambda mm: mm.group(1) + DD, sty, count=1)
+    else:
+        sty2 = ('<?xml version="1.0"?><w:styles xmlns:w='
+                '"http://schemas.openxmlformats.org/wordprocessingml/2006/main">' + DD + "</w:styles>")
+    dd_replaced = (sty2 != sty)
+
+    def _clean_normal(m):
+        blk = m.group(0)
+        blk = re.sub(r"<w:rFonts\b[^>]*/>", "", blk)
+        blk = re.sub(r"<w:szCs\b[^>]*/>", "", blk)
+        blk = re.sub(r"<w:sz\b[^>]*/>", "", blk)
+        return blk
+
+    sty3, _n_norm = re.subn(r'<w:style\b[^>]*w:styleId="Normal".*?</w:style>', _clean_normal,
+                            sty2, count=1, flags=re.S)
+    normal_cleaned = (sty3 != sty2)
+    data["word/document.xml"] = doc2.encode("utf-8")
+    data["word/styles.xml"] = sty3.encode("utf-8")
+    if "word/styles.xml" not in names:
+        names.append("word/styles.xml")
+    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zo:
+        for n in names:
+            zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            zo.writestr(zi, data[n])
+    env_chk = the_thuc_check(out_path, he=("dang" if he_eff == "dang" else None))
+    T1IDS = ("TT-KHO-GIAY", "TT-LE-TREN", "TT-LE-DUOI", "TT-LE-TRAI", "TT-LE-PHAI",
+             "TT-FONT", "TT-CO-CHU-NOI-DUNG")
+    t1f = sorted({f["id"] for f in env_chk["findings"] if f["level"] == "FAIL" and f["id"] in T1IDS})
+    return {"ok": not t1f, "schema": "the_thuc_normalize.v1",
+            "in": os.path.basename(str(in_path)), "out": os.path.basename(str(out_path)),
+            "he": he_eff, "sz_default_halfpt": int(sz),
+            "changes": {"sections_fixed": n_fixed[0], "docdefaults_replaced": dd_replaced,
+                        "normal_cleaned": normal_cleaned},
+            "self_check": {"he_check": env_chk.get("he"), "t1_fail": len(t1f), "t1_fail_ids": t1f,
+                           "fail": env_chk["summary"]["fail"], "warn": env_chk["summary"]["warn"]}}
+
+
+def cmd_the_thuc_normalize(args):
+    """CLI `tl the-thuc-normalize <in> <out> [--he auto|nha-nuoc|dang] [--json]` — ghi file OUT local
+    (ghi đè nếu tồn tại; in==out bị chặn IN_OUT_SAME). rc: 0 = self-check hết FAIL T1; 2 = còn."""
+    import os
+    ip = getattr(args, "in_docx", None)
+    op = getattr(args, "out_docx", None)
+    if not ip or not os.path.isfile(ip):
+        env = {"ok": False, "schema": "the_thuc_normalize.v1", "error": "FILE_NOT_FOUND", "in": str(ip or "")}
+        print(_json_dumps(env))
+        return 2
+    env = the_thuc_normalize(ip, op, he=(getattr(args, "he", "auto") or "auto"))
+    print(_json_dumps(env))
+    return 0 if env.get("ok") else 2
+
+
 def cmd_the_thuc_check(args):
     """CLI `tl the-thuc-check <docx> [--he ...] [--strict] [--json] [--out f]` — luôn in envelope JSON
     (READ-ONLY, offline; --json giữ tương thích bộ cờ chung). rc: 0 ok / 2 có FAIL (strict: WARN cũng 2)."""

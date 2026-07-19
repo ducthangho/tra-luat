@@ -1406,6 +1406,18 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true', "help": 'envelope JSON (mặc định đã in JSON)'},
          {"flags": ['--out'], "help": 'ghi envelope JSON ra file'},
      ]},
+    {"name": 'the-thuc-normalize', "handler": 'cmd_the_thuc_normalize',
+     "help": 'chuẩn hoá KHUNG mẫu docx (ghi file OUT local): sectPr portrait → A4 + lề 20/20/30/15mm '
+             '(bộ thoả cả 3 hệ), docDefaults → Times New Roman + cỡ theo hệ (nhà nước 13pt/Đảng 14pt), '
+             'Normal bỏ font/sz đè; KHÔNG đụng run-level; landscape giữ nguyên; self-gate '
+             'the-thuc-check hết FAIL T1 (R4 v1.34.78 — bước bắt buộc trước khi seed mẫu kho chung)',
+     "args": [
+         {"dest": 'in_docx', "metavar": 'in', "help": 'file .docx nguồn (không bị sửa)'},
+         {"dest": 'out_docx', "metavar": 'out', "help": 'file .docx output (ghi đè nếu tồn tại; phải khác in)'},
+         {"flags": ['--he'], "choices": ['auto', 'nha-nuoc', 'dang'], "default": 'auto',
+          "help": 'hệ cỡ chữ mặc định: nhà nước 13pt / Đảng 14pt; auto = phân luồng theo nội dung'},
+         {"flags": ['--json'], "action": 'store_true', "help": 'envelope JSON (mặc định đã in JSON)'},
+     ]},
 ]
 
 
@@ -1602,6 +1614,7 @@ COMMAND_META = {
     "vbhn-normalize":        _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "registry-doctor":       _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "the-thuc-check":        _m("low", True, "none", False, False, True, None, None, False, "the_thuc", generated=True),   # R2 v1.34.75 — PURE offline, đọc docx local, envelope deterministic
+    "the-thuc-normalize":    _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),   # R4 v1.34.78 — ghi file OUT local (không Drive/registry/NLM)
 }
 
 

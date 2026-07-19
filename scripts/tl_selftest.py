@@ -13647,6 +13647,81 @@ def run() -> int:
             return _ok and not ({"TT-BAC-CO-CHU", "TT-SO-NHO-10", "TT-THUT-DAU-DONG", "TT-VIET-TAT"} & _ids2)
     _t110("r137_t3_hints", _c137_t3_hints)
 
+    # ═══ v1.34.78 — r138 (R4 kế hoạch the-thuc): `tl the-thuc-normalize <in> <out>` — chuẩn hoá KHUNG
+    # mẫu trước khi seed kho chung: sectPr portrait → A4 + lề 20/20/30/15mm (bộ thoả CẢ 3 hệ, §2 kế
+    # hoạch); docDefaults → TNR + sz theo hệ (nhà nước 13pt / Đảng 14pt); style Normal bỏ rFonts/sz đè
+    # (ca ND250 Normal=Arial đè docDefaults=TNR); KHÔNG đụng run-level (giữ format cục bộ); section
+    # landscape GIỮ nguyên (bảng khổ rộng hợp lệ). Self-gate: the_thuc_check(out) hết FAIL nhóm T1.
+    # Zip repack deterministic (date 1980) → idempotent bytes. Đỏ-trước. ═══
+    def _c138_normalize_fixes_bad():
+        import tempfile as _tf138
+        with _tf138.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _bad = _mk136(_dp, "b.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None,
+                          runs=_VN136)                                         # ca ND187: Arial + lề 10mm + no-sz
+            _out = str(_dp / "b_norm.docx")
+            _env = _TL_MODULE.the_thuc_normalize(str(_bad), _out)
+            _ok = (_env.get("ok") is True and _env.get("schema") == "the_thuc_normalize.v1"
+                   and (_env.get("self_check") or {}).get("t1_fail", 1) == 0)
+            _p = _TL_MODULE._the_thuc_parse_docx(_out)
+            _s = _p["sections"][0]
+            _ok = _ok and (_s["top"], _s["bottom"], _s["left"], _s["right"]) == (1134, 1134, 1701, 850)
+            _ok = _ok and _p["defaults"]["font"] == "Times New Roman" and _p["defaults"]["sz"] == 26
+            _e = _TL_MODULE.the_thuc_check(_out)
+            return _ok and not any(f["level"] == "FAIL" and f["id"] in (
+                "TT-KHO-GIAY", "TT-LE-TREN", "TT-LE-DUOI", "TT-LE-TRAI", "TT-LE-PHAI",
+                "TT-FONT", "TT-CO-CHU-NOI-DUNG") for f in _e["findings"])
+    _t110("r138_normalize_fixes_bad", _c138_normalize_fixes_bad)
+
+    def _c138_normalize_preserves():
+        import tempfile as _tf138
+        with _tf138.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _rf = _mk136(_dp, "r.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None,
+                         runs=[("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "Times New Roman", "24"),
+                               ("Nội dung giữ format run.", "Times New Roman", "28")])
+            _out = str(_dp / "r_norm.docx")
+            _TL_MODULE.the_thuc_normalize(str(_rf), _out)
+            _p = _TL_MODULE._the_thuc_parse_docx(_out)
+            _ok = [(f, s) for f, s, _n in _p["runs"]] == [("Times New Roman", 24), ("Times New Roman", 28)]
+            _ls = _mk136(_dp, "l.docx", pgsz=(16838, 11906), orient="landscape",
+                         mar=(1281, 1281, 1474, 1691), runs=_VN136)            # landscape lề lạ — GIỮ nguyên
+            _out2 = str(_dp / "l_norm.docx")
+            _TL_MODULE.the_thuc_normalize(str(_ls), _out2)
+            _s2 = _TL_MODULE._the_thuc_parse_docx(_out2)["sections"][0]
+            _ok = _ok and _s2["orient"] == "landscape" and (_s2["top"], _s2["left"]) == (1281, 1474)
+            return _ok
+    _t110("r138_normalize_preserves", _c138_normalize_preserves)
+
+    def _c138_normalize_idempotent_cli():
+        import tempfile as _tf138
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ns = _ap.parse_args(["the-thuc-normalize", "a.docx", "b.docx", "--he", "dang", "--json"])
+                _ok = getattr(_ns, "he", None) == "dang"
+        except SystemExit:   # cờ/lệnh chưa có → exit(2) (bẫy .68)
+            return False
+        with _tf138.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _bad = _mk136(_dp, "b.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None, runs=_VN136)
+            _o1, _o2 = str(_dp / "n1.docx"), str(_dp / "n2.docx")
+            _TL_MODULE.the_thuc_normalize(str(_bad), _o1)
+            _TL_MODULE.the_thuc_normalize(_o1, _o2)
+            _ok = _ok and Path(_o1).read_bytes() == Path(_o2).read_bytes()     # idempotent bytes
+            _bo = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo):
+                _rc = _TL_MODULE.cmd_the_thuc_normalize(argparse.Namespace(
+                    in_docx=str(_bad), out_docx=str(_dp / "n3.docx"), he="auto", json=True))
+            _j = json.loads(_bo.getvalue())
+            _ok = _ok and _rc == 0 and _j.get("ok") is True
+            _bo2 = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo2):
+                _rc2 = _TL_MODULE.cmd_the_thuc_normalize(argparse.Namespace(
+                    in_docx=str(_bad), out_docx=str(_bad), he="auto", json=True))   # in==out → chặn
+            return _ok and _rc2 == 2 and json.loads(_bo2.getvalue()).get("error") == "IN_OUT_SAME"
+    _t110("r138_normalize_idempotent_cli", _c138_normalize_idempotent_cli)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1801,7 +1801,10 @@ def _profile_block_meta(name: str, prof: dict, marker: dict | None = None) -> di
             "style": str(mm.get("style") or ""),
             "relations": (mm.get("relations") if isinstance(mm.get("relations"), dict)
                           else {"base": DEFAULT_PROFILE}),
-            "source_policy": str(mm.get("source_policy") or "materialize_preferred")}
+            "source_policy": str(mm.get("source_policy") or "materialize_preferred"),
+            # r139 (v1.34.79): WHITELIST chiều ĐỌC — thiếu dòng này là khối trinh_bay_theo_mau KHÔNG BAO
+            # GIỜ tới profile-load dù marker có (song sinh bẫy _marker_body chiều ghi, r132a).
+            "templates": (mm.get("templates") if isinstance(mm.get("templates"), list) else [])}
 
 
 def cmd_profile_load(a) -> int:

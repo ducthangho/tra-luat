@@ -13722,6 +13722,27 @@ def run() -> int:
             return _ok and _rc2 == 2 and json.loads(_bo2.getvalue()).get("error") == "IN_OUT_SAME"
     _t110("r138_normalize_idempotent_cli", _c138_normalize_idempotent_cli)
 
+    # ═══ v1.34.79 — r139: BUG smoke-ghi-thật 19-07 bắt được (seed kho chung xong, add template vào
+    # NQ80 verified NHƯNG `tl profile-load` KHÔNG hiện khối trinh_bay_theo_mau): `_profile_block_meta`
+    # là WHITELIST chiều ĐỌC marker→meta và THIẾU pass-through `templates` — bản SONG SINH của bẫy
+    # `_marker_body` chiều GHI (r132a chỉ khóa ghi); r132 test gọi THẲNG generate_profile_load_block
+    # với meta tự dựng nên lọt gap đúng CHỖ NỐI. Khóa 2 tầng: unit (hàm trả templates) + tích hợp
+    # (marker → _profile_block_meta → generate → khối hiện). Đỏ-trước. ═══
+    def _c139_block_meta_passthrough_templates():
+        import tl_core.profile_mgmt as _pm139
+        import gen_instructions as _gi139
+        _tpl = [{"id": "mau-cong-van-1-5", "drive_id": "D15", "name": "MAU_ND30_1-5_Cong_van.docx",
+                 "scope": "soạn công văn", "note": "", "added_at": "2026-07-19T00:00:00Z"}]
+        _meta = _pm139._profile_block_meta("p1", {"notebookId": "nb"}, {"templates": _tpl})
+        if (_meta.get("templates") or []) != _tpl:                       # unit: pass-through tường minh
+            return False
+        _blk = _gi139.generate_profile_load_block(_meta, "session", "0.0.0")
+        _ok = "## trinh_bay_theo_mau" in _blk and "`mau-cong-van-1-5`" in _blk and "D15" in _blk
+        _meta0 = _pm139._profile_block_meta("p1", {"notebookId": "nb"}, {"style": "x"})
+        _blk0 = _gi139.generate_profile_load_block(_meta0, "session", "0.0.0")
+        return _ok and "trinh_bay_theo_mau" not in _blk0                # không templates → block VẮNG
+    _t110("r139_block_meta_passthrough_templates", _c139_block_meta_passthrough_templates)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

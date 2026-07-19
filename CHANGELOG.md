@@ -1,3 +1,19 @@
+# ★ v1.34.79 — fix: profile-load hiện khối trinh_bay_theo_mau (templates pass-through chiều ĐỌC) (2026-07-19)
+
+> BUG do SMOKE GHI THẬT 19-07 bắt (seed kho chung xong, template-add vào NQ80 marker verified NHƯNG
+> `tl profile-load` không hiện khối): `_profile_block_meta` — WHITELIST hợp nhất marker→meta chiều
+> ĐỌC — **thiếu pass-through `templates`** → khối trinh_bay_theo_mau (v1.34.71) không bao giờ tới
+> profile-load dù marker có. Bản SONG SINH của bẫy `_marker_body` chiều GHI (r132a chỉ khóa ghi);
+> r132 test gọi THẲNG generate_profile_load_block với meta tự dựng nên lọt gap đúng CHỖ NỐI.
+
+- Vá 1 dòng `_profile_block_meta` +key `templates` (list, fail-safe []); phủ cả 2 caller
+  (profile-load marker-live + profile-use offline). TDD r139 đỏ-trước khóa 2 tầng: unit
+  (hàm pass-through) + tích hợp (marker → meta → generate → khối hiện). selftest 1107→**1108**.
+- Smoke end-to-end THẬT sau vá: add `mau-cong-van-1-5` (kho chung `1WscZ5bK…`) vào NQ80 →
+  `profile-load NQ80` hiện khối đủ id/tên/drive_id/scope "CHỈ KHI…" → remove sạch (2 journal).
+- Bài học khóa: mọi WHITELIST hợp nhất field marker phải soi CẢ HAI CHIỀU ghi/đọc khi thêm field mới.
+- Kernel CHỈ đổi header — re-import không bắt buộc. Không đổi CLI → golden 0-diff.
+
 # ★ v1.34.78 — R4 the-thuc: lệnh `tl the-thuc-normalize` (chuẩn hoá khung mẫu) (2026-07-19)
 
 > R4/4 — MẢNH CODE CUỐI của kế hoạch the-thuc (r138 ×3 đỏ-trước, selftest 1104→**1107**).

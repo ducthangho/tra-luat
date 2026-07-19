@@ -1,3 +1,30 @@
+# ★ v1.34.77 — R3 the-thuc: T2 cấu trúc + T3 khuyến nghị cho `the-thuc-check` (2026-07-19)
+
+> R3/4 kế hoạch the-thuc (TDD r137 ×5 đỏ-trước, selftest 1099→**1104**). **T2 — hiện diện CẤU TRÚC**
+> (regex trên text bóc): thành phần bắt buộc theo hệ (Quốc hiệu/Tiêu ngữ FAIL — hệ Đảng: tiêu đề ĐCSVN;
+> TT-SO-KY-HIEU đúng cú-pháp-hệ với bẫy CHÉO `Số 06-CT/TU` Đảng vs `Số: 06/CT-UBND` nhà nước — dùng
+> nhầm bị gọi tên tường minh; địa danh-ngày [vbqppl/vbqppl_qh WARN vì Đ71 "nếu có"]; Nơi nhận
+> [hanh_chinh/dang FAIL, vbqppl WARN, luật skip]; tên loại + chức vụ ký + Căn cứ = WARN heuristic;
+> Đảng: TT-DANG-SAO dấu (*) + TT-DANG-5GACH `-----` FAIL; VBHN: TT-VBHN-LIET-KE ≥2 tham chiếu
+> `số n/năm/` + TT-VBHN-CHU-THICH mẫu câu "được sđbs theo quy định tại…" + TT-VBHN-XAC-THUC). **T3 —
+> khuyến nghị**: TT-BAC-CO-CHU nhất-quán-bậc (đo sz Quốc hiệu↔Tiêu ngữ phải lệch đúng 1pt — footnote
+> Mục V NĐ30; Đảng: tiêu đề ≠15pt); TT-SO-NHO-10 (ngày<10/tháng<3 đệm 0); TT-THUT-DAU-DONG (w:ind
+> 1-1,27cm / Đảng ~10mm, INFO); TT-VIET-TAT (đối chiếu 4 bảng viết tắt, INFO); TT-DONG (Đảng 18-22pt
+> Exactly, WARN).
+
+- **2 fix từ smoke file thật (giá trị dogfooding):** (1) `_the_thuc_detect_he` nhận VBHN dạng số CŨ
+  `n/VBHN-CQ` không năm (ca 4231/VBHN-BTP — trước bị phân nhầm vbqppl); (2) parser đọc thêm
+  **word/footnotes.xml** — chú thích chân trang VBHN nằm ở đó trong docx chuẩn (bản GDoc inline-hoá nên
+  corpus-text có; docx gốc tách file → TT-VBHN-CHU-THICH từng FAIL oan). Fixture builder hỗ trợ
+  footnotes; ca khoá trong r137.
+- Smoke: 4231 local → he=vbhn, T2 checklist PASS trọn (chỉ còn 4 FAIL T1 Arial/lề đã biết); HD05 →
+  he=dang, sao/gạch/số/thể loại PASS. Parser mở rộng paras (ind/spacing/sz-resolved per-paragraph).
+- Data-op cùng phiên (trước R3): **PDF NQ351 Công báo lưu Drive làm nguồn đối chiếu** — upload qua
+  gws_bridge vào cat 44 (`1pHjHkm5AC1pgOfhCAjHESna5gAGmjxO_`), register `row_kind=ref corpus=false`
+  (không đẩy NLM — mẫu dạng ảnh); reference §0 đã trỏ từ v1.34.76.
+- COMMANDS.md row + RUNBOOK row cập nhật T1+T2+T3; _STUB_MAP +2; kernel CHỈ đổi header — re-import
+  không bắt buộc.
+
 # ★ v1.34.76 — the-thuc: chốt ngưỡng lề nhánh QH (NQ351) từ PDF sơ đồ; WARN→FAIL (2026-07-19)
 
 > User cấp **PDF gốc NQ 351/2017 (Công báo 287+288)** — digital 39 trang, đủ lời văn Đ1-40 + Phụ lục I

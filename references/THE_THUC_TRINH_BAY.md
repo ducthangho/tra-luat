@@ -1,4 +1,4 @@
-# THỂ THỨC & KỸ THUẬT TRÌNH BÀY VĂN BẢN — NEO TRI THỨC 4 HỆ (v1.34.76)
+# THỂ THỨC & KỸ THUẬT TRÌNH BÀY VĂN BẢN — NEO TRI THỨC 4 HỆ (v1.34.77)
 
 > **Vai trò:** reference bắt buộc của skill tra-luat cho mọi việc SOẠN/ĐIỀN/KIỂM văn bản theo thể thức nhà
 > nước và của Đảng — cặp đối xứng với `references/VAN_PHONG_HANH_CHINH.md` (văn phong = NỘI DUNG; file này

@@ -120,7 +120,19 @@ def _the_thuc_parse_docx(path):
             sty = z.read("word/styles.xml").decode("utf-8", "replace")
         except KeyError:
             sty = ""
+        try:
+            fnx = z.read("word/footnotes.xml").decode("utf-8", "replace")   # chú thích chân trang (VBHN!)
+        except KeyError:
+            fnx = ""
     droot = ET.fromstring(doc)
+    footnotes = ""
+    if fnx:
+        try:
+            froot = ET.fromstring(fnx)
+            footnotes = "\n".join(
+                "".join((t.text or "") for t in fn.iter(W + "t")) for fn in froot.iter(W + "footnote"))
+        except ET.ParseError:
+            footnotes = ""
 
     def _gi(el, attr):
         if el is None:
@@ -169,17 +181,39 @@ def _the_thuc_parse_docx(path):
     runs = []
     paras = []
     for p in droot.iter(W + "p"):
+        ppr = p.find(W + "pPr")
+        ind_fl = sp_line = None
+        sp_rule = None
+        if ppr is not None:
+            iel = ppr.find(W + "ind")
+            if iel is not None:
+                try:
+                    ind_fl = int(iel.get(W + "firstLine"))
+                except (TypeError, ValueError):
+                    ind_fl = None
+            sel = ppr.find(W + "spacing")
+            if sel is not None:
+                sp_rule = sel.get(W + "lineRule")
+                try:
+                    sp_line = int(sel.get(W + "line"))
+                except (TypeError, ValueError):
+                    sp_line = None
         ptxt = []
+        pszs = {}                      # sz RESOLVED (run→Normal→docDefaults) → số chữ, per-paragraph (T3 bậc)
         for r in p.iter(W + "r"):
             rt = "".join((t.text or "") for t in r.iter(W + "t"))
             f, s = _rpr_font_sz(r.find(W + "rPr"))
             if rt:
                 runs.append((f, s, len(rt)))
                 ptxt.append(rt)
+                se = s if s is not None else (normal["sz"] if normal["sz"] is not None else defaults["sz"])
+                if se is not None:
+                    pszs[se] = pszs.get(se, 0) + len(rt)
         if ptxt:
-            paras.append("".join(ptxt))
+            paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line, "rule": sp_rule, "szs": pszs})
     return {"sections": sections, "defaults": defaults, "normal": normal,
-            "runs": runs, "text": "\n".join(paras)}
+            "runs": runs, "text": "\n".join(p["text"] for p in paras), "paras": paras,
+            "footnotes": footnotes}
 
 
 def _the_thuc_detect_he(text):
@@ -189,7 +223,7 @@ def _the_thuc_detect_he(text):
     head = (text or "")[:4000]
     if "ĐẢNG CỘNG SẢN VIỆT NAM" in head and "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in head:
         return "dang"
-    if re.search(r"\d+/\d{4}/VBHN-", head):
+    if re.search(r"\d+/(?:\d{4}/)?VBHN-", head):   # nhận cả dạng CŨ n/VBHN-CQ (trước 01/7/2026, vd 4231/VBHN-BTP)
         return "vbhn"
     if re.search(r"\d+/\d{4}/[A-ZĐ]", head):
         if (re.search(r"/(QH|UBTVQH)\d+\b|/CTN\b", head)
@@ -197,6 +231,170 @@ def _the_thuc_detect_he(text):
             return "vbqppl_qh"
         return "vbqppl"
     return "hanh_chinh"
+
+
+def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
+    """T2 (R3 v1.34.77) — hiện diện CẤU TRÚC bằng regex trên text bóc: thành phần bắt buộc theo hệ
+    (Đ8 k2 NĐ30 / Đ71 k2 NĐ78 / Đ15 QĐ399), số ký hiệu đúng cú-pháp-hệ (bẫy chéo Đảng↔nhà nước),
+    checklist VBHN (NĐ250), dấu sao + 5 gạch VB Đảng (HD05). Thiếu bắt buộc = FAIL; thành phần
+    heuristic/điều-kiện = WARN."""
+    import re
+    t = text or ""
+    head = t[:4000]
+    CAN9 = {"hanh_chinh": "NĐ 30/2020 Đ8 k2 — 9 thành phần chính",
+            "vbqppl": "NĐ 78/2025 Đ71 k2 — thành phần chính (địa danh/nơi nhận: nếu có)",
+            "vbqppl_qh": "NĐ 78/2025 Đ71 k2 + NQ 351/2017 Chương II",
+            "vbhn": "NĐ 250/2026 Phụ lục — thể thức văn bản hợp nhất",
+            "dang": "QĐ 399-QĐ/TW Đ15 — 9 thành phần bắt buộc"}
+    can9 = CAN9[he_eff]
+    nha_nuoc = he_eff in ("hanh_chinh", "vbqppl", "vbqppl_qh", "vbhn")
+    if nha_nuoc:
+        if "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in head:
+            add("TT-QUOC-HIEU", "FAIL", "không thấy Quốc hiệu",
+                "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM (trên cùng bên phải trang đầu)", can9)
+        if not re.search(r"Độc lập\s*-\s*Tự do\s*-\s*Hạnh phúc", head):
+            add("TT-TIEU-NGU", "FAIL", "không thấy Tiêu ngữ",
+                "Độc lập - Tự do - Hạnh phúc (dưới Quốc hiệu, có đường kẻ ngang)", can9)
+    elif "ĐẢNG CỘNG SẢN VIỆT NAM" not in head:
+        add("TT-TIEU-DE-DANG", "FAIL", "không thấy tiêu đề",
+            "ĐẢNG CỘNG SẢN VIỆT NAM (góc phải dòng đầu, in hoa 15 đậm)", can9)
+    SK = {
+        "hanh_chinh": (r"Số:\s*\d+\s*/\s*[A-ZĐ][\wĐ]*(?:-[\wĐ]+)*",
+                       "Số: <n>/<viết tắt loại>-<viết tắt CQ> — PL I NĐ30 Mục II.3"),
+        "vbqppl": (r"[Ss]ố:\s*\d+/\d{4}/[A-ZĐ]", "<n>/<năm>/<ký hiệu> — PL I NĐ187 Phần II.3"),
+        "vbqppl_qh": (r"[Ss]ố:\s*\d+/\d{4}/[A-ZĐ]", "<n>/<năm>/<ký hiệu> — NQ 351/2017 Đ32"),
+        "vbhn": (r"Số:\s*\d+/(?:\d{4}/)?VBHN-", "…/VBHN-… — NĐ250 PL II.1 (dạng cũ không năm hợp lệ trước 01/7/2026)"),
+        "dang": (r"Số\s+\d+\s*-\s*[A-ZĐ]+/[A-ZĐ]+", "Số <n>-<loại>/<CQ>, KHÔNG dấu hai chấm — HD05 mục 3.2"),
+    }
+    pat, exp = SK[he_eff]
+    if not re.search(pat, head):
+        meas = "không khớp cú pháp hệ " + he_eff
+        if he_eff == "dang" and re.search(r"Số:\s*\d+/", head):
+            meas = "dùng cú pháp nhà nước 'Số: n/LOẠI-CQ' trong văn bản Đảng"
+        elif nha_nuoc and re.search(r"Số\s+\d+\s*-[A-ZĐ]+/", head):
+            meas = "dùng cú pháp Đảng 'Số n-LOẠI/CQ' trong văn bản nhà nước"
+        add("TT-SO-KY-HIEU", "FAIL", meas, exp, can9)
+    if not re.search(r",\s*ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}", head):
+        lvl = "WARN" if he_eff in ("vbqppl", "vbqppl_qh") else "FAIL"   # Đ71: địa danh (nếu có); luật ghi thời điểm thông qua cuối VB
+        add("TT-DIA-DANH-NGAY", lvl, "không thấy '<địa danh>, ngày … tháng … năm …'",
+            "vd: Hà Nội, ngày 05 tháng 01 năm 2026", can9)
+    if he_eff in ("hanh_chinh", "dang") and not re.search(r"Nơi nhận\s*:", t):
+        add("TT-NOI-NHAN", "FAIL", "không thấy 'Nơi nhận:'", "khối Nơi nhận cuối văn bản", can9)
+    elif he_eff == "vbqppl" and not re.search(r"Nơi nhận\s*:", t):
+        add("TT-NOI-NHAN", "WARN", "không thấy 'Nơi nhận:' (Đ71 k2: nếu có)", "khối Nơi nhận", can9)
+    LOAI_NN = (r"(NGHỊ QUYẾT|QUYẾT ĐỊNH|CHỈ THỊ|QUY CHẾ|QUY ĐỊNH|THÔNG CÁO|THÔNG BÁO|HƯỚNG DẪN|CHƯƠNG TRÌNH"
+               r"|KẾ HOẠCH|PHƯƠNG ÁN|ĐỀ ÁN|DỰ ÁN|BÁO CÁO|BIÊN BẢN|TỜ TRÌNH|HỢP ĐỒNG|CÔNG ĐIỆN|GIẤY MỜI"
+               r"|GIẤY GIỚI THIỆU|GIẤY NGHỈ PHÉP|PHIẾU GỬI|PHIẾU CHUYỂN|PHIẾU BÁO|NGHỊ ĐỊNH|THÔNG TƯ"
+               r"|BỘ LUẬT|LUẬT|PHÁP LỆNH|LỆNH|CÔNG VĂN)")
+    LOAI_DANG = (r"(CƯƠNG LĨNH|ĐIỀU LỆ|CHIẾN LƯỢC|NGHỊ QUYẾT|QUYẾT ĐỊNH|CHỈ THỊ|KẾT LUẬN|QUY CHẾ|QUY ĐỊNH"
+                 r"|THÔNG TRI|HƯỚNG DẪN|THÔNG BÁO|THÔNG CÁO|TUYÊN BỐ|LỜI KÊU GỌI|BÁO CÁO|KẾ HOẠCH|QUY HOẠCH"
+                 r"|CHƯƠNG TRÌNH|ĐỀ ÁN|PHƯƠNG ÁN|DỰ ÁN|TỜ TRÌNH|CÔNG VĂN|BIÊN BẢN)")
+    if he_eff == "hanh_chinh" and not (re.search(LOAI_NN, head) or "V/v" in head):
+        add("TT-TEN-LOAI", "WARN", "không nhận diện tên loại (hoặc trích yếu công văn 'V/v')",
+            "tên loại in hoa đậm 13-14 / công văn: 'V/v …'", can9)
+    if he_eff == "dang" and not re.search(LOAI_DANG, head):
+        add("TT-TEN-LOAI", "WARN", "không nhận diện thể loại trong 25 thể loại", "thể loại in hoa 15-16 đậm — Đ5 QĐ399", can9)
+    if not re.search(r"(TM\.|KT\.|TL\.|TUQ\.|Q\.|T/M\b|CHỦ TỊCH|PHÓ CHỦ TỊCH|BỘ TRƯỞNG|THỨ TRƯỞNG|THỦ TƯỚNG"
+                     r"|PHÓ THỦ TƯỚNG|CHÁNH VĂN PHÒNG|PHÓ CHÁNH VĂN PHÒNG|CHÁNH ÁN|VIỆN TRƯỞNG|TỔNG THƯ KÝ"
+                     r"|TỔNG BÍ THƯ|BÍ THƯ|PHÓ BÍ THƯ|GIÁM ĐỐC|TRƯỞNG BAN)", t):
+        add("TT-CHUC-VU-KY", "WARN", "không nhận diện quyền hạn/chức vụ người ký",
+            "TM./KT./TL./TUQ. hoặc chức danh in hoa (VB Đảng: T/M)", can9)
+    if he_eff in ("vbqppl", "vbqppl_qh", "vbhn") and "Căn cứ" not in t:
+        add("TT-CAN-CU", "WARN", "không thấy 'Căn cứ …'", "căn cứ ban hành, in thường 14 nghiêng", can9)
+    if he_eff == "dang":
+        if "*" not in head[:2500]:
+            add("TT-DANG-SAO", "FAIL", "không thấy dấu sao (*) dưới tên cơ quan",
+                "dấu * ngăn tên cơ quan với số ký hiệu — HD05 mục 2", can9)
+        if not re.search(r"-{5,}", t):
+            add("TT-DANG-5GACH", "FAIL", "không thấy 5 dấu gạch nối '-----'",
+                "5 gạch ngăn trích yếu với nội dung — HD05 mục 5", can9)
+    if he_eff == "vbhn":
+        n_vb = len(re.findall(r"[Ss]ố\s+\d+/\d{4}/", head))
+        if n_vb < 2:
+            add("TT-VBHN-LIET-KE", "FAIL", f"chỉ thấy {n_vb} tham chiếu 'số n/năm/…' phần đầu",
+                "liệt kê ≥2 văn bản được hợp nhất ngay sau tên — NĐ250 mục II.2", can9)
+        t_fn = t + "\n" + (footnotes or "")               # chú thích chân trang docx nằm word/footnotes.xml
+        if re.search(r"sửa đổi, bổ sung", t) and not re.search(
+                r"được\s+(sửa đổi, bổ sung|sửa đổi|bổ sung|thay thế|bãi bỏ|đính chính)[^.\n]{0,80}theo quy định tại", t_fn):
+            add("TT-VBHN-CHU-THICH", "FAIL", "có nội dung sửa đổi/bổ sung nhưng thiếu chú thích chân trang đúng mẫu câu",
+                "'… được sửa đổi, bổ sung theo quy định tại …, có hiệu lực kể từ ngày …' — NĐ250 mục V-XI", can9)
+        if "XÁC THỰC VĂN BẢN HỢP NHẤT" not in t:
+            add("TT-VBHN-XAC-THUC", "FAIL", "không thấy khối 'XÁC THỰC VĂN BẢN HỢP NHẤT'",
+                "khối ký xác thực cuối văn bản, trên đường kẻ ngang — NĐ250 mục XIII", can9)
+
+
+def _the_thuc_check_t3(parsed, he_eff, add):
+    """T3 (R3 v1.34.77) — khuyến nghị WARN/INFO: nhất-quán-bậc cỡ chữ (footnote Mục V NĐ30 — đo sz
+    Quốc hiệu↔Tiêu ngữ phải lệch đúng 1pt; Đảng: tiêu đề phải 15pt), ngày<10/tháng<3 thêm 0, thụt đầu
+    dòng 1-1,27cm (Đảng ~10mm) qua w:ind, viết tắt tên loại đối chiếu bảng, giãn dòng Đảng 18-22pt Exactly."""
+    import re
+    from collections import Counter
+    text = parsed["text"] or ""
+    paras = parsed.get("paras") or []
+    head = text[:4000]
+
+    def _psz(sub):
+        for p in paras:
+            if sub in p["text"]:
+                return max(p["szs"].items(), key=lambda kv: kv[1])[0] if p["szs"] else None
+        return None
+
+    if he_eff == "dang":
+        s = _psz("ĐẢNG CỘNG SẢN VIỆT NAM")
+        if s is not None and s != 30:
+            add("TT-BAC-CO-CHU", "WARN", f"tiêu đề ĐCSVN {s/2:g}pt", "15pt cố định",
+                "HD 05-HD/VPTW Phụ lục 2 (TT 1)")
+    else:
+        sq = _psz("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
+        st = _psz("Độc lập")
+        if sq is not None and st is not None and (st - sq) != 2:
+            add("TT-BAC-CO-CHU", "WARN",
+                f"Quốc hiệu {sq/2:g}pt / Tiêu ngữ {st/2:g}pt",
+                "Tiêu ngữ = Quốc hiệu + 1pt (cặp 12-13 hoặc 13-14 — tăng, giảm phải thống nhất)",
+                "PL I NĐ 30/2020 Mục V, chú thích 1")
+    n_bad = len(re.findall(r"ngày\s+\d\s+tháng", text)) + len(re.findall(r"tháng\s+[12]\s+năm", text))
+    if n_bad:
+        add("TT-SO-NHO-10", "WARN", f"{n_bad} vị trí ngày<10/tháng<3 chưa đệm số 0",
+            "vd: ngày 05 tháng 01 năm 2026", "PL I NĐ 30/2020 Mục II.4.b")
+    inds = [p["ind"] for p in paras if p.get("ind")]
+    if len(inds) >= 3:
+        mi = Counter(inds).most_common(1)[0][0] * 25.4 / 1440.0
+        lo, hi = (9.0, 11.0) if he_eff == "dang" else (9.9, 12.8)
+        if not (lo <= mi <= hi):
+            add("TT-THUT-DAU-DONG", "INFO", f"thụt đầu dòng phổ biến {mi:.1f} mm",
+                "1-1,27 cm (nhà nước) / ~10 mm (Đảng)", "PL I NĐ30 Mục II.6 / PL I NĐ187 / HD05 6.2.2")
+    ABBR_NN = {"NQ", "QĐ", "CT", "QC", "QyĐ", "TC", "TB", "HD", "CTr", "KH", "PA", "ĐA", "DA", "BC", "BB",
+               "TTr", "HĐ", "CĐ", "BGN", "BTT", "GUQ", "GM", "GGT", "GNP", "PG", "PC", "PB", "SY", "TrS", "SL"}
+    ABBR_QPPL = {"NĐ", "QĐ", "TT", "NQ", "NQLT", "TTLT", "PL", "L", "LQ"}
+    ABBR_VBHN = {"LQ", "PL", "NQ", "NQTV", "NL", "LC", "QĐC", "NĐ", "QĐ", "TT", "TL", "QĐCT"}
+    ABBR_DANG = {"NQ", "QĐ", "CT", "KL", "QC", "TT", "TTr", "CTr", "HD", "TB", "TC", "BC", "KH", "QH",
+                 "ĐA", "PA", "DA", "CV", "BB", "CL", "ĐL", "ĐH"}
+    m = None
+    aset = None
+    if he_eff == "hanh_chinh":
+        m = re.search(r"Số:\s*\d+\s*/\s*([A-ZĐ][\wĐ]*)", head)
+        aset = ABBR_NN
+    elif he_eff in ("vbqppl", "vbqppl_qh"):
+        m = re.search(r"[Ss]ố:\s*\d+/\d{4}/([A-ZĐ][\wĐ]*)", head)
+        if m and re.match(r"(?:QH|UBTVQH)\d+$|CTN$", m.group(1)):
+            m = None                                   # luật/pháp lệnh: token sau năm là CƠ QUAN, không phải loại
+        aset = ABBR_QPPL
+    elif he_eff == "vbhn":
+        m = re.search(r"\d+/\d{4}/VBHN-([A-ZĐ][\wĐ]*)-", head)   # dạng cũ n/VBHN-CQ: token là cơ quan → bỏ
+        aset = ABBR_VBHN
+    elif he_eff == "dang":
+        m = re.search(r"Số\s+\d+\s*-\s*([A-ZĐ][\wĐ]*)/", head)
+        aset = ABBR_DANG
+    if m and aset is not None and m.group(1) not in aset:
+        add("TT-VIET-TAT", "INFO", f"viết tắt loại '{m.group(1)}' không thuộc bảng hệ {he_eff}",
+            "bảng viết tắt tên loại — THE_THUC_TRINH_BAY §7", "PL III NĐ30 / NĐ250 II.1 / HD05 3.2")
+    if he_eff == "dang":
+        lines = [p["line"] for p in paras if p.get("rule") == "exact" and p.get("line")]
+        if lines:
+            ml = Counter(lines).most_common(1)[0][0]
+            if not (360 <= ml <= 440):
+                add("TT-DONG", "WARN", f"giãn dòng Exactly {ml/20:g}pt", "18-22pt (Exactly)",
+                    "HD 05-HD/VPTW Phần II mục 6.2.2")
 
 
 def the_thuc_check(path, he=None, strict=False):
@@ -314,6 +512,10 @@ def the_thuc_check(path, he=None, strict=False):
         else:
             add("TT-CO-CHU-NOI-DUNG", "WARN", "cỡ chữ không khai báo (Word render theo fallback ứng dụng)",
                 f"{(crit_all['vbqppl'] if he_eff == 'vbhn' else c).get('co_noi_dung')} pt", CAN_SZ[he_eff])
+
+    # ── T2 cấu trúc + T3 khuyến nghị (R3 v1.34.77) ──
+    _the_thuc_check_t2(d["text"], he_eff, add, footnotes=d.get("footnotes", ""))
+    _the_thuc_check_t3(d, he_eff, add)
 
     findings.sort(key=lambda f: (f["id"], f["level"], f["location"]))
     n_fail = sum(1 for f in findings if f["level"] == "FAIL")

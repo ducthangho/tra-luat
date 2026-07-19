@@ -13360,15 +13360,17 @@ def run() -> int:
     # Fixture docx TỰ SINH temp-dir (không commit binary). Resolve font/sz 3 tầng run→Normal→docDefaults
     # (ca thật ND187: docDefaults=Arial + 0 run-format → FAIL font, WARN sz). Đỏ-trước. ═══
     def _mk136(_dir, _name, *, mar=(1134, 1134, 1701, 850), pgsz=(11906, 16838), orient=None,
-               d_font="Times New Roman", d_sz="26", n_font=None, n_sz=None, runs=None):
+               d_font="Times New Roman", d_sz="26", n_font=None, n_sz=None, runs=None, ind=None,
+               footnotes=None):
         import zipfile as _zf136
         _rs = []
+        _ppr = f'<w:pPr><w:ind w:firstLine="{ind}"/></w:pPr>' if ind else ""
         for _tx, _f, _s in (runs or []):
             _rpr = ""
             if _f or _s:
                 _rpr = ("<w:rPr>" + (f'<w:rFonts w:ascii="{_f}" w:hAnsi="{_f}"/>' if _f else "")
                         + (f'<w:sz w:val="{_s}"/>' if _s else "") + "</w:rPr>")
-            _rs.append(f'<w:p><w:r>{_rpr}<w:t xml:space="preserve">{_tx}</w:t></w:r></w:p>')
+            _rs.append(f'<w:p>{_ppr}<w:r>{_rpr}<w:t xml:space="preserve">{_tx}</w:t></w:r></w:p>')
         _or = f' w:orient="{orient}"' if orient else ""
         _doc = ('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
                 "<w:body>" + "".join(_rs)
@@ -13387,6 +13389,11 @@ def run() -> int:
             _z.writestr("[Content_Types].xml", '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>')
             _z.writestr("word/document.xml", _doc)
             _z.writestr("word/styles.xml", _sty)
+            if footnotes:
+                _fns = "".join(f'<w:footnote w:id="{i+1}"><w:p><w:r><w:t xml:space="preserve">{tx}</w:t></w:r></w:p></w:footnote>'
+                               for i, tx in enumerate(footnotes))
+                _z.writestr("word/footnotes.xml",
+                            f'<?xml version="1.0"?><w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">{_fns}</w:footnotes>')
         return _p
 
     _VN136 = [("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
@@ -13513,6 +13520,132 @@ def run() -> int:
                     docx_path=str(_ls), he="auto", strict=True, json=True, out=None))
             return _ok and _rcw == 2                                            # --strict nâng WARN→FAIL
     _t110("r136_the_thuc_cli_wired", _c136_cli_wired)
+
+    # ═══ v1.34.77 — r137 (R3 kế hoạch the-thuc): T2 hiện diện cấu trúc (9 thành phần theo hệ, regex số
+    # ký hiệu 4 cú pháp — bẫy chéo Đảng `Số 06-CT/TU` vs nhà nước `Số: 06/CT-UBND`; VBHN checklist liệt-kê/
+    # chú-thích-chân-trang/khối-xác-thực; Đảng dấu sao * + 5 gạch -----) + T3 khuyến nghị (nhất-quán-bậc
+    # footnote Mục V NĐ30 đo bằng sz Quốc-hiệu↔Tiêu-ngữ phải lệch đúng 1pt; ngày<10/tháng<3 thêm 0; thụt
+    # đầu dòng 1-1,27cm qua w:ind; viết tắt tên loại đối chiếu bảng). Đỏ-trước. ═══
+    def _c137_t2_nha_nuoc_missing():
+        import tempfile as _tf137
+        with _tf137.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _thieu = _mk136(_dp, "t.docx", runs=[
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None),           # có Quốc hiệu, THIẾU Tiêu ngữ
+                ("Số: 05/BC-VP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("BÁO CÁO", None, None), ("Nội dung.", None, None)])           # THIẾU Nơi nhận
+            _e = _TL_MODULE.the_thuc_check(str(_thieu))
+            _ids = {f["id"] for f in _e["findings"] if f["level"] == "FAIL"}
+            _ok = {"TT-TIEU-NGU", "TT-NOI-NHAN"} <= _ids and "TT-QUOC-HIEU" not in _ids
+            _du = _mk136(_dp, "d.docx", runs=_VN136)                           # fixture đủ → 0 FAIL (T1+T2)
+            _e2 = _TL_MODULE.the_thuc_check(str(_du))
+            return _ok and _e2["summary"]["fail"] == 0
+    _t110("r137_t2_nha_nuoc_missing", _c137_t2_nha_nuoc_missing)
+
+    def _c137_t2_so_ky_hieu_cheo():
+        import tempfile as _tf137
+        with _tf137.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _dang_sai = _mk136(_dp, "ds.docx", d_sz="28", runs=[               # VB Đảng dùng cú pháp NHÀ NƯỚC
+                ("ĐẢNG CỘNG SẢN VIỆT NAM", None, None), ("ĐẢNG ỦY XÃ A", None, None), ("*", None, None),
+                ("Số: 06/CT-UBND", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("CHỈ THỊ", None, None), ("-----", None, None), ("Nội dung.", None, None),
+                ("Nơi nhận:", None, None)])
+            _e1 = _TL_MODULE.the_thuc_check(str(_dang_sai))
+            _ok = any(f["id"] == "TT-SO-KY-HIEU" and f["level"] == "FAIL" for f in _e1["findings"])
+            _dang_dung = _mk136(_dp, "dd.docx", d_sz="28", runs=[
+                ("ĐẢNG CỘNG SẢN VIỆT NAM", None, None), ("ĐẢNG ỦY XÃ A", None, None), ("*", None, None),
+                ("Số 06-CT/TU", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("CHỈ THỊ", None, None), ("-----", None, None), ("Nội dung.", None, None),
+                ("Nơi nhận:", None, None)])
+            _e2 = _TL_MODULE.the_thuc_check(str(_dang_dung))
+            _ok = _ok and not any(f["id"] == "TT-SO-KY-HIEU" for f in _e2["findings"])
+            _hc_sai = _mk136(_dp, "hs.docx", runs=[                            # VB nhà nước dùng cú pháp ĐẢNG
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
+                ("Số 06-CT/TU", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("CHỈ THỊ", None, None), ("Nội dung.", None, None), ("Nơi nhận:", None, None)])
+            _e3 = _TL_MODULE.the_thuc_check(str(_hc_sai))
+            return _ok and any(f["id"] == "TT-SO-KY-HIEU" and f["level"] == "FAIL" for f in _e3["findings"])
+    _t110("r137_t2_so_ky_hieu_cheo", _c137_t2_so_ky_hieu_cheo)
+
+    def _c137_t2_vbhn_checklist():
+        import tempfile as _tf137
+        with _tf137.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _du = _mk136(_dp, "v1.docx", runs=[
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
+                ("Số: 01/2026/VBHN-NĐ-BQP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("NGHỊ ĐỊNH", None, None),
+                ("Nghị định số 78/2025/NĐ-CP ngày 01 tháng 4 năm 2025, có hiệu lực kể từ ngày 01 tháng 4 năm 2025", None, None),
+                ("Nghị định số 187/2025/NĐ-CP ngày 01 tháng 7 năm 2025, có hiệu lực kể từ ngày 01 tháng 7 năm 2025", None, None),
+                ("Điều 1. Nội dung đã được sửa đổi, bổ sung.", None, None),
+                ("Điều này được sửa đổi, bổ sung theo quy định tại khoản 1 Điều 1 của Nghị định số 187/2025/NĐ-CP, có hiệu lực kể từ ngày 01 tháng 7 năm 2025.", None, None),
+                ("XÁC THỰC VĂN BẢN HỢP NHẤT", None, None), ("Nơi nhận:", None, None)])
+            _e1 = _TL_MODULE.the_thuc_check(str(_du))
+            _ok = not any(f["id"].startswith("TT-VBHN-") for f in _e1["findings"])
+            _thieu = _mk136(_dp, "v2.docx", runs=[
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
+                ("Số: 01/2026/VBHN-NĐ-BQP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("Điều 1 đã được sửa đổi, bổ sung năm 2025.", None, None)])
+            _e2 = _TL_MODULE.the_thuc_check(str(_thieu))
+            _ids = {f["id"] for f in _e2["findings"] if f["level"] == "FAIL"}
+            _ok = _ok and {"TT-VBHN-LIET-KE", "TT-VBHN-CHU-THICH", "TT-VBHN-XAC-THUC"} <= _ids
+            _cu = _mk136(_dp, "v3.docx", runs=[                                # số VBHN dạng CŨ không năm (ca 4231)
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
+                ("Số: 4231/VBHN-BTP", None, None), ("Hà Nội, ngày 15 tháng 7 năm 2025", None, None),
+                ("Điều 1 đã được sửa đổi, bổ sung.", None, None)],
+                footnotes=["Điều này được sửa đổi, bổ sung theo quy định tại khoản 1 Điều 1 của Nghị định số 187/2025/NĐ-CP, có hiệu lực kể từ ngày 01 tháng 7 năm 2025."])
+            _e3 = _TL_MODULE.the_thuc_check(str(_cu))                          # chú thích Ở footnotes.xml (ca 4231 thật)
+            return (_ok and _e3.get("he") == "vbhn"
+                    and not any(f["id"] == "TT-SO-KY-HIEU" for f in _e3["findings"])
+                    and not any(f["id"] == "TT-VBHN-CHU-THICH" for f in _e3["findings"]))
+    _t110("r137_t2_vbhn_checklist", _c137_t2_vbhn_checklist)
+
+    def _c137_t2_dang_sao_gach():
+        import tempfile as _tf137
+        with _tf137.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _thieu = _mk136(_dp, "d1.docx", d_sz="28", runs=[                  # thiếu * và -----
+                ("ĐẢNG CỘNG SẢN VIỆT NAM", None, None), ("ĐẢNG ỦY XÃ A", None, None),
+                ("Số 12-BC/ĐU", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("BÁO CÁO", None, None), ("Nội dung.", None, None), ("Nơi nhận:", None, None)])
+            _e1 = _TL_MODULE.the_thuc_check(str(_thieu))
+            _ids = {f["id"] for f in _e1["findings"] if f["level"] == "FAIL"}
+            _ok = {"TT-DANG-SAO", "TT-DANG-5GACH"} <= _ids
+            _du = _mk136(_dp, "d2.docx", d_sz="30", runs=[
+                ("ĐẢNG CỘNG SẢN VIỆT NAM", None, "30"), ("ĐẢNG ỦY XÃ A", None, None), ("*", None, None),
+                ("Số 12-BC/ĐU", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+                ("BÁO CÁO", None, None), ("-----", None, None), ("Nội dung báo cáo.", None, "28"),
+                ("Nơi nhận:", None, None)])
+            _e2 = _TL_MODULE.the_thuc_check(str(_du))
+            return _ok and not any(f["id"].startswith("TT-DANG-") for f in _e2["findings"])
+    _t110("r137_t2_dang_sao_gach", _c137_t2_dang_sao_gach)
+
+    def _c137_t3_hints():
+        import tempfile as _tf137
+        with _tf137.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _p = _mk136(_dp, "h.docx", ind="850", runs=[                       # thụt 15mm (chuẩn 1-1,27cm)
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, "24"),            # Quốc hiệu 12pt
+                ("Độc lập - Tự do - Hạnh phúc", None, "28"),                   # Tiêu ngữ 14pt → lệch 2pt (bậc sai)
+                ("Số: 05/XYZQ-VP", None, None),                                # viết tắt XYZQ ∉ bảng
+                ("Hà Nội, ngày 5 tháng 1 năm 2026", None, None),               # ngày<10 + tháng<3 không số 0
+                ("BÁO CÁO", None, None), ("Nội dung một.", None, None), ("Nội dung hai.", None, None),
+                ("Nội dung ba.", None, None), ("Nơi nhận:", None, None)])
+            _e = _TL_MODULE.the_thuc_check(str(_p))
+            _by = {f["id"]: f["level"] for f in _e["findings"]}
+            _ok = _by.get("TT-BAC-CO-CHU") == "WARN" and _by.get("TT-SO-NHO-10") == "WARN"
+            _ok = _ok and _by.get("TT-THUT-DAU-DONG") == "INFO" and _by.get("TT-VIET-TAT") == "INFO"
+            _sach = _mk136(_dp, "s.docx", ind="600", runs=[                    # thụt 600tw≈1,06cm hợp lệ
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, "24"),            # cặp 12/13 ĐÚNG bậc
+                ("Độc lập - Tự do - Hạnh phúc", None, "26"),
+                ("Số: 05/BC-VP", None, None), ("Hà Nội, ngày 19 tháng 12 năm 2026", None, None),
+                ("BÁO CÁO", None, None), ("Nội dung một.", None, None), ("Nội dung hai.", None, None),
+                ("Nội dung ba.", None, None), ("Nơi nhận:", None, None)])
+            _e2 = _TL_MODULE.the_thuc_check(str(_sach))
+            _ids2 = {f["id"] for f in _e2["findings"]}
+            return _ok and not ({"TT-BAC-CO-CHU", "TT-SO-NHO-10", "TT-THUT-DAU-DONG", "TT-VIET-TAT"} & _ids2)
+    _t110("r137_t3_hints", _c137_t3_hints)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

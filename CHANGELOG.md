@@ -1,3 +1,18 @@
+# ★ v1.34.82 — bất biến 18 CORPUS-FIRST khi TÌM/NẠP (user yêu cầu nguyên văn) (2026-07-19)
+
+> User bổ sung nguyên tắc bất biến 18 vào kernel: **rà corpus VBQPPL + mọi shard TRƯỚC khi tìm/tải nguồn
+> ngoài** (`reg-query` biến thể số hiệu · `locate` · `dedup-check` · `slot-audit --all-shards`; nền
+> 743ed200 + VBQPPL-2 45739ff7); CHỈ nạp phần MISS; đã corpus=true (nhất là VBHN mới nhất) → báo "đã có"
+> + vị trí, KHÔNG nạp trùng; áp cho fetch-route/fetch-links/find-doc + "lấy văn bản này về". r142
+> đỏ-trước khóa: anchor + MỌI lệnh mục 18 hứa phải TỒN TẠI trong parser (dedup-check cần positional
+> query — test chỉnh theo cú pháp thật). selftest 1110→**1111**.
+
+- **ĐÍNH CHÍNH mốc size kernel** (memory/CHANGELOG .81 ghi nhầm "đệm 18B"): code thật
+  `_kernel_size_findings` warn=47×1024=**48.128B**, fail=48×1024=**49.152B** — kernel .82 = **47.751B**,
+  đệm thật tới WARN còn **377B** (vẫn chật — cân nhắc diet trước khi thêm lớn).
+- Kernel ĐỔI RUỘT (tiếp .81) → deploy .82 xong RE-IMPORT Capabilities (một lần cho cả chuỗi từ .69).
+- Golden workflow_audit regen chủ đích (size_bytes 47.086→47.751); parser không đổi.
+
 # ★ v1.34.81 — normalize choices 5 hệ (+vbqppl-qh) + kernel DANH MỤC trỏ THE_THUC_TRINH_BAY (2026-07-19)
 
 > Đóng backlog seed 19-07 (r141 đỏ-trước, selftest 1109→**1110**): (1) `the-thuc-normalize --he` đồng

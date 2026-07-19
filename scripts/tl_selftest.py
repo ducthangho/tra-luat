@@ -13796,6 +13796,30 @@ def run() -> int:
             return _ok and _env2.get("he") == "vbqppl_qh" and _env2.get("sz_default_halfpt") == 28 and _env2.get("ok") is True
     _t110("r141_normalize_vbqppl_qh_choice", _c141_normalize_vbqppl_qh_choice)
 
+    # ═══ v1.34.82 — r142 (user yêu cầu 19-07): bất biến 18 CORPUS-FIRST khi TÌM/NẠP — rà corpus
+    # VBQPPL + mọi shard TRƯỚC khi tìm/tải nguồn ngoài; chỉ nạp phần MISS; đã corpus=true → báo "đã có".
+    # Khoá: (a) kernel có mục 18 + anchor lệnh/id notebook; (b) MỌI lệnh mục 18 hứa phải TỒN TẠI trong
+    # parser (kernel không hứa lệnh không có — bài học Z2-B1); (c) size ≤ WARN 47KiB (đính chính mốc:
+    # warn=47*1024=48128, fail=48*1024=49152 — memory phiên trước ghi nhầm 47.104). Đỏ-trước. ═══
+    def _c142_corpus_first_invariant():
+        _t = (HERE.parent / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        _ok = all(a in _t for a in (
+            "18. **CORPUS-FIRST khi TÌM/NẠP**", "TRƯỚC khi tìm/tải nguồn ngoài",
+            "`tl slot-audit --all-shards`", "`tl dedup-check`", "743ed200", "45739ff7",
+            "KHÔNG nạp trùng", "nạp phần MISS"))
+        _ok = _ok and len(_t.encode("utf-8")) <= 47 * 1024                # dưới WARN
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ok = _ok and _ap.parse_args(["slot-audit", "--all-shards"]) is not None
+                _ok = _ok and _ap.parse_args(["dedup-check", "x", "--json"]) is not None
+                _ok = _ok and _ap.parse_args(["reg-query", "--sohieu", "x"]) is not None
+                _ok = _ok and _ap.parse_args(["locate", "x"]) is not None
+        except SystemExit:   # lệnh/cờ kernel hứa mà parser không có → FAIL (bẫy .68)
+            return False
+        return _ok
+    _t110("r142_corpus_first_invariant", _c142_corpus_first_invariant)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

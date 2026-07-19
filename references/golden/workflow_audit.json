@@ -1075,7 +1075,7 @@
     "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)",
     "fail": [],
     "fail_limit": 327680,
-    "files_scanned": 64,
+    "files_scanned": 65,
     "size_ok": true,
     "waived": [
       "scripts/tl_selftest.py"
@@ -1084,7 +1084,7 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 149,
+    "checked_commands": 150,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
@@ -1092,7 +1092,7 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 177,
+    "available_commands": 178,
     "cards": 24,
     "groups": 11,
     "tasks": 60

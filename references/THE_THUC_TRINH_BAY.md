@@ -19,18 +19,27 @@
 | VBHN | NĐ 250/2026/NĐ-CP | `1w-UfKKEo3gLrNElbdUr…` (tra `reg-query --sohieu 250-2026-ND-CP`) |
 | Đảng | QĐ 399-QĐ/TW (thể loại, thẩm quyền, thể thức) | `1jMXEIIaNgsRskFeqruG…` (tra `reg-query --sohieu 399-QD-TW`) |
 | Đảng | HD 05-HD/VPTW (kỹ thuật trình bày chi tiết) | `1Lko21mOLzF6xGvP0HAj…` (tra `reg-query --sohieu 05-HD-VPTW`) |
-| Hệ cũ (đối chiếu) | NQ 351/2017/UBTVQH14 | `19YN7y4_na_G8V3IzJKZEdtHw9M_xuf6W3Uml31k7pLA` |
+| VBQPPL nhánh QH/UBTVQH/CTN (**HIỆU LỰC**) | NQ 351/2017/UBTVQH14 | `19YN7y4_na_G8V3IzJKZEdtHw9M_xuf6W3Uml31k7pLA` |
 
 **QUAN TRỌNG — quan hệ 78↔187:** Phụ lục I-IV của NĐ 78/2025 **đã bị NĐ 187/2025 THAY THẾ TOÀN BỘ**
 (Điều 3 khoản 3 NĐ187, hiệu lực **01/7/2025**); Điều 68 NĐ78 (viện dẫn) áp theo bản sửa của NĐ187. Vì vậy:
 quy tắc "chữ" (thành phần, bố cục, đánh số, viện dẫn) đọc ở NĐ78 Đ60-71; mọi thông số "đo được" đọc ở
 **Phụ lục I của NĐ 187** — KHÔNG trích phụ lục NĐ78 (bản trong corpus là file đính kèm không bóc được).
 
+**QUAN TRỌNG — NQ 351/2017 VẪN HIỆU LỰC cho VBQPPL của QH/UBTVQH/CTN** (user xác nhận 2026-07-19: chưa có
+văn bản thay thế; NĐ78/187 là nghị định của Chính phủ không bãi bỏ được nghị quyết UBTVQH — grep "351"
+trong cả 78/187 = 0 hit). Hệ VBQPPL vì vậy TÁCH 2 NHÁNH: **vbqppl_qh** (Luật/Bộ luật/Pháp lệnh/NQ
+QH-UBTVQH/NQLT có UBTVQH/Lệnh/QĐ CTN → chuẩn NQ351, §3.4) và **vbqppl** (CP/TTg/Bộ/TANDTC/VKSNDTC/KTNN/
+HĐND/UBND → chuẩn NĐ78+PL I NĐ187, §3.2-3.3). Khác biệt đo được lớn nhất: nhánh QH thân văn bản cỡ
+**14 CỐ ĐỊNH** (không phải dải 13-14), Quốc hiệu **12 cố định**, Tiêu ngữ **14 cố định**.
+
 ## 1. PHÂN LUỒNG 4 HỆ (thứ tự nhận diện của `the-thuc-check --he auto`)
 
 1. Dòng đơn `ĐẢNG CỘNG SẢN VIỆT NAM` (không kèm Quốc hiệu 2 dòng) → **dang**.
 2. Số ký hiệu chứa `/VBHN-` → **vbhn**.
-3. Số ký hiệu có năm dạng `\d+/\d{4}/…` + tên loại thuộc danh mục VBQPPL → **vbqppl**.
+3. Số ký hiệu có năm dạng `\d+/\d{4}/…` + tên loại thuộc danh mục VBQPPL → **vbqppl**; trong đó nếu tên
+   loại là LUẬT/BỘ LUẬT/PHÁP LỆNH hoặc ký hiệu có QH/UBTVQH/CTN (vd `…/QH15`, `…/UBTVQH15`, `…/CTN`)
+   → nhánh **vbqppl_qh** (chuẩn NQ 351/2017 — §3.4).
 4. Còn lại (có Quốc hiệu + Tiêu ngữ) → **hanh_chinh**.
 
 Không chắc → người dùng ép `--he`. VB ban hành trước 01/7/2025 (hệ NQ351/NĐ34 cũ): NGOÀI phạm vi kiểm —
@@ -141,6 +150,33 @@ CQ cùng ban hành*; lệnh/QĐ CTN = *số + năm + viết tắt loại + viế
 **Bố cục (Đ63 NĐ78):** phần → chương → mục → tiểu mục → điều → khoản → điểm; đánh số điều bằng số Ả Rập
 từ "Điều 1"; mỗi điểm một ý; phần/chương/mục/tiểu mục/điều phải có tên. Số chỉ khóa QH + số thứ tự
 phần/chương = **số La Mã** (Đ64 k3).
+
+### 3.4. Nhánh QH/UBTVQH/CTN — NQ 351/2017/UBTVQH14 (**VẪN HIỆU LỰC**, user xác nhận 2026-07-19)
+
+Phạm vi (Đ1): VBQPPL của Quốc hội, UBTVQH, Chủ tịch nước + NQ liên tịch có UBTVQH (KHÔNG gồm Hiến pháp).
+Hiệu lực từ 20/5/2017, thay NQ 1139/2007/UBTVQH11; chưa có văn bản thay thế.
+
+| Thành phần (điều NQ351) | Loại chữ | Cỡ | Kiểu |
+|---|---|---|---|
+| Quốc hiệu (Đ30) | in hoa | **12** (cố định) | đứng, đậm |
+| Tiêu ngữ (Đ30; gạch nối giữa các từ, có cách chữ; kẻ ngang dưới) | in thường | **14** (cố định) | đứng, đậm |
+| Tên cơ quan ban hành (Đ31; kẻ 1/3–1/2; NQ QH/UBTVQH và lệnh/QĐ CTN: dòng in hoa 14 trên phần căn cứ) | in hoa | **12** | đứng, đậm |
+| "Số:"/"… số" + ký hiệu (Đ32; sau "Số" có `:`; <10 thêm 0) | thường / in hoa | **13** | đứng |
+| Tên văn bản luật/pháp lệnh (Đ33; tên loại + tên gọi dòng riêng; chú thích "(kèm theo…)" 14 nghiêng) | in hoa / thường | **14** | đứng, đậm |
+| Căn cứ ban hành (Đ34; "QUYẾT NGHỊ"/"LỆNH"/"QUYẾT ĐỊNH" in hoa 14 đậm dòng riêng + `:`) | in thường | **14** | nghiêng |
+| Nội dung (Đ35; thụt 1–1,27 cm; đoạn ≥6pt; **dòng: đơn hoặc từ 15pt trở lên** — không có trần 1,5 lines) | in thường | **14** (cố định) | đứng |
+| Phần/Chương (La Mã) · Mục/Tiểu mục (Ả Rập) · Điều · Khoản · Điểm (chữ cái) — tiêu đề in hoa 14 đậm | — | **14** | đứng (đề mục đậm) |
+| Thời điểm QH thông qua (Đ36, dưới điều cuối — luật/NQ QH; khóa QH số La Mã, kỳ họp Ả Rập) | in thường | 14 | nghiêng |
+| Địa danh, ngày tháng năm (Đ36 k2 — pháp lệnh/NQ UBTVQH/NQLT/lệnh/QĐ CTN, cùng dòng số ký hiệu) | in thường | 14 | nghiêng |
+| Chức vụ người ký (Đ37) | in hoa | **13** | đứng, đậm |
+| Từ "Nơi nhận" (Đ38 — NQLT và QĐ CTN) | in thường | **12** | nghiêng, đậm |
+| Danh sách nơi nhận (Đ38; "Lưu: HC, …") | in thường | **11** | đứng |
+| Số trang (Đ39 k3; VB kèm theo đánh số riêng) | — | **13** | đứng, không trang 1 |
+
+**Khổ giấy/lề/phông (Đ39):** A4 210×297; phông Times New Roman Unicode TCVN 6909:2001; **định lề "được
+thực hiện theo Phụ lục kèm theo Nghị quyết này"** — phụ lục là SƠ ĐỒ (hình vẽ), bản corpus hiện KHÔNG có
+số mm máy-đọc → bộ kiểm nhánh vbqppl_qh: lề chỉ WARN theo dải-hợp nhà nước (trên/dưới 15–25, trái 30–35,
+phải 15–20), KHÔNG FAIL, kèm ghi chú đề nghị nạp bản NQ351 đầy đủ phụ lục để chốt ngưỡng.
 
 ## 4. HỆ VBHN — NĐ 250/2026/NĐ-CP (hiệu lực **01/7/2026**)
 
@@ -273,10 +309,11 @@ FAIL tự nhiên để smoke bộ kiểm.
 
 ## 9. HỆ CŨ — KHÔNG DÙNG LÀM CHUẨN KIỂM
 
-- **NQ 351/2017/UBTVQH14** (thể thức VBQPPL của QH/UBTVQH/CTN, theo Luật 80/2015): KHÔNG bị bãi bỏ minh
-  thị trong NĐ78/187 (grep "351" 0 hit cả 2 file) nhưng trùng phạm vi với PL II NĐ187 → bị thay trên thực
-  tế từ 01/7/2025. Khác biệt chính hệ cũ: thân văn bản cỡ 14 cố định (mới: dải 13-14). Registry
-  `hieuluc=can_kiem_tra` — muốn cập nhật cờ là data-op riêng, không tự ý.
+- ~~NQ 351/2017~~ **ĐÍNH CHÍNH 2026-07-19 (user xác nhận): NQ 351/2017 KHÔNG phải hệ cũ** — vẫn hiệu lực
+  cho VBQPPL của QH/UBTVQH/CTN vì chưa có văn bản thay thế (NĐ CP không bãi bỏ được NQ UBTVQH; grep "351"
+  trong 78/187 = 0 hit). Chuẩn kiểm nhánh này = §3.4. Registry `hieuluc=can_kiem_tra` → nên cập nhật
+  "còn hiệu lực" (data-op riêng khi user duyệt). PL II NĐ187 (19 mẫu QH/CTN) tồn tại SONG SONG — dùng làm
+  mẫu tham khảo trình bày, ngưỡng đo lấy theo NQ351 khi xung đột (thân 14 cố định).
 - **NĐ 34/2016, 154/2020, 59/2024**: bãi bỏ minh thị tại Đ78 k2 NĐ 78/2025.
 - **QĐ 66-QĐ/TW + 223-QĐ/TW** (thay bởi QĐ399); **HD 36-HD/VPTW** (thay bởi HD05).
 - VB ban hành trước 01/7/2025: bộ kiểm chỉ WARN "ngày ban hành thuộc hệ quy định cũ", không áp ngưỡng.
@@ -286,6 +323,7 @@ FAIL tự nhiên để smoke bộ kiểm.
 ```
 hanh_chinh: le_tren_mm=20-25 le_duoi_mm=20-25 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13-14 quoc_hieu=12-13 tieu_ngu=13-14 so_ky_hieu=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
 vbqppl: le_tren_mm=15-20 le_duoi_mm=15-20 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13 quoc_hieu=12-13 ten_luat=14 can_cu=14 chuc_vu_ky=13 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
+vbqppl_qh: le_tren_mm=na le_duoi_mm=na le_trai_mm=na le_phai_mm=na font=Times New Roman co_noi_dung=14-14 so_trang=13 quoc_hieu=12-12 tieu_ngu=14-14 so_ky_hieu=13 can_cu=14 chuc_vu_ky=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_min=don_hoac_15pt ghi_chu=le_theo_phu_luc_so_do_NQ351_chua_co_ban_may_doc
 vbhn: ke_thua=vbqppl so_trang=13-14 ky_hieu=STT/NAM/VBHN-loai-cq can_co=liet_ke_vb,chu_thich_chan_trang,khoi_xac_thuc
 dang: le_tren_mm=20 le_duoi_mm=20 le_trai_mm=30 le_phai_mm=15 font=Times New Roman co_noi_dung=14-15 tieu_de=15 the_loai=15-16 so_ky_hieu=14 noi_nhan_tu=14 noi_nhan_ds=12 lien_he=10 ky_hieu_soan=11 so_trang=14 line_pt=18-22 thut_dau_dong_mm=10 doan_pt_min=6
 normalize: le=20/20/30/15 font=Times New Roman sz_nha_nuoc=13 sz_dang=14

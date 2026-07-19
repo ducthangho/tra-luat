@@ -1,3 +1,33 @@
+# ★ v1.34.75 — R2 the-thuc: lệnh `tl the-thuc-check` (T1 + phân luồng 4+1 hệ) (2026-07-19)
+
+> R2/4 kế hoạch the-thuc (user duyệt 6/6 + LÀM LUÔN cùng phiên R1). **ĐÍNH CHÍNH PHÁP LÝ từ user:
+> NQ 351/2017/UBTVQH14 VẪN HIỆU LỰC cho thể thức VBQPPL của QH/UBTVQH/CTN** (chưa có văn bản thay thế;
+> NĐ CP không bãi bỏ được NQ UBTVQH; user viết "NQ 371" = 351 — registry số 371: 0 hit) → hệ VBQPPL
+> TÁCH 2 NHÁNH: `vbqppl_qh` (NQ351 — thân 14 CỐ ĐỊNH, Quốc hiệu 12, lề chỉ WARN vì Đ39.1 định lề theo
+> Phụ lục SƠ ĐỒ chưa có bản máy-đọc trong corpus) và `vbqppl` (NĐ78+PL I NĐ187). Reference cập nhật
+> §0/§1/§3.4/§9 + NEO thêm dòng vbqppl_qh; ĐỀ NGHỊ USER nạp bản NQ351 đầy đủ phụ lục để chốt ngưỡng lề.
+
+- **Module MỚI `tl_core/the_thuc.py`** (stdlib-only zipfile+ET — docx=zip; KHÔNG python-docx):
+  `tl the-thuc-check <docx> [--he auto|hanh-chinh|vbqppl|vbqppl-qh|vbhn|dang] [--strict] [--json]
+  [--out f]` — T1 đo cứng: TT-KHO-GIAY (A4 ±1mm) / TT-LE-* (per-section, dải theo hệ; Đảng đơn trị
+  20/20/30/15) / TT-TRINH-BAY-NGANG (landscape → WARN, bỏ kiểm lề section đó) / TT-FONT (resolve 3
+  tầng run→Normal→docDefaults — ca ND187 0 rFonts bắt được) / TT-CO-CHU-NOI-DUNG (mode w:sz theo
+  lượng chữ; vắng sz → WARN không đoán). Finding kèm `can_cu` nguyên văn. Envelope
+  `the_thuc_check.v1` deterministic; rc 0/2; `--strict` nâng WARN→FAIL.
+- **Drift-lock 2 chiều:** `the_thuc_neo_lines()` render từ hằng `_the_thuc_criteria()` phải == 6 dòng
+  block NEO-DRIFT-LOCK trong THE_THUC_TRINH_BAY.md (r136 so từng dòng) — đổi 1 phía là selftest đỏ.
+- **TDD r136 ×6 đỏ-trước** (fixture docx TỰ SINH temp-dir, không commit binary): pass/fail lề+font
+  (tái tạo ca ND187), phân luồng 4 hệ, landscape+sz-missing WARN, nhánh QH (14 cố định pass / 13 FAIL
+  / lề lệch chỉ WARN), CLI+deterministic+strict-rc. selftest 1093→**1099**.
+- **SMOKE THẬT 4 docx `bieu-mau-the-thuc\`**: cả 4 FAIL đúng dự đoán mổ-XML 19-07 — ND187/HD05/ND250
+  Arial 100% + lề 10mm + 12/10pt; HD05 nhận he=dang, ND250 nhận he=vbhn; ND30 lề 27,5/22,6mm. Bộ kiểm
+  bắt lỗi thật ngay ngày đầu. (Hành vi biết: file PHỤ LỤC trộn ví dụ nhiều hệ → auto-detect có thể
+  nghiêng vbqppl — ép `--he` khi kiểm file kiểu này; VB đơn hệ không bị.)
+- Đăng ký: GENERATED_SPECS + COMMAND_META (`low/read-only/none`, det_json, module the_thuc);
+  `_STUB_MAP` +8 tên; bind tuple +_tl_the_thuc. Golden `parser_surface` regen CHỦ ĐÍCH đúng +1 dòng
+  hash lệnh mới. COMMANDS.md +1 row (CRLF giữ, escape `\|` GFM); RUNBOOK §D row thể thức cập nhật.
+- Kernel CHỈ đổi header (46.987B giữ) — re-import không bắt buộc.
+
 # ★ v1.34.74 — R1 the-thuc: reference THE_THUC_TRINH_BAY.md — NEO 4 hệ thể thức (2026-07-19)
 
 > Kế hoạch `D:\Quốc hội\ke-hoach-the-thuc-2026-07-19.md` user duyệt 6/6 câu grill (tích hợp tra-luat,

@@ -13353,6 +13353,165 @@ def run() -> int:
         return _ok
     _t110("r135_the_thuc_reference_anchored", _c135_the_thuc_reference_anchored)
 
+    # ═══ v1.34.75 — r136 (R2 kế hoạch the-thuc): `tl the-thuc-check` — kiểm thể thức docx PURE offline
+    # stdlib (zipfile+ET), 4+1 hệ (hanh_chinh NĐ30 | vbqppl NĐ78+PL I NĐ187 | vbqppl_qh NQ351/2017 VẪN
+    # HIỆU LỰC cho QH/UBTVQH/CTN [user xác nhận 19-07] | vbhn NĐ250 kế thừa vbqppl | dang QĐ399+HD05).
+    # Drift-lock 2 chiều: the_thuc_neo_lines() render từ hằng == 6 dòng block NEO-DRIFT-LOCK reference.
+    # Fixture docx TỰ SINH temp-dir (không commit binary). Resolve font/sz 3 tầng run→Normal→docDefaults
+    # (ca thật ND187: docDefaults=Arial + 0 run-format → FAIL font, WARN sz). Đỏ-trước. ═══
+    def _mk136(_dir, _name, *, mar=(1134, 1134, 1701, 850), pgsz=(11906, 16838), orient=None,
+               d_font="Times New Roman", d_sz="26", n_font=None, n_sz=None, runs=None):
+        import zipfile as _zf136
+        _rs = []
+        for _tx, _f, _s in (runs or []):
+            _rpr = ""
+            if _f or _s:
+                _rpr = ("<w:rPr>" + (f'<w:rFonts w:ascii="{_f}" w:hAnsi="{_f}"/>' if _f else "")
+                        + (f'<w:sz w:val="{_s}"/>' if _s else "") + "</w:rPr>")
+            _rs.append(f'<w:p><w:r>{_rpr}<w:t xml:space="preserve">{_tx}</w:t></w:r></w:p>')
+        _or = f' w:orient="{orient}"' if orient else ""
+        _doc = ('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                "<w:body>" + "".join(_rs)
+                + f'<w:sectPr><w:pgSz w:w="{pgsz[0]}" w:h="{pgsz[1]}"{_or}/>'
+                + f'<w:pgMar w:top="{mar[0]}" w:bottom="{mar[1]}" w:left="{mar[2]}" w:right="{mar[3]}" w:header="720" w:footer="720"/>'
+                + "</w:sectPr></w:body></w:document>")
+        _dfx = ("<w:docDefaults><w:rPrDefault><w:rPr>"
+                + (f'<w:rFonts w:ascii="{d_font}" w:hAnsi="{d_font}"/>' if d_font else "")
+                + (f'<w:sz w:val="{d_sz}"/>' if d_sz else "") + "</w:rPr></w:rPrDefault></w:docDefaults>") if (d_font or d_sz) else ""
+        _nst = ('<w:style w:type="paragraph" w:styleId="Normal"><w:rPr>'
+                + (f'<w:rFonts w:ascii="{n_font}"/>' if n_font else "") + (f'<w:sz w:val="{n_sz}"/>' if n_sz else "")
+                + "</w:rPr></w:style>") if (n_font or n_sz) else ""
+        _sty = f'<?xml version="1.0"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">{_dfx}{_nst}</w:styles>'
+        _p = _dir / _name
+        with _zf136.ZipFile(_p, "w") as _z:
+            _z.writestr("[Content_Types].xml", '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>')
+            _z.writestr("word/document.xml", _doc)
+            _z.writestr("word/styles.xml", _sty)
+        return _p
+
+    _VN136 = [("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
+              ("Số: 05/BC-VP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+              ("BÁO CÁO", None, None), ("Nội dung thử nghiệm đủ dài để tính cỡ chữ phần thân.", None, None),
+              ("Nơi nhận:", None, None)]
+
+    def _c136_neo_drift_lock():
+        _txt = (HERE.parent / "references" / "THE_THUC_TRINH_BAY.md").read_text(encoding="utf-8", errors="replace")
+        import re as _re136
+        _m = _re136.search(r"NEO-DRIFT-LOCK[^\n]*\n\n```\n(.*?)```", _txt, _re136.S)
+        if not _m:
+            _m = _re136.search(r"NEO-DRIFT-LOCK.*?```\n(.*?)```", _txt, _re136.S)
+        _ref_lines = [l for l in _m.group(1).strip().splitlines() if l.strip()]
+        _code_lines = _TL_MODULE.the_thuc_neo_lines()
+        return _ref_lines == _code_lines            # đổi 1 phía (reference/hằng) → đỏ
+    _t110("r136_the_thuc_neo_drift_lock", _c136_neo_drift_lock)
+
+    def _c136_check_pass_fail():
+        import tempfile as _tf136
+        with _tf136.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _ok_p = _mk136(_dp, "ok.docx", runs=_VN136)
+            _e1 = _TL_MODULE.the_thuc_check(str(_ok_p))
+            _ok = (_e1.get("ok") is True and _e1.get("he") == "hanh_chinh"
+                   and _e1.get("schema") == "the_thuc_check.v1" and _e1["summary"]["fail"] == 0)
+            # ca thật ND187: lề 10mm + docDefaults Arial + run trống format
+            _bad_p = _mk136(_dp, "bad.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None,
+                            runs=_VN136)
+            _e2 = _TL_MODULE.the_thuc_check(str(_bad_p))
+            _ids_fail = {f["id"] for f in _e2["findings"] if f["level"] == "FAIL"}
+            _ok = _ok and _e2.get("ok") is False and {"TT-LE-TREN", "TT-LE-DUOI", "TT-FONT"} <= _ids_fail
+            _ok = _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "WARN" for f in _e2["findings"])
+            _ok = _ok and all("can_cu" in f and f["can_cu"] for f in _e2["findings"])
+            return _ok
+    _t110("r136_the_thuc_check_pass_fail", _c136_check_pass_fail)
+
+    def _c136_he_detect():
+        import tempfile as _tf136
+        with _tf136.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _dang = _mk136(_dp, "d.docx", mar=(1134, 1134, 1701, 850), d_sz="28", runs=[
+                ("ĐẢNG CỘNG SẢN VIỆT NAM", None, None), ("ĐẢNG ỦY XÃ A", None, None),
+                ("Số 12-BC/ĐU", None, None), ("Nội dung văn bản của Đảng.", None, None)])
+            _vbhn = _mk136(_dp, "h.docx", runs=[("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None),
+                ("Số: 01/2026/VBHN-LQ-VPQH", None, None), ("Nội dung.", None, None)])
+            _qh = _mk136(_dp, "q.docx", d_sz="28", runs=[("QUỐC HỘI", None, None),
+                ("Luật số: 64/2025/QH15", None, None), ("LUẬT", None, None),
+                ("BAN HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT", None, None), ("Nội dung điều luật.", None, None)])
+            _cp = _mk136(_dp, "c.docx", mar=(1134, 1134, 1701, 850), runs=[
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("NGHỊ ĐỊNH", None, None),
+                ("Số: 250/2026/NĐ-CP", None, None), ("Nội dung nghị định.", None, None)])
+            _r = [_TL_MODULE.the_thuc_check(str(p)).get("he") for p in (_dang, _vbhn, _qh, _cp)]
+            return _r == ["dang", "vbhn", "vbqppl_qh", "vbqppl"]
+    _t110("r136_the_thuc_he_detect", _c136_he_detect)
+
+    def _c136_landscape_sz_missing():
+        import tempfile as _tf136
+        with _tf136.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _ls = _mk136(_dp, "ls.docx", pgsz=(16838, 11906), orient="landscape", runs=_VN136)
+            _e = _TL_MODULE.the_thuc_check(str(_ls))
+            _ok = any(f["id"] == "TT-TRINH-BAY-NGANG" and f["level"] == "WARN" for f in _e["findings"])
+            _ok = _ok and not any(f["id"].startswith("TT-LE-") and f["level"] == "FAIL" for f in _e["findings"])
+            _ok = _ok and not any(f["id"] == "TT-KHO-GIAY" for f in _e["findings"])   # 297×210 landscape = A4 hợp lệ
+            _nosz = _mk136(_dp, "ns.docx", d_sz=None, runs=_VN136)
+            _e2 = _TL_MODULE.the_thuc_check(str(_nosz))
+            _ok = _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "WARN" for f in _e2["findings"])
+            return _ok and not any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "FAIL" for f in _e2["findings"])
+    _t110("r136_the_thuc_landscape_sz_missing", _c136_landscape_sz_missing)
+
+    def _c136_vbqppl_qh_rules():
+        import tempfile as _tf136
+        _qh_runs = [("QUỐC HỘI", None, None), ("Luật số: 64/2025/QH15", None, None), ("LUẬT", None, None),
+                    ("BAN HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT", None, None), ("Nội dung điều luật.", None, None)]
+        with _tf136.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            # NQ351: thân 14 CỐ ĐỊNH; lề chỉ WARN (phụ lục sơ đồ chưa có bản máy-đọc) — KHÔNG FAIL lề
+            _p1 = _mk136(_dp, "q1.docx", mar=(567, 567, 1701, 850), d_sz="28", runs=_qh_runs)
+            _e1 = _TL_MODULE.the_thuc_check(str(_p1))
+            _ok = _e1.get("he") == "vbqppl_qh"
+            _ok = _ok and not any(f["id"].startswith("TT-LE-") and f["level"] == "FAIL" for f in _e1["findings"])
+            _ok = _ok and any(f["id"].startswith("TT-LE-") and f["level"] == "WARN" for f in _e1["findings"])
+            _ok = _ok and not any(f["id"] == "TT-CO-CHU-NOI-DUNG" for f in _e1["findings"])   # 14pt đúng
+            _p2 = _mk136(_dp, "q2.docx", d_sz="26", runs=_qh_runs)                            # 13pt — sai (14 cố định)
+            _e2 = _TL_MODULE.the_thuc_check(str(_p2))
+            return _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "FAIL" for f in _e2["findings"])
+    _t110("r136_the_thuc_vbqppl_qh_rules", _c136_vbqppl_qh_rules)
+
+    def _c136_cli_wired():
+        import tempfile as _tf136
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ns = _ap.parse_args(["the-thuc-check", "x.docx", "--he", "vbqppl-qh", "--strict", "--json"])
+                _ok = (getattr(_ns, "he", None) == "vbqppl-qh" and _ns.strict is True)
+        except SystemExit:   # cờ chưa có → exit(2) là BaseException — coi là FAIL (bẫy .68)
+            return False
+        with _tf136.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _bad = _mk136(_dp, "b.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None, runs=_VN136)
+            _outs = []
+            for _ in range(2):
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo):
+                    _rc = _TL_MODULE.cmd_the_thuc_check(argparse.Namespace(
+                        docx_path=str(_bad), he="auto", strict=False, json=True, out=None))
+                _outs.append(_bo.getvalue())
+            _ok = _ok and _rc == 2 and _outs[0] == _outs[1]                     # deterministic + rc FAIL
+            _j = json.loads(_outs[0])
+            _ok = _ok and _j.get("schema") == "the_thuc_check.v1" and _j.get("he_source") == "auto"
+            _good = _mk136(_dp, "g.docx", runs=_VN136)
+            _bo2 = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo2):
+                _rc0 = _TL_MODULE.cmd_the_thuc_check(argparse.Namespace(
+                    docx_path=str(_good), he="auto", strict=False, json=True, out=None))
+            _ok = _ok and _rc0 == 0
+            _ls = _mk136(_dp, "l.docx", pgsz=(16838, 11906), orient="landscape", runs=_VN136)  # chỉ WARN
+            _bo3 = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo3):
+                _rcw = _TL_MODULE.cmd_the_thuc_check(argparse.Namespace(
+                    docx_path=str(_ls), he="auto", strict=True, json=True, out=None))
+            return _ok and _rcw == 2                                            # --strict nâng WARN→FAIL
+    _t110("r136_the_thuc_cli_wired", _c136_cli_wired)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

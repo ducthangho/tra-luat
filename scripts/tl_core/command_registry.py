@@ -1393,6 +1393,19 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
          {"flags": ['--limit'], "type": int, "default": 20},
      ]},
+    {"name": 'the-thuc-check', "handler": 'cmd_the_thuc_check',
+     "help": 'READ-ONLY offline: kiểm THỂ THỨC file .docx (T1: khổ giấy/lề/font/cỡ chữ + phân luồng hệ) '
+             'theo 4+1 hệ — hanh-chinh NĐ30/2020 | vbqppl NĐ78+PL I NĐ187/2025 | vbqppl-qh NQ351/2017 '
+             '(QH/UBTVQH/CTN — vẫn hiệu lực) | vbhn NĐ250/2026 | dang QĐ399+HD05; căn cứ nguyên văn: '
+             'references/THE_THUC_TRINH_BAY.md (R2 v1.34.75)',
+     "args": [
+         {"dest": 'docx_path', "metavar": 'docx', "help": 'đường dẫn file .docx cần kiểm (local, offline)'},
+         {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'vbqppl', 'vbqppl-qh', 'vbhn', 'dang'],
+          "default": 'auto', "help": 'ép hệ tiêu chí; auto = phân luồng theo nội dung'},
+         {"flags": ['--strict'], "action": 'store_true', "help": 'nâng WARN thành FAIL (rc=2)'},
+         {"flags": ['--json'], "action": 'store_true', "help": 'envelope JSON (mặc định đã in JSON)'},
+         {"flags": ['--out'], "help": 'ghi envelope JSON ra file'},
+     ]},
 ]
 
 
@@ -1588,6 +1601,7 @@ COMMAND_META = {
     "profile-rebuild-registry": _m("high", False, "registry", True, True, False, None, "profile_rebuild_registry", False, None, generated=True),   # Pha-E-hoàn-thiện v1.34.16
     "vbhn-normalize":        _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "registry-doctor":       _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
+    "the-thuc-check":        _m("low", True, "none", False, False, True, None, None, False, "the_thuc", generated=True),   # R2 v1.34.75 — PURE offline, đọc docx local, envelope deterministic
 }
 
 

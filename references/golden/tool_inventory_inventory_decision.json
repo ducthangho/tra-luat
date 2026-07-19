@@ -164,6 +164,7 @@
     "source-verify",
     "status",
     "sweep",
+    "the-thuc-check",
     "tool-inventory",
     "transport-info",
     "tvpl-url",
@@ -1601,6 +1602,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "the-thuc-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "tool-inventory": {
         "generated": true,
         "idempotency_contract": null,
@@ -1723,9 +1734,9 @@
       }
     },
     "counts": {
-      "generated_parsers": 142,
+      "generated_parsers": 143,
       "high_risk": 27,
-      "total": 149,
+      "total": 150,
       "write_commands": 75
     },
     "schema": "command_registry.v1"

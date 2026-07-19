@@ -1,3 +1,22 @@
+# ★ v1.34.83 — QUỐC HIỆU/TIÊU NGỮ CHÍNH XÁC TUYỆT ĐỐI + tích hợp §6.6-6.8 (2026-07-19)
+
+> User yêu cầu "tiêu ngữ, quốc hiệu phải chính xác tuyệt đối, không được sai" + tích hợp 3 điều chỉnh
+> thể thức (bản THE_THUC_TRINH_BAY.md có §6.6-6.8 do user chép đè — đã THẨM ĐỊNH: diff chỉ +6 dòng §6
+> + newline cuối, LF thuần, 18 anchor r135 + NEO nguyên vẹn, selftest xanh trước khi nhận).
+
+- **EXACT-match r143 (đỏ-trước ×3, selftest 1111→1114):** Quốc hiệu/Tiêu ngữ/tiêu đề Đảng so ĐÚNG TỪNG
+  KÝ TỰ sau chuẩn hoá NFC + space-class (NBSP/tab→space, gộp space — docx macOS dính NFD không FAIL
+  oan): tìm thấy BIẾN THỂ gần đúng (bỏ dấu/case/gạch/space so lỏng) mà lệch nguyên văn → **FAIL
+  `TT-QUOC-HIEU-SAI` / `TT-TIEU-NGU-SAI` / `TT-TIEU-DE-DANG-SAI`** kèm dòng sai — bắt được: en-dash
+  "–" thay "-", thiếu dấu tiếng Việt, dính chữ do <w:br/> cứng giữa Quốc hiệu, sai hoa-thường.
+- **WARN vỡ-dòng mềm §6.6** (đúng TÊN cờ reference hứa): `QUOC_HIEU_WRAPPED`/`TEN_CQ_WRAPPED` — ước
+  lượng est=len×pt×0.62×20tw so tcW ô bảng header (hàng đầu chứa Quốc hiệu; K=0.62 TNR in hoa).
+- **INFO `TT-THUT-DE-MUC` §6.7**: ≥3 đề mục/gạch đầu dòng và >50% thiếu thụt dòng đầu ~1cm (567tw).
+- §6.8 (giá trị khuyến nghị tạo file) là advisory trong reference — normalize GIỮ 15mm lề phải (cận
+  dưới dải; 18-20 của §6.8 cũng trong dải — cả hai đạt khi kiểm). Không đổi NEO/hằng → golden 0-diff
+  (trừ bundle do reference đổi). Smoke: demo công văn giữ ok/0-FAIL, không cờ mới oan.
+- _STUB_MAP +4 helper (bẫy r90). Kernel CHỈ đổi header.
+
 # ★ v1.34.82 — bất biến 18 CORPUS-FIRST khi TÌM/NẠP (user yêu cầu nguyên văn) (2026-07-19)
 
 > User bổ sung nguyên tắc bất biến 18 vào kernel: **rà corpus VBQPPL + mọi shard TRƯỚC khi tìm/tải nguồn

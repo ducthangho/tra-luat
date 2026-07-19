@@ -261,6 +261,12 @@ Bản sao (HD05 PL 3): dấu "Bản sao văn bản" hình chữ nhật **80 mm x
 5. Đa section: kiểm lề từng `sectPr`; section landscape → WARN kèm ghi chú "hợp lệ nếu chứa bảng biểu"
    (NĐ30 I.2 / NĐ187 I.2 đều cho phép).
 
+6. **Quốc hiệu và tên cơ quan/đơn vị ban hành phải nằm gọn trên MỘT dòng (không ngắt dòng)** — khi SOẠN/ĐIỀN, chọn cỡ chữ và độ rộng ô đủ để cả dòng "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" và dòng tên cơ quan/đơn vị (ví dụ "TIỂU BAN LAO ĐỘNG, VIỆC LÀM") không bị vắt sang dòng thứ hai. Thực chứng: quốc hiệu vỡ dòng khi để cỡ 13 trong ô hẹp → đặt khối tiêu đề cỡ 12 (Quốc hiệu 12–13, tên cơ quan 12–13 theo §2.3/§3.3) và nới ô là đủ. Bộ kiểm: WARN `QUOC_HIEU_WRAPPED` / `TEN_CQ_WRAPPED` khi một trong hai bị ngắt dòng.
+
+7. **Thụt đầu dòng áp cho TOÀN VĂN BẢN, trừ bảng** — mọi đoạn thân, KỂ CẢ đề mục (1., 2., …, 3.1., 6.1., …) và gạch đầu dòng, dùng thụt dòng đầu 1 cm (567 twips — ngang mốc "1" trên thước; cận dưới của dải cho phép 1–1,27 cm): DÒNG ĐẦU lùi vào, các DÒNG SAU trở về sát lề trái (căn đều hai biên). Gạch đầu dòng đặt lề trái = 0, thụt dòng đầu = 567 twips (1 cm), ký tự "-" ở vị trí thụt — KHÔNG dùng thụt treo (dòng tiếp KHÔNG thụt theo chữ). Đây là kiểu trình bày của văn bản gốc (NĐ30 ô 6 · NQ351 Đ35). Các bảng (khối tiêu đề, khối chữ ký) KHÔNG áp thụt này.
+
+8. **Giá trị KHUYẾN NGHỊ khi TẠO file (nằm trong dải cho phép — KHÔNG đổi drift-lock §10)** — lề: trên/dưới 20 mm (1134 twips), trái 30 mm (1701 twips), phải 18–20 mm (1017–1134 twips); khối tiêu đề Quốc hiệu + tên cơ quan cỡ 12, Tiêu ngữ cỡ 13, ô đủ rộng để mỗi khối gọn MỘT dòng (tham chiếu: ô trái ~4694, ô phải ~5546 twips); gạch chân dưới tên cơ quan và Tiêu ngữ dùng GẠCH CHÂN CẤP CHỮ (run underline), KHÔNG dùng viền đoạn có thụt lề (làm hẹp vùng chữ → vỡ dòng); thân + đề mục + gạch đầu dòng cỡ 14, thụt dòng đầu 1 cm (567 twips), căn đều hai biên, giãn dòng 1,5. Khi KIỂM (`the-thuc-check`) vẫn áp dải rộng §10 (thụt 1–1,27 cm đều đạt).
+
 ## 7. MA TRẬN LOẠI VĂN BẢN → HỆ → MẪU KHUNG
 
 ### 7.1. Hành chính — bảng viết tắt (PL III NĐ30: 27 loại + 3 bản sao) & 14 mẫu

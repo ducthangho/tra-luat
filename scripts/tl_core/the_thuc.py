@@ -236,6 +236,109 @@ def _the_thuc_detect_he(text):
     return "hanh_chinh"
 
 
+def _tt_chuan_hoa_space(s):
+    """r143 (v1.34.83): nền so EXACT nguyên văn — NFC (docx từ macOS hay dính NFD decomposed) +
+    NBSP/tab → space + gộp space. KHÔNG đổi gạch nối/hoa-thường (đó chính là phần phải ĐÚNG TUYỆT ĐỐI)."""
+    import re
+    import unicodedata
+    s = unicodedata.normalize("NFC", s or "")
+    s = s.replace(" ", " ").replace("\t", " ")
+    return re.sub(r" {2,}", " ", s)
+
+
+def _tt_loose_key(s):
+    """r143: khoá so LỎNG bắt biến-thể-gần-đúng — casefold + bỏ dấu (NFD strip combining) + mọi loại
+    gạch → '-' + bỏ hết space/gạch. Near-hit mà không exact ⇒ FAIL *-SAI."""
+    import re
+    import unicodedata
+    s = unicodedata.normalize("NFD", (s or "").casefold())
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    for ch in ("–", "—", "‐", "‑"):
+        s = s.replace(ch, "-")
+    return re.sub(r"[\s\-]+", "", s)
+
+
+def _tt_dong_gan_dung(text_norm, chuan):
+    """r143: trả DÒNG đầu tiên khớp lỏng với chuẩn (làm measured chỉ chỗ sai) — '' nếu không có."""
+    key = _tt_loose_key(chuan)
+    for ln in (text_norm or "").split("\n"):
+        if key in _tt_loose_key(ln):
+            return ln.strip()[:80]
+    return ""
+
+
+def _the_thuc_wrap_scan(path, defaults, normal):
+    """§6.6 THE_THUC_TRINH_BAY (r143): ước lượng VỠ DÒNG MỀM trong Ô BẢNG header — est = len(dòng) ×
+    pt × 0.62 × 20 twips (K=0.62 ≈ TNR in hoa) so tcW dxa. Chỉ quét HÀNG bảng đầu tiên chứa Quốc hiệu
+    (khớp lỏng); tc khác cùng hàng: para IN HOA dài = tên cơ quan. Trả [(id, measured)] mức WARN —
+    tên cờ ĐÚNG như reference hứa: QUOC_HIEU_WRAPPED / TEN_CQ_WRAPPED."""
+    import zipfile
+    import xml.etree.ElementTree as ET
+    W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    out = []
+    try:
+        with zipfile.ZipFile(path) as z:
+            droot = ET.fromstring(z.read("word/document.xml").decode("utf-8", "replace"))
+    except Exception:  # noqa: BLE001 — wrap-scan là advisory, không được làm gãy check chính
+        return out
+    key_qh = _tt_loose_key("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
+
+    def _sz_of(tc):
+        for r in tc.iter(W + "r"):
+            rpr = r.find(W + "rPr")
+            if rpr is not None:
+                sz = rpr.find(W + "sz")
+                if sz is not None:
+                    try:
+                        return int(sz.get(W + "val"))
+                    except (TypeError, ValueError):
+                        pass
+        return (normal or {}).get("sz") or (defaults or {}).get("sz")
+
+    for tr in droot.iter(W + "tr"):
+        infos = []
+        qh_here = False
+        for tc in tr.findall(W + "tc"):
+            tw = None
+            tcpr = tc.find(W + "tcPr")
+            if tcpr is not None:
+                tcw = tcpr.find(W + "tcW")
+                if tcw is not None and (tcw.get(W + "type") in (None, "dxa")):
+                    try:
+                        tw = int(tcw.get(W + "w"))
+                    except (TypeError, ValueError):
+                        tw = None
+            paras = []
+            for p in tc.iter(W + "p"):
+                t = _tt_chuan_hoa_space("".join((x.text or "") for x in p.iter(W + "t"))).strip()
+                if t:
+                    paras.append(t)
+            infos.append((tc, tw, paras))
+            if any(key_qh in _tt_loose_key(t) for t in paras):
+                qh_here = True
+        if not qh_here:
+            continue
+        for tc, tw, paras in infos:
+            if not tw or tw <= 0:
+                continue
+            sz = _sz_of(tc)
+            if not sz:
+                continue
+            pt = sz / 2.0
+            for t in paras:
+                est = int(len(t) * pt * 0.62 * 20)
+                if est <= tw:
+                    continue
+                if key_qh in _tt_loose_key(t):
+                    out.append(("QUOC_HIEU_WRAPPED",
+                                f"ước rộng {est} > ô {tw} twips (cỡ {pt:g}pt): '{t[:40]}…'"))
+                elif len(t) >= 8 and t == t.upper() and any(c.isalpha() for c in t):
+                    out.append(("TEN_CQ_WRAPPED",
+                                f"ước rộng {est} > ô {tw} twips (cỡ {pt:g}pt): '{t[:40]}…'"))
+        break  # chỉ hàng header đầu chứa Quốc hiệu
+    return out
+
+
 def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
     """T2 (R3 v1.34.77) — hiện diện CẤU TRÚC bằng regex trên text bóc: thành phần bắt buộc theo hệ
     (Đ8 k2 NĐ30 / Đ71 k2 NĐ78 / Đ15 QĐ399), số ký hiệu đúng cú-pháp-hệ (bẫy chéo Đảng↔nhà nước),
@@ -251,16 +354,33 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
             "dang": "QĐ 399-QĐ/TW Đ15 — 9 thành phần bắt buộc"}
     can9 = CAN9[he_eff]
     nha_nuoc = he_eff in ("hanh_chinh", "vbqppl", "vbqppl_qh", "vbhn")
+    # r143 (v1.34.83, user: "quốc hiệu/tiêu ngữ CHÍNH XÁC TUYỆT ĐỐI"): EXACT sau NFC + space-class;
+    # near-hit (lỏng: bỏ dấu/case/gạch/space) mà lệch nguyên văn → FAIL *-SAI kèm dòng sai.
+    _hn = _tt_chuan_hoa_space(head)
     if nha_nuoc:
-        if "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in head:
-            add("TT-QUOC-HIEU", "FAIL", "không thấy Quốc hiệu",
-                "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM (trên cùng bên phải trang đầu)", can9)
-        if not re.search(r"Độc lập\s*-\s*Tự do\s*-\s*Hạnh phúc", head):
-            add("TT-TIEU-NGU", "FAIL", "không thấy Tiêu ngữ",
-                "Độc lập - Tự do - Hạnh phúc (dưới Quốc hiệu, có đường kẻ ngang)", can9)
-    elif "ĐẢNG CỘNG SẢN VIỆT NAM" not in head:
-        add("TT-TIEU-DE-DANG", "FAIL", "không thấy tiêu đề",
-            "ĐẢNG CỘNG SẢN VIỆT NAM (góc phải dòng đầu, in hoa 15 đậm)", can9)
+        for _chuan, _id0, _ten, _exp in (
+                ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "TT-QUOC-HIEU", "Quốc hiệu",
+                 "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM (trên cùng bên phải trang đầu)"),
+                ("Độc lập - Tự do - Hạnh phúc", "TT-TIEU-NGU", "Tiêu ngữ",
+                 "Độc lập - Tự do - Hạnh phúc (dưới Quốc hiệu, có đường kẻ ngang)")):
+            if _chuan in _hn:
+                continue
+            _gan = _tt_dong_gan_dung(_hn, _chuan)
+            if _gan:
+                add(_id0 + "-SAI", "FAIL", f"lệch nguyên văn: '{_gan}'",
+                    _exp + " — ĐÚNG TỪNG KÝ TỰ (dấu, hoa-thường, gạch nối, khoảng cách)", can9)
+            else:
+                add(_id0, "FAIL", "không thấy " + _ten, _exp, can9)
+    else:
+        _td = "ĐẢNG CỘNG SẢN VIỆT NAM"
+        if _td not in _hn:
+            _gan = _tt_dong_gan_dung(_hn, _td)
+            if _gan:
+                add("TT-TIEU-DE-DANG-SAI", "FAIL", f"lệch nguyên văn: '{_gan}'",
+                    "ĐẢNG CỘNG SẢN VIỆT NAM — ĐÚNG TỪNG KÝ TỰ", can9)
+            else:
+                add("TT-TIEU-DE-DANG", "FAIL", "không thấy tiêu đề",
+                    "ĐẢNG CỘNG SẢN VIỆT NAM (góc phải dòng đầu, in hoa 15 đậm)", can9)
     SK = {
         "hanh_chinh": (r"Số:\s*\d+\s*/\s*[A-ZĐ][\wĐ]*(?:-[\wĐ]+)*",
                        "Số: <n>/<viết tắt loại>-<viết tắt CQ> — PL I NĐ30 Mục II.3"),
@@ -335,6 +455,18 @@ def _the_thuc_check_t3(parsed, he_eff, add):
     text = parsed["text"] or ""
     paras = parsed.get("paras") or []
     head = text[:4000]
+
+    # r143 (§6.7 THE_THUC_TRINH_BAY): đề mục (1., 2., 3.1., …) và gạch đầu dòng cũng thụt DÒNG ĐẦU
+    # 1 cm (567 twips) — đếm para dạng đề-mục thiếu firstLine (<400 twips) → INFO tổng (quy ước nhà,
+    # không phải FAIL quy định).
+    _dm_re = re.compile(r"^\s*(?:\d+(?:\.\d+)*\.|-)\s+\S")
+    _dm = [p for p in paras if len(p.get("text") or "") > 8 and _dm_re.match(p["text"])]
+    _dm_miss = [p for p in _dm if not p.get("ind") or p["ind"] < 400]
+    if len(_dm_miss) >= 3 and len(_dm_miss) * 2 > len(_dm):
+        add("TT-THUT-DE-MUC", "INFO",
+            f"{len(_dm_miss)}/{len(_dm)} đề mục/gạch đầu dòng không thụt dòng đầu ~1 cm (567 twips)",
+            "thụt dòng đầu 1 cm áp cho TOÀN văn bản kể cả đề mục, trừ bảng",
+            "THE_THUC_TRINH_BAY §6.7 (quy ước trình bày gốc NĐ30 ô 6 · NQ351 Đ35)")
 
     def _psz(sub):
         for p in paras:
@@ -519,6 +651,9 @@ def the_thuc_check(path, he=None, strict=False):
     # ── T2 cấu trúc + T3 khuyến nghị (R3 v1.34.77) ──
     _the_thuc_check_t2(d["text"], he_eff, add, footnotes=d.get("footnotes", ""))
     _the_thuc_check_t3(d, he_eff, add)
+    for _wid, _wm in _the_thuc_wrap_scan(path, d["defaults"], d["normal"]):   # §6.6 r143 — vỡ dòng mềm ô header
+        add(_wid, "WARN", _wm, "Quốc hiệu/tên cơ quan gọn MỘT dòng — khối tiêu đề cỡ 12 + nới ô (§6.8)",
+            "THE_THUC_TRINH_BAY §6.6 (thực chứng 19-07)")
 
     findings.sort(key=lambda f: (f["id"], f["level"], f["location"]))
     n_fail = sum(1 for f in findings if f["level"] == "FAIL")

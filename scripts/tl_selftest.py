@@ -13820,6 +13820,96 @@ def run() -> int:
         return _ok
     _t110("r142_corpus_first_invariant", _c142_corpus_first_invariant)
 
+    # ═══ v1.34.83 — r143 (user yêu cầu 19-07 "tiêu ngữ, quốc hiệu phải chính xác TUYỆT ĐỐI"):
+    # (a) EXACT-match Quốc hiệu/Tiêu ngữ/tiêu đề Đảng sau chuẩn hoá NFC + space-class (NBSP/tab→space,
+    # gộp space) — thấy BIẾN THỂ gần đúng mà lệch nguyên văn (en-dash, thiếu dấu, dính chữ do <w:br/>
+    # cứng, sai hoa-thường) → FAIL TT-QUOC-HIEU-SAI / TT-TIEU-NGU-SAI / TT-TIEU-DE-DANG-SAI; NFD
+    # (decomposed — macOS) KHÔNG được FAIL oan. (b) WARN vỡ-dòng mềm theo §6.6 reference (đúng TÊN cờ
+    # reference hứa): QUOC_HIEU_WRAPPED / TEN_CQ_WRAPPED — ước lượng est=len×pt×0.62×20tw so tcW ô bảng.
+    # (c) INFO TT-THUT-DE-MUC (§6.7): đề mục/gạch đầu dòng không thụt dòng đầu. Đỏ-trước. ═══
+    def _mk143(_dir, _name, body, d_sz="26"):
+        import zipfile as _zf143
+        _doc = ('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                "<w:body>" + body
+                + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'
+                + '<w:pgMar w:top="1134" w:bottom="1134" w:left="1701" w:right="850" w:header="720" w:footer="720"/>'
+                + "</w:sectPr></w:body></w:document>")
+        _sty = ('<?xml version="1.0"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>'
+                + (f'<w:sz w:val="{d_sz}"/>' if d_sz else "") + "</w:rPr></w:rPrDefault></w:docDefaults></w:styles>")
+        _p = _dir / _name
+        with _zf143.ZipFile(_p, "w") as _z:
+            _z.writestr("word/document.xml", _doc)
+            _z.writestr("word/styles.xml", _sty)
+        return str(_p)
+
+    def _pp143(*texts):
+        return "".join(f'<w:p><w:r><w:t xml:space="preserve">{t}</w:t></w:r></w:p>' for t in texts)
+
+    def _c143_exact_quoc_hieu_tieu_ngu():
+        import tempfile as _tf143
+        import unicodedata as _ud143
+        with _tf143.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _ids = lambda e, lv: {f["id"] for f in e["findings"] if f["level"] == lv}   # noqa: E731
+            _e1 = _TL_MODULE.the_thuc_check(_mk143(_dp, "a.docx", _pp143(
+                "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "Độc lập – Tự do – Hạnh phúc",
+                "Số: 05/BC-VP", "Hà Nội, ngày 19 tháng 7 năm 2026", "Nơi nhận:")))
+            _ok = ("TT-TIEU-NGU-SAI" in _ids(_e1, "FAIL") and "TT-TIEU-NGU" not in _ids(_e1, "FAIL")
+                   and not any(i.startswith("TT-QUOC-HIEU") for i in _ids(_e1, "FAIL")))
+            _e2 = _TL_MODULE.the_thuc_check(_mk143(_dp, "b.docx", _pp143(
+                "CONG HOA XA HOI CHU NGHIA VIET NAM", "Độc lập - Tự do - Hạnh phúc",
+                "Số: 05/BC-VP", "Nơi nhận:")))
+            _ok = _ok and "TT-QUOC-HIEU-SAI" in _ids(_e2, "FAIL")
+            _nfd = _ud143.normalize("NFD", "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
+            _e3 = _TL_MODULE.the_thuc_check(_mk143(_dp, "c.docx", _pp143(
+                _nfd, "Độc lập - Tự do - Hạnh phúc", "Số: 05/BC-VP", "Nơi nhận:")))
+            _ok = _ok and not any(i.startswith("TT-QUOC-HIEU") for i in _ids(_e3, "FAIL"))   # NFC hoá — không oan
+            _e4 = _TL_MODULE.the_thuc_check(_mk143(_dp, "d.docx",
+                '<w:p><w:r><w:t>CỘNG HÒA XÃ HỘI CHỦ NGHĨA</w:t></w:r><w:r><w:t>VIỆT NAM</w:t></w:r></w:p>'
+                + _pp143("Độc lập - Tự do - Hạnh phúc", "Số: 05/BC-VP", "Nơi nhận:")))
+            _ok = _ok and "TT-QUOC-HIEU-SAI" in _ids(_e4, "FAIL")                            # wrap CỨNG dính chữ
+            _e5 = _TL_MODULE.the_thuc_check(_mk143(_dp, "e.docx", _pp143(
+                "ĐẢNG CỘNG SẢN VIỆTNAM", "ĐẢNG ỦY XÃ A", "Số 12-BC/ĐU", "Nội dung.")), he="dang")
+            _ok = _ok and "TT-TIEU-DE-DANG-SAI" in _ids(_e5, "FAIL")
+            _e6 = _TL_MODULE.the_thuc_check(_mk143(_dp, "f.docx", _pp143(*[t for t, _, _ in _VN136])))
+            return _ok and not any(i.endswith("-SAI") for i in _ids(_e6, "FAIL"))            # chuẩn → sạch
+    _t110("r143_exact_quoc_hieu_tieu_ngu", _c143_exact_quoc_hieu_tieu_ngu)
+
+    def _c143_wrap_warn():
+        import tempfile as _tf143
+        with _tf143.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _tbl = ('<w:tbl><w:tr>'
+                    '<w:tc><w:tcPr><w:tcW w:w="4694" w:type="dxa"/></w:tcPr>'
+                    '<w:p><w:r><w:t>TIỂU BAN VĂN HÓA GIÁO DỤC THỂ THAO VÀ DU LỊCH</w:t></w:r></w:p></w:tc>'
+                    '<w:tc><w:tcPr><w:tcW w:w="3000" w:type="dxa"/></w:tcPr>'
+                    '<w:p><w:r><w:t>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</w:t></w:r></w:p></w:tc>'
+                    "</w:tr></w:tbl>")
+            _e1 = _TL_MODULE.the_thuc_check(_mk143(_dp, "w1.docx",
+                _tbl + _pp143("Độc lập - Tự do - Hạnh phúc", "Số: 05/BC-VP", "Nơi nhận:")))
+            _w1 = {f["id"] for f in _e1["findings"] if f["level"] == "WARN"}
+            _ok = "QUOC_HIEU_WRAPPED" in _w1 and "TEN_CQ_WRAPPED" in _w1
+            _tbl2 = _tbl.replace('w:w="3000"', 'w:w="5546"').replace('w:w="4694"', 'w:w="6800"')
+            _e2 = _TL_MODULE.the_thuc_check(_mk143(_dp, "w2.docx",
+                _tbl2 + _pp143("Độc lập - Tự do - Hạnh phúc", "Số: 05/BC-VP", "Nơi nhận:"), d_sz="24"))
+            _w2 = {f["id"] for f in _e2["findings"] if f["level"] == "WARN"}
+            return _ok and "QUOC_HIEU_WRAPPED" not in _w2 and "TEN_CQ_WRAPPED" not in _w2
+    _t110("r143_wrap_warn", _c143_wrap_warn)
+
+    def _c143_thut_de_muc():
+        import tempfile as _tf143
+        with _tf143.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _body = _pp143("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "Độc lập - Tự do - Hạnh phúc",
+                           "Số: 05/BC-VP", "Nơi nhận:",
+                           "1. Đề mục thứ nhất không thụt dòng đầu theo quy ước.",
+                           "2. Đề mục thứ hai cũng không thụt dòng đầu như trên.",
+                           "3.1. Đề mục con thứ ba cũng không thụt dòng đầu.")
+            _e = _TL_MODULE.the_thuc_check(_mk143(_dp, "t.docx", _body))
+            return any(f["id"] == "TT-THUT-DE-MUC" and f["level"] == "INFO" for f in _e["findings"])
+    _t110("r143_thut_de_muc", _c143_thut_de_muc)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

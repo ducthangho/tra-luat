@@ -1,3 +1,23 @@
+# ★ v1.34.81 — normalize choices 5 hệ (+vbqppl-qh) + kernel DANH MỤC trỏ THE_THUC_TRINH_BAY (2026-07-19)
+
+> Đóng backlog seed 19-07 (r141 đỏ-trước, selftest 1109→**1110**): (1) `the-thuc-normalize --he` đồng
+> bộ bộ choices với the-thuc-check — `auto|hanh-chinh|vbqppl|vbqppl-qh|vbhn|dang` (+`nha-nuoc` GIỮ làm
+> alias cũ .78 = 13pt/self-check auto); `dang|vbqppl-qh` → 14pt — mẫu Luật HẾT phải mẹo `--he dang`;
+> `auto` nay dùng `_the_thuc_detect_he` THẬT (envelope `he` = hệ detect; self-check ép đúng hệ khi
+> flag). ★Bẫy vá kèm: bóc plain-text cho detect PHẢI chèn `\n` tại `</w:p>` TRƯỚC khi strip tag —
+> detect anchored `^Số:` (r140) cần ranh giới dòng, thiếu là mẫu Luật auto rớt về hanh_chinh.
+> (2) **Kernel DANH MỤC REFERENCES +1 dòng** trỏ `references/THE_THUC_TRINH_BAY.md` (99B — kernel
+> 46.987→**47.086B**, đệm tới WARN-47.104 còn **18B**: KHÔNG thêm gì vào kernel nữa nếu chưa diet) —
+> agent Capabilities nay thấy bộ thể thức ngay từ kernel thay vì chỉ qua RUNBOOK.
+> **⚠ KERNEL ĐỔI RUỘT (lần đầu từ .70) → RE-IMPORT Capabilities BẮT BUỘC khi deploy .81** — gộp sạch
+> nợ re-import treo từ .69 luôn một lần.
+
+- Golden regen CHỦ ĐÍCH: parser_surface (hash the-thuc-normalize — choices đổi) + workflow_audit
+  (size_bytes 47.086, links_checked 14→**15** — link-check xác nhận reference tồn tại).
+- Backfill-markers DRY: 15 profile → 14 has_marker + vbthuong `skipped_vbt_root` **BY-DESIGN** (root
+  là chính Van_ban_thuong gốc — marker ở đó nhiễu discover; định danh qua config). Backlog
+  "vbthuong MARKER_MISSING" ĐÓNG bằng kết luận, không phải bug.
+
 # ★ v1.34.80 — fix detect-hệ the-thuc-check: viện dẫn VBQPPL trong thân không làm lệch hệ (2026-07-19)
 
 > Gap do DEMO điền Mẫu 1.5 bắt được (data-op seed 19-07): công văn hành chính viện dẫn "…Nghị định số

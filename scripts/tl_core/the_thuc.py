@@ -552,12 +552,13 @@ def the_thuc_normalize(in_path, out_path, he=None):
     doc = data.get("word/document.xml", b"").decode("utf-8", "replace")
     sty = data.get("word/styles.xml", b"").decode("utf-8", "replace") if "word/styles.xml" in data else ""
     if he in (None, "auto"):
-        plain = re.sub(r"<[^>]+>", "", doc)[:6000]
-        he_eff = ("dang" if ("ĐẢNG CỘNG SẢN VIỆT NAM" in plain
-                            and "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in plain) else "nha_nuoc")
+        # r141 (v1.34.81): auto dùng detect THẬT (5 hệ) — mẫu Luật auto ra vbqppl_qh → 14pt đúng NQ351.
+        # PHẢI chèn \n tại </w:p> TRƯỚC khi strip tag — detect anchored "^Số:" cần ranh giới dòng (r140).
+        plain = re.sub(r"<[^>]+>", "", re.sub(r"</w:p>", "\n", doc[:200000]))[:6000]
+        he_eff = _the_thuc_detect_he(plain)
     else:
-        he_eff = str(he).replace("-", "_")
-    sz = "28" if he_eff == "dang" else "26"
+        he_eff = str(he).replace("-", "_")   # nha_nuoc = alias cũ (.78): cỡ nhà nước 13pt, self-check auto
+    sz = "28" if he_eff in ("dang", "vbqppl_qh") else "26"
     n_fixed = [0]
 
     def _fix_sect(m):
@@ -622,7 +623,8 @@ def the_thuc_normalize(in_path, out_path, he=None):
             zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
             zi.compress_type = zipfile.ZIP_DEFLATED
             zo.writestr(zi, data[n])
-    env_chk = the_thuc_check(out_path, he=("dang" if he_eff == "dang" else None))
+    chk_he = he_eff if he_eff in ("hanh_chinh", "vbqppl", "vbqppl_qh", "vbhn", "dang") else None
+    env_chk = the_thuc_check(out_path, he=chk_he)
     T1IDS = ("TT-KHO-GIAY", "TT-LE-TREN", "TT-LE-DUOI", "TT-LE-TRAI", "TT-LE-PHAI",
              "TT-FONT", "TT-CO-CHU-NOI-DUNG")
     t1f = sorted({f["id"] for f in env_chk["findings"] if f["level"] == "FAIL" and f["id"] in T1IDS})

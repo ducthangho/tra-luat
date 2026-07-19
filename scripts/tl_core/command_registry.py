@@ -1414,8 +1414,10 @@ GENERATED_SPECS = [
      "args": [
          {"dest": 'in_docx', "metavar": 'in', "help": 'file .docx nguồn (không bị sửa)'},
          {"dest": 'out_docx', "metavar": 'out', "help": 'file .docx output (ghi đè nếu tồn tại; phải khác in)'},
-         {"flags": ['--he'], "choices": ['auto', 'nha-nuoc', 'dang'], "default": 'auto',
-          "help": 'hệ cỡ chữ mặc định: nhà nước 13pt / Đảng 14pt; auto = phân luồng theo nội dung'},
+         {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'vbqppl', 'vbqppl-qh', 'vbhn', 'dang', 'nha-nuoc'],
+          "default": 'auto',
+          "help": 'hệ cỡ chữ mặc định (r141 đồng bộ the-thuc-check): dang|vbqppl-qh → 14pt, còn lại 13pt; '
+                  'auto = detect 5 hệ theo nội dung; nha-nuoc = alias cũ (13pt, self-check auto)'},
          {"flags": ['--json'], "action": 'store_true', "help": 'envelope JSON (mặc định đã in JSON)'},
      ]},
 ]

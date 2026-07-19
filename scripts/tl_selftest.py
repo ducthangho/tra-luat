@@ -13765,6 +13765,37 @@ def run() -> int:
         return _ok
     _t110("r140_detect_cite_in_body", _c140_detect_cite_in_body)
 
+    # ═══ v1.34.81 — r141: normalize +choice `vbqppl-qh` (backlog seed 19-07: mẫu Luật phải mẹo --he
+    # dang để lấy 14pt vì .78 chỉ có auto|nha-nuoc|dang). Đồng bộ bộ choices với the-thuc-check
+    # (auto|hanh-chinh|vbqppl|vbqppl-qh|vbhn|dang; nha-nuoc GIỮ làm alias cũ = 13pt/check-auto);
+    # auto nay dùng _the_thuc_detect_he thật (envelope he = hệ detect, sz 28 cho dang|vbqppl_qh);
+    # self-check ép đúng hệ khi flag. Đỏ-trước. ═══
+    def _c141_normalize_vbqppl_qh_choice():
+        import tempfile as _tf141
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ns = _ap.parse_args(["the-thuc-normalize", "a.docx", "b.docx", "--he", "vbqppl-qh"])
+                _ok = getattr(_ns, "he", None) == "vbqppl-qh"
+                _ns2 = _ap.parse_args(["the-thuc-normalize", "a.docx", "b.docx", "--he", "nha-nuoc"])
+                _ok = _ok and getattr(_ns2, "he", None) == "nha-nuoc"      # alias cũ GIỮ
+        except SystemExit:   # choice chưa có → exit(2) (bẫy .68)
+            return False
+        _qh_runs = [("QUỐC HỘI", None, None), ("Luật số: 64/2025/QH15", None, None), ("LUẬT", None, None),
+                    ("BAN HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT", None, None), ("Nội dung điều luật.", None, None)]
+        with _tf141.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _src = _mk136(_dp, "l.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None, runs=_qh_runs)
+            _env = _TL_MODULE.the_thuc_normalize(str(_src), str(_dp / "l1.docx"), he="vbqppl-qh")
+            _ok = (_ok and _env.get("ok") is True and _env.get("he") == "vbqppl_qh"
+                   and _env.get("sz_default_halfpt") == 28
+                   and (_env.get("self_check") or {}).get("he_check") == "vbqppl_qh")
+            _p = _TL_MODULE._the_thuc_parse_docx(str(_dp / "l1.docx"))
+            _ok = _ok and _p["defaults"]["sz"] == 28 and _p["defaults"]["font"] == "Times New Roman"
+            _env2 = _TL_MODULE.the_thuc_normalize(str(_src), str(_dp / "l2.docx"))   # AUTO: detect vbqppl_qh → 28
+            return _ok and _env2.get("he") == "vbqppl_qh" and _env2.get("sz_default_halfpt") == 28 and _env2.get("ok") is True
+    _t110("r141_normalize_vbqppl_qh_choice", _c141_normalize_vbqppl_qh_choice)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

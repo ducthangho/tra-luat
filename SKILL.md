@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.34.80 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.34.81 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -294,6 +294,7 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/RUNBOOK.md` | Khởi động chi tiết theo môi trường, vận hành LIVE |
 | `references/API_CONTRACT.md` | Hợp đồng webapp GAS (action/param/version) |
 | `references/KERNEL_APPENDIX.md` | Trích NGUYÊN VĂN từ kernel (G1b): Cowork route tải-về §A · 45s tách-bước §B · sharding topology §C — hiệu lực như kernel |
+| `references/THE_THUC_TRINH_BAY.md` | Thể thức 5 hệ + NEO (`the-thuc-check`/`-normalize`) |
 | `references/DOCTRINE_APPENDIX.md` | Toàn bộ doctrine mở rộng + lý do thiết kế |
 | `references/workflows/*.json` | Workflow cards máy-đọc (schema, risk, idempotency) |
 | `references/golden/*.json` | Golden fixtures tất định |

@@ -13464,16 +13464,18 @@ def run() -> int:
                     ("BAN HÀNH VĂN BẢN QUY PHẠM PHÁP LUẬT", None, None), ("Nội dung điều luật.", None, None)]
         with _tf136.TemporaryDirectory() as _d:
             _dp = Path(_d)
-            # NQ351: thân 14 CỐ ĐỊNH; lề chỉ WARN (phụ lục sơ đồ chưa có bản máy-đọc) — KHÔNG FAIL lề
-            _p1 = _mk136(_dp, "q1.docx", mar=(567, 567, 1701, 850), d_sz="28", runs=_qh_runs)
+            # NQ351 (v1.34.76): thân 14 CỐ ĐỊNH; lề 20-25/20-25/30-35/15-20 mm (sơ đồ Mẫu PDF) → FAIL khi lệch
+            _p1 = _mk136(_dp, "q1.docx", mar=(1191, 1191, 1815, 992), d_sz="28", runs=_qh_runs)   # 21/21/32/17.5mm hợp lệ
             _e1 = _TL_MODULE.the_thuc_check(str(_p1))
             _ok = _e1.get("he") == "vbqppl_qh"
-            _ok = _ok and not any(f["id"].startswith("TT-LE-") and f["level"] == "FAIL" for f in _e1["findings"])
-            _ok = _ok and any(f["id"].startswith("TT-LE-") and f["level"] == "WARN" for f in _e1["findings"])
-            _ok = _ok and not any(f["id"] == "TT-CO-CHU-NOI-DUNG" for f in _e1["findings"])   # 14pt đúng
-            _p2 = _mk136(_dp, "q2.docx", d_sz="26", runs=_qh_runs)                            # 13pt — sai (14 cố định)
+            _ok = _ok and not any(f["id"].startswith("TT-LE-") for f in _e1["findings"])          # lề đúng → không finding
+            _ok = _ok and not any(f["id"] == "TT-CO-CHU-NOI-DUNG" for f in _e1["findings"])        # 14pt đúng
+            _p2 = _mk136(_dp, "q2.docx", mar=(567, 567, 1701, 850), d_sz="28", runs=_qh_runs)      # lề trên/dưới 10mm — sai
             _e2 = _TL_MODULE.the_thuc_check(str(_p2))
-            return _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "FAIL" for f in _e2["findings"])
+            _ok = _ok and any(f["id"] in ("TT-LE-TREN", "TT-LE-DUOI") and f["level"] == "FAIL" for f in _e2["findings"])
+            _p3 = _mk136(_dp, "q3.docx", mar=(1191, 1191, 1815, 992), d_sz="26", runs=_qh_runs)    # 13pt — sai (14 cố định)
+            _e3 = _TL_MODULE.the_thuc_check(str(_p3))
+            return _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "FAIL" for f in _e3["findings"])
     _t110("r136_the_thuc_vbqppl_qh_rules", _c136_vbqppl_qh_rules)
 
     def _c136_cli_wired():

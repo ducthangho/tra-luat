@@ -1,4 +1,4 @@
-# THỂ THỨC & KỸ THUẬT TRÌNH BÀY VĂN BẢN — NEO TRI THỨC 4 HỆ (v1.34.74)
+# THỂ THỨC & KỸ THUẬT TRÌNH BÀY VĂN BẢN — NEO TRI THỨC 4 HỆ (v1.34.76)
 
 > **Vai trò:** reference bắt buộc của skill tra-luat cho mọi việc SOẠN/ĐIỀN/KIỂM văn bản theo thể thức nhà
 > nước và của Đảng — cặp đối xứng với `references/VAN_PHONG_HANH_CHINH.md` (văn phong = NỘI DUNG; file này
@@ -13,13 +13,13 @@
 | Hệ | Văn bản | drive_id |
 |---|---|---|
 | Hành chính | NĐ 30/2020/NĐ-CP chính văn (Đ8, Đ9, Đ25-27) | `1J7wqHmUX3sh3ZLgIqm1YrVUYQWLlTNPjTD1RkneIFd4` |
-| Hành chính | NĐ 30/2020 Phụ lục I-VI (GDoc riêng) | `1jvdjxkkwOWg6OsZhfDgoSIBq79GYySnJhrWgq1qKLqA` |
+| Hành chính | NĐ 30/2020 Phụ lục I-VI (docx gốc TNR — nạp lại 19-07, overflow VBQPPL-2) | `1YgArj3UFuC9RY…` (tra `reg-query --sohieu 30-2020-ND-CP` dòng corpus=true row_kind=overflow) |
 | VBQPPL | NĐ 78/2025/NĐ-CP (lời văn Chương V Đ60-71) | `1Efh0dU229h75iIGM2kXRGxknci0mOrVFKdD13XCVdl0` |
 | VBQPPL | NĐ 187/2025/NĐ-CP (PL I-IV hiện hành) | `19DNiE5Jsk3B3nOUT45FEwgk-xR0e73lqNtRr9KqfjXQ` |
 | VBHN | NĐ 250/2026/NĐ-CP | `1w-UfKKEo3gLrNElbdUr…` (tra `reg-query --sohieu 250-2026-ND-CP`) |
 | Đảng | QĐ 399-QĐ/TW (thể loại, thẩm quyền, thể thức) | `1jMXEIIaNgsRskFeqruG…` (tra `reg-query --sohieu 399-QD-TW`) |
 | Đảng | HD 05-HD/VPTW (kỹ thuật trình bày chi tiết) | `1Lko21mOLzF6xGvP0HAj…` (tra `reg-query --sohieu 05-HD-VPTW`) |
-| VBQPPL nhánh QH/UBTVQH/CTN (**HIỆU LỰC**) | NQ 351/2017/UBTVQH14 | `19YN7y4_na_G8V3IzJKZEdtHw9M_xuf6W3Uml31k7pLA` |
+| VBQPPL nhánh QH/UBTVQH/CTN (**HIỆU LỰC**) | NQ 351/2017/UBTVQH14 — GDoc lời văn + **PDF Công báo 287+288 (chú thích lề trên sơ đồ Mẫu 1-16)** | GDoc `19YN7y4_na_G8V3IzJKZEdtHw9M_xuf6W3Uml31k7pLA`; PDF gốc `351_2017_UBTVQH14` (user cấp 19-07 — nguồn số lề) |
 
 **QUAN TRỌNG — quan hệ 78↔187:** Phụ lục I-IV của NĐ 78/2025 **đã bị NĐ 187/2025 THAY THẾ TOÀN BỘ**
 (Điều 3 khoản 3 NĐ187, hiệu lực **01/7/2025**); Điều 68 NĐ78 (viện dẫn) áp theo bản sửa của NĐ187. Vì vậy:
@@ -173,10 +173,11 @@ Hiệu lực từ 20/5/2017, thay NQ 1139/2007/UBTVQH11; chưa có văn bản th
 | Danh sách nơi nhận (Đ38; "Lưu: HC, …") | in thường | **11** | đứng |
 | Số trang (Đ39 k3; VB kèm theo đánh số riêng) | — | **13** | đứng, không trang 1 |
 
-**Khổ giấy/lề/phông (Đ39):** A4 210×297; phông Times New Roman Unicode TCVN 6909:2001; **định lề "được
-thực hiện theo Phụ lục kèm theo Nghị quyết này"** — phụ lục là SƠ ĐỒ (hình vẽ), bản corpus hiện KHÔNG có
-số mm máy-đọc → bộ kiểm nhánh vbqppl_qh: lề chỉ WARN theo dải-hợp nhà nước (trên/dưới 15–25, trái 30–35,
-phải 15–20), KHÔNG FAIL, kèm ghi chú đề nghị nạp bản NQ351 đầy đủ phụ lục để chốt ngưỡng.
+**Khổ giấy/lề/phông (Đ39):** A4 210×297; phông Times New Roman Unicode TCVN 6909:2001; số trang cỡ 13.
+**Định lề (Đ39.1 dẫn "theo Phụ lục"; số lấy từ chú thích lề trên sơ đồ Mẫu 1-16, PDF Công báo 287+288,
+user cấp 19-07 — nhất quán mọi mẫu):** lề trên **20–25 mm** · lề dưới **20–25 mm** · lề trái **30–35 mm**
+· lề phải **15–20 mm** (= trùng hệ hành chính NĐ30). Từ v1.34.76 bộ kiểm nhánh vbqppl_qh áp lề FAIL như
+các hệ khác (trước đó WARN dải-hợp vì corpus GDoc thiếu sơ đồ số).
 
 ## 4. HỆ VBHN — NĐ 250/2026/NĐ-CP (hiệu lực **01/7/2026**)
 
@@ -323,7 +324,7 @@ FAIL tự nhiên để smoke bộ kiểm.
 ```
 hanh_chinh: le_tren_mm=20-25 le_duoi_mm=20-25 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13-14 quoc_hieu=12-13 tieu_ngu=13-14 so_ky_hieu=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
 vbqppl: le_tren_mm=15-20 le_duoi_mm=15-20 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13 quoc_hieu=12-13 ten_luat=14 can_cu=14 chuc_vu_ky=13 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
-vbqppl_qh: le_tren_mm=na le_duoi_mm=na le_trai_mm=na le_phai_mm=na font=Times New Roman co_noi_dung=14-14 so_trang=13 quoc_hieu=12-12 tieu_ngu=14-14 so_ky_hieu=13 can_cu=14 chuc_vu_ky=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_min=don_hoac_15pt ghi_chu=le_theo_phu_luc_so_do_NQ351_chua_co_ban_may_doc
+vbqppl_qh: le_tren_mm=20-25 le_duoi_mm=20-25 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=14-14 so_trang=13 quoc_hieu=12-12 tieu_ngu=14-14 so_ky_hieu=13 can_cu=14 chuc_vu_ky=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_min=don_hoac_15pt
 vbhn: ke_thua=vbqppl so_trang=13-14 ky_hieu=STT/NAM/VBHN-loai-cq can_co=liet_ke_vb,chu_thich_chan_trang,khoi_xac_thuc
 dang: le_tren_mm=20 le_duoi_mm=20 le_trai_mm=30 le_phai_mm=15 font=Times New Roman co_noi_dung=14-15 tieu_de=15 the_loai=15-16 so_ky_hieu=14 noi_nhan_tu=14 noi_nhan_ds=12 lien_he=10 ky_hieu_soan=11 so_trang=14 line_pt=18-22 thut_dau_dong_mm=10 doan_pt_min=6
 normalize: le=20/20/30/15 font=Times New Roman sz_nha_nuoc=13 sz_dang=14

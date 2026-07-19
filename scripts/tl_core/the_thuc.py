@@ -7,8 +7,8 @@ KHÔNG python-docx — bất biến zero-dependency; docx = zip, đọc word/doc
 `the_thuc_neo_lines()` == block trong reference; đổi 1 phía là selftest đỏ):
   hanh_chinh — NĐ 30/2020 PL I · vbqppl — NĐ 78/2025 Đ60-71 + PL I NĐ 187/2025 (PL NĐ78 bị thay toàn bộ)
   vbqppl_qh — NQ 351/2017/UBTVQH14 (VẪN HIỆU LỰC cho QH/UBTVQH/CTN, user xác nhận 2026-07-19; thân 14
-  CỐ ĐỊNH; lề chỉ WARN — phụ lục sơ đồ chưa có bản máy-đọc) · vbhn — NĐ 250/2026 (font/lề kế thừa
-  vbqppl) · dang — QĐ 399-QĐ/TW + HD 05-HD/VPTW (lề đơn trị 20/20/30/15, thân 14-15).
+  CỐ ĐỊNH; lề 20-25/20-25/30-35/15-20 mm từ sơ đồ Mẫu PDF Công báo — v1.34.76 áp FAIL) · vbhn —
+  NĐ 250/2026 (font/lề kế thừa vbqppl) · dang — QĐ 399-QĐ/TW + HD 05-HD/VPTW (lề đơn trị 20/20/30/15).
 
 Resolve font/cỡ BẮT BUỘC fallback 3 tầng run → style Normal → docDefaults (mổ XML 19-07: file convert
 GDoc để trống run — ND187 0 thẻ rFonts); ET parser thật nên miễn nhiễm bẫy whitespace `<w:sz ... />`.
@@ -56,11 +56,11 @@ def _the_thuc_criteria():
             "ten_luat": "14", "can_cu": "14", "chuc_vu_ky": "13", "noi_nhan_ds": "11",
             "thut_dau_dong_cm": "1-1.27", "doan_pt_min": "6", "dong_max_lines": "1.5"},
         "vbqppl_qh": {
-            "le_tren_mm": "na", "le_duoi_mm": "na", "le_trai_mm": "na", "le_phai_mm": "na",
+            "le_tren_mm": "20-25", "le_duoi_mm": "20-25", "le_trai_mm": "30-35", "le_phai_mm": "15-20",
             "font": "Times New Roman", "co_noi_dung": "14-14", "so_trang": "13", "quoc_hieu": "12-12",
             "tieu_ngu": "14-14", "so_ky_hieu": "13", "can_cu": "14", "chuc_vu_ky": "13",
             "noi_nhan_tu": "12", "noi_nhan_ds": "11", "thut_dau_dong_cm": "1-1.27", "doan_pt_min": "6",
-            "dong_min": "don_hoac_15pt", "ghi_chu": "le_theo_phu_luc_so_do_NQ351_chua_co_ban_may_doc"},
+            "dong_min": "don_hoac_15pt"},
         "vbhn": {
             "ke_thua": "vbqppl", "so_trang": "13-14", "ky_hieu": "STT/NAM/VBHN-loai-cq",
             "can_co": "liet_ke_vb,chu_thich_chan_trang,khoi_xac_thuc"},
@@ -226,7 +226,7 @@ def the_thuc_check(path, he=None, strict=False):
     CAN_LE = {
         "hanh_chinh": "PL I NĐ 30/2020, Mục I.3: lề trên/dưới 20-25 mm, trái 30-35 mm, phải 15-20 mm",
         "vbqppl": "PL I NĐ 187/2025, Mục 1 Phần I.3: mép trên/dưới/phải 15-20 mm, mép trái 30-35 mm",
-        "vbqppl_qh": "NQ 351/2017, Đ39.1: định lề theo Phụ lục (sơ đồ) — corpus chưa có bản máy-đọc",
+        "vbqppl_qh": "NQ 351/2017, Đ39.1 + chú thích lề sơ đồ Mẫu 1-16 (Phụ lục I): trên/dưới 20-25, trái 30-35, phải 15-20 mm",
         "vbhn": "NĐ 250/2026, PL mục I.1 → PL I NĐ 187/2025 Phần I.3: trên/dưới/phải 15-20, trái 30-35 mm",
         "dang": "HD 05-HD/VPTW, Phần II mục IV.4.1: lề trên 20 / dưới 20 / trái 30 / phải 15 mm"}
     CAN_FONT = {

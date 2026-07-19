@@ -1,3 +1,21 @@
+# ★ v1.34.76 — the-thuc: chốt ngưỡng lề nhánh QH (NQ351) từ PDF sơ đồ; WARN→FAIL (2026-07-19)
+
+> User cấp **PDF gốc NQ 351/2017 (Công báo 287+288)** — digital 39 trang, đủ lời văn Đ1-40 + Phụ lục I
+> (16 mẫu sơ đồ) + Phụ lục II (viết hoa). Render sơ đồ Mẫu 1-2 (PyMuPDF): **chú thích lề trên mẫu =
+> trên/dưới 20-25, trái 30-35, phải 15-20 mm** (nhất quán, = hệ hành chính NĐ30) — đúng số corpus GDoc
+> thiếu (chỉ ghi "định lề theo Phụ lục"). Font/cỡ chữ trên sơ đồ khớp 100% text đã trích (Quốc hiệu 12,
+> Tiêu ngữ 14, số ký hiệu 13, tên luật 14, nội dung 14, chức vụ 13, họ tên 14).
+
+- Nhánh **vbqppl_qh** trước để lề WARN dải-hợp (corpus thiếu sơ đồ số) → nay áp **FAIL** với ngưỡng thật
+  20-25/20-25/30-35/15-20 mm. Sửa `_the_thuc_criteria` (na→ranges, bỏ ghi_chu) + NEO block reference +
+  CAN_LE citation + docstring. NEO drift-lock r136 tự khớp (render == reference).
+- Test r136_vbqppl_qh_rules cập nhật: lề hợp lệ → 0 finding lề; lề 10mm → TT-LE-TREN/DUOI FAIL; 13pt →
+  TT-CO-CHU FAIL (14 cố định). selftest 1099/1099 (không đổi count — sửa case sẵn).
+- Reference §0 cập nhật drive_id NĐ30 phụ lục (bản docx gốc mới nạp 19-07, overflow) + nguồn NQ351 (GDoc
+  lời văn + PDF sơ đồ). Kernel chỉ header — re-import không bắt buộc.
+- **Quyết định corpus:** GIỮ GDoc `19YN7y4` làm bản NQ351 text-queryable (NLM); KHÔNG nạp PDF làm bản
+  trùng (mẫu là ảnh, không query text được; số lề đã vào reference). PDF lưu làm nguồn đối chiếu.
+
 # ★ v1.34.75 — R2 the-thuc: lệnh `tl the-thuc-check` (T1 + phân luồng 4+1 hệ) (2026-07-19)
 
 > R2/4 kế hoạch the-thuc (user duyệt 6/6 + LÀM LUÔN cùng phiên R1). **ĐÍNH CHÍNH PHÁP LÝ từ user:

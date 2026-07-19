@@ -13315,6 +13315,44 @@ def run() -> int:
         return _ok and "PERF nạp lô" in _g and "--nlm-no-wait" in _g and "Nạp LÔ ≥2 file (PERF" in _rb
     _t110("r134_ingest_perf_hint", _c134_ingest_perf_hint)
 
+    # ═══ v1.34.74 — r135 (R1 kế hoạch the-thuc 19-07, user duyệt 6/6): references/THE_THUC_TRINH_BAY.md
+    # = NEO tri thức thể thức 4 hệ (hành chính NĐ30/2020 PL I; VBQPPL = lời văn NĐ78 Đ60-71 + PL I
+    # NĐ187/2025 vì PL I-IV NĐ78 bị NĐ187 THAY TOÀN BỘ Đ3k3; VBHN NĐ250/2026 font/lề DẪN CHIẾU VBQPPL;
+    # Đảng QĐ399+HD05 bảng riêng) + block NEO-DRIFT-LOCK máy-đọc cho R2 the-thuc-check (hằng code phải
+    # khớp block — đổi 1 phía là đỏ). Anchor = NGUYÊN VĂN verify từ corpus 19-07: lề 2 hệ nhà nước KHÁC
+    # nhau (NĐ30 trên/dưới 20-25 vs NĐ187 trên/dưới/phải 15-20); số trang VBQPPL 13 CỐ ĐỊNH; Đảng tiêu
+    # đề 15/lề đơn trị/dòng 18-22pt Exactly; ký hiệu VBHN 01/2026/VBHN-LQ-VPQH. Đỏ-trước. ═══
+    def _c135_the_thuc_reference_anchored():
+        _p = HERE.parent / "references" / "THE_THUC_TRINH_BAY.md"
+        if not _p.exists():
+            return False
+        _t = _p.read_text(encoding="utf-8", errors="replace")
+        _ok = "\r" not in _t                                            # repo LF
+        _ok = _ok and _release_should_include(_p, HERE.parent)          # PHẢI nằm trong bundle deploy
+        for _a in (
+            "20 - 25 mm", "cách mép phải 15 - 20 mm",                   # lề NĐ30 (nguyên văn PL I I.3)
+            "mép phải 15 - 20 mi-li-mét (mm)",                          # lề NĐ187 (nguyên văn PL I Phần I.3)
+            "cách mép trái 30 - 35 mi-li-mét (mm)",
+            "Times New Roman", "TCVN 6909:2001",                        # phông chung 4 hệ
+            "cỡ chữ 13, kiểu chữ đứng, không hiển thị số trang thứ nhất",  # số trang VBQPPL 13 cố định
+            "cỡ chữ 13 đến 14",                                         # số trang NĐ30 + VBHN NĐ250
+            "ĐẢNG CỘNG SẢN VIỆT NAM", "18pt đến 22pt (Exactly)",        # hệ Đảng (HD05)
+            "01/2026/VBHN-LQ-VPQH", "XÁC THỰC VĂN BẢN HỢP NHẤT",        # hệ VBHN (NĐ250)
+            "tăng, giảm phải thống nhất",                               # nhất-quán-bậc (footnote Mục V NĐ30)
+            "01/7/2025", "01/7/2026",                                   # hiệu lực PL NĐ187 / NĐ250
+            "Mẫu 1.5", "Phụ lục III của NĐ 187", "Mẫu số 26",           # ma trận mẫu 3 kho
+        ):
+            _ok = _ok and (_a in _t)
+        for _n in ("NEO-DRIFT-LOCK",                                    # block máy-đọc cho R2
+                   "hanh_chinh: le_tren_mm=20-25 le_duoi_mm=20-25 le_trai_mm=30-35 le_phai_mm=15-20",
+                   "vbqppl: le_tren_mm=15-20 le_duoi_mm=15-20 le_trai_mm=30-35 le_phai_mm=15-20",
+                   "vbhn: ke_thua=vbqppl so_trang=13-14",
+                   "dang: le_tren_mm=20 le_duoi_mm=20 le_trai_mm=30 le_phai_mm=15",
+                   "normalize: le=20/20/30/15"):
+            _ok = _ok and (_n in _t)
+        return _ok
+    _t110("r135_the_thuc_reference_anchored", _c135_the_thuc_reference_anchored)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

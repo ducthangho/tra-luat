@@ -539,6 +539,7 @@ Không nêu profile ⇒ `defaultProfile` (hiện `vbqppl`).
 |---|---|---|
 | Nạp vb mới không trùng | "vbthuong: nạp các văn bản mới không trùng trong `_HOP_NAP` vào notebook dự án" | `--profile vbthuong` ingest/preingest → dedup theo registry vbthuong → `map_set notebookId=$NB` |
 | **Nạp LÔ ≥2 file (PERF v1.34.73)** | "nạp nhanh 3 file này" | reg-query MỌI số hiệu trước (dedup) → `ingest-local --nlm-no-wait` ×N SONG SONG (−~50%/file — bỏ chờ settle) → `tl nlm-reconcile <nb> --apply` MỘT lần cuối → readback 1 lần. Chi tiết: `references/GOTCHAS.md §10` |
+| **Soạn/kiểm THỂ THỨC (R1 v1.34.74)** | "soạn công văn đúng thể thức", "văn bản này đúng thể thức chưa" | căn cứ 4 hệ (hành chính NĐ30 / VBQPPL NĐ78+PL I NĐ187 / VBHN NĐ250 / Đảng QĐ399+HD05) + bảng ngưỡng + ma trận loại-VB→mẫu: `references/THE_THUC_TRINH_BAY.md`; dựng .docx bằng công cụ docx MÔI TRƯỜNG theo mẫu kho chung `_meta/templates` (tra-luat KHÔNG sinh docx); lệnh kiểm `tl the-thuc-check` (R2, kế hoạch 2026-07-19) |
 | Tra nguyên văn | "vbthuong: tra nguyên văn Điều X của <văn bản>" | query notebook `fec6c125` + verify; miss → fallback vbqppl |
 | Rà soát đối chiếu VBQPPL | "vbthuong: rà soát Điều X, đối chiếu thêm VBQPPL" | `tl nlm-cross --notebooks fec6c125,743ed200` |
 | Kiểm slot trước khi nạp | "vbthuong: kiểm slot notebook dự án" | `--profile vbthuong slot-audit --notebook-id $NB` |

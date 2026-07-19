@@ -1,0 +1,294 @@
+# THỂ THỨC & KỸ THUẬT TRÌNH BÀY VĂN BẢN — NEO TRI THỨC 4 HỆ (v1.34.74)
+
+> **Vai trò:** reference bắt buộc của skill tra-luat cho mọi việc SOẠN/ĐIỀN/KIỂM văn bản theo thể thức nhà
+> nước và của Đảng — cặp đối xứng với `references/VAN_PHONG_HANH_CHINH.md` (văn phong = NỘI DUNG; file này
+> = HÌNH THỨC). Là NEO drift-lock cho lệnh `tl the-thuc-check` (R2, kế hoạch
+> `D:\Quốc hội\ke-hoach-the-thuc-2026-07-19.md`): hằng `THE_THUC_CRITERIA` trong code phải khớp block
+> `NEO-DRIFT-LOCK` cuối file — đổi một phía mà quên phía kia là selftest đỏ.
+> **Nguồn:** trích NGUYÊN VĂN từ corpus (verify 2026-07-19). Số liệu KHÔNG được sửa tay khi quy định nguồn
+> chưa đổi; quy định đổi = nạp VB mới vào corpus → sửa file này → sửa hằng code → regen golden, một đường.
+
+## 0. NGUỒN CORPUS (drive_id — tra lại bằng `tl doc-text <id>`)
+
+| Hệ | Văn bản | drive_id |
+|---|---|---|
+| Hành chính | NĐ 30/2020/NĐ-CP chính văn (Đ8, Đ9, Đ25-27) | `1J7wqHmUX3sh3ZLgIqm1YrVUYQWLlTNPjTD1RkneIFd4` |
+| Hành chính | NĐ 30/2020 Phụ lục I-VI (GDoc riêng) | `1jvdjxkkwOWg6OsZhfDgoSIBq79GYySnJhrWgq1qKLqA` |
+| VBQPPL | NĐ 78/2025/NĐ-CP (lời văn Chương V Đ60-71) | `1Efh0dU229h75iIGM2kXRGxknci0mOrVFKdD13XCVdl0` |
+| VBQPPL | NĐ 187/2025/NĐ-CP (PL I-IV hiện hành) | `19DNiE5Jsk3B3nOUT45FEwgk-xR0e73lqNtRr9KqfjXQ` |
+| VBHN | NĐ 250/2026/NĐ-CP | `1w-UfKKEo3gLrNElbdUr…` (tra `reg-query --sohieu 250-2026-ND-CP`) |
+| Đảng | QĐ 399-QĐ/TW (thể loại, thẩm quyền, thể thức) | `1jMXEIIaNgsRskFeqruG…` (tra `reg-query --sohieu 399-QD-TW`) |
+| Đảng | HD 05-HD/VPTW (kỹ thuật trình bày chi tiết) | `1Lko21mOLzF6xGvP0HAj…` (tra `reg-query --sohieu 05-HD-VPTW`) |
+| Hệ cũ (đối chiếu) | NQ 351/2017/UBTVQH14 | `19YN7y4_na_G8V3IzJKZEdtHw9M_xuf6W3Uml31k7pLA` |
+
+**QUAN TRỌNG — quan hệ 78↔187:** Phụ lục I-IV của NĐ 78/2025 **đã bị NĐ 187/2025 THAY THẾ TOÀN BỘ**
+(Điều 3 khoản 3 NĐ187, hiệu lực **01/7/2025**); Điều 68 NĐ78 (viện dẫn) áp theo bản sửa của NĐ187. Vì vậy:
+quy tắc "chữ" (thành phần, bố cục, đánh số, viện dẫn) đọc ở NĐ78 Đ60-71; mọi thông số "đo được" đọc ở
+**Phụ lục I của NĐ 187** — KHÔNG trích phụ lục NĐ78 (bản trong corpus là file đính kèm không bóc được).
+
+## 1. PHÂN LUỒNG 4 HỆ (thứ tự nhận diện của `the-thuc-check --he auto`)
+
+1. Dòng đơn `ĐẢNG CỘNG SẢN VIỆT NAM` (không kèm Quốc hiệu 2 dòng) → **dang**.
+2. Số ký hiệu chứa `/VBHN-` → **vbhn**.
+3. Số ký hiệu có năm dạng `\d+/\d{4}/…` + tên loại thuộc danh mục VBQPPL → **vbqppl**.
+4. Còn lại (có Quốc hiệu + Tiêu ngữ) → **hanh_chinh**.
+
+Không chắc → người dùng ép `--he`. VB ban hành trước 01/7/2025 (hệ NQ351/NĐ34 cũ): NGOÀI phạm vi kiểm —
+chỉ WARN ngày ban hành, không áp ngưỡng cũ (quyết định grill Q6, 2026-07-19).
+
+## 2. HỆ HÀNH CHÍNH — NĐ 30/2020/NĐ-CP + Phụ lục I
+
+### 2.1. Thành phần thể thức (Điều 8)
+**9 thành phần chính (k2, bắt buộc):** a) Quốc hiệu và Tiêu ngữ; b) Tên cơ quan, tổ chức ban hành; c) Số,
+ký hiệu; d) Địa danh và thời gian ban hành; đ) Tên loại và trích yếu nội dung; e) Nội dung; g) Chức vụ, họ
+tên và chữ ký của người có thẩm quyền; h) Dấu, chữ ký số của cơ quan, tổ chức; i) Nơi nhận.
+**Bổ sung (k3, tùy loại):** phụ lục; dấu chỉ độ mật/mức độ khẩn/chỉ dẫn phạm vi lưu hành; ký hiệu người
+soạn thảo + số lượng bản; địa chỉ cơ quan, email, website, ĐT, Fax.
+Ngoại lệ: **công văn** không có tên loại (trích yếu ở ô 5b, sau "V/v"); "Kính gửi" (ô 9a) chỉ với Tờ
+trình/Báo cáo (cấp dưới → cấp trên) và Công văn.
+
+### 2.2. Kỹ thuật chung (Phụ lục I, Mục I — nguyên văn)
+- Khổ giấy: **A4 (210 mm x 297 mm)**; kiểu trình bày theo chiều dài; bảng biểu không làm phụ lục riêng
+  **có thể trình bày theo chiều rộng** (landscape hợp lệ có điều kiện).
+- Định lề: "Cách mép trên và mép dưới **20 - 25 mm**, cách mép trái 30 - 35 mm, **cách mép phải 15 - 20 mm**."
+- Phông chữ: "Phông chữ tiếng Việt **Times New Roman**, bộ mã ký tự Unicode theo Tiêu chuẩn Việt Nam
+  **TCVN 6909:2001**, màu đen."
+- Số trang: từ số 1, chữ số Ả Rập, "**cỡ chữ 13 đến 14**, kiểu chữ đứng, được đặt canh giữa theo chiều
+  ngang trong phần lề trên của văn bản, không hiển thị số trang thứ nhất."
+
+### 2.3. Bảng cỡ chữ theo thành phần (Phụ lục I Mục II + bảng Mục V)
+
+| Thành phần (ô sơ đồ) | Loại chữ | Cỡ | Kiểu |
+|---|---|---|---|
+| Quốc hiệu "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" (ô 1) | in hoa | **12–13** | đứng, đậm |
+| Tiêu ngữ "Độc lập - Tự do - Hạnh phúc" (ô 1, kẻ ngang dưới dài bằng dòng chữ) | in thường | **13–14** | đứng, đậm |
+| Tên CQ chủ quản trực tiếp (ô 2) | in hoa | 12–13 | đứng |
+| Tên CQ ban hành (ô 2, kẻ ngang 1/3–1/2 dòng) | in hoa | 12–13 | đứng, đậm |
+| Từ "Số:" + ký hiệu (ô 3; `/` giữa số và ký hiệu, `-` giữa nhóm viết tắt; số <10 thêm 0) | thường/hoa | **13** (cố định) | đứng |
+| Địa danh, thời gian (ô 4) | in thường | 13–14 | **nghiêng** |
+| Tên loại (ô 5a) + trích yếu | in hoa / thường | 13–14 | đứng, đậm |
+| Trích yếu công văn (ô 5b, sau "V/v") | in thường | 12–13 | đứng |
+| Nội dung (ô 6; thụt đầu dòng 1–1,27 cm; cách đoạn ≥6pt; giãn dòng đơn → tối đa 1,5 lines) | in thường | 13–14 | đứng |
+| Phần/Chương/Mục/Tiểu mục/Điều (từ + số, đậm; tiêu đề in hoa đậm) | — | 13–14 | đứng, đậm |
+| Khoản (số Ả Rập + `.`) / Điểm (chữ cái + `)`) | in thường | 13–14 | đứng |
+| Quyền hạn (TM./Q./KT./TL./TUQ.) + chức vụ người ký (ô 7a) | in hoa | 13–14 | đứng, đậm |
+| Họ tên người ký (ô 7b) | in thường | 13–14 | đứng, đậm |
+| "Kính gửi" + nơi nhận (ô 9a) | in thường | 13–14 | đứng |
+| Từ "Nơi nhận:" (ô 9b) | in thường | **12** (cố định) | nghiêng, đậm |
+| Danh sách nơi nhận (đầu dòng `-`, cuối `;`, chốt "Lưu: VT, …") | in thường | **11** (cố định) | đứng |
+| Từ "Phụ lục" + số La Mã | in thường | **14** (cố định) | đứng, đậm |
+| Tiêu đề phụ lục | in hoa | 13–14 | đứng, đậm |
+| Dấu khẩn HỎA TỐC/THƯỢNG KHẨN/KHẨN (khung 30×8/40×8/20×8 mm, mực đỏ) | in hoa | 13–14 | đứng, đậm |
+| Chỉ dẫn phạm vi lưu hành (ô 11, khung viền đơn) | in hoa | 13–14 | đứng, đậm |
+| Ký hiệu người soạn thảo + số lượng bản (ô 12) | in hoa/số | **11** (cố định) | đứng |
+| Địa chỉ CQ/email/website/ĐT/Fax (ô 13) | in thường | 11–12 | đứng |
+
+**Nhất-quán-bậc (footnote bảng Mục V — nguyên văn):** "Cỡ chữ trong cùng một văn bản **tăng, giảm phải thống nhất**, ví dụ: Quốc hiệu cỡ chữ 13, Tiêu ngữ cỡ chữ 14, địa danh và ngày, tháng, năm văn bản cỡ chữ
+14 hoặc Quốc hiệu cỡ chữ 12, Tiêu ngữ cỡ chữ 13, địa danh và ngày, tháng, năm văn bản cỡ chữ 13." → bộ
+kiểm KHÔNG kiểm dải từng thành phần độc lập; kiểm CẢ VĂN BẢN cùng bậc (cận dưới đồng loạt hoặc cận trên
+đồng loạt).
+
+### 2.4. Bản sao (Phụ lục I Phần II)
+SAO Y / SAO LỤC / TRÍCH SAO (viết tắt SY/SL/TrS): cụm hình thức sao in hoa 13–14 đậm; bản sao điện tử
+định dạng **PDF ≥1.4, ảnh màu, ≥200 dpi, tỷ lệ 100%**, chữ ký số CQ ở ô 14, thông tin cỡ **10**; bản sao
+giấy trình bày sau văn bản cần sao, dưới đường kẻ nét liền, 7 thành phần (Đ25 k4 dẫn PL I).
+
+## 3. HỆ VBQPPL — lời văn NĐ 78/2025 (Đ60-71) + thông số PL I NĐ 187/2025
+
+### 3.1. Thành phần thể thức (Đ71 NĐ78)
+**Chính (k2):** Quốc hiệu và Tiêu ngữ; tên cơ quan ban hành; số, ký hiệu; địa danh (nếu có); thời gian
+thông qua/ban hành; tên loại và trích yếu; nội dung; chức vụ, họ tên, chữ ký; dấu/chữ ký của cơ quan;
+nơi nhận (nếu có). **Bổ sung (k3):** phụ lục; dấu độ mật/khẩn; ký hiệu người soạn + số bản; địa chỉ CQ,
+email, cổng/trang TTĐT.
+
+### 3.2. Kỹ thuật chung (PL I NĐ187, Mục 1 Phần I — nguyên văn)
+- Khổ A4 (210 mm x 297 mm), trình bày chiều dài; bảng biểu có thể chiều rộng.
+- Định lề: "Cách mép trên và mép dưới, **mép phải 15 - 20 mi-li-mét (mm)**, **cách mép trái 30 - 35 mi-li-mét (mm)**." ← CHÚ Ý: trên/dưới 15-20 **KHÁC** hệ hành chính (20-25).
+- Phông: Times New Roman, Unicode TCVN 6909:2001, màu đen.
+- Số trang: số Ả Rập, "**cỡ chữ 13, kiểu chữ đứng, không hiển thị số trang thứ nhất**, đặt canh giữa theo
+  chiều ngang trong phần lề trên" ← 13 CỐ ĐỊNH (khác hành chính 13-14).
+
+### 3.3. Cỡ chữ theo thành phần (PL I NĐ187, Phần II-III)
+
+| Thành phần | Loại chữ | Cỡ | Kiểu |
+|---|---|---|---|
+| Quốc hiệu | in hoa | 12–13 | đứng, đậm (trên cùng bên PHẢI) |
+| Tiêu ngữ | in thường | 13–14 | đứng, đậm, kẻ ngang dưới |
+| Tên cơ quan ban hành (trên cùng bên TRÁI, kẻ 1/3–1/2) | in hoa | 12–13 | đứng, đậm |
+| Từ "Số:" + số / ký hiệu (`/` giữa số-năm-ký hiệu, `-` giữa nhóm; năm đủ 4 số; <10 thêm 0) | thường / in hoa | **13** | đứng |
+| **Tên luật, pháp lệnh** | in hoa | **14** (cố định) | đứng, đậm, canh giữa |
+| Tên loại VB khác + tên gọi | in hoa 14 / thường 13–14 | 14 / 13–14 | đứng, đậm |
+| Địa danh, ngày tháng năm | in thường | 13–14 | nghiêng |
+| **Căn cứ ban hành** (mỗi căn cứ xuống dòng, cuối `;`) | in thường | **14** (cố định) | **nghiêng** |
+| "QUYẾT NGHỊ:"/"LỆNH:"/"QUYẾT ĐỊNH:" (NQ QH-UBTVQH, lệnh/QĐ CTN) | in hoa | 14 | đứng, đậm, dòng riêng |
+| Nội dung (thụt 1–1,27 cm; đoạn ≥6pt; dòng đơn → 1,5 lines) | in thường | 13–14 | đứng |
+| Từ "Phần"/"Chương" + số **La Mã** | in thường | 13–14 | đứng, đậm |
+| TÊN phần/chương | in hoa | **14** | đứng, đậm |
+| Mục/Tiểu mục (từ + số **Ả Rập**; tên in hoa 13–14 đậm) | in thường | 13–14 | đứng, đậm |
+| Điều (từ "Điều" + số Ả Rập + `.`; cách lề trái 1–1,27 cm) | in thường | 13–14 | đứng, đậm |
+| Khoản (số Ả Rập + `.`) / Điểm (chữ cái tiếng Việt + `)`) | in thường | 13–14 | đứng |
+| **Chức vụ người ký** ("TM.", "KT.", "Q." cùng cỡ) | in hoa | **13** (cố định) | đứng, đậm |
+| Họ tên người ký | in thường | 13–14 | đứng, đậm |
+| Từ "Nơi nhận:" | in thường | 12 | nghiêng, đậm |
+| Danh sách nơi nhận (đầu `-`, cuối `;`) | in thường | **11** | đứng |
+| Từ "Phụ lục" + số La Mã / tiêu đề phụ lục | thường / in hoa | 13–14 | đứng, đậm |
+
+**Số, ký hiệu VBQPPL (PL I NĐ187 Phần II.3):** luật/NQ QH, pháp lệnh/NQ UBTVQH = *loại + số + năm + viết
+tắt CQ + số khóa QH* (khóa bằng **số La Mã**); NQ/TT liên tịch = *số + năm + viết tắt loại + viết tắt các
+CQ cùng ban hành*; lệnh/QĐ CTN = *số + năm + viết tắt loại + viết tắt chức danh*; VBQPPL khác = *số + năm
++ viết tắt loại + viết tắt CQ* (vd `250/2026/NĐ-CP`). Đánh số riêng từng loại, bắt đầu 01 mỗi năm.
+
+**Bố cục (Đ63 NĐ78):** phần → chương → mục → tiểu mục → điều → khoản → điểm; đánh số điều bằng số Ả Rập
+từ "Điều 1"; mỗi điểm một ý; phần/chương/mục/tiểu mục/điều phải có tên. Số chỉ khóa QH + số thứ tự
+phần/chương = **số La Mã** (Đ64 k3).
+
+## 4. HỆ VBHN — NĐ 250/2026/NĐ-CP (hiệu lực **01/7/2026**)
+
+**Font/lề/cỡ chữ:** NĐ250 KHÔNG tự quy định — nguyên văn mục I.1: khổ giấy, kiểu trình bày, định lề,
+phông, cỡ, kiểu chữ "được thực hiện **tương tự theo quy định của pháp luật về kỹ thuật trình bày văn bản
+quy phạm pháp luật**" → dùng ngưỡng hệ VBQPPL (§3). Riêng **số trang: cỡ chữ 13 đến 14** (mục XII).
+
+**Checklist CẤU TRÚC (phần kiểm riêng của hệ VBHN — mục II-XV Phụ lục NĐ250):**
+1. **Số, ký hiệu** = `STT/NĂM-ký-xác-thực/VBHN-<viết tắt loại>-<viết tắt CQ ký xác thực>`; số đánh riêng
+   theo năm, <10 thêm 0; `/` giữa số-năm, `-` giữa nhóm. Ví dụ nguyên văn: **`01/2026/VBHN-LQ-VPQH`**,
+   `01/2026/VBHN-NĐ-BQP`, `01/2026/VBHN-QĐC-BNV`, `01/2026/VBHN-TT-BTP`.
+2. **Bảng viết tắt loại (mục II.1):** Bộ luật/Luật QH = **LQ**; Pháp lệnh = PL; Nghị quyết = NQ; NQ của
+   UBTVQH = **NQTV**; NQ liên tịch = NL; Lệnh CTN = LC; Quyết định CTN = **QĐC**; Nghị định = NĐ; Quyết
+   định = QĐ; Thông tư = TT; Thông tư liên tịch = TL; QĐ của Chủ tịch UBND cấp tỉnh = QĐCT.
+3. **Tên VBHN** = tên loại + tên VB được sửa đổi bổ sung; NGAY SAU tên: khối **liệt kê các văn bản được
+   hợp nhất** (đủ tên, số, ký hiệu, ngày thông qua/ký, cơ quan, ngày hiệu lực); không hợp nhất các VB sửa
+   đổi với nhau.
+4. **Chú thích chân trang đánh số** (mục V-XI): ký hiệu số mũ ngay sau đối tượng bị tác động (tên VB/phần/
+   chương/mục/điều/khoản/điểm/đoạn/cụm từ); ghi chú cuối trang dưới **đường kẻ ngang**; mẫu câu cố định
+   theo loại tác động: "*Điều này được sửa đổi/sửa đổi, bổ sung/thay thế theo quy định tại … của …, có
+   hiệu lực kể từ ngày …*" / "*… được bổ sung theo …*" / bãi bỏ / tạm ngưng; riêng **đính chính** ghi
+   ngày ban hành văn bản đính chính (không ghi "có hiệu lực").
+5. **Khối ký xác thực** (mục XIII) cuối văn bản, ngăn với nội dung bằng đường kẻ ngang dài nét liền:
+   "**XÁC THỰC VĂN BẢN HỢP NHẤT**" + địa danh-ngày + chức vụ người ký xác thực + chữ ký, dấu + họ tên;
+   "Nơi nhận" có mục đăng Công báo + Cơ sở dữ liệu quốc gia về pháp luật.
+
+## 5. HỆ VĂN BẢN CỦA ĐẢNG — QĐ 399-QĐ/TW + HD 05-HD/VPTW
+
+### 5.1. Thành phần (Đ15 QĐ399 — 9 thành phần bắt buộc)
+1) Tiêu đề "ĐẢNG CỘNG SẢN VIỆT NAM"; 2) tên cơ quan ban hành; 3) số và ký hiệu; 4) địa danh và ngày
+tháng năm; 5) tên loại và trích yếu; 6) nội dung; 7) quyền hạn, chức vụ, họ tên, chữ ký; 8) dấu của cơ
+quan; 9) nơi nhận. (Bổ sung Đ16: phụ lục, dấu mật/khẩn, chỉ dẫn phạm vi phổ biến/dự thảo/tài liệu hội
+nghị, ký hiệu người soạn + số bản, thông tin liên hệ.)
+
+**25 thể loại (Đ5 QĐ399):** Cương lĩnh chính trị, Điều lệ Đảng, Chiến lược, Nghị quyết, Quyết định, Chỉ
+thị, Kết luận, Quy chế, Quy định, Thông tri, Hướng dẫn, Thông báo, Thông cáo, Tuyên bố, Lời kêu gọi, Báo
+cáo, Kế hoạch, Quy hoạch, Chương trình, Đề án, Phương án, Dự án, Tờ trình, Công văn, Biên bản (+ 8 giấy
+tờ hành chính Đ6). Thẩm quyền theo cấp: Đ8-13 (NGOÀI phạm vi kiểm format — backlog).
+
+### 5.2. Kỹ thuật trình bày (HD05 Phần II mục IV — nguyên văn; lề ĐƠN TRỊ, không dải)
+- Phông: Times New Roman, Unicode TCVN 6909: 2001 (nguồn HD05 in có khoảng trắng sau "6909:"), màu đen.
+- Khổ A4; giấy tờ hành chính được dùng A4 hoặc A5.
+- **Định lề mặt trước:** lề trên **20 mm** · lề dưới **20 mm** · lề trái **30 mm** · lề phải **15 mm**
+  (in 2 mặt: mặt sau đảo trái 15/phải 30).
+- Nội dung: dàn đều 2 lề; đầu dòng lùi ~10 mm; Spacing ≥6pt; **Line spacing từ 18pt đến 22pt (Exactly)**;
+  kết thúc có dấu chấm.
+- Số trang: số Ả Rập, cách mép trên 10 mm, canh giữa, không hiển thị trang thứ nhất.
+
+### 5.3. Bảng cỡ chữ (HD05 Phụ lục 2 — trích cột chính)
+
+| TT | Thành phần | Loại chữ | Cỡ | Kiểu |
+|---|---|---|---|---|
+| 1 | Tiêu đề "ĐẢNG CỘNG SẢN VIỆT NAM" (góc phải dòng đầu, kẻ ngang dưới dài bằng tiêu đề) | in hoa | **15** | đứng, đậm |
+| 2 | Tên CQ cấp trên trực tiếp / tên CQ ban hành (góc trái; dưới có **dấu sao `*`**) | in hoa | **14** | đứng / đứng, đậm |
+| 3 | Số và ký hiệu — `Số 127-QĐ/TW` (KHÔNG dấu hai chấm; **`-` trước viết tắt loại, `/` trước viết tắt CQ** — NGƯỢC với nhà nước; QĐ = Quyết định ∪ Quy định; CT=Chỉ thị, CTr=Chương trình, TT=Thông tri, TTr=Tờ trình; CQ đại hội = ĐH) | in thường | **14** | đứng |
+| 4 | Địa danh, ngày tháng năm | in thường | 14 | nghiêng |
+| 5 | Thể loại văn bản | in hoa | **15-16** | đứng, đậm |
+| 5 | Trích yếu nội dung (ngăn với nội dung bằng **5 dấu gạch nối `-----`**) | in thường | **14-15** | đứng, đậm |
+| 5 | Trích yếu thể loại công văn | in thường | **12** | nghiêng |
+| 6 | Nội dung + Phần/Chương (La Mã hoặc chữ)/Mục (Ả Rập)/Điều/Khoản/Điểm | in thường | **14-15** | đứng (đề mục: đậm) |
+| 7 | Quyền hạn (T/M…) / chức vụ / họ tên người ký | in hoa/in hoa/thường | 14 | đậm/đứng/đậm |
+| 9 | "Kính gửi"/"Kính trình" | in thường | 14 | nghiêng |
+| 9 | Từ "Nơi nhận:" (có **gạch chân**) / danh sách nơi nhận | in thường | **14** / **12** | đứng |
+| 11 | Dấu chỉ mức độ khẩn | in hoa | 14 | đứng, đậm |
+| 12 | Chỉ dẫn phạm vi lưu hành (vd TÀI LIỆU HỘI NGHỊ) / chỉ dẫn dự thảo | in hoa / thường | **12** / 14 | đậm / nghiêng |
+| 13 | Ký hiệu người soạn thảo + số bản phát hành | in thường | **11** | đứng |
+| 14 | Thông tin liên hệ cơ quan | in thường | **10** | đứng |
+| 15 | Số trang văn bản, phụ lục | in thường | **14** | đứng |
+
+Bản sao (HD05 PL 3): dấu "Bản sao văn bản" hình chữ nhật **80 mm x 50 mm, mực đỏ**, chữ in hoa cỡ 13
+đậm; ký hiệu bản sao ghi chung **BS**. HD05 thay thế HD 36-HD/VPTW (04/3/2018).
+
+## 6. QUY TẮC XUYÊN HỆ (cho bộ kiểm)
+
+1. **Nhất-quán-bậc cỡ chữ** (§2.3) — áp hệ nhà nước; hệ Đảng dải 14-15 cũng kiểm đồng bậc.
+2. Ngày <10 và tháng <3 (hệ hành chính)/số <10 (mọi hệ): thêm số 0 phía trước.
+3. Đơn vị đo docx: mm = twips × 25,4 / 1440 (1 mm ≈ 56,69 twips); cỡ chữ pt = w:sz/2 (half-points);
+   so dải với dung sai ±1 mm. Cỡ chữ tiếng Việt do `w:sz` chi phối (Latin script), KHÔNG dùng `w:szCs`.
+4. Resolve font/cỡ BẮT BUỘC fallback 3 tầng: run (`w:rPr`) → style `Normal` → `docDefaults` — file
+   convert thường bỏ trống run (xem §8). Regex XML phải dung sai khoảng trắng (`<w:sz w:val="28" />`).
+5. Đa section: kiểm lề từng `sectPr`; section landscape → WARN kèm ghi chú "hợp lệ nếu chứa bảng biểu"
+   (NĐ30 I.2 / NĐ187 I.2 đều cho phép).
+
+## 7. MA TRẬN LOẠI VĂN BẢN → HỆ → MẪU KHUNG
+
+### 7.1. Hành chính — bảng viết tắt (PL III NĐ30: 27 loại + 3 bản sao) & 14 mẫu
+Viết tắt: NQ, QĐ, CT, QC, QyĐ, TC, TB, HD, CTr, KH, PA, ĐA, DA, BC, BB, TTr, HĐ, CĐ, BGN, BTT, GUQ, GM,
+GGT, GNP, PG, PC, PB (+ SY, TrS, SL).
+Mẫu: **1.1** Nghị quyết (cá biệt); **1.2** Quyết định (cá biệt) quy định trực tiếp; **1.3** QĐ quy định
+gián tiếp; **1.4** Văn bản có tên loại (mẫu vạn năng: CT/QC/QyĐ/TB/KH/BC/TTr…); **Mẫu 1.5** Công văn;
+**1.6** Công điện; **1.7** Giấy mời; **1.8** Giấy giới thiệu; **1.9** Biên bản; **1.10** Giấy nghỉ phép;
+**2.1/2.2** Phụ lục VB giấy/điện tử; **3.1/3.2** Bản sao giấy/điện tử.
+
+### 7.2. VBQPPL — mẫu của NĐ 187 (thay toàn bộ mẫu NĐ78)
+- **Phụ lục II của NĐ 187** (19 mẫu — QH/UBTVQH/CTN): 01 Bộ luật; 02 Luật; 03 Luật sđbs một luật; 04 Luật
+  sđbs nhiều luật; 05 NQ QH; 06 NQ QH (ban hành VB kèm theo); 07 VB kèm NQ QH; 08 NQ sđbs VB của QH;
+  09 Pháp lệnh; 10 PL sđbs; 11 NQ UBTVQH; 12 NQ UBTVQH (kèm theo); 13 VB kèm NQ UBTVQH; 14 NQ sđbs VB
+  UBTVQH; 15 NQ liên tịch; 16 Lệnh CTN (không điều); 17 Lệnh CTN (theo điều); 18 QĐ CTN; 19 Phụ lục kèm
+  VBQPPL.
+- **Phụ lục III của NĐ 187** (26 mẫu — CP/TTg/Bộ/TANDTC/VKSNDTC/KTNN/HĐND/UBND/CT UBND tỉnh): 01 NĐ CP
+  (trực tiếp); 02 NĐ CP (ban hành kèm); 03 NQ CP; 04 NQLT CP-MTTQ; 05 QĐ TTg (trực tiếp); 06 QĐ TTg
+  (kèm); 07 NQ HĐTP TANDTC; 08-09 TT Chánh án; 10-11 TT Viện trưởng; 12-13 TT Tổng KTNN; 14-15 TT Bộ
+  trưởng; 16 TTLT; 17-18 NQ HĐND; 19-20 QĐ UBND; 21-22 QĐ CT UBND tỉnh; 23 VBQPPL sđbs MỘT VB; 24 sđbs
+  NHIỀU VB; 25 bãi bỏ VB; **Mẫu số 26** Phụ lục kèm VBQPPL.
+- **Phụ lục IV của NĐ 187** (12 mẫu hồ sơ chính sách/dự án/dự thảo): 01 Tờ trình chính sách; 02 Tờ trình
+  dự án/dự thảo; 03 Báo cáo đánh giá tác động; 04-05 Thuyết minh quy phạm hóa; 06 Bản đánh giá TTHC/phân
+  cấp/…; 07 Báo cáo rà soát; 08 Tổng kết thi hành; 09 Thực trạng QHXH; 10 Tổng hợp-tiếp thu-giải trình;
+  11-12 Bản so sánh.
+
+### 7.3. Đảng — khung theo HD05 PL 1-2 (sơ đồ ô 1-15 + bảng §5.3); thể loại theo Đ5 QĐ399.
+
+### 7.4. Kho mẫu chung trên Drive (`_meta/templates/` root nền VBQPPL)
+10 mẫu seed đợt đầu (grill Q4 duyệt 19-07): hành chính 1.2, 1.4, **1.5**, 1.9 (+1.1 khi cần); VBQPPL
+PL III-01, III-05, III-14, III-17, III-19; PL II-02. File docx nguồn gộp lưu `_meta/templates/_nguon-goc/`.
+
+## 8. CẢNH BÁO FILE MẪU BÓC (mổ XML 2026-07-19 — `D:\Quốc hội\bieu-mau-the-thuc\`)
+
+| File | Font render thật | Lề T/B/L/R (mm) | Ghi chú |
+|---|---|---|---|
+| BIEU_MAU_ND30-2020 | Times New Roman (4115 run) | 28,3/27,5/22,6/22,6 | lề lệch CẢ 4 cạnh so dải chính nó mô tả; 3 section, 1 landscape |
+| BIEU_MAU_ND187-2025 | **Arial** (docDefaults; 0 thẻ rFonts) | 10/10/30/20 | chỉ 8 run có w:sz — cỡ chữ không khai báo |
+| BIEU_MAU_HD05-VPTW | **Arial** (608 run) | 10/10/30/20 | w:sz thân ~10pt — lệch chuẩn 14-15 |
+| PHU_LUC_ND250-2026 | **Arial** (style Normal đè TNR) | 10/10/30/20 | nguyên khối, 0 page-break |
+
+**Hệ quả bắt buộc:** (1) KHÔNG BAO GIỜ seed thẳng các file này làm khung điền — phải qua
+`the-thuc-normalize` (lề **20/20/30/15 mm** — bộ giá trị nằm trong dải của CẢ 3 hệ, trùng lề cố định hệ
+Đảng; docDefaults → Times New Roman; sz nhà nước 13 / Đảng 14) rồi `the-thuc-check` PASS T1 mới upload;
+(2) tiêu chí kiểm lấy từ QUY ĐỊNH (file này), không "học" từ thuộc tính file mẫu; (3) 4 file trên là ca
+FAIL tự nhiên để smoke bộ kiểm.
+
+## 9. HỆ CŨ — KHÔNG DÙNG LÀM CHUẨN KIỂM
+
+- **NQ 351/2017/UBTVQH14** (thể thức VBQPPL của QH/UBTVQH/CTN, theo Luật 80/2015): KHÔNG bị bãi bỏ minh
+  thị trong NĐ78/187 (grep "351" 0 hit cả 2 file) nhưng trùng phạm vi với PL II NĐ187 → bị thay trên thực
+  tế từ 01/7/2025. Khác biệt chính hệ cũ: thân văn bản cỡ 14 cố định (mới: dải 13-14). Registry
+  `hieuluc=can_kiem_tra` — muốn cập nhật cờ là data-op riêng, không tự ý.
+- **NĐ 34/2016, 154/2020, 59/2024**: bãi bỏ minh thị tại Đ78 k2 NĐ 78/2025.
+- **QĐ 66-QĐ/TW + 223-QĐ/TW** (thay bởi QĐ399); **HD 36-HD/VPTW** (thay bởi HD05).
+- VB ban hành trước 01/7/2025: bộ kiểm chỉ WARN "ngày ban hành thuộc hệ quy định cũ", không áp ngưỡng.
+
+## 10. NEO-DRIFT-LOCK (máy-đọc — R2 đối chiếu hằng `THE_THUC_CRITERIA`; KHÔNG sửa tay khi quy định nguồn chưa đổi)
+
+```
+hanh_chinh: le_tren_mm=20-25 le_duoi_mm=20-25 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13-14 quoc_hieu=12-13 tieu_ngu=13-14 so_ky_hieu=13 noi_nhan_tu=12 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
+vbqppl: le_tren_mm=15-20 le_duoi_mm=15-20 le_trai_mm=30-35 le_phai_mm=15-20 font=Times New Roman co_noi_dung=13-14 so_trang=13 quoc_hieu=12-13 ten_luat=14 can_cu=14 chuc_vu_ky=13 noi_nhan_ds=11 thut_dau_dong_cm=1-1.27 doan_pt_min=6 dong_max_lines=1.5
+vbhn: ke_thua=vbqppl so_trang=13-14 ky_hieu=STT/NAM/VBHN-loai-cq can_co=liet_ke_vb,chu_thich_chan_trang,khoi_xac_thuc
+dang: le_tren_mm=20 le_duoi_mm=20 le_trai_mm=30 le_phai_mm=15 font=Times New Roman co_noi_dung=14-15 tieu_de=15 the_loai=15-16 so_ky_hieu=14 noi_nhan_tu=14 noi_nhan_ds=12 lien_he=10 ky_hieu_soan=11 so_trang=14 line_pt=18-22 thut_dau_dong_mm=10 doan_pt_min=6
+normalize: le=20/20/30/15 font=Times New Roman sz_nha_nuoc=13 sz_dang=14
+```
+
+*(Cập nhật file này: sửa số → chạy selftest thấy r135/r-R2 đỏ → sửa hằng code + regen golden cùng release.)*

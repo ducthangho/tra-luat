@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.34.73",
+  "skill_version": "1.34.74",
   "webapp_target": "2.21.2m",
   "root_name": "tra-luat",
-  "file_count": 171,
-  "total_bytes": 5202223,
-  "package_hash": "568e647e8873ca0c90f9a1e7844f9b1c48750cb23c0da4d3657f4f191722d1c8",
-  "content_hash": "568e647e8873ca0c90f9a1e7844f9b1c48750cb23c0da4d3657f4f191722d1c8",
+  "file_count": 172,
+  "total_bytes": 5234428,
+  "package_hash": "bb1a26e521e02d65f62b44f7dfa5fe9756ba50396c171369e110a13cd7a85694",
+  "content_hash": "bb1a26e521e02d65f62b44f7dfa5fe9756ba50396c171369e110a13cd7a85694",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 199015,
-      "sha256": "d233617ffebd27f449134f5302421b9928913054189512c9e4122c8d7887f8a3"
+      "size": 201300,
+      "sha256": "417c3002ec1715f8cce9edd8859c8cb510b09f18d2577930272b7e2fb41cc87f"
     },
     {
       "path": "CONTEXT.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 46987,
-      "sha256": "e9326df10400c5e9cf4f7306424fc08445e5d0f8fa019488b8b5b2f92f8b238a"
+      "sha256": "b3907d4e1cd25fa4fe2fd5b9845daef6479e433f0b4031e7f03cf3475128fd6c"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "e19c16c66aaac96f6d258f6706ad01bf767d66a0d2349076b77a889ef620cf55"
+      "sha256": "96a328101df88ab46dcecba873d75861f1badba08a6075e934d5d509156df105"
     },
     {
       "path": "agents/openai.yaml",
@@ -213,8 +213,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 53988,
-      "sha256": "997f398c12f96494449c723ef9412daed38d3dd315ccf80d3849c32083788933"
+      "size": 54496,
+      "sha256": "14b3ecdc3ea1d9cae8867c4c3b2f747f1de5187629433271ad2f70191e2c7aed"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
@@ -225,6 +225,11 @@
       "path": "references/STALE_RELATION_GUARD.md",
       "size": 3253,
       "sha256": "b938bb4d067293eab68bf62898ab6981a9e7d2c1b24e76151a8ef3923e9fa168"
+    },
+    {
+      "path": "references/THE_THUC_TRINH_BAY.md",
+      "size": 26275,
+      "sha256": "c1c5281547d76de08c4284c034fec71cd0177c1c9997b9dc3a41af32f2c9811b"
     },
     {
       "path": "references/VAN_PHONG_HANH_CHINH.md",
@@ -669,7 +674,7 @@
     {
       "path": "scripts/tl.py",
       "size": 206783,
-      "sha256": "1e11f8062f271e379d908a2d9258c483318f595baf168a61823872b645b72ade"
+      "sha256": "0e30272c83760703714213b1140d46af4f3d5b50f83769b9a5289f3eadd42320"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -823,8 +828,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 976223,
-      "sha256": "9b3fa58b22852a22da08d44458a30be4ac9d65da0ad96adb5e729510bce95d49"
+      "size": 979360,
+      "sha256": "6685489f4952026c4e916614a6eff6a02ca4d684d88d7df67bce61c58cb1726d"
     },
     {
       "path": "scripts/tra_cuu.py",

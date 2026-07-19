@@ -1,3 +1,27 @@
+# ★ v1.34.74 — R1 the-thuc: reference THE_THUC_TRINH_BAY.md — NEO 4 hệ thể thức (2026-07-19)
+
+> Kế hoạch `D:\Quốc hội\ke-hoach-the-thuc-2026-07-19.md` user duyệt 6/6 câu grill (tích hợp tra-luat,
+> 3 tầng KHUNG/ĐIỀN/KIỂM, seam tách-được). R1 = neo tri thức: `references/THE_THUC_TRINH_BAY.md` trích
+> NGUYÊN VĂN corpus (verify 19-07): 4 bảng ngưỡng (hành chính NĐ30 PL I; VBQPPL = lời văn NĐ78 Đ60-71 +
+> **PL I NĐ187/2025 — PL I-IV NĐ78 bị NĐ187 THAY TOÀN BỘ** Đ3k3 hiệu lực 01/7/2025; VBHN NĐ250/2026
+> font/lề DẪN CHIẾU VBQPPL + checklist cấu trúc; Đảng QĐ399+HD05 bảng riêng) + ma trận loại-VB→hệ→mẫu
+> (NĐ30 14 mẫu; NĐ187 PL II 19 + PL III 26 + PL IV 12; HD05 PL 1-3) + cảnh báo 4 file mẫu bóc KHÔNG đạt
+> chuẩn (Arial/lề 10mm — mổ XML 19-07, không seed thẳng, phải normalize R4) + block **NEO-DRIFT-LOCK**
+> máy-đọc cho R2 `the-thuc-check`. selftest 1092→1093 (r135 đỏ-trước: exists+LF+in-bundle+18 anchor
+> nguyên văn+6 dòng NEO).
+
+- Số then chốt: lề 2 hệ nhà nước KHÁC nhau (NĐ30 trên/dưới 20-25mm vs NĐ187 trên/dưới/phải 15-20mm,
+  trái đều 30-35); bộ lề 20/20/30/15 nằm trong dải CẢ 3 hệ (trùng lề cố định Đảng) = giá trị normalize
+  duy nhất; số trang VBQPPL 13 CỐ ĐỊNH vs hành chính/VBHN 13-14 vs Đảng 14; Đảng: tiêu đề ĐCSVN 15, số
+  ký hiệu `Số 127-QĐ/TW` KHÔNG hai chấm (`-` trước loại, `/` trước CQ — ngược nhà nước), dấu sao (*),
+  5 gạch `-----`, dòng 18-22pt Exactly.
+- RUNBOOK §D +1 row route "soạn/kiểm thể thức" → reference; kernel KHÔNG đổi ruột (chỉ header version)
+  ⇒ re-import không bắt buộc.
+- NQ 351/2017 hệ cũ: không bị bãi bỏ minh thị (grep 0 hit trong 78/187) nhưng bị thay trên thực tế từ
+  01/7/2025 — không dùng làm chuẩn kiểm; registry `hieuluc=can_kiem_tra` GIỮ (sửa cờ = data-op riêng).
+- Bẫy phiên ghi nhận: anchor selftest phải là chuỗi 1 DÒNG — wrap văn bản giữa chuỗi làm r135 đỏ oan
+  (2 lần đầu); HD05 in "TCVN 6909: 2001" CÓ khoảng trắng (khác NĐ30/187) — trích đúng từng nguồn.
+
 # ★ v1.34.73 — PERF nạp lô: perf_hint trong DRY plan + GOTCHAS §10 + RUNBOOK §D (2026-07-19)
 
 > Mổ xẻ "30 phút / 3 file" (journal đo ~260s/file apply): **chờ NLM settle mặc định ăn ≈NỬA thời gian

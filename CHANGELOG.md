@@ -1,3 +1,21 @@
+# ★ v1.34.80 — fix detect-hệ the-thuc-check: viện dẫn VBQPPL trong thân không làm lệch hệ (2026-07-19)
+
+> Gap do DEMO điền Mẫu 1.5 bắt được (data-op seed 19-07): công văn hành chính viện dẫn "…Nghị định số
+> 30/2020/NĐ-CP ngày…" trong THÂN → regex bare `\d+/\d{4}/` của `_the_thuc_detect_he` nhầm he=vbqppl
+> (sai ngưỡng lề trên/dưới 15-20 thay 20-25 + đòi năm trong số ký hiệu) — ca PHỔ BIẾN vì mọi công văn
+> đều viện dẫn VBQPPL. Fix r140 (đỏ-trước): detect vbqppl/vbhn chỉ nhận SỐ KÝ HIỆU CỦA CHÍNH văn bản —
+> anchored đầu dòng `^\s*(Bộ luật|Luật|Pháp lệnh|Lệnh|Nghị quyết|Nghị định|Quyết định|Thông tư)? [Ss]ố:`
+> ("Luật số: 64/2025/QH15" ✓, "Số: 250/2026/NĐ-CP" ✓, "Số: 4231/VBHN-BTP" ✓; viện dẫn giữa câu KHÔNG
+> match). selftest 1108→**1109**.
+
+- Hệ quả chủ đích: file PHỤ LỤC trộn ví dụ (BIEU_MAU/PHU_LUC_ND250) nay auto-detect về hanh_chinh —
+  loại file này VỐN phải ép `--he` (hành vi ghi từ R2); VB đơn hệ thật đều đúng (4231→vbhn giữ nguyên,
+  demo công văn→hanh_chinh ok:true fail=0).
+- DEMO end-to-end 3 tầng ĐÃ CHẠY TRỌN: khung Mẫu 1.5 kho chung → điền công văn thật (thay text trong
+  w:t theo para, GIỮ run-format; header mẫu là BẢNG — thao tác para-level, DROP chỉ ngoài bảng) →
+  `the-thuc-check` PASS (0 FAIL; 1 WARN nhất-quán-bậc là của khung gốc NĐ30 in Quốc hiệu=Tiêu ngữ=13).
+- Kernel CHỈ đổi header; không đổi CLI → golden 0-diff.
+
 # ★ v1.34.79 — fix: profile-load hiện khối trinh_bay_theo_mau (templates pass-through chiều ĐỌC) (2026-07-19)
 
 > BUG do SMOKE GHI THẬT 19-07 bắt (seed kho chung xong, template-add vào NQ80 marker verified NHƯNG

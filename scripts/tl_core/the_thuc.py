@@ -223,9 +223,12 @@ def _the_thuc_detect_he(text):
     head = (text or "")[:4000]
     if "ĐẢNG CỘNG SẢN VIỆT NAM" in head and "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" not in head:
         return "dang"
-    if re.search(r"\d+/(?:\d{4}/)?VBHN-", head):   # nhận cả dạng CŨ n/VBHN-CQ (trước 01/7/2026, vd 4231/VBHN-BTP)
+    # r140 (v1.34.80): chỉ nhận SỐ KÝ HIỆU CỦA CHÍNH VB — anchored đầu dòng "(<loại> )Số:"; công văn
+    # VIỆN DẪN "…Nghị định số 30/2020/NĐ-CP ngày…" giữa câu KHÔNG được làm lệch hệ (demo 1.5 bắt được).
+    _SO = r"(?m)^\s*(?:(?:Bộ\s+luật|Luật|Pháp\s+lệnh|Lệnh|Nghị\s+quyết|Nghị\s+định|Quyết\s+định|Thông\s+tư)\s+)?[Ss]ố\s*:\s*"
+    if re.search(_SO + r"\d+/(?:\d{4}/)?VBHN-", head):   # nhận cả dạng CŨ n/VBHN-CQ (vd 4231/VBHN-BTP)
         return "vbhn"
-    if re.search(r"\d+/\d{4}/[A-ZĐ]", head):
+    if re.search(_SO + r"\d+/\d{4}/[A-ZĐ]", head):
         if (re.search(r"/(QH|UBTVQH)\d+\b|/CTN\b", head)
                 or re.search(r"(?m)^\s*(BỘ\s+)?LUẬT\s*$|^\s*PHÁP\s+LỆNH\s*$", head)):
             return "vbqppl_qh"

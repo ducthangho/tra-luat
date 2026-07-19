@@ -13743,6 +13743,28 @@ def run() -> int:
         return _ok and "trinh_bay_theo_mau" not in _blk0                # không templates → block VẮNG
     _t110("r139_block_meta_passthrough_templates", _c139_block_meta_passthrough_templates)
 
+    # ═══ v1.34.80 — r140: gap detect-hệ do DEMO điền Mẫu 1.5 bắt được (19-07): công văn VIỆN DẪN
+    # "Nghị định số 30/2020/NĐ-CP" trong THÂN → regex bare `\d+/\d{4}/` nhầm he=vbqppl (sai ngưỡng lề
+    # 15-20 thay 20-25 + đòi năm trong số) — ca PHỔ BIẾN vì công văn nào cũng viện dẫn VBQPPL. Fix:
+    # detect vbqppl/vbhn chỉ nhận SỐ KÝ HIỆU CỦA CHÍNH VB — anchored đầu dòng `^\s*(<loại> )?[Ss]ố:`
+    # ("Luật số: 64/2025/QH15" ✓, "Số: 250/2026/NĐ-CP" ✓; "…Nghị định số 30/2020/NĐ-CP ngày…" giữa
+    # câu → KHÔNG match). 4 fixture detect cũ (r136) phải giữ nguyên kết quả. Đỏ-trước. ═══
+    def _c140_detect_cite_in_body():
+        _cv = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n"
+               "Số: 123/VPQH-HC\nHà Nội, ngày 19 tháng 07 năm 2026\n"
+               "Thực hiện Nghị định số 30/2020/NĐ-CP ngày 05 tháng 3 năm 2020 của Chính phủ về công tác văn thư.\n"
+               "Nơi nhận:")
+        _ok = _TL_MODULE._the_thuc_detect_he(_cv) == "hanh_chinh"
+        _cv2 = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố: 15/BC-VP\n"
+                "Theo văn bản hợp nhất số 4231/VBHN-BTP của Bộ Tư pháp và Luật số 64/2025/QH15.\nNơi nhận:")
+        _ok = _ok and _TL_MODULE._the_thuc_detect_he(_cv2) == "hanh_chinh"
+        _ok = _ok and _TL_MODULE._the_thuc_detect_he("QUỐC HỘI\nLuật số: 64/2025/QH15\nLUẬT\nBAN HÀNH VBQPPL") == "vbqppl_qh"
+        _ok = _ok and _TL_MODULE._the_thuc_detect_he("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố: 250/2026/NĐ-CP\nNGHỊ ĐỊNH") == "vbqppl"
+        _ok = _ok and _TL_MODULE._the_thuc_detect_he("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố: 01/2026/VBHN-LQ-VPQH") == "vbhn"
+        _ok = _ok and _TL_MODULE._the_thuc_detect_he("BỘ TƯ PHÁP\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n\tSố: 4231/VBHN-BTP\nNGHỊ ĐỊNH") == "vbhn"
+        return _ok
+    _t110("r140_detect_cite_in_body", _c140_detect_cite_in_body)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

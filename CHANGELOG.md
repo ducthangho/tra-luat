@@ -1,3 +1,14 @@
+# ★ v1.34.92 — ô có viền phải có đệm dọc (§6.25) (2026-07-20)
+
+> User gửi ảnh: dòng cuối ô "Nội dung" của Phiếu trình **dính sát nét kẻ dưới**.
+
+- **`tblCellMar` mặc định KHÔNG có top/bottom** — bộ dựng chỉ khai trái/phải 72tw nên chữ chạm viền.
+  Nay khai **6pt = 120tw** trên và dưới cho **mọi bảng CÓ VIỀN**: bảng nội dung VÀ bảng tổng hợp ý
+  kiến (bảng tổng hợp bị y hệt, sửa luôn cho nhất quán). Chỉnh: `spec.dem_o_pt`.
+- **Bảng tiêu đề (không viền) giữ 0** — thêm đệm ở đó sẽ xô lệch khối tiêu đề đã tinh chỉnh theo
+  §6.9-6.11 (gạch ôm sát chữ, hai ô cùng chuỗi `w:line`).
+- r156 siết: đệm dọc bảng 1 = (0,0) · bảng 2 và 3 = (120,120). Xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.91 — Phiếu trình: "Kính gửi" không đậm, thụt 0,8cm trong bảng (§6.24) (2026-07-20)
 
 - **"Kính gửi" KHÔNG in đậm** (user 20-07). Lưu ý: mẫu gốc CÓ đậm — đây là yêu cầu của Ủy ban ghi đè

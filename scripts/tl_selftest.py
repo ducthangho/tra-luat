@@ -14327,6 +14327,18 @@ def run() -> int:
             _m = _r6.search(r'<w:ind w:firstLine="(\d+)"', _q)
             if not _m or int(_m.group(1)) != 454:
                 return False
+        # r160: ô CÓ VIỀN phải có đệm dọc, nếu không dòng cuối DÍNH nét kẻ dưới (user 20-07 gửi
+        # ảnh). tblCellMar mặc định chỉ có trái/phải ⇒ phải khai thêm top/bottom. Bảng tiêu đề
+        # (không viền, layout đã tinh chỉnh) giữ 0.
+        def _mar(_t):
+            _m = _r6.search(r"<w:tblCellMar>.*?</w:tblCellMar>", _t, _r6.S)
+            _tp = _r6.search(r'<w:top w:w="(\d+)"', _m.group(0)) if _m else None
+            _bt = _r6.search(r'<w:bottom w:w="(\d+)"', _m.group(0)) if _m else None
+            return (int(_tp.group(1)) if _tp else 0, int(_bt.group(1)) if _bt else 0)
+        if _mar(_tbls[0]) != (0, 0):
+            return False
+        if _mar(_tbls[1]) != (120, 120) or _mar(_tbls[2]) != (120, 120):
+            return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt
                 and "Kính gửi: Đồng chí Chủ nhiệm Ủy ban" in _txt

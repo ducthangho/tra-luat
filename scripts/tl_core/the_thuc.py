@@ -965,13 +965,23 @@ def _phieu_trinh_build(spec, out_path):
         return (f'<w:tc><w:tcPr><w:tcW w:w="{w}" w:type="dxa"/>{bd}{extra}{_va}</w:tcPr>'
                 f'{inner}</w:tc>')
 
-    def tbl(cols, rows, bd=NIL4, va=""):
+    # r160 (user 20-07, ảnh: dòng cuối ô Nội dung DÍNH viền dưới): tblCellMar chỉ đặt trái/phải,
+    # trên/dưới = 0 ⇒ chữ chạm nét kẻ. Đệm dọc mặc định 6pt = 120tw (spec.dem_o_pt).
+    _mar_o = max(0, int(round(float(spec.get("dem_o_pt", 6)) * 20)))
+
+    def _cellmar(tb):
+        _d = (f'<w:top w:w="{_mar_o}" w:type="dxa"/>'
+              f'<w:bottom w:w="{_mar_o}" w:type="dxa"/>') if tb else ""
+        return ('<w:tblCellMar>' + _d + '<w:left w:w="72" w:type="dxa"/>'
+                '<w:right w:w="72" w:type="dxa"/></w:tblCellMar>')
+
+    def tbl(cols, rows, bd=NIL4, va="", mar_tb=False):
         g = "".join(f'<w:gridCol w:w="{c}"/>' for c in cols)
         tr = "".join("<w:tr>" + "".join(cell(cols[k], c, bd, va) for k, c in enumerate(r))
                      + "</w:tr>" for r in rows)
         return (f'<w:tbl><w:tblPr><w:tblW w:w="{sum(cols)}" w:type="dxa"/><w:jc w:val="center"/>'
-                '<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="72" w:type="dxa"/>'
-                '<w:right w:w="72" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000"/></w:tblPr>'
+                f'<w:tblLayout w:type="fixed"/>{_cellmar(mar_tb)}'
+                f'<w:tblLook w:val="0000"/></w:tblPr>'
                 f'<w:tblGrid>{g}</w:tblGrid>{tr}</w:tbl>')
 
     def th(t, **kw):
@@ -1046,8 +1056,8 @@ def _phieu_trinh_build(spec, out_path):
                    + cell(wr2, _tt_p(" ", sz=S_THAN, jc="center", **LH), VIEN,
                           extra="<w:vMerge/>") + "</w:tr>")
     body.append(f'<w:tbl><w:tblPr><w:tblW w:w="{W}" w:type="dxa"/><w:jc w:val="center"/>'
-                '<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="72" w:type="dxa"/>'
-                '<w:right w:w="72" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000"/></w:tblPr>'
+                f'<w:tblLayout w:type="fixed"/>{_cellmar(True)}'
+                f'<w:tblLook w:val="0000"/></w:tblPr>'
                 f'<w:tblGrid><w:gridCol w:w="{wl2}"/><w:gridCol w:w="{wr2}"/></w:tblGrid>'
                 + "".join(_tr) + "</w:tbl>")
 
@@ -1066,7 +1076,7 @@ def _phieu_trinh_build(spec, out_path):
             rows.append([o(str(i), jc="center"), o(r.get("ho_ten", "")),
                          o("X" if r.get("dong_y") else "", jc="center"),
                          o(r.get("gop_y", ""))])
-        body.append(tbl(cols, rows, bd=VIEN))
+        body.append(tbl(cols, rows, bd=VIEN, mar_tb=True))
 
     _tt_ghi_docx(body, le, S_THAN, out_path, pgw=PGW)
     env = the_thuc_check(out_path, he="hanh_chinh")

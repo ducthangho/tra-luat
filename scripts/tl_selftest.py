@@ -14008,7 +14008,13 @@ def run() -> int:
             _seq = []
             for _tc in _import_re.finditer(r"<w:tc>.*?</w:tc>", _tb, _import_re.S):
                 _seq.append([m.group(1) for m in _import_re.finditer(r'w:line="(\d+)"', _tc.group(0))])
-            _ok = _ok and len(_seq) == 2 and _seq[0] == _seq[1]
+            # r164: §6.9 đòi hai ô CÙNG BỘ giá trị chiều cao dòng (mỗi dòng cao bằng nhau). Chuỗi
+            # chỉ trùng KHÍT khi hai ô cùng số đoạn — tên cơ quan dài nay được CÂN DÒNG (§6.27,
+            # kiêng dòng 1 từ) nên có thể nhiều đoạn hơn; §6.14 đã chốt lệch dòng KHÔNG bắt buộc
+            # ngang nhau.
+            _ok = _ok and len(_seq) == 2 and set(_seq[0]) == set(_seq[1])
+            if len(_seq[0]) == len(_seq[1]):
+                _ok = _ok and _seq[0] == _seq[1]
             # hệ ĐẢNG
             SPEC_D = dict(SPEC_HC, he="dang", chu_quan="ĐẢNG BỘ KHỐI CƠ QUAN TRUNG ƯƠNG",
                           ten_cq="ĐẢNG ỦY ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC", so_kh="Số 12-BC/ĐU",
@@ -14019,6 +14025,12 @@ def run() -> int:
             _ok = _ok and _env2.get("ok") is True and _e2["he"] == "dang" and _e2["summary"]["fail"] == 0
             _d3 = __import__("zipfile").ZipFile(_o2).read("word/document.xml").decode("utf-8")
             _ok = _ok and "ĐẢNG CỘNG SẢN VIỆT NAM" in _d3 and "-----" in _d3 and "*" in _d3
+            # r164 §6.27: tên cơ quan DÀI được chia CÂN — KHÔNG dòng nào chỉ có 1 từ
+            _dai = _TL_MODULE._tt_can_dong("ĐẢNG BỘ KHỐI CÁC CƠ QUAN TRUNG ƯƠNG", 5099, 28)
+            _ok = _ok and len(_dai) >= 2 and all(len(_x.split()) >= 2 for _x in _dai)
+            _ok = _ok and " ".join(_dai) == "ĐẢNG BỘ KHỐI CÁC CƠ QUAN TRUNG ƯƠNG"
+            # r164 §6.28: khối ký mang keepNext + hàng cantSplit ⇒ không rơi riêng sang trang mới
+            _ok = _ok and "<w:cantSplit/>" in _d2 and _d2.count("<w:keepNext/>") >= 5
             return _ok
     _t110("r145_the_thuc_build", _c145_the_thuc_build)
 
@@ -14379,7 +14391,7 @@ def run() -> int:
             return (int(_tp.group(1)) if _tp else 0, int(_bt.group(1)) if _bt else 0)
         if _mar(_tbls[0]) != (0, 0):
             return False
-        if _mar(_tbls[1]) != (120, 120) or _mar(_tbls[2]) != (120, 120):
+        if _mar(_tbls[1]) != (80, 80) or _mar(_tbls[2]) != (80, 80):   # r164: 6pt → 4pt
             return False
         # r161: Google Docs BỎ tblCellMar khi chuyển .docx → GDoc (kho mẫu lưu canonical dạng GDoc)
         # ⇒ đoạn CUỐI của ô có viền phải mang w:after (spacing SỐNG SÓT round-trip), nếu không bản
@@ -14393,7 +14405,7 @@ def run() -> int:
                 if not "".join(_r6.findall(r"<w:t[^>]*>([^<]*)</w:t>", _last)).strip():
                     continue          # ô vMerge rỗng — bỏ qua
                 _af = _r6.search(r'w:after="(\d+)"', _last)
-                if not _af or int(_af.group(1)) != 120:
+                if not _af or int(_af.group(1)) != 80:
                     return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt

@@ -608,6 +608,33 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                 f"Quốc hiệu {sq/2:g}pt / Tiêu ngữ {st/2:g}pt",
                 "Tiêu ngữ = Quốc hiệu + 1pt (cặp 12-13 hoặc 13-14 — tăng, giảm phải thống nhất)",
                 "PL I NĐ 30/2020 Mục V, chú thích 1")
+    # r163 (user 20-07): TỔ CHỨC ĐẢNG ĐÃ KẾT THÚC HOẠT ĐỘNG theo KL 121-KL/TW (28/01/2025) —
+    # "Kết thúc hoạt động của Đảng uỷ Khối các cơ quan Trung ương, Đảng uỷ Khối Doanh nghiệp Trung
+    # ương"; "Kết thúc hoạt động của các đảng đoàn, ban cán sự đảng ở Trung ương; ở cấp tỉnh";
+    # thay bằng 4 đảng bộ trực thuộc BCH TW (các cơ quan Đảng TW · Quốc hội · Chính phủ · MTTQ và
+    # các đoàn thể TW). Ghi tên cơ quan đã giải thể lên văn bản là sai thực tế tổ chức.
+    _CHET = (("Khối các cơ quan Trung ương", "Đảng bộ/Đảng uỷ Quốc hội · Chính phủ · các cơ quan "
+                                             "Đảng Trung ương (tuỳ cơ quan chủ quản)"),
+             ("Khối Doanh nghiệp Trung ương", "Đảng bộ Chính phủ (doanh nghiệp nhà nước) — tra lại "
+                                              "quyết định chuyển giao cụ thể"),
+             ("Đảng đoàn Quốc hội", "Đảng uỷ Quốc hội"),
+             ("Ban cán sự đảng Chính phủ", "Đảng uỷ Chính phủ"))
+    _htxt = _tt_chuan_hoa_space(text)
+    for _ten, _thay in _CHET:
+        if _tt_loose_key(_ten) in _tt_loose_key(_htxt):
+            add("TT-TO-CHUC-HET-HIEU-LUC", "WARN", f"nhắc tổ chức đã kết thúc hoạt động: '{_ten}'",
+                "thay bằng: " + _thay, "KL 121-KL/TW mục II.2.1 (corpus 1pa5nGnV…)")
+            break
+    # r163: LẪN KIỂU ĐẶT DẤU trong cùng văn bản (user 20-07: "ĐẢNG UỶ ỦY BAN" — cùng chữ 'ủy' mà
+    # hai từ cạnh nhau đánh dấu khác nhau). Cả hai kiểu đều được chấp nhận, nhưng phải NHẤT QUÁN.
+    for _cu, _moi in (("uỷ", "ủy"), ("hoá", "hóa"), ("thuỷ", "thủy"), ("quý", "qúy"),
+                      ("khoá", "khóa"), ("hoà", "hòa"), ("loã", "lõa"), ("toà", "tòa")):
+        _l = _htxt.lower()
+        if _cu in _l and _moi in _l:
+            add("TT-CHINH-TA-DAU", "WARN",
+                f"lẫn hai kiểu đặt dấu trong cùng văn bản: '{_cu}' và '{_moi}'",
+                "chọn MỘT kiểu và dùng nhất quán toàn văn bản", "quy tắc chính tả — nhất quán")
+            break
     n_bad = len(re.findall(r"ngày\s+\d\s+tháng", text)) + len(re.findall(r"tháng\s+[12]\s+năm", text))
     if n_bad:
         add("TT-SO-NHO-10", "WARN", f"{n_bad} vị trí ngày<10/tháng<3 chưa đệm số 0",
@@ -895,7 +922,7 @@ def the_thuc_normalize(in_path, out_path, he=None):
 
 
 def _tt_p(text, *, sz=28, b=False, i=False, u=False, jc="both", first=0, before=0, after=0,
-          line=360, rule="atLeast"):
+          line=360, rule="atLeast", keep=False):
     """1 đoạn docx với thuộc tính TƯỜNG MINH (builder r145 — không phụ thuộc style ngoài)."""
     rpr = "<w:rPr>"
     if b:
@@ -906,9 +933,43 @@ def _tt_p(text, *, sz=28, b=False, i=False, u=False, jc="both", first=0, before=
         rpr += '<w:u w:val="single"/>'
     rpr += f'<w:sz w:val="{sz}"/><w:szCs w:val="{sz}"/></w:rPr>'
     esc = (str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
-    return (f'<w:p><w:pPr><w:spacing w:before="{before}" w:after="{after}" w:line="{line}"'
+    # r164: keepNext = "dính với đoạn sau" — chống trang CHỈ CÓ khối ký ở đầu (§6.28)
+    _kn = "<w:keepNext/>" if keep else ""
+    return (f'<w:p><w:pPr>{_kn}<w:spacing w:before="{before}" w:after="{after}" w:line="{line}"'
             f' w:lineRule="{rule}"/><w:ind w:firstLine="{first}"/><w:jc w:val="{jc}"/></w:pPr>'
             f'<w:r>{rpr}<w:t xml:space="preserve">{esc}</w:t></w:r></w:p>')
+
+
+def _tt_can_dong(text, w_o, sz, hoa=True):
+    """r164 §6.27 — chia tên cơ quan DÀI thành các dòng CÂN NHAU tại ranh giới TỪ.
+
+    Word tự ngắt dòng theo chiều rộng, hay để lại dòng cuối chỉ MỘT từ (user 20-07: "rất hạn chế
+    để một dòng chỉ có đúng một từ — kiêng"). Chủ động chia trước bằng nhiều ĐOẠN (không dùng
+    `<w:br/>` — r143 cho thấy br cứng làm dính chữ khi bóc text để đối chiếu nguyên văn).
+    Trả về list dòng; nếu vừa một dòng thì trả [text]."""
+    import math
+    K = 0.62 if hoa else 0.50
+
+    def _est(x):
+        return len(x) * K * (sz / 2) * 20
+
+    if _est(text) <= w_o or " " not in text:
+        return [text]
+    tu = text.split()
+    n = min(len(tu), max(2, math.ceil(_est(text) / w_o)))
+    min_tu = 2 if len(tu) >= 2 * n else 1        # đủ từ thì mỗi dòng ≥ 2 từ
+    muc = len(text) / n
+    ra, cur = [], []
+    for k, w in enumerate(tu):
+        cur.append(w)
+        con_tu, con_dong = len(tu) - k - 1, n - len(ra) - 1
+        if (con_dong > 0 and len(" ".join(cur)) >= muc * 0.9
+                and len(cur) >= min_tu and con_tu >= min_tu * con_dong):
+            ra.append(" ".join(cur))
+            cur = []
+    if cur:
+        ra.append(" ".join(cur))
+    return ra or [text]
 
 
 def _tt_so_nbsp(text, pt_text, pt_gach, hoa=True, ty_le=0.42):
@@ -992,7 +1053,8 @@ def _phieu_trinh_build(spec, out_path):
 
     # r160 (user 20-07, ảnh: dòng cuối ô Nội dung DÍNH viền dưới): tblCellMar chỉ đặt trái/phải,
     # trên/dưới = 0 ⇒ chữ chạm nét kẻ. Đệm dọc mặc định 6pt = 120tw (spec.dem_o_pt).
-    _mar_o = max(0, int(round(float(spec.get("dem_o_pt", 6)) * 20)))
+    # r164: user 20-07 "hẹp lại 1 xíu nhưng không quá hẹp như trước" (trước = 0) ⇒ 6pt → 4pt
+    _mar_o = max(0, int(round(float(spec.get("dem_o_pt", 4)) * 20)))
 
     def _cellmar(tb):
         _d = (f'<w:top w:w="{_mar_o}" w:type="dxa"/>'
@@ -1182,8 +1244,12 @@ def the_thuc_build(spec, out_path):
     LH = dict(line=L_KHOI, rule="exact")
     if dang:
         TD = "ĐẢNG CỘNG SẢN VIỆT NAM"
-        left = (_tt_p(spec.get("chu_quan", ""), sz=S["cq"], jc="center", **LH)
-                + _tt_p(spec.get("ten_cq", ""), sz=S["cq"], b=True, jc="center", **LH)
+        # ⚠ chu_quan RỖNG vẫn phải sinh MỘT đoạn rỗng: §6.9 đòi hai ô tiêu đề CÙNG chuỗi w:line
+        # thì gạch mới ngang nhau — bỏ hẳn đoạn này làm lệch số đoạn giữa hai ô (r145 bắt được).
+        left = "".join(_tt_p(_d, sz=S["cq"], jc="center", **LH)
+                       for _d in _tt_can_dong(spec.get("chu_quan", ""), wl, S["cq"]))
+        left += ("".join(_tt_p(_d, sz=S["cq"], b=True, jc="center", **LH)
+                         for _d in _tt_can_dong(spec.get("ten_cq", ""), wl, S["cq"]))
                 # r148: dấu sao là CHỮ THẬT — line phải ĐỦ CAO, ép exact nhỏ hơn cỡ chữ thì
                 # Word CẮT NGỌN (user 20-07: "không thể đọc được dấu sao ở đâu"). Chỉ đoạn
                 # GẠCH (toàn NBSP, không nét nhô) mới được ép line nhỏ.
@@ -1197,8 +1263,13 @@ def the_thuc_build(spec, out_path):
                  + _tt_p(spec.get("dia_danh", ""), sz=S["dd"], i=True, jc="center", before=120, **LH))
     else:
         TN = "Độc lập - Tự do - Hạnh phúc"
-        left = (_tt_p(spec.get("chu_quan", ""), sz=S["cq"], jc="center", **LH)
-                + _tt_p(spec.get("ten_cq", ""), sz=S["cq"], b=True, jc="center", **LH)
+        # r164 §6.27: chia CÂN theo từ, tránh dòng cuối chỉ 1 từ (kiêng)
+        # ⚠ chu_quan RỖNG vẫn phải sinh MỘT đoạn rỗng: §6.9 đòi hai ô tiêu đề CÙNG chuỗi w:line
+        # thì gạch mới ngang nhau — bỏ hẳn đoạn này làm lệch số đoạn giữa hai ô (r145 bắt được).
+        left = "".join(_tt_p(_d, sz=S["cq"], jc="center", **LH)
+                       for _d in _tt_can_dong(spec.get("chu_quan", ""), wl, S["cq"]))
+        left += ("".join(_tt_p(_d, sz=S["cq"], b=True, jc="center", **LH)
+                         for _d in _tt_can_dong(spec.get("ten_cq", ""), wl, S["cq"]))
                 + _tt_gach(spec.get("ten_cq", ""), S["cq"], hoa=True, ty_le=0.42)
                 + _tt_p(spec.get("so_kh", ""), sz=S["so"], jc="center", before=120, **LH))
         right = (_tt_p("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", sz=S["qh"], b=True, jc="center", **LH)
@@ -1284,8 +1355,14 @@ def the_thuc_build(spec, out_path):
     # Đo tỷ lệ trên chính sơ đồ (khe ô6→ô7a ÷ chiều cao vùng chữ) ≈ 8,4mm ≈ 24pt ⇒ lấy làm MẶC
     # ĐỊNH (trước đây 12pt, quá sát). Chỉnh được bằng spec.dem_ky_pt.
     _dem_ky = max(120, int(round(float(spec.get("dem_ky_pt", 24)) * 20)))
-    body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=_dem_ky, rule="exact"))
-    body.append(tbl(wl2, wr2, nn, ky))
+    # r164 §6.28: đoạn thân CUỐI + đoạn đệm mang keepNext ⇒ Word không đẩy RIÊNG khối ký sang
+    # trang mới (user 20-07: "không được để một trang chỉ có phần ký ở ngay trên đầu").
+    if body and body[-1].startswith("<w:p>"):
+        body[-1] = body[-1].replace("<w:pPr>", "<w:pPr><w:keepNext/>", 1)
+    body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=_dem_ky, rule="exact",
+                      keep=True))
+    _tb_ky = tbl(wl2, wr2, nn, ky).replace("<w:tr>", "<w:tr><w:trPr><w:cantSplit/></w:trPr>", 1)
+    body.append(_tb_ky.replace("<w:pPr>", "<w:pPr><w:keepNext/>"))
 
     _tt_ghi_docx(body, le, S["than"], out_path, pgw=PGW)
     env_chk = the_thuc_check(out_path, he=("dang" if dang else ("vbqppl_qh" if qh else None)))

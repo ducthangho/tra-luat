@@ -1,3 +1,25 @@
+# ★ v1.34.95 — cân dòng, keepNext, tổ chức hết hiệu lực, nhất quán dấu (§6.27-6.30) (2026-07-20)
+
+> Bốn góp ý của user sau khi xem bộ mẫu Đảng, cộng một chỉnh cho Phiếu trình. selftest 1125/1125.
+
+- **§6.29 TỔ CHỨC ĐÃ KẾT THÚC HOẠT ĐỘNG** — bộ mẫu Đảng ghi cơ quan cấp trên là *"Đảng bộ Khối các
+  cơ quan Trung ương"*, mà KL 121-KL/TW mục II.2.1 đã **kết thúc hoạt động** tổ chức này; các cơ quan
+  Quốc hội nay thuộc **Đảng uỷ Quốc hội** (Đảng bộ Quốc hội — QĐ 244-QĐ/TW ngày 24/01/2025).
+  Cùng lỗi ở `BC_74_DU_UBQLV` (*"Khối Doanh nghiệp Trung ương"*, cũng đã giải thể). Cờ mới
+  `TT-TO-CHUC-HET-HIEU-LUC` (WARN, hệ dang).
+- **§6.30 NHẤT QUÁN KIỂU ĐẶT DẤU** — *"ĐẢNG UỶ ỦY BAN VĂN HOÁ VÀ XÃ HỘI"*: cùng chữ "ủy" mà hai từ
+  cạnh nhau đánh dấu khác kiểu. Cả hai kiểu đều hợp lệ nhưng phải nhất quán trong một văn bản.
+  Cờ mới `TT-CHINH-TA-DAU` (WARN).
+- **§6.27 CÂN DÒNG, KIÊNG DÒNG 1 TỪ** — `_tt_can_dong` chia tên cơ quan dài thành các đoạn cân nhau
+  tại ranh giới từ, mỗi dòng ≥2 từ. Không dùng `<w:br/>` (r143: br cứng làm dính chữ khi bóc text).
+  ⚠ Kéo theo: ô trái có thể nhiều đoạn hơn ô phải ⇒ r145 nới assert §6.9 thành "cùng BỘ giá trị
+  chiều cao dòng", chuỗi chỉ trùng khít khi hai ô cùng số đoạn (đúng §6.14).
+- **§6.28 KHÔNG ĐỂ TRANG CHỈ CÓ KHỐI KÝ** — `keepNext` cho đoạn thân cuối + đoạn đệm + mọi đoạn
+  trong bảng ký, `cantSplit` cho hàng bảng ký.
+- **Phiếu trình**: đệm ô 6pt → **4pt** (user: hẹp lại một xíu, đừng như trước = 0).
+- ★Hồi quy bắt được trong phiên: bỏ đoạn `chu_quan` RỖNG làm hai ô tiêu đề lệch chuỗi `w:line`
+  (r145 đỏ) — chu_quan rỗng vẫn phải sinh một đoạn rỗng để giữ §6.9.
+
 # ★ v1.34.94 — CHỨC VỤ người ký VB ĐẢNG không in đậm (HD05 PL2 mục 7) (2026-07-20)
 
 > Rà TRỌN Phụ lục 2 HD 05-HD/VPTW (bản 27/5/2026) đối chiếu builder — cùng cách đã làm với NQ351.

@@ -65,6 +65,16 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   nguồn sự thật cho tool-inventory/workflow-audit. KHÁC **registry corpus** (Google Sheet `tra_luat_registry`
   — sổ cái văn bản pháp luật). Nói trần "registry" trong ngữ cảnh vận hành corpus = registry corpus.
 
+## Thể thức
+
+- **Đặc tả thể thức** — bản khai duy nhất về trình bày (cỡ/kiểu/canh/thụt + căn cứ) của từng thành phần
+  văn bản theo hệ. Builder và bộ kiểm cùng đọc từ đây; giá trị trình bày không được ghi nơi thứ hai. Xem ADR-0009.
+- **Bậc thẩm quyền (B1/B2/B3)** — thứ tự phân xử khi các nguồn quy định lệch nhau: **B1** văn bản gốc
+  nguyên văn thắng tuyệt đối; **B2** reference có trích § cụ thể thắng code; **B3** quy ước nội bộ — hợp lệ
+  nhưng buộc mang nhãn "quy ước", cấm trình bày như căn cứ pháp lý. Mỗi ô đặc tả tự khai bậc của mình.
+- **Cách ly (ô đặc tả)** — trạng thái của ô chưa xác minh được căn cứ: không dùng để build/kiểm, chờ đối
+  soát văn bản gốc. Khác với **khai trắng** — hệ tuyên bố tường minh là chưa được đặc tả.
+
 ## Profile
 
 - **Profile** — không gian corpus tự chủ (folder Drive + notebook NLM + registry Sheet riêng + manifest JSON riêng,

@@ -13351,7 +13351,8 @@ def run() -> int:
                    "vbqppl: le_tren_mm=15-20 le_duoi_mm=15-20 le_trai_mm=30-35 le_phai_mm=15-20",
                    "vbhn: ke_thua=vbqppl so_trang=13-14",
                    "dang: le_tren_mm=20 le_duoi_mm=20 le_trai_mm=30 le_phai_mm=15",
-                   "normalize: le=20/20/30/15"):
+                   # r172 (ADR-0009/Q4): normalize lề THEO HỆ — nhà nước 20 = build, Đảng 15 HD05
+                   "normalize: le_nha_nuoc=20/20/30/20 le_dang=20/20/30/15"):
             _ok = _ok and (_n in _t)
         return _ok
     _t110("r135_the_thuc_reference_anchored", _c135_the_thuc_reference_anchored)
@@ -13668,7 +13669,8 @@ def run() -> int:
                    and (_env.get("self_check") or {}).get("t1_fail", 1) == 0)
             _p = _TL_MODULE._the_thuc_parse_docx(_out)
             _s = _p["sections"][0]
-            _ok = _ok and (_s["top"], _s["bottom"], _s["left"], _s["right"]) == (1134, 1134, 1701, 850)
+            # r172 (ADR-0009/Q4): file nhà nước → lề phải 1134 (20mm) = trùng builder, hết đá nhau
+            _ok = _ok and (_s["top"], _s["bottom"], _s["left"], _s["right"]) == (1134, 1134, 1701, 1134)
             _ok = _ok and _p["defaults"]["font"] == "Times New Roman" and _p["defaults"]["sz"] == 26
             _e = _TL_MODULE.the_thuc_check(_out)
             return _ok and not any(f["level"] == "FAIL" and f["id"] in (
@@ -14414,7 +14416,7 @@ def run() -> int:
             for _q in _r70.findall(r"<w:p>.*?</w:p>", _x, _r70.S):
                 if "".join(_r70.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() != _txt:
                     continue
-                _co, _kieu, _canh, _thut, _cc = _spec_o
+                _co, _kieu, _canh, _thut, _cc = _spec_o[:5]   # r172: tuple 6 trường (+bac ADR-0009)
                 _sz = _r70.search(r'<w:sz w:val="(\d+)"', _q)
                 _pt = int(_sz.group(1)) / 2 if _sz else None
                 _lo, _hi = (float(v) for v in (_co.split("-") * 2)[:2])

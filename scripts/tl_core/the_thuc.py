@@ -71,80 +71,105 @@ def _the_thuc_criteria():
             "ky_hieu_soan": "11", "so_trang": "14", "line_pt": "18-22", "thut_dau_dong_mm": "10",
             "doan_pt_min": "6"},
         "normalize": {
-            "le": "20/20/30/15", "font": "Times New Roman", "sz_nha_nuoc": "13", "sz_dang": "14"},
+            "le_nha_nuoc": "20/20/30/20", "le_dang": "20/20/30/15",
+            "font": "Times New Roman", "sz_nha_nuoc": "13", "sz_dang": "14"},
     }
 
 
 def _tt_dac_ta():
-    """r170 — ĐẶC TẢ ĐẦY ĐỦ từng THÀNH PHẦN × HỆ. Bổ khuyết cho `_the_thuc_criteria()` vốn chỉ khoá
-    NGƯỠNG SỐ (cỡ chữ, lề, thụt) — trong khi mọi lỗi thực chiến 20-07 đều nằm ở thứ KHÔNG được
+    """r170+r172 — ĐẶC TẢ ĐẦY ĐỦ từng THÀNH PHẦN × HỆ. Bổ khuyết cho `_the_thuc_criteria()` vốn chỉ
+    khoá NGƯỠNG SỐ (cỡ chữ, lề, thụt) — trong khi mọi lỗi thực chiến 20-07 đều nằm ở thứ KHÔNG được
     khoá: **kiểu chữ** (đậm/nghiêng/gạch chân), **canh lề**, **loại thụt**. Mỗi ô:
 
-        (co, kieu, canh, thut, can_cu)
+        (co, kieu, canh, thut, can_cu, bac)
           co    : cỡ chữ (pt) — "n" đơn trị | "lo-hi" dải
           kieu  : tập con của {dam, nghieng, gach} — "" = in thường đứng
           canh  : center | both | left | right
           thut  : "0" | "fl:<twips>" thụt DÒNG ĐẦU | "left:<twips>" thụt TRÁI cả khối
           can_cu: điều khoản gốc, để tra ngược khi tranh cãi
+          bac   : bậc thẩm quyền ADR-0009 — "B1" nguyên văn văn bản gốc · "B2" reference có trích §
+                  · "B3" quy ước nội bộ (KHÔNG phải căn cứ pháp lý). Hậu tố "*": luật chỉ cho DẢI
+                  hoặc không ấn định thuộc tính đó — giá trị đơn trong ô là LỰA CHỌN nội bộ (phần
+                  chọn mang tính B3). Ô không xác minh được căn cứ → CÁCH LY: không đưa vào bảng.
 
+    Hai hệ `vbqppl` (CP/TTg/Bộ) và `vbhn` KHAI TRẮNG TƯỜNG MINH (ADR-0009): giá trị
+    {"__khai_trang__": lý_do} — consumer hỏi tới phải trả lời "chưa đặc tả", cấm giả vờ kiểm.
     Dùng cho: (a) test đối soát r170 — dựng văn bản mẫu rồi kiểm TỪNG thành phần khớp bảng, chặn
-    builder và bộ kiểm trôi khỏi nhau; (b) tra cứu khi soạn tay.
+    builder và bảng trôi khỏi nhau; (b) tra cứu khi soạn tay. ĐÍCH ADR-0009: builder + bộ kiểm cùng
+    ĐỌC bảng này (nối theo trình tự 5 bước — docs/adr/0009); khi đó bảng là nguồn sự thật duy nhất.
     ⚠ Sửa bảng này = sửa hành vi builder: phải kèm căn cứ nguyên văn, không "chỉnh cho đẹp"."""
     return {
         "hanh_chinh": {          # NĐ 30/2020 Phụ lục I
-            "quoc_hieu":    ("12-13", "dam",          "center", "0",       "NĐ30 PL I II.1"),
-            "tieu_ngu":     ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.1"),
-            "ten_cq":       ("12-13", "dam",          "center", "0",       "NĐ30 PL I II.2"),
-            "so_ky_hieu":   ("13",    "",             "center", "0",       "NĐ30 PL I II.3"),
-            "dia_danh":     ("13-14", "nghieng",      "center", "0",       "NĐ30 PL I II.4"),
-            "ten_loai":     ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.5"),
-            "trich_yeu":    ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.5"),
-            "than":         ("13-14", "",             "both",   "fl:567",  "NĐ30 PL I II.6.e"),
-            "quyen_han_ky": ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ"),
-            "chuc_vu_ky":   ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ"),
-            "ho_ten_ky":    ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7"),
-            "noi_nhan_tu":  ("12",    "dam,nghieng",  "left",   "0",       "NĐ30 PL I II.9"),
-            "noi_nhan_ds":  ("11",    "",             "left",   "0",       "NĐ30 PL I II.9"),
+            "quoc_hieu":    ("12-13", "dam",          "center", "0",       "NĐ30 PL I II.1", "B1"),
+            "tieu_ngu":     ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.1", "B1"),
+            # r172: TÁCH chủ quản/ban hành theo §6.16 — trước gộp một ô `ten_cq` khai "dam" khiến
+            # CQ CHỦ QUẢN bị đậm sai (NĐ30 PL I II.2: chủ quản in hoa KHÔNG đậm, ban hành ĐẬM)
+            "ten_cq_tren":  ("12-13", "",             "center", "0",       "NĐ30 PL I II.2 — chủ quản KHÔNG đậm (§6.16)", "B1"),
+            "ten_cq":       ("12-13", "dam",          "center", "0",       "NĐ30 PL I II.2 — CQ ban hành đậm", "B1"),
+            "so_ky_hieu":   ("13",    "",             "center", "0",       "NĐ30 PL I II.3", "B1"),
+            "dia_danh":     ("13-14", "nghieng",      "center", "0",       "NĐ30 PL I II.4", "B1"),
+            "ten_loai":     ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.5", "B1"),
+            "trich_yeu":    ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.5", "B1"),
+            "than":         ("13-14", "",             "both",   "fl:567",  "NĐ30 PL I II.6.e (thụt 1-1,27cm)", "B1*"),
+            # r172: 4 ô bố cục — NĐ30 PL I II.6 (bảng §2.3: từ+số đậm, tiêu đề in hoa đậm);
+            # canh giữa là quy ước trình bày phổ biến, NĐ30 không ấn định ⇒ hậu tố *
+            "phan_chuong":  ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6 (bảng §2.3)", "B1*"),
+            "tieu_de_pc":   ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6 (tiêu đề in hoa đậm)", "B1*"),
+            "muc":          ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6", "B1*"),
+            "dieu":         ("13-14", "dam",          "both",   "fl:567",  "NĐ30 PL I II.6 (Điều: từ+số+tên đậm)", "B1*"),
+            "quyen_han_ky": ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ", "B1"),
+            "chuc_vu_ky":   ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ", "B1"),
+            "ho_ten_ky":    ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7", "B1"),
+            "noi_nhan_tu":  ("12",    "dam,nghieng",  "left",   "0",       "NĐ30 PL I II.9", "B1"),
+            "noi_nhan_ds":  ("11",    "",             "left",   "0",       "NĐ30 PL I II.9", "B1"),
         },
-        "vbqppl_qh": {           # NQ 351/2017/UBTVQH14 — Phụ lục I (sơ đồ) + Đ33-38
-            "quoc_hieu":    ("12",    "dam",          "center", "0",       "NQ351 PL I sơ đồ"),
-            "tieu_ngu":     ("14",    "dam",          "center", "0",       "NQ351 PL I sơ đồ"),
-            "ten_cq":       ("12",    "dam",          "center", "0",       "NQ351 PL I sơ đồ"),
-            "so_ky_hieu":   ("13",    "",             "center", "0",       "NQ351 Đ32"),
-            "dia_danh":     ("14",    "nghieng",      "center", "0",       "NQ351 Đ36 k2"),
-            "ten_loai":     ("14",    "dam",          "center", "0",       "NQ351 PL I sơ đồ"),
-            "trich_yeu":    ("14",    "dam",          "center", "0",       "NQ351 PL I sơ đồ"),
-            "can_cu":       ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ34"),
-            "phan_chuong":  ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a"),
-            "tieu_de_pc":   ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a"),
-            "muc":          ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 b"),
-            "dieu":         ("14",    "dam",          "both",   "left:567", "NQ351 Đ35 k2 c"),
-            "than":         ("14",    "",             "both",   "fl:567",  "NQ351 Đ35 k1"),
-            "thong_qua":    ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ36 k1"),
-            "chuc_vu_ky":   ("13",    "dam",          "center", "0",       "NQ351 Đ37 k1"),
-            "ho_ten_ky":    ("14",    "dam",          "center", "0",       "NQ351 Đ37 k2"),
-            "noi_nhan_tu":  ("12",    "dam,nghieng",  "left",   "0",       "NQ351 Đ38"),
-            "noi_nhan_ds":  ("11",    "",             "left",   "0",       "NQ351 Đ38"),
+        "vbqppl_qh": {           # NQ 351/2017/UBTVQH14 — Đ30-39 + PL I sơ đồ Mẫu 1-16 (19 sơ đồ)
+            "quoc_hieu":    ("12",    "dam",          "center", "0",       "NQ351 Đ30 (Mẫu 16: 13 — §6.17)", "B1"),
+            "tieu_ngu":     ("14",    "dam",          "center", "0",       "NQ351 Đ30", "B1"),
+            "ten_cq":       ("12",    "dam",          "center", "0",       "NQ351 Đ31", "B1"),
+            "so_ky_hieu":   ("13",    "",             "center", "0",       "NQ351 Đ32", "B1"),
+            "dia_danh":     ("14",    "nghieng",      "center", "0",       "NQ351 Đ36 k2", "B1"),
+            "ten_loai":     ("14",    "dam",          "center", "0",       "NQ351 Đ33", "B1"),
+            "trich_yeu":    ("14",    "dam",          "center", "0",       "NQ351 Đ33", "B1"),
+            "can_cu":       ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ34 (thụt 1-1,27cm)", "B1*"),
+            "phan_chuong":  ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a", "B1"),
+            "tieu_de_pc":   ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a", "B1"),
+            "muc":          ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 b", "B1"),
+            "dieu":         ("14",    "dam",          "both",   "left:567", "NQ351 Đ35 k2 c (thụt TRÁI)", "B1*"),
+            "than":         ("14",    "",             "both",   "fl:567",  "NQ351 Đ35 k1", "B1*"),
+            "thong_qua":    ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ36 k1", "B1*"),
+            # r172: bổ khuyết — Mẫu 10-13 dùng TM. ỦY BAN THƯỜNG VỤ QUỐC HỘI (Đ37 k1)
+            "quyen_han_ky": ("13",    "dam",          "center", "0",       "NQ351 Đ37 k1 (Mẫu 10-13)", "B1"),
+            "chuc_vu_ky":   ("13",    "dam",          "center", "0",       "NQ351 Đ37 k1", "B1"),
+            "ho_ten_ky":    ("14",    "dam",          "center", "0",       "NQ351 Đ37 k2", "B1"),
+            "noi_nhan_tu":  ("12",    "dam,nghieng",  "left",   "0",       "NQ351 Đ38", "B1"),
+            "noi_nhan_ds":  ("11",    "",             "left",   "0",       "NQ351 Đ38", "B1"),
         },
         "dang": {                # QĐ 399-QĐ/TW + HD 05-HD/VPTW (bản 27/5/2026)
-            "tieu_de":      ("15",    "dam",          "center", "0",       "HD05 PL2 mục 1"),
-            "ten_cq_tren":  ("14",    "",             "center", "0",       "HD05 PL2 mục 2"),
-            "ten_cq":       ("14",    "dam",          "center", "0",       "HD05 PL2 mục 2"),
-            "so_ky_hieu":   ("14",    "",             "center", "0",       "HD05 PL2 mục 3"),
-            "dia_danh":     ("14",    "nghieng",      "center", "0",       "HD05 PL2 mục 4"),
-            "the_loai":     ("15-16", "dam",          "center", "0",       "HD05 PL2 mục 5"),
-            "trich_yeu":    ("14-15", "dam",          "center", "0",       "HD05 PL2 mục 5"),
-            "phan_chuong":  ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a"),
-            "tieu_de_pc":   ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a"),
-            "muc":          ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 b"),
-            "dieu":         ("14-15", "dam",          "both",   "fl:567",  "HD05 6.2.4 c + 6.2.2"),
-            "than":         ("14-15", "",             "both",   "fl:567",  "HD05 mục 6.2.2"),
-            "quyen_han_ky": ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7"),
-            "chuc_vu_ky":   ("14",    "",             "center", "0",       "HD05 PL2 mục 7"),
-            "ho_ten_ky":    ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7"),
-            "noi_nhan_tu":  ("14",    "gach",         "left",   "0",       "HD05 PL2 mục 9"),
-            "noi_nhan_ds":  ("12",    "",             "left",   "0",       "HD05 PL2 mục 9"),
+            "tieu_de":      ("15",    "dam",          "center", "0",       "HD05 PL2 mục 1", "B1"),
+            "ten_cq_tren":  ("14",    "",             "center", "0",       "HD05 PL2 mục 2", "B1"),
+            "ten_cq":       ("14",    "dam",          "center", "0",       "HD05 PL2 mục 2", "B1"),
+            "so_ky_hieu":   ("14",    "",             "center", "0",       "HD05 PL2 mục 3", "B1"),
+            "dia_danh":     ("14",    "nghieng",      "center", "0",       "HD05 PL2 mục 4", "B1"),
+            "the_loai":     ("15-16", "dam",          "center", "0",       "HD05 PL2 mục 5", "B1"),
+            "trich_yeu":    ("14-15", "dam",          "center", "0",       "HD05 PL2 mục 5", "B1"),
+            "phan_chuong":  ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a", "B1"),
+            "tieu_de_pc":   ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a", "B1"),
+            "muc":          ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 b", "B1"),
+            # thụt 10mm=567tw ĐƠN TRỊ theo HD05 6.2.2 (khác nhà nước dải 1-1,27cm) ⇒ B1 không *
+            "dieu":         ("14-15", "dam",          "both",   "fl:567",  "HD05 6.2.4 c + 6.2.2", "B1"),
+            "than":         ("14-15", "",             "both",   "fl:567",  "HD05 mục 6.2.2 (10mm đơn trị)", "B1"),
+            "quyen_han_ky": ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7", "B1"),
+            "chuc_vu_ky":   ("14",    "",             "center", "0",       "HD05 PL2 mục 7 — KHÔNG đậm", "B1"),
+            "ho_ten_ky":    ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7", "B1"),
+            "noi_nhan_tu":  ("14",    "gach",         "left",   "0",       "HD05 PL2 mục 9", "B1"),
+            "noi_nhan_ds":  ("12",    "",             "left",   "0",       "HD05 PL2 mục 9", "B1"),
         },
+        # ── ADR-0009: hai hệ CHƯA ĐẶC TẢ — khai trắng tường minh, cấm giả vờ kiểm ──
+        "vbqppl": {"__khai_trang__": "CHƯA ĐẶC TẢ — hệ CP/TTg/Bộ (NĐ 78/2025 + PL I NĐ 187/2025) "
+                                     "chưa đối soát từng ô; hiện chỉ áp ngưỡng số _the_thuc_criteria()."},
+        "vbhn":   {"__khai_trang__": "CHƯA ĐẶC TẢ — VBHN (NĐ 250/2026) dùng checklist TT-VBHN-*; "
+                                     "trình bày kế thừa vbqppl (hệ đó cũng chưa đặc tả)."},
     }
 
 
@@ -851,11 +876,12 @@ def the_thuc_check(path, he=None, strict=False):
             if mm is None:
                 continue
             rng = _tt_range(c.get(ck))
-            if rng is None:  # vbqppl_qh: chỉ WARN theo dải-hợp nhà nước
+            if rng is None:  # r172: nhánh này nay chỉ còn vbhn chạm tới (ke_thua chưa materialize,
+                             # không khai khoá lề riêng) — vbqppl_qh ĐÃ có ngưỡng FAIL từ v1.34.76
                 lo, hi = hop
                 if not (lo - 1 <= mm <= hi + 1):
                     add(f"TT-LE-{side}", "WARN", f"{mm:.1f} mm",
-                        f"dải-hợp {lo}-{hi} mm (chưa có ngưỡng máy-đọc NQ351)", CAN_LE[he_eff], loc)
+                        f"dải-hợp {lo}-{hi} mm (hệ chưa khai ngưỡng lề riêng)", CAN_LE[he_eff], loc)
             else:
                 lo, hi = rng
                 if not (lo - 1 <= mm <= hi + 1):
@@ -963,7 +989,10 @@ def the_thuc_normalize(in_path, out_path, he=None):
                 mm = re.search(rf'w:{name}="(-?\d+)"', attrs)
                 return mm.group(1) if mm else dflt
             gut = re.search(r'w:gutter="(-?\d+)"', attrs)
-            new_mar = ('<w:pgMar w:top="1134" w:right="850" w:bottom="1134" w:left="1701"'
+            # r172 (ADR-0009/Q4): lề phải THEO HỆ = build (:~1349) — nhà nước 20mm (NĐ30 cho dải
+            # 15-20, chọn 20 để normalize KHÔNG âm thầm đổi lề file đã build) · Đảng 15mm HD05 đơn trị
+            _r_le = "850" if he_eff == "dang" else "1134"
+            new_mar = (f'<w:pgMar w:top="1134" w:right="{_r_le}" w:bottom="1134" w:left="1701"'
                        f' w:header="{_keep("header", "720")}" w:footer="{_keep("footer", "720")}"'
                        + (f' w:gutter="{gut.group(1)}"' if gut else "") + "/>")
             new = new.replace(m3.group(0), new_mar, 1)

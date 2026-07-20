@@ -481,7 +481,11 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
         add("TT-TEN-LOAI", "WARN", "không nhận diện thể loại trong 25 thể loại", "thể loại in hoa 15-16 đậm — Đ5 QĐ399", can9)
     if not re.search(r"(TM\.|KT\.|TL\.|TUQ\.|Q\.|T/M\b|CHỦ TỊCH|PHÓ CHỦ TỊCH|BỘ TRƯỞNG|THỨ TRƯỞNG|THỦ TƯỚNG"
                      r"|PHÓ THỦ TƯỚNG|CHÁNH VĂN PHÒNG|PHÓ CHÁNH VĂN PHÒNG|CHÁNH ÁN|VIỆN TRƯỞNG|TỔNG THƯ KÝ"
-                     r"|TỔNG BÍ THƯ|BÍ THƯ|PHÓ BÍ THƯ|GIÁM ĐỐC|TRƯỞNG BAN)", t):
+                     r"|TỔNG BÍ THƯ|BÍ THƯ|PHÓ BÍ THƯ|GIÁM ĐỐC|TRƯỞNG BAN"
+                     # r149: đơn vị trực thuộc ký NHÂN DANH MÌNH — chức vụ đứng một mình, không
+                     # tiền tố TM./KT./TL. (vd Vụ trưởng Vụ CN&HT báo cáo Lãnh đạo Ủy ban)
+                     r"|VỤ TRƯỞNG|PHÓ VỤ TRƯỞNG|CỤC TRƯỞNG|PHÓ CỤC TRƯỞNG|TỔNG CỤC TRƯỞNG"
+                     r"|TRƯỞNG PHÒNG|PHÓ TRƯỞNG PHÒNG|CHỦ NHIỆM|PHÓ CHỦ NHIỆM|TỔNG GIÁM ĐỐC)", t):
         add("TT-CHUC-VU-KY", "WARN", "không nhận diện quyền hạn/chức vụ người ký",
             "TM./KT./TL./TUQ. hoặc chức danh in hoa (VB Đảng: T/M)", can9)
     if he_eff in ("vbqppl", "vbqppl_qh", "vbhn") and "Căn cứ" not in t:
@@ -915,10 +919,15 @@ def the_thuc_build(spec, out_path):
         TD = "ĐẢNG CỘNG SẢN VIỆT NAM"
         left = (_tt_p(spec.get("chu_quan", ""), sz=S["cq"], jc="center", **LH)
                 + _tt_p(spec.get("ten_cq", ""), sz=S["cq"], b=True, jc="center", **LH)
-                + _tt_p("*", sz=S["cq"], b=True, jc="center", line=160, rule="exact")   # HD05: dấu sao
+                # r148: dấu sao là CHỮ THẬT — line phải ĐỦ CAO, ép exact nhỏ hơn cỡ chữ thì
+                # Word CẮT NGỌN (user 20-07: "không thể đọc được dấu sao ở đâu"). Chỉ đoạn
+                # GẠCH (toàn NBSP, không nét nhô) mới được ép line nhỏ.
+                + _tt_p("*", sz=S["cq"], b=True, jc="center", line=240, rule="atLeast")
                 + _tt_p(spec.get("so_kh", ""), sz=S["so"], jc="center", before=120, **LH))
+        # r147: gạch ÁP SÁT tiêu đề (HD05 1.2 "ngăn cách tiêu đề với địa danh"); KHÔNG chèn đoạn
+        # đệm ép 2 ô cân số đoạn — nhánh trái thường nhiều dòng hơn, ép cân làm gạch xa chữ
+        # (user 20-07: 2 nhánh lệch dòng KHÔNG bắt buộc ngang nhau, miễn gạch ôm sát chữ).
         right = (_tt_p(TD, sz=S["qh"], b=True, jc="center", **LH)
-                 + _tt_p(" ", sz=S["cq"], jc="center", **LH)
                  + _tt_gach(TD, S["qh"], hoa=True, ty_le=1.00, pt_gach=S["cq"])
                  + _tt_p(spec.get("dia_danh", ""), sz=S["dd"], i=True, jc="center", before=120, **LH))
     else:
@@ -952,12 +961,14 @@ def the_thuc_build(spec, out_path):
 
     # ── Nơi nhận | ký (bảng 2 ô) + đoạn đệm trên ──
     wl2, wr2 = round(W * 0.57), W - round(W * 0.57)
-    nn = _tt_p("Nơi nhận:", sz=S["nn"], b=True, i=not dang, u=dang, jc="left",
-               line=L_KHOI, rule="exact")
+    nn = _tt_p("Nơi nhận:", sz=S["nn"], b=not dang, i=not dang, u=dang, jc="left",
+               line=L_KHOI, rule="exact")   # r147: Đảng KHÔNG đậm (HD05 PL2)
     for x in (spec.get("noi_nhan") or []):
         nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
-    ky = (_tt_p(spec.get("quyen_han", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact")
-          + _tt_p(spec.get("chuc_vu", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact")
+    # r149: bỏ dòng RỖNG khi chỉ có MỘT dòng chức vụ — đơn vị trực thuộc ký nhân danh mình
+    # (vd "VỤ TRƯỞNG" đứng một mình, không tiền tố TM./KT./TL.)
+    ky = ("".join(_tt_p(_x, sz=S["ky"], b=True, jc="center", line=L_KHOI, rule="exact")
+                  for _x in (spec.get("quyen_han", ""), spec.get("chuc_vu", "")) if str(_x).strip())
           + "".join(_tt_p(" ", sz=S["ky"], jc="center", line=300, rule="exact")
                     for _ in range(int(spec.get("dong_trong_ky", 5))))
           + _tt_p(spec.get("ho_ten", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact"))

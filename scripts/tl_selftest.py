@@ -14019,6 +14019,94 @@ def run() -> int:
             return _ok
     _t110("r145_the_thuc_build", _c145_the_thuc_build)
 
+    # ═══ v1.34.85 — r147: 2 lỗi VB ĐẢNG user chỉ ra 20-07, tra NGUYÊN VĂN HD05 xác nhận:
+    # (a) "Nơi nhận" hệ Đảng — PL2 HD05: In thường · cỡ 14 · "Đứng, CÓ GẠCH CHÂN" ⇒ KHÔNG ĐẬM
+    #     (builder .84 để đậm = SAI; hệ nhà nước thì NĐ30 Mục V ghi rõ "nghiêng, đậm" — GIỮ).
+    # (b) gạch dưới tiêu đề ĐCSVN cách quá xa: builder .84 chèn ĐOẠN ĐỆM ép 2 ô cân 4 đoạn; HD05 1.2
+    #     nói gạch "ngăn cách tiêu đề với địa danh" ⇒ phải ÁP SÁT tiêu đề. Hai nhánh KHÔNG bắt buộc
+    #     ngang nhau khi số dòng lệch (user 20-07) — mỗi nhánh ôm sát chữ của mình. Đỏ-trước. ═══
+    def _c147_dang_noi_nhan_va_gach():
+        import tempfile as _tf147
+        import zipfile as _zf147
+        import re as _re147
+        SPEC = {"he": "dang", "chu_quan": "ĐẢNG BỘ KHỐI DOANH NGHIỆP TRUNG ƯƠNG",
+                "ten_cq": "ĐẢNG ỦY ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC TẠI DOANH NGHIỆP",
+                "so_kh": "Số 74-BC/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                "ten_loai": "BÁO CÁO", "trich_yeu": "kết quả công tác",
+                "body": [{"text": "1- Nội dung thử nghiệm đủ dài cho phần thân văn bản."}],
+                "noi_nhan": ["- Ban Thường vụ (để báo cáo);", "- Lưu Văn phòng."],
+                "quyen_han": "T/M BAN THƯỜNG VỤ", "chuc_vu": "PHÓ BÍ THƯ", "ho_ten": "Trần Văn B"}
+        with _tf147.TemporaryDirectory() as _d:
+            _o = str(Path(_d) / "d.docx")
+            _TL_MODULE.the_thuc_build(SPEC, _o)
+            _x = _zf147.ZipFile(_o).read("word/document.xml").decode("utf-8")
+            _tbls = _re147.findall(r"<w:tbl>.*?</w:tbl>", _x, _re147.S)
+            # (a) "Nơi nhận:" hệ Đảng: có gạch chân, KHÔNG đậm
+            _nn = [p for p in _re147.findall(r"<w:p>.*?</w:p>", _tbls[1], _re147.S)
+                   if "Nơi nhận:" in "".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", p))]
+            if not _nn:
+                return False
+            _ok = ("<w:u " in _nn[0]) and ("<w:b/>" not in _nn[0])
+            # (b) ô PHẢI hệ Đảng: gạch ÁP SÁT tiêu đề — không đoạn đệm rỗng chen giữa
+            _tcs = _re147.findall(r"<w:tc>.*?</w:tc>", _tbls[0], _re147.S)
+            _ps = _re147.findall(r"<w:p>.*?</w:p>", _tcs[1], _re147.S)
+            _txt = ["".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", p)).strip() for p in _ps]
+            _iTD = next(i for i, t in enumerate(_txt) if "ĐẢNG CỘNG SẢN VIỆT NAM" in t)
+            _iG = next(i for i, p in enumerate(_ps) if "<w:u " in p)
+            _ok = _ok and (_iG == _iTD + 1)                     # gạch NGAY SAU tiêu đề
+            # hệ nhà nước GIỮ "Nơi nhận" nghiêng+đậm (NĐ30 Mục V)
+            _o2 = str(Path(_d) / "hc.docx")
+            _TL_MODULE.the_thuc_build(dict(SPEC, he="hanh_chinh", chu_quan="CHÍNH PHỦ",
+                                           ten_cq="ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC TẠI DOANH NGHIỆP",
+                                           so_kh="Số: 187/BC-UBQLV"), _o2)
+            _x2 = _zf147.ZipFile(_o2).read("word/document.xml").decode("utf-8")
+            _nn2 = [p for p in _re147.findall(r"<w:p>.*?</w:p>", _x2, _re147.S)
+                    if "Nơi nhận:" in "".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", p))]
+            return _ok and "<w:b/>" in _nn2[0] and "<w:i/>" in _nn2[0]
+    _t110("r147_dang_noi_nhan_va_gach", _c147_dang_noi_nhan_va_gach)
+
+    # ═══ v1.34.85 — r148: DẤU SAO (*) VB Đảng bị CẮT CỤT (user 20-07: "không thể đọc được dấu sao ở
+    # đâu"). Nguyên nhân: đoạn dấu sao để line=160 EXACT (8pt) trong khi chữ 14pt ⇒ Word cắt từ trên,
+    # chỉ còn chân dấu sao. Quy tắc: ĐOẠN CHỨA CHỮ THẬT phải có line ≥ cỡ chữ (hoặc atLeast) — chỉ
+    # đoạn GẠCH (toàn NBSP, không nét chữ nhô) mới được ép line nhỏ. Đỏ-trước. ═══
+    def _c148_dau_sao_khong_bi_cat():
+        import tempfile as _tf148
+        import zipfile as _zf148
+        import re as _re148
+        SPEC = {"he": "dang", "chu_quan": "ĐẢNG BỘ KHỐI DOANH NGHIỆP TRUNG ƯƠNG",
+                "ten_cq": "ĐẢNG ỦY ỦY BAN QUẢN LÝ VỐN", "so_kh": "Số 74-BC/ĐU",
+                "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026", "ten_loai": "BÁO CÁO",
+                "trich_yeu": "kết quả công tác",
+                "body": [{"text": "1- Nội dung thử nghiệm đủ dài cho phần thân văn bản."}],
+                "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN THƯỜNG VỤ",
+                "chuc_vu": "PHÓ BÍ THƯ", "ho_ten": "Trần Văn B"}
+        with _tf148.TemporaryDirectory() as _d:
+            _o = str(Path(_d) / "d.docx")
+            _TL_MODULE.the_thuc_build(SPEC, _o)
+            _x = _zf148.ZipFile(_o).read("word/document.xml").decode("utf-8")
+            _tb = _re148.search(r"<w:tbl>.*?</w:tbl>", _x, _re148.S).group(0)
+            _sao = [p for p in _re148.findall(r"<w:p>.*?</w:p>", _tb, _re148.S)
+                    if "".join(_re148.findall(r"<w:t[^>]*>([^<]*)</w:t>", p)).strip() == "*"]
+            if len(_sao) != 1:
+                return False
+            _p = _sao[0]
+            _sz = int(_re148.search(r'<w:sz w:val="(\d+)"', _p).group(1))      # half-points
+            _m = _re148.search(r'w:line="(\d+)" w:lineRule="(\w+)"', _p)
+            _line, _rule = int(_m.group(1)), _m.group(2)
+            # line EXACT phải ≥ cỡ chữ (twips = pt×20 = sz/2×20 = sz×10); hoặc dùng atLeast
+            _ok = (_rule != "exact") or (_line >= _sz * 10)
+            # MỌI đoạn có chữ thật trong bảng tiêu đề đều phải thoả (không riêng dấu sao)
+            for _q in _re148.findall(r"<w:p>.*?</w:p>", _tb, _re148.S):
+                _t = "".join(_re148.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip()
+                if not _t or _t == " " or ("<w:u " in _q):        # bỏ qua đoạn GẠCH (toàn NBSP)
+                    continue
+                _s2 = int(_re148.search(r'<w:sz w:val="(\d+)"', _q).group(1))
+                _m2 = _re148.search(r'w:line="(\d+)" w:lineRule="(\w+)"', _q)
+                if _m2 and _m2.group(2) == "exact" and int(_m2.group(1)) < _s2 * 10:
+                    return False
+            return _ok
+    _t110("r148_dau_sao_khong_bi_cat", _c148_dau_sao_khong_bi_cat)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

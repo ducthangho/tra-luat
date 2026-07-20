@@ -1,3 +1,25 @@
+# ★ v1.34.85 — vá 4 lỗi VB Đảng/đơn-vị-trực-thuộc do thực chiến lộ + §6.14-6.16 (2026-07-20)
+
+> User thử 2 VB (khối Chính phủ tên đơn vị dài · thể thức Đảng) → chỉ ra 4 lỗi, tra NGUYÊN VĂN HD05
+> xác nhận. selftest 1116→**1118** (r147 ×1, r148 ×1 đỏ-trước; +r149 nới regex chức vụ).
+
+- **(1) "Nơi nhận" VB ĐẢNG KHÔNG ĐẬM** — PL2 HD05: In thường · cỡ 14 · *"Đứng, CÓ GẠCH CHÂN"*, không
+  có "đậm"; builder .84 để đậm = SAI. Hệ nhà nước GIỮ nghiêng+đậm (NĐ30 Mục V). Reference thêm khối
+  ⚠ĐÍNH CHÍNH vì đây là chỗ rất dễ nhầm giữa 2 hệ.
+- **(2) Gạch dưới tiêu đề ĐCSVN cách quá xa** — builder .84 chèn đoạn đệm ép 2 ô cân số đoạn; nhánh
+  trái (tên CQ dài 2 dòng) ≠ nhánh phải (tiêu đề 1 dòng) nên đệm đẩy gạch rơi xa. **§6.14**: hai nhánh
+  lệch dòng thì KHÔNG bắt buộc ngang nhau, gạch phải ÔM SÁT chữ nhánh mình (HD05 1.2: gạch "ngăn cách
+  tiêu đề với địa danh"). Bỏ đoạn đệm.
+- **(3) Dấu sao (*) bị CẮT NGỌN, nhìn như vết bẩn** — đoạn dấu sao để `line 8pt exact` trong khi chữ
+  14pt ⇒ Word cắt từ trên. **§6.15**: đoạn có CHỮ THẬT phải `line ≥ cỡ chữ` (hoặc `atLeast`); chỉ đoạn
+  GẠCH (toàn NBSP) mới được ép nhỏ. r148 khoá quy tắc cho MỌI đoạn trong bảng tiêu đề.
+- **(4) Cấu trúc chủ quản vs ban hành (§6.16)** — đơn vị trực thuộc (vụ/cục/phòng) ra VB nhân danh
+  mình: chủ quản in hoa KHÔNG đậm ở trên, đơn vị ban hành in hoa ĐẬM + gạch dưới ở dưới; ký hiệu theo
+  đơn vị ban hành; người ký ghi chức vụ ĐỨNG MỘT MÌNH (VỤ TRƯỞNG), không TL./KT. r149: bộ kiểm
+  TT-CHUC-VU-KY nhận thêm chức danh cấp vụ/cục/phòng/chủ nhiệm; builder bỏ dòng ký rỗng khi chỉ 1 dòng.
+- Thực chiến bản cuối: `BC_187_CNHT_ha_tang_CNTT.docx` (0 FAIL, 1 WARN wrap tên chủ quản 44 ký tự —
+  đúng thực tế) · `BC_74_DU_UBQLV_chuyen_doi_so_moi.docx` (**0/0/0**). Kernel CHỈ đổi header.
+
 # ★ v1.34.84 — ĐÚC KẾT THỰC CHIẾN: 4 tiêu chí kiểm mới + lệnh `tl the-thuc-build` (2026-07-20)
 
 > User duyệt "OK, tổng hợp kinh nghiệm vào skill" sau khi nghiệm thu BC rà soát thể thức. Toàn bộ lỗi

@@ -1,3 +1,16 @@
+# ★ v1.34.91 — Phiếu trình: "Kính gửi" không đậm, thụt 0,8cm trong bảng (§6.24) (2026-07-20)
+
+- **"Kính gửi" KHÔNG in đậm** (user 20-07). Lưu ý: mẫu gốc CÓ đậm — đây là yêu cầu của Ủy ban ghi đè
+  mẫu, không phải sửa lỗi.
+- **Đề mục và mọi paragraph trong BẢNG nội dung thụt đầu dòng 0,8cm** (`spec.thut_bang_cm`, dải
+  0,8–1cm, ưu tiên 0,8). Trước đó đề mục không thụt còn paragraph thụt 1cm. ⚠ 0,8cm THẤP HƠN dải
+  1–1,27cm của NĐ30/NQ351 — hợp lệ vì phiếu trình là biểu mẫu NỘI BỘ (§6.21), không được áp sang
+  văn bản phát hành.
+- **Sửa thêm một chỗ tôi tự ý làm khác mẫu gốc**: dòng *"Nội dung: …"* — bản .90 để cỡ 13, dàn đều,
+  thụt 1cm; mẫu gốc là **cỡ 14, canh giữa, không thụt**. Đối chiếu lại mới thấy, nay bám đúng gốc.
+- r156 siết: "Kính gửi" không có `<w:b/>` · đề mục + paragraph trong bảng có `firstLine=454`.
+  Xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.90 — Phiếu trình: mỗi cấp ký một dòng có viền + khe trước bảng (2026-07-20)
 
 > User: *"khoảng cách giữa bảng nội dung và phần tiêu đề cần xa hơn. Phần ký bên cột trái của các

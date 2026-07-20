@@ -14311,6 +14311,22 @@ def run() -> int:
                 _bd = _r6.search(r"<w:tcBorders>.*?</w:tcBorders>", _c, _r6.S)
                 if not _bd or 'w:val="single"' not in _bd.group(0):
                     return False
+        # r159: "Kính gửi" KHÔNG đậm (user 20-07, khác mẫu gốc) · đề mục + paragraph TRONG BẢNG
+        # thụt 0,8cm = 454tw (ưu tiên của user; NĐ30 cho 1-1,27cm nhưng đây là biểu mẫu nội bộ).
+        def _para(_pred):
+            for _q in _r6.findall(r"<w:p>.*?</w:p>", _x, _r6.S):
+                _t = "".join(_r6.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip()
+                if _pred(_t):
+                    return _q
+            return ""
+        _kg = _para(lambda t: t.startswith("Kính gửi:"))
+        if not _kg or "<w:b/>" in _kg:
+            return False
+        for _pfx in ("Quá trình thực hiện:", "Đề xuất:", "Thường trực Ủy ban"):
+            _q = _para(lambda t, _p=_pfx: t.startswith(_p))
+            _m = _r6.search(r'<w:ind w:firstLine="(\d+)"', _q)
+            if not _m or int(_m.group(1)) != 454:
+                return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt
                 and "Kính gửi: Đồng chí Chủ nhiệm Ủy ban" in _txt

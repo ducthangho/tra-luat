@@ -1000,10 +1000,15 @@ def _phieu_trinh_build(spec, out_path):
     body.append(_tt_p(spec.get("ten_loai", "PHIẾU TRÌNH VĂN BẢN"), sz=S_TL, b=True, jc="center",
                       before=360, line=LN, rule=RULE))
     if spec.get("kinh_gui"):
-        body.append(_tt_p("Kính gửi: " + spec["kinh_gui"], sz=S_TL, b=True, jc="center",
+        # r159: "Kính gửi" KHÔNG in đậm (user 20-07) — giữ cỡ 14 canh giữa như mẫu gốc
+        body.append(_tt_p("Kính gửi: " + spec["kinh_gui"], sz=S_TL, jc="center",
                           before=240, line=LN, rule=RULE))
     if spec.get("noi_dung"):
-        body.append(th("Nội dung: " + spec["noi_dung"], jc="both", first=THUT, before=240))
+        # r159: bám ĐÚNG mẫu gốc — "Nội dung" cỡ 14, KHÔNG đậm, CANH GIỮA, không thụt (bản .90 tự ý
+        # để cỡ 13 + dàn đều + thụt 1cm; đối chiếu lại mẫu mới thấy). "Kính gửi" cùng khối, cỡ 14
+        # canh giữa — riêng ĐẬM thì user yêu cầu BỎ (mẫu gốc có đậm).
+        body.append(_tt_p("Nội dung: " + spec["noi_dung"], sz=S_TL, jc="center",
+                          before=240, line=LN, rule=RULE))
 
     # ── (2) bảng "quá trình thực hiện | ý kiến lãnh đạo" (tỷ lệ 70/30 như mẫu gốc) ──
     # r158: khe giữa khối tiêu đề/nội dung và BẢNG nội dung (user 20-07 "cần xa hơn").
@@ -1016,9 +1021,12 @@ def _phieu_trinh_build(spec, out_path):
         muc = spec.get(khoa) or []
         if not muc:
             continue
-        trai2 += th(nhan, b=True, jc="both", before=120)
+        # r159: trong BẢNG nội dung, ĐỀ MỤC và các paragraph đều thụt đầu dòng — mặc định 0,8cm
+        # (user ưu tiên; thấp hơn dải 1-1,27cm của NĐ30 nhưng phiếu trình là biểu mẫu NỘI BỘ, §6.21).
+        _thut_b = max(0, int(round(float(spec.get("thut_bang_cm", 0.8)) * 567)))
+        trai2 += th(nhan, b=True, jc="both", first=_thut_b, before=120)
         for x in ([muc] if isinstance(muc, str) else muc):
-            trai2 += th(x, jc="both", first=THUT, before=120)
+            trai2 += th(x, jc="both", first=_thut_b, before=120)
     phai2 = "".join(_tt_p(x, sz=S_THAN, b=True, jc="center", before=120, **LH)
                     for x in (spec.get("y_kien_phai") or ["Ý kiến của", "Lãnh đạo Ủy ban"]))
     # r157/r158: bảng nội dung CÓ VIỀN và MỖI CẤP KÝ MỘT DÒNG RIÊNG (đúng mẫu gốc: 4 dòng, ô phải

@@ -292,6 +292,10 @@ Bản sao (HD05 PL 3): dấu "Bản sao văn bản" hình chữ nhật **80 mm x
 
 20. **QUỐC HUY (Mẫu 15a/15b/16 NQ351) KHÔNG chèn bằng đoạn rỗng (§6.20)** — chừa chỗ bằng một đoạn văn bản trống thì Word hiển thị đúng là **một dòng trống ngay trên tên cơ quan** (bộ kiểm cờ `TT-DONG-TRONG-DAU`). Quốc huy là **ảnh nổi**, chèn đè lên phía trên khối tiêu đề.
 
+32. **KHỐI TIÊU ĐỀ MẶC ĐỊNH CHIA ĐÔI (§6.32)** — **đo hình học THẬT của chính file HD 05-HD/VPTW**: `tblGrid` khối tiêu đề = **4612 | 4675** trên vùng chữ 9071 ⇒ **~50/50**, tâm khối phải ở **74,8%**. Nếu chỉ cấp cho ô phải đúng bề rộng tiêu đề cần (hệ Đảng: 4256 = 45,5%) thì ô phải hẹp và **bị đẩy sang phải** — tâm 77,2%, nhìn lệch (user 20-07). Quy tắc: `wr = min(max(need_r, 50%×W), 62%×W)` — **mặc định chia đôi, chỉ NỚI ô phải khi Quốc hiệu/tiêu đề không đủ chỗ một dòng** (§6.6). Hệ nhà nước: Quốc hiệu 34 ký tự cần 58% nên giữ nguyên như cũ, không hồi quy.
+
+> **★ CÁCH LÀM ĐÚNG khi user kêu "lệch":** đừng suy từ nguyên tắc canh giữa — **mở file NGUỒN CHÍNH THỨC ra đo `tblGrid`/`tcW` thật**. Ở ca này tôi đã đo tỷ lệ khối rồi kết luận "đúng chuẩn" (sai), sửa ngắt dòng (đúng nhưng chưa đủ), rồi mới đo hình học HD05 và thấy chênh 45,5% vs 51,5%.
+
 31. **GẠCH CHÂN "Nơi nhận" KHÔNG TRÙM DẤU HAI CHẤM (§6.31)** — HD05 PL2 mục 9 ghi *"Đứng, có gạch chân"*, và cột **Minh hoạ** của chính bảng đó render thành **hai run tách nhau**: `Nơi nhận` (gạch chân) + `:` (KHÔNG gạch chân). Gạch chân cả `Nơi nhận:` là sai. (Hệ nhà nước không có gạch chân — NĐ30 để *nghiêng, đậm*.)
 
 > **★ CÁCH ĐỌC PHỤ LỤC 2 HD05 — cột "Minh hoạ" là BẰNG CHỨNG ĐỊNH DẠNG.** Mỗi ô cột Minh hoạ được render ĐÚNG kiểu chữ mà dòng đó quy định (soi `<w:b/>`, `<w:u >` ở cấp RUN). Đây là cách xác minh mạnh hơn đọc mô tả chữ: `T/M BAN THƯỜNG VỤ`[đậm] · `PHÓ BÍ THƯ`[KHÔNG đậm] · `Nguyễn Văn A`[đậm] · `Nơi nhận`[gạch chân] + `:`[không]. ⚠ **KHÔNG** dùng các bảng minh hoạ khổ nhỏ ở đầu HD05 (bảng 2-7 trong docx) làm chuẩn — chúng là HÌNH thu nhỏ, toàn bộ để 10pt và không đậm gì cả.

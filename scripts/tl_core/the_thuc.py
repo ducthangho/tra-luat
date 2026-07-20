@@ -1275,7 +1275,13 @@ def the_thuc_build(spec, out_path):
     # ô TRÁI nhận phần còn lại — tên CQ quá dài thì xuống dòng (chấp nhận được, không tránh nổi)
     _tdp = "ĐẢNG CỘNG SẢN VIỆT NAM" if dang else "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"
     _need_r = round(len(_tdp) * 0.62 * (S["qh"] / 2) * 20 * 1.04)   # +4% đệm
-    wr = max(round(W * 0.40), min(_need_r, round(W * 0.62)))
+    # r167 (user 20-07: "tiêu ngữ lệch phải quá, nên gần lề trái thì cân xứng hơn"): ĐO HÌNH HỌC
+    # THẬT của chính file HD 05-HD/VPTW — `tblGrid` khối tiêu đề = **4612 | 4675** trên vùng chữ
+    # 9071, tức chia ĐÔI ~50/50. Trước đây chỉ lấy đúng bề rộng cần cho tiêu đề (hệ Đảng: 4256 =
+    # 45,5%) ⇒ ô phải hẹp và bị đẩy sang phải, tâm khối phải 77,2% thay vì 74,8% của HD05.
+    # Quy tắc: MẶC ĐỊNH chia đôi; chỉ NỚI ô phải khi Quốc hiệu/tiêu đề không đủ chỗ 1 dòng (§6.6 —
+    # nhà nước Quốc hiệu 34 ký tự cần 58%, vẫn giữ nguyên như cũ, không hồi quy).
+    wr = min(max(_need_r, round(W * 0.50)), round(W * 0.62))
     wl = W - wr
     L_KHOI = 360 if dang else 300      # Đảng: mọi khối ≥18pt (HD05 6.2.2)
     LH = dict(line=L_KHOI, rule="exact")

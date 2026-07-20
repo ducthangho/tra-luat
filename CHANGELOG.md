@@ -1,3 +1,20 @@
+# ★ v1.34.98 — khối tiêu đề mặc định chia đôi (§6.32) (2026-07-20)
+
+> User: *"chưa thấy các mẫu Đảng xử lý vấn đề lệch phải của cột Tiêu ngữ"* — đúng, .97 mới sửa ngắt
+> dòng chứ chưa đụng độ rộng cột.
+
+- **Đo hình học THẬT của chính file HD 05-HD/VPTW**: `tblGrid` khối tiêu đề = **4612 | 4675** trên
+  vùng chữ 9071 ⇒ ~**50/50**, tâm khối phải **74,8%**. Builder chỉ cấp cho ô phải đúng bề rộng tiêu
+  đề cần (hệ Đảng 4256 = **45,5%**) ⇒ ô phải hẹp, bị đẩy sang phải, tâm **77,2%**.
+- Quy tắc mới: `wr = min(max(need_r, 50%×W), 62%×W)` — **mặc định chia đôi**, chỉ nới ô phải khi
+  Quốc hiệu/tiêu đề không đủ chỗ một dòng (§6.6). Kết quả hệ Đảng: `4677 | 4678`, tâm trái **25,0%**
+  / tâm phải **75,0%** — khớp HD05 (24,8% / 74,8%).
+- **Hệ nhà nước KHÔNG đổi** (Quốc hiệu 34 ký tự cần 58%) — r145 chốt cả hai chiều: hệ Đảng phải chia
+  đôi (`|wl−wr| ≤ 2`, tâm phải 74-76%), hệ nhà nước ô phải vẫn rộng hơn ô trái. Xác minh ĐỎ-TRƯỚC.
+- ★Bài học ghi vào reference: user kêu "lệch" thì **mở file nguồn chính thức ra đo `tblGrid` thật**,
+  đừng suy từ nguyên tắc canh giữa. Tôi đã đo tỷ lệ khối rồi kết luận "đúng chuẩn" (sai), sửa ngắt
+  dòng (đúng nhưng chưa đủ), rồi mới đo hình học HD05 mới thấy chênh 45,5% vs 51,5%.
+
 # ★ v1.34.97 — cân dòng không cắt đôi cụm cố định (§6.27) (2026-07-20)
 
 > User gửi ảnh đối chiếu: bản HD05 gốc vs bản dựng. Tỷ lệ khối trái/phải của bản dựng đã gần đúng

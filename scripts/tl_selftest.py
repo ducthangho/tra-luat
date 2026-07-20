@@ -14042,6 +14042,20 @@ def run() -> int:
                                        and _ds[_i + 1].startswith(_cam[1]))
             # r164 §6.28: khối ký mang keepNext + hàng cantSplit ⇒ không rơi riêng sang trang mới
             _ok = _ok and "<w:cantSplit/>" in _d2 and _d2.count("<w:keepNext/>") >= 5
+            # r167 §6.32: khối tiêu đề MẶC ĐỊNH chia đôi — đo từ chính file HD05
+            # (tblGrid 4612|4675 trên vùng chữ 9071 ⇒ tâm khối phải 74,8%). Hệ Đảng trước đây chỉ
+            # lấy đúng bề rộng cần cho tiêu đề (45,5%) ⇒ khối phải bị đẩy sang phải (user 20-07).
+            _g3 = [int(_v) for _v in _import_re.findall(
+                r'<w:gridCol w:w="(\d+)"',
+                _import_re.search(r"<w:tbl>.*?</w:tbl>", _d3, _import_re.S).group(0))]
+            _W3 = sum(_g3)
+            _tam = (_g3[0] + _g3[1] / 2) / _W3 * 100
+            _ok = _ok and len(_g3) == 2 and 74.0 <= _tam <= 76.0 and abs(_g3[0] - _g3[1]) <= 2
+            # hệ nhà nước KHÔNG bị ép chia đôi: Quốc hiệu 34 ký tự cần ô phải rộng hơn (§6.6)
+            _g2 = [int(_v) for _v in _import_re.findall(
+                r'<w:gridCol w:w="(\d+)"',
+                _import_re.search(r"<w:tbl>.*?</w:tbl>", _d2, _import_re.S).group(0))]
+            _ok = _ok and len(_g2) == 2 and _g2[1] > _g2[0]
             return _ok
     _t110("r145_the_thuc_build", _c145_the_thuc_build)
 

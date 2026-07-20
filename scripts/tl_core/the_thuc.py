@@ -958,13 +958,50 @@ def _tt_can_dong(text, w_o, sz, hoa=True):
     tu = text.split()
     n = min(len(tu), max(2, math.ceil(_est(text) / w_o)))
     min_tu = 2 if len(tu) >= 2 * n else 1        # đủ từ thì mỗi dòng ≥ 2 từ
+    # r166 (user 20-07, đối chiếu ảnh HD05 gốc): KHÔNG cắt giữa một cụm danh từ. Chia cân thuần
+    # theo độ dài cho ra "ĐẢNG ỦY ỦY BAN VĂN | HÓA VÀ XÃ HỘI" — tách đôi "VĂN HÓA", nhìn rất chật.
+    # Ưu tiên điểm cắt NGAY SAU từ chỉ loại hình tổ chức (cắt TRƯỚC phần tên lĩnh vực).
+    _KHOA = ("BAN", "ỦY", "UỶ", "VỤ", "CỤC", "SỞ", "PHÒNG", "VIỆN", "TRƯỜNG", "TÂM", "ĐỒNG",
+             "ĐOÀN", "HỘI", "NGÀNH", "KHỐI", "BỘ")
+    # CỤM CỐ ĐỊNH — tuyệt đối không tách đôi ("NHÀ | NƯỚC", "VĂN | HÓA" nhìn rất chướng)
+    _CUM = ("NHÀ NƯỚC", "VĂN HÓA", "VĂN HOÁ", "XÃ HỘI", "TRUNG ƯƠNG", "QUỐC HỘI", "CHÍNH PHỦ",
+            "DOANH NGHIỆP", "GIÁO DỤC", "ĐÀO TẠO", "Y TẾ", "TÀI CHÍNH", "KẾ HOẠCH", "ĐẦU TƯ",
+            "LAO ĐỘNG", "THƯƠNG BINH", "QUỐC PHÒNG", "AN NINH", "ĐỐI NGOẠI", "TƯ PHÁP", "NỘI VỤ",
+            "CÔNG THƯƠNG", "NÔNG NGHIỆP", "MÔI TRƯỜNG", "KHOA HỌC", "CÔNG NGHỆ", "THÔNG TIN",
+            "TRUYỀN THÔNG", "GIAO THÔNG", "VẬN TẢI", "XÂY DỰNG", "THANH TRA", "KIỂM TOÁN",
+            "MẶT TRẬN", "TỔ QUỐC", "THƯỜNG VỤ", "CHẤP HÀNH", "BÍ THƯ", "VĂN PHÒNG", "THANH NIÊN",
+            "PHỤ NỮ", "NÔNG DÂN", "DÂN TỘC", "TÔN GIÁO", "NGÂN HÀNG", "BẢO HIỂM", "HẠ TẦNG",
+            "CHIẾN BINH", "TÀI NGUYÊN", "PHÁP LUẬT", "ĐẶC KHU", "TỈNH ỦY", "THÀNH ỦY")
+
+    def _duoc_tach(_k):
+        """cắt SAU từ thứ _k-1 (tức trước tu[_k]) có phá cụm cố định không?"""
+        if _k <= 0 or _k >= len(tu):
+            return False
+        return (tu[_k - 1] + " " + tu[_k]).upper().strip(",.;:") not in _CUM
+
+    if n == 2:
+        _tot = None
+        for _i in range(min_tu, len(tu) - min_tu + 1):
+            if not _duoc_tach(_i):
+                continue
+            _d1, _d2 = " ".join(tu[:_i]), " ".join(tu[_i:])
+            if _est(_d1) > w_o or _est(_d2) > w_o:
+                continue
+            _lech = abs(len(_d1) - len(_d2))
+            _uu = 0 if tu[_i - 1].upper().strip(",") in _KHOA else 1
+            _diem = (_uu, _lech)                     # ưu tiên cắt sau từ khoá, rồi mới cân
+            if _tot is None or _diem < _tot[0]:
+                _tot = (_diem, [_d1, _d2])
+        if _tot:
+            return _tot[1]
     muc = len(text) / n
     ra, cur = [], []
     for k, w in enumerate(tu):
         cur.append(w)
         con_tu, con_dong = len(tu) - k - 1, n - len(ra) - 1
         if (con_dong > 0 and len(" ".join(cur)) >= muc * 0.9
-                and len(cur) >= min_tu and con_tu >= min_tu * con_dong):
+                and len(cur) >= min_tu and con_tu >= min_tu * con_dong
+                and _duoc_tach(k + 1)):
             ra.append(" ".join(cur))
             cur = []
     if cur:

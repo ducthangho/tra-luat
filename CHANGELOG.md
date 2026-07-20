@@ -1,3 +1,20 @@
+# ★ v1.34.97 — cân dòng không cắt đôi cụm cố định (§6.27) (2026-07-20)
+
+> User gửi ảnh đối chiếu: bản HD05 gốc vs bản dựng. Tỷ lệ khối trái/phải của bản dựng đã gần đúng
+> (tâm khối trái 32% vs 33%, khối phải 77% vs 74%) — thứ làm nó TRÔNG lệch và chật là ĐIỂM NGẮT DÒNG.
+
+- `_tt_can_dong` chia cân thuần theo độ dài cho ra `ĐẢNG ỦY ỦY BAN VĂN` | `HÓA VÀ XÃ HỘI` —
+  **tách đôi "VĂN HÓA"**. Quy tắc mới, theo thứ tự ưu tiên:
+  1. **cấm** điểm cắt phá cụm cố định (`NHÀ NƯỚC`, `VĂN HÓA`, `XÃ HỘI`, `TRUNG ƯƠNG`, `LAO ĐỘNG`,
+     `THƯỜNG VỤ`, `CHẤP HÀNH`, `TỔ QUỐC`… — 50 cụm hay gặp trong tên cơ quan);
+  2. **ưu tiên** cắt ngay sau từ chỉ loại hình tổ chức (`BAN`, `ỦY`, `VỤ`, `CỤC`, `SỞ`, `PHÒNG`,
+     `VIỆN`, `KHỐI`, `BỘ`…) — tức cắt TRƯỚC phần tên lĩnh vực;
+  3. rồi mới cân độ dài.
+  Kết quả: `ĐẢNG ỦY ỦY BAN` | `VĂN HÓA VÀ XÃ HỘI` · `ỦY BAN QUẢN LÝ VỐN` | `NHÀ NƯỚC TẠI DOANH NGHIỆP`
+  · `ĐẢNG BỘ KHỐI` | `CÁC CƠ QUAN TRUNG ƯƠNG`.
+- Áp cho cả nhánh tối ưu (2 dòng) lẫn nhánh greedy (≥3 dòng). r145 chốt: cụm cố định không được
+  nằm vắt qua hai dòng. Xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.96 — gạch chân "Nơi nhận" không trùm dấu hai chấm (§6.31) (2026-07-20)
 
 > User yêu cầu kiểm KỸ LẠI thể thức nơi nhận và phần ký sau khi vá .94.

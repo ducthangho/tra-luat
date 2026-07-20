@@ -14029,6 +14029,17 @@ def run() -> int:
             _dai = _TL_MODULE._tt_can_dong("ĐẢNG BỘ KHỐI CÁC CƠ QUAN TRUNG ƯƠNG", 5099, 28)
             _ok = _ok and len(_dai) >= 2 and all(len(_x.split()) >= 2 for _x in _dai)
             _ok = _ok and " ".join(_dai) == "ĐẢNG BỘ KHỐI CÁC CƠ QUAN TRUNG ƯƠNG"
+            # r166 (user gửi ảnh đối chiếu HD05 gốc): KHÔNG cắt đôi CỤM CỐ ĐỊNH. Chia cân thuần
+            # theo độ dài cho ra "…ỦY BAN VĂN | HÓA VÀ XÃ HỘI" — tách "VĂN HÓA", nhìn rất chật.
+            for _t, _cam in (("ĐẢNG ỦY ỦY BAN VĂN HÓA VÀ XÃ HỘI", ("VĂN", "HÓA")),
+                             ("ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC TẠI DOANH NGHIỆP", ("NHÀ", "NƯỚC")),
+                             ("ĐẢNG BỘ KHỐI CÁC CƠ QUAN TRUNG ƯƠNG", ("TRUNG", "ƯƠNG"))):
+                _ds = _TL_MODULE._tt_can_dong(_t, 5099, 28)
+                _ok = _ok and " ".join(_ds) == _t and all(len(_x.split()) >= 2 for _x in _ds)
+                # cụm cố định không được nằm vắt qua hai dòng
+                for _i in range(len(_ds) - 1):
+                    _ok = _ok and not (_ds[_i].endswith(_cam[0])
+                                       and _ds[_i + 1].startswith(_cam[1]))
             # r164 §6.28: khối ký mang keepNext + hàng cantSplit ⇒ không rơi riêng sang trang mới
             _ok = _ok and "<w:cantSplit/>" in _d2 and _d2.count("<w:keepNext/>") >= 5
             return _ok

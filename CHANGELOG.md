@@ -1,3 +1,20 @@
+# ★ v1.34.99 — Chương/Mục canh giữa, Điều có dấu chấm (§6.33) (2026-07-20)
+
+> User rà mẫu Quy chế Đảng: *"Chương, Điều được alignment trung tâm hay phải trái, font, size, in
+> đậm đã chính xác chưa"*. Cỡ chữ/đậm đều đúng; **canh lề và dấu sau số Điều thì SAI**.
+
+- **HD05 mục 6.2.3.a-b**: từ "Phần"/"Chương"/"Mục" + số thứ tự trình bày **CHÍNH GIỮA hai lề**, tên
+  phần/chương/mục ở dòng liền kề dưới. Builder để `Chương I` **dàn đều + thụt 1cm** ⇒ sai.
+  `kieu="giua"` trước chỉ dùng được cho hệ `vbqppl_qh`, nay **mở cho MỌI hệ**.
+- **HD05 mục 6.2.3.c**: sau số thứ tự của điều có **DẤU CHẤM** (`Điều 1.`), mẫu đang dùng dấu hai
+  chấm (`Điều 1:`). Ví dụ PL2 xác nhận: `Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng`.
+- **Điều KHÔNG canh giữa** — theo 6.2.2: dàn đều hai lề + thụt đầu dòng 10mm (giữ nguyên, đã đúng).
+- Tiêu chí mới **`TT-CHUONG-CANH-GIUA`** (WARN); parser thêm cờ `jc` cấp đoạn.
+- Đối chiếu phần còn lại của mẫu Quy chế đều ĐÚNG: ĐCSVN 15 đậm · tên CQ 14 (cấp trên không đậm,
+  CQ ban hành đậm) · số-KH 14 · địa danh 14 nghiêng · thể loại 16 đậm · trích yếu 15 đậm ·
+  Điều 15 đậm · giãn dòng 20pt Exactly · Nơi nhận 14 gạch chân + liệt kê 12 · T/M đậm, chức vụ
+  không đậm, họ tên đậm.
+
 # ★ v1.34.98 — khối tiêu đề mặc định chia đôi (§6.32) (2026-07-20)
 
 > User: *"chưa thấy các mẫu Đảng xử lý vấn đề lệch phải của cột Tiêu ngữ"* — đúng, .97 mới sửa ngắt

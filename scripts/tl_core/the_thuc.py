@@ -188,7 +188,7 @@ def _the_thuc_parse_docx(path):
     for p in droot.iter(W + "p"):
         ppr = p.find(W + "pPr")
         ind_fl = sp_line = None
-        sp_rule = None
+        sp_rule = p_jc = None
         if ppr is not None:
             iel = ppr.find(W + "ind")
             if iel is not None:
@@ -203,6 +203,9 @@ def _the_thuc_parse_docx(path):
                     sp_line = int(sel.get(W + "line"))
                 except (TypeError, ValueError):
                     sp_line = None
+            jel = ppr.find(W + "jc")            # r168: canh lề (HD05 6.2.3: Chương/Mục CHÍNH GIỮA)
+            if jel is not None:
+                p_jc = jel.get(W + "val")
         ptxt = []
         pszs = {}                      # sz RESOLVED (run→Normal→docDefaults) → số chữ, per-paragraph (T3 bậc)
         pdam = False                   # r162: có run nào ĐẬM không (HD05 PL2 mục 7 phân biệt đậm/đứng)
@@ -223,7 +226,7 @@ def _the_thuc_parse_docx(path):
         if ptxt:
             paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line,
                           "rule": sp_rule, "szs": pszs, "in_tbl": id(p) in _in_tbl,
-                          "dam": pdam})
+                          "dam": pdam, "jc": p_jc})
     return {"sections": sections, "defaults": defaults, "normal": normal,
             "runs": runs, "text": "\n".join(p["text"] for p in paras), "paras": paras,
             "footnotes": footnotes}
@@ -584,6 +587,17 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                 add("TT-CHUC-VU-DAM", "WARN", f"chức vụ người ký in đậm: '{_t[:40]}'",
                     "VB Đảng: quyền hạn (T/M…) ĐẬM · chức vụ chỉ ĐỨNG, không đậm",
                     "HD 05-HD/VPTW Phụ lục 2, mục 7")
+                break
+        # r168 (HD05 6.2.3 a-b): từ "Phần"/"Chương"/"Mục" + số thứ tự phải CHÍNH GIỮA hai lề.
+        for _p in paras:
+            _t = (_p.get("text") or "").strip()
+            if _p.get("in_tbl") or not re.match(r"^(Phần|Chương|Mục)\s+\S", _t) or len(_t) > 40:
+                continue
+            if (_p.get("jc") or "") != "center":
+                add("TT-CHUONG-CANH-GIUA", "WARN",
+                    f"'{_t[:30]}' canh '{_p.get('jc') or 'mặc định'}', không phải giữa",
+                    "từ Phần/Chương/Mục + số thứ tự trình bày CHÍNH GIỮA hai lề",
+                    "HD 05-HD/VPTW mục 6.2.3 a-b")
                 break
         s = _psz("ĐẢNG CỘNG SẢN VIỆT NAM")
         if s is not None and s != 30:
@@ -1349,8 +1363,10 @@ def the_thuc_build(spec, out_path):
     for it in (spec.get("body") or []):
         t = it.get("text", "") if isinstance(it, dict) else str(it)
         dm = bool(it.get("de_muc")) if isinstance(it, dict) else False
-        # Đ35 k2 a-b NQ351: "Phần/Chương/Mục/Tiểu mục" + số và TIÊU ĐỀ — đậm, DÒNG RIÊNG, canh giữa
-        if qh and isinstance(it, dict) and it.get("kieu") == "giua":
+        # Đ35 k2 a-b NQ351 + HD05 mục 6.2.3 a-b: "Phần/Chương/Mục" + số và TIÊU ĐỀ — đậm, DÒNG
+        # RIÊNG, CHÍNH GIỮA hai lề, KHÔNG thụt. r168: mở cho MỌI hệ (trước chỉ vbqppl_qh) vì HD05
+        # quy định y hệt cho văn bản Đảng — mẫu Quy chế đang để "Chương I" dàn đều + thụt 1cm.
+        if isinstance(it, dict) and it.get("kieu") == "giua":
             body.append(_tt_p(t, sz=S["than"], b=True, jc="center", before=240,
                               line=LN, rule=RULE))
             continue

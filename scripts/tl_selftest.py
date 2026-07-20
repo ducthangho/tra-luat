@@ -14348,6 +14348,55 @@ def run() -> int:
         return any(f["id"] == "TT-CHUC-VU-DAM" for f in _e2["findings"])
     _t110("r162_chuc_vu_ky_dang_khong_dam", _c162_chuc_vu_ky_dang_khong_dam)
 
+    # ═══ v1.34.99 — r168: user rà mẫu Quy chế Đảng. HD05 mục 6.2.3: (a-b) từ "Phần"/"Chương"/"Mục"
+    # + số thứ tự trình bày CHÍNH GIỮA hai lề, tên phần/chương ở dòng liền kề dưới; (c) sau số thứ
+    # tự của ĐIỀU có DẤU CHẤM. Builder để "Chương I" dàn đều + thụt 1cm. Đỏ-trước. ═══
+    def _c168_chuong_canh_giua_he_dang():
+        import re as _r68, zipfile as _z68, tempfile as _tf68
+        SPEC = {"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI",
+                "ten_cq": "ĐẢNG ỦY ỦY BAN VĂN HÓA VÀ XÃ HỘI", "so_kh": "Số 12-QC/ĐU",
+                "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026", "ten_loai": "QUY CHẾ",
+                "trich_yeu": "làm việc của Ban Chấp hành",
+                "body": [{"text": "Chương I", "de_muc": True, "kieu": "giua"},
+                         {"text": "NHỮNG QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
+                         {"text": "Điều 1. Phạm vi điều chỉnh", "de_muc": True},
+                         {"text": "Quy chế này quy định về nguyên tắc làm việc."}],
+                "noi_nhan": ["- Lưu Văn phòng Đảng ủy."], "quyen_han": "T/M BAN CHẤP HÀNH",
+                "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"}
+        _o = str(Path(_tf68.mkdtemp()) / "qc.docx")
+        _TL_MODULE.the_thuc_build(SPEC, _o)
+        _x = _z68.ZipFile(_o).read("word/document.xml").decode("utf-8")
+
+        def _pr(_txt):
+            for _q in _r68.findall(r"<w:p>.*?</w:p>", _x, _r68.S):
+                if "".join(_r68.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() == _txt:
+                    return _q
+            return ""
+        # Chương + tên chương: CHÍNH GIỮA, đậm, KHÔNG thụt
+        for _t in ("Chương I", "NHỮNG QUY ĐỊNH CHUNG"):
+            _q = _pr(_t)
+            if 'w:val="center"' not in _q or "<w:b/>" not in _q:
+                return False
+            _f = _r68.search(r'w:firstLine="(\d+)"', _q)
+            if _f and int(_f.group(1)) != 0:
+                return False
+        # Điều: dàn đều hai lề + thụt 10mm + đậm (HD05 6.2.2 + PL2 mục 6)
+        _d = _pr("Điều 1. Phạm vi điều chỉnh")
+        if 'w:val="both"' not in _d or "<w:b/>" not in _d:
+            return False
+        if int(_r68.search(r'w:firstLine="(\d+)"', _d).group(1)) != 567:
+            return False
+        # bộ kiểm phải BẮT được khi Chương bị dàn đều thay vì canh giữa
+        _bad = _x.replace(_pr("Chương I"), _pr("Chương I").replace('w:val="center"', 'w:val="both"'))
+        _o2 = str(Path(_tf68.mkdtemp()) / "bad.docx")
+        _zi = _z68.ZipFile(_o)
+        with _z68.ZipFile(_o2, "w", _z68.ZIP_DEFLATED) as _zo:
+            for _n in _zi.namelist():
+                _zo.writestr(_n, _bad if _n == "word/document.xml" else _zi.read(_n))
+        _e2 = _TL_MODULE.the_thuc_check(_o2, he="dang")
+        return any(f["id"] == "TT-CHUONG-CANH-GIUA" for f in _e2["findings"])
+    _t110("r168_chuong_canh_giua_he_dang", _c168_chuong_canh_giua_he_dang)
+
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══
     def _c156_phieu_trinh():

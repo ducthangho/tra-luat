@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2m",
   "root_name": "tra-luat",
   "file_count": 173,
-  "total_bytes": 5457507,
-  "package_hash": "156712a5c7d171fb31fd5bdd5e2e7f8991a325c3db7aa424a29dd27d59cee7fa",
-  "content_hash": "156712a5c7d171fb31fd5bdd5e2e7f8991a325c3db7aa424a29dd27d59cee7fa",
+  "total_bytes": 5457693,
+  "package_hash": "6a277dd6baeeabeb52355c0f4a15c18eb6d60a5a7b4fb55cbb986ffe1db2b83d",
+  "content_hash": "6a277dd6baeeabeb52355c0f4a15c18eb6d60a5a7b4fb55cbb986ffe1db2b83d",
   "required_missing": [],
   "files": [
     {
@@ -583,8 +583,8 @@
     },
     {
       "path": "scripts/gen_instructions.py",
-      "size": 69485,
-      "sha256": "00e3667d702f99e51f353927fbb043ccf0729c20f0d3dddc079a1d0064cabd60"
+      "size": 69671,
+      "sha256": "32cc8c8a13caaa242fcdb4945e505320795c918a75335598616620c72a4a8450"
     },
     {
       "path": "scripts/gws_bridge.py",

@@ -945,7 +945,9 @@ def selftest() -> int:
     cases.append(("profile_block_templates_conditional",
                   "## trinh_bay_theo_mau" in _bt and "`DTPL`" in _bt and "tl doc-text" in _bt
                   and "GIỮ NGUYÊN khung" in _bt and "verify NGUYÊN VĂN" in _bt
-                  and "KHÔNG sinh docx" in _bt and "trinh_bay_theo_mau" not in _bs))
+                  # v1.34.89: doctrine cũ "tra-luat KHÔNG sinh docx" SAI từ .84 (có the-thuc-build)
+                  and "tl the-thuc-build" in _bt and "the-thuc-check" in _bt
+                  and "KHÔNG sinh docx" not in _bt and "trinh_bay_theo_mau" not in _bs))
     bad = "research_start có thể import nguồn vào NotebookLM khi cần."
     cases.append(("audit_bad_project_instruction_fails", not audit(bad, "project")["ok"]))
     cases.append(("audit_bad_nlm_prompt_fails", not audit(bad, "nlm")["ok"]))

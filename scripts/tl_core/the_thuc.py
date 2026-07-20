@@ -134,10 +134,10 @@ def _tt_dac_ta():
             "dia_danh":     ("14",    "nghieng",      "center", "0",       "HD05 PL2 mục 4"),
             "the_loai":     ("15-16", "dam",          "center", "0",       "HD05 PL2 mục 5"),
             "trich_yeu":    ("14-15", "dam",          "center", "0",       "HD05 PL2 mục 5"),
-            "phan_chuong":  ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.3 a"),
-            "tieu_de_pc":   ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.3 a"),
-            "muc":          ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.3 b"),
-            "dieu":         ("14-15", "dam",          "both",   "fl:567",  "HD05 6.2.3 c + 6.2.2"),
+            "phan_chuong":  ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a"),
+            "tieu_de_pc":   ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a"),
+            "muc":          ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 b"),
+            "dieu":         ("14-15", "dam",          "both",   "fl:567",  "HD05 6.2.4 c + 6.2.2"),
             "than":         ("14-15", "",             "both",   "fl:567",  "HD05 mục 6.2.2"),
             "quyen_han_ky": ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7"),
             "chuc_vu_ky":   ("14",    "",             "center", "0",       "HD05 PL2 mục 7"),
@@ -661,7 +661,20 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                     "VB Đảng: quyền hạn (T/M…) ĐẬM · chức vụ chỉ ĐỨNG, không đậm",
                     "HD 05-HD/VPTW Phụ lục 2, mục 7")
                 break
-        # r168 (HD05 6.2.3 a-b): từ "Phần"/"Chương"/"Mục" + số thứ tự phải CHÍNH GIỮA hai lề.
+        # r171 (user 20-07 qua mẫu Quyết định): KHOẢN và ĐIỂM KHÔNG được in đậm — HD05 PL2 mục 6
+        # cho đậm "Từ Điều, số thứ tự và TÊN ĐIỀU", còn "Khoản"/"Điểm" là "Đứng"; minh hoạ PL2 ở
+        # cấp run xác nhận: '1. Quy định về…'[đậm=0] · 'a) …'[đậm=0]. Nội dung của điều (khi điều
+        # không có tên) cũng là nội dung, chỉ tiền tố "Điều N." mới đậm.
+        for _p in paras:
+            _t = (_p.get("text") or "").strip()
+            if _p.get("in_tbl") or not _p.get("dam"):
+                continue
+            if re.match(r"^\d+[.)-]\s+\S", _t) or re.match(r"^[a-zđ]\)\s+\S", _t):
+                add("TT-KHOAN-DAM", "WARN", f"khoản/điểm in đậm: '{_t[:34]}'",
+                    "khoản, điểm trình bày in thường ĐỨNG — chỉ Phần/Chương/Mục/Điều + tên mới đậm",
+                    "HD 05-HD/VPTW Phụ lục 2 mục 6")
+                break
+        # r168 (HD05 6.2.4 a-b): từ "Phần"/"Chương"/"Mục" + số thứ tự phải CHÍNH GIỮA hai lề.
         for _p in paras:
             _t = (_p.get("text") or "").strip()
             if _p.get("in_tbl") or not re.match(r"^(Phần|Chương|Mục)\s+\S", _t) or len(_t) > 40:
@@ -670,7 +683,7 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                 add("TT-CHUONG-CANH-GIUA", "WARN",
                     f"'{_t[:30]}' canh '{_p.get('jc') or 'mặc định'}', không phải giữa",
                     "từ Phần/Chương/Mục + số thứ tự trình bày CHÍNH GIỮA hai lề",
-                    "HD 05-HD/VPTW mục 6.2.3 a-b")
+                    "HD 05-HD/VPTW mục 6.2.4 a-b")
                 break
         s = _psz("ĐẢNG CỘNG SẢN VIỆT NAM")
         if s is not None and s != 30:
@@ -1437,7 +1450,7 @@ def the_thuc_build(spec, out_path):
     for it in (spec.get("body") or []):
         t = it.get("text", "") if isinstance(it, dict) else str(it)
         dm = bool(it.get("de_muc")) if isinstance(it, dict) else False
-        # Đ35 k2 a-b NQ351 + HD05 mục 6.2.3 a-b: "Phần/Chương/Mục" + số và TIÊU ĐỀ — đậm, DÒNG
+        # Đ35 k2 a-b NQ351 + HD05 mục 6.2.4 a-b: "Phần/Chương/Mục" + số và TIÊU ĐỀ — đậm, DÒNG
         # RIÊNG, CHÍNH GIỮA hai lề, KHÔNG thụt. r168: mở cho MỌI hệ (trước chỉ vbqppl_qh) vì HD05
         # quy định y hệt cho văn bản Đảng — mẫu Quy chế đang để "Chương I" dàn đều + thụt 1cm.
         if isinstance(it, dict) and it.get("kieu") == "giua":
@@ -1449,7 +1462,23 @@ def the_thuc_build(spec, out_path):
         # "khi xuống dòng thì chữ đầu dòng lùi vào" (thụt DÒNG ĐẦU). Một dòng thì nhìn giống nhau,
         # chỉ lộ khác biệt khi tiêu đề điều xuống dòng.
         _dieu_qh = qh and isinstance(it, dict) and it.get("kieu") == "dieu"
-        body.append(_tt_p(t, sz=S["than"], b=dm, jc="both",
+        _ngh = bool(it.get("nghieng")) if isinstance(it, dict) else False
+        # r171 (user 20-07): "Điều N." ĐẬM nhưng NỘI DUNG của điều thì KHÔNG — HD05 PL2 chỉ cho
+        # đậm "Từ 'Điều', số thứ tự và TÊN ĐIỀU"; khoản/điểm là "Đứng" (minh hoạ PL2: '1. Quy định
+        # về…'[đậm=0]). Điều có nội dung ngay (không có tên điều) ⇒ chỉ đậm phần tiền tố.
+        _dd = (it.get("dam_dau") or "") if isinstance(it, dict) else ""
+        if _dd:
+            _rpr_d = f'<w:rPr><w:b/><w:bCs/><w:sz w:val="{S["than"]}"/><w:szCs w:val="{S["than"]}"/></w:rPr>'
+            _rpr_n = f'<w:rPr><w:sz w:val="{S["than"]}"/><w:szCs w:val="{S["than"]}"/></w:rPr>'
+            _esc = lambda z: str(z).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            body.append(
+                f'<w:p><w:pPr><w:spacing w:before="120" w:after="0" w:line="{LN}"'
+                f' w:lineRule="{RULE}"/><w:ind w:left="{THUT if _dieu_qh else 0}"'
+                f' w:firstLine="{0 if _dieu_qh else THUT}"/><w:jc w:val="both"/></w:pPr>'
+                f'<w:r>{_rpr_d}<w:t xml:space="preserve">{_esc(_dd)}</w:t></w:r>'
+                f'<w:r>{_rpr_n}<w:t xml:space="preserve">{_esc(t)}</w:t></w:r></w:p>')
+            continue
+        body.append(_tt_p(t, sz=S["than"], b=dm, i=_ngh, jc="both",
                           first=0 if _dieu_qh else THUT, left=THUT if _dieu_qh else 0,
                           before=120, after=60 if dm else 0, line=LN, rule=RULE))
 

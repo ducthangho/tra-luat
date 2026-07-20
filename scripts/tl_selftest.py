@@ -14496,6 +14496,50 @@ def run() -> int:
         return not _loi
     _t110("r170_dac_ta_thanh_phan_khop_builder", _c170_dac_ta_khop_builder)
 
+    # ═══ v1.35.1 — r171: user rà mẫu Quyết định Đảng — "nội dung Điều 3 tại sao phải in đậm".
+    # HD05 PL2 mục 6 chỉ cho đậm "Từ Điều, số thứ tự và TÊN ĐIỀU"; Khoản/Điểm là "Đứng" (minh hoạ
+    # ở cấp run: '1. Quy định về…'[đậm=0], 'a) …'[đậm=0]). Điều KHÔNG có tên (nội dung tiếp ngay)
+    # ⇒ chỉ tiền tố "Điều N." đậm. Đỏ-trước. ═══
+    def _c171_khoan_diem_khong_dam():
+        import re as _r71, zipfile as _z71, tempfile as _tf71
+        BASE = {"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
+                "so_kh": "Số 1-QĐ/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "về công tác cán bộ",
+                "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN THƯỜNG VỤ",
+                "chuc_vu": "PHÓ BÍ THƯ", "ho_ten": "Nguyễn Văn A"}
+
+        def _dung(body):
+            _o = str(Path(_tf71.mkdtemp()) / "q.docx")
+            _TL_MODULE.the_thuc_build(dict(BASE, body=body), _o)
+            return _o, _z71.ZipFile(_o).read("word/document.xml").decode("utf-8")
+
+        # (a) tiền tố đậm + nội dung KHÔNG đậm trong CÙNG một đoạn
+        _o, _x = _dung([{"dam_dau": "Điều 3. ",
+                         "text": "Các đồng chí chịu trách nhiệm thi hành Quyết định này."}])
+        _p = [_q for _q in _r71.findall(r"<w:p>.*?</w:p>", _x, _r71.S)
+              if "Điều 3." in "".join(_r71.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q))]
+        if not _p:
+            return False
+        _rs = [("".join(_r71.findall(r"<w:t[^>]*>([^<]*)</w:t>", _r)), "<w:b/>" in _r)
+               for _r in _r71.findall(r"<w:r>.*?</w:r>", _p[0], _r71.S)]
+        _rs = [x for x in _rs if x[0].strip()]
+        if len(_rs) != 2 or not _rs[0][1] or _rs[1][1]:
+            return False
+        # bản ĐÚNG không được cảnh báo
+        if any(f["id"] == "TT-KHOAN-DAM"
+               for f in _TL_MODULE.the_thuc_check(_o, he="dang")["findings"]):
+            return False
+        # (b) khoản in đậm ⇒ bộ kiểm PHẢI bắt
+        _o2, _ = _dung([{"text": "1- Nội dung khoản.", "de_muc": True}])
+        if not any(f["id"] == "TT-KHOAN-DAM"
+                   for f in _TL_MODULE.the_thuc_check(_o2, he="dang")["findings"]):
+            return False
+        # (c) điểm 'a)' in đậm cũng phải bắt
+        _o3, _ = _dung([{"text": "a) Nội dung điểm.", "de_muc": True}])
+        return any(f["id"] == "TT-KHOAN-DAM"
+                   for f in _TL_MODULE.the_thuc_check(_o3, he="dang")["findings"])
+    _t110("r171_khoan_diem_khong_in_dam", _c171_khoan_diem_khong_dam)
+
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══
     def _c156_phieu_trinh():

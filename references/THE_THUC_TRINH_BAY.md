@@ -292,6 +292,10 @@ Bản sao (HD05 PL 3): dấu "Bản sao văn bản" hình chữ nhật **80 mm x
 
 20. **QUỐC HUY (Mẫu 15a/15b/16 NQ351) KHÔNG chèn bằng đoạn rỗng (§6.20)** — chừa chỗ bằng một đoạn văn bản trống thì Word hiển thị đúng là **một dòng trống ngay trên tên cơ quan** (bộ kiểm cờ `TT-DONG-TRONG-DAU`). Quốc huy là **ảnh nổi**, chèn đè lên phía trên khối tiêu đề.
 
+31. **GẠCH CHÂN "Nơi nhận" KHÔNG TRÙM DẤU HAI CHẤM (§6.31)** — HD05 PL2 mục 9 ghi *"Đứng, có gạch chân"*, và cột **Minh hoạ** của chính bảng đó render thành **hai run tách nhau**: `Nơi nhận` (gạch chân) + `:` (KHÔNG gạch chân). Gạch chân cả `Nơi nhận:` là sai. (Hệ nhà nước không có gạch chân — NĐ30 để *nghiêng, đậm*.)
+
+> **★ CÁCH ĐỌC PHỤ LỤC 2 HD05 — cột "Minh hoạ" là BẰNG CHỨNG ĐỊNH DẠNG.** Mỗi ô cột Minh hoạ được render ĐÚNG kiểu chữ mà dòng đó quy định (soi `<w:b/>`, `<w:u >` ở cấp RUN). Đây là cách xác minh mạnh hơn đọc mô tả chữ: `T/M BAN THƯỜNG VỤ`[đậm] · `PHÓ BÍ THƯ`[KHÔNG đậm] · `Nguyễn Văn A`[đậm] · `Nơi nhận`[gạch chân] + `:`[không]. ⚠ **KHÔNG** dùng các bảng minh hoạ khổ nhỏ ở đầu HD05 (bảng 2-7 trong docx) làm chuẩn — chúng là HÌNH thu nhỏ, toàn bộ để 10pt và không đậm gì cả.
+
 27. **KIÊNG DÒNG CHỈ CÓ MỘT TỪ — CÂN DÒNG TÊN CƠ QUAN (§6.27)** — để Word tự ngắt thì tên cơ quan dài hay rớt lại **một từ trơ trọi** ở dòng cuối (user 20-07: *"rất hạn chế để một dòng chỉ có đúng một từ — kiêng"*). Chủ động chia trước bằng **nhiều ĐOẠN cân nhau tại ranh giới TỪ** (`_tt_can_dong`), mỗi dòng ≥2 từ khi đủ từ. **KHÔNG dùng `<w:br/>`** — r143 cho thấy br cứng làm dính chữ khi bóc text đối chiếu nguyên văn. ⚠ Hệ quả với §6.9: tên cơ quan cân thành 2 đoạn thì ô trái nhiều đoạn hơn ô phải ⇒ chuỗi `w:line` KHÔNG còn trùng khít; đúng theo §6.14 (lệch dòng không bắt buộc ngang nhau) — chỉ cần hai ô dùng **cùng bộ giá trị** chiều cao dòng.
 
 28. **KHÔNG ĐỂ TRANG CHỈ CÓ KHỐI KÝ (§6.28)** — khối ký rơi riêng sang trang mới, phía trên không còn nội dung, là lỗi trình bày nặng. Đặt `<w:keepNext/>` cho **đoạn thân CUỐI** và **đoạn đệm** trước khối ký, `<w:keepNext/>` cho mọi đoạn trong bảng ký, `<w:cantSplit/>` cho hàng của bảng ký ⇒ Word kéo theo ít nhất một đoạn nội dung sang cùng trang với chữ ký.

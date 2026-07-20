@@ -14077,7 +14077,16 @@ def run() -> int:
             _x2 = _zf147.ZipFile(_o2).read("word/document.xml").decode("utf-8")
             _nn2 = [p for p in _re147.findall(r"<w:p>.*?</w:p>", _x2, _re147.S)
                     if "Nơi nhận:" in "".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", p))]
-            return _ok and "<w:b/>" in _nn2[0] and "<w:i/>" in _nn2[0]
+            _ok = _ok and "<w:b/>" in _nn2[0] and "<w:i/>" in _nn2[0]
+            # r165: VB ĐẢNG — gạch chân CHỈ dưới chữ "Nơi nhận", DẤU HAI CHẤM không gạch chân
+            # (cột Minh hoạ HD05 PL2 render rõ hai run tách nhau).
+            _nn3 = [p for p in _re147.findall(r"<w:p>.*?</w:p>", _x, _re147.S)
+                    if "".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", p)).strip()
+                    .startswith("Nơi nhận")]
+            _rs = _re147.findall(r"<w:r>.*?</w:r>", _nn3[0], _re147.S) if _nn3 else []
+            _m = {"".join(_re147.findall(r"<w:t[^>]*>([^<]*)</w:t>", _r)): ("<w:u " in _r)
+                  for _r in _rs}
+            return _ok and _m.get("Nơi nhận") is True and _m.get(":") is False
     _t110("r147_dang_noi_nhan_va_gach", _c147_dang_noi_nhan_va_gach)
 
     # ═══ v1.34.85 — r148: DẤU SAO (*) VB Đảng bị CẮT CỤT (user 20-07: "không thể đọc được dấu sao ở

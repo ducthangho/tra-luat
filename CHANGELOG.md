@@ -1,3 +1,18 @@
+# ★ v1.34.96 — gạch chân "Nơi nhận" không trùm dấu hai chấm (§6.31) (2026-07-20)
+
+> User yêu cầu kiểm KỸ LẠI thể thức nơi nhận và phần ký sau khi vá .94.
+
+- **Xác minh lại phần ký bằng cột "Minh hoạ" của HD05 PL2** — mỗi ô minh hoạ được render ĐÚNG kiểu
+  chữ mà dòng đó quy định, soi ở cấp RUN: `T/M BAN THƯỜNG VỤ`[đậm=1] · `PHÓ BÍ THƯ`[đậm=**0**] ·
+  `Nguyễn Văn A`[đậm=1]. ⇒ **bản vá .94 ĐÚNG** (chức vụ người ký VB Đảng không in đậm), nay có
+  bằng chứng định dạng chứ không chỉ mô tả chữ.
+- **§6.31 lỗi mới lộ ra từ chính minh hoạ đó**: `Nơi nhận`[gạch chân] + `:`[KHÔNG gạch chân] là hai
+  run tách nhau — builder đang gạch chân cả `Nơi nhận:`. Đã tách run.
+- Ghi vào reference cách đọc PL2: **cột Minh hoạ = bằng chứng định dạng**; ⚠ KHÔNG dùng các bảng
+  minh hoạ khổ nhỏ ở đầu HD05 (toàn 10pt, không đậm gì) làm chuẩn — chúng là HÌNH thu nhỏ.
+- Nơi nhận VB Đảng vẫn dùng **dấu chấm phẩy `;`** — HD05 mục 9.2.5 nguyên văn và ví dụ minh hoạ
+  trong chính HD05 đều `;`; đã trình nguyên văn cho user, chờ xác nhận nếu Uỷ ban có quy ước riêng.
+
 # ★ v1.34.95 — cân dòng, keepNext, tổ chức hết hiệu lực, nhất quán dấu (§6.27-6.30) (2026-07-20)
 
 > Bốn góp ý của user sau khi xem bộ mẫu Đảng, cộng một chỉnh cho Phiếu trình. selftest 1125/1125.

@@ -1329,8 +1329,19 @@ def the_thuc_build(spec, out_path):
     if qh and not (spec.get("noi_nhan") or []):
         nn = _tt_p(" ", sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
     else:
-        nn = _tt_p("Nơi nhận:", sz=S["nn"], b=not dang, i=not dang, u=dang, jc="left",
-                   line=L_KHOI, rule="exact")   # r147: Đảng KHÔNG đậm (HD05 PL2)
+        # r147: Đảng KHÔNG đậm (HD05 PL2). r165: và gạch chân CHỈ ĐẶT DƯỚI CHỮ "Nơi nhận" —
+        # DẤU HAI CHẤM KHÔNG gạch chân (cột Minh hoạ PL2 render rõ: 'Nơi nhận'[u=1] + ':'[u=0]).
+        if dang:
+            nn = ('<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="' + str(L_KHOI)
+                  + '" w:lineRule="exact"/><w:ind w:firstLine="0"/><w:jc w:val="left"/></w:pPr>'
+                  + f'<w:r><w:rPr><w:u w:val="single"/><w:sz w:val="{S["nn"]}"/>'
+                    f'<w:szCs w:val="{S["nn"]}"/></w:rPr><w:t xml:space="preserve">Nơi nhận</w:t>'
+                    '</w:r>'
+                  + f'<w:r><w:rPr><w:sz w:val="{S["nn"]}"/><w:szCs w:val="{S["nn"]}"/></w:rPr>'
+                    '<w:t xml:space="preserve">:</w:t></w:r></w:p>')
+        else:
+            nn = _tt_p("Nơi nhận:", sz=S["nn"], b=True, i=True, jc="left",
+                       line=L_KHOI, rule="exact")
         for x in (spec.get("noi_nhan") or []):
             nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
     # r149: bỏ dòng RỖNG khi chỉ có MỘT dòng chức vụ — đơn vị trực thuộc ký nhân danh mình

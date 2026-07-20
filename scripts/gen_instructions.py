@@ -635,7 +635,10 @@ chính sách nguồn: {policy} (ưu tiên materialize về Drive khi xuất đư
                     + "\n".join(_tl_lines)
                     + "\n\nKhi soạn theo mẫu: GIỮ NGUYÊN khung/đề mục/trật tự phần của mẫu, chỉ điền nội dung; "
                       "mọi căn cứ pháp lý phải verify NGUYÊN VĂN trước khi đưa vào; văn phong theo khối van_phong; "
-                      "dựng file .docx thành phẩm bằng công cụ docx của MÔI TRƯỜNG (tra-luat KHÔNG sinh docx).")
+                      "dựng file .docx thành phẩm bằng `tl the-thuc-build --spec <json> --out <docx>` "
+                      "(hệ hanh-chinh | dang | vbqppl-qh, hoặc mau=phieu_trinh) rồi kiểm bằng "
+                      "`tl the-thuc-check`; mẫu phức tạp ngoài khả năng dựng thì dùng công cụ "
+                      "docx của MÔI TRƯỜNG theo khung mẫu.")
     return head + "\n\n" + tline + "\n\n" + "\n\n".join(x.strip() for x in body).strip() + "\n"
 
 

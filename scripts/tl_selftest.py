@@ -13261,7 +13261,10 @@ def run() -> int:
         _b = _gi132.generate_profile_load_block(_mt, "session", _gi132.VERSION)
         _ok = ("## trinh_bay_theo_mau" in _b and "`DTPL`" in _b and "CHỈ KHI soạn phiếu trình." in _b
                and "tl doc-text" in _b and "GIỮ NGUYÊN khung" in _b and "mẫu 2026" in _b
-               and "verify NGUYÊN VĂN" in _b and "KHÔNG sinh docx" in _b)
+               # v1.34.88: doctrine "tra-luat KHÔNG sinh docx" ĐÃ SAI từ .84 (có the-thuc-build)
+               # — block phải chỉ đúng công cụ, nếu không mọi profile bị dẫn nhầm sang tool ngoài.
+               and "verify NGUYÊN VĂN" in _b and "tl the-thuc-build" in _b
+               and "the-thuc-check" in _b and "KHÔNG sinh docx" not in _b)
         _b0 = _gi132.generate_profile_load_block({"profile": "beta", "notebookId": "nb-1",
                                                   "rootFolderId": "FB"}, "session", _gi132.VERSION)
         _ok = _ok and "trinh_bay_theo_mau" not in _b0                    # không templates → block VẮNG

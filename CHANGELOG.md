@@ -1,3 +1,23 @@
+# ★ v1.34.89 — sửa doctrine "tra-luat KHÔNG sinh docx" đã SAI từ .84 (2026-07-20)
+
+> Lộ ra khi kiểm Instruction Block sau lúc nạp mẫu Phiếu trình vào profile UBVHXH.
+
+- **`generate_profile_load_block` vẫn dạy "dựng .docx bằng công cụ docx của MÔI TRƯỜNG (tra-luat
+  KHÔNG sinh docx)"** — sai kể từ v1.34.84 khi có `tl the-thuc-build`. Câu này nằm trong khối
+  `trinh_bay_theo_mau` của MỌI profile có mẫu ⇒ đang chủ động dẫn nhầm sang công cụ ngoài trong khi
+  skill dựng được và tự self-check. Thay bằng: dựng bằng `tl the-thuc-build` (hanh-chinh | dang |
+  vbqppl-qh | mau=phieu_trinh) rồi kiểm `tl the-thuc-check`; mẫu phức tạp ngoài khả năng dựng mới
+  dùng công cụ MÔI TRƯỜNG. RUNBOOK §D cùng nội dung.
+- r132 trước đây **ghim đúng câu sai** (`"KHÔNG sinh docx" in _b`) nên đổi doctrine là test đỏ —
+  đã cập nhật thành khẳng định NGƯỢC LẠI (`"tl the-thuc-build" in _b` và `"KHÔNG sinh docx" not in _b`).
+- Mẫu Phiếu trình đã nạp vào profile "UBVHXH khóa XV": id `mau-phieu-trinh-ubvhxh-khung-sach`,
+  drive_id `1cdDxcgyXrnW370yEzqLM8Kn9Xsci7C0qNICQM_Ej-8g` (bản CÓ viền). ★Lưu ý vận hành: kho mẫu lưu
+  bản canonical dạng Google Doc ⇒ verify sau upload phải soi **CẤU TRÚC** (tblW/tcBorders), KHÔNG
+  byte-match như deploy zip skill; và Google export ghi thuộc tính **thứ tự khác**
+  (`<w:top w:color=… w:sz="4" w:val="single"/>`) nên đừng dò `<w:top w:val="single"`.
+- ★`--template-scope` KHÔNG tự bỏ tiền tố: truyền "CHỈ KHI …" sẽ ra "CHỈ KHI CHỈ KHI …". Truyền vế
+  điều kiện trần. Sửa entry = `--template-remove` rồi `--template-add` (add trùng id → TEMPLATE_ID_EXISTS).
+
 # ★ v1.34.88 — Phiếu trình: bảng nội dung PHẢI có viền (§6.22) (2026-07-20)
 
 > User: *"Phần nội dung Phiếu trình cần nằm trong bảng 02 cột, có border. Hiện nay không có border.

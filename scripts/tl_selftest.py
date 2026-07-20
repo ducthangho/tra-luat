@@ -14339,6 +14339,20 @@ def run() -> int:
             return False
         if _mar(_tbls[1]) != (120, 120) or _mar(_tbls[2]) != (120, 120):
             return False
+        # r161: Google Docs BỎ tblCellMar khi chuyển .docx → GDoc (kho mẫu lưu canonical dạng GDoc)
+        # ⇒ đoạn CUỐI của ô có viền phải mang w:after (spacing SỐNG SÓT round-trip), nếu không bản
+        # trên Drive lại dính nét kẻ dưới dù bản local đã đúng.
+        for _t in (_tbls[1], _tbls[2]):
+            for _c in _r6.findall(r"<w:tc>.*?</w:tc>", _t, _r6.S):
+                _ps = _r6.findall(r"<w:p>.*?</w:p>", _c, _r6.S)
+                if not _ps:
+                    continue
+                _last = _ps[-1]
+                if not "".join(_r6.findall(r"<w:t[^>]*>([^<]*)</w:t>", _last)).strip():
+                    continue          # ô vMerge rỗng — bỏ qua
+                _af = _r6.search(r'w:after="(\d+)"', _last)
+                if not _af or int(_af.group(1)) != 120:
+                    return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt
                 and "Kính gửi: Đồng chí Chủ nhiệm Ủy ban" in _txt

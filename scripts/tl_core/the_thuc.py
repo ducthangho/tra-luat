@@ -975,6 +975,18 @@ def _phieu_trinh_build(spec, out_path):
         return ('<w:tblCellMar>' + _d + '<w:left w:w="72" w:type="dxa"/>'
                 '<w:right w:w="72" w:type="dxa"/></w:tblCellMar>')
 
+    def _dem_day_o(inner, tw):
+        """r161: Google Docs **BỎ HẲN** `tblCellMar` khi chuyển .docx → GDoc (kho mẫu lưu canonical
+        dạng GDoc) ⇒ chỉ dựa vào tblCellMar thì bản trên Drive lại dính nét kẻ. `w:before`/`w:after`
+        thì SỐNG SÓT round-trip ⇒ đặt thêm `after` cho ĐOẠN CUỐI của ô. Giữ cả hai: Word dùng
+        tblCellMar (đệm đều cả trên lẫn dưới), GDoc dùng after."""
+        import re as _re
+        _m = list(_re.finditer(r'w:after="(\d+)"', inner))
+        if not _m:
+            return inner
+        _l = _m[-1]
+        return inner[:_l.start()] + f'w:after="{tw}"' + inner[_l.end():]
+
     def tbl(cols, rows, bd=NIL4, va="", mar_tb=False):
         g = "".join(f'<w:gridCol w:w="{c}"/>' for c in cols)
         tr = "".join("<w:tr>" + "".join(cell(cols[k], c, bd, va) for k, c in enumerate(r))
@@ -1045,14 +1057,15 @@ def _phieu_trinh_build(spec, out_path):
     # <w:tblBorders> trực tiếp — soi mỗi tblBorders sẽ kết luận NHẦM "không viền" (đã mắc 20-07).
     # Bộ dựng tự sinh styles.xml tối thiểu nên phải đặt viền TRỰC TIẾP cấp ô.
     wr2 = W - wl2
-    _tr = ["<w:tr>" + cell(wl2, trai2, VIEN)
-           + cell(wr2, phai2, VIEN, extra='<w:vMerge w:val="restart"/>') + "</w:tr>"]
+    _tr = ["<w:tr>" + cell(wl2, _dem_day_o(trai2, _mar_o), VIEN)
+           + cell(wr2, _dem_day_o(phai2, _mar_o), VIEN,
+                  extra='<w:vMerge w:val="restart"/>') + "</w:tr>"]
     for k in (spec.get("ky_trai") or []):
         _o = _tt_p(k.get("chuc_vu", ""), sz=S_THAN, b=True, jc="center", before=120, **LH)
         for _ in range(int(k.get("dong_trong", 3))):
             _o += _tt_p(" ", sz=S_THAN, jc="center", **LH)
         _o += _tt_p(k.get("ho_ten", ""), sz=S_THAN, b=True, jc="center", **LH)
-        _tr.append("<w:tr>" + cell(wl2, _o, VIEN)
+        _tr.append("<w:tr>" + cell(wl2, _dem_day_o(_o, _mar_o), VIEN)
                    + cell(wr2, _tt_p(" ", sz=S_THAN, jc="center", **LH), VIEN,
                           extra="<w:vMerge/>") + "</w:tr>")
     body.append(f'<w:tbl><w:tblPr><w:tblW w:w="{W}" w:type="dxa"/><w:jc w:val="center"/>'
@@ -1069,7 +1082,7 @@ def _phieu_trinh_build(spec, out_path):
         cols = [round(W * r) for r in (0.073, 0.225, 0.239, 0.463)]
         cols[-1] = W - sum(cols[:-1])
         def o(t, b=False, jc="left"):
-            return _tt_p(t, sz=S_THAN, b=b, jc=jc, line=LN, rule=RULE)
+            return _tt_p(t, sz=S_THAN, b=b, jc=jc, after=_mar_o, line=LN, rule=RULE)
         rows = [[o("STT", True, "center"), o("Họ và tên", True, "center"),
                  o("Đồng ý", True, "center"), o("Góp ý", True, "center")]]
         for i, r in enumerate(th_y, 1):

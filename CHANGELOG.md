@@ -1,3 +1,15 @@
+# ★ v1.34.93 — đệm ô phải khai HAI TẦNG vì Google Docs bỏ tblCellMar (§6.26) (2026-07-20)
+
+> Phát hiện khi verify bản mẫu .92 vừa upload: local đúng 120tw nhưng **trên Drive = 0**.
+
+- Kho mẫu lưu **canonical dạng Google Doc** ⇒ .docx bị convert. Round-trip **BỎ HẲN** `tblCellMar`
+  (và `tcMar`), trong khi `w:before`/`w:after` của đoạn **sống sót**. Chỉ dựa vào `tblCellMar` thì
+  bản local đúng còn bản dùng thật (tải từ kho mẫu) lại dính nét kẻ — đúng lỗi user báo.
+- **Khai hai tầng**: `tblCellMar` top/bottom (Word) **+** `w:after` cho **đoạn CUỐI mỗi ô có viền**
+  (Google Docs). Áp cho bảng nội dung và bảng tổng hợp.
+- r156 siết thêm: đoạn cuối của mọi ô có viền (trừ ô vMerge rỗng) phải có `w:after=120`.
+  Xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.92 — ô có viền phải có đệm dọc (§6.25) (2026-07-20)
 
 > User gửi ảnh: dòng cuối ô "Nội dung" của Phiếu trình **dính sát nét kẻ dưới**.

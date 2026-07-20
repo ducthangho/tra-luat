@@ -1,3 +1,30 @@
+# ★ v1.34.87 — khe khối ký (có rà quy định), Quốc huy, và bộ dựng PHIẾU TRÌNH (2026-07-20)
+
+> Ba việc user nêu sau khi xem 19 mẫu + gửi mẫu Phiếu trình của Ủy ban Văn hóa và Xã hội.
+> selftest 1123→**1124** (r154, r156).
+
+- **Khe giữa nội dung và khối ký — RÀ QUY ĐỊNH, KẾT LUẬN: KHÔNG CÓ (§6.19)**. Đã đọc NĐ 30/2020
+  PL I Mục II.6.e + **Mục IV sơ đồ bố trí** (ảnh nhúng trong docx, phải trích ra mới xem được) và
+  NQ 351/2017 Đ35/Đ37: không văn bản nào ấn định khoảng cách này; ràng buộc duy nhất là "đoạn ≥6pt".
+  Sơ đồ vẽ ô 6 và ô 7a ở hai băng tách rời nhưng chỉ ghi số cho LỀ TRANG. Đo tỷ lệ trên sơ đồ ⇒
+  ≈8,4mm ≈ **24pt**, lấy làm mặc định (trước là 12pt — user thấy quá sát). Chỉnh: `spec.dem_ky_pt`
+  (sàn 6pt). r154 khoá mặc định + khả năng chỉnh + sàn.
+- **Quốc huy KHÔNG chừa chỗ bằng đoạn rỗng (§6.20)** — Mẫu 15a/15b/16 NQ351 trước đây chèn một đoạn
+  trống để dành chỗ, Word hiển thị đúng là **một dòng trống ngay trên "CHỦ TỊCH NƯỚC"** (user phát
+  hiện) và bộ kiểm cờ `TT-DONG-TRONG-DAU`. Quốc huy là ảnh NỔI, chèn đè. 19 mẫu đã dựng lại.
+- **`the-thuc-build` dựng PHIẾU TRÌNH** — `spec.mau = "phieu_trinh"` (§6.21). Ba khối: tiêu đề 2 ô ·
+  bảng 2 cột 70/30 "quá trình thực hiện + đề xuất + các cấp ký | ý kiến lãnh đạo" · bảng TỔNG HỢP Ý
+  KIẾN 4 cột CÓ viền. Là **biểu mẫu nội bộ**, không phải VB phát hành ⇒ tự loại `TT-SO-KY-HIEU`,
+  `TT-NOI-NHAN`, `TT-CHUC-VU-KY`, `TT-TEN-LOAI` khỏi kết luận self-check.
+  ⚠ **Mẫu gốc để cả 3 bảng TRÀN lề** (9180 / 10065 / 9180 twips > vùng chữ 9072) và nội dung cỡ 12
+  (NĐ30 đòi 13-14) — bộ dựng tính bề rộng từ `sectPr` nên bản sinh ra không tràn. r156 khoá.
+  Thêm cấp phát ô tiêu đề theo nhu cầu THẬT của CẢ HAI nhánh (tên "ỦY BAN VĂN HÓA VÀ XÃ HỘI" cỡ 13
+  tràn ô 59 twips ⇒ hạ về cỡ 12, NĐ30 cho 12-13).
+- **r155 tách `_tt_ghi_docx`** — đóng gói docx dùng chung cho cả hai bộ dựng. ★Bẫy khi tách: chuỗi
+  `env_chk = the_thuc_check(out_path` có MẶT ở `the_thuc_normalize` TRƯỚC `the_thuc_build` ⇒ phải
+  `index(..., i)` tìm SAU mốc đầu, nếu không sẽ cắt nhầm khối rỗng (assert đã chặn).
+  Tên module mới phải đăng ký vào bảng re-export trong `tl.py` nếu không r90 đỏ.
+
 # ★ v1.34.86 — vá 3 lỗ hổng bộ kiểm hệ vbqppl_qh + `the-thuc-build --he vbqppl-qh` (2026-07-20)
 
 > Bắt nguồn từ việc dựng thử **19 mẫu Phụ lục I NQ 351/2017**. Sơ đồ 19 mẫu là **ẢNH** ở PDF Công báo

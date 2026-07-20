@@ -14233,6 +14233,65 @@ def run() -> int:
         return (_ok_tn and _ok_gach and _ok_cc and _ok_ke and _ok_ky
                 and env["self_check"]["fail"] == 0 and env["he"] == "vbqppl_qh")
 
+    # ═══ v1.34.87 — r154: user 20-07 "phần ký cần khoảng cách tới nội dung rộng hơn". Rà NĐ30 PL I
+    # + NQ351: KHÔNG có quy định định lượng khe này (chỉ "đoạn ≥6pt"); sơ đồ Mục IV vẽ hai băng tách
+    # rời nhưng không ghi số ⇒ lấy 24pt đo từ tỷ lệ sơ đồ làm mặc định, cho chỉnh qua dem_ky_pt. ═══
+    def _c154_khe_truoc_khoi_ky():
+        import re as _r4, zipfile as _z4, tempfile as _tf4
+        def _khe(spec):
+            _o = str(Path(_tf4.mkdtemp()) / "k.docx")
+            _TL_MODULE.the_thuc_build(spec, _o)
+            _x = _z4.ZipFile(_o).read("word/document.xml").decode("utf-8")
+            _truoc = _x.split("<w:tbl>")[-2]          # đoạn đệm ngay trước BẢNG ký
+            _m = _r4.findall(r'w:line="(\d+)" w:lineRule="exact"', _truoc)
+            return int(_m[-1])
+        _base = {"he": "hanh_chinh", "ten_cq": "BỘ TÀI CHÍNH", "so_kh": "Số: 12/BC-BTC",
+                 "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026", "ten_loai": "BÁO CÁO",
+                 "trich_yeu": "kết quả công tác", "body": [{"text": "Nội dung báo cáo."}],
+                 "noi_nhan": ["- Lưu: VT."], "chuc_vu": "BỘ TRƯỞNG", "ho_ten": "Nguyễn Văn A"}
+        # mặc định 24pt = 480 twips (trước v1.34.87 là 12pt/240 — quá sát, user phản ánh)
+        if _khe(dict(_base)) != 480:
+            return False
+        # chỉnh được, và có sàn 6pt (=120tw) theo NĐ30 PL I II.6.e
+        return (_khe(dict(_base, dem_ky_pt=36)) == 720
+                and _khe(dict(_base, dem_ky_pt=1)) == 120
+                and _khe(dict(_base, he="dang", dem_ky_pt=30)) == 600)
+    _t110("r154_khe_truoc_khoi_ky_24pt_va_chinh_duoc", _c154_khe_truoc_khoi_ky)
+    # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
+    # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══
+    def _c156_phieu_trinh():
+        import re as _r6, zipfile as _z6, tempfile as _tf6
+        SPEC = {"mau": "phieu_trinh", "chu_quan": "QUỐC HỘI KHÓA XVI",
+                "ten_cq": "ỦY BAN VĂN HÓA VÀ XÃ HỘI",
+                "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                "kinh_gui": "Đồng chí Chủ nhiệm Ủy ban", "noi_dung": "Tham gia ý kiến …",
+                "qua_trinh": ["Thường trực Ủy ban nhận được Công văn số …"],
+                "de_xuat": ["Kính trình đồng chí Chủ nhiệm xem xét, chỉ đạo."],
+                "ky_trai": [{"chuc_vu": "Chuyên viên", "ho_ten": "Nguyễn Văn A"},
+                            {"chuc_vu": "Phó Vụ trưởng", "ho_ten": "Trần Thị B"}],
+                "y_kien_phai": ["Ý kiến của", "Chủ nhiệm Ủy ban"],
+                "tong_hop": [{"ho_ten": "Lê Văn C (Phó Chủ nhiệm)", "dong_y": True,
+                              "gop_y": "(không có ý kiến khác)"},
+                             {"ho_ten": "UV Phạm Thị D", "dong_y": False, "gop_y": "Đề nghị viết gọn."}]}
+        _o = str(Path(_tf6.mkdtemp()) / "pt.docx")
+        env = _TL_MODULE.the_thuc_build(SPEC, _o)      # dispatch qua khoá spec "mau"
+        if env.get("schema") != "phieu_trinh_build.v1" or env["self_check"]["fail"]:
+            return False
+        _x = _z6.ZipFile(_o).read("word/document.xml").decode("utf-8")
+        _W = 11906 - 1701 - 1134
+        # MỌI bảng phải nằm trong vùng chữ (lỗi thật của mẫu gốc)
+        if [int(w) for w in _r6.findall(r'<w:tblW w:w="(\d+)"', _x)] != [_W, _W, _W]:
+            return False
+        # bảng tổng hợp có VIỀN, hai bảng trên KHÔNG viền
+        if _x.count('<w:top w:val="single" w:sz="4"/>') < 8:
+            return False
+        _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
+        return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt
+                and "Kính gửi: Đồng chí Chủ nhiệm Ủy ban" in _txt
+                and "Quá trình thực hiện:" in _txt and "Đề xuất:" in _txt)
+    _t110("r156_phieu_trinh_bang_khong_tran_le", _c156_phieu_trinh)
+
+
     _t110("r150_bac_co_chu_vbqppl_qh_theo_nq351", _c150_bac_co_chu_theo_nq351)
     _t110("r151_luat_nq_qh_khong_can_dia_danh", _c151_luat_khong_can_dia_danh)
     _t110("r152_vb_kem_theo_va_phu_luc_khong_fail_oan", _c152_kem_theo_va_phu_luc)

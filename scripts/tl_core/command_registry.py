@@ -1428,7 +1428,7 @@ GENERATED_SPECS = [
              'căn cứ nghiêng, kẻ ngang trước dòng thông qua); '
              'tự self-check bằng the-thuc-check',
      "args": [
-         {"flags": ['--spec'], "required": True, "help": 'file JSON: he, chu_quan, ten_cq, so_kh, dia_danh, ten_loai, trich_yeu, body[], noi_nhan[], quyen_han, chuc_vu, ho_ten, le{}, dong_trong_ky; riêng vbqppl-qh thêm: co_quan_ban_hanh, can_cu[], tu_lenh, thong_qua, body[].kieu="giua"'},
+         {"flags": ['--spec'], "required": True, "help": 'file JSON: he, chu_quan, ten_cq, so_kh, dia_danh, ten_loai, trich_yeu, body[], noi_nhan[], quyen_han, chuc_vu, ho_ten, le{}, dong_trong_ky; riêng vbqppl-qh thêm: co_quan_ban_hanh, can_cu[], tu_lenh, thong_qua, body[].kieu="giua"; khe trước khối ký dem_ky_pt (mặc định 24pt); mau="phieu_trinh" ⇒ dựng PHIẾU TRÌNH (chu_quan, kinh_gui, noi_dung, qua_trinh[], de_xuat[], ky_trai[], y_kien_phai[], tong_hop[])'},
          {"flags": ['--out'], "required": True, "help": 'đường dẫn .docx output'},
          {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'vbqppl-qh', 'dang'], "default": 'auto',
           "help": 'ép hệ (mặc định lấy từ spec.he)'},

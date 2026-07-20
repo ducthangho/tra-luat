@@ -900,6 +900,162 @@ def _tt_gach(text_tren, pt_text, *, hoa, ty_le, pt_gach=26, line=160):
     return _tt_p(" " * n, sz=pt_gach, u=True, jc="center", line=line, rule="exact")
 
 
+def _tt_ghi_docx(body, le, sz_def, out_path, pgw=11906, pgh=16838):
+    """r155 v1.34.87 — đóng gói docx tối thiểu, TÁCH khỏi the_thuc_build để bộ dựng phiếu trình dùng
+    chung: document.xml + styles.xml mặc định Times New Roman, zip TẤT ĐỊNH (date_time cố định)."""
+    import zipfile
+    doc = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+           '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+           "<w:body>" + "".join(body)
+           + f'<w:sectPr><w:pgSz w:w="{pgw}" w:h="{pgh}"/><w:pgMar w:top="{le["top"]}"'
+           f' w:right="{le["right"]}" w:bottom="{le["bottom"]}" w:left="{le["left"]}"'
+           ' w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>')
+    sty = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+           '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+           '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman"'
+           ' w:hAnsi="Times New Roman" w:cs="Times New Roman"/>'
+           f'<w:sz w:val="{sz_def}"/><w:szCs w:val="{sz_def}"/></w:rPr></w:rPrDefault>'
+           "<w:pPrDefault/></w:docDefaults></w:styles>")
+    CT = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+          '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+          '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+          '<Default Extension="xml" ContentType="application/xml"/>'
+          '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-'
+          'officedocument.wordprocessingml.document.main+xml"/>'
+          '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-'
+          'officedocument.wordprocessingml.styles+xml"/></Types>')
+    RELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+            'relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+    DRELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+             '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+             'relationships/styles" Target="styles.xml"/></Relationships>')
+    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zo:
+        for n, d in (("[Content_Types].xml", CT), ("_rels/.rels", RELS),
+                     ("word/_rels/document.xml.rels", DRELS),
+                     ("word/document.xml", doc), ("word/styles.xml", sty)):
+            zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            zo.writestr(zi, d)
+
+
+def _phieu_trinh_build(spec, out_path):
+    """r156 v1.34.87 — dựng PHIẾU TRÌNH VĂN BẢN (biểu mẫu nội bộ của Ủy ban, nạp từ mẫu VHXH 20-07).
+
+    KHÔNG phải văn bản hành chính phát hành: không số ký hiệu, không Nơi nhận, không dấu ⇒ bộ kiểm
+    thể thức NĐ30 chỉ áp phần khối tiêu đề. Ba khối: (1) tiêu đề 2 ô · (2) bảng 2 cột "quá trình
+    thực hiện | ý kiến lãnh đạo" kèm các cấp ký · (3) bảng tổng hợp ý kiến 4 cột CÓ VIỀN.
+    Bề rộng MỌI bảng tính từ vùng chữ (§6.10) — mẫu gốc để 9180/10065/9180 twips đều TRÀN lề."""
+    le = dict({"top": 1134, "bottom": 1134, "left": 1701, "right": 1134}, **(spec.get("le") or {}))
+    PGW = 11906
+    W = PGW - le["left"] - le["right"]
+    # tên CQ cỡ 12 (NĐ30 cho 12-13): cỡ 13 làm "ỦY BAN VĂN HÓA VÀ XÃ HỘI" tràn ô 59 twips
+    S_CQ, S_QH, S_TN, S_DD, S_TL, S_THAN = 24, 24, 26, 26, 28, 26
+    LN, RULE, THUT = 312, "atLeast", 567
+    LH = dict(line=300, rule="exact")
+    NIL4 = ('<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/>'
+            '<w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>')
+    VIEN = ('<w:tcBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/>'
+            '<w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/></w:tcBorders>')
+
+    def cell(w, inner, bd=NIL4, va=""):
+        _va = '<w:vAlign w:val="center"/>' if va else ""
+        return f'<w:tc><w:tcPr><w:tcW w:w="{w}" w:type="dxa"/>{bd}{_va}</w:tcPr>{inner}</w:tc>'
+
+    def tbl(cols, rows, bd=NIL4, va=""):
+        g = "".join(f'<w:gridCol w:w="{c}"/>' for c in cols)
+        tr = "".join("<w:tr>" + "".join(cell(cols[k], c, bd, va) for k, c in enumerate(r))
+                     + "</w:tr>" for r in rows)
+        return (f'<w:tbl><w:tblPr><w:tblW w:w="{sum(cols)}" w:type="dxa"/><w:jc w:val="center"/>'
+                '<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="72" w:type="dxa"/>'
+                '<w:right w:w="72" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000"/></w:tblPr>'
+                f'<w:tblGrid>{g}</w:tblGrid>{tr}</w:tbl>')
+
+    def th(t, **kw):
+        return _tt_p(t, sz=S_THAN, line=LN, rule=RULE, **kw)
+
+    body = []
+    # ── (1) khối tiêu đề ──
+    QH, TN = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "Độc lập - Tự do - Hạnh phúc"
+    # §6.6: cấp phát ô theo nhu cầu THẬT của CẢ HAI nhánh — ô phải đủ Quốc hiệu một dòng, phần
+    # còn lại cho ô trái, nhưng không được bóp ô trái nhỏ hơn tên cơ quan (nếu chật thì chia đều).
+    need_r = round(len(QH) * 0.62 * (S_QH / 2) * 20 * 1.04)
+    need_l = round(len(spec.get("ten_cq", "")) * 0.62 * (S_CQ / 2) * 20 * 1.04)
+    wr = max(round(W * 0.40), min(need_r, round(W * 0.62)))
+    if W - wr < need_l:
+        wr = W - need_l if need_l + need_r <= W else round(W * need_r / (need_l + need_r))
+    trai = ""
+    if spec.get("chu_quan"):
+        trai += _tt_p(spec["chu_quan"], sz=S_CQ, jc="center", **LH)
+    trai += _tt_p(spec.get("ten_cq", ""), sz=S_CQ, b=True, jc="center", **LH)
+    trai += _tt_gach(spec.get("ten_cq", ""), S_CQ, hoa=True, ty_le=0.42)
+    phai = (_tt_p(QH, sz=S_QH, b=True, jc="center", **LH)
+            + _tt_p(TN, sz=S_TN, b=True, jc="center", **LH)
+            + _tt_gach(TN, S_TN, hoa=False, ty_le=1.00)
+            + _tt_p(spec.get("dia_danh", ""), sz=S_DD, i=True, jc="center", before=120, **LH))
+    body.append(tbl([W - wr, wr], [[trai, phai]]))
+    body.append(_tt_p(spec.get("ten_loai", "PHIẾU TRÌNH VĂN BẢN"), sz=S_TL, b=True, jc="center",
+                      before=360, line=LN, rule=RULE))
+    if spec.get("kinh_gui"):
+        body.append(_tt_p("Kính gửi: " + spec["kinh_gui"], sz=S_TL, b=True, jc="center",
+                          before=240, line=LN, rule=RULE))
+    if spec.get("noi_dung"):
+        body.append(th("Nội dung: " + spec["noi_dung"], jc="both", first=THUT, before=240))
+
+    # ── (2) bảng "quá trình thực hiện | ý kiến lãnh đạo" (tỷ lệ 70/30 như mẫu gốc) ──
+    wl2 = round(W * 0.70)
+    trai2 = ""
+    for nhan, khoa in (("Quá trình thực hiện:", "qua_trinh"), ("Đề xuất:", "de_xuat")):
+        muc = spec.get(khoa) or []
+        if not muc:
+            continue
+        trai2 += th(nhan, b=True, jc="both", before=120)
+        for x in ([muc] if isinstance(muc, str) else muc):
+            trai2 += th(x, jc="both", first=THUT, before=120)
+    # các cấp ký trong ô trái: chức vụ → chừa dòng ký → họ tên
+    for k in (spec.get("ky_trai") or []):
+        trai2 += _tt_p(k.get("chuc_vu", ""), sz=S_THAN, b=True, jc="center", before=240, **LH)
+        for _ in range(int(k.get("dong_trong", 3))):
+            trai2 += _tt_p(" ", sz=S_THAN, jc="center", **LH)
+        trai2 += _tt_p(k.get("ho_ten", ""), sz=S_THAN, b=True, jc="center", **LH)
+    phai2 = "".join(_tt_p(x, sz=S_THAN, b=True, jc="center", before=120, **LH)
+                    for x in (spec.get("y_kien_phai") or ["Ý kiến của", "Lãnh đạo Ủy ban"]))
+    body.append(tbl([wl2, W - wl2], [[trai2, phai2]]))
+
+    # ── (3) bảng TỔNG HỢP Ý KIẾN (4 cột, CÓ viền) ──
+    th_y = spec.get("tong_hop")
+    if th_y:
+        body.append(_tt_p(spec.get("tieu_de_tong_hop", "TỔNG HỢP Ý KIẾN"), sz=S_TL, b=True,
+                          jc="center", before=360, line=LN, rule=RULE))
+        cols = [round(W * r) for r in (0.073, 0.225, 0.239, 0.463)]
+        cols[-1] = W - sum(cols[:-1])
+        def o(t, b=False, jc="left"):
+            return _tt_p(t, sz=S_THAN, b=b, jc=jc, line=LN, rule=RULE)
+        rows = [[o("STT", True, "center"), o("Họ và tên", True, "center"),
+                 o("Đồng ý", True, "center"), o("Góp ý", True, "center")]]
+        for i, r in enumerate(th_y, 1):
+            rows.append([o(str(i), jc="center"), o(r.get("ho_ten", "")),
+                         o("X" if r.get("dong_y") else "", jc="center"),
+                         o(r.get("gop_y", ""))])
+        body.append(tbl(cols, rows, bd=VIEN))
+
+    _tt_ghi_docx(body, le, S_THAN, out_path, pgw=PGW)
+    env = the_thuc_check(out_path, he="hanh_chinh")
+    # biểu mẫu nội bộ: KHÔNG có số ký hiệu / Nơi nhận / chức vụ ký kiểu TM. ⇒ loại khỏi kết luận
+    _bo = {"TT-SO-KY-HIEU", "TT-NOI-NHAN", "TT-CHUC-VU-KY", "TT-TEN-LOAI"}
+    _con = [f for f in env["findings"] if f["id"] not in _bo]
+    return {"ok": not [f for f in _con if f["level"] == "FAIL"], "schema": "phieu_trinh_build.v1",
+            "out": __import__("os").path.basename(str(out_path)), "mau": "phieu_trinh",
+            "vung_chu_twips": W,
+            "self_check": {"fail": len([f for f in _con if f["level"] == "FAIL"]),
+                           "warn": len([f for f in _con if f["level"] == "WARN"]),
+                           "fail_ids": sorted({f["id"] for f in _con if f["level"] == "FAIL"}),
+                           "bo_qua_vi_bieu_mau_noi_bo": sorted(
+                               {f["id"] for f in env["findings"] if f["id"] in _bo})}}
+
+
 def the_thuc_build(spec, out_path):
     """r145 v1.34.84 — DỰNG docx ĐÚNG-BY-CONSTRUCTION (đúc kết thực chiến 20-07). Mọi kích thước TÍNH
     được: bề rộng bảng = pgSz − lề (§6.10, không tràn); độ dài gạch theo công thức (§6.9); hai ô tiêu đề
@@ -908,6 +1064,8 @@ def the_thuc_build(spec, out_path):
     trống để ký + đóng dấu. Hệ: hanh_chinh (NĐ30) | dang (QĐ399+HD05). Trả envelope + self-check."""
     import os
     import zipfile
+    if str(spec.get("mau") or "").replace("-", "_") == "phieu_trinh":
+        return _phieu_trinh_build(spec, out_path)      # r156: biểu mẫu nội bộ, bố cục riêng
     he = str(spec.get("he") or "hanh_chinh").replace("-", "_")
     dang = (he == "dang")
     qh = (he == "vbqppl_qh")     # r152 v1.34.86 — 19 mẫu Phụ lục I NQ 351/2017
@@ -1041,45 +1199,16 @@ def the_thuc_build(spec, out_path):
           # Đ37 k2 NQ351: họ tên in thường ĐẬM cỡ 14 trong khi chức vụ cỡ 13 — hai cỡ KHÁC nhau
           + _tt_p(spec.get("ho_ten", ""), sz=(S["than"] if qh else S["ky"]), b=True,
                   jc="center", line=300, rule="exact"))
-    body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=240, rule="exact"))
+    # §6.19 (r154 v1.34.87 — user 20-07 thấy khối ký sát nội dung): KHÔNG có quy định định lượng
+    # khe giữa nội dung và khối ký. NĐ30 PL I II.6.e / NQ351 Đ35 k1 chỉ ràng "khoảng cách giữa các
+    # đoạn ≥ 6pt"; sơ đồ Mục IV PL I NĐ30 vẽ ô 6 và ô 7a ở hai băng tách rời NHƯNG không ghi số.
+    # Đo tỷ lệ trên chính sơ đồ (khe ô6→ô7a ÷ chiều cao vùng chữ) ≈ 8,4mm ≈ 24pt ⇒ lấy làm MẶC
+    # ĐỊNH (trước đây 12pt, quá sát). Chỉnh được bằng spec.dem_ky_pt.
+    _dem_ky = max(120, int(round(float(spec.get("dem_ky_pt", 24)) * 20)))
+    body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=_dem_ky, rule="exact"))
     body.append(tbl(wl2, wr2, nn, ky))
 
-    doc = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-           '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-           "<w:body>" + "".join(body)
-           + f'<w:sectPr><w:pgSz w:w="{PGW}" w:h="16838"/><w:pgMar w:top="{le["top"]}"'
-           f' w:right="{le["right"]}" w:bottom="{le["bottom"]}" w:left="{le["left"]}"'
-           ' w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>')
-    sz_def = S["than"]
-    sty = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-           '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-           '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman"'
-           ' w:hAnsi="Times New Roman" w:cs="Times New Roman"/>'
-           f'<w:sz w:val="{sz_def}"/><w:szCs w:val="{sz_def}"/></w:rPr></w:rPrDefault>'
-           "<w:pPrDefault/></w:docDefaults></w:styles>")
-    CT = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-          '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-          '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-          '<Default Extension="xml" ContentType="application/xml"/>'
-          '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-'
-          'officedocument.wordprocessingml.document.main+xml"/>'
-          '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-'
-          'officedocument.wordprocessingml.styles+xml"/></Types>')
-    RELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
-            'relationships/officeDocument" Target="word/document.xml"/></Relationships>')
-    DRELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-             '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
-             'relationships/styles" Target="styles.xml"/></Relationships>')
-    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zo:
-        for n, d in (("[Content_Types].xml", CT), ("_rels/.rels", RELS),
-                     ("word/_rels/document.xml.rels", DRELS),
-                     ("word/document.xml", doc), ("word/styles.xml", sty)):
-            zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
-            zi.compress_type = zipfile.ZIP_DEFLATED
-            zo.writestr(zi, d)
+    _tt_ghi_docx(body, le, S["than"], out_path, pgw=PGW)
     env_chk = the_thuc_check(out_path, he=("dang" if dang else ("vbqppl_qh" if qh else None)))
     return {"ok": env_chk["summary"]["fail"] == 0, "schema": "the_thuc_build.v1",
             "out": os.path.basename(str(out_path)), "he": he,

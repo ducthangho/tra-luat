@@ -1022,7 +1022,11 @@ def _phieu_trinh_build(spec, out_path):
         trai2 += _tt_p(k.get("ho_ten", ""), sz=S_THAN, b=True, jc="center", **LH)
     phai2 = "".join(_tt_p(x, sz=S_THAN, b=True, jc="center", before=120, **LH)
                     for x in (spec.get("y_kien_phai") or ["Ý kiến của", "Lãnh đạo Ủy ban"]))
-    body.append(tbl([wl2, W - wl2], [[trai2, phai2]]))
+    # r157: bảng nội dung CÓ VIỀN. Mẫu gốc không có <w:tblBorders> trực tiếp mà mang
+    # <w:tblStyle w:val="TableGrid"/> — viền nằm trong styles.xml, soi mỗi tblBorders sẽ kết luận
+    # NHẦM là "không viền" (đã mắc 20-07). Bộ dựng tự sinh styles.xml tối thiểu KHÔNG có TableGrid
+    # nên phải đặt viền TRỰC TIẾP ở cấp ô.
+    body.append(tbl([wl2, W - wl2], [[trai2, phai2]], bd=VIEN))
 
     # ── (3) bảng TỔNG HỢP Ý KIẾN (4 cột, CÓ viền) ──
     th_y = spec.get("tong_hop")

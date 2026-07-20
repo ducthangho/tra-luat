@@ -14282,8 +14282,16 @@ def run() -> int:
         # MỌI bảng phải nằm trong vùng chữ (lỗi thật của mẫu gốc)
         if [int(w) for w in _r6.findall(r'<w:tblW w:w="(\d+)"', _x)] != [_W, _W, _W]:
             return False
-        # bảng tổng hợp có VIỀN, hai bảng trên KHÔNG viền
-        if _x.count('<w:top w:val="single" w:sz="4"/>') < 8:
+        # r157: bảng TIÊU ĐỀ không viền · bảng NỘI DUNG và bảng TỔNG HỢP đều CÓ viền.
+        # (mẫu gốc mang viền qua <w:tblStyle TableGrid> trong styles.xml chứ không phải
+        # <w:tblBorders> trực tiếp — soi thiếu chỗ này sẽ dựng ra bảng nội dung KHÔNG viền.)
+        _tbls = _r6.findall(r"<w:tbl>.*?</w:tbl>", _x, _r6.S)
+        if len(_tbls) != 3:
+            return False
+        # phải soi ĐÚNG thẻ viền: 'w:val="single"' trơn còn khớp cả <w:u w:val="single"/> (GẠCH
+        # dưới tên cơ quan/Tiêu ngữ ở bảng tiêu đề) ⇒ bảng 1 bị coi nhầm là có viền.
+        _co_vien = [('<w:top w:val="single"' in _t) for _t in _tbls]
+        if _co_vien != [False, True, True]:
             return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt

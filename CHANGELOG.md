@@ -1,3 +1,19 @@
+# ★ v1.34.88 — Phiếu trình: bảng nội dung PHẢI có viền (§6.22) (2026-07-20)
+
+> User: *"Phần nội dung Phiếu trình cần nằm trong bảng 02 cột, có border. Hiện nay không có border.
+> Hãy nhìn cho kỹ"* — đúng, và nguyên nhân là tôi soi thiếu một tầng. selftest 1124 (r156 siết thêm).
+
+- **Viền bảng có thể đến từ `tblStyle`, không chỉ `tblBorders` (§6.22)** — mẫu gốc VHXH để bảng nội
+  dung mang `<w:tblStyle w:val="TableGrid"/>` với viền nằm trong `styles.xml`, KHÔNG có
+  `<w:tblBorders>` trực tiếp. Lần rà trước chỉ tìm `tblBorders` nên kết luận NHẦM là "không viền" và
+  dựng ra bảng nội dung trần. Quy trình soi viền nay ghi vào reference: tblBorders → tblStyle +
+  styles.xml → tcBorders (ghi đè).
+- Bộ dựng tự sinh `styles.xml` tối thiểu (không có TableGrid) ⇒ **đặt viền TRỰC TIẾP cấp ô**.
+  Phiếu trình: bảng tiêu đề không viền · bảng nội dung CÓ viền · bảng tổng hợp CÓ viền.
+- ★Bẫy khi viết test: dò `w:val="single"` trơn khớp cả `<w:u w:val="single"/>` (gạch chân tên cơ
+  quan/Tiêu ngữ) ⇒ bảng tiêu đề bị coi nhầm là có viền. Dò `<w:top w:val="single"`. r156 đã siết
+  thành `[False, True, True]` cho đúng ba bảng và xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.87 — khe khối ký (có rà quy định), Quốc huy, và bộ dựng PHIẾU TRÌNH (2026-07-20)
 
 > Ba việc user nêu sau khi xem 19 mẫu + gửi mẫu Phiếu trình của Ủy ban Văn hóa và Xã hội.

@@ -14296,6 +14296,21 @@ def run() -> int:
         _co_vien = [('<w:top w:val="single"' in _t) for _t in _tbls]
         if _co_vien != [False, True, True]:
             return False
+        # r158: bảng nội dung phải có 1 dòng nội dung + MỖI CẤP KÝ MỘT DÒNG (đúng mẫu gốc 4 dòng),
+        # ô phải vMerge dọc suốt. Gộp các cấp ký chung một ô thì KHÔNG có viền ngăn giữa họ.
+        _rows2 = _r6.findall(r"<w:tr>.*?</w:tr>", _tbls[1], _r6.S)
+        if len(_rows2) != 1 + len(SPEC["ky_trai"]):
+            return False
+        if '<w:vMerge w:val="restart"/>' not in _rows2[0]:
+            return False
+        if not all("<w:vMerge/>" in _q for _q in _rows2[1:]):
+            return False
+        # MỌI ô của bảng nội dung đều có viền (kể cả các ô ký bên trái)
+        for _q in _rows2:
+            for _c in _r6.findall(r"<w:tc>.*?</w:tc>", _q, _r6.S):
+                _bd = _r6.search(r"<w:tcBorders>.*?</w:tcBorders>", _c, _r6.S)
+                if not _bd or 'w:val="single"' not in _bd.group(0):
+                    return False
         _txt = "".join(_r6.findall(r'<w:t[^>]*>([^<]*)</w:t>', _x))
         return ("PHIẾU TRÌNH VĂN BẢN" in _txt and "TỔNG HỢP Ý KIẾN" in _txt
                 and "Kính gửi: Đồng chí Chủ nhiệm Ủy ban" in _txt

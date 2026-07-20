@@ -960,9 +960,10 @@ def _phieu_trinh_build(spec, out_path):
     VIEN = ('<w:tcBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/>'
             '<w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/></w:tcBorders>')
 
-    def cell(w, inner, bd=NIL4, va=""):
+    def cell(w, inner, bd=NIL4, va="", extra=""):
         _va = '<w:vAlign w:val="center"/>' if va else ""
-        return f'<w:tc><w:tcPr><w:tcW w:w="{w}" w:type="dxa"/>{bd}{_va}</w:tcPr>{inner}</w:tc>'
+        return (f'<w:tc><w:tcPr><w:tcW w:w="{w}" w:type="dxa"/>{bd}{extra}{_va}</w:tcPr>'
+                f'{inner}</w:tc>')
 
     def tbl(cols, rows, bd=NIL4, va=""):
         g = "".join(f'<w:gridCol w:w="{c}"/>' for c in cols)
@@ -1005,6 +1006,10 @@ def _phieu_trinh_build(spec, out_path):
         body.append(th("Nội dung: " + spec["noi_dung"], jc="both", first=THUT, before=240))
 
     # ── (2) bảng "quá trình thực hiện | ý kiến lãnh đạo" (tỷ lệ 70/30 như mẫu gốc) ──
+    # r158: khe giữa khối tiêu đề/nội dung và BẢNG nội dung (user 20-07 "cần xa hơn").
+    body.append(_tt_p(" ", sz=S_THAN, jc="left",
+                      line=max(120, int(round(float(spec.get("dem_bang_pt", 18)) * 20))),
+                      rule="exact"))
     wl2 = round(W * 0.70)
     trai2 = ""
     for nhan, khoa in (("Quá trình thực hiện:", "qua_trinh"), ("Đề xuất:", "de_xuat")):
@@ -1014,19 +1019,29 @@ def _phieu_trinh_build(spec, out_path):
         trai2 += th(nhan, b=True, jc="both", before=120)
         for x in ([muc] if isinstance(muc, str) else muc):
             trai2 += th(x, jc="both", first=THUT, before=120)
-    # các cấp ký trong ô trái: chức vụ → chừa dòng ký → họ tên
-    for k in (spec.get("ky_trai") or []):
-        trai2 += _tt_p(k.get("chuc_vu", ""), sz=S_THAN, b=True, jc="center", before=240, **LH)
-        for _ in range(int(k.get("dong_trong", 3))):
-            trai2 += _tt_p(" ", sz=S_THAN, jc="center", **LH)
-        trai2 += _tt_p(k.get("ho_ten", ""), sz=S_THAN, b=True, jc="center", **LH)
     phai2 = "".join(_tt_p(x, sz=S_THAN, b=True, jc="center", before=120, **LH)
                     for x in (spec.get("y_kien_phai") or ["Ý kiến của", "Lãnh đạo Ủy ban"]))
-    # r157: bảng nội dung CÓ VIỀN. Mẫu gốc không có <w:tblBorders> trực tiếp mà mang
-    # <w:tblStyle w:val="TableGrid"/> — viền nằm trong styles.xml, soi mỗi tblBorders sẽ kết luận
-    # NHẦM là "không viền" (đã mắc 20-07). Bộ dựng tự sinh styles.xml tối thiểu KHÔNG có TableGrid
-    # nên phải đặt viền TRỰC TIẾP ở cấp ô.
-    body.append(tbl([wl2, W - wl2], [[trai2, phai2]], bd=VIEN))
+    # r157/r158: bảng nội dung CÓ VIỀN và MỖI CẤP KÝ MỘT DÒNG RIÊNG (đúng mẫu gốc: 4 dòng, ô phải
+    # vMerge dọc suốt). Gộp các cấp ký vào chung một ô như trước thì KHÔNG có viền ngăn giữa họ.
+    # ⚠ Mẫu gốc mang viền qua <w:tblStyle w:val="TableGrid"/> (viền ở styles.xml), KHÔNG có
+    # <w:tblBorders> trực tiếp — soi mỗi tblBorders sẽ kết luận NHẦM "không viền" (đã mắc 20-07).
+    # Bộ dựng tự sinh styles.xml tối thiểu nên phải đặt viền TRỰC TIẾP cấp ô.
+    wr2 = W - wl2
+    _tr = ["<w:tr>" + cell(wl2, trai2, VIEN)
+           + cell(wr2, phai2, VIEN, extra='<w:vMerge w:val="restart"/>') + "</w:tr>"]
+    for k in (spec.get("ky_trai") or []):
+        _o = _tt_p(k.get("chuc_vu", ""), sz=S_THAN, b=True, jc="center", before=120, **LH)
+        for _ in range(int(k.get("dong_trong", 3))):
+            _o += _tt_p(" ", sz=S_THAN, jc="center", **LH)
+        _o += _tt_p(k.get("ho_ten", ""), sz=S_THAN, b=True, jc="center", **LH)
+        _tr.append("<w:tr>" + cell(wl2, _o, VIEN)
+                   + cell(wr2, _tt_p(" ", sz=S_THAN, jc="center", **LH), VIEN,
+                          extra="<w:vMerge/>") + "</w:tr>")
+    body.append(f'<w:tbl><w:tblPr><w:tblW w:w="{W}" w:type="dxa"/><w:jc w:val="center"/>'
+                '<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="72" w:type="dxa"/>'
+                '<w:right w:w="72" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000"/></w:tblPr>'
+                f'<w:tblGrid><w:gridCol w:w="{wl2}"/><w:gridCol w:w="{wr2}"/></w:tblGrid>'
+                + "".join(_tr) + "</w:tbl>")
 
     # ── (3) bảng TỔNG HỢP Ý KIẾN (4 cột, CÓ viền) ──
     th_y = spec.get("tong_hop")

@@ -1,3 +1,19 @@
+# ★ v1.34.90 — Phiếu trình: mỗi cấp ký một dòng có viền + khe trước bảng (2026-07-20)
+
+> User: *"khoảng cách giữa bảng nội dung và phần tiêu đề cần xa hơn. Phần ký bên cột trái của các
+> chuyên viên cần có viền"*. Soi lại mẫu gốc thì đúng — và bản dựng của tôi sai CẤU TRÚC, không chỉ
+> thiếu viền. selftest 1124 (r156 siết thêm).
+
+- **§6.23 — bảng nội dung là bảng 4 DÒNG, không phải 1 dòng.** Mẫu gốc: dòng 1 = "Quá trình thực
+  hiện" + "Đề xuất"; **mỗi cấp ký một dòng riêng** (Chuyên viên · Phó Vụ trưởng · Ủy viên chuyên
+  trách); cột phải "Ý kiến của Chủ nhiệm Ủy ban" là MỘT ô dọc suốt bằng `<w:vMerge w:val="restart"/>`
+  + `<w:vMerge/>`. Bản .88 gộp hết các cấp ký vào chung một ô ⇒ **không có viền ngăn giữa họ**.
+  Nay mọi ô của bảng đều có viền trực tiếp.
+- **Khe trước bảng nội dung** `spec.dem_bang_pt`, mặc định **18pt** (trước là 0 — bảng dính sát khối
+  tiêu đề). Không có quy định định lượng, cùng lý do §6.19.
+- r156 siết: số dòng = 1 + số cấp ký · vMerge đúng chỗ · MỌI ô bảng nội dung có `w:val="single"`.
+  Xác minh ĐỎ-TRƯỚC.
+
 # ★ v1.34.89 — sửa doctrine "tra-luat KHÔNG sinh docx" đã SAI từ .84 (2026-07-20)
 
 > Lộ ra khi kiểm Instruction Block sau lúc nạp mẫu Phiếu trình vào profile UBVHXH.

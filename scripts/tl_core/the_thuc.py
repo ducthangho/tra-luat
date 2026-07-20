@@ -180,6 +180,11 @@ def _the_thuc_parse_docx(path):
 
     runs = []
     paras = []
+    # r146: đoạn NẰM TRONG BẢNG phải nhận dạng được — §6.7 "bảng KHÔNG áp thụt đầu dòng"
+    _in_tbl = set()
+    for _tb in droot.iter(W + "tbl"):
+        for _p in _tb.iter(W + "p"):
+            _in_tbl.add(id(_p))
     for p in droot.iter(W + "p"):
         ppr = p.find(W + "pPr")
         ind_fl = sp_line = None
@@ -210,7 +215,8 @@ def _the_thuc_parse_docx(path):
                 if se is not None:
                     pszs[se] = pszs.get(se, 0) + len(rt)
         if ptxt:
-            paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line, "rule": sp_rule, "szs": pszs})
+            paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line,
+                          "rule": sp_rule, "szs": pszs, "in_tbl": id(p) in _in_tbl})
     return {"sections": sections, "defaults": defaults, "normal": normal,
             "runs": runs, "text": "\n".join(p["text"] for p in paras), "paras": paras,
             "footnotes": footnotes}
@@ -339,6 +345,62 @@ def _the_thuc_wrap_scan(path, defaults, normal):
     return out
 
 
+def _the_thuc_check_layout(path, sections, add):
+    """T1b (r144 v1.34.84 — 4 lỗi gặp THẬT khi soạn BC rà soát 20-07, bộ kiểm cũ không bắt):
+    §6.10 bảng TRÀN vùng chữ (tblW > pgSz−lề; lỗi kế thừa khi copy mẫu có lề khác) = FAIL ·
+    §6.12 viền ô SÓT cạnh (khai nil 1-3 cạnh → cạnh còn lại HIỆN thành kẻ ngang lạ) = WARN ·
+    §6.9 gạch bằng SHAPE cứng (không co theo chữ mới → lệch) = WARN · đoạn RỖNG đầu văn bản = INFO."""
+    import re
+    import zipfile
+    try:
+        with zipfile.ZipFile(path) as z:
+            doc = z.read("word/document.xml").decode("utf-8", "replace")
+    except Exception:  # noqa: BLE001
+        return
+    s0 = sections[0] if sections else {}
+    pgw, L, R = s0.get("w"), s0.get("left"), s0.get("right")
+    if pgw and L is not None and R is not None:
+        w_text = pgw - L - R
+        for m in re.finditer(r'<w:tblW w:w="(\d+)" w:type="dxa"', doc):
+            wt = int(m.group(1))
+            if wt > w_text:
+                add("TT-BANG-TRAN-LE", "FAIL", f"bảng {wt} > vùng chữ {w_text} twips (tràn "
+                    f"{(wt - w_text) * 25.4 / 1440:.1f} mm)",
+                    f"tblW ≤ pgSz.w − lề trái − lề phải = {w_text} twips",
+                    "THE_THUC_TRINH_BAY §6.10 (thực chiến 20-07: tblW kế thừa mẫu có lề khác)")
+                break
+    CANH = ("top", "left", "bottom", "right")
+    for m in re.finditer(r"<w:tcBorders>(.*?)</w:tcBorders>", doc, re.S):
+        blk = m.group(1)
+        co = [c for c in CANH if re.search(rf"<w:{c}\b", blk)]
+        if co and len(co) < 4:
+            add("TT-VIEN-O-SOT", "WARN", "ô bảng khai viền thiếu cạnh: " + ", ".join(sorted(set(CANH) - set(co)))
+                + f" (mới khai {len(co)}/4)",
+                'khai nil ĐỦ 4 cạnh <w:top/left/bottom/right w:val="nil"/>',
+                "THE_THUC_TRINH_BAY §6.12 (thực chiến 20-07: sót top → kẻ ngang trên Quốc hiệu)")
+            break
+    if "AlternateContent" in doc or "<wps:wsp" in doc:
+        add("TT-GACH-SHAPE", "WARN", "văn bản có hình vẽ (shape) — nếu là ĐƯỜNG KẺ dưới tên cơ quan/"
+            "Tiêu ngữ/trích yếu thì kích thước CỨNG, không co theo chữ",
+            "dùng GẠCH CHÂN CẤP CHỮ (run underline) — độ dài tính theo chữ",
+            "THE_THUC_TRINH_BAY §6.9/§6.8 (thực chiến 20-07)")
+    body_i = doc.find("<w:body>")
+    if body_i >= 0:
+        head = doc[body_i + 8:]
+        n_rong = 0
+        for m in re.finditer(r"<w:p\b(?:[^>]*/>|.*?</w:p>)", head, re.S):
+            if m.start() > 4000:
+                break
+            seg = m.group(0)
+            if "".join(re.findall(r"<w:t[^>]*>([^<]*)</w:t>", seg)).strip():
+                break
+            n_rong += 1
+        if n_rong:
+            add("TT-DONG-TRONG-DAU", "INFO", f"{n_rong} đoạn rỗng ở ĐẦU văn bản (trước khối tiêu đề)",
+                "bỏ đoạn rỗng đầu — tạo dòng trống lạ trên bảng Quốc hiệu",
+                "THE_THUC_TRINH_BAY §6.13 (thực chiến 20-07)")
+
+
 def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
     """T2 (R3 v1.34.77) — hiện diện CẤU TRÚC bằng regex trên text bóc: thành phần bắt buộc theo hệ
     (Đ8 k2 NĐ30 / Đ71 k2 NĐ78 / Đ15 QĐ399), số ký hiệu đúng cú-pháp-hệ (bẫy chéo Đảng↔nhà nước),
@@ -459,8 +521,9 @@ def _the_thuc_check_t3(parsed, he_eff, add):
     # r143 (§6.7 THE_THUC_TRINH_BAY): đề mục (1., 2., 3.1., …) và gạch đầu dòng cũng thụt DÒNG ĐẦU
     # 1 cm (567 twips) — đếm para dạng đề-mục thiếu firstLine (<400 twips) → INFO tổng (quy ước nhà,
     # không phải FAIL quy định).
-    _dm_re = re.compile(r"^\s*(?:\d+(?:\.\d+)*\.|-)\s+\S")
-    _dm = [p for p in paras if len(p.get("text") or "") > 8 and _dm_re.match(p["text"])]
+    _dm_re = re.compile(r"^\s*(?:\d+(?:\.\d+)*[.-]|[IVX]+-|-)\s+\S")   # r146 +kiểu Đảng "I-"/"1-"
+    _dm = [p for p in paras if len(p.get("text") or "") > 8 and _dm_re.match(p["text"])
+           and not p.get("in_tbl")]      # r146: §6.7 — BẢNG không áp thụt (Nơi nhận/ký)
     _dm_miss = [p for p in _dm if not p.get("ind") or p["ind"] < 400]
     if len(_dm_miss) >= 3 and len(_dm_miss) * 2 > len(_dm):
         add("TT-THUT-DE-MUC", "INFO",
@@ -651,6 +714,7 @@ def the_thuc_check(path, he=None, strict=False):
     # ── T2 cấu trúc + T3 khuyến nghị (R3 v1.34.77) ──
     _the_thuc_check_t2(d["text"], he_eff, add, footnotes=d.get("footnotes", ""))
     _the_thuc_check_t3(d, he_eff, add)
+    _the_thuc_check_layout(path, d["sections"], add)   # T1b r144 — layout/viền/shape/đoạn rỗng
     for _wid, _wm in _the_thuc_wrap_scan(path, d["defaults"], d["normal"]):   # §6.6 r143 — vỡ dòng mềm ô header
         add(_wid, "WARN", _wm, "Quốc hiệu/tên cơ quan gọn MỘT dòng — khối tiêu đề cỡ 12 + nới ô (§6.8)",
             "THE_THUC_TRINH_BAY §6.6 (thực chứng 19-07)")
@@ -770,6 +834,199 @@ def the_thuc_normalize(in_path, out_path, he=None):
                         "normal_cleaned": normal_cleaned},
             "self_check": {"he_check": env_chk.get("he"), "t1_fail": len(t1f), "t1_fail_ids": t1f,
                            "fail": env_chk["summary"]["fail"], "warn": env_chk["summary"]["warn"]}}
+
+
+def _tt_p(text, *, sz=28, b=False, i=False, u=False, jc="both", first=0, before=0, after=0,
+          line=360, rule="atLeast"):
+    """1 đoạn docx với thuộc tính TƯỜNG MINH (builder r145 — không phụ thuộc style ngoài)."""
+    rpr = "<w:rPr>"
+    if b:
+        rpr += "<w:b/><w:bCs/>"
+    if i:
+        rpr += "<w:i/><w:iCs/>"
+    if u:
+        rpr += '<w:u w:val="single"/>'
+    rpr += f'<w:sz w:val="{sz}"/><w:szCs w:val="{sz}"/></w:rPr>'
+    esc = (str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    return (f'<w:p><w:pPr><w:spacing w:before="{before}" w:after="{after}" w:line="{line}"'
+            f' w:lineRule="{rule}"/><w:ind w:firstLine="{first}"/><w:jc w:val="{jc}"/></w:pPr>'
+            f'<w:r>{rpr}<w:t xml:space="preserve">{esc}</w:t></w:r></w:p>')
+
+
+def _tt_so_nbsp(text, pt_text, pt_gach, hoa=True, ty_le=0.42):
+    """§6.9 — số ký tự NBSP để GẠCH dài đúng tỷ_lệ so với dòng chữ.
+    n = len × K × pt_chữ × tỷ_lệ / (0.25 × pt_gạch); K = 0.62 (IN HOA) | 0.50 (in thường có dấu);
+    NBSP rộng 0.25em. tỷ_lệ: tên CQ/trích yếu = 0.42 (giữa dải 1/3–1/2 NĐ30) · Tiêu ngữ = 1.00."""
+    K = 0.62 if hoa else 0.50
+    return max(4, round(len(str(text)) * K * pt_text * ty_le / (0.25 * pt_gach)))
+
+
+def _tt_gach(text_tren, pt_text, *, hoa, ty_le, pt_gach=26, line=160):
+    """§6.9 — ĐOẠN gạch riêng (KHÔNG gạch-chân-cấp-chữ cho Tiêu ngữ: cơ chế khác ⇒ lệch cao độ)."""
+    n = _tt_so_nbsp(text_tren, pt_text / 2, pt_gach / 2, hoa=hoa, ty_le=ty_le)
+    return _tt_p(" " * n, sz=pt_gach, u=True, jc="center", line=line, rule="exact")
+
+
+def the_thuc_build(spec, out_path):
+    """r145 v1.34.84 — DỰNG docx ĐÚNG-BY-CONSTRUCTION (đúc kết thực chiến 20-07). Mọi kích thước TÍNH
+    được: bề rộng bảng = pgSz − lề (§6.10, không tràn); độ dài gạch theo công thức (§6.9); hai ô tiêu đề
+    CÙNG chuỗi chiều cao dòng ⇒ gạch + số/ngày ngang nhau tất định; viền nil ĐỦ 4 cạnh (§6.12); khoảng
+    trên/dưới gạch cân (§6.11); không đoạn rỗng đầu (§6.13); khối Nơi nhận | ký = bảng 2 ô, ≥5 dòng
+    trống để ký + đóng dấu. Hệ: hanh_chinh (NĐ30) | dang (QĐ399+HD05). Trả envelope + self-check."""
+    import os
+    import zipfile
+    he = str(spec.get("he") or "hanh_chinh").replace("-", "_")
+    dang = (he == "dang")
+    # lề mặc định THEO HỆ: Đảng ĐƠN TRỊ 20/20/30/15 (HD05 IV.4.1) · nhà nước 20/20/30/20 (§6.8)
+    le = dict({"top": 1134, "bottom": 1134, "left": 1701,
+               "right": 850 if dang else 1134}, **(spec.get("le") or {}))
+    PGW = 11906
+    W = PGW - le["left"] - le["right"]
+    NIL4 = ('<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/>'
+            '<w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>')
+    # cỡ chữ theo hệ (half-points): [CQ, tiêu-đề/quốc-hiệu, tiêu-ngữ, số-KH, địa-danh, tên-loại,
+    #                                trích-yếu, thân, nơi-nhận-từ, nơi-nhận-ds, ký]
+    S = dict(cq=28, qh=30, tn=0, so=28, dd=28, tl=32, ty=30, than=30, nn=28, nnds=24, ky=28) if dang \
+        else dict(cq=24, qh=24, tn=26, so=26, dd=26, tl=28, ty=28, than=28, nn=24, nnds=22, ky=28)
+    LN = 400 if dang else 360        # Đảng: 20pt Exactly (dải 18-22 HD05) · nhà nước: ≥18pt
+    RULE = "exact" if dang else "atLeast"
+    THUT = 567
+
+    def cell(w, inner):
+        return f'<w:tc><w:tcPr><w:tcW w:w="{w}" w:type="dxa"/>{NIL4}</w:tcPr>{inner}</w:tc>'
+
+    def tbl(w_l, w_r, left, right):
+        return (f'<w:tbl><w:tblPr><w:tblW w:w="{w_l + w_r}" w:type="dxa"/><w:jc w:val="center"/>'
+                '<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="0" w:type="dxa"/>'
+                '<w:right w:w="0" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000"/></w:tblPr>'
+                f'<w:tblGrid><w:gridCol w:w="{w_l}"/><w:gridCol w:w="{w_r}"/></w:tblGrid>'
+                f"<w:tr>{cell(w_l, left)}{cell(w_r, right)}</w:tr></w:tbl>")
+
+    # ── khối tiêu đề: 4 đoạn/ô ĐỐI XỨNG (text · text · gạch|sao · số/ngày) ──
+    # §6.6 tất định: ô PHẢI đủ chứa Quốc hiệu/tiêu đề 1 DÒNG (bắt buộc);
+    # ô TRÁI nhận phần còn lại — tên CQ quá dài thì xuống dòng (chấp nhận được, không tránh nổi)
+    _tdp = "ĐẢNG CỘNG SẢN VIỆT NAM" if dang else "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"
+    _need_r = round(len(_tdp) * 0.62 * (S["qh"] / 2) * 20 * 1.04)   # +4% đệm
+    wr = max(round(W * 0.40), min(_need_r, round(W * 0.62)))
+    wl = W - wr
+    L_KHOI = 360 if dang else 300      # Đảng: mọi khối ≥18pt (HD05 6.2.2)
+    LH = dict(line=L_KHOI, rule="exact")
+    if dang:
+        TD = "ĐẢNG CỘNG SẢN VIỆT NAM"
+        left = (_tt_p(spec.get("chu_quan", ""), sz=S["cq"], jc="center", **LH)
+                + _tt_p(spec.get("ten_cq", ""), sz=S["cq"], b=True, jc="center", **LH)
+                + _tt_p("*", sz=S["cq"], b=True, jc="center", line=160, rule="exact")   # HD05: dấu sao
+                + _tt_p(spec.get("so_kh", ""), sz=S["so"], jc="center", before=120, **LH))
+        right = (_tt_p(TD, sz=S["qh"], b=True, jc="center", **LH)
+                 + _tt_p(" ", sz=S["cq"], jc="center", **LH)
+                 + _tt_gach(TD, S["qh"], hoa=True, ty_le=1.00, pt_gach=S["cq"])
+                 + _tt_p(spec.get("dia_danh", ""), sz=S["dd"], i=True, jc="center", before=120, **LH))
+    else:
+        TN = "Độc lập - Tự do - Hạnh phúc"
+        left = (_tt_p(spec.get("chu_quan", ""), sz=S["cq"], jc="center", **LH)
+                + _tt_p(spec.get("ten_cq", ""), sz=S["cq"], b=True, jc="center", **LH)
+                + _tt_gach(spec.get("ten_cq", ""), S["cq"], hoa=True, ty_le=0.42)
+                + _tt_p(spec.get("so_kh", ""), sz=S["so"], jc="center", before=120, **LH))
+        right = (_tt_p("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", sz=S["qh"], b=True, jc="center", **LH)
+                 + _tt_p(TN, sz=S["tn"], b=True, jc="center", **LH)
+                 + _tt_gach(TN, S["tn"], hoa=False, ty_le=1.00)
+                 + _tt_p(spec.get("dia_danh", ""), sz=S["dd"], i=True, jc="center", before=120, **LH))
+    body = [tbl(wl, wr, left, right)]
+
+    # ── tên loại + trích yếu (+ gạch 1/3–1/2 | Đảng: 5 gạch nối HD05) ──
+    body.append(_tt_p(spec.get("ten_loai", ""), sz=S["tl"], b=True, jc="center", before=360,
+                      line=LN, rule=RULE))
+    ty = spec.get("trich_yeu", "")
+    if ty:
+        body.append(_tt_p(ty, sz=S["ty"], b=True, jc="center", line=LN, rule=RULE))
+    body.append(_tt_p("-----", sz=S["ty"], b=True, jc="center", line=200, rule="exact") if dang
+                else _tt_gach(ty or spec.get("ten_loai", ""), S["ty"], hoa=False, ty_le=0.42,
+                              pt_gach=S["ty"], line=200))
+
+    # ── thân: Before 6pt / After 0 (đề mục After 3pt) / thụt 1cm ──
+    for it in (spec.get("body") or []):
+        t = it.get("text", "") if isinstance(it, dict) else str(it)
+        dm = bool(it.get("de_muc")) if isinstance(it, dict) else False
+        body.append(_tt_p(t, sz=S["than"], b=dm, jc="both", first=THUT,
+                          before=120, after=60 if dm else 0, line=LN, rule=RULE))
+
+    # ── Nơi nhận | ký (bảng 2 ô) + đoạn đệm trên ──
+    wl2, wr2 = round(W * 0.57), W - round(W * 0.57)
+    nn = _tt_p("Nơi nhận:", sz=S["nn"], b=True, i=not dang, u=dang, jc="left",
+               line=L_KHOI, rule="exact")
+    for x in (spec.get("noi_nhan") or []):
+        nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
+    ky = (_tt_p(spec.get("quyen_han", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact")
+          + _tt_p(spec.get("chuc_vu", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact")
+          + "".join(_tt_p(" ", sz=S["ky"], jc="center", line=300, rule="exact")
+                    for _ in range(int(spec.get("dong_trong_ky", 5))))
+          + _tt_p(spec.get("ho_ten", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact"))
+    body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=240, rule="exact"))
+    body.append(tbl(wl2, wr2, nn, ky))
+
+    doc = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+           '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+           "<w:body>" + "".join(body)
+           + f'<w:sectPr><w:pgSz w:w="{PGW}" w:h="16838"/><w:pgMar w:top="{le["top"]}"'
+           f' w:right="{le["right"]}" w:bottom="{le["bottom"]}" w:left="{le["left"]}"'
+           ' w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>')
+    sz_def = S["than"]
+    sty = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+           '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+           '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman"'
+           ' w:hAnsi="Times New Roman" w:cs="Times New Roman"/>'
+           f'<w:sz w:val="{sz_def}"/><w:szCs w:val="{sz_def}"/></w:rPr></w:rPrDefault>'
+           "<w:pPrDefault/></w:docDefaults></w:styles>")
+    CT = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+          '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+          '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+          '<Default Extension="xml" ContentType="application/xml"/>'
+          '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-'
+          'officedocument.wordprocessingml.document.main+xml"/>'
+          '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-'
+          'officedocument.wordprocessingml.styles+xml"/></Types>')
+    RELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+            'relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+    DRELS = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+             '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+             'relationships/styles" Target="styles.xml"/></Relationships>')
+    with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zo:
+        for n, d in (("[Content_Types].xml", CT), ("_rels/.rels", RELS),
+                     ("word/_rels/document.xml.rels", DRELS),
+                     ("word/document.xml", doc), ("word/styles.xml", sty)):
+            zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            zo.writestr(zi, d)
+    env_chk = the_thuc_check(out_path, he=("dang" if dang else None))
+    return {"ok": env_chk["summary"]["fail"] == 0, "schema": "the_thuc_build.v1",
+            "out": os.path.basename(str(out_path)), "he": he,
+            "vung_chu_twips": W, "bang_twips": W,
+            "self_check": {"he": env_chk.get("he"), "fail": env_chk["summary"]["fail"],
+                           "warn": env_chk["summary"]["warn"], "info": env_chk["summary"]["info"],
+                           "fail_ids": sorted({f["id"] for f in env_chk["findings"]
+                                               if f["level"] == "FAIL"})}}
+
+
+def cmd_the_thuc_build(args):
+    """CLI `tl the-thuc-build --spec <json> --out <docx>` — dựng docx đúng thể thức từ spec JSON."""
+    import json as _json
+    import os
+    sp = getattr(args, "spec", None)
+    out = getattr(args, "out", None)
+    if not sp or not os.path.isfile(sp):
+        print(_json_dumps({"ok": False, "schema": "the_thuc_build.v1", "error": "SPEC_NOT_FOUND",
+                           "spec": str(sp or "")}))
+        return 2
+    with open(sp, encoding="utf-8") as fh:
+        spec = _json.load(fh)
+    if getattr(args, "he", None) and args.he != "auto":
+        spec["he"] = args.he
+    env = the_thuc_build(spec, out)
+    print(_json_dumps(env))
+    return 0 if env.get("ok") else 2
 
 
 def cmd_the_thuc_normalize(args):

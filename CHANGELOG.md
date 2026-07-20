@@ -1,3 +1,27 @@
+# ★ v1.34.84 — ĐÚC KẾT THỰC CHIẾN: 4 tiêu chí kiểm mới + lệnh `tl the-thuc-build` (2026-07-20)
+
+> User duyệt "OK, tổng hợp kinh nghiệm vào skill" sau khi nghiệm thu BC rà soát thể thức. Toàn bộ lỗi
+> trình bày user chỉ ra trong phiên (kẻ ngang lạ trên Quốc hiệu · gạch không cân xứng · hai gạch lệch
+> cao độ · spacing sít · Nơi nhận chưa đậm · khối ký lệch · bảng tràn lề · dòng trống thừa) nay thành
+> TRI THỨC + BỘ KIỂM + BỘ SINH. selftest 1114→**1116** (r144 ×1, r145 ×1 đỏ-trước; +r146 vá bug).
+
+- **Reference §6.9–6.13 MỚI**: hai gạch đồng cấu trúc + công thức độ dài gạch `len×K×pt×tỷ_lệ/(0.25×pt_gạch)`
+  (K=0.62 hoa / 0.50 thường; tỷ lệ 0.42 tên CQ & trích yếu, 1.00 Tiêu ngữ) · bảng ≤ vùng chữ · cân
+  khoảng quanh gạch · viền nil ĐỦ 4 cạnh · khối cuối = bảng 2 ô + ≥5 dòng ký + dọn đoạn rỗng đầu.
+- **4 TIÊU CHÍ KIỂM MỚI (r144)**: `TT-BANG-TRAN-LE` (FAIL — tblW > pgSz−lề, lỗi kế thừa mẫu lề khác) ·
+  `TT-VIEN-O-SOT` (WARN — tcBorders nil 3/4 cạnh → cạnh còn lại hiện thành kẻ ngang) · `TT-GACH-SHAPE`
+  (WARN — gạch vẽ bằng drawing, không co theo chữ) · `TT-DONG-TRONG-DAU` (INFO — đoạn rỗng đầu VB).
+- **LỆNH MỚI `tl the-thuc-build --spec <json> --out <docx>` (r145)**: sinh docx ĐÚNG-BY-CONSTRUCTION 2 hệ
+  (hành chính NĐ30 · Đảng QĐ399+HD05) từ package tối thiểu tự dựng; bề rộng bảng tính từ lề, ô phải
+  luôn đủ chứa Quốc hiệu/tiêu đề 1 dòng (tên CQ dài nhận phần còn lại — xuống dòng là chấp nhận được),
+  gạch theo công thức, tự self-check bằng `the-thuc-check`. ⚠ Lề mặc định KHÁC theo hệ: nhà nước
+  20/20/30/20 (§6.8) · **Đảng 20/20/30/15 ĐƠN TRỊ** (HD05 IV.4.1); giãn dòng Đảng 18–22pt Exactly áp
+  MỌI khối kể cả tiêu đề/nơi nhận/ký (bug builder bắt được khi thử VB Đảng đầu tiên).
+- **r146 vá bug do chính test thực chiến lộ ra**: `TT-THUT-DE-MUC` đếm nhầm dòng "Nơi nhận" trong BẢNG
+  (§6.7 nói rõ bảng KHÔNG áp thụt) → parser nay đánh dấu `in_tbl`, T3 bỏ qua; regex đề mục nhận thêm
+  kiểu Đảng `I-` / `1-` (HD05 dùng gạch nối thay dấu chấm).
+- Golden regen chủ đích (+1 lệnh); _STUB_MAP +6. Kernel CHỈ đổi header.
+
 # ★ v1.34.83 — QUỐC HIỆU/TIÊU NGỮ CHÍNH XÁC TUYỆT ĐỐI + tích hợp §6.6-6.8 (2026-07-19)
 
 > User yêu cầu "tiêu ngữ, quốc hiệu phải chính xác tuyệt đối, không được sai" + tích hợp 3 điều chỉnh

@@ -164,6 +164,7 @@
     "source-verify",
     "status",
     "sweep",
+    "the-thuc-build",
     "the-thuc-check",
     "the-thuc-normalize",
     "tool-inventory",
@@ -1603,6 +1604,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "the-thuc-build": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "the-thuc-check": {
         "generated": true,
         "idempotency_contract": null,
@@ -1745,10 +1756,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 144,
+      "generated_parsers": 145,
       "high_risk": 27,
-      "total": 151,
-      "write_commands": 76
+      "total": 152,
+      "write_commands": 77
     },
     "schema": "command_registry.v1"
   },

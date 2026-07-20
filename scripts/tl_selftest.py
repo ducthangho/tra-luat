@@ -13910,6 +13910,115 @@ def run() -> int:
             return any(f["id"] == "TT-THUT-DE-MUC" and f["level"] == "INFO" for f in _e["findings"])
     _t110("r143_thut_de_muc", _c143_thut_de_muc)
 
+    # ═══ v1.34.84 — r144/r145: TỔNG HỢP THỰC CHIẾN 20-07 (user duyệt "OK, tổng hợp kinh nghiệm vào
+    # skill"). r144 = 4 TIÊU CHÍ KIỂM MỚI bắt đúng 4 lỗi gặp thật khi soạn BC rà soát: bảng TRÀN vùng
+    # chữ (kế thừa tblW của mẫu có lề khác) · viền ô SÓT cạnh (nil 3/4 → cạnh còn lại hiện thành kẻ
+    # ngang) · gạch bằng SHAPE cứng (không co theo chữ mới) · đoạn RỖNG đầu văn bản. r145 = lệnh
+    # `tl the-thuc-build` dựng docx ĐÚNG-BY-CONSTRUCTION 2 hệ (hành chính + Đảng), mọi kích thước
+    # TÍNH được (bề rộng bảng từ lề; độ dài gạch theo công thức len×K×pt×tỷ_lệ/(0.25×pt_gạch)). ═══
+    def _c144_tieu_chi_moi():
+        import tempfile as _tf144
+        import zipfile as _zf144
+        with _tf144.TemporaryDirectory() as _d:
+            _dp = Path(_d)
+            _ids = lambda e, lv: {f["id"] for f in e["findings"] if f["level"] == lv}   # noqa: E731
+
+            def _mk(name, body, mar='w:top="1134" w:right="1134" w:bottom="1134" w:left="1701"'):
+                _doc = ('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/'
+                        'wordprocessingml/2006/main"><w:body>' + body
+                        + f'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar {mar}'
+                        ' w:header="720" w:footer="720"/></w:sectPr></w:body></w:document>')
+                _sty = ('<?xml version="1.0"?><w:styles xmlns:w="http://schemas.openxmlformats.org/'
+                        'wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr>'
+                        '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>'
+                        '<w:sz w:val="26"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>')
+                _p = _dp / name
+                with _zf144.ZipFile(_p, "w") as _z:
+                    _z.writestr("word/document.xml", _doc)
+                    _z.writestr("word/styles.xml", _sty)
+                return str(_p)
+
+            _hdr = _pp143("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "Độc lập - Tự do - Hạnh phúc",
+                          "Số: 05/BC-VP", "Hà Nội, ngày 20 tháng 7 năm 2026", "Nơi nhận:")
+            # (a) bảng TRÀN vùng chữ: vùng chữ = 11906-1701-1134 = 9071; tblW 9531 → FAIL
+            _tbl = ('<w:tbl><w:tblPr><w:tblW w:w="9531" w:type="dxa"/></w:tblPr><w:tr>'
+                    '<w:tc><w:tcPr><w:tcW w:w="9531" w:type="dxa"/></w:tcPr>'
+                    "<w:p><w:r><w:t>x</w:t></w:r></w:p></w:tc></w:tr></w:tbl>")
+            _e = _TL_MODULE.the_thuc_check(_mk("a.docx", _tbl + _hdr))
+            _ok = "TT-BANG-TRAN-LE" in _ids(_e, "FAIL")
+            # (b) viền ô SÓT cạnh top (đúng ca kẻ ngang trên Quốc hiệu)
+            _tb2 = ('<w:tbl><w:tblPr><w:tblW w:w="9071" w:type="dxa"/></w:tblPr><w:tr>'
+                    '<w:tc><w:tcPr><w:tcW w:w="9071" w:type="dxa"/><w:tcBorders>'
+                    '<w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/>'
+                    "</w:tcBorders></w:tcPr><w:p><w:r><w:t>x</w:t></w:r></w:p></w:tc></w:tr></w:tbl>")
+            _e2 = _TL_MODULE.the_thuc_check(_mk("b.docx", _tb2 + _hdr))
+            _ok = _ok and "TT-VIEN-O-SOT" in _ids(_e2, "WARN")
+            # (c) gạch bằng SHAPE cứng
+            _sh = ('<w:p><w:r><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/'
+                   'markup-compatibility/2006"><w:drawing/></mc:AlternateContent></w:r></w:p>')
+            _e3 = _TL_MODULE.the_thuc_check(_mk("c.docx", _hdr + _sh))
+            _ok = _ok and "TT-GACH-SHAPE" in _ids(_e3, "WARN")
+            # (d) đoạn RỖNG đầu văn bản
+            _e4 = _TL_MODULE.the_thuc_check(_mk("d.docx", "<w:p/><w:p/>" + _hdr))
+            _ok = _ok and "TT-DONG-TRONG-DAU" in _ids(_e4, "INFO")
+            # sạch: không cờ mới nào oan
+            _e5 = _TL_MODULE.the_thuc_check(_mk("e.docx", _hdr))
+            return _ok and not ({"TT-BANG-TRAN-LE", "TT-VIEN-O-SOT", "TT-GACH-SHAPE", "TT-DONG-TRONG-DAU"}
+                                & (_ids(_e5, "FAIL") | _ids(_e5, "WARN") | _ids(_e5, "INFO")))
+    _t110("r144_tieu_chi_moi", _c144_tieu_chi_moi)
+
+    def _c145_the_thuc_build():
+        import tempfile as _tf145
+        _ap = build_parser()
+        try:
+            with _ctx110.redirect_stderr(_io110.StringIO()):
+                _ns = _ap.parse_args(["the-thuc-build", "--spec", "s.json", "--out", "o.docx"])
+                _ok = getattr(_ns, "out", None) == "o.docx"
+        except SystemExit:
+            return False
+        SPEC_HC = {"he": "hanh_chinh", "chu_quan": "CHÍNH PHỦ",
+                   "ten_cq": "ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC TẠI DOANH NGHIỆP",
+                   "so_kh": "Số: 27/BC-UBQLV", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                   "ten_loai": "BÁO CÁO", "trich_yeu": "Tình hình triển khai hạ tầng số",
+                   "body": [{"text": "I. TÌNH HÌNH CHUNG", "de_muc": True},
+                            {"text": "Trong 6 tháng đầu năm, các đơn vị đã hoàn thành kế hoạch đề ra."}],
+                   "noi_nhan": ["- Thủ tướng Chính phủ (để báo cáo);", "- Lưu: VT, CNHT."],
+                   "quyen_han": "TL. CHỦ TỊCH", "chuc_vu": "VỤ TRƯỞNG VỤ CÔNG NGHỆ & HẠ TẦNG",
+                   "ho_ten": "Nguyễn Văn A"}
+        with _tf145.TemporaryDirectory() as _d:
+            _o1 = str(Path(_d) / "hc.docx")
+            _env = _TL_MODULE.the_thuc_build(SPEC_HC, _o1)
+            _ok = (_ok and _env.get("ok") is True and _env.get("schema") == "the_thuc_build.v1"
+                   and (_env.get("self_check") or {}).get("fail") == 0)
+            _e = _TL_MODULE.the_thuc_check(_o1)
+            _ok = _ok and _e["he"] == "hanh_chinh" and _e["summary"]["fail"] == 0
+            _p = _TL_MODULE._the_thuc_parse_docx(_o1)
+            _s = _p["sections"][0]
+            _ok = _ok and (_s["left"], _s["right"]) == (1701, 1134)          # lề §6.8
+            _d2 = __import__("zipfile").ZipFile(_o1).read("word/document.xml").decode("utf-8")
+            _import_re = __import__("re")
+            _wtbl = [int(x) for x in _import_re.findall(r'<w:tblW w:w="(\d+)"', _d2)]
+            _ok = _ok and _wtbl and max(_wtbl) <= 11906 - 1701 - 1134       # §6.10 không tràn
+            _ok = _ok and _d2.count('<w:tcBorders><w:top w:val="nil"/>') == len(_wtbl) * 2  # §6.12 nil 4 cạnh
+            # §6.9: hai ô tiêu đề CÙNG chuỗi chiều cao dòng ⇒ gạch ngang nhau
+            _tb = _import_re.search(r"<w:tbl>.*?</w:tbl>", _d2, _import_re.S).group(0)
+            _seq = []
+            for _tc in _import_re.finditer(r"<w:tc>.*?</w:tc>", _tb, _import_re.S):
+                _seq.append([m.group(1) for m in _import_re.finditer(r'w:line="(\d+)"', _tc.group(0))])
+            _ok = _ok and len(_seq) == 2 and _seq[0] == _seq[1]
+            # hệ ĐẢNG
+            SPEC_D = dict(SPEC_HC, he="dang", chu_quan="ĐẢNG BỘ KHỐI CƠ QUAN TRUNG ƯƠNG",
+                          ten_cq="ĐẢNG ỦY ỦY BAN QUẢN LÝ VỐN NHÀ NƯỚC", so_kh="Số 12-BC/ĐU",
+                          quyen_han="T/M BAN THƯỜNG VỤ", chuc_vu="PHÓ BÍ THƯ")
+            _o2 = str(Path(_d) / "d.docx")
+            _env2 = _TL_MODULE.the_thuc_build(SPEC_D, _o2)
+            _e2 = _TL_MODULE.the_thuc_check(_o2)
+            _ok = _ok and _env2.get("ok") is True and _e2["he"] == "dang" and _e2["summary"]["fail"] == 0
+            _d3 = __import__("zipfile").ZipFile(_o2).read("word/document.xml").decode("utf-8")
+            _ok = _ok and "ĐẢNG CỘNG SẢN VIỆT NAM" in _d3 and "-----" in _d3 and "*" in _d3
+            return _ok
+    _t110("r145_the_thuc_build", _c145_the_thuc_build)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

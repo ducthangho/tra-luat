@@ -1420,6 +1420,18 @@ GENERATED_SPECS = [
                   'auto = detect 5 hệ theo nội dung; nha-nuoc = alias cũ (13pt, self-check auto)'},
          {"flags": ['--json'], "action": 'store_true', "help": 'envelope JSON (mặc định đã in JSON)'},
      ]},
+    {"name": 'the-thuc-build', "handler": 'cmd_the_thuc_build',
+     "help": 'DỰNG .docx ĐÚNG THỂ THỨC từ spec JSON (r145 v1.34.84 — đúc kết thực chiến): bề rộng bảng '
+             'tính từ lề (không tràn), độ dài gạch theo công thức, hai ô tiêu đề đối xứng ⇒ gạch ngang '
+             'nhau, viền nil đủ 4 cạnh, khoảng ký ≥5 dòng; hệ hanh-chinh (NĐ30) | dang (QĐ399+HD05); '
+             'tự self-check bằng the-thuc-check',
+     "args": [
+         {"flags": ['--spec'], "required": True, "help": 'file JSON: he, chu_quan, ten_cq, so_kh, dia_danh, ten_loai, trich_yeu, body[], noi_nhan[], quyen_han, chuc_vu, ho_ten, le{}, dong_trong_ky'},
+         {"flags": ['--out'], "required": True, "help": 'đường dẫn .docx output'},
+         {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'dang'], "default": 'auto',
+          "help": 'ép hệ (mặc định lấy từ spec.he)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
 ]
 
 
@@ -1616,6 +1628,7 @@ COMMAND_META = {
     "vbhn-normalize":        _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "registry-doctor":       _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "the-thuc-check":        _m("low", True, "none", False, False, True, None, None, False, "the_thuc", generated=True),   # R2 v1.34.75 — PURE offline, đọc docx local, envelope deterministic
+    "the-thuc-build":       _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),
     "the-thuc-normalize":    _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),   # R4 v1.34.78 — ghi file OUT local (không Drive/registry/NLM)
 }
 

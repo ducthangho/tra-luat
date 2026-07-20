@@ -1,3 +1,31 @@
+# ★ v1.34.86 — vá 3 lỗ hổng bộ kiểm hệ vbqppl_qh + `the-thuc-build --he vbqppl-qh` (2026-07-20)
+
+> Bắt nguồn từ việc dựng thử **19 mẫu Phụ lục I NQ 351/2017**. Sơ đồ 19 mẫu là **ẢNH** ở PDF Công báo
+> 287+288 trang 17-35 (bản GDoc mất sạch phần này) — render bằng PyMuPDF mới đọc được, nhờ đó chốt
+> được ngưỡng treo từ 19-07. selftest 1118→**1122** (r150-r153, cả 4 ĐỎ-TRƯỚC đã xác minh).
+
+- **(1) TT-BAC-CO-CHU áp nhầm NĐ30 cho hệ vbqppl_qh** — sơ đồ NQ351: **Quốc hiệu 12 · Tiêu ngữ 14**
+  (bậc +2pt; Mẫu 16 là 13/14). Quy tắc "+1pt" của NĐ30 Mục V chỉ dành cho hành chính/vbqppl/vbhn.
+  Hệ quả cũ: MỌI VBQPPL của Quốc hội bị WARN oan — trong khi **NEO cuối reference đã ghi ĐÚNG**
+  (`quoc_hieu=12-12 tieu_ngu=14-14`), tức code mâu thuẫn với chính neo của nó. **§6.17**.
+- **(2) TT-DIA-DANH-NGAY cảnh báo oan cho luật/NQ Quốc hội** — Đ3 k1 NQ351: phần mở đầu luật, bộ luật,
+  nghị quyết của Quốc hội KHÔNG có địa danh; thời điểm thông qua ghi CUỐI văn bản (Đ36 k1). Nhận diện
+  bám ký hiệu CỦA CHÍNH VB (match `Số: n/năm/KH` đầu tiên) — không bám `QH\d` trôi nổi vì căn cứ hay
+  dẫn *"Luật … số 57/2014/QH13"*.
+- **(3) Mẫu 6b/11b/14 bị FAIL oan** — văn bản ban hành kèm theo không có số-KH/địa danh/căn cứ; phụ lục
+  (Mẫu 14) thêm nữa là không có Quốc hiệu/Tiêu ngữ/người ký. Đều LÀ THIẾT KẾ. **§6.18**.
+  ⚠ **Bẫy đã sập trong phiên**: bỏ qua nhánh nhà nước cho phụ lục mà quên chặn ⇒ rơi xuống nhánh Đảng,
+  đòi "ĐẢNG CỘNG SẢN VIỆT NAM" (FAIL oan kiểu khác). r152 khoá đúng ca này.
+- **`tl the-thuc-build --he vbqppl-qh`** — hệ dựng thứ ba. Spec thêm `co_quan_ban_hanh`, `can_cu[]`,
+  `tu_lenh` (QUYẾT NGHỊ:/NAY…:/QUYẾT ĐỊNH:), `thong_qua` (tự chèn kẻ ngang Đ36 k1), `body[].kieu="giua"`
+  (Phần/Chương/Mục + tiêu đề, đậm canh giữa). Đặc trưng hệ: Tiêu ngữ 14 · **KHÔNG gạch dưới tên gọi** ·
+  căn cứ nghiêng · "(Ký và đóng dấu)" · họ tên 14 trong khi chức vụ 13 · không Nơi nhận nếu không khai.
+- **19 mẫu đã dựng**: `D:\Quốc hội\mau-nq351\` + `GHI_CHU.md` (Quốc huy Mẫu 15a/15b/16 chèn tay).
+  Mẫu 6b/11b/14 nay **0/0/0**. Mẫu TRỐNG vẫn FAIL `TT-SO-KY-HIEU` vì số hiệu "…/20…/QH…" không có chữ
+  số — đã kiểm chứng bằng bản điền số thật (Luật 45/2019/QH14) → **0 FAIL**, không phải lỗi mẫu.
+- Golden `parser_surface` regen CHỦ ĐÍCH đúng **1 lệnh** (`the-thuc-build` — thêm choice `vbqppl-qh`).
+  Kernel CHỈ đổi header (47.751B, đệm 377B) ⇒ **re-import Capabilities KHÔNG bắt buộc**.
+
 # ★ v1.34.85 — vá 4 lỗi VB Đảng/đơn-vị-trực-thuộc do thực chiến lộ + §6.14-6.16 (2026-07-20)
 
 > User thử 2 VB (khối Chính phủ tên đơn vị dài · thể thức Đảng) → chỉ ra 4 lỗi, tra NGUYÊN VĂN HD05

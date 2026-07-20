@@ -419,7 +419,23 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
     # r143 (v1.34.83, user: "quốc hiệu/tiêu ngữ CHÍNH XÁC TUYỆT ĐỐI"): EXACT sau NFC + space-class;
     # near-hit (lỏng: bỏ dấu/case/gạch/space) mà lệch nguyên văn → FAIL *-SAI kèm dòng sai.
     _hn = _tt_chuan_hoa_space(head)
-    if nha_nuoc:
+    # r150 (v1.34.86 — lộ khi dựng 19 mẫu Phụ lục I NQ351): hệ vbqppl_qh có 3 dạng THIẾU thành phần
+    # mở đầu THEO THIẾT KẾ, không phải sai sót:
+    #   · Mẫu 6b/11b "văn bản ban hành kèm theo nghị quyết": KHÔNG số-KH, địa danh, căn cứ
+    #   · Mẫu 14 "phụ lục ban hành kèm theo VBQPPL": thêm KHÔNG Quốc hiệu/Tiêu ngữ, không người ký
+    # Nhận diện CHỈ trong hệ vbqppl_qh để không nới lỏng hanh_chinh/vbqppl/vbhn/dang.
+    _kem_theo = bool(he_eff == "vbqppl_qh" and re.search(r"\(\s*Ban hành kèm theo", head))
+    _phu_luc = bool(_kem_theo and head.lstrip("﻿ \t\r\n").startswith("PHỤ LỤC"))
+    # r151: Đ3 k1 NQ351 — phần mở đầu LUẬT/BỘ LUẬT và NGHỊ QUYẾT CỦA QUỐC HỘI KHÔNG có địa danh
+    # (thời điểm Quốc hội thông qua ghi CUỐI văn bản, Đ36 k1); chỉ pháp lệnh, NQ của UBTVQH, NQ liên
+    # tịch, lệnh/quyết định của Chủ tịch nước mới có. Bám ký hiệu CỦA CHÍNH VB (match ĐẦU TIÊN, có
+    # dấu hai chấm) — không bám 'QH\d' trôi nổi vì căn cứ hay dẫn 'Luật … số 57/2014/QH13'.
+    _m_sk = re.search(r"[Ss]ố:\s*\d+/\d{4}/([A-ZĐ][\wĐ]*)", head)
+    _vb_cua_qh = bool(he_eff == "vbqppl_qh" and _m_sk and _m_sk.group(1).startswith("QH"))
+    if _phu_luc:
+        pass          # Mẫu 14: phụ lục KHÔNG có Quốc hiệu/Tiêu ngữ — và KHÔNG được rơi
+                      # xuống nhánh Đảng đòi "ĐẢNG CỘNG SẢN VIỆT NAM"
+    elif nha_nuoc:
         for _chuan, _id0, _ten, _exp in (
                 ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", "TT-QUOC-HIEU", "Quốc hiệu",
                  "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM (trên cùng bên phải trang đầu)"),
@@ -452,14 +468,15 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
         "dang": (r"Số\s+\d+\s*-\s*[A-ZĐ]+/[A-ZĐ]+", "Số <n>-<loại>/<CQ>, KHÔNG dấu hai chấm — HD05 mục 3.2"),
     }
     pat, exp = SK[he_eff]
-    if not re.search(pat, head):
+    if not _kem_theo and not re.search(pat, head):
         meas = "không khớp cú pháp hệ " + he_eff
         if he_eff == "dang" and re.search(r"Số:\s*\d+/", head):
             meas = "dùng cú pháp nhà nước 'Số: n/LOẠI-CQ' trong văn bản Đảng"
         elif nha_nuoc and re.search(r"Số\s+\d+\s*-[A-ZĐ]+/", head):
             meas = "dùng cú pháp Đảng 'Số n-LOẠI/CQ' trong văn bản nhà nước"
         add("TT-SO-KY-HIEU", "FAIL", meas, exp, can9)
-    if not re.search(r",\s*ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}", head):
+    if not (_kem_theo or _vb_cua_qh) and not re.search(
+            r",\s*ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}", head):
         lvl = "WARN" if he_eff in ("vbqppl", "vbqppl_qh") else "FAIL"   # Đ71: địa danh (nếu có); luật ghi thời điểm thông qua cuối VB
         add("TT-DIA-DANH-NGAY", lvl, "không thấy '<địa danh>, ngày … tháng … năm …'",
             "vd: Hà Nội, ngày 05 tháng 01 năm 2026", can9)
@@ -479,7 +496,8 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
             "tên loại in hoa đậm 13-14 / công văn: 'V/v …'", can9)
     if he_eff == "dang" and not re.search(LOAI_DANG, head):
         add("TT-TEN-LOAI", "WARN", "không nhận diện thể loại trong 25 thể loại", "thể loại in hoa 15-16 đậm — Đ5 QĐ399", can9)
-    if not re.search(r"(TM\.|KT\.|TL\.|TUQ\.|Q\.|T/M\b|CHỦ TỊCH|PHÓ CHỦ TỊCH|BỘ TRƯỞNG|THỨ TRƯỞNG|THỦ TƯỚNG"
+    if not _phu_luc and not re.search(
+                     r"(TM\.|KT\.|TL\.|TUQ\.|Q\.|T/M\b|CHỦ TỊCH|PHÓ CHỦ TỊCH|BỘ TRƯỞNG|THỨ TRƯỞNG|THỦ TƯỚNG"
                      r"|PHÓ THỦ TƯỚNG|CHÁNH VĂN PHÒNG|PHÓ CHÁNH VĂN PHÒNG|CHÁNH ÁN|VIỆN TRƯỞNG|TỔNG THƯ KÝ"
                      r"|TỔNG BÍ THƯ|BÍ THƯ|PHÓ BÍ THƯ|GIÁM ĐỐC|TRƯỞNG BAN"
                      # r149: đơn vị trực thuộc ký NHÂN DANH MÌNH — chức vụ đứng một mình, không
@@ -488,7 +506,7 @@ def _the_thuc_check_t2(text, he_eff, add, footnotes=""):
                      r"|TRƯỞNG PHÒNG|PHÓ TRƯỞNG PHÒNG|CHỦ NHIỆM|PHÓ CHỦ NHIỆM|TỔNG GIÁM ĐỐC)", t):
         add("TT-CHUC-VU-KY", "WARN", "không nhận diện quyền hạn/chức vụ người ký",
             "TM./KT./TL./TUQ. hoặc chức danh in hoa (VB Đảng: T/M)", can9)
-    if he_eff in ("vbqppl", "vbqppl_qh", "vbhn") and "Căn cứ" not in t:
+    if he_eff in ("vbqppl", "vbqppl_qh", "vbhn") and not _kem_theo and "Căn cứ" not in t:
         add("TT-CAN-CU", "WARN", "không thấy 'Căn cứ …'", "căn cứ ban hành, in thường 14 nghiêng", can9)
     if he_eff == "dang":
         if "*" not in head[:2500]:
@@ -546,6 +564,17 @@ def _the_thuc_check_t3(parsed, he_eff, add):
         if s is not None and s != 30:
             add("TT-BAC-CO-CHU", "WARN", f"tiêu đề ĐCSVN {s/2:g}pt", "15pt cố định",
                 "HD 05-HD/VPTW Phụ lục 2 (TT 1)")
+    elif he_eff == "vbqppl_qh":
+        # r150 — NQ351 Phụ lục I (sơ đồ 19 mẫu, Công báo 287+288 tr.17-35): Quốc hiệu 12 · Tiêu ngữ
+        # 14 ⇒ bậc +2pt (riêng Mẫu 16 QĐ Chủ tịch nước: 13/14 = +1). KHÁC quy tắc +1 của NĐ30 —
+        # trước v1.34.86 áp nhầm NĐ30 cho hệ này nên mọi VBQPPL của QH đều bị cảnh báo oan.
+        sq = _psz("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
+        st = _psz("Độc lập")
+        if sq is not None and st is not None and not (st == 28 and sq in (24, 26)):
+            add("TT-BAC-CO-CHU", "WARN",
+                f"Quốc hiệu {sq/2:g}pt / Tiêu ngữ {st/2:g}pt",
+                "Quốc hiệu 12 (Mẫu 16: 13) · Tiêu ngữ 14 cố định",
+                "NQ 351/2017 Phụ lục I — sơ đồ mẫu")
     else:
         sq = _psz("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
         st = _psz("Độc lập")
@@ -881,6 +910,7 @@ def the_thuc_build(spec, out_path):
     import zipfile
     he = str(spec.get("he") or "hanh_chinh").replace("-", "_")
     dang = (he == "dang")
+    qh = (he == "vbqppl_qh")     # r152 v1.34.86 — 19 mẫu Phụ lục I NQ 351/2017
     # lề mặc định THEO HỆ: Đảng ĐƠN TRỊ 20/20/30/15 (HD05 IV.4.1) · nhà nước 20/20/30/20 (§6.8)
     le = dict({"top": 1134, "bottom": 1134, "left": 1701,
                "right": 850 if dang else 1134}, **(spec.get("le") or {}))
@@ -892,6 +922,8 @@ def the_thuc_build(spec, out_path):
     #                                trích-yếu, thân, nơi-nhận-từ, nơi-nhận-ds, ký]
     S = dict(cq=28, qh=30, tn=0, so=28, dd=28, tl=32, ty=30, than=30, nn=28, nnds=24, ky=28) if dang \
         else dict(cq=24, qh=24, tn=26, so=26, dd=26, tl=28, ty=28, than=28, nn=24, nnds=22, ky=28)
+    if qh:   # NQ351 Phụ lục I: Tiêu ngữ 14 (bậc +2, KHÁC NĐ30) · địa danh 14 · chức vụ ký 13
+        S.update(tn=28, dd=28, ky=26)
     LN = 400 if dang else 360        # Đảng: 20pt Exactly (dải 18-22 HD05) · nhà nước: ≥18pt
     RULE = "exact" if dang else "atLeast"
     THUT = 567
@@ -948,30 +980,67 @@ def the_thuc_build(spec, out_path):
     ty = spec.get("trich_yeu", "")
     if ty:
         body.append(_tt_p(ty, sz=S["ty"], b=True, jc="center", line=LN, rule=RULE))
-    body.append(_tt_p("-----", sz=S["ty"], b=True, jc="center", line=200, rule="exact") if dang
-                else _tt_gach(ty or spec.get("ten_loai", ""), S["ty"], hoa=False, ty_le=0.42,
-                              pt_gach=S["ty"], line=200))
+    if not qh:      # NQ351: KHÔNG có gạch dưới tên gọi văn bản (khác NĐ30 / HD05)
+        body.append(_tt_p("-----", sz=S["ty"], b=True, jc="center", line=200, rule="exact") if dang
+                    else _tt_gach(ty or spec.get("ten_loai", ""), S["ty"], hoa=False, ty_le=0.42,
+                                  pt_gach=S["ty"], line=200))
+
+    # ── vbqppl_qh: tên CQ ban hành · căn cứ (nghiêng) · từ lệnh (Đ33-34 NQ351) ──
+    if qh:
+        _cqbh = spec.get("co_quan_ban_hanh") or []
+        for _d in ([_cqbh] if isinstance(_cqbh, str) else _cqbh):
+            body.append(_tt_p(_d, sz=S["than"], b=True, jc="center", before=120,
+                              line=LN, rule=RULE))
+        for _c in (spec.get("can_cu") or []):
+            body.append(_tt_p(_c, sz=S["than"], i=True, jc="both", first=THUT, before=120,
+                              line=LN, rule=RULE))
+        if spec.get("tu_lenh"):     # QUYẾT NGHỊ: | NAY…: | QUYẾT ĐỊNH:
+            body.append(_tt_p(spec["tu_lenh"], sz=S["than"], b=True, jc="center", before=120,
+                              line=LN, rule=RULE))
 
     # ── thân: Before 6pt / After 0 (đề mục After 3pt) / thụt 1cm ──
     for it in (spec.get("body") or []):
         t = it.get("text", "") if isinstance(it, dict) else str(it)
         dm = bool(it.get("de_muc")) if isinstance(it, dict) else False
+        # Đ35 k2 a-b NQ351: "Phần/Chương/Mục/Tiểu mục" + số và TIÊU ĐỀ — đậm, DÒNG RIÊNG, canh giữa
+        if qh and isinstance(it, dict) and it.get("kieu") == "giua":
+            body.append(_tt_p(t, sz=S["than"], b=True, jc="center", before=240,
+                              line=LN, rule=RULE))
+            continue
         body.append(_tt_p(t, sz=S["than"], b=dm, jc="both", first=THUT,
                           before=120, after=60 if dm else 0, line=LN, rule=RULE))
 
+    # ── Đ36 k1: điều cuối và thông tin thời điểm Quốc hội thông qua phân cách bằng KẺ NGANG liền ──
+    if qh and spec.get("thong_qua"):
+        body.append('<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6" w:space="1"'
+                    ' w:color="auto"/></w:pBdr><w:spacing w:before="240" w:after="120"'
+                    ' w:line="120" w:lineRule="exact"/></w:pPr></w:p>')
+        body.append(_tt_p(spec["thong_qua"], sz=S["than"], i=True, jc="both", first=THUT,
+                          before=120, line=LN, rule=RULE))
+
     # ── Nơi nhận | ký (bảng 2 ô) + đoạn đệm trên ──
     wl2, wr2 = round(W * 0.57), W - round(W * 0.57)
-    nn = _tt_p("Nơi nhận:", sz=S["nn"], b=not dang, i=not dang, u=dang, jc="left",
-               line=L_KHOI, rule="exact")   # r147: Đảng KHÔNG đậm (HD05 PL2)
-    for x in (spec.get("noi_nhan") or []):
-        nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
+    # r152: NQ351 — luật, pháp lệnh, nghị quyết KHÔNG có Nơi nhận (chỉ NQ liên tịch Đ38 k1 và
+    # quyết định của Chủ tịch nước có) ⇒ vbqppl_qh không khai noi_nhan thì ô trái để TRỐNG
+    if qh and not (spec.get("noi_nhan") or []):
+        nn = _tt_p(" ", sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
+    else:
+        nn = _tt_p("Nơi nhận:", sz=S["nn"], b=not dang, i=not dang, u=dang, jc="left",
+                   line=L_KHOI, rule="exact")   # r147: Đảng KHÔNG đậm (HD05 PL2)
+        for x in (spec.get("noi_nhan") or []):
+            nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
     # r149: bỏ dòng RỖNG khi chỉ có MỘT dòng chức vụ — đơn vị trực thuộc ký nhân danh mình
     # (vd "VỤ TRƯỞNG" đứng một mình, không tiền tố TM./KT./TL.)
     ky = ("".join(_tt_p(_x, sz=S["ky"], b=True, jc="center", line=L_KHOI, rule="exact")
                   for _x in (spec.get("quyen_han", ""), spec.get("chuc_vu", "")) if str(_x).strip())
+          # NQ351 sơ đồ: dưới chức vụ là dòng "(Ký và đóng dấu)" in thường 14 nghiêng
+          + (_tt_p("(Ký và đóng dấu)", sz=S["than"], i=True, jc="center", line=L_KHOI,
+                   rule="exact") if qh else "")
           + "".join(_tt_p(" ", sz=S["ky"], jc="center", line=300, rule="exact")
                     for _ in range(int(spec.get("dong_trong_ky", 5))))
-          + _tt_p(spec.get("ho_ten", ""), sz=S["ky"], b=True, jc="center", line=300, rule="exact"))
+          # Đ37 k2 NQ351: họ tên in thường ĐẬM cỡ 14 trong khi chức vụ cỡ 13 — hai cỡ KHÁC nhau
+          + _tt_p(spec.get("ho_ten", ""), sz=(S["than"] if qh else S["ky"]), b=True,
+                  jc="center", line=300, rule="exact"))
     body.append(_tt_p(" ", sz=S["nnds"], jc="left", line=240, rule="exact"))
     body.append(tbl(wl2, wr2, nn, ky))
 
@@ -1011,7 +1080,7 @@ def the_thuc_build(spec, out_path):
             zi = zipfile.ZipInfo(n, date_time=(1980, 1, 1, 0, 0, 0))
             zi.compress_type = zipfile.ZIP_DEFLATED
             zo.writestr(zi, d)
-    env_chk = the_thuc_check(out_path, he=("dang" if dang else None))
+    env_chk = the_thuc_check(out_path, he=("dang" if dang else ("vbqppl_qh" if qh else None)))
     return {"ok": env_chk["summary"]["fail"] == 0, "schema": "the_thuc_build.v1",
             "out": os.path.basename(str(out_path)), "he": he,
             "vung_chu_twips": W, "bang_twips": W,

@@ -14107,6 +14107,137 @@ def run() -> int:
             return _ok
     _t110("r148_dau_sao_khong_bi_cat", _c148_dau_sao_khong_bi_cat)
 
+    # ═══ v1.34.86 — r150-r153: dựng 19 MẪU Phụ lục I NQ 351/2017 (sơ đồ = ẢNH trang 17-35 Công báo
+    # 287+288, bản GDoc mất sạch) lộ 3 lỗ hổng bộ kiểm + builder chưa có hệ vbqppl_qh. Đỏ-trước. ═══
+    def _spec_qh(**kw):
+        d = {"he": "vbqppl_qh", "ten_cq": "QUỐC HỘI", "so_kh": "Luật số: 45/2019/QH14",
+             "ten_loai": "LUẬT", "trich_yeu": "PHÒNG, CHỐNG TÁC HẠI CỦA RƯỢU, BIA",
+             "can_cu": ["Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;",
+                        "Quốc hội ban hành Luật Phòng, chống tác hại của rượu, bia."],
+             "body": [{"text": "Chương I", "kieu": "giua"},
+                      {"text": "NHỮNG QUY ĐỊNH CHUNG", "kieu": "giua"},
+                      {"text": "Điều 1. Phạm vi điều chỉnh", "de_muc": True},
+                      {"text": "Luật này quy định biện pháp giảm mức tiêu thụ rượu, bia."}],
+             "thong_qua": "Luật này được Quốc hội nước Cộng hòa xã hội chủ nghĩa Việt Nam khóa XIV, "
+                          "kỳ họp thứ 7 thông qua ngày 14 tháng 6 năm 2019.",
+             "chuc_vu": "CHỦ TỊCH QUỐC HỘI", "ho_ten": "Nguyễn Thị Kim Ngân"}
+        d.update(kw)
+        return d
+
+    def _build_qh(spec):
+        import tempfile as _tf
+        _d = _tf.mkdtemp()
+        _o = str(Path(_d) / "qh.docx")
+        env = _TL_MODULE.the_thuc_build(spec, _o)
+        return env, _o
+
+    def _c150_bac_co_chu_theo_nq351():
+        # Sơ đồ NQ351: Quốc hiệu 12 / Tiêu ngữ 14 (bậc +2). Trước v1.34.86 áp nhầm quy tắc +1 của
+        # NĐ30 cho hệ vbqppl_qh ⇒ MỌI VBQPPL của Quốc hội bị WARN oan.
+        import re as _r, zipfile as _z, tempfile as _tf
+        env, _o = _build_qh(_spec_qh())
+        _e = _TL_MODULE.the_thuc_check(_o, he="vbqppl_qh")
+        if any(f["id"] == "TT-BAC-CO-CHU" for f in _e["findings"]):
+            return False                       # 12/14 của NQ351 KHÔNG được cảnh báo
+        # ĐỐI CHỨNG (chốt đúng tiêu chí, không pass nhờ lý do khác): hạ Tiêu ngữ về 13pt — hợp lệ
+        # theo NĐ30 nhưng SAI NQ351 ⇒ hệ vbqppl_qh PHẢI bắt.
+        _x = _z.ZipFile(_o).read("word/document.xml").decode("utf-8")
+        if '<w:sz w:val="28"/>' not in _x:
+            return False
+        _ps = _r.findall(r"<w:p>.*?</w:p>", _x, _r.S)
+        _tn = [q for q in _ps
+               if "".join(_r.findall(r"<w:t[^>]*>([^<]*)</w:t>", q)).strip()
+               == "Độc lập - Tự do - Hạnh phúc"]
+        _x2 = _x.replace(_tn[0], _tn[0].replace('w:val="28"', 'w:val="26"'))
+        _o2 = str(Path(_tf.mkdtemp()) / "bac13.docx")
+        _zin = _z.ZipFile(_o)
+        with _z.ZipFile(_o2, "w", _z.ZIP_DEFLATED) as _zo:
+            for _n in _zin.namelist():
+                _zo.writestr(_n, _x2 if _n == "word/document.xml" else _zin.read(_n))
+        _e2 = _TL_MODULE.the_thuc_check(_o2, he="vbqppl_qh")
+        return (any(f["id"] == "TT-BAC-CO-CHU" for f in _e2["findings"])
+                and env["self_check"]["fail"] == 0)
+
+    def _c151_luat_khong_can_dia_danh():
+        # Đ3 k1 NQ351: phần mở đầu luật/NQ Quốc hội KHÔNG có địa danh (thời điểm thông qua ghi cuối).
+        _, _o = _build_qh(_spec_qh())
+        _e = _TL_MODULE.the_thuc_check(_o, he="vbqppl_qh")
+        _luat_sach = not any(f["id"] == "TT-DIA-DANH-NGAY" for f in _e["findings"])
+        # ngược lại: nghị quyết của UBTVQH THIẾU địa danh thì VẪN phải cảnh báo
+        _, _o2 = _build_qh(_spec_qh(ten_cq="ỦY BAN THƯỜNG VỤ QUỐC HỘI",
+                                    so_kh="Nghị quyết số: 351/2017/UBTVQH14",
+                                    ten_loai="NGHỊ QUYẾT", thong_qua=None))
+        _e2 = _TL_MODULE.the_thuc_check(_o2, he="vbqppl_qh")
+        return _luat_sach and any(f["id"] == "TT-DIA-DANH-NGAY" for f in _e2["findings"])
+
+    def _c152_kem_theo_va_phu_luc():
+        # Mẫu 6b/11b (VB ban hành kèm theo): không số-KH/địa danh/căn cứ · Mẫu 14 (phụ lục): thêm
+        # không Quốc hiệu/Tiêu ngữ/người ký — THEO THIẾT KẾ, không được FAIL.
+        import tempfile as _tf
+        _d = Path(_tf.mkdtemp())
+        _kt = _spec_qh(so_kh=None, can_cu=None, thong_qua=None, ten_loai="QUY CHẾ",
+                       trich_yeu="LÀM VIỆC CỦA HỘI ĐỒNG",
+                       co_quan_ban_hanh="(Ban hành kèm theo Nghị quyết số: 12/2021/QH15 "
+                                        "ngày 30 tháng 7 năm 2021 của Quốc hội)")
+        _o = str(_d / "kt.docx")
+        _TL_MODULE.the_thuc_build(_kt, _o)
+        _e = _TL_MODULE.the_thuc_check(_o, he="vbqppl_qh")
+        _ids = {f["id"] for f in _e["findings"]}
+        if {"TT-SO-KY-HIEU", "TT-DIA-DANH-NGAY", "TT-CAN-CU"} & _ids:
+            return False
+        # Mẫu 14 (phụ lục): KHÔNG Quốc hiệu/Tiêu ngữ/người ký. BẪY ĐÃ SẬP 20-07: bỏ qua nhánh
+        # nhà nước mà quên chặn ⇒ rơi xuống nhánh Đảng, đòi "ĐẢNG CỘNG SẢN VIỆT NAM" (FAIL oan).
+        import re as _r2, zipfile as _z2
+        _pl_xml = ("".join(_TL_MODULE._tt_p(_x, sz=28, b=_b, i=_i, jc="center")
+                           for _x, _b, _i in (("PHỤ LỤC", True, False),
+                                              ("(Ban hành kèm theo Nghị quyết số: 12/2021/QH15)",
+                                               False, True),
+                                              ("Phụ lục I", True, False),
+                                              ("BIỂU MẪU THỐNG KÊ", True, False))))
+        _o3 = str(_d / "phuluc.docx")
+        _zi = _z2.ZipFile(_o)
+        _doc = _zi.read("word/document.xml").decode("utf-8")
+        _body = _r2.search(r"<w:body>.*</w:body>", _doc, _r2.S).group(0)
+        with _z2.ZipFile(_o3, "w", _z2.ZIP_DEFLATED) as _zo:
+            for _n in _zi.namelist():
+                _zo.writestr(_n, _doc.replace(_body, "<w:body>" + _pl_xml + "</w:body>")
+                             if _n == "word/document.xml" else _zi.read(_n))
+        _e3 = _TL_MODULE.the_thuc_check(_o3, he="vbqppl_qh")
+        _ids3 = {f["id"] for f in _e3["findings"]}
+        return not ({"TT-TIEU-DE-DANG", "TT-TIEU-DE-DANG-SAI", "TT-QUOC-HIEU", "TT-TIEU-NGU",
+                     "TT-CHUC-VU-KY", "TT-SO-KY-HIEU"} & _ids3)
+
+    def _c153_build_he_vbqppl_qh():
+        # Builder phải sinh ĐÚNG đặc trưng NQ351: Tiêu ngữ 14 · KHÔNG gạch dưới tên gọi ·
+        # căn cứ nghiêng · kẻ ngang trước dòng thông qua · họ tên 14 trong khi chức vụ 13.
+        import re as _r, zipfile as _z
+        env, _o = _build_qh(_spec_qh())
+        _x = _z.ZipFile(_o).read("word/document.xml").decode("utf-8")
+        _ps = _r.findall(r"<w:p>.*?</w:p>|<w:p/>|<w:p>[^<]*</w:p>", _x, _r.S)
+
+        def _txt(p):
+            return "".join(_r.findall(r"<w:t[^>]*>([^<]*)</w:t>", p)).strip()
+        _tn = [p for p in _ps if _txt(p) == "Độc lập - Tự do - Hạnh phúc"]
+        _ok_tn = len(_tn) == 1 and '<w:sz w:val="28"/>' in _tn[0]
+        _tg = [p for p in _ps if _txt(p) == "PHÒNG, CHỐNG TÁC HẠI CỦA RƯỢU, BIA"]
+        # tên gọi KHÔNG kèm đoạn gạch ngay sau (khác NĐ30/HD05)
+        _i = _ps.index(_tg[0]) if _tg else -1
+        _ok_gach = _i >= 0 and '<w:u ' not in _ps[_i + 1]
+        _cc = [p for p in _ps if _txt(p).startswith("Căn cứ Hiến pháp")]
+        _ok_cc = len(_cc) == 1 and "<w:i/>" in _cc[0]
+        _ok_ke = "<w:pBdr>" in _x and "w:val=\"single\"" in _x
+        _ht = [p for p in _ps if _txt(p) == "Nguyễn Thị Kim Ngân"]
+        _cv = [p for p in _ps if _txt(p) == "CHỦ TỊCH QUỐC HỘI"]
+        _ok_ky = (len(_ht) == 1 and '<w:sz w:val="28"/>' in _ht[0]
+                  and len(_cv) == 1 and '<w:sz w:val="26"/>' in _cv[0])
+        return (_ok_tn and _ok_gach and _ok_cc and _ok_ke and _ok_ky
+                and env["self_check"]["fail"] == 0 and env["he"] == "vbqppl_qh")
+
+    _t110("r150_bac_co_chu_vbqppl_qh_theo_nq351", _c150_bac_co_chu_theo_nq351)
+    _t110("r151_luat_nq_qh_khong_can_dia_danh", _c151_luat_khong_can_dia_danh)
+    _t110("r152_vb_kem_theo_va_phu_luc_khong_fail_oan", _c152_kem_theo_va_phu_luc)
+    _t110("r153_the_thuc_build_he_vbqppl_qh", _c153_build_he_vbqppl_qh)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

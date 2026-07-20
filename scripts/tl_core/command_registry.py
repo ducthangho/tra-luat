@@ -1423,12 +1423,14 @@ GENERATED_SPECS = [
     {"name": 'the-thuc-build', "handler": 'cmd_the_thuc_build',
      "help": 'DỰNG .docx ĐÚNG THỂ THỨC từ spec JSON (r145 v1.34.84 — đúc kết thực chiến): bề rộng bảng '
              'tính từ lề (không tràn), độ dài gạch theo công thức, hai ô tiêu đề đối xứng ⇒ gạch ngang '
-             'nhau, viền nil đủ 4 cạnh, khoảng ký ≥5 dòng; hệ hanh-chinh (NĐ30) | dang (QĐ399+HD05); '
+             'nhau, viền nil đủ 4 cạnh, khoảng ký ≥5 dòng; hệ hanh-chinh (NĐ30) | dang (QĐ399+HD05) | '
+             'vbqppl-qh (NQ 351/2017 — 19 mẫu Phụ lục I: Tiêu ngữ 14, không gạch dưới tên gọi, '
+             'căn cứ nghiêng, kẻ ngang trước dòng thông qua); '
              'tự self-check bằng the-thuc-check',
      "args": [
-         {"flags": ['--spec'], "required": True, "help": 'file JSON: he, chu_quan, ten_cq, so_kh, dia_danh, ten_loai, trich_yeu, body[], noi_nhan[], quyen_han, chuc_vu, ho_ten, le{}, dong_trong_ky'},
+         {"flags": ['--spec'], "required": True, "help": 'file JSON: he, chu_quan, ten_cq, so_kh, dia_danh, ten_loai, trich_yeu, body[], noi_nhan[], quyen_han, chuc_vu, ho_ten, le{}, dong_trong_ky; riêng vbqppl-qh thêm: co_quan_ban_hanh, can_cu[], tu_lenh, thong_qua, body[].kieu="giua"'},
          {"flags": ['--out'], "required": True, "help": 'đường dẫn .docx output'},
-         {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'dang'], "default": 'auto',
+         {"flags": ['--he'], "choices": ['auto', 'hanh-chinh', 'vbqppl-qh', 'dang'], "default": 'auto',
           "help": 'ép hệ (mặc định lấy từ spec.he)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},

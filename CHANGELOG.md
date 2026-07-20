@@ -1,3 +1,25 @@
+# ★ v1.34.94 — CHỨC VỤ người ký VB ĐẢNG không in đậm (HD05 PL2 mục 7) (2026-07-20)
+
+> Rà TRỌN Phụ lục 2 HD 05-HD/VPTW (bản 27/5/2026) đối chiếu builder — cùng cách đã làm với NQ351.
+> selftest 1124→**1125** (r162 đỏ-trước).
+
+- **HD05 PL2 mục 7 tách rõ**: *quyền hạn* (`T/M …`, `K/T …`) = **Đứng, ĐẬM**; *chức vụ* (`BÍ THƯ`,
+  `PHÓ BÍ THƯ`, `CHÁNH VĂN PHÒNG`…) = chỉ **Đứng**, KHÔNG đậm. Builder để **cả hai** đậm tới .93.
+  Nhà nước thì ngược lại (NĐ30 PL I II.7.đ / NQ351 Đ37 k1: cả hai cùng đậm) — bẫy chéo hai hệ.
+  **Reference §5.3 đã ghi ĐÚNG "đậm/đứng/đậm" từ trước** ⇒ lại là code mâu thuẫn neo của chính nó,
+  y hệt ca TT-BAC-CO-CHU ở .86.
+- Lỗi này **đã lọt vào văn bản giao ở .85** (`BC_74_DU_UBQLV_chuyen_doi_so_moi.docx` để `PHÓ BÍ THƯ`
+  đậm). Đã dựng lại.
+- **Tiêu chí mới `TT-CHUC-VU-DAM`** (WARN, hệ dang): đoạn IN HOA + mang từ chức danh + KHÔNG có tiền
+  tố quyền hạn (T/M, K/T, TL., TUQ., Q.) mà in đậm ⇒ cảnh báo. Parser thêm cờ `dam` cấp đoạn.
+- **Bộ 14 MẪU VĂN BẢN ĐẢNG** theo thể loại QĐ 399 dựng tại `D:\Quốc hội\mau-dang-hd05\`
+  (nghị quyết, quyết định, chỉ thị, kết luận, quy định, quy chế, kế hoạch, chương trình, hướng dẫn,
+  thông báo, báo cáo, tờ trình, đề án, biên bản). ⚠ HD05 **KHÔNG có** bộ mẫu theo thể loại như
+  NQ351 — chỉ có sơ đồ bố trí (PL1), bảng cỡ chữ (PL2), mẫu dấu bản sao (PL3); bộ mẫu này dựng theo
+  thể loại QĐ399 + thông số PL2. Mẫu TRỐNG FAIL `TT-SO-KY-HIEU`/`TT-DIA-DANH-NGAY` như thường lệ;
+  bản điền số thật **0/0/0**.
+- Sơ đồ PL1 (ảnh nhúng, trích `word/media/image1.png`) xác nhận lề Đảng **20/20/30/15mm ĐƠN TRỊ**.
+
 # ★ v1.34.93 — đệm ô phải khai HAI TẦNG vì Google Docs bỏ tblCellMar (§6.26) (2026-07-20)
 
 > Phát hiện khi verify bản mẫu .92 vừa upload: local đúng 120tw nhưng **trên Drive = 0**.

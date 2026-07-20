@@ -226,7 +226,7 @@ tờ hành chính Đ6). Thẩm quyền theo cấp: Đ8-13 (NGOÀI phạm vi ki�
   kết thúc có dấu chấm.
 - Số trang: số Ả Rập, cách mép trên 10 mm, canh giữa, không hiển thị trang thứ nhất.
 
-### 5.3. Bảng cỡ chữ (HD05 Phụ lục 2 — trích cột chính)
+### 5.3. Bảng cỡ chữ (HD05 Phụ lục 2 — **đã đối chiếu TRỌN bảng 20-07**, bản HD05 ngày 27/5/2026)
 
 | TT | Thành phần | Loại chữ | Cỡ | Kiểu |
 |---|---|---|---|---|
@@ -238,7 +238,10 @@ tờ hành chính Đ6). Thẩm quyền theo cấp: Đ8-13 (NGOÀI phạm vi ki�
 | 5 | Trích yếu nội dung (ngăn với nội dung bằng **5 dấu gạch nối `-----`**) | in thường | **14-15** | đứng, đậm |
 | 5 | Trích yếu thể loại công văn | in thường | **12** | nghiêng |
 | 6 | Nội dung + Phần/Chương (La Mã hoặc chữ)/Mục (Ả Rập)/Điều/Khoản/Điểm | in thường | **14-15** | đứng (đề mục: đậm) |
-| 7 | Quyền hạn (T/M…) / chức vụ / họ tên người ký | in hoa/in hoa/thường | 14 | đậm/đứng/đậm |
+| 7 | Quyền hạn (T/M…) / chức vụ / họ tên người ký | in hoa/in hoa/thường | 14 | **đậm / ĐỨNG (KHÔNG đậm) / đậm** |
+
+> **⚠ ĐÍNH CHÍNH DỄ SAI — CHỨC VỤ người ký VB ĐẢNG KHÔNG IN ĐẬM.** HD05 PL2 mục 7 tách rõ: *quyền hạn* (`T/M …`, `K/T …`) = **Đứng, đậm**; *chức vụ* (`BÍ THƯ`, `PHÓ BÍ THƯ`, `CHÁNH VĂN PHÒNG`…) = chỉ **Đứng**. Nhà nước thì NGƯỢC LẠI: NĐ30 PL I II.7.đ và NQ351 Đ37 k1 đều cho quyền hạn VÀ chức vụ **cùng đậm**. Builder để cả hai đậm tới v1.34.93 (lọt vào VB đã giao `BC_74_DU_UBQLV_chuyen_doi_so_moi.docx`); v1.34.94 vá + thêm cờ `TT-CHUC-VU-DAM`. Cùng họ với đính chính "Nơi nhận VB Đảng không đậm" ở §6 — **hai chỗ này là bẫy chéo hai hệ dễ nhầm nhất**.
+
 | 9 | "Kính gửi"/"Kính trình" | in thường | 14 | nghiêng |
 | 9 | Từ "Nơi nhận:" (có **gạch chân**) / danh sách nơi nhận | in thường | **14** / **12** | đứng |
 | 11 | Dấu chỉ mức độ khẩn | in hoa | 14 | đứng, đậm |

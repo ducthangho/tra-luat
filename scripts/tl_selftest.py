@@ -14260,6 +14260,48 @@ def run() -> int:
                 and _khe(dict(_base, dem_ky_pt=1)) == 120
                 and _khe(dict(_base, he="dang", dem_ky_pt=30)) == 600)
     _t110("r154_khe_truoc_khoi_ky_24pt_va_chinh_duoc", _c154_khe_truoc_khoi_ky)
+    # ═══ v1.34.94 — r162: rà TRỌN Phụ lục 2 HD05 (bản 27/5/2026) đối chiếu builder, phát hiện
+    # CHỨC VỤ người ký VB ĐẢNG bị in ĐẬM sai. HD05 PL2 mục 7: quyền hạn "Đứng, ĐẬM" · chức vụ chỉ
+    # "Đứng". Reference §5.3 ĐÃ ghi đúng "đậm/đứng/đậm" từ trước ⇒ code mâu thuẫn neo. Đỏ-trước. ═══
+    def _c162_chuc_vu_ky_dang_khong_dam():
+        import re as _r62, zipfile as _z62, tempfile as _tf62
+        SPEC = {"he": "dang", "chu_quan": "ĐẢNG BỘ KHỐI DOANH NGHIỆP TRUNG ƯƠNG",
+                "ten_cq": "ĐẢNG UỶ ỦY BAN QUẢN LÝ VỐN", "so_kh": "Số 74-BC/ĐU",
+                "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026", "ten_loai": "BÁO CÁO",
+                "trich_yeu": "kết quả công tác", "body": [{"text": "1- Nội dung thử nghiệm."}],
+                "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN THƯỜNG VỤ",
+                "chuc_vu": "PHÓ BÍ THƯ", "ho_ten": "Trần Văn B"}
+        _o = str(Path(_tf62.mkdtemp()) / "d.docx")
+        _TL_MODULE.the_thuc_build(SPEC, _o)
+        _x = _z62.ZipFile(_o).read("word/document.xml").decode("utf-8")
+
+        def _dam(_txt):
+            for _q in _r62.findall(r"<w:p>.*?</w:p>", _x, _r62.S):
+                if "".join(_r62.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() == _txt:
+                    return "<w:b/>" in _q
+            return None
+        # quyền hạn ĐẬM · chức vụ KHÔNG đậm · họ tên ĐẬM
+        if _dam("T/M BAN THƯỜNG VỤ") is not True or _dam("PHÓ BÍ THƯ") is not False:
+            return False
+        if _dam("Trần Văn B") is not True:
+            return False
+        # bộ kiểm phải BẮT được văn bản để chức vụ đậm (lỗi này đã lọt vào VB giao ở .85)
+        _e = _TL_MODULE.the_thuc_check(_o, he="dang")
+        if any(f["id"] == "TT-CHUC-VU-DAM" for f in _e["findings"]):
+            return False                      # bản ĐÚNG thì KHÔNG được cảnh báo
+        _x2 = _x.replace("<w:rPr><w:sz", "<w:rPr><w:b/><w:bCs/><w:sz", 1) if False else _x
+        _ps = [_q for _q in _r62.findall(r"<w:p>.*?</w:p>", _x, _r62.S)
+               if "".join(_r62.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() == "PHÓ BÍ THƯ"]
+        _bad = _x.replace(_ps[0], _ps[0].replace("<w:rPr>", "<w:rPr><w:b/><w:bCs/>", 1))
+        _o2 = str(Path(_tf62.mkdtemp()) / "bad.docx")
+        _zi = _z62.ZipFile(_o)
+        with _z62.ZipFile(_o2, "w", _z62.ZIP_DEFLATED) as _zo:
+            for _n in _zi.namelist():
+                _zo.writestr(_n, _bad if _n == "word/document.xml" else _zi.read(_n))
+        _e2 = _TL_MODULE.the_thuc_check(_o2, he="dang")
+        return any(f["id"] == "TT-CHUC-VU-DAM" for f in _e2["findings"])
+    _t110("r162_chuc_vu_ky_dang_khong_dam", _c162_chuc_vu_ky_dang_khong_dam)
+
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══
     def _c156_phieu_trinh():

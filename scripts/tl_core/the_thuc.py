@@ -205,9 +205,15 @@ def _the_thuc_parse_docx(path):
                     sp_line = None
         ptxt = []
         pszs = {}                      # sz RESOLVED (run→Normal→docDefaults) → số chữ, per-paragraph (T3 bậc)
+        pdam = False                   # r162: có run nào ĐẬM không (HD05 PL2 mục 7 phân biệt đậm/đứng)
         for r in p.iter(W + "r"):
             rt = "".join((t.text or "") for t in r.iter(W + "t"))
             f, s = _rpr_font_sz(r.find(W + "rPr"))
+            _rpr = r.find(W + "rPr")
+            if rt and _rpr is not None:
+                _b = _rpr.find(W + "b")
+                if _b is not None and (_b.get(W + "val") not in ("0", "false", "none")):
+                    pdam = True
             if rt:
                 runs.append((f, s, len(rt)))
                 ptxt.append(rt)
@@ -216,7 +222,8 @@ def _the_thuc_parse_docx(path):
                     pszs[se] = pszs.get(se, 0) + len(rt)
         if ptxt:
             paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line,
-                          "rule": sp_rule, "szs": pszs, "in_tbl": id(p) in _in_tbl})
+                          "rule": sp_rule, "szs": pszs, "in_tbl": id(p) in _in_tbl,
+                          "dam": pdam})
     return {"sections": sections, "defaults": defaults, "normal": normal,
             "runs": runs, "text": "\n".join(p["text"] for p in paras), "paras": paras,
             "footnotes": footnotes}
@@ -560,6 +567,24 @@ def _the_thuc_check_t3(parsed, he_eff, add):
         return None
 
     if he_eff == "dang":
+        # r162 (HD05 Phụ lục 2 mục 7): quyền hạn ký "Đứng, ĐẬM" · CHỨC VỤ người ký chỉ "Đứng" —
+        # KHÔNG đậm. Rất dễ nhầm vì nhà nước/NQ351 thì cả hai đều đậm. Nhận diện: đoạn IN HOA có
+        # từ chức danh, KHÔNG mang tiền tố quyền hạn (T/M, K/T, TL., TUQ., Q.) ⇒ là dòng chức vụ.
+        _CD = ("BÍ THƯ", "PHÓ BÍ THƯ", "CHÁNH VĂN PHÒNG", "PHÓ CHÁNH VĂN PHÒNG", "TRƯỞNG BAN",
+               "PHÓ TRƯỞNG BAN", "CHỦ NHIỆM", "PHÓ CHỦ NHIỆM", "TRƯỞNG ĐOÀN", "CHỦ TỊCH",
+               "PHÓ CHỦ TỊCH", "GIÁM ĐỐC", "PHÓ GIÁM ĐỐC", "VỤ TRƯỞNG", "PHÓ VỤ TRƯỞNG")
+        _QH_PFX = ("T/M", "TM.", "K/T", "KT.", "TL.", "TUQ.", "Q.")
+        for _p in paras:
+            _t = (_p.get("text") or "").strip()
+            if not _t or _t != _t.upper() or not _p.get("dam"):
+                continue
+            if any(_t.startswith(_x) for _x in _QH_PFX):
+                continue                      # dòng QUYỀN HẠN — đậm là ĐÚNG
+            if any(_c in _t for _c in _CD):
+                add("TT-CHUC-VU-DAM", "WARN", f"chức vụ người ký in đậm: '{_t[:40]}'",
+                    "VB Đảng: quyền hạn (T/M…) ĐẬM · chức vụ chỉ ĐỨNG, không đậm",
+                    "HD 05-HD/VPTW Phụ lục 2, mục 7")
+                break
         s = _psz("ĐẢNG CỘNG SẢN VIỆT NAM")
         if s is not None and s != 30:
             add("TT-BAC-CO-CHU", "WARN", f"tiêu đề ĐCSVN {s/2:g}pt", "15pt cố định",
@@ -1239,8 +1264,12 @@ def the_thuc_build(spec, out_path):
             nn += _tt_p(x, sz=S["nnds"], jc="left", line=L_KHOI, rule="exact")
     # r149: bỏ dòng RỖNG khi chỉ có MỘT dòng chức vụ — đơn vị trực thuộc ký nhân danh mình
     # (vd "VỤ TRƯỞNG" đứng một mình, không tiền tố TM./KT./TL.)
-    ky = ("".join(_tt_p(_x, sz=S["ky"], b=True, jc="center", line=L_KHOI, rule="exact")
-                  for _x in (spec.get("quyen_han", ""), spec.get("chuc_vu", "")) if str(_x).strip())
+    # r162 (HD05 Phụ lục 2 mục 7): VB ĐẢNG — quyền hạn "Đứng, ĐẬM" nhưng CHỨC VỤ chỉ "Đứng",
+    # KHÔNG đậm. Nhà nước (NĐ30 PL I II.7.đ) và vbqppl_qh (NQ351 Đ37 k1) thì CẢ HAI đều đậm.
+    # Reference §5.3 đã ghi đúng "đậm/đứng/đậm" từ trước — code để cả hai đậm là SAI.
+    ky = ("".join(_tt_p(_x, sz=S["ky"], b=_bd, jc="center", line=L_KHOI, rule="exact")
+                  for _x, _bd in ((spec.get("quyen_han", ""), True),
+                                  (spec.get("chuc_vu", ""), not dang)) if str(_x).strip())
           # NQ351 sơ đồ: dưới chức vụ là dòng "(Ký và đóng dấu)" in thường 14 nghiêng
           + (_tt_p("(Ký và đóng dấu)", sz=S["than"], i=True, jc="center", line=L_KHOI,
                    rule="exact") if qh else "")

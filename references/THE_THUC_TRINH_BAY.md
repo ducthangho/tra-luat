@@ -292,6 +292,18 @@ Bản sao (HD05 PL 3): dấu "Bản sao văn bản" hình chữ nhật **80 mm x
 
 20. **QUỐC HUY (Mẫu 15a/15b/16 NQ351) KHÔNG chèn bằng đoạn rỗng (§6.20)** — chừa chỗ bằng một đoạn văn bản trống thì Word hiển thị đúng là **một dòng trống ngay trên tên cơ quan** (bộ kiểm cờ `TT-DONG-TRONG-DAU`). Quốc huy là **ảnh nổi**, chèn đè lên phía trên khối tiêu đề.
 
+34. **TẤT ĐỊNH HOÁ — BẢNG ĐẶC TẢ THÀNH PHẦN × HỆ (§6.34)** — `_the_thuc_criteria()` (NEO-DRIFT-LOCK cũ) chỉ khoá **ngưỡng SỐ**: cỡ chữ, lề, thụt. Nhưng **mọi lỗi thực chiến 20-07 đều nằm ở thứ KHÔNG được khoá**: kiểu chữ (đậm/nghiêng/gạch chân), canh lề, loại thụt. Bổ sung `_tt_dac_ta()` — mỗi ô là `(cỡ, kiểu, canh, thụt, căn_cứ)` cho **48 thành phần × 3 hệ**, `thut` phân biệt `fl:<tw>` (thụt DÒNG ĐẦU) với `left:<tw>` (thụt TRÁI cả khối). Test `r170` dựng văn bản thật cho từng hệ rồi đối soát **từng thành phần** với bảng ⇒ builder và bảng không thể trôi khỏi nhau; đổi bảng mà không đổi builder (hoặc ngược lại) là test ĐỎ ngay.
+
+    **Ba chỗ ba hệ THỰC SỰ khác nhau — bảng làm chúng hiện rõ, đây đúng là ba lỗi đã mắc:**
+
+    | Thành phần | hành chính | VBQPPL Quốc hội | Đảng |
+    |---|---|---|---|
+    | `chuc_vu_ky` | đậm | đậm | **in thường** (HD05 PL2 mục 7) |
+    | `noi_nhan_tu` | đậm + nghiêng | đậm + nghiêng | **gạch chân**, không đậm |
+    | `dieu` | — | thụt **TRÁI** 567 (NQ351 Đ35 k2c *"cách lề trái"*) | thụt **DÒNG ĐẦU** 567 (HD05 6.2.2 *"khi xuống dòng… lùi vào"*) |
+
+    ⚠ Sửa `_tt_dac_ta()` = sửa hành vi builder — **phải kèm căn cứ nguyên văn**, không "chỉnh cho đẹp".
+
 33. **BỐ CỤC THÂN VB ĐẢNG — CHƯƠNG/MỤC CANH GIỮA, ĐIỀU DÀN ĐỀU (§6.33)** — HD05 mục 6.2.3 nguyên văn: *(a)* từ **"Phần"/"Chương"** + số thứ tự trình bày cùng một dòng, **CHÍNH GIỮA hai lề**; **tên** của phần/chương ở **dòng liền kề phía dưới** (cũng chính giữa, in hoa); *(b)* từ **"Mục"** + số thứ tự cũng **chính giữa**, tên mục ở dòng liền kề dưới; *(c)* từ **"Điều"**, số thứ tự và tên điều **cùng một dòng**, số dùng chữ số Ả-rập và **SAU SỐ CÓ DẤU CHẤM (.)** — ví dụ PL2: `Điều 1. Phạm vi điều chỉnh và đối tượng áp dụng`. Điều KHÔNG canh giữa ⇒ theo 6.2.2: **dàn đều hai lề, thụt đầu dòng 10mm**. Cỡ/kiểu (PL2 mục 6): Phần/Chương/Mục/Điều + tên đều **14-15 đứng ĐẬM**; **khoản, điểm 14-15 đứng KHÔNG đậm**. Cờ `TT-CHUONG-CANH-GIUA`. ⚠ Số thứ tự phần/chương dùng **chữ số La Mã hoặc ghi bằng chữ** (`Chương II`, `Phần thứ hai`); mục dùng **Ả-rập** (`Mục 1`).
 
 32. **KHỐI TIÊU ĐỀ MẶC ĐỊNH CHIA ĐÔI (§6.32)** — **đo hình học THẬT của chính file HD 05-HD/VPTW**: `tblGrid` khối tiêu đề = **4612 | 4675** trên vùng chữ 9071 ⇒ **~50/50**, tâm khối phải ở **74,8%**. Nếu chỉ cấp cho ô phải đúng bề rộng tiêu đề cần (hệ Đảng: 4256 = 45,5%) thì ô phải hẹp và **bị đẩy sang phải** — tâm 77,2%, nhìn lệch (user 20-07). Quy tắc: `wr = min(max(need_r, 50%×W), 62%×W)` — **mặc định chia đôi, chỉ NỚI ô phải khi Quốc hiệu/tiêu đề không đủ chỗ một dòng** (§6.6). Hệ nhà nước: Quốc hiệu 34 ký tự cần 58% nên giữ nguyên như cũ, không hồi quy.

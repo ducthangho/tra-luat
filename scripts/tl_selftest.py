@@ -14397,6 +14397,105 @@ def run() -> int:
         return any(f["id"] == "TT-CHUONG-CANH-GIUA" for f in _e2["findings"])
     _t110("r168_chuong_canh_giua_he_dang", _c168_chuong_canh_giua_he_dang)
 
+    # ═══ v1.35.0 — r170 TẤT ĐỊNH HOÁ: `_tt_dac_ta()` đặc tả ĐẦY ĐỦ từng thành phần × hệ
+    # (cỡ · kiểu chữ · canh lề · loại thụt · căn cứ). `_the_thuc_criteria()` chỉ khoá NGƯỠNG SỐ,
+    # trong khi mọi lỗi thực chiến 20-07 nằm ở kiểu/canh/thụt. Test này dựng văn bản thật cho từng
+    # hệ rồi đối soát TỪNG thành phần với bảng ⇒ builder và bảng không thể trôi khỏi nhau. ═══
+    def _c170_dac_ta_khop_builder():
+        import re as _r70, zipfile as _z70, tempfile as _tf70
+        DT = _TL_MODULE._tt_dac_ta()
+
+        def _dung(spec):
+            _o = str(Path(_tf70.mkdtemp()) / "x.docx")
+            _TL_MODULE.the_thuc_build(spec, _o)
+            return _z70.ZipFile(_o).read("word/document.xml").decode("utf-8")
+
+        def _khop(_x, _txt, _spec_o, _ten):
+            for _q in _r70.findall(r"<w:p>.*?</w:p>", _x, _r70.S):
+                if "".join(_r70.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() != _txt:
+                    continue
+                _co, _kieu, _canh, _thut, _cc = _spec_o
+                _sz = _r70.search(r'<w:sz w:val="(\d+)"', _q)
+                _pt = int(_sz.group(1)) / 2 if _sz else None
+                _lo, _hi = (float(v) for v in (_co.split("-") * 2)[:2])
+                if _pt is None or not (_lo <= _pt <= _hi):
+                    return f"{_ten}: cỡ {_pt} ngoài {_co}"
+                _co_dam, _co_ngh = "<w:b/>" in _q, "<w:i/>" in _q
+                _co_gach = "<w:u " in _q
+                _mong = set(x for x in _kieu.split(",") if x)
+                _that = set()
+                if _co_dam:
+                    _that.add("dam")
+                if _co_ngh:
+                    _that.add("nghieng")
+                if _co_gach:
+                    _that.add("gach")
+                if _mong != _that:
+                    return f"{_ten}: kiểu {sorted(_that)} ≠ {sorted(_mong)} ({_cc})"
+                _jc = _r70.search(r'<w:jc w:val="(\w+)"', _q)
+                if (_jc.group(1) if _jc else "") != _canh:
+                    return f"{_ten}: canh {_jc.group(1) if _jc else '-'} ≠ {_canh} ({_cc})"
+                _fl = _r70.search(r'w:firstLine="(\d+)"', _q)
+                _lf = _r70.search(r'w:left="(\d+)"', _q)
+                _fl, _lf = int(_fl.group(1)) if _fl else 0, int(_lf.group(1)) if _lf else 0
+                if _thut == "0":
+                    _bad = (_fl, _lf) != (0, 0)
+                elif _thut.startswith("fl:"):
+                    _bad = _fl != int(_thut[3:]) or _lf != 0
+                else:
+                    _bad = _lf != int(_thut[5:]) or _fl != 0
+                if _bad:
+                    return f"{_ten}: thụt fl={_fl} left={_lf} ≠ {_thut} ({_cc})"
+                return None
+            return f"{_ten}: KHÔNG tìm thấy đoạn '{_txt[:20]}'"
+
+        _loi = []
+        # ── hệ ĐẢNG ──
+        _x = _dung({"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
+                    "so_kh": "Số 12-QC/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                    "ten_loai": "QUY CHẾ", "trich_yeu": "làm việc",
+                    "body": [{"text": "Chương I", "de_muc": True, "kieu": "giua"},
+                             {"text": "QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
+                             {"text": "Điều 1. Phạm vi", "de_muc": True},
+                             {"text": "Nội dung thân văn bản."}],
+                    "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN CHẤP HÀNH",
+                    "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"})
+        for _k, _t in (("tieu_de", "ĐẢNG CỘNG SẢN VIỆT NAM"), ("ten_cq_tren", "ĐẢNG ỦY QUỐC HỘI"),
+                       ("ten_cq", "ĐẢNG ỦY ỦY BAN"), ("so_ky_hieu", "Số 12-QC/ĐU"),
+                       ("dia_danh", "Hà Nội, ngày 20 tháng 7 năm 2026"), ("the_loai", "QUY CHẾ"),
+                       ("trich_yeu", "làm việc"), ("phan_chuong", "Chương I"),
+                       ("tieu_de_pc", "QUY ĐỊNH CHUNG"), ("dieu", "Điều 1. Phạm vi"),
+                       ("than", "Nội dung thân văn bản."),
+                       ("quyen_han_ky", "T/M BAN CHẤP HÀNH"), ("chuc_vu_ky", "BÍ THƯ"),
+                       ("ho_ten_ky", "Nguyễn Văn A"), ("noi_nhan_ds", "- Lưu Văn phòng.")):
+            _r = _khop(_x, _t, DT["dang"][_k], "dang." + _k)
+            if _r:
+                _loi.append(_r)
+        # ── hệ VBQPPL QUỐC HỘI ──
+        _x2 = _dung({"he": "vbqppl_qh", "ten_cq": "QUỐC HỘI", "so_kh": "Luật số: 45/2019/QH14",
+                     "ten_loai": "LUẬT", "trich_yeu": "PHÒNG, CHỐNG TÁC HẠI",
+                     "can_cu": ["Căn cứ Hiến pháp;"],
+                     "body": [{"text": "Chương I", "kieu": "giua"},
+                              {"text": "NHỮNG QUY ĐỊNH CHUNG", "kieu": "giua"},
+                              {"text": "Điều 1. Phạm vi", "de_muc": True, "kieu": "dieu"},
+                              {"text": "Nội dung thân."}],
+                     "thong_qua": "Luật này được Quốc hội thông qua ngày 14 tháng 6 năm 2019.",
+                     "chuc_vu": "CHỦ TỊCH QUỐC HỘI", "ho_ten": "Nguyễn Thị Kim Ngân"})
+        for _k, _t in (("quoc_hieu", "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"),
+                       ("tieu_ngu", "Độc lập - Tự do - Hạnh phúc"), ("ten_cq", "QUỐC HỘI"),
+                       ("so_ky_hieu", "Luật số: 45/2019/QH14"), ("ten_loai", "LUẬT"),
+                       ("trich_yeu", "PHÒNG, CHỐNG TÁC HẠI"), ("can_cu", "Căn cứ Hiến pháp;"),
+                       ("phan_chuong", "Chương I"), ("tieu_de_pc", "NHỮNG QUY ĐỊNH CHUNG"),
+                       ("dieu", "Điều 1. Phạm vi"), ("than", "Nội dung thân."),
+                       ("chuc_vu_ky", "CHỦ TỊCH QUỐC HỘI"), ("ho_ten_ky", "Nguyễn Thị Kim Ngân")):
+            _r = _khop(_x2, _t, DT["vbqppl_qh"][_k], "vbqppl_qh." + _k)
+            if _r:
+                _loi.append(_r)
+        if _loi:
+            print("  [r170] LỆCH đặc tả: " + " · ".join(_loi[:6]), file=sys.stderr)
+        return not _loi
+    _t110("r170_dac_ta_thanh_phan_khop_builder", _c170_dac_ta_khop_builder)
+
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══
     def _c156_phieu_trinh():
@@ -14461,7 +14560,9 @@ def run() -> int:
             return False
         for _pfx in ("Quá trình thực hiện:", "Đề xuất:", "Thường trực Ủy ban"):
             _q = _para(lambda t, _p=_pfx: t.startswith(_p))
-            _m = _r6.search(r'<w:ind w:firstLine="(\d+)"', _q)
+            # r169: KHÔNG neo vào '<w:ind w:firstLine' — thẻ ind nay có thêm w:left phía trước.
+            # Bẫy thứ tự thuộc tính (đã gặp với w:val của viền, và với bản Google-export).
+            _m = _r6.search(r'w:firstLine="(\d+)"', _q)
             if not _m or int(_m.group(1)) != 454:
                 return False
         # r160: ô CÓ VIỀN phải có đệm dọc, nếu không dòng cuối DÍNH nét kẻ dưới (user 20-07 gửi

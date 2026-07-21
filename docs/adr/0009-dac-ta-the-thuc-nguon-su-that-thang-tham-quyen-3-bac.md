@@ -38,6 +38,10 @@
 - **Ca B3 đầu tiên đã phán:** lề phải văn bản nhà nước = 20mm (NĐ30 cho dải 15-20; chọn 20 vì mọi
   sản phẩm đã giao build ở 20mm — normalize sửa theo build để idempotent, không âm thầm đổi lề file
   cũ; và giữ khoảng cách nhận diện với hệ Đảng đơn trị 15mm). Dòng "le=…/15" ở §8 NEO sửa theo.
+- **Tiến độ thi hành:** bước 1 ✅ r172 (v1.35.2) · bước 2 ✅ r173 (v1.35.3, sổ-hai-chiều) · bước 3
+  ✅ r174 (v1.35.4 — **trục CỠ CHỮ** dẫn xuất từ bảng qua `_tt_co_build`, byte-identical; trục
+  kiểu/canh/thụt vẫn inline trong builder nhưng bị r170+r173 khoá từ ngoài — nối nốt ở bước 5 nếu
+  thực tế đòi) · bước 4 đo lũ ⏳ · bước 5 nối bộ kiểm ⏳.
 - **Phương án đã bác:** giữ hiện trạng + đổi cách gọi tên (bảng chỉ là tài liệu) — bác vì chấp nhận
   vùng cố tình lệch ADR-0003 ngay tại vùng giao sản phẩm cho Ủy ban; nối thẳng bộ kiểm trước khi vá
   bảng — bác vì nối bảng đang sai vào bộ kiểm là sản xuất finding sai hàng loạt.

@@ -173,6 +173,41 @@ def _tt_dac_ta():
     }
 
 
+def _tt_co_build(he):
+    """r174 (ADR-0009 bước 3): CỠ CHỮ builder DẪN XUẤT từ bảng `_tt_dac_ta()` — hết hard-code S.
+    Ô đơn trị → dùng thẳng; ô khai DẢI → tra `_CHON` (lựa chọn nội bộ bậc B3 TRONG dải luật —
+    dải nằm ở cột `co` của bảng, lựa chọn phải thuộc dải, lệch là ValueError NGAY lúc build).
+    Trả dict half-points theo khoá tắt của builder. Đối chiếu tay 33 giá trị × 3 hệ khớp 100%
+    giá trị S cũ ⇒ dẫn xuất byte-identical (đã chứng minh bằng hash 4 văn bản chuẩn, r174)."""
+    _CHON = {   # B3 — giá trị build chọn trong dải; sửa bảng NỚI/DỜI dải thì phải soát lại đây
+        "hanh_chinh": {"quoc_hieu": 12, "tieu_ngu": 13, "ten_cq": 12, "dia_danh": 13,
+                       "ten_loai": 14, "trich_yeu": 14, "than": 14, "chuc_vu_ky": 14},
+        "dang": {"the_loai": 16, "trich_yeu": 15, "than": 15},
+        "vbqppl_qh": {},        # NQ351 toàn đơn trị — không phải chọn gì
+    }
+    DT = _tt_dac_ta()[he]
+
+    def co(key):
+        if key not in DT:
+            return 0            # hệ không có thành phần này (vd tiêu ngữ hệ Đảng) — sentinel cũ
+        c = DT[key][0]
+        if "-" in c:
+            lo, hi = (int(v) for v in c.split("-", 1))
+            pick = _CHON[he].get(key)
+            if pick is None or not (lo <= pick <= hi):
+                raise ValueError(f"_tt_co_build: ô {he}.{key} dải {c} nhưng lựa chọn build "
+                                 f"{pick!r} thiếu/ngoài dải — bổ sung _CHON cho đúng")
+            return pick
+        return int(c)
+
+    m = {"cq": co("ten_cq"), "qh": co("tieu_de") if he == "dang" else co("quoc_hieu"),
+         "tn": co("tieu_ngu"), "so": co("so_ky_hieu"), "dd": co("dia_danh"),
+         "tl": co("the_loai") if he == "dang" else co("ten_loai"),
+         "ty": co("trich_yeu"), "than": co("than"),
+         "nn": co("noi_nhan_tu"), "nnds": co("noi_nhan_ds"), "ky": co("chuc_vu_ky")}
+    return {k: v * 2 for k, v in m.items()}
+
+
 def the_thuc_neo_lines():
     """Render 6 dòng NEO-DRIFT-LOCK từ hằng — r136 so == block trong THE_THUC_TRINH_BAY.md."""
     c = _the_thuc_criteria()
@@ -1380,12 +1415,10 @@ def the_thuc_build(spec, out_path):
     W = PGW - le["left"] - le["right"]
     NIL4 = ('<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/>'
             '<w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>')
-    # cỡ chữ theo hệ (half-points): [CQ, tiêu-đề/quốc-hiệu, tiêu-ngữ, số-KH, địa-danh, tên-loại,
-    #                                trích-yếu, thân, nơi-nhận-từ, nơi-nhận-ds, ký]
-    S = dict(cq=28, qh=30, tn=0, so=28, dd=28, tl=32, ty=30, than=30, nn=28, nnds=24, ky=28) if dang \
-        else dict(cq=24, qh=24, tn=26, so=26, dd=26, tl=28, ty=28, than=28, nn=24, nnds=22, ky=28)
-    if qh:   # NQ351 Phụ lục I: Tiêu ngữ 14 (bậc +2, KHÁC NĐ30) · địa danh 14 · chức vụ ký 13
-        S.update(tn=28, dd=28, ky=26)
+    # r174 (ADR-0009 bước 3): cỡ chữ DẪN XUẤT từ bảng đặc tả — sửa bảng là builder đổi theo,
+    # hết cảnh hai nơi cùng ghi (trước: dict S hard-code tại đây, trôi khỏi bảng không ai hay).
+    # Half-points; khoá tắt: cq/qh/tn/so/dd/tl/ty/than/nn/nnds/ky — xem _tt_co_build.
+    S = _tt_co_build("dang" if dang else ("vbqppl_qh" if qh else "hanh_chinh"))
     LN = 400 if dang else 360        # Đảng: 20pt Exactly (dải 18-22 HD05) · nhà nước: ≥18pt
     RULE = "exact" if dang else "atLeast"
     THUT = 567

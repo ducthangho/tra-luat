@@ -114,3 +114,26 @@
     tồn tại trong toàn văn HD05. `ABBR_DANG` + §5.3 vốn đã đúng — sửa phía SẢN PHẨM:
     `Mau_Dang_05_Quy_dinh.docx` `-QĐi/ĐU` → `-QĐ/ĐU`. Đính chính hồ sơ: bảng viết tắt ở HD05
     **mục 3.1.2**, không phải 3.2 như ghi chú r176 (3.2 = kỹ thuật trình bày số-ký-hiệu).
+- **Hậu kiểm 2026-07-21 (r178) — TIÊU CHÍ MÁY CÔNG VĂN HỆ ĐẢNG.** Đóng việc-mở treo từ r175:
+  biến thể `dang.cong_van` CÓ Ô nhưng **chưa bao giờ kích hoạt được** (code chỉ bật cong_van cho
+  hanh_chinh qua «V/v»; HD05 không dùng «V/v»). Tiêu chí 2 vế, **neo vào Ô**: `so_ky_hieu` khớp
+  «Số N-CV/…» (3.1.2.b vd 3 + 3.1.2.a không liệt CV — **B2**, cố ý không khai B1 vì suy từ ví dụ
+  chứ không phải bảng liệt kê đóng) ∧ vắng ô `the_loai` (phản đảo 5.1.1 — **B1**). Ô mới
+  `kinh_gui` 14 nghiêng (PL2 mục 5 + 9.2.3 — B1; `canh`/`thut`="na" vì 9.2.3 «ở chính giữa» nhập
+  nhằng canh-giữa vs vị-trí-giữa-trang). Trích yếu công văn Đảng neo VỊ TRÍ (5.2.3), khai **B3**.
+  - **Bài học «đo trước, phán sau» — phép đo BÁC một ứng viên và VÁ một thiết kế:** (i) «Kính
+    gửi» tưởng là tiêu chí đẹp (9.2.3 nói rõ công văn có Kính gửi) nhưng khớp **35/190** docx
+    thật — báo cáo, tờ trình, phiếu trình: nguyên văn chỉ cho chiều THUẬN, dùng chiều ĐẢO là tự
+    bịa. (ii) Viết theo khuôn `_head[:3000]` sẵn có thì **hỏng ngay trên dữ liệu đang có**:
+    «-CV/» khớp đúng 1/190 file và là dương tính giả (trích dẫn «Công văn số 3152-CV/VPTW» ở đoạn
+    thân một BÁO CÁO, offset 1040 < 3000). Chỉ chạy test tự dựng thì cả hai lỗi đều KHÔNG lộ.
+  - **Bài học «test xanh không chứng minh gì nếu chưa biết đỏ»:** bộ đột biến 7 chốt bắt được
+    **3 CHỐT CHẾT** trong khi selftest vẫn 1131/1131 xanh — chốt «vắng the_loai», chốt «-CV/» ở
+    tầng check, chốt «-CV/» ở classifier — vì mọi ca test đều đã bị một chốt KHÁC chặn trước khi
+    chạm tới. Phải thêm ca chạm ĐÚNG từng chốt (f7, f9, f10) mới đỏ. Quy tắc rút ra: **mỗi chốt
+    phòng vệ cần một ca mà CHỈ chốt đó đứng giữa test và lỗi**; nhiều chốt cùng chặn = phủ giả.
+  - **Hồi quy tự bắt được:** đặt nhánh `kinh_gui` ngoài cổng «-CV/» làm một tờ trình thật rụng
+    1 `TT-DT-THAN-THUT` (190 docx: 4170→4169) — ô biến thể không vào bảng khi biến thể tắt, nên
+    đoạn bị gán vào đó thành **mất kiểm âm thầm**. Sau khi siết: **190/190 khớp r177 từng finding**.
+  - **Phạm vi sổ `_BAT_DUOC`:** giữ **53 ô**, KHÔNG bump — sổ r173 dựng từ bảng CHÍNH; ô biến thể
+    không đột biến được trên văn bản mẫu chung, khoá ở r176 ca (e)/(f) thay thế.

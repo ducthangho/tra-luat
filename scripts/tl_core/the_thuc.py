@@ -235,8 +235,30 @@ def _tt_dac_ta_bien_the():
         },
         "dang": {
             "cong_van": {   # công văn Đảng — KHÔNG thể loại; trích yếu NGHIÊNG cỡ 12
-                "nhan_dien": "không thể loại; trích yếu nghiêng dưới số ký hiệu (HD05)",
-                "them": {"trich_yeu_cv": ("12", "nghieng", "center", "0", "THE_THUC_TRINH_BAY §5 bảng TT-5 (gốc HD05): trích yếu công văn in thường 12 NGHIÊNG", "B2*")},
+                # r178: KÍCH HOẠT (trước đó ô có sẵn nhưng KHÔNG tiêu chí máy nào bật được).
+                # Tiêu chí = ô `so_ky_hieu` khớp «Số N-CV/…» ∧ KHÔNG có ô `the_loai`.
+                #   · «-CV/» : HD05 3.1.2.b ví dụ 3 «Công văn của ban tuyên giáo và dân vận
+                #     tỉnh uỷ — Số 138-CV/BTGDVTU»; bảng thống nhất viết tắt khi TRÙNG chữ cái
+                #     đầu (3.1.2.a: QĐ, CT, CTr, TT, TTr) KHÔNG chứa CV ⇒ không thể loại nào
+                #     khác chiếm ký hiệu này. Bậc B2 (suy từ ví dụ + vắng mặt, KHÔNG phải bảng
+                #     liệt kê đóng) — cố ý KHÔNG khai B1.
+                #   · vắng `the_loai` : phản đảo của 5.1.1 «Văn bản ban hành đều ghi tên loại
+                #     văn bản, TRỪ công văn» ⇒ CÓ tên loại ⇒ KHÔNG phải công văn (B1).
+                # ★ Phải neo vào Ô, KHÔNG dò regex head-blob như nhánh V/v: đo 21-07 trên 190
+                #   docx thật cho đúng 1 lần khớp «-CV/» và đó là DƯƠNG TÍNH GIẢ —
+                #   `02_Bao-cao-tiep-thu-chi-dao.docx` là BÁO CÁO, chuỗi nằm ở đoạn thân số 8
+                #   («Công văn số 3152-CV/VPTW, ngày 19/6/2026»), offset 1040 < 3000 nên
+                #   `_head[:3000]` CHẠM. Cả hai vế tiêu chí đều giết ca này (test r178 khoá).
+                # ★ «Kính gửi» BỊ BÁC làm TIÊU CHÍ (khớp 35/190 file thật: báo cáo, tờ trình,
+                #   phiếu trình…). 9.2.3 chỉ cho chiều công văn ⇒ có Kính gửi, KHÔNG cho đảo.
+                "nhan_dien": "ô so_ky_hieu «Số N-CV/…» (HD05 3.1.2.b vd 3, B2) ∧ KHÔNG có ô the_loai (5.1.1 phản đảo, B1)",
+                "them": {
+                    "trich_yeu_cv": ("12", "nghieng", "center", "0", "HD05 PL2 mục 5 «Trích yếu nội dung thể loại công văn | In thường | 12 | Nghiêng» + 5.2.3 «trình bày cân đối dưới số và ký hiệu văn bản (ô số 5b)»", "B1"),
+                    # r178 ô MỚI. canh/thut "na": PL2 chỉ pin cỡ+kiểu; 9.2.3 «ở chính giữa,
+                    # trang đầu văn bản» NHẬP NHẰNG giữa canh-giữa và vị-trí-giữa-trang ⇒
+                    # không kiểm (khuôn "na" r175 — luật không ấn định rõ thì cấm đoán).
+                    "kinh_gui": ("14", "nghieng", "na", "na", "HD05 PL2 mục 5 «Từ \"Kính gửi\" đối với thể loại công văn … | In thường | 14 | Nghiêng» + 9.2.3 (ô số 5a)", "B1"),
+                },
                 "bo": ("the_loai", "trich_yeu"),
             },
         },
@@ -1097,6 +1119,32 @@ def _tt_dt_phan_loai(ps, he):
             if i not in gan and re.match(r"^V/v\s", txts[i]):
                 _set(i, "trich_yeu_cv")
                 break
+    # r178 — hệ ĐẢNG: HD05 KHÔNG dùng «V/v» (PL2 nêu ví dụ «về việc chuẩn bị hội nghị…», chữ
+    # thường) nên không có neo KÝ TỰ; neo duy nhất là VỊ TRÍ, 5.2.3 «trình bày cân đối dưới số
+    # và ký hiệu văn bản (ô số 5b)» ⇒ đoạn chưa gán đầu tiên SAU `so_ky_hieu`. Bậc B3 (suy diễn
+    # vị trí — HD05 không cho tiêu chí ký tự), user duyệt 21-07.
+    # ★ Nhánh này PHẢI tự phòng vệ, KHÔNG được noi theo nhánh V/v ở trên: gán vô điều kiện thì
+    #   trên một BÁO CÁO nó cướp đúng đoạn `the_loai` (bước 3+4 chạy SAU, `_set` không ghi đè)
+    #   ⇒ hỏng phân loại văn bản thường. Hai chốt: (a) chính ô so_ky_hieu phải mang «-CV/»,
+    #   (b) đoạn ứng viên KHÔNG in hoa (mọi `the_loai` đều in hoa).
+    elif he == "dang" and i_sk is not None and re.search(r"-\s*CV\s*/", txts[i_sk]):
+        for i in range(i_sk + 1, head_n):
+            if i in gan:
+                continue
+            if not _hoa(txts[i]) and len(txts[i]) < 300:
+                _set(i, "trich_yeu_cv")
+            break
+        # «Kính gửi:» — ô 5a của công văn Đảng (HD05 9.2.3 + PL2 mục 5).
+        # ★ PHẢI nằm TRONG cổng «-CV/» này, KHÔNG tách thành nhánh `he == "dang"` tự do dù neo
+        #   ký tự đã chặt: ô `kinh_gui` chỉ vào bảng khi biến thể BẬT, nên trên một TỜ TRÌNH
+        #   Đảng (cũng mở đầu «Kính gửi:») việc gán sẽ nuốt đoạn vốn đang được kiểm là `than`
+        #   ⇒ MẤT KIỂM ÂM THẦM. Đo 21-07 bắt đúng lỗi này: `01_To-trinh_Bo-Chinh-tri.docx`
+        #   rụng 1 TT-DT-THAN-THUT (tổng 4170→4169). Siết vào cổng rồi thì 190/190 docx thật
+        #   khớp r177 từng finding một.
+        for i in range(head_n):
+            if i not in gan and re.match(r"^Kính\s+gửi\s*:", txts[i]):
+                _set(i, "kinh_gui")
+                break
     # 3+4. tên loại TRƯỚC (chặn dưới của khối tên cơ quan), rồi khối cơ quan in hoa
     o_loai = "the_loai" if he == "dang" else "ten_loai"
     i_loai = None
@@ -1252,8 +1300,9 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
     Hệ khai trắng (vbqppl/vbhn) → không kiểm (QĐ1 — «chưa đặc tả», cấm giả vờ). Biến thể:
     «/QĐ-CTN» → qd_ctn (override co quốc hiệu 13 — hiện bị Đ4 nhường TT-BAC-CO-CHU vốn ĐÃ biết
     Mẫu 16 từ r150; giữ resolve cho override tương lai) · «V/v» đầu dòng → cong_van hanh_chinh
-    (them trich_yeu_cv, bo ten_loai/trich_yeu). Nhận diện cong_van hệ ĐẢNG chưa có tiêu chí máy
-    (HD05 không dùng «V/v») — để sau, không đoán. Baseline nghiệm thu r176: lớp A 49 VB = 876
+    (them trich_yeu_cv, bo ten_loai/trich_yeu) · **r178 cong_van hệ ĐẢNG ĐÃ CÓ TIÊU CHÍ MÁY**:
+    ô `so_ky_hieu` khớp «Số N-CV/…» ∧ vắng ô `the_loai` (căn cứ + vì sao neo-Ô chứ không
+    head-blob: xem `_tt_dac_ta_bien_the()` dang.cong_van). Baseline nghiệm thu r176: lớp A 49 VB = 876
     finding (`do-lu-2026-07-21/tong_hop_sau_va.md`) trừ các nhóm Đ4 nhường; Đ5 gỡ ở r177 nên
     trich_yeu·kieu kiểm lại bình thường (INFO)."""
     import re
@@ -1279,6 +1328,19 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
         _ap = _bien.get("qd_ctn")
     elif he_eff == "hanh_chinh" and re.search(r"(?m)^\s*V/v\s", _head):
         _ap = _bien.get("cong_van")
+    elif he_eff == "dang":
+        # r178 — NEO VÀO Ô, không dò head-blob (head-blob bắt nhầm trích dẫn «Công văn số
+        # 3152-CV/VPTW» ở thân một BÁO CÁO thật, xem `_tt_dac_ta_bien_the()`).
+        _i_sk = next((i for i, _o in gan.items() if _o == "so_ky_hieu"), None)
+        # ★ TRUNG THỰC VỀ ĐỘ PHỦ (đột biến r178): vế `the_loai` là chốt SỐNG — có ca f7/f8 chạm
+        #   đúng nó (ký hiệu «-CV/» NHƯNG có tên loại), gỡ ra là đỏ. Vế `-CV/` ở ĐÂY thì
+        #   KHÔNG quan sát được: cổng «-CV/» trong `_tt_dt_phan_loai` đã chặn việc gán
+        #   trich_yeu_cv/kinh_gui từ trước, nên hạ vế này xuống True không đổi finding nào —
+        #   giữ lại là PHÒNG VỆ THỪA có chủ ý (hai tầng cùng đọc một căn cứ 3.1.2.b), KHÔNG
+        #   phải chốt đã được test khoá. Đừng dựa vào nó một mình nếu sau này gỡ cổng classifier.
+        if (_i_sk is not None and "the_loai" not in _cac_o          # 5.1.1 phản đảo (B1)
+                and re.search(r"^\s*Số\s*\d+\s*-\s*CV\s*/", ps[_i_sk]["text"])):   # 3.1.2.b (B2)
+            _ap = _bien.get("cong_van")
     if _ap:
         _IDX = {"co": 0, "kieu": 1, "canh": 2, "thut": 3}
         for _o, _ovr in (_ap.get("override") or {}).items():

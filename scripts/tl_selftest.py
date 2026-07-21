@@ -14647,7 +14647,13 @@ def run() -> int:
     #     bằng chính thuộc tính đậm: lật bỏ đậm là mất neo (hạn chế cố hữu của neo văn bản);
     #   · (dang|vbqppl_qh).than — đoạn thân văn bản test <25 ký tự, dưới ngưỡng giỏ than;
     #   · vbqppl_qh.quyen_han_ky — văn bản test NGẮN: dòng TM. rơi ngoài vùng quét khối ký
-    #     i ≥ 2n/3 (corpus thật văn bản dài thì lọt vùng — hanh_chinh/dang cùng ô vẫn bắt). ═══
+    #     i ≥ 2n/3 (corpus thật văn bản dài thì lọt vùng — hanh_chinh/dang cùng ô vẫn bắt).
+    # ★ PHẠM VI (r178, đọc kỹ trước khi tưởng sổ thiếu): sổ này CHỈ phủ bảng CHÍNH — `_tat_ca`
+    #   dựng từ `DT = _tt_dac_ta()`. Ô của bảng BIẾN THỂ `_tt_dac_ta_bien_the()` —
+    #   hanh_chinh.trich_yeu_cv, dang.trich_yeu_cv, dang.kinh_gui (r178) — nằm NGOÀI sổ, vì
+    #   chúng chỉ tồn tại khi biến thể bật nên không đột biến được trên văn bản mẫu chung.
+    #   Chúng được khoá hai chiều ở r176 ca (e)/(f) thay cho sổ này. Thêm ô biến thể mới thì
+    #   khoá ở đó, ĐỪNG nhét vào _BAT_DUOC (sẽ đỏ «không đột biến được»). Sổ = 53 ô. ═══
     def _c173_dot_bien_so_hai_chieu():
         import re as _r73, zipfile as _z73, tempfile as _tf73
         DT = _TL_MODULE._tt_dac_ta()
@@ -14992,6 +14998,112 @@ def run() -> int:
             _loi.append("(e) V/v 14 nghiêng không bị bắt CO+KIEU")
         if any(i.startswith(("TT-DT-TEN-LOAI-", "TT-DT-TRICH-YEU-K", "TT-DT-TRICH-YEU-CO")) for i in _cv2):
             _loi.append("(e) ô đã bo (ten_loai/trich_yeu) vẫn bị kiểm")
+        # (f) r178 — TIÊU CHÍ MÁY CÔNG VĂN HỆ ĐẢNG. Tiêu chí = ô so_ky_hieu «Số N-CV/…»
+        #     (HD05 3.1.2.b vd 3) ∧ vắng ô the_loai (5.1.1 phản đảo). Khoá CẢ HAI CHIỀU —
+        #     chiều nghịch quan trọng hơn: corpus 1251 mục + 190 docx thật có 0 công văn Đảng,
+        #     nên rủi ro thật không phải "bỏ sót" mà là "nhận nhầm văn bản có tên loại".
+        def _p78(t, sz=28, b=False, i=False, u=False, jc="center", fl=0):
+            _rp = ("<w:rPr>" + ("<w:b/>" if b else "") + ("<w:i/>" if i else "")
+                   + ('<w:u w:val="single"/>' if u else "") + f'<w:sz w:val="{sz}"/></w:rPr>')
+            return (f'<w:p><w:pPr><w:ind w:firstLine="{fl}" w:left="0"/><w:jc w:val="{jc}"/>'
+                    f"</w:pPr><w:r>{_rp}<w:t xml:space=\"preserve\">{t}</w:t></w:r></w:p>")
+
+        def _dcv(name, sk="Số 138-CV/BTGDVTU", loai=None, ty=(24, True), kg=(28, True)):
+            """công văn Đảng dựng chuẩn; `loai` ≠ None ⇒ thành văn bản CÓ TÊN LOẠI."""
+            _b = (_p78("BAN CHẤP HÀNH TRUNG ƯƠNG", 28)
+                  + _p78("BAN TUYÊN GIÁO VÀ DÂN VẬN TỈNH UỶ", 28, b=True)
+                  + _p78("ĐẢNG CỘNG SẢN VIỆT NAM", 30, b=True)
+                  + _p78(sk, 28)
+                  + _p78("Hà Nội, ngày 21 tháng 7 năm 2026", 28, i=True)
+                  + (_p78(loai[0], loai[1], b=True) + _p78("tiếp thu chỉ đạo của Bộ Chính trị", 28, b=True)
+                     if loai else _p78("về việc chuẩn bị hội nghị trực tuyến", ty[0], i=ty[1]))
+                  + _p78("Kính gửi:", kg[0], i=kg[1])
+                  + _p78("Đề nghị các đơn vị chuẩn bị nội dung theo chỉ đạo.", 28, jc="both", fl=567)
+                  + _p78("Nơi nhận:", 28, u=True, jc="left")
+                  + _p78("- Lưu VT.", 24, jc="left"))
+            return _mk143(Path(_td), name, _b, d_sz="28")
+        # f1 — công văn Đảng CHUẨN: sạch tuyệt đối (biến thể bật, không đẻ finding oan)
+        _f1 = _ids(_dcv("dcv1.docx"), "dang")
+        if any(i.startswith("TT-DT-") for i in _f1):
+            _loi.append(f"(f) công văn Đảng chuẩn sinh {sorted(i for i in _f1 if i.startswith('TT-DT-'))[:3]}")
+        # f2 — trích yếu 14 ĐỨNG (kiểu văn-bản-thường) thay vì 12 nghiêng → CO + KIEU
+        _f2 = _ids(_dcv("dcv2.docx", ty=(28, False)), "dang")
+        if not {"TT-DT-TRICH-YEU-CV-CO", "TT-DT-TRICH-YEU-CV-KIEU"} <= _f2:
+            _loi.append("(f) trích yếu CV 14 đứng không bị bắt CO+KIEU")
+        if any(i.startswith(("TT-DT-THE-LOAI-", "TT-DT-TRICH-YEU-K", "TT-DT-TRICH-YEU-CO")) for i in _f2):
+            _loi.append("(f) ô đã bo (the_loai/trich_yeu) vẫn bị kiểm")
+        # f3 — ô MỚI kinh_gui (HD05 PL2 mục 5 + 9.2.3): 15pt đứng → CO + KIEU
+        _f3 = _ids(_dcv("dcv3.docx", kg=(30, False)), "dang")
+        if not {"TT-DT-KINH-GUI-CO", "TT-DT-KINH-GUI-KIEU"} <= _f3:
+            _loi.append("(f) ô kinh_gui không được kiểm")
+        # f4 — CHIỀU NGHỊCH: BÁO CÁO Đảng (có tên loại, có «Kính gửi:», và trích dẫn «-CV/» ở
+        #      THÂN — đúng khuôn `02_Bao-cao-tiep-thu-chi-dao.docx` thật) KHÔNG được nhận nhầm.
+        _b4 = (_p78("BAN CHẤP HÀNH TRUNG ƯƠNG", 28) + _p78("BAN CHÍNH SÁCH, CHIẾN LƯỢC", 28, b=True)
+               + _p78("ĐẢNG CỘNG SẢN VIỆT NAM", 30, b=True) + _p78("Số 42-BC/BCSCL", 28)
+               + _p78("Hà Nội, ngày 21 tháng 7 năm 2026", 28, i=True)
+               + _p78("BÁO CÁO", 30, b=True) + _p78("tiếp thu chỉ đạo của Bộ Chính trị", 28, b=True)
+               + _p78("Kính gửi:", 28, i=True)
+               + _p78("Thực hiện chỉ đạo (Công văn số 3152-CV/VPTW, ngày 19/6/2026).", 28, jc="both", fl=567)
+               + _p78("Nơi nhận:", 28, u=True, jc="left") + _p78("- Lưu VT.", 24, jc="left"))
+        _f4 = _ids(_mk143(Path(_td), "dbc4.docx", _b4, d_sz="28"), "dang")
+        if any(("TRICH-YEU-CV" in i or "KINH-GUI" in i) for i in _f4):
+            _loi.append(f"(f) BÁO CÁO bị nhận nhầm là công văn: {sorted(_f4)[:4]}")
+        # f5 — và ô `the_loai` của báo cáo phải VẪN ĐƯỢC KIỂM (không bị `bo` âm thầm):
+        #      lật THE LOAI sang 14pt thường ⇒ buộc phải ra TT-DT-THE-LOAI-*
+        _b5 = _b4.replace(_p78("BÁO CÁO", 30, b=True), _p78("BÁO CÁO", 28))
+        _f5 = _ids(_mk143(Path(_td), "dbc5.docx", _b5, d_sz="28"), "dang")
+        if not any(i.startswith("TT-DT-THE-LOAI-") for i in _f5):
+            _loi.append("(f) the_loai của BÁO CÁO hết được kiểm — biến thể bị bật oan")
+        # f6 — tiêu chí neo vào Ô: «Kính gửi:» một mình KHÔNG được bật biến thể (đo 21-07:
+        #      35/190 docx thật có «Kính gửi» — báo cáo, tờ trình, phiếu trình)
+        _f6 = _ids(_dcv("dcv6.docx", sk="Số 42-TTr/BCSCL", loai=("TỜ TRÌNH", 30)), "dang")
+        if any(("TRICH-YEU-CV" in i or "KINH-GUI" in i) for i in _f6):
+            _loi.append("(f) «Kính gửi» một mình bật được biến thể")
+        # f7 — chạm ĐÚNG chốt thứ hai (vắng the_loai). Ký hiệu «-CV/» NHƯNG có tên loại: theo
+        #      5.1.1 phản đảo KHÔNG phải công văn. Không có ca này thì chốt là code chết —
+        #      đột biến 21-07 (gỡ chốt) vẫn xanh vì f4/f5/f6 đã bị vế «-CV/» chặn từ trước.
+        _f7 = _ids(_dcv("dcv7.docx", loai=("BÁO CÁO", 30)), "dang")
+        if any(("TRICH-YEU-CV" in i or "KINH-GUI" in i) for i in _f7):
+            _loi.append("(f) «-CV/» + CÓ tên loại vẫn bật biến thể (hỏng chốt 5.1.1)")
+        if not any(i.startswith("TT-DT-THE-LOAI-") for i in
+                   _ids(_dcv("dcv8.docx", loai=("BÁO CÁO", 28)), "dang")):
+            _loi.append("(f) «-CV/» + tên loại: the_loai hết được kiểm")
+        # f9 — hệ Đảng, KHÔNG tên loại (classifier trượt / layout lạ) và KHÔNG «-CV/» ⇒ biến thể
+        #      PHẢI TẮT. LƯU Ý ĐỘ PHỦ: ca này khoá HÀNH VI, nhưng chốt thực sự chặn nó là cổng
+        #      «-CV/» trong `_tt_dt_phan_loai`, KHÔNG phải vế «-CV/» ở tầng check — hạ vế tầng
+        #      check xuống True vẫn xanh (đột biến DB2 21-07). Vế đó là phòng vệ THỪA có chủ ý,
+        #      đã ghi rõ tại `_the_thuc_check_dac_ta`; đừng tưởng ca này khoá nó.
+        _b9 = (_p78("BAN CHẤP HÀNH TRUNG ƯƠNG", 28) + _p78("BAN CHÍNH SÁCH, CHIẾN LƯỢC", 28, b=True)
+               + _p78("ĐẢNG CỘNG SẢN VIỆT NAM", 30, b=True) + _p78("Số 42-BC/BCSCL", 28)
+               + _p78("Hà Nội, ngày 21 tháng 7 năm 2026", 28, i=True)
+               + _p78("về việc tiếp thu chỉ đạo của Bộ Chính trị", 24, i=True)
+               + _p78("Đề nghị các đơn vị triển khai theo chỉ đạo.", 28, jc="both", fl=567)
+               + _p78("Nơi nhận:", 28, u=True, jc="left") + _p78("- Lưu VT.", 24, jc="left"))
+        _f9 = _ids(_mk143(Path(_td), "dbc9.docx", _b9, d_sz="28"), "dang")
+        if any("TRICH-YEU-CV" in i for i in _f9):
+            _loi.append("(f) không «-CV/» mà vẫn bật biến thể (hỏng chốt 3.1.2.b)")
+        # f10 — chạm chốt «-CV/» ở CLASSIFIER, tái hiện ĐÚNG hồi quy đo được 21-07: TỜ TRÌNH Đảng
+        #       mở đầu «Kính gửi:» THỤT SAI (fl=0 trong khi `than` đòi 567) ⇒ r177 ra
+        #       TT-DT-THAN-THUT. Nếu nhánh kinh_gui thoát khỏi cổng «-CV/», nó nuốt đoạn này và
+        #       finding BIẾN MẤT — mất kiểm âm thầm, đúng ca `01_To-trinh_Bo-Chinh-tri.docx`
+        #       (tổng 190 docx thật 4170→4169). Tầng check KHÔNG che được ca này.
+        # ★ ký hiệu phải là «-BC/» chứ KHÔNG «-TTr/»: `SK_PAT["dang"]` = `^\s*Số\s+\d+\s*-\s*[A-ZĐ]+/`
+        #   KHÔNG khớp `TTr` (chữ `r` thường) ⇒ i_sk = None ⇒ nhánh không chạy ⇒ ca đậu RỖNG
+        #   NGHĨA. Bản dùng «-TTr/» từng qua cả đột biến DB3 mà vẫn xanh vì đúng lý do này.
+        _b10 = (_p78("BAN CHẤP HÀNH TRUNG ƯƠNG", 28) + _p78("BAN CHÍNH SÁCH, CHIẾN LƯỢC", 28, b=True)
+                + _p78("ĐẢNG CỘNG SẢN VIỆT NAM", 30, b=True) + _p78("Số 42-BC/BCSCL", 28)
+                + _p78("Hà Nội, ngày 21 tháng 7 năm 2026", 28, i=True)
+                + _p78("BÁO CÁO", 30, b=True) + _p78("kết quả triển khai nghị quyết", 28, b=True)
+                # ★ dòng này phải ĐỦ DÀI (≥ ngưỡng giỏ `than`, xem hồ sơ gap r173): bản 23 ký tự
+                #   rơi dưới ngưỡng ⇒ không vào giỏ ⇒ ca test rỗng nghĩa, đỏ oan trên code sạch.
+                + _p78("Kính gửi: Bộ Chính trị; Ban Bí thư Trung ương Đảng; các tỉnh uỷ, thành uỷ;",
+                       28, jc="both", fl=0)
+                + _p78("Đề nghị Bộ Chính trị xem xét, cho ý kiến về báo cáo nêu trên theo quy định.",
+                       28, jc="both", fl=567)
+                + _p78("Nơi nhận:", 28, u=True, jc="left") + _p78("- Lưu VT.", 24, jc="left"))
+        _f10 = _ids(_mk143(Path(_td), "dttr10.docx", _b10, d_sz="28"), "dang")
+        if "TT-DT-THAN-THUT" not in _f10:
+            _loi.append("(f) TỜ TRÌNH: đoạn «Kính gửi» bị nuốt → mất kiểm âm thầm")
         # Đ1: mọi TT-DT không bao giờ FAIL
         for _pp, _hh in ((_m1, "hanh_chinh"), (_cv(28, True, "cv3.docx"), "hanh_chinh")):
             if _pp and any(_i.startswith("TT-DT-") and _l == "FAIL" for _i, _l in _lvls(_pp, _hh)):

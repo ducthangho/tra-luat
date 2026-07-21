@@ -100,3 +100,17 @@
 - **Hệ quả:** `the-thuc-check` sau bước 5 sẽ sinh finding mới trên file hôm nay "sạch" (kể cả bộ đã
   giao); bước 4 tồn tại để đo và duyệt cơn lũ đó TRƯỚC khi nối, chống lặp lại tiền lệ cảnh báo oan
   Quốc huy. GHI_CHU/tài liệu chỉ được tuyên bố "0 finding" khi có lệnh kiểm chạy lại được.
+- **Hậu kiểm 2026-07-21 (r177) — ĐÓNG GIỎ CÁCH LY «chờ nguyên văn»:** cả hai ca phân xử bằng
+  nguyên văn B1 từ corpus, đúng trình tự «không đoán» của Đ5.
+  - **Đ5 `trich_yeu·kieu`:** NĐ30 PL I II.5.b *«Trích yếu nội dung văn bản … trình bày bằng chữ
+    in thường, cỡ chữ từ 13 đến 14, kiểu chữ đứng, đậm»* + HD05 PL2 mục 5 *«Trích yếu nội dung
+    văn bản | In thường | 14-15 | Đứng, đậm»* ⇒ bảng GIỮ «dam», cách ly GỠ; «đậm,nghiêng» đo được
+    trong thực chiến là lệch chuẩn thật. Mức INFO (trich_yeu thuộc nhóm tin-cậy-thấp Đ1 — chưa
+    thăng FAIL, vẫn chờ duyệt zero-oan như mọi ô). Sổ r173 `_BAT_DUOC` 51→53 ô; test r176 (d)
+    lật chiều: đậm+nghiêng PHẢI ra `TT-DT-TRICH-YEU-KIEU` INFO.
+  - **Ca `QĐi` vs `QĐ` (cùng giỏ):** HD05 3.1.2.a *«Trường hợp chữ cái đầu các âm tiết của tên
+    loại văn bản trùng nhau thì thống nhất ký hiệu một số tên loại văn bản như sau: Quyết định,
+    Quy định: QĐ»* + ví dụ 3.1.2.b(ii) *«Quy định của UBKTTW — Số 23-QĐ/UBKTTW»*; `QĐi` không
+    tồn tại trong toàn văn HD05. `ABBR_DANG` + §5.3 vốn đã đúng — sửa phía SẢN PHẨM:
+    `Mau_Dang_05_Quy_dinh.docx` `-QĐi/ĐU` → `-QĐ/ĐU`. Đính chính hồ sơ: bảng viết tắt ở HD05
+    **mục 3.1.2**, không phải 3.2 như ghi chú r176 (3.2 = kỹ thuật trình bày số-ký-hiệu).

@@ -14640,8 +14640,9 @@ def run() -> int:
     # Đột biến là máy-canh-cho-máy-canh: bằng chứng dây nối bảng→bộ kiểm còn sống sau refactor.
     # r176 (ADR-0009 BƯỚC 5 nối bộ kiểm): sổ 1 ô → 51 ô — lớp đặc tả `TT-DT-<Ô>-KIEU` bắt 50 ô
     # + cờ tay TT-CHUC-VU-DAM giữ dang.chuc_vu_ky (Đ4 nhường, lớp đặc tả skip kieu ô đó).
-    # 8 GAP còn lại có hồ sơ (quét `buoc5_soquet` 21-07, KHÔNG phải quên):
-    #   · (hanh_chinh|dang).trich_yeu — Đ5 CÁCH LY kieu chờ nguyên văn NĐ30 PL I II.5;
+    # 6 GAP còn lại có hồ sơ (quét `buoc5_soquet` 21-07, KHÔNG phải quên):
+    #   · (hanh_chinh|dang).trich_yeu HẾT GAP từ r177 — Đ5 phân xử nguyên văn B1 (NĐ30 PL I
+    #     II.5.b + HD05 PL2 mục 5 đều «đứng, đậm») ⇒ gỡ cách ly, 2 ô vào _BAT_DUOC (sổ 51→53);
     #   · (hanh_chinh|dang).de_muc_than + vbqppl_qh.co_quan_ban_hanh — classifier NHẬN DIỆN
     #     bằng chính thuộc tính đậm: lật bỏ đậm là mất neo (hạn chế cố hữu của neo văn bản);
     #   · (dang|vbqppl_qh).than — đoạn thân văn bản test <25 ký tự, dưới ngưỡng giỏ than;
@@ -14653,7 +14654,7 @@ def run() -> int:
         _BAT_DUOC = {("dang", "chuc_vu_ky"): "TT-CHUC-VU-DAM"}
         for _he73, _os73 in (
                 ("dang", ("tieu_de", "ten_cq_tren", "ten_cq", "so_ky_hieu", "dia_danh",
-                          "the_loai", "phan_chuong", "tieu_de_pc", "muc", "dieu",
+                          "the_loai", "trich_yeu", "phan_chuong", "tieu_de_pc", "muc", "dieu",
                           "quyen_han_ky", "ho_ten_ky", "noi_nhan_tu", "noi_nhan_ds")),
                 ("vbqppl_qh", ("quoc_hieu", "tieu_ngu", "ten_cq", "so_ky_hieu", "ten_loai",
                                "trich_yeu", "can_cu", "cau_ban_hanh", "phan_chuong",
@@ -14661,8 +14662,8 @@ def run() -> int:
                                "tu_lenh", "dia_danh", "muc",
                                "noi_nhan_tu", "noi_nhan_ds")),
                 ("hanh_chinh", ("quoc_hieu", "tieu_ngu", "ten_cq_tren", "ten_cq", "so_ky_hieu",
-                                "dia_danh", "ten_loai", "phan_chuong", "tieu_de_pc", "muc",
-                                "dieu", "than", "quyen_han_ky", "chuc_vu_ky", "ho_ten_ky",
+                                "dia_danh", "ten_loai", "trich_yeu", "phan_chuong", "tieu_de_pc",
+                                "muc", "dieu", "than", "quyen_han_ky", "chuc_vu_ky", "ho_ten_ky",
                                 "noi_nhan_tu", "noi_nhan_ds"))):
             for _o73 in _os73:
                 _BAT_DUOC[(_he73, _o73)] = "TT-DT-" + _o73.upper().replace("_", "-") + "-KIEU"
@@ -14958,11 +14959,12 @@ def run() -> int:
         _f3 = _m3 and _ids(_m3, "dang")
         if not _f3 or "TT-CHUC-VU-DAM" not in _f3 or "TT-DT-CHUC-VU-KY-KIEU" in _f3:
             _loi.append("(c) Đ4 chuc_vu_ky: cờ tay/TT-DT sai phân vai")
-        # (d) Đ5: trich_yeu hanh_chinh đậm+nghiêng → cách ly
+        # (d) Đ5 ĐÃ GỠ CÁCH LY (r177 phân xử B1: NĐ30 PL I II.5.b + HD05 PL2 mục 5 đều «đứng,
+        #     đậm») — trich_yeu đậm+nghiêng nay PHẢI ra TT-DT-TRICH-YEU-KIEU mức INFO (Đ1 tin-cậy-thấp)
         _m4 = _sua_xml(_hc, str(Path(_td) / "m4.docx"),
                        lambda x: _lat(x, "về việc ban hành quy chế", "i"))
-        if not _m4 or "TT-DT-TRICH-YEU-KIEU" in _ids(_m4, "hanh_chinh"):
-            _loi.append("(d) Đ5 trich_yeu·kieu không được cách ly")
+        if not _m4 or ("TT-DT-TRICH-YEU-KIEU", "INFO") not in _lvls(_m4, "hanh_chinh"):
+            _loi.append("(d) Đ5 đã gỡ: trich_yeu·kieu đậm+nghiêng không ra INFO")
         # (e) biến thể cong_van hanh_chinh — docx tay: chuẩn 0 TT-DT; V/v 14 nghiêng → CO + KIEU
         def _p76x(t, sz=26, b=False, i=False, jc="center", fl=0):
             _rp = "<w:rPr>" + ("<w:b/>" if b else "") + ("<w:i/>" if i else "") \

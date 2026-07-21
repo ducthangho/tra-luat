@@ -990,6 +990,8 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                "TTr", "HĐ", "CĐ", "BGN", "BTT", "GUQ", "GM", "GGT", "GNP", "PG", "PC", "PB", "SY", "TrS", "SL"}
     ABBR_QPPL = {"NĐ", "QĐ", "TT", "NQ", "NQLT", "TTLT", "PL", "L", "LQ"}
     ABBR_VBHN = {"LQ", "PL", "NQ", "NQTV", "NL", "LC", "QĐC", "NĐ", "QĐ", "TT", "TL", "QĐCT"}
+    # r177 phân xử: HD05 3.1.2.a nguyên văn «Quyết định, Quy định: QĐ» — KHÔNG tồn tại `QĐi` trong HD05
+    # (TT=Thông tri, TTr=Tờ trình, CTr=Chương trình; ví dụ 3.1.2.b: Quy định của UBKTTW = Số 23-QĐ/UBKTTW).
     ABBR_DANG = {"NQ", "QĐ", "CT", "KL", "QC", "TT", "TTr", "CTr", "HD", "TB", "TC", "BC", "KH", "QH",
                  "ĐA", "PA", "DA", "CV", "BB", "CL", "ĐL", "ĐH"}
     m = None
@@ -1010,7 +1012,7 @@ def _the_thuc_check_t3(parsed, he_eff, add):
         aset = ABBR_DANG
     if m and aset is not None and m.group(1) not in aset:
         add("TT-VIET-TAT", "INFO", f"viết tắt loại '{m.group(1)}' không thuộc bảng hệ {he_eff}",
-            "bảng viết tắt tên loại — THE_THUC_TRINH_BAY §7", "PL III NĐ30 / NĐ250 II.1 / HD05 3.2")
+            "bảng viết tắt tên loại — THE_THUC_TRINH_BAY §7", "PL III NĐ30 / NĐ250 II.1 / HD05 3.1.2")
     if he_eff == "dang":
         lines = [p["line"] for p in paras if p.get("rule") == "exact" and p.get("line")]
         if lines:
@@ -1240,15 +1242,20 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
           (vd cặp 14/15pt) — chấp nhận, muốn bịt phải mở lại kèm hồ sơ chống-trùng] ·
           TT-CHUC-VU-DAM ↔ dang chuc_vu_ky·kieu · TT-CHUONG-CANH-GIUA ↔ dang (phan_chuong|muc)·canh.
           TT-KHOAN-DAM không có ô tương ứng — không giao với dieu·kieu (regex ^Điều vs ^\\d|^[a-zđ]).
-      Đ5  CÁCH LY (hanh_chinh|dang)·trich_yeu·kieu — «đậm,nghiêng vs đậm» chờ NGUYÊN VĂN NĐ30
-          PL I II.5 (cùng giỏ ca `QĐi` chờ HD05 3.2). Không đoán.
+      Đ5  ĐÃ PHÂN XỬ r177 (2026-07-21, nguyên văn B1) — GIỮ «dam», GỠ CÁCH LY trich_yeu·kieu:
+          NĐ30 PL I II.5.b «Trích yếu nội dung văn bản … chữ in thường, cỡ chữ từ 13 đến 14,
+          kiểu chữ đứng, đậm» · HD05 PL2 mục 5 «Trích yếu nội dung văn bản | In thường | 14-15 |
+          Đứng, đậm» ⇒ «đậm,nghiêng» thực chiến là lệch chuẩn THẬT (mức INFO — trich_yeu thuộc
+          nhóm tin-cậy-thấp Đ1). Cùng giỏ: ca `QĐi` ĐÓNG — HD05 3.1.2.a «Quyết định, Quy định:
+          QĐ», `QĐi` không tồn tại trong HD05 (bảng viết tắt ở 3.1.2, KHÔNG phải 3.2 như hồ sơ cũ).
 
     Hệ khai trắng (vbqppl/vbhn) → không kiểm (QĐ1 — «chưa đặc tả», cấm giả vờ). Biến thể:
     «/QĐ-CTN» → qd_ctn (override co quốc hiệu 13 — hiện bị Đ4 nhường TT-BAC-CO-CHU vốn ĐÃ biết
     Mẫu 16 từ r150; giữ resolve cho override tương lai) · «V/v» đầu dòng → cong_van hanh_chinh
     (them trich_yeu_cv, bo ten_loai/trich_yeu). Nhận diện cong_van hệ ĐẢNG chưa có tiêu chí máy
-    (HD05 không dùng «V/v») — để sau, không đoán. Baseline nghiệm thu: lớp A 49 VB = 876 finding
-    (`do-lu-2026-07-21/tong_hop_sau_va.md`) trừ các nhóm Đ4/Đ5 nhường/cách ly."""
+    (HD05 không dùng «V/v») — để sau, không đoán. Baseline nghiệm thu r176: lớp A 49 VB = 876
+    finding (`do-lu-2026-07-21/tong_hop_sau_va.md`) trừ các nhóm Đ4 nhường; Đ5 gỡ ở r177 nên
+    trich_yeu·kieu kiểm lại bình thường (INFO)."""
     import re
     bang0 = _tt_dac_ta().get(he_eff)
     if not bang0 or "__khai_trang__" in bang0:
@@ -1287,8 +1294,6 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
     if he_eff == "dang":
         _bo_kiem |= {("chuc_vu_ky", "kieu"),                                  # Đ4: TT-CHUC-VU-DAM
                      ("phan_chuong", "canh"), ("muc", "canh")}                # Đ4: TT-CHUONG-CANH-GIUA
-    if he_eff in ("hanh_chinh", "dang"):
-        _bo_kiem.add(("trich_yeu", "kieu"))                                   # Đ5: CÁCH LY chờ B1
     _TIN_CAY_THAP = {"ten_cq_tren", "ten_cq", "trich_yeu", "ho_ten_ky", "tieu_de_pc", "than"}
     for i, o in sorted(gan.items()):
         if o not in bang:

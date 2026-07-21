@@ -879,7 +879,7 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
     return "", ""
 
 
-def _sohieu_from_title_zone(zone: str) -> str:
+def _sohieu_from_title_zone(zone: str, strict_letterhead: bool = False) -> str:
     """(v1.34.6 #1 — log phiên 2026-07-09): số hiệu của CHÍNH tài liệu chỉ nằm ở VÙNG TIÊU ĐỀ trên DÒNG NGẮN
     kiểu letterhead ('Số: 41/2024/QH15', 'Luật số: …' ≤80 ký tự) — ƯU TIÊN dòng có 'Số:' đứng trước. Số hiệu
     trong CÂU VĂN DÀI là TRÍCH DẪN văn bản khác (báo cáo/tài liệu thường nhắc luật) → BỎ. Trước đây quét cả
@@ -912,7 +912,47 @@ def _sohieu_from_title_zone(zone: str) -> str:
         _pre = _strip_accents(zone[_ls:_c.start()]).lower()
         if re.fullmatch(r"\s*so\s*[:.]?\s*", _pre):
             return _c.group(0)
-    return best
+    # r179 T4: strict_letterhead — CHỈ nhận số trên DÒNG LETTERHEAD THUẦN (2 nhánh fullmatch trên), KHÔNG
+    # best-fallback (số ngắn-dòng không tiền tố 'Số' = trích dẫn tiềm năng). Dùng cho bằng-chứng-official
+    # của draft-tier: veto marker yếu đòi số hiệu CHẮC CHẮN của chính văn bản, không phải số trôi nổi.
+    return "" if strict_letterhead else best
+
+
+def _draft_banner_line(zone: str) -> bool:
+    """r179 T4 (PURE): banner «DỰ THẢO» ĐỨNG ĐẦU DÒNG RIÊNG trong vùng tiêu đề (nhận hậu tố 'ngày…'/'lần N'),
+    sau khi bỏ artifact toạ độ docx ('-44005514605Dự thảo…', '00Dự thảo…', 'left270510Dự thảo…' — đo trên
+    file thật BNV 16/7/2026). «dự thảo» NẰM TRONG CÂU (trích yếu 'góp ý dự thảo X') KHÔNG phải banner —
+    đó là marker yếu, xử ở tầng weak."""
+    for ln in (zone or "").splitlines()[:40]:
+        t = _strip_accents(re.sub(r"^(?:left|right|center)?-?\d+\s*", "", ln.strip())).lower()
+        if re.match(r"^du\s*thao\b", t):
+            return True
+    return False
+
+
+def _sohieu_line_khuyet(zone: str) -> bool:
+    """r179 T4 (PURE): dòng Số LETTERHEAD mà SỐ BỎ TRỐNG — 'Số:      /TTr-BNV', 'Luật số: /2026/QH16',
+    'Số:' trơ — dấu hiệu văn bản CHƯA BAN HÀNH mạnh (đo trên file thật: 3/6 file lô BNV có dạng này).
+    Chỉ nhận dòng ngắn ≤80 (dòng dài = văn xuôi)."""
+    _LETTERHEAD_SO = (r"(?:(?:bo\s+luat|luat|nghi\s+quyet|nghi\s+dinh|phap\s+lenh|thong\s+tu|"
+                      r"quyet\s+dinh|lenh)\s+)?so\s*[:.]")
+    for ln in (zone or "").splitlines()[:40]:
+        raw = re.sub(r"^(?:left|right|center)?-?\d+\s*", "", ln.strip())
+        if not raw or len(raw) > 80:
+            continue
+        t = _strip_accents(raw).lower()
+        if re.fullmatch(_LETTERHEAD_SO + r"\s*(?:/\S{1,25})?", t):
+            return True
+    return False
+
+
+def _issue_dateline_complete(zone: str) -> bool:
+    """r179 T4 (PURE): dateline ban hành ĐỦ SỐ 'ngày D tháng M năm YYYY' trong vùng tiêu đề. Dạng khuyết
+    'ngày   tháng 7 năm 2026' (chưa ký) KHÔNG đạt. ⚠ một mình dateline KHÔNG đủ làm bằng chứng official —
+    trích dẫn 'Căn cứ NĐ… ngày 23 tháng 5 năm 2018' trong 1500 ký tự đầu cũng khớp (đo file thật 01_Du_thao
+    — vì vậy veto đòi AND với Số-line letterhead có số)."""
+    return bool(re.search(r"ngay\s+\d{1,2}\s+thang\s+\d{1,2}\s+nam\s+(?:19|20)\d{2}",
+                          _strip_accents(zone or "").lower()))
 
 
 def _is_dang_title_zone(zone: str, sohieu: str = "") -> bool:
@@ -982,8 +1022,19 @@ def _classify_doc_header(text: str, filename: str = "") -> dict:
     # N2b (v1.33.41): draft trước quét TOÀN 16000 chars — 'lấy ý kiến' trong THÂN luật (điều khoản về lấy ý kiến
     # nhân dân) bắn cờ DUTHAO cho luật chính thức. Marker dự thảo chỉ có nghĩa ở VÙNG TIÊU ĐỀ (đầu văn bản/tên
     # file); VBHN là văn bản ĐÃ ban hành — không bao giờ draft.
+    # r179 T4 (grill 21-07 — BẬC BẰNG CHỨNG, MỌI HỆ, không riêng Đảng): (1) banner «DỰ THẢO» dòng riêng HOẶC
+    # Số-line KHUYẾT số («Số:  /TTr-BNV») = bằng chứng draft MẠNH ⇒ draft; (2) Số-line letterhead CÓ SỐ THẬT
+    # trong TEXT (strict — KHÔNG best-fallback/filename: đo file thật thấy sohieu nhiễm UUID tên file) AND
+    # dateline «ngày D tháng M năm Y» ĐỦ SỐ = bằng chứng official MẠNH ⇒ PHỦ QUYẾT marker chữ yếu («lấy ý
+    # kiến»/«góp ý»/«dự thảo» trong trích yếu — văn bản BÀN VỀ dự thảo không đổi bản chất nó); (3) không bằng
+    # chứng nào ⇒ marker yếu giữ hành vi cũ. QĐ 383-QĐ/TW «lấy ý kiến» đã ký → hết draft oan (log vận hành).
     _draft_zone = _strip_accents((head[:1500] or "") + "\n" + (filename or "")).lower()
-    draft = (not _is_vbhn_doc) and any(k in _draft_zone for k in ("du thao", "draft", "lay y kien", "gop y du thao"))
+    _weak_draft = any(k in _draft_zone for k in ("du thao", "draft", "lay y kien", "gop y du thao"))
+    _tz179 = head[:1500] or ""
+    _strong_draft = _draft_banner_line(_tz179) or _sohieu_line_khuyet(_tz179)
+    _strong_official = (bool(_sohieu_from_title_zone(_tz179, strict_letterhead=True))
+                        and _issue_dateline_complete(_tz179))
+    draft = (not _is_vbhn_doc) and (_strong_draft or (_weak_draft and not _strong_official))
     # v1.34.41 B.2 GĐ2 (grill D2 — G4 PHẢI vá cùng G1): văn kiện ĐẢNG/VB HÀNH CHÍNH nhận diện TRƯỚC nhánh
     # vbqppl — nếu không, sohieu Đảng vừa bắt được sẽ kích 'elif sohieu' → vbqppl → Điều-gate chặn oan cat 00.
     # dang thắng CẢ draft (văn kiện Đảng không bao giờ đòi Điều, draft hay không; cờ draft vẫn giữ ở field riêng).

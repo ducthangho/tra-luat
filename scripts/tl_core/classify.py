@@ -262,6 +262,19 @@ def _nlm_status_known(status: str) -> bool:
     return s.startswith("pushed") or s.startswith("synced") or s == "active" or _nlm_status_removed(s)
 
 
+def _nlm_status_write_ok(status: str) -> bool:
+    """r179 T1 (ADR-0010 — nlm_status là TỪ VỰNG ĐÓNG ở CỬA GHI): hợp lệ = họ pushed*/synced*/active/
+    removed_<lý do> (hậu tố lý do BẮT BUỘC — 'removed' trần không nói vì sao gỡ) + rỗng (route clear).
+    KHÁC `_nlm_status_known` (phía ĐỌC/audit khoan dung dữ liệu cũ: nhận thêm trash*/deleted/removed-trần
+    — GIỮ NGUYÊN by-design). added/live/ready là từ cũ ngoài từ vựng: backfill-nlm-status nắn added→pushed,
+    live→active MỘT LẦN; cửa ghi TỪ CHỐI để sổ không tái nhiễm."""
+    s = (status or "").strip().lower()
+    if not s:
+        return True
+    return bool(s.startswith("pushed") or s.startswith("synced") or s == "active"
+                or re.match(r"removed_.+", s))
+
+
 def _name_goc_base_key(name: str) -> str:
     """Số hiệu BẢN GỐC (base) MÃ HOÁ TRONG TÊN VBHN qua token 'goc_<base>' (vd 'Luat_PPP_goc_64-2020-QH14'
     → '64-2020-QH14'; 'NSNN_goc_89-2025-QH15_sdbs_145-2025-QH15' → '89-2025-QH15'). Tên do quy trình đặt tên
@@ -1227,15 +1240,32 @@ def _backfill_titlevn_candidates(entries: list, force: bool = False) -> list[dic
 
 
 def _profile_title_from_header(text: str, fallback: str = "") -> str:
-    lines = [re.sub(r"\s+", " ", x).strip() for x in (text or "").splitlines()[:80]]
+    # r179 T4 (đo file thật): BỎ BOM đầu file (.txt/.html đọc utf-8 giữ ﻿ → regex noise `^\s*` KHÔNG
+    # khớp, quốc hiệu thành title rác).
+    lines = [re.sub(r"\s+", " ", x).strip() for x in (text or "").lstrip("﻿").splitlines()[:80]]
     lines = [x for x in lines if x]
     for line in lines:
         n = _strip_accents(line).lower()
         if any(k in n for k in ("luat ", "bo luat", "nghi quyet", "nghi dinh", "thong tu", "quyet dinh")):
             return line[:160]
+    # r179 T4: dòng LETTERHEAD TÊN CƠ QUAN (IN HOA, ngắn) không phải title — '598805267335BỘ NỘI VỤ'
+    # (artifact toạ độ docx + agency, đo file thật 8_Ban_tong_hop) / 'BAN CHẤP HÀNH TRUNG ƯƠNG' từng thành
+    # title rác. Pattern agency BOUNDED (bo\s+(?!luat) né 'BỘ LUẬT'; không nhận 'so|vu|ban' trần — 'SO SÁNH'/
+    # 'BAN HÀNH' là title thật).
+    _AGENCY_RE = (r"^(?:bo\s+(?!luat)|uy\s+ban\b|quoc\s+hoi\b|chinh\s+phu\b|van\s+phong\b|"
+                  r"ban\s+(?:chap\s+hanh|bi\s+thu|chi\s+dao|to\s+chuc|tuyen\s+giao|dan\s+van|noi\s+chinh|"
+                  r"kinh\s+te|can\s+su|cong\s+tac)|bo\s+chinh\s+tri\b|dang\s+cong\s+san\b|dang\s+bo\b|"
+                  r"(?:tinh|thanh|huyen|quan|xa|dang)\s+uy\b|hoi\s+dong\s+nhan\s+dan\b|hdnd\b|ubnd\b|"
+                  r"tong\s+cuc\b|cuc\s+[a-z]|so\s+(?:noi\s+vu|y\s+te|tu\s+phap|tai\s+chinh|giao\s+duc|"
+                  r"lao\s+dong|xay\s+dung|cong\s+thuong)|vu\s+(?:phap\s+che|to\s+chuc))")
     for line in lines:
-        if len(line) >= 12 and not re.search(r"^\s*(cong hoa|doc lap|so:|số:|ha noi)", _strip_accents(line).lower()):
-            return line[:160]
+        _l = re.sub(r"^(?:left|right|center)?-?\d{4,}", "", line).strip()
+        n = _strip_accents(_l).lower()
+        if len(_l) < 12 or re.search(r"^\s*(cong hoa|doc lap|so:|số:|ha noi)", n):
+            continue
+        if len(_l) <= 60 and _l == _l.upper() and re.match(_AGENCY_RE, n):
+            continue
+        return _l[:160]
     return Path(fallback).stem[:160]
 
 

@@ -75,6 +75,32 @@ def cmd_locate(a) -> int:
     # CHỈ coi là SỐ HIỆU khi truy vấn THỰC SỰ giống số hiệu — nếu không, `norm_sohieu("bảo hiểm xã hội")` ra chuỗi
     # rác bị dùng như số hiệu → LOW_CONFIDENCE/NO_EXACT_SOHIEU giả (regression v1.22.54). Cụm danh từ → key rỗng → khớp tên.
     key = norm_sohieu(q) if _looks_like_sohieu_query(q) else ""
+    # r179 T7 (doctrine «--json = cờ khoan dung» KHÔNG áp cho lệnh đọc lõi — locate bị driver batch parse
+    # stdout tay): --json in ENVELOPE THẬT ở CẢ 3 nhánh (offline index / offline manifest / webapp find),
+    # stdout sạch (narration text tắt). Row nền VBQPPL mang scope:'vbqppl' + cờ BASE_SCOPE_HIT (T5 MỘT từ vựng).
+    _json179 = bool(getattr(a, "json", False))
+
+    def _lrow179(o, base=False):
+        flags = list(_title_flags(o))
+        if key and norm_sohieu(_entry_sohieu(o)) != key:
+            flags.append("NO_EXACT_SOHIEU")
+        r = {"drive_id": _entry_drive_id(o), "name": _entry_name(o), "sohieu": _entry_sohieu(o),
+             "cat": str(_entry_cat(o) or ""), "hieuluc": str(o.get("hieuluc") or o.get("hieu_luc") or ""),
+             "nlm": _nlm_display(o), "flags": flags}
+        if base:
+            r["scope"] = "vbqppl"
+            r["flags"] = list(dict.fromkeys(r["flags"] + ["BASE_SCOPE_HIT"]))
+        return r
+
+    def _lemit179(mode, rows_out, low_conf, found=None, **extra):
+        out = {"ok": True, "schema": "locate.v1", "query": q, "mode": mode,
+               "count": len(rows_out) if found is None else found,
+               "shown": len(rows_out), "truncated": (found or len(rows_out)) > len(rows_out),
+               "low_confidence": bool(low_conf), "rows": rows_out, **extra}
+        if low_conf:
+            out["warnings"] = list(dict.fromkeys(list(out.get("warnings") or [])
+                                                 + ["LOW_CONFIDENCE_NO_EXACT_SOHIEU"]))
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     idx_path = _cache_file("manifest_index.json")
     # v1.29.4 (AUDIT #9 auto-refresh): cache quá hạn (>900s — quá cả trần cache đọc GAS 600s) → TỰ refresh manifest
     # (kèm rebuild index) thay vì âm thầm khớp trên dữ liệu cũ (nguồn báo-động-giả lặp lại các phiên rà). --trust-cache tắt.
@@ -95,6 +121,10 @@ def cmd_locate(a) -> int:
         try:
             idx = json.loads(idx_path.read_text(encoding="utf-8"))
             hits = idx.get("so_hieu", {}).get(key) or idx.get("so_hieu", {}).get(q)
+            if hits and _json179:
+                _lemit179("offline_index", [_lrow179(e) for e in hits], False,
+                          warnings=["OFFLINE_CACHE_INDEX_MAY_LAG_LIVE"])
+                return 0
             if hits:
                 print(f"[offline index] {key}: {len(hits)} entry")
                 for e in hits:
@@ -128,10 +158,19 @@ def cmd_locate(a) -> int:
             _seen = {_entry_drive_id(e) for e in mhits if _entry_drive_id(e)}
             bhits = [e for e in b_entries if _locate_match(e) and _entry_drive_id(e) not in _seen]
             bhits.sort(key=lambda e: (_entry_score(e), -len(_title_flags(e))), reverse=True)
-        if bhits and not mhits:
-            print(f"[offline manifest] {q}: 0 entry trong profile '{_active_profile()}' — hit dưới là NỀN VBQPPL (TL_BASE_ALSO).")
         if _base_also and berr and not bhits:
             print(f"[tl] ⚠ base-also: không đọc được manifest nền VBQPPL ({berr}) — kết quả CHỈ scope profile.", file=sys.stderr)
+        if (mhits or bhits) and _json179:
+            # r179 T7: envelope máy-đọc — hit profile trước, hit nền sau (scope+BASE_SCOPE_HIT per-row).
+            _exact = [e for e in (mhits + bhits) if key and norm_sohieu(_entry_sohieu(e)) == key]
+            _rows179 = ([_lrow179(e) for e in mhits[:a.max]] + [_lrow179(e, base=True) for e in bhits[:a.max]])
+            _lemit179("offline_manifest", _rows179, bool(key) and not _exact,
+                      found=len(mhits) + len(bhits), profile_hits=len(mhits), base_hits=len(bhits),
+                      warnings=(["OFFLINE_CACHE_MANIFEST_MAY_LAG_LIVE"]
+                                + (["BASE_MANIFEST_READ_ERROR"] if (_base_also and berr) else [])))
+            return 0
+        if bhits and not mhits:
+            print(f"[offline manifest] {q}: 0 entry trong profile '{_active_profile()}' — hit dưới là NỀN VBQPPL (TL_BASE_ALSO).")
         if mhits or bhits:
             # #10: truy vấn theo SỐ HIỆU nhưng KHÔNG có entry đúng số hiệu → kết quả CHỈ khớp MỜ theo tên → rủi ro
             # nhầm văn bản (vd `locate 142/2025/QH15` ra VBHN_74 Đấu thầu). Gắn cờ độ-tin-cậy rõ ràng.
@@ -155,8 +194,9 @@ def cmd_locate(a) -> int:
                     if key and norm_sohieu(_entry_sohieu(e)) != key:
                         flags.append("NO_EXACT_SOHIEU")
                     warn = (" | WARN=" + ",".join(flags)) if flags else ""
+                    # r179 T5: đánh dấu [nền] TỪNG DÒNG (MỘT từ vựng với reg-query text) — không chỉ header nhóm.
                     print(f"  ~ {_entry_name(e)[:70]} | sohieu={_entry_sohieu(e)} | cat={_entry_cat(e)} "
-                          f"| hieuluc={e.get('hieuluc') or e.get('hieu_luc') or ''} | nlm={_nlm_display(e)}{warn}")
+                          f"| hieuluc={e.get('hieuluc') or e.get('hieu_luc') or ''} | nlm={_nlm_display(e)}{warn} [nền]")
             if _low_conf:
                 print(f"[tl] ⚠ KHÔNG có văn bản đúng số hiệu '{key}' trong manifest — các dòng trên CHỈ là khớp-mờ-tên, "
                       "ĐỪNG dùng làm nguồn nếu cần đúng số hiệu; xác minh QT-5/web hoặc kiểm số hiệu.")
@@ -176,6 +216,10 @@ def cmd_locate(a) -> int:
     rows = r.get("rows", [])
     _wf_exact = [o for o in rows if key and norm_sohieu(o.get("sohieu", "")) == key]
     _wf_low = bool(key) and rows and not _wf_exact
+    if _json179:
+        _lemit179("webapp_find", [_lrow179(o) for o in rows[:a.max]], _wf_low,
+                  found=len(rows), tier=r.get("tier"))
+        return 0 if rows else 1
     print(f"[webapp find tier={r.get('tier')}] {len(rows)} rows"
           + ("  ⚠ LOW_CONFIDENCE (KHÔNG khớp đúng số hiệu — fulltext lạc đề)" if _wf_low else ""))
     for o in rows[: a.max]:
@@ -1187,6 +1231,10 @@ def cmd_vbhn_check(a) -> int:
     year = getattr(a, "year", "") or ""
     # vbhn positional-compat (tương thích runbook cũ): `tl vbhn-check "<trích yếu|số hiệu>"` → định tuyến goc/subject.
     target = getattr(a, "target", "") or ""
+    # r179 T6 (log vận hành: tay quen `--sohieu` bị usage-error): --sohieu = ALIAS MỎNG của positional —
+    # đi cùng đường định tuyến (số hiệu → goc; lỡ truyền trích yếu → subject, không gãy). Positional thắng nếu cả hai.
+    if not target:
+        target = getattr(a, "sohieu", "") or ""
     if target and not (subject or goc or year):
         if _looks_like_sohieu_query(target):
             goc = target

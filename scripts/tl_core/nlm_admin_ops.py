@@ -827,6 +827,29 @@ def cmd_nlm_reconcile(a) -> int:
            "desync_real_sample": [f"{_entry_sohieu(e)}|{_entry_name(e)[:40]}" for e in plan["desync_real"][:10]],
            "foreign_skipped_sample": [f"{c['source_id'][:12]}…↛{(c.get('registry_notebook') or '?')[:12]}… (by {c['by']}) | {str(c.get('title') or '')[:32]}" for c in (plan.get("foreign_skipped") or [])[:10]],
            "unregistered_sample": plan["unregistered"][:8]}
+    if _from_plan is None:
+        # r179 T8 (ADR-0010 — «CẢ HAI lệnh in CẢ HAI số, tên tường minh»): reconcile có live-set per-source →
+        # coverage_gap CHÍNH XÁC = dòng nlm_due (diện phải-có: corpus∪ref, trừ removed_*) mà nguồn VẮNG live.
+        # removed_family_still_live giải thích chênh đếm với slot-audit (đo 21-07: 11 dòng removed_from_drive
+        # nguồn còn sống = trọn desync_estimate +11 của slot-audit — hai lệnh 51/40 KHÔNG mâu thuẫn).
+        _due179 = _nlm_due_rows(entries, nb, None)
+        _live179 = {str(x) for x in (live_ids or set())}
+        _cov179 = [e for e in _due179 if str(_entry_nlm(e) or "").strip() not in _live179]
+        _rmlive179 = [e for e in (entries or [])
+                      if _nlm_status_removed(str(e.get("nlm_status") or ""))
+                      and str(_entry_nlm(e) or "").strip() in _live179 and str(_entry_nlm(e) or "").strip()]
+        out["nlm_due_rows"] = len(_due179)
+        out["coverage_gap"] = len(_cov179)
+        if _cov179:
+            out["coverage_gap_sample"] = [f"{_entry_sohieu(e) or _sohieu_key_entry(e)}|{_entry_name(e)[:40]}"
+                                          for e in _cov179[:10]]
+        out["removed_family_still_live"] = len(_rmlive179)
+        if _rmlive179:
+            out["removed_family_still_live_sample"] = [_entry_name(e)[:44] for e in _rmlive179[:10]]
+        out["labels_note"] = ("coverage_gap = nlm_due (diện PHẢI-CÓ-MẶT: corpus∪ref, trừ removed_*) có nguồn "
+                              "VẮNG live — nợ phủ (slot-audit chủ trì, đây là bản per-source). desync_real = "
+                              "nlm_claim (sổ KHẲNG ĐỊNH có mặt) nhưng VẮNG live — reconcile chủ trì. Hai phép đo "
+                              "trả lời hai câu hỏi KHÁC nhau — lệch số không phải mâu thuẫn (ADR-0010).")
     if _from_plan is not None:   # v1.34.54 A3: chỉ số live lấy từ artifact (run này KHÔNG gọi NLM)
         out["live_on_nlm"] = _from_plan["art"].get("live_on_nlm")
         out["from_plan"] = {"path": _from_plan["path"], "age_s": _from_plan["age_s"],

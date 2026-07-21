@@ -2637,8 +2637,9 @@ def run() -> int:
     _m6 = _merge_base_entries([{"id": "A", "drive_id": "A"}, {"id": "B", "drive_id": "B"}],
                               [{"id": "B", "drive_id": "B"}, {"id": "C", "drive_id": "C"}])
     cases.append(("r6_merge_base_entries_dedup_order",
-                  [_entry_drive_id(e) for e in _m6] == ["A", "B", "C"] and _m6[2].get("_scope") == "vbqppl"
-                  and "_scope" not in _m6[0]))
+                  # r179 T5: MỘT từ vựng scope — khoá `_scope` riêng đã BỎ, hit nền mang scope='vbqppl'
+                  [_entry_drive_id(e) for e in _m6] == ["A", "B", "C"] and _m6[2].get("scope") == "vbqppl"
+                  and "scope" not in _m6[0] and "_scope" not in _m6[2]))
     # (A) _base_manifest_entries KHÔI PHỤC env overlay profile (kể cả TL_BASE_ALSO) dù đọc nền lỗi/thành công.
     _apply_profile_env(cfg6, "p6")
     with _hush():   # có thể chạm LIVE (cache miss → gas-retry/gws-fallback GWS_CRED_EXPIRED) — test chỉ cần env-restore
@@ -15219,6 +15220,298 @@ def run() -> int:
     _t110("r151_luat_nq_qh_khong_can_dia_danh", _c151_luat_khong_can_dia_danh)
     _t110("r152_vb_kem_theo_va_phu_luc_khong_fail_oan", _c152_kem_theo_va_phu_luc)
     _t110("r153_the_thuc_build_he_vbqppl_qh", _c153_build_he_vbqppl_qh)
+
+    # ═══ v1.35.9 — r179: 7 fix log phiên vận hành (BAN_GIAO_r179 2026-07-21 · ADR-0010; fixture đo từ
+    # file thật lô BNV 16/7 + profile «Luật BHXH» 51/40/+11). Kỷ luật đột biến r178: mỗi chốt có ca CHỈ nó chặn. ═══
+    # (T1) từ vựng ĐÓNG cửa ghi — BẤT ĐỐI XỨNG CÓ CHỦ ĐÍCH với _nlm_status_known (đọc khoan dung GIỮ NGUYÊN)
+    cases.append(("r179_t1_nlm_status_write_vocab_closed",
+                  _nlm_status_write_ok("pushed") and _nlm_status_write_ok("pushed_2026")
+                  and _nlm_status_write_ok("synced") and _nlm_status_write_ok("active")
+                  and _nlm_status_write_ok("removed_superseded_by_VBHN") and _nlm_status_write_ok("")
+                  and not _nlm_status_write_ok("added") and not _nlm_status_write_ok("live")
+                  and not _nlm_status_write_ok("ready") and not _nlm_status_write_ok("removed")
+                  and not _nlm_status_write_ok("trashed") and not _nlm_status_write_ok("deleted")
+                  and _nlm_status_known("removed") and _nlm_status_known("trashed") and _nlm_status_known("deleted")))
+    class _FkG179:
+        def __init__(self):
+            self.calls = []
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "reg_get":
+                return {"ok": True, "rows": [{"drive_id": "d179_345678901234567890", "sohieu": "142/2025/QH15"}]}
+            return {"ok": True}
+    _keys179 = ("_gas", "_apply_journal_start", "_journal_append", "_reg_before_from_manifest",
+                "_invalidate_manifest_cache", "load_creds", "apply_profile_offline", "_manifest_entries",
+                "_apply_gate", "_journaled_reg_upsert")
+    _sav179 = {k: getattr(_TL_MODULE, k) for k in _keys179}
+    _did179 = "d179_345678901234567890"
+    _ups179 = []
+    try:
+        _g179 = _FkG179()
+        _TL_MODULE._gas = lambda: _g179
+        _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "run179"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._reg_before_from_manifest = lambda *a, **k: {}
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [
+            {"drive_id": _did179, "sohieu": "142/2025/QH15", "name": "Luat_142-2025-QH15_Phuc_hoi"}]
+        def _fk_ups179(run_id, g, payload, before=None):
+            _ups179.append(dict(payload))
+            return {"verified": True, "reg_upsert": {"ok": True}}
+        _TL_MODULE._journaled_reg_upsert = _fk_ups179
+        def _mk179(**kw):
+            base = dict(config=None, profile=None, bulk=None, cols=None, drive_id=None, clear_cols=None,
+                        confirm=None, force_insert=False, force_unsafe=False, apply=False, row_kind=None)
+            for k in ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc", "sua_doi",
+                      "nlm_source_id", "nlm_notebook_id", "nlm_status", "nlm_title", "tukhoa", "corpus", "title_vn"):
+                base[k] = None
+            base.update(kw)
+            return argparse.Namespace(**base)
+        # (T1) giá trị lạ → rc=2 TRƯỚC MỌI round-trip (kể cả _gas — không call nào được phép)
+        with _hush():
+            _rc179a = _TL_MODULE.cmd_register(_mk179(drive_id=_did179, nlm_status="added"))
+        cases.append(("r179_t1_register_gate_rc2_before_server",
+                      _rc179a == 2 and not _g179.calls and not _ups179))
+        # (T1) họ hợp lệ đi qua tới upsert
+        with _hush():
+            _rc179b = _TL_MODULE.cmd_register(_mk179(drive_id=_did179, nlm_status="pushed"))
+        cases.append(("r179_t1_register_valid_family_passes",
+                      _rc179b == 0 and bool(_ups179) and _ups179[-1].get("nlm_status") == "pushed"))
+        # (T3) guard sua_doi tự trỏ — pure + 2 chiều + biến thể norm (142/2025 ≡ 142-2025) + cùng-lệnh
+        cases.append(("r179_t3_sua_doi_self_ref_pure",
+                      _sua_doi_self_ref("142/2025/QH15", "142-2025-QH15")
+                      and _sua_doi_self_ref("142-2025-QH15", "41/2024/QH15; 142/2025/QH15")
+                      and not _sua_doi_self_ref("142/2025/QH15", "41/2024/QH15")
+                      and not _sua_doi_self_ref("", "142/2025/QH15")))
+        _g179.calls.clear(); _ups179.clear()
+        with _hush():
+            _rc179c = _TL_MODULE.cmd_register(_mk179(drive_id=_did179, sua_doi="142-2025-QH15"))
+        cases.append(("r179_t3_register_self_ref_blocked_rc2", _rc179c == 2 and not _ups179))
+        with _hush():
+            _rc179d = _TL_MODULE.cmd_register(_mk179(drive_id=_did179, sua_doi="41/2024/QH15"))
+        cases.append(("r179_t3_register_other_target_passes",
+                      _rc179d == 0 and bool(_ups179) and _ups179[-1].get("sua_doi") == "41/2024/QH15"))
+        _ups179.clear()
+        with _hush():
+            _rc179e = _TL_MODULE.cmd_register(_mk179(drive_id=_did179, sohieu="09/2026/QH16", sua_doi="09-2026-QH16"))
+        cases.append(("r179_t3_register_same_command_variant_blocked", _rc179e == 2 and not _ups179))
+    finally:
+        for _k, _v in _sav179.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (T2) backfill-nlm-status: map TẤT ĐỊNH added→pushed live→active (case-insens); ready/no-drive_id = stray
+    _E179 = [
+        {"drive_id": "a1_345678901234567890", "name": "A1", "nlm_status": "added"},
+        {"drive_id": "a2_345678901234567890", "name": "A2", "nlm_status": "Live"},
+        {"drive_id": "a3_345678901234567890", "name": "A3", "nlm_status": "ready"},
+        {"drive_id": "a4_345678901234567890", "name": "A4", "nlm_status": "pushed"},
+        {"drive_id": "a5_345678901234567890", "name": "A5", "nlm_status": "removed_from_drive"},
+        {"drive_id": "a6_345678901234567890", "name": "A6", "nlm_status": ""},
+        {"name": "A7_no_did", "nlm_status": "added"},
+    ]
+    _sug179, _stray179 = _backfill_nlm_status_candidates(_E179)
+    cases.append(("r179_t2_backfill_candidates_map",
+                  [(s["drive_id"][:2], s["nlm_status"], s["nlm_status_old"]) for s in _sug179]
+                  == [("a1", "pushed", "added"), ("a2", "active", "Live")]
+                  and sorted(x["why"] for x in _stray179) == ["NO_DRIVE_ID", "OUTSIDE_MAP"]))
+    _keysT2 = ("_manifest_entries", "apply_profile_offline", "_apply_gate", "load_creds", "_gas",
+               "_apply_journal_start", "_journal_append", "_invalidate_manifest_cache", "_journaled_reg_upsert")
+    _savT2 = {k: getattr(_TL_MODULE, k) for k in _keysT2}
+    _upsT2, _gasT2_calls = [], []
+    try:
+        _TL_MODULE._manifest_entries = lambda refresh=False: _E179
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        class _GT2:
+            def get(self, action, **kw):
+                _gasT2_calls.append(action)
+                return {"ok": True}
+        _TL_MODULE._gas = lambda: _GT2()
+        _TL_MODULE._apply_gate = lambda a, write_cols=None, stream=True: (True, {"ok": True})
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE._apply_journal_start = lambda *a, **k: "runT2"
+        _TL_MODULE._journal_append = lambda *a, **k: None
+        _TL_MODULE._invalidate_manifest_cache = lambda: None
+        _TL_MODULE._journaled_reg_upsert = (lambda run_id, g, payload, before=None:
+                                            (_upsT2.append((dict(payload), dict(before or {}))) or {"verified": True}))
+        _bufT2 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bufT2), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcT2d = _TL_MODULE.cmd_backfill_nlm_status(build_parser().parse_args(["backfill-nlm-status", "--json"]))
+        _jT2d = json.loads(_bufT2.getvalue())
+        cases.append(("r179_t2_backfill_dry_no_write",
+                      _rcT2d == 0 and _jT2d.get("mode") == "DRY" and _jT2d.get("suggested_count") == 2
+                      and _jT2d.get("stray_count") == 2 and not _upsT2))
+        _bufT2b = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bufT2b), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcT2a = _TL_MODULE.cmd_backfill_nlm_status(build_parser().parse_args(["backfill-nlm-status", "--apply"]))
+        _jT2a = json.loads(_bufT2b.getvalue())
+        cases.append(("r179_t2_backfill_apply_upsert_per_row_with_before",
+                      _rcT2a == 0 and _jT2a.get("applied") == 2
+                      and [(p.get("drive_id")[:2], p.get("nlm_status")) for p, _b in _upsT2]
+                      == [("a1", "pushed"), ("a2", "active")]
+                      and [_b.get("nlm_status") for _p, _b in _upsT2] == ["added", "Live"]))
+    finally:
+        for _k, _v in _savT2.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (T4) BẬC BẰNG CHỨNG draft — mỗi bậc một ca CHỈ nó quyết định (fixture khớp file thật lô BNV + QĐ-TW log)
+    _t4_qd = _classify_doc_header(
+        "BAN CHẤP HÀNH TRUNG ƯƠNG\nĐẢNG CỘNG SẢN VIỆT NAM\n___\nSố 383-QĐ/TW\n"
+        "Hà Nội, ngày 15 tháng 3 năm 2026\nQUYẾT ĐỊNH\nvề việc ban hành Kế hoạch lấy ý kiến nhân dân "
+        "đối với dự thảo Nghị quyết\n", "QD_383_ke_hoach.docx")
+    _t4_luat = _classify_doc_header(
+        "QUỐC HỘI\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nLuật số: 41/2024/QH15\n"
+        "Hà Nội, ngày 29 tháng 6 năm 2024\nLUẬT\nBẢO HIỂM XÃ HỘI\nĐiều 5. Lấy ý kiến nhân dân\n", "Luat_41.docx")
+    _t4_khuyet = _classify_doc_header(
+        "BỘ NỘI VỤ\nCỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố:      /TTr-BNV\nHà Nội, ngày   tháng 7 năm 2026\n"
+        "TỜ TRÌNH\nDự án Luật sửa đổi\n", "To_trinh.docx")
+    _t4_banner = _classify_doc_header("QUỐC HỘI\nDỰ THẢO\nLUẬT\nĐất đai (sửa đổi)\n", "Luat_dd.docx")
+    _t4_gopy = _classify_doc_header("Ý kiến góp ý dự thảo Luật BHXH sửa đổi\nKính gửi Ban soạn thảo\n", "gop_y.docx")
+    cases.append(("r179_t4_draft_evidence_tiers",
+                  _t4_qd["draft"] is False and _t4_qd["kind"] == "dang"
+                  and _t4_luat["draft"] is False and _t4_luat["kind"] == "vbqppl"
+                  and _t4_khuyet["draft"] is True and _t4_banner["draft"] is True and _t4_gopy["draft"] is True))
+    # (T4) veto official ĐÒI AND cả hai vế — ca đo file thật 01: dateline-đủ TỪ TRÍCH DẪN nhưng KHÔNG Số-line-có-số
+    # → vẫn draft (đột biến nới strict→best-fallback sẽ nhặt 63/2018/NĐ-CP làm số → veto sai → ca này ĐỎ)
+    _t4_and1 = _classify_doc_header(
+        "BÁO CÁO\nvề tiến độ dự thảo Luật Bảo hiểm xã hội\n"
+        "Căn cứ Nghị định số 63/2018/NĐ-CP ngày 23 tháng 5 năm 2018 của Chính phủ;\nnội dung chi tiết.\n", "bc.docx")
+    _t4_and2 = _classify_doc_header(
+        "QUỐC HỘI\nLuật số: 41/2024/QH15\nLUẬT\nvề tổ chức lấy ý kiến nhân dân\n", "x.docx")   # số CÓ, dateline KHÔNG
+    cases.append(("r179_t4_official_veto_requires_both_evidences",
+                  _t4_and1["draft"] is True and _t4_and2["draft"] is True))
+    cases.append(("r179_t4_draft_helper_detectors",
+                  _draft_banner_line("-44005514605Dự thảo ngày 16/7/2026\n")
+                  and _draft_banner_line("left270510Dự thảo ngày 16/7/2026 \n")
+                  and _draft_banner_line("00Dự thảo ngày 16/7/2026\n")
+                  and not _draft_banner_line("V/v góp ý dự thảo Luật Bảo hiểm\n")
+                  and _sohieu_line_khuyet("Số:      /TTr-BNV\n")
+                  and _sohieu_line_khuyet("Luật số: /2026/QH16\n")
+                  and not _sohieu_line_khuyet("Số: 41/2024/QH15\n")
+                  and _issue_dateline_complete("Hà Nội, ngày 29 tháng 6 năm 2024\n")
+                  and not _issue_dateline_complete("Hà Nội, ngày   tháng 7 năm 2026\n")
+                  and not _issue_dateline_complete("Hà Nội, ngày 22/7/2026\n")))
+    cases.append(("r179_t4_strict_letterhead_no_best_fallback",
+                  _sohieu_from_title_zone("dòng ngắn nhắc 63/2018/NĐ-CP\n", strict_letterhead=True) == ""
+                  and _sohieu_from_title_zone("dòng ngắn nhắc 63/2018/NĐ-CP\n") == "63/2018/NĐ-CP"))
+    # (T4) title: BOM + letterhead cơ quan (kèm artifact toạ độ docx) — 'SO SÁNH…' KHÔNG bị nhận nhầm agency
+    cases.append(("r179_t4_title_bom_letterhead_skip",
+                  _profile_title_from_header("﻿CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n"
+                                             "BÁO CÁO TỔNG KẾT CÔNG TÁC DÂN VẬN NĂM 2025\n", "bc.txt")
+                  == "BÁO CÁO TỔNG KẾT CÔNG TÁC DÂN VẬN NĂM 2025"
+                  and _profile_title_from_header("598805267335BỘ NỘI VỤ\nCỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                                                 "Bản tổng hợp ý kiến, tiếp thu, giải trình các nội dung\n", "8b.docx")
+                  == "Bản tổng hợp ý kiến, tiếp thu, giải trình các nội dung"
+                  and _profile_title_from_header("BAN CHẤP HÀNH TRUNG ƯƠNG\nVĂN PHÒNG\n"
+                                                 "BÁO CÁO TÌNH HÌNH THỰC HIỆN CHẾ ĐỘ\n", "bc2.docx")
+                  == "BÁO CÁO TÌNH HÌNH THỰC HIỆN CHẾ ĐỘ"
+                  and _profile_title_from_header("SO SÁNH CÁC PHƯƠNG ÁN VỀ HƯU TRÍ\nnội dung thêm cho đủ.", "x.docx")
+                  == "SO SÁNH CÁC PHƯƠNG ÁN VỀ HƯU TRÍ"))
+    # (T5) reg-query: MỘT từ vựng scope — row nền scope:'vbqppl'+BASE_SCOPE_HIT; row profile KHÔNG; `_scope` TUYỆT CHỦNG
+    _keysT5 = ("_manifest_entries", "_base_manifest_entries", "apply_profile_offline")
+    _savT5 = {k: getattr(_TL_MODULE, k) for k in _keysT5}
+    try:
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: [
+            {"drive_id": "p1_345678901234567890", "name": "Luat_Profile_Viec_lam", "so_hieu": "74/2025/QH15", "corpus": "true"}]
+        _TL_MODULE._base_manifest_entries = lambda cfg=None: ([
+            {"drive_id": "b1_345678901234567890", "name": "ND_Nen_Viec_lam", "so_hieu": "88/2020/NĐ-CP", "corpus": "true"}], None)
+        _bufT5 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bufT5), _ctx27.redirect_stderr(_io27.StringIO()):
+            _rcT5 = _TL_MODULE.cmd_reg_query(build_parser().parse_args(
+                ["reg-query", "--name", "viec lam", "--base-also", "--json"]))
+        _jT5 = json.loads(_bufT5.getvalue())
+        _rT5p = next(r for r in _jT5["rows"] if r["drive_id"].startswith("p1"))
+        _rT5b = next(r for r in _jT5["rows"] if r["drive_id"].startswith("b1"))
+        cases.append(("r179_t5_reg_query_scope_one_vocab",
+                      _rcT5 == 0 and _rT5b.get("scope") == "vbqppl" and "BASE_SCOPE_HIT" in (_rT5b.get("flags") or [])
+                      and "scope" not in _rT5p and "BASE_SCOPE_HIT" not in (_rT5p.get("flags") or [])
+                      and all("_scope" not in r for r in _jT5["rows"])))
+        # (T7) locate --json envelope THẬT (nhánh manifest; --base-also để né shortcut index) + scope per-row
+        _sav_age179 = _TL_MODULE._manifest_cache_age_seconds
+        _TL_MODULE._manifest_cache_age_seconds = lambda: 10
+        try:
+            _bufT7 = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bufT7), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcT7 = _TL_MODULE.cmd_locate(build_parser().parse_args(
+                    ["locate", "Viec lam", "--json", "--base-also", "--trust-cache"]))
+            _jT7 = json.loads(_bufT7.getvalue())
+            _rT7p = next(r for r in _jT7["rows"] if r["drive_id"].startswith("p1"))
+            _rT7b = next(r for r in _jT7["rows"] if r["drive_id"].startswith("b1"))
+            cases.append(("r179_t7_locate_json_real_envelope",
+                          _rcT7 == 0 and _jT7.get("schema") == "locate.v1" and _jT7.get("mode") == "offline_manifest"
+                          and _jT7.get("profile_hits") == 1 and _jT7.get("base_hits") == 1
+                          and _rT7b.get("scope") == "vbqppl" and "BASE_SCOPE_HIT" in (_rT7b.get("flags") or [])
+                          and "scope" not in _rT7p))
+        finally:
+            _TL_MODULE._manifest_cache_age_seconds = _sav_age179
+    finally:
+        for _k, _v in _savT5.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (T6) vbhn-check --sohieu = alias mỏng positional (định tuyến số hiệu → goc)
+    _keysT6 = ("_manifest_entries", "load_creds", "apply_profile_offline")
+    _savT6 = {k: getattr(_TL_MODULE, k) for k in _keysT6}
+    try:
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE.load_creds = lambda *a, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _bufT6 = _io27.StringIO()
+        with _ctx27.redirect_stdout(_bufT6), _ctx27.redirect_stderr(_io27.StringIO()):
+            _TL_MODULE.cmd_vbhn_check(build_parser().parse_args(["vbhn-check", "--sohieu", "84/2015/QH13", "--json"]))
+        _jT6 = json.loads(_bufT6.getvalue())
+        cases.append(("r179_t6_vbhn_check_sohieu_alias_routes_goc", _jT6.get("goc") == "84/2015/QH13"))
+    finally:
+        for _k, _v in _savT6.items():
+            setattr(_TL_MODULE, _k, _v)
+    # (T8) nlm_due (diện PHẢI-CÓ: corpus∪ref − removed_*) + fold blank-nb về base — PURE
+    _E179t8 = [
+        {"drive_id": "o1x345678901234567890", "row_kind": "own", "corpus": "true", "nlm_source_id": "s1",
+         "nlm_notebook_id": "NB179", "nlm_status": "pushed"},
+        {"drive_id": "o2x345678901234567890", "row_kind": "own", "corpus": "true", "nlm_source_id": "s2",
+         "nlm_notebook_id": "NB179", "nlm_status": "pushed"},
+        {"drive_id": "r1x345678901234567890", "row_kind": "ref", "corpus": "false", "nlm_source_id": "t1",
+         "nlm_notebook_id": "NB179", "nlm_status": "pushed"},
+        {"drive_id": "rmx345678901234567890", "row_kind": "own", "corpus": "false", "nlm_source_id": "u1",
+         "nlm_notebook_id": "NB179", "nlm_status": "removed_from_drive"},
+        {"drive_id": "d1x345678901234567890", "row_kind": "own", "corpus": "true",
+         "nlm_notebook_id": "NB179", "nlm_status": ""},
+        {"drive_id": "w1x345678901234567890", "row_kind": "own", "corpus": "false",
+         "nlm_notebook_id": "NB179", "nlm_status": ""},
+    ]
+    _E179t8b = _E179t8 + [
+        {"drive_id": "rm2345678901234567890", "row_kind": "ref", "corpus": "true", "nlm_source_id": "u2",
+         "nlm_notebook_id": "NB179", "nlm_status": "removed_superseded_by_VBHN"},
+        {"drive_id": "nbx345678901234567890", "row_kind": "own", "corpus": "true", "nlm_status": ""},
+    ]
+    cases.append(("r179_t8_nlm_due_rows_pure",
+                  {e["drive_id"][:2] for e in _nlm_due_rows(_E179t8b, "NB179", "BASE179")} == {"o1", "o2", "r1", "d1"}
+                  and {e["drive_id"][:2] for e in _nlm_due_rows(_E179t8b, "BASE179", "BASE179")} == {"nb"}))
+    # (T8) slot-audit: khoá `gap` trần TUYỆT CHỦNG; desync_estimate + nlm_due/coverage_gap + removed-còn-trỏ
+    # giải thích TRỌN (+1 = 1 dòng removed_from_drive — thu nhỏ của ca thật +11 «Luật BHXH»)
+    _nc179 = _TL_MODULE._imp("nlm_cli")
+    _sav_ng179 = _nc179.notebook_get
+    _sav_me179 = _TL_MODULE._manifest_entries
+    _sav_apo179 = _TL_MODULE.apply_profile_offline
+    try:
+        _nc179.notebook_get = lambda nb, timeout=120: {"ok": True, "source_count": 4}
+        _TL_MODULE._manifest_entries = lambda refresh=False: _E179t8
+        _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+        _buf179s = _io27.StringIO()
+        with _ctx27.redirect_stdout(_buf179s), _ctx27.redirect_stderr(_io27.StringIO()):
+            _TL_MODULE.cmd_slot_audit(build_parser().parse_args(["slot-audit", "--notebook-id", "NB179", "--json"]))
+        _o179s = json.loads(_buf179s.getvalue())
+        cases.append(("r179_t8_slot_audit_labels_explicit",
+                      "gap" not in _o179s and _o179s.get("nlm_claim_rows") == 3
+                      and _o179s.get("desync_estimate") == 1 and _o179s.get("nlm_due_rows") == 4
+                      and _o179s.get("coverage_gap") == 1 and len(_o179s.get("coverage_gap_sample") or []) == 1
+                      and _o179s.get("removed_family_still_pointing") == 1
+                      and "note_removed_live" in _o179s
+                      and "Lệch" not in str(_o179s.get("warning") or "")   # warning-desync cũ KHÔNG bắn khi đã giải thích trọn
+                      and "labels_note" in _o179s))
+    finally:
+        _nc179.notebook_get = _sav_ng179
+        _TL_MODULE._manifest_entries = _sav_me179
+        _TL_MODULE.apply_profile_offline = _sav_apo179
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

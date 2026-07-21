@@ -231,6 +231,16 @@ GENERATED_SPECS = [
          {"flags": ['--json'], "action": 'store_true'},
          {"flags": ['--out'], "help": 'ghi JSON summary ra file atomically; tự bật JSON'},
      ]},
+    {"name": 'backfill-nlm-status', "handler": 'cmd_backfill_nlm_status',
+     "help": "r179 (ADR-0010): nắn nlm_status về TỪ VỰNG ĐÓNG — map tất định added→pushed, live→active "
+             "(reg_upsert per-row, journaled, undo được); giá trị ngoài map (ready/typo) KHÔNG đụng, báo stray. "
+             "DRY mặc định, --apply ghi. Chạy MỘT LẦN sau deploy r179 (cửa ghi register đã đóng từ vựng)",
+     "args": [
+         {"flags": ['--limit'], "type": int, "help": 'số dòng tối đa mỗi lần (mặc định: tất cả map được)'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'THỰC THI reg_upsert per-row (mặc định DRY)'},
+         {"flags": ['--refresh'], "action": 'store_true'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'missing-sohieu', "handler": 'cmd_missing_sohieu',
      "help": 'KH1 Pha 1.5: đề xuất số hiệu cho dòng registry thiếu sohieu (parse từ tên); DRY mặc định, --apply ghi. ⚠ xác minh bằng header-verify (G2)',
      "args": [
@@ -793,6 +803,7 @@ GENERATED_SPECS = [
      "help": 'QT-5: dò VBHN theo trích yếu + gốc + năm; không overclaim nếu không có hit',
      "args": [
          {"dest": 'target', "nargs": '?', "help": 'tương thích runbook cũ: trích yếu HOẶC số hiệu gốc/VBHN (định tuyến tự động)'},
+         {"flags": ['--sohieu'], "help": 'r179: alias mỏng của positional — số hiệu gốc/VBHN, định tuyến y hệt (tay quen --sohieu hết usage-error)'},
          {"flags": ['--subject'], "help": 'trích yếu/tên luật. ⚠ QUOTE cả cụm có dấu cách: --subject "bộ luật lao động" (KHÔNG `--subject bộ luật lao động` → shell word-split → unrecognized arguments)'},
          {"flags": ['--goc'], "help": 'số hiệu luật gốc/sửa đổi, ví dụ: 84/2015/QH13'},
          {"flags": ['--year'], "help": 'năm VBHN kỳ vọng, ví dụ: 2024'},
@@ -1519,6 +1530,7 @@ COMMAND_META = {
     "backfill-loai":        _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "backfill-title-vn":    _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
     "backfill-hieuluc":     _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),
+    "backfill-nlm-status":  _m("medium", False, "registry", False, True, False, None, None, False, "nlm_ops", generated=True),   # r179 ADR-0010: nắn added→pushed, live→active (một lần, journaled)
     "drive-push":           dict(_m("high", False, "drive", False, False, False, None, "drive_push", False, None),
                                  builtin_gate="md5_verify_fixed_fileid"),
     "reg-delete":           _m("high", False, "registry", True, False, False, None, "reg_delete", False, None, generated=True),

@@ -184,6 +184,111 @@ def _slot_count_all_shards(entries: list, base_nb: str | None = None) -> dict:
     return dict(c)
 
 
+def _nlm_due_rows(entries: list, notebook_id: str, base_notebook_id: str | None = None) -> list[dict]:
+    """r179 T8 (ADR-0010, PURE — CONTEXT «nlm_due»): diện PHẢI-CÓ-MẶT theo chính sách corpus trên notebook =
+    dòng (corpus=true ∪ row_kind=ref) quy về notebook (nb khớp; blank quy về BASE — cùng luật fold
+    _nlm_slot_count), LOẠI họ removed_* (gỡ có chủ đích = RỜI diện, lý do nằm ở hậu tố). KHÁC nlm_claim
+    (sổ KHẲNG ĐỊNH có mặt — status họ sống/src). due↔vật lý = coverage_gap (nợ phủ, slot-audit);
+    claim↔live = desync (nlm-reconcile). MỘT helper cho CẢ HAI lệnh — một từ vựng, một cách đếm."""
+    base_notebook_id = (base_notebook_id or NLM_BASE_NOTEBOOK).strip()
+    is_base = notebook_id == base_notebook_id
+    out = []
+    for e in entries or []:
+        if _nlm_status_removed(str(e.get("nlm_status") or "")):
+            continue
+        if _entry_row_kind(e) != "ref" and str(e.get("corpus") or "").strip().lower() != "true":
+            continue
+        nbv = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if nbv == notebook_id or (not nbv and is_base):
+            out.append(e)
+    return out
+
+
+def _backfill_nlm_status_candidates(entries: list) -> tuple[list[dict], list[dict]]:
+    """r179 T2 (ADR-0010, PURE): ứng viên nắn nlm_status về từ vựng đóng — CHỈ map TẤT ĐỊNH added→pushed,
+    live→active (so exact, case-insensitive; map INLINE — bẫy I11: hằng module-level không sống sót
+    bind-REBASE). Giá trị ngoài map mà cũng ngoài từ vựng ghi (ready, typo, trash* cũ…) KHÔNG đụng —
+    trả riêng `stray` để báo (sửa tay qua `register --nlm-status` sau khi hiểu vì sao có). Dòng map được
+    nhưng THIẾU drive_id → stray NO_DRIVE_ID (reg_upsert khoá theo drive_id, không khoá thì không ghi
+    an toàn). Trả (sug, stray)."""
+    _map = {"added": "pushed", "live": "active"}
+    sug, stray = [], []
+    for e in entries or []:
+        raw = str(e.get("nlm_status") or "").strip()
+        if not raw:
+            continue
+        new = _map.get(raw.lower())
+        did = _entry_drive_id(e)
+        if new:
+            if did:
+                sug.append({"drive_id": did, "name": _entry_name(e)[:54],
+                            "nlm_status": new, "nlm_status_old": raw})
+            else:
+                stray.append({"drive_id": "", "name": _entry_name(e)[:40],
+                              "nlm_status_old": raw, "why": "NO_DRIVE_ID"})
+        elif not _nlm_status_write_ok(raw):
+            stray.append({"drive_id": did or "", "name": _entry_name(e)[:40],
+                          "nlm_status_old": raw, "why": "OUTSIDE_MAP"})
+    return sug, stray
+
+
+def cmd_backfill_nlm_status(a) -> int:
+    """r179 T2 (ADR-0010): nắn nlm_status về TỪ VỰNG ĐÓNG một lần — added→pushed, live→active, qua
+    reg_upsert PER-ROW (journaled + verified + undo được; [[vbqppl-sohieu-must-have-year]] chọn upsert
+    cho sửa-giá-trị, KHÔNG reg_bulk). DRY mặc định; giá trị ngoài map không đụng (báo stray)."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    try:
+        entries = _manifest_entries(refresh=getattr(a, "refresh", False))
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] backfill-nlm-status: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
+    sug, stray = _backfill_nlm_status_candidates(entries)
+    lim = getattr(a, "limit", None) or len(sug)
+    sel = sug[:lim]
+    if getattr(a, "apply", False):
+        _ok_gate, _ = _apply_gate(a, write_cols="nlm_status")
+        if not _ok_gate:
+            return 2
+        try:
+            load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        except (Exception, SystemExit):
+            pass
+        g = _gas()
+        run_id = _apply_journal_start("backfill-nlm-status", {"n": len(sel)})
+        applied, failed = 0, []
+        for s in sel:
+            v = _journaled_reg_upsert(run_id, g, {"drive_id": s["drive_id"], "nlm_status": s["nlm_status"]},
+                                      before={"nlm_status": s["nlm_status_old"]})
+            if v.get("verified"):
+                applied += 1
+            else:
+                failed.append({"drive_id": s["drive_id"], "error": str(v.get("error") or "")[:120]})
+        _invalidate_manifest_cache()
+        _journal_append(run_id, {"t": "run_end", "ok": not failed,
+                                 "counts": {"applied": applied, "failed": len(failed)}})
+        out = {"ok": not failed, "applied": applied, "failed": failed, "suggested": len(sug),
+               "stray_count": len(stray), "stray": stray[:20], "journal": run_id}
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(f"[tl] backfill-nlm-status: ghi {applied}/{len(sel)}. journal={run_id}. "
+              f"MANIFEST_STALE: `tl boot --refresh`.", file=sys.stderr)
+        return 0 if not failed else 1
+    from collections import Counter
+    cnt = Counter(f"{s['nlm_status_old']}→{s['nlm_status']}" for s in sug)
+    if getattr(a, "json", False):
+        print(json.dumps({"ok": True, "mode": "DRY", "suggested_count": len(sug),
+                          "distribution": dict(cnt), "stray_count": len(stray), "stray": stray[:20],
+                          "suggested": sel}, ensure_ascii=False, indent=2))
+    else:
+        print(f"== backfill-nlm-status DRY · map được {len(sug)} · stray (không đụng) {len(stray)} "
+              f"(--apply để ghi) ==")
+        print("  phân bố: " + (", ".join(f"{k}={v}" for k, v in cnt.most_common()) or "(trống)"))
+        for s in sel[:20]:
+            print(f"  {s['nlm_status_old']:8s}→ {s['nlm_status']:8s} {s['name']}")
+        for x in stray[:8]:
+            print(f"  ⚠ STRAY [{x['why']}]: nlm_status='{x['nlm_status_old']}' — {x['name']}"
+                  " (ngoài map — hiểu nguồn gốc rồi sửa tay `register --nlm-status`)")
+    return 0
+
+
 def cmd_slot_audit(a) -> int:
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     if a.manifest:
@@ -267,6 +372,32 @@ def cmd_slot_audit(a) -> int:
     # nlm-reconcile: nlm_claim_rows = corpus_estimate + ref_rows; gap tính trên claim; gợi ý backfill
     # (lệnh GHI) CHỈ in khi gap CÒN LẠI sau khi trừ ref ≠ 0.
     _ref_rows = _nlm_ref_slot_count(entries, notebook_id, getattr(a, "base_notebook_id", None))
+    # r179 T8 (ADR-0010 — sự cố «51/40/51»: hai lệnh hai luật đếm, số vênh không nhãn): slot-audit nay in
+    # CẢ HAI số tên tường minh — nlm_due/coverage_gap (diện PHẢI-CÓ ↔ ghi nhận) + desync_estimate (vật lý ↔
+    # nlm_claim theo ĐẾM; per-source chuẩn ở nlm-reconcile). Khoá `gap` trần BỎ (cấm theo CONTEXT).
+    _active179 = {"pushed", "synced", "added", "stale", "true", "1", "yes"}
+    _due179 = _nlm_due_rows(entries, notebook_id, getattr(a, "base_notebook_id", None))
+    _cov179 = [e for e in _due179
+               if not (e.get("nlm_source_id") or e.get("source_id"))
+               and str(e.get("nlm_status") or e.get("nlm") or "").strip().lower() not in _active179]
+    _rm_point179 = 0
+    for e in entries or []:
+        if not _nlm_status_removed(str(e.get("nlm_status") or "")):
+            continue
+        if not (e.get("nlm_source_id") or e.get("source_id")):
+            continue
+        _nbv = str(e.get("nlm_notebook_id") or e.get("notebook_id") or "").strip()
+        if _nbv == notebook_id or (not _nbv and out.get("is_base_notebook")):
+            _rm_point179 += 1
+    out["nlm_due_rows"] = len(_due179)
+    out["coverage_gap"] = len(_cov179)
+    if _cov179:
+        out["coverage_gap_sample"] = [f"{_entry_sohieu(e) or ''}|{_entry_name(e)[:40]}" for e in _cov179[:10]]
+    out["removed_family_still_pointing"] = _rm_point179
+    out["labels_note"] = ("coverage_gap = nlm_due (diện PHẢI-CÓ-MẶT: corpus∪ref, trừ removed_*) CHƯA có ghi nhận "
+                          "có mặt trong sổ — nợ phủ, mức sổ-cái (per-source: nlm-reconcile coverage_gap). "
+                          "desync_estimate = vật_lý − nlm_claim_rows theo ĐẾM (per-source chuẩn: nlm-reconcile "
+                          "desync_real). Hai phép đo trả lời hai câu hỏi KHÁC nhau (ADR-0010).")
     if phys is not None:
         reg = out.get("slots_effective", 0)
         out["physical_source_count"] = phys
@@ -274,12 +405,18 @@ def cmd_slot_audit(a) -> int:
         out["ref_rows"] = _ref_rows
         out["nlm_claim_rows"] = reg + _ref_rows
         out["gap_vs_corpus_estimate"] = phys - reg
-        out["gap"] = phys - out["nlm_claim_rows"]
+        out["desync_estimate"] = phys - out["nlm_claim_rows"]
         out["ground_truth"] = "physical (tl nlm-get / nlm notebook get)"
-        if out["gap"] != 0:
-            out["warning"] = (f"Lệch {phys} vật lý vs {out['nlm_claim_rows']} registry-claim (corpus {reg} + ref "
-                              f"{_ref_rows}) ({out['gap']:+d}) — backfill nlm_notebook_id (`tl backfill-notebook`) "
-                              f"hoặc nguồn add thẳng chưa ghi registry; đối chiếu `tl nlm-reconcile` trước khi ghi.")
+        if out["desync_estimate"] != 0 and out["desync_estimate"] == _rm_point179:
+            out["note_removed_live"] = (f"desync_estimate {out['desync_estimate']:+d} được giải thích TRỌN bằng "
+                                        f"{_rm_point179} dòng họ removed_* còn con trỏ nguồn (nguồn có thể vẫn "
+                                        f"sống trên notebook — vd removed_from_drive: file Drive đã xoá, nguồn "
+                                        f"NLM giữ). KHÔNG phải desync sổ; xác nhận per-source: `tl nlm-reconcile`.")
+        elif out["desync_estimate"] != 0:
+            out["warning"] = (f"Lệch {phys} vật lý vs {out['nlm_claim_rows']} nlm_claim_rows (corpus {reg} + ref "
+                              f"{_ref_rows}) ({out['desync_estimate']:+d}) — backfill nlm_notebook_id "
+                              f"(`tl backfill-notebook`) hoặc nguồn add thẳng chưa ghi registry; đối chiếu "
+                              f"`tl nlm-reconcile` (desync_real per-source) trước khi ghi.")
         elif out["gap_vs_corpus_estimate"] != 0:
             out["note_ref"] = (f"Chênh {out['gap_vs_corpus_estimate']:+d} vs corpus-estimate giải thích TRỌN bằng "
                                f"{_ref_rows} dòng row_kind=ref (hợp lệ theo thiết kế — canonical VBQPPL add vào "
@@ -290,8 +427,11 @@ def cmd_slot_audit(a) -> int:
         line = (f"notebook={out['notebook_id']} used={out['slots_effective']} "
                 f"matching={out['slots_for_notebook']} missing_nb={out['rows_missing_nlm_notebook_id']}")
         if phys is not None:
-            line += f" | VẬT LÝ={phys} gap={out['gap']:+d}"
+            line += (f" | VẬT LÝ={phys} desync_estimate={out['desync_estimate']:+d}"
+                     f" | nlm_due={out['nlm_due_rows']} coverage_gap={out['coverage_gap']}")
         print(line)
+        if out.get("note_removed_live"):
+            print("  ℹ " + out["note_removed_live"])
         if out.get("warning"):
             print("  ⚠ " + out["warning"])
         if out.get("live_read_failed"):   # M2: không im lặng nuốt lỗi đọc live thành 0-vật-lý

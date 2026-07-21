@@ -183,6 +183,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.29.4 #9) TẮT auto-refresh khi cache >900s (mặc định tự refresh — chống báo-động-giả cache lệch)")
     p.add_argument("--refresh", action="store_true", help="tải lại manifest trước khi locate")
     p.add_argument("--debug", action="store_true", help="in lỗi fallback manifest nếu có")
+    p.add_argument("--json", action="store_true",
+                   help="(r179 T7) envelope JSON THẬT locate.v1 ở cả 3 nhánh (index/manifest/webapp) — hết no-op; row nền mang scope+BASE_SCOPE_HIT")
     _add_base_also_flags(p)
     p.set_defaults(fn=cmd_locate)
 

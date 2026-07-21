@@ -147,6 +147,18 @@ def _reg_row_present(g, drive_id) -> bool | None:
 
 
 def cmd_register(a) -> int:
+    # r179 T1 (ADR-0010): --nlm-status là TỪ VỰNG ĐÓNG — giá trị lạ (added/live/ready/typo mới) TỪ CHỐI rc=2
+    # TRƯỚC mọi round-trip, kèm danh sách họ hợp lệ. Dữ liệu cũ đã nắn 1 lần bằng `backfill-nlm-status`
+    # (added→pushed, live→active); cửa ghi đóng để sổ không tái nhiễm. Rỗng ("") = route clear, vẫn hợp lệ.
+    _nst = getattr(a, "nlm_status", None)
+    if _nst and not _nlm_status_write_ok(_nst):
+        print(json.dumps({"ok": False, "error": "NLM_STATUS_UNKNOWN", "value": _nst,
+                          "valid_families": ["pushed*", "synced*", "active",
+                                             "removed_<lý do> (vd removed_superseded_by_VBHN)"],
+                          "note": "Từ vựng ĐÓNG (ADR-0010): added→pushed, live→active (đã backfill một lần); "
+                                  "xoá giá trị dùng --nlm-status \"\" (route reg_clear)."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     g = _gas()
     if getattr(a, "clear_cols", None):
         # v1.34.40 A.2 (log Chỉ thị — 'sai mà báo verified:true'): --clear-cols đi kèm field set từng bị VỨT
@@ -304,6 +316,25 @@ def cmd_register(a) -> int:
         print(f"[tl] register CHẶN: cat '{payload['cat']}' KHÔNG thuộc taxonomy 45+2 (xem `tl cat-list`); đổi cat nên "
               f"dùng `tl recat --cat <số>`. KHÔNG ghi.", file=sys.stderr)
         return 2
+    # r179 T3 (grill 21-07): sua_doi TỰ TRỎ = dữ liệu quan hệ vô nghĩa — chặn cứng rc=2, KHÔNG có --force
+    # (không tồn tại ca hợp lệ). So SAU norm_sohieu (142/2025/QH15 ≡ 142-2025-QH15); số hiệu của dòng lấy từ
+    # --sohieu cùng lệnh, fallback dòng registry hiện có trong manifest theo drive_id (best-effort).
+    if payload.get("sua_doi"):
+        _own_sh = payload.get("sohieu") or ""
+        if not _own_sh:
+            try:
+                _own_sh = next((_entry_sohieu(e) for e in _manifest_entries()
+                                if _entry_drive_id(e) == a.drive_id), "")
+            except Exception:  # noqa: BLE001 — không đọc được manifest → không suy được sohieu dòng, guard bỏ qua
+                _own_sh = ""
+        if _sua_doi_self_ref(_own_sh, payload["sua_doi"]):
+            print(json.dumps({"ok": False, "error": "SUA_DOI_SELF_REFERENCE",
+                              "sohieu": _own_sh, "sua_doi": payload["sua_doi"],
+                              "note": "sua_doi trỏ về CHÍNH văn bản («A sửa đổi A») — vô nghĩa, KHÔNG ghi. "
+                                      "Ý định thật thường là: (a) ghi sua_doi lên dòng LUẬT GỐC trỏ luật sửa; "
+                                      "(b) ghi goc trên dòng luật sửa. Không có --force cho ca này."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     # v1.29.2 (AUDIT B1 #2): reg_upsert đơn cũng qua gate + journaled-upsert (trước g.get trần) — có intent{before}
     # từ manifest (best-effort) → `tl undo` khôi phục được (kể cả khóa immutable sohieu/goc vì đi reg_upsert).
     _fields = [k for k in payload if k != "drive_id"]
@@ -336,6 +367,17 @@ def cmd_register(a) -> int:
                              if not _clr.get("verified") else {})} if _clr is not None else {}),
                       **({"error": v.get("error")} if v.get("error") else {})}, ensure_ascii=False))
     return 0 if _all_ok else 1
+
+
+def _sua_doi_self_ref(row_sohieu: str, sua_doi_value: str) -> bool:
+    """r179 T3 (PURE, grill 21-07): sua_doi TỰ TRỎ — một token trong sua_doi (tách ;/,) sau norm_sohieu
+    TRÙNG số hiệu CHÍNH dòng. «Luật A sửa đổi Luật A» vô nghĩa, không tồn tại ca hợp lệ → caller chặn cứng
+    rc=2, KHÔNG --force. norm hoá CẢ HAI vế → bắt biến thể 142/2025/QH15 ≡ 142-2025-QH15."""
+    own = norm_sohieu(str(row_sohieu or "").strip())
+    if not own:
+        return False
+    return any(norm_sohieu(tok.strip()) == own
+               for tok in re.split(r"[;,]", str(sua_doi_value or "")) if tok.strip())
 
 
 def _register_bulk_missing(items: list, known_ids: set, live_prober, cap: int = 20) -> list:

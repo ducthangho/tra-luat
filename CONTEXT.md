@@ -65,6 +65,30 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   nguồn sự thật cho tool-inventory/workflow-audit. KHÁC **registry corpus** (Google Sheet `tra_luat_registry`
   — sổ cái văn bản pháp luật). Nói trần "registry" trong ngữ cảnh vận hành corpus = registry corpus.
 
+## Sổ cái corpus & NLM
+
+- **Draft (ingest)** — văn bản CHƯA BAN HÀNH, xét theo BẬC BẰNG CHỨNG (chốt 2026-07-21): banner «DỰ THẢO»
+  hoặc số hiệu rỗng/khuyết là bằng chứng draft mạnh; số hiệu đầy đủ + ngày ban hành là bằng chứng official
+  mạnh và PHỦ QUYẾT các marker chữ yếu («lấy ý kiến», «góp ý» — chỉ có nghĩa khi không có bằng chứng ban
+  hành). Văn bản góp ý/BC về một dự thảo là văn bản official — đối tượng nó bàn tới không đổi bản chất nó.
+
+- **nlm_status** — trạng thái NLM của một dòng registry corpus. Từ vựng ĐÓNG (chốt 2026-07-21): họ `pushed*`
+  (đã đẩy nguồn lên notebook), họ `synced*` (đã đối soát khớp), `active` (xác nhận đang sống trên notebook),
+  họ `removed_*` (đã gỡ CÓ CHỦ ĐÍCH — hậu tố ghi lý do, vd `removed_superseded_by_VBHN`), hoặc RỖNG (chưa từng
+  đụng NLM). Giá trị ngoài họ là dữ liệu lỗi: cửa ghi từ chối, audit gắn cờ. `added`/`live` là từ cũ đã nắn
+  về `pushed`/`active` — không phải trạng thái hợp lệ.
+- **Scope (dòng kết quả)** — nguồn gốc của MỘT dòng trong kết quả lệnh đọc: dòng profile (mặc định, không
+  đánh dấu) hay dòng NỀN VBQPPL kéo vào qua base-also — dòng nền mang `scope: vbqppl` + cờ `BASE_SCOPE_HIT`,
+  MỘT cách mã hoá duy nhất ở mọi lệnh đọc (chốt 2026-07-21; khe `_scope`/`scope` hai kiểu là sự cố đã vá).
+  Đếm/lọc "của profile" phải loại dòng nền bằng đúng hai dấu này.
+- **nlm_claim** — điều SỔ CÁI KHẲNG ĐỊNH đang có mặt trên notebook: dòng có `nlm_status` thuộc họ sống
+  (`pushed*`/`synced*`/`active`). Đối chiếu claim ↔ live (đếm vật lý trên NLM) ra **desync** — việc của
+  `nlm-reconcile`. KHÁC nlm_due.
+- **nlm_due** — diện PHẢI-CÓ-MẶT theo chính sách corpus (dòng corpus ∪ ref). Đối chiếu due ↔ vật lý ra
+  **coverage_gap** (nợ phủ) — việc của `slot-audit`. Hai phép đo trả lời hai câu hỏi khác nhau; con số
+  lệch nhau giữa chúng KHÔNG phải mâu thuẫn. Cấm dùng trần chữ "claim"/"gap" không kèm định nghĩa
+  (chốt 2026-07-21 — sự cố hai lệnh cho số "vênh" 51/40/51).
+
 ## Thể thức
 
 - **Đặc tả thể thức** — bản khai duy nhất về trình bày (cỡ/kiểu/canh/thụt + căn cứ) của từng thành phần

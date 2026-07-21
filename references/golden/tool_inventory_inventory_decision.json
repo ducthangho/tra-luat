@@ -2,6 +2,7 @@
   "commands_available": [
     "backfill-hieuluc",
     "backfill-loai",
+    "backfill-nlm-status",
     "backfill-notebook",
     "backfill-title-vn",
     "bench",
@@ -245,6 +246,16 @@
         "write_scope": "registry"
       },
       "backfill-loai": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "backfill-nlm-status": {
         "generated": true,
         "idempotency_contract": null,
         "read_only": false,
@@ -1756,10 +1767,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 145,
+      "generated_parsers": 146,
       "high_risk": 27,
-      "total": 152,
-      "write_commands": 77
+      "total": 153,
+      "write_commands": 78
     },
     "schema": "command_registry.v1"
   },

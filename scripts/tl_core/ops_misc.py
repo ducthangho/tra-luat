@@ -1592,7 +1592,9 @@ def cmd_config_pin_registry(a) -> int:
 
 def _merge_base_entries(profile_hits: list[dict], base_hits: list[dict]) -> list[dict]:
     """A (v1.30.0, PURE): hợp nhất hit — PROFILE TRƯỚC, nền VBQPPL BỔ SUNG (dedup theo drive_id); hit nền được
-    đánh dấu _scope='vbqppl' để hiển thị/máy-đọc phân biệt nguồn. Canonical của profile luôn thắng."""
+    đánh dấu scope='vbqppl' để hiển thị/máy-đọc phân biệt nguồn. Canonical của profile luôn thắng.
+    r179 T5 (CONTEXT «Scope (dòng kết quả)»): khoá `_scope` riêng của reg-query BỎ — MỘT cách mã hoá duy nhất
+    `scope:'vbqppl'` (+ cờ BASE_SCOPE_HIT gắn ở tầng emit row) đồng nhất với source-map/exists/locate."""
     seen = {_entry_drive_id(e) for e in (profile_hits or []) if _entry_drive_id(e)}
     out = list(profile_hits or [])
     for e in base_hits or []:
@@ -1600,7 +1602,7 @@ def _merge_base_entries(profile_hits: list[dict], base_hits: list[dict]) -> list
         if did and did in seen:
             continue
         e2 = dict(e)
-        e2["_scope"] = "vbqppl"
+        e2["scope"] = "vbqppl"
         out.append(e2)
     return out
 
@@ -2148,8 +2150,11 @@ def cmd_reg_query(a) -> int:
         # reg-query --json envelope chuẩn (rows + entries cho mọi parser; ok/count/limit/truncated để công cụ kiểm tải).
         _rows = [_reg_query_row(e) for e in hits[:lim]]
         for _r, _e in zip(_rows, hits[:lim]):
-            if _e.get("_scope"):
-                _r["scope"] = _e["_scope"]      # hit bổ sung từ nền VBQPPL (base-also)
+            if _e.get("scope") == "vbqppl":
+                # r179 T5: MỘT từ vựng scope — row nền mang scope:'vbqppl' + cờ BASE_SCOPE_HIT (đồng nhất
+                # source-map/exists/locate; khoá `_scope` riêng đã BỎ). Đếm "của profile" = loại đúng 2 dấu này.
+                _r["scope"] = "vbqppl"
+                _r["flags"] = list(dict.fromkeys(list(_r.get("flags") or []) + ["BASE_SCOPE_HIT"]))
         _env = {"ok": True, "schema": "reg-query.v2", "count": len(hits), "limit": lim,
                 "truncated": len(hits) > lim, "rows": _rows, "entries": _rows}
         if _live_mode:
@@ -2159,7 +2164,7 @@ def cmd_reg_query(a) -> int:
         _emit_json_payload(_env, getattr(a, "out", None))   # S-4 (v1.33.34): atomic --out, mirror doctor/sweep
     else:
         for e in hits[:lim]:
-            _sc = " [nền]" if e.get("_scope") else ""
+            _sc = " [nền]" if e.get("scope") == "vbqppl" else ""
             print(f"  {_entry_drive_id(e)}\tcat={str(_entry_cat(e)).split('_')[0]:3s} "
                   f"corpus={'Y' if str(e.get('corpus')).lower()=='true' else '-'} nlm={_nlm_display(e)}  {_entry_name(e)[:54]}{_sc}")
         print(f"— {len(hits)} kết quả" + (f" (hiện {lim})" if len(hits) > lim else ""))

@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.1",
+  "skill_version": "1.35.5",
   "webapp_target": "2.21.2m",
   "root_name": "tra-luat",
-  "file_count": 173,
-  "total_bytes": 5537940,
-  "package_hash": "8ef01012cfb0bd022d4d19940f6dfe6b1033180187db08486350e9f95e33316c",
-  "content_hash": "8ef01012cfb0bd022d4d19940f6dfe6b1033180187db08486350e9f95e33316c",
+  "file_count": 174,
+  "total_bytes": 5597239,
+  "package_hash": "2c905f258bcd3f037b4194bcaed52a0e19608d592766ae736fceaacab2684804",
+  "content_hash": "2c905f258bcd3f037b4194bcaed52a0e19608d592766ae736fceaacab2684804",
   "required_missing": [],
   "files": [
     {
@@ -23,13 +23,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 249923,
-      "sha256": "a889126853444543ba01532591433ca4dafcc826f4772b76c7af1427a420c241"
+      "size": 260311,
+      "sha256": "b4835a2611d3bcb4e46cbdc9b7ec949c381592344c4ffca8f8edc55d93413677"
     },
     {
       "path": "CONTEXT.md",
-      "size": 10924,
-      "sha256": "42e96a428e40f7a8a104402cb4238a3169a435fab49ee096d7eb028d3bfc3ec8"
+      "size": 12514,
+      "sha256": "9eeb2a5e8793c1d6d3b7f762774a6d5d7b6cc69af30e2f729f6b2dea140259f9"
     },
     {
       "path": "INSTALL.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 47750,
-      "sha256": "5f6da0fd1d3207aa1c48018ab55e3e43dc58eb28b44a6a06fc001ea93dd3cf3f"
+      "sha256": "3472d5bc4adb1ecceba050a48b5ddac04551a659403127cb271cbbbe671a288a"
     },
     {
       "path": "VERSION",
-      "size": 7,
-      "sha256": "f94faeb30d3276f949866dfe7b9adcda39209d70ab07dec59a88452688468850"
+      "size": 6,
+      "sha256": "8cdd5a8046eb3233630aa8483f00d6cc117fd4c78f7f57a52ad9e20499562d28"
     },
     {
       "path": "agents/openai.yaml",
@@ -105,6 +105,11 @@
       "path": "docs/adr/0008-topology-shard-hop-nhat-va-partial-trung-thuc.md",
       "size": 4124,
       "sha256": "d764854dd65b14fe0f98d6bf60885acbf79d8593e9c6a5c9cd2561e9e77305d6"
+    },
+    {
+      "path": "docs/adr/0009-dac-ta-the-thuc-nguon-su-that-thang-tham-quyen-3-bac.md",
+      "size": 10001,
+      "sha256": "f9398dab3f2132b93f6c07dd8c69a56fcdb5cfa8026d1847e430ad6b671f284b"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -228,8 +233,8 @@
     },
     {
       "path": "references/THE_THUC_TRINH_BAY.md",
-      "size": 58052,
-      "sha256": "cbdf9b56c134379749d9175d7dca114286c81898c2e9ace7ea9ecdacd97cabfb"
+      "size": 60908,
+      "sha256": "99d7baa45546aa6308e769310f780a54a370b07e2f1d5cf6fe2e10b2db380b65"
     },
     {
       "path": "references/VAN_PHONG_HANH_CHINH.md",
@@ -673,8 +678,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 208077,
-      "sha256": "d89722c118d095ea0af6da1cf3f6cb2d3e6429c45cfe9f47d11c6c1fd7060452"
+      "size": 208310,
+      "sha256": "711cf667ed32111ac71814c8d31863975b11f5159c5b23c52408b7f1b4b7eb58"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -808,8 +813,8 @@
     },
     {
       "path": "scripts/tl_core/the_thuc.py",
-      "size": 103437,
-      "sha256": "be5e1a4e303b9067bd0fd44f4c99cba449293bfced834a2c8e328bc3bf64a05b"
+      "size": 115915,
+      "sha256": "bdc3c4cc2b518c016bb488a6173276e4607281b8d1a9dfd8ac06c59c4ddfe22d"
     },
     {
       "path": "scripts/tl_core/workflow.py",
@@ -833,8 +838,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1086945,
-      "sha256": "910e7cba1b9e89277aa07823b2c6cf081d15a68d1f72e5ee09bf2d8af826412f"
+      "size": 1108699,
+      "sha256": "4d7b72184c55f7ba274b692c6852c92e79606bab3ac81e4376201638bcfb5752"
     },
     {
       "path": "scripts/tra_cuu.py",

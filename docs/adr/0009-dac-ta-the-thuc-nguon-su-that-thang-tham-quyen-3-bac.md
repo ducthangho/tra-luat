@@ -41,7 +41,44 @@
 - **Tiến độ thi hành:** bước 1 ✅ r172 (v1.35.2) · bước 2 ✅ r173 (v1.35.3, sổ-hai-chiều) · bước 3
   ✅ r174 (v1.35.4 — **trục CỠ CHỮ** dẫn xuất từ bảng qua `_tt_co_build`, byte-identical; trục
   kiểu/canh/thụt vẫn inline trong builder nhưng bị r170+r173 khoá từ ngoài — nối nốt ở bước 5 nếu
-  thực tế đòi) · bước 4 đo lũ ⏳ · bước 5 nối bộ kiểm ⏳.
+  thực tế đòi) · **bước 4 ✅ 2026-07-21** (đo lũ — kết quả + 5 quyết định Đ1-Đ5 bên dưới; hồ sơ
+  `D:\Quốc hội\do-lu-2026-07-21\BAO-CAO-DO-LU-2026-07-21.md`) · **vòng 2 bước 1** vá bảng theo Đ2
+  ✅ r175 (v1.35.5) · bước 5 nối bộ kiểm ⏳ (điều kiện Đ3/Đ4/Đ5).
+- **Bước 4 — số liệu đo (bộ kiểm nháp NGOÀI repo, skill v1.35.4):** Tầng 1: sản phẩm builder tự
+  dựng 4 hệ/biến thể = **0 finding** (trùng kết luận byte-match r174); 33 mẫu chuẩn = 15 finding,
+  đối chiếu tay **không cái nào là lỗi mẫu — toàn bộ là khiếm khuyết của BẢNG** (thiếu ô câu ban
+  hành/«Xét đề nghị»; nhóm CTN cỡ khác; ô không biểu diễn được ngoại lệ Mẫu 16; nhóm «kèm theo»
+  chưa có ô; `dieu` đặc tả cấp đoạn trong khi HD05/NĐ30/NQ351 quy định cấp RUN). Tầng 2: 129 file
+  thật, khớp 105/111 dòng báo cáo nền 19-07; lớp A (49 VB hoàn chỉnh) = **1.214 finding**, trong
+  đó hai văn bản nền xếp «đạt chuẩn hoàn toàn» ăn 85 và 57 finding — bằng chứng chốt Đ1. Lớp phụ
+  lục = 4.575 finding thì 4.403 rơi ô `than` (nhiễu thuần). Chính phiên đo bắt 6 nguồn cảnh báo
+  oan của bản nháp (lũ 7.779 → 5.842 sau vá) — giá trị của «đo trước, phán sau».
+- **Bước 4 — 5 quyết định user duyệt (2026-07-21, duyệt cả gói):**
+  - **Đ1** — KHÔNG thăng FAIL ô nào vòng này; toàn bộ lớp đặc tả vào ở WARN (B3 → INFO). Không ô
+    nào đạt zero-oan: ô đuôi dính cả văn bản đã phát hành, ô lớn đang oan vì bảng thiếu ô.
+  - **Đ2** — quay bước 1 vá bảng TRƯỚC khi nối (thi hành r175): ô khối căn cứ đầy đủ (câu «… ban
+    hành …», dòng «Xét/Theo đề nghị»), ô đề mục thân bài, ô trích yếu công văn V/v, biểu diễn
+    ngoại lệ theo mẫu (Mẫu 16, nhóm CTN), đặc tả `dieu` cấp RUN.
+  - **Đ3** — bước 5 CHỈ áp lớp đặc tả cho file nhận diện được khối đầu (có Quốc hiệu/tiêu đề
+    Đảng); phụ lục/phụ biểu bỏ qua lớp này.
+  - **Đ4** — chống báo trùng với cờ viết tay hiện có (TT-BAC-CO-CHU, TT-CHUC-VU-DAM,
+    TT-CHUONG-CANH-GIUA, TT-KHOAN-DAM): một hiện tượng chỉ một finding.
+  - **Đ5** — CÁCH LY `trich_yeu·kieu` (đậm,nghiêng vs đậm) chờ nguyên văn NĐ30 PL I II.5 — cùng
+    giỏ với ca `QĐi` vs `QĐ` chờ HD05 3.2. Không đoán.
+- **Vòng 2 bước 1 (r175) — nội dung vá bảng:** (a) vbqppl_qh +3 ô đo từ mẫu chuẩn B1:
+  `cau_ban_hanh` (14 nghiêng, «Quốc hội ban hành Luật … .»), `co_quan_ban_hanh` (14 đậm giữa —
+  dòng chủ thể «CHỦ TỊCH / NƯỚC CHXHCNVN», «ỦY BAN THƯỜNG VỤ QUỐC HỘI» sau trích yếu; tầng-1 lộ:
+  3 finding chuc_vu_ky 14pt hoá ra bản nháp gán nhầm dòng này — chữ ký thật 13pt khớp bảng),
+  `tu_lenh` (14 đậm giữa — «QUYẾT ĐỊNH:»/«NAY …:»); ô `can_cu` mở nghĩa gồm dòng «Xét/Theo đề
+  nghị …». (b) `de_muc_than` hanh_chinh (B3 — NĐ30 không ấn định đề mục tự do; INFO vĩnh viễn)
+  và dang (B2* — reference §5 TT-6 «đề mục: đậm»). (c) Bảng BIẾN THỂ MẪU mới
+  `_tt_dac_ta_bien_the()` — trục thứ ba (mẫu/biến thể) chồng lên (thành phần × hệ): override
+  Mẫu 16 quốc hiệu 13 (B1 sơ đồ); biến thể công văn hanh_chinh (ô 5b NĐ30: trích yếu V/v 12-13
+  đứng, B2*) và dang (TT-5: 12 nghiêng, B2*) kèm `bo` tên loại/trích yếu; nhóm «kèm theo» (Mẫu
+  6b/11b/14) VẪN CÁCH LY — chưa đủ căn cứ từng ô, production tiếp tục dùng `_kem_theo`/`_phu_luc`.
+  (d) `dieu` cả 3 hệ: kiểu `dam` → **`dam:tien_to`** (văn phạm mới: thuộc tính áp cho TIỀN TỐ
+  «Điều N.» + tên điều; nội dung inline sau đó phải Đứng — khớp r171 và cơ chế `dam_dau` builder).
+  Chưa hệ nào đổi ngưỡng số ⇒ builder byte-identical (không đụng `_tt_co_build`/`_CHON`).
 - **Phương án đã bác:** giữ hiện trạng + đổi cách gọi tên (bảng chỉ là tài liệu) — bác vì chấp nhận
   vùng cố tình lệch ADR-0003 ngay tại vùng giao sản phẩm cho Ủy ban; nối thẳng bộ kiểm trước khi vá
   bảng — bác vì nối bảng đang sai vào bộ kiểm là sản xuất finding sai hàng loạt.

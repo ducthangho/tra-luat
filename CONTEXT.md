@@ -74,6 +74,11 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   nhưng buộc mang nhãn "quy ước", cấm trình bày như căn cứ pháp lý. Mỗi ô đặc tả tự khai bậc của mình.
 - **Cách ly (ô đặc tả)** — trạng thái của ô chưa xác minh được căn cứ: không dùng để build/kiểm, chờ đối
   soát văn bản gốc. Khác với **khai trắng** — hệ tuyên bố tường minh là chưa được đặc tả.
+- **Biến thể mẫu** — trục thứ ba chồng lên (thành phần × hệ): cùng một hệ nhưng nhóm mẫu khác trình bày
+  khác (Mẫu 16 QĐ-CTN quốc hiệu 13; công văn không tên loại, trích yếu «V/v» riêng). Bản khai
+  `_tt_dac_ta_bien_the()`: override/thêm/bỏ ô theo nhóm, mỗi mục vẫn mang căn cứ + bậc. Xem ADR-0009 r175.
+- **«na» (ô đặc tả)** — giá trị thuộc tính nghĩa «luật KHÔNG ấn định và thực tiễn đa dạng — không kiểm».
+  Khác «0» (ấn định là không-thụt) và khác cách ly (cả Ô không dùng được).
 
 ## Profile
 

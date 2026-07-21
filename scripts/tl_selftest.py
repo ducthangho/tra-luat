@@ -14424,7 +14424,9 @@ def run() -> int:
                     return f"{_ten}: cỡ {_pt} ngoài {_co}"
                 _co_dam, _co_ngh = "<w:b/>" in _q, "<w:i/>" in _q
                 _co_gach = "<w:u " in _q
-                _mong = set(x for x in _kieu.split(",") if x)
+                # r175: hậu tố phạm vi ":tien_to" (đậm áp cho tiền tố «Điều N.» + tên) — văn bản
+                # builder dựng ở đây toàn ĐỀ MỤC THUẦN (cả đoạn là tiền tố) ⇒ vẫn mong cả đoạn đậm
+                _mong = set(x.split(":", 1)[0] for x in _kieu.split(",") if x)
                 _that = set()
                 if _co_dam:
                     _that.add("dam")
@@ -14434,13 +14436,16 @@ def run() -> int:
                     _that.add("gach")
                 if _mong != _that:
                     return f"{_ten}: kiểu {sorted(_that)} ≠ {sorted(_mong)} ({_cc})"
+                # r175: "na" = luật không ấn định, thực tiễn đa dạng — KHÔNG kiểm thuộc tính đó
                 _jc = _r70.search(r'<w:jc w:val="(\w+)"', _q)
-                if (_jc.group(1) if _jc else "") != _canh:
+                if _canh != "na" and (_jc.group(1) if _jc else "") != _canh:
                     return f"{_ten}: canh {_jc.group(1) if _jc else '-'} ≠ {_canh} ({_cc})"
                 _fl = _r70.search(r'w:firstLine="(\d+)"', _q)
                 _lf = _r70.search(r'w:left="(\d+)"', _q)
                 _fl, _lf = int(_fl.group(1)) if _fl else 0, int(_lf.group(1)) if _lf else 0
-                if _thut == "0":
+                if _thut == "na":
+                    _bad = False
+                elif _thut == "0":
                     _bad = (_fl, _lf) != (0, 0)
                 elif _thut.startswith("fl:"):
                     _bad = _fl != int(_thut[3:]) or _lf != 0
@@ -14452,7 +14457,7 @@ def run() -> int:
             return f"{_ten}: KHÔNG tìm thấy đoạn '{_txt[:20]}'"
 
         _loi, _phu = [], set()   # r172: _phu = tập (hệ, ô) đã test — khoá đủ-phủ 100% cuối hàm
-        # ── hệ ĐẢNG (17/17 ô) ──
+        # ── hệ ĐẢNG (18/18 ô — r175 +de_muc_than) ──
         _x = _dung({"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
                     "so_kh": "Số 12-QC/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
                     "ten_loai": "QUY CHẾ", "trich_yeu": "làm việc",
@@ -14460,6 +14465,8 @@ def run() -> int:
                              {"text": "QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
                              {"text": "Mục 1. NGUYÊN TẮC", "de_muc": True, "kieu": "giua"},
                              {"text": "Điều 1. Phạm vi", "de_muc": True},
+                             # r175: đề mục TỰ DO (La Mã — không phải khoản/điểm r171)
+                             {"text": "I. NHIỆM VỤ TRỌNG TÂM", "de_muc": True},
                              {"text": "Nội dung thân văn bản."}],
                     "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN CHẤP HÀNH",
                     "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"})
@@ -14469,6 +14476,7 @@ def run() -> int:
                        ("trich_yeu", "làm việc"), ("phan_chuong", "Chương I"),
                        ("tieu_de_pc", "QUY ĐỊNH CHUNG"), ("muc", "Mục 1. NGUYÊN TẮC"),
                        ("dieu", "Điều 1. Phạm vi"),
+                       ("de_muc_than", "I. NHIỆM VỤ TRỌNG TÂM"),
                        ("than", "Nội dung thân văn bản."),
                        ("quyen_han_ky", "T/M BAN CHẤP HÀNH"), ("chuc_vu_ky", "BÍ THƯ"),
                        ("ho_ten_ky", "Nguyễn Văn A"), ("noi_nhan_tu", "Nơi nhận:"),
@@ -14480,7 +14488,9 @@ def run() -> int:
         # ── hệ VBQPPL QUỐC HỘI ──
         _x2 = _dung({"he": "vbqppl_qh", "ten_cq": "QUỐC HỘI", "so_kh": "Luật số: 45/2019/QH14",
                      "ten_loai": "LUẬT", "trich_yeu": "PHÒNG, CHỐNG TÁC HẠI",
-                     "can_cu": ["Căn cứ Hiến pháp;"],
+                     # r175: câu ban hành đi QUA khoá can_cu của builder (cùng trình bày nghiêng
+                     # thụt dòng đầu — Mẫu 02); ô cau_ban_hanh đối soát chính đoạn này
+                     "can_cu": ["Căn cứ Hiến pháp;", "Quốc hội ban hành Luật này."],
                      "body": [{"text": "Chương I", "kieu": "giua"},
                               {"text": "NHỮNG QUY ĐỊNH CHUNG", "kieu": "giua"},
                               {"text": "Điều 1. Phạm vi", "de_muc": True, "kieu": "dieu"},
@@ -14491,12 +14501,31 @@ def run() -> int:
                        ("tieu_ngu", "Độc lập - Tự do - Hạnh phúc"), ("ten_cq", "QUỐC HỘI"),
                        ("so_ky_hieu", "Luật số: 45/2019/QH14"), ("ten_loai", "LUẬT"),
                        ("trich_yeu", "PHÒNG, CHỐNG TÁC HẠI"), ("can_cu", "Căn cứ Hiến pháp;"),
+                       ("cau_ban_hanh", "Quốc hội ban hành Luật này."),
                        ("phan_chuong", "Chương I"), ("tieu_de_pc", "NHỮNG QUY ĐỊNH CHUNG"),
                        ("dieu", "Điều 1. Phạm vi"), ("than", "Nội dung thân."),
                        ("thong_qua", "Luật này được Quốc hội thông qua ngày 14 tháng 6 năm 2019."),
                        ("chuc_vu_ky", "CHỦ TỊCH QUỐC HỘI"), ("ho_ten_ky", "Nguyễn Thị Kim Ngân")):
             _phu.add(("vbqppl_qh", _k))
             _r = _khop(_x2, _t, DT["vbqppl_qh"][_k], "vbqppl_qh." + _k)
+            if _r:
+                _loi.append(_r)
+        # ── r175: LỆNH Chủ tịch nước (dạng Mẫu 15a) — phủ 2 ô chủ thể/từ lệnh (builder đã có
+        # khoá co_quan_ban_hanh + tu_lenh từ r152 nhưng bảng thiếu ô, đo lũ 21-07 lộ) ──
+        _x5 = _dung({"he": "vbqppl_qh", "ten_cq": "CHỦ TỊCH NƯỚC", "so_kh": "Số: 08/2026/L-CTN",
+                     "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
+                     "ten_loai": "LỆNH", "trich_yeu": "Về việc công bố Luật",
+                     "co_quan_ban_hanh": ["CHỦ TỊCH",
+                                          "NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"],
+                     "can_cu": ["Căn cứ Điều 88 Hiến pháp;", "Xét đề nghị của Chính phủ;"],
+                     "tu_lenh": "NAY CÔNG BỐ:",
+                     "body": [{"text": "Luật Nhà giáo đã được Quốc hội thông qua."}],
+                     "chuc_vu": "CHỦ TỊCH", "ho_ten": "Nguyễn Văn D"})
+        for _k, _t in (("co_quan_ban_hanh", "NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"),
+                       ("tu_lenh", "NAY CÔNG BỐ:"),
+                       ("can_cu", "Xét đề nghị của Chính phủ;")):
+            _phu.add(("vbqppl_qh", _k))
+            _r = _khop(_x5, _t, DT["vbqppl_qh"][_k], "vbqppl_qh." + _k)
             if _r:
                 _loi.append(_r)
         # ── r172: NQ UBTVQH (dạng Mẫu 10) — phủ nốt 5 ô hệ QH mà mẫu Luật không có ──
@@ -14517,7 +14546,7 @@ def run() -> int:
             _r = _khop(_x3, _t, DT["vbqppl_qh"][_k], "vbqppl_qh." + _k)
             if _r:
                 _loi.append(_r)
-        # ── r172: HỆ HÀNH CHÍNH (18/18 ô) — trước đây 0 ô có test (ADR-0009 bước 2) ──
+        # ── r172: HỆ HÀNH CHÍNH (19/19 ô — r175 +de_muc_than) ──
         _x4 = _dung({"he": "hanh-chinh", "chu_quan": "BỘ NỘI VỤ", "ten_cq": "VỤ TỔ CHỨC CÁN BỘ",
                      "so_kh": "Số: 15/QĐ-TCCB", "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
                      "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "về việc ban hành quy chế",
@@ -14525,6 +14554,7 @@ def run() -> int:
                               {"text": "QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
                               {"text": "Mục 1. NGUYÊN TẮC", "de_muc": True, "kieu": "giua"},
                               {"text": "Điều 1. Phạm vi điều chỉnh", "de_muc": True},
+                              {"text": "I. TÌNH HÌNH CHUNG", "de_muc": True},   # r175 đề mục tự do
                               {"text": "Nội dung thân văn bản hành chính."}],
                      "noi_nhan": ["- Lưu: VT."], "quyen_han": "KT. BỘ TRƯỞNG",
                      "chuc_vu": "THỨ TRƯỞNG", "ho_ten": "Trần Văn C"})
@@ -14536,6 +14566,7 @@ def run() -> int:
                        ("ten_loai", "QUYẾT ĐỊNH"), ("trich_yeu", "về việc ban hành quy chế"),
                        ("phan_chuong", "Chương I"), ("tieu_de_pc", "QUY ĐỊNH CHUNG"),
                        ("muc", "Mục 1. NGUYÊN TẮC"), ("dieu", "Điều 1. Phạm vi điều chỉnh"),
+                       ("de_muc_than", "I. TÌNH HÌNH CHUNG"),
                        ("than", "Nội dung thân văn bản hành chính."),
                        ("quyen_han_ky", "KT. BỘ TRƯỞNG"), ("chuc_vu_ky", "THỨ TRƯỞNG"),
                        ("ho_ten_ky", "Trần Văn C"), ("noi_nhan_tu", "Nơi nhận:"),
@@ -14621,6 +14652,7 @@ def run() -> int:
                        {"text": "QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
                        {"text": "Mục 1. NGUYÊN TẮC", "de_muc": True, "kieu": "giua"},
                        {"text": "Điều 1. Phạm vi", "de_muc": True},
+                       {"text": "I. NHIỆM VỤ TRỌNG TÂM", "de_muc": True},   # r175 đề mục tự do
                        {"text": "Nội dung thân văn bản."}],
               "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN CHẤP HÀNH",
               "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"},
@@ -14629,14 +14661,15 @@ def run() -> int:
               ("dia_danh", "Hà Nội, ngày 20 tháng 7 năm 2026"), ("the_loai", "QUY CHẾ"),
               ("trich_yeu", "làm việc"), ("phan_chuong", "Chương I"),
               ("tieu_de_pc", "QUY ĐỊNH CHUNG"), ("muc", "Mục 1. NGUYÊN TẮC"),
-              ("dieu", "Điều 1. Phạm vi"), ("than", "Nội dung thân văn bản."),
+              ("dieu", "Điều 1. Phạm vi"), ("de_muc_than", "I. NHIỆM VỤ TRỌNG TÂM"),
+              ("than", "Nội dung thân văn bản."),
               ("quyen_han_ky", "T/M BAN CHẤP HÀNH"), ("chuc_vu_ky", "BÍ THƯ"),
               ("ho_ten_ky", "Nguyễn Văn A"), ("noi_nhan_tu", "Nơi nhận:"),
               ("noi_nhan_ds", "- Lưu Văn phòng."))),
             ("vbqppl_qh", "vbqppl_qh",   # flag = dạng GẠCH DƯỚI: the_thuc_check cấp module KHÔNG normalize dấu gạch
              {"he": "vbqppl_qh", "ten_cq": "QUỐC HỘI", "so_kh": "Luật số: 45/2019/QH14",
               "ten_loai": "LUẬT", "trich_yeu": "PHÒNG, CHỐNG TÁC HẠI",
-              "can_cu": ["Căn cứ Hiến pháp;"],
+              "can_cu": ["Căn cứ Hiến pháp;", "Quốc hội ban hành Luật này."],   # r175 câu ban hành
               "body": [{"text": "Chương I", "kieu": "giua"},
                        {"text": "NHỮNG QUY ĐỊNH CHUNG", "kieu": "giua"},
                        {"text": "Điều 1. Phạm vi", "de_muc": True, "kieu": "dieu"},
@@ -14647,10 +14680,22 @@ def run() -> int:
               ("tieu_ngu", "Độc lập - Tự do - Hạnh phúc"), ("ten_cq", "QUỐC HỘI"),
               ("so_ky_hieu", "Luật số: 45/2019/QH14"), ("ten_loai", "LUẬT"),
               ("trich_yeu", "PHÒNG, CHỐNG TÁC HẠI"), ("can_cu", "Căn cứ Hiến pháp;"),
+              ("cau_ban_hanh", "Quốc hội ban hành Luật này."),
               ("phan_chuong", "Chương I"), ("tieu_de_pc", "NHỮNG QUY ĐỊNH CHUNG"),
               ("dieu", "Điều 1. Phạm vi"), ("than", "Nội dung thân."),
               ("thong_qua", "Luật này được Quốc hội thông qua ngày 14 tháng 6 năm 2019."),
               ("chuc_vu_ky", "CHỦ TỊCH QUỐC HỘI"), ("ho_ten_ky", "Nguyễn Thị Kim Ngân"))),
+            ("vbqppl_qh", "vbqppl_qh",   # r175: Lệnh CTN — đột biến 2 ô chủ thể/từ lệnh mới
+             {"he": "vbqppl_qh", "ten_cq": "CHỦ TỊCH NƯỚC", "so_kh": "Số: 08/2026/L-CTN",
+              "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
+              "ten_loai": "LỆNH", "trich_yeu": "Về việc công bố Luật",
+              "co_quan_ban_hanh": ["CHỦ TỊCH", "NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"],
+              "can_cu": ["Căn cứ Điều 88 Hiến pháp;", "Xét đề nghị của Chính phủ;"],
+              "tu_lenh": "NAY CÔNG BỐ:",
+              "body": [{"text": "Luật Nhà giáo đã được Quốc hội thông qua."}],
+              "chuc_vu": "CHỦ TỊCH", "ho_ten": "Nguyễn Văn D"},
+             (("co_quan_ban_hanh", "NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"),
+              ("tu_lenh", "NAY CÔNG BỐ:"))),
             ("vbqppl_qh", "vbqppl_qh",
              {"he": "vbqppl_qh", "ten_cq": "ỦY BAN THƯỜNG VỤ QUỐC HỘI",
               "so_kh": "Số: 155/2026/UBTVQH15",
@@ -14673,6 +14718,7 @@ def run() -> int:
                        {"text": "QUY ĐỊNH CHUNG", "de_muc": True, "kieu": "giua"},
                        {"text": "Mục 1. NGUYÊN TẮC", "de_muc": True, "kieu": "giua"},
                        {"text": "Điều 1. Phạm vi điều chỉnh", "de_muc": True},
+                       {"text": "I. TÌNH HÌNH CHUNG", "de_muc": True},   # r175 đề mục tự do
                        {"text": "Nội dung thân văn bản hành chính."}],
               "noi_nhan": ["- Lưu: VT."], "quyen_han": "KT. BỘ TRƯỞNG",
               "chuc_vu": "THỨ TRƯỞNG", "ho_ten": "Trần Văn C"},
@@ -14684,6 +14730,7 @@ def run() -> int:
               ("ten_loai", "QUYẾT ĐỊNH"), ("trich_yeu", "về việc ban hành quy chế"),
               ("phan_chuong", "Chương I"), ("tieu_de_pc", "QUY ĐỊNH CHUNG"),
               ("muc", "Mục 1. NGUYÊN TẮC"), ("dieu", "Điều 1. Phạm vi điều chỉnh"),
+              ("de_muc_than", "I. TÌNH HÌNH CHUNG"),
               ("than", "Nội dung thân văn bản hành chính."),
               ("quyen_han_ky", "KT. BỘ TRƯỞNG"), ("chuc_vu_ky", "THỨ TRƯỞNG"),
               ("ho_ten_ky", "Trần Văn C"), ("noi_nhan_tu", "Nơi nhận:"),
@@ -14737,6 +14784,51 @@ def run() -> int:
             print("  [r173] " + " · ".join(_loi[:8]), file=sys.stderr)
         return not _loi
     _t110("r173_dot_bien_so_hai_chieu", _c173_dot_bien_so_hai_chieu)
+
+    # ═══ v1.35.5 — r175 (ADR-0009 bước-4 Đ2): BẢNG BIẾN THỂ THEO MẪU `_tt_dac_ta_bien_the()` —
+    # trục thứ ba chồng lên (thành phần × hệ). Khoá CẤU TRÚC (hành vi kiểm khoá ở bước 5):
+    # (a) hệ tồn tại trong bảng chính, không khai trắng; (b) override trỏ ô CÓ THẬT, giá trị
+    # PHẢI KHÁC gốc (bằng gốc = biến thể vô nghĩa = bảng trôi), kèm (giá_trị, căn_cứ, bậc);
+    # (c) ô "them" đúng tuple-6, KHÔNG trùng tên ô bảng chính; (d) "bo" trỏ ô có thật;
+    # (e) mọi bậc hợp lệ B1/B2/B3 (± hậu tố *). ═══
+    def _c175_bien_the_cau_truc():
+        DT = _TL_MODULE._tt_dac_ta()
+        BT = _TL_MODULE._tt_dac_ta_bien_the()
+        _IDX = {"co": 0, "kieu": 1, "canh": 2, "thut": 3}
+        _BAC = ("B1", "B2", "B3", "B1*", "B2*", "B3*")
+        _loi = []
+        for _he, _nhoms in BT.items():
+            if _he not in DT or "__khai_trang__" in DT[_he]:
+                _loi.append(f"{_he}: hệ không có trong bảng chính hoặc khai trắng")
+                continue
+            for _ten, _bt in _nhoms.items():
+                if not (_bt.get("nhan_dien") or "").strip():
+                    _loi.append(f"{_he}.{_ten}: thiếu nhan_dien")
+                for _o, _ovr in (_bt.get("override") or {}).items():
+                    if _o not in DT[_he]:
+                        _loi.append(f"{_he}.{_ten}: override ô lạ '{_o}'")
+                        continue
+                    for _truong, _v in _ovr.items():
+                        if _truong not in _IDX or not (isinstance(_v, tuple) and len(_v) == 3):
+                            _loi.append(f"{_he}.{_ten}.{_o}.{_truong}: phải (giá_trị, căn_cứ, bậc)")
+                            continue
+                        if _v[0] == DT[_he][_o][_IDX[_truong]]:
+                            _loi.append(f"{_he}.{_ten}.{_o}.{_truong}: giá trị TRÙNG bảng chính — biến thể vô nghĩa")
+                        if _v[2] not in _BAC or not (_v[1] or "").strip():
+                            _loi.append(f"{_he}.{_ten}.{_o}.{_truong}: bậc/căn cứ hỏng")
+                for _o, _cell in (_bt.get("them") or {}).items():
+                    if _o in DT[_he]:
+                        _loi.append(f"{_he}.{_ten}: them '{_o}' TRÙNG ô bảng chính — phải là override")
+                    if not (isinstance(_cell, tuple) and len(_cell) == 6
+                            and _cell[5] in _BAC and (_cell[4] or "").strip()):
+                        _loi.append(f"{_he}.{_ten}.{_o}: tuple-6 hỏng (cỡ,kiểu,canh,thụt,căn_cứ,bậc)")
+                for _o in (_bt.get("bo") or ()):
+                    if _o not in DT[_he]:
+                        _loi.append(f"{_he}.{_ten}: bo ô lạ '{_o}'")
+        if _loi:
+            print("  [r175] " + " · ".join(_loi[:6]), file=sys.stderr)
+        return not _loi
+    _t110("r175_bien_the_mau_cau_truc", _c175_bien_the_cau_truc)
 
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══

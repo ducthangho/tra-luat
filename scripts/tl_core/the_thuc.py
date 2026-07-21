@@ -83,9 +83,15 @@ def _tt_dac_ta():
 
         (co, kieu, canh, thut, can_cu, bac)
           co    : cỡ chữ (pt) — "n" đơn trị | "lo-hi" dải
-          kieu  : tập con của {dam, nghieng, gach} — "" = in thường đứng
-          canh  : center | both | left | right
-          thut  : "0" | "fl:<twips>" thụt DÒNG ĐẦU | "left:<twips>" thụt TRÁI cả khối
+          kieu  : tập con của {dam, nghieng, gach} — "" = in thường đứng. Hậu tố PHẠM VI
+                  ":tien_to" (r175, ADR-0009 bước-4 khiếm khuyết 5): thuộc tính áp cho TIỀN TỐ
+                  đề mục — «Điều N.» + TÊN ĐIỀU — còn NỘI DUNG chạy tiếp trong cùng đoạn phải
+                  Đứng (HD05 PL2 mục 6 «từ Điều, số thứ tự và tên điều» · NĐ30 PL I II.6 ·
+                  NQ351 Đ35 k2 c; khớp cơ chế `dam_dau` của builder, r171). Đoạn CHỈ gồm tiền
+                  tố (đề mục thuần) ⇒ cả đoạn mang thuộc tính.
+          canh  : center | both | left | right | "na" (r175: luật KHÔNG ấn định và thực tiễn
+                  đa dạng — KHÔNG kiểm thuộc tính này; khác với giá trị cụ thể = có kiểm)
+          thut  : "0" | "fl:<twips>" thụt DÒNG ĐẦU | "left:<twips>" thụt TRÁI cả khối | "na"
           can_cu: điều khoản gốc, để tra ngược khi tranh cãi
           bac   : bậc thẩm quyền ADR-0009 — "B1" nguyên văn văn bản gốc · "B2" reference có trích §
                   · "B3" quy ước nội bộ (KHÔNG phải căn cứ pháp lý). Hậu tố "*": luật chỉ cho DẢI
@@ -116,7 +122,12 @@ def _tt_dac_ta():
             "phan_chuong":  ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6 (bảng §2.3)", "B1*"),
             "tieu_de_pc":   ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6 (tiêu đề in hoa đậm)", "B1*"),
             "muc":          ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.6", "B1*"),
-            "dieu":         ("13-14", "dam",          "both",   "fl:567",  "NĐ30 PL I II.6 (Điều: từ+số+tên đậm)", "B1*"),
+            "dieu":         ("13-14", "dam:tien_to",  "both",   "fl:567",  "NĐ30 PL I II.6 (Điều: từ+số+tên đậm; nội dung Đứng)", "B1*"),
+            # r175 (ADR-0009 bước-4 Đ2): đề mục TỰ DO của BC/CV/KH («I.», «1.», tiêu đề đậm không
+            # đánh số) — NĐ30 chỉ ấn định Phần/Chương/Mục/Điều; đề mục tự do là QUY ƯỚC nội bộ
+            # (builder de_muc). PHÂN BIỆT khoản/điểm dưới Điều: in thường (§2 bảng reference).
+            # canh/thut "na": không ấn định + thực tiễn hai kiểu (giữa-không-thụt vs đều-thụt 1cm)
+            "de_muc_than":  ("13-14", "dam",          "na",     "na",      "quy ước nội bộ — NĐ30 KHÔNG ấn định đề mục tự do (đo lũ 21-07: 42/49 VB thật dùng đề mục đậm)", "B3"),
             "quyen_han_ky": ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ", "B1"),
             "chuc_vu_ky":   ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7.đ", "B1"),
             "ho_ten_ky":    ("13-14", "dam",          "center", "0",       "NĐ30 PL I II.7", "B1"),
@@ -131,11 +142,22 @@ def _tt_dac_ta():
             "dia_danh":     ("14",    "nghieng",      "center", "0",       "NQ351 Đ36 k2", "B1"),
             "ten_loai":     ("14",    "dam",          "center", "0",       "NQ351 Đ33", "B1"),
             "trich_yeu":    ("14",    "dam",          "center", "0",       "NQ351 Đ33", "B1"),
-            "can_cu":       ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ34 (thụt 1-1,27cm)", "B1*"),
+            # r175: gồm cả dòng «Xét/Theo đề nghị của …» của Lệnh/QĐ CTN (Mẫu 15a/15b/16 — cùng
+            # khối mở đầu, cùng trình bày với căn cứ; đo sơ đồ: 14 nghiêng thụt dòng đầu)
+            "can_cu":       ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ34 (thụt 1-1,27cm) + PL I Mẫu 15a/15b/16 (dòng Xét đề nghị)", "B1*"),
+            # r175 (đo lũ 21-07, khiếm khuyết 1): câu tuyên bố ban hành «Quốc hội ban hành
+            # Luật … .» / «UBTVQH ban hành Pháp lệnh … .» — nghiêng như căn cứ (đo Mẫu 01-04/08-09/13)
+            "cau_ban_hanh": ("14",    "nghieng",      "both",   "fl:567",  "NQ351 PL I sơ đồ Mẫu 1-4, 8-9, 13 (câu «… ban hành …» in nghiêng)", "B1*"),
+            # r175: dòng CHỦ THỂ ban hành sau tên loại/trích yếu («ỦY BAN THƯỜNG VỤ QUỐC HỘI» Mẫu
+            # 10-13 · «CHỦ TỊCH / NƯỚC CHXHCNVN» Mẫu 15-16). Tầng-1 đo lũ lộ ô thiếu: bản nháp gán
+            # nhầm dòng này vào chuc_vu_ky (14pt) — chữ ký thật 13pt vẫn khớp bảng.
+            "co_quan_ban_hanh": ("14", "dam",         "center", "0",       "NQ351 PL I sơ đồ Mẫu 10-13, 15a/15b, 16 (builder: khoá co_quan_ban_hanh)", "B1"),
+            # r175: từ lệnh «QUYẾT NGHỊ:» / «QUYẾT ĐỊNH:» / «NAY …:» (builder: khoá tu_lenh)
+            "tu_lenh":      ("14",    "dam",          "center", "0",       "NQ351 PL I sơ đồ Mẫu 5, 10-13, 15a/15b, 16", "B1"),
             "phan_chuong":  ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a", "B1"),
             "tieu_de_pc":   ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 a", "B1"),
             "muc":          ("14",    "dam",          "center", "0",       "NQ351 Đ35 k2 b", "B1"),
-            "dieu":         ("14",    "dam",          "both",   "left:567", "NQ351 Đ35 k2 c (thụt TRÁI)", "B1*"),
+            "dieu":         ("14",    "dam:tien_to",  "both",   "left:567", "NQ351 Đ35 k2 c (thụt TRÁI; từ+số+tên đậm, nội dung Đứng)", "B1*"),
             "than":         ("14",    "",             "both",   "fl:567",  "NQ351 Đ35 k1", "B1*"),
             "thong_qua":    ("14",    "nghieng",      "both",   "fl:567",  "NQ351 Đ36 k1", "B1*"),
             # r172: bổ khuyết — Mẫu 10-13 dùng TM. ỦY BAN THƯỜNG VỤ QUỐC HỘI (Đ37 k1)
@@ -157,8 +179,15 @@ def _tt_dac_ta():
             "tieu_de_pc":   ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 a", "B1"),
             "muc":          ("14-15", "dam",          "center", "0",       "HD05 mục 6.2.4 b", "B1"),
             # thụt 10mm=567tw ĐƠN TRỊ theo HD05 6.2.2 (khác nhà nước dải 1-1,27cm) ⇒ B1 không *
-            "dieu":         ("14-15", "dam",          "both",   "fl:567",  "HD05 6.2.4 c + 6.2.2", "B1"),
+            # r175: kiểu cấp RUN (khiếm khuyết 5 đo lũ) — HD05 PL2 mục 6 đậm «từ Điều, số thứ tự
+            # và tên điều»; Điều KHÔNG tên (nội dung chạy tiếp cùng đoạn) chỉ đậm tiền tố (r171)
+            "dieu":         ("14-15", "dam:tien_to",  "both",   "fl:567",  "HD05 6.2.4 c + 6.2.2 + PL2 mục 6", "B1"),
             "than":         ("14-15", "",             "both",   "fl:567",  "HD05 mục 6.2.2 (10mm đơn trị)", "B1"),
+            # r175 (Đ2): đề mục tự do BC/KH/CTr Đảng — reference §5 bảng TT-6 ghi rõ «đề mục:
+            # đậm» (gốc HD05 mục 6). canh/thut "na": TT-6 chỉ pin KIỂU; kho mẫu HD05 canh giữa
+            # không thụt, corpus thật dàn đều thụt 1cm — hai kiểu cùng sống, không ấn định.
+            # Khoản/điểm dưới Điều vẫn Đứng (r171).
+            "de_muc_than":  ("14-15", "dam",          "na",     "na",      "THE_THUC_TRINH_BAY §5 bảng TT-6 «đề mục: đậm» (gốc HD05 mục 6)", "B2*"),
             "quyen_han_ky": ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7", "B1"),
             "chuc_vu_ky":   ("14",    "",             "center", "0",       "HD05 PL2 mục 7 — KHÔNG đậm", "B1"),
             "ho_ten_ky":    ("14",    "dam",          "center", "0",       "HD05 PL2 mục 7", "B1"),
@@ -170,6 +199,47 @@ def _tt_dac_ta():
                                      "chưa đối soát từng ô; hiện chỉ áp ngưỡng số _the_thuc_criteria()."},
         "vbhn":   {"__khai_trang__": "CHƯA ĐẶC TẢ — VBHN (NĐ 250/2026) dùng checklist TT-VBHN-*; "
                                      "trình bày kế thừa vbqppl (hệ đó cũng chưa đặc tả)."},
+    }
+
+
+def _tt_dac_ta_bien_the():
+    """r175 (ADR-0009 bước-4 Đ2, khiếm khuyết 3) — BIẾN THỂ THEO MẪU: trục thứ ba chồng lên bảng
+    (thành phần × hệ) của `_tt_dac_ta()`. Đo lũ 21-07 chứng minh một ô không biểu diễn nổi ngoại
+    lệ theo mẫu (Mẫu 16 quốc hiệu 13 trong khi hệ khai 12 — chú thích có từ r150 nhưng chỉ là
+    prose, máy không đọc được). Mỗi biến thể:
+
+        "<hệ>": {"<tên_biến_thể>": {
+            "nhan_dien": <mô tả cách nhận nhóm — consumer bước 5 tự resolve>,
+            "override":  {ô: {trường: (giá_trị, căn_cứ, bậc)}}   — ĐÈ giá trị ô bảng chính,
+            "them":      {ô_mới: tuple-6 y hệ bảng chính}         — ô CHỈ tồn tại ở biến thể,
+            "bo":        (ô, …)                                    — ô bảng chính KHÔNG áp cho nhóm.
+        }}
+
+    Consumer (bước 5) resolve biến thể TRƯỚC rồi mới kiểm; không resolve được → dùng bảng chính
+    nguyên trạng. Nhóm «văn bản/phụ lục ban hành kèm theo» (NQ351 Mẫu 6b/11b/14) VẪN CÁCH LY —
+    chưa đối soát đủ căn cứ từng ô (ADR-0009: không đoán); production tiếp tục nhận diện bằng
+    `_kem_theo`/`_phu_luc` (r150) và bỏ kiểm thành phần thiếu-theo-thiết-kế."""
+    return {
+        "vbqppl_qh": {
+            "qd_ctn": {     # Mẫu 16 — Quyết định của Chủ tịch nước
+                "nhan_dien": "ký hiệu «…/QĐ-CTN» (sơ đồ Mẫu 16 PL I NQ351)",
+                "override": {"quoc_hieu": {"co": ("13", "NQ351 PL I sơ đồ Mẫu 16 — Quốc hiệu 13, khác 12 của Mẫu 1-15 (§6.17)", "B1")}},
+            },
+        },
+        "hanh_chinh": {
+            "cong_van": {   # công văn — KHÔNG tên loại; trích yếu «V/v …» dưới số ký hiệu
+                "nhan_dien": "không tên loại; dòng «V/v …» ngay dưới số ký hiệu (NĐ30 PL I ô 5b)",
+                "them": {"trich_yeu_cv": ("12-13", "", "center", "0", "THE_THUC_TRINH_BAY §2 bảng ô 5b (gốc NĐ30 PL I): in thường 12-13 đứng; canh giữa cột trái theo sơ đồ", "B2*")},
+                "bo": ("ten_loai", "trich_yeu"),
+            },
+        },
+        "dang": {
+            "cong_van": {   # công văn Đảng — KHÔNG thể loại; trích yếu NGHIÊNG cỡ 12
+                "nhan_dien": "không thể loại; trích yếu nghiêng dưới số ký hiệu (HD05)",
+                "them": {"trich_yeu_cv": ("12", "nghieng", "center", "0", "THE_THUC_TRINH_BAY §5 bảng TT-5 (gốc HD05): trích yếu công văn in thường 12 NGHIÊNG", "B2*")},
+                "bo": ("the_loai", "trich_yeu"),
+            },
+        },
     }
 
 

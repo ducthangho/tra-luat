@@ -39,6 +39,25 @@ def bind(tl_module) -> None:
 
 
 
+def _extract_resolve_entries(a) -> list:
+    """r180 S3: tập entries cho resolve --sohieu của extract — dưới PROFILE thì ĐỌC CỘNG NỀN vbqppl
+    (mirror base-also của reg-query; doctrine «Nền VBQPPL luôn bật»). Profile trước, nền bổ sung,
+    dedup drive_id, hit nền mang scope='vbqppl' (_merge_base_entries). Hố phiên vận hành 21-07:
+    `extract 52-2025-VPQH --profile "Luật BHXH"` fail dù dòng nền đang sống."""
+    ents = _manifest_entries(refresh=getattr(a, "refresh", False))
+    if _active_profile() != DEFAULT_PROFILE and _base_also_enabled(a):
+        try:
+            _b, _berr = _base_manifest_entries(getattr(a, "config", None))
+            ents = _merge_base_entries(ents, _b or [])
+            if _berr:
+                print(f"[tl] ⚠ base-also (extract): manifest nền có lỗi ({_berr}) — hit nền có thể thiếu.",
+                      file=sys.stderr)
+        except Exception as _be:  # noqa: BLE001 — nền hỏng thì resolve trên profile, KHÔNG nuốt im lặng
+            print(f"[tl] ⚠ base-also (extract): không đọc được manifest nền ({_be}) — resolve trên profile.",
+                  file=sys.stderr)
+    return ents
+
+
 def cmd_extract(a) -> int:
     """B2 token-saving: exporttext ra ĐĨA → regex Điều → in đúng Điều.
     Có thể truyền GDoc id trực tiếp hoặc `--sohieu` để tự chọn canonical từ manifest."""
@@ -70,7 +89,7 @@ def cmd_extract(a) -> int:
             print(f"[tl] ⚠ không đọc được manifest (bỏ metadata canonical, export vẫn chạy): {_me}", file=sys.stderr)
     if not gdoc_id and a.sohieu:
         try:
-            _ents = _manifest_entries(refresh=a.refresh)
+            _ents = _extract_resolve_entries(a)   # r180 S3: profile + CỘNG NỀN (base-also)
             canon, gdoc_id, _nm, hits = _resolve_deep_target(a.sohieu, _ents)
         except Exception as e:
             print(f"[tl] không đọc được manifest để resolve --sohieu: {e}", file=sys.stderr)

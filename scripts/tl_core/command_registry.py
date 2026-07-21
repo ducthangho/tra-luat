@@ -127,10 +127,11 @@ GENERATED_SPECS = [
          {"flags": ['--force-unsafe'], "dest": 'force_unsafe', "action": 'store_true', "help": '(Pha 1+) bỏ qua precheck blocker (rủi ro)'},
      ]},
     {"name": 'source-update-corpus', "handler": 'cmd_source_update_corpus',
-     "help": '(MERGE) bật/tắt cờ corpus 1 nguồn VBQPPL: `false`=BỎ RA KHỎI CORPUS (reg_upsert corpus=false reversible + gỡ nguồn NLM, GUARD shared_source_id); `true`=đưa vào lại. DRY mặc định; --apply --confirm yes',
+     "help": '(MERGE) bật/tắt cờ corpus 1 nguồn VBQPPL: `false`=BỎ RA KHỎI CORPUS (reg_upsert corpus=false reversible + gỡ nguồn NLM, GUARD shared_source_id); `false --as-ref`=HẠ REF (r180 S2: corpus=false + row_kind=ref, GIỮ NLM); `true`=đưa vào lại. DRY mặc định; --apply --confirm yes',
      "args": [
          {"dest": 'target', "help": 'drive_id hoặc số hiệu'},
          {"dest": 'status', "help": 'true/false (đưa vào / bỏ ra khỏi corpus)'},
+         {"flags": ['--as-ref'], "dest": 'as_ref', "action": 'store_true', "help": 'r180 S2 (chỉ với false): hạ thành ref — corpus=false + row_kind=ref, GIỮ nguồn NLM/nlm_status (tham khảo truy-vấn-được)'},
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--confirm'], "default": ''},
          {"flags": ['--refresh'], "action": 'store_true'},

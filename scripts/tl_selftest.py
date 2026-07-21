@@ -13370,11 +13370,15 @@ def run() -> int:
         import zipfile as _zf136
         _rs = []
         _ppr = f'<w:pPr><w:ind w:firstLine="{ind}"/></w:pPr>' if ind else ""
-        for _tx, _f, _s in (runs or []):
+        for _r136 in (runs or []):
+            # r180: tuple 3 phần tử (text, font, sz) như cũ; phần tử 4 tuỳ chọn = rPr thô chèn thêm
+            # (vd '<w:i/>' cho địa danh nghiêng) — fixture phải ĐÚNG thể thức vì 2 ô đã thăng FAIL.
+            _tx, _f, _s = _r136[0], _r136[1], _r136[2]
+            _xr = _r136[3] if len(_r136) > 3 else ""
             _rpr = ""
-            if _f or _s:
+            if _f or _s or _xr:
                 _rpr = ("<w:rPr>" + (f'<w:rFonts w:ascii="{_f}" w:hAnsi="{_f}"/>' if _f else "")
-                        + (f'<w:sz w:val="{_s}"/>' if _s else "") + "</w:rPr>")
+                        + _xr + (f'<w:sz w:val="{_s}"/>' if _s else "") + "</w:rPr>")
             _rs.append(f'<w:p>{_ppr}<w:r>{_rpr}<w:t xml:space="preserve">{_tx}</w:t></w:r></w:p>')
         _or = f' w:orient="{orient}"' if orient else ""
         _doc = ('<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
@@ -13401,10 +13405,16 @@ def run() -> int:
                             f'<?xml version="1.0"?><w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">{_fns}</w:footnotes>')
         return _p
 
+    # r180: fixture "đạt chuẩn" phải ĐÚNG thể thức thật — địa danh NGHIÊNG (NĐ30 II.4) và «Nơi nhận:»
+    # 12pt (NĐ30 II.9): hai ô dia_danh·kieu + noi_nhan_tu·co đã THĂNG FAIL, fixture cũ (đều 13pt
+    # đứng) chính là ca lệch thật mà bộ kiểm nay đánh trượt — sửa fixture, KHÔNG nới bộ kiểm.
     _VN136 = [("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", None, None), ("Độc lập - Tự do - Hạnh phúc", None, None),
-              ("Số: 05/BC-VP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None),
+              ("Số: 05/BC-VP", None, None), ("Hà Nội, ngày 19 tháng 7 năm 2026", None, None, "<w:i/>"),
               ("BÁO CÁO", None, None), ("Nội dung thử nghiệm đủ dài để tính cỡ chữ phần thân.", None, None),
-              ("Nơi nhận:", None, None)]
+              ("Nơi nhận:", None, "24")]
+    # r180: biến thể KHÔNG cỡ tường minh cho các ca «doc không khai cỡ» — sz 24 của «Nơi nhận:» sẽ
+    # thành cỡ-phổ-biến-duy-nhất làm TT-CO-CHU-NOI-DUNG đổi WARN→FAIL sai ý fixture.
+    _VN136_NOSZ = [(r[0], r[1], None) + ((r[3],) if len(r) > 3 else ()) for r in _VN136]
 
     def _c136_neo_drift_lock():
         _txt = (HERE.parent / "references" / "THE_THUC_TRINH_BAY.md").read_text(encoding="utf-8", errors="replace")
@@ -13427,7 +13437,7 @@ def run() -> int:
                    and _e1.get("schema") == "the_thuc_check.v1" and _e1["summary"]["fail"] == 0)
             # ca thật ND187: lề 10mm + docDefaults Arial + run trống format
             _bad_p = _mk136(_dp, "bad.docx", mar=(567, 567, 1701, 1134), d_font="Arial", d_sz=None,
-                            runs=_VN136)
+                            runs=_VN136_NOSZ)   # r180: NOSZ — giữ ý «run trống format», TT-CO-CHU WARN
             _e2 = _TL_MODULE.the_thuc_check(str(_bad_p))
             _ids_fail = {f["id"] for f in _e2["findings"] if f["level"] == "FAIL"}
             _ok = _ok and _e2.get("ok") is False and {"TT-LE-TREN", "TT-LE-DUOI", "TT-FONT"} <= _ids_fail
@@ -13464,7 +13474,7 @@ def run() -> int:
             _ok = any(f["id"] == "TT-TRINH-BAY-NGANG" and f["level"] == "WARN" for f in _e["findings"])
             _ok = _ok and not any(f["id"].startswith("TT-LE-") and f["level"] == "FAIL" for f in _e["findings"])
             _ok = _ok and not any(f["id"] == "TT-KHO-GIAY" for f in _e["findings"])   # 297×210 landscape = A4 hợp lệ
-            _nosz = _mk136(_dp, "ns.docx", d_sz=None, runs=_VN136)
+            _nosz = _mk136(_dp, "ns.docx", d_sz=None, runs=_VN136_NOSZ)   # r180: NOSZ — «không khai cỡ» đúng nghĩa
             _e2 = _TL_MODULE.the_thuc_check(str(_nosz))
             _ok = _ok and any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "WARN" for f in _e2["findings"])
             return _ok and not any(f["id"] == "TT-CO-CHU-NOI-DUNG" and f["level"] == "FAIL" for f in _e2["findings"])
@@ -13878,7 +13888,7 @@ def run() -> int:
             _e5 = _TL_MODULE.the_thuc_check(_mk143(_dp, "e.docx", _pp143(
                 "ĐẢNG CỘNG SẢN VIỆTNAM", "ĐẢNG ỦY XÃ A", "Số 12-BC/ĐU", "Nội dung.")), he="dang")
             _ok = _ok and "TT-TIEU-DE-DANG-SAI" in _ids(_e5, "FAIL")
-            _e6 = _TL_MODULE.the_thuc_check(_mk143(_dp, "f.docx", _pp143(*[t for t, _, _ in _VN136])))
+            _e6 = _TL_MODULE.the_thuc_check(_mk143(_dp, "f.docx", _pp143(*[r[0] for r in _VN136])))   # r180: tuple 4 phần tử
             return _ok and not any(i.endswith("-SAI") for i in _ids(_e6, "FAIL"))            # chuẩn → sạch
     _t110("r143_exact_quoc_hieu_tieu_ngu", _c143_exact_quoc_hieu_tieu_ngu)
 
@@ -15512,6 +15522,209 @@ def run() -> int:
         _nc179.notebook_get = _sav_ng179
         _TL_MODULE._manifest_entries = _sav_me179
         _TL_MODULE.apply_profile_offline = _sav_apo179
+
+    # ═══ v1.35.10 — r180 (ADR-0009 Đ3/Đ6): THĂNG FAIL 8 Ô user duyệt zero-oan 2026-07-22
+    # (hồ sơ `D:\Quốc hội\thang-o-2026-07-22\ket_luan_doi_chieu.md` — đo tươi 159 file, lớp A 191
+    # WARN, đối chiếu tay từng finding). Khoá BA CHIỀU:
+    #   (a) chiều thuận: ô thăng bắn FAIL khi vi phạm — CHỈ chốt này chặn mutant gỡ set thăng;
+    #   (b) chiều nghịch: trục KHÁC của cùng ô giữ WARN — chặn mutant thăng lố cả ô;
+    #   (c) Đ1 bất khả xâm: ô tin-cậy-thấp giữ INFO — thăng không đụng nấc INFO vĩnh viễn.
+    def _r180_env(_spec, _mut_txt, _fn):
+        import re as _r80, zipfile as _z80, tempfile as _tf80
+        _b = str(Path(_tf80.mkdtemp()) / "b.docx")
+        _TL_MODULE.the_thuc_build(_spec, _b)
+        _x = _z80.ZipFile(_b).read("word/document.xml").decode("utf-8")
+        for _q in _r80.findall(r"<w:p>.*?</w:p>", _x, _r80.S):
+            if "".join(_r80.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() != _mut_txt:
+                continue
+            _nq = _fn(_q)
+            if not _nq or _nq == _q:
+                return None
+            _mx = _x.replace(_q, _nq, 1)
+            _om = str(Path(_tf80.mkdtemp()) / "m.docx")
+            with _z80.ZipFile(_b) as _zi, _z80.ZipFile(_om, "w", _z80.ZIP_DEFLATED) as _zo:
+                for _it in _zi.infolist():
+                    _d = _zi.read(_it.filename)
+                    if _it.filename == "word/document.xml":
+                        _d = _mx.encode("utf-8")
+                    _zo.writestr(_it, _d)
+            return _TL_MODULE.the_thuc_check(_om, he=_spec["he"].replace("-", "_"))
+        return None
+
+    def _r180_lvl(_env, _fid):
+        return next((f["level"] for f in (_env or {}).get("findings", []) if f["id"] == _fid), None)
+
+    def _r180_sz(_v):
+        import re as _r80
+        return lambda _q: _r80.sub(r'(<w:sz w:val=")\d+(")', r"\g<1>%d\g<2>" % _v, _q)
+
+    def _r180_dam(_q):
+        return (_q.replace("<w:rPr>", "<w:rPr><w:b/>", 1) if "<w:b/>" not in _q else None)
+
+    def _r180_jc_both(_q):
+        if "<w:jc " in _q:
+            import re as _r80
+            return _r80.sub(r'<w:jc w:val="[a-z]+"/>', '<w:jc w:val="both"/>', _q)
+        return _q.replace("<w:pPr>", '<w:pPr><w:jc w:val="both"/>', 1)
+
+    _sp80hc = {"he": "hanh-chinh", "chu_quan": "BỘ NỘI VỤ", "ten_cq": "VỤ TỔ CHỨC CÁN BỘ",
+               "so_kh": "Số: 15/QĐ-TCCB", "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
+               "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "về việc ban hành quy chế",
+               "body": [{"text": "Nội dung thân văn bản hành chính."}],
+               "noi_nhan": ["- Lưu: VT."], "quyen_han": "KT. BỘ TRƯỞNG",
+               "chuc_vu": "THỨ TRƯỞNG", "ho_ten": "Trần Văn C"}
+    _sp80d = {"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
+              "so_kh": "Số 12-QC/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+              "ten_loai": "QUY CHẾ", "trich_yeu": "làm việc",
+              "body": [{"text": "Nội dung thân văn bản."}],
+              "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN CHẤP HÀNH",
+              "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"}
+    _t110("r180_thang_hc_noi_nhan_ds_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80hc, "- Lưu: VT.", _r180_sz(26)),
+                            "TT-DT-NOI-NHAN-DS-CO") == "FAIL")
+    _t110("r180_thang_hc_noi_nhan_tu_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80hc, "Nơi nhận:", _r180_sz(30)),
+                            "TT-DT-NOI-NHAN-TU-CO") == "FAIL")
+    _t110("r180_thang_hc_ten_loai_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80hc, "QUYẾT ĐỊNH", _r180_sz(30)),
+                            "TT-DT-TEN-LOAI-CO") == "FAIL")
+    _t110("r180_thang_hc_dia_danh_kieu_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80hc, "Hà Nội, ngày 21 tháng 7 năm 2026", _r180_dam),
+                            "TT-DT-DIA-DANH-KIEU") == "FAIL")
+    _t110("r180_thang_dang_the_loai_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80d, "QUY CHẾ", _r180_sz(28)),
+                            "TT-DT-THE-LOAI-CO") == "FAIL")
+    _t110("r180_thang_dang_dia_danh_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80d, "Hà Nội, ngày 20 tháng 7 năm 2026", _r180_sz(26)),
+                            "TT-DT-DIA-DANH-CO") == "FAIL")
+    _t110("r180_thang_dang_so_ky_hieu_co_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80d, "Số 12-QC/ĐU", _r180_sz(26)),
+                            "TT-DT-SO-KY-HIEU-CO") == "FAIL")
+    _t110("r180_thang_dang_dia_danh_kieu_FAIL",
+          lambda: _r180_lvl(_r180_env(_sp80d, "Hà Nội, ngày 20 tháng 7 năm 2026", _r180_dam),
+                            "TT-DT-DIA-DANH-KIEU") == "FAIL")
+    _t110("r180_giu_warn_truc_chua_duyet",   # (b) noi_nhan_ds·canh KHÔNG thăng — hồ sơ mục III.3
+          lambda: _r180_lvl(_r180_env(_sp80hc, "- Lưu: VT.", _r180_jc_both),
+                            "TT-DT-NOI-NHAN-DS-CANH") == "WARN")
+    _t110("r180_giu_info_tin_cay_thap",      # (c) than ∈ tin-cậy-thấp — INFO vĩnh viễn Đ1
+          lambda: _r180_lvl(_r180_env(_sp80hc, "Nội dung thân văn bản hành chính.", _r180_sz(30)),
+                            "TT-DT-THAN-CO") == "INFO")
+
+    # (S1 r180) cổng OCR đường corpus NỀN — PURE helper mirror vế ocr_ok của _ingest_verify_gate
+    # (hố phiên vận hành 21-07: ingest-local coi --source-quality/--ocr-verified là trang trí,
+    # corpus=true vô điều kiện). CHỈ chốt này chặn mutant gỡ block/đổi flag.
+    _t110("r180_s1_ingest_local_ocr_gate_pure",
+          lambda: (_TL_MODULE._ingest_local_ocr_gate("ocr", False)["block"] is True
+                   and _TL_MODULE._ingest_local_ocr_gate("ocr", False)["flag"] == "OCR_UNVERIFIED_NOT_CORPUS"
+                   and _TL_MODULE._ingest_local_ocr_gate("ocr", False)["corpus_allowed"] is False
+                   and _TL_MODULE._ingest_local_ocr_gate("ocr", True)["block"] is False
+                   and _TL_MODULE._ingest_local_ocr_gate("auto", False)["block"] is False
+                   and _TL_MODULE._ingest_local_ocr_gate("digital", False)["corpus_allowed"] is True
+                   and _TL_MODULE._ingest_local_ocr_gate(None, False)["block"] is False))
+
+    # (S2 r180) hạ ref một bước: `source-update-corpus false --as-ref` = corpus=false + row_kind=ref,
+    # GIỮ nguồn NLM + nlm_status họ sống (không xoá, không removed_*). Khác false thường (vẫn xoá NLM
+    # — khoá cũ dòng ~145 GIỮ NGUYÊN). shared_source_id KHÔNG chặn nhánh as_ref (không đụng NLM).
+    def _c180_s2_as_ref():
+        _e = [{"drive_id": "u2", "nlm_source_id": "U2", "name": "c102", "so_hieu": "5/2025/QH15"}]
+        _pa = _TL_MODULE._source_update_corpus_plan(_e, "5/2025/QH15", False, as_ref=True)
+        _pb = _TL_MODULE._source_update_corpus_plan(_e, "5/2025/QH15", False)
+        return (_pa["ok"] and _pa["will_remove_nlm"] is False and _pa["set_row_kind"] == "ref"
+                and _pa["set_corpus"] is False and _pb["will_remove_nlm"] is True
+                and _pb.get("set_row_kind") is None)
+    _t110("r180_s2_as_ref_keeps_nlm", _c180_s2_as_ref)
+
+    def _c180_s2_as_ref_shared():
+        _e = [{"drive_id": "a1", "nlm_source_id": "S", "name": "x", "so_hieu": "1/2025/QH15"},
+              {"drive_id": "a2", "nlm_source_id": "S", "name": "y", "so_hieu": "2/2025/QH15"}]
+        return (_TL_MODULE._source_update_corpus_plan(_e, "1/2025/QH15", False, as_ref=True).get("blocked_shared") is not True
+                and _TL_MODULE._source_update_corpus_plan(_e, "1/2025/QH15", False).get("blocked_shared") is True)
+    _t110("r180_s2_as_ref_shared_not_blocked", _c180_s2_as_ref_shared)
+
+    # (S3 r180) extract resolve --sohieu ĐỌC CỘNG NỀN dưới profile (doctrine «Nền VBQPPL luôn bật»
+    # — hố 21-07: `extract 52-2025-VPQH --profile "Luật BHXH"` fail dù dòng nền sống). Hit nền mang
+    # scope='vbqppl' theo CONTEXT «Scope (dòng kết quả)».
+    def _c180_s3_base_also():
+        _sav = (_TL_MODULE._manifest_entries, _TL_MODULE._base_manifest_entries, _TL_MODULE._active_profile)
+        try:
+            _TL_MODULE._manifest_entries = lambda refresh=False: [{"drive_id": "P180", "name": "own", "so_hieu": "1/BC-X"}]
+            _TL_MODULE._base_manifest_entries = lambda config_path=None, refresh=False: (
+                [{"drive_id": "B180", "name": "VBHN_52-2025-VPQH_Hien_phap", "so_hieu": "52-2025-VPQH"}], None)
+            _TL_MODULE._active_profile = lambda: "Luật BHXH"
+            _ns180 = argparse.Namespace(refresh=False, config=None, base_also=True)
+            _e = _TL_MODULE._extract_resolve_entries(_ns180)
+            _base = [x for x in _e if x.get("drive_id") == "B180"]
+            # dưới NỀN (active = DEFAULT) → KHÔNG merge (không đọc nền hai lần) — kể cả cờ bật
+            _TL_MODULE._active_profile = lambda: _TL_MODULE.DEFAULT_PROFILE
+            _e2 = _TL_MODULE._extract_resolve_entries(_ns180)
+            return (len(_e) == 2 and len(_base) == 1 and _base[0].get("scope") == "vbqppl"
+                    and len(_e2) == 1)
+        finally:
+            (_TL_MODULE._manifest_entries, _TL_MODULE._base_manifest_entries, _TL_MODULE._active_profile) = _sav
+    _t110("r180_s3_extract_resolve_base_also", _c180_s3_base_also)
+
+    # (S5 r180) source-update-corpus NOT_FOUND trên cache → tự refresh MỘT lần trước khi kết luận
+    # (hố 21-07: gọi ngay sau apply bị NOT_FOUND, phải reg-query --refresh tay).
+    def _c180_s5_auto_refresh():
+        _sav_me = _TL_MODULE._manifest_entries
+        _sav_apo = _TL_MODULE.apply_profile_offline
+        try:
+            _row = {"drive_id": "R180", "name": "z", "so_hieu": "9/2026/QH15"}
+            _TL_MODULE._manifest_entries = lambda refresh=False: ([_row] if refresh else [])
+            _TL_MODULE.apply_profile_offline = lambda *x, **k: None
+            _buf = _io27.StringIO()
+            with _ctx27.redirect_stdout(_buf), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_source_update_corpus(build_parser().parse_args(
+                    ["source-update-corpus", "9/2026/QH15", "false"]))
+            _j = json.loads(_buf.getvalue())
+            return _rc == 0 and _j.get("mode") == "DRY" and _j.get("drive_id") == "R180"
+        finally:
+            _TL_MODULE._manifest_entries = _sav_me
+            _TL_MODULE.apply_profile_offline = _sav_apo
+    _t110("r180_s5_not_found_auto_refresh", _c180_s5_auto_refresh)
+
+    # (S4 r180) DRY .doc cũ: NO_TEXT_FOR_VERIFY → info OLD_DOC_VERIFY_AT_APPLY + verify_at_apply
+    # (verify thật chạy ở apply sau convert server-side — hố 21-07: DRY phán corpus_allowed=false
+    # trong khi apply ra 76 Điều corpus=true). .docx/--text-file GIỮ NGUYÊN.
+    def _c180_s4():
+        _g = {"ok": False, "flags": ["NO_TEXT_FOR_VERIFY"], "info": [], "corpus_allowed": False}
+        _r1 = _TL_MODULE._profile_dry_gate_soften(dict(_g), ".doc", False)
+        _r2 = _TL_MODULE._profile_dry_gate_soften(dict(_g), ".docx", False)
+        _r3 = _TL_MODULE._profile_dry_gate_soften(dict(_g), ".doc", True)
+        return (_r1.get("verify_at_apply") is True and "NO_TEXT_FOR_VERIFY" not in _r1["flags"]
+                and "OLD_DOC_VERIFY_AT_APPLY" in _r1["info"]
+                and _r2.get("verify_at_apply") is None and _r3.get("verify_at_apply") is None)
+    _t110("r180_s4_old_doc_verify_at_apply", _c180_s4)
+
+    # (S7 r180) reg-query positional = lọc mờ theo tên (alias --name) — hết rc=2 'unrecognized arguments'
+    def _c180_s7():
+        _sav_me = _TL_MODULE._manifest_entries
+        _sav_apo = _TL_MODULE.apply_profile_offline
+        try:
+            _TL_MODULE._manifest_entries = lambda refresh=False: [
+                {"drive_id": "Q71", "name": "VBHN_52-2025-VPQH_Hien_phap_2013", "so_hieu": "52-2025-VPQH"},
+                {"drive_id": "Q72", "name": "Luat_45-2019-QH14", "so_hieu": "45/2019/QH14"}]
+            _TL_MODULE.apply_profile_offline = lambda *x, **k: None
+            _buf = _io27.StringIO()
+            with _ctx27.redirect_stdout(_buf), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_reg_query(build_parser().parse_args(
+                    ["reg-query", "Hien_phap", "--json", "--no-base-also"]))
+            _j = json.loads(_buf.getvalue())
+            return _rc == 0 and _j.get("count") == 1 and "Q71" in _buf.getvalue()
+        finally:
+            _TL_MODULE._manifest_entries = _sav_me
+            _TL_MODULE.apply_profile_offline = _sav_apo
+    _t110("r180_s7_reg_query_positional_fuzzy", _c180_s7)
+
+    # (S8 r180) nlm-add --row-kind: cờ tường minh THẮNG suy-topology; không cờ → luật cũ F-06
+    # (overflow trừ kind bảo hộ ref/thuong); còn lại None (không đụng).
+    def _c180_s8():
+        _f = _TL_MODULE._nlm_link_row_kind
+        _p = build_parser().parse_args(["nlm-add", "--drive-id", "x", "--row-kind", "ref"])
+        return (_p.row_kind == "ref" and _f("ref", "", False) == "ref" and _f("REF", "own", True) == "ref"
+                and _f("", "", True) == "overflow" and _f("", "ref", True) is None
+                and _f(None, "", False) is None)
+    _t110("r180_s8_nlm_add_row_kind", _c180_s8)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

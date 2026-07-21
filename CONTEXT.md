@@ -84,6 +84,10 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **nlm_claim** — điều SỔ CÁI KHẲNG ĐỊNH đang có mặt trên notebook: dòng có `nlm_status` thuộc họ sống
   (`pushed*`/`synced*`/`active`). Đối chiếu claim ↔ live (đếm vật lý trên NLM) ra **desync** — việc của
   `nlm-reconcile`. KHÁC nlm_due.
+- **Hạ ref (demote corpus→ref)** — thao tác MỘT BƯỚC đưa một nguồn ra khỏi diện căn cứ nhưng GIỮ nó
+  truy-vấn-được: corpus=false + row_kind=ref, nguồn NLM và nlm_status họ sống GIỮ NGUYÊN (chốt
+  2026-07-22, ca ILO C102). KHÁC «bỏ ra khỏi corpus» thường (corpus=false + GỠ nguồn NLM + removed_*).
+  Nhất quán [[nlm_due]]: due = corpus ∪ ref nên dòng hạ ref không sinh nhiễu desync/coverage_gap.
 - **nlm_due** — diện PHẢI-CÓ-MẶT theo chính sách corpus (dòng corpus ∪ ref). Đối chiếu due ↔ vật lý ra
   **coverage_gap** (nợ phủ) — việc của `slot-audit`. Hai phép đo trả lời hai câu hỏi khác nhau; con số
   lệch nhau giữa chúng KHÔNG phải mâu thuẫn. Cấm dùng trần chữ "claim"/"gap" không kèm định nghĩa

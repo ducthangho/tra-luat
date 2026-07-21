@@ -48,6 +48,19 @@ def bind(tl_module) -> None:
             g[_n] = _re
 
 
+def _nlm_link_row_kind(explicit, cur_rk: str, shard_is_overflow: bool):
+    """r180 S8 (PURE, test offline): row_kind ghi ở bước reg_link của nlm-add — cờ --row-kind tường
+    minh THẮNG suy-topology (trước đây nlm-add trả row_kind=null, phải `register --row-kind` riêng);
+    không cờ → luật cũ v1.34.49 F-06: shard overflow suy 'overflow' trừ kind bảo hộ (ref/thuong);
+    còn lại None (không đụng cột)."""
+    rk = (explicit or "").strip().lower()
+    if rk:
+        return rk
+    if shard_is_overflow and (cur_rk or "") not in _ROW_KIND_PROTECTED:
+        return "overflow"
+    return None
+
+
 def cmd_nlm_add(a) -> int:
     """(1) Thêm nguồn NLM qua CLI `nlm source add` (thay MCP source_add) — đúng directive CLI-first."""
     # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-add rơi về VBQPPL base).
@@ -207,8 +220,10 @@ def cmd_nlm_add(a) -> int:
                         except Exception:  # noqa: BLE001
                             _topo_na = {"shards": []}
                         _cur_rk_na = str((_row_e or {}).get("row_kind") or "").strip().lower()
-                        if _shard_row_kind(nb, _topo_na) == "overflow" and _cur_rk_na not in _ROW_KIND_PROTECTED:
-                            _it_na["row_kind"] = "overflow"
+                        _rk80 = _nlm_link_row_kind(getattr(a, "row_kind", None), _cur_rk_na,
+                                                   _shard_row_kind(nb, _topo_na) == "overflow")   # r180 S8
+                        if _rk80:
+                            _it_na["row_kind"] = _rk80
                             _cols_na += ",row_kind"
                             _bef_na["row_kind"] = _cur_rk_na
                         _v = _journaled_reg_write(_rid, _g, [_it_na], _cols_na,

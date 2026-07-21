@@ -1317,6 +1317,8 @@ def cmd_profile_ingest(a) -> int:
                 "info": ["SPREADSHEET_TEXT_VERIFY_SKIPPED"]}
     else:
         gate = _ingest_verify_gate(probe_text, info, source_quality, getattr(a, "ocr_verified", False))
+        gate = _profile_dry_gate_soften(gate, Path(f).suffix.lower(),
+                                        bool(getattr(a, "text_file", None)))   # r180 S4
         if _pdf_q9p and _pdf_q9p.get("broken_font"):
             # v1.34.58 (C-#9): DRY báo đúng bệnh — thay NO_TEXT/OCR_UNVERIFIED bằng flag broken-font
             # (gate không chặn từ probe local; apply giữ nguyên: _read_doc_text(gdoc) sau convert quyết corpus).
@@ -1344,7 +1346,9 @@ def cmd_profile_ingest(a) -> int:
         "size_bytes": size_bytes,
         "large": bool(chunks),
         "chunk_plan": _chunk_summaries(chunks),
-        "registry": {"row_kind": "own", "cat": "own", "corpus": bool(gate.get("corpus_allowed"))},
+        "registry": {"row_kind": "own", "cat": "own",
+                     "corpus": (None if gate.get("verify_at_apply")
+                                else bool(gate.get("corpus_allowed")))},   # r180 S4: None = quyết ở apply
         "note": "DRY mặc định. --apply tạo canonical GDoc flat trong root profile; nếu tách, chunk NLM nằm trong _meta.",
     }
     _contract = build_ingest_plan(
@@ -1814,6 +1818,34 @@ def _ingest_local_prev_state(file_path: str, name: str, *, identity_hash: str = 
     return out
 
 
+def _profile_dry_gate_soften(gate: dict, suffix: str, has_text_file: bool) -> dict:
+    """r180 S4 (PURE, test offline): .doc CŨ (binary) không đọc được local → DRY không được phán
+    corpus_allowed như KẾT LUẬN — verify THẬT chạy ở apply sau convert server-side (hố 21-07: dry
+    NO_TEXT_FOR_VERIFY + corpus_allowed=false, apply ra 76 Điều corpus=true). Đổi NO_TEXT_FOR_VERIFY
+    thành info OLD_DOC_VERIFY_AT_APPLY + verify_at_apply=True. KHÔNG đụng .docx/.pdf hay khi có
+    --text-file (các đường đó đọc/probe được local — gate dry là dự báo thật)."""
+    if suffix != ".doc" or has_text_file or "NO_TEXT_FOR_VERIFY" not in (gate.get("flags") or []):
+        return gate
+    g2 = dict(gate)
+    g2["flags"] = [x for x in gate["flags"] if x != "NO_TEXT_FOR_VERIFY"]
+    g2["info"] = list(gate.get("info") or []) + ["OLD_DOC_VERIFY_AT_APPLY"]
+    g2["verify_at_apply"] = True
+    return g2
+
+
+def _ingest_local_ocr_gate(source_quality: str, ocr_verified: bool) -> dict:
+    """r180 S1 (PURE, test offline): cổng OCR đường corpus NỀN — mirror vế ocr_ok của
+    _ingest_verify_gate bên profile-ingest (doctrine: PDF scan/OCR chưa đối chiếu thì KHÔNG vào
+    corpus/NLM làm canonical). Trước r180, ingest-local nhận cặp cờ nhưng chỉ ghi cảnh báo
+    auto-plan — bước link cuối vẫn corpus=true vô điều kiện (hố ghi nhận phiên vận hành 21-07:
+    Hiệp định VN–Hàn scan --source-quality ocr KHÔNG --ocr-verified vẫn corpus=true)."""
+    sq = (source_quality or "auto").lower()
+    block = (sq == "ocr") and not bool(ocr_verified)
+    return {"block": block, "source_quality": sq, "ocr_verified": bool(ocr_verified),
+            "flag": ("OCR_UNVERIFIED_NOT_CORPUS" if block else None),
+            "corpus_allowed": not block}
+
+
 def cmd_ingest_local(a) -> int:
     """(2)+(3) Ingest 1 file local vào corpus bằng 1 lệnh: upload _HOP_NAP → organize (convert GDoc + tên chuẩn + cat + stamp + register)
     → preflight chọn base/overflow → `nlm source add` (CLI) → push registry. DRY mặc định; --apply để thực thi.
@@ -1932,8 +1964,11 @@ def cmd_ingest_local(a) -> int:
     if _active_profile() != DEFAULT_PROFILE and os.environ.get("TL_CATEGORIES_MODE", "").strip().lower() == "inherit":
         _inherit_warn = ("PROFILE categories=inherit → văn bản vào CÂY CHUNG VBQPPL theo cat, KHÔNG vào rootFolder RIÊNG "
                          "của profile. Muốn profile SỞ HỮU cây riêng: đặt config.profiles.<p>.categories='own' rồi ingest lại.")
+    _ocr_g = _ingest_local_ocr_gate(getattr(a, "source_quality", "auto"),
+                                    getattr(a, "ocr_verified", False))   # r180 S1
     plan = {"file": f, "name": name, "sohieu": sohieu or None, "cat": cat or None,
             "reg_cat_label": (_cat_reg_label(cat) if cat else None),   # S6 v1.33.44: giá trị THẬT sẽ ghi registry
+            "ocr_gate": _ocr_g,   # r180 S1: DRY báo trước corpus_allowed=false khi ocr∧¬verified
             "cat_ten": (official or {}).get("ten"), "cat_valid": cat_valid, "folder_exists": folder_exists,
             "need_mkdir": need_mkdir, "review_cat": review_cat, "cat_note": cat_note, "goc": goc or None,
             "hieuluc": hieuluc, "loai": loai or None, "size_bytes": _size_bytes,
@@ -2014,6 +2049,13 @@ def cmd_ingest_local(a) -> int:
                                        "Hoặc `--allow-large` để nạp NGUYÊN file (chấp nhận giảm chất lượng truy vấn)"]},
                          ensure_ascii=False, indent=2))
         return 2
+    # r180 S1: cổng OCR đường nền — ocr∧¬verified ⇒ ÉP đường --no-nlm-add (Drive+registry corpus=false,
+    # KHÔNG đụng NLM), cuối nhánh trả rc=2 kèm hướng dẫn ocr-verify. Mirror ngữ nghĩa profile-ingest.
+    if _ocr_g["block"] and not getattr(a, "no_nlm_add", False):
+        print("[tl] ⚠ S1 (r180): --source-quality ocr CHƯA --ocr-verified → corpus KHÔNG set, BỎ nlm-add. "
+              "Đối chiếu OCR xong: `tl ocr-verify …` rồi chạy lại với --ocr-verified (hoặc dùng `tl ingest-ocr`).",
+              file=sys.stderr)
+        a.no_nlm_add = True
     # Group B: profile DỰ ÁN thiếu notebookId → DỪNG (KHÔNG đẩy nhầm vào VBQPPL base). load_creds ở trên đã set
     # TL_NOTEBOOK_ID nếu profile có; nếu KHÔNG có và profile != vbqppl → lỗi NO_NOTEBOOK_ID (đúng gốc lỗi Nhóm B).
     _nb_check, _nb_err = _resolve_nlm_notebook(None)
@@ -2276,6 +2318,19 @@ def cmd_ingest_local(a) -> int:
                    "2) tl nlm-reconcile --all-notebooks   (nguồn add tay hiện thành link_candidates bắc cầu exact-title → chạy per-notebook --apply để link registry)",
                    f"3) tl register --drive-id {gdoc} --corpus true   (đưa vào corpus SAU khi đã link NLM)",
                ]}
+        if _ocr_g["block"]:
+            # r180 S1: canonical ĐÃ tạo nhưng OCR chưa đối chiếu → note registry + rc=2 (mirror
+            # verify_gate profile-ingest: «Canonical đã tạo nhưng chưa corpus/NLM»).
+            _vu_ocr = _verified_reg_upsert(g, {"drive_id": gdoc, "note": "OCR_UNVERIFIED_NOT_CORPUS"})
+            out.update({"ok": False, "step": "ocr_verify_gate", "ocr_gate": _ocr_g,
+                        "registry_note_verified": bool(_vu_ocr.get("verified")),
+                        "next_steps": [
+                            "1) Đối chiếu OCR với bản gốc: tl ocr-verify <text_file> --source <file> --json",
+                            f"2) Đạt → nạp NLM (add tay UI hoặc nlm-add) rồi: tl register --drive-id {gdoc} --corpus true",
+                            "   (hoặc làm lại trọn gói bằng: tl ingest-ocr <file> --text-file <txt> --cat <NN> --apply --confirm yes)",
+                        ]})
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+            return 2
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         return 0
     nc = _imp("nlm_cli")

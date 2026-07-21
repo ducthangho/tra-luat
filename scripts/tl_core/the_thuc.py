@@ -1357,6 +1357,17 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
         _bo_kiem |= {("chuc_vu_ky", "kieu"),                                  # Đ4: TT-CHUC-VU-DAM
                      ("phan_chuong", "canh"), ("muc", "canh")}                # Đ4: TT-CHUONG-CANH-GIUA
     _TIN_CAY_THAP = {"ten_cq_tren", "ten_cq", "trich_yeu", "ho_ten_ky", "tieu_de_pc", "than"}
+    # r180 (ADR-0009 Đ3/Đ6): 8 (hệ·ô·trục) user duyệt THĂNG FAIL 2026-07-22 theo chuẩn zero-oan
+    # tuyệt đối (hồ sơ `D:\Quốc hội\thang-o-2026-07-22\ket_luan_doi_chieu.md` — đo tươi 159 file,
+    # đối chiếu tay từng finding lớp A+C). CHỈ thăng từ WARN — B3/tin-cậy-thấp giữ INFO vĩnh viễn
+    # (Đ1); trục chưa duyệt của cùng ô GIỮ WARN. Inline trong hàm: hằng module-level chết theo
+    # bind-REBASE (bẫy I11).
+    _THANG_FAIL = {
+        ("hanh_chinh", "noi_nhan_ds", "CO"), ("hanh_chinh", "noi_nhan_tu", "CO"),
+        ("hanh_chinh", "ten_loai", "CO"), ("hanh_chinh", "dia_danh", "KIEU"),
+        ("dang", "the_loai", "CO"), ("dang", "dia_danh", "CO"),
+        ("dang", "so_ky_hieu", "CO"), ("dang", "dia_danh", "KIEU"),
+    }
     for i, o in sorted(gan.items()):
         if o not in bang:
             continue
@@ -1367,14 +1378,18 @@ def _the_thuc_check_dac_ta(d, he_eff, add):
         _nhan = " — bậc " + bac + (", tin cậy nhận diện thấp" if o in _TIN_CAY_THAP else "")
         _loc = f"đoạn {i + 1}: '{p['text'][:40]}'"
 
-        def _f(truong, do_duoc, ky_vong):
-            add(_oid + truong.upper(), muc, do_duoc, ky_vong + _nhan, cc, _loc)
+        def _f(truong, do_duoc, ky_vong, chua_do=False):
+            # r180: thăng theo (hệ, ô, trục) đã duyệt — không đụng nấc INFO; chua_do=True là nhánh
+            # KHÔNG CÓ SỐ ĐO (vd «cỡ không khai báo») → giữ WARN, zero-oan chỉ thăng vi phạm ĐO ĐƯỢC.
+            _muc_f = ("FAIL" if (not chua_do and muc == "WARN"
+                                 and (he_eff, o, truong.upper()) in _THANG_FAIL) else muc)
+            add(_oid + truong.upper(), _muc_f, do_duoc, ky_vong + _nhan, cc, _loc)
 
         if (o, "co") not in _bo_kiem:
             lo, hi = (float(v) for v in (co.split("-") * 2)[:2])
             pt = p["sz"] / 2 if p["sz"] else None
             if pt is None:
-                _f("co", "cỡ không khai báo", co + "pt")
+                _f("co", "cỡ không khai báo", co + "pt", chua_do=True)   # r180: không đo được → không thăng FAIL
             elif not (lo <= pt <= hi):
                 _f("co", f"{pt:g}pt", co + "pt")
         if (o, "kieu") not in _bo_kiem:

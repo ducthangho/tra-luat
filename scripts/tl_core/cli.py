@@ -251,6 +251,8 @@ def build_parser() -> argparse.ArgumentParser:
     # S8 (v1.33.44 — log 7A: drift doc↔CLI, ghi chú cũ dùng --drive/--wait): --drive = ALIAS của --drive-id;
     # --wait = NO-OP tương thích (mặc định ĐÃ wait; tắt bằng --no-wait) — driver theo doc cũ không gãy usage-error.
     p.add_argument("--drive-id", "--drive", dest="drive_id"); p.add_argument("--url"); p.add_argument("--file")
+    p.add_argument("--row-kind", dest="row_kind", choices=["own", "overflow", "ref"],
+                   help="r180 S8: ghi row_kind ngay ở bước reg_link (vd `ref` cho nguồn tham khảo) — trước đây trả row_kind=null, phải `register --row-kind` riêng")
     p.add_argument("--type", default=None, help="doc|sheets|slides — bỏ trống = tự nhận từ MIME manifest (#4 v1.34.17)"); p.add_argument("--title"); p.add_argument("--no-wait", action="store_true")
     p.add_argument("--wait", action="store_true",
                    help="no-op: mặc định ĐÃ wait tới khi nguồn settle; nhận cờ cho tương thích ghi chú cũ (tắt: --no-wait)")
@@ -333,6 +335,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
     p = sub.add_parser("reg-query", help="truy vấn registry/manifest OFFLINE (đọc CACHE) + lọc (name/sohieu/cat/loai/nlm/row-kind/corpus/mime). E2: SAU khi ghi sheet (reg_upsert/ingest/backfill) phải `--refresh` để thấy thay đổi LIVE, nếu không sẽ đọc cache CŨ (vd nlm rỗng dù sheet đã ghi).")
+    p.add_argument("query", nargs="?", help="r180 S7: lọc mờ theo tên (alias --name) — vd `tl reg-query Hien_phap`")
     p.add_argument("--name"); p.add_argument("--sohieu"); p.add_argument("--cat")
     p.add_argument("--loai", help="(v1.33.6) lọc theo LOẠI văn bản, so CHUẨN HOÁ enum ('Luật' khớp cả 'Luat'/'luật'; 'Bộ luật' riêng) — trước đây phải lọc tay theo tiền tố tên")
     p.add_argument("--nlm", nargs="?", const=True, default=False, type=_optional_bool_flag,

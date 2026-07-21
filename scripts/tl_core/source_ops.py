@@ -772,9 +772,12 @@ def cmd_source_delete(a) -> int:
     return 0 if reg.get("ok") else 2
 
 
-def _source_update_corpus_plan(entries: list, target: str, is_corpus: bool) -> dict:
+def _source_update_corpus_plan(entries: list, target: str, is_corpus: bool, as_ref: bool = False) -> dict:
     """PURE: kế hoạch bật/tắt cờ corpus 1 nguồn. corpus=false = 'bỏ ra khỏi corpus' (reversible ở registry) + gỡ nguồn NLM
-    (GUARD shared_source_id). corpus=true = đưa lại vào corpus (cần nlm-add/ingest sau nếu chưa có nguồn)."""
+    (GUARD shared_source_id). corpus=true = đưa lại vào corpus (cần nlm-add/ingest sau nếu chưa có nguồn).
+    r180 S2: as_ref=True (chỉ nghĩa với false) = HẠ REF một bước — corpus=false + row_kind=ref, GIỮ nguồn
+    NLM và nlm_status họ sống (tham khảo truy-vấn-được, không phải căn cứ — ca ILO C102; ADR-0010:
+    nlm_due = corpus ∪ ref nên dòng ref giữ NLM là nhất quán sổ). Không đụng NLM → shared KHÔNG chặn."""
     e = _source_find(entries, target)
     if not e:
         return {"ok": False, "error": "NOT_FOUND", "target": target}
@@ -782,6 +785,12 @@ def _source_update_corpus_plan(entries: list, target: str, is_corpus: bool) -> d
     shared = bool(sid) and sid in {g["source_id"] for g in _shared_source_id_groups(entries)}
     plan = {"ok": True, "drive_id": _entry_drive_id(e), "name": _entry_name(e), "sohieu": _entry_sohieu(e) or "",
             "set_corpus": is_corpus, "nlm_source_id": sid or None, "shared_source_id": shared}
+    if not is_corpus and as_ref:
+        plan.update({"set_row_kind": "ref", "will_remove_nlm": False,
+                     "note": ("HẠ REF: reg_upsert corpus=false + row_kind=ref, GIỮ nguồn NLM/nlm_status "
+                              "(tham khảo truy-vấn-được, không phải căn cứ). Đưa lại corpus: "
+                              "`tl source-update-corpus <t> true` (+ register --row-kind '' nếu cần).")})
+        return plan
     if not is_corpus:
         if shared:
             # (MERGE, an toàn — review) 'bỏ ra khỏi corpus' khi nguồn DÙNG CHUNG (FALSE-LINK) → CHẶN (tránh nhầm status
@@ -807,11 +816,23 @@ def cmd_source_update_corpus(a) -> int:
     if status_str not in ("true", "false", "yes", "no", "1", "0"):
         print("[tl] source-update-corpus: cần <target> và <status> (true/false).", file=sys.stderr); return 2
     is_corpus = status_str in ("true", "yes", "1")
+    _as_ref = bool(getattr(a, "as_ref", False)) and not is_corpus   # r180 S2 (--as-ref chỉ nghĩa với false)
     try:
         entries = _manifest_entries(refresh=getattr(a, "refresh", False))
     except Exception as e:
         print(f"[tl] source-update-corpus: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    plan = _source_update_corpus_plan(entries, (getattr(a, "target", "") or "").strip(), is_corpus)
+    plan = _source_update_corpus_plan(entries, (getattr(a, "target", "") or "").strip(), is_corpus,
+                                      as_ref=_as_ref)
+    if (not plan.get("ok")) and plan.get("error") == "NOT_FOUND" and not getattr(a, "refresh", False):
+        # r180 S5: dòng vừa ghi có thể chưa vào cache manifest → tự refresh MỘT lần trước khi kết
+        # luận NOT_FOUND (hố 21-07: gọi ngay sau apply bị NOT_FOUND oan, phải --refresh tay).
+        print("[tl] S5 (r180): NOT_FOUND trên cache → tự refresh manifest thử lại một lần.", file=sys.stderr)
+        try:
+            entries = _manifest_entries(refresh=True)
+            plan = _source_update_corpus_plan(entries, (getattr(a, "target", "") or "").strip(), is_corpus,
+                                              as_ref=_as_ref)
+        except Exception as _e5:  # noqa: BLE001 — refresh hỏng thì giữ kết luận cũ, không nuốt
+            print(f"[tl] S5: refresh lỗi ({_e5}) — giữ kết luận NOT_FOUND từ cache.", file=sys.stderr)
     if not plan.get("ok"):
         print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr); return 2
     if plan.get("blocked_shared"):    # CHẶN TOÀN BỘ khi shared+false — resolve FALSE-LINK trước
@@ -819,16 +840,22 @@ def cmd_source_update_corpus(a) -> int:
     if not (getattr(a, "apply", False) and getattr(a, "confirm", "").strip().lower() == "yes"):
         print(json.dumps({"mode": "DRY", "confirm_required": "--apply --confirm yes", **plan}, ensure_ascii=False, indent=2))
         return 0
-    _ok_gate, _ = _apply_gate(a, write_cols="corpus,nlm_status")   # (Pha 1+) precheck + journal + verified upsert
+    _ok_gate, _ = _apply_gate(a, write_cols=("corpus,row_kind" if _as_ref else "corpus,nlm_status"))   # (Pha 1+)
     if not _ok_gate:
         return 2
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     g = _gas()
-    run_id = _apply_journal_start("source-update-corpus", {"corpus": is_corpus, "drive_id": plan["drive_id"]})
+    run_id = _apply_journal_start("source-update-corpus",
+                                  {"corpus": is_corpus, "drive_id": plan["drive_id"], "as_ref": _as_ref})
     payload = {"drive_id": plan["drive_id"], "corpus": "true" if is_corpus else "false"}
-    if not is_corpus:
+    if _as_ref:
+        payload["row_kind"] = "ref"   # r180 S2: GIỮ nlm_status họ sống — KHÔNG ghi removed_*
+    elif not is_corpus:
         payload["nlm_status"] = "removed_by_user"
     _before = {"corpus": "false" if is_corpus else "true"}   # undo = trả cờ corpus ngược lại
+    if _as_ref:
+        _e_rk = next((x for x in entries if _entry_drive_id(x) == plan["drive_id"]), {}) or {}
+        _before["row_kind"] = str(_e_rk.get("row_kind") or "")
     _vu = _journaled_reg_upsert(run_id, g, payload, before=_before)
     reg = _vu.get("reg_upsert") or {"ok": _vu.get("verified")}
     nlm_r = None
@@ -852,7 +879,8 @@ def cmd_source_update_corpus(a) -> int:
                                              before=_rc_before)
     _journal_append(run_id, {"t": "run_end", "ok": bool(reg.get("ok")), "counts": {"corpus": is_corpus}})
     _invalidate_manifest_cache()
-    print(json.dumps({"ok": bool(reg.get("ok")), "corpus": is_corpus, "reg_upsert": reg, "nlm_delete": nlm_r,
+    print(json.dumps({"ok": bool(reg.get("ok")), "corpus": is_corpus, "as_ref": _as_ref,
+                      "reg_upsert": reg, "nlm_delete": nlm_r,
                       **({"nlm_ref_cleared": bool(ref_clear.get("verified"))} if ref_clear is not None else {}),
                       "journal": run_id,
                       "nlm_blocked_shared": plan.get("nlm_shared_blocked", False),

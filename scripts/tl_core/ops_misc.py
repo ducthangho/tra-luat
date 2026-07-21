@@ -2016,8 +2016,15 @@ def _reg_query_row(e: dict) -> dict:
 
 def cmd_reg_query(a) -> int:
     """Truy vấn registry/manifest OFFLINE với bộ lọc (thay ~chục snippet json.load+filter tay).
-    Lọc: --name (substring), --sohieu, --cat (mã/tiền tố), --nlm/--no-nlm, --row-kind, --corpus/--no-corpus, --mime."""
+    Lọc: --name (substring), --sohieu, --cat (mã/tiền tố), --nlm/--no-nlm, --row-kind, --corpus/--no-corpus, --mime.
+    r180 S7: positional tự do = lọc mờ theo tên (alias --name) — `reg-query "Hien_phap"` chạy được."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    _q80 = (getattr(a, "query", None) or "").strip()
+    if _q80:
+        if getattr(a, "name", None):
+            print(f"[tl] reg-query: có cả positional {_q80!r} lẫn --name → dùng --name.", file=sys.stderr)
+        else:
+            a.name = _q80   # r180 S7: positional = fuzzy --name (trước đây rc=2 unrecognized arguments)
     # v1.34.58 (C-#11 — Q9=a): --live đọc AUTHORITATIVE qua reg_get (né manifest cache stale — bài học
     # 'manifest không đáng tin' v1.34.50) — CHỈ hợp lệ kèm bộ lọc HẸP (--drive-id | --sohieu | --name);
     # không lọc → LIVE_NEEDS_FILTER rc=2 (reg_get toàn bảng đắt/vô nghĩa; đọc rộng dùng manifest/--refresh).

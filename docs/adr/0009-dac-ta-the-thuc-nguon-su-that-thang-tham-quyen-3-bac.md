@@ -43,7 +43,22 @@
   kiểu/canh/thụt vẫn inline trong builder nhưng bị r170+r173 khoá từ ngoài — nối nốt ở bước 5 nếu
   thực tế đòi) · **bước 4 ✅ 2026-07-21** (đo lũ — kết quả + 5 quyết định Đ1-Đ5 bên dưới; hồ sơ
   `D:\Quốc hội\do-lu-2026-07-21\BAO-CAO-DO-LU-2026-07-21.md`) · **vòng 2 bước 1** vá bảng theo Đ2
-  ✅ r175 (v1.35.5) · bước 5 nối bộ kiểm ⏳ (điều kiện Đ3/Đ4/Đ5).
+  ✅ r175 (v1.35.5) · **bước 5 nối bộ kiểm ✅ r176 (v1.35.6, 2026-07-21) — TRÌNH TỰ 5 BƯỚC HOÀN TẤT**.
+- **Bước 5 — thi hành (r176):** lớp đặc tả `_the_thuc_check_dac_ta` nối vào `the-thuc-check` sau T3,
+  sinh finding `TT-DT-<Ô>-<CO|KIEU|CANH|THUT>`; parser production mở kênh `dt` per-đoạn (kế thừa
+  style đủ tầng); classifier port NGUYÊN TRẠNG từ bộ kiểm nháp (6 bẫy oan đã vá giữ đủ) + vá oan
+  mới lộ khi quét sổ: neo `thong_qua` siết theo công thức Đ36 k1 «<loại> này được Quốc hội … thông
+  qua» (thân Lệnh công bố hết bị gán nhầm). Điều kiện Đ3/Đ4/Đ5 thi hành đúng nguyên văn (Đ4 nhường
+  trọn `co` khối đầu ở MỌI hệ — chấp nhận kẽ hanh_chinh cờ tay chỉ đo bậc tương đối, hồ sơ trong
+  docstring). Mức Đ1: B1/B2→WARN · B3→INFO · ô tin-cậy-thấp→INFO; không FAIL. Sổ `_BAT_DUOC` r173
+  mở 1→51 ô đúng cơ chế tự-cưỡng-chế; 8 gap còn lại có hồ sơ tại comment r173. **Nghiệm thu** (129
+  file, baseline @v1.35.5): tầng 1 qua PRODUCTION = 0 TT-DT tuyệt đối (19 NQ351 · 15 HD05 · builder);
+  lớp A 876→856 — diff per-ô đúng 5 dòng, 100% quy về Đ4 (−9 TT-BAC-CO-CHU, −4 TT-CHUC-VU-DAM) và
+  Đ5 (−7 trich_yeu·kieu); lớp B 3.905→0 (Đ3); lớp C 46→42. Chống-trùng kiểm tay: mỗi hiện tượng
+  đúng MỘT finding cờ tay, không TT-DT trùng. Việc mở sau (không chặn ADR): nhận diện cong_van hệ
+  Đảng chưa có tiêu chí máy (HD05 không dùng «V/v») — biến thể dang.cong_van chưa kích hoạt được
+  từ bộ kiểm; trục kiểu/canh/thụt của builder vẫn inline (r170+r173 khoá ngoài, nối nốt nếu thực
+  tế đòi).
 - **Bước 4 — số liệu đo (bộ kiểm nháp NGOÀI repo, skill v1.35.4):** Tầng 1: sản phẩm builder tự
   dựng 4 hệ/biến thể = **0 finding** (trùng kết luận byte-match r174); 33 mẫu chuẩn = 15 finding,
   đối chiếu tay **không cái nào là lỗi mẫu — toàn bộ là khiếm khuyết của BẢNG** (thiếu ô câu ban

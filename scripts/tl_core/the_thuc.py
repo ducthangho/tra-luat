@@ -381,6 +381,71 @@ def _the_thuc_parse_docx(path):
                 normal["font"], normal["sz"] = _rpr_font_sz(st.find(W + "rPr"))
                 break
 
+    # r176 (ADR-0009 bước 5): kênh `dt` per-đoạn cho LỚP ĐẶC TẢ — cỡ/đậm/nghiêng/gạch/canh/thụt
+    # resolve KẾ THỪA STYLE đủ tầng run → pPr/rPr → pStyle → Normal → docDefaults (1 cấp basedOn),
+    # port từ bộ kiểm nháp đo-lũ 21-07 (spec_check_draft.py — thiếu tầng style từng đẻ 701 finding
+    # oan). Các khoá cũ ind/jc/dam/szs GIỮ NGUYÊN ngữ nghĩa (cờ viết tay r143-r171 đang tựa vào);
+    # kênh mới nằm riêng trong p["dt"]. Chưa xử lý w:bCs, theme font, basedOn >1 cấp (như draft).
+    def _rpr5(rpr):
+        """(font, sz, dam, nghieng, gach) — None = tầng này không khai."""
+        if rpr is None:
+            return None, None, None, None, None
+        f5, s5 = _rpr_font_sz(rpr)
+
+        def _tf(tag):
+            el = rpr.find(W + tag)
+            if el is None:
+                return None
+            v = el.get(W + "val")
+            if tag == "u":
+                return None if v in (None, "none") else True
+            return v not in ("0", "false", "none")
+
+        return f5, s5, _tf("b"), _tf("i"), _tf("u")
+
+    def _lay3(ppr):
+        """(jc, firstLine, left) khai ở MỘT tầng pPr — None = không khai."""
+        if ppr is None:
+            return None, None, None
+        jel = ppr.find(W + "jc")
+        _jc3 = jel.get(W + "val") if jel is not None else None
+        _fl3 = _lf3 = None
+        iel = ppr.find(W + "ind")
+        if iel is not None:
+            for _a3 in ("firstLine", "left"):
+                try:
+                    _v3 = int(iel.get(W + _a3))
+                except (TypeError, ValueError):
+                    _v3 = None
+                if _a3 == "firstLine":
+                    _fl3 = _v3
+                else:
+                    _lf3 = _v3
+        return _jc3, _fl3, _lf3
+
+    _st5, _st3 = {}, {}
+    _dd5, _dd3 = (None,) * 5, (None,) * 3
+    if sty:
+        _dd5 = _rpr5(sroot.find(f"{W}docDefaults/{W}rPrDefault/{W}rPr"))
+        _dd3 = _lay3(sroot.find(f"{W}docDefaults/{W}pPrDefault/{W}pPr"))
+        _raw5, _raw3, _base = {}, {}, {}
+        for st in sroot.iter(W + "style"):
+            _sid = st.get(W + "styleId")
+            if not _sid:
+                continue
+            _raw5[_sid] = _rpr5(st.find(W + "rPr"))
+            _raw3[_sid] = _lay3(st.find(W + "pPr"))
+            _b0 = st.find(W + "basedOn")
+            if _b0 is not None:
+                _base[_sid] = _b0.get(W + "val")
+        for _sid in _raw5:
+            _p5 = _raw5.get(_base.get(_sid) or "", (None,) * 5)
+            _st5[_sid] = tuple(v if v is not None else _p5[i] for i, v in enumerate(_raw5[_sid]))
+            _p3 = _raw3.get(_base.get(_sid) or "", (None,) * 3)
+            _st3[_sid] = tuple(v if v is not None else _p3[i] for i, v in enumerate(_raw3[_sid]))
+    _no5 = _st5.get("Normal", (None,) * 5)
+    _no3 = _st3.get("Normal", (None,) * 3)
+
     runs = []
     paras = []
     # r146: đoạn NẰM TRONG BẢNG phải nhận dạng được — §6.7 "bảng KHÔNG áp thụt đầu dòng"
@@ -409,9 +474,36 @@ def _the_thuc_parse_docx(path):
             jel = ppr.find(W + "jc")            # r168: canh lề (HD05 6.2.3: Chương/Mục CHÍNH GIỮA)
             if jel is not None:
                 p_jc = jel.get(W + "val")
+        # r176: resolve kênh dt của đoạn này (KHÔNG đụng các biến cũ ở trên)
+        _pstyle = None
+        _p_rpr5 = (None,) * 5
+        _jc_d = _fl_d = _lf_d = None
+        if ppr is not None:
+            _sel = ppr.find(W + "pStyle")
+            _pstyle = _sel.get(W + "val") if _sel is not None else None
+            _p_rpr5 = _rpr5(ppr.find(W + "rPr"))
+            _jc_d, _fl_d, _lf_d = _lay3(ppr)
+        _s5 = _st5.get(_pstyle or "", (None,) * 5)
+        _s3 = _st3.get(_pstyle or "", (None,) * 3)
+        _lay = []
+        for _i2, _v2 in enumerate((_jc_d, _fl_d, _lf_d)):   # kế thừa pStyle → Normal → docDefaults
+            if _v2 is None:
+                _v2 = next((x for x in (_s3[_i2], _no3[_i2], _dd3[_i2]) if x is not None), None)
+            _lay.append(_v2)
+
+        def _res5(i2, run_v):
+            for v2 in (run_v, _p_rpr5[i2], _s5[i2], _no5[i2], _dd5[i2]):
+                if v2 is not None:
+                    return v2
+            return None
+
         ptxt = []
         pszs = {}                      # sz RESOLVED (run→Normal→docDefaults) → số chữ, per-paragraph (T3 bậc)
         pdam = False                   # r162: có run nào ĐẬM không (HD05 PL2 mục 7 phân biệt đậm/đứng)
+        _n_dt = 0
+        _szc = {}
+        _dam_n = _ngh_n = _gach_n = 0
+        _dam_dau = None                # r176: bold của RUN ĐẦU có chữ — kiểm văn phạm ":tien_to"
         for r in p.iter(W + "r"):
             rt = "".join((t.text or "") for t in r.iter(W + "t"))
             f, s = _rpr_font_sz(r.find(W + "rPr"))
@@ -426,10 +518,28 @@ def _the_thuc_parse_docx(path):
                 se = s if s is not None else (normal["sz"] if normal["sz"] is not None else defaults["sz"])
                 if se is not None:
                     pszs[se] = pszs.get(se, 0) + len(rt)
+                _rf5 = _rpr5(_rpr)
+                _n_dt += len(rt)
+                _sz_r = _res5(1, _rf5[1])
+                if _sz_r:
+                    _szc[_sz_r] = _szc.get(_sz_r, 0) + len(rt)
+                _b5 = bool(_res5(2, _rf5[2]))
+                if _dam_dau is None:
+                    _dam_dau = _b5
+                if _b5:
+                    _dam_n += len(rt)
+                if _res5(3, _rf5[3]):
+                    _ngh_n += len(rt)
+                if _res5(4, _rf5[4]):
+                    _gach_n += len(rt)
         if ptxt:
             paras.append({"text": "".join(ptxt), "ind": ind_fl, "line": sp_line,
                           "rule": sp_rule, "szs": pszs, "in_tbl": id(p) in _in_tbl,
-                          "dam": pdam, "jc": p_jc})
+                          "dam": pdam, "jc": p_jc,
+                          "dt": {"sz": (max(_szc.items(), key=lambda kv: kv[1])[0] if _szc else None),
+                                 "dam": _dam_n / _n_dt, "nghieng": _ngh_n / _n_dt,
+                                 "gach": _gach_n / _n_dt, "dam_dau": bool(_dam_dau),
+                                 "jc": _lay[0], "fl": _lay[1] or 0, "left": _lay[2] or 0}})
     return {"sections": sections, "defaults": defaults, "normal": normal,
             "runs": runs, "text": "\n".join(p["text"] for p in paras), "paras": paras,
             "footnotes": footnotes}
@@ -910,6 +1020,321 @@ def _the_thuc_check_t3(parsed, he_eff, add):
                     "HD 05-HD/VPTW Phần II mục 6.2.2")
 
 
+def _tt_dt_phan_loai(ps, he):
+    """r176 (ADR-0009 bước 5) — PHÂN LOẠI đoạn → ô đặc tả bằng NEO VĂN BẢN, port nguyên trạng từ
+    bộ kiểm nháp đo-lũ 21-07 (`do-lu-2026-07-21/spec_check_draft.py`) SAU khi đã vá 6 nguồn cảnh
+    báo oan tại chỗ — đừng "tối ưu" lại kẻo vấp đúng bẫy cũ:
+      · quốc hiệu so BẰNG sau chuẩn hoá lỏng (so CHỨA nuốt câu «Căn cứ Hiến pháp nước CHXHCNVN»)
+      · `ho_ten_ky` bỏ chú thích «(Ký và đóng dấu)»/«(Chữ ký)»
+      · mẫu trắng không số («Luật số: …/20…/QH…») → chặn khối cơ quan 8 đoạn đầu
+      · `chuc_vu_ky`/`quyen_han_ky` CHỈ quét i ≥ 2n/3 (dòng chủ thể «CHỦ TỊCH / NƯỚC CHXHCNVN»
+        GIỮA văn bản là ô co_quan_ban_hanh 14pt, không phải chữ ký 13pt)
+      · `tieu_de_pc` gán NGAY trong nhánh phan_chuong (kẻo nhánh de_muc_than cướp trước)
+      · đoạn TRONG BẢNG bỏ với nhóm đề mục thân («Điều 14.» trong ô bảng phụ lục là TRÍCH DẪN)
+      · đoạn GỘP tiêu-đề+ngày (Chỉ-thị-04-CT-TW) không phải ô địa danh.
+    `ps` = list dict {text (đã _tt_chuan_hoa_space + strip), sz, dam/nghieng/gach (tỉ lệ),
+    dam_dau, jc, fl, left, in_tbl} — dựng ở `_the_thuc_check_dac_ta`. Trả dict idx → tên ô;
+    đoạn không neo chắc thì KHÔNG gán (trừ giỏ `than`)."""
+    import re
+    LOAI = (r"(CƯƠNG LĨNH|ĐIỀU LỆ|CHIẾN LƯỢC|NGHỊ QUYẾT|QUYẾT ĐỊNH|CHỈ THỊ|KẾT LUẬN|QUY CHẾ|QUY ĐỊNH"
+            r"|THÔNG TRI|HƯỚNG DẪN|THÔNG BÁO|THÔNG CÁO|TUYÊN BỐ|LỜI KÊU GỌI|BÁO CÁO|KẾ HOẠCH|QUY HOẠCH"
+            r"|CHƯƠNG TRÌNH|ĐỀ ÁN|PHƯƠNG ÁN|DỰ ÁN|TỜ TRÌNH|CÔNG VĂN|BIÊN BẢN|NGHỊ ĐỊNH|THÔNG TƯ"
+            r"|BỘ LUẬT|LUẬT|PHÁP LỆNH|LỆNH|HỢP ĐỒNG|CÔNG ĐIỆN|GIẤY MỜI|PHIẾU GỬI)")
+    QH_PFX = ("T/M", "TM.", "K/T", "KT.", "TL.", "TUQ.", "Q.", "THAY MẶT")
+    CHUC_DANH = ("TỔNG BÍ THƯ", "BÍ THƯ", "PHÓ BÍ THƯ", "CHỦ TỊCH", "PHÓ CHỦ TỊCH", "THỦ TƯỚNG",
+                 "PHÓ THỦ TƯỚNG", "BỘ TRƯỞNG", "THỨ TRƯỞNG", "CHÁNH VĂN PHÒNG", "PHÓ CHÁNH VĂN PHÒNG",
+                 "CHỦ NHIỆM", "PHÓ CHỦ NHIỆM", "VỤ TRƯỞNG", "PHÓ VỤ TRƯỞNG", "CỤC TRƯỞNG",
+                 "TRƯỞNG BAN", "PHÓ TRƯỞNG BAN", "GIÁM ĐỐC", "PHÓ GIÁM ĐỐC", "TỔNG THƯ KÝ",
+                 "VIỆN TRƯỞNG", "CHÁNH ÁN", "TRƯỞNG ĐOÀN", "TỔNG GIÁM ĐỐC")
+    SK_PAT = {
+        "hanh_chinh": r"^\s*Số:\s*[\d/.]+\s*/\s*[A-ZĐ]",
+        "vbqppl_qh": r"^\s*(?:(?:Bộ\s+luật|Luật|Pháp\s+lệnh|Lệnh|Nghị\s+quyết)\s+)?[Ss]ố:\s*\d+/\d{4}/",
+        "dang": r"^\s*Số\s+\d+\s*-\s*[A-ZĐ]+/",
+    }
+    NGAY = r",\s*ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}"
+
+    def _hoa(t):
+        return bool(t) and t == t.upper() and any(c.isalpha() for c in t)
+
+    n = len(ps)
+    gan = {}
+    head_n = min(n, 30)
+    txts = [p["text"] for p in ps]
+
+    def _set(i, o):
+        if i is not None and 0 <= i < n and i not in gan:
+            gan[i] = o
+
+    # 1. neo tuyệt đối
+    for i in range(head_n):
+        k = _tt_loose_key(txts[i]).rstrip(".;:")
+        if k == _tt_loose_key("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"):
+            _set(i, "quoc_hieu")
+        elif k == _tt_loose_key("Độc lập - Tự do - Hạnh phúc"):
+            _set(i, "tieu_ngu")
+        elif he == "dang" and k == _tt_loose_key("ĐẢNG CỘNG SẢN VIỆT NAM"):
+            _set(i, "tieu_de")
+    # 2. số ký hiệu + địa danh
+    i_sk = None
+    for i in range(head_n):
+        if i in gan:
+            continue
+        if re.search(SK_PAT[he], txts[i]) and len(txts[i]) < 70:
+            _set(i, "so_ky_hieu")
+            i_sk = i
+            break
+    for i in range(head_n):
+        if (i not in gan and re.search(NGAY, txts[i]) and len(txts[i]) < 80
+                and "ĐẢNG CỘNG SẢN" not in txts[i] and "CỘNG HÒA" not in txts[i]):
+            _set(i, "dia_danh")
+            break
+    # trích yếu công văn «V/v …» — ô trich_yeu_cv chỉ có trong bảng hiệu lực khi biến thể
+    # cong_van kích hoạt (vòng so bỏ qua ô không có trong bảng nên gán ở đây luôn là an toàn)
+    if he == "hanh_chinh":
+        for i in range(head_n):
+            if i not in gan and re.match(r"^V/v\s", txts[i]):
+                _set(i, "trich_yeu_cv")
+                break
+    # 3+4. tên loại TRƯỚC (chặn dưới của khối tên cơ quan), rồi khối cơ quan in hoa
+    o_loai = "the_loai" if he == "dang" else "ten_loai"
+    i_loai = None
+    for i in range(head_n):
+        if i in gan or not _hoa(txts[i]) or len(txts[i]) > 60:
+            continue
+        if re.match(r"^" + LOAI + r"\b", txts[i]):
+            _set(i, o_loai)
+            i_loai = i
+            break
+    # nhóm «kèm theo» (Mẫu 6b/11b/14): KHÔNG có khối cơ quan — dòng in hoa đầu là TÊN GỌI văn bản
+    # kèm theo. Bảng chưa có ô cho nhóm này ⇒ đánh dấu NGOÀI đặc tả (Đ3 — production tiếp tục
+    # `_kem_theo`/`_phu_luc` r150), không gán bừa.
+    _kem = [i for i, t in enumerate(txts[:head_n]) if re.match(r"^\(\s*Ban hành kèm theo", t)]
+    for i in _kem:
+        _set(i, "__ngoai_dac_ta__")
+    _ngoai = bool(_kem) or bool(txts and txts[0].startswith("PHỤ LỤC"))
+    _tran = min([x for x in (i_sk, i_loai, head_n) if x is not None] + [8 if i_sk is None else 99])
+    cq = [] if _ngoai else [
+        i for i in range(min(head_n, _tran))
+        if i not in gan and _hoa(txts[i]) and 3 < len(txts[i]) < 90
+        and not re.match(r"^" + LOAI + r"\b", txts[i])]
+    # hệ QH (NQ351) KHÔNG có ô cơ quan chủ quản — chỉ một dòng cơ quan ban hành
+    if len(cq) >= 2 and he != "vbqppl_qh":
+        _set(cq[0], "ten_cq_tren")
+        _set(cq[1], "ten_cq")
+    elif cq:
+        _set(cq[-1] if he == "vbqppl_qh" else cq[0], "ten_cq")
+    if i_loai is not None:
+        for j in range(i_loai + 1, min(i_loai + 4, n)):
+            t = txts[j]
+            if not t or re.match(r"^[-–—_*]{3,}$", t):
+                continue
+            if len(t) < 400 and not re.match(r"^(Căn cứ|Điều|Chương|Phần|Mục)\b", t):
+                _set(j, "trich_yeu")
+            break
+    # 5. thân + kết cấu
+    i_nn = None
+    for i, t in enumerate(txts):
+        if re.match(r"^Nơi nhận\s*:", t):
+            i_nn = i
+            _set(i, "noi_nhan_tu")
+            break
+    if i_nn is not None:
+        for j in range(i_nn + 1, n):
+            if txts[j].startswith("-"):
+                _set(j, "noi_nhan_ds")
+            elif txts[j]:
+                break
+    i_chuc = None
+    for i in range(n - 1, max(n - 40, (2 * n) // 3 - 1, -1), -1):
+        t = txts[i]
+        if i in gan or not _hoa(t) or len(t) > 60:
+            continue
+        if any(t.startswith(x) for x in QH_PFX):
+            _set(i, "quyen_han_ky")
+            continue
+        if any(c in t for c in CHUC_DANH):
+            _set(i, "chuc_vu_ky")
+            i_chuc = i if i_chuc is None else i_chuc
+    if i_chuc is not None:
+        # họ tên nằm SAU khoảng trống chữ ký (mẫu chuẩn chừa 5-6 đoạn rỗng) ⇒ quét xa, bỏ đoạn rỗng
+        for j in range(i_chuc + 1, min(i_chuc + 12, n)):
+            t = txts[j]
+            if not t:
+                continue
+            if t.startswith("(") or re.search(r"[Cc]hữ ký|đóng dấu|^Ký\b|dấu/", t):
+                continue
+            if t and not _hoa(t) and len(t) < 50 and not t.endswith((".", ";", ":")):
+                _set(j, "ho_ten_ky")
+                break
+    i_pc = []
+    for i, t in enumerate(txts):
+        if i in gan or ps[i]["in_tbl"]:
+            continue
+        if re.match(r"^(Phần|Chương)\s+\S", t) and len(t) < 40:
+            _set(i, "phan_chuong")
+            i_pc.append(i)
+            for j in range(i + 1, min(i + 3, n)):
+                if txts[j]:
+                    if j not in gan and _hoa(txts[j]) and len(txts[j]) < 120:
+                        _set(j, "tieu_de_pc")
+                    break
+        elif re.match(r"^Mục\s+\d", t) and len(t) < 90:
+            _set(i, "muc")
+        elif re.match(r"^Điều\s+(?:\d+|…|\.\.\.)\s*[.:]?", t):   # +mẫu trắng "Điều … (tiêu đề)"
+            _set(i, "dieu")
+        elif re.match(r"^(Căn cứ|Xét đề nghị|Theo đề nghị)\b", t) and he in ("vbqppl_qh",):
+            _set(i, "can_cu")
+        elif (he == "vbqppl_qh" and len(t) < 200
+              and re.search(r"ban hành (Bộ luật|Luật|Pháp lệnh|Nghị quyết)\b", t)
+              and i < (2 * n) // 3 and ps[i]["nghieng"] >= 0.6):
+            _set(i, "cau_ban_hanh")
+        elif he == "vbqppl_qh" and re.match(r"^(QUYẾT NGHỊ|QUYẾT ĐỊNH|NAY [^:]{0,50}):$", t):
+            _set(i, "tu_lenh")
+        elif (he == "vbqppl_qh" and i < (2 * n) // 3 and _hoa(t) and ps[i]["dam"] >= 0.6
+              and re.match(r"^(QUỐC HỘI|ỦY BAN THƯỜNG VỤ QUỐC HỘI( VÀ .{0,60})?|CHỦ TỊCH"
+                           r"|NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM|CHÍNH PHỦ)$", t)):
+            _set(i, "co_quan_ban_hanh")
+        # r176 vá oan TẠI CHỖ (quét sổ bước 5 lộ): thân Lệnh công bố luôn có câu «Luật X đã được
+        # Quốc hội thông qua» — draft so CHỨA gán nhầm ô thong_qua (đòi nghiêng) cho đoạn THÂN.
+        # Neo theo đúng công thức Đ36 k1 NQ351: «<loại> này được Quốc hội … thông qua».
+        elif he == "vbqppl_qh" and re.match(
+                r"(Bộ luật|Luật|Pháp lệnh|Nghị quyết) này được Quốc hội[^.]{0,120}thông qua", t):
+            _set(i, "thong_qua")
+        # đề mục TỰ DO thân bài (r175 Đ2): đánh số/La Mã in đậm, hoặc tiêu đề đậm ngắn không kết
+        # câu — route ra khỏi giỏ `than` (ô de_muc_than: hanh_chinh B3→INFO · dang B2*)
+        elif (he in ("hanh_chinh", "dang") and ps[i]["dam"] >= 0.6
+              and (i_loai is None or i > i_loai) and i > 3
+              and any(c.isalpha() for c in t) and (
+                  re.match(r"^(\d+(\.\d+)*[.)]|[IVX]+[.)-])\s+\S", t)
+                  or (len(t) < 120 and not t.rstrip().endswith((".", ";", ":", ","))))):
+            _set(i, "de_muc_than")
+    for i in i_pc:
+        for j in range(i + 1, min(i + 3, n)):
+            if txts[j] and j not in gan and _hoa(txts[j]) and len(txts[j]) < 120:
+                _set(j, "tieu_de_pc")
+            break
+    # 6. THÂN: đoạn còn lại có nội dung câu, giữa đầu văn bản và khối Nơi nhận, ngoài bảng
+    het = i_nn if i_nn is not None else n
+    bd = max([i for i in gan if gan[i] in ("trich_yeu", o_loai, "so_ky_hieu", "dia_danh")] or [0]) + 1
+    for i in range(bd, het):
+        if i in gan or ps[i]["in_tbl"]:
+            continue
+        t = txts[i]
+        if len(t) >= 25 and not _hoa(t):
+            _set(i, "than")
+    return gan
+
+
+def _the_thuc_check_dac_ta(d, he_eff, add):
+    """r176 — ADR-0009 BƯỚC 5 «NỐI BỘ KIỂM»: so từng đoạn đã phân loại với bảng `_tt_dac_ta()`
+    (+ biến thể `_tt_dac_ta_bien_the()`), sinh finding `TT-DT-<Ô>-<THUỘC_TÍNH>` (CO/KIEU/CANH/THUT).
+    Điều kiện vào + mức = ĐÚNG 5 quyết định user duyệt 21-07 (ADR-0009 bước 4, đo trên 129 file):
+
+      Đ1  KHÔNG FAIL vòng này: ô B1/B2 → WARN · ô B3 → INFO. Thêm: ô nhận diện TIN CẬY THẤP
+          (than, ten_cq, ten_cq_tren, trich_yeu, tieu_de_pc, ho_ten_ky — classifier neo yếu)
+          cũng → INFO: chưa đủ tư cách thăng, chi phí cảnh báo oan bất đối xứng (QĐ3).
+      Đ3  CHỈ chạy khi classifier nhận diện được KHỐI ĐẦU (quoc_hieu / tieu_de Đảng); nhóm
+          «kèm theo»/PHỤ LỤC bỏ qua lớp này (đo lũ lớp B: 4.403/4.575 finding là nhiễu `than`).
+      Đ4  NHƯỜNG cờ viết tay — một hiện tượng một finding: TT-BAC-CO-CHU ↔ (quoc_hieu|tieu_ngu|
+          tieu_de)·co [nhường ở MỌI hệ; hanh_chinh cờ tay chỉ đo BẬC tương đối ⇒ có kẽ tuyệt-đối
+          (vd cặp 14/15pt) — chấp nhận, muốn bịt phải mở lại kèm hồ sơ chống-trùng] ·
+          TT-CHUC-VU-DAM ↔ dang chuc_vu_ky·kieu · TT-CHUONG-CANH-GIUA ↔ dang (phan_chuong|muc)·canh.
+          TT-KHOAN-DAM không có ô tương ứng — không giao với dieu·kieu (regex ^Điều vs ^\\d|^[a-zđ]).
+      Đ5  CÁCH LY (hanh_chinh|dang)·trich_yeu·kieu — «đậm,nghiêng vs đậm» chờ NGUYÊN VĂN NĐ30
+          PL I II.5 (cùng giỏ ca `QĐi` chờ HD05 3.2). Không đoán.
+
+    Hệ khai trắng (vbqppl/vbhn) → không kiểm (QĐ1 — «chưa đặc tả», cấm giả vờ). Biến thể:
+    «/QĐ-CTN» → qd_ctn (override co quốc hiệu 13 — hiện bị Đ4 nhường TT-BAC-CO-CHU vốn ĐÃ biết
+    Mẫu 16 từ r150; giữ resolve cho override tương lai) · «V/v» đầu dòng → cong_van hanh_chinh
+    (them trich_yeu_cv, bo ten_loai/trich_yeu). Nhận diện cong_van hệ ĐẢNG chưa có tiêu chí máy
+    (HD05 không dùng «V/v») — để sau, không đoán. Baseline nghiệm thu: lớp A 49 VB = 876 finding
+    (`do-lu-2026-07-21/tong_hop_sau_va.md`) trừ các nhóm Đ4/Đ5 nhường/cách ly."""
+    import re
+    bang0 = _tt_dac_ta().get(he_eff)
+    if not bang0 or "__khai_trang__" in bang0:
+        return
+    paras = d.get("paras") or []
+    if not paras:
+        return
+    ps = [dict(p["dt"], text=_tt_chuan_hoa_space(p["text"]).strip(), in_tbl=p["in_tbl"])
+          for p in paras]
+    gan = _tt_dt_phan_loai(ps, he_eff)
+    _cac_o = set(gan.values())
+    if "__ngoai_dac_ta__" in _cac_o:                                   # Đ3: kèm theo/phụ lục
+        return
+    if ("tieu_de" if he_eff == "dang" else "quoc_hieu") not in _cac_o:  # Đ3: phải có khối đầu
+        return
+    bang = dict(bang0)
+    _head = "\n".join(p["text"] for p in ps)[:3000]
+    _bien = _tt_dac_ta_bien_the().get(he_eff) or {}
+    _ap = None
+    if he_eff == "vbqppl_qh" and re.search(r"/QĐ-CTN\b", _head):
+        _ap = _bien.get("qd_ctn")
+    elif he_eff == "hanh_chinh" and re.search(r"(?m)^\s*V/v\s", _head):
+        _ap = _bien.get("cong_van")
+    if _ap:
+        _IDX = {"co": 0, "kieu": 1, "canh": 2, "thut": 3}
+        for _o, _ovr in (_ap.get("override") or {}).items():
+            _cell = list(bang[_o])
+            for _truong, (_v, _cc2, _bac2) in _ovr.items():
+                _cell[_IDX[_truong]] = _v
+                _cell[4], _cell[5] = _cc2, _bac2
+            bang[_o] = tuple(_cell)
+        bang.update(_ap.get("them") or {})
+        for _o in (_ap.get("bo") or ()):
+            bang.pop(_o, None)
+    _bo_kiem = {("quoc_hieu", "co"), ("tieu_ngu", "co"), ("tieu_de", "co")}   # Đ4: TT-BAC-CO-CHU
+    if he_eff == "dang":
+        _bo_kiem |= {("chuc_vu_ky", "kieu"),                                  # Đ4: TT-CHUC-VU-DAM
+                     ("phan_chuong", "canh"), ("muc", "canh")}                # Đ4: TT-CHUONG-CANH-GIUA
+    if he_eff in ("hanh_chinh", "dang"):
+        _bo_kiem.add(("trich_yeu", "kieu"))                                   # Đ5: CÁCH LY chờ B1
+    _TIN_CAY_THAP = {"ten_cq_tren", "ten_cq", "trich_yeu", "ho_ten_ky", "tieu_de_pc", "than"}
+    for i, o in sorted(gan.items()):
+        if o not in bang:
+            continue
+        co, kieu, canh, thut, cc, bac = bang[o]
+        p = ps[i]
+        muc = "INFO" if (bac.startswith("B3") or o in _TIN_CAY_THAP) else "WARN"
+        _oid = "TT-DT-" + o.upper().replace("_", "-") + "-"
+        _nhan = " — bậc " + bac + (", tin cậy nhận diện thấp" if o in _TIN_CAY_THAP else "")
+        _loc = f"đoạn {i + 1}: '{p['text'][:40]}'"
+
+        def _f(truong, do_duoc, ky_vong):
+            add(_oid + truong.upper(), muc, do_duoc, ky_vong + _nhan, cc, _loc)
+
+        if (o, "co") not in _bo_kiem:
+            lo, hi = (float(v) for v in (co.split("-") * 2)[:2])
+            pt = p["sz"] / 2 if p["sz"] else None
+            if pt is None:
+                _f("co", "cỡ không khai báo", co + "pt")
+            elif not (lo <= pt <= hi):
+                _f("co", f"{pt:g}pt", co + "pt")
+        if (o, "kieu") not in _bo_kiem:
+            _raw = [x for x in kieu.split(",") if x]
+            _mong = {x.split(":", 1)[0] for x in _raw}
+            _that = {k for k in ("dam", "nghieng", "gach") if p[k] >= 0.6}
+            # văn phạm ":tien_to" (r175): chỉ RUN ĐẦU (tiền tố «Điều N.» + tên) cần mang thuộc
+            # tính; nội dung inline sau đó Đứng — đoạn đề-mục-thuần đậm cả đoạn vẫn khớp
+            if _mong != _that and not (any(x.endswith(":tien_to") for x in _raw)
+                                       and "dam" in _mong and p["dam_dau"] and _that <= _mong):
+                _f("kieu", ",".join(sorted(_that)) or "thường", ",".join(sorted(_mong)) or "thường")
+        if canh != "na" and (o, "canh") not in _bo_kiem:
+            jc = p["jc"] or ""
+            if jc != canh and not (canh == "left" and jc == ""):
+                _f("canh", jc or "mặc định", canh)
+        if thut != "na" and (o, "thut") not in _bo_kiem:
+            fl, lf = p["fl"], p["left"]
+            if thut == "0":
+                _bad = (fl, lf) != (0, 0)
+            elif thut.startswith("fl:"):
+                _bad = abs(fl - int(thut[3:])) > 170 or lf != 0   # dung sai ±3mm (dải 1-1,27cm)
+            else:
+                _bad = abs(lf - int(thut[5:])) > 170 or fl != 0
+            if _bad:
+                _f("thut", f"fl={fl} left={lf}", thut)
+
+
 def the_thuc_check(path, he=None, strict=False):
     """Engine kiểm T1 (R2): khổ giấy / lề / font / cỡ chữ nội dung / trình bày ngang — PURE, trả
     envelope dict `the_thuc_check.v1` deterministic (findings sort theo id). rc do cmd quyết:
@@ -1030,6 +1455,7 @@ def the_thuc_check(path, he=None, strict=False):
     # ── T2 cấu trúc + T3 khuyến nghị (R3 v1.34.77) ──
     _the_thuc_check_t2(d["text"], he_eff, add, footnotes=d.get("footnotes", ""))
     _the_thuc_check_t3(d, he_eff, add)
+    _the_thuc_check_dac_ta(d, he_eff, add)   # r176 — ADR-0009 bước 5: lớp đặc tả đọc bảng (Đ1/Đ3/Đ4/Đ5)
     _the_thuc_check_layout(path, d["sections"], add)   # T1b r144 — layout/viền/shape/đoạn rỗng
     for _wid, _wm in _the_thuc_wrap_scan(path, d["defaults"], d["normal"]):   # §6.6 r143 — vỡ dòng mềm ô header
         add(_wid, "WARN", _wm, "Quốc hiệu/tên cơ quan gọn MỘT dòng — khối tiêu đề cỡ 12 + nới ô (§6.8)",

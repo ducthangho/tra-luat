@@ -79,6 +79,11 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   `_tt_dac_ta_bien_the()`: override/thêm/bỏ ô theo nhóm, mỗi mục vẫn mang căn cứ + bậc. Xem ADR-0009 r175.
 - **«na» (ô đặc tả)** — giá trị thuộc tính nghĩa «luật KHÔNG ấn định và thực tiễn đa dạng — không kiểm».
   Khác «0» (ấn định là không-thụt) và khác cách ly (cả Ô không dùng được).
+- **Lớp đặc tả (TT-DT)** — lớp kiểm của `the-thuc-check` ĐỌC bảng đặc tả (ADR-0009 bước 5, r176):
+  phân loại từng đoạn bằng neo văn bản rồi so 4 thuộc tính với ô, finding `TT-DT-<Ô>-<THUỘC_TÍNH>`.
+  Chỉ chạy khi nhận diện được khối đầu (Đ3); nhường cờ viết tay các thuộc tính đã có người canh (Đ4);
+  mức WARN/INFO theo bậc + độ tin cậy nhận diện, không FAIL (Đ1 — thăng FAIL từng ô do user duyệt
+  theo chuẩn zero-oan).
 
 ## Profile
 

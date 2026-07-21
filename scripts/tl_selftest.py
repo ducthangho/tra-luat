@@ -14634,15 +14634,38 @@ def run() -> int:
     # ═══ v1.35.3 — r173 (ADR-0009 bước 2, CHIỀU NGHỊCH): đột biến LẬT ĐẬM từng ô đặc tả — vi phạm
     # `kieu` chắc chắn — rồi soi bộ kiểm CÓ KÊU KHÔNG. Sự thật đo 20-07: bộ kiểm chưa đọc bảng,
     # 5 đột biến tay chỉ bắt 1/5. Test này biến sự thật đó thành SỔ HAI CHIỀU:
-    #   · _BAT_DUOC = ô mà bộ kiểm HÔM NAY bắt được (duy nhất chuc_vu_ky hệ Đảng — cờ viết tay)
-    #     → tụt lùi (hết bắt) = ĐỎ;
-    #   · mọi ô còn lại = gap ledger ngầm → bước 5 nối bộ kiểm làm ô nào bật cờ = ĐỎ tại đây,
-    #     buộc CHUYỂN ô đó vào _BAT_DUOC — sổ không thể trôi khỏi thực tế theo cả hai hướng.
-    # Đột biến là máy-canh-cho-máy-canh: bằng chứng dây nối bảng→bộ kiểm còn sống sau refactor. ═══
+    #   · _BAT_DUOC = ô mà bộ kiểm bắt được → tụt lùi (hết bắt) = ĐỎ;
+    #   · mọi ô còn lại = gap ledger ngầm → ô nào bật cờ mới = ĐỎ tại đây, buộc CHUYỂN vào
+    #     _BAT_DUOC — sổ không thể trôi khỏi thực tế theo cả hai hướng.
+    # Đột biến là máy-canh-cho-máy-canh: bằng chứng dây nối bảng→bộ kiểm còn sống sau refactor.
+    # r176 (ADR-0009 BƯỚC 5 nối bộ kiểm): sổ 1 ô → 51 ô — lớp đặc tả `TT-DT-<Ô>-KIEU` bắt 50 ô
+    # + cờ tay TT-CHUC-VU-DAM giữ dang.chuc_vu_ky (Đ4 nhường, lớp đặc tả skip kieu ô đó).
+    # 8 GAP còn lại có hồ sơ (quét `buoc5_soquet` 21-07, KHÔNG phải quên):
+    #   · (hanh_chinh|dang).trich_yeu — Đ5 CÁCH LY kieu chờ nguyên văn NĐ30 PL I II.5;
+    #   · (hanh_chinh|dang).de_muc_than + vbqppl_qh.co_quan_ban_hanh — classifier NHẬN DIỆN
+    #     bằng chính thuộc tính đậm: lật bỏ đậm là mất neo (hạn chế cố hữu của neo văn bản);
+    #   · (dang|vbqppl_qh).than — đoạn thân văn bản test <25 ký tự, dưới ngưỡng giỏ than;
+    #   · vbqppl_qh.quyen_han_ky — văn bản test NGẮN: dòng TM. rơi ngoài vùng quét khối ký
+    #     i ≥ 2n/3 (corpus thật văn bản dài thì lọt vùng — hanh_chinh/dang cùng ô vẫn bắt). ═══
     def _c173_dot_bien_so_hai_chieu():
         import re as _r73, zipfile as _z73, tempfile as _tf73
         DT = _TL_MODULE._tt_dac_ta()
         _BAT_DUOC = {("dang", "chuc_vu_ky"): "TT-CHUC-VU-DAM"}
+        for _he73, _os73 in (
+                ("dang", ("tieu_de", "ten_cq_tren", "ten_cq", "so_ky_hieu", "dia_danh",
+                          "the_loai", "phan_chuong", "tieu_de_pc", "muc", "dieu",
+                          "quyen_han_ky", "ho_ten_ky", "noi_nhan_tu", "noi_nhan_ds")),
+                ("vbqppl_qh", ("quoc_hieu", "tieu_ngu", "ten_cq", "so_ky_hieu", "ten_loai",
+                               "trich_yeu", "can_cu", "cau_ban_hanh", "phan_chuong",
+                               "tieu_de_pc", "dieu", "thong_qua", "chuc_vu_ky", "ho_ten_ky",
+                               "tu_lenh", "dia_danh", "muc",
+                               "noi_nhan_tu", "noi_nhan_ds")),
+                ("hanh_chinh", ("quoc_hieu", "tieu_ngu", "ten_cq_tren", "ten_cq", "so_ky_hieu",
+                                "dia_danh", "ten_loai", "phan_chuong", "tieu_de_pc", "muc",
+                                "dieu", "than", "quyen_han_ky", "chuc_vu_ky", "ho_ten_ky",
+                                "noi_nhan_tu", "noi_nhan_ds"))):
+            for _o73 in _os73:
+                _BAT_DUOC[(_he73, _o73)] = "TT-DT-" + _o73.upper().replace("_", "-") + "-KIEU"
         _SPECS = (
             ("dang", "dang",
              {"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
@@ -14829,6 +14852,152 @@ def run() -> int:
             print("  [r175] " + " · ".join(_loi[:6]), file=sys.stderr)
         return not _loi
     _t110("r175_bien_the_mau_cau_truc", _c175_bien_the_cau_truc)
+
+    # ═══ v1.35.6 — r176 (ADR-0009 BƯỚC 5): NỐI BỘ KIỂM đọc bảng — lớp đặc tả `TT-DT-<Ô>-<THUỘC_TÍNH>`
+    # trong `_the_thuc_check_dac_ta`. Khoá 6 hành vi theo đúng gói Đ1-Đ5 user duyệt 21-07:
+    #   (a) TẦNG-1 = 0: sản phẩm builder chuẩn 4 hệ/biến thể (kể cả Lệnh CTN có câu thân «Luật X
+    #       đã được Quốc hội thông qua» — ca oan thong_qua đã vá, và QĐ-CTN kích hoạt qd_ctn)
+    #       KHÔNG được sinh finding TT-DT nào — finding ở tầng này = builder↔bảng đá nhau (QĐ3);
+    #   (b) Đ3: mất khối đầu (quốc hiệu bị thay) ⇒ lớp đặc tả IM hẳn, kể cả khi có lỗi thật;
+    #   (c) Đ4: dang chuc_vu_ky đậm → CHỈ cờ tay TT-CHUC-VU-DAM, không thêm TT-DT (một hiện
+    #       tượng một finding);
+    #   (d) Đ5: hanh_chinh trich_yeu «đậm,nghiêng» → CÁCH LY, không TT-DT-TRICH-YEU-KIEU;
+    #   (e) biến thể cong_van: «V/v» 12 đứng chuẩn → 0 TT-DT; V/v 14 nghiêng → TT-DT-TRICH-YEU-CV
+    #       cả CO lẫn KIEU; ô ten_loai/trich_yeu đã `bo` không được kiểm;
+    #   (f) văn phạm dam:tien_to: «Điều 3.» đậm + nội dung inline Đứng → KHÔNG TT-DT-DIEU-KIEU
+    #       và KHÔNG TT-KHOAN-DAM (lớp đặc tả không giẫm cờ tay r171);
+    #   Mức theo Đ1: TT-DT WARN (B1/B2 tin cậy cao) — không bao giờ FAIL. ═══
+    def _c176_noi_bo_kiem_dac_ta():
+        import re as _r76, zipfile as _z76, tempfile as _tf76
+        _loi = []
+
+        def _dung(spec):
+            _o = str(Path(_tf76.mkdtemp()) / "x.docx")
+            _TL_MODULE.the_thuc_build(spec, _o)
+            return _o
+
+        def _ids(p, he):
+            return {f["id"] for f in _TL_MODULE.the_thuc_check(p, he=he)["findings"]}
+
+        def _lvls(p, he):
+            return {(f["id"], f["level"]) for f in _TL_MODULE.the_thuc_check(p, he=he)["findings"]}
+
+        def _sua_xml(src, out, fn):
+            _x = _z76.ZipFile(src).read("word/document.xml").decode("utf-8")
+            _x2 = fn(_x)
+            if _x2 is None or _x2 == _x:
+                return None
+            with _z76.ZipFile(src) as _zi, _z76.ZipFile(out, "w", _z76.ZIP_DEFLATED) as _zo:
+                for _it in _zi.infolist():
+                    _d = _zi.read(_it.filename)
+                    if _it.filename == "word/document.xml":
+                        _d = _x2.encode("utf-8")
+                    _zo.writestr(_it, _d)
+            return out
+
+        def _lat(_xml, _txt, them):
+            """them='b'/'i': THÊM đậm/nghiêng vào đoạn _txt; them='-b': BỎ đậm."""
+            for _q in _r76.findall(r"<w:p>.*?</w:p>", _xml, _r76.S):
+                if "".join(_r76.findall(r"<w:t[^>]*>([^<]*)</w:t>", _q)).strip() != _txt:
+                    continue
+                if them == "-b":
+                    _nq = _q.replace("<w:b/>", "").replace("<w:bCs/>", "")
+                elif them == "b":
+                    _nq = _q.replace("<w:rPr>", "<w:rPr><w:b/>")
+                else:
+                    _nq = _q.replace("<w:rPr>", "<w:rPr><w:i/>")
+                return _xml.replace(_q, _nq, 1) if _nq != _q else None
+            return None
+
+        S_HC = {"he": "hanh-chinh", "chu_quan": "BỘ NỘI VỤ", "ten_cq": "VỤ TỔ CHỨC CÁN BỘ",
+                "so_kh": "Số: 15/QĐ-TCCB", "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
+                "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "về việc ban hành quy chế",
+                "body": [{"text": "Điều 1. Phạm vi điều chỉnh", "de_muc": True},
+                         {"text": "Nội dung thân văn bản hành chính."}],
+                "noi_nhan": ["- Lưu: VT."], "quyen_han": "KT. BỘ TRƯỞNG",
+                "chuc_vu": "THỨ TRƯỞNG", "ho_ten": "Trần Văn C"}
+        S_DANG = {"he": "dang", "chu_quan": "ĐẢNG ỦY QUỐC HỘI", "ten_cq": "ĐẢNG ỦY ỦY BAN",
+                  "so_kh": "Số 12-QC/ĐU", "dia_danh": "Hà Nội, ngày 20 tháng 7 năm 2026",
+                  "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "về công tác cán bộ",
+                  "body": [{"dam_dau": "Điều 3. ",
+                            "text": "Các đồng chí chịu trách nhiệm thi hành Quyết định này."}],
+                  "noi_nhan": ["- Lưu Văn phòng."], "quyen_han": "T/M BAN THƯỜNG VỤ",
+                  "chuc_vu": "BÍ THƯ", "ho_ten": "Nguyễn Văn A"}
+        S_CTN = {"he": "vbqppl_qh", "ten_cq": "CHỦ TỊCH NƯỚC", "so_kh": "Số: 09/2026/QĐ-CTN",
+                 "dia_danh": "Hà Nội, ngày 21 tháng 7 năm 2026",
+                 "ten_loai": "QUYẾT ĐỊNH", "trich_yeu": "Về việc đặc xá",
+                 "co_quan_ban_hanh": ["CHỦ TỊCH", "NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"],
+                 "can_cu": ["Căn cứ Điều 88 Hiến pháp;", "Xét đề nghị của Chính phủ;"],
+                 "tu_lenh": "QUYẾT ĐỊNH:",
+                 "body": [{"text": "Luật Đặc xá đã được Quốc hội thông qua và có hiệu lực."}],
+                 "chuc_vu": "CHỦ TỊCH", "ho_ten": "Nguyễn Văn D"}
+        # (a) tầng-1 = 0 TT-DT trên builder chuẩn (3 spec, gồm ca thong_qua-oan + qd_ctn)
+        _hc = _dung(S_HC)
+        _dg = _dung(S_DANG)
+        _ctn = _dung(S_CTN)
+        for _p76, _he76 in ((_hc, "hanh_chinh"), (_dg, "dang"), (_ctn, "vbqppl_qh")):
+            _dt = sorted(i for i in _ids(_p76, _he76) if i.startswith("TT-DT-"))
+            if _dt:
+                _loi.append(f"(a) {_he76}: builder chuẩn sinh {_dt[:4]}")
+        # (f) dam:tien_to — đã nằm trong _dg: khoá thêm tường minh
+        _f_dg = _ids(_dg, "dang")
+        if "TT-DT-DIEU-KIEU" in _f_dg or "TT-KHOAN-DAM" in _f_dg:
+            _loi.append("(f) dam_dau «Điều 3.» bị báo oan")
+        # (b) Đ3: có lỗi thật (so_ky_hieu đậm) → bắt; mất khối đầu → lớp đặc tả im hẳn
+        _td = _tf76.mkdtemp()
+        _m1 = _sua_xml(_hc, str(Path(_td) / "m1.docx"), lambda x: _lat(x, "Số: 15/QĐ-TCCB", "b"))
+        if not _m1 or ("TT-DT-SO-KY-HIEU-KIEU", "WARN") not in _lvls(_m1, "hanh_chinh"):
+            _loi.append("(b) lỗi thật so_ky_hieu đậm không ra WARN TT-DT")
+        _m2 = _m1 and _sua_xml(_m1, str(Path(_td) / "m2.docx"),
+                               lambda x: x.replace("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+                                                   "PHỤ LỤC THAM KHẢO", 1))
+        if not _m2 or any(i.startswith("TT-DT-") for i in _ids(_m2, "hanh_chinh")):
+            _loi.append("(b) Đ3: mất khối đầu mà lớp đặc tả vẫn kiểm")
+        # (c) Đ4: chuc_vu_ky Đảng đậm → chỉ cờ tay
+        _m3 = _sua_xml(_dg, str(Path(_td) / "m3.docx"), lambda x: _lat(x, "BÍ THƯ", "b"))
+        _f3 = _m3 and _ids(_m3, "dang")
+        if not _f3 or "TT-CHUC-VU-DAM" not in _f3 or "TT-DT-CHUC-VU-KY-KIEU" in _f3:
+            _loi.append("(c) Đ4 chuc_vu_ky: cờ tay/TT-DT sai phân vai")
+        # (d) Đ5: trich_yeu hanh_chinh đậm+nghiêng → cách ly
+        _m4 = _sua_xml(_hc, str(Path(_td) / "m4.docx"),
+                       lambda x: _lat(x, "về việc ban hành quy chế", "i"))
+        if not _m4 or "TT-DT-TRICH-YEU-KIEU" in _ids(_m4, "hanh_chinh"):
+            _loi.append("(d) Đ5 trich_yeu·kieu không được cách ly")
+        # (e) biến thể cong_van hanh_chinh — docx tay: chuẩn 0 TT-DT; V/v 14 nghiêng → CO + KIEU
+        def _p76x(t, sz=26, b=False, i=False, jc="center", fl=0):
+            _rp = "<w:rPr>" + ("<w:b/>" if b else "") + ("<w:i/>" if i else "") \
+                  + f'<w:sz w:val="{sz}"/></w:rPr>'
+            return (f'<w:p><w:pPr><w:ind w:firstLine="{fl}" w:left="0"/><w:jc w:val="{jc}"/>'
+                    f"</w:pPr><w:r>{_rp}<w:t xml:space=\"preserve\">{t}</w:t></w:r></w:p>")
+
+        def _cv(sz_vv, ngh_vv, name):
+            _b = (_p76x("BỘ NỘI VỤ", 24) + _p76x("VỤ TỔ CHỨC CÁN BỘ", 24, b=True)
+                  + _p76x("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", 24, b=True)
+                  + _p76x("Độc lập - Tự do - Hạnh phúc", 26, b=True)
+                  + _p76x("Số: 402/UBKTTC-TH", 26)
+                  + _p76x("Hà Nội, ngày 21 tháng 7 năm 2026", 26, i=True)
+                  + _p76x("V/v đề nghị phối hợp thẩm tra", sz_vv, i=ngh_vv)
+                  + _p76x("Ủy ban trân trọng đề nghị quý cơ quan phối hợp thẩm tra dự thảo.",
+                          26, jc="both", fl=567)
+                  + _p76x("Nơi nhận:", 24, b=True, i=True, jc="left")
+                  + _p76x("- Lưu: VT.", 22, jc="left"))
+            return _mk143(Path(_td), name, _b)
+        _cv1 = _ids(_cv(24, False, "cv1.docx"), "hanh_chinh")
+        if any(i.startswith("TT-DT-") for i in _cv1):
+            _loi.append(f"(e) công văn chuẩn sinh {sorted(i for i in _cv1 if i.startswith('TT-DT-'))[:3]}")
+        _cv2 = _ids(_cv(28, True, "cv2.docx"), "hanh_chinh")
+        if not {"TT-DT-TRICH-YEU-CV-CO", "TT-DT-TRICH-YEU-CV-KIEU"} <= _cv2:
+            _loi.append("(e) V/v 14 nghiêng không bị bắt CO+KIEU")
+        if any(i.startswith(("TT-DT-TEN-LOAI-", "TT-DT-TRICH-YEU-K", "TT-DT-TRICH-YEU-CO")) for i in _cv2):
+            _loi.append("(e) ô đã bo (ten_loai/trich_yeu) vẫn bị kiểm")
+        # Đ1: mọi TT-DT không bao giờ FAIL
+        for _pp, _hh in ((_m1, "hanh_chinh"), (_cv(28, True, "cv3.docx"), "hanh_chinh")):
+            if _pp and any(_i.startswith("TT-DT-") and _l == "FAIL" for _i, _l in _lvls(_pp, _hh)):
+                _loi.append("Đ1: TT-DT sinh FAIL")
+        if _loi:
+            print("  [r176] " + " · ".join(_loi[:8]), file=sys.stderr)
+        return not _loi
+    _t110("r176_noi_bo_kiem_dac_ta", _c176_noi_bo_kiem_dac_ta)
 
     # ═══ v1.34.87 — r156: PHIẾU TRÌNH (biểu mẫu nội bộ Ủy ban, user nạp mẫu VHXH 20-07). Mẫu gốc có
     # 3 bảng TRÀN lề (9180/10065/9180 > vùng chữ 9072) ⇒ bộ dựng phải TÍNH bề rộng từ lề (§6.10). ═══

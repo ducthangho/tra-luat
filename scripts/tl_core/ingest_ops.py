@@ -863,6 +863,13 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
             import zipfile as _zf
             with _zf.ZipFile(path) as z:
                 xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+            # r182: lọc markup sửa đổi TRƯỚC khi bóc tag — probe cũ giữ CẢ w:delText nên DRY phân loại
+            # trên chữ ĐÃ BỎ (dự thảo sửa đổi bị đọc sai cả hai chiều). `strip` = văn bản vận hành thật.
+            _dm = _imp("docx_markup")
+            xml, _st = _dm.strip_markup(xml, "strip")
+            _w = _dm.warn_line(_st, str(path))
+            if _w:
+                print(_w, file=sys.stderr)
             xml = re.sub(r"</w:p>", "\n", xml)
             txt = re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
             if txt:

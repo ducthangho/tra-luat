@@ -17,6 +17,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from verify_deep import split_articles, t1_structure, ROMAN_PAT, extract_appendix, appendix_start  # noqa: E402
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
+from docx_markup import MODES, has_markup, strip_markup, resolve_mode, warn_line, scan_file  # noqa: E402  (r182)
 
 
 def _clean_md_artifacts(t: str) -> str:
@@ -45,7 +46,21 @@ def _clean_md_artifacts(t: str) -> str:
     return t
 
 
-def _docx_to_text(path: str) -> str:
+def _docx_zip_text(path: str, mode: str = "strip") -> tuple:
+    """Nhánh KHÔNG python-docx: đọc thẳng word/document.xml. GIỮ bảng (w:tr→dòng, w:tc→tab).
+    v1.35.12 (r182): lọc markup sửa đổi TRƯỚC khi bóc tag — nhánh này trước đây giữ CẢ w:delText
+    (tệ hơn nhánh lib) ⇒ đọc chữ ĐÃ BỎ như quy phạm còn hiệu lực."""
+    import zipfile
+    xml = zipfile.ZipFile(path).read("word/document.xml").decode("utf-8", "replace")
+    xml, st = strip_markup(xml, mode)
+    # GIỮ bảng: xuống dòng theo đoạn & hàng bảng, tab giữa ô
+    xml = (xml.replace("</w:p>", "\n")
+              .replace("</w:tr>", "\n")
+              .replace("</w:tc>", "\t"))
+    return _html.unescape(re.sub(r"<[^>]+>", "", xml)), st
+
+
+def _docx_lib_text(path: str, mode: str = "strip") -> tuple:
     """Bóc text từ .docx GIỮ THỨ TỰ tài liệu, bao gồm CẢ bảng (w:tbl).
 
     Vá lỗi v1.15.6: trước đây dùng `docx.Document(path).paragraphs` — chỉ lấy
@@ -54,40 +69,67 @@ def _docx_to_text(path: str) -> str:
     `appendix_start`/`phu_luc` mất nguyên Phụ lục IV, đối chiếu sai (tưởng vắng
     ngành nghề). Nay duyệt body theo THỨ TỰ tài liệu, lấy cả w:p và w:tbl, để
     phụ lục bảng nằm đúng vị trí (sau thân) và `appendix_start` bắt được.
-    """
+
+    Vá lỗi v1.35.12 (r182): `Paragraph(child, doc).text` nối MỌI run KHÔNG kiểm w:strike (giữ chữ ĐÃ
+    BỎ) và python-docx BỎ run nằm trong w:ins/w:del (không phải con TRỰC TIẾP của w:p) ⇒ MẤT chữ MỚI
+    THÊM. Bảng (c.text) CÙNG LỖI. Nay phần tử NÀO có markup thì lọc qua docx_markup rồi mới đọc —
+    phần tử sạch giữ NGUYÊN đường cũ (bytes bất biến cho corpus đã nạp)."""
+    import docx  # type: ignore
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import qn
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+    from lxml import etree          # python-docx đã kéo lxml; tostring giữ NGUYÊN whitespace (khác
+    #                                 `.xml` của python-docx = serialize_for_reading, có pretty-print)
+    doc = docx.Document(path)
+    tot = {}
+
+    def _clean(el):
+        """Phần tử có markup → lọc + tái dựng; sạch → trả nguyên (đường cũ, không đụng)."""
+        x = etree.tostring(el, encoding="unicode")
+        if not has_markup(x):
+            return el
+        x2, st = strip_markup(x, mode)
+        for k, v in st.items():
+            tot[k] = tot.get(k, 0) + v
+        try:
+            return parse_xml(x2)
+        except Exception:  # noqa: BLE001 — xml lọc hỏng (hiếm) → giữ phần tử gốc, thà thừa hơn mất
+            return el
+
+    out: list[str] = []
+    for child in doc.element.body.iterchildren():
+        tag = child.tag
+        if tag == qn("w:p"):
+            out.append(Paragraph(_clean(child), doc).text)
+        elif tag == qn("w:tbl"):
+            for row in Table(_clean(child), doc).rows:
+                prev = None
+                cells = []
+                for c in row.cells:           # ô gộp (merge) trả lặp -> khử trùng liền kề
+                    txt = c.text.strip()
+                    if txt != prev:
+                        cells.append(txt)
+                    prev = txt
+                out.append("\t".join(cells))
+    return "\n".join(out), tot
+
+
+def _docx_to_text(path: str, mode: str = "strip") -> str:
+    """Điều phối 2 nhánh + CẢNH BÁO markup ra stderr (không nuốt: đọc nhầm dự thảo = sai pháp lý)."""
     try:
-        import docx  # type: ignore
-        from docx.oxml.ns import qn
-        from docx.table import Table
-        from docx.text.paragraph import Paragraph
-        doc = docx.Document(path)
-        out: list[str] = []
-        for child in doc.element.body.iterchildren():
-            tag = child.tag
-            if tag == qn("w:p"):
-                out.append(Paragraph(child, doc).text)
-            elif tag == qn("w:tbl"):
-                for row in Table(child, doc).rows:
-                    prev = None
-                    cells = []
-                    for c in row.cells:           # ô gộp (merge) trả lặp -> khử trùng liền kề
-                        txt = c.text.strip()
-                        if txt != prev:
-                            cells.append(txt)
-                        prev = txt
-                    out.append("\t".join(cells))
-        return "\n".join(out)
+        import docx  # type: ignore  # noqa: F401
     except ImportError:
-        import zipfile
-        xml = zipfile.ZipFile(path).read("word/document.xml").decode("utf-8", "replace")
-        # GIỮ bảng: xuống dòng theo đoạn & hàng bảng, tab giữa ô
-        xml = (xml.replace("</w:p>", "\n")
-                  .replace("</w:tr>", "\n")
-                  .replace("</w:tc>", "\t"))
-        return _html.unescape(re.sub(r"<[^>]+>", "", xml))
+        txt, st = _docx_zip_text(path, mode)
+    else:
+        txt, st = _docx_lib_text(path, mode)
+    w = warn_line(st, Path(path).name)
+    if w:
+        print(w, file=sys.stderr)
+    return txt
 
 
-def read_input(p: str) -> str:
+def read_input(p: str, markup_mode: str = "strip") -> str:
     path = Path(p); ext = path.suffix.lower()
     if ext in (".txt", ".md"):
         return _clean_md_artifacts(path.read_text(encoding="utf-8", errors="replace"))
@@ -97,7 +139,7 @@ def read_input(p: str) -> str:
         h = re.sub(r"(?i)<br\s*/?>|</p>|</div>|</li>|</tr>", "\n", h)
         return _html.unescape(re.sub(r"(?s)<[^>]+>", " ", h))
     if ext == ".docx":
-        return _docx_to_text(str(path))
+        return _docx_to_text(str(path), markup_mode)
     if ext == ".pdf":
         r = subprocess.run(["pdftotext", "-layout", str(path), "-"],
                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
@@ -158,9 +200,28 @@ def main():
                     help="Văn bản CHỈ là phụ lục/mẫu: lưu nguyên khối phu_luc, không ép thành Điều, không FATAL.")
     ap.add_argument("--recorded-at", default="",
                     help="timestamp provenance tường minh; mặc định bỏ để cùng input tạo cùng cache bytes")
+    ap.add_argument("--markup-mode", default="auto", choices=list(MODES),
+                    help="(r182) markup sửa đổi .docx: auto=đánh dấu ⟦BỎ:…⟧ cho DỰ THẢO / loại hẳn cho "
+                         "VBQPPL đã ban hành · strip=loại hẳn · mark=đánh dấu · raw=giữ nguyên (đối chứng)")
     a = ap.parse_args()
 
-    raw = unicodedata.normalize("NFC", read_input(a.input).replace("\r\n", "\n").replace("\r", "\n"))
+    # r182: dự thảo thì GIỮ dấu vết chữ bị đề nghị bỏ (người rà cần thấy); văn bản ban hành thì loại hẳn.
+    _is_draft = ("draft" in a.document_variant.lower()
+                 or "du_thao" in a.document_variant.lower()
+                 or "dự thảo" in (a.effective_status or "").lower())
+    _mk_mode = resolve_mode(a.markup_mode, is_draft=_is_draft)
+    _mk_st = scan_file(a.input) if Path(a.input).suffix.lower() == ".docx" else {}
+    _mk_st = {k: v for k, v in sorted(_mk_st.items()) if v}
+
+    def _rd(_m):
+        return unicodedata.normalize("NFC", read_input(a.input, _m).replace("\r\n", "\n").replace("\r", "\n"))
+
+    # ★ CẤU TRÚC LUÔN PHÂN TÍCH TRÊN BẢN `strip` — ĐO ĐƯỢC (ca r182_gach_bo_khong_sinh_dieu_ma):
+    # `ART_SPLIT` đòi CHỮ HOA ngay sau "Điều N." nên nhãn '⟦' CHẶN Điều thật, còn dấu ':' trong '⟦BỎ:'
+    # lại THOẢ lookbehind [\s.;:] nên tiêu đề ĐÃ GẠCH BỎ đẻ ra "Điều ma". Không nhãn nào chữa được cả
+    # hai chiều ⇒ bản `mark`/`raw` CHỈ là bản XEM (lưu ở text_markup), KHÔNG bao giờ nuôi parser.
+    raw = _rd("strip")
+    _raw_view = _rd(_mk_mode) if (_mk_st and _mk_mode != "strip") else ""
     if a.as_appendix:
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
@@ -192,6 +253,12 @@ def main():
         coverage = "complete_vs_independent" if not rep["flags"] else (
             "partial: " + " | ".join(rep["flags"])[:400])
 
+    # r182: markup sửa đổi là TÍN HIỆU PHÁP LÝ (bản đang sửa ≠ bản hiệu lực) — ghi vào record để
+    # người tra thấy ngay. CHỈ ghi khi CÓ markup ⇒ văn bản sạch giữ NGUYÊN bytes cache như trước.
+    if _mk_st:
+        rep["flags"].append("MARKUP_SUA_DOI: " + ", ".join(f"{k}={v}" for k, v in _mk_st.items())
+                            + f" (che_do={_mk_mode}) — chữ w:del/gạch-ngang ĐÃ BỎ, w:ins là chữ MỚI THÊM")
+
     nums = sorted(arts)
     norm = re.sub(r"[ \t]+", " ", raw).strip()
     so_hieu = a.number_symbol or "UNKNOWN"
@@ -215,6 +282,11 @@ def main():
         "has_phu_luc": bool(phu_luc),
         "phu_luc": phu_luc,
     }
+    if _mk_st:
+        record["markup"] = _mk_st
+        record["markup_mode"] = _mk_mode
+        if _raw_view:
+            record["text_markup"] = _raw_view   # bản XEM (⟦BỎ:…⟧) — KHÔNG dùng để phân tích cấu trúc
     if a.recorded_at:
         record["verified_at"] = a.recorded_at
         record["ingested_at"] = a.recorded_at

@@ -2216,20 +2216,31 @@ def _doc_text_fetch_binary(file_id: str, *, suffix: str = ".bin"):
     return None
 
 
-def _docx_unzip_text(path) -> str:
+def _docx_unzip_text(path, mode: str = "strip") -> str:
     """PURE-ish (A1): bóc text THẬT từ .docx local = unzip word/document.xml + strip tag (mẫu
-    _profile_read_probe_text v1.34.27 — không cần lib ngoài). </w:p> → newline giữ cấu trúc Điều."""
+    _profile_read_probe_text v1.34.27 — không cần lib ngoài). </w:p> → newline giữ cấu trúc Điều.
+
+    r182: strip-tag TRẦN giữ CẢ w:delText ⇒ `tl doc-text`/`tl extract` đọc chữ ĐÃ BỎ của dự thảo như
+    quy phạm còn hiệu lực (sai ĐÚNG-SAI về nội dung pháp luật). Nay lọc markup TRƯỚC khi bóc tag.
+    Mặc định `strip` vì text này ĐƯỢC CACHE + nuôi corpus: chữ đã bỏ tuyệt đối không được lẫn vào kho;
+    người rà muốn thấy dấu vết thì `tl doc-text --markup mark` (đường đó không đụng cache)."""
     import zipfile as _zf
     try:
         with _zf.ZipFile(path) as z:
             xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+        _dm = _imp("docx_markup")
+        xml, _st = _dm.strip_markup(xml, mode)
+        _w = _dm.warn_line(_st, str(path))
+        if _w:
+            print(_w, file=sys.stderr)
         xml = re.sub(r"</w:p>", "\n", xml)
         return re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
     except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → coi như không đọc được
         return ""
 
 
-def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None) -> tuple:
+def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None,
+                  markup: str = "strip") -> tuple:
     """A1 (v1.34.60 — kế hoạch NLM-fallback E1–E3, TIỀN ĐỀ E1): MỘT đường đọc text cho MỌI định dạng.
     Route theo mime/tên (manifest entry): GDoc→export (_read_doc_text, giữ đường cũ); .docx→download+unzip
     word/document.xml; .pdf→download+pdftotext (_read_local_text_for_analysis). Không rõ định dạng → thử
@@ -2238,7 +2249,10 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
     fid = str(file_id or "").strip()
     if not fid:
         return "", ""
-    if not refresh:
+    # r182: chỉ chế độ CHUẨN (strip) mới được dùng/ghi cache — mark/raw là bản ĐỌC-XEM của người rà,
+    # để lọt vào extract_<id>.txt sẽ bơm ⟦BỎ:…⟧ (hoặc chữ đã bỏ) vào corpus.
+    _mk_canon = (markup or "strip") == "strip"
+    if not refresh and _mk_canon:
         try:
             _cf = _cache_file(f"extract_{fid}.txt")
             if _cf.exists():
@@ -2281,7 +2295,7 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                 with open(p, "rb") as _fh:
                     head = _fh.read(8)
                 if kind == "docx" or (kind == "" and head.startswith(b"PK\x03\x04")):
-                    t = _docx_unzip_text(p)
+                    t = _docx_unzip_text(p, markup or "strip")
                     if t:
                         text, src = t, "docx"
                 elif kind == "pdf" or (kind == "" and head.startswith(b"%PDF")):
@@ -2299,12 +2313,13 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
     if not text:
         return "", ""
     text = _strip_font_runs(text)
-    try:
-        _cf = _cache_file(f"extract_{fid}.txt")
-        _cf.parent.mkdir(parents=True, exist_ok=True)
-        _cf.write_text(text, encoding="utf-8")
-    except Exception:  # noqa: BLE001 — cache best-effort, không chặn kết quả
-        pass
+    if _mk_canon:
+        try:
+            _cf = _cache_file(f"extract_{fid}.txt")
+            _cf.parent.mkdir(parents=True, exist_ok=True)
+            _cf.write_text(text, encoding="utf-8")
+        except Exception:  # noqa: BLE001 — cache best-effort, không chặn kết quả
+            pass
     return text, src
 
 
@@ -2324,7 +2339,8 @@ def cmd_doc_text(a) -> int:
     except (SystemExit, Exception):  # noqa: BLE001
         pass
     fid = str(getattr(a, "file_id", "") or "").strip()
-    text, src = _doc_text_any(fid, refresh=getattr(a, "refresh", False))
+    text, src = _doc_text_any(fid, refresh=getattr(a, "refresh", False),
+                              markup=str(getattr(a, "markup", "strip") or "strip"))
     if not text:
         print(json.dumps({"ok": False, "error": "DOC_TEXT_UNAVAILABLE", "file_id": fid,
                           "note": "Không đọc được text (cache/GDoc-export/docx-unzip/pdftotext đều fail) — "

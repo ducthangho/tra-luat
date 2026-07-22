@@ -15808,6 +15808,202 @@ def run() -> int:
                 and _se.get("TL_PROFILE") == "custom")
     _t110("r181_golden_env_pins_base_profile", _c181_fix3_golden_env_pins)
 
+    # ═══ v1.35.12 — r182: MARKUP SỬA ĐỔI (.docx tracked changes) — 3 reader sản xuất đọc SAI ═══
+    # Đo TƯƠI trước khi vá (probe qua ĐÚNG hàm sản xuất, KHÔNG dựng text tay): nhánh python-docx GIỮ chữ
+    # gạch ngang + MẤT chữ w:ins (python-docx bỏ run không phải con TRỰC TIẾP của w:p); hai nhánh
+    # strip-tag (`_docx_unzip_text` = tl doc-text/extract, `_profile_read_probe_text` = cổng nạp) giữ CẢ
+    # w:delText ⇒ đọc dự thảo SAI CẢ HAI CHIỀU. Đây là lỗi ĐÚNG-SAI về NỘI DUNG PHÁP LUẬT.
+    import zipfile as _zf182
+    _NS182 = ('xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"')
+    _RUN182 = '<w:r><w:t xml:space="preserve">{}</w:t></w:r>'
+    _STK182 = '<w:r><w:rPr><w:{0}{1}/></w:rPr><w:t xml:space="preserve">{2}</w:t></w:r>'
+    _BODY182 = (
+        # (1) run thường + run w:strike  → strike phải BỊ BỎ
+        "<w:p>" + _RUN182.format("Điều 1. ") + _STK182.format("strike", "", "GACH_BO ")
+        + _RUN182.format("GIU1") + "</w:p>"
+        # (2) w:del > w:delText → BỊ BỎ
+        '<w:p><w:del w:id="1" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        '<w:r><w:delText xml:space="preserve">DEL_BO </w:delText></w:r></w:del>'
+        + _RUN182.format("GIU2") + "</w:p>"
+        # (3) w:ins > w:t → phải ĐƯỢC GIỮ (chỗ python-docx đánh rơi)
+        '<w:p><w:ins w:id="2" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        + _RUN182.format("INS_MOI ") + "</w:ins>" + _RUN182.format("GIU3") + "</w:p>"
+        # (4) w:dstrike BỊ BỎ; w:strike val="false" = ĐÈ TẮT → GIỮ
+        "<w:p>" + _STK182.format("dstrike", ' w:val="true"', "DGACH_BO ")
+        + _STK182.format("strike", ' w:val="false"', "GIU4") + "</w:p>"
+        # (5) w:rPrChange lưu ĐỊNH DẠNG CŨ (có strike) → KHÔNG được hiểu là run hiện tại bị gạch
+        '<w:p><w:r><w:rPr><w:rPrChange w:id="3" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        '<w:rPr><w:strike/></w:rPr></w:rPrChange></w:rPr>'
+        '<w:t xml:space="preserve">GIU5</w:t></w:r></w:p>'
+        # (6) moveFrom BỊ BỎ / moveTo GIỮ
+        '<w:p><w:moveFrom w:id="4" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        + _RUN182.format("MOVEFROM_BO ") + "</w:moveFrom>"
+        '<w:moveTo w:id="5" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        + _RUN182.format("MOVETO_GIU") + "</w:moveTo></w:p>"
+        # (7) BẢNG — CÙNG LỖI với đoạn văn (c.text nối mọi run)
+        "<w:tbl><w:tr>"
+        "<w:tc>" + "<w:p>" + _RUN182.format("O_THUONG") + "</w:p>" + "</w:tc>"
+        "<w:tc><w:p>" + _STK182.format("strike", "", "O_GACH") + "</w:p></w:tc>"
+        '<w:tc><w:p><w:del w:id="6" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        '<w:r><w:delText>O_DEL</w:delText></w:r></w:del>'
+        '<w:ins w:id="7" w:author="a" w:date="2026-07-16T00:00:00Z">'
+        + _RUN182.format("O_INS") + "</w:ins></w:p></w:tc>"
+        "</w:tr></w:tbl>"
+        # (8) TIÊU ĐỀ ĐIỀU bị gạch bỏ → tuyệt đối không được sinh "Điều ma" trong cấu trúc
+        "<w:p>" + _STK182.format("strike", "", "Điều 5. Dieu ma") + "</w:p>")
+
+    def _mkdocx182(path, body):
+        _doc = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                f"<w:document {_NS182}><w:body>{body}</w:body></w:document>")
+        _CT = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+               '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+               '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+               '<Default Extension="xml" ContentType="application/xml"/>'
+               '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-'
+               'officedocument.wordprocessingml.document.main+xml"/></Types>')
+        _RE = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+               '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+               '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/'
+               'relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+        with _zf182.ZipFile(path, "w", _zf182.ZIP_DEFLATED) as _zo:
+            for _n, _d in (("[Content_Types].xml", _CT), ("_rels/.rels", _RE), ("word/document.xml", _doc)):
+                _zi = _zf182.ZipInfo(_n, date_time=(1980, 1, 1, 0, 0, 0))
+                _zi.compress_type = _zf182.ZIP_DEFLATED
+                _zo.writestr(_zi, _d)
+        return path
+
+    _BO182 = ("GACH_BO", "DEL_BO", "DGACH_BO", "MOVEFROM_BO", "O_GACH", "O_DEL", "Điều 5")
+    _GIU182 = ("GIU1", "GIU2", "GIU3", "GIU4", "GIU5", "INS_MOI", "MOVETO_GIU", "O_THUONG", "O_INS")
+
+    def _doc182(txt):
+        """Đọc ĐÚNG = KHÔNG còn chữ đã bỏ VÀ KHÔNG mất chữ mới thêm."""
+        return (txt or "") and all(k not in txt for k in _BO182) and all(k in txt for k in _GIU182)
+
+    _d182 = Path(_TL_MODULE.CACHE) / "r182_markup"
+    _d182.mkdir(parents=True, exist_ok=True)
+    _fx182 = _mkdocx182(str(_d182 / "fixture.docx"), _BODY182)
+    _dm182 = _TL_MODULE._imp("docx_markup")
+    _nd182 = _TL_MODULE._imp("normalize_document")
+
+    # (Fix0 — nền) bộ lọc XML thuần: bỏ del/strike/moveFrom, GIỮ ins/moveTo, tôn trọng val=false,
+    #        bỏ qua rPrChange (định dạng CŨ). Chỉ-nó-chặn cho chính docx_markup.strip_markup.
+    def _c182_xml_filter():
+        _x = f"<w:document {_NS182}><w:body>{_BODY182}</w:body></w:document>"
+        _out, _st = _dm182.strip_markup(_x, "strip")
+        _plain = _dm182.xml_chunk_text(_out)
+        return (all(k not in _plain for k in _BO182) and all(k in _plain for k in _GIU182)
+                and _st["del"] == 2 and _st["ins"] == 2 and _st["strike"] == 4
+                and _st["move_from"] == 1 and _st["move_to"] == 1 and _st["pr_change"] == 1)
+    _t110("r182_docx_markup_xml_filter", _c182_xml_filter)
+
+    # (BẤT BIẾN CORPUS) docx KHÔNG markup ⇒ xml ra = xml vào (nguyên đối tượng) ⇒ mọi văn bản đã nạp
+    #        GIỮ NGUYÊN text_hash/bytes cache. Đây là chốt chống hồi quy diện rộng của r182.
+    def _c182_no_markup_noop():
+        _clean = (f"<w:document {_NS182}><w:body><w:p>" + _RUN182.format("Điều 1. Sạch")
+                  + "</w:p></w:body></w:document>")
+        _o, _s = _dm182.strip_markup(_clean, "strip")
+        _fx = _mkdocx182(str(_d182 / "clean.docx"), "<w:p>" + _RUN182.format("Điều 1. Sạch") + "</w:p>")
+        return (_o == _clean and not any(_s.values()) and _dm182.warn_line(_s) == ""
+                and _dm182.has_markup(_clean) is False
+                and "Sạch" in _TL_MODULE._docx_unzip_text(_fx))
+    _t110("r182_no_markup_is_noop", _c182_no_markup_noop)
+
+    # (Fix1) normalize_document NHÁNH python-docx — chốt gốc P0: `Paragraph(child, doc).text` nối MỌI run
+    #        (giữ strike) và python-docx BỎ run trong w:ins/w:del. Bảng (c.text) cùng lỗi.
+    def _c182_normalize_lib():
+        try:
+            import docx as _dx182  # noqa: F401
+        except ImportError:
+            return True            # không có lib ⇒ nhánh này không tồn tại trên máy; Fix2 phủ đường đọc
+        _t, _st = _nd182._docx_lib_text(_fx182, "strip")
+        return _doc182(_t) and _st.get("ins") == 2 and _st.get("strike") == 4
+    _t110("r182_normalize_lib_branch_markup", _c182_normalize_lib)
+
+    # (Fix2) normalize_document NHÁNH FALLBACK (không python-docx) — trước r182 giữ CẢ w:delText.
+    def _c182_normalize_zip():
+        _t, _st = _nd182._docx_zip_text(_fx182, "strip")
+        return _doc182(_t) and _st.get("del") == 2
+    _t110("r182_normalize_zip_branch_markup", _c182_normalize_zip)
+
+    # (Fix3) `tl doc-text` / `tl extract` — reader THẬT của đường tra cứu (KHÔNG phải _docx_to_text;
+    #        tự kiểm r182 phát hiện: vá mỗi normalize_document là CHƯA chạm đường này).
+    def _c182_doc_text_reader():
+        return _doc182(_TL_MODULE._docx_unzip_text(_fx182))
+    _t110("r182_doc_text_reader_markup", _c182_doc_text_reader)
+
+    # (Fix4) cổng nạp (_profile_read_probe_text) — DRY phân loại phải đọc trên văn bản VẬN HÀNH THẬT.
+    def _c182_ingest_probe():
+        _t, _src = _TL_MODULE._profile_read_probe_text(_fx182)
+        return _doc182(_t) and _src.endswith("#docx-local")
+    _t110("r182_ingest_probe_markup", _c182_ingest_probe)
+
+    # (Chế độ ĐÁNH DẤU) dự thảo: chữ bị đề nghị bỏ hiện dưới nhãn ⟦BỎ:…⟧ (người rà thấy dấu vết),
+    #        chữ w:ins vẫn GIỮ. `auto` = mark cho dự thảo / strip cho VBQPPL đã ban hành.
+    def _c182_mark_mode():
+        _t, _ = _nd182._docx_zip_text(_fx182, "mark")
+        _lbl = _dm182.MARK_OPEN + "GACH_BO" + _dm182.MARK_CLOSE
+        # CẢ HAI nhánh phải giữ nhãn: python-docx CHỈ nối w:t nên nhãn phải là w:t THẬT (đo được r182:
+        # chèn text trần ⇒ nhánh lib nuốt nhãn, nhánh strip-tag giữ ⇒ hai đường đọc lệch nhau).
+        try:
+            import docx as _dx182b  # noqa: F401
+            _tl182, _ = _nd182._docx_lib_text(_fx182, "mark")
+            _lib_ok = _lbl in _tl182 and "INS_MOI" in _tl182
+        except ImportError:
+            _lib_ok = True
+        return (_lbl in _t and "INS_MOI" in _t and "GIU5" in _t and _lib_ok
+                and _dm182.resolve_mode("auto", is_draft=True) == "mark"
+                and _dm182.resolve_mode("auto", is_draft=False) == "strip"
+                and _dm182.resolve_mode("strip", is_draft=True) == "strip")
+    _t110("r182_mark_mode_labels_removed", _c182_mark_mode)
+
+    # (An toàn CẤU TRÚC — chốt doctrine) tiêu đề "Điều 5." bị GẠCH BỎ không được sinh Điều MA.
+    #        ĐO ĐƯỢC khi dựng ca: bản `mark` KHÔNG an toàn cho parser — `ART_SPLIT` đòi CHỮ HOA ngay sau
+    #        "Điều N." nên nhãn '⟦' CHẶN Điều 1 THẬT, còn ':' trong '⟦BỎ:' THOẢ lookbehind [\s.;:] nên
+    #        "Điều 5" đã gạch lại ĐƯỢC bắt (đo: split_articles(mark) = [5], MẤT [1]). ⇒ pipeline THẬT
+    #        phải phân tích trên bản `strip` BẤT KỂ chế độ; mark/raw chỉ đi vào `text_markup` (bản XEM).
+    #        Đây là ca ĐI QUA CLI THẬT (subprocess, đúng đường ingest_to_cache gọi), không dựng text tay.
+    def _c182_khong_sinh_dieu_ma():
+        import subprocess as _sp182
+        _sa = _TL_MODULE._imp("verify_deep").split_articles
+        _ts, _ = _nd182._docx_zip_text(_fx182, "strip")
+        _out182 = _d182 / "rec_mark.json"
+        _p182 = _sp182.run(
+            [sys.executable, str(Path(_nd182.__file__).resolve()), "--input", _fx182,
+             "--out", str(_out182), "--number-symbol", "1/2026/QH16",
+             "--document-variant", "draft", "--markup-mode", "mark"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace")
+        _rec182 = json.loads(_out182.read_text(encoding="utf-8")) if _out182.exists() else {}
+        _arts182 = sorted(int(_k) for _k in (_rec182.get("articles") or {}))
+        return (_p182.returncode == 0 and _arts182 == [1]          # KHÔNG có Điều 5 ma, KHÔNG mất Điều 1
+                and _rec182.get("markup", {}).get("del") == 2      # vẫn khai báo có markup
+                and _rec182.get("markup_mode") == "mark"
+                and _dm182.MARK_OPEN in (_rec182.get("text_markup") or "")   # bản XEM giữ nhãn ⟦BỎ:…⟧
+                and "GACH_BO" not in json.dumps(_rec182.get("articles"), ensure_ascii=False)
+                and 1 in _sa(_ts) and 5 not in _sa(_ts))
+    _t110("r182_gach_bo_khong_sinh_dieu_ma", _c182_khong_sinh_dieu_ma)
+
+    # (Cách ly CACHE) mark/raw là bản ĐỌC-XEM: KHÔNG được đọc/ghi extract_<id>.txt, nếu không ⟦BỎ:…⟧
+    #        (hoặc chữ đã bỏ ở chế độ raw) sẽ chảy vào corpus qua đường extract.
+    def _c182_markup_bypasses_cache():
+        _fid = "r182fid"
+        _cf = _TL_MODULE._cache_file(f"extract_{_fid}.txt")
+        _cf.parent.mkdir(parents=True, exist_ok=True)
+        _cf.write_text("CACHE_CU", encoding="utf-8")
+        _sav = _TL_MODULE._doc_text_fetch_binary
+        _TL_MODULE._doc_text_fetch_binary = lambda fid, suffix=".docx": _fx182
+        try:
+            _t_str, _ = _TL_MODULE._doc_text_any(_fid, entry={"name": "x.docx"})
+            _t_mark, _ = _TL_MODULE._doc_text_any(_fid, entry={"name": "x.docx"}, markup="mark")
+            _cache_sau = _cf.read_text(encoding="utf-8")
+        finally:
+            _TL_MODULE._doc_text_fetch_binary = _sav
+            _cf.unlink(missing_ok=True)
+        return (_t_str == "CACHE_CU"                       # strip: DÙNG cache như cũ
+                and _dm182.MARK_OPEN in _t_mark            # mark: BỎ QUA cache, đọc lại + đánh dấu
+                and _cache_sau == "CACHE_CU")              # mark: KHÔNG ghi đè cache chuẩn
+    _t110("r182_markup_mode_bypasses_cache", _c182_markup_bypasses_cache)
+
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

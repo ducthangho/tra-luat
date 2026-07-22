@@ -15726,6 +15726,88 @@ def run() -> int:
                 and _f(None, "", False) is None)
     _t110("r180_s8_nlm_add_row_kind", _c180_s8)
 
+    # ═══ r181 — nền 1167/1169 do S10 lật defaultProfile «Luật BHXH»: (a) selftest KHÔNG hermetic w.r.t. profile
+    #      → _profile_cache_dir() rơi vào subdir profile CHƯA có trong temp; (b) _ckpt_save NUỐT OSError khi cha
+    #      thiếu → checkpoint resume ghi hụt IM LẶNG → r20/r30 đỏ. Vá cả 2, mỗi vá 1 ca CHỈ-NÓ-CHẶN. ═══
+    # (Fix1) _ckpt_save mkdir thư mục cha: ép _profile_cache_dir()→subdir CHƯA tồn tại (độc lập Fix2). Thiếu mkdir
+    #        → write nổ FileNotFoundError bị `except OSError: pass` nuốt → _ck_written=False, run2 không nối tiếp.
+    def _c181_fix1_mkdir():
+        import shutil as _sh181
+        _fx = [
+            {"id": "m1", "drive_id": "m1", "name": "luat-x-so-1-2020-qh14-000-d1.html",
+             "so_hieu": "1/2020/QH14", "cat": "34", "corpus": "true", "mime": "text/html"},
+            {"id": "m2", "drive_id": "m2", "name": "2_2021_TT-BYT_111.docx", "so_hieu": "2/2021/TT-BYT",
+             "cat": "45", "corpus": "true", "mime": "application/msword"},
+            {"id": "m3", "drive_id": "m3", "name": "ND_3-2022-ND-CP_Quy_dinh.docx", "so_hieu": "3/2022/NĐ-CP",
+             "cat": "20", "corpus": "true", "mime": "application/msword"},
+        ]
+        _sub = _TL_MODULE.CACHE / "prof_sub_missing_r181"        # subdir CHƯA tồn tại trong temp cache
+        _o_pcd, _o_me = _TL_MODULE._profile_cache_dir, _TL_MODULE._manifest_entries
+        _TL_MODULE._profile_cache_dir = lambda: _sub
+        _TL_MODULE._manifest_entries = lambda refresh=False: _fx
+        try:
+            _ck = _TL_MODULE._cache_file("corpus_audit_ckpt_all.json")   # = _sub / ...
+            _existed_before = _sub.exists()
+            _ba = _io27.StringIO()
+            with _ctx27.redirect_stdout(_ba), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rca = _TL_MODULE.cmd_corpus_audit(
+                    build_parser().parse_args(["corpus-audit", "--all", "--resume", "--limit", "2", "--json"]))
+            _oa = json.loads(_ba.getvalue())
+            _ck_written = _ck.exists()          # KEY: mkdir → checkpoint GHI ĐƯỢC vào subdir mới
+            _bb = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bb), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rcb = _TL_MODULE.cmd_corpus_audit(
+                    build_parser().parse_args(["corpus-audit", "--all", "--resume", "--limit", "2", "--json"]))
+            _ob = json.loads(_bb.getvalue())
+            _ck_gone = not _ck.exists()
+        finally:
+            _TL_MODULE._profile_cache_dir, _TL_MODULE._manifest_entries = _o_pcd, _o_me
+            _sh181.rmtree(_sub, ignore_errors=True)
+        return ((not _existed_before) and _rca == 3 and _oa["partial"] is True and _oa["remaining"] == 1
+                and _ck_written
+                and _rcb == 0 and _ob["partial"] is False and _ob["coverage_complete"] is True and _ck_gone)
+    _t110("r181_ckpt_save_mkdirs_missing_parent", _c181_fix1_mkdir)
+
+    # (Fix2) CƠ CHẾ ghim của selftest(): với env profile NON-DEFAULT giả lập (đúng lớp leak apply_profile_offline
+    #        (config THẬT)→TL_PROFILE=«Luật BHXH» mà debug r181 đo được ở r20/r30), _selftest_pin_profile PHẢI
+    #        đưa active==DEFAULT & _profile_cache_dir()==CACHE (base, hermetic), rồi _selftest_restore_profile trả
+    #        NGUYÊN env cũ. Máy-ĐỘC-LẬP + chỉ-Fix2-chặn (thiếu helper → AttributeError → đỏ; Fix1 không đụng).
+    #        selftest() GỌI cơ chế này (call-site) — được nền-xanh-dưới-«Luật BHXH» xác nhận tích hợp.
+    def _c181_fix2_pin():
+        _pin, _res = _TL_MODULE._selftest_pin_profile, _TL_MODULE._selftest_restore_profile
+        _p_old = _hos.environ.get("TL_PROFILE")
+        try:
+            _hos.environ["TL_PROFILE"] = "__probe_nondefault_r181__"   # giả lộ nhiễm defaultProfile máy
+            _saved = _pin()
+            _pin_ok = (_TL_MODULE._active_profile() == _TL_MODULE.DEFAULT_PROFILE
+                       and _TL_MODULE._profile_cache_dir() == _TL_MODULE.CACHE)
+            _saved_ok = _saved == "__probe_nondefault_r181__"          # pin trả NGUYÊN giá trị nhiễm để restore
+            _res(_saved)
+            _restore_ok = _hos.environ.get("TL_PROFILE") == "__probe_nondefault_r181__"
+        finally:
+            if _p_old is None:
+                _hos.environ.pop("TL_PROFILE", None)
+            else:
+                _hos.environ["TL_PROFILE"] = _p_old
+        return _pin_ok and _saved_ok and _restore_ok
+    _t110("r181_selftest_pin_profile_hermetic", _c181_fix2_pin)
+
+    # (Fix3) golden-test tự-hermetic: `_golden_env` LUÔN tiêm TL_PROFILE=DEFAULT_PROFILE vào env subprocess golden
+    #        (goldens là artifact NỀN; subprocess kế thừa defaultProfile máy — nếu ≠ nền «Luật BHXH» thì reg-query
+    #        trả base_also / corpus·đếm theo overlay → golden ĐỎ GIẢ, cùng bệnh S10 như selftest). Case tự khai
+    #        TL_PROFILE thì tôn trọng (setdefault). Máy-ĐỘC-LẬP + chỉ-Fix3-chặn (thiếu tiêm → no-env trả None →
+    #        AttributeError → đỏ). Tích hợp xác nhận: golden-test + determinism-audit rc=0 dưới default «Luật BHXH».
+    def _c181_fix3_golden_env_pins():
+        _ge = _TL_MODULE._tl_workflow._golden_env
+        _DP = _TL_MODULE.DEFAULT_PROFILE
+        _no = _ge({"id": "x", "args": []})                                    # case KHÔNG khai env
+        _wi = _ge({"id": "y", "args": [], "env": {"TL_CACHE_DIR": "{FIXTURES}/m"}})
+        _se = _ge({"id": "z", "args": [], "env": {"TL_PROFILE": "custom"}})    # case tự khai → tôn trọng
+        return (isinstance(_no, dict) and _no.get("TL_PROFILE") == _DP
+                and _wi.get("TL_PROFILE") == _DP and "TL_CACHE_DIR" in _wi
+                and _se.get("TL_PROFILE") == "custom")
+    _t110("r181_golden_env_pins_base_profile", _c181_fix3_golden_env_pins)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -2061,6 +2061,7 @@ def cmd_corpus_audit(a) -> int:
     def _ckpt_save():
         if _ckpt is not None:
             try:
+                _ckpt.parent.mkdir(parents=True, exist_ok=True)   # (r181) profile-cache-dir (profile≠default / phiên mới) có thể CHƯA tồn tại → tạo trước, khỏi ghi HỤT im lặng (mất tiến độ)
                 _ckpt.write_text(json.dumps({"done": sorted(_ck_done), "rows": rows, "need_read": need_read,
                                              "errors": err}, ensure_ascii=False), encoding="utf-8")
             except OSError:

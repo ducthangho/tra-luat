@@ -896,13 +896,16 @@ def _golden_args(case: dict) -> list[str]:
     return [a.replace("{FIXTURES}", fd) for a in case["args"]]
 
 
-def _golden_env(case: dict) -> dict | None:
-    """v1.34.3 (I1): env per-case (vd TL_CACHE_DIR → fixture manifest), thay {FIXTURES} như args."""
-    env = case.get("env")
-    if not env:
-        return None
+def _golden_env(case: dict) -> dict:
+    """v1.34.3 (I1): env per-case (vd TL_CACHE_DIR → fixture manifest), thay {FIXTURES} như args.
+    (r181) LUÔN ghim TL_PROFILE=DEFAULT_PROFILE: golden fixtures chụp dưới profile NỀN; subprocess golden kế thừa
+    defaultProfile máy — nếu ≠ nền (vd S10 «Luật BHXH») thì reg-query trả base_also / corpus·đếm theo overlay
+    profile → golden ĐỎ GIẢ (cùng bệnh hermetic-profile như selftest). Case tự khai TL_PROFILE thì tôn trọng
+    (setdefault). Đường --write cũng nhờ đó regen dưới ĐÚNG nền."""
     fd = str(_golden_fixdir())
-    return {k: str(v).replace("{FIXTURES}", fd) for k, v in env.items()}
+    env = {k: str(v).replace("{FIXTURES}", fd) for k, v in (case.get("env") or {}).items()}
+    env.setdefault("TL_PROFILE", DEFAULT_PROFILE)
+    return env
 
 
 def _golden_test(*, write: bool = False) -> dict:

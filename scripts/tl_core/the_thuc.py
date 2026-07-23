@@ -339,14 +339,15 @@ def _the_thuc_parse_docx(path):
     import zipfile
     import xml.etree.ElementTree as ET
     W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
     with zipfile.ZipFile(path) as z:
-        doc = z.read("word/document.xml").decode("utf-8", "replace")
+        doc = read_member_bounded(z, "word/document.xml").decode("utf-8", "replace")
         try:
-            sty = z.read("word/styles.xml").decode("utf-8", "replace")
+            sty = read_member_bounded(z, "word/styles.xml").decode("utf-8", "replace")
         except KeyError:
             sty = ""
         try:
-            fnx = z.read("word/footnotes.xml").decode("utf-8", "replace")   # chú thích chân trang (VBHN!)
+            fnx = read_member_bounded(z, "word/footnotes.xml").decode("utf-8", "replace")   # chú thích chân trang (VBHN!)
         except KeyError:
             fnx = ""
     droot = ET.fromstring(doc)
@@ -628,8 +629,9 @@ def _the_thuc_wrap_scan(path, defaults, normal):
     W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
     out = []
     try:
+        from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
         with zipfile.ZipFile(path) as z:
-            droot = ET.fromstring(z.read("word/document.xml").decode("utf-8", "replace"))
+            droot = ET.fromstring(read_member_bounded(z, "word/document.xml").decode("utf-8", "replace"))
     except Exception:  # noqa: BLE001 — wrap-scan là advisory, không được làm gãy check chính
         return out
     key_qh = _tt_loose_key("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
@@ -698,8 +700,9 @@ def _the_thuc_check_layout(path, sections, add):
     import re
     import zipfile
     try:
+        from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
         with zipfile.ZipFile(path) as z:
-            doc = z.read("word/document.xml").decode("utf-8", "replace")
+            doc = read_member_bounded(z, "word/document.xml").decode("utf-8", "replace")
     except Exception:  # noqa: BLE001
         return
     s0 = sections[0] if sections else {}
@@ -1569,9 +1572,10 @@ def the_thuc_normalize(in_path, out_path, he=None):
     if os.path.abspath(str(in_path)) == os.path.abspath(str(out_path)):
         return {"ok": False, "schema": "the_thuc_normalize.v1", "error": "IN_OUT_SAME",
                 "in": os.path.basename(str(in_path)), "out": os.path.basename(str(out_path))}
+    from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb per-member
     with zipfile.ZipFile(in_path) as z:
         names = z.namelist()
-        data = {n: z.read(n) for n in names}
+        data = {n: read_member_bounded(z, n) for n in names}
     doc = data.get("word/document.xml", b"").decode("utf-8", "replace")
     sty = data.get("word/styles.xml", b"").decode("utf-8", "replace") if "word/styles.xml" in data else ""
     if he in (None, "auto"):

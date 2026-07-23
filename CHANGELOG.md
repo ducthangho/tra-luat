@@ -1,3 +1,22 @@
+# ★ v1.35.18 — r188 SEC-01 BOUNDED-READ DOCX/XML + TELEMETRY degraded_reason + DOCS SYNC ADR (2026-07-23)
+
+> Pha D (chốt) kế hoạch review p9 phần-còn-lại. +3 test r188 (1231/1231).
+
+- **SEC-01 — chống zip-bomb DOCX/XML:** engine thêm `read_member_bounded(zf, member)` — đọc member
+  STREAMING với TRẦN bytes giải nén (env `TL_DOCX_XML_MAX_MB`, mặc định 50, clamp [1,500]); vượt ⇒
+  `ZIP_MEMBER_BOUND_EXCEEDED` (ValueError), member thiếu GIỮ ngữ nghĩa KeyError. Wire 9 điểm đọc:
+  `_docx_unzip_text` (doc-text/extract), probe profile-ingest, `docx_markup.scan_file`,
+  `normalize_document._docx_zip_text`, the_thuc (check/wrap-scan/landscape + normalize đọc
+  TOÀN BỘ member khi repack). Các đường catch-all sẵn có fail-safe "" / scan(0) — không OOM,
+  không traceback giữa pipeline.
+- **Telemetry degraded_reason (WP5 dứt điểm):** `profile-list --discover` + `profile-sync` nay NỔI
+  `degraded_reason` từ scan (SERVER_NO_PROFILE_CATALOG…) lên output JSON như doctor r185 —
+  perf gate chỉ được coi xanh trên đường bulk, fallback phải tự khai.
+- **Docs sync:** bổ sung 3 ADR bị tham chiếu từ r184 mà chưa có file trong cây:
+  `0011-source-revision-tach-khoi-content-identity` (SourceRevision/claim-key/resume gate),
+  `0012-marker-transaction-schema-v2` (state machine + v2 + rollout R1/R2 — R2 đã thi hành r186),
+  `0013-zip-immutable-plan-bundle` (bundle hash, 1-extract r185, subprocess=0 r187).
+
 # ★ v1.35.17 — r187 WP7 TRACER-BULLET: ENGINE INGEST CHUNG — SUBPROCESS=0 (ZIP) + STAGE SCHEDULER + HASH-ONCE (2026-07-23)
 
 > Pha C kế hoạch review p9 phần-còn-lại (ADR-0004, ticket WP7/R3 ở r185). Module MỚI

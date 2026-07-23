@@ -17057,6 +17057,95 @@ def run() -> int:
                 setattr(_zi183, _k, _v)
     _t110("r187_zip_apply_inprocess_no_subprocess", _c187_zip_apply_inprocess_no_subprocess)
 
+    # ═══ r188 (SEC-01 + WP5 telemetry): bounded-read DOCX/XML chống zip-bomb (trần bytes giải nén
+    # per-member, env TL_DOCX_XML_MAX_MB); degraded_reason nổi lên profile-list --discover / profile-sync. ═══
+    def _c188_read_member_bounded_blocks_bomb():
+        import zipfile as _zf188
+        with _tf110.TemporaryDirectory() as _d:
+            _zp = str(Path(_d) / "b.docx")
+            with _zf188.ZipFile(_zp, "w", _zf188.ZIP_DEFLATED) as _z:
+                _z.writestr("word/document.xml", "<w:t>" + "a" * (2 * 1024 * 1024) + "</w:t>")
+                _z.writestr("small.xml", "<ok/>")
+            with _zf188.ZipFile(_zp) as _z:
+                _ok_small = _ie187.read_member_bounded(_z, "small.xml", max_bytes=1024) == b"<ok/>"
+                try:
+                    _ie187.read_member_bounded(_z, "word/document.xml", max_bytes=1024 * 1024)
+                    _blocked = False
+                except ValueError as _e:
+                    _blocked = "ZIP_MEMBER_BOUND_EXCEEDED" in str(_e)
+                try:
+                    _ie187.read_member_bounded(_z, "missing.xml", max_bytes=1024)
+                    _missing_keyerror = False
+                except KeyError:
+                    _missing_keyerror = True
+            return _ok_small and _blocked and _missing_keyerror
+    _t110("r188_read_member_bounded_blocks_bomb", _c188_read_member_bounded_blocks_bomb)
+
+    def _c188_docx_reader_bounded_wired():
+        # document.xml vượt trần (env cap 1MB) → _docx_unzip_text trả "" fail-safe (không OOM) và
+        # docx_markup.scan_file trả 0 thể; docx thường (dưới trần) vẫn đọc bình thường.
+        import zipfile as _zf188
+        _sv_env = os.environ.get("TL_DOCX_XML_MAX_MB")
+        try:
+            os.environ["TL_DOCX_XML_MAX_MB"] = "1"
+            with _tf110.TemporaryDirectory() as _d:
+                _big = str(Path(_d) / "bomb.docx")
+                with _zf188.ZipFile(_big, "w", _zf188.ZIP_DEFLATED) as _z:
+                    _z.writestr("word/document.xml",
+                                "<w:p><w:t>" + "x" * (1536 * 1024) + "</w:t></w:p>")
+                _ok_doc = str(Path(_d) / "ok.docx")
+                with _zf188.ZipFile(_ok_doc, "w", _zf188.ZIP_DEFLATED) as _z:
+                    _z.writestr("word/document.xml", "<w:p><w:t>văn bản 188</w:t></w:p>")
+                _dm188 = __import__("docx_markup")
+                return (_TL_MODULE._docx_unzip_text(_big) == ""
+                        and "văn bản 188" in _TL_MODULE._docx_unzip_text(_ok_doc)
+                        and sum(_dm188.scan_file(_big).values()) == 0
+                        and _ie187.docx_xml_max_bytes() == 1024 * 1024)
+        finally:
+            if _sv_env is None:
+                os.environ.pop("TL_DOCX_XML_MAX_MB", None)
+            else:
+                os.environ["TL_DOCX_XML_MAX_MB"] = _sv_env
+    _t110("r188_docx_reader_bounded_wired", _c188_docx_reader_bounded_wired)
+
+    def _c188_degraded_reason_surfaces_discover_sync():
+        _keys188 = ("load_creds", "_gas", "_discover_scan_vbthuong")
+        _sv = {k: getattr(_TL_MODULE, k) for k in _keys188}
+
+        class _FkG188:
+            def get(self, action, **kw):
+                return {"vanBanThuongId": "VBT188"} if action == "bootstrap" else {"items": []}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkG188()
+            _TL_MODULE._discover_scan_vbthuong = lambda g, vbt, folder_cap=60: {
+                "folders": [], "root_files": [], "folder_total": 0, "capped": False,
+                "via": "list_loop", "degraded_reason": "SERVER_NO_PROFILE_CATALOG: r188"}
+            with _tf110.TemporaryDirectory() as _d:
+                _cfg = str(Path(_d) / "tra_luat_config.v2.json")
+                Path(_cfg).write_text(json.dumps({
+                    "schema": 2, "webappUrl": "https://x/exec", "token": "t",
+                    "defaultProfile": "vbqppl", "profiles": {"vbqppl": {"rootFolderId": "r1"}}},
+                    ensure_ascii=False), encoding="utf-8")
+                _pathd, _cfgd = _TL_MODULE._read_config_record(_cfg)
+                _b1 = _io110.StringIO()
+                with _ctx110.redirect_stdout(_b1), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _TL_MODULE._profile_list_discover(
+                        argparse.Namespace(config=_cfg, json=True, folder_cap=60), _pathd, _cfgd)
+                _o1 = json.loads(_b1.getvalue())
+                _b2 = _io110.StringIO()
+                with _ctx110.redirect_stdout(_b2), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _TL_MODULE._cmd_profile_sync_impl(
+                        argparse.Namespace(config=_cfg, json=True, folder_cap=60,
+                                           target_profile=None, apply=False))
+                _o2 = json.loads(_b2.getvalue())
+            return ("SERVER_NO_PROFILE_CATALOG: r188" in str(_o1.get("degraded_reason"))
+                    and "SERVER_NO_PROFILE_CATALOG: r188" in str(_o2.get("degraded_reason")))
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r188_degraded_reason_surfaces_discover_sync", _c188_degraded_reason_surfaces_discover_sync)
+
     def _c187_zip_archive_hash_once_per_scope():
         # Trong MỘT run (plan bundle): archive sha256_file tính ĐÚNG 1 lần — extract-verify hit memo;
         # guard nội dung per-member (so sha256 từng member lúc extract) GIỮ NGUYÊN.

@@ -861,8 +861,9 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
     if ext == ".docx":
         try:
             import zipfile as _zf
+            from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
             with _zf.ZipFile(path) as z:
-                xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+                xml = read_member_bounded(z, "word/document.xml").decode("utf-8", errors="replace")
             # r182: lọc markup sửa đổi TRƯỚC khi bóc tag — probe cũ giữ CẢ w:delText nên DRY phân loại
             # trên chữ ĐÃ BỎ (dự thảo sửa đổi bị đọc sai cả hai chiều). `strip` = văn bản vận hành thật.
             _dm = _imp("docx_markup")

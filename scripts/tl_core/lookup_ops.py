@@ -2270,8 +2270,9 @@ def _docx_unzip_text(path, mode: str = "strip") -> str:
     người rà muốn thấy dấu vết thì `tl doc-text --markup mark` (đường đó không đụng cache)."""
     import zipfile as _zf
     try:
+        from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
         with _zf.ZipFile(path) as z:
-            xml = z.read("word/document.xml").decode("utf-8", errors="replace")
+            xml = read_member_bounded(z, "word/document.xml").decode("utf-8", errors="replace")
         _dm = _imp("docx_markup")
         xml, _st = _dm.strip_markup(xml, mode)
         _w = _dm.warn_line(_st, str(path))

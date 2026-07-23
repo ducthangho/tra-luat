@@ -120,6 +120,39 @@ def hash_file_once(path, *, chunk_size: int = 1024 * 1024) -> str:
     return digest
 
 
+# ── 2b. SEC-01 (r188): bounded-read member zip — chống zip-bomb DOCX/XML ──
+_DOCX_XML_MAX_MB_DEFAULT = 50
+
+
+def docx_xml_max_bytes() -> int:
+    """Trần bytes GIẢI NÉN cho một member XML của DOCX — env TL_DOCX_XML_MAX_MB
+    (mặc định 50, clamp [1, 500]); giá trị rác → mặc định."""
+    import os as _os
+    try:
+        v = int(str(_os.environ.get("TL_DOCX_XML_MAX_MB", "") or _DOCX_XML_MAX_MB_DEFAULT))
+    except (TypeError, ValueError):
+        v = _DOCX_XML_MAX_MB_DEFAULT
+    return max(1, min(v, 500)) * 1024 * 1024
+
+
+def read_member_bounded(zf, member: str, *, max_bytes: int | None = None) -> bytes:
+    """SEC-01 (r188): đọc member zip STREAMING với trần bytes giải nén — file nén nhỏ phình to
+    (zip-bomb) bị chặn TRƯỚC khi nuốt RAM, raise ValueError ZIP_MEMBER_BOUND_EXCEEDED.
+    Member không tồn tại giữ nguyên ngữ nghĩa KeyError của ZipFile.read."""
+    cap = int(max_bytes or docx_xml_max_bytes())
+    chunks, total = [], 0
+    with zf.open(member, "r") as stream:
+        while True:
+            chunk = stream.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > cap:
+                raise ValueError(f"ZIP_MEMBER_BOUND_EXCEEDED:{member}:{total}>{cap}")
+            chunks.append(chunk)
+    return b"".join(chunks)
+
+
 # ── 3. Child runner in-process với stdout/stderr route theo thread ──
 class _ThreadRouteProxy:
     """Proxy file-like: thread có route → ghi vào buffer riêng; thread khác → stream gốc."""

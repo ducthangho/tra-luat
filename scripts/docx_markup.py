@@ -96,9 +96,10 @@ def scan_file(path) -> dict:
     """Đếm markup của MỘT file .docx (thuần đọc). Không mở được/không phải docx → mọi thể = 0."""
     import zipfile
     try:
+        from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
         with zipfile.ZipFile(path) as z:
-            return scan(z.read("word/document.xml").decode("utf-8", "replace"))
-    except Exception:  # noqa: BLE001 — docx hỏng/mã hoá/không phải zip → coi như sạch markup
+            return scan(read_member_bounded(z, "word/document.xml").decode("utf-8", "replace"))
+    except Exception:  # noqa: BLE001 — docx hỏng/mã hoá/không phải zip/vượt trần → coi như sạch markup
         return scan("")
 
 

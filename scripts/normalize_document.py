@@ -51,7 +51,9 @@ def _docx_zip_text(path: str, mode: str = "strip") -> tuple:
     v1.35.12 (r182): lọc markup sửa đổi TRƯỚC khi bóc tag — nhánh này trước đây giữ CẢ w:delText
     (tệ hơn nhánh lib) ⇒ đọc chữ ĐÃ BỎ như quy phạm còn hiệu lực."""
     import zipfile
-    xml = zipfile.ZipFile(path).read("word/document.xml").decode("utf-8", "replace")
+    from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
+    with zipfile.ZipFile(path) as _z:
+        xml = read_member_bounded(_z, "word/document.xml").decode("utf-8", "replace")
     xml, st = strip_markup(xml, mode)
     # GIỮ bảng: xuống dòng theo đoạn & hàng bảng, tab giữa ô
     xml = (xml.replace("</w:p>", "\n")

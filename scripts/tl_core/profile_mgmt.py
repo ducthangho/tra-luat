@@ -683,6 +683,8 @@ def _profile_list_discover(a, path, cfg) -> int:
     out = {"ok": True, "config": path, "vanBanThuongId": vbt_id,
            "folder_total": scan.get("folder_total"), "scanned": len(scan.get("folders") or []),
            "capped": bool(scan.get("capped")), **rep}
+    if scan.get("degraded_reason"):   # r188/WP5: telemetry — perf gate chỉ xanh trên đường bulk
+        out["degraded_reason"] = scan.get("degraded_reason")
     if scan.get("capped"):
         out["warning"] = (f"CHỈ quét {out['scanned']}/{out['folder_total']} thư mục (cap) — chạy lại với "
                           f"--folder-cap {out['folder_total']} để phủ đủ; kết luận 'config_only' có thể là giả khi cap.")
@@ -2215,6 +2217,8 @@ def _cmd_profile_sync_impl(a) -> int:
            "config_report": _config_candidates_report(getattr(a, "config", None)),
            "note": "MỘT CHIỀU marker→config (ADR-0003). Marker sai → sửa qua lệnh mutation hoặc "
                    "profile-backfill-markers --force; marker_missing → profile-backfill-markers --apply."}
+    if scan.get("degraded_reason"):   # r188/WP5: telemetry — perf gate chỉ xanh trên đường bulk
+        out["degraded_reason"] = scan.get("degraded_reason")
     if scan.get("capped"):
         out["warning"] = (f"CHỈ quét {out['scanned']}/{scan.get('folder_total')} thư mục (cap) — "
                           f"chạy lại với --folder-cap {scan.get('folder_total')}.")

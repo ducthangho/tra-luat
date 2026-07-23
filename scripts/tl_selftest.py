@@ -16506,9 +16506,9 @@ def run() -> int:
     _t110("r184_zip_bundle_hash_covers_children", _c183_zip_bundle_hash_covers_children)
 
     def _c183_zip_apply_no_self_replan():
-        # Case A (khớp bundle): apply gọi child ĐÚNG 1 lần (subprocess apply), mang --expected-plan-hash
-        # ĐÃ DUYỆT, KHÔNG chạy child DRY subprocess, không tự sinh hash mới.
-        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+        # Case A (khớp bundle): apply gọi child ĐÚNG 1 lần (r187: in-process apply), mang
+        # --expected-plan-hash ĐÃ DUYỆT, KHÔNG chạy child DRY thêm, không tự sinh hash mới.
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_zip_child_apply_one",
                                                "_apply_journal_start", "_journal_append")}
         _argvs = []
         try:
@@ -16519,7 +16519,7 @@ def run() -> int:
             def _fk_child(args):
                 _argvs.append(list(args))
                 return {"ok": True, "returncode": 0, "json": {"ok": True}}
-            _zi183._run_child_tl = _fk_child
+            _zi183._zip_child_apply_one = _fk_child   # r187: funnel apply mới (subprocess=0)
             with _tf110.TemporaryDirectory() as _d:
                 _zp = _mk_zip183(_d)
                 _bundle = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
@@ -16806,7 +16806,7 @@ def run() -> int:
 
     def _c185_zip_apply_single_extraction():
         # WP6/ING-03: apply = ĐÚNG 1 lần extract+hash member (trước r185: 2 extract + pre-pass).
-        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_zip_child_apply_one",
                                                "_apply_journal_start", "_journal_append",
                                                "_safe_extract_zip_for_ingest")}
         _n_extract = {"i": 0}
@@ -16814,7 +16814,8 @@ def run() -> int:
             _zi183._apply_journal_start = lambda *a, **k: "runZ185"
             _zi183._journal_append = lambda *a, **k: None
             _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "F" * 64, "json": {}}
-            _zi183._run_child_tl = lambda args: {"ok": True, "returncode": 0, "json": {"ok": True}}
+            # r187: apply child nay đi _zip_child_apply_one (in-process) — patch đúng funnel mới
+            _zi183._zip_child_apply_one = lambda args: {"ok": True, "returncode": 0, "json": {"ok": True}}
             _sav_ex = _sv["_safe_extract_zip_for_ingest"]
             def _ex(*a, **k):
                 _n_extract["i"] += 1
@@ -16838,7 +16839,7 @@ def run() -> int:
 
     def _c185_zip_insufficient_memory_blocks():
         # D7: không đủ RAM cho 1 worker → DỪNG TRƯỚC mutation với lỗi hành động được.
-        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_zip_child_apply_one",
                                                "_apply_journal_start", "_journal_append")}
         _sv_base = _zi183._INGEST_WORKER_BASE_BYTES
         _argvs = []
@@ -16846,7 +16847,8 @@ def run() -> int:
             _zi183._apply_journal_start = lambda *a, **k: "runZ185m"
             _zi183._journal_append = lambda *a, **k: None
             _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "G" * 64, "json": {}}
-            _zi183._run_child_tl = lambda args: (_argvs.append(list(args)) or {"ok": True, "json": {"ok": True}})
+            # r187: apply child nay đi _zip_child_apply_one (in-process) — patch đúng funnel mới
+            _zi183._zip_child_apply_one = lambda args: (_argvs.append(list(args)) or {"ok": True, "json": {"ok": True}})
             with _tf110.TemporaryDirectory() as _d:
                 _zp = _mk_zip183(_d)
                 _exp = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
@@ -16948,6 +16950,129 @@ def run() -> int:
                 and "CANARY" in _rows[0]["action"]
                 and "--profile-name zeta --apply --force" in _rows[1]["action"])
     _t110("r186_migration_plan_canary", _c186_migration_plan_canary)
+
+    # ═══ r187 (ADR-0004 WP7 — tracer-bullet): engine ingest chung — stage scheduler upload≤2/NLM≤2,
+    # hash nguồn ĐÚNG 1 LẦN trong run_scope, child ZIP chạy IN-PROCESS (subprocess=0). ═══
+    import tl_core.ingest_engine as _ie187
+
+    def _c187_stage_slot_caps_concurrency():
+        import threading as _th187, time as _tm187
+        _st = {"in": 0, "max": 0}
+        _lk = _th187.Lock()
+
+        def _work():
+            with _ie187.stage_slot("upload"):
+                with _lk:
+                    _st["in"] += 1
+                    _st["max"] = max(_st["max"], _st["in"])
+                _tm187.sleep(0.01)
+                with _lk:
+                    _st["in"] -= 1
+        _ts = [_th187.Thread(target=_work) for _ in range(8)]
+        for _t in _ts:
+            _t.start()
+        for _t in _ts:
+            _t.join()
+        _lims = _ie187.stage_limits()
+        return _st["max"] <= 2 and _lims.get("upload") == 2 and _lims.get("nlm") == 2
+    _t110("r187_stage_slot_caps_concurrency", _c187_stage_slot_caps_concurrency)
+
+    def _c187_hash_once_run_scope():
+        with _tf110.TemporaryDirectory() as _d:
+            _p = Path(_d) / "a.bin"
+            _p.write_bytes(b"x" * 1024)
+            _c0 = _ie187.hash_stats()["computed"]
+            with _ie187.run_scope():
+                _h1 = _ic183.sha256_file(_p)
+                _h2 = _ic183.sha256_file(_p)
+                _in = _ie187.hash_stats()["computed"] - _c0
+            _h3 = _ic183.sha256_file(_p)   # ngoài scope: memo tắt → tính lại
+            _out = _ie187.hash_stats()["computed"] - _c0
+            import hashlib as _hl187
+            return (_h1 == _h2 == _h3 == _hl187.sha256(b"x" * 1024).hexdigest()
+                    and _in == 1 and _out == 2 and not _ie187.memo_active())
+    _t110("r187_hash_once_run_scope", _c187_hash_once_run_scope)
+
+    def _c187_child_runner_inprocess_routed_io():
+        # 2 thread chạy child ĐỒNG THỜI — mỗi thread bắt ĐÚNG stdout của mình (route theo thread,
+        # không dùng redirect_stdout process-global vốn không thread-safe).
+        import threading as _th187
+
+        def _pf(payload):
+            def factory():
+                import argparse as _ap187
+                p = _ap187.ArgumentParser()
+                p.add_argument("x")
+
+                def _fn(ns):
+                    print(json.dumps({"ok": True, "who": ns.x, **payload}))
+                    return 0
+                p.set_defaults(fn=_fn)
+                return p
+            return factory
+        _res = {}
+
+        def _run(tag):
+            _res[tag] = _ie187.run_child_inprocess([tag], parser_factory=_pf({"tag": tag}))
+        _ts = [_th187.Thread(target=_run, args=(t,)) for t in ("A", "B")]
+        for _t in _ts:
+            _t.start()
+        for _t in _ts:
+            _t.join()
+        _e = _ie187.run_child_inprocess(["--bogus-flag"], parser_factory=_pf({}))
+        return (_res["A"]["ok"] and (_res["A"]["json"] or {}).get("who") == "A"
+                and (_res["B"]["json"] or {}).get("who") == "B"
+                and (_res["A"]["json"] or {}).get("tag") == "A"
+                and (_res["B"]["json"] or {}).get("tag") == "B"
+                and _e["ok"] is False and _e["returncode"] != 0)
+    _t110("r187_child_runner_inprocess_routed_io", _c187_child_runner_inprocess_routed_io)
+
+    def _c187_zip_apply_inprocess_no_subprocess():
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_zip_child_apply_one",
+                                               "_run_child_tl", "_apply_journal_start", "_journal_append")}
+        _argvs = []
+        try:
+            _zi183._apply_journal_start = lambda *a, **k: "runZ187"
+            _zi183._journal_append = lambda *a, **k: None
+            _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "H" * 64, "json": {}}
+            _zi183._zip_child_apply_one = lambda args: (_argvs.append(list(args))
+                                                        or {"ok": True, "returncode": 0, "json": {"ok": True}})
+
+            def _boom187(args):
+                raise AssertionError("SUBPROCESS_CALLED")
+            _zi183._run_child_tl = _boom187
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _exp = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
+                                                   expected_plan_hash=_exp), mode="vbqppl")
+                _o = json.loads(_bo.getvalue())
+            return (_rc == 0 and _o.get("ok") is True and _argvs
+                    and all("--apply" in v and "--confirm" in v and "--expected-plan-hash" in v
+                            for v in _argvs))
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r187_zip_apply_inprocess_no_subprocess", _c187_zip_apply_inprocess_no_subprocess)
+
+    def _c187_zip_archive_hash_once_per_scope():
+        # Trong MỘT run (plan bundle): archive sha256_file tính ĐÚNG 1 lần — extract-verify hit memo;
+        # guard nội dung per-member (so sha256 từng member lúc extract) GIỮ NGUYÊN.
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one",)}
+        try:
+            _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "K" * 64, "json": {}}
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _c0 = _ie187.hash_stats()["computed"]
+                _b = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
+                _n = _ie187.hash_stats()["computed"] - _c0
+            return bool(_b.get("ok")) and _n == 1
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r187_zip_archive_hash_once_per_scope", _c187_zip_archive_hash_once_per_scope)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

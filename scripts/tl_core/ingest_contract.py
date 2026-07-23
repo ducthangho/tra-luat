@@ -41,15 +41,11 @@ def sha256_bytes(data: bytes) -> str:
 
 
 def sha256_file(path: str | Path, *, chunk_size: int = 1024 * 1024) -> str:
-    """Hash a source exactly once using bounded memory."""
-    h = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        while True:
-            chunk = stream.read(chunk_size)
-            if not chunk:
-                break
-            h.update(chunk)
-    return h.hexdigest()
+    """Hash a source exactly once using bounded memory.
+    r187 (ADR-0004 WP7): ủy quyền engine — trong ingest_engine.run_scope() memo theo realpath
+    (hash nguồn ĐÚNG 1 lần/run, kể cả child plan); ngoài scope hành vi cũ (tính mỗi lần gọi)."""
+    from tl_core.ingest_engine import hash_file_once
+    return hash_file_once(path, chunk_size=chunk_size)
 
 
 def _hash_payload(value: Any) -> str:

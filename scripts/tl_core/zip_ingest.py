@@ -321,24 +321,21 @@ def _zip_child_args(item, *, mode: str, profile: str, cat: str, a) -> list:
 
 def _zip_child_plan_one(child_args: list) -> dict:
     """r184 (ADR-0013): chạy child CLI ở chế độ DRY **in-process** (0 subprocess, 0 mutation) để lấy
-    child plan_hash cho bundle. stdout child bị nuốt; chỉ trả JSON + plan_hash."""
-    import io as _io, contextlib as _ctx
-    try:
-        _ns = build_parser().parse_args([str(x) for x in (child_args or []) if str(x)])
-        _bo, _be = _io.StringIO(), _io.StringIO()
-        with _ctx.redirect_stdout(_bo), _ctx.redirect_stderr(_be):
-            _rc = _ns.fn(_ns)
-        try:
-            _j = json.loads(_bo.getvalue())
-        except Exception:  # noqa: BLE001
-            _j = {}
-        return {"ok": _rc == 0 and bool(_j.get("plan_hash")), "returncode": _rc, "json": _j,
-                "plan_hash": str(_j.get("plan_hash") or ""), "stderr_tail": _be.getvalue()[-400:]}
-    except SystemExit as _e:  # argparse exit
-        return {"ok": False, "returncode": int(getattr(_e, "code", 2) or 0), "json": {}, "plan_hash": "",
-                "error": "CHILD_ARGPARSE_EXIT"}
-    except Exception as _e:  # noqa: BLE001
-        return {"ok": False, "json": {}, "plan_hash": "", "error": f"{type(_e).__name__}: {_e}"}
+    child plan_hash cho bundle. r187 (ADR-0004 WP7): ủy quyền engine runner chung — stdout/stderr
+    route theo thread (an toàn khi chạy trong pool), một runner cho cả DRY lẫn apply."""
+    from tl_core.ingest_engine import run_child_inprocess
+    _r = run_child_inprocess(child_args, parser_factory=build_parser)
+    _j = _r.get("json") if isinstance(_r.get("json"), dict) else {}
+    return {"ok": bool(_r.get("ok")) and bool(_j.get("plan_hash")), "returncode": _r.get("returncode"),
+            "json": _j, "plan_hash": str(_j.get("plan_hash") or ""),
+            "stderr_tail": str(_r.get("stderr_tail") or "")[-400:]}
+
+
+def _zip_child_apply_one(child_args: list) -> dict:
+    """r187 (ADR-0004 WP7 — subprocess=0): chạy child APPLY in-process qua engine runner — thay
+    _run_child_tl (subprocess). Shape trả về GIỮ NGUYÊN hợp đồng _run_child_tl."""
+    from tl_core.ingest_engine import run_child_inprocess
+    return run_child_inprocess(child_args, parser_factory=build_parser)
 
 
 def _zip_child_plans_from_extracted(extracted, *, mode: str, profile: str, cat: str, a) -> tuple:
@@ -410,6 +407,14 @@ def _zip_workers_effective(requested: int, member_sizes: list) -> dict:
 
 
 def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
+    """r187 (ADR-0004 WP7): mở engine run_scope cho TOÀN run — sha256_file memo theo realpath
+    (archive + member + child plan hash nguồn ĐÚNG 1 lần/invocation)."""
+    from tl_core.ingest_engine import run_scope
+    with run_scope():
+        return _zip_plan_bundle_impl(a, mode=mode, profile=profile, cat=cat)
+
+
+def _zip_plan_bundle_impl(a, *, mode: str, profile: str, cat: str) -> dict:
     """r184 (ADR-0013 — ING-01): IMMUTABLE PLAN BUNDLE. DRY lập ĐẦY ĐỦ child plan cho từng member;
     parent `plan_hash` = fingerprint TOÀN bundle (archive + member list + mọi child plan). Xác nhận
     hash này = duyệt đúng bộ kế hoạch con — apply không được lập kế hoạch mới (khác ⇒
@@ -438,6 +443,13 @@ def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
 
 
 def _zip_apply(a, *, mode: str) -> int:
+    """r187 (ADR-0004 WP7): engine run_scope trọn apply — hash nguồn 1 lần xuyên plan/extract/child."""
+    from tl_core.ingest_engine import run_scope
+    with run_scope():
+        return _zip_apply_impl(a, mode=mode)
+
+
+def _zip_apply_impl(a, *, mode: str) -> int:
     from concurrent.futures import ThreadPoolExecutor
     from tl_core.ingest_contract import authorize_apply
     cat = getattr(a, "cat", "") or ""
@@ -504,8 +516,10 @@ def _zip_apply(a, *, mode: str) -> int:
             _journal_append(run_id, {"t": "intent", "op": "ingest_member", "key": item["normalized_path"],
                                      "set": {"plan_hash": child_plan_hash, "member_sha256": item.get("sha256")}})
             # --confirm yes hợp lệ Ở ĐÂY vì child_plan_hash nằm TRONG bundle user đã duyệt (ADR-0013)
-            applied = _run_child_tl(child + ["--apply", "--confirm", "yes",
-                                             "--expected-plan-hash", child_plan_hash])
+            # r187 (WP7): child apply IN-PROCESS qua engine (subprocess=0) — registry đã có lane RLock
+            # (r185/ING-05), upload/NLM bị stage scheduler chặn ≤2 concurrent (engine.stage_slot).
+            applied = _zip_child_apply_one(child + ["--apply", "--confirm", "yes",
+                                                    "--expected-plan-hash", child_plan_hash])
             applied_ok = bool(applied.get("ok") and isinstance(applied.get("json"), dict)
                               and applied["json"].get("ok") is True)
             return {"ok": applied_ok, "step": "child_apply", "zip_path": item["normalized_path"],

@@ -1445,8 +1445,10 @@ def cmd_profile_ingest(a) -> int:
     else:
         inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
         import base64
-        up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode("ascii"), name=Path(f).stem + up_ext,
-                    mime=up_mime, parentId=inbox, convert="false", register="false", share="false", force="true")
+        from tl_core.ingest_engine import stage_slot   # r187 (WP7): upload ≤2 concurrent
+        with stage_slot("upload"):
+            up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode("ascii"), name=Path(f).stem + up_ext,
+                        mime=up_mime, parentId=inbox, convert="false", register="false", share="false", force="true")
         fid = up.get("fileId") or up.get("id")
         if not fid:
             print(json.dumps({"ok": False, "step": "upload", "detail": up}, ensure_ascii=False, indent=2), file=sys.stderr)
@@ -1601,7 +1603,9 @@ def cmd_profile_ingest(a) -> int:
                                  "name,corpus,row_kind,note,hieuluc")
         _final_ok = bool(_children_ok and rb.get("verified"))
     else:
-        add = nc.source_add(notebook_id, drive_id=gdoc, doc_type=("sheets" if _is_sheet else "doc"), wait=True)
+        from tl_core.ingest_engine import stage_slot   # r187 (WP7): NLM ≤2 concurrent
+        with stage_slot("nlm"):
+            add = nc.source_add(notebook_id, drive_id=gdoc, doc_type=("sheets" if _is_sheet else "doc"), wait=True)
         if not (add.get("ok") and add.get("source_id")):
             print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
@@ -1648,7 +1652,9 @@ def _profile_push_chunks(g, nc, notebook_id: str, gdoc: str, doc_name: str, info
         if not chunk_id:
             nlm_sources.append({"ok": False, "part": c["part"], "step": "createtext", "detail": cr})
             continue
-        add = nc.source_add(notebook_id, drive_id=chunk_id, doc_type="doc", wait=True)
+        from tl_core.ingest_engine import stage_slot   # r187 (WP7): NLM ≤2 concurrent
+        with stage_slot("nlm"):
+            add = nc.source_add(notebook_id, drive_id=chunk_id, doc_type="doc", wait=True)
         src = add.get("source_id") if add.get("ok") else ""
         if not src:
             nlm_sources.append({"ok": False, "part": c["part"], "chunk_gdoc": chunk_id,
@@ -1838,7 +1844,9 @@ def cmd_profile_ingest_resume(a) -> int:
     else:
         _sid = str(canon.get("nlm_source_id") or "").strip()
         if not _sid:
-            add = nc.source_add(notebook_id, drive_id=gdoc, doc_type="doc", wait=True)
+            from tl_core.ingest_engine import stage_slot   # r187 (WP7): NLM ≤2 concurrent
+            with stage_slot("nlm"):
+                add = nc.source_add(notebook_id, drive_id=gdoc, doc_type="doc", wait=True)
             if not (add.get("ok") and add.get("source_id")):
                 print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
@@ -2295,8 +2303,10 @@ def cmd_ingest_local(a) -> int:
         print(f"[tl] --drive-id: dùng file có sẵn trên Drive (fileId={fid}), bỏ bước upload.", file=sys.stderr)
     else:
         _step("upload", name + up_ext, mime=up_mime)
-        up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode(), name=name + up_ext,
-                    mime=up_mime, parentId=inbox, convert="false", register="false")
+        from tl_core.ingest_engine import stage_slot   # r187 (WP7): upload ≤2 concurrent
+        with stage_slot("upload"):
+            up = g.post("upload", b64=base64.b64encode(Path(f).read_bytes()).decode(), name=name + up_ext,
+                        mime=up_mime, parentId=inbox, convert="false", register="false")
         fid = up.get("fileId") or up.get("id")
         _step_ok("upload", name + up_ext, bool(fid), fileId=fid)
         if not fid:
@@ -2477,7 +2487,9 @@ def cmd_ingest_local(a) -> int:
             # settle (source_id có NGAY từ add-response → reg_link phía dưới vẫn ghi ĐỦ; settle chạy ngầm phía NLM).
             _no_wait = bool(getattr(a, "nlm_no_wait", False))
             _step("nlm_source_add", gdoc, notebook=target, title=name[:120], wait=(not _no_wait))
-            add = nc.source_add(target, drive_id=gdoc, doc_type="doc", wait=(not _no_wait))
+            from tl_core.ingest_engine import stage_slot   # r187 (WP7): NLM ≤2 concurrent
+            with stage_slot("nlm"):
+                add = nc.source_add(target, drive_id=gdoc, doc_type="doc", wait=(not _no_wait))
             _add_verified = bool(add.get("ok") and add.get("source_id"))
             _step_ok("nlm_source_add", gdoc, _add_verified, source_id=add.get("source_id"), wait=(not _no_wait))
             if not _add_verified:

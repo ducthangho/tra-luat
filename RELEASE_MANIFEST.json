@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.23",
+  "skill_version": "1.35.24",
   "webapp_target": "2.21.2n",
   "root_name": "tra-luat",
-  "file_count": 182,
-  "total_bytes": 6314405,
-  "package_hash": "1fcf4da3c48d1d55e0cde1506a5a59d6c4e33e46f254b50cccef3df04a3b2886",
-  "content_hash": "1fcf4da3c48d1d55e0cde1506a5a59d6c4e33e46f254b50cccef3df04a3b2886",
+  "file_count": 181,
+  "total_bytes": 6312470,
+  "package_hash": "221a0148f4aacfcdcbdb40fd0fd58e889364550d3b9ff2a8e2cba9dec229656c",
+  "content_hash": "221a0148f4aacfcdcbdb40fd0fd58e889364550d3b9ff2a8e2cba9dec229656c",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 325073,
-      "sha256": "68af8a44cdb162a181a11d36982310531c2ef940dfe3357a87ef3cb6048a1ee9"
+      "size": 327008,
+      "sha256": "06f81725db9409209d653963af6ca66bc47df6907bb0caa8483f7372ebbd4e20"
     },
     {
       "path": "CONTEXT.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 48124,
-      "sha256": "9148745299e93e16ef52fb3cdf96bb5bfa293c60b066843475bf40ab8b3b8f1d"
+      "sha256": "2b5242507d36ef13a1f002958b82c682c0bdbbd4c5ef6748cf279419e29b2e0e"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "ee25c03b237edc7e1bf76a977d43b30c3d69ccf20b41d40748c78df37cd777d4"
+      "sha256": "bc0b2d4bd2f3e62c4ea2b59bcd912513ebd11c3c7e896840725c44f790576e3e"
     },
     {
       "path": "agents/openai.yaml",
@@ -708,8 +708,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 214273,
-      "sha256": "28dbd71daba68e66e5db43e52ed4319895766b3070cb7d58aa599802959082f0"
+      "size": 214379,
+      "sha256": "747deb3f160f91ce47b9cd170e72c6f5025f0c6c8aae0fe923075903a02c86bc"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -833,8 +833,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 57548,
-      "sha256": "8dd3ae3021b4da3c4348fa3cf14c9d7c8d60b786a4eb443782f077aec1a1f0de"
+      "size": 59912,
+      "sha256": "a682f88b4dd2c92f3d7152feee43e38846df39f0d2a2a6d21608c449d439075c"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -873,8 +873,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1303182,
-      "sha256": "156b2259eb61f19102e219827db7aa9391a0800a1b650c574d9fd7538d3eadc4"
+      "size": 1305601,
+      "sha256": "e138fd518172c317158c43497016c4e77ea72d6651b4a128184b6eb0fdee7784"
     },
     {
       "path": "scripts/tra_cuu.py",
@@ -915,11 +915,6 @@
       "path": "tra_luat_config.example.json",
       "size": 3509,
       "sha256": "909916e84116f836a2b4ff3ab4691dfd80b5f3c2aedfbefd267a7bb4f4bfdc7d"
-    },
-    {
-      "path": "tra_luat_config.v2.json.bak_truoc_shard3_2026-07-23",
-      "size": 8759,
-      "sha256": "0e61acbe6df2a9641ef179750daf2c6c713dccbe8f5bfd7967f92619ac684865"
     }
   ],
   "determinism_note": "Manifest không chứa timestamp hay đường dẫn tuyệt đối; package_hash tính từ path,size,sha256 đã sort."

@@ -17820,6 +17820,41 @@ def run() -> int:
                 setattr(_TL_MODULE, _k, _v)
     _t110("r192_f9_fetch_route_hoi_truoc_mac_dinh", _c192_f9_fetch_route_ask_first)
 
+    # ═══ r193 — HOTFIX SỰ CỐ TOKEN 23-07: file backup config đuôi BIẾN THỂ (`….json.bak_truoc_shard3_…`)
+    # lọt release-bundle → token webapp THẬT nằm trong zip LIVE trên Drive (script ship của user quét ra;
+    # gate 9 bước KHÔNG có bước quét token). Hai tầng vệ: exclude biến thể + cổng quét token trong bundle. ═══
+    def _c193_release_exclude_bak_variants():
+        # Chỉ-nó-chặn: luật cũ chỉ bắt suffix `.bak` CHÍNH XÁC + tên config CHÍNH XÁC — các biến thể sau
+        # trước r193 đều ĐI LỌT.
+        with _tf110.TemporaryDirectory() as _d:
+            _r = Path(_d)
+            def _mk(name):
+                p = _r / name
+                p.write_text("x", encoding="utf-8")
+                return p
+            _bad = ["tra_luat_config.v2.json.bak_truoc_shard3_2026-07-23",
+                    "tra_luat_config.json.old", "notes.docx.bak2", "CLAUDE.md.orig", "a.tmp_save"]
+            _good = ["SKILL.md", "tra_luat_config.example.json", "template_notes.md"]
+            _inc = _TL_MODULE._release_should_include
+            return (all(_inc(_mk(n), _r) is False for n in _bad)
+                    and all(_inc(_mk(n), _r) is True for n in _good))
+    _t110("r193_release_exclude_bak_bien_the", _c193_release_exclude_bak_variants)
+
+    def _c193_release_bundle_token_scan():
+        # PURE + shape: member chứa token thật (tl_ + ≥20 alnum) → finding (token CẮT, không in trọn);
+        # nhị phân/placeholder → sạch; cmd_release_bundle có cổng TOKEN_IN_BUNDLE xoá zip tạm rc=2.
+        import inspect as _ins193
+        import tl_core.release as _rl193
+        _tok = "tl_" + "a1" * 12
+        _f1 = _TL_MODULE._release_secret_findings("cfg/x.json", ('{"token": "%s"}' % _tok).encode("utf-8"))
+        _f2 = _TL_MODULE._release_secret_findings("bin/x.zip", b"\xff\xfe\x00PK")
+        _f3 = _TL_MODULE._release_secret_findings("cfg/example.json", b'{"token": "<DIEN_TOKEN>"}')
+        _src = _ins193.getsource(_rl193.cmd_release_bundle)
+        return (len(_f1) == 1 and _f1[0].startswith("cfg/x.json: tl_") and _tok not in _f1[0]
+                and _f2 == [] and _f3 == []
+                and "TOKEN_IN_BUNDLE" in _src and "_release_secret_findings(rel, data)" in _src)
+    _t110("r193_release_bundle_quet_token", _c193_release_bundle_token_scan)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

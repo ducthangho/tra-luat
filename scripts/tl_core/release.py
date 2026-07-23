@@ -460,7 +460,14 @@ def _release_should_include(path: Path, root: Path) -> bool:
     if len(rel.parts) == 1 and rel.name in _RELEASE_EXCLUDE_NAMES:
         # Do not hash generated root-level manifests/snapshots/reports by default; release-bundle adds a fresh manifest.
         return False
-    if rel.name in _RELEASE_EXCLUDE_NAMES_ANYWHERE:   # v1.33.54: config thật/CLAUDE.md ở MỌI cấp
+    # r193 (sự cố 23-07: `tra_luat_config.v2.json.bak_truoc_shard3_…` LỌT bundle → token LIVE lên Drive —
+    # luật cũ chỉ bắt TÊN CHÍNH XÁC + đuôi `.bak` CHÍNH XÁC, đuôi backup BIẾN THỂ lọt): (a) tên loại-trừ
+    # mọi-cấp nay bắt CẢ biến thể có hậu tố (`<tên>.bak_*`/`<tên>.old`…); (b) mọi tên chứa `.bak`/`.tmp`
+    # (có dấu chấm đứng trước) đều bị loại — backup là file local-only, không bao giờ thuộc gói phát hành.
+    _nl93 = rel.name.lower()
+    if any(_nl93 == x.lower() or _nl93.startswith(x.lower() + ".") for x in _RELEASE_EXCLUDE_NAMES_ANYWHERE):
+        return False
+    if ".bak" in _nl93 or ".tmp" in _nl93:
         return False
     if rel.as_posix().startswith("references/golden/fixtures/"):   # v1.33.59: fixtures SINH-TẠI-CHỖ (không commit, không hash)
         return False
@@ -925,6 +932,20 @@ def cmd_bundle_export(a) -> int:
     return 0
 
 
+def _release_secret_findings(rel: str, data: bytes) -> list:
+    """r193 (PURE — sự cố 23-07: token webapp THẬT trong file backup config lọt bundle, nằm LIVE trên
+    Drive tới khi script ship của user quét ra): quét NỘI DUNG từng member TRƯỚC khi ghi zip theo khuôn
+    token `tl_[A-Za-z0-9]{20,}`. Trả list mô tả finding (token CẮT 10 ký tự — không in trọn secret);
+    dữ liệu không decode utf-8 được → [] (token luôn nằm trong file text/JSON)."""
+    if not data:
+        return []
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return []
+    return [f"{rel}: {t[:10]}…" for t in re.findall(r"tl_[A-Za-z0-9]{20,}", text)]
+
+
 def cmd_release_bundle(a) -> int:
     root = _release_root_from_arg(getattr(a, "root", None))
     out_path = Path(getattr(a, "out", None) or f"{root.name}-release.zip").expanduser().resolve()
@@ -981,6 +1002,21 @@ def cmd_release_bundle(a) -> int:
                     pass
                 res = {"ok": False, "error": "RELEASE_BUNDLE_FILE_CHANGED", "file": rel,
                        "note": "File đổi giữa lúc build manifest và lúc zip (process khác đang ghi?) — chạy lại khi cây ổn định."}
+                _print_json_or_text(res, getattr(a, "json", False))
+                return 2
+            # r193: CỔNG QUÉT TOKEN trong chính release-bundle (trước đây chỉ script ship của user quét
+            # SAU khi build — bundle chứa token đã kịp lên Drive ở lượt deploy trước). Thấy token thật →
+            # XOÁ zip tạm, FAIL rc=2, KHÔNG bao giờ phát hành.
+            _sec93 = _release_secret_findings(rel, data)
+            if _sec93:
+                try:
+                    tmp.unlink()
+                except FileNotFoundError:
+                    pass
+                res = {"ok": False, "error": "TOKEN_IN_BUNDLE", "findings": _sec93[:10],
+                       "note": "Member chứa token webapp thật (khuôn tl_…) — KHÔNG phát hành. Đưa file "
+                               "config/backup ra khỏi cây skill (hoặc thêm exclude) rồi build lại; nếu "
+                               "token từng lên Drive ở bản trước: XOAY TOKEN."}
                 _print_json_or_text(res, getattr(a, "json", False))
                 return 2
             _zip_write_bytes_deterministic(zf, data, f"{top}/{rel}")

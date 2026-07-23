@@ -17258,6 +17258,66 @@ def run() -> int:
                 setattr(_TL_MODULE, _k, _v)
     _t110("r188_degraded_reason_surfaces_discover_sync", _c188_degraded_reason_surfaces_discover_sync)
 
+    # ═══ r190 (P10 Pha D dứt điểm): propagate `via` (không chỉ degraded_reason) ra discover/sync;
+    # SEC-01 cap TỔNG khi đọc toàn bộ member (the_thuc repack). ═══
+    def _c190_via_surfaces_discover_sync():
+        _keys190 = ("load_creds", "_gas", "_discover_scan_vbthuong")
+        _sv = {k: getattr(_TL_MODULE, k) for k in _keys190}
+
+        class _FkG190:
+            def get(self, action, **kw):
+                return {"vanBanThuongId": "VBT190"} if action == "bootstrap" else {"items": []}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkG190()
+            _TL_MODULE._discover_scan_vbthuong = lambda g, vbt, folder_cap=60: {
+                "folders": [], "root_files": [], "folder_total": 0, "capped": False,
+                "via": "profile_catalog"}   # đường bulk khỏe: KHÔNG degraded nhưng via vẫn phải nổi
+            with _tf110.TemporaryDirectory() as _d:
+                _cfg = str(Path(_d) / "tra_luat_config.v2.json")
+                Path(_cfg).write_text(json.dumps({
+                    "schema": 2, "webappUrl": "https://x/exec", "token": "t",
+                    "defaultProfile": "vbqppl", "profiles": {"vbqppl": {"rootFolderId": "r1"}}},
+                    ensure_ascii=False), encoding="utf-8")
+                _pathv, _cfgv = _TL_MODULE._read_config_record(_cfg)
+                _b1 = _io110.StringIO()
+                with _ctx110.redirect_stdout(_b1), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _TL_MODULE._profile_list_discover(
+                        argparse.Namespace(config=_cfg, json=True, folder_cap=60), _pathv, _cfgv)
+                _o1 = json.loads(_b1.getvalue())
+                _b2 = _io110.StringIO()
+                with _ctx110.redirect_stdout(_b2), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _TL_MODULE._cmd_profile_sync_impl(
+                        argparse.Namespace(config=_cfg, json=True, folder_cap=60,
+                                           target_profile=None, apply=False))
+                _o2 = json.loads(_b2.getvalue())
+            return (_o1.get("via") == "profile_catalog" and _o2.get("via") == "profile_catalog"
+                    and "degraded_reason" not in _o1 and "degraded_reason" not in _o2)
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r190_via_surfaces_discover_sync", _c190_via_surfaces_discover_sync)
+
+    def _c190_read_all_members_total_cap():
+        import zipfile as _zf190
+        with _tf110.TemporaryDirectory() as _d:
+            _zp = str(Path(_d) / "t.docx")
+            with _zf190.ZipFile(_zp, "w", _zf190.ZIP_DEFLATED) as _z:
+                for _i in range(3):
+                    _z.writestr(f"word/m{_i}.xml", "y" * (600 * 1024))   # 3×600KB — từng member dưới trần 1MB
+            with _zf190.ZipFile(_zp) as _z:
+                _all = _ie187.read_all_members_bounded(_z, max_bytes=1024 * 1024,
+                                                       total_max_bytes=4 * 1024 * 1024)
+                _ok_all = set(_all) == {f"word/m{_i}.xml" for _i in range(3)}
+                try:
+                    _ie187.read_all_members_bounded(_z, max_bytes=1024 * 1024,
+                                                    total_max_bytes=1024 * 1024)
+                    _blocked = False
+                except ValueError as _e:
+                    _blocked = "ZIP_TOTAL_BOUND_EXCEEDED" in str(_e)
+            return _ok_all and _blocked
+    _t110("r190_read_all_members_total_cap", _c190_read_all_members_total_cap)
+
     def _c187_zip_archive_hash_once_per_scope():
         # Trong MỘT run (plan bundle): archive sha256_file tính ĐÚNG 1 lần — extract-verify hit memo;
         # guard nội dung per-member (so sha256 từng member lúc extract) GIỮ NGUYÊN.

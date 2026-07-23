@@ -683,6 +683,8 @@ def _profile_list_discover(a, path, cfg) -> int:
     out = {"ok": True, "config": path, "vanBanThuongId": vbt_id,
            "folder_total": scan.get("folder_total"), "scanned": len(scan.get("folders") or []),
            "capped": bool(scan.get("capped")), **rep}
+    if scan.get("via"):   # r190 (P10 Pha D): via LUÔN nổi — biết đang đi bulk hay fallback
+        out["via"] = scan.get("via")
     if scan.get("degraded_reason"):   # r188/WP5: telemetry — perf gate chỉ xanh trên đường bulk
         out["degraded_reason"] = scan.get("degraded_reason")
     if scan.get("capped"):
@@ -2219,6 +2221,8 @@ def _cmd_profile_sync_impl(a) -> int:
            "config_report": _config_candidates_report(getattr(a, "config", None)),
            "note": "MỘT CHIỀU marker→config (ADR-0003). Marker sai → sửa qua lệnh mutation hoặc "
                    "profile-backfill-markers --force; marker_missing → profile-backfill-markers --apply."}
+    if scan.get("via"):   # r190 (P10 Pha D): via LUÔN nổi — biết đang đi bulk hay fallback
+        out["via"] = scan.get("via")
     if scan.get("degraded_reason"):   # r188/WP5: telemetry — perf gate chỉ xanh trên đường bulk
         out["degraded_reason"] = scan.get("degraded_reason")
     if scan.get("capped"):

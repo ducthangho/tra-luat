@@ -1572,10 +1572,10 @@ def the_thuc_normalize(in_path, out_path, he=None):
     if os.path.abspath(str(in_path)) == os.path.abspath(str(out_path)):
         return {"ok": False, "schema": "the_thuc_normalize.v1", "error": "IN_OUT_SAME",
                 "in": os.path.basename(str(in_path)), "out": os.path.basename(str(out_path))}
-    from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb per-member
+    from tl_core.ingest_engine import read_all_members_bounded   # r188/r190 SEC-01: trần member + trần TỔNG
     with zipfile.ZipFile(in_path) as z:
         names = z.namelist()
-        data = {n: read_member_bounded(z, n) for n in names}
+        data = read_all_members_bounded(z)
     doc = data.get("word/document.xml", b"").decode("utf-8", "replace")
     sty = data.get("word/styles.xml", b"").decode("utf-8", "replace") if "word/styles.xml" in data else ""
     if he in (None, "auto"):

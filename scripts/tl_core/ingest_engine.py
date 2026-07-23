@@ -153,6 +153,23 @@ def read_member_bounded(zf, member: str, *, max_bytes: int | None = None) -> byt
     return b"".join(chunks)
 
 
+def read_all_members_bounded(zf, *, max_bytes: int | None = None,
+                             total_max_bytes: int | None = None) -> dict:
+    """SEC-01 (r190): đọc TOÀN BỘ member của một zip với trần per-member VÀ trần TỔNG — đường
+    repack (the_thuc normalize) đọc mọi member vào RAM, N member vừa-dưới-trần cộng lại vẫn
+    có thể nuốt RAM. Mặc định tổng = 4× trần member. Trả {name: bytes} theo thứ tự namelist."""
+    cap = int(max_bytes or docx_xml_max_bytes())
+    tcap = int(total_max_bytes or cap * 4)
+    out, total = {}, 0
+    for name in zf.namelist():
+        data = read_member_bounded(zf, name, max_bytes=cap)
+        total += len(data)
+        if total > tcap:
+            raise ValueError(f"ZIP_TOTAL_BOUND_EXCEEDED:{total}>{tcap}")
+        out[name] = data
+    return out
+
+
 # ── 3. Child runner in-process với stdout/stderr route theo thread ──
 class _ThreadRouteProxy:
     """Proxy file-like: thread có route → ghi vào buffer riêng; thread khác → stream gốc."""

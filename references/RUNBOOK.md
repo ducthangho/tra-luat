@@ -500,6 +500,18 @@ lẫn link DOWNLOAD click-thẳng-tải-được. Với link để người dùn
 `thuvienphapluat.vn` → `luatvietnam.vn` → `congbao.chinhphu.vn` → cổng official khác (`vbpl.vn`, `vanban.chinhphu.vn`) → trang khác.
 Quy tắc này CHỈ áp cho link tải tiện dụng; canonical lưu/đối chiếu vẫn official-first.
 
+**B7. Ingest an toàn + resume định danh + marker v2 (r184–r190).**
+- **Resume có định danh (ADR-0011)**: `profile-ingest --resume` name-only chỉ DRY repair;
+  `--apply` cần `--journal <run_id>` (apply nay ghi journal) hoặc `--drive-id` fingerprint khớp registry.
+- **Marker schema v2 (ADR-0012)**: writer phát v2 + fingerprint từ v1.35.17; corpus đã migrate trọn 23-07.
+  Doctor báo `MARKER_SCHEMA_V1` trên marker mới xuất hiện → `profile-doctor --plan-marker-migration`
+  (canary trước, user duyệt `--apply`).
+- **Biến môi trường ingest**: `TL_INGEST_MEMORY_BUDGET_MB` (ngân sách RAM worker ZIP, mặc định 256,
+  clamp 64-4096 — D7); `TL_DOCX_XML_MAX_MB` (trần giải nén per-member DOCX/XML chống zip-bomb,
+  mặc định 50, clamp 1-500 — SEC-01; đường repack the_thuc thêm trần TỔNG = 4× member).
+- **Đường bulk GAS ≥2.21.2n** (`profile_catalog`, `drive_info_bulk` — API_CONTRACT): discover/sync/doctor
+  in `via` (bulk hay fallback) + `degraded_reason` khi rơi fallback — perf chỉ được coi đạt trên đường bulk.
+
 ---
 
 ## C. KẾT PHIÊN — sinh manifest chuẩn

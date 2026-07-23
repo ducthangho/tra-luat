@@ -725,6 +725,8 @@ GENERATED_SPECS = [
          {"flags": ['--limit'], "type": int, "default": 0, "help": '(v1.34.30) CHỈ kiểm N profile mỗi run (0=tất cả) — cho --deep khỏi timeout khi nhiều profile; giữ scan-all mặc định; kèm resume_command khi còn dư'},
          {"flags": ['--skip'], "type": int, "default": 0, "help": '(v1.34.30) bỏ qua N profile đầu (offset resume, dùng với --limit)'},
          {"flags": ['--fix'], "action": 'store_true', "help": 'lập kế hoạch move asset lạc chỗ (cần --apply để chạy)'},
+         {"flags": ['--plan-marker-migration'], "dest": 'plan_marker_migration', "action": 'store_true',
+          "help": '(r184/ADR-0012) liệt kê DRY plan nâng marker v1→v2 (KHÔNG ghi — migration chạy ở R2)'},
          {"flags": ['--apply'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},

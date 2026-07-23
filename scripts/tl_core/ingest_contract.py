@@ -99,21 +99,58 @@ def build_ingest_plan(
     }
 
 
-def identity_hash_for_drive_source(
-    drive_id: str, *, target_scope: str, canonical_name: str, profile: str
+def build_source_revision(
+    provider: str, source_id: str, *, revision: str = "", version: str = "",
+    checksum: str = "", observed_at: str = ""
+) -> dict[str, Any]:
+    """ADR-0011 (r184/ING-02): Source Revision — định danh NGUỒN + phiên bản NHÀ CUNG CẤP.
+    KHÔNG PHẢI bằng chứng nội dung: `identity_strength='revision'` khi có revision/version/checksum,
+    ngược lại 'metadata'. Chỉ byte-hash thật (build_ingest_plan) mới được mang `content_hash` —
+    Source Revision không bao giờ nhét token vào slot content_hash."""
+    sid = str(source_id or "").strip()
+    if not sid:
+        return {"ok": False, "error": "SOURCE_ID_REQUIRED"}
+    strength = "revision" if (str(revision or "") or str(version or "") or str(checksum or "")) else "metadata"
+    return {"ok": True, "schema": "source_revision.v1", "provider": str(provider or ""),
+            "source_id": sid, "revision": str(revision or ""), "version": str(version or ""),
+            "checksum": str(checksum or ""), "identity_strength": strength,
+            "observed_at": str(observed_at or "")}
+
+
+def claim_key_for_source(
+    rev: dict, *, target_scope: str, canonical_name: str, profile: str
 ) -> str:
-    """v1.34.52 (F-04/D2 — grill GAS 2.21.2l 2026-07-15): identity_hash cho nguồn ĐÃ TRÊN DRIVE
-    (ingest-missing — không có bytes cục bộ để hash trực tiếp). Dùng CHUNG payload shape + hàm hash
-    với :func:`build_ingest_plan` (content_hash = sha256(drive_id) thay vì sha256(bytes)) — MỘT khái
-    niệm identity_hash cho mọi đường ingest, không thêm thuật toán hash mới."""
-    content_hash = sha256_bytes(str(drive_id or "").strip().encode("utf-8"))
-    identity_payload = {
-        "content_hash": content_hash,
+    """ADR-0011 (r184): khóa INGEST CLAIM (mutex chống ghi đồng thời xuyên host) từ một Source
+    Revision. Payload KHÔNG có trường `content_hash` → không thể đội lốt Content Identity và không
+    bao giờ được dùng cho no-op/dedup/replace. `observed_at` CỐ Ý loại khỏi khóa (mỗi host một
+    timestamp — vào khóa là claim mất tác dụng)."""
+    payload = {
+        "claim": "ingest_claim.v1",
+        "source_revision": {k: str((rev or {}).get(k) or "")
+                            for k in ("schema", "provider", "source_id", "revision",
+                                      "version", "checksum", "identity_strength")},
         "target_scope": str(target_scope or ""),
         "canonical_name": str(canonical_name or ""),
         "profile": str(profile or ""),
     }
-    return _hash_payload(identity_payload)
+    return _hash_payload(payload)
+
+
+def identity_hash_for_drive_source(
+    drive_id: str, *, target_scope: str, canonical_name: str, profile: str
+) -> str:
+    """r184 (ADR-0011 — ING-02): retype thành CLAIM KEY tường minh. Bản cũ (v1.34.52) nhét
+    sha256(drive_id) vào slot `content_hash` cùng shape với build_ingest_plan — token định danh
+    đội lốt bằng chứng nội dung (drive_id giữ nguyên nhưng revision đổi vẫn 'cùng nội dung').
+    Nay: SourceRevision(gdrive, drive_id) → claim_key_for_source — chỉ hợp lệ làm khóa
+    ingest_claim, KHÔNG dùng cho no-op/dedup/replace. Giá trị hash ĐỔI so với v1.34.52: hai host
+    lệch phiên bản không khóa chéo nhau trong cửa sổ rollout (TTL claim 5' — chấp nhận, ghi rõ)."""
+    rev = build_source_revision("gdrive", drive_id)
+    if not rev.get("ok"):
+        rev = {"schema": "source_revision.v1", "provider": "gdrive", "source_id": "",
+               "revision": "", "version": "", "checksum": "", "identity_strength": "metadata"}
+    return claim_key_for_source(rev, target_scope=target_scope,
+                                canonical_name=canonical_name, profile=profile)
 
 
 def build_remote_plan(

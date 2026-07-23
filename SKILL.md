@@ -302,4 +302,4 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/golden/*.json` | Golden fixtures tất định |
 | `CONTEXT.md` (gốc repo) | Từ điển thuật ngữ chuẩn của dự án |
 | `docs/adr/` | Quyết định kiến trúc (ADR-0001 bundle-protocol, ADR-0002 bind-giàn-giáo) |
-| `references/changelog_archive/` | CHANGELOG cũ (DEV-ONLY, KHÔNG trong bundle deploy — kernel giữ 10 version gần nhất) |
+| *(kho CHANGELOG sâu — chỉ ở repo dev, KHÔNG đóng gói)* | Lịch sử version cũ nằm ở cây nguồn dev (thư mục `changelog_archive`); kernel giữ 10 version gần nhất |

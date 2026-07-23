@@ -403,7 +403,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
                    help="(v1.34.60 ADR-5) NLM chết → GIỮ dừng ở dedup-gate như cũ thay vì tự chuyển --no-nlm-add")
     p.add_argument("--resume", action="store_true",
-                   help="(v1.34.55 C4+C5) NỐI THEO REGISTRY sau khi chết giữa chừng: --name <tên canonical> + --apply --confirm yes — dò chunk __partNN đã có, chỉ làm phần thiếu; name đã đủ part → tự SỬA corpus kẹt false")
+                   help="(r184 ADR-0011/D5) NỐI sau khi chết giữa chừng: --name <tên> KHÔNG --apply = DRY repair plan; "
+                        "--apply --confirm yes PHẢI kèm --drive-id HOẶC --journal <run_id> (chứng minh đúng nguồn)")
+    p.add_argument("--journal", help="(r184 ADR-0011/D5) run_id journal của lần apply đứt — dùng với --resume --apply; "
+                                     "journal legacy thiếu fingerprint → LEGACY_JOURNAL_REPLAN_REQUIRED")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_ingest)
 
@@ -430,7 +433,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
                    help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
     p.add_argument("--resume", action="store_true",
-                   help="(v1.34.55 C4+C5) NỐI THEO REGISTRY sau khi chết giữa chừng: --name <tên canonical> + --apply --confirm yes — dò chunk __partNN đã có, chỉ làm phần thiếu; name đã đủ part → tự SỬA corpus kẹt false")
+                   help="(r184 ADR-0011/D5) NỐI sau khi chết giữa chừng: --name <tên> KHÔNG --apply = DRY repair plan; "
+                        "--apply --confirm yes PHẢI kèm --drive-id HOẶC --journal <run_id> (chứng minh đúng nguồn)")
+    p.add_argument("--journal", help="(r184 ADR-0011/D5) run_id journal của lần apply đứt — dùng với --resume --apply; "
+                                     "journal legacy thiếu fingerprint → LEGACY_JOURNAL_REPLAN_REQUIRED")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_profile_file_add)
 

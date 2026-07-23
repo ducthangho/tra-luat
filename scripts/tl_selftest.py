@@ -6909,7 +6909,24 @@ def run() -> int:
                              "gamma": {"rootFolderId": "FC", "notebookId": "nbC"}}}, ensure_ascii=False),
                 encoding="utf-8")
             _old91 = {**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "description": "mô tả cũ"}
-            _g91 = _FkG88({"FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
+
+            class _FkG91(_FkG88):
+                # r184 (ADR-0012): _marker_write nay PROVE-ONE bằng re-list sau cleanup → fake phải
+                # Drive-faithful: upload XUẤT HIỆN trong list, trash BIẾN MẤT khỏi list.
+                def get(self, action, **kw):
+                    if action == "trash":
+                        _fid = str(kw.get("fileId"))
+                        for _k in self.tree:
+                            self.tree[_k] = [i for i in self.tree[_k] if str(i.get("id")) != _fid]
+                    return super().get(action, **kw)
+                def post(self, action, **kw):
+                    _r = super().post(action, **kw)
+                    if action == "upload" and _r.get("fileId"):
+                        self.tree.setdefault(str(kw.get("folderId")), []).append(
+                            {"id": _r["fileId"], "name": str(kw.get("name")), "type": "file"})
+                    return _r
+
+            _g91 = _FkG91({"FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
                            "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}],
                            "FC": [{"id": "doc1", "name": "x.gdoc", "type": "file"}]},
                           {"mkB": json.dumps(_old91, ensure_ascii=False)})
@@ -10365,7 +10382,7 @@ def run() -> int:
         return _rca == 0 and _calls["claim"] is None and _out.get("nlm") == "SKIPPED_BY_FLAG"
     _t110("r116_ingest_local_no_nlm_add_skips_claim", _c116_no_nlm_add_skips_claim)
 
-    def _run_resume116(rows, doc_text, chunk_max=10000, name="BC_Resume116"):
+    def _run_resume116(rows, doc_text, chunk_max=10000, name="BC_Resume116", drive_id=None, journal=None):
         # Harness C4+C5: cmd_profile_ingest --resume — bắt createtext/source_add/final write.
         _calls = {"createtext": 0, "source_add": 0, "final_write": None, "upserts": []}
 
@@ -10404,12 +10421,12 @@ def run() -> int:
             _TL_MODULE._verified_reg_write = _fk_write
             _TL_MODULE._verified_reg_upsert = lambda g, item, **kw: (_calls["upserts"].append(dict(item))
                                                                      or {"verified": True})
-            _ns = argparse.Namespace(config=None, profile="p116", file=None, drive_id=None, apply=True,
+            _ns = argparse.Namespace(config=None, profile="p116", file=None, drive_id=drive_id, apply=True,
                                      allow_default=False, name=name, text_file=None, source_quality="auto",
                                      ocr_verified=False, large_threshold=None, chunk_max_chars=chunk_max,
                                      hieuluc=None, skip_live_check=False, allow_dup_name=False, no_nlm_add=False,
                                      resume=True, json=True, deterministic=False, confirm="yes",
-                                     expected_plan_hash=None)
+                                     expected_plan_hash=None, journal=journal)
             _bo, _be = _io27.StringIO(), _io27.StringIO()
             with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
                 _rc = _TL_MODULE.cmd_profile_ingest(_ns)
@@ -10433,7 +10450,7 @@ def run() -> int:
         rows = [{"drive_id": "GD116", "name": "BC_Resume116", "corpus": "false", "row_kind": "own",
                  "nlm_source_id": "", "hieuluc": "Còn", "note": "n", "sohieu": "", "loai": "thuong"},
                 {"drive_id": "CK01", "name": "BC_Resume116__part01", "nlm_source_id": "sOLD1"}]
-        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116)
+        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116, drive_id="GD116")   # r184 D5: apply cần identity
         return (_rc == 0 and _out.get("ok") is True and _out.get("parts_total") == _exp
                 and _out.get("parts_skipped_done") == 1 and _calls["createtext"] == _exp - 1
                 and _calls["source_add"] == _exp - 1
@@ -10448,7 +10465,7 @@ def run() -> int:
                  "nlm_source_id": "", "hieuluc": "Còn", "note": "n", "sohieu": "", "loai": "thuong"}]
         rows += [{"drive_id": f"CK{i:02d}", "name": f"BC_Resume116__part{i:02d}", "nlm_source_id": f"s{i}"}
                  for i in range(1, _exp + 1)]
-        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116)
+        _rc, _out, _err, _calls = _run_resume116(rows, _TXT116, drive_id="GD116")   # r184 D5
         return (_rc == 0 and _calls["createtext"] == 0 and _calls["source_add"] == 0
                 and _out.get("corpus_written") == "true" and _out.get("parts_skipped_done") == _exp)
     _t110("r116_resume_repairs_stuck_corpus_false", _c116_resume_repairs_stuck_corpus)
@@ -10457,7 +10474,7 @@ def run() -> int:
         # Nguồn đơn (text ngắn không chunk): có sid → không add lại, chỉ ghi corpus=true.
         rows = [{"drive_id": "GD116", "name": "BC_Resume116", "corpus": "false", "row_kind": "own",
                  "nlm_source_id": "sCANON", "hieuluc": "Còn", "note": "n"}]
-        _rc, _out, _err, _calls = _run_resume116(rows, "Nội dung ngắn " * 10)
+        _rc, _out, _err, _calls = _run_resume116(rows, "Nội dung ngắn " * 10, drive_id="GD116")   # r184 D5
         return (_rc == 0 and _calls["source_add"] == 0 and _out.get("single_source") is True
                 and _out.get("nlm_source_id") == "sCANON" and _out.get("corpus_written") == "true")
     _t110("r116_resume_single_source_repair", _c116_resume_single_source_repair)
@@ -10467,7 +10484,7 @@ def run() -> int:
         # RESUME_NOT_FOUND (cả 3 rc=2, không side-effect).
         _rc1, _o1, _e1, _c1 = _run_resume116([], "x", name="")
         _sav_lc = _TL_MODULE.load_creds
-        _rc3, _o3, _e3, _c3 = _run_resume116([{"drive_id": "d", "name": "KHAC"}], "x")
+        _rc3, _o3, _e3, _c3 = _run_resume116([{"drive_id": "d", "name": "KHAC"}], "x", drive_id="d")   # r184 D5
         _ns2 = argparse.Namespace(config=None, profile=None, name="X116", resume=True, apply=True, confirm=None,
                                   json=True, deterministic=False)
         _be2 = _io27.StringIO()
@@ -16003,6 +16020,434 @@ def run() -> int:
                 and _cache_sau == "CACHE_CU")              # mark: KHÔNG ghi đè cache chuẩn
     _t110("r182_markup_mode_bypasses_cache", _c182_markup_bypasses_cache)
 
+    # ═══ v1.35.13 — r184 (REL-01, review p9 2026-07-23): gate link SKILL.md đối chiếu FILE-SET MANIFEST,
+    # KHÔNG phải cây đĩa. Baseline v1.35.12: SKILL.md trỏ references/changelog_archive/ (dev-only, release
+    # exclude) → cây dev XANH (r67 kiểm exists() trên đĩa) nhưng artifact giải nén ĐỎ 4 test (r67/r125/r127/
+    # r128 — workflow-audit rc=2 vì links_missing) = gate xanh giả. Chốt WP1: release-verify FAIL-CLOSED khi
+    # con trỏ runtime không nằm trong package. ═══
+    import tl_core.release as _rel183
+
+    def _c183_skill_links_pure():
+        _f = _rel183._skill_links_findings
+        _mf = ["references/COMMANDS.md", "references/workflows/a.json", "scripts/tl.py"]
+        _sk = ("xem `references/COMMANDS.md` + `references/workflows/*.json` + "
+               "`references/changelog_archive/` + `references/workflows/`")
+        _r = _f(_sk, _mf)
+        return (_r["links_ok"] is False
+                and _r["links_missing"] == ["references/changelog_archive/"]
+                and _r["links_checked"] >= 3
+                and _f("khong co link nao", _mf)["links_ok"] is True
+                and _f("xem references/COMMANDS.md.", _mf)["links_missing"] == []      # đuôi dấu câu bị tước
+                and _f("references/THIEU.md", _mf)["links_missing"] == ["references/THIEU.md"]
+                and _f("references/COMMANDS.md", [])["links_ok"] is False)             # manifest rỗng → fail-closed
+
+    _t110("r184_skill_links_findings_pure", _c183_skill_links_pure)
+
+    def _c183_skill_links_wired_release_verify():
+        # Cây giả: SKILL.md trỏ file KHÔNG có trong manifest → release-verify PHẢI fail + phơi check riêng.
+        with _tf110.TemporaryDirectory() as _d183:
+            _root183 = _P110(_d183)
+            (_root183 / "SKILL.md").write_text("xem references/thieu_trong_goi.md", encoding="utf-8")
+            _rv = _rel183._verify_release_manifest(_root183, {"schema": "release_manifest.v1", "files": []},
+                                                   strict=False)
+            _sl = _rv.get("skill_links") or {}
+            return (_rv.get("ok") is False and _sl.get("links_ok") is False
+                    and _sl.get("links_missing") == ["references/thieu_trong_goi.md"]
+                    and any("SKILL_LINKS_NOT_IN_PACKAGE" in str(e) for e in (_rv.get("errors") or [])))
+
+    _t110("r184_skill_links_wired_release_verify", _c183_skill_links_wired_release_verify)
+
+    def _c183_skill_links_real_tree_in_package():
+        # Cây THẬT: mọi con trỏ runtime trong SKILL.md phải nằm trong package-set (RED tới khi gỡ
+        # con trỏ changelog_archive khỏi SKILL.md — không nới auditor, sửa con trỏ).
+        _mfst = _rel183._build_release_manifest(HERE.parent)
+        _paths = [x["path"] for x in (_mfst.get("files") or [])]
+        _sk = (HERE.parent / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        _r = _rel183._skill_links_findings(_sk, _paths)
+        return _r["links_ok"] is True and _r["links_checked"] >= 6
+
+    _t110("r184_skill_links_real_tree_in_package", _c183_skill_links_real_tree_in_package)
+
+    # ═══ r184 marker transaction (ADR-0012/PRO-01): _marker_write hết false-success — FULL readback,
+    # enumeration KHÔNG nuốt lỗi, prove-one sau cleanup; reader v1/v2; guard mutation khi mơ hồ. ═══
+    import base64 as _b64183
+
+    class _FkG183:
+        """Fake GAS lập trình được cho _marker_write: others = marker dư trong _meta;
+        fail ⊆ {upload,list,trash}; readback ghi đè payload download; dynamic_trash mô phỏng Drive thật."""
+        def __init__(self, body, others=(), fail=(), readback=None, dynamic_trash=True):
+            self.body, self.others, self.fail = dict(body), set(others), set(fail)
+            self.readback, self.dynamic_trash, self.calls = readback, dynamic_trash, []
+        def post(self, action, **kw):
+            self.calls.append((action, kw))
+            if action == "upload":
+                if "upload" in self.fail:
+                    raise RuntimeError("UPLOAD_DOWN")
+                return {"ok": True, "fileId": "fidNew"}
+            return {"ok": True}
+        def get(self, action, **kw):
+            self.calls.append((action, kw))
+            if action == "download":
+                _rb = self.body if self.readback is None else self.readback
+                return {"b64": _b64183.b64encode(json.dumps(_rb).encode("utf-8")).decode("ascii")}
+            if action == "list":
+                if "list" in self.fail:
+                    raise TimeoutError("LIST_TIMEOUT")
+                return {"items": [{"type": "file", "name": "tra_luat_profile.json", "id": _i}
+                                  for _i in sorted(self.others)]
+                                 + [{"type": "file", "name": "tra_luat_profile.json", "id": "fidNew"},
+                                    {"type": "folder", "name": "templates", "id": "fT"}]}
+            if action == "trash":
+                if "trash" in self.fail:
+                    return {"ok": False}
+                if self.dynamic_trash:
+                    self.others.discard(kw.get("fileId"))
+                return {"ok": True}
+            return {"ok": True}
+
+    _body183 = {"schema": "tra_luat_profile.v1", "profile": "P183", "rootFolderId": "root183",
+                "metaFolderId": "meta183", "notebookId": "nb", "registryDocId": "rg",
+                "manifestId": "mf", "categories": "own", "manifestScope": "own"}
+    _savJ183 = _TL_MODULE._journal_append
+    _TL_MODULE._journal_append = lambda *a, **k: None
+    try:
+        def _c183_marker_happy_commit():
+            _g = _FkG183(_body183, others={"fidOld"})
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return (_w["ok"] is True and _w["status"] == "COMMITTED" and _w["verified"] is True
+                    and _w["enumerate_ok"] is True and _w["cleanup_ok"] is True
+                    and _w["proven_single"] is True
+                    and {t["fileId"] for t in _w["trashed_old"]} == {"fidOld"}
+                    and all(_w["phases"].values()))
+        _t110("r184_marker_happy_commit_prove_one", _c183_marker_happy_commit)
+
+        def _c183_marker_truncated_payload():
+            _cut = {k: v for k, v in _body183.items() if k != "registryDocId"}   # marker CỤT
+            _g = _FkG183(_body183, readback=_cut)
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return _w["ok"] is False and _w["status"] == "FAILED" and _w["verified"] is False
+        _t110("r184_marker_truncated_payload_failed", _c183_marker_truncated_payload)
+
+        def _c183_marker_each_field_drift():
+            for _k in ("schema", "profile", "rootFolderId", "metaFolderId", "notebookId",
+                       "registryDocId", "manifestId", "categories", "manifestScope"):
+                _rb = {**_body183, _k: "KHAC"}
+                _g = _FkG183(_body183, readback=_rb)
+                _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+                if _w["verified"] is not False or _w["ok"] is not False:
+                    return False   # bản cũ chỉ so 3 trường — lệch notebookId/registryDocId… vẫn lọt
+            return True
+        _t110("r184_marker_full_readback_every_field", _c183_marker_each_field_drift)
+
+        def _c183_marker_list_timeout_partial():
+            _g = _FkG183(_body183, others={"fidOld"}, fail={"list"})
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return (_w["ok"] is False and _w["status"] == "PARTIAL" and _w["verified"] is True
+                    and _w["enumerate_ok"] is False and _w["cleanup_ok"] is False
+                    and _w["proven_single"] is False)   # trước r184: except:pass → ok=True false-success
+        _t110("r184_marker_list_timeout_not_swallowed", _c183_marker_list_timeout_partial)
+
+        def _c183_marker_trash_fail_partial():
+            _g = _FkG183(_body183, others={"fidOld"}, fail={"trash"})
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return (_w["ok"] is False and _w["status"] == "PARTIAL"
+                    and _w["enumerate_ok"] is True and _w["cleanup_ok"] is False)
+        _t110("r184_marker_trash_fail_partial", _c183_marker_trash_fail_partial)
+
+        def _c183_marker_dup_survives_not_proven():
+            # trash "thành công" nhưng bản dư VẪN CÒN trong list tươi (eventual/ghost) → prove-one bắt
+            _g = _FkG183(_body183, others={"fidGhost"}, dynamic_trash=False)
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return (_w["ok"] is False and _w["status"] == "PARTIAL"
+                    and _w["cleanup_ok"] is True and _w["proven_single"] is False)
+        _t110("r184_marker_ghost_dup_not_proven_single", _c183_marker_dup_survives_not_proven)
+
+        def _c183_marker_retry_leftover_selfheal():
+            # retry đứt để lại 2 bản cũ, old_id="" — enumerate quét + trash + prove-one COMMITTED
+            _g = _FkG183(_body183, others={"fidA", "fidB"})
+            _w = _TL_MODULE._marker_write(_g, "meta183", dict(_body183), old_id="", run_id=None)
+            return (_w["ok"] is True and {t["fileId"] for t in _w["trashed_old"]} == {"fidA", "fidB"}
+                    and len([c for c in _g.calls if c[0] == "list"]) == 2)   # enumerate + prove-one
+        _t110("r184_marker_retry_leftover_selfheal_commit", _c183_marker_retry_leftover_selfheal)
+    finally:
+        _TL_MODULE._journal_append = _savJ183
+
+    def _c183_marker_validate_v1_v2():
+        _v = _TL_MODULE._marker_validate
+        _v2 = {"schema": "tra_luat_profile.v2", "profile": "p", "rootFolderId": "r",
+               "metaFolderId": "m", "manifestScope": "own", "notebookId": "n",
+               "registryDocId": "rg", "manifestId": "mf"}
+        _fp = _TL_MODULE._marker_fingerprint(_v2)
+        _ok_v1, _ = _v({"schema": "tra_luat_profile.v1", "profile": "p", "rootFolderId": "r"})
+        _ok_v2, _ = _v(dict(_v2))
+        _ok_fp, _ = _v({**_v2, "fingerprint": _fp})
+        _bad_fp, _e_fp = _v({**_v2, "fingerprint": "0" * 64})
+        _miss_meta, _e_meta = _v({k: v for k, v in _v2.items() if k != "metaFolderId"})
+        _miss_reg, _e_reg = _v({k: v for k, v in _v2.items() if k != "registryDocId"})
+        _lite_ok, _ = _v({"schema": "tra_luat_profile.v2", "profile": "p", "rootFolderId": "r",
+                          "metaFolderId": "m", "manifestScope": "inherit"})
+        return (_ok_v1 and _ok_v2 and _ok_fp
+                and not _bad_fp and "FINGERPRINT_MISMATCH" in _e_fp
+                and not _miss_meta and any("META_FOLDER_ID" in e for e in _e_meta)
+                and not _miss_reg and any("REGISTRY_DOC_ID" in e for e in _e_reg)
+                and _lite_ok)   # manifestScope≠own: không ép registry/manifest/notebook
+    _t110("r184_marker_validate_reader_v1_v2", _c183_marker_validate_v1_v2)
+
+    def _c183_marker_mutation_guard():
+        _gd = _TL_MODULE._marker_mutation_guard
+        _mk = {"schema": "tra_luat_profile.v1", "profile": "p", "rootFolderId": "r"}
+        return ((_gd({"error": "MARKER_READ_FAILED:X"}) or {}).get("error") == "MARKER_READ_FAILED"
+                and (_gd({"marker_file_ids": ["a", "b"]}) or {}).get("error") == "MARKER_AMBIGUOUS_DUPLICATE"
+                and (_gd({"found": True, "marker": {"schema": "sai"}}) or {}).get("error") == "MARKER_INVALID"
+                and (_gd({"found": True, "marker": _mk, "marker_file_ids": ["a"]},
+                         expect_profile="KHAC") or {}).get("error") == "PROFILE_MARKER_NAME_CONFLICT"
+                and _gd({"found": True, "marker": _mk, "marker_file_ids": ["a"]},
+                        expect_profile="p") is None
+                and _gd({"found": False, "marker_file_ids": []}) is None)
+    _t110("r184_marker_mutation_guard", _c183_marker_mutation_guard)
+
+    def _c183_doctor_migration_flag():
+        _ns = build_parser().parse_args(["profile-doctor", "--plan-marker-migration", "--json"])
+        return getattr(_ns, "plan_marker_migration", False) is True
+    _t110("r184_doctor_plan_marker_migration_flag", _c183_doctor_migration_flag)
+
+    # ═══ r184 ING-02 (ADR-0011/D4-D5): SourceRevision ≠ Content Identity; Ingest Claim tách khỏi
+    # dedup; resume profile phải chứng minh đúng nguồn. ═══
+    import tl_core.ingest_contract as _ic183
+
+    def _c183_source_revision_strength():
+        _r1 = _ic183.build_source_revision("gdrive", "d1")
+        _r2 = _ic183.build_source_revision("gdrive", "d1", revision="7")
+        _r3 = _ic183.build_source_revision("gdrive", "")
+        return (_r1["ok"] and _r1["identity_strength"] == "metadata"
+                and _r2["identity_strength"] == "revision"
+                and _r3.get("error") == "SOURCE_ID_REQUIRED"
+                and "content_hash" not in _r1)
+    _t110("r184_source_revision_strength", _c183_source_revision_strength)
+
+    def _c183_claim_key_not_content_identity():
+        # Khóa claim KHÔNG được trùng identity_hash kiểu content (bản cũ: sha256(drive_id) đội lốt
+        # content_hash cùng payload shape). Tái tạo giá trị MASQUERADE cũ để chứng minh đã tách.
+        _kw = dict(target_scope="nb1", canonical_name="Luat_X", profile="p1")
+        _new = _ic183.identity_hash_for_drive_source("d123", **_kw)
+        _old_masq = _ic183._hash_payload({
+            "content_hash": _ic183.sha256_bytes(b"d123"),
+            "target_scope": "nb1", "canonical_name": "Luat_X", "profile": "p1"})
+        _rev = _ic183.build_source_revision("gdrive", "d123")
+        _direct = _ic183.claim_key_for_source(_rev, **_kw)
+        _rev_ts = _ic183.build_source_revision("gdrive", "d123", observed_at="2026-07-23T00:00:00Z")
+        return (_new != _old_masq                          # hết đội lốt content identity
+                and _new == _direct                        # wrapper = đường SourceRevision chính danh
+                and _ic183.claim_key_for_source(_rev_ts, **_kw) == _direct   # observed_at NGOÀI khóa
+                and len(_new) == 64)
+    _t110("r184_claim_key_not_content_identity", _c183_claim_key_not_content_identity)
+
+    def _c183_resume_gate_matrix():
+        _g = _TL_MODULE._resume_identity_gate
+        _legacy = {"t": "run_start", "cmd": "profile-ingest", "name": "N"}          # không fingerprint
+        _good = {"t": "run_start", "cmd": "profile-ingest", "name": "N",
+                 "drive_id": "gd1", "plan_hash": "h" * 64}
+        return ((_g(apply=True, journal="", drive_id="", name="N", canon_drive_id="gd1",
+                    journal_head=None) or {}).get("error") == "RESUME_REQUIRES_IDENTITY"
+                and (_g(apply=True, journal="", drive_id="KHAC", name="N", canon_drive_id="gd1",
+                        journal_head=None) or {}).get("error") == "RESUME_IDENTITY_MISMATCH"
+                and (_g(apply=True, journal="run1", drive_id="", name="N", canon_drive_id="gd1",
+                        journal_head=None) or {}).get("error") == "RESUME_JOURNAL_NOT_FOUND"
+                and (_g(apply=True, journal="run1", drive_id="", name="N", canon_drive_id="gd1",
+                        journal_head=_legacy) or {}).get("error") == "LEGACY_JOURNAL_REPLAN_REQUIRED"
+                and (_g(apply=True, journal="run1", drive_id="", name="KHAC", canon_drive_id="gd1",
+                        journal_head=_good) or {}).get("error") == "RESUME_JOURNAL_NAME_MISMATCH"
+                and (_g(apply=True, journal="run1", drive_id="", name="N", canon_drive_id="gd2",
+                        journal_head=_good) or {}).get("error") == "RESUME_IDENTITY_MISMATCH"
+                and _g(apply=True, journal="run1", drive_id="", name="N", canon_drive_id="gd1",
+                       journal_head=_good) is None
+                and _g(apply=True, journal="", drive_id="gd1", name="N", canon_drive_id="gd1",
+                       journal_head=None) is None
+                and _g(apply=False, journal="", drive_id="", name="N", canon_drive_id="gd1",
+                       journal_head=None) is None)   # DRY name-only = repair, được phép
+    _t110("r184_resume_identity_gate_matrix", _c183_resume_gate_matrix)
+
+    def _c183_resume_name_only_apply_blocked():
+        # Flow THẬT: --resume --name --apply --confirm yes KHÔNG identity → chặn TRƯỚC mọi remote call.
+        _b = _io110.StringIO()
+        with _ctx110.redirect_stdout(_io110.StringIO()), _ctx110.redirect_stderr(_b):
+            _rc = _TL_MODULE.cmd_profile_ingest_resume(argparse.Namespace(
+                name="Ten_Canonical", apply=True, confirm="yes", journal=None, drive_id=None,
+                config=None, profile=None, chunk_max_chars=100000, json=True))
+        return _rc == 2 and "RESUME_REQUIRES_IDENTITY" in _b.getvalue()
+    _t110("r184_resume_name_only_apply_blocked", _c183_resume_name_only_apply_blocked)
+
+    def _c183_resume_parser_journal_flag():
+        _ns = build_parser().parse_args(["profile-ingest", "--resume", "--name", "X",
+                                         "--journal", "profile-ingest_1_2", "--json"])
+        return (getattr(_ns, "journal", None) == "profile-ingest_1_2"
+                and getattr(_ns, "resume", False) is True)
+    _t110("r184_resume_parser_journal_flag", _c183_resume_parser_journal_flag)
+
+    def _c183_resume_dry_repair_readonly():
+        # DRY repair: name-only KHÔNG --apply → plan read-only, 0 mutation (không createtext/source_add/reg_write).
+        _muts = []
+        _keys183r = ("load_creds", "_profile_policy_error", "_resolve_nlm_notebook", "_gas",
+                     "_read_doc_text", "_verified_reg_write", "_profile_push_chunks")
+        _sav183r = {k: getattr(_TL_MODULE, k) for k in _keys183r}
+
+        class _FkGRes:
+            def get(self, action, **kw):
+                if action == "reg_get":
+                    return {"ok": True, "rows": [
+                        {"name": "VB_Resume", "drive_id": "gdX", "corpus": "false", "nlm_source_id": ""},
+                        {"name": "VB_Resume__part01", "drive_id": "c1", "nlm_source_id": "s1"}]}
+                return {"ok": True}
+            def post(self, action, **kw):
+                _muts.append(action)
+                return {"ok": True}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda x: ("nb183", None)
+            _TL_MODULE._gas = lambda: _FkGRes()
+            _TL_MODULE._read_doc_text = lambda fid: "Điều 1. Nội dung."
+            _TL_MODULE._verified_reg_write = lambda *a, **k: (_muts.append("reg_write") or {"verified": True})
+            _TL_MODULE._profile_push_chunks = lambda *a, **k: (_muts.append("push_chunks") or [])
+            _b = _io110.StringIO()
+            with _ctx110.redirect_stdout(_b), _ctx110.redirect_stderr(_io110.StringIO()):
+                _rc = _TL_MODULE.cmd_profile_ingest_resume(argparse.Namespace(
+                    name="VB_Resume", apply=False, confirm=None, journal=None, drive_id=None,
+                    config=None, profile=None, chunk_max_chars=100000, json=True))
+            _o = json.loads(_b.getvalue())
+        finally:
+            for _k, _v in _sav183r.items():
+                setattr(_TL_MODULE, _k, _v)
+        return (_rc == 0 and _o.get("mode") == "DRY_REPAIR" and _o.get("single_source") is True
+                and not _muts and any("--drive-id" in s or "--journal" in s
+                                      for s in (_o.get("apply_requires") or [])))
+    _t110("r184_resume_dry_repair_readonly", _c183_resume_dry_repair_readonly)
+
+    # ═══ r184 ING-01 (ADR-0013): ZIP immutable plan bundle — DRY lập đủ child plan, plan_hash phủ
+    # toàn bundle; apply KHÔNG tự lập plan mới/tự confirm; drift ⇒ PLAN_DRIFT_REPLAN_REQUIRED. ═══
+    import tl_core.zip_ingest as _zi183
+    import zipfile as _zf183
+
+    def _mk_zip183(d, names=("van_ban.docx",)):
+        _zp = _P110(d) / "lo183.zip"
+        with _zf183.ZipFile(_zp, "w") as _z:
+            for _n in names:
+                _z.writestr(_n, "noi dung " + _n)
+        return str(_zp)
+
+    def _ns183(zp, **kw):
+        base = dict(file=zp, cat="01", profile=None, config=None, max_files=200, max_size_mb=50,
+                    max_total_mb=500, max_ratio=100.0, apply=False, confirm=None,
+                    expected_plan_hash=None, workers=1, skip_nlm_preflight=True,
+                    json=True, deterministic=True)
+        base.update(kw)
+        return argparse.Namespace(**base)
+
+    def _c183_zip_bundle_hash_covers_children():
+        _sav = _zi183._zip_child_plan_one
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "A" * 64, "json": {}}
+                _b1 = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
+                _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "B" * 64, "json": {}}
+                _b2 = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
+                _zi183._zip_child_plan_one = lambda args: {"ok": False, "plan_hash": "", "returncode": 2}
+                _b3 = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
+            return (_b1.get("ok") is True and _b1.get("schema") == "ingest_zip_bundle.v1"
+                    and _b1.get("plan_hash") != _b1.get("parent_plan_hash")           # hash phủ children
+                    and _b1.get("plan_hash") != _b2.get("plan_hash")                  # child đổi ⇒ bundle đổi
+                    and _b1.get("parent_plan_hash") == _b2.get("parent_plan_hash")    # parent bất biến
+                    and (_b1.get("child_plans") or [{}])[0].get("child_plan_hash") == "A" * 64
+                    and _b3.get("ok") is False and _b3.get("error") == "CHILD_PLAN_FAILED")
+        finally:
+            _zi183._zip_child_plan_one = _sav
+    _t110("r184_zip_bundle_hash_covers_children", _c183_zip_bundle_hash_covers_children)
+
+    def _c183_zip_apply_no_self_replan():
+        # Case A (khớp bundle): apply gọi child ĐÚNG 1 lần (subprocess apply), mang --expected-plan-hash
+        # ĐÃ DUYỆT, KHÔNG chạy child DRY subprocess, không tự sinh hash mới.
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+                                               "_apply_journal_start", "_journal_append")}
+        _argvs = []
+        try:
+            _zi183._apply_journal_start = lambda *a, **k: "runZ183"
+            _zi183._journal_append = lambda *a, **k: None
+            _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "C" * 64, "json": {}}
+
+            def _fk_child(args):
+                _argvs.append(list(args))
+                return {"ok": True, "returncode": 0, "json": {"ok": True}}
+            _zi183._run_child_tl = _fk_child
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _bundle = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
+                                                   expected_plan_hash=_bundle["plan_hash"]),
+                                            mode="vbqppl")
+                _o = json.loads(_bo.getvalue())
+            _apply_calls = [v for v in _argvs if "--apply" in v]
+            return (_rc == 0 and _o.get("ok") is True and len(_argvs) == 1 == len(_apply_calls)
+                    and "--expected-plan-hash" in _argvs[0]
+                    and _argvs[0][_argvs[0].index("--expected-plan-hash") + 1] == "C" * 64
+                    and _o.get("plan_hash") == _bundle["plan_hash"])
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r184_zip_apply_no_self_replan", _c183_zip_apply_no_self_replan)
+
+    def _c183_zip_apply_drift_blocks_mutation():
+        # Case B (drift): recompute lúc apply KHÁC bundle đã duyệt ⇒ PLAN_DRIFT_REPLAN_REQUIRED,
+        # KHÔNG một mutation nào (child subprocess không được gọi).
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+                                               "_apply_journal_start", "_journal_append")}
+        _argvs, _n = [], {"i": 0}
+        try:
+            _zi183._apply_journal_start = lambda *a, **k: "runZ183d"
+            _zi183._journal_append = lambda *a, **k: None
+
+            def _fk_plan(args):   # call#1 (bundle trong _zip_apply): D…; call#2 (drift pre-pass): E…
+                _n["i"] += 1
+                return {"ok": True, "plan_hash": ("D" if _n["i"] <= 1 else "E") * 64, "json": {}}
+            _zi183._zip_child_plan_one = _fk_plan
+            _zi183._run_child_tl = lambda args: (_argvs.append(list(args))
+                                                 or {"ok": True, "returncode": 0, "json": {"ok": True}})
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                # bundle hash tương ứng child hash D…: tính bằng một lần _zip_plan_bundle stub cố định D
+                _sav2 = _zi183._zip_child_plan_one
+                _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "D" * 64, "json": {}}
+                _expected = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
+                _zi183._zip_child_plan_one = _sav2
+                _n["i"] = 0
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
+                                                   expected_plan_hash=_expected), mode="vbqppl")
+                _o = json.loads(_bo.getvalue())
+            _r0 = (_o.get("results") or [{}])[0]
+            return (_rc != 0 and _o.get("ok") is False and not _argvs
+                    and _r0.get("error") == "PLAN_DRIFT_REPLAN_REQUIRED"
+                    and _r0.get("recorded_plan_hash") == "D" * 64
+                    and _r0.get("recomputed_plan_hash") == "E" * 64)
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r184_zip_apply_drift_blocks_mutation", _c183_zip_apply_drift_blocks_mutation)
+
+    def _c183_zip_dry_no_cat_keeps_classify():
+        # DRY không --cat: giữ DRY phân loại parent-only + note bundle (không chết vì child thiếu cat).
+        _bo = _io110.StringIO()
+        with _tf110.TemporaryDirectory() as _d:
+            _zp = _mk_zip183(_d)
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                _rc = _TL_MODULE.cmd_ingest_zip(_ns183(_zp, cat=""))
+        _o = json.loads(_bo.getvalue())
+        return (_rc == 0 and _o.get("ok") is True and "note_bundle" in _o
+                and _o.get("schema") != "ingest_zip_bundle.v1")
+    _t110("r184_zip_dry_no_cat_keeps_classify", _c183_zip_dry_no_cat_keeps_classify)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

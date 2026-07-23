@@ -2284,6 +2284,45 @@ def _docx_unzip_text(path, mode: str = "strip") -> str:
         return ""
 
 
+def _markup_warn(fid: str, mode: str, why: str, meta=None) -> str:
+    """r186 (tách từ `_doc_text_any` để `cmd_extract` DÙNG CHUNG — hai lệnh cùng bẫy thì phải cùng một
+    câu cảnh báo, không được lệch chữ). In stderr + ghi `meta`; trả câu cảnh báo (rỗng nếu không cảnh
+    báo). `raw` = đối chứng CÓ CHỦ ĐÍCH ⇒ im lặng là đúng; mọi chế độ LỌC mà không chứng minh được là
+    đã lọc ⇒ phải nói."""
+    _m = meta if isinstance(meta, dict) else {}
+    if (mode or "").strip().lower() == "raw" or _m.get("markup_warning"):
+        return ""
+    w = _GDOC_MARKUP_WARN.format(fid=fid or "?", mode=mode, why=why, dm=_GDOC_DOCX_MIME)
+    _m["markup_warning"] = w
+    print(w, file=sys.stderr)
+    return w
+
+
+def _markup_cert_path(fid: str):
+    """SIDECAR chứng nhận của cache `extract_<id>.txt` — nguồn sự thật 'text này ĐÃ qua docx_markup chưa'."""
+    return _cache_file(f"extract_{fid}.txt.markup.json")
+
+
+def _markup_cert_write(fid: str, *, filter_ran: bool, found: bool, source: str = "") -> None:
+    """r183/r186: ghi chứng nhận CÙNG LÚC với cache chuẩn. Không có sidecar = cache cũ/đường text-plain
+    ⇒ lần đọc sau CẢNH BÁO thay vì im lặng (đóng vòng poison extract → cache → doc-text → corpus)."""
+    try:
+        _p = _markup_cert_path(fid)
+        _p.parent.mkdir(parents=True, exist_ok=True)
+        _p.write_text(json.dumps({"v": "r183", "filter_ran": bool(filter_ran), "found": bool(found),
+                                  "source": source}, ensure_ascii=False), encoding="utf-8")
+    except Exception:  # noqa: BLE001 — chứng nhận best-effort; thiếu nó = cảnh báo, KHÔNG phải im lặng
+        pass
+
+
+def _markup_cert_read(fid: str) -> dict:
+    try:
+        _p = _markup_cert_path(fid)
+        return (json.loads(_p.read_text(encoding="utf-8")) or {}) if _p.exists() else {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None,
                   markup: str = "strip", meta=None) -> tuple:
     """A1 (v1.34.60 — kế hoạch NLM-fallback E1–E3, TIỀN ĐỀ E1): MỘT đường đọc text cho MỌI định dạng.
@@ -2307,35 +2346,22 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                   "markup_warning": ""})
 
     def _mk_warn(why: str) -> None:
-        """r183: `raw` là ĐỐI CHỨNG có chủ đích (người dùng XIN bản thô) ⇒ không cảnh báo; mọi chế độ
-        lọc mà không chứng minh được là đã lọc ⇒ nói thẳng ra stderr."""
-        if _mode == "raw" or _meta.get("markup_warning"):
-            return
-        w = _GDOC_MARKUP_WARN.format(fid=fid or "?", mode=_mode, why=why, dm=_GDOC_DOCX_MIME)
-        _meta["markup_warning"] = w
-        print(w, file=sys.stderr)
+        _markup_warn(fid, _mode, why, _meta)      # r186: helper DÙNG CHUNG với cmd_extract
 
     if not fid:
         return "", ""
     # r182: chỉ chế độ CHUẨN (strip) mới được dùng/ghi cache — mark/raw là bản ĐỌC-XEM của người rà,
     # để lọt vào extract_<id>.txt sẽ bơm ⟦BỎ:…⟧ (hoặc chữ đã bỏ) vào corpus.
     _mk_canon = _mode == "strip"
-    _sidecar = f"extract_{fid}.txt.markup.json"
     if not refresh and _mk_canon:
         try:
             _cf = _cache_file(f"extract_{fid}.txt")
             if _cf.exists():
                 _ct = _cf.read_text(encoding="utf-8", errors="replace")
                 if _ct.strip():
-                    # r183: cache do đường export text/plain (cmd_extract, hoặc doc-text TRƯỚC r183) ghi
-                    # KHÔNG hề qua docx_markup. Không có sidecar chứng nhận ⇒ coi như CHƯA lọc và nói ra.
-                    _cert = {}
-                    try:
-                        _sf = _cache_file(_sidecar)
-                        if _sf.exists():
-                            _cert = json.loads(_sf.read_text(encoding="utf-8")) or {}
-                    except Exception:  # noqa: BLE001
-                        _cert = {}
+                    # r183: cache do đường export text/plain (cmd_extract TRƯỚC r186, hoặc doc-text
+                    # TRƯỚC r183) ghi KHÔNG hề qua docx_markup. Không có sidecar ⇒ coi như CHƯA lọc.
+                    _cert = _markup_cert_read(fid)
                     if _cert.get("filter_ran"):
                         _meta["markup_filter_ran"] = True
                         _meta["markup_found"] = bool(_cert.get("found"))
@@ -2422,14 +2448,11 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
             _cf = _cache_file(f"extract_{fid}.txt")
             _cf.parent.mkdir(parents=True, exist_ok=True)
             _cf.write_text(text, encoding="utf-8")
-            # r183: SIDECAR chứng nhận — lần đọc cache sau biết text này ĐÃ qua docx_markup hay chưa.
-            # Không có sidecar = cache cũ/đường text-plain ⇒ lần sau cảnh báo thay vì im lặng.
-            _cache_file(_sidecar).write_text(
-                json.dumps({"v": "r183", "filter_ran": bool(_meta.get("markup_filter_ran")),
-                            "found": bool(_meta.get("markup_found")), "source": src},
-                           ensure_ascii=False), encoding="utf-8")
         except Exception:  # noqa: BLE001 — cache best-effort, không chặn kết quả
             pass
+        # r183: SIDECAR chứng nhận — lần đọc cache sau biết text này ĐÃ qua docx_markup hay chưa.
+        _markup_cert_write(fid, filter_ran=bool(_meta.get("markup_filter_ran")),
+                           found=bool(_meta.get("markup_found")), source=src)
     return text, src
 
 

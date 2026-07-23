@@ -60,7 +60,18 @@ def _extract_resolve_entries(a) -> list:
 
 def cmd_extract(a) -> int:
     """B2 token-saving: exporttext ra ĐĨA → regex Điều → in đúng Điều.
-    Có thể truyền GDoc id trực tiếp hoặc `--sohieu` để tự chọn canonical từ manifest."""
+    Có thể truyền GDoc id trực tiếp hoặc `--sohieu` để tự chọn canonical từ manifest.
+
+    r186 (đo tươi 23-07-2026, SAU r183): lệnh này vẫn dính NGUYÊN bẫy mà r183 vá cho `doc-text` — đọc
+    Google Doc bằng transport `read`/`exporttext` = export text/plain ⇒ MẤT SẠCH dấu vết sửa đổi
+    (đo trên dự thảo BHXH 16/7: 25.338 ký tự = BẢN THÔ, đủ cả 3 câu ĐÃ BỎ, 0 nhãn, 0 cảnh báo).
+    NGUY HIỂM HƠN doc-text vì extract GHI THẲNG vào cache chuẩn `extract_<id>.txt` — nguồn nuôi
+    corpus/NLM ⇒ chữ đã bỏ chảy vào kho. Nay: (a) chế độ lọc → EXPORT .docx + `docx_markup` trước;
+    (b) không lọc được → CẢNH BÁO `[markup] ⚠` (dùng chung câu với doc-text), `--markup-strict` ⇒ rc=3
+    và KHÔNG ghi gì; (c) ghi cache chuẩn thì ghi kèm SIDECAR chứng nhận."""
+    _mk_mode = str(getattr(a, "markup", "strip") or "strip").strip().lower()
+    _mk_strict = bool(getattr(a, "markup_strict", False))
+    _mk_meta = {}
     gdoc_id = a.gdoc_id
     _extract_canon = None
     # A1 (false-404): positional KHÔNG phải gdoc-id thật (id Drive ≥20 ký tự alnum) → coi như SỐ HIỆU/tên, định tuyến --sohieu.
@@ -126,8 +137,30 @@ def cmd_extract(a) -> int:
                     t = str(_arts[n] or "").strip()
                     _parts.append(t if re.match(r"^\s*Điều\s", t) else f"Điều {n}. {t}")
                 text, src = "\n\n".join(_parts), f"cache-build consolidated ({len(_arts)} điều, no-cap)"
+                # r186: bản consolidated do `cache-build`/normalize_document dựng — KHÔNG biết nó dựng ở
+                # chế độ markup nào (auto = mark cho dự thảo!) ⇒ không được coi là đã lọc.
+                _markup_warn(gdoc_id, _mk_mode,
+                             "text dựng từ CACHE-BUILD consolidated — không kiểm được nó dựng ở chế độ "
+                             "markup nào (`--markup-mode auto` cho DỰ THẢO ra bản `mark`); dựng lại bằng "
+                             "`tl cache-build … ` sau khi đối chiếu .docx gốc nếu cần chắc", _mk_meta)
         except Exception:  # noqa: BLE001
             text = None
+    # r186 (a): chế độ LỌC → thử EXPORT .docx trước (đường DUY NHẤT còn giữ w:strike/w:ins/w:del của một
+    # Google Doc; export text/plain bên dưới san phẳng hết). Dùng chung `_gdoc_docx_text` với doc-text.
+    if text is None and gdoc_id and _mk_mode != "raw":
+        try:
+            _tg, _stg = _gdoc_docx_text(gdoc_id, _mk_mode)
+        except Exception as _ge:  # noqa: BLE001 — export lỗi KHÔNG được chặn đường đọc cũ
+            _tg, _stg = "", None
+            if getattr(a, "debug", False):
+                print(f"[tl] export .docx lỗi (sẽ thử text/plain): {_ge}", file=sys.stderr)
+        if _tg:
+            text, src = _tg, f"gdoc-docx (markup {_mk_mode})"
+            _mk_meta["markup_filter_ran"] = True
+            _mk_meta["markup_found"] = bool(_stg and any(_stg.values()))
+            if not _mk_meta["markup_found"]:
+                _markup_warn(gdoc_id, _mk_mode, "bản .docx export từ Google Doc KHÔNG mang dấu vết sửa "
+                             "đổi nào (del=0, strike=0, ins=0) — không có gì để lọc", _mk_meta)
     # Đọc nguyên văn: ƯU TIÊN transport→gws (export GDoc→text trực tiếp, BỎ QUA webapp `exporttext` vốn
     # lỗi OAuth scope `script.external_request`). Fallback webapp exporttext nếu transport/gws không sẵn.
     def _read_fulltext(_fid):
@@ -153,6 +186,11 @@ def cmd_extract(a) -> int:
 
     if text is None:
         text, src, _err = _read_fulltext(gdoc_id)
+        if text is not None:
+            # r186 (b): đây là text/plain — `docx_markup` KHÔNG chạy được trên nó. Im lặng là hành vi cấm.
+            _markup_warn(gdoc_id, _mk_mode, "chỉ đọc được qua export text/plain (export .docx không dùng "
+                         "được) — định dạng gạch-bỏ đã bị san phẳng nên bộ lọc markup KHÔNG chạy trên "
+                         "nguồn này", _mk_meta)
         # v1.34.40 A.1 fallback false-404: positional dạng-id nhưng Drive báo NOT_FOUND (= chắc chắn KHÔNG phải
         # id thật, ví dụ tên file 'Luat_113-2025-QH15_Dan_so' ≥20 ký tự) → deep-resolve MỘT lần như trước.
         # CHỈ khi NOT_FOUND — lỗi mạng/auth/scope KHÔNG resolve (resolve lúc đó là đoán mò trên input hợp lệ).
@@ -176,6 +214,9 @@ def cmd_extract(a) -> int:
                     print(f"[tl] ⚠ {DRAFT_WARNING}: nguồn đang đọc là dự thảo, không được viện dẫn như văn bản "
                           f"có hiệu lực.", file=sys.stderr)
                 text, src, _err = _read_fulltext(gdoc_id)
+                if text is not None:   # r186: đường resolve-lại cũng là text/plain ⇒ cùng cảnh báo
+                    _markup_warn(gdoc_id, _mk_mode, "chỉ đọc được qua export text/plain sau khi resolve "
+                                 "lại canonical — bộ lọc markup KHÔNG chạy trên nguồn này", _mk_meta)
         if text is None:
             print(f"[tl] đọc nguyên văn LỖI (gws/transport + webapp exporttext): {_err}\n"
                   f"     → webapp exporttext thiếu OAuth scope → cần gws (transport): bootstrap + gws auth ở "
@@ -183,9 +224,30 @@ def cmd_extract(a) -> int:
                   f"     → hoặc file .docx/.pdf: copy_convert sang Google Doc trước.", file=sys.stderr)
             return 1
     text = _sanitize_export_text(_strip_font_runs(text))   # U1 v1.31.2: + diệt surrogate/control-byte (lọc dòng rác font như cũ)
+    # r186: --markup-strict = không chứng minh được đã lọc thì KHÔNG ghi gì cả. Ở extract điều này nặng
+    # hơn doc-text: file ghi ra là NGUỒN NUÔI CORPUS, để lọt bản thô là bơm chữ đã bỏ vào kho.
+    if _mk_meta.get("markup_warning") and _mk_strict:
+        print(json.dumps({"ok": False, "error": "MARKUP_UNVERIFIED", "file_id": gdoc_id, "source": src,
+                          "markup_mode": _mk_mode, "note": _mk_meta["markup_warning"]},
+                         ensure_ascii=False), file=sys.stderr)
+        return 3
     _profile_cache_dir().mkdir(parents=True, exist_ok=True)
-    disk = Path(a.out) if a.out else _cache_file(f"extract_{gdoc_id}.txt")
+    if a.out:
+        disk = Path(a.out)
+    elif _mk_mode == "strip":
+        disk = _cache_file(f"extract_{gdoc_id}.txt")       # KHOÁ CHUẨN — chỉ bản strip mới được vào
+    else:
+        # r182/r186: mark (⟦BỎ:…⟧) và raw (chữ đã bỏ) là bản ĐỌC-XEM; để lọt vào khoá chuẩn là bơm
+        # thẳng vào corpus qua đường extract ⇒ tách khoá riêng, nói rõ ra.
+        disk = _cache_file(f"extract_{gdoc_id}.{_mk_mode}.txt")
+        print(f"[tl] ⚠ chế độ `--markup {_mk_mode}` là bản ĐỌC-XEM → KHÔNG ghi vào khoá cache chuẩn "
+              f"`extract_{gdoc_id}.txt` (tránh chảy vào corpus); ghi ra {disk.name}.", file=sys.stderr)
     disk.write_text(text, encoding="utf-8")   # toàn văn nằm trên ĐĨA, KHÔNG vào context
+    if not a.out and _mk_mode == "strip":
+        # r186: chứng nhận ĐỒNG THỜI với cache chuẩn ⇒ `doc-text` đọc lại cache này hết phải cảnh báo
+        # (đóng vòng poison extract → cache → doc-text → corpus).
+        _markup_cert_write(gdoc_id, filter_ran=bool(_mk_meta.get("markup_filter_ran")),
+                           found=bool(_mk_meta.get("markup_found")), source=str(src or ""))
     print(f"[tl] {len(text)} ký tự → {disk} (0 token vào context) [nguồn: {src}]")
     # A4: exporttext webapp CAP ~200k ký tự → khi chạm cap, văn bản DÀI có thể bị CẮT (không phải đủ 200k). Cảnh báo rõ.
     if len(text) >= 199000 and not str(src or "").startswith("cache-build"):

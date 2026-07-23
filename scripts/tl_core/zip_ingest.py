@@ -341,36 +341,27 @@ def _zip_child_plan_one(child_args: list) -> dict:
         return {"ok": False, "json": {}, "plan_hash": "", "error": f"{type(_e).__name__}: {_e}"}
 
 
-def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
-    """r184 (ADR-0013 — ING-01): IMMUTABLE PLAN BUNDLE. DRY lập ĐẦY ĐỦ child plan cho từng member
-    (in-process, tuần tự — tránh đua trạng thái profile toàn cục); parent `plan_hash` = fingerprint
-    TOÀN bundle (archive + member list + mọi child plan). Xác nhận hash này = duyệt đúng bộ kế hoạch
-    con — apply không được lập kế hoạch mới (khác ⇒ PLAN_DRIFT_REPLAN_REQUIRED)."""
-    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
-                     max_files=a.max_files, max_size_mb=a.max_size_mb,
-                     max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
-    if not plan.get("ok"):
-        return plan
+def _zip_child_plans_from_extracted(extracted, *, mode: str, profile: str, cat: str, a) -> tuple:
+    """r185/WP6: lập child plans từ MỘT lần extract đã có (in-process, tuần tự — tránh đua trạng thái
+    profile toàn cục). Tách ra để _zip_apply TÁI DÙNG chính lần extract của nó (1 extract/invocation —
+    trước r185: bundle extract 1 lần + apply extract lần 2, hash member ×3)."""
     child_plans, child_errors = [], []
-    with tempfile.TemporaryDirectory(prefix="tl_zip_plan_") as _td:
-        try:
-            _extracted = _safe_extract_zip_for_ingest(
-                a.file, _td, plan=plan, max_size_mb=getattr(a, "max_size_mb", None),
-                max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
-        except Exception as _exc:  # noqa: BLE001
-            return {**plan, "ok": False, "step": "zip_extract_verify_plan",
-                    "error": f"{type(_exc).__name__}: {_exc}"}
-        for _item in _extracted:
-            _dry = _zip_child_plan_one(_zip_child_args(_item, mode=mode, profile=profile, cat=cat, a=a))
-            _rec = {"zip_path": _item["normalized_path"], "member_sha256": _item.get("sha256"),
-                    "child_plan_hash": str(_dry.get("plan_hash") or ""), "ok": bool(_dry.get("ok"))}
-            if not _dry.get("ok"):
-                _rec.update({"error": "CHILD_PLAN_FAILED", "returncode": _dry.get("returncode"),
-                             "detail": str(_dry.get("error") or "")[:200],
-                             "stderr_tail": str(_dry.get("stderr_tail") or "")[-400:]})
-                child_errors.append(_rec)
-            child_plans.append(_rec)
+    for _item in extracted or []:
+        _dry = _zip_child_plan_one(_zip_child_args(_item, mode=mode, profile=profile, cat=cat, a=a))
+        _rec = {"zip_path": _item["normalized_path"], "member_sha256": _item.get("sha256"),
+                "child_plan_hash": str(_dry.get("plan_hash") or ""), "ok": bool(_dry.get("ok"))}
+        if not _dry.get("ok"):
+            _rec.update({"error": "CHILD_PLAN_FAILED", "returncode": _dry.get("returncode"),
+                         "detail": str(_dry.get("error") or "")[:200],
+                         "stderr_tail": str(_dry.get("stderr_tail") or "")[-400:]})
+            child_errors.append(_rec)
+        child_plans.append(_rec)
     child_plans.sort(key=lambda r: str(r.get("zip_path") or "").casefold())
+    return child_plans, child_errors
+
+
+def _zip_bundle_assemble(plan: dict, child_plans: list, child_errors: list) -> dict:
+    """PURE (r185/WP6): ráp bundle từ parent plan + child plans — fingerprint TOÀN bundle (ADR-0013)."""
     from tl_core.ingest_contract import canonical_json_bytes
     _bundle_commit = {"schema": "ingest_zip_bundle.v1", "parent_plan_hash": plan.get("plan_hash"),
                       "archive_sha256": plan.get("archive_sha256"),
@@ -386,6 +377,66 @@ def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
                            "hợp lệ — replan bằng DRY mới."}
 
 
+_INGEST_MEM_BUDGET_DEFAULT_MB = 256
+_INGEST_WORKER_BASE_BYTES = 32 * 1024 * 1024          # chi phí nền mỗi worker (interpreter/buffer)
+_INGEST_WORKER_SIZE_FACTOR = 2.5                       # bytes giữ đồng thời ≈ bytes + b64 (~2,33×) + đệm
+
+
+def _ingest_memory_budget_mb() -> int:
+    """D7 (r185/WP6): ngân sách RAM ingest — env TL_INGEST_MEMORY_BUDGET_MB (mặc định 256),
+    clamp [64, 4096]; giá trị rác → mặc định (LOUD hơn = việc của plan disclosure)."""
+    try:
+        v = int(str(os.environ.get("TL_INGEST_MEMORY_BUDGET_MB", "") or _INGEST_MEM_BUDGET_DEFAULT_MB))
+    except (TypeError, ValueError):
+        v = _INGEST_MEM_BUDGET_DEFAULT_MB
+    return max(64, min(v, 4096))
+
+
+def _zip_workers_effective(requested: int, member_sizes: list) -> dict:
+    """PURE (D7 — r185/WP6): workers_effective = min(requested, 4, floor(budget / estimate));
+    estimate/worker = 32MiB + 2,5 × size-lớn-nhất (đường GAS/Base64 giữ cả bytes lẫn chuỗi b64 trong
+    RAM). Không đủ cho 1 worker ⇒ workers_effective=0 — caller DỪNG Ở PLAN với lỗi hành động được,
+    không cố apply. Override của người dùng vẫn bị hard cap 4 chặn."""
+    req = max(1, int(requested or 1))
+    budget = _ingest_memory_budget_mb() * 1024 * 1024
+    max_size = max([int(s or 0) for s in (member_sizes or [])] or [0])
+    est = int(_INGEST_WORKER_BASE_BYTES + _INGEST_WORKER_SIZE_FACTOR * max_size)
+    fit = budget // est if est > 0 else 0
+    eff = min(req, 4, int(fit))
+    return {"workers_requested": req, "workers_effective": max(0, eff), "hard_cap": 4,
+            "memory_budget_mb": _ingest_memory_budget_mb(),
+            "per_worker_estimate_bytes": est, "largest_member_bytes": max_size,
+            "peak_memory_estimate_bytes": est * max(1, eff)}
+
+
+def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
+    """r184 (ADR-0013 — ING-01): IMMUTABLE PLAN BUNDLE. DRY lập ĐẦY ĐỦ child plan cho từng member;
+    parent `plan_hash` = fingerprint TOÀN bundle (archive + member list + mọi child plan). Xác nhận
+    hash này = duyệt đúng bộ kế hoạch con — apply không được lập kế hoạch mới (khác ⇒
+    PLAN_DRIFT_REPLAN_REQUIRED khi authorize). r185/WP6: extract+hash MỘT lượt, plan công khai D7."""
+    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
+                     max_files=a.max_files, max_size_mb=a.max_size_mb,
+                     max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+    if not plan.get("ok"):
+        return plan
+    with tempfile.TemporaryDirectory(prefix="tl_zip_plan_") as _td:
+        try:
+            _extracted = _safe_extract_zip_for_ingest(
+                a.file, _td, plan=plan, max_size_mb=getattr(a, "max_size_mb", None),
+                max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+        except Exception as _exc:  # noqa: BLE001
+            return {**plan, "ok": False, "step": "zip_extract_verify_plan",
+                    "error": f"{type(_exc).__name__}: {_exc}"}
+        child_plans, child_errors = _zip_child_plans_from_extracted(
+            _extracted, mode=mode, profile=profile, cat=cat, a=a)
+    out = _zip_bundle_assemble(plan, child_plans, child_errors)
+    # D7: plan CÔNG KHAI workers/memory estimate — người duyệt thấy trước tài nguyên apply sẽ dùng.
+    out["resources"] = _zip_workers_effective(
+        int(getattr(a, "workers", 4) or 4),
+        [i.get("size") for i in (plan.get("items") or []) if i.get("status") == "accepted"])
+    return out
+
+
 def _zip_apply(a, *, mode: str) -> int:
     from concurrent.futures import ThreadPoolExecutor
     from tl_core.ingest_contract import authorize_apply
@@ -394,51 +445,58 @@ def _zip_apply(a, *, mode: str) -> int:
     if mode == "vbqppl" and not cat:
         print(_json_dumps({"ok": False, "error": "CAT_REQUIRED_FOR_VBQPPL_ZIP_APPLY", "note": "Dùng --cat NN hoặc chạy dry-run để phân loại trước."}, deterministic=_deterministic_enabled(a)))
         return 2
-    # r184 (ADR-0013): plan = BUNDLE — child plans lập lại tất định, authorize phủ TOÀN bundle.
-    plan = _zip_plan_bundle(a, mode=mode, profile=profile, cat=cat)
-    if not plan.get("ok"):
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
-    auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
-                           expected_plan_hash=getattr(a, "expected_plan_hash", None),
-                           actual_plan_hash=plan.get("plan_hash") or "")
-    if not auth.get("ok"):
-        print(_json_dumps({"ok": False, "step": "apply_authorization", **auth},
-                          deterministic=_deterministic_enabled(a)))
-        return 2
-    _child_hash_by_path = {str(c.get("zip_path") or ""): str(c.get("child_plan_hash") or "")
-                           for c in (plan.get("child_plans") or [])}
-    results = []
-    run_id = _apply_journal_start("profile-ingest-zip" if mode == "profile" else "ingest-zip",
-                                  {"file": str(a.file), "plan_hash": plan.get("plan_hash"),
-                                   "parent_plan_hash": plan.get("parent_plan_hash"),
-                                   "archive_sha256": plan.get("archive_sha256"), "profile": profile, "cat": cat})
-    _journal_append(run_id, {"t": "plan", "op": "zip_bundle", "key": str(a.file),
-                             "set": {"child_plans": plan.get("child_plans")}})
+    # r184 (ADR-0013) + r185/WP6 (ING-03): plan bundle lập từ CHÍNH MỘT lần extract của apply —
+    # 1 extract + 1 lượt hash member/invocation (trước: bundle extract riêng rồi apply extract lại,
+    # cộng pre-pass recompute = hash member ×3). Drift so với bản user duyệt do authorize bắt
+    # (expected_plan_hash phủ TOÀN bundle) — sai khác ⇒ PLAN_DRIFT_REPLAN_REQUIRED trước mutation.
     with tempfile.TemporaryDirectory(prefix="tl_zip_ingest_") as td:
+        plan0 = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
+                          max_files=a.max_files, max_size_mb=a.max_size_mb,
+                          max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+        if not plan0.get("ok"):
+            print(_json_dumps(plan0, deterministic=_deterministic_enabled(a))); return 2
         try:
             extracted = _safe_extract_zip_for_ingest(
-                a.file, td, plan=plan, max_size_mb=getattr(a, "max_size_mb", None),
+                a.file, td, plan=plan0, max_size_mb=getattr(a, "max_size_mb", None),
                 max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
         except Exception as exc:  # noqa: BLE001
-            _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
-            print(_json_dumps({"ok": False, "step": "zip_extract_verify", "journal": run_id,
+            print(_json_dumps({"ok": False, "step": "zip_extract_verify",
                                "error": f"{type(exc).__name__}: {exc}"}, deterministic=_deterministic_enabled(a)))
             return 2
-
-        # r184 (ADR-0013): tiền-kiểm DRIFT tuần tự (in-process — không đua profile-state):
-        # recompute child plan hash, KHÁC bundle đã duyệt ⇒ PLAN_DRIFT_REPLAN_REQUIRED, KHÔNG mutation.
-        _verified, _drifted = [], []
-        for item in extracted:
-            _recheck = _zip_child_plan_one(_zip_child_args(item, mode=mode, profile=profile, cat=cat, a=a))
-            _recorded = _child_hash_by_path.get(str(item.get("normalized_path") or ""), "")
-            if not (_recheck.get("ok") and _recorded and str(_recheck.get("plan_hash")) == _recorded):
-                _drifted.append({"ok": False, "step": "child_plan_drift", "error": "PLAN_DRIFT_REPLAN_REQUIRED",
-                                 "zip_path": item["normalized_path"],
-                                 "recorded_plan_hash": _recorded,
-                                 "recomputed_plan_hash": str(_recheck.get("plan_hash") or ""),
-                                 "returncode": _recheck.get("returncode")})
-            else:
-                _verified.append((item, _recorded))
+        _cp, _ce = _zip_child_plans_from_extracted(extracted, mode=mode, profile=profile, cat=cat, a=a)
+        plan = _zip_bundle_assemble(plan0, _cp, _ce)
+        if not plan.get("ok"):
+            print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
+        auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
+                               expected_plan_hash=getattr(a, "expected_plan_hash", None),
+                               actual_plan_hash=plan.get("plan_hash") or "")
+        if not auth.get("ok"):
+            _out_auth = {"ok": False, "step": "apply_authorization", **auth}
+            if str(auth.get("error") or "") in ("PLAN_HASH_MISMATCH", "PLAN_MISMATCH"):
+                _out_auth["drift"] = ("PLAN_DRIFT_REPLAN_REQUIRED — bundle hiện tại khác bản đã duyệt "
+                                      "(archive/member/child plan đổi); DRY lại lấy bundle plan_hash mới.")
+            print(_json_dumps(_out_auth, deterministic=_deterministic_enabled(a)))
+            return 2
+        # D7 (r185/WP6): điều tiết worker theo ngân sách RAM — không đủ 1 worker ⇒ DỪNG TRƯỚC mutation.
+        _res = _zip_workers_effective(int(getattr(a, "workers", 4) or 4),
+                                      [i.get("size") for i in extracted])
+        if _res["workers_effective"] < 1:
+            print(_json_dumps({"ok": False, "error": "INSUFFICIENT_MEMORY_BUDGET", **_res,
+                               "note": "File lớn nhất vượt ngân sách RAM cho 1 worker — tăng "
+                                       "TL_INGEST_MEMORY_BUDGET_MB hoặc tách file khỏi ZIP."},
+                              deterministic=_deterministic_enabled(a)))
+            return 2
+        _child_hash_by_path = {str(c.get("zip_path") or ""): str(c.get("child_plan_hash") or "")
+                               for c in (plan.get("child_plans") or [])}
+        results = []
+        run_id = _apply_journal_start("profile-ingest-zip" if mode == "profile" else "ingest-zip",
+                                      {"file": str(a.file), "plan_hash": plan.get("plan_hash"),
+                                       "parent_plan_hash": plan.get("parent_plan_hash"),
+                                       "archive_sha256": plan.get("archive_sha256"), "profile": profile, "cat": cat})
+        _journal_append(run_id, {"t": "plan", "op": "zip_bundle", "key": str(a.file),
+                                 "set": {"child_plans": plan.get("child_plans"), "resources": _res}})
+        _verified = [(item, _child_hash_by_path.get(str(item.get("normalized_path") or ""), ""))
+                     for item in extracted]
 
         def _run_member(pair):
             item, child_plan_hash = pair
@@ -456,10 +514,10 @@ def _zip_apply(a, *, mode: str) -> int:
                     **({"stderr_tail": applied.get("stderr_tail"), "stdout_tail": applied.get("stdout_tail")}
                        if not applied_ok else {})}
 
-        workers = max(1, min(int(getattr(a, "workers", 4) or 4), 8, len(_verified) or 1))
+        # r185/WP6 (D7): worker theo ngân sách RAM (hard cap 4 — trước: cap 8 không đếm RAM).
+        workers = max(1, min(int(_res["workers_effective"]), len(_verified) or 1))
         with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="tl-zip-ingest") as pool:
             results = list(pool.map(_run_member, _verified))
-        results.extend(_drifted)
         results.sort(key=lambda r: str(r.get("zip_path") or "").casefold())
         for r in results:
             _journal_append(run_id, {"t": "commit", "op": "ingest_member", "key": r.get("zip_path"),
@@ -475,7 +533,7 @@ def _zip_apply(a, *, mode: str) -> int:
            "counts": {"applied": _applied_ok, "failed": _applied_fail, "total": len(results)},
            "partial": bool(_applied_fail) and bool(_applied_ok),
            "journal": run_id, "plan_hash": plan.get("plan_hash"), "archive_sha256": plan.get("archive_sha256"),
-           "workers": workers,
+           "workers": workers, "resources": _res,
            "dry_run_plan": {k: plan.get(k) for k in ("zip", "files_total", "accepted", "skipped", "warnings", "limits")},
            "results": results, "note": "Apply xử lý MỌI member (child độc lập+idempotent); ok=all(member). Xem counts/partial. Từng pipeline tự upload→convert→readback→register→NLM."}
     _journal_append(run_id, {"t": "run_end", "ok": bool(out["ok"]),

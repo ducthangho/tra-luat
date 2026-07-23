@@ -922,6 +922,58 @@ def _cmd_profile_doctor_impl(a) -> int:
     _vbt_root_id = None   # v1.34.36 (backlog #2 handoff 2026-07-11): lazy bootstrap 1 lần cho check root==VBT
     findings, infos_all = [], {}
     marker_migration_plan = []   # r184 (ADR-0012): DRY plan v1→v2, chỉ gom khi --plan-marker-migration
+    # r185/WP5 (D6): PREFETCH 1 lần cho cả run — shallow về ≤3 GAS call (bootstrap + profile_catalog +
+    # drive_info_bulk), KHÔNG tăng theo số profile. Server cũ → prefetch rỗng, vòng lặp fallback per-call
+    # như cũ (degraded_reason ghi vào output).
+    _degraded_reasons = []
+    try:
+        _vbt_root_id = str((g.get("bootstrap") or {}).get("vanBanThuongId") or "")
+    except Exception:  # noqa: BLE001
+        _vbt_root_id = ""
+    _cat_by_root = {}
+    if _vbt_root_id:
+        try:
+            _cat_d = g.get("profile_catalog", folderId=_vbt_root_id, folderCap="200")
+        except Exception as _e:  # noqa: BLE001
+            _cat_d = {"ok": False, "error": f"{type(_e).__name__}: {_e}"}
+        if isinstance(_cat_d, dict) and _cat_d.get("ok") and _cat_d.get("schema") == "profile_catalog.v1":
+            _cat_by_root = {str(f.get("id") or ""): f for f in _catalog_to_scan(_cat_d).get("folders") or []}
+        else:
+            _degraded_reasons.append(
+                f"SERVER_NO_PROFILE_CATALOG: {str((_cat_d or {}).get('error') or '')[:160]}")
+    _asset_ids = {str((profs.get(_n) or {}).get(_k) or "").strip()
+                  for _n in _names_run for _k in ("registryDocId", "manifestId")
+                  if isinstance(profs.get(_n), dict) and str((profs.get(_n) or {}).get(_k) or "").strip()}
+    # r185/WP5 (Q6 bulk): gộp CẢ template drive_id (từ marker trong catalog) vào CÙNG một lô info —
+    # deep 1 profile giữ ≤4 GAS + 1 NLM, không tăng theo ≤50 template.
+    for _n0 in _names_run:
+        _p0 = profs.get(_n0) if isinstance(profs.get(_n0), dict) else {}
+        _rec0 = _cat_by_root.get(str(_p0.get("rootFolderId") or "").strip()) or {}
+        _mk0 = _rec0.get("marker") if isinstance(_rec0.get("marker"), dict) else {}
+        _tl0 = _mk0.get("templates") if isinstance(_mk0.get("templates"), list) else []
+        for _t0 in _tl0:
+            _d0 = str((_t0 or {}).get("drive_id") or "")
+            if _d0:
+                _asset_ids.add(_d0)
+    _asset_ids = sorted(_asset_ids)
+    _info_by_id, _bulk_covered = {}, set()
+    _shared_tpl_cache = {"resolved": False, "id": ""}   # r185/WP5: shared templates-folder — resolve LƯỜI ≤1 lần/run
+    if _asset_ids:
+        try:
+            _ib = g.get("drive_info_bulk", ids=json.dumps(_asset_ids[:200]))
+        except Exception as _e:  # noqa: BLE001
+            _ib = {"ok": False, "error": f"{type(_e).__name__}: {_e}"}
+        if isinstance(_ib, dict) and _ib.get("ok") and _ib.get("schema") == "drive_info_bulk.v1":
+            _bulk_covered = set(_asset_ids[:200])
+            for _r in (_ib.get("results") or []):
+                if _r.get("ok"):
+                    _info_by_id[str(_r.get("id"))] = {"mimeType": _r.get("mime"),
+                                                      "parents": _r.get("parents") or [],
+                                                      "trashed": bool(_r.get("trashed")),
+                                                      "name": _r.get("name")}
+        else:
+            _degraded_reasons.append(
+                f"SERVER_NO_DRIVE_INFO_BULK: {str((_ib or {}).get('error') or '')[:160]}")
     for _idx, n in enumerate(_names_run, 1):
         _before_len = len(findings)
         prof = profs.get(n) if isinstance(profs.get(n), dict) else {}
@@ -929,6 +981,9 @@ def _cmd_profile_doctor_impl(a) -> int:
         for key in ("registryDocId", "manifestId"):
             fid = str(prof.get(key) or "").strip()
             if not fid:
+                continue
+            if fid in _info_by_id:   # r185/WP5: hit prefetch — 0 call
+                infos[fid] = dict(_info_by_id[fid])
                 continue
             try:
                 fi = _gas_get_retry(g, "info", fileId=fid)
@@ -954,7 +1009,9 @@ def _cmd_profile_doctor_impl(a) -> int:
         if _root and _vbt_root_id and _root == _vbt_root_id:
             _root = ""   # tắt marker-check; các check layout/deep phía dưới không phụ thuộc _root
         if _root:
-            _mr = _marker_read(g, _root, meta_id=str(prof.get("metaFolderId") or "") or None)
+            # r185/WP5: hit catalog prefetch → 0 call; miss (folder ngoài cap/scan hoặc server cũ) → đường cũ.
+            _mr = (_marker_from_catalog(_cat_by_root[_root]) if _root in _cat_by_root
+                   else _marker_read(g, _root, meta_id=str(prof.get("metaFolderId") or "") or None))
             # #7 (v1.34.30): ≥2 file marker cùng tên trong _meta = dấu vết retry đứt (create/from-nlm/promote) →
             # bản mồ côi trỏ registry/manifest khác. profile-sync/backfill --force nay TỰ trash bản dư (self-heal).
             if len(_mr.get("marker_file_ids") or []) > 1:
@@ -1014,15 +1071,45 @@ def _cmd_profile_doctor_impl(a) -> int:
                 else:
                     apply_profile_offline(getattr(a, "config", None), n)   # scope registry PROFILE cho reg_get
                     _pend = _blk = 0
+                    # r185/WP5 (PRO-03/D6): reg_get_bulk 1 call thay O(source) reg_get — rows[i] ứng keys[i]
+                    # (null = thiếu), thứ tự TẤT ĐỊNH theo keys. Lưu ý ghi nhận: bulk trả 1 row/sid (byKey);
+                    # sid có NHIỀU row (sentinel + own chuyển tiếp) chỉ thấy row cuối — ca hiếm, tự lộ qua
+                    # hygiene; server cũ/lỗi → fallback per-sid như cũ + degraded_reason.
+                    _sids_d = [str(_s.get("id") or "") for _s in (_sl_deep.get("sources") or [])
+                               if str(_s.get("id") or "")]
+                    _rows_by_sid = None
+                    if _sids_d:
+                        try:
+                            _rows_by_sid = {}
+                            for _i0 in range(0, len(_sids_d), 300):   # 300/lô: fixture D6 300 nguồn = 1 call
+                                _chunk = _sids_d[_i0:_i0 + 300]
+                                _bk = g.get("reg_get_bulk", key_field="nlm_source_id",
+                                            keys=json.dumps(_chunk),
+                                            refresh=("true" if _i0 == 0 else "false"))
+                                if not (isinstance(_bk, dict) and _bk.get("ok")
+                                        and _bk.get("key_field") == "nlm_source_id"
+                                        and isinstance(_bk.get("rows"), list)):
+                                    raise RuntimeError(str((_bk or {}).get("error")
+                                                           or "REG_GET_BULK_BAD_SHAPE"))
+                                _brows = _bk.get("rows") or []
+                                for _j0, _k0 in enumerate(_chunk):
+                                    _r0 = _brows[_j0] if _j0 < len(_brows) else None
+                                    _rows_by_sid[_k0] = [_r0] if isinstance(_r0, dict) else []
+                        except Exception as _e:  # noqa: BLE001
+                            _rows_by_sid = None
+                            _degraded_reasons.append(f"REG_GET_BULK_UNAVAILABLE: {str(_e)[:120]}")
                     for _s in (_sl_deep.get("sources") or []):
                         _sid = str(_s.get("id") or "")
                         if not _sid:
                             continue
-                        try:
-                            _rr = (_gas_get_retry(g, "reg_get", nlm_source_id=_sid, refresh="false")
-                                   or {}).get("rows") or []
-                        except Exception:  # noqa: BLE001
-                            continue
+                        if _rows_by_sid is not None:
+                            _rr = _rows_by_sid.get(_sid) or []
+                        else:
+                            try:
+                                _rr = (_gas_get_retry(g, "reg_get", nlm_source_id=_sid, refresh="false")
+                                       or {}).get("rows") or []
+                            except Exception:  # noqa: BLE001
+                                continue
                         _own_d = [r for r in _rr if str(r.get("drive_id") or "")
                                   and not str(r.get("drive_id")).startswith(_NLM_ONLY_SENTINEL_PREFIX)]
                         _sent_d = [r for r in _rr if str(r.get("drive_id") or "")
@@ -1062,10 +1149,45 @@ def _cmd_profile_doctor_impl(a) -> int:
             if _tpls_d:
                 _shared_meta_d = _base_meta_folder_id(g, profs, cfg)
                 _prof_meta_d = str(_mk_t.get("metaFolderId") or prof.get("metaFolderId") or "")
+                # r185/WP5 (PRO-04): probe qua drive_info_bulk ĐÃ PREFETCH (0 call/template, không tải
+                # nội dung chỉ để kiểm tồn tại). Location theo parents: templates-folder của profile lấy
+                # từ catalog; 'shared' resolve LƯỜI 1 lần/run chỉ khi có template ngoài profile.
+                _rec_cat_t = _cat_by_root.get(_root) or {}
+                _prof_tpl_folder = next((str(_it.get("id") or "") for _it in (_rec_cat_t.get("items") or [])
+                                         if str(_it.get("type")) == "folder"
+                                         and str(_it.get("name")) == "templates"), "")
+                def _shared_tpl_id():
+                    if not _shared_tpl_cache["resolved"]:
+                        _shared_tpl_cache["resolved"] = True
+                        try:
+                            _smi = (_gas_get_retry(g, "list", folderId=str(_shared_meta_d)) or {}).get("items") or []
+                            _shared_tpl_cache["id"] = next((str(x.get("id") or "") for x in _smi
+                                                            if str(x.get("type")) == "folder"
+                                                            and str(x.get("name")) == "templates"), "")
+                        except Exception:  # noqa: BLE001
+                            _shared_tpl_cache["id"] = ""
+                    return _shared_tpl_cache["id"]
+
                 _probe_d = {}
                 for _t_d in _tpls_d:
                     _did_d = str((_t_d or {}).get("drive_id") or "")
-                    if _did_d and _did_d not in _probe_d:
+                    if not _did_d or _did_d in _probe_d:
+                        continue
+                    if _did_d in _bulk_covered:
+                        _bi = _info_by_id.get(_did_d)
+                        if _bi is None or _bi.get("trashed"):
+                            _probe_d[_did_d] = {"exists": False, "location": "unknown", "name": ""}
+                        else:
+                            _par = set(_bi.get("parents") or [])
+                            if _prof_tpl_folder and _prof_tpl_folder in _par:
+                                _loc = "profile_templates"
+                            elif _shared_meta_d and _shared_tpl_id() and _shared_tpl_id() in _par:
+                                _loc = "shared"
+                            else:
+                                _loc = "outside"
+                            _probe_d[_did_d] = {"exists": True, "location": _loc,
+                                                "name": str(_bi.get("name") or "")}
+                    else:   # server cũ / id ngoài lô prefetch → probe cũ (degraded)
                         _probe_d[_did_d] = _template_probe(g, _did_d, _prof_meta_d, _shared_meta_d)
                 for _f_d in _template_findings(_tpls_d, _probe_d):
                     findings.append({"check": _f_d["finding"],
@@ -1086,6 +1208,8 @@ def _cmd_profile_doctor_impl(a) -> int:
            "fixable": len(fixes),
            "invariant": "LAYOUT: registry+manifest của profile nằm TRONG thư mục profile (root hoặc _meta).",
            "note": "DRY mặc định; --fix --apply move asset lạc chỗ vào _meta (fileId giữ nguyên — config không đổi)."}
+    if _degraded_reasons:   # r185/WP5: telemetry — performance gate chỉ xanh trên đường bulk
+        out["degraded_reason"] = _degraded_reasons
     if getattr(a, "plan_marker_migration", False):   # r184 (ADR-0012): DRY-only, không cấp quyền ghi
         out["marker_migration_plan"] = sorted(marker_migration_plan, key=lambda r: str(r.get("profile") or ""))
         out["marker_migration_note"] = ("DRY plan v1→v2 — KHÔNG ghi ở R1; R2 chạy profile-backfill-markers "
@@ -2024,20 +2148,19 @@ def _cmd_profile_sync_impl(a) -> int:
     findings = [r for r in rows if r.get("status") not in ("in_sync", "refused_base")]
     applied, all_ok = [], True
     if getattr(a, "apply", False):
+        # r185/WP5 (D6): tính TOÀN BỘ diff rồi ghi config NGUYÊN TỬ MỘT LẦN (trước: N lần
+        # read-modify-write + N journal run cho N profile) — output giữ thứ tự profile canonical.
+        _blocks_sync = {}
         for r in actionable:
             name = str(r.get("profile"))
-            block = (r.get("block") if r.get("status") == "new_from_marker"
-                     else {d["field"]: d["marker"] for d in (r.get("diffs") or [])})
-            cfgp = _persist_profile_config(getattr(a, "config", None), name, block)
-            got = {}
-            if cfgp:
-                _, cfg2 = _read_config_record(getattr(a, "config", None))
-                got = _profiles_from_config(cfg2).get(name) or {}
-            def _c(x):
-                return json.dumps(x, sort_keys=True, ensure_ascii=False) if isinstance(x, dict) else str(x or "")
-            ver = bool(cfgp) and all(_c(got.get(k)) == _c(v) for k, v in (block or {}).items())
-            applied.append({"profile": name, "status": r.get("status"), "config": cfgp,
-                            "written": sorted(block or {}), "verified": ver})
+            _blocks_sync[name] = (r.get("block") if r.get("status") == "new_from_marker"
+                                  else {d["field"]: d["marker"] for d in (r.get("diffs") or [])}) or {}
+        _bw = _persist_profiles_config_bulk(getattr(a, "config", None), _blocks_sync)
+        for r in actionable:
+            name = str(r.get("profile"))
+            ver = bool((_bw.get("verified") or {}).get(name))
+            applied.append({"profile": name, "status": r.get("status"), "config": _bw.get("config"),
+                            "written": sorted(_blocks_sync.get(name) or {}), "verified": ver})
             all_ok = all_ok and ver
             r["applied"] = ver
     is_apply = bool(getattr(a, "apply", False))
@@ -3237,10 +3360,65 @@ def _cmd_profile_set_meta_impl(a) -> int:
     return 0 if out["ok"] else 1
 
 
+def _catalog_to_scan(cat: dict) -> dict:
+    """PURE (r185/WP5): đổi payload `profile_catalog.v1` (server ≥2.21.2n, 1 call) về ĐÚNG shape scan
+    cũ của _discover_scan_vbthuong — consumer (_discover_classify/_profile_sync_rows/doctor) không đổi.
+    Marker: bản ĐẦU theo thứ tự server (sort name,id); MỌI id đều vào marker_file_ids (client tự phát
+    hiện DUPLICATE — server không chọn hộ, khớp doctrine #7 v1.34.30)."""
+    out_folders = []
+    for fo in (cat.get("folders") or []):
+        markers = [m for m in (fo.get("markers") or []) if str(m.get("id") or "")]
+        ids = [str(m.get("id")) for m in markers]
+        marker, merr, mfid = None, None, ""
+        if markers:
+            m0 = markers[0]
+            mfid = str(m0.get("id") or "")
+            if m0.get("error"):
+                merr = f"MARKER_PARSE_FAILED: {m0.get('error')}"
+            else:
+                try:
+                    marker = json.loads(m0.get("json_text") or "")
+                except Exception as e:  # noqa: BLE001
+                    merr = f"MARKER_PARSE_FAILED: {e}"
+        if len(set(ids)) > 1:
+            merr = f"MARKER_DUPLICATE:{','.join(ids)}"
+        out_folders.append({"id": fo.get("id"), "name": fo.get("name"),
+                            "items": fo.get("items") or [],
+                            "meta_folder_id": fo.get("meta_folder_id") or None,
+                            "marker": marker, "marker_error": merr, "marker_file_id": mfid,
+                            "marker_file_ids": ids})
+    return {"ok": True, "vbt_id": str(cat.get("folderId") or ""), "folders": out_folders,
+            "root_files": cat.get("root_files") or [], "capped": bool(cat.get("capped")),
+            "folder_total": int(cat.get("folder_total") or 0), "via": "profile_catalog"}
+
+
+def _marker_from_catalog(folder_rec: dict) -> dict:
+    """PURE (r185/WP5): folder record (shape scan) → shape kết quả _marker_read cho doctor —
+    khỏi tốn 3 call list/list/download mỗi profile khi đã có catalog."""
+    fr = folder_rec or {}
+    marker = fr.get("marker")
+    ids = [i for i in (fr.get("marker_file_ids") or []) if i]
+    merr = str(fr.get("marker_error") or "")
+    return {"found": marker is not None, "fileId": str(fr.get("marker_file_id") or ""),
+            "marker": marker, "meta_folder_id": str(fr.get("meta_folder_id") or ""),
+            "marker_file_ids": ids,
+            "error": (merr if (marker is None and ids and not merr.startswith("MARKER_DUPLICATE")) else None)}
+
+
 def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
     """B: quét Van_ban_thuong 2 cấp read-only qua GAS `list` — con trực tiếp + trong `_meta` của từng thư mục con
     (registry/manifest kiểu mới nằm trong _meta, kiểu cũ nằm thẳng trong folder). Cap thư mục quét, LOUD khi cắt.
-    P1 (v1.34.22): đọc thêm MARKER `tra_luat_profile.json` (ADR-0003) — kèm marker/marker_error/marker_file_id."""
+    P1 (v1.34.22): đọc thêm MARKER `tra_luat_profile.json` (ADR-0003) — kèm marker/marker_error/marker_file_id.
+    r185/WP5 (D3/D6): ƯU TIÊN 1 call `profile_catalog` (server ≥2.21.2n) — discover/sync về ≤2 GAS call/run,
+    KHÔNG tăng theo số profile; server cũ → fallback vòng lặp cũ (O(profile) call) + `degraded_reason`
+    (telemetry — performance gate chỉ xanh trên đường bulk)."""
+    try:
+        _cat = g.get("profile_catalog", folderId=str(vbt_id), folderCap=str(int(folder_cap)))
+    except Exception as _e:  # noqa: BLE001
+        _cat = {"ok": False, "error": f"{type(_e).__name__}: {_e}"}
+    if isinstance(_cat, dict) and _cat.get("ok") and _cat.get("schema") == "profile_catalog.v1":
+        return _catalog_to_scan(_cat)
+    _degraded = f"SERVER_NO_PROFILE_CATALOG: {str((_cat or {}).get('error') or '')[:160]}"
     top = _gas_get_retry(g, "list", folderId=vbt_id)
     items = top.get("items") or []
     root_files = [x for x in items if str(x.get("type")) != "folder"]
@@ -3276,7 +3454,8 @@ def _discover_scan_vbthuong(g, vbt_id: str, folder_cap: int = 60) -> dict:
                             "marker": marker, "marker_error": merr, "marker_file_id": mfid,
                             "marker_file_ids": marker_file_ids})
     return {"ok": True, "vbt_id": vbt_id, "folders": out_folders, "root_files": root_files,
-            "capped": len(subfolders) > folder_cap, "folder_total": len(subfolders)}
+            "capped": len(subfolders) > folder_cap, "folder_total": len(subfolders),
+            "via": "list_loop", "degraded_reason": _degraded}
 
 def _adopt_pick_assets(items: list[dict], reg_override: str = "", man_override: str = "") -> dict:
     """C (PURE, test offline): chọn registry Sheet + manifest JSON từ items (con folder + _meta). Override thắng.

@@ -3407,7 +3407,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2m"))
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2n"))   # r185/WP5: +profile_catalog +drive_info_bulk
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -16533,39 +16533,33 @@ def run() -> int:
     _t110("r184_zip_apply_no_self_replan", _c183_zip_apply_no_self_replan)
 
     def _c183_zip_apply_drift_blocks_mutation():
-        # Case B (drift): recompute lúc apply KHÁC bundle đã duyệt ⇒ PLAN_DRIFT_REPLAN_REQUIRED,
-        # KHÔNG một mutation nào (child subprocess không được gọi).
+        # Case B (drift — r185/WP6): bundle giữa DRY (user duyệt, child hash D…) và APPLY (child hash
+        # đổi thành E… — archive/nội dung/option đổi) ⇒ authorize PLAN_MISMATCH + ghi chú
+        # PLAN_DRIFT_REPLAN_REQUIRED, KHÔNG một mutation nào (child subprocess không được gọi).
+        # (r184 dùng pre-pass recompute riêng; r185 gộp về authorize — 1 extract + 1 lượt hash.)
         _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
                                                "_apply_journal_start", "_journal_append")}
-        _argvs, _n = [], {"i": 0}
+        _argvs = []
         try:
             _zi183._apply_journal_start = lambda *a, **k: "runZ183d"
             _zi183._journal_append = lambda *a, **k: None
-
-            def _fk_plan(args):   # call#1 (bundle trong _zip_apply): D…; call#2 (drift pre-pass): E…
-                _n["i"] += 1
-                return {"ok": True, "plan_hash": ("D" if _n["i"] <= 1 else "E") * 64, "json": {}}
-            _zi183._zip_child_plan_one = _fk_plan
             _zi183._run_child_tl = lambda args: (_argvs.append(list(args))
                                                  or {"ok": True, "returncode": 0, "json": {"ok": True}})
             with _tf110.TemporaryDirectory() as _d:
                 _zp = _mk_zip183(_d)
-                # bundle hash tương ứng child hash D…: tính bằng một lần _zip_plan_bundle stub cố định D
-                _sav2 = _zi183._zip_child_plan_one
+                # DRY của user: child hash D… → expected bundle hash
                 _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "D" * 64, "json": {}}
                 _expected = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
-                _zi183._zip_child_plan_one = _sav2
-                _n["i"] = 0
+                # APPLY: child plan nay ra E… (drift) → bundle hash khác expected
+                _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "E" * 64, "json": {}}
                 _bo = _io110.StringIO()
                 with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
                     _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
                                                    expected_plan_hash=_expected), mode="vbqppl")
                 _o = json.loads(_bo.getvalue())
-            _r0 = (_o.get("results") or [{}])[0]
             return (_rc != 0 and _o.get("ok") is False and not _argvs
-                    and _r0.get("error") == "PLAN_DRIFT_REPLAN_REQUIRED"
-                    and _r0.get("recorded_plan_hash") == "D" * 64
-                    and _r0.get("recomputed_plan_hash") == "E" * 64)
+                    and _o.get("step") == "apply_authorization"
+                    and "PLAN_DRIFT_REPLAN_REQUIRED" in str(_o.get("drift") or ""))
         finally:
             for _k, _v in _sv.items():
                 setattr(_zi183, _k, _v)
@@ -16582,6 +16576,316 @@ def run() -> int:
         return (_rc == 0 and _o.get("ok") is True and "note_bundle" in _o
                 and _o.get("schema") != "ingest_zip_bundle.v1")
     _t110("r184_zip_dry_no_cat_keeps_classify", _c183_zip_dry_no_cat_keeps_classify)
+
+    # ═══ r185 — WP5/WP6 perf (kế hoạch review p9): bulk Profile ≤2/≤3/≤4 GAS call (D6), fallback
+    # degraded; sync ghi config nguyên tử 1 lần; ZIP 1 extract/invocation + D7 RAM/worker budget;
+    # registry mutation 1 lane trong process (ING-05). ═══
+    def _mk_catalog185(n_profiles, n_tpl=0, dup_marker=False, bad_json=False):
+        folders = []
+        for i in range(1, n_profiles + 1):
+            mk = {"schema": "tra_luat_profile.v1", "profile": f"p{i:02d}", "rootFolderId": f"F{i:02d}",
+                  "metaFolderId": f"M{i:02d}", "notebookId": f"nb{i:02d}", "registryDocId": f"R{i:02d}",
+                  "manifestId": f"Mf{i:02d}", "categories": "own", "manifestScope": "own",
+                  "templates": [{"id": f"t{j}", "drive_id": f"TPL{i:02d}_{j}"} for j in range(n_tpl)]}
+            markers = [{"id": f"mk{i:02d}", "json_text": ("{hong" if bad_json else json.dumps(mk)), "error": None}]
+            if dup_marker:
+                markers.append({"id": f"mk{i:02d}b", "json_text": json.dumps(mk), "error": None})
+            folders.append({"id": f"F{i:02d}", "name": f"p{i:02d}",
+                            "meta_folder_id": f"M{i:02d}",
+                            "items": [{"id": f"M{i:02d}", "name": "_meta", "mime": "x", "size": 0, "type": "folder"},
+                                      {"id": f"T{i:02d}", "name": "templates", "mime": "x", "size": 0, "type": "folder"},
+                                      {"id": f"mk{i:02d}", "name": "tra_luat_profile.json", "mime": "application/json",
+                                       "size": 1, "type": "file"}],
+                            "markers": markers})
+        return {"ok": True, "schema": "profile_catalog.v1", "folderId": "VBT185",
+                "folder_total": n_profiles, "capped": False, "folders": folders, "root_files": []}
+
+    class _FkG185:
+        """Fake GAS đếm call theo action; new=True mô phỏng server 2.21.2n (catalog/info_bulk/reg_get_bulk)."""
+        def __init__(self, catalog=None, new=True, n_sources=0):
+            self.calls, self.catalog, self.new, self.n_sources = [], catalog, new, n_sources
+        def counts(self):
+            from collections import Counter
+            return Counter(a for a, _ in self.calls)
+        def get(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            if action == "bootstrap":
+                return {"ok": True, "vanBanThuongId": "VBT185"}
+            if action == "profile_catalog":
+                return self.catalog if (self.new and self.catalog) else {"ok": False, "error": "Action không hỗ trợ: profile_catalog"}
+            if action == "drive_info_bulk":
+                if not self.new:
+                    return {"ok": False, "error": "Action không hỗ trợ: drive_info_bulk"}
+                ids = json.loads(kw.get("ids") or "[]")
+                return {"ok": True, "schema": "drive_info_bulk.v1", "count": len(ids),
+                        "results": [{"id": i, "ok": True, "name": f"n_{i}",
+                                     "mime": ("application/vnd.google-apps.spreadsheet" if i.startswith("R")
+                                              else "application/json"),
+                                     "size": 1, "parents": ([f"T{i[3:5]}"] if i.startswith("TPL") else ["M00"]),
+                                     "trashed": False, "modifiedTime": "2026-01-01T00:00:00Z"} for i in ids]}
+            if action == "reg_get_bulk":
+                if not self.new:
+                    return {"ok": False, "error": "Action không hỗ trợ: reg_get_bulk"}
+                keys = json.loads(kw.get("keys") or "[]")
+                return {"ok": True, "key_field": kw.get("key_field"), "count": len(keys),
+                        "rows": [{"drive_id": f"gd_{k}", "nlm_source_id": k, "row_kind": "own"} for k in keys]}
+            if action == "reg_get":
+                return {"ok": True, "rows": [{"drive_id": f"gd_{kw.get('nlm_source_id')}",
+                                              "nlm_source_id": kw.get("nlm_source_id")}]}
+            if action == "list":
+                return {"ok": True, "items": []}
+            if action == "info":
+                return {"ok": True, "file": {"id": kw.get("fileId"), "mimeType": "application/json",
+                                             "parents": ["X"], "trashed": False, "name": "f"}}
+            return {"ok": True}
+        def post(self, action, **kw):
+            self.calls.append((action, dict(kw)))
+            return {"ok": True}
+
+    def _c185_catalog_to_scan_pure():
+        _s = _TL_MODULE._catalog_to_scan(_mk_catalog185(2))
+        _d = _TL_MODULE._catalog_to_scan(_mk_catalog185(1, dup_marker=True))
+        _b = _TL_MODULE._catalog_to_scan(_mk_catalog185(1, bad_json=True))
+        return (_s["ok"] and len(_s["folders"]) == 2 and _s["via"] == "profile_catalog"
+                and (_s["folders"][0]["marker"] or {}).get("profile") == "p01"
+                and _s["folders"][0]["marker_file_ids"] == ["mk01"]
+                and str(_d["folders"][0]["marker_error"] or "").startswith("MARKER_DUPLICATE:")
+                and len(_d["folders"][0]["marker_file_ids"]) == 2
+                and _b["folders"][0]["marker"] is None
+                and "MARKER_PARSE_FAILED" in str(_b["folders"][0]["marker_error"]))
+    _t110("r185_catalog_to_scan_pure", _c185_catalog_to_scan_pure)
+
+    def _c185_discover_scan_call_budget():
+        # D6: scan = ĐÚNG 1 call profile_catalog, KHÔNG tăng theo 1/10/50 profile.
+        for _n in (1, 10, 50):
+            _g = _FkG185(catalog=_mk_catalog185(_n))
+            _s = _TL_MODULE._discover_scan_vbthuong(_g, "VBT185", folder_cap=60)
+            if not (len(_g.calls) == 1 and _g.calls[0][0] == "profile_catalog"
+                    and len(_s["folders"]) == _n and _s.get("via") == "profile_catalog"):
+                return False
+        # server CŨ: fallback vòng lặp cũ + degraded_reason, KHÔNG vỡ shape
+        _g_old = _FkG185(new=False)
+        _s_old = _TL_MODULE._discover_scan_vbthuong(_g_old, "VBT185", folder_cap=60)
+        return (_s_old["ok"] and _s_old.get("via") == "list_loop"
+                and "SERVER_NO_PROFILE_CATALOG" in str(_s_old.get("degraded_reason"))
+                and _g_old.counts()["profile_catalog"] == 1)
+    _t110("r185_discover_scan_call_budget", _c185_discover_scan_call_budget)
+
+    def _c185_doctor_shallow_budget_50():
+        # D6: doctor shallow 50 profile = ≤3 GAS call (bootstrap + profile_catalog + drive_info_bulk).
+        _n50 = 50
+        _cfg185 = {"schema": 2, "profiles": {"vbqppl": {"rootFolderId": "rB"},
+                                             **{f"p{i:02d}": {"rootFolderId": f"F{i:02d}", "metaFolderId": f"M{i:02d}",
+                                                              "notebookId": f"nb{i:02d}", "registryDocId": f"R{i:02d}",
+                                                              "manifestId": f"Mf{i:02d}", "categories": "own",
+                                                              "manifestScope": "own"} for i in range(1, _n50 + 1)}}}
+        _g = _FkG185(catalog=_mk_catalog185(_n50))
+        _keys = ("_read_config_record", "load_creds", "_gas")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE._read_config_record = lambda *a, **k: ("cfg185", _cfg185)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _g
+            _bo = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                _rc = _TL_MODULE.cmd_profile_doctor(argparse.Namespace(
+                    config=None, profile=None, target_profile="", deep=False, limit=0, skip=0,
+                    fix=False, plan_marker_migration=False, apply=False, json=True))
+            _o = json.loads(_bo.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+        _c = _g.counts()
+        _total_gas = sum(_c.values())
+        return (_rc in (0, 1) and len(_o.get("profiles_checked") or []) == _n50
+                and _total_gas <= 3 and _c["profile_catalog"] == 1 and _c["drive_info_bulk"] == 1
+                and _c.get("info", 0) == 0 and _c.get("list", 0) == 0 and _c.get("download", 0) == 0
+                and "degraded_reason" not in _o)
+    _t110("r185_doctor_shallow_budget_50_le_3call", _c185_doctor_shallow_budget_50)
+
+    def _c185_doctor_deep_budget_300src_50tpl():
+        # D6: deep 1 profile, 300 nguồn + 50 template = ≤4 GAS + 1 NLM; 0 reg_get lẻ, 0 probe/template.
+        _cfgd = {"schema": 2, "profiles": {"vbqppl": {"rootFolderId": "rB"},
+                                           "p01": {"rootFolderId": "F01", "metaFolderId": "M01",
+                                                   "notebookId": "nb01", "registryDocId": "R01",
+                                                   "manifestId": "Mf01", "categories": "own",
+                                                   "manifestScope": "own"}}}
+        _g = _FkG185(catalog=_mk_catalog185(1, n_tpl=50))
+
+        class _NC185:
+            calls = 0
+            def source_list(self, nb):
+                _NC185.calls += 1
+                return {"ok": True, "sources": [{"id": f"sid{i:03d}"} for i in range(300)]}
+        _keys = ("_read_config_record", "load_creds", "_gas", "_imp", "apply_profile_offline",
+                 "_base_meta_folder_id")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE._read_config_record = lambda *a, **k: ("cfgd", _cfgd)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _g
+            _TL_MODULE._base_meta_folder_id = lambda *a, **k: "M00"
+            _sav_imp = _sav["_imp"]
+            _TL_MODULE._imp = lambda nm: _NC185() if nm == "nlm_cli" else _sav_imp(nm)
+            _bo = _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                _rc = _TL_MODULE.cmd_profile_doctor(argparse.Namespace(
+                    config=None, profile=None, target_profile="p01", deep=True, limit=0, skip=0,
+                    fix=False, plan_marker_migration=False, apply=False, json=True))
+            _o = json.loads(_bo.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+        _c = _g.counts()
+        return (_rc in (0, 1) and sum(_c.values()) <= 4 and _NC185.calls == 1
+                and _c["reg_get_bulk"] == 1 and _c.get("reg_get", 0) == 0
+                and _c.get("download", 0) == 0
+                and not [f for f in (_o.get("findings") or []) if f.get("check") == "NLM_SOURCE_UNREGISTERED"])
+    _t110("r185_doctor_deep_budget_300src_50tpl", _c185_doctor_deep_budget_300src_50tpl)
+
+    def _c185_sync_bulk_single_write():
+        # D6: profile-sync --apply ghi config NGUYÊN TỬ MỘT LẦN cho N block (trước: N lần).
+        _writes = []
+        _sav_wa = _TL_MODULE._write_json_atomic
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _cfgp = _P110(_d) / "tra_luat_config.v2.json"
+                _cfgp.write_text(json.dumps({"schema": 2, "webappUrl": "https://x/exec", "token": "t",
+                                             "profiles": {"vbqppl": {"rootFolderId": "rB"}}},
+                                            ensure_ascii=False), encoding="utf-8")
+                def _wa(p, d):
+                    _writes.append(str(p))
+                    return _sav_wa(p, d)
+                _TL_MODULE._write_json_atomic = _wa
+                _bw = _TL_MODULE._persist_profiles_config_bulk(str(_cfgp), {
+                    "a1": {"rootFolderId": "FA", "notebookId": "nA"},
+                    "a2": {"rootFolderId": "FB"},
+                    "a3": {"rootFolderId": "FC", "registryDocId": "RC"}})
+                _rb = json.loads(_cfgp.read_text(encoding="utf-8"))
+            return (_bw["ok"] is True and len(_writes) == 1
+                    and all(_bw["verified"].get(k) for k in ("a1", "a2", "a3"))
+                    and (_rb["profiles"]["a1"]["notebookId"] == "nA")
+                    and (_rb["profiles"]["vbqppl"]["rootFolderId"] == "rB")   # không đụng block khác
+                    and _TL_MODULE._persist_profiles_config_bulk(str(_cfgp), {})["ok"] is True)
+        finally:
+            _TL_MODULE._write_json_atomic = _sav_wa
+    _t110("r185_sync_bulk_single_write", _c185_sync_bulk_single_write)
+
+    def _c185_zip_workers_effective_pure():
+        _f = _zi183._zip_workers_effective
+        _sv_env = os.environ.get("TL_INGEST_MEMORY_BUDGET_MB")
+        try:
+            os.environ["TL_INGEST_MEMORY_BUDGET_MB"] = "256"
+            _r10 = _f(4, [10 * 1024 * 1024])          # est ≈ 57MiB → fit 4 → eff 4
+            _r35 = _f(4, [35 * 1024 * 1024])          # est ≈ 119,5MiB → fit 2 → eff 2
+            _r200 = _f(4, [200 * 1024 * 1024])        # est ≈ 532MiB > 256 → eff 0 (DỪNG Ở PLAN)
+            _rcap = _f(8, [1024])                     # hard cap 4 chặn override
+            os.environ["TL_INGEST_MEMORY_BUDGET_MB"] = "1024"
+            _r200b = _f(4, [200 * 1024 * 1024])       # budget 1024 → fit 1
+            os.environ["TL_INGEST_MEMORY_BUDGET_MB"] = "rac"
+            _rjunk = _f(2, [1024])                    # giá trị rác → default 256
+        finally:
+            if _sv_env is None:
+                os.environ.pop("TL_INGEST_MEMORY_BUDGET_MB", None)
+            else:
+                os.environ["TL_INGEST_MEMORY_BUDGET_MB"] = _sv_env
+        return (_r10["workers_effective"] == 4 and _r35["workers_effective"] == 2
+                and _r200["workers_effective"] == 0 and _rcap["workers_effective"] == 4
+                and _rcap["hard_cap"] == 4 and _r200b["workers_effective"] == 1
+                and _rjunk["memory_budget_mb"] == 256
+                and _r35["peak_memory_estimate_bytes"] <= 256 * 1024 * 1024)
+    _t110("r185_zip_workers_effective_pure", _c185_zip_workers_effective_pure)
+
+    def _c185_zip_apply_single_extraction():
+        # WP6/ING-03: apply = ĐÚNG 1 lần extract+hash member (trước r185: 2 extract + pre-pass).
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+                                               "_apply_journal_start", "_journal_append",
+                                               "_safe_extract_zip_for_ingest")}
+        _n_extract = {"i": 0}
+        try:
+            _zi183._apply_journal_start = lambda *a, **k: "runZ185"
+            _zi183._journal_append = lambda *a, **k: None
+            _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "F" * 64, "json": {}}
+            _zi183._run_child_tl = lambda args: {"ok": True, "returncode": 0, "json": {"ok": True}}
+            _sav_ex = _sv["_safe_extract_zip_for_ingest"]
+            def _ex(*a, **k):
+                _n_extract["i"] += 1
+                return _sav_ex(*a, **k)
+            _zi183._safe_extract_zip_for_ingest = _ex
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _exp = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
+                _n_extract["i"] = 0
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
+                                                   expected_plan_hash=_exp), mode="vbqppl")
+                _o = json.loads(_bo.getvalue())
+            return (_rc == 0 and _o.get("ok") is True and _n_extract["i"] == 1
+                    and (_o.get("resources") or {}).get("workers_effective", 0) >= 1)
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r185_zip_apply_single_extraction", _c185_zip_apply_single_extraction)
+
+    def _c185_zip_insufficient_memory_blocks():
+        # D7: không đủ RAM cho 1 worker → DỪNG TRƯỚC mutation với lỗi hành động được.
+        _sv = {k: getattr(_zi183, k) for k in ("_zip_child_plan_one", "_run_child_tl",
+                                               "_apply_journal_start", "_journal_append")}
+        _sv_base = _zi183._INGEST_WORKER_BASE_BYTES
+        _argvs = []
+        try:
+            _zi183._apply_journal_start = lambda *a, **k: "runZ185m"
+            _zi183._journal_append = lambda *a, **k: None
+            _zi183._zip_child_plan_one = lambda args: {"ok": True, "plan_hash": "G" * 64, "json": {}}
+            _zi183._run_child_tl = lambda args: (_argvs.append(list(args)) or {"ok": True, "json": {"ok": True}})
+            with _tf110.TemporaryDirectory() as _d:
+                _zp = _mk_zip183(_d)
+                _exp = _zi183._zip_plan_bundle(_ns183(_zp), mode="vbqppl", profile="", cat="01")["plan_hash"]
+                _zi183._INGEST_WORKER_BASE_BYTES = 8 * 1024 * 1024 * 1024   # ép est > mọi budget
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _zi183._zip_apply(_ns183(_zp, apply=True, confirm="yes",
+                                                   expected_plan_hash=_exp), mode="vbqppl")
+                _o = json.loads(_bo.getvalue())
+            return (_rc == 2 and _o.get("error") == "INSUFFICIENT_MEMORY_BUDGET" and not _argvs
+                    and "TL_INGEST_MEMORY_BUDGET_MB" in str(_o.get("note")))
+        finally:
+            _zi183._INGEST_WORKER_BASE_BYTES = _sv_base
+            for _k, _v in _sv.items():
+                setattr(_zi183, _k, _v)
+    _t110("r185_zip_insufficient_memory_blocks", _c185_zip_insufficient_memory_blocks)
+
+    def _c185_reg_lane_serializes():
+        # ING-05: mutation registry qua funnel = MỘT LANE — 8 thread không bao giờ chồng nhau.
+        import threading as _th185
+        _state = {"in": 0, "max": 0, "err": 0}
+
+        class _FkGReg:
+            def post(self, action, **kw):
+                _state["in"] += 1
+                _state["max"] = max(_state["max"], _state["in"])
+                import time as _t185
+                _t185.sleep(0.005)
+                _state["in"] -= 1
+                return {"ok": True, "patched": 1}
+            def get(self, action, **kw):
+                return {"ok": True, "rows": []}
+        _g = _FkGReg()
+
+        def _work():
+            try:
+                _TL_MODULE._verified_reg_write(_g, [{"drive_id": "d185", "name": "x"}], "name")
+            except Exception:  # noqa: BLE001
+                _state["err"] += 1
+        _ts = [_th185.Thread(target=_work) for _ in range(8)]
+        for _t in _ts:
+            _t.start()
+        for _t in _ts:
+            _t.join()
+        return _state["max"] == 1 and _state["err"] == 0 and _TL_MODULE._REG_LANE is not None
+    _t110("r185_reg_lane_serializes", _c185_reg_lane_serializes)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

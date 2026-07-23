@@ -12,6 +12,7 @@ import shutil     # noqa: F401
 import subprocess # noqa: F401
 import sys        # noqa: F401
 import tempfile   # noqa: F401
+import threading  # noqa: F401
 import time       # noqa: F401
 import zipfile    # noqa: F401
 from pathlib import Path  # noqa: F401
@@ -146,7 +147,31 @@ def _verify_reg_result(rb: dict, expected: int) -> dict:
 _REG_BULK_READBACK_MAX = 3   # v1.34.34: batch ≤N item mới readback field-level (cost +1 reg_get/item ~2-3s)
 
 
+_REG_LANE = threading.RLock()   # r185/WP6 (ING-05/D7): registry mutation = MỘT LANE trong process
+
+
 def _verified_reg_write(g, items: list, cols) -> dict:
+    """r185/WP6 (ING-05): funnel mutation registry đi MỘT LANE tuần tự trong process (RLock — reentrant
+    vì _journaled_reg_write gọi lồng _verified_reg_write). GIỚI HẠN GHI NHẬN: lane này KHÔNG phủ child
+    SUBPROCESS của ingest-zip (mỗi child một process — row khác nhau nên an toàn; cùng identity đã có
+    ingest_claim F-04 chặn); lane xuyên-process = việc WP7 engine in-process."""
+    with _REG_LANE:
+        return _verified_reg_write_unlocked(g, items, cols)
+
+
+def _journaled_reg_write(run_id: str, g, items: list, cols, key_field: str = "drive_id", before_by_key: dict | None = None) -> dict:
+    """r185/WP6 (ING-05): xem _verified_reg_write — cùng lane."""
+    with _REG_LANE:
+        return _journaled_reg_write_unlocked(run_id, g, items, cols, key_field=key_field, before_by_key=before_by_key)
+
+
+def _verified_reg_upsert(g, payload: dict) -> dict:
+    """r185/WP6 (ING-05): xem _verified_reg_write — cùng lane."""
+    with _REG_LANE:
+        return _verified_reg_upsert_unlocked(g, payload)
+
+
+def _verified_reg_write_unlocked(g, items: list, cols) -> dict:
     """Bọc reg_bulk AN TOÀN (Pha 1 sẽ thay mọi g.post('reg_bulk',...) trực tiếp): (1) validate cột ∈ schema TRƯỚC ghi
     (chống cột lạ bị bỏ im lặng); (2) sau ghi đối chiếu patched==len(items). Trả verify dict. KHÔNG raise.
     v1.34.34 (THỰC CHỨNG lô song song 2026-07-12): 2 process reg_bulk CÙNG LÚC → race last-write-wins trên Sheet
@@ -252,7 +277,7 @@ def _apply_journal_start(cmd: str, meta: dict | None = None) -> str:
     return run_id
 
 
-def _journaled_reg_write(run_id: str, g, items: list, cols, key_field: str = "drive_id", before_by_key: dict | None = None) -> dict:
+def _journaled_reg_write_unlocked(run_id: str, g, items: list, cols, key_field: str = "drive_id", before_by_key: dict | None = None) -> dict:
     """Ghi registry AN TOÀN + CÓ NHẬT KÝ: (1) journal `intent{before}` TRƯỚC (before=giá trị cũ để undo); (2) verified
     reg-write (validate cột + patched≥expected); (3) journal `commit{verify}` SAU. Trả verify dict (verified/patched/…).
     KHÔNG raise. Tổng quát hoá đường ghi cho MỌI lệnh mutate (Pha 1)."""
@@ -284,7 +309,7 @@ def _journaled_reg_write(run_id: str, g, items: list, cols, key_field: str = "dr
     return v
 
 
-def _verified_reg_upsert(g, payload: dict) -> dict:
+def _verified_reg_upsert_unlocked(g, payload: dict) -> dict:
     """Bọc reg_upsert AN TOÀN (cho khóa immutable: sohieu/goc/name — reg_bulk bỏ IM LẶNG): (1) validate field ghi ∈ schema
     (chống cột lạ); (2) sau ghi verify = `ok` (upsert ĐƯỢC CHẤP NHẬN). ⚠ `updated=False` = giá trị ĐÃ ĐÚNG (idempotent)
     → THÀNH CÔNG, KHÔNG phải hụt (chống báo động giả như reg_bulk patched=0). `changed`=đã thực sự đổi (thông tin).

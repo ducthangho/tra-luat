@@ -1,9 +1,9 @@
 # tra-luat — HỢP ĐỒNG API SỐNG (webapp Apps Script)
 
-> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2m`** · đã xác minh `ping.version=2.21.2m`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2l (regen2 profile-own scope + blowup guard + row_kind + claims F-04/F-08) ⊕ export `row_kind` RAW (D3 v1.34.55); `tl.py EXPECT_VERSION=2.21.2m`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
+> **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2n`** · đã xác minh `ping.version=2.21.2n`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2l (regen2 profile-own scope + blowup guard + row_kind + claims F-04/F-08) ⊕ export `row_kind` RAW (D3 v1.34.55); `tl.py EXPECT_VERSION=2.21.2n`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
 > **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema`. Nếu KHÁC
-> `2.21.2m`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
-> `Code.2.21.2m.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
+> `2.21.2n`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
+> `Code.2.21.2n.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
 > nhãn cũ, KHÔNG phải phiên bản deploy; nguồn sự thật = `ping.version`.)
 >
 > **Slot theo notebook (LIVE từ 2.21.2g):** `nlm_slots`/`nlm_preflight`/`nlm_dedup` đếm theo
@@ -181,6 +181,8 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `register` | GET | `fileId` | `name, mime, sha256` | `ok, fileId, registered` (chữ ký cũ; ghi vào sheet) |
 | `ingest_claim` | **POST** | `run_id`; `keys[]` (mảng `identity_hash`) và/hoặc `release_keys[]` | `drive_ids[]` (song song `keys`, chỉ để lưu tham khảo) | `ok, run_id, results:[{identity_hash,granted,reason,source_id?}], granted, denied, released[], release_failed[]` |
 | `reg_get_bulk` | GET/POST | `keys[]` | `key_field` (`'drive_id'`\|`'nlm_source_id'`, mặc định `drive_id`), `commit_claims[]` (`[{identity_hash,source_id,run_id}]`) | `ok, key_field, count, rows[]` (NGUYÊN THỨ TỰ `keys`, không khớp → `null`; TOÀN BỘ 27 `REG_COLS_`/dòng) + `committed[], commit_failed[]` nếu có `commit_claims` |
+| `profile_catalog` | GET | `folderId` (vanBanThuongId) | `folderCap` (mặc định 60, trần 200) | `ok, schema='profile_catalog.v1', folder_total, capped, folders[]` (`{id,name,meta_folder_id,items[],markers[{id,json_text,error}]}` — items = con folder ∪ con `_meta`, sort name→id; MỌI bản marker trùng đều liệt kê, client tự phát hiện DUPLICATE), `root_files[]` — v2.21.2n (r185/WP5): 1 call thay ~3×N call discover/doctor |
+| `drive_info_bulk` | GET/POST | `ids[]` (JSON array, ≤200) | — | `ok, schema='drive_info_bulk.v1', count, results[]` (`{id,ok,name,mime,size,parents[],trashed,modifiedTime}` — GIỮ THỨ TỰ input, lỗi per-item không phá lô) — v2.21.2n (r185/WP5): probe template/asset theo lô |
 
 > **v2.21.2l (F-04/F-08 — ĐÃ DEPLOY, LIVE trong 2.21.2m; xem CHANGELOG v1.34.52/55):** `ingest_claim` là
 > reservation identity XUYÊN HOST (Sheet tab `claims` riêng, TTL 5 phút) — acquire TRƯỚC `source_add`, chống 2

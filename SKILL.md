@@ -15,11 +15,11 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.14 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.15 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
-> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2m`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
+> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2n`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
 > - **`references/RUNBOOK.md`** — trình tự khởi động + cổng vận hành (đánh số, tất định).
 > - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
 >
@@ -239,7 +239,7 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 - **Tra cứu/Instruction:** `tra_cuu.py` · `keywords.py` · `verify_deep.py` · `gen_instructions.py` (sinh/audit Instruction có `SKILL_OF_RECORD` + external-ingest gate).
 
 ## 8. APPS SCRIPT WEBAPP
-Target contract = **2.21.2m** (`Code.2.21.2m.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
+Target contract = **2.21.2n** (`Code.2.21.2n.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
 - **`references/Code.2.21.2m.gs`:** như 2.21.2l (Cách B/`row_kind`, manifestScope, claims F-04/F-08) + export `row_kind` RAW (bỏ default 'own' — manifest == Sheet == reg_get; ĐẾM corpus/own GIỮ blank→own).
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
 - Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE + target `Code.2.21.2*.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.

@@ -456,6 +456,63 @@ def _persist_profile_config(config_path: str | None, name: str, prof: dict) -> s
         return None
 
 
+def _persist_profiles_config_bulk(config_path: str | None, blocks: dict) -> dict:
+    """r185/WP5 (D6 — profile-sync): ghi NHIỀU block profile trong MỘT lần read-modify-write nguyên tử
+    (trước: _persist_profile_config ×N = N lần đọc/ghi file + N journal run). blocks = {name: {field: value}}.
+    Cùng semantics merge (chỉ set field CÓ giá trị, không xoá field cũ) + journal MỘT run (intent per profile,
+    before đầy đủ) + readback verify per profile. Trả {ok, config, verified: {name: bool}}."""
+    blocks = {str(k): dict(v) for k, v in (blocks or {}).items() if isinstance(v, dict)}
+    if not blocks:
+        return {"ok": True, "config": None, "verified": {}}
+    target, data, err = _mutable_config_target(config_path)
+    if target is None or err or not isinstance(data, dict):
+        return {"ok": False, "config": None, "verified": {k: False for k in blocks}}
+    try:
+        profs = data.get("profiles") if isinstance(data.get("profiles"), dict) else {}
+        _rid = None
+        try:
+            _rid = _apply_journal_start("config-write", {"target": str(target),
+                                                         "profile_blocks": sorted(blocks)})
+        except Exception:  # noqa: BLE001
+            _rid = None
+        expected = {}
+        for name in sorted(blocks):
+            cur = profs.get(name) if isinstance(profs.get(name), dict) else {}
+            _before = dict(cur)
+            cur.update({k: v for k, v in blocks[name].items() if v})
+            profs[name] = cur
+            expected[name] = dict(cur)
+            if _rid:
+                try:
+                    _journal_append(_rid, {"t": "intent", "op": "config_write", "key": name,
+                                           "key_field": "profile",
+                                           "set": {k: v for k, v in blocks[name].items() if v},
+                                           "before": _before})
+                except Exception:  # noqa: BLE001
+                    pass
+        data["profiles"] = profs
+        _write_json_atomic(target, data)   # MỘT lần ghi nguyên tử cho TOÀN BỘ diff
+        verified = {}
+        try:
+            _rb = json.loads(target.read_text(encoding="utf-8"))
+            _rb_profs = _rb.get("profiles") or {}
+            for name in blocks:
+                verified[name] = _rb_profs.get(name) == expected.get(name)
+        except Exception:  # noqa: BLE001
+            verified = {k: False for k in blocks}
+        if _rid:
+            for name in sorted(blocks):
+                try:
+                    _journal_append(_rid, {"t": "commit", "op": "config_write", "key": name,
+                                           "ok": bool(verified.get(name)),
+                                           "verify": {"readback_match": bool(verified.get(name))}})
+                except Exception:  # noqa: BLE001
+                    pass
+        return {"ok": all(verified.values()), "config": str(target), "verified": verified}
+    except Exception:  # noqa: BLE001
+        return {"ok": False, "config": None, "verified": {k: False for k in blocks}}
+
+
 def _read_config_record(config_path: str | None = None) -> tuple[str | None, dict]:
     """Đọc config-of-record theo cùng thứ tự load_creds, nhưng KHÔNG đòi webapp token."""
     for p in _config_candidates(config_path):

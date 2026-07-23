@@ -318,6 +318,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.60 ADR-5) NLM chết → DỪNG rc=2 (fail-closed) thay vì tự chuyển --no-nlm-add (v1.34.54)")
     p.add_argument("--skip-live-check", dest="skip_live_check", action="store_true",
                    help="(v1.29.3) BỎ cổng dedup-live trước nlm add (mặc định DỪNG nếu title đã LIVE / không liệt kê được)")
+    p.add_argument("--replace-sohieu", dest="replace_sohieu", action="store_true",
+                   help="(F1 r191) THAY BẢN có chủ đích: cho qua cổng dedup số hiệu LIVE (lỏng-năm) khi số hiệu "
+                        "đã có dòng corpus-effective — in dòng cũ + chuỗi hạ bản sau nạp (mặc định CHẶN rc=2)")
     # v1.34.33 (benchmark 2026-07-12: settle-wait = ~50% của 238s/file): KHÔNG chờ nguồn settle sau `nlm source add`
     # — source_id có NGAY từ response nên reg_link vẫn ghi đủ; settle diễn ra ngầm phía NLM. Post-add dup-check bị
     # BỎ QUA khi no-wait (nguồn có thể chưa liệt kê được — check sẽ âm tính giả). Nạp LÔ xong chạy `tl nlm-reconcile`

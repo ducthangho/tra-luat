@@ -206,6 +206,19 @@ def _ingest_dedup_title_key(x) -> str:
     return re.sub(r"[\s_\-]+", " ", _strip_accents(str(x or "")).lower()).strip()
 
 
+def _ingest_dedup_sohieu_live(sohieu: str, entries: list) -> list:
+    """F1 r191 (PURE, đề xuất #4 — bẫy 158/159 23-07): các dòng registry TRÙNG SỐ HIỆU với `sohieu` theo
+    khoá LỎNG-NĂM (`_sohieu_loose`: '158/2025/NĐ-CP' ≡ '158-2025-ND-CP' ≡ biến thể thiếu năm) VÀ đang
+    corpus-effective (`_entry_is_corpus_effective` — kể cả row_kind=overflow dù corpus=false). So
+    BẰNG-KHOÁ tuyệt đối, KHÔNG substring — '29-2025' không bắt oan '129-2025'. Caller tự loại dòng
+    của CHÍNH nguồn đang nạp (--drive-id/resume)."""
+    key = _sohieu_loose(str(sohieu or ""))
+    if not key:
+        return []
+    return [e for e in (entries or [])
+            if _sohieu_loose(_sohieu_key_entry(e)) == key and _entry_is_corpus_effective(e)]
+
+
 def _ingest_missing_dedup_live(targets: list, live_sources: list) -> tuple[list, list, int]:
     """PURE (S13 idempotency — chống trùng): đối chiếu target với nguồn LIVE THẬT trên notebook đích. 3 TẦNG khớp:
     (1) Drive fileId (`_nlm_source_drive_id`); (2) FALLBACK số hiệu DUY NHẤT (chống VBHN reuse false-link);
@@ -768,7 +781,9 @@ def _ingest_target(g, sohieu: str, name: str):
     # 'TL_OVERFLOW_NOTEBOOK_ID' bị đẩy thẳng làm target → LIVE_SOURCE_LIST_FAILED/'nlm login' oan SAU side-effect.
     if (not overflow) or overflow == "TL_OVERFLOW_NOTEBOOK_ID" or "-" not in overflow:
         try:
-            overflow = _discover_overflow_from_registry(_manifest_entries(refresh=False), base)
+            # F2 r191: heal_dirty=False — discovery overflow là đọc ADVISORY best-effort, không phải
+            # resolve theo số hiệu ⇒ không ép refresh LIVE khi marker bẩn (giữ hermetic + rẻ).
+            overflow = _discover_overflow_from_registry(_manifest_entries(refresh=False, heal_dirty=False), base)
         except Exception:  # noqa: BLE001
             overflow = ""
     if not overflow:
@@ -1945,6 +1960,41 @@ def _profile_dry_gate_soften(gate: dict, suffix: str, has_text_file: bool) -> di
     return g2
 
 
+_PDF_IMAGE_CHARS_PER_PAGE = 100   # F4 r191: dưới ngưỡng ⇒ PDF ảnh (đo 23-07: 4 PDF 'ký số' ~12-37 ký tự/trang)
+
+
+def _pdf_image_verdict(chars: int, pages: int, threshold: int = _PDF_IMAGE_CHARS_PER_PAGE) -> dict:
+    """F4 r191 (PURE): phân xử PDF ảnh theo MẬT ĐỘ text-layer (ký tự không-trắng / trang). pages<=0 →
+    unknown=True (KHÔNG kết luận — thiếu pdftotext/không đếm được trang thì không đoán); < threshold ⇒
+    pdf_image=True (PDF scan/ảnh — text layer chỉ còn metadata chữ ký số)."""
+    if pages <= 0:
+        return {"pdf_image": False, "unknown": True, "chars": int(chars), "pages": int(pages),
+                "chars_per_page": None, "threshold": int(threshold)}
+    cpp = chars / pages
+    return {"pdf_image": cpp < threshold, "unknown": False, "chars": int(chars), "pages": int(pages),
+            "chars_per_page": round(cpp, 1), "threshold": int(threshold)}
+
+
+def _pdf_text_layer_stats(path: str) -> dict:
+    """F4 r191 (IO): đo text-layer PDF local lúc lập plan — text qua `_read_local_text_for_analysis`
+    (pdftotext -layout), số trang đếm từ form-feed \\f của chính output (pdftotext phát 1 \\f/trang, kể cả
+    trang trắng); fallback đếm '/Type /Page' trong byte PDF. Trả verdict `_pdf_image_verdict` + warnings."""
+    try:
+        _txt, _warns = _read_local_text_for_analysis(Path(path))
+    except Exception as _e:  # noqa: BLE001
+        _txt, _warns = "", [f"PDF_PROBE_ERROR:{type(_e).__name__}"]
+    pages = _txt.count("\f") if _txt else 0
+    if pages <= 0:
+        try:
+            pages = len(re.findall(rb"/Type\s*/Page(?![a-zA-Z])", Path(path).read_bytes()))
+        except Exception:  # noqa: BLE001
+            pages = 0
+    chars = len(re.sub(r"\s", "", _txt or ""))
+    v = _pdf_image_verdict(chars, pages)
+    v["warnings"] = list(_warns or [])
+    return v
+
+
 def _ingest_local_ocr_gate(source_quality: str, ocr_verified: bool) -> dict:
     """r180 S1 (PURE, test offline): cổng OCR đường corpus NỀN — mirror vế ocr_ok của
     _ingest_verify_gate bên profile-ingest (doctrine: PDF scan/OCR chưa đối chiếu thì KHÔNG vào
@@ -2076,11 +2126,30 @@ def cmd_ingest_local(a) -> int:
     if _active_profile() != DEFAULT_PROFILE and os.environ.get("TL_CATEGORIES_MODE", "").strip().lower() == "inherit":
         _inherit_warn = ("PROFILE categories=inherit → văn bản vào CÂY CHUNG VBQPPL theo cat, KHÔNG vào rootFolder RIÊNG "
                          "của profile. Muốn profile SỞ HỮU cây riêng: đặt config.profiles.<p>.categories='own' rồi ingest lại.")
+    # F4 r191 (đề xuất #3 — đo 23-07: 4 PDF 'ký số' datafiles.chinhphu.vn/hue.gov.vn đều PDF ẢNH, text
+    # layer 149 ký tự metadata chữ ký): nguồn .pdf đo text-layer NGAY lúc lập plan; dưới
+    # _PDF_IMAGE_CHARS_PER_PAGE ký tự/trang ⇒ cờ PDF_IMAGE → coi source_quality=ocr CHƯA verify → rơi
+    # vào ocr_gate r180 S1 sẵn có (chặn corpus rc=2, đi tiếp bằng đường OCR-verify) — KHÔNG đẻ nhánh mới.
+    # Chỉ override khi user để 'auto' (đường ingest-ocr truyền --source-quality ocr --ocr-verified tường
+    # minh thì đi qua như cũ); không đo được (thiếu pdftotext) → cảnh báo, KHÔNG đoán.
+    _pdf_probe = None
+    if _src_ext == ".pdf":
+        _pdf_probe = _pdf_text_layer_stats(f)
+        if _pdf_probe.get("unknown"):
+            print("[tl] ⚠ F4 r191: KHÔNG đo được text-layer PDF (thiếu pdftotext/không đếm được trang) — "
+                  "không kết luận PDF ảnh; tự đối chiếu tay trước khi apply.", file=sys.stderr)
+        elif _pdf_probe["pdf_image"] and str(getattr(a, "source_quality", "auto") or "auto").lower() == "auto":
+            a.source_quality = "ocr"
+            print(f"[tl] ⚠ PDF_IMAGE (F4 r191): text-layer ~{_pdf_probe['chars_per_page']} ký tự/trang "
+                  f"(< {_pdf_probe['threshold']}, {_pdf_probe['pages']} trang) → PDF SCAN/ảnh — coi "
+                  f"source_quality=ocr CHƯA verify (convert mù sẽ mất nội dung). Đường đúng: `tl ingest-ocr` "
+                  f"hoặc OCR xong `tl ocr-verify` rồi chạy lại với --ocr-verified.", file=sys.stderr)
     _ocr_g = _ingest_local_ocr_gate(getattr(a, "source_quality", "auto"),
                                     getattr(a, "ocr_verified", False))   # r180 S1
     plan = {"file": f, "name": name, "sohieu": sohieu or None, "cat": cat or None,
             "reg_cat_label": (_cat_reg_label(cat) if cat else None),   # S6 v1.33.44: giá trị THẬT sẽ ghi registry
             "ocr_gate": _ocr_g,   # r180 S1: DRY báo trước corpus_allowed=false khi ocr∧¬verified
+            "pdf_image": _pdf_probe,   # F4 r191: verdict đo text-layer PDF (None nếu không phải .pdf)
             "cat_ten": (official or {}).get("ten"), "cat_valid": cat_valid, "folder_exists": folder_exists,
             "need_mkdir": need_mkdir, "review_cat": review_cat, "cat_note": cat_note, "goc": goc or None,
             "hieuluc": hieuluc, "loai": loai or None, "size_bytes": _size_bytes,
@@ -2120,6 +2189,48 @@ def cmd_ingest_local(a) -> int:
     _prev = (_ingest_local_prev_state(str(f), name, identity_hash=_contract["identity_hash"],
                                       plan_hash=_contract["plan_hash"])
              if getattr(a, "resume", False) else {})
+    # F1 r191 (đề xuất #4 — bẫy 158/159 đo 23-07): DEDUP SỐ HIỆU trên dữ liệu LIVE ngay tại DRY — dedup
+    # cache nguội che dòng 158/159 đã có sẵn → DRY "đi lọt" rồi apply tạo dòng + GDoc TRÙNG (phải
+    # source-delete). Khoá so LỎNG-NĂM (`_sohieu_loose`) BẰNG-KHOÁ ('29-2025' không bắt oan '129-2025');
+    # trùng dòng corpus-effective ⇒ CHẶN rc=2. Ca THAY BẢN thoát bằng cờ tường minh --replace-sohieu
+    # (in dòng cũ + chuỗi hạ bản sau nạp). --resume bỏ qua (identity/plan-hash gate đã giữ);
+    # --skip-live-check bỏ qua CÓ CHỦ ĐÍCH (cùng ngữ nghĩa 'bỏ dedup cross-run', rủi ro tự chịu).
+    if sohieu and not _prev and not getattr(a, "skip_live_check", False):
+        try:
+            _live_f1 = _manifest_entries(refresh=True)
+        except (SystemExit, Exception) as _f1e:  # noqa: BLE001
+            print(json.dumps({"ok": False, "step": "sohieu_dedup_live", "error": "LIVE_REGISTRY_UNAVAILABLE",
+                              "detail": str(_f1e)[:200],
+                              "note": "F1 r191: dedup số hiệu phải đo trên registry LIVE — không đọc được thì "
+                                      "KHÔNG xác minh được trùng (fail-closed, mirror S13). Sửa creds/`tl boot` "
+                                      "rồi chạy lại; ép bỏ (tự chịu rủi ro trùng): --skip-live-check."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        _dups_f1 = [e for e in _ingest_dedup_sohieu_live(sohieu, _live_f1)
+                    if not (_from_drive and str(_entry_drive_id(e) or "") == _from_drive)]
+        if _dups_f1:
+            _rows_f1 = [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:80],
+                         "sohieu": _entry_sohieu(e) or _sohieu_key_entry(e), "cat": _entry_cat(e),
+                         "row_kind": _entry_row_kind(e) or "", "corpus": str(e.get("corpus") or "")}
+                        for e in _dups_f1[:10]]
+            if not getattr(a, "replace_sohieu", False):
+                print(json.dumps({"ok": False, "step": "sohieu_dedup_live", "aborted": True,
+                                  "reason": "SOHIEU_ALREADY_IN_CORPUS", "sohieu": sohieu,
+                                  "sohieu_key_loose": _sohieu_loose(sohieu), "rows": _rows_f1,
+                                  "note": "Số hiệu ĐÃ có dòng corpus-effective trên registry LIVE (khoá lỏng-năm) "
+                                          "— nạp tiếp sẽ tạo dòng + GDoc trùng. THAY BẢN có chủ đích: thêm "
+                                          "--replace-sohieu (nạp xong hạ bản cũ theo next_steps); nghi trùng oan: "
+                                          "`tl reg-query --live --sohieu <sốhiệu>` đối chiếu trước."},
+                                 ensure_ascii=False, indent=2), file=sys.stderr)
+                return 2
+            plan["replace_sohieu"] = {
+                "old_rows": _rows_f1,
+                "post_steps": [f"tl source-update-corpus {r['drive_id']} false --json   # hạ bản cũ "
+                               f"({r['name'][:40]}) sau khi bản mới đã verify" for r in _rows_f1]
+                              + ["tl nlm-reconcile --apply   # đối soát notebook sau hoán đổi"]}
+            print(f"[tl] ⚠ --replace-sohieu: {len(_dups_f1)} dòng cũ CÙNG số hiệu (lỏng-năm) sẽ SONG SONG "
+                  f"tồn tại tới khi hạ bản — làm theo plan.replace_sohieu.post_steps SAU khi bản mới verify.",
+                  file=sys.stderr)
     if not getattr(a, "apply", False):
         plan["mode"] = "DRY"
         plan["note"] = (("--apply để chạy: dùng file Drive có sẵn (bỏ upload)→organize(convert/cat/stamp/register)"

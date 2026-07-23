@@ -45,6 +45,13 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Identity ingest** — tổ hợp `content_hash + target scope + canonical name + profile` dùng cho idempotency,
   deduplicate và resume. Tên file đơn lẻ không phải identity; cùng identity là no-op đã xác minh, còn cùng tên
   nhưng khác hash là conflict và chỉ được thay thế bằng một kế hoạch chỉ rõ source ID cũ.
+- **PDF_IMAGE** — verdict đo text-layer PDF lúc lập plan ingest (r191): trung bình **< 100 ký tự
+  không-trắng/trang** ⇒ PDF scan/ảnh (text layer chỉ còn metadata chữ ký số) → coi
+  `source_quality=ocr` chưa verify, rơi vào ocr_gate hiện hành — KHÔNG convert mù. Không đo được
+  (thiếu pdftotext) → `unknown`, cảnh báo chứ không đoán.
+- **Manifest bẩn (marker)** — trạng thái sau một lệnh GHI registry (r191): cache manifest local bị xoá
+  + để lại `manifest.dirty`; lệnh ĐỌC resolve-theo-số-hiệu kế tiếp PHẢI tự refresh LIVE rồi xoá marker
+  (fail-closed nếu không fetch được). Đường đọc advisory (discovery) không bị ép.
 - **Cache staged / verified** — `staged` là dữ liệu đã thu nhận nhưng chưa đạt đủ schema, provenance và quality
   gate; `verified` chỉ được đặt sau khi mọi gate này đọc lại thành công. Fallback hoặc candidate được suy đoán
   không bao giờ được tự nâng thành verified.
@@ -74,9 +81,18 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 
 - **nlm_status** — trạng thái NLM của một dòng registry corpus. Từ vựng ĐÓNG (chốt 2026-07-21): họ `pushed*`
   (đã đẩy nguồn lên notebook), họ `synced*` (đã đối soát khớp), `active` (xác nhận đang sống trên notebook),
-  họ `removed_*` (đã gỡ CÓ CHỦ ĐÍCH — hậu tố ghi lý do, vd `removed_superseded_by_VBHN`), hoặc RỖNG (chưa từng
-  đụng NLM). Giá trị ngoài họ là dữ liệu lỗi: cửa ghi từ chối, audit gắn cờ. `added`/`live` là từ cũ đã nắn
-  về `pushed`/`active` — không phải trạng thái hợp lệ.
+  `deferred` (xem mục riêng), họ `removed_*` (đã gỡ CÓ CHỦ ĐÍCH — hậu tố ghi lý do, vd
+  `removed_superseded_by_VBHN`), hoặc RỖNG (chưa từng đụng NLM). Giá trị ngoài họ là dữ liệu lỗi: cửa ghi
+  từ chối, audit gắn cờ. `added`/`live` là từ cũ đã nắn về `pushed`/`active` — không phải trạng thái hợp lệ.
+- **deferred (nlm_status)** — ngữ nghĩa MỞ RỘNG (r191, 2026-07-23): «việc đưa nguồn lên NLM đang TREO
+  XÁC MINH» — gồm CẢ hai ca (a) NLM chết, chưa gửi (defer v1.34.60 — dòng không có nlm_source_id) và
+  (b) ĐÃ GỬI qua `--no-wait`, có source_id thật nhưng CHƯA xác minh settle. deferred KHÔNG claim có mặt
+  vật lý (không thuộc nlm_claim) nên không vi phạm VERIFY-THEN-LINK; corpus KHÔNG auto-true khi còn
+  deferred. `nlm-reconcile` thấy sid có mặt live đúng notebook → nâng `deferred→pushed` (settle_confirm,
+  chỉ cột nlm_status).
+- **Thay bản (`--replace-sohieu`)** — thoát CÓ CHỦ ĐÍCH khỏi cổng dedup số hiệu LIVE của `ingest-local`
+  (r191): nạp bản MỚI cùng số hiệu (khoá lỏng-năm) khi corpus đã có dòng effective — plan in dòng cũ +
+  chuỗi hạ bản sau nạp; mặc định KHÔNG cờ là CHẶN rc=2. KHÁC «nạp trùng do cache nguội» (bug đã vá F1).
 - **Scope (dòng kết quả)** — nguồn gốc của MỘT dòng trong kết quả lệnh đọc: dòng profile (mặc định, không
   đánh dấu) hay dòng NỀN VBQPPL kéo vào qua base-also — dòng nền mang `scope: vbqppl` + cờ `BASE_SCOPE_HIT`,
   MỘT cách mã hoá duy nhất ở mọi lệnh đọc (chốt 2026-07-21; khe `_scope`/`scope` hai kiểu là sự cố đã vá).

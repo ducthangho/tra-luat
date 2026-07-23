@@ -10612,12 +10612,21 @@ def run() -> int:
             for _k, _v in _sav.items():
                 setattr(_TL_MODULE, _k, _v)
 
-    def _c117_no_wait_skips_reg_link():
-        # A-#1 NEGATIVE: --no-wait → BỎ HẲN reg_link (stale-an-toàn) + note lưới nlm-reconcile; không probe.
+    def _c117_no_wait_links_deferred():
+        # F3 r191 (đề xuất #2 — THAY ca cũ 'skips_reg_link' v1.34.56: đo 23-07 cho thấy bỏ hẳn reg_link
+        # để lại 3 dòng nlm=''/nb='-' phải register tay): --no-wait nay reg_link NGAY sid THẬT +
+        # nlm_status='deferred' (đã gửi, chưa xác minh settle — không probe, probe sẽ âm tính giả);
+        # corpus KHÔNG trong cols (không auto-true khi còn deferred); claim KHÔNG commit; note nlm-reconcile.
         _rc, _o, _e, _calls = _run_na117(no_wait=True)
-        return (_rc == 0 and _calls["add"] == 1 and not _calls["reg_writes"]
-                and "nlm-reconcile" in _e and _calls["probe_get"] == 0 and _calls["probe_list"] == 0)
-    _t110("r117_nlm_add_no_wait_skips_reg_link", _c117_no_wait_skips_reg_link)
+        _w = (_calls["reg_writes"] or [{}])[0]
+        _it = (_w.get("items") or [{}])[0]
+        return (_rc == 0 and _calls["add"] == 1 and len(_calls["reg_writes"]) == 1
+                and _it.get("nlm_source_id") == "sidNA117" and _it.get("nlm_status") == "deferred"
+                and _it.get("nlm_notebook_id") == "nb117" and _it.get("drive_id") == "dNA117"
+                and "corpus" not in (_w.get("cols") or "")
+                and "nlm-reconcile" in _e and _calls["probe_get"] == 0 and _calls["probe_list"] == 0
+                and _calls["commit_claims"] is None)
+    _t110("r191_nlm_add_no_wait_links_deferred", _c117_no_wait_links_deferred)
 
     def _c117_verify_fail_no_link():
         # A-#1 NEGATIVE: sid trả về nhưng KHÔNG live-bền (ca canary dbe706a0) → KHÔNG ghi registry, rc vẫn 0.
@@ -17334,6 +17343,264 @@ def run() -> int:
             for _k, _v in _sv.items():
                 setattr(_zi183, _k, _v)
     _t110("r187_zip_archive_hash_once_per_scope", _c187_zip_archive_hash_once_per_scope)
+
+    # ═══ r191 — ĐỢT VÁ AN TOÀN DỮ LIỆU (kế hoạch KE_HOACH_VA_SKILL_r191_r192 chốt 23-07-2026; TDD
+    # một-ca-chỉ-nó-chặn tiền lệ r181). F1 dedup sohieu LIVE lỏng-năm · F2 marker manifest bẩn ép
+    # refresh phía đọc · F3 no-wait reg_link deferred (ca chính thay r117 ở trên) · F4 cổng PDF-ảnh. ═══
+    def _c191_dedup_sohieu_loose_year():
+        # F1 TDD (a)+(c): khoá lỏng-năm bắt cả biến thể THIẾU năm; corpus=false bỏ; overflow vẫn bắt.
+        _ents = [{"drive_id": "dOLD", "name": "ND_158", "so_hieu": "158/2025/NĐ-CP", "corpus": "true"},
+                 {"drive_id": "dNOYEAR", "name": "NQ_72", "so_hieu": "72/NQ-TW", "corpus": "true"},
+                 {"drive_id": "dREF", "name": "ref", "so_hieu": "10-2020-QH14", "corpus": "false"},
+                 {"drive_id": "dOVF", "name": "ovf", "so_hieu": "20-2021-QH15", "corpus": "false",
+                  "row_kind": "overflow"}]
+        _h1 = _TL_MODULE._ingest_dedup_sohieu_live("158-2025-ND-CP", _ents)
+        _h2 = _TL_MODULE._ingest_dedup_sohieu_live("72-2025-NQ-TW", _ents)
+        _h3 = _TL_MODULE._ingest_dedup_sohieu_live("10-2020-QH14", _ents)
+        _h4 = _TL_MODULE._ingest_dedup_sohieu_live("20-2021-QH15", _ents)
+        return (len(_h1) == 1 and _h1[0]["drive_id"] == "dOLD"
+                and len(_h2) == 1 and _h2[0]["drive_id"] == "dNOYEAR"
+                and _h3 == [] and len(_h4) == 1 and _h4[0]["drive_id"] == "dOVF")
+    _t110("r191_dedup_sohieu_live_loose_year", _c191_dedup_sohieu_loose_year)
+
+    def _c191_dedup_sohieu_no_bat_oan():
+        # F1 TDD (d): so BẰNG-KHOÁ — nạp '29-2025' KHÔNG bắt oan dòng '129-2025'; sohieu rỗng → [].
+        _ents = [{"drive_id": "d129", "name": "ND_129", "so_hieu": "129/2025/NĐ-CP", "corpus": "true"}]
+        return (_TL_MODULE._ingest_dedup_sohieu_live("29-2025-ND-CP", _ents) == []
+                and _TL_MODULE._ingest_dedup_sohieu_live("", _ents) == [])
+    _t110("r191_dedup_sohieu_29_khong_bat_oan_129", _c191_dedup_sohieu_no_bat_oan)
+
+    def _run191_ingest(ns_over=None, ents=None, pdf_stats=None, src_ext=".docx"):
+        # Harness ingest-local dùng chung F1/F4 (khuôn r114 + mock _manifest_entries ghi lại refresh-arg).
+        import zipfile as _zf191
+        _keys = ["load_creds", "apply_profile_offline", "_profile_policy_error", "_valid_cats",
+                 "_load_phapdien", "_ingest_local_cat_gate", "_resolve_nlm_notebook", "_gas",
+                 "_ingest_target", "_verify_convert_readback", "_apply_journal_start", "_journal_append",
+                 "_manifest_entries", "_verified_reg_upsert", "_imp"]
+        if pdf_stats is not None:
+            _keys.append("_pdf_text_layer_stats")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        _mrefresh = []
+
+        class _G191:
+            def get(self, action, **kw):
+                if action == "bootstrap":
+                    return {"inboxFolderId": "inb191"}
+                if action == "organize":
+                    return {"ok": True, "fileId": "gd191", "srcId": "sr191"}
+                if action == "reg_get":
+                    return {"ok": True, "rows": [{"drive_id": "gd191", "src_id": "sr191",
+                                                  "name": "Nghi_dinh_158_Test",
+                                                  "cat": _TL_MODULE._cat_reg_label("01"),
+                                                  "corpus": "false", "sohieu": "158-2025-ND-CP",
+                                                  "title_vn": "x"}]}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                return {"ok": True, "fileId": "up191"}
+
+        class _BoomNC191:
+            def __getattr__(self, k):
+                raise AssertionError("nlm_cli không được đụng trong --no-nlm-add (r191)")
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
+            _TL_MODULE._load_phapdien = lambda: {}
+            _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+                "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
+                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb191", None)
+            _TL_MODULE._gas = lambda: _G191()
+            _TL_MODULE._ingest_target = (lambda *a, **k:
+                                         (_ for _ in ()).throw(AssertionError("no target: --no-nlm-add")))
+            _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
+            _TL_MODULE._apply_journal_start = lambda *a, **k: "run191"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _TL_MODULE._manifest_entries = (lambda refresh=False, **kw:
+                                            (_mrefresh.append(refresh), list(ents or []))[1])
+            _TL_MODULE._verified_reg_upsert = lambda g, item, **kw: {"verified": True}
+            _TL_MODULE._imp = lambda name: (_BoomNC191() if name == "nlm_cli" else _realimp(name))
+            if pdf_stats is not None:
+                _TL_MODULE._pdf_text_layer_stats = lambda p: dict(pdf_stats)
+            with _tf110.NamedTemporaryFile(suffix=src_ext, delete=False) as _f:
+                _fp = _f.name
+            if src_ext == ".pdf":
+                Path(_fp).write_bytes(b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF\n")
+            else:
+                with _zf191.ZipFile(_fp, "w") as _z:
+                    _z.writestr("[Content_Types].xml", "<Types/>")
+                    _z.writestr("word/document.xml", "<document>t191</document>")
+            _ns = argparse.Namespace(
+                file=_fp, name="Nghi_dinh_158_Test", sohieu="158/2025/NĐ-CP", cat="01", goc="",
+                hieuluc="", loai="Nghị định", apply=False, resume=False, auto_plan=False, text_file=None,
+                source_quality="auto", ocr_verified=False, force_cat=False, allow_large=False,
+                large_threshold=None, skip_nlm_preflight=False, skip_live_check=False, nlm_no_wait=False,
+                no_nlm_add=True, config=None, profile=None, json=True, deterministic=False, drive_id=None,
+                confirm=None, expected_plan_hash=None, replace_sohieu=False)
+            for _k, _v in (ns_over or {}).items():
+                setattr(_ns, _k, _v)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_ingest_local(_ns)
+            try:
+                _plan = json.loads(_bo.getvalue())
+            except Exception:  # noqa: BLE001
+                _plan = {}
+            os.unlink(_fp)
+            return _rc, _plan, _be.getvalue(), _mrefresh, _ns
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c191_ingest_sohieu_dup_dry_blocks():
+        # F1 TDD (a) — bẫy thật 23-07: nạp lại 158-2025-ND-CP KHÔNG cờ → DRY rc=2, đo LIVE (refresh=True).
+        _rc, _plan, _e, _mr, _ = _run191_ingest(
+            ents=[{"drive_id": "dOLD158", "name": "ND_158_cu", "so_hieu": "158/2025/NĐ-CP",
+                   "corpus": "true"}])
+        return (_rc == 2 and '"sohieu_dedup_live"' in _e and "SOHIEU_ALREADY_IN_CORPUS" in _e
+                and _mr == [True] and not _plan.get("mode"))
+    _t110("r191_ingest_local_sohieu_dup_dry_rc2", _c191_ingest_sohieu_dup_dry_blocks)
+
+    def _c191_ingest_replace_sohieu_passes():
+        # F1 TDD (b): kèm --replace-sohieu → DRY đi tiếp, plan in dòng cũ + chuỗi hạ bản sau nạp.
+        _rc, _plan, _e, _mr, _ = _run191_ingest(
+            ns_over={"replace_sohieu": True},
+            ents=[{"drive_id": "dOLD158", "name": "ND_158_cu", "so_hieu": "158/2025/NĐ-CP",
+                   "corpus": "true"}])
+        _rs = _plan.get("replace_sohieu") or {}
+        return (_rc == 0 and _plan.get("mode") == "DRY"
+                and (_rs.get("old_rows") or [{}])[0].get("drive_id") == "dOLD158"
+                and any("source-update-corpus dOLD158 false" in s for s in (_rs.get("post_steps") or [])))
+    _t110("r191_ingest_local_replace_sohieu_di_tiep", _c191_ingest_replace_sohieu_passes)
+
+    def _c191_manifest_dirty_forces_refresh():
+        # F2 TDD — bẫy thật 23-07 (extract sau hạ-corpus trả bản CŨ): sau _invalidate_manifest_cache,
+        # đọc kế tiếp refresh=False PHẢI tự nâng thành LIVE (trả bản MỚI) + xoá marker. Chỉ-nó-chặn:
+        # thiếu marker-check thì mock refresh=False trả OLD.
+        # Gọi hàm MODULE (tl_core.regio, đã rebase globals→tl) — né mock `_manifest_entries` rò từ ca khác
+        # trong namespace tl; heal đòi TL_WEBAPP trong env (main() nạp ở production) → set dummy.
+        import os as _os191
+        import tl_core.regio as _rg191
+        _pold = _os191.environ.get("TL_PROFILE")
+        _wold = _os191.environ.get("TL_WEBAPP")
+        _sv = {k: getattr(_TL_MODULE, k) for k in ("_load_manifest_full",)}
+        try:
+            _os191.environ["TL_PROFILE"] = "selftest-r191f2"
+            _os191.environ["TL_WEBAPP"] = "https://dummy-r191f2.local/exec"
+            _cd = _TL_MODULE._profile_cache_dir()
+            _cd.mkdir(parents=True, exist_ok=True)
+            (_cd / "manifest.json").write_text('{"entries": [{"drive_id": "OLD"}]}', encoding="utf-8")
+            _rg191._invalidate_manifest_cache()
+            _marker = _rg191._manifest_dirty_marker()
+            _inv_ok = _marker.exists() and not (_cd / "manifest.json").exists()
+            _TL_MODULE._load_manifest_full = (lambda refresh=False:
+                                              {"entries": [{"drive_id": "NEW" if refresh else "OLD"}]})
+            _ents = _rg191._manifest_entries(refresh=False)
+            return (_inv_ok and _ents and _ents[0]["drive_id"] == "NEW" and not _marker.exists())
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _ek, _ev in (("TL_PROFILE", _pold), ("TL_WEBAPP", _wold)):
+                if _ev is None:
+                    _os191.environ.pop(_ek, None)
+                else:
+                    _os191.environ[_ek] = _ev
+    _t110("r191_manifest_dirty_ep_refresh_phia_doc", _c191_manifest_dirty_forces_refresh)
+
+    def _c191_manifest_dirty_advisory_no_heal():
+        # F2: đường đọc ADVISORY (heal_dirty=False — vd discovery overflow) KHÔNG bị ép refresh,
+        # marker GIỮ NGUYÊN cho lệnh resolve kế tiếp.
+        import os as _os191
+        import tl_core.regio as _rg191
+        _pold = _os191.environ.get("TL_PROFILE")
+        _wold = _os191.environ.get("TL_WEBAPP")
+        _sv = {k: getattr(_TL_MODULE, k) for k in ("_load_manifest_full",)}
+        try:
+            _os191.environ["TL_PROFILE"] = "selftest-r191f2b"
+            _os191.environ["TL_WEBAPP"] = "https://dummy-r191f2.local/exec"
+            _cd = _TL_MODULE._profile_cache_dir()
+            _cd.mkdir(parents=True, exist_ok=True)
+            _rg191._invalidate_manifest_cache()
+            _marker = _rg191._manifest_dirty_marker()
+            _TL_MODULE._load_manifest_full = (lambda refresh=False:
+                                              {"entries": [{"drive_id": "NEW" if refresh else "OLD"}]})
+            _ents = _rg191._manifest_entries(refresh=False, heal_dirty=False)
+            return (_ents and _ents[0]["drive_id"] == "OLD" and _marker.exists())
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _ek, _ev in (("TL_PROFILE", _pold), ("TL_WEBAPP", _wold)):
+                if _ev is None:
+                    _os191.environ.pop(_ek, None)
+                else:
+                    _os191.environ[_ek] = _ev
+    _t110("r191_manifest_dirty_advisory_khong_heal", _c191_manifest_dirty_advisory_no_heal)
+
+    def _c191_reconcile_settle_confirm_plan():
+        # F3 TDD (b): dòng deferred + sid CÓ MẶT live đúng notebook → settle_confirm (nâng pushed khi
+        # --apply); deferred VẮNG live giữ nguyên desync_real; pushed live không vào settle_confirm.
+        _ents = [{"drive_id": "dA", "name": "A", "nlm_source_id": "sA", "nlm_notebook_id": "NBX",
+                  "nlm_status": "deferred"},
+                 {"drive_id": "dB", "name": "B", "nlm_source_id": "sB", "nlm_notebook_id": "NBX",
+                  "nlm_status": "pushed"},
+                 {"drive_id": "dC", "name": "C", "nlm_source_id": "sC", "nlm_notebook_id": "NBX",
+                  "nlm_status": "deferred"}]
+        _pl = _TL_MODULE._nlm_reconcile_plan([{"id": "sA"}, {"id": "sB"}], _ents, "NBX")
+        return ([e["drive_id"] for e in (_pl.get("settle_confirm") or [])] == ["dA"]
+                and [e["drive_id"] for e in _pl["desync_real"]] == ["dC"])
+    _t110("r191_reconcile_settle_confirm_deferred_live", _c191_reconcile_settle_confirm_plan)
+
+    def _c191_reconcile_settle_apply_shape():
+        # F3: khối apply settle_confirm CHỈ ghi cột nlm_status (corpus KHÔNG auto-true) — shape-lock khuôn r95.
+        import inspect as _ins191
+        import tl_core.nlm_admin_ops as _nao191
+        _src = _ins191.getsource(_nao191.cmd_nlm_reconcile)
+        if 'if plan.get("settle_confirm")' not in _src:
+            return False
+        _seg = _src.split('if plan.get("settle_confirm")')[1].split("--clear-stale")[0]
+        return ('_journaled_reg_write(run_id, g, _items_sc, "nlm_status"' in _seg
+                and '"nlm_status": "pushed"' in _seg and '"corpus"' not in _seg)
+    _t110("r191_reconcile_settle_confirm_apply_only_status", _c191_reconcile_settle_apply_shape)
+
+    def _c191_pdf_image_verdict_pure():
+        # F4 TDD: fixture ~12 ký tự/trang (bẫy 4 PDF 'ký số' 23-07) → pdf_image; ≥1.500/trang → qua;
+        # không đếm được trang → unknown, KHÔNG đoán.
+        _v1 = _TL_MODULE._pdf_image_verdict(48, 4)
+        _v2 = _TL_MODULE._pdf_image_verdict(6000, 4)
+        _v3 = _TL_MODULE._pdf_image_verdict(0, 0)
+        return (_v1["pdf_image"] is True and _v1["chars_per_page"] == 12.0 and _v1["threshold"] == 100
+                and _v2["pdf_image"] is False and _v3["unknown"] is True and _v3["pdf_image"] is False)
+    _t110("r191_pdf_image_verdict_nguong_100", _c191_pdf_image_verdict_pure)
+
+    def _c191_ingest_pdf_image_gate_rc2():
+        # F4 TDD (a): PDF ảnh (~12 ký tự/trang) → DRY plan cờ PDF_IMAGE + ocr_gate.block; APPLY rơi vào
+        # ocr_verify_gate r180 S1 → rc=2 (corpus KHÔNG set) — không đẻ nhánh mới.
+        _st = {"pdf_image": True, "unknown": False, "chars": 48, "pages": 4, "chars_per_page": 12.0,
+               "threshold": 100, "warnings": []}
+        _rcd, _plan, _ed, _mr, _ns = _run191_ingest(src_ext=".pdf", pdf_stats=_st)
+        if not (_rcd == 0 and (_plan.get("pdf_image") or {}).get("pdf_image") is True
+                and (_plan.get("ocr_gate") or {}).get("block") is True and "PDF_IMAGE" in _ed):
+            return False
+        _rca, _plana, _ea, _mra, _nsa = _run191_ingest(
+            src_ext=".pdf", pdf_stats=_st,
+            ns_over={"apply": True, "confirm": "yes", "expected_plan_hash": _plan.get("plan_hash")})
+        return (_rca == 2 and _plana.get("step") == "ocr_verify_gate"
+                and (_plana.get("ocr_gate") or {}).get("flag") == "OCR_UNVERIFIED_NOT_CORPUS")
+    _t110("r191_ingest_local_pdf_image_rc2", _c191_ingest_pdf_image_gate_rc2)
+
+    def _c191_ingest_pdf_text_passes():
+        # F4 TDD (b): PDF text thật (≥1.500 ký tự/trang) → KHÔNG cờ, ocr_gate mở, source_quality giữ auto.
+        _st = {"pdf_image": False, "unknown": False, "chars": 6000, "pages": 4, "chars_per_page": 1500.0,
+               "threshold": 100, "warnings": []}
+        _rc, _plan, _e, _mr, _ns = _run191_ingest(src_ext=".pdf", pdf_stats=_st)
+        return (_rc == 0 and _plan.get("mode") == "DRY"
+                and (_plan.get("pdf_image") or {}).get("pdf_image") is False
+                and (_plan.get("ocr_gate") or {}).get("block") is False
+                and getattr(_ns, "source_quality", "") == "auto")
+    _t110("r191_ingest_local_pdf_text_di_qua", _c191_ingest_pdf_text_passes)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

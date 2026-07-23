@@ -169,8 +169,15 @@ def cmd_nlm_add(a) -> int:
     # probe sẽ âm tính giả — stale-an-toàn, reconcile chữa); ngược lại probe live 1 nhịp TRƯỚC khi link.
     if getattr(a, "drive_id", None) and r.get("source_id"):
         if getattr(a, "no_wait", False):
-            print("[tl] nlm-add --no-wait: sid chưa settle — KHÔNG ghi registry; "
-                  "lưới cuối lô: tl nlm-reconcile <nb> --apply", file=sys.stderr)
+            # F3 r191 (đề xuất #2 — đo 23-07: 3 nguồn add no-wait có source_id trả về mà registry nlm=''
+            # nb='-', phải register tay từng dòng): no-wait KHÔNG bỏ reg_link nữa — link NGAY bằng
+            # source_id THẬT từ add-response (link không cần đợi settle) + nlm_status='deferred' (ngữ
+            # nghĩa mở rộng r191: ĐÃ GỬI NLM, CHƯA xác minh settle — không claim có mặt vật lý nên không
+            # vi phạm VERIFY-THEN-LINK A-#1 v1.34.56). corpus KHÔNG đụng (không auto-true khi còn
+            # deferred); `tl nlm-reconcile --apply` thấy nguồn live → nâng deferred→pushed. Claim KHÔNG
+            # commit (sid chưa xác minh — TTL 5' tự heal, giữ nguyên hành vi cũ).
+            _lk91 = _nlm_no_wait_reg_link(a, nb, str(r.get("source_id")))
+            print(json.dumps({"reg_link": _lk91}, ensure_ascii=False), file=sys.stderr)
         else:
             # Probe rẻ: source_get nếu nlm_cli có; fallback re-list FRESH (list của dedup-gate chụp TRƯỚC add
             # — KHÔNG tái dùng được). Probe fail → KHÔNG ghi registry, rc vẫn 0 (add đã thành công; link là
@@ -250,6 +257,45 @@ def cmd_nlm_add(a) -> int:
     if _run56:
         _journal_append(_run56, {"t": "run_end", "ok": True, "counts": {"OK": 1}})
     return 0
+
+
+def _nlm_no_wait_reg_link(a, nb: str, sid: str) -> dict:
+    """F3 r191: reg_link cho `nlm-add --no-wait` — ghi sid THẬT + nlm_status='deferred' (đã gửi NLM, chưa
+    xác minh settle). Chỉ link dòng ĐÃ TỒN TẠI và CHƯA có nlm_source_id KHÁC (stale-an-toàn — không ghi đè
+    pointer sẵn có bằng sid chưa settle); KHÔNG tự tạo row xương; KHÔNG đụng corpus/row_kind. Lỗi → note,
+    KHÔNG fail add (nguồn đã lên NLM thật; nlm-reconcile là lưới)."""
+    did = str(getattr(a, "drive_id", "") or "")
+    try:
+        _row = next((e for e in _manifest_entries(refresh=False)
+                     if str(e.get("drive_id") or e.get("gdoc_id") or "") == did), None)
+    except Exception as _e:  # noqa: BLE001
+        return {"ok": False, "reason": "MANIFEST_UNAVAILABLE", "detail": f"{type(_e).__name__}: {_e}"[:200],
+                "note": "reg_link no-wait cần manifest — `tl nlm-reconcile --apply` bắc cầu sau."}
+    if _row is None:
+        return {"ok": False, "reason": "ROW_NOT_FOUND",
+                "note": "registry CHƯA có dòng cho drive_id — `tl register --drive-id …` hoặc "
+                        "`tl nlm-reconcile --apply` (không tự tạo row xương)."}
+    _old_sid = str(_row.get("nlm_source_id") or "").strip()
+    if _old_sid and _old_sid != sid:
+        return {"ok": False, "reason": "ROW_HAS_POINTER", "existing_source_id": _old_sid,
+                "note": "dòng đã có nlm_source_id KHÁC — KHÔNG ghi đè bằng sid chưa settle; "
+                        "`tl nlm-reconcile` phân xử."}
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        _rid = _apply_journal_start("nlm-add-link", {"drive_id": did, "source_id": sid, "no_wait": True})
+        _bef = {"nlm_source_id": _old_sid,
+                "nlm_notebook_id": str(_row.get("nlm_notebook_id") or ""),
+                "nlm_status": str(_row.get("nlm_status") or "")}
+        _v = _journaled_reg_write(_rid, _gas(), [{"drive_id": did, "nlm_source_id": sid,
+                                                  "nlm_notebook_id": nb, "nlm_status": "deferred"}],
+                                  "nlm_source_id,nlm_notebook_id,nlm_status",
+                                  before_by_key={did: _bef})
+        _journal_append(_rid, {"t": "run_end", "ok": bool(_v.get("verified")), "counts": {"DEFERRED": 1}})
+        return {"ok": bool(_v.get("verified")), "journal": _rid, "nlm_status": "deferred", "source_id": sid,
+                "next": "tl nlm-reconcile <nb> --apply — xác minh settle live, nâng deferred→pushed"}
+    except Exception as _e:  # noqa: BLE001
+        return {"ok": False, "reason": type(_e).__name__, "detail": str(_e)[:200],
+                "note": "add OK; link lỗi → `tl nlm-reconcile --apply` bắc cầu."}
 
 
 def _nlm_add_deferred(a, nb: str, *, why: str = "") -> int:
@@ -509,6 +555,7 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
     by_drive: dict[str, list] = {}   # v1.34.53 (A2): LIST — dòng dual-registered (cùng drive_id, 2 notebook) phải lọc theo chủ quyền, không lấy dòng-đầu mù
     by_sohieu: dict[str, dict] = {}
     n_rows, backfill, desync_real, already_removed, other_notebook = 0, [], [], [], []
+    settle_confirm = []   # F3 r191: dòng deferred (no-wait/defer) mà sid NAY THẤY live → nâng pushed
     for e in entries:
         did = _entry_drive_id(e)
         if did:
@@ -526,6 +573,10 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
         if sid in live_ids:
             if nb != notebook_id:
                 backfill.append(e)
+            elif str(e.get("nlm_status") or "").strip().lower() == "deferred":
+                # F3 r191: 'đã gửi, chưa xác minh settle' mà nguồn NAY có mặt live đúng notebook →
+                # xác minh xong, nâng deferred→pushed (CHỈ nlm_status — corpus KHÔNG auto-true).
+                settle_confirm.append(e)
         elif nb and nb != notebook_id:
             other_notebook.append(e)   # v1.19.11: thuộc shard/notebook KHÁC (vd overflow VBQPPL-2) → KHÔNG phải desync
         else:
@@ -594,6 +645,7 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             "foreign_skipped": foreign_skipped,   # v1.34.53 (A2): match được NHƯNG dòng thuộc notebook khác → KHÔNG ghi, chỉ báo
             "stale": desync_real,  # giữ khóa cũ = desync_real (tương thích ngược)
             "link_candidates": link_candidates,
+            "settle_confirm": settle_confirm,   # F3 r191: deferred + sid live đúng notebook → nâng pushed
             "unregistered": sorted(still_unreg),
             "registry_on_nlm_rows": n_rows}
 
@@ -819,6 +871,7 @@ def cmd_nlm_reconcile(a) -> int:
             _rows_ln, _rows_bf = _keep_ln, _keep_bf
         plan = {"backfill": _rows_bf, "desync_real": [], "already_removed": [], "other_notebook": [],
                 "foreign_skipped": [], "stale": [], "unregistered": [], "registry_on_nlm_rows": None,
+                "settle_confirm": [],   # F3 r191: đường from-plan không re-scan live → không phân xử deferred
                 "link_candidates": [{"entry": r, "source_id": r.get("source_id"), "by": r.get("by") or "plan",
                                      "title": r.get("name") or ""} for r in _rows_ln]}
         print(f"[tl] nlm-reconcile --from-plan: {_from_plan['path']} (tuổi {_from_plan['age_s']}s) — "
@@ -834,6 +887,7 @@ def cmd_nlm_reconcile(a) -> int:
            "already_removed_by_status": rm_by_status,
            "other_notebook": len(plan.get("other_notebook") or []),  # thuộc shard/notebook khác (overflow) — không tính desync
            "link_candidates": len(plan.get("link_candidates") or []),  # C1: nguồn live bắc cầu được sang registry (chỉ thiếu source_id)
+           "settle_confirm": len(plan.get("settle_confirm") or []),  # F3 r191: deferred + sid live → nâng pushed khi --apply
            "foreign_skipped": len(plan.get("foreign_skipped") or []),  # v1.34.53 (A2): match dòng notebook KHÁC → guard chặn ghi, chỉ báo
            "unregistered_on_nlm": len(plan["unregistered"]),
            "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
@@ -960,6 +1014,17 @@ def cmd_nlm_reconcile(a) -> int:
             _vs_ln.append(_journaled_reg_write(run_id, g, _rk_ln, "nlm_source_id,nlm_notebook_id,nlm_status,row_kind",
                                                before_by_key=_brk_ln))
         out["reg_bulk_link"] = _merge_writes(_vs_ln, len(_rk_ln))
+    # F3 r191: nâng deferred→pushed cho dòng đã XÁC MINH sid live đúng notebook (nlm-add --no-wait / defer).
+    # CHỈ ghi nlm_status — corpus KHÔNG auto-true khi còn/deferred vừa nâng (corpus là việc pipeline ingest).
+    if plan.get("settle_confirm"):
+        _items_sc = [{"drive_id": _entry_drive_id(e), "nlm_status": "pushed"}
+                     for e in plan["settle_confirm"] if _entry_drive_id(e)]
+        _bef_sc = {_entry_drive_id(e): {"nlm_status": str(e.get("nlm_status") or "deferred")}
+                   for e in plan["settle_confirm"] if _entry_drive_id(e)}
+        if _items_sc:
+            _v_sc = _journaled_reg_write(run_id, g, _items_sc, "nlm_status", before_by_key=_bef_sc)
+            out["reg_bulk_settle_confirm"] = {"ok": bool((_v_sc.get("reg_bulk") or {}).get("ok")),
+                                              "verified": bool(_v_sc.get("verified")), "count": len(_items_sc)}
     # --clear-stale CHỈ áp desync_real (KHÔNG xoá mapping/ status của dòng already_removed).
     if getattr(a, "clear_stale", False) and plan["desync_real"]:
         ops = [{"action": "reg_clear", "drive_id": _entry_drive_id(e),

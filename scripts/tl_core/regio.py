@@ -41,9 +41,18 @@ def _cache_file(name: str) -> Path:
     return _profile_cache_dir() / name
 
 
+def _manifest_dirty_marker() -> Path:
+    """F2 r191: đường dẫn marker 'manifest BẨN' (sau lệnh GHI registry) trong cache dir profile hiện hành."""
+    return _cache_file("manifest.dirty")
+
+
 def _invalidate_manifest_cache() -> None:
     """(MERGE) Sau khi GHI registry (rename/delete/corpus-toggle) → xoá cache manifest LOCAL để lần đọc sau lấy LIVE
-    (khỏi đọc cache CŨ nlm rỗng/tên cũ). Lần boot/reg-query kế tự nạp lại."""
+    (khỏi đọc cache CŨ nlm rỗng/tên cũ). Lần boot/reg-query kế tự nạp lại.
+    F2 r191 (đề xuất #5 — sự cố 23-07: extract 164-2025 NGAY SAU hoán đổi canonical vẫn trả bản CŨ, phải
+    `boot --refresh` tay): để lại marker `manifest.dirty` — lệnh ĐỌC kế tiếp qua `_manifest_entries` thấy
+    marker PHẢI tự refresh LIVE (nạp creds + fetch + ghi lại cache) trước khi resolve; marker xoá sau
+    refresh thành công. Chỉ vá PHÍA ĐỌC — phía ghi không cộng giá."""
     for _n in ("manifest.json", "manifest_index.json"):
         try:
             _p = _cache_file(_n)
@@ -51,6 +60,12 @@ def _invalidate_manifest_cache() -> None:
                 _p.unlink()
         except Exception:
             pass
+    try:
+        _m = _manifest_dirty_marker()
+        _m.parent.mkdir(parents=True, exist_ok=True)
+        _m.write_text("1", encoding="utf-8")
+    except Exception:
+        pass
 
 
 def _journal_dir() -> Path:
@@ -849,10 +864,32 @@ def _load_manifest_full(refresh: bool=False) -> dict:
     return full
 
 
-def _manifest_entries(refresh: bool=False) -> list[dict]:
+def _manifest_entries(refresh: bool=False, *, heal_dirty: bool=True) -> list[dict]:
+    # F2 r191: marker BẨN (ghi bởi _invalidate_manifest_cache sau lệnh GHI registry) → ÉP refresh LIVE
+    # trước khi resolve — chặn ca đọc-sau-ghi trả canonical CŨ (23-07: extract 164-2025 sau hoán đổi phải
+    # boot --refresh tay). KHÔNG tự load_creds ở đây: production mọi lệnh ngoài _CREDS_LAZY_CMDS đã được
+    # main() nạp creds, và gas.py tự self-heal từ config; thiếu thật thì _load_manifest_full nổ lỗi RÕ
+    # (fail-closed thay vì âm thầm trả bản nguội). Vá MỘT chỗ phủ mọi lệnh đọc resolve theo số hiệu
+    # (extract/locate/xref/doc-text đều đi qua đây). `heal_dirty=False` cho đường đọc ADVISORY
+    # (vd discovery overflow best-effort) — ngoài phạm vi 'resolve theo số hiệu', không ép refresh.
+    # Chỉ heal khi CÓ creds webapp trong env (main() đã nạp cho mọi lệnh ngoài _CREDS_LAZY_CMDS) —
+    # thiếu creds thì giữ hành vi cũ (không ép fetch mù; bare selftest nhờ đó trơ với marker).
+    if not refresh and heal_dirty and (os.environ.get("TL_WEBAPP") or "").strip():
+        try:
+            if _manifest_dirty_marker().exists():
+                refresh = True
+        except Exception:  # noqa: BLE001
+            pass
     m = _load_manifest_full(refresh=refresh)
     if m.get("ok") is False:
         raise RuntimeError(m.get("error") or json.dumps(m, ensure_ascii=False)[:500])
+    if refresh:
+        try:
+            _mk = _manifest_dirty_marker()
+            if _mk.exists():
+                _mk.unlink()
+        except Exception:  # noqa: BLE001
+            pass
     return m.get("entries") or m.get("files") or m.get("rows") or []
 
 

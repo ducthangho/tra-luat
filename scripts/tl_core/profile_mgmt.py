@@ -439,7 +439,9 @@ def cmd_profile_rename(a) -> int:
     rid = _apply_journal_start("profile-rename-marker", {"old": old, "new": new})
     marker_result = _marker_write(
         g, str(mr.get("meta_folder_id") or meta_id),
-        _marker_body(new, marker_prof, existing=marker), old_id=str(mr.get("fileId") or ""), run_id=rid)
+        _marker_body(new, marker_prof, existing=marker,
+                     meta_id=str(mr.get("meta_folder_id") or meta_id or "")),   # v1.35.16 R2: v2 đòi metaFolderId
+        old_id=str(mr.get("fileId") or ""), run_id=rid)
     marker_complete = bool(marker_result.get("ok"))   # r184: đủ chuỗi hậu điều (readback+enumerate+cleanup+prove-one)
     if not marker_complete:
         rollback = _rename_profile_config(getattr(a, "config", None), new, old, False)
@@ -1043,8 +1045,9 @@ def _cmd_profile_doctor_impl(a) -> int:
                     # gom DRY plan v1→v2. KHÔNG auto-migrate ở R1.
                     if str((_mr.get("marker") or {}).get("schema") or "") != _PROFILE_MARKER_SCHEMA_V2:
                         findings.append({"check": "MARKER_SCHEMA_V1", "severity": "info", "profile": n,
-                                         "note": "marker schema v1 — đọc được (compat 1 phiên bản); nâng v2 "
-                                                 "qua migration DRY plan (--plan-marker-migration), ghi ở R2."})
+                                         "note": "marker schema v1 — đọc được (compat 1 phiên bản); writer v2 "
+                                                 "bật từ v1.35.16: --plan-marker-migration → chạy CANARY "
+                                                 "trước rồi mới migrate đại trà (user duyệt --apply)."})
                         if getattr(a, "plan_marker_migration", False):
                             marker_migration_plan.append({
                                 "profile": n, "fileId": _mr.get("fileId"),
@@ -1211,9 +1214,11 @@ def _cmd_profile_doctor_impl(a) -> int:
     if _degraded_reasons:   # r185/WP5: telemetry — performance gate chỉ xanh trên đường bulk
         out["degraded_reason"] = _degraded_reasons
     if getattr(a, "plan_marker_migration", False):   # r184 (ADR-0012): DRY-only, không cấp quyền ghi
-        out["marker_migration_plan"] = sorted(marker_migration_plan, key=lambda r: str(r.get("profile") or ""))
-        out["marker_migration_note"] = ("DRY plan v1→v2 — KHÔNG ghi ở R1; R2 chạy profile-backfill-markers "
-                                        "--force sau khi mọi reader đã hiểu v2.")
+        # v1.35.16 (R2): writer v2 ĐÃ BẬT — plan chốt thứ tự CANARY-trước, action chạy được per-profile.
+        out["marker_migration_plan"] = _migration_plan_finalize(marker_migration_plan)
+        out["marker_migration_note"] = ("DRY plan v1→v2 (writer v2 bật từ v1.35.16) — chạy CANARY trước, "
+                                        "verify profile-doctor sạch rồi mới migrate phần còn lại; "
+                                        "mọi lệnh --apply do user duyệt.")
     # #5: còn profile chưa kiểm (do --limit) → resume_command offset qua --skip (stateless, giữ cờ deep/fix/apply).
     _done = _skip + _run_total
     if _done < _total:
@@ -1592,16 +1597,21 @@ def _marker_required_keys(d: dict) -> tuple:
     return tuple(req)
 
 
-def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str | None = None) -> dict:
+def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str | None = None,
+                 meta_id: str | None = None) -> dict:
     """PURE (ADR-0003): dựng nội dung marker từ block config; GIỮ metadata MÔ TẢ của marker cũ
-    (description/style/relations/source_policy/created_at — phần mô tả sống trên marker, config không có)."""
+    (description/style/relations/source_policy/created_at — phần mô tả sống trên marker, config không có).
+    v1.35.16 (ADR-0012 R2 — reader v1/v2 LIVE từ r184): WRITER phát schema v2 + fingerprint canonical;
+    `meta_id` = fallback metaFolderId khi prof thiếu (marker luôn nằm trong chính _meta được ghi)."""
     prof = prof or {}
     ex = existing if isinstance(existing, dict) else {}
     ts = now or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    body = {"schema": _PROFILE_MARKER_SCHEMA, "profile": str(name or "")}
+    body = {"schema": _PROFILE_MARKER_SCHEMA_V2, "profile": str(name or "")}
     for k in _MARKER_IDENTITY_KEYS:
         v = prof.get(k)
         body[k] = v if isinstance(v, dict) else str(v or "")
+    if not str(body.get("metaFolderId") or "").strip() and str(meta_id or "").strip():
+        body["metaFolderId"] = str(meta_id)
     body["description"] = str(ex.get("description") or "")
     body["style"] = str(ex.get("style") or "")
     rel = dict(ex.get("relations")) if isinstance(ex.get("relations"), dict) else {}
@@ -1616,6 +1626,7 @@ def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str |
     body["created_at"] = str(ex.get("created_at") or ts)
     body["updated_at"] = ts
     body["updated_by"] = f"tl v{VERSION}"
+    body["fingerprint"] = _marker_fingerprint(body)   # v1.35.16 (ADR-0012 R2): đóng dấu CUỐI, sau mọi trường
     return body
 
 
@@ -1666,6 +1677,20 @@ def _marker_mutation_guard(mr: dict, expect_profile: str | None = None) -> dict 
                 return {"error": "PROFILE_MARKER_NAME_CONFLICT", "existing_profile": _mp,
                         "note": "Folder đã thuộc profile khác — không ghi đè định danh."}
     return None
+
+
+def _migration_plan_finalize(plan: list) -> list:
+    """PURE (v1.35.16, ADR-0012 R2 — TDD r186): chốt plan migration marker v1→v2 — sort tất định theo
+    profile, phần tử ĐẦU là CANARY (migrate 1 profile → verify doctor sạch → mới đại trà), action là lệnh
+    chạy được per-profile. Mutation LIVE vẫn do user duyệt/chạy — plan chỉ MÔ TẢ."""
+    rows = sorted((dict(r) for r in (plan or []) if isinstance(r, dict)),
+                  key=lambda r: str(r.get("profile") or ""))
+    for i, r in enumerate(rows):
+        r["canary"] = (i == 0)
+        r["action"] = (f"tl profile-backfill-markers --profile-name {r.get('profile')} --apply --force"
+                       + ("   # CANARY — verify `tl profile-doctor` sạch rồi mới migrate phần còn lại"
+                          if i == 0 else ""))
+    return rows
 
 
 def _template_id_norm(s: str) -> str:
@@ -1843,6 +1868,18 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
                                          "old_fileId": str(old_id or "")}})
     phases = {"upload": False, "readback_full": False, "enumerate": False,
               "cleanup": False, "prove_single": False}
+    # v1.35.16 (ADR-0012 R2 — TDD r186): body không hợp lệ (v2 thiếu trường bắt buộc theo manifestScope /
+    # fingerprint lệch) ⇒ REJECTED TRƯỚC upload — 0 mutation Drive, không tạo marker hỏng rồi mới phát hiện.
+    _bok, _berrs = _marker_validate(body)
+    if not _bok:
+        if run_id:
+            _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key, "ok": False,
+                                     "verify": {"status": "REJECTED", "errors": _berrs,
+                                                "repair": "bổ sung trường thiếu trong config/marker rồi chạy lại "
+                                                          "(own-scope cần notebookId/registryDocId/manifestId)"}})
+        return {"ok": False, "status": "REJECTED", "errors": _berrs, "verified": False,
+                "enumerate_ok": False, "cleanup_ok": False, "proven_single": False,
+                "phases": phases, "fileId": "", "trashed_old": [], "upload": None}
     try:
         up = g.post("upload", b64=_b64_text(json.dumps(body, ensure_ascii=False, indent=2)),
                     name=_PROFILE_MARKER_NAME, mime="application/json", folderId=str(meta_id),
@@ -3348,9 +3385,9 @@ def _cmd_profile_set_meta_impl(a) -> int:
             changes["templates"]["drive_id"] = _fid_u
         existing["templates"] = new_tpl
     _identity = {k: old.get(k) for k in _MARKER_IDENTITY_KEYS}   # identity từ MARKER (nguồn sự thật)
-    body = _marker_body(name, _identity, existing=existing)
-    w = _marker_write(g, mr.get("meta_folder_id") or str(prof.get("metaFolderId") or ""),
-                      body, old_id=mr.get("fileId") or "", run_id=rid)
+    _meta_w = str(mr.get("meta_folder_id") or prof.get("metaFolderId") or "")
+    body = _marker_body(name, _identity, existing=existing, meta_id=_meta_w)   # v1.35.16 R2: v2 đòi metaFolderId
+    w = _marker_write(g, _meta_w, body, old_id=mr.get("fileId") or "", run_id=rid)
     out.update({"ok": bool(w.get("ok")), "journal": rid,   # r184: chuỗi hậu điều đầy đủ
                 "marker": {"fileId": w.get("fileId"), "verified": w.get("verified"),
                            "status": w.get("status"), "cleanup_ok": w.get("cleanup_ok", True),

@@ -6300,10 +6300,14 @@ def run() -> int:
     _MK = "tra_luat_profile.json"
     _mk_beta_cfg = {"rootFolderId": "FB", "metaFolderId": "FBm", "notebookId": "nb-old",
                     "registryDocId": "RB", "manifestId": "MB", "categories": "own", "manifestScope": "own"}
+    # r186 (ADR-0012 R2): writer phát v2 + fingerprint — fixture VÁ TRƯỜNG sau _marker_body phải re-mint
+    # fingerprint, nếu không marker giả lập thành "v2 fingerprint lệch" và bị validate chặn ĐÚNG THIẾT KẾ.
+    def _remint186(d):
+        return {**d, "fingerprint": _TL_MODULE._marker_fingerprint(d)}
     # (1) PURE: _marker_body sinh từ config block — schema/định danh/relations nền vbqppl/materialize_preferred
     _mb86 = _TL_MODULE._marker_body("beta", _mk_beta_cfg)
     cases.append(("r86_marker_body_defaults",
-                  _mb86.get("schema") == "tra_luat_profile.v1" and _mb86.get("profile") == "beta"
+                  _mb86.get("schema") == "tra_luat_profile.v2" and _mb86.get("profile") == "beta"   # r186: writer v2
                   and _mb86.get("rootFolderId") == "FB" and _mb86.get("notebookId") == "nb-old"
                   and (_mb86.get("relations") or {}).get("base") == "vbqppl"
                   and _mb86.get("source_policy") == "materialize_preferred"))
@@ -6330,8 +6334,8 @@ def run() -> int:
         {"id": "FA", "name": "Du an A", "items": [], "marker": {"schema": "tra_luat_profile.v1", "profile": "duan_a",
                                                                 "rootFolderId": "FA", "notebookId": "nbA"}},
         {"id": "FK", "name": "Hong marker", "items": [], "marker_error": "MARKER_PARSE_FAILED: boom"},
-        {"id": "FB", "name": "Beta", "items": [], "marker": {**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
-                                                             "notebookId": "nb-new"}},
+        {"id": "FB", "name": "Beta", "items": [], "marker": _remint186({**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
+                                                                        "notebookId": "nb-new"})},
     ]
     _dc86 = _TL_MODULE._discover_classify(_fx86_folders, [], {"vbqppl": {"rootFolderId": "r1"},
                                                               "beta": {**_mk_beta_cfg}}, vbt_id="VBT")
@@ -6407,7 +6411,7 @@ def run() -> int:
                 "mkA": {"schema": "tra_luat_profile.v1", "profile": "duan_a", "rootFolderId": "FA",
                         "metaFolderId": "FAm", "notebookId": "nbA", "registryDocId": "RA", "manifestId": "MA",
                         "categories": "own", "manifestScope": "own"},
-                "mkB": {**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "notebookId": "nb-new"},
+                "mkB": _remint186({**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "notebookId": "nb-new"}),
                 "mkD": {"schema": "tra_luat_profile.v1", "profile": "vbqppl", "rootFolderId": "FD"},
             }
             _g86 = _FkG86(_tree86, dict(_markers86))
@@ -6487,8 +6491,8 @@ def run() -> int:
                 "schema": 2, "webappUrl": "https://x/exec", "token": "t", "defaultProfile": "vbqppl",
                 "profiles": {"vbqppl": {"rootFolderId": "r1"},
                              "beta": dict(_mk_beta_cfg)}}, ensure_ascii=False), encoding="utf-8")
-            _mk87 = {**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
-                     "description": "Hồ sơ BHXH Thái Nguyên", "style": "Văn phong trang trọng nội bộ."}
+            _mk87 = _remint186({**_TL_MODULE._marker_body("beta", _mk_beta_cfg),
+                                "description": "Hồ sơ BHXH Thái Nguyên", "style": "Văn phong trang trọng nội bộ."})
             _g87 = _FkG86({"FB": [{"id": "FBm", "name": "_meta", "type": "folder"}],
                            "FBm": [{"id": "mkB", "name": _MK, "mime": "application/json", "type": "file"}]},
                           {"mkB": dict(_mk87)})
@@ -6519,7 +6523,7 @@ def run() -> int:
                           and "Hồ sơ BHXH Thái Nguyên" in str(_o87a.get("instruction"))
                           and not _g87.uploads and not _g87.trashed))
             # (2) drift marker↔config → cảnh báo gợi ý profile-sync (marker vẫn thắng phần mô tả)
-            _g87.markers["mkB"] = {**_mk87, "notebookId": "nb-new"}
+            _g87.markers["mkB"] = _remint186({**_mk87, "notebookId": "nb-new"})   # r186: v2 re-mint fingerprint
             _rc87b, _o87b = _ld87(name="beta")
             cases.append(("r87_load_drift_warns_sync",
                           _rc87b == 0 and [d["field"] for d in _o87b.get("drift", [])] == ["notebookId"]
@@ -6908,7 +6912,7 @@ def run() -> int:
                              "beta": dict(_mk_beta_cfg),
                              "gamma": {"rootFolderId": "FC", "notebookId": "nbC"}}}, ensure_ascii=False),
                 encoding="utf-8")
-            _old91 = {**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "description": "mô tả cũ"}
+            _old91 = _remint186({**_TL_MODULE._marker_body("beta", _mk_beta_cfg), "description": "mô tả cũ"})
 
             class _FkG91(_FkG88):
                 # r184 (ADR-0012): _marker_write nay PROVE-ONE bằng re-list sau cleanup → fake phải
@@ -8376,8 +8380,11 @@ def run() -> int:
                       and isinstance(_d106, dict)))
 
         # Hai marker cùng profile ở hai root là xung đột định danh, không được last-write-wins.
-        _m106a = _TL_MODULE._marker_body("dup", {"rootFolderId": "R1"}, now="2026-01-01T00:00:00Z")
-        _m106b = _TL_MODULE._marker_body("dup", {"rootFolderId": "R2"}, now="2026-01-01T00:00:00Z")
+        # r186: v2 đòi metaFolderId — fixture minimal thêm meta để lỗi bị bắt là DUPLICATE, không phải invalid
+        _m106a = _TL_MODULE._marker_body("dup", {"rootFolderId": "R1", "metaFolderId": "M1"},
+                                         now="2026-01-01T00:00:00Z")
+        _m106b = _TL_MODULE._marker_body("dup", {"rootFolderId": "R2", "metaFolderId": "M2"},
+                                         now="2026-01-01T00:00:00Z")
         _rows106 = _TL_MODULE._profile_sync_rows(
             [{"id": "R1", "marker": _m106a}, {"id": "R2", "marker": _m106b}], {"vbqppl": {}})
         cases.append(("r106_duplicate_marker_profile_blocked",
@@ -16886,6 +16893,61 @@ def run() -> int:
             _t.join()
         return _state["max"] == 1 and _state["err"] == 0 and _TL_MODULE._REG_LANE is not None
     _t110("r185_reg_lane_serializes", _c185_reg_lane_serializes)
+
+    # ═══ r186 (ADR-0012 R2): marker WRITER v2 (schema v2 + fingerprint) + fail-closed body invalid
+    # TRƯỚC upload + migration plan có CANARY. Reader v1/v2 đã LIVE từ r184 — flip writer an toàn. ═══
+    _cfg186 = {"rootFolderId": "root186", "metaFolderId": "meta186", "notebookId": "nb",
+               "registryDocId": "rg", "manifestId": "mf", "categories": "own", "manifestScope": "own"}
+
+    def _c186_marker_body_v2_fingerprint():
+        _b = _TL_MODULE._marker_body("beta", _cfg186, now="2026-01-01T00:00:00Z")
+        _okv, _errs = _TL_MODULE._marker_validate(_b)
+        return (_b["schema"] == "tra_luat_profile.v2"
+                and _b["fingerprint"] == _TL_MODULE._marker_fingerprint(_b)
+                and _okv and not _errs)
+    _t110("r186_marker_body_writer_v2_fingerprint", _c186_marker_body_v2_fingerprint)
+
+    def _c186_marker_body_meta_id_fallback():
+        # prof thiếu metaFolderId → lấy meta_id nơi GHI (marker luôn nằm trong _meta đó);
+        # prof có sẵn → GIỮ giá trị prof, meta_id không ghi đè.
+        _p = {k: v for k, v in _cfg186.items() if k != "metaFolderId"}
+        _b1 = _TL_MODULE._marker_body("beta", _p, now="2026-01-01T00:00:00Z", meta_id="M9")
+        _b2 = _TL_MODULE._marker_body("beta", _cfg186, now="2026-01-01T00:00:00Z", meta_id="M9")
+        return _b1["metaFolderId"] == "M9" and _b2["metaFolderId"] == "meta186"
+    _t110("r186_marker_body_meta_id_fallback", _c186_marker_body_meta_id_fallback)
+
+    def _c186_marker_write_rejects_invalid_body():
+        # own-scope thiếu notebookId (fingerprint ĐÚNG — lỗi là trường thiếu, không phải drift)
+        # → fail-closed REJECTED TRƯỚC upload: 0 call mutation Drive.
+        _bad = _TL_MODULE._marker_body("beta", _cfg186, now="2026-01-01T00:00:00Z")
+        _bad["notebookId"] = ""
+        _bad.pop("fingerprint", None)
+        _bad["fingerprint"] = _TL_MODULE._marker_fingerprint(_bad)
+        _g = _FkG183(_bad)
+        _w = _TL_MODULE._marker_write(_g, "meta186", _bad, old_id="", run_id=None)
+        return (_w["ok"] is False and _w["status"] == "REJECTED"
+                and any("NOTEBOOK_ID" in e for e in (_w.get("errors") or []))
+                and not any(c[0] == "upload" for c in _g.calls))
+    _t110("r186_marker_write_rejects_invalid_body", _c186_marker_write_rejects_invalid_body)
+
+    def _c186_marker_write_v2_commit():
+        # happy path v2 trọn chuỗi hậu điều r184 (readback FULL kể cả fingerprint) + self-heal bản v1 cũ.
+        _b = _TL_MODULE._marker_body("beta", _cfg186, now="2026-01-01T00:00:00Z")
+        _g = _FkG183(_b, others={"fidOldV1"})
+        _w = _TL_MODULE._marker_write(_g, "meta186", dict(_b), old_id="", run_id=None)
+        return (_w["ok"] is True and _w["status"] == "COMMITTED"
+                and {t["fileId"] for t in _w["trashed_old"]} == {"fidOldV1"})
+    _t110("r186_marker_write_v2_commit", _c186_marker_write_v2_commit)
+
+    def _c186_migration_plan_canary():
+        _fin = _TL_MODULE._migration_plan_finalize
+        _rows = _fin([{"profile": "zeta", "fileId": "f2"}, {"profile": "alpha", "fileId": "f1"}])
+        return ([r["profile"] for r in _rows] == ["alpha", "zeta"]
+                and _rows[0]["canary"] is True and _rows[1]["canary"] is False
+                and "--profile-name alpha --apply --force" in _rows[0]["action"]
+                and "CANARY" in _rows[0]["action"]
+                and "--profile-name zeta --apply --force" in _rows[1]["action"])
+    _t110("r186_migration_plan_canary", _c186_migration_plan_canary)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

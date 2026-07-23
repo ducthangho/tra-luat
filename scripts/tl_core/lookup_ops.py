@@ -2138,16 +2138,19 @@ def _emit_raw_no_gdoc(name: str, as_json: bool) -> int:
         print(f"[tl] {note}")
     return 2
 
-def _read_doc_text(gdoc_id: str, config=None):
+def _read_doc_text(gdoc_id: str, config=None, *, use_cache: bool = True):
     """Đọc nguyên văn GDoc → text. THỨ TỰ: (B1) direct-media EXPORT text/plain bằng gws CRED (KHÔNG cần binary gws —
     chỉ cần ~/.config/gws/credentials.json → né GAS, hết spam FALLBACK) → transport→gws (binary) → webapp exporttext.
-    Trả str (rỗng nếu lỗi mọi đường). v1.31.2: mọi nhánh qua _sanitize_export_text (U1)."""
+    Trả str (rỗng nếu lỗi mọi đường). v1.31.2: mọi nhánh qua _sanitize_export_text (U1).
+
+    r183: `use_cache=False` cho đường ĐỌC-XEM markup (mark/raw) — cache extract_<id>.txt là bản CHUẨN
+    (strip); dùng nó cho mark/raw là trả bản khác chế độ người dùng xin mà không nói gì."""
     # (D — log rà: timeout văn bản lớn) TÁI DÙNG cache text mà cmd_extract/cmd_cache_build đã ghi ra đĩa
     # (extract_<gdoc>.txt) TRƯỚC khi export lại → xref/footnote-map trên cùng văn bản (vd Bộ luật Dân sự)
     # không phải export lần 2 (hết timeout > 20s). Chỉ dùng khi cache CÓ + đọc được.
     try:
         _cf = _cache_file(f"extract_{gdoc_id}.txt")
-        if _cf.exists():
+        if use_cache and _cf.exists():
             _ct = _cf.read_text(encoding="utf-8", errors="replace")
             if _ct.strip():
                 return _sanitize_export_text(_strip_font_runs(_ct))
@@ -2194,26 +2197,67 @@ def _text_looks_binary(s: str) -> bool:
     return s[:4].startswith("PK\x03\x04") or s[:5].startswith("%PDF") or ("\x00" in s[:4096])
 
 
-def _doc_text_fetch_binary(file_id: str, *, suffix: str = ".bin"):
+def _doc_text_fetch_binary(file_id: str, *, suffix: str = ".bin", export_mime: str | None = None):
     """A1 (v1.34.60): tải BINARY Drive → file tạm, trả Path hoặc None. Ưu tiên gws cred direct-media
-    (1 hop, không b64, không cap 9MB — mẫu _read_doc_text B1); fallback transport download. Caller tự dọn."""
+    (1 hop, không b64, không cap 9MB — mẫu _read_doc_text B1); fallback transport download. Caller tự dọn.
+
+    r183: `export_mime` để EXPORT file Google-native (Doc → .docx) — alt=media KHÔNG tải được Docs-native,
+    phải đi /export. Đây là đường duy nhất lấy được markup sửa đổi của một Google Doc."""
     dst = Path(tempfile.mkdtemp(prefix="tl_doctext_")) / f"doc{suffix}"
     try:
         _tlg = _imp("tl_gws")
         _cred = _tlg._read_gws_cred()
         if _cred and not getattr(_tlg, "_CRED_AUTH_DEAD", False):
-            _tlg._drive_media_download(file_id, str(dst), _cred)
+            _tlg._drive_media_download(file_id, str(dst), _cred, export_mime=export_mime)
             if dst.exists() and dst.stat().st_size > 0:
                 return dst
     except Exception:  # noqa: BLE001
         pass
     try:
-        rr = _imp("transport").drive_op("download", file_id=file_id, out=str(dst))
+        _kw = {"dest": str(dst), "export_mime": export_mime} if export_mime else {"out": str(dst)}
+        rr = _imp("transport").drive_op("download", file_id=file_id, **_kw)
         if isinstance(rr, dict) and rr.get("ok") and dst.exists() and dst.stat().st_size > 0:
             return dst
     except Exception:  # noqa: BLE001
         pass
     return None
+
+
+_GDOC_DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+# r183 — câu cảnh báo cho nguồn Google Doc KHÔNG chứng minh được là đã lọc markup. Bẫy đo 23-07-2026:
+# `--markup strip` trên Google Doc trả CHÍNH BẢN THÔ (chữ đã bỏ đọc thành quy phạm hiện hành) mà rc=0.
+_GDOC_MARKUP_WARN = (
+    "[markup] ⚠ KHÔNG CHỨNG MINH ĐƯỢC ĐÃ LỌC MARKUP ({fid}) — chế độ `--markup {mode}` không lọc được "
+    "gì: {why}. Bản Google Doc trong kho THƯỜNG ĐÁNH RƠI markup sửa đổi khi convert (giữ CHỮ, mất "
+    "gạch-bỏ) ⇒ KHÔNG được coi kết quả này là 'đã loại chữ đã bỏ', và KHÔNG dùng làm căn cứ trích dẫn "
+    "dự thảo. Đường đúng: về .docx GỐC (`tl download <id> --export-mime {dm}` hoặc file gốc) rồi đọc "
+    "lại; kiểm chứng bằng `--markup mark` (0 nhãn ⟦BỎ⟧ = không có dấu vết nào để lọc). "
+    "Muốn CHẶN CỨNG thay vì cảnh báo: thêm `--markup-strict`.")
+
+
+def _gdoc_docx_text(file_id: str, mode: str = "strip") -> tuple:
+    """r183: đọc một Google Doc QUA BẢN EXPORT .docx để giữ được markup sửa đổi (w:strike/w:ins/w:del) —
+    export text/plain của `_read_doc_text` san phẳng hết, nên `--markup` thành no-op IM LẶNG.
+    Trả (text, stats) — ("", None) nếu không export/không đọc được (caller tự rơi về đường cũ + cảnh báo)."""
+    p = _doc_text_fetch_binary(file_id, suffix=".docx", export_mime=_GDOC_DOCX_MIME)
+    if p is None:
+        return "", None
+    try:
+        with open(p, "rb") as _fh:
+            if not _fh.read(4).startswith(b"PK\x03\x04"):   # export lỗi → HTML/JSON lỗi, không phải docx
+                return "", None
+        st = _imp("docx_markup").scan_file(p)
+        t = _docx_unzip_text(p, mode or "strip")
+        return (t, st) if t else ("", None)
+    except Exception:  # noqa: BLE001
+        return "", None
+    finally:
+        try:
+            os.unlink(p)
+            os.rmdir(Path(p).parent)
+        except Exception:  # noqa: BLE001 — temp OS tự dọn
+            pass
 
 
 def _docx_unzip_text(path, mode: str = "strip") -> str:
@@ -2240,24 +2284,64 @@ def _docx_unzip_text(path, mode: str = "strip") -> str:
 
 
 def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None,
-                  markup: str = "strip") -> tuple:
+                  markup: str = "strip", meta=None) -> tuple:
     """A1 (v1.34.60 — kế hoạch NLM-fallback E1–E3, TIỀN ĐỀ E1): MỘT đường đọc text cho MỌI định dạng.
     Route theo mime/tên (manifest entry): GDoc→export (_read_doc_text, giữ đường cũ); .docx→download+unzip
     word/document.xml; .pdf→download+pdftotext (_read_local_text_for_analysis). Không rõ định dạng → thử
     export rồi sniff binary. Đọc được → ghi cache extract_<id>.txt (chung khoá với extract/cache-build —
-    lần sau khỏi export). Trả (text, source) với source ∈ {cache,gdoc,docx,pdf}; fail mọi đường → ("", "")."""
+    lần sau khỏi export). Trả (text, source) với source ∈ {cache,gdoc,gdoc-docx,docx,pdf}; fail mọi
+    đường → ("", "").
+
+    r183 (bẫy IM LẶNG đo 23-07-2026): nhánh gdoc đi export text/plain — ĐÁNH RƠI mọi dấu vết sửa đổi ⇒
+    `--markup` thành no-op mà vẫn rc=0 (đo: cả 3 chế độ 25.339 ký tự = BẢN THÔ, trong khi .docx gốc
+    strip=21.131 ⇒ 4.405 ký tự chữ ĐÃ BỎ đọc thành quy phạm hiện hành, sinh 6 phát hiện SAI). Nay:
+    (a) gdoc + strip/mark → EXPORT .docx rồi lọc qua docx_markup như nhánh .docx; (b) không lấy được
+    markup (export fail / bản convert đã mất dấu vết / cache cũ không chứng nhận) → CẢNH BÁO TƯỜNG MINH
+    ra stderr + khai vào `meta`, KHÔNG bao giờ trả kết quả im lặng như thể đã lọc.
+    `meta` (dict, tuỳ chọn) nhận: markup_mode · markup_filter_ran · markup_found · markup_warning."""
     fid = str(file_id or "").strip()
+    _mode = (markup or "strip").strip().lower()
+    _meta = meta if isinstance(meta, dict) else {}
+    _meta.update({"markup_mode": _mode, "markup_filter_ran": False, "markup_found": False,
+                  "markup_warning": ""})
+
+    def _mk_warn(why: str) -> None:
+        """r183: `raw` là ĐỐI CHỨNG có chủ đích (người dùng XIN bản thô) ⇒ không cảnh báo; mọi chế độ
+        lọc mà không chứng minh được là đã lọc ⇒ nói thẳng ra stderr."""
+        if _mode == "raw" or _meta.get("markup_warning"):
+            return
+        w = _GDOC_MARKUP_WARN.format(fid=fid or "?", mode=_mode, why=why, dm=_GDOC_DOCX_MIME)
+        _meta["markup_warning"] = w
+        print(w, file=sys.stderr)
+
     if not fid:
         return "", ""
     # r182: chỉ chế độ CHUẨN (strip) mới được dùng/ghi cache — mark/raw là bản ĐỌC-XEM của người rà,
     # để lọt vào extract_<id>.txt sẽ bơm ⟦BỎ:…⟧ (hoặc chữ đã bỏ) vào corpus.
-    _mk_canon = (markup or "strip") == "strip"
+    _mk_canon = _mode == "strip"
+    _sidecar = f"extract_{fid}.txt.markup.json"
     if not refresh and _mk_canon:
         try:
             _cf = _cache_file(f"extract_{fid}.txt")
             if _cf.exists():
                 _ct = _cf.read_text(encoding="utf-8", errors="replace")
                 if _ct.strip():
+                    # r183: cache do đường export text/plain (cmd_extract, hoặc doc-text TRƯỚC r183) ghi
+                    # KHÔNG hề qua docx_markup. Không có sidecar chứng nhận ⇒ coi như CHƯA lọc và nói ra.
+                    _cert = {}
+                    try:
+                        _sf = _cache_file(_sidecar)
+                        if _sf.exists():
+                            _cert = json.loads(_sf.read_text(encoding="utf-8")) or {}
+                    except Exception:  # noqa: BLE001
+                        _cert = {}
+                    if _cert.get("filter_ran"):
+                        _meta["markup_filter_ran"] = True
+                        _meta["markup_found"] = bool(_cert.get("found"))
+                    else:
+                        _mk_warn("text lấy từ CACHE `extract_<id>.txt` KHÔNG kèm chứng nhận đã-lọc "
+                                 "(cache cũ, hoặc do `tl extract` ghi từ export text/plain) — đọc lại "
+                                 "bằng `--refresh`")
                     return _ct, "cache"
         except Exception:  # noqa: BLE001
             pass
@@ -2279,15 +2363,29 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
     else:
         kind = ""
     text, src = "", ""
-    if kind in ("gdoc", ""):
+    # r183 (a): Google Doc + chế độ LỌC → đi qua bản EXPORT .docx, là đường DUY NHẤT còn giữ được
+    # w:strike/w:ins/w:del. Ưu tiên TRƯỚC export text/plain (vốn san phẳng hết ⇒ no-op im lặng).
+    if kind == "gdoc" and _mode != "raw":
+        _tg, _stg = _gdoc_docx_text(fid, _mode)
+        if _tg:
+            text, src = _tg, "gdoc-docx"
+            _meta["markup_filter_ran"] = True
+            _meta["markup_found"] = bool(_stg and any(_stg.values()))
+            if not _meta["markup_found"]:
+                _mk_warn("bản .docx export từ Google Doc KHÔNG mang dấu vết sửa đổi nào "
+                         "(del=0, strike=0, ins=0) — không có gì để lọc")
+    if not text and kind in ("gdoc", ""):
         # live-smoke 2026-07-16 bắt: máy lazy-creds → GAS trong _read_doc_text RAISE 'Thiếu TL_WEBAPP/
         # TL_TOKEN' — KHÔNG được xuyên thủng; nuốt để còn thử đường binary (gws cred direct không cần token).
         try:
-            t = _read_doc_text(fid, config)
+            t = _read_doc_text(fid, config, use_cache=_mk_canon)
         except (SystemExit, Exception):  # noqa: BLE001
             t = ""
         if t and not _text_looks_binary(t):
             text, src = t, "gdoc"
+            # r183 (b): đây là text/plain — docx_markup KHÔNG chạy được trên nó. Im lặng là hành vi cấm.
+            _mk_warn("chỉ đọc được qua export text/plain (export .docx không dùng được) — định dạng "
+                     "gạch-bỏ đã bị san phẳng nên bộ lọc markup KHÔNG chạy trên nguồn này")
     if not text and kind in ("docx", "pdf", ""):
         p = _doc_text_fetch_binary(fid, suffix={"docx": ".docx", "pdf": ".pdf"}.get(kind, ".bin"))
         if p is not None:
@@ -2295,9 +2393,14 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                 with open(p, "rb") as _fh:
                     head = _fh.read(8)
                 if kind == "docx" or (kind == "" and head.startswith(b"PK\x03\x04")):
-                    t = _docx_unzip_text(p, markup or "strip")
+                    t = _docx_unzip_text(p, _mode)
                     if t:
                         text, src = t, "docx"
+                        _meta["markup_filter_ran"] = _mode != "raw"
+                        try:   # r183: khai số đếm thật để caller/JSON nói được ĐÃ lọc cái gì
+                            _meta["markup_found"] = any(_imp("docx_markup").scan_file(p).values())
+                        except Exception:  # noqa: BLE001
+                            pass
                 elif kind == "pdf" or (kind == "" and head.startswith(b"%PDF")):
                     t, _w = _read_local_text_for_analysis(Path(p))
                     if t:
@@ -2318,6 +2421,12 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
             _cf = _cache_file(f"extract_{fid}.txt")
             _cf.parent.mkdir(parents=True, exist_ok=True)
             _cf.write_text(text, encoding="utf-8")
+            # r183: SIDECAR chứng nhận — lần đọc cache sau biết text này ĐÃ qua docx_markup hay chưa.
+            # Không có sidecar = cache cũ/đường text-plain ⇒ lần sau cảnh báo thay vì im lặng.
+            _cache_file(_sidecar).write_text(
+                json.dumps({"v": "r183", "filter_ran": bool(_meta.get("markup_filter_ran")),
+                            "found": bool(_meta.get("markup_found")), "source": src},
+                           ensure_ascii=False), encoding="utf-8")
         except Exception:  # noqa: BLE001 — cache best-effort, không chặn kết quả
             pass
     return text, src
@@ -2339,8 +2448,16 @@ def cmd_doc_text(a) -> int:
     except (SystemExit, Exception):  # noqa: BLE001
         pass
     fid = str(getattr(a, "file_id", "") or "").strip()
+    _meta = {}
     text, src = _doc_text_any(fid, refresh=getattr(a, "refresh", False),
-                              markup=str(getattr(a, "markup", "strip") or "strip"))
+                              markup=str(getattr(a, "markup", "strip") or "strip"), meta=_meta)
+    # r183: --markup-strict = KHÔNG chứng minh được đã lọc thì KHÔNG trả văn bản. Thà thiếu văn bản còn
+    # hơn có văn bản mà người đọc tưởng đã loại chữ đã bỏ (bẫy 23-07: 6 phát hiện SAI từ bản thô).
+    if _meta.get("markup_warning") and getattr(a, "markup_strict", False):
+        print(json.dumps({"ok": False, "error": "MARKUP_UNVERIFIED", "file_id": fid, "source": src,
+                          "markup_mode": _meta.get("markup_mode"),
+                          "note": _meta.get("markup_warning")}, ensure_ascii=False), file=sys.stderr)
+        return 3
     if not text:
         print(json.dumps({"ok": False, "error": "DOC_TEXT_UNAVAILABLE", "file_id": fid,
                           "note": "Không đọc được text (cache/GDoc-export/docx-unzip/pdftotext đều fail) — "
@@ -2353,14 +2470,25 @@ def cmd_doc_text(a) -> int:
         Path(a.out).write_text(body, encoding="utf-8")
         print(f"[tl] doc-text → {a.out} ({len(body)} ký tự, via {src})")
         return 0
+    _cut = bool(_mx and len(body) > _mx)
     if getattr(a, "json", False):
         print(_json_dumps({"ok": True, "schema": "doc_text.v1", "file_id": fid, "source": src,
                            "chars": len(body), "dieu": getattr(a, "dieu", None) or None,
-                           "truncated": bool(_mx and len(body) > _mx),
+                           "truncated": _cut,
+                           "markup_mode": _meta.get("markup_mode"),
+                           "markup_filter_ran": bool(_meta.get("markup_filter_ran")),
+                           "markup_found": bool(_meta.get("markup_found")),
+                           "markup_warning": _meta.get("markup_warning") or None,
                            "text": body[:_mx] if _mx else body},
                           deterministic=_deterministic_enabled(a)))
         return 0
     print(body[:_mx] if _mx else body)
+    # r183: cắt mà không báo ⇒ hai chế độ markup đều bị cắt về CÙNG số ký tự và trông y hệt nhau —
+    # đúng cái đã suýt làm chẩn sai hôm 23-07 khi so độ dài strip vs raw.
+    if _cut:
+        print(f"[tl] ⚠ ĐẦU RA BỊ CẮT: in {_mx}/{len(body)} ký tự (--max {_mx}). So sánh độ dài/nội dung "
+              f"giữa các chế độ trên bản bị cắt là VÔ NGHĨA — dùng `--max 0 --out <file>` để lấy toàn văn.",
+              file=sys.stderr)
     return 0
 
 

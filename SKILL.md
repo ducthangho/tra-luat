@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.12 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.13 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -88,7 +88,7 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 16. **Registry chỉ ghi sự thật ĐÃ XÁC MINH vật lý** — nghi ngờ → để stale (reconcile chữa), KHÔNG ghi trước-xác-minh-sau.
 17. **NLM chết ≠ dừng (v1.34.60/61)** — hard-dead (probe 1 lần+cache; transient retry): đường ĐỌC `nlm-content/query/cross` tự fallback CORPUS — content đọc GDoc theo sid (lossless); query/cross VERBATIM-RETURN ≤5 văn bản (+Điều cắt) cho agent tự tổng hợp, KHÔNG máy sinh RAG; >5/mơ hồ → chỉ ứng viên. Đường ĐẨY `nlm-add`/ingest-* → DEFER (`nlm_status=deferred`+batch-link; corpus KHÔNG true — chống corpus-ảo); `nlm-list` → STALE_CACHE advisory (≠ bằng chứng vật lý). Audit/DRY → tiếp trên cache stale cờ `UNVERIFIED_NLM_STATE` (belief, không xử theo); GHI-cần-vật-lý (migrate/reconcile --apply) → DEFER + resume-artifact `--from-plan` — KHÔNG ghi trên belief. Fallback rc=0 + cảnh báo stderr + `nlm_status:offline`; tắt: `--no-fallback`/`TL_NLM_FALLBACK=0`. Text mọi định dạng: `tl doc-text <id> [--dieu N]` (.docx unzip THẬT, hết binary).
 18. **CORPUS-FIRST khi TÌM/NẠP** — Khi người dùng yêu cầu tìm hoặc nạp văn bản, PHẢI rà corpus VBQPPL + mọi shard TRƯỚC khi tìm/tải nguồn ngoài: `tl reg-query --sohieu <sh>` (thử các biến thể số hiệu) · `tl locate "<tên>"` · `tl dedup-check` · `tl slot-audit --all-shards` (notebook nền 743ed200, shard VBQPPL-2 45739ff7, shard mới nếu có). CHỈ tìm/tải bên ngoài và nạp phần MISS. Đã có bản corpus=true (nhất là VBHN mới nhất) → KHÔNG nạp trùng, chỉ báo "đã có" + vị trí. Áp cho `fetch-route`/`fetch-links`/`find-doc` và mọi yêu cầu "lấy văn bản này về".
-19. **RÀ DỰ THẢO & KHẲNG ĐỊNH PHÁP LÝ** — (a) rà dự thảo PHẢI **ĐỌC KÈM TỜ TRÌNH**: tách MỤC TIÊU CHÍNH SÁCH (tờ trình) khỏi CÂU CHỮ QUY PHẠM (dự thảo) — phần lớn "vênh" là **KHÁC TẦNG**; chỉ kết luận mâu thuẫn khi ĐỐI CHIẾU CÙNG TẦNG. (b) **.docx dự thảo có MARKUP:** `w:strike`/`w:del` = **ĐÃ BỎ**, `w:ins` = **MỚI THÊM** — reader đã lọc (r182, cảnh báo stderr); soi: `tl doc-text <id> --markup mark` (⟦BỎ:…⟧). KHÔNG kết luận trên bản chưa lọc. (c) **MỌI KHẲNG ĐỊNH PHÁP LÝ phải verify NGUYÊN VĂN** qua `get_legal_article` (AI Tra Cứu Luật) hoặc `tl extract` — **CẤM nêu theo trí nhớ**, kể cả điều tưởng đã thuộc.
+19. **RÀ DỰ THẢO & KHẲNG ĐỊNH PHÁP LÝ** — (a) rà dự thảo PHẢI **ĐỌC KÈM TỜ TRÌNH**: tách MỤC TIÊU CHÍNH SÁCH (tờ trình) khỏi CÂU CHỮ QUY PHẠM (dự thảo) — phần lớn "vênh" là **KHÁC TẦNG**; chỉ kết luận mâu thuẫn khi ĐỐI CHIẾU CÙNG TẦNG. (b) **dự thảo có MARKUP:** `w:strike`/`w:del` = **ĐÃ BỎ**, `w:ins` = **MỚI THÊM** — r182 lọc .docx (soi `--markup mark` ⟦BỎ⟧); ★r183 Google Doc hay MẤT markup ⇒ doc-text tự export .docx, không lọc được thì **cảnh báo `[markup]`** (`--markup-strict` rc=3) ⇒ về .docx GỐC. (c) **MỌI KHẲNG ĐỊNH PHÁP LÝ phải verify NGUYÊN VĂN** qua `get_legal_article` (AI Tra Cứu Luật) hoặc `tl extract` — **CẤM nêu theo trí nhớ**, kể cả điều tưởng đã thuộc.
 
 ## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
 > ## ★★ BƯỚC 0 — CHỌN ĐÚNG 1 ĐƯỜNG THEO MÔI TRƯỜNG (ĐỪNG TRỘN, ĐỪNG ĐỤNG `_parts` SỚM) ★★

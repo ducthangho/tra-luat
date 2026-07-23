@@ -11861,7 +11861,9 @@ def run() -> int:
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (
                     _dx if fid == "dDOCX121" else (_pdf if fid == "pPDF121" else None))
                 # đường export cũ với .docx trả BINARY zip — _doc_text_any KHÔNG được dùng nó cho .docx
-                _TL_MODULE._read_doc_text = lambda fid, config=None: (
+                # r183: reader nhận thêm kwarg `use_cache` → double PHẢI nuốt **kw, nếu không TypeError
+                # bị `except Exception` của _doc_text_any nuốt và ca thành âm tính GIẢ.
+                _TL_MODULE._read_doc_text = lambda fid, config=None, **kw: (
                     "GDOC TEXT 121" if fid == "gGDOC121" else "PK\x03\x04BINARYZIPRAC")
                 _TL_MODULE._read_local_text_for_analysis = lambda p, max_chars=500000: ("PDF TEXT 121", [])
                 _txt, _src = _TL_MODULE._doc_text_any("dDOCX121")
@@ -11879,7 +11881,7 @@ def run() -> int:
                 _ok_p = _tp == "PDF TEXT 121" and "pdf" in _sp
                 _ok_bin = (_TL_MODULE._text_looks_binary("PK\x03\x04abc121")
                            and not _TL_MODULE._text_looks_binary("Điều 1. text thường 121"))
-                _TL_MODULE._read_doc_text = lambda fid, config=None: ""
+                _TL_MODULE._read_doc_text = lambda fid, config=None, **kw: ""
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None
                 _t3, _ = _TL_MODULE._doc_text_any("dGHOST121")
                 _ok_neg = _t3 == ""
@@ -11893,13 +11895,13 @@ def run() -> int:
                                  '<w:p><w:r><w:t>Điều 1. Nội dung docx thật 121</w:t></w:r></w:p>'
                                  '</w:body></w:document>')
 
-                def _rdt_raise121(fid, config=None):
+                def _rdt_raise121(fid, config=None, **kw):
                     raise RuntimeError("Thiếu TL_WEBAPP/TL_TOKEN (mô phỏng máy lazy-creds)")
                 _TL_MODULE._read_doc_text = _rdt_raise121
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: (_dx2 if fid == "rRAW121" else None)
                 _tr, _sr = _TL_MODULE._doc_text_any("rRAW121")   # không có entry → sniff PK → unzip
                 _ok_raise = "Nội dung docx thật 121" in _tr and _sr == "docx"
-                _TL_MODULE._read_doc_text = lambda fid, config=None: ""
+                _TL_MODULE._read_doc_text = lambda fid, config=None, **kw: ""
                 _TL_MODULE._doc_text_fetch_binary = lambda fid, **k: None
                 _ns = argparse.Namespace(file_id="dDOCX121", out=None, dieu="1", max=0, refresh=False,
                                          json=True, config=None, profile=None, deterministic=False)
@@ -16003,6 +16005,138 @@ def run() -> int:
                 and _cache_sau == "CACHE_CU")              # mark: KHÔNG ghi đè cache chuẩn
     _t110("r182_markup_mode_bypasses_cache", _c182_markup_bypasses_cache)
 
+    # ══════════ r183 — NGUỒN GOOGLE DOC: `--markup` KHÔNG ĐƯỢC LÀ NO-OP IM LẶNG ══════════
+    # Đo thật 23-07-2026 (Dự thảo Luật BHXH 16/7, drive_id 1ltPv6…): `tl doc-text <id> --markup strip`
+    # trả CHÍNH BẢN THÔ (25.339 ký tự cả 3 chế độ, 0 nhãn ⟦BỎ⟧) trong khi .docx gốc strip=21.131 —
+    # 4.405 ký tự chữ ĐÃ BỎ bị đọc như quy phạm hiện hành ⇒ 6 phát hiện SAI trong một đợt rà soát.
+    # Gốc: nhánh gdoc của `_doc_text_any` đi `_read_doc_text` (export text/plain — ĐÁNH RƠI mọi dấu vết
+    # sửa đổi) và KHÔNG hề đụng docx_markup, nhưng vẫn trả rc=0 như thể đã lọc. IM LẶNG = tệ nhất.
+    def _fake_gdoc_env(fx_docx, plain_text):
+        """Giả lập Drive: export .docx trả `fx_docx`; export text/plain (đường _read_doc_text) trả
+        `plain_text` (chữ gạch bỏ đã bị san phẳng thành chữ thường như Google Doc vẫn làm)."""
+        _sav = (_TL_MODULE._doc_text_fetch_binary, _TL_MODULE._read_doc_text)
+        def _fb(fid, *, suffix=".bin", export_mime=None):
+            return fx_docx if (export_mime and fx_docx) else None
+        _TL_MODULE._doc_text_fetch_binary = _fb
+        _TL_MODULE._read_doc_text = lambda fid, config=None, **kw: plain_text
+        return _sav
+
+    def _restore_gdoc_env(_sav):
+        _TL_MODULE._doc_text_fetch_binary, _TL_MODULE._read_doc_text = _sav
+
+    _GDOC_ENTRY183 = {"mime": "application/vnd.google-apps.document", "name": "Dự thảo.gdoc"}
+    _PLAIN183 = "Điều 1. " + " ".join(_BO182 + _GIU182)      # ← bản THÔ mà export text/plain trả về
+
+    # (Fix1 — ca CHỈ-NÓ-CHẶN) gdoc + --markup strip: phải EXPORT .docx rồi lọc qua docx_markup.
+    #        Trước r183: trả thẳng _PLAIN183 (còn nguyên GACH_BO/DEL_BO) ⇒ ca này ĐỎ.
+    def _c183_gdoc_qua_docx():
+        # BẢN RIÊNG: `_doc_text_any`/`_gdoc_docx_text` unlink file tạm sau khi đọc (ca r182 trước đó đã
+        # xoá mất `fixture.docx`) ⇒ mỗi ca phải tự dựng bản của mình.
+        _fx = _mkdocx182(str(_d182 / "gdoc_markup.docx"), _BODY182)
+        _fid = "r183gdoc"
+        _cf = _TL_MODULE._cache_file(f"extract_{_fid}.txt")
+        _cf.unlink(missing_ok=True)
+        _sav = _fake_gdoc_env(_fx, _PLAIN183)
+        try:
+            _t, _s = _TL_MODULE._doc_text_any(_fid, entry=_GDOC_ENTRY183, markup="strip", refresh=True)
+        finally:
+            _restore_gdoc_env(_sav)
+            _cf.unlink(missing_ok=True)
+            _TL_MODULE._cache_file(f"extract_{_fid}.txt.markup.json").unlink(missing_ok=True)
+        return _doc182(_t) and _s == "gdoc-docx"
+    _t110("r183_gdoc_strip_qua_docx_export", _c183_gdoc_qua_docx)
+
+    # (Fix2) Không lấy được markup (Google Doc đã đánh rơi khi convert, hoặc export .docx fail) ⇒ PHẢI
+    #        cảnh báo TƯỜNG MINH ra stderr + khai trong meta. Không có markup KHÔNG chứng minh được là
+    #        văn bản sạch — chỉ chứng minh ta không thấy gì; người rà phải biết để về .docx gốc.
+    def _c183_canh_bao_khi_mat_markup():
+        import contextlib as _cl183, io as _io183
+        _fid = "r183clean"
+        _fx_clean = _mkdocx182(str(_d182 / "gdoc_clean.docx"),
+                               "<w:p>" + _RUN182.format("Điều 1. Sach") + "</w:p>")
+        _cf = _TL_MODULE._cache_file(f"extract_{_fid}.txt")
+        _cf.unlink(missing_ok=True)
+        _meta, _err = {}, _io183.StringIO()
+        _sav = _fake_gdoc_env(_fx_clean, "Điều 1. Sach")
+        try:
+            with _cl183.redirect_stderr(_err):
+                _t, _s = _TL_MODULE._doc_text_any(_fid, entry=_GDOC_ENTRY183, markup="strip",
+                                                  refresh=True, meta=_meta)
+                # raw = ĐỐI CHỨNG có chủ đích ⇒ KHÔNG cảnh báo (không ai tưởng nhầm là đã lọc)
+                _mraw = {}
+                _TL_MODULE._doc_text_any(_fid, entry=_GDOC_ENTRY183, markup="raw",
+                                         refresh=True, meta=_mraw)
+        finally:
+            _restore_gdoc_env(_sav)
+            _cf.unlink(missing_ok=True)
+            _TL_MODULE._cache_file(f"extract_{_fid}.txt.markup.json").unlink(missing_ok=True)
+        return ("Sach" in _t and _meta.get("markup_found") is False
+                and bool(_meta.get("markup_warning")) and "[markup]" in _err.getvalue()
+                and not _mraw.get("markup_warning"))
+    _t110("r183_gdoc_mat_markup_canh_bao", _c183_canh_bao_khi_mat_markup)
+
+    # (Fix3) `--markup-strict`: có cảnh báo ⇒ TỪ CHỐI in text (rc=3). Đường dành cho pipeline/thẩm tra —
+    #        thà không có văn bản còn hơn có văn bản tưởng đã lọc mà chưa lọc.
+    def _c183_strict_tu_choi():
+        import contextlib as _cl183, io as _io183, types as _ty183
+        _sav = _TL_MODULE._doc_text_any
+        def _stub(fid, **kw):
+            _m = kw.get("meta")
+            if isinstance(_m, dict):
+                _m.update({"markup_mode": "strip", "markup_found": False, "markup_filter_ran": False,
+                           "markup_warning": "[markup] ⚠ thử nghiệm"})
+            return "NOI_DUNG_CHUA_LOC", "gdoc"
+        _TL_MODULE._doc_text_any = _stub
+        _a = _ty183.SimpleNamespace(file_id="x", refresh=False, markup="strip", markup_strict=True,
+                                    dieu=None, max=0, out=None, json=False, config=None, profile=None)
+        _so, _se = _io183.StringIO(), _io183.StringIO()
+        try:
+            with _cl183.redirect_stdout(_so), _cl183.redirect_stderr(_se):
+                _rc = _TL_MODULE.cmd_doc_text(_a)
+        finally:
+            _TL_MODULE._doc_text_any = _sav
+        return _rc == 3 and "NOI_DUNG_CHUA_LOC" not in _so.getvalue() and "[markup]" in _se.getvalue()
+    _t110("r183_markup_strict_tu_choi_rc3", _c183_strict_tu_choi)
+
+    # (Fix4) `--max` cắt stdout mà KHÔNG báo ⇒ hai chế độ đều bị cắt về cùng số ký tự và trông y hệt
+    #        nhau (đo 23-07: suýt chẩn sai vì đúng bẫy này). Cắt thì phải nói là đã cắt.
+    def _c183_canh_bao_cat_stdout():
+        import contextlib as _cl183, io as _io183, types as _ty183
+        _sav = _TL_MODULE._doc_text_any
+        _TL_MODULE._doc_text_any = lambda fid, **kw: ("A" * 500, "gdoc-docx")
+        _a = _ty183.SimpleNamespace(file_id="x", refresh=False, markup="raw", markup_strict=False,
+                                    dieu=None, max=100, out=None, json=False, config=None, profile=None)
+        _so, _se = _io183.StringIO(), _io183.StringIO()
+        try:
+            with _cl183.redirect_stdout(_so), _cl183.redirect_stderr(_se):
+                _rc = _TL_MODULE.cmd_doc_text(_a)
+        finally:
+            _TL_MODULE._doc_text_any = _sav
+        return (_rc == 0 and len(_so.getvalue().strip()) == 100
+                and "CẮT" in _se.getvalue() and "--max 0" in _se.getvalue())
+    _t110("r183_canh_bao_cat_stdout", _c183_canh_bao_cat_stdout)
+
+    # (Fix5) CACHE CŨ (do `tl extract`/doc-text TRƯỚC r183 ghi từ export text/plain) vẫn nằm trên đĩa và
+    #        KHÔNG mang dấu vết markup nào. Đọc lại cache mà im lặng = tái diễn đúng bẫy cũ ⇒ cache
+    #        không có sidecar chứng nhận đã-lọc thì PHẢI cảnh báo (gợi ý --refresh).
+    def _c183_cache_cu_canh_bao():
+        import contextlib as _cl183, io as _io183
+        _fid = "r183cachecu"
+        _cf = _TL_MODULE._cache_file(f"extract_{_fid}.txt")
+        _cf.parent.mkdir(parents=True, exist_ok=True)
+        _cf.write_text("Điều 1. GACH_BO", encoding="utf-8")
+        _sc = _TL_MODULE._cache_file(f"extract_{_fid}.txt.markup.json")
+        _sc.unlink(missing_ok=True)
+        _meta, _err = {}, _io183.StringIO()
+        try:
+            with _cl183.redirect_stderr(_err):
+                _t, _s = _TL_MODULE._doc_text_any(_fid, entry=_GDOC_ENTRY183, markup="strip", meta=_meta)
+        finally:
+            _cf.unlink(missing_ok=True)
+            _sc.unlink(missing_ok=True)
+        return (_s == "cache" and bool(_meta.get("markup_warning"))
+                and "[markup]" in _err.getvalue() and "--refresh" in _err.getvalue())
+    _t110("r183_cache_cu_khong_chung_nhan_canh_bao", _c183_cache_cu_canh_bao)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

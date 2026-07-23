@@ -1389,6 +1389,7 @@ _STUB_MAP = {
         '_ingest_local_ocr_gate',   # r180 S1 cổng OCR đường nền (note CUỐI dòng — I11)
         '_profile_dry_gate_soften',   # r180 S4 DRY .doc cũ VERIFY_AT_APPLY (note CUỐI dòng — I11)
         '_profile_push_chunks', 'cmd_profile_ingest_resume',   # v1.34.55 C4+C5 (note CUỐI dòng — I11)
+        '_resume_identity_gate', '_journal_head',   # r184 ADR-0011/D5 siết resume (note CUỐI dòng — I11)
         '_chunk_summaries', '_classify_doc_header', '_ingest_ckpt_load', '_ingest_ckpt_load_full', '_ingest_dedup_title_key', '_ingest_local_cat_gate',
         '_ingest_local_prev_state', '_ingest_missing_dedup_live', '_ingest_missing_partition', '_ingest_missing_select', '_ingest_target', '_ingest_verify_gate',
         '_profile_ingest_note', '_profile_read_probe_text', '_profile_source_quality', '_safe_profile_doc_name',
@@ -1472,6 +1473,7 @@ _STUB_MAP = {
         'cmd_profile_manifest', 'cmd_profile_rebuild_registry', 'cmd_profile_rename', 'cmd_profile_use',
         # P1 marker (v1.34.22, ADR-0003)
         '_marker_body', '_marker_validate', '_marker_diff', '_marker_find_in_items', '_marker_read', '_marker_write',
+        '_marker_fingerprint', '_marker_required_keys', '_marker_mutation_guard',   # r184 (ADR-0012)
         '_config_candidates_report', '_profile_sync_rows', '_cmd_profile_sync_impl', '_cmd_profile_backfill_markers_impl',
         'cmd_profile_sync', 'cmd_profile_backfill_markers',
         '_profile_block_meta', '_cmd_profile_load_impl', 'cmd_profile_load',   # P2 (v1.34.24)
@@ -1497,7 +1499,7 @@ _STUB_MAP = {
     ],
     "release": [
         '_sha256_file', '_write_text_atomic',   # I11
-        '_build_release_manifest', '_release_should_include', '_verify_release_manifest', 'cmd_bundle_export', 'cmd_determinism_audit', 'cmd_release_bundle',
+        '_build_release_manifest', '_release_should_include', '_skill_links_findings', '_verify_release_manifest', 'cmd_bundle_export', 'cmd_determinism_audit', 'cmd_release_bundle',
         'cmd_release_check', 'cmd_release_manifest', 'cmd_release_verify',
     ],
     "resolve": [
@@ -1558,6 +1560,8 @@ _REG_CLEAR_PROTECTED = _tl_source_ops._REG_CLEAR_PROTECTED   # ĐỢT A v1.34.64
 # v1.34.22 (P1, ADR-0003): hằng marker profile (hàm rebase — kể cả classify._discover_classify — đọc globals tl)
 _PROFILE_MARKER_NAME = _tl_profile_mgmt._PROFILE_MARKER_NAME
 _PROFILE_MARKER_SCHEMA = _tl_profile_mgmt._PROFILE_MARKER_SCHEMA
+_PROFILE_MARKER_SCHEMA_V2 = _tl_profile_mgmt._PROFILE_MARKER_SCHEMA_V2   # r184 (ADR-0012) — bẫy I11: hằng mới PHẢI re-export
+_MARKER_SCHEMAS_READABLE = _tl_profile_mgmt._MARKER_SCHEMAS_READABLE     # r184 — như trên
 _MARKER_IDENTITY_KEYS = _tl_profile_mgmt._MARKER_IDENTITY_KEYS
 _PROFILE_SYSPROMPT_NAME = _tl_profile_mgmt._PROFILE_SYSPROMPT_NAME   # P3 (v1.34.25)
 _SEED_RAW_EXT_RE = _tl_profile_mgmt._SEED_RAW_EXT_RE                 # P3 — bẫy I11: hằng mới PHẢI re-export

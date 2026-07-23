@@ -511,6 +511,24 @@ def _build_release_manifest(root: Path) -> dict:
     }
 
 
+def _skill_links_findings(skill_text: str, manifest_paths) -> dict:
+    """PURE (r184/REL-01): đối chiếu MỌI con trỏ `references/...` trong SKILL.md với FILE-SET của
+    release manifest — không phải cây đĩa. Cây dev có thể chứa thư mục dev-only (release exclude) làm
+    gate cây XANH nhưng artifact ĐỎ; nguồn sự thật của "link sống lúc runtime" là package-set.
+    Link glob (dừng trước `*`) và link thư mục khớp theo PREFIX; manifest rỗng → mọi link fail-closed."""
+    links = sorted({m.rstrip(".,;:)]}") for m in re.findall(r"references/[A-Za-z0-9_./\-]+", str(skill_text or ""))})
+    paths = [str(p) for p in (manifest_paths or [])]
+    missing = []
+    for link in links:
+        if link.endswith("/"):
+            hit = any(p.startswith(link) for p in paths)
+        else:
+            hit = link in paths or any(p.startswith(link + "/") for p in paths)
+        if not hit:
+            missing.append(link)
+    return {"links_checked": len(links), "links_missing": missing, "links_ok": not missing}
+
+
 def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
     root = root.resolve()
     raw_files = manifest.get("files") if isinstance(manifest, dict) else None
@@ -592,6 +610,22 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
     required_missing = [x for x in (list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)) if not (root / x).exists()]
     if required_missing:
         ok = False
+    # r184 (REL-01): con trỏ runtime trong SKILL.md phải nằm trong PACKAGE-SET (expected của manifest) —
+    # kiểm exists() trên cây đĩa để lọt thư mục dev-only bị release-exclude (gate cây xanh, artifact đỏ).
+    skill_links = {"links_checked": 0, "links_missing": [], "links_ok": True, "skipped": "NO_SKILL_MD"}
+    _sk_path = root / "SKILL.md"
+    if _sk_path.exists():
+        try:
+            _sk_text = _sk_path.read_text(encoding="utf-8", errors="replace")
+        except OSError as _sk_err:
+            _sk_text = None
+            errors.append(f"SKILL_LINKS_UNREADABLE:{type(_sk_err).__name__}")
+            ok = False
+        if _sk_text is not None:
+            skill_links = _skill_links_findings(_sk_text, sorted(expected))
+            if not skill_links["links_ok"]:
+                errors.append("SKILL_LINKS_NOT_IN_PACKAGE:" + ",".join(skill_links["links_missing"][:10]))
+                ok = False
     package_hash_current_expected = hashlib.sha256("\n".join(
         f"{c['path']}\0{c.get('actual_size', -1)}\0{c.get('actual_sha256')}"
         for c in checks if c.get("actual_sha256")
@@ -614,6 +648,7 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         "extra_files": extra[:200],
         "missing_from_current_manifest": missing_from_current_manifest[:200],
         "required_missing": required_missing,
+        "skill_links": skill_links,
         "errors": errors,
         "package_hash_expected": manifest.get("package_hash"),
         "package_hash_current": package_hash_current_expected,

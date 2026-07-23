@@ -440,7 +440,7 @@ def cmd_profile_rename(a) -> int:
     marker_result = _marker_write(
         g, str(mr.get("meta_folder_id") or meta_id),
         _marker_body(new, marker_prof, existing=marker), old_id=str(mr.get("fileId") or ""), run_id=rid)
-    marker_complete = bool(marker_result.get("verified")) and bool(marker_result.get("cleanup_ok", True))
+    marker_complete = bool(marker_result.get("ok"))   # r184: đủ chuỗi hậu điều (readback+enumerate+cleanup+prove-one)
     if not marker_complete:
         rollback = _rename_profile_config(getattr(a, "config", None), new, old, False)
         out = {**plan, "ok": False, "error": "PROFILE_RENAME_MARKER_FAILED",
@@ -870,8 +870,7 @@ def _cmd_profile_adopt_impl(a) -> int:
                                                         existing=_old_mk.get("marker")),
                                            old_id=_old_mk.get("fileId") or "",
                                            run_id=_apply_journal_start("profile-adopt-marker", {"profile": name}))
-    marker_complete = bool(_marker_result and _marker_result.get("verified")
-                           and _marker_result.get("cleanup_ok", True))
+    marker_complete = bool(_marker_result and _marker_result.get("ok"))   # r184: chuỗi hậu điều đầy đủ
     cfgp = (_persist_profile_config(getattr(a, "config", None), name, prof_block)
             if marker_complete else None)
     final_ok = marker_complete and bool(cfgp)
@@ -922,6 +921,7 @@ def _cmd_profile_doctor_impl(a) -> int:
     _run_total = len(_names_run)
     _vbt_root_id = None   # v1.34.36 (backlog #2 handoff 2026-07-11): lazy bootstrap 1 lần cho check root==VBT
     findings, infos_all = [], {}
+    marker_migration_plan = []   # r184 (ADR-0012): DRY plan v1→v2, chỉ gom khi --plan-marker-migration
     for _idx, n in enumerate(_names_run, 1):
         _before_len = len(findings)
         prof = profs.get(n) if isinstance(profs.get(n), dict) else {}
@@ -982,6 +982,19 @@ def _cmd_profile_doctor_impl(a) -> int:
                                          "fields": [d["field"] for d in _mdiffs],
                                          "note": "marker ≠ config — marker là nguồn sự thật: `tl profile-sync "
                                                  "--apply`; marker SAI → profile-backfill-markers --force."})
+                    # r184 (ADR-0012): marker v1 = schema cũ — cảnh báo + (nếu --plan-marker-migration)
+                    # gom DRY plan v1→v2. KHÔNG auto-migrate ở R1.
+                    if str((_mr.get("marker") or {}).get("schema") or "") != _PROFILE_MARKER_SCHEMA_V2:
+                        findings.append({"check": "MARKER_SCHEMA_V1", "severity": "info", "profile": n,
+                                         "note": "marker schema v1 — đọc được (compat 1 phiên bản); nâng v2 "
+                                                 "qua migration DRY plan (--plan-marker-migration), ghi ở R2."})
+                        if getattr(a, "plan_marker_migration", False):
+                            marker_migration_plan.append({
+                                "profile": n, "fileId": _mr.get("fileId"),
+                                "meta_folder_id": _mr.get("meta_folder_id"),
+                                "from_schema": str((_mr.get("marker") or {}).get("schema") or ""),
+                                "to_schema": _PROFILE_MARKER_SCHEMA_V2, "mode": "DRY",
+                                "action": "profile-backfill-markers --force (R2 — writer v2 + full readback + prove-one)"})
         # P4 (v1.34.26): --deep = chiều Drive↔NLM↔registry — đối chiếu nguồn LIVE trên notebook với row
         # registry (theo nlm_source_id): unregistered / nlm-only pending|blocked / sentinel sót.
         if getattr(a, "deep", False):
@@ -1073,6 +1086,10 @@ def _cmd_profile_doctor_impl(a) -> int:
            "fixable": len(fixes),
            "invariant": "LAYOUT: registry+manifest của profile nằm TRONG thư mục profile (root hoặc _meta).",
            "note": "DRY mặc định; --fix --apply move asset lạc chỗ vào _meta (fileId giữ nguyên — config không đổi)."}
+    if getattr(a, "plan_marker_migration", False):   # r184 (ADR-0012): DRY-only, không cấp quyền ghi
+        out["marker_migration_plan"] = sorted(marker_migration_plan, key=lambda r: str(r.get("profile") or ""))
+        out["marker_migration_note"] = ("DRY plan v1→v2 — KHÔNG ghi ở R1; R2 chạy profile-backfill-markers "
+                                        "--force sau khi mọi reader đã hiểu v2.")
     # #5: còn profile chưa kiểm (do --limit) → resume_command offset qua --skip (stateless, giữ cờ deep/fix/apply).
     _done = _skip + _run_total
     if _done < _total:
@@ -1343,7 +1360,7 @@ def cmd_profile_create(a) -> int:
         _mkw = _marker_write(gas, meta_id,
                              _marker_body(name, prof_block),
                              run_id=_apply_journal_start("profile-create-marker", {"profile": name}))
-        marker_complete = bool(_mkw.get("verified")) and bool(_mkw.get("cleanup_ok", True))
+        marker_complete = bool(_mkw.get("ok"))   # r184: chuỗi hậu điều đầy đủ
         if marker_complete:
             actions.append(f"marker _meta/{_PROFILE_MARKER_NAME} → {_mkw.get('fileId')} (readback OK)")
             _cfgp = _persist_profile_config(getattr(a, "config", None), name, prof_block)
@@ -1423,8 +1440,32 @@ def _strip_shared_fixes(findings: list[dict], profiles: dict) -> list[dict]:
 #    TỒN TẠI + ĐỊNH DANH + metadata mô tả của profile; config = cache runtime; sync MỘT CHIỀU marker→config. ──
 _PROFILE_MARKER_NAME = "tra_luat_profile.json"
 _PROFILE_MARKER_SCHEMA = "tra_luat_profile.v1"
+# ADR-0012 (r184): schema v2 — R1 chỉ ĐỌC (writer v2 bật ở R2 sau khi mọi reader hiểu v2).
+_PROFILE_MARKER_SCHEMA_V2 = "tra_luat_profile.v2"
+_MARKER_SCHEMAS_READABLE = (_PROFILE_MARKER_SCHEMA, _PROFILE_MARKER_SCHEMA_V2)
 _MARKER_IDENTITY_KEYS = ("rootFolderId", "metaFolderId", "notebookId", "registryDocId",
                          "manifestId", "categories", "manifestScope")
+
+
+def _marker_fingerprint(d: dict) -> str:
+    """PURE (ADR-0012): fingerprint marker = sha256 canonical-JSON toàn payload trừ chính trường
+    fingerprint (sort_keys + separators chặt — tất định trên mọi OS)."""
+    import hashlib as _hl
+    b = {k: v for k, v in (d or {}).items() if k != "fingerprint"}
+    return _hl.sha256(json.dumps(b, ensure_ascii=False, sort_keys=True,
+                                 separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _marker_required_keys(d: dict) -> tuple:
+    """PURE (ADR-0012): bộ trường định danh bắt buộc THEO LOẠI profile. v1 giữ mức cũ (compat 1 phiên bản);
+    v2: thêm metaFolderId; profile sở hữu registry/manifest (manifestScope=own) phải khai đủ
+    notebookId/registryDocId/manifestId."""
+    if str((d or {}).get("schema") or "") != _PROFILE_MARKER_SCHEMA_V2:
+        return ("profile", "rootFolderId")
+    req = ["profile", "rootFolderId", "metaFolderId"]
+    if str((d or {}).get("manifestScope") or "").strip().lower() == "own":
+        req += ["notebookId", "registryDocId", "manifestId"]
+    return tuple(req)
 
 
 def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str | None = None) -> dict:
@@ -1455,17 +1496,52 @@ def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str |
 
 
 def _marker_validate(d) -> tuple:
-    """PURE: marker hợp lệ = schema đúng + profile + rootFolderId khác rỗng. Trả (ok, errors[])."""
+    """PURE (ADR-0012/r184): reader hiểu CẢ v1 lẫn v2. v1 = mức kiểm cũ (compat 1 phiên bản);
+    v2 = bộ trường bắt buộc theo loại profile (_marker_required_keys) + fingerprint (nếu có) phải khớp
+    canonical recompute. Trả (ok, errors[])."""
     if not isinstance(d, dict):
         return False, ["NOT_A_DICT"]
     errs = []
-    if str(d.get("schema") or "") != _PROFILE_MARKER_SCHEMA:
+    _sch = str(d.get("schema") or "")
+    if _sch not in _MARKER_SCHEMAS_READABLE:
         errs.append(f"SCHEMA_MISMATCH:{d.get('schema')}")
-    if not str(d.get("profile") or "").strip():
-        errs.append("PROFILE_EMPTY")
-    if not str(d.get("rootFolderId") or "").strip():
-        errs.append("ROOT_FOLDER_ID_EMPTY")
+    for k in _marker_required_keys(d):
+        _v = d.get(k)
+        if not (_v if isinstance(_v, dict) else str(_v or "").strip()):
+            errs.append(f"{re.sub(r'(?<!^)(?=[A-Z])', '_', k).upper()}_EMPTY"
+                        if k != "rootFolderId" else "ROOT_FOLDER_ID_EMPTY")
+    if _sch == _PROFILE_MARKER_SCHEMA_V2 and str(d.get("fingerprint") or ""):
+        if str(d.get("fingerprint")) != _marker_fingerprint(d):
+            errs.append("FINGERPRINT_MISMATCH")
     return (not errs), errs
+
+
+def _marker_mutation_guard(mr: dict, expect_profile: str | None = None) -> dict | None:
+    """Chốt ADR-0012: mutation profile chỉ chạy khi trạng thái marker KHÔNG mơ hồ. Nhận kết quả
+    _marker_read; trả None nếu an toàn, dict lỗi actionable nếu phải CHẶN (đọc lỗi / duplicate /
+    marker không hợp lệ / marker thuộc profile khác). Lệnh ĐỌC vẫn được phép với cảnh báo —
+    guard này chỉ dành cho đường ghi; repair tường minh (backfill --force) không đi qua guard."""
+    mr = mr or {}
+    if mr.get("error"):
+        return {"error": "MARKER_READ_FAILED", "detail": str(mr.get("error")),
+                "note": "Không xác định được trạng thái marker — sửa kết nối/quyền rồi chạy lại; "
+                        "KHÔNG mutation khi mù trạng thái."}
+    ids = sorted({i for i in (mr.get("marker_file_ids") or []) if i})
+    if len(ids) > 1:
+        return {"error": "MARKER_AMBIGUOUS_DUPLICATE", "marker_file_ids": ids,
+                "note": "Nhiều marker cùng tên trong _meta — chạy profile-doctor rồi "
+                        "profile-backfill-markers --force để repair trước khi mutation."}
+    if mr.get("found"):
+        _ok, _errs = _marker_validate(mr.get("marker"))
+        if not _ok:
+            return {"error": "MARKER_INVALID", "detail": _errs,
+                    "note": "Marker không hợp lệ — repair bằng profile-backfill-markers --force."}
+        if expect_profile is not None:
+            _mp = str((mr.get("marker") or {}).get("profile") or "")
+            if _mp and _mp != str(expect_profile):
+                return {"error": "PROFILE_MARKER_NAME_CONFLICT", "existing_profile": _mp,
+                        "note": "Folder đã thuộc profile khác — không ghi đè định danh."}
+    return None
 
 
 def _template_id_norm(s: str) -> str:
@@ -1628,14 +1704,21 @@ def _marker_read(g, root_id: str, meta_id: str | None = None) -> dict:
 
 
 def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | None = None) -> dict:
-    """Ghi marker (ADR-0003: CHỈ lệnh tl được ghi — journaled + readback): upload bản MỚI vào _meta →
-    readback download so schema/profile/rootFolderId → trash bản cũ SAU khi bản mới verified (fail-safe
-    tạo-trước-dọn-sau, khuôn profile-index). Trả {ok, verified, fileId, trashed_old, upload}."""
+    """Ghi marker (ADR-0003 + ADR-0012/r184 — PRO-01): state machine journaled
+    intent → upload → FULL readback → enumerate → cleanup → prove-one → commit.
+    Khác bản cũ (false-success): (1) readback so TOÀN BỘ payload, không chỉ 3 trường —
+    marker cụt/lệch bất kỳ trường nào ⇒ verified=False; (2) enumeration lỗi KHÔNG nuốt
+    (trước: `except: pass` ⇒ duplicate sót vẫn cleanup_ok=True); (3) sau cleanup RE-LIST
+    chứng minh không còn marker nào khác fid mới (prove-one). Không chứng minh được hậu
+    điều ⇒ status PARTIAL/FAILED, ok=False, journal giữ dữ kiện repair — KHÔNG báo thành công.
+    Trả {ok, status, verified, enumerate_ok, cleanup_ok, proven_single, phases, fileId, trashed_old, upload}."""
     key = str(body.get("profile") or "")
     if run_id:
         _journal_append(run_id, {"t": "intent", "op": "marker_write", "key": key,
                                  "set": {"metaFolderId": str(meta_id), "marker": body,
                                          "old_fileId": str(old_id or "")}})
+    phases = {"upload": False, "readback_full": False, "enumerate": False,
+              "cleanup": False, "prove_single": False}
     try:
         up = g.post("upload", b64=_b64_text(json.dumps(body, ensure_ascii=False, indent=2)),
                     name=_PROFILE_MARKER_NAME, mime="application/json", folderId=str(meta_id),
@@ -1643,47 +1726,67 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
     except Exception as e:  # noqa: BLE001
         up = {"ok": False, "error": f"MARKER_UPLOAD_RAISED:{type(e).__name__}"}
     fid = str((up or {}).get("fileId") or (up or {}).get("id") or "")
+    phases["upload"] = bool(fid)
     verified = False
     if fid:
         try:
             d = _gas_get_retry(g, "download", fileId=fid)
             rb = json.loads(base64.b64decode(d.get("b64") or "").decode("utf-8"))
-            verified = all(str(rb.get(k) or "") == str(body.get(k) or "")
-                           for k in ("schema", "profile", "rootFolderId"))
+            verified = rb == body   # FULL payload equality — không so 3 trường nữa
         except Exception:  # noqa: BLE001
             verified = False
-    # #7 (v1.34.30, log grill — ROOT CAUSE marker trùng): upload force=true LUÔN tạo fileId MỚI (Drive cho trùng
-    # tên). TRƯỚC đây chỉ trash `old_id` do caller truyền → create/from-nlm/promote (old_id="") gặp marker cũ của
-    # LẦN RETRY ĐỨT → sót DUPLICATE mồ côi. Nay SELF-HEAL: sau khi bản mới verified, quét _meta trash MỌI marker
-    # cùng tên khác fileId mới (không chỉ old_id) → marker-write idempotent về số-lượng.
+    phases["readback_full"] = verified
+
+    def _list_other_markers():
+        _mitems = (_gas_get_retry(g, "list", folderId=str(meta_id)) or {}).get("items") or []
+        return [str(_it.get("id") or "") for _it in _mitems
+                if str(_it.get("type")) != "folder" and str(_it.get("name")) == _PROFILE_MARKER_NAME
+                and str(_it.get("id") or "") and str(_it.get("id") or "") != fid]
+
+    # #7 (v1.34.30): upload force=true LUÔN tạo fileId mới → self-heal quét _meta trash MỌI marker khác fid.
+    # r184: lỗi list là PARTIAL tường minh, không còn nuốt im lặng.
     trashed = []
+    enumerate_ok = False
     _to_trash = {str(old_id)} if (old_id and str(old_id) != fid) else set()
     if verified and fid:
         try:
-            _mitems = (_gas_get_retry(g, "list", folderId=str(meta_id)) or {}).get("items") or []
-            for _it in _mitems:
-                if str(_it.get("type")) != "folder" and str(_it.get("name")) == _PROFILE_MARKER_NAME:
-                    _oid = str(_it.get("id") or "")
-                    if _oid and _oid != fid:
-                        _to_trash.add(_oid)
+            _to_trash.update(_list_other_markers())
+            enumerate_ok = True
         except Exception:  # noqa: BLE001
-            pass
-    if verified:
+            enumerate_ok = False
+    phases["enumerate"] = enumerate_ok
+    if verified and enumerate_ok:
         for _oid in sorted(_to_trash):
             try:
                 tr = g.get("trash", fileId=_oid, confirm="yes")
                 trashed.append({"fileId": _oid, "ok": bool(tr.get("ok"))})
             except Exception as e:  # noqa: BLE001
                 trashed.append({"fileId": _oid, "ok": False, "error": str(e)})
-    cleanup_ok = all(bool(x.get("ok")) for x in trashed)
+    cleanup_ok = enumerate_ok and all(bool(x.get("ok")) for x in trashed)
+    phases["cleanup"] = cleanup_ok
+    # prove-one: bản mới đã chứng minh tồn tại bằng readback trực tiếp; ở đây chứng minh
+    # KHÔNG CÒN bản nào khác (danh sách tươi sau cleanup).
+    proven_single = False
+    if verified and cleanup_ok:
+        try:
+            proven_single = not _list_other_markers()
+        except Exception:  # noqa: BLE001
+            proven_single = False
+    phases["prove_single"] = proven_single
+    ok = (bool((up or {}).get("ok")) and bool(fid) and verified
+          and enumerate_ok and cleanup_ok and proven_single)
+    status = "COMMITTED" if ok else ("FAILED" if not (fid and verified) else "PARTIAL")
     if run_id:
-        _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key,
-                                 "ok": verified and cleanup_ok,
-                                 "verify": {"fileId": fid, "trashed_old": trashed,
-                                            "error": (up or {}).get("error")}})
-    return {"ok": bool((up or {}).get("ok")) and bool(fid) and verified and cleanup_ok,
-            "verified": verified, "cleanup_ok": cleanup_ok, "fileId": fid,
-            "trashed_old": trashed, "upload": up}
+        _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key, "ok": ok,
+                                 "verify": {"fileId": fid, "old_fileId": str(old_id or ""),
+                                            "trashed_old": trashed, "status": status, "phases": phases,
+                                            "error": (up or {}).get("error"),
+                                            "repair": (None if ok else
+                                                       "tl profile-doctor — kiểm marker duplicate/verify rồi "
+                                                       "profile-backfill-markers --force cho profile này")}})
+    return {"ok": ok, "status": status, "verified": verified, "enumerate_ok": enumerate_ok,
+            "cleanup_ok": cleanup_ok, "proven_single": proven_single, "phases": phases,
+            "fileId": fid, "trashed_old": trashed, "upload": up}
 
 
 def _config_candidates_report(config_path: str | None = None) -> dict:
@@ -2058,16 +2161,18 @@ def _cmd_profile_backfill_markers_impl(a) -> int:
             continue
         body = _marker_body(p["profile"], {**p["prof"], "metaFolderId": meta_id}, existing=p["existing"])
         w = _marker_write(g, meta_id, body, old_id=p["old_id"], run_id=rid)
-        complete = bool(w.get("verified")) and bool(w.get("cleanup_ok", True)) and meta_config_ok
+        complete = bool(w.get("ok")) and meta_config_ok   # r184: chuỗi hậu điều đầy đủ
         p["row"].update({"status": "written" if complete else "failed",
                          "verified": bool(w.get("verified")), "cleanup_ok": bool(w.get("cleanup_ok", True)),
                          "config_updated": meta_config_ok, "fileId": w.get("fileId"),
                          "trashed_old": w["trashed_old"]})
         if not complete:
             p["row"]["error"] = str((w.get("upload") or {}).get("error")
-                                          or ("MARKER_CLEANUP_FAILED" if not w.get("cleanup_ok", True)
-                                              else "CONFIG_UPDATE_FAILED" if not meta_config_ok
-                                              else "READBACK_MISMATCH"))
+                                          or ("READBACK_MISMATCH" if not w.get("verified")
+                                              else "MARKER_ENUMERATE_FAILED" if not w.get("enumerate_ok", True)
+                                              else "MARKER_CLEANUP_FAILED" if not w.get("cleanup_ok", True)
+                                              else "MARKER_NOT_PROVEN_SINGLE" if not w.get("proven_single", True)
+                                              else "CONFIG_UPDATE_FAILED"))
         all_ok = all_ok and complete
     unresolved = [r for r in rows if r.get("status") not in ("written", "has_marker", "skipped_vbt_root")]
     final_ok = all_ok and not unresolved
@@ -2384,9 +2489,9 @@ def _cmd_profile_promote_impl(a) -> int:
                   "registryDocId": reg_id, "manifestId": man_id,
                   "manifestScope": "own", "categories": "own"}
     mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
-    marker_complete = bool(mkw.get("verified")) and bool(mkw.get("cleanup_ok", True))
+    marker_complete = bool(mkw.get("ok"))   # r184: chuỗi hậu điều đầy đủ
     results["marker"] = {"fileId": mkw.get("fileId"), "verified": mkw.get("verified"),
-                         "cleanup_ok": mkw.get("cleanup_ok", True)}
+                         "status": mkw.get("status"), "cleanup_ok": mkw.get("cleanup_ok", True)}
     if not marker_complete:
         out = {**plan, "ok": False, **results, "journal": rid,
                "error": "MARKER_WRITE_UNVERIFIED",
@@ -2686,7 +2791,7 @@ def _cmd_profile_from_nlm_impl(a) -> int:
                   "registryDocId": reg_id, "manifestId": man_id,
                   "manifestScope": "own", "categories": "own"}
     mkw = _marker_write(g, meta_id, _marker_body(name, prof_block), run_id=rid)
-    marker_complete = bool(mkw.get("verified")) and bool(mkw.get("cleanup_ok", True))
+    marker_complete = bool(mkw.get("ok"))   # r184: chuỗi hậu điều đầy đủ
     if not marker_complete:
         out = {**plan, "ok": False, "rootFolderId": root_id, "metaFolderId": meta_id,
                "registryDocId": reg_id, "manifestId": man_id, "config_written": None,
@@ -3123,9 +3228,9 @@ def _cmd_profile_set_meta_impl(a) -> int:
     body = _marker_body(name, _identity, existing=existing)
     w = _marker_write(g, mr.get("meta_folder_id") or str(prof.get("metaFolderId") or ""),
                       body, old_id=mr.get("fileId") or "", run_id=rid)
-    out.update({"ok": bool(w.get("verified")) and bool(w.get("cleanup_ok", True)), "journal": rid,
+    out.update({"ok": bool(w.get("ok")), "journal": rid,   # r184: chuỗi hậu điều đầy đủ
                 "marker": {"fileId": w.get("fileId"), "verified": w.get("verified"),
-                           "cleanup_ok": w.get("cleanup_ok", True),
+                           "status": w.get("status"), "cleanup_ok": w.get("cleanup_ok", True),
                            "trashed_old": w.get("trashed_old")},
                 "next_steps": [f"tl profile-load {name}   (block phiên sẽ mang mô tả/văn phong mới)"]})
     print(json.dumps(out, ensure_ascii=False, indent=2), file=sys.stdout if out["ok"] else sys.stderr)

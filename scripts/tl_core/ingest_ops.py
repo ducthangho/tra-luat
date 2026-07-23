@@ -1401,6 +1401,13 @@ def cmd_profile_ingest(a) -> int:
         print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
         return 2
     g = _gas()
+    # r184 (ADR-0011/D5 — ING-02): profile-ingest apply nay CÓ JOURNAL với fingerprint — resume --journal
+    # <run_id> revalidate được đúng nguồn (trước đây apply không journal ⇒ resume buộc phải mò theo tên).
+    _pi_run_id = _apply_journal_start("profile-ingest", {
+        "file": str(f), "name": doc_name, "profile": profile, "drive_id": _from_drive,
+        "source_sha256": str(_contract.get("source", {}).get("sha256") or ""),
+        "identity_hash": str(_contract.get("identity_hash") or ""),
+        "plan_hash": str(_contract.get("plan_hash") or "")})
     # v1.34.53 (C2 — log phiên OCR 2026-07-15: lệnh loạt timeout giữa chừng, chạy lại → 6 dòng registry trùng TÊN
     # y hệt, phải hygiene scan + xóa tay): DUP-GUARD THEO TÊN trong REGISTRY (live, refresh) TRƯỚC upload/tạo GDoc —
     # SỚM HƠN gate TITLE_ALREADY_ON_NOTEBOOK (gate đó chỉ chặn trước NLM add, khi GDoc+registry ĐÃ tạo = dup rồi).
@@ -1613,7 +1620,10 @@ def cmd_profile_ingest(a) -> int:
            "classification": info, "verify_gate": gate, "split_count": len(chunks),
            "nlm_sources": nlm_sources, "registry_verified": bool(rb.get("verified")),
            "registry_patched": (rb.get("reg_bulk") or {}).get("patched"),
-           "target_notebook": notebook_id, "hieuluc": hieuluc}
+           "target_notebook": notebook_id, "hieuluc": hieuluc, "journal": _pi_run_id}
+    _journal_append(_pi_run_id, {"t": "run_end", "ok": bool(_final_ok),
+                                 "counts": {"nlm_sources": len(nlm_sources)},
+                                 "verify": {"gdoc": gdoc, "registry_verified": bool(rb.get("verified"))}})
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if _final_ok else 2
 
@@ -1660,6 +1670,56 @@ def _profile_push_chunks(g, nc, notebook_id: str, gdoc: str, doc_name: str, info
 _RESUME_PART_RE = re.compile(r"__part(\d{1,3})$")
 
 
+def _resume_identity_gate(*, apply: bool, journal: str, drive_id: str, name: str,
+                          canon_drive_id: str, journal_head: dict | None) -> dict | None:
+    """PURE (ADR-0011/D5 — r184/ING-02): siết resume profile. Khớp-theo-TÊN chỉ còn là REPAIR ở
+    chế độ DRY; APPLY phải chứng minh đúng nguồn bằng --journal <run_id> hoặc --drive-id <id>,
+    và fingerprint phải còn khớp. Journal legacy (không plan_hash/identity_hash) đọc được để chẩn
+    đoán nhưng KHÔNG cấp quyền ghi. Trả None nếu qua; dict lỗi actionable nếu chặn."""
+    if apply and not (str(journal or "").strip() or str(drive_id or "").strip()):
+        return {"error": "RESUME_REQUIRES_IDENTITY",
+                "note": "name-only resume nay là DRY repair (bỏ --apply để xem plan); apply cần "
+                        "--journal <run_id> HOẶC --drive-id <id> chứng minh đúng nguồn (ADR-0011/D5)."}
+    if str(drive_id or "").strip() and str(canon_drive_id or "").strip() \
+            and str(drive_id).strip() != str(canon_drive_id).strip():
+        return {"error": "RESUME_IDENTITY_MISMATCH", "expected_drive_id": str(drive_id).strip(),
+                "registry_drive_id": str(canon_drive_id).strip(),
+                "note": "Dòng canonical khớp tên nhưng KHÁC drive_id — không nối; kiểm reg-query "
+                        "rồi replan (cùng tên có thể là nguồn khác)."}
+    if str(journal or "").strip():
+        if not isinstance(journal_head, dict) or not journal_head:
+            return {"error": "RESUME_JOURNAL_NOT_FOUND", "journal": str(journal).strip(),
+                    "note": "Không đọc được run_start của journal này — `tl journal` liệt kê run."}
+        if not (str(journal_head.get("plan_hash") or "") or str(journal_head.get("identity_hash") or "")):
+            return {"error": "LEGACY_JOURNAL_REPLAN_REQUIRED", "journal": str(journal).strip(),
+                    "note": "Journal đời cũ không có fingerprint (plan_hash/identity_hash) — vẫn đọc "
+                            "được để chẩn đoán (`tl journal <run>`) nhưng không cấp quyền ghi; replan "
+                            "bằng profile-ingest thường hoặc resume --drive-id."}
+        _jn = str(journal_head.get("name") or "")
+        if _jn and str(name or "") and _jn != str(name):
+            return {"error": "RESUME_JOURNAL_NAME_MISMATCH", "journal_name": _jn, "name": str(name),
+                    "note": "Journal thuộc canonical KHÁC tên — nối nhầm run."}
+        _jd = str(journal_head.get("drive_id") or journal_head.get("gdoc") or "")
+        if _jd and str(canon_drive_id or "").strip() and _jd != str(canon_drive_id).strip():
+            return {"error": "RESUME_IDENTITY_MISMATCH", "journal_drive_id": _jd,
+                    "registry_drive_id": str(canon_drive_id).strip(),
+                    "note": "Fingerprint journal không còn khớp dòng registry — nguồn đã đổi; replan."}
+    return None
+
+
+def _journal_head(run_id: str) -> dict | None:
+    """Đọc record run_start của một journal run (None nếu không đọc được)."""
+    try:
+        _p = _journal_path(str(run_id or "").strip())
+        for _ln in _p.read_text(encoding="utf-8").splitlines():
+            if _ln.strip():
+                _r = json.loads(_ln)
+                return _r if _r.get("t") == "run_start" else None
+    except Exception:  # noqa: BLE001
+        return None
+    return None
+
+
 def cmd_profile_ingest_resume(a) -> int:
     """v1.34.55 (C4+C5 — log phiên OCR: bị giết giữa lúc add chunk → phải reg-query dò tay, xóa sạch canonical
     lẫn chunk mồ côi rồi chạy lại TỪ ĐẦU ×2; + 4 canonical corpus=''/false dù chunk con pushed đủ): RESUME theo
@@ -1674,10 +1734,21 @@ def cmd_profile_ingest_resume(a) -> int:
                           "note": "Truyền --name '<tên canonical y hệt registry>' (lấy từ NAME_ALREADY_IN_REGISTRY "
                                   "hoặc reg-query --name)."}, ensure_ascii=False), file=sys.stderr)
         return 2
-    if not getattr(a, "apply", False) or str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
+    # r184 (ADR-0011/D5 — ING-02): name-only resume phân loại lại thành REPAIR — KHÔNG --apply ⇒ DRY plan
+    # (read-only); --apply ⇒ phải chứng minh đúng nguồn (--journal/--drive-id) + confirm yes.
+    _apply_mode = bool(getattr(a, "apply", False))
+    if _apply_mode and str(getattr(a, "confirm", "") or "").strip().lower() != "yes":
         print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED", "expected": "yes",
-                          "note": "--resume ghi NLM/registry → cần --apply --confirm yes (không có plan-hash vì "
-                                  "không có file nguồn local)."}, ensure_ascii=False), file=sys.stderr)
+                          "note": "--resume --apply ghi NLM/registry → cần --confirm yes."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    _jr_arg = str(getattr(a, "journal", None) or "").strip()
+    _did_arg = str(getattr(a, "drive_id", None) or "").strip()
+    _early_gate = _resume_identity_gate(apply=_apply_mode, journal=_jr_arg, drive_id=_did_arg,
+                                        name=name, canon_drive_id="", journal_head=None) \
+        if (_apply_mode and not (_jr_arg or _did_arg)) else None
+    if _early_gate:
+        print(json.dumps({"ok": False, **_early_gate}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
@@ -1704,6 +1775,14 @@ def cmd_profile_ingest_resume(a) -> int:
                          ensure_ascii=False), file=sys.stderr)
         return 2
     gdoc = str(canon.get("drive_id") or canon.get("gdoc_id") or "")
+    # r184 (ADR-0011/D5): gate identity ĐẦY ĐỦ khi apply — drive_id/journal fingerprint phải khớp dòng registry.
+    if _apply_mode:
+        _gate = _resume_identity_gate(apply=True, journal=_jr_arg, drive_id=_did_arg, name=name,
+                                      canon_drive_id=gdoc,
+                                      journal_head=(_journal_head(_jr_arg) if _jr_arg else None))
+        if _gate:
+            print(json.dumps({"ok": False, **_gate}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
     hieuluc = str(canon.get("hieuluc") or "") or "Còn"
     note = (str(canon.get("note") or "") or f"resume:{name}")[:300]
     info = {"sohieu": str(canon.get("sohieu") or ""), "loai": str(canon.get("loai") or "")}
@@ -1723,6 +1802,23 @@ def cmd_profile_ingest_resume(a) -> int:
         return 2
     chunk_max = int(getattr(a, "chunk_max_chars", None) or 100000)
     chunks = _split_by_dieu_chunks(text, chunk_max) if len(text) > chunk_max else []
+    if not _apply_mode:
+        # r184 (D5): DRY REPAIR PLAN — read-only, 0 mutation; apply cần identity tường minh.
+        _missing = ([i for i in range(1, len(chunks) + 1) if i not in done_parts]
+                    if len(chunks) > 1 else ([] if str(canon.get("nlm_source_id") or "").strip() else [0]))
+        out = {"ok": True, "mode": "DRY_REPAIR", "resumed": False, "name": name, "gdoc": gdoc,
+               "parts_total": len(chunks), "parts_done": sorted(done_parts),
+               "parts_missing": _missing, "corpus_now": str(canon.get("corpus") or ""),
+               "single_source": len(chunks) <= 1,
+               "planned": ("đủ part — chỉ repair corpus theo _children_ok" if len(chunks) > 1 and not _missing
+                           else "push part thiếu rồi ghi corpus" if len(chunks) > 1
+                           else "repair corpus/nlm_source_id nguồn đơn"),
+               "apply_requires": [f"--resume --name '{name}' --apply --confirm yes",
+                                  "--drive-id <id> HOẶC --journal <run_id> (ADR-0011/D5 — chứng minh đúng nguồn)"],
+               "note": "Name-only resume = REPAIR DRY (một phiên bản chuyển tiếp); apply không nhận "
+                       "name-only nữa."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+        return 0
     nc = _imp("nlm_cli")
     meta_id = os.environ.get("TL_META_FOLDER_ID", "").strip() or os.environ.get("TL_ROOT_FOLDER_ID", "").strip()
     if len(chunks) > 1:

@@ -301,6 +301,91 @@ def _safe_extract_zip_for_ingest(zip_path: str, temp_dir: str, *, plan: dict | N
     return extracted
 
 
+def _zip_child_args(item, *, mode: str, profile: str, cat: str, a) -> list:
+    """r184 (ADR-0013): argv child CHUNG cho plan-bundle (DRY) lẫn apply — một nguồn sự thật,
+    bundle drift không thể đến từ hai cách dựng args khác nhau."""
+    if mode == "profile":
+        child = ["profile-ingest", item["path"], "--json"]
+        if profile:
+            child += ["--profile", profile]
+    else:
+        child = ["ingest-local", item["path"], "--cat", cat, "--json"]
+    if getattr(a, "skip_nlm_preflight", False) and mode != "profile":
+        child.append("--skip-nlm-preflight")
+    if mode != "profile" and getattr(a, "profile", None):   # v1.33.56 (regression/F2)
+        child += ["--profile", a.profile]
+    if getattr(a, "config", None):   # v1.33.56 (PH2-04): child PHẢI thấy cùng config với parent
+        child += ["--config", str(Path(a.config).expanduser().resolve())]
+    return child
+
+
+def _zip_child_plan_one(child_args: list) -> dict:
+    """r184 (ADR-0013): chạy child CLI ở chế độ DRY **in-process** (0 subprocess, 0 mutation) để lấy
+    child plan_hash cho bundle. stdout child bị nuốt; chỉ trả JSON + plan_hash."""
+    import io as _io, contextlib as _ctx
+    try:
+        _ns = build_parser().parse_args([str(x) for x in (child_args or []) if str(x)])
+        _bo, _be = _io.StringIO(), _io.StringIO()
+        with _ctx.redirect_stdout(_bo), _ctx.redirect_stderr(_be):
+            _rc = _ns.fn(_ns)
+        try:
+            _j = json.loads(_bo.getvalue())
+        except Exception:  # noqa: BLE001
+            _j = {}
+        return {"ok": _rc == 0 and bool(_j.get("plan_hash")), "returncode": _rc, "json": _j,
+                "plan_hash": str(_j.get("plan_hash") or ""), "stderr_tail": _be.getvalue()[-400:]}
+    except SystemExit as _e:  # argparse exit
+        return {"ok": False, "returncode": int(getattr(_e, "code", 2) or 0), "json": {}, "plan_hash": "",
+                "error": "CHILD_ARGPARSE_EXIT"}
+    except Exception as _e:  # noqa: BLE001
+        return {"ok": False, "json": {}, "plan_hash": "", "error": f"{type(_e).__name__}: {_e}"}
+
+
+def _zip_plan_bundle(a, *, mode: str, profile: str, cat: str) -> dict:
+    """r184 (ADR-0013 — ING-01): IMMUTABLE PLAN BUNDLE. DRY lập ĐẦY ĐỦ child plan cho từng member
+    (in-process, tuần tự — tránh đua trạng thái profile toàn cục); parent `plan_hash` = fingerprint
+    TOÀN bundle (archive + member list + mọi child plan). Xác nhận hash này = duyệt đúng bộ kế hoạch
+    con — apply không được lập kế hoạch mới (khác ⇒ PLAN_DRIFT_REPLAN_REQUIRED)."""
+    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
+                     max_files=a.max_files, max_size_mb=a.max_size_mb,
+                     max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+    if not plan.get("ok"):
+        return plan
+    child_plans, child_errors = [], []
+    with tempfile.TemporaryDirectory(prefix="tl_zip_plan_") as _td:
+        try:
+            _extracted = _safe_extract_zip_for_ingest(
+                a.file, _td, plan=plan, max_size_mb=getattr(a, "max_size_mb", None),
+                max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+        except Exception as _exc:  # noqa: BLE001
+            return {**plan, "ok": False, "step": "zip_extract_verify_plan",
+                    "error": f"{type(_exc).__name__}: {_exc}"}
+        for _item in _extracted:
+            _dry = _zip_child_plan_one(_zip_child_args(_item, mode=mode, profile=profile, cat=cat, a=a))
+            _rec = {"zip_path": _item["normalized_path"], "member_sha256": _item.get("sha256"),
+                    "child_plan_hash": str(_dry.get("plan_hash") or ""), "ok": bool(_dry.get("ok"))}
+            if not _dry.get("ok"):
+                _rec.update({"error": "CHILD_PLAN_FAILED", "returncode": _dry.get("returncode"),
+                             "detail": str(_dry.get("error") or "")[:200],
+                             "stderr_tail": str(_dry.get("stderr_tail") or "")[-400:]})
+                child_errors.append(_rec)
+            child_plans.append(_rec)
+    child_plans.sort(key=lambda r: str(r.get("zip_path") or "").casefold())
+    from tl_core.ingest_contract import canonical_json_bytes
+    _bundle_commit = {"schema": "ingest_zip_bundle.v1", "parent_plan_hash": plan.get("plan_hash"),
+                      "archive_sha256": plan.get("archive_sha256"),
+                      "children": [{k: c.get(k) for k in ("zip_path", "member_sha256", "child_plan_hash")}
+                                   for c in child_plans]}
+    _bundle_hash = hashlib.sha256(canonical_json_bytes(_bundle_commit)).hexdigest()
+    return {**plan, "schema": "ingest_zip_bundle.v1", "parent_plan_hash": plan.get("plan_hash"),
+            "plan_hash": _bundle_hash, "child_plans": child_plans,
+            "ok": bool(plan.get("ok")) and not child_errors,
+            **({"error": "CHILD_PLAN_FAILED", "child_errors": child_errors} if child_errors else {}),
+            "bundle_note": "plan_hash = fingerprint TOÀN bundle (ADR-0013): archive + member + MỌI child "
+                           "plan. --expected-plan-hash giá trị này khi apply; hash cũ (chỉ parent) hết "
+                           "hợp lệ — replan bằng DRY mới."}
+
+
 def _zip_apply(a, *, mode: str) -> int:
     from concurrent.futures import ThreadPoolExecutor
     from tl_core.ingest_contract import authorize_apply
@@ -309,9 +394,8 @@ def _zip_apply(a, *, mode: str) -> int:
     if mode == "vbqppl" and not cat:
         print(_json_dumps({"ok": False, "error": "CAT_REQUIRED_FOR_VBQPPL_ZIP_APPLY", "note": "Dùng --cat NN hoặc chạy dry-run để phân loại trước."}, deterministic=_deterministic_enabled(a)))
         return 2
-    plan = _zip_plan(a.file, mode=mode, profile=(profile if mode == "profile" else ""), cat=cat,
-                     max_files=a.max_files, max_size_mb=a.max_size_mb,
-                     max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
+    # r184 (ADR-0013): plan = BUNDLE — child plans lập lại tất định, authorize phủ TOÀN bundle.
+    plan = _zip_plan_bundle(a, mode=mode, profile=profile, cat=cat)
     if not plan.get("ok"):
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 2
     auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
@@ -321,10 +405,15 @@ def _zip_apply(a, *, mode: str) -> int:
         print(_json_dumps({"ok": False, "step": "apply_authorization", **auth},
                           deterministic=_deterministic_enabled(a)))
         return 2
+    _child_hash_by_path = {str(c.get("zip_path") or ""): str(c.get("child_plan_hash") or "")
+                           for c in (plan.get("child_plans") or [])}
     results = []
     run_id = _apply_journal_start("profile-ingest-zip" if mode == "profile" else "ingest-zip",
                                   {"file": str(a.file), "plan_hash": plan.get("plan_hash"),
+                                   "parent_plan_hash": plan.get("parent_plan_hash"),
                                    "archive_sha256": plan.get("archive_sha256"), "profile": profile, "cat": cat})
+    _journal_append(run_id, {"t": "plan", "op": "zip_bundle", "key": str(a.file),
+                             "set": {"child_plans": plan.get("child_plans")}})
     with tempfile.TemporaryDirectory(prefix="tl_zip_ingest_") as td:
         try:
             extracted = _safe_extract_zip_for_ingest(
@@ -336,25 +425,27 @@ def _zip_apply(a, *, mode: str) -> int:
                                "error": f"{type(exc).__name__}: {exc}"}, deterministic=_deterministic_enabled(a)))
             return 2
 
-        def _run_member(item):
-            if mode == "profile":
-                child = ["profile-ingest", item["path"], "--json"]
-                if profile:
-                    child += ["--profile", profile]
+        # r184 (ADR-0013): tiền-kiểm DRIFT tuần tự (in-process — không đua profile-state):
+        # recompute child plan hash, KHÁC bundle đã duyệt ⇒ PLAN_DRIFT_REPLAN_REQUIRED, KHÔNG mutation.
+        _verified, _drifted = [], []
+        for item in extracted:
+            _recheck = _zip_child_plan_one(_zip_child_args(item, mode=mode, profile=profile, cat=cat, a=a))
+            _recorded = _child_hash_by_path.get(str(item.get("normalized_path") or ""), "")
+            if not (_recheck.get("ok") and _recorded and str(_recheck.get("plan_hash")) == _recorded):
+                _drifted.append({"ok": False, "step": "child_plan_drift", "error": "PLAN_DRIFT_REPLAN_REQUIRED",
+                                 "zip_path": item["normalized_path"],
+                                 "recorded_plan_hash": _recorded,
+                                 "recomputed_plan_hash": str(_recheck.get("plan_hash") or ""),
+                                 "returncode": _recheck.get("returncode")})
             else:
-                child = ["ingest-local", item["path"], "--cat", cat, "--json"]
-            if getattr(a, "skip_nlm_preflight", False) and mode != "profile":
-                child.append("--skip-nlm-preflight")
-            if mode != "profile" and getattr(a, "profile", None):   # v1.33.56 (regression/F2)
-                child += ["--profile", a.profile]
-            if getattr(a, "config", None):   # v1.33.56 (PH2-04): child PHẢI thấy cùng config với parent
-                child += ["--config", str(Path(a.config).expanduser().resolve())]
-            dry = _run_child_tl(child)
-            child_plan_hash = str(((dry.get("json") or {}).get("plan_hash") or ""))
-            if not (dry.get("ok") and child_plan_hash):
-                return {"ok": False, "step": "child_plan", "zip_path": item["normalized_path"],
-                        "returncode": dry.get("returncode"), "stderr_tail": dry.get("stderr_tail"),
-                        "stdout_tail": dry.get("stdout_tail")}
+                _verified.append((item, _recorded))
+
+        def _run_member(pair):
+            item, child_plan_hash = pair
+            child = _zip_child_args(item, mode=mode, profile=profile, cat=cat, a=a)
+            _journal_append(run_id, {"t": "intent", "op": "ingest_member", "key": item["normalized_path"],
+                                     "set": {"plan_hash": child_plan_hash, "member_sha256": item.get("sha256")}})
+            # --confirm yes hợp lệ Ở ĐÂY vì child_plan_hash nằm TRONG bundle user đã duyệt (ADR-0013)
             applied = _run_child_tl(child + ["--apply", "--confirm", "yes",
                                              "--expected-plan-hash", child_plan_hash])
             applied_ok = bool(applied.get("ok") and isinstance(applied.get("json"), dict)
@@ -365,9 +456,10 @@ def _zip_apply(a, *, mode: str) -> int:
                     **({"stderr_tail": applied.get("stderr_tail"), "stdout_tail": applied.get("stdout_tail")}
                        if not applied_ok else {})}
 
-        workers = max(1, min(int(getattr(a, "workers", 4) or 4), 8, len(extracted) or 1))
+        workers = max(1, min(int(getattr(a, "workers", 4) or 4), 8, len(_verified) or 1))
         with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="tl-zip-ingest") as pool:
-            results = list(pool.map(_run_member, extracted))
+            results = list(pool.map(_run_member, _verified))
+        results.extend(_drifted)
         results.sort(key=lambda r: str(r.get("zip_path") or "").casefold())
         for r in results:
             _journal_append(run_id, {"t": "commit", "op": "ingest_member", "key": r.get("zip_path"),
@@ -394,10 +486,18 @@ def _zip_apply(a, *, mode: str) -> int:
 
 
 def cmd_ingest_zip(a) -> int:
-    out = _zip_plan(a.file, mode="vbqppl", cat=getattr(a, "cat", "") or "", max_files=a.max_files,
-                    max_size_mb=a.max_size_mb, max_total_mb=getattr(a, "max_total_mb", 500),
-                    max_ratio=getattr(a, "max_ratio", 100.0))
     if not getattr(a, "apply", False):
+        cat = getattr(a, "cat", "") or ""
+        if not cat:
+            # Chưa có --cat: DRY phân loại như cũ (parent-only) — bundle child plans cần cat.
+            out = _zip_plan(a.file, mode="vbqppl", cat="", max_files=a.max_files,
+                            max_size_mb=a.max_size_mb, max_total_mb=getattr(a, "max_total_mb", 500),
+                            max_ratio=getattr(a, "max_ratio", 100.0))
+            out["note_bundle"] = ("r184/ADR-0013: đây là DRY PHÂN LOẠI (chưa có --cat) — plan_hash này "
+                                  "KHÔNG apply được; chạy lại DRY với --cat NN để nhận bundle plan_hash.")
+        else:
+            # r184 (ADR-0013): DRY in BUNDLE — child plans đầy đủ + plan_hash phủ toàn bundle.
+            out = _zip_plan_bundle(a, mode="vbqppl", profile="", cat=cat)
         _print_json_or_text(out, getattr(a, "json", False))
         return 0 if out.get("ok") else 2
     return _zip_apply(a, mode="vbqppl")
@@ -405,9 +505,9 @@ def cmd_ingest_zip(a) -> int:
 
 def cmd_profile_ingest_zip(a) -> int:
     prof = getattr(a, "profile", None) or os.environ.get("TL_PROFILE") or DEFAULT_PROFILE
-    out = _zip_plan(a.file, mode="profile", profile=prof, max_files=a.max_files, max_size_mb=a.max_size_mb,
-                    max_total_mb=getattr(a, "max_total_mb", 500), max_ratio=getattr(a, "max_ratio", 100.0))
     if not getattr(a, "apply", False):
+        # r184 (ADR-0013): DRY in BUNDLE — child plans đầy đủ + plan_hash phủ toàn bundle.
+        out = _zip_plan_bundle(a, mode="profile", profile=prof, cat="")
         _print_json_or_text(out, getattr(a, "json", False))
         return 0 if out.get("ok") else 2
     return _zip_apply(a, mode="profile")

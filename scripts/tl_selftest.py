@@ -13176,8 +13176,11 @@ def run() -> int:
             (_r / "references" / "changelog_archive").mkdir(parents=True)
             for _rel, _keep in (("references/Code.2.21.2k.gs", False),
                                 ("references/changelog_archive/CHANGELOG-den-1.33.53.md", False),
-                                ("references/Code.2.21.2m.gs", True),
-                                ("references/Code.2.21.2l.gs", True),
+                                # r194: current nay 2.21.2n — 2 bản cũ thành dead-weight, loại khỏi GÓI
+                                # (giữ trong repo); bản current PHẢI còn trong gói.
+                                ("references/Code.2.21.2m.gs", False),
+                                ("references/Code.2.21.2l.gs", False),
+                                ("references/Code.2.21.2n.gs", True),
                                 ("references/API_CONTRACT.md", True)):
                 _fp = _r / _rel
                 _fp.write_text("x", encoding="utf-8")
@@ -17839,6 +17842,28 @@ def run() -> int:
             return (all(_inc(_mk(n), _r) is False for n in _bad)
                     and all(_inc(_mk(n), _r) is True for n in _good))
     _t110("r193_release_exclude_bak_bien_the", _c193_release_exclude_bak_variants)
+
+    def _c194_bundle_deflate_deterministic():
+        # r194 (amend ADR-0007 — user yêu cầu hạ size 24-07): writer nén DEFLATED mức 9 CỐ ĐỊNH — member
+        # ghi ×2 cùng data phải cùng byte; data nén được phải NHỎ hơn stored; verifier archive chấp nhận
+        # DEFLATED (không còn COMPRESSION_NOT_STORED oan).
+        import zipfile as _zf194
+        import tl_core.release as _rel194   # helper nội bộ release — không trong bảng re-export tl
+        _data = ("x" * 500 + "PHÁP LUẬT " * 200).encode("utf-8")
+        def _mk194():
+            _b = _io110.BytesIO()
+            with _zf194.ZipFile(_b, "w") as _z:
+                _rel194._zip_write_bytes_deterministic(_z, _data, "t/a.txt")
+            return _b.getvalue()
+        _z1, _z2 = _mk194(), _mk194()
+        with _zf194.ZipFile(_io110.BytesIO(_z1)) as _z:
+            _inf = _z.infolist()[0]
+            _ok_meta = (_inf.compress_type == _zf194.ZIP_DEFLATED
+                        and _inf.compress_size < _inf.file_size
+                        and _inf.date_time == (1980, 1, 1, 0, 0, 0)
+                        and _z.read("t/a.txt") == _data)   # giải nén tròn nội dung
+        return _z1 == _z2 and _ok_meta
+    _t110("r194_bundle_deflate_tat_dinh", _c194_bundle_deflate_deterministic)
 
     def _c193_release_bundle_token_scan():
         # PURE + shape: member chứa token thật (tl_ + ≥20 alnum) → finding (token CẮT, không in trọn);

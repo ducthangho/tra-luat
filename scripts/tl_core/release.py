@@ -333,7 +333,8 @@ _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   #
 # manifest trên dev-tree: walk thư mục (không phải git ls-files) đã liệt kê + hash tra_luat_config.v2.json
 # vào RELEASE_MANIFEST (rò metadata + file_count lệch zip-set 115≠109 → release-verify trong gói FAIL).
 _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json",
-                                   "Code.2.21.2k.gs"}   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim; GIỮ 2.21.2m (current)/2.21.2l (còn ref)
+                                   "Code.2.21.2k.gs",   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim
+                                   "Code.2.21.2l.gs", "Code.2.21.2m.gs"}   # r194: current nay là 2.21.2n — 2 bản cũ (412KB) thành dead-weight bundle; GIỮ trong repo/git, chỉ loại khỏi GÓI (tiền lệ 2.21.2k)
 
 _RELEASE_EXCLUDE_NAMES = {
     "RELEASE_MANIFEST.json",
@@ -704,8 +705,10 @@ def _verify_release_archive(zip_path: Path, manifest: dict, *, expected_archive_
 
     def _metadata_errors(info) -> list[str]:
         errors = []
-        if info.compress_type != zipfile.ZIP_STORED:
-            errors.append("COMPRESSION_NOT_STORED")
+        # r194 (AMEND ADR-0007): chấp nhận CẢ STORED (bundle cũ) lẫn DEFLATED (canon mới, mức 9 cố định);
+        # loại nén khác vẫn là lỗi. Check compress_size==file_size CHỈ áp cho STORED.
+        if info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+            errors.append("COMPRESSION_NOT_STORED_OR_DEFLATED")
         if info.date_time != (1980, 1, 1, 0, 0, 0):
             errors.append("TIMESTAMP_NOT_FIXED")
         if info.create_system != 3:
@@ -718,7 +721,7 @@ def _verify_release_archive(zip_path: Path, manifest: dict, *, expected_archive_
             errors.append("SPECIAL_ENTRY")
         if mode != 0o100644:
             errors.append("PERMISSION_NOT_FIXED")
-        if info.compress_size != info.file_size:
+        if info.compress_type == zipfile.ZIP_STORED and info.compress_size != info.file_size:
             errors.append("STORED_SIZE_MISMATCH")
         return errors
 
@@ -854,24 +857,29 @@ def cmd_release_verify(a) -> int:
 def _zip_write_file_deterministic(zf, src: Path, arcname: str):
     info = zipfile.ZipInfo(arcname)
     info.date_time = (1980, 1, 1, 0, 0, 0)
-    info.compress_type = zipfile.ZIP_STORED
+    info.compress_type = zipfile.ZIP_DEFLATED   # r194: cùng canon nén với _zip_write_bytes_deterministic
     info.create_system = 3
     info.extra = b""
     info.comment = b""
     # 0644 regular file; keep deterministic permissions.
     info.external_attr = 0o100644 << 16
-    zf.writestr(info, src.read_bytes())
+    zf.writestr(info, src.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
 
 
 def _zip_write_bytes_deterministic(zf, data: bytes, arcname: str):
+    # r194 (AMEND ADR-0007, user yêu cầu hạ size 24-07): ZIP_STORED → ZIP_DEFLATED mức 9 CỐ ĐỊNH —
+    # bundle 6.4MB → ~1.5MB. Tính tất định GIỮ NGUYÊN cách ĐO: build ×2 CÙNG MÔI TRƯỜNG phải cùng SHA
+    # (gate/CI vốn đo vậy — CI so 2 bản build CỦA CHÍNH NÓ, không so hash cố định xuyên máy); per-file
+    # sha256 trong RELEASE_MANIFEST tính trên NỘI DUNG GIẢI NÉN nên bất biến với mức nén — release-verify
+    # trong gói không đổi. Metadata vẫn đóng băng (date/attrs/extra) như ADR-0007.
     info = zipfile.ZipInfo(arcname)
     info.date_time = (1980, 1, 1, 0, 0, 0)
-    info.compress_type = zipfile.ZIP_STORED
+    info.compress_type = zipfile.ZIP_DEFLATED
     info.create_system = 3
     info.extra = b""
     info.comment = b""
     info.external_attr = 0o100644 << 16
-    zf.writestr(info, data)
+    zf.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
 
 
 
@@ -1072,7 +1080,7 @@ def cmd_release_bundle(a) -> int:
            "warnings": ([_warn_redirect] if _warn_redirect else []),
            "content_hash": manifest.get("content_hash"),
            "archive_sha256": bundle_sha, "archive_sha256_rebuild": rebuild_sha, "reproducible": True,
-           "note": "ZIP_STORED root/thứ tự/timestamp/permission cố định; build ×2 cùng SHA (ADR-0007)."}
+           "note": "ZIP_DEFLATED-9 (r194 amend ADR-0007) root/thứ tự/timestamp/permission cố định; build ×2 cùng SHA."}
     _print_json_or_text(res, getattr(a, "json", False))
     return 0
 

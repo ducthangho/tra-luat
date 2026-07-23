@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.24 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.25 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -242,9 +242,9 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 
 ## 8. APPS SCRIPT WEBAPP
 Target contract = **2.21.2n** (`Code.2.21.2n.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
-- **`references/Code.2.21.2m.gs`:** như 2.21.2l (Cách B/`row_kind`, manifestScope, claims F-04/F-08) + export `row_kind` RAW (bỏ default 'own' — manifest == Sheet == reg_get; ĐẾM corpus/own GIỮ blank→own).
+- **2.21.2m** (.gs chỉ còn repo dev — r194): như 2.21.2l (Cách B/`row_kind`, manifestScope, claims F-04/F-08) + export `row_kind` RAW (bỏ default 'own' — manifest == Sheet == reg_get; ĐẾM corpus/own GIỮ blank→own).
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
-- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE + target `Code.2.21.2*.gs`; lịch sử/biện luận ở `DOCTRINE_APPENDIX.md` + `CHANGELOG.md`.
+- Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE; lịch sử ở `DOCTRINE_APPENDIX.md`/`CHANGELOG.md`.
 - Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2m`, rồi `contract_check.py --audit`.
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
 - Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2m`.

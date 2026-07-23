@@ -20,3 +20,19 @@
 - **Hệ quả:** Bundle lớn hơn nhưng đóng/mở nhanh hơn, dễ so sánh và tái tạo xuyên môi trường. Kênh phân phối phải
   lưu/công bố cả hai hash; mọi thay đổi metadata archive có chủ ý cũng tạo archive hash mới. ZIP được đóng lại
   bằng công cụ khác dù giữ nguyên nội dung sẽ không còn được coi là artifact canonical.
+
+## Amend r194 (v1.35.25, 2026-07-24) — ZIP_DEFLATED mức 9 cố định
+
+- **Bối cảnh:** bundle chạm 6,4MB (ZIP_STORED toàn phần); user yêu cầu hạ kích thước. Đo lại rủi ro
+  "compressed bytes phụ thuộc implementation": mọi phép so archive-hash của quy trình đều là **build ×2
+  trong CÙNG MÔI TRƯỜNG** (gate local ×2; CI build 2 bản CỦA CHÍNH NÓ rồi so nhau; deploy so bản build
+  với bản tải ngược CÙNG artifact) — không có phép so hash cố định xuyên máy. Per-file SHA-256 trong
+  `RELEASE_MANIFEST.json` tính trên NỘI DUNG GIẢI NÉN nên bất biến với mức nén; `release-verify` trong
+  gói không đổi ngữ nghĩa.
+- **Quyết định:** writer chuyển `ZIP_DEFLATED` `compresslevel=9` cố định (metadata vẫn đóng băng như cũ);
+  verifier archive chấp nhận {STORED (bundle cũ), DEFLATED}; check `compress_size==file_size` chỉ áp cho
+  STORED. Phần còn lại của ADR (root/thứ tự/timestamp/permission cố định, repro-gate ×2, hai hash) giữ
+  nguyên hiệu lực. Kết quả đo: 6,4MB → ~1,5MB.
+- **Ràng buộc mới:** archive-hash chỉ có nghĩa trong cùng môi trường build (zlib cùng bản). Nếu tương lai
+  cần so hash xuyên máy (vd CI so với hash công bố sẵn) thì phải quay lại STORED hoặc pin zlib — mở lại
+  amend này bằng ADR mới.

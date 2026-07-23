@@ -191,16 +191,30 @@ def _auth_fail(rc: int, out: str, err: str) -> dict:
 
 
 def source_add(notebook_id: str, drive_id=None, url=None, file=None, text=None,
-               doc_type="doc", title=None, wait=True, timeout=600) -> dict:
-    """Thêm nguồn qua CLI `nlm source add` (thay MCP). Trả {ok, source_id, title, ready} hoặc {ok:False, fallback:'mcp'}."""
+               doc_type="doc", title=None, wait=True, timeout=120) -> dict:
+    """Thêm nguồn qua CLI `nlm source add` (thay MCP). Trả {ok, source_id, title, ready} hoặc {ok:False, fallback:'mcp'}.
+    F5 van 3 (r192): mặc định CHỜ SETTLE TỐI ĐA 120s (trước 600s — đo 23-07: nguồn nhỏ 30-90s, 343k ký tự
+    >10' client-timeout nhưng ĂN server-side) — quá ngưỡng thì THÔI CHỜ chứ KHÔNG huỷ (nguồn đang index);
+    rc≠0 mà output ĐÃ có Source ID ⇒ add THÀNH CÔNG, chỉ hết giờ chờ → ok=True + settle_timeout=True
+    (caller ghi deferred, cuối lô `nlm-reconcile` xác minh); subprocess hard-kill ở timeout+30s → rc=124
+    kèm note 'có thể đã ăn server-side' (ĐỪNG add lại mù — reconcile là đường vét)."""
     if not nlm_available():
         return {"ok": False, "error": "nlm CLI không có trên PATH", "fallback": "mcp"}
     if not (drive_id or url or file or text is not None):
         return {"ok": False, "error": "source_add cần drive_id|url|file|text"}
     rc, out, err = _run(_add_args(notebook_id, drive_id, url, file, text, doc_type, title, wait, timeout), timeout=timeout + 30)
+    m = _SID_RE.search(out or "")
     if rc != 0:
-        return _auth_fail(rc, out, err)
-    m = _SID_RE.search(out)
+        if m:   # van 3: add đã trả Source ID — chỉ là CLI bỏ chờ/hết giờ settle, KHÔNG phải fail
+            return {"ok": True, "source_id": m.group(1), "ready": False, "settle_timeout": True,
+                    "via": "nlm-cli", "raw": (out or "").strip()[-200:],
+                    "note": f"thôi chờ settle sau {timeout}s (nguồn đang index) — nlm-reconcile cuối lô xác minh"}
+        r = _auth_fail(rc, out, err)
+        if rc == 124:
+            r["settle_timeout"] = True
+            r["note"] = ("client-timeout — add CÓ THỂ đã ăn server-side: ĐỪNG add lại mù; "
+                         "chờ ≥60s rồi `tl nlm-reconcile` xác minh/link.")
+        return r
     return {"ok": True, "source_id": (m.group(1) if m else None), "ready": "(ready)" in out,
             "via": "nlm-cli", "raw": out.strip()[-200:]}
 

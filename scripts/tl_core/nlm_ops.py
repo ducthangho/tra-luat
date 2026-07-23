@@ -1089,7 +1089,8 @@ def cmd_nlm_query(a) -> int:
 # ── v1.34.54 (A1+C8+B1 — grill Q3/Q8 2026-07-15): tuổi cookie + preflight 2 tầng + batch-link ──
 _NLM_COOKIE_LIFE_MIN = 60      # hồ sơ DBSC 2026-07-12: đời cookie ~1h, `nlm login` là đủ
 _NLM_COOKIE_WARN_AGE_MIN = 45  # tuổi vượt ngưỡng → khuyên re-auth trước lô dài / chuyển nlm-links
-NLM_BATCH_LINKS_THRESHOLD = 2  # grill Q3(a): >2 file → đường batch-link (hằng số, KHÔNG config env — D7)
+NLM_BATCH_LINKS_THRESHOLD = 4  # F5 van 1 (r192, grilling 23-07): lô >4 nguồn → KHÔNG auto-add, xuất bảng tay (trước: >2 — grill Q3(a); hằng số, KHÔNG config env — D7)
+NLM_COOKIE_BATCH_MAX_MIN = 50  # F7 (r192): cookie NLM quá ~50' → CHẶN lô API-add >1 nguồn, bắt `nlm login` trước (đời cookie ~60'; trước chỉ WARN COOKIE_AGE_HIGH)
 
 
 def _nlm_auth_age_minutes():
@@ -1401,6 +1402,22 @@ def _nlm_links_rows(entries: list, *, profile_scope: bool) -> list:
     return out
 
 
+def _nlm_links_md(rows: list, nb: str, *, title: str = "Bảng tay nạp NotebookLM") -> str:
+    """F5 van 1 (r192, PURE): dựng BẢNG TAY markdown — link bấm-được từng nguồn (QT-1) + link notebook đích
+    + hẹn `nlm-reconcile` sau khi người dùng nạp xong. Dùng bởi `nlm-links --md-out` và nhánh bảng-tay
+    của `ingest-missing` (lô > NLM_BATCH_LINKS_THRESHOLD)."""
+    nb_url = f"https://notebooklm.google.com/notebook/{nb}"
+    lines = [f"# {title} — {len(rows)} nguồn", "",
+             f"Notebook đích: [{nb}]({nb_url})", "",
+             "Mở notebook → Add source → Google Drive (picker chọn được NHIỀU file 1 lần) hoặc dán link:", ""]
+    for e in rows:
+        lines.append(f"- [{_entry_name(e)}]({_entry_links_url(e)})")
+    lines += ["", "Sau khi nạp xong TRÊN UI:", "",
+              f"1. `tl nlm-reconcile {nb} --apply`   # bắc cầu registry (exact-title, ownership-guard A2)",
+              "2. Scope nền: `tl register --drive-id <id> --corpus true` từng dòng sau khi link.", ""]
+    return "\n".join(lines)
+
+
 def cmd_nlm_links(a) -> int:
     """B1 (v1.34.54, grill Q2/Q3=a): in DANH SÁCH LINK Drive để NẠP BATCH TAY vào NotebookLM — né cookie ~1h
     khi lô dài. STDOUT = CHỈ LINK (mỗi dòng 1 — dán thẳng vào ô Websites/Links của UI; NLM nhận nhiều link cách
@@ -1425,6 +1442,16 @@ def cmd_nlm_links(a) -> int:
             print(json.dumps({"ok": False, "error": _nberr}, ensure_ascii=False), file=sys.stderr)
             return 2
     rows = _nlm_links_rows(entries, profile_scope=_active_profile() != DEFAULT_PROFILE)
+    # F5 van 1 (r192): --drive-ids = bảng tay cho LÔ CỤ THỂ (caller — vd ingest-missing chuyển tay — đưa
+    # danh sách id); lọc trực tiếp trên entries, KHÔNG đòi điều-kiện 'chưa có nlm_source_id' của mặc định.
+    _dids91 = [s.strip() for s in str(getattr(a, "drive_ids", "") or "").split(",") if s.strip()]
+    if _dids91:
+        _by_did91 = {str(_entry_drive_id(e) or ""): e for e in entries}
+        rows = [_by_did91[d] for d in _dids91 if d in _by_did91]
+        _miss91 = [d for d in _dids91 if d not in _by_did91]
+        if _miss91:
+            print(f"[tl] ⚠ nlm-links --drive-ids: {len(_miss91)} id không thấy trong manifest (bỏ qua): "
+                  f"{_miss91[:5]}", file=sys.stderr)
     _cat = (getattr(a, "cat", None) or "").strip()
     if _cat:
         rows = [e for e in rows if str(_entry_cat(e) or "").startswith(_cat) or str(_entry_cat(e) or "").split("_")[0] == _cat]
@@ -1435,9 +1462,22 @@ def cmd_nlm_links(a) -> int:
     links = [_entry_links_url(e) for e in rows]
     nb_url = f"https://notebooklm.google.com/notebook/{nb}"
     rep = _nlm_preflight_report(nb, probe=False)   # chỉ tuổi cookie — lệnh này OFFLINE, không gọi NLM
+    # F5 van 1 (r192): --md-out = ghi BẢNG TAY markdown (link bấm-được + notebook + hẹn reconcile) ra file
+    # sổ trong gói việc — dùng khi lô > NLM_BATCH_LINKS_THRESHOLD chuyển nạp tay.
+    _md_out91 = getattr(a, "md_out", None)
+    if _md_out91:
+        try:
+            _p91 = Path(_md_out91)
+            _p91.parent.mkdir(parents=True, exist_ok=True)
+            _p91.write_text(_nlm_links_md(rows, nb), encoding="utf-8", newline="\n")
+            print(f"[tl] nlm-links: bảng tay → {_p91}", file=sys.stderr)
+        except Exception as _me91:  # noqa: BLE001
+            print(f"[tl] ⚠ nlm-links --md-out lỗi ghi ({_me91}) — dùng stdout/JSON thay.", file=sys.stderr)
+            _md_out91 = None
     if getattr(a, "json", False) or getattr(a, "out", None):
         payload = {"ok": True, "schema": "nlm_links.v1", "notebook": nb, "notebook_url": nb_url,
                    "count": len(links), "total_pending": _total, "links": links,
+                   **({"hand_sheet": str(_md_out91)} if _md_out91 else {}),
                    "rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e), "cat": _entry_cat(e)} for e in rows],
                    "cookie_age_min": rep.get("age_min"),
                    "next_steps": [f"Dán links vào Add source → Websites của {nb_url}",

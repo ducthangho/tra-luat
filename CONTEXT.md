@@ -45,6 +45,14 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Identity ingest** — tổ hợp `content_hash + target scope + canonical name + profile` dùng cho idempotency,
   deduplicate và resume. Tên file đơn lẻ không phải identity; cùng identity là no-op đã xác minh, còn cùng tên
   nhưng khác hash là conflict và chỉ được thay thế bằng một kế hoạch chỉ rõ source ID cũ.
+- **Ba van NLM (r192)** — ba chốt điều tiết đường nạp NLM, con số chốt qua grilling 23-07: **van trước lô**
+  (lô >4 nguồn → không auto-add API, xuất BẢNG TAY markdown + hẹn reconcile), **van kích thước** (nguồn
+  >150k ký tự → tự `--nlm-no-wait`), **van runtime** (chờ settle quá 120s → thôi chờ KHÔNG huỷ, ghi
+  deferred, chạy tiếp; cuối lô một lượt reconcile). Đường "nạp tay" chỉ kích hoạt ở van 1 hoặc khi NLM
+  chết hẳn.
+- **Bảng tay (nạp NLM)** — file markdown do van 1 sinh (`hand_sheet`): link bấm-được từng nguồn + link
+  notebook đích + hẹn `nlm-reconcile --apply` sau khi người dùng nạp xong trên UI. Sinh bằng
+  `tl nlm-links --drive-ids … --md-out …` hoặc tự động ở nhánh bảng-tay của `ingest-missing`.
 - **PDF_IMAGE** — verdict đo text-layer PDF lúc lập plan ingest (r191): trung bình **< 100 ký tự
   không-trắng/trang** ⇒ PDF scan/ảnh (text layer chỉ còn metadata chữ ký số) → coi
   `source_quality=ocr` chưa verify, rơi vào ocr_gate hiện hành — KHÔNG convert mù. Không đo được

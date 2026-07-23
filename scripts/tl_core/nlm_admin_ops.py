@@ -119,8 +119,9 @@ def cmd_nlm_add(a) -> int:
                                                   "identity_hash": _claim56})
         try:
             load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-            _cl56 = _gas().get("ingest_claim", keys=json.dumps([_claim56]), run_id=_run56,
-                               drive_ids=json.dumps([str(a.drive_id)]))
+            # F6 r192: claim qua _ingest_claim_get — retry chọn lọc 5s/15s (GAS 404 chập chờn đo 23-07)
+            _cl56 = _ingest_claim_get(_gas(), a, keys=json.dumps([_claim56]), run_id=_run56,
+                                      drive_ids=json.dumps([str(a.drive_id)]))
         except Exception as _ce56:  # noqa: BLE001
             _cl56 = {"ok": False, "error": str(_ce56)}
         if not _cl56.get("ok"):
@@ -136,9 +137,10 @@ def cmd_nlm_add(a) -> int:
             _journal_append(_run56, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
             print(json.dumps({"ok": False, "error": "CLAIMED_ELSEWHERE", "journal": _run56,
                               "reason": (_gr56 or {}).get("reason"),
+                              "claim_ttl_hint": _claim_ttl_hint(),
                               "note": "Lần add trước/host khác có thể ĐÃ thành công server-side — `tl nlm-list "
-                                      "<nb>` hoặc `tl nlm-reconcile` xác minh TRƯỚC khi retry; claim TTL 5'. "
-                                      "Sau timeout NLM: chờ ≥60s cho settle rồi mới kiểm."},
+                                      "<nb>` hoặc `tl nlm-reconcile` xác minh TRƯỚC khi retry; giờ hết hạn ở "
+                                      "claim_ttl_hint. Sau timeout NLM: chờ ≥60s cho settle rồi mới kiểm."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
     _dt, _dt_src = _nlm_add_doc_type(getattr(a, "type", None), getattr(a, "drive_id", None))
@@ -168,7 +170,12 @@ def cmd_nlm_add(a) -> int:
     # reg_link ghi sid NOT_FOUND → con trỏ treo phải revert tay). --no-wait → BỎ HẲN reg_link (sid chưa settle,
     # probe sẽ âm tính giả — stale-an-toàn, reconcile chữa); ngược lại probe live 1 nhịp TRƯỚC khi link.
     if getattr(a, "drive_id", None) and r.get("source_id"):
-        if getattr(a, "no_wait", False):
+        if r.get("settle_timeout") and not getattr(a, "no_wait", False):
+            # F5 van 3 (r192): CLI thôi chờ settle sau 120s (không huỷ — sid THẬT đã có) → xử NHƯ no-wait:
+            # reg_link deferred (F3), reconcile cuối lô nâng pushed.
+            print("[tl] ⚠ Van runtime (F5 r192): thôi chờ settle sau 120s — sid đã có, link DEFERRED; "
+                  "`tl nlm-reconcile --apply` xác minh + nâng pushed.", file=sys.stderr)
+        if getattr(a, "no_wait", False) or r.get("settle_timeout"):
             # F3 r191 (đề xuất #2 — đo 23-07: 3 nguồn add no-wait có source_id trả về mà registry nlm=''
             # nb='-', phải register tay từng dòng): no-wait KHÔNG bỏ reg_link nữa — link NGAY bằng
             # source_id THẬT từ add-response (link không cần đợi settle) + nlm_status='deferred' (ngữ

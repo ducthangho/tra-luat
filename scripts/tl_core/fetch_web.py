@@ -282,13 +282,30 @@ def _fetch_plan(q: str) -> list:
 
 def cmd_fetch_route(a) -> int:
     """RESOLVE + DEDUP + kế hoạch tải official-first (ưu tiên docx>doc>pdf). Advisory — không tải.
-    Bước tải do agent chạy qua Claude in Chrome theo recipe; hiệu-lực xác minh ở vbpl trước khi nạp canonical."""
+    F9 (r192, đề xuất #9 — khuôn 10b nổi hơn): «phê duyệt nạp theo skill ≠ phê duyệt TỰ TẢI nguồn gated»
+    ⇒ MẶC ĐỊNH dừng ở LINK BẤM-ĐƯỢC cho người dùng tự tải (khuôn C2(b) của fetch-links); recipe TỰ TẢI
+    (fetch_plan cho agent chạy Chrome) CHỈ xuất khi có cờ tường minh --auto-download-approved — người vận
+    hành gõ SAU khi người dùng đồng ý trong phiên, không bao giờ là mặc định."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     q = (getattr(a, "query", None) or getattr(a, "sohieu", None) or "").strip()
     if not q:
         print("[tl] fetch-route cần <số hiệu|tên>", file=sys.stderr); return 2
     dedup, _ = _dedup_status(q)
-    out = {"ok": True, "query": q, "dedup": dedup, "fetch_plan": _fetch_plan(q),
+    plan = _fetch_plan(q)
+    if not getattr(a, "auto_download_approved", False):
+        dl_md = []
+        for s in plan["sources"]:
+            gurl = (s.get("google_search_variants") or [plan["google_global"]])[0]
+            dl_md.append(f"- [Tải .{s['expected_format']} {q} — {s['source']} (cần đăng nhập)]({gurl})")
+        dl_md.append(f"- [Tìm toàn cục (Google) — “{plan['query_variants'][0]}”]({plan['google_global']})")
+        out = {"ok": True, "query": q, "dedup": dedup, "mode": "ask_first_links",
+               "download_links_markdown": dl_md, "upload_link_markdown": _hopnap_upload_md(),
+               "note": ("F9/10b HỎI TRƯỚC: đưa link bấm-được cho NGƯỜI DÙNG tự tải (nguồn gated cần đăng "
+                        "nhập); muốn agent TỰ tải phải hỏi người dùng trong phiên rồi chạy lại với "
+                        "--auto-download-approved. in_corpus_active=true ⇒ dedup, chỉ tải nếu cần bản mới hơn.")}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+        return 0
+    out = {"ok": True, "query": q, "dedup": dedup, "mode": "auto_fetch_plan", "fetch_plan": plan,
            "note": ("FORMAT docx>doc>pdf ⇒ TVPL/LuatVietnam (docx) trước → vbpl (doc) → Công báo (pdf). "
                     "Official (vbpl) để xác minh BẢN ĐÚNG + HIỆU-LỰC. in_corpus_active=true ⇒ dedup, chỉ tải nếu cần bản mới hơn.")}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))

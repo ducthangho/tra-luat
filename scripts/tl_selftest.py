@@ -5331,8 +5331,10 @@ def run() -> int:
                           _rc2 == 0 and _j2.get("ok") is True and "keyword=17/VBHN-VPQH" in _j2.get("search_url", "")
                           and len(_j2.get("flow_claude_code") or []) == 5))
             # (3) fetch-route: VBHN-first variants + xếp nguồn docx trước (TVPL rank 1)
+            # F9 r192: fetch_plan nay CHỈ xuất khi --auto-download-approved (mặc định = link hỏi-trước)
             _rc3, _o3 = _cap72(_TL_MODULE.cmd_fetch_route, argparse.Namespace(
-                config=None, profile=None, query="Luật Xây dựng", sohieu=None, deterministic=False))
+                config=None, profile=None, query="Luật Xây dựng", sohieu=None, deterministic=False,
+                auto_download_approved=True))
             _j3 = json.loads(_o3)
             _fp3 = _j3.get("fetch_plan") or {}
             cases.append(("r72a_fetch_route_vbhn_first_docx_rank",
@@ -10991,12 +10993,15 @@ def run() -> int:
     _t110("r118_migrate_apply_repoint_and_verify_bulk", _c118_migrate_apply_repoint_verify)
 
     def _c118_migrate_batch_links_stdout():
-        # ADD >2 doc không --api-add → BATCH_LINKS: stdout CHỈ link (mẫu r115 nlm-links); stderr hướng dẫn
-        # 'CHẠY LẠI'; KHÔNG side-effect thêm.
-        _rows_add = [r0 for r0 in _rows_mg118 if not r0["nlm_source_id"]]
+        # ADD >NLM_BATCH_LINKS_THRESHOLD (4 — F5 van 1 r192, trước là 2) doc không --api-add → BATCH_LINKS:
+        # stdout CHỈ link (mẫu r115 nlm-links); stderr hướng dẫn 'CHẠY LẠI'; KHÔNG side-effect thêm.
+        _rows_add = ([r0 for r0 in _rows_mg118 if not r0["nlm_source_id"]]
+                     + [{"drive_id": c * 24, "name": f"Doc_Add{c.upper()}_118", "nlm_source_id": "",
+                         "nlm_notebook_id": "", "nlm_status": ""} for c in ("x", "y")])
+        assert len(_rows_add) > _TL_MODULE.NLM_BATCH_LINKS_THRESHOLD
         _rc, _o, _so, _e, _c = _run_mg118(_rows_add, _phys_mg118, apply=True, confirm="yes", json_mode=False)
         _lines = [ln for ln in _so.splitlines() if ln.strip()]
-        return (_rc == 0 and len(_lines) == 3
+        return (_rc == 0 and len(_lines) == len(_rows_add)
                 and all(ln.startswith("https://docs.google.com/") for ln in _lines)
                 and "CHẠY LẠI" in _e and not _c["adds"] and not _c["upserts"] and _c["deletes"] == 0)
     _t110("r118_migrate_add_over_threshold_batch_links", _c118_migrate_batch_links_stdout)
@@ -12012,7 +12017,7 @@ def run() -> int:
     # (cờ UNVERIFIED_NLM_STATE, KHÔNG ghi trên belief — physical-first); đường GHI-cần-vật-lý (migrate --apply,
     # reconcile --apply) = DEFER + resume-artifact (--from-plan khi NLM sống). NEGATIVE-INPUT TRƯỚC (r102). ═══
     _DID122 = "dAUD122" + "0" * 17          # 24 ký tự — đủ regex drive-id
-    _DIDM122 = ["dMIG122" + c * 17 for c in "abc"]
+    _DIDM122 = ["dMIG122" + c * 17 for c in "abcde"]   # 5 doc > NLM_BATCH_LINKS_THRESHOLD=4 (F5 van 1 r192; trước 3 doc > 2)
 
     def _c122_wiring_meta_from_plan():
         from tl_core.command_registry import COMMAND_META as _CM122
@@ -12205,7 +12210,8 @@ def run() -> int:
         except Exception:
             return False
         return (_rc == 0 and _j.get("dry_run") is True and _j.get("unverified_nlm_state") is True
-                and (_j.get("counts") or {}).get("repoint") == 1 and (_j.get("counts") or {}).get("add") == 2
+                and (_j.get("counts") or {}).get("repoint") == 1
+                and (_j.get("counts") or {}).get("add") == len(_DIDM122) - 1   # 4 (fixture 5 doc — F5 van 1 r192)
                 and not _calls["resume_writes"])
     _t110("r122_migrate_dry_dead_stale_unverified", _c122_migrate_dry_dead_stale_unverified)
 
@@ -17601,6 +17607,218 @@ def run() -> int:
                 and (_plan.get("ocr_gate") or {}).get("block") is False
                 and getattr(_ns, "source_quality", "") == "auto")
     _t110("r191_ingest_local_pdf_text_di_qua", _c191_ingest_pdf_text_passes)
+
+    # ═══ r192 — ĐỢT HIỆU NĂNG/UX NLM (kế hoạch r191/r192 chốt 23-07): F5 BA VAN NLM · F6 retry GAS
+    # chọn lọc · F7 preflight-lô auth · F8 ingest_claim đọc config · F9 fetch hỏi-trước mặc định. ═══
+    def _c192_van1_bang_tay_md():
+        # F5 van 1: ngưỡng lô chốt 4 + bảng tay markdown đủ 3 phần (link nguồn bấm-được, notebook đích,
+        # hẹn nlm-reconcile) — nguồn nuôi nhánh BẢNG TAY của ingest-missing/nlm-links --md-out.
+        _rows = [{"drive_id": f"dV1{i}", "name": f"Doc_{i}"} for i in range(5)]
+        _md = _TL_MODULE._nlm_links_md(_rows, "nbV1")
+        return (_TL_MODULE.NLM_BATCH_LINKS_THRESHOLD == 4
+                and "notebooklm.google.com/notebook/nbV1" in _md
+                and all(f"[Doc_{i}]" in _md for i in range(5))
+                and "nlm-reconcile nbV1 --apply" in _md)
+    _t110("r192_van1_nguong4_bang_tay_md", _c192_van1_bang_tay_md)
+
+    def _c192_van1_nlm_links_md_out():
+        # F5 van 1: nlm-links --drive-ids (lô cụ thể, không đòi chưa-trên-NLM) + --md-out ghi bảng tay.
+        _keys = ("apply_profile_offline", "_manifest_entries", "_nlm_preflight_report")
+        _sv = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False, **kw: [
+                {"drive_id": "dL1", "name": "Doc_L1", "cat": "01", "nlm_source_id": "sACC"},
+                {"drive_id": "dL2", "name": "Doc_L2", "cat": "02", "nlm_source_id": ""}]
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=False: {"age_min": None, "warn": []}
+            with _tf110.TemporaryDirectory() as _d:
+                _mdp = str(Path(_d) / "bang_tay.md")
+                _ns = argparse.Namespace(config=None, profile=None, refresh=False, notebook="nbL192",
+                                         cat=None, limit=None, json=True, out=None,
+                                         drive_ids="dL1,dGHOST", md_out=_mdp)
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _TL_MODULE.cmd_nlm_links(_ns)
+                _o = json.loads(_bo.getvalue())
+                _md = Path(_mdp).read_text(encoding="utf-8")
+            return (_rc == 0 and _o.get("count") == 1 and _o.get("hand_sheet") == _mdp
+                    and _o.get("rows") and _o["rows"][0]["drive_id"] == "dL1"   # dL1 lấy DÙ đã có sid
+                    and "[Doc_L1]" in _md and "nbL192" in _md)
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r192_van1_nlm_links_drive_ids_md_out", _c192_van1_nlm_links_md_out)
+
+    def _c192_van1_ingest_missing_hand_sheet_shape():
+        # F5 van 1 (shape-lock khuôn r95): nhánh BATCH_LINKS của ingest-missing nay GHI bảng tay
+        # (_nlm_links_md → hand_sheet + next_steps reconcile).
+        import inspect as _ins192
+        import tl_core.ingest_ops as _io192
+        _src = _ins192.getsource(_io192.cmd_ingest_missing)
+        _seg = _src.split('mode": "BATCH_LINKS')[0]
+        return ("_nlm_links_md(to_add, target_nb)" in _seg and "nlm_bang_tay_" in _seg
+                and '"hand_sheet"' in _src and "nlm-reconcile" in _src)
+    _t110("r192_van1_ingest_missing_bang_tay_shape", _c192_van1_ingest_missing_hand_sheet_shape)
+
+    def _c192_van2_size_forces_no_wait():
+        # F5 van 2: text >150k ký tự → TỰ chuyển --nlm-no-wait ngay lúc lập plan (DRY thấy trước);
+        # text nhỏ → không đụng. Ngưỡng chốt 150k (đo: 343k >10'; <100k 30-90s).
+        _svp = _TL_MODULE._profile_read_probe_text
+        try:
+            _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("x" * 200_000, "mock")
+            _rc, _plan, _e, _mr, _ns = _run191_ingest(ns_over={"no_nlm_add": False})
+            _big_ok = (_rc == 0 and (_plan.get("nlm_size_van") or {}).get("forced_no_wait") is True
+                       and (_plan.get("nlm_size_van") or {}).get("chars") == 200_000
+                       and getattr(_ns, "nlm_no_wait", False) is True and "Van kích thước" in _e)
+            _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("x" * 90_000, "mock")
+            _rc2, _plan2, _e2, _mr2, _ns2 = _run191_ingest(ns_over={"no_nlm_add": False})
+            return (_big_ok and _rc2 == 0 and _plan2.get("nlm_size_van") is None
+                    and getattr(_ns2, "nlm_no_wait", False) is False
+                    and _TL_MODULE._NLM_SIZE_VAN_CHARS == 150_000)
+        finally:
+            _TL_MODULE._profile_read_probe_text = _svp
+    _t110("r192_van2_150k_tu_chuyen_no_wait", _c192_van2_size_forces_no_wait)
+
+    def _c192_van3_khong_huy_settle_timeout():
+        # F5 van 3: source_add mặc định chờ settle 120s; CLI rc≠0 nhưng ĐÃ có Source ID → ok=True +
+        # settle_timeout (KHÔNG coi là fail — nguồn đang index, KHÔNG huỷ); subprocess hard-kill chỉ ở
+        # timeout+30 (=150s — không giết trước khi CLI tự bỏ chờ); rc=124 → note 'ĐỪNG add lại mù'.
+        import inspect as _ins192
+        _nc192 = _imp("nlm_cli")
+        _sig = _ins192.signature(_nc192.source_add)
+        if _sig.parameters["timeout"].default != 120:
+            return False
+        _sv_run, _sv_avail = _nc192._run, _nc192.nlm_available
+        _ran = []
+        try:
+            _nc192.nlm_available = lambda: True
+            _sid = "12345678-abcd-4abc-8def-1234567890ab"
+            _nc192._run = lambda args, timeout=120: (_ran.append(timeout),
+                                                     (1, f"Source ID: {_sid}\n(waiting...)", ""))[1]
+            _r1 = _nc192.source_add("nbV3", drive_id="dV3")
+            _nc192._run = lambda args, timeout=120: (124, "", "timeout 150s")
+            _r2 = _nc192.source_add("nbV3", drive_id="dV3")
+            _nc192._run = lambda args, timeout=120: (1, "boom", "auth error 401")
+            _r3 = _nc192.source_add("nbV3", drive_id="dV3")
+            return (_r1.get("ok") is True and _r1.get("settle_timeout") is True
+                    and _r1.get("source_id") == _sid and _r1.get("ready") is False
+                    and _ran == [150]
+                    and _r2.get("ok") is False and _r2.get("settle_timeout") is True
+                    and "add lại mù" in str(_r2.get("note") or "")
+                    and _r3.get("ok") is False and not _r3.get("settle_timeout"))
+        finally:
+            _nc192._run, _nc192.nlm_available = _sv_run, _sv_avail
+    _t110("r192_van3_thoi_cho_khong_huy_add", _c192_van3_khong_huy_settle_timeout)
+
+    def _c192_van3_wiring_deferred_shape():
+        # F5 van 3 (shape-lock): settle_timeout được ĐẤU vào lane deferred — nlm-add link deferred (F3),
+        # ingest-local ghi deferred + KHÔNG corpus + bỏ dup-check.
+        import inspect as _ins192
+        import tl_core.nlm_admin_ops as _na192
+        import tl_core.ingest_ops as _io192
+        _s_add = _ins192.getsource(_na192.cmd_nlm_add)
+        _s_il = _ins192.getsource(_io192.cmd_ingest_local)
+        return ('r.get("settle_timeout")' in _s_add
+                and '_nlm_no_wait_reg_link' in _s_add
+                and '_v3_deferred = bool(add.get("settle_timeout"))' in _s_il
+                and '"nlm_status": "deferred"' in _s_il
+                and 'elif not _v3_deferred:' in _s_il)
+    _t110("r192_van3_dau_vao_lane_deferred", _c192_van3_wiring_deferred_shape)
+
+    def _c192_f6_retry_schedule_404():
+        # F6: _gas_get_retry nhận _schedule tường minh (5s/15s) + coi 'HTTPError: 404' là transient
+        # (GAS 404 chập chờn đo 23-07); lỗi nghiệp vụ JSON ok:false KHÔNG retry.
+        import time as _time192
+        _calls = {"n": 0}
+        _sleeps = []
+
+        class _G192:
+            def get(self, action, **kw):
+                _calls["n"] += 1
+                if _calls["n"] <= 2:
+                    return {"ok": False, "error": "HTTPError: 404: Not Found"}
+                return {"ok": True, "results": []}
+        _sv_sleep = _time192.sleep
+        try:
+            _time192.sleep = lambda s: _sleeps.append(s)
+            _r = _TL_MODULE._gas_get_retry(_G192(), "ingest_claim", _schedule=(5.0, 15.0))
+            _calls2 = {"n": 0}
+
+            class _G192b:
+                def get(self, action, **kw):
+                    _calls2["n"] += 1
+                    return {"ok": False, "error": "NOT_FOUND: khong co dong"}
+            _r2 = _TL_MODULE._gas_get_retry(_G192b(), "reg_get", _schedule=(5.0, 15.0))
+            return (_r.get("ok") is True and _calls["n"] == 3 and _sleeps == [5.0, 15.0]
+                    and _r2.get("ok") is False and _calls2["n"] == 1)
+        finally:
+            _time192.sleep = _sv_sleep
+    _t110("r192_f6_retry_5s15s_404_transient", _c192_f6_retry_schedule_404)
+
+    def _c192_f7_cookie_batch_gate():
+        # F7: hằng chốt 50' + cổng lô trong ingest-missing (shape-lock — trước đây COOKIE_AGE_HIGH chỉ WARN).
+        import inspect as _ins192
+        import tl_core.ingest_ops as _io192
+        _src = _ins192.getsource(_io192.cmd_ingest_missing)
+        return (_TL_MODULE.NLM_COOKIE_BATCH_MAX_MIN == 50
+                and "NLM_COOKIE_TOO_OLD_FOR_BATCH" in _src
+                and "_nlm_auth_age_minutes()" in _src
+                and "len(to_add) > 1" in _src)
+    _t110("r192_f7_cookie_50p_chan_lo", _c192_f7_cookie_batch_gate)
+
+    def _c192_f8_claim_mot_cua():
+        # F8+F6: _ingest_claim_get tự nạp creds từ config (load_creds vốn ưu tiên env) + forward
+        # _gas_get_retry đúng action/schedule; cả 3 call-site claim đi qua MỘT cửa này.
+        import inspect as _ins192
+        import tl_core.ingest_ops as _io192
+        import tl_core.nlm_admin_ops as _na192
+        _cnt = {"creds": 0, "retry": None}
+        _sv = {k: getattr(_TL_MODULE, k) for k in ("load_creds", "_gas_get_retry")}
+        try:
+            _TL_MODULE.load_creds = lambda *a, **k: _cnt.__setitem__("creds", _cnt["creds"] + 1)
+            _TL_MODULE._gas_get_retry = (lambda g, action, _schedule=None, **kw:
+                                         (_cnt.__setitem__("retry", (action, _schedule)), {"ok": True})[1])
+            _r = _TL_MODULE._ingest_claim_get(object(), argparse.Namespace(config=None, profile=None),
+                                              keys="[]", run_id="r192")
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+        _s_im = _ins192.getsource(_io192.cmd_ingest_missing)
+        _s_il = _ins192.getsource(_io192.cmd_ingest_local)
+        _s_na = _ins192.getsource(_na192.cmd_nlm_add)
+        return (_r.get("ok") is True and _cnt["creds"] == 1
+                and _cnt["retry"] == ("ingest_claim", (5.0, 15.0))
+                and all("_ingest_claim_get(" in s for s in (_s_im, _s_il, _s_na))
+                and not any('g.get("ingest_claim"' in s for s in (_s_im, _s_il))
+                and '_gas().get("ingest_claim"' not in _s_na)
+    _t110("r192_f8_claim_doc_config_mot_cua", _c192_f8_claim_mot_cua)
+
+    def _c192_f9_fetch_route_ask_first():
+        # F9 (10b nổi hơn): fetch-route MẶC ĐỊNH dừng ở link bấm-được (KHÔNG fetch_plan);
+        # --auto-download-approved mới xuất recipe tự tải.
+        _keys = ("apply_profile_offline", "_dedup_status", "_hopnap_upload_md")
+        _sv = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._dedup_status = lambda q: ({"in_corpus_active": False}, None)
+            _TL_MODULE._hopnap_upload_md = lambda: "[upload](https://drive.google.com/x)"
+            def _run_fr(approved):
+                _ns = argparse.Namespace(config=None, profile=None, query="Luật Thử 192", sohieu=None,
+                                         deterministic=False, auto_download_approved=approved)
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _TL_MODULE.cmd_fetch_route(_ns)
+                return _rc, json.loads(_bo.getvalue())
+            _rc1, _o1 = _run_fr(False)
+            _rc2, _o2 = _run_fr(True)
+            return (_rc1 == 0 and _o1.get("mode") == "ask_first_links" and "fetch_plan" not in _o1
+                    and (_o1.get("download_links_markdown") or [])
+                    and all(s.startswith("- [") for s in _o1["download_links_markdown"])
+                    and _rc2 == 0 and _o2.get("mode") == "auto_fetch_plan" and _o2.get("fetch_plan"))
+        finally:
+            for _k, _v in _sv.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r192_f9_fetch_route_hoi_truoc_mac_dinh", _c192_f9_fetch_route_ask_first)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

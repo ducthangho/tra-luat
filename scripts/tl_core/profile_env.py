@@ -369,12 +369,17 @@ def _ref_tokens(s) -> set[str]:
     return {norm_sohieu(x) for x in pats}
 
 
-def _gas_get_retry(g, action: str, _retries: int = 2, _backoff: float = 1.5, **kw) -> dict:
+def _gas_get_retry(g, action: str, _retries: int = 2, _backoff: float = 1.5, _schedule=None, **kw) -> dict:
     """v1.29.4 (i5): GET action ĐỌC idempotent với RETRY backoff — CHỈ retry khi lỗi TRANSIENT (timeout/URLError/
     'Response không phải JSON' = webapp trả trang lỗi tạm). KHÔNG dùng cho action mutate (retry mù = at-least-once,
     nguy hiểm với createtext/copy_convert). Gốc sự cố: sau bust-cache, lệnh kế rebuild manifest đúng lúc webapp
-    chậm → 1 lỗi transient = PARSEERR/timeout hàng loạt, phải boot --refresh tay."""
+    chậm → 1 lỗi transient = PARSEERR/timeout hàng loạt, phải boot --refresh tay.
+    F6 r192: (a) `_schedule` = lịch chờ TƯỜNG MINH theo giây, số retry = len(schedule) (vd (5, 15) cho
+    ingest_claim/reg_get); (b) GAS 404 CHẬP CHỜN ('HTTPError: 404' từ chính URL webapp — hạ tầng deploy,
+    KHÁC NOT_FOUND nghiệp vụ vốn trả JSON ok:false) nay coi là transient (đo 23-07)."""
     import time as _t
+    if _schedule is not None:
+        _retries = len(_schedule)
     r = {}
     for _i in range(_retries + 1):
         r = g.get(action, **kw)
@@ -382,12 +387,14 @@ def _gas_get_retry(g, action: str, _retries: int = 2, _backoff: float = 1.5, **k
             return r
         _msg = str(r.get("error") or "")
         if not any(s in _msg for s in ("TimeoutError", "timed out", "URLError", "RemoteDisconnected",
-                                       "ConnectionReset", "IncompleteRead", "Response không phải JSON", "HTTPError: 5")):
+                                       "ConnectionReset", "IncompleteRead", "Response không phải JSON",
+                                       "HTTPError: 5", "HTTPError: 404")):
             return r          # lỗi THẬT từ webapp (JSON ok:false) → không retry
         if _i < _retries:
-            print(f"[gas-retry] {action}: lỗi transient ({_msg[:60]}…) → thử lại {_i + 1}/{_retries} sau {_backoff * (_i + 1):.1f}s",
+            _delay = float(_schedule[_i]) if _schedule is not None else _backoff * (_i + 1)
+            print(f"[gas-retry] {action}: lỗi transient ({_msg[:60]}…) → thử lại {_i + 1}/{_retries} sau {_delay:.1f}s",
                   file=sys.stderr, flush=True)
-            _t.sleep(_backoff * (_i + 1))
+            _t.sleep(_delay)
     return r
 
 

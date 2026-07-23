@@ -206,6 +206,26 @@ def _ingest_dedup_title_key(x) -> str:
     return re.sub(r"[\s_\-]+", " ", _strip_accents(str(x or "")).lower()).strip()
 
 
+def _ingest_claim_get(g, a, **kw) -> dict:
+    """F8+F6 r192: gọi `ingest_claim` (GET đọc idempotent) qua MỘT cửa — (F8) tự nạp creds từ config như
+    mọi bước khác (load_creds vốn ƯU TIÊN env TL_WEBAPP/TL_TOKEN nếu đã có — hết cảnh phải export tay);
+    (F6) retry chọn lọc 2 lần backoff 5s/15s cho lỗi transient KỂ CẢ GAS 404 chập chờn (đo 23-07).
+    KHÔNG dùng cho action ghi."""
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001 — thiếu creds: để lỗi nổ rõ ở chính call bên dưới
+        pass
+    return _gas_get_retry(g, "ingest_claim", _schedule=(5.0, 15.0), **kw)
+
+
+def _claim_ttl_hint() -> str:
+    """F6 r192: giờ hết hạn MUỘN NHẤT của claim host khác (client không thấy acquired_at của họ →
+    worst-case now+TTL 5') — in kèm CLAIMED_ELSEWHERE để người vận hành biết khi nào thử lại."""
+    import datetime as _dt
+    return (f"claim host khác hết hạn muộn nhất "
+            f"{(_dt.datetime.now() + _dt.timedelta(minutes=5)).strftime('%H:%M:%S')} (TTL 5')")
+
+
 def _ingest_dedup_sohieu_live(sohieu: str, entries: list) -> list:
     """F1 r191 (PURE, đề xuất #4 — bẫy 158/159 23-07): các dòng registry TRÙNG SỐ HIỆU với `sohieu` theo
     khoá LỎNG-NĂM (`_sohieu_loose`: '158/2025/NĐ-CP' ≡ '158-2025-ND-CP' ≡ biến thể thiếu năm) VÀ đang
@@ -525,18 +545,47 @@ def cmd_ingest_missing(a) -> int:
                       else f"cookie NLM chết ({_rep54.get('why') or '?'})")
             _links54 = [_entry_links_url(e) for e in to_add]
             _nb_url54 = f"https://notebooklm.google.com/notebook/{target_nb}"
-            print(f"[tl] ingest-missing → BATCH-LINK ({_why54}): KHÔNG add API. Dán {len(_links54)} link vào "
+            # F5 van 1 (r192): kèm BẢNG TAY markdown (link bấm-được + notebook + hẹn reconcile) ghi ra
+            # file sổ — người dùng nạp tay theo bảng, xong `nlm-reconcile --apply` bắc cầu.
+            _sheet91 = None
+            try:
+                _sheet_p91 = HERE / ".tl_state" / f"nlm_bang_tay_{_ck_key}.md"
+                _sheet_p91.parent.mkdir(parents=True, exist_ok=True)
+                _sheet_p91.write_text(_nlm_links_md(to_add, target_nb), encoding="utf-8", newline="\n")
+                _sheet91 = str(_sheet_p91)
+            except Exception as _she91:  # noqa: BLE001 — bảng tay best-effort; links vẫn đủ trong JSON
+                print(f"[tl]   ⚠ không ghi được bảng tay ({_she91}) — dùng links trong JSON.", file=sys.stderr)
+            print(f"[tl] ingest-missing → BẢNG TAY/BATCH-LINK ({_why54}): KHÔNG add API. Dán {len(_links54)} link vào "
                   f"Add source → Websites của {_nb_url54} rồi chạy `tl nlm-reconcile {target_nb} --apply`. "
                   f"(Ép add API: --force-api-add; danh sách link thuần: `tl nlm-links`)", file=sys.stderr, flush=True)
             for _w54 in (_rep54.get("warn") or []):
                 print(f"[tl]   ⚠ {_w54}", file=sys.stderr)
             print(json.dumps({"ok": True, "mode": "BATCH_LINKS", "reason": _why54, "notebook": target_nb,
                               "notebook_url": _nb_url54, "count": len(_links54), "links": _links54,
+                              **({"hand_sheet": _sheet91} if _sheet91 else {}),
+                              "next_steps": [
+                                  ("Mở bảng tay " + _sheet91) if _sheet91 else "Dán links vào Add source của notebook",
+                                  f"tl nlm-reconcile {target_nb} --apply   # sau khi nạp xong trên UI",
+                              ],
                               "note": "Chưa add gì qua API — dán links vào UI (batch), xong reconcile --apply "
                                       "để link registry (ownership-guard A2). Base đầy → dán vào shard overflow "
                                       "rồi reconcile --all-notebooks (DRY) xem hướng dẫn per-notebook."},
                              ensure_ascii=False, indent=2))
             return 0
+        # F7 (r192): PREFLIGHT-LÔ AUTH — sắp add API >1 nguồn mà cookie NLM đã quá NLM_COOKIE_BATCH_MAX_MIN
+        # (~50'/đời ~60') ⇒ DỪNG SỚM trước mọi side-effect, bắt `nlm login` trước lô (trước đây chỉ WARN
+        # COOKIE_AGE_HIGH → chết giữa lô, chuỗi dở dang).
+        if len(to_add) > 1:
+            _age92 = _nlm_auth_age_minutes()
+            if _age92 is not None and _age92 > NLM_COOKIE_BATCH_MAX_MIN:
+                print(json.dumps({"ok": False, "aborted": True, "reason": "NLM_COOKIE_TOO_OLD_FOR_BATCH",
+                                  "cookie_age_min": round(_age92, 1), "max_age_min": NLM_COOKIE_BATCH_MAX_MIN,
+                                  "pending": len(to_add),
+                                  "note": "Cookie NLM sắp hết đời (~60') mà lô còn dài — chạy `nlm login` "
+                                          "TRƯỚC lô rồi chạy lại (chết giữa lô để lại chuỗi dở dang). "
+                                          "Đường không-cookie: `tl nlm-links` nạp tay + reconcile."},
+                                 ensure_ascii=False, indent=2), file=sys.stderr)
+                return 2
     # v1.34.52 (F-04/D9 — grill GAS 2.21.2l 2026-07-15): ACQUIRE claim identity_hash cho TOÀN BỘ to_add
     # TRƯỚC vòng lặp add — chặn 2 host cùng add 1 identity trong cửa sổ race giữa preflight-dedup (xong ở
     # trên) và source_add thật (sắp chạy). Optional server-side (D8): webapp cũ (<2.21.2l) không có action
@@ -555,8 +604,9 @@ def cmd_ingest_missing(a) -> int:
     _committed_candidates: list[tuple] = []   # [(identity_hash, drive_id, source_id)] — commit theo lô sau vòng lặp
     if _hash_by_did:
         try:
-            _cl = g.get("ingest_claim", keys=json.dumps(list(_hash_by_did.values())),
-                        run_id=run_id, drive_ids=json.dumps(list(_hash_by_did.keys())))
+            # F8+F6 r192: claim qua MỘT cửa _ingest_claim_get — tự nạp creds config + retry 5s/15s (404 chập chờn)
+            _cl = _ingest_claim_get(g, a, keys=json.dumps(list(_hash_by_did.values())),
+                                    run_id=run_id, drive_ids=json.dumps(list(_hash_by_did.keys())))
         except Exception as _cle:  # noqa: BLE001
             _cl = {"ok": False, "error": str(_cle)}
         if not _cl.get("ok"):
@@ -572,11 +622,11 @@ def cmd_ingest_missing(a) -> int:
                 if _dd:
                     _denied_dids.add(_dd)
                     results.append({"drive_id": _dd, "ok": False, "skipped": "CLAIMED_ELSEWHERE",
-                                    "reason": _rr.get("reason")})
+                                    "reason": _rr.get("reason"), "claim_ttl_hint": _claim_ttl_hint()})
         if _denied_dids:
             to_add = [e for e in to_add if _entry_drive_id(e) not in _denied_dids]
             print(f"[tl]   ⚠ {len(_denied_dids)} mục đang bị host khác giữ claim (F-04) → SKIP trong run này "
-                  f"(không phải lỗi — thử lại sau khi claim hết hạn/host kia xong).", file=sys.stderr, flush=True)
+                  f"(không phải lỗi — {_claim_ttl_hint()}).", file=sys.stderr, flush=True)
     # v1.34.49 (F-06): row_kind SUY TỪ TOPOLOGY per-notebook (own→không ghi, overflow→ghi 'overflow'); kind
     # bảo hộ (ref/thuong) trên dòng sẵn có KHÔNG BAO GIỜ bị clobber. cols per-link theo item.
     _rk_by_did = {}
@@ -1961,6 +2011,7 @@ def _profile_dry_gate_soften(gate: dict, suffix: str, has_text_file: bool) -> di
 
 
 _PDF_IMAGE_CHARS_PER_PAGE = 100   # F4 r191: dưới ngưỡng ⇒ PDF ảnh (đo 23-07: 4 PDF 'ký số' ~12-37 ký tự/trang)
+_NLM_SIZE_VAN_CHARS = 150_000     # F5 van 2 r192: nguồn >150k ký tự → settle NLM rất lâu (đo: 343k >10'; <100k 30-90s) ⇒ tự no-wait
 
 
 def _pdf_image_verdict(chars: int, pages: int, threshold: int = _PDF_IMAGE_CHARS_PER_PAGE) -> dict:
@@ -2104,6 +2155,22 @@ def cmd_ingest_local(a) -> int:
             print(f"[tl] B.2 blank-over-guess: loai '{loai}' suy heuristic (không letterhead/prefix) — ĐỂ TRỐNG "
                   f"cho profile thường; điền sau: tl register --drive-id <gdoc> --loai \"{loai}\"", file=sys.stderr)
             loai = ""
+    # F5 van 2 (r192): VAN KÍCH THƯỚC trước từng nguồn — text >_NLM_SIZE_VAN_CHARS thì settle NLM rất lâu
+    # (đo 23-07: 343k ký tự >10' client-timeout; <100k chỉ 30-90s) ⇒ TỰ chuyển --nlm-no-wait (source_id vẫn
+    # ghi registry đủ; xác minh settle bằng `nlm-reconcile` cuối lô — khuôn lô chuẩn). Chỉ đo được khi có
+    # text local (docx/--text-file); không đo được thì KHÔNG đoán.
+    _van2_chars = None
+    if not getattr(a, "nlm_no_wait", False) and not getattr(a, "no_nlm_add", False):
+        try:
+            _pt_v2, _ = _profile_read_probe_text(f, getattr(a, "text_file", None))
+            _van2_chars = len(_pt_v2 or "") or None
+        except Exception:  # noqa: BLE001
+            _van2_chars = None
+        if _van2_chars and _van2_chars > _NLM_SIZE_VAN_CHARS:
+            a.nlm_no_wait = True
+            print(f"[tl] ⚠ Van kích thước (F5 r192): nguồn ~{_van2_chars:,} ký tự > {_NLM_SIZE_VAN_CHARS:,} "
+                  f"→ NLM settle sẽ RẤT lâu — TỰ chuyển --nlm-no-wait; xác minh bằng `tl nlm-reconcile` "
+                  f"cuối lô (truy vấn nội dung này trên NLM cần chờ vài phút).", file=sys.stderr)
     # (4) validate cat theo ĐỦ 45 chủ đề pháp điển (không chỉ folder đang có)
     folders_now = _valid_cats(getattr(a, "config", None), getattr(a, "profile", None))   # folder THỰC
     pd = _load_phapdien()                                                                # 45 chủ đề + 00/46
@@ -2150,6 +2217,8 @@ def cmd_ingest_local(a) -> int:
             "reg_cat_label": (_cat_reg_label(cat) if cat else None),   # S6 v1.33.44: giá trị THẬT sẽ ghi registry
             "ocr_gate": _ocr_g,   # r180 S1: DRY báo trước corpus_allowed=false khi ocr∧¬verified
             "pdf_image": _pdf_probe,   # F4 r191: verdict đo text-layer PDF (None nếu không phải .pdf)
+            "nlm_size_van": ({"chars": _van2_chars, "forced_no_wait": bool(getattr(a, "nlm_no_wait", False))}
+                             if (_van2_chars and _van2_chars > _NLM_SIZE_VAN_CHARS) else None),   # F5 van 2 r192
             "cat_ten": (official or {}).get("ten"), "cat_valid": cat_valid, "folder_exists": folder_exists,
             "need_mkdir": need_mkdir, "review_cat": review_cat, "cat_note": cat_note, "goc": goc or None,
             "hieuluc": hieuluc, "loai": loai or None, "size_bytes": _size_bytes,
@@ -2344,8 +2413,9 @@ def cmd_ingest_local(a) -> int:
     if not getattr(a, "no_nlm_add", False):
         _claim_ih55 = str(_contract["identity_hash"])
         try:
-            _cl55 = g.get("ingest_claim", keys=json.dumps([_claim_ih55]), run_id=run_id,
-                          drive_ids=json.dumps([str(getattr(a, "drive_id", None) or "")]))
+            # F8+F6 r192: claim qua MỘT cửa _ingest_claim_get (creds config + retry 5s/15s cho 404 chập chờn)
+            _cl55 = _ingest_claim_get(g, a, keys=json.dumps([_claim_ih55]), run_id=run_id,
+                                      drive_ids=json.dumps([str(getattr(a, "drive_id", None) or "")]))
         except Exception as _cle55:  # noqa: BLE001
             _cl55 = {"ok": False, "error": str(_cle55)}
         if not _cl55.get("ok"):
@@ -2361,8 +2431,10 @@ def cmd_ingest_local(a) -> int:
             _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
             print(json.dumps({"ok": False, "error": "CLAIMED_ELSEWHERE", "journal": run_id,
                               "reason": (_gr55 or {}).get("reason"),
+                              "claim_ttl_hint": _claim_ttl_hint(),
                               "note": "Host khác đang ingest CÙNG nội dung/scope (claim F-04) — không phải lỗi; "
-                                      "thử lại sau ~5' (TTL) hoặc để host kia xong."}, ensure_ascii=False, indent=2),
+                                      "để host kia xong hoặc thử lại sau giờ hết hạn ở claim_ttl_hint."},
+                             ensure_ascii=False, indent=2),
                   file=sys.stderr)
             return 2
 
@@ -2560,6 +2632,7 @@ def cmd_ingest_local(a) -> int:
         return 0
     nc = _imp("nlm_cli")
     src = _prev.get("nlm_source_id") or ""
+    _v3_deferred = False   # F5 van 3 r192: CLI thôi chờ settle sau 120s → ghi deferred (set bên dưới)
     if src:
         # N6: nguồn NLM đã add ở run trước (journal có source_id) → skip gate+add, chỉ còn LINK registry.
         _step_ok("nlm_source_add", gdoc, True, source_id=src, resumed=True)
@@ -2609,13 +2682,21 @@ def cmd_ingest_local(a) -> int:
                                   "note": "NLM add phải trả source_id; Drive+registry đã xong, chạy lại CÙNG LỆNH + --resume."}, ensure_ascii=False, indent=2), file=sys.stderr)
                 return 2
             src = add.get("source_id")
+            _v3_deferred = bool(add.get("settle_timeout")) and not _no_wait
+            if _v3_deferred:
+                # F5 van 3 (r192): CLI THÔI CHỜ settle sau 120s (nguồn đang index — KHÔNG huỷ, sid THẬT đã
+                # có) → bước link cuối ghi nlm_status='deferred' (F3), corpus KHÔNG set; bỏ post-add
+                # dup-check (nguồn chưa liệt kê được). Cuối lô: nlm-reconcile nâng pushed → register corpus.
+                print("[tl] ⚠ Van runtime (F5 r192): thôi chờ settle sau 120s — sid đã có, ghi DEFERRED "
+                      "(corpus chưa set). Cuối lô: `tl nlm-reconcile --apply` (nâng pushed) rồi "
+                      "`tl register --drive-id <gdoc> --corpus true`.", file=sys.stderr, flush=True)
             if _no_wait:
                 # Post-add dup-check cần source_list — nguồn CHƯA settle có thể chưa liệt kê → âm tính giả + tốn
                 # thêm ~18s (trái mục đích no-wait). BỎ QUA có chủ đích; lưới sau = `tl nlm-reconcile` cuối lô.
                 print("[tl] --nlm-no-wait: bỏ chờ settle + bỏ post-add dup-check — nạp lô xong chạy "
                       "`tl nlm-reconcile` xác nhận settle/link; truy vấn NLM nội dung này cần chờ vài phút.",
                       file=sys.stderr, flush=True)
-            else:
+            elif not _v3_deferred:
                 _dup_after = _nlm_post_add_dup_check(nc, target, gdoc, src)   # N1 v1.33.41: bắt trùng-sau-add tại chỗ
                 if _dup_after:
                     print(json.dumps(_dup_after, ensure_ascii=False, indent=2), file=sys.stderr)
@@ -2632,12 +2713,20 @@ def cmd_ingest_local(a) -> int:
     # profile-ingest 1 file CÓ set), timeout 45s cắt giữa add↔link để lại dòng registry corpus/nlm trống, phải
     # vá tay nlm-add + register. corpus=true thuộc đúng bước này (văn bản CHỈ vào corpus khi đã push NLM xong);
     # đứt giữa chừng → chạy lại CÙNG LỆNH + --resume là ghi nốt (idempotent).
-    v = _journaled_reg_write(run_id, g, [{"drive_id": gdoc, "nlm_source_id": src, "nlm_notebook_id": target,
-                                          "row_kind": rk, "nlm_status": "pushed", "corpus": "true"}],
-                             "nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus",
+    # F5 van 3 (r192): settle-timeout → ghi 'deferred' + KHÔNG set corpus (F3: corpus không auto-true khi
+    # còn deferred — mirror khuôn ADD-TAY v1.34.35: corpus chỉ set sau khi xác minh trên NLM).
+    if _v3_deferred:
+        _item92 = {"drive_id": gdoc, "nlm_source_id": src, "nlm_notebook_id": target,
+                   "row_kind": rk, "nlm_status": "deferred"}
+        _cols92 = "nlm_source_id,nlm_notebook_id,row_kind,nlm_status"
+    else:
+        _item92 = {"drive_id": gdoc, "nlm_source_id": src, "nlm_notebook_id": target,
+                   "row_kind": rk, "nlm_status": "pushed", "corpus": "true"}
+        _cols92 = "nlm_source_id,nlm_notebook_id,row_kind,nlm_status,corpus"
+    v = _journaled_reg_write(run_id, g, [_item92], _cols92,
                              before_by_key={gdoc: {"nlm_source_id": "", "nlm_status": "", "corpus": ""}})
     rb = v.get("reg_bulk") or {}
-    if _claim_ih55 and v.get("verified"):
+    if _claim_ih55 and v.get("verified") and not _v3_deferred:
         # v1.34.55 (D1/F-08): COMMIT claim GỘP vào 1 call reg_get_bulk (vừa đóng claim vừa readback) — best-effort,
         # lô lỗi tự heal qua TTL 5' (khớp dung sai ingest-missing D3/D7; kết quả run KHÔNG phụ thuộc commit).
         try:
@@ -2650,12 +2739,17 @@ def cmd_ingest_local(a) -> int:
     _final_ok = bool(v.get("verified"))
     out = {"ok": _final_ok, "name": name, "gdoc": gdoc, "src_docx": src_docx, "cat": cat, "journal": run_id,
            "plan_hash": _contract["plan_hash"], "identity_hash": _contract["identity_hash"],
-            "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None, "corpus": _final_ok,
+            "reg_cat_label": (_cat_reg_label(cat) if cat else None), "loai": loai or None,
+           "corpus": (False if _v3_deferred else _final_ok),
            "cat_ten": (official or {}).get("ten"), "folder_created": need_mkdir, "preflight": pf,
            "target_notebook": target, "row_kind": rk, "nlm_source_id": src, "reg_pushed": rb.get("patched"),
            "reg_verified": bool(v.get("verified")), "via": "nlm-cli",
-           **({"nlm_settle": "not_waited", "next_step": "tl nlm-reconcile (cuối lô) — xác nhận nguồn settle + link đủ"}
-              if getattr(a, "nlm_no_wait", False) else {}),
+           **({"nlm_settle": "timeout_deferred", "nlm_status": "deferred",
+               "next_steps": ["tl nlm-reconcile --apply   # xác minh settle, nâng deferred→pushed",
+                              f"tl register --drive-id {gdoc} --corpus true   # đưa vào corpus SAU khi pushed"]}
+              if _v3_deferred else
+              ({"nlm_settle": "not_waited", "next_step": "tl nlm-reconcile (cuối lô) — xác nhận nguồn settle + link đủ"}
+               if getattr(a, "nlm_no_wait", False) else {})),
            "sidecar": "src_id=docx gắn vào dòng GDoc (register atomic; regen2 cũng tự ghép cặp cùng base-name)"}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if _final_ok else 2

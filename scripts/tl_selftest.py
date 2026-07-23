@@ -16154,6 +16154,115 @@ def run() -> int:
         return (_s == "cache" and bool(_meta.get("markup_warning"))
                 and "[markup]" in _err.getvalue() and "--refresh" in _err.getvalue())
     _t110("r183_cache_cu_khong_chung_nhan_canh_bao", _c183_cache_cu_canh_bao)
+
+    # ══════════ r186 — `tl extract` TRÊN GOOGLE DOC: CÙNG BẪY, r183 chưa chạm ══════════
+    # Đo tươi 23-07-2026 SAU r183, cùng dự thảo BHXH: `tl extract <gdoc>` trả 25.338 ký tự = BẢN THÔ,
+    # đủ cả 3 câu ĐÃ BỎ («tối đa là 12 tháng», «phải được chứng thực», «là cơ quan nhà nước»), 0 nhãn,
+    # 0 cảnh báo — vì `cmd_extract` đọc bằng transport `read`/`exporttext` (text/plain), không hề có cờ
+    # `--markup`. Tệ hơn doc-text: extract GHI THẲNG vào cache chuẩn `extract_<id>.txt` = nguồn nuôi
+    # corpus/NLM ⇒ chữ đã bỏ chảy vào kho.
+    def _extract_ns186(**kw):
+        import argparse as _ap186
+        _d = dict(gdoc_id=None, sohieu=None, refresh=False, out=None, find=None, dieu=None, json=False,
+                  debug=False, deterministic=False, config=None, profile=None, markup="strip",
+                  markup_strict=False)
+        _d.update(kw)
+        return _ap186.Namespace(**_d)
+
+    class _FkTr186:
+        """transport giả: `read` trả BẢN THÔ (đúng cái text/plain của Drive trả về cho Google Doc)."""
+        def __init__(self, text): self.text = text
+        def drive_op(self, op, **kw): return {"ok": True, "text": self.text}
+
+    def _extract_env186(fx_docx, plain_text):
+        _sav = {k: getattr(_TL_MODULE, k) for k in
+                ("_doc_text_fetch_binary", "_imp", "_gas", "load_creds", "apply_profile_offline",
+                 "_manifest_entries")}
+        _real = _sav["_imp"]
+        class _FkCache186:
+            def find(self, sh): return None
+        _tr = _FkTr186(plain_text)
+        _TL_MODULE.load_creds = lambda *x, **k: None
+        _TL_MODULE.apply_profile_offline = lambda *x, **k: None
+        _TL_MODULE._manifest_entries = lambda refresh=False: []
+        _TL_MODULE._imp = lambda n: (_tr if n == "transport" else (_FkCache186() if n == "cache" else _real(n)))
+        _TL_MODULE._gas = lambda: type("_G186", (), {"get": lambda *_a, **_k: {"ok": False, "error": "off"}})()
+        _TL_MODULE._doc_text_fetch_binary = (
+            lambda fid, *, suffix=".bin", export_mime=None: (fx_docx if (export_mime and fx_docx) else None))
+        return _sav
+
+    def _cap186(fn, ns):
+        import contextlib as _cl, io as _io
+        _b = _io.StringIO()
+        with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_b):
+            _rc = fn(ns)
+        return _rc, _b.getvalue()
+
+    _FID186 = "r186gdoc_1234567890123456789012"
+
+    # (Fix1 — ca CHỈ-NÓ-CHẶN) extract trên gdoc phải đi export .docx + lọc markup như doc-text (r183).
+    def _c186_extract_qua_docx():
+        _fx = _mkdocx182(str(_d182 / "extract_markup.docx"), _BODY182)
+        _out = _d182 / "ex186.txt"
+        _sav = _extract_env186(_fx, _PLAIN183)
+        try:
+            _rc, _ = _cap186(_TL_MODULE.cmd_extract, _extract_ns186(gdoc_id=_FID186, out=str(_out)))
+            _t = _out.read_text(encoding="utf-8") if _out.exists() else ""
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _out.unlink(missing_ok=True)
+        return _rc == 0 and _doc182(_t)
+    _t110("r186_extract_gdoc_qua_docx_markup", _c186_extract_qua_docx)
+
+    # (Fix2) không lấy được markup (export .docx fail → rơi về text/plain) ⇒ CẢNH BÁO tường minh;
+    #        `--markup-strict` ⇒ rc=3 và KHÔNG ghi file (không để bản thô đi tiếp dưới danh nghĩa đã lọc).
+    def _c186_extract_canh_bao_va_strict():
+        import contextlib as _cl186, io as _io186
+        _out = _d182 / "ex186b.txt"
+        _out.unlink(missing_ok=True)
+        _sav = _extract_env186(None, _PLAIN183)          # None = export .docx KHÔNG dùng được
+        _e1, _e2 = _io186.StringIO(), _io186.StringIO()
+        try:
+            with _cl186.redirect_stderr(_e1), _cl186.redirect_stdout(_io186.StringIO()):
+                _rc1 = _TL_MODULE.cmd_extract(_extract_ns186(gdoc_id=_FID186, out=str(_out)))
+            _co_ghi = _out.exists()
+            _out.unlink(missing_ok=True)
+            with _cl186.redirect_stderr(_e2), _cl186.redirect_stdout(_io186.StringIO()):
+                _rc2 = _TL_MODULE.cmd_extract(_extract_ns186(gdoc_id=_FID186, out=str(_out),
+                                                             markup_strict=True))
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _out.unlink(missing_ok=True)
+        return (_rc1 == 0 and _co_ghi and "[markup]" in _e1.getvalue()          # cảnh báo, vẫn trả text
+                and _rc2 == 3 and not _out.exists() and "[markup]" in _e2.getvalue())
+    _t110("r186_extract_canh_bao_va_markup_strict", _c186_extract_canh_bao_va_strict)
+
+    # (Fix3 — ĐÓNG VÒNG POISON) extract ghi cache chuẩn `extract_<id>.txt` = nguồn doc-text đọc lại.
+    #        Ghi bản ĐÃ LỌC + SIDECAR chứng nhận ⇒ doc-text sau đó KHÔNG còn phải cảnh báo.
+    def _c186_extract_ghi_sidecar():
+        _fx = _mkdocx182(str(_d182 / "extract_cert.docx"), _BODY182)
+        _cf = _TL_MODULE._cache_file(f"extract_{_FID186}.txt")
+        _sc = _TL_MODULE._cache_file(f"extract_{_FID186}.txt.markup.json")
+        _cf.unlink(missing_ok=True)
+        _sc.unlink(missing_ok=True)
+        _sav = _extract_env186(_fx, _PLAIN183)
+        _meta = {}
+        try:
+            _rc, _ = _cap186(_TL_MODULE.cmd_extract, _extract_ns186(gdoc_id=_FID186))   # KHÔNG --out → cache chuẩn
+            _cert = json.loads(_sc.read_text(encoding="utf-8")) if _sc.exists() else {}
+            _cached = _cf.read_text(encoding="utf-8") if _cf.exists() else ""
+            _t, _s = _TL_MODULE._doc_text_any(_FID186, entry={"mime": "application/vnd.google-apps.document"},
+                                              meta=_meta)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            _cf.unlink(missing_ok=True)
+            _sc.unlink(missing_ok=True)
+        return (_rc == 0 and _doc182(_cached) and _cert.get("filter_ran") is True
+                and _s == "cache" and not _meta.get("markup_warning"))
+    _t110("r186_extract_ghi_sidecar_dong_vong_poison", _c186_extract_ghi_sidecar)
     # ═══ v1.35.13 — r184 (REL-01, review p9 2026-07-23): gate link SKILL.md đối chiếu FILE-SET MANIFEST,
     # KHÔNG phải cây đĩa. Baseline v1.35.12: SKILL.md trỏ references/changelog_archive/ (dev-only, release
     # exclude) → cây dev XANH (r67 kiểm exists() trên đĩa) nhưng artifact giải nén ĐỎ 4 test (r67/r125/r127/

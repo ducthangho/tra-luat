@@ -17051,13 +17051,16 @@ def run() -> int:
     _t110("r186_marker_write_v2_commit", _c186_marker_write_v2_commit)
 
     def _c186_migration_plan_canary():
+        # r189: action phải QUOTE tên profile — tên có dấu cách ("Biểu mẫu DMVB") dán nguyên văn
+        # vào shell bị vỡ tham số (bug thực chiến migration 23-07).
         _fin = _TL_MODULE._migration_plan_finalize
-        _rows = _fin([{"profile": "zeta", "fileId": "f2"}, {"profile": "alpha", "fileId": "f1"}])
-        return ([r["profile"] for r in _rows] == ["alpha", "zeta"]
+        _rows = _fin([{"profile": "zeta", "fileId": "f2"},
+                      {"profile": "Biểu mẫu DMVB", "fileId": "f1"}])
+        return ([r["profile"] for r in _rows] == ["Biểu mẫu DMVB", "zeta"]
                 and _rows[0]["canary"] is True and _rows[1]["canary"] is False
-                and "--profile-name alpha --apply --force" in _rows[0]["action"]
+                and '--profile-name "Biểu mẫu DMVB" --apply --force' in _rows[0]["action"]
                 and "CANARY" in _rows[0]["action"]
-                and "--profile-name zeta --apply --force" in _rows[1]["action"])
+                and '--profile-name "zeta" --apply --force' in _rows[1]["action"])
     _t110("r186_migration_plan_canary", _c186_migration_plan_canary)
 
     # ═══ r187 (ADR-0004 WP7 — tracer-bullet): engine ingest chung — stage scheduler upload≤2/NLM≤2,

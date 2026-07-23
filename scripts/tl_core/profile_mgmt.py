@@ -1689,7 +1689,9 @@ def _migration_plan_finalize(plan: list) -> list:
                   key=lambda r: str(r.get("profile") or ""))
     for i, r in enumerate(rows):
         r["canary"] = (i == 0)
-        r["action"] = (f"tl profile-backfill-markers --profile-name {r.get('profile')} --apply --force"
+        # v1.35.20 (r189 — bug thực chiến migration 23-07): QUOTE tên profile — tên có dấu cách
+        # ("Biểu mẫu DMVB") dán nguyên văn vào shell bị vỡ tham số. Ngoặc kép chạy được cả cmd lẫn bash.
+        r["action"] = (f'tl profile-backfill-markers --profile-name "{r.get("profile")}" --apply --force'
                        + ("   # CANARY — verify `tl profile-doctor` sạch rồi mới migrate phần còn lại"
                           if i == 0 else ""))
     return rows

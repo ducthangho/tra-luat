@@ -808,20 +808,127 @@ def _source_update_corpus_plan(entries: list, target: str, is_corpus: bool, as_r
     return plan
 
 
+def _source_update_corpus_bulk(a, targets: list, is_corpus: bool, as_ref: bool) -> int:
+    """r197 (KE_HOACH p11 §4, quyết định #3 duyệt 24-07): flip corpus N target MỘT LÔ — CHỈ registry-thuần
+    (`true` hoặc `false --as-ref`); `false` trần bị chặn (gỡ NLM là chuỗi side-effect per-row — đi từng dòng).
+    Auto-refresh manifest TRƯỚC plan (bài học 24-07: dò trên cache cũ nạp chồng 9 tài liệu). Ghi = 1 reg_bulk
+    (qua _journaled_reg_write: intent{before}/commit per-row, bust cache 1 lần) + 1 reg_get_bulk verify
+    authoritative per-row. Journal 1 run/N before-image → `tl undo <run>` khôi phục CẢ LÔ. Fail-closed cả lô
+    khi có target lỗi. Trần payload: tiền lệ L4 22-07 undo 118 dòng qua reg_bulk — lô 26 trong biên."""
+    if (not is_corpus) and not as_ref:
+        print(json.dumps({"ok": False, "error": "BULK_PLAIN_FALSE_REFUSED", "count": len(targets),
+                          "note": "Bulk CHỈ nhận `true` hoặc `false --as-ref` (registry-thuần). `false` trần "
+                                  "gỡ nguồn NLM per-row (side-effect chuỗi) — chạy TỪNG target như cũ, hoặc "
+                                  "dùng --as-ref nếu ý định là hạ ref."}, ensure_ascii=False, indent=2),
+              file=sys.stderr)
+        return 2
+    _seen = set()
+    targets = [t for t in (str(x).strip() for x in targets) if t and not (t in _seen or _seen.add(t))]
+    try:
+        entries = _manifest_entries(refresh=True)   # spec §4.2: auto-refresh trước khi lập plan
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] source-update-corpus bulk: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
+    plans, bad = [], []
+    for t in targets:
+        p = _source_update_corpus_plan(entries, t, is_corpus, as_ref=as_ref)
+        (plans if p.get("ok") else bad).append(p)
+    _dids = [p["drive_id"] for p in plans]
+    if len(set(_dids)) != len(_dids):
+        _dup = sorted({d for d in _dids if _dids.count(d) > 1})
+        print(json.dumps({"ok": False, "error": "BULK_DUPLICATE_ROWS", "duplicate_drive_ids": _dup,
+                          "note": "≥2 target trỏ CÙNG dòng registry (vd sohieu + drive_id của cùng văn bản) "
+                                  "— gỡ trùng rồi chạy lại."}, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    if bad:
+        print(json.dumps({"ok": False, "error": "BULK_TARGETS_NOT_OK", "bad": bad,
+                          "good_count": len(plans),
+                          "note": "Fail-closed CẢ LÔ — không apply một phần. Sửa/gỡ target lỗi rồi chạy lại."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
+    _by_id = {_entry_drive_id(e): e for e in entries if _entry_drive_id(e)}
+    _corpus_to = "true" if is_corpus else "false"
+    rows = []
+    for p in plans:
+        _e = _by_id.get(p["drive_id"], {}) or {}
+        rows.append({"drive_id": p["drive_id"], "name": p["name"], "sohieu": p.get("sohieu") or "",
+                     "corpus_from": str(_e.get("corpus") or ""), "corpus_to": _corpus_to,
+                     "row_kind_from": str(_e.get("row_kind") or ""),
+                     "row_kind_to": ("ref" if as_ref else str(_e.get("row_kind") or "")),
+                     "nlm_status": str(_e.get("nlm_status") or "")})
+    if not (getattr(a, "apply", False) and (getattr(a, "confirm", "") or "").strip().lower() == "yes"):
+        print(json.dumps({"mode": "DRY", "bulk": True, "count": len(rows), "set_corpus": is_corpus,
+                          "as_ref": as_ref, "rows": rows, "confirm_required": "--apply --confirm yes"},
+                         ensure_ascii=False, indent=2))
+        return 0
+    _ok_gate, _ = _apply_gate(a, write_cols=("corpus,row_kind" if as_ref else "corpus"))
+    if not _ok_gate:
+        return 2
+    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    g = _gas()
+    run_id = _apply_journal_start("source-update-corpus",
+                                  {"bulk": len(rows), "corpus": is_corpus, "as_ref": as_ref})
+    cols = "corpus,row_kind" if as_ref else "corpus"
+    items = [{"drive_id": r["drive_id"], "corpus": _corpus_to,
+              **({"row_kind": "ref"} if as_ref else {})} for r in rows]
+    before_by_key = {r["drive_id"]: {"corpus": r["corpus_from"],
+                                     **({"row_kind": r["row_kind_from"]} if as_ref else {})} for r in rows}
+    v = _journaled_reg_write(run_id, g, items, cols, before_by_key=before_by_key)
+    # Verify AUTHORITATIVE 1 reg_get_bulk (spec §4.4) — lệch dòng nào báo dòng đó; KHÔNG tin patched trần.
+    mismatches, verify_err = [], None
+    try:
+        _rgb = g.get("reg_get_bulk", keys=json.dumps([r["drive_id"] for r in rows]), key_field="drive_id")
+        if not (isinstance(_rgb, dict) and _rgb.get("ok") is True):
+            verify_err = str((_rgb or {}).get("error") or "reg_get_bulk not ok")
+        else:
+            _rrows = _rgb.get("rows") or []
+            for _i, r in enumerate(rows):
+                got = _rrows[_i] if _i < len(_rrows) else None
+                if not got:
+                    mismatches.append({"drive_id": r["drive_id"], "error": "ROW_MISSING"}); continue
+                if str(got.get("corpus") or "").strip().lower() != _corpus_to:
+                    mismatches.append({"drive_id": r["drive_id"], "col": "corpus",
+                                       "want": _corpus_to, "got": str(got.get("corpus") or "")})
+                if as_ref and str(got.get("row_kind") or "").strip() != "ref":
+                    mismatches.append({"drive_id": r["drive_id"], "col": "row_kind",
+                                       "want": "ref", "got": str(got.get("row_kind") or "")})
+    except Exception as e:  # noqa: BLE001
+        verify_err = f"{type(e).__name__}: {e}"
+    ok = bool(v.get("verified")) and not mismatches and verify_err is None
+    _journal_append(run_id, {"t": "run_end", "ok": ok,
+                             "counts": {"bulk": len(rows), "mismatch": len(mismatches)}})
+    # _invalidate_manifest_cache: ĐÃ bust đúng 1 lần bên trong _journaled_reg_write (spec §4.6) — không gọi thêm.
+    print(json.dumps({"ok": ok, "bulk": len(rows), "corpus": is_corpus, "as_ref": as_ref,
+                      "reg_write": {"verified": v.get("verified"), "patched": v.get("patched"),
+                                    "expected": v.get("expected"), "error": v.get("error")},
+                      "verify_bulk": {"checked": len(rows), "mismatches": mismatches,
+                                      **({"error": verify_err} if verify_err else {})},
+                      "journal": run_id,
+                      "note": "cache manifest đã xoá → `tl boot --refresh`. Undo CẢ LÔ: `tl undo " + run_id + "`."},
+                     ensure_ascii=False, indent=2))
+    return 0 if ok else 2
+
+
 def cmd_source_update_corpus(a) -> int:
-    """(MERGE) Bật/tắt cờ corpus 1 nguồn VBQPPL. `false` = BỎ RA KHỎI CORPUS (reg_upsert corpus=false reversible + gỡ nguồn
-    NLM, GUARD shared_source_id). `true` = đưa vào lại. DRY mặc định; `--apply --confirm yes` ghi."""
+    """(MERGE) Bật/tắt cờ corpus nguồn VBQPPL. `false` = BỎ RA KHỎI CORPUS (reg_upsert corpus=false reversible + gỡ nguồn
+    NLM, GUARD shared_source_id). `true` = đưa vào lại. r197: N target = lô registry-thuần (xem _source_update_corpus_bulk).
+    DRY mặc định; `--apply --confirm yes` ghi."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     status_str = (getattr(a, "status", "") or "").strip().lower()
     if status_str not in ("true", "false", "yes", "no", "1", "0"):
         print("[tl] source-update-corpus: cần <target> và <status> (true/false).", file=sys.stderr); return 2
     is_corpus = status_str in ("true", "yes", "1")
     _as_ref = bool(getattr(a, "as_ref", False)) and not is_corpus   # r180 S2 (--as-ref chỉ nghĩa với false)
+    # r197: parser nargs='+' → target là LIST; namespace cũ (test/gọi tay) truyền str vẫn chạy y hệt.
+    _tg_raw = getattr(a, "target", "") or ""
+    _tlist = [str(t).strip() for t in (_tg_raw if isinstance(_tg_raw, list) else [_tg_raw]) if str(t).strip()]
+    if len(_tlist) > 1:
+        return _source_update_corpus_bulk(a, _tlist, is_corpus, _as_ref)
+    _tgt = _tlist[0] if _tlist else ""
     try:
         entries = _manifest_entries(refresh=getattr(a, "refresh", False))
     except Exception as e:
         print(f"[tl] source-update-corpus: cần `tl boot` trước ({e}).", file=sys.stderr); return 2
-    plan = _source_update_corpus_plan(entries, (getattr(a, "target", "") or "").strip(), is_corpus,
+    plan = _source_update_corpus_plan(entries, _tgt, is_corpus,
                                       as_ref=_as_ref)
     if (not plan.get("ok")) and plan.get("error") == "NOT_FOUND" and not getattr(a, "refresh", False):
         # r180 S5: dòng vừa ghi có thể chưa vào cache manifest → tự refresh MỘT lần trước khi kết
@@ -829,7 +936,7 @@ def cmd_source_update_corpus(a) -> int:
         print("[tl] S5 (r180): NOT_FOUND trên cache → tự refresh manifest thử lại một lần.", file=sys.stderr)
         try:
             entries = _manifest_entries(refresh=True)
-            plan = _source_update_corpus_plan(entries, (getattr(a, "target", "") or "").strip(), is_corpus,
+            plan = _source_update_corpus_plan(entries, _tgt, is_corpus,
                                               as_ref=_as_ref)
         except Exception as _e5:  # noqa: BLE001 — refresh hỏng thì giữ kết luận cũ, không nuốt
             print(f"[tl] S5: refresh lỗi ({_e5}) — giữ kết luận NOT_FOUND từ cache.", file=sys.stderr)

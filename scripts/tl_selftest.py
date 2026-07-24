@@ -18086,6 +18086,119 @@ def run() -> int:
                 _TL_MODULE._nlm_verdict_sleep = _sav_sleep
     _t110("r196_nlm_add_404_fail_closed_truoc_add", _c196_nlm_add_404_fail_closed_truoc_add)
 
+    # ═══ r197 — BULK CORPUS-FLIP CLIENT-ONLY (KE_HOACH p11 §4, quyết định #3 user duyệt 24-07):
+    # source-update-corpus nhận N target (nargs='+'), CHỈ flip registry-thuần (`true` hoặc `false --as-ref`);
+    # `false` trần với N>1 → rc=2 BULK_PLAIN_FALSE_REFUSED (gỡ NLM là chuỗi side-effect per-row — đi từng
+    # dòng như cũ). Bulk: auto-refresh manifest TRƯỚC plan (bài học 24-07) · 1 reg_bulk + 1 reg_get_bulk
+    # verify authoritative · journal 1 run/N before-image → undo cả lô · 1 target = hành vi CŨ Y HỆT.
+    # Tiền lệ payload server: L4 22-07 undo 118 dòng qua reg_bulk. Số đo gốc: 26 lượt × ~15s = ~400s. ═══
+    def _c197_parser_n_target():
+        # Chỉ-nó-chặn (a): parser nhận N target trước 1 positional status; 1 target vẫn parse được.
+        _bp = build_parser()
+        try:
+            _n2 = _bp.parse_args(["source-update-corpus", "A1", "B2", "true"])
+            _n1 = _bp.parse_args(["source-update-corpus", "A1", "true"])
+        except SystemExit:
+            return False
+        return (_n2.target == ["A1", "B2"] and _n2.status == "true"
+                and _n1.target == ["A1"] and _n1.status == "true")
+    _t110("r197_bulk_parser_n_target", _c197_parser_n_target)
+
+    def _c197_bulk_plain_false_refused():
+        # Chỉ-nó-chặn (b): N>1 + false KHÔNG --as-ref → rc=2 NGAY (kể cả DRY), trước mọi đọc/ghi.
+        _sav_apo197 = _TL_MODULE.apply_profile_offline
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _be = _io110.StringIO()
+            with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_io110.StringIO()):
+                _rc = _TL_MODULE.cmd_source_update_corpus(argparse.Namespace(
+                    config=None, profile=None, refresh=False, target=["dA197", "dB197"], status="false",
+                    as_ref=False, apply=False, confirm=""))
+            return _rc == 2 and "BULK_PLAIN_FALSE_REFUSED" in _be.getvalue()
+        finally:
+            _TL_MODULE.apply_profile_offline = _sav_apo197
+    _t110("r197_bulk_plain_false_rc2", _c197_bulk_plain_false_refused)
+
+    def _c197_bulk_calls_journal_undo():
+        # Chỉ-nó-chặn (c)+(d): 4 target (>_REG_BULK_READBACK_MAX=3 — né readback per-item) apply true →
+        # DRY trước đó ra bảng 4 dòng + auto-refresh manifest; apply = ĐÚNG 1 reg_bulk + 1 reg_get_bulk,
+        # 0 reg_upsert/reg_get lẻ; journal 4 intent{before} → _journal_undo_ops đủ 4 restore corpus cũ.
+        _calls = {"reg_bulk": 0, "reg_get_bulk": 0, "khac": []}
+        _refresh_seen = []
+        _rows197 = [{"drive_id": f"d197{_i}", "name": f"L197_{_i}", "so_hieu": f"{_i}9/2026/QH15",
+                     "corpus": "false", "row_kind": "", "nlm_status": ""} for _i in range(1, 5)]
+
+        class _FkG197:
+            def post(self, action, **kw):
+                if action == "reg_bulk":
+                    _calls["reg_bulk"] += 1
+                    return {"ok": True, "patched": len(kw.get("items") or [])}
+                _calls["khac"].append(("post", action))
+                return {"ok": True}
+
+            def get(self, action, **kw):
+                if action == "reg_get_bulk":
+                    _calls["reg_get_bulk"] += 1
+                    _ks = json.loads(kw.get("keys") or "[]")
+                    return {"ok": True, "rows": [{"drive_id": k, "corpus": "true"} for k in _ks]}
+                _calls["khac"].append(("get", action))
+                return {"ok": True}
+        _keys197 = ("apply_profile_offline", "_manifest_entries", "_apply_gate", "load_creds", "_gas",
+                    "_invalidate_manifest_cache")
+        _sav197 = {k: getattr(_TL_MODULE, k) for k in _keys197}
+        _o_jenv = os.environ.get("TL_JOURNAL_DIR")
+        import tempfile as _tf197
+        try:
+            with _tf197.TemporaryDirectory() as _d197:
+                os.environ["TL_JOURNAL_DIR"] = _d197
+
+                def _fake_me(refresh=False):
+                    _refresh_seen.append(bool(refresh))
+                    return [dict(r) for r in _rows197]
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._manifest_entries = _fake_me
+                _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: _FkG197()
+                _TL_MODULE._invalidate_manifest_cache = lambda: None
+                _tgts = [r["drive_id"] for r in _rows197]
+                _buf_d = _io110.StringIO()
+                with _ctx110.redirect_stdout(_buf_d), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc_d = _TL_MODULE.cmd_source_update_corpus(argparse.Namespace(
+                        config=None, profile=None, refresh=False, target=list(_tgts), status="true",
+                        as_ref=False, apply=False, confirm=""))
+                _jd = json.loads(_buf_d.getvalue())
+                _dry_ok = (_rc_d == 0 and _jd.get("mode") == "DRY" and _jd.get("bulk") is True
+                           and len(_jd.get("rows") or []) == 4
+                           and _jd["rows"][0].get("corpus_from") == "false"
+                           and _jd["rows"][0].get("corpus_to") == "true"
+                           and True in _refresh_seen)   # auto-refresh manifest trước plan
+                _buf = _io110.StringIO()
+                with _ctx110.redirect_stdout(_buf), _ctx110.redirect_stderr(_io110.StringIO()):
+                    _rc = _TL_MODULE.cmd_source_update_corpus(argparse.Namespace(
+                        config=None, profile=None, refresh=False, target=list(_tgts), status="true",
+                        as_ref=False, apply=True, confirm="yes"))
+                _out = json.loads(_buf.getvalue())
+                _recs = _TL_MODULE._journal_read(str(_out.get("journal") or ""))
+                _undo = _TL_MODULE._journal_undo_ops(_recs)
+        finally:
+            for _k, _v in _sav197.items():
+                setattr(_TL_MODULE, _k, _v)
+            if _o_jenv is None:
+                os.environ.pop("TL_JOURNAL_DIR", None)
+            else:
+                os.environ["TL_JOURNAL_DIR"] = _o_jenv
+        _ints = [r for r in _recs if r.get("t") == "intent"]
+        return (_dry_ok and _rc == 0 and _out.get("ok") is True
+                and _calls["reg_bulk"] == 1 and _calls["reg_get_bulk"] == 1 and not _calls["khac"]
+                and (_out.get("verify_bulk") or {}).get("checked") == 4
+                and not (_out.get("verify_bulk") or {}).get("mismatches")
+                and len(_ints) == 4
+                and all(isinstance(r.get("before"), dict) and r["before"].get("corpus") == "false" for r in _ints)
+                and len(_undo) == 4
+                and all(o.get("op") == "restore" and (o.get("before") or {}).get("corpus") == "false" for o in _undo))
+    _t110("r197_bulk_1regbulk_1getbulk_undo_du_N", _c197_bulk_calls_journal_undo)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

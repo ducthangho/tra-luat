@@ -9497,10 +9497,11 @@ def run() -> int:
         return len(pl["link_candidates"]) == 1 and pl["link_candidates"][0]["by"] == "title"
     _t110("r114_reconcile_own_title_link_still_works", _c114_own_title_link_still_works)
 
-    def _run_bridge114(dry_json):
+    def _run_bridge114(dry_json, attested=True):
         # Harness C1: stub _run_child_tl — bắt argv 3 child (ocr-verify, DRY, apply); trả (rc, out, calls).
         # ★ ocr.py bind = COPY-một-lần (KHÔNG rebase __globals__ như ingest_ops) → phải patch MODULE ocr,
         # patch _TL_MODULE._run_child_tl không ăn (bài học harness r114).
+        # r196: attested = người dùng truyền --ocr-verified cho bridge (mặc định True giữ hợp đồng ca r114).
         _ocrmod = _TL_MODULE._tl_ocr
         _sav_rct = _ocrmod._run_child_tl
         import tempfile as _tfb
@@ -9523,7 +9524,7 @@ def run() -> int:
             _ns = argparse.Namespace(file=_src, text_file=_txt, apply=True, confirm="yes",
                                      name=None, hieuluc=None, chunk_max_chars=None, allow_default=False,
                                      skip_live_check=False, profile="bhxh", json=True, deterministic=False,
-                                     expected_plan_hash=None)
+                                     expected_plan_hash=None, ocr_verified=bool(attested))
             _buf = _io27.StringIO()
             with _ctx27.redirect_stdout(_buf), _ctx27.redirect_stderr(_io27.StringIO()):
                 _rc = _TL_MODULE.cmd_profile_ingest_ocr(_ns)
@@ -17938,6 +17939,152 @@ def run() -> int:
         return (_cfg.get("webappUrl") == "https://example.invalid/v2cwd"
                 and _cfg.get("token") == "tl_v2cwd195")
     _t110("r195_gas_config_v2_cwd_dong", _c195_gas_config_v2_cwd)
+
+    # ═══ r196 — BRIDGE OCR TỰ CHẾ CAM KẾT (TRINH 3.11, ca thật A-8 VCB 10838 ngày 24-07): _bridge_ocr_plan
+    # nối --ocr-verified vào child VÔ ĐIỀU KIỆN — cờ vốn là CAM KẾT CON NGƯỜI đã đối chiếu (ocr-verify XANH
+    # vẫn dặn «nếu đã đối chiếu bổ sung bằng mắt/nguồn gốc»), bridge biến máy-đo-xanh thành người-đã-kiểm
+    # ⇒ verify_gate child in ocr_verified=true mà không ai cam kết; đường VBQPPL thủng cổng S1 (r180).
+    # Vá: bridge nhận --ocr-verified tường minh; THIẾU → chặn rc=2 TRƯỚC child (không side-effect), planned_child
+    # KHÔNG chứa cờ; verify máy đỏ vẫn chặn như cũ (hai tầng độc lập). ═══
+    def _c196_bridge_profile_thieu_attest_chan():
+        # Chỉ-nó-chặn (a): apply KHÔNG --ocr-verified → rc=2, warning ATTESTATION, DỪNG sau ocr-verify
+        # (không child profile-ingest nào chạy), planned_child KHÔNG chứa cờ.
+        _rc, _out, _calls = _run_bridge114({"plan_hash": "H196"}, attested=False)
+        return (_rc == 2 and "OCR_VERIFIED_ATTESTATION_REQUIRED" in (_out.get("warnings") or [])
+                and len(_calls) == 1 and _calls[0][0] == "ocr-verify"
+                and "--ocr-verified" not in (_out.get("planned_child_dry") or [])
+                and "--ocr-verified" not in (_out.get("planned_child_command") or []))
+    _t110("r196_bridge_profile_thieu_attest_chan", _c196_bridge_profile_thieu_attest_chan)
+
+    def _c196_bridge_profile_attest_moi_forward():
+        # POSITIVE CONTROL: có --ocr-verified → hành vi r114 giữ nguyên (3 child, forward cờ, rc=0).
+        _rc, _out, _calls = _run_bridge114({"plan_hash": "H196"}, attested=True)
+        return (_rc == 0 and len(_calls) == 3 and "--ocr-verified" in _calls[1]
+                and "OCR_VERIFIED_ATTESTATION_REQUIRED" not in (_out.get("warnings") or []))
+    _t110("r196_bridge_profile_attest_moi_forward", _c196_bridge_profile_attest_moi_forward)
+
+    def _c196_bridge_vbqppl_thieu_attest_chan():
+        # Chỉ-nó-chặn (b — đường S1 thật): vbqppl mode, manifest ĐÃ verified (máy-đo xanh hết cỡ) mà
+        # KHÔNG attestation → plan vẫn phải ok=False; CÓ attestation → ok=True (chứng minh chỉ thiếu cam kết).
+        _ocrmod = _TL_MODULE._tl_ocr
+        _sav_rct = _ocrmod._run_child_tl
+        import tempfile as _tf196
+        try:
+            _ocrmod._run_child_tl = lambda args: {"ok": True, "returncode": 0,
+                                                  "json": {"ok": True, "manifest": {"verification_status": "verified"}}}
+            with _tf196.NamedTemporaryFile(suffix=".pdf", delete=False) as _fs:
+                _src = _fs.name
+            with _tf196.NamedTemporaryFile(suffix=".txt", delete=False) as _ft:
+                _ft.write(b"Dieu 1. Noi dung du dai." * 40)
+                _txt = _ft.name
+            def _ns196(att):
+                return argparse.Namespace(file=_src, text_file=_txt, apply=False, cat="01", name=None,
+                                          sohieu=None, goc=None, hieuluc=None, loai=None, force_cat=False,
+                                          allow_large=False, skip_nlm_preflight=False, skip_live_check=False,
+                                          json=True, deterministic=False, ocr_verified=att)
+            _p_no = _ocrmod._bridge_ocr_plan(_ns196(False), mode="vbqppl")
+            _p_yes = _ocrmod._bridge_ocr_plan(_ns196(True), mode="vbqppl")
+            os.unlink(_src); os.unlink(_txt)
+            return ((not _p_no["ok"]) and "OCR_VERIFIED_ATTESTATION_REQUIRED" in _p_no["warnings"]
+                    and "--ocr-verified" not in _p_no["planned_child_dry"]
+                    and _p_yes["ok"] and "--ocr-verified" in _p_yes["planned_child_dry"])
+        finally:
+            _ocrmod._run_child_tl = _sav_rct
+    _t110("r196_bridge_vbqppl_thieu_attest_chan", _c196_bridge_vbqppl_thieu_attest_chan)
+
+    # ═══ r196 — NLM-ADD 404 RẼ NHẦM "OFFLINE" (TRINH 3.9, ca thật KL 137-KL/TW 24-07): probe notebook_get
+    # trả NOT_FOUND thoáng qua (flake backend sau đợt gỡ 6 nguồn; MCP cùng notebook OK cùng lúc, tối cùng
+    # ngày nlm-cli add OK «BUG 404 KHÔNG tái hiện») → _nlm_verdict retry TỨC THÌ 1 nhịp (vẫn trong cửa sổ
+    # flake) → _nlm_or_corpus kết luận «NLM OFFLINE» rẽ deferred — SAI BẢN CHẤT: NOT_FOUND trên MỘT notebook
+    # = đích không nhìn thấy (id sai/flake), KHÔNG phải NLM chết (auth alive). Vá: (1) NOT_FOUND retry backoff
+    # 5s/15s (mirror F6 r192 GAS «retry kể cả 404»; hook _nlm_verdict_sleep cho test); (2) route mới
+    # 'not_found' fail-closed + banner playbook (kiểm --notebook-id UUID topology / lane MCP + register),
+    # KHÔNG defer; (3) cmd_nlm_add rc=2 NOTEBOOK_NOT_FOUND TRƯỚC mọi side-effect. ═══
+    _NF196 = "Failed to get notebook: API error (code 5): NOT_FOUND"
+
+    def _c196_nlm_verdict_404_retry_backoff():
+        # Chỉ-nó-chặn (a): 404 ×2 rồi sống → verdict phải retry backoff 5s/15s và kết luận ALIVE
+        # (trước r196: 1 retry tức thì → dead oan trong cửa sổ flake; timeout thường giữ 1-retry ADR-7 r121).
+        _nc, _cnt = _mk_nc121([{"ok": False, "error": _NF196}, {"ok": False, "error": _NF196}, {"ok": True}])
+        _slept = []
+        _sav_sleep = getattr(_TL_MODULE, "_nlm_verdict_sleep", None)
+        try:
+            _TL_MODULE._nlm_verdict_sleep = lambda s: _slept.append(s)
+            def _case():
+                _v = _TL_MODULE._nlm_verdict("nb196a")
+                return _v["alive"] is True and _cnt["probe"] == 3 and _slept == [5, 15]
+            return _with_nc121(_nc, _case)
+        finally:
+            if _sav_sleep is None:
+                _TL_MODULE.__dict__.pop("_nlm_verdict_sleep", None)
+            else:
+                _TL_MODULE._nlm_verdict_sleep = _sav_sleep
+    _t110("r196_nlm_verdict_404_retry_backoff", _c196_nlm_verdict_404_retry_backoff)
+
+    def _c196_nlm_or_corpus_404_route_not_found():
+        # Chỉ-nó-chặn (b): 404 BỀN (hết backoff vẫn 404) → route 'not_found' + banner playbook,
+        # KHÔNG phải 'deferred', KHÔNG banner «NLM OFFLINE» (auth có thể vẫn sống — đừng nói dối trạng thái).
+        _nc, _cnt = _mk_nc121([{"ok": False, "error": _NF196}])
+        _sav_sleep = getattr(_TL_MODULE, "_nlm_verdict_sleep", None)
+        try:
+            _TL_MODULE._nlm_verdict_sleep = lambda s: None
+            def _case():
+                _be = _io110.StringIO()
+                with _ctx110.redirect_stderr(_be):
+                    _rt = _TL_MODULE._nlm_or_corpus("nlm-add", argparse.Namespace(no_fallback=False),
+                                                    notebook_id="nb196b", probe=True)
+                _errtxt = _be.getvalue()
+                return (_rt["route"] == "not_found" and _rt["nlm_alive"] is False
+                        and "NOT_FOUND" in _errtxt and "--notebook-id" in _errtxt
+                        and "NLM OFFLINE" not in _errtxt)
+            return _with_nc121(_nc, _case)
+        finally:
+            if _sav_sleep is None:
+                _TL_MODULE.__dict__.pop("_nlm_verdict_sleep", None)
+            else:
+                _TL_MODULE._nlm_verdict_sleep = _sav_sleep
+    _t110("r196_nlm_or_corpus_404_route_not_found", _c196_nlm_or_corpus_404_route_not_found)
+
+    def _c196_nlm_add_404_fail_closed_truoc_add():
+        # Chỉ-nó-chặn (c — ca KL 137 nguyên trạng): nlm-add --url với notebook 404 bền → rc=2
+        # NOTEBOOK_NOT_FOUND, source_add KHÔNG BAO GIỜ được gọi (fail TRƯỚC side-effect), không defer.
+        _called = {"add": 0}
+
+        class _NC196c:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb):
+                return {"ok": False, "error": _NF196}
+
+            def source_add(self, nb, **kw):
+                _called["add"] += 1
+                return {"ok": True, "source_id": "SID196"}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+        _sav_sleep = getattr(_TL_MODULE, "_nlm_verdict_sleep", None)
+        _sav_apo = _TL_MODULE.apply_profile_offline
+        try:
+            _TL_MODULE._nlm_verdict_sleep = lambda s: None
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _ns = argparse.Namespace(notebook_id="nb196c", drive_id=None, url="https://example.invalid/kl137",
+                                     file=None, text=None, title=None, type=None, no_wait=False,
+                                     skip_live_check=False, no_fallback=False, config=None, profile=None,
+                                     row_kind=None, json=True, deterministic=False)
+            def _case():
+                _be = _io110.StringIO()
+                with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_io110.StringIO()):
+                    _rc = _TL_MODULE.cmd_nlm_add(_ns)
+                return _rc == 2 and "NOTEBOOK_NOT_FOUND" in _be.getvalue() and _called["add"] == 0
+            return _with_nc121(_NC196c(), _case)
+        finally:
+            _TL_MODULE.apply_profile_offline = _sav_apo
+            if _sav_sleep is None:
+                _TL_MODULE.__dict__.pop("_nlm_verdict_sleep", None)
+            else:
+                _TL_MODULE._nlm_verdict_sleep = _sav_sleep
+    _t110("r196_nlm_add_404_fail_closed_truoc_add", _c196_nlm_add_404_fail_closed_truoc_add)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

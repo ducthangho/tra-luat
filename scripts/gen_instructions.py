@@ -482,8 +482,8 @@ Khi văn bản lớn cần đưa vào NotebookLM, Claude phải ưu tiên lập 
 
 Khi OCR/chunk đã verify cần đưa vào corpus, không tạo pipeline ghi mới. Phải dùng bridge về pipeline hiện có:
 
-- OCR VBQPPL: `tl ingest-ocr <file> --text-file <ocr.txt> --cat <NN>` để verify rồi gọi lại `ingest-local` với `--source-quality ocr --ocr-verified`.
-- OCR profile: `tl profile-ingest-ocr <file> --text-file <ocr.txt>` để verify rồi gọi lại `profile-ingest` với `--source-quality ocr --ocr-verified`.
+- OCR VBQPPL: `tl ingest-ocr <file> --text-file <ocr.txt> --cat <NN> --ocr-verified` để verify rồi gọi lại `ingest-local` với `--source-quality ocr`; bridge chỉ forward `--ocr-verified` khi người dùng đã tự đối chiếu và truyền cờ tường minh — thiếu cờ bridge chặn rc=2.
+- OCR profile: `tl profile-ingest-ocr <file> --text-file <ocr.txt> --ocr-verified` để verify rồi gọi lại `profile-ingest` với `--source-quality ocr`; cùng luật cam kết tường minh như trên.
 - Chunk profile: `tl profile-ingest-chunks <chunk_manifest.json>` để chạy `chunk-verify` rồi gọi lại `profile-ingest` từng chunk.
 
 Mọi bridge apply phải có `--confirm yes`. Bridge không ghi trực tiếp vào Drive, registry hoặc NotebookLM; convert/readback/register/NLM vẫn do pipeline hiện có xử lý.

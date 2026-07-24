@@ -76,6 +76,18 @@ def cmd_nlm_add(a) -> int:
     # + fallback bật → defer: registry nlm_status=deferred + batch-link, KHÔNG add mù, rc=0. --no-fallback/
     # TL_NLM_FALLBACK=0 → đường cũ (gate dedup sẽ fail-closed LIVE_SOURCE_LIST_FAILED như trước).
     _v60a = _nlm_or_corpus("nlm-add", a, notebook_id=nb, probe=True)
+    # r196 (TRINH 3.9 — ca KL 137 24-07): notebook 404 bền ≠ NLM offline → rc=2 fail-closed TRƯỚC mọi
+    # side-effect (KHÔNG defer — defer trỏ đích không nhìn thấy; trước r196 banner «NLM OFFLINE» đánh lừa,
+    # --url còn chết NLM_OFFLINE_NO_DEFER_FOR_URL khó hiểu ×2).
+    if _v60a["route"] == "not_found":
+        print(json.dumps({"ok": False, "error": "NOTEBOOK_NOT_FOUND", "notebook": nb,
+                          "detail": _v60a["why"],
+                          "note": "nlm CLI không nhìn thấy notebook này (auth có thể vẫn sống). "
+                                  "(1) Kiểm --notebook-id = UUID ĐẦY ĐỦ theo config topology; "
+                                  "(2) NLM chập chờn sau mutation lớn — đã retry 5s/15s, chờ ≥60s thử lại; "
+                                  "(3) lane thay thế: MCP source_add + `tl register` nối sổ."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     if _v60a["route"] == "deferred":
         return _nlm_add_deferred(a, nb, why=_v60a["why"])
     for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tầng-2 tuổi cookie (WARN, không chặn; tầng-1 live = gate dedup bên dưới)

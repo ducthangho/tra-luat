@@ -1167,6 +1167,26 @@ def _nlm_hard_dead(why: str) -> bool:
                                   "csrf", "invalid_grant", "403", "forbidden", "trên path", "not on path"))
 
 
+# r196 (TRINH 3.9 — ca KL 137-KL/TW 24-07): NOT_FOUND trên MỘT notebook = ĐÍCH KHÔNG NHÌN THẤY (id sai /
+# flake backend sau mutation lớn — eventual consistency), KHÔNG phải «NLM chết» (auth alive, MCP cùng
+# notebook OK cùng lúc). Backoff mirror F6 r192 (GAS retry 5s/15s kể cả 404).
+_NLM_NOT_FOUND_RETRY_DELAYS = (5, 15)
+
+
+def _nlm_not_found(why: str) -> bool:
+    """PURE (r196): lỗi lớp NOT_FOUND của NLM API (nlm CLI in «Failed to get notebook: API error (code 5):
+    NOT_FOUND»). Đứng SAU _nlm_hard_dead khi phân loại — chuỗi auth không bao giờ khớp lớp này."""
+    low = (why or "").lower()
+    return ("not_found" in low or "not found" in low or "(code 5)" in low or "404" in low)
+
+
+def _nlm_verdict_sleep(seconds: float) -> None:
+    """Hook ngủ giữa các nhịp retry NOT_FOUND của _nlm_verdict — tách riêng để selftest stub (bẫy I11:
+    hàm rebase đọc globals tl → test patch _TL_MODULE._nlm_verdict_sleep)."""
+    import time as _t
+    _t.sleep(seconds)
+
+
 def _nlm_verdict(notebook_id: str, *, refresh: bool = False) -> dict:
     """(ADR-7) probe LIVE đúng 1 LẦN/notebook/process (cache _NLM_PROBE_CACHE — hằng ở tl.py, bẫy I11), tái
     dùng _nlm_preflight_report. Hard-dead chốt ngay; lỗi transient retry 1 nhịp RỒI MỚI kết luận dead.
@@ -1177,8 +1197,16 @@ def _nlm_verdict(notebook_id: str, *, refresh: bool = False) -> dict:
     rep = _nlm_preflight_report(notebook_id)
     alive, why = rep.get("alive"), str(rep.get("why") or "")
     if alive is False and not _nlm_hard_dead(why):
-        rep2 = _nlm_preflight_report(notebook_id)
-        alive, why = rep2.get("alive"), str(rep2.get("why") or why)
+        # r196 (TRINH 3.9): NOT_FOUND retry backoff 5s/15s (flake backend sau mutation lớn cần thời gian
+        # settle — retry tức thì ×1 của ADR-7 vẫn trong cửa sổ flake); transient khác giữ 1 nhịp tức thì.
+        _delays = list(_NLM_NOT_FOUND_RETRY_DELAYS) if _nlm_not_found(why) else [0]
+        for _d in _delays:
+            if _d:
+                _nlm_verdict_sleep(_d)
+            rep2 = _nlm_preflight_report(notebook_id)
+            alive, why = rep2.get("alive"), str(rep2.get("why") or why)
+            if alive is not False:
+                break
     v = {"alive": True if alive is None else bool(alive), "why": why, "age_min": rep.get("age_min")}
     _NLM_PROBE_CACHE[key] = v
     return v
@@ -1224,6 +1252,18 @@ def _nlm_or_corpus(cmd_name: str, a=None, *, notebook_id=None, err=None, probe: 
     if not dead:
         return out
     out["nlm_alive"], out["why"] = False, why
+    # r196 (TRINH 3.9): NOT_FOUND bền (đã backoff 5s/15s) ≠ NLM chết — KHÔNG rẽ fallback/defer (defer ghi
+    # nlm_status=deferred trỏ notebook không nhìn thấy = poison registry nếu id sai; banner «NLM OFFLINE»
+    # nói dối trạng thái khi auth sống). Route 'not_found' fail-closed + playbook; lệnh không xử route này
+    # rơi về đường cũ (gate live tự fail với lỗi thật).
+    if _nlm_not_found(why) and not _nlm_hard_dead(why):
+        out["route"] = "not_found"
+        print(f"[tl] ⚠ NOTEBOOK NOT_FOUND qua nlm CLI ({(why or '')[:100]}) — auth có thể VẪN SỐNG, đây là "
+              f"đích-không-nhìn-thấy chứ không phải NLM offline. Kiểm --notebook-id (UUID ĐẦY ĐỦ theo config "
+              f"topology, đừng gõ tay/prefix); NLM có thể chập chờn sau mutation lớn (đã retry 5s/15s) — chờ "
+              f"≥60s thử lại; lane thay thế: MCP source_add + `tl register` nối sổ.",
+              file=sys.stderr, flush=True)
+        return out
     out["route"] = {"corpus_read": "corpus_read", "defer": "deferred", "stale_cache": "stale_cache",
                     "unverified": "unverified"}.get(mode, "none")
     _nlm_fallback_banner(cmd_name, why, out["route"])

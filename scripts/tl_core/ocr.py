@@ -414,6 +414,12 @@ def _bridge_ocr_plan(a, *, mode: str) -> dict:
     verify = _bridge_common_ocr_verify(a.text_file, mode=mode, source=getattr(a, "file", "") or "")
     source = Path(a.file)
     text = Path(a.text_file)
+    # r196 (TRINH 3.11 — ca thật A-8 VCB 10838 ngày 24-07): --ocr-verified là CAM KẾT CON NGƯỜI đã đối chiếu
+    # (neo ≥6 từ, đủ trang/Điều/phụ lục) — ocr-verify XANH chỉ là máy-đo, chính nó dặn «nếu đã đối chiếu bổ
+    # sung». Trước r196 bridge nối cờ vô điều kiện ⇒ verify_gate child in ocr_verified=true mà không ai cam
+    # kết — đường VBQPPL thủng cổng S1 (r180). Nay: chỉ forward khi user truyền cờ cho bridge; thiếu → chặn
+    # rc=2 TRƯỚC child (fail trước side-effect); verify máy đỏ vẫn chặn như cũ (hai tầng độc lập).
+    attested = bool(getattr(a, "ocr_verified", False))
     out = {
         "ok": bool(verify.get("ok")),
         "schema": "ocr_ingest_bridge.v1",
@@ -421,24 +427,31 @@ def _bridge_ocr_plan(a, *, mode: str) -> dict:
         "file": str(source),
         "text_file": str(text),
         "apply": bool(getattr(a, "apply", False)),
+        "ocr_verified_attested": attested,
         "verification": verify,
         "warnings": [],
         "planned_child_command": [],
-        "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại ingest-local/profile-ingest hiện có với --source-quality ocr --ocr-verified.",
+        "note": "Bridge không ghi trực tiếp; apply chỉ gọi lại ingest-local/profile-ingest hiện có với --source-quality ocr, forward --ocr-verified CHỈ KHI user đã cam kết đối chiếu (r196).",
         "idempotency": _idempotency_contract_for_workflow("ocr_ingest"),
     }
     if not source.exists():
         out["ok"] = False; out["warnings"].append("SOURCE_FILE_NOT_FOUND")
     if not text.exists():
         out["ok"] = False; out["warnings"].append("TEXT_FILE_NOT_FOUND")
+    if not attested:
+        out["ok"] = False
+        out["warnings"].append("OCR_VERIFIED_ATTESTATION_REQUIRED")
+        out["hint"] = ("Đối chiếu text OCR với bản gốc (neo ≥6 từ, không mất trang/Điều/phụ lục) "
+                       "rồi chạy lại kèm --ocr-verified.")
     man = ((verify.get("json") or {}).get("manifest") if isinstance(verify.get("json"), dict) else None)
     if mode == "vbqppl" and not (isinstance(man, dict) and man.get("verification_status") == "verified"):
         out["ok"] = False
         out["warnings"].append("VBQPPL_OCR_REQUIRES_VERIFIED_MANIFEST")
+    _attest_flag = ["--ocr-verified"] if attested else []
     if mode == "vbqppl":
         if not getattr(a, "cat", None):
             out["ok"] = False; out["warnings"].append("CAT_REQUIRED_FOR_VBQPPL_OCR_INGEST")
-        child = ["ingest-local", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--auto-plan", "--json"]
+        child = ["ingest-local", str(source), "--text-file", str(text), "--source-quality", "ocr"] + _attest_flag + ["--auto-plan", "--json"]
         for opt in ("name", "sohieu", "cat", "goc", "hieuluc", "loai"):
             val = getattr(a, opt, None)
             if val:
@@ -447,7 +460,7 @@ def _bridge_ocr_plan(a, *, mode: str) -> dict:
             if getattr(a, flag, False):
                 child.append("--" + flag.replace("_", "-"))
     else:
-        child = ["profile-ingest", str(source), "--text-file", str(text), "--source-quality", "ocr", "--ocr-verified", "--json"]
+        child = ["profile-ingest", str(source), "--text-file", str(text), "--source-quality", "ocr"] + _attest_flag + ["--json"]
         for opt in ("name", "hieuluc"):
             val = getattr(a, opt, None)
             if val:

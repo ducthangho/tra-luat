@@ -28,6 +28,7 @@
   "schema": "route_task.v1",
   "stop_conditions": [
     "ocr-verify failed",
+    "missing --ocr-verified attestation",
     "missing text_file",
     "VBQPPL without cat",
     "apply without confirm yes"
@@ -39,7 +40,7 @@
       "profile"
     ],
     "apply": [
-      "call existing ingest-local/profile-ingest with --source-quality ocr --ocr-verified",
+      "call existing ingest-local/profile-ingest with --source-quality ocr; forward --ocr-verified only when operator attested",
       "do not write Drive/registry/NLM directly"
     ],
     "confirm_required": true,
@@ -64,6 +65,7 @@
     "plan": [
       "run ocr-verify on sidecar text",
       "build child ingest-local/profile-ingest command",
+      "require explicit --ocr-verified attestation (human compared >=6-word anchors, pages, Dieu, appendix)",
       "require confirm yes for apply"
     ],
     "readback_command": "ocr-verify <text_file> --source <source> --mode <mode> --json",
@@ -89,6 +91,7 @@
     "schema": "workflow_card.v1",
     "stop_conditions": [
       "ocr-verify failed",
+      "missing --ocr-verified attestation",
       "missing text_file",
       "VBQPPL without cat",
       "apply without confirm yes"

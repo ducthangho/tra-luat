@@ -1445,13 +1445,28 @@ def _nlm_links_rows(entries: list, *, profile_scope: bool) -> list:
 def _nlm_links_md(rows: list, nb: str, *, title: str = "Bảng tay nạp NotebookLM") -> str:
     """F5 van 1 (r192, PURE): dựng BẢNG TAY markdown — link bấm-được từng nguồn (QT-1) + link notebook đích
     + hẹn `nlm-reconcile` sau khi người dùng nạp xong. Dùng bởi `nlm-links --md-out` và nhánh bảng-tay
-    của `ingest-missing` (lô > NLM_BATCH_LINKS_THRESHOLD)."""
+    của `ingest-missing` (lô > NLM_BATCH_LINKS_THRESHOLD). r199 (grill 24-07 C1): lô >ngưỡng chia KHỐI
+    ≤NLM_BATCH_LINKS_THRESHOLD URL — NLM dễ chết khi dồn lô; mỗi khối tự đủ (link notebook tại header),
+    dặn CHỜ khối trước xử lý xong; lô ≤ngưỡng giữ dạng phẳng r192 y hệt."""
     nb_url = f"https://notebooklm.google.com/notebook/{nb}"
+    _thr = NLM_BATCH_LINKS_THRESHOLD
     lines = [f"# {title} — {len(rows)} nguồn", "",
-             f"Notebook đích: [{nb}]({nb_url})", "",
-             "Mở notebook → Add source → Google Drive (picker chọn được NHIỀU file 1 lần) hoặc dán link:", ""]
-    for e in rows:
-        lines.append(f"- [{_entry_name(e)}]({_entry_links_url(e)})")
+             f"Notebook đích: [{nb}]({nb_url})", ""]
+    if len(rows) <= _thr:
+        lines += ["Mở notebook → Add source → Google Drive (picker chọn được NHIỀU file 1 lần) hoặc dán link:", ""]
+        for e in rows:
+            lines.append(f"- [{_entry_name(e)}]({_entry_links_url(e)})")
+    else:
+        _nblk = (len(rows) + _thr - 1) // _thr
+        lines += [f"Lô {len(rows)} nguồn → chia {_nblk} khối ≤{_thr} URL (NLM dễ chết khi dồn lô). "
+                  "Nạp TỪNG KHỐI: Add source → Google Drive (picker chọn NHIỀU file) hoặc dán link của khối, "
+                  "CHỜ NLM nhận xong khối này rồi mới sang khối kế.", ""]
+        for _bi in range(_nblk):
+            lines.append(f"## Khối {_bi + 1}/{_nblk} — [mở notebook]({nb_url})")
+            lines.append("")
+            for e in rows[_bi * _thr:(_bi + 1) * _thr]:
+                lines.append(f"- [{_entry_name(e)}]({_entry_links_url(e)})")
+            lines.append("")
     lines += ["", "Sau khi nạp xong TRÊN UI:", "",
               f"1. `tl nlm-reconcile {nb} --apply`   # bắc cầu registry (exact-title, ownership-guard A2)",
               "2. Scope nền: `tl register --drive-id <id> --corpus true` từng dòng sau khi link.", ""]

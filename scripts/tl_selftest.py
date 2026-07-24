@@ -17677,6 +17677,24 @@ def run() -> int:
                 and '"hand_sheet"' in _src and "nlm-reconcile" in _src)
     _t110("r192_van1_ingest_missing_bang_tay_shape", _c192_van1_ingest_missing_hand_sheet_shape)
 
+    def _c199_van1_bang_tay_chia_khoi():
+        # r199 (grill 24-07 C1): bảng tay lô >NLM_BATCH_LINKS_THRESHOLD chia KHỐI ≤4 URL — NLM dễ chết khi
+        # dồn lô; mỗi khối TỰ ĐỦ (link notebook tại header khối) + dặn CHỜ khối trước xong; lô ≤ngưỡng giữ
+        # dạng phẳng r192 y hệt. Ca chỉ-nó-chặn của Release A.
+        _rows9 = [{"drive_id": f"dK{i}", "name": f"Doc_{i}"} for i in range(9)]
+        _md9 = _TL_MODULE._nlm_links_md(_rows9, "nbK9")
+        _blocks = [seg for seg in _md9.split("\n## ") if seg.startswith("Khối ")]
+        _b1 = _blocks[0] if _blocks else ""
+        _rows3 = [{"drive_id": f"dK{i}", "name": f"Doc_{i}"} for i in range(3)]
+        _md3 = _TL_MODULE._nlm_links_md(_rows3, "nbK3")
+        return (len(_blocks) == 3 and "Khối 1/3" in _md9 and "Khối 3/3" in _md9
+                and "[Doc_3]" in _b1 and "[Doc_4]" not in _b1
+                and "notebooklm.google.com/notebook/nbK9" in _b1
+                and "chờ" in _md9.lower()
+                and "nlm-reconcile nbK9 --apply" in _md9
+                and "## Khối" not in _md3 and all(f"[Doc_{i}]" in _md3 for i in range(3)))
+    _t110("r199_van1_bang_tay_chia_khoi_4", _c199_van1_bang_tay_chia_khoi)
+
     def _c192_van2_size_forces_no_wait():
         # F5 van 2: text >150k ký tự → TỰ chuyển --nlm-no-wait ngay lúc lập plan (DRY thấy trước);
         # text nhỏ → không đụng. Ngưỡng chốt 150k (đo: 343k >10'; <100k 30-90s).

@@ -51,7 +51,9 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   deferred, chạy tiếp; cuối lô một lượt reconcile). Đường "nạp tay" chỉ kích hoạt ở van 1 hoặc khi NLM
   chết hẳn.
 - **Bảng tay (nạp NLM)** — file markdown do van 1 sinh (`hand_sheet`): link bấm-được từng nguồn + link
-  notebook đích + hẹn `nlm-reconcile --apply` sau khi người dùng nạp xong trên UI. Sinh bằng
+  notebook đích + hẹn `nlm-reconcile --apply` sau khi người dùng nạp xong trên UI. Lô >4 nguồn chia
+  **khối ≤4 URL** (r199): mỗi khối tự đủ (link notebook tại header), nạp từng khối và chờ NLM nhận
+  xong khối trước — sự cố NLM khoanh vùng theo khối, không mất cả lô. Sinh bằng
   `tl nlm-links --drive-ids … --md-out …` hoặc tự động ở nhánh bảng-tay của `ingest-missing`.
 - **PDF_IMAGE** — verdict đo text-layer PDF lúc lập plan ingest (r191): trung bình **< 100 ký tự
   không-trắng/trang** ⇒ PDF scan/ảnh (text layer chỉ còn metadata chữ ký số) → coi

@@ -453,7 +453,13 @@ _IMMUTABLE_UPSERT_COLS = {"sohieu", "goc"}   # reg_bulk BỎ IM LẶNG khi ĐỔ
 
 
 def _looks_like_sohieu_query(q: str) -> bool:
-    return bool(re.search(r"\d{1,4}\s*[-/_]\s*(?:\d{4}|VBHN|VPQH|LCT\s*[-/_]\s*HDNN\d*)", q or "", re.I))
+    if re.search(r"\d{1,4}\s*[-/_]\s*(?:\d{4}|VBHN|VPQH|LCT\s*[-/_]\s*HDNN\d*)", q or "", re.I):
+        return True
+    # FIX-A r201 (grill 24-07 đêm — ca sống 342-QĐ/BTCTW): số Đảng/hành-chính BARE (không năm) rớt cổng cũ
+    # (đòi năm/VBHN) → tier sohieu KHÔNG BAO GIỜ chạy dù _sohieu_query_hits_entry đã có phép nới D5
+    # (v1.34.41). Nhận đúng khuôn _dang_bare_key: fullmatch trên KHÓA CHUẨN HOÁ toàn truy vấn — truy vấn
+    # tên/câu chữ không thể khớp (không phải substring), không nới gì thêm ở tầng khớp.
+    return bool(_dang_bare_key((q or "").replace("_", "-")))
 
 
 def _sohieu_year(s: str) -> int | None:

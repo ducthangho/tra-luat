@@ -18632,6 +18632,57 @@ def run() -> int:
         return (_rc == 0 and _r.get("pass") is True and _r.get("needs_chunk_pipeline") is True)
     _t110("r200_verify_staged_needs_chunk_flag", _c200_verify_staged_needs_chunk_flag)
 
+    def _c201_exists_sohieu_dang_bare():
+        # FIX-A r201 (grill 24-07 đêm, ca sống 342-QĐ/BTCTW): cổng _looks_like_sohieu_query phải nhận số
+        # hiệu Đảng/hành-chính BARE (không năm) — trước vá cổng đòi năm/VBHN nên tier sohieu không bao giờ
+        # chạy, exists báo not-found OAN dù entry có mặt (phép nới D5 ở _sohieu_query_hits_entry bị bỏ đói).
+        _ok_gate = (_TL_MODULE._looks_like_sohieu_query("342-QD-BTCTW")
+                    and _TL_MODULE._looks_like_sohieu_query("342-QĐ/BTCTW")
+                    and _TL_MODULE._looks_like_sohieu_query("04-CT-TW"))
+        _no_over = not (_TL_MODULE._looks_like_sohieu_query("Luật Dân số")
+                        or _TL_MODULE._looks_like_sohieu_query("bao cao tong hop 2026")
+                        or _TL_MODULE._looks_like_sohieu_query("Điều 5"))
+        # Đường sản xuất thật: _source_map_one phải ra DIRECT hit trên entry Đảng bare (cả query có dấu /).
+        _ents = [{"drive_id": "dD1", "name": "QD_342-2026-QD-BTCTW_He_thong_thong_tin",
+                  "so_hieu": "342-QD-BTCTW", "cat": "00_Van_ban_cua_Dang", "corpus": "true",
+                  "row_kind": "own", "mime": "application/vnd.google-apps.document"}]
+        _m = _TL_MODULE._source_map_one("342-QĐ/BTCTW", _ents)
+        _canon = _m.get("canonical") or {}
+        return (_ok_gate and _no_over and bool(_m.get("direct_hits"))
+                and _canon.get("drive_id") == "dD1")
+    _t110("r201_exists_sohieu_dang_bare", _c201_exists_sohieu_dang_bare)
+
+    def _c201_title_dang_quydinh_cancu_bom():
+        # FIX-B r201 (grill C3, ca sống 342-QĐ/BTCTW — 3 defect _profile_title_from_header):
+        # (a) dòng «Căn cứ …» chứa 'quyết định' KHÔNG được thành title (stop-tại-Căn-cứ);
+        # (b) loại Đảng đứng riêng «QUY ĐỊNH» + dòng «VỀ …» kế = title ghép (line-anchored, không substring);
+        # (c) BOM/zero-width GIỮA dòng letterhead phải bị strip per-line để agency-skip hoạt động.
+        _head342 = ("﻿BAN CHẤP HÀNH TRUNG ƯƠNG\nBAN TỔ CHỨC\n*\n\tĐẢNG CỘNG SẢN VIỆT NAM\n"
+                    "---------------\n\tSố 342-QĐ/BTCTW\n\tHà Nội, ngày 20 tháng 6 năm 2026\n\t \n"
+                    "QUY ĐỊNH\nVỀ HỆ THỐNG THÔNG TIN LĨNH VỰC TỔ CHỨC XÂY DỰNG ĐẢNG\n-----\n"
+                    "- Căn cứ Điều lệ Đảng;\n"
+                    "- Căn cứ Quyết định số 216-QĐ/TW, ngày 28/12/2024 của Bộ Chính trị về chức năng;\n")
+        _t1 = _TL_MODULE._profile_title_from_header(_head342, "x.docx")
+        _ok1 = (_t1 == "QUY ĐỊNH VỀ HỆ THỐNG THÔNG TIN LĨNH VỰC TỔ CHỨC XÂY DỰNG ĐẢNG"
+                and "Căn cứ" not in _t1)
+        # (c) văn bản thường: dòng agency DÍNH-LIỀN mang BOM ở ĐẦU DÒNG (không phải đầu text — biến thể
+        # probe lúc ingest, chính là chuỗi lọt vào title_vn registry) phải bị agency-skip sau strip per-line.
+        _head_bom = ("ĐẢNG CỘNG SẢN VIỆT NAM\n﻿BAN CHẤP HÀNH TRUNG ƯƠNGBAN TỔ CHỨC*\n"
+                     "BÁO CÁO TỔNG KẾT CÔNG TÁC TỔ CHỨC XÂY DỰNG ĐẢNG NĂM 2026\n")
+        _t2b = _TL_MODULE._profile_title_from_header(_head_bom, "y.docx")
+        _ok2b = ("ban chấp hành" not in _t2b.lower() and "﻿" not in _t2b
+                 and _t2b.startswith("BÁO CÁO TỔNG KẾT"))
+        # Regression VBQPPL: LUẬT giữ nguyên hành vi cũ (vòng từ-khóa cũ, trước mọi Căn cứ).
+        _head_luat = "QUỐC HỘI\nSố: 45/2019/QH14\nLUẬT DÂN SỐ\nCăn cứ Hiến pháp;\n"
+        _t3 = _TL_MODULE._profile_title_from_header(_head_luat, "z.docx")
+        _ok3 = _t3 == "LUẬT DÂN SỐ"
+        # (a) chỉ-nó-chặn: head chỉ còn căn-cứ chứa 'quyết định' → KHÔNG lấy làm title (fallback filename).
+        _head_cc = "\t \n- Căn cứ Quyết định số 216-QĐ/TW của Bộ Chính trị về chức năng nhiệm vụ;\n"
+        _t4 = _TL_MODULE._profile_title_from_header(_head_cc, "ten_goc.docx")
+        _ok4 = "Căn cứ" not in _t4
+        return _ok1 and _ok2b and _ok3 and _ok4
+    _t110("r201_title_dang_quydinh_cancu_bom", _c201_title_dang_quydinh_cancu_bom)
+
     def _c198_ingest_local_giu_duong_cu():
         # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
         # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.

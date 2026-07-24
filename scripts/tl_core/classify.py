@@ -1242,11 +1242,30 @@ def _backfill_titlevn_candidates(entries: list, force: bool = False) -> list[dic
 def _profile_title_from_header(text: str, fallback: str = "") -> str:
     # r179 T4 (đo file thật): BỎ BOM đầu file (.txt/.html đọc utf-8 giữ ﻿ → regex noise `^\s*` KHÔNG
     # khớp, quốc hiệu thành title rác).
-    lines = [re.sub(r"\s+", " ", x).strip() for x in (text or "").lstrip("﻿").splitlines()[:80]]
+    # r201 FIX-B (grill 24-07 đêm C3, ca sống 342-QĐ/BTCTW — 3 defect): (a) strip zero-width PER-LINE
+    # (_ZERO_WIDTH_RE — BOM/artifact docx GIỮA text thoát lstrip đầu-text, dòng letterhead mang BOM né
+    # agency-skip vì regex anchored fail → thành title rác trong title_vn); (b) dòng «Căn cứ …» KHÔNG BAO
+    # GIỜ là title — DỪNG quét khi gặp (trước: căn cứ nhắc 'Quyết định số 216-QĐ/TW' bị vòng từ-khóa bắt
+    # nhầm); (c) loại Đảng/hành-chính ĐỨNG RIÊNG (line-anchored FULLMATCH, KHÔNG substring — 'quy định'
+    # giữa câu không ăn) → title = loại + dòng «Về …» kế tiếp.
+    lines = [re.sub(r"\s+", " ", _ZERO_WIDTH_RE.sub("", x)).strip() for x in (text or "").splitlines()[:80]]
     lines = [x for x in lines if x]
-    for line in lines:
+    _cancu_re = re.compile(r"^[-–—]?\s*can cu\b")
+    _dang_kind_re = re.compile(r"^(?:quy dinh|quy che|chi thi|ket luan|huong dan|thong bao|ke hoach)$")
+    for _i, line in enumerate(lines):
         n = _strip_accents(line).lower()
+        if _cancu_re.match(n):
+            break
         if any(k in n for k in ("luat ", "bo luat", "nghi quyet", "nghi dinh", "thong tu", "quyet dinh")):
+            return line[:160]
+        if _dang_kind_re.fullmatch(n):
+            for _nxt in lines[_i + 1:_i + 3]:
+                if re.fullmatch(r"[-_=*.\s]+", _nxt):
+                    continue   # separator giữa loại và trích yếu
+                _nn = _strip_accents(_nxt).lower()
+                if _nn.startswith("ve ") or _nn.startswith("v/v"):
+                    return f"{line} {_nxt}"[:160]
+                break
             return line[:160]
     # r179 T4: dòng LETTERHEAD TÊN CƠ QUAN (IN HOA, ngắn) không phải title — '598805267335BỘ NỘI VỤ'
     # (artifact toạ độ docx + agency, đo file thật 8_Ban_tong_hop) / 'BAN CHẤP HÀNH TRUNG ƯƠNG' từng thành
@@ -1261,6 +1280,8 @@ def _profile_title_from_header(text: str, fallback: str = "") -> str:
     for line in lines:
         _l = re.sub(r"^(?:left|right|center)?-?\d{4,}", "", line).strip()
         n = _strip_accents(_l).lower()
+        if _cancu_re.match(n):
+            break   # r201 FIX-B (b): fallback cũng không bao giờ lấy dòng Căn cứ làm title
         if len(_l) < 12 or re.search(r"^\s*(cong hoa|doc lap|so:|số:|ha noi)", n):
             continue
         if len(_l) <= 60 and _l == _l.upper() and re.match(_AGENCY_RE, n):

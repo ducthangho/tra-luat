@@ -3407,7 +3407,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2n"))   # r185/WP5: +profile_catalog +drive_info_bulk
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2o"))   # r198/ADR-0014: +ingest_commit (trước: 2.21.2n r185/WP5)
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")
@@ -13189,11 +13189,12 @@ def run() -> int:
             (_r / "references" / "changelog_archive").mkdir(parents=True)
             for _rel, _keep in (("references/Code.2.21.2k.gs", False),
                                 ("references/changelog_archive/CHANGELOG-den-1.33.53.md", False),
-                                # r194: current nay 2.21.2n — 2 bản cũ thành dead-weight, loại khỏi GÓI
-                                # (giữ trong repo); bản current PHẢI còn trong gói.
+                                # r194: bản cũ = dead-weight, loại khỏi GÓI (giữ repo); current PHẢI còn.
+                                # r198: current nay 2.21.2o — 2.21.2n xuống hàng cũ (tiền lệ r194).
                                 ("references/Code.2.21.2m.gs", False),
                                 ("references/Code.2.21.2l.gs", False),
-                                ("references/Code.2.21.2n.gs", True),
+                                ("references/Code.2.21.2n.gs", False),
+                                ("references/Code.2.21.2o.gs", True),
                                 ("references/API_CONTRACT.md", True)):
                 _fp = _r / _rel
                 _fp.write_text("x", encoding="utf-8")
@@ -18198,6 +18199,208 @@ def run() -> int:
                 and len(_undo) == 4
                 and all(o.get("op") == "restore" and (o.get("before") or {}).get("corpus") == "false" for o in _undo))
     _t110("r197_bulk_1regbulk_1getbulk_undo_du_N", _c197_bulk_calls_journal_undo)
+
+    # ═══ r198 — INGEST_COMMIT (ADR-0014, GAS 2.21.2o; KE_HOACH p11 §5, quyết định #4/#6): client
+    # `cmd_profile_ingest` feature-detect ping ≥ 2.21.2o → MỘT call ingest_commit (organize+register+readback
+    # row/file) thay chuỗi organize + info×N + reg_get×N; version cũ → đường 12-call GIỮ NGUYÊN (fallback);
+    # ingest-local KHÔNG đổi đường (soak xong mới chuyển, release sau). Sub-step marker partial → step
+    # 'ingest_commit:<điểm đứt>' tường minh. Cache version 1 ping/process (_GAS_VER_CACHE — mutable ở tl, I11). ═══
+    def _c198_gas_version_at_least_pure():
+        _f = _TL_MODULE._gas_version_at_least
+        return (_f("2.21.2o", "2.21.2o") and _f("2.21.2p", "2.21.2o") and _f("2.22.0", "2.21.2o")
+                and _f("3.0.0", "2.21.2o") and not _f("2.21.2n", "2.21.2o") and not _f("2.21.2", "2.21.2o")
+                and not _f("", "2.21.2o") and not _f("abc", "2.21.2o") and not _f(None, "2.21.2o"))
+    _t110("r198_gas_version_at_least_pure", _c198_gas_version_at_least_pure)
+
+    def _c198_feature_detect_cache_1ping():
+        # Chỉ-nó-chặn (a): version cũ → False; ≥2.21.2o → True; cache = ĐÚNG 1 ping/process dù hỏi 2 lần;
+        # ping raise → False (fail-safe về đường cũ).
+        _cnt = {"ping": 0}
+
+        class _FkPing:
+            def __init__(self, ver):
+                self._v = ver
+
+            def get(self, action, **kw):
+                if action == "ping":
+                    _cnt["ping"] += 1
+                    if isinstance(self._v, Exception):
+                        raise self._v
+                    return {"ok": True, "pong": True, "version": self._v}
+                raise AssertionError(action)
+        _TL_MODULE._GAS_VER_CACHE.clear()
+        try:
+            _g_old = _FkPing("2.21.2n")
+            _r1 = _TL_MODULE._ingest_commit_supported(_g_old)
+            _r1b = _TL_MODULE._ingest_commit_supported(_g_old)
+            _ping_old = _cnt["ping"]
+            _TL_MODULE._GAS_VER_CACHE.clear(); _cnt["ping"] = 0
+            _r2 = _TL_MODULE._ingest_commit_supported(_FkPing("2.21.2o"))
+            _ping_new = _cnt["ping"]
+            _TL_MODULE._GAS_VER_CACHE.clear(); _cnt["ping"] = 0
+            _r3 = _TL_MODULE._ingest_commit_supported(_FkPing(RuntimeError("mang chet")))
+        finally:
+            _TL_MODULE._GAS_VER_CACHE.clear()
+        return (_r1 is False and _r1b is False and _ping_old == 1
+                and _r2 is True and _ping_new == 1 and _r3 is False)
+    _t110("r198_feature_detect_cache_1ping", _c198_feature_detect_cache_1ping)
+
+    def _c198_partial_marker_step():
+        # Chỉ-nó-chặn (c): partial organize_done=true, upsert_done=false → step 'ingest_commit:register'
+        # (điểm đứt ĐẦU TIÊN theo thứ tự organize→rename→register→readback); transport raise → :transport.
+        class _FkIC:
+            def get(self, action, **kw):
+                if action == "ingest_commit":
+                    return {"ok": False, "organize_done": True, "rename_done": True, "upsert_done": False}
+                raise AssertionError(action)
+
+        class _FkBoom:
+            def get(self, action, **kw):
+                raise RuntimeError("đứt mạng 198")
+        _r = _TL_MODULE._ingest_commit_call(_FkIC(), {"fileId": "F198"})
+        _rt = _TL_MODULE._ingest_commit_call(_FkBoom(), {"fileId": "F198"})
+        return (_r.get("ok") is False and _r.get("step") == "ingest_commit:register"
+                and _rt.get("ok") is False and _rt.get("step") == "ingest_commit:transport")
+    _t110("r198_partial_marker_step", _c198_partial_marker_step)
+
+    def _c198_commit_readback_checks():
+        # Chỉ-nó-chặn (d): row/file trong response đủ dựng convert_readback.v1 CÙNG bộ phép kiểm
+        # (_verify_convert_readback) — 0 call thêm; sai folder → check gdoc_in_expected_folder rớt.
+        _gmime = "application/vnd.google-apps.document"
+        _resp = {"ok": True, "fileId": "GD198", "srcId": "UP198",
+                 "file": {"id": "GD198", "name": "Bao_cao_198", "mimeType": _gmime, "parents": ["ROOT198"]},
+                 "src_file": {"id": "UP198", "name": "Bao_cao_198.docx",
+                              "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                              "parents": ["ROOT198"]}}
+        _rb1 = _TL_MODULE._ingest_commit_readback(_resp, expected_name="Bao_cao_198", src_id="UP198",
+                                                  expected_src_name="Bao_cao_198.docx",
+                                                  expected_folder_id="ROOT198")
+        _rb2 = _TL_MODULE._ingest_commit_readback(_resp, expected_name="Bao_cao_198", src_id="UP198",
+                                                  expected_src_name="Bao_cao_198.docx",
+                                                  expected_folder_id="ROOT_KHAC")
+        _fail2 = [c["name"] for c in _rb2["checks"] if not c["ok"]]
+        return (_rb1.get("ok") is True and _rb1.get("schema") == "convert_readback.v1"
+                and _rb2.get("ok") is False and "gdoc_in_expected_folder" in _fail2)
+    _t110("r198_commit_readback_checks", _c198_commit_readback_checks)
+
+    def _run_pi198(gas_ver):
+        # Harness call-site (khuôn _run_pi114): fake gas ĐẾM call theo action; version quyết định đường.
+        _calls = {"ping": 0, "organize": 0, "ingest_commit": 0, "info": 0, "upload": 0, "reg_get": 0}
+        _gmime = "application/vnd.google-apps.document"
+
+        class _FkGas198:
+            def get(self, action, **kw):
+                if action == "ping":
+                    _calls["ping"] += 1
+                    return {"ok": True, "pong": True, "version": gas_ver}
+                if action == "bootstrap":
+                    return {"ok": True, "inboxFolderId": "INBOX198"}
+                if action == "reg_get":
+                    _calls["reg_get"] += 1
+                    return {"ok": True, "rows": []}
+                if action == "organize":
+                    _calls["organize"] += 1
+                    return {"ok": True, "fileId": "GD198", "srcId": "SRC198"}
+                if action == "ingest_commit":
+                    _calls["ingest_commit"] += 1
+                    _nm = str(kw.get("name") or "")
+                    return {"ok": True, "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "fileId": "GD198", "srcId": "SRC198",
+                            "row": {"drive_id": "GD198", "name": _nm},
+                            "file": {"id": "GD198", "name": _nm, "mimeType": _gmime, "parents": ["ROOT198"]},
+                            "src_file": {"id": "SRC198", "name": _nm + ".docx",
+                                         "mimeType": "application/x-docx", "parents": ["ROOT198"]},
+                            "elapsed_ms": 42}
+                if action == "info":
+                    _calls["info"] += 1
+                    return {"ok": True, "file": {"id": kw.get("fileId"), "name": "x", "mimeType": _gmime}}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "upload":
+                    _calls["upload"] += 1
+                return {"ok": True, "fileId": "SRC198"}
+
+        class _FkNC198:
+            def source_add(self, nb, **kw):
+                return {"ok": True, "source_id": "SID198", "ready": True}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+        _keys = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds", "_gas",
+                 "_resolve_nlm_notebook", "_imp", "_verify_convert_readback", "_read_doc_text",
+                 "_profile_read_probe_text", "_profile_source_quality", "_verified_reg_write")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _env = {k: os.environ.get(k) for k in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_JOURNAL_DIR")}
+        _doc_text = "Nội dung báo cáo thử nghiệm 198 đủ dài để qua verify gate cho văn bản thường." * 3
+        import tempfile as _tf198
+        try:
+            with _tf198.TemporaryDirectory() as _d:
+                _xf = Path(_d) / "bao_cao_198.docx"
+                with _zf63.ZipFile(_xf, "w") as _z:
+                    _z.writestr("[Content_Types].xml", "<Types/>")
+                    _z.writestr("word/document.xml", "<document>bc198</document>")
+                os.environ["TL_JOURNAL_DIR"] = _d
+                _TL_MODULE._GAS_VER_CACHE.clear()
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._active_profile = lambda: "p198"
+                _TL_MODULE._profile_policy_error = lambda **k: None
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: _FkGas198()
+                _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB198", None)
+                _TL_MODULE._imp = lambda name: _FkNC198() if name == "nlm_cli" else _sav["_imp"](name)
+                _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
+                _TL_MODULE._read_doc_text = lambda *a, **k: _doc_text
+                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: (_doc_text, None)
+                _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
+                _TL_MODULE._verified_reg_write = lambda *a, **k: {"verified": True, "reg_bulk": {"patched": 1}}
+                os.environ["TL_ROOT_FOLDER_ID"] = "ROOT198"; os.environ["TL_META_FOLDER_ID"] = "META198"
+                _ns = argparse.Namespace(
+                    config=None, profile=None, file=str(_xf), drive_id=None, apply=False, allow_default=False,
+                    name="Bao_cao_Test_198", text_file=None, source_quality="auto", ocr_verified=False,
+                    large_threshold=None, chunk_max_chars=None, hieuluc=None, skip_live_check=False,
+                    allow_dup_name=False, json=True, deterministic=False, confirm=None, expected_plan_hash=None)
+                _bd = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rcd = _TL_MODULE.cmd_profile_ingest(_ns)
+                _pl = json.loads(_bd.getvalue())
+                _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+                _bo = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rca = _TL_MODULE.cmd_profile_ingest(_ns)
+                _outj = None
+                try:
+                    _outj = json.loads(_bo.getvalue())
+                except Exception:  # noqa: BLE001
+                    pass
+                return _rcd, _rca, _outj, _calls
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _k, _v in _env.items():
+                (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+            _TL_MODULE._GAS_VER_CACHE.clear()
+
+    def _c198_profile_via_commit_vs_fallback():
+        # Chỉ-nó-chặn (b)+(a-callsite): server 2.21.2o → ĐÚNG 1 ingest_commit, 0 organize, 0 info, rc=0;
+        # server 2.21.2n → 0 ingest_commit, 1 organize (fallback GIỮ NGUYÊN), rc=0; ping đúng 1 lần/run.
+        _rcd_n, _rca_n, _out_n, _c_new = _run_pi198("2.21.2o")
+        _rcd_o, _rca_o, _out_o, _c_old = _run_pi198("2.21.2n")
+        return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
+                and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
+                and _c_new["ping"] == 1
+                and _rcd_o == 0 and _rca_o == 0 and (_out_o or {}).get("ok") is True
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 1 and _c_old["ping"] == 1)
+    _t110("r198_profile_via_commit_vs_fallback", _c198_profile_via_commit_vs_fallback)
+
+    def _c198_ingest_local_giu_duong_cu():
+        # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
+        # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.
+        import inspect as _ins198
+        import tl_core.ingest_ops as _io198
+        _src = _ins198.getsource(_io198.cmd_ingest_local)
+        return 'g.get("organize"' in _src and "ingest_commit" not in _src
+    _t110("r198_ingest_local_giu_duong_cu", _c198_ingest_local_giu_duong_cu)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

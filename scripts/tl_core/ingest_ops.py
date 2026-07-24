@@ -1321,6 +1321,85 @@ def _profile_ingest_note(info: dict, gate: dict, source_quality: str, split_coun
     return "; ".join(bits)[:500]
 
 
+def _gas_version_at_least(ver, want) -> bool:
+    """PURE (r198 ADR-0014): so version webapp dạng '2.21.2o' (số.số.số + đuôi chữ thường, tuple-compare;
+    '' < 'a' < … < 'o' nên '2.21.2' < '2.21.2o' đúng chiều). Không parse được → False (fail-safe → đường cũ)."""
+    def _t(v):
+        m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)([a-z]*)", str(v or "").strip())
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4)) if m else None
+    _a, _b = _t(ver), _t(want)
+    return bool(_a and _b and _a >= _b)
+
+
+def _ingest_commit_supported(g) -> bool:
+    """r198 (ADR-0014 #3): feature-detect server có action ingest_commit — ping version ≥ 2.21.2o.
+    Cache 1 ping/process qua _GAS_VER_CACHE (mutable sống ở tl.py — bẫy I11); ping lỗi/parse hỏng → False
+    (rơi về đường 12-call hiện tại, fail-safe; client cũ/server cũ không đổi hành vi)."""
+    if "ver" not in _GAS_VER_CACHE:
+        try:
+            _GAS_VER_CACHE["ver"] = str(((g.get("ping") or {}) if g else {}).get("version") or "")
+        except Exception:  # noqa: BLE001
+            _GAS_VER_CACHE["ver"] = ""
+    return _gas_version_at_least(_GAS_VER_CACHE["ver"], "2.21.2o")
+
+
+def _ingest_commit_call(g, okw: dict) -> dict:
+    """r198 (ADR-0014): gọi action `ingest_commit` (GAS 2.21.2o) — MỘT round-trip organize(+rename)+register+
+    readback (row snapshot + file info), thay chuỗi organize → info×N → reg_get×N (~2s/call đường truyền).
+    Envelope trả về organize-compatible (fileId/srcId) + row/file/src_file + sub-step marker. Partial/lỗi →
+    ok=False + step 'ingest_commit:<điểm đứt ĐẦU TIÊN>' (organize→rename→register→readback) — journal/--resume
+    (ADR-0011/D5) map được; KHÔNG im lặng."""
+    try:
+        r = g.get("ingest_commit", **okw)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "step": "ingest_commit:transport", "error": f"{type(e).__name__}: {e}"}
+    if not isinstance(r, dict):
+        return {"ok": False, "step": "ingest_commit:shape", "error": "response không phải dict"}
+    if not r.get("ok"):
+        _dut = next((n for n, d in (("organize", r.get("organize_done")), ("rename", r.get("rename_done")),
+                                    ("register", r.get("upsert_done")), ("readback", bool(r.get("file"))))
+                     if not d), "readback")
+        r.setdefault("step", f"ingest_commit:{_dut}")
+    return r
+
+
+def _ingest_commit_readback(resp: dict, *, expected_name: str, src_id: str, expected_src_name: str,
+                            expected_folder_id: str) -> dict:
+    """r198 (ADR-0014): dựng convert_readback.v1 từ file/src_file TRONG response ingest_commit — 0 call thêm,
+    CÙNG BỘ phép kiểm _verify_convert_readback (gdoc tồn tại/mime native/tên/folder; src tồn tại/không-gdoc/
+    tên/folder) để downstream không đổi ngữ nghĩa."""
+    checks = []
+    def add(name, ok, detail=""):
+        checks.append({"name": name, "ok": bool(ok), "detail": str(detail)[:300]})
+    gf = resp.get("file") or {}
+    add("gdoc_exists", bool(gf.get("id")), gf.get("id") or "<missing>")
+    gm = str(gf.get("mimeType") or "")
+    add("gdoc_mime_is_google_native", gm == _GDOC_MIME, f"{gm or '<missing>'} (expect {_GDOC_MIME})")
+    gn = str(gf.get("name") or "")
+    if expected_name:
+        add("gdoc_name_matches", gn == expected_name, f"actual={gn!r} expected={expected_name!r}")
+    gps = [str(x) for x in (gf.get("parents") or [])]
+    if expected_folder_id:
+        add("gdoc_in_expected_folder", expected_folder_id in gps, ",".join(gps) or "<missing>")
+    sf = resp.get("src_file") or {}
+    sn, sm = str(sf.get("name") or ""), str(sf.get("mimeType") or "")
+    if src_id:
+        add("source_exists", bool(sf.get("id")), sf.get("id") or "<missing>")
+        add("source_not_google_doc", sm != _GDOC_MIME, sm or "<missing>")
+        if expected_src_name:
+            add("source_name_matches", sn == expected_src_name, f"actual={sn!r} expected={expected_src_name!r}")
+        if expected_folder_id:
+            sps = [str(x) for x in (sf.get("parents") or [])]
+            add("source_in_expected_folder", expected_folder_id in sps, ",".join(sps) or "<missing>")
+    ok = all(c["ok"] for c in checks)
+    return {"ok": ok, "schema": "convert_readback.v1", "gdoc_id": str(gf.get("id") or ""), "src_id": src_id or None,
+            "expected_name": expected_name or None, "expected_src_name": expected_src_name or None,
+            "expected_folder_id": expected_folder_id or None, "checks": checks, "via": "ingest_commit",
+            "gdoc": {"name": gn, "mime": gm, "parents": gps},
+            "source": ({"name": sn, "mime": sm, "parents": [str(x) for x in (sf.get("parents") or [])]}
+                       if src_id else None)}
+
+
 def cmd_profile_ingest(a) -> int:
     if getattr(a, "resume", False):   # v1.34.55 C4+C5: RESUME theo registry — không upload/organize lại
         return cmd_profile_ingest_resume(a)
@@ -1520,6 +1599,7 @@ def cmd_profile_ingest(a) -> int:
             print(json.dumps({"ok": False, "step": "upload", "detail": up}, ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
     hieuluc = DRAFT_WARNING if info.get("draft") else (getattr(a, "hieuluc", None) or "Còn")
+    _via_commit = False   # r198 ADR-0014: chỉ nhánh organize (non-sheet) đi đường gộp
     if _is_sheet:
         # v1.34.6 #2: organize chỉ convert→GDoc; bảng tính phải copy_convert toType=sheets (API_CONTRACT).
         org = g.get("copy_convert", fileId=fid, name=doc_name, folderId=root_id, toType="sheets",
@@ -1540,19 +1620,31 @@ def cmd_profile_ingest(a) -> int:
                 print(f"[tl] B.2 blank-over-guess: loai '{info['loai']}' suy heuristic (không letterhead/prefix) "
                       f"→ ĐỂ TRỐNG; điền sau: tl register --drive-id <gdoc> --loai \"{info['loai']}\"",
                       file=sys.stderr)
-        org = g.get("organize", **okw)
+        # r198 (ADR-0014 #3/#6): feature-detect server ≥2.21.2o → MỘT call ingest_commit (organize+register+
+        # readback row/file) thay organize + info×N + reg_get×N; server cũ → đường organize GIỮ NGUYÊN (fallback).
+        _via_commit = _ingest_commit_supported(g)
+        org = _ingest_commit_call(g, okw) if _via_commit else g.get("organize", **okw)
     gdoc = org.get("fileId")
     if not gdoc:
-        print(json.dumps({"ok": False, "step": ("copy_convert_sheets" if _is_sheet else "organize"), "detail": org},
+        print(json.dumps({"ok": False,
+                          "step": ("copy_convert_sheets" if _is_sheet else
+                                   (org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                          "detail": org},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     # Deterministic readback: không add NLM/registry tiếp nếu Drive convert/rename chưa xác nhận được.
     src_id = (org.get("srcFileId") if _is_sheet else org.get("srcId")) or fid
-    rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=doc_name,
-                                          src_id=("" if _is_sheet else src_id),
-                                          expected_src_name=("" if _is_sheet else doc_name + up_ext),
-                                          expected_folder_id=root_id,
-                                          expected_gdoc_mime=(_GSHEET_MIME if _is_sheet else None))
+    if _via_commit and org.get("file"):
+        # r198: readback dựng từ CHÍNH response (0 call thêm) — cùng bộ phép kiểm _verify_convert_readback.
+        rb_convert = _ingest_commit_readback(org, expected_name=doc_name, src_id=src_id,
+                                             expected_src_name=doc_name + up_ext,
+                                             expected_folder_id=root_id)
+    else:
+        rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=doc_name,
+                                              src_id=("" if _is_sheet else src_id),
+                                              expected_src_name=("" if _is_sheet else doc_name + up_ext),
+                                              expected_folder_id=root_id,
+                                              expected_gdoc_mime=(_GSHEET_MIME if _is_sheet else None))
     if not rb_convert.get("ok"):
         print(json.dumps({"ok": False, "step": "convert_readback", "gdoc": gdoc, "src_id": src_id,
                           "readback": rb_convert,

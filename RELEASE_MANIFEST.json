@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.28",
-  "webapp_target": "2.21.2n",
+  "skill_version": "1.35.29",
+  "webapp_target": "2.21.2o",
   "root_name": "tra-luat",
-  "file_count": 179,
-  "total_bytes": 5703200,
-  "package_hash": "d307851b91ec63d912931e21f8e37dd2dab1905c9863d7ad4d16ad4185fdf18a",
-  "content_hash": "d307851b91ec63d912931e21f8e37dd2dab1905c9863d7ad4d16ad4185fdf18a",
+  "file_count": 180,
+  "total_bytes": 5734156,
+  "package_hash": "af996c1bddf34feaa3dc5c4b8ecc5b687903970ce4fbbc37d7436a0d5d2aebc2",
+  "content_hash": "af996c1bddf34feaa3dc5c4b8ecc5b687903970ce4fbbc37d7436a0d5d2aebc2",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 89981,
-      "sha256": "866853d930688d539ef6a68df89f991fa95a3683272e17247266c7fb9d48b2e5"
+      "size": 93022,
+      "sha256": "791e915f619eb583df6db3529107e6280cb9ca52be4a19bd808c34e70c4c2eac"
     },
     {
       "path": "CONTEXT.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 48081,
-      "sha256": "4433564637da14f6cabb98337045d91de33768f84d14ba56f08c53ad6f44d039"
+      "sha256": "a4a0bbde7bbdb2a6d201169ae180505001c7a9fbe6984a2114b70a81d286c123"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "ffe4ac12a730523a76e251d910c6b12bfdd3df33b152686e4335765d8c5f2bb1"
+      "sha256": "984407b7cb44c48cdd8aa217e85655db67b65aa3f2e8b93704ba77b635025610"
     },
     {
       "path": "agents/openai.yaml",
@@ -132,9 +132,14 @@
       "sha256": "39d943e377fa9e1fbd1ca2650e157c2cc500bc7ac3c540c855f115140526bea4"
     },
     {
+      "path": "docs/adr/0014-ingest-commit-gop-round-trip.md",
+      "size": 4381,
+      "sha256": "bd7cdd7d0b5ffdd2a772051797fe273d6cab1a5238f1a7ff0912e73efe7a4f88"
+    },
+    {
       "path": "references/API_CONTRACT.md",
-      "size": 28918,
-      "sha256": "4879ea7bb322d2412bfb19af9ca32442c83fa35a9c7ab5aed0abdb8cdf8fd274"
+      "size": 29646,
+      "sha256": "b8f5b3b9c0876423a7eaa3e639341abb12269838c0e06bded9ed986c95d37524"
     },
     {
       "path": "references/APPSSCRIPT_MANIFEST.open-egress.json",
@@ -162,9 +167,9 @@
       "sha256": "bc6c9cfdd187b089b3d87438c5ebd9614166f72a599ac9b3274a20fd3372f163"
     },
     {
-      "path": "references/Code.2.21.2n.gs",
-      "size": 210907,
-      "sha256": "cd4b4fbfdc4d66c1e6571d34e394c66318fc1965d771b972fe1fec89a8315347"
+      "path": "references/Code.2.21.2o.gs",
+      "size": 214470,
+      "sha256": "308ebd7048aa0a3a27c74aa1866b4a49e39b8cda97553a885e00cb644c694f17"
     },
     {
       "path": "references/DELTA_v1.19.md",
@@ -698,8 +703,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 214744,
-      "sha256": "64fe9825e3f131f89abe5dfa6895d5c8aa7dfa51711d1a696739045eb8384a5f"
+      "size": 215157,
+      "sha256": "8d7358ebd6ae79d55532dad120969007adf10866fb66dabd31d71f52d4e77e52"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -768,8 +773,8 @@
     },
     {
       "path": "scripts/tl_core/ingest_ops.py",
-      "size": 215972,
-      "sha256": "60bd7b7bd4b1ddf0c1d4ea09488188629d405a2d192770db788f474789954559"
+      "size": 221846,
+      "sha256": "23c02dd55f7525fb1f2b21ce806d2ff00e8e5a1d1f7f908bcb384738b4905131"
     },
     {
       "path": "scripts/tl_core/jsonio.py",
@@ -823,8 +828,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 61173,
-      "sha256": "66fc3359226f5d18f3ecb3b711f655ddd389240b58495429180afaaaf945b711"
+      "size": 61199,
+      "sha256": "a4849761ad8dc5b63184754cc6a81de433c436a0f1ef66f10350256f239318a7"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -863,8 +868,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1328001,
-      "sha256": "32cbe77a46ac9d0a1be313165a3a2c676957d4bc340aee825b533c8f486bfa18"
+      "size": 1340931,
+      "sha256": "a0b732f8340228b07cc7a0a93e82ee2cd249ac18cd64d9df273d75ce45ff3ee0"
     },
     {
       "path": "scripts/tra_cuu.py",

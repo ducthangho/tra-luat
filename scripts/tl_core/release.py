@@ -334,7 +334,7 @@ _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   #
 # vào RELEASE_MANIFEST (rò metadata + file_count lệch zip-set 115≠109 → release-verify trong gói FAIL).
 _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json",
                                    "Code.2.21.2k.gs",   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim
-                                   "Code.2.21.2l.gs", "Code.2.21.2m.gs"}   # r194: current nay là 2.21.2n — 2 bản cũ (412KB) thành dead-weight bundle; GIỮ trong repo/git, chỉ loại khỏi GÓI (tiền lệ 2.21.2k)
+                                   "Code.2.21.2l.gs", "Code.2.21.2m.gs", "Code.2.21.2n.gs"}   # r194: bản cũ = dead-weight bundle, GIỮ repo/git chỉ loại khỏi GÓI (tiền lệ 2.21.2k); r198: current nay 2.21.2o — 2.21.2n xuống hàng cũ
 
 _RELEASE_EXCLUDE_NAMES = {
     "RELEASE_MANIFEST.json",

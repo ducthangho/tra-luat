@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2o",
   "root_name": "tra-luat",
   "file_count": 181,
-  "total_bytes": 5796348,
-  "package_hash": "8294a02023491d5160de1b427ba5fab583dd396dd48a8b5ad422f0daa9aa24cc",
-  "content_hash": "8294a02023491d5160de1b427ba5fab583dd396dd48a8b5ad422f0daa9aa24cc",
+  "total_bytes": 5797281,
+  "package_hash": "710657ed0dd827a7c7f35ce77653cfc5b2cbc0db21b377bee56e00ac6c27060f",
+  "content_hash": "710657ed0dd827a7c7f35ce77653cfc5b2cbc0db21b377bee56e00ac6c27060f",
   "required_missing": [],
   "files": [
     {
@@ -208,8 +208,8 @@
     },
     {
       "path": "references/KERNEL_APPENDIX.md",
-      "size": 10312,
-      "sha256": "3a38a240b76d59f6b19ddfca9229ababf2a71d90480f3c97ad27c57f2fa8521e"
+      "size": 11245,
+      "sha256": "65513aabe1c9890590806e2d2e424270cf895712b0e7dc2accd3c9e304532de0"
     },
     {
       "path": "references/MULTI_CORPUS_PROFILE_V1_18.md",

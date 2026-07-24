@@ -814,7 +814,9 @@ def _ingest_perf_hint(nlm_no_wait: bool, no_nlm_add: bool):
         return None
     return ("PERF nạp LÔ ≥2 file: thêm --nlm-no-wait (−~50%/file; 3 lệnh chạy SONG SONG được) + "
             "`tl nlm-reconcile <notebook> --apply` MỘT lần cuối lô; lô lớn: --no-nlm-add (dừng sau "
-            "Drive+registry) rồi nlm-links batch + reconcile. Đơn lẻ: giữ mặc định (verify-then-link).")
+            "Drive+registry) rồi nlm-links batch + reconcile. Đơn lẻ: giữ mặc định (verify-then-link). "
+            "Lưu ý (FIX-D r201): thêm cờ SAU dry-run ⇒ plan_hash đổi ⇒ phải chạy DRY lại lấy hash mới "
+            "(by design — tránh PLAN_HASH_MISMATCH oan).")
 
 
 def _upload_mime_ext(path: str) -> tuple[str, str]:

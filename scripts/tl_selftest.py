@@ -18683,6 +18683,127 @@ def run() -> int:
         return _ok1 and _ok2b and _ok3 and _ok4
     _t110("r201_title_dang_quydinh_cancu_bom", _c201_title_dang_quydinh_cancu_bom)
 
+    def _c201_reconcile_listing_channel_guard():
+        # FIX-C r201 (grill 24-07 đêm C2, ca sống «300 unregistered» phiên Chat): kênh liệt kê NLM suy hoá
+        # trả id lạc namespace → ~100% nguồn live thành 'unregistered' mà tool IM LẶNG; --apply mù theo đó
+        # sẽ link/clear bậy hàng loạt. Guard: live ≥ 20 VÀ unregistered/live > 50% → LISTING_CHANNEL_SUSPECT:
+        # DRY vẫn in report + banner LOUD + playbook; --apply DỪNG rc=2 TRƯỚC MỌI GHI (trước journal/gate);
+        # override tường minh --force-unsafe. Ca lành 2/300 và ca live<20 KHÔNG kích.
+        import io as _ioC, contextlib as _ctxC
+        _writesC = []
+        class _FkGasC:   # apply force-unsafe với plan rỗng: không lệnh ghi nào được gọi
+            def get(self, *a, **k): _writesC.append("gas_get"); return {"ok": True}
+            def post(self, *a, **k): _writesC.append("gas_post"); return {"ok": True}
+        _keysC = ("_imp", "apply_profile_offline", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+                  "_gas", "_apply_gate", "_apply_journal_start", "_journaled_reg_write", "_journal_append",
+                  "_nlm_preflight_report", "_resolve_shard_topology", "_shard_row_kind")
+        _savC = {k: getattr(_TL_MODULE, k) for k in _keysC}
+        def _runC(srcs, ents, apply=False, force=False):
+            class _FkNCc:
+                def source_list(self, nb, skip_freshness=True, **kw):
+                    return {"ok": True, "count": len(srcs), "sources": srcs}
+            _TL_MODULE._imp = lambda name: _FkNCc() if name == "nlm_cli" else _savC["_imp"](name)
+            _TL_MODULE._manifest_entries = lambda refresh=False: ents
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id="NBc", refresh=True,
+                                     apply=apply, clear_stale=False, force_unsafe=force, out=None,
+                                     all_notebooks=False, from_plan=None, plan_out=None, json=True)
+            _bo, _be = _ioC.StringIO(), _ioC.StringIO()
+            with _ctxC.redirect_stdout(_bo), _ctxC.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            try:
+                _o = json.loads(_bo.getvalue())
+            except Exception:
+                _o = {}
+            return _rc, _o, _be.getvalue()
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ((nb or "NBc"), None)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkGasC()
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+            _TL_MODULE._apply_journal_start = lambda *a, **k: (_writesC.append("journal") or "runC")
+            _TL_MODULE._journaled_reg_write = lambda *a, **k: (_writesC.append("reg_write")
+                                                               or {"verified": True, "patched": 0,
+                                                                   "reg_bulk": {"ok": True}})
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=False: {"warn": []}
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {}
+            _TL_MODULE._shard_row_kind = lambda *a, **k: None
+            # (i) 25 nguồn live, 0 khớp registry → 100% unregistered (≥20): DRY banner + apply chặn rc=2
+            _srcs_bad = [{"id": f"zz{i}", "title": f"La_khong_khop_{i}"} for i in range(25)]
+            _ents_1 = [{"drive_id": "dR1", "name": "Dong_Reg_1", "nlm_source_id": "", "corpus": "true"}]
+            _rcd, _od, _ed = _runC(_srcs_bad, _ents_1)
+            _ok_dry = (_rcd == 0 and _od.get("verdict") == "LISTING_CHANNEL_SUSPECT"
+                       and _od.get("unregistered_on_nlm") == 25 and _od.get("live_on_nlm") == 25
+                       and "LISTING_CHANNEL_SUSPECT" in _ed and "force-unsafe" in _ed
+                       and "nlm login" in _ed)   # report VẪN in + banner LOUD + playbook trên stderr
+            _writesC.clear()
+            _rca, _oa, _ea = _runC(_srcs_bad, _ents_1, apply=True)
+            _ok_apply = (_rca == 2 and _writesC == [] and "LISTING_CHANNEL_SUSPECT" in _ea)
+            # (ii) --force-unsafe: đi tiếp (plan rỗng → không ghi gì, rc=0, journal ĐƯỢC mở)
+            _writesC.clear()
+            _rcf, _of, _ef = _runC(_srcs_bad, _ents_1, apply=True, force=True)
+            _ok_force = (_rcf == 0 and _of.get("ok") is True and "journal" in _writesC
+                         and "reg_write" not in _writesC)
+            # (iii) ca lành 2/300 KHÔNG kích + ca 5/5 (100% nhưng live<20) KHÔNG kích
+            _ents_ok = [{"drive_id": f"d{i}", "name": f"Doc_khop_{i}", "nlm_source_id": f"s{i}",
+                         "nlm_notebook_id": "NBc", "nlm_status": "pushed", "corpus": "true"}
+                        for i in range(298)]
+            _srcs_ok = ([{"id": f"s{i}", "title": f"Doc_khop_{i}"} for i in range(298)]
+                        + [{"id": "zzA", "title": "La_le_A"}, {"id": "zzB", "title": "La_le_B"}])
+            _rch, _oh, _eh = _runC(_srcs_ok, _ents_ok)
+            _ok_healthy = (_rch == 0 and "verdict" not in _oh and _oh.get("unregistered_on_nlm") == 2
+                           and "LISTING_CHANNEL_SUSPECT" not in _eh)
+            _srcs_small = [{"id": f"yy{i}", "title": f"La_nho_{i}"} for i in range(5)]
+            _rcs, _os_, _es = _runC(_srcs_small, _ents_1)
+            _ok_small = (_rcs == 0 and "verdict" not in _os_ and "LISTING_CHANNEL_SUSPECT" not in _es)
+            return _ok_dry and _ok_apply and _ok_force and _ok_healthy and _ok_small
+        finally:
+            for _k, _v in _savC.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r201_reconcile_listing_channel_guard", _c201_reconcile_listing_channel_guard)
+
+    def _c201_reconcile_title_bridge_tier3_lock():
+        # Khóa hành vi tier-3 title-bridge của _nlm_reconcile_plan (thay «golden fixture» — golden không
+        # chạy offline với NLM live; quyết định C1 grill 24-07 đêm). Tên KHÔNG số để sohieu-tier bất hoạt:
+        # (a) link đúng khi title chuẩn hóa khớp DUY NHẤT dòng own chưa có sid (by=title);
+        # (b) ownership guard: dòng trỏ notebook KHÁC → foreign_skipped kèm notebook, KHÔNG candidate;
+        # (c) dòng ĐÃ CÓ nlm_source_id không bị re-point bằng định danh yếu (title) → source ở lại unregistered;
+        # (d) title khớp ≥2 dòng own → mơ hồ, KHÔNG link.
+        _ents_tb = [
+            {"drive_id": "dA", "name": "BC_Tong_ket_cuoi_nam", "nlm_source_id": "", "corpus": "true"},
+            {"drive_id": "dB", "name": "KH_Hanh_dong_chuyen_doi", "nlm_source_id": "",
+             "nlm_notebook_id": "NB_KHAC", "corpus": "true"},
+            {"drive_id": "dC", "name": "QD_Da_co_sid_cu", "nlm_source_id": "s-old",
+             "nlm_notebook_id": "NB1", "nlm_status": "pushed", "corpus": "true"},
+            {"drive_id": "dDa", "name": "TT_Trung_ten_nhau", "nlm_source_id": "", "corpus": "true"},
+            {"drive_id": "dDb", "name": "TT_Trung_ten_nhau", "nlm_source_id": "", "corpus": "true"},
+        ]
+        _srcs_tb = [
+            {"id": "sa", "title": "BC_Tong_ket_cuoi_nam"},
+            {"id": "sb", "title": "KH_Hanh_dong_chuyen_doi"},
+            {"id": "sc", "title": "QD_Da_co_sid_cu"},
+            {"id": "sd", "title": "TT_Trung_ten_nhau"},
+        ]
+        _pl = _TL_MODULE._nlm_reconcile_plan(_srcs_tb, _ents_tb, "NB1")
+        _lc = {c["source_id"]: c for c in (_pl.get("link_candidates") or [])}
+        _fs = {f["source_id"]: f for f in (_pl.get("foreign_skipped") or [])}
+        return (set(_lc) == {"sa"} and _lc["sa"]["by"] == "title"
+                and _lc["sa"]["entry"].get("drive_id") == "dA"
+                and "sb" in _fs and _fs["sb"].get("registry_notebook") == "NB_KHAC"
+                and sorted(_pl["unregistered"]) == ["sb", "sc", "sd"])
+    _t110("r201_reconcile_title_bridge_tier3_lock", _c201_reconcile_title_bridge_tier3_lock)
+
+    def _c201_perf_hint_plan_hash_note():
+        # FIX-D r201 (grill C1, vấn đề #5 — by design nhưng gây PLAN_HASH_MISMATCH oan): PERF hint phải
+        # nhắc «thêm cờ SAU dry-run ⇒ plan_hash đổi ⇒ DRY lại» ngay tại chỗ nó xúi thêm --nlm-no-wait;
+        # hint vẫn None khi đã dùng cờ nhanh (không lải nhải — hành vi v1.34.73 giữ nguyên).
+        _h = _TL_MODULE._ingest_perf_hint(False, False)
+        return (_h is not None and "plan_hash" in _h and "DRY lại" in _h
+                and _TL_MODULE._ingest_perf_hint(True, False) is None
+                and _TL_MODULE._ingest_perf_hint(False, True) is None)
+    _t110("r201_perf_hint_plan_hash_note", _c201_perf_hint_plan_hash_note)
+
     def _c198_ingest_local_giu_duong_cu():
         # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
         # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.

@@ -669,6 +669,20 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
             "registry_on_nlm_rows": n_rows}
 
 
+# FIX-C r201 (grill 24-07 đêm C2 — ca sống «300 unregistered» phiên Chat): kênh liệt kê NLM suy hoá
+# (3 kênh chết) trả id lạc namespace → ~100% nguồn live thành 'unregistered' mà reconcile IM LẶNG;
+# --apply mù theo đó link/clear bậy hàng loạt. Ngưỡng 50% xa mọi ca lành (máy khỏe đo 2/300 = 0,7%);
+# sàn live ≥ 20 tránh kích oan notebook nhỏ/mới. HẰNG re-export tl.py (bẫy I11).
+_RECONCILE_SUSPECT_MIN_LIVE = 20
+_RECONCILE_SUSPECT_UNREG_RATIO = 0.5
+
+
+def _reconcile_channel_suspect(live_n: int, unreg_n: int) -> bool:
+    """PURE (FIX-C r201): True khi tỷ lệ 'unregistered'/live vượt ngưỡng nghi-kênh — dấu hiệu kênh
+    liệt kê trả dữ liệu sai namespace, KHÔNG phải registry lệch thật."""
+    return live_n >= _RECONCILE_SUSPECT_MIN_LIVE and unreg_n > live_n * _RECONCILE_SUSPECT_UNREG_RATIO
+
+
 def cmd_nlm_reconcile(a) -> int:
     """C (WS1): đối soát registry↔NLM bằng ground-truth từ CLI nlm. Backfill nlm_notebook_id cho dòng
     THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định.
@@ -746,7 +760,8 @@ def cmd_nlm_reconcile(a) -> int:
             _per.append({"notebook": _nb_i, "rc": _rc_i,
                          **{k: _r_i.get(k) for k in ("ok", "live_on_nlm", "desync_real", "unregistered_on_nlm",
                                                      "link_candidates", "backfill_nlm_notebook_id",
-                                                     "already_removed", "error") if k in _r_i}})
+                                                     "already_removed", "error",
+                                                     "verdict") if k in _r_i}})   # verdict: FIX-C r201 nổi lên sweep
             print(f"[reconcile] {_nb_i[:8]}…: desync={_r_i.get('desync_real')} unregistered="
                   f"{_r_i.get('unregistered_on_nlm')} link_candidates={_r_i.get('link_candidates')}",
                   file=sys.stderr, flush=True)
@@ -915,6 +930,23 @@ def cmd_nlm_reconcile(a) -> int:
            "desync_real_sample": [f"{_entry_sohieu(e)}|{_entry_name(e)[:40]}" for e in plan["desync_real"][:10]],
            "foreign_skipped_sample": [f"{c['source_id'][:12]}…↛{(c.get('registry_notebook') or '?')[:12]}… (by {c['by']}) | {str(c.get('title') or '')[:32]}" for c in (plan.get("foreign_skipped") or [])[:10]],
            "unregistered_sample": plan["unregistered"][:8]}
+    # FIX-C r201 (grill C2): guard nghi-kênh — live ≥ 20 VÀ unregistered/live > 50% ⇒ dữ liệu liệt kê
+    # KHÔNG đáng tin. DRY vẫn in report (verdict trong out) + banner LOUD + playbook; --apply DỪNG rc=2
+    # TRƯỚC mọi ghi (chốt đặt sau nhánh DRY, trước preflight/gate/journal); override --force-unsafe.
+    # Đường --from-plan không re-scan live (live_ids rỗng, unregistered rỗng) → guard bất hoạt by design.
+    _suspect_c2 = _reconcile_channel_suspect(len(live_ids), len(plan["unregistered"]))
+    if _suspect_c2:
+        out["verdict"] = "LISTING_CHANNEL_SUSPECT"
+        out["verdict_note"] = (f"unregistered {len(plan['unregistered'])}/{len(live_ids)} live "
+                               f"(>{int(_RECONCILE_SUSPECT_UNREG_RATIO * 100)}%, live≥"
+                               f"{_RECONCILE_SUSPECT_MIN_LIVE}) — nghi KÊNH LIỆT KÊ NLM suy hoá trả id "
+                               "lạc namespace, KHÔNG phải registry lệch thật. ĐỪNG tin plan này.")
+        print(f"[tl] 🛑🛑 LISTING_CHANNEL_SUSPECT: {len(plan['unregistered'])}/{len(live_ids)} nguồn live "
+              "bị coi là 'unregistered' — kênh liệt kê NLM khả nghi (đã từng thấy 3 kênh chết trả id lạc "
+              "namespace).", file=sys.stderr)
+        print("[tl]    playbook: (1) đổi kênh liệt kê / `tl nlm-auth-status` soi 3 kênh; (2) `nlm login` "
+              "làm tươi cookie; (3) đo lại trên máy khỏe rồi so verdict. --apply bị CHẶN rc=2 trước mọi "
+              "ghi (override tường minh: --force-unsafe).", file=sys.stderr)
     if _from_plan is None:
         # r179 T8 (ADR-0010 — «CẢ HAI lệnh in CẢ HAI số, tên tường minh»): reconcile có live-set per-source →
         # coverage_gap CHÍNH XÁC = dòng nlm_due (diện phải-có: corpus∪ref, trừ removed_*) mà nguồn VẮNG live.
@@ -969,6 +1001,14 @@ def cmd_nlm_reconcile(a) -> int:
             except Exception as _pae:  # noqa: BLE001 — artifact best-effort, DRY vẫn trọn vẹn
                 out["plan_artifact_error"] = str(_pae)
         _emit_json_payload(out, getattr(a, "out", None)); return 0
+    if _suspect_c2 and not getattr(a, "force_unsafe", False):
+        # FIX-C r201: DỪNG TRƯỚC MỌI GHI (preflight/gate/journal/reg_bulk đều chưa chạy tới).
+        print(json.dumps({"ok": False, "error": "LISTING_CHANNEL_SUSPECT",
+                          "unregistered_on_nlm": len(plan["unregistered"]), "live_on_nlm": len(live_ids),
+                          "note": "Kênh liệt kê NLM khả nghi — apply theo plan này sẽ link/clear bậy hàng "
+                                  "loạt. Làm theo playbook banner (đổi kênh / nlm login / đo máy khỏe); "
+                                  "cố ý đi tiếp: --force-unsafe."}, ensure_ascii=False), file=sys.stderr)
+        return 2
     for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tuổi cookie trước lô ghi (WARN; tầng-1 live đã nằm ở source_list phía trên)
         print(f"[tl] ⚠ {_w54}", file=sys.stderr)
     # v1.34.49 (F-06): +row_kind vào gate-cols (superset — backfill/link trên shard overflow nay ghi row_kind)

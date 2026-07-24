@@ -4051,15 +4051,23 @@ def run() -> int:
     _clv = _classify_ref({"raw": "x", "name_phrase": "PCTH thuoc la", "sohieu": "09-2012-QH13", "loai": "Luật"}, _vcov)
     cases.append(("xref_vbhn_coverage_before_typo", _clv["flag"] == "OUTDATED"))
     # Group B (log rà mới): _ingest_target dùng NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID), không hard-code VBQPPL base.
+    # r195 hermetic: ghim _manifest_entries RAISE — trước đây ca này ngầm dựa vào «gas không tự tìm được creds»
+    # để discovery overflow trả rỗng; máy có env TL_WEBAPP (hoặc gas r195 tự thấy config v2) → discovery đi
+    # MẠNG THẬT → g=None nổ AttributeError → FAIL oan (đúng họ r181: selftest phải trung hoà trạng thái sống).
     import os as _os
     _prev = _os.environ.get("TL_NOTEBOOK_ID"); _prevov = _os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")
+    _sv_me_gb = _TL_MODULE._manifest_entries
     try:
         _os.environ["TL_NOTEBOOK_ID"] = "NB_PROFILE_X"; _os.environ.pop("TL_OVERFLOW_NOTEBOOK_ID", None)
+        def _me_gb_raise(*_a, **_k):
+            raise RuntimeError("hermetic: không đọc manifest trong ca này")
+        _TL_MODULE._manifest_entries = _me_gb_raise
         _tgt, _ = _ingest_target(None, "1/2020/QH14", "x")
         cases.append(("ingest_target_uses_profile_notebook", _tgt == "NB_PROFILE_X"))
     except Exception:
         cases.append(("ingest_target_uses_profile_notebook", False))
     finally:
+        _TL_MODULE._manifest_entries = _sv_me_gb
         _os.environ.pop("TL_NOTEBOOK_ID", None) if _prev is None else _os.environ.__setitem__("TL_NOTEBOOK_ID", _prev)
         if _prevov is not None:
             _os.environ["TL_OVERFLOW_NOTEBOOK_ID"] = _prevov
@@ -7703,7 +7711,10 @@ def run() -> int:
     _ns96 = build_parser().parse_args(["nlm-reconcile", "--all-notebooks", "--json"])
     cases.append(("r96_parser_reconcile_all_notebooks", getattr(_ns96, "all_notebooks", False) is True))
     _keys96 = ("apply_profile_offline", "_resolve_nlm_notebook", "_imp", "_manifest_entries",
-               "_read_config_record")   # v1.34.49: resolver đọc config-of-record → hermetic
+               "_read_config_record",   # v1.34.49: resolver đọc config-of-record → hermetic
+               "_resolve_overflow_shards")   # r195 hermetic: ghim resolver — ca này test SWEEP đủ base+overflow,
+                                             # không test luật union shard (đã có ca riêng v1.34.47/49); để resolver
+                                             # thật thì phân loại foreign đổi theo config/creds sống của máy.
     _sav96 = {k: getattr(_TL_MODULE, k) for k in _keys96}
     _env96 = os.environ.get("TL_OVERFLOW_NOTEBOOK_ID")
     _realimp96 = _TL_MODULE._imp
@@ -7718,6 +7729,7 @@ def run() -> int:
         _TL_MODULE._imp = lambda name: (_FakeNC96 if name == "nlm_cli" else _realimp96(name))
         _TL_MODULE._manifest_entries = lambda refresh=False: []
         _TL_MODULE._read_config_record = lambda *a, **k: (None, {})
+        _TL_MODULE._resolve_overflow_shards = lambda ent, base, cfg=None: ["ovf96"]
         def _mk96(**kw):
             base = dict(config=None, profile=None, notebook_id=None, apply=False, clear_stale=False,
                         force_unsafe=False, refresh=True, json=True, out=None, all_notebooks=True)
@@ -17879,6 +17891,53 @@ def run() -> int:
                 and _f2 == [] and _f3 == []
                 and "TOKEN_IN_BUNDLE" in _src and "_release_secret_findings(rel, data)" in _src)
     _t110("r193_release_bundle_quet_token", _c193_release_bundle_token_scan)
+
+    # ═══ r195 — VÁ BUG CLAIM CREDS (đo 24-07, lô ATVSLĐ): _fallback/gas.py chụp WEBAPP/TOKEN từ env
+    # LÚC IMPORT (_ensure_creds không bao giờ đọc lại os.environ) và DEFAULT_CONFIGS không biết
+    # tra_luat_config.v2.json ở cwd/gốc skill ⇒ nlm-add (gas bị import trước, load_creds chạy sau)
+    # chết INGEST_CLAIM_FAILED «Thiếu TL_WEBAPP/TL_TOKEN» dù config v2 ngay cwd và --config tường minh. ═══
+    def _c195_gas_ensure_creds_doc_lai_env():
+        # Chỉ-nó-chặn (a): globals trống (mô phỏng import lúc env trống) + env set SAU import
+        # → _ensure_creds phải đọc env TẠI-LÚC-GỌI và trả đúng creds, không RuntimeError.
+        import gas as _g195
+        _glb = _g195._ensure_creds.__globals__
+        _sv_g = {k: _glb.get(k) for k in ("WEBAPP", "TOKEN")}
+        _sv_e = {k: os.environ.get(k) for k in ("TL_WEBAPP", "TL_TOKEN")}
+        try:
+            _glb["WEBAPP"] = _glb["TOKEN"] = ""
+            os.environ["TL_WEBAPP"] = "https://example.invalid/exec195"
+            os.environ["TL_TOKEN"] = "tl_selftest195"
+            try:
+                _w, _t = _g195._ensure_creds(None)
+            except RuntimeError:
+                return False
+            return _w == "https://example.invalid/exec195" and _t == "tl_selftest195"
+        finally:
+            for _k, _v in _sv_g.items():
+                _glb[_k] = _v
+            for _k, _v in _sv_e.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+    _t110("r195_gas_creds_env_sau_import", _c195_gas_ensure_creds_doc_lai_env)
+
+    def _c195_gas_config_v2_cwd():
+        # Chỉ-nó-chặn (b): không dựa env — _load_config_file phải thấy tra_luat_config.v2.json ở CWD
+        # TẠI-LÚC-GỌI (trước r195: candidates TĨNH lúc import, chỉ ~/.tra_luat_config.json + /tmp).
+        import gas as _g195
+        with _tf110.TemporaryDirectory() as _d:
+            (Path(_d) / "tra_luat_config.v2.json").write_text(
+                '{"webappUrl": "https://example.invalid/v2cwd", "token": "tl_v2cwd195"}', encoding="utf-8")
+            _sv_cwd = os.getcwd()
+            os.chdir(_d)
+            try:
+                _cfg = _g195._load_config_file(None)
+            finally:
+                os.chdir(_sv_cwd)
+        return (_cfg.get("webappUrl") == "https://example.invalid/v2cwd"
+                and _cfg.get("token") == "tl_v2cwd195")
+    _t110("r195_gas_config_v2_cwd_dong", _c195_gas_config_v2_cwd)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

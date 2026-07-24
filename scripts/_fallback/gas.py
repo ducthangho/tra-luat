@@ -4,8 +4,9 @@
 # -*- coding: utf-8 -*-
 """gas.py — client tối thiểu cho tra-luat Apps Script webapp.
 
-Nguồn credential:
-  env TL_WEBAPP/TL_TOKEN → --config FILE → ~/.tra_luat_config.json → /tmp/tra_luat_config.json
+Nguồn credential (r195: env đọc lại TẠI-LÚC-GỌI, candidates tính động):
+  env TL_WEBAPP/TL_TOKEN → --config FILE → tra_luat_config.v2.json/.json (cwd → gốc skill → scripts/)
+  → ~/.tra_luat_config.json → /tmp/tra_luat_config.json
 
 Dùng từ Python:
   import gas
@@ -41,9 +42,21 @@ TOKEN = os.environ.get("TL_TOKEN") or ""
 DEFAULT_PROFILE = "vbqppl"
 
 
+def _default_configs() -> list:
+    """r195: candidates tính ĐỘNG tại-lúc-gọi, đồng bộ _config_candidates của profile_env — thêm
+    tra_luat_config.v2.json/.json ở cwd → gốc skill → scripts/ TRƯỚC bộ tĩnh cũ (home + /tmp).
+    Trước r195 chỉ có DEFAULT_CONFIGS tĩnh ⇒ script con `import gas` trần không thấy config v2."""
+    _scripts = Path(__file__).resolve().parent.parent      # scripts/ (file này ở scripts/_fallback/)
+    out: list = []
+    for d in (Path.cwd(), _scripts.parent, _scripts):
+        for n in ("tra_luat_config.v2.json", "tra_luat_config.json"):
+            out.append(d / n)
+    return out + DEFAULT_CONFIGS
+
+
 def _load_config_file(path: str | None = None) -> Dict[str, Any]:
     candidates = [Path(path)] if path else []
-    candidates += DEFAULT_CONFIGS
+    candidates += _default_configs()
     for p in candidates:
         try:
             if p and p.exists():
@@ -98,6 +111,11 @@ def _scope_params(params: Dict[str, Any]) -> Dict[str, Any]:
 
 def _ensure_creds(config_path: str | None = None, profile: str | None = None) -> tuple[str, str]:
     global WEBAPP, TOKEN
+    # r195 (bug 24-07): đọc LẠI env TẠI-LÚC-GỌI — snapshot lúc import từng làm nlm-add chết
+    # INGEST_CLAIM_FAILED khi gas bị import trước load_creds (env set sau đó bị bỏ qua vĩnh viễn).
+    # Ưu tiên: env tại-lúc-gọi > globals cache > config file.
+    WEBAPP = os.environ.get("TL_WEBAPP") or os.environ.get("TL_WEBAPP_URL") or WEBAPP
+    TOKEN = os.environ.get("TL_TOKEN") or TOKEN
     if WEBAPP and TOKEN and not profile:
         return WEBAPP, TOKEN
     cfg = _load_config_file(config_path)

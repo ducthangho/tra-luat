@@ -1061,10 +1061,10 @@
     }
   ],
   "kernel": {
-    "links_checked": 14,
+    "links_checked": 13,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 48128,
+    "size_bytes": 48095,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,

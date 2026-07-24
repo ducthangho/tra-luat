@@ -137,6 +137,18 @@ GENERATED_SPECS = [
          {"flags": ['--refresh'], "action": 'store_true'},
          {"flags": ['--force-unsafe'], "dest": 'force_unsafe', "action": 'store_true', "help": '(Pha 1+) bỏ qua precheck blocker (rủi ro)'},
      ]},
+    {"name": 'verify-staged', "handler": 'cmd_verify_staged',
+     "help": '(r200 staged lane — grill 24-07) verify PARITY các dòng staged (đọc toàn văn + verify_gate + quét Điều/chunk — ĐÚNG bộ cổng lane thường, đổi thời điểm KHÔNG đổi tiêu chuẩn): DRY = báo cáo; --apply --confirm yes: PASS → bulk-flip corpus=true + note thật (1 reg_bulk journaled, undo cả lô), FAIL → ở lại staged (note staged:fail:<FLAG>), KHÔNG auto-xóa/KHÔNG NLM. NLM nạp SAU qua nlm-links (bảng tay khối ≤4)/nlm-reconcile',
+     "args": [
+         {"flags": ['--drive-ids'], "dest": 'drive_ids', "help": 'CSV drive_id — chỉ verify các dòng này (mặc định: mọi dòng note staged:* trong scope profile)'},
+         {"flags": ['--chunk-max-chars'], "dest": 'chunk_max_chars', "type": int, "help": 'ngưỡng flag needs_chunk_pipeline (mặc định 100000 — parity profile-ingest)'},
+         {"flags": ['--allow-default'], "dest": 'allow_default', "action": 'store_true', "help": 'cho phép chạy trên profile vbqppl (mặc định chặn — mirror profile-ingest)'},
+         {"flags": ['--apply'], "action": 'store_true'},
+         {"flags": ['--confirm'], "default": ''},
+         {"flags": ['--refresh'], "action": 'store_true', "help": '(danh nghĩa — dò staged LUÔN refresh manifest LIVE, bài học 24-07)'},
+         {"flags": ['--force-unsafe'], "dest": 'force_unsafe', "action": 'store_true', "help": '(Pha 1+) bỏ qua precheck blocker (rủi ro)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'source-delete', "handler": 'cmd_source_delete',
      "help": '(MERGE) XÓA CỨNG 1 nguồn VBQPPL (bất khả nghịch): gỡ NLM (GUARD shared_source_id) + trash Drive + xóa dòng registry. DRY mặc định; --apply --confirm yes. Cân nhắc `source-update-corpus false` (reversible) trước',
      "args": [
@@ -1544,6 +1556,8 @@ COMMAND_META = {
     "source-rename":        _m("high", False, "drive_registry_nlm", False, True, False, None, "source_rename", False, None, generated=True),
     "source-delete":        _m("high", False, "drive_registry_nlm", True, False, False, None, "source_delete", False, None, generated=True),
     "source-update-corpus": _m("high", False, "registry_nlm", True, True, False, None, "source_update_corpus", False, None, generated=True),
+    "verify-staged":        _m("high", False, "registry", True, True, False, None, "verify_staged", False, None, generated=True),   # r200 staged lane grill 24-07
+
     "dedup-plan":           _m("high", False, "registry_nlm", False, True, False, None, "dedup_plan", False, None, generated=True),
     "dedup-corpus":         _m("high", False, "drive_registry_nlm", True, True, False, None, "dedup_corpus", False, "hygiene", generated=True, nlm_fallback="none"),   # v1.34.63 B1 (trục NỘI DUNG; apply ủy quyền source-update-corpus/source-delete; ghi → none)
     "register":             _m("high", False, "registry", False, True, False, None, "register", False, None),

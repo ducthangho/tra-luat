@@ -179,6 +179,7 @@
     "vbhn-verify",
     "vbhn-year-fix",
     "verify-integrity",
+    "verify-staged",
     "workflow-audit",
     "xref"
   ],
@@ -1745,6 +1746,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "verify-staged": {
+        "generated": true,
+        "idempotency_contract": "verify_staged",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
       "workflow-audit": {
         "generated": true,
         "idempotency_contract": null,
@@ -1767,10 +1778,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 146,
-      "high_risk": 27,
-      "total": 153,
-      "write_commands": 78
+      "generated_parsers": 147,
+      "high_risk": 28,
+      "total": 154,
+      "write_commands": 79
     },
     "schema": "command_registry.v1"
   },

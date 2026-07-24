@@ -403,6 +403,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.53 C2) BỎ dup-guard tên registry trước upload (mặc định DỪNG nếu tên y hệt đã có dòng)")
     p.add_argument("--no-nlm-add", dest="no_nlm_add", action="store_true",
                    help="(v1.34.54 B2) DỪNG sau Drive+registry, KHÔNG đụng NLM — nạp NLM cuối lô bằng nlm-links (dán batch) + nlm-reconcile --apply")
+    p.add_argument("--staged", action="store_true",
+                   help="(r200 grill 24-07) lane STAGED — chỉ docx digital (TỪ CHỐI pdf/ocr/sheet): dừng sau "
+                        "convert-readback, registry corpus=false + note staged:pending, HOÃN đọc-toàn-văn/"
+                        "verify_gate/chunk/NLM sang `tl verify-staged` (parity — đổi thời điểm, không đổi tiêu chuẩn)")
     p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
                    help="(v1.34.60 ADR-5) NLM chết → GIỮ dừng ở dedup-gate như cũ thay vì tự chuyển --no-nlm-add")
     p.add_argument("--resume", action="store_true",

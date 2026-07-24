@@ -22,6 +22,11 @@ from pathlib import Path  # noqa: F401
 
 _TL = None
 
+# r200 (grill 24-07 C2/C3): marker note dòng STAGED — lane trì hoãn của profile-ingest --staged.
+# "staged:pending;sq=<source_quality>" lúc nạp; verify-staged PASS → note thật, FAIL → "staged:fail:<FLAG>".
+# Dò dòng staged = note.startswith(STAGED_NOTE_PREFIX). HẰNG re-export trực tiếp vào tl.py (bẫy I11).
+STAGED_NOTE_PREFIX = "staged:"
+
 
 def bind(tl_module) -> None:
     """REBASE __globals__ từng hàm đã chuyển về namespace SỐNG của tl (khuôn I1-I4)."""
@@ -1449,6 +1454,17 @@ def cmd_profile_ingest(a) -> int:
     # v1.34.6 #2: bảng tính đi đường riêng — canonical = Google SHEET (copy_convert toType=sheets),
     # không probe text/không gate Điều (không có văn bản pháp quy dạng bảng tính), NLM add type=sheets.
     _is_sheet = Path(f).suffix.lower() in _SPREADSHEET_EXTS
+    # r200 (grill 24-07 C3): lane STAGED TỪ CHỐI pdf / source_quality=ocr / bảng tính — rc=2 TRƯỚC mọi
+    # side-effect (kể cả probe). Phạm vi lane = docx digital chất lượng cao; pdf/ocr đi lane thường
+    # (S1/PDF_IMAGE nguyên vẹn), sheet vốn không có text verify để hoãn.
+    _staged = bool(getattr(a, "staged", False))
+    if _staged and (_is_sheet or Path(f).suffix.lower() == ".pdf" or source_quality == "ocr"):
+        print(json.dumps({"ok": False, "step": "staged_gate", "error": "STAGED_LANE_REFUSES_SOURCE",
+                          "ext": Path(f).suffix.lower(), "source_quality": source_quality,
+                          "note": "Lane --staged chỉ nhận tài liệu văn bản digital (docx/doc/rtf/odt, "
+                                  "KHÔNG ocr). pdf/ocr/bảng tính: bỏ --staged đi lane thường."},
+                         ensure_ascii=False, indent=2), file=sys.stderr)
+        return 2
     # v1.34.58 (C-#9): .pdf probe qua _probe_pdf_quality — lấy flag broken_font cho gate DRY bên dưới.
     _pdf_q9p = None
     if _is_sheet:
@@ -1503,6 +1519,13 @@ def cmd_profile_ingest(a) -> int:
                                 else bool(gate.get("corpus_allowed")))},   # r180 S4: None = quyết ở apply
         "note": "DRY mặc định. --apply tạo canonical GDoc flat trong root profile; nếu tách, chunk NLM nằm trong _meta.",
     }
+    if _staged:
+        # r200: plan staged — corpus vào false (staged), verify/chunk/NLM hoãn sang verify-staged.
+        plan["staged"] = True
+        plan["registry"]["corpus"] = False
+        plan["registry"]["staged_note"] = f"{STAGED_NOTE_PREFIX}pending;sq={source_quality}"
+        plan["note"] = ("DRY mặc định. --apply (STAGED): upload→convert→readback→registry corpus=false; "
+                        "HOÃN đọc-toàn-văn/verify_gate/chunk/NLM sang `tl verify-staged` (parity).")
     _contract = build_ingest_plan(
         f, target_scope=f"profile-root:{profile}", canonical_name=doc_name, profile=profile,
         source_kind=("drive" if _from_drive else "local"), source_id=_from_drive,
@@ -1512,7 +1535,9 @@ def cmd_profile_ingest(a) -> int:
                  "hieuluc": getattr(a, "hieuluc", None) or "",
                  "large_threshold": large_threshold, "chunk_max_chars": chunk_max,
                  "allow_default": bool(getattr(a, "allow_default", False)),
-                 "skip_live_check": bool(getattr(a, "skip_live_check", False))},
+                 "skip_live_check": bool(getattr(a, "skip_live_check", False)),
+                 # r200: key CHỈ xuất hiện khi staged — plan cũ giữ nguyên byte/hash (không churn golden).
+                 **({"staged": True} if _staged else {})},
     )
     if not _contract.get("ok"):
         print(_json_dumps({"ok": False, "step": "plan_build", "detail": _contract},
@@ -1652,6 +1677,28 @@ def cmd_profile_ingest(a) -> int:
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
 
+    # r200 (grill 24-07 C2/C3/C4): lane STAGED dừng NGAY sau convert-readback — cổng an toàn i+ii+iii đã đủ
+    # (dedup tên/sohieu + claim đường commit + readback Drive/registry); HOÃN iv/v/vi (đọc toàn văn +
+    # verify_gate + quét Điều/chunk) sang `tl verify-staged` (PARITY — đổi thời điểm, KHÔNG đổi tiêu chuẩn,
+    # ADR-0004 không bị bỏ hậu điều). corpus=false (staged) tới khi verify PASS bulk-flip; KHÔNG đụng NLM.
+    if _staged:
+        _snote = f"{STAGED_NOTE_PREFIX}pending;sq={source_quality}"
+        rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "corpus": "false", "row_kind": "own",
+                                      "note": _snote, "hieuluc": hieuluc}],
+                                 "name,corpus,row_kind,note,hieuluc")
+        out = {"ok": bool(rb.get("verified")), "staged": True, "nlm": "DEFERRED_STAGED", "gdoc": gdoc,
+               "src_id": fid, "name": doc_name, "profile": profile,
+               "gdoc_url": f"https://docs.google.com/document/d/{gdoc}",
+               "registry_verified": bool(rb.get("verified")), "journal": _pi_run_id,
+               "next_steps": [f"tl --profile {profile} verify-staged   # parity iv+v+vi (DRY báo cáo)",
+                              f"tl --profile {profile} verify-staged --apply --confirm yes   # PASS → bulk-flip corpus",
+                              "NLM nạp SAU flip: nlm-links (bảng tay khối ≤4) + nlm-reconcile --apply"]}
+        _journal_append(_pi_run_id, {"t": "run_end", "ok": bool(rb.get("verified")),
+                                     "counts": {"staged": 1},
+                                     "verify": {"gdoc": gdoc, "registry_verified": bool(rb.get("verified"))}})
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+        return 0 if rb.get("verified") else 2
+
     actual_text = ""
     if not _is_sheet:   # v1.34.6 #2: bảng tính không re-read/re-classify text (gate sheet đã chốt ở trên)
         try:
@@ -1788,6 +1835,94 @@ def cmd_profile_ingest(a) -> int:
                                  "verify": {"gdoc": gdoc, "registry_verified": bool(rb.get("verified"))}})
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     return 0 if _final_ok else 2
+
+
+def cmd_verify_staged(a) -> int:
+    """r200 (grill 24-07 C4/C5/C6): verify PARITY các dòng STAGED — chạy ĐÚNG bộ cổng lane thường đã hoãn
+    (iv đọc toàn văn canonical + v verify_gate + vi quét Điều-trùng/ngưỡng chunk), không hơn không kém.
+    DRY = báo cáo. --apply --confirm yes: PASS → bulk-flip corpus=true + note thật (1 reg_bulk journaled,
+    `tl undo <run>` cả lô); FAIL → Ở LẠI staged (note staged:fail:<FLAG>), KHÔNG auto-xóa, KHÔNG NLM.
+    NLM nạp SAU flip qua nlm-links (bảng tay khối ≤4)/nlm-reconcile — van 1 r192 giữ nguyên."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    profile = _active_profile()
+    if profile == DEFAULT_PROFILE and not getattr(a, "allow_default", False):
+        print("[tl] verify-staged chỉ dành cho profile dự án; thêm --allow-default nếu cố ý chạy trên vbqppl.",
+              file=sys.stderr)
+        return 2
+    _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
+    if _perr:
+        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+    load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+    try:
+        entries = _manifest_entries(refresh=True)   # dò staged LUÔN đo LIVE (bài học reg-query --refresh 24-07)
+    except Exception as e:  # noqa: BLE001
+        print(f"[tl] verify-staged: cần `tl boot` trước ({e}).", file=sys.stderr)
+        return 2
+    _dids = [s.strip() for s in str(getattr(a, "drive_ids", "") or "").split(",") if s.strip()]
+    rows = [e for e in entries if str(e.get("note") or "").startswith(STAGED_NOTE_PREFIX)]
+    if _dids:
+        _dset = set(_dids)
+        rows = [e for e in rows if _entry_drive_id(e) in _dset]
+    if not rows:
+        print(_json_dumps({"ok": True, "schema": "verify_staged.v1", "staged_rows": 0,
+                           "note": "Không có dòng staged (note staged:*) trong scope."},
+                          deterministic=_deterministic_enabled(a)))
+        return 0
+    chunk_max = int(getattr(a, "chunk_max_chars", None) or 100000)
+    results = []
+    for e in rows:
+        did = _entry_drive_id(e)
+        name = _entry_name(e)
+        _old_note = str(e.get("note") or "")
+        sq = "auto"
+        if ";sq=" in _old_note:
+            sq = _old_note.split(";sq=", 1)[1].split(";", 1)[0].strip() or "auto"
+        try:
+            text = _read_doc_text(did, getattr(a, "config", None)) or ""
+        except Exception:  # noqa: BLE001 — đọc hỏng = fail parity (NO_TEXT), KHÔNG nuốt thành pass
+            text = ""
+        info = _classify_doc_header(text, name)
+        gate = (_ingest_verify_gate(text, info, sq, False) if text.strip()
+                else {"ok": False, "flags": ["NO_TEXT_FOR_VERIFY"], "corpus_allowed": False})
+        _dd = _dup_dieu_scan(text) if text else {"dup_count": 0}
+        _passed = bool(gate.get("ok"))
+        _note_new = (_profile_ingest_note(info, gate, sq) if _passed
+                     else f"{STAGED_NOTE_PREFIX}fail:{(gate.get('flags') or ['GATE_FAIL'])[0]}")
+        results.append({"drive_id": did, "name": name, "pass": _passed,
+                        "flags": list(gate.get("flags") or []), "dup_dieu": _dd.get("dup_count") or 0,
+                        "needs_chunk_pipeline": bool(text and len(text) > chunk_max),
+                        "source_quality": sq, "note_new": _note_new, "note_old": _old_note})
+    _n_pass = sum(1 for r in results if r["pass"])
+    plan = {"ok": True, "schema": "verify_staged.v1", "profile": profile,
+            "staged_rows": len(rows), "passed": _n_pass, "failed": len(results) - _n_pass,
+            "rows": results,
+            "note": "PARITY lane thường (iv+v+vi — đổi thời điểm, KHÔNG đổi tiêu chuẩn). needs_chunk_pipeline "
+                    "= khi nạp NLM phải đi pipeline chunk (profile-ingest không --staged/--no-nlm-add)."}
+    if not (getattr(a, "apply", False) and str(getattr(a, "confirm", "") or "").strip().lower() == "yes"):
+        print(_json_dumps({"mode": "DRY", "confirm_required": "--apply --confirm yes", **plan},
+                          deterministic=_deterministic_enabled(a)))
+        return 0
+    _ok_gate, _ = _apply_gate(a, write_cols="corpus,note")
+    if not _ok_gate:
+        return 2
+    g = _gas()
+    run_id = _apply_journal_start("verify-staged", {"profile": profile, "rows": len(results), "passed": _n_pass})
+    items = [{"drive_id": r["drive_id"], "corpus": ("true" if r["pass"] else "false"),
+              "note": r["note_new"]} for r in results]
+    before = {r["drive_id"]: {"corpus": "false", "note": r["note_old"]} for r in results}
+    vu = _journaled_reg_write(run_id, g, items, "corpus,note", before_by_key=before)
+    _journal_append(run_id, {"t": "run_end", "ok": bool(vu.get("verified")),
+                             "counts": {"flipped": _n_pass, "failed": len(results) - _n_pass}})
+    _invalidate_manifest_cache()
+    out = {**plan, "ok": bool(vu.get("verified")), "mode": "APPLY", "journal": run_id,
+           "registry_verified": bool(vu.get("verified")),
+           "next_steps": ([f"tl --profile {profile} nlm-links --md-out nlm_bang_tay_staged.md   # bảng tay khối ≤4",
+                           "tl nlm-reconcile <notebook> --apply   # sau khi nạp NLM"] if _n_pass else [])
+                          + (["rows FAIL ở lại staged — soi flags rồi đi lane thường từng file"]
+                             if (len(results) - _n_pass) else []),
+           "note": "cache manifest đã xoá → `tl boot --refresh`. Undo cả lô: `tl undo " + run_id + "`."}
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
+    return 0 if vu.get("verified") else 2
 
 
 def _profile_push_chunks(g, nc, notebook_id: str, gdoc: str, doc_name: str, info: dict, note: str,

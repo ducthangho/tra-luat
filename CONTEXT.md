@@ -24,7 +24,9 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   + `gen_instructions --selftest` + `release-bundle` ×2 cùng SHA-256 + `release-verify` trong gói giải nén.
 - **Ingest thành công** — mọi hậu điều bắt buộc của phạm vi đã chọn đều được đọc lại và xác nhận đúng. Kết quả
   thiếu, mơ hồ hoặc chỉ hoàn tất một phần là ingest thất bại có thể nối tiếp; ngoại lệ chủ ý dừng trước NLM chỉ
-  thành công khi phần Drive/registry đã được xác nhận và tài liệu chưa được nhận là corpus.
+  thành công khi phần Drive/registry đã được xác nhận và tài liệu chưa được nhận là corpus. Ngoại lệ duy nhất
+  của vế corpus (ADR-0015): tài liệu đã qua **verify parity** thì corpus được flip dù NLM còn nợ —
+  nợ NLM theo dõi riêng bằng `nlm_status`.
 - **Kế hoạch ingest** — bản mô tả bất biến của một lần ingest, ràng buộc byte nguồn, đích, tên canonical và toàn
   bộ tùy chọn bằng một dấu vân tay. Apply chỉ là quyền thực thi đúng kế hoạch đã xác nhận; nguồn hoặc cấu hình
   thay đổi thì phải lập và xác nhận kế hoạch mới. Resume có thể dùng kế hoạch đã ghi trong journal nhưng vẫn phải
@@ -65,6 +67,13 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Cache staged / verified** — `staged` là dữ liệu đã thu nhận nhưng chưa đạt đủ schema, provenance và quality
   gate; `verified` chỉ được đặt sau khi mọi gate này đọc lại thành công. Fallback hoặc candidate được suy đoán
   không bao giờ được tự nâng thành verified.
+- **Staged ingest (lane trì hoãn, ADR-0015)** — đường `profile-ingest --staged` cho docx digital: GIỮ đủ cổng
+  AN TOÀN lúc nạp (dedup tên/số hiệu LIVE, claim xuyên host, convert-readback), HOÃN cổng CHẤT LƯỢNG (đọc
+  toàn văn canonical, verify_gate, quét Điều/chunk) và NLM. Dòng vào registry `corpus=false` +
+  note `staged:pending;sq=…`; TỪ CHỐI pdf/ocr/bảng tính. Hoãn ≠ bỏ — ADR-0004 giữ nguyên.
+- **Verify parity** — nguyên tắc của `verify-staged`: chạy ĐÚNG bộ cổng lane thường đã hoãn, không hơn không
+  kém — lane staged đổi THỜI ĐIỂM kiểm, không đổi TIÊU CHUẨN. PASS → bulk-flip `corpus=true` cả lô (journal,
+  undo được); FAIL → ở lại staged (note `staged:fail:<FLAG>`), không auto-xóa, không NLM.
 - **ZIP portable-safe** — profile archive dùng path Unicode NFC với dấu `/`, từ chối traversal, special entry,
   tên không portable và mọi collision sau canonical hóa kể cả khác hoa thường. Kế hoạch ZIP ràng buộc hash toàn
   archive cùng `normalized_path + member_hash + size`; giới hạn tài nguyên do môi trường cấu hình và apply luôn

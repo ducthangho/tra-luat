@@ -121,7 +121,7 @@
  "profile-from-nlm": "b72bf101a9d996b36f03c586a3b589811fbefe84fec7be946727ca6461c7a7cf",
  "profile-index": "90a109413c9da2cb4aec4608bb712f38d2d26cc08784812827c046e49a573740",
  "profile-info": "a0bd3800a01b8de231210ed9a8d698f7c4304f54428c45be420ea9cf7dbbfacf",
- "profile-ingest": "1e68778ad7f3601af580835edf5b748426b7a6d9caef9293d91f95729fe68e66",
+ "profile-ingest": "8b9b26413d3905918f1ba41f666cb25fc8913c4f4bc93a547ada35b5080d4053",
  "profile-ingest-chunks": "39417a593d3723a9215b59c0a5fe97ef0d3322a60f8fa4a6ca9b85202b9962d2",
  "profile-ingest-ocr": "66ae47c1c8121f50c40a687f50665f4cf3f8347bc4712e79a21b57a21a358bae",
  "profile-ingest-zip": "162607e16ca030c2e57741f9ea75d4b33b387d488f1d2c3b273f2657f018df36",
@@ -182,6 +182,7 @@
  "vbhn-verify": "e0f0fd81c7366bec5fd05aec5a7e36991f4e42f0a0e16f4362b910a530562310",
  "vbhn-year-fix": "00b3c4fbbeda2033ca8b743a3903d715d3231bdc5b5af3fd2c4bbd208f7ac2ab",
  "verify-integrity": "a4539c3be4d2aff714f6ecb1d8cf79cbdfbcc96ce2b079d02f458193fadab6cd",
+ "verify-staged": "018f11c63f10b0b28b2a6fc9185dac846deccc312cd26d6bc7a2557c1c4b95af",
  "workflow-audit": "98320fd1caaf95d1bc1a5eb86c5515f4156d063625f7daaca4715ed1b73dae29",
  "xref": "12b6d26acfaea51d06702427bba851abb46a599422829fb6c1e7bdfdb71e7bb8"
 }

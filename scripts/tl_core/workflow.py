@@ -407,6 +407,16 @@ _IDEMPOTENCY_CONTRACTS.update({
         "resume_command": "source-update-corpus <target> <status> --apply --confirm yes",
         "rollback_hint": "undo <run_id> --apply (before row) hoặc chạy lại với giá trị corpus ngược",
     },
+    "verify_staged": {   # r200 staged lane (grill 24-07 C4/C5)
+        "schema": "idempotency_contract.v1",
+        "idempotency_key": "drive_id+verdict — PASS đã flip thì note hết staged:* nên RA KHỎI tập dò; FAIL ghi lại cùng note vô hại",
+        "journal_key": "tl_journal/verify-staged_<run_id> (before corpus+note TỪNG dòng cả lô)",
+        "resume_behavior": "chạy lại CÙNG LỆNH — tập dò tự thu hẹp theo note staged:* (parity đo lại từ đầu, không tin kết quả dở)",
+        "duplicate_guard": "DRY mặc định; --apply đòi --confirm yes; CHỈ đụng dòng note staged:* trong scope profile",
+        "readback_command": "reg-query --drive-id <id> --json (corpus + note đúng đích)",
+        "resume_command": "verify-staged --apply --confirm yes",
+        "rollback_hint": "undo <run_id> --apply (before corpus+note cả lô)",
+    },
 })
 
 # v1.34.56 (A-#12 — kế hoạch 13-vấn-đề 2026-07-16): contract cho lệnh mới nlm-source-remove (gỡ nguồn

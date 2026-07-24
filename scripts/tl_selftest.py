@@ -18411,6 +18411,227 @@ def run() -> int:
                 and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 1 and _c_old["ping"] == 1)
     _t110("r198_profile_via_commit_vs_fallback", _c198_profile_via_commit_vs_fallback)
 
+    # ═══ r200 — STAGED LANE (grill 24-07, 6 quyết định C1-C6): profile-ingest --staged (giữ i+ii+iii,
+    # hoãn iv+v+vi, từ chối pdf/ocr/sheet, corpus=false staged) + verify-staged (parity → bulk-flip). ═══
+    def _c200_staged_tu_choi_pdf_ocr_sheet():
+        # C3: fast-lane TỪ CHỐI pdf / source_quality=ocr / bảng tính — rc=2 TRƯỚC mọi side-effect (DRY local).
+        _keys = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "_profile_source_quality")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        import tempfile as _tf200
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._active_profile = lambda: "p200"
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE._profile_source_quality = lambda f, sq: sq if sq != "auto" else "auto"
+            with _tf200.TemporaryDirectory() as _d:
+                _rcs = []
+                for _fn, _sq in (("t.pdf", "auto"), ("t.docx", "ocr"), ("t.xlsx", "auto")):
+                    _p = Path(_d) / _fn
+                    if _fn.endswith(".docx"):
+                        with _zf63.ZipFile(_p, "w") as _z:
+                            _z.writestr("[Content_Types].xml", "<Types/>")
+                            _z.writestr("word/document.xml", "<document>t200</document>")
+                    elif _fn.endswith(".xlsx"):
+                        with _zf63.ZipFile(_p, "w") as _z:
+                            _z.writestr("[Content_Types].xml", "<Types/>")
+                            _z.writestr("xl/workbook.xml", "<workbook/>")
+                    else:
+                        _p.write_bytes(b"%PDF-1.4 fake")
+                    _ns = argparse.Namespace(
+                        config=None, profile=None, file=str(_p), drive_id=None, apply=False, staged=True,
+                        allow_default=False, name="T200", text_file=None, source_quality=_sq,
+                        ocr_verified=False, large_threshold=None, chunk_max_chars=None, hieuluc=None,
+                        skip_live_check=False, allow_dup_name=False, json=True, deterministic=False,
+                        confirm=None, expected_plan_hash=None, resume=False)
+                    _be = _io27.StringIO()
+                    with _ctx27.redirect_stdout(_io27.StringIO()), _ctx27.redirect_stderr(_be):
+                        _rc = _TL_MODULE.cmd_profile_ingest(_ns)
+                    _rcs.append((_rc, "STAGED_LANE_REFUSES_SOURCE" in _be.getvalue()))
+                return all(_rc == 2 and _hit for _rc, _hit in _rcs)
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r200_staged_tu_choi_pdf_ocr_sheet", _c200_staged_tu_choi_pdf_ocr_sheet)
+
+    def _c200_staged_apply_bo_iv_v_vi():
+        # C2+C3: --staged apply DỪNG sau convert-readback — KHÔNG đọc toàn văn (iv), KHÔNG verify_gate lại (v),
+        # KHÔNG NLM; registry corpus=false + note staged:pending;sq=…; rc=0. Khuôn _run_pi198.
+        _calls = {"ingest_commit": 0, "upload": 0, "read_doc_text": 0, "nlm_add": 0}
+        _wrote = []
+        _gmime = "application/vnd.google-apps.document"
+
+        class _FkGas200:
+            def get(self, action, **kw):
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}
+                if action == "bootstrap":
+                    return {"ok": True, "inboxFolderId": "INBOX200"}
+                if action == "reg_get":
+                    return {"ok": True, "rows": []}
+                if action == "ingest_commit":
+                    _calls["ingest_commit"] += 1
+                    _nm = str(kw.get("name") or "")
+                    return {"ok": True, "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "fileId": "GD200", "srcId": "SRC200",
+                            "row": {"drive_id": "GD200", "name": _nm},
+                            "file": {"id": "GD200", "name": _nm, "mimeType": _gmime, "parents": ["ROOT200"]},
+                            "src_file": {"id": "SRC200", "name": _nm + ".docx",
+                                         "mimeType": "application/x-docx", "parents": ["ROOT200"]}}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "upload":
+                    _calls["upload"] += 1
+                return {"ok": True, "fileId": "SRC200"}
+
+        class _FkNC200:
+            def source_add(self, nb, **kw):
+                _calls["nlm_add"] += 1
+                return {"ok": True, "source_id": "SIDX"}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+
+        def _rdt_boom(*a, **k):
+            _calls["read_doc_text"] += 1
+            return "KHONG_DUOC_GOI"
+
+        def _cap_write(g, items, cols):
+            _wrote.append((list(items), cols))
+            return {"verified": True, "reg_bulk": {"patched": len(items)}}
+        _keys = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds", "_gas",
+                 "_resolve_nlm_notebook", "_imp", "_verify_convert_readback", "_read_doc_text",
+                 "_profile_read_probe_text", "_profile_source_quality", "_verified_reg_write")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _env = {k: os.environ.get(k) for k in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_JOURNAL_DIR")}
+        _doc_text = "Nội dung báo cáo thử nghiệm 200 đủ dài để qua verify gate cho văn bản thường." * 3
+        import tempfile as _tf200
+        try:
+            with _tf200.TemporaryDirectory() as _d:
+                _xf = Path(_d) / "bao_cao_200.docx"
+                with _zf63.ZipFile(_xf, "w") as _z:
+                    _z.writestr("[Content_Types].xml", "<Types/>")
+                    _z.writestr("word/document.xml", "<document>bc200</document>")
+                os.environ["TL_JOURNAL_DIR"] = _d
+                _TL_MODULE._GAS_VER_CACHE.clear()
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._active_profile = lambda: "p200"
+                _TL_MODULE._profile_policy_error = lambda **k: None
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._gas = lambda: _FkGas200()
+                _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB200", None)
+                _TL_MODULE._imp = lambda name: _FkNC200() if name == "nlm_cli" else _sav["_imp"](name)
+                _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
+                _TL_MODULE._read_doc_text = _rdt_boom
+                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: (_doc_text, None)
+                _TL_MODULE._profile_source_quality = lambda f, sq: "digital"
+                _TL_MODULE._verified_reg_write = _cap_write
+                os.environ["TL_ROOT_FOLDER_ID"] = "ROOT200"; os.environ["TL_META_FOLDER_ID"] = "META200"
+                _ns = argparse.Namespace(
+                    config=None, profile=None, file=str(_xf), drive_id=None, apply=False, staged=True,
+                    allow_default=False, name="Bao_cao_Test_200", text_file=None, source_quality="auto",
+                    ocr_verified=False, large_threshold=None, chunk_max_chars=None, hieuluc=None,
+                    skip_live_check=False, allow_dup_name=False, json=True, deterministic=False,
+                    confirm=None, expected_plan_hash=None, resume=False)
+                _bd = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rcd = _TL_MODULE.cmd_profile_ingest(_ns)
+                _pl = json.loads(_bd.getvalue())
+                _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+                _bo = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rca = _TL_MODULE.cmd_profile_ingest(_ns)
+                _out = json.loads(_bo.getvalue())
+                _items = _wrote[-1][0] if _wrote else []
+                _row = _items[0] if _items else {}
+                return (_rcd == 0 and _pl.get("staged") is True
+                        and _rca == 0 and _out.get("ok") is True and _out.get("staged") is True
+                        and _out.get("nlm") == "DEFERRED_STAGED"
+                        and _calls["upload"] == 1 and _calls["ingest_commit"] == 1
+                        and _calls["read_doc_text"] == 0 and _calls["nlm_add"] == 0
+                        and _row.get("corpus") == "false"
+                        and str(_row.get("note") or "").startswith(_TL_MODULE.STAGED_NOTE_PREFIX + "pending")
+                        and ";sq=digital" in str(_row.get("note") or ""))
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _k, _v in _env.items():
+                (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+            _TL_MODULE._GAS_VER_CACHE.clear()
+    _t110("r200_staged_apply_bo_iv_v_vi", _c200_staged_apply_bo_iv_v_vi)
+
+    def _run_vs200(entries, rdt_map, *, apply=False, chunk_max=None):
+        # Harness verify-staged: manifest + doc-text giả, write-infra vá capture — trả (rc, out, captured).
+        _cap = {"items": None, "cols": None, "before": None, "runs": []}
+
+        def _cap_jrw(run_id, g, items, cols, key_field="drive_id", before_by_key=None):
+            _cap["items"], _cap["cols"], _cap["before"] = list(items), cols, dict(before_by_key or {})
+            return {"verified": True, "patched": len(items)}
+        _keys = ("apply_profile_offline", "_active_profile", "_profile_policy_error", "load_creds",
+                 "_manifest_entries", "_read_doc_text", "_gas", "_apply_gate", "_apply_journal_start",
+                 "_journal_append", "_journaled_reg_write", "_invalidate_manifest_cache")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._active_profile = lambda: "p200"
+            _TL_MODULE._profile_policy_error = lambda **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._manifest_entries = lambda refresh=False, **kw: list(entries)
+            _TL_MODULE._read_doc_text = lambda did, cfg=None: rdt_map.get(did, "")
+            _TL_MODULE._gas = lambda: object()
+            _TL_MODULE._apply_gate = lambda a, **k: (True, None)
+            _TL_MODULE._apply_journal_start = lambda cmd, meta=None: "run200"
+            _TL_MODULE._journal_append = lambda run_id, rec: _cap["runs"].append(rec)
+            _TL_MODULE._journaled_reg_write = _cap_jrw
+            _TL_MODULE._invalidate_manifest_cache = lambda *a, **k: None
+            _ns = argparse.Namespace(config=None, profile=None, allow_default=False, drive_ids=None,
+                                     chunk_max_chars=chunk_max, refresh=False, apply=apply,
+                                     confirm=("yes" if apply else ""), force_unsafe=False,
+                                     json=True, deterministic=False)
+            _bo = _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                _rc = _TL_MODULE.cmd_verify_staged(_ns)
+            return _rc, json.loads(_bo.getvalue()), _cap
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c200_verify_staged_parity_va_flip():
+        # C4+C5: parity iv+v+vi trên dòng staged; PASS → corpus=true + note thật; FAIL → ở lại staged
+        # note staged:fail:<FLAG>; dòng không-staged KHÔNG bị đụng; journal before đủ lô.
+        _good = "Nội dung báo cáo thử nghiệm 200 đủ dài để qua verify gate cho văn bản thường." * 3
+        _ents = [{"drive_id": "dA", "name": "Bao_cao_A", "note": "staged:pending;sq=digital", "corpus": "false"},
+                 {"drive_id": "dB", "name": "Bao_cao_B", "note": "staged:pending;sq=digital", "corpus": "false"},
+                 {"drive_id": "dC", "name": "Khac", "note": "", "corpus": "true"}]
+        _rcd, _dry, _ = _run_vs200(_ents, {"dA": _good}, apply=False)
+        _rows = {r["drive_id"]: r for r in (_dry.get("rows") or [])}
+        _rca, _out, _cap = _run_vs200(_ents, {"dA": _good}, apply=True)
+        _by = {i["drive_id"]: i for i in (_cap["items"] or [])}
+        return (_rcd == 0 and _dry.get("mode") == "DRY" and _dry.get("staged_rows") == 2
+                and _dry.get("passed") == 1 and _dry.get("failed") == 1
+                and _rows["dA"]["pass"] is True and _rows["dB"]["pass"] is False
+                and "NO_TEXT_FOR_VERIFY" in (_rows["dB"].get("flags") or [])
+                and "dC" not in _rows
+                and _rca == 0 and _out.get("ok") is True and _out.get("mode") == "APPLY"
+                and set(_by) == {"dA", "dB"}
+                and _by["dA"]["corpus"] == "true"
+                and not str(_by["dA"]["note"]).startswith(_TL_MODULE.STAGED_NOTE_PREFIX)
+                and _by["dB"]["corpus"] == "false"
+                and str(_by["dB"]["note"]).startswith(_TL_MODULE.STAGED_NOTE_PREFIX + "fail:")
+                and _cap["before"].get("dA", {}).get("note") == "staged:pending;sq=digital"
+                and _cap["cols"] == "corpus,note")
+    _t110("r200_verify_staged_parity_va_flip", _c200_verify_staged_parity_va_flip)
+
+    def _c200_verify_staged_needs_chunk_flag():
+        # C4 (vi): file vượt chunk_max → PASS vẫn flip nhưng flag needs_chunk_pipeline=True (NLM sau phải
+        # đi pipeline chunk, mirror note --no-nlm-add r192).
+        _good = "Nội dung báo cáo thử nghiệm 200 đủ dài để qua verify gate cho văn bản thường." * 3
+        _ents = [{"drive_id": "dL", "name": "Bao_cao_L", "note": "staged:pending;sq=digital", "corpus": "false"}]
+        _rc, _dry, _ = _run_vs200(_ents, {"dL": _good}, apply=False, chunk_max=40)
+        _r = (_dry.get("rows") or [{}])[0]
+        return (_rc == 0 and _r.get("pass") is True and _r.get("needs_chunk_pipeline") is True)
+    _t110("r200_verify_staged_needs_chunk_flag", _c200_verify_staged_needs_chunk_flag)
+
     def _c198_ingest_local_giu_duong_cu():
         # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
         # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.

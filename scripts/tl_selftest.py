@@ -9007,7 +9007,10 @@ def run() -> int:
     _t110("r110_nlm_add_capacity_error_classifier", _c110_caperr)
 
     # ── runner dùng chung cho cmd_ingest_missing (F-02/D3) ──
-    def _run_im110(counts, n_targets, add_script=None, cap_env=None, claim_deny_dids=None, claim_ok=True):
+    # r208d: +force_api_add (mặc định True = hành vi cũ của MỌI caller sẵn có) — cần False để chạm được
+    # cổng lô F7/canary, vốn nằm trong nhánh `to_add and not force_api_add`.
+    def _run_im110(counts, n_targets, add_script=None, cap_env=None, claim_deny_dids=None, claim_ok=True,
+                   force_api_add=True):
         class _NC110:
             def __init__(self):
                 self.adds = []
@@ -9084,7 +9087,7 @@ def run() -> int:
             # vào gate BATCH_LINKS mới (>2 file → in link dán tay); gate đó có test r115 riêng.
             _ns = argparse.Namespace(config=None, profile=None, apply=True, refresh=False, cat=None, limit=25,
                                      allow_no_sohieu=False, skip_live_check=False, relink=False,
-                                     retry_failed=False, force_api_add=True, json=True, out=None)
+                                     retry_failed=False, force_api_add=force_api_add, json=True, out=None)
             _bo, _be = _io110.StringIO(), _io110.StringIO()
             with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
                 rc = _TL_MODULE.cmd_ingest_missing(_ns)
@@ -17881,15 +17884,20 @@ def run() -> int:
     _t110("r192_f6_retry_5s15s_404_transient", _c192_f6_retry_schedule_404)
 
     def _c192_f7_cookie_batch_gate():
-        # F7: hằng chốt 50' + cổng lô trong ingest-missing (shape-lock — trước đây COOKIE_AGE_HIGH chỉ WARN).
+        # F7 — r208d ĐỔI KỲ VỌNG CÓ CHỦ ĐÍCH (user duyệt 26-07): cổng lô KHÔNG còn chặn theo TUỔI.
+        # Ngưỡng 50' cũ dựng trên «đời cookie ~60'» mà đo tươi 25/26-07 bác bỏ (cookie phiên hạn 380 NGÀY;
+        # chết do token xoay hết hạn) ⇒ tuổi vừa chặn oan phiên tốt vừa cho qua phiên đã chết (đo được:
+        # chết thật lúc age_min=5,2' trong khi công cụ hứa còn 54,8'). Nay chốt = CANARY LIVE; tuổi chỉ
+        # còn CẢNH BÁO. Shape-lock: hằng đổi tên MAX→WARN, nhánh abort cũ phải BIẾN MẤT.
         import inspect as _ins192
         import tl_core.ingest_ops as _io192
         _src = _ins192.getsource(_io192.cmd_ingest_missing)
-        return (_TL_MODULE.NLM_COOKIE_BATCH_MAX_MIN == 50
-                and "NLM_COOKIE_TOO_OLD_FOR_BATCH" in _src
-                and "_nlm_auth_age_minutes()" in _src
+        return (_TL_MODULE.NLM_COOKIE_BATCH_WARN_MIN == 50
+                and not hasattr(_TL_MODULE, "NLM_COOKIE_BATCH_MAX_MIN")   # tên cũ nói dối → đã gỡ
+                and "NLM_COOKIE_TOO_OLD_FOR_BATCH" not in _src            # chặn-theo-tuổi đã BỎ
+                and "NLM_AUTH_DEAD_BEFORE_BATCH" in _src                  # thay bằng canary LIVE
                 and "len(to_add) > 1" in _src)
-    _t110("r192_f7_cookie_50p_chan_lo", _c192_f7_cookie_batch_gate)
+    _t110("r208d_f7_canary_thay_chan_theo_tuoi", _c192_f7_cookie_batch_gate)
 
     def _c192_f8_claim_mot_cua():
         # F8+F6: _ingest_claim_get tự nạp creds từ config (load_creds vốn ưu tiên env) + forward
@@ -19648,6 +19656,51 @@ def run() -> int:
                  and "__Secure-1PSIDRTS" in _TL_MODULE._NLM_ROTATION_COOKIE_NAMES)
         return _ok_a and _ok_b and _ok_c and _ok_d
     _t110("r208c_cookie_do_thay_vi_doan", _c208c_cookie_do_thay_vi_doan)
+
+    def _c208d_canary_truoc_lo():
+        # r208d (user duyệt 26-07): van F7 ĐỔI từ chặn-theo-TUỔI sang CANARY LIVE trước lô.
+        # Bằng chứng đổi: đo tươi 25/26-07 — cookie phiên hạn 380 NGÀY (không có TTL 1h), phiên chết thật
+        # lúc `age_min` mới 5,2' trong khi công cụ hứa «còn 54,8'». Tuổi vừa CHẶN OAN phiên còn tốt vừa
+        # CHO QUA phiên đã chết ⇒ chốt phải là verdict LIVE. Canary KHÔNG tốn round-trip mới: `_rep54`
+        # phía trên đã probe (probe=not _thr_over).
+        _sav_rep = _TL_MODULE._nlm_preflight_report
+        _sv_env = _env110({"TL_NLM_FALLBACK": "0"})   # tắt fallback ⇒ dead KHÔNG rẽ BATCH_LINKS, rơi đúng cổng lô
+        try:
+            # (a) canary báo CHẾT → DỪNG rc=2 TRƯỚC mọi side-effect (0 add), có lý do + đường ra
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {
+                "alive": False, "why": "Authentication expired", "age_min": 5.2,
+                "rotation_token_expired": True, "warn": []}
+            _rc_a, _o_a, _adds_a, _regs_a, _err_a, _ = _run_im110(
+                {"base110": 100, "ov110": 100}, 2, force_api_add=False)
+            _ok_a = (_rc_a == 2 and _adds_a == [] and _regs_a == []
+                     and "NLM_AUTH_DEAD_BEFORE_BATCH" in _err_a
+                     and "nlm-auth-load" in _err_a          # chết PHẢI kèm đường ra (3.2)
+                     and "5.2" in _err_a)                   # …và nói rõ tuổi, để thấy tuổi KHÔNG cứu được
+            # (b) canary báo SỐNG nhưng tuổi CAO (99' > 50') → KHÔNG chặn nữa (trước r208d bị chặn oan)
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {
+                "alive": True, "why": "", "age_min": 99.0, "warn": []}
+            _rc_b, _o_b, _adds_b, _regs_b, _err_b, _ = _run_im110(
+                {"base110": 100, "ov110": 100}, 2, force_api_add=False)
+            _ok_b = (_rc_b == 0 and len(_adds_b) == 2
+                     and "NLM_COOKIE_TOO_OLD_FOR_BATCH" not in _err_b
+                     and "COOKIE_AGE_HIGH" in _err_b)       # vẫn CẢNH BÁO, chỉ thôi chặn
+            # (c) canary KHÔNG kết luận được (alive=None) → KHÔNG chặn (bài học M2: không kết luận ≠ chết)
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {
+                "alive": None, "why": "", "age_min": None, "warn": []}
+            _rc_c, _o_c, _adds_c, _regs_c, _err_c, _ = _run_im110(
+                {"base110": 100, "ov110": 100}, 2, force_api_add=False)
+            _ok_c = (_rc_c == 0 and len(_adds_c) == 2 and "NLM_AUTH_DEAD_BEFORE_BATCH" not in _err_c)
+            # (d) token xoay hết hạn mà phiên còn SỐNG → cảnh báo «có thể chết đột ngột», KHÔNG chặn
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=True: {
+                "alive": True, "why": "", "age_min": 3.0, "rotation_token_expired": True, "warn": []}
+            _rc_d, _o_d, _adds_d, _regs_d, _err_d, _ = _run_im110(
+                {"base110": 100, "ov110": 100}, 2, force_api_add=False)
+            _ok_d = (_rc_d == 0 and len(_adds_d) == 2 and "ROTATION_TOKEN_EXPIRED" in _err_d)
+        finally:
+            _TL_MODULE._nlm_preflight_report = _sav_rep
+            _env110_restore(_sv_env)
+        return _ok_a and _ok_b and _ok_c and _ok_d
+    _t110("r208d_canary_truoc_lo", _c208d_canary_truoc_lo)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

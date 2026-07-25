@@ -1182,7 +1182,12 @@ def cmd_nlm_query(a) -> int:
 _NLM_COOKIE_LIFE_MIN = 60      # hồ sơ DBSC 2026-07-12: đời cookie ~1h, `nlm login` là đủ
 _NLM_COOKIE_WARN_AGE_MIN = 45  # tuổi vượt ngưỡng → khuyên re-auth trước lô dài / chuyển nlm-links
 NLM_BATCH_LINKS_THRESHOLD = 4  # F5 van 1 (r192, grilling 23-07): lô >4 nguồn → KHÔNG auto-add, xuất bảng tay (trước: >2 — grill Q3(a); hằng số, KHÔNG config env — D7)
-NLM_COOKIE_BATCH_MAX_MIN = 50  # F7 (r192): cookie NLM quá ~50' → CHẶN lô API-add >1 nguồn, bắt `nlm login` trước (đời cookie ~60'; trước chỉ WARN COOKIE_AGE_HIGH)
+# r208d (user duyệt 26-07): F7 ĐỔI TỪ CHẶN-THEO-TUỔI SANG CANARY LIVE. Ngưỡng 50' cũ dựng trên «đời
+# cookie ~60'» — đo tươi 25/26-07 chứng minh KHÔNG có TTL 1h nào (cookie phiên hạn 380 NGÀY; chết là do
+# token xoay `__Secure-1PSIDRTS` hết hạn mà CLI nlm không gia hạn) ⇒ tuổi KHÔNG dự đoán được cái chết:
+# phiên chết thật lúc `age_min` mới 5,2' trong khi công cụ hứa «còn 54,8'». Nay tuổi CHỈ CÒN CẢNH BÁO;
+# chốt chặn là verdict probe LIVE. Đổi tên hằng cho khỏi nói dối (MAX ⇒ WARN).
+NLM_COOKIE_BATCH_WARN_MIN = 50  # tuổi (phút) từ lần xác thực thành công gần nhất → CẢNH BÁO trước lô; KHÔNG chặn
 
 
 def _nlm_auth_age_minutes():

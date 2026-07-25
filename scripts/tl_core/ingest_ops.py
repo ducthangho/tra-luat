@@ -577,20 +577,42 @@ def cmd_ingest_missing(a) -> int:
                                       "rồi reconcile --all-notebooks (DRY) xem hướng dẫn per-notebook."},
                              ensure_ascii=False, indent=2))
             return 0
-        # F7 (r192): PREFLIGHT-LÔ AUTH — sắp add API >1 nguồn mà cookie NLM đã quá NLM_COOKIE_BATCH_MAX_MIN
-        # (~50'/đời ~60') ⇒ DỪNG SỚM trước mọi side-effect, bắt `nlm login` trước lô (trước đây chỉ WARN
-        # COOKIE_AGE_HIGH → chết giữa lô, chuỗi dở dang).
+        # F7 — r208d (user duyệt 26-07): PREFLIGHT-LÔ AUTH nay là CANARY LIVE, KHÔNG còn chặn theo tuổi.
+        # Vì sao đổi: ngưỡng 50' cũ dựng trên «đời cookie ~60'», mà đo tươi 25/26-07 cho thấy KHÔNG có TTL
+        # 1h nào (cookie phiên hạn 380 ngày; chết do token xoay hết hạn, CLI nlm không gia hạn được) ⇒ tuổi
+        # vừa CHẶN OAN phiên còn tốt, vừa CHO QUA phiên đã chết (đo được: chết thật lúc age_min=5,2').
+        # Chốt duy nhất đáng tin là probe LIVE — và `_rep54` PHÍA TRÊN đã probe rồi (probe=not _thr_over,
+        # tới được đây nghĩa là _thr_over=False) nên KHÔNG tốn round-trip mới.
+        #  · alive=False  → DỪNG SỚM rc=2 trước mọi side-effect (chỉ tới được đây khi fallback TẮT — có
+        #    fallback thì `_dead54` đã rẽ BATCH_LINKS ở trên). Trước r208d nhánh này đi tiếp đường API rồi
+        #    mới fail giữa chừng; dừng sớm vẫn fail-closed mà không để lại chuỗi dở dang.
+        #  · alive=None   → KHÔNG kết luận ≠ chết (bài học M2 v1.33.35) → KHÔNG chặn, chỉ cảnh báo.
+        #  · tuổi cao / token xoay hết hạn → CẢNH BÁO (phiên có thể chết ĐỘT NGỘT giữa lô), KHÔNG chặn.
         if len(to_add) > 1:
-            _age92 = _nlm_auth_age_minutes()
-            if _age92 is not None and _age92 > NLM_COOKIE_BATCH_MAX_MIN:
-                print(json.dumps({"ok": False, "aborted": True, "reason": "NLM_COOKIE_TOO_OLD_FOR_BATCH",
-                                  "cookie_age_min": round(_age92, 1), "max_age_min": NLM_COOKIE_BATCH_MAX_MIN,
-                                  "pending": len(to_add),
-                                  "note": "Cookie NLM sắp hết đời (~60') mà lô còn dài — chạy `nlm login` "
-                                          "TRƯỚC lô rồi chạy lại (chết giữa lô để lại chuỗi dở dang). "
-                                          "Đường không-cookie: `tl nlm-links` nạp tay + reconcile."},
+            _alive92 = _rep54.get("alive")
+            if _alive92 is False:
+                print(json.dumps({"ok": False, "aborted": True, "reason": "NLM_AUTH_DEAD_BEFORE_BATCH",
+                                  "why": str(_rep54.get("why") or "")[:160], "pending": len(to_add),
+                                  "cookie_age_min": _rep54.get("age_min"),
+                                  **({"rotation_token_expired": _rep54.get("rotation_token_expired")}
+                                     if _rep54.get("rotation_token_expired") is not None else {}),
+                                  "fix": nlm_auth_fix_hint(compact=False),
+                                  "note": "Canary LIVE trước lô báo phiên NLM đã CHẾT — dừng trước mọi "
+                                          "side-effect (chết giữa lô để lại chuỗi dở dang). Làm tươi "
+                                          "credential rồi chạy lại; đường không-cookie: `tl nlm-links` "
+                                          "nạp tay + `tl nlm-reconcile --apply`."},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
                 return 2
+            _age92 = _rep54.get("age_min")
+            if _age92 is not None and _age92 > NLM_COOKIE_BATCH_WARN_MIN:
+                print(f"[tl]   ⚠ COOKIE_AGE_HIGH trước lô: {_age92:.0f}' kể từ lần xác thực thành công gần "
+                      f"nhất (ngưỡng {NLM_COOKIE_BATCH_WARN_MIN}'). Canary LIVE nói còn SỐNG nên KHÔNG chặn "
+                      f"— nhưng tuổi KHÔNG dự đoán được cái chết; lô dài vẫn có thể đứt giữa chừng.",
+                      file=sys.stderr, flush=True)
+            if _rep54.get("rotation_token_expired"):
+                print("[tl]   ⚠ ROTATION_TOKEN_EXPIRED trước lô: phiên KHÔNG gia hạn được nữa, có thể chết "
+                      "ĐỘT NGỘT giữa lô. Cân nhắc làm tươi credential trước, hoặc đi `tl nlm-links`.",
+                      file=sys.stderr, flush=True)
     # v1.34.52 (F-04/D9 — grill GAS 2.21.2l 2026-07-15): ACQUIRE claim identity_hash cho TOÀN BỘ to_add
     # TRƯỚC vòng lặp add — chặn 2 host cùng add 1 identity trong cửa sổ race giữa preflight-dedup (xong ở
     # trên) và source_add thật (sắp chạy). Optional server-side (D8): webapp cũ (<2.21.2l) không có action

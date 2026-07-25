@@ -2364,20 +2364,15 @@ def _ingest_local_ocr_gate(source_quality: str, ocr_verified: bool) -> dict:
             "corpus_allowed": not block}
 
 
-def cmd_ingest_local(a) -> int:
-    """(2)+(3) Ingest 1 file local vào corpus bằng 1 lệnh: upload _HOP_NAP → organize (convert GDoc + tên chuẩn + cat + stamp + register)
-    → preflight chọn base/overflow → `nlm source add` (CLI) → push registry. DRY mặc định; --apply để thực thi.
-    (4) validate cat ∈ tập folder thực; lệch → REVIEW_CAT (chặn trừ --force-cat). (5) register=true → 1 dòng atomic (GDoc drive_id + src_id=docx).
-    N6 (v1.33.42): `--resume` nối tiếp TẤT ĐỊNH sau timeout — đọc journal run trước, skip bước đã xong (tái dùng
-    fileId/gdoc/source_id), gate dup → LINK thay vì abort. Cowork: chạy lại CÙNG LỆNH + --resume tới rc=0.
-    v1.33.44 (log 7A S4/S5/S6): registry sạch NGAY tại ingest — loai chuẩn enum (_normalize_loai), reg_cat NHÃN ĐỦ
-    (_cat_reg_label), bước link cuối ghi KÈM corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest."""
-    import base64
-    from tl_core.ingest_contract import authorize_apply, build_ingest_plan, validate_source_file
+def _il_stage_plan(ctx):
+    """R-b WP7 (r204): stage PLAN — nguyên văn phần DRY/plan của cmd_ingest_local cũ (K1: plan DRY
+    byte-bất-biến kể cả plan_hash — hợp đồng ADR-0011; charact pre: .tl_state/charact_pre_ingestlocal.json)."""
+    a = ctx["a"]
+    from tl_core.ingest_contract import build_ingest_plan, validate_source_file
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=False, forbid_inherit=True)
     if _perr:
-        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+        return {"rc": _emit_profile_policy_error(_perr, getattr(a, "json", False))}
     f = getattr(a, "file", None)
     # v1.34.37: --drive-id = file ĐÃ Ở TRÊN DRIVE (người dùng kéo-thả _HOP_NAP qua UI) → bỏ upload, organize
     # ngay trên file đó. Tải NHỊ PHÂN về temp để auto-plan/size chạy Y NHƯ đường local; fid = drive_id gốc.
@@ -2389,31 +2384,31 @@ def cmd_ingest_local(a) -> int:
             print(json.dumps({"ok": False, "step": "drive_id_args",
                               "error": "CHỈ MỘT trong <file> (local) HOẶC --drive-id (đã ở Drive) — không cả hai."},
                              ensure_ascii=False), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         _dsrc = _resolve_drive_id_source(_gas(), _drive_id)
         if not _dsrc.get("ok"):
             print(json.dumps({"ok": False, "step": "drive_id_resolve", **_dsrc}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
         if _dsrc.get("is_sheet"):
             print(json.dumps({"ok": False, "step": "drive_id_sheet", "drive_id": _drive_id,
                               "error": "Bảng tính (.xlsx/.xls) không đi đường ingest-local (canonical vbqppl = Google Doc). "
                                        "Bảng tính thuộc profile riêng → dùng `tl profile-ingest --drive-id`."},
                              ensure_ascii=False), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         f = _dsrc.get("local_path") or ""
         _from_drive = _drive_id
         _source_sha256 = str(_dsrc.get("sha256") or "")
     if not (f and Path(f).exists()):
         print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
-              file=sys.stderr); return 2
+              file=sys.stderr); return {"rc": 2}
     _source_check = validate_source_file(
         f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt"}, direct_upload=(not bool(_from_drive))
     )
     if not _source_check.get("ok"):
         print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     explicit_name = getattr(a, "name", None)
     explicit_cat = getattr(a, "cat", None)
     sohieu = (getattr(a, "sohieu", None) or "").strip()
@@ -2438,7 +2433,7 @@ def cmd_ingest_local(a) -> int:
         except Exception as e:  # noqa: BLE001
             print(json.dumps({"ok": False, "step": "auto_plan", "error": str(e)}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
         if not explicit_name and auto_plan.get("name"):
             name = auto_plan["name"]
         if not sohieu and auto_plan.get("sohieu"):
@@ -2557,7 +2552,7 @@ def cmd_ingest_local(a) -> int:
     if not _contract.get("ok"):
         print(_json_dumps({"ok": False, "step": "plan_build", "detail": _contract},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     plan.update({"schema": _contract.get("schema"), "source_sha256": _contract.get("source", {}).get("sha256"),
                  "identity_hash": _contract.get("identity_hash"), "plan_hash": _contract.get("plan_hash")})
     _prev = (_ingest_local_prev_state(str(f), name, identity_hash=_contract["identity_hash"],
@@ -2579,7 +2574,7 @@ def cmd_ingest_local(a) -> int:
                                       "KHÔNG xác minh được trùng (fail-closed, mirror S13). Sửa creds/`tl boot` "
                                       "rồi chạy lại; ép bỏ (tự chịu rủi ro trùng): --skip-live-check."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         _dups_f1 = [e for e in _ingest_dedup_sohieu_live(sohieu, _live_f1)
                     if not (_from_drive and str(_entry_drive_id(e) or "") == _from_drive)]
         if _dups_f1:
@@ -2596,7 +2591,7 @@ def cmd_ingest_local(a) -> int:
                                           "--replace-sohieu (nạp xong hạ bản cũ theo next_steps); nghi trùng oan: "
                                           "`tl reg-query --live --sohieu <sốhiệu>` đối chiếu trước."},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
-                return 2
+                return {"rc": 2}
             plan["replace_sohieu"] = {
                 "old_rows": _rows_f1,
                 "post_steps": [f"tl source-update-corpus {r['drive_id']} false --json   # hạ bản cũ "
@@ -2614,7 +2609,20 @@ def cmd_ingest_local(a) -> int:
         _ph = _ingest_perf_hint(bool(getattr(a, "nlm_no_wait", False)), bool(getattr(a, "no_nlm_add", False)))
         if _ph:
             plan["perf_hint"] = _ph   # v1.34.73: nhắc đường nạp-lô nhanh ngay tại DRY (nơi người vận hành đọc plan)
-        print(_json_dumps(plan, deterministic=_deterministic_enabled(a))); return 0
+        print(_json_dumps(plan, deterministic=_deterministic_enabled(a)))
+        return {"stop": "DRY_PLAN"}
+    return {"f": f, "_from_drive": _from_drive, "explicit_cat": explicit_cat, "auto_plan": auto_plan,
+            "name": name, "cat": cat, "sohieu": sohieu, "goc": goc, "hieuluc": hieuluc, "loai": loai,
+            "official": official, "need_mkdir": need_mkdir, "review_cat": review_cat, "cat_note": cat_note,
+            "_ocr_g": _ocr_g, "_size_bytes": _size_bytes, "_large_threshold": _large_threshold,
+            "_large_file": _large_file, "_large_note": _large_note, "_contract": _contract, "_prev": _prev}
+
+
+
+def _il_stage_confirm(ctx):
+    """R-b WP7 (r204): stage CONFIRM — authorize_apply nguyên văn (plan_hash + confirm yes + resume_plan_hash)."""
+    a, _contract, _prev = ctx["a"], ctx["_contract"], ctx["_prev"]
+    from tl_core.ingest_contract import authorize_apply
     _auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
                             expected_plan_hash=getattr(a, "expected_plan_hash", None),
                             actual_plan_hash=_contract["plan_hash"],
@@ -2622,19 +2630,34 @@ def cmd_ingest_local(a) -> int:
     if not _auth.get("ok"):
         print(_json_dumps({"ok": False, "step": "apply_authorization", **_auth},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
+    return None
+
+
+
+def _il_stage_prepare(ctx):
+    """R-b WP7 (r204): stage STAGE (chuẩn bị) — gate auto-cat/cat/large/OCR-S1, notebook + NLM preflight,
+    journal, claim F-04, mkdir cat, target/preflight shard, upload nguyên văn."""
+    import base64
+    a, f, _from_drive = ctx["a"], ctx["f"], ctx["_from_drive"]
+    explicit_cat, auto_plan, name, cat = ctx["explicit_cat"], ctx["auto_plan"], ctx["name"], ctx["cat"]
+    sohieu, official, need_mkdir = ctx["sohieu"], ctx["official"], ctx["need_mkdir"]
+    review_cat, cat_note, _ocr_g = ctx["review_cat"], ctx["cat_note"], ctx["_ocr_g"]
+    _size_bytes, _large_threshold = ctx["_size_bytes"], ctx["_large_threshold"]
+    _large_file, _large_note = ctx["_large_file"], ctx["_large_note"]
+    _contract, _prev = ctx["_contract"], ctx["_prev"]
     if auto_plan and not explicit_cat and not getattr(a, "force_cat", False):
         auto_flags = set(auto_plan.get("warnings") or [])
         if "NO_PROBE_TEXT_FOR_AUTO_CAT" in auto_flags or "CAT_AUTO_LOW_CONFIDENCE" in auto_flags:
             print(json.dumps({"ok": False, "step": "auto_cat_review", "auto_plan": auto_plan,
                               "fix": "Truyền --text-file <ocr.txt> để phân tích nội dung, hoặc --cat <mã> / --force-cat nếu đã kiểm tra tay."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
     if review_cat:
         print(json.dumps({"ok": False, "step": "cat_review", "cat": cat or None, "cat_note": cat_note,
                           "fix": "Truyền --cat <mã 1-45 đúng Bộ pháp điển> (xem references/phap_dien_45.json)."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     # Large-file gate (yêu cầu user): file LỚN → DỪNG để HỎI người dùng cho phép TÁCH (chất lượng RAG cao nhất).
     # Bỏ qua bằng `--allow-large` (nạp nguyên, chấp nhận giảm chất lượng). KHÔNG tự tách (cần người duyệt cách tách).
     if _large_file and not getattr(a, "allow_large", False):
@@ -2645,7 +2668,7 @@ def cmd_ingest_local(a) -> int:
                           "options": ["TÁCH theo Phần/Chương/cụm Điều → ingest từng phần (mỗi phần 1 nguồn, chất lượng cao nhất)",
                                        "Hoặc `--allow-large` để nạp NGUYÊN file (chấp nhận giảm chất lượng truy vấn)"]},
                          ensure_ascii=False, indent=2))
-        return 2
+        return {"rc": 2}
     # r180 S1: cổng OCR đường nền — ocr∧¬verified ⇒ ÉP đường --no-nlm-add (Drive+registry corpus=false,
     # KHÔNG đụng NLM), cuối nhánh trả rc=2 kèm hướng dẫn ocr-verify. Mirror ngữ nghĩa profile-ingest.
     if _ocr_g["block"] and not getattr(a, "no_nlm_add", False):
@@ -2657,7 +2680,7 @@ def cmd_ingest_local(a) -> int:
     # TL_NOTEBOOK_ID nếu profile có; nếu KHÔNG có và profile != vbqppl → lỗi NO_NOTEBOOK_ID (đúng gốc lỗi Nhóm B).
     _nb_check, _nb_err = _resolve_nlm_notebook(None)
     if _nb_err:
-        print(json.dumps({"ok": False, "step": "notebook_resolve", "error": _nb_err}, ensure_ascii=False)); return 2
+        print(json.dumps({"ok": False, "step": "notebook_resolve", "error": _nb_err}, ensure_ascii=False)); return {"rc": 2}
     # v1.29.7 (log NĐ131 #9): PRE-CHECK NLM TRƯỚC MỌI side-effect — pipeline giả định NLM sẵn sàng nhưng
     # `boot --setup` cố tình bỏ NLM (né timeout) → bước CUỐI `nlm add` gãy sau khi upload+organize+register ĐÃ xong
     # (chuỗi dở dang phải vá tay). Kiểm binary + notebook_get LIVE (~2s) NGAY ĐÂY; fail → DỪNG với hướng dẫn,
@@ -2687,7 +2710,7 @@ def cmd_ingest_local(a) -> int:
                                           "Sửa `nlm login` rồi chạy lại; hoặc bỏ --no-fallback để tự chuyển "
                                           "--no-nlm-add (ADD-TAY)."}, ensure_ascii=False, indent=2),
                       file=sys.stderr)
-                return 2
+                return {"rc": 2}
             print(f"[tl] ⚠ NLM chết ({_nlm_why}) → TỰ CHUYỂN --no-nlm-add (ADD-TAY): xong Drive+registry, "
                   f"dán link vào notebook rồi `tl nlm-reconcile --apply`. (Kiểm phiên: tl nlm-auth-status --wait)",
                   file=sys.stderr, flush=True)
@@ -2730,7 +2753,7 @@ def cmd_ingest_local(a) -> int:
                               "note": "Không xin được claim xuyên host (F-04, webapp cần ≥2.21.2l) — DỪNG an toàn "
                                       "TRƯỚC upload (chưa side-effect)."}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
         _gr55 = next((r for r in (_cl55.get("results") or []) if r.get("identity_hash") == _claim_ih55), None)
         if not (_gr55 or {}).get("granted"):
             _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"BLOCKED": 1}})
@@ -2741,7 +2764,7 @@ def cmd_ingest_local(a) -> int:
                                       "để host kia xong hoặc thử lại sau giờ hết hạn ở claim_ttl_hint."},
                              ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
 
     def _step(op, key, **kw):
         _journal_append(run_id, {"t": "intent", "op": op, "key": key, "set": dict(kw)})
@@ -2755,7 +2778,7 @@ def cmd_ingest_local(a) -> int:
         mk = g.get("mkdir", name=(official or {}).get("folder"))
         _step_ok("mkdir_cat", cat, mk.get("ok"))
         if not mk.get("ok"):
-            print(json.dumps({"ok": False, "step": "mkdir_cat", "journal": run_id, "detail": mk}, ensure_ascii=False), file=sys.stderr); return 2
+            print(json.dumps({"ok": False, "step": "mkdir_cat", "journal": run_id, "detail": mk}, ensure_ascii=False), file=sys.stderr); return {"rc": 2}
     # v1.34.53 (A4 — log phiên 2026-07-15: cookie chết + base đầy → `--no-nlm-add` vẫn bị chặn
     # OVERFLOW_ROOM_UNKNOWN, phải thêm --skip-nlm-preflight --skip-live-check oan): --no-nlm-add KHÔNG đụng
     # NLM trong run này → BỎ _ingest_target (nlm_preflight GAS + đếm slot live); target chỉ còn dùng in URL
@@ -2773,7 +2796,7 @@ def cmd_ingest_local(a) -> int:
                           "note": "MỌI shard (base+overflow) đầy — chưa upload/ghi gì. Duyệt/chuẩn bị shard mới "
                                   "(cập nhật overflowNotebookId hoặc tạo shard) rồi chạy lại."},
                          ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
     # convert=false + register=false: GIỮ file NHỊ PHÂN làm src (KHÔNG để upload tự convert→GDoc + tự register,
     # nếu không organize convert sẽ tạo GDoc THỨ HAI → trùng. Chỉ organize tạo 1 GDoc + 1 dòng registry.)
@@ -2799,7 +2822,24 @@ def cmd_ingest_local(a) -> int:
         fid = up.get("fileId") or up.get("id")
         _step_ok("upload", name + up_ext, bool(fid), fileId=fid)
         if not fid:
-            print(json.dumps({"ok": False, "step": "upload", "journal": run_id, "detail": up}, ensure_ascii=False), file=sys.stderr); return 2
+            print(json.dumps({"ok": False, "step": "upload", "journal": run_id, "detail": up}, ensure_ascii=False), file=sys.stderr); return {"rc": 2}
+    _w_prep = ((["cat_folder"] if need_mkdir else [])
+               + ([] if (_prev.get("upload_fid") or _from_drive) else ["drive_src"]))
+    return {"g": g, "run_id": run_id, "_claim_ih55": _claim_ih55, "target": target, "pf": pf,
+            "up_ext": up_ext, "fid": fid, "_step": _step, "_step_ok": _step_ok,
+            **({"_counts": {"write": _w_prep}} if _w_prep else {})}
+
+
+
+def _il_stage_write(ctx):
+    """R-b WP7 (r204): stage WRITE — okw organize nguyên văn; ĐIỂM ĐỔI CÓ CHỦ ĐÍCH DUY NHẤT của R-b
+    (p11 mục 2 + quyết định 1(b)/α grill 25-07): feature-detect ADR-0014 nằm TRONG stage này — server
+    ≥2.21.2o đi MỘT call ingest_commit (organize+register+readback row/file), server cũ giữ organize
+    (fallback; R-c gỡ = xóa một nhánh tại đây, mirror _pi_stage_write)."""
+    g, fid, name, cat = ctx["g"], ctx["fid"], ctx["name"], ctx["cat"]
+    sohieu, goc, loai, hieuluc = ctx["sohieu"], ctx["goc"], ctx["loai"], ctx["hieuluc"]
+    run_id, _prev = ctx["run_id"], ctx["_prev"]
+    _step, _step_ok = ctx["_step"], ctx["_step_ok"]
     # (5) register=true → tạo 1 dòng registry atomic ngay (drive_id=GDoc, src_id=docx) — không lệ thuộc regen2 ghép cặp
     okw = {"fileId": fid, "convert": "true", "name": name, "moveSrc": "true", "hieuluc": hieuluc, "register": "true"}
     if cat:
@@ -2812,29 +2852,56 @@ def cmd_ingest_local(a) -> int:
     if loai: okw["loai"] = loai
     if _prev.get("gdoc"):
         # N6: organize (convert+register) đã xong ở run trước → tái dùng gdoc/srcId (organize lại tạo GDoc THỨ 2).
+        _via_commit, org = False, None
         gdoc, src_docx = _prev["gdoc"], _prev.get("src_docx")
         _step_ok("organize", fid, True, gdoc=gdoc, srcId=src_docx, resumed=True)
         print(f"[tl] --resume: skip organize (gdoc={gdoc}).", file=sys.stderr)
     else:
         _step("organize", fid, cat=cat, sohieu=sohieu)
-        org = g.get("organize", **okw)
+        # r198 (ADR-0014 #3/#6) cho ingest-local (R-b r204): feature-detect server ≥2.21.2o → MỘT call
+        # ingest_commit thay organize + info×N (convert-readback từ response, 0 call thêm — stage readback);
+        # server cũ → organize GIỮ NGUYÊN (fallback, cùng khuôn _pi_stage_write).
+        _via_commit = _ingest_commit_supported(g)
+        org = _ingest_commit_call(g, okw) if _via_commit else g.get("organize", **okw)
         gdoc = org.get("fileId")
         src_docx = org.get("srcId")
         _step_ok("organize", fid, bool(gdoc), gdoc=gdoc, srcId=src_docx)
         if not gdoc:
-            print(json.dumps({"ok": False, "step": "organize", "journal": run_id, "detail": org}, ensure_ascii=False), file=sys.stderr); return 2
+            print(json.dumps({"ok": False,
+                              "step": ((org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                              "journal": run_id, "detail": org}, ensure_ascii=False), file=sys.stderr)
+            return {"rc": 2}
+    return {"gdoc": gdoc, "src_docx": src_docx, "org": org, "_via_commit": _via_commit,
+            **({"_counts": {"write": ["gdoc"]}} if not _prev.get("gdoc") else {})}
+
+
+
+def _il_stage_readback(ctx):
+    """R-b WP7 (r204): stage READBACK — convert-readback (từ response khi _via_commit — khuôn r198,
+    0 call thêm) + backfill sohieu/title_vn + registry readback nguyên văn."""
+    a, g, org, _via_commit = ctx["a"], ctx["g"], ctx["org"], ctx["_via_commit"]
+    gdoc, src_docx, fid, name, up_ext = ctx["gdoc"], ctx["src_docx"], ctx["fid"], ctx["name"], ctx["up_ext"]
+    sohieu, goc, loai, auto_plan, cat = ctx["sohieu"], ctx["goc"], ctx["loai"], ctx["auto_plan"], ctx["cat"]
+    run_id, _step_ok = ctx["run_id"], ctx["_step_ok"]
+    _bf_done = False
     # Deterministic readback sau convert/rename/move: không add NLM nếu GDoc/source chưa đúng tên, đúng MIME.
     _src_for_rb = src_docx or fid
-    _rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=name,
-                                           src_id=_src_for_rb, expected_src_name=name + up_ext,
-                                           expected_folder_id="")
+    if _via_commit and org and org.get("file"):
+        # r198/r204: readback dựng từ CHÍNH response ingest_commit (0 call thêm) — CÙNG BỘ phép kiểm
+        # _verify_convert_readback (expected_folder_id="" như đường cũ ingest-local).
+        _rb_convert = _ingest_commit_readback(org, expected_name=name, src_id=_src_for_rb,
+                                              expected_src_name=name + up_ext, expected_folder_id="")
+    else:
+        _rb_convert = _verify_convert_readback(g, gdoc_id=gdoc, expected_name=name,
+                                               src_id=_src_for_rb, expected_src_name=name + up_ext,
+                                               expected_folder_id="")
     _step_ok("convert_readback", gdoc, bool(_rb_convert.get("ok")), checks=_rb_convert.get("checks"))
     if not _rb_convert.get("ok"):
         print(json.dumps({"ok": False, "step": "convert_readback", "journal": run_id, "gdoc": gdoc,
                           "src_id": _src_for_rb, "readback": _rb_convert,
                           "note": "Dừng trước NLM add: Drive convert/rename chưa đạt readback."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     # v1.29.7 (log NĐ131 #1 — dòng registry sohieu=None dù đã truyền --sohieu): organize register CÓ nhận sohieu
     # server-side nhưng thực tế từng KHÔNG persist → theo doctrine verified-write: READ-BACK registry sau organize,
     # thiếu thì BACKFILL tường minh qua journaled reg_upsert (sohieu = khóa immutable → upsert, không reg_bulk).
@@ -2874,7 +2941,8 @@ def cmd_ingest_local(a) -> int:
                 _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
                 print(_json_dumps({"ok": False, "step": "registry_backfill_readback", "journal": run_id,
                                    "detail": _vbf}, deterministic=_deterministic_enabled(a)), file=sys.stderr)
-                return 2
+                return {"rc": 2}
+            _bf_done = True
     # Registry is a required postcondition of organize, including the
     # intentional --no-nlm-add path.  Never infer it from the write response.
     try:
@@ -2895,7 +2963,23 @@ def cmd_ingest_local(a) -> int:
         print(_json_dumps({"ok": False, "step": "registry_readback", "journal": run_id,
                            "checks": _registry_checks, "readback": _reg_read},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
+    _cnt_rb = {"readback": ["gdoc", "registry_row"]}
+    if _bf_done:
+        _cnt_rb["write"] = ["registry_row"]
+    return {"_registry_row": _registry_row, "_counts": _cnt_rb}
+
+
+
+def _il_stage_commit(ctx):
+    """R-b WP7 (r204): stage COMMIT — lối ra --no-nlm-add/OCR-note, dedup-gate NLM, source_add,
+    reg_link + claim commit + journal run_end + output nguyên văn."""
+    a, g, gdoc, src_docx, fid = ctx["a"], ctx["g"], ctx["gdoc"], ctx["src_docx"], ctx["fid"]
+    name, cat, loai, target, pf = ctx["name"], ctx["cat"], ctx["loai"], ctx["target"], ctx["pf"]
+    official, need_mkdir, _ocr_g = ctx["official"], ctx["need_mkdir"], ctx["_ocr_g"]
+    _registry_row, _contract, _prev = ctx["_registry_row"], ctx["_contract"], ctx["_prev"]
+    run_id, _claim_ih55 = ctx["run_id"], ctx["_claim_ih55"]
+    _step, _step_ok = ctx["_step"], ctx["_step_ok"]
     # v1.34.35 (quy trình ADD-TAY): --no-nlm-add DỪNG tại đây — Drive + registry (organize register) ĐÃ xong,
     # KHÔNG đụng NLM (né cookie ~1h). corpus KHÔNG set (doctrine S4: corpus=true chỉ khi đã lên NLM). In next_steps
     # điền sẵn: add tay URL trên UI notebook → nlm-reconcile --apply (link bắc cầu exact-title: tên GDoc = tên
@@ -2906,7 +2990,7 @@ def cmd_ingest_local(a) -> int:
             print(_json_dumps({"ok": False, "step": "no_nlm_registry_readback", "journal": run_id,
                                "error": "CORPUS_MUST_BE_FALSE_BEFORE_NLM", "registry_row": _registry_row},
                               deterministic=_deterministic_enabled(a)), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         _journal_append(run_id, {"t": "run_end", "ok": True, "counts": {"OK": 1}, "no_nlm_add": True})
         _gdoc_url = f"https://docs.google.com/document/d/{gdoc}"
         _nb_url = f"https://notebooklm.google.com/notebook/{target}"
@@ -2932,9 +3016,9 @@ def cmd_ingest_local(a) -> int:
                             "   (hoặc làm lại trọn gói bằng: tl ingest-ocr <file> --text-file <txt> --cat <NN> --apply --confirm yes)",
                         ]})
             print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-            return 2
+            return {"stop": "DONE", "rc": 2, "_counts": {"write": ["registry_row"]}}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 0
+        return {"stop": "DONE", "rc": 0}
     nc = _imp("nlm_cli")
     src = _prev.get("nlm_source_id") or ""
     _v3_deferred = False   # F5 van 3 r192: CLI thôi chờ settle sau 120s → ghi deferred (set bên dưới)
@@ -2963,7 +3047,7 @@ def cmd_ingest_local(a) -> int:
                                           "XONG, KHÔNG add NLM trùng. Xử: chạy lại với --resume (tự LINK nguồn có sẵn); hoặc "
                                           "`tl nlm-reconcile`/`tl nlm-orphans`; hoặc gỡ nguồn cũ rồi `tl nlm-add`. Ép: --skip-live-check."},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
-                return 2
+                return {"rc": 2}
         if not src and _verd == "list_failed" and not getattr(a, "skip_live_check", False):
             _step_ok("nlm_dedup_gate", gdoc, False, reason="LIVE_SOURCE_LIST_FAILED")
             print(json.dumps({"ok": False, "step": "nlm_dedup_gate", "journal": run_id, "aborted": True,
@@ -2971,7 +3055,7 @@ def cmd_ingest_local(a) -> int:
                               "note": "KHÔNG liệt kê được nguồn LIVE (S13) → DỪNG trước source_add (Drive+register XONG). "
                                       "`nlm login` rồi `tl nlm-add` bước còn lại; HOẶC --skip-live-check."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         if not src:
             # v1.34.33 (#2 benchmark 2026-07-12): settle-wait chiếm ~50% tổng 238s/file — `--nlm-no-wait` bỏ chờ
             # settle (source_id có NGAY từ add-response → reg_link phía dưới vẫn ghi ĐỦ; settle chạy ngầm phía NLM).
@@ -2985,7 +3069,7 @@ def cmd_ingest_local(a) -> int:
             if not _add_verified:
                 print(json.dumps({"ok": False, "step": "nlm_add(cli)", "journal": run_id, "gdoc": gdoc, "target": target, "detail": add,
                                   "note": "NLM add phải trả source_id; Drive+registry đã xong, chạy lại CÙNG LỆNH + --resume."}, ensure_ascii=False, indent=2), file=sys.stderr)
-                return 2
+                return {"rc": 2}
             src = add.get("source_id")
             _v3_deferred = bool(add.get("settle_timeout")) and not _no_wait
             if _v3_deferred:
@@ -3006,7 +3090,7 @@ def cmd_ingest_local(a) -> int:
                 if _dup_after:
                     print(json.dumps(_dup_after, ensure_ascii=False, indent=2), file=sys.stderr)
                     _journal_append(run_id, {"t": "run_end", "ok": False, "counts": {"FAILED": 1}})
-                    return 2
+                    return {"rc": 2}
     # v1.29.7 (log NĐ131 #6): trước đây `target != NLM_BASE_NOTEBOOK → overflow` — SAI cho profile own (notebook
     # profile ≠ base VBQPPL toàn cục → mọi tài liệu profile bị gán overflow dù preflight nói 'không overflow → base').
     # ĐÚNG: overflow CHỈ khi target == overflow-shard ĐÃ CẤU HÌNH của profile đang chạy; còn lại (base VBQPPL hoặc
@@ -3057,7 +3141,30 @@ def cmd_ingest_local(a) -> int:
                if getattr(a, "nlm_no_wait", False) else {})),
            "sidecar": "src_id=docx gắn vào dòng GDoc (register atomic; regen2 cũng tự ghép cặp cùng base-name)"}
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if _final_ok else 2
+    return {"stop": "DONE", "rc": (0 if _final_ok else 2), "_counts": {"write": ["registry_row"]}}
+
+
+
+def cmd_ingest_local(a) -> int:
+    """(2)+(3) Ingest 1 file local vào corpus bằng 1 lệnh: upload _HOP_NAP → organize (convert GDoc + tên chuẩn + cat + stamp + register)
+    → preflight chọn base/overflow → `nlm source add` (CLI) → push registry. DRY mặc định; --apply để thực thi.
+    (4) validate cat ∈ tập folder thực; lệch → REVIEW_CAT (chặn trừ --force-cat). (5) register=true → 1 dòng atomic (GDoc drive_id + src_id=docx).
+    N6 (v1.33.42): `--resume` nối tiếp TẤT ĐỊNH sau timeout — đọc journal run trước, skip bước đã xong (tái dùng
+    fileId/gdoc/source_id), gate dup → LINK thay vì abort. Cowork: chạy lại CÙNG LỆNH + --resume tới rc=0.
+    v1.33.44 (log 7A S4/S5/S6): registry sạch NGAY tại ingest — loai chuẩn enum (_normalize_loai), reg_cat NHÃN ĐỦ
+    (_cat_reg_label), bước link cuối ghi KÈM corpus=true — hết chuỗi vá backfill-loai/recat/register sau mỗi ingest.
+    R-b WP7 (r204, ADR-0004 Đ1 — KE_HOACH p13 quyết định 1(b)): điều phối qua ENGINE run_pipeline — bảng 6 stage
+    _il_stage_* chuỗi ADR plan→confirm→stage→write→readback→commit, thân stage BÊ NGUYÊN VĂN code cũ; chuyển GAS
+    ingest_commit GỘP CÙNG ĐỢT (p11 mục 2) — feature-detect TRONG stage write (quyết định α, fallback server cũ)."""
+    from tl_core.ingest_engine import run_pipeline   # R-b r204: engine sở hữu trình tự (stdlib thuần, không bind)
+    return run_pipeline([
+        {"name": "plan", "run": _il_stage_plan},
+        {"name": "confirm", "run": _il_stage_confirm},
+        {"name": "stage", "run": _il_stage_prepare},
+        {"name": "write", "run": _il_stage_write},
+        {"name": "readback", "run": _il_stage_readback},
+        {"name": "commit", "run": _il_stage_commit},
+    ], {"a": a})
 
 
 def _verify_convert_readback(g, *, gdoc_id: str, expected_name: str = "", src_id: str = "", expected_src_name: str = "", expected_folder_id: str = "", expected_gdoc_mime: str | None = None) -> dict:

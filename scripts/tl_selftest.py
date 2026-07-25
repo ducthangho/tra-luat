@@ -4677,7 +4677,11 @@ def run() -> int:
     # corpus=true ở bước link cuối) + helper thật chạy offline đúng ('VBHN'→enum, '03'→nhãn đủ).
     import inspect as _ins55
     import tl_core.ingest_ops as _io55   # I5 v1.34.8: nguồn THẬT ở tl_core.ingest_ops
-    _src55 = _ins55.getsource(_io55.cmd_ingest_local)
+    # R-b r204: cmd_ingest_local = adapter run_pipeline — thân dời vào 6 stage _il_stage_* (kỳ vọng GIỮ NGUYÊN,
+    # chỉ đổi chỗ trỏ getsource sang ghép adapter + 6 stage).
+    _src55 = "".join(_ins55.getsource(_f55) for _f55 in (
+        _io55.cmd_ingest_local, _io55._il_stage_plan, _io55._il_stage_confirm, _io55._il_stage_prepare,
+        _io55._il_stage_write, _io55._il_stage_readback, _io55._il_stage_commit))
     cases.append(("r55_ingest_local_canonical_loai_cat_corpus",
                   "loai = _normalize_loai(loai)" in _src55
                   and "_cat_reg_label(cat)" in _src55
@@ -7656,7 +7660,11 @@ def run() -> int:
     # True) + post-add dup-check CHỈ ở nhánh có-wait + output/next_step nêu nlm-reconcile khi no-wait.
     import inspect as _ins95
     import tl_core.ingest_ops as _io95
-    _src95 = _ins95.getsource(_io95.cmd_ingest_local)
+    # R-b r204: thân cmd_ingest_local dời vào 6 stage _il_stage_* — ghép source (kỳ vọng GIỮ NGUYÊN;
+    # "if _no_wait:" + dup-check nằm trong _il_stage_commit nên split vẫn đúng thứ tự).
+    _src95 = "".join(_ins95.getsource(_f95) for _f95 in (
+        _io95.cmd_ingest_local, _io95._il_stage_plan, _io95._il_stage_confirm, _io95._il_stage_prepare,
+        _io95._il_stage_write, _io95._il_stage_readback, _io95._il_stage_commit))
     cases.append(("r95_ingest_local_no_wait_shape",
                   "wait=(not _no_wait)" in _src95
                   and "wait=True" not in _src95                       # hết hardcode chờ settle
@@ -17752,7 +17760,9 @@ def run() -> int:
         import tl_core.nlm_admin_ops as _na192
         import tl_core.ingest_ops as _io192
         _s_add = _ins192.getsource(_na192.cmd_nlm_add)
-        _s_il = _ins192.getsource(_io192.cmd_ingest_local)
+        # R-b r204: lane deferred của ingest-local nằm trong _il_stage_commit — ghép source (kỳ vọng GIỮ NGUYÊN).
+        _s_il = "".join(_ins192.getsource(_f192) for _f192 in (
+            _io192.cmd_ingest_local, _io192._il_stage_write, _io192._il_stage_readback, _io192._il_stage_commit))
         return ('r.get("settle_timeout")' in _s_add
                 and '_nlm_no_wait_reg_link' in _s_add
                 and '_v3_deferred = bool(add.get("settle_timeout"))' in _s_il
@@ -17819,7 +17829,10 @@ def run() -> int:
             for _k, _v in _sv.items():
                 setattr(_TL_MODULE, _k, _v)
         _s_im = _ins192.getsource(_io192.cmd_ingest_missing)
-        _s_il = _ins192.getsource(_io192.cmd_ingest_local)
+        # R-b r204: claim F-04 của ingest-local nằm trong _il_stage_prepare — ghép source (kỳ vọng GIỮ NGUYÊN,
+        # kể cả vế cấm g.get("ingest_claim" trực tiếp).
+        _s_il = "".join(_ins192.getsource(_f192) for _f192 in (
+            _io192.cmd_ingest_local, _io192._il_stage_plan, _io192._il_stage_prepare, _io192._il_stage_commit))
         _s_na = _ins192.getsource(_na192.cmd_nlm_add)
         return (_r.get("ok") is True and _cnt["creds"] == 1
                 and _cnt["retry"] == ("ingest_claim", (5.0, 15.0))
@@ -18858,14 +18871,187 @@ def run() -> int:
                 and all(f'"{n}"' in _src for n in ("plan", "confirm", "stage", "write", "readback", "commit")))
     _t110("r203_profile_ingest_via_pipeline", _c203_profile_ingest_via_pipeline)
 
-    def _c198_ingest_local_giu_duong_cu():
-        # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
-        # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.
-        import inspect as _ins198
-        import tl_core.ingest_ops as _io198
-        _src = _ins198.getsource(_io198.cmd_ingest_local)
-        return 'g.get("organize"' in _src and "ingest_commit" not in _src
-    _t110("r198_ingest_local_giu_duong_cu", _c198_ingest_local_giu_duong_cu)
+    # ═══ r204 — WP7 R-b (KE_HOACH p13 quyết định 1(b) + p11 mục 2, GỘP MỘT LẦN): di trú cmd_ingest_local
+    # lên run_pipeline ĐỒNG THỜI chuyển stage write sang GAS ingest_commit (feature-detect + fallback,
+    # khuôn r198 profile-ingest). Thay test khóa r198_ingest_local_giu_duong_cu (lock «giữ đường cũ chờ
+    # soak» hết hiệu lực theo lệnh user 25-07 — chuỗi R-a→R-b→R-c tăng tốc). ═══
+    def _c204_ingest_local_via_pipeline():
+        # Khóa KHUNG (mutation-killer di trú R-b): cmd_ingest_local điều phối qua run_pipeline ĐÚNG chuỗi
+        # ADR plan→confirm→stage→write→readback→commit; feature-detect ingest_commit + fallback organize
+        # nhốt TRONG _il_stage_write (quyết định α — R-c gỡ fallback = xóa một nhánh một stage).
+        import inspect as _ins204
+        import tl_core.ingest_ops as _io204
+        _src = _ins204.getsource(_io204.cmd_ingest_local)
+        _srcw = _ins204.getsource(_io204._il_stage_write)
+        return ("run_pipeline" in _src
+                and all(f'"{n}"' in _src for n in ("plan", "confirm", "stage", "write", "readback", "commit"))
+                and "_ingest_commit_supported" in _srcw and 'g.get("organize"' in _srcw
+                and "_ingest_commit_supported" not in _ins204.getsource(_io204._il_stage_prepare)
+                and "_ingest_commit_supported" not in _ins204.getsource(_io204._il_stage_commit))
+    _t110("r204_ingest_local_via_pipeline", _c204_ingest_local_via_pipeline)
+
+    def _run_il204(gas_ver):
+        # Harness call-site (khuôn _run_pi198): fake gas ĐẾM call theo action cho cmd_ingest_local;
+        # version server quyết định đường ingest_commit vs organize (fail-safe → đường cũ).
+        _calls = {"ping": 0, "organize": 0, "ingest_commit": 0, "info": 0, "upload": 0, "reg_get": 0}
+        _gmime204 = "application/vnd.google-apps.document"
+
+        class _FkGas204:
+            def __init__(self):
+                self._okw = {}
+
+            def _row(self):
+                return {"drive_id": "GD204", "gdoc_id": "GD204", "src_id": "SRC204",
+                        "name": str(self._okw.get("name") or ""),
+                        "cat": str(self._okw.get("reg_cat") or ""),
+                        "sohieu": str(self._okw.get("sohieu") or ""),
+                        "title_vn": "x", "corpus": "", "nlm_source_id": "", "row_kind": ""}
+
+            def get(self, action, **kw):
+                if action == "ping":
+                    _calls["ping"] += 1
+                    return {"ok": True, "pong": True, "version": gas_ver}
+                if action == "bootstrap":
+                    return {"ok": True, "inboxFolderId": "INBOX204"}
+                if action == "ingest_claim":
+                    _keys = json.loads(kw.get("keys") or "[]")
+                    return {"ok": True, "results": [{"identity_hash": k, "granted": True} for k in _keys]}
+                if action == "reg_get":
+                    _calls["reg_get"] += 1
+                    return {"ok": True, "rows": ([self._row()] if kw.get("drive_id") else [])}
+                if action == "reg_get_bulk":
+                    return {"ok": True, "rows": [self._row()]}
+                if action == "organize":
+                    _calls["organize"] += 1
+                    self._okw = dict(kw)
+                    return {"ok": True, "fileId": "GD204", "srcId": "SRC204"}
+                if action == "ingest_commit":
+                    _calls["ingest_commit"] += 1
+                    self._okw = dict(kw)
+                    _nm = str(kw.get("name") or "")
+                    return {"ok": True, "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "fileId": "GD204", "srcId": "SRC204", "row": self._row(),
+                            "file": {"id": "GD204", "name": _nm, "mimeType": _gmime204, "parents": ["CAT204"]},
+                            "src_file": {"id": "SRC204", "name": _nm + ".docx",
+                                         "mimeType": "application/x-docx", "parents": ["CAT204"]},
+                            "elapsed_ms": 42}
+                if action == "info":
+                    _calls["info"] += 1
+                    return {"ok": True, "file": {"id": kw.get("fileId"), "name": "x", "mimeType": _gmime204}}
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "upload":
+                    _calls["upload"] += 1
+                return {"ok": True, "fileId": "UP204"}
+
+        class _FkNC204:
+            def nlm_available(self):
+                return True
+
+            def notebook_get(self, nb, **kw):
+                return {"ok": True, "source_count": 1}
+
+            def source_add(self, nb, **kw):
+                return {"ok": True, "source_id": "SID204", "ready": True}
+
+            def source_list(self, nb, **kw):
+                return {"ok": True, "count": 0, "sources": []}
+
+        _keys204 = ("load_creds", "_profile_policy_error", "_gas", "_active_profile", "_resolve_nlm_notebook",
+                    "_imp", "_verify_convert_readback", "_profile_read_probe_text", "_nlm_preflight_report",
+                    "_ingest_target", "_manifest_entries", "_journaled_reg_write", "_valid_cats",
+                    "_load_phapdien", "_nlm_fallback_enabled")
+        _sav204 = {k: getattr(_TL_MODULE, k) for k in _keys204}
+        _env204 = {k: os.environ.get(k) for k in ("TL_JOURNAL_DIR", "TL_OVERFLOW_NOTEBOOK_ID",
+                                                  "TL_CATEGORIES_MODE", "TL_NLM_FALLBACK")}
+        import tempfile as _tf204
+        try:
+            with _tf204.TemporaryDirectory() as _d:
+                _xf = Path(_d) / "vb_204.docx"
+                with _zf63.ZipFile(_xf, "w") as _z:
+                    _z.writestr("[Content_Types].xml", "<Types/>")
+                    _z.writestr("word/document.xml", "<document>vb204</document>")
+                os.environ["TL_JOURNAL_DIR"] = _d
+                for _k in ("TL_OVERFLOW_NOTEBOOK_ID", "TL_CATEGORIES_MODE", "TL_NLM_FALLBACK"):
+                    os.environ.pop(_k, None)
+                _TL_MODULE._GAS_VER_CACHE.clear()
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._profile_policy_error = lambda **k: None
+                _TL_MODULE._gas = lambda: _FkGas204()
+                _TL_MODULE._active_profile = lambda: "p204"
+                _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ("NB204", None)
+                _TL_MODULE._imp = lambda name: _FkNC204() if name == "nlm_cli" else _sav204["_imp"](name)
+                _TL_MODULE._verify_convert_readback = lambda *a, **k: {"ok": True, "checks": []}
+                _TL_MODULE._profile_read_probe_text = lambda f, tf=None: ("Van ban thu 204 du dai. " * 3, None)
+                _TL_MODULE._nlm_preflight_report = lambda nb, probe=False: {"warn": []}
+                _TL_MODULE._ingest_target = lambda g, sohieu, name: ("NB204", {"note": "fk204"})
+                _TL_MODULE._manifest_entries = lambda refresh=False: []
+                _TL_MODULE._journaled_reg_write = lambda run_id, g, items, cols, **kw: {
+                    "verified": True, "reg_bulk": {"patched": len(items)}}
+                _TL_MODULE._valid_cats = lambda config=None, profile=None: {"36"}
+                _TL_MODULE._load_phapdien = lambda: {"36": {"ten": "Bao hiem 204", "folder": "36_Bao_hiem_204"}}
+                _TL_MODULE._nlm_fallback_enabled = lambda a: True
+                _ns = argparse.Namespace(
+                    config=None, profile=None, json=True, file=str(_xf), drive_id=None,
+                    name="VB_204_ingest_local", sohieu="99/2026/NĐ-CP", cat="36", goc="", hieuluc=None,
+                    loai=None, apply=False, confirm=None, expected_plan_hash=None, resume=False,
+                    auto_plan=False, text_file=None, source_quality="auto", ocr_verified=False,
+                    force_cat=False, allow_large=False, large_threshold=None, skip_nlm_preflight=False,
+                    no_fallback=False, skip_live_check=False, replace_sohieu=False,
+                    nlm_no_wait=False, no_nlm_add=False, deterministic=True)
+                _bd = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bd), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rcd = _TL_MODULE.cmd_ingest_local(_ns)
+                _pl = json.loads(_bd.getvalue())
+                _ns.apply = True; _ns.confirm = "yes"; _ns.expected_plan_hash = _pl.get("plan_hash")
+                _bo = _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rca = _TL_MODULE.cmd_ingest_local(_ns)
+                _outj = None
+                try:
+                    _outj = json.loads(_bo.getvalue())
+                except Exception:  # noqa: BLE001
+                    pass
+                return _rcd, _rca, _outj, _calls
+        finally:
+            for _k, _v in _sav204.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _k, _v in _env204.items():
+                (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
+            _TL_MODULE._GAS_VER_CACHE.clear()
+
+    def _c204_ingest_local_via_commit_vs_fallback():
+        # Chỉ-nó-chặn R-b: server 2.21.2o → ĐÚNG 1 ingest_commit, 0 organize, 0 info, ping đúng 1 lần,
+        # rc=0 cả DRY lẫn apply; server 2.21.2n → 0 ingest_commit, 1 organize (fallback GIỮ NGUYÊN), rc=0.
+        _rcd_n, _rca_n, _out_n, _c_new = _run_il204("2.21.2o")
+        _rcd_o, _rca_o, _out_o, _c_old = _run_il204("2.21.2n")
+        return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
+                and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
+                and _c_new["ping"] == 1 and _c_new["upload"] == 1
+                and _rcd_o == 0 and _rca_o == 0 and (_out_o or {}).get("ok") is True
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 1 and _c_old["ping"] == 1)
+    _t110("r204_ingest_local_via_commit_vs_fallback", _c204_ingest_local_via_commit_vs_fallback)
+
+    def _c204_zip_child_di_duong_pipeline():
+        # R-b phần 2 (ZIP adapter): child zip chạy in-process qua build_parser (r187) = CHÍNH
+        # cmd_ingest_local/cmd_profile_ingest → TỰ đi pipeline + ingest_commit, zip_ingest KHÔNG sửa.
+        # Khóa wiring route+args; charact zip so ngoài selftest (.tl_state/charact_{pre,post}_zip.json).
+        import inspect as _ins204z
+        import tl_core.ingest_ops as _io204z
+        import tl_core.zip_ingest as _zi204
+        from tl_core.cli import build_parser as _bp204
+        _a204 = argparse.Namespace(skip_nlm_preflight=False, profile=None, config=None)
+        _args = _zi204._zip_child_args({"path": "x.docx"}, mode="vbqppl", profile="", cat="36", a=_a204)
+        _ns = _bp204().parse_args(_args)
+        _args_p = _zi204._zip_child_args({"path": "x.docx"}, mode="profile", profile="pZ", cat="", a=_a204)
+        _ns_p = _bp204().parse_args(_args_p)
+        # ns.fn = stub lazy tl.py (getsource ra stub) → khóa route theo TÊN, khóa pipeline trên hàm THẬT.
+        return (_args[:2] == ["ingest-local", "x.docx"] and _ns.fn.__name__ == "cmd_ingest_local"
+                and "run_pipeline" in _ins204z.getsource(_io204z.cmd_ingest_local)
+                and _args_p[:2] == ["profile-ingest", "x.docx"] and _ns_p.fn.__name__ == "cmd_profile_ingest"
+                and "run_pipeline" in _ins204z.getsource(_io204z.cmd_profile_ingest))
+    _t110("r204_zip_child_di_duong_pipeline", _c204_zip_child_di_duong_pipeline)
 
     # ═══ r202 — sự cố Tầng-3 smoke 25-07 (mẫu r193): profile-delete --apply backup config (CHỨA token)
     # bằng Path(path).with_suffix(...) ⇒ `.bak.json` nằm CẠNH config = GỐC cây skill — vi phạm doctrine

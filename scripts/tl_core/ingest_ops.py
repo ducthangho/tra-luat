@@ -1407,18 +1407,19 @@ def _ingest_commit_readback(resp: dict, *, expected_name: str, src_id: str, expe
                        if src_id else None)}
 
 
-def cmd_profile_ingest(a) -> int:
-    if getattr(a, "resume", False):   # v1.34.55 C4+C5: RESUME theo registry — không upload/organize lại
-        return cmd_profile_ingest_resume(a)
-    from tl_core.ingest_contract import authorize_apply, build_ingest_plan, validate_source_file
+def _pi_stage_plan(ctx):
+    """R-a WP7: stage PLAN — nguyên văn phần DRY/plan của cmd_profile_ingest cũ (K1: plan DRY byte-bất-biến
+    kể cả plan_hash — hợp đồng ADR-0011, script --expected-plan-hash của user không được gãy)."""
+    a = ctx["a"]
+    from tl_core.ingest_contract import build_ingest_plan, validate_source_file
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     profile = _active_profile()
     if profile == DEFAULT_PROFILE and not getattr(a, "allow_default", False):
         print("[tl] profile-ingest chỉ dành cho profile dự án; thêm --allow-default nếu cố ý chạy trên vbqppl.", file=sys.stderr)
-        return 2
+        return {"rc": 2}
     _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
     if _perr:
-        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+        return {"rc": _emit_profile_policy_error(_perr, getattr(a, "json", False))}
     f = getattr(a, "file", None)
     # v1.34.37: --drive-id = file ĐÃ Ở TRONG THƯ MỤC PROFILE → bỏ upload, CHỈ convert→GDoc + đổi tên chuẩn (giữ
     # PHẲNG trong root profile, KHÔNG xếp cat). Tải NHỊ PHÂN về temp để probe/verify chạy y như đường local.
@@ -1430,20 +1431,20 @@ def cmd_profile_ingest(a) -> int:
             print(json.dumps({"ok": False, "step": "drive_id_args",
                               "error": "CHỈ MỘT trong <file> (local) HOẶC --drive-id (đã ở Drive) — không cả hai."},
                              ensure_ascii=False), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         load_creds(getattr(a, "config", None), getattr(a, "profile", None))
         _dsrc = _resolve_drive_id_source(_gas(), _drive_id)
         if not _dsrc.get("ok"):
             print(json.dumps({"ok": False, "step": "drive_id_resolve", **_dsrc}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
         f = _dsrc.get("local_path") or ""
         _from_drive = _drive_id
         _source_sha256 = str(_dsrc.get("sha256") or "")
     if not (f and Path(f).exists()):
         print(f"[tl] profile-ingest: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở thư mục profile)",
               file=sys.stderr)
-        return 2
+        return {"rc": 2}
     _source_check = validate_source_file(
         f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt", ".xlsx", ".xls"},
         direct_upload=(not bool(_from_drive)),
@@ -1451,7 +1452,7 @@ def cmd_profile_ingest(a) -> int:
     if not _source_check.get("ok"):
         print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     source_quality = _profile_source_quality(f, getattr(a, "source_quality", "auto"))
     # v1.34.6 #2: bảng tính đi đường riêng — canonical = Google SHEET (copy_convert toType=sheets),
     # không probe text/không gate Điều (không có văn bản pháp quy dạng bảng tính), NLM add type=sheets.
@@ -1466,7 +1467,7 @@ def cmd_profile_ingest(a) -> int:
                           "note": "Lane --staged chỉ nhận tài liệu văn bản digital (docx/doc/rtf/odt, "
                                   "KHÔNG ocr). pdf/ocr/bảng tính: bỏ --staged đi lane thường."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     # v1.34.58 (C-#9): .pdf probe qua _probe_pdf_quality — lấy flag broken_font cho gate DRY bên dưới.
     _pdf_q9p = None
     if _is_sheet:
@@ -1544,34 +1545,51 @@ def cmd_profile_ingest(a) -> int:
     if not _contract.get("ok"):
         print(_json_dumps({"ok": False, "step": "plan_build", "detail": _contract},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     plan.update({"schema": _contract.get("schema"), "source_sha256": _contract.get("source", {}).get("sha256"),
                  "identity_hash": _contract.get("identity_hash"), "plan_hash": _contract.get("plan_hash")})
     if not getattr(a, "apply", False):
         plan["apply_requires"] = ["--apply", "--confirm yes", f"--expected-plan-hash {_contract['plan_hash']}"]
         print(_json_dumps(plan, deterministic=_deterministic_enabled(a)))
-        return 0
+        return {"stop": "DRY_PLAN"}
+    return {"f": f, "_from_drive": _from_drive, "_source_sha256": _source_sha256, "profile": profile,
+            "source_quality": source_quality, "_is_sheet": _is_sheet, "_staged": _staged,
+            "probe_text": probe_text, "info": info, "doc_name": doc_name, "gate": gate,
+            "size_bytes": size_bytes, "large_threshold": large_threshold, "chunk_max": chunk_max,
+            "chunks": chunks, "plan": plan, "_contract": _contract}
+
+
+def _pi_stage_confirm(ctx):
+    """R-a WP7: stage CONFIRM — authorize_apply nguyên văn (plan_hash + confirm yes)."""
+    a, _contract = ctx["a"], ctx["_contract"]
+    from tl_core.ingest_contract import authorize_apply
     _auth = authorize_apply(apply=True, confirm=getattr(a, "confirm", None),
                             expected_plan_hash=getattr(a, "expected_plan_hash", None),
                             actual_plan_hash=_contract["plan_hash"])
     if not _auth.get("ok"):
         print(_json_dumps({"ok": False, "step": "apply_authorization", **_auth},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
+    return None
 
+
+def _pi_stage_prepare(ctx):
+    """R-a WP7: stage STAGE (chuẩn bị) — creds/policy/root/notebook/journal/dup-gate/upload nguyên văn."""
+    a, f, profile = ctx["a"], ctx["f"], ctx["profile"]
+    doc_name, _from_drive, _contract = ctx["doc_name"], ctx["_from_drive"], ctx["_contract"]
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
     if _perr:
-        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+        return {"rc": _emit_profile_policy_error(_perr, getattr(a, "json", False))}
     root_id = os.environ.get("TL_ROOT_FOLDER_ID", "").strip()
     meta_id = os.environ.get("TL_META_FOLDER_ID", "").strip() or root_id
     if not root_id:
         print("[tl] profile-ingest: profile thiếu rootFolderId.", file=sys.stderr)
-        return 2
+        return {"rc": 2}
     notebook_id, nb_err = _resolve_nlm_notebook(None)
     if nb_err:
         print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     g = _gas()
     # r184 (ADR-0011/D5 — ING-02): profile-ingest apply nay CÓ JOURNAL với fingerprint — resume --journal
     # <run_id> revalidate được đúng nguồn (trước đây apply không journal ⇒ resume buộc phải mò theo tên).
@@ -1595,7 +1613,7 @@ def cmd_profile_ingest(a) -> int:
                               "error": "REGISTRY_DUP_CHECK_FAILED", "detail": _rg_dup.get("error"),
                               "note": "Không đọc được registry để kiểm tên trùng — DỪNG an toàn TRƯỚC upload."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
         _dup_rows = [r for r in (_rg_dup.get("rows") or [])
                      if str(r.get("name") or "").strip() == doc_name
                      and str(r.get("drive_id") or r.get("gdoc_id") or "") != str(_from_drive or "")]
@@ -1609,7 +1627,7 @@ def cmd_profile_ingest(a) -> int:
                                       "vào đây — dòng cũ ĐÃ có: dùng dòng cũ / `tl source-delete` dòng hỏng rồi chạy "
                                       "lại; trùng tên hợp lệ (hiếm): --allow-dup-name."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
     up_mime, up_ext = _upload_mime_ext(f)
     if _from_drive:
         # v1.34.37: dùng chính file Drive có sẵn làm nguồn convert (KHÔNG re-upload).
@@ -1624,7 +1642,19 @@ def cmd_profile_ingest(a) -> int:
         fid = up.get("fileId") or up.get("id")
         if not fid:
             print(json.dumps({"ok": False, "step": "upload", "detail": up}, ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
+    return {"root_id": root_id, "meta_id": meta_id, "notebook_id": notebook_id, "g": g,
+            "_pi_run_id": _pi_run_id, "up_mime": up_mime, "up_ext": up_ext, "fid": fid,
+            **({"_counts": {"write": ["drive_src"]}} if not _from_drive else {})}
+
+
+def _pi_stage_write(ctx):
+    """R-a WP7: stage WRITE — organize/ingest_commit/copy_convert nguyên văn; feature-detect ADR-0014
+    nằm TRONG stage này (quyết định α grill 25-07): R-c gỡ fallback = xóa một nhánh tại đây."""
+    a, g, f = ctx["a"], ctx["g"], ctx["f"]
+    info, _is_sheet, fid = ctx["info"], ctx["_is_sheet"], ctx["fid"]
+    doc_name, root_id = ctx["doc_name"], ctx["root_id"]
+    gate, source_quality, probe_text = ctx["gate"], ctx["source_quality"], ctx["probe_text"]
     hieuluc = DRAFT_WARNING if info.get("draft") else (getattr(a, "hieuluc", None) or "Còn")
     _via_commit = False   # r198 ADR-0014: chỉ nhánh organize (non-sheet) đi đường gộp
     if _is_sheet:
@@ -1658,7 +1688,22 @@ def cmd_profile_ingest(a) -> int:
                                    (org.get("step") or "ingest_commit") if _via_commit else "organize"),
                           "detail": org},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
+    return {"hieuluc": hieuluc, "_via_commit": _via_commit, "org": org, "gdoc": gdoc,
+            "_counts": {"write": ["gdoc"]}}
+
+
+def _pi_stage_readback(ctx):
+    """R-a WP7: stage READBACK — convert-readback + STAGED_STOP r200 + canonical text + late-draft rename
+    + re-gate nguyên văn (mọi phép kiểm giữ vị trí, thứ tự cũ)."""
+    a, g, org = ctx["a"], ctx["g"], ctx["org"]
+    _is_sheet, fid, _via_commit = ctx["_is_sheet"], ctx["fid"], ctx["_via_commit"]
+    doc_name, up_ext, root_id = ctx["doc_name"], ctx["up_ext"], ctx["root_id"]
+    _staged, source_quality, hieuluc = ctx["_staged"], ctx["source_quality"], ctx["hieuluc"]
+    gdoc, profile, _pi_run_id = ctx["gdoc"], ctx["profile"], ctx["_pi_run_id"]
+    info, gate, probe_text = ctx["info"], ctx["gate"], ctx["probe_text"]
+    chunk_max, size_bytes, large_threshold = ctx["chunk_max"], ctx["size_bytes"], ctx["large_threshold"]
+    chunks = ctx["chunks"]
     # Deterministic readback: không add NLM/registry tiếp nếu Drive convert/rename chưa xác nhận được.
     src_id = (org.get("srcFileId") if _is_sheet else org.get("srcId")) or fid
     if _via_commit and org.get("file"):
@@ -1677,7 +1722,7 @@ def cmd_profile_ingest(a) -> int:
                           "readback": rb_convert,
                           "note": "Dừng trước NLM add: Drive convert/rename/move chưa đạt readback."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
 
     # r200 (grill 24-07 C2/C3/C4): lane STAGED dừng NGAY sau convert-readback — cổng an toàn i+ii+iii đã đủ
     # (dedup tên/sohieu + claim đường commit + readback Drive/registry); HOÃN iv/v/vi (đọc toàn văn +
@@ -1699,7 +1744,8 @@ def cmd_profile_ingest(a) -> int:
                                      "counts": {"staged": 1},
                                      "verify": {"gdoc": gdoc, "registry_verified": bool(rb.get("verified"))}})
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 0 if rb.get("verified") else 2
+        return {"stop": "STAGED_STOP", "rc": 0 if rb.get("verified") else 2,
+                "_counts": {"write": ["registry_row"], "readback": ["gdoc"]}}
 
     actual_text = ""
     if not _is_sheet:   # v1.34.6 #2: bảng tính không re-read/re-classify text (gate sheet đã chốt ở trên)
@@ -1716,7 +1762,7 @@ def cmd_profile_ingest(a) -> int:
                            "registry_verified": bool(_stage_v.get("verified")),
                            "note": "Không dùng probe trước upload thay cho canonical readback; tài liệu giữ staged."},
                           deterministic=_deterministic_enabled(a)), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     verify_text = actual_text if not _is_sheet else probe_text
     if verify_text:
         info = _classify_doc_header(verify_text, doc_name)
@@ -1736,7 +1782,7 @@ def cmd_profile_ingest(a) -> int:
                 print(_json_dumps({"ok": False, "step": "late_draft_rename_readback", "rename": _ren,
                                    "drive_readback": _ren_rb, "registry": _ren_reg},
                                   deterministic=_deterministic_enabled(a)), file=sys.stderr)
-                return 2
+                return {"rc": 2}
             hieuluc = DRAFT_WARNING
         gate = _ingest_verify_gate(verify_text, info, source_quality, getattr(a, "ocr_verified", False))
         _dd54a = _dup_dieu_scan(verify_text)   # v1.34.54 A7a: apply đọc text canonical — info-only cho profile
@@ -1744,6 +1790,17 @@ def cmd_profile_ingest(a) -> int:
             print(f"[tl] ℹ dup-Điều (A7a): {_dup_dieu_note(_dd54a)} — info; nghi file trộn nhiều văn bản thì soi tay.",
                   file=sys.stderr)
         chunks = _split_by_dieu_chunks(verify_text, chunk_max) if (len(verify_text) > chunk_max or size_bytes > large_threshold) else []
+    return {"src_id": src_id, "info": info, "doc_name": doc_name, "gate": gate,
+            "hieuluc": hieuluc, "chunks": chunks, "_counts": {"readback": ["gdoc"]}}
+
+
+def _pi_stage_commit(ctx):
+    """R-a WP7: stage COMMIT — verify-gate/NLM fallback/dedup-gate/add/reg-write/journal run_end nguyên văn."""
+    a, g, gdoc, fid = ctx["a"], ctx["g"], ctx["gdoc"], ctx["fid"]
+    info, gate, source_quality, chunks = ctx["info"], ctx["gate"], ctx["source_quality"], ctx["chunks"]
+    doc_name, hieuluc, profile = ctx["doc_name"], ctx["hieuluc"], ctx["profile"]
+    notebook_id, meta_id, _is_sheet = ctx["notebook_id"], ctx["meta_id"], ctx["_is_sheet"]
+    _contract, _pi_run_id = ctx["_contract"], ctx["_pi_run_id"]
     note = _profile_ingest_note(info, gate, source_quality, len(chunks))
     if not gate.get("ok"):
         rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "corpus": "false", "row_kind": "own",
@@ -1753,7 +1810,7 @@ def cmd_profile_ingest(a) -> int:
                "registry_verified": bool(rb.get("verified")),
                "note": "Canonical đã tạo nhưng chưa corpus/NLM; cần verify/OCR lại."}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 2
+        return {"rc": 2}
 
     # v1.34.60 (E3 — tổng quát hoá B1 sang profile-ingest, ADR-4): NLM hard-dead → TỰ CHUYỂN --no-nlm-add
     # (mirror ingest-local v1.34.54) thay vì chết ở dedup-gate LIVE_SOURCE_LIST_FAILED phía dưới; Drive+registry
@@ -1779,7 +1836,8 @@ def cmd_profile_ingest(a) -> int:
             out["note"] = ("File LỚN cần chunk khi lên NLM — đường add-tay KHÔNG tự tạo chunk GDoc; khi nạp NLM "
                            "chạy lại profile-ingest KHÔNG --no-nlm-add (pipeline chunk+add đầy đủ).")
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 0 if rb.get("verified") else 2
+        return {"stop": "DONE", "rc": 0 if rb.get("verified") else 2,
+                "_counts": {"write": ["registry_row"]}}
     nc = _imp("nlm_cli")
     # v1.29.3 (AUDIT B3 #3): dedup-live gate TRƯỚC source_add — ca thật: re-run profile-ingest sau fail giữa chừng tạo
     # GDoc MỚI nhưng TITLE CŨ → nguồn trùng nội dung trên notebook. Gate khớp title canonical + mọi chunk-title.
@@ -1793,13 +1851,13 @@ def cmd_profile_ingest(a) -> int:
                                   "KHÔNG add NLM. Xử: `tl nlm-orphans`/`tl nlm-reconcile` link bản cũ, hoặc xóa nguồn cũ "
                                   "trước khi ingest bản mới. Ép add: --skip-live-check."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     if _verd == "list_failed" and not getattr(a, "skip_live_check", False):
         print(json.dumps({"ok": False, "step": "nlm_dedup_gate", "aborted": True, "reason": "LIVE_SOURCE_LIST_FAILED",
                           "gdoc": gdoc,
                           "note": "KHÔNG liệt kê được nguồn LIVE (S13) → DỪNG trước source_add. `nlm login` rồi chạy lại; "
                                   "HOẶC --skip-live-check nếu CHẮC không trùng."}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     nlm_sources = []
     if len(chunks) > 1:
         nlm_sources = _profile_push_chunks(g, nc, notebook_id, gdoc, doc_name, info, note, meta_id, chunks)
@@ -1816,7 +1874,7 @@ def cmd_profile_ingest(a) -> int:
         if not (add.get("ok") and add.get("source_id")):
             print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add}, ensure_ascii=False, indent=2),
                   file=sys.stderr)
-            return 2
+            return {"rc": 2}
         src = add.get("source_id")
         rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": doc_name, "nlm_source_id": src,
                                       "nlm_notebook_id": notebook_id, "row_kind": "own",
@@ -1836,7 +1894,25 @@ def cmd_profile_ingest(a) -> int:
                                  "counts": {"nlm_sources": len(nlm_sources)},
                                  "verify": {"gdoc": gdoc, "registry_verified": bool(rb.get("verified"))}})
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if _final_ok else 2
+    return {"stop": "DONE", "rc": 0 if _final_ok else 2, "_counts": {"write": ["registry_row"]}}
+
+
+def cmd_profile_ingest(a) -> int:
+    """R-a WP7 (ADR-0004 Đ1, KE_HOACH p13 grill 25-07): điều phối qua ENGINE `run_pipeline` — MỘT bảng
+    stage chuỗi ADR plan→confirm→stage→write→readback→commit; thân từng stage là code cũ BÊ NGUYÊN VĂN
+    (parity K1/K2/K3 — charact `.tl_state/charact_pre_wp7.json`); feature-detect ingest_commit nằm TRONG
+    stage write (quyết định α). resume/OCR-bridge/chunks/ZIP ngoài khuôn R-a (quyết định 6)."""
+    if getattr(a, "resume", False):   # v1.34.55 C4+C5: RESUME theo registry — không upload/organize lại
+        return cmd_profile_ingest_resume(a)
+    from tl_core.ingest_engine import run_pipeline   # R-a: engine sở hữu trình tự (stdlib thuần, không bind)
+    return run_pipeline([
+        {"name": "plan", "run": _pi_stage_plan},
+        {"name": "confirm", "run": _pi_stage_confirm},
+        {"name": "stage", "run": _pi_stage_prepare},
+        {"name": "write", "run": _pi_stage_write},
+        {"name": "readback", "run": _pi_stage_readback},
+        {"name": "commit", "run": _pi_stage_commit},
+    ], {"a": a})
 
 
 def cmd_verify_staged(a) -> int:

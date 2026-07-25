@@ -254,3 +254,47 @@ def run_child_inprocess(child_args, *, parser_factory) -> dict:
         payload = None
     return {"cmd": " ".join(args), "returncode": int(rc or 0), "ok": (rc or 0) == 0,
             "json": payload, "stdout_tail": so[-2000:], "stderr_tail": se[-2000:], "inprocess": True}
+
+
+# ── 4. State machine R-a (ADR-0004 Đ1 — KE_HOACH p13 grill 25-07, quyết định i/α) ──
+def run_pipeline(stages, ctx) -> int:
+    """Thi hành TUẦN TỰ bảng stage khai báo — engine sở hữu TRÌNH TỰ + FAIL-CLOSED + ĐẾM write/readback;
+    I/O (GAS/Drive/journal) do adapter tiêm vào ctx dưới dạng callback (engine giữ stdlib thuần, không bind).
+
+    stage = {"name": str, "run": fn(ctx) -> dict|None}. Hợp đồng kết quả của run:
+      • None / dict thường            → shallow-merge vào ctx, đi tiếp stage kế.
+      • {"rc": n} (không kèm "stop")  → DỪNG fail-closed: ctx["_halt"]={stage, rc}, trả n (stage sau KHÔNG chạy).
+      • {"stop": "<OUTCOME>"[, "rc"]} → DỪNG HỢP LỆ (DRY_PLAN / STAGED_STOP / DONE…): ctx["_stop"]=outcome,
+                                        trả rc (mặc định 0). DONE kèm rc=2 = chạy hết nhưng hậu điều fail.
+      • key "_counts" = {"write": [resource…], "readback": [resource…]} → engine cộng dồn ctx["_counters"]
+        và ENFORCE ADR-0004: mỗi resource ≤ 1 write TRONG MỘT STAGE (vượt = ValueError PIPELINE_WRITE_BOUND
+        — lỗi lập trình bảng stage, không phải lỗi dữ liệu); xuyên-stage được phép (ca late-draft rename).
+    ctx["_trace"] ghi thứ tự stage đã chạy (khớp sub-step marker ADR-0011 khi adapter cần)."""
+    ctx.setdefault("_trace", [])
+    ctx.setdefault("_counters", {"write": {}, "readback": {}})
+    for st in stages:
+        name = str(st.get("name") or f"stage{len(ctx['_trace'])}")
+        ctx["_trace"].append(name)
+        res = st["run"](ctx)
+        if not res:
+            continue
+        cnt = res.pop("_counts", None)
+        if cnt:
+            for kind in ("write", "readback"):
+                seen: dict = {}
+                for r in (cnt.get(kind) or []):
+                    seen[r] = seen.get(r, 0) + 1
+                    if kind == "write" and seen[r] > 1:
+                        raise ValueError(f"PIPELINE_WRITE_BOUND: stage '{name}' ghi resource '{r}' "
+                                         f"{seen[r]} lần (ADR-0004: ≤1 write/resource/stage)")
+                    ctx["_counters"][kind][r] = ctx["_counters"][kind].get(r, 0) + 1
+        if "stop" in res:
+            ctx["_stop"] = str(res["stop"])
+            return int(res.get("rc") or 0)
+        if res.get("rc") is not None:
+            ctx["_halt"] = {"stage": name, "rc": int(res["rc"])}
+            return int(res["rc"])
+        for k, v in res.items():
+            if k != "rc":
+                ctx[k] = v
+    return 0

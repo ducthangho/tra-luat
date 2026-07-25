@@ -18804,6 +18804,60 @@ def run() -> int:
                 and _TL_MODULE._ingest_perf_hint(False, True) is None)
     _t110("r201_perf_hint_plan_hash_note", _c201_perf_hint_plan_hash_note)
 
+    def _c203_run_pipeline_halt_merge_stop():
+        # R-a WP7 (KE_HOACH p13 §3, quyết định i): engine `run_pipeline(stages, ctx)` — tuần tự, merge kết
+        # quả thường vào ctx; {"rc":n} = DỪNG fail-closed (stage sau KHÔNG chạy, ctx._halt ghi stage);
+        # {"stop":X} = DỪNG HỢP LỆ (DRY_PLAN/STAGED_STOP/DONE), rc mặc định 0; ctx._trace đúng thứ tự.
+        import tl_core.ingest_engine as _ie203
+        _ran = []
+        _ctx = {}
+        _rc = _ie203.run_pipeline([
+            {"name": "s1", "run": lambda c: (_ran.append("s1") or {"x": 1})},
+            {"name": "s2", "run": lambda c: (_ran.append("s2") or {"rc": 2})},
+            {"name": "s3", "run": lambda c: _ran.append("s3")},
+        ], _ctx)
+        _ok_halt = (_rc == 2 and _ran == ["s1", "s2"] and _ctx.get("x") == 1
+                    and _ctx.get("_halt", {}).get("stage") == "s2" and _ctx.get("_trace") == ["s1", "s2"])
+        _ctx2 = {}
+        _rc2 = _ie203.run_pipeline([
+            {"name": "w", "run": lambda c: {"stop": "STAGED_STOP"}},
+            {"name": "never", "run": lambda c: {"rc": 1}},
+        ], _ctx2)
+        _ok_stop = (_rc2 == 0 and _ctx2.get("_stop") == "STAGED_STOP" and _ctx2.get("_trace") == ["w"])
+        _rc3 = _ie203.run_pipeline([{"name": "done", "run": lambda c: {"stop": "DONE", "rc": 2}}], {})
+        return _ok_halt and _ok_stop and _rc3 == 2
+    _t110("r203_run_pipeline_halt_merge_stop", _c203_run_pipeline_halt_merge_stop)
+
+    def _c203_run_pipeline_write_bound():
+        # ADR-0004: mỗi resource ≤1 write MỖI STAGE (rename late-draft ở stage khác vẫn hợp lệ) — vượt trong
+        # cùng stage = ValueError PIPELINE_WRITE_BOUND; counters cộng dồn xuyên stage cho audit.
+        import tl_core.ingest_engine as _ie203
+        _ctx = {}
+        _rc = _ie203.run_pipeline([
+            {"name": "w1", "run": lambda c: {"_counts": {"write": ["gdoc"], "readback": ["gdoc"]}}},
+            {"name": "w2", "run": lambda c: {"_counts": {"write": ["gdoc"]}}},
+        ], _ctx)
+        _ok_two_stage = (_rc == 0 and _ctx["_counters"]["write"]["gdoc"] == 2
+                         and _ctx["_counters"]["readback"]["gdoc"] == 1)
+        try:
+            _ie203.run_pipeline([{"name": "bad", "run": lambda c: {"_counts": {"write": ["r", "r"]}}}], {})
+            _ok_bound = False
+        except ValueError as _e:
+            _ok_bound = "PIPELINE_WRITE_BOUND" in str(_e)
+        return _ok_two_stage and _ok_bound
+    _t110("r203_run_pipeline_write_bound", _c203_run_pipeline_write_bound)
+
+    def _c203_profile_ingest_via_pipeline():
+        # Khóa KHUNG (mutation-killer di trú R-a): cmd_profile_ingest phải điều phối qua run_pipeline với
+        # ĐÚNG chuỗi ADR plan→confirm→stage→write→readback→commit; hành vi ngoài (call-count, plan bytes)
+        # đã khóa bởi r198_profile_via_commit_vs_fallback + charact_pre_wp7 (K1/K2 — so ngoài selftest).
+        import inspect as _ins203
+        import tl_core.ingest_ops as _io203
+        _src = _ins203.getsource(_io203.cmd_profile_ingest)
+        return ("run_pipeline" in _src
+                and all(f'"{n}"' in _src for n in ("plan", "confirm", "stage", "write", "readback", "commit")))
+    _t110("r203_profile_ingest_via_pipeline", _c203_profile_ingest_via_pipeline)
+
     def _c198_ingest_local_giu_duong_cu():
         # (e): ingest-local KHÔNG đổi đường release này (quyết định #6 — soak xong mới chuyển):
         # source cmd_ingest_local vẫn g.get("organize"...), KHÔNG nhắc ingest_commit.

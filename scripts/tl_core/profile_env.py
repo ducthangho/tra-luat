@@ -538,6 +538,25 @@ def _write_json_atomic(target: Path, data: dict) -> None:
     os.replace(_tmp, str(target))
 
 
+def _config_backup_dir() -> Path:
+    """r202 (doctrine r193 — backup config CHỨA token KHÔNG BAO GIỜ nằm trong cây skill; sự cố token
+    lọt bundle 23-07 + profile-delete để `.bak.json` ở gốc cây 25-07): thư mục đích cho MỌI backup
+    config. Ưu tiên TL_CONFIG_BACKUP_DIR (test/override) → `D:\\Quốc hội\\_config_backups` (máy chuẩn,
+    chỉ khi ĐÃ tồn tại — không tự dựng cây ngoài) → `%LOCALAPPDATA%\\tra-luat\\_config_backups`."""
+    env = (os.environ.get("TL_CONFIG_BACKUP_DIR") or "").strip()
+    if env:
+        target = Path(env).expanduser()
+    else:
+        preferred = Path("D:/Quốc hội/_config_backups")
+        if preferred.is_dir():
+            target = preferred
+        else:
+            base = os.environ.get("LOCALAPPDATA") or str(Path.home())
+            target = Path(base) / "tra-luat" / "_config_backups"
+    target.mkdir(parents=True, exist_ok=True)
+    return target
+
+
 def _mutable_config_target(config_path: str | None = None) -> tuple[Path | None, dict, str | None]:
     """Choose the same config-of-record used for reads, then mutate that exact file.
 

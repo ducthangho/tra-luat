@@ -520,10 +520,13 @@ def cmd_profile_delete(a) -> int:
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
         return 2
     # (MERGE Claude) backup config TRƯỚC khi gỡ → hồi phục được
+    # r202 (doctrine r193): backup CHỨA token — ghi vào _config_backup_dir() NGOÀI cây skill;
+    # trước đây with_suffix đặt `.bak.json` CẠNH config = gốc cây (sự cố Tầng-3 smoke 25-07).
     bkp = None
     try:
         if path and _path_exists_safe(path):
-            bkp = str(Path(path).with_suffix(f".{_profile_file_slug(name)}.bak.json"))
+            _bkp_name = Path(path).with_suffix(f".{_profile_file_slug(name)}.bak.json").name
+            bkp = str(_config_backup_dir() / _bkp_name)
             _write_json_atomic(Path(bkp), cfg)
     except Exception:
         bkp = None

@@ -18813,6 +18813,53 @@ def run() -> int:
         return 'g.get("organize"' in _src and "ingest_commit" not in _src
     _t110("r198_ingest_local_giu_duong_cu", _c198_ingest_local_giu_duong_cu)
 
+    # ═══ r202 — sự cố Tầng-3 smoke 25-07 (mẫu r193): profile-delete --apply backup config (CHỨA token)
+    # bằng Path(path).with_suffix(...) ⇒ `.bak.json` nằm CẠNH config = GỐC cây skill — vi phạm doctrine
+    # «backup config KHÔNG BAO GIỜ nằm trong cây skill». Luật mới: ghi vào _config_backup_dir()
+    # (TL_CONFIG_BACKUP_DIR → D:\Quốc hội\_config_backups → %LOCALAPPDATA%\tra-luat\_config_backups). ═══
+    def _c202_profile_delete_backup_ngoai_cay():
+        # Chỉ-nó-chặn: trước r202 backup rơi vào thư mục config (giả lập gốc cây) và TL_CONFIG_BACKUP_DIR
+        # bị bỏ qua; sau r202 thư mục config SẠCH `.bak` + backup tròn nội dung nằm đúng đích ngoài cây.
+        import types as _ty202
+        _sav_pme = _TL_MODULE._profile_manifest_entries_for
+        _sav_env = _env110({"TL_CONFIG_BACKUP_DIR": None})
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _tree = _P110(_d) / "skilltree"; _tree.mkdir()
+                _bdir = _P110(_d) / "backups"
+                _cfgp = _tree / "tra_luat_config.v2.json"
+                _cfg0 = {"defaultProfile": "vbqppl",
+                         "profiles": {"vbqppl": {"rootFolderId": "r0"},
+                                      "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}
+                _cfgp.write_text(json.dumps(_cfg0, ensure_ascii=False), encoding="utf-8")
+                os.environ["TL_CONFIG_BACKUP_DIR"] = str(_bdir)
+                _TL_MODULE._profile_manifest_entries_for = lambda *a, **k: ([], None)
+                _ns = _ty202.SimpleNamespace(name="XoaThu", config=str(_cfgp), refresh=False,
+                                             apply=True, confirm="yes",
+                                             delete_nlm_sources=False, trash_assets=False)
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo):
+                    _rc = _TL_MODULE.cmd_profile_delete(_ns)
+                _out = json.loads(_bo.getvalue())
+                _bkp = _out.get("config_backup") or ""
+                _tree_bak = [p.name for p in _tree.iterdir() if ".bak" in p.name]
+                _cfg_after = json.loads(_cfgp.read_text(encoding="utf-8"))
+                _bkp_ok = (bool(_bkp) and _P110(_bkp).is_file()
+                           and _P110(_bkp).parent.resolve() == _bdir.resolve()
+                           and json.loads(_P110(_bkp).read_text(encoding="utf-8")) == _cfg0)
+                # env UNSET → đích mặc định vẫn NGOÀI cây skill (doctrine — chạy được cả máy lạ lẫn máy chuẩn)
+                os.environ.pop("TL_CONFIG_BACKUP_DIR", None)
+                _dflt = _P110(str(_TL_MODULE._config_backup_dir())).resolve()
+                _skroot = _P110(_TL_MODULE.__file__).resolve().parent.parent
+                _dflt_ok = (_dflt.name == "_config_backups" and _dflt != _skroot
+                            and _skroot not in _dflt.parents)
+                return (_rc == 0 and _out.get("ok") is True and _bkp_ok and not _tree_bak
+                        and "XoaThu" not in (_cfg_after.get("profiles") or {}) and _dflt_ok)
+        finally:
+            _TL_MODULE._profile_manifest_entries_for = _sav_pme
+            _env110_restore(_sav_env)
+    _t110("r202_profile_delete_backup_ngoai_cay", _c202_profile_delete_backup_ngoai_cay)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

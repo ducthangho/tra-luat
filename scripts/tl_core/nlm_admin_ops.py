@@ -675,12 +675,27 @@ def _nlm_reconcile_plan(live_sources, entries: list, notebook_id: str) -> dict:
 # sàn live ≥ 20 tránh kích oan notebook nhỏ/mới. HẰNG re-export tl.py (bẫy I11).
 _RECONCILE_SUSPECT_MIN_LIVE = 20
 _RECONCILE_SUSPECT_UNREG_RATIO = 0.5
+_RECONCILE_REGISTRY_THIN_RATIO = 0.2   # r206: registry < 20% số nguồn live ⇒ MỎNG bất thường (nghi xoá/sai scope)
 
 
 def _reconcile_channel_suspect(live_n: int, unreg_n: int) -> bool:
     """PURE (FIX-C r201): True khi tỷ lệ 'unregistered'/live vượt ngưỡng nghi-kênh — dấu hiệu kênh
     liệt kê trả dữ liệu sai namespace, KHÔNG phải registry lệch thật."""
     return live_n >= _RECONCILE_SUSPECT_MIN_LIVE and unreg_n > live_n * _RECONCILE_SUSPECT_UNREG_RATIO
+
+
+def _reconcile_suspect_kind(live_n: int, unreg_n: int, registry_n: int) -> str:
+    """PURE (r206 — ca thật 25-07): guard r201 chỉ nhìn TỶ LỆ nên hô nhầm «kênh liệt kê suy hoá» khi
+    registry nền bị xoá còn 2 dòng (live 300/300 unregistered, nlm-auth-status alive, cookie tươi 6,6′)
+    → đẩy người vận hành đi `nlm login` trong khi đang là CẤP CỨU MẤT DỮ LIỆU. Phân định NGUYÊN NHÂN
+    khi guard ĐÃ bật: registry mỏng bất thường so với live ⇒ REGISTRY_SCOPE_SUSPECT (registry rỗng/sai
+    scope), ngược lại giữ LISTING_CHANNEL_SUSPECT. Trả "" khi guard KHÔNG bật — ngưỡng CHẶN của r201
+    giữ NGUYÊN, hàm này chỉ đổi LỜI CHẨN."""
+    if not _reconcile_channel_suspect(live_n, unreg_n):
+        return ""
+    if registry_n < live_n * _RECONCILE_REGISTRY_THIN_RATIO:
+        return "REGISTRY_SCOPE_SUSPECT"
+    return "LISTING_CHANNEL_SUSPECT"
 
 
 def cmd_nlm_reconcile(a) -> int:
@@ -934,16 +949,35 @@ def cmd_nlm_reconcile(a) -> int:
     # KHÔNG đáng tin. DRY vẫn in report (verdict trong out) + banner LOUD + playbook; --apply DỪNG rc=2
     # TRƯỚC mọi ghi (chốt đặt sau nhánh DRY, trước preflight/gate/journal); override --force-unsafe.
     # Đường --from-plan không re-scan live (live_ids rỗng, unregistered rỗng) → guard bất hoạt by design.
+    _reg_n206 = len(entries or [])          # r206: số dòng registry/manifest lúc đối soát — LUÔN in ra
+    out["registry_rows_seen"] = _reg_n206
     _suspect_c2 = _reconcile_channel_suspect(len(live_ids), len(plan["unregistered"]))
-    if _suspect_c2:
+    _kind206 = _reconcile_suspect_kind(len(live_ids), len(plan["unregistered"]), _reg_n206)
+    if _suspect_c2 and _kind206 == "REGISTRY_SCOPE_SUSPECT":
+        # r206: registry MỎNG bất thường ⇒ KHÔNG phải bệnh kênh liệt kê. Đây là cấp cứu dữ liệu —
+        # playbook phải trỏ registry/version-history, TUYỆT ĐỐI không dụ người dùng --force-unsafe.
+        out["verdict"] = "REGISTRY_SCOPE_SUSPECT"
+        out["verdict_note"] = (f"registry chỉ {_reg_n206} dòng so với {len(live_ids)} nguồn live "
+                               f"(<{int(_RECONCILE_REGISTRY_THIN_RATIO * 100)}%) — nghi registry RỖNG/SAI "
+                               "SCOPE (bị xoá, hoặc registryDocId trỏ nhầm Sheet), KHÔNG phải kênh liệt kê. "
+                               "ĐỪNG tin plan này.")
+        print(f"[tl] 🛑🛑 REGISTRY_SCOPE_SUSPECT: registry chỉ {_reg_n206} dòng / {len(live_ids)} nguồn live "
+              f"— nghi MẤT DỮ LIỆU hoặc sai scope registry (KHÔNG phải kênh NLM).", file=sys.stderr)
+        print("[tl]    playbook: (1) `tl counts --refresh` đối chiếu registry_rows; (2) `tl profile-info "
+              "--json` kiểm registryDocId có trỏ đúng Sheet nền; (3) MỞ VERSION HISTORY của Sheet registry "
+              "tìm revision làm rơi số dòng → khôi phục; (4) soi `tl journal` + Apps Script Executions. "
+              "--apply bị CHẶN rc=2 trước mọi ghi. ⛔ ĐỪNG --force-unsafe khi registry đang mỏng — sẽ "
+              "link/clear bậy đè lên bản đã hỏng.", file=sys.stderr)
+    elif _suspect_c2:
         out["verdict"] = "LISTING_CHANNEL_SUSPECT"
         out["verdict_note"] = (f"unregistered {len(plan['unregistered'])}/{len(live_ids)} live "
                                f"(>{int(_RECONCILE_SUSPECT_UNREG_RATIO * 100)}%, live≥"
                                f"{_RECONCILE_SUSPECT_MIN_LIVE}) — nghi KÊNH LIỆT KÊ NLM suy hoá trả id "
-                               "lạc namespace, KHÔNG phải registry lệch thật. ĐỪNG tin plan này.")
+                               f"lạc namespace, KHÔNG phải registry lệch thật (registry {_reg_n206} dòng "
+                               "— KHÔNG mỏng). ĐỪNG tin plan này.")
         print(f"[tl] 🛑🛑 LISTING_CHANNEL_SUSPECT: {len(plan['unregistered'])}/{len(live_ids)} nguồn live "
               "bị coi là 'unregistered' — kênh liệt kê NLM khả nghi (đã từng thấy 3 kênh chết trả id lạc "
-              "namespace).", file=sys.stderr)
+              f"namespace); registry {_reg_n206} dòng nên KHÔNG nghi mất dữ liệu.", file=sys.stderr)
         print("[tl]    playbook: (1) đổi kênh liệt kê / `tl nlm-auth-status` soi 3 kênh; (2) `nlm login` "
               "làm tươi cookie; (3) đo lại trên máy khỏe rồi so verdict. --apply bị CHẶN rc=2 trước mọi "
               "ghi (override tường minh: --force-unsafe).", file=sys.stderr)
@@ -1003,11 +1037,18 @@ def cmd_nlm_reconcile(a) -> int:
         _emit_json_payload(out, getattr(a, "out", None)); return 0
     if _suspect_c2 and not getattr(a, "force_unsafe", False):
         # FIX-C r201: DỪNG TRƯỚC MỌI GHI (preflight/gate/journal/reg_bulk đều chưa chạy tới).
-        print(json.dumps({"ok": False, "error": "LISTING_CHANNEL_SUSPECT",
+        # r206: error mang ĐÚNG lời chẩn (registry mỏng ⇒ REGISTRY_SCOPE_SUSPECT) — ngưỡng chặn KHÔNG đổi.
+        _note206 = ("Registry RỖNG/SAI SCOPE — apply theo plan này sẽ link/clear bậy đè lên bản đã hỏng. "
+                    "Khôi phục registry trước (version history Sheet / `tl counts --refresh` / "
+                    "`tl profile-info --json`); ⛔ ĐỪNG --force-unsafe khi registry đang mỏng."
+                    if _kind206 == "REGISTRY_SCOPE_SUSPECT" else
+                    "Kênh liệt kê NLM khả nghi — apply theo plan này sẽ link/clear bậy hàng "
+                    "loạt. Làm theo playbook banner (đổi kênh / nlm login / đo máy khỏe); "
+                    "cố ý đi tiếp: --force-unsafe.")
+        print(json.dumps({"ok": False, "error": _kind206,
                           "unregistered_on_nlm": len(plan["unregistered"]), "live_on_nlm": len(live_ids),
-                          "note": "Kênh liệt kê NLM khả nghi — apply theo plan này sẽ link/clear bậy hàng "
-                                  "loạt. Làm theo playbook banner (đổi kênh / nlm login / đo máy khỏe); "
-                                  "cố ý đi tiếp: --force-unsafe."}, ensure_ascii=False), file=sys.stderr)
+                          "registry_rows_seen": _reg_n206,
+                          "note": _note206}, ensure_ascii=False), file=sys.stderr)
         return 2
     for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tuổi cookie trước lô ghi (WARN; tầng-1 live đã nằm ở source_list phía trên)
         print(f"[tl] ⚠ {_w54}", file=sys.stderr)

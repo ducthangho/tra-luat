@@ -109,3 +109,33 @@
   Với file <1MB b64 KHÔNG phải bottleneck (phình +33% ≈ <1s mạng) — độ trễ nằm ở Apps Script runtime
   + convert GDoc. File rất lớn → cân nhắc đường gws CLI (backlog), KHÔNG đổi đường ingest chuẩn.
 - Readback sau lô: `reg-query` 1 LẦN cuối (KHÔNG `--refresh` giữa chừng — mỗi refresh kéo registry đầy).
+
+## 11. Chẩn đoán sự cố registry + phiên REMOTE (bài học 2026-07-25)
+
+- **`nlm-reconcile` báo ~100% nguồn live thành `unregistered` KHÔNG mặc nhiên là bệnh kênh liệt kê.**
+  Ca thật 25-07: registry nền bị xoá còn **2 dòng** → 300/300 unregistered, trong khi `tl nlm-auth-status`
+  báo `alive:true`, cookie mới 6,6′. Guard r201 chỉ nhìn TỶ LỆ nên hô nhầm `LISTING_CHANNEL_SUSPECT` +
+  playbook `nlm login` — chữa nhầm bệnh. Từ r206 guard soi thêm `registry_rows_seen` và hô
+  `REGISTRY_SCOPE_SUSPECT` khi registry mỏng (<20% số live). **Dù verdict nào cũng ĐỪNG `--force-unsafe`**
+  trước khi `tl counts --refresh` xác nhận registry còn đủ dòng.
+- **`tl counts` KHÔNG kèm `--refresh` đọc SNAPSHOT cache** (`snapshot NNNs`) — có thể là ảnh cũ của trạng
+  thái đã hỏng. Phân định sự cố 25-07 chính nhờ so cached (2 dòng) với `--refresh` (1300 dòng). Mọi kết
+  luận "mất dữ liệu" phải chốt bằng `--refresh`, không chốt bằng snapshot.
+- **`tl journal` là file CỤC BỘ theo máy/clone.** Thao tác chạy từ clone khác (`C:\qh` vs `D:\...`), phiên
+  Cowork/Chat, hay máy khác KHÔNG xuất hiện ở đây — journal sạch KHÔNG đồng nghĩa "không ai ghi". Truy
+  nguyên có thẩm quyền: **version history của Sheet registry** (mốc giờ + tài khoản từng revision) và
+  **Apps Script → Executions** (mọi `doPost/doGet` bất kể client). Journal chỉ là manh mối thứ ba.
+- **`profile-delete-assets` xoá ĐÚNG scope** (kiểm 25-07: 4 lần chạy, mỗi lần 1 Sheet 44-ký-tự + 3 thư mục
+  33-ký-tự của CHÍNH profile đó; 0/16 id trùng tài sản nền). Đừng đổ tội cho nó khi chưa đối chiếu id —
+  so `done_keys` của `tl journal <run_id> --json` với `registryDocId`/`rootFolderId`/`manifestId`/categories
+  trong `tl profile-info --json`.
+- **Phiên Claude Code REMOTE (web) KHÔNG chạy được lệnh live**: egress policy chặn `script.google.com`,
+  `notebooklm.google.com`, `drive.usercontent.google.com` (403 tại CONNECT — xem `curl "$HTTPS_PROXY/__agentproxy/status"`).
+  Muốn mở: environment → Network access → **Custom** + `*.google.com`, `*.googleusercontent.com`,
+  `*.googleapis.com`, nhớ tick "include default list" (giữ npm/pypi). **Bẫy dễ sót: `script.googleusercontent.com`** —
+  GAS redirect payload phản hồi sang host này, thiếu nó thì mọi call webapp vẫn chết dù đã mở `script.google.com`.
+  Drive MCP VẪN sống khi Google bị chặn (traffic connector đi qua server Anthropic, không qua egress sandbox)
+  → "Drive đọc được" KHÔNG mâu thuẫn với "webapp chết".
+- **Clone tươi báo 12 `F821` là GIẢ**: các tên bơm động vào `globals()` qua vòng `_STUB_MAP` (`tl.py`)
+  — `build_parser`, `load_creds`, `_active_profile`… Selftest xanh là bằng chứng runtime resolve đúng.
+  Chỉ coi là bug khi số F821 LỆCH khỏi baseline này.

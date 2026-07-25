@@ -18758,7 +18758,11 @@ def run() -> int:
             _TL_MODULE._shard_row_kind = lambda *a, **k: None
             # (i) 25 nguồn live, 0 khớp registry → 100% unregistered (≥20): DRY banner + apply chặn rc=2
             _srcs_bad = [{"id": f"zz{i}", "title": f"La_khong_khop_{i}"} for i in range(25)]
-            _ents_1 = [{"drive_id": "dR1", "name": "Dong_Reg_1", "nlm_source_id": "", "corpus": "true"}]
+            # r206 (đổi fixture CÓ CHỦ ĐÍCH): bệnh «kênh liệt kê suy hoá» THẬT thì registry vẫn DÀY —
+            # 30 dòng ≥ 20% của 25 live → verdict giữ LISTING_CHANNEL_SUSPECT. Ca registry MỎNG (nghi
+            # mất dữ liệu) tách sang r206_reconcile_registry_thin_verdict.
+            _ents_1 = [{"drive_id": f"dR{i}", "name": f"Dong_Reg_{i}", "nlm_source_id": "", "corpus": "true"}
+                       for i in range(30)]
             _rcd, _od, _ed = _runC(_srcs_bad, _ents_1)
             _ok_dry = (_rcd == 0 and _od.get("verdict") == "LISTING_CHANNEL_SUSPECT"
                        and _od.get("unregistered_on_nlm") == 25 and _od.get("live_on_nlm") == 25
@@ -18789,6 +18793,91 @@ def run() -> int:
             for _k, _v in _savC.items():
                 setattr(_TL_MODULE, _k, _v)
     _t110("r201_reconcile_listing_channel_guard", _c201_reconcile_listing_channel_guard)
+
+    def _c206_suspect_kind_pure():
+        # r206 PURE: phân định nguyên nhân khi guard r201 đã bật. Ngưỡng CHẶN không đổi — chỉ LỜI CHẨN.
+        _f = _TL_MODULE._reconcile_suspect_kind
+        return (_f(300, 300, 2) == "REGISTRY_SCOPE_SUSPECT"          # ca thật 25-07: registry bị xoá còn 2 dòng
+                and _f(300, 300, 1300) == "LISTING_CHANNEL_SUSPECT"  # registry lành → đúng bệnh kênh liệt kê
+                and _f(300, 10, 2) == ""                             # guard KHÔNG bật → KHÔNG chẩn bừa
+                and _f(5, 5, 0) == ""                                # live<20 → r201 bất hoạt, giữ nguyên
+                and _f(25, 25, 5) == "LISTING_CHANNEL_SUSPECT"       # biên: 5 == 25*20% → KHÔNG coi là mỏng
+                and _f(25, 25, 4) == "REGISTRY_SCOPE_SUSPECT")       # biên dưới → mỏng
+    _t110("r206_suspect_kind_pure", _c206_suspect_kind_pure)
+
+    def _c206_reconcile_registry_thin_verdict():
+        # r206 (ca thật 25-07): registry nền bị xoá còn 2 dòng → 300/300 live thành 'unregistered'.
+        # Guard r201 (chỉ nhìn tỷ lệ) hô «LISTING_CHANNEL_SUSPECT» + playbook `nlm login`, TRONG KHI
+        # nlm-auth-status báo alive/cookie 6,6′ — lời chẩn sai đẩy người vận hành đi chữa nhầm bệnh,
+        # còn --force-unsafe thì mời gọi ghi đè lên registry đã hỏng. Khoá: registry mỏng ⇒ verdict
+        # REGISTRY_SCOPE_SUSPECT, playbook trỏ version-history/counts/profile-info và CẤM force-unsafe;
+        # hành vi CHẶN (DRY rc=0 có verdict · apply rc=2 TRƯỚC mọi ghi) GIỮ NGUYÊN r201.
+        import io as _ioD, contextlib as _ctxD
+        _writesD = []
+        class _FkGasD:
+            def get(self, *a, **k): _writesD.append("gas_get"); return {"ok": True}
+            def post(self, *a, **k): _writesD.append("gas_post"); return {"ok": True}
+        _keysD = ("_imp", "apply_profile_offline", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+                  "_gas", "_apply_gate", "_apply_journal_start", "_journaled_reg_write", "_journal_append",
+                  "_nlm_preflight_report", "_resolve_shard_topology", "_shard_row_kind")
+        _savD = {k: getattr(_TL_MODULE, k) for k in _keysD}
+        def _runD(srcs, ents, apply=False):
+            class _FkNCd:
+                def source_list(self, nb, skip_freshness=True, **kw):
+                    return {"ok": True, "count": len(srcs), "sources": srcs}
+            _TL_MODULE._imp = lambda name: _FkNCd() if name == "nlm_cli" else _savD["_imp"](name)
+            _TL_MODULE._manifest_entries = lambda refresh=False: ents
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id="NBd", refresh=True,
+                                     apply=apply, clear_stale=False, force_unsafe=False, out=None,
+                                     all_notebooks=False, from_plan=None, plan_out=None, json=True)
+            _bo, _be = _ioD.StringIO(), _ioD.StringIO()
+            with _ctxD.redirect_stdout(_bo), _ctxD.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            try:
+                _o = json.loads(_bo.getvalue())
+            except Exception:
+                _o = {}
+            return _rc, _o, _be.getvalue()
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ((nb or "NBd"), None)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkGasD()
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+            _TL_MODULE._apply_journal_start = lambda *a, **k: (_writesD.append("journal") or "runD")
+            _TL_MODULE._journaled_reg_write = lambda *a, **k: (_writesD.append("reg_write")
+                                                               or {"verified": True, "patched": 0,
+                                                                   "reg_bulk": {"ok": True}})
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=False: {"warn": []}
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {}
+            _TL_MODULE._shard_row_kind = lambda *a, **k: None
+            # ca thật thu nhỏ: 30 nguồn live, registry còn ĐÚNG 2 dòng (bị xoá) → 100% unregistered
+            _srcs_w = [{"id": f"live{i}", "title": f"Nguon_song_{i}"} for i in range(30)]
+            _ents_thin = [{"drive_id": "dS1", "name": "Sot_lai_1", "nlm_source_id": "", "corpus": "true"},
+                          {"drive_id": "dS2", "name": "Sot_lai_2", "nlm_source_id": "", "corpus": "true"}]
+            _rcd, _od, _ed = _runD(_srcs_w, _ents_thin)
+            _ok_dry = (_rcd == 0 and _od.get("verdict") == "REGISTRY_SCOPE_SUSPECT"
+                       and _od.get("registry_rows_seen") == 2 and _od.get("live_on_nlm") == 30
+                       and "REGISTRY_SCOPE_SUSPECT" in _ed and "version history" in _ed.lower()
+                       and "LISTING_CHANNEL_SUSPECT" not in _ed)
+            # playbook KHÔNG được mời --force-unsafe như lối thoát; phải có dấu cấm
+            _ok_no_lure = "ĐỪNG --force-unsafe" in _ed
+            _writesD.clear()
+            _rca, _oa, _ea = _runD(_srcs_w, _ents_thin, apply=True)
+            _ok_apply = (_rca == 2 and _writesD == []            # CHẶN trước MỌI ghi (kể cả journal)
+                         and "REGISTRY_SCOPE_SUSPECT" in _ea and "LISTING_CHANNEL_SUSPECT" not in _ea)
+            # registry DÀY + cùng tỷ lệ 100% unregistered → vẫn là bệnh kênh liệt kê (không đổi r201)
+            _ents_fat = [{"drive_id": f"dF{i}", "name": f"Day_{i}", "nlm_source_id": "", "corpus": "true"}
+                         for i in range(40)]
+            _rcf, _of, _ef = _runD(_srcs_w, _ents_fat)
+            _ok_fat = (_rcf == 0 and _of.get("verdict") == "LISTING_CHANNEL_SUSPECT"
+                       and _of.get("registry_rows_seen") == 40 and "REGISTRY_SCOPE_SUSPECT" not in _ef)
+            return _ok_dry and _ok_no_lure and _ok_apply and _ok_fat
+        finally:
+            for _k, _v in _savD.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r206_reconcile_registry_thin_verdict", _c206_reconcile_registry_thin_verdict)
 
     def _c201_reconcile_title_bridge_tier3_lock():
         # Khóa hành vi tier-3 title-bridge của _nlm_reconcile_plan (thay «golden fixture» — golden không

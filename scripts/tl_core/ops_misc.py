@@ -990,7 +990,7 @@ def cmd_doctor(a) -> int:
     add("nlm CLI (fast-lane)", bool(nlm_bin),
         (f"tl={nlm_bin}; {nprobe.get('path_note')}{_nlm_age_note}" if nlm_bin else
          "KHÔNG tìm thấy → NLM rơi về MCP (chậm). Cowork: chạy lặp `tl nlm-install --resume` tới rc=0; "
-         "sau đó `tl nlm-auth-load`/`nlm login`."))
+         "sau đó " + nlm_auth_fix_hint()))   # r208b 3.2: chuỗi khắc phục auth đúng thứ tự (một nguồn sự thật)
     # M1 (v1.33.35 — log rà 45 Luật LIVE FALSE-GREEN: nlm-auth-load/`nlm login --check` báo OK [rc=0] nhưng
     # nlm-get/list/reconcile LIVE 'Authentication expired'): CANARY LIVE THẬT — 1 `nlm notebook get` base
     # notebook, KHÔNG tin tuổi cookie / login --check. Chỉ chạy khi có binary + KHÔNG --offline. alive=False

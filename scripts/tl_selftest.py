@@ -19353,6 +19353,242 @@ def run() -> int:
             _env110_restore(_sav_env)
     _t110("r202_profile_delete_backup_ngoai_cay", _c202_profile_delete_backup_ngoai_cay)
 
+    def _c208b_auth_fix_chain_dung_thu_tu():
+        # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill
+        # chỉ hô `nlm login` — lệnh TƯƠNG TÁC, KHÔNG chạy được ở Cowork/headless; đường đúng
+        # `tl nlm-auth-load` không chỗ nào nhắc, `nlm-auth-pull` thì báo cụt "thiếu TL_MASTER_KEY".
+        # DRIFT-LOCK: MỌI chuỗi khắc phục auth (nguồn sự thật + 2 bản dự phòng + hàm phát) phải nêu ĐỦ
+        # 3 lệnh ĐÚNG THỨ TỰ nlm-auth-load → nlm-auth-pull → nlm login. Không có test này thì lần sau
+        # ai đó thêm thông báo auth mới lại rơi về `nlm login` trần — đúng cái bẫy vừa trả giá.
+        import nlm_cli as _nc208b, tl_gws as _tg208b
+        import tl_core.nlm_ops as _no208b
+
+        def _thu_tu(s):
+            _i = [str(s).find(x) for x in ("nlm-auth-load", "nlm-auth-pull", "nlm login")]
+            return all(x >= 0 for x in _i) and _i[0] < _i[1] < _i[2]
+        _chuoi = [_nc208b.AUTH_FIX_HINT, _nc208b.AUTH_FIX_HINT_SHORT,
+                  _no208b._AUTH_FIX_FALLBACK, _tg208b._AUTH_FIX_FALLBACK_GWS,
+                  _tg208b._auth_fix_hint_short(),
+                  _TL_MODULE.nlm_auth_fix_hint(), _TL_MODULE.nlm_auth_fix_hint(compact=False)]
+        _ok_order = all(_thu_tu(s) for s in _chuoi)
+        # bản đầy đủ phải NÓI LẤY TL_MASTER_KEY Ở ĐÂU (báo cáo: "không nói lấy ở đâu"), bản ngắn ít
+        # nhất phải nêu tên biến; và phải cảnh báo `nlm login` là đường TƯƠNG TÁC.
+        _ok_key = ("TL_MASTER_KEY" in _nc208b.AUTH_FIX_HINT and "TL_MASTER_KEY" in _nc208b.AUTH_FIX_HINT_SHORT
+                   and "headless" in _nc208b.AUTH_FIX_HINT.lower()
+                   and "TƯƠNG TÁC" in _nc208b.AUTH_FIX_HINT)
+        # auth_hint do adapter nlm_cli sinh = NGUỒN của mọi thông điệp downstream (nlm_ops/profile_mgmt
+        # chỉ chuyển tiếp) → khoá ở đây là khoá được cả họ.
+        _o_run, _o_av = _nc208b._run, _nc208b.nlm_available
+        try:
+            _nc208b.nlm_available = lambda: True
+            _nc208b._run = lambda args, timeout=120: (1, "", "401 Unauthorized: Authentication expired")
+            _h1 = (_nc208b.source_list("nb208b") or {}).get("auth_hint") or ""
+            _h2 = (_nc208b._run_json(["x"]) or {}).get("auth_hint") or ""
+            _h3 = (_nc208b._auth_fail(1, "", "auth expired") or {}).get("auth_hint") or ""
+        finally:
+            _nc208b._run, _nc208b.nlm_available = _o_run, _o_av
+        _ok_adapter = all(_thu_tu(h) for h in (_h1, _h2, _h3))
+        # slot-audit --all-shards: note LIVE khi auth chết phải mang chuỗi đúng đường (r208 (b) đã khoá
+        # 'nlm-auth-load'; ở đây khoá ĐỦ CẢ BA lệnh, đúng thứ tự).
+        _sl = _TL_MODULE._slot_live_counts.__wrapped__ if hasattr(_TL_MODULE._slot_live_counts, "__wrapped__") \
+            else _TL_MODULE._slot_live_counts
+        _o_imp = _TL_MODULE._imp
+
+        class _FkNC208b:
+            def notebook_get(self, nb, timeout=120):
+                return {"ok": False, "error": "Authentication expired", "auth_hint": "x"}
+        try:
+            _TL_MODULE._imp = lambda n: _FkNC208b() if n == "nlm_cli" else _o_imp(n)
+            _err208b = str((_sl(["NB208b"]) or {}).get("NB208b", {}).get("error") or "")
+        finally:
+            _TL_MODULE._imp = _o_imp
+        _ok_slot = _thu_tu(_err208b)
+        # bẫy I11: hằng dự phòng PHẢI re-export sang tl (hàm rebase globals đọc ở namespace tl), và
+        # nlm_auth_fix_hint phải là HÀM trong tl (nếu quên _STUB_MAP thì gọi qua tl sẽ NameError).
+        _ok_export = (_TL_MODULE._AUTH_FIX_FALLBACK == _no208b._AUTH_FIX_FALLBACK
+                      and callable(_TL_MODULE.nlm_auth_fix_hint))
+        return _ok_order and _ok_key and _ok_adapter and _ok_slot and _ok_export
+    _t110("r208b_auth_fix_chain_dung_thu_tu", _c208b_auth_fix_chain_dung_thu_tu)
+
+    def _c208b_register_tu_dien_name_cat():
+        # r208b 2.1 (báo cáo 25-07 mục 2.1 — CA CHỈ-NÓ-CHẶN): 17 dòng ghép bằng `register --drive-id
+        # --nlm-source-id …` đều ra name=""/cat="" mà vẫn `ok:true` IM LẶNG → corpus-audit gắn
+        # NLM_GHOST_SOURCE/ORPHAN_CAT trong khi file vẫn đúng folder cat 23 và nguồn vẫn sống trên NLM.
+        # Cờ báo động giả kiểu này khiến người vận hành dễ đi XOÁ nhầm nguồn còn tốt.
+        _pd = {"23": {"ten": "Lao động", "folder": "23_Lao_dong"}, "05": {"ten": "X", "folder": "05_Can_bo"}}
+        _f = _TL_MODULE._register_infer_name_cat
+        # (a) PURE: name bỏ đuôi; cat tra qua config.categories (folderId) — KHÔNG cần tên folder
+        _a = _f("Luat_ATVSLD_84_2015_QH13.docx", ["FID23"], {"23": "FID23"}, "", _pd)
+        # (b) PURE: không có trong config.categories → khớp TÊN folder cha canonical
+        _b = _f("Nghi_dinh_39_2016_ND_CP", ["FIDX"], {}, "23_Lao_dong", _pd)
+        # (c) PURE: folder TRƠ '23' (kho cũ) vẫn suy ra nhãn đủ; QUARANTINE giữ nguyên
+        _c = _f("Tai_lieu.pdf", ["FIDY"], {}, "23", _pd)
+        _q = _f("X.docx", ["FIDQ"], {}, "QUARANTINE", _pd)
+        # (d) PURE: folder LẠ → cat=None + LÝ DO (caller BẮT BUỘC cảnh báo, không im lặng)
+        _d = _f("Y.docx", ["FIDZ"], {}, "Thu_muc_la", _pd)
+        _ok_pure = (_a["name"] == "Luat_ATVSLD_84_2015_QH13" and _a["cat"] == "23_Lao_dong"
+                    and _b["cat"] == "23_Lao_dong" and _b["name"] == "Nghi_dinh_39_2016_ND_CP"
+                    and _c["cat"] == "23_Lao_dong" and _q["cat"] == "QUARANTINE"
+                    and _d["cat"] is None and bool(_d["why"].get("cat"))
+                    and _f("", [], {}, "", _pd)["name"] is None)
+        # (e) _register_autofill: điền cột TRỐNG, KHÔNG đè giá trị đã có, TRÁNH cột đang --clear-cols
+        _o_imp = _TL_MODULE._imp
+        _o_cfi = _TL_MODULE._register_cat_folder_ids
+        _o_pd = _TL_MODULE._load_phapdien
+        _calls = []
+
+        class _FkTr208b:
+            def drive_op(self, op, file_id=None, **k):
+                _calls.append((op, file_id))
+                if file_id == "D1":
+                    return {"ok": True, "file": {"id": "D1", "name": "Luat_Cong_doan_2024.docx",
+                                                 "parents": ["FID23"]}}
+                if file_id == "FID23":
+                    return {"ok": True, "file": {"id": "FID23", "name": "23_Lao_dong"}}
+                return {"ok": False, "error": "NOT_FOUND"}
+
+        class _FkG208b:
+            def __init__(self, row): self.row = row
+            def get(self, action, **k):
+                return {"ok": True, "rows": ([self.row] if self.row else [])}
+        try:
+            _TL_MODULE._imp = lambda n: _FkTr208b() if n == "transport" else _o_imp(n)
+            _TL_MODULE._register_cat_folder_ids = lambda: {}      # ép đi đường tên folder cha
+            _TL_MODULE._load_phapdien = lambda: _pd
+            # dòng CHƯA có (insert mới) → điền cả hai + báo autofilled
+            _p1 = {"drive_id": "D1", "nlm_source_id": "s1"}
+            _r1 = _TL_MODULE._register_autofill(_FkG208b(None), "D1", _p1, [])
+            _ok_e = (_p1.get("name") == "Luat_Cong_doan_2024" and _p1.get("cat") == "23_Lao_dong"
+                     and _r1["filled"] == {"name": "Luat_Cong_doan_2024", "cat": "23_Lao_dong"}
+                     and _r1["missing"] == [] and _r1["row_present"] is False
+                     and any("REGISTER_AUTOFILLED" in w for w in _r1["warn"]))
+            # dòng ĐÃ có name → KHÔNG đè; giá trị trong LỆNH cũng không bị đè
+            _p2 = {"drive_id": "D1", "cat": "05_Can_bo"}
+            _r2 = _TL_MODULE._register_autofill(_FkG208b({"drive_id": "D1", "name": "Ten_da_co", "cat": ""}),
+                                                "D1", _p2, [])
+            _ok_f = (_p2.get("cat") == "05_Can_bo" and "name" not in _p2
+                     and _r2["filled"] == {} and _r2["row_present"] is True)
+            # cột đang bị --clear-cols xoá thì TUYỆT ĐỐI không điền lại (chống lệnh người vận hành)
+            _p3 = {"drive_id": "D1", "nlm_source_id": "s1"}
+            _r3 = _TL_MODULE._register_autofill(_FkG208b({}), "D1", _p3, ["name", "cat"])
+            _ok_g = ("name" not in _p3 and "cat" not in _p3 and _r3["filled"] == {} and _r3["missing"] == [])
+            # probe Drive HỎNG → KHÔNG im lặng: missing + cảnh báo có lệnh chữa + nêu lỗi probe
+            _p4 = {"drive_id": "DX", "nlm_source_id": "s9"}
+            _r4 = _TL_MODULE._register_autofill(_FkG208b({}), "DX", _p4, [])
+            _w4 = " ".join(_r4["warn"])
+            _ok_h = (_r4["missing"] == ["name", "cat"] and "REGISTER_ROW_INCOMPLETE" in _w4
+                     and "--name" in _w4 and "--cat" in _w4 and _r4.get("probe_error")
+                     and "NLM_GHOST_SOURCE" in _w4)   # nói THẲNG hậu quả nếu để trống
+        finally:
+            _TL_MODULE._imp, _TL_MODULE._register_cat_folder_ids = _o_imp, _o_cfi
+            _TL_MODULE._load_phapdien = _o_pd
+        # (i) hằng mới PHẢI re-export sang tl (bẫy I11) và KHÔNG bị stub biến thành hàm
+        _ok_i = (isinstance(_TL_MODULE._REGISTER_AUTOFILL_COLS, tuple)
+                 and _TL_MODULE._REGISTER_AUTOFILL_COLS == ("name", "cat")
+                 and hasattr(_TL_MODULE._REGISTER_NAME_EXT_RE, "sub"))
+        return _ok_pure and _ok_e and _ok_f and _ok_g and _ok_h and _ok_i
+    _t110("r208b_register_tu_dien_name_cat", _c208b_register_tu_dien_name_cat)
+
+    def _c208b_reconcile_luon_in_plan():
+        # r208b 2.4 (báo cáo 25-07 mục 2.4): sau khi khôi phục registry, drift là THẬT (24/29 chưa đăng
+        # ký) nhưng công cụ trả verdict + "ĐỪNG tin plan này" và KHÔNG cho xem gì → phải làm tay 17 dòng.
+        # NGƯỠNG CHẶN GIỮ NGUYÊN (r201/r206) và KHÔNG có --trust-live/--after-restore (registry có thể
+        # bị đua về rỗng bất cứ lúc nào ⇒ không lời khẳng định nào của người dùng cứu được ca đó).
+        # Yêu cầu MỚI: chặn thì vẫn phải CHO XEM — in plan đầy đủ + ghi file JSON để soát; và cửa hậu
+        # `--from-plan` phải TỪ CHỐI plan sinh lúc đang nghi (đường đó không re-scan live ⇒ guard tắt).
+        import io as _ioP, contextlib as _ctxP, tempfile as _tfP
+        _writesP = []
+
+        class _FkGasP:
+            def get(self, *a, **k): _writesP.append("gas_get"); return {"ok": True}
+            def post(self, *a, **k): _writesP.append("gas_post"); return {"ok": True}
+        _keysP = ("_imp", "apply_profile_offline", "_resolve_nlm_notebook", "_manifest_entries", "load_creds",
+                  "_gas", "_apply_gate", "_apply_journal_start", "_journaled_reg_write", "_journal_append",
+                  "_nlm_preflight_report", "_resolve_shard_topology", "_shard_row_kind")
+        _savP = {k: getattr(_TL_MODULE, k) for k in _keysP}
+        _srcs = [{"id": f"zz{i}", "title": f"Nguon_live_{i}"} for i in range(25)]
+        _ents = [{"drive_id": f"dR{i}", "name": f"Dong_Reg_{i}", "nlm_source_id": "", "corpus": "true"}
+                 for i in range(30)]
+
+        def _runP(apply, plan_out, from_plan=None, force=False):
+            class _FkNCp:
+                def source_list(self, nb, skip_freshness=True, **kw):
+                    return {"ok": True, "count": len(_srcs), "sources": _srcs}
+            _TL_MODULE._imp = lambda name: _FkNCp() if name == "nlm_cli" else _savP["_imp"](name)
+            _TL_MODULE._manifest_entries = lambda refresh=False: _ents
+            _ns = argparse.Namespace(config=None, profile=None, notebook_id="NBp", refresh=True,
+                                     apply=apply, clear_stale=False, force_unsafe=force, out=None,
+                                     all_notebooks=False, from_plan=from_plan, plan_out=plan_out, json=True)
+            _bo, _be = _ioP.StringIO(), _ioP.StringIO()
+            with _ctxP.redirect_stdout(_bo), _ctxP.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_reconcile(_ns)
+            try:
+                _o = json.loads(_bo.getvalue())
+            except Exception:
+                _o = {}
+            return _rc, _o, _be.getvalue()
+        _td = _tfP.mkdtemp(prefix="tl_r208b_")
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE._resolve_nlm_notebook = lambda nb=None: ((nb or "NBp"), None)
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _FkGasP()
+            _TL_MODULE._apply_gate = lambda a, write_cols=None: (True, None)
+            _TL_MODULE._apply_journal_start = lambda *a, **k: (_writesP.append("journal") or "runP")
+            _TL_MODULE._journaled_reg_write = lambda *a, **k: (_writesP.append("reg_write")
+                                                               or {"verified": True, "patched": 0,
+                                                                   "reg_bulk": {"ok": True}})
+            _TL_MODULE._journal_append = lambda *a, **k: None
+            _TL_MODULE._nlm_preflight_report = lambda nb, probe=False: {"warn": []}
+            _TL_MODULE._resolve_shard_topology = lambda *a, **k: {}
+            _TL_MODULE._shard_row_kind = lambda *a, **k: None
+            # (a) --apply bị guard CHẶN: rc=2, KHÔNG ghi gì, NHƯNG plan in ĐẦY ĐỦ ra stdout + ghi file
+            _writesP.clear()
+            _pb = str(Path(_td) / "blocked.json")
+            _rc_a, _o_a, _e_a = _runP(True, _pb)
+            _art_a = json.loads(Path(_pb).read_text(encoding="utf-8")) if Path(_pb).exists() else {}
+            _ok_a = (_rc_a == 2 and _writesP == []                      # ngưỡng chặn GIỮ NGUYÊN
+                     and _o_a.get("mode") == "APPLY_BLOCKED"
+                     and _o_a.get("blocked_by") == "LISTING_CHANNEL_SUSPECT"
+                     and _o_a.get("verdict") == "LISTING_CHANNEL_SUSPECT"
+                     and _o_a.get("unregistered_on_nlm") == 25 and _o_a.get("live_on_nlm") == 25
+                     and "unregistered_sample" in _o_a and _o_a.get("plan_artifact") == _pb
+                     and _art_a.get("schema") == "reconcile_plan.v1"
+                     and _art_a.get("verdict") == "LISTING_CHANNEL_SUSPECT"
+                     and "LISTING_CHANNEL_SUSPECT" in _e_a)             # lỗi VẪN ở stderr (đừng gộp 2>&1)
+            # (b) --apply --from-plan trên chính artifact đó: TỪ CHỐI (cửa hậu vòng qua guard)
+            _writesP.clear()
+            _rc_b, _o_b, _e_b = _runP(True, None, from_plan=_pb)
+            _ok_b = (_rc_b == 2 and _writesP == [] and "PLAN_VERDICT_SUSPECT" in _e_b)
+            # (c) --force-unsafe vẫn là cửa DUY NHẤT để đi tiếp (không thêm cờ mới nào)
+            _writesP.clear()
+            _rc_c, _o_c, _e_c = _runP(True, None, from_plan=_pb, force=True)
+            _ok_c = (_rc_c == 0 and "PLAN_VERDICT_SUSPECT" not in _e_c)
+            # (d) DRY KHÔNG khai --plan-out vẫn ghi artifact (trước r208b: chỉ nhánh --all-notebooks mới ghi
+            #     → DRY gõ tay chưa bao giờ để lại file soát được). Plan NGHI ghi tên .BLOCKED riêng để
+            #     `--from-plan auto` không bao giờ nhặt phải.
+            _rc_d, _o_d, _e_d = _runP(False, None)
+            _pa_d = str(_o_d.get("plan_artifact") or "")
+            _ok_d = (_rc_d == 0 and _pa_d.endswith(_TL_MODULE._RECONCILE_PLAN_BLOCKED_SUFFIX)
+                     and Path(_pa_d).exists()
+                     and _pa_d != _TL_MODULE._reconcile_plan_path("NBp"))
+            # (e) ca LÀNH (không verdict): artifact ghi ĐÚNG đường --from-plan auto, KHÔNG dấu verdict
+            _srcs[:] = [{"id": f"s{i}", "title": f"Doc_khop_{i}"} for i in range(28)]
+            _ents[:] = [{"drive_id": f"d{i}", "name": f"Doc_khop_{i}", "nlm_source_id": f"s{i}",
+                         "nlm_notebook_id": "NBp", "nlm_status": "pushed", "corpus": "true"}
+                        for i in range(28)]
+            _rc_e, _o_e, _e_e = _runP(False, None)
+            _ok_e = (_rc_e == 0 and "verdict" not in _o_e
+                     and _o_e.get("plan_artifact") == _TL_MODULE._reconcile_plan_path("NBp")
+                     and "verdict" not in json.loads(Path(_o_e["plan_artifact"]).read_text(encoding="utf-8")))
+            return _ok_a and _ok_b and _ok_c and _ok_d and _ok_e
+        finally:
+            for _k, _v in _savP.items():
+                setattr(_TL_MODULE, _k, _v)
+            import shutil as _shP
+            _shP.rmtree(_td, ignore_errors=True)
+    _t110("r208b_reconcile_luon_in_plan", _c208b_reconcile_luon_in_plan)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

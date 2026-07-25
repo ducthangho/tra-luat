@@ -291,6 +291,24 @@ def cmd_backfill_nlm_status(a) -> int:
 
 _SLOT_LIVE_DIFF_WARN = 2   # r208 (báo cáo 25-07 mục 2.2): lệch registry↔LIVE quá 2 ⇒ gắn cờ
 
+# r208b (báo cáo 25-07 mục 3.2): thông điệp DỰ PHÒNG khi KHÔNG nạp được nlm_cli (nguồn sự thật là
+# nlm_cli.AUTH_FIX_HINT*). Chỉ dùng ở chế độ suy hoá — selftest drift-lock bắt CẢ BA chuỗi phải nêu
+# ĐÚNG thứ tự nlm-auth-load → nlm-auth-pull → nlm login, nên bản dự phòng không lệch đường được.
+_AUTH_FIX_FALLBACK = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
+                      "→ `nlm login` (tương tác)")
+
+
+def nlm_auth_fix_hint(compact: bool = True) -> str:
+    """r208b 3.2 (ca thật 25-07): CHUỖI KHẮC PHỤC AUTH đúng đường, một nguồn sự thật.
+    compact=True → bản ngắn nối vào note/live_note; False → bản đầy đủ (giải thích headless vs
+    tương tác + lấy TL_MASTER_KEY ở đâu). KHÔNG bao giờ chỉ hô `nlm login` — lệnh đó TƯƠNG TÁC,
+    vô dụng trong Cowork/headless và chính là bẫy đã ngốn nhiều bước của người vận hành."""
+    try:
+        _nc = _imp("nlm_cli")
+        return _nc.AUTH_FIX_HINT_SHORT if compact else _nc.AUTH_FIX_HINT
+    except Exception:  # noqa: BLE001 — không nạp được adapter thì vẫn phải chỉ ĐÚNG đường
+        return _AUTH_FIX_FALLBACK
+
 
 def _slot_live_counts(notebook_ids, skip: bool = False) -> dict:
     """r208: đọc source_count LIVE cho TỪNG shard (nhánh --all-shards trước đây bỏ hẳn bước này).
@@ -315,7 +333,7 @@ def _slot_live_counts(notebook_ids, skip: bool = False) -> dict:
             else:
                 _err = str((_ng or {}).get("error") or "?")[:120]
                 if (_ng or {}).get("auth_hint"):
-                    _err += " — 🔴 AUTH hết hạn: `tl nlm-auth-load` (rồi `tl nlm-auth-pull`, cuối cùng `nlm login`)"
+                    _err += " — " + nlm_auth_fix_hint()   # r208b 3.2: một nguồn sự thật cho chuỗi khắc phục
                 out[nb] = {"live": None, "error": _err}
         except Exception as e:  # noqa: BLE001
             out[nb] = {"live": None, "error": f"{type(e).__name__}"}
@@ -434,7 +452,7 @@ def cmd_slot_audit(a) -> int:
             else:
                 out["live_read_failed"] = True
                 out["live_note"] = ("KHÔNG đọc được live source_count (" + str(_ng.get("error") or "?")[:120] + ")"
-                                    + (" — 🔴 AUTH hết hạn: `nlm login`" if _ng.get("auth_hint") else "")
+                                    + (" — " + nlm_auth_fix_hint() if _ng.get("auth_hint") else "")   # r208b 3.2
                                     + " → KHÔNG suy gap (dùng `--physical N` neo tay nếu cần).")
         except Exception as e:  # noqa: BLE001 — không có cred/offline → bỏ qua, KHÔNG chặn
             out["live_read_failed"] = True
@@ -856,7 +874,7 @@ def _live_source_count(nc, notebook_id: str, heal_state: dict | None = None) -> 
             return int(r.get("source_count") or 0), True, ""
         if hs.get("healed"):
             return None, False, str(r.get("error") or "notebook_get !ok") + \
-                (" — 🔴 AUTH: `nlm login`" if r.get("auth_hint") else "")
+                (" — " + nlm_auth_fix_hint() if r.get("auth_hint") else "")   # r208b 3.2
         hs["healed"] = True
         try:
             load_creds(None, None)

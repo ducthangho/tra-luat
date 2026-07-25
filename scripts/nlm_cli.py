@@ -27,6 +27,23 @@ def _strip_keyring(s: str) -> str:
     return "\n".join(kept)
 
 
+# ───── r208b (báo cáo 25-07 mục 3.2): THỨ TỰ KHẮC PHỤC AUTH — MỘT nguồn sự thật ─────
+# Ca thật 25-07: cookie NLM chết, MỌI thông báo trong skill chỉ hô `nlm login` — lệnh TƯƠNG TÁC,
+# KHÔNG chạy được trong Cowork/headless. Đường đúng là `tl nlm-auth-load` (kéo cookie mã hoá từ
+# Drive bằng webapp token, KHÔNG cần master key) mà KHÔNG thông báo nào gợi ý; người vận hành mò
+# nhiều bước, thử `nlm-auth-pull` thì báo cụt lủn "thiếu TL_MASTER_KEY" không nói lấy ở đâu.
+# THỨ TỰ BẤT BIẾN (rẻ→đắt, headless→tương tác); selftest drift-lock giữ mọi thông điệp đi qua đây:
+_AUTH_FIX_ORDER = ("tl nlm-auth-load", "tl nlm-auth-pull", "nlm login")
+AUTH_FIX_HINT = (
+    "Lỗi auth NLM — khắc phục THEO THỨ TỰ: (1) `tl nlm-auth-load` (kéo cookie mã hoá từ Drive bằng "
+    "webapp token — CHẠY ĐƯỢC HEADLESS, không cần master key); (2) `tl nlm-auth-pull` (cần "
+    "TL_MASTER_KEY — biến môi trường máy đã bootstrap, đặt bởi `tl-setup.ps1` hoặc "
+    "`export TL_MASTER_KEY='<passphrase>'`); (3) `nlm login` (TƯƠNG TÁC — cần browser, KHÔNG chạy "
+    "được trong Cowork/headless).")
+AUTH_FIX_HINT_SHORT = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
+                       "→ `nlm login` (tương tác, chỉ khi có browser)")
+
+
 def _local_bin_paths() -> list[str]:
     """Thư mục thường chứa `nlm` sau `pip install --user`/`uv tool install` mà shell non-login (Cowork)
     KHÔNG có trên PATH: ~/.local/bin + user-base bin/Scripts (POSIX/Windows)."""
@@ -115,7 +132,7 @@ def source_list(notebook_id: str, skip_freshness: bool = True, drive: bool = Tru
         auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
         return {"ok": False, "rc": rc, "error": f"nlm source list rc={rc}: {(err or out)[:300]}",
                 "fallback": "mcp",
-                "auth_hint": "Lỗi auth: chạy `nlm login` (TƯƠNG TÁC) rồi thử lại." if auth else None}
+                "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2: chuỗi đúng đường, KHÔNG chỉ `nlm login`
     try:
         data = json.loads(out)
     except Exception as e:
@@ -133,7 +150,7 @@ def _run_json(args: list[str], timeout: int = 180) -> dict:
         low = (err + out).lower()
         auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
         return {"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
-                "auth_hint": "Lỗi auth: `nlm login`." if auth else None}
+                "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2
     try:
         return {"ok": True, "data": json.loads(out), "via": "nlm-cli"}
     except Exception:
@@ -187,7 +204,7 @@ def _auth_fail(rc: int, out: str, err: str) -> dict:
     low = (err + out).lower()
     auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
     return {"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}", "fallback": "mcp",
-            "auth_hint": "Lỗi auth: chạy `nlm login` rồi thử lại." if auth else None}
+            "auth_hint": AUTH_FIX_HINT if auth else None}   # r208b 3.2
 
 
 def source_add(notebook_id: str, drive_id=None, url=None, file=None, text=None,

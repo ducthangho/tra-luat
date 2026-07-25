@@ -243,6 +243,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="(v1.34.54 A3) --apply nạp plan-artifact sweep DRY vừa ghi (mặc định .tl_state/reconcile_plan_<nb>.json) — BỎ re-scan NLM; an toàn: TTL 15' + freshness reg_get_bulk trên dòng sắp ghi")
     p.add_argument("--no-fallback", dest="no_fallback", action="store_true",
                    help="(v1.34.61 E2) NLM chết + --apply → GIỮ rc=2 như cũ thay vì DEFERRED_NLM_OFFLINE rc=0")
+    # r208b 2.4 (báo cáo 25-07): DRY nay LUÔN ghi plan-artifact (mặc định .tl_state/reconcile_plan_<nb>.json —
+    # đúng đường --from-plan auto); --apply bị guard CHẶN cũng in plan đầy đủ + ghi bản .BLOCKED để soát.
+    # Cờ này chỉ để đổi ĐÍCH ghi (trước đây chỉ nhánh --all-notebooks nội bộ mới đặt được plan_out).
+    p.add_argument("--plan-out", dest="plan_out",
+                   help="(r208b) đường ghi plan-artifact JSON (mặc định .tl_state\\reconcile_plan_<nb>.json; bản bị guard chặn ghi .BLOCKED.json và `--from-plan` TỪ CHỐI nạp)")
     p.set_defaults(fn=cmd_nlm_reconcile)
 
 
@@ -460,6 +465,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--row-kind", dest="row_kind", choices=["own", "overflow", "ref"],
                    help="(v1.29.7) sửa row_kind (own/overflow/ref) — vd chữa dòng bị gán nhầm overflow")
     p.add_argument("--force-unsafe", dest="force_unsafe", action="store_true", help="(v1.29.2) BỎ QUA precheck blocker — RỦI RO, tự chịu")
+    # r208b 2.1 (báo cáo 25-07): mặc định TỰ SUY name (tên file Drive) + cat (folder cha) khi cột trống,
+    # không suy được thì cảnh báo trong kết quả. Cờ này để tắt khi cố ý muốn dòng trống (hiếm).
+    p.add_argument("--no-autofill", dest="no_autofill", action="store_true",
+                   help="(r208b) TẮT tự suy name/cat từ metadata Drive — mặc định register điền cột trống rồi báo `autofilled`, không suy được thì `warn: REGISTER_ROW_INCOMPLETE` (trước đây trả ok:true im lặng với name=\"\"/cat=\"\" ⇒ cờ NLM_GHOST_SOURCE/ORPHAN_CAT giả)")
     # N3 (v1.33.41 — log rà: agent quen tay `register … --apply` bị usage-error rc=2 giữa loop): register GHI
     # TRỰC TIẾP by-design (journaled+verified, không DRY) — nhận cờ --apply làm NO-OP để không vỡ muscle-memory.
     p.add_argument("--apply", action="store_true", help="(no-op compat) register luôn ghi trực tiếp — cờ này chỉ để khỏi vỡ script/agent-loop quen các lệnh DRY-mặc-định")

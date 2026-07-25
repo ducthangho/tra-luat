@@ -97,6 +97,22 @@ def _gws_cred_alive(timeout: float = 20.0) -> tuple[bool, str]:
         return False, str(e)[:240]
 
 
+# r208b 3.2 (báo cáo 25-07): thông điệp auth của doctor cũng phải chỉ ĐÚNG đường. Đọc thẳng
+# `nlm_cli` THẬT (không qua `_imp` — selftest tiêm module giả cho canary, module giả không mang
+# hằng này). Bản dự phòng cuối chỉ dùng khi không nạp nổi adapter; drift-lock trong selftest bắt
+# MỌI biến thể phải nêu đúng thứ tự nlm-auth-load → nlm-auth-pull → nlm login.
+_AUTH_FIX_FALLBACK_GWS = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
+                          "→ `nlm login` (tương tác)")
+
+
+def _auth_fix_hint_short() -> str:
+    try:
+        import importlib as _il
+        return _il.import_module("nlm_cli").AUTH_FIX_HINT_SHORT
+    except Exception:  # noqa: BLE001
+        return _AUTH_FIX_FALLBACK_GWS
+
+
 def _nlm_auth_alive(notebook_id: str, timeout: int = 30) -> tuple[bool | None, str]:
     """M1 (v1.33.35 — log rà 45 Luật LIVE: nlm-auth-load/doctor/`nlm login --check` báo XANH [rc=0] nhưng
     nlm-get/list/reconcile LIVE đều 'Authentication expired'): CANARY LIVE THẬT cho NLM — gọi 1 lệnh chạm
@@ -137,7 +153,10 @@ def _nlm_auth_alive(notebook_id: str, timeout: int = 30) -> tuple[bool | None, s
         break
     # sau retry — auth_hint BỀN → EXPIRED (RED, ưu tiên trước transient); mạng/transient → KHÔNG kết luận
     if r.get("auth_hint"):
-        return False, "AUTH_EXPIRED: nlm cookie hết hạn (bền qua 3 lần probe) — `nlm login` (tương tác) rồi `tl nlm-auth-stage`/`secrets-set --nlm`"
+        # r208b 3.2: TRƯỚC đây doctor chỉ hô `nlm login` (tương tác — vô dụng ở Cowork/headless), đúng
+        # thông điệp đã ngốn nhiều bước của người vận hành 25-07. Nay nêu ĐỦ chuỗi đúng thứ tự.
+        return False, ("AUTH_EXPIRED: nlm cookie hết hạn (bền qua 3 lần probe) — " + _auth_fix_hint_short()
+                       + "; sau khi có cookie tươi thì `tl nlm-auth-stage`/`secrets-set --nlm` để đẩy vào bundle")
     _errl = str(r.get("error") or "").lower()
     if any(s in _errl for s in _TRANSIENT):
         return None, f"PROBE_INCONCLUSIVE (transient/mạng sau 3 lần — KHÔNG kết luận auth; thử `tl nlm-auth-load` rồi probe lại): {str(r.get('error') or '?')[:140]}"

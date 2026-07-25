@@ -698,6 +698,53 @@ def _reconcile_suspect_kind(live_n: int, unreg_n: int, registry_n: int) -> str:
     return "LISTING_CHANNEL_SUSPECT"
 
 
+# r208b 2.4 (báo cáo 25-07): plan sinh ra khi guard ĐANG NGHI phải nằm ở TÊN FILE KHÁC — nếu ghi
+# đè lên đường `--from-plan auto` thì lần `--apply --from-plan` sau sẽ nuốt trọn plan khả nghi mà
+# guard KHÔNG bật lại được (đường from-plan không re-scan live ⇒ live_ids rỗng ⇒ guard bất hoạt).
+# HẰNG ⇒ re-export TRỰC TIẾP ở tl.py, KHÔNG cho vào _STUB_MAP (bẫy stub-biến-hằng-thành-hàm).
+_RECONCILE_PLAN_BLOCKED_SUFFIX = ".BLOCKED.json"
+
+
+def _reconcile_plan_path(nb: str, blocked: bool = False) -> str:
+    """r208b 2.4: đường mặc định của plan-artifact. blocked=True → tên RIÊNG để `--from-plan auto`
+    (vốn chỉ tìm `reconcile_plan_<nb>.json`) KHÔNG BAO GIỜ nhặt phải plan đang bị nghi ngờ."""
+    _base = f"reconcile_plan_{nb}"
+    return str(HERE / ".tl_state" / (_base + (_RECONCILE_PLAN_BLOCKED_SUFFIX if blocked else ".json")))
+
+
+def _reconcile_plan_artifact(nb: str, plan: dict, live_n: int, created_ts: float,
+                             verdict: str = "") -> dict:
+    """PURE (r208b 2.4 — tách từ nhánh DRY để CẢ nhánh apply-bị-chặn cũng ghi được): dựng plan-artifact
+    `reconcile_plan.v1` (slim rows đủ để `--apply --from-plan` ghi mà không re-scan). `verdict` khác
+    rỗng = plan sinh lúc guard đang nghi ⇒ đóng dấu vào artifact để đường from-plan TỪ CHỐI nạp."""
+    _slim = lambda e: {"drive_id": _entry_drive_id(e), "nlm_source_id": (_entry_nlm(e) or "").strip(),   # noqa: E731
+                       "nlm_notebook_id": str(e.get("nlm_notebook_id") or ""),
+                       "row_kind": str(e.get("row_kind") or ""), "name": _entry_name(e)}
+    art = {"schema": "reconcile_plan.v1", "notebook": nb, "created_ts": created_ts,
+           "live_on_nlm": live_n,
+           "backfill": [_slim(e) for e in (plan.get("backfill") or [])],
+           "link_candidates": [{**_slim(c["entry"]), "source_id": c["source_id"], "by": c["by"]}
+                               for c in (plan.get("link_candidates") or [])],
+           "desync_real": [_slim(e) for e in (plan.get("desync_real") or [])]}
+    if verdict:
+        art["verdict"] = verdict
+        art["note"] = ("Plan sinh khi guard ĐANG NGHI (" + verdict + ") — CHỈ để người vận hành SOÁT "
+                       "bằng mắt. `--apply --from-plan` sẽ TỪ CHỐI nạp file này.")
+    return art
+
+
+def _reconcile_write_artifact(path: str, art: dict) -> tuple:
+    """r208b 2.4: ghi plan-artifact ra đĩa. Trả (path|None, error|None) — best-effort, KHÔNG bao giờ
+    làm hỏng lệnh chính (báo cáo vẫn phải in đủ dù không ghi được file)."""
+    try:
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        Path(path).write_text(json.dumps(art, ensure_ascii=False, indent=1) + "\n",
+                              encoding="utf-8", newline="\n")
+        return str(path), None
+    except Exception as e:  # noqa: BLE001
+        return None, str(e)
+
+
 def cmd_nlm_reconcile(a) -> int:
     """C (WS1): đối soát registry↔NLM bằng ground-truth từ CLI nlm. Backfill nlm_notebook_id cho dòng
     THỰC SỰ trên NLM; báo (và --clear-stale thì clear) dòng 'pushed' nhưng KHÔNG trên NLM. DRY mặc định.
@@ -764,7 +811,7 @@ def cmd_nlm_reconcile(a) -> int:
                                   notebook_id=_nb_i, apply=False, clear_stale=False,
                                   force_unsafe=getattr(a, "force_unsafe", False),
                                   refresh=getattr(a, "refresh", False), json=True, out=None, all_notebooks=False,
-                                  plan_out=str(HERE / ".tl_state" / f"reconcile_plan_{_nb_i}.json"))
+                                  plan_out=_reconcile_plan_path(_nb_i))   # r208b 2.4: dùng chung helper đường plan
             try:
                 with _ctx.redirect_stdout(_buf):
                     _rc_i = cmd_nlm_reconcile(_ns_i)
@@ -824,6 +871,17 @@ def cmd_nlm_reconcile(a) -> int:
             print(json.dumps({"ok": False, "error": "PLAN_MISMATCH", "path": str(_fp),
                               "plan_notebook": _art.get("notebook"), "notebook": nb}, ensure_ascii=False),
                   file=sys.stderr)
+            return 2
+        # r208b 2.4: plan sinh lúc guard đang nghi mang dấu `verdict` → TỪ CHỐI nạp. Đường from-plan
+        # KHÔNG re-scan live nên guard r201/r206 bất hoạt ở đây; thiếu chốt này thì «luôn ghi plan»
+        # (2.4) vô tình mở cửa hậu đi vòng qua chính cái chặn mà 2.4 hứa giữ nguyên.
+        if _art.get("verdict") and not getattr(a, "force_unsafe", False):
+            print(json.dumps({"ok": False, "error": "PLAN_VERDICT_SUSPECT", "path": str(_fp),
+                              "verdict": _art.get("verdict"),
+                              "note": "Plan này sinh ra lúc reconcile ĐANG NGHI (guard bật) — chỉ để "
+                                      "SOÁT, không để ghi. Sửa gốc theo playbook rồi chạy lại DRY tươi "
+                                      "(bỏ --from-plan); cố ý đi tiếp: --force-unsafe."},
+                             ensure_ascii=False), file=sys.stderr)
             return 2
         if _age_s > 900:
             print(json.dumps({"ok": False, "error": "PLAN_STALE", "age_s": round(_age_s), "ttl_s": 900,
@@ -978,9 +1036,10 @@ def cmd_nlm_reconcile(a) -> int:
         print(f"[tl] 🛑🛑 LISTING_CHANNEL_SUSPECT: {len(plan['unregistered'])}/{len(live_ids)} nguồn live "
               "bị coi là 'unregistered' — kênh liệt kê NLM khả nghi (đã từng thấy 3 kênh chết trả id lạc "
               f"namespace); registry {_reg_n206} dòng nên KHÔNG nghi mất dữ liệu.", file=sys.stderr)
-        print("[tl]    playbook: (1) đổi kênh liệt kê / `tl nlm-auth-status` soi 3 kênh; (2) `nlm login` "
-              "làm tươi cookie; (3) đo lại trên máy khỏe rồi so verdict. --apply bị CHẶN rc=2 trước mọi "
-              "ghi (override tường minh: --force-unsafe).", file=sys.stderr)
+        # r208b 3.2: bước «làm tươi cookie» trước đây chỉ ghi `nlm login` (tương tác — vô dụng headless).
+        print("[tl]    playbook: (1) đổi kênh liệt kê / `tl nlm-auth-status` soi 3 kênh; (2) làm tươi "
+              "cookie theo thứ tự " + nlm_auth_fix_hint() + "; (3) đo lại trên máy khỏe rồi so verdict. "
+              "--apply bị CHẶN rc=2 trước mọi ghi (override tường minh: --force-unsafe).", file=sys.stderr)
     if _from_plan is None:
         # r179 T8 (ADR-0010 — «CẢ HAI lệnh in CẢ HAI số, tên tường minh»): reconcile có live-set per-source →
         # coverage_gap CHÍNH XÁC = dòng nlm_due (diện phải-có: corpus∪ref, trừ removed_*) mà nguồn VẮNG live.
@@ -1012,28 +1071,20 @@ def cmd_nlm_reconcile(a) -> int:
         out["note"] = ("DRY. --apply: reg_bulk nlm_notebook_id cho backfill + LINK nlm_source_id cho link_candidates "
                        "(bắc cầu gdoc↔source_id). --clear-stale: CHỈ clear desync_real (status pushed/synced nhưng vắng "
                        "NLM); KHÔNG đụng already_removed (đã gỡ có chủ đích).")
-        _plan_out = getattr(a, "plan_out", None)
-        if _plan_out:
-            # v1.34.54 (A3 — yêu cầu hiệu năng Q7b: 'lần apply sau phải nhanh hơn sau khi đã DRY'): ghi PLAN
-            # ARTIFACT đủ dữ liệu ghi (slim rows) để `--apply --from-plan` BỎ re-scan (source_list + manifest =
-            # phần đắt nhất); apply chỉ còn freshness-check reg_get_bulk trên đúng các dòng sắp ghi + verify write.
-            import time as _t
-            _slim = lambda e: {"drive_id": _entry_drive_id(e), "nlm_source_id": (_entry_nlm(e) or "").strip(),   # noqa: E731
-                               "nlm_notebook_id": str(e.get("nlm_notebook_id") or ""),
-                               "row_kind": str(e.get("row_kind") or ""), "name": _entry_name(e)}
-            _art = {"schema": "reconcile_plan.v1", "notebook": nb, "created_ts": _t.time(),
-                    "live_on_nlm": len(live_ids),
-                    "backfill": [_slim(e) for e in plan["backfill"]],
-                    "link_candidates": [{**_slim(c["entry"]), "source_id": c["source_id"], "by": c["by"]}
-                                        for c in (plan.get("link_candidates") or [])],
-                    "desync_real": [_slim(e) for e in plan["desync_real"]]}
-            try:
-                Path(_plan_out).parent.mkdir(parents=True, exist_ok=True)
-                Path(_plan_out).write_text(json.dumps(_art, ensure_ascii=False, indent=1) + "\n",
-                                           encoding="utf-8", newline="\n")
-                out["plan_artifact"] = str(_plan_out)
-            except Exception as _pae:  # noqa: BLE001 — artifact best-effort, DRY vẫn trọn vẹn
-                out["plan_artifact_error"] = str(_pae)
+        # v1.34.54 (A3 — yêu cầu hiệu năng Q7b: 'lần apply sau phải nhanh hơn sau khi đã DRY'): ghi PLAN
+        # ARTIFACT đủ dữ liệu ghi (slim rows) để `--apply --from-plan` BỎ re-scan (source_list + manifest =
+        # phần đắt nhất); apply chỉ còn freshness-check reg_get_bulk trên đúng các dòng sắp ghi + verify write.
+        # r208b 2.4 (báo cáo 25-07): TRƯỚC ĐÂY chỉ ghi khi có --plan-out — mà --plan-out KHÔNG có trên CLI,
+        # nên DRY gõ tay chưa bao giờ để lại file soát được; nay LUÔN ghi (mặc định đúng đường --from-plan
+        # auto). Plan mang verdict thì ghi tên .BLOCKED để from-plan không nuốt phải.
+        import time as _t
+        _plan_out = getattr(a, "plan_out", None) or _reconcile_plan_path(nb, blocked=bool(out.get("verdict")))
+        _artd = _reconcile_plan_artifact(nb, plan, len(live_ids), _t.time(), str(out.get("verdict") or ""))
+        _pa, _pae = _reconcile_write_artifact(_plan_out, _artd)
+        if _pa:
+            out["plan_artifact"] = _pa
+        else:
+            out["plan_artifact_error"] = _pae
         _emit_json_payload(out, getattr(a, "out", None)); return 0
     if _suspect_c2 and not getattr(a, "force_unsafe", False):
         # FIX-C r201: DỪNG TRƯỚC MỌI GHI (preflight/gate/journal/reg_bulk đều chưa chạy tới).
@@ -1045,9 +1096,31 @@ def cmd_nlm_reconcile(a) -> int:
                     "Kênh liệt kê NLM khả nghi — apply theo plan này sẽ link/clear bậy hàng "
                     "loạt. Làm theo playbook banner (đổi kênh / nlm login / đo máy khỏe); "
                     "cố ý đi tiếp: --force-unsafe.")
+        # r208b 2.4 (báo cáo 25-07 mục 2.4): CHẶN thì vẫn phải CHO XEM. Trước đây nhánh này chỉ trả
+        # error rc=2 — người vận hành mất hẳn đường soát, phải làm tay 17 dòng. Ngưỡng chặn GIỮ NGUYÊN
+        # (r201/r206, và KHÔNG có --trust-live/--after-restore: registry có thể bị đua về rỗng bất cứ
+        # lúc nào ⇒ không tồn tại lời khẳng định nào của người dùng đủ cứu tình huống đó). Nay LUÔN in
+        # plan đầy đủ ra STDOUT + ghi file JSON tên .BLOCKED để soát bằng mắt; error vẫn ở STDERR (giữ
+        # kỷ luật «parse JSON đừng gộp 2>&1»), rc vẫn 2, KHÔNG ghi một dòng registry nào.
+        import time as _tb
+        out["mode"] = "APPLY_BLOCKED"
+        out["blocked_by"] = _kind206
+        _pb = getattr(a, "plan_out", None) or _reconcile_plan_path(nb, blocked=True)
+        _pbp, _pbe = _reconcile_write_artifact(
+            _pb, _reconcile_plan_artifact(nb, plan, len(live_ids), _tb.time(), _kind206))
+        if _pbp:
+            out["plan_artifact"] = _pbp
+        else:
+            out["plan_artifact_error"] = _pbe
+        out["blocked_note"] = (
+            "Plan in ĐẦY ĐỦ để SOÁT — KHÔNG có dòng registry nào được ghi (rc=2). Artifact mang dấu "
+            "verdict nên `--apply --from-plan` sẽ TỪ CHỐI nạp: sửa gốc theo playbook rồi chạy lại, "
+            "hoặc đọc plan và ghi tay từng dòng bằng `tl register`.")
+        _emit_json_payload(out, getattr(a, "out", None))
         print(json.dumps({"ok": False, "error": _kind206,
                           "unregistered_on_nlm": len(plan["unregistered"]), "live_on_nlm": len(live_ids),
                           "registry_rows_seen": _reg_n206,
+                          **({"plan_artifact": _pbp} if _pbp else {}),
                           "note": _note206}, ensure_ascii=False), file=sys.stderr)
         return 2
     for _w54 in (_nlm_preflight_report(nb, probe=False).get("warn") or []):   # v1.34.54 A1: tuổi cookie trước lô ghi (WARN; tầng-1 live đã nằm ở source_list phía trên)

@@ -133,17 +133,158 @@ def _register_clear(a, g) -> int:
     return 0 if verified else 1
 
 
-def _reg_row_present(g, drive_id) -> bool | None:
-    """#3 (v1.34.30, log grill): CÓ dòng registry khớp drive_id này KHÔNG? Dùng để phân biệt 'vừa INSERT dòng mới'
-    vs 'khớp giá trị cũ, không đổi' — cả hai đều cho reg_upsert `updated:false` (ảo giác ghi-hụt). reg_get refresh=true
-    né cache 600s. Trả True/False; None khi KHÔNG xác định được (reg_get lỗi mạng) → caller bỏ qua field inserted."""
+def _reg_row_get(g, drive_id):
+    """r208b 2.1: đọc DÒNG registry hiện có theo drive_id (reg_get refresh=true — né cache 600s).
+    Trả dict dòng · {} khi KHÔNG có dòng nào · None khi KHÔNG xác định được (reg_get lỗi mạng).
+    Tách khỏi `_reg_row_present` để autofill dùng CHÍNH round-trip đó (không thêm call GAS thứ hai)."""
     try:
         rb = g.get("reg_get", drive_id=str(drive_id), refresh="true")
     except Exception:  # noqa: BLE001
         return None
     if not isinstance(rb, dict):
         return None
-    return bool(rb.get("rows") or [])
+    _rows = rb.get("rows") or []
+    return dict(_rows[0]) if _rows else {}
+
+
+def _reg_row_present(g, drive_id) -> bool | None:
+    """#3 (v1.34.30, log grill): CÓ dòng registry khớp drive_id này KHÔNG? Dùng để phân biệt 'vừa INSERT dòng mới'
+    vs 'khớp giá trị cũ, không đổi' — cả hai đều cho reg_upsert `updated:false` (ảo giác ghi-hụt). reg_get refresh=true
+    né cache 600s. Trả True/False; None khi KHÔNG xác định được (reg_get lỗi mạng) → caller bỏ qua field inserted."""
+    _row = _reg_row_get(g, drive_id)
+    return None if _row is None else bool(_row)
+
+
+# r208b 2.1 (báo cáo 25-07): cột `register` TỰ SUY được từ metadata Drive khi vắng. HẰNG ⇒ re-export
+# TRỰC TIẾP ở tl.py, KHÔNG cho vào _STUB_MAP (trạm stub biến tên thành HÀM — bẫy đã trả giá ở r208).
+_REGISTER_AUTOFILL_COLS = ("name", "cat")
+_REGISTER_NAME_EXT_RE = re.compile(r"\.(docx?|pdf|txt|html?|rtf|odt|md|zip)$", re.I)
+
+
+def _register_infer_name_cat(file_name: str, parent_ids, cat_folder_ids: dict,
+                             parent_name: str = "", phapdien: dict | None = None) -> dict:
+    """PURE-ish (r208b 2.1 — báo cáo 25-07 mục 2.1): suy `name`/`cat` cho dòng registry từ METADATA
+    DRIVE THẬT, không đoán theo nội dung:
+      · name = TÊN FILE Drive, bỏ đuôi mở rộng quen thuộc (GDoc gốc vốn không có đuôi → giữ nguyên);
+      · cat  = nhãn canonical `NN_Ten`, tra theo thứ tự (1) folder cha khớp `config.categories`
+               (map mã→folderId — KHÔNG tốn round-trip nào), (2) TÊN folder cha khớp taxonomy 45+2
+               (khớp đúng tên canonical, hoặc tiền tố 2-số của folder trơ kiểu '23'/'23_…').
+    Trả {"name":…, "cat":…, "why": {cột: lý do}} — giá trị None nghĩa là KHÔNG suy được và caller
+    BẮT BUỘC cảnh báo (bug 2.1 chính là trả `ok:true` im lặng với name=""/cat="")."""
+    out = {"name": None, "cat": None, "why": {}}
+    _nm = str(file_name or "").strip()
+    if _nm:
+        out["name"] = _REGISTER_NAME_EXT_RE.sub("", _nm).strip() or _nm
+    else:
+        out["why"]["name"] = "Drive KHÔNG trả tên file (files_get rỗng/không đọc được)"
+    pd = _load_phapdien() if phapdien is None else phapdien
+    _by_fid = {str(v): str(k) for k, v in (cat_folder_ids or {}).items() if v}
+    _code = next((_by_fid[str(p)] for p in (parent_ids or []) if str(p) in _by_fid), "")
+    _pn = str(parent_name or "").strip()
+    if not _code and _pn:
+        if _pn == "QUARANTINE":
+            _code = "QUARANTINE"
+        else:
+            _code = next((c for c, info in (pd or {}).items() if (info or {}).get("folder") == _pn), "")
+            if not _code and (m := re.match(r"^(\d{1,2})(?:\D|$)", _pn)):
+                _cand = _norm_cat(m.group(1))
+                _code = _cand if _cand in (pd or {}) else ""
+    if _code == "QUARANTINE":
+        out["cat"] = "QUARANTINE"
+    elif _code:
+        # nhãn ĐỦ canonical `NN_Ten` (P1-1) — lấy từ CHÍNH bảng đã nhận để hàm thật sự PURE (test tiêm
+        # bảng riêng); chỉ rơi về `_cat_reg_label` khi bảng thiếu cột folder.
+        out["cat"] = str(((pd or {}).get(_code) or {}).get("folder") or "") or _cat_reg_label(_code)
+    else:
+        out["why"]["cat"] = ("folder cha KHÔNG khớp taxonomy 45+2 (không có trong config.categories, "
+                             "tên folder cũng không khớp) — file có thể đang nằm ngoài cây chủ đề"
+                             if (parent_ids or _pn) else
+                             "KHÔNG đọc được folder cha của file trên Drive")
+    return out
+
+
+def _register_autofill(g, drive_id: str, payload: dict, clear_cols, row=None) -> dict:
+    """r208b 2.1: điền `name`/`cat` còn TRỐNG cho dòng registry, hoặc CẢNH BÁO khi không suy được.
+
+    Ca thật 25-07: 17 dòng ghép bằng `register --drive-id --nlm-source-id --row-kind --corpus
+    --title-vn` đều ra `name:""`, `cat:""` ⇒ corpus-audit gắn NLM_GHOST_SOURCE/ORPHAN_CAT/
+    MISSING_SOHIEU trong khi file vẫn nằm ĐÚNG folder cat 23 và nguồn vẫn SỐNG trên NLM. Cờ báo
+    động giả kiểu này nguy hiểm: người vận hành thấy «ghost source» rất dễ đi XOÁ nhầm thứ còn tốt.
+
+    Nguyên tắc: CHỈ chạm cột đang trống ở CẢ HAI phía (không có trong lệnh, và trống ở dòng registry
+    hiện có) — không bao giờ đè giá trị người vận hành đã ghi; cột đang bị `--clear-cols` xoá thì
+    TRÁNH (người vận hành cố ý xoá, autofill điền lại là chống lệnh). Tốn ≤2 round-trip Drive và chỉ
+    khi thật sự thiếu. Trả {"filled", "missing", "warn", "row_present", "probe_error"}."""
+    _cc = set(clear_cols or [])
+    _need = [c for c in _REGISTER_AUTOFILL_COLS
+             if not str(payload.get(c) or "").strip() and c not in _cc]
+    if row is None:
+        row = _reg_row_get(g, drive_id)
+    _present = None if row is None else bool(row)
+    _need = [c for c in _need if not str((row or {}).get(c) or "").strip()]
+    out = {"filled": {}, "missing": [], "warn": [], "row_present": _present}
+    if not _need:
+        return out
+    _f, _perr = {}, None
+    try:
+        _fg = _imp("transport").drive_op("files_get", file_id=str(drive_id), _quiet=True)
+        _f = (_fg or {}).get("file") or {} if isinstance(_fg, dict) and _fg.get("ok") else {}
+        if not _f:
+            _perr = str((_fg or {}).get("error") or "files_get không trả file")[:160]
+    except Exception as e:  # noqa: BLE001 — probe best-effort: hỏng thì CẢNH BÁO, không chặn ghi
+        _perr = f"{type(e).__name__}: {e}"[:160]
+    _pname = ""
+    _parents = list(_f.get("parents") or [])
+    if "cat" in _need and _parents:
+        try:   # round-trip thứ 2 CHỈ khi cần tên folder cha (config.categories chưa đủ để tra)
+            _pg = _imp("transport").drive_op("files_get", file_id=str(_parents[0]), _quiet=True)
+            _pname = str((((_pg or {}).get("file") or {}).get("name") or "")) if isinstance(_pg, dict) else ""
+        except Exception:  # noqa: BLE001
+            _pname = ""
+    _inf = _register_infer_name_cat(_f.get("name") or "", _parents, _register_cat_folder_ids(), _pname)
+    for c in _need:
+        if _inf.get(c):
+            payload[c] = _inf[c]
+            out["filled"][c] = _inf[c]
+        else:
+            out["missing"].append(c)
+    if out["filled"]:
+        out["warn"].append("REGISTER_AUTOFILLED: " + ", ".join(f"{k}={v!r}" for k, v in out["filled"].items())
+                           + " — suy từ metadata Drive (tên file / folder cha). Sai thì ghi đè bằng "
+                             "`register --name … --cat …`.")
+    if out["missing"]:
+        out["warn"].append(
+            "REGISTER_ROW_INCOMPLETE: dòng registry THIẾU " + "/".join(out["missing"])
+            + (f" (không suy được: {'; '.join(_inf['why'].get(c, '?') for c in out['missing'])})")
+            + (f" [probe Drive lỗi: {_perr}]" if _perr else "")
+            + ". Chạy tiếp `tl register --drive-id " + str(drive_id) + " "
+            + " ".join(f"--{c} …" for c in out["missing"])
+            + "` — để trống sẽ sinh cờ BÁO ĐỘNG GIẢ (NLM_GHOST_SOURCE/ORPHAN_CAT) ở corpus-audit.")
+    if _perr:
+        out["probe_error"] = _perr
+    return out
+
+
+def _register_cat_folder_ids() -> dict:
+    """r208b 2.1: map {mã cat → folderId} của profile đang hoạt động (config.categories, có xử lý
+    'inherit' như `_resolve_cat_folder`). Đọc CONFIG LOCAL — không round-trip. {} nếu chưa cấu hình."""
+    try:
+        cfg = None
+        for p in _config_candidates(os.environ.get("TL_CONFIG_PATH")):
+            if p and Path(p).exists():
+                cfg = _read_json_file(p)
+                if cfg:
+                    break
+        if not cfg:
+            return {}
+        prof = _profiles_from_config(cfg).get(_active_profile()) or {}
+        cats = prof.get("categories", {})
+        if isinstance(cats, str) and cats == "inherit":
+            prof = _profiles_from_config(cfg).get(cfg.get("defaultProfile", DEFAULT_PROFILE)) or {}
+            cats = prof.get("categories", {}) or {}
+        return {str(k): str(v) for k, v in (cats or {}).items() if v} if isinstance(cats, dict) else {}
+    except Exception:  # noqa: BLE001 — thiếu/hỏng config → chỉ mất đường tra rẻ, còn đường tên folder
+        return {}
 
 
 def cmd_register(a) -> int:
@@ -335,6 +476,17 @@ def cmd_register(a) -> int:
                                       "(b) ghi goc trên dòng luật sửa. Không có --force cho ca này."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 2
+    # r208b 2.1 (báo cáo 25-07): dòng ghép bằng `register --drive-id --nlm-source-id …` trước đây ra
+    # name=""/cat="" mà vẫn `ok:true` IM LẶNG → corpus-audit gắn NLM_GHOST_SOURCE/ORPHAN_CAT giả,
+    # người vận hành dễ đi XOÁ nhầm nguồn còn tốt. Nay suy từ metadata Drive (tên file / folder cha),
+    # không suy được thì CẢNH BÁO ngay trong kết quả. Chỉ chạm cột trống ở CẢ lệnh LẪN dòng hiện có.
+    _af = {}
+    # Chỉ chạy khi lệnh CÓ field set — lệnh thuần-xoá (`--sohieu ""`) phải giữ nguyên hành vi cũ,
+    # autofill điền lại giữa một lệnh xoá là chống ý định người vận hành (và thêm round-trip oan).
+    if [k for k in payload if k != "drive_id"] and not getattr(a, "no_autofill", False):
+        _af = _register_autofill(g, a.drive_id, payload, _clear_cols)
+        for _w in _af.get("warn") or []:
+            print(f"[tl] ⚠ {_w}", file=sys.stderr)
     # v1.29.2 (AUDIT B1 #2): reg_upsert đơn cũng qua gate + journaled-upsert (trước g.get trần) — có intent{before}
     # từ manifest (best-effort) → `tl undo` khôi phục được (kể cả khóa immutable sohieu/goc vì đi reg_upsert).
     _fields = [k for k in payload if k != "drive_id"]
@@ -349,7 +501,9 @@ def cmd_register(a) -> int:
     r = {}
     # #3 (v1.34.30, log grill): reg_upsert trả `updated:false` cho CẢ 'vừa insert dòng mới' LẪN 'khớp giá trị cũ,
     # không đổi' → operator tưởng ghi hụt, phải reg-query lại. Precheck reg_get TRƯỚC ghi để phát cờ `inserted` rõ.
-    _existed_before = _reg_row_present(g, a.drive_id) if _fields else None
+    # r208b 2.1: autofill ĐÃ đọc dòng ở trên → tái dùng, KHÔNG thêm round-trip reg_get thứ hai.
+    _existed_before = (_af.get("row_present") if "row_present" in _af
+                       else (_reg_row_present(g, a.drive_id) if _fields else None))
     if _fields:
         _before = (_reg_before_from_manifest([payload], _fields) or {}).get(str(a.drive_id))
         v = _journaled_reg_upsert(run_id, g, payload, before=_before)
@@ -362,6 +516,10 @@ def cmd_register(a) -> int:
     _inserted = (not _existed_before) if (_fields and _existed_before is not None) else None
     print(json.dumps({**r, "verified": _all_ok, "journal": run_id,
                       **({"inserted": _inserted} if _inserted is not None else {}),
+                      # r208b 2.1: KHÔNG bao giờ trả kết quả «sạch» im lặng khi dòng còn thiếu name/cat.
+                      **({"autofilled": _af["filled"]} if _af.get("filled") else {}),
+                      **({"complete": False, "incomplete_cols": _af["missing"]} if _af.get("missing") else {}),
+                      **({"warn": _af["warn"]} if _af.get("warn") else {}),
                       **({"cleared_cols": _clear_cols, "cleared": _clr.get("cleared"),
                           **({"clear_error": _clr.get("error") or (_clr.get("resp") or {}).get("error")}
                              if not _clr.get("verified") else {})} if _clr is not None else {}),

@@ -260,9 +260,10 @@ mất tiện, KHÔNG mất đúng.
 | 2. Tự refresh | gặp lỗi xác thực → **CHỈ `nlm login` THAY PHIÊN MỚI, một lần** trước khi bỏ cuộc. **CẤM tự `nlm-auth-load`** (BÁC 26-07 — ghi đè jar bằng bundle cũ/cũng chết); KHÔNG tin `nlm login --check` (bẫy FALSE-GREEN M1) — xác nhận sống lại CHỈ bằng probe live | CHỈ local (Cowork/chat không tự refresh được → nhảy thẳng tầng 3) |
 | 3. Chế độ chạy-không-NLM | T2 thay bằng quét cache/Drive trực tiếp (chậm hơn, tốn context hơn, tất định); phát hiện vẫn ghi nhưng `muc_chac_chan="cho_verify_nlm"` + vào **Q-VERIFY**; cookie sống lại → MỘT lượt trả nợ kiểm chéo tuần tự, đạt thì nâng hạng | mọi nơi — vòng RÀ **không bao giờ dừng vì cookie** |
 
-> **Van F7 (`NLM_COOKIE_BATCH_MAX_MIN=50′`, cảnh báo 45′) — chốt 26-07: docs-only.** Van đang dựng trên
-> TTL 60′ đã bị đo bác, GIỮ NGUYÊN trong code (chặn-thừa vô hại). Sửa sang canary-live là **hạng mục code
-> RIÊNG sau Đợt 1** (đụng `tl.py`, cần phép đo + test `rXX_` riêng, không đi ké bump Đợt 1).
+> **Van F7 — ĐÃ XONG TRƯỚC Đợt 1 (r208d/v1.35.44, user duyệt 26-07):** chốt chặn lô = **verdict probe
+> LIVE** thay chặn-theo-tuổi (canary không tốn round-trip mới); hằng đổi tên `NLM_COOKIE_BATCH_MAX_MIN`
+> → `NLM_COOKIE_BATCH_WARN_MIN` (vẫn 50′ nhưng chỉ CẢNH BÁO); `alive=None` không chặn (M2);
+> token xoay hết hạn → cảnh báo «có thể chết đột ngột», không chặn.
 
 ### LOOP C — TÁI RÀ ĐỊNH KỲ (mới hoàn toàn so với kế hoạch trước; P5+P6)
 

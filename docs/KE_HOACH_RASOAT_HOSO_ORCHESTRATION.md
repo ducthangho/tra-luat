@@ -231,8 +231,12 @@ chờ duyệt `--apply` + `BUGS_FOUND.md`. **Thêm:** gate offline vẫn N/N và
 làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.md). H0 ngay sau vì nó là mục nặng nhất mà H9
 phơi ra và nằm trong LÕI. H2 sau H1 vì PLAN trỏ tới schema master.
 
-**Chặn (cập nhật 26-07): KHÔNG CÒN.** Q1/Q2 đã chốt; nền code đã đậu tới `v1.35.43`, cây sạch. Đợt 1
-khởi công khi người ra lệnh — nhánh riêng từ master mới nhất, MỘT bump `1.35.44`, test prefix `r209_`.
+**Đợt 1 ĐÃ THI HÀNH 26-07** — nhánh `claude/r209-rasoat-dot1`, commit `245cd4d`, **v1.35.45 (r209)**, nền
+`c2ea090` (v1.35.44 — r208b/c/d đã chiếm 1.35.42–44 nên bump là 45, không phải 44 như dự kiến cũ). Trọn
+H9→H0→H1/H1b→H2 + ADR-0016, selftest **1311/1311** (+7 `r209_*`), workflow/determinism/golden strict XANH,
+`release-verify --archive` XANH trên gói 187 file (guard mới: `doc_pointers ok=true`, baseline đúng 10,
+advisory 64). Golden regen CÓ CHỦ ĐÍCH 2 fixture (thẻ mới xuất hiện trong output). **Chờ user: merge +
+deploy tay** (upload-skill-to-Package.cmd + re-import Capabilities vì SKILL.md đổi).
 
 ## F. RỦI RO & GIẢM THIỂU
 

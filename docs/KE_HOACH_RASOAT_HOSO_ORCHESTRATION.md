@@ -9,10 +9,12 @@
 > **CHỐT 25-07 chiều (grill trên máy dev):** Q1 = (ii) SỬA LÕI · Q2 = XOÁ đặc tả `nlm_log.py` khỏi chỉ dẫn sống ·
 > nơi lưu state = **LAI** (§B.5) · H1b = cấu trúc hoá (xem H1b) · baseline H9 = hằng số trong `release.py` (xem H9) ·
 > đối chiếu kho best-practices ĐÃ LÀM — không mâu thuẫn, 3 bổ sung A1–A3 (xem WORKFLOW doc đầu file).
-> **Nền đo đã trôi:** master nay ở `v1.35.40` (`r208a` slot-audit + `r208-gas` GAS 2.21.2p ATOMIC RMW — ĐÃ LIVE),
-> kèm bump `v1.35.41` (contract 2.21.2p) đang dở tay chưa commit. Hai commit mới không chạm file Đợt 1 đụng tới —
-> nhận định hiện trạng vẫn đứng. Đợt 1 xây SAU khi v1.35.41 đậu = MỘT bump duy nhất; mọi tên test `r208_*`
-> dưới đây phải **đánh số lại theo revision thực** khi đậu (r208 đã bị chiếm).
+> **Nền đo (cập nhật 26-07 — CHẶN ĐÃ HẾT):** master ở `v1.35.43` (`r208c`; chuỗi r208a→r208-gas→r208b→r208c
+> đều đã commit, cây SẠCH; GAS 2.21.2p ATOMIC RMW LIVE, `nlm_auth_status.v2`). Các commit mới không chạm
+> file Đợt 1 đụng tới — nhận định hiện trạng vẫn đứng. **Đợt 1 = MỘT bump `1.35.44`, test prefix `r209_`**
+> (thay mọi tên `r208_*` dưới đây — r208 đã bị chiếm). Hằng số vận hành mặc định + từ vựng: WORKFLOW §0/§0b.
+> ADR kiến trúc điều phối (state LAI · single-writer theo claim · anchor): viết MỘT bản lúc Đợt 1 khởi công,
+> số kế tiếp trong `docs/adr/` (chốt 26-07).
 
 ---
 
@@ -229,9 +231,8 @@ chờ duyệt `--apply` + `BUGS_FOUND.md`. **Thêm:** gate offline vẫn N/N và
 làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.md). H0 ngay sau vì nó là mục nặng nhất mà H9
 phơi ra và nằm trong LÕI. H2 sau H1 vì PLAN trỏ tới schema master.
 
-**Chặn (cập nhật 25-07):** Q1/Q2 ĐÃ CHỐT — không còn chặn nội dung. Chặn duy nhất còn lại là **nền code**:
-bump `v1.35.41` (contract 2.21.2p) đang dở tay trong cây chính, chưa commit. Đợt 1 khởi công SAU khi nó đậu,
-trên nhánh riêng, MỘT bump duy nhất (dự kiến `1.35.42`), tên test đánh số theo revision thực.
+**Chặn (cập nhật 26-07): KHÔNG CÒN.** Q1/Q2 đã chốt; nền code đã đậu tới `v1.35.43`, cây sạch. Đợt 1
+khởi công khi người ra lệnh — nhánh riêng từ master mới nhất, MỘT bump `1.35.44`, test prefix `r209_`.
 
 ## F. RỦI RO & GIẢM THIỂU
 

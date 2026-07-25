@@ -17,6 +17,33 @@
 
 ---
 
+## §0. TỪ VỰNG (chốt 26-07 — dùng ĐÚNG các từ này, không gọi chệch)
+
+| Từ | Nghĩa chốt |
+|---|---|
+| **phiên chính** | phiên đang cầm `session_claim` — BÊN GHI DUY NHẤT tại mỗi thời điểm. Là VAI TRÒ chuyển giao được, không phải một cửa sổ bất tử. (Tránh gọi "main worker" — dễ lẫn với worker Q-NLM) |
+| **agent rà** (`tl-rasoat`) | agent con read-only rà MỘT đơn vị, trả JSON về phiên chính. Không ghi bất cứ gì |
+| **worker Q-NLM** | bên drain hàng đợi nạp NotebookLM, TUẦN TỰ; chỉ "ghi" vào NLM (dịch vụ ngoài), KHÔNG ghi state/registry — kết quả trả JSON, phiên chính ghi |
+| **PLAN** | KHÁI NIỆM kế hoạch hồ sơ; file vật lý là `_meta/rasoat_state.json` |
+| **đơn vị rà** | một mục việc trong Q-UNITS (Điều/cụm Điều × văn bản, hoặc `doi_chieu_bo_sung`) — đơn vị nhỏ nhất của tiến độ và checkpoint |
+| **neo phụ thuộc (anchor)** | bộ `{doc_deps(text_hash), cite, verified_at, ttl}` gắn vào từng phát hiện — điều kiện để tái-rà là PHÉP TÍNH |
+| **đóng gói** | nghi thức A8: xong/trả đơn vị đang cầm → đẩy sổ → cập nhật state + note bàn giao → NHẢ claim → kết sổ registry |
+| **bàn giao** | phiên kế nhiệm: Pha 0 → đọc state từ Drive → GHI claim mới → rà tiếp. Kill-ngang = bàn giao không nghi thức, mất tối đa 1 đơn vị dở |
+
+## §0b. BỘ HẰNG SỐ MẶC ĐỊNH (chốt 26-07 — kickoff từng hồ sơ override được)
+
+| Hằng số | Giá trị | Ghi chú |
+|---|---|---|
+| `X` stale-claim takeover | **30 phút** | quá hạn + con trỏ tiến độ không nhích → chiếm quyền (§3) |
+| `max_units_per_session` (chat) | **6** | hồ sơ toàn đơn vị SÂU → kickoff hạ 4 (A8) |
+| `ttl_ngay` anchor (mức `can_kiem_tra`) | **90 ngày** | một quý — khớp nhịp sửa đổi văn bản (Loop C) |
+| `K` (`dry_rounds`) | **2** | khớp `rasoat-loop` hiện hành |
+| Ngân sách NLM / hồ sơ | **60 call** | H6 kickoff |
+| `quota_tvpl` / ngày | **100** | SỔ ĐẾM + PHẢN ỨNG — tụt bậc khi TVPL báo hết quota THẬT, không chặn sớm; account đo 26-07 chưa từng chạm trần |
+| Biến thể tự trị Loop B | **TẮT mặc định** | opt-in từng hồ sơ trong kickoff; H7 chạy hồ sơ đầu với mặc định bảo thủ để đếm điểm chạm chuẩn |
+
+---
+
 ## §1. NGUYÊN LÝ TỰ ĐỘNG HOÁ (rút từ pattern đã kiểm chứng trong repo + best practice Claude Code)
 
 | # | Nguyên lý | Nguồn gốc trong repo |
@@ -106,7 +133,7 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 
 > **Stale-claim takeover (chốt 26-07):** `session_claim` ghi kèm giờ + con trỏ tiến độ (đơn vị đang cầm).
 > Kịch bản kill-ngang không ai nhả claim → phiên mới được CHIẾM QUYỀN khi claim quá hạn X phút mà con trỏ
-> tiến độ KHÔNG nhích (X đặc tả trong H2 — `RASOAT_PLAN_SCHEMA.md`; gợi ý 30′); chiếm = ghi claim mới đè
+> tiến độ KHÔNG nhích (**X = 30′ — chốt 26-07**, ghi vào H2 `RASOAT_PLAN_SCHEMA.md`); chiếm = ghi claim mới đè
 > qua RMW nguyên tử (GAS 2.21.2p), đơn vị `doing` mồ côi trả về `pending`. Không có takeover khi con trỏ
 > còn nhích — hai phiên cùng sống thì phiên sau LÙI, không giành.
 >
@@ -122,7 +149,7 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 
 | Bước | Việc | Lệnh/cơ chế có thật | Tự động? |
 |---|---|---|---|
-| A1 | Pha 0 tiền kiểm: ping, cookie, VERSION khớp | `doctor`/`ping`, `nlm-auth-status`, probe 3 kênh NLM (KERNEL_APPENDIX §E) | ✅ — fail chặn đứng thì dừng sớm TRƯỚC khi tiêu NLM |
+| A1 | Pha 0 tiền kiểm: ping, auth NLM, VERSION khớp | `doctor`/`ping`, `nlm-auth-status` (v2), **canary probe LIVE** khi lượt cần NLM (§4b tầng 1 — không tin mô hình tuổi) | ✅ — fail chặn đứng thì dừng sớm TRƯỚC khi tiêu NLM |
 | A2 | Nhận vai: ghi `session_claim` (id phiên + giờ) vào state | RMW qua GAS (LockService làm lưới) | ✅ |
 | A3 | Lấy đơn vị `pending` ưu tiên cao nhất (SÂU trước, theo phân tầng worksheet). **Ưu tiên NLM-ready (chốt 25-07):** lấy đơn vị có nguồn liên quan đã `added` trong Q-NLM trước; đơn vị mà nguồn còn `pending` NLM chỉ lấy khi KHÔNG còn việc khác — khi đó phát hiện tự mang `muc_chac_chan="cho_verify_nlm"` + vào Q-VERIFY (cơ chế §4b áp theo TỪNG NGUỒN). Không có "rà thiếu mà ghi là chắc chắn" | `rasoat_worksheet.py` đã chấm SÂU/ĐỐI CHIẾU/— | ✅ |
 | A4 | T1→T2→T3 theo quy trình 3 tầng; mở rộng frontier | `tra_cuu --cite --exact`, `notebook_query` scoped, `frontier-expand --json` | ✅ (ngân sách NLM trừ dần trong state). **NLM chết → KHÔNG dừng**: T2 chuyển quét cache/Drive trực tiếp (chế độ không-NLM §4b) |
@@ -147,8 +174,8 @@ ngưỡng cứng 60% nằm quanh đó nhưng chừa ~40% cho: hoàn tất đơn 
 
 - **Nguồn tín hiệu:** Claude Code/Cowork = `context_window.used_percentage` (statusline input máy-đọc-được,
   `claude-settings.md:753`) / cảnh báo harness. Claude chat = KHÔNG có số đo tin cậy → dùng ngưỡng ĐẾM
-  thay ngưỡng %: `max_units_per_session` trong kickoff (mặc định gợi ý 5–8 đơn vị/phiên, hồ sơ chỉnh theo
-  độ sâu), cộng thêm đóng gói sớm nếu thấy dấu hiệu cạn (trả lời bị nén, quên chi tiết gần).
+  thay ngưỡng %: `max_units_per_session` trong kickoff (**mặc định 6 — chốt 26-07**; hồ sơ toàn đơn vị
+  SÂU hạ 4), cộng thêm đóng gói sớm nếu thấy dấu hiệu cạn (trả lời bị nén, quên chi tiết gần).
 - **KHÔNG `/compact` giữa phiên rà:** compact là tóm tắt CÓ MẤT MÁT; state đã là file (P1) nên bàn giao
   phiên-mới-context-sạch luôn rẻ hơn và trung thực hơn. `/compact` chỉ dành cho phiên tương tác thường.
 
@@ -165,7 +192,9 @@ hoạch — r207 đã đo bỏ 1 call chỉ −0,6s (trong nhiễu), và nửa g
    `ingest-route`/`profile-ingest … --json` DRY → plan + `plan_hash` → append Q-APPROVALS. Văn bản
    vào ở trạng thái **staged `corpus=false`** — có mặt để rà tiếp, chưa được tin là corpus.
    **Nguồn tải (uỷ quyền trong kickoff — chống hỏi-người rời rạc):** văn bản lấy được từ danh sách
-   nguồn tin cậy đã khai (vbpl.vn, Công báo, cổng .gov.vn/.chinhphu.vn…) → máy TỰ tải vào khu tập kết;
+   nguồn tin cậy đã khai — **danh sách mặc định chốt 26-07: `vbpl.vn` · `congbao.chinhphu.vn` ·
+   `*.chinhphu.vn` · `*.gov.vn` · `quochoi.vn` · `dangcongsan.vn`** (wildcard gov.vn giữ có chủ đích:
+   chỉ áp trong phạm vi hồ sơ, và QT-2 + xác minh official-first vẫn gác phía sau) → máy TỰ tải vào khu tập kết;
    KHÔNG tự lấy được → gắn `cho_nguoi_tai` (kèm link TVPL nếu có) và **gom hỏi chung tại điểm chạm ②**,
    không hỏi lẻ từng file giữa chừng.
    **Bậc thang TVPL (chốt 25-07 — docx TVPL chất lượng file tốt nhất, user có account):**
@@ -173,9 +202,10 @@ hoạch — r207 đã đo bỏ 1 call chỉ −0,6s (trong nhiễu), và nửa g
      lô (uỷ quyền trong kickoff; recipe thực chiến: click tab "Tải về" trước rồi mới `(docx)`).
      **Ranh giới an toàn TUYỆT ĐỐI:** chỉ dùng phiên ĐÃ đăng nhập — máy không bao giờ nhập mật khẩu hộ;
      gặp login hết hạn/CAPTCHA → DỪNG kênh, tụt bậc, gom hỏi người tại ②.
-   - **Quota guard:** đếm `quota_tvpl` trong state như quota NLM (ngưỡng thật CẦN NGƯỜI XÁC NHẬN — ghi cũ
-     "~1 docx/ngày" có thể lỗi thời với account hiện tại); chạm ngưỡng → tụt bậc **LuatVietnam (docx) →
-     vbpl.vn (.doc) → Công báo (PDF = hạ sách cuối, kiểm chất lượng text theo luật cứng C1/10a)**.
+   - **Quota guard (chốt 26-07):** `quota_tvpl` mặc định **100/ngày**, vai trò **SỔ ĐẾM + PHẢN ỨNG** — tụt
+     bậc khi TVPL báo hết quota THẬT, không chặn sớm (account đo 26-07 chưa từng chạm trần; ghi cũ
+     "~1 docx/ngày" là account đời trước). Bậc tụt: **LuatVietnam (docx) → vbpl.vn (.doc) → Công báo
+     (PDF = hạ sách cuối, kiểm chất lượng text theo luật cứng C1/10a)**.
    - Claude chat: không lái Chrome được → link TVPL bấm-được cho người tự tải, gom MỘT lần tại ②.
    - **KHÔNG đổi canonical:** mọi bản tải về vẫn qua QT-2 + xác minh official-first (`_official_rank`
      vbpl/Công báo=1 … TVPL=4 giữ nguyên — TVPL cho FILE đẹp, official để CHỐT bản đúng).
@@ -200,6 +230,8 @@ hoạch — r207 đã đo bỏ 1 call chỉ −0,6s (trong nhiễu), và nửa g
 > cho bước 2 với điều kiện hẹp — "văn bản được ≥1 phát hiện đã-verify dẫn chiếu đích danh, đúng loại
 > VBQPPL, đi làn staged" ⇒ máy tự apply lô staged, người chỉ còn duyệt bước 3 (flip). Điểm dừng có
 > chủ đích vẫn còn — nhưng lùi về nơi rẻ nhất.
+> **Chốt 26-07: biến thể này TẮT mặc định** — opt-in từng hồ sơ trong kickoff (§0b). Điểm chạm ② vốn đã
+> rẻ (1 câu hỏi/pha); H7 chạy hồ sơ đầu với mặc định bảo thủ để số đếm điểm-chạm-người làm chuẩn nghiệm thu.
 
 ### §4a. WORKER Q-NLM — nạp NotebookLM TUẦN TỰ, tách khỏi đường găng (chốt 25-07)
 
@@ -224,9 +256,13 @@ mất tiện, KHÔNG mất đúng.
 
 | Tầng | Cơ chế | Môi trường |
 |---|---|---|
-| 1. Tiền kiểm | Pha 0 đo tuổi cookie mỗi lần thức dậy + cron `secrets-set --nlm` ngày 1 lần phía local | mọi nơi |
-| 2. Tự refresh | gặp lỗi xác thực giữa chừng → tự chạy `nlm login`/`refresh_auth` MỘT lần trước khi bỏ cuộc | CHỈ local (Cowork/chat không tự refresh được → nhảy thẳng tầng 3) |
+| 1. Tiền kiểm | **1 canary probe LIVE** (`notebook_get`, đo thật ~4,3s) TRƯỚC lượt/lô cần NLM — **mô hình TUỔI đã bị đo 26-07 BÁC** (chết do token xoay DBSC hết hạn, thời điểm KHÔNG đoán trước; `age_min` = thời gian từ lần xác thực thành công gần nhất, không phải tuổi cookie). Cron `secrets-set --nlm` ngày 1 lần phía local GIỮ, nhưng bundle Drive **không bảo đảm sống** — luôn probe trước khi dùng | mọi nơi |
+| 2. Tự refresh | gặp lỗi xác thực → **CHỈ `nlm login` THAY PHIÊN MỚI, một lần** trước khi bỏ cuộc. **CẤM tự `nlm-auth-load`** (BÁC 26-07 — ghi đè jar bằng bundle cũ/cũng chết); KHÔNG tin `nlm login --check` (bẫy FALSE-GREEN M1) — xác nhận sống lại CHỈ bằng probe live | CHỈ local (Cowork/chat không tự refresh được → nhảy thẳng tầng 3) |
 | 3. Chế độ chạy-không-NLM | T2 thay bằng quét cache/Drive trực tiếp (chậm hơn, tốn context hơn, tất định); phát hiện vẫn ghi nhưng `muc_chac_chan="cho_verify_nlm"` + vào **Q-VERIFY**; cookie sống lại → MỘT lượt trả nợ kiểm chéo tuần tự, đạt thì nâng hạng | mọi nơi — vòng RÀ **không bao giờ dừng vì cookie** |
+
+> **Van F7 (`NLM_COOKIE_BATCH_MAX_MIN=50′`, cảnh báo 45′) — chốt 26-07: docs-only.** Van đang dựng trên
+> TTL 60′ đã bị đo bác, GIỮ NGUYÊN trong code (chặn-thừa vô hại). Sửa sang canary-live là **hạng mục code
+> RIÊNG sau Đợt 1** (đụng `tl.py`, cần phép đo + test `rXX_` riêng, không đi ké bump Đợt 1).
 
 ### LOOP C — TÁI RÀ ĐỊNH KỲ (mới hoàn toàn so với kế hoạch trước; P5+P6)
 
@@ -283,14 +319,14 @@ không bao giờ chạy tay giữa hồ sơ.
 |---|---|---|
 | Mỗi phiên làm việc | Loop A drain + Loop B gom lô | người mở phiên hoặc Routine hằng ngày |
 | Tuần 1 lần | Loop C tái rà | Routine phiên-mới, prompt cố định "chạy tái rà hồ sơ X"; thoát im lặng nếu không delta. **(A2)** wrapper khai `disallowed-tools: AskUserQuestion` (kho nêu đích danh use case background loop) + `disable-model-invocation: true` — tái-rà chỉ chạy theo lịch/lệnh tường minh (nguồn: `claude-skills.md`). **(A3)** chạy headless local (`claude -p`): thêm `--max-turns` + `--max-budget-usd` làm fail-safe ngoài `max_iter` — cả hai CHỈ có ở print mode, Routine cloud phải dựa `max_iter` trong state (nguồn: `claude-cli-startup-flags.md` §Budget & Limits) |
-| Ngày 1 lần (phía LOCAL) | refresh cookie NLM (`secrets-set --nlm`) | cron máy local (COWORK_PROJECT.md §3) — Cowork/chat không tự refresh được (tầng 2 §4b chỉ có ở local) |
+| Ngày 1 lần (phía LOCAL) | refresh cookie NLM (`secrets-set --nlm`) | cron máy local (COWORK_PROJECT.md §3) — Cowork/chat không tự refresh được (tầng 2 §4b chỉ có ở local). ⚠ bundle stage lên Drive KHÔNG bảo đảm sống (đo 26-07: mang token xoay đã hết hạn) — nơi dùng luôn probe live trước |
 | Trước mỗi lượt bất kỳ | Pha 0 tiền kiểm | luôn luôn — rẻ, chặn sớm |
 
 ### §5a. WARM-UP TOOLS lúc khởi động (chốt 25-07) — làm nóng, KHÔNG thay cổng
 
 | Môi trường | Cách làm |
 |---|---|
-| Cowork / Claude Code | **Warm-up NỀN** ngay khi phiên bắt đầu: `tl ping --json` + `nlm-auth-status` + tuổi cookie + `registry_orchestrator boot` (changes_pull delta — nhịp 1 §4c) chạy background task (read-only), kết quả ghi file nhỏ; Pha 0 **đọc lại** kết quả thay vì chờ gọi mới — phiên chính trong lúc đó đọc PLAN/worksheet. Gắn: bước nền trong RUNBOOK boot hoặc SessionStart hook dev-side (`.claude/settings.json` — không vào zip). Tool MCP load MỘT lần theo lô (ToolSearch batch / `alwaysLoad` cho server NLM — kho best-practice `claude-settings.md` §Per-Server Tool Loading) |
+| Cowork / Claude Code | **Warm-up NỀN** ngay khi phiên bắt đầu: `tl ping --json` + `nlm-auth-status` (schema v2 — không còn `est_remaining_min`; đọc cờ `ROTATION_TOKEN_EXPIRED`) + `registry_orchestrator boot` (changes_pull delta — nhịp 1 §4c) chạy background task (read-only), kết quả ghi file nhỏ; Pha 0 **đọc lại** kết quả thay vì chờ gọi mới — phiên chính trong lúc đó đọc PLAN/worksheet. Gắn: bước nền trong RUNBOOK boot hoặc SessionStart hook dev-side (`.claude/settings.json` — không vào zip). Tool MCP load MỘT lần theo lô (ToolSearch batch / `alwaysLoad` cho server NLM — kho best-practice `claude-settings.md` §Per-Server Tool Loading) |
 | Claude chat | Không có background thật → **Pha 0 phân tầng LƯỜI**: (a) boot chỉ `ping` GAS (1 call, rẻ, đằng nào cũng cần); (b) probe NLM HOÃN đến ngay trước lần dùng NLM đầu — lượt chạy chế độ không-NLM thì khỏi probe; (c) không chặn việc đọc/lập kế hoạch sau lưng probe chưa cần |
 
 **Hai ranh giới:** (1) warm-up CHỈ dùng lệnh read-only (ping/status/probe) — không "làm nóng" bằng lệnh ghi;

@@ -1,0 +1,69 @@
+{
+  "schema": "workflow_card.v1",
+  "id": "rasoat_hoso",
+  "title": "Vòng lặp rà soát hồ sơ dự thảo luật (lớp điều phối — worklist trên rasoat_state.json)",
+  "risk": "medium",
+  "write_scope": "profile_meta_rasoat_state_drive + master_local_out_dir (NGOAI cay skill - doctrine B.5)",
+  "applies_to": [
+    "rasoat_hoso",
+    "orchestration"
+  ],
+  "recommended_commands": [
+    "rasoat-loop --dry-rounds 2 --json",
+    "frontier-expand --json",
+    "reg-query --refresh --json",
+    "profile-ingest --staged --json",
+    "verify-staged --json",
+    "nlm-reconcile <nb> --all-notebooks"
+  ],
+  "plan": [
+    "A1 Pha 0 tien kiem: ping + nlm-auth-status v2 + canary probe LIVE khi luot can NLM (khong tin mo hinh tuoi cookie)",
+    "A2 nhan vai: ghi session_claim (id + gio + con tro tien do) vao _meta/rasoat_state.json qua RMW",
+    "A3 lay don vi pending uu tien cao nhat (SAU truoc, uu tien NLM-ready; nguon chua vao NLM -> phat hien mang muc_chac_chan=cho_verify_nlm)",
+    "A4 ra 3 tang (T1 cache tat dinh -> T2 quet tho -> T3 dao sau) + frontier-expand; NLM chet -> che do khong-NLM (quet cache truc tiep)",
+    "A5 VERIFY tung phat hien (nlm_qa verify; nguyen van CHI tu cache/raw); fail verify -> KHONG ghi",
+    "A6 ghi master/<unit>.json (kem anchor + muc_chac_chan) local --out-dir NGOAI cay skill -> danh done -> cap nhat state SAU MOI don vi",
+    "A7 ung vien moi -> Q-INGEST (lan staged, gom LO duyet 1 lan); nguon flip xong -> Q-NLM worker tuan tu nap sau",
+    "A8 dong goi CHU DONG: nguong context 40% mem / 60% cung do tai RANH GIOI don vi (chat: max_units_per_session=6) -> checkpoint + note ban giao + NHA claim"
+  ],
+  "verify": [
+    "moi phat hien ghi vao master deu da qua VERIFY hoac mang muc_chac_chan=cho_verify_nlm trong Q-VERIFY",
+    "sau luot chay: git status cay skill SACH (state/master nam NGOAI cay - doctrine B.5)",
+    "don vi done khong bao gio reset ve pending toan phan tru khi anchor vo",
+    "rasoat_phuluc.py --in master/ chay duoc tren thu muc master (append-only muc thu muc)"
+  ],
+  "stop_conditions": [
+    "HOI TU: het pending + Q-INGEST rong + dry_rounds >= 2",
+    "context cham nguong cung 60% (do tai ranh gioi don vi) -> dong goi",
+    "moi don vi con lai deu blocked boi CUNG mot loi (chan dung that) -> bao nguoi 1 dong",
+    "can ngan sach NLM (mac dinh 60 call/ho so) hoac quota TVPL bao het that",
+    "max-iter fail-safe cua rasoat-loop"
+  ],
+  "rules": [
+    "phien chinh (dang cam session_claim) la BEN GHI DUY NHAT; agent ra read-only; worker Q-NLM chi goi NLM, tra JSON ve phien chinh",
+    "stale-claim takeover: claim qua han 30 phut ma con tro tien do KHONG nhich -> phien moi chiem quyen qua RMW; con nhich -> phien sau LUI",
+    "diem dung co chu dich giu nguyen: duyet lo --apply, deploy tay, ket luan cuoi + ky do nguoi",
+    "state bien dong NAM NGOAI cay skill (package_hash) - chi MAU rong (templates/) nam trong cay",
+    "khong /compact giua phien ra - ban giao qua file trung thuc hon tom tat co mat mat"
+  ],
+  "idempotency_contract": {
+    "unit_of_progress": "1 don vi ra = 1 file master/<unit>.json + 1 lan cap nhat state",
+    "rerun_safe": "chay lai luot drain khong lam lai don vi done; kill giua chung mat toi da 1 don vi do"
+  },
+  "journal_key": "rasoat_hoso_state",
+  "resume_behavior": "phien ke nhiem: Pha 0 -> doc _meta/rasoat_state.json tu Drive -> ghi session_claim MOI -> ra tiep don vi pending; don vi doing mo coi tra ve pending",
+  "resume_command": "rasoat-loop --dry-rounds 2 --json",
+  "dry_run_required": true,
+  "confirm_required": true,
+  "readback_required": true,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "session_claim",
+    "quota_nlm",
+    "quota_tvpl",
+    "verified_at",
+    "timestamp",
+    "progress"
+  ]
+}

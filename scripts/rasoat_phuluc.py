@@ -12,8 +12,11 @@ Cấu trúc master: xem templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json
     "van_ban":  [ {linh_vuc, loai, so_hieu, ngay, ten, hieu_luc_tu, tinh_trang,
                    sua_doi_bo_sung, ghi_chu} ... ],   # -> Phụ lục I (03-BN)
     "noi_dung": [ {key, linh_vuc, van_ban, can_cu, phan_tich, hinh_thuc,
-                   lo_trinh, tieu_chi, ghi_chu} ... ] # -> Phụ lục II..V (04..07-BN)
+                   lo_trinh, tieu_chi, ghi_chu,
+                   muc_chac_chan, anchor{cite,…}} ... ] # -> Phụ lục II..V (04..07-BN)
   }
+  (v1.35.45 r209/H1b: `muc_chac_chan` + `anchor.cite` được nối vào cột Ghi chú khi kết xuất —
+   field lạ khác vẫn bỏ qua như cũ.)
 
 Định tuyến theo trường "hinh_thuc" (không phân biệt hoa thường, có dấu):
   - "ban hành mới"                              -> 05-BN (Phụ lục III)
@@ -136,11 +139,20 @@ def table_xuly(items, kind):
         L.append(f"| | **LĨNH VỰC {lv.upper()}** | | | | | | |")
         for r in rows:
             n += 1
+            # v1.35.45 (r209/H1b) — phụ lục không được rơi mất mức chắc chắn + cite nguyên văn (bảng C):
+            # nối vào cột Ghi chú; master vẫn là nguồn sự thật đầy đủ.
+            gc = r.get("ghi_chu", "") or ""
+            mcc = (r.get("muc_chac_chan") or "").strip()
+            cite = ((r.get("anchor") or {}).get("cite") or "").strip()
+            if mcc:
+                gc = gc + ("; " if gc else "") + "mức: " + mcc
+            if cite:
+                gc = gc + ("; " if gc else "") + "cite: " + cite
             L.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
                 n, md_escape(r.get("van_ban", "")), md_escape(r.get("can_cu", "")),
                 md_escape(r.get("phan_tich", "")), md_escape(r.get("hinh_thuc", "")),
                 md_escape(r.get("lo_trinh", "")), md_escape(r.get("tieu_chi", "")),
-                md_escape(r.get("ghi_chu", ""))))
+                md_escape(gc)))
     return "\n".join(L), n
 
 

@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.44 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.45 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -111,10 +111,10 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 >   Khối trên tải zip SẠCH (public, chỉ cần curl) rồi chạy `tl_fetch.sh` **bên trong zip sạch** → config(curl)+ping+uv+gws(musl)+
 >   boot. **Tách nlm** vì cài nlm (uv+Python+PyPI) hay vượt **45s/lệnh Cowork** → `--setup` (không nlm) xong nhanh, nlm chạy
 >   riêng khi cần. Xong: `cd "$(cat ~/.tl_fetch/ROOT)" && TL_CONFIG=~/.tra_luat_config.json python3 scripts/tl.py <args>`.
->   ⛔ **ĐỪNG** `tl_boot.py ping` / `verify-integrity` / `build_parts` / ghép `_parts` / "dig into recovery" — VÔ ÍCH, đã biết
->   mount cắt. Chỉ khi **`curl` zip LỖI** (mất mạng Drive) mới tính nhánh `_parts`/Drive MCP. (A1–A3 dưới là ĐƯỜNG LOCAL.)
-> - **LOCAL / mount lành (vd máy Windows) →** chạy thẳng khối **A1–A3** bên dưới. `tl_boot.py ping` ở local KHÔNG đụng `_parts`
->   (on-disk khớp MANIFEST → chạy thẳng; chỉ ghép `_parts` khi thật sự cắt cụt).
+>   ⛔ **ĐỪNG** `tl_boot.py ping` / `verify-integrity` / "dig into recovery" — VÔ ÍCH, đã biết
+>   mount cắt. Chỉ khi **`curl` zip LỖI** (mất mạng Drive) mới tính nhánh Drive MCP. (A1–A3 dưới là ĐƯỜNG LOCAL.)
+> - **LOCAL / mount lành (vd máy Windows) →** chạy thẳng khối **A1–A3** bên dưới. `tl_boot.py ping` ở local an toàn
+>   (chỉ strip NUL rồi chạy thẳng — cơ chế `_parts/` ĐÃ BỎ).
 >
 > **COWORK — chi tiết đường tải-về (bảng artifact public/curl-route + ⛔ bẫy NPM-GLIBC gws): trích NGUYÊN VĂN →**
 > **`references/KERNEL_APPENDIX.md` §A** — route chuẩn đã nằm TRỌN trong khối BƯỚC 0 trên; gws Cowork LUÔN `tl gws-bootstrap-cowork`, ⛔ KHÔNG npm.
@@ -129,13 +129,12 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 > **Thứ tự (user yêu cầu): CONFIG(apps script) + GWS cred TRƯỚC** → rồi nlm. gws trước nlm để Python tải qua direct-media nhanh.
 > Fallback config: webapp `download` (token) → Drive MCP. Bật public 1 lần bằng `set-package-public.cmd` (xem §Đóng gói).
 >
-> **Còn local (mount lành):** `python scripts/tl_boot.py …` THAY cho `tl.py` — tự strip NUL + verify sha (MANIFEST) +
-> ghép từ `_parts` nếu cắt cụt; báo rõ + exit≠0 thay vì im lặng exit 0. tl_boot/build_parts cũng cắt → SHELL
-> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`. **`_parts` cũng hỏng → `tl_fetch.sh`
-> (Drive) hoặc RE-SYNC skill** là cách dứt điểm.
+> **Còn local (mount lành):** `python scripts/tl_boot.py …` THAY cho `tl.py` — tự strip NUL; báo rõ + exit≠0 thay vì
+> im lặng exit 0 (cơ chế `_parts/` ĐÃ BỎ — xem đầu `tl_boot.py`). tl.py hỏng/cắt cụt → `tl verify-integrity` soi,
+> rồi **`sh scripts/tl_fetch.sh` (zip SẠCH từ Drive) hoặc RE-SYNC skill** là cách dứt điểm.
 > **Khi SỬA file skill trong Cowork: ĐỪNG tin Edit/Write
 > native (hay cắt cụt) — ghi bằng Python `pathlib.write_text()`/heredoc qua Bash, rồi `tl verify-integrity` để xác minh.
-> Chi tiết: `references/COWORK_EDIT_SAFETY.md`.** (Sửa file đã-chunk xong PHẢI `python scripts/build_parts.py`.)
+> Chi tiết: `references/COWORK_EDIT_SAFETY.md`.**
 > **THIẾU config/token (phiên trống)?** `ping` báo lỗi + đường KHÔI PHỤC (fileId baked sẵn, ƯU TIÊN trên xuống):
 > 1) ★★ **`tl up --nlm`** = BOOTSTRAP TẤT ĐỊNH 1-LỆNH (idempotent): config→gws cred+binary→nlm→manifest→readiness, in
 >    trạng thái từng bước. **MỌI env (Chat/Cowork/Code) NÊN chạy `tl up --nlm` ĐẦU PHIÊN** để cài gws+nlm + nạp corpus NGAY.

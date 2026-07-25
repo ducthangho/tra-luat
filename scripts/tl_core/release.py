@@ -411,6 +411,7 @@ _RELEASE_REQUIRED_FILES = [
     "references/golden/tool_inventory_inventory_decision.json",
     "references/golden/route_task_ocr_ingest.json",
     "references/golden/route_task_profile_ingest_chunks.json",
+    "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",   # r209/H1: mẫu bảng master rà soát — bên đọc rasoat_phuluc.py
 ]
 
 _RELEASE_REQUIRED_WORKFLOWS = [
@@ -438,6 +439,7 @@ _RELEASE_REQUIRED_WORKFLOWS = [
     "references/workflows/release_bundle.json",
     "references/workflows/final_acceptance.json",
     "references/workflows/go_live_runbook.json",
+    "references/workflows/rasoat_hoso.json",   # r209/H2: thẻ quy trình rà soát hồ sơ (lớp điều phối)
 ]
 
 
@@ -537,6 +539,64 @@ def _skill_links_findings(skill_text: str, manifest_paths) -> dict:
     return {"links_checked": len(links), "links_missing": missing, "links_ok": not missing}
 
 
+# r209 (H9 Đợt-1 rà-hồ-sơ): guard RATCHET con trỏ tài liệu — mở rộng vùng phủ REL-01 từ «references/ trong
+# SKILL.md» ra «references/|templates/|scripts/ trong SKILL.md + references/*.md». Đo 26-07 trên v1.35.44:
+# 80 cặp (tài_liệu, con_trỏ) đứt — 65 trong DOCTRINE_APPENDIX (LƯU TRỮ → advisory), 5 tầng A+B vá ở H0/H1,
+# 10 nợ cũ khoanh BASELINE dưới. Fail-closed CHỈ với cặp MỚI ở tài liệu SỐNG — không baseline thì guard đỏ
+# 80 mục ngay ngày đầu và sẽ bị vô hiệu hoá (bài học §0.8 kế hoạch). Gỡ nợ = XOÁ mục baseline (ratchet:
+# sửa baseline = sửa code = qua ruff→selftest→CHANGELOG→review; test r209 khoá số đếm).
+_POINTER_ARCHIVE_DOCS = frozenset({"references/DOCTRINE_APPENDIX.md"})
+_POINTER_BASELINE = frozenset({
+    ("references/API_CONTRACT.md", "scripts/manifest_build.py"),        # bản thật ở scripts/_fallback/
+    ("references/COWORK_EDIT_SAFETY.md", "scripts/ten_file.py"),        # placeholder ví dụ trong prose
+    ("references/DELTA_v1.19.md", "references/Code.2.21.2h.gs"),        # GAS đời cũ đã ra archive
+    ("references/DEV_TOOLING_GUIDE.md", "references/Code.2.21.2i.gs"),
+    ("references/GOTCHAS.md", "scripts/.tl_state"),                     # thư mục runtime, cố ý ngoài gói
+    ("references/PATCH_v2.21.1.gs.md", "references/APPSSCRIPT_MANIFEST.restricted-egress.json"),
+    ("references/QUY_TRINH_RA_SOAT_3_TANG.md", "references/BANG_PHAN_TANG_RUI_RO.md"),
+    ("references/SKILL_KERNEL_MAPPING.md", "references/SKILL_KERNEL_DRAFT.md"),
+    ("references/SKILL_KERNEL_MAPPING.md", "references/changelog_archive/CHANGELOG-2026H1.md"),
+    ("references/THE_THUC_TRINH_BAY.md", "templates/_nguon-goc/"),      # đường DRIVE `_meta/templates/…` — false-positive giữ chủ đích
+})
+
+
+def _doc_pointer_findings(doc_texts: dict, manifest_paths, *, archive_docs=_POINTER_ARCHIVE_DOCS,
+                          baseline=_POINTER_BASELINE) -> dict:
+    """PURE (r209/H9): quét con trỏ `references/|templates/|scripts/…` trong TỪNG tài liệu, đối chiếu
+    PACKAGE-SET (như REL-01: nguồn sự thật là manifest, không phải cây đĩa). Ratchet 2 tầng:
+    (a) tài liệu trong `archive_docs` → chỉ ADVISORY (lưu trữ lịch sử, không sửa thân);
+    (b) cặp (tài_liệu, con_trỏ) trong `baseline` → nợ cũ đã khoanh, im lặng; MỌI cặp khác thiếu trong
+    package ⇒ fail-closed. Khớp theo CẶP: con trỏ được miễn ở doc này KHÔNG tự miễn ở doc khác.
+    Link glob (chứa `*`) bỏ qua; link thư mục (đuôi `/`) khớp PREFIX; manifest rỗng ⇒ fail-closed."""
+    paths = [str(p) for p in (manifest_paths or [])]
+
+    def _hit(link):
+        if link.endswith("/"):
+            return any(p.startswith(link) for p in paths)
+        return link in paths or any(p.startswith(link + "/") for p in paths)
+
+    fail, advisory, baseline_hits, checked = [], [], [], 0
+    for doc in sorted(doc_texts or {}):
+        text = str(doc_texts.get(doc) or "")
+        links = sorted({m.rstrip(".,;:)]}»*`") for m in
+                        re.findall(r"(?:references|templates|scripts)/[A-Za-z0-9_./\-]+", text)})
+        for link in links:
+            if "*" in link or not link:
+                continue
+            checked += 1
+            if _hit(link):
+                continue
+            pair = (doc, link)
+            if doc in archive_docs:
+                advisory.append(pair)
+            elif pair in baseline:
+                baseline_hits.append(pair)
+            else:
+                fail.append(pair)
+    return {"pointers_checked": checked, "pointers_fail": fail, "pointers_advisory": advisory,
+            "pointers_baseline": baseline_hits, "pointers_ok": not fail}
+
+
 def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
     root = root.resolve()
     raw_files = manifest.get("files") if isinstance(manifest, dict) else None
@@ -634,6 +694,23 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
             if not skill_links["links_ok"]:
                 errors.append("SKILL_LINKS_NOT_IN_PACKAGE:" + ",".join(skill_links["links_missing"][:10]))
                 ok = False
+    # r209 (H9): guard RATCHET con trỏ tài liệu SỐNG (references/|templates/|scripts/) trên
+    # SKILL.md + references/*.md — xem _doc_pointer_findings. Cặp MỚI đứt ⇒ fail-closed.
+    _doc_texts = {}
+    _doc_list = sorted((root / "references").glob("*.md")) if (root / "references").is_dir() else []
+    if _sk_path.exists():
+        _doc_list.append(_sk_path)
+    for _dp in _doc_list:
+        try:
+            _doc_texts[_dp.relative_to(root).as_posix()] = _dp.read_text(encoding="utf-8", errors="replace")
+        except OSError as _dp_err:
+            errors.append(f"DOC_POINTER_UNREADABLE:{_dp.name}:{type(_dp_err).__name__}")
+            ok = False
+    doc_pointers = _doc_pointer_findings(_doc_texts, sorted(expected))
+    if not doc_pointers["pointers_ok"]:
+        errors.append("DOC_POINTERS_NOT_IN_PACKAGE:" +
+                      ",".join(f"{d}->{l}" for d, l in doc_pointers["pointers_fail"][:10]))
+        ok = False
     package_hash_current_expected = hashlib.sha256("\n".join(
         f"{c['path']}\0{c.get('actual_size', -1)}\0{c.get('actual_sha256')}"
         for c in checks if c.get("actual_sha256")
@@ -657,6 +734,7 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         "missing_from_current_manifest": missing_from_current_manifest[:200],
         "required_missing": required_missing,
         "skill_links": skill_links,
+        "doc_pointers": doc_pointers,
         "errors": errors,
         "package_hash_expected": manifest.get("package_hash"),
         "package_hash_current": package_hash_current_expected,

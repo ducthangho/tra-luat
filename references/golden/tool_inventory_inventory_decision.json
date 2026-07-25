@@ -1805,6 +1805,7 @@
     "nlm_query_quality",
     "ocr_ingest",
     "ocr_pdf_scan",
+    "rasoat_hoso",
     "release_bundle",
     "release_check",
     "release_manifest",

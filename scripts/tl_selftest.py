@@ -19702,6 +19702,142 @@ def run() -> int:
         return _ok_a and _ok_b and _ok_c and _ok_d
     _t110("r208d_canary_truoc_lo", _c208d_canary_truoc_lo)
 
+    # ───── r209 (Đợt 1 lớp điều phối rà hồ sơ): H9 guard ratchet · H0 cứu hộ LÕI · H1 template master · H2 thẻ quy trình ─────
+    from pathlib import Path as _P209
+    import json as _j209, re as _re209
+    import importlib.util as _ilu209
+    _ROOT209 = _P209(__file__).resolve().parent.parent
+    from tl_core import release as _rel209
+    from tl_core import workflow as _wf209
+    _spec209 = _ilu209.spec_from_file_location("rasoat_phuluc_r209", _ROOT209 / "scripts" / "rasoat_phuluc.py")
+    _rp209 = _ilu209.module_from_spec(_spec209); _spec209.loader.exec_module(_rp209)
+
+    def _c209_pointer_findings_pure():
+        # H9: helper thuần — bắt cả templates/+scripts/, tước dấu câu, thư mục khớp PREFIX,
+        # manifest rỗng fail-closed, archive→advisory, baseline im lặng, cặp MỚI → ĐỎ.
+        f = _rel209._doc_pointer_findings
+        pkg = ["scripts/co.py", "scripts/tl_core/a.py", "references/y.md"]
+        docs = {"references/SONG.md": "xem `templates/x.json` và scripts/co.py, thư mục scripts/tl_core/ nhé (references/y.md)."}
+        r = f(docs, pkg, archive_docs=frozenset(), baseline=frozenset())
+        ok1 = (r["pointers_fail"] == [("references/SONG.md", "templates/x.json")]) and not r["pointers_ok"]
+        r0 = f(docs, [], archive_docs=frozenset(), baseline=frozenset())
+        ok2 = (len(r0["pointers_fail"]) == 4) and not r0["pointers_ok"]
+        ra = f({"references/DOCTRINE_APPENDIX.md": "chạy scripts/ghost.py đi"}, pkg)
+        ok3 = ra["pointers_ok"] and ra["pointers_advisory"] == [("references/DOCTRINE_APPENDIX.md", "scripts/ghost.py")]
+        rb = f({"references/GOTCHAS.md": "xem scripts/.tl_state nhé"}, pkg)
+        ok4 = rb["pointers_ok"] and rb["pointers_baseline"] == [("references/GOTCHAS.md", "scripts/.tl_state")]
+        rc = f({"references/GOTCHAS.md": "xem scripts/ghost2.py"}, pkg)
+        ok5 = (not rc["pointers_ok"]) and rc["pointers_fail"] == [("references/GOTCHAS.md", "scripts/ghost2.py")]
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r209_pointer_findings_pure", _c209_pointer_findings_pure)
+
+    def _c209_baseline_ratchet():
+        # H9: baseline khoá SỐ ĐẾM 10 — thêm mục miễn trừ là test đỏ, phải sửa test CÓ CHỦ ĐÍCH.
+        bl = _rel209._POINTER_BASELINE
+        ok1 = len(bl) == 10
+        ok2 = all(doc not in _rel209._POINTER_ARCHIVE_DOCS for doc, _ in bl)
+        # khớp theo CẶP: cùng con trỏ nhưng ở DOC KHÁC vẫn phải ĐỎ (miễn trừ không lan)
+        r = _rel209._doc_pointer_findings({"references/KHAC.md": "scripts/.tl_state"}, ["scripts/x.py"])
+        ok3 = not r["pointers_ok"]
+        return ok1 and ok2 and ok3
+    _t110("r209_baseline_ratchet", _c209_baseline_ratchet)
+
+    def _c209_cay_that_va_phan_chung():
+        # H9 nghiệm thu trên CÂY THẬT: 0 cặp fail sau H0+H1; advisory (DOCTRINE) vẫn ĐƯỢC BÁO;
+        # đủ 10 baseline hit (ratchet đang gài, không vacuous). PHẢN CHỨNG 2 CHIỀU: bơm đúng
+        # dòng SKILL.md TRƯỚC-H0 → guard phải ĐỎ đúng 2 con trỏ ma.
+        root = _ROOT209
+        docs = {}
+        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
+            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
+        paths = []
+        for sub in ("scripts", "references", "templates"):
+            base = root / sub
+            if base.is_dir():
+                for q in base.rglob("*"):
+                    if not q.is_file():
+                        continue
+                    rp = q.relative_to(root).as_posix()
+                    # mô phỏng package-set: loại runtime/cache như release walk
+                    if "/.tl_state/" in ("/" + rp) or "__pycache__" in rp or rp.endswith(".pyc"):
+                        continue
+                    paths.append(rp)
+        r = _rel209._doc_pointer_findings(docs, paths)
+        ok1 = r["pointers_ok"] and r["pointers_fail"] == []
+        ok2 = len(r["pointers_advisory"]) >= 30
+        ok3 = len(r["pointers_baseline"]) == 10
+        cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
+        r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
+        ok4 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
+            ("SKILL.md", "scripts/tl_rebuild.sh"), ("SKILL.md", "scripts/build_parts.py")}
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r209_cay_that_va_phan_chung", _c209_cay_that_va_phan_chung)
+
+    def _c209_skill_md_khong_tro_file_ma():
+        # H0 nghiệm thu: MỌI con trỏ references/|templates/|scripts/ trong SKILL.md tồn tại trên đĩa
+        # (glob * bỏ qua; con trỏ thư mục khớp PREFIX — nhớ ca scripts/tl_core/).
+        root = _ROOT209
+        text = (root / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        links = sorted({m.rstrip(".,;:)]}»*`") for m in
+                        _re209.findall(r"(?:references|templates|scripts)/[A-Za-z0-9_./\-]+", text)})
+        bad = []
+        for link in links:
+            if "*" in link or not link:
+                continue
+            p = root / link
+            if link.endswith("/"):
+                if not p.is_dir():
+                    bad.append(link)
+            elif not p.exists():
+                bad.append(link)
+        return not bad
+    _t110("r209_skill_md_khong_tro_file_ma", _c209_skill_md_khong_tro_file_ma)
+
+    def _c209_master_template_va_vocab():
+        # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
+        # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
+        # so_hieu mẫu theo chuẩn bất biến NN-YYYY-VBHN-XXX.
+        tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        d = _j209.loads(tp.read_text(encoding="utf-8"))
+        co, vb, nd = _rp209.load_master(str(tp))
+        ok1 = bool(co) and len(vb) == 1 and len(nd) == 1
+        vocab = d.get("_vocab_hinh_thuc") or {}
+        ok2 = len(vocab) == 10 and all(_rp209.route(k) == v for k, v in vocab.items())
+        ok3 = _rp209.route("sua doi bo sung") == "04" and _rp209.route("ban hanh moi") == "04"
+        ok4 = _re209.fullmatch(r"\d+-\d{4}-VBHN-[A-Z]+", vb[0].get("so_hieu") or "") is not None
+        ok5 = (nd[0].get("muc_chac_chan") in (d.get("_muc_chac_chan_enum") or [])
+               and (nd[0].get("anchor") or {}).get("ttl_ngay") == 90)
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r209_master_template_va_vocab", _c209_master_template_va_vocab)
+
+    def _c209_bang_c_du_truong():
+        # H1b: qua rasoat_phuluc, phụ lục 04 KHÔNG rơi mất mức chắc chắn + cite (nối vào cột Ghi chú).
+        tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        _co, _vb, nd = _rp209.load_master(str(tp))
+        tbl, n = _rp209.table_xuly(_rp209.dedup(nd), "04")
+        return n == 1 and ("mức: chac_chan" in tbl) and ("cite: cache:18-2025-VBHN-VPQH#dieu54" in tbl)
+    _t110("r209_bang_c_du_truong", _c209_bang_c_du_truong)
+
+    def _c209_the_rasoat_hoso_hop_le():
+        # H2: thẻ rasoat_hoso đủ 12 trường bắt buộc, recommended_commands CÓ THẬT trong parser,
+        # nằm trong _RELEASE_REQUIRED_WORKFLOWS (+ template trong _RELEASE_REQUIRED_FILES),
+        # và _workflow_cards_audit KHÔNG có error nào dính tới thẻ mới.
+        fp = _ROOT209 / "references" / "workflows" / "rasoat_hoso.json"
+        o = _j209.loads(fp.read_text(encoding="utf-8"))
+        req = {"schema", "id", "title", "risk", "plan", "write_scope", "dry_run_required",
+               "confirm_required", "readback_required", "rollback_required",
+               "live_state_required", "volatile_fields"}
+        ok1 = req <= set(o) and o["schema"] == "workflow_card.v1" and o["id"] == "rasoat_hoso" and o["risk"] == "medium"
+        ok2 = bool(o["plan"]) and bool(o.get("verify")) and bool(o.get("stop_conditions"))
+        avail = set(_wf209._available_commands_from_parser())
+        ok3 = all((str(c).split() or [""])[0] in avail for c in o.get("recommended_commands", []))
+        ok4 = ("references/workflows/rasoat_hoso.json" in _rel209._RELEASE_REQUIRED_WORKFLOWS
+               and "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json" in _rel209._RELEASE_REQUIRED_FILES)
+        wa = _wf209._workflow_cards_audit()
+        ok5 = not [e for e in (wa.get("errors") or []) if "rasoat_hoso" in _j209.dumps(e, ensure_ascii=False)]
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r209_the_rasoat_hoso_hop_le", _c209_the_rasoat_hoso_hop_le)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

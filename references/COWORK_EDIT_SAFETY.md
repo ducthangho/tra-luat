@@ -3,9 +3,9 @@
 Bug: tool **Edit/Write native của Cowork** đôi khi **cắt cụt file** — clamp độ dài về kích thước file TRƯỚC khi sửa,
 và **Read có thể trả cache cũ** nên không thấy hỏng ngay. Skill có phòng thủ 3 lớp; tài liệu này là lớp **NGĂN** (write-side).
 
-> Lớp 1 NGĂN (write-side, dưới đây) · Lớp 2 PHÁT HIỆN (`tl verify-integrity`; `build_parts.py --verify` so
-> `_parts/MANIFEST.sha256`) · Lớp 3 KHÔI PHỤC — **★ `tl_fetch.sh` (tải từ Drive về /tmp, BỎ QUA mount) là chắc nhất**;
-> local: `_parts/` + `_healed_script_path` + `tl_rebuild.sh` (shell) + `build_parts.py --rebuild`. Dùng cả ba.
+> Lớp 1 NGĂN (write-side, dưới đây) · Lớp 2 PHÁT HIỆN (`tl verify-integrity`) · Lớp 3 KHÔI PHỤC —
+> **★ `tl_fetch.sh` (tải zip SẠCH từ Drive, BỎ QUA mount) là đường khôi phục DUY NHẤT còn lại**: cơ chế
+> `_parts/` ĐÃ BỎ từ khi Cowork bootstrap qua zip tải-về (xem docstring đầu `scripts/tl_boot.py`). Dùng cả ba lớp.
 
 ## 1. NGĂN — khi sửa file skill trong Cowork, ĐỪNG tin tool Edit/Write native. FALLBACK (theo thứ tự ưu tiên):
 
@@ -26,12 +26,11 @@ và **Read có thể trả cache cũ** nên không thấy hỏng ngay. Skill có
 
 ## 2. PHÁT HIỆN — sau MỖI lần ghi, verify trong terminal (đừng tin Read cache):
 
-- **Một lệnh, đối chiếu toàn bộ với `_parts/`:**
+- **Một lệnh:**
   ```bash
-  python scripts/tl_boot.py verify-integrity        # ✓OK ·NOPARTS ~DRIFT ⚠NUL ✗TRUNCATED/MISSING ; exit 2 nếu có lỗi
+  python scripts/tl_boot.py verify-integrity        # exit ≠ 0 khi có file hỏng/cắt cụt
   ```
 - Thủ công: `wc -l scripts/tl.py` và `md5sum scripts/tl.py` so trước/sau; hoặc `python -c "import ast,sys; ast.parse(open(sys.argv[1],encoding='utf-8').read())" scripts/tl.py` (đỏ = cắt cụt).
-- **DRIFT** = file compile được nhưng KHÁC `_parts/` → bạn vừa sửa hợp lệ; **chạy lại `python scripts/build_parts.py`** để cập nhật mảnh (BẮT BUỘC sau mỗi lần sửa file đã-chunk, nếu không recovery sẽ ghép ra bản CŨ).
 
 ## 3. KHÔI PHỤC — THANG LEO theo mức nặng (mount có thể cắt cụt CẢ công cụ recovery)
 
@@ -52,23 +51,17 @@ và **Read có thể trả cache cũ** nên không thấy hỏng ngay. Skill có
    ```
    (curl public OK; nếu sandbox CHẶN cả Drive → đổi sang webapp: xem nhánh python trong `tl_fetch.sh`.)
    (curl thẳng Drive chỉ chạy khi allowlist `drive.usercontent.google.com`. Drive file `1H5kAt3SRVP7_…` = zip skill share "anyone with link".)
-1. **Chỉ `tl.py` cắt cụt (tl_boot còn sống, mount local lành phần khác):** `python scripts/tl_boot.py <args>` — tự ghép
-   `tl.py` từ `_parts/tl/`, verify sha (bắt cả ca "compile được nhưng mangled"). Script subprocess tự lành qua `_healed_script_path`.
-2. **Sửa tại chỗ từ `_parts/`:** `python scripts/tl_boot.py verify-integrity --fix` (ghép lại TRUNCATED/NUL/MISSING,
-   ghi bằng Python; không đụng DRIFT).
-3. **`tl_boot.py` HOẶC `build_parts.py` cũng cắt cụt (Python recovery chết):** dùng **shell**:
-   ```sh
-   sh scripts/tl_rebuild.sh                 # ghép MỌI _parts -> /tmp/tl_rebuilt, verify MANIFEST, báo mảnh hỏng
-   python /tmp/tl_rebuilt/tl.py <args>
-   ```
-4. **Soi mảnh nào mount cắt (chẩn đoán):** `python scripts/build_parts.py --verify` (hoặc, không cần Python:
-   `cd scripts && sha256sum -c _parts/MANIFEST.sha256 | grep -v ': OK$'`).
-5. **MẢNH `_parts` cũng bị mount cắt** (MANIFEST báo lệch / `tl_rebuild.sh` exit 3): ghép local KHÔNG cứu được →
-   quay lại **bước 0 (`tl_fetch.sh` tải từ Drive)** — đây mới là lối thoát khi mount giao bản hỏng cho cả nguồn lẫn mảnh.
-   Hết cách nữa (egress chặn + zip Drive cũng lỗi) → **RE-SYNC skill** (restart Cowork + cài lại) / `/rewind` / revert git ở host.
+1. **Chỉ `tl.py` hỏng nhẹ (NUL-pad):** `python scripts/tl_boot.py <args>` — launcher tự strip NUL rồi chạy `tl.py`
+   (v1.35.45 r209/H0: cơ chế ghép `_parts/` ĐÃ BỎ — tl_boot chỉ còn strip NUL, xem docstring đầu file).
+2. **Nghi cắt cụt bất kỳ file nào:** `python scripts/tl_boot.py verify-integrity` để CHỈ MẶT file hỏng — rồi quay
+   lại **bước 0** (`tl_fetch.sh` tải zip SẠCH): từ khi bỏ `_parts/`, KHÔNG còn đường ghép local nào; đừng mất thời
+   gian tìm công cụ ghép (bài học H0 26-07: chỉ dẫn cũ trỏ vào `build_parts.py`/`tl_rebuild.sh` chưa từng tồn tại).
+3. **Hết cách (egress chặn + zip Drive cũng lỗi):** **RE-SYNC skill** (restart Cowork + cài lại) / `/rewind` /
+   revert git ở host.
 
-*(Thư mục skill read-only → mọi bản ghép ra ghi vào `/tmp` (writable), không ghi đè thư mục skill.)*
+*(Thư mục skill read-only → bản tải-về chạy từ `$HOME/.tl_fetch`, không ghi đè thư mục skill.)*
 
 ## 4. Quy tắc đóng gói (liên quan)
-Mỗi lần bump version / sửa `*.py`: **chạy `python scripts/build_parts.py`** để `_parts/` khớp on-disk (build_parts tự
-verify `ghép==gốc`). `FORCE_CHUNK` đảm bảo bootstrap + script subprocess luôn có `_parts/` dù nhỏ. Xem `build_parts.py`.
+Cơ chế `_parts/` ĐÃ BỎ — KHÔNG còn bước sinh mảnh sau khi sửa. Sau MỌI lần sửa file skill: chạy chuỗi
+LỆNH KIỂM CUỐI trong `SKILL.md` (selftest → workflow-audit/determinism-audit --strict → golden-test →
+`release-manifest` sinh Ở BƯỚC CUỐI → release-bundle + release-verify --archive).

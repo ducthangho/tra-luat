@@ -1,0 +1,55 @@
+{
+  "_schema": "mau_bang_tong_hop_phat_hien.v1",
+  "_mo_ta": "MẪU bảng master phát hiện rà soát (bất biến, trong gói). Bên đọc DUY NHẤT: scripts/rasoat_phuluc.py — load_master() nhận 1 file JSON hoặc THƯ MỤC nhiều file *.json (gộp, append-only ở mức thư mục); field lạ (bắt đầu _) bị bỏ qua. THỰC THỂ biến động của từng hồ sơ ghi NGOÀI cây skill (xem references/RASOAT_PLAN_SCHEMA.md).",
+  "_canh_bao_hinh_thuc": "route() trong rasoat_phuluc.py khớp chuỗi CÓ DẤU cố định — giá trị sai chính tả/không dấu (vd 'sua doi bo sung', 'ban hanh moi') rơi ÂM THẦM về phụ lục 04. CHỈ dùng giá trị trong _vocab_hinh_thuc; test r209 khoá bộ từ vựng này.",
+  "_vocab_hinh_thuc": {
+    "sửa đổi, bổ sung": "04",
+    "thay thế": "04",
+    "bãi bỏ một phần": "04",
+    "hướng dẫn áp dụng": "04",
+    "ban hành mới": "05",
+    "bãi bỏ toàn bộ": "06",
+    "tạm ngưng toàn bộ": "07",
+    "tạm ngừng toàn bộ": "07",
+    "nghiên cứu": "F",
+    "chờ bổ sung căn cứ": "F"
+  },
+  "_muc_chac_chan_enum": ["chac_chan", "can_kiem_tra", "cho_verify_nlm"],
+  "co_quan": "……(cơ quan rà soát — điền khi tạo thực thể)",
+  "van_ban": [
+    {
+      "linh_vuc": "Lao động",
+      "loai": "Văn bản hợp nhất",
+      "so_hieu": "18-2025-VBHN-VPQH",
+      "ngay": "2025-06-30",
+      "ten": "Bộ luật Lao động (văn bản hợp nhất)",
+      "hieu_luc_tu": "2021-01-01",
+      "tinh_trang": "Còn hiệu lực",
+      "sua_doi_bo_sung": "",
+      "ghi_chu": "MẪU — thay bằng văn bản thật của hồ sơ; so_hieu PHẢI theo chuẩn NN-YYYY-VBHN-XXX (có NĂM)"
+    }
+  ],
+  "noi_dung": [
+    {
+      "key": "VD-MAU-01",
+      "linh_vuc": "Lao động",
+      "van_ban": "18-2025-VBHN-VPQH",
+      "can_cu": "Điều 54; đối chiếu Luật Việc làm 2025 Điều 30",
+      "phan_tich": "MẪU — mô tả nội dung cần xử lý, nguyên văn trích từ cache/raw (không từ NLM)",
+      "hinh_thuc": "sửa đổi, bổ sung",
+      "lo_trinh": "2026-2027",
+      "tieu_chi": "mâu thuẫn, chồng chéo",
+      "ghi_chu": "",
+      "muc_chac_chan": "chac_chan",
+      "anchor": {
+        "doc_deps": [
+          {"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000", "dieu": ["54"]}
+        ],
+        "cite": "cache:18-2025-VBHN-VPQH#dieu54",
+        "skill_version": "1.35.45",
+        "verified_at": "2026-07-26",
+        "ttl_ngay": 90
+      }
+    }
+  ]
+}

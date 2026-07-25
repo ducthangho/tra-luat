@@ -88,7 +88,7 @@ Dừng đơn vị khi: (a) đã soi hết Điều rủi ro cao + Điều bị c�
 ---
 
 ## PHA 4 — TỔNG HỢP & ĐIỀN PHIẾU (A–G)
-> Văn phong: tuân `references/VAN_PHONG_HANH_CHINH.md` (câu ngắn, chính xác, không đa nghĩa, không viết tắt/tiếng Anh/văn hoa). Phụ lục: dồn phát hiện vào bảng master (`templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json`), rà xong mới chạy `rasoat_phuluc.py` sinh 03–07-BN MỘT LẦN (dedup + đánh số). Ghi mỗi truy vấn NLM bằng `nlm_log.py add`.
+> Văn phong: tuân `references/VAN_PHONG_HANH_CHINH.md` (câu ngắn, chính xác, không đa nghĩa, không viết tắt/tiếng Anh/văn hoa). Phụ lục: dồn phát hiện vào bảng master (`templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json`), rà xong mới chạy `rasoat_phuluc.py` sinh 03–07-BN MỘT LẦN (dedup + đánh số). Ghi mỗi truy vấn NLM vào `NHAT_KY_NLM_<số hiệu>.csv` (khung sẵn do `rasoat_worksheet.py` sinh); quota NLM đếm trong state hồ sơ (`references/RASOAT_PLAN_SCHEMA.md`).
 - Mỗi phát hiện điền bảng C theo trật tự cố định: nguyên văn → căn cứ đối chiếu (tên+số hiệu+Điều/Khoản) → phân tích → hình thức xử lý & lộ trình → định tuyến phụ lục → (T1: thành phần i–xii) + mức độ chắc chắn.
 - Thứ tự ưu tiên xử lý: giải thích (Đ60) → hướng dẫn áp dụng (Đ61) → tạm ngưng → sửa đổi/bổ sung/thay thế/bãi bỏ/ban hành mới. Cơ chế đặc thù NQ 206/2025 **không** áp cho nội dung trái Hiến pháp/trái pháp luật và điều kiện ĐTKD sai thẩm quyền.
 - Mục D: đếm theo văn bản gốc, 1 nội dung 1 lần, khớp phụ lục 03–07-BN.

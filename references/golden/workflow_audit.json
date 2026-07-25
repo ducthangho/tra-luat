@@ -723,6 +723,54 @@
     },
     {
       "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "file": "references/workflows/rasoat_hoso.json",
+      "id": "rasoat_hoso",
+      "recommended": [
+        {
+          "available": true,
+          "command": "rasoat-loop --dry-rounds 2 --json"
+        },
+        {
+          "available": true,
+          "command": "frontier-expand --json"
+        },
+        {
+          "available": true,
+          "command": "reg-query --refresh --json"
+        },
+        {
+          "available": true,
+          "command": "profile-ingest --staged --json"
+        },
+        {
+          "available": true,
+          "command": "verify-staged --json"
+        },
+        {
+          "available": true,
+          "command": "nlm-reconcile <nb> --all-notebooks"
+        }
+      ],
+      "risk": "medium",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "session_claim",
+        "quota_nlm",
+        "quota_tvpl",
+        "verified_at",
+        "timestamp",
+        "progress"
+      ],
+      "write_scope": "profile_meta_rasoat_state_drive + master_local_out_dir (NGOAI cay skill - doctrine B.5)"
+    },
+    {
+      "contract": {
         "confirm_required": false,
         "dry_run_required": false,
         "live_state_required": false,
@@ -1064,7 +1112,7 @@
     "links_checked": 13,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 48089,
+    "size_bytes": 47866,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,
@@ -1093,7 +1141,7 @@
   "schema": "workflow_audit.v2",
   "summary": {
     "available_commands": 182,
-    "cards": 24,
+    "cards": 25,
     "groups": 11,
     "tasks": 60
   },

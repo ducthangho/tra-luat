@@ -51,7 +51,19 @@ function t(name, cond) {
   else { fail++; console.log('  [FAIL] ' + name); }
 }
 
-t('app_version_2212m', sandbox.APP_VERSION === '2.21.2m');
+// Trước đây pin CỨNG '2.21.2m' ⇒ đỏ từ 2.21.2n, rữa theo mỗi lần bump (test rỗng nghĩa).
+// Nay khóa CHIỀU: version phải đúng dạng và KHÔNG được tụt dưới 2.21.2m (mốc ra đời của file test này).
+t('app_version_khong_tut_duoi_2212m', (function () {
+  const m = /^(\d+)\.(\d+)\.(\d+)([a-z]*)$/.exec(String(sandbox.APP_VERSION || ''));
+  if (!m) return false;
+  const cur = [Number(m[1]), Number(m[2]), Number(m[3]), m[4]];
+  const min = [2, 21, 2, 'm'];
+  for (let i = 0; i < 4; i++) {
+    if (cur[i] > min[i]) return true;
+    if (cur[i] < min[i]) return false;
+  }
+  return true;
+})());
 const rBlank = sandbox.nlmCompactRow_({ drive_id: 'd1', row_kind: '' });
 const rMiss = sandbox.nlmCompactRow_({ drive_id: 'd2' });
 const rOv = sandbox.nlmCompactRow_({ drive_id: 'd3', row_kind: 'overflow' });

@@ -172,9 +172,11 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `reg_get` | GET | `sohieu`\|`drive_id`\|`nlm_source_id`\|`name_contains` | `refresh` | `ok, count, rows[]` |
 | `reg_upsert` | GET | `drive_id` | **bất kỳ cột REG_COLS_** (dùng `sohieu`, KHÔNG `so_hieu`) | `ok, drive_id, updated` |
 | `reg_bulk` | **POST** | `items[]` (`[{drive_id\|nlm_source_id, <cột>}]`) | `cols` (mặc định `'nlm_title'`) | `ok, total, patched, missed, miss[], cols[]` |
-| `reg_delete` | **POST** | **`confirm='yes'`**, `drive_ids[]` | `require_removed` (mặc định `'yes'`) | `ok, requested, removed, skipped_live, not_found` |
+| `reg_delete` | **POST** | **`confirm='yes'`**, `drive_ids[]` | `require_removed` (mặc định `'yes'`) | `ok, requested, removed, skipped_live, not_found` — v2.21.2p tự khai `expect_shrink` = số dòng xóa (KI-27) |
 | `reg_clear` | GET | `drive_id`\|`nlm_source_id` | `cols` (nlm_*/note tự do; **2.21.2l: cột thường ∈ REG_COLS_ cần thêm `force='yes'`; drive_id/name BẢO VỆ**), `confirm='yes'` | `ok, cleared, drive_ids[], cols[]` |
 | `reg_addcols` | GET | **`confirm='yes'`** | — | `ok, cols, header[]` (ghi lại header sheet — chạy 1 lần sau khi thêm cột) |
+| `reg_bak_list` | GET | — | — | `ok, current_rows, keep, count, baks[]` (`{tab,stamp,rows}`, mới→cũ) — **v2.21.2p KI-27** CHỈ ĐỌC: liệt kê bản sao registry xoay vòng `files_bak_<ts>` (giữ 5 bản, sinh tự động mỗi lần `regWriteAll_`) |
+| `reg_bak_restore` | **POST** | **`confirm='yes'`**, `tab` (`files_bak_<ts>`) **hoặc** `stamp` | — | `ok, restored_from, rows_before, rows_after` — **v2.21.2p KI-27**: thay TOÀN BỘ registry bằng bản sao; bản đang dùng được giữ thành `files_bak_<ts>` mới ⇒ khôi phục ĐẢO NGƯỢC được. Chạy `manifest_export` sau đó |
 | `map_set` | GET | `drive_id`\|`sohieu` | `nlm_source_id, status, notebookId`(=`nlm_notebook_id`\|`notebook`)`, nlm_title` | `ok, drive_id, updated` (gọi SAU mỗi `source_add` ok; **v1.18: LUÔN truyền `notebookId` để slot đếm đúng theo notebook**) |
 | `map_unpushed` | GET | — | `includeStale, refresh` | `ok, count, rows[], nlm_quota{tier,cap,pushed,slots_free}` |
 | `map_mark_stale` | GET | `drive_id` | — | `ok, drive_id, updated` |
@@ -243,7 +245,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 
 | action | GET/POST | bắt buộc | tùy chọn | response |
 |---|---|---|---|---|
-| `regen2` | GET | **`confirm='yes'`** | `refresh, registryDocId, manifestScope=own|inherited, rootFolderId, profileName, categoriesMode, confirmInherited=yes, confirmBlowup=yes` | `ok, treeHash, count, corpus_count, old_own_count, new_own_count, manifest_scope, stats, elapsedMs`; hoặc `PROFILE_MANIFEST_SCOPE_BLOWUP` trước khi ghi |
+| `regen2` (v2.21.2p: nhận thêm `expect_shrink=<n>` — bắt buộc khi phép co chạm ngưỡng thảm hoạ KI-27) | GET | **`confirm='yes'`** | `refresh, registryDocId, manifestScope=own|inherited, rootFolderId, profileName, categoriesMode, confirmInherited=yes, confirmBlowup=yes` | `ok, treeHash, count, corpus_count, old_own_count, new_own_count, manifest_scope, stats, elapsedMs`; hoặc `PROFILE_MANIFEST_SCOPE_BLOWUP` trước khi ghi |
 | `manifest_export` | GET | — | `registryDocId, manifestId` (v1.19) | `ok, manifestId, treeHash, count, corpus_count, so_hieu_parsed, so_hieu_missing, schema_version, registry_scope, manifest_scope` |
 | `manifest` | GET | — | — | `ok, manifestFileId, name, updated, downloadUrl` (đọc metadata) |
 | `regen` (cũ) | GET | **`confirm='yes'`** | — | `ok, count, treeHash, manifestFileId` (ghi Doc registry + JSON — LEGACY, ưu tiên `regen2`) |

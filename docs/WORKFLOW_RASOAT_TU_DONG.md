@@ -104,6 +104,12 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 Ý nghĩa: phát hiện này ĐÚNG chừng nào các `text_hash` kia còn là bản hiện hành. Đổi hash / có VBHN mới
 / TTL cạn (với mức "cần kiểm tra") ⇒ máy TỰ biết phát hiện nào cần rà lại — không cần người nhớ.
 
+> **Stale-claim takeover (chốt 26-07):** `session_claim` ghi kèm giờ + con trỏ tiến độ (đơn vị đang cầm).
+> Kịch bản kill-ngang không ai nhả claim → phiên mới được CHIẾM QUYỀN khi claim quá hạn X phút mà con trỏ
+> tiến độ KHÔNG nhích (X đặc tả trong H2 — `RASOAT_PLAN_SCHEMA.md`; gợi ý 30′); chiếm = ghi claim mới đè
+> qua RMW nguyên tử (GAS 2.21.2p), đơn vị `doing` mồ côi trả về `pending`. Không có takeover khi con trỏ
+> còn nhích — hai phiên cùng sống thì phiên sau LÙI, không giành.
+>
 > `so_hieu` trong anchor PHẢI theo chuẩn bất biến `NN-YYYY-VBHN-XXX` (mọi số hiệu có NĂM). Kèm anchor, mỗi
 > dòng `noi_dung[]` mang `muc_chac_chan` (`chac_chan | can_kiem_tra | cho_verify_nlm` — H1b KE_HOACH); TTL
 > chỉ áp mức `can_kiem_tra`, còn `cho_verify_nlm` do Q-VERIFY xử lý (§4b).
@@ -123,7 +129,28 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 | A5 | VERIFY từng phát hiện | `nlm_qa verify`; nguyên văn CHỈ từ cache/raw | ✅ — phát hiện fail verify KHÔNG được ghi. Chế độ không-NLM: ghi với `muc_chac_chan="cho_verify_nlm"` + vào Q-VERIFY, trả nợ khi cookie sống (§4b) |
 | A6 | Ghi `master/<unit>.json` (kèm anchor) + đánh `done` + cập nhật CSV nhật ký NLM | ghi file, ngoài cây skill | ✅ |
 | A7 | Ứng viên mới từ A4 → append Q-INGEST; Điều liên quan mới → append Q-UNITS | máy phân loại theo phạm vi kickoff | ✅ |
-| A8 | Cạn ngân sách/context → chốt checkpoint + note bàn giao → thoát êm | state đã là file nên "thoát" = không làm gì thêm | ✅ |
+| A8 | Đóng gói CHỦ ĐỘNG theo ngưỡng context (quy tắc dưới bảng) hoặc cạn ngân sách → chốt checkpoint + note bàn giao + nhả `session_claim` → thoát êm | state đã là file nên "thoát" = không làm gì thêm | ✅ |
+
+**Quy tắc đóng gói chủ động (chốt 26-07 — đối chiếu kho best-practice):** đo tại **RANH GIỚI ĐƠN VỊ**
+(sau mỗi A6), không bao giờ giữa chừng một đơn vị.
+
+| Ngưỡng context đã dùng | Hành động |
+|---|---|
+| < 40% | chạy bình thường |
+| **40%** (mềm) | CHUẨN BỊ: không nhận đơn vị SÂU (T3) mới; ưu tiên đơn vị nhẹ/việc kết sổ; note bàn giao viết dần |
+| **60%** (cứng) | ĐÓNG GÓI ngay sau đơn vị hiện tại — nghi thức A8, kể cả khi Q-UNITS còn pending |
+
+Căn cứ (kho best-practice): tip chính thức "Use `/compact` at ~50% context" (`claude-settings.md:804`) —
+ngưỡng cứng 60% nằm quanh đó nhưng chừa ~40% cho: hoàn tất đơn vị dở (một đơn vị SÂU T3 ngốn được
+10–20%) + nghi thức đóng gói + biên an toàn. Auto-compact mặc định nổ ở **~95%** (`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`,
+`claude-settings.md:928`) — với phiên rà, **chạm auto-compact = SỰ CỐ quy trình**, không phải cơ chế vận hành.
+
+- **Nguồn tín hiệu:** Claude Code/Cowork = `context_window.used_percentage` (statusline input máy-đọc-được,
+  `claude-settings.md:753`) / cảnh báo harness. Claude chat = KHÔNG có số đo tin cậy → dùng ngưỡng ĐẾM
+  thay ngưỡng %: `max_units_per_session` trong kickoff (mặc định gợi ý 5–8 đơn vị/phiên, hồ sơ chỉnh theo
+  độ sâu), cộng thêm đóng gói sớm nếu thấy dấu hiệu cạn (trả lời bị nén, quên chi tiết gần).
+- **KHÔNG `/compact` giữa phiên rà:** compact là tóm tắt CÓ MẤT MÁT; state đã là file (P1) nên bàn giao
+  phiên-mới-context-sạch luôn rẻ hơn và trung thực hơn. `/compact` chỉ dành cho phiên tương tác thường.
 
 ### LOOP B — NẠP GIỮA CHỪNG (chìa khoá: làn STAGED r200 — P2; **đơn vị tối ưu là LÔ, không phải file**)
 

@@ -28,6 +28,7 @@
 | P5 | **Phát hiện phải mang NEO PHỤ THUỘC** (nó đúng dựa trên bản nào của văn bản nào) — đây là điều kiện để "rà lại định kỳ" thành phép TÍNH thay vì làm lại từ đầu | ADR-0011 (source revision tách content identity); registry `superseded_by` |
 | P6 | **Wake định kỳ im lặng khi không có việc.** Lịch chạy lại không được thành spam; chỉ nổi lên khi có delta thật | pattern Routine/cron; `changes_pull` delta rẻ |
 | P7 | **Hồ sơ = PROFILE.** Không phát minh khái niệm "hồ sơ" mới: mỗi hồ sơ dự thảo là 1 profile (folder + registry + notebook + marker `_meta/` riêng) → thừa hưởng single-writer LockService+RMW và độ bền Drive | ADR-0003 (marker là nguồn sự thật), v1.30.0 baseAlso |
+| P8 | **(chốt 25-07) Một đường nạp — HAI chế độ điều phối.** Nạp ad-hoc (ngoài rà soát) và nạp trong rà soát dùng CHUNG lõi máy: QT-2 → dry-plan + `plan_hash` → staged → verify-staged → cache; khác nhau CHỈ ở tầng duyệt: người-có-mặt duyệt ngay từng yêu cầu vs kickoff uỷ quyền + gom lô tại điểm chạm ②. Hai nâng cấp áp cho CẢ HAI chế độ: **B0 dò-trùng-tươi** (sự cố nạp chồng 9 tài liệu 24-07 xảy ra ở đường nạp THƯỜNG) và **tách kênh NLM** (văn bản dùng được từ cache ngay, NLM làm giàu sau — kể cả ad-hoc không bắt người ngồi chờ ~86s/lô) | làn staged r200; cổng tiền-nạp QT-2/WEB (SKILL.md:183–184); bài học 24-07 |
 
 ---
 
@@ -80,7 +81,7 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 
 | File | Nơi lưu | Vai trò | Ghi chú |
 |---|---|---|---|
-| `_meta/rasoat_state.json` | **Drive** | Q-UNITS + Q-INGEST + **Q-NLM** + con trỏ chu kỳ + `session_claim` + quota NLM còn lại + note bàn giao | nguồn sự thật resume; Drive theo ADR-0003 — `~/.tra_luat_cache` không đủ bền (Claude chat xoá trắng sandbox mỗi phiên); RMW đã ATOMIC (GAS 2.21.2p). Gộp Q-INGEST/Q-NLM vào MỘT file = 1 lần RMW, 1 claim |
+| `_meta/rasoat_state.json` | **Drive** | Q-UNITS + Q-INGEST + **Q-NLM** + con trỏ chu kỳ + `session_claim` + quota NLM còn lại + **quota TVPL** + note bàn giao | nguồn sự thật resume; Drive theo ADR-0003 — `~/.tra_luat_cache` không đủ bền (Claude chat xoá trắng sandbox mỗi phiên); RMW đã ATOMIC (GAS 2.21.2p). Gộp Q-INGEST/Q-NLM vào MỘT file = 1 lần RMW, 1 claim |
 | — Q-INGEST (trong state) | Drive | ứng viên từ `frontier-expand` (`missing_in_corpus`) + user bổ sung, trạng thái dry-planned/staged/flipped | mục NGOÀI phạm vi kickoff contract → gắn `out_of_scope`, chờ người, không tự nạp |
 | — Q-NLM (trong state) | Drive | nguồn chờ nạp NotebookLM: `pending/added/failed` — worker §4a drain tuần tự | nạp NLM là LÀM GIÀU về sau, không chặn rà (đơn vị rà được ngay khi cache xong) |
 | `master/<unit>.json` (thư mục) | **local `--out-dir`**, đẩy Drive ở checkpoint/Pha 4 (chat: mỗi đơn vị/lô nhỏ) | sổ phát hiện — 1 file/đơn vị rà, schema `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` | append-only ở mức thư mục; `rasoat_phuluc.py --in master/` gộp khi tổng hợp; mỗi `noi_dung[]` mang `anchor` + `muc_chac_chan` (H1b) |
@@ -140,6 +141,17 @@ hoạch — r207 đã đo bỏ 1 call chỉ −0,6s (trong nhiễu), và nửa g
    nguồn tin cậy đã khai (vbpl.vn, Công báo, cổng .gov.vn/.chinhphu.vn…) → máy TỰ tải vào khu tập kết;
    KHÔNG tự lấy được → gắn `cho_nguoi_tai` (kèm link TVPL nếu có) và **gom hỏi chung tại điểm chạm ②**,
    không hỏi lẻ từng file giữa chừng.
+   **Bậc thang TVPL (chốt 25-07 — docx TVPL chất lượng file tốt nhất, user có account):**
+   - Local/Cowork có Chrome đăng nhập TVPL sẵn → kênh **`tl tvpl-url` auto-download docx TUẦN TỰ** cho cả
+     lô (uỷ quyền trong kickoff; recipe thực chiến: click tab "Tải về" trước rồi mới `(docx)`).
+     **Ranh giới an toàn TUYỆT ĐỐI:** chỉ dùng phiên ĐÃ đăng nhập — máy không bao giờ nhập mật khẩu hộ;
+     gặp login hết hạn/CAPTCHA → DỪNG kênh, tụt bậc, gom hỏi người tại ②.
+   - **Quota guard:** đếm `quota_tvpl` trong state như quota NLM (ngưỡng thật CẦN NGƯỜI XÁC NHẬN — ghi cũ
+     "~1 docx/ngày" có thể lỗi thời với account hiện tại); chạm ngưỡng → tụt bậc **LuatVietnam (docx) →
+     vbpl.vn (.doc) → Công báo (PDF = hạ sách cuối, kiểm chất lượng text theo luật cứng C1/10a)**.
+   - Claude chat: không lái Chrome được → link TVPL bấm-được cho người tự tải, gom MỘT lần tại ②.
+   - **KHÔNG đổi canonical:** mọi bản tải về vẫn qua QT-2 + xác minh official-first (`_official_rank`
+     vbpl/Công báo=1 … TVPL=4 giữ nguyên — TVPL cho FILE đẹp, official để CHỐT bản đúng).
    **Chuẩn-bị-trước, duyệt-sau:** mọi việc nặng (tải, bóc tách, cache, dry-run) làm XONG TRƯỚC khi hỏi
    người — lúc duyệt, việc còn lại chỉ là ghi registry vài giây/lô; thời gian người vắng mặt không thành
    thời gian máy chết (vòng RÀ vẫn chạy trên đơn vị đã có).

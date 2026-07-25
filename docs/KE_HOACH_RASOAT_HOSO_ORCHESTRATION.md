@@ -207,7 +207,7 @@ GÓI. Bỏ (c) = gói ĐỎ ở LIVE (§0.6).
 | Hạng mục | Sản phẩm | Nghiệm thu (mã test) |
 |---|---|---|
 | **H5. Degrade-and-continue + bug ledger** | mục mới trong `QUY_TRINH_RA_SOAT_3_TANG.md`: phân loại lỗi (workaround/blocker), format `BUGS_FOUND.md`, quy tắc "sửa nóng CHỈ khi chặn đứng; còn lại gom vá sau lượt rà" | `r2xx_degrade_khong_dung_vong`: bơm 1 lỗi giả lập giữa vòng rà → vòng lặp ghi ledger và chạy tiếp, PLAN vẫn tiến |
-| **H6. Kickoff contract + tiền kiểm** | mẫu giao việc trong `RASOAT_HOSO_LOOP.md` (phạm vi, uỷ quyền nạp văn-bản-thuộc-hồ-sơ, ngân sách NLM, chính sách lỗi) + **mở rộng PHA 0 đã có** (`QUY_TRINH:30`) thêm doctor/precheck/tuổi cookie — fail → dừng TRƯỚC khi rà | `r2xx_pha0_cookie_gia_dung_som`: cookie giả >14 ngày → dừng ở Pha 0 với thông báo 1 dòng, chưa tiêu 1 call NLM nào |
+| **H6. Kickoff contract + tiền kiểm** | mẫu giao việc trong `RASOAT_HOSO_LOOP.md` (phạm vi, uỷ quyền nạp văn-bản-thuộc-hồ-sơ, ngân sách NLM, chính sách lỗi, **+ chốt 25-07: uỷ quyền nguồn tải** — danh sách domain tin cậy tự tải + kênh TVPL-VIP `tl tvpl-url` qua Chrome đăng-nhập-sẵn + ngưỡng `quota_tvpl` — xem WORKFLOW §4 B.1 bậc thang TVPL) + **mở rộng PHA 0 đã có** (`QUY_TRINH:30`) thêm doctor/precheck/tuổi cookie — fail → dừng TRƯỚC khi rà | `r2xx_pha0_cookie_gia_dung_som`: cookie giả >14 ngày → dừng ở Pha 0 với thông báo 1 dòng, chưa tiêu 1 call NLM nào |
 
 ### Đợt 4 — Kiểm chứng LIVE (không thể cổng-máy — đây là phần duy nhất cần người)
 

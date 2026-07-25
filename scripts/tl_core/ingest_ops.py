@@ -1677,10 +1677,22 @@ def _pi_stage_write(ctx):
                 print(f"[tl] B.2 blank-over-guess: loai '{info['loai']}' suy heuristic (không letterhead/prefix) "
                       f"→ ĐỂ TRỐNG; điền sau: tl register --drive-id <gdoc> --loai \"{info['loai']}\"",
                       file=sys.stderr)
-        # r198 (ADR-0014 #3/#6): feature-detect server ≥2.21.2o → MỘT call ingest_commit (organize+register+
-        # readback row/file) thay organize + info×N + reg_get×N; server cũ → đường organize GIỮ NGUYÊN (fallback).
+        # r198 (ADR-0014 #3/#6) → r205 R-c(b) (user duyệt 25-07): GỠ fallback organize 12-call —
+        # feature-detect nay là GUARD fail-closed: server <2.21.2o (hoặc ping lỗi/transient) ⇒ rc=2
+        # TRƯỚC khi ghi, KHÔNG lặng lẽ đi đường cũ không ai soak. Upload đã journal → resume tái dùng.
         _via_commit = _ingest_commit_supported(g)
-        org = _ingest_commit_call(g, okw) if _via_commit else g.get("organize", **okw)
+        if not _via_commit:
+            print(json.dumps({"ok": False, "step": "ingest_commit_guard",
+                              "error": "SERVER_TOO_OLD_FOR_INGEST_COMMIT",
+                              "need": ">=2.21.2o", "got": _GAS_VER_CACHE.get("ver") or "",
+                              "journal": ctx.get("_pi_run_id"),
+                              "note": "R-c r205 đã gỡ fallback organize. Server phải ≥2.21.2o "
+                                      "(EXPECT_VERSION); ping lỗi/chập chờn cũng rơi vào đây — chạy lại; "
+                                      "server cũ thật: deploy GAS qua clasp GIỮ deployment ID rồi "
+                                      "profile-ingest --resume --journal <run_id> tái dùng upload."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return {"rc": 2}
+        org = _ingest_commit_call(g, okw)
     gdoc = org.get("fileId")
     if not gdoc:
         print(json.dumps({"ok": False,
@@ -2097,20 +2109,16 @@ def _journal_head(run_id: str) -> dict | None:
     return None
 
 
-def cmd_profile_ingest_resume(a) -> int:
-    """v1.34.55 (C4+C5 — log phiên OCR: bị giết giữa lúc add chunk → phải reg-query dò tay, xóa sạch canonical
-    lẫn chunk mồ côi rồi chạy lại TỪ ĐẦU ×2; + 4 canonical corpus=''/false dù chunk con pushed đủ): RESUME theo
-    REGISTRY — KHÔNG upload/organize lại. Dò canonical (tên y hệt) + chunk `__partNN` hiện có; re-split text
-    canonical TỪ DRIVE (tất định, cùng chunk_max) → CHỈ làm part còn thiếu; cuối cùng ghi corpus canonical theo
-    _children_ok — nghĩa là chạy resume trên name đã-đủ-part cũng TỰ SỬA ca corpus kẹt false (C5). Nguồn đơn
-    (không chunk): thiếu nlm_source_id → add; có rồi → chỉ repair corpus. Cần --name + --apply --confirm yes
-    (không plan-hash — không có file nguồn local; xác nhận tường minh thay thế)."""
+def _pr_stage_plan(ctx):
+    """R-c r205 (WP7, quyết định (c) user duyệt 25-07): stage PLAN của resume — nguyên văn phần gate
+    tham số + đọc registry/canon của cmd_profile_ingest_resume cũ (read-only, 0 mutation)."""
+    a = ctx["a"]
     name = (getattr(a, "name", None) or "").strip()
     if not name:
         print(json.dumps({"ok": False, "error": "RESUME_NEEDS_NAME",
                           "note": "Truyền --name '<tên canonical y hệt registry>' (lấy từ NAME_ALREADY_IN_REGISTRY "
                                   "hoặc reg-query --name)."}, ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     # r184 (ADR-0011/D5 — ING-02): name-only resume phân loại lại thành REPAIR — KHÔNG --apply ⇒ DRY plan
     # (read-only); --apply ⇒ phải chứng minh đúng nguồn (--journal/--drive-id) + confirm yes.
     _apply_mode = bool(getattr(a, "apply", False))
@@ -2118,7 +2126,7 @@ def cmd_profile_ingest_resume(a) -> int:
         print(json.dumps({"ok": False, "error": "CONFIRM_REQUIRED", "expected": "yes",
                           "note": "--resume --apply ghi NLM/registry → cần --confirm yes."},
                          ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     _jr_arg = str(getattr(a, "journal", None) or "").strip()
     _did_arg = str(getattr(a, "drive_id", None) or "").strip()
     _early_gate = _resume_identity_gate(apply=_apply_mode, journal=_jr_arg, drive_id=_did_arg,
@@ -2126,15 +2134,15 @@ def cmd_profile_ingest_resume(a) -> int:
         if (_apply_mode and not (_jr_arg or _did_arg)) else None
     if _early_gate:
         print(json.dumps({"ok": False, **_early_gate}, ensure_ascii=False, indent=2), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
     if _perr:
-        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
+        return {"rc": _emit_profile_policy_error(_perr, getattr(a, "json", False))}
     notebook_id, nb_err = _resolve_nlm_notebook(None)
     if nb_err:
         print(json.dumps({"ok": False, "step": "notebook_resolve", "error": nb_err}, ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     g = _gas()
     try:
         _rg = g.get("reg_get", name_contains=name, refresh="true")
@@ -2143,15 +2151,24 @@ def cmd_profile_ingest_resume(a) -> int:
     if not _rg.get("ok"):
         print(json.dumps({"ok": False, "error": "RESUME_REGISTRY_READ_FAILED", "detail": _rg.get("error")},
                          ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     rows = _rg.get("rows") or []
     canon = next((r for r in rows if str(r.get("name") or "").strip() == name), None)
     if not canon:
         print(json.dumps({"ok": False, "error": "RESUME_NOT_FOUND", "name": name,
                           "note": "Không có dòng canonical tên này — chạy profile-ingest thường (chưa có gì để nối)."},
                          ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     gdoc = str(canon.get("drive_id") or canon.get("gdoc_id") or "")
+    return {"name": name, "_apply_mode": _apply_mode, "_jr_arg": _jr_arg, "_did_arg": _did_arg,
+            "notebook_id": notebook_id, "g": g, "rows": rows, "canon": canon, "gdoc": gdoc}
+
+
+def _pr_stage_confirm(ctx):
+    """R-c r205: stage CONFIRM của resume — gate identity ĐẦY ĐỦ r184 (ADR-0011/D5) nguyên văn
+    (apply phải chứng minh đúng nguồn: drive_id/journal fingerprint khớp dòng registry; DRY no-op)."""
+    a, name, gdoc = ctx["a"], ctx["name"], ctx["gdoc"]
+    _apply_mode, _jr_arg, _did_arg = ctx["_apply_mode"], ctx["_jr_arg"], ctx["_did_arg"]
     # r184 (ADR-0011/D5): gate identity ĐẦY ĐỦ khi apply — drive_id/journal fingerprint phải khớp dòng registry.
     if _apply_mode:
         _gate = _resume_identity_gate(apply=True, journal=_jr_arg, drive_id=_did_arg, name=name,
@@ -2159,7 +2176,15 @@ def cmd_profile_ingest_resume(a) -> int:
                                       journal_head=(_journal_head(_jr_arg) if _jr_arg else None))
         if _gate:
             print(json.dumps({"ok": False, **_gate}, ensure_ascii=False, indent=2), file=sys.stderr)
-            return 2
+            return {"rc": 2}
+    return None
+
+
+def _pr_stage_prepare(ctx):
+    """R-c r205: stage STAGE (chuẩn bị) của resume — derive fields, dò part đã xong, re-split text
+    canonical từ Drive (tất định) + DRY_REPAIR stop nguyên văn (read-only)."""
+    a, name, canon, rows, gdoc = ctx["a"], ctx["name"], ctx["canon"], ctx["rows"], ctx["gdoc"]
+    _apply_mode = ctx["_apply_mode"]
     hieuluc = str(canon.get("hieuluc") or "") or "Còn"
     note = (str(canon.get("note") or "") or f"resume:{name}")[:300]
     info = {"sohieu": str(canon.get("sohieu") or ""), "loai": str(canon.get("loai") or "")}
@@ -2176,7 +2201,7 @@ def cmd_profile_ingest_resume(a) -> int:
         print(json.dumps({"ok": False, "error": "RESUME_TEXT_UNAVAILABLE", "gdoc": gdoc,
                           "note": "Không đọc được text canonical từ Drive để re-split — kiểm gdoc/export."},
                          ensure_ascii=False), file=sys.stderr)
-        return 2
+        return {"rc": 2}
     chunk_max = int(getattr(a, "chunk_max_chars", None) or 100000)
     chunks = _split_by_dieu_chunks(text, chunk_max) if len(text) > chunk_max else []
     if not _apply_mode:
@@ -2195,7 +2220,17 @@ def cmd_profile_ingest_resume(a) -> int:
                "note": "Name-only resume = REPAIR DRY (một phiên bản chuyển tiếp); apply không nhận "
                        "name-only nữa."}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-        return 0
+        return {"stop": "DRY_REPAIR"}
+    return {"hieuluc": hieuluc, "note": note, "info": info, "done_parts": done_parts, "chunks": chunks}
+
+
+def _pr_stage_write(ctx):
+    """R-c r205: stage WRITE của resume — push part thiếu / add nguồn đơn + reg write theo nhánh
+    NGUYÊN VĂN (giữ if/else liền khối — _verified_reg_write vốn fused write+verify nên KHÔNG có
+    stage readback riêng, thêm readback rời = đổi số call, trái parity)."""
+    a, g, name, gdoc, canon = ctx["a"], ctx["g"], ctx["name"], ctx["gdoc"], ctx["canon"]
+    notebook_id, hieuluc, note, info = ctx["notebook_id"], ctx["hieuluc"], ctx["note"], ctx["info"]
+    done_parts, chunks = ctx["done_parts"], ctx["chunks"]
     nc = _imp("nlm_cli")
     meta_id = os.environ.get("TL_META_FOLDER_ID", "").strip() or os.environ.get("TL_ROOT_FOLDER_ID", "").strip()
     if len(chunks) > 1:
@@ -2221,7 +2256,7 @@ def cmd_profile_ingest_resume(a) -> int:
             if not (add.get("ok") and add.get("source_id")):
                 print(json.dumps({"ok": False, "step": "nlm_add", "gdoc": gdoc, "detail": add},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
-                return 2
+                return {"rc": 2}
             _sid = add.get("source_id")
         rb = _verified_reg_write(g, [{"drive_id": gdoc, "name": name, "nlm_source_id": _sid,
                                       "nlm_notebook_id": notebook_id, "row_kind": "own",
@@ -2232,8 +2267,35 @@ def cmd_profile_ingest_resume(a) -> int:
                "parts_total": 0, "single_source": True, "nlm_source_id": _sid,
                "corpus_written": "true", "registry_verified": bool(rb.get("verified"))}
         _final_ok = out["ok"]
+    return {"out": out, "_final_ok": _final_ok, "_counts": {"write": ["registry_row"]}}
+
+
+def _pr_stage_commit(ctx):
+    """R-c r205: stage COMMIT của resume — in kết quả + rc cuối nguyên văn."""
+    a, out, _final_ok = ctx["a"], ctx["out"], ctx["_final_ok"]
     print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0 if _final_ok else 2
+    return {"stop": "DONE", "rc": 0 if _final_ok else 2}
+
+
+def cmd_profile_ingest_resume(a) -> int:
+    """v1.34.55 (C4+C5 — log phiên OCR: bị giết giữa lúc add chunk → phải reg-query dò tay, xóa sạch canonical
+    lẫn chunk mồ côi rồi chạy lại TỪ ĐẦU ×2; + 4 canonical corpus=''/false dù chunk con pushed đủ): RESUME theo
+    REGISTRY — KHÔNG upload/organize lại. Dò canonical (tên y hệt) + chunk `__partNN` hiện có; re-split text
+    canonical TỪ DRIVE (tất định, cùng chunk_max) → CHỈ làm part còn thiếu; cuối cùng ghi corpus canonical theo
+    _children_ok — nghĩa là chạy resume trên name đã-đủ-part cũng TỰ SỬA ca corpus kẹt false (C5). Nguồn đơn
+    (không chunk): thiếu nlm_source_id → add; có rồi → chỉ repair corpus. Cần --name + --apply --confirm yes
+    (không plan-hash — không có file nguồn local; xác nhận tường minh thay thế).
+    R-c r205 (WP7 quyết định (c), user duyệt 25-07): điều phối qua ENGINE run_pipeline — bảng 5 stage
+    _pr_stage_* chuỗi plan→confirm→stage→write→commit (KHÔNG readback riêng: _verified_reg_write fused
+    write+verify), thân stage BÊ NGUYÊN VĂN; charact .tl_state/charact_{pre,post}_resume.json."""
+    from tl_core.ingest_engine import run_pipeline   # R-c r205: engine sở hữu trình tự (mirror R-a/R-b)
+    return run_pipeline([
+        {"name": "plan", "run": _pr_stage_plan},
+        {"name": "confirm", "run": _pr_stage_confirm},
+        {"name": "stage", "run": _pr_stage_prepare},
+        {"name": "write", "run": _pr_stage_write},
+        {"name": "commit", "run": _pr_stage_commit},
+    ], {"a": a})
 
 
 def _ingest_local_cat_gate(cat: str, folders_now, pd: dict) -> dict:
@@ -2858,11 +2920,22 @@ def _il_stage_write(ctx):
         print(f"[tl] --resume: skip organize (gdoc={gdoc}).", file=sys.stderr)
     else:
         _step("organize", fid, cat=cat, sohieu=sohieu)
-        # r198 (ADR-0014 #3/#6) cho ingest-local (R-b r204): feature-detect server ≥2.21.2o → MỘT call
-        # ingest_commit thay organize + info×N (convert-readback từ response, 0 call thêm — stage readback);
-        # server cũ → organize GIỮ NGUYÊN (fallback, cùng khuôn _pi_stage_write).
+        # r198 (ADR-0014 #3/#6) cho ingest-local (R-b r204) → r205 R-c(b): GỠ fallback organize —
+        # feature-detect nay là GUARD fail-closed (mirror _pi_stage_write): server <2.21.2o/ping lỗi ⇒
+        # rc=2 trước khi ghi; upload đã journal — chạy lại CÙNG LỆNH + --resume tái dùng fileId.
         _via_commit = _ingest_commit_supported(g)
-        org = _ingest_commit_call(g, okw) if _via_commit else g.get("organize", **okw)
+        if not _via_commit:
+            print(json.dumps({"ok": False, "step": "ingest_commit_guard",
+                              "error": "SERVER_TOO_OLD_FOR_INGEST_COMMIT",
+                              "need": ">=2.21.2o", "got": _GAS_VER_CACHE.get("ver") or "",
+                              "journal": run_id,
+                              "note": "R-c r205 đã gỡ fallback organize. Server phải ≥2.21.2o "
+                                      "(EXPECT_VERSION); ping lỗi/chập chờn — chạy lại; server cũ thật: "
+                                      "deploy GAS qua clasp GIỮ deployment ID rồi chạy lại CÙNG LỆNH "
+                                      "+ --resume (tái dùng upload từ journal)."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return {"rc": 2}
+        org = _ingest_commit_call(g, okw)
         gdoc = org.get("fileId")
         src_docx = org.get("srcId")
         _step_ok("organize", fid, bool(gdoc), gdoc=gdoc, srcId=src_docx)

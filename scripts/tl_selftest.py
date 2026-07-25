@@ -7773,9 +7773,11 @@ def run() -> int:
             self.calls = []
         def get(self, action, **kw):
             self.calls.append(("get", action))
+            if action == "ping":
+                return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205: guard gỡ-fallback cần version
             if action == "bootstrap":
                 return {"inboxFolderId": "inbox97"}
-            if action == "organize":
+            if action in ("organize", "ingest_commit"):   # r205: đường ingest_commit (thiếu 'file' → readback qua _verify_convert_readback như cũ)
                 return {"ok": True, "fileId": "gdoc97", "srcId": "src97"}
             if action == "reg_get":
                 return {"ok": True, "rows": [{"drive_id": "gdoc97", "src_id": "src97",
@@ -9548,12 +9550,14 @@ def run() -> int:
 
         class _FkGas114:
             def get(self, action, **kw):
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205: guard gỡ-fallback cần version
                 if action == "bootstrap":
                     return {"ok": True, "inboxFolderId": "INBOX114"}
                 if action == "reg_get":
                     _calls["reg_get"] = dict(kw)
                     return reg_get_resp
-                if action == "organize":
+                if action in ("organize", "ingest_commit"):   # r205: ingest_commit đếm chung 'organize' (số lần ghi Drive)
                     _calls["organize"] += 1
                     return {"ok": True, "fileId": "GD114", "srcId": "SRC114"}
                 return {"ok": True, "fileId": "GD114"}
@@ -9683,9 +9687,11 @@ def run() -> int:
             def get(self, action, **kw):
                 if action == "nlm_preflight":
                     raise AssertionError("nlm_preflight GAS in --no-nlm-add (A4)")
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb114"}
-                if action == "organize":
+                if action in ("organize", "ingest_commit"):   # r205
                     return {"ok": True, "fileId": "gd114", "srcId": "sr114"}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd114", "src_id": "sr114",
@@ -10135,9 +10141,11 @@ def run() -> int:
 
         class _G115i:
             def get(self, action, **kw):
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb115"}
-                if action == "organize":
+                if action in ("organize", "ingest_commit"):   # r205
                     return {"ok": True, "fileId": "gd115", "srcId": "sr115"}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd115", "src_id": "sr115",
@@ -10298,9 +10306,11 @@ def run() -> int:
                     return {"ok": True, "rows": [{"drive_id": k} for k in keys],
                             "committed": [c["identity_hash"] for c in (_calls["commit_claims"] or [])],
                             "commit_failed": []}
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb116"}
-                if action == "organize":
+                if action in ("organize", "ingest_commit"):   # r205
                     return {"ok": True, "fileId": "gd116", "srcId": "sr116"}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd116", "src_id": "sr116",
@@ -17416,9 +17426,11 @@ def run() -> int:
 
         class _G191:
             def get(self, action, **kw):
+                if action == "ping":
+                    return {"ok": True, "pong": True, "version": "2.21.2o"}   # r205
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb191"}
-                if action == "organize":
+                if action in ("organize", "ingest_commit"):   # r205
                     return {"ok": True, "fileId": "gd191", "srcId": "sr191"}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd191", "src_id": "sr191",
@@ -18412,17 +18424,19 @@ def run() -> int:
                 (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
             _TL_MODULE._GAS_VER_CACHE.clear()
 
-    def _c198_profile_via_commit_vs_fallback():
-        # Chỉ-nó-chặn (b)+(a-callsite): server 2.21.2o → ĐÚNG 1 ingest_commit, 0 organize, 0 info, rc=0;
-        # server 2.21.2n → 0 ingest_commit, 1 organize (fallback GIỮ NGUYÊN), rc=0; ping đúng 1 lần/run.
+    def _c205_profile_commit_only_server_guard():
+        # r205 R-c(b) (user duyệt 25-07, thay lock r198 commit-vs-fallback): GỠ fallback organize —
+        # server 2.21.2o → ĐÚNG 1 ingest_commit, 0 organize, 0 info, rc=0; server CŨ 2.21.2n → GUARD
+        # fail-closed rc=2 SERVER_TOO_OLD_FOR_INGEST_COMMIT TRONG stage write (0 ingest_commit,
+        # 0 organize; DRY vẫn rc=0 — plan không chạm server; upload đã journal → --resume sau nâng GAS).
         _rcd_n, _rca_n, _out_n, _c_new = _run_pi198("2.21.2o")
         _rcd_o, _rca_o, _out_o, _c_old = _run_pi198("2.21.2n")
         return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
                 and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
                 and _c_new["ping"] == 1
-                and _rcd_o == 0 and _rca_o == 0 and (_out_o or {}).get("ok") is True
-                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 1 and _c_old["ping"] == 1)
-    _t110("r198_profile_via_commit_vs_fallback", _c198_profile_via_commit_vs_fallback)
+                and _rcd_o == 0 and _rca_o == 2 and _out_o is None
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 1)
+    _t110("r205_profile_commit_only_server_guard", _c205_profile_commit_only_server_guard)
 
     # ═══ r200 — STAGED LANE (grill 24-07, 6 quyết định C1-C6): profile-ingest --staged (giữ i+ii+iii,
     # hoãn iv+v+vi, từ chối pdf/ocr/sheet, corpus=false staged) + verify-staged (parity → bulk-flip). ═══
@@ -18885,7 +18899,9 @@ def run() -> int:
         _srcw = _ins204.getsource(_io204._il_stage_write)
         return ("run_pipeline" in _src
                 and all(f'"{n}"' in _src for n in ("plan", "confirm", "stage", "write", "readback", "commit"))
-                and "_ingest_commit_supported" in _srcw and 'g.get("organize"' in _srcw
+                and "_ingest_commit_supported" in _srcw
+                # r205 R-c(b): fallback organize ĐÃ GỠ — guard SERVER_TOO_OLD thay chỗ, 0 nhánh organize.
+                and 'g.get("organize"' not in _srcw and "SERVER_TOO_OLD_FOR_INGEST_COMMIT" in _srcw
                 and "_ingest_commit_supported" not in _ins204.getsource(_io204._il_stage_prepare)
                 and "_ingest_commit_supported" not in _ins204.getsource(_io204._il_stage_commit))
     _t110("r204_ingest_local_via_pipeline", _c204_ingest_local_via_pipeline)
@@ -19021,17 +19037,18 @@ def run() -> int:
                 (os.environ.pop(_k, None) if _v is None else os.environ.__setitem__(_k, _v))
             _TL_MODULE._GAS_VER_CACHE.clear()
 
-    def _c204_ingest_local_via_commit_vs_fallback():
-        # Chỉ-nó-chặn R-b: server 2.21.2o → ĐÚNG 1 ingest_commit, 0 organize, 0 info, ping đúng 1 lần,
-        # rc=0 cả DRY lẫn apply; server 2.21.2n → 0 ingest_commit, 1 organize (fallback GIỮ NGUYÊN), rc=0.
+    def _c205_ingest_local_commit_only_server_guard():
+        # r205 R-c(b) (thay lock r204 commit-vs-fallback): server 2.21.2o → 1 ingest_commit, 0 organize,
+        # 0 info, ping 1 lần, rc=0 cả DRY lẫn apply; server 2.21.2n → GUARD rc=2 trong stage write
+        # (0 commit/0 organize; upload đã journal — chạy lại CÙNG LỆNH + --resume sau khi nâng GAS).
         _rcd_n, _rca_n, _out_n, _c_new = _run_il204("2.21.2o")
         _rcd_o, _rca_o, _out_o, _c_old = _run_il204("2.21.2n")
         return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
                 and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
                 and _c_new["ping"] == 1 and _c_new["upload"] == 1
-                and _rcd_o == 0 and _rca_o == 0 and (_out_o or {}).get("ok") is True
-                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 1 and _c_old["ping"] == 1)
-    _t110("r204_ingest_local_via_commit_vs_fallback", _c204_ingest_local_via_commit_vs_fallback)
+                and _rcd_o == 0 and _rca_o == 2 and _out_o is None
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 1)
+    _t110("r205_ingest_local_commit_only_server_guard", _c205_ingest_local_commit_only_server_guard)
 
     def _c204_zip_child_di_duong_pipeline():
         # R-b phần 2 (ZIP adapter): child zip chạy in-process qua build_parser (r187) = CHÍNH
@@ -19052,6 +19069,35 @@ def run() -> int:
                 and _args_p[:2] == ["profile-ingest", "x.docx"] and _ns_p.fn.__name__ == "cmd_profile_ingest"
                 and "run_pipeline" in _ins204z.getsource(_io204z.cmd_profile_ingest))
     _t110("r204_zip_child_di_duong_pipeline", _c204_zip_child_di_duong_pipeline)
+
+    # ═══ r205 — WP7 R-c (grill nhỏ 25-07, user duyệt từng câu: (a) hẹp · (b) như khuyến nghị ·
+    # (c) CÓ làm): (a) lock ingest_to_cache chỉ-đọc-Drive/đọc-ghi-cache; (b) gỡ fallback organize
+    # (2 test guard ở trên thay lock r198/r204); (c) di trú cmd_profile_ingest_resume lên pipeline. ═══
+    def _c205_resume_via_pipeline():
+        # R-c(c): cmd_profile_ingest_resume điều phối qua run_pipeline — bảng 5 stage plan→confirm→
+        # stage→write→commit (KHÔNG stage readback riêng: _verified_reg_write vốn fused write+verify,
+        # thêm readback rời = đổi số call, trái parity). Thân stage bê nguyên văn — charact
+        # .tl_state/charact_{pre,post}_resume.json so ngoài selftest.
+        import inspect as _ins205
+        import tl_core.ingest_ops as _io205
+        _src = _ins205.getsource(_io205.cmd_profile_ingest_resume)
+        return ("run_pipeline" in _src
+                and all(f'"{n}"' in _src for n in ("plan", "confirm", "stage", "write", "commit")))
+    _t110("r205_resume_via_pipeline", _c205_resume_via_pipeline)
+
+    def _c205_ingest_to_cache_chi_doc_ghi_cache():
+        # R-c(a) (ADR-0004 Đ3, phạm vi HẸP user duyệt): ingest_to_cache CHỈ đọc Drive (exportdocx/
+        # exporttext/vb_status) + đọc/ghi cache; convert Drive ngầm = stub raise CACHE_ONLY; không
+        # action ghi/dọn Drive nào khác. Lock để mọi mutation thêm sau này bị chặn.
+        import inspect as _ins205a
+        import re as _re205
+        import ingest_to_cache as _itc205
+        _src = _ins205a.getsource(_itc205)
+        _acts = set(_re205.findall(r'_appsscript\([^)]*?,\s*"(\w+)"', _src))
+        return (_acts <= {"exportdocx", "exporttext", "vb_status"}
+                and "CACHE_ONLY_NO_DRIVE_CONVERSION" in _ins205a.getsource(_itc205.fetch_drive_convert_docx)
+                and not any(f'"{_x}"' in _src for _x in ("organize", "ingest_commit", "trash", "reg_bulk")))
+    _t110("r205_ingest_to_cache_chi_doc_ghi_cache", _c205_ingest_to_cache_chi_doc_ghi_cache)
 
     # ═══ r202 — sự cố Tầng-3 smoke 25-07 (mẫu r193): profile-delete --apply backup config (CHỨA token)
     # bằng Path(path).with_suffix(...) ⇒ `.bak.json` nằm CẠNH config = GỐC cây skill — vi phạm doctrine

@@ -289,6 +289,39 @@ def cmd_backfill_nlm_status(a) -> int:
     return 0
 
 
+_SLOT_LIVE_DIFF_WARN = 2   # r208 (báo cáo 25-07 mục 2.2): lệch registry↔LIVE quá 2 ⇒ gắn cờ
+
+
+def _slot_live_counts(notebook_ids, skip: bool = False) -> dict:
+    """r208: đọc source_count LIVE cho TỪNG shard (nhánh --all-shards trước đây bỏ hẳn bước này).
+
+    Trả {nb: {"live": int|None, "error": str|None}}. Bài học M2 (v1.33.35 — slot-audit lệch −288 GIẢ
+    khi cookie chết): `notebook_get` trả {ok:False} chứ KHÔNG raise ⇒ TUYỆT ĐỐI không quy về 0; đọc
+    hỏng thì để live=None và ghi lý do, để chỗ gọi giữ nguyên số registry thay vì suy ra gap ảo."""
+    out: dict = {}
+    if skip:
+        return out
+    try:
+        _nc = _imp("nlm_cli")
+    except Exception as e:  # noqa: BLE001 — offline/không cred: giữ nguyên hành vi cũ, KHÔNG chặn
+        return {nb: {"live": None, "error": f"không nạp được nlm CLI ({type(e).__name__})"} for nb in notebook_ids}
+    for nb in notebook_ids:
+        if not nb:
+            continue
+        try:
+            _ng = _nc.notebook_get(nb)
+            if isinstance(_ng, dict) and _ng.get("ok"):
+                out[nb] = {"live": int(_ng.get("source_count") or 0), "error": None}
+            else:
+                _err = str((_ng or {}).get("error") or "?")[:120]
+                if (_ng or {}).get("auth_hint"):
+                    _err += " — 🔴 AUTH hết hạn: `tl nlm-auth-load` (rồi `tl nlm-auth-pull`, cuối cùng `nlm login`)"
+                out[nb] = {"live": None, "error": _err}
+        except Exception as e:  # noqa: BLE001
+            out[nb] = {"live": None, "error": f"{type(e).__name__}"}
+    return out
+
+
 def cmd_slot_audit(a) -> int:
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     if a.manifest:
@@ -306,6 +339,10 @@ def cmd_slot_audit(a) -> int:
             return 1
     if getattr(a, "all_shards", False):
         # KH1 Pha 1.3 (II.5): đếm slot theo TỪNG shard + cảnh báo shard >ngưỡng (mặc định 270/300) để chuẩn bị shard kế.
+        # r208 (báo cáo 25-07 mục 2.2): nhánh --all-shards TRƯỚC ĐÂY chỉ đếm từ manifest/registry, KHÔNG hỏi
+        # LIVE — trong khi nhánh 1-notebook đã neo LIVE từ v1.33.35 (WS1/A3). Hậu quả đo tươi 25-07 trên
+        # registry LÀNH: mọi shard báo THIẾU (297 vs 300 · 275 vs 293 · 54 vs 108 · 17 vs 29) ⇒ base hiện
+        # «còn 3 chỗ» trong khi ĐÃ ĐẦY ⇒ nạp tiếp = tràn. Nay đối chiếu LIVE từng shard, in cạnh nhau.
         near = getattr(a, "near_full", None) or 270
         _base_sa = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
         per = _slot_count_all_shards(entries, _base_sa)
@@ -319,25 +356,62 @@ def cmd_slot_audit(a) -> int:
                 per.setdefault(_sid_sa, 0)
         _cap_of = lambda nb: _caps_sa.get(nb, NLM_SLOT_CAP)   # noqa: E731
         rows = sorted(per.items(), key=lambda kv: (-kv[1], kv[0]))
+        # r208: LIVE là chân lý (quy tắc SKILL) — hỏi từng shard, KHÔNG suy 0 khi đọc hỏng (bài học M2
+        # v1.33.35: cookie chết → source_count thiếu → gap −288 GIẢ). --no-live để tắt (offline/không cred).
+        _live_sa = _slot_live_counts([nb for nb, _ in rows], skip=getattr(a, "no_live", False))
+        _eff_of = lambda nb, n: (_live_sa.get(nb, {}).get("live") if _live_sa.get(nb, {}).get("live") is not None else n)  # noqa: E731
         warn = [{"notebook_id": nb, "count": n, "cap": _cap_of(nb)} for nb, n in rows
-                if n >= min(near, _cap_of(nb))]
+                if _eff_of(nb, n) >= min(near, _cap_of(nb))]
+        _shards_sa = []
+        for nb, n in rows:
+            _lv = _live_sa.get(nb, {})
+            _live_n, _eff = _lv.get("live"), _eff_of(nb, n)
+            _row = {"notebook_id": nb, "count": n, "cap": _cap_of(nb),
+                    "near_full": _eff >= min(near, _cap_of(nb)), "full": _eff >= _cap_of(nb)}
+            if _live_n is not None:
+                _row["live_source_count"] = _live_n
+                _row["live_diff"] = _live_n - n          # dương = registry BÁO THIẾU so với LIVE
+                _row["live_mismatch"] = abs(_live_n - n) > _SLOT_LIVE_DIFF_WARN
+            elif _lv.get("error"):
+                _row["live_read_failed"] = True
+                _row["live_note"] = _lv["error"]
+            _shards_sa.append(_row)
         res = {"ok": True, "gate": "slot-audit", "cap": NLM_SLOT_CAP, "near_full_threshold": near,
                "topology_ok": _topo_sa.get("ok"),
-               "shards": [{"notebook_id": nb, "count": n, "cap": _cap_of(nb),
-                           "near_full": n >= min(near, _cap_of(nb)), "full": n >= _cap_of(nb)} for nb, n in rows],
+               "live_checked": not getattr(a, "no_live", False),
+               "live_diff_warn_threshold": _SLOT_LIVE_DIFF_WARN,
+               "shards": _shards_sa,
                "near_full_shards": warn}
+        _mm_sa = [r for r in _shards_sa if r.get("live_mismatch")]
+        if _mm_sa:
+            res["live_mismatch_shards"] = _mm_sa
+            res["live_mismatch_note"] = ("LIVE ≠ registry: LIVE LÀ CHÂN LÝ — quyết định còn/hết slot phải theo "
+                                         "live_source_count. Lệch thường do dòng removed_*/ref hoặc nguồn thêm "
+                                         "ngoài skill; đối soát per-source: `tl nlm-reconcile <nb>` (DRY).")
         if _topo_sa.get("findings"):
             res["topology_findings"] = _topo_sa.get("findings")
         if getattr(a, "json", False):
             print(json.dumps(res, ensure_ascii=False, indent=2))
         else:
             print(f"== slot-audit --all-shards · {len(rows)} shard · cap default={NLM_SLOT_CAP} ngưỡng near-full={near} ==")
-            for nb, n in rows:
-                _c = _cap_of(nb)
-                mk = "✗ FULL" if n >= _c else ("⚠ NEAR" if n >= min(near, _c) else "·")
-                print(f"  {mk:7s} {nb[:40]:40s} {n}/{_c}")
+            if res.get("live_checked"):
+                print(f"   {'':7s} {'notebook':40s} {'registry':>9s} {'LIVE':>6s}   (LIVE là chân lý)")
+            for _r in _shards_sa:
+                nb, n, _c = _r["notebook_id"], _r["count"], _r["cap"]
+                _live_n = _r.get("live_source_count")
+                _eff = _live_n if _live_n is not None else n
+                mk = "✗ FULL" if _eff >= _c else ("⚠ NEAR" if _eff >= min(near, _c) else "·")
+                if _live_n is None:
+                    _tail = f"{n}/{_c}" + ("   ⚠ không đọc được LIVE" if _r.get("live_read_failed") else "")
+                    print(f"  {mk:7s} {nb[:40]:40s} {_tail}")
+                else:
+                    _flag = f"   ⚠ LỆCH {_live_n - n:+d}" if _r.get("live_mismatch") else ""
+                    print(f"  {mk:7s} {nb[:40]:40s} {n:>9d} {_live_n:>4d}/{_c}{_flag}")
             if warn:
                 print(f"  ⚠ {len(warn)} shard chạm ngưỡng → chuẩn bị shard kế (đừng để ingest-missing chạm partial).")
+            if _mm_sa:
+                print(f"  ⚠ {len(_mm_sa)} shard LỆCH registry↔LIVE > {_SLOT_LIVE_DIFF_WARN} — quyết định slot theo "
+                      f"cột LIVE, KHÔNG theo registry. Đối soát: `tl nlm-reconcile <nb>` (DRY).")
         return 0
     notebook_id = a.notebook_id or os.environ.get("TL_NOTEBOOK_ID", "")
     if not notebook_id:

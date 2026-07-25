@@ -9264,6 +9264,69 @@ def run() -> int:
                 and int(sh[_v3_110].get("cap") or 0) == 450 and _v1_110 in sh)
     _t110("r110_slot_audit_includes_declared_zero_row_shard", _c110_slotaudit)
 
+    def _c208_slotaudit_all_shards_doi_chieu_live():
+        # r208 (báo cáo 25-07 mục 2.2) — CA CHỈ-NÓ-CHẶN. Nhánh --all-shards TRƯỚC ĐÂY không hỏi LIVE.
+        # Đo tươi 25-07 (registry LÀNH): base registry 297 nhưng LIVE 300 ⇒ hiện «còn 3 chỗ» trong khi ĐÃ ĐẦY.
+        #  (a) LIVE > registry ⇒ in cả hai số, live_diff đúng, live_mismatch khi lệch > 2, và near_full/full
+        #      tính THEO LIVE (đây là phần chống nạp tràn — điểm chí tử của bug);
+        #  (b) auth chết (ok:False) ⇒ live=None + live_read_failed, TUYỆT ĐỐI không quy 0 (bài học M2 −288 giả);
+        #  (c) --no-live ⇒ không có khoá live nào (giữ nguyên hành vi cũ, r110 vẫn xanh).
+        _nc208 = _need_base("nlm_cli")
+        _keys = ("apply_profile_offline", "_manifest_entries", "_read_config_record")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _o_ng208 = _nc208.notebook_get
+        _ent = [{"nlm_notebook_id": _v1_110, "row_kind": "own", "nlm_source_id": f"s{i}", "nlm_status": "pushed"}
+                for i in range(297)]
+        _cfg = {"profiles": {"vbqppl": {"notebookId": _v1_110, "shards": [{"id": _v1_110, "role": "primary"}]}}}
+
+        def _run(no_live, ng):
+            _nc208.notebook_get = ng
+            _sv = _env110({"TL_NOTEBOOK_ID": _v1_110, "TL_OVERFLOW_NOTEBOOK_ID": None, "TL_PROFILE": None})
+            try:
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE._manifest_entries = lambda refresh=False: _ent
+                _TL_MODULE._read_config_record = lambda *a, **k: (None, _cfg)
+                _ns = argparse.Namespace(config=None, profile=None, manifest=None, refresh=False, all_shards=True,
+                                         near_full=None, json=True, notebook_id=None, base_notebook_id=None,
+                                         physical=None, no_live=no_live, out=None)
+                _bo = _io110.StringIO()
+                with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_io110.StringIO()):
+                    rc = _TL_MODULE.cmd_slot_audit(_ns)
+                return rc, json.loads(_bo.getvalue() or "{}")
+            finally:
+                _env110_restore(_sv)
+        try:
+            # (a) LIVE=300 vs registry=297, cap 300
+            _rc_a, _oa = _run(False, lambda nb, timeout=120: {"ok": True, "source_count": 300})
+            _sa = {s.get("notebook_id"): s for s in (_oa.get("shards") or [])}.get(_v1_110) or {}
+            _a_ok = (_rc_a == 0 and _sa.get("count") == 297 and _sa.get("live_source_count") == 300
+                     and _sa.get("live_diff") == 3 and _sa.get("live_mismatch") is True
+                     and _sa.get("full") is True          # ← THEO LIVE: đầy, dù registry mới 297
+                     and bool(_oa.get("live_mismatch_shards")))
+            # (b) auth chết → KHÔNG quy 0, KHÔNG bịa mismatch
+            _rc_b, _ob = _run(False, lambda nb, timeout=120: {"ok": False, "error": "Authentication expired",
+                                                             "auth_hint": "nlm login"})
+            _sb = {s.get("notebook_id"): s for s in (_ob.get("shards") or [])}.get(_v1_110) or {}
+            _b_ok = (_rc_b == 0 and _sb.get("live_read_failed") is True
+                     and "live_source_count" not in _sb and "live_diff" not in _sb
+                     and _sb.get("count") == 297
+                     and "nlm-auth-load" in str(_sb.get("live_note") or ""))   # 3.2: chỉ đúng đường
+            # (c) --no-live giữ nguyên hành vi cũ
+            _rc_c, _oc = _run(True, lambda nb, timeout=120: {"ok": True, "source_count": 999})
+            _sc = {s.get("notebook_id"): s for s in (_oc.get("shards") or [])}.get(_v1_110) or {}
+            _c_ok = (_rc_c == 0 and "live_source_count" not in _sc and _oc.get("live_checked") is False)
+        finally:
+            _nc208.notebook_get = _o_ng208
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+        # drift-lock hằng số (khuôn NLM_SLOT_CAP r71): khai 2 nơi ⇒ phải BẰNG NHAU. KHÔNG đưa hằng số
+        # vào _STUB_MAP — stub biến nó thành hàm, JSON dumps vỡ (bẫy đã trả giá khi làm r208).
+        import tl_core.nlm_ops as _no208
+        _const_ok = (_no208._SLOT_LIVE_DIFF_WARN == _TL_MODULE._SLOT_LIVE_DIFF_WARN
+                     and isinstance(_TL_MODULE._SLOT_LIVE_DIFF_WARN, int))
+        return _a_ok and _b_ok and _c_ok and _const_ok
+    _t110("r208_slot_audit_all_shards_doi_chieu_live", _c208_slotaudit_all_shards_doi_chieu_live)
+
     # (17) F-09: stamp topology cho manifest/registry-map — hash khớp resolver, registry_digest đổi theo entries,
     # routing_epoch từ config (default 0).
     def _c110_stamp():

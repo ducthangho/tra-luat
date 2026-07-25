@@ -5,8 +5,15 @@
 > sự kiện, và cách đạt tự động hoá cao nhất trong khuôn khổ 3 điểm dừng có chủ đích.
 > Yêu cầu gốc (2026-07-25): tự động hoá cao nhất; **giữa chừng nạp thêm nguồn**; **sửa lỗi phát hiện được**;
 > **định kỳ rà lại kết quả cũ**.
-> ⚠ Kho `claude-code-best-practice` là clone dev-only local, KHÔNG có trong phiên remote này — các
-> nguyên lý §1 cần đối chiếu lại kho đó trên máy dev trước khi chốt (CLAUDE.md buộc ưu tiên kho).
+> ✅ **Đối chiếu kho `claude-code-best-practice` ĐÃ LÀM 25-07 trên máy dev** (bản Jul 25 2026 / Claude Code
+> v2.1.220, đã pull): **KHÔNG có nguyên lý P1–P7 nào bị kho khuyên ngược.** Ba bổ sung rút từ kho (đã nhập
+> vào thân tài liệu, nguồn ghi tại chỗ): **A1** — agent read-only ép cứng bằng frontmatter (`claude-subagents.md`),
+> xem KE_HOACH C4; **A2** — wrapper Loop C khai `disallowed-tools: AskUserQuestion` + `disable-model-invocation`
+> (`claude-skills.md`), xem §5; **A3** — headless local thêm `--max-turns`/`--max-budget-usd`, chỉ có ở print
+> mode (`claude-cli-startup-flags.md`), xem §5.
+> **CHỐT 25-07 (grill):** nơi lưu state = LAI (§3) · Loop B thêm B0/uỷ-quyền-nguồn-tải/tách-kênh/chuẩn-bị-trước
+> (§4) · worker Q-NLM tuần tự (§4a) · phòng thủ NLM 3 tầng + Q-VERIFY (§4b) · đơn vị "đối chiếu bổ sung" (§4 B.4)
+> · ma trận môi trường local/Cowork/Claude-chat (§5b).
 
 ---
 
@@ -67,21 +74,25 @@ phải mỗi file), ③ nghiệm thu + ký. Giữa chúng máy tự chạy, kể
 
 ---
 
-## §3. STATE — 4 hàng đợi + sổ phát hiện (tất cả là FILE, nằm trong `_meta/` của profile hồ sơ — P1+P7)
+## §3. STATE — hàng đợi + sổ phát hiện (tất cả là FILE — P1+P7; nơi lưu **LAI, chốt 25-07**)
 
-| File | Vai trò | Ghi chú |
-|---|---|---|
-| `_meta/rasoat_state.json` | Q-UNITS + con trỏ chu kỳ + `session_claim` + quota NLM còn lại + note bàn giao | nguồn sự thật resume; nằm trên Drive theo ADR-0003 → bền hơn `~/.tra_luat_cache` (bị reset giữa phiên) |
-| `_meta/rasoat_ingest_queue.json` | Q-INGEST: ứng viên từ `frontier-expand` (`missing_in_corpus`) + user bổ sung, kèm trạng thái dry-planned/staged/flipped | mục nào NGOÀI phạm vi kickoff contract → gắn `out_of_scope`, chờ người, không tự nạp |
-| `master/<unit>.json` (thư mục) | sổ phát hiện — 1 file/đơn vị rà, schema `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` | append-only ở mức thư mục; `rasoat_phuluc.py --in master/` gộp khi tổng hợp |
-| `_meta/rasoat_bugs.md` | Q-BUGS: lỗi skill gặp giữa chừng | mỗi mục: VERSION đo được + lệnh tái hiện + workaround đã dùng + phân loại workaround/blocker |
-| `_meta/rasoat_approvals.json` | Q-APPROVALS: các dry-plan (kèm `plan_hash`) đã gom, chờ duyệt lô | người duyệt đọc 1 bảng, chấp thuận → máy chạy chuỗi `--apply --confirm yes --expected-plan-hash` |
+State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--out-dir`, đẩy Drive theo lô (§B.5 KE_HOACH).
+
+| File | Nơi lưu | Vai trò | Ghi chú |
+|---|---|---|---|
+| `_meta/rasoat_state.json` | **Drive** | Q-UNITS + Q-INGEST + **Q-NLM** + con trỏ chu kỳ + `session_claim` + quota NLM còn lại + note bàn giao | nguồn sự thật resume; Drive theo ADR-0003 — `~/.tra_luat_cache` không đủ bền (Claude chat xoá trắng sandbox mỗi phiên); RMW đã ATOMIC (GAS 2.21.2p). Gộp Q-INGEST/Q-NLM vào MỘT file = 1 lần RMW, 1 claim |
+| — Q-INGEST (trong state) | Drive | ứng viên từ `frontier-expand` (`missing_in_corpus`) + user bổ sung, trạng thái dry-planned/staged/flipped | mục NGOÀI phạm vi kickoff contract → gắn `out_of_scope`, chờ người, không tự nạp |
+| — Q-NLM (trong state) | Drive | nguồn chờ nạp NotebookLM: `pending/added/failed` — worker §4a drain tuần tự | nạp NLM là LÀM GIÀU về sau, không chặn rà (đơn vị rà được ngay khi cache xong) |
+| `master/<unit>.json` (thư mục) | **local `--out-dir`**, đẩy Drive ở checkpoint/Pha 4 (chat: mỗi đơn vị/lô nhỏ) | sổ phát hiện — 1 file/đơn vị rà, schema `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` | append-only ở mức thư mục; `rasoat_phuluc.py --in master/` gộp khi tổng hợp; mỗi `noi_dung[]` mang `anchor` + `muc_chac_chan` (H1b) |
+| `_meta/rasoat_bugs.md` | local, đẩy cùng checkpoint | Q-BUGS: lỗi skill gặp giữa chừng | mỗi mục: VERSION đo được + lệnh tái hiện + workaround đã dùng + phân loại workaround/blocker |
+| `_meta/rasoat_approvals.json` | local, đẩy cùng checkpoint | Q-APPROVALS: các dry-plan (kèm `plan_hash`) đã gom, chờ duyệt lô | người duyệt đọc 1 bảng, chấp thuận → máy chạy chuỗi `--apply --confirm yes --expected-plan-hash` |
+| — Q-VERIFY (trong state) | Drive | phát hiện ghi trong chế độ không-NLM (`muc_chac_chan="cho_verify_nlm"`) chờ trả nợ kiểm chéo `nlm_qa` | cookie sống lại → một lượt trả nợ tuần tự, đạt thì nâng hạng (§4b) |
 
 **NEO PHỤ THUỘC của mỗi phát hiện** (điều kiện của Loop C — P5), thêm vào mỗi dòng `noi_dung[]`:
 
 ```json
 "anchor": {
-  "doc_deps": [{"so_hieu": "18/VBHN-VPQH 2025", "text_hash": "sha256:…", "dieu": ["54", "125"]}],
+  "doc_deps": [{"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:…", "dieu": ["54", "125"]}],
   "cite": "cache:18VBHN2025#dieu54",
   "skill_version": "1.35.38",
   "verified_at": "2026-07-25",
@@ -91,6 +102,10 @@ phải mỗi file), ③ nghiệm thu + ký. Giữa chúng máy tự chạy, kể
 
 Ý nghĩa: phát hiện này ĐÚNG chừng nào các `text_hash` kia còn là bản hiện hành. Đổi hash / có VBHN mới
 / TTL cạn (với mức "cần kiểm tra") ⇒ máy TỰ biết phát hiện nào cần rà lại — không cần người nhớ.
+
+> `so_hieu` trong anchor PHẢI theo chuẩn bất biến `NN-YYYY-VBHN-XXX` (mọi số hiệu có NĂM). Kèm anchor, mỗi
+> dòng `noi_dung[]` mang `muc_chac_chan` (`chac_chan | can_kiem_tra | cho_verify_nlm` — H1b KE_HOACH); TTL
+> chỉ áp mức `can_kiem_tra`, còn `cho_verify_nlm` do Q-VERIFY xử lý (§4b).
 
 ---
 
@@ -103,32 +118,76 @@ phải mỗi file), ③ nghiệm thu + ký. Giữa chúng máy tự chạy, kể
 | A1 | Pha 0 tiền kiểm: ping, cookie, VERSION khớp | `doctor`/`ping`, `nlm-auth-status`, probe 3 kênh NLM (KERNEL_APPENDIX §E) | ✅ — fail chặn đứng thì dừng sớm TRƯỚC khi tiêu NLM |
 | A2 | Nhận vai: ghi `session_claim` (id phiên + giờ) vào state | RMW qua GAS (LockService làm lưới) | ✅ |
 | A3 | Lấy đơn vị `pending` ưu tiên cao nhất (SÂU trước, theo phân tầng worksheet) | `rasoat_worksheet.py` đã chấm SÂU/ĐỐI CHIẾU/— | ✅ |
-| A4 | T1→T2→T3 theo quy trình 3 tầng; mở rộng frontier | `tra_cuu --cite --exact`, `notebook_query` scoped, `frontier-expand --json` | ✅ (ngân sách NLM trừ dần trong state) |
-| A5 | VERIFY từng phát hiện | `nlm_qa verify`; nguyên văn CHỈ từ cache/raw | ✅ — phát hiện fail verify KHÔNG được ghi |
+| A4 | T1→T2→T3 theo quy trình 3 tầng; mở rộng frontier | `tra_cuu --cite --exact`, `notebook_query` scoped, `frontier-expand --json` | ✅ (ngân sách NLM trừ dần trong state). **NLM chết → KHÔNG dừng**: T2 chuyển quét cache/Drive trực tiếp (chế độ không-NLM §4b) |
+| A5 | VERIFY từng phát hiện | `nlm_qa verify`; nguyên văn CHỈ từ cache/raw | ✅ — phát hiện fail verify KHÔNG được ghi. Chế độ không-NLM: ghi với `muc_chac_chan="cho_verify_nlm"` + vào Q-VERIFY, trả nợ khi cookie sống (§4b) |
 | A6 | Ghi `master/<unit>.json` (kèm anchor) + đánh `done` + cập nhật CSV nhật ký NLM | ghi file, ngoài cây skill | ✅ |
 | A7 | Ứng viên mới từ A4 → append Q-INGEST; Điều liên quan mới → append Q-UNITS | máy phân loại theo phạm vi kickoff | ✅ |
 | A8 | Cạn ngân sách/context → chốt checkpoint + note bàn giao → thoát êm | state đã là file nên "thoát" = không làm gì thêm | ✅ |
 
-### LOOP B — NẠP GIỮA CHỪNG (chìa khoá: làn STAGED r200 — P2)
+### LOOP B — NẠP GIỮA CHỪNG (chìa khoá: làn STAGED r200 — P2; **đơn vị tối ưu là LÔ, không phải file**)
 
 Vấn đề gốc: nạp văn bản là đường GHI rủi ro cao (hook hỏi từng `--apply`) ⇒ nạp giữa chừng kiểu cũ
-= chạm người O(số file). Làn staged đảo lại:
+= chạm người O(số file). Làn staged đảo lại. Số đo ủng hộ lô: bulk-flip nhanh **×3,9** so với từng file;
+NLM lô 8 nguồn wall 86,5s + reconcile 27,8s (khuôn lô r192). KHÔNG đưa việc gộp thêm GAS call vào kế
+hoạch — r207 đã đo bỏ 1 call chỉ −0,6s (trong nhiễu), và nửa gộp `reg_get` CỐ Ý không làm (race đã trả giá).
 
+0. **B0 — dò trùng trên dữ liệu TƯƠI (bắt buộc, bài học 24-07):** trước khi lập kế hoạch lô,
+   `reg-query --refresh` — dò trùng bằng cache nguội đã từng nạp chồng 9 tài liệu vào ATVSLĐ.
 1. **Tự động, không cần duyệt nội dung:** mỗi ứng viên trong Q-INGEST (thuộc phạm vi hồ sơ) chạy
    `ingest-route`/`profile-ingest … --json` DRY → plan + `plan_hash` → append Q-APPROVALS. Văn bản
    vào ở trạng thái **staged `corpus=false`** — có mặt để rà tiếp, chưa được tin là corpus.
+   **Nguồn tải (uỷ quyền trong kickoff — chống hỏi-người rời rạc):** văn bản lấy được từ danh sách
+   nguồn tin cậy đã khai (vbpl.vn, Công báo, cổng .gov.vn/.chinhphu.vn…) → máy TỰ tải vào khu tập kết;
+   KHÔNG tự lấy được → gắn `cho_nguoi_tai` (kèm link TVPL nếu có) và **gom hỏi chung tại điểm chạm ②**,
+   không hỏi lẻ từng file giữa chừng.
+   **Chuẩn-bị-trước, duyệt-sau:** mọi việc nặng (tải, bóc tách, cache, dry-run) làm XONG TRƯỚC khi hỏi
+   người — lúc duyệt, việc còn lại chỉ là ghi registry vài giây/lô; thời gian người vắng mặt không thành
+   thời gian máy chết (vòng RÀ vẫn chạy trên đơn vị đã có).
 2. **Điểm chạm ② (1 lần/pha):** người mở bảng Q-APPROVALS — mỗi dòng: tên chuẩn, đích, plan_hash —
    duyệt cả lô. Máy chạy chuỗi apply với `--expected-plan-hash` (lệch plan = tự chặn).
 3. **Cổng máy đóng lô:** `verify-staged` (DRY báo cáo → `--apply --confirm yes`) — PASS flip
    `corpus=true` cả lô (1 `reg_bulk` journaled, **undo được cả lô**), FAIL ở lại staged kèm cờ.
-   NLM nạp sau qua `nlm-links`/`ingest-missing` (cũng DRY-first, cũng vào Q-APPROVALS).
+   **Tách kênh:** kênh kho/cache (không cần NLM) dừng ở đây — đơn vị RÀ ĐƯỢC NGAY; kênh NLM đi riêng:
+   nguồn flip xong append **Q-NLM**, worker §4a nạp tuần tự sau, không chặn ai.
 4. Văn bản mới flip xong → `ingest_to_cache` → `rasoat_worksheet` chấm phân tầng → **sinh đơn vị
    mới vào Q-UNITS** → Loop A rà tiếp. Vòng khép kín.
+   **Đơn vị "đối chiếu bổ sung" (chốt 25-07 — bịt lỗ hổng file-mới-liên-quan-đơn-vị-đã-done):** khi văn
+   bản mới D flip vào corpus, chạy `relation-check`/frontier 2 CHIỀU: đơn vị `done` nào dẫn chiếu tới/bị
+   D dẫn chiếu → sinh đơn vị loại `doi_chieu_bo_sung` (cặp đơn-vị-cũ × D) — CHỈ so phần giao với D,
+   không rà lại toàn đơn vị. **Bất biến (test khoá):** đơn vị `done` không bao giờ reset về `pending`
+   toàn phần trừ khi anchor vỡ. Chi phí O(delta) — "rà lại là phép tính, không phải làm lại".
 
 > Biến thể tự trị hơn (tuỳ khẩu vị rủi ro, ghi trong kickoff contract): người có thể **uỷ quyền trước**
 > cho bước 2 với điều kiện hẹp — "văn bản được ≥1 phát hiện đã-verify dẫn chiếu đích danh, đúng loại
 > VBQPPL, đi làn staged" ⇒ máy tự apply lô staged, người chỉ còn duyệt bước 3 (flip). Điểm dừng có
 > chủ đích vẫn còn — nhưng lùi về nơi rẻ nhất.
+
+### §4a. WORKER Q-NLM — nạp NotebookLM TUẦN TỰ, tách khỏi đường găng (chốt 25-07)
+
+Nạp NLM chậm (lô 8 nguồn ≈ 86,5s + reconcile 27,8s) trong khi đơn vị rà chỉ cần CACHE. Ghép nạp NLM vào
+vòng RÀ là tự chuốc nghẽn — tách thành worker riêng:
+
+- **MỘT worker duy nhất, drain Q-NLM tuần tự tới hết** (tuần tự là chủ đích: cookie mong manh, có
+  reconcile sau lô, tránh dồn dập). KHÔNG chạy nhiều worker song song.
+- **Phạm vi ghi = NLM + JSON trả về, KHÔNG hơn:** worker không ghi registry, không ghi file trong cây;
+  kết quả trả JSON về phiên chính — phiên chính mới cập nhật Q-NLM trong state (giữ một-người-ghi +
+  bài học rogue-edit).
+- **Idempotent qua reconcile (khuôn r192):** worker chết giữa chừng → chạy lại tự bỏ qua nguồn đã có.
+- **Bẫy PDF ghi thẳng vào đặc tả:** `nlm-add --drive-id` HỎNG với PDF → đi đường tải file + `source_add
+  source_type=file`; hỏng nữa → đánh `failed` + ghi làn lỗi, KHÔNG retry vô hạn.
+- **Theo môi trường (§5b):** local = background task thật của phiên chính; Claude chat = worker là VAI,
+  mỗi phiên thức dậy drain một đoạn, hàng đợi nằm trên Drive chờ phiên sau. Chậm hơn, không sai hơn.
+
+### §4b. PHÒNG THỦ NLM 3 TẦNG — cookie chắc chắn chết khi chạy lâu (chốt 25-07)
+
+Điểm neo doctrine: NLM chỉ giữ vai **ĐỊNH VỊ + KIỂM CHÉO** — nguyên văn CHỈ từ cache/raw. Mất NLM =
+mất tiện, KHÔNG mất đúng.
+
+| Tầng | Cơ chế | Môi trường |
+|---|---|---|
+| 1. Tiền kiểm | Pha 0 đo tuổi cookie mỗi lần thức dậy + cron `secrets-set --nlm` ngày 1 lần phía local | mọi nơi |
+| 2. Tự refresh | gặp lỗi xác thực giữa chừng → tự chạy `nlm login`/`refresh_auth` MỘT lần trước khi bỏ cuộc | CHỈ local (Cowork/chat không tự refresh được → nhảy thẳng tầng 3) |
+| 3. Chế độ chạy-không-NLM | T2 thay bằng quét cache/Drive trực tiếp (chậm hơn, tốn context hơn, tất định); phát hiện vẫn ghi nhưng `muc_chac_chan="cho_verify_nlm"` + vào **Q-VERIFY**; cookie sống lại → MỘT lượt trả nợ kiểm chéo tuần tự, đạt thì nâng hạng | mọi nơi — vòng RÀ **không bao giờ dừng vì cookie** |
 
 ### LOOP C — TÁI RÀ ĐỊNH KỲ (mới hoàn toàn so với kế hoạch trước; P5+P6)
 
@@ -165,9 +224,25 @@ Chi phí mỗi kỳ ≈ 0 khi corpus đứng yên, và tỷ lệ thuận với m
 | Lịch | Việc | Cơ chế |
 |---|---|---|
 | Mỗi phiên làm việc | Loop A drain + Loop B gom lô | người mở phiên hoặc Routine hằng ngày |
-| Tuần 1 lần | Loop C tái rà | Routine phiên-mới, prompt cố định "chạy tái rà hồ sơ X"; thoát im lặng nếu không delta |
-| Ngày 1 lần (phía LOCAL) | refresh cookie NLM (`secrets-set --nlm`) | cron máy local (COWORK_PROJECT.md §3) — Cowork không tự refresh được |
+| Tuần 1 lần | Loop C tái rà | Routine phiên-mới, prompt cố định "chạy tái rà hồ sơ X"; thoát im lặng nếu không delta. **(A2)** wrapper khai `disallowed-tools: AskUserQuestion` (kho nêu đích danh use case background loop) + `disable-model-invocation: true` — tái-rà chỉ chạy theo lịch/lệnh tường minh (nguồn: `claude-skills.md`). **(A3)** chạy headless local (`claude -p`): thêm `--max-turns` + `--max-budget-usd` làm fail-safe ngoài `max_iter` — cả hai CHỈ có ở print mode, Routine cloud phải dựa `max_iter` trong state (nguồn: `claude-cli-startup-flags.md` §Budget & Limits) |
+| Ngày 1 lần (phía LOCAL) | refresh cookie NLM (`secrets-set --nlm`) | cron máy local (COWORK_PROJECT.md §3) — Cowork/chat không tự refresh được (tầng 2 §4b chỉ có ở local) |
 | Trước mỗi lượt bất kỳ | Pha 0 tiền kiểm | luôn luôn — rẻ, chặn sớm |
+
+---
+
+## §5b. MA TRẬN MÔI TRƯỜNG — cùng một bộ state, ba môi trường thay nhau cầm việc (chốt 25-07)
+
+Các cổng mạnh nhất (`--expected-plan-hash`, `--confirm yes`, fail-closed) là code trong `tl.py` — chạy đâu
+cũng ép được. Cái khác nhau giữa môi trường là hạ tầng quanh vòng lặp:
+
+| Cơ chế | Claude Code/Cowork local | Claude chat (LIVE Package) | Hệ quả thiết kế |
+|---|---|---|---|
+| Lưu trữ giữa phiên | `~/.tra_luat_cache` sống lâu | sandbox **xoá trắng mỗi phiên** | state sống-còn trên Drive (§3) nên kế nhiệm vẹn; riêng chat: đẩy `master/` sau MỖI đơn vị/lô nhỏ |
+| Worker Q-NLM | background task thật | không có tiến trình nền bền | worker là **VAI**: mỗi phiên drain một đoạn, hàng đợi chờ trên Drive (§4a) |
+| Tự refresh cookie (tầng 2 §4b) | `nlm login` CLI có thật | không có | chat nhảy thẳng tầng 3 (chạy-không-NLM + Q-VERIFY) |
+| Lịch Loop C | cron/Routine | không có cron tin cậy | chat: MỘT câu gõ tay tuần 1 lần, hoặc uỷ máy local chạy — state chung trên Drive, ai chạy cũng được |
+| Hook duyệt `--apply` | PreToolUse ép cứng | không có hook | còn (a) cổng code `tl.py` (mạnh, giữ nguyên) + (b) doctrine SKILL.md "HỎI trước `--apply`" (mức nhắc) |
+| Agent con cách ly context | spawn được (frontmatter ép read-only — A1) | **không spawn gì cả** | vòng lặp chạy trong chính phiên; ngân sách context hẹp hơn → checkpoint sớm + bàn giao qua file càng quan trọng |
 
 ---
 
@@ -175,15 +250,18 @@ Chi phí mỗi kỳ ≈ 0 khi corpus đứng yên, và tỷ lệ thuận với m
 
 Workflow trên chạy được ~70% bằng lệnh đã có. Phần thiếu, xếp theo giá trị/công sức:
 
-1. **Anchor trong schema master** (sửa `templates/…json` + quy ước ghi) — không cần code mới, `rasoat_phuluc.py`
-   bỏ qua field lạ. Điều kiện của Loop C. *(≈ H1 mở rộng)*
-2. **`rasoat_state.json` + quy ước claim/checkpoint** trong `_meta/` profile — schema + kịch bản, không code lõi. *(≈ H2, chuyển nơi lưu theo P7)*
-3. **Kịch bản vòng lặp** (`references/RASOAT_HOSO_LOOP.md`) bọc A1–A8/B1–B4/C1–C6 bằng từ vựng
-   `dry_rounds`/`max_iter`/PAUSE — prose mỏng vì mọi bước đều trỏ lệnh thật. *(≈ H3)*
+1. **Template master TẠO MỚI có anchor + `muc_chac_chan` ngay từ đầu** — local KHÔNG có
+   `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (đã kiểm 25-07), tạo theo H1, KHÔNG có bước merge;
+   `rasoat_phuluc.py` bỏ qua field lạ + mở rộng tối thiểu để phụ lục xuất kèm (H1b). Điều kiện của Loop C.
+2. **`rasoat_state.json` (gồm Q-INGEST/Q-NLM/Q-VERIFY) + quy ước claim/checkpoint** trong `_meta/` profile
+   trên Drive — schema + kịch bản, không code lõi. *(≈ H2, nơi lưu LAI §3)*
+3. **Kịch bản vòng lặp** (`references/RASOAT_HOSO_LOOP.md`) bọc A1–A8/B0–B4/C1–C6 bằng từ vựng
+   `dry_rounds`/`max_iter`/PAUSE — prose mỏng vì mọi bước đều trỏ lệnh thật. Gồm cả đặc tả worker Q-NLM
+   (§4a), chế độ không-NLM (§4b), đơn vị `doi_chieu_bo_sung` (B.4) và 2 luật riêng cho chat (§5b). *(≈ H3)*
 4. **Staleness scanner** — phần code MỚI duy nhất đáng viết: đọc master + registry, so hash, in danh sách
    stale + lệnh re-queue. Read-only, JSON, tất định → dễ test golden. *(mới — phục vụ Loop C)*
-5. Routine wrapper cho Loop C (prompt cố định + điều kiện thoát im lặng). *(mới, nhỏ)*
-6. Agent con cách ly context cho T3 (tuỳ chọn, Đợt sau — không phải nền tảng).
+5. Routine wrapper cho Loop C (prompt cố định + thoát im lặng + frontmatter A2). *(mới, nhỏ)*
+6. Agent con cách ly context cho T3 (tuỳ chọn, Đợt sau — không phải nền tảng; khi làm thì ép cứng theo A1).
 
 ## §7. VÍ DỤ MỘT CHU KỲ (hồ sơ 3 văn bản, minh hoạ điểm chạm)
 
@@ -203,6 +281,6 @@ Tuần 3  máy (Routine C): changes_pull thấy VBHN mới của Luật Y → 4/
 
 ---
 
-*Đối chiếu bắt buộc trên máy dev trước khi chốt: (1) kho `claude-code-best-practice` (P1–P7 có mục nào
-kho khuyên khác không); (2) `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` local có sẵn chưa (nếu có thì
-schema anchor phải merge vào bản đó, không tạo bản thứ hai).*
+*Đối chiếu trên máy dev ĐÃ LÀM 25-07 — kết quả: (1) kho `claude-code-best-practice` KHÔNG khuyên ngược
+P1–P7; 3 bổ sung A1–A3 đã nhập vào thân (đầu file + §5 + KE_HOACH C4). (2) `templates/…json` local KHÔNG
+tồn tại → tạo mới theo H1, schema anchor + `muc_chac_chan` nhập ngay từ đầu, không có bước merge.*

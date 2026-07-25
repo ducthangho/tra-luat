@@ -5,6 +5,14 @@
 > **Nền đo:** bản này đối chiếu trên `v1.35.38` (`ccad292`). Bản đầu (`1835b46`, nhánh
 > `claude/legal-document-review-architecture-dlbrut`) đối chiếu trên `v1.35.32` (`96b56f4`) — xem §0.
 > Tài liệu nền: `references/QUY_TRINH_RA_SOAT_3_TANG.md` · `references/CHECKPOINT_TEST_PLAN.md` · ADR-0001 · ADR-0004.
+>
+> **CHỐT 25-07 chiều (grill trên máy dev):** Q1 = (ii) SỬA LÕI · Q2 = XOÁ đặc tả `nlm_log.py` khỏi chỉ dẫn sống ·
+> nơi lưu state = **LAI** (§B.5) · H1b = cấu trúc hoá (xem H1b) · baseline H9 = hằng số trong `release.py` (xem H9) ·
+> đối chiếu kho best-practices ĐÃ LÀM — không mâu thuẫn, 3 bổ sung A1–A3 (xem WORKFLOW doc đầu file).
+> **Nền đo đã trôi:** master nay ở `v1.35.40` (`r208a` slot-audit + `r208-gas` GAS 2.21.2p ATOMIC RMW — ĐÃ LIVE),
+> kèm bump `v1.35.41` (contract 2.21.2p) đang dở tay chưa commit. Hai commit mới không chạm file Đợt 1 đụng tới —
+> nhận định hiện trạng vẫn đứng. Đợt 1 xây SAU khi v1.35.41 đậu = MỘT bump duy nhất; mọi tên test `r208_*`
+> dưới đây phải **đánh số lại theo revision thực** khi đậu (r208 đã bị chiếm).
 
 ---
 
@@ -81,10 +89,16 @@ trừ các điểm dừng có chủ đích (mục B.4).
    để kế nhiệm phiên: "phiên chính" là VAI TRÒ chuyển giao tuần tự, không phải một cửa sổ context bất tử.
 4. **Điểm dừng có chủ đích (giữ nguyên, không tự động hoá qua):** hook duyệt `--apply`/`*-delete`/`--clear-stale`;
    deploy tay ở LIVE (`upload-skill-to-Package.cmd`); kết luận cuối + ký do người rà soát (Mục G).
-5. **(MỚI — §0.5) State biến động NẰM NGOÀI cây skill.** Đây là doctrine đã trả giá: r193 (backup config lọt bundle
-   → token LIVE lên Drive) và r202 ("backup config profile-delete ra NGOÀI cây skill"). Cây skill được hash toàn
-   bộ vào `package_hash`; mọi file thay đổi theo lượt rà mà nằm trong cây sẽ làm `release-verify`/golden ĐỎ.
-   → PLAN.json + bảng master ghi ở `~/.tra_luat_cache/rasoat/<ho_so_id>/`, hoặc `--out-dir` trỏ ngoài cây.
+5. **(MỚI — §0.5, CHỐT LAI 25-07) State biến động NẰM NGOÀI cây skill — và chia hai tầng bền.** Doctrine đã trả
+   giá: r193 (backup config lọt bundle → token LIVE lên Drive) và r202. Cây skill được hash toàn bộ vào
+   `package_hash`; mọi file thay đổi theo lượt rà mà nằm trong cây sẽ làm `release-verify`/golden ĐỎ. Nơi lưu **LAI**:
+   - **State sống-còn** (`_meta/rasoat_state.json` = PLAN + Q-UNITS + Q-INGEST + Q-NLM + `session_claim` + quota +
+     note bàn giao — nhỏ, ghi ở ranh giới đơn vị): **Drive `_meta/` của profile** (P7). Đây là nguồn sự thật resume;
+     `~/.tra_luat_cache` không đủ bền (Claude chat xoá trắng sandbox mỗi phiên). RMW qua GAS đã ATOMIC (2.21.2p).
+     Chi phí chấp nhận được: ~1 call/đơn vị so với 6 call/file của đường nạp.
+   - **Sổ nặng** (`master/`, Q-APPROVALS, Q-BUGS — mỗi đơn vị 1 file, ghi 1 lần khi done): **local `--out-dir`
+     ngoài cây**, đẩy Drive THEO LÔ ở checkpoint/Pha 4. Kill giữa chừng mất tối đa 1 đơn vị dở — đúng ngưỡng H8.
+     **Riêng Claude chat:** đẩy `master/` sau MỖI đơn vị hoặc lô nhỏ (sandbox không sống qua phiên).
    Chỉ **MẪU rỗng** (template, bất biến) mới được nằm trong cây và vào zip.
 6. **(MỚI — §0.1) Tái dùng từ vựng hội tụ đã có, không đặt bộ mới.** `tl loop` và `tl rasoat-loop` đã dùng chung
    một idiom: `--dry-rounds K` (K vòng liên tiếp không sinh việc mới = HỘI TỤ) + `--max-iter` (fail-safe) + PAUSE
@@ -110,10 +124,10 @@ NGƯỜI: nghiệm thu (duyệt Phiếu A–G, duyệt lô lệnh --apply chờ,
 
 | # | Thành phần | Dạng | Nơi lưu | Ghi chú |
 |---|---|---|---|---|
-| C1 | `PLAN.json` hồ sơ | JSON máy-đọc-được, **biến động** | `~/.tra_luat_cache/rasoat/<ho_so_id>/PLAN.json` | văn bản × đơn vị rà × trạng thái (pending/doing/done) + hàng đợi phát sinh + note bàn giao + quota NLM còn lại + `session_claim` |
-| C2 | Bảng master phát hiện | **THƯ MỤC nhiều file `.json`**, mỗi đơn vị 1 file (append-only ở mức thư mục — §0.4) | `~/.tra_luat_cache/rasoat/<ho_so_id>/master/` | schema = bảng C Pha 4, field name theo đúng `rasoat_phuluc.py` (§E/H1); đầu vào duy nhất của `rasoat_phuluc.py --in <thư mục>` |
+| C1 | PLAN hồ sơ (= `rasoat_state.json`) | JSON máy-đọc-được, **biến động** | **Drive `_meta/` của profile** (P7 — CHỐT LAI §B.5) | văn bản × đơn vị rà × trạng thái (pending/doing/done/blocked/stale) + Q-INGEST + **Q-NLM** + note bàn giao + quota NLM còn lại + `session_claim` |
+| C2 | Bảng master phát hiện | **THƯ MỤC nhiều file `.json`**, mỗi đơn vị 1 file (append-only ở mức thư mục — §0.4) | local `--out-dir` ngoài cây, đẩy Drive theo lô ở checkpoint/Pha 4 (chat: mỗi đơn vị — §B.5) | schema = bảng C Pha 4, field name theo đúng `rasoat_phuluc.py` (§E/H1) **+ `anchor` + `muc_chac_chan` ngay từ đầu (H1b)**; đầu vào duy nhất của `rasoat_phuluc.py --in <thư mục>` |
 | C3 | Vòng lặp `/rasoat-hoso` | reference + command mỏng | `references/` (+ wrapper `.claude/commands/`) | kịch bản worklist **bọc `rasoat-loop`/`frontier-expand`**, dùng từ vựng `dry_rounds`/`max_iter`/PAUSE |
-| C4 | Agent rà đơn vị `tl-rasoat` | prompt mẫu (read-only) | `references/` (+ wrapper `.claude/agents/`) | Tầng 1→3 + VERIFY cho MỘT đơn vị; cấp quota NLM trong prompt; trả JSON schema C2 |
+| C4 | Agent rà đơn vị `tl-rasoat` | prompt mẫu (read-only) | `references/` (+ wrapper `.claude/agents/`) | Tầng 1→3 + VERIFY cho MỘT đơn vị; cấp quota NLM trong prompt; trả JSON schema C2. **(A1 — best-practice)** wrapper dev ÉP CỨNG bằng frontmatter `disallowedTools: Write, Edit, NotebookEdit` + `maxTurns` (nguồn: kho best-practice `claude-subagents.md`, bảng Frontmatter); prompt chỉ là lớp 2. LIVE không có file agent → prompt-only + hậu kiểm `verify-integrity` |
 | C5 | `BUGS_FOUND.md` + chính sách degrade-and-continue | quy ước trong quy trình | ngoài cây skill (§B.5) | lỗi có workaround → ghi + đi vòng; chỉ blocker mới dừng chờ người |
 | C6 | Kickoff contract | mẫu giao việc | `references/` | phạm vi hồ sơ, uỷ quyền ghi (nạp văn bản THUỘC hồ sơ), ngân sách, chính sách lỗi |
 | C7 | **(MỚI)** Thẻ quy trình `rasoat_hoso` | `workflow_card.v1` — **bất biến**, có cổng | `references/workflows/rasoat_hoso.json` | MẪU tĩnh của vòng lặp: `plan[]`/`verify[]`/`stop_conditions[]`/`resume_behavior`. Được `workflow-audit` + `release-verify` kiểm tự động (§E/H2) |
@@ -165,20 +179,21 @@ GÓI. Bỏ (c) = gói ĐỎ ở LIVE (§0.6).
 
 | Hạng mục | Sản phẩm | Nghiệm thu (mã test) |
 |---|---|---|
-| **H1. Khôi phục 2 tham chiếu đứt** | (a) `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` — schema **suy từ mã bên đọc**, không từ prose: gốc `{co_quan, van_ban[], noi_dung[]}`; `van_ban[]` = `so_hieu·ten·ngay·hieu_luc_tu·sua_doi_bo_sung·tinh_trang·loai·linh_vuc·ghi_chu`; `noi_dung[]` = `key·van_ban·can_cu·phan_tich·hinh_thuc·lo_trinh·tieu_chi·linh_vuc·ghi_chu`. (b) Quyết một trong hai: viết `scripts/nlm_log.py` đúng đặc tả `DOCTRINE_APPENDIX:62–85`, HOẶC xoá đặc tả đó và đổi F5 sang cơ chế có thật | `r2xx_master_template_doc_duoc`: `rasoat_phuluc.py --in <mẫu>` rc=0, sinh đủ 03–07-BN. `r2xx_hinh_thuc_vocab`: mọi giá trị `hinh_thuc` trong mẫu route đúng bucket — **bẫy**: `route()` (`rasoat_phuluc.py:46`) khớp chuỗi cố định ("ban hành mới"→05, "bãi bỏ toàn bộ"→06, "tạm ngưng/ngừng toàn bộ"→07, "nghiên cứu"/"mục f"/`chờ…`→F), sai chính tả = **âm thầm** rơi hết vào 04 |
-| **H1b. Ba trường bảng C không có chỗ trong schema hiện tại** | Bảng C yêu cầu *nguyên văn-cite*, *định tuyến phụ lục*, *mức độ chắc chắn*; `noi_dung[]` không có trường nào cho 3 thứ đó (định tuyến thì **tính** từ `hinh_thuc`). Chốt: mở rộng `rasoat_phuluc.py` thêm trường, HOẶC quy ước dồn vào `ghi_chu` | `r2xx_bang_c_du_truong`: mỗi phát hiện trong mẫu truy lại được nguyên văn + mức chắc chắn sau khi qua `rasoat_phuluc.py` (không mất dữ liệu) |
+| **H1. Khôi phục 2 tham chiếu đứt** | (a) `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` — schema **suy từ mã bên đọc**, không từ prose: gốc `{co_quan, van_ban[], noi_dung[]}`; `van_ban[]` = `so_hieu·ten·ngay·hieu_luc_tu·sua_doi_bo_sung·tinh_trang·loai·linh_vuc·ghi_chu`; `noi_dung[]` = `key·van_ban·can_cu·phan_tich·hinh_thuc·lo_trinh·tieu_chi·linh_vuc·ghi_chu` **+ `anchor` (NEO PHỤ THUỘC — schema §3 WORKFLOW doc, nhập từ đầu vì local KHÔNG có template sẵn, tạo mới không merge) + `muc_chac_chan`**. (b) **ĐÃ CHỐT 25-07 = XOÁ**: bỏ đặc tả `nlm_log.py` khỏi chỉ dẫn SỐNG (`QUY_TRINH_RA_SOAT_3_TANG.md:91` — thay bằng `NHAT_KY_NLM_<sh>.csv` của `rasoat_worksheet.py`); `DOCTRINE_APPENDIX` là lưu trữ nguyên văn, KHÔNG sửa thân; quota NLM đếm trong state | `r2xx_master_template_doc_duoc`: `rasoat_phuluc.py --in <mẫu>` rc=0, sinh đủ 03–07-BN. `r2xx_hinh_thuc_vocab`: mọi giá trị `hinh_thuc` trong mẫu route đúng bucket — **bẫy**: `route()` (`rasoat_phuluc.py:46`) khớp chuỗi cố định ("ban hành mới"→05, "bãi bỏ toàn bộ"→06, "tạm ngưng/ngừng toàn bộ"→07, "nghiên cứu"/"mục f"/`chờ…`→F), sai chính tả = **âm thầm** rơi hết vào 04 |
+| **H1b. Ba trường bảng C — ĐÃ CHỐT 25-07: cấu trúc hoá 2, tính toán 1, sửa code tối thiểu** | (1) *Nguyên văn-cite* = `anchor.cite` (không đặt trường trùng thứ hai); (2) *mức chắc chắn* = trường mới **`muc_chac_chan`** enum có kiểm soát `chac_chan \| can_kiem_tra \| cho_verify_nlm` (Loop C đọc máy: TTL chỉ áp mức `can_kiem_tra`; `cho_verify_nlm` = ghi khi rà chế độ không-NLM, chờ trả nợ kiểm chéo); (3) *định tuyến phụ lục* KHÔNG thêm trường — là hàm của `hinh_thuc` (2 nguồn sự thật sẽ lệch). **Sửa `rasoat_phuluc.py` tối thiểu**: xuất phụ lục nối `muc_chac_chan` + `anchor.cite` vào cột ghi chú (vài dòng, nằm trong bump duy nhất Đợt 1) | `r2xx_bang_c_du_truong`: mỗi phát hiện trong mẫu truy lại được nguyên văn + mức chắc chắn sau khi qua `rasoat_phuluc.py` (không mất dữ liệu, kể cả trong bản phụ lục xuất ra) |
 | **H2. Schema PLAN hồ sơ** | (a) `references/workflows/rasoat_hoso.json` theo **`workflow_card.v1` sẵn có** (`plan[]`, `verify[]`, `stop_conditions[]`, `idempotency_contract`, `journal_key`, `resume_behavior`, `resume_command`, `write_scope`, `risk`) — không đặt schema mới cho phần tĩnh; (b) `references/RASOAT_PLAN_SCHEMA.md` chỉ đặc tả phần **biến động** (`rasoat_plan.v1`: trạng thái/hàng đợi/bàn giao/quota/`session_claim`) + 1 JSON mẫu | `r2xx_the_rasoat_hoso_hop_le`: `workflow-audit --strict --json` ok=true với thẻ mới; thêm vào `_RELEASE_REQUIRED_WORKFLOWS` + golden 0-diff. Phần biến động: Claude sinh được PLAN từ hồ sơ mẫu bằng tay theo schema, không cần code mới |
-| **H9. (MỚI, đã đổi thiết kế theo §0.8) Guard tham chiếu đứt dạng RATCHET** | `_skill_links_findings` (`release.py:527`) chỉ đọc `SKILL.md`, chỉ khớp `references/…`. Thay bằng helper thuần mới quét cả `references/*.md` và khớp `templates/…`+`scripts/…`, kèm **2 thứ bắt buộc**: (a) **phân hạng tài liệu** — fail-closed cho tài liệu SỐNG, advisory cho LƯU TRỮ (`DOCTRINE_APPENDIX.md`); (b) **allow-list baseline** chốt 66 mục tầng C | `r208_pointer_findings_pure`: hàm thuần — bắt `templates/`+`scripts/`, tước dấu câu/backtick, thư mục khớp prefix, manifest rỗng = fail-closed. `r208_baseline_ratchet`: con trỏ trong baseline → im; con trỏ MỚI không có trong package → ĐỎ ngay. `r208_cay_that_tang_A_B`: trên cây thật, tập fail-closed **đúng bằng** 5 mục tầng A+B trước khi sửa, **rỗng** sau H0+H1 |
-| **H0. (MỚI — §0.8 tầng A) Vá lỗ hổng đường cấp cứu của LÕI** | SKILL.md ra lệnh chạy `scripts/build_parts.py` / `scripts/tl_rebuild.sh` — cả hai chưa từng tồn tại. Chọn 1 trong 2 hướng (cần người quyết, xem cuối §E): **(i) VIẾT** hai công cụ đúng hợp đồng `_parts`/`FORCE_CHUNK` đang có trong `tl.py`/`tl_boot.py`; **(ii) SỬA LÕI** — bỏ hai con trỏ khỏi SKILL.md + `COWORK_EDIT_SAFETY.md`, trỏ về đường cứu hộ có thật (`tl_fetch.sh`, `tl_boot.py`) | `r208_skill_md_khong_tro_file_ma`: mọi con trỏ `scripts/…` trong SKILL.md nằm trong package-set. Nếu chọn (i): thêm test `ghép == gốc` cho `build_parts.py --verify` |
+| **H9. (MỚI, đã đổi thiết kế theo §0.8) Guard tham chiếu đứt dạng RATCHET** | `_skill_links_findings` (`release.py:527`) chỉ đọc `SKILL.md`, chỉ khớp `references/…`. Thay bằng helper thuần mới quét cả `references/*.md` và khớp `templates/…`+`scripts/…`, kèm **2 thứ bắt buộc**: (a) **phân hạng tài liệu** — fail-closed cho tài liệu SỐNG, advisory cho LƯU TRỮ (`DOCTRINE_APPENDIX.md`); (b) **allow-list baseline** chốt 66 mục tầng C. **ĐÃ CHỐT 25-07 — nơi lưu baseline: hằng số Python (frozenset) NGAY TRONG `release.py`** cạnh helper, khớp theo **cặp `(tài_liệu, con_trỏ)`** (miễn trừ trong DOCTRINE không tự động miễn trừ ở SKILL.md) + hằng phân hạng LƯU TRỮ; KHÔNG tạo file package mới (H9 không đụng manifest — chỉ H1 phải đụng). Ratchet đúng nghĩa: sửa baseline = sửa code = qua ruff→selftest→CHANGELOG→review | `r208_pointer_findings_pure`: hàm thuần — bắt `templates/`+`scripts/`, tước dấu câu/backtick, thư mục khớp prefix, manifest rỗng = fail-closed. `r208_baseline_ratchet`: con trỏ trong baseline → im; con trỏ MỚI không có trong package → ĐỎ ngay. `r208_cay_that_tang_A_B`: trên cây thật, tập fail-closed **đúng bằng** 5 mục tầng A+B trước khi sửa, **rỗng** sau H0+H1 |
+| **H0. (MỚI — §0.8 tầng A) Vá lỗ hổng đường cấp cứu của LÕI** | SKILL.md ra lệnh chạy `scripts/build_parts.py` / `scripts/tl_rebuild.sh` — cả hai chưa từng tồn tại. **ĐÃ CHỐT 25-07 = hướng (ii) SỬA LÕI**: bỏ hai con trỏ khỏi SKILL.md:133–138 + `COWORK_EDIT_SAFETY.md`, trỏ về đường cứu hộ có thật (`tl_fetch.sh`, `tl_boot.py`, `tl verify-integrity`); cơ chế `_parts/` đã bỏ (`tl_boot.py:4`). ⚠ SKILL.md chỉ còn ~39B headroom dưới trần 48KB — bản sửa PHẢI giảm byte (bản nháp phiên remote giảm 42B, làm lại tay, giữ nguyên line ending) | `r208_skill_md_khong_tro_file_ma`: mọi con trỏ `scripts/…` trong SKILL.md nằm trong package-set. Nếu chọn (i): thêm test `ghép == gốc` cho `build_parts.py --verify` |
 
 *Vì sao H9 nằm ở Đợt 1:* nó là cái duy nhất bảo đảm Đợt 1 không tự tạo thêm tham chiếu đứt mới. Làm sau = làm lại.
 *Vì sao H0 chen lên trước:* nó không thuộc phạm vi rà hồ sơ, nhưng H9 sẽ phơi nó ra và LÕI không thể ở trạng thái
 "chỉ dẫn cấp cứu trỏ vào hư không". Đây là lỗi nặng hơn cả 2 tham chiếu đứt mà bản đầu tìm ra.
 
-> **Hai quyết định cần người chốt trước khi code (đều làm đổi khối lượng việc, không phải chi tiết kỹ thuật):**
-> **(Q1)** H0 đi hướng (i) VIẾT hai công cụ, hay (ii) SỬA LÕI trỏ về đường có thật?
-> **(Q2)** H1(b) `nlm_log.py`: viết đúng đặc tả `DOCTRINE_APPENDIX:62–85`, hay xoá đặc tả và đổi F5 sang
-> đếm quota trong PLAN? — Chọn "viết" ở Q1/Q2 = thêm 3 công cụ mới + test + bump; chọn "sửa tài liệu" = docs-only.
+> **Hai quyết định — NGƯỜI ĐÃ CHỐT 25-07 (không hỏi lại):**
+> **(Q1)** H0 = **(ii) SỬA LÕI** — trỏ về đường có thật, không viết công cụ mới.
+> **(Q2)** H1(b) = **XOÁ đặc tả** `nlm_log.py` khỏi chỉ dẫn sống; quota NLM đếm trong state file.
+> Cả hai đều là hướng "sửa tài liệu" — phần code còn lại của Đợt 1: helper H9 trong `release.py` + mở rộng
+> tối thiểu `rasoat_phuluc.py` (H1b), chung MỘT bump.
 
 ### Đợt 2 — Lớp điều phối
 
@@ -214,14 +229,15 @@ chờ duyệt `--apply` + `BUGS_FOUND.md`. **Thêm:** gate offline vẫn N/N và
 làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.md). H0 ngay sau vì nó là mục nặng nhất mà H9
 phơi ra và nằm trong LÕI. H2 sau H1 vì PLAN trỏ tới schema master.
 
-**Chặn:** H0 và H1(b) đang chờ Q1/Q2 ở trên. H9 làm được ngay, không phụ thuộc — và nên làm trước để số liệu
-"trước/sau" có thật. Phần còn lại của Đợt 1 chỉ chạy tiếp sau khi Q1/Q2 chốt.
+**Chặn (cập nhật 25-07):** Q1/Q2 ĐÃ CHỐT — không còn chặn nội dung. Chặn duy nhất còn lại là **nền code**:
+bump `v1.35.41` (contract 2.21.2p) đang dở tay trong cây chính, chưa commit. Đợt 1 khởi công SAU khi nó đậu,
+trên nhánh riêng, MỘT bump duy nhất (dự kiến `1.35.42`), tên test đánh số theo revision thực.
 
 ## F. RỦI RO & GIẢM THIỂU
 
 | Rủi ro | Giảm thiểu |
 |---|---|
-| Cookie NLM chết giữa vòng rà (Cowork không tự refresh) | H6 tiền kiểm tuổi cookie; cron `secrets-set --nlm` phía local (COWORK_PROJECT.md §3) |
+| Cookie NLM chết giữa vòng rà (Cowork/chat không tự refresh) | **Phòng thủ 3 tầng (chốt 25-07, chi tiết WORKFLOW §4b):** (1) H6 tiền kiểm tuổi cookie + cron `secrets-set --nlm` phía local; (2) local: tự chạy `nlm login`/`refresh_auth` MỘT lần khi gặp lỗi xác thực; (3) chế độ **chạy-không-NLM**: T2 quét cache/Drive trực tiếp, phát hiện đánh `muc_chac_chan="cho_verify_nlm"` vào Q-VERIFY, cookie sống lại thì trả nợ kiểm chéo. Mất NLM = mất tiện, không mất đúng (nguyên văn vốn CHỈ từ cache/raw) |
 | Lỗi skill chặn đứng ở LIVE (deploy là bước tay) | H5 degrade-and-continue; tần suất giảm dần theo mỗi fix khoá test `rXX_` |
 | Hai phiên cùng cầm quyền ghi (vi phạm single-writer) | quy ước trong H3: nhận vai = ghi `session_claim` vào PLAN; registry đã có LockService+RMW làm lưới dưới |
 | LIVE drift (kết luận lỗi đo trên bản trễ) | mọi báo lỗi skill trong `BUGS_FOUND.md` ghi rõ VERSION đo được (CONTEXT.md — LIVE vs canonical). **Bản kế hoạch này là ví dụ sống:** §0 tồn tại vì bản đầu đo trên v1.35.32 |

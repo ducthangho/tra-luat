@@ -231,6 +231,25 @@ Chi phí mỗi kỳ ≈ 0 khi corpus đứng yên, và tỷ lệ thuận với m
 
 ---
 
+## §4c. NHỊP REGISTRY / MANIFEST / BACKFILL — 4 nhịp, CẤM chen ngang (chốt 25-07)
+
+(manifest ở đây = manifest PROFILE — ảnh chụp Sheet registry; KHÔNG phải `RELEASE_MANIFEST.json` đóng gói.)
+Phần máy đã tối ưu sẵn trong `registry_orchestrator.py` («kiểm RẺ chạy LUÔN, kiểm ĐẮT chỉ khi nghi vấn»);
+mục này chỉ chốt các việc đó ĐỨNG Ở NHỊP NÀO của 3 vòng lặp:
+
+| Nhịp | Việc | Ghi chú |
+|---|---|---|
+| 1. BOOT (mỗi phiên) | `registry_orchestrator boot` = `changes_pull` delta token — ghép vào lô warm-up NỀN §5a | KHÔNG regen2 ở boot trừ khi orchestrator tự leo thang (delta > ngưỡng 40) |
+| 2. TRONG vòng RÀ (Loop A) | registry **CHỈ ĐỌC, và đọc OFFLINE** (`reg-query` trên manifest cache; `--live` chỉ readback hẹp ngay sau ghi) | **CẤM mọi backfill/hygiene giữa vòng rà** — gom về ranh giới pha (P2). Chỗ dễ vi phạm nhất |
+| 3. CUỐI LÔ NẠP (Loop B.4) | `nlm-reconcile --all-notebooks` MỘT lần/lô + readback 1 lần (nếp PERF v1.34.73). **Sau-lô:** `backfill-title-vn` cho dòng MỚI (lô 40, xếp vào ĐUÔI worker Q-NLM sau khi add xong) — `title_vn` có dấu nuôi QT-5/tra cứu mà vòng rà dùng NGAY, không dồn cuối hồ sơ | `backfill-loai`/`recat` HẾT cần sau ingest (v1.33.44 ghi sạch ngay) — chỉ còn cho dòng cũ, xếp nhịp 4 |
+| 4. CHECKPOINT/KẾT PHIÊN + Loop C | kết phiên = `tl manifest` (orchestrator `end`: export luôn, regen2 CHỈ khi `--touched-drive`) → manifest tươi làm sẵn cache cho warm-up phiên sau — hai nhịp tự nuôi nhau. `ops-plan` cuối phiên rà → kết quả đổ vào **Q-APPROVALS chờ duyệt**, KHÔNG tự `--apply`. Vệ sinh định kỳ (`hygiene scan`/`sweep`/`tl loop`) ghép cùng nhịp **Loop C hằng tuần** — cùng phiên-mới, cùng thoát-im-lặng | backfill one-shot sau deploy (`backfill-nlm-status`, `profile-backfill-markers`) KHÔNG thuộc vòng lặp nào |
+
+**Hai bẫy:** (a) GAS cache ~600s — dò trùng phải `--refresh` (B0), ghi xong readback `--live` hẹp, không tin
+cache; (b) `regen2` là lệnh ĐẮT duy nhất nhóm này — chỉ chạy qua orchestrator (ngưỡng/`--touched-drive`),
+không bao giờ chạy tay giữa hồ sơ.
+
+---
+
 ## §5. LỊCH THỨC DẬY (tự động hoá theo thời gian)
 
 | Lịch | Việc | Cơ chế |
@@ -244,7 +263,7 @@ Chi phí mỗi kỳ ≈ 0 khi corpus đứng yên, và tỷ lệ thuận với m
 
 | Môi trường | Cách làm |
 |---|---|
-| Cowork / Claude Code | **Warm-up NỀN** ngay khi phiên bắt đầu: `tl ping --json` + `nlm-auth-status` + tuổi cookie chạy background task (read-only), kết quả ghi file nhỏ; Pha 0 **đọc lại** kết quả thay vì chờ gọi mới — phiên chính trong lúc đó đọc PLAN/worksheet. Gắn: bước nền trong RUNBOOK boot hoặc SessionStart hook dev-side (`.claude/settings.json` — không vào zip). Tool MCP load MỘT lần theo lô (ToolSearch batch / `alwaysLoad` cho server NLM — kho best-practice `claude-settings.md` §Per-Server Tool Loading) |
+| Cowork / Claude Code | **Warm-up NỀN** ngay khi phiên bắt đầu: `tl ping --json` + `nlm-auth-status` + tuổi cookie + `registry_orchestrator boot` (changes_pull delta — nhịp 1 §4c) chạy background task (read-only), kết quả ghi file nhỏ; Pha 0 **đọc lại** kết quả thay vì chờ gọi mới — phiên chính trong lúc đó đọc PLAN/worksheet. Gắn: bước nền trong RUNBOOK boot hoặc SessionStart hook dev-side (`.claude/settings.json` — không vào zip). Tool MCP load MỘT lần theo lô (ToolSearch batch / `alwaysLoad` cho server NLM — kho best-practice `claude-settings.md` §Per-Server Tool Loading) |
 | Claude chat | Không có background thật → **Pha 0 phân tầng LƯỜI**: (a) boot chỉ `ping` GAS (1 call, rẻ, đằng nào cũng cần); (b) probe NLM HOÃN đến ngay trước lần dùng NLM đầu — lượt chạy chế độ không-NLM thì khỏi probe; (c) không chặn việc đọc/lập kế hoạch sau lưng probe chưa cần |
 
 **Hai ranh giới:** (1) warm-up CHỈ dùng lệnh read-only (ping/status/probe) — không "làm nóng" bằng lệnh ghi;

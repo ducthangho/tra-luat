@@ -118,7 +118,7 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 |---|---|---|---|
 | A1 | Pha 0 tiền kiểm: ping, cookie, VERSION khớp | `doctor`/`ping`, `nlm-auth-status`, probe 3 kênh NLM (KERNEL_APPENDIX §E) | ✅ — fail chặn đứng thì dừng sớm TRƯỚC khi tiêu NLM |
 | A2 | Nhận vai: ghi `session_claim` (id phiên + giờ) vào state | RMW qua GAS (LockService làm lưới) | ✅ |
-| A3 | Lấy đơn vị `pending` ưu tiên cao nhất (SÂU trước, theo phân tầng worksheet) | `rasoat_worksheet.py` đã chấm SÂU/ĐỐI CHIẾU/— | ✅ |
+| A3 | Lấy đơn vị `pending` ưu tiên cao nhất (SÂU trước, theo phân tầng worksheet). **Ưu tiên NLM-ready (chốt 25-07):** lấy đơn vị có nguồn liên quan đã `added` trong Q-NLM trước; đơn vị mà nguồn còn `pending` NLM chỉ lấy khi KHÔNG còn việc khác — khi đó phát hiện tự mang `muc_chac_chan="cho_verify_nlm"` + vào Q-VERIFY (cơ chế §4b áp theo TỪNG NGUỒN). Không có "rà thiếu mà ghi là chắc chắn" | `rasoat_worksheet.py` đã chấm SÂU/ĐỐI CHIẾU/— | ✅ |
 | A4 | T1→T2→T3 theo quy trình 3 tầng; mở rộng frontier | `tra_cuu --cite --exact`, `notebook_query` scoped, `frontier-expand --json` | ✅ (ngân sách NLM trừ dần trong state). **NLM chết → KHÔNG dừng**: T2 chuyển quét cache/Drive trực tiếp (chế độ không-NLM §4b) |
 | A5 | VERIFY từng phát hiện | `nlm_qa verify`; nguyên văn CHỈ từ cache/raw | ✅ — phát hiện fail verify KHÔNG được ghi. Chế độ không-NLM: ghi với `muc_chac_chan="cho_verify_nlm"` + vào Q-VERIFY, trả nợ khi cookie sống (§4b) |
 | A6 | Ghi `master/<unit>.json` (kèm anchor) + đánh `done` + cập nhật CSV nhật ký NLM | ghi file, ngoài cây skill | ✅ |
@@ -239,6 +239,17 @@ Chi phí mỗi kỳ ≈ 0 khi corpus đứng yên, và tỷ lệ thuận với m
 | Tuần 1 lần | Loop C tái rà | Routine phiên-mới, prompt cố định "chạy tái rà hồ sơ X"; thoát im lặng nếu không delta. **(A2)** wrapper khai `disallowed-tools: AskUserQuestion` (kho nêu đích danh use case background loop) + `disable-model-invocation: true` — tái-rà chỉ chạy theo lịch/lệnh tường minh (nguồn: `claude-skills.md`). **(A3)** chạy headless local (`claude -p`): thêm `--max-turns` + `--max-budget-usd` làm fail-safe ngoài `max_iter` — cả hai CHỈ có ở print mode, Routine cloud phải dựa `max_iter` trong state (nguồn: `claude-cli-startup-flags.md` §Budget & Limits) |
 | Ngày 1 lần (phía LOCAL) | refresh cookie NLM (`secrets-set --nlm`) | cron máy local (COWORK_PROJECT.md §3) — Cowork/chat không tự refresh được (tầng 2 §4b chỉ có ở local) |
 | Trước mỗi lượt bất kỳ | Pha 0 tiền kiểm | luôn luôn — rẻ, chặn sớm |
+
+### §5a. WARM-UP TOOLS lúc khởi động (chốt 25-07) — làm nóng, KHÔNG thay cổng
+
+| Môi trường | Cách làm |
+|---|---|
+| Cowork / Claude Code | **Warm-up NỀN** ngay khi phiên bắt đầu: `tl ping --json` + `nlm-auth-status` + tuổi cookie chạy background task (read-only), kết quả ghi file nhỏ; Pha 0 **đọc lại** kết quả thay vì chờ gọi mới — phiên chính trong lúc đó đọc PLAN/worksheet. Gắn: bước nền trong RUNBOOK boot hoặc SessionStart hook dev-side (`.claude/settings.json` — không vào zip). Tool MCP load MỘT lần theo lô (ToolSearch batch / `alwaysLoad` cho server NLM — kho best-practice `claude-settings.md` §Per-Server Tool Loading) |
+| Claude chat | Không có background thật → **Pha 0 phân tầng LƯỜI**: (a) boot chỉ `ping` GAS (1 call, rẻ, đằng nào cũng cần); (b) probe NLM HOÃN đến ngay trước lần dùng NLM đầu — lượt chạy chế độ không-NLM thì khỏi probe; (c) không chặn việc đọc/lập kế hoạch sau lưng probe chưa cần |
+
+**Hai ranh giới:** (1) warm-up CHỈ dùng lệnh read-only (ping/status/probe) — không "làm nóng" bằng lệnh ghi;
+(2) kết quả warm-up có **TTL** — cookie đo lúc boot có thể chết sau 3 giờ; warm-up là làm nóng, "Pha 0 trước
+mỗi lượt" vẫn là cổng thật (chỉ được đọc lại kết quả nền khi còn tươi).
 
 ---
 

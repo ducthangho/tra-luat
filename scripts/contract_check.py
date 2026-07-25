@@ -65,7 +65,7 @@ def bump_after_deploy(new: str) -> int:
         print("✗ Không đọc được version đóng dấu trong API_CONTRACT.md"); return 1
     if old == new:
         print(f"= Đã đóng dấu {new}, không cần bump."); return 0
-    c = CONTRACT.read_text(encoding="utf-8")
+    c = CONTRACT.read_text(encoding="utf-8", newline="")
     c = c.replace(f"Phiên bản deploy đã đóng dấu: `{old}`", f"Phiên bản deploy đã đóng dấu: `{new}`")
     c = c.replace(f"Nếu KHÁC `{old}`", f"Nếu KHÁC `{new}`")
     c = c.replace(f"version:'{old}'", f"version:'{new}'")
@@ -80,18 +80,24 @@ def bump_after_deploy(new: str) -> int:
     # v1.34.52 (bẫy bắt khi chạy THẬT — r67 kernel-size đỏ oan): .gitattributes khóa `* -text` (byte thật,
     # không eol-normalize) NHƯNG write_text mặc định trên Windows dịch \n→\r\n → MỌI dòng phình +1 byte
     # (SKILL.md 49121→49440B, vượt trần 48KB). newline="\n" ép LF tường minh cho MỌI write_text ở hàm này.
-    CONTRACT.write_text(c, encoding="utf-8", newline="\n")
-    t = TL_PY.read_text(encoding="utf-8")
+    #
+    # r208 (bẫy NGƯỢC, bắt khi bump 2.21.2o→2.21.2p): ép LF lại XÓA SẠCH CRLF của file vốn CRLF —
+    # read_text mặc định nuốt \r, write_text newline="\n" ghi ra LF ⇒ tl.py 1643 CRLF → 0, tl_selftest
+    # 19365 → 0, SKILL.md 307 → 0; diff phình 21.320 dòng cho một thay đổi 5 dòng (không soát nổi).
+    # CÁCH ĐÚNG cho CẢ HAI: newline="" ở CẢ read lẫn write = KHÔNG dịch gì, giữ nguyên kết thúc dòng
+    # vốn có của từng file (LF giữ LF, CRLF giữ CRLF) ⇒ không phình byte, không nuốt \r.
+    CONTRACT.write_text(c, encoding="utf-8", newline="")
+    t = TL_PY.read_text(encoding="utf-8", newline="")
     t = re.sub(r'(EXPECT_VERSION\s*=\s*")[^"]+(")', r"\g<1>" + new + r"\g<2>", t, count=1)
     t = t.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
     # v1.34.20: literal expect_version SỐNG Ở tl_selftest.py (tách từ tl.py hồi I-series) — sửa cả đó
     _st = HERE / "tl_selftest.py"
     if _st.exists():
-        _t2 = _st.read_text(encoding="utf-8")
+        _t2 = _st.read_text(encoding="utf-8", newline="")
         _t2n = _t2.replace(f'EXPECT_VERSION == "{old}"', f'EXPECT_VERSION == "{new}"')
         if _t2n != _t2:
-            _st.write_text(_t2n, encoding="utf-8", newline="\n")
-    TL_PY.write_text(t, encoding="utf-8", newline="\n")
+            _st.write_text(_t2n, encoding="utf-8", newline="")
+    TL_PY.write_text(t, encoding="utf-8", newline="")
 
     # v1.16.10: đồng bộ thêm SKILL.md + RUNBOOK.md để RUNBOOK/Claude không chặn nhầm ở version cũ
     #           (tái lập được — không còn sửa tay một lần như v1.16.9).
@@ -99,10 +105,10 @@ def bump_after_deploy(new: str) -> int:
     for rel in ("SKILL.md", "references/RUNBOOK.md"):
         pdoc = HERE.parent / rel
         try:
-            d = pdoc.read_text(encoding="utf-8")
+            d = pdoc.read_text(encoding="utf-8", newline="")
             if old and old in d:
                 doc_hits += d.count(old); d = d.replace(old, new)
-                pdoc.write_text(d, encoding="utf-8", newline="\n")
+                pdoc.write_text(d, encoding="utf-8", newline="")
         except OSError:
             pass
     cv, tv = contract_version(), tl_expect_version()

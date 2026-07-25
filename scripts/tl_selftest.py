@@ -3407,7 +3407,7 @@ def run() -> int:
         cases.append(("gen_instructions_skill_binding", bool(_audit.get("ok"))))
     except Exception:
         cases.append(("gen_instructions_skill_binding", False))
-    cases.append(("expect_version", EXPECT_VERSION == "2.21.2o"))   # r198/ADR-0014: +ingest_commit (trước: 2.21.2n r185/WP5)
+    cases.append(("expect_version", EXPECT_VERSION == "2.21.2p"))   # r198/ADR-0014: +ingest_commit (trước: 2.21.2n r185/WP5)
     cases.append(("gws_pin_set", bool(re.match(r"^\d+\.\d+\.\d+$", GWS_PINNED_VERSION)) and "latest" not in GWS_PINNED_VERSION))
     try:
         _tr = _imp("transport")

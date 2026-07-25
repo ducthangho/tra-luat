@@ -23,6 +23,30 @@ Bản đầu đúng về kiến trúc và nguyên tắc. Bảy điểm sau là s
 | 0.6 | "File mới cho LIVE đặt ở `references/`/`templates/` (vào zip)" | Vào zip thì đúng (walk theo loại-trừ). Nhưng thiếu 2 bước: `templates/` chưa có trong `_RELEASE_REQUIRED_FILES` (`release.py:380–420`) và `RELEASE_MANIFEST.json` phải regen (181 → 182 file) | Thêm file mà không regen manifest = `release-verify` FAIL trong gói (tiền lệ ghi ở `release.py:334`: "file_count lệch zip-set 115≠109") |
 | 0.7 | Nghiệm thu H1–H6 toàn bộ do người mắt thường xác nhận | CLAUDE.md buộc "thêm test `rXX_` cho mỗi fix"; đã có sẵn cơ chế cổng: `workflow-audit` (fail-closed trong `release-verify`, `release.py:73,243`) + guard `links_missing` (`release.py:537`) | Thêm H9 (§E) biến nghiệm thu H1 thành **cổng máy**, và mỗi hạng mục gắn 1 mã test |
 
+### §0.8. ĐO THẬT BLAST RADIUS CỦA H9 — 75 con trỏ đứt, và 4 "tài liệu hoá nhưng chưa từng viết"
+
+Trước khi viết guard H9, đã **đo** thay vì đoán: quét 28 tài liệu trong package-set (SKILL.md + `references/*.md`)
+với mẫu `(references|templates|scripts)/…` đối chiếu 182 file của package.
+
+**Kết quả: 75 con trỏ đứt, không phải 2.** Guard fail-closed toàn bộ là bất khả thi ngay. Nhưng phân tầng thì rõ:
+
+| Tầng | Số lượng | Nội dung | Xử lý |
+|---|---|---|---|
+| **A — LÕI, đường cấp cứu** | 2 | `scripts/build_parts.py` + `scripts/tl_rebuild.sh` — **SKILL.md:114,133,134,138 ra lệnh dứt khoát** ("Sửa file đã-chunk xong **PHẢI** `python scripts/build_parts.py`", "`sh scripts/tl_rebuild.sh`"), và `COWORK_EDIT_SAFETY.md:59–74` dựng cả quy trình cứu hộ 5 bước trên hai file này. `git log --all --diff-filter=ADR` **RỖNG** → chưa từng tồn tại | **H0 (mới) — ưu tiên cao nhất.** LIVE bị bảo chạy lệnh không có, đúng lúc file bị mount cắt cụt. Cơ chế `_parts`/`FORCE_CHUNK` thì CÓ thật trong `tl.py`/`tl_boot.py`/`tl_selftest.py`, và `tl_fetch.sh` có thật — nên chuỗi cứu hộ chỉ hụt 2 mắt |
+| **B — tài liệu quy trình sống** | 3 | `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`QUY_TRINH:91`, `rasoat_phuluc.py:9`), `scripts/nlm_log.py` (`QUY_TRINH:91`), `templates/_nguon-goc/` (`THE_THUC_TRINH_BAY.md`) | H1 (đã có) + mở rộng thêm `_nguon-goc/` |
+| **C — lưu trữ lịch sử** | ~66 | Gần như toàn bộ từ `DOCTRINE_APPENDIX.md` — trỏ tới lớp script tiền-hợp-nhất (`doctor.py`, `nlm_qa.py`, `wizard.py`, `reg_delete.py`…) đã gộp vào `tl.py`/`tl_core/`. **Không phải bug** | Không dọn. Cần **allow-list baseline** + 1 dòng đầu `DOCTRINE_APPENDIX.md` ghi rõ đây là tài liệu LƯU TRỮ |
+| **D — lệch đường dẫn** | ≥1 | `scripts/manifest_build.py` (`API_CONTRACT.md`) thật ra ở `scripts/_fallback/manifest_build.py` | Sửa con trỏ, không tạo file |
+
+**Hệ quả thiết kế H9 (đổi so với §0.7):** guard KHÔNG thể là "mở rộng regex rồi fail-closed". Phải là
+**ratchet có baseline**: (a) phân loại tài liệu — fail-closed cho tài liệu SỐNG (SKILL.md + quy trình), advisory
+cho tài liệu LƯU TRỮ; (b) allow-list baseline chốt 66 mục tầng C, để guard fail-closed **với con trỏ MỚI ngay từ
+ngày đầu** mà không phải dọn 75 mục trước. Không có baseline thì H9 vĩnh viễn đỏ và sẽ bị vô hiệu hoá.
+
+**Nhận định quan trọng hơn từng lỗi lẻ:** cả 4 mục tầng A+B đều **được đặc tả rất chi tiết rồi không bao giờ được
+viết** — `nlm_log.py` có cả đặc tả cờ (`--answer`/`push`/`--file`/`--folder-name`), `build_parts.py` có cả cờ
+(`--verify`/`--rebuild`) và quy trình 5 bước. Đây là **mẫu hình lặp**, không phải 4 sự cố rời. Guard H9 chính là
+thứ khiến mẫu hình này không tái diễn — đó là lý do nó xứng đáng đứng ở Đợt 1, trước cả H1.
+
 **Không phải rủi ro:** nhánh `dlbrut` dựng trên `96b56f4` — đã kiểm `git merge-base --is-ancestor`: đây là tổ tiên
 của `master`, nên hợp nhất chỉ THÊM tài liệu, không lùi r202–r207. Chỉ là **nền đo bị trễ**: r203–r205 (engine
 `run_pipeline`, `profile-ingest-resume` lên bảng stage, gộp `ingest_commit`) làm hàng "Nạp hồ sơ" và "kế nhiệm/resume"
@@ -118,7 +142,8 @@ hàng đợi động đã có phần lõi, và do r203–r205 làm chặt đư�
 | Sửa skill giữa chừng | ~60% | ADR-0001 bundle, gate, `tl_boot` self-heal; THIẾU C5 |
 | Tổng hợp & trình bày | ~70% | `rasoat_phuluc`, văn phong/thể thức references. ⚠ **HAI tham chiếu đứt** (§0.3): `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`QUY_TRINH:91`, `DOCTRINE_APPENDIX:78`, `rasoat_phuluc.py:9`) và `scripts/nlm_log.py` (`QUY_TRINH:91`, `DOCTRINE_APPENDIX:62–85`, `rasoat_worksheet.py:188`) — cái sau chưa từng tồn tại trong git |
 | Kế nhiệm phiên | ~55% | journal/resume phủ phần ghi (r205 chặt thêm); THIẾU note bàn giao trạng thái rà (gộp vào C1) |
-| **(MỚI)** Cổng máy cho lớp điều phối | ~15% | `workflow-audit` + `_RELEASE_REQUIRED_WORKFLOWS` + golden 0-diff là cơ chế sẵn sàng dùng lại; nhưng guard `links_missing` **chỉ quét SKILL.md** và **chỉ khớp mẫu `references/…`** (`release.py:527,537`) → mù với 2 tham chiếu đứt ở §0.3 |
+| **(MỚI)** Cổng máy cho lớp điều phối | ~15% | `workflow-audit` + `_RELEASE_REQUIRED_WORKFLOWS` + golden 0-diff là cơ chế sẵn sàng dùng lại; nhưng guard `links_missing` **chỉ quét SKILL.md** và **chỉ khớp mẫu `references/…`** (`release.py:527,537`) → mù với **75** con trỏ đứt đo được ở §0.8, trong đó 5 mục sống (2 mục nằm ngay trong LÕI, đường cấp cứu) |
+| **(MỚI)** Đường cấp cứu file bị mount cắt cụt | ~60% | Cơ chế `_parts`/`FORCE_CHUNK` có thật (`tl.py`, `tl_boot.py`, `tl_selftest.py`) và `tl_fetch.sh` có thật; nhưng **2 mắt xích LÕI ra lệnh chạy chưa từng được viết** — xem §0.8 tầng A → H0 |
 
 ## E. KẾ HOẠCH TRIỂN KHAI
 
@@ -143,9 +168,17 @@ GÓI. Bỏ (c) = gói ĐỎ ở LIVE (§0.6).
 | **H1. Khôi phục 2 tham chiếu đứt** | (a) `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` — schema **suy từ mã bên đọc**, không từ prose: gốc `{co_quan, van_ban[], noi_dung[]}`; `van_ban[]` = `so_hieu·ten·ngay·hieu_luc_tu·sua_doi_bo_sung·tinh_trang·loai·linh_vuc·ghi_chu`; `noi_dung[]` = `key·van_ban·can_cu·phan_tich·hinh_thuc·lo_trinh·tieu_chi·linh_vuc·ghi_chu`. (b) Quyết một trong hai: viết `scripts/nlm_log.py` đúng đặc tả `DOCTRINE_APPENDIX:62–85`, HOẶC xoá đặc tả đó và đổi F5 sang cơ chế có thật | `r2xx_master_template_doc_duoc`: `rasoat_phuluc.py --in <mẫu>` rc=0, sinh đủ 03–07-BN. `r2xx_hinh_thuc_vocab`: mọi giá trị `hinh_thuc` trong mẫu route đúng bucket — **bẫy**: `route()` (`rasoat_phuluc.py:46`) khớp chuỗi cố định ("ban hành mới"→05, "bãi bỏ toàn bộ"→06, "tạm ngưng/ngừng toàn bộ"→07, "nghiên cứu"/"mục f"/`chờ…`→F), sai chính tả = **âm thầm** rơi hết vào 04 |
 | **H1b. Ba trường bảng C không có chỗ trong schema hiện tại** | Bảng C yêu cầu *nguyên văn-cite*, *định tuyến phụ lục*, *mức độ chắc chắn*; `noi_dung[]` không có trường nào cho 3 thứ đó (định tuyến thì **tính** từ `hinh_thuc`). Chốt: mở rộng `rasoat_phuluc.py` thêm trường, HOẶC quy ước dồn vào `ghi_chu` | `r2xx_bang_c_du_truong`: mỗi phát hiện trong mẫu truy lại được nguyên văn + mức chắc chắn sau khi qua `rasoat_phuluc.py` (không mất dữ liệu) |
 | **H2. Schema PLAN hồ sơ** | (a) `references/workflows/rasoat_hoso.json` theo **`workflow_card.v1` sẵn có** (`plan[]`, `verify[]`, `stop_conditions[]`, `idempotency_contract`, `journal_key`, `resume_behavior`, `resume_command`, `write_scope`, `risk`) — không đặt schema mới cho phần tĩnh; (b) `references/RASOAT_PLAN_SCHEMA.md` chỉ đặc tả phần **biến động** (`rasoat_plan.v1`: trạng thái/hàng đợi/bàn giao/quota/`session_claim`) + 1 JSON mẫu | `r2xx_the_rasoat_hoso_hop_le`: `workflow-audit --strict --json` ok=true với thẻ mới; thêm vào `_RELEASE_REQUIRED_WORKFLOWS` + golden 0-diff. Phần biến động: Claude sinh được PLAN từ hồ sơ mẫu bằng tay theo schema, không cần code mới |
-| **H9. (MỚI) Mở rộng guard tham chiếu đứt** | `_skill_links_findings` (`release.py:527`) hiện chỉ đọc `SKILL.md` và chỉ khớp regex `references/…`. Mở rộng: quét thêm `references/*.md`, và khớp cả `templates/…` + `scripts/…` | `r2xx_links_guard_bat_2_ref_dut`: chạy guard trên cây **trước H1** phải báo đúng 2 mục (`templates/MAU_…json`, `scripts/nlm_log.py`); chạy **sau H1** phải rỗng. Đây là thứ biến nghiệm thu H1 thành cổng máy — và là lý do 2 tham chiếu đứt sống được nhiều bản |
+| **H9. (MỚI, đã đổi thiết kế theo §0.8) Guard tham chiếu đứt dạng RATCHET** | `_skill_links_findings` (`release.py:527`) chỉ đọc `SKILL.md`, chỉ khớp `references/…`. Thay bằng helper thuần mới quét cả `references/*.md` và khớp `templates/…`+`scripts/…`, kèm **2 thứ bắt buộc**: (a) **phân hạng tài liệu** — fail-closed cho tài liệu SỐNG, advisory cho LƯU TRỮ (`DOCTRINE_APPENDIX.md`); (b) **allow-list baseline** chốt 66 mục tầng C | `r208_pointer_findings_pure`: hàm thuần — bắt `templates/`+`scripts/`, tước dấu câu/backtick, thư mục khớp prefix, manifest rỗng = fail-closed. `r208_baseline_ratchet`: con trỏ trong baseline → im; con trỏ MỚI không có trong package → ĐỎ ngay. `r208_cay_that_tang_A_B`: trên cây thật, tập fail-closed **đúng bằng** 5 mục tầng A+B trước khi sửa, **rỗng** sau H0+H1 |
+| **H0. (MỚI — §0.8 tầng A) Vá lỗ hổng đường cấp cứu của LÕI** | SKILL.md ra lệnh chạy `scripts/build_parts.py` / `scripts/tl_rebuild.sh` — cả hai chưa từng tồn tại. Chọn 1 trong 2 hướng (cần người quyết, xem cuối §E): **(i) VIẾT** hai công cụ đúng hợp đồng `_parts`/`FORCE_CHUNK` đang có trong `tl.py`/`tl_boot.py`; **(ii) SỬA LÕI** — bỏ hai con trỏ khỏi SKILL.md + `COWORK_EDIT_SAFETY.md`, trỏ về đường cứu hộ có thật (`tl_fetch.sh`, `tl_boot.py`) | `r208_skill_md_khong_tro_file_ma`: mọi con trỏ `scripts/…` trong SKILL.md nằm trong package-set. Nếu chọn (i): thêm test `ghép == gốc` cho `build_parts.py --verify` |
 
 *Vì sao H9 nằm ở Đợt 1:* nó là cái duy nhất bảo đảm Đợt 1 không tự tạo thêm tham chiếu đứt mới. Làm sau = làm lại.
+*Vì sao H0 chen lên trước:* nó không thuộc phạm vi rà hồ sơ, nhưng H9 sẽ phơi nó ra và LÕI không thể ở trạng thái
+"chỉ dẫn cấp cứu trỏ vào hư không". Đây là lỗi nặng hơn cả 2 tham chiếu đứt mà bản đầu tìm ra.
+
+> **Hai quyết định cần người chốt trước khi code (đều làm đổi khối lượng việc, không phải chi tiết kỹ thuật):**
+> **(Q1)** H0 đi hướng (i) VIẾT hai công cụ, hay (ii) SỬA LÕI trỏ về đường có thật?
+> **(Q2)** H1(b) `nlm_log.py`: viết đúng đặc tả `DOCTRINE_APPENDIX:62–85`, hay xoá đặc tả và đổi F5 sang
+> đếm quota trong PLAN? — Chọn "viết" ở Q1/Q2 = thêm 3 công cụ mới + test + bump; chọn "sửa tài liệu" = docs-only.
 
 ### Đợt 2 — Lớp điều phối
 
@@ -177,8 +210,12 @@ chờ duyệt `--apply` + `BUGS_FOUND.md`. **Thêm:** gate offline vẫn N/N và
 
 ### Thứ tự phụ thuộc
 
-`H9 → H1/H1b → H2 → H3 → H4 → H5/H6 → H7 → H8`. H9 trước H1 để guard bắt được trạng thái "trước khi sửa"
-làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.md). H2 sau H1 vì PLAN trỏ tới schema master.
+`H9 → H0 → H1/H1b → H2 → H3 → H4 → H5/H6 → H7 → H8`. H9 trước tiên để guard bắt được trạng thái "trước khi sửa"
+làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.md). H0 ngay sau vì nó là mục nặng nhất mà H9
+phơi ra và nằm trong LÕI. H2 sau H1 vì PLAN trỏ tới schema master.
+
+**Chặn:** H0 và H1(b) đang chờ Q1/Q2 ở trên. H9 làm được ngay, không phụ thuộc — và nên làm trước để số liệu
+"trước/sau" có thật. Phần còn lại của Đợt 1 chỉ chạy tiếp sau khi Q1/Q2 chốt.
 
 ## F. RỦI RO & GIẢM THIỂU
 
@@ -191,6 +228,8 @@ làm bằng chứng (test 2 chiều, đúng bài học đắt giá trong CLAUDE.
 | Agent con vượt quota NLM | quota ghi trong prompt + phiên chính đối chiếu sau mỗi đơn vị. ⚠ **SỬA (§0.3):** cơ chế cũ ghi là "bắt buộc `nlm_log.py add`" — script đó **không tồn tại**. Cho tới khi H1(b) chốt, đếm quota bằng số lần gọi ghi trong PLAN (`quota_con_lai`), không dựa vào `nlm_log` |
 | **(MỚI)** State biến động lọt cây skill → `package_hash` lệch, `release-verify`/golden ĐỎ | §B.5: PLAN/master ra ngoài cây (`~/.tra_luat_cache/rasoat/<ho_so_id>/`); test `r2xx_loop_khong_ghi_trong_cay` khoá lại |
 | **(MỚI)** Thêm file mẫu mà quên regen `RELEASE_MANIFEST` → gói FAIL ở LIVE | §E: quy tắc 3 bước (a/b/c); tiền lệ đã ghi trong `release.py:334` (115≠109) |
+| **(MỚI)** Guard H9 bật fail-closed toàn bộ → 75 mục đỏ → bị vô hiệu hoá cho xong | §0.8: bắt buộc có allow-list baseline + phân hạng tài liệu sống/lưu trữ. Guard chỉ chặn con trỏ MỚI; nợ cũ nằm trong baseline, gỡ dần |
+| **(MỚI)** Chỉ dẫn cấp cứu của LÕI trỏ vào file không tồn tại, phát tác đúng lúc sự cố mount cắt file | H0. Trước khi H0 xong: khi gặp file cắt cụt, dùng `tl_fetch.sh` + `tl_boot.py` (có thật), **bỏ qua** bước `build_parts`/`tl_rebuild` trong SKILL.md:133–138 |
 | **(MỚI)** `hinh_thuc` sai chính tả → phát hiện âm thầm rơi hết vào phụ lục 04 | test `r2xx_hinh_thuc_vocab` (H1) khoá bộ từ vựng có kiểm soát; không để `route()` fallback im lặng |
 
 ---

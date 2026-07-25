@@ -151,6 +151,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(fn=tlg.cmd_nlm_auth_stage)
     p = sub.add_parser("nlm-auth-load", help="[COWORK] tải nlm cookie mã hoá từ Drive → giải mã (webapp token) → ~/.notebooklm-mcp-cli (HEADLESS, KHÔNG cần master key/`nlm login`)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId nlm cred mã hoá (mặc định NLM_CRED_FILEID / env TL_NLM_CRED_FILEID)")
+    # r208c 3.1 (đo 25-07): lệnh này GHI ĐÈ jar cục bộ — bundle cũ hơn sẽ giết cookie đang sống.
+    p.add_argument("--force", action="store_true",
+                   help="(r208c) BỎ QUA chốt chống hạ cấp — mặc định TỪ CHỐI khi bundle Drive CŨ HƠN jar cục bộ (đo 25-07: bản stage trễ 127', token xoay trong đó hết hạn 7,2h ⇒ nạp đè = mất cookie tươi)")
     p.set_defaults(fn=tlg.cmd_nlm_auth_load)
     p = sub.add_parser("drive-parity", help="GĐ1 pilot: đối chứng get-meta 1 fileId qua gws vs GAS (+spec MCP), đo ms, test fallback")
     p.add_argument("--file-id", dest="file_id", required=True, help="Drive fileId để get-meta đối chứng")

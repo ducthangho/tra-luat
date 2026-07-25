@@ -9975,11 +9975,16 @@ def run() -> int:
             _r2 = _TL_MODULE._nlm_preflight_report("NB115")
             _TL_MODULE._imp = lambda n: _NCBare() if n == "nlm_cli" else _sav_imp(n)
             _r3 = _TL_MODULE._nlm_preflight_report("NB115")
+            # r208c 3.1 (ĐỔI KỲ VỌNG CÓ CHỦ ĐÍCH): `est_remaining_min` bị BỎ HẲN — đo tươi 25-07 nó
+            # hứa «còn 54,8'» trên phiên ĐÃ CHẾT (alive:false, warn rỗng) và «còn 0,0'» trên phiên
+            # đang sống. Không dự đoán được thì đừng in ra số. Thay bằng: chết ⇒ PHẢI có đường ra.
             return (_r1["alive"] is True and 45 < (_r1["age_min"] or 0) < 60
                     and any("COOKIE_AGE_HIGH" in w for w in _r1["warn"])
-                    and (_r1["est_remaining_min"] or 0) < 15
+                    and "est_remaining_min" not in _r1
                     and _r2["alive"] is False and "expired" in _r2["why"].lower()
-                    and _r3["alive"] is None)
+                    and "nlm-auth-load" in str(_r2.get("fix") or "")
+                    and any("AUTH_DEAD" in w for w in _r2["warn"])
+                    and _r3["alive"] is None and "fix" not in _r3)   # chưa kết luận ⇒ KHÔNG hô khắc phục
         finally:
             _TL_MODULE._imp = _sav_imp
             _env110_restore(_sv)
@@ -19588,6 +19593,61 @@ def run() -> int:
             import shutil as _shP
             _shP.rmtree(_td, ignore_errors=True)
     _t110("r208b_reconcile_luon_in_plan", _c208b_reconcile_luon_in_plan)
+
+    def _c208c_cookie_do_thay_vi_doan():
+        # r208c 3.1 (ĐO TƯƠI 25-07 23:5x — lật tiền đề báo cáo mục 3.1). Số đo trên jar THẬT:
+        #   · KHÔNG cookie nào TTL ~1h: SID/__Secure-1PSID/HSID/SSID/APISID/OSID hết hạn 2027-08-09
+        #     (380 NGÀY), __Secure-1PSIDTS/SIDCC 365 ngày ⇒ hằng _NLM_COOKIE_LIFE_MIN=60 KHÔNG có gì đỡ;
+        #   · credential ngắn hạn DUY NHẤT = __Secure-1PSIDRTS (token xoay DBSC), đã hết hạn ~110'
+        #     TRƯỚC khi phiên chết, và CLI nlm KHÔNG xoay lại (2 lần gọi live: 0 giá trị nào đổi);
+        #   · `nlm-auth-status` in `est_remaining_min: 54.8` với `warn: []` trên phiên ĐÃ CHẾT
+        #     (alive:false) — trấn an giả trên xác chết. Đó là lý do bỏ hẳn con số đó.
+        # CA CHỈ-NÓ-CHẶN: (a) đọc hạn THẬT của token xoay; (b) chống hạ cấp nlm-auth-load.
+        _f = _TL_MODULE._nlm_rotation_token_state
+        import time as _t208c
+        _now = _t208c.time()
+        # (a) jar có token xoay ĐÃ hết hạn → expired=True + số phút ÂM (đo được, không đoán)
+        _het = _f([{"name": "__Secure-1PSIDRTS", "expires": _now - 110 * 60},
+                   {"name": "SID", "expires": _now + 380 * 86400}])
+        # jar còn hạn → expired=False; jar KHÔNG có token xoay → found=False, KHÔNG suy 'còn sống'
+        _con = _f([{"name": "__Secure-1PSIDRTS", "expires": _now + 30 * 60}])
+        _khong = _f([{"name": "SID", "expires": _now + 380 * 86400}])
+        _ok_a = (_het["found"] is True and _het["expired"] is True and _het["expires_in_min"] < 0
+                 and _con["expired"] is False and _con["expires_in_min"] > 0
+                 and _khong["found"] is False and _khong["expired"] is None)
+        # preflight: token xoay hết hạn ⇒ cờ ROTATION_TOKEN_EXPIRED + KHÔNG còn est_remaining_min
+        _sav = {k: getattr(_TL_MODULE, k) for k in ("_nlm_auth_age_minutes", "_nlm_rotation_token_state")}
+        try:
+            _TL_MODULE._nlm_auth_age_minutes = lambda: 5.2      # ĐÚNG ca thật: "mới 5,2 phút"…
+            _TL_MODULE._nlm_rotation_token_state = lambda jar=None: {
+                "found": True, "expired": True, "expires_in_min": -110.7, "name": "__Secure-1PSIDRTS"}
+            _rep = _TL_MODULE._nlm_preflight_report("NB208c", probe=False)
+            _ok_b = (_rep.get("rotation_token_expired") is True
+                     and _rep.get("rotation_token_min") == -110.7
+                     and "est_remaining_min" not in _rep          # …mà KHÔNG hứa còn 54,8'
+                     and any("ROTATION_TOKEN_EXPIRED" in w for w in _rep["warn"])
+                     and any("KHÔNG GIA HẠN" in w for w in _rep["warn"]))
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+        # (b) chống hạ cấp: bundle CŨ HƠN jar cục bộ ⇒ TỪ CHỐI (ca thật: bản stage trễ 127', token xoay
+        # trong đó hết hạn 7,2h ⇒ nạp đè = tự giết cookie tươi ⇒ đề xuất «tự gọi nlm-auth-load» BỊ BÁC).
+        import tl_gws as _tg208c
+        from datetime import datetime as _dt208c, timedelta as _td208c
+
+        def _meta(phut_truoc):
+            return {"profiles/default/metadata.json": json.dumps(
+                {"last_validated": (_dt208c.now() - _td208c(minutes=phut_truoc)).isoformat()})}
+        _dg_cu, _why_cu = _tg208c._nlm_auth_load_downgrade(_meta(415), _meta(2))    # bundle 415' vs local 2'
+        _dg_moi, _ = _tg208c._nlm_auth_load_downgrade(_meta(2), _meta(415))         # bundle TƯƠI hơn → cho
+        _dg_trong, _ = _tg208c._nlm_auth_load_downgrade(_meta(415), {})             # chưa có local → KHÔNG chặn
+        _ok_c = (_dg_cu is True and "cũ hơn" in _why_cu
+                 and _dg_moi is False and _dg_trong is False)
+        # hằng mới re-export sang tl (bẫy I11) và KHÔNG bị stub biến thành hàm
+        _ok_d = (isinstance(_TL_MODULE._NLM_ROTATION_COOKIE_NAMES, tuple)
+                 and "__Secure-1PSIDRTS" in _TL_MODULE._NLM_ROTATION_COOKIE_NAMES)
+        return _ok_a and _ok_b and _ok_c and _ok_d
+    _t110("r208c_cookie_do_thay_vi_doan", _c208c_cookie_do_thay_vi_doan)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

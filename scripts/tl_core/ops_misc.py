@@ -1131,7 +1131,8 @@ def cmd_doctor(a) -> int:
                              **({"error": str(_err_d)[:120]} if not _ok_d else {})})
                 if not _ok_d and not _json:
                     print(f"  ⚠ overflow liveness: {str(_s_d.get('id'))[:16]}… KHÔNG đọc được "
-                          f"({str(_err_d)[:80]}) — kiểm shard còn sống / `nlm login`.")
+                          f"({str(_err_d)[:80]}) — kiểm shard còn sống; nếu do auth: "
+                          + nlm_auth_fix_hint())   # r208c 3.2: chỗ sót cuối còn hô `nlm login` trần
             if _ovl:
                 topology_report["overflow_liveness"] = _ovl
         except Exception:  # noqa: BLE001 — advisory best-effort

@@ -1208,18 +1208,82 @@ def _nlm_auth_age_minutes():
     return None
 
 
+# r208c 3.1 (ĐO 25-07 23:5x — đo tươi jar cục bộ, xem CHANGELOG): token XOAY phiên của Google
+# (DBSC). Đây là credential DUY NHẤT ngắn hạn trong jar — mọi cookie phiên khác (SID/__Secure-1PSID/
+# HSID/SSID/APISID/OSID…) đo được hạn 2027-08-09 = 380 NGÀY, `1PSIDTS`/`SIDCC` 365 ngày. Hết hạn
+# token này ⇒ phiên KHÔNG gia hạn được nữa, chỉ có thể THAY (`nlm login`). HẰNG ⇒ re-export TRỰC TIẾP
+# ở tl.py, KHÔNG cho vào _STUB_MAP (bẫy stub-biến-hằng-thành-hàm).
+_NLM_ROTATION_COOKIE_NAMES = ("__Secure-1PSIDRTS", "__Secure-3PSIDRTS")
+
+
+def _nlm_rotation_token_state(jar=None) -> dict:
+    """r208c 3.1 (PURE-ish, jar tiêm được): trạng thái token XOAY phiên trong cookie jar nlm — tín hiệu
+    DUY NHẤT trong jar thật sự nói được điều gì về tuổi thọ phiên.
+
+    Trả {"found":bool, "expired":bool|None, "expires_in_min":float|None, "name":str}. found=False ⇒
+    KHÔNG kết luận gì (jar lạ/chưa login máy này) — TUYỆT ĐỐI không suy ra 'còn sống'.
+
+    Vì sao cần: mô hình cũ ước lượng đời cookie bằng HẰNG SỐ 60' rồi in `est_remaining_min = 60 − tuổi`.
+    Đo tươi 25-07 cho thấy con số đó sai CẢ HAI CHIỀU — đầu phiên `alive:true` mà báo còn 0,0'; cuối
+    phiên `alive:false` (phiên ĐÃ CHẾT) mà báo **còn 54,8'** và `warn` RỖNG. Trấn an giả trên xác chết."""
+    import time as _t
+    out = {"found": False, "expired": None, "expires_in_min": None, "name": ""}
+    rows = jar
+    if rows is None:
+        base = Path.home() / ".notebooklm-mcp-cli"
+        for _rel in (("profiles", "default", "cookies.json"), ("auth.json",)):
+            try:
+                _d = json.loads((base.joinpath(*_rel)).read_text(encoding="utf-8"))
+                rows = _d if isinstance(_d, list) else (_d.get("cookies") or [])
+                if rows:
+                    break
+            except Exception:  # noqa: BLE001 — chưa login máy này / jar hỏng → found=False
+                rows = None
+    _best = None
+    for c in (rows or []):
+        if not isinstance(c, dict) or c.get("name") not in _NLM_ROTATION_COOKIE_NAMES:
+            continue
+        try:
+            _e = float(c.get("expires") or c.get("expirationDate") or c.get("expiry") or 0)
+        except Exception:  # noqa: BLE001
+            continue
+        if _e > 0 and (_best is None or _e > _best[1]):
+            _best = (str(c.get("name")), _e)
+    if _best:
+        out.update(found=True, name=_best[0],
+                   expires_in_min=round((_best[1] - _t.time()) / 60.0, 1),
+                   expired=(_best[1] <= _t.time()))
+    return out
+
+
 def _nlm_preflight_report(notebook_id: str, *, probe: bool = True) -> dict:
     """v1.34.54 (A1+C8, doctrine M1): tầng 1 = probe LIVE `notebook_get` (login --check KHÔNG chứng minh cookie
-    sống — M1 v1.33.35); tầng 2 = tuổi cookie + ước lượng còn lại (đời thường ~60'). warn[] chỉ CẢNH BÁO,
-    caller tự quyết chặn/không. probe=False khi caller đã tự probe (không gọi NLM 2 lần)."""
-    rep = {"alive": None, "why": "", "age_min": None, "est_remaining_min": None, "warn": []}
+    sống — M1 v1.33.35); tầng 2 = tín hiệu cục bộ. warn[] chỉ CẢNH BÁO, caller tự quyết chặn/không.
+    probe=False khi caller đã tự probe (không gọi NLM 2 lần).
+
+    r208c 3.1: BỎ HẲN `est_remaining_min` (60 − tuổi) — đo tươi 25-07 chứng minh nó nói dối cả hai chiều,
+    tệ nhất là hứa «còn 54,8 phút» trên phiên ĐÃ CHẾT với `warn` rỗng. Thay bằng thứ ĐO ĐƯỢC:
+    `rotation_token_expired`/`rotation_token_min` (hạn thật trong jar) + verdict probe LIVE. `age_min`
+    GIỮ nhưng đọc cho đúng nghĩa: thời gian từ LẦN XÁC THỰC THÀNH CÔNG GẦN NHẤT, KHÔNG phải tuổi cookie
+    và KHÔNG dự đoán được cái chết (van F7/`NLM_COOKIE_BATCH_MAX_MIN` vẫn dùng nó — GIỮ NGUYÊN ngưỡng)."""
+    rep = {"alive": None, "why": "", "age_min": None, "warn": []}
     age = _nlm_auth_age_minutes()
     if age is not None:
         rep["age_min"] = round(age, 1)
-        rep["est_remaining_min"] = round(max(0.0, _NLM_COOKIE_LIFE_MIN - age), 1)
         if age > _NLM_COOKIE_WARN_AGE_MIN:
-            rep["warn"].append(f"COOKIE_AGE_HIGH: cookie ~{age:.0f}' tuổi (đời thường ~{_NLM_COOKIE_LIFE_MIN}') "
-                               f"— nên `nlm login` trước lô dài, hoặc chuyển đường `tl nlm-links` (batch dán tay).")
+            rep["warn"].append(f"COOKIE_AGE_HIGH: {age:.0f}' kể từ lần xác thực THÀNH CÔNG gần nhất "
+                               f"(ngưỡng {_NLM_COOKIE_WARN_AGE_MIN}') — nên `nlm login` trước lô dài, hoặc "
+                               f"chuyển đường `tl nlm-links` (batch dán tay). LƯU Ý: đây KHÔNG phải tuổi "
+                               f"cookie và KHÔNG dự đoán được thời điểm chết — chốt duy nhất là probe LIVE.")
+    _rot = _nlm_rotation_token_state()
+    if _rot.get("found"):
+        rep["rotation_token_expired"] = bool(_rot["expired"])
+        rep["rotation_token_min"] = _rot["expires_in_min"]
+        if _rot["expired"]:
+            rep["warn"].append(
+                f"ROTATION_TOKEN_EXPIRED: {_rot['name']} hết hạn {abs(_rot['expires_in_min']):.0f}' trước "
+                "⇒ phiên này KHÔNG GIA HẠN được nữa, chỉ có thể THAY bằng `nlm login` (tương tác). Phiên "
+                "vẫn có thể sống thêm một lúc rồi chết ĐỘT NGỘT — không đoán trước được; đừng mở lô dài.")
     if probe:
         try:
             nc = _imp("nlm_cli")
@@ -1234,6 +1298,11 @@ def _nlm_preflight_report(notebook_id: str, *, probe: bool = True) -> dict:
                     rep["why"] = str(r.get("error") or "")[:120]
         except Exception as e:  # noqa: BLE001
             rep["alive"], rep["why"] = False, f"{type(e).__name__}: {e}"
+    if rep["alive"] is False:
+        # r208c 3.1 (đo 25-07): `nlm-auth-status` từng trả alive:false với warn RỖNG — báo chết mà KHÔNG
+        # một dòng khắc phục nào, đúng thứ báo cáo mục 3.2 phàn nàn. Chết thì PHẢI kèm đường ra.
+        rep["fix"] = nlm_auth_fix_hint(compact=False)
+        rep["warn"].append("AUTH_DEAD: " + nlm_auth_fix_hint())
     return rep
 
 
@@ -1495,7 +1564,8 @@ def cmd_nlm_auth_status(a) -> int:
     while True:
         _n += 1
         rep = _nlm_preflight_report(nb)
-        out = {"ok": bool(rep.get("alive")), "schema": "nlm_auth_status.v1", "notebook_probed": nb,
+        # r208c 3.1: schema v2 — BỎ `est_remaining_min` (bịa: 60 − tuổi), THÊM `rotation_token_*` + `fix`.
+        out = {"ok": bool(rep.get("alive")), "schema": "nlm_auth_status.v2", "notebook_probed": nb,
                "attempt": _n, **rep}
         if rep.get("alive") or _deadline is None:
             print(_json_dumps(out, deterministic=_deterministic_enabled(a)))

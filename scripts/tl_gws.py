@@ -1289,9 +1289,40 @@ def cmd_gws_auth_load(a) -> int:
     return 2
 
 
-def _nlm_auth_load(token: str, fid: str):
+def _nlm_auth_files_raw() -> dict:
+    """r208c 3.1: đọc THÔ file auth nlm cục bộ ({relpath: text}) — KHÁC `_nlm_auth_files` ở chỗ KHÔNG
+    dựng lại auth.json từ profile. So tươi/cũ phải nhìn đúng cái đang nằm trên đĩa."""
+    base = os.path.expanduser("~/.notebooklm-mcp-cli")
+    out = {}
+    for rel in _NLM_AUTH_RELS:
+        p = os.path.join(base, *rel.split("/"))
+        try:
+            if os.path.exists(p):
+                out[rel] = open(p, encoding="utf-8").read()
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
+def _nlm_auth_load_downgrade(bundle: dict, local: dict) -> tuple:
+    """PURE (r208c 3.1): bản bundle sắp ghi đè có CŨ HƠN bản cục bộ không? Trả (is_downgrade, lý_do).
+
+    Mốc so = `_nlm_auth_age_days` (ưu tiên `profiles/default/metadata.json.last_validated`, fallback
+    `auth.json.extracted_at`) — đúng tín hiệu tươi mà M1b v1.33.38 đã chốt. Không đọc được MỘT trong
+    hai phía ⇒ (False, …): KHÔNG chặn khi không có bằng chứng (máy chưa từng login vẫn nạp được)."""
+    _b, _l = _nlm_auth_age_days(bundle or {}), _nlm_auth_age_days(local or {})
+    if _b is None or _l is None:
+        return False, ("chưa có bản cục bộ để so" if _l is None else "bundle không mang mốc thời gian")
+    if _b <= _l:
+        return False, f"bundle tươi hơn/bằng (bundle {_b * 1440:.0f}' vs cục bộ {_l * 1440:.0f}')"
+    return True, (f"bundle {_b * 1440:.0f}' tuổi vs cục bộ {_l * 1440:.0f}' "
+                  f"(cũ hơn {(_b - _l) * 1440:.0f}')")
+
+
+def _nlm_auth_load(token: str, fid: str, force: bool = False):
     """Tải nlm_cred.enc (webapp `download`) → giải mã (khoá=token) → ghi ~/.notebooklm-mcp-cli/{auth.json,profiles/…}.
-    Trả (ok, msg). KHÔNG cần master key (mirror _gws_auth_load → nlm headless)."""
+    Trả (ok, msg). KHÔNG cần master key (mirror _gws_auth_load → nlm headless).
+    r208c 3.1: `force=True` bỏ qua chốt chống hạ cấp (mặc định TỪ CHỐI ghi đè bằng bản cũ hơn)."""
     import base64
     store = _imp("gws_cred_store")
     if not fid:
@@ -1310,6 +1341,15 @@ def _nlm_auth_load(token: str, fid: str):
         return False, f"giải mã lỗi (token sai/dữ liệu hỏng): {e}"
     if not isinstance(nlm, dict) or not nlm:
         return False, "nlm_cred rỗng/sai định dạng."
+    # r208c 3.1: CHỐNG HẠ CẤP. Lệnh này GHI ĐÈ jar cục bộ bằng bản bundle — đo tươi 25-07: bản
+    # `auth.json` đem đi stage trễ hơn profile sống 127', `extracted_at` 415', token xoay trong đó
+    # hết hạn từ 7,2 GIỜ trước. Nạp bản như vậy đè lên phiên đang sống = TỰ GIẾT cookie tươi. Đây
+    # đúng là lý do phải BÁC đề xuất «tự gọi nlm-auth-load khi auth expired» của báo cáo mục 3.1.
+    _dg, _why_dg = _nlm_auth_load_downgrade(nlm, _nlm_auth_files_raw())
+    if _dg and not force:
+        return False, ("TỪ CHỐI HẠ CẤP — " + _why_dg + ". Bản trên Drive CŨ HƠN bản cục bộ: ghi đè sẽ "
+                       "LÀM MẤT cookie tươi hơn đang có. Muốn cố ý: `--force`. Đường đúng khi cookie "
+                       "chết hẳn: `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
     for rel, content in nlm.items():
         dst = os.path.join(nbase, *str(rel).split("/"))
@@ -1321,9 +1361,23 @@ def _nlm_auth_load(token: str, fid: str):
         except OSError:
             pass
     age = _nlm_auth_age_days(nlm)
+    # r208c 3.1: bundle có thể mang sẵn PHIÊN ĐÃ CHẾT — đo tươi 25-07: bản trên Drive chứa đúng token
+    # xoay hết hạn −129' y như jar cục bộ, nạp về KHÔNG hồi sinh được gì. Đây chính là lý do vòng lặp
+    # «auth expired → tự nlm-auth-load → thử lại» của báo cáo mục 3.1 sẽ quay vòng vô ích. Nói THẲNG.
+    _rot_b = ""
+    try:
+        import importlib as _il_rb
+        _rs = _il_rb.import_module("tl_core.nlm_ops")._nlm_rotation_token_state(
+            json.loads(nlm.get("profiles/default/cookies.json", "[]")))
+        if _rs.get("found") and _rs.get("expired"):
+            _rot_b = (f" ⚠ BUNDLE_ROTATION_TOKEN_EXPIRED: {_rs['name']} trong bundle hết hạn "
+                      f"{abs(_rs['expires_in_min']):.0f}' trước — bản vừa nạp KHÔNG hồi sinh được phiên; "
+                      "phải `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
+    except Exception:  # noqa: BLE001 — cảnh báo best-effort, không chặn nạp
+        pass
     return True, (f"~/.notebooklm-mcp-cli ({len(nlm)} file"
                   + (f", ~{age:.0f} ngày tuổi" if age is not None else "") + ")"
-                  + _nlm_cookie_age_note(age))
+                  + _nlm_cookie_age_note(age) + _rot_b)
 
 
 def cmd_nlm_auth_stage(a) -> int:
@@ -1391,7 +1445,7 @@ def cmd_nlm_auth_load(a) -> int:
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     token = os.environ.get("TL_TOKEN") or ""
     fid = getattr(a, "cred_file_id", None) or os.environ.get("TL_NLM_CRED_FILEID") or NLM_CRED_FILEID
-    ok, msg = _nlm_auth_load(token, fid)
+    ok, msg = _nlm_auth_load(token, fid, force=bool(getattr(a, "force", False)))
     if ok:
         print(f"[nlm-auth-load] ✓ nạp nlm cookie → {msg} (chmod 600). nlm chạy headless. Kiểm: nlm login --check")
         return 0

@@ -1338,10 +1338,31 @@ def _gas_version_at_least(ver, want) -> bool:
     return bool(_a and _b and _a >= _b)
 
 
+def _gas_ver_note(resp):
+    """r207 (p11 món 3): NHẶT `version` từ response GAS BẤT KỲ vào _GAS_VER_CACHE.
+
+    Mọi action đều trả `version`=APP_VERSION (ping VÀ bootstrap — xem doBootstrap_ Code.gs), nên khi
+    pipeline đã gọi `bootstrap` trước thì feature-detect ADR-0014 KHÔNG cần tốn 1 `ping` RIÊNG
+    (~2,1 s round-trip đo được 25-07 = 5% wall mỗi file).
+
+    Fail-safe, KHÔNG đổi ngữ nghĩa guard: chỉ ghi khi cache CHƯA có và giá trị là chuỗi non-empty
+    ⇒ server cũ/response không mang version → cache vẫn trống → `_ingest_commit_supported` ping như
+    cũ. Trả nguyên `resp` để gọi lồng tại call-site. KHÔNG raise (nuốt mọi lỗi hình dạng)."""
+    try:
+        if "ver" not in _GAS_VER_CACHE and isinstance(resp, dict):
+            _v = str(resp.get("version") or "")
+            if _v:
+                _GAS_VER_CACHE["ver"] = _v
+    except Exception:  # noqa: BLE001
+        pass
+    return resp
+
+
 def _ingest_commit_supported(g) -> bool:
-    """r198 (ADR-0014 #3): feature-detect server có action ingest_commit — ping version ≥ 2.21.2o.
+    """r198 (ADR-0014 #3): feature-detect server có action ingest_commit — version ≥ 2.21.2o.
     Cache 1 ping/process qua _GAS_VER_CACHE (mutable sống ở tl.py — bẫy I11); ping lỗi/parse hỏng → False
-    (rơi về đường 12-call hiện tại, fail-safe; client cũ/server cũ không đổi hành vi)."""
+    (r205 R-c: guard fail-closed rc=2, KHÔNG còn fallback organize).
+    r207: nếu `_gas_ver_note` đã nhặt được version từ call trước (bootstrap) thì KHÔNG ping nữa."""
     if "ver" not in _GAS_VER_CACHE:
         try:
             _GAS_VER_CACHE["ver"] = str(((g.get("ping") or {}) if g else {}).get("version") or "")
@@ -1633,7 +1654,8 @@ def _pi_stage_prepare(ctx):
         # v1.34.37: dùng chính file Drive có sẵn làm nguồn convert (KHÔNG re-upload).
         fid = _from_drive
     else:
-        inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
+        # r207: _gas_ver_note nhặt `version` từ CHÍNH response bootstrap ⇒ stage write khỏi ping riêng.
+        inbox = (_gas_ver_note(g.get("bootstrap")) or {}).get("inboxFolderId")
         import base64
         from tl_core.ingest_engine import stage_slot   # r187 (WP7): upload ≤2 concurrent
         with stage_slot("upload"):
@@ -2859,7 +2881,8 @@ def _il_stage_prepare(ctx):
                                   "(cập nhật overflowNotebookId hoặc tạo shard) rồi chạy lại."},
                          ensure_ascii=False), file=sys.stderr)
         return {"rc": 2}
-    inbox = (g.get("bootstrap") or {}).get("inboxFolderId")
+    # r207: xem _pi_stage_prepare — nhặt version từ bootstrap, ingest-local cũng khỏi ping riêng.
+    inbox = (_gas_ver_note(g.get("bootstrap")) or {}).get("inboxFolderId")
     # convert=false + register=false: GIỮ file NHỊ PHÂN làm src (KHÔNG để upload tự convert→GDoc + tự register,
     # nếu không organize convert sẽ tạo GDoc THỨ HAI → trùng. Chỉ organize tạo 1 GDoc + 1 dòng registry.)
     # MIME/đuôi THẬT theo file (item upload-flow): .doc/.pdf/.docx upload đúng định dạng → organize convert=true convert đúng.

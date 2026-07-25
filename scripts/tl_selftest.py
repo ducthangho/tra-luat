@@ -18337,7 +18337,10 @@ def run() -> int:
                     _calls["ping"] += 1
                     return {"ok": True, "pong": True, "version": gas_ver}
                 if action == "bootstrap":
-                    return {"ok": True, "inboxFolderId": "INBOX198"}
+                    # r207: FAITHFUL với doBootstrap_ THẬT (Code.gs) — bootstrap trả version=APP_VERSION
+                    # y như ping. Fake thiếu version = fake KHÔNG trung thực (bài học _FkG88), sẽ giấu
+                    # mất phép bỏ-ping của r207.
+                    return {"ok": True, "inboxFolderId": "INBOX198", "version": gas_ver}
                 if action == "reg_get":
                     _calls["reg_get"] += 1
                     return {"ok": True, "rows": []}
@@ -18431,12 +18434,62 @@ def run() -> int:
         # 0 organize; DRY vẫn rc=0 — plan không chạm server; upload đã journal → --resume sau nâng GAS).
         _rcd_n, _rca_n, _out_n, _c_new = _run_pi198("2.21.2o")
         _rcd_o, _rca_o, _out_o, _c_old = _run_pi198("2.21.2n")
+        # r207 (p11 món 3): ping HẾT là 1 — version nhặt từ CHÍNH response bootstrap (_gas_ver_note).
+        # Guard giữ nguyên ngữ nghĩa: server cũ vẫn rc=2 fail-closed, chỉ KHÔNG tốn round-trip ping.
         return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
                 and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
-                and _c_new["ping"] == 1
+                and _c_new["ping"] == 0
                 and _rcd_o == 0 and _rca_o == 2 and _out_o is None
-                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 1)
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 0)
     _t110("r205_profile_commit_only_server_guard", _c205_profile_commit_only_server_guard)
+
+    def _c207_ver_note_bo_ping_rieng():
+        # r207 (p11 món 3) — CA CHỈ-NÓ-CHẶN. Ba mệnh đề, mỗi cái hỏng theo một kiểu khác nhau:
+        #  (a) response CÓ version (bootstrap thật) → _ingest_commit_supported KHÔNG ping (0 call),
+        #      verdict vẫn ĐÚNG theo version đó;
+        #  (b) response KHÔNG version (server cũ/action khác) → cache trống → ping NHƯ CŨ (fallback
+        #      còn nguyên, đây là chốt chống "vá quá tay" làm mất feature-detect);
+        #  (c) _gas_ver_note KHÔNG ghi đè khi cache ĐÃ có, và nuốt mọi hình dạng rác (None/list/str)
+        #      — nó nằm trên đường ingest nên KHÔNG được phép raise.
+        _cnt = {"ping": 0}
+
+        class _FkPing207:
+            def __init__(self, ver):
+                self._v = ver
+
+            def get(self, action, **_kw):
+                if action == "ping":
+                    _cnt["ping"] += 1
+                    return {"ok": True, "pong": True, "version": self._v}
+                raise AssertionError(action)
+
+        _M = _TL_MODULE
+        _M._GAS_VER_CACHE.clear()
+        try:
+            # (a) version tới từ bootstrap ⇒ 0 ping, verdict True
+            _M._gas_ver_note({"ok": True, "inboxFolderId": "I", "version": "2.21.2o"})
+            _a_ok = (_M._ingest_commit_supported(_FkPing207("2.21.2o")) is True and _cnt["ping"] == 0)
+            # (a2) version CŨ tới từ bootstrap ⇒ vẫn 0 ping nhưng verdict False (guard fail-closed)
+            _M._GAS_VER_CACHE.clear(); _cnt["ping"] = 0
+            _M._gas_ver_note({"ok": True, "version": "2.21.2n"})
+            _a2_ok = (_M._ingest_commit_supported(_FkPing207("2.21.2o")) is False and _cnt["ping"] == 0)
+            # (b) bootstrap KHÔNG version ⇒ ping như cũ đúng 1 lần
+            _M._GAS_VER_CACHE.clear(); _cnt["ping"] = 0
+            _M._gas_ver_note({"ok": True, "inboxFolderId": "I"})
+            _b_ok = (_M._ingest_commit_supported(_FkPing207("2.21.2o")) is True and _cnt["ping"] == 1)
+            # (c) không ghi đè + nuốt rác
+            _M._GAS_VER_CACHE.clear()
+            _M._gas_ver_note({"version": "2.21.2o"})
+            _M._gas_ver_note({"version": "9.9.9z"})
+            _keep = _M._GAS_VER_CACHE.get("ver") == "2.21.2o"
+            _M._GAS_VER_CACHE.clear()
+            for _junk in (None, [], "x", 7, {"version": ""}, {"version": None}):
+                _M._gas_ver_note(_junk)
+            _c_ok = _keep and "ver" not in _M._GAS_VER_CACHE
+        finally:
+            _M._GAS_VER_CACHE.clear()
+        return _a_ok and _a2_ok and _b_ok and _c_ok
+    _t110("r207_ver_note_bo_ping_rieng", _c207_ver_note_bo_ping_rieng)
 
     # ═══ r200 — STAGED LANE (grill 24-07, 6 quyết định C1-C6): profile-ingest --staged (giữ i+ii+iii,
     # hoãn iv+v+vi, từ chối pdf/ocr/sheet, corpus=false staged) + verify-staged (parity → bulk-flip). ═══
@@ -19017,7 +19070,8 @@ def run() -> int:
                     _calls["ping"] += 1
                     return {"ok": True, "pong": True, "version": gas_ver}
                 if action == "bootstrap":
-                    return {"ok": True, "inboxFolderId": "INBOX204"}
+                    # r207: FAITHFUL với doBootstrap_ THẬT — trả version như ping (xem _run_pi198).
+                    return {"ok": True, "inboxFolderId": "INBOX204", "version": gas_ver}
                 if action == "ingest_claim":
                     _keys = json.loads(kw.get("keys") or "[]")
                     return {"ok": True, "results": [{"identity_hash": k, "granted": True} for k in _keys]}
@@ -19128,15 +19182,16 @@ def run() -> int:
 
     def _c205_ingest_local_commit_only_server_guard():
         # r205 R-c(b) (thay lock r204 commit-vs-fallback): server 2.21.2o → 1 ingest_commit, 0 organize,
-        # 0 info, ping 1 lần, rc=0 cả DRY lẫn apply; server 2.21.2n → GUARD rc=2 trong stage write
+        # 0 info, rc=0 cả DRY lẫn apply; server 2.21.2n → GUARD rc=2 trong stage write
         # (0 commit/0 organize; upload đã journal — chạy lại CÙNG LỆNH + --resume sau khi nâng GAS).
+        # r207 (p11 món 3): ping 1 → 0 — version nhặt từ response bootstrap (mirror _c205 nhánh profile).
         _rcd_n, _rca_n, _out_n, _c_new = _run_il204("2.21.2o")
         _rcd_o, _rca_o, _out_o, _c_old = _run_il204("2.21.2n")
         return (_rcd_n == 0 and _rca_n == 0 and (_out_n or {}).get("ok") is True
                 and _c_new["ingest_commit"] == 1 and _c_new["organize"] == 0 and _c_new["info"] == 0
-                and _c_new["ping"] == 1 and _c_new["upload"] == 1
+                and _c_new["ping"] == 0 and _c_new["upload"] == 1
                 and _rcd_o == 0 and _rca_o == 2 and _out_o is None
-                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 1)
+                and _c_old["ingest_commit"] == 0 and _c_old["organize"] == 0 and _c_old["ping"] == 0)
     _t110("r205_ingest_local_commit_only_server_guard", _c205_ingest_local_commit_only_server_guard)
 
     def _c204_zip_child_di_duong_pipeline():

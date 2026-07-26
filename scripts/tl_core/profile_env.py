@@ -136,20 +136,39 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
         "overflowNotebookId": "TL_OVERFLOW_NOTEBOOK_ID",   # Option 1: đích overflow khi notebook đầy
     }
     # Xóa overlay profile trước đó để chuyển profile trong cùng process không bị dính scope cũ.
+    # r214 (sổ lỗi TL_META_FOLDER_ID_BI_PROFILE_OVERLAY_XOA — đo LIVE 26-07): vòng xoá này TRƯỚC ĐÂY pop VÔ
+    # ĐIỀU KIỆN cả 6 khoá, nên env do NGƯỜI DÙNG export trước khi chạy — đúng đường mà `state-get`/`state-put`
+    # và RASOAT_HOSO_LOOP §7 chỉ — bị xoá trắng khi block profile thiếu ô tương ứng; lệnh rồi báo
+    # META_FOLDER_ID_TRONG và chỉ lại chính cái đường vừa bị nó phá. Mục đích THẬT của vòng xoá chỉ là "đổi
+    # profile trong CÙNG process không dính scope cũ" ⇒ chỉ cần xoá đúng khoá do CHÍNH overlay trước ghi.
+    # Dấu vết để trong env (KHÔNG dùng biến module: bẫy I11 — mutable/hằng ở tl_core phải re-export sang tl.py
+    # mới sống qua rebase globals; env lại đi theo cả process con, đúng ngữ nghĩa "overlay đã ghi").
+    # ★NGOẠI LỆ GIỮ NGUYÊN (v1.33.48): PROFILE_NOT_FOUND → xoá SẠCH bất kể ai ghi, để guard hạ nguồn
+    # (NO_NOTEBOOK_ID / PROFILE_CATEGORIES_OWN_REQUIRED / registry-id-empty) fail-closed, KHÔNG mượn scope nền
+    # từ env còn sót — nới chỗ này là mở lại đúng lớp sự cố 1.23.21 mà v1.33.48 sinh ra để chặn.
+    _mark = "TL_PROFILE_ENV_OVERLAY"
+    _prev_overlay = {k for k in str(os.environ.get(_mark) or "").split(",") if k}
+    _profile_missing = (_hit is None and name0 != DEFAULT_PROFILE)
+    _written = []
     for dst in tuple(mapping.values()) + ("TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO"):
-        os.environ.pop(dst, None)
+        if _profile_missing or dst in _prev_overlay:
+            os.environ.pop(dst, None)
     for src, dst in mapping.items():
         val = prof.get(src)
         if val:
             os.environ[dst] = str(val)
+            _written.append(dst)
     categories = prof.get("categories")
     if isinstance(categories, str):
         os.environ["TL_CATEGORIES_MODE"] = categories.strip().lower()
+        _written.append("TL_CATEGORIES_MODE")
     elif isinstance(categories, dict):
         os.environ["TL_CATEGORIES_MODE"] = "own"
+        _written.append("TL_CATEGORIES_MODE")
     manifest_scope = str(prof.get("manifestScope") or "").strip().lower()
     if manifest_scope:
         os.environ["TL_MANIFEST_SCOPE"] = manifest_scope
+        _written.append("TL_MANIFEST_SCOPE")
     # v1.30.0 (A — profile CỘNG VBQPPL): profile DỰ ÁN mặc định TL_BASE_ALSO=1 — các lệnh ĐỌC (locate/reg-query/
     # source-map/exists/nlm-cross) quét THÊM nền VBQPPL+shards, hit profile ưu tiên (doctrine MULTI_CORPUS_V1_18 §2
     # nay vào CLI, không chỉ Instruction). Opt-out: config.profiles.<p>.baseAlso=false hoặc --no-base-also per-lệnh.
@@ -158,6 +177,8 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     # (prof=fallback vbqppl ở trên) mà vẫn set cờ ⇒ nền tự quét mình 2 lần (vô hại nhờ dedup drive_id nhưng tốn IO + sai doctrine).
     if name != DEFAULT_PROFILE and name in profiles:
         os.environ["TL_BASE_ALSO"] = "0" if prof.get("baseAlso") is False else "1"
+        _written.append("TL_BASE_ALSO")
+    os.environ[_mark] = ",".join(_written)   # r214: khoá do overlay NÀY ghi — lượt sau chỉ được xoá đúng chúng
     return {"profile": name, "profile_found": name in profiles, "profile_data": prof, "profiles": sorted(profiles)}
 
 

@@ -20372,6 +20372,181 @@ def run() -> int:
         return ok0 and ok1 and ok2 and ok3
     _t110("r213_auth_carve_out_khong_pha_thu_tu", _c213_auth_carve_out_khong_pha_thu_tu)
 
+    # ═══ r214 (v1.35.50) — hai lỗi công cụ đo được ở lượt rà 2 (26-07), sổ lỗi mục 8 + mục 9 ═══
+    _PROF_ENV214 = ("TL_PROFILE", "TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID",
+                    "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE",
+                    "TL_BASE_ALSO", "TL_PROFILE_ENV_OVERLAY")
+
+    def _cfg214(tmpdir):
+        """Config fixture: P_CO_META có metaFolderId, P_THIEU_META KHÔNG có (đúng ca profile Cowork
+        bootstrap 26-07 — MARKER_CONFIG_DRIFT ô metaFolderId rỗng)."""
+        _p = Path(tmpdir) / "tra_luat_config.v2.json"
+        _p.write_text(json.dumps({
+            "schema": 2, "webappUrl": "https://fixture.invalid/exec", "token": "tk214",
+            "defaultProfile": "vbqppl",
+            "profiles": {
+                "vbqppl": {"notebookId": "NBBASE214", "rootFolderId": "ROOTV214",
+                           "registryDocId": "REGV214", "manifestId": "MANV214"},
+                "P_CO_META": {"notebookId": "NB214A", "rootFolderId": "ROOT214A", "metaFolderId": "META_TU_CONFIG",
+                              "registryDocId": "REG214A", "manifestId": "MAN214A",
+                              "categories": "own", "manifestScope": "own"},
+                "P_THIEU_META": {"notebookId": "NB214B", "rootFolderId": "ROOT214B",
+                                 "registryDocId": "REG214B", "manifestId": "MAN214B",
+                                 "categories": "own", "manifestScope": "own"},
+            }}, ensure_ascii=False, indent=1), encoding="utf-8")
+        return str(_p)
+
+    def _c214_env_nguoi_dung_song_qua_overlay():
+        # SỔ LỖI mục 8 TL_META_FOLDER_ID_BI_PROFILE_OVERLAY_XOA: `state-get/state-put` (r213) và
+        # RASOAT_HOSO_LOOP §7 bảo người dùng export TL_META_FOLDER_ID; _apply_profile_env lại pop VÔ
+        # ĐIỀU KIỆN rồi chỉ set lại khi config có ô đó ⇒ profile thiếu ô = env bị XOÁ TRẮNG, lệnh báo
+        # META_FOLDER_ID_TRONG và chỉ lại đúng cái đường nó vừa phá. ĐỎ trước r214.
+        import tempfile as _tf214
+        _sv = _env110({k: None for k in _PROF_ENV214})
+        try:
+            with _tf214.TemporaryDirectory() as _d:
+                _cfg = _cfg214(_d)
+                os.environ["TL_META_FOLDER_ID"] = "META_NGUOI_DUNG_EXPORT"
+                _TL_MODULE.apply_profile_offline(_cfg, "P_THIEU_META")
+                ok_giu = os.environ.get("TL_META_FOLDER_ID") == "META_NGUOI_DUNG_EXPORT"
+                # các ô CÓ trong config vẫn phải do config quyết (không phải env cũ)
+                ok_config = (os.environ.get("TL_ROOT_FOLDER_ID") == "ROOT214B"
+                             and os.environ.get("TL_NOTEBOOK_ID") == "NB214B")
+                # config CÓ ô đó thì config THẮNG env (không đảo chiều ưu tiên)
+                os.environ["TL_META_FOLDER_ID"] = "META_NGUOI_DUNG_EXPORT"
+                _TL_MODULE.apply_profile_offline(_cfg, "P_CO_META")
+                ok_config_thang = os.environ.get("TL_META_FOLDER_ID") == "META_TU_CONFIG"
+            return ok_giu and ok_config and ok_config_thang
+        finally:
+            _env110_restore(_sv)
+    _t110("r214_env_meta_folder_song_qua_profile_overlay", _c214_env_nguoi_dung_song_qua_overlay)
+
+    def _c214_profile_not_found_van_xoa_sach():
+        # CHIỀU NGƯỢC 1 — chống VÁ QUÁ TAY: v1.33.48 cố ý xoá SẠCH scope khi tên profile không có trong
+        # config, để guard hạ nguồn fail-closed thay vì mượn env còn sót mà ghi nhầm corpus NỀN (lớp sự
+        # cố 1.23.21). Nếu r214 "giữ env người dùng" một cách vô điều kiện thì ca này ĐỎ.
+        import tempfile as _tf214
+        _sv = _env110({k: None for k in _PROF_ENV214})
+        try:
+            with _tf214.TemporaryDirectory() as _d:
+                _cfg = _cfg214(_d)
+                os.environ["TL_META_FOLDER_ID"] = "META_NGUOI_DUNG_EXPORT"
+                os.environ["TL_REGISTRY_DOC_ID"] = "REG_NGUOI_DUNG_EXPORT"
+                os.environ["TL_NOTEBOOK_ID"] = "NB_NGUOI_DUNG_EXPORT"
+                _b = _io110.StringIO()
+                with _ctx110.redirect_stderr(_b):
+                    _TL_MODULE.apply_profile_offline(_cfg, "P_KHONG_TON_TAI_214")
+                _sach = all(os.environ.get(k) is None
+                            for k in ("TL_META_FOLDER_ID", "TL_REGISTRY_DOC_ID", "TL_NOTEBOOK_ID"))
+                return _sach and "PROFILE_NOT_FOUND" in _b.getvalue()
+        finally:
+            _env110_restore(_sv)
+    _t110("r214_profile_not_found_van_xoa_sach_env", _c214_profile_not_found_van_xoa_sach)
+
+    def _c214_doi_profile_khong_dinh_scope_cu():
+        # CHIỀU NGƯỢC 2 — chống VÁ QUÁ TAY kiểu "thôi không pop nữa": mục đích GỐC của vòng xoá là đổi
+        # profile trong CÙNG process không dính scope cũ. P_CO_META (metaFolderId=META_TU_CONFIG) →
+        # P_THIEU_META thì ô đó PHẢI biến mất, không được thừa kế.
+        import tempfile as _tf214
+        _sv = _env110({k: None for k in _PROF_ENV214})
+        try:
+            with _tf214.TemporaryDirectory() as _d:
+                _cfg = _cfg214(_d)
+                _TL_MODULE.apply_profile_offline(_cfg, "P_CO_META")
+                ok1 = os.environ.get("TL_META_FOLDER_ID") == "META_TU_CONFIG"
+                _TL_MODULE.apply_profile_offline(_cfg, "P_THIEU_META")
+                ok2 = os.environ.get("TL_META_FOLDER_ID") is None
+                ok3 = os.environ.get("TL_ROOT_FOLDER_ID") == "ROOT214B"
+                return ok1 and ok2 and ok3
+        finally:
+            _env110_restore(_sv)
+    _t110("r214_doi_profile_trong_cung_process_khong_dinh_scope_cu", _c214_doi_profile_khong_dinh_scope_cu)
+
+    def _c214_query_args_gop_mot_co_s():
+        # SỔ LỖI mục 9 NLM_QUERY_LOAI_NGUON_KHONG_BAO — NGUYÊN NHÂN GỐC: `nlm notebook query -s` là MỘT
+        # chuỗi «Comma-separated source IDs», KHÔNG phải option lặp ⇒ phát `-s a -s b` thì b ĐÈ a, chỉ
+        # nguồn CUỐI sống (đo 26-07: truyền 212 rồi 233 → sources_used chỉ còn 233). `cross_query` trong
+        # CÙNG file vốn đã đúng khuôn `-n ",".join(...)`.
+        import nlm_cli as _nc214
+        _a2 = _nc214._query_args("NB214", "cau hoi", ["sid-A", "sid-B"])
+        ok_mot_co = _a2.count("-s") == 1 and "sid-A,sid-B" in _a2
+        _a1 = _nc214._query_args("NB214", "cau hoi", ["sid-A"])
+        ok_mot_nguon = _a1.count("-s") == 1 and "sid-A" in _a1          # 1 nguồn: hành vi KHÔNG đổi
+        _a0 = _nc214._query_args("NB214", "cau hoi", None)
+        ok_khong_nguon = "-s" not in _a0 and _a0[:3] == ["notebook", "query", "NB214"]
+        _ab = _nc214._query_args("NB214", "cau hoi", ["  sid-A  ", "", None])   # rác không sinh dấu phẩy thừa
+        ok_sach = "sid-A" in _ab and ",," not in ",".join(_ab)
+        return ok_mot_co and ok_mot_nguon and ok_khong_nguon and ok_sach
+    _t110("r214_nlm_query_source_ids_gop_mot_co_s", _c214_query_args_gop_mot_co_s)
+
+    def _c214_scope_shortfall_pure():
+        _f = _TL_MODULE._nlm_scope_shortfall
+        r1 = _f(["A", "B"], {"sources_used": ["b"]})                     # UUID so KHÔNG phân biệt hoa/thường
+        ok1 = r1["do_duoc"] and r1["thieu"] == ["A"]
+        r2 = _f(["A", "B"], {"sources_used": [{"id": "A"}, {"source_id": "B"}]})
+        ok2 = r2["do_duoc"] and r2["thieu"] == []
+        # CHIỀU NGƯỢC — chống BÁO ĐỘNG GIẢ: `sources`/`citations` là nguồn ĐƯỢC TRÍCH DẪN, vốn là tập con
+        # hợp lệ của nguồn được QUÉT ⇒ tuyệt đối KHÔNG suy ra thiếu nguồn từ đó.
+        r3 = _f(["A", "B"], {"sources": [{"id": "A"}], "citations": ["A"]})
+        ok3 = (r3["do_duoc"] is False) and r3["thieu"] == []
+        # và không đo được thì KHÔNG được suy ra "đủ" (do_duoc=False, không phải True)
+        r4 = _f(["A"], {"answer": "..."})
+        r5 = _f([], {"sources_used": []})
+        ok4 = (r4["do_duoc"] is False) and (r5["do_duoc"] is False)
+        r6 = _f(["A"], {"data": {"sources_used": ["A"]}})                # envelope lồng 1 tầng
+        ok5 = r6["do_duoc"] and r6["thieu"] == []
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r214_nlm_scope_shortfall_khong_bao_dong_gia", _c214_scope_shortfall_pure)
+
+    def _run_q214(source_ids, data, strict):
+        """Chạy ĐƯỜNG SẢN XUẤT cmd_nlm_query với nlm_cli giả (query THÀNH CÔNG, envelope tự khai)."""
+        class _NC214:
+            def notebook_query(self, nb, q, source_ids=None):
+                return {"ok": True, "data": data}
+        _keys = ("apply_profile_offline", "_imp", "_resolve_nlm_notebook", "load_creds")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _realimp = _TL_MODULE._imp
+        try:
+            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._imp = lambda name: (_NC214() if name == "nlm_cli" else _realimp(name))
+            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb214", None)
+            _ns = argparse.Namespace(query="q", notebook_id="nb214", source_id=list(source_ids),
+                                     strict_scope=strict, json=False, out=None, max=4000,
+                                     no_fallback=False, config=None, profile=None, deterministic=False)
+            _bo, _be = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_nlm_query(_ns)
+            return _rc, _bo.getvalue(), _be.getvalue()
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _c214_strict_scope_fail_closed():
+        _thieu = {"sources_used": ["sid-B"], "answer": "khong tim thay noi dung nao"}
+        _du = {"sources_used": ["sid-A", "sid-B"], "answer": "co"}
+        _mu = {"answer": "co"}                                            # envelope không khai phạm vi
+        # (1) mặc định: THIẾU nguồn → vẫn trả lời nhưng CẢNH BÁO (không chặn công việc đang chạy)
+        rc1, o1, e1 = _run_q214(["sid-A", "sid-B"], _thieu, False)
+        ok1 = rc1 == 0 and "NLM_SCOPE_SHORTFALL" in e1 and "sid-A" in e1 and "answer" in o1
+        # (2) --strict-scope + THIẾU → rc=2 và KHÔNG phát câu trả lời ra stdout (agent hạ nguồn sẽ tưởng đủ)
+        rc2, o2, e2 = _run_q214(["sid-A", "sid-B"], _thieu, True)
+        ok2 = rc2 == 2 and o2.strip() == "" and "NLM_SCOPE_SHORTFALL" in e2
+        # (3) --strict-scope + ĐỦ → rc=0, có câu trả lời, KHÔNG cảnh báo
+        rc3, o3, e3 = _run_q214(["sid-A", "sid-B"], _du, True)
+        ok3 = rc3 == 0 and "answer" in o3 and "NLM_SCOPE_SHORTFALL" not in e3
+        # (4) --strict-scope + KHÔNG đo được → fail-CLOSED rc=2 (đòi bảo đảm mà không chứng minh được)
+        rc4, o4, e4 = _run_q214(["sid-A"], _mu, True)
+        ok4 = rc4 == 2 and "SCOPE_UNVERIFIABLE" in e4 and o4.strip() == ""
+        # (5) CHIỀU NGƯỢC: KHÔNG có cờ + không đo được → im lặng như cũ, KHÔNG báo động giả
+        rc5, o5, e5 = _run_q214(["sid-A"], _mu, False)
+        ok5 = rc5 == 0 and "answer" in o5 and "SCOPE" not in e5
+        # (6) CHIỀU NGƯỢC: không truyền --source-id thì --strict-scope KHÔNG được tự chặn
+        rc6, o6, _ = _run_q214([], _mu, True)
+        ok6 = rc6 == 0 and "answer" in o6
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r214_nlm_query_strict_scope_fail_closed", _c214_strict_scope_fail_closed)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

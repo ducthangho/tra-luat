@@ -1144,6 +1144,38 @@ def cmd_nlm_content(a) -> int:
     return 0
 
 
+def _nlm_scope_shortfall(requested, data) -> dict:
+    """PURE (r214): đối chiếu phạm vi ĐÃ YÊU CẦU (`--source-id`) với phạm vi NLM TỰ KHAI đã dùng.
+
+    Trả {"do_duoc": bool, "used": [id…], "thieu": [id…]}.
+
+    ★`do_duoc=False` ⇒ envelope KHÔNG khai `sources_used` → KHÔNG kết luận gì. Tuyệt đối KHÔNG suy ra
+    "đủ nguồn" từ chỗ không đo được (đúng bài học 26-07: câu trả lời «không tìm thấy» của NLM không
+    phải kết luận âm tính).
+
+    CỐ Ý chỉ nhận đúng khoá `sources_used`: các khoá họ hàng (`sources`, `citations`) là nguồn được
+    TRÍCH DẪN — vốn là tập con HỢP LỆ của nguồn được QUÉT, đoán sang đó chỉ đẻ báo động giả."""
+    _req = [str(s).strip() for s in (requested or []) if str(s).strip()]
+    if not _req or not isinstance(data, dict):
+        return {"do_duoc": False, "used": [], "thieu": []}
+    raw = data.get("sources_used")
+    if raw is None and isinstance(data.get("data"), dict):   # envelope lồng 1 tầng
+        raw = data["data"].get("sources_used")
+    if not isinstance(raw, list):
+        return {"do_duoc": False, "used": [], "thieu": []}
+    used = []
+    for item in raw:
+        if isinstance(item, str):
+            used.append(item.strip())
+        elif isinstance(item, dict):
+            for k in ("id", "source_id", "sourceId"):
+                if str(item.get(k) or "").strip():
+                    used.append(str(item[k]).strip())
+                    break
+    _low = {u.lower() for u in used if u}
+    return {"do_duoc": True, "used": used, "thieu": [s for s in _req if s.lower() not in _low]}
+
+
 def cmd_nlm_query(a) -> int:
     """RAG query qua CLI nlm (fast-lane). Thay MCP notebook_query. VẪN phải verify nguyên văn với cache/raw."""
     # Group B: nạp TL_NOTEBOOK_ID từ PROFILE ĐANG DÙNG (trước đây thiếu → --profile NQ36 nlm-query nhắm VBQPPL base).
@@ -1174,6 +1206,31 @@ def cmd_nlm_query(a) -> int:
         if _v60["route"] == "corpus_read":
             return _nlm_query_corpus_fallback(a, a.query, cmd="nlm-query", why=_v60["why"])
         print(json.dumps(r, ensure_ascii=False, indent=2), file=sys.stderr); return 2
+    # r214 (sổ lỗi NLM_QUERY_LOAI_NGUON_KHONG_BAO): tầng 2 sau khi đã vá argv `-s` gộp CSV ở nlm_cli —
+    # NLM vẫn có thể thu hẹp phạm vi vì lý do phía nó (nguồn chưa index xong / bị loại). "Im lặng thu hẹp
+    # phạm vi" là kiểu hỏng đẻ ra KẾT LUẬN ÂM TÍNH GIẢ, nên phải nói ra.
+    _req_sids = list(getattr(a, "source_id", None) or [])
+    _strict = bool(getattr(a, "strict_scope", False))
+    _scope = _nlm_scope_shortfall(_req_sids, r.get("data"))
+    if _strict and _req_sids and not _scope["do_duoc"]:
+        # fail-CLOSED: người dùng ĐÃ đòi bảo đảm phạm vi mà envelope không khai `sources_used` ⇒ không
+        # chứng minh được thì KHÔNG phát câu trả lời ra stdout (agent hạ nguồn sẽ tưởng là đủ nguồn).
+        print(json.dumps({"ok": False, "error": "SCOPE_UNVERIFIABLE",
+                          "requested": _req_sids,
+                          "fix": "bỏ --strict-scope để nhận câu trả lời kèm cảnh báo, hoặc kiểm phạm vi "
+                                 "bằng `tl nlm-get`/`nlm-list` rồi so nguyên văn trên cache."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    if _scope["thieu"]:
+        _msg = (f"[tl] ⚠ NLM_SCOPE_SHORTFALL: yêu cầu {len(_req_sids)} nguồn, NLM khai dùng "
+                f"{len(_scope['used'])} — THIẾU: {', '.join(_scope['thieu'])}. Câu trả lời chỉ phủ phần "
+                f"nguồn còn lại ⇒ KHÔNG đọc 'không tìm thấy' thành kết luận âm tính.")
+        if _strict:
+            print(json.dumps({"ok": False, "error": "NLM_SCOPE_SHORTFALL", "requested": _req_sids,
+                              "sources_used": _scope["used"], "missing": _scope["thieu"]},
+                             ensure_ascii=False), file=sys.stderr)
+            return 2
+        print(_msg, file=sys.stderr)
     print(json.dumps(r.get("data"), ensure_ascii=False, indent=2) if r.get("data") is not None else r.get("text", ""))
     print("[tl] LƯU Ý: RAG chỉ ĐỊNH VỊ; verify nguyên văn bằng cache/raw (KHÔNG nhận RAG làm nguyên văn).", file=sys.stderr)
     return 0

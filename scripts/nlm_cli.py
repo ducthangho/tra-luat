@@ -178,12 +178,25 @@ def source_content(source_id: str, timeout: int = 180) -> dict:
     return _run_json(["source", "content", source_id, "-j"], timeout=timeout)
 
 
-def notebook_query(notebook_id: str, query: str, source_ids=None, timeout: int = 240) -> dict:
-    """RAG query trên notebook (thay MCP notebook_query). source_ids: scope (nếu CLI hỗ trợ -s)."""
+def _query_args(notebook_id: str, query: str, source_ids=None) -> list:
+    """PURE (r214): dựng argv cho `nlm notebook query` (tách để selftest, không shell).
+
+    ★BUG r214 (đo 26-07, sổ lỗi NLM_QUERY_LOAI_NGUON_KHONG_BAO): bản cũ phát `-s <id>` LẶP LẠI
+    cho từng nguồn, nhưng `nlm notebook query --source-ids/-s` là MỘT chuỗi «Comma-separated source
+    IDs» (không phải option lặp) ⇒ giá trị SAU đè giá trị TRƯỚC, chỉ nguồn CUỐI sống sót. Đo thật:
+    truyền 2 --source-id (212 rồi 233) → `sources_used` chỉ còn 233 = cái CUỐI, rc vẫn 0, không warn
+    ⇒ sinh kết luận ÂM TÍNH GIẢ. Nay gộp một `-s` duy nhất bằng dấu phẩy — ĐÚNG khuôn `cross_query`
+    (`-n ",".join(...)`) vốn đã dùng trong CHÍNH file này."""
     args = ["notebook", "query", notebook_id, query, "-j"]
-    for sid in (source_ids or []):
-        args += ["-s", sid]
-    return _run_json(args, timeout=timeout)
+    _sids = [str(s).strip() for s in (source_ids or []) if s is not None and str(s).strip()]
+    if _sids:
+        args += ["-s", ",".join(_sids)]
+    return args
+
+
+def notebook_query(notebook_id: str, query: str, source_ids=None, timeout: int = 240) -> dict:
+    """RAG query trên notebook (thay MCP notebook_query). source_ids: scope (CLI nhận CSV — xem _query_args)."""
+    return _run_json(_query_args(notebook_id, query, source_ids), timeout=timeout)
 
 
 # ───────────── NLM WRITE qua CLI (thay MCP source_add/delete/sync — đúng directive CLI-first) ─────────────

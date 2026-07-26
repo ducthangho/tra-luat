@@ -1319,6 +1319,7 @@ GENERATED_SPECS = [
          {"dest": 'query'},
          {"flags": ['--notebook-id'], "dest": 'notebook_id'},
          {"flags": ['--source-id'], "dest": 'source_id', "action": 'append', "help": 'scope source_id (lặp được)'},
+         {"flags": ['--strict-scope'], "dest": 'strict_scope', "action": 'store_true', "help": '(r214) rc=2 khi NLM khai dùng THIẾU nguồn so với --source-id, hoặc không khai `sources_used` để kiểm (fail-closed; mặc định chỉ CẢNH BÁO)'},
          {"flags": ['--no-fallback'], "dest": 'no_fallback', "action": 'store_true', "help": '(v1.34.60 ADR-5) NLM chết → GIỮ dừng rc=2 như cũ, không verbatim-return'},
          {"flags": ['--out'], "help": '(v1.34.60 ADR-6) ghi envelope fallback (toàn văn không cắt --max) ra file — né tràn stdout'},
          {"flags": ['--max'], "type": int, "default": 4000, "help": '(v1.34.60) trần ký tự/văn bản khi fallback in stdout (0/âm → 4000); --out bỏ trần'},

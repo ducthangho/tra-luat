@@ -62,15 +62,34 @@ def route(hinh_thuc):
 
 
 def load_master(p):
+    """v1.35.49 (r213/b — sự cố PHA 4 SẬP đo LIVE 26-07): nhận CẢ khuôn bảng master lẫn khuôn §6
+    `master/<unit>.json`, qua ĐÚNG hàm quy đổi của `tl rasoat-merge` (một nguồn chân lý).
+
+    Bản cũ `van_ban += d.get("van_ban", [])` gặp khuôn §6 (`van_ban` là CHUỖI số hiệu) thì `+=` trải
+    CHUỖI thành TỪNG KÝ TỰ rồi mới chết ở nơi khác ("'str' object has no attribute 'get'") — hỏng
+    IM LẶNG trước, báo lỗi sai chỗ sau. Nay: khuôn lạ FAIL-CLOSED, nói rõ file nào."""
     path = Path(p)
     files = sorted(path.glob("*.json")) if path.is_dir() else [path]
-    van_ban, noi_dung, co_quan = [], [], ""
+    try:
+        import sys as _sys
+        _sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from tl_core.lookup_ops import _rasoat_merge_units
+    except Exception as e:  # noqa: BLE001
+        raise SystemExit(f"[rasoat_phuluc] không nạp được tl_core.lookup_ops ({e}) — chạy từ trong "
+                         f"cây skill, hoặc dựng bảng master trước bằng `tl rasoat-merge`.")
+    docs = []
     for f in files:
-        d = json.loads(f.read_text(encoding="utf-8"))
-        co_quan = co_quan or d.get("co_quan", "")
-        van_ban += d.get("van_ban", [])
-        noi_dung += d.get("noi_dung", [])
-    return co_quan, van_ban, noi_dung
+        try:
+            docs.append((f.name, json.loads(f.read_text(encoding="utf-8"))))
+        except Exception as e:  # noqa: BLE001
+            raise SystemExit(f"[rasoat_phuluc] {f.name}: JSON hỏng — {e}")
+    merged = _rasoat_merge_units(docs)
+    if merged.get("_bo_qua"):
+        ten = ", ".join(str(x.get("nguon")) for x in merged["_bo_qua"])
+        raise SystemExit(f"[rasoat_phuluc] KHUÔN KHÔNG NHẬN RA: {ten}. Chờ 1 trong 2: khuôn bảng "
+                         f"master (van_ban=DANH SÁCH + noi_dung) hoặc khuôn §6 master/<unit>.json "
+                         f"(phat_hien). File có CẢ hai khoá cũng bị từ chối — không đoán.")
+    return merged.get("co_quan", ""), merged.get("van_ban", []), merged.get("noi_dung", [])
 
 
 def dedup(items):

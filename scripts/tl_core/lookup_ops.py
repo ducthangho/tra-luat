@@ -2633,3 +2633,426 @@ def _resolve_base_gdoc(base: str, entries: list[dict]):
     if can is None:
         return None, "", ""
     return can, (_entry_drive_id(can) or ""), _entry_name(can)
+
+
+# ══════════════ r213 (v1.35.49) — ĐỢT 5: hai lỗ hổng lượt rà LIVE 26-07 phơi ra ══════════════
+# Cả hai là MẮT XÍCH BẮT BUỘC của lớp điều phối mà KHÔNG cổng máy nào phủ (sổ lỗi H7/H8 26-07):
+#  (a) STATE_DRIVE_KHONG_CO_DUONG_GHI — WRITE_PATHS_v1 bắt state ở Drive `_meta/rasoat_state.json`
+#      làm nguồn sự thật resume, nhưng gói LIVE KHÔNG có lệnh nào ghi một JSON tuỳ ý vào `_meta/`.
+#      ĐO LẠI: mặt ghi ĐÃ CÓ và đang chạy THẬT trong sản xuất (_create_profile_manifest_json,
+#      profile-index) = g.post("upload", mime=application/json, folderId=_meta, convert/register/
+#      share="false", force="true") rồi MỚI dọn bản cũ. Thiếu là thiếu LỆNH, KHÔNG thiếu năng lực
+#      ⇒ KHÔNG đổi GAS, KHÔNG thêm action `files_put`, và KHÔNG mượn cổng `profile-file-add
+#      --apply` (mượn cổng đó = bắt người duyệt MỖI lần chốt state — đúng thứ phá nghiệm thu ≤2
+#      lần xen của H7).
+#  (b) THIEU_BUOC_GOP_MASTER_UNIT_SANG_BANG_MASTER — PHA 4 SẬP: khuôn §6 `master/<unit>.json` và
+#      khuôn bảng master mà `rasoat_phuluc.py` đọc KHỚP ở tầng item (cùng 10 trường + anchor) nhưng
+#      LỆCH ở tầng container (§6: `van_ban` là CHUỖI + phát hiện dưới `phat_hien`; bảng: `van_ban`
+#      là DANH SÁCH metadata + `noi_dung` phẳng). Đợt 1–3 không định nghĩa bước "dồn" ⇒ định nghĩa
+#      ở đây, MỘT nguồn chân lý dùng chung cho cả `tl rasoat-merge` lẫn `rasoat_phuluc.py`.
+
+# I11: HẰNG re-export trực tiếp sang tl.py (hàm rebase đọc globals tl).
+_RASOAT_STATE_ALLOWED = ("rasoat_state.json", "rasoat_approvals.json")
+_RASOAT_BANG_SCHEMA = "mau_bang_tong_hop_phat_hien.v1"
+# Ô metadata Phụ lục 03 KHÔNG suy được từ khuôn §6 — để RỖNG và báo lên, TUYỆT ĐỐI không bịa.
+_RASOAT_VB_META_FIELDS = ("linh_vuc", "loai", "so_hieu", "ngay", "ten",
+                          "hieu_luc_tu", "tinh_trang", "sua_doi_bo_sung", "ghi_chu")
+
+
+def _rasoat_state_scope(name):
+    """PURE (r213/a): CHỐT CHẶN phạm vi đường ghi state. Chỉ cho ghi ĐÚNG tên trong WRITE_PATHS_v1,
+    và chỉ dạng basename (không đường dẫn) — để `state-put` không bao giờ thành cổng ghi Drive tổng
+    quát. Trả (ok, ly_do).
+
+    FAIL-CLOSED theo bài học r212 (guard ADR-0001 fail-open sống sót nhiều bản vì test đi qua bind):
+    rỗng/None/có path/không thuộc danh sách ⇒ TỪ CHỐI. Không có nhánh "nghi ngờ thì cho qua"."""
+    n = str(name or "").strip()
+    if not n:
+        return False, "STATE_NAME_EMPTY"
+    if ("/" in n) or ("\\" in n) or n.startswith(".") or n != os.path.basename(n):
+        return False, "STATE_NAME_HAS_PATH:" + n
+    if n not in _RASOAT_STATE_ALLOWED:
+        return False, "STATE_NAME_NOT_ALLOWED:" + n
+    return True, "ok"
+
+
+def _rasoat_sohieu_key(s):
+    """PURE (r213/b): khoá so trùng số hiệu cho bảng master. TỰ CHỨA — import CỤC BỘ, không mượn
+    helper nào sống nhờ globals của tl.
+
+    Bẫy đã trả giá ngay khi viết r213: bản đầu dùng `_norm_compare_text`, chạy tốt qua `tl` (đã
+    bind) nhưng NameError `unicodedata` khi `rasoat_phuluc.py` gọi thẳng — chính khuôn false-green
+    "test qua bind không chứng minh đường sản xuất". Nhóm hàm _rasoat_* PHẢI chạy được ở CẢ HAI
+    đường: trong tl (đã rebase globals) và import trần từ script con."""
+    import re as _re
+    import unicodedata as _ud
+    return _re.sub(r"\s+", " ", _ud.normalize("NFC", str(s or "")).strip().upper()).replace("/", "-")
+
+
+def _rasoat_unit_shape(d):
+    """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
+    `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.
+
+      'unit_v1' = khuôn §6 RASOAT_HOSO_LOOP (`master/<unit>.json`): phát hiện dưới `phat_hien`.
+      'bang_v1' = khuôn `mau_bang_tong_hop_phat_hien.v1`: nội dung phẳng dưới `noi_dung`.
+      'unknown' = KHÔNG nhận ra (kể cả khi có CẢ HAI khoá) ⇒ bên gọi phải FAIL-CLOSED, không đoán.
+
+    Có cả `phat_hien` lẫn `noi_dung` = file lai/hỏng: trả 'unknown' chứ không tự chọn — đoán sai ở
+    đây là nuốt mất phát hiện mà không ai biết."""
+    if not isinstance(d, dict):
+        return "unknown"
+    has_ph = isinstance(d.get("phat_hien"), list)
+    has_nd = isinstance(d.get("noi_dung"), list)
+    if has_ph and not has_nd:
+        return "unit_v1"
+    if has_nd and not has_ph:
+        return "bang_v1"
+    return "unknown"
+
+
+def _rasoat_unit_to_bang(d, nguon=""):
+    """PURE (r213/b): quy đổi MỘT khuôn §6 sang mảnh khuôn bảng master.
+    Trả (van_ban_rows, noi_dung_rows, thieu) — `thieu` = danh sách ô metadata Phụ lục 03 không suy
+    ra được từ đơn vị rà (ngay/hieu_luc_tu/tinh_trang/loai…).
+
+    KHÔNG BỊA: đơn vị rà chỉ biết số hiệu + tên văn bản; ngày ban hành/hiệu lực/tình trạng nằm ở
+    registry, không nằm trong phiếu rà. Trường thiếu để RỖNG và ĐẨY LÊN để người điền — thà bảng
+    có ô trống nhìn thấy được còn hơn ô bịa nhìn như thật. Đơn vị nào muốn đủ ô thì mang sẵn
+    `van_ban_meta` (dict) — §6 chấp nhận, không bắt buộc."""
+    sohieu = str((d or {}).get("van_ban") or "").strip()
+    meta = (d or {}).get("van_ban_meta")
+    row = {k: "" for k in _RASOAT_VB_META_FIELDS}
+    if isinstance(meta, dict):
+        for k in _RASOAT_VB_META_FIELDS:
+            if meta.get(k) is not None:
+                row[k] = str(meta.get(k) or "")
+    row["so_hieu"] = row.get("so_hieu") or sohieu
+    row["ten"] = row.get("ten") or str((d or {}).get("ten") or "")
+    phat_hien = [x for x in ((d or {}).get("phat_hien") or []) if isinstance(x, dict)]
+    # linh_vuc của văn bản: lấy theo lĩnh vực của phát hiện ĐẦU TIÊN (chỉ để gom nhóm bảng 03,
+    # không phải kết luận phân loại) — rỗng thì để rasoat_phuluc rơi vào "(Chưa phân loại)".
+    if not row.get("linh_vuc"):
+        row["linh_vuc"] = next((str(x.get("linh_vuc") or "") for x in phat_hien if x.get("linh_vuc")), "")
+    thieu = [k for k in _RASOAT_VB_META_FIELDS if not str(row.get(k) or "").strip()]
+    if thieu and nguon:
+        row["ghi_chu"] = (row.get("ghi_chu") or "") + \
+            ("; " if row.get("ghi_chu") else "") + "[rasoat-merge] ô trống cần điền: " + ", ".join(thieu)
+    return ([row] if sohieu or row.get("ten") else []), phat_hien, thieu
+
+
+def _rasoat_merge_units(docs):
+    """PURE (r213/b): gộp N tài liệu (khuôn §6 và/hoặc khuôn bảng có sẵn) thành MỘT khuôn
+    `mau_bang_tong_hop_phat_hien.v1` mà `rasoat_phuluc.py` đọc thẳng được.
+
+    `docs` = [(ten_nguon, dict), …] — GIỮ THỨ TỰ đầu vào để kết quả TẤT ĐỊNH (gọi hai lần trên cùng
+    tập file phải ra byte y hệt; đây là điều kiện để golden/determinism khoá được).
+    Khuôn 'unknown' KHÔNG bị bỏ qua im lặng: dồn vào `bo_qua` để bên gọi rc≠0 — chính chỗ này là
+    nơi lỗi cũ trốn được (`van_ban += <chuỗi>` trải CHUỖI thành từng KÝ TỰ rồi mới chết ở nơi khác).
+    Dedup văn bản theo `so_hieu` (giữ bản đầu); phát hiện KHÔNG dedup ở đây — rasoat_phuluc.dedup()
+    mới là chỗ dedup xuyên luật, để nguyên tắc "đếm một lần" chỉ có MỘT chỗ cài."""
+    van_ban, noi_dung, nguon, thieu_o, bo_qua = [], [], [], [], []
+    seen_vb = set()
+    for ten, d in (docs or []):
+        shape = _rasoat_unit_shape(d)
+        if shape == "unit_v1":
+            vbs, nds, thieu = _rasoat_unit_to_bang(d, nguon=ten)
+            if thieu:
+                thieu_o.append({"nguon": ten, "so_hieu": str((d or {}).get("van_ban") or ""), "o_trong": thieu})
+        elif shape == "bang_v1":
+            vbs = [x for x in ((d or {}).get("van_ban") or []) if isinstance(x, dict)]
+            nds = [x for x in ((d or {}).get("noi_dung") or []) if isinstance(x, dict)]
+        else:
+            bo_qua.append({"nguon": ten, "ly_do": "KHUON_KHONG_NHAN_RA"})
+            continue
+        for r in vbs:
+            k = _rasoat_sohieu_key(r.get("so_hieu")) if r.get("so_hieu") else ""
+            if k and k in seen_vb:
+                continue
+            if k:
+                seen_vb.add(k)
+            van_ban.append(r)
+        noi_dung += nds
+        nguon.append({"nguon": ten, "khuon": shape, "so_van_ban": len(vbs), "so_phat_hien": len(nds)})
+    co_quan = next((str(d.get("co_quan")) for _t, d in (docs or [])
+                    if isinstance(d, dict) and d.get("co_quan")), "")
+    return {"schema": _RASOAT_BANG_SCHEMA, "co_quan": co_quan,
+            "van_ban": van_ban, "noi_dung": noi_dung,
+            "_nguon": nguon, "_thieu_o_metadata": thieu_o, "_bo_qua": bo_qua}
+
+
+def _rasoat_state_reconcile(state, master_unit_ids):
+    """PURE (r213 — khe hở H8 ĐO ĐƯỢC 26-07): phiên kế nhiệm chết THẬT sau khi ghi
+    `master/<unit>.json` nhưng TRƯỚC khi cập nhật state ⇒ state còn `doing` trong khi việc đã xong.
+    Card `rasoat_hoso` chỉ có luật "đơn vị doing mồ côi trả về pending" — áp thẳng luật đó ở đây sẽ
+    RÀ LẠI một đơn vị đã xong (tốn lượt, và đẻ phát hiện trùng số).
+
+    Luật hoà giải (r213):
+      doing + ĐÃ có master/<unit>.json  → done    (việc đã xong, chỉ mất bước ghi sổ)
+      doing + KHÔNG có master           → pending (đúng luật mồ côi cũ)
+      done                              → GIỮ NGUYÊN (bất biến done-không-reset, §0b)
+    Trả (state_moi, thay_doi). Không sửa tại chỗ — state cũ giữ nguyên để so được 2 chiều."""
+    import copy as _copy
+    st = _copy.deepcopy(state) if isinstance(state, dict) else {}
+    have = {str(x).strip() for x in (master_unit_ids or []) if str(x).strip()}
+    thay_doi = []
+    for u in (st.get("q_units") or []):
+        if not isinstance(u, dict):
+            continue
+        uid, cur = str(u.get("unit_id") or ""), str(u.get("trang_thai") or "")
+        if cur != "doing" or not uid:
+            continue
+        moi = "done" if uid in have else "pending"
+        u["trang_thai"] = moi
+        thay_doi.append({"unit_id": uid, "tu": cur, "sang": moi,
+                         "can_cu": ("co master/" + uid + ".json") if moi == "done" else "khong co master"})
+    return st, thay_doi
+
+
+def _rasoat_meta_folder(a):
+    """r213/a: giải folder `_meta/` cho đường ghi state. Thứ tự: --folder-id → env
+    TL_META_FOLDER_ID (profile apply đã nạp từ `metaFolderId`). Trả (folder_id, loi).
+
+    Lỗi KHÔNG cụt lủn: sự cố PROFILE_META_FOLDER_KHONG_CO_TRONG_CONFIG (26-07) làm mất thời gian
+    đúng vì thông báo không chỉ đường; đường vòng ĐỌC-ONLY (profile-sync DRY, KHÔNG --apply) nay
+    do máy đọc ra, không phải người tự nhớ."""
+    fid = str(getattr(a, "folder_id", "") or "").strip()
+    if fid:
+        return fid, ""
+    fid = os.environ.get("TL_META_FOLDER_ID", "").strip()
+    if fid:
+        return fid, ""
+    return "", ("META_FOLDER_ID_TRONG — profile chưa có `metaFolderId`. Đọc marker KHÔNG cần --apply: "
+                "`tl --profile <P> profile-sync --json` → rows[].diffs[].marker; rồi truyền "
+                "`--folder-id <id>` hoặc đặt env TL_META_FOLDER_ID.")
+
+
+def _rasoat_state_find(g, folder_id, name):
+    """r213/a: tìm MỌI bản `name` trong folder `_meta/` (khớp tên CHÍNH XÁC — bài học
+    `_index_old_candidates`: startswith từng suýt trash nhầm file backup của người dùng)."""
+    items = (_gas_get_retry(g, "list", folderId=folder_id) or {}).get("items") or []
+    return [x for x in items
+            if str(x.get("name") or "") == name and str(x.get("type") or "") != "folder"]
+
+
+def cmd_state_get(a) -> int:
+    """r213/a — ĐỌC state rà hồ sơ từ Drive `_meta/` (WRITE_PATHS_v1). READ-ONLY.
+    rc=0 đọc được · rc=3 CHƯA CÓ trên Drive (lượt đầu — KHÔNG phải lỗi) · rc=2 lỗi thật."""
+    import base64
+    name = str(getattr(a, "name", "") or "rasoat_state.json").strip()
+    as_json = bool(getattr(a, "json", False))
+    ok, why = _rasoat_state_scope(name)
+    if not ok:
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": False, "error": why}, True)
+        return 2
+    fid, err = _rasoat_meta_folder(a)
+    if err:
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": False, "error": err}, True)
+        return 2
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        g = _gas()
+        cands = _rasoat_state_find(g, fid, name)
+    except SystemExit as e:
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": False,
+                             "error": "CAN_WEBAPP_LIVE: " + str(e)}, True)
+        return 2
+    except Exception as e:  # noqa: BLE001
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": False,
+                             "error": "LIST_FAILED: " + str(e)}, True)
+        return 2
+    if not cands:
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": True, "found": False,
+                             "name": name, "folderId": fid,
+                             "note": "chưa có state trên Drive — lượt rà ĐẦU TIÊN của hồ sơ này"}, True)
+        return 3
+    canh_bao = []
+    pick = cands[0]
+    if len(cands) > 1:
+        # >1 bản cùng tên = lần dọn trước hụt. Chọn bản MỚI NHẤT theo modifiedTime (`list` KHÔNG
+        # trả modifiedTime → phải hỏi `info` từng bản) và NÓI RA, không im lặng chọn bừa.
+        stamped = []
+        for c in cands:
+            try:
+                inf = (_gas_get_retry(g, "info", fileId=str(c.get("id"))) or {}).get("file") or {}
+            except Exception:  # noqa: BLE001
+                inf = {}
+            stamped.append((str(inf.get("modifiedTime") or ""), c))
+        stamped.sort(key=lambda t: t[0], reverse=True)
+        pick = stamped[0][1]
+        canh_bao.append("CO_%d_BAN_TRUNG_TEN — chọn bản mới nhất (%s); bản cũ chưa được dọn, "
+                        "`state-put` lượt sau sẽ dọn." % (len(cands), pick.get("id")))
+    try:
+        r = _gas_get_retry(g, "download", fileId=str(pick.get("id")))
+        body = base64.b64decode(r["b64"]).decode("utf-8")
+        state = json.loads(body)
+    except Exception as e:  # noqa: BLE001
+        _print_json_or_text({"schema": "rasoat_state_get.v1", "ok": False,
+                             "error": "DOWNLOAD_OR_PARSE_FAILED: " + str(e),
+                             "fileId": pick.get("id")}, True)
+        return 2
+    out_path = str(getattr(a, "out", "") or "").strip()
+    if out_path:
+        Path(out_path).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    payload = {"schema": "rasoat_state_get.v1", "ok": True, "found": True, "name": name,
+               "folderId": fid, "fileId": pick.get("id"), "bytes": len(body),
+               "out": out_path or None, "canh_bao": canh_bao}
+    if as_json:
+        payload["state"] = state
+    _print_json_or_text(payload, True)
+    return 0
+
+
+def cmd_state_put(a) -> int:
+    """r213/a — GHI state rà hồ sơ lên Drive `_meta/` (WRITE_PATHS_v1), KHÔNG cần người duyệt.
+
+    Đây là điểm cả kiến trúc xoay quanh: `_meta/rasoat_state.json` là nguồn sự thật resume, phải
+    ghi được sau MỖI đơn vị rà. Mượn cổng `profile-file-add --apply --confirm yes` là bắt người
+    duyệt mỗi lần chốt state ⇒ phá nghiệm thu H7 (≤2 lần xen/hồ sơ). Vì vậy lệnh này KHÔNG có
+    --confirm; đổi lại nó bị khoá bằng BA chốt máy:
+      1. `_rasoat_state_scope` — chỉ đúng tên trong WRITE_PATHS_v1, fail-CLOSED;
+      2. folder đích BẮT BUỘC là `_meta/` (--folder-id / TL_META_FOLDER_ID), không có mặc định root;
+      3. `--expect-claim` — TỪ CHỐI ghi khi `session_claim.id` trên Drive khác kỳ vọng (single-writer).
+    register/share="false" ⇒ KHÔNG vào registry, KHÔNG chia sẻ link (mặc định `upload` là
+    ANYONE_WITH_LINK — state để mở link công khai là rò rỉ, phải tắt TƯỜNG MINH).
+    THỨ TỰ AN TOÀN: tạo bản MỚI trước → mới dọn bản cũ. Chết giữa chừng = tồn 2 bản, `state-get`
+    lấy bản mới nhất và lượt `state-put` sau dọn nốt; đảo thứ tự thì chết giữa chừng = MẤT state."""
+    name = str(getattr(a, "name", "") or "rasoat_state.json").strip()
+    src = str(getattr(a, "in_file", "") or "").strip()
+    dry = bool(getattr(a, "dry_run", False))
+    ok, why = _rasoat_state_scope(name)
+    if not ok:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False, "error": why}, True)
+        return 2
+    if not src or not Path(src).is_file():
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "IN_FILE_KHONG_TON_TAI: " + (src or "(trống)")}, True)
+        return 2
+    try:
+        body_obj = json.loads(Path(src).read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "IN_FILE_KHONG_PHAI_JSON_HOP_LE: " + str(e)}, True)
+        return 2
+    fid, err = _rasoat_meta_folder(a)
+    if err:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False, "error": err}, True)
+        return 2
+    body = json.dumps(body_obj, ensure_ascii=False, indent=2)
+    if dry:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": True, "dry_run": True,
+                             "name": name, "folderId": fid, "bytes": len(body.encode("utf-8")),
+                             "se_lam": ["upload bản mới (register/share=false)", "trash bản cũ trùng tên"]}, True)
+        return 0
+    try:
+        load_creds(getattr(a, "config", None), getattr(a, "profile", None))
+        g = _gas()
+        olds = _rasoat_state_find(g, fid, name)
+    except SystemExit as e:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "CAN_WEBAPP_LIVE: " + str(e)}, True)
+        return 2
+    except Exception as e:  # noqa: BLE001
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "LIST_FAILED: " + str(e)}, True)
+        return 2
+    expect = str(getattr(a, "expect_claim", "") or "").strip()
+    if expect:
+        import base64 as _b64
+        cur_claim, doc_ok = "", False
+        if olds:
+            try:
+                r = _gas_get_retry(g, "download", fileId=str(olds[0].get("id")))
+                cur = json.loads(_b64.b64decode(r["b64"]).decode("utf-8"))
+                cur_claim = str(((cur or {}).get("session_claim") or {}).get("id") or "")
+                doc_ok = True
+            except Exception:  # noqa: BLE001
+                doc_ok = False
+        # FAIL-CLOSED: không đọc được bản trên Drive thì KHÔNG kết luận "chắc là khớp".
+        if olds and not doc_ok:
+            _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                                 "error": "EXPECT_CLAIM_KHONG_KIEM_DUOC — có bản trên Drive nhưng "
+                                          "đọc/parse hỏng; từ chối ghi đè."}, True)
+            return 2
+        if olds and cur_claim != expect:
+            _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                                 "error": "CLAIM_LECH", "claim_tren_drive": cur_claim,
+                                 "claim_ky_vong": expect,
+                                 "note": "phiên khác đang cầm claim — theo §9 stale-claim takeover: "
+                                         "chỉ chiếm quyền khi claim quá hạn mà con trỏ tiến độ KHÔNG nhích."}, True)
+            return 2
+    rid = _apply_journal_start("state-put", {"name": name, "folderId": fid, "old": len(olds)})
+    up = g.post("upload", b64=_b64_text(body), name=name, mime="application/json",
+                folderId=fid, convert="false", register="false", share="false", force="true")
+    new_id = up.get("fileId") or up.get("id")
+    if not new_id:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False, "step": "upload",
+                             "detail": up, "journal": rid}, True)
+        return 2
+    _journal_append(rid, {"t": "commit", "op": "state_upload", "key": new_id, "ok": True})
+    cleanup = []
+    for old in olds:
+        oid = str(old.get("id") or "")
+        if not oid or oid == new_id:
+            continue
+        _journal_append(rid, {"t": "intent", "op": "drive_trash", "key": oid, "set": {"restore": "action restore"}})
+        try:
+            tr = g.get("trash", fileId=oid, confirm="yes")
+        except Exception as e:  # noqa: BLE001
+            tr = {"ok": False, "error": str(e)}
+        _journal_append(rid, {"t": "commit", "op": "drive_trash", "key": oid, "ok": bool(tr.get("ok"))})
+        cleanup.append({"fileId": oid, "ok": bool(tr.get("ok"))})
+    don_ok = all(x.get("ok") for x in cleanup)
+    _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": True, "name": name, "folderId": fid,
+                         "fileId": new_id, "bytes": len(body.encode("utf-8")),
+                         "don_ban_cu": cleanup, "don_sach": don_ok, "journal": rid,
+                         "note": None if don_ok else "bản cũ chưa dọn hết — state-get vẫn đúng "
+                                                     "(lấy bản mới nhất), lượt state-put sau dọn tiếp."}, True)
+    return 0
+
+
+def cmd_rasoat_merge(a) -> int:
+    """r213/b — DỒN N phiếu `master/<unit>.json` (khuôn §6) thành MỘT bảng master mà
+    `rasoat_phuluc.py` đọc thẳng được. Đây là mắt xích PHA 4 mà Đợt 1–3 tả bằng lời ("dồn phát hiện
+    vào bảng master") nhưng không ai cài — nó sập ngay lần chạy thật đầu tiên (26-07).
+    Không gọi mạng, không NLM. rc=0 sạch · rc=2 lỗi/có file khuôn lạ bị bỏ."""
+    inp = str(getattr(a, "in_dir", "") or "").strip()
+    p = Path(inp) if inp else None
+    if not p or not p.exists():
+        _print_json_or_text({"schema": "rasoat_merge.v1", "ok": False,
+                             "error": "IN_KHONG_TON_TAI: " + (inp or "(trống)")}, True)
+        return 2
+    files = sorted(p.glob("*.json")) if p.is_dir() else [p]
+    docs, hong = [], []
+    for f in files:
+        try:
+            docs.append((f.name, json.loads(f.read_text(encoding="utf-8"))))
+        except Exception as e:  # noqa: BLE001
+            hong.append({"nguon": f.name, "ly_do": "JSON_HONG: " + str(e)})
+    merged = _rasoat_merge_units(docs)
+    bo_qua = (merged.get("_bo_qua") or []) + hong
+    merged["_bo_qua"] = bo_qua
+    out_path = str(getattr(a, "out", "") or "").strip() or str(
+        (p.parent if p.is_dir() else p.parent) / "BANG_MASTER.json")
+    Path(out_path).write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
+    # Hoà giải state (khe hở H8): CHỈ khi người gọi trỏ --state; sửa tại chỗ là quyết định của họ.
+    hoa_giai = None
+    st_path = str(getattr(a, "state", "") or "").strip()
+    if st_path and Path(st_path).is_file():
+        try:
+            st = json.loads(Path(st_path).read_text(encoding="utf-8"))
+            uids = [f.stem for f in files if f.suffix == ".json"]
+            st2, thay_doi = _rasoat_state_reconcile(st, uids)
+            if thay_doi and not bool(getattr(a, "dry_run", False)):
+                Path(st_path).write_text(json.dumps(st2, ensure_ascii=False, indent=2), encoding="utf-8")
+            hoa_giai = {"state": st_path, "thay_doi": thay_doi,
+                        "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
+        except Exception as e:  # noqa: BLE001
+            hoa_giai = {"state": st_path, "loi": str(e)}
+    out = {"schema": "rasoat_merge.v1", "ok": not bo_qua, "in": str(p), "out": out_path,
+           "so_file": len(files), "so_van_ban": len(merged.get("van_ban") or []),
+           "so_phat_hien": len(merged.get("noi_dung") or []),
+           "nguon": merged.get("_nguon"), "thieu_o_metadata": merged.get("_thieu_o_metadata"),
+           "bo_qua": bo_qua, "hoa_giai_state": hoa_giai,
+           "buoc_ke": "python scripts/rasoat_phuluc.py --in " + out_path + " --out-dir <out-dir>/phuluc"}
+    _print_json_or_text(out, True)
+    return 0 if not bo_qua else 2

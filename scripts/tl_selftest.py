@@ -20193,6 +20193,180 @@ def run() -> int:
         return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r212_guard_bundle_meta_khong_phu_thuoc_bind", _c212_guard_bundle_meta_khong_phu_thuoc_bind)
 
+    # ═════ r213 (ĐỢT 5): hai lỗ hổng lượt rà LIVE 26-07 + chốt mâu thuẫn doctrine nlm-auth-load ═════
+    def _r213_lookup_nobind():
+        """Nạp THẲNG tl_core/lookup_ops.py từ file — KHÔNG ai gọi bind() cho instance này.
+        Đây là đường `rasoat_phuluc.py` đi thật; test qua `_imp()` (đã bind) KHÔNG chứng minh được nó."""
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("lookup_ops_nobind_r213",
+                                           _ROOT209 / "scripts" / "tl_core" / "lookup_ops.py")
+        _m = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _c213_rasoat_ops_chay_duoc_khong_can_bind():
+        # Bẫy đã trả giá NGAY khi viết r213: bản đầu của `_rasoat_merge_units` gọi `_norm_compare_text`,
+        # chạy tốt qua `tl` (đã bind) nhưng NameError `unicodedata` khi rasoat_phuluc.py import trần.
+        # Khoá CẢ HAI đường: instance chưa bind phải chạy, và nguồn không được mượn lại helper đó.
+        _m = _r213_lookup_nobind()
+        _u = {"van_ban": "159-2025-ND-CP", "ten": "ND 159", "phat_hien": [{"key": "VD-01"}]}
+        ok0 = _m._rasoat_merge_units([("u1.json", _u)])["van_ban"][0]["so_hieu"] == "159-2025-ND-CP"
+        ok1 = _m._rasoat_sohieu_key("159/2025/ND-CP") == _m._rasoat_sohieu_key(" 159-2025-nd-cp ")
+        ok2 = _m._rasoat_state_scope("rasoat_state.json")[0] is True
+        _st, _ch = _m._rasoat_state_reconcile({"q_units": [{"unit_id": "u1", "trang_thai": "doing"}]}, ["u1"])
+        ok3 = _st["q_units"][0]["trang_thai"] == "done"
+        # PHẢN CHỨNG: nhóm _rasoat_* KHÔNG được gọi helper sống-nhờ-globals-tl. `_norm_compare_text`
+        # là cái đã cắn; nếu ai đó nối lại thì test này ĐỎ trước khi LIVE phát hiện.
+        _src = (_ROOT209 / "scripts" / "tl_core" / "lookup_ops.py").read_text(encoding="utf-8", errors="replace")
+        _blk = _src[_src.find("def _rasoat_sohieu_key"):]
+        ok4 = "_norm_compare_text(" not in _blk
+        return ok0 and ok1 and ok2 and ok3 and ok4
+    _t110("r213_rasoat_ops_chay_duoc_khong_can_bind", _c213_rasoat_ops_chay_duoc_khong_can_bind)
+
+    def _c213_gop_master_s6_chay_tron_chuoi_den_phu_luc():
+        # Sự cố 26-07: `rasoat_phuluc.py --in <out-dir>/master` SẬP (AttributeError 'str' has no 'get').
+        # PHA 4 = mắt xích DUY NHẤT giữa lớp điều phối và sản phẩm trình bày, chưa cổng máy nào phủ.
+        # Test chạy ĐÚNG đường sản xuất: subprocess `python scripts/rasoat_phuluc.py --in <thư mục master>`.
+        import os as _os213
+        import subprocess as _sp213
+        import sys as _sys213
+        import tempfile as _tf213
+        _u1 = {"unit_id": "unit-001", "van_ban": "159-2025-ND-CP", "ten": "ND 159", "trang_thai": "done",
+               "phat_hien": [{"key": "VD-01", "linh_vuc": "BHXH", "van_ban": "159-2025-ND-CP Dieu 1",
+                              "can_cu": "41-2024-QH15", "phan_tich": "x", "hinh_thuc": "sửa đổi, bổ sung",
+                              "muc_chac_chan": "cho_verify_nlm", "anchor": {"cite": "Dieu 1"}},
+                             {"key": "VD-02", "linh_vuc": "BHXH", "hinh_thuc": "nghiên cứu"}]}
+        _u2 = {"unit_id": "unit-002", "van_ban": "233-2025-ND-CP", "ten": "ND 233", "trang_thai": "done",
+               "phat_hien": [{"key": "VD-03", "linh_vuc": "BHXH", "hinh_thuc": "ban hành mới"}]}
+        with _tf213.TemporaryDirectory() as _d:
+            _md = _P209(_d) / "master"
+            _md.mkdir()
+            (_md / "unit-001.json").write_text(_j209.dumps(_u1, ensure_ascii=False), encoding="utf-8")
+            (_md / "unit-002.json").write_text(_j209.dumps(_u2, ensure_ascii=False), encoding="utf-8")
+            _env = dict(_os213.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+            _r = _sp213.run([_sys213.executable, str(_ROOT209 / "scripts" / "rasoat_phuluc.py"),
+                             "--in", str(_md), "--out-dir", str(_P209(_d) / "phuluc")],
+                            capture_output=True, text=True, encoding="utf-8", env=_env, timeout=120)
+            ok0 = _r.returncode == 0                                  # ĐỎ trước r213 (crash)
+            _out = {}
+            try:
+                _out = _j209.loads((_r.stdout or "").strip().splitlines()[-1])
+            except Exception:  # noqa: BLE001
+                ok0 = False
+            # 3 phát hiện: 1 vào 04, 1 vào 05, 1 rơi Mục F. 2 văn bản vào Phụ lục 03.
+            ok1 = (_out.get("counts", {}).get("04") == 1 and _out.get("counts", {}).get("05") == 1
+                   and _out.get("muc_f") == 1 and _out.get("n_van_ban") == 2)
+            ok2 = (_P209(_d) / "phuluc" / "PHU_LUC_03_07_BN_TONG_HOP.md").is_file()
+            # PHẢN CHỨNG 1: khuôn lạ KHÔNG được nuốt im lặng — phải rc≠0, không phải "0 phát hiện".
+            (_md / "rac.json").write_text('{"khong_phai_khuon_nao": 1}', encoding="utf-8")
+            _r2 = _sp213.run([_sys213.executable, str(_ROOT209 / "scripts" / "rasoat_phuluc.py"),
+                              "--in", str(_md), "--out-dir", str(_P209(_d) / "p2")],
+                             capture_output=True, text=True, encoding="utf-8", env=_env, timeout=120)
+            ok3 = _r2.returncode != 0 and "KHUÔN KHÔNG NHẬN RA" in (_r2.stderr or "") + (_r2.stdout or "")
+        # PHẢN CHỨNG 2: tái hiện THUẬT TOÁN CŨ trên đúng dữ liệu này — `van_ban += <chuỗi>` trải CHUỖI
+        # thành TỪNG KÝ TỰ. Chứng minh test bắt được nếu ai đó revert, không chỉ "bản mới chạy xanh".
+        _cu = []
+        _cu += _u1.get("van_ban", [])
+        ok4 = len(_cu) == len("159-2025-ND-CP") and _cu[0] == "1"     # đúng hành vi hỏng đã trả giá
+        return ok0 and ok1 and ok2 and ok3 and ok4
+    _t110("r213_gop_master_s6_chay_tron_chuoi_den_phu_luc", _c213_gop_master_s6_chay_tron_chuoi_den_phu_luc)
+
+    def _c213_merge_khuon_nhan_dien_2_chieu():
+        _m = _r213_lookup_nobind()
+        ok0 = _m._rasoat_unit_shape({"van_ban": "159-2025-ND-CP", "phat_hien": []}) == "unit_v1"
+        ok1 = _m._rasoat_unit_shape({"van_ban": [], "noi_dung": []}) == "bang_v1"
+        # CHIỀU NGƯỢC: file lai (có CẢ hai khoá) và file rác đều phải 'unknown' — đoán bừa ở đây là
+        # nuốt mất phát hiện mà không ai biết.
+        ok2 = _m._rasoat_unit_shape({"phat_hien": [], "noi_dung": []}) == "unknown"
+        ok3 = (_m._rasoat_unit_shape({"x": 1}) == "unknown" and _m._rasoat_unit_shape(None) == "unknown"
+               and _m._rasoat_unit_shape("chuoi") == "unknown")
+        # dedup văn bản theo số hiệu chuẩn hoá, nhưng KHÔNG dedup phát hiện (việc của rasoat_phuluc)
+        _g = _m._rasoat_merge_units([("a.json", {"van_ban": "159-2025-ND-CP", "phat_hien": [{"key": "A"}]}),
+                                     ("b.json", {"van_ban": "159/2025/ND-CP", "phat_hien": [{"key": "B"}]})])
+        ok4 = len(_g["van_ban"]) == 1 and len(_g["noi_dung"]) == 2 and not _g["_bo_qua"]
+        # KHÔNG BỊA: ô metadata suy không ra phải RỖNG và nổi lên _thieu_o_metadata
+        ok5 = (_g["van_ban"][0]["ngay"] == "" and _g["van_ban"][0]["hieu_luc_tu"] == ""
+               and any("ngay" in x["o_trong"] for x in _g["_thieu_o_metadata"]))
+        ok6 = bool(_m._rasoat_merge_units([("z.json", {"z": 1})])["_bo_qua"])
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r213_merge_khuon_nhan_dien_2_chieu", _c213_merge_khuon_nhan_dien_2_chieu)
+
+    def _c213_state_put_scope_fail_closed():
+        # state-put là lệnh GHI Drive CỐ Ý không có --confirm (mượn cổng duyệt = bắt người xen mỗi lần
+        # chốt state → phá nghiệm thu H7 ≤2 lần xen). Đổi lại phạm vi phải khoá CỨNG và FAIL-CLOSED.
+        _m = _r213_lookup_nobind()
+        ok0 = all(_m._rasoat_state_scope(n)[0] is True for n in _m._RASOAT_STATE_ALLOWED)
+        # CHIỀU NGƯỢC — mọi lối thoát khỏi `_meta/` đều phải bị chặn:
+        _xau = ["", None, "   ", "x.json", "../rasoat_state.json", "a/rasoat_state.json",
+                "a\\rasoat_state.json", ".rasoat_state.json", "rasoat_state.json.bak",
+                "tra_luat_registry", "RASOAT_STATE.JSON"]
+        ok1 = all(_m._rasoat_state_scope(n)[0] is False for n in _xau)
+        ok2 = all(isinstance(_m._rasoat_state_scope(n)[1], str) and _m._rasoat_state_scope(n)[1]
+                  for n in _xau)                                     # lý do TỪ CHỐI luôn nói ra
+        _src = (_ROOT209 / "scripts" / "tl_core" / "lookup_ops.py").read_text(encoding="utf-8", errors="replace")
+        _blk = _src[_src.find("def cmd_state_put"):]
+        # `upload` mặc định ANYONE_WITH_LINK + ghi registry ⇒ state để mặc định là RÒ RỈ + bẩn registry.
+        # Khoá 3 tham số này ở NGUỒN: mất một cái là đỏ, không đợi ai đọc lại code.
+        ok3 = all(s in _blk for s in ('register="false"', 'share="false"', 'force="true"'))
+        # THỨ TỰ AN TOÀN: upload bản mới TRƯỚC, trash bản cũ SAU (đảo lại = chết giữa chừng mất state)
+        ok4 = _blk.find('g.post("upload"') < _blk.find('g.get("trash"')
+        # không có --confirm là CHỦ ĐÍCH, nhưng cổng thật phải được khai trong registry
+        import tl_core.command_registry as _cr213
+        ok5 = (_cr213.COMMAND_META["state-put"].get("builtin_gate") == "rasoat_state_scope_guard"
+               and _cr213.COMMAND_META["state-put"]["requires_confirm"] is False
+               and _cr213.COMMAND_META["state-put"]["supports_dry_run"] is True)
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r213_state_put_scope_fail_closed", _c213_state_put_scope_fail_closed)
+
+    def _c213_state_hoa_giai_don_vi_doing():
+        # Khe hở H8 ĐO ĐƯỢC 26-07: phiên kế nhiệm chết THẬT sau khi ghi master/<unit>.json nhưng TRƯỚC
+        # khi cập nhật state ⇒ state còn `doing` dù việc đã xong. Luật cũ của card ("doing mồ côi → pending")
+        # áp thẳng sẽ RÀ LẠI đơn vị đã xong và đẻ phát hiện trùng số.
+        _m = _r213_lookup_nobind()
+        _st0 = {"q_units": [{"unit_id": "unit-001", "trang_thai": "doing"},
+                            {"unit_id": "unit-002", "trang_thai": "doing"},
+                            {"unit_id": "unit-003", "trang_thai": "done"},
+                            {"unit_id": "unit-004", "trang_thai": "pending"}]}
+        _st1, _ch = _m._rasoat_state_reconcile(_st0, ["unit-001", "unit-003"])
+        _tt = {u["unit_id"]: u["trang_thai"] for u in _st1["q_units"]}
+        ok0 = _tt["unit-001"] == "done"        # doing + CÓ master → done (không rà lại)
+        ok1 = _tt["unit-002"] == "pending"     # doing + KHÔNG master → pending (luật mồ côi cũ)
+        ok2 = _tt["unit-003"] == "done"        # done KHÔNG BAO GIỜ bị hạ (bất biến done-không-reset)
+        ok3 = _tt["unit-004"] == "pending"     # pending không bị đụng
+        ok4 = len(_ch) == 2 and {c["unit_id"] for c in _ch} == {"unit-001", "unit-002"}
+        # KHÔNG sửa tại chỗ — state gốc phải nguyên vẹn để so 2 chiều
+        ok5 = _st0["q_units"][0]["trang_thai"] == "doing"
+        # CHIỀU NGƯỢC: master rỗng ⇒ mọi doing về pending, KHÔNG có cái nào tự lên done
+        _st2, _ = _m._rasoat_state_reconcile(_st0, [])
+        ok6 = all(u["trang_thai"] != "done" for u in _st2["q_units"] if u["unit_id"] != "unit-003")
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r213_state_hoa_giai_don_vi_doing", _c213_state_hoa_giai_don_vi_doing)
+
+    def _c213_auth_carve_out_khong_pha_thu_tu():
+        # MÂU THUẪN DOCTRINE (đo 26-07): chuỗi `fix` xếp `nlm-auth-load` ở (1) trong khi §4b CẤM tự chạy.
+        # Cả hai đúng, khác NGỮ CẢNH (bootstrap headless vs giữa lượt rà). Chốt = CÂU TRỪ, không đảo thứ
+        # tự (đảo là phá nghiệm thu r208b), không nới §4b (nới là mở lại vòng lặp r208c đã đóng).
+        import nlm_cli as _nc213, tl_gws as _tg213
+        import tl_core.nlm_ops as _no213
+
+        def _thu_tu213(s):
+            _i = [str(s).find(x) for x in ("nlm-auth-load", "nlm-auth-pull", "nlm login")]
+            return all(x >= 0 for x in _i) and _i[0] < _i[1] < _i[2]
+        _chuoi213 = [_nc213.AUTH_FIX_HINT, _nc213.AUTH_FIX_HINT_SHORT, _no213._AUTH_FIX_FALLBACK,
+                     _tg213._AUTH_FIX_FALLBACK_GWS, _tg213._auth_fix_hint_short()]
+        ok0 = all(_thu_tu213(s) for s in _chuoi213)          # nghiệm thu r208b KHÔNG được vỡ
+        ok1 = all("§4b" in s and "KHÔNG tự chạy" in s for s in _chuoi213)
+        # câu trừ phải nói ĐI TIẾP (không-NLM), chứ không phải "dừng lượt rà"
+        ok2 = all(("không-NLM" in s) or ("khong-NLM" in s) for s in _chuoi213)
+        # CHIỀU NGƯỢC: doctrine ở tài liệu vẫn phải CẤM — câu trừ trong thông báo không được lặng lẽ
+        # thay thế điều cấm trong RASOAT_HOSO_LOOP/QUY_TRINH (2 nguồn phải cùng nói một điều).
+        _d1 = (_ROOT209 / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        _d2 = (_ROOT209 / "references" / "QUY_TRINH_RA_SOAT_3_TANG.md").read_text(encoding="utf-8", errors="replace")
+        ok3 = ("nlm-auth-load" in _d1 and "nlm-auth-load" in _d2
+               and "CẤM" in _d2)
+        return ok0 and ok1 and ok2 and ok3
+    _t110("r213_auth_carve_out_khong_pha_thu_tu", _c213_auth_carve_out_khong_pha_thu_tu)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

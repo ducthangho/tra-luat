@@ -946,6 +946,34 @@ GENERATED_SPECS = [
          {"flags": ['--refresh'], "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    # ── r213 (v1.35.49) ĐỢT 5: hai mắt xích BẮT BUỘC của lớp điều phối mà lượt rà LIVE 26-07 phơi ra ──
+    {"name": 'rasoat-merge', "handler": 'cmd_rasoat_merge',
+     "help": 'PHA 4: DỒN N phiếu master/<unit>.json (khuôn §6) → MỘT bảng master mà rasoat_phuluc.py đọc thẳng được. Không mạng, không NLM',
+     "args": [
+         {"flags": ['--in'], "dest": 'in_dir', "required": True, "help": 'thư mục master/ (hoặc 1 file .json)'},
+         {"flags": ['--out'], "help": 'file bảng master ra; mặc định <in>/../BANG_MASTER.json'},
+         {"flags": ['--state'], "help": 'kèm HOÀ GIẢI state: đơn vị doing mà ĐÃ có master → done, không có → pending'},
+         {"flags": ['--dry-run'], "dest": 'dry_run', "action": 'store_true', "help": 'không ghi lại --state (vẫn xuất bảng master)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'state-get', "handler": 'cmd_state_get',
+     "help": 'READ-ONLY: đọc state rà hồ sơ từ Drive _meta/ (WRITE_PATHS_v1). rc=3 = chưa có (lượt đầu), KHÔNG phải lỗi',
+     "args": [
+         {"flags": ['--name'], "default": 'rasoat_state.json', "help": 'tên file trong _meta/ (danh sách đóng)'},
+         {"flags": ['--folder-id'], "dest": 'folder_id', "help": 'folder _meta/; mặc định env TL_META_FOLDER_ID'},
+         {"flags": ['--out'], "help": 'ghi state ra file local'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'state-put', "handler": 'cmd_state_put',
+     "help": 'GHI state rà hồ sơ lên Drive _meta/ (WRITE_PATHS_v1) — KHÔNG cần người duyệt; khoá bằng danh sách tên đóng + folder _meta/ bắt buộc + --expect-claim',
+     "args": [
+         {"flags": ['--in'], "dest": 'in_file', "required": True, "help": 'file JSON state local để đẩy lên'},
+         {"flags": ['--name'], "default": 'rasoat_state.json', "help": 'tên file trong _meta/ (danh sách đóng)'},
+         {"flags": ['--folder-id'], "dest": 'folder_id', "help": 'folder _meta/; mặc định env TL_META_FOLDER_ID'},
+         {"flags": ['--expect-claim'], "dest": 'expect_claim', "help": 'TỪ CHỐI ghi nếu session_claim.id trên Drive khác (single-writer §9)'},
+         {"flags": ['--dry-run'], "dest": 'dry_run', "action": 'store_true'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'footnote-map', "handler": 'cmd_footnote_map',
      "help": 'B3: bản đồ sửa đổi cấp Điều từ footnote VBHN (marker[n]↔chú thích luật sửa) + PENDING_EFFECT',
      "args": [
@@ -1633,6 +1661,13 @@ COMMAND_META = {
     "xref":                  _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "frontier-expand":       _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "rasoat-loop":           _m("low", False, "local", False, False, False, None, None, False, None, generated=True),
+    # r213 ĐỢT 5 — state-put GHI Drive nhưng CỐ Ý không requires_confirm: mượn cổng duyệt = bắt người
+    # xen mỗi lần chốt state, phá nghiệm thu H7 (≤2 lần xen/hồ sơ). Cổng thật = builtin_gate
+    # (_rasoat_state_scope fail-CLOSED: danh sách tên đóng + folder _meta/ bắt buộc) + --dry-run.
+    "rasoat-merge":          _m("low", False, "local", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
+    "state-get":             _m("low", True, "none", False, False, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
+    "state-put":             dict(_m("medium", False, "drive", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
+                                  builtin_gate="rasoat_state_scope_guard"),
     "footnote-map":          _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "cluster":               _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "rasoat-chongcheo":      _m("low", True, "none", False, False, False, None, None, False, None, generated=True),

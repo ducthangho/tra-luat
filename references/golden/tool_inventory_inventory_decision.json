@@ -137,6 +137,7 @@
     "rasoat",
     "rasoat-chongcheo",
     "rasoat-loop",
+    "rasoat-merge",
     "recat",
     "reconcile",
     "reg-delete",
@@ -163,6 +164,8 @@
     "source-rename",
     "source-update-corpus",
     "source-verify",
+    "state-get",
+    "state-put",
     "status",
     "sweep",
     "the-thuc-build",
@@ -1386,6 +1389,16 @@
         "workflow_task": null,
         "write_scope": "local"
       },
+      "rasoat-merge": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": true,
+        "workflow_task": "rasoat_hoso",
+        "write_scope": "local"
+      },
       "recat": {
         "generated": true,
         "idempotency_contract": "recat",
@@ -1596,6 +1609,26 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "state-get": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "rasoat_hoso",
+        "write_scope": "none"
+      },
+      "state-put": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": "rasoat_hoso",
+        "write_scope": "drive"
+      },
       "status": {
         "generated": true,
         "idempotency_contract": null,
@@ -1778,10 +1811,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 147,
+      "generated_parsers": 150,
       "high_risk": 28,
-      "total": 154,
-      "write_commands": 79
+      "total": 157,
+      "write_commands": 81
     },
     "schema": "command_registry.v1"
   },

@@ -55,11 +55,11 @@ nào**; **chặn làn ghi** ⇒ nhận việc nhưng khai rõ Loop B đứng (ch
 | Bước | Việc | Lệnh/cơ chế CÓ THẬT |
 |---|---|---|
 | **A1** | Pha 0 tiền kiểm — chạy ĐỦ `PHA0_GATE_v1` b1–b6 (`references/QUY_TRINH_RA_SOAT_3_TANG.md`): b1 `doctor` · b2 `ping`/contract · b3 `precheck` · b4 `profile-doctor` · b5 auth · b6 canary. **Không tin mô hình tuổi cookie** — lượt nào cần NLM thì canary probe LIVE trước (van F7 r208d đã chuyển sang verdict LIVE). Chặn đứng ⇒ dừng SỚM khi chưa tiêu call truy vấn NLM nào | `tl doctor --json` · `tl ping --json` · `tl precheck --json` · `tl profile-doctor --json` · `tl nlm-auth-status --json` (schema v2, đọc `rotation_token_expired`) · `registry_orchestrator boot` |
-| **A2** | Nhận vai: ghi `session_claim` (id + giờ + `progress_ptr`) vào state. Claim cũ quá hạn **30′** mà `progress_ptr` KHÔNG nhích → chiếm quyền; còn nhích → phiên sau LÙI | RMW qua GAS |
+| **A2** | Nhận vai: `state-get` đọc state từ Drive → **HOÀ GIẢI đơn vị `doing`** (r213, khe hở H8 đo 26-07: phiên trước chết SAU khi ghi master nhưng TRƯỚC khi ghi state — `doing` mà ĐÃ có `master/<unit>.json` ⇒ `done`, không có ⇒ `pending`; `done` KHÔNG BAO GIỜ bị hạ) → ghi `session_claim` (id + giờ + `progress_ptr`) → `state-put`. Claim cũ quá hạn **30′** mà `progress_ptr` KHÔNG nhích → chiếm quyền; còn nhích → phiên sau LÙI | `tl state-get --json` · `tl rasoat-merge --state …` (hoà giải) · `tl state-put --in … --expect-claim <id cũ>` |
 | **A3** | Lấy đơn vị `pending` ưu tiên cao nhất: SÂU trước, và **ưu tiên NLM-ready** (nguồn đã `added` trong Q-NLM). Nguồn còn `pending` NLM → chỉ lấy khi hết việc khác, phát hiện tự mang `muc_chac_chan="cho_verify_nlm"` | `scripts/rasoat_worksheet.py` (chấm SÂU/ĐỐI CHIẾU/—) |
 | **A4** | Rà 3 tầng: T1 cache tất định → T2 quét thô → T3 đào sâu; mở rộng frontier | `tl extract --dieu N` · `tl tra_cuu --cite --exact` · `tl nlm-query`/`nlm-cross` scoped · `tl frontier-expand --json` |
 | **A5** | VERIFY từng phát hiện — **nguyên văn CHỈ từ cache/raw**; fail verify ⇒ KHÔNG ghi | `nlm_qa verify` (đường `tl`); chế độ không-NLM → §4b |
-| **A6** | Ghi `master/<unit>.json` (kèm `anchor` + `muc_chac_chan`) → đánh `done` → **cập nhật state NGAY** (không dồn cuối phiên) | ghi NGOÀI cây skill (§7) |
+| **A6** | Ghi `master/<unit>.json` (kèm `anchor` + `muc_chac_chan`) → đánh `done` → **cập nhật state NGAY** (không dồn cuối phiên) | ghi NGOÀI cây skill (§7); `tl state-put --in <out-dir>/rasoat_state.json` |
 | **A7** | Ứng viên mới → Q-INGEST (§3); Điều liên quan mới → Q-UNITS; văn bản mới flip corpus → sinh đơn vị `doi_chieu_bo_sung` (§3.6) | phân loại theo phạm vi kickoff |
 | **A8** | **Đóng gói chủ động** (§8) → note bàn giao → NHẢ claim → thoát êm | state là file nên "thoát" = không làm gì thêm |
 
@@ -119,6 +119,16 @@ lượt trả nợ kiểm chéo tuần tự, đạt thì nâng hạng. Sửa aut
 `nlm-auth-load` (ghi đè jar bằng bản cũ/cũng chết); không tin `nlm login --check` (FALSE-GREEN), chốt
 duy nhất là probe LIVE. **Vòng RÀ không bao giờ dừng vì cookie.**
 
+> **Mâu thuẫn doctrine đã chốt (r213 — đo 26-07).** Chuỗi khắc phục của `nlm-auth-status` xếp
+> `tl nlm-auth-load` ở vị trí **(1)**, ngược hẳn điều cấm ngay trên. Cả hai đều đúng, khác NGỮ CẢNH:
+> vị trí (1) là đường **bootstrap Cowork/headless** — ở đó máy chưa có jar nào và `nlm-auth-load` là
+> đường duy nhất chạy được không cần browser. Trong **lượt rà** thì ngược lại: jar đang sống hoặc vừa
+> chết, nạp bundle đè lên là quay vòng vô ích. ⇒ **Không đảo thứ tự** (đảo là phá đường bootstrap,
+> nghiệm thu r208b) và **không nới điều cấm** (nới là mở lại vòng lặp r208c đã đóng); thay vào đó mọi
+> thông báo auth nay mang sẵn **câu trừ** trỏ về §4b, vì agent đọc thông báo lỗi thường không đọc
+> doctrine. Chốt chặn hạ cấp `_nlm_auth_load_downgrade` (r208c) vẫn giữ — nó chặn bản CŨ hơn nhưng
+> KHÔNG chặn được bản mới-hơn-mà-cũng-chết, nên câu trừ là lớp phòng thủ còn thiếu.
+
 ## §5. LÀN LỖI — degrade-and-continue
 
 > Đặc tả đầy đủ (4 bước, phân hạng, khuôn sổ `BUG_LEDGER_v1`, luật sửa nóng):
@@ -174,6 +184,27 @@ QUY TẮC ĐIỀN:
 Phiên chính nhận JSON → validate schema → ghi `master/<unit>.json` → cập nhật state. JSON sai schema:
 KHÔNG ghi, đánh `blocked` + ghi Q-BUGS.
 
+### §6b. PHA 4 — DỒN N PHIẾU ĐƠN VỊ → BẢNG MASTER → PHỤ LỤC
+
+Khuôn `master/<unit>.json` (trên) và khuôn bảng master (`templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json`)
+khớp ở tầng **item** nhưng lệch ở tầng **container**: §6 để `van_ban` là CHUỖI số hiệu và phát hiện dưới
+`phat_hien`; bảng cần `van_ban` là DANH SÁCH metadata (cho Phụ lục 03) và `noi_dung` phẳng. Bước "dồn"
+này Đợt 1–3 chỉ tả bằng lời nên **không ai cài — PHA 4 sập thật ngày 26-07**. Từ r213 nó là lệnh:
+
+```bash
+tl rasoat-merge --in <out-dir>/master --out <out-dir>/BANG_MASTER.json \
+                --state <out-dir>/rasoat_state.json --json      # --state = kèm hoà giải đơn vị doing
+python scripts/rasoat_phuluc.py --in <out-dir>/BANG_MASTER.json --out-dir <out-dir>/phuluc
+```
+
+`rasoat_phuluc.py` nay **tự nhận khuôn §6** (dùng chung đúng hàm quy đổi), nên `--in <out-dir>/master`
+cũng chạy thẳng. Khuôn KHÔNG nhận ra ⇒ **rc≠0 nói rõ file nào**, không nuốt im lặng (bản cũ gặp
+`van_ban` là chuỗi thì `+=` trải CHUỖI thành TỪNG KÝ TỰ rồi mới chết sai chỗ).
+
+**KHÔNG BỊA metadata:** đơn vị rà chỉ biết số hiệu + tên; `ngay`/`hieu_luc_tu`/`tinh_trang` nằm ở
+registry chứ không nằm trong phiếu rà ⇒ để **RỖNG** và nổi lên `_thieu_o_metadata` để người điền. Đơn
+vị nào muốn đủ ô thì mang sẵn `van_ban_meta` (dict, tuỳ chọn) trong `master/<unit>.json`.
+
 ## §7. ĐƯỜNG GHI LÚC CHẠY (bất biến §B.5: state biến động NGOÀI cây skill)
 
 Cây skill được hash toàn bộ vào `package_hash`; mọi file đổi theo lượt rà mà nằm trong cây sẽ làm
@@ -189,6 +220,25 @@ _meta/rasoat_state.json
 `_meta/…` = trên Drive trong profile hồ sơ (bền, sống qua kill/sandbox). `<out-dir>` = thư mục local
 NGOÀI cây skill (`--out-dir`), đẩy Drive theo lô ở checkpoint; Claude chat đẩy sau MỖI đơn vị vì sandbox
 xoá trắng mỗi phiên. Chỉ **MẪU rỗng** (`templates/`) được nằm trong cây và vào zip.
+
+**LỆNH GHI/ĐỌC STATE (r213 — trước đó doc bắt state ở Drive mà KHÔNG lệnh nào ghi được; lượt rà 26-07
+phải giữ state local, không sống nổi ca §7 sandbox xoá trắng):**
+
+```bash
+tl --profile "<hồ sơ>" state-get --out <out-dir>/rasoat_state.json --json    # rc=3 = chưa có (lượt đầu)
+tl --profile "<hồ sơ>" state-put --in <out-dir>/rasoat_state.json --expect-claim <id> --json
+```
+
+`state-put` **KHÔNG có `--confirm`** — và đó là chủ đích: mượn cổng duyệt (`profile-file-add --apply`)
+là bắt người xen MỖI lần chốt state, phá nghiệm thu ≤2 lần xen của H7. Đổi lại nó bị khoá bằng ba chốt
+máy: (1) danh sách tên ĐÓNG `rasoat_state.json`/`rasoat_approvals.json`, fail-CLOSED với mọi tên khác
+hoặc có đường dẫn; (2) folder đích BẮT BUỘC là `_meta/` (`--folder-id`/`TL_META_FOLDER_ID`, không có
+mặc định root); (3) `--expect-claim` từ chối ghi khi `session_claim.id` trên Drive đã khác (single-writer
+§9). File ghi lên `register="false" share="false"` ⇒ KHÔNG vào registry, KHÔNG mở link công khai.
+Thứ tự an toàn: tạo bản MỚI trước, dọn bản cũ sau — chết giữa chừng thì `state-get` vẫn lấy bản mới nhất.
+
+`metaFolderId` rỗng trong config? Đọc marker KHÔNG cần `--apply`: `tl --profile <P> profile-sync --json`
+→ `rows[].diffs[].marker`.
 
 ## §8. ĐÓNG GÓI & BÀN GIAO (A8)
 

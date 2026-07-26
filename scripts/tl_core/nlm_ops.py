@@ -295,7 +295,8 @@ _SLOT_LIVE_DIFF_WARN = 2   # r208 (báo cáo 25-07 mục 2.2): lệch registry�
 # nlm_cli.AUTH_FIX_HINT*). Chỉ dùng ở chế độ suy hoá — selftest drift-lock bắt CẢ BA chuỗi phải nêu
 # ĐÚNG thứ tự nlm-auth-load → nlm-auth-pull → nlm login, nên bản dự phòng không lệch đường được.
 _AUTH_FIX_FALLBACK = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
-                      "→ `nlm login` (tương tác)")
+                      "→ `nlm login` (tương tác) · ⚠ ĐANG TRONG LƯỢT RÀ HỒ SƠ (RASOAT_HOSO_LOOP §4b): "
+                      "KHÔNG tự chạy (1)/(2) — chuyển chế độ không-NLM và ĐI TIẾP")   # r213 ĐỢT 5: câu trừ ngữ cảnh
 
 
 def nlm_auth_fix_hint(compact: bool = True) -> str:

@@ -738,6 +738,18 @@
         },
         {
           "available": true,
+          "command": "state-get --json"
+        },
+        {
+          "available": true,
+          "command": "state-put --in <out-dir>/rasoat_state.json --expect-claim <id> --json"
+        },
+        {
+          "available": true,
+          "command": "rasoat-merge --in <out-dir>/master --out <out-dir>/BANG_MASTER.json --state <out-dir>/rasoat_state.json --json"
+        },
+        {
+          "available": true,
           "command": "frontier-expand --json"
         },
         {
@@ -1144,7 +1156,7 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 154,
+    "checked_commands": 157,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
@@ -1152,7 +1164,7 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 182,
+    "available_commands": 185,
     "cards": 25,
     "groups": 11,
     "tasks": 60

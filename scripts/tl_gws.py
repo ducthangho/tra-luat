@@ -106,7 +106,8 @@ def _gws_cred_alive(timeout: float = 20.0) -> tuple[bool, str]:
 # hằng này). Bản dự phòng cuối chỉ dùng khi không nạp nổi adapter; drift-lock trong selftest bắt
 # MỌI biến thể phải nêu đúng thứ tự nlm-auth-load → nlm-auth-pull → nlm login.
 _AUTH_FIX_FALLBACK_GWS = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
-                          "→ `nlm login` (tương tác)")
+                          "→ `nlm login` (tương tác) · ⚠ ĐANG TRONG LƯỢT RÀ HỒ SƠ (RASOAT_HOSO_LOOP §4b): "
+                          "KHÔNG tự chạy (1)/(2) — chuyển chế độ không-NLM và ĐI TIẾP")   # r213 ĐỢT 5: câu trừ ngữ cảnh
 
 
 def _auth_fix_hint_short() -> str:

@@ -34,14 +34,25 @@ def _strip_keyring(s: str) -> str:
 # nhiều bước, thử `nlm-auth-pull` thì báo cụt lủn "thiếu TL_MASTER_KEY" không nói lấy ở đâu.
 # THỨ TỰ BẤT BIẾN (rẻ→đắt, headless→tương tác); selftest drift-lock giữ mọi thông điệp đi qua đây:
 _AUTH_FIX_ORDER = ("tl nlm-auth-load", "tl nlm-auth-pull", "nlm login")
+# ── r213 (v1.35.49) ĐỢT 5: NGOẠI LỆ NGỮ CẢNH — chốt mâu thuẫn doctrine phát hiện ở lượt rà 26-07 ──
+# Chuỗi trên xếp `nlm-auth-load` ở vị trí (1) trong khi RASOAT_HOSO_LOOP §4b + PHA 0 CẤM tự chạy nó.
+# Cả hai đều ĐÚNG, chỉ khác NGỮ CẢNH: (1) là đường bootstrap Cowork/headless — ở đó máy CHƯA có jar
+# nào, `nlm-auth-load` là đường duy nhất chạy được không cần browser. Trong LƯỢT RÀ thì ngược lại:
+# jar đang sống (hoặc vừa chết), nạp bundle đè lên là quay vòng vô ích, và §4b bắt đi tiếp không-NLM.
+# ⇒ KHÔNG đảo thứ tự (đảo là phá đường bootstrap — nghiệm thu r208b), KHÔNG nới §4b (nới là mở lại
+# đúng vòng lặp r208c đã đóng). Thêm CÂU TRỪ, vì agent đọc thông báo lỗi thường không đọc doctrine.
+# Chốt chặn hạ cấp `_nlm_auth_load_downgrade` (r208c) vẫn giữ: nó chặn ghi đè bằng bản CŨ hơn, nhưng
+# KHÔNG chặn được bản mới-hơn-mà-cũng-chết ⇒ câu trừ này là lớp phòng thủ còn thiếu.
+_AUTH_FIX_RASOAT_CARVE = ("⚠ ĐANG TRONG LƯỢT RÀ HỒ SƠ (RASOAT_HOSO_LOOP §4b): KHÔNG tự chạy (1)/(2) "
+                          "— chuyển chế độ không-NLM và ĐI TIẾP; xác thực để người làm NGOÀI lượt rà.")
 AUTH_FIX_HINT = (
     "Lỗi auth NLM — khắc phục THEO THỨ TỰ: (1) `tl nlm-auth-load` (kéo cookie mã hoá từ Drive bằng "
     "webapp token — CHẠY ĐƯỢC HEADLESS, không cần master key); (2) `tl nlm-auth-pull` (cần "
     "TL_MASTER_KEY — biến môi trường máy đã bootstrap, đặt bởi `tl-setup.ps1` hoặc "
     "`export TL_MASTER_KEY='<passphrase>'`); (3) `nlm login` (TƯƠNG TÁC — cần browser, KHÔNG chạy "
-    "được trong Cowork/headless).")
+    "được trong Cowork/headless). " + _AUTH_FIX_RASOAT_CARVE)
 AUTH_FIX_HINT_SHORT = ("🔴 AUTH hết hạn: `tl nlm-auth-load` → `tl nlm-auth-pull` (cần TL_MASTER_KEY) "
-                       "→ `nlm login` (tương tác, chỉ khi có browser)")
+                       "→ `nlm login` (tương tác, chỉ khi có browser) · " + _AUTH_FIX_RASOAT_CARVE)
 
 
 def _local_bin_paths() -> list[str]:

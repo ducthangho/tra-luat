@@ -2894,7 +2894,9 @@ def cmd_state_get(a) -> int:
     if out_path:
         Path(out_path).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     payload = {"schema": "rasoat_state_get.v1", "ok": True, "found": True, "name": name,
-               "folderId": fid, "fileId": pick.get("id"), "bytes": len(body),
+               # r213 (bắt ở lượt kiểm LIVE 26-07): PHẢI đếm BYTE utf-8, không phải KÝ TỰ — `state-put`
+               # đếm byte nên bản đầu báo 478/471 cho CÙNG một file (7 ký tự có dấu), nhìn như mất dữ liệu.
+               "folderId": fid, "fileId": pick.get("id"), "bytes": len(body.encode("utf-8")),
                "out": out_path or None, "canh_bao": canh_bao}
     if as_json:
         payload["state"] = state

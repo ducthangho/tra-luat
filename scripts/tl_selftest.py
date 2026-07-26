@@ -20315,7 +20315,12 @@ def run() -> int:
         ok5 = (_cr213.COMMAND_META["state-put"].get("builtin_gate") == "rasoat_state_scope_guard"
                and _cr213.COMMAND_META["state-put"]["requires_confirm"] is False
                and _cr213.COMMAND_META["state-put"]["supports_dry_run"] is True)
-        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+        # Bắt ở lượt kiểm LIVE 26-07: `state-get` đếm KÝ TỰ còn `state-put` đếm BYTE, cùng nhãn
+        # "bytes" ⇒ CÙNG một file báo 478 vs 471 (7 ký tự có dấu), nhìn hệt như mất dữ liệu khi
+        # đối chiếu round-trip. Hai đầu PHẢI cùng đơn vị.
+        _bget = _src[_src.find("def cmd_state_get"):_src.find("def cmd_state_put")]
+        ok6 = '"bytes": len(body.encode("utf-8"))' in _bget and '"bytes": len(body)' not in _bget
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r213_state_put_scope_fail_closed", _c213_state_put_scope_fail_closed)
 
     def _c213_state_hoa_giai_don_vi_doing():

@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.45 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.46 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -216,6 +216,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | OCR & chunk (local an toàn) | `ocr-analyze/run/verify` · `chunk-plan/apply/verify` |
 | NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
 | Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc/nlm-status` · `sweep` · `dedup-plan/corpus` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
+| Rà soát hồ sơ (điều phối) | `rasoat-loop --dry-rounds K` · `frontier-expand` — kịch bản: `references/RASOAT_HOSO_LOOP.md` |
 | Audit & release | `workflow-audit` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
 | Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
 
@@ -241,12 +242,11 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 
 ## 8. APPS SCRIPT WEBAPP
 Target contract = **2.21.2p** (`Code.2.21.2p.gs`, ĐÃ LIVE — verify `ping.version`, `registry_schema=reg_cols_row_kind_v1`, 27 cột). Tham số/khóa/gotcha MỌI action: **`references/API_CONTRACT.md`**.
-- **2.21.2m** (.gs chỉ còn repo dev — r194): như 2.21.2l (Cách B/`row_kind`, manifestScope, claims F-04/F-08) + export `row_kind` RAW (bỏ default 'own' — manifest == Sheet == reg_get; ĐẾM corpus/own GIỮ blank→own).
 - **`references/REGEN2_PROFILE_SCOPE_V1.19.5.md`:** quyết định best-combined, khác biệt hai nhánh và quy trình phục hồi an toàn.
 - Bản `.gs` đời trước (2.21.1→2.21.2h) ĐÃ đưa ra archive ngoài skill — chỉ giữ bản LIVE; lịch sử ở `DOCTRINE_APPENDIX.md`/`CHANGELOG.md`.
-- Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2m`, rồi `contract_check.py --audit`.
+- Deploy: `clasp push` + `clasp deploy -i` (GIỮ URL+token — xem gas-project/), `tl ping` phải ra `2.21.2p`, rồi `contract_check.py --audit`.
 - Cột registry mới muốn sống qua `regen2` → khai báo `REG_COLS_` + `REG_NLM_KEEP_` trong `.gs` → Deploy → `reg_addcols&confirm=yes`.
-- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2m`.
+- Lịch sử vá: F1–F16c → 2.21.2b; profile-scope guard → 2.21.2l. `API_CONTRACT.md`, `tl.py EXPECT_VERSION`, SKILL/RUNBOOK đồng bộ `2.21.2p`.
 
 ## 9. PHỤ THUỘC
 `pip install -r requirements.txt`. Cần env `TL_WEBAPP` / `TL_TOKEN` (mirror `tra_luat_config.json`).
@@ -299,6 +299,7 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/KERNEL_APPENDIX.md` | Trích NGUYÊN VĂN từ kernel (G1b): Cowork route tải-về §A · 45s tách-bước §B · sharding topology §C · profile marker §D — hiệu lực như kernel |
 | `references/THE_THUC_TRINH_BAY.md` | Thể thức 5 hệ + NEO (`the-thuc-check`/`-normalize`) |
 | `references/DOCTRINE_APPENDIX.md` | Toàn bộ doctrine mở rộng + lý do thiết kế |
+| `references/RASOAT_HOSO_LOOP.md` | Vòng lặp rà hồ sơ (Loop A/B/C) + prompt agent `tl-rasoat`; state: `references/RASOAT_PLAN_SCHEMA.md` |
 | `references/workflows/*.json` | Workflow cards máy-đọc (schema, risk, idempotency) |
 | `references/golden/*.json` | Golden fixtures tất định |
 | `CONTEXT.md` (gốc repo) | Từ điển thuật ngữ chuẩn của dự án |

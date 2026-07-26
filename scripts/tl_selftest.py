@@ -19838,6 +19838,87 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r209_the_rasoat_hoso_hop_le", _c209_the_rasoat_hoso_hop_le)
 
+    # ───── r210 (Đợt 2 lớp điều phối rà hồ sơ): H3 kịch bản vòng lặp · H4 agent rà đơn vị read-only ─────
+    _ROOT210 = _P209(__file__).resolve().parent.parent
+    _LOOP210 = (_ROOT210 / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+
+    def _write_paths210(text):
+        """PURE: bóc khối WRITE_PATHS_v1 + phán đường ghi nào NẰM TRONG cây skill (cấm — doctrine B.5)."""
+        i = text.find("<!-- WRITE_PATHS_v1")
+        j = text.find("-->", i + 1) if i >= 0 else -1
+        if i < 0 or j < 0:
+            return None, ["NO_WRITE_PATHS_BLOCK"]
+        rows = [ln.strip() for ln in text[i + len("<!-- WRITE_PATHS_v1"):j].splitlines() if ln.strip()]
+        bad = [r for r in rows if r.split("/")[0] in
+               {"references", "templates", "scripts", "docs", "agents", "reports"} or r.startswith(("/", "./", "../"))]
+        return rows, bad
+
+    def _c210_loop_khong_ghi_trong_cay():
+        # H3: MỌI đường ghi lúc chạy phải NGOÀI cây skill (state biến động lọt cây ⇒ package_hash lệch,
+        # release-verify/golden ĐỎ — r193/r202 đã trả giá). PHẢN CHỨNG 2 CHIỀU ở cuối.
+        rows, bad = _write_paths210(_LOOP210)
+        ok1 = rows is not None and len(rows) >= 3 and not bad
+        ok2 = any(r.startswith("_meta/") for r in (rows or [])) and any("<out-dir>" in r for r in (rows or []))
+        # phản chứng: bơm đường ghi TRONG cây → helper phải bắt
+        _fake = "<!-- WRITE_PATHS_v1\ntemplates/master.json\nreferences/x.json\n-->"
+        _r2, _b2 = _write_paths210(_fake)
+        ok3 = sorted(_b2) == ["references/x.json", "templates/master.json"]
+        # phản chứng 2: không có khối → fail-closed, không im lặng cho qua
+        _r3, _b3 = _write_paths210("tài liệu không khai đường ghi")
+        ok4 = _r3 is None and _b3 == ["NO_WRITE_PATHS_BLOCK"]
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r210_loop_khong_ghi_trong_cay", _c210_loop_khong_ghi_trong_cay)
+
+    def _c210_loop_doc_khop_the():
+        # H3 drift-guard: kịch bản (prose) ↔ thẻ máy (rasoat_hoso.json) phải nói CÙNG một thứ —
+        # tái dùng từ vựng hội tụ có sẵn (dry_rounds/max_iter/PAUSE), không đặt bộ mới.
+        card = _j209.loads((_ROOT210 / "references" / "workflows" / "rasoat_hoso.json").read_text(encoding="utf-8"))
+        ok1 = all(("**" + s + "**") in _LOOP210 for s in ("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"))
+        ok2 = all(tok in _LOOP210 for tok in ("dry_rounds", "max_iter", "PAUSE", "session_claim"))
+        ok3 = all((str(c).split() or [""])[0] in _LOOP210 for c in card.get("recommended_commands", []))
+        ok4 = ("dry_rounds ≥ 2" in _LOOP210) or ("dry_rounds >= 2" in _LOOP210)
+        # hằng số chốt phải khớp giữa 2 tài liệu (30' takeover · 6 đơn vị/phiên chat · TTL 90)
+        sch = (_ROOT210 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8", errors="replace")
+        ok5 = all(t in _LOOP210 for t in ("30′", "max_units_per_session", "40%", "60%")) and "30 phút" in sch
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r210_loop_doc_khop_the", _c210_loop_doc_khop_the)
+
+    def _c210_agent_prompt_dung_schema():
+        # H4: prompt agent phải trả ĐÚNG bộ trường của mẫu master (drift = phiên chính ghi hụt dữ liệu),
+        # và phải khai ranh giới read-only + cấm nguyên-văn-từ-RAG.
+        tp = _ROOT210 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        nd = _j209.loads(tp.read_text(encoding="utf-8"))["noi_dung"][0]
+        ok1 = all(('"' + k + '"') in _LOOP210 for k in nd if not k.startswith("_"))
+        ok2 = all(('"' + k + '"') in _LOOP210 for k in nd["anchor"])
+        ok3 = all(t in _LOOP210 for t in ("READ-ONLY", "--apply", "cache/raw"))
+        ok4 = "cho_verify_nlm" in _LOOP210 and "_vocab_hinh_thuc" in _LOOP210
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r210_agent_prompt_dung_schema", _c210_agent_prompt_dung_schema)
+
+    def _c210_agent_wrapper_ep_cung():
+        # H4/A1 (kho best-practice claude-subagents.md): wrapper dev-side ÉP CỨNG bằng frontmatter, không
+        # chỉ dặn bằng lời. `.claude/` bị loại khỏi gói (release exclude) ⇒ vắng file = LIVE, bỏ qua.
+        wp = _ROOT210 / ".claude" / "agents" / "tl-rasoat.md"
+        if not wp.exists():
+            return True
+        fm = wp.read_text(encoding="utf-8", errors="replace").split("---")[1]
+        ok1 = "disallowedTools:" in fm and all(t in fm for t in ("Write", "Edit"))
+        ok2 = "tools:" in fm and not any(t in fm.split("disallowedTools")[0] for t in ("Write", "Edit"))
+        ok3 = "maxTurns:" in fm
+        return ok1 and ok2 and ok3
+    _t110("r210_agent_wrapper_ep_cung", _c210_agent_wrapper_ep_cung)
+
+    def _c210_skill_tro_kich_ban_va_gas_dung_ban():
+        # SKILL.md phải trỏ kịch bản mới (guard r209 đã bắt con trỏ đứt) VÀ hết nhắc GAS 2.21.2m —
+        # bản LIVE là 2.21.2p; dòng "tl ping phải ra 2.21.2m" là chỉ dẫn SAI đã sửa cùng đợt.
+        sk = (_ROOT210 / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        ok1 = "references/RASOAT_HOSO_LOOP.md" in sk and "rasoat-loop" in sk
+        ok2 = "2.21.2m" not in sk and sk.count("2.21.2p") >= 3
+        ok3 = ("references/RASOAT_HOSO_LOOP.md" in _rel209._RELEASE_REQUIRED_FILES
+               and "references/RASOAT_PLAN_SCHEMA.md" in _rel209._RELEASE_REQUIRED_FILES)
+        return ok1 and ok2 and ok3
+    _t110("r210_skill_tro_kich_ban_va_gas_dung_ban", _c210_skill_tro_kich_ban_va_gas_dung_ban)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -19919,6 +19919,245 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r210_skill_tro_kich_ban_va_gas_dung_ban", _c210_skill_tro_kich_ban_va_gas_dung_ban)
 
+    # ───── r211 (Đợt 3 lớp điều phối): H5 degrade-and-continue + sổ lỗi · H6 kickoff contract + PHA 0 ─────
+    _QT211 = (_ROOT209 / "references" / "QUY_TRINH_RA_SOAT_3_TANG.md").read_text(encoding="utf-8", errors="replace")
+    _LOOP211 = _LOOP210  # cùng file kịch bản, đã đọc ở khối r210
+    _LEDGER_FIELDS211 = ("ma", "thoi_diem", "version_do_duoc", "lenh_tai_hien",
+                         "hau_qua", "phan_loai", "duong_vong", "don_vi")
+
+    def _block211(text, tag):
+        """PURE: bóc khối máy-đọc `<!-- <tag> … -->` thành dict key → [giá trị tách bằng '|'].
+        Không có khối ⇒ (None, ["NO_BLOCK:<tag>"]) — fail-closed, KHÔNG im lặng cho qua
+        (cùng idiom WRITE_PATHS_v1 của r210: đặc tả phải máy đọc được thì guard mới bắt được drift)."""
+        head = "<!-- " + tag
+        i = text.find(head)
+        j = text.find("-->", i + 1) if i >= 0 else -1
+        if i < 0 or j < 0:
+            return None, ["NO_BLOCK:" + tag]
+        out, errs = {}, []
+        for ln in text[i + len(head):j].splitlines():
+            ln = ln.strip()
+            if not ln:
+                continue
+            if ":" not in ln:
+                errs.append("NO_COLON:" + ln[:40])
+                continue
+            k, v = ln.split(":", 1)
+            out[k.strip()] = [p.strip() for p in v.split("|") if p.strip()]
+        return out, errs
+
+    def _ledger_entry_ok211(entry, fields):
+        """PURE: mục sổ lỗi HỢP LỆ ⇔ đủ MỌI trường bắt buộc và không trường nào rỗng.
+        Thiếu/rỗng ⇒ coi như CHƯA ghi sổ (sổ cụt còn tệ hơn không có sổ: nó giả vờ đã có vết)."""
+        return bool(fields) and all(str(entry.get(f, "")).strip() for f in fields)
+
+    def _c211_so_loi_dung_khuon():
+        # H5: khuôn sổ lỗi phải máy đọc được, ĐÚNG 8 trường, ĐÚNG 2 hạng — và `version_do_duoc`
+        # là bắt buộc (bài học LIVE drift: kết luận "skill lỗi" đo trên bản trễ là vô giá trị).
+        blk, errs = _block211(_QT211, "BUG_LEDGER_v1")
+        ok1 = blk is not None and not errs
+        fields = tuple(blk.get("truong_bat_buoc", [])) if blk else ()
+        ok2 = fields == _LEDGER_FIELDS211
+        ok3 = blk is not None and blk.get("phan_loai") == ["workaround", "blocker"]
+        good = {f: "x" for f in fields}
+        ok4 = _ledger_entry_ok211(good, fields)
+        # phản chứng 1: thiếu version_do_duoc ⇒ KHÔNG hợp lệ
+        _miss = dict(good)
+        _miss.pop("version_do_duoc", None)
+        ok5 = not _ledger_entry_ok211(_miss, fields)
+        # phản chứng 2: có trường nhưng RỖNG cũng không tính là đã ghi
+        _empt = dict(good)
+        _empt["lenh_tai_hien"] = "   "
+        ok6 = not _ledger_entry_ok211(_empt, fields)
+        # phản chứng 3: tài liệu không khai khuôn ⇒ fail-closed
+        _b, _e = _block211("tài liệu không khai khuôn sổ", "BUG_LEDGER_v1")
+        ok7 = _b is None and _e == ["NO_BLOCK:BUG_LEDGER_v1"]
+        # tên sổ phải TRÙNG đường ghi đã khoá ở WRITE_PATHS_v1 (r210) — không đẻ tên file thứ hai
+        _rows, _bad = _write_paths210(_LOOP211)
+        ok8 = (not _bad) and any(r.endswith("rasoat_bugs.md") for r in (_rows or [])) \
+            and "rasoat_bugs.md" in _QT211 and "rasoat_bugs.md" in _LOOP211
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    _t110("r211_so_loi_dung_khuon", _c211_so_loi_dung_khuon)
+
+    def _drain211(units, loi, blk):
+        """PURE: mô phỏng MỘT lượt drain theo đúng luật LÀN LỖI đã khai trong tài liệu.
+        `loi` = {unit_id: (ma, phan_loai)}. workaround ⇒ đơn vị vẫn tới `done`; blocker ⇒ `blocked`
+        rồi ĐI TIẾP đơn vị khác. Chặn đứng toàn cục CHỈ khi lượt này không đơn vị nào `done` VÀ mọi
+        đơn vị blocked cùng MỘT `ma`."""
+        fields = tuple(blk.get("truong_bat_buoc", []))
+        hang = list(blk.get("phan_loai", []))
+        st, so, ptr, tien = {}, [], None, 0
+        for u in units:
+            e = loi.get(u)
+            pl = e[1] if e else None
+            if e is not None and pl in hang:
+                _m = {"ma": e[0], "thoi_diem": "2026-07-26T10:00", "version_do_duoc": "1.35.47",
+                      "lenh_tai_hien": "tl extract --dieu 1", "hau_qua": "khong doc duoc don vi",
+                      "phan_loai": pl, "don_vi": u,
+                      "duong_vong": "khong co" if pl == "blocker" else "--method auto"}
+                so.append({f: _m.get(f, "") for f in fields})
+            st[u] = "blocked" if pl == "blocker" else "done"
+            if st[u] == "done":
+                tien += 1
+                ptr = u  # con trỏ tiến độ nhích = PLAN vẫn tiến
+        _blocked = [u for u in units if st.get(u) == "blocked"]
+        _ma = {loi[u][0] for u in _blocked}
+        return {"trang_thai": st, "so": so, "tien": tien, "ptr": ptr,
+                "chan_dung": bool(_blocked) and tien == 0 and len(_ma) == 1,
+                "so_hop_le": bool(so) and all(_ledger_entry_ok211(m, fields) for m in so)}
+
+    def _c211_degrade_khong_dung_vong():
+        # H5 (nghiệm thu kế hoạch): bơm 1 lỗi giả lập GIỮA vòng rà → ghi ledger và CHẠY TIẾP, PLAN vẫn tiến.
+        blk, _e = _block211(_QT211, "BUG_LEDGER_v1")
+        if blk is None:
+            return False
+        units = ["u1", "u2", "u3", "u4", "u5", "u6"]
+        ra = _drain211(units, {"u2": ("EXTRACT_CUT", "blocker")}, blk)
+        ok1 = (not ra["chan_dung"]) and ra["trang_thai"]["u2"] == "blocked" and ra["tien"] == 5
+        ok2 = len(ra["so"]) == 1 and ra["so_hop_le"] and ra["ptr"] == "u6"
+        # lỗi có đường vòng: đơn vị vẫn tới done NHƯNG vẫn phải ghi sổ (workaround không được im lặng)
+        rb = _drain211(units, {"u2": ("NLM_AUTH_DEAD", "workaround")}, blk)
+        ok3 = rb["trang_thai"]["u2"] == "done" and rb["tien"] == 6 and len(rb["so"]) == 1 and not rb["chan_dung"]
+        # PHẢN CHỨNG 1: mọi đơn vị blocked bởi CÙNG một mã ⇒ chặn đứng THẬT, phải dừng
+        rc = _drain211(units, {u: ("GAS_DOWN", "blocker") for u in units}, blk)
+        ok4 = rc["chan_dung"] and rc["tien"] == 0
+        # PHẢN CHỨNG 2: blocked hết nhưng KHÁC mã ⇒ KHÔNG phải chặn đứng (mã khác = còn đường khác để thử)
+        rd = _drain211(units, {u: ("MA_" + u, "blocker") for u in units}, blk)
+        ok5 = not rd["chan_dung"]
+        # PHẢN CHỨNG 3: khuôn đòi trường mà sổ không có ⇒ so_hop_le FALSE (không cho ghi sổ cụt)
+        rf = _drain211(units, {"u3": ("X", "blocker")},
+                       {"truong_bat_buoc": ["ma", "truong_khong_ai_dien"], "phan_loai": ["workaround", "blocker"]})
+        ok6 = len(rf["so"]) == 1 and not rf["so_hop_le"]
+        # drift prose: cả quy trình lẫn kịch bản phải nói CÙNG bộ từ vựng + bất biến không-giả-done
+        ok7 = all(t in _QT211 for t in ("workaround", "blocker", "Chặn đứng toàn cục", "KHÔNG giả `done`")) \
+            and all(t in _LOOP211 for t in ("`workaround`", "`blocker`", "PLAN vẫn tiến"))
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r211_degrade_khong_dung_vong", _c211_degrade_khong_dung_vong)
+
+    def _sua_nong211(phan_loai, chan_dung, moi_truong):
+        """PURE: luật sửa nóng — CHỈ chặn đứng toàn cục mới được bỏ vòng rà đi vá, và vá ở CANONICAL
+        theo quy trình (test rXX_ + deploy tay). Không có nhánh nào vá tại LIVE: deploy là bước tay
+        nên vá tại chỗ sẽ bị đè ở lần deploy sau, và mọi kết luận sau đó hết tái lập."""
+        if phan_loai not in ("workaround", "blocker"):
+            return "phan_loai_la"
+        return "va_tai_canonical" if chan_dung else "gom_va_sau_luot_ra"
+
+    def _c211_sua_nong_chi_khi_chan_dung():
+        # H5: "sửa nóng CHỈ khi chặn đứng; còn lại gom vá sau lượt rà" — và LIVE không bao giờ là nơi vá.
+        ok1 = all(_sua_nong211(pl, False, mt) == "gom_va_sau_luot_ra"
+                  for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
+        ok2 = all(_sua_nong211(pl, True, mt) == "va_tai_canonical"
+                  for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
+        # PHẢN CHỨNG: không tồn tại đầu vào nào khiến máy vá tại LIVE
+        ok3 = not [1 for pl in ("workaround", "blocker", "linh_tinh") for cd in (True, False)
+                   for mt in ("live", "canonical") if "live" in _sua_nong211(pl, cd, mt)]
+        ok4 = _sua_nong211("nghiem_trong", True, "live") == "phan_loai_la"  # hạng lạ ⇒ không tự suy diễn
+        blk, _e = _block211(_QT211, "BUG_LEDGER_v1")
+        ok5 = blk is not None and blk.get("sua_nong") \
+            and "chan_dung_toan_cuc" in blk["sua_nong"][0] and "CAM va tai LIVE" in blk["sua_nong"][0]
+        ok6 = all(t in _QT211 for t in ("CHỈ khi chặn đứng", "gom vá sau lượt rà", "test `rXX_`")) \
+            and "gom vá sau lượt rà" in _LOOP211
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r211_sua_nong_chi_khi_chan_dung", _c211_sua_nong_chi_khi_chan_dung)
+
+    def _pha0_run211(gate, hong, can_nlm=True):
+        """PURE: chạy cổng PHA 0 theo ĐÚNG thứ tự đã khai (b1–b4 trước; b5–b6 CHỈ khi lượt cần NLM).
+        Trả: đã chạy bước nào · có dừng sớm không · chế độ NLM · làn ghi · số call TRUY VẤN NLM đã tiêu
+        (cổng không bao giờ được tiêu call truy vấn nào — canary là notebook_get, ngoài ngân sách 60)."""
+        truoc = [k for k in gate if k[:2] in ("b1", "b2", "b3", "b4")]
+        sau = [k for k in gate if k[:2] in ("b5", "b6")]
+        da_chay, so, lan_ghi, che_do = [], [], "mo", "nlm"
+        for k in truoc + (sau if can_nlm else []):
+            da_chay.append(k[:2])
+            if k[:2] not in hong:
+                continue
+            verdict = (gate[k] or [""])[-1]
+            if verdict == "chan_dung":
+                return {"da_chay": da_chay, "dung_som": True, "bao_1_dong": True, "che_do": che_do,
+                        "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so + [k[:2]]}
+            so.append(k[:2])
+            if verdict == "chan_lan_ghi":
+                lan_ghi = "dung"
+            elif verdict == "co_fallback":
+                che_do = "khong_nlm"
+        return {"da_chay": da_chay, "dung_som": False, "bao_1_dong": False, "che_do": che_do,
+                "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so}
+
+    def _c211_pha0_chan_som_truoc_khi_tieu_nlm():
+        # H6: PHA 0 mở rộng — doctor/precheck/profile + canary probe LIVE. Hỏng chặn đứng ⇒ DỪNG SỚM khi
+        # CHƯA tiêu call truy vấn NLM nào; hỏng phiên NLM ⇒ tụt chế độ, KHÔNG dừng vòng (§4b tầng 3).
+        gate, errs = _block211(_QT211, "PHA0_GATE_v1")
+        ok1 = gate is not None and not errs and len([k for k in gate if k[:1] == "b"]) == 6
+        if gate is None:
+            return False
+        _k6 = [k for k in gate if k[:2] == "b6"]
+        ok2 = len(_k6) == 1 and gate[_k6[0]][-1] == "co_fallback"
+        # (a) canary chết giữa lượt CẦN NLM ⇒ không dừng, tụt chế độ không-NLM, 0 call truy vấn
+        ra = _pha0_run211(gate, {"b6"})
+        ok3 = (not ra["dung_som"]) and ra["che_do"] == "khong_nlm" and ra["nlm_query_calls"] == 0 and ra["so"] == ["b6"]
+        # (b) hỏng chặn đứng ở b1 ⇒ DỪNG SỚM, chưa hề chạm b5/b6, 0 call truy vấn, báo người 1 dòng
+        rb = _pha0_run211(gate, {"b1"})
+        ok4 = rb["dung_som"] and rb["bao_1_dong"] and rb["nlm_query_calls"] == 0 \
+            and "b5" not in rb["da_chay"] and "b6" not in rb["da_chay"]
+        # (c) hỏng làn ghi (precheck) ⇒ Loop B đứng nhưng Loop A vẫn rà — degrade chứ không dừng
+        rc = _pha0_run211(gate, {"b3"})
+        ok5 = (not rc["dung_som"]) and rc["lan_ghi"] == "dung" and rc["che_do"] == "nlm"
+        # (d) lượt KHÔNG cần NLM ⇒ không probe máy móc
+        rd = _pha0_run211(gate, set(), can_nlm=False)
+        ok6 = rd["da_chay"] == ["b1", "b2", "b3", "b4"]
+        # PHẢN CHỨNG: nếu hạ b6 thành `chan_dung` thì cookie chết sẽ GIẾT vòng rà — mô phỏng phải phân
+        # biệt được hai thế giới đó, nếu không test này vô nghĩa
+        _gia = dict(gate)
+        _gia[_k6[0]] = gate[_k6[0]][:-1] + ["chan_dung"]
+        ok7 = _pha0_run211(_gia, {"b6"})["dung_som"] and not ra["dung_som"]
+        # PHẢN CHỨNG 2: tài liệu không khai cổng ⇒ fail-closed
+        _b, _e2 = _block211("không khai cổng nào", "PHA0_GATE_v1")
+        ok8 = _b is None and _e2 == ["NO_BLOCK:PHA0_GATE_v1"]
+        ok9 = (gate.get("ngan_sach_truoc_cong") or [""])[0].startswith("0 call truy van NLM")
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9
+    _t110("r211_pha0_chan_som_truoc_khi_tieu_nlm", _c211_pha0_chan_som_truoc_khi_tieu_nlm)
+
+    def _c211_kickoff_du_muc_va_hang_so():
+        # H6: hợp đồng giao việc ĐỦ 8 mục, mục nào không có mặc định thì phải hỏi, và bộ hằng số
+        # KHÔNG được đẻ bản thứ hai — phải khớp RASOAT_PLAN_SCHEMA §4.
+        kc, errs = _block211(_LOOP211, "KICKOFF_CONTRACT_v1")
+        ok1 = kc is not None and not errs
+        if kc is None:
+            return False
+        muc = kc.get("muc_bat_buoc", [])
+        ok2 = len(muc) == 8 and muc[0] == "pham_vi_ho_so" and kc.get("khong_co_mac_dinh") == ["pham_vi_ho_so"]
+        ok3 = all(t in _LOOP211 for t in ("Phạm vi hồ sơ", "Uỷ quyền nạp", "Uỷ quyền nguồn tải", "Ngân sách",
+                                          "Chính sách lỗi", "Biến thể tự trị Loop B", "Môi trường & đường ghi",
+                                          "Nghiệm thu & điểm dừng"))
+        md = dict(p.split("=", 1) for p in kc.get("mac_dinh", []) if "=" in p)
+        ok4 = md == {"nlm": "60", "tvpl": "100", "dry_rounds": "2",
+                     "max_units_per_session": "6", "takeover_phut": "30", "ttl_ngay": "90"}
+        sch = (_ROOT209 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8", errors="replace")
+        ok5 = all(v in sch for v in ("**60 call**", "**100**", "**2**", "**6**", "**30 phút**", "**90**"))
+        ok6 = "PHA0_GATE_v1" in (kc.get("tien_kiem") or [""])[0] and "PHA0_GATE_v1" in _QT211 \
+            and "CAM doan" in (kc.get("thieu_muc") or [""])[0]
+        # phản chứng: hợp đồng cụt ⇒ đọc ra ĐÚNG số mục cụt, không im lặng làm tròn thành đủ
+        _f, _ = _block211("<!-- KICKOFF_CONTRACT_v1\nmuc_bat_buoc: a | b\n-->", "KICKOFF_CONTRACT_v1")
+        ok7 = _f["muc_bat_buoc"] == ["a", "b"] and len(_f["muc_bat_buoc"]) != len(muc)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r211_kickoff_du_muc_va_hang_so", _c211_kickoff_du_muc_va_hang_so)
+
+    def _c211_the_khop_luat_moi():
+        # drift-guard thẻ máy ↔ prose cho phần MỚI của Đợt 3 (thẻ là thứ `workflow-audit` gác fail-closed).
+        card = _j209.loads((_ROOT209 / "references" / "workflows" / "rasoat_hoso.json").read_text(encoding="utf-8"))
+        rules = " | ".join(card.get("rules", []))
+        ok1 = "PHA0_GATE_v1" in card["plan"][0] and "chua tieu call truy van NLM" in card["plan"][0]
+        ok2 = all(t in rules for t in ("workaround", "blocker", "rasoat_bugs.md", "VONG VAN TIEN"))
+        ok3 = "sua nong CHI khi chan dung toan cuc" in rules and "CAM va tai LIVE" in rules
+        cmds = [str(c).split()[0] for c in card.get("recommended_commands", [])]
+        avail = set(_wf209._available_commands_from_parser())
+        ok4 = all(c in avail for c in cmds) and all(c in _LOOP211 for c in cmds)
+        ok5 = {"doctor", "precheck", "nlm-auth-status"} <= set(cmds)
+        wa = _wf209._workflow_cards_audit()
+        ok6 = not [e for e in (wa.get("errors") or []) if "rasoat_hoso" in _j209.dumps(e, ensure_ascii=False)]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r211_the_khop_luat_moi", _c211_the_khop_luat_moi)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

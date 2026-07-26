@@ -14,10 +14,13 @@
     "reg-query --refresh --json",
     "profile-ingest --staged --json",
     "verify-staged --json",
-    "nlm-reconcile <nb> --all-notebooks"
+    "nlm-reconcile <nb> --all-notebooks",
+    "doctor --json",
+    "precheck --json",
+    "nlm-auth-status --json"
   ],
   "plan": [
-    "A1 Pha 0 tien kiem: ping + nlm-auth-status v2 + canary probe LIVE khi luot can NLM (khong tin mo hinh tuoi cookie)",
+    "A1 Pha 0 tien kiem PHA0_GATE_v1 b1-b6: doctor + ping/contract + precheck + profile-doctor, roi nlm-auth-status v2 + canary probe LIVE CHI khi luot can NLM (khong tin mo hinh tuoi cookie); fail chan dung -> dung som khi chua tieu call truy van NLM nao",
     "A2 nhan vai: ghi session_claim (id + gio + con tro tien do) vao _meta/rasoat_state.json qua RMW",
     "A3 lay don vi pending uu tien cao nhat (SAU truoc, uu tien NLM-ready; nguon chua vao NLM -> phat hien mang muc_chac_chan=cho_verify_nlm)",
     "A4 ra 3 tang (T1 cache tat dinh -> T2 quet tho -> T3 dao sau) + frontier-expand; NLM chet -> che do khong-NLM (quet cache truc tiep)",
@@ -44,7 +47,9 @@
     "stale-claim takeover: claim qua han 30 phut ma con tro tien do KHONG nhich -> phien moi chiem quyen qua RMW; con nhich -> phien sau LUI",
     "diem dung co chu dich giu nguyen: duyet lo --apply, deploy tay, ket luan cuoi + ky do nguoi",
     "state bien dong NAM NGOAI cay skill (package_hash) - chi MAU rong (templates/) nam trong cay",
-    "khong /compact giua phien ra - ban giao qua file trung thuc hon tom tat co mat mat"
+    "khong /compact giua phien ra - ban giao qua file trung thuc hon tom tat co mat mat",
+    "degrade-and-continue: loi co duong vong = workaround (don vi van den done), khong co = blocker (don vi blocked, KHONG gia done) - ca hai deu ghi so rasoat_bugs.md du 8 truong va VONG VAN TIEN",
+    "sua nong CHI khi chan dung toan cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE, loi le thi gom va sau luot ra"
   ],
   "idempotency_contract": {
     "unit_of_progress": "1 don vi ra = 1 file master/<unit>.json + 1 lan cap nhat state",

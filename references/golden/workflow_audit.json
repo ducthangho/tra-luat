@@ -755,6 +755,18 @@
         {
           "available": true,
           "command": "nlm-reconcile <nb> --all-notebooks"
+        },
+        {
+          "available": true,
+          "command": "doctor --json"
+        },
+        {
+          "available": true,
+          "command": "precheck --json"
+        },
+        {
+          "available": true,
+          "command": "nlm-auth-status --json"
         }
       ],
       "risk": "medium",

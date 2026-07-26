@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.46",
+  "skill_version": "1.35.47",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 188,
-  "total_bytes": 6250064,
-  "package_hash": "f8b2ea89cf2f7cfd394c481ef5db05b65ef8e52aa826147ad977577f81594529",
-  "content_hash": "f8b2ea89cf2f7cfd394c481ef5db05b65ef8e52aa826147ad977577f81594529",
+  "total_bytes": 6282299,
+  "package_hash": "f32f9695c84e2d6fc8034d3bad726b482c74bb5091c65c1b712cf32b982e1502",
+  "content_hash": "f32f9695c84e2d6fc8034d3bad726b482c74bb5091c65c1b712cf32b982e1502",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 132620,
-      "sha256": "82645344246a45a7db52aac25e08fa1dee85cdb606b939947288b98504709f77"
+      "size": 136973,
+      "sha256": "1fe8d45d4f9568da1a202b9ef6075d577d7ceade61ed80df38a7efa8f94d1736"
     },
     {
       "path": "CONTEXT.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 47924,
-      "sha256": "c34f31e0d61c62b06e9db27a932cb747b805960fc6dc789520c0f49210abf3fe"
+      "sha256": "55eb54c20e916da768b8e2a9bbd9f95fcdc02cd39455a81753699d48392b700f"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "fa15343c75101997086ad17d4dff80b50c91bef0aaf2340876afb8766e714020"
+      "sha256": "da28f2ad9c9835e2a88fee09fe7b230c87779f9cee7e0d405ed346c19447485d"
     },
     {
       "path": "agents/openai.yaml",
@@ -238,13 +238,13 @@
     },
     {
       "path": "references/QUY_TRINH_RA_SOAT_3_TANG.md",
-      "size": 9600,
-      "sha256": "646ddda7317d81ac877c88edd7832ef07ed601b55b391ea024e2719927d7de2b"
+      "size": 16904,
+      "sha256": "49c85bf0a60d87f5bfff3d2deae7e3f2243891efe2e11d2282b4655798f1e629"
     },
     {
       "path": "references/RASOAT_HOSO_LOOP.md",
-      "size": 14299,
-      "sha256": "a4394f7600503991bcbd27a2801bf9869c2cf84a4f9c7d8da78e7251eddfca05"
+      "size": 17331,
+      "sha256": "63c7dfba4d42f4d200a34cdbd332bd5961722c3d1163d9d204e17e47d27bfd8e"
     },
     {
       "path": "references/RASOAT_PLAN_SCHEMA.md",
@@ -423,8 +423,8 @@
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 28830,
-      "sha256": "9bec6952f985dc154ba71e66241edb6cb27f78fe5313210d9f13b1632f78e0ca"
+      "size": 29102,
+      "sha256": "0e62c358f60c015fcbfe359de7bdffabc02f467369ca2d66f1d0be5ec9561438"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -528,8 +528,8 @@
     },
     {
       "path": "references/workflows/rasoat_hoso.json",
-      "size": 3790,
-      "sha256": "09feede1001ec60ff3865484c1bc7726b3d8f5a69c6db7866193609e33c31ad7"
+      "size": 4332,
+      "sha256": "2179b7147b2566e1e0728240a27268adeadac130f562a516af749a22f6e36528"
     },
     {
       "path": "references/workflows/release_bundle.json",
@@ -739,7 +739,7 @@
     {
       "path": "scripts/tl.py",
       "size": 219299,
-      "sha256": "67ef042a61e950423b6665cf67bfd9c48b89c48b7641679c336cfbbcc5e93f74"
+      "sha256": "0c73da35d13d445779de685438e62c80e6af297d863723f5825ffe7546cfbfaa"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -903,8 +903,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1450029,
-      "sha256": "4beb95c570fa902c10e93943085b942bf93e80329159b1775e91352fc48fc141"
+      "size": 1466761,
+      "sha256": "64cf67476bc72caf4d292c0cd20cf32ea447bcd877c8440c47ba989d7e326886"
     },
     {
       "path": "scripts/tra_cuu.py",

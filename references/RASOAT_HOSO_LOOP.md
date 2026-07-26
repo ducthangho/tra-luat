@@ -20,23 +20,41 @@
 Lưới dưới cùng: registry ghi qua GAS có LockService + RMW nguyên tử (2.21.2p) — nhưng đó là lưới, KHÔNG
 phải giấy phép cho hai phiên cùng ghi.
 
-## §1. HỢP ĐỒNG GIAO VIỆC (kickoff — khung tối thiểu; H6 sẽ mở rộng phần tiền kiểm)
+## §1. HỢP ĐỒNG GIAO VIỆC (kickoff) — người giao việc MỘT lần, đủ 8 mục
 
-Người giao việc MỘT lần, nêu đủ 6 mục; thiếu mục nào thì hỏi trước khi chạy vòng lặp:
+Thiếu mục nào ⇒ **hỏi TRƯỚC khi chạy vòng lặp**, không tự đoán (đoán sai = rà nhầm phạm vi, tiêu ngân sách
+nhầm chỗ, hoặc nạp văn bản người ta không muốn). Mục có mặc định thì im lặng = nhận mặc định — mặc định
+lấy từ `references/RASOAT_PLAN_SCHEMA.md` §4, kickoff override được từng hồ sơ.
 
-1. **Phạm vi hồ sơ**: danh sách văn bản + profile đích (`--profile <P>`); hồ sơ = PROFILE (không đẻ khái niệm mới).
-2. **Uỷ quyền nạp**: được tự nạp văn bản THUỘC hồ sơ theo làn staged hay không.
-3. **Uỷ quyền nguồn tải**: mặc định tự tải từ `vbpl.vn` · `congbao.chinhphu.vn` · `*.chinhphu.vn` ·
-   `*.gov.vn` · `quochoi.vn` · `dangcongsan.vn`; nguồn gated (TVPL/LVN) đi kênh Chrome đăng-nhập-sẵn (§3.2).
-4. **Ngân sách**: NLM mặc định 60 call/hồ sơ; `quota_tvpl` 100/ngày (sổ đếm, không chặn sớm).
-5. **Chính sách lỗi**: degrade-and-continue (§5) — chỉ dừng toàn cục khi mọi đơn vị còn lại cùng blocked.
-6. **Biến thể tự trị Loop B**: TẮT mặc định; bật thì ghi rõ điều kiện hẹp (§3.4).
+| # | Mục | Người giao phải nêu | Im lặng = mặc định |
+|---|---|---|---|
+| 1 | **Phạm vi hồ sơ** | danh sách văn bản + profile đích (`--profile <P>`); hồ sơ = PROFILE, không đẻ khái niệm mới | **KHÔNG có mặc định — bắt buộc hỏi** |
+| 2 | **Uỷ quyền nạp** | được tự nạp văn bản THUỘC hồ sơ theo làn staged hay không | có: làn staged `corpus=false`, người duyệt LÔ tại ② |
+| 3 | **Uỷ quyền nguồn tải** | domain được tự tải; nguồn gated đi kênh Chrome đăng-nhập-sẵn | `vbpl.vn` · `congbao.chinhphu.vn` · `*.chinhphu.vn` · `*.gov.vn` · `quochoi.vn` · `dangcongsan.vn`; gated TVPL→LVN (§3.2) |
+| 4 | **Ngân sách** | NLM call/hồ sơ · `quota_tvpl`/ngày | 60 · 100 (sổ đếm + phản ứng, không chặn sớm) |
+| 5 | **Chính sách lỗi** | degrade-and-continue hay dừng sớm | degrade-and-continue (§5) — chỉ dừng khi mọi đơn vị còn lại cùng blocked |
+| 6 | **Biến thể tự trị Loop B** | bật/tắt; bật thì ghi rõ điều kiện hẹp | TẮT (§3.4) |
+| 7 | **Môi trường & đường ghi** | nơi chạy (local/Cowork/Claude chat) + `--out-dir` cho sổ nặng | local: `--out-dir` NGOÀI cây skill, đẩy Drive theo lô; chat: đẩy sau MỖI đơn vị (§7) |
+| 8 | **Nghiệm thu & điểm dừng** | ai nghiệm thu/ký; cần dự thảo Phiếu A–G hay chỉ bảng master | Phiếu A–G nháp + bảng master + Q-APPROVALS + sổ lỗi; ba điểm chạm ①②③ giữ nguyên |
+
+<!-- KICKOFF_CONTRACT_v1
+muc_bat_buoc: pham_vi_ho_so | uy_quyen_nap | uy_quyen_nguon_tai | ngan_sach | chinh_sach_loi | bien_the_tu_tri | moi_truong_va_duong_ghi | nghiem_thu_va_diem_dung
+khong_co_mac_dinh: pham_vi_ho_so
+mac_dinh: nlm=60 | tvpl=100 | dry_rounds=2 | max_units_per_session=6 | takeover_phut=30 | ttl_ngay=90
+thieu_muc: HOI truoc khi chay vong lap - CAM doan
+tien_kiem: PHA0_GATE_v1 (references/QUY_TRINH_RA_SOAT_3_TANG.md - PHA 0)
+-->
+
+**Tiền kiểm khi nhận việc:** chạy `PHA0_GATE_v1` (`references/QUY_TRINH_RA_SOAT_3_TANG.md`, PHA 0) NGAY tại
+kickoff, trước khi hứa gì. Hỏng loại **chặn đứng** ⇒ báo người 1 dòng tại chỗ, **chưa tiêu call truy vấn NLM
+nào**; **chặn làn ghi** ⇒ nhận việc nhưng khai rõ Loop B đứng (chỉ rà được trên cái đã có trong corpus);
+**có fallback** ⇒ nhận việc, chạy chế độ suy giảm và ghi vào note bàn giao.
 
 ## §2. LOOP A — RÀ (mỗi phiên chạy MỘT lượt drain)
 
 | Bước | Việc | Lệnh/cơ chế CÓ THẬT |
 |---|---|---|
-| **A1** | Pha 0 tiền kiểm: `ping` + VERSION khớp + auth NLM. **Không tin mô hình tuổi cookie** — lượt nào cần NLM thì canary probe LIVE trước (van F7 r208d đã chuyển sang verdict LIVE) | `tl ping --json` · `tl nlm-auth-status --json` (schema v2, đọc `rotation_token_expired`) · `registry_orchestrator boot` |
+| **A1** | Pha 0 tiền kiểm — chạy ĐỦ `PHA0_GATE_v1` b1–b6 (`references/QUY_TRINH_RA_SOAT_3_TANG.md`): b1 `doctor` · b2 `ping`/contract · b3 `precheck` · b4 `profile-doctor` · b5 auth · b6 canary. **Không tin mô hình tuổi cookie** — lượt nào cần NLM thì canary probe LIVE trước (van F7 r208d đã chuyển sang verdict LIVE). Chặn đứng ⇒ dừng SỚM khi chưa tiêu call truy vấn NLM nào | `tl doctor --json` · `tl ping --json` · `tl precheck --json` · `tl profile-doctor --json` · `tl nlm-auth-status --json` (schema v2, đọc `rotation_token_expired`) · `registry_orchestrator boot` |
 | **A2** | Nhận vai: ghi `session_claim` (id + giờ + `progress_ptr`) vào state. Claim cũ quá hạn **30′** mà `progress_ptr` KHÔNG nhích → chiếm quyền; còn nhích → phiên sau LÙI | RMW qua GAS |
 | **A3** | Lấy đơn vị `pending` ưu tiên cao nhất: SÂU trước, và **ưu tiên NLM-ready** (nguồn đã `added` trong Q-NLM). Nguồn còn `pending` NLM → chỉ lấy khi hết việc khác, phát hiện tự mang `muc_chac_chan="cho_verify_nlm"` | `scripts/rasoat_worksheet.py` (chấm SÂU/ĐỐI CHIẾU/—) |
 | **A4** | Rà 3 tầng: T1 cache tất định → T2 quét thô → T3 đào sâu; mở rộng frontier | `tl extract --dieu N` · `tl tra_cuu --cite --exact` · `tl nlm-query`/`nlm-cross` scoped · `tl frontier-expand --json` |
@@ -103,12 +121,19 @@ duy nhất là probe LIVE. **Vòng RÀ không bao giờ dừng vì cookie.**
 
 ## §5. LÀN LỖI — degrade-and-continue
 
-1. Lỗi lệnh → fallback CÓ SẴN (`--method auto`; cookie chết → `BATCH_LINKS`; GAS cache 600s → `--refresh`).
-2. Vẫn bí → ghi Q-BUGS (VERSION đo được + lệnh tái hiện + hậu quả) → đơn vị đánh `blocked` (KHÔNG giả `done`)
-   → lấy đơn vị kế tiếp.
-3. Dừng toàn cục CHỈ khi mọi đơn vị còn lại blocked bởi CÙNG một lỗi → báo người đúng 1 dòng.
-4. Sửa nóng ở LIVE: **KHÔNG** (deploy là bước tay). Fix ở canonical theo quy trình (test `rXX_`), đợt sau
-   Loop C thấy `skill_version` mới sẽ tự re-queue đơn vị blocked.
+> Đặc tả đầy đủ (4 bước, phân hạng, khuôn sổ `BUG_LEDGER_v1`, luật sửa nóng):
+> `references/QUY_TRINH_RA_SOAT_3_TANG.md` — mục LÀN LỖI. Dưới đây là bản vận hành cho vòng lặp.
+
+1. Lỗi lệnh → fallback CÓ SẴN (`--method auto`; cookie chết → chế độ không-NLM/`tl nlm-links`; GAS cache
+   600s → `--refresh`). Đi vòng được ⇒ hạng **`workaround`**, đơn vị vẫn chạy tới `done`.
+2. Vẫn bí ⇒ hạng **`blocker`**: ghi Q-BUGS (sổ `rasoat_bugs.md`, **đủ 8 trường** — `ma` · `thoi_diem` ·
+   `version_do_duoc` · `lenh_tai_hien` · `hau_qua` · `phan_loai` · `duong_vong` · `don_vi`; thiếu trường =
+   coi như chưa ghi sổ) → đơn vị đánh `blocked` (KHÔNG giả `done`) → lấy đơn vị kế tiếp. **PLAN vẫn tiến.**
+3. Dừng toàn cục CHỈ khi mọi đơn vị còn lại blocked bởi CÙNG một `ma` → báo người đúng 1 dòng + checkpoint.
+   Một `blocker` lẻ KHÔNG BAO GIỜ được đọc thành lý do dừng.
+4. Sửa nóng: **CHỈ khi chặn đứng toàn cục**, và vẫn KHÔNG vá tại LIVE (deploy là bước tay ⇒ vá tại chỗ bị đè
+   ở lần deploy sau). Fix ở canonical theo quy trình (ruff → selftest N/N + test `rXX_` → CHANGELOG → bump),
+   lỗi lẻ thì **gom vá sau lượt rà**; đợt sau Loop C thấy `skill_version` mới sẽ tự re-queue đơn vị blocked.
 
 ## §6. AGENT RÀ ĐƠN VỊ `tl-rasoat` — PROMPT MẪU (dán khi spawn; LIVE không có file agent riêng)
 

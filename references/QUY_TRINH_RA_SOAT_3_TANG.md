@@ -27,10 +27,43 @@ PHA 0 Khởi động ──► PHA 1 Định vị VB đích ──► PHA 2 Phá
 
 ---
 
-## PHA 0 — KHỞI ĐỘNG
+## PHA 0 — KHỞI ĐỘNG & TIỀN KIỂM (chạy MỖI lần thức dậy, kể cả phiên kế nhiệm)
 - Đọc `tra_luat_config.json` (Drive MCP) → `TL_WEBAPP/TL_TOKEN/TL_MIRROR_ID`.
 - `registry_orchestrator.py boot` (ping + changes_pull); `regen2` chỉ khi mất baseline / delta > 40.
 - `notebook_get` một lần → bản đồ `nlm_title ↔ source_id`, dùng lại cả phiên.
+
+**Cổng tiền kiểm — đứng TRƯỚC mọi việc rà.** Hỏng thứ không có đường vòng ⇒ dừng SỚM, **chưa tiêu một call truy vấn NLM nào**; hỏng thứ có đường vòng ⇒ chạy suy giảm, KHÔNG dừng vòng (xem mục LÀN LỖI).
+
+| # | Kiểm | Lệnh | Hỏng thì |
+|---|---|---|---|
+| b1 | môi trường/đường dẫn/secret sẵn sàng | `tl doctor --json` | **chặn đứng** — không có gì chạy được |
+| b2 | webapp sống + contract khớp `EXPECT_VERSION`; ghi lại VERSION nơi chạy | `tl ping --json` | **chặn làn ghi** — Loop B (nạp/registry) dừng; Loop A vẫn rà trên cache |
+| b3 | cột/schema registry định ghi hợp lệ (chống `so_hieu`≠`sohieu`) | `tl precheck --json` | **chặn làn ghi** |
+| b4 | profile hồ sơ có thật + layout đúng (nơi đặt `_meta/rasoat_state.json`) | `tl profile-doctor --json` | **chặn đứng** — không có nơi ghi state/claim thì không rà có kỷ luật được |
+| b5 | phiên NLM: đọc `alive` · `warn[]` · `rotation_token_expired` | `tl nlm-auth-status --json` | **có fallback** |
+| b6 | **canary probe LIVE** ngay trước lượt/lô CẦN NLM | `tl nlm-auth-status <notebook_id> --json` (probe `notebook_get`) | **có fallback** |
+
+- **Thứ tự:** b1–b4 luôn chạy trước; b5–b6 CHỈ chạy khi lượt sắp cần NLM — không probe máy móc mỗi phiên.
+- **Chi phí trước cổng = 0 call truy vấn.** Canary là `notebook_get` (siêu dữ liệu, ~4,3s), KHÔNG trừ vào ngân sách 60 call/hồ sơ — ngân sách đó dành cho `notebook_query`.
+- **Đọc verdict cho đúng** (đo 26-07 đã BÁC mô hình "cookie chết theo tuổi"; `age_min` = thời gian từ lần xác thực THÀNH CÔNG gần nhất, KHÔNG dự đoán được cái chết): `alive=false` ⇒ chuyển chế độ không-NLM · `alive=null` ⇒ **KHÔNG chặn** (không probe được ≠ chết) · `alive=true` kèm `rotation_token_expired` ⇒ chạy tiếp nhưng **không mở lô dài** (phiên hết đường gia hạn, có thể chết đột ngột).
+- **Sửa xác thực:** CHỈ `nlm login` thay phiên mới (local); **CẤM** tự `nlm-auth-load` (ghi đè jar bằng bản cũ/cũng chết); không tin `nlm login --check` (FALSE-GREEN) — chốt duy nhất là probe LIVE.
+- **Hỏng có fallback KHÔNG dừng vòng:** ghi sổ lỗi + chạy chế độ không-NLM (T2 quét cache/Drive trực tiếp; phát hiện mang `muc_chac_chan="cho_verify_nlm"` → Q-VERIFY, trả nợ kiểm chéo khi phiên NLM sống lại).
+
+<!-- PHA0_GATE_v1
+b1 doctor: tl doctor --json | chan_dung
+b2 webapp_contract: tl ping --json | chan_lan_ghi
+b3 precheck: tl precheck --json | chan_lan_ghi
+b4 profile: tl profile-doctor --json | chan_dung
+b5 nlm_auth: tl nlm-auth-status --json | co_fallback
+b6 canary: tl nlm-auth-status <notebook_id> --json | co_fallback
+thu_tu: b1 b2 b3 b4 truoc; b5 b6 CHI khi luot sap can NLM
+ngan_sach_truoc_cong: 0 call truy van NLM (canary = notebook_get, khong tru ngan sach 60)
+chan_dung: DUNG SOM + bao nguoi 1 dong + checkpoint, chua tieu call truy van NLM nao
+chan_lan_ghi: Loop B (nap/registry) dung; Loop A van ra tren cache - ghi so loi
+co_fallback: che do khong-NLM + ghi so loi, KHONG dung vong
+-->
+
+Kịch bản điều phối gọi đúng cổng này ở bước A1 — xem `references/RASOAT_HOSO_LOOP.md`.
 
 ## PHA 1 — ĐỊNH VỊ VĂN BẢN ĐÍCH
 - `vb_status <số hiệu>` → số hiệu thật, VBHN hay gốc, in-force, `superseded_by`/`supersedes`, `nlm_source_id`.
@@ -97,6 +130,47 @@ Dừng đơn vị khi: (a) đã soi hết Điều rủi ro cao + Điều bị c�
 ## PHA 5 — VỆ SINH REGISTRY CUỐI PHIÊN
 - Không đụng cấu trúc Drive → `manifest_export`.
 - Có move/rename/ingest/add → `manifest_build.py` (regen2 → manifest_export); doc mới thiếu tukhoa → `backfill_keywords_live.py`.
+
+---
+
+## LÀN LỖI — DEGRADE-AND-CONTINUE & SỔ LỖI (xuyên suốt mọi pha)
+> Nguyên tắc: **lỗi công cụ không được làm dừng vòng rà.** Mất tiện nghi ≠ mất đúng — nguyên văn vốn CHỈ lấy từ cache/raw. Kịch bản điều phối áp mục này ở làn lỗi: `references/RASOAT_HOSO_LOOP.md`.
+
+**Bốn bước, theo đúng thứ tự, không nhảy cóc:**
+1. **Thử đường vòng CÓ SẴN** — `--method auto` (chuỗi fallback extract) · phiên NLM chết → chế độ không-NLM (T2 quét cache/Drive) hoặc `tl nlm-links` dán tay · GAS cache ~600s → `--refresh` · PDF `nlm-add --drive-id` hỏng → tải file rồi `source_add source_type=file` · server cũ → guard `SERVER_TOO_OLD` đã fail-closed sẵn.
+2. Đi vòng được ⇒ hạng **`workaround`**: ghi sổ 1 mục, đơn vị **vẫn chạy tiếp tới `done`** (phát hiện nào thiếu kiểm chéo NLM thì mang `muc_chac_chan="cho_verify_nlm"` vào Q-VERIFY).
+3. Không đi vòng được ⇒ hạng **`blocker`**: ghi sổ, đơn vị đánh `blocked` (**KHÔNG giả `done`**, không mất việc), lấy đơn vị `pending` kế tiếp — **vòng vẫn tiến**.
+4. **Chặn đứng toàn cục** = mọi đơn vị còn lại đều `blocked` bởi **CÙNG một `ma` lỗi**. Chỉ khi đó mới dừng: checkpoint + báo người **đúng 1 dòng**.
+
+**Phân hạng chỉ có HAI hạng** — `workaround` (có đường vòng đã biết, kết quả vẫn dùng được) và `blocker` (đơn vị này không rà tiếp được). "Chặn đứng" KHÔNG phải hạng lỗi: nó là **trạng thái của hồ sơ**, suy ra từ hàng đợi, nên một lỗi `blocker` lẻ không bao giờ được đọc thành lý do dừng.
+
+**Sửa nóng — CHỈ khi chặn đứng, và vẫn KHÔNG vá tại LIVE:**
+- `workaround`/`blocker` lẻ ⇒ **gom vá sau lượt rà**. Bỏ vòng rà đi sửa công cụ là vứt phiên đang cầm claim để đổi lấy một bản vá chưa ai cần gấp.
+- Chặn đứng toàn cục ⇒ vá ở **canonical** theo quy trình sửa code (ruff → `--selftest` N/N + test `rXX_` → CHANGELOG → bump 3 chỗ) rồi deploy tay. **Không bao giờ** sửa file trong gói LIVE: deploy là bước tay, mọi vá tại chỗ sẽ bị đè ở lần deploy sau và làm mọi kết luận sau đó không tái lập được.
+- Đợt sau, Loop C thấy `skill_version` mới ⇒ **tự re-queue các đơn vị `blocked`** — vòng tự lành, không ai phải nhớ.
+
+**Sổ lỗi `rasoat_bugs.md`** (kế hoạch điều phối gọi là `BUGS_FOUND.md` — CÙNG một sổ; tên file máy đọc là `rasoat_bugs.md`): nằm ở `<out-dir>` **ngoài cây skill**, đẩy Drive cùng checkpoint. Mỗi mục là một khối đủ 8 trường:
+
+<!-- BUG_LEDGER_v1
+truong_bat_buoc: ma | thoi_diem | version_do_duoc | lenh_tai_hien | hau_qua | phan_loai | duong_vong | don_vi
+phan_loai: workaround | blocker
+chan_dung_toan_cuc: moi don vi con lai deu blocked boi CUNG mot ma
+sua_nong: chi khi chan_dung_toan_cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE
+so_file: rasoat_bugs.md (ngoai cay skill, day Drive cung checkpoint)
+-->
+
+```text
+- ma: NLM_AUTH_DEAD
+  thoi_diem: 2026-07-26T10:12
+  version_do_duoc: 1.35.46
+  lenh_tai_hien: tl nlm-query "..." --profile <P>
+  hau_qua: T2 khong quet duoc bang NLM
+  phan_loai: workaround
+  duong_vong: chuyen che do khong-NLM; 3 phat hien mang cho_verify_nlm vao Q-VERIFY
+  don_vi: unit-004
+```
+
+`version_do_duoc` là **VERSION đo được tại nơi chạy** (LIVE ≠ canonical) — bắt buộc, vì một báo lỗi đo trên bản trễ là vô giá trị. Thiếu bất kỳ trường nào ⇒ mục **không hợp lệ**, coi như chưa ghi sổ.
 
 ---
 

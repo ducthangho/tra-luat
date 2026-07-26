@@ -20158,6 +20158,41 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r211_the_khop_luat_moi", _c211_the_khop_luat_moi)
 
+    # ───── r212: guard ADR-0001 phải ĐÚNG kể cả khi bind() chưa chạy (đo 26-07 — nó đang fail-OPEN) ─────
+    def _c212_guard_bundle_meta_khong_phu_thuoc_bind():
+        # Đo 26-07: `import tl_gws` trần rồi gọi `_bundle_meta_blocks_push` trên thư mục CÓ BUNDLE_META.json
+        # → trả False. Vì `Path` là tên stdlib DUY NHẤT trong nhóm đó còn chờ `bind()` chép từ namespace tl,
+        # nên mọi đường dispatch không qua `build_parser` đều biến guard cấm-publish thành CHO PHÉP publish.
+        # r65 không bắt được vì nó dùng `_imp("tl_gws")` — instance ĐÃ bind.
+        import importlib.util as _ilu212
+        import tempfile as _tf212
+        _spec212 = _ilu212.spec_from_file_location("tl_gws_nobind_r212", _ROOT209 / "scripts" / "tl_gws.py")
+        _m212 = _ilu212.module_from_spec(_spec212)
+        _spec212.loader.exec_module(_m212)          # nạp THẲNG từ file: không ai gọi bind() cho instance này
+        ok0 = getattr(_m212, "_BOUND", None) is False
+        with _tf212.TemporaryDirectory() as _d212:
+            _bun212 = _P209(_d212) / "bundle"
+            _bun212.mkdir()
+            (_bun212 / "BUNDLE_META.json").write_text("{}", encoding="utf-8")
+            _clean212 = _P209(_d212) / "clean"
+            _clean212.mkdir()
+            ok1 = _m212._bundle_meta_blocks_push(_bun212) is True     # ĐỎ trước r212 (NameError bị nuốt → False)
+            ok2 = _m212._bundle_meta_blocks_push(_clean212) is False
+            # PHẢN CHỨNG 1: gỡ `Path` khỏi globals ⇒ tái hiện ĐÚNG sự cố cũ. Nay hỏng phải CHẶN (fail-closed),
+            # không được im lặng cho publish — đây là chỗ bản cũ trả False.
+            _sav212 = _m212.__dict__.pop("Path")
+            try:
+                ok3 = (_m212._bundle_meta_blocks_push(_bun212) is True
+                       and _m212._bundle_meta_blocks_push(_clean212) is True)
+            finally:
+                _m212.__dict__["Path"] = _sav212
+            ok4 = _m212._bundle_meta_blocks_push(_clean212) is False  # khôi phục xong: trở lại phân biệt đúng
+        # PHẢN CHỨNG 2: khoá luôn NGUỒN — xoá dòng import ở top là test đỏ, không đợi ai đo lại bằng tay
+        _src212 = (_ROOT209 / "scripts" / "tl_gws.py").read_text(encoding="utf-8", errors="replace")
+        ok5 = "\nfrom pathlib import Path" in _src212
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r212_guard_bundle_meta_khong_phu_thuoc_bind", _c212_guard_bundle_meta_khong_phu_thuoc_bind)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

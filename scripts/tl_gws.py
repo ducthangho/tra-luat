@@ -18,6 +18,10 @@ import hashlib
 import tarfile
 import tempfile
 import subprocess  # noqa: F401  (một số hàm import lại cục bộ; giữ ở top cho path bypass-bind)
+from pathlib import Path  # v1.35.48 r212 (đo 26-07: `import tl_gws` trần → _bundle_meta_blocks_push trả False
+# dù thư mục CÓ BUNDLE_META.json) — `Path` là tên duy nhất trong nhóm stdlib còn phải chờ bind(), nên guard
+# ADR-0001 nuốt NameError và fail-OPEN ở mọi đường dispatch không qua build_parser. Đúng bẫy mà chính chú
+# thích trên đã cảnh báo, chỉ là sót tên.
 
 _BOUND = False
 def bind(tl_module):
@@ -1533,11 +1537,13 @@ def _gcloud_drive_update(token: str, fid: str, path: str, mime: str, new_name: s
 
 
 def _bundle_meta_blocks_push(root) -> bool:
-    """v1.33.59 (ADR-0001): cây chứa BUNDLE_META.json = giải nén từ bundle nhánh song song → cấm publish."""
+    """v1.33.59 (ADR-0001): cây chứa BUNDLE_META.json = giải nén từ bundle nhánh song song → cấm publish.
+    v1.35.48 (r212) — FAIL-CLOSED: bản cũ `except → False` biến MỌI trục trặc thành "cứ publish đi", tức
+    guard cấm-publish lại hỏng theo hướng CHO PHÉP. Không đọc được thì CHẶN (người vẫn có `--force`)."""
     try:
         return (Path(root) / "BUNDLE_META.json").exists()
     except Exception:  # noqa: BLE001
-        return False
+        return True
 
 
 def cmd_drive_push(a) -> int:

@@ -197,7 +197,7 @@ GÓI. Bỏ (c) = gói ĐỎ ở LIVE (§0.6).
 > Cả hai đều là hướng "sửa tài liệu" — phần code còn lại của Đợt 1: helper H9 trong `release.py` + mở rộng
 > tối thiểu `rasoat_phuluc.py` (H1b), chung MỘT bump.
 
-### Đợt 2 — Lớp điều phối
+### Đợt 2 — Lớp điều phối ✅ **ĐÃ THI HÀNH 26-07** — nhánh `claude/r210-rasoat-dot2` (`d82ef70`), **v1.35.46 (r210)**, selftest **1316/1316**, release-verify gói 188 file XANH. Sản phẩm: `references/RASOAT_HOSO_LOOP.md` (H3) + prompt agent `tl-rasoat` §6 & wrapper dev ép cứng frontmatter (H4) + 2 wrapper `.claude/`. Kèm dọn `2.21.2m` khỏi SKILL.md (2 chỉ dẫn sai version).
 
 | Hạng mục | Sản phẩm | Nghiệm thu (mã test) |
 |---|---|---|

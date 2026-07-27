@@ -770,9 +770,10 @@ def cmd_workflow_audit(a) -> int:
 # Cờ là ĐẦU VÀO ĐỂ PHÂN XỬ, không phải phán quyết ⇒ mặc định rc=1 (không fail); --strict mới đẩy 1→2.
 _DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
 _DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references")
-# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi). CỐ Ý DỪNG Ở ĐÂY —
-# L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11` bên dưới; đừng "bổ sung nốt" mà không đo lại.
-_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L5", "L6", "L7", "L8", "L9")
+# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4
+# (giàn giáo nháp). CỐ Ý DỪNG Ở ĐÂY — L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11`
+# bên dưới; đừng "bổ sung nốt" mà không đo lại.
+_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
 # §2.2 nói thẳng: «tài liệu lịch sử được phép dẫn tệp đã xoá». Ba nguồn dưới đây GHI LẠI QUÁ KHỨ, không
 # phải con trỏ để đi theo — DOCTRINE_APPENDIX tự khai «TOÀN BỘ thân SKILL.md trước refactor v1.16.0,
 # GIỮ NGUYÊN để tra cứu lý do», changelog thì theo định nghĩa là sổ. Đo 28-07: 127/134 cờ L1 nằm ở đúng
@@ -802,6 +803,16 @@ _DOC_CLAIMS_ORPHAN_DIR = "references/"
 _DOC_CLAIMS_ORPHAN_EXTRA = (("scripts", "*.py"), ("scripts/tl_core", "*.py"),
                             ("scripts/_fallback", "*.py"), ("references/workflows", "*.json"),
                             ("docs/adr", "*.md"), (".", "*.md"))
+
+# ── r220: L4 — giàn giáo nháp còn sót trong VĂN XUÔI ({{...}}, TODO/TBD/FIXME, XXX). Quét trên
+# `nospan`: marker nằm trong fence/span là VÍ DỤ hay ký pháp đang được MÔ TẢ, không phải trạng thái
+# của chính tài liệu. ★ĐO 2026-07-28 TRƯỚC KHI THIẾT KẾ (đúng khuôn đã bác L10/L11): 12/12 hit
+# `XXX` toàn kho là placeholder cơ-quan-ban-hành trong KÝ PHÁP số hiệu `NN-YYYY-VBHN-XXX` — kề
+# dấu '-' ⇒ mảnh của định danh dài, KHÔNG phải giàn giáo (cùng phép loại trừ kề '-' mà L2 dùng
+# cho khúc UUID notebook). Sau loại trừ: 0 hit sống toàn kho; hit TODO duy nhất nằm ở
+# DOCTRINE_APPENDIX (lịch sử, ghi chép cố ý lưu) ⇒ advisory. Lớp vào kho là XANH SẴN, khuôn L8/L9.
+_DOC_CLAIMS_L4_MUSTACHE_RE = re.compile(r"\{\{[^{}\n]*\}\}")
+_DOC_CLAIMS_L4_WORD_RE = re.compile(r"\b(?:TODO|TBD|FIXME|XXX)\b")
 
 # ══ ĐO 2026-07-28 (r219) — VÌ SAO L10 VÀ L11 KHÔNG ĐƯỢC LÀM ═════════════════════════════════════
 # Kế hoạch r218 xếp L11 vào «hai lớp đáng nhất». Đo trên kho thật thì cả hai đều hô ~100% báo giả,
@@ -1178,6 +1189,20 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
         if not hit:
             _add("L3", m.start(1), tgt, "LINK_TARGET_MISSING")
 
+    # ── L4 (r220): giàn giáo nháp còn sót ─────────────────────────────────────────────────────────
+    # Tài liệu SỐNG trình bày như đã xong mà còn `{{chỗ_điền}}`/TODO trong văn xuôi thì không hoàn
+    # cảnh nào đúng ⇒ CỜ; tài liệu lịch sử nhắc lại là ghi chép ⇒ advisory (cùng khuôn L1/L8).
+    for m in _DOC_CLAIMS_L4_MUSTACHE_RE.finditer(nospan):
+        _add("L4", m.start(), m.group(0), "DRAFT_PLACEHOLDER", advisory=historical)
+    for m in _DOC_CLAIMS_L4_WORD_RE.finditer(nospan):
+        tok = m.group(0)
+        # `NN-YYYY-VBHN-XXX` — ký pháp số hiệu (12/12 hit đo được toàn kho 28-07): XXX kề '-' là
+        # mảnh của định danh dài, không phải khẳng định «chỗ này chưa viết» ⇒ im, cùng phép của L2.
+        if tok == "XXX" and ((m.start() > 0 and nospan[m.start() - 1] == "-")
+                             or nospan[m.end():m.end() + 1] == "-"):
+            continue
+        _add("L4", m.start(), tok, "DRAFT_MARKER", advisory=historical)
+
     # ── L5: version vX.Y.Z ────────────────────────────────────────────────────────────────────────
     for m in _DOC_CLAIMS_VER_RE.finditer(nospan):
         v = m.group(1)
@@ -1496,8 +1521,9 @@ def _golden_ensure_fixtures() -> None:
                           "categories": "own", "manifestScope": "own"},
         },
     }, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
-    # r218: tài liệu mẫu cho golden doc-claims-check — gài đủ MỌI LỚP quét-theo-token (r219: thêm L8),
-    # mỗi lớp một khẳng định sai VÀ một khẳng định đúng, cộng khối fence để khoá phép che nhiễu. Mọi
+    # r218: tài liệu mẫu cho golden doc-claims-check — gài đủ MỌI LỚP quét-theo-token (r219: thêm
+    # L8; r220: thêm L4 — cặp nổ/im trên cùng một dòng, và marker trong fence/span phải im), mỗi
+    # lớp một khẳng định sai VÀ một khẳng định đúng, cộng khối fence để khoá phép che nhiễu. Mọi
     # giá trị chọn sao cho ổn định qua các đợt bump: `v1.0.1` mãi dưới sàn sổ, `r09` mãi dưới sàn đợt,
     # `references/GOTCHAS.md` là tệp bất biến của kho. (Số hiệu phụ thuộc thời điểm nằm hết trong
     # `basis`/`detail` — khai volatile.) L9 KHÔNG có ở đây được: nó cần lượt quét đủ rộng, nên cái
@@ -1512,9 +1538,10 @@ def _golden_ensure_fixtures() -> None:
         "Sai tiếp: bản v1.99.0, đợt r999, con trỏ `scripts/tl.py:999999`.",
         "Link gãy [kế hoạch](./KHONG_CO_KE_HOACH.md); link ngoài [web](https://example.invalid/x.md).",
         "Lệnh `tl sweep --json` có thật, `tl khong-co-lenh-nay` thì không.",
+        "Nháp sót: {{dien_sau}} và việc TODO dang dở; ký pháp NN-YYYY-VBHN-XXX với `TODO trong span` thì im.",
         "",
         chr(96) * 3 + "bash",
-        "cat references/KHONG_CO_TRONG_FENCE.md   # r998 v1.98.0",
+        "cat references/KHONG_CO_TRONG_FENCE.md   # r998 v1.98.0 TODO {{trong_fence}}",
         chr(96) * 3,
         "",
     ])).encode("utf-8")

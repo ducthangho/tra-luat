@@ -1,3 +1,45 @@
+# ★ v1.35.56 — r220: doc-claims-check trả nốt L4 (giàn giáo nháp) — và phép đo cắt `XXX` trần khỏi đề bài (+2 test, 1370/1370) (2026-07-28)
+
+> Nợ CỐ Ý cuối cùng của kế hoạch r218. Vẫn đúng bài học r219 — ĐO TRƯỚC KHI THIẾT KẾ: phép đo lần
+> này cắt hẳn một phần đề bài (`XXX` trần) trước khi nó kịp thành ~100% báo giả, và cho sẵn ranh
+> giới cờ-vs-advisory đúng ngay từ dòng code đầu tiên.
+
+## L4 — giàn giáo nháp còn sót trong văn xuôi
+
+`{{...}}` (reason `DRAFT_PLACEHOLDER`) và `TODO`/`TBD`/`FIXME`/`XXX` (reason `DRAFT_MARKER`) trong
+VĂN XUÔI: tài liệu sống trình bày như đã xong mà còn chỗ-điền thì không hoàn cảnh nào đúng ⇒ **cờ**;
+tài liệu lịch sử nhắc lại là ghi chép ⇒ advisory (cùng khuôn L1/L8). Quét trên bản đã che CẢ fence
+LẪN span backtick — marker nằm trong fence/span là ví dụ hay ký pháp đang được MÔ TẢ, không phải
+trạng thái của chính tài liệu.
+
+★Đo 2026-07-28 TRƯỚC khi viết dòng code nào (đúng khuôn đã bác L10/L11 ở r219):
+
+* `{{...}}` / `<TODO>` / `TBD` / `FIXME` = **0 hit toàn kho** — bốn khuôn vào là xanh sẵn.
+* **12/12 hit `XXX` toàn kho là placeholder cơ-quan-ban-hành trong ký pháp số hiệu
+  `NN-YYYY-VBHN-XXX`** — tất cả kề dấu `-`. Bắt `XXX` trần như kế hoạch r218 đặt hàng thì lớp này
+  khai trương bằng ~100% báo giả. Giữ `XXX` nhưng **loại hit kề `-`** (đúng phép loại trừ mà L2
+  dùng cho khúc UUID notebook) ⇒ 0 báo giả mà vẫn bắt được `XXX` đứng rời.
+* Hit `TODO` DUY NHẤT toàn kho nằm ở `references/DOCTRINE_APPENDIX.md` (tài liệu lịch sử) ⇒ vào kho
+  đúng **0 cờ + 1 advisory** — gate `--strict` không đổi màu, cùng khuôn "vào kho là xanh sẵn" của
+  L8/L9.
+
+## Nghiệm thu
+
+* Selftest **1368 → 1370** (+2 ca `r220_*`): ca cờ với BA đối chứng trong CÙNG tài liệu (`XXX` kề
+  `-`, marker trong span, marker trong fence — cả ba phải IM); ca PURE lịch-sử-hạ-advisory nạp
+  thẳng `workflow.py` không bind + ratchet 0 cờ L4 trên kho thật.
+* **Phản chứng 2 chiều CHẠY THẬT trên bãi cách ly, 7 đột biến: 7/7 đỏ đúng ca** — M1 bỏ loại trừ kề
+  `-` · M2 quét thiếu che span · M3 bỏ hạ advisory lịch sử · M4 bỏ L4 khỏi danh sách lớp · M5 hỏng
+  regex placeholder · M6 mask thôi che fence (đỏ CẢ guard che-nhiễu `r218_*` = đúng, mask là của
+  chung) · M7 bỏ `TBD` khỏi họ marker. Không đột biến nào lọt lưới ⇒ không giữ chốt chưa chứng minh.
+* Golden `doc_claims_check_fixture` regen CÓ CHỦ ĐÍCH: fixture (SINH TỪ MÃ trong
+  `_golden_ensure_fixtures`) thêm cặp nổ/im trên cùng một dòng + marker trong fence; `by_layer`
+  thêm `L4: 2`, `claims_flagged` 10→12, `layers` thêm L4. `workflow_audit` KHÔNG đổi (card không
+  bị hash). Card `doc_claims_check.json` thêm dòng plan L4.
+* ruff F delta **+1 và là `F821 Undefined name Path`** ở `tl_selftest.py` (194→195 — đúng lớp báo
+  giả GOTCHAS §11: tên bơm động vào `globals()` qua `_STUB_MAP`; test mới dùng `Path(td)` đúng
+  khuôn các ca `r219_*`). Gate 8/8 xanh trọn, gen_instructions 38/38, bundle dựng ×2 trùng byte.
+
 # ★ v1.35.55 — r219: doc-claims-check thêm L8/L9, BÁC L10/L11 bằng đo, và vá 3 sự thật sai trong chính GOTCHAS.md (+7 test, 1368/1368) (2026-07-28)
 
 > Đợt này trả nốt nợ CỐ Ý của r218. Kết quả đáng ghi nhất **không phải hai lớp mới**, mà là ba lần

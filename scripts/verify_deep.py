@@ -80,6 +80,100 @@ def preamble_of(raw):
     return parts[0].strip() if len(parts) > 1 else ""
 
 
+CB_DONG_CHAY = re.compile(
+    r"^\s*(?:\d{1,4}\s+)?CÔNG\s+BÁO\s*/\s*Số\s+[^/\n]*/\s*Ngày\s+\d{1,2}\s*-\s*\d{1,2}\s*-\s*\d{4}\s*(?:\d{1,4}\s*)?$")
+CB_SO_TRANG = re.compile(r"^\s*\d{1,4}\s*$")
+CB_CHU_KY_SO = (re.compile(r"^\s*Người\s+ký\s*:"), re.compile(r"^\s*Email\s*:"),
+                re.compile(r"^\s*Cơ\s+quan\s*:"), re.compile(r"^\s*Thời\s+gian\s+ký\s*:"))
+CB_DAU_MUC = re.compile(r"^\s*(?:VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHẦN\s+VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT)\s*$")
+
+
+def loc_rac_congbao(raw):
+    """PURE (r217 — sổ lỗi `BAN_CONG_BAO_BOC_RA_CON_RAC_KHONG_CO_BUOC_LAM_SACH_CHUAN`, lượt rà 6):
+    bóc PDF Công báo ra thì thân văn bản bị chèn RÁC TRÌNH BÀY. Trả dict — KHÔNG ghi file, KHÔNG in.
+
+    Bỏ ĐÚNG BA loại có khuôn CHẮC, mỗi loại đều phải khớp TOÀN DÒNG (dính chữ khác ⇒ KHÔNG bỏ):
+      · `dong_chay`  — dòng chạy đầu trang `[số] CÔNG BÁO/Số …/Ngày d-m-yyyy [số]`;
+      · `so_trang`   — dòng CHỈ có số VÀ đứng KỀ một dòng chạy (bỏ qua dòng trắng xen giữa). Điều kiện
+                       kề là bắt buộc: trong phụ lục/biểu mẫu có vô số dòng chỉ-một-số là DỮ LIỆU THẬT;
+      · `chu_ky_so`  — khối chữ ký số ĐỦ 4 dòng liên tiếp đúng thứ tự Người ký/Email/Cơ quan/Thời gian ký.
+                       ★Đo 27-07: khối này KHÔNG chỉ nằm ở đầu bản — ND 159 có HAI khối nằm GIỮA thân
+                       (sau khoản 6 Điều 1), Luật 41/2024 có một khối; bản làm sạch bằng tay ở lượt 6 chỉ
+                       bắt khối ở đầu nên còn sót. Vì vậy quét TOÀN VĂN, không neo vị trí.
+
+    ★KHÔNG tự bỏ NHÃN MỤC Công báo ở đầu bản (`VĂN BẢN QUY PHẠM PHÁP LUẬT`, tên cơ quan in một mình) —
+    chỉ KHAI BÁO ở `canh_bao`. Đo trên 3 bản thật cho thấy mọi quy tắc tự động đều cắt vào khối đầu:
+    Công báo in tên cơ quan HAI lần (nhãn mục + cơ quan ban hành), và neo «CỘNG HÒA XÃ HỘI CHỦ NGHĨA
+    VIỆT NAM» nằm SAU dòng số hiệu ở cả Luật 41/2024 (`Luật số: 41/2024/QH15` trên neo 1 dòng) lẫn
+    ND 159 (`Số: 159/2025/NĐ-CP`) ⇒ cắt tại neo là ăn mất chính danh tính văn bản. Người quyết, không máy.
+
+    Phản chứng NỘI TẠI (chạy mỗi lần, không phải chỉ trong test): số dòng giữ + số dòng bỏ phải bằng số
+    dòng vào, và bản ra phải ĐÚNG BẰNG `"\\n".join(dòng giữ)` — lệch ⇒ bước làm sạch đã đụng thứ khác."""
+    lines = (raw or "").split("\n")
+    n = len(lines)
+    bo = {}
+
+    def _ke_dong_chay(i):
+        for buoc in (-1, 1):
+            j = i + buoc
+            while 0 <= j < n and not lines[j].strip():
+                j += buoc
+            if 0 <= j < n and CB_DONG_CHAY.match(lines[j]):
+                return True
+        return False
+
+    for i, ln in enumerate(lines):
+        if CB_DONG_CHAY.match(ln):
+            bo[i] = "dong_chay"
+    for i, ln in enumerate(lines):
+        if i not in bo and CB_SO_TRANG.match(ln) and _ke_dong_chay(i):
+            bo[i] = "so_trang"
+    for i in range(n - 3):
+        if all(CB_CHU_KY_SO[k].match(lines[i + k]) for k in range(4)):
+            for k in range(4):
+                bo.setdefault(i + k, "chu_ky_so")
+
+    giu = [ln for i, ln in enumerate(lines) if i not in bo]
+    out = "\n".join(giu)
+    if len(giu) + len(bo) != n or out != "\n".join(giu):
+        raise AssertionError("LOC_CONGBAO_PHAN_CHUNG_HONG: %d giữ + %d bỏ ≠ %d dòng vào" % (len(giu), len(bo), n))
+
+    canh_bao = []
+    con_dau_muc = [i + 1 for i, ln in enumerate(lines) if i not in bo and CB_DAU_MUC.match(ln)]
+    if con_dau_muc:
+        canh_bao.append("DAU_MUC_CONG_BAO_CON_LAI: dòng %s — nhãn mục của Công báo, KHÔNG tự bỏ được "
+                        "(Công báo in tên cơ quan hai lần; cắt máy sẽ ăn vào khối đầu). Cắt tay tới dòng "
+                        "mang số hiệu (`Số: …` / `Luật số: …`) rồi nạp lại."
+                        % ", ".join(str(x) for x in con_dau_muc))
+    sot = [i + 1 for i, ln in enumerate(lines) if i not in bo and "CÔNG BÁO/" in ln.replace("  ", " ")]
+    if sot:
+        canh_bao.append("DONG_CHAY_DINH_CHU_THAN_VAN_BAN: dòng %s có 'CÔNG BÁO/' nhưng KHÔNG khớp toàn "
+                        "dòng ⇒ cố ý KHÔNG bỏ (có thể là chữ của thân văn bản). Kiểm bằng mắt."
+                        % ", ".join(str(x) for x in sot[:10]))
+    return {"text": out,
+            "counts": {"dong_chay": sum(1 for v in bo.values() if v == "dong_chay"),
+                       "so_trang": sum(1 for v in bo.values() if v == "so_trang"),
+                       "chu_ky_so": sum(1 for v in bo.values() if v == "chu_ky_so")},
+            "bo": [{"dong": i + 1, "loai": bo[i], "noi_dung": lines[i]} for i in sorted(bo)],
+            "canh_bao": canh_bao,
+            "dong_vao": n, "dong_ra": len(giu),
+            "chars_vao": len(raw or ""), "chars_ra": len(out)}
+
+
+def co_rac_congbao(raw):
+    """PURE (r217): CHỈ ĐO, không sửa — dùng ở đường nạp khi người dùng KHÔNG bật `--loc-congbao`.
+    Trả list mô tả; rỗng = sạch. Cùng họ với cờ `khoi_dau_missing` của r215: khai báo, KHÔNG chặn —
+    bản Công báo còn rác vẫn là bản chính thức, chặn nạp là phá đúng ca dùng chính đáng."""
+    r = loc_rac_congbao(raw)
+    c = r["counts"]
+    ra = []
+    if any(c.values()):
+        ra.append("NGUON_CONG_BAO_CON_RAC: dòng chạy=%d · số trang=%d · chữ ký số=%d (bỏ được bằng "
+                  "`--loc-congbao`)" % (c["dong_chay"], c["so_trang"], c["chu_ky_so"]))
+    ra.extend(r["canh_bao"])
+    return ra
+
+
 def appendix_start(raw):
     """→ chỉ số ký tự nơi khối PHỤ LỤC bắt đầu (heading đầu tiên TỪ Điều cuối trở đi), hoặc -1."""
     last_art = None

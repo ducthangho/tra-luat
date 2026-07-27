@@ -33,6 +33,7 @@
     "deploy-plan",
     "determinism-audit",
     "doc-compare",
+    "doc-patch",
     "doc-text",
     "doctor",
     "download",
@@ -547,6 +548,16 @@
         "risk": "low",
         "supports_dry_run": false,
         "workflow_task": null,
+        "write_scope": "local"
+      },
+      "doc-patch": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": "rasoat_hoso",
         "write_scope": "local"
       },
       "doc-text": {
@@ -1811,10 +1822,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 150,
+      "generated_parsers": 151,
       "high_risk": 28,
-      "total": 157,
-      "write_commands": 81
+      "total": 158,
+      "write_commands": 82
     },
     "schema": "command_registry.v1"
   },

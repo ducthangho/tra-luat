@@ -975,6 +975,18 @@ GENERATED_SPECS = [
          {"flags": ['--dry-run'], "dest": 'dry_run', "action": 'store_true'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    # ── r217 (v1.35.53): SỬA THEO ĐIỂM thay cho thay-trọn-gói (lượt rà 6: không bản nào trùm bản nào) ──
+    {"name": 'doc-patch', "handler": 'cmd_doc_patch',
+     "help": 'SỬA record cache theo DANH SÁCH ĐIỂM (không thay trọn gói): mỗi điểm phải khớp ĐÚNG 1 lần trong vùng đã khai. DRY mặc định; --apply --confirm yes; tự sao lưu + nhật ký undo. Không mạng',
+     "args": [
+         {"dest": 'sohieu', "nargs": '?', "help": 'số hiệu văn bản trong cache (vd 158/2025/NĐ-CP)'},
+         {"flags": ['--diem'], "help": 'file JSON danh sách điểm: {"so_hieu":…, "diem":[{"ma","vung","tim","thay","ly_do"}]} — vung = khoi_dau|dieu:<N>|phu_luc'},
+         {"flags": ['--undo'], "help": 'run_id của lượt patch cần hoàn tác (chép lại bản sao lưu; có cổng sha256)'},
+         {"flags": ['--cache-dir'], "dest": 'cache_dir', "help": 'thư mục cache; mặc định env TRA_LUAT_CACHE / ~/.tra_luat_cache'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'GHI thật (mặc định DRY)'},
+         {"flags": ['--confirm'], "help": 'phải là `yes` khi --apply'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'footnote-map', "handler": 'cmd_footnote_map',
      "help": 'B3: bản đồ sửa đổi cấp Điều từ footnote VBHN (marker[n]↔chú thích luật sửa) + PENDING_EFFECT',
      "args": [
@@ -1670,6 +1682,9 @@ COMMAND_META = {
     "state-get":             _m("low", True, "none", False, False, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
     "state-put":             dict(_m("medium", False, "drive", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
                                   builtin_gate="rasoat_state_scope_guard"),
+    # r217: GHI record cache cục bộ (không mạng) — có --confirm và DRY mặc định vì đây là sửa NGUỒN
+    # pháp lý đang phục vụ tra cứu; risk medium chứ không low, dù phạm vi ghi chỉ là "local".
+    "doc-patch":             _m("medium", False, "local", True, True, True, "rasoat_hoso", None, False, "lookup_ops", generated=True),
     "footnote-map":          _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "cluster":               _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "rasoat-chongcheo":      _m("low", True, "none", False, False, False, None, None, False, None, generated=True),

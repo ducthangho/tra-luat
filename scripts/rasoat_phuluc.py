@@ -214,13 +214,40 @@ def main():
         else:
             P.append("*Không có nội dung.*"); counts[k] = 0
 
-    # Mục F (ngoài phụ lục)
-    P.append("\n## Nội dung chuyển Mục F (chờ bổ sung căn cứ — KHÔNG vào phụ lục)")
+    # r217 (lượt rà 8, 27-07): Mục F NAY LÀ MỘT PHỤ LỤC CÓ SỐ. Trước đây nó in ra dưới nhãn "Mục F
+    # — KHÔNG vào phụ lục" trong khi Báo cáo rà soát lại hứa một "Phụ lục" cho đúng danh mục đó ⇒ bộ
+    # hồ sơ trình không khớp tên với chính nó. ★Số VI/VII chứ KHÔNG phải III/IV: III/IV/V đã thuộc về
+    # Mẫu 05/06/07-BN — chiếm lại số của chúng là đổi nghĩa một bộ biểu mẫu chuẩn chỉ vì trong hồ sơ
+    # này chúng tình cờ rỗng.
+    # Tên phải nói ĐÚNG cái nhóm này chứa: `route()` dồn vào đây CẢ "nghiên cứu, rút kinh nghiệm"
+    # LẪN "chờ bổ sung căn cứ" — gọi tắt là "chưa đủ căn cứ kết luận" sẽ mô tả sai phần lớn số dòng.
+    P.append("\n## Phụ lục VI — Danh mục nội dung đề nghị nghiên cứu, rút kinh nghiệm "
+             "và nội dung chưa đủ căn cứ kết luận")
     if buckets["F"]:
-        P.append("| STT | Văn bản | Nội dung | Căn cứ cần bổ sung |")
-        P.append("|---|---|---|---|")
+        P.append("| STT | Mã | Văn bản | Nội dung | Căn cứ cần bổ sung |")
+        P.append("|---|---|---|---|---|")
         for i, r in enumerate(buckets["F"], 1):
-            P.append(f"| {i} | {md_escape(r.get('van_ban',''))} | {md_escape(r.get('phan_tich',''))} | {md_escape(r.get('can_cu',''))} |")
+            P.append(f"| {i} | {md_escape(r.get('key',''))} | {md_escape(r.get('van_ban',''))} "
+                     f"| {md_escape(r.get('phan_tich',''))} | {md_escape(r.get('can_cu',''))} |")
+    else:
+        P.append("*Không có.*")
+
+    # r217 — Phụ lục VII: BẢNG TỔNG HỢP toàn bộ nội dung rà soát theo mã. Đây là bản TRÌNH BÀY của
+    # bảng master; trước r217 chỉ tồn tại dưới dạng dữ liệu JSON, nên Báo cáo hứa một phụ lục mà
+    # không có gì để đính kèm. Cột "Thuộc phụ lục" cho phép tra chéo ngược từ mã về nơi nó được đề
+    # xuất xử lý — đối chiếu hai chiều với các phụ lục trên.
+    _PL_CUA = {"04": "II", "05": "III", "06": "IV", "07": "V", "F": "VI"}
+    P.append("\n## Phụ lục VII — Bảng tổng hợp nội dung rà soát (theo mã)")
+    if noi_dung:
+        P.append("| STT | Mã | Văn bản được rà soát | Căn cứ đối chiếu | Nội dung | Hình thức xử lý "
+                 "| Mức | Thuộc phụ lục |")
+        P.append("|---|---|---|---|---|---|---|---|")
+        for i, r in enumerate(noi_dung, 1):
+            P.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                i, md_escape(r.get("key", "")), md_escape(r.get("van_ban", "")),
+                md_escape(r.get("can_cu", "")), md_escape(r.get("phan_tich", "")),
+                md_escape(r.get("hinh_thuc", "")), md_escape(r.get("muc_chac_chan", "")),
+                _PL_CUA.get(route(r.get("hinh_thuc")), "")))
     else:
         P.append("*Không có.*")
 
@@ -231,11 +258,13 @@ def main():
     P.append(f"- Đề xuất ban hành mới (Mẫu 05-BN): **{counts['05']}**")
     P.append(f"- Đề xuất bãi bỏ toàn bộ (Mẫu 06-BN): **{counts['06']}**")
     P.append(f"- Đề xuất tạm ngưng toàn bộ (Mẫu 07-BN): **{counts['07']}**")
-    P.append(f"- Nội dung chờ bổ sung căn cứ (Mục F): **{len(buckets['F'])}**")
+    P.append(f"- Nội dung chưa đủ căn cứ kết luận (Phụ lục VI): **{len(buckets['F'])}**")
+    P.append(f"- Tổng nội dung rà soát (Phụ lục VII): **{len(noi_dung)}**")
 
     f.write_text("\n".join(P), encoding="utf-8")
     print(json.dumps({"ok": True, "out": str(f), "counts": counts,
-                      "muc_f": len(buckets["F"]), "n_van_ban": len(van_ban),
+                      "muc_f": len(buckets["F"]), "phu_luc_vi": len(buckets["F"]),
+                      "phu_luc_vii": len(noi_dung), "n_van_ban": len(van_ban),
                       "n_noi_dung_dedup": len(noi_dung)}, ensure_ascii=False))
 
 

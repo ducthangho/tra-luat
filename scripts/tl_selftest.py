@@ -20879,6 +20879,262 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
 
+    # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════
+    # Bối cảnh (lượt rà 6+7, 27-07): đối chiếu bản kho ↔ bản Công báo ra ND 159 lệch 17 điểm, ND 158
+    # lệch 111 điểm, và kết luận là KHÔNG BẢN NÀO TRÙM BẢN NÀO ⇒ thay trọn gói là đánh đổi mù. Còn
+    # bản Công báo bóc từ PDF thì mang rác trình bày; bản làm sạch BẰNG TAY ở lượt 6 sót 12 dòng khối
+    # chữ ký số nằm GIỮA thân văn bản (ND 159 hai khối, Luật 41/2024 một khối) — đúng thứ mà một bộ
+    # lọc có khuôn bắt được còn mắt người thì không.
+    def _r217_verify_deep_nobind():
+        """Nạp THẲNG scripts/verify_deep.py — đây là đường `normalize_document.py` đi thật (script con
+        chạy bằng subprocess, KHÔNG qua tl/bind)."""
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("verify_deep_nobind_r217", _ROOT209 / "scripts" / "verify_deep.py")
+        _m = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    _R217_CB = ("Người ký: CỔNG THÔNG TIN ĐIỆN TỬ CHÍNH PHỦ\n"
+                "Email: thongtinchinhphu@chinhphu.vn\n"
+                "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\n"
+                "Thời gian ký: 08.07.2025 14:58:33 +07:00\n"
+                "\n"
+                "            CÔNG BÁO/Số 851 + 852/Ngày 01-7-2025                 3\n"
+                "\n"
+                "VĂN BẢN QUY PHẠM PHÁP LUẬT\n"
+                "\n"
+                "                    CHÍNH PHỦ\n"
+                "\n"
+                "CHÍNH PHỦ           CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                "Số: 158/2025/NĐ-CP  Hà Nội, ngày 25 tháng 6 năm 2025\n"
+                "Điều 1. Phạm vi điều chỉnh\n"
+                "Nội dung điều 1.\n"
+                "4  CÔNG BÁO/Số 851 + 852/Ngày 01-7-2025\n"
+                "Điều 2. Giải thích từ ngữ\n"
+                "Nội dung điều 2.\n"
+                "\n"
+                "5 \n"
+                "CÔNG BÁO/Số 851 + 852/Ngày 01-7-2025 \n"
+                "Người ký: CỔNG THÔNG TIN ĐIỆN TỬ CHÍNH PHỦ\n"
+                "Email: thongtinchinhphu@chinhphu.vn\n"
+                "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\n"
+                "Thời gian ký: 11.07.2025 09:17:17 +07:00\n"
+                "Điều 3. Hiệu lực thi hành\n"
+                "Bảng số liệu:\n"
+                "12\n"
+                "34\n")
+
+    def _c217_loc_congbao_bo_dung_ba_loai():
+        _m = _r217_verify_deep_nobind()
+        r = _m.loc_rac_congbao(_R217_CB)
+        c = r["counts"]
+        # dòng chạy: 3 (một dòng dính số trang ở đuôi, một dính ở đầu, một đứng riêng)
+        ok1 = c["dong_chay"] == 3
+        # số trang: CHỈ dòng "5" (kề dòng chạy). Hai dòng "12"/"34" là DỮ LIỆU BẢNG ⇒ phải giữ.
+        ok2 = c["so_trang"] == 1 and [x["noi_dung"].strip() for x in r["bo"] if x["loai"] == "so_trang"] == ["5"]
+        # ★khối chữ ký số: ĐỦ 8 dòng — khối ở ĐẦU *và* khối nằm GIỮA thân (cái lượt 6 làm tay đã sót)
+        ok3 = c["chu_ky_so"] == 8
+        ok4 = "\n12\n34\n" in r["text"] and "Điều 3. Hiệu lực thi hành" in r["text"]
+        # phản chứng nội tại phải khớp số dòng
+        ok5 = r["dong_vao"] - r["dong_ra"] == len(r["bo"]) == 12
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r217_loc_congbao_bo_dung_ba_loai", _c217_loc_congbao_bo_dung_ba_loai)
+
+    def _c217_loc_congbao_khong_dung_khoi_dau():
+        """★CHIỀU NGƯỢC — cái đắt nhất phải KHÔNG xảy ra: bộ lọc ăn vào khối đầu văn bản.
+        Công báo in tên cơ quan HAI lần (nhãn mục + cơ quan ban hành) và ở Luật 41/2024 dòng
+        `Luật số: …` còn đứng TRƯỚC «CỘNG HÒA…» ⇒ mọi quy tắc cắt tự động đều cắt mất danh tính."""
+        _m = _r217_verify_deep_nobind()
+        r = _m.loc_rac_congbao(_R217_CB)
+        t = r["text"]
+        ok1 = "Số: 158/2025/NĐ-CP" in t and "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" in t
+        ok2 = t.count("CHÍNH PHỦ") == 2 and "VĂN BẢN QUY PHẠM PHÁP LUẬT" in t   # KHÔNG tự bỏ nhãn mục
+        ok3 = any(x.startswith("DAU_MUC_CONG_BAO_CON_LAI") for x in r["canh_bao"])  # mà PHẢI khai báo
+        # văn bản SẠCH (không phải nguồn Công báo) ⇒ không sửa gì, không báo động giả
+        _sach = "CHÍNH PHỦ\nSố: 1/2025/NĐ-CP\nĐiều 1. Abc\n123\n456\n"
+        r2 = _m.loc_rac_congbao(_sach)
+        ok4 = r2["text"] == _sach and r2["bo"] == [] and _m.co_rac_congbao(_sach) == []
+        # dòng có chữ 'CÔNG BÁO/' nhưng KHÔNG khớp toàn dòng ⇒ CỐ Ý giữ + khai báo (có thể là thân VB)
+        r3 = _m.loc_rac_congbao("Đăng trên CÔNG BÁO/Số 851 + 852/Ngày 01-7-2025 theo quy định.\n")
+        ok5 = r3["bo"] == [] and any(x.startswith("DONG_CHAY_DINH_CHU") for x in r3["canh_bao"])
+        ok6 = _m.loc_rac_congbao("")["text"] == "" and _m.co_rac_congbao("") == []
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r217_loc_congbao_khong_dung_khoi_dau", _c217_loc_congbao_khong_dung_khoi_dau)
+
+    def _c217_docpatch_fail_closed_toan_lo():
+        _m = _r213_lookup_nobind()   # PURE: chạy được ở đường import trần
+        _rec = {"khoi_dau": "CHÍNH PHỦ\nSố: 158/2025/NĐ-CP", "chars": 100,
+                "articles": {"8": "Điều 8. ngưởi sử dụng lao động đóng.", "9": "Điều 9. abc abc"},
+                "phu_luc": "PHỤ LỤC I\nsạc pin", "structure": {"khoi_dau_chars": 0, "phu_luc_chars": 0}}
+        # (1) ca THẬT VD-34: một điểm, khớp đúng 1 lần ⇒ áp được
+        r1 = _m._docpatch_ap(_rec, [{"ma": "VD-34", "vung": "dieu:8", "tim": "ngưởi", "thay": "người"}])
+        ok1 = (r1["ok"] and r1["record"]["articles"]["8"] == "Điều 8. người sử dụng lao động đóng."
+               and r1["record"]["chars"] == 100 and r1["record"]["articles"]["9"] == _rec["articles"]["9"])
+        # (2) KHỚP NHIỀU LẦN ⇒ từ chối (máy KHÔNG được chọn hộ sửa cái nào)
+        r2 = _m._docpatch_ap(_rec, [{"ma": "X", "vung": "dieu:9", "tim": "abc", "thay": "xyz"}])
+        ok2 = not r2["ok"] and r2["loi"][0]["trang_thai"] == "KHOP_NHIEU_LAN" and r2["record"] is None
+        # (3) KHÔNG KHỚP ⇒ từ chối
+        ok3 = _m._docpatch_ap(_rec, [{"ma": "Y", "vung": "dieu:8", "tim": "zzz", "thay": "a"}])["loi"][0]["trang_thai"] == "KHONG_KHOP"
+        # (4) ★FAIL-CLOSED TOÀN LÔ: 1 điểm tốt + 1 điểm hỏng ⇒ KHÔNG áp điểm nào
+        r4 = _m._docpatch_ap(_rec, [{"ma": "VD-34", "vung": "dieu:8", "tim": "ngưởi", "thay": "người"},
+                                    {"ma": "X", "vung": "dieu:9", "tim": "abc", "thay": "xyz"}])
+        ok4 = not r4["ok"] and r4["record"] is None and len(r4["loi"]) == 1
+        # (5) vùng sai / vùng không có / lô rỗng / tim==thay ⇒ đều từ chối, không nổ
+        ok5 = (not _m._docpatch_ap(_rec, [{"vung": "toan_van", "tim": "a", "thay": "b"}])["ok"]
+               and not _m._docpatch_ap(_rec, [{"vung": "dieu:99", "tim": "a", "thay": "b"}])["ok"]
+               and not _m._docpatch_ap(_rec, [])["ok"]
+               and _m._docpatch_ap(_rec, [{"vung": "dieu:8", "tim": "ngưởi", "thay": "ngưởi"}])["loi"][0]["trang_thai"] == "TIM_BANG_THAY")
+        # (6) khối đầu + phụ lục cũng sửa được, và structure được cập nhật theo
+        r6 = _m._docpatch_ap(_rec, [{"ma": "A", "vung": "phu_luc", "tim": "sạc", "thay": "xạc"},
+                                    {"ma": "B", "vung": "khoi_dau", "tim": "158/2025", "thay": "159/2025"}])
+        ok6 = (r6["ok"] and "xạc pin" in r6["record"]["phu_luc"]
+               and r6["record"]["structure"]["phu_luc_chars"] == len(r6["record"]["phu_luc"])
+               and r6["record"]["structure"]["khoi_dau_chars"] == len(r6["record"]["khoi_dau"]))
+        # (7) record NGUỒN không bị sửa tại chỗ (deepcopy) — nếu không, DRY cũng làm bẩn dữ liệu
+        ok7 = _rec["articles"]["8"] == "Điều 8. ngưởi sử dụng lao động đóng."
+        # (8) delta_chars đo đúng dấu và độ lớn
+        r8 = _m._docpatch_ap(_rec, [{"ma": "C", "vung": "dieu:8", "tim": "ngưởi", "thay": "người ta"}])
+        ok8 = r8["delta_chars"] == 3 and r8["record"]["chars"] == 103
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    _t110("r217_docpatch_fail_closed_toan_lo", _c217_docpatch_fail_closed_toan_lo)
+
+    def _c217_docpatch_apply_undo_duong_san_xuat():
+        """Chạy ĐÚNG đường sản xuất (subprocess `tl doc-patch`): DRY → cổng --confirm → ghi thật →
+        undo. Khoá cả cổng sha256 của undo — bài học r213: đường GHI nào chưa ai chạy thật thì đừng
+        ship (kiểm LIVE r213 bắt được lỗi đếm byte/ký tự mà test thuần không thấy)."""
+        import hashlib as _hl110
+        import json as _js217
+        import os as _os110
+        import subprocess as _sp217
+        import sys as _sys217
+        import tempfile as _tf217
+        _rec = {"schema": "tra-luat-bundle/1.9", "doc_key": "x--consolidated", "so_hieu": "158/2025/NĐ-CP",
+                "number_symbol": "158/2025/NĐ-CP", "aliases": [], "chars": 40, "verify_flags": [],
+                "khoi_dau": "CHÍNH PHỦ", "articles": {"8": "Điều 8. ngưởi sử dụng lao động."},
+                "phu_luc": "", "structure": {"khoi_dau_chars": 9, "phu_luc_chars": 0}}
+        with _tf217.TemporaryDirectory() as _td:
+            _cd = Path(_td) / "cache"
+            (_cd / "docs").mkdir(parents=True)
+            _tgt = _cd / "docs" / "x--consolidated.json"
+            _tgt.write_text(_js217.dumps(_rec, ensure_ascii=False), encoding="utf-8")
+            _dm = Path(_td) / "diem.json"
+            _dm.write_text(_js217.dumps({"so_hieu": "158/2025/NĐ-CP",
+                                         "diem": [{"ma": "VD-34", "vung": "dieu:8", "tim": "ngưởi",
+                                                   "thay": "người", "ly_do": "đối chiếu Công báo"}]},
+                                        ensure_ascii=False), encoding="utf-8")
+            _env = dict(_os110.environ, TL_JOURNAL_DIR=str(Path(_td) / "journal"))
+
+            def _run(*args):
+                p = _sp217.run([_sys217.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-patch",
+                                *args, "--cache-dir", str(_cd), "--json"],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=180, env=_env)
+                return p.returncode, _js217.loads(p.stdout[p.stdout.find("{"):]) if "{" in p.stdout else {}
+            _sha0 = _hl110.sha256(_tgt.read_bytes()).hexdigest()
+            # (1) DRY: rc=0, KHÔNG ghi
+            rc1, j1 = _run("158/2025/NĐ-CP", "--diem", str(_dm))
+            ok1 = (rc1 == 0 and j1.get("che_do") == "DRY" and j1.get("da_ghi") is False
+                   and _hl110.sha256(_tgt.read_bytes()).hexdigest() == _sha0)
+            # (2) --apply THIẾU --confirm ⇒ rc=2, vẫn KHÔNG ghi
+            rc2, j2 = _run("158/2025/NĐ-CP", "--diem", str(_dm), "--apply")
+            ok2 = (rc2 == 2 and j2.get("error") == "NEED_CONFIRM"
+                   and _hl110.sha256(_tgt.read_bytes()).hexdigest() == _sha0)
+            # (3) file điểm khai số hiệu KHÁC ⇒ chặn (chạy nhầm tệp điểm lên văn bản khác)
+            _dm2 = Path(_td) / "diem_lech.json"
+            _dm2.write_text(_js217.dumps({"so_hieu": "159/2025/NĐ-CP", "diem": [{"vung": "dieu:8",
+                            "tim": "ngưởi", "thay": "người"}]}, ensure_ascii=False), encoding="utf-8")
+            rc3, j3 = _run("158/2025/NĐ-CP", "--diem", str(_dm2), "--apply", "--confirm", "yes")
+            ok3 = rc3 == 2 and j3.get("error") == "SO_HIEU_LECH_VOI_FILE_DIEM"
+            # (4) GHI THẬT: nội dung đổi, có sao lưu + nhật ký, sha khớp cái lệnh khai
+            rc4, j4 = _run("158/2025/NĐ-CP", "--diem", str(_dm), "--apply", "--confirm", "yes")
+            _d4 = _js217.loads(_tgt.read_text(encoding="utf-8"))
+            ok4 = (rc4 == 0 and j4.get("da_ghi") is True
+                   and _d4["articles"]["8"] == "Điều 8. người sử dụng lao động."
+                   and Path(j4["bak"]).is_file() and j4["sha_truoc"] == _sha0
+                   and j4["sha_sau"] == _hl110.sha256(_tgt.read_bytes()).hexdigest()
+                   and len(_d4["doc_patch"]["lich_su"]) == 1
+                   and any(x.startswith("DOC_PATCH:") for x in _d4["verify_flags"]))
+            _rid = j4["journal"]
+            # (5) ★CỔNG UNDO: file bị đổi sau lượt patch ⇒ TỪ CHỐI hoàn tác (không nuốt thay đổi lạ)
+            _tgt.write_text(_tgt.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+            rc5, j5 = _run("--undo", _rid, "--apply", "--confirm", "yes")
+            ok5 = rc5 == 2 and j5.get("error") == "UNDO_FILE_DA_DOI_SAU_KHI_PATCH"
+            # (6) khôi phục đúng trạng thái sau-patch rồi undo ⇒ về ĐÚNG BẢN GỐC (sha khớp tuyệt đối)
+            _tgt.write_text(_tgt.read_text(encoding="utf-8")[:-1], encoding="utf-8")
+            rc6, j6 = _run("--undo", _rid, "--apply", "--confirm", "yes")
+            ok6 = (rc6 == 0 and j6.get("che_do") == "UNDO"
+                   and _hl110.sha256(_tgt.read_bytes()).hexdigest() == _sha0
+                   and j6.get("khop_sha_truoc_patch") is True
+                   and "doc_patch" not in _js217.loads(_tgt.read_text(encoding="utf-8")))
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r217_docpatch_apply_undo_duong_san_xuat", _c217_docpatch_apply_undo_duong_san_xuat)
+
+    def _c217_ingest_congbao_khai_bao_khong_chan():
+        """Đường NẠP thật (subprocess `normalize_document.py`, đúng cách `ingest_to_cache` gọi nó):
+        không bật cờ ⇒ KHAI BÁO mà VẪN NẠP; bật cờ ⇒ bỏ rác + ghi audit. Cảnh báo không được chặn —
+        bản Công báo còn rác vẫn là bản chính thức."""
+        import json as _js217b
+        import subprocess as _sp217b
+        import sys as _sys217b
+        import tempfile as _tf217b
+        with _tf217b.TemporaryDirectory() as _td:
+            _in = Path(_td) / "cb.txt"
+            _in.write_text(_R217_CB, encoding="utf-8")
+
+            def _run(*extra):
+                _out = Path(_td) / ("out%d.json" % len(extra))
+                p = _sp217b.run([_sys217b.executable, str(_ROOT209 / "scripts" / "normalize_document.py"),
+                                 "--input", str(_in), "--out", str(_out), "--number-symbol", "158/2025/NĐ-CP",
+                                 *extra], capture_output=True, text=True, encoding="utf-8",
+                                errors="replace", timeout=180)
+                return p.returncode, (_js217b.loads(_out.read_text(encoding="utf-8")) if _out.is_file() else {})
+            rc1, d1 = _run()
+            ok1 = rc1 == 0 and any(x.startswith("NGUON_CONG_BAO_CON_RAC") for x in d1.get("verify_flags") or [])
+            ok2 = "CÔNG BÁO/Số 851" in _js217b.dumps(d1, ensure_ascii=False)   # KHÔNG chặn, KHÔNG tự sửa
+            _au = Path(_td) / "audit.json"
+            rc3, d3 = _run("--loc-congbao", "--loc-congbao-audit", str(_au))
+            ok3 = rc3 == 0 and any(x.startswith("LOC_CONG_BAO:") for x in d3.get("verify_flags") or [])
+            ok4 = "CÔNG BÁO/Số 851" not in _js217b.dumps(d3, ensure_ascii=False)
+            ok5 = _au.is_file() and _js217b.loads(_au.read_text(encoding="utf-8"))["counts"]["chu_ky_so"] == 8
+            # khối đầu văn bản SỐNG SÓT qua bộ lọc (số hiệu vẫn chứng minh được danh tính)
+            ok6 = "Số: 158/2025/NĐ-CP" in (d3.get("khoi_dau") or "")
+            # cờ khai báo KHÔNG làm văn bản thành `partial` (nó không phải khiếm khuyết cấu trúc)
+            ok7 = not str(d1.get("coverage") or "").startswith("partial: NGUON_CONG_BAO")
+            return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r217_ingest_congbao_khai_bao_khong_chan", _c217_ingest_congbao_khai_bao_khong_chan)
+
+    def _c217_ingest_file_khong_doc_bang_locale():
+        """r217 — khoá lỗi ĐO ĐƯỢC 27-07: `ingest_to_cache.py` đọc lại record cache bằng `open()` KHÔNG
+        khai encoding ⇒ trên Windows locale cp1258 nổ UnicodeDecodeError. Chỗ đó nằm SAU khi cache đã
+        ghi, nên lệnh in `{"ok": false, "ingest_failed"}` rc=2 TRONG KHI KHO ĐÃ ĐỔI — cả đường
+        `--method file` (cache-build offline) chưa từng chạy nổi trên máy tiếng Việt.
+
+        Kiểm bằng HÀNH VI, MÁY-ĐỘC-LẬP: chạy đường nạp thật dưới `-W error::EncodingWarning` +
+        PYTHONWARNDEFAULTENCODING=1 ⇒ mọi `open()` thiếu encoding NỔ bất kể locale của máy chạy test.
+        (Grep chuỗi `encoding=` sẽ xanh giả ngay khi ai đó thêm một `open()` trần ở dòng khác.)"""
+        import json as _js217c
+        import os as _os217c
+        import subprocess as _sp217c
+        import sys as _sys217c
+        import tempfile as _tf217c
+        with _tf217c.TemporaryDirectory() as _td:
+            _in = Path(_td) / "cb.txt"
+            _in.write_text(_R217_CB, encoding="utf-8")
+            _cd = Path(_td) / "cache"
+            _env = dict(_os217c.environ, PYTHONWARNDEFAULTENCODING="1")
+            p = _sp217c.run([_sys217c.executable, "-W", "error::EncodingWarning",
+                             str(_ROOT209 / "scripts" / "ingest_to_cache.py"),
+                             "--so-hieu", "158/2025/NĐ-CP", "--method", "file", "--input", str(_in),
+                             "--cache-dir", str(_cd)], capture_output=True, text=True,
+                            encoding="utf-8", errors="replace", timeout=300, env=_env)
+            ok1 = p.returncode == 0
+            _j = _js217c.loads(p.stdout[p.stdout.find("{"):]) if "{" in p.stdout else {}
+            ok2 = _j.get("ok") is True and _j.get("n_articles") == 3
+            # ĐÚNG cái bẫy: rc≠0 mà cache VẪN được ghi ⇒ hai vế phải nhất quán
+            ok3 = Path(_j.get("cache_file") or "").is_file()
+        return ok1 and ok2 and ok3
+    _t110("r217_ingest_file_khong_doc_bang_locale", _c217_ingest_file_khong_doc_bang_locale)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

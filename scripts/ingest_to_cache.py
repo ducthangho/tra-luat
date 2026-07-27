@@ -492,6 +492,10 @@ def run_normalize(input_path: str, so_hieu: str, title: str, variant: str,
         cmd += ["--aliases", extra["aliases"]]
     if extra.get("as_appendix"):
         cmd += ["--as-appendix"]
+    if extra.get("loc_congbao"):        # r217: chuyển thẳng cho normalize_document (đường nạp DUY NHẤT)
+        cmd += ["--loc-congbao"]
+    if extra.get("loc_congbao_audit"):
+        cmd += ["--loc-congbao-audit", extra["loc_congbao_audit"]]
     p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     sys.stderr.write(p.stderr)
     if p.returncode != 0:
@@ -583,6 +587,11 @@ def main():
                     help="Nếu số hiệu đã bị VBHN còn hiệu lực hợp nhất (vb_status) => NẠP VBHN thay thế.")
     ap.add_argument("--as-appendix", action="store_true",
                     help="Văn bản CHỈ là phụ lục/mẫu (không có Điều nghị định): lưu nguyên khối phu_luc, không ép thành Điều.")
+    ap.add_argument("--loc-congbao", dest="loc_congbao", action="store_true",
+                    help="(r217) Nguồn bóc từ PDF Công báo: BỎ dòng chạy đầu trang + dòng số trang + khối chữ ký "
+                         "số. Không bật thì chỉ KHAI BÁO vào verify_flags (cảnh báo, KHÔNG chặn).")
+    ap.add_argument("--loc-congbao-audit", dest="loc_congbao_audit", default="",
+                    help="(r217) Ghi JSON audit TỪNG DÒNG bị bỏ ra file (bằng chứng đối chiếu).")
     args = ap.parse_args()
     sys.path.insert(0, str(HERE))
     # B3: tự nạp webapp/token như `tl` nếu chưa truyền — env TL_WEBAPP/TL_TOKEN, rồi config (key `webappUrl`/`token`,
@@ -692,6 +701,8 @@ def main():
         "goc": goc,
         "aliases": aliases,
         "as_appendix": args.as_appendix,
+        "loc_congbao": getattr(args, "loc_congbao", False),              # r217
+        "loc_congbao_audit": getattr(args, "loc_congbao_audit", ""),     # r217
     }
     if not Path(input_path).is_file():
         raise RuntimeError(f"SOURCE_NOT_FILE:{input_path}")
@@ -710,7 +721,12 @@ def main():
                                       source_sha256=source_sha256, source_policy=args.source_policy,
                                       source_provider=args.source_provider)
 
-    d = json.load(open(target)) if target else {}
+    # r217 (đo 27-07 trên Windows locale cp1258): `open(target)` không khai encoding ⇒ đọc lại record
+    # cache UTF-8 bằng codec locale và NỔ UnicodeDecodeError. Chỗ này nằm SAU khi cache đã ghi xong
+    # (patch_cache_metadata ở trên), nên lệnh in `{"ok": false, "reason": "ingest_failed"}` rc=2 TRONG
+    # KHI KHO ĐÃ ĐỔI — đúng lớp bẫy "rc≠0 không có nghĩa là chưa ghi gì". Toàn bộ đường `--method file`
+    # (cache-build offline, không đụng Drive) chưa từng chạy nổi trên máy tiếng Việt vì dòng này.
+    d = json.load(open(target, encoding="utf-8")) if target else {}
     arts = d.get("articles", {})
     n_arts = len(arts) if isinstance(arts, dict) else len(arts or [])
     print(json.dumps({

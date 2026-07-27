@@ -1,3 +1,72 @@
+# ★ v1.35.52 — r216: `rasoat-merge` đếm hai lần mà không ai biết, và đơn vị rà xuyên văn bản lọt vào danh mục VBQPPL (+5 test, 1346/1346) (2026-07-27)
+
+> Nguồn: `rasoat_bugs.md` lượt rà 7 (27-07) — `RASOAT_MERGE_AN_CA_FILE_BAK_TRONG_THU_MUC_MASTER` +
+> `RASOAT_MERGE_KHONG_CO_KHAI_NIEM_DON_VI_XUYEN_VAN_BAN`, và mục treo từ lượt 6
+> `BANG_MASTER_DI_TRUOC_MASTER_UNIT_KHONG_CONG_NAO_BAT`. Cùng lớp **hỏng IM LẶNG** với r214/r215:
+> rc=0, không cảnh báo, chỉ SỐ LIỆU là sai — mà đây là số liệu đi thẳng vào biểu mẫu trình Uỷ ban.
+
+## (a) Bản sao lưu để lẫn trong `master/` ⇒ bảng master phồng 40 → 53 phát hiện, `_bo_qua` RỖNG, rc=0
+
+`rasoat-merge --in <thư mục>` quét MỌI `*.json`. Đo thật 27-07 khi một bản sao lưu bị đặt nhầm vào
+`master/`:
+
+| | trước vá | sau vá |
+|---|---|---|
+| số phát hiện | **53** (13 mã VD trùng) | **40** |
+| số văn bản | 5 | 4 |
+| cảnh báo | **không có** (`_bo_qua: []`, rc=0) | `bo_qua_ban_sao` + rc=0 |
+
+Hai nguồn mang **cùng `unit_id`** vẫn được gộp, không cổng nào đối chiếu. Phụ lục sinh ra từ bảng đó
+đếm một phát hiện HAI lần, và người đọc bản phụ lục không có cách nào biết là trùng.
+
+- **`_rasoat_la_ban_sao` (PURE)** — CỐ Ý HẸP: chỉ thành phần (ngăn bằng dấu chấm, KHÔNG tính thành
+  phần đầu) bắt đầu bằng `bak`/`backup`. Không đoán theo `old`/`copy`/`cu`; `bakery-2025.json` vẫn là
+  phiếu thật. Bản sao bị bỏ qua **được KHAI BÁO** ở `bo_qua_ban_sao` — bỏ qua im lặng chỉ là đổi sang
+  một cái bẫy khác. ★Ghi chú giữ lại trong docstring: `backup` KHÔNG bắt đầu bằng `bak` (b-a-c ≠
+  b-a-k) — bản đầu gộp làm một tiền tố và test đỏ ngay.
+- **`_rasoat_trung_lap` (PURE)** — bắt trùng `key` (`phat_hien` lẫn `noi_dung`) và trùng `unit_id`,
+  nêu rõ nguồn nào mang giá trị trùng. Cổng **fail-CLOSED**: có trùng ⇒ rc=2 và **KHÔNG ghi**. Ghi đè
+  bằng bảng đã đếm hai lần là mất luôn bản đúng để đối chiếu ở lượt sau.
+
+## (b) `--check`: bảng master ĐI TRƯỚC tầng unit thì merge lật ngược âm thầm
+
+Khe hở đo được ở lượt 6: bản cập nhật VD-12 chỉ nằm ở `BANG_MASTER.json`, chưa chép về
+`master/unit-003.json`. `rasoat-merge` lấy unit làm NGUỒN và bảng master làm ĐÍCH ⇒ chạy lại là mất
+trắng một lượt làm việc, không báo gì. Lượt 6 phải xử bằng luật miệng "CẤM chạy `rasoat-merge`".
+
+**`tl rasoat-merge --check`** = đối chiếu bảng master đang có với kết quả merge, **KHÔNG ghi đè**;
+lệch ⇒ rc=2 kèm danh sách (`CHI_CO_O_BANG_MASTER` / `CHI_CO_O_KET_QUA_MERGE` / `KHAC_NOI_DUNG` +
+ô lệch / hai loại cho `van_ban`). `_rasoat_check_lech` CỐ Ý bỏ qua `_nguon`/`_thieu_o_metadata`/
+`_bo_qua` — chúng mang tên file, đổi theo chỗ chạy chứ không theo dữ liệu.
+
+## (c) Đơn vị rà XUYÊN VĂN BẢN bị đẩy vào Mẫu 03-BN thành "văn bản" không tồn tại
+
+`_rasoat_unit_to_bang` lấy `van_ban` của đơn vị làm SỐ HIỆU một dòng trong Mẫu 03-BN = *Danh mục
+VBQPPL thuộc đối tượng, phạm vi rà soát*. `unit-006` (rà khối Căn cứ ban hành của CẢ 4 nghị định)
+không phải một VBQPPL, nhưng nhãn mô tả của nó — `158/159/212/233-2025-ND-CP (KHOI CAN CU BAN HANH)`
+— thành **dòng thứ 5** của một biểu mẫu chính thức trình Uỷ ban.
+
+★`unit-004` (đơn vị đối chiếu 159×158) thoát được **CHỈ VÌ** tình cờ đặt `van_ban` trùng số hiệu thật
+nên bị dedup nuốt đi — may, không phải do công cụ biết phân biệt.
+
+Khoá mới **`loai_don_vi: van_ban|doi_chieu|xuyen_van_ban`** trong khuôn §6: `doi_chieu`/`xuyen_van_ban`
+⇒ KHÔNG sinh dòng Mẫu 03-BN (và cũng không đòi điền ô metadata — đơn vị này không phải văn bản), phát
+hiện vẫn gộp bình thường. **Mặc định (thiếu khoá) = GIỮ NGUYÊN hành vi cũ**: chỉ đơn vị tự khai mới
+đổi cách xử lý.
+
+## Nghiệm thu
+
+- Selftest **1341 → 1346** (+5 `r216_*`). Bốn test PURE nạp `lookup_ops.py` THẲNG từ file (không
+  bind) — đúng đường `rasoat_phuluc.py` đi; một test chạy **đường sản xuất thật** bằng subprocess
+  `tl rasoat-merge`, vì cái đã cắn 27-07 là hành vi của LỆNH (rc=0 + ghi đè), không phải của hàm.
+- **Phản chứng 2 chiều CHẠY THẬT 8 đột biến trên bãi cách ly: 8/8 đỏ đúng ca** — gồm cả hai hướng
+  "tắt guard" (M1/M3/M5/M7) và "vá quá tay" (M2 coi mọi file là bản sao, M6 đơn vị nào cũng không
+  sinh dòng), cùng hai hướng fail-open của cổng ghi (M4 thấy trùng vẫn ghi, M8 `--check` ghi đè).
+- `ruff --select F` delta **0 thực chất**: +4 dòng đều là `_print_json_or_text` — tên do `bind()` cấp,
+  đúng nhóm nợ sẵn của `lookup_ops.py`; `tl.py` giữ nguyên 17.
+- `parser_surface` regen **chủ đích 1 dòng** (`rasoat-merge`, do thêm `--check`). SKILL.md
+  **byte-đẳng-dài 47.924** ⇒ re-import Capabilities KHÔNG bắt buộc. GAS vẫn **2.21.2p**, không đụng.
+
 # ★ v1.35.51 — r215: khối đầu văn bản bị đánh rơi trên đường cache, và nguồn DỰ THẢO phục vụ RAG lặng lẽ (+6 test, 1341/1341) (2026-07-27)
 
 > Nguồn: `rasoat_bugs.md` lượt rà 4 (27-07) — `CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN` (mục đáng vá nhất)

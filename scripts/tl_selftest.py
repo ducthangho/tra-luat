@@ -20722,6 +20722,163 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r215_nlm_draft_sources_do_dung_pham_vi", _c215_nlm_draft_sources)
 
+    # ═════ r216: hai lỗ hổng của `rasoat-merge` ĐO ĐƯỢC ở lượt rà 7 (27-07) ═════
+    # Bối cảnh: một bản sao lưu đặt nhầm trong `master/` làm bảng master phồng 40 → 53 phát hiện,
+    # 13 mã VD trùng nhau, `_bo_qua` rỗng, rc=0 — không cổng nào bắt. Và `unit-006` (đơn vị rà khối
+    # Căn cứ của CẢ 4 nghị định) đẩy nhãn mô tả của nó vào Mẫu 03-BN thành "văn bản" thứ 5.
+    def _c216_la_ban_sao_hep_dung_muc():
+        _m = _r213_lookup_nobind()   # PURE: phải chạy ở đường import trần, không cần bind()
+        f = _m._rasoat_la_ban_sao
+        ok1 = (f("unit-003.bak.truoc_vd12_luot7.json") and f("unit-003.bak.json")
+               and f("BANG_MASTER.backup.json"))
+        # CHIỀU NGƯỢC — phiếu rà THẬT không được nuốt (nuốt phiếu đắt hơn hẳn cái guard này phòng):
+        ok2 = not any(f(n) for n in ["unit-003.json", "unit-006.json", "BANG_MASTER.json",
+                                     "bakery-2025.json", "unit-old.json", "unit-003.copy.json"])
+        ok3 = not f("") and not f(None)
+        return ok1 and ok2 and ok3
+    _t110("r216_la_ban_sao_hep_dung_muc", _c216_la_ban_sao_hep_dung_muc)
+
+    def _c216_trung_lap_bat_duoc_ca_hai_loai():
+        _m = _r213_lookup_nobind()
+        _u3 = {"unit_id": "unit-003", "van_ban": "212-2025-ND-CP",
+               "phat_hien": [{"key": "VD-10"}, {"key": "VD-12"}]}
+        # ĐÚNG ca đã xảy ra: cùng file lọt vào hai lần (bản gốc + bản sao lưu)
+        _trung = _m._rasoat_trung_lap([("unit-003.json", _u3), ("unit-003.bak.json", dict(_u3))])
+        ok1 = ({x["gia_tri"] for x in _trung["key"]} == {"VD-10", "VD-12"}
+               and [x["gia_tri"] for x in _trung["unit_id"]] == ["unit-003"])
+        ok2 = _trung["key"][0]["nguon"] == ["unit-003.json", "unit-003.bak.json"]   # nêu ĐÚNG nguồn nào
+        # CHIỀU NGƯỢC: hồ sơ SẠCH (đúng 6 đơn vị của lượt 7) KHÔNG được báo động giả
+        _sach = [("unit-00%d.json" % i, {"unit_id": "unit-00%d" % i,
+                                         "phat_hien": [{"key": "VD-%02d" % i}]}) for i in range(1, 7)]
+        ok3 = _m._rasoat_trung_lap(_sach) == {"key": [], "unit_id": []}
+        # khuôn bảng (`noi_dung`) cũng phải được soi, không chỉ khuôn §6 (`phat_hien`)
+        ok4 = bool(_m._rasoat_trung_lap([("a.json", {"noi_dung": [{"key": "VD-01"}]}),
+                                         ("b.json", {"noi_dung": [{"key": "VD-01"}]})])["key"])
+        # rác không làm nổ, và phát hiện KHÔNG có `key` thì không tự gom thành trùng
+        ok5 = (_m._rasoat_trung_lap([]) == {"key": [], "unit_id": []}
+               and _m._rasoat_trung_lap([("a.json", {"phat_hien": [{"key": ""}, {}]}),
+                                         ("b.json", {"phat_hien": [{"key": ""}]})])["key"] == [])
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r216_trung_lap_bat_duoc_ca_hai_loai", _c216_trung_lap_bat_duoc_ca_hai_loai)
+
+    def _c216_loai_don_vi_xuyen_van_ban_khong_sinh_dong_03bn():
+        _m = _r213_lookup_nobind()
+        # unit-006 THẬT: rà khối Căn cứ của cả 4 nghị định — KHÔNG phải một VBQPPL
+        _u6 = {"unit_id": "unit-006", "loai_don_vi": "xuyen_van_ban",
+               "van_ban": "158/159/212/233-2025-ND-CP (KHOI CAN CU BAN HANH)",
+               "ten": "Ra soat khoi Can cu ban hanh cua ca 4 nghi dinh",
+               "phat_hien": [{"key": "VD-38"}, {"key": "VD-39"}, {"key": "VD-40"}]}
+        _vb, _ph, _thieu = _m._rasoat_unit_to_bang(_u6, nguon="unit-006.json")
+        ok1 = _vb == [] and _thieu == []          # không dòng Mẫu 03-BN, không đòi điền ô
+        ok2 = [x["key"] for x in _ph] == ["VD-38", "VD-39", "VD-40"]   # phát hiện KHÔNG mất
+        ok3 = "doi_chieu" and _m._rasoat_unit_to_bang(dict(_u6, loai_don_vi="doi_chieu"))[0] == []
+        # ★CHIỀU NGƯỢC 1 — mặc định (KHÔNG khai `loai_don_vi`) phải GIỮ NGUYÊN hành vi cũ:
+        _u6_cu = {k: v for k, v in _u6.items() if k != "loai_don_vi"}
+        ok4 = len(_m._rasoat_unit_to_bang(_u6_cu, nguon="unit-006.json")[0]) == 1
+        # ★CHIỀU NGƯỢC 2 — đơn vị rà MỘT văn bản, dù khai loại lạ, vẫn sinh dòng như cũ:
+        _u5 = {"unit_id": "unit-005", "loai_don_vi": "van_ban", "van_ban": "158-2025-ND-CP",
+               "ten": "ND 158", "phat_hien": [{"key": "VD-27"}]}
+        ok5 = len(_m._rasoat_unit_to_bang(_u5)[0]) == 1
+        # gộp cả hồ sơ: 5 đơn vị văn bản + 1 đơn vị xuyên văn bản ⇒ ĐÚNG 4 văn bản (dedup 159), 6 phát hiện
+        _docs = [("unit-001.json", {"unit_id": "unit-001", "van_ban": "159-2025-ND-CP", "phat_hien": [{"key": "A"}]}),
+                 ("unit-004.json", {"unit_id": "unit-004", "loai_don_vi": "doi_chieu",
+                                    "van_ban": "159-2025-ND-CP", "phat_hien": [{"key": "B"}]}),
+                 ("unit-006.json", dict(_u6))]
+        _g = _m._rasoat_merge_units(_docs)
+        ok6 = (len(_g["van_ban"]) == 1 and _g["van_ban"][0]["so_hieu"] == "159-2025-ND-CP"
+               and len(_g["noi_dung"]) == 5)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r216_loai_don_vi_xuyen_van_ban_khong_sinh_dong_03bn",
+          _c216_loai_don_vi_xuyen_van_ban_khong_sinh_dong_03bn)
+
+    def _c216_check_lech_doi_chieu_hai_chieu():
+        _m = _r213_lookup_nobind()
+        _cu = {"van_ban": [{"so_hieu": "159-2025-ND-CP"}],
+               "noi_dung": [{"key": "VD-01", "phan_tich": "x"}, {"key": "VD-02"}]}
+        ok1 = _m._rasoat_check_lech(_cu, _cu) == []      # trùng khớp ⇒ RỖNG
+        # đúng ca VD-12 của lượt 7: bảng master ĐI TRƯỚC, merge sẽ lật ngược
+        _moi = {"van_ban": [{"so_hieu": "159-2025-ND-CP"}],
+                "noi_dung": [{"key": "VD-01", "phan_tich": "CU"}, {"key": "VD-03"}]}
+        _l = _m._rasoat_check_lech(_cu, _moi)
+        _loai = {x["loai"] for x in _l}
+        ok2 = _loai == {"KHAC_NOI_DUNG", "CHI_CO_O_BANG_MASTER", "CHI_CO_O_KET_QUA_MERGE"}
+        ok3 = [x["o_lech"] for x in _l if x["loai"] == "KHAC_NOI_DUNG"] == [["phan_tich"]]
+        # `_nguon`/`_thieu_o_metadata` mang TÊN FILE ⇒ CỐ Ý không tính là lệch (đổi theo chỗ chạy)
+        ok4 = _m._rasoat_check_lech(dict(_cu, _nguon=[{"nguon": "a.json"}]),
+                                    dict(_cu, _nguon=[{"nguon": "b.json"}], _bo_qua=[1])) == []
+        # văn bản thêm/bớt cũng phải nổi lên (đúng ca dòng Mẫu 03-BN thứ 5)
+        ok5 = any(x["loai"] == "VAN_BAN_CHI_CO_O_KET_QUA_MERGE"
+                  for x in _m._rasoat_check_lech(_cu, dict(_cu, van_ban=_cu["van_ban"] + [{"so_hieu": "X-2025"}])))
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r216_check_lech_doi_chieu_hai_chieu", _c216_check_lech_doi_chieu_hai_chieu)
+
+    def _c216_merge_fail_closed_tren_duong_san_xuat():
+        """Chạy ĐÚNG đường sản xuất (subprocess `tl rasoat-merge`), không qua bind — vì cái đã cắn
+        27-07 là hành vi của LỆNH, không phải của hàm: rc=0 và bảng master bị ghi đè bằng bản đếm
+        hai lần. Khoá cả hai vế: (a) có trùng ⇒ rc=2 và KHÔNG ghi; (b) sạch ⇒ vẫn ghi như cũ."""
+        import json as _js216
+        import subprocess as _sp216
+        import sys as _sys216
+        import tempfile as _tf216
+        _u = {"unit_id": "unit-003", "van_ban": "212-2025-ND-CP", "ten": "ND 212",
+              "phat_hien": [{"key": "VD-10", "linh_vuc": "BHXH", "hinh_thuc": "nghiên cứu"}]}
+        with _tf216.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"
+            _d.mkdir()
+            (_d / "unit-003.json").write_text(_js216.dumps(_u, ensure_ascii=False), encoding="utf-8")
+            _out = Path(_td) / "BANG_MASTER.json"
+
+            def _run(*extra):
+                return _sp216.run([_sys216.executable, str(_ROOT209 / "scripts" / "tl.py"), "rasoat-merge",
+                                   "--in", str(_d), "--out", str(_out), "--json", *extra],
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                  timeout=180)
+            # (b) hồ sơ SẠCH: ghi bình thường, rc=0
+            _r1 = _run()
+            ok1 = _r1.returncode == 0 and _out.is_file()
+            _j1 = _js216.loads(_r1.stdout[_r1.stdout.find("{"):])
+            ok2 = _j1.get("so_phat_hien") == 1 and _j1.get("da_ghi") is True
+            # BẢN SAO LƯU để lẫn vào master/ ⇒ bị bỏ qua nhưng KHAI BÁO, KHÔNG phồng số liệu
+            (_d / "unit-003.bak.truoc_x.json").write_text(_js216.dumps(_u, ensure_ascii=False),
+                                                          encoding="utf-8")
+            _r2 = _run()
+            _j2 = _js216.loads(_r2.stdout[_r2.stdout.find("{"):])
+            ok3 = (_r2.returncode == 0 and _j2.get("so_phat_hien") == 1
+                   and [x["nguon"] for x in _j2.get("bo_qua_ban_sao") or []] == ["unit-003.bak.truoc_x.json"])
+            # (a) TRÙNG THẬT (hai phiếu khác tên, cùng unit_id + cùng mã VD) ⇒ rc=2 và KHÔNG ghi đè
+            _truoc = _out.read_bytes()
+            (_d / "unit-003-copy.json").write_text(_js216.dumps(_u, ensure_ascii=False), encoding="utf-8")
+            _r3 = _run()
+            _j3 = _js216.loads(_r3.stdout[_r3.stdout.find("{"):])
+            ok4 = (_r3.returncode == 2 and _j3.get("error") == "TRUNG_LAP_GIUA_CAC_NGUON"
+                   and _j3.get("da_ghi") is False and _out.read_bytes() == _truoc)
+            ok5 = ({x["gia_tri"] for x in _j3["trung_lap"]["key"]} == {"VD-10"}
+                   and {x["gia_tri"] for x in _j3["trung_lap"]["unit_id"]} == {"unit-003"})
+            # `--check`: bảng master đang có KHÁC kết quả merge ⇒ rc=2, nêu key, KHÔNG ghi đè
+            (_d / "unit-003-copy.json").unlink()
+            _out.write_text(_js216.dumps({"van_ban": [], "noi_dung": [{"key": "VD-99"}]},
+                                         ensure_ascii=False), encoding="utf-8")
+            _truoc2 = _out.read_bytes()
+            _r4 = _run("--check")
+            _j4 = _js216.loads(_r4.stdout[_r4.stdout.find("{"):])
+            # so_lech = 3: VD-99 chỉ có ở bảng master · VD-10 chỉ có ở kết quả merge · và VĂN BẢN
+            # 212 chỉ có ở kết quả merge (bản stub để `van_ban` rỗng) — kiểm THÀNH PHẦN, không kiểm
+            # mỗi con số, để test nói đúng cái nó bảo vệ.
+            ok6 = (_r4.returncode == 2 and _j4.get("da_ghi") is False
+                   and _out.read_bytes() == _truoc2 and _j4.get("so_lech") == 3
+                   and {x["loai"] for x in _j4["lech"]} == {"CHI_CO_O_BANG_MASTER",
+                                                            "CHI_CO_O_KET_QUA_MERGE",
+                                                            "VAN_BAN_CHI_CO_O_KET_QUA_MERGE"})
+            # CHIỀU NGƯỢC của --check: bảng master KHỚP ⇒ rc=0, vẫn KHÔNG ghi (check là read-only)
+            _out.write_text(_js216.dumps(_j1 and {"van_ban": [{"so_hieu": "212-2025-ND-CP"}],
+                                                  "noi_dung": _u["phat_hien"]}, ensure_ascii=False),
+                            encoding="utf-8")
+            _r5 = _run("--check")
+            _j5 = _js216.loads(_r5.stdout[_r5.stdout.find("{"):])
+            ok7 = _r5.returncode == 0 and _j5.get("so_lech") == 0 and _j5.get("da_ghi") is False
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

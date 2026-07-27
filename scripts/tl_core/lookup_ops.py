@@ -2722,6 +2722,76 @@ def _rasoat_sohieu_key(s):
     return _re.sub(r"\s+", " ", _ud.normalize("NFC", str(s or "")).strip().upper()).replace("/", "-")
 
 
+def _rasoat_la_ban_sao(name):
+    """PURE (r216 — đo được 27-07 lượt rà 7): tên file có phải BẢN SAO LƯU không.
+
+    `rasoat-merge --in <thư mục>` quét MỌI `*.json`, kể cả bản sao lưu. Một bản sao đặt nhầm trong
+    `master/` đã làm bảng master phồng 40 → 53 phát hiện với 13 mã VD TRÙNG NHAU và HAI nguồn cùng
+    `unit_id`, mà `_bo_qua` vẫn rỗng và rc=0 — phụ lục sinh ra từ đó đếm một phát hiện HAI lần.
+
+    CỐ Ý HẸP: chỉ nhận khi tên có THÀNH PHẦN (ngăn bằng dấu chấm, KHÔNG tính thành phần ĐẦU) bắt
+    đầu bằng `bak` hoặc `backup` — bắt `unit-003.bak.<gì đó>.json` và `unit-003.backup.json`.
+    KHÔNG đoán theo `old`/`copy`/`cu`, và KHÔNG xét thành phần đầu (nên `bakery-2025.json` vẫn là
+    phiếu thật). Đoán rộng ở đây là nuốt mất phiếu rà thật — đắt hơn hẳn cái nó phòng. Bản sao bị
+    bỏ qua PHẢI được KHAI BÁO (`bo_qua_ban_sao`), không im lặng: bỏ qua im lặng chỉ là bẫy khác.
+
+    ★Hai tiền tố phải viết TÁCH: `backup` KHÔNG bắt đầu bằng `bak` (b-a-c ≠ b-a-k) — bản đầu r216
+    gộp làm một và test đỏ ngay, giữ ghi chú này để không ai "rút gọn" lại."""
+    stem = str(name or "").strip()
+    if stem.lower().endswith(".json"):
+        stem = stem[:-5]
+    return any(part.lower().startswith(("bak", "backup")) for part in stem.split(".")[1:])
+
+
+def _rasoat_trung_lap(docs):
+    """PURE (r216): bắt TRÙNG giữa các nguồn trước khi ghi đè bảng master. Trả dict
+    {"key": [...], "unit_id": [...]}, mỗi mục nêu rõ giá trị trùng và các nguồn mang nó.
+
+    Hai loại trùng, cùng một hậu quả — đếm hai lần mà không ai biết:
+      · trùng `key` trong `noi_dung`  → một phát hiện vào phụ lục hai lần;
+      · trùng `unit_id` giữa các file → hai phiếu cùng mô tả một đơn vị rà.
+    Bên gọi FAIL-CLOSED: có trùng thì KHÔNG ghi, rc=2. Bảng master sai mà vẫn ghi đè thì lần chạy
+    sau không còn bản đúng để đối chiếu."""
+    keys, uids = {}, {}
+    for ten, d in (docs or []):
+        if not isinstance(d, dict):
+            continue
+        uid = str(d.get("unit_id") or "").strip()
+        if uid:
+            uids.setdefault(uid, []).append(ten)
+        for x in ((d.get("phat_hien") or []) + (d.get("noi_dung") or [])):
+            if isinstance(x, dict) and str(x.get("key") or "").strip():
+                keys.setdefault(str(x["key"]).strip(), []).append(ten)
+    return {"key": [{"gia_tri": k, "nguon": v} for k, v in keys.items() if len(v) > 1],
+            "unit_id": [{"gia_tri": k, "nguon": v} for k, v in uids.items() if len(v) > 1]}
+
+
+def _rasoat_check_lech(cu, moi):
+    """PURE (r216): đối chiếu bảng master ĐANG CÓ với kết quả merge — cho chế độ `--check`.
+
+    Chỉ so phần NỘI DUNG (`van_ban` theo số hiệu, `noi_dung` theo `key`); CỐ Ý bỏ qua `_nguon`/
+    `_thieu_o_metadata`/`_bo_qua` vì chúng mang tên file nguồn, đổi theo chỗ chạy chứ không phải
+    theo dữ liệu. Trả danh sách lệch, rỗng = trùng khớp."""
+    lech = []
+    a_nd = {str(x.get("key") or ""): x for x in (cu.get("noi_dung") or []) if isinstance(x, dict)}
+    b_nd = {str(x.get("key") or ""): x for x in (moi.get("noi_dung") or []) if isinstance(x, dict)}
+    for k in sorted(set(a_nd) - set(b_nd)):
+        lech.append({"loai": "CHI_CO_O_BANG_MASTER", "key": k})
+    for k in sorted(set(b_nd) - set(a_nd)):
+        lech.append({"loai": "CHI_CO_O_KET_QUA_MERGE", "key": k})
+    for k in sorted(set(a_nd) & set(b_nd)):
+        o = sorted(f for f in set(a_nd[k]) | set(b_nd[k]) if a_nd[k].get(f) != b_nd[k].get(f))
+        if o:
+            lech.append({"loai": "KHAC_NOI_DUNG", "key": k, "o_lech": o})
+    a_vb = {_rasoat_sohieu_key(x.get("so_hieu")) for x in (cu.get("van_ban") or []) if isinstance(x, dict)}
+    b_vb = {_rasoat_sohieu_key(x.get("so_hieu")) for x in (moi.get("van_ban") or []) if isinstance(x, dict)}
+    for s in sorted(a_vb - b_vb):
+        lech.append({"loai": "VAN_BAN_CHI_CO_O_BANG_MASTER", "so_hieu": s})
+    for s in sorted(b_vb - a_vb):
+        lech.append({"loai": "VAN_BAN_CHI_CO_O_KET_QUA_MERGE", "so_hieu": s})
+    return lech
+
+
 def _rasoat_unit_shape(d):
     """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
     `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.
@@ -2751,7 +2821,17 @@ def _rasoat_unit_to_bang(d, nguon=""):
     KHÔNG BỊA: đơn vị rà chỉ biết số hiệu + tên văn bản; ngày ban hành/hiệu lực/tình trạng nằm ở
     registry, không nằm trong phiếu rà. Trường thiếu để RỖNG và ĐẨY LÊN để người điền — thà bảng
     có ô trống nhìn thấy được còn hơn ô bịa nhìn như thật. Đơn vị nào muốn đủ ô thì mang sẵn
-    `van_ban_meta` (dict) — §6 chấp nhận, không bắt buộc."""
+    `van_ban_meta` (dict) — §6 chấp nhận, không bắt buộc.
+
+    r216 — `loai_don_vi`: đơn vị ĐỐI CHIẾU / XUYÊN VĂN BẢN không phải một VBQPPL, nên KHÔNG được
+    sinh dòng trong Mẫu 03-BN ("Danh mục VBQPPL thuộc đối tượng, phạm vi rà soát") — phát hiện thì
+    vẫn gộp bình thường. Đo được 27-07: `unit-006` (rà khối Căn cứ ban hành của CẢ 4 nghị định) đẩy
+    nhãn mô tả của chính nó vào danh mục thành "văn bản" thứ 5, tức một biểu mẫu trình Uỷ ban liệt
+    kê một văn bản KHÔNG TỒN TẠI. `unit-004` thoát được CHỈ VÌ tình cờ đặt `van_ban` trùng số hiệu
+    thật nên bị dedup nuốt đi — may, không phải do công cụ biết phân biệt.
+    Mặc định (thiếu khoá) = giữ NGUYÊN hành vi cũ: chỉ đơn vị tự khai mới đổi cách xử lý."""
+    loai = str((d or {}).get("loai_don_vi") or "").strip().lower()
+    khong_sinh_dong = loai in ("doi_chieu", "xuyen_van_ban")
     sohieu = str((d or {}).get("van_ban") or "").strip()
     meta = (d or {}).get("van_ban_meta")
     row = {k: "" for k in _RASOAT_VB_META_FIELDS}
@@ -2766,6 +2846,10 @@ def _rasoat_unit_to_bang(d, nguon=""):
     # không phải kết luận phân loại) — rỗng thì để rasoat_phuluc rơi vào "(Chưa phân loại)".
     if not row.get("linh_vuc"):
         row["linh_vuc"] = next((str(x.get("linh_vuc") or "") for x in phat_hien if x.get("linh_vuc")), "")
+    if khong_sinh_dong:
+        # Không sinh dòng ⇒ cũng KHÔNG báo "ô metadata còn trống": đơn vị này không phải văn bản,
+        # đòi nó điền ngày ban hành/hiệu lực là đòi thứ không tồn tại.
+        return [], phat_hien, []
     thieu = [k for k in _RASOAT_VB_META_FIELDS if not str(row.get(k) or "").strip()]
     if thieu and nguon:
         row["ghi_chu"] = (row.get("ghi_chu") or "") + \
@@ -3056,7 +3140,10 @@ def cmd_rasoat_merge(a) -> int:
         _print_json_or_text({"schema": "rasoat_merge.v1", "ok": False,
                              "error": "IN_KHONG_TON_TAI: " + (inp or "(trống)")}, True)
         return 2
-    files = sorted(p.glob("*.json")) if p.is_dir() else [p]
+    tat_ca = sorted(p.glob("*.json")) if p.is_dir() else [p]
+    # r216 — bản sao lưu để lẫn trong master/ KHÔNG được gộp; bỏ qua nhưng phải KHAI BÁO.
+    ban_sao = [f for f in tat_ca if p.is_dir() and _rasoat_la_ban_sao(f.name)]
+    files = [f for f in tat_ca if f not in ban_sao]
     docs, hong = [], []
     for f in files:
         try:
@@ -3068,6 +3155,40 @@ def cmd_rasoat_merge(a) -> int:
     merged["_bo_qua"] = bo_qua
     out_path = str(getattr(a, "out", "") or "").strip() or str(
         (p.parent if p.is_dir() else p.parent) / "BANG_MASTER.json")
+    bo_qua_ban_sao = [{"nguon": f.name, "ly_do": "BAN_SAO_LUU_BI_BO_QUA"} for f in ban_sao]
+    nen = {"schema": "rasoat_merge.v1", "in": str(p), "out": out_path,
+           "so_file": len(files), "so_van_ban": len(merged.get("van_ban") or []),
+           "so_phat_hien": len(merged.get("noi_dung") or []),
+           "bo_qua_ban_sao": bo_qua_ban_sao}
+    # r216 — CỔNG TRÙNG (fail-CLOSED): trùng `key`/`unit_id` ⇒ KHÔNG ghi. Ghi đè bằng bảng đã đếm
+    # hai lần là mất luôn bản đúng để đối chiếu ở lượt sau.
+    trung = _rasoat_trung_lap(docs)
+    if trung.get("key") or trung.get("unit_id"):
+        _print_json_or_text(dict(nen, ok=False, error="TRUNG_LAP_GIUA_CAC_NGUON", trung_lap=trung,
+                                 da_ghi=False, bo_qua=bo_qua,
+                                 fix="mỗi phát hiện chỉ được nằm ở MỘT phiếu và mỗi `unit_id` chỉ "
+                                     "một file; bản sao lưu đặt NGOÀI thư mục master/"), True)
+        return 2
+    # r216 — `--check`: đối chiếu bảng master đang có với kết quả merge, KHÔNG ghi đè.
+    if bool(getattr(a, "check", False)):
+        cu_p = Path(out_path)
+        if not cu_p.is_file():
+            _print_json_or_text(dict(nen, ok=False, error="CHECK_KHONG_CO_BANG_MASTER_DE_DOI_CHIEU",
+                                     da_ghi=False, bo_qua=bo_qua), True)
+            return 2
+        try:
+            cu = json.loads(cu_p.read_text(encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001
+            _print_json_or_text(dict(nen, ok=False, error="CHECK_BANG_MASTER_HONG: " + str(e),
+                                     da_ghi=False, bo_qua=bo_qua), True)
+            return 2
+        lech = _rasoat_check_lech(cu, merged)
+        _print_json_or_text(dict(nen, ok=not lech and not bo_qua, che_do="check", da_ghi=False,
+                                 so_lech=len(lech), lech=lech, bo_qua=bo_qua,
+                                 fix=None if not lech else
+                                 "bảng master ĐI TRƯỚC tầng unit: chép phát hiện về `master/<unit>.json` "
+                                 "rồi merge lại, ĐỪNG merge đè — merge lấy unit làm nguồn."), True)
+        return 0 if (not lech and not bo_qua) else 2
     Path(out_path).write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
     # Hoà giải state (khe hở H8): CHỈ khi người gọi trỏ --state; sửa tại chỗ là quyết định của họ.
     hoa_giai = None
@@ -3083,11 +3204,10 @@ def cmd_rasoat_merge(a) -> int:
                         "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
         except Exception as e:  # noqa: BLE001
             hoa_giai = {"state": st_path, "loi": str(e)}
-    out = {"schema": "rasoat_merge.v1", "ok": not bo_qua, "in": str(p), "out": out_path,
-           "so_file": len(files), "so_van_ban": len(merged.get("van_ban") or []),
-           "so_phat_hien": len(merged.get("noi_dung") or []),
-           "nguon": merged.get("_nguon"), "thieu_o_metadata": merged.get("_thieu_o_metadata"),
-           "bo_qua": bo_qua, "hoa_giai_state": hoa_giai,
-           "buoc_ke": "python scripts/rasoat_phuluc.py --in " + out_path + " --out-dir <out-dir>/phuluc"}
+    out = dict(nen, ok=not bo_qua, da_ghi=True,
+               nguon=merged.get("_nguon"), thieu_o_metadata=merged.get("_thieu_o_metadata"))
+    out.update({"bo_qua": bo_qua, "hoa_giai_state": hoa_giai,
+                "buoc_ke": "python scripts/rasoat_phuluc.py --in " + out_path
+                           + " --out-dir <out-dir>/phuluc"})
     _print_json_or_text(out, True)
     return 0 if not bo_qua else 2

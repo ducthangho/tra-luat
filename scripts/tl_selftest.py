@@ -21338,6 +21338,182 @@ def run() -> int:
 
     _t110("r218_docclaims_strict_fail_closed_va_tat_dinh", _c218_strict_fail_closed_va_tat_dinh)
 
+    # ─────────── r219: doc-claims-check lớp L8 (tên lệnh) + L9 (tài liệu mồ côi) ───────────
+    # Dùng lại đúng khuôn r218: chạy `python scripts/tl.py …` như người dùng thật, mỗi lớp một cặp
+    # «đỏ đúng ca» + «đối chứng không báo giả». L9 thêm một ca PURE vì lớp đó so CÂY ĐĨA THẬT —
+    # muốn dựng ca mồ côi phải có gốc giả, mà gốc giả thì không đi qua CLI được (xem ca _l9_tu_tat).
+    def _c219_l8_lenh_khong_ton_tai():
+        """L8 — tài liệu bảo chạy `tl khong-co-lenh-nay`: phiên sau đi theo là vào ngõ cụt ⇒ CỜ.
+        Kèm ca đối chứng NGAY TRONG cùng tài liệu: `tl sweep` có thật thì không được nổ."""
+        import tempfile as _tf219
+        with _tf219.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nChạy `tl khong-co-lenh-nay --json` rồi `tl sweep --json`.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L8")
+        return (rc == 1 and j.get("ok") is False and len(f) == 1
+                and f[0]["claim"] == "tl khong-co-lenh-nay"
+                and f[0]["reason"] == "TL_COMMAND_UNKNOWN" and f[0]["line"] == 3)
+
+    _t110("r219_docclaims_l8_lenh_khong_ton_tai", _c219_l8_lenh_khong_ton_tai)
+
+    def _c219_l8_khong_bao_gia():
+        """ĐỐI CHỨNG L8 — năm khuôn viết ĐÚNG, cả năm đều ĐO ĐƯỢC trên kho thật và mỗi khuôn giết
+        một cách cài đặt ẩu khác nhau:
+          • `tl --profile "Luật BHXH" sweep` — không nuốt giá trị option toàn cục ⇒ đọc ra lệnh «Luật»;
+          • `tl nlm-*` (sổ lưu trữ) — regex tham lam ⇒ đọc ra «nlm», một lệnh không tồn tại;
+          • `tl --selftest` — không có subcommand, đừng bịa;
+          • `python scripts/tl.py doc-claims-check` — đường gọi đầy đủ cũng phải nhận ra;
+          • văn xuôi NGOÀI backtick — neo `tl` ở ĐẦU SPAN mới loại được. Ba câu dưới đây chép
+            NGUYÊN VĂN từ sổ lưu trữ của chính kho (`tl cho`, `tl selftest`, `tl rebase`): quét trần
+            bắt cả ba, và cả ba đều là tiếng Việt/danh từ chứ không phải lệnh."""
+        import tempfile as _tf219
+        with _tf219.TemporaryDirectory() as td:
+            d = _r218_doc(td, "\n".join([
+                "# Đối chứng L8",
+                '- `tl --profile "Luật BHXH" sweep --json` và `tl --deterministic reg-query --json`.',
+                # Tên profile CHỮ THƯỜNG là ca thật mà `_DOC_CLAIMS_CMD_RE` KHÔNG đỡ được: bản viết hoa
+                # rơi ngoài `[a-z]` nên im lặng kể cả khi quên nuốt giá trị option (phản chứng M2 lọt
+                # lưới đúng vì lẽ đó) — phải có dòng này thì cổng _DOC_CLAIMS_GLOBAL_OPT_VAL mới bị đo.
+                "- Hồ sơ khác: `tl --profile bhxh sweep --json`, `tl --config abc.json counts`.",
+                "- Nhóm `tl nlm-*` đi đường batch-link; `tl --selftest` chạy toàn bộ ca.",
+                "- Đường đầy đủ: `python scripts/tl.py doc-claims-check --strict --json`.",
+                "- 26 stub hàm + 2 alias hằng trong tl cho phép bind chạy sau.",
+                "- Kiểm định: **transport selftest 12/12**, **tl selftest 338/338**.",
+                "- Hằng không vào globals tl rebase → NameError → INLINE tuple trong hàm.",
+                "",
+            ]))
+            rc, j, _ = _r218_run("--path", str(d))
+        return (rc == 0 and j.get("ok") is True and _r218_layers(j, "L8") == []
+                and not [a for a in (j.get("advisories") or []) if a.get("layer") == "L8"])
+
+    _t110("r219_docclaims_l8_khong_bao_gia", _c219_l8_khong_bao_gia)
+
+    def _c219_l9_mo_coi_pure():
+        """L9 PURE trên GỐC GIẢ — nạp thẳng tl_core/workflow.py, KHÔNG bind (bẫy false-green-qua-bind).
+        Ba trạng thái phải PHÂN BIỆT được, nếu gộp thì lớp này vô dụng:
+          • có con trỏ SỐNG      → im lặng (kể cả khi chỉ nhắc bằng TÊN TỆP trần, không kèm đường dẫn);
+          • chỉ tài liệu LỊCH SỬ → advisory (có thể là ghi chép cố ý lưu, không phải phán quyết);
+          • không ai nhắc        → CỜ (tệp nằm trong gói mà không đường nào tới).
+        Ca thứ tư là chiều NGƯỢC: được .py nhắc thì KHÔNG mồ côi — thiếu vế này thì lớp hô oan mọi
+        tài liệu chỉ được mã nguồn trỏ tới (đo trên kho thật: 3/5 ứng viên rơi đúng vào vế này)."""
+        import tempfile as _tf219
+        _wf = _mod215("workflow.py", "_wf219")
+        with _tf219.TemporaryDirectory() as td:
+            _root = Path(td)
+            (_root / "references").mkdir(parents=True)
+            (_root / "scripts").mkdir(parents=True)
+            for n in ("DUOC_TRO.md", "CHI_TEN_TRAN.md", "CHI_SU_NHAC.md", "MO_COI.md", "TU_CODE.md"):
+                (_root / "references" / n).write_text("# " + n, encoding="utf-8")
+            (_root / "scripts" / "x.py").write_text("# xem references/TU_CODE.md\n", encoding="utf-8")
+            _scanned = {
+                "SKILL.md": "Đọc `references/DUOC_TRO.md`; chi tiết ở CHI_TEN_TRAN.md.",
+                "CHANGELOG.md": "v1.0.0 — thêm references/CHI_SU_NHAC.md",
+                "references/DUOC_TRO.md": "", "references/CHI_TEN_TRAN.md": "",
+                "references/CHI_SU_NHAC.md": "", "references/MO_COI.md": "",
+                "references/TU_CODE.md": "",
+            }
+            got = {d["claim"]: d for d in _wf._doc_claims_orphans(_scanned, _root)}
+        ok1 = "references/DUOC_TRO.md" not in got          # con trỏ sống, đường dẫn đầy đủ
+        ok2 = "references/CHI_TEN_TRAN.md" not in got      # con trỏ sống, chỉ TÊN TỆP trần
+        ok3 = "references/TU_CODE.md" not in got           # chiều ngược: .py trỏ tới cũng là con trỏ
+        _mc = got.get("references/MO_COI.md") or {}
+        ok4 = (_mc.get("reason") == "DOC_NO_INBOUND_POINTER" and not _mc.get("_advisory")
+               and _mc.get("layer") == "L9" and _mc.get("line") == 1)
+        _cs = got.get("references/CHI_SU_NHAC.md") or {}
+        ok5 = (_cs.get("reason") == "DOC_POINTED_ONLY_BY_HISTORICAL" and _cs.get("_advisory") is True
+               and (_cs.get("detail") or {}).get("historical_refs") == 1)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and len(got) == 2
+
+    _t110("r219_docclaims_l9_mo_coi_pure", _c219_l9_mo_coi_pure)
+
+    def _c219_l9_tu_tat_khi_quet_hep():
+        """«0 cờ vì sạch» ≠ «0 cờ vì không chạy» — lớp tự tắt PHẢI khai báo. Quét hẹp (một thư mục
+        ngoài cây) thì L9 vô nghĩa: mọi tệp references/ thật đều sẽ trông như mồ côi. Chiều ngược:
+        lượt quét mặc định đủ rộng thì L9 KHÔNG được nằm trong danh sách tắt."""
+        import tempfile as _tf219
+        with _tf219.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nKhông có gì đặc biệt.\n")
+            _, j_hep, _ = _r218_run("--path", str(d))
+        _, j_rong, _ = _r218_run()
+        _bl = j_rong.get("by_layer") or {}
+        return ((j_hep.get("layers_skipped") or {}).get("L9")
+                and "L9" not in (j_rong.get("layers_skipped") or {})
+                and "L8" not in (j_rong.get("layers_skipped") or {})
+                and "L8" in (j_rong.get("layers") or []) and "L9" in (j_rong.get("layers") or [])
+                and (j_rong.get("basis") or {}).get("commands_known", 0) > 100
+                # RATCHET: hai lớp mới phải SẠCH trên chính kho này. Đo 28-07 vào kho là 0/0 — nếu
+                # sau này đỏ thì hoặc tài liệu thật hỏng, hoặc lớp hạ chuẩn (vd quên hạ advisory cho
+                # tài liệu lịch sử: sổ lưu trữ có `tl regen2`, lệnh đã gỡ từ lâu).
+                and _bl.get("L8") == 0 and _bl.get("L9") == 0)
+
+    _t110("r219_docclaims_l9_tu_tat_khi_quet_hep", _c219_l9_tu_tat_khi_quet_hep)
+
+    def _c219_l10_l11_bi_bac_co_ghi_ly_do():
+        """KHOÁ QUYẾT ĐỊNH, không phải khoá hành vi. L10/L11 là hai lớp kế hoạch r218 đặt hàng mà đo
+        28-07 bác (L11: 2/2 hit ở tài liệu sống đều viết ĐÚNG — số hiệu chính thức VỐN là dạng bare;
+        L10: 24/30 version GAS không có tệp .gs vì kho cố ý chỉ giữ 6 bản gần nhất). Lý do phải đi
+        THEO SẢN PHẨM: phiên sau đọc `basis.layers_bac` là biết ngay, khỏi 'bổ sung nốt' rồi tự đổ
+        rác vào chính báo cáo mình cần đọc."""
+        _, j, _ = _r218_run()
+        bac = ((j.get("basis") or {}).get("layers_bac") or {})
+        return (set(bac) == {"L10", "L11"} and all(len(v) > 40 for v in bac.values())
+                and "L10" not in (j.get("layers") or []) and "L11" not in (j.get("layers") or []))
+
+    _t110("r219_docclaims_l10_l11_bi_bac_co_ghi_ly_do", _c219_l10_l11_bi_bac_co_ghi_ly_do)
+
+    def _c219_hai_manifest_egress_song_doi():
+        """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho
+        (chỉ ghi 'tự dựng bằng cách thêm khóa') ⇒ người vận hành theo đúng khuyến nghị thì không có gì
+        để copy. r219 tạo tệp. Khoá BẤT BIẾN thật sự nguy hiểm: hai manifest chỉ được khác NHAU ĐÚNG
+        khóa `urlFetchWhitelist` — lệch thêm khóa nào khác nghĩa là đổi policy egress đã âm thầm kéo
+        theo đổi oauthScope/quyền webapp, đúng loại thay đổi không ai soi khi chỉ định 'siết egress'."""
+        import json as _js219
+        _o = _ROOT209 / "references" / "APPSSCRIPT_MANIFEST.open-egress.json"
+        _r = _ROOT209 / "references" / "APPSSCRIPT_MANIFEST.restricted-egress.json"
+        if not (_o.is_file() and _r.is_file()):
+            return False
+        a = _js219.loads(_o.read_text(encoding="utf-8"))
+        b = _js219.loads(_r.read_text(encoding="utf-8"))
+        return (set(b) - set(a) == {"urlFetchWhitelist"} and set(a) - set(b) == set()
+                and all(a[k] == b[k] for k in set(a) & set(b))
+                and isinstance(b["urlFetchWhitelist"], list) and len(b["urlFetchWhitelist"]) == 4
+                and all(str(u).startswith("https://") and "google" in str(u)
+                        for u in b["urlFetchWhitelist"])
+                and "\r" not in _r.read_text(encoding="utf-8"))   # repo ghi LF
+
+    _t110("r219_hai_manifest_egress_song_doi", _c219_hai_manifest_egress_song_doi)
+
+    def _c219_gotchas_nhan_trang_thai():
+        """Việc B — nhãn trạng thái trong GOTCHAS.md. Ba khẳng định, mỗi cái chặn một kiểu mục nát:
+
+        (1) **Nhãn phải có ĐỊNH NGHĨA.** Ký hiệu `[B]` rải trong thân mà chú giải bị xoá thì người đọc
+            gặp một dấu không biết nghĩa — tệ hơn không dán. Kiểm CƠ HỌC: mọi nhãn dùng trong thân
+            phải nằm trong tập nhãn chú giải đã khai.
+        (2) **Bẫy đã BỊ BÁC không được quay lại dạng lời khuyên.** Ca thật: «cookie DBSC đời ~1h,
+            `nlm login` là đủ» — đo 26+27-07 bác cả hai vế (không cookie nào TTL 1h; `nlm login` trần
+            là NO-OP, phải `--force`). Đây là bẫy NGUY HIỂM NHẤT loại này vì câu gốc đọc như hướng
+            dẫn vận hành: ai theo nó sẽ tin mình đã đăng nhập trong khi chưa.
+        (3) **Trần r127 còn đệm.** Đo 28-07: 12.258/12.288B. Hết đệm mà cứ viết thì lượt sau hoặc phải
+            nới trần (vá quá tay — chính thứ ratchet sinh ra để chặn) hoặc cắt mất bẫy thật."""
+        _g = (_ROOT209 / "references" / "GOTCHAS.md").read_text(encoding="utf-8")
+        _head = _g.split("## ", 1)[0]
+        import re as _re219
+        _khai = set(_re219.findall(r"`\[([A-Z])\]`", _head))
+        _dung = set(_re219.findall(r"`\[([A-Z])\]`", _g[len(_head):]))
+        ok1 = "NHÃN (r219)" in _head and _khai == {"B"} and _dung and _dung <= _khai
+        _nlm = _g.split("## 9.", 1)[-1].split("\n## ", 1)[0] if "## 9." in _g else ""
+        ok2 = ("BỊ BÁC" in _nlm and "`--force`" in _nlm and "NO-OP" in _nlm
+               and "__Secure-1PSIDRTS" in _nlm
+               # câu gốc chỉ được tồn tại BÊN TRONG ngoặc kép của mệnh đề bị bác, không đứng độc lập
+               and "«Cookie DBSC đời ~1h, `nlm login` là đủ»" in _nlm)
+        # (2b) số liệu kernel phải là số ĐO ĐƯỢC, không phải số cũ trước KERNEL-DIET r128
+        _skill = (_ROOT209 / "SKILL.md").stat().st_size
+        ok3 = f"{_skill:,}".replace(",", ".") in _g and "49.145" not in _g
+        ok4 = 4 * 1024 <= len(_g.encode("utf-8")) <= 12 * 1024
+        return ok1 and ok2 and ok3 and ok4
+
+    _t110("r219_gotchas_nhan_trang_thai", _c219_gotchas_nhan_trang_thai)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,0 +1,23 @@
+{
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "dependencies": {
+    "enabledAdvancedServices": [
+      { "userSymbol": "Drive", "serviceId": "drive", "version": "v3" }
+    ]
+  },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/script.external_request"
+  ],
+  "urlFetchWhitelist": [
+    "https://www.googleapis.com/",
+    "https://drive.google.com/",
+    "https://docs.google.com/",
+    "https://drive.usercontent.google.com/"
+  ],
+  "webapp": { "executeAs": "USER_DEPLOYING", "access": "ANYONE_ANONYMOUS" },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8"
+}

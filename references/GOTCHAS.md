@@ -4,16 +4,18 @@
 > memory phiên — agent tiêu thụ skill KHÔNG thấy. File này gom TRÍCH nguyên văn, nhóm theo CHỦ ĐỀ.
 > Con trỏ chuẩn: `references/RUNBOOK.md` → đây. Đọc TRƯỚC khi: release, sửa registry, viết script mới,
 > move/tách module. Chi tiết từng vụ: CHANGELOG.md theo version ghi kèm.
+>
+> **NHÃN (r219):** không nhãn = bẫy CÒN hiệu lực · `[B]` = tiền đề **BỊ BÁC** bởi đo về sau,
+> theo câu thay thế, đừng theo câu gốc. Chỉ dán ở chỗ trạng thái ĐÃ ĐỔI; sửa CÂU trước khi dán.
 
 ## 1. Trần mount & size (lớp sự cố #5)
 
 - **Trần mount ~343KB/file** — `tl.py` từng bị **CẮT CỤT** khi vượt (Cowork mount); self-heal chỉ cứu
   NUL-pad, **KHÔNG cứu cắt cụt**. Guard sống ở `workflow-audit`: `py_size` WARN >280KB / FAIL --strict
   >320KB (waiver `tl_selftest.py` — không bước Cowork nào import; hỏng thì fail ỒN ÀO).
-- **Kernel SKILL.md ≤ 49.152B (48K)** — trần SÁT NHẤT toàn hệ (hiện ~49.145B, đệm 7B); WARN >47KB
-  (G1a). Đổi kernel ⇒ user re-import Capabilities. Muốn thêm chữ vào kernel: bớt chữ chỗ khác trước.
-- **Bundle import ≤200 file** — cây dev 212 file từng import FAIL; đóng gói CHỈ qua `tl release-bundle`
-  (không zip cây dev thô).
+- **Kernel SKILL.md: WARN >48.128B (G1a) · CỨNG 49.152B** — đo 28-07: **47.966B, đệm 162B** tới WARN.
+  Đổi kernel ⇒ re-import Capabilities. Thêm chữ: bớt chỗ khác TRƯỚC.
+- **Bundle import ≤200 file** — cây dev 212 từng FAIL; đóng gói CHỈ qua `tl release-bundle`.
 
 ## 2. I11 / stub-farm / bind-REBASE (tách module)
 
@@ -35,9 +37,11 @@
 - **Golden `workflow_audit` NHÚNG size SKILL.md + files_scanned** — mọi chỉnh SKILL.md/thêm file runtime
   phải `golden-test --write` LẠI (CÓ CHỦ ĐÍCH, diff phải giải thích được từng dòng) rồi mới manifest.
   **Golden diff bất ngờ = BUG — DỪNG, cấm --write che.**
-- **Repo ghi LF** (`* -text` khoá byte); riêng `references/COMMANDS.md` là **CRLF toàn phần** — chèn dòng
-  phải CRLF khớp, KHÔNG mass-strip trailing-space (125 dòng cũ vốn có ` |` + CR).
-- **Commit message qua `-F <file>`** (tiếng Việt/ký tự đặc biệt an toàn); secret-guard hook quét trước.
+- `[B]` **«Repo ghi LF, riêng COMMANDS.md CRLF» — THIẾU (đo 28-07).** EOL theo TỆP: **8 tệp CRLF toàn
+  phần** — gồm `SKILL.md`, `tl.py`, `tl_selftest.py`, `COMMANDS.md` — 200 tệp LF, 0 hỗn hợp. **Sửa
+  bằng BYTE**: `write_text` nuốt sạch CR CẢ TỆP (r219 trả giá). COMMANDS.md: không mass-strip
+  trailing-space (125 dòng vốn có ` |` + CR).
+- **Commit message qua `-F <file>`** (tiếng Việt an toàn); secret-guard hook quét trước.
 - Gate phải kiểm **rc THẬT từng lệnh, output ra file rồi mới parse** — `cmd | python -c ...` từng NUỐT rc
   → commit lọt khi gate ĐỎ (xem `.claude/commands/gate.md`).
 
@@ -78,9 +82,8 @@
 - `_read_doc_text` với `.docx` trả **BINARY zip** — text .docx thật = `tl doc-text` (unzip
   `word/document.xml`); so nội dung bằng content-hash/bag-of-words, KHÔNG so char-count text-vs-binary.
 - Mọi số hiệu/tên VBQPPL **phải có NĂM** (số tái dùng theo năm → collision, nhất là VBHN).
-- docx/pdf GỐC + GDoc CONVERT cùng văn bản = **KHÔNG trùng** (định nghĩa chốt 2026-07-16); chỉ trùng khi
-  ≥2 GDoc hoặc ≥2 docx cùng nội dung — text convert lệch nhẹ nên cặp hợp lệ hay rơi dải NEAR (soi
-  `type` chứa `|`).
+- docx/pdf GỐC + GDoc CONVERT cùng văn bản = **KHÔNG trùng**; chỉ trùng khi ≥2 GDoc hoặc ≥2 docx cùng
+  nội dung — text convert lệch nhẹ nên cặp hợp lệ hay rơi dải NEAR (soi `type` chứa `|`).
 
 ## 8. Windows console / heredoc
 
@@ -92,8 +95,10 @@
 
 ## 9. NLM vận hành
 
-- **Cookie DBSC đời ~1h** — `nlm login` là đủ; tuổi >45' nên re-auth trước lô dài / chuyển `nlm-links`
-  (batch >2 file đi đường batch-link).
+- `[B]` **«Cookie DBSC đời ~1h, `nlm login` là đủ» — BỊ BÁC (đo 26+27-07).** Không cookie nào TTL 1h;
+  chết do token XOAY `__Secure-1PSIDRTS` CLI không xoay lại ⇒ giờ chết KHÔNG đoán trước, đừng hứa "còn
+  N phút". **`nlm login` TRẦN = NO-OP** (probe homepage → xanh giả, rc=0) ⇒ phải `--force`; verdict
+  `all_failed` ⇒ `--clear`. Lô dài chuyển `nlm-links` (batch >2 file).
 - NLM chết ≠ dừng: đọc → fallback corpus (verbatim-return, KHÔNG máy sinh RAG); ghi → DEFER (không
   corpus-ảo); audit/plan trên cache stale = **belief** (`UNVERIFIED_NLM_STATE`) — không xử theo.
 - `nlm-migrate --apply` cần đúng 1 bộ lọc (`FILTER_REQUIRED` fail-closed); NLM chết → KHÔNG ghi trên
@@ -107,7 +112,7 @@
   → `nlm-links` batch → reconcile. Đơn lẻ giữ mặc định verify-then-link (an toàn v1.34.56).
 - **Upload đi b64 qua webapp là BẮT BUỘC** (Apps Script doPost không nhận multipart binary; trần 35MB).
   Với file <1MB b64 KHÔNG phải bottleneck (phình +33% ≈ <1s mạng) — độ trễ nằm ở Apps Script runtime
-  + convert GDoc. File rất lớn → cân nhắc đường gws CLI (backlog), KHÔNG đổi đường ingest chuẩn.
+  + convert GDoc. File rất lớn → cân nhắc gws CLI (backlog).
 - Readback sau lô: `reg-query` 1 LẦN cuối (KHÔNG `--refresh` giữa chừng — mỗi refresh kéo registry đầy).
 
 ## 11. Chẩn đoán sự cố registry + phiên REMOTE (bài học 2026-07-25)
@@ -125,8 +130,8 @@
   Cowork/Chat, hay máy khác KHÔNG xuất hiện ở đây — journal sạch KHÔNG đồng nghĩa "không ai ghi". Truy
   nguyên có thẩm quyền: **version history của Sheet registry** (mốc giờ + tài khoản từng revision) và
   **Apps Script → Executions** (mọi `doPost/doGet` bất kể client). Journal chỉ là manh mối thứ ba.
-- **`profile-delete-assets` xoá ĐÚNG scope** (kiểm 25-07: 4 lần chạy, mỗi lần 1 Sheet 44-ký-tự + 3 thư mục
-  33-ký-tự của CHÍNH profile đó; 0/16 id trùng tài sản nền). Đừng đổ tội cho nó khi chưa đối chiếu id —
+- **`profile-delete-assets` xoá ĐÚNG scope** (kiểm 25-07 qua 4 lần chạy: 0/16 id trùng tài sản nền —
+  mỗi lần đúng 1 Sheet + 3 thư mục của CHÍNH profile đó). Đừng đổ tội cho nó khi chưa đối chiếu id —
   so `done_keys` của `tl journal <run_id> --json` với `registryDocId`/`rootFolderId`/`manifestId`/categories
   trong `tl profile-info --json`.
 - **Phiên Claude Code REMOTE (web) KHÔNG chạy được lệnh live**: egress policy chặn `script.google.com`,

@@ -31,9 +31,11 @@
     "L3": 1,
     "L5": 1,
     "L6": 1,
-    "L7": 1
+    "L7": 1,
+    "L8": 1,
+    "L9": 0
   },
-  "claims_flagged": 9,
+  "claims_flagged": 10,
   "files_scanned": 1,
   "flags": [
     {
@@ -80,6 +82,13 @@
       "layer": "L3",
       "line": 6,
       "reason": "LINK_TARGET_MISSING"
+    },
+    {
+      "claim": "tl khong-co-lenh-nay",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L8",
+      "line": 7,
+      "reason": "TL_COMMAND_UNKNOWN"
     }
   ],
   "layers": [
@@ -88,8 +97,13 @@
     "L3",
     "L5",
     "L6",
-    "L7"
+    "L7",
+    "L8",
+    "L9"
   ],
+  "layers_skipped": {
+    "L9": "lượt quét không đủ rộng (cần SKILL.md + ≥1 tệp references/)"
+  },
   "ok": false,
   "roots": [
     "references/golden/fixtures/doc_claims"

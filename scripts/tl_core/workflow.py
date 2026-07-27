@@ -770,7 +770,9 @@ def cmd_workflow_audit(a) -> int:
 # Cờ là ĐẦU VÀO ĐỂ PHÂN XỬ, không phải phán quyết ⇒ mặc định rc=1 (không fail); --strict mới đẩy 1→2.
 _DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
 _DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references")
-_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L5", "L6", "L7")
+# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi). CỐ Ý DỪNG Ở ĐÂY —
+# L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11` bên dưới; đừng "bổ sung nốt" mà không đo lại.
+_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L5", "L6", "L7", "L8", "L9")
 # §2.2 nói thẳng: «tài liệu lịch sử được phép dẫn tệp đã xoá». Ba nguồn dưới đây GHI LẠI QUÁ KHỨ, không
 # phải con trỏ để đi theo — DOCTRINE_APPENDIX tự khai «TOÀN BỘ thân SKILL.md trước refactor v1.16.0,
 # GIỮ NGUYÊN để tra cứu lý do», changelog thì theo định nghĩa là sổ. Đo 28-07: 127/134 cờ L1 nằm ở đúng
@@ -784,11 +786,88 @@ _DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
 _DOC_CLAIMS_NOISE_CHARS = "<>{}*$"
 _DOC_CLAIMS_NOISE_SUBSTR = ("path/to", "...", "…")
 
+# ── r219: L8 — tên lệnh `tl <cmd>`. Nguồn sự thật = golden `parser_surface.json` (repo-local, tất
+# định, đã bị `golden-test` khoá byte) chứ KHÔNG import `build_parser`: doctrine false-green-test-qua-bind
+# nói thẳng rằng đọc qua đường đã bind không chứng minh gì, và import tl.py trong handler kéo theo
+# `load_creds` — thứ mà lệnh READ-ONLY offline này cố ý không đụng. Thiếu tệp ⇒ BỎ QUA lớp và KHAI BÁO,
+# không được đoán (hô sai tên lệnh là đúng loại lỗi lệnh này sinh ra để chặn).
+_DOC_CLAIMS_PARSER_SURFACE = "references/golden/parser_surface.json"
+_DOC_CLAIMS_TL_HEADS = ("python", "python3", "py")
+_DOC_CLAIMS_CMD_RE = re.compile(r"^[a-z][a-z0-9\-]{2,}$")
+# Option TOÀN CỤC ăn theo một giá trị — không nuốt thì `tl --profile P sweep` đọc ra lệnh «P».
+_DOC_CLAIMS_GLOBAL_OPT_VAL = ("--profile", "--config")
+
+# ── r219: L9 — tài liệu mồ côi. Chỉ chạy khi lượt quét ĐỦ RỘNG (xem `_doc_claims_orphan_scope`).
+_DOC_CLAIMS_ORPHAN_DIR = "references/"
+_DOC_CLAIMS_ORPHAN_EXTRA = (("scripts", "*.py"), ("scripts/tl_core", "*.py"),
+                            ("scripts/_fallback", "*.py"), ("references/workflows", "*.json"),
+                            ("docs/adr", "*.md"), (".", "*.md"))
+
+# ══ ĐO 2026-07-28 (r219) — VÌ SAO L10 VÀ L11 KHÔNG ĐƯỢC LÀM ═════════════════════════════════════
+# Kế hoạch r218 xếp L11 vào «hai lớp đáng nhất». Đo trên kho thật thì cả hai đều hô ~100% báo giả,
+# nên làm chúng là làm hỏng chính cái khiến báo cáo dùng được (ranh giới cờ-vs-advisory).
+#
+# L11 «số hiệu VBQPPL thiếu NĂM»: 20 hit / 5 tệp, trong đó 18 ở tài liệu LỊCH SỬ và ĐÚNG 2 ở tài
+#   liệu sống — cả 2 đều VIẾT ĐÚNG. `62/VBHN-VPQH` (SKILL.md) là số hiệu CHÍNH THỨC in trên văn bản;
+#   `88/VBHN-VPQH` (COMMANDS.md) nằm trong câu đang MÔ TẢ việc v1.33.47 cố ý chấp nhận dạng bare.
+#   Bất biến «phải có NĂM» áp cho KHOÁ REGISTRY (`NN-YYYY-VBHN-XXX`), không áp cho trích dẫn văn
+#   xuôi — và mặt registry ĐÃ CÓ cổng riêng (`vbhn-year-fix`, VBHN_MINISTRY_YEAR_GUARD.md).
+#   Bản thu hẹp «bare number ĐA NGHĨA» (89/VBHN-VPQH = Luật MTTQ 2025 hay Luật NSNN 2026?) thì cần
+#   tra registry cache — máy-phụ-thuộc, phá tính tất định của golden ⇒ không thuộc lệnh này.
+# L10 «GAS version thiếu `references/Code.<ver>.gs`»: 30 version được dẫn, chỉ 6 có tệp ⇒ 24 cờ.
+#   Kho GIỮ 6 bản .gs gần nhất là CÓ CHỦ ĐÍCH; và chính việc viết `Code.<ver>.gs` vào tài liệu đã
+#   làm guard con trỏ r209 ĐỎ (regex của nó cắt ở '<'). Lớp này sẽ đòi thêm rác để tự nó xanh.
+_DOC_CLAIMS_BAC_L10_L11 = {
+    "L10": "24/30 version GAS được dẫn không có tệp .gs — kho giữ 6 bản gần nhất là có chủ đích",
+    "L11": "2/2 hit ở tài liệu sống đều viết ĐÚNG (số hiệu chính thức là dạng bare); bất biến "
+           "NN-YYYY-VBHN-XXX áp cho khoá registry, đã có cổng vbhn-year-fix",
+}
+
 
 def _doc_claims_noisy(tok: str) -> bool:
     t = str(tok)
     return (any(c in t for c in _DOC_CLAIMS_NOISE_CHARS)
             or any(s in t for s in _DOC_CLAIMS_NOISE_SUBSTR))
+
+
+def _doc_claims_tl_cmd(span_text: str):
+    """r219/L8 — trả tên lệnh trong span dạng `tl <cmd> …`, hoặc None nếu span không phải câu lệnh.
+
+    Phân tích theo TOKEN chứ không bằng một regex dài, vì ba ca dưới đây đã đo được và mỗi ca giết
+    một cách viết regex khác nhau:
+      • `tl nlm-*` (sổ lưu trữ) — regex tham lam trả về «nlm», một lệnh KHÔNG tồn tại ⇒ báo giả.
+        Xét TRỌN token rồi lọc nhiễu (`*`) thì tự rụng.
+      • `tl --profile "Luật BHXH" sweep` — không nuốt giá trị của option toàn cục thì đọc ra lệnh
+        «Luật» hoặc «P».
+      • văn xuôi tiếng Việt «`tl` cho phép…» — quét trần bắt 8 hit toàn báo giả; neo `tl` phải ở
+        ĐẦU span mới loại được (đo: 8 → 4, và 4 còn lại đều nằm trong sổ lưu trữ).
+    """
+    toks = str(span_text).strip().split()
+    if not toks:
+        return None
+    def _is_tl_py(t):
+        return t.replace("\\", "/").rstrip(",;").endswith("scripts/tl.py")
+    if toks[0] == "tl":
+        i = 1
+    elif len(toks) >= 2 and toks[0] in _DOC_CLAIMS_TL_HEADS and _is_tl_py(toks[1]):
+        i = 2
+    elif _is_tl_py(toks[0]):
+        i = 1
+    else:
+        return None
+    while i < len(toks) and toks[i].startswith("-"):
+        i += 2 if (toks[i] in _DOC_CLAIMS_GLOBAL_OPT_VAL) else 1
+    if i >= len(toks):
+        return None                      # `tl --selftest`, `tl --version` — không có subcommand
+    tok = toks[i].strip(_DOC_CLAIMS_TRIM)
+    # CỐ Ý KHÔNG gọi thêm `_doc_claims_noisy(tok)` ở đây: phản chứng r219 (M3) chạy thật cho thấy nó
+    # là MÃ CHẾT — `_DOC_CLAIMS_CMD_RE` chỉ nhận `[a-z][a-z0-9-]{2,}` nên mọi ký tự nhiễu `<>{}*$`,
+    # `/`, `…` đã rụng trước; tắt bộ lọc nhiễu đi mà không test nào đỏ. Một chốt không đột biến nào
+    # giết được là chốt CHƯA ĐƯỢC CHỨNG MINH, giữ lại chỉ tạo cảm giác an toàn giả. Cái gánh việc
+    # thật là CMD_RE — và nó có phản chứng riêng (nới lớp ký tự ⇒ `tl nlm-*` nổ thành lệnh «nlm-*»).
+    if not tok or not _DOC_CLAIMS_CMD_RE.match(tok):
+        return None
+    return tok
 
 
 def _doc_claims_mask(text: str) -> tuple:
@@ -926,16 +1005,27 @@ def _doc_claims_context(root: Path) -> dict:
     toplevel = {p.name for p in root.iterdir()} if root.is_dir() else set()
     _rc_ab, _ab = _doc_claims_git(root, ["rev-parse", "--short", "HEAD"])
     sha_lens = {40} | ({len(_ab.strip())} if _rc_ab == 0 and _ab.strip() else {7})
+    # r219/L8 — tập lệnh. Thiếu/hỏng golden ⇒ commands=None ⇒ lớp TỰ TẮT và khai báo lý do.
+    commands, cmd_src = None, None
+    try:
+        _ps = json.loads((root / _DOC_CLAIMS_PARSER_SURFACE).read_text(encoding="utf-8"))
+        if isinstance(_ps, dict) and _ps:
+            commands, cmd_src = set(_ps), _DOC_CLAIMS_PARSER_SURFACE
+    except (OSError, ValueError):
+        pass
     return {"version": cur, "version_text": ver_txt, "changelog_versions": cl_versions,
             "changelog_rs": cl_rs, "floor_version": floor_v, "floor_r": floor_r, "max_r": max_r,
             "pyindex": pyindex, "root": root, "_deleted": None, "toplevel": toplevel,
-            "sha_lens": sha_lens,
+            "sha_lens": sha_lens, "commands": commands,
             "basis": {"version": ver_txt, "sha_lens": sorted(sha_lens),
                       "changelog_files": len(_cl_files),
                       "changelog_versions": len(cl_versions), "changelog_rs": len(cl_rs),
                       "changelog_headings": len(heads),
                       "floor_version": ".".join(str(x) for x in floor_v) if floor_v else None,
                       "floor_r": floor_r, "max_r": max_r,
+                      "commands_source": cmd_src,
+                      "commands_known": len(commands) if commands else 0,
+                      "layers_bac": dict(_DOC_CLAIMS_BAC_L10_L11),
                       "note": "tập tra cứu = CHANGELOG.md + references/changelog_archive/*.md, quét "
                               "toàn văn; dưới sàn ⇒ advisory (khuyết của sổ, không phải trích dẫn sai)"}}
 
@@ -1136,6 +1226,81 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
             continue
         if num < 1 or num > total:
             _add("L7", m.start(), claim, "PYLOC_LINE_OUT_OF_RANGE", {"file_lines": total})
+
+    # ── L8 (r219): tên lệnh `tl <cmd>` không có trong parser ──────────────────────────────────────
+    # Đây là lớp ĐÚNG TRỌNG TÂM của cả lệnh doc-claims-check: tài liệu bảo phiên sau chạy một lệnh
+    # KHÔNG TỒN TẠI thì phiên đó đi thẳng vào ngõ cụt — không cách nào đúng, nên là CỜ chứ không
+    # phải advisory. Quét trên `nofence` và CHỈ trong span backtick (lệnh luôn được viết trong
+    # backtick; văn xuôi thì không) — đo 28-07: quét trần 8 hit toàn báo giả, trong-span còn 4 và
+    # cả 4 đều ở sổ lưu trữ, tức 0 cờ trên tài liệu sống ⇒ lớp này vào kho là XANH SẴN.
+    # Tài liệu LỊCH SỬ được phép nhắc lệnh đã gỡ (`tl regen2` — ca thật) ⇒ hạ advisory, cùng khuôn L1.
+    if ctx.get("commands"):
+        for sp in _DOC_CLAIMS_SPAN_RE.finditer(nofence):
+            cmd = _doc_claims_tl_cmd(sp.group(1))
+            if not cmd or cmd in ctx["commands"]:
+                continue
+            _add("L8", sp.start(), "tl " + cmd, "TL_COMMAND_UNKNOWN", advisory=historical)
+    return out
+
+
+def _doc_claims_orphan_scope(scanned: dict) -> bool:
+    """L9 chỉ có nghĩa khi lượt quét ĐỦ RỘNG. Chạy nó trên `--path references/GOTCHAS.md` thì mọi tệp
+    khác đều «không ai trỏ tới» — một kết luận vô nghĩa sinh ra 28 cờ rác. Điều kiện: có SKILL.md
+    (nơi giữ danh mục) VÀ ít nhất một tệp dưới references/."""
+    return ("SKILL.md" in scanned
+            and any(k.startswith(_DOC_CLAIMS_ORPHAN_DIR) for k in scanned))
+
+
+def _doc_claims_orphans(scanned: dict, root: Path) -> list:
+    """L9 — tài liệu mồ côi.
+
+    ★ĐO 28-07 BÁC ĐỊNH NGHĨA CỦA KẾ HOẠCH, và đây là chỗ đáng ghi lại nhất của lớp này. Kế hoạch
+    r218 định nghĩa mồ côi = «vắng trong mục DANH MỤC REFERENCES của SKILL.md». Đo: 20/29 tệp
+    references/*.md vắng ⇒ hô 69% cây tài liệu. Tệ hơn: cách «sửa» duy nhất là thêm 20 dòng vào
+    SKILL.md, trong khi kernel chỉ còn 162 B đệm tới trần WARN 47KB ⇒ lớp đó BẤT KHẢ THI HÀNH.
+    Danh mục kernel là bản CHỌN LỌC có chủ đích (9 mục + 2 glob), không phải chỉ mục đầy đủ —
+    đọc nó thành chỉ mục là đọc sai chức năng của nó.
+
+    Định nghĩa dùng được (đo ra 0 cờ + 5 advisory trên kho, tức vào kho là xanh sẵn):
+      • cờ  `DOC_NO_INBOUND_POINTER` — KHÔNG nguồn nào trong kho nhắc tới (md đã quét + mọi .py +
+        workflow card + docs/adr). Tệp nằm trong gói mà không đường nào dẫn tới: BẤT KHẢ đúng.
+      • adv `DOC_POINTED_ONLY_BY_HISTORICAL` — chỉ CHANGELOG/sổ lưu trữ/DOCTRINE_APPENDIX nhắc.
+        Người đọc hiện tại không có lối tới, nhưng có thể là ghi chép thiết kế cố ý lưu ⇒ advisory.
+    """
+    refs = sorted(p for p in (root / "references").glob("*.md")) if root.is_dir() else []
+    if not refs:
+        return []
+    extra = {}
+    for sub, pat in _DOC_CLAIMS_ORPHAN_EXTRA:
+        d = root / sub
+        if not d.is_dir():
+            continue
+        for f in sorted(d.glob(pat)):
+            try:
+                extra[_doc_claims_rel(f, root)] = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+    out = []
+    for p in refs:
+        rel = _doc_claims_rel(p, root)
+        base = p.name
+        live = hist = 0
+        for src, txt in list(scanned.items()) + list(extra.items()):
+            if src == rel or (rel not in txt and base not in txt):
+                continue
+            if src.startswith(_DOC_CLAIMS_HISTORICAL):
+                hist += 1
+            else:
+                live += 1
+        if live:
+            continue
+        d = {"layer": "L9", "file": rel, "line": 1, "claim": rel}
+        if hist:
+            d.update(reason="DOC_POINTED_ONLY_BY_HISTORICAL", detail={"historical_refs": hist},
+                     _advisory=True)
+        else:
+            d["reason"] = "DOC_NO_INBOUND_POINTER"
+        out.append(d)
     return out
 
 
@@ -1147,6 +1312,7 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
                 "missing_paths": sorted(bad), "usage_error": True}
     ctx = _doc_claims_context(root)
     flags, advisories, checked = [], [], 0
+    scanned = {}
     for f in files:
         try:
             raw = f.read_text(encoding="utf-8", errors="replace")   # GOTCHAS §8: encoding TƯỜNG MINH
@@ -1154,9 +1320,18 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
             flags.append({"layer": "L0", "file": _doc_claims_rel(f, root), "line": 1,
                           "claim": f.name, "reason": "FILE_UNREADABLE", "detail": type(e).__name__})
             continue
+        scanned[_doc_claims_rel(f, root)] = raw
         nofence, nospan = _doc_claims_mask(raw)
         starts = _doc_claims_linestarts(raw)
         for fl in _doc_claims_scan_one(f, nofence, nospan, starts, root=root, ctx=ctx):
+            checked += 1
+            if fl.pop("_advisory", False):
+                advisories.append(fl)
+            else:
+                flags.append(fl)
+    l9_ran = _doc_claims_orphan_scope(scanned)
+    if l9_ran:
+        for fl in _doc_claims_orphans(scanned, root):
             checked += 1
             if fl.pop("_advisory", False):
                 advisories.append(fl)
@@ -1167,11 +1342,17 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
     flags.sort(key=_key)
     advisories.sort(key=_key)
     by_layer = {L: sum(1 for x in flags if x["layer"] == L) for L in _DOC_CLAIMS_LAYERS}
+    # Lớp TỰ TẮT phải KHAI BÁO — «0 cờ vì không chạy» và «0 cờ vì sạch» là hai kết luận khác hẳn.
+    skipped = {}
+    if not ctx.get("commands"):
+        skipped["L8"] = "thiếu " + _DOC_CLAIMS_PARSER_SURFACE
+    if not l9_ran:
+        skipped["L9"] = "lượt quét không đủ rộng (cần SKILL.md + ≥1 tệp references/)"
     return {"ok": not flags, "schema": _DOC_CLAIMS_SCHEMA, "roots": roots,
             "files_scanned": len(files), "claims_flagged": checked,
             "flags": flags, "advisories": advisories,
             "by_layer": by_layer, "advisory_count": len(advisories),
-            "layers": list(_DOC_CLAIMS_LAYERS), "basis": ctx["basis"]}
+            "layers": list(_DOC_CLAIMS_LAYERS), "layers_skipped": skipped, "basis": ctx["basis"]}
 
 
 def cmd_doc_claims_check(a) -> int:
@@ -1315,10 +1496,14 @@ def _golden_ensure_fixtures() -> None:
                           "categories": "own", "manifestScope": "own"},
         },
     }, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
-    # r218: tài liệu mẫu cho golden doc-claims-check — gài ĐỦ SÁU LỚP, mỗi lớp một khẳng định sai VÀ
-    # một khẳng định đúng, cộng khối fence để khoá phép che nhiễu. Mọi giá trị chọn sao cho ổn định qua
-    # các đợt bump: `v1.0.1` mãi dưới sàn sổ, `r09` mãi dưới sàn đợt, `references/GOTCHAS.md` là tệp
-    # bất biến của kho. (Số hiệu phụ thuộc thời điểm nằm hết trong `basis`/`detail` — khai volatile.)
+    # r218: tài liệu mẫu cho golden doc-claims-check — gài đủ MỌI LỚP quét-theo-token (r219: thêm L8),
+    # mỗi lớp một khẳng định sai VÀ một khẳng định đúng, cộng khối fence để khoá phép che nhiễu. Mọi
+    # giá trị chọn sao cho ổn định qua các đợt bump: `v1.0.1` mãi dưới sàn sổ, `r09` mãi dưới sàn đợt,
+    # `references/GOTCHAS.md` là tệp bất biến của kho. (Số hiệu phụ thuộc thời điểm nằm hết trong
+    # `basis`/`detail` — khai volatile.) L9 KHÔNG có ở đây được: nó cần lượt quét đủ rộng, nên cái
+    # golden khoá là dòng `layers_skipped.L9` — chính bằng chứng lớp đã tự tắt đúng lúc.
+    # ★Fixture này SINH TỪ MÃ: sửa tay tệp dưới `references/golden/fixtures/` sẽ bị ghi đè lặng lẽ ở
+    # lần `golden-test` kế tiếp — muốn đổi thì đổi Ở ĐÂY (r219 đã trả giá một lượt).
     doc_claims = ("\n".join([
         "# Tài liệu mẫu cho doc-claims-check",
         "",
@@ -1326,6 +1511,7 @@ def _golden_ensure_fixtures() -> None:
         "Sai: `references/KHONG_CO_FILE.md`, commit deadbee, sổ notebook fec6c125.",
         "Sai tiếp: bản v1.99.0, đợt r999, con trỏ `scripts/tl.py:999999`.",
         "Link gãy [kế hoạch](./KHONG_CO_KE_HOACH.md); link ngoài [web](https://example.invalid/x.md).",
+        "Lệnh `tl sweep --json` có thật, `tl khong-co-lenh-nay` thì không.",
         "",
         chr(96) * 3 + "bash",
         "cat references/KHONG_CO_TRONG_FENCE.md   # r998 v1.98.0",

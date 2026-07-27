@@ -375,8 +375,8 @@ GIỮ NGUYÊN `CONFIG.ROOT_FOLDER_ID` trong: định nghĩa `CONFIG`, `CATEGORIE
 ## F16c — chốt policy egress (2 manifest)
 Bỏ file ví dụ có khóa `_GHI_CHU_`. Dùng MỘT trong hai (theo lựa chọn):
 - **`references/APPSSCRIPT_MANIFEST.open-egress.json`** — KHÔNG `urlFetchWhitelist` ⇒ `fetch_url_to_drive` tải được nguồn ngoài (congbao/vbpl…). Chọn nếu ƯU TIÊN auto-fetch.
-- **biến thể restricted-egress** (KHÔNG kèm sẵn trong kho — dựng bằng cách thêm khóa `urlFetchWhitelist`
-  vào `references/APPSSCRIPT_MANIFEST.open-egress.json`) — có `urlFetchWhitelist` (4 domain Google) ⇒ siết egress; **KHÔNG dùng `fetch_url_to_drive`**, nạp ngoài qua HƯỚNG B (Claude `web_fetch` → `upload`). Chọn nếu ƯU TIÊN an toàn.
+- **`references/APPSSCRIPT_MANIFEST.restricted-egress.json`** *(r219: hiện vật ĐÃ CÓ trong kho — trước đó tài liệu khuyến nghị bản này làm MẶC ĐỊNH nhưng chỉ ghi cách tự dựng, người vận hành theo khuyến nghị thì không có gì để copy)* — có `urlFetchWhitelist` (4 domain Google) ⇒ siết egress; **KHÔNG dùng `fetch_url_to_drive`**, nạp ngoài qua HƯỚNG B (Claude `web_fetch` → `upload`). Chọn nếu ƯU TIÊN an toàn.
+> Hai tệp chỉ khác nhau ĐÚNG khóa `urlFetchWhitelist`; mọi sửa đổi khác (scope, advanced service, webapp access) phải áp cho CẢ HAI, nếu không thì đổi policy egress sẽ âm thầm kéo theo đổi quyền.
 > Khuyến nghị mặc định: **restricted-egress** (giá trị auto-fetch hạn chế vì phần lớn nguồn official là PDF — xem A2),
 > trừ khi anh thực sự cần auto-fetch .doc/.docx ungated.
 

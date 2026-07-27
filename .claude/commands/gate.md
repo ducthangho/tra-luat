@@ -1,5 +1,5 @@
 ---
-description: Full-gate offline (selftest + 3 audit strict + golden 0-diff + release-check/verify) — kiểm rc THẬT từng lệnh, pipefail-ĐÚNG, không tin "ok: true" trôi qua pipe
+description: Full-gate offline 8 bước (selftest + gen_instructions + 3 audit strict + doc-claims-check + golden 0-diff + release-check/verify) — kiểm rc THẬT từng lệnh, pipefail-ĐÚNG, không tin "ok: true" trôi qua pipe
 ---
 
 Chạy FULL GATE của tra-luat theo §6.5 kế hoạch guard-va-boc-tl-core. **BẮT BUỘC kiểm rc THẬT của TỪNG
@@ -18,12 +18,13 @@ g selftest      $P scripts/tl.py --selftest
 g gen_inst      $P scripts/gen_instructions.py --selftest
 g workflow      $P scripts/tl.py workflow-audit --strict --json
 g golden        $P scripts/tl.py golden-test --json          # KHÔNG BAO GIỜ --write ở đây (R6)
+g docclaims     $P scripts/tl.py doc-claims-check --strict --json   # r219 nối vào (r218 làm lệnh mà QUÊN nối)
 g determinism   $P scripts/tl.py determinism-audit --strict --json
 g relcheck      $P scripts/tl.py release-check --full --json
 g relverify     $P scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
 
 FAIL=0
-for n in selftest gen_inst workflow golden determinism relcheck relverify; do
+for n in selftest gen_inst workflow golden docclaims determinism relcheck relverify; do
   ok="rc=${RC[$n]}"
   extra=""
   case "$n" in

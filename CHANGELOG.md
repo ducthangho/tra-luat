@@ -1,3 +1,105 @@
+# ★ v1.35.55 — r219: doc-claims-check thêm L8/L9, BÁC L10/L11 bằng đo, và vá 3 sự thật sai trong chính GOTCHAS.md (+7 test, 1368/1368) (2026-07-28)
+
+> Đợt này trả nốt nợ CỐ Ý của r218. Kết quả đáng ghi nhất **không phải hai lớp mới**, mà là ba lần
+> phép đo bác thẳng thiết kế đã đặt hàng: hai lớp bị loại vì đo ra ~100% báo giả, một lớp phải đổi
+> hẳn định nghĩa vì định nghĩa gốc **bất khả thi hành**. Xây theo kế hoạch mà không đo trước thì cả
+> ba đều đã lọt vào kho và làm hỏng đúng cái khiến báo cáo dùng được: ranh giới cờ-vs-advisory.
+
+## (a) L8 — tên lệnh `tl <cmd>` không tồn tại
+
+Lớp đúng trọng tâm của cả lệnh: tài liệu bảo phiên sau chạy một lệnh KHÔNG CÓ thì phiên đó đi thẳng
+vào ngõ cụt — không cách nào đúng ⇒ **cờ**, không phải advisory. Nguồn sự thật là golden
+`references/golden/parser_surface.json` (191 lệnh, repo-local, tất định, đã bị `golden-test` khoá byte)
+chứ KHÔNG import `build_parser` — import tl.py trong handler kéo theo `load_creds`, thứ mà lệnh
+READ-ONLY offline này cố ý không đụng. Thiếu golden ⇒ lớp **tự tắt và khai báo**, không đoán.
+
+Chỉ quét TRONG span backtick. Đo 28-07: quét trần bắt 8 hit và **cả 8 đều là báo giả tiếng Việt** —
+`tl cho` (từ "…hằng trong tl cho"), `tl selftest` (từ "**tl selftest 338/338**"), `tl rebase` (từ
+"globals tl rebase → NameError"). Trong-span còn 4, cả 4 nằm ở sổ lưu trữ ⇒ **0 cờ trên tài liệu sống**.
+
+## (b) L9 — tài liệu mồ côi. ★Định nghĩa của kế hoạch BỊ BÁC
+
+Kế hoạch r218 định nghĩa mồ côi = «vắng trong mục DANH MỤC REFERENCES của SKILL.md». **Đo: 20/29 tệp
+`references/*.md` vắng** ⇒ lớp này hô 69% cây tài liệu. Tệ hơn — cách "sửa" duy nhất là thêm 20 dòng
+vào SKILL.md, trong khi kernel chỉ còn **162 B** đệm tới trần WARN ⇒ **lớp BẤT KHẢ THI HÀNH**. Danh
+mục kernel là bản CHỌN LỌC có chủ đích (9 mục + 2 glob), đọc nó thành chỉ mục là đọc sai chức năng.
+
+Định nghĩa dùng được, đo ra **0 cờ + 2 advisory** (vào kho là xanh sẵn):
+* cờ `DOC_NO_INBOUND_POINTER` — KHÔNG nguồn nào trong kho nhắc tới (md đã quét + mọi `.py` + workflow
+  card + `docs/adr`). Tệp nằm trong gói mà không đường nào dẫn tới = BẤT KHẢ đúng.
+* advisory `DOC_POINTED_ONLY_BY_HISTORICAL` — chỉ CHANGELOG/sổ lưu trữ nhắc.
+
+L9 chạy MỘT LẦN cuối lượt và **chỉ khi lượt quét đủ rộng** (có `SKILL.md` + ≥1 tệp `references/`);
+quét hẹp thì mọi tệp khác đều "không ai trỏ tới" — kết luận vô nghĩa sinh 28 cờ rác.
+
+## (c) L10 và L11 — CỐ Ý KHÔNG LÀM, lý do đi THEO SẢN PHẨM
+
+Kế hoạch xếp L11 vào "hai lớp đáng nhất". Đo bác cả hai; lý do nằm ở `basis.layers_bac` của mọi lượt
+chạy (và có test khoá) để phiên sau khỏi "bổ sung nốt" rồi tự đổ rác vào báo cáo mình cần đọc:
+
+* **L11 số hiệu VBQPPL thiếu NĂM** — 20 hit/5 tệp, 18 ở tài liệu lịch sử, **đúng 2 ở tài liệu sống và
+  cả 2 viết ĐÚNG**: `62/VBHN-VPQH` (SKILL.md) là số hiệu CHÍNH THỨC in trên văn bản; `88/VBHN-VPQH`
+  (COMMANDS.md) nằm trong câu đang MÔ TẢ việc v1.33.47 cố ý chấp nhận dạng bare. Bất biến
+  `NN-YYYY-VBHN-XXX` áp cho **khoá registry**, không áp cho trích dẫn văn xuôi — và mặt registry đã có
+  cổng riêng (`vbhn-year-fix`). Bản thu hẹp "bare number ĐA NGHĨA" thì cần tra registry cache ⇒
+  máy-phụ-thuộc, phá tính tất định của golden.
+* **L10 GAS version thiếu `Code.<ver>.gs`** — 30 version được dẫn, chỉ 6 có tệp ⇒ 24 cờ. Kho giữ 6 bản
+  gần nhất là CÓ CHỦ ĐÍCH; và chính việc viết `Code.<ver>.gs` vào tài liệu đã làm guard con trỏ r209 đỏ.
+
+## (d) Việc B — nhãn trạng thái GOTCHAS.md, và 3 sự thật SAI trong chính nó
+
+Ràng buộc đo trước khi gõ: test `r127_gotchas_doc_pointer_driftlock` khoá 4KB ≤ file ≤ 12KB; file đang
+**11.784 B ⇒ đệm 504 B**, không phải "~10KB còn ~2KB" như kế hoạch ghi. Dán nhãn cho cả ~42 bẫy tốn
+~588 B ⇒ không vừa. **Không nới trần** (nới ratchet cho code mình xanh chính là "vá quá tay") mà cắt
+chữ chỗ khác — đúng nếp file này tự dặn. Kết: **12.276 B, còn đệm 12 B.**
+
+Nhãn chỉ dán ở chỗ trạng thái ĐÃ ĐỔI (`[B]` = tiền đề BỊ BÁC); không nhãn = còn hiệu lực. "Còn hiệu
+lực" là mặc định nên nhãn cho nó không mang tin — dán tất cả vừa hết byte vừa loãng tín hiệu.
+
+Ba mục sửa, cả ba đều là **số/kết luận sai đang nằm trong tài liệu bẫy**:
+1. **§9 cookie NLM** — «cookie DBSC đời ~1h, `nlm login` là đủ» BỊ BÁC (đo 26+27-07): không cookie nào
+   TTL 1h; chết do token XOAY `__Secure-1PSIDRTS`; **`nlm login` trần là NO-OP** (probe homepage → xanh
+   giả, rc=0) ⇒ phải `--force`. Đây là mục nguy hiểm nhất vì câu gốc đọc như hướng dẫn vận hành.
+2. **§1 trần kernel** — ghi "hiện ~49.145B, đệm 7B" (số TRƯỚC KERNEL-DIET r128), đo thật **47.966 B,
+   đệm 162 B tới WARN 48.128** ⇒ lệch ~1,2 KB.
+3. **§3 kiểu xuống dòng** — ghi "repo ghi LF, riêng COMMANDS.md CRLF". Đo: **8 tệp CRLF TOÀN PHẦN**
+   (gồm `SKILL.md`, `tl.py`, `tl_selftest.py`), 200 tệp LF, 0 hỗn hợp. Chính đợt này trả giá: bump
+   version bằng `write_text` nuốt sạch CR của SKILL.md (307 dòng) — `git diff --numstat` bắt được ngay,
+   đã hoàn tác và làm lại ở mức BYTE.
+
+## (e) Hiện vật manifest restricted-egress (F16c)
+
+`references/PATCH_v2.21.1.gs.md` khuyến nghị bản **restricted-egress** làm MẶC ĐỊNH nhưng tệp không có
+trong kho — chỉ ghi cách tự dựng ⇒ người vận hành theo đúng khuyến nghị thì không có gì để copy. Nay có
+`references/APPSSCRIPT_MANIFEST.restricted-egress.json`, và test khoá bất biến thật sự nguy hiểm: hai
+manifest chỉ được khác nhau ĐÚNG khoá `urlFetchWhitelist` — lệch thêm khoá nào khác nghĩa là đổi policy
+egress đã âm thầm kéo theo đổi oauthScope/quyền webapp.
+
+## (f) ★r218 làm ra cái cổng nhưng QUÊN nối vào gate
+
+`doc-claims-check` **không hề có trong `.claude/commands/gate.md`** (7 bước, sửa lần cuối ở `cece035`,
+từ trước r218). Nghĩa là suốt r218 cái lỗ hổng nó sinh ra để bịt vẫn chỉ đóng khi có người NHỚ chạy tay
+— đúng loại hỏng mà chính nó đi bắt. r219 nối vào: gate nay **8 bước**, `doc-claims-check --strict` đứng
+sau `golden`. Guard không nối vào đường chạy tự động thì guard chỉ là tài liệu.
+
+## Nghiệm thu
+
+* Selftest **1361 → 1368** (+7 ca `r219_*`), **gate 8/8 xanh trọn** (kể cả bước mới), gen_instructions
+  38/38, ruff F delta **0 thực chất** (+1 và là `F821 Undefined name Path` ở `tl_selftest.py` 193→194 —
+  đúng lớp báo giả GOTCHAS §11 đã ghi: tên bơm động vào `globals()` qua `_STUB_MAP`).
+* **Phản chứng 2 chiều CHẠY THẬT trên bãi cách ly, 2 lượt / 18 đột biến.** Lượt 1: 9/11 đỏ đúng ca —
+  và **2 ca lọt lưới đều là phát hiện thật**, không phải trục trặc harness:
+  * M2 lọt ⇒ ca đối chứng thiếu tên profile CHỮ THƯỜNG (bản viết hoa rơi ngoài `[a-z]` của `CMD_RE`
+    nên im lặng kể cả khi guard bị tắt) ⇒ đã bổ sung dòng đo được.
+  * M3 lọt ⇒ **`_doc_claims_noisy` trong `_doc_claims_tl_cmd` là MÃ CHẾT** (`CMD_RE` chỉ nhận
+    `[a-z][a-z0-9-]{2,}` nên mọi ký tự nhiễu đã rụng trước) ⇒ **gỡ**. Một chốt không đột biến nào giết
+    được là chốt CHƯA ĐƯỢC CHỨNG MINH; giữ lại chỉ tạo cảm giác an toàn giả.
+* Golden `doc_claims_check_fixture` regen CÓ CHỦ ĐÍCH: `by_layer` thêm L8/L9, `layers` thêm L8/L9,
+  `layers_skipped.L9` (bằng chứng lớp tự tắt đúng lúc), và ca L8 mới khoá byte (`tl sweep` KHÔNG nổ,
+  `tl khong-co-lenh-nay` nổ đúng dòng 7). ★Bẫy trả giá một lượt: fixture dưới `references/golden/
+  fixtures/` **SINH TỪ MÃ** (`_golden_ensure_fixtures`) — sửa tay bị ghi đè lặng lẽ ở `golden-test` kế
+  tiếp, phải sửa trong `workflow.py`. (`workflow_audit` KHÔNG đổi: nó không đếm `references/*.json`.)
+
 # ★ v1.35.54 — r218: `tl doc-claims-check` — cổng kiểm TRÍCH DẪN trong văn xuôi, và 8 con trỏ chết nó bắt được ngay lần chạy đầu (+9 test, 1361/1361) (2026-07-28)
 
 > Lỗ hổng đã ĐO, không phải phỏng đoán: gate 9 bước kiểm mã nguồn + manifest + bundle, **không bước nào

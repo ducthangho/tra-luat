@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 188,
-  "total_bytes": 6495679,
-  "package_hash": "45b0979b38fd68d26ba71901f7e4fcdc35df962d43695ce5c66c1201e2761843",
-  "content_hash": "45b0979b38fd68d26ba71901f7e4fcdc35df962d43695ce5c66c1201e2761843",
+  "total_bytes": 6495715,
+  "package_hash": "f7ae92612bb97ced1377fd0b2d86411b815152c98d1f9da5ebd7ba5bb480e32b",
+  "content_hash": "f7ae92612bb97ced1377fd0b2d86411b815152c98d1f9da5ebd7ba5bb480e32b",
   "required_missing": [],
   "files": [
     {
@@ -708,8 +708,8 @@
     },
     {
       "path": "scripts/rasoat_phuluc.py",
-      "size": 14556,
-      "sha256": "5def1477751db0229eb4d59e13ae6e783dc2b73a3d7961e87b9f6d222f2f8624"
+      "size": 14592,
+      "sha256": "33da54b82064f3c51d910e72dc00d93e3ed6159a58d5ded342c1193be6c27a35"
     },
     {
       "path": "scripts/rasoat_worksheet.py",

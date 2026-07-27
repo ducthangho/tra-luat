@@ -258,7 +258,7 @@ def main():
     P.append(f"- Đề xuất ban hành mới (Mẫu 05-BN): **{counts['05']}**")
     P.append(f"- Đề xuất bãi bỏ toàn bộ (Mẫu 06-BN): **{counts['06']}**")
     P.append(f"- Đề xuất tạm ngưng toàn bộ (Mẫu 07-BN): **{counts['07']}**")
-    P.append(f"- Nội dung chưa đủ căn cứ kết luận (Phụ lục VI): **{len(buckets['F'])}**")
+    P.append(f"- Nội dung nghiên cứu, rút kinh nghiệm + chưa đủ căn cứ kết luận (Phụ lục VI): **{len(buckets['F'])}**")
     P.append(f"- Tổng nội dung rà soát (Phụ lục VII): **{len(noi_dung)}**")
 
     f.write_text("\n".join(P), encoding="utf-8")

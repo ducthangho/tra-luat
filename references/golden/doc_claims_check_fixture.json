@@ -1,0 +1,99 @@
+{
+  "advisories": [
+    {
+      "claim": "v1.0.1",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L5",
+      "line": 3,
+      "reason": "VERSION_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "claim": "r09",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L6",
+      "line": 3,
+      "reason": "R_BELOW_CHANGELOG_FLOOR"
+    },
+    {
+      "claim": "fec6c125",
+      "detail": "<volatile>",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L2",
+      "line": 4,
+      "reason": "SHA_LIKE_NOT_A_COMMIT"
+    }
+  ],
+  "advisory_count": 3,
+  "basis": "<volatile>",
+  "by_layer": {
+    "L1": 1,
+    "L2": 1,
+    "L3": 1,
+    "L5": 1,
+    "L6": 1,
+    "L7": 1
+  },
+  "claims_flagged": 9,
+  "files_scanned": 1,
+  "flags": [
+    {
+      "claim": "references/KHONG_CO_FILE.md",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L1",
+      "line": 4,
+      "reason": "PATH_MISSING"
+    },
+    {
+      "claim": "deadbee",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L2",
+      "line": 4,
+      "reason": "SHA_NOT_A_COMMIT"
+    },
+    {
+      "claim": "v1.99.0",
+      "detail": "<volatile>",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L5",
+      "line": 5,
+      "reason": "VERSION_AHEAD_OF_CURRENT"
+    },
+    {
+      "claim": "r999",
+      "detail": "<volatile>",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L6",
+      "line": 5,
+      "reason": "R_AHEAD_OF_LATEST"
+    },
+    {
+      "claim": "scripts/tl.py:999999",
+      "detail": "<volatile>",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L7",
+      "line": 5,
+      "reason": "PYLOC_LINE_OUT_OF_RANGE"
+    },
+    {
+      "claim": "./KHONG_CO_KE_HOACH.md",
+      "file": "references/golden/fixtures/doc_claims/claims.md",
+      "layer": "L3",
+      "line": 6,
+      "reason": "LINK_TARGET_MISSING"
+    }
+  ],
+  "layers": [
+    "L1",
+    "L2",
+    "L3",
+    "L5",
+    "L6",
+    "L7"
+  ],
+  "ok": false,
+  "roots": [
+    "references/golden/fixtures/doc_claims"
+  ],
+  "schema": "doc_claims_check.v1",
+  "strict": false
+}

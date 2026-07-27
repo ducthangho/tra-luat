@@ -1,3 +1,108 @@
+# ★ v1.35.54 — r218: `tl doc-claims-check` — cổng kiểm TRÍCH DẪN trong văn xuôi, và 8 con trỏ chết nó bắt được ngay lần chạy đầu (+9 test, 1361/1361) (2026-07-28)
+
+> Lỗ hổng đã ĐO, không phải phỏng đoán: gate 9 bước kiểm mã nguồn + manifest + bundle, **không bước nào
+> kiểm tính đúng của trích dẫn trong tài liệu**. Trong khi `CHANGELOG.md`, `GOTCHAS.md`, `RUNBOOK.md`,
+> `DOCTRINE_APPENDIX.md` dày đặc `r216`, `9279426`, `tl.py:1504`, `references/X.md`, `v1.35.52`.
+> Khuôn hỏng đã trả giá nhiều lần: tài liệu dẫn tệp–cờ–số hiệu đã đổi chỗ, không ai phát hiện cho tới
+> khi một phiên sau đi theo con trỏ và lạc. Đúng loại lỗi máy bắt rẻ hơn người.
+
+## (a) Lệnh mới `tl doc-claims-check` — READ-ONLY, sáu lớp, fail-CLOSED khi `--strict`
+
+```
+tl doc-claims-check [--path <file|dir> ...] [--strict] [--json] [--out <file>]
+```
+
+Không ghi (trừ `--out` do người gọi khai), không mạng, không GAS/NLM, **không có `--apply`/`--fix`**.
+`rc` 0 sạch · 1 có cờ · 2 lỗi dùng lệnh; `--strict` đẩy 1→2 (khuôn `workflow-audit --strict`).
+
+| Lớp | Bắt gì | Xác minh bằng |
+|---|---|---|
+| L1 | đường dẫn trong span backtick có `/` | tồn tại trong cây (hoặc cạnh tài liệu) |
+| L2 | commit SHA | `git cat-file` + `merge-base --is-ancestor` CỤC BỘ |
+| L3 | link markdown tương đối | resolve TỪ VỊ TRÍ TÀI LIỆU |
+| L5 | `v1.NN.NN` | ≤ VERSION hiện hành + có trong sổ |
+| L6 | `rNNN` (chấp hậu tố `r208d`) | ≤ đợt mới nhất + có trong sổ |
+| L7 | `<file>.py:<dòng>` | tệp tồn tại **và** đủ số dòng |
+
+Che nhiễu (§2.4) giữ nguyên offset nên số dòng báo cáo vẫn đúng: khối fence ```` ``` ````/`~~~` che cho
+mọi lớp; span backtick che THÊM cho L2/L5/L6 (SHA/version trong ví dụ lệnh là minh hoạ), nhưng **không**
+che cho L1/L7 — đường dẫn và con trỏ mã vốn luôn nằm trong backtick, che đi là mù.
+
+## (b) Ranh giới CỜ vs ADVISORY — thứ quyết định báo cáo dùng được hay thành rác
+
+Bản đầu tiên hô **213 cờ**. Đọc kỹ thì phần lớn là lỗi của chính công cụ, và mỗi lần sửa đều phải ĐO:
+
+- **56 cờ `VERSION_AHEAD_OF_CURRENT` đều là `v2.x`** — version **webapp GAS** (`2.21.2p`), hệ đánh số
+  KHÁC hẳn VERSION skill. Kế hoạch viết `v1.NN.NN` là có lý do; siết regex về nhánh `v1.*`.
+- **18 cờ `SHA_NOT_A_COMMIT` đều dài ĐÚNG 8 và đều là khúc đầu UUID notebook** («query notebook
+  `fec6c125`»), trong khi git ở kho này viết tắt **7**. Ngưỡng nay lấy từ chính git
+  (`rev-parse --short`) + 40; hình dạng khác mà không tra ra commit ⇒ advisory, không hô sai.
+- **`CHANGELOG.md` không phải sổ đầy đủ** — nó bị cắt còn 50 mục, sổ cũ nằm ở
+  `references/changelog_archive/`. Đọc thiếu chỗ đó thì 184 version bị hô sai. Và **quét toàn văn chứ
+  không chỉ dòng tiêu đề**: số hiệu đợt phần lớn nằm trong thân bài, headings-only chỉ thấy 4/191.
+- Gộp đủ archive rồi dải `v1.9–v1.22` **vẫn thủng** (46/420) ⇒ đó là khuyết của SỔ, không phải bằng
+  chứng trích dẫn sai ⇒ `VERSION_NOT_IN_CHANGELOG` xuống advisory. L6 đối xứng: `r160` không tra được
+  nhưng sổ cũng vắng r158/159/161/163/165. **Chỉ khẳng định BẤT KHẢ mới là cờ** (vượt VERSION/đợt mới nhất).
+- §2.2 nói thẳng «tài liệu lịch sử được phép dẫn tệp đã xoá»: `CHANGELOG.md`,
+  `references/changelog_archive/`, `references/DOCTRINE_APPENDIX.md` (tự khai là thân SKILL.md trước
+  v1.16.0, giữ nguyên để tra bối cảnh) ⇒ L1 ở đó là advisory. Phân định theo **loại tài liệu**, không
+  theo tuổi tệp: git kho này chỉ 265 commit trong khi skill già hơn thế, `--diff-filter=D` không phân
+  định nổi (nó chỉ nhận ra 3/134).
+
+Kết quả: **213 → 8 cờ**, 275 advisory. Kế hoạch §2.3 và §2.7 **tự mâu thuẫn** ở L2 (§2.3 đòi SHA phải có
+chữ số, §2.7 lấy `deadbeef` — không chữ số nào — làm phản chứng); đo ra kho có **0** token hex toàn chữ
+cái nên bỏ vế «phải có chữ số», giữ vế «phải có chữ a-f» (vế này mới gánh việc: loại token toàn số).
+
+## (c) Tám con trỏ chết bắt được ngay lần chạy đầu — đã vá cả tám
+
+| Vị trí | Trích dẫn | Sự thật |
+|---|---|---|
+| `references/API_CONTRACT.md:266` | `scripts/manifest_build.py` | bản thật ở `scripts/_fallback/` |
+| `references/DELTA_v1.19.md:6,31` | `references/Code.2.21.2h.gs` | snapshot `.gs` chỉ giữ từ `2.21.2k` |
+| `references/DEV_TOOLING_GUIDE.md:56` | `references/Code.2.21.2i.gs` | nay trỏ `Code.2.21.2p.gs` hiện hành |
+| `references/PATCH_v2.21.1.gs.md:378` | `APPSSCRIPT_MANIFEST.restricted-egress.json` | **không có trong kho — mà đó là phương án được KHUYẾN NGHỊ MẶC ĐỊNH** |
+| `references/QUY_TRINH_RA_SOAT_3_TANG.md:92` | `references/BANG_PHAN_TANG_RUI_RO.md` | không tồn tại; quy tắc nằm ngay dưới cùng trang |
+| `references/SKILL_KERNEL_MAPPING.md:25` | `changelog_archive/CHANGELOG-2026H1.md` | tên thật là `CHANGELOG-den-1.33.53.md` + `CHANGELOG-1.33.54-den-1.34.99.md` |
+| `references/THE_THUC_TRINH_BAY.md:333` | `r160` | không tra được, nhưng dải sổ thưa ⇒ giữ ở advisory, KHÔNG vá |
+
+## (d) ★Đối chứng ngoài dự kiến: r209 đã khoanh đúng 6 mục này từ trước — nay TRẢ NỢ
+
+`tl_core/release.py` có sẵn guard con trỏ r209 với `_POINTER_BASELINE` **10 cặp nợ đã khoanh**.
+`doc-claims-check` quét bằng đường hoàn toàn khác và dựng lại **đúng 6 cặp trong số đó** từ con số 0 —
+tức danh sách khoanh nợ ấy chính xác, chỉ là chưa ai trả. Đã sửa thân tài liệu ⇒ baseline **10 → 4**
+(ratchet chặn chiều THÊM miễn trừ; trả nợ làm số nhỏ đi là chiều đúng, hạ mốc có chủ đích). Bốn cặp còn
+lại không phải nợ: placeholder trong văn xuôi, thư mục runtime cố ý ngoài gói, đường Drive `_meta/templates/…`.
+
+Hai guard **bổ sung nhau chứ không trùng**: r209 đối chiếu PACKAGE-SET (nguồn sự thật = manifest) cho
+`references/*.md` + `SKILL.md`; r218 đối chiếu CÂY THẬT, thêm link/SHA/version/đợt/`py:dòng`, có đệ quy
+thư mục con và có phép che fence/backtick.
+
+## (e) Bẫy tự gây, ghi lại để khỏi mắc lần hai
+
+- Fixture golden nằm DƯỚI `references/` và **cố tình** chứa trích dẫn chết (đó là nội dung test). Quét
+  mặc định mà nuốt chúng thì `--strict` không bao giờ xanh và 8 phát hiện thật lẫn với dữ liệu test ⇒
+  bỏ qua `references/golden/fixtures/` khi ĐI NGANG, vẫn quét khi trỏ THẲNG (chính là cách golden chạy).
+- Sửa `DEV_TOOLING_GUIDE.md` thành `references/Code.<ver>.gs` làm **r209 đỏ**: regex con trỏ của nó cắt
+  ở `<` và sinh ra `references/Code` không tồn tại. Bộ lọc nhiễu của r218 nuốt token đó, r209 thì không
+  — vá một reader chưa phải vá xong bẫy (bài học `ke-hoach-khung-tham-tra`).
+- Lệnh mới thiếu dòng trong `_CREDS_LAZY_CMDS` ⇒ `main()` `load_creds` sys.exit TRƯỚC handler trên máy
+  không config (GOTCHAS §4). Đã thêm.
+- `r218` trong dòng doctrine mới bị CHÍNH nó hô `R_AHEAD_OF_LATEST` khi CHANGELOG chưa có mục r218 —
+  đúng hành vi mong muốn, tự hết khi mục này tồn tại.
+
+## (f) Việc C — doctrine «một bài học một lượt ghi»
+
+`references/RASOAT_HOSO_LOOP.md` §9bis: không gộp nhiều phát hiện vào một lần ghi — cách đánh số lúc nháp
+(«phát hiện 3», «mục trên») rò rỉ vào bản đã ghi và thành trích dẫn chết. Nhắc lại quy ước sao lưu:
+mọi `*.bak.*.json` để Ở GỐC out-dir, KHÔNG trong `master/`.
+
+## Nghiệm thu
+
+selftest **1361/1361** (+9 ca r218, mỗi lớp ≥1 phản chứng «đỏ đúng ca», đều chạy qua đường sản xuất
+`python scripts/tl.py …` chứ không qua bind) · gate 9/9 · `doc-claims-check --strict` rc=0 trên kho thật ·
+chạy 2 lượt cho stdout byte-identical · golden thêm case `doc_claims_check_fixture`, regen `workflow_audit`
+CÓ CHỦ ĐÍCH (đổi kích thước SKILL.md + 2 tệp runtime mới) · **0 lệnh ghi Drive, 0 call NLM**.
+
 # ★ v1.35.53 — r217: sửa-theo-điểm thay cho thay-trọn-gói, bộ lọc nguồn Công báo, và một đường nạp chưa từng chạy nổi trên máy tiếng Việt (+6 test, 1352/1352) (2026-07-28)
 
 > Nguồn: kết luận lượt rà 6 (`THAY_BAN_TRON_GOI_BI_BAC`) + `BAN_CONG_BAO_BOC_RA_CON_RAC_KHONG_CO_BUOC_LAM_SACH_CHUAN`.

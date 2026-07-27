@@ -89,7 +89,7 @@ Kịch bản điều phối gọi đúng cổng này ở bước A1 — xem `ref
 ## VÒNG LẶP RÀ SOÁT — 3 TẦNG (lặp theo từng đơn vị rà)
 
 ### TẦNG 1 — PHÂN TẦNG (cache, 0 NLM)
-> Tự động hóa: `rasoat_worksheet.py --so-hieu <…>` sinh sẵn **Phiếu công tác** (bảng phân tầng SÂU/ĐỐI CHIẾU/— + theo dõi tiến độ) và **Nhật ký NLM (CSV)**. Quy tắc dấu hiệu xem `references/BANG_PHAN_TANG_RUI_RO.md`.
+> Tự động hóa: `rasoat_worksheet.py --so-hieu <…>` sinh sẵn **Phiếu công tác** (bảng phân tầng SÂU/ĐỐI CHIẾU/— + theo dõi tiến độ) và **Nhật ký NLM (CSV)**. Bảng dấu hiệu phân tầng: xem ngay danh sách dưới đây.
 Từ raw của đơn vị rà, lọc **Điều rủi ro cao** = Điều thoả ≥1 dấu hiệu:
 - giao quy định chi tiết / "theo quy định của Chính phủ" (rủi ro T2: chưa ban hành chi tiết);
 - đặt điều kiện ĐTKD / điều kiện hành nghề / thủ tục hành chính (T4);

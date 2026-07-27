@@ -250,6 +250,18 @@ trình**. **KHÔNG `/compact` giữa phiên rà** — bàn giao qua file trung t
 Nghi thức: xong/trả đơn vị đang cầm → đẩy sổ → cập nhật state + note bàn giao → NHẢ claim → kết sổ registry
 (`tl manifest`; `tl ops-plan` đổ việc vệ sinh vào Q-APPROVALS chờ duyệt, KHÔNG tự `--apply`).
 
+## §9bis. QUY ƯỚC GHI (r218)
+
+**Một bài học — một lượt ghi.** Không gộp nhiều phát hiện vào một lần ghi tài liệu: cách đánh số lúc nháp
+("phát hiện 3", "mục trên", "bảng dưới") rò rỉ vào bản đã ghi và biến thành **trích dẫn chết** — người đọc
+sau đi theo con trỏ và lạc. Ghi xong MỘT mục, neo lại vào cây, rồi mới sang mục sau.
+
+Cùng họ với bẫy đã mắc lượt 7 (để bản sao lưu **trong** `master/` ⇒ `rasoat-merge` nuốt, 40→53 phát hiện):
+**mọi `*.bak.*.json` để Ở GỐC out-dir, KHÔNG để trong `master/`.**
+
+Kiểm được bằng máy: `tl doc-claims-check --strict` bắt con trỏ chết dạng đường dẫn/link/`file.py:dòng`/
+version/số hiệu đợt. Nó KHÔNG bắt được "mục trên" — nên vế đó vẫn là kỷ luật lúc ghi.
+
 ## §9. NHỊP REGISTRY (cấm chen ngang)
 
 BOOT `changes_pull` (nền, cùng warm-up) · **trong vòng rà: registry CHỈ ĐỌC, đọc OFFLINE** (`reg-query` trên

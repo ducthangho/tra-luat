@@ -263,7 +263,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 > và mọi subfolder của chính profile. `categoriesMode=inherit` không cấp quyền quét cây category VBQPPL.
 > Dòng `row_kind=ref` được giữ nguyên khi quét own. Trước `regWriteAll_`, guard chặn nếu
 > `new_own_count > max(2×old_own_count, old_own_count+50)`; override có chủ ý bằng `confirmBlowup=yes`.
-> **Sinh manifest 1 lệnh:** `scripts/manifest_build.py` = `regen2` + `manifest_export` (tự kiểm regen2 ok mới export).
+> **Sinh manifest 1 lệnh:** `scripts/_fallback/manifest_build.py` = `regen2` + `manifest_export` (tự kiểm regen2 ok mới export).
 > `inbox_process` mặc định đọc `_HOP_NAP` (từ v2.18.0; bản cũ trỏ nhầm `_INBOX`).
 
 ---

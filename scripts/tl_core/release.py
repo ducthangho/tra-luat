@@ -548,16 +548,17 @@ def _skill_links_findings(skill_text: str, manifest_paths) -> dict:
 # 80 mục ngay ngày đầu và sẽ bị vô hiệu hoá (bài học §0.8 kế hoạch). Gỡ nợ = XOÁ mục baseline (ratchet:
 # sửa baseline = sửa code = qua ruff→selftest→CHANGELOG→review; test r209 khoá số đếm).
 _POINTER_ARCHIVE_DOCS = frozenset({"references/DOCTRINE_APPENDIX.md"})
+# r218: TRẢ NỢ 6/10 mục. `doc-claims-check` (lệnh mới, đường quét độc lập) dựng lại ĐÚNG 6 cặp dưới đây
+# từ con số 0 — tức danh sách khoanh nợ này chính xác, chỉ là chưa ai trả. Đã sửa thân tài liệu nên chúng
+# không còn là hit; ratchet hạ 10 → 4, đi ĐÚNG chiều (ratchet chặn THÊM miễn trừ, không chặn bớt):
+#   API_CONTRACT→scripts/manifest_build.py · DELTA_v1.19→Code.2.21.2h.gs · DEV_TOOLING_GUIDE→Code.2.21.2i.gs
+#   PATCH_v2.21.1→APPSSCRIPT_MANIFEST.restricted-egress.json · QUY_TRINH_RA_SOAT→BANG_PHAN_TANG_RUI_RO.md
+#   SKILL_KERNEL_MAPPING→changelog_archive/CHANGELOG-2026H1.md
+# Bốn cặp còn lại KHÔNG phải nợ — false-positive có chủ đích; sửa thân sẽ làm tài liệu SAI đi.
 _POINTER_BASELINE = frozenset({
-    ("references/API_CONTRACT.md", "scripts/manifest_build.py"),        # bản thật ở scripts/_fallback/
     ("references/COWORK_EDIT_SAFETY.md", "scripts/ten_file.py"),        # placeholder ví dụ trong prose
-    ("references/DELTA_v1.19.md", "references/Code.2.21.2h.gs"),        # GAS đời cũ đã ra archive
-    ("references/DEV_TOOLING_GUIDE.md", "references/Code.2.21.2i.gs"),
     ("references/GOTCHAS.md", "scripts/.tl_state"),                     # thư mục runtime, cố ý ngoài gói
-    ("references/PATCH_v2.21.1.gs.md", "references/APPSSCRIPT_MANIFEST.restricted-egress.json"),
-    ("references/QUY_TRINH_RA_SOAT_3_TANG.md", "references/BANG_PHAN_TANG_RUI_RO.md"),
     ("references/SKILL_KERNEL_MAPPING.md", "references/SKILL_KERNEL_DRAFT.md"),
-    ("references/SKILL_KERNEL_MAPPING.md", "references/changelog_archive/CHANGELOG-2026H1.md"),
     ("references/THE_THUC_TRINH_BAY.md", "templates/_nguon-goc/"),      # đường DRIVE `_meta/templates/…` — false-positive giữ chủ đích
 })
 

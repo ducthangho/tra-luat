@@ -19732,9 +19732,11 @@ def run() -> int:
     _t110("r209_pointer_findings_pure", _c209_pointer_findings_pure)
 
     def _c209_baseline_ratchet():
-        # H9: baseline khoá SỐ ĐẾM 10 — thêm mục miễn trừ là test đỏ, phải sửa test CÓ CHỦ ĐÍCH.
+        # H9: baseline khoá SỐ ĐẾM — thêm mục miễn trừ là test đỏ, phải sửa test CÓ CHỦ ĐÍCH.
+        # r218 hạ 10 → 4: đã TRẢ 6 mục nợ (sửa thân tài liệu, xem _POINTER_BASELINE). Ratchet chặn
+        # chiều THÊM miễn trừ; trả nợ làm số nhỏ đi là chiều đúng, nên hạ mốc là có chủ đích.
         bl = _rel209._POINTER_BASELINE
-        ok1 = len(bl) == 10
+        ok1 = len(bl) == 4
         ok2 = all(doc not in _rel209._POINTER_ARCHIVE_DOCS for doc, _ in bl)
         # khớp theo CẶP: cùng con trỏ nhưng ở DOC KHÁC vẫn phải ĐỎ (miễn trừ không lan)
         r = _rel209._doc_pointer_findings({"references/KHAC.md": "scripts/.tl_state"}, ["scripts/x.py"])
@@ -19765,7 +19767,7 @@ def run() -> int:
         r = _rel209._doc_pointer_findings(docs, paths)
         ok1 = r["pointers_ok"] and r["pointers_fail"] == []
         ok2 = len(r["pointers_advisory"]) >= 30
-        ok3 = len(r["pointers_baseline"]) == 10
+        ok3 = len(r["pointers_baseline"]) == 4   # r218 trả 6 nợ (xem _POINTER_BASELINE)
         cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
         r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
         ok4 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
@@ -21134,6 +21136,207 @@ def run() -> int:
             ok3 = Path(_j.get("cache_file") or "").is_file()
         return ok1 and ok2 and ok3
     _t110("r217_ingest_file_khong_doc_bang_locale", _c217_ingest_file_khong_doc_bang_locale)
+
+    # ───────────────────────── r218: doc-claims-check (kiểm trích dẫn cơ học) ─────────────────────────
+    # Doctrine tra-luat (false-green-test-qua-bind): gọi qua đường ĐÃ BIND không chứng minh gì ⇒ MỌI ca
+    # dưới đây chạy `python scripts/tl.py doc-claims-check ...` như người dùng thật, đọc rc THẬT + JSON thật.
+    # Khuôn ca: mỗi lớp một PHẢN CHỨNG «đỏ đúng ca» — tài liệu chứa ĐÚNG MỘT khẳng định sai, kỳ vọng
+    # ĐÚNG lớp đó nổ; kèm ca ĐỐI CHỨNG khẳng định-đúng để bắt báo giả.
+    def _r218_run(*args, tmp=None):
+        import json as _js218
+        import subprocess as _sp218
+        import sys as _sys218
+        p = _sp218.run([_sys218.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-claims-check",
+                        *args, "--json"], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", timeout=300)
+        j = _js218.loads(p.stdout[p.stdout.find("{"):]) if "{" in p.stdout else {}
+        return p.returncode, j, p.stdout
+
+    def _r218_doc(td, body: str):
+        d = Path(td) / "tailieu"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "vandeban.md").write_text(body, encoding="utf-8")
+        return d
+
+    def _r218_layers(j, layer):
+        return [f for f in (j.get("flags") or []) if f.get("layer") == layer]
+
+    def _c218_sach_khong_bao_gia():
+        """ĐỐI CHỨNG (không phải ca dễ): tài liệu chỉ chứa khẳng định ĐÚNG — đường dẫn có thật, SHA có
+        thật, version ≤ hiện hành và có mục CHANGELOG, rNNN có trong CHANGELOG, `tl.py:1` trong tầm.
+        Nếu bất kỳ lớp nào báo giả ở đây thì lệnh vô dụng trên kho thật (150 cờ nhiễu = không ai đọc)."""
+        import subprocess as _sp218b
+        import tempfile as _tf218
+        _sha = _sp218b.run([("git"), "-C", str(_ROOT209), "rev-parse", "--short=8", "HEAD"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace",
+                           timeout=60)
+        if _sha.returncode != 0:
+            return False
+        _sha = _sha.stdout.strip()
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "\n".join([
+                "# Đối chứng",
+                f"- Bẫy nằm ở `references/GOTCHAS.md`, vá tại `{_sha}` (v1.35.50 — r217).",
+                "- Con trỏ mã: `scripts/tl.py:1` và `scripts/tl_core/workflow.py:1`.",
+                "- Xem thêm [gotchas](../tailieu/vandeban.md).",
+                "",
+            ]))
+            rc, j, _ = _r218_run("--path", str(d))
+        return rc == 0 and j.get("ok") is True and j.get("flags") == [] and j.get("files_scanned") == 1
+
+    _t110("r218_docclaims_sach_khong_bao_gia", _c218_sach_khong_bao_gia)
+
+    def _c218_l1_duong_dan_chet():
+        """L1 — `references/KHONG_CO_FILE.md` không hề tồn tại ⇒ PHẢI ra cờ L1 (đúng dòng, đúng lý do)."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nĐọc `references/KHONG_CO_FILE.md` trước khi release.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L1")
+        return (rc == 1 and j.get("ok") is False and len(f) == 1
+                and f[0]["claim"] == "references/KHONG_CO_FILE.md"
+                and f[0]["reason"] == "PATH_MISSING" and f[0]["line"] == 3)
+
+    _t110("r218_docclaims_l1_duong_dan_chet", _c218_l1_duong_dan_chet)
+
+    def _c218_l2_sha_khong_ton_tai():
+        """L2 — `deadbee` đúng hình dạng git viết tắt của kho này (7) mà không tra ra commit ⇒ cờ L2.
+        Ba chốt chặn báo giả, cả ba đều là ca ĐO ĐƯỢC trên kho thật (không phải giả định):
+          • token TOÀN SỐ (`20260728` — ngày viết liền) KHÔNG phải SHA;
+          • khúc đầu UUID kèm gạch nối (`743ed200-aaaa-…`) KHÔNG phải SHA — `\\b` cắt ngay ở '-';
+          • `fec6c125` — khúc đầu UUID viết TRẦN, dài 8 ≠ 7/40 ⇒ AMBIGU, xuống advisory chứ không hô
+            sai: 18/18 token hex trên kho thuộc đúng lớp này, hô cờ hết thì gate không bao giờ xanh.
+        (Kế hoạch §2.7 lấy `deadbeef` — 8 ký tự — làm ca cờ; sau khi đo thì 8 chính là hình dạng ID
+        notebook, nên ca cờ đổi sang 7 ký tự và ca 8 ký tự thành phản chứng advisory.)"""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nVá ở commit deadbee ngày 20260728, sổ 743ed200-aaaa-bbbb-cccc-000000000001, notebook fec6c125.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L2")
+        adv = [x for x in (j.get("advisories") or []) if x.get("layer") == "L2"]
+        return (rc == 1 and len(f) == 1 and f[0]["claim"] == "deadbee"
+                and f[0]["reason"] == "SHA_NOT_A_COMMIT"
+                and len(adv) == 1 and adv[0]["claim"] == "fec6c125"
+                and adv[0]["reason"] == "SHA_LIKE_NOT_A_COMMIT")
+
+    _t110("r218_docclaims_l2_sha_khong_ton_tai", _c218_l2_sha_khong_ton_tai)
+
+    def _c218_l3_link_tuong_doi_gay():
+        """L3 — link markdown tương đối phải resolve TỪ VỊ TRÍ TÀI LIỆU (không phải cwd/gốc repo);
+        link tuyệt đối http(s) và neo `#` KHÔNG được đụng tới."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "\n".join([
+                "# T", "", "Xem [kế hoạch](./KHONG_CO_KE_HOACH.md) và [web](https://example.invalid/x.md)",
+                "và [neo](#muc-2).", "",
+            ]))
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L3")
+        return (rc == 1 and len(f) == 1 and f[0]["claim"] == "./KHONG_CO_KE_HOACH.md"
+                and f[0]["reason"] == "LINK_TARGET_MISSING")
+
+    _t110("r218_docclaims_l3_link_tuong_doi_gay", _c218_l3_link_tuong_doi_gay)
+
+    def _c218_l5_version_vuot_hien_hanh():
+        """L5 — `v1.99.0` > VERSION ⇒ cờ (sai trong MỌI hoàn cảnh, không phụ thuộc sổ đầy hay vơi).
+        Hai chốt chặn báo giả, cả hai đều đo được trên kho thật:
+          • `v1.0.1` dưới sàn sổ ⇒ ADVISORY (sổ thủng dải cũ là khuyết của sổ, không phải trích dẫn sai);
+          • `v2.21.2p` là version WEBAPP GAS — hệ đánh số KHÁC, KHÔNG được đem so với VERSION skill
+            (đo 28-07: xét chung thì 56 trích dẫn GAS đúng đắn bị hô «vượt hiện hành»)."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nBản v1.99.0 sẽ có, v1.0.1 là chuyện cũ, webapp v2.21.2p đang chạy.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L5")
+        adv = [x for x in (j.get("advisories") or []) if x.get("layer") == "L5"]
+        return (rc == 1 and len(f) == 1 and f[0]["claim"] == "v1.99.0"
+                and f[0]["reason"] == "VERSION_AHEAD_OF_CURRENT"
+                and len(adv) == 1 and adv[0]["claim"] == "v1.0.1"
+                and adv[0]["reason"] == "VERSION_BELOW_CHANGELOG_FLOOR")
+
+    _t110("r218_docclaims_l5_version_vuot_hien_hanh", _c218_l5_version_vuot_hien_hanh)
+
+    def _c218_l6_r_khong_co_trong_changelog():
+        """L6 — `r999` lớn hơn đợt mới nhất từng ghi ⇒ BẤT KHẢ ⇒ cờ; `r09` dưới sàn ⇒ advisory.
+        Đối xứng với L5: chỉ khẳng định không-thể-đúng mới là cờ. Ca thật buộc phải thế — `r160` trong
+        THE_THUC_TRINH_BAY.md không tra được, nhưng sổ cũng vắng r158/159/161/163/165, nên «vắng trong
+        dải thưa» KHÔNG chứng minh trích dẫn sai (advisory), khác hẳn «lớn hơn mọi đợt đã có».
+        Chốt chặn báo giả: `r208d` (đợt có hậu tố chữ) phải tra ra đợt 208 — nếu khớp cứng `\\br208\\b`
+        thì mọi trích dẫn `r208d/r208c/r208b` trong sổ đều vô hình và `r208` bị hô sai oan (đo 28-07)."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nĐợt r999 đã làm việc đó, r09 là tiền sử, còn r208d thì có thật.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L6")
+        adv = [x for x in (j.get("advisories") or []) if x.get("layer") == "L6"]
+        return (rc == 1 and len(f) == 1 and f[0]["claim"] == "r999"
+                and f[0]["reason"] == "R_AHEAD_OF_LATEST"
+                and len(adv) == 1 and adv[0]["claim"] == "r09")
+
+    _t110("r218_docclaims_l6_r_khong_co_trong_changelog", _c218_l6_r_khong_co_trong_changelog)
+
+    def _c218_l7_dong_vuot_so_dong_file():
+        """L7 — `scripts/tl.py:999999` trỏ quá số dòng thật ⇒ cờ; `khong_co_file.py:3` ⇒ cờ THIẾU TỆP.
+        Hai lý do phải TÁCH BẠCH: 'lệch dòng' sửa được bằng đánh lại số, 'mất tệp' là chuyện khác."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "# T\n\nXem `scripts/tl.py:999999` và `khong_co_file.py:3`.\n")
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L7")
+        return (rc == 1 and len(f) == 2
+                and f[0]["claim"] == "khong_co_file.py:3" and f[0]["reason"] == "PYLOC_FILE_MISSING"
+                and f[1]["claim"] == "scripts/tl.py:999999"
+                and f[1]["reason"] == "PYLOC_LINE_OUT_OF_RANGE")
+
+    _t110("r218_docclaims_l7_dong_vuot_so_dong_file", _c218_l7_dong_vuot_so_dong_file)
+
+    def _c218_che_nhieu_fence_va_span():
+        """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.
+        Test chỉ khẳng định 'trong fence im' sẽ XANH GIẢ khi chưa cài lớp nào ⇒ phải khẳng định CẢ HAI VẾ.
+        Vế thứ ba: span backtick che cho L2/L5/L6 (ví dụ lệnh) nhưng KHÔNG che cho L1/L7 (đường dẫn,
+        con trỏ mã vốn luôn nằm trong backtick — che đi là mù)."""
+        import tempfile as _tf218
+        _fence = chr(96) * 3
+        with _tf218.TemporaryDirectory() as td:
+            d1 = _r218_doc(td, "\n".join([
+                "# Trong fence", "", _fence + "bash",
+                "cat references/KHONG_CO.md   # r999 v1.99.0 deadbeef", _fence, "",
+            ]))
+            rc1, j1, _ = _r218_run("--path", str(d1))
+            d2 = Path(td) / "ngoai"
+            d2.mkdir()
+            (d2 / "x.md").write_text("# Ngoài fence\n\nĐọc `references/KHONG_CO.md` nhé.\n", encoding="utf-8")
+            rc2, j2, _ = _r218_run("--path", str(d2))
+            d3 = Path(td) / "span"
+            d3.mkdir()
+            (d3 / "x.md").write_text("# Span\n\nVí dụ `git show deadbeef` và `references/KHONG_CO.md`.\n",
+                                     encoding="utf-8")
+            rc3, j3, _ = _r218_run("--path", str(d3))
+        return (rc1 == 0 and j1.get("flags") == []
+                and rc2 == 1 and len(_r218_layers(j2, "L1")) == 1
+                and rc3 == 1 and _r218_layers(j3, "L2") == [] and len(_r218_layers(j3, "L1")) == 1)
+
+    _t110("r218_docclaims_che_nhieu_fence_va_span", _c218_che_nhieu_fence_va_span)
+
+    def _c218_strict_fail_closed_va_tat_dinh():
+        """(a) fail-CLOSED: `--strict` có cờ ⇒ rc PHẢI = 2, không phải 1 (ai đưa vào gate dùng cờ này).
+        (b) TẤT ĐỊNH: chạy 2 lượt cùng đầu vào ⇒ stdout BYTE-IDENTICAL, thứ tự cờ đã sắp xếp.
+        (c) `--path` trỏ chỗ không có ⇒ rc=2 lỗi DÙNG LỆNH (khác hẳn rc=1 'có cờ')."""
+        import tempfile as _tf218
+        with _tf218.TemporaryDirectory() as td:
+            d = _r218_doc(td, "\n".join([
+                "# T", "", "`references/ZZZ.md` rồi `references/AAA.md`, đợt r999, `scripts/tl.py:999999`.", "",
+            ]))
+            rc_s, _, _ = _r218_run("--path", str(d), "--strict")
+            rc_a, ja, out_a = _r218_run("--path", str(d))
+            rc_b, _, out_b = _r218_run("--path", str(d))
+            rc_x, jx, _ = _r218_run("--path", str(Path(td) / "khong_ton_tai"))
+        _keys = [(f["file"], f["line"], f["layer"], f["claim"], f["reason"]) for f in (ja.get("flags") or [])]
+        return (rc_s == 2 and rc_a == 1 and rc_b == 1 and out_a == out_b
+                and len(_keys) >= 3 and _keys == sorted(_keys)
+                and rc_x == 2 and jx.get("error") == "PATH_NOT_FOUND")
+
+    _t110("r218_docclaims_strict_fail_closed_va_tat_dinh", _c218_strict_fail_closed_va_tat_dinh)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

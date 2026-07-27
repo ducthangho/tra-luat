@@ -41,6 +41,15 @@ GENERATED_SPECS = [
          {"flags": ["--strict"], "action": "store_true", "help": "fail cả khi có warnings"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "doc-claims-check", "handler": "cmd_doc_claims_check",
+     "help": "READ-ONLY: kiểm CƠ HỌC trích dẫn trong văn xuôi (đường dẫn, SHA, link, version, rNNN, file.py:dòng)",
+     "args": [
+         {"flags": ["--path"], "action": "append",
+          "help": "tệp/thư mục .md cần quét (lặp được); mặc định CHANGELOG/SKILL/CLAUDE/CONTEXT + references/"},
+         {"flags": ["--strict"], "action": "store_true", "help": "biến rc=1 (có cờ) thành rc=2 — dùng khi đưa vào gate"},
+         {"flags": ["--json"], "action": "store_true"},
+         {"flags": ["--out"], "help": "ghi payload JSON ra file (atomic)"},
+     ]},
     {"name": "golden-test", "handler": "cmd_golden_test",
      "help": "READ-ONLY mặc định: so JSON golden fixtures; --write để cập nhật fixtures",
      "args": [
@@ -1560,6 +1569,8 @@ COMMAND_META = {
     "route-task":           _m("low", True, "none", False, False, True, "workflow_audit", None, True, "workflow", True),
     "workflow-audit":       _m("low", True, "none", False, False, True, "workflow_audit", None, True, "workflow", True),
     "golden-test":          _m("low", False, "local", False, True, True, "workflow_audit", None, True, "workflow", True),
+    # read_only=True + write_scope="local": chỉ ghi khi người gọi tự khai `--out` (khuôn live-state-snapshot)
+    "doc-claims-check":     _m("low", True, "local", False, False, True, "workflow_audit", None, True, "workflow", True),
     "determinism-audit":    _m("low", True, "none", False, False, True, "workflow_audit", None, True, "release", True),
     "release-manifest":     _m("low", False, "local", False, True, True, "release_manifest", None, True, "release", True),
     "release-verify":       _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),

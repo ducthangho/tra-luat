@@ -1,0 +1,52 @@
+{
+  "id": "doc_claims_check",
+  "title": "Kiểm cơ học trích dẫn trong văn xuôi tài liệu",
+  "risk": "low",
+  "applies_to": [
+    "release",
+    "skill_update",
+    "doc_change"
+  ],
+  "apply": [
+    "read-only audit only"
+  ],
+  "stop_conditions": [
+    "--path trỏ tệp/thư mục không tồn tại (rc=2, lỗi dùng lệnh)",
+    "cờ còn lại khi chạy --strict trong gate"
+  ],
+  "schema": "workflow_card.v1",
+  "write_scope": "local",
+  "dry_run_required": false,
+  "confirm_required": false,
+  "readback_required": false,
+  "rollback_required": false,
+  "live_state_required": false,
+  "volatile_fields": [
+    "path",
+    "file",
+    "out",
+    "basis"
+  ],
+  "recommended_commands": [
+    "doc-claims-check",
+    "doc-claims-check --strict --json",
+    "doc-claims-check --path references --json",
+    "doc-claims-check --out bao_cao_trich_dan.json --json",
+    "workflow-audit --strict --json"
+  ],
+  "plan": [
+    "gom tệp .md theo --path, mặc định CHANGELOG/SKILL/CLAUDE/CONTEXT + references/",
+    "che khối fence ```/~~~ giữ nguyên offset; che thêm span backtick cho L2/L5/L6",
+    "L1 đường dẫn trong backtick · L3 link markdown tương đối (resolve từ vị trí tài liệu)",
+    "L2 commit SHA qua git cat-file cục bộ · L7 con trỏ <file>.py:<dòng>",
+    "L5 version v1.x · L6 số hiệu đợt rNNN, tra CHANGELOG.md + references/changelog_archive/*.md",
+    "xếp cờ theo (file, dòng, lớp, trích dẫn, lý do) rồi in JSON tất định"
+  ],
+  "verify": [
+    "schema=doc_claims_check.v1",
+    "rc 0 sạch / 1 có cờ / 2 lỗi dùng lệnh; --strict đẩy 1 thành 2",
+    "chạy 2 lần trên cùng đầu vào cho stdout byte-identical",
+    "cờ chỉ gồm khẳng định BẤT KHẢ; cái không kiểm được nằm ở advisories"
+  ],
+  "rollback_hint": "Lệnh READ-ONLY, không có gì để hoàn tác; --out chỉ ghi đúng tệp người gọi khai."
+}

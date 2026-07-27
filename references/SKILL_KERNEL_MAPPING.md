@@ -22,7 +22,9 @@
 ~5KB mỗi mục → ~34KB, đổi lấy việc phải viết-lại-lời các đoạn mệnh lệnh (rủi ro drift ngữ nghĩa).
 
 **Kết quả draft:** xem `references/SKILL_KERNEL_DRAFT.md`. **CHANGELOG (458KB):** khi duyệt sẽ cắt còn
-10 version gần nhất, phần cũ chuyển `references/changelog_archive/CHANGELOG-2026H1.md` (nguyên văn).
+10 version gần nhất, phần cũ chuyển sang thư mục changelog archive (nguyên văn). Đã thực hiện, tên tệp thực
+tế là `CHANGELOG-den-1.33.53.md` và `CHANGELOG-1.33.54-den-1.34.99.md` — chúng nằm trong cây phát triển và
+**không đóng vào gói phát hành**.
 
 **Quy trình khi bạn DUYỆT:** (1) SKILL_KERNEL_DRAFT.md → SKILL.md (bump v1.34.0); (2) cắt CHANGELOG + archive;
 (3) full gate + zip + deploy + curl verify; (4) BẠN re-import Capabilities (bắt buộc — đổi lớn doctrine);

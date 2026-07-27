@@ -153,6 +153,48 @@
         "readback_required": false,
         "rollback_required": false
       },
+      "file": "references/workflows/doc_claims_check.json",
+      "id": "doc_claims_check",
+      "recommended": [
+        {
+          "available": true,
+          "command": "doc-claims-check"
+        },
+        {
+          "available": true,
+          "command": "doc-claims-check --strict --json"
+        },
+        {
+          "available": true,
+          "command": "doc-claims-check --path references --json"
+        },
+        {
+          "available": true,
+          "command": "doc-claims-check --out bao_cao_trich_dan.json --json"
+        },
+        {
+          "available": true,
+          "command": "workflow-audit --strict --json"
+        }
+      ],
+      "risk": "low",
+      "schema": "workflow_card.v1",
+      "volatile_fields": [
+        "path",
+        "file",
+        "out",
+        "basis"
+      ],
+      "write_scope": "local"
+    },
+    {
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
       "file": "references/workflows/final_acceptance.json",
       "id": "final_acceptance",
       "recommended": [
@@ -1082,7 +1124,7 @@
       "name": "bootstrap_health"
     },
     {
-      "command_count": 18,
+      "command_count": 19,
       "missing_commands": [],
       "name": "inventory_decision"
     },
@@ -1136,7 +1178,7 @@
     "links_checked": 15,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 47924,
+    "size_bytes": 47966,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,
@@ -1156,7 +1198,7 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 158,
+    "checked_commands": 159,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
@@ -1164,8 +1206,8 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 186,
-    "cards": 25,
+    "available_commands": 187,
+    "cards": 26,
     "groups": 11,
     "tasks": 60
   },

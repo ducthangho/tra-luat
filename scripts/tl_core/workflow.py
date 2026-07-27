@@ -44,7 +44,7 @@ _TOOL_GROUPS = {
     },
     "inventory_decision": {
         "title": "Inventory & Decision",
-        "commands": ["tool-inventory", "route-task", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook"],
+        "commands": ["tool-inventory", "route-task", "workflow-audit", "doc-claims-check", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook"],
         "purpose": "Tra kho tool/script và định tuyến workflow trước khi viết tool mới hoặc làm tác vụ rủi ro.",
     },
     "source_discovery": {
@@ -760,6 +760,434 @@ def cmd_workflow_audit(a) -> int:
     return 0 if out.get("ok") else 2
 
 
+# ───────────────────────── r218: doc-claims-check (kiểm TRÍCH DẪN cơ học trong văn xuôi) ─────────────────────────
+# Lỗ hổng đã ĐO 2026-07-28: gate 9 bước kiểm mã nguồn + manifest + bundle, KHÔNG bước nào kiểm tính đúng
+# của trích dẫn trong tài liệu. Trong khi CHANGELOG/GOTCHAS/RUNBOOK/DOCTRINE_APPENDIX dày đặc `r216`,
+# `9279426`, `tl.py:1504`, `references/X.md`, `v1.35.52`. Khuôn hỏng đã trả giá: doc dẫn tệp–cờ–số hiệu
+# đã đổi chỗ, không ai phát hiện tới khi một phiên sau đi theo và lạc.
+#
+# READ-ONLY tuyệt đối: không ghi (trừ --out do người gọi chỉ định), không mạng, không GAS/NLM, không --fix.
+# Cờ là ĐẦU VÀO ĐỂ PHÂN XỬ, không phải phán quyết ⇒ mặc định rc=1 (không fail); --strict mới đẩy 1→2.
+_DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
+_DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references")
+_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L5", "L6", "L7")
+# §2.2 nói thẳng: «tài liệu lịch sử được phép dẫn tệp đã xoá». Ba nguồn dưới đây GHI LẠI QUÁ KHỨ, không
+# phải con trỏ để đi theo — DOCTRINE_APPENDIX tự khai «TOÀN BỘ thân SKILL.md trước refactor v1.16.0,
+# GIỮ NGUYÊN để tra cứu lý do», changelog thì theo định nghĩa là sổ. Đo 28-07: 127/134 cờ L1 nằm ở đúng
+# ba chỗ này; không hạ cấp thì 8 phát hiện SỐNG bị chôn dưới 127 mục không ai sửa được (sửa sổ = viết
+# lại lịch sử). Phân định theo LOẠI TÀI LIỆU, không theo tuổi của tệp bị dẫn — git ở kho này chỉ có 265
+# commit trong khi skill già hơn thế, nên `--diff-filter=D` không phân định nổi.
+_DOC_CLAIMS_HISTORICAL = ("CHANGELOG.md", "references/changelog_archive/",
+                          "references/DOCTRINE_APPENDIX.md")
+_DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
+# §2.4 che nhiễu: token mang các ký tự này là GIÀN GIÁO/placeholder, không phải trích dẫn thật.
+_DOC_CLAIMS_NOISE_CHARS = "<>{}*$"
+_DOC_CLAIMS_NOISE_SUBSTR = ("path/to", "...", "…")
+
+
+def _doc_claims_noisy(tok: str) -> bool:
+    t = str(tok)
+    return (any(c in t for c in _DOC_CLAIMS_NOISE_CHARS)
+            or any(s in t for s in _DOC_CLAIMS_NOISE_SUBSTR))
+
+
+def _doc_claims_mask(text: str) -> tuple:
+    """§2.4 — che nhiễu GIỮ NGUYÊN OFFSET (thay bằng dấu cách, chừa `\\n`) để số dòng báo cáo vẫn đúng.
+
+    Trả (nofence, nofence_nospan):
+      • nofence       — đã che khối fence ```/~~~ (L1/L3/L7 quét trên bản này: đường dẫn và
+                        `tl.py:1504` VỐN nằm trong span backtick, che span đi là mù).
+      • nofence_nospan— che thêm span backtick (L2/L5/L6 quét bản này: SHA/version/số hiệu đợt
+                        trong ví dụ lệnh là MINH HOẠ, không phải khẳng định).
+    Quét fence theo DÒNG (không regex đa dòng): fence lồng/không đóng vẫn cho kết quả xác định."""
+    out, fence = [], None
+    for ln in str(text).split("\n"):
+        m = re.match(r"^(`{3,}|~{3,})", ln.lstrip())
+        if fence is None:
+            if m:
+                fence = m.group(1)[0]
+                out.append(" " * len(ln))
+            else:
+                out.append(ln)
+        else:
+            out.append(" " * len(ln))
+            if m and m.group(1)[0] == fence:
+                fence = None
+    nofence = "\n".join(out)
+    nospan = re.sub(r"`[^`\n]*`", lambda m: " " * len(m.group(0)), nofence)
+    return nofence, nospan
+
+
+def _doc_claims_linestarts(text: str) -> list:
+    starts, pos = [0], 0
+    for ln in str(text).split("\n"):
+        pos += len(ln) + 1
+        starts.append(pos)
+    return starts
+
+
+def _doc_claims_lineno(starts: list, offset: int) -> int:
+    import bisect as _bs
+    return max(1, _bs.bisect_right(starts, int(offset)))
+
+
+def _doc_claims_rel(p, root) -> str:
+    """Đường dẫn ỔN ĐỊNH cho JSON: repo-relative posix khi nằm trong cây, ngược lại absolute posix.
+    (Tự relative hoá thay vì trông vào audit_projection — `roots`/`file` trong list không được scrub.)"""
+    try:
+        return Path(p).resolve().relative_to(Path(root).resolve()).as_posix()
+    except Exception:  # noqa: BLE001
+        return Path(p).as_posix()
+
+
+def _doc_claims_targets(paths, root: Path) -> tuple:
+    """Trả (files, roots_decl, errors). Thư mục → mọi *.md bên dưới; tệp → chính nó."""
+    decl = [str(x) for x in (paths or [])] or list(_DOC_CLAIMS_DEFAULT_PATHS)
+    files, errors, roots = [], [], []
+    for raw in decl:
+        p = Path(raw)
+        if not p.is_absolute():
+            p = root / raw
+        roots.append(_doc_claims_rel(p, root))
+        if p.is_dir():
+            # BẪY TỰ GÂY: fixture golden nằm DƯỚI `references/` và CỐ TÌNH chứa trích dẫn chết (đó là
+            # nội dung test). Quét mặc định mà nuốt chúng thì gate `--strict` không bao giờ xanh, và tệ
+            # hơn: 8 phát hiện thật lẫn với dữ liệu test. Bỏ qua khi ĐI NGANG; vẫn quét khi người dùng
+            # trỏ THẲNG vào đó (chính là cách case golden chạy).
+            _skip = not _doc_claims_rel(p, root).startswith(_DOC_CLAIMS_FIXTURES)
+            for f in sorted(p.rglob("*.md")):
+                if _skip and _doc_claims_rel(f, root).startswith(_DOC_CLAIMS_FIXTURES):
+                    continue
+                files.append(f)
+        elif p.is_file():
+            files.append(p)
+        elif paths:            # --path người dùng khai mà không tồn tại = lỗi DÙNG LỆNH (rc=2)
+            errors.append(str(raw))
+    seen, uniq = set(), []
+    for f in sorted(files, key=lambda x: _doc_claims_rel(x, root)):
+        k = _doc_claims_rel(f, root)
+        if k not in seen:
+            seen.add(k)
+            uniq.append(f)
+    return uniq, roots, errors
+
+
+def _doc_claims_context(root: Path) -> dict:
+    """Ngữ cảnh xác minh, đọc MỘT LẦN cho cả lượt quét (không mạng, không fetch).
+
+    ★ĐO 2026-07-28 — hai tiền đề của kế hoạch phải sửa, cả hai đều do đo chứ không do đoán:
+
+    (1) `CHANGELOG.md` chỉ còn 50 mục (v1.35.0…v1.35.53), nhưng sổ CŨ KHÔNG MẤT: nó nằm ở
+        `references/changelog_archive/*.md`. Đọc thiếu chỗ đó thì 184 version bị hô sai. Vì vậy tập
+        tra cứu = CHANGELOG.md + toàn bộ archive, và quét TOÀN VĂN chứ không chỉ dòng tiêu đề — số
+        hiệu đợt (rNNN) phần lớn nằm trong thân bài, headings-only chỉ thấy 4/191.
+
+    (2) Ngay cả khi gộp đủ archive, dải v1.9.x–v1.22.x vẫn thủng (46/420 version được dẫn không có
+        ở đâu trong sổ). Đó là KHUYẾT của sổ, không phải bằng chứng trích dẫn sai ⇒ hạ
+        VERSION_NOT_IN_CHANGELOG xuống advisory. Cờ THẬT của L5 chỉ còn VERSION_AHEAD_OF_CURRENT —
+        version lớn hơn VERSION hiện hành thì SAI trong mọi hoàn cảnh, không phụ thuộc sổ đầy hay vơi.
+        (Đối chiếu: L6 giữ nguyên mức cờ vì đo ra chỉ 1/192 số hiệu đợt không tra được ⇒ nhiễu ~0.)"""
+    ver_txt = ""
+    try:
+        ver_txt = (root / "VERSION").read_text(encoding="utf-8").strip()
+    except OSError:
+        pass
+    heads, cl_versions, cl_rs = [], set(), set()
+    _cl_files = [root / "CHANGELOG.md"]
+    _arc = root / "references" / "changelog_archive"
+    if _arc.is_dir():
+        _cl_files.extend(sorted(_arc.glob("*.md")))
+    for _cf in _cl_files:
+        try:
+            _txt = _cf.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        # Khuôn nhận dạng phải KHỚP HỆT bên tài liệu (v1.* và rNN+), nếu không sàn tính ra vô nghĩa:
+        # lấy cả `v0.7.7` thì sàn version tụt xuống 0.7.7 và nhánh advisory không bao giờ chạy; lấy cả
+        # `r0` thì sàn r = 0 (falsy) — cùng một lỗi, hai chỗ.
+        cl_versions.update(re.findall(r"\bv(1\.\d+\.\d+)\b", _txt))
+        cl_rs.update(int(x) for x in re.findall(r"\br(\d{2,4})[a-z]?\b", _txt))
+        heads.extend(ln for ln in _txt.split("\n") if ln.startswith("#"))
+    def _vt(s):
+        try:
+            return tuple(int(x) for x in str(s).split("."))
+        except ValueError:
+            return None
+    cur = _vt(ver_txt)
+    floor_v = min((_vt(v) for v in cl_versions if _vt(v)), default=None)
+    floor_r = min(cl_rs, default=None)
+    max_r = max(cl_rs, default=None)
+    pyindex = {}
+    for d in ("scripts", "scripts/tl_core", "scripts/_fallback", "."):
+        dd = root / d
+        if dd.is_dir():
+            for f in sorted(dd.glob("*.py")):
+                pyindex.setdefault(f.name, []).append(f)
+    toplevel = {p.name for p in root.iterdir()} if root.is_dir() else set()
+    _rc_ab, _ab = _doc_claims_git(root, ["rev-parse", "--short", "HEAD"])
+    sha_lens = {40} | ({len(_ab.strip())} if _rc_ab == 0 and _ab.strip() else {7})
+    return {"version": cur, "version_text": ver_txt, "changelog_versions": cl_versions,
+            "changelog_rs": cl_rs, "floor_version": floor_v, "floor_r": floor_r, "max_r": max_r,
+            "pyindex": pyindex, "root": root, "_deleted": None, "toplevel": toplevel,
+            "sha_lens": sha_lens,
+            "basis": {"version": ver_txt, "sha_lens": sorted(sha_lens),
+                      "changelog_files": len(_cl_files),
+                      "changelog_versions": len(cl_versions), "changelog_rs": len(cl_rs),
+                      "changelog_headings": len(heads),
+                      "floor_version": ".".join(str(x) for x in floor_v) if floor_v else None,
+                      "floor_r": floor_r, "max_r": max_r,
+                      "note": "tập tra cứu = CHANGELOG.md + references/changelog_archive/*.md, quét "
+                              "toàn văn; dưới sàn ⇒ advisory (khuyết của sổ, không phải trích dẫn sai)"}}
+
+
+_DOC_CLAIMS_SPAN_RE = re.compile(r"`([^`\n]+)`")
+_DOC_CLAIMS_PATH_RE = re.compile(r"^([A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)+)(/?)$")
+_DOC_CLAIMS_RELPATH_RE = re.compile(r"^(\.{1,2}/[A-Za-z0-9_.\-/]+?)(/?)$")
+_DOC_CLAIMS_EXT_RE = re.compile(r"\.[A-Za-z][A-Za-z0-9]{0,4}$")
+_DOC_CLAIMS_SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
+_DOC_CLAIMS_LINK_RE = re.compile(r"\[[^\]\n]*\]\(([^)\s]+)\)")
+# CHỈ nhánh v1.* — `v2.21.2p` là version WEBAPP GAS, hệ đánh số KHÁC hẳn; xét chung thì 56 trích dẫn
+# GAS đúng đắn bị hô «vượt VERSION hiện hành» (đo 28-07). Kế hoạch §2.3 viết `v1.NN.NN` là có lý do.
+_DOC_CLAIMS_VER_RE = re.compile(r"\bv(1\.\d+\.\d+)\b")
+_DOC_CLAIMS_R_RE = re.compile(r"\br(\d{2,4})[a-z]?\b")
+_DOC_CLAIMS_PYLOC_RE = re.compile(r"\b([A-Za-z0-9_][A-Za-z0-9_./\-]*\.py):(\d+)\b")
+_DOC_CLAIMS_TRIM = ".,;:!?)]}»›\"'(«‹[{"
+
+
+def _doc_claims_git(root: Path, args: list) -> tuple:
+    """git CỤC BỘ, đọc-thuần (§2.5: không fetch, không mạng). Thiếu git ⇒ (rc≠0, '') để đường gọi tự
+    hạ cấp, KHÔNG được nổ giữa lượt quét."""
+    try:
+        p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=120)
+        return p.returncode, p.stdout
+    except Exception:  # noqa: BLE001
+        return 127, ""
+
+
+def _doc_claims_deleted_set(ctx: dict) -> set:
+    """Tập đường dẫn TỪNG bị xoá — phân loại «đã xoá» (tài liệu lịch sử, hợp lệ) vs «sai» (§2.2).
+    MỘT lệnh git cho cả lượt, gọi lười (chỉ khi có ≥1 đường dẫn hụt)."""
+    if ctx.get("_deleted") is None:
+        rc, out = _doc_claims_git(ctx["root"], ["log", "--diff-filter=D", "--name-only",
+                                                "--pretty=format:"])
+        ctx["_deleted"] = {ln.strip() for ln in out.split("\n") if ln.strip()} if rc == 0 else set()
+    return ctx["_deleted"]
+
+
+def _doc_claims_sha_state(ctx: dict, sha: str) -> str:
+    """'commit' | 'reachable' | 'missing' — cache theo lượt (tài liệu lặp lại cùng SHA rất nhiều)."""
+    cache = ctx.setdefault("_sha_cache", {})
+    if sha not in cache:
+        rc, _ = _doc_claims_git(ctx["root"], ["cat-file", "-e", sha + "^{commit}"])
+        if rc != 0:
+            cache[sha] = "missing"
+        else:
+            rc2, _ = _doc_claims_git(ctx["root"], ["merge-base", "--is-ancestor", sha, "HEAD"])
+            cache[sha] = "reachable" if rc2 == 0 else "commit"
+    return cache[sha]
+
+
+def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
+                         root: Path, ctx: dict) -> list:
+    """Sáu lớp kiểm CƠ HỌC. Mỗi phát hiện là dict; `_advisory=True` ⇒ xếp vào advisories (không fail
+    --strict). Ranh giới cờ-vs-advisory là điều KHIẾN báo cáo dùng được: cái máy CHẮC CHẮN sai mới là cờ."""
+    out = []
+    rel = _doc_claims_rel(doc, root)
+    historical = rel.startswith(_DOC_CLAIMS_HISTORICAL)
+
+    def _add(layer, off, claim, reason, detail=None, advisory=False):
+        d = {"layer": layer, "file": rel, "line": _doc_claims_lineno(starts, off),
+             "claim": claim, "reason": reason}
+        if detail is not None:
+            d["detail"] = detail
+        if advisory:
+            d["_advisory"] = True
+        out.append(d)
+
+    # ── L1: đường dẫn trong span backtick có chứa '/' ──────────────────────────────────────────────
+    # Tách TOKEN trong span (span thật hay là cả câu lệnh: `python scripts/tl.py extract <id>`) —
+    # xét nguyên span thì token nhiễu `<id>` sẽ nuốt luôn đường dẫn thật đứng cạnh.
+    for sp in _DOC_CLAIMS_SPAN_RE.finditer(nofence):
+        for tk in re.finditer(r"\S+", sp.group(1)):
+            tok = tk.group(0).strip(_DOC_CLAIMS_TRIM)
+            if not tok or "/" not in tok or _doc_claims_noisy(tok):
+                continue
+            off = sp.start() + 1 + tk.start()
+            m = _DOC_CLAIMS_PATH_RE.match(tok) or _DOC_CLAIMS_RELPATH_RE.match(tok)
+            if not m:
+                continue
+            body, slash = m.group(1), m.group(2)
+            if not slash and not _DOC_CLAIMS_EXT_RE.search(body.rsplit("/", 1)[-1]):
+                continue     # không phần mở rộng và không kết bằng '/' ⇒ chưa chắc là đường dẫn
+            docrel = (doc.parent / body)
+            if body.startswith("."):
+                if docrel.exists():
+                    continue
+                _add("L1", off, tok, "PATH_MISSING")
+                continue
+            # CHỈ xét khẳng định VỀ CÂY NÀY: đoạn đầu phải là một mục top-level có thật. `word/document.xml`
+            # (đường dẫn BÊN TRONG file .docx), `~/.tra_luat_cache/…`, `12_Lao_dong_BHXH/…` không phải
+            # khẳng định về repo ⇒ im lặng, chứ không hô sai.
+            if body.split("/", 1)[0] not in ctx["toplevel"]:
+                continue
+            if (root / body).exists() or docrel.exists():
+                continue
+            if body in _doc_claims_deleted_set(ctx):
+                _add("L1", off, tok, "PATH_DELETED", advisory=True)
+            elif historical:
+                _add("L1", off, tok, "PATH_MISSING_IN_HISTORICAL_DOC", advisory=True)
+            else:
+                _add("L1", off, tok, "PATH_MISSING")
+
+    # ── L2: commit SHA (7-40 hex, PHẢI có ≥1 chữ a-f) ─────────────────────────────────────────────
+    # ★Kế hoạch r218 TỰ MÂU THUẪN: §2.3 đòi «≥1 chữ số VÀ ≥1 chữ a-f», §2.7 lại lấy `deadbeef` (KHÔNG
+    # có chữ số nào) làm phản chứng — dưới luật §2.3 thì `deadbeef` không đời nào nổ. ĐO để phân xử:
+    # trong TOÀN BỘ tài liệu kho, số token hex-7-40 toàn-chữ-cái = 0 (giả thuyết nhiễu 'defaced' không
+    # có thật) ⇒ bỏ vế «phải có chữ số», giữ vế «phải có chữ a-f». Vế giữ lại mới là vế gánh việc: nó
+    # loại token TOÀN SỐ (ngày viết liền `20260728`, số thứ tự) vốn nhiều thật.
+    for m in _DOC_CLAIMS_SHA_RE.finditer(nospan):
+        sha = m.group(0)
+        if not any("a" <= c <= "f" for c in sha):
+            continue
+        # ĐO: `743ed200-aaaa-…`, `fec6c125-e01c-…` là UUID notebook, `\b` cắt ngay dấu '-' nên khúc đầu
+        # trông y hệt SHA ngắn. Kề '-' ⇒ mảnh của định danh dài, KHÔNG phải khẳng định về commit.
+        if (m.start() > 0 and nospan[m.start() - 1] == "-") or nospan[m.end():m.end() + 1] == "-":
+            continue
+        st = _doc_claims_sha_state(ctx, sha)
+        if st == "reachable":
+            continue
+        if st == "commit":
+            _add("L2", m.start(), sha, "SHA_NOT_REACHABLE_FROM_HEAD", advisory=True)
+            continue
+        # ĐO 28-07: cả 18 token hex bị bắt trên kho đều DÀI ĐÚNG 8 và đều là khúc đầu UUID notebook
+        # («query notebook fec6c125»), trong khi git ở kho này viết tắt 7. Độ dài GIT tự khai
+        # (`rev-parse --short`) + 40 = hình dạng của một khẳng định về commit; hình dạng khác mà không
+        # tra ra commit thì AMBIGU, không phải sai ⇒ advisory. Tự hiệu chỉnh khi kho lớn lên, git nới
+        # viết tắt thì ngưỡng nới theo.
+        if len(sha) in ctx["sha_lens"]:
+            _add("L2", m.start(), sha, "SHA_NOT_A_COMMIT")
+        else:
+            _add("L2", m.start(), sha, "SHA_LIKE_NOT_A_COMMIT", {"len": len(sha)}, advisory=True)
+
+    # ── L3: link markdown tương đối — resolve TỪ VỊ TRÍ TÀI LIỆU ──────────────────────────────────
+    for m in _DOC_CLAIMS_LINK_RE.finditer(nofence):
+        tgt = m.group(1).strip()
+        if (not tgt or tgt.startswith(("#", "http://", "https://", "mailto:", "ftp://", "<"))
+                or _doc_claims_noisy(tgt) or re.match(r"^[A-Za-z]:[\\/]", tgt)):
+            continue
+        bare = tgt.split("#", 1)[0].split("?", 1)[0]
+        # `[nhãn](url)` — chỗ giữ chỗ trong tài liệu mẫu, không có '/' cũng không có đuôi ⇒ không phải
+        # khẳng định về một tệp nào cả.
+        if not bare or ("/" not in bare and "." not in bare):
+            continue
+        try:
+            hit = (doc.parent / bare).exists() or (root / bare).exists()
+        except OSError:
+            hit = False
+        if not hit:
+            _add("L3", m.start(1), tgt, "LINK_TARGET_MISSING")
+
+    # ── L5: version vX.Y.Z ────────────────────────────────────────────────────────────────────────
+    for m in _DOC_CLAIMS_VER_RE.finditer(nospan):
+        v = m.group(1)
+        try:
+            t = tuple(int(x) for x in v.split("."))
+        except ValueError:
+            continue
+        if ctx["version"] and t > ctx["version"]:
+            _add("L5", m.start(), "v" + v, "VERSION_AHEAD_OF_CURRENT", ctx["version_text"])
+        elif ctx["floor_version"] and t < ctx["floor_version"]:
+            _add("L5", m.start(), "v" + v, "VERSION_BELOW_CHANGELOG_FLOOR", advisory=True)
+        elif v not in ctx["changelog_versions"]:
+            _add("L5", m.start(), "v" + v, "VERSION_NOT_IN_CHANGELOG", advisory=True)
+
+    # ── L6: số hiệu đợt vá rNNN (chấp hậu tố: `r208d` là đợt 208) ─────────────────────────────────
+    # ĐỐI XỨNG VỚI L5 — và lý do là ca thật: `r160` (THE_THUC_TRINH_BAY.md) không tra được, nhưng sổ
+    # cũng KHÔNG có r158/159/161/163/165 ⇒ vắng mặt trong dải thưa KHÔNG chứng minh trích dẫn sai.
+    # Chỉ khẳng định BẤT KHẢ mới là cờ: đợt lớn hơn đợt mới nhất từng ghi thì chưa tồn tại, không có
+    # cách nào đúng. Trong-dải-mà-vắng = advisory.
+    for m in _DOC_CLAIMS_R_RE.finditer(nospan):
+        n, claim = int(m.group(1)), m.group(0)
+        if ctx["max_r"] and n > ctx["max_r"]:
+            _add("L6", m.start(), claim, "R_AHEAD_OF_LATEST", {"latest": ctx["max_r"]})
+        elif ctx["floor_r"] and n < ctx["floor_r"]:
+            _add("L6", m.start(), claim, "R_BELOW_CHANGELOG_FLOOR", advisory=True)
+        elif n not in ctx["changelog_rs"]:
+            _add("L6", m.start(), claim, "R_NOT_IN_CHANGELOG", advisory=True)
+
+    # ── L7: con trỏ mã <file>.py:<dòng> ───────────────────────────────────────────────────────────
+    for m in _DOC_CLAIMS_PYLOC_RE.finditer(nofence):
+        fname, num = m.group(1), int(m.group(2))
+        claim = f"{fname}:{num}"
+        if _doc_claims_noisy(fname):
+            continue
+        if "/" in fname:
+            cands = [root / fname, doc.parent / fname]
+        else:
+            cands = list(ctx["pyindex"].get(fname.rsplit("/", 1)[-1], []))
+        hit = next((c for c in cands if Path(c).is_file()), None)
+        if hit is None:
+            _add("L7", m.start(), claim, "PYLOC_FILE_MISSING")
+            continue
+        try:
+            total = Path(hit).read_text(encoding="utf-8", errors="replace").count("\n") + 1
+        except OSError:
+            continue
+        if num < 1 or num > total:
+            _add("L7", m.start(), claim, "PYLOC_LINE_OUT_OF_RANGE", {"file_lines": total})
+    return out
+
+
+def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
+    root = Path(root) if root else HERE.parent
+    files, roots, bad = _doc_claims_targets(paths, root)
+    if bad:
+        return {"ok": False, "schema": _DOC_CLAIMS_SCHEMA, "error": "PATH_NOT_FOUND",
+                "missing_paths": sorted(bad), "usage_error": True}
+    ctx = _doc_claims_context(root)
+    flags, advisories, checked = [], [], 0
+    for f in files:
+        try:
+            raw = f.read_text(encoding="utf-8", errors="replace")   # GOTCHAS §8: encoding TƯỜNG MINH
+        except OSError as e:
+            flags.append({"layer": "L0", "file": _doc_claims_rel(f, root), "line": 1,
+                          "claim": f.name, "reason": "FILE_UNREADABLE", "detail": type(e).__name__})
+            continue
+        nofence, nospan = _doc_claims_mask(raw)
+        starts = _doc_claims_linestarts(raw)
+        for fl in _doc_claims_scan_one(f, nofence, nospan, starts, root=root, ctx=ctx):
+            checked += 1
+            if fl.pop("_advisory", False):
+                advisories.append(fl)
+            else:
+                flags.append(fl)
+    def _key(d):   # thứ tự TẤT ĐỊNH (đích §2.7-10: hai lượt cho JSON byte-identical)
+        return (d["file"], d["line"], d["layer"], d["claim"], d["reason"])
+    flags.sort(key=_key)
+    advisories.sort(key=_key)
+    by_layer = {L: sum(1 for x in flags if x["layer"] == L) for L in _DOC_CLAIMS_LAYERS}
+    return {"ok": not flags, "schema": _DOC_CLAIMS_SCHEMA, "roots": roots,
+            "files_scanned": len(files), "claims_flagged": checked,
+            "flags": flags, "advisories": advisories,
+            "by_layer": by_layer, "advisory_count": len(advisories),
+            "layers": list(_DOC_CLAIMS_LAYERS), "basis": ctx["basis"]}
+
+
+def cmd_doc_claims_check(a) -> int:
+    out = _doc_claims_check(getattr(a, "path", None) or None)
+    strict = bool(getattr(a, "strict", False))
+    out["strict"] = strict
+    if getattr(a, "out", None):
+        _write_text_atomic(Path(a.out), _json_dumps(out, deterministic=True) + "\n")
+    _print_json_or_text(out, getattr(a, "json", False))
+    if out.get("usage_error"):
+        return 2
+    if out.get("ok"):
+        return 0
+    return 2 if strict else 1
+
+
 def _golden_dir() -> Path:
     return HERE.parent / "references" / "golden"
 
@@ -795,6 +1223,12 @@ _GOLDEN_CASES = [
      "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene"}},
     # (v1.34.7 I4) ops-plan HỒI SINH golden nhờ FIXTURE CONFIG (bài học v1.34.3: output phụ thuộc trạng thái
     # config máy — nay --config fixture + xoá env TL_* để fixture quyết định tất cả → cross-machine).
+    # r218: doc-claims-check trên fixture .md cố định — khoá cả 6 lớp + phép che fence trong MỘT ảnh.
+    # `basis` (VERSION, sàn sổ) và `detail` (số dòng tệp, đợt mới nhất) đổi theo thời điểm ⇒ khai volatile,
+    # phần nghiệp vụ (lớp/lý do/dòng/thứ tự) vẫn bị khoá byte.
+    {"id": "doc_claims_check_fixture", "file": "doc_claims_check_fixture.json",
+     "args": ["doc-claims-check", "--path", "{FIXTURES}/doc_claims", "--json"],
+     "volatile_keys": ["basis", "detail"]},
     {"id": "hygiene_ops_plan_fixture_config", "file": "hygiene_ops_plan_fixture_config.json",
      "args": ["ops-plan", "--config", "{FIXTURES}/config_fixture.json", "--json"],
      "env": {"TL_CACHE_DIR": "{FIXTURES}/cache_hygiene", "TL_REGISTRY_DOC_ID": "", "TL_NOTEBOOK_ID": "",
@@ -881,7 +1315,25 @@ def _golden_ensure_fixtures() -> None:
                           "categories": "own", "manifestScope": "own"},
         },
     }, ensure_ascii=False, sort_keys=True, indent=1).encode("utf-8")
+    # r218: tài liệu mẫu cho golden doc-claims-check — gài ĐỦ SÁU LỚP, mỗi lớp một khẳng định sai VÀ
+    # một khẳng định đúng, cộng khối fence để khoá phép che nhiễu. Mọi giá trị chọn sao cho ổn định qua
+    # các đợt bump: `v1.0.1` mãi dưới sàn sổ, `r09` mãi dưới sàn đợt, `references/GOTCHAS.md` là tệp
+    # bất biến của kho. (Số hiệu phụ thuộc thời điểm nằm hết trong `basis`/`detail` — khai volatile.)
+    doc_claims = ("\n".join([
+        "# Tài liệu mẫu cho doc-claims-check",
+        "",
+        "Đúng: `references/GOTCHAS.md` và `scripts/tl.py:1`; bản v1.0.1 cũ, đợt r09 xa xưa.",
+        "Sai: `references/KHONG_CO_FILE.md`, commit deadbee, sổ notebook fec6c125.",
+        "Sai tiếp: bản v1.99.0, đợt r999, con trỏ `scripts/tl.py:999999`.",
+        "Link gãy [kế hoạch](./KHONG_CO_KE_HOACH.md); link ngoài [web](https://example.invalid/x.md).",
+        "",
+        chr(96) * 3 + "bash",
+        "cat references/KHONG_CO_TRONG_FENCE.md   # r998 v1.98.0",
+        chr(96) * 3,
+        "",
+    ])).encode("utf-8")
     want = {
+        "doc_claims/claims.md": doc_claims,
         "sample_profile.txt": sample,
         "snap_a.json": snap_a,
         "snap_a2.json": snap_b,

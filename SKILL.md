@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.35.53 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.35.54 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -41,7 +41,7 @@ Chỉ viết tool mới khi lệnh/script/hàm hiện có không đáp ứng; to
 
 Mọi quy trình nạp/convert/rename/OCR/zip/chunk theo mẫu: `route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
 
-`tool-inventory`, `route-task`, `workflow-audit`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
+`tool-inventory`, `route-task`, `workflow-audit`, `doc-claims-check`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
 
 Helper tách sang `scripts/tl_core/*.py` (Pha B–E v1.33.55–58; command_registry = metadata lệnh risk/gates/card/contract, `workflow-audit` đối chiếu registry↔parser↔cards); `scripts/tl.py` = entrypoint public DUY NHẤT (stub ủy quyền — KHÔNG gọi tl_core trực tiếp từ ngoài).
 
@@ -217,7 +217,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
 | Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc/nlm-status` · `sweep` · `dedup-plan/corpus` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
 | Rà soát hồ sơ (điều phối) | `rasoat-loop --dry-rounds K` · `frontier-expand` — kịch bản: `references/RASOAT_HOSO_LOOP.md` |
-| Audit & release | `workflow-audit` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
+| Audit & release | `workflow-audit` · `doc-claims-check` · `determinism-audit` · `golden-test` · `release-manifest/verify/bundle/check` · `bundle-export` |
 | Live & deploy | `live-readiness` · `live-contract-check` · `live-state-snapshot/diff` · `deploy-plan` · `rollback-plan` · `go-live-runbook` · `final-acceptance` · `drive-push` |
 
 Lệnh GHI: DRY mặc định → `--apply` (± `--confirm yes`) → verify/readback → journal (undo được).

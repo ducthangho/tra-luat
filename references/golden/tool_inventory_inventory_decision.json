@@ -32,6 +32,7 @@
     "dedup-plan",
     "deploy-plan",
     "determinism-audit",
+    "doc-claims-check",
     "doc-compare",
     "doc-patch",
     "doc-text",
@@ -193,6 +194,7 @@
         "tool-inventory",
         "route-task",
         "workflow-audit",
+        "doc-claims-check",
         "determinism-audit",
         "golden-test",
         "release-check",
@@ -213,6 +215,7 @@
         "tool-inventory",
         "route-task",
         "workflow-audit",
+        "doc-claims-check",
         "determinism-audit",
         "golden-test",
         "release-check",
@@ -539,6 +542,16 @@
         "supports_dry_run": false,
         "workflow_task": "workflow_audit",
         "write_scope": "none"
+      },
+      "doc-claims-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "local"
       },
       "doc-compare": {
         "generated": true,
@@ -1822,9 +1835,9 @@
       }
     },
     "counts": {
-      "generated_parsers": 151,
+      "generated_parsers": 152,
       "high_risk": 28,
-      "total": 158,
+      "total": 159,
       "write_commands": 82
     },
     "schema": "command_registry.v1"
@@ -1836,6 +1849,7 @@
     "chunk_ingest",
     "convert_rename",
     "deploy_plan",
+    "doc_claims_check",
     "final_acceptance",
     "go_live_runbook",
     "ingest_local",

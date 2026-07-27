@@ -3,7 +3,10 @@
 Ngày: 2026-06-23 · 1 webapp deployment (giữ URL+token), nhận `registryDocId`/`manifestId` mỗi request.
 Trạng thái: **`2.21.2h` là bản cần deploy (LIVE target)** = Cách B + writeconfig giữ/merge profiles (§A8) + `row_kind=own|ref|overflow` + profile-scope đầy đủ cho CLI. `2.21.2g` là tiền thân (Cách B + writeconfig nhưng chưa có schema/row_kind hotfix). EXPECT/contract = `2.21.2h`. **KHÔNG tự deploy từ skill.**
 
-## A. Apps Script (`.gs`) — `references/Code.2.21.2h.gs` (LIVE target; tiền thân `Code.2.21.2g.gs`)
+## A. Apps Script (`.gs`) — bản GAS `2.21.2h` (LIVE target thời v1.19; tiền thân `2.21.2g`)
+
+> Gói phát hành chỉ kèm snapshot `.gs` của hai bản mới nhất (`2.21.2o`, `2.21.2p`); các bản cũ hơn —
+> kể cả `2.21.2h`/`2.21.2g` — không đóng vào gói.
 
 Mục tiêu: mọi action thao tác registry/manifest nhận `registryDocId`/`manifestId`; thiếu ⇒ hằng VBQPPL nền
 (tương thích ngược, `vbqppl` chạy y như cũ).
@@ -28,7 +31,7 @@ Mục tiêu: mọi action thao tác registry/manifest nhận `registryDocId`/`ma
 6. **Version:** `2.21.2h` — `EXPECT_VERSION=2.21.2h`, `API_CONTRACT` đóng dấu `2.21.2h`.
    `ping` trả thêm `schema_version`, `registry_schema='reg_cols_row_kind_v1'`, `registry_cols` để tránh silent mismatch khi REG_COLS_ đổi.
 7. **Backward-compat:** thiếu `registryDocId`/`manifestId` ⇒ VBQPPL nền.
-8. **writeconfig (giữ trong `2.21.2h`):** `references/Code.2.21.2h.gs` — `buildConfigObject_` GIỮ/merge block
+8. **writeconfig (giữ trong `2.21.2h`):** bản GAS `2.21.2h` — `buildConfigObject_` GIỮ/merge block
    `schema/defaultProfile/profiles` v2 đã có trong mirror khi rewrite/rotate token (issue v1.19.1#4); cho phép
    khởi tạo `profiles` qua `writeconfig` (luôn đồng bộ `profiles.vbqppl` theo hằng nền). Vì đã LIVE, rotate
    token/`writeconfig` KHÔNG còn xoá block `profiles`.

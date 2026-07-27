@@ -16,7 +16,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from verify_deep import (split_articles, t1_structure, ROMAN_PAT, extract_appendix,  # noqa: E402
-                         appendix_start, preamble_of)
+                         appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao)
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
 from docx_markup import MODES, has_markup, strip_markup, resolve_mode, warn_line, scan_file  # noqa: E402  (r182)
 
@@ -203,6 +203,11 @@ def main():
                     help="Văn bản CHỈ là phụ lục/mẫu: lưu nguyên khối phu_luc, không ép thành Điều, không FATAL.")
     ap.add_argument("--recorded-at", default="",
                     help="timestamp provenance tường minh; mặc định bỏ để cùng input tạo cùng cache bytes")
+    ap.add_argument("--loc-congbao", dest="loc_congbao", action="store_true",
+                    help="(r217) BỎ rác trình bày của bản bóc từ PDF Công báo: dòng chạy đầu trang · dòng "
+                         "chỉ có số trang (kề dòng chạy) · khối chữ ký số 4 dòng. KHÔNG bật thì chỉ KHAI BÁO.")
+    ap.add_argument("--loc-congbao-audit", dest="loc_congbao_audit", default="",
+                    help="(r217) ghi JSON audit TỪNG DÒNG bị bỏ ra file (bằng chứng cho người rà đối chiếu)")
     ap.add_argument("--markup-mode", default="auto", choices=list(MODES),
                     help="(r182) markup sửa đổi .docx: auto=đánh dấu ⟦BỎ:…⟧ cho DỰ THẢO / loại hẳn cho "
                          "VBQPPL đã ban hành · strip=loại hẳn · mark=đánh dấu · raw=giữ nguyên (đối chứng)")
@@ -225,6 +230,31 @@ def main():
     # hai chiều ⇒ bản `mark`/`raw` CHỈ là bản XEM (lưu ở text_markup), KHÔNG bao giờ nuôi parser.
     raw = _rd("strip")
     _raw_view = _rd(_mk_mode) if (_mk_st and _mk_mode != "strip") else ""
+
+    # r217 (sổ lỗi BAN_CONG_BAO_BOC_RA_CON_RAC_KHONG_CO_BUOC_LAM_SACH_CHUAN): rác trình bày của bản
+    # bóc từ PDF Công báo. Lọc CHỈ khi được yêu cầu TƯỜNG MINH — im lặng sửa nguồn pháp lý là việc
+    # không được phép; không bật thì KHAI BÁO vào verify_flags (cùng họ `khoi_dau_missing` của r215,
+    # cảnh báo KHÔNG chặn: bản Công báo còn rác vẫn là bản chính thức).
+    _cb_flags, _cb_rep = [], None
+    if getattr(a, "loc_congbao", False):
+        _cb_rep = loc_rac_congbao(raw)
+        raw = _cb_rep["text"]
+        if _raw_view:
+            _raw_view = loc_rac_congbao(_raw_view)["text"]
+        _cb_flags.append("LOC_CONG_BAO: bỏ %d dòng (dòng chạy=%d · số trang=%d · chữ ký số=%d), %d → %d ký tự"
+                         % (len(_cb_rep["bo"]), _cb_rep["counts"]["dong_chay"], _cb_rep["counts"]["so_trang"],
+                            _cb_rep["counts"]["chu_ky_so"], _cb_rep["chars_vao"], _cb_rep["chars_ra"]))
+        _cb_flags.extend(_cb_rep["canh_bao"])
+        if a.loc_congbao_audit:
+            Path(a.loc_congbao_audit).write_text(
+                json.dumps({"input": str(Path(a.input).name), "counts": _cb_rep["counts"],
+                            "dong_vao": _cb_rep["dong_vao"], "dong_ra": _cb_rep["dong_ra"],
+                            "chars_vao": _cb_rep["chars_vao"], "chars_ra": _cb_rep["chars_ra"],
+                            "canh_bao": _cb_rep["canh_bao"], "bo": _cb_rep["bo"]},
+                           ensure_ascii=False, indent=2), encoding="utf-8")
+    else:
+        _cb_flags.extend(co_rac_congbao(raw))
+
     if a.as_appendix:
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
@@ -260,6 +290,8 @@ def main():
             sys.exit(2)
         coverage = "complete_vs_independent" if not rep["flags"] else (
             "partial: " + " | ".join(rep["flags"])[:400])
+
+    rep["flags"].extend(_cb_flags)      # r217: cờ Công báo vào verify_flags của CẢ hai nhánh (phụ lục / thân)
 
     # r182: markup sửa đổi là TÍN HIỆU PHÁP LÝ (bản đang sửa ≠ bản hiệu lực) — ghi vào record để
     # người tra thấy ngay. CHỈ ghi khi CÓ markup ⇒ văn bản sạch giữ NGUYÊN bytes cache như trước.

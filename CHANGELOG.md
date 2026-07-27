@@ -1,3 +1,106 @@
+# ★ v1.35.53 — r217: sửa-theo-điểm thay cho thay-trọn-gói, bộ lọc nguồn Công báo, và một đường nạp chưa từng chạy nổi trên máy tiếng Việt (+6 test, 1352/1352) (2026-07-28)
+
+> Nguồn: kết luận lượt rà 6 (`THAY_BAN_TRON_GOI_BI_BAC`) + `BAN_CONG_BAO_BOC_RA_CON_RAC_KHONG_CO_BUOC_LAM_SACH_CHUAN`.
+> Đây là hai mục vá người giao việc đã chọn ở lượt 7 nhưng để lại vì lớn hơn hẳn phần còn lại.
+> Mục (c) thì không ai đặt hàng — nó lộ ra ngay lần đầu chạy thật đường nạp offline.
+
+## (a) `tl doc-patch <số hiệu> --diem <file>` — sửa ĐÚNG những điểm đã chứng minh
+
+Lượt rà 6 đối chiếu bản kho với bản đăng Công báo: ND 159 lệch 17 điểm, ND 158 lệch 111 điểm. Nhưng
+kết luận đắt hơn con số là **không bản nào trùm bản nào** — bản Công báo mang lỗi riêng («ngưởi» ở
+khoản 2 Điều 8 ND 158 chính là phát hiện VD-34), còn bản kho mất hai công thức tính vì công thức là
+ảnh/equation trong Google Doc. Thay trọn gói vì thế là **đánh đổi mù**: sửa được vài điểm thì rước
+vào lỗi khác. Việc đúng là sửa từng điểm, có bằng chứng, có đường lùi — mà công cụ chưa có.
+
+| | |
+|---|---|
+| cổng ghi | DRY mặc định · `--apply --confirm yes` · không có chế độ ghi ngầm |
+| phạm vi | `vung` BẮT BUỘC: `khoi_dau` \| `dieu:<N>` \| `phu_luc` — không có "tìm khắp văn bản" |
+| khớp | mỗi điểm phải khớp **ĐÚNG 1 lần**; 0 lần ⇒ `KHONG_KHOP`, >1 ⇒ `KHOP_NHIEU_LAN` |
+| fail-closed | **toàn lô**: một điểm hỏng ⇒ KHÔNG áp điểm nào |
+| nhầm văn bản | `so_hieu` trong file điểm lệch số hiệu đang sửa ⇒ chặn |
+| đường lùi | tự sao lưu `docs/_doc_patch_bak/` + nhật ký; `doc-patch --undo <run_id>` |
+| cổng undo | chỉ hoàn tác khi file còn ĐÚNG sha256 lượt patch đã ghi — khác ⇒ từ chối |
+
+`KHOP_NHIEU_LAN` là chỗ cố ý không "thông minh": một chuỗi chính tả sai thường có mặt ở nhiều Điều,
+và máy không được chọn hộ sửa cái nào. Người dùng thu hẹp bằng cách đưa thêm chữ hai bên vào `tim`.
+
+**Không mượn `tl undo`**: nhật ký undo hiện có phục vụ registry qua GAS, hoàn tác của nó là ghi lại
+giá trị ô. Ở đây đối tượng là FILE record cache, hoàn tác là chép lại nguyên bản. Trộn hai thứ vào
+một lệnh là mời một lớp lỗi mới.
+
+`text_hash` **cố ý KHÔNG tính lại** — record không giữ bố cục dòng của bản gốc nên mọi cách tính lại
+đều ra một con số không đối chiếu được với gì cả; thay vào đó record mang cờ `DOC_PATCH:` nói thẳng
+rằng hash đang là của bản nguồn TRƯỚC khi sửa, kèm `doc_patch.lich_su` đủ để dựng lại đường đi.
+
+## (b) Bộ lọc nguồn Công báo ở đường nạp — `--loc-congbao`
+
+Văn bản bóc từ PDF Công báo mang rác trình bày chen vào giữa thân. Bỏ ĐÚNG BA loại có khuôn chắc,
+mỗi loại phải khớp **toàn dòng** (dính chữ khác ⇒ không bỏ, chỉ khai báo):
+
+- `dong_chay` — dòng chạy đầu trang `[số] CÔNG BÁO/Số …/Ngày d-m-yyyy [số]`;
+- `so_trang` — dòng chỉ có số **và kề một dòng chạy**. Điều kiện kề là bắt buộc: trong phụ lục/biểu
+  mẫu có vô số dòng chỉ-một-số là dữ liệu thật;
+- `chu_ky_so` — khối chữ ký số đủ 4 dòng liên tiếp, **quét toàn văn chứ không neo ở đầu bản**.
+
+★Đo 27-07 trên ba văn bản thật: khối chữ ký số **không chỉ nằm ở đầu** — ND 159 có HAI khối nằm giữa
+thân (sau khoản 6 Điều 1), Luật 41/2024 có một khối. Bản làm sạch **bằng tay** ở lượt 6 chỉ bắt khối
+ở đầu nên còn sót 12 dòng; bộ lọc bắt đủ.
+
+★**Cố ý KHÔNG tự bỏ nhãn mục Công báo** ở đầu bản (`VĂN BẢN QUY PHẠM PHÁP LUẬT`, tên cơ quan in một
+mình) — chỉ khai báo `DAU_MUC_CONG_BAO_CON_LAI`. Công báo in tên cơ quan HAI lần (nhãn mục + cơ quan
+ban hành), và neo «CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM» nằm SAU dòng số hiệu ở cả Luật 41/2024
+(`Luật số: 41/2024/QH15`) lẫn ND 159 (`Số: 159/2025/NĐ-CP`) ⇒ mọi quy tắc cắt tự động đều ăn mất
+chính danh tính văn bản. Người quyết, không máy.
+
+Không bật cờ thì **khai báo mà vẫn nạp** (`NGUON_CONG_BAO_CON_RAC` vào `verify_flags`) — cùng họ với
+`khoi_dau_missing` của r215: bản Công báo còn rác vẫn là bản chính thức, chặn nạp là phá đúng ca dùng
+chính đáng. Cờ khai báo cũng không làm văn bản thành `partial` vì nó không phải khiếm khuyết cấu trúc.
+
+## (c) Đường nạp `--method file` chưa từng chạy nổi trên máy tiếng Việt — và báo hỏng SAU KHI đã ghi
+
+Lần đầu chạy thật `ingest_to_cache.py --method file` (đường `cache-build` offline, không đụng Drive):
+
+```
+{"ok": false, "reason": "ingest_failed",
+ "error": "UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 46"}
+```
+
+`ingest_to_cache.py:724` đọc lại record cache bằng `open(target)` **không khai encoding** ⇒ Python
+dùng codec locale (cp1258 trên Windows tiếng Việt) và nổ. Chỗ đó nằm **SAU** `patch_cache_metadata`,
+nên lệnh in `ok:false` rc=2 **trong khi cache đã được ghi 49.758 B** — đúng lớp bẫy "rc≠0 không có
+nghĩa là chưa ghi gì". Lượt 6 kết luận đường này "chạy được" bằng cách ĐỌC CODE; nó chưa từng chạy.
+
+Khoá bằng **hành vi, máy-độc-lập**: chạy đường nạp dưới `-W error::EncodingWarning` +
+`PYTHONWARNDEFAULTENCODING=1` ⇒ mọi `open()` thiếu encoding nổ bất kể locale của máy chạy test. Grep
+chuỗi `encoding=` sẽ xanh giả ngay khi ai đó thêm một `open()` trần ở dòng khác.
+
+## (d) `rasoat_phuluc.py`: Mục F thành Phụ lục VI, thêm Phụ lục VII
+
+Bộ hồ sơ trình không khớp tên với chính nó: Báo cáo rà soát hứa một "Phụ lục" cho danh mục nội dung
+chưa đủ căn cứ kết luận, còn tệp sinh ra đặt nhãn "Mục F — KHÔNG vào phụ lục"; và bảng tổng hợp theo
+mã thì chỉ tồn tại dưới dạng dữ liệu JSON, không có bản trình bày để đính kèm.
+
+★Số **VI/VII** chứ không phải III/IV: III/IV/V đã thuộc về Mẫu 05/06/07-BN. Chiếm lại số của chúng là
+đổi nghĩa một bộ biểu mẫu chuẩn chỉ vì trong một hồ sơ cụ thể chúng tình cờ rỗng. Tên Phụ lục VI cũng
+nói đủ hai thứ `route()` dồn vào đó ("nghiên cứu, rút kinh nghiệm" **và** "chưa đủ căn cứ kết luận") —
+gọi tắt theo vế sau sẽ mô tả sai phần lớn số dòng.
+
+## Nghiệm thu
+
+- selftest **1346 → 1352** (+6 `r217_*`: 2 PURE nạp `verify_deep.py` thẳng từ file không qua bind,
+  1 PURE nạp `lookup_ops.py` thẳng, 3 chạy **đường sản xuất thật** bằng subprocess).
+- **Phản chứng 2 chiều CHẠY THẬT 11 đột biến trên bãi cách ly: 11/11 đỏ đúng ca, 0 lọt lưới** — cả
+  hướng tắt guard (bỏ fail-closed toàn lô, bỏ cổng `--confirm`, bỏ cổng sha undo, bỏ cổng số hiệu,
+  chỉ quét chữ ký số ở đầu, thôi khai báo, trả lại `open()` trần) lẫn hướng vá quá tay (nới khớp
+  đúng-1-lần thành ≥1, bỏ dòng-chỉ-có-số không cần kề dòng chạy, bỏ luôn nhãn mục, chặn nạp khi còn
+  rác). Bốn đột biến còn làm đỏ thêm test khác — guard phủ chéo.
+- `ruff --select F` **delta 0 thực chất**: `tl.py` +0, `verify_deep.py` +0 (0 lỗi), ba script đường
+  nạp +0; `lookup_ops.py` +26 và `tl_selftest.py` +11 đều là tên đã bind — đúng 2 tên mới
+  (`_journal_read`, `_journal_new_run_id`) và cả hai đều có trong danh sách bind của `tl.py`.
+- `parser_surface` regen **chủ đích 1 dòng** (thêm `doc-patch`). SKILL.md **byte-đẳng-dài 47.924**
+  ⇒ re-import Capabilities KHÔNG bắt buộc. GAS **vẫn 2.21.2p**, không đụng.
+
 # ★ v1.35.52 — r216: `rasoat-merge` đếm hai lần mà không ai biết, và đơn vị rà xuyên văn bản lọt vào danh mục VBQPPL (+5 test, 1346/1346) (2026-07-27)
 
 > Nguồn: `rasoat_bugs.md` lượt rà 7 (27-07) — `RASOAT_MERGE_AN_CA_FILE_BAK_TRONG_THU_MUC_MASTER` +

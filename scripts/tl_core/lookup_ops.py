@@ -3211,3 +3211,280 @@ def cmd_rasoat_merge(a) -> int:
                            + " --out-dir <out-dir>/phuluc"})
     _print_json_or_text(out, True)
     return 0 if not bo_qua else 2
+
+
+# ── r217 (v1.35.53): SỬA THEO ĐIỂM — `tl doc-patch` ─────────────────────────────────────────────
+# Sinh ra từ kết luận lượt rà 6 (27-07): đối chiếu bản kho với bản Công báo cho ND 159 lệch 17 điểm,
+# ND 158 lệch 111 điểm, và đo ra **không bản nào trùm bản nào** (bản Công báo mang lỗi riêng «ngưởi»
+# = chính VD-34; bản kho mất HAI CÔNG THỨC tính vì công thức là ảnh/equation trong Google Doc).
+# ⇒ THAY TRỌN GÓI LÀ ĐÁNH ĐỔI MÙ: sửa được vài điểm thì rước vào lỗi khác. Việc đúng là sửa ĐÚNG
+# những điểm đã chứng minh, từng điểm một, có bằng chứng và có đường lùi.
+
+def _docpatch_norm(s):
+    """PURE (r217): NFC hoá chuỗi so khớp. Record cache do `normalize_document` ghi đã NFC; chuỗi
+    người dùng gõ/copy từ PDF thường NFD ⇒ không chuẩn hoá thì đếm ra 0 và điểm bị từ chối oan."""
+    import unicodedata as _ud
+    return _ud.normalize("NFC", str(s or ""))
+
+
+def _docpatch_vung_doc(record, vung):
+    """PURE (r217): đọc nội dung MỘT vùng của record. Trả (ok, text, err).
+    Vùng hợp lệ: `khoi_dau` · `dieu:<N>` · `phu_luc`. BẮT BUỘC khai vùng — không có chế độ "tìm khắp
+    văn bản": một chuỗi chính tả sai thường xuất hiện ở nhiều Điều, sửa mù là sửa nhầm chỗ."""
+    d = record if isinstance(record, dict) else {}
+    v = str(vung or "").strip()
+    if v == "khoi_dau":
+        return True, str(d.get("khoi_dau") or ""), ""
+    if v == "phu_luc":
+        return True, str(d.get("phu_luc") or ""), ""
+    m = re.fullmatch(r"dieu:(\d+[a-zđ]*)", v)
+    if m:
+        arts = d.get("articles") or {}
+        k = m.group(1)
+        if k not in arts:
+            return False, "", "VUNG_KHONG_CO_TRONG_RECORD: dieu:" + k
+        return True, str(arts[k] or ""), ""
+    return False, "", "VUNG_KHONG_HOP_LE: " + (v or "(trống)") + " — dùng khoi_dau | dieu:<N> | phu_luc"
+
+
+def _docpatch_vung_ghi(record, vung, text):
+    """PURE (r217): ghi nội dung mới vào đúng vùng (trả record ĐÃ sửa tại chỗ)."""
+    v = str(vung or "").strip()
+    if v == "khoi_dau":
+        record["khoi_dau"] = text
+    elif v == "phu_luc":
+        record["phu_luc"] = text
+    else:
+        record.setdefault("articles", {})[re.fullmatch(r"dieu:(\d+[a-zđ]*)", v).group(1)] = text
+    return record
+
+
+def _docpatch_ap(record, diem_list):
+    """PURE (r217): áp danh sách điểm lên MỘT record cache. KHÔNG đọc/ghi file, KHÔNG in.
+    Trả {"ok", "ket_qua": [...], "record": <bản mới>, "delta_chars", "loi": [...]}.
+
+    FAIL-CLOSED TOÀN LÔ: chỉ cần MỘT điểm không thoả thì KHÔNG áp điểm nào. Sửa được nửa lô rồi
+    dừng là để lại một bản kho không ai mô tả nổi — tệ hơn hẳn không sửa.
+
+    Mỗi điểm phải khớp ĐÚNG MỘT lần trong vùng đã khai:
+      · 0 lần  ⇒ `KHONG_KHOP` — chuỗi sai, hoặc bản kho khác bản người rà đang đọc;
+      · >1 lần ⇒ `KHOP_NHIEU_LAN` — sửa cái nào? Máy không được chọn hộ. Thu hẹp bằng cách đưa thêm
+        chữ hai bên vào `tim` cho tới khi duy nhất.
+    `tim` == `thay` ⇒ từ chối (điểm rỗng nghĩa, chỉ làm nhiễu nhật ký)."""
+    import copy as _copy
+    rec = _copy.deepcopy(record if isinstance(record, dict) else {})
+    ket_qua, loi = [], []
+    for i, dm in enumerate(diem_list or []):
+        d = dm if isinstance(dm, dict) else {}
+        ma = str(d.get("ma") or f"#{i + 1}")
+        vung = str(d.get("vung") or "")
+        tim, thay = _docpatch_norm(d.get("tim")), _docpatch_norm(d.get("thay"))
+        r = {"ma": ma, "vung": vung, "tim": tim, "thay": thay, "ly_do": str(d.get("ly_do") or "")}
+        if not tim:
+            r["trang_thai"] = "TIM_RONG"
+        elif tim == thay:
+            r["trang_thai"] = "TIM_BANG_THAY"
+        else:
+            ok, cur, err = _docpatch_vung_doc(rec, vung)
+            if not ok:
+                r["trang_thai"] = err
+            else:
+                n = _docpatch_norm(cur).count(tim)
+                r["so_lan_khop"] = n
+                r["trang_thai"] = "OK" if n == 1 else ("KHONG_KHOP" if n == 0 else "KHOP_NHIEU_LAN")
+                if n == 1:
+                    j = _docpatch_norm(cur).find(tim)
+                    r["truoc"] = _docpatch_norm(cur)[max(0, j - 60):j]
+                    r["sau"] = _docpatch_norm(cur)[j + len(tim):j + len(tim) + 60]
+        if r["trang_thai"] != "OK":
+            loi.append({"ma": ma, "vung": vung, "trang_thai": r["trang_thai"]})
+        ket_qua.append(r)
+    if not diem_list:
+        loi.append({"ma": "(lô)", "trang_thai": "DANH_SACH_DIEM_RONG"})
+    if loi:
+        return {"ok": False, "ket_qua": ket_qua, "record": None, "delta_chars": 0, "loi": loi}
+    delta = 0
+    for r in ket_qua:
+        _, cur, _e = _docpatch_vung_doc(rec, r["vung"])
+        moi = _docpatch_norm(cur).replace(r["tim"], r["thay"], 1)
+        delta += len(r["thay"]) - len(r["tim"])
+        _docpatch_vung_ghi(rec, r["vung"], moi)
+    st = rec.get("structure")
+    if isinstance(st, dict):
+        st["khoi_dau_chars"] = len(str(rec.get("khoi_dau") or ""))
+        st["phu_luc_chars"] = len(str(rec.get("phu_luc") or ""))
+    if isinstance(rec.get("chars"), int):
+        rec["chars"] = rec["chars"] + delta
+    return {"ok": True, "ket_qua": ket_qua, "record": rec, "delta_chars": delta, "loi": []}
+
+
+def _docpatch_tim_file(so_hieu, cache_dir):
+    """(r217) → danh sách Path record cache khớp số hiệu/alias. Dùng ĐÚNG luật chuẩn hoá của
+    `scripts/cache.py::find` để không đẻ ra chiều tra thứ hai; nhiều hơn 1 ⇒ bên gọi fail-CLOSED."""
+    key = re.sub(r"[^a-z0-9]+", "-", str(so_hieu or "").lower()).strip("-")
+    ra = []
+    for f in sorted(Path(cache_dir, "docs").glob("*.json")):
+        try:
+            doc = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        cands = [doc.get("so_hieu", ""), doc.get("number_symbol", "")] + list(doc.get("aliases", []) or [])
+        if any(re.sub(r"[^a-z0-9]+", "-", str(c).lower()).strip("-") == key for c in cands if c):
+            ra.append(f)
+    return ra
+
+
+def _docpatch_sha(p):
+    import hashlib as _h
+    return _h.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def _docpatch_cache_dir(a):
+    return str(getattr(a, "cache_dir", "") or "").strip() or os.environ.get("TRA_LUAT_CACHE") \
+        or os.environ.get("TL_CACHE_DIR") or str(Path(os.path.expanduser("~")) / ".tra_luat_cache")
+
+
+def cmd_doc_patch(a) -> int:
+    """r217 — SỬA CACHE VĂN BẢN THEO ĐIỂM, có nhật ký và đường lùi. DRY mặc định.
+
+    Đây là lệnh GHI. Cổng duyệt = `--apply --confirm yes` (KHÔNG có chế độ ghi ngầm), và trước khi
+    ghi luôn tự sao lưu nguyên bản record vào `docs/_doc_patch_bak/`. Hoàn tác: `tl doc-patch
+    --undo <run_id> --apply --confirm yes`.
+
+    Vì sao KHÔNG mượn `tl undo`: nhật ký undo hiện có phục vụ registry qua GAS (`reg_upsert`/
+    `reg_bulk`) — hoàn tác của nó là ghi lại giá trị ô. Ở đây đối tượng là FILE record cache, hoàn
+    tác là chép lại nguyên bản; trộn hai thứ vào một lệnh là mời một lớp lỗi mới.
+
+    Đường lùi có CỔNG: undo chỉ chạy khi file hiện tại còn ĐÚNG sha256 mà lượt patch đã ghi. Khác
+    ⇒ từ chối (đã có thay đổi khác chen vào; chép đè bản sao lưu sẽ nuốt luôn thay đổi đó)."""
+    cache_dir = _docpatch_cache_dir(a)
+    undo_run = str(getattr(a, "undo", "") or "").strip()
+    apply_ = bool(getattr(a, "apply", False))
+    nen = {"schema": "doc_patch.v1", "cache_dir": cache_dir}
+
+    if undo_run:
+        recs = _journal_read(undo_run) or []
+        cm = [r for r in recs if r.get("t") == "commit" and r.get("op") == "doc_patch" and r.get("ok")]
+        if not cm:
+            _print_json_or_text(dict(nen, ok=False, error="UNDO_KHONG_CO_COMMIT_TRONG_JOURNAL",
+                                     run_id=undo_run), True)
+            return 2
+        c = cm[-1]
+        tgt, bak = Path(c.get("key") or ""), Path(c.get("bak") or "")
+        if not tgt.is_file() or not bak.is_file():
+            _print_json_or_text(dict(nen, ok=False, error="UNDO_THIEU_FILE", target=str(tgt),
+                                     bak=str(bak), target_con=tgt.is_file(), bak_con=bak.is_file()), True)
+            return 2
+        sha_now = _docpatch_sha(tgt)
+        if sha_now != c.get("sha_sau"):
+            _print_json_or_text(dict(nen, ok=False, error="UNDO_FILE_DA_DOI_SAU_KHI_PATCH",
+                                     sha_hien_tai=sha_now, sha_luc_patch=c.get("sha_sau"),
+                                     fix="đã có thay đổi khác sau lượt patch — chép đè bản sao lưu sẽ "
+                                         "nuốt luôn thay đổi đó. Đối chiếu tay với " + str(bak)), True)
+            return 2
+        if not apply_:
+            _print_json_or_text(dict(nen, ok=True, che_do="DRY", run_id=undo_run, target=str(tgt),
+                                     bak=str(bak), se_lam="chép bản sao lưu đè lên record",
+                                     note="thêm `--apply --confirm yes` để hoàn tác"), True)
+            return 0
+        if str(getattr(a, "confirm", "") or "") != "yes":
+            _print_json_or_text(dict(nen, ok=False, error="NEED_CONFIRM",
+                                     note="undo GHI ĐÈ record cache — thêm `--confirm yes`"), True)
+            return 2
+        rid = _journal_new_run_id("doc-patch-undo")
+        _journal_append(rid, {"t": "run_start", "cmd": "doc-patch --undo", "of_run": undo_run})
+        _journal_append(rid, {"t": "intent", "op": "doc_patch_undo", "key": str(tgt),
+                              "set": {"tu_bak": str(bak)}})
+        tgt.write_bytes(bak.read_bytes())
+        _journal_append(rid, {"t": "commit", "op": "doc_patch_undo", "key": str(tgt), "ok": True,
+                              "sha_sau": _docpatch_sha(tgt)})
+        _journal_append(rid, {"t": "run_end", "ok": True, "counts": {"restored": 1}})
+        _print_json_or_text(dict(nen, ok=True, che_do="UNDO", run_id=undo_run, journal=rid,
+                                 target=str(tgt), sha_sau_undo=_docpatch_sha(tgt),
+                                 khop_sha_truoc_patch=_docpatch_sha(tgt) == c.get("sha_truoc")), True)
+        return 0
+
+    diem_file = str(getattr(a, "diem", "") or "").strip()
+    so_hieu = str(getattr(a, "sohieu", "") or "").strip()
+    if not so_hieu or not diem_file:
+        _print_json_or_text(dict(nen, ok=False,
+                                 error="CAN_SO_HIEU_VA_DIEM: `tl doc-patch <số hiệu> --diem <file.json>`"), True)
+        return 2
+    if not Path(diem_file).is_file():
+        _print_json_or_text(dict(nen, ok=False, error="DIEM_FILE_KHONG_TON_TAI: " + diem_file), True)
+        return 2
+    try:
+        dj = json.loads(Path(diem_file).read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        _print_json_or_text(dict(nen, ok=False, error="DIEM_FILE_KHONG_PHAI_JSON: " + str(e)), True)
+        return 2
+    diem_list = dj.get("diem") if isinstance(dj, dict) else dj
+    # Cổng nhầm-văn-bản: file điểm khai số hiệu thì phải khớp số hiệu đang sửa. Một tệp điểm soạn cho
+    # ND 159 chạy nhầm lên ND 158 sẽ khớp được vài chuỗi chung — im lặng làm hỏng đúng thứ cần đúng.
+    sh_khai = str((dj.get("so_hieu") if isinstance(dj, dict) else "") or "").strip()
+    if sh_khai and _rasoat_sohieu_key(sh_khai) != _rasoat_sohieu_key(so_hieu):
+        _print_json_or_text(dict(nen, ok=False, error="SO_HIEU_LECH_VOI_FILE_DIEM",
+                                 so_hieu_lenh=so_hieu, so_hieu_file_diem=sh_khai), True)
+        return 2
+    hits = _docpatch_tim_file(so_hieu, cache_dir)
+    if len(hits) != 1:
+        _print_json_or_text(dict(nen, ok=False,
+                                 error="CACHE_KHONG_TIM_THAY" if not hits else "CACHE_IDENTITY_CONFLICT",
+                                 so_hieu=so_hieu, ung_vien=[p.name for p in hits]), True)
+        return 2
+    target = hits[0]
+    record = json.loads(target.read_text(encoding="utf-8"))
+    kq = _docpatch_ap(record, diem_list)
+    nen.update({"so_hieu": so_hieu, "target": str(target), "so_diem": len(diem_list or []),
+                "diem_file": diem_file})
+    if not kq["ok"]:
+        _print_json_or_text(dict(nen, ok=False, error="DIEM_KHONG_AP_DUOC", da_ghi=False,
+                                 loi=kq["loi"], ket_qua=kq["ket_qua"],
+                                 fix="FAIL-CLOSED toàn lô: không điểm nào được áp. `KHOP_NHIEU_LAN` "
+                                     "⇒ thêm chữ hai bên vào `tim` cho tới khi duy nhất; `KHONG_KHOP` "
+                                     "⇒ đối chiếu lại bản kho (`tl doc-text <id> --markup mark`)."), True)
+        return 2
+    if not apply_:
+        _print_json_or_text(dict(nen, ok=True, che_do="DRY", da_ghi=False, delta_chars=kq["delta_chars"],
+                                 ket_qua=kq["ket_qua"],
+                                 note="thêm `--apply --confirm yes` để GHI (tự sao lưu + nhật ký undo)"), True)
+        return 0
+    if str(getattr(a, "confirm", "") or "") != "yes":
+        _print_json_or_text(dict(nen, ok=False, error="NEED_CONFIRM", da_ghi=False,
+                                 note="doc-patch GHI ĐÈ record cache — thêm `--confirm yes`"), True)
+        return 2
+    rid = _journal_new_run_id("doc-patch")
+    sha_truoc = _docpatch_sha(target)
+    bak_dir = Path(cache_dir, "docs", "_doc_patch_bak")
+    bak_dir.mkdir(parents=True, exist_ok=True)
+    bak = bak_dir / f"{target.stem}.{rid}.json"
+    bak.write_bytes(target.read_bytes())
+    _journal_append(rid, {"t": "run_start", "cmd": "doc-patch", "so_hieu": so_hieu,
+                          "target": str(target), "bak": str(bak), "so_diem": len(diem_list)})
+    _journal_append(rid, {"t": "intent", "op": "doc_patch", "key": str(target),
+                          "set": {"diem": [{"ma": r["ma"], "vung": r["vung"]} for r in kq["ket_qua"]],
+                                  "bak": str(bak), "sha_truoc": sha_truoc}})
+    rec = kq["record"]
+    lich_su = (rec.get("doc_patch") or {}).get("lich_su") or []
+    lich_su.append({"run_id": rid, "diem_file": diem_file, "so_diem": len(kq["ket_qua"]),
+                    "delta_chars": kq["delta_chars"], "sha_truoc": sha_truoc,
+                    "diem": [{"ma": r["ma"], "vung": r["vung"], "tim": r["tim"], "thay": r["thay"],
+                              "ly_do": r["ly_do"]} for r in kq["ket_qua"]]})
+    rec["doc_patch"] = {"lich_su": lich_su}
+    vf = rec.get("verify_flags")
+    if isinstance(vf, list):
+        vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
+                  "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
+                  % (len(kq["ket_qua"]), rid))
+    tmp = target.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(rec, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(str(tmp), str(target))
+    sha_sau = _docpatch_sha(target)
+    _journal_append(rid, {"t": "commit", "op": "doc_patch", "key": str(target), "ok": True,
+                          "bak": str(bak), "sha_truoc": sha_truoc, "sha_sau": sha_sau})
+    _journal_append(rid, {"t": "run_end", "ok": True, "counts": {"diem": len(kq["ket_qua"])}})
+    _print_json_or_text(dict(nen, ok=True, che_do="APPLY", da_ghi=True, journal=rid, bak=str(bak),
+                             delta_chars=kq["delta_chars"], sha_truoc=sha_truoc, sha_sau=sha_sau,
+                             ket_qua=kq["ket_qua"],
+                             undo="tl doc-patch --undo " + rid + " --apply --confirm yes"), True)
+    return 0

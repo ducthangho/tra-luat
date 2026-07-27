@@ -21514,6 +21514,72 @@ def run() -> int:
 
     _t110("r219_gotchas_nhan_trang_thai", _c219_gotchas_nhan_trang_thai)
 
+    # ─────────── r220: doc-claims-check lớp L4 (giàn giáo nháp còn sót) ───────────
+    # ĐO 28-07 TRƯỚC KHI LÀM (đúng khuôn đã bác L10/L11): {{...}}/<TODO>/TBD/FIXME = 0 hit toàn
+    # kho; 12/12 hit XXX đều là ký pháp số hiệu `NN-YYYY-VBHN-XXX` (kề dấu '-'); hit TODO duy nhất
+    # nằm ở DOCTRINE_APPENDIX (lịch sử). Thiết kế đi theo số đo: quét NOSPAN, loại XXX kề '-',
+    # lịch sử hạ advisory ⇒ lớp vào kho là XANH SẴN và gate --strict không đổi màu.
+    def _c220_l4_gian_giao_nhap():
+        """L4 — {{placeholder}}/TODO/TBD trong VĂN XUÔI tài liệu sống ⇒ CỜ (tài liệu trình bày như
+        đã xong mà còn giàn giáo thì không hoàn cảnh nào đúng). Đối chứng NGAY TRONG cùng tài liệu,
+        cả ba đều là ca đo được trên kho thật:
+          • `NN-YYYY-VBHN-XXX` — XXX kề '-' là ký pháp số hiệu, phải IM (12/12 hit toàn kho);
+          • marker trong span backtick — ví dụ minh hoạ, phải IM;
+          • marker trong fence — phải IM (kể cả XXX đứng rời trong fence)."""
+        import tempfile as _tf220
+        _fence = chr(96) * 3
+        with _tf220.TemporaryDirectory() as td:
+            d = _r218_doc(td, "\n".join([
+                "# T",
+                "",
+                "Việc này còn TODO chưa xong, chỗ kia {{dien_sau}} và phần TBD.",
+                "Số hiệu chuẩn NN-YYYY-VBHN-XXX thì không phải giàn giáo.",
+                "Ví dụ `TODO trong span` im lặng.",
+                _fence + "python",
+                "# TODO trong fence cũng im lặng, XXX vậy",
+                _fence,
+                "",
+            ]))
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L4")
+        return (rc == 1 and j.get("ok") is False
+                and sorted(x["claim"] for x in f) == ["TBD", "TODO", "{{dien_sau}}"]
+                and all(x["line"] == 3 for x in f)
+                and {x["reason"] for x in f} == {"DRAFT_MARKER", "DRAFT_PLACEHOLDER"}
+                and not [a for a in (j.get("advisories") or []) if a.get("layer") == "L4"])
+
+    _t110("r220_docclaims_l4_gian_giao_nhap", _c220_l4_gian_giao_nhap)
+
+    def _c220_l4_lich_su_advisory_va_ratchet_kho():
+        """(a) PURE trên GỐC GIẢ — nạp thẳng tl_core/workflow.py, KHÔNG bind (bẫy
+        false-green-qua-bind): tài liệu LỊCH SỬ nhắc TODO/{{...}} là ghi chép được cố ý lưu, không
+        phải giàn giáo đang sống ⇒ CẢ HAI reason phải hạ advisory — đường CLI không dựng được tài
+        liệu lịch sử giả nên phải PURE. (b) RATCHET trên kho thật: L4 phải CÓ trong `layers` và
+        0 cờ — kho hiện SẠCH giàn giáo sống (đo 28-07); sau này đỏ là tài liệu thật hỏng, không
+        phải lớp hỏng (cùng khuôn ratchet L8/L9 của r219)."""
+        import tempfile as _tf220
+        _wf = _mod215("workflow.py", "_wf220")
+        with _tf220.TemporaryDirectory() as td:
+            _root = Path(td)
+            doc = _root / "CHANGELOG.md"
+            raw = "# So\n\nTODO thời đó, {{cho_dien}} còn dang dở.\n"
+            doc.write_text(raw, encoding="utf-8")
+            ctx = _wf._doc_claims_context(_root)
+            nofence, nospan = _wf._doc_claims_mask(raw)
+            starts = _wf._doc_claims_linestarts(raw)
+            got = [x for x in _wf._doc_claims_scan_one(doc, nofence, nospan, starts,
+                                                       root=_root, ctx=ctx)
+                   if x["layer"] == "L4"]
+        ok_a = (len(got) == 2 and all(x.get("_advisory") is True for x in got)
+                and {x["reason"] for x in got} == {"DRAFT_MARKER", "DRAFT_PLACEHOLDER"}
+                and all(x["line"] == 3 for x in got))
+        _, j, _ = _r218_run()
+        _bl = j.get("by_layer") or {}
+        ok_b = ("L4" in (j.get("layers") or []) and _bl.get("L4") == 0)
+        return ok_a and ok_b
+
+    _t110("r220_docclaims_l4_lich_su_advisory_va_ratchet_kho", _c220_l4_lich_su_advisory_va_ratchet_kho)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

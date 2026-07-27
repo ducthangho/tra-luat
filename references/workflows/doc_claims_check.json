@@ -36,8 +36,9 @@
   ],
   "plan": [
     "gom tệp .md theo --path, mặc định CHANGELOG/SKILL/CLAUDE/CONTEXT + references/",
-    "che khối fence ```/~~~ giữ nguyên offset; che thêm span backtick cho L2/L5/L6",
+    "che khối fence ```/~~~ giữ nguyên offset; che thêm span backtick cho L2/L4/L5/L6",
     "L1 đường dẫn trong backtick · L3 link markdown tương đối (resolve từ vị trí tài liệu)",
+    "L4 (r220) giàn giáo nháp {{...}}/TODO/TBD/FIXME/XXX ngoài fence+span; XXX kề '-' = ký pháp số hiệu, im",
     "L2 commit SHA qua git cat-file cục bộ · L7 con trỏ <file>.py:<dòng>",
     "L5 version v1.x · L6 số hiệu đợt rNNN, tra CHANGELOG.md + references/changelog_archive/*.md",
     "L8 (r219) tên lệnh `tl <cmd>` trong span backtick, tra references/golden/parser_surface.json",

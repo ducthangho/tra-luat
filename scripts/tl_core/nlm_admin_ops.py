@@ -158,6 +158,20 @@ def cmd_nlm_add(a) -> int:
     _dt, _dt_src = _nlm_add_doc_type(getattr(a, "type", None), getattr(a, "drive_id", None))
     if _dt_src.startswith("auto"):
         print(f"[tl] nlm-add: tự nhận --type {_dt} ({_dt_src}) — ép kiểu khác bằng --type.", file=sys.stderr)
+    # r215 (sổ lỗi DU_THAO_ND_BHXH_DE_CORPUS_TRUE_VA_DA_DAY_LEN_NLM): đẩy DỰ THẢO lên notebook là hợp lệ
+    # (hồ sơ trình), nhưng đẩy IM LẶNG thì không — mọi truy vấn sau đó có thể trích chữ dự thảo như quy
+    # phạm hiện hành. Cảnh báo tại chỗ đẩy; cảnh báo đối xứng ở `nlm-query` lo lúc HỎI.
+    if getattr(a, "drive_id", None):
+        try:
+            _e215 = next((x for x in _manifest_entries(refresh=False)
+                          if str(x.get("drive_id") or x.get("gdoc_id") or "") == str(a.drive_id)), None)
+        except Exception:  # noqa: BLE001 — registry hỏng không chặn đường đẩy
+            _e215 = None
+        if _e215 is not None and _entry_is_draft(_e215):
+            print(f"[tl] ⚠ {DRAFT_WARNING}: nguồn đang đẩy lên notebook {nb[:8]}… là DỰ THẢO "
+                  f"({_entry_name(_e215)[:60]}) — sau khi lên, RAG có thể trả nội dung dự thảo lẫn với "
+                  f"văn bản có hiệu lực. Giữ dấu DUTHAO trong tiêu đề nguồn và đối chiếu nguyên văn "
+                  f"trước khi viện dẫn.", file=sys.stderr)
     r = nc.source_add(nb, drive_id=getattr(a, "drive_id", None), url=getattr(a, "url", None),
                       file=getattr(a, "file", None), doc_type=_dt,
                       title=getattr(a, "title", None), wait=not getattr(a, "no_wait", False))

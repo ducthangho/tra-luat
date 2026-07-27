@@ -67,6 +67,19 @@ def split_articles(raw):
     return arts
 
 
+def preamble_of(raw):
+    """→ KHỐI ĐẦU VĂN BẢN: phần đứng TRƯỚC "Điều 1" (Quốc hiệu, cơ quan ban hành, Số hiệu, địa danh-
+    ngày tháng, tên loại + trích yếu, toàn bộ khối "Căn cứ…", tiêu đề Chương I). '' nếu không tách được Điều.
+
+    r215 (sổ lỗi CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN, đo 27-07-2026): `split_articles` bỏ `parts[0]`
+    nên record cache consolidated KHÔNG hề lưu khối này ⇒ bản dựng lại từ `articles` bắt đầu thẳng từ
+    "Điều 1", văn bản KHÔNG TỰ CHỨNG MINH ĐƯỢC DANH TÍNH và `_classify_doc_header` đoán sai (đã trả giá
+    ở VBHN Luật NSNN 89-2026). Dùng CHUNG `ART_SPLIT` với `split_articles` để hai bên không bao giờ lệch
+    định nghĩa "chỗ Điều đầu tiên bắt đầu"."""
+    parts = ART_SPLIT.split(raw or "")
+    return parts[0].strip() if len(parts) > 1 else ""
+
+
 def appendix_start(raw):
     """→ chỉ số ký tự nơi khối PHỤ LỤC bắt đầu (heading đầu tiên TỪ Điều cuối trở đi), hoặc -1."""
     last_art = None

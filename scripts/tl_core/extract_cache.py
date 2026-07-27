@@ -58,6 +58,42 @@ def _extract_resolve_entries(a) -> list:
     return ents
 
 
+def _consolidated_text(doc) -> tuple:
+    """PURE (r215 — sổ lỗi `CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN`): dựng lại TOÀN VĂN từ record cache
+    consolidated = **khối đầu + các Điều + phụ lục**, thay vì chỉ nối `articles` như trước.
+
+    Trả `(text, rep)` với `rep` = {"khoi_dau": "co"|"rong"|"thieu_khoa", "articles": n,
+    "phu_luc": bool, "thieu": [nhãn…]}.
+
+    Đo 27-07-2026 trên ND 158/2025 (`chars` nguồn = 115.600): bản nối-chỉ-`articles` = 108.823 ký tự —
+    ĐÚNG BẰNG cái `doc-text` phục vụ mặc định — tức đánh rơi **6.030 ký tự phụ lục** (record CÓ lưu,
+    đường dựng lại bỏ) **và toàn bộ khối đầu văn bản** (record KHÔNG lưu, trước r215). Hai lỗ hổng khác
+    nhau nên `rep` phân biệt `thieu_khoa` (cache dựng TRƯỚC r215 — không có khoá) với `rong` (cache
+    r215+ và văn bản thật sự không có khối đầu): cái đầu là lỗi công cụ, cái sau là dữ kiện về văn bản."""
+    d = doc if isinstance(doc, dict) else {}
+    arts = d.get("articles") or {}
+
+    def _artkey(k):
+        m = re.match(r"(\d+)([a-z]*)", str(k).strip().lower())
+        return (int(m.group(1)), m.group(2)) if m else (10**9, str(k))
+
+    parts = []
+    for n in sorted(arts.keys(), key=_artkey):
+        t = str(arts[n] or "").strip()
+        parts.append(t if re.match(r"^\s*Điều\s", t) else f"Điều {n}. {t}")
+    kd_raw = d.get("khoi_dau")
+    kd = str(kd_raw or "").strip()
+    rep = {"khoi_dau": ("thieu_khoa" if "khoi_dau" not in d else ("co" if kd else "rong")),
+           "articles": len(arts), "phu_luc": bool(str(d.get("phu_luc") or "").strip()), "thieu": []}
+    if rep["khoi_dau"] == "thieu_khoa":
+        rep["thieu"].append("khoi_dau")
+    blocks = ([kd] if kd else []) + parts
+    pl = str(d.get("phu_luc") or "").strip()
+    if pl:
+        blocks.append(pl)
+    return "\n\n".join(blocks), rep
+
+
 def cmd_extract(a) -> int:
     """B2 token-saving: exporttext ra ĐĨA → regex Điều → in đúng Điều.
     Có thể truyền GDoc id trực tiếp hoặc `--sohieu` để tự chọn canonical từ manifest.
@@ -129,14 +165,22 @@ def cmd_extract(a) -> int:
             _cdoc = _imp("cache").find(_sh_cache)
             _arts = (_cdoc or {}).get("articles") or {}
             if _arts:
-                def _artkey(k):
-                    m = re.match(r"(\d+)([a-z]*)", str(k).strip().lower())
-                    return (int(m.group(1)), m.group(2)) if m else (10**9, str(k))
-                _parts = []
-                for n in sorted(_arts.keys(), key=_artkey):
-                    t = str(_arts[n] or "").strip()
-                    _parts.append(t if re.match(r"^\s*Điều\s", t) else f"Điều {n}. {t}")
-                text, src = "\n\n".join(_parts), f"cache-build consolidated ({len(_arts)} điều, no-cap)"
+                # r215: dựng lại ĐỦ (khối đầu + Điều + phụ lục) — bản cũ chỉ nối `articles` nên đánh rơi
+                # cả phụ lục ĐANG CÓ trong record lẫn khối đầu văn bản, rồi GHI ĐÈ bản thiếu đó vào khoá
+                # cache chuẩn `extract_<id>.txt` ⇒ `doc-text` phục vụ mặc định một văn bản không danh tính.
+                text, _crep = _consolidated_text(_cdoc)
+                _bits = [f"{_crep['articles']} điều"]
+                if _crep["khoi_dau"] == "co":
+                    _bits.insert(0, "khối đầu")
+                if _crep["phu_luc"]:
+                    _bits.append("phụ lục")
+                src = f"cache-build consolidated ({', '.join(_bits)}, no-cap)"
+                if _crep["thieu"]:
+                    print(f"[tl] ⚠ [khoi-dau] record cache `{_sh_cache}` dựng TRƯỚC r215 — KHÔNG lưu khối "
+                          f"đầu văn bản (số hiệu/ngày ban hành/cơ quan/căn cứ). Bản dựng lại bắt đầu thẳng "
+                          f"từ Điều đầu tiên ⇒ KHÔNG dùng nó để xác định danh tính văn bản; dựng lại cache "
+                          f"bằng `tl cache-build {_sh_cache} --gdoc-id {gdoc_id}`, hoặc đọc bản đủ bằng "
+                          f"`tl doc-text {gdoc_id} --markup mark`.", file=sys.stderr)
                 # r186: bản consolidated do `cache-build`/normalize_document dựng — KHÔNG biết nó dựng ở
                 # chế độ markup nào (auto = mark cho dự thảo!) ⇒ không được coi là đã lọc.
                 _markup_warn(gdoc_id, _mk_mode,

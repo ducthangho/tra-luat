@@ -1144,6 +1144,40 @@ def cmd_nlm_content(a) -> int:
     return 0
 
 
+def _nlm_draft_sources(entries, *, source_ids=None, notebook_id: str = "") -> list:
+    """PURE (r215 — sổ lỗi `DU_THAO_ND_BHXH_DE_CORPUS_TRUE_VA_DA_DAY_LEN_NLM`): các dòng registry LÀ
+    DỰ THẢO mà đang NẰM TRONG phạm vi sắp hỏi NLM.
+
+    Đo 27-07-2026 trên hồ sơ BHXH: hai DỰ THẢO nghị định (`DUTHAO_ND_…`) mang `corpus=true`,
+    `nlm_status=pushed` trong chính notebook hồ sơ. Cờ `DRAFT_NOT_EFFECTIVE` CÓ bắn ở đường phân loại,
+    nhưng **không đường nào nói ra vào lúc hỏi** ⇒ câu trả lời RAG có thể trộn chữ dự thảo với luật
+    đang có hiệu lực mà người hỏi không biết.
+
+    ★CỐ Ý KHÔNG CHẶN: dự thảo nằm trong notebook HỒ SƠ TRÌNH là đúng chỗ — chúng chính là đối tượng rà.
+    Cái sai là phục vụ chúng LẶNG LẼ. Vì vậy đây là phép đo để CẢNH BÁO, không phải cổng cấm.
+
+    Phạm vi: có `source_ids` → chỉ xét đúng các dòng trỏ tới sid đó; không có → cả notebook (dòng còn
+    trỏ `nlm_source_id` và thuộc `notebook_id` nếu biết). Đọc registry, KHÔNG đoán từ envelope NLM."""
+    _sids = {str(s).strip().lower() for s in (source_ids or []) if str(s).strip()}
+    _nb = str(notebook_id or "").strip().lower()
+    out = []
+    for e in (entries or []):
+        sid = str(_entry_nlm(e) or "").strip()
+        if not sid:
+            continue
+        if _sids:
+            if sid.lower() not in _sids:
+                continue
+        elif _nb:
+            _enb = str(_entry_nlm_notebook_id(e) or "").strip().lower()
+            if _enb and _enb != _nb:
+                continue
+        if _entry_is_draft(e):
+            out.append({"source_id": sid, "name": _entry_name(e),
+                        "sohieu": _entry_sohieu(e), "drive_id": _entry_drive_id(e)})
+    return sorted(out, key=lambda r: (str(r["name"]), str(r["source_id"])))
+
+
 def _nlm_scope_shortfall(requested, data) -> dict:
     """PURE (r214): đối chiếu phạm vi ĐÃ YÊU CẦU (`--source-id`) với phạm vi NLM TỰ KHAI đã dùng.
 
@@ -1231,6 +1265,19 @@ def cmd_nlm_query(a) -> int:
                              ensure_ascii=False), file=sys.stderr)
             return 2
         print(_msg, file=sys.stderr)
+    # r215: nguồn DỰ THẢO trong phạm vi vừa hỏi — nói ra TRƯỚC khi in câu trả lời, để người đọc không
+    # đọc chữ dự thảo thành quy phạm đang có hiệu lực. Cảnh báo, KHÔNG chặn (dự thảo thuộc hồ sơ trình).
+    try:
+        _drafts = _nlm_draft_sources(_manifest_entries(refresh=False),
+                                     source_ids=_req_sids, notebook_id=nb)
+    except Exception:  # noqa: BLE001 — registry hỏng không được chặn đường hỏi
+        _drafts = []
+    if _drafts:
+        print(f"[tl] ⚠ {DRAFT_WARNING}: phạm vi vừa hỏi có {len(_drafts)} nguồn là DỰ THẢO — "
+              f"{', '.join(str(d['name'])[:56] for d in _drafts[:4])}"
+              f"{' …' if len(_drafts) > 4 else ''}. Câu trả lời có thể TRỘN chữ dự thảo với văn bản đang "
+              f"có hiệu lực; không viện dẫn phần nào chưa đối chiếu nguyên văn trên bản chính thức.",
+              file=sys.stderr)
     print(json.dumps(r.get("data"), ensure_ascii=False, indent=2) if r.get("data") is not None else r.get("text", ""))
     print("[tl] LƯU Ý: RAG chỉ ĐỊNH VỊ; verify nguyên văn bằng cache/raw (KHÔNG nhận RAG làm nguyên văn).", file=sys.stderr)
     return 0

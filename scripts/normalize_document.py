@@ -15,7 +15,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from verify_deep import split_articles, t1_structure, ROMAN_PAT, extract_appendix, appendix_start  # noqa: E402
+from verify_deep import (split_articles, t1_structure, ROMAN_PAT, extract_appendix,  # noqa: E402
+                         appendix_start, preamble_of)
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
 from docx_markup import MODES, has_markup, strip_markup, resolve_mode, warn_line, scan_file  # noqa: E402  (r182)
 
@@ -228,6 +229,7 @@ def main():
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
         phu_luc = raw.strip()
+        khoi_dau = ""       # r215: cả văn bản LÀ phụ lục ⇒ không có khối đầu riêng để giữ
         arts = split_articles(raw)   # giữ Điều nội bộ của mẫu (nếu có), KHÔNG bắt buộc
         rep = {"flags": ["APPENDIX: nạp dạng phụ lục/mẫu — không kiểm cấu trúc Điều nghị định"]}
         rep["t1"] = {"tier": "T1", "ok": True, "fatal": False, "articles_found": len(arts)}
@@ -239,6 +241,10 @@ def main():
         _ap = appendix_start(raw)
         body = raw[:_ap] if _ap >= 0 else raw
         phu_luc = raw[_ap:].strip() if _ap >= 0 else ""
+        # r215 (CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN): GIỮ khối đầu văn bản. Trước r215 phần này bị
+        # `split_articles` bỏ im lặng (`parts[0]`) nên record consolidated không lưu số hiệu/ngày ban
+        # hành/căn cứ ⇒ mọi bản dựng lại từ `articles` là văn bản KHÔNG CÓ DANH TÍNH.
+        khoi_dau = preamble_of(body)
         arts = split_articles(body)
         if not arts:
             print(json.dumps({"error": "Không tách được Điều nào — kiểm tra nguồn "
@@ -278,8 +284,10 @@ def main():
         "structure": {"chapters": len(ROMAN_PAT.findall(body)),
                       "articles": len(nums), "terminal_article": (nums[-1] if nums else 0),
                       "has_phu_luc": bool(phu_luc), "phu_luc_chars": len(phu_luc),
+                      "has_khoi_dau": bool(khoi_dau), "khoi_dau_chars": len(khoi_dau),
                       "is_appendix": bool(getattr(a, "as_appendix", False))},
         "coverage": coverage, "verify_flags": rep["flags"],
+        "khoi_dau": khoi_dau,          # r215: khối đầu văn bản — nguồn DUY NHẤT chứng minh danh tính
         "articles": {str(n): arts[n] for n in nums},
         "has_phu_luc": bool(phu_luc),
         "phu_luc": phu_luc,

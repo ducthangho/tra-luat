@@ -20547,6 +20547,181 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r214_nlm_query_strict_scope_fail_closed", _c214_strict_scope_fail_closed)
 
+    # ═══ r215 (v1.35.51) — KHỐI ĐẦU VĂN BẢN + nguồn DỰ THẢO trong phạm vi hỏi NLM ═══
+    # Hai mục sổ lỗi lượt rà 4 (27-07-2026): `CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN` (đo trên ND 158/2025:
+    # bản phục vụ mặc định 108.823 ký tự = nối-chỉ-`articles`, đánh rơi 6.030 ký tự phụ lục ĐANG CÓ trong
+    # record + toàn bộ khối đầu KHÔNG HỀ được lưu) và `DU_THAO_ND_BHXH_DE_CORPUS_TRUE_VA_DA_DAY_LEN_NLM`.
+    # Nhóm PURE nạp THẲNG từ file (KHÔNG bind) — bẫy [[false-green-test-qua-bind]] đã trả giá ở r213.
+
+    def _mod215(fname, modname):
+        """Nạp THẲNG tl_core/<file>.py — KHÔNG ai gọi bind() cho instance này (chứng minh hàm PURE
+        chạy được ở CẢ HAI đường, không sống nhờ namespace tl đã bind)."""
+        import importlib.util as _ilu215
+        _sp = _ilu215.spec_from_file_location(modname, _ROOT209 / "scripts" / "tl_core" / fname)
+        _m = _ilu215.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    _KD215 = ("CHÍNH PHỦ\nSố: 158/2025/NĐ-CP\nCỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+              "Hà Nội, ngày 25 tháng 6 năm 2025\nNGHỊ ĐỊNH\nQuy định chi tiết một số điều của Luật "
+              "Bảo hiểm xã hội\nCăn cứ Luật Tổ chức Chính phủ ngày 18 tháng 02 năm 2025;\n"
+              "Chương I\nQUY ĐỊNH CHUNG")
+    _THAN215 = ("Điều 1. Phạm vi điều chỉnh\nNghị định này quy định chi tiết…\n\n"
+                "Điều 2. Đối tượng áp dụng\nNgười lao động…")
+    _PL215 = "PHỤ LỤC I\nDANH MỤC NGHỀ NẶNG NHỌC\n(Kèm theo Nghị định số 158/2025/NĐ-CP)"
+
+    def _c215_preamble_of():
+        """`preamble_of` GIỮ đúng khối đầu, và KHÔNG bịa ra khối đầu khi văn bản không có."""
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("_vd215", _ROOT209 / "scripts" / "verify_deep.py")
+        _vd = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_vd)
+        _full = _KD215 + "\n" + _THAN215
+        _kd = _vd.preamble_of(_full)
+        # (1) lấy ĐỦ khối đầu: số hiệu + ngày + căn cứ + tiêu đề Chương I đều còn
+        ok1 = ("158/2025/NĐ-CP" in _kd and "ngày 25 tháng 6 năm 2025" in _kd
+               and "Căn cứ" in _kd and "Chương I" in _kd)
+        # (2) và DỪNG ĐÚNG chỗ — không nuốt sang thân
+        ok2 = "Phạm vi điều chỉnh" not in _kd and not _kd.endswith("Điều 1.")
+        # (3) CHIỀU NGƯỢC: text vào thẳng thân (đúng bản cache đang phục vụ) → RỖNG, không bịa
+        ok3 = _vd.preamble_of(_THAN215) == ""
+        # (4) CHIỀU NGƯỢC: không có Điều nào (phụ lục độc lập) → RỖNG, không trả cả văn bản
+        ok4 = _vd.preamble_of(_PL215) == ""
+        # (5) cùng ĐỊNH NGHĨA ranh giới với split_articles — hai bên không được lệch
+        ok5 = _full[len(_vd.preamble_of(_full)):].lstrip().startswith("Điều 1.")
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r215_preamble_of_giu_khoi_dau_van_ban", _c215_preamble_of)
+
+    def _c215_consolidated_text():
+        """Dựng lại từ cache = khối đầu + Điều + PHỤ LỤC; phân biệt cache-cũ với văn-bản-không-có."""
+        _ec = _mod215("extract_cache.py", "_ec215")
+        _arts = {"1": "Điều 1. Phạm vi điều chỉnh\nNghị định này…", "2": "Điều 2. Đối tượng áp dụng\nNgười…"}
+        # (1) record ĐỦ (r215+): thứ tự khối đầu → Điều → phụ lục, KHÔNG mất mảnh nào
+        _t1, _r1 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215})
+        ok1 = (_t1.startswith("CHÍNH PHỦ") and "158/2025/NĐ-CP" in _t1 and "PHỤ LỤC I" in _t1
+               and _t1.index("Điều 1.") < _t1.index("PHỤ LỤC I")
+               and _r1["khoi_dau"] == "co" and _r1["thieu"] == [] and _r1["articles"] == 2)
+        # (2) ĐÚNG CA ĐÃ TRẢ GIÁ — record dựng TRƯỚC r215 (KHÔNG có khoá `khoi_dau`): phụ lục vẫn được
+        #     cứu (record CÓ lưu), nhưng thiếu khối đầu thì phải KHAI ra để caller cảnh báo.
+        _t2, _r2 = _ec._consolidated_text({"articles": _arts, "phu_luc": _PL215})
+        ok2 = (_r2["khoi_dau"] == "thieu_khoa" and _r2["thieu"] == ["khoi_dau"]
+               and "PHỤ LỤC I" in _t2 and _t2.startswith("Điều 1."))
+        # (3) PHÂN ĐỊNH: cache r215+ mà văn bản THẬT SỰ không có khối đầu → `rong`, KHÔNG báo thiếu công cụ
+        _t3, _r3 = _ec._consolidated_text({"khoi_dau": "", "articles": _arts, "phu_luc": ""})
+        ok3 = _r3["khoi_dau"] == "rong" and _r3["thieu"] == [] and _r3["phu_luc"] is False
+        # (4) CHIỀU NGƯỢC: bản CŨ nối-chỉ-articles đánh rơi phụ lục — bản mới phải DÀI HƠN đúng phần đó
+        ok4 = len(_t2) > len("\n\n".join(_arts[k] for k in ("1", "2"))) and _PL215 in _t2
+        # (5) record rỗng → không nổ, không bịa
+        _t5, _r5 = _ec._consolidated_text({})
+        ok5 = _t5 == "" and _r5["articles"] == 0 and _r5["thieu"] == ["khoi_dau"]
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r215_consolidated_text_dung_lai_du_khoi_dau_va_phu_luc", _c215_consolidated_text)
+
+    def _c215_thieu_khoi_dau_pure():
+        """Cổng «text vào thẳng thân» — bắt đúng ca, và KHÔNG đẻ báo động giả trên corpus đang chạy."""
+        _lo = _mod215("lookup_ops.py", "_lo215")
+        _f = _lo._text_thieu_khoi_dau
+        # (1) BẮT: đúng hình dạng bản cache đã phục vụ ND 158
+        ok1 = _f(_THAN215) and _f("  \n\nĐiều 1. Phạm vi\nnội dung") and _f("Chương I\nQUY ĐỊNH CHUNG")
+        ok1 = ok1 and _f("Mục 1. Nguyên tắc\nnội dung")
+        # (2) CHIỀU NGƯỢC — văn bản CÓ khối đầu: KHÔNG được bắt
+        ok2 = not _f(_KD215 + "\n" + _THAN215)
+        ok3 = not _f("QUỐC HỘI\nLUẬT\nBẢO HIỂM XÃ HỘI\nLuật số: 41/2024/QH15\n\nĐiều 1. Phạm vi")
+        # (3) CHIỀU NGƯỢC — phụ lục/mẫu độc lập mở đầu bằng PHỤ LỤC: KHÔNG phải ca này
+        ok4 = not _f(_PL215)
+        # (4) CHIỀU NGƯỢC — rỗng/không phải văn bản: im lặng, không báo động
+        ok5 = (not _f("")) and (not _f(None)) and (not _f("Nội dung tự do nói về Điều 1 của Luật."))
+        # (5) không bắt nhầm câu dẫn chiếu mở đầu bằng chữ "Điều" mà KHÔNG phải mốc cấu trúc
+        ok6 = not _f("Điều khoản chuyển tiếp được hiểu như sau: …")
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r215_text_thieu_khoi_dau_khong_bao_dong_gia", _c215_thieu_khoi_dau_pure)
+
+    def _c215_classify_khai_bao():
+        """`_classify_doc_header` KHAI BÁO khi danh tính rút ra từ text không có khối đầu (ca 89-2026)."""
+        _cl = _TL_MODULE._classify_doc_header
+        # (1) đúng ca đã trả giá: text vào thẳng thân, trong THÂN có nhắc số hiệu luật khác
+        _than = ("Điều 1. Phạm vi điều chỉnh\nLuật này sửa đổi, bổ sung một số điều của Luật Ngân sách "
+                 "nhà nước số 145/2025/QH15…\n\nĐiều 2. Đối tượng áp dụng\nnội dung")
+        _i1 = _cl(_than, "")
+        ok1 = _i1.get("khoi_dau_missing") is True
+        # (2) CHIỀU NGƯỢC: văn bản CÓ khối đầu → không khai bừa
+        _i2 = _cl("QUỐC HỘI\nLUẬT\nLuật số: 41/2024/QH15\nHà Nội, ngày 29 tháng 6 năm 2024\n\n"
+                  "Điều 1. Phạm vi điều chỉnh\nnội dung", "Luat_41-2024-QH15.docx")
+        ok2 = _i2.get("khoi_dau_missing") is False
+        # (3) cờ mới KHÔNG được làm đổi kết quả nhận dạng cũ (chỉ thêm thông tin)
+        ok3 = _i2.get("sohieu") and "41" in str(_i2.get("sohieu"))
+        # (4) text rỗng → không khai thiếu (không có gì để nói)
+        ok4 = _cl("", "Bao_cao.docx").get("khoi_dau_missing") is False
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r215_classify_doc_header_khai_bao_thieu_khoi_dau", _c215_classify_khai_bao)
+
+    def _c215_doc_text_canh_bao():
+        """ĐƯỜNG SẢN XUẤT `cmd_doc_text`: cache thiếu khối đầu → cảnh báo stderr + khai trong JSON."""
+        _keys = ("apply_profile_offline", "load_creds", "_cache_file", "_markup_cert_read")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            with _tf110.TemporaryDirectory() as _td:
+                _dir = _P110(_td)
+                _TL_MODULE.apply_profile_offline = lambda *a, **k: None
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                _TL_MODULE._cache_file = lambda n: _dir / n
+                _TL_MODULE._markup_cert_read = lambda fid: {"filter_ran": True, "found": False}
+
+                def _run(fid, body):
+                    (_dir / f"extract_{fid}.txt").write_text(body, encoding="utf-8")
+                    _ns = argparse.Namespace(file_id=fid, refresh=False, markup="strip",
+                                             markup_strict=False, dieu=None, out=None, max=0,
+                                             json=True, config=None, profile=None, deterministic=False)
+                    _bo, _be = _io110.StringIO(), _io110.StringIO()
+                    with _ctx110.redirect_stdout(_bo), _ctx110.redirect_stderr(_be):
+                        _rc = _TL_MODULE.cmd_doc_text(_ns)
+                    return _rc, _bo.getvalue(), _be.getvalue()
+
+                # (1) cache VÀO THẲNG THÂN (đúng bản đã phục vụ ND 158) → rc=0 (vẫn phục vụ) NHƯNG nói ra
+                rc1, o1, e1 = _run("FID215A", _THAN215)
+                _j1 = json.loads(o1)
+                ok1 = (rc1 == 0 and _j1["khoi_dau_missing"] is True and "khoi-dau" in e1
+                       and "danh tính" in e1 and _j1["text"].startswith("Điều 1."))
+                # (2) CHIỀU NGƯỢC: cache CÓ khối đầu → KHÔNG cảnh báo, cờ False
+                rc2, o2, e2 = _run("FID215B", _KD215 + "\n" + _THAN215)
+                _j2 = json.loads(o2)
+                ok2 = rc2 == 0 and _j2["khoi_dau_missing"] is False and "khoi-dau" not in e2
+                return ok1 and ok2
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+    _t110("r215_doc_text_canh_bao_khi_cache_thieu_khoi_dau", _c215_doc_text_canh_bao)
+
+    def _c215_nlm_draft_sources():
+        """Nguồn DỰ THẢO trong phạm vi sắp hỏi — đo đúng phạm vi, không vơ đũa."""
+        _no = _mod215("nlm_ops.py", "_no215")
+        # Nạp TRẦN (không bind) rồi nối tay ĐÚNG bộ `_entry_*` đang chạy thật: chứng minh chính
+        # `_nlm_draft_sources` không sống nhờ namespace tl, mà vẫn đo bằng bộ helper của sản xuất.
+        for _n in ("_entry_is_draft", "_entry_nlm", "_entry_nlm_notebook_id", "_entry_name",
+                   "_entry_sohieu", "_entry_drive_id"):
+            setattr(_no, _n, getattr(_TL_MODULE, _n))
+        _ents = [
+            {"name": "DUTHAO_ND_Sua_doi_bo_sung_BHXH_16-7-2026", "drive_id": "d1",
+             "nlm_source_id": "s1", "nlm_notebook_id": "NB-HS", "hieuluc": "DỰ THẢO - hồ sơ trình"},
+            {"name": "ND_158-2025-ND-CP_BHXH_bat_buoc", "drive_id": "d2", "sohieu": "158-2025-ND-CP",
+             "nlm_source_id": "s2", "nlm_notebook_id": "NB-HS", "hieuluc": "Còn hiệu lực"},
+            {"name": "DUTHAO_ND_Ho_so_dang_ky_Dieu_23", "drive_id": "d3",
+             "nlm_source_id": "s3", "nlm_notebook_id": "NB-KHAC", "hieuluc": "DỰ THẢO"},
+            {"name": "DUTHAO_chua_day_len_NLM", "drive_id": "d4", "nlm_source_id": ""},
+        ]
+        # (1) cả notebook: bắt dự thảo CÙNG notebook, KHÔNG lôi notebook khác vào
+        _r1 = _no._nlm_draft_sources(_ents, notebook_id="NB-HS")
+        ok1 = [r["source_id"] for r in _r1] == ["s1"]
+        # (2) ghim --source-id: chỉ xét đúng nguồn được hỏi
+        ok2 = [r["source_id"] for r in _no._nlm_draft_sources(_ents, source_ids=["s2", "s3"])] == ["s3"]
+        # (3) CHIỀU NGƯỢC: phạm vi chỉ có văn bản đã ban hành → RỖNG (không báo động giả)
+        ok3 = _no._nlm_draft_sources(_ents, source_ids=["s2"]) == []
+        # (4) CHIỀU NGƯỢC: dòng dự thảo CHƯA lên NLM không tính (chưa thành rủi ro RAG)
+        ok4 = all(r["drive_id"] != "d4" for r in _no._nlm_draft_sources(_ents))
+        # (5) rỗng/None → rỗng, không nổ
+        ok5 = _no._nlm_draft_sources([]) == [] and _no._nlm_draft_sources(None) == []
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r215_nlm_draft_sources_do_dung_pham_vi", _c215_nlm_draft_sources)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

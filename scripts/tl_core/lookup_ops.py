@@ -2323,6 +2323,25 @@ def _markup_cert_read(fid: str) -> dict:
         return {}
 
 
+def _text_thieu_khoi_dau(text) -> bool:
+    """PURE (r215 — sổ lỗi `CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN`): text VÀO THẲNG thân văn bản, tức
+    KHÔNG có khối đầu (Quốc hiệu · cơ quan ban hành · `Số: …` · địa danh-ngày tháng · tên loại + trích
+    yếu · khối `Căn cứ…`).
+
+    Đây là cổng chặn cái đã trả giá THẬT hai lần: bản cache dựng-lại-từ-`articles` bắt đầu từ "Điều 1"
+    ⇒ `_classify_doc_header` không còn gì để đọc trong vùng tiêu đề nên đi quét sâu 16k và **nhặt số
+    hiệu từ THÂN** (ca VBHN Luật NSNN `89-2026` trả về `145/2025/QH15` — số của luật SỬA ĐỔI được liệt
+    kê trong thân). Máy đoán thì phải nói là đang đoán.
+
+    CỐ Ý hẹp và tất định: chỉ bắt khi ký tự đầu tiên có nghĩa là mốc cấu trúc THÂN (`Điều N.` /
+    `Chương <La Mã>` / `Mục N`). Văn bản phụ lục độc lập (mở đầu `PHỤ LỤC`) hay văn bản có letterhead
+    KHÔNG bị bắt ⇒ không đẻ báo động giả trên corpus đang chạy."""
+    t = (text or "").lstrip()
+    if not t:
+        return False
+    return bool(re.match(r"(?:Điều\s+\d+[a-zđ]*\s*\.|Chương\s+[IVXLC]+\b|Mục\s+\d+\b)", t))
+
+
 def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=None,
                   markup: str = "strip", meta=None) -> tuple:
     """A1 (v1.34.60 — kế hoạch NLM-fallback E1–E3, TIỀN ĐỀ E1): MỘT đường đọc text cho MỌI định dạng.
@@ -2343,10 +2362,21 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
     _mode = (markup or "strip").strip().lower()
     _meta = meta if isinstance(meta, dict) else {}
     _meta.update({"markup_mode": _mode, "markup_filter_ran": False, "markup_found": False,
-                  "markup_warning": ""})
+                  "markup_warning": "", "khoi_dau_missing": False})
 
     def _mk_warn(why: str) -> None:
         _markup_warn(fid, _mode, why, _meta)      # r186: helper DÙNG CHUNG với cmd_extract
+
+    def _kd_gate(t: str, source: str) -> None:
+        """r215: mọi đường trả text đều đi qua đây — thiếu khối đầu thì NÓI RA, không phục vụ im lặng."""
+        if not _text_thieu_khoi_dau(t):
+            return
+        _meta["khoi_dau_missing"] = True
+        print(f"[tl] ⚠ [khoi-dau] text (nguồn: {source}) BẮT ĐẦU THẲNG từ thân văn bản — không có khối "
+              f"đầu (số hiệu/ngày ban hành/cơ quan/căn cứ). KHÔNG dùng bản này để xác định danh tính "
+              f"văn bản (`_classify_doc_header` sẽ đi nhặt số hiệu trong THÂN). Lấy bản đủ: "
+              f"`tl doc-text {fid} --markup mark`, hoặc dựng lại cache bằng `tl cache-build`.",
+              file=sys.stderr)
 
     if not fid:
         return "", ""
@@ -2369,6 +2399,7 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                         _mk_warn("text lấy từ CACHE `extract_<id>.txt` KHÔNG kèm chứng nhận đã-lọc "
                                  "(cache cũ, hoặc do `tl extract` ghi từ export text/plain) — đọc lại "
                                  "bằng `--refresh`")
+                    _kd_gate(_ct, "cache")   # r215: đúng đường đã phục vụ ND 158 thiếu khối đầu
                     return _ct, "cache"
         except Exception:  # noqa: BLE001
             pass
@@ -2453,6 +2484,7 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
         # r183: SIDECAR chứng nhận — lần đọc cache sau biết text này ĐÃ qua docx_markup hay chưa.
         _markup_cert_write(fid, filter_ran=bool(_meta.get("markup_filter_ran")),
                            found=bool(_meta.get("markup_found")), source=src)
+    _kd_gate(text, src)
     return text, src
 
 
@@ -2503,6 +2535,7 @@ def cmd_doc_text(a) -> int:
                            "markup_filter_ran": bool(_meta.get("markup_filter_ran")),
                            "markup_found": bool(_meta.get("markup_found")),
                            "markup_warning": _meta.get("markup_warning") or None,
+                           "khoi_dau_missing": bool(_meta.get("khoi_dau_missing")),   # r215
                            "text": body[:_mx] if _mx else body},
                           deterministic=_deterministic_enabled(a)))
         return 0

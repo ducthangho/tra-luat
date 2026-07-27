@@ -1169,6 +1169,11 @@ def _classify_doc_header(text: str, filename: str = "") -> dict:
         "agency": facts.get("agency") or "",
         "title": _profile_title_from_header(head, filename),
         "header_chars": len(head),
+        # r215 (sổ lỗi CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN): KHAI BÁO khi danh tính được rút ra từ
+        # text KHÔNG CÓ khối đầu văn bản. Không đổi cách đoán (đường quét sâu 16k vẫn cần cho layout
+        # VPQH in số VBHN ở khối ký CUỐI — v1.34.6 #1), chỉ thôi im lặng: ca VBHN Luật NSNN 89-2026 trả
+        # về `145/2025/QH15` nhặt từ THÂN, mà người đọc không có cách nào biết đó là suy đoán.
+        "khoi_dau_missing": _text_thieu_khoi_dau(head),
     }
 
 

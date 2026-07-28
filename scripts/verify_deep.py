@@ -35,6 +35,55 @@ ROMAN_PAT = re.compile(r"(?m)^Chương\s+([IVXLC]+)\b")
 PHU_LUC_PAT = re.compile(r"(?m)^[ \t]*PHỤ\s+LỤC(?:[ \t]*$|[ \t]+(?:SỐ[ \t]+)?[IVXLC0-9]+\b)")
 ROMAN_VAL = {"I":1,"V":5,"X":10,"L":50,"C":100}
 
+# r221 — số hiệu: chuẩn hoá + PHẠM VI tìm.
+# Đo 28-07 trên 11 record cache: phép cũ `re.escape(so_hieu.split("/")[0])` so nguyên chuỗi
+# đúng 0/11 — nó CHƯA TỪNG khớp một lần nào, vì đường nạp truyền KHOÁ REGISTRY gạch ngang
+# ('19-2026-VBHN-VPQH') còn bản in dùng gạch chéo ('19/VBHN-VPQH'), nên `split("/")[0]` trả
+# về nguyên khoá. Phải xử lý CẢ BA khác biệt, cả ba đã có sẵn ở tl_core/classify.py:64-94.
+_VBHN_WITHYEAR_RE = re.compile(r"^(\d+)-(\d{4})-VBHN-(.+)$", re.I)
+# Layout VPQH in 'Số: NN/VBHN-XXX' CHỈ ở khối XÁC THỰC cuối bài (đo: 54/VBHN-VPQH ở vị trí
+# 105.362/108.650) ⇒ chỉ soi 2000 ký tự đầu là bỏ sót. Cửa sổ đuôi đo theo bậc: 3000 còn
+# sót (hit cách cuối 3.288), 4000 và 6000 đều đạt 10/11 mà KHÔNG nới thêm ô lọt nhầm
+# (3/110 = đúng bằng phương án chỉ-head), 10000 bắt đầu ăn vào thân (4/110).
+_SOHIEU_TAIL = 4000
+
+
+def _sohieu_fold(s):
+    """Nén số hiệu về alnum không dấu để so bất kể ngăn cách ('/' hay '-').
+
+    ★ 'Đ'/'đ' (U+0110/U+0111) KHÔNG phân rã bằng NFKD — phải thay TRƯỚC khi bỏ dấu, nếu
+    không '[^a-z0-9]' xoá thẳng và '158/2025/NĐ-CP' nén thành '1582025ncp' (mất 'd'), khiến
+    phép so trượt đúng nhóm Nghị định. Mượn nguyên phép của classify.py:_strip_accents.
+    """
+    s = (s or "").replace("Đ", "D").replace("đ", "d")
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def sohieu_corroborated(so_hieu, raw):
+    """Số hiệu của CHÍNH văn bản có xuất hiện ở khối đầu HOẶC khối ký/xác thực cuối không?
+
+    Cố ý KHÔNG quét toàn văn: khối CĂN CỨ dẫn số hiệu văn bản KHÁC, đo ra 6/110 ô khớp
+    nhầm (vd thân ND 158 chứa '41/2024/QH15') ⇒ quét toàn văn sẽ im lặng cho qua một
+    doc_key gán SAI. Giới hạn đầu+đuôi giữ mức lọt nhầm đúng bằng phương án chỉ-head.
+    """
+    if not so_hieu:
+        return True
+    # Chốt trên số hiệu ĐÃ NÉN, không trên phạm vi: số hiệu rác (chỉ toàn ngăn cách, vd '///')
+    # nén thành chuỗi RỖNG, mà '' nằm trong MỌI chuỗi ⇒ nếu không chặn ở đây thì nó khớp mọi
+    # văn bản. Chặn theo phạm vi rỗng như bản nháp đầu chỉ đỡ được khi văn bản CŨNG rỗng.
+    fold = _sohieu_fold(so_hieu)
+    if not fold:
+        return False
+    scope = _sohieu_fold(raw[:2000] + "\n" + raw[-_SOHIEU_TAIL:])
+    if fold in scope:
+        return True
+    # VBHN: khoá registry mang NĂM tiêm thêm (bất biến NN-YYYY-VBHN-XXX, chống tái dùng số)
+    # còn bản in chính thức KHÔNG có năm ⇒ chấp nhận dạng không-năm là khớp.
+    m = _VBHN_WITHYEAR_RE.fullmatch(so_hieu)
+    return bool(m and _sohieu_fold("{}-VBHN-{}".format(m.group(1), m.group(3))) in scope)
+
 
 def roman_to_int(s):
     v, prev = 0, 0
@@ -283,10 +332,9 @@ def t1_structure(raw, declared_n, so_hieu, report):
     if not HEAD_PAT.search(head):
         out["ok"] = False
         report["flags"].append("T1: không thấy quốc hiệu ở đầu — nghi thiếu trang đầu/lẫn chrome web")
-    if so_hieu:
-        key = re.escape(so_hieu.split("/")[0])
-        if not re.search(key, head):
-            report["flags"].append(f"T1-nhẹ: số '{so_hieu}' không thấy trong 2000 ký tự đầu")
+    if so_hieu and not sohieu_corroborated(so_hieu, raw):
+        report["flags"].append(
+            f"T1-nhẹ: số '{so_hieu}' không thấy ở khối đầu lẫn khối ký cuối")
     # 4) Chương La Mã liên tục
     romans = [roman_to_int(r) for r in ROMAN_PAT.findall(raw)]
     out["chapters"] = len(romans)

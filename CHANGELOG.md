@@ -1,3 +1,58 @@
+# ★ v1.35.57 — r221: cổng T1 số hiệu của `verify_deep` — sửa một phép so CHƯA TỪNG khớp đúng lần nào (+2 test, 1372/1372) (2026-07-28)
+
+> Lượt rà hồ sơ đo ra `verify_deep.py:287` sai ở **11/11** record cache: nó gắn cờ «không thấy số
+> hiệu» cho **cả những bản in đúng chuẩn**. Không phải hồi quy — cổng này chưa bao giờ khớp đúng
+> một lần nào. Và lại đúng khuôn r219/r220: **phép đo bác chính đề xuất đầu tiên**, lần này là đề
+> xuất của phiên đang làm.
+
+## Chỗ hỏng
+
+`re.escape(so_hieu.split("/")[0])` chỉ có nghĩa với dạng IN trên văn bản («41/2024/QH15»), nhưng
+đường nạp truyền **khoá registry** gạch ngang («41-2024-QH15») — không có `/` nào để tách, nên
+`split("/")[0]` trả về nguyên khoá rồi đem so nguyên chuỗi với văn bản dùng gạch chéo. Cùng họ lỗi
+mà r219 đã bác ở L11: **lẫn khoá registry với trích dẫn văn xuôi**.
+
+Phải xử lý **cả ba** khác biệt, cả ba đã có sẵn ở `scripts/tl_core/classify.py:64-94` mà
+`verify_deep` chưa mượn (`scripts/build_cache.py:65-66` mới làm một phần ba):
+
+1. gạch ngang (khoá) vs gạch chéo (bản in);
+2. **`Đ`/`đ` (U+0110/U+0111) KHÔNG phân rã bằng NFKD** — phải thay TRƯỚC khi bỏ dấu, nếu không
+   `[^a-z0-9]` xoá thẳng và «158/2025/NĐ-CP» nén thành `1582025ncp`;
+3. VBHN in **không có năm** («19/VBHN-VPQH» vs khoá «19-2026-VBHN-VPQH»).
+
+## Phạm vi tìm — đo theo bậc, không chọn theo cảm giác
+
+Layout VPQH in «Số: NN/VBHN-XXX» **chỉ ở khối XÁC THỰC cuối bài** (đo: `54/VBHN-VPQH` ở vị trí
+105.362/108.650) ⇒ chỉ soi head-2000 là bỏ sót. Nhưng **quét toàn văn thì nới quá tay** — khối CĂN
+CỨ dẫn số hiệu văn bản KHÁC:
+
+| phạm vi | tự-khớp | lọt NHẦM |
+|---|---|---|
+| phép cũ | **0/11** | — |
+| head-2000 | 9/11 | 3/110 |
+| toàn văn | 10/11 | **6/110** ✗ |
+| **head-2000 + tail-4000** | **10/11** | **3/110** ✓ |
+
+Chọn head+tail: nhạy hơn head-thuần một bậc mà mức lọt nhầm **đúng bằng** nó. Tail 3000 còn sót
+(hit cách cuối 3.288), 6000 không đổi, 10000 bắt đầu ăn vào thân (4/110). Cờ duy nhất còn lại sau
+khi vá là `89-2026-VBHN-VPQH` — **báo đúng**: số hiệu vắng mặt trên toàn bộ 127.359 ký tự.
+
+★Chốt `if not fold: return False` đặt trên **số hiệu đã nén**, không trên phạm vi: số hiệu rác
+(«///») nén ra chuỗi RỖNG, mà `"" in x` đúng với mọi `x` ⇒ chốt theo phạm vi rỗng như bản nháp đầu
+chỉ đỡ được khi văn bản CŨNG rỗng.
+
+## Nghiệm thu
+
+* Selftest **1370 → 1372** (+2 ca `r221_*`), nạp THẲNG `verify_deep.py` không qua bind (bẫy r212).
+* **Phản chứng CHẠY THẬT 8/8 đỏ đúng ca.** ★M8 (bỏ `.replace("đ","d")` chữ thường) ban đầu **KHÔNG**
+  làm test đỏ ⇒ theo luật kho đó là mã chết; đã bổ sung ca nguồn-viết-thường thay vì gỡ chốt, vì
+  chốt là bản mượn nguyên của `classify.py` và phá tính đối xứng mới là chỗ hỏng sau này.
+* Ca đối chứng **bắt buộc chứa chữ Đ** — ca QH15/VBHN (vốn không có Đ) để phép sai **vẫn xanh**;
+  phiên trước đã tự sa vào đúng bẫy này hai lần.
+* Test đi qua `t1_structure` chứ không chỉ gọi hàm con — bài học r219: guard không nối vào đường
+  chạy thì guard chỉ là tài liệu.
+* ruff F delta **0**. Không đụng dữ liệu cache/registry/corpus.
+
 # ★ v1.35.56 — r220: doc-claims-check trả nốt L4 (giàn giáo nháp) — và phép đo cắt `XXX` trần khỏi đề bài (+2 test, 1370/1370) (2026-07-28)
 
 > Nợ CỐ Ý cuối cùng của kế hoạch r218. Vẫn đúng bài học r219 — ĐO TRƯỚC KHI THIẾT KẾ: phép đo lần

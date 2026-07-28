@@ -1,3 +1,50 @@
+# ★ v1.35.59 — r223: khung test NUỐT LỖI — «quét không chạy được» hoá trang thành «quét chạy rồi bất đồng» (+1 test, 1376/1376) (2026-07-29)
+
+> Hồ sơ bàn giao ghi hai ca `r219_docclaims_l9_tu_tat_khi_quet_hep` và `…l10_l11_bi_bac` «đỏ chập
+> chờn khi chạy nối nhiều lượt selftest», quy cho `_r218_run` dùng `subprocess timeout=300`.
+> **Đo 29-07 BÁC chú thích đó**, và cái đo được ra lại là một khuyết nặng hơn.
+
+## Vì sao `timeout=300` là nghi phạm sai
+
+| Phép đo | Số |
+|---|---|
+| `doc-claims-check --json` toàn kho (35 tệp, JSON 58.386 B), đo đơn | **3,88 s** |
+| Cùng lệnh, ép 6 luồng song song + selftest chạy nền | **8,5–10,2 s** |
+| Trần `timeout` | 300 s |
+| **Biên** | **30–77 lần** |
+
+Chạy **4 lượt selftest nối** (109/118/173/134 s, lượt 3 đè lên phép ép tải): **4/4 đều 1375/1375**,
+hai ca xanh cả 4 lượt, kho sạch cả 4 lượt. **Không dựng lại được hiện tượng.** Quá hạn chỉ là nghi
+phạm đứng gần hiện trường.
+
+## Khuyết thật
+
+`_r218_run` phân xử báo cáo bằng `j = loads(...) if "{" in out else {}` — lượt quét sập, quá hạn hay
+trả JSON hỏng đều quy về **`{}` lặng lẽ**. Mà đúng **hai ca gọi TRẦN** ấy là hai ca duy nhất **không
+kiểm `rc`** (mọi ca `--path` đều kiểm `rc==0`/`rc==1`). Nên `{}` hoá trang thành BẤT ĐỒNG NỘI DUNG:
+cả hai đỏ cùng lúc, **không ghi lý do**, không phân biệt nổi với một hồi quy thật.
+
+★Trớ trêu: đó đúng là giáo lý mà chính ca `_l9_tu_tat` áp cho **sản phẩm** — «0 cờ vì sạch» ≠ «0 cờ
+vì không chạy», nên lớp tự tắt phải khai báo qua `layers_skipped`. Giáo lý ấy bị vi phạm ngay ở tầng
+**khung test**. Một khung test không nói nổi «tôi đã không chạy» thì mọi ca nó gác đều là báo cáo có
+điều kiện.
+
+## Vá
+
+- **`_r218_phanxu()` tách riêng** — phân xử một lượt quét, nổ `_R218ScanChet` **kèm mã lý do**
+  (`STDOUT_KHONG_CO_JSON` / `JSON_HONG` / `QUA_HAN_300s` / `BAO_CAO_THIEU_KHOA`) và ngữ cảnh lượt
+  quét, thay vì trả `{}`. Tách rời để phản chứng bơm được đầu vào hỏng mà **vẫn là đường sản xuất**
+  (`_r218_run` gọi đúng hàm này — không bind, theo doctrine `false-green-test-qua-bind`).
+- **`_r218_run_toankho()` memo hoá** lượt quét toàn kho, chốt hình dạng báo cáo MỘT chỗ
+  (`basis` + `layers` phải có). Hai ca gọi trần nay dùng **đúng một** lượt quét thay vì hai:
+  selftest 1376 ca chạy **107,5 s** so với nền 109–134 s.
+- **+1 ca `r223_khung_test_khong_duoc_nuot_loi`** — phản chứng 2 chiều: chiều xuôi đọc được báo cáo
+  thật có rác đứng trước JSON; chiều ngược ba dạng hỏng phải nổ ĐÚNG mã lý do; ca thứ tư khoá memo
+  (hai lần gọi phải trả về CÙNG một đối tượng).
+
+★Không đụng `timeout=300`: đo cho thấy nó không phải cơ chế, và hạ trần xuống chỉ đổi một ca đỏ
+không lý do thành một ca đỏ không lý do khác.
+
 # ★ v1.35.58 — r222: dấu cách bị gạch trong .docx — bộ lọc markup ĐẺ RA chữ không có trong văn bản (+3 test, 1375/1375) (2026-07-28)
 
 > Lượt rà hồ sơ đo ra `scripts/docx_markup.py` bỏ TRỌN run bị gạch **kể cả khi nội dung bị gạch chỉ

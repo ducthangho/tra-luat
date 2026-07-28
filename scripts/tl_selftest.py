@@ -21229,15 +21229,52 @@ def run() -> int:
     # dưới đây chạy `python scripts/tl.py doc-claims-check ...` như người dùng thật, đọc rc THẬT + JSON thật.
     # Khuôn ca: mỗi lớp một PHẢN CHỨNG «đỏ đúng ca» — tài liệu chứa ĐÚNG MỘT khẳng định sai, kỳ vọng
     # ĐÚNG lớp đó nổ; kèm ca ĐỐI CHỨNG khẳng định-đúng để bắt báo giả.
+    class _R218ScanChet(RuntimeError):
+        """v1.35.59 (đo 29-07) — «lượt quét KHÔNG chạy được» phải KHÁC «quét chạy rồi bất đồng»."""
+
+    def _r218_phanxu(out, what):
+        """PHÂN XỬ một lượt quét, tách rời để phản chứng bơm được đầu vào hỏng mà VẪN là đường sản
+        xuất (`_r218_run` gọi đúng hàm này — không bind, xem doctrine false-green-test-qua-bind).
+
+        Trước r223: `j = loads(...) if "{" in out else {}` ⇒ lượt quét sập trả `{}` LẶNG LẼ. Hai ca
+        gọi TRẦN (`_l9_tu_tat`, `_l10_l11_bi_bac`) không kiểm `rc` nên `{}` hoá trang thành BẤT ĐỒNG:
+        cả hai đỏ cùng lúc, không ghi lý do, không phân biệt nổi với hồi quy thật. Đúng cái giáo lý
+        mà ca `_l9_tu_tat` áp cho SẢN PHẨM («0 cờ vì sạch» ≠ «0 cờ vì không chạy» ⇒ `layers_skipped`)
+        — bị vi phạm ngay ở tầng KHUNG TEST."""
+        import json as _jsp218
+        if "{" not in out:
+            raise _R218ScanChet(f"STDOUT_KHONG_CO_JSON [{what}] — lượt quét không chạy được")
+        try:
+            return _jsp218.loads(out[out.find("{"):])
+        except ValueError as _e218:
+            raise _R218ScanChet(f"JSON_HONG [{what}] — {_e218}") from _e218
+
     def _r218_run(*args, tmp=None):
-        import json as _js218
         import subprocess as _sp218
         import sys as _sys218
-        p = _sp218.run([_sys218.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-claims-check",
-                        *args, "--json"], capture_output=True, text=True, encoding="utf-8",
-                       errors="replace", timeout=300)
-        j = _js218.loads(p.stdout[p.stdout.find("{"):]) if "{" in p.stdout else {}
-        return p.returncode, j, p.stdout
+        _what = " ".join(str(a) for a in args) or "(toàn kho)"
+        try:
+            p = _sp218.run([_sys218.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-claims-check",
+                            *args, "--json"], capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=300)
+        except _sp218.TimeoutExpired as _to218:
+            # ĐO 29-07: lượt trần = 3,88s đo đơn / 8,5-10,2s ép 6 luồng ⇒ biên 30-77 lần. Chạm trần
+            # 300s KHÔNG phải chuyện thường ⇒ nếu xảy ra thì phải NÓI, đừng nuốt thành ca đỏ vô cớ.
+            raise _R218ScanChet(f"QUA_HAN_300s [{_what}]") from _to218
+        return p.returncode, _r218_phanxu(p.stdout, _what), p.stdout
+
+    _r218_memo_toankho = {}
+
+    def _r218_run_toankho():
+        """Lượt quét TOÀN KHO dùng CHUNG. Hai ca cần đúng CÙNG một lượt, mà mỗi lượt tốn ~4-10s ⇒
+        memo hoá (đỡ một lượt quét mỗi lần chạy selftest). Chốt hình dạng MỘT chỗ: tới đây mà không
+        nổ thì lượt quét CHẮC CHẮN đã chạy thật, hai ca gọi sau chỉ còn việc phán nội dung."""
+        if not _r218_memo_toankho:
+            _rc, _j, _ = _r218_run()
+            if not isinstance(_j, dict) or "basis" not in _j or "layers" not in _j:
+                raise _R218ScanChet(f"BAO_CAO_THIEU_KHOA [(toàn kho)] — khoá có: {sorted(_j)[:8]}")
+            _r218_memo_toankho["rc"], _r218_memo_toankho["j"] = _rc, _j
+        return _r218_memo_toankho["rc"], _r218_memo_toankho["j"]
 
     def _r218_doc(td, body: str):
         d = Path(td) / "tailieu"
@@ -21521,7 +21558,7 @@ def run() -> int:
         with _tf219.TemporaryDirectory() as td:
             d = _r218_doc(td, "# T\n\nKhông có gì đặc biệt.\n")
             _, j_hep, _ = _r218_run("--path", str(d))
-        _, j_rong, _ = _r218_run()
+        _, j_rong = _r218_run_toankho()   # r223: lượt chung, nổ có lý do nếu quét không chạy được
         _bl = j_rong.get("by_layer") or {}
         return ((j_hep.get("layers_skipped") or {}).get("L9")
                 and "L9" not in (j_rong.get("layers_skipped") or {})
@@ -21541,12 +21578,39 @@ def run() -> int:
         L10: 24/30 version GAS không có tệp .gs vì kho cố ý chỉ giữ 6 bản gần nhất). Lý do phải đi
         THEO SẢN PHẨM: phiên sau đọc `basis.layers_bac` là biết ngay, khỏi 'bổ sung nốt' rồi tự đổ
         rác vào chính báo cáo mình cần đọc."""
-        _, j, _ = _r218_run()
+        _, j = _r218_run_toankho()   # r223: lượt chung (memo), KHÔNG quét lại toàn kho lần hai
         bac = ((j.get("basis") or {}).get("layers_bac") or {})
         return (set(bac) == {"L10", "L11"} and all(len(v) > 40 for v in bac.values())
                 and "L10" not in (j.get("layers") or []) and "L11" not in (j.get("layers") or []))
 
     _t110("r219_docclaims_l10_l11_bi_bac_co_ghi_ly_do", _c219_l10_l11_bi_bac_co_ghi_ly_do)
+
+    def _c223_khung_test_khong_duoc_nuot_loi():
+        """r223 — PHẢN CHỨNG 2 CHIỀU trên `_r218_phanxu`, ĐƯỜNG SẢN XUẤT (`_r218_run` gọi đúng hàm
+        này, không bind). Chiều XUÔI: báo cáo thật vẫn đọc được, kể cả khi có rác trước JSON.
+        Chiều NGƯỢC — ba dạng hỏng mà TRƯỚC r223 đều hoá `{}` lặng lẽ rồi để hai ca gọi trần đỏ y
+        như một hồi quy thật: nay cả ba phải NỔ, và nổ KÈM MÃ LÝ DO + ngữ cảnh lượt quét.
+        Ca thứ tư khoá cái memo: hai ca gọi trần phải dùng ĐÚNG MỘT lượt quét (đo 29-07: mỗi lượt
+        toàn kho 3,88s đo đơn, 8,5-10,2s khi ép tải ⇒ quét hai lần là phí, và nhân đôi cửa sổ hỏng).
+        ★Vì sao không đo bằng `timeout`: 4 lượt selftest nối + ép 6 luồng song song đều KHÔNG chạm
+        trần 300s (biên 30-77 lần) ⇒ quá hạn là nghi phạm SAI; khuyết thật là nuốt lỗi."""
+        ok_xuoi = _r218_phanxu('rác đầu dòng\n{"ok": true, "basis": {}}', "t").get("ok") is True
+        _ly_do = []
+        for _hong in ("", "Traceback (most recent call last):\nOSError: sập", '{"ok": tru'):
+            try:
+                _r218_phanxu(_hong, "t")
+                _ly_do.append(None)     # nuốt lỗi ⇒ khuyết r223 còn nguyên ⇒ ca này PHẢI đỏ
+            except _R218ScanChet as _e223:
+                _ly_do.append(str(_e223))
+        ok_nguoc = all(r and "[t]" in r for r in _ly_do)
+        ok_ma = ([r.split()[0] for r in _ly_do if r]
+                 == ["STDOUT_KHONG_CO_JSON", "STDOUT_KHONG_CO_JSON", "JSON_HONG"])
+        _, _j1 = _r218_run_toankho()
+        _, _j2 = _r218_run_toankho()
+        ok_memo = _j1 is _j2 and isinstance(_j1, dict) and "basis" in _j1
+        return ok_xuoi and ok_nguoc and ok_ma and ok_memo
+
+    _t110("r223_khung_test_khong_duoc_nuot_loi", _c223_khung_test_khong_duoc_nuot_loi)
 
     def _c219_hai_manifest_egress_song_doi():
         """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho

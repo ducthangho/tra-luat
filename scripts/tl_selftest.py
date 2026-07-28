@@ -21580,6 +21580,74 @@ def run() -> int:
 
     _t110("r220_docclaims_l4_lich_su_advisory_va_ratchet_kho", _c220_l4_lich_su_advisory_va_ratchet_kho)
 
+    # ---- r221: cổng T1 số hiệu (verify_deep) --------------------------------
+    # Đo 28-07 trên 11 record cache: phép cũ `re.escape(so_hieu.split("/")[0])` đúng 0/11 —
+    # CHƯA TỪNG khớp một lần nào, vì đường nạp truyền KHOÁ REGISTRY gạch ngang còn bản in
+    # dùng gạch chéo. Sau khi vá: 10/11, và cờ còn lại (89-2026-VBHN-VPQH) là THẬT.
+    def _r221_verify_deep_nobind():
+        """Nạp THẲNG scripts/verify_deep.py — KHÔNG qua tl/bind (bẫy false-green r212)."""
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("verify_deep_nobind_r221", _ROOT209 / "scripts" / "verify_deep.py")
+        _m = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _c221_sohieu_khop_ca_ba_khac_biet():
+        """CHIỀU THUẬN — phải khớp bất kể CẢ BA khác biệt giữa khoá registry và bản in."""
+        _m = _r221_verify_deep_nobind()
+        f = _m.sohieu_corroborated
+        # (1) ★CA ĐỐI CHỨNG CHỨA CHỮ Đ — BẮT BUỘC phải có. 'Đ' U+0110 KHÔNG phân rã bằng
+        #     NFKD; nếu ai đó bỏ bước replace('Đ','D') thì '158/2025/NĐ-CP' nén thành
+        #     '1582025ncp' (mất 'd') và ca này ĐỎ. Kiểm bằng ca QH15/VBHN (không có Đ) thì
+        #     phép sai VẪN XANH — nên ca này là ca duy nhất bắt được đột biến đó.
+        ok1 = f("158-2025-ND-CP", "CHÍNH PHỦ\nSố: 158/2025/NĐ-CP\nHà Nội, ngày 25 tháng 6 năm 2025\n")
+        # (2) gạch ngang (khoá) vs gạch chéo (bản in)
+        ok2 = f("212-2025-ND-CP", "Số: 212/2025/NĐ-CP\n")
+        # (3) VBHN: khoá mang NĂM tiêm thêm, bản in KHÔNG có năm
+        ok3 = f("19-2026-VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        # (4) layout VPQH in số hiệu CHỈ ở khối XÁC THỰC cuối bài (đo thật: 54/VBHN-VPQH ở
+        #     vị trí 105.362/108.650) ⇒ chỉ soi head-2000 là bỏ sót
+        ok4 = f("54-2025-VBHN-VPQH", "x" * 9000 + "\nVĂN PHÒNG QUỐC HỘI\nSố: 54/VBHN-VPQH\n" + "y" * 500)
+        # (5) không khai số hiệu ⇒ không phạt
+        ok5 = f("", "bất kỳ")
+        # (6) ★nguồn viết THƯỜNG: 'đ' U+0111 cũng KHÔNG phân rã bằng NFKD. Ca này là ca
+        #     DUY NHẤT giữ chốt .replace('đ','d') — thiếu nó thì chốt đó là mã chết
+        #     (phản chứng M8 đo được: bỏ chốt mà 5 ca trên vẫn XANH).
+        ok6 = f("158-2025-ND-CP", "số: 158/2025/nđ-cp")
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+
+    _t110("r221_t1_sohieu_khop_ca_ba_khac_biet", _c221_sohieu_khop_ca_ba_khac_biet)
+
+    def _c221_sohieu_khong_noi_qua_tay():
+        """CHIỀU NGƯỢC — cái đắt nhất phải KHÔNG xảy ra: nới tay tới mức cho qua bản SAI."""
+        _m = _r221_verify_deep_nobind()
+        f = _m.sohieu_corroborated
+        # (1) số hiệu SAI thật vẫn phải bị bắt
+        ok1 = not f("99-2099-ND-CP", "CHÍNH PHỦ\nSố: 158/2025/NĐ-CP\n")
+        # (2) ★KHÔNG quét toàn văn: khối CĂN CỨ dẫn số hiệu văn bản KHÁC. Đo: quét toàn văn
+        #     cho 6/110 ô khớp nhầm (thân ND 158 chứa '41/2024/QH15') ⇒ một doc_key gán SAI
+        #     sẽ lọt im lặng. Số hiệu nằm GIỮA thân KHÔNG được tính là corroborate.
+        ok2 = not f("158-2025-ND-CP", "x" * 9000 + "Số: 158/2025/NĐ-CP" + "y" * 9000)
+        # (3) văn bản rỗng
+        ok3 = not f("158-2025-ND-CP", "")
+        # (4) ★số hiệu RÁC nén ra chuỗi RỖNG — '' nằm trong MỌI chuỗi ⇒ nếu chốt đặt trên
+        #     phạm vi thay vì trên số hiệu đã nén thì nó khớp mọi văn bản
+        ok4 = not f("///", "CHÍNH PHỦ\nSố: 158/2025/NĐ-CP\n") and not f("---", "")
+        # (5) ★NỐI VÀO ĐƯỜNG CHẠY THẬT — bài học r219: guard không nối vào gate chỉ là tài
+        #     liệu. Đi qua t1_structure chứ không chỉ gọi hàm con.
+        _doc = ("VĂN PHÒNG QUỐC HỘI\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nSố: 19/VBHN-VPQH\n"
+                "LUẬT\nĐiều 1. Phạm vi điều chỉnh\nNội dung điều 1.\n"
+                "Điều 2. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 01.\n")
+        _r_ok = {"flags": []}
+        _m.t1_structure(_doc, None, "19-2026-VBHN-VPQH", _r_ok)
+        ok5 = not any("T1-nhẹ" in x for x in _r_ok["flags"])
+        _r_bad = {"flags": []}
+        _m.t1_structure(_doc, None, "99-2099-ND-CP", _r_bad)
+        ok6 = any("T1-nhẹ" in x for x in _r_bad["flags"])
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+
+    _t110("r221_t1_sohieu_khong_noi_qua_tay", _c221_sohieu_khong_noi_qua_tay)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

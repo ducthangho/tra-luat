@@ -16150,6 +16150,93 @@ def run() -> int:
                 and _cache_sau == "CACHE_CU")              # mark: KHÔNG ghi đè cache chuẩn
     _t110("r182_markup_mode_bypasses_cache", _c182_markup_bypasses_cache)
 
+    # ══════════ r222 — DẤU CÁCH BỊ GẠCH: BỎ NÓ LÀ DÍNH CHỮ (ĐẺ RA CHỮ KHÔNG CÓ TRONG VĂN BẢN) ══════════
+    # Đo 28-07-2026 trên `19-2026-VBHN-VPQH` @121.553 — VBHN Luật BHXH, tức CĂN CỨ ĐỐI CHIẾU Luật mẹ của
+    # cả hồ sơ rà. Nguồn viết: [run 'hủy bỏ quyết định tuyên bố mất tích…'] + [run STRIKE ' '] +
+    # [run 'quyết định…'] ⇒ NGUỒN VIẾT ĐÚNG. Bộ lọc bỏ CẢ run giữa: raw 187.401 vs strip/mark/auto
+    # 187.399 (−2 = đúng 2 dấu cách bị gạch) ⇒ **«hủy bỏquyết định»**. Dấu cách bị gạch là TÀN DƯ ĐỊNH
+    # DẠNG, không phải «chữ đã bỏ» theo nghĩa nghiệp vụ. ★Bỏ nhầm CHỮ = MẤT nội dung (dễ thấy); bỏ nhầm
+    # DẤU CÁCH = SINH nội dung mới (đọc vẫn trôi, không ai thấy) ⇒ hại hơn. Chế độ `mark` cũng dính, dù
+    # nó đáng lẽ chỉ ĐÁNH DẤU. Lỗi này còn LẬT một bằng chứng cũ: «Điều 80 bản kho dính chữ bỏquyết»
+    # từng bị quy cho NGUỒN, thật ra là lỗi ĐƯỜNG ĐỌC.
+    _CAU222 = "hủy bỏ quyết định tuyên bố mất tích hoặc hủy bỏ quyết định tuyên bố là đã chết"
+    _SPACE222 = '<w:r><w:rPr><w:strike/></w:rPr><w:t xml:space="preserve"> </w:t></w:r>'
+    _BODY222 = ("<w:p>" + _RUN182.format("hủy bỏ quyết định tuyên bố mất tích hoặc hủy bỏ") + _SPACE222
+                + _RUN182.format("quyết định tuyên bố là đã chết") + "</w:p>")
+    _fx222 = _mkdocx182(str(_d182 / "r222_space.docx"), _BODY222)
+
+    def _c222_khong_dinh_chu():
+        _x = f"<w:document {_NS182}><w:body>{_BODY222}</w:body></w:document>"
+        # CẢ BA chế độ phải đọc ra ĐÚNG câu gốc (mark: nhãn ⟦BỎ:…⟧ dành cho CHỮ, không cho dấu cách).
+        _ok_xml = all(_dm182.chunk_payload(_dm182.strip_markup(_x, _m)[0]) == _CAU222
+                      for _m in ("raw", "strip", "mark"))
+        # ĐỦ 4 ĐƯỜNG ĐỌC SẢN XUẤT — bài học r182: vá một reader KHÔNG phải vá xong bẫy.
+        _t_zip, _ = _nd182._docx_zip_text(_fx222, "strip")
+        _t_probe, _ = _TL_MODULE._profile_read_probe_text(_fx222)
+        _t_unzip = _TL_MODULE._docx_unzip_text(_fx222)
+        try:
+            import docx as _dx222  # noqa: F401
+            _t_lib, _ = _nd182._docx_lib_text(_fx222, "strip")
+        except ImportError:
+            _t_lib = _CAU222       # không có lib ⇒ nhánh này không tồn tại trên máy
+        # `xml:space="preserve"` là BẮT BUỘC theo OOXML cho dấu cách đầu/cuối w:t — thiếu nó thì Word
+        # (và mọi bộ đọc tôn trọng lược đồ) nuốt lại đúng dấu cách vừa cứu. ★Phải đo trên xml mà các run
+        # CÒN LẠI KHÔNG mang sẵn thuộc tính đó, nếu không phép so xanh nhờ chuỗi của người khác
+        # (false-green — đúng bẫy đã trả giá ở phép kiểm bundle lượt 14).
+        _x_attr = (f"<w:document {_NS182}><w:body><w:p><w:r><w:t>A</w:t></w:r>" + _SPACE222
+                   + "<w:r><w:t>B</w:t></w:r></w:p></w:body></w:document>")
+        _ok_attr = 'xml:space="preserve"' in _dm182.strip_markup(_x_attr, "strip")[0]
+        return (_ok_xml and _ok_attr and all(_CAU222 in _t and "bỏquyết" not in _t
+                                             for _t in (_t_zip, _t_probe, _t_unzip, _t_lib)))
+    _t110("r222_dau_cach_bi_gach_khong_dinh_chu", _c222_khong_dinh_chu)
+
+    # (ĐỐI CHỨNG NGƯỢC — chặn "vá quá tay") mẩu RỖNG HẲN vẫn phải bị bỏ SẠCH: `<w:del …/>` tự đóng =
+    # đánh dấu XOÁ DẤU-ĐOẠN, có ở MỌI docx track-changes.
+    # ★PHẢI SO Ở MỨC XML, không phải mức văn bản — đo bằng đột biến M2 của r222: bỏ vế `pay and` thì
+    # mẩu rỗng trả "" (và `"" is not None`) nên sinh `<w:t></w:t>` RỖNG; văn bản KHÔNG đổi nên mọi ca
+    # đo theo text vẫn xanh, tức chốt trông như mã chết trong khi nó thật sự giữ một bất biến. Cái bị
+    # phá là bất biến thiết kế của module — «chỉ CẮT/BÓC tag markup, KHÔNG đụng gì khác» (cùng họ
+    # `r182_no_markup_is_noop`): mọi ranh giới đoạn bị chèn một run rỗng.
+    # Ca này cũng khoá `chunk_payload` phải đọc TRONG w:t/w:delText: docx in đẹp có xuống dòng GIỮA các
+    # tag, hiểu nhầm nó là khoảng trắng nội dung thì lại đẻ dấu cách ma theo đường khác.
+    def _c222_rong_han_khong_de_dau_cach():
+        _tag222 = '<w:del w:id="9" w:author="a" w:date="2026-07-28T00:00:00Z"/>'
+        _x = (f"<w:document {_NS182}><w:body><w:p>" + _RUN182.format("A") + _tag222
+              + _RUN182.format("B") + "</w:p></w:body></w:document>")
+        _o, _ = _dm182.strip_markup(_x, "strip")
+        return (_o == _x.replace(_tag222, "")          # ĐÚNG BẰNG xml vào trừ đi đúng cái tag markup
+                and _dm182.chunk_payload(_o) == "AB"
+                and _dm182.chunk_payload('<w:del w:id="9"/>') == ""
+                and _dm182.chunk_payload('<w:r><w:t xml:space="preserve"> </w:t></w:r>') == " "
+                and _dm182.chunk_payload("<w:del>\n  <w:r/>\n</w:del>") == "")
+    _t110("r222_mau_rong_han_khong_de_dau_cach_ma", _c222_rong_han_khong_de_dau_cach)
+
+    # (PHỦ ĐỦ THỂ) w:del · w:moveFrom · delText LẠC (đi nhánh `_cut_inline` — nằm SẴN trong w:r nên chỉ
+    # được thay bằng w:t, bọc w:r nữa là lồng run sai lược đồ) · run gạch chỉ chứa <w:tab/>. Mỗi thể là
+    # một nhánh mã: thiếu ca thì đột biến sống (r219/r221: chốt không đột biến nào giết được là chốt CHƯA
+    # ĐƯỢC CHỨNG MINH). Đo bằng `chunk_payload` chứ không `xml_chunk_text` — cái sau nén \s+ nên "A  B"
+    # cũng xanh, tức là ca hỏng vẫn qua.
+    def _c222_moi_the_giu_dau_cach():
+        def _p(body):
+            _o, _ = _dm182.strip_markup(
+                f"<w:document {_NS182}><w:body><w:p>{body}</w:p></w:body></w:document>", "strip")
+            return _dm182.chunk_payload(_o)
+        return (_p(_RUN182.format("A") + '<w:del w:id="1"><w:r><w:delText xml:space="preserve"> '
+                   "</w:delText></w:r></w:del>" + _RUN182.format("B")) == "A B"
+                and _p(_RUN182.format("C") + '<w:moveFrom w:id="2"><w:r><w:t xml:space="preserve"> '
+                       "</w:t></w:r></w:moveFrom>" + _RUN182.format("D")) == "C D"
+                and _p(_RUN182.format("E") + '<w:r><w:delText xml:space="preserve"> </w:delText>'
+                       "</w:r>" + _RUN182.format("F")) == "E F"
+                and _p(_RUN182.format("G") + '<w:r><w:rPr><w:strike/></w:rPr><w:tab/></w:r>'
+                       + _RUN182.format("H")) == "G H"
+                # Giữ ĐÚNG khoảng trắng nguồn, không quy về một dấu cách: strip phải trùng raw.
+                and _p(_RUN182.format("K") + _STK182.format("strike", "", "  ")
+                       + _RUN182.format("L")) == "K  L"
+                # ...và CHỮ bị gạch thì vẫn phải BỎ — r222 không được nới thành "giữ tất".
+                and _p(_RUN182.format("I") + _STK182.format("strike", "", "BOCHU")
+                       + _RUN182.format("J")) == "IJ")
+    _t110("r222_moi_the_markup_giu_dau_cach", _c222_moi_the_giu_dau_cach)
+
     # ══════════ r183 — NGUỒN GOOGLE DOC: `--markup` KHÔNG ĐƯỢC LÀ NO-OP IM LẶNG ══════════
     # Đo thật 23-07-2026 (Dự thảo Luật BHXH 16/7, drive_id 1ltPv6…): `tl doc-text <id> --markup strip`
     # trả CHÍNH BẢN THÔ (25.339 ký tự cả 3 chế độ, 0 nhãn ⟦BỎ⟧) trong khi .docx gốc strip=21.131 —

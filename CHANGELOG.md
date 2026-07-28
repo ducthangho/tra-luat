@@ -1,3 +1,86 @@
+# ★ v1.35.58 — r222: dấu cách bị gạch trong .docx — bộ lọc markup ĐẺ RA chữ không có trong văn bản (+3 test, 1375/1375) (2026-07-28)
+
+> Lượt rà hồ sơ đo ra `scripts/docx_markup.py` bỏ TRỌN run bị gạch **kể cả khi nội dung bị gạch chỉ
+> là MỘT DẤU CÁCH** ⇒ hai từ dính liền. Đo trên `19-2026-VBHN-VPQH` (VBHN Luật BHXH — căn cứ đối
+> chiếu Luật mẹ của cả hồ sơ) @121.553: `raw` = 187.401 ký tự, văn bản «hủy bỏ quyết định»;
+> `strip`/`mark`/`auto` = 187.399 (**−2**, đúng 2 dấu cách bị gạch) ⇒ **«hủy bỏquyết định»**.
+> **Nguồn viết ĐÚNG, công cụ làm hỏng.**
+
+## Vì sao đây là lỗi nặng chứ không phải lỗi trình bày
+
+Bỏ nhầm **chữ** = MẤT nội dung — dễ thấy, dễ bắt. Bỏ nhầm **dấu cách** = SINH nội dung mới: câu vẫn
+đọc trôi, không ai soi, và chữ lạ ấy đi thẳng vào bản trích dẫn quy phạm. Dấu cách bị gạch là **tàn
+dư định dạng**, không phải «chữ đã bỏ» theo nghĩa nghiệp vụ.
+
+★Lỗi này **lật một bằng chứng của đợt rà trước**: «Điều 80 bản kho dính chữ *bỏquyết*» từng được
+dùng để kết luận «bản Công báo đúng hơn» ở Luật 41/2024. Thực ra bản kho không sai — **bộ lọc sai**;
+lỗi biến mất khi đổi nguồn chỉ vì bản mới không mang markup, tức **gỡ được tình cờ**. ⇒ *Một «lỗi
+của dữ liệu» có thể là lỗi của ĐƯỜNG ĐỌC dữ liệu; đối chiếu `--markup raw` trước khi quy lỗi cho
+nguồn.*
+
+## Chỗ hỏng
+
+`_cut_block`/`_cut_inline` xoá mẩu markup rồi mới hỏi có nhãn không, mà nhãn dựng bằng
+`xml_chunk_text` — hàm này nén `\s+` rồi `.strip()`, nên trả `""` cho **CẢ** mẩu rỗng hẳn **LẪN**
+mẩu chỉ-khoảng-trắng. Hai thứ đó phải xử lý **ngược nhau**, nhưng đường cũ không phân biệt được.
+★Chế độ `mark` dính y hệt, dù nó đáng lẽ chỉ ĐÁNH DẤU chứ không xoá.
+
+## Cách vá
+
+- `scripts/docx_markup.py:76` — thêm `chunk_payload()`: chữ THÔ, **chỉ ruột `w:t`/`w:delText`**
+  (`scripts/docx_markup.py:48`), giữ nguyên khoảng trắng, softbreak (`w:tab`/`w:br`/`w:cr`) tính là
+  một dấu cách. Chỉ đọc trong phần tử text — **không** lấy mọi text lọt giữa tag, để docx bị in đẹp
+  (xuống dòng giữa các tag) không bị hiểu nhầm là có khoảng trắng nội dung.
+- `scripts/docx_markup.py:150` — `_keep_space()`: mẩu bị bỏ mà ruột **chỉ có khoảng trắng** thì trả
+  **chính khoảng trắng đó** (không quy về một dấu cách), ngược lại trả `None` = bỏ như cũ. Áp ở **cả
+  ba** chế độ: nhãn `⟦BỎ: ⟧` vừa là rác vừa không phải nội dung bị bỏ.
+- Phủ đủ thể: `w:del` · `w:moveFrom` · run `w:strike`/`w:dstrike` · `delText` lạc
+  (`scripts/docx_markup.py:177`, chỉ được thay bằng `w:t` vì đang nằm SẴN trong `w:r`).
+- Thẻ sinh ra mang `xml:space="preserve"` — bắt buộc theo OOXML cho khoảng trắng đầu/cuối `w:t`.
+
+Một chỗ vá phủ **mọi** reader: đo trước khi sửa — `strip_markup` là đường DUY NHẤT, 4 nơi gọi
+(`scripts/normalize_document.py`, `scripts/tl_core/ingest_ops.py`, `scripts/tl_core/lookup_ops.py`),
+**0 bản sao chép logic**. Đây đúng là chỗ r182 từng trả giá (vá một reader, còn hai reader kia sai
+tiếp), nên lần này kiểm trước bằng phép đo chứ không bằng trí nhớ.
+
+## Phản chứng — và đột biến lọt lưới là phát hiện đáng giá nhất
+
+**8 đột biến THẬT vào mã sản xuất, chạy bộ test ĐÓNG GÓI (không phải harness rời): 8/8 đỏ đúng ca.**
+Riêng M5 («nới thành giữ tất») đỏ thêm **11 ca r182** — đúng, vì nó phá luôn bất biến cũ.
+
+★**Lượt đầu M2 LỌT LƯỚI, và nó lật chính lời chú thích vừa viết.** M2 = bỏ vế `pay and` trong
+`pay and not pay.strip()`. Chú thích ban đầu bảo vế ấy chống «đẻ dấu cách ma ở mọi ranh giới đoạn» —
+**sai**: mẩu rỗng trả `""`, mà `"" is not None`, nên cái sinh ra là `<w:t></w:t>` **RỖNG**, tức VĂN
+BẢN không đổi. Khác biệt thật nằm ở mức **XML**: `<w:del …/>` tự đóng (đánh dấu xoá dấu-đoạn) có
+trong MỌI docx track-changes, nên bỏ vế này là chèn một run rỗng vào **mọi ranh giới đoạn** — phá
+bất biến thiết kế «chỉ CẮT/BÓC tag markup, KHÔNG đụng gì khác» (cùng họ `r182_no_markup_is_noop`).
+⇒ ca khoá đổi sang **so ở mức XML** (`_o == _x` trừ đúng cái tag) rồi M2 mới chết.
+
+*Bài học giữ lại:* chốt đúng việc mà **chú thích sai lý do** còn nguy hơn chốt thừa — phiên sau đọc
+chú thích rồi gỡ nhầm. Đột biến là thứ duy nhất phân xử được điều đó.
+
+## Hai lỗi của chính đợt này, ghi để khỏi lặp
+
+1. **Phép kiểm toàn vẹn lấy MẪU không phải là phép kiểm toàn vẹn.** Harness phản chứng bị giết giữa
+   chừng ⇒ `finally` không chạy ⇒ đột biến M3 **nằm lại trên mã canonical**. Tôi kiểm bằng
+   `git diff --numstat` (36/2) + `grep` **một dòng** ⇒ cả hai đều xanh, vì M3 thay 2 dòng bằng 2
+   dòng và không đụng dòng được grep. Lượt chạy sau lấy chính file bẩn làm «bản pristine» ⇒ bản sao
+   lưu cũng nhiễm. **Toàn vẹn phải đo bằng hash CẢ TỆP; bản gốc phải lấy từ trạng thái đã xác minh.**
+2. **Chốt chống rỗng, lần thứ hai trong hai đợt liên tiếp.** Harness in `?/?` khi không parse được
+   kết quả, mà chốt `base_ok != base_tot` vẫn xanh vì **so hai dấu `?` với nhau**. Nay nền phải là
+   **số thật** và phải **đúng bằng** số ca mong đợi mới được chạy tiếp.
+
+## Ranh giới — r222 vá CÔNG CỤ, không tự sửa DỮ LIỆU
+
+Record cache `19-2026-VBHN-VPQH` **vẫn còn** «bỏquyết» (đúng 1 chỗ trên toàn cache 11 record; 10
+record kia `markup=null` nên không dính). Cờ `markup strike=2` treo trên record ấy **vẫn báo** sau
+r222: `scan()` đếm theo THỂ, không phân biệt gạch-chữ với gạch-khoảng-trắng — cố ý không đổi, vì
+thêm trường vào `stats` là đổi lược đồ đã ghi vào record. Người thẩm tra quyết **không nạp lại**
+lượt này.
+
+*Đây là lần thứ tư một đợt phải nhắc lại cùng một câu: **vá công cụ không tự sửa dữ liệu công cụ đã
+làm hỏng.***
+
 # ★ v1.35.57 — r221: cổng T1 số hiệu của `verify_deep` — sửa một phép so CHƯA TỪNG khớp đúng lần nào (+2 test, 1372/1372) (2026-07-28)
 
 > Lượt rà hồ sơ đo ra `verify_deep.py:287` sai ở **11/11** record cache: nó gắn cờ «không thấy số

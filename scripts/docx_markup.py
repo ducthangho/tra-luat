@@ -25,7 +25,7 @@ import html as _html
 import re
 
 __all__ = ["MODES", "MARK_OPEN", "MARK_CLOSE", "has_markup", "scan", "scan_file", "strip_markup",
-           "warn_line", "resolve_mode", "xml_chunk_text"]
+           "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload"]
 
 MARK_OPEN = "⟦BỎ:"
 MARK_CLOSE = "⟧"
@@ -44,6 +44,8 @@ _RE_UNWRAP = re.compile(r"</?w:(?:ins|moveTo)\b[^>]*/?>")
 # delText lạc ngoài w:del (docx sinh bởi công cụ lạ) — lưới phụ.
 _RE_DELTEXT = re.compile(r"<w:delText\b[^>]*>.*?</w:delText>", re.S)
 _RE_RUN = re.compile(r"<w:r\b[^>]*>.*?</w:r>", re.S)
+# Ruột text THẬT của mẩu xml (w:t/w:delText). `\b` chặn khớp nhầm <w:tab/>.
+_RE_TEXTEL = re.compile(r"<w:(t|delText)\b[^>]*>(.*?)</w:\1>", re.S)
 _RE_RPR = re.compile(r"<w:rPr\b[^>]*>.*?</w:rPr>", re.S)
 _RE_STRIKE = re.compile(r"<w:(?:d)?strike\b[^>]*/?>")
 _RE_VAL = re.compile(r'w:val\s*=\s*"([^"]*)"')
@@ -69,6 +71,16 @@ def xml_chunk_text(chunk: str) -> str:
     t = _RE_SOFTBREAK.sub(" ", chunk)
     t = _html.unescape(_RE_TAG.sub("", t))
     return re.sub(r"\s+", " ", t).strip()
+
+
+def chunk_payload(chunk: str) -> str:
+    """v1.35.58 (r222) — chữ THÔ của mẩu xml: CHỈ ruột w:t/w:delText (tab/br/cr = một dấu cách),
+    GIỮ NGUYÊN khoảng trắng. Khác `xml_chunk_text` đúng ở chỗ r222 cần: `xml_chunk_text` nén rồi
+    `.strip()` nên trả "" cho CẢ mẩu RỖNG HẲN lẫn mẩu CHỈ-KHOẢNG-TRẮNG — mà hai thứ đó phải xử lý
+    NGƯỢC nhau (xem `strip_markup._keep_space`). Chỉ đọc trong w:t/w:delText, không phải mọi text
+    lọt giữa tag, để docx bị in đẹp (xuống dòng giữa các tag) không bị hiểu nhầm là có khoảng trắng."""
+    x = _RE_SOFTBREAK.sub("<w:t> </w:t>", chunk or "")
+    return "".join(_html.unescape(m.group(2)) for m in _RE_TEXTEL.finditer(x))
 
 
 def has_markup(xml: str) -> bool:
@@ -116,7 +128,10 @@ def resolve_mode(mode: str, *, is_draft: bool) -> str:
 
 def strip_markup(xml: str, mode: str = "strip") -> tuple:
     """Trả (xml_đã_xử_lý, stats). mode: strip=loại hẳn · mark=thay bằng ⟦BỎ:…⟧ · raw=giữ nguyên (hành vi
-    TRƯỚC r182, chỉ để đối chứng). Tài liệu sạch markup ⇒ trả CHÍNH chuỗi vào (bất biến no-op)."""
+    TRƯỚC r182, chỉ để đối chứng). Tài liệu sạch markup ⇒ trả CHÍNH chuỗi vào (bất biến no-op).
+
+    v1.35.58 (r222): mẩu bị bỏ mà ruột CHỈ có khoảng trắng thì GIỮ khoảng trắng ở MỌI chế độ (kể cả
+    `mark`: nhãn ⟦BỎ: ⟧ vừa là rác vừa không phải nội dung bị bỏ) — xem `_keep_space`."""
     x = xml or ""
     st = scan(x)
     if mode == "raw" or not has_markup(x):
@@ -132,8 +147,28 @@ def strip_markup(xml: str, mode: str = "strip") -> tuple:
         t = t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         return f'<w:t xml:space="preserve">{MARK_OPEN}{t}{MARK_CLOSE}</w:t>'
 
+    def _keep_space(m):
+        """v1.35.58 (r222) — mẩu bị bỏ mà ruột CHỈ có khoảng trắng thì trả CHÍNH khoảng trắng đó,
+        ngược lại trả None (= bỏ như cũ). Đo 28-07 trên `19-2026-VBHN-VPQH` @121.553: nguồn viết
+        `[run 'hủy bỏ quyết định tuyên bố mất tích'] + [run STRIKE ' '] + [run 'quyết định…']`, bỏ
+        cả run giữa ⇒ raw 187.401 vs strip 187.399 ⇒ **«hủy bỏquyết định»** — công cụ ĐẺ RA một chữ
+        không có trong văn bản. DẤU CÁCH bị gạch là TÀN DƯ ĐỊNH DẠNG, không phải «chữ đã bỏ» theo
+        nghĩa nghiệp vụ: bỏ chữ thì mất nội dung, bỏ dấu cách thì SINH nội dung — hại hơn.
+        ★Vế `pay and` KHÔNG thừa, nhưng lý do KHÔNG phải «đẻ dấu cách ma» — đo bằng đột biến M2 của
+        r222: bỏ vế đó thì mẩu rỗng trả `""`, mà `"" is not None` nên sinh ra `<w:t></w:t>` RỖNG, tức
+        VĂN BẢN không đổi (mọi ca đo theo text đều xanh — chốt trông như mã chết). Khác biệt thật ở
+        mức XML: `<w:del …/>` tự đóng (đánh dấu xoá DẤU-ĐOẠN) có ở mọi docx track-changes, nên bỏ vế
+        này là chèn một run rỗng vào MỌI ranh giới đoạn — phá bất biến thiết kế của module («chỉ
+        CẮT/BÓC tag markup, KHÔNG đụng gì khác», cùng họ với `r182_no_markup_is_noop`). Ca khoá phải
+        so ở mức XML mới giết được M2."""
+        pay = chunk_payload(m.group(0))
+        return pay if (pay and not pay.strip()) else None
+
     def _cut_block(m):
         """Chỗ thay là cấp INLINE trong w:p (w:del / w:moveFrom / w:r) → bọc trong w:r cho hợp lệ."""
+        sp = _keep_space(m)
+        if sp is not None:
+            return f'<w:r><w:t xml:space="preserve">{sp}</w:t></w:r>'
         if mode != "mark":
             return ""
         lb = _label(m)
@@ -141,6 +176,9 @@ def strip_markup(xml: str, mode: str = "strip") -> tuple:
 
     def _cut_inline(m):
         """delText lạc nằm SẴN trong w:r → chỉ thay bằng w:t (bọc w:r nữa sẽ lồng run, sai lược đồ)."""
+        sp = _keep_space(m)
+        if sp is not None:
+            return f'<w:t xml:space="preserve">{sp}</w:t>'
         return _label(m) if mode == "mark" else ""
 
     x = _RE_PRCHANGE.sub("", x)          # (1) bản ghi định dạng cũ — TRƯỚC khi dò strike

@@ -558,7 +558,9 @@ _POINTER_ARCHIVE_DOCS = frozenset({"references/DOCTRINE_APPENDIX.md"})
 _POINTER_BASELINE = frozenset({
     ("references/COWORK_EDIT_SAFETY.md", "scripts/ten_file.py"),        # placeholder ví dụ trong prose
     ("references/GOTCHAS.md", "scripts/.tl_state"),                     # thư mục runtime, cố ý ngoài gói
-    ("references/SKILL_KERNEL_MAPPING.md", "references/SKILL_KERNEL_DRAFT.md"),
+    # (r226 TRẢ NỢ: cặp SKILL_KERNEL_MAPPING.md → references/SKILL_KERNEL_DRAFT.md đã gỡ khỏi baseline —
+    #  `doc-claims-check` L1 bắt đúng rằng tệp đó CHƯA BAO GIỜ có trong kho, nên tài liệu đã sửa lời cho
+    #  đúng thay vì khoanh nợ tiếp. Ratchet siết 4 → 3.)
     ("references/THE_THUC_TRINH_BAY.md", "templates/_nguon-goc/"),      # đường DRIVE `_meta/templates/…` — false-positive giữ chủ đích
 })
 

@@ -180,7 +180,8 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 ## Kiến trúc skill
 
 - **Kernel (SKILL.md)** — doctrine agent đọc mỗi phiên; đích Pha F: 20-35KB, chỉ bất biến + con trỏ references.
-  Quy trình đổi kernel: draft ở `references/SKILL_KERNEL_DRAFT.md` → user duyệt → thay thật → re-import.
+  Quy trình đổi kernel: draft ở tệp nháp CỤC BỘ trong `references/` (tên đang dùng: `SKILL_KERNEL_DRAFT.md`;
+  KHÔNG commit — chưa từng có trong lịch sử git) → user duyệt → thay thật → re-import.
 - **tl_core** — package module tách từ tl.py (Pha B trở đi); tl.py là CLI facade duy nhất, bên ngoài không
   gọi tl_core trực tiếp. Đích dài hạn: tl.py ≈ 2.500 dòng (facade + parser skeleton + stubs).
 - **bind(tl)** — cơ chế copy-globals cấp helper cho module tl_core trong GIAI ĐOẠN DI CƯ; là giàn giáo,

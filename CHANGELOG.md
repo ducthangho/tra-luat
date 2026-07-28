@@ -1,3 +1,56 @@
+# ★ v1.35.61 — r225: guard r218/r219 chỉ đóng ở đường TAY — nối `doc-claims-check` + `release-check` vào CI (2026-07-29)
+
+> Việc đặt ra: đối chiếu con số «gate 8 bước» (prompt bàn giao) với «gate 9 bước» (ghi chép cũ). Đối chiếu
+> cho ra: **không mâu thuẫn** — có HAI bộ gate khác tên gọi trùng, và đúng chỗ tiếp giáp giữa chúng là một
+> lỗ hổng chưa ai thấy.
+
+## Hai bộ gate — không cái nào là tập con của cái kia
+
+| | `/gate` — 8 bước | CI — 9 bước |
+|---|---|---|
+| Nguồn | `.claude/commands/gate.md` | `.github/workflows/ci.yml` (job tên `gate`) |
+| Chạy khi | người gõ TAY trong phiên | TỰ ĐỘNG: push master + PR, ubuntu × windows |
+| Chỉ nó có | `doc-claims-check --strict` · `release-check --full` · `release-verify --strict` | `py_compile` · `release-bundle` ×2 same-SHA · `tl_boot --version` |
+
+Cả hai con số đều đúng, khác đối tượng. Nhưng r218 dựng cổng kiểm trích dẫn, r219 nối nó vào `/gate` —
+**đường TAY** — mà quên CI, **đường TỰ ĐỘNG**. Đúng câu r219 tự viết ở mục v1.35.55: «guard không nối vào
+đường chạy tự động thì guard chỉ là tài liệu». Vá một reader chưa phải vá xong bẫy.
+
+## Phản chứng 2 chiều CHẠY THẬT (worktree `--detach` riêng, đã dọn)
+
+| Bước nối vào CI | Chiều XANH (checkout sạch) | Chiều ĐỎ (đột biến đúng ca) |
+|---|---|---|
+| `doc-claims-check --strict` | rc=0 | trích dẫn chết vào `references/GOTCHAS.md` → **rc=2** |
+| `release-check --full` | rc=0 | `SyntaxError` ở `tl_core/the_thuc.py` → **rc=3** |
+| `release-verify --strict` | rc=0 | file thừa `tl_core/rac_pc225.py` → **rc=2**, `extra_files` liệt kê đúng |
+
+Chiều xanh đo trên worktree checkout sạch — **cùng hình dạng cây với CI runner**, không phải cây dev có rác.
+
+## Hai ca LỌT LƯỚI, đã phân xử (không ca nào là chốt yếu)
+
+1. **VERSION lệch → `release-check` vẫn xanh.** Đột biến SAI CA: `release-check --full` là bộ py_compile +
+   `instruction_project_audit`/`instruction_nlm_audit` + `workflow_audit` in-process, nó không hề kiểm VERSION.
+2. **File `.py` lỗi cú pháp MỚI trong `tl_core/` → `release-check` vẫn xanh.** Vì bước py_compile của nó chạy
+   **danh sách tường minh 11 module**, trong khi `detail` lại ghi `"scripts/tl_core/*.py"` — nhãn nói glob,
+   việc làm là danh sách. Đo tiếp: `tl_core/` nay **29 file .py**, tức **18 module** (`the_thuc`, `ingest_engine`,
+   `classify`, `profile_mgmt`, `resolve`…) không nằm trong danh sách py_compile nào — cả `release.py` lẫn `ci.yml`.
+
+★ **18 module đó KHÔNG hở**: bơm `SyntaxError` vào `the_thuc.py` → `release-check` **rc=3** và `tl --selftest`
+**rc=3**, chỉ riêng `py_compile` danh-sách-tường-minh xanh. Nghĩa là danh sách kia **dư thừa và lệch nhãn, không
+phải lỗ hổng** ⇒ CỐ Ý KHÔNG sửa trong r225: sửa nhãn `detail` là đụng `release.py` cho một lợi ích chữ nghĩa,
+kéo theo trọn chu trình bump/gate/manifest/bundle. Ghi vào sổ để đợt nào đụng `release.py` thì sửa kèm.
+
+★ Cùng phản chứng này cho thấy **giá trị gia tăng thật** của `release-check --full` trong CI: nó ĐỎ đúng ca mà
+`py_compile` của CI xanh.
+
+## Chốt
+
+CI 9 → **11 bước**: `doc-claims-check --strict` chèn sau `golden-test` (đúng vị trí nó đứng trong `/gate`),
+`release-check --full` trước `release-verify`, và `release-verify` nay mang `--strict`. Thứ tự giữ nguyên
+`release-verify` TRƯỚC `release-bundle` — đảo lại thì `dist/a.zip`/`dist/b.zip` thành `extra_files` và `--strict`
+đỏ oan. `.github/` cố ý nằm ngoài manifest/zip (từ v1.33.59) nên thay đổi này không đụng gói skill; bump version
+là do CHANGELOG.md — file CÓ trong manifest.
+
 # ★ v1.35.60 — r224: 5 «import thừa» F401 ở tl.py KHÔNG thừa — chúng là MẶT NAMESPACE của 1646 hàm re-home (2026-07-29)
 
 > Việc đặt ra: dọn 5 F401 đầu `scripts/tl.py` (`base64` `datetime` `hashlib` `unicodedata` `zipfile`),

@@ -1,3 +1,40 @@
+# ★ v1.35.60 — r224: 5 «import thừa» F401 ở tl.py KHÔNG thừa — chúng là MẶT NAMESPACE của 1646 hàm re-home (2026-07-29)
+
+> Việc đặt ra: dọn 5 F401 đầu `scripts/tl.py` (`base64` `datetime` `hashlib` `unicodedata` `zipfile`),
+> tiền đề «import thừa THẬT vì thân tl.py đã tách sang tl_core». **Đo 29-07 BÁC tiền đề đó**: 4/5 tên có
+> hàm gọi thật, và cơ chế giữ chúng sống không phải cái grep nhìn ra được.
+
+## Vì sao cả grep lẫn phép kiểm «module có tự import chưa» đều phân xử NGƯỢC
+
+| Phép đo | Số |
+|---|---|
+| Hàm tl_core có `__globals__` **IS** namespace tl.py | **1646** |
+| Hàm re-home tra `unicodedata` | 19 |
+| Hàm re-home tra `base64` | 9 |
+| Hàm re-home tra `hashlib` | 3 |
+| Hàm re-home tra `datetime` | 2 |
+| Hàm re-home tra `zipfile` | 0 |
+
+Hàm tách sang `tl_core` được **re-home** về globals của tl.py nên tra tên toàn cục ở **tl.py**, không ở tệp
+gốc. Vì thế `tl_core/profile_mgmt.py` **có** `import datetime` mức module mà vẫn `NameError` khi tl.py
+thiếu tên — mọi phép kiểm dựa trên «tệp gốc đã tự import chưa» đều cho kết luận ngược.
+
+## Phản chứng 2 chiều (bắt buộc theo CLAUDE.md)
+
+| Lượt | Thay đổi | Kết quả |
+|---|---|---|
+| 1 | bỏ cả 5 tên | selftest **ĐỎ** — `NameError: unicodedata` ở `tl_core/classify.py` |
+| 2 | giữ `base64`+`unicodedata`, bỏ 3 tên còn lại | gate **ĐỎ** — `NameError: datetime` ở `tl_core/profile_mgmt.py` |
+| 3 | giữ cả 5 + `# noqa: F401` | gate **XANH** |
+
+Lượt 1–2 chứng minh khung đo CÓ lực phát hiện (không phải xanh giả) — đúng bài học r223.
+
+## Chốt
+
+Giữ nguyên 5 tên, tách sang dòng riêng mang `# noqa: F401` kèm số đo, để `noqa` **không** che import thừa
+mới ở dòng trên. Mặt import lúc chạy **y hệt** master (14 tên, không thêm/bớt) ⇒ hành vi không đổi.
+`ruff --select F scripts/tl.py`: **12 F821 + 0 F401**, delta F821 so master = 0.
+
 # ★ v1.35.59 — r223: khung test NUỐT LỖI — «quét không chạy được» hoá trang thành «quét chạy rồi bất đồng» (+1 test, 1376/1376) (2026-07-29)
 
 > Hồ sơ bàn giao ghi hai ca `r219_docclaims_l9_tu_tat_khi_quet_hep` và `…l10_l11_bi_bac` «đỏ chập

@@ -43,10 +43,17 @@ jobs:
         run: python scripts/tl.py workflow-audit --strict --json
       - name: golden-test
         run: python scripts/tl.py golden-test --json
+      # r225: r218 dựng cổng kiểm trích dẫn, r219 nối vào `/gate` (đường TAY) mà QUÊN CI (đường TỰ ĐỘNG)
+      # — đúng loại hỏng r219 tự mô tả: "guard không nối vào đường chạy tự động thì guard chỉ là tài liệu".
+      - name: doc-claims-check strict
+        run: python scripts/tl.py doc-claims-check --strict --json
       - name: determinism-audit strict
         run: python scripts/tl.py determinism-audit --strict --json
-      - name: release-verify (manifest khớp cây)
-        run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --json
+      - name: release-check full
+        run: python scripts/tl.py release-check --full --json
+      # --strict: file THỪA trong cây mà manifest không có ⇒ ĐỎ (bản cũ chỉ cảnh báo rồi trôi qua)
+      - name: release-verify strict (manifest khớp cây)
+        run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
       - name: release-bundle x2 cùng SHA-256
         shell: bash
         run: |

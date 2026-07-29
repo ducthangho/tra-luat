@@ -21772,6 +21772,84 @@ def run() -> int:
 
     _t110("r229_mirror_nlm_ops_cung_quy_tac", _c229_mirror_nlm_ops_cung_quy_tac)
 
+    # ───── r230 (v1.35.66): gợi ý khắc phục của doctor phải KHỚP thứ lệnh thật sự ghi được ─────
+    def _c230_goi_y_doctor_khop_thu_reconcile_ghi_duoc():
+        """r230 — doctor in MỘT câu «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`» cho MỌI drift.
+        Đo 29-07-2026 trên kho thật: breakdown = NLM_STATUS_MISMATCH 0 · CORPUS_TRUE_NOT_ON_NLM 53 ·
+        NLM_NOTEBOOK_ID_MISSING 0, mà DRY của reconcile trên CẢ notebook nền LẪN notebook overflow
+        đều cho backfill=0 · link=0 · desync=0 ⇒ `--apply` ghi ĐÚNG 0 DÒNG. Ai làm theo sẽ tin đã
+        sửa xong trong khi không có gì đổi — cùng lớp bẫy «`nlm login` là đủ» mà GOTCHAS §9 đã bác:
+        câu sai nguy hiểm vì nó ĐỌC NHƯ hướng dẫn vận hành.
+
+        Ba khẳng định: (1) chỉ có NỢ PHỦ ⇒ TUYỆT ĐỐI không được mời `--apply` như cách chữa, phải
+        nói rõ nó KHÔNG chạm tới; (2) có cờ reconcile chữa được ⇒ VẪN phải mời, và đếm ĐÚNG số mục
+        chữa được (7 = 3+4), không phải tổng drift; (3) sạch ⇒ im."""
+        _om = _mod215("ops_misc.py", "_om230")
+        _chi_no = _om._drift_hint_lines(
+            {"NLM_STATUS_MISMATCH": 0, "CORPUS_TRUE_NOT_ON_NLM": 53, "NLM_NOTEBOOK_ID_MISSING": 0}, "nb-x")
+        ok1 = (len(_chi_no) == 1 and "NỢ PHỦ" in _chi_no[0] and "KHÔNG chạm tới" in _chi_no[0]
+               and "chữa được 1 bước" not in _chi_no[0] and "53" in _chi_no[0])
+        _chua_duoc = _om._drift_hint_lines(
+            {"NLM_STATUS_MISMATCH": 4, "CORPUS_TRUE_NOT_ON_NLM": 0, "NLM_NOTEBOOK_ID_MISSING": 3}, "nb-x")
+        ok2 = (len(_chua_duoc) == 1 and "7 mục chữa được 1 bước" in _chua_duoc[0]
+               and "`tl nlm-reconcile nb-x --apply`" in _chua_duoc[0])
+        _ca_hai = _om._drift_hint_lines(
+            {"NLM_STATUS_MISMATCH": 1, "CORPUS_TRUE_NOT_ON_NLM": 2, "NLM_NOTEBOOK_ID_MISSING": 0}, "nb-x")
+        ok3 = len(_ca_hai) == 2
+        ok4 = _om._drift_hint_lines({k: 0 for k in
+                                     ("NLM_STATUS_MISMATCH", "CORPUS_TRUE_NOT_ON_NLM",
+                                      "NLM_NOTEBOOK_ID_MISSING")}, "nb-x") == []
+        # stub-farm: cmd_doctor re-home __globals__ về namespace tl ⇒ tên mới PHẢI khai trong _STUB_MAP,
+        # nếu quên thì doctor NameError đúng lúc in cảnh báo (bẫy I11). Khoá luôn.
+        import importlib as _il230
+        ok5 = callable(getattr(_il230.import_module("tl"), "_drift_hint_lines", None))
+        return ok1 and ok2 and ok3 and ok4 and ok5
+
+    _t110("r230_goi_y_doctor_khop_thu_reconcile_ghi_duoc",
+          _c230_goi_y_doctor_khop_thu_reconcile_ghi_duoc)
+
+    def _c230_row_kind_va_backfill_la_hai_tap_roi_nhau():
+        """r230 — vì sao gợi ý cũ cho lớp row_kind sai theo CẤU TRÚC, không phải sai theo dữ liệu:
+        `_topology_row_kind_findings` chỉ nhận dòng ĐÃ CÓ nlm_notebook_id (`if not nb: continue`),
+        còn reconcile chỉ ghi row_kind KÈM dòng backfill/link — tức dòng THIẾU nlm_notebook_id. Hai
+        tập RỜI NHAU ⇒ `--apply` không bao giờ chạm tới lớp này, với mọi dữ liệu. Đo 29-07 khớp:
+        notebook overflow mang 71 dòng lệch mà backfill=0, link=0.
+
+        Khẳng định: mọi finding đều mang notebook_id KHÔNG rỗng, và dòng thiếu notebook_id (ứng viên
+        backfill duy nhất) KHÔNG bao giờ xuất hiện trong findings — kể cả khi row_kind của nó sai.
+        Kèm chốt UX: chuỗi gợi ý cũ phải BIẾN MẤT khỏi doctor, thay bằng REPORT-ONLY."""
+        # `_topology_row_kind_findings` gọi `_shard_row_kind` (nlm_admin_ops) và `_resolve_shard_topology`
+        # gọi `_profiles_from_config` — cả hai chỉ resolve qua namespace tl (re-home), nên KHÔNG nạp
+        # thẳng bằng _mod215 được (đã thử: NameError _profiles_from_config).
+        import importlib as _il230b
+        _tl230 = _il230b.import_module("tl")
+        _v1, _v2 = "nb-230-primary", "nb-230-overflow"
+        _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
+        try:
+            topo = _tl230._resolve_shard_topology([], _v1, cfg={"profiles": {"vbqppl": {
+                "notebookId": _v1, "shards": [{"id": _v1, "role": "primary"},
+                                              {"id": _v2, "role": "overflow"}]}}}, profile="vbqppl")
+        finally:
+            _env110_restore(_sv)
+        ents = [
+            {"drive_id": "co_nb_sai_rk", "nlm_notebook_id": _v2, "row_kind": "own"},     # ĐÚNG lớp 71 dòng
+            {"drive_id": "thieu_nb_rk_sai", "nlm_notebook_id": "", "row_kind": "own"},   # ứng viên backfill
+            {"drive_id": "thieu_nb_rk_of", "row_kind": "overflow"},                      # ứng viên backfill
+            {"drive_id": "co_nb_dung", "nlm_notebook_id": _v1, "row_kind": "own"},
+        ]
+        f = _tl230._topology_row_kind_findings(ents, topo)
+        _ids = {x["drive_id"] for x in f}
+        ok_moi_finding_co_nb = all(str(x.get("notebook_id") or "").strip() for x in f)
+        ok_backfill_vang = not ({"thieu_nb_rk_sai", "thieu_nb_rk_of"} & _ids)
+        ok_bat_dung_ca = _ids == {"co_nb_sai_rk"}
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ops_misc.py").read_text(encoding="utf-8")
+        ok_ux = ("mẫu trong --json; sửa: `tl nlm-reconcile <nb> --apply`" not in _src
+                 and "REPORT-ONLY: `nlm-reconcile --apply` KHÔNG chữa lớp này" in _src)
+        return ok_moi_finding_co_nb and ok_backfill_vang and ok_bat_dung_ca and ok_ux
+
+    _t110("r230_row_kind_va_backfill_la_hai_tap_roi_nhau",
+          _c230_row_kind_va_backfill_la_hai_tap_roi_nhau)
+
     def _c219_hai_manifest_egress_song_doi():
         """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho
         (chỉ ghi 'tự dựng bằng cách thêm khóa') ⇒ người vận hành theo đúng khuyến nghị thì không có gì

@@ -1,3 +1,77 @@
+# ★ v1.35.66 — r230: gợi ý khắc phục của `doctor` chỉ tới lệnh KHÔNG chữa được (2026-07-29)
+
+> Phát hiện khi làm theo chính gợi ý của `doctor` sau r229: chạy `nlm-reconcile --apply` cho 53 mục
+> lệch thì DRY cho thấy nó ghi ĐÚNG 0 DÒNG. Dừng trước khi ghi, đo lại, hoá ra gợi ý sai.
+
+## Gốc — sai theo CẤU TRÚC, không phải theo dữ liệu
+
+`doctor` in MỘT câu cho MỌI kiểu drift: «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`». Nhưng
+reconcile CHỈ ghi cho dòng **THIẾU** `nlm_notebook_id`/`nlm_source_id` (tập backfill/link).
+
+| Cờ | reconcile `--apply` chữa được? | Vì sao |
+|---|---|---|
+| `NLM_NOTEBOOK_ID_MISSING` | ✅ | đúng định nghĩa backfill |
+| `NLM_STATUS_MISMATCH` | ✅ | link/settle |
+| `CORPUS_TRUE_NOT_ON_NLM` | ❌ | **NỢ PHỦ** — nguồn CHƯA CÓ MẶT trên NLM; không lệnh registry nào tạo ra nguồn |
+| `row_kind` topology (71 dòng) | ❌ | reconcile ghi `row_kind` **kèm** dòng backfill/link, mà `_topology_row_kind_findings` chỉ nhận dòng **ĐÃ CÓ** `nlm_notebook_id` (`if not nb: continue`) ⇒ **hai tập RỜI NHAU** |
+
+Đo 29-07-2026 trên kho thật: breakdown `NLM_STATUS_MISMATCH=0 · CORPUS_TRUE_NOT_ON_NLM=53 ·
+NLM_NOTEBOOK_ID_MISSING=0`; DRY reconcile trên **cả** notebook nền `743ed200…` **lẫn** notebook
+overflow `2d8c2fef…` (nơi mang đủ 71 dòng lệch) đều cho `backfill=0 · link=0 · desync=0 ·
+settle=0 · unregistered=0`. Grep toàn kho: `OVERFLOW_ROW_NOT_MARKED_OVERFLOW` chỉ xuất hiện ở
+ĐÚNG MỘT chỗ — hàm phát hiện; không có đường ghi nào.
+
+Đây là lớp bẫy nguy hiểm nhất, cùng họ với «`nlm login` là đủ» đã bị bác ở GOTCHAS §9: câu sai
+**đọc như hướng dẫn vận hành**, nên người làm đúng theo nó sẽ tin đã sửa xong trong khi không có
+gì đổi.
+
+## Vá
+
+`_drift_hint_lines(bd, nb)` — PURE, tách khỏi chỗ in để test được; gợi ý theo TỪNG cờ:
+- có `NLM_NOTEBOOK_ID_MISSING`/`NLM_STATUS_MISMATCH` ⇒ vẫn mời `--apply`, nhưng đếm ĐÚNG số mục
+  chữa được (không phải tổng drift);
+- có `CORPUS_TRUE_NOT_ON_NLM` ⇒ nói thẳng là NỢ PHỦ, `--apply` KHÔNG chạm tới, trỏ `slot-audit` +
+  `ingest-missing`;
+- sạch ⇒ im.
+
+Tên mới PHẢI khai trong `_STUB_MAP["ops_misc"]`: `cmd_doctor` re-home `__globals__` về namespace
+`tl`, quên khai thì NameError đúng lúc in cảnh báo (bẫy I11). Ca test khoá luôn điều này.
+
+Gợi ý `row_kind` đổi thành REPORT-ONLY kèm lý do cấu trúc. Sửa 2 chú thích đã lỗi thời trong
+`ops_misc.py` (§F-06) và docstring `_topology_row_kind_findings` (`nlm_ops.py`) — cả hai đang nói
+`--apply` chữa được.
+
+## Test khoá (2 ca) + phản chứng hai chiều
+
+| Ca | Khẳng định | Gỡ vá |
+|---|---|---|
+| `r230_goi_y_doctor_khop_thu_reconcile_ghi_duoc` | chỉ NỢ PHỦ ⇒ không mời `--apply`; có cờ chữa được ⇒ mời và đếm đúng (7=3+4); cả hai ⇒ 2 dòng; sạch ⇒ rỗng; `_drift_hint_lines` resolve được từ namespace tl | **ĐỎ** |
+| `r230_row_kind_va_backfill_la_hai_tap_roi_nhau` | mọi finding đều mang `notebook_id` khác rỗng; dòng THIẾU `notebook_id` (ứng viên backfill duy nhất) không bao giờ lọt vào findings dù `row_kind` sai; kèm chốt UX chuỗi gợi ý cũ đã biến mất | **ĐỎ** |
+
+Selftest **1386/1386**. Gỡ 3 tệp logic (giữ test) ⇒ **1384/1386**, cả 2 ca đỏ.
+
+Ruff `--select F` DELTA so master = **0** cả 4 tệp. Ghi chú: bản test đầu dùng `_TL_MODULE` làm
+delta **+3** (`F821 Undefined name '_TL_MODULE'` — đúng lớp sẵn có 1992 lần, nhưng tiêu chí là
+delta 0) ⇒ đổi sang `importlib.import_module("tl")` gán biến cục bộ. Đã thử `_mod215` (nạp thẳng
+tl_core) và BÁC: `_resolve_shard_topology` gọi `_profiles_from_config`, `_topology_row_kind_findings`
+gọi `_shard_row_kind` (nlm_admin_ops) — cả hai chỉ resolve qua namespace tl, nạp thẳng ⇒ NameError.
+
+## Hiệu lực (doctor LIVE, cùng dữ liệu từng sinh ra gợi ý sai)
+
+```
+⚠ registry↔NLM lệch: 53 mục → NLM_STATUS_MISMATCH=0 · CORPUS_TRUE_NOT_ON_NLM=53 · NLM_NOTEBOOK_ID_MISSING=0
+   53 mục CORPUS_TRUE_NOT_ON_NLM = NỢ PHỦ (nguồn CHƯA có mặt trên NLM) — `nlm-reconcile --apply`
+   KHÔNG chạm tới: nó chỉ điền trường cho dòng ĐÃ có nguồn. Soi bằng `tl slot-audit --notebook-id
+   743ed200-…`; đẩy nguồn bằng `tl ingest-missing`.
+```
+
+Câu «đồng bộ 1 bước … --apply» đã biến mất khỏi ca này.
+
+## KHÔNG làm
+
+Không tự sửa 53 mục lẫn 71 dòng — đó là DATA-ops, cần user chốt phạm vi. r230 chỉ sửa việc
+**công cụ nói sai sự thật**.
+
 # ★ v1.35.65 — r229: tuổi cookie NLM ra số ÂM vì mốc `last_validated` naive lệch múi giờ (2026-07-29)
 
 > Phát hiện khi bootstrap gws/nlm trong sandbox Claude Code on the web (UTC) từ bundle stage ở máy

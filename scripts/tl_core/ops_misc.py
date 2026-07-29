@@ -938,6 +938,33 @@ def _doctor_exporttext_probe(g, entries: list[dict]) -> dict:
     return {"ok": False, "drive_id": did, "detail": raw + hint}
 
 
+def _drift_hint_lines(bd: dict, nb: str) -> list[str]:
+    """r230 (PURE): dòng GỢI Ý cho cảnh báo drift registry↔NLM của doctor — tách khỏi chỗ in để test
+    được, và để gợi ý KHỚP đúng thứ `nlm-reconcile --apply` THẬT SỰ ghi được.
+
+    Bug đo 29-07-2026: doctor in MỘT câu duy nhất «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`»
+    cho MỌI kiểu drift. Đo trên kho thật: breakdown = NLM_STATUS_MISMATCH 0 · CORPUS_TRUE_NOT_ON_NLM
+    53 · NLM_NOTEBOOK_ID_MISSING 0; DRY của reconcile trên CẢ notebook nền LẪN notebook overflow đều
+    cho backfill=0 · link=0 · desync=0 ⇒ `--apply` ghi ĐÚNG 0 DÒNG. Người vận hành làm theo gợi ý sẽ
+    tin đã sửa xong trong khi không có gì đổi — đúng lớp bẫy nguy hiểm nhất (câu đọc như hướng dẫn
+    vận hành), cùng họ với bẫy «`nlm login` là đủ» đã bị bác ở GOTCHAS §9.
+
+    Lý do CẤU TRÚC (không phải ngẫu nhiên theo dữ liệu): reconcile chỉ ghi cho dòng THIẾU
+    nlm_notebook_id/nlm_source_id (tập backfill/link). `CORPUS_TRUE_NOT_ON_NLM` là NỢ PHỦ — nguồn
+    CHƯA CÓ MẶT trên NLM; không lệnh registry nào tạo ra nguồn, nên `--apply` không thể chạm tới."""
+    out: list[str] = []
+    _fix = int(bd.get("NLM_NOTEBOOK_ID_MISSING") or 0) + int(bd.get("NLM_STATUS_MISMATCH") or 0)
+    if _fix:
+        out.append(f"     {_fix} mục chữa được 1 bước: `tl nlm-reconcile {nb} --apply` "
+                   "(backfill nlm_notebook_id + link gdoc↔source_id; gợi ý, KHÔNG chặn).")
+    _gap = int(bd.get("CORPUS_TRUE_NOT_ON_NLM") or 0)
+    if _gap:
+        out.append(f"     {_gap} mục CORPUS_TRUE_NOT_ON_NLM = NỢ PHỦ (nguồn CHƯA có mặt trên NLM) — "
+                   "`nlm-reconcile --apply` KHÔNG chạm tới: nó chỉ điền trường cho dòng ĐÃ có nguồn. "
+                   f"Soi bằng `tl slot-audit --notebook-id {nb}`; đẩy nguồn bằng `tl ingest-missing`.")
+    return out
+
+
 def cmd_doctor(a) -> int:
     """Chẩn đoán phiên trống: script lõi (gốc HOẶC _fallback), optional, credential,
     API_CONTRACT↔tl EXPECT, webapp ping, (--deep) manifest_export + exporttext-scope probe. (--offline) bỏ phần webapp."""
@@ -1058,13 +1085,15 @@ def cmd_doctor(a) -> int:
             if not _json:
                 print(f"  ⚠ registry↔NLM lệch: {_drift_n} mục → "
                       + " · ".join(f"{k}={_bd[k]}" for k in _drift_keys))
-                print(f"     đồng bộ 1 bước: `tl nlm-reconcile {_nb} --apply` "
-                      f"(backfill nlm_notebook_id + link gdoc↔source_id; gợi ý, KHÔNG chặn).")
+                for _hl in _drift_hint_lines(_bd, _nb):   # r230: gợi ý theo TỪNG cờ, xem docstring
+                    print(_hl)
     except Exception:
         pass
     # v1.34.49 (F-06/F-09 doctor — ADVISORY/REPORT-ONLY theo grill, KHÔNG đổi rc): bất biến notebook↔row_kind
     # theo TOPOLOGY (primary⇔own/blank, overflow⇔overflow, notebook lạ) + findings resolver (alias lệch declared,
-    # shard lạ trong registry) + stamp F-09. Sửa: `tl nlm-reconcile <nb> --apply` (nay ghi row_kind theo topology).
+    # shard lạ trong registry) + stamp F-09. r230 SỬA CHÚ THÍCH: reconcile --apply ghi row_kind theo topology
+    # NHƯNG chỉ KÈM dòng backfill/link (dòng THIẾU nlm_notebook_id) — dòng vào findings này đã CÓ
+    # nlm_notebook_id ⇒ --apply KHÔNG bao giờ chạm tới. Lớp này thực sự REPORT-ONLY.
     _topo_doc = None
     try:
         _ents_t = _manifest_entries(refresh=False)
@@ -1087,8 +1116,15 @@ def cmd_doctor(a) -> int:
             if _topo_doc.get("ok") is False:
                 print(f"  ⚠ topology CONFIG CONFLICT: {_topo_doc.get('error')} — đường ghi/route sẽ fail-closed (D5).")
             if _rkf_doc:
+                # r230: gợi ý cũ («sửa: nlm-reconcile <nb> --apply») KHÔNG chữa được lớp này —
+                # reconcile chỉ ghi row_kind KÈM dòng backfill/link, mà dòng lọt vào đây BẮT BUỘC
+                # đã có nlm_notebook_id (điều kiện của `_topology_row_kind_findings`) ⇒ hai tập RỜI
+                # NHAU theo cấu trúc. Đo 29-07 trên notebook overflow mang 71 dòng lệch: backfill=0,
+                # link=0 ⇒ --apply ghi 0 dòng.
                 print(f"  ⚠ topology row_kind lệch: {len(_rkf_doc)} dòng (primary⇔own, overflow⇔overflow, notebook lạ)"
-                      f" → mẫu trong --json; sửa: `tl nlm-reconcile <nb> --apply`.")
+                      f" → mẫu trong --json. REPORT-ONLY: `nlm-reconcile --apply` KHÔNG chữa lớp này "
+                      f"(chỉ ghi row_kind kèm dòng backfill/link — dòng ở đây đã có nlm_notebook_id, "
+                      f"hai tập rời nhau); phải sửa qua đường ghi registry cho từng dòng.")
             for _f_d in (_topo_doc.get("findings") or [])[:4]:
                 print(f"  ⚠ topology: {_f_d}")
     except Exception:  # noqa: BLE001 — advisory không được làm hỏng doctor

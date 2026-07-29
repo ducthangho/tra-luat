@@ -836,7 +836,13 @@ _ROW_KIND_PROTECTED = ("ref", "thuong")   # kind NGHIỆP VỤ — không suy t�
 def _topology_row_kind_findings(entries: list[dict], topo: dict) -> list[dict]:
     """v1.34.49 (F-06 doctor, PURE): bất biến `notebook==primary ⇔ row_kind∈{own,''}` và `notebook∈overflow ⇔
     row_kind=='overflow'` cho dòng ĐÃ có nlm_notebook_id. Bỏ qua kind bảo hộ (ref/thuong) + dòng chưa lên NLM.
-    Trả findings [{drive_id, notebook_id, row_kind, finding}] — REPORT-ONLY (sửa: nlm-reconcile --apply / reg_upsert)."""
+    Trả findings [{drive_id, notebook_id, row_kind, finding}] — REPORT-ONLY.
+
+    r230 SỬA CHÚ THÍCH: bản cũ ghi «sửa: nlm-reconcile --apply / reg_upsert» — vế `nlm-reconcile
+    --apply` SAI. Reconcile ghi row_kind theo topology nhưng chỉ KÈM dòng backfill/link, tức dòng
+    THIẾU nlm_notebook_id; còn điều kiện lọt vào findings này là ĐÃ CÓ nlm_notebook_id (`if not nb:
+    continue` ngay dưới) ⇒ hai tập RỜI NHAU theo cấu trúc, --apply không bao giờ chạm tới. Đường
+    sửa thật là ghi registry cho từng dòng (reg_upsert row_kind)."""
     out: list[dict] = []
     _foreign = set((topo or {}).get("foreign_notebooks") or [])   # v1.34.51: dòng notebook profile-khác → KHÔNG flag
     for e in entries or []:

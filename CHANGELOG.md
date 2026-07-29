@@ -1,3 +1,17 @@
+# ★ v1.35.72 — r235: nlm-auth-import TỰ TÌM file trên Drive (bỏ bước tra fileId) (2026-07-29)
+
+Mục tiêu vận hành: người dùng chỉ có ĐIỆN THOẠI, muốn "cơ bản chỉ chạy script". Bản r233 bắt
+phải nêu `--drive-id <fileId>` — mà lấy fileId trên điện thoại là bước thủ công khó chịu nhất
+của cả luồng (mở Drive, chia sẻ, cắt id khỏi URL).
+
+Nay chạy `./scripts/nlm-auth-import.sh` KHÔNG tham số: tự truy vấn Drive qua gws
+(`name contains 'nlm-auth' and trashed = false`, `orderBy modifiedTime desc`), in tối đa 5 bản
+tìm được, ĐÁNH DẤU bản mới nhất bằng mũi tên rồi dùng nó. `--drive-find <chuỗi>` để đổi chuỗi
+tìm; `--drive-id` và `--file` giữ nguyên.
+
+Không tìm thấy ⇒ nói thẳng phải làm gì (đặt tên file có `nlm-auth`), không để người dùng đoán.
+
+Luồng điện thoại rút còn: export cookie JSON → lưu vào Drive → ở đây gõ 1 lệnh.
 # ★ v1.35.71 — r234: chính env-reimport.sh in lời khuyên đã bị bác (2026-07-29)
 
 Ngay lượt chạy đầu sau khi deploy r233, `env-reimport.sh` in ở nhánh NLM-chết:

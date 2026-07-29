@@ -10,11 +10,13 @@
 # LUỒNG:
 #   [ĐIỆN THOẠI] trình duyệt có extension → đăng nhập notebooklm.google.com → export cookie
 #                → tải file lên Google Drive (ĐỪNG dán vào chat: đó là session Google đầy đủ)
-#   [Ở ĐÂY]      ./nlm-cookie-import.sh --drive-id <fileId>
+#   [Ở ĐÂY]      ./scripts/nlm-auth-import.sh          ← không cần fileId, tự tìm
 #
-#   ./nlm-cookie-import.sh --file /path/cookies.json     # file đã có sẵn trong container
-#   ./nlm-cookie-import.sh --drive-id <fileId>           # tải từ Drive bằng gws rồi nạp
-#   ./nlm-cookie-import.sh --drive-id <id> --no-stage    # nạp nhưng KHÔNG đẩy lên bundle
+#   ./nlm-auth-import.sh                       # TỰ TÌM trên Drive file tên chứa 'nlm-auth' (mới nhất)
+#   ./nlm-auth-import.sh --drive-find <chuỗi>  # tự tìm theo chuỗi khác
+#   ./nlm-auth-import.sh --drive-id <fileId>   # nêu thẳng fileId
+#   ./nlm-auth-import.sh --file /path/x.json   # file đã có sẵn trong container
+#   ./nlm-auth-import.sh --no-stage            # nạp nhưng KHÔNG làm tươi bundle Drive
 #
 # Định dạng chấp nhận (theo extract_cookies_from_chrome_export của nlm):
 #   · JSON list  [{"name":"SID","value":"..."}, ...]   ← export của hầu hết extension
@@ -31,12 +33,13 @@ cd "$ROOT" || exit 1
 PY="${TL_PYTHON:-python3}"
 export PATH="$HOME/.local/bin:$PATH"
 
-SRC=""; DRIVE_ID=""; DO_STAGE=1
+SRC=""; DRIVE_ID=""; DO_STAGE=1; FIND=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --file)     SRC="${2:-}"; shift ;;
-    --drive-id) DRIVE_ID="${2:-}"; shift ;;
-    --no-stage) DO_STAGE=0 ;;
+    --file)       SRC="${2:-}"; shift ;;
+    --drive-id)   DRIVE_ID="${2:-}"; shift ;;
+    --drive-find) FIND="${2:-nlm-auth}"; shift ;;
+    --no-stage)   DO_STAGE=0 ;;
     -h|--help)  sed -n '2,26p' "$0"; exit 0 ;;
     *) echo "✗ cờ lạ: $1" >&2; exit 1 ;;
   esac
@@ -54,6 +57,30 @@ command -v nlm >/dev/null 2>&1 || { bad "chưa có nlm — chạy ./scripts/env-
 TMP="$(mktemp -d)"; chmod 700 "$TMP"; trap 'rm -rf "$TMP"' EXIT
 
 say "1. Lấy file cookie"
+# Không tham số nào ⇒ TỰ TÌM trên Drive. Mục tiêu: trên điện thoại bạn chỉ cần export rồi
+# lưu vào Drive; ở đây gõ đúng một lệnh, KHÔNG phải đi tra fileId.
+if [ -z "$DRIVE_ID" ] && [ -z "$SRC" ] && [ -z "$FIND" ]; then FIND="nlm-auth"; fi
+if [ -n "$FIND" ] && [ -z "$DRIVE_ID" ]; then
+  command -v gws >/dev/null 2>&1 || { bad "cần gws để tìm trên Drive"; exit 1; }
+  Q="name contains '$FIND' and trashed = false"
+  HITS="$(gws drive files list --params "{\"q\":\"$Q\",\"orderBy\":\"modifiedTime desc\",\"pageSize\":5,\"fields\":\"files(id,name,modifiedTime)\"}" 2>/dev/null)"
+  N="$(printf '%s' "$HITS" | $PY -c 'import json,sys;print(len(json.load(sys.stdin).get("files") or []))' 2>/dev/null || echo 0)"
+  if [ "${N:-0}" = "0" ]; then
+    bad "không thấy file nào tên chứa '$FIND' trên Drive."
+    echo "        Trên điện thoại: export cookie (JSON) rồi lưu vào Drive với tên có '$FIND'," >&2
+    echo "        ví dụ 'nlm-auth-2026-07-29.json'. Hoặc nêu thẳng: --drive-id <fileId>" >&2
+    exit 1
+  fi
+  printf '%s' "$HITS" | $PY -c '
+import json,sys
+fs=json.load(sys.stdin)["files"]
+for i,f in enumerate(fs):
+    print(("  → " if i==0 else "    ")+f"{f['"'"'name'"'"']}  ({f['"'"'modifiedTime'"'"']})")
+' 2>/dev/null
+  DRIVE_ID="$(printf '%s' "$HITS" | $PY -c 'import json,sys;print(json.load(sys.stdin)["files"][0]["id"])' 2>/dev/null)"
+  [ -n "$DRIVE_ID" ] || { bad "không đọc được fileId từ kết quả tìm"; exit 1; }
+  ok "chọn bản MỚI NHẤT (mũi tên) — id=${DRIVE_ID:0:12}…"
+fi
 if [ -n "$DRIVE_ID" ]; then
   command -v gws >/dev/null 2>&1 || { bad "cần gws để tải từ Drive — ./scripts/env-reimport.sh --no-nlm"; exit 1; }
   SRC="$TMP/cookies.in"
@@ -64,7 +91,7 @@ elif [ -n "$SRC" ]; then
   [ -s "$SRC" ] || { bad "file rỗng/không tồn tại: $SRC"; exit 1; }
   ok "dùng file cục bộ: $SRC ($(stat -c%s "$SRC") byte)"
 else
-  bad "phải nêu --file hoặc --drive-id (xem --help)"; exit 1
+  bad "không có nguồn cookie (xem --help)"; exit 1
 fi
 
 # ── 2. Kiểm định dạng + ĐỦ cookie, TRƯỚC khi đụng vào jar đang có ──

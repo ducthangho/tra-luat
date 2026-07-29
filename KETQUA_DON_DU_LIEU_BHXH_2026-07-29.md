@@ -74,13 +74,48 @@ văn ĐẦU TIÊN trong bundle**, mất chỉ số `phan_N_cua_8`, và gắn ti�
 ⇒ Hai nhóm này cần **vá code** (thêm guard doctype trước khi ép cat 46; chặn NAME_TRICH_YEU khi tên khớp
 `phan_\d+_cua_\d+`), không phải áp đề xuất. Chưa vá trong phiên này.
 
+## 5c. ĐÃ XỬ LÝ mục treo số 1 — và vấn đề thật KHÁC điều tôi báo lúc đầu
+
+Khi mở dữ liệu ra xem để quyết, hoá ra "17 tài liệu corpus=true không số hiệu" không phải vấn đề chính.
+Vấn đề thật nằm ở chỗ khác và nguy hiểm hơn:
+
+**(a) 12 tài liệu hồ sơ dự thảo bị dán nhãn `Còn` — tức "CÒN HIỆU LỰC".**
+Gồm Bản so sánh thuyết minh (3 phần), Ý kiến góp ý 80 công văn (8 phần), Mục lục tra ngược.
+Đây là **tài liệu làm việc của hồ sơ dự thảo** mà mang nhãn như văn bản đang có hiệu lực — sai thẳng vào
+điều `style` của profile cấm ("dự thảo luôn kèm cảnh báo 'DỰ THẢO — chưa hiệu lực'").
+*Ghi chú tự phê: bước chuẩn hoá từ vựng ở §3 đã đổi `Còn hiệu lực`→`Còn` cho đúng 12 dòng này — tức tôi
+đã chuẩn hoá một nhãn vốn SAI NGHĨA thành dạng chuẩn, chứ không phát hiện ra cái sai. Chỉ khi đọc dữ liệu
+để trả lời câu hỏi corpus mới lộ.*
+→ Đã sửa 12/12 về `DỰ THẢO — chưa hiệu lực` (journal `register-bulk_1785322020_6048`).
+Kiểm lại: **không còn dòng dự thảo nào mang nhãn `Còn`**.
+
+**(b) Phụ lục thì vào corpus, còn văn bản TRUNG TÂM thì bị loại.**
+`corpus=false` gồm chính **bản dự thảo Luật**, **Tờ trình BNV**, **Bản tổng hợp tiếp thu giải trình**,
+Phụ lục BC tiến độ, và tài liệu họp TTUB — trong khi các bản so sánh/góp ý ăn theo chúng lại `corpus=true`.
+Hồ sơ như vậy không dùng được cho thẩm tra: tra "dự thảo sửa Điều X" thì không có chính dự thảo.
+→ Đã đặt `corpus=true` cho **5 văn bản trung tâm** (đều đã `nlm=pushed` từ trước, nên chỉ là làm cho
+registry trung thực với thứ đang tìm kiếm được). 5 journal `source-update-corpus_17853220…`.
+
+**Vì sao GIỮ 17 dòng ở `corpus=true` thay vì hạ xuống:** mô tả của chính profile là "Hồ sơ xây dựng Luật
+BHXH (sửa đổi): dự thảo luật, tờ trình, thuyết minh, báo cáo rà soát/thẩm tra, góp ý bộ ngành…" — tức
+những tài liệu này CHÍNH LÀ lý do profile tồn tại. Hạ `corpus=false` sẽ rút ruột hồ sơ. Rào an toàn đúng
+chỗ là **nhãn `DỰ THẢO — chưa hiệu lực`** (nay đã đủ cho cả 25 dòng), không phải loại khỏi corpus.
+Riêng 10 file thế hệ **16.6.2026** giữ `corpus=false` là ĐÚNG — chúng đã bị bản 16-7 thay thế.
+
+**(c) Điền `loai` cho 12 dòng đang trống** (`Bản so sánh` ×3 · `Ý kiến góp ý` ×8 · `Phụ lục` ×1) — theo
+đúng quy ước tiếng Việt mà profile đã dùng sẵn (`Tài liệu làm việc`, `Bản tổng hợp`, `Báo cáo`, `Tờ trình`).
+Journal `register-bulk_1785322345_8638`.
+
+> ⚠ **Đánh đổi có chủ đích, cần nói rõ:** việc này đẩy `loai_noncanonical` từ 4 lên **16**. KHÔNG phải dữ
+> liệu xấu đi — mà vì `sweep` chỉ có enum VBQPPL, không có rổ cho "tài liệu làm việc / văn bản Đảng ngoài
+> enum, CÓ CHỦ ĐÍCH". Trước đó 12 dòng này `loai` **rỗng** (tệ hơn hẳn). Đây đúng phát hiện C5 của auditor:
+> cờ sẽ kêu vĩnh viễn vì thiếu bucket. Việc cần làm là **vá `sweep`** thêm rổ đó, không phải bỏ trống `loai`.
+> Cùng lớp: `NQ_Dang`/`QD_Dang` (4 dòng văn bản Đảng) cũng luôn bị đếm là "phi chuẩn".
+
 ## 5. Còn treo — cần bạn quyết
 
-1. **17 tài liệu hồ sơ dự thảo 16-7-2026 đang `corpus=true` nhưng không số hiệu** (thuyết minh, bản so
-   sánh 3 phần, 80 công văn góp ý 8 phần, mục lục…), trong khi 10 file "Hồ sơ Luật" thế hệ 16.6 lại để
-   `corpus=false`. Quyết định này chi phối luôn 20/22 dòng bị gắn cờ `name_nonstandard` — nên tôi không
-   tự chọn. Hai hướng: giữ trong corpus (chấp nhận cờ tên) hoặc hạ `corpus=false`/`loai=thuong` cho nhất
-   quán với thế hệ trước.
+1. ~~17 tài liệu hồ sơ dự thảo~~ → **ĐÃ XỬ LÝ, xem §5c** (giữ corpus=true; sửa 12 nhãn sai; đưa 5 văn
+   bản trung tâm vào corpus).
 2. **3 nguồn NLM là PDF thô** (góp ý Agribank / Vietcombank / BIDV) — nên convert sang GDoc rồi re-push.
 3. **Notebook `80742228-…` giữ 54 dòng nhưng NGOÀI topology đã khai** — cần quyết là notebook cũ đã bỏ
    hay khai thiếu topology.
@@ -115,9 +150,16 @@ sang VBQPPL-3 (`tl push-overflow`).
 Còn `removed_family_still_pointing: 10` — 10 dòng `removed_from_drive` vẫn giữ `nlm_source_id`
 (mục B4 cũ). Không gây lệch (audit vật lý sạch), nhưng nên `nlm-reconcile --clear-stale` ở lượt dọn kho nền.
 
-## 6. Trạng thái cuối
+## 6. Trạng thái cuối (đo sau bước cuối cùng)
 
-`total=93` · `corpus` (client) `40` / theo luật server `25` · `nlm_drift`: `NLM_STATUS_MISMATCH=0`,
-`NLM_NOTEBOOK_ID_MISSING=0`, `CORPUS_TRUE_NOT_ON_NLM=1` (đúng thiết kế: bản canonical Luật 41 không tự
-lên NLM, đi qua 2 chunk) · `duplicates.by_name_active=0`, `by_md5=0` · NLM `coverage_gap=0`,
-`desync_real=0` · selftest **1384/1384**.
+| Chỉ số | Giá trị |
+|---|---|
+| `doctor` | **rc=0** — mọi cổng xanh (đầu phiên rc=2) |
+| registry | `total=93` · `corpus` client **45** / theo luật server **30** |
+| `hieuluc` | chỉ 3 giá trị: `Còn` 23 · rỗng 45 · `DỰ THẢO — chưa hiệu lực` 25 — **không dòng dự thảo nào còn dán nhãn "Còn"** |
+| `nlm_drift` | `NLM_STATUS_MISMATCH=0` · `NLM_NOTEBOOK_ID_MISSING=0` · `CORPUS_TRUE_NOT_ON_NLM=1` (đúng thiết kế — bản canonical Luật 41 đi NLM qua 2 chunk) |
+| `nlm-audit-physical` | **`clean=true`** — cả 4 chỉ số = 0 |
+| `nlm-reconcile` | `coverage_gap=0` · `desync_real=0` |
+| notebook hồ sơ | 71 nguồn (live = physical = registry) |
+| `loai_noncanonical` | 16 — **CỐ Ý**, xem cảnh báo ở §5c (thiếu rổ cho tài liệu làm việc / văn bản Đảng) |
+| selftest | **1384/1384** · VERSION 1.35.66 |

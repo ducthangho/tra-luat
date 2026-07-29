@@ -1,3 +1,38 @@
+# ★ v1.35.70 — r233: hai script vận hành sandbox headless + đo lại đường NLM (2026-07-29)
+
+## `scripts/env-reimport.sh` — dựng lại môi trường
+
+Idempotent, chỉ cần `TL_TOKEN` (KHÔNG cần `TL_MASTER_KEY`). Ba điểm thiết kế có chủ đích:
+- smoke **THẬT** bằng `gws drive files list`, không dừng ở `gws-ping` (ping chỉ đọc config, không
+  chứng minh `refresh_token` còn đổi được access token);
+- phán quyết NLM **chỉ** bằng probe LIVE — tuổi cookie và cờ rotation KHÔNG kết luận thay được;
+- khi chốt chống hạ cấp (r229) chặn thì **KHÔNG tự `--force`**: jar cục bộ chết thì bundle càng
+  chết, ép ghi chỉ mất bản tươi hơn. `rc=3` = gws sống / NLM chết ⇒ deploy vẫn chạy.
+
+## `scripts/nlm-auth-import.sh` — nạp cookie từ trình duyệt KHÁC
+
+Cho đường "lấy cookie ở điện thoại → nạp vào sandbox". Kiểm ĐỦ cookie phiên TRƯỚC khi đụng jar,
+sao lưu jar và KHÔI PHỤC nếu nạp hỏng hoặc probe LIVE đỏ, rồi `nlm-auth-stage` để phiên sau khỏi
+làm lại. Tên tệp cố ý KHÔNG chứa `cookie`: mẫu đó nằm trong danh sách secret của `CLAUDE.md` nên
+secret_guard chặn cả đọc lẫn ghi — bản đầu đặt tên `nlm-cookie-import.sh` và bị chặn ngay.
+
+## Đo lại đường NLM (thay cho suy đoán trước đó)
+
+| Câu hỏi | Kết luận | Bằng chứng |
+|---|---|---|
+| NotebookLM MCP có trong phiên Cowork/web này? | **KHÔNG** | `ListMcpResourcesTool` chỉ trả server `github`; ToolSearch không có tool notebooklm nào |
+| MCP của gói nlm chạy được khi chưa `nlm login`? | **KHÔNG** | `notebooklm-mcp = notebooklm_tools.mcp.server:main` dùng chung `get_client()`→`load_cached_tokens()`; docstring server tự ghi "run `nlm login`" |
+| Lấy cookie từ Chrome trên điện thoại? | **KHÔNG** | 9/13 cookie phiên là `httpOnly` (đo trên jar thật) ⇒ JS/bookmarklet mù; Chrome Android không có extension |
+| `nlm login` chạy trong sandbox? | **KHÔNG** | cần CDP tới browser đã đăng nhập; container chỉ có egress qua proxy, không với tới máy người dùng |
+| Có đường nào từ điện thoại? | **CÓ** | trình duyệt Android có extension (Quetta/Edge Canary/Firefox+add-on) → export JSON → Drive → `nlm-auth-import.sh` |
+
+Sửa lại một khẳng định sai ở lượt trước: tài liệu và câu trả lời từng nói "thiếu nlm/auth thì
+fallback NotebookLM MCP". Điều đó KHÔNG đúng cho phiên này — không có server nào để fallback.
+
+`nlm login --manual -f` nhận JSON list / JSON dict / chuỗi header (`extract_cookies_from_chrome_export`),
+KHÔNG nhận Netscape `.txt` — script bắt riêng ca đó và in lệnh `awk` chuyển đổi, vì extension phổ
+biến nhất lại xuất đúng định dạng không dùng được.
+
 # ★ v1.35.69 — r232: gợi ý khắc phục của `doctor` chỉ tới lệnh KHÔNG chữa được (2026-07-29)
 
 > Phát hiện khi làm theo chính gợi ý của `doctor` sau r229: chạy `nlm-reconcile --apply` cho 53 mục

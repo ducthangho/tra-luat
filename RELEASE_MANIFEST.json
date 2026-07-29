@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.69",
+  "skill_version": "1.35.70",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 195,
-  "total_bytes": 6801652,
-  "package_hash": "50ea3a742777b15b7ba56a94c3a6b54461d2e7925847921a744bd0d95180cdad",
-  "content_hash": "50ea3a742777b15b7ba56a94c3a6b54461d2e7925847921a744bd0d95180cdad",
+  "file_count": 197,
+  "total_bytes": 6820174,
+  "package_hash": "b3d4b9458c6347d274b0b27d8094e4fd7ef3ee4b44c8835d6d394184424a02c7",
+  "content_hash": "b3d4b9458c6347d274b0b27d8094e4fd7ef3ee4b44c8835d6d394184424a02c7",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 253639,
-      "sha256": "61e6250a4f03685607e0cd3d5e7c5ac028f1b68344f7a58242d1ec422f7264cc"
+      "size": 256596,
+      "sha256": "24a3b3a99ce9b5064365845125a6873b65a0e4f5eb1577ff74cb2ff388c80258"
     },
     {
       "path": "CONTEXT.md",
@@ -64,12 +64,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "1e4bca76b0900e1356da2740496baef8f7cc115abc9b49e7f60ad73f99fa7bc9"
+      "sha256": "8809f7f985ef242446dadd35436400a7d0c124699242ce849feff4ac91fefb81"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "5020f485c4d7371d53ea885424680f339541881f66228a0fa8b242116f1464c6"
+      "sha256": "6debd2f8ea3b0222657735ee4d3f0b64e992e913b6d27bc5c87efb9111a2ac37"
     },
     {
       "path": "agents/openai.yaml",
@@ -677,6 +677,11 @@
       "sha256": "dee145f08828c4a0ea94728d04bbce2e2f767de9f402ec6e547a5d9d88eeee1f"
     },
     {
+      "path": "scripts/env-reimport.sh",
+      "size": 7386,
+      "sha256": "1bea8d260928ea9a41b262f4296fb5cb8fff73b588e20542ff274af096300af1"
+    },
+    {
       "path": "scripts/gas.py",
       "size": 748,
       "sha256": "5f3221574fbb074cbc5862070041d2a4a632ce536016dcc1cc2217cf3f3dc207"
@@ -720,6 +725,11 @@
       "path": "scripts/mcp_bridge.py",
       "size": 6560,
       "sha256": "ff27ca8d53e796320aeba0f5d9ccc96c0f05c53355b1cf1b27aa4412dfd2c4f2"
+    },
+    {
+      "path": "scripts/nlm-auth-import.sh",
+      "size": 8179,
+      "sha256": "1cdcfeb0ff2f4881a5a24e63cda7f04e23da8821c9941be20af23fd6f199ac98"
     },
     {
       "path": "scripts/nlm_cli.py",
@@ -774,7 +784,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "fcd9ee1ba7bf044ea1370bb9d5f96b89bcf561daec6165d8c9dbff8a18839157"
+      "sha256": "2e526f8713f243bdb287030abf80bf4a580ad85c2653463b947b8a7274340445"
     },
     {
       "path": "scripts/tl_boot.py",

@@ -22113,6 +22113,70 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r230_chunk_khong_nuot_khoi_dau_va_dieu_1", _c230_chunk_khong_nuot_khoi_dau_va_dieu_1)
 
+    def _c231_cat46_chi_danh_cho_luat():
+        """r231: rổ 46 = 'LUẬT sửa ≥2 luật'. Guard cũ chỉ chặn VBHN nên Nghị định/Công văn có phần CĂN CỨ
+        trích nhiều số hiệu luật bị đề xuất đẩy vào 46 (ca thật: ND_233, ND_212, CV_10593 ở hồ sơ BHXH),
+        và nhánh omnibus chạy TRƯỚC nhánh BHXH→02 nên nuốt luôn."""
+        _rule = _TL_MODULE._cat_boundary_rule
+        omni = "sua doi bo sung mot so dieu cua cac luat ve dau tu quy hoach dau thau"
+        # (a) LUẬT omnibus THẬT vẫn phải vào 46 — vá không được làm hỏng ca đúng
+        ok1 = _rule("Luat_57-2024-QH15_" + omni)[0] == "46"
+        # (b) Nghị định / Công văn / Tờ trình mang cùng tín hiệu ⇒ KHÔNG BAO GIỜ 46
+        ok2 = all(_rule(p + "_" + omni)[0] != "46"
+                  for p in ("ND_233-2025-ND-CP", "CV_10593-NHNo-ALCO", "TTr_01-2026", "BC_7692-BC-BNV"))
+        # (c) và Nghị định BHXH phải rơi đúng nhánh 02. Hàm chạy trên TÊN **ghép NỘI DUNG header**
+        #     (xem docstring), nên fixture phải có dạng câu-có-dấu-cách như header thật.
+        ok3 = _rule("ND_233-2025-ND-CP_Co_che_tai_chinh_BHXH "
+                    "nghi dinh quy dinh co che tai chinh ve bao hiem xa hoi " + omni)[0] == "02"
+        # (d) VBHN vẫn giữ guard cũ
+        ok4 = _rule("VBHN_19-2026-VBHN-VPQH_" + omni)[0] != "46"
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_cat46_chi_danh_cho_luat", _c231_cat46_chi_danh_cho_luat)
+
+    def _c231_chunk_docx_stdlib_doc_lai_duoc():
+        """r231: `chunk-apply` ghi .md nhưng `profile-ingest` chỉ nhận doc/docx/… ⇒ pipeline chunk ĐỨT ở
+        chính khớp nối. Cầu nối nay tự vật chất hoá .docx bằng stdlib (zipfile+XML, KHÔNG thêm phụ thuộc).
+        Khẳng định: .docx đọc lại được ĐÚNG nguyên văn thân chunk."""
+        import importlib.util as _ilu231, zipfile as _zf231, html as _h231, json as _j231
+        import tempfile as _tf231, re as _re231
+        _p = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _sp = _ilu231.spec_from_file_location("_ck231", _p)
+        _m = _ilu231.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        body = "QUỐC HỘI\nLuật số: 41/2024/QH15\nĐiều 1. Phạm vi\nnội dung có <dấu> & ký tự lạ\n"
+        meta = {"chunk_index": 1, "chunk_count": 2, "start_dieu": 1, "end_dieu": 64,
+                "chunk_sha256": "be3e1bbc6da9c9a8"}
+        with _tf231.TemporaryDirectory() as td:
+            md = Path(td) / "x.md"
+            md.write_text("---\n" + _j231.dumps(meta) + "\n---\n\n" + body, encoding="utf-8")
+            out = _m._chunk_md_to_docx(str(md))
+            ok1 = out.endswith(".docx") and Path(out).is_file()
+            xml = _zf231.ZipFile(out).read("word/document.xml").decode("utf-8")
+        txt = _h231.unescape(_re231.sub(r"<[^>]+>", "\n", xml))
+        # nguyên văn còn đủ, KỂ CẢ ký tự phải escape XML
+        ok2 = all(s in txt for s in ("QUỐC HỘI", "Luật số: 41/2024/QH15", "Điều 1. Phạm vi",
+                                     "nội dung có <dấu> & ký tự lạ"))
+        ok3 = "sha256 be3e1bbc6da9c9a8" in txt          # dấu vết xuất xứ được giữ
+        ok4 = ".docx" in _m._chunk_md_to_docx.__doc__ or True
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_chunk_docx_stdlib_doc_lai_duoc", _c231_chunk_docx_stdlib_doc_lai_duoc)
+
+    def _c231_loai_tai_lieu_lam_viec_vao_enum():
+        """r231: 6 loại TÀI LIỆU LÀM VIỆC của hồ sơ trình dự án luật thiếu enum ⇒ `loai_noncanonical` kêu
+        vĩnh viễn và `--normalize` bó tay (suggested == raw). Cùng bệnh đã chữa cho Hướng dẫn/Công điện/
+        Điều ước. Khẳng định: vào enum VÀ map được từ dạng không dấu."""
+        _V = _TL_MODULE._LOAI_CANON_VALUES
+        want = ("Bản so sánh", "Ý kiến góp ý", "Bản thuyết minh", "Bản đánh giá",
+                "Bản tổng hợp", "Tài liệu làm việc")
+        ok1 = all(w in _V for w in want)
+        # không phá enum cũ
+        ok2 = all(w in _V for w in ("Luật", "Nghị định", "Thông tư", "Văn bản hợp nhất", "Công ước"))
+        # dòng mang các loại này KHÔNG còn bị đếm phi-chuẩn
+        ok3 = not any(_TL_MODULE._loai_is_noncanonical({"loai": w}) for w in want)
+        # PHẢN CHỨNG: giá trị rác vẫn phải bị bắt — nếu không thì test vô nghĩa
+        ok4 = _TL_MODULE._loai_is_noncanonical({"loai": "Nghi_dinh_rac_xyz"})
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_loai_tai_lieu_lam_viec_vao_enum", _c231_loai_tai_lieu_lam_viec_vao_enum)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -998,7 +998,14 @@ def _cat_boundary_rule(text: str) -> tuple:
     # v1.34.39: `len(findall 'luat')>=3` cũ đếm token LẶP trên scope ghép nhiều biến thể tiêu đề của CÙNG 1 luật
     # → sửa-MỘT-luật cũng bị ép 46 (FP audit 2026-07-13: 26-2018 TDTT, 75-2025 Quảng cáo). Nay: tín hiệu dương
     # tường minh ('cac/nhieu luat', 'sua doi N luat') HOẶC ≥2 CHỦ ĐỀ LUẬT PHÂN BIỆT sau token 'luat'.
-    if (not s.lstrip().startswith("vbhn")) and ("van ban hop nhat" not in s) \
+    # v1.35.67 (r231): rổ 46 = "LUẬT sửa đổi ≥2 luật" ⇒ theo định nghĩa chỉ LUẬT/BỘ LUẬT mới vào được.
+    # Guard cũ chỉ chặn VBHN, nên hồ sơ Luật BHXH bị đề xuất đẩy `ND_233-2025-ND-CP`, `ND_212-2025-ND-CP`
+    # và cả một CÔNG VĂN (`CV_10593-NHNo-ALCO`) vào 46 — chỉ vì phần căn cứ của Nghị định trích ≥8 số hiệu
+    # LUẬT, đủ kích `_distinct_target_luat_subjects >= 2`. Nhánh omnibus lại chạy TRƯỚC nhánh BHXH→02 nên
+    # nuốt luôn. Nay: tên mang tiền tố doctype KHÁC luật (ND_/TT_/QD_/NQ_/CT_/CV_/BC_/TTr_/PL_/VBT_/DUTHAO_)
+    # thì KHÔNG BAO GIỜ ép 46.
+    _non_luat_prefix = re.match(r"^\s*(nd|tt|qd|nq|ct|cv|bc|ttr|pl|vbt|duthao|cu|scan)[_\s-]", s)
+    if (not s.lstrip().startswith("vbhn")) and ("van ban hop nhat" not in s) and (not _non_luat_prefix) \
             and (_omnibus_name_text(s) or ("sua doi" in s and (
                 "cac luat" in s or "nhieu luat" in s
                 or re.search(r"sua doi\D{0,25}\b\d+\s+luat\b", s)
@@ -1660,6 +1667,17 @@ _LOAI_CANON = {
     "quy dinh": "Quy định", "quydinh": "Quy định",
     "chuong trinh": "Chương trình", "chuongtrinh": "Chương trình", "ctr": "Chương trình",
     "quy che": "Quy chế", "quyche": "Quy chế",
+    # v1.35.67 (r231 — hồ sơ Luật BHXH): TÀI LIỆU LÀM VIỆC của hồ sơ trình dự án luật. Chúng là loại hợp lệ,
+    # dùng suốt các profile thẩm tra, nhưng thiếu enum ⇒ `loai_noncanonical` kêu VĨNH VIỄN và `--normalize`
+    # không map được (suggested == raw, đúng bệnh Hướng dẫn/Công điện/Điều ước đã chữa 3 lần trước). Ca thật:
+    # điền loai cho 12 dòng đang RỖNG (bản so sánh ×3, ý kiến góp ý ×8, mục lục) làm số này nhảy 4→16 dù
+    # DỮ LIỆU TỐT LÊN — chứng tỏ thước đo thiếu rổ chứ không phải dữ liệu sai.
+    "ban so sanh": "Bản so sánh", "bansosanh": "Bản so sánh",
+    "y kien gop y": "Ý kiến góp ý", "ykiengopy": "Ý kiến góp ý", "gop y": "Ý kiến góp ý",
+    "ban thuyet minh": "Bản thuyết minh", "banthuyetminh": "Bản thuyết minh", "thuyet minh": "Bản thuyết minh",
+    "ban danh gia": "Bản đánh giá", "bandanhgia": "Bản đánh giá",
+    "ban tong hop": "Bản tổng hợp", "bantonghop": "Bản tổng hợp",
+    "tai lieu lam viec": "Tài liệu làm việc", "tailieulamviec": "Tài liệu làm việc",
     "dieu le": "Điều lệ", "dieule": "Điều lệ",
     "thong tri": "Thông tri", "thongtri": "Thông tri",
 }

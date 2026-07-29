@@ -1898,7 +1898,13 @@ def _corpus_audit_row(entry: dict, header_text: str) -> dict:
     # 2) TÊN / TRÍCH YẾU — CHỈ khi tên hiện tại HỎNG CẤU TRÚC (UUID/đuôi file/thiếu mã loại) — tên ĐÃ chuẩn KHÔNG đụng
     # (trích yếu-từ-header quá nhiễu để đổi tên chuẩn, dễ SAI: rớt năm/nhặt cơ quan). GUARD: subject không boilerplate +
     # phải CHIA SẺ ≥1 token với tên cũ (corroborate — chống Kế toán→Văn phòng quốc hội) + tên mới hợp lệ + KHÔNG VBHN-thiếu-năm.
-    if _name_looks_nonstandard(name) and not _vbhn_noyear:
+    # v1.35.67 (r231): KHÔNG đề xuất đổi tên cho tệp BUNDLE nhiều phần (`..._phan_3_cua_8`, `..._part02...`).
+    # Header của bundle là header của tài liệu ĐẦU TIÊN trong đó, nên `_doc_subject_for_name` trích ra chủ đề
+    # của MỘT phần rồi đặt cho CẢ bundle: ca thật hồ sơ Luật BHXH — `VBT_Y_kien_gop_y_Luat_BHXH_16-7_phan_6_cua_8`
+    # bị đề xuất thành `Luat_Cong_ngan_hang_nha_nuoc` (mất chỉ số phần + gắn tiền tố Luat_ cho thứ không phải luật).
+    _is_bundle = bool(re.search(r"(?i)(phan|part)[_\s-]*\d+[_\s-]*(cua|of|/)[_\s-]*\d+"
+                                r"|__part\d+__", name or ""))
+    if _name_looks_nonstandard(name) and not _vbhn_noyear and not _is_bundle:
         merged = dict(info)
         if reg_sh and not merged.get("sohieu"):
             merged["sohieu"] = _entry_sohieu(entry); merged["sohieu_key"] = reg_sh

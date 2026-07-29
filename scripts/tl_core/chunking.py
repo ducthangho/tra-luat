@@ -349,6 +349,57 @@ def _profile_ingest_chunks_plan(a) -> dict:
     return out
 
 
+def _chunk_md_to_docx(md_path: str) -> str:
+    """v1.35.67 (r231) — VÁ KHỚP NỐI GÃY của chính pipeline chunk.
+
+    `chunk-apply` ghi `.md`, nhưng `profile-ingest` chỉ nhận doc/docx/odt/pdf/rtf/xls/xlsx
+    ⇒ `profile-ingest-chunks` gọi con luôn rc=2 (`UNSUPPORTED_EXTENSION`) — pipeline đứt ở đúng
+    chỗ nối nó lại. Nới allowlist là SAI hướng (mở cửa cho .md bất kỳ vào corpus); thay vào đó
+    cầu nối tự vật chất hoá chunk thành .docx.
+
+    Viết .docx bằng `zipfile` + XML thuần — KHÔNG thêm phụ thuộc (requirements.txt: stdlib-only).
+    Front-matter JSON của chunk được giữ thành đoạn đầu (dấu vết xuất xứ + sha256), thân giữ NGUYÊN VĂN.
+    """
+    raw = Path(md_path).read_text(encoding="utf-8")
+    m = re.match(r"---\n(.*?)\n---\n(.*)$", raw, re.S)
+    meta_txt, body = (m.group(1), m.group(2).lstrip("\n")) if m else ("", raw)
+    try:
+        meta = json.loads(meta_txt) if meta_txt else {}
+    except Exception:
+        meta = {}
+    head = ""
+    if meta:
+        head = ("[chunk %s/%s · Điều %s-%s · sha256 %s]" % (
+            meta.get("chunk_index"), meta.get("chunk_count"),
+            meta.get("start_dieu"), meta.get("end_dieu"), str(meta.get("chunk_sha256", ""))[:16]))
+
+    def _esc(t: str) -> str:
+        return (t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+    paras = ([head] if head else []) + body.split("\n")
+    body_xml = "".join(
+        '<w:p><w:r><w:t xml:space="preserve">%s</w:t></w:r></w:p>' % _esc(line) for line in paras)
+    doc_xml = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+               '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+               '<w:body>%s</w:body></w:document>' % body_xml)
+    ctypes = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+              '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+              '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+              '<Default Extension="xml" ContentType="application/xml"/>'
+              '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.'
+              'wordprocessingml.document.main+xml"/></Types>')
+    rels = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/'
+            'officeDocument" Target="word/document.xml"/></Relationships>')
+    out = str(Path(md_path).with_suffix(".docx"))
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml", ctypes)
+        z.writestr("_rels/.rels", rels)
+        z.writestr("word/document.xml", doc_xml)
+    return out
+
+
 def cmd_profile_ingest_chunks(a) -> int:
     ok, err = _bridge_confirm_apply(a, what="profile-ingest-chunks")
     if not ok:
@@ -367,7 +418,12 @@ def cmd_profile_ingest_chunks(a) -> int:
     _resume_note = None
     for _i, rec in enumerate(_cmds, 1):
         print(f"[chunks] ({_i}/{_n}) {rec.get('expected_name')} …", file=sys.stderr, flush=True)
-        r = _run_child_tl(rec["command"])
+        _cmd = list(rec["command"])
+        # r231: đổi đường dẫn .md → .docx vừa vật chất hoá (profile-ingest không nhận .md)
+        for _k, _tok in enumerate(_cmd):
+            if isinstance(_tok, str) and _tok.endswith(".md") and Path(_tok).is_file():
+                _cmd[_k] = _chunk_md_to_docx(_tok)
+        r = _run_child_tl(_cmd)
         r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
         results.append(r)
         print("[chunks-jsonl] " + json.dumps({"i": _i, "n": _n, "ok": bool(r.get("ok")),

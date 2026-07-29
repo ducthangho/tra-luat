@@ -570,6 +570,36 @@ def _refresh_nlm_auth():
         return False
 
 
+_NLM_LV_JITTER_S = 120.0     # dung sai đồng hồ (NTP) — mốc "tương lai" trong khoảng này = vừa xác thực xong
+
+
+def _nlm_lv_age_seconds(lv):
+    """PURE (v1.35.65): tuổi (giây) từ `metadata.json.last_validated`, hoặc None nếu mốc KHÔNG DÙNG ĐƯỢC.
+
+    Bug đo 29-07-2026 (sandbox UTC, jar stage từ máy UTC+7): `last_validated` do nlm ghi theo GIỜ CỦA
+    MÁY GHI và là ISO **NAIVE** (`2026-07-29T18:04:42`, không tzinfo). Trừ thẳng `datetime.now()` của
+    máy ĐỌC = trộn hai múi giờ → lệch 465,6' → `_nlm_auth_age_days` trả **ÂM 0,3 ngày**, `nlm-auth-load`
+    in "~-0 ngày tuổi". Sai số bị chặn bởi biên múi giờ thực (UTC-12..UTC+14 ⇒ ≤14h ≈ 0,58 ngày) nên
+    KHÔNG lật nổi ngưỡng 14 ngày ở giữa dải; cái ĐẮT nằm ở chỗ khác: (a) in tuổi ÂM là sai hiển nhiên,
+    (b) SÁT ngưỡng thì nuốt mất cảnh báo, (c) NẶNG NHẤT — `_nlm_auth_load_downgrade` so tuổi bundle
+    (mốc máy STAGE ghi) với tuổi jar cục bộ (mốc máy NÀY ghi): hai gốc thời gian khác nhau ⇒ bundle từ
+    máy đi trước LUÔN ra tuổi âm ⇒ luôn "bundle tươi hơn" ⇒ chốt chống hạ cấp r208c 3.1 mở toang.
+
+    Quy tắc: có tzinfo → so tuyệt đối (đúng ở mọi máy); naive & tuổi ≥ 0 → DÙNG (cùng máy: chính xác;
+    khác múi: chỉ ĐỘI LÊN ≤14h — lệch về phía cảnh báo SỚM, an toàn) nên mốc 2026-07-05 «ưu tiên
+    last_validated» giữ nguyên; naive & mốc ở TƯƠNG LAI quá dung sai đồng hồ → mốc vô nghĩa với đồng hồ
+    máy này ⇒ trả None để caller rơi xuống `extracted_at` (epoch — tz-safe), KHÔNG bịa số âm."""
+    from datetime import datetime as _dt
+    try:
+        t = _dt.fromisoformat(str(lv))
+    except (TypeError, ValueError):
+        return None
+    age = ((_dt.now(t.tzinfo) if t.tzinfo else _dt.now()) - t).total_seconds()
+    if age >= 0:
+        return age
+    return 0.0 if age >= -_NLM_LV_JITTER_S else None
+
+
 def _nlm_auth_age_days(nlm_auth):
     """Tuổi cookie (ngày) — cảnh báo cookie cũ sắp hết hạn (~2–4 tuần).
 
@@ -578,14 +608,17 @@ def _nlm_auth_age_days(nlm_auth):
     storage) → age vẫn báo ~19 ngày dù vừa refresh, khiến cảnh báo LUÔN SAI sau khi đã làm đúng việc user được
     khuyên làm. Tín hiệu tươi THẬT nằm ở `profiles/default/metadata.json.last_validated` (ISO, cập nhật mỗi lần
     `nlm login`/`--check` xác thực OK) — ưu tiên đọc đó; fallback `auth.json.extracted_at` (epoch) cho bundle cũ
-    không có metadata.json (tương thích ngược)."""
+    không có metadata.json (tương thích ngược).
+
+    v1.35.65: mốc naive lệch múi giờ KHÔNG còn cho ra tuổi âm — xem `_nlm_lv_age_seconds`."""
     import time as _t
-    from datetime import datetime as _dt
     try:
         meta = json.loads(nlm_auth.get("profiles/default/metadata.json", "{}"))
         lv = meta.get("last_validated")
         if lv:
-            return (_dt.now() - _dt.fromisoformat(lv)).total_seconds() / 86400.0
+            _a = _nlm_lv_age_seconds(lv)      # None = mốc ở tương lai (lệch múi giờ) → rơi xuống epoch
+            if _a is not None:
+                return _a / 86400.0
     except Exception:
         pass
     try:

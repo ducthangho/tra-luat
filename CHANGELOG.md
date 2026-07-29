@@ -1,3 +1,23 @@
+# ★ v1.35.74 — r237: cookie harvest KHÔNG cần notebooklm.google.com (vá cho vùng bị chặn web) (2026-07-29)
+
+User đã cài Firefox + Cookie-Editor nhưng notebooklm.google.com bị chặn theo vùng ⇒ không mở
+được trang web để "đứng trên tab đó" mà export. App NotebookLM thì chạy.
+
+Đo trên jar TỪNG CHẠY ĐƯỢC (139 notebook): 7 cookie nlm bắt buộc (SID · __Secure-1PSID ·
+__Secure-3PSID · HSID · SSID · APISID · SAPISID) đều nằm trên .google.com / .google.com.hk —
+KHÔNG cái nào trên notebooklm.google.com (trang đó chỉ có _ga/OSID, không phải thứ nlm dùng).
+Tức chúng là cookie ĐĂNG NHẬP GOOGLE CHUNG. Bằng chứng mạnh nhất: jar cũ lấy SID/__Secure-1PSID
+từ .google.com.HK (một trang Google vùng khác) mà vẫn chạy 139 notebook từ sandbox.
+
+Hệ quả: harvest cookie từ Gmail / myaccount.google.com (KHÔNG bị chặn) là ĐỦ; không cần mở
+notebooklm web. Truy cập API NotebookLM xảy ra Ở SANDBOX (vùng của nó), không ở trình duyệt
+người dùng — nên vùng của điện thoại không liên quan.
+
+App NotebookLM chạy được KHÔNG dùng làm nguồn cookie: app lưu auth ở storage riêng, không root
+thì không lấy ra được. Nó chỉ XÁC NHẬN tài khoản có quyền NotebookLM (khớp: sandbox chạy được).
+
+Vá hướng dẫn trong nlm-auth-import.sh (header + thông điệp thiếu-cookie): trỏ Gmail/myaccount
+thay vì notebooklm; nêu rõ vùng web bị chặn không ảnh hưởng.
 # ★ v1.35.73 — r236: nlm-auth-import --watch (tự phát hiện file mới) + đính chính "script cài trên điện thoại" (2026-07-29)
 
 ## Yêu cầu & giới hạn thật

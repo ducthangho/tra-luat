@@ -8,8 +8,12 @@
 # add-on). `nlm login` tương tác thì KHÔNG chạy được ở đây (không màn hình, không CDP tới máy bạn).
 #
 # LUỒNG:
-#   [ĐIỆN THOẠI] trình duyệt có extension → đăng nhập notebooklm.google.com → export cookie
-#                → tải file lên Google Drive (ĐỪNG dán vào chat: đó là session Google đầy đủ)
+#   [ĐIỆN THOẠI] trình duyệt có extension → đăng nhập MỘT trang Google BẤT KỲ (Gmail /
+#                myaccount.google.com — KHÔNG cần notebooklm.google.com, có thể bị chặn theo vùng)
+#                → Cookie-Editor Export JSON → tải lên Google Drive (ĐỪNG dán chat: session đầy đủ)
+#   VÌ SAO: 7 cookie nlm cần (SID/__Secure-1PSID/3PSID/HSID/SSID/APISID/SAPISID) là cookie ĐĂNG NHẬP
+#   GOOGLE CHUNG trên .google.com — KHÔNG phải của notebooklm. Truy cập API NotebookLM xảy ra Ở
+#   SANDBOX (vùng của nó, không bị chặn) — đã kiểm: jar cũ lấy từ .google.com.hk vẫn chạy 139 notebook.
 #   [Ở ĐÂY]      ./scripts/nlm-auth-import.sh          ← không cần fileId, tự tìm
 #
 #   ./nlm-auth-import.sh                       # TỰ TÌM trên Drive file tên chứa 'nlm-auth' (mới nhất)
@@ -182,9 +186,10 @@ thieu = [n for n in BAT_BUOC if not ck.get(n)]
 print(f"  parse được {len(ck)} cookie")
 if thieu:
     print(f"  THIẾU cookie bắt buộc: {thieu}", file=sys.stderr)
-    print("  Nguyên nhân thường gặp: export chỉ lấy cookie của tab hiện tại (notebooklm.google.com)", file=sys.stderr)
-    print("  mà các cookie phiên nằm ở domain .google.com / accounts.google.com.", file=sys.stderr)
-    print("  → export TOÀN BỘ cookie domain google.com, hoặc mở accounts.google.com rồi export.", file=sys.stderr)
+    print("  7 cookie này là cookie ĐĂNG NHẬP GOOGLE CHUNG trên .google.com — KHÔNG phải của", file=sys.stderr)
+    print("  notebooklm. Export từ tab Gmail hoặc myaccount.google.com (đã đăng nhập) là ĐỦ;", file=sys.stderr)
+    print("  KHÔNG cần mở notebooklm.google.com (trang web đó có thể bị chặn theo vùng — không sao,", file=sys.stderr)
+    print("  API NotebookLM chạy ở SANDBOX, không phải ở trình duyệt bạn).", file=sys.stderr)
     sys.exit(2)
 rts = [n for n in ("__Secure-1PSIDRTS", "__Secure-3PSIDRTS") if ck.get(n)]
 print(f"  đủ {len(BAT_BUOC)} cookie phiên bắt buộc" + (f" · có rotation token {rts}" if rts else

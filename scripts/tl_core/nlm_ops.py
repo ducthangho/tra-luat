@@ -838,7 +838,7 @@ def _topology_row_kind_findings(entries: list[dict], topo: dict) -> list[dict]:
     row_kind=='overflow'` cho dòng ĐÃ có nlm_notebook_id. Bỏ qua kind bảo hộ (ref/thuong) + dòng chưa lên NLM.
     Trả findings [{drive_id, notebook_id, row_kind, finding}] — REPORT-ONLY.
 
-    r230 SỬA CHÚ THÍCH: bản cũ ghi «sửa: nlm-reconcile --apply / reg_upsert» — vế `nlm-reconcile
+    r232 SỬA CHÚ THÍCH: bản cũ ghi «sửa: nlm-reconcile --apply / reg_upsert» — vế `nlm-reconcile
     --apply` SAI. Reconcile ghi row_kind theo topology nhưng chỉ KÈM dòng backfill/link, tức dòng
     THIẾU nlm_notebook_id; còn điều kiện lọt vào findings này là ĐÃ CÓ nlm_notebook_id (`if not nb:
     continue` ngay dưới) ⇒ hai tập RỜI NHAU theo cấu trúc, --apply không bao giờ chạm tới. Đường

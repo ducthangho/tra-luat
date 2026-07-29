@@ -1313,10 +1313,26 @@ def _ingest_verify_gate(text: str, classification: dict | None = None,
             "corpus_allowed": ok and ocr_ok}
 
 
+# v1.35.65 (r229): MỘT định nghĩa "tiêu đề Điều" dùng chung cho ĐẾM (_dieu_sequence_stats) và CẮT
+# (_split_by_dieu_chunks). Trước đây hai nơi tự viết regex lỏng `^\s*Điều\s+(\d+)\b`: bản pdftotext của
+# Công báo ngắt dòng giữa câu, đẩy DẪN CHIẾU "Điều N của Luật này" lên đầu dòng ⇒ vừa sai SỐ ĐẾM (161
+# cho luật 141 Điều) vừa CẮT NHẦM — chunk part 2 bắt đầu ở "Điều 2" giữa thân Điều 64, tức nguồn NLM bị
+# xẻ GIỮA CÂU. Tiêu đề thật phải kết bằng `.`/`:` hoặc hết dòng. `[ \t]*` (không `\s*`) để `^` không
+# trượt qua dòng trước.
+# Regex nằm TRONG thân hàm, KHÔNG phải hằng cấp module: 1646 hàm tl_core được re-home `__globals__`
+# về tl.py nên tra tên toàn cục ở ĐÓ — hằng module sẽ NameError (đã đỏ 1 lượt), còn HÀM thì phải khai
+# thêm vào `_STUB_MAP["ingest_ops"]` mới resolve được.
+def _dieu_head_marks(text: str) -> list:
+    """Danh sách match TIÊU ĐỀ Điều. Không thấy tiêu đề đúng thể thức → lùi về luật cũ, để văn bản
+    kiểu 'Điều 5 Quy định chung' (tên cùng dòng, không dấu) KHÔNG tệ đi so với trước."""
+    marks = list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)[a-zđ]?[ \t]*(?:[.:]|$)", text or ""))
+    return marks if marks else list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)\b", text or ""))
+
+
 def _split_by_dieu_chunks(text: str, max_chars: int = 100000) -> list[dict]:
     text = text or ""
     max_chars = max(10000, int(max_chars or 100000))
-    marks = list(re.finditer(r"(?mi)^\s*Điều\s+(\d+)\b", text))
+    marks = _dieu_head_marks(text)
     if not marks:
         return [{"part": 1, "start_dieu": None, "end_dieu": None, "chars": len(text), "text": text}] if text else []
     spans = []
@@ -3457,7 +3473,9 @@ def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = ""
     }
 
 def _dieu_sequence_stats(text: str) -> dict:
-    nums = [int(x) for x in re.findall(r"(?mi)^\s*Điều\s+(\d+)\b", text or "")]
+    # v1.35.65 (r229) — dùng CHUNG _dieu_head_marks với _split_by_dieu_chunks (xem ghi chú ở đó):
+    # đếm theo TIÊU ĐỀ đúng thể thức, không đếm dẫn chiếu "Điều N của Luật này" bị PDF ngắt dòng.
+    nums = [int(m.group(1)) for m in _dieu_head_marks(text or "")]
     gaps = []
     for a, b in zip(nums, nums[1:]):
         if b > a + 1:

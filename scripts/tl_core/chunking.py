@@ -47,7 +47,15 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
         if not prev:
             return True
         last = prev.rsplit("\n", 1)[-1].rstrip()
-        return (not last) or last[-1] in ".;:!?…)\u201d\u00bb"
+        if (not last) or last[-1] in ".;:!?…)\u201d\u00bb":
+            return True
+        # v1.35.66 (r230): guard PH2-08 CHẶN OAN tiêu đề đứng ngay sau DÒNG CƠ CẤU không có dấu kết câu
+        # ("Chương I" / "NHỮNG QUY ĐỊNH CHUNG" / "Mục 1"). Ca thật: Luật BHXH 41/2024 — `Điều 1.` nằm
+        # ngay sau `NHỮNG QUY ĐỊNH CHUNG` ⇒ bị loại ⇒ rơi khỏi MỌI chunk (mất 750 ký tự: khối đầu
+        # văn bản + trọn Điều 1) mà `warnings` vẫn RỖNG.
+        if re.match(r"(?i)^\s*(chương|mục|phần|tiểu\s+mục)\b", last):
+            return True
+        return last == last.upper() and len(last) <= 120   # dòng TOÀN HOA = tiêu đề cơ cấu
     matches = [m for m in article_pat.finditer(text) if _is_heading(m)]
     if matches:
         boundaries = [(m.start(), (matches[i+1].start() if i+1 < len(matches) else len(text)), m.group(1).strip()) for i, m in enumerate(matches)]
@@ -65,6 +73,18 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
         if group_start is not None:
             chunk_text = text[group_start:group_end]
             records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
+        # v1.35.66 (r230) BẢO TOÀN NỘI DUNG: chunk chỉ chạy TỪ tiêu đề đầu tiên, nên mọi thứ đứng
+        # trước nó (khối đầu văn bản: cơ quan ban hành, SỐ HIỆU, tên luật, căn cứ — và cả một Điều bị
+        # `_is_heading` loại oan) BIẾN MẤT không dấu vết. Đo trên Luật BHXH 41/2024: total 183.428 ký
+        # tự nhưng tổng chunk chỉ 182.678 ⇒ hụt 750, `warnings` RỖNG. Nay gắn phần đầu vào chunk 1 —
+        # bất biến: tổng ký tự các chunk == tổng ký tự nguồn.
+        if records and boundaries and boundaries[0][0] > 0:
+            head = text[:boundaries[0][0]]
+            if head.strip():
+                r0 = records[0]
+                r0["text"] = head + r0["text"]
+                r0["start_char"] = 0
+                r0["chars"] = len(r0["text"])
         return "by_article", records
     # v1.34.38 (#2 log Chỉ thị) + v1.34.40 C.1 REDESIGN (log: chunk 191k lọt qua max-chars 90k + Phần V bị gộp
     # mất ranh giới): strategy by_heading cho văn kiện Đảng/Đề án KHÔNG có Điều. LUẬT MỚI (grill 2026-07-13):
@@ -329,6 +349,57 @@ def _profile_ingest_chunks_plan(a) -> dict:
     return out
 
 
+def _chunk_md_to_docx(md_path: str) -> str:
+    """v1.35.67 (r231) — VÁ KHỚP NỐI GÃY của chính pipeline chunk.
+
+    `chunk-apply` ghi `.md`, nhưng `profile-ingest` chỉ nhận doc/docx/odt/pdf/rtf/xls/xlsx
+    ⇒ `profile-ingest-chunks` gọi con luôn rc=2 (`UNSUPPORTED_EXTENSION`) — pipeline đứt ở đúng
+    chỗ nối nó lại. Nới allowlist là SAI hướng (mở cửa cho .md bất kỳ vào corpus); thay vào đó
+    cầu nối tự vật chất hoá chunk thành .docx.
+
+    Viết .docx bằng `zipfile` + XML thuần — KHÔNG thêm phụ thuộc (requirements.txt: stdlib-only).
+    Front-matter JSON của chunk được giữ thành đoạn đầu (dấu vết xuất xứ + sha256), thân giữ NGUYÊN VĂN.
+    """
+    raw = Path(md_path).read_text(encoding="utf-8")
+    m = re.match(r"---\n(.*?)\n---\n(.*)$", raw, re.S)
+    meta_txt, body = (m.group(1), m.group(2).lstrip("\n")) if m else ("", raw)
+    try:
+        meta = json.loads(meta_txt) if meta_txt else {}
+    except Exception:
+        meta = {}
+    head = ""
+    if meta:
+        head = ("[chunk %s/%s · Điều %s-%s · sha256 %s]" % (
+            meta.get("chunk_index"), meta.get("chunk_count"),
+            meta.get("start_dieu"), meta.get("end_dieu"), str(meta.get("chunk_sha256", ""))[:16]))
+
+    def _esc(t: str) -> str:
+        return (t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+    paras = ([head] if head else []) + body.split("\n")
+    body_xml = "".join(
+        '<w:p><w:r><w:t xml:space="preserve">%s</w:t></w:r></w:p>' % _esc(line) for line in paras)
+    doc_xml = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+               '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+               '<w:body>%s</w:body></w:document>' % body_xml)
+    ctypes = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+              '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+              '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+              '<Default Extension="xml" ContentType="application/xml"/>'
+              '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.'
+              'wordprocessingml.document.main+xml"/></Types>')
+    rels = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/'
+            'officeDocument" Target="word/document.xml"/></Relationships>')
+    out = str(Path(md_path).with_suffix(".docx"))
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml", ctypes)
+        z.writestr("_rels/.rels", rels)
+        z.writestr("word/document.xml", doc_xml)
+    return out
+
+
 def cmd_profile_ingest_chunks(a) -> int:
     ok, err = _bridge_confirm_apply(a, what="profile-ingest-chunks")
     if not ok:
@@ -347,7 +418,12 @@ def cmd_profile_ingest_chunks(a) -> int:
     _resume_note = None
     for _i, rec in enumerate(_cmds, 1):
         print(f"[chunks] ({_i}/{_n}) {rec.get('expected_name')} …", file=sys.stderr, flush=True)
-        r = _run_child_tl(rec["command"])
+        _cmd = list(rec["command"])
+        # r231: đổi đường dẫn .md → .docx vừa vật chất hoá (profile-ingest không nhận .md)
+        for _k, _tok in enumerate(_cmd):
+            if isinstance(_tok, str) and _tok.endswith(".md") and Path(_tok).is_file():
+                _cmd[_k] = _chunk_md_to_docx(_tok)
+        r = _run_child_tl(_cmd)
         r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
         results.append(r)
         print("[chunks-jsonl] " + json.dumps({"i": _i, "n": _n, "ok": bool(r.get("ok")),

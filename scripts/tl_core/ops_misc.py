@@ -939,7 +939,7 @@ def _doctor_exporttext_probe(g, entries: list[dict]) -> dict:
 
 
 def _drift_hint_lines(bd: dict, nb: str) -> list[str]:
-    """r230 (PURE): dòng GỢI Ý cho cảnh báo drift registry↔NLM của doctor — tách khỏi chỗ in để test
+    """r232 (PURE): dòng GỢI Ý cho cảnh báo drift registry↔NLM của doctor — tách khỏi chỗ in để test
     được, và để gợi ý KHỚP đúng thứ `nlm-reconcile --apply` THẬT SỰ ghi được.
 
     Bug đo 29-07-2026: doctor in MỘT câu duy nhất «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`»
@@ -1085,13 +1085,13 @@ def cmd_doctor(a) -> int:
             if not _json:
                 print(f"  ⚠ registry↔NLM lệch: {_drift_n} mục → "
                       + " · ".join(f"{k}={_bd[k]}" for k in _drift_keys))
-                for _hl in _drift_hint_lines(_bd, _nb):   # r230: gợi ý theo TỪNG cờ, xem docstring
+                for _hl in _drift_hint_lines(_bd, _nb):   # r232: gợi ý theo TỪNG cờ, xem docstring
                     print(_hl)
     except Exception:
         pass
     # v1.34.49 (F-06/F-09 doctor — ADVISORY/REPORT-ONLY theo grill, KHÔNG đổi rc): bất biến notebook↔row_kind
     # theo TOPOLOGY (primary⇔own/blank, overflow⇔overflow, notebook lạ) + findings resolver (alias lệch declared,
-    # shard lạ trong registry) + stamp F-09. r230 SỬA CHÚ THÍCH: reconcile --apply ghi row_kind theo topology
+    # shard lạ trong registry) + stamp F-09. r232 SỬA CHÚ THÍCH: reconcile --apply ghi row_kind theo topology
     # NHƯNG chỉ KÈM dòng backfill/link (dòng THIẾU nlm_notebook_id) — dòng vào findings này đã CÓ
     # nlm_notebook_id ⇒ --apply KHÔNG bao giờ chạm tới. Lớp này thực sự REPORT-ONLY.
     _topo_doc = None
@@ -1116,7 +1116,7 @@ def cmd_doctor(a) -> int:
             if _topo_doc.get("ok") is False:
                 print(f"  ⚠ topology CONFIG CONFLICT: {_topo_doc.get('error')} — đường ghi/route sẽ fail-closed (D5).")
             if _rkf_doc:
-                # r230: gợi ý cũ («sửa: nlm-reconcile <nb> --apply») KHÔNG chữa được lớp này —
+                # r232: gợi ý cũ («sửa: nlm-reconcile <nb> --apply») KHÔNG chữa được lớp này —
                 # reconcile chỉ ghi row_kind KÈM dòng backfill/link, mà dòng lọt vào đây BẮT BUỘC
                 # đã có nlm_notebook_id (điều kiện của `_topology_row_kind_findings`) ⇒ hai tập RỜI
                 # NHAU theo cấu trúc. Đo 29-07 trên notebook overflow mang 71 dòng lệch: backfill=0,

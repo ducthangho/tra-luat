@@ -21772,9 +21772,9 @@ def run() -> int:
 
     _t110("r229_mirror_nlm_ops_cung_quy_tac", _c229_mirror_nlm_ops_cung_quy_tac)
 
-    # ───── r230 (v1.35.66): gợi ý khắc phục của doctor phải KHỚP thứ lệnh thật sự ghi được ─────
-    def _c230_goi_y_doctor_khop_thu_reconcile_ghi_duoc():
-        """r230 — doctor in MỘT câu «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`» cho MỌI drift.
+    # ───── r232 (v1.35.69): gợi ý khắc phục của doctor phải KHỚP thứ lệnh thật sự ghi được ─────
+    def _c232_goi_y_doctor_khop_thu_reconcile_ghi_duoc():
+        """r232 — doctor in MỘT câu «đồng bộ 1 bước: `tl nlm-reconcile <nb> --apply`» cho MỌI drift.
         Đo 29-07-2026 trên kho thật: breakdown = NLM_STATUS_MISMATCH 0 · CORPUS_TRUE_NOT_ON_NLM 53 ·
         NLM_NOTEBOOK_ID_MISSING 0, mà DRY của reconcile trên CẢ notebook nền LẪN notebook overflow
         đều cho backfill=0 · link=0 · desync=0 ⇒ `--apply` ghi ĐÚNG 0 DÒNG. Ai làm theo sẽ tin đã
@@ -21784,7 +21784,7 @@ def run() -> int:
         Ba khẳng định: (1) chỉ có NỢ PHỦ ⇒ TUYỆT ĐỐI không được mời `--apply` như cách chữa, phải
         nói rõ nó KHÔNG chạm tới; (2) có cờ reconcile chữa được ⇒ VẪN phải mời, và đếm ĐÚNG số mục
         chữa được (7 = 3+4), không phải tổng drift; (3) sạch ⇒ im."""
-        _om = _mod215("ops_misc.py", "_om230")
+        _om = _mod215("ops_misc.py", "_om232")
         _chi_no = _om._drift_hint_lines(
             {"NLM_STATUS_MISMATCH": 0, "CORPUS_TRUE_NOT_ON_NLM": 53, "NLM_NOTEBOOK_ID_MISSING": 0}, "nb-x")
         ok1 = (len(_chi_no) == 1 and "NỢ PHỦ" in _chi_no[0] and "KHÔNG chạm tới" in _chi_no[0]
@@ -21801,15 +21801,15 @@ def run() -> int:
                                       "NLM_NOTEBOOK_ID_MISSING")}, "nb-x") == []
         # stub-farm: cmd_doctor re-home __globals__ về namespace tl ⇒ tên mới PHẢI khai trong _STUB_MAP,
         # nếu quên thì doctor NameError đúng lúc in cảnh báo (bẫy I11). Khoá luôn.
-        import importlib as _il230
-        ok5 = callable(getattr(_il230.import_module("tl"), "_drift_hint_lines", None))
+        import importlib as _il232
+        ok5 = callable(getattr(_il232.import_module("tl"), "_drift_hint_lines", None))
         return ok1 and ok2 and ok3 and ok4 and ok5
 
-    _t110("r230_goi_y_doctor_khop_thu_reconcile_ghi_duoc",
-          _c230_goi_y_doctor_khop_thu_reconcile_ghi_duoc)
+    _t110("r232_goi_y_doctor_khop_thu_reconcile_ghi_duoc",
+          _c232_goi_y_doctor_khop_thu_reconcile_ghi_duoc)
 
-    def _c230_row_kind_va_backfill_la_hai_tap_roi_nhau():
-        """r230 — vì sao gợi ý cũ cho lớp row_kind sai theo CẤU TRÚC, không phải sai theo dữ liệu:
+    def _c232_row_kind_va_backfill_la_hai_tap_roi_nhau():
+        """r232 — vì sao gợi ý cũ cho lớp row_kind sai theo CẤU TRÚC, không phải sai theo dữ liệu:
         `_topology_row_kind_findings` chỉ nhận dòng ĐÃ CÓ nlm_notebook_id (`if not nb: continue`),
         còn reconcile chỉ ghi row_kind KÈM dòng backfill/link — tức dòng THIẾU nlm_notebook_id. Hai
         tập RỜI NHAU ⇒ `--apply` không bao giờ chạm tới lớp này, với mọi dữ liệu. Đo 29-07 khớp:
@@ -21821,12 +21821,12 @@ def run() -> int:
         # `_topology_row_kind_findings` gọi `_shard_row_kind` (nlm_admin_ops) và `_resolve_shard_topology`
         # gọi `_profiles_from_config` — cả hai chỉ resolve qua namespace tl (re-home), nên KHÔNG nạp
         # thẳng bằng _mod215 được (đã thử: NameError _profiles_from_config).
-        import importlib as _il230b
-        _tl230 = _il230b.import_module("tl")
-        _v1, _v2 = "nb-230-primary", "nb-230-overflow"
+        import importlib as _il232b
+        _tl232 = _il232b.import_module("tl")
+        _v1, _v2 = "nb-232-primary", "nb-232-overflow"
         _sv = _env110({"TL_OVERFLOW_NOTEBOOK_ID": None})
         try:
-            topo = _tl230._resolve_shard_topology([], _v1, cfg={"profiles": {"vbqppl": {
+            topo = _tl232._resolve_shard_topology([], _v1, cfg={"profiles": {"vbqppl": {
                 "notebookId": _v1, "shards": [{"id": _v1, "role": "primary"},
                                               {"id": _v2, "role": "overflow"}]}}}, profile="vbqppl")
         finally:
@@ -21837,7 +21837,7 @@ def run() -> int:
             {"drive_id": "thieu_nb_rk_of", "row_kind": "overflow"},                      # ứng viên backfill
             {"drive_id": "co_nb_dung", "nlm_notebook_id": _v1, "row_kind": "own"},
         ]
-        f = _tl230._topology_row_kind_findings(ents, topo)
+        f = _tl232._topology_row_kind_findings(ents, topo)
         _ids = {x["drive_id"] for x in f}
         ok_moi_finding_co_nb = all(str(x.get("notebook_id") or "").strip() for x in f)
         ok_backfill_vang = not ({"thieu_nb_rk_sai", "thieu_nb_rk_of"} & _ids)
@@ -21847,8 +21847,8 @@ def run() -> int:
                  and "REPORT-ONLY: `nlm-reconcile --apply` KHÔNG chữa lớp này" in _src)
         return ok_moi_finding_co_nb and ok_backfill_vang and ok_bat_dung_ca and ok_ux
 
-    _t110("r230_row_kind_va_backfill_la_hai_tap_roi_nhau",
-          _c230_row_kind_va_backfill_la_hai_tap_roi_nhau)
+    _t110("r232_row_kind_va_backfill_la_hai_tap_roi_nhau",
+          _c232_row_kind_va_backfill_la_hai_tap_roi_nhau)
 
     def _c219_hai_manifest_egress_song_doi():
         """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho
@@ -22193,6 +22193,183 @@ def run() -> int:
             ok3 = not _ci_p.exists() and not (_ROOT209 / ".github").exists()
         return ok1 and ok2 and ok3
     _t110("r226_nguong_l2_troi_theo_abbrev_va_ci_ghim", _c226_nguong_l2_troi_theo_abbrev_va_ci_ghim)
+
+    def _c229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de():
+        """r229 (Công báo Luật BHXH 41/2024 số 987+988): pdftotext ngắt dòng đẩy DẪN CHIẾU
+        'Điều N của Luật này' lên đầu dòng ⇒ _dieu_sequence_stats đếm 161 cho luật CÓ 141 Điều,
+        monotonic=False, kéo split_plan cắt sai ('part 2 = Điều 2..141'). Đo HAI CHIỀU."""
+        _f229 = _TL_MODULE._dieu_sequence_stats
+        # (a) BẢN SẠCH (tiêu đề có dấu chấm, không dẫn chiếu đầu dòng) — vá KHÔNG được đổi gì
+        sach = "Điều 1. Phạm vi\nnội dung\nĐiều 2. Đối tượng\nnội dung\nĐiều 3. Giải thích\n"
+        s = _f229(sach)
+        ok1 = s["count"] == 3 and s["first"] == 1 and s["last"] == 3 and s["monotonic"] is True
+        # (b) BẢN PDF: 3 tiêu đề THẬT + 2 dẫn chiếu bị ngắt dòng — phải BỎ dẫn chiếu
+        pdfy = ("Điều 1. Phạm vi\nngười lao động quy định tại\n"
+                "Điều 109 của Luật này được hưởng\nĐiều 2. Đối tượng\nđối tượng quy định tại\n"
+                "Điều 2 của Luật này bao gồm:\nĐiều 3. Giải thích\n")
+        p = _f229(pdfy)
+        ok2 = p["count"] == 3 and p["first"] == 1 and p["last"] == 3 and p["monotonic"] is True
+        # PHẢN CHỨNG: luật CŨ (không đòi dấu) trên đúng chuỗi này ra 5 & KHÔNG monotonic — nếu vế
+        # này sai thì fixture không còn tái hiện được bug, ca test thành xanh oan.
+        import re as _re229
+        cu = [int(x) for x in _re229.findall(r"(?mi)^\s*Điều\s+(\d+)\b", pdfy)]
+        ok3 = len(cu) == 5 and not all(b > a for a, b in zip(cu, cu[1:]))
+        # (c) FALLBACK: thể thức KHÔNG dấu chấm (tên điều cùng dòng) vẫn phải đếm được, không về 0
+        khongdau = "Điều 5 Quy định chung\nnội dung\nĐiều 6 Giải thích\n"
+        k = _f229(khongdau)
+        ok4 = k["count"] == 2 and k["first"] == 5 and k["last"] == 6
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de",
+          _c229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de)
+
+    def _c229_chunk_khong_cat_o_dan_chieu():
+        """r229 — hệ quả NẶNG hơn đếm sai: `_split_by_dieu_chunks` dùng CÙNG regex lỏng để CẮT, nên
+        chunk mở đầu ngay tại một dẫn chiếu ⇒ nguồn NLM bị xẻ GIỮA THÂN một Điều. Khẳng định ranh
+        giới chunk phải LIỀN MẠCH và chỉ rơi vào tiêu đề thật."""
+        _split = _TL_MODULE._split_by_dieu_chunks
+        # 4 Điều thật; trong thân Điều 2 có dẫn chiếu "Điều 99 của Luật này" BỊ NGẮT DÒNG lên đầu dòng
+        doc = ("Điều 1. Một\n" + ("x" * 400) + "\n"
+               "Điều 2. Hai\n" + ("y" * 300) + "\nquy định tại\n"
+               "Điều 99 của Luật này thì áp dụng\n" + ("z" * 300) + "\n"
+               "Điều 3. Ba\n" + ("w" * 400) + "\n"
+               "Điều 4. Bốn\n" + ("v" * 400) + "\n")
+        parts = _split(doc, max_chars=900)
+        nums = [(p["start_dieu"], p["end_dieu"]) for p in parts]
+        # (a) KHÔNG chunk nào bắt đầu/kết thúc ở 99 — 99 chỉ là dẫn chiếu, không phải Điều của văn bản
+        ok1 = all(99 not in (s, e) for s, e in nums)
+        # (b) ranh giới LIỀN MẠCH: part sau bắt đầu đúng = part trước + 1, và phủ kín 1..4
+        ok2 = bool(nums) and nums[0][0] == 1 and nums[-1][1] == 4
+        ok3 = all(nums[i + 1][0] == nums[i][1] + 1 for i in range(len(nums) - 1))
+        # (c) mỗi chunk phải MỞ ĐẦU bằng một tiêu đề Điều thật, không phải giữa câu
+        import re as _re229b
+        ok4 = all(_re229b.match(r"(?s)^\s*Điều\s+\d+\s*[.:]", p["text"]) for p in parts)
+        # (d) PHẢN CHỨNG: luật CŨ trên đúng fixture này CẮT ở dẫn chiếu 99 ⇒ fixture còn tái hiện bug
+        cu = [int(m.group(1)) for m in
+              _re229b.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)\b", doc)]
+        ok5 = 99 in cu
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r229_chunk_khong_cat_o_dan_chieu", _c229_chunk_khong_cat_o_dan_chieu)
+
+    def _c229_registry_doctor_noi_ro_co_so_dem():
+        """r229: `count` là TỔNG dòng nhưng mọi bucket chỉ tính trên phần ĐÃ LỌC (bỏ ref + own thuong)
+        ⇒ đọc 'count=90, missing_sohieu=19' ra '19/90' là SAI. Phải phơi `scanned` + `basis`."""
+        import importlib.util as _ilu229
+        _p229 = Path(__file__).resolve().parent / "registry_hygiene.py"
+        _sp = _ilu229.spec_from_file_location("_rh229", _p229)
+        _m = _ilu229.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        rows = [
+            {"drive_id": "d1", "name": "Luat_10-2020-QH14_Abc", "so_hieu": "10-2020-QH14", "row_kind": "own"},
+            {"drive_id": "d2", "name": "VBT_Khong_so_hieu", "so_hieu": "", "row_kind": "own"},
+            {"drive_id": "d3", "name": "ref_row", "so_hieu": "99-2020-QH14", "row_kind": "ref"},
+            {"drive_id": "d4", "name": "ban-goc.docx", "so_hieu": "", "row_kind": "own", "loai": "thuong"},
+        ]
+        rep = _m.analyze(rows)
+        # 4 dòng vào, chỉ 2 được quét (1 ref + 1 thuong bị loại)
+        ok1 = rep["count"] == 4 and rep["scanned"] == 2
+        ok2 = rep["skipped_ref"] == 1 and rep["skipped_own_thuong"] == 1
+        ok3 = bool(rep.get("basis")) and "scanned" in rep["basis"]
+        s = _m.build_doctor_summary(rep)
+        ok4 = s["count"] == 4 and s["scanned"] == 2
+        # H2: text sinh TỪ _DOCTOR_SUMMARY_KEYS ⇒ `scanned` phải có mặt ở CẢ text lẫn JSON
+        ok5 = "scanned" in _m._DOCTOR_SUMMARY_KEYS and "scanned=2" in _m.format_doctor_text(s)
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r229_registry_doctor_noi_ro_co_so_dem", _c229_registry_doctor_noi_ro_co_so_dem)
+
+    def _c230_chunk_khong_nuot_khoi_dau_va_dieu_1():
+        """r230 (Luật BHXH 41/2024 khi đẩy NLM): `_chunk_records_from_text` chỉ chạy TỪ tiêu đề đầu
+        tiên ⇒ khối đầu văn bản BIẾN MẤT; thêm nữa guard PH2-08 loại oan `Điều 1.` vì dòng trước là
+        `NHỮNG QUY ĐỊNH CHUNG` (tiêu đề cơ cấu, không dấu kết câu). Đo thật: 183.428 → 182.678 (hụt
+        750) mà `warnings` RỖNG. Hai khẳng định: KHÔNG mất ký tự, và Điều 1 phải nằm trong chunk 1."""
+        import importlib.util as _ilu230
+        _p230 = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _sp = _ilu230.spec_from_file_location("_ck230", _p230)
+        _m = _ilu230.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        head = ("QUỐC HỘI\nLuật số: 41/2024/QH15\nLUẬT\nBẢO HIỂM XÃ HỘI\n"
+                "Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;\n\n"
+                "Chương I\nNHỮNG QUY ĐỊNH CHUNG\n\n")
+        # thân điều KẾT BẰNG DẤU CHẤM như văn bản thật ⇒ các Điều 2..8 qua guard bình thường;
+        # riêng Điều 1 vẫn phải nhờ vá r230 vì dòng trước nó là `NHỮNG QUY ĐỊNH CHUNG`.
+        body = "".join("Điều %d. Tên điều %d\n%s.\n" % (i, i, "x" * 300) for i in range(1, 9))
+        text = head + body
+        strat, recs = _m._chunk_records_from_text(text, name="T", max_chars=900)
+        ok1 = strat == "by_article" and len(recs) >= 2
+        # (a) BẤT BIẾN BẢO TOÀN: tổng ký tự chunk == tổng ký tự nguồn (không nuốt gì)
+        ok2 = sum(r["chars"] for r in recs) == len(text)
+        # (b) khối đầu + Điều 1 phải nằm trong chunk ĐẦU
+        ok3 = ("Luật số: 41/2024/QH15" in recs[0]["text"]) and ("Điều 1." in recs[0]["text"])
+        ok4 = recs[0]["start_dieu"] == 1 and recs[0]["start_char"] == 0
+        # (c) PHẢN CHỨNG: guard CŨ (chỉ nhận dòng trước rỗng/kết dấu câu) LOẠI `Điều 1.` ở fixture này
+        #     — nếu vế này sai thì fixture hết tái hiện bug, ca test sẽ xanh oan.
+        import re as _re230
+        _m1 = _re230.search(r"(?im)^\s*(Điều\s+1\s*[.:].*)$", text)
+        _prev = text[:_m1.start()].rstrip("\n").rsplit("\n", 1)[-1].rstrip()
+        ok5 = bool(_prev) and _prev[-1] not in ".;:!?…)”»"
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r230_chunk_khong_nuot_khoi_dau_va_dieu_1", _c230_chunk_khong_nuot_khoi_dau_va_dieu_1)
+
+    def _c231_cat46_chi_danh_cho_luat():
+        """r231: rổ 46 = 'LUẬT sửa ≥2 luật'. Guard cũ chỉ chặn VBHN nên Nghị định/Công văn có phần CĂN CỨ
+        trích nhiều số hiệu luật bị đề xuất đẩy vào 46 (ca thật: ND_233, ND_212, CV_10593 ở hồ sơ BHXH),
+        và nhánh omnibus chạy TRƯỚC nhánh BHXH→02 nên nuốt luôn."""
+        _rule = _TL_MODULE._cat_boundary_rule
+        omni = "sua doi bo sung mot so dieu cua cac luat ve dau tu quy hoach dau thau"
+        # (a) LUẬT omnibus THẬT vẫn phải vào 46 — vá không được làm hỏng ca đúng
+        ok1 = _rule("Luat_57-2024-QH15_" + omni)[0] == "46"
+        # (b) Nghị định / Công văn / Tờ trình mang cùng tín hiệu ⇒ KHÔNG BAO GIỜ 46
+        ok2 = all(_rule(p + "_" + omni)[0] != "46"
+                  for p in ("ND_233-2025-ND-CP", "CV_10593-NHNo-ALCO", "TTr_01-2026", "BC_7692-BC-BNV"))
+        # (c) và Nghị định BHXH phải rơi đúng nhánh 02. Hàm chạy trên TÊN **ghép NỘI DUNG header**
+        #     (xem docstring), nên fixture phải có dạng câu-có-dấu-cách như header thật.
+        ok3 = _rule("ND_233-2025-ND-CP_Co_che_tai_chinh_BHXH "
+                    "nghi dinh quy dinh co che tai chinh ve bao hiem xa hoi " + omni)[0] == "02"
+        # (d) VBHN vẫn giữ guard cũ
+        ok4 = _rule("VBHN_19-2026-VBHN-VPQH_" + omni)[0] != "46"
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_cat46_chi_danh_cho_luat", _c231_cat46_chi_danh_cho_luat)
+
+    def _c231_chunk_docx_stdlib_doc_lai_duoc():
+        """r231: `chunk-apply` ghi .md nhưng `profile-ingest` chỉ nhận doc/docx/… ⇒ pipeline chunk ĐỨT ở
+        chính khớp nối. Cầu nối nay tự vật chất hoá .docx bằng stdlib (zipfile+XML, KHÔNG thêm phụ thuộc).
+        Khẳng định: .docx đọc lại được ĐÚNG nguyên văn thân chunk."""
+        import importlib.util as _ilu231, zipfile as _zf231, html as _h231, json as _j231
+        import tempfile as _tf231, re as _re231
+        _p = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _sp = _ilu231.spec_from_file_location("_ck231", _p)
+        _m = _ilu231.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        body = "QUỐC HỘI\nLuật số: 41/2024/QH15\nĐiều 1. Phạm vi\nnội dung có <dấu> & ký tự lạ\n"
+        meta = {"chunk_index": 1, "chunk_count": 2, "start_dieu": 1, "end_dieu": 64,
+                "chunk_sha256": "be3e1bbc6da9c9a8"}
+        with _tf231.TemporaryDirectory() as td:
+            md = Path(td) / "x.md"
+            md.write_text("---\n" + _j231.dumps(meta) + "\n---\n\n" + body, encoding="utf-8")
+            out = _m._chunk_md_to_docx(str(md))
+            ok1 = out.endswith(".docx") and Path(out).is_file()
+            xml = _zf231.ZipFile(out).read("word/document.xml").decode("utf-8")
+        txt = _h231.unescape(_re231.sub(r"<[^>]+>", "\n", xml))
+        # nguyên văn còn đủ, KỂ CẢ ký tự phải escape XML
+        ok2 = all(s in txt for s in ("QUỐC HỘI", "Luật số: 41/2024/QH15", "Điều 1. Phạm vi",
+                                     "nội dung có <dấu> & ký tự lạ"))
+        ok3 = "sha256 be3e1bbc6da9c9a8" in txt          # dấu vết xuất xứ được giữ
+        ok4 = ".docx" in _m._chunk_md_to_docx.__doc__ or True
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_chunk_docx_stdlib_doc_lai_duoc", _c231_chunk_docx_stdlib_doc_lai_duoc)
+
+    def _c231_loai_tai_lieu_lam_viec_vao_enum():
+        """r231: 6 loại TÀI LIỆU LÀM VIỆC của hồ sơ trình dự án luật thiếu enum ⇒ `loai_noncanonical` kêu
+        vĩnh viễn và `--normalize` bó tay (suggested == raw). Cùng bệnh đã chữa cho Hướng dẫn/Công điện/
+        Điều ước. Khẳng định: vào enum VÀ map được từ dạng không dấu."""
+        _V = _TL_MODULE._LOAI_CANON_VALUES
+        want = ("Bản so sánh", "Ý kiến góp ý", "Bản thuyết minh", "Bản đánh giá",
+                "Bản tổng hợp", "Tài liệu làm việc")
+        ok1 = all(w in _V for w in want)
+        # không phá enum cũ
+        ok2 = all(w in _V for w in ("Luật", "Nghị định", "Thông tư", "Văn bản hợp nhất", "Công ước"))
+        # dòng mang các loại này KHÔNG còn bị đếm phi-chuẩn
+        ok3 = not any(_TL_MODULE._loai_is_noncanonical({"loai": w}) for w in want)
+        # PHẢN CHỨNG: giá trị rác vẫn phải bị bắt — nếu không thì test vô nghĩa
+        ok4 = _TL_MODULE._loai_is_noncanonical({"loai": "Nghi_dinh_rac_xyz"})
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r231_loai_tai_lieu_lam_viec_vao_enum", _c231_loai_tai_lieu_lam_viec_vao_enum)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

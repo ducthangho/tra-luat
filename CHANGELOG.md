@@ -1,4 +1,4 @@
-# ★ v1.35.66 — r230: gợi ý khắc phục của `doctor` chỉ tới lệnh KHÔNG chữa được (2026-07-29)
+# ★ v1.35.69 — r232: gợi ý khắc phục của `doctor` chỉ tới lệnh KHÔNG chữa được (2026-07-29)
 
 > Phát hiện khi làm theo chính gợi ý của `doctor` sau r229: chạy `nlm-reconcile --apply` cho 53 mục
 > lệch thì DRY cho thấy nó ghi ĐÚNG 0 DÒNG. Dừng trước khi ghi, đo lại, hoá ra gợi ý sai.
@@ -45,10 +45,10 @@ Gợi ý `row_kind` đổi thành REPORT-ONLY kèm lý do cấu trúc. Sửa 2 c
 
 | Ca | Khẳng định | Gỡ vá |
 |---|---|---|
-| `r230_goi_y_doctor_khop_thu_reconcile_ghi_duoc` | chỉ NỢ PHỦ ⇒ không mời `--apply`; có cờ chữa được ⇒ mời và đếm đúng (7=3+4); cả hai ⇒ 2 dòng; sạch ⇒ rỗng; `_drift_hint_lines` resolve được từ namespace tl | **ĐỎ** |
-| `r230_row_kind_va_backfill_la_hai_tap_roi_nhau` | mọi finding đều mang `notebook_id` khác rỗng; dòng THIẾU `notebook_id` (ứng viên backfill duy nhất) không bao giờ lọt vào findings dù `row_kind` sai; kèm chốt UX chuỗi gợi ý cũ đã biến mất | **ĐỎ** |
+| `r232_goi_y_doctor_khop_thu_reconcile_ghi_duoc` | chỉ NỢ PHỦ ⇒ không mời `--apply`; có cờ chữa được ⇒ mời và đếm đúng (7=3+4); cả hai ⇒ 2 dòng; sạch ⇒ rỗng; `_drift_hint_lines` resolve được từ namespace tl | **ĐỎ** |
+| `r232_row_kind_va_backfill_la_hai_tap_roi_nhau` | mọi finding đều mang `notebook_id` khác rỗng; dòng THIẾU `notebook_id` (ứng viên backfill duy nhất) không bao giờ lọt vào findings dù `row_kind` sai; kèm chốt UX chuỗi gợi ý cũ đã biến mất | **ĐỎ** |
 
-Selftest **1386/1386**. Gỡ 3 tệp logic (giữ test) ⇒ **1384/1386**, cả 2 ca đỏ.
+Selftest **1393/1393** (sau merge origin/master mang r230/r231). Trước merge: 1386/1386; gỡ 3 tệp logic (giữ test) ⇒ 1384/1386, cả 2 ca đỏ.
 
 Ruff `--select F` DELTA so master = **0** cả 4 tệp. Ghi chú: bản test đầu dùng `_TL_MODULE` làm
 delta **+3** (`F821 Undefined name '_TL_MODULE'` — đúng lớp sẵn có 1992 lần, nhưng tiêu chí là
@@ -69,9 +69,165 @@ Câu «đồng bộ 1 bước … --apply» đã biến mất khỏi ca này.
 
 ## KHÔNG làm
 
-Không tự sửa 53 mục lẫn 71 dòng — đó là DATA-ops, cần user chốt phạm vi. r230 chỉ sửa việc
+Không tự sửa 53 mục lẫn 71 dòng — đó là DATA-ops, cần user chốt phạm vi. r232 chỉ sửa việc
 **công cụ nói sai sự thật**.
 
+## Va chạm số hiệu khi merge (ghi lại để lượt sau khỏi vấp)
+
+Bản vá này làm ở nhánh tách từ v1.35.65 và tự đánh **r230/v1.35.66**. Trong lúc đó `master` đã tiêu
+thụ ĐÚNG hai số đó cho việc khác (`r230` = chunk NLM nuốt khối đầu văn bản, `r231` = 4 vá dọn hồ sơ
+BHXH) và đi tới **v1.35.68**. Khi merge phải đánh lại toàn bộ thành **r232/v1.35.69** — đổi bằng
+token CHÍNH XÁC, không thay chuỗi hàng loạt, vì `tl_selftest.py` chứa CẢ `r230` của master (3 chỗ,
+gồm `r230_chunk_khong_nuot_khoi_dau_va_dieu_1`) lẫn của mình (5 chỗ); `ops_misc.py`/`nlm_ops.py`
+master không đụng nên thay cả tệp được. Sau đổi: còn đúng 3 chỗ `r230` — của master.
+
+# ★ v1.35.68 — merge r229 vào nhánh r230/r231 (2026-07-29)
+
+**Thêm `scripts/deploy-package.sh` — đóng gói + deploy TỪ LINUX/Cowork.** Trước đây deploy chỉ có
+đường Windows (`upload-skill-to-Package.ps1` ở `D:\Quốc hội\`, user double-click), nên trong container
+remote KHÔNG deploy được. Script này chạy cùng quy trình §10 DEV_TOOLING_GUIDE + §6 bước 7-8:
+VERSION khớp 3 chỗ → gate 8 bước → bundle ×2 đòi same-SHA → verify trong gói → (tuỳ chọn) drive-push
+→ tải lại đối chiếu BYTE + VERSION.
+
+MẶC ĐỊNH KHÔNG ĐẨY: phải nêu `--push`. Ba điểm học từ chính lần chạy đầu:
+- `release-bundle` TỪ CHỐI ghi zip trong skill root (`OUT_INSIDE_SKILL_ROOT`, kẻo zip nuốt chính nó)
+  và tự chuyển ra thư mục cha ⇒ script phải đọc đường dẫn THẬT từ khoá `out` của JSON. Bản đầu tin
+  vào tham số mình truyền nên `sha256sum` chết trên tệp không tồn tại, hai chuỗi RỖNG so nhau lại
+  BẰNG NHAU ⇒ cổng same-SHA báo ✓ oan. Nay chặn rỗng trước khi so.
+- `release-verify` chạy trong gói sinh `__pycache__` ⇒ đếm tệp phải loại, nếu không 195 đọc thành 224.
+- `doc-claims-check` đỏ trên clone SHALLOW vì SHA cũ trong `changelog_archive` không resolve được.
+  Script chỉ hạ thành WARN khi repo THẬT SỰ shallow VÀ mọi cờ đều là `SHA_NOT_A_COMMIT`; cờ khác ⇒
+  đỏ như thường. Đã ĐO NỀN trên origin/master: y hệt 2 cờ, delta = 0.
+
+Phản chứng đã chạy (không tin cổng chặn chỉ vì nó tồn tại): VERSION lệch 3 chỗ ⇒ rc=1 chặn ở bước 0;
+bơm token dạng `AKfycb…` vào `references/` ⇒ quét bắt đúng tệp/dòng, rc=2, KHÔNG đẩy.
+
+Nhánh `claude/review-bhxh-law-profile-2m08hz` tách ra TRƯỚC khi r229 lên master nên phân kỳ thật:
+master có r229 (v1.35.65), nhánh có r230 (v1.35.66) + r231 (v1.35.67). Merge gộp cả hai ⇒ cây kết quả
+KHÁC mọi bản 1.35.67 phát hành trước đó, nên bump số mới thay vì giữ 1.35.67 (một số version = một cây).
+Xung đột chỉ ở 4 chỗ mang số version (VERSION · hằng `VERSION` tl.py · header SKILL.md · CHANGELOG);
+KHÔNG có xung đột logic — r229 chạm `nlm_ops`/`tl_gws`, r230/r231 chạm chunk + registry/enum.
+
+**Bẫy đã sập và gỡ được — GIẢI XUNG ĐỘT PHẢI GIỮ LINE ENDING.** Lượt gỡ đầu viết lại `SKILL.md` và
+`scripts/tl.py` bằng Python text-mode (`open(...,'w')`), nuốt CRLF→LF: SKILL.md 47966→47659 byte
+(đúng 307 byte = 307 dòng), tl.py 223463→221776 (1687 dòng). Nội dung ĐÚNG, chỉ line ending sai.
+Gate bắt: `golden-test` case `workflow_audit` lệch `kernel.size_bytes` 47966≠47659, kéo theo
+`determinism-audit` + test `r219_gotchas_nhan_trang_thai`. ⇒ Hai tệp này là CRLF TOÀN BỘ; sửa bằng
+script phải mở nhị phân hoặc `newline=''`. Đây là lý do golden 0-diff là GATE, không phải nghi lễ.
+
+# ★ v1.35.67 — r231: 4 vá bắt được khi dọn hồ sơ Luật BHXH (2026-07-29)
+
+## Ca 1 — rổ 46 nuốt Nghị định và cả CÔNG VĂN
+
+Rổ 46 = «LUẬT sửa đổi ≥2 luật» ⇒ theo định nghĩa chỉ Luật/Bộ luật vào được. Guard cũ **chỉ chặn VBHN**,
+nên phần CĂN CỨ của một Nghị định (trích ≥8 số hiệu luật) đủ kích `_distinct_target_luat_subjects >= 2`
+⇒ `corpus-audit` đề xuất đẩy `ND_233-2025-ND-CP`, `ND_212-2025-ND-CP` và `CV_10593-NHNo-ALCO` vào 46.
+Nhánh omnibus lại chạy TRƯỚC nhánh BHXH→02 nên nuốt luôn cả ca đúng.
+**Vá:** tên mang tiền tố doctype khác luật (`ND_/TT_/QD_/NQ_/CT_/CV_/BC_/TTr_/PL_/VBT_/DUTHAO_/CU_/SCAN_`)
+KHÔNG BAO GIỜ ép 46. Test giữ cả ca ĐÚNG (Luật omnibus thật vẫn → 46) lẫn guard VBHN cũ.
+
+## Ca 2 — `NAME_TRICH_YEU` đổi tên phá bundle nhiều phần
+
+Header của tệp bundle là header của tài liệu ĐẦU TIÊN trong đó, nên `_doc_subject_for_name` trích chủ đề
+của một phần rồi đặt cho CẢ bundle: `VBT_Y_kien_gop_y_Luat_BHXH_16-7_phan_6_cua_8` →
+`Luat_Cong_ngan_hang_nha_nuoc` (mất chỉ số phần, gắn tiền tố `Luat_` cho thứ không phải luật).
+**Vá:** bỏ qua NAME_TRICH_YEU khi tên khớp `phan_N_cua_M` / `part_N_of_M` / `__partNN__`.
+
+## Ca 3 — pipeline chunk ĐỨT ở chính khớp nối của nó
+
+`chunk-apply` ghi `.md`, `profile-ingest` chỉ nhận doc/docx/odt/pdf/rtf/xls/xlsx ⇒
+`profile-ingest-chunks` gọi con luôn `rc=2 UNSUPPORTED_EXTENSION`. Nới allowlist là SAI hướng (mở cửa cho
+`.md` bất kỳ vào corpus). **Vá:** cầu nối tự vật chất hoá chunk thành `.docx` bằng **`zipfile` + XML thuần**
+— KHÔNG thêm phụ thuộc (requirements.txt: stdlib-only). Front-matter giữ thành đoạn đầu (dấu vết + sha256),
+thân giữ NGUYÊN VĂN; test đọc ngược `word/document.xml` khẳng định còn đủ, kể cả ký tự phải escape XML.
+
+## Ca 4 — `loai_noncanonical` thiếu rổ cho TÀI LIỆU LÀM VIỆC
+
+Điền `loai` cho 12 dòng đang RỖNG (bản so sánh ×3, ý kiến góp ý ×8, mục lục) làm `loai_noncanonical`
+nhảy **4 → 16** dù dữ liệu TỐT LÊN — thước đo thiếu rổ, không phải dữ liệu sai. Cùng bệnh đã chữa 3 lần
+trước (Hướng dẫn v1.34.31 · Công điện v1.30.1 · Điều ước v1.32.0).
+**Vá:** thêm 6 loại vào enum — `Bản so sánh` · `Ý kiến góp ý` · `Bản thuyết minh` · `Bản đánh giá` ·
+`Bản tổng hợp` · `Tài liệu làm việc` (kèm alias không dấu). Test có vế phản chứng: giá trị rác vẫn phải bị bắt.
+
+`python scripts/tl.py --selftest` ⇒ **1387/1387** (thêm 3 ca r231).
+
+# ★ v1.35.66 — r230: chunk NLM NUỐT khối đầu văn bản + Điều 1, `warnings` vẫn rỗng (2026-07-29)
+
+> Bắt được khi đẩy Luật BHXH 41/2024 (bản Công báo 987+988, 183k ký tự) lên NotebookLM.
+
+`_chunk_records_from_text` chỉ sinh chunk **TỪ tiêu đề Điều đầu tiên trở đi**, nên toàn bộ phần đứng
+trước nó — cơ quan ban hành, **SỐ HIỆU**, tên luật, căn cứ Hiến pháp, `Chương I` — **biến mất không dấu
+vết**. Cộng thêm guard `_is_heading` (PH2-08, vốn sinh ra để loại dẫn chiếu) **loại oan `Điều 1.`** vì
+dòng ngay trước là `NHỮNG QUY ĐỊNH CHUNG` — tiêu đề cơ cấu, không kết bằng dấu câu.
+
+| Đo trên Luật BHXH 41/2024 | trước | sau |
+|---|---|---|
+| `total_chars` | 183.428 | 183.428 |
+| tổng ký tự các chunk | **182.678** (hụt **750**) | **183.428** (hụt 0) |
+| `warnings` | `[]` — im lặng | `[]` (không còn gì để báo) |
+| ranh giới | `part1 Điều 2..65` · `part2 66..141` | `part1 Điều 1..64` · `part2 65..141` |
+
+Hậu quả nếu không bắt: nguồn NLM của luật gốc **thiếu cả số hiệu lẫn Điều 1** — hỏi "Điều 1 Luật BHXH
+quy định gì" sẽ không có căn cứ, mà không chỗ nào báo lỗi. Ranh giới mới cũng **khớp** `_split_by_dieu_chunks`
+(đã vá r229), hết cảnh hai bộ cắt cho hai kết quả.
+
+**Vá:** (1) `_is_heading` chấp nhận thêm khi dòng trước là dòng cơ cấu (`Chương/Mục/Phần/Tiểu mục`
+hoặc dòng TOÀN HOA ≤120 ký tự); (2) **bất biến bảo toàn** — phần đầu được gắn vào chunk 1, tổng ký tự
+các chunk luôn == tổng ký tự nguồn.
+
+Test `r230_chunk_khong_nuot_khoi_dau_va_dieu_1` khẳng định cả hai, kèm vế **phản chứng** (guard cũ loại
+`Điều 1.` trên đúng fixture đó) để fixture hết tái hiện bug là ĐỎ chứ không xanh oan.
+
+`python scripts/tl.py --selftest` ⇒ **1384/1384**.
+
+# ★ v1.35.65 — r229: dẫn chiếu "Điều N" đầu dòng bị đếm thành TIÊU ĐỀ ⇒ split_plan cắt sai; registry-doctor nói rõ CƠ SỞ ĐẾM (2026-07-29)
+
+> Phát hiện khi rà hồ sơ **Luật BHXH** và nạp bản **Công báo số 987+988 ngày 25-8-2024** của Luật BHXH
+> 41/2024/QH15. Cả hai lỗi đều thuộc lớp «con số trông đúng nên không ai kiểm».
+
+## Ca 1 — `_dieu_sequence_stats` đếm 161 Điều cho luật CÓ 141 Điều
+
+Regex cũ `^\s*Điều\s+(\d+)\b` neo đầu dòng nhưng **không đòi dấu kết tiêu đề**. Bản `pdftotext` của
+Công báo ngắt dòng giữa câu, đẩy **dẫn chiếu** lên đầu dòng — 20 mục thừa đều dạng
+`Điều 109 của Luật này…`, `Điều 2 của Luật này bao gồm:`.
+
+| Đo trên bản Công báo 41/2024 | count | monotonic | split_plan |
+|---|---|---|---|
+| luật CŨ | 161 | **False** | part 2 = **Điều 2**..141 (SAI, phải là 65..141) |
+| luật MỚI | **141** | True | ranh giới đúng |
+
+**Cùng một regex lỏng nằm ở HAI nơi** — và nơi thứ hai nặng hơn: `_split_by_dieu_chunks` dùng nó để **CẮT**,
+nên chunk part 2 mở đầu ngay tại dẫn chiếu «Điều 2 của Luật này» nằm GIỮA THÂN Điều 64 ⇒ nguồn NLM bị
+**xẻ giữa câu**, không chỉ sai nhãn.
+
+| chunk_plan (Công báo 41/2024, 190k ký tự > ngưỡng NLM) | trước | sau |
+|---|---|---|
+| part 1 | Điều 1..64 | Điều 1..63 |
+| part 2 | **Điều 2**..141 (cắt giữa thân Điều 64) | Điều **64**..141 |
+
+**Vá:** một hàm `_dieu_head_marks` dùng chung cho ĐẾM lẫn CẮT — tiêu đề phải kết bằng `.`/`:` hoặc hết
+dòng; **giữ fallback** luật cũ khi thể thức không có dấu (`Điều 5 Quy định chung`) ⇒ không văn bản nào tệ đi.
+
+**Bẫy kiến trúc đã trả giá (đỏ 2 lượt):** hàm mới trong `tl_core` KHÔNG tự thấy nhau — 1646 hàm được
+re-home `__globals__` về `tl.py`. Hàm phải khai thêm vào `_STUB_MAP["ingest_ops"]`; **hằng cấp module thì
+KHÔNG có đường nào** (`_DIEU_HEAD_RE` NameError) ⇒ regex phải để TRONG thân hàm.
+
+**Đo 2 chiều (bắt buộc theo CLAUDE.md):** bản GDoc sạch 141→141 (KHÔNG hồi quy) · bản PDF 161→141
+monotonic. Test `r229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de` có **vế phản chứng**: khẳng định luật
+CŨ trên đúng fixture đó ra 5 & không monotonic — fixture hết tái hiện bug là ca test ĐỎ, không xanh oan.
+
+## Ca 2 — `registry-doctor`: `count` là TỔNG, mọi bucket lại tính trên phần ĐÃ LỌC
+
+`analyze()` bỏ qua `row_kind='ref'` và bản gốc `loai='thuong'`, nhưng vẫn trả `count = len(rows)`.
+Trên hồ sơ Luật BHXH: `count=90, missing_sohieu=19` ⇒ người đọc hiểu «19/90», thật ra là **19 trên 25
+dòng được quét** (27 ref + 38 thuong bị loại); đếm thẳng registry có **56** dòng sohieu rỗng.
+Tương tự `duplicate_sohieu_groups=0` trong khi dữ liệu có 2 nhóm trùng — đều rơi vào phần bị loại.
+
+**Vá:** thêm `scanned` / `skipped_ref` / `skipped_own_thuong` / `basis` — đúng khuôn `sweep.corpus_basis`.
+`scanned` vào `_DOCTOR_SUMMARY_KEYS` nên **text và JSON vẫn 1-1** (giữ bất biến H2).
+
+## Kết quả
+`python scripts/tl.py --selftest` ⇒ **1383/1383** (thêm 3 ca r229: đếm · cắt-chunk · cơ-sở-đếm).
 # ★ v1.35.65 — r229: tuổi cookie NLM ra số ÂM vì mốc `last_validated` naive lệch múi giờ (2026-07-29)
 
 > Phát hiện khi bootstrap gws/nlm trong sandbox Claude Code on the web (UTC) từ bundle stage ở máy

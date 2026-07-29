@@ -115,6 +115,93 @@ Mở ra đọc thì tên hai file **sai hẳn so với nội dung**, không ch�
 ⇒ Đã `rename` qua webapp (rc ok cho cả hai). Rủi ro trích nhầm dự thảo làm luật hiện hành: **đã gỡ**.
 Còn lại là quyết định chính sách raw-twin (mục B7 báo cáo chính): đăng ký `loai=thuong` hay để mồ côi.
 
+## ✅ 6. ĐÃ HOÀN TẤT (người dùng gửi 2 file .doc lúc 08:27)
+
+### 6a. Kiểm file nhận được
+
+| File | Kích thước | Metadata Word | Khớp Công báo? |
+|---|---|---|---|
+| `2024_987__988_412024QH15.doc` | 884.736 B | 88 trang · 156.009 ký tự · `Author: congbao` · tạo 14-8-2024 | ✅ đúng 88 trang như PDF 987+988 |
+| `2025_853__854_1592025N_CP.doc` | 722.944 B | 18 trang · 27.742 ký tự · `Author: congbao` · tạo 03-7-2025 | ✅ đúng 18 trang như PDF 853+854 |
+
+**Bẫy gặp phải:** bộ đọc của skill KHÔNG đọc được `.doc` nhị phân (Word 97-2003) — nạp thẳng ra
+`sohieu=""`, `0 Điều`. Phải cài `libreoffice-writer` và `soffice --convert-to docx` trước.
+Sau chuyển: **L41 = 141 Điều, ND159 = 18 Điều** (đúng số thật).
+
+**Cảnh báo markup đã truy, là BÁO ĐỘNG GIẢ:** L41 báo `strike=1`, nhưng mở `word/document.xml` ra đếm:
+`w:del=0, w:ins=0` (KHÔNG có sửa đổi theo dõi nào) và cả 3 thẻ `w:strike` chỉ gạch **một dấu cách**.
+ND159 sạch tuyệt đối (0/0/0).
+
+### 6b. Đối chiếu chất lượng — bản .doc THẮNG cả PDF lẫn bản trong kho
+
+| Phép so | Kết quả |
+|---|---|
+| .docx vs PDF Công báo (L41) | docx **141 Điều** / PDF chỉ 137 — PDF mất 4 tiêu đề do ngắt dòng |
+| .docx vs PDF Công báo (ND159) | docx **18 Điều** / PDF chỉ 16 |
+| **.docx vs bản ND159 CŨ trong kho** | 14/18 khớp; **4 Điều lệch = đúng 4 lỗi đã tìm ra** |
+
+Chi tiết 4 chỗ (bản Công báo ĐÚNG, bản kho SAI): Điều 5 `chuyển`→kho ghi `chuyến`; Điều 8
+`(n x 12 – m +1) đến`→kho ghi `- m +1) đên`; Điều 14 `hằng tháng`→kho ghi `hàng tháng`;
+Điều 5+18 `Trung ương`→kho ghi `trung ương`.
+
+**Và giải toả được lo ngại ở mục 4b:** bản .doc **CÓ đủ công thức** mà bản kho đánh rơi —
+Điều 14 kho chỉ còn `"theo công thức sau: Trong đó:"`, bản Công báo có `Ttt = Mbq x 2 x N / TChtxh`
+và `TCtt = TChtxh + (Ttt - Tdt) x TChtxh / Tdt`. Thứ duy nhất bản kho có thêm là khối **"Nơi nhận"**
+(danh sách phát hành — hành chính, không phải quy phạm; Công báo vốn không đăng).
+
+### 6c. Kết quả nạp + xác minh SAU khi convert
+
+| | Luật 41/2024/QH15 | NĐ 159/2025/NĐ-CP |
+|---|---|---|
+| GDoc mới | `1WHqzh9lH3k20yx…` | `16HCyOYKeetCo5X…` |
+| Phân loại tự động | `41/2024/QH15` · Luật · 2024 · `draft=false` | `159/2025/NĐ-CP` · Nghị định · 2025 · `draft=false` |
+| Điều nhận được | **141**, `first=1 last=141 monotonic=True` | **18**, monotonic |
+| chunk_plan | `part1 Điều 1..64` · `part2 Điều 65..141` (liền mạch — nhờ vá r229) | không cần chunk |
+| **Đối chiếu GDoc ↔ nguồn .doc** | **141/141 Điều · khớp nguyên văn 140/141** | **18/18 Điều · khớp nguyên văn 18/18** |
+| corpus | `true` | `true` |
+| journal | `profile-ingest_1785314343_2267` | `profile-ingest_1785315037_2267` |
+
+Chỗ lệch duy nhất của L41 (Điều 141): chuỗi `196856985` có trong .docx trung gian nhưng không có
+trong GDoc **và cũng không có trong PDF Công báo** ⇒ là *field code* Word bị LibreOffice render thành
+chữ khi chuyển .doc→.docx; Drive bỏ đúng. **Bản trong kho sạch hơn bản trung gian.**
+
+Kiểm điểm rơi của NĐ 159 sau khi vào kho: công thức Điều 14 còn nguyên ✅ · `chuyển kinh phí` ✅ ·
+`đến (n x 12)` ✅ · `hằng tháng` ✅ · không còn `chuyến`/`đên` ✅.
+
+**Thay bản NĐ 159 (món #2) đã trọn vẹn:** xoá bản cũ `1yqsb_Sis4Y…`
+(journal `source-delete_1785316625_2267`) → đổi tên bản mới về tên chuẩn `ND_159-2025-ND-CP_BHXH_tu_nguyen`
+(journal `source-rename_1785316699_3350`) → trả `corpus=true`
+(journal `source-update-corpus_1785316839_3715`). Mọi bước đều `tl undo <journal>` được.
+
+## 7. TRẢ LỜI: Luật 41 đã có bản VBHN trong vbqppl và các shard chưa?
+
+Quét **toàn bộ 1353 dòng** (kho nền vbqppl + profile + mọi shard, `reg-query --base-also --limit 3000`).
+Chỉ có **đúng 2 dòng** dính tới Luật BHXH 41/2024:
+
+| Số hiệu | Tên | corpus | cat | notebook | row_kind |
+|---|---|---|---|---|---|
+| `19-2026-VBHN-VPQH` | `VBHN_19-2026-VBHN-VPQH_2026_Luat_BHXH_HopNhat` | true | `02_Bao_hiem` | `59e8d0de` | ref |
+| `41-2024-QH15` | `Luat_41-2024-QH15_Bao_hiem_xa_hoi` | false | `_ZZZ_QUARANTINE_taluat` | (không) | own |
+
+⇒ **CÓ, đã có đúng MỘT bản VBHN** là `19-2026-VBHN-VPQH` (hợp nhất Luật BHXH), nằm ở kho NỀN,
+`corpus=true`, đã đẩy lên notebook `59e8d0de`. Hồ sơ Luật BHXH mượn nó dưới dạng `row_kind=ref`.
+**Không có VBHN thứ hai nào** của Luật BHXH ở bất kỳ shard nào — không trùng, không phân mảnh.
+
+Lưu ý kèm theo: bản VBHN 19-2026 này **vẫn mang cảnh báo `MARKUP_SUA_DOI strike=2`** từ các lượt trước.
+Nay đã có bản BAN HÀNH sạch (`Luat_41-2024-QH15_2024_Bao_hiem_xa_hoi`, 141/141 Điều verify),
+nên trích nguyên văn **nên neo bản ban hành**, chỉ dùng VBHN khi cần bản đã hợp nhất sửa đổi.
+
+### Bản đồ shard (đo được, không suy đoán)
+
+| Notebook | Số dòng | Ghi chú |
+|---|---|---|
+| `45739ff7-347a-45c7-8066-0f2f3b55f76a` | 311 | shard lớn nhất |
+| `743ed200-2e55-4673-b7a0-9bfd13b41ce6` | 298 | |
+| `59e8d0de-c0fa-4dc7-ae69-66be0e8afc6b` | 79 | notebook hồ sơ BHXH (chứa VBHN 19-2026) |
+| `80742228-ba7a-481c-bd8e-d4115876ed6e` | **54** | ⚠ **NGOÀI topology đã khai** — `doctor` bắt được nhưng chỉ nêu 3 dòng mẫu; thật ra **54 dòng**. Cần `nlm-reconcile` xác định là notebook cũ bỏ hay khai thiếu |
+| `2d8c2fef-d08b-44c9-958b-7341523a20ce` | 20 | |
+| (không notebook) | 591 | |
+
 ## 5. Việc tôi sẽ làm ngay khi có file .doc
 
 1. `reg-query --refresh --sohieu <số hiệu>` — dò trùng trước (đã làm: Luật 41 hiện `count=0`).

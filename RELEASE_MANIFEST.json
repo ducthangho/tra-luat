@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.63",
+  "skill_version": "1.35.64",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 191,
-  "total_bytes": 6668232,
-  "package_hash": "c53b49414e0a49438a56641e88f62a1d8423d0205de92dbb01b7dae5daac99a9",
-  "content_hash": "c53b49414e0a49438a56641e88f62a1d8423d0205de92dbb01b7dae5daac99a9",
+  "total_bytes": 6677527,
+  "package_hash": "f1643289985ad444a28ff5b2592907137f65a9c51ea4b7592ca3137bb89884b4",
+  "content_hash": "f1643289985ad444a28ff5b2592907137f65a9c51ea4b7592ca3137bb89884b4",
   "required_missing": [],
   "files": [
     {
@@ -18,13 +18,13 @@
     },
     {
       "path": ".gitignore",
-      "size": 800,
-      "sha256": "53927a61fb44b3d9279c951d738f9f30e70007ec65c7d95ee31b3e281e46e6d7"
+      "size": 1011,
+      "sha256": "c4f56daf1354205d48aee0588d775ad89416ec22cd47f42f9eac39dfc5634a24"
     },
     {
       "path": "CHANGELOG.md",
-      "size": 227255,
-      "sha256": "c3312fd0da5d2dd75dce0ab0c117c8dc0bda16c23d25860f5b141fed0e9a5731"
+      "size": 232206,
+      "sha256": "bc90e79567c0f01057da58766f3791850c3acf97fdb9c53d60ee19fed362d16d"
     },
     {
       "path": "CONTEXT.md",
@@ -49,12 +49,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "37bb8dae7a115ba2791accc488802667fdf710dab6e29db852fc722e98f9baf8"
+      "sha256": "ca84dc32063f66cea11c6f5721e4677a8292b4511467fecf02efc4cdf7101b6c"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "457c087bc4418b2531bf442c4a914953a589ef5cea6eaa2df04f17818ee34218"
+      "sha256": "0ddacde9329205a360839bed99b614498c45b8e051e25e684ef517fd7590d3b1"
     },
     {
       "path": "agents/openai.yaml",
@@ -268,8 +268,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 55926,
-      "sha256": "28c1501d01db4fc98ca0dbd078cc0bf26bb4f14949c7ea937cd275c7e4ba5697"
+      "size": 56353,
+      "sha256": "c8e9f5fd61b19e0a658abacb81476029870069c929502bb2b1d434e97fb05c6d"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
@@ -754,7 +754,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223343,
-      "sha256": "866372385aecf0175dc7903c201b0a76565af6dad7fcd42e9be702654c9018d5"
+      "sha256": "01108ad4897c1636e40a1046082d5e624b961177d7adb61be77f44c65e378914"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -918,8 +918,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1600646,
-      "sha256": "3985dd421b0356b3e77e29b3648c8c14921ba13810fae8658648804d9b85fab4"
+      "size": 1604352,
+      "sha256": "09321649a6c05fb9776cf367e29d4a0e19ae30fdef8933b2f78e82d6c0bcc1a0"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -21936,14 +21936,26 @@ def run() -> int:
         ok2 = _f8 == [] and _a8 == ["abc1234"] and _len8 == [8, 40]
         # (b) DRIFT-LOCK đường TỰ ĐỘNG — đúng bài học r219/r225: guard không nối vào CI thì chỉ là tài
         #     liệu. Hai dòng phải CÙNG có mặt, và dòng ghim phải đứng TRƯỚC bước gọi doc-claims-check.
-        _ci = (_ROOT209 / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8", errors="replace")
         #     Neo vào chính DÒNG BƯỚC (`- name: doc-claims-check…`), KHÔNG neo vào chuỗi trần
         #     `doc-claims-check` — chuỗi trần còn nằm trong các dòng chú thích phía trên, so vị trí với
         #     nó là so với một comment chứ không so với bước chạy (đã cắn đúng cái đó khi viết ca này).
-        _i_pin = _ci.find("core.abbrev 7")
-        _i_depth = _ci.find("fetch-depth: 0")
-        _i_dcc = _ci.find("- name: doc-claims-check")
-        ok3 = 0 <= _i_pin < _i_dcc and 0 <= _i_depth < _i_dcc
+        #
+        # r227 — HAI BỐI CẢNH, hai khẳng định KHÁC NHAU. Bản r226 chỉ đúng một bối cảnh nên ĐỎ ở bối
+        # cảnh kia: smoke-test bản ĐÃ CÀI (bung bundle ra rồi `tl --selftest` từ đó) bắt được ca này đỏ
+        # vì `.github/` KHÔNG nằm trong gói — CỐ Ý, gói không mang cấu hình CI — tức đỏ do CHỖ CHẠY chứ
+        # không do drift. KHÔNG chữa bằng «thiếu tệp thì cho qua»: như thế xoá ci.yml trong kho cũng
+        # lọt lưới. Mỗi bối cảnh gánh một khẳng định riêng, không bối cảnh nào xanh vì im lặng:
+        #   · trong CÂY GIT → ci.yml PHẢI có và đúng thứ tự (drift-lock như cũ);
+        #   · trong GÓI CÀI → `.github/` PHẢI KHÔNG có (nếu có tức tệp dev lọt vào bundle — cũng là lỗi).
+        _ci_p = _ROOT209 / ".github" / "workflows" / "ci.yml"
+        if (_ROOT209 / ".git").exists():          # worktree để `.git` là TỆP ⇒ `.exists()` phủ cả hai
+            _ci = _ci_p.read_text(encoding="utf-8", errors="replace")
+            _i_pin = _ci.find("core.abbrev 7")
+            _i_depth = _ci.find("fetch-depth: 0")
+            _i_dcc = _ci.find("- name: doc-claims-check")
+            ok3 = 0 <= _i_pin < _i_dcc and 0 <= _i_depth < _i_dcc
+        else:
+            ok3 = not _ci_p.exists() and not (_ROOT209 / ".github").exists()
         return ok1 and ok2 and ok3
     _t110("r226_nguong_l2_troi_theo_abbrev_va_ci_ghim", _c226_nguong_l2_troi_theo_abbrev_va_ci_ghim)
 

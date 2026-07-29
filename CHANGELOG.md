@@ -1,3 +1,51 @@
+# ★ v1.35.63 — r227: ca r226/c đỏ khi chạy TỪ GÓI ĐÃ CÀI — test khẳng định về kho, chạy ở nơi không phải kho (2026-07-29)
+
+> Bắt được bằng phép thử chưa từng làm: bung bundle v1.35.62 vào `~/.claude/skills/tra-luat/` rồi chạy
+> `tl --selftest` **từ đó**. CI chạy trong CÂY GIT; LIVE chạy trong GÓI ĐÃ BUNG. Hai hình dạng khác nhau,
+> và r225/r226 mới chỉ soi được hình dạng thứ nhất.
+
+## Đo: cùng một gói, hai chỗ chạy
+
+| Ca | 1.35.61 từ gói | 1.35.62 từ gói | Phán |
+|---|---|---|---|
+| `r216_merge_fail_closed_tren_duong_san_xuat` | ĐỎ | **XANH** | r226 chữa đúng cả ở hình dạng LIVE, không riêng CI |
+| `r218_docclaims_sach_khong_bao_gia` | ĐỎ | ĐỎ | **có sẵn**, không phải hồi quy của r226 |
+| `r219_docclaims_l9_tu_tat_khi_quet_hep` | ĐỎ | ĐỎ | **có sẵn** |
+| `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` | — | **ĐỎ** | **do r226 gây ra** — vá ở đây |
+
+## Gốc và cách vá
+
+Vế (b) của r226/c đọc `.github/workflows/ci.yml` để khoá thứ tự hai dòng trong CI. Nhưng `.github/`
+**cố ý không đóng gói**, nên ở gói cài tệp đó không tồn tại ⇒ ca đỏ vì CHỖ CHẠY, không vì drift.
+
+Đã **BÁC** cách chữa hiển nhiên «thiếu tệp thì cho qua»: như thế thì xoá hẳn `ci.yml` trong kho cũng lọt
+lưới — vá một báo giả bằng cách mở một lỗ thật. Thay vào đó mỗi bối cảnh gánh một khẳng định riêng, không
+bối cảnh nào xanh vì im lặng:
+
+| Bối cảnh | Khẳng định |
+|---|---|
+| trong CÂY GIT (`.git` tồn tại) | `ci.yml` PHẢI có, và dòng ghim `core.abbrev` + `fetch-depth: 0` phải đứng TRƯỚC bước `doc-claims-check` |
+| trong GÓI CÀI | `.github/` PHẢI KHÔNG có — nếu có tức tệp dev lọt vào bundle, cũng là lỗi |
+
+## Nghiệm thu
+
+- `tl --selftest` trong CÂY GIT (Python 3.12): **1379/1379**.
+- `tl --selftest` **TỪ GÓI ĐÃ BUNG**: ca r226/c nay XANH; còn đúng 2 ca đỏ `r218`/`r219` — **cả hai có sẵn
+  từ trước r226**, đã đo trên chính bản 1.35.61.
+- Gói lành: `tl_boot --version` → `tl 1.35.63`; 192 tệp; không lọt `.git`/`CLAUDE.md`/`.claude`/
+  `.githooks`/`tra_luat_config.v2.json`.
+- Phản chứng 2 chiều, **mỗi nhánh một chiều** (không nhánh nào xanh vì im lặng):
+  · bơm `.github/workflows/ci.yml` VÀO GÓI → ca ĐỎ (khẳng định phía gói không rỗng nghĩa);
+  · gỡ dòng ghim `core.abbrev` khỏi `ci.yml` TRONG CÂY GIT → ca ĐỎ (drift-lock cũ còn nguyên hiệu lực).
+- 9 bước gate chạy tay trong cây git: đều rc=0.
+
+## Còn nợ (đo được, cố ý chưa sửa)
+
+`r218_docclaims_sach_khong_bao_gia` và `r219_docclaims_l9_tu_tat_khi_quet_hep` đỏ khi chạy từ gói cài, và
+đã đỏ như thế từ TRƯỚC r226 (đo trên 1.35.61). Cùng lớp với ca vừa vá — lớp `doc-claims-check` giả định
+đang đứng trong cây git — nhưng chữa chúng phải đụng thiết kế hai lớp guard, rộng hơn hẳn một dòng điều
+kiện, nên tách ra đợt riêng. Hệ quả đang chịu: `tl --selftest` ở LIVE ra 1377/1379 chứ không N/N.
+
 # ★ v1.35.62 — r226: CI đỏ ≥9 run KHÔNG phải lỗi test — lệnh cục bộ thuần chết ở cổng creds (2026-07-29)
 
 > Việc đặt ra: CI đỏ liên tiếp từ 27-07 (r217) trên CẢ ubuntu lẫn windows, luôn đúng một ca

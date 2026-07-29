@@ -133,11 +133,15 @@ else
       NLM_RC=3
       bad "NLM CHẾT — phiên hết hạn, KHÔNG cứu được từ sandbox headless."
       echo "        Cookie phiên Google xoay từ browser profile; container này không có." >&2
-      echo "        Làm ở máy CÓ TRÌNH DUYỆT (Windows/desktop):" >&2
-      echo "            nlm login" >&2
-      echo "            python scripts/tl.py nlm-auth-stage" >&2
-      echo "        Rồi quay lại đây chạy: ./env-reimport.sh   (sẽ nạp được ngay)" >&2
-      echo "        Trong lúc chờ: dùng NotebookLM MCP (mcp__notebooklm-*) — không cần cookie CLI." >&2
+      echo "        CÁCH A — máy có trình duyệt (Windows/desktop):" >&2
+      echo "            nlm login  &&  python scripts/tl.py nlm-auth-stage" >&2
+      echo "            rồi quay lại đây chạy: ./scripts/env-reimport.sh" >&2
+      echo "        CÁCH B — chỉ có điện thoại: trình duyệt CÓ EXTENSION (Quetta/Edge Canary/" >&2
+      echo "            Firefox+add-on) → đăng nhập notebooklm.google.com → export cookie JSON" >&2
+      echo "            → tải lên Drive → ./scripts/nlm-auth-import.sh --drive-id <fileId>" >&2
+      echo "            (Chrome Android KHÔNG được: không extension, mà 9/13 cookie là httpOnly)" >&2
+      echo "        LƯU Ý: KHÔNG có đường 'fallback NotebookLM MCP' ở phiên này — đã đo:" >&2
+      echo "            phiên chỉ có server github; MCP của gói nlm cũng dùng CHUNG cookie này." >&2
     fi
   fi
 fi

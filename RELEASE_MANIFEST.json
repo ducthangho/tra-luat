@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.70",
+  "skill_version": "1.35.71",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 197,
-  "total_bytes": 6820174,
-  "package_hash": "b3d4b9458c6347d274b0b27d8094e4fd7ef3ee4b44c8835d6d394184424a02c7",
-  "content_hash": "b3d4b9458c6347d274b0b27d8094e4fd7ef3ee4b44c8835d6d394184424a02c7",
+  "total_bytes": 6821874,
+  "package_hash": "e3e54ce51836aa249f96db06dbd8cb7ad3067bc2a5802821a559f0942a2515fd",
+  "content_hash": "e3e54ce51836aa249f96db06dbd8cb7ad3067bc2a5802821a559f0942a2515fd",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 256596,
-      "sha256": "24a3b3a99ce9b5064365845125a6873b65a0e4f5eb1577ff74cb2ff388c80258"
+      "size": 257790,
+      "sha256": "94b5c0f84821ed4bd80fc9724f4377dfe0673b89c613bea34d1b4b9d1cd63d21"
     },
     {
       "path": "CONTEXT.md",
@@ -64,12 +64,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "8809f7f985ef242446dadd35436400a7d0c124699242ce849feff4ac91fefb81"
+      "sha256": "2c7538d0e6a4754c040ff2b4c04c3ac48a494834489bbfc36031b47df8e65868"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "6debd2f8ea3b0222657735ee4d3f0b64e992e913b6d27bc5c87efb9111a2ac37"
+      "sha256": "2a8ef599ba6dd8dc6d74a0735ce8d005c46d97c169c5dd59dbd4db0d73764d6a"
     },
     {
       "path": "agents/openai.yaml",
@@ -678,8 +678,8 @@
     },
     {
       "path": "scripts/env-reimport.sh",
-      "size": 7386,
-      "sha256": "1bea8d260928ea9a41b262f4296fb5cb8fff73b588e20542ff274af096300af1"
+      "size": 7892,
+      "sha256": "cefdd69673bd491b92b20e5777ad7374c75c6239c68e34b85861f6d7f107fd05"
     },
     {
       "path": "scripts/gas.py",
@@ -784,7 +784,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "2e526f8713f243bdb287030abf80bf4a580ad85c2653463b947b8a7274340445"
+      "sha256": "97560cb675443346d146f2b718cbaf19a58582e7bb64e0027b6965e9e5c93d28"
     },
     {
       "path": "scripts/tl_boot.py",

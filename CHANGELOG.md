@@ -1,3 +1,19 @@
+# ★ v1.35.71 — r234: chính env-reimport.sh in lời khuyên đã bị bác (2026-07-29)
+
+Ngay lượt chạy đầu sau khi deploy r233, `env-reimport.sh` in ở nhánh NLM-chết:
+«Trong lúc chờ: dùng NotebookLM MCP (mcp__notebooklm-*) — không cần cookie CLI.»
+
+Câu đó SAI, và r233 đã đo ra chính điều ngược lại trong cùng một lượt: phiên này KHÔNG có
+NotebookLM MCP nào (`ListMcpResourcesTool` chỉ trả `github`), còn MCP của chính gói nlm thì
+dùng CHUNG `get_client()`→`load_cached_tokens()` nên cũng chết theo cookie. Tức script vừa
+viết đã mang sẵn lời khuyên mà CHANGELOG cùng bản vá tuyên bố là sai — đúng lớp bug r232 vừa
+sửa cho `doctor`, lần này tôi tự mắc lại.
+
+Thay bằng hai đường THẬT: (A) máy có trình duyệt → `nlm login` + `nlm-auth-stage`; (B) chỉ có
+điện thoại → trình duyệt CÓ extension (Quetta/Edge Canary/Firefox+add-on) → export JSON →
+Drive → `nlm-auth-import.sh --drive-id`. Kèm câu chốt: Chrome Android KHÔNG dùng được (không
+extension, 9/13 cookie httpOnly) và KHÔNG tồn tại đường fallback MCP ở phiên này.
+
 # ★ v1.35.70 — r233: hai script vận hành sandbox headless + đo lại đường NLM (2026-07-29)
 
 ## `scripts/env-reimport.sh` — dựng lại môi trường

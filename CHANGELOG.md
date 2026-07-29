@@ -1,3 +1,87 @@
+# ★ v1.35.62 — r226: CI đỏ ≥9 run KHÔNG phải lỗi test — lệnh cục bộ thuần chết ở cổng creds (2026-07-29)
+
+> Việc đặt ra: CI đỏ liên tiếp từ 27-07 (r217) trên CẢ ubuntu lẫn windows, luôn đúng một ca
+> `r216_merge_fail_closed_tren_duong_san_xuat`, trong khi cây dev 1376/1376 và worktree `--detach` cùng
+> HEAD cũng 1376/1376. Giả thuyết đang treo là «CI ghim Python 3.12, dev 3.13». **Đo xong: sai giả thuyết.**
+
+## Phân xử giả thuyết Python — bằng cách chạy CẢ HAI bản trên cùng một máy
+
+| Bản Python | Máy KHÔNG config | Máy CÓ creds (`TL_WEBAPP`+`TL_TOKEN`) |
+|---|---|---|
+| 3.12.3 | **1375/1376** (đỏ đúng ca r216) | ca r216 xanh |
+| 3.13.12 | **1375/1376** (đỏ đúng ca r216) | ca r216 xanh |
+
+Cùng bản Python mà đổi kết quả theo *chỗ chạy*, còn đổi bản Python thì không đổi gì ⇒ biến thật KHÔNG phải
+Python, cũng không phải OS. Biến thật là **máy có config hay không**.
+
+## Nguyên nhân gốc: `rasoat-merge` thiếu ở `_CREDS_LAZY_CMDS`
+
+`main()` gọi `load_creds` cho MỌI lệnh ngoài `_CREDS_LAZY_CMDS`. `rasoat-merge` không có trong tập đó, nên
+trên máy trống nó `sys.exit` rc=1 **TRƯỚC handler** — dù handler tự khai «Không gọi mạng, không NLM». Ca
+r216 chạy đúng đường sản xuất (subprocess) rồi parse `stdout`, mà stdout RỖNG ⇒ `JSONDecodeError` ⇒ FAIL.
+Máy dev xanh chỉ vì có `tra_luat_config.v2.json` (`.gitignore` dòng 7) — runner clone sạch thì không.
+
+Đây đúng LỚP bug đã cắn hai lần: `doc-text` (bug CI 16-07, khoá ở `r121`) và `doc-claims-check` (r218). Vá
+lần này gom cả họ hàng r213, mỗi tên một bằng chứng riêng:
+
+| Lệnh | Bằng chứng nó KHÔNG được chết ở cổng |
+|---|---|
+| `rasoat-merge` | handler thuần cục bộ, không có đường dùng creds |
+| `state-get` | handler CÓ `except SystemExit → CAN_WEBAPP_LIVE` (rc=2 + JSON) — là **code chết** khi `main()` thoát trước |
+| `state-put` | nhánh `--dry-run` return TRƯỚC `load_creds`; cùng nhánh `CAN_WEBAPP_LIVE` chết như trên |
+
+Đo sau vá (máy trống): cả ba tới được handler, trả JSON schema của chính nó thay vì tường creds ở stderr.
+
+## Blocker THỨ HAI, chỉ lộ ra khi selftest hết chặn: `doc-claims-check --strict` đỏ trên clone runner
+
+r225 nối guard vào CI nhưng bước selftest đỏ đứng TRƯỚC nên guard **chưa từng chạy trên runner**. Chạy tay
+trên clone `--depth 1` (đúng hình dạng `actions/checkout@v4` mặc định) ra **4 cờ cứng**:
+
+| Cờ | Phân xử | Vá |
+|---|---|---|
+| L1 ×2 — `SKILL_KERNEL_DRAFT.md` | Guard bắt **ĐÚNG**: tệp chưa bao giờ có trong lịch sử git (`git log --all` = rỗng), chỉ tồn tại cục bộ trên máy dev. | Sửa TÀI LIỆU (`CONTEXT.md`, `references/SKILL_KERNEL_MAPPING.md`) nói đúng rằng đây là bản nháp không commit; **trả nợ** cặp tương ứng trong `_POINTER_BASELINE` (ratchet 4 → 3). |
+| L2 ×2 — `ad413e7`, `78d6bfe` | Guard hô **SAI**: cả hai là commit THẬT (09-07 và 07-07); clone nông không có lịch sử để tra nên `cat-file -e` trượt. | `fetch-depth: 0` — cấp cho guard cái lịch sử nó cần để kết luận. |
+
+## Ngưỡng L2 trôi theo KÍCH THƯỚC KHO — dòng ghim `core.abbrev` là dòng gánh việc
+
+`sha_lens` lấy từ `git rev-parse --short`, mà git tự nới độ dài viết tắt theo số object. Cùng một kho:
+
+| Hình dạng clone | `core.abbrev` | Hậu quả cho L2 |
+|---|---|---|
+| `--depth 1` | 7 | ngưỡng đúng như mọi phép đo r218 giả định |
+| đủ lịch sử (281 commit, 17.783 object) | **8** | 8 = độ dài tiền tố UUID notebook (`743ed200`, `45739ff7`, `dbe706a0`…) ⇒ **18 cờ GIẢ**, và ca `r218_docclaims_l2_sha_khong_ton_tai` (mồi `deadbee`, 7 ký tự) **cũng đỏ theo** |
+
+Nghĩa là bật `fetch-depth: 0` một mình sẽ đổi 4 cờ lấy 18 cờ. Nên CI ghim `core.abbrev 7` — **giữ đúng
+ngưỡng mà r218 đã đo và thiết kế theo, không phải nới lỏng guard**. Đo sau khi ghim, trên clone ĐỦ lịch sử:
+`doc-claims-check --strict` rc=0, **0 cờ cứng**, L2 vẫn BẬT hoàn toàn.
+
+> Đã cân nhắc và BÁC hướng «L2 tự tắt khi clone nông»: nó làm chính ca
+> `r218_docclaims_l2_sha_khong_ton_tai` đỏ trên runner (lớp tắt thì mồi `deadbee` không còn được bắt) —
+> tức là chữa cờ giả bằng cách tắt guard ở đúng nơi guard cần chạy.
+
+## Nghiệm thu
+
+- `tl --selftest` trên Python **3.12**, container clone sạch KHÔNG config: **1379/1379** (+3 ca r226).
+- 11/11 bước CI chạy tay trên chính container đó: đều rc=0; `release-bundle` ×2 cùng SHA-256, 192 entry.
+- Phản chứng, hai lượt trong worktree `--detach` riêng (đã dọn):
+  · gỡ 3 tên khỏi `_CREDS_LAZY_CMDS` → **3/3 đỏ đúng ca** (`r216_merge_fail_closed_tren_duong_san_xuat`,
+  `r226_lenh_cuc_bo_khong_chet_o_cong_creds`, `r226_r216_khong_phu_thuoc_config_may_chay`), 1376/1379;
+  · gỡ dòng ghim `core.abbrev` khỏi `ci.yml` → **1/1 đỏ đúng ca**
+  (`r226_nguong_l2_troi_theo_abbrev_va_ci_ghim`), 1378/1379.
+- Ca `r226_lenh_cuc_bo_khong_chet_o_cong_creds` chặn thẳng `load_creds` cho ném `SystemExit` rồi chạy
+  `main()` THẬT ⇒ tất định trên MỌI máy, kể cả máy CÓ config (tước env không đủ: `_config_candidates` còn
+  dò cwd/gốc-skill/`~`). Kèm NEGATIVE control: lệnh ngoài danh sách phải VẪN chết ở cổng.
+- `doc-claims-check --strict`: **4 cờ → 0** (clone `--depth 1` trước vá; clone đủ + ghim abbrev sau vá).
+- Ca `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` phản chứng 2 chiều trên kho git THẬT: cùng tài liệu, đổi
+  mỗi `core.abbrev` mà kết luận L2 lật (7 ⇒ cờ cứng · 8 ⇒ advisory) + drift-lock hai dòng trong `ci.yml`.
+
+## Còn nợ (đo được, cố ý chưa sửa)
+
+Ngưỡng L2 vẫn tự hiệu chỉnh theo `core.abbrev` — CI nay ghim nên tất định, nhưng **máy dev không được
+ghim**: khi kho lớn thêm và git nới viết tắt lên 8, `/gate` sẽ đỏ bằng đúng 18 cờ giả nói trên. Chưa sửa
+trong lõi vì cần thiết kế riêng để phân biệt «tiền tố UUID» với «SHA viết tắt» — sửa kèm đợt nào đụng lớp
+L2. Chữa tạm tại chỗ: `git config core.abbrev 7`.
+
 # ★ v1.35.61 — r225: guard r218/r219 chỉ đóng ở đường TAY — nối `doc-claims-check` + `release-check` vào CI (2026-07-29)
 
 > Việc đặt ra: đối chiếu con số «gate 8 bước» (prompt bàn giao) với «gate 9 bước» (ghi chép cũ). Đối chiếu

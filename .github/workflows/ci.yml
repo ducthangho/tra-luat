@@ -11,6 +11,12 @@ on:
   push:
     branches: [master]
   pull_request:
+  # r226 — CHỖ HỞ ĐÃ TRẢ GIÁ 9 RUN: hai cò trên chỉ bắn ở master và ở PR, nên nhánh làm việc KHÔNG bao
+  # giờ được gate soi. Đợt r225 nối 3 guard vào CI mà nhánh không chạy được ⇒ tưởng đã đóng nhưng chưa
+  # từng chạy lần nào. `workflow_dispatch` cho phép soi gate theo yêu cầu trên BẤT KỲ ref nào, không
+  # phải mở PR mới biết. (GitHub đòi workflow có mặt ở nhánh mặc định thì nút này mới dùng được ⇒ chỉ
+  # hiệu lực SAU khi bản này lên master.)
+  workflow_dispatch:
 
 jobs:
   gate:
@@ -29,7 +35,19 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
+          # r226 — NGƯỠNG L2 CỦA doc-claims-check PHẢI TẤT ĐỊNH. `sha_lens` lấy từ `git rev-parse --short`,
+          # mà git tự nới độ dài viết tắt theo SỐ OBJECT của kho. ĐO trên chính kho này: clone `--depth 1`
+          # → 7 · clone đủ lịch sử (281 commit, 17.783 object) → 8. Mà 8 đúng bằng độ dài tiền tố UUID
+          # notebook (743ed200, 45739ff7, dbe706a0…) ⇒ ngưỡng trôi lên 8 thì 18 tiền tố UUID bị hô
+          # SHA_NOT_A_COMMIT và ca r218_docclaims_l2_sha_khong_ton_tai (mồi `deadbee`, 7 ký tự) cũng đỏ
+          # theo. Ghim 7 = giữ ĐÚNG ngưỡng mọi phép đo của r218 dựa vào, KHÔNG phải nới lỏng guard.
+          git config --global core.abbrev 7
       - uses: actions/checkout@v4
+        with:
+          # r226 — `fetch-depth` mặc định (1) làm L2 MÙ: `cat-file -e` trượt với mọi SHA cũ nên trích dẫn
+          # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
+          # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

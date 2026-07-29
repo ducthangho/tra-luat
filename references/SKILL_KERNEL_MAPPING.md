@@ -21,7 +21,8 @@
 (a) CHẤP NHẬN 41.8KB — ưu tiên an toàn doctrine (khuyến nghị); (b) nén thêm §1 phần sau BƯỚC 0 + §2 xuống
 ~5KB mỗi mục → ~34KB, đổi lấy việc phải viết-lại-lời các đoạn mệnh lệnh (rủi ro drift ngữ nghĩa).
 
-**Kết quả draft:** xem `references/SKILL_KERNEL_DRAFT.md`. **CHANGELOG (458KB):** khi duyệt sẽ cắt còn
+**Kết quả draft:** xem tệp nháp `SKILL_KERNEL_DRAFT.md` — bản làm việc CỤC BỘ, KHÔNG commit (r226: guard
+`doc-claims-check` L1 bắt đúng — kho chưa bao giờ có tệp này). **CHANGELOG (458KB):** khi duyệt sẽ cắt còn
 10 version gần nhất, phần cũ chuyển sang thư mục changelog archive (nguyên văn). Đã thực hiện, tên tệp thực
 tế là `CHANGELOG-den-1.33.53.md` và `CHANGELOG-1.33.54-den-1.34.99.md` — chúng nằm trong cây phát triển và
 **không đóng vào gói phát hành**.

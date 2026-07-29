@@ -19822,8 +19822,11 @@ def run() -> int:
         # H9: baseline khoá SỐ ĐẾM — thêm mục miễn trừ là test đỏ, phải sửa test CÓ CHỦ ĐÍCH.
         # r218 hạ 10 → 4: đã TRẢ 6 mục nợ (sửa thân tài liệu, xem _POINTER_BASELINE). Ratchet chặn
         # chiều THÊM miễn trừ; trả nợ làm số nhỏ đi là chiều đúng, nên hạ mốc là có chủ đích.
+        # r226 hạ 4 → 3: trả nốt cặp SKILL_KERNEL_MAPPING.md → references/SKILL_KERNEL_DRAFT.md —
+        # `doc-claims-check` L1 bắt đúng rằng tệp đó CHƯA BAO GIỜ có trong kho (nó chỉ nằm cục bộ trên
+        # máy dev), nên sửa lời tài liệu thay vì khoanh nợ tiếp.
         bl = _rel209._POINTER_BASELINE
-        ok1 = len(bl) == 4
+        ok1 = len(bl) == 3
         ok2 = all(doc not in _rel209._POINTER_ARCHIVE_DOCS for doc, _ in bl)
         # khớp theo CẶP: cùng con trỏ nhưng ở DOC KHÁC vẫn phải ĐỎ (miễn trừ không lan)
         r = _rel209._doc_pointer_findings({"references/KHAC.md": "scripts/.tl_state"}, ["scripts/x.py"])
@@ -19854,7 +19857,7 @@ def run() -> int:
         r = _rel209._doc_pointer_findings(docs, paths)
         ok1 = r["pointers_ok"] and r["pointers_fail"] == []
         ok2 = len(r["pointers_advisory"]) >= 30
-        ok3 = len(r["pointers_baseline"]) == 4   # r218 trả 6 nợ (xem _POINTER_BASELINE)
+        ok3 = len(r["pointers_baseline"]) == 3   # r218 trả 6 nợ, r226 trả thêm 1 (xem _POINTER_BASELINE)
         cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
         r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
         ok4 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
@@ -21798,6 +21801,151 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
 
     _t110("r221_t1_sohieu_khong_noi_qua_tay", _c221_sohieu_khong_noi_qua_tay)
+
+    # ═════ r226: lệnh CỤC BỘ THUẦN không được chết ở cổng creds TRƯỚC handler ═════
+    # Bối cảnh: CI ĐỎ ≥9 run liên tiếp từ 27-07 (ubuntu + windows), luôn ở ca
+    # r216_merge_fail_closed_tren_duong_san_xuat, trong khi máy dev 1376/1376. ĐO ra: khác biệt KHÔNG
+    # phải OS, KHÔNG phải Python (3.12 và 3.13 cùng đỏ / cùng xanh theo CÙNG một biến), mà là máy dev có
+    # `tra_luat_config.v2.json` (.gitignore:7) còn runner clone SẠCH ⇒ `main()` gọi `load_creds` rồi
+    # sys.exit(rc=1) TRƯỚC handler ⇒ stdout RỖNG ⇒ r216 parse JSON gãy. Cùng LỚP với bug CI 2026-07-16
+    # (`doc-text`, khoá ở r121) và với dòng `doc-claims-check` (r218).
+    #
+    # Cách kiểm phải TẤT ĐỊNH trên MỌI máy — kể cả máy CÓ config: không thể chỉ tước env
+    # TL_WEBAPP/TL_TOKEN vì `_config_candidates` còn dò cwd/gốc-skill/scripts/~. Nên ta CHẶN THẲNG
+    # `load_creds` cho nó ném SystemExit (đúng thứ nó làm trên máy trống) rồi chạy `main()` THẬT:
+    # lệnh thuộc `_CREDS_LAZY_CMDS` phải ĐI TỚI handler (trả rc), lệnh ngoài phải VẪN chết ở cổng.
+    def _c226_lenh_cuc_bo_khong_chet_o_cong_creds():
+        import contextlib as _ctx226
+        import io as _io226
+        import tempfile as _tf226
+
+        _that = _TL_MODULE.load_creds
+
+        def _chan(*_a, **_k):                       # y hệt máy KHÔNG config: sys.exit chuỗi hướng dẫn
+            raise SystemExit("[tl] Thiếu TL_WEBAPP/TL_TOKEN — (mô phỏng máy trống)")
+
+        def _chay(argv):
+            """Trả (rc, None) nếu tới được handler · (None, SystemExit) nếu chết ở cổng creds."""
+            _b = _io226.StringIO()
+            try:
+                with _ctx226.redirect_stdout(_b), _ctx226.redirect_stderr(_io226.StringIO()):
+                    return _TL_MODULE.main(argv), None
+            except SystemExit as e:
+                return None, e
+
+        _TL_MODULE.load_creds = _chan
+        try:
+            with _tf226.TemporaryDirectory() as _td:
+                _st = Path(_td) / "state.json"
+                _st.write_text('{"buoc": 1}', encoding="utf-8")
+                _thieu = Path(_td) / "khong-co-that"
+                # (a) ba lệnh cục bộ thuần PHẢI tới handler — rc do handler quyết, KHÔNG phải SystemExit
+                _r_merge = _chay(["rasoat-merge", "--in", str(_thieu), "--out", str(Path(_td) / "o.json"),
+                                  "--json"])
+                _r_get = _chay(["state-get", "--json"])
+                _r_put = _chay(["state-put", "--in", str(_st), "--json", "--dry-run"])
+                ok1 = all(r[1] is None and isinstance(r[0], int) for r in (_r_merge, _r_get, _r_put))
+                # handler rasoat-merge nói ĐÚNG lỗi của nó (không phải tường creds) và KHÔNG ghi ra
+                ok2 = _r_merge[0] == 2 and not (Path(_td) / "o.json").exists()
+                # (b) NEGATIVE control: lệnh NGOÀI danh sách vẫn phải chết ở cổng — nếu vế này xanh
+                #     nghĩa là cổng đã hỏng/hoặc load_creds không còn được main() gọi ⇒ test vô nghĩa
+                _r_counts = _chay(["counts", "--json"])
+                # phải chết ĐÚNG ở cổng creds (nhận diện bằng chuỗi mồi), KHÔNG phải chết vì argparse —
+                # nếu không, ca này sẽ xanh oan khi ai đó đổi tên/cờ lệnh mồi.
+                ok3 = (_r_counts[0] is None and isinstance(_r_counts[1], SystemExit)
+                       and "mô phỏng máy trống" in str(_r_counts[1]))
+        finally:
+            _TL_MODULE.load_creds = _that
+        # (c) drift-lock danh sách — đúng idiom r121 (`doc-text`) / r186: xoá tên khỏi frozenset là ĐỎ ngay
+        _lazy226 = set(getattr(_TL_MODULE, "_CREDS_LAZY_CMDS", frozenset()))
+        ok4 = {"rasoat-merge", "state-get", "state-put"} <= _lazy226 and "counts" not in _lazy226
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r226_lenh_cuc_bo_khong_chet_o_cong_creds", _c226_lenh_cuc_bo_khong_chet_o_cong_creds)
+
+    # r226/b — GỐC RỄ ca r216: nó chạy `tl rasoat-merge` qua subprocess THỪA HƯỞNG env của phiên, nên
+    # trên máy có config thì xanh, máy trống thì đỏ — tức nó ĐO CẢ MÁY chứ không chỉ đo code. Khoá lại
+    # đúng chỗ đó: subprocess phải được cấp env creds TƯỜNG MINH thì kết quả mới nói về `tl`, không nói
+    # về chỗ chạy. (Ca này canh chính khuôn env đó, để lần sau ai bỏ đi là ĐỎ chứ không âm thầm trôi.)
+    def _c226_r216_khong_phu_thuoc_config_may_chay():
+        import json as _js226b
+        import subprocess as _sp226b
+        import sys as _sys226b
+        import tempfile as _tf226b
+        _u = {"unit_id": "unit-226", "van_ban": "212-2025-ND-CP", "ten": "ND 212",
+              "phat_hien": [{"key": "VD-26", "linh_vuc": "BHXH", "hinh_thuc": "nghiên cứu"}]}
+        with _tf226b.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"
+            _d.mkdir()
+            (_d / "unit-226.json").write_text(_js226b.dumps(_u, ensure_ascii=False), encoding="utf-8")
+            _out = Path(_td) / "BANG_MASTER.json"
+            # env TƯỚC SẠCH creds + HOME/USERPROFILE trỏ thư mục trống ⇒ mô phỏng runner CI clone sạch
+            # (không tuyệt đối — gốc skill vẫn có thể có config — nên vế (a) ở ca trên mới là chốt chặn).
+            _env = dict(os.environ)
+            for _k in ("TL_WEBAPP", "TL_TOKEN"):
+                _env.pop(_k, None)
+            _env["HOME"] = _env["USERPROFILE"] = str(Path(_td) / "home")
+            (Path(_td) / "home").mkdir()
+            _r = _sp226b.run([_sys226b.executable, str(_ROOT209 / "scripts" / "tl.py"), "rasoat-merge",
+                              "--in", str(_d), "--out", str(_out), "--json"],
+                             capture_output=True, text=True, encoding="utf-8", errors="replace",
+                             timeout=180, env=_env, cwd=str(Path(_td) / "home"))
+            ok1 = _r.returncode == 0 and _out.is_file() and _r.stdout.lstrip().startswith("{")
+            if not ok1:
+                return False
+            _j = _js226b.loads(_r.stdout[_r.stdout.find("{"):])
+            ok2 = _j.get("so_phat_hien") == 1 and _j.get("da_ghi") is True
+        return ok1 and ok2
+    _t110("r226_r216_khong_phu_thuoc_config_may_chay", _c226_r216_khong_phu_thuoc_config_may_chay)
+
+    # r226/c — NGƯỠNG L2 TRÔI THEO KÍCH THƯỚC KHO, và CI phải ghim nó. Bối cảnh: r225 nối
+    # `doc-claims-check --strict` vào CI nhưng bước selftest đỏ đứng TRƯỚC nên guard CHƯA TỪNG chạy trên
+    # runner. Chạy tay mới lộ: `sha_lens` lấy từ `git rev-parse --short`, mà git tự nới độ dài viết tắt
+    # theo số object — cùng một kho, clone `--depth 1` ra 7 còn clone đủ lịch sử ra 8. Ngưỡng 8 trùng
+    # độ dài tiền tố UUID notebook ⇒ 18 tiền tố bị hô SHA_NOT_A_COMMIT, và chính ca
+    # `r218_docclaims_l2_sha_khong_ton_tai` (mồi `deadbee`, 7 ký tự) cũng đỏ theo.
+    # PHẢN CHỨNG 2 CHIỀU trên kho git THẬT (không giả lập `_doc_claims_git`): cùng một tài liệu, chỉ đổi
+    # `core.abbrev`, mà kết luận của L2 lật — đó là bằng chứng dòng ghim trong CI là dòng GÁNH VIỆC.
+    def _c226_nguong_l2_troi_theo_abbrev_va_ci_ghim():
+        import subprocess as _sp226c
+        import tempfile as _tf226c
+        _check = _TL_MODULE._doc_claims_check   # đường sản xuất: chính `cmd_doc_claims_check` gọi hàm này
+
+        def _git(cwd, *args):
+            return _sp226c.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *args], cwd=str(cwd),
+                               capture_output=True, text=True, timeout=120).returncode
+        with _tf226c.TemporaryDirectory() as _td:
+            _kho = Path(_td) / "kho"
+            _kho.mkdir()
+            if _git(_kho, "init", "-q") != 0:
+                return False
+            # `abc1234`: 7 hex có chữ a-f, KHÔNG phải commit nào — đúng hình dạng L2 phải bắt khi ngưỡng=7
+            (_kho / "CONTEXT.md").write_text("# T\n\nsửa ở abc1234 nhé.\n", encoding="utf-8")
+            _git(_kho, "add", "-A")
+            _git(_kho, "commit", "-q", "-m", "c1")
+
+            def _l2_flags(abbrev):
+                _git(_kho, "config", "core.abbrev", str(abbrev))
+                _j = _check(root=_kho)
+                return ([f["claim"] for f in (_j.get("flags") or []) if f.get("layer") == "L2"],
+                        [x["claim"] for x in (_j.get("advisories") or []) if x.get("layer") == "L2"],
+                        (_j.get("basis") or {}).get("sha_lens"))
+            _f7, _a7, _len7 = _l2_flags(7)
+            _f8, _a8, _len8 = _l2_flags(8)
+        # ngưỡng 7 ⇒ CỜ CỨNG · ngưỡng 8 ⇒ tụt xuống advisory. Cùng tài liệu, khác chỗ chạy.
+        ok1 = _f7 == ["abc1234"] and _len7 == [7, 40]
+        ok2 = _f8 == [] and _a8 == ["abc1234"] and _len8 == [8, 40]
+        # (b) DRIFT-LOCK đường TỰ ĐỘNG — đúng bài học r219/r225: guard không nối vào CI thì chỉ là tài
+        #     liệu. Hai dòng phải CÙNG có mặt, và dòng ghim phải đứng TRƯỚC bước gọi doc-claims-check.
+        _ci = (_ROOT209 / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8", errors="replace")
+        #     Neo vào chính DÒNG BƯỚC (`- name: doc-claims-check…`), KHÔNG neo vào chuỗi trần
+        #     `doc-claims-check` — chuỗi trần còn nằm trong các dòng chú thích phía trên, so vị trí với
+        #     nó là so với một comment chứ không so với bước chạy (đã cắn đúng cái đó khi viết ca này).
+        _i_pin = _ci.find("core.abbrev 7")
+        _i_depth = _ci.find("fetch-depth: 0")
+        _i_dcc = _ci.find("- name: doc-claims-check")
+        ok3 = 0 <= _i_pin < _i_dcc and 0 <= _i_depth < _i_dcc
+        return ok1 and ok2 and ok3
+    _t110("r226_nguong_l2_troi_theo_abbrev_va_ci_ghim", _c226_nguong_l2_troi_theo_abbrev_va_ci_ghim)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

@@ -5,10 +5,10 @@
   "skill_version": "1.35.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 194,
-  "total_bytes": 6771360,
-  "package_hash": "b5ff7b888701c5b38ab98ba832d55a555396aac03cc3ed0b97aec02652c02231",
-  "content_hash": "b5ff7b888701c5b38ab98ba832d55a555396aac03cc3ed0b97aec02652c02231",
+  "file_count": 195,
+  "total_bytes": 6786520,
+  "package_hash": "9b1f14dd9fcc0e2feb1fb078c68bc084dbedbb65952b6c62e8743ca65969c53e",
+  "content_hash": "9b1f14dd9fcc0e2feb1fb078c68bc084dbedbb65952b6c62e8743ca65969c53e",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 246162,
-      "sha256": "057ba513968f6fcf3b636292b86518fb3b371f18b0ff002f4b60f6f0c3a25cd7"
+      "size": 247905,
+      "sha256": "7f80121e5232f2ac9e68100dc9026145b100711dd81faa3442e2873fd3a251ca"
     },
     {
       "path": "CONTEXT.md",
@@ -665,6 +665,11 @@
       "path": "scripts/contract_check.py",
       "size": 12579,
       "sha256": "ec62cc3764568be67d93c0f803eb026b6d2e8dde94696e9e47748a78a92bf233"
+    },
+    {
+      "path": "scripts/deploy-package.sh",
+      "size": 13417,
+      "sha256": "af56274c14b90a2ee4a7a9a06ddf878ab145e4f309eac22c6e560c3e452e20fc"
     },
     {
       "path": "scripts/docx_markup.py",

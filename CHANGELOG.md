@@ -1,5 +1,24 @@
 # ★ v1.35.68 — merge r229 vào nhánh r230/r231 (2026-07-29)
 
+**Thêm `scripts/deploy-package.sh` — đóng gói + deploy TỪ LINUX/Cowork.** Trước đây deploy chỉ có
+đường Windows (`upload-skill-to-Package.ps1` ở `D:\Quốc hội\`, user double-click), nên trong container
+remote KHÔNG deploy được. Script này chạy cùng quy trình §10 DEV_TOOLING_GUIDE + §6 bước 7-8:
+VERSION khớp 3 chỗ → gate 8 bước → bundle ×2 đòi same-SHA → verify trong gói → (tuỳ chọn) drive-push
+→ tải lại đối chiếu BYTE + VERSION.
+
+MẶC ĐỊNH KHÔNG ĐẨY: phải nêu `--push`. Ba điểm học từ chính lần chạy đầu:
+- `release-bundle` TỪ CHỐI ghi zip trong skill root (`OUT_INSIDE_SKILL_ROOT`, kẻo zip nuốt chính nó)
+  và tự chuyển ra thư mục cha ⇒ script phải đọc đường dẫn THẬT từ khoá `out` của JSON. Bản đầu tin
+  vào tham số mình truyền nên `sha256sum` chết trên tệp không tồn tại, hai chuỗi RỖNG so nhau lại
+  BẰNG NHAU ⇒ cổng same-SHA báo ✓ oan. Nay chặn rỗng trước khi so.
+- `release-verify` chạy trong gói sinh `__pycache__` ⇒ đếm tệp phải loại, nếu không 195 đọc thành 224.
+- `doc-claims-check` đỏ trên clone SHALLOW vì SHA cũ trong `changelog_archive` không resolve được.
+  Script chỉ hạ thành WARN khi repo THẬT SỰ shallow VÀ mọi cờ đều là `SHA_NOT_A_COMMIT`; cờ khác ⇒
+  đỏ như thường. Đã ĐO NỀN trên origin/master: y hệt 2 cờ, delta = 0.
+
+Phản chứng đã chạy (không tin cổng chặn chỉ vì nó tồn tại): VERSION lệch 3 chỗ ⇒ rc=1 chặn ở bước 0;
+bơm token dạng `AKfycb…` vào `references/` ⇒ quét bắt đúng tệp/dòng, rc=2, KHÔNG đẩy.
+
 Nhánh `claude/review-bhxh-law-profile-2m08hz` tách ra TRƯỚC khi r229 lên master nên phân kỳ thật:
 master có r229 (v1.35.65), nhánh có r230 (v1.35.66) + r231 (v1.35.67). Merge gộp cả hai ⇒ cây kết quả
 KHÁC mọi bản 1.35.67 phát hành trước đó, nên bump số mới thay vì giữ 1.35.67 (một số version = một cây).

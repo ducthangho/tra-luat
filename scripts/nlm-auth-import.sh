@@ -210,14 +210,17 @@ def _guide():
     print("    Đảm bảo Cookie-Editor export TOÀN BỘ cookie của trang, không lọc.", file=sys.stderr)
 if thieu:
     print(f"  THIẾU cookie định-danh: {thieu}", file=sys.stderr); _guide(); sys.exit(2)
-if not has_ts:
-    print("  THIẾU __Secure-*PSIDTS (dấu thời gian phiên) — API NotebookLM sẽ TỪ CHỐI dù đăng nhập được.", file=sys.stderr)
-    print(f"  (đo 29-07: bản {len(ck)} cookie thiếu đúng nhóm này ⇒ probe network_error)", file=sys.stderr); _guide(); sys.exit(2)
+# r239 (đo 29-07): LSID là CỔNG THẬT. Kiểm chứng LIVE: bản chỉ có định-danh (thiếu LSID/__Host/*RTS)
+# bị Google ĐẨY VỀ signin dù đã mint *PSIDTS qua RotateCookies ⇒ *PSIDTS KHÔNG phải nút thắt (nlm tự
+# mint). Nút thắt = cookie ĐĂNG NHẬP (LSID/__Host-GAPS) + ROTATION (*PSIDRTS), chỉ có ở accounts.google.com.
 if not has_lsid:
-    print("  THIẾU LSID (cookie đăng nhập, sống ở accounts.google.com) — thường KÉO THEO thiếu ủy quyền API.", file=sys.stderr); _guide(); sys.exit(2)
-print(f"  đủ {len(DINH_DANH)} định-danh + *PSIDTS + LSID"
-      + (" · có rotation token (tự gia hạn)" if has_rts else
-         "\n  ⚠ KHÔNG có *PSIDRTS — phiên KHÔNG tự gia hạn, dùng được nhưng ngắn; re-export nếu chết sớm"))
+    print("  THIẾU LSID — cookie ĐĂNG NHẬP (sống ở accounts.google.com). ĐÂY là nút thắt:", file=sys.stderr)
+    print("  đo LIVE 29-07: bộ cookie THIẾU LSID bị Google ĐẨY VỀ signin dù đã mint *PSIDTS.", file=sys.stderr)
+    _guide(); sys.exit(2)
+print(f"  đủ {len(DINH_DANH)} định-danh + LSID"
+      + ("" if has_ts else " (thiếu *PSIDTS — nlm sẽ tự mint qua RotateCookies, KHÔNG chặn)")
+      + (" · có *PSIDRTS (tự gia hạn)" if has_rts else
+         "\n  ⚠ thiếu *PSIDRTS — phiên KHÔNG tự gia hạn; nếu Google vẫn đẩy signin thì cần export lại đủ hơn"))
 PY
 RC=$?; [ $RC -eq 0 ] || { bad "file cookie không dùng được (xem lý do trên)"; exit 2; }
 ok "định dạng + độ đủ: đạt"

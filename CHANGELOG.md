@@ -1,3 +1,27 @@
+# ★ v1.35.76 — r239: nút thắt cookie NLM là LSID/đăng-nhập, KHÔNG phải PSIDTS (đo LIVE) (2026-07-29)
+
+Tiếp r238. User export lại nhưng vẫn 19 cookie thiếu nhóm phiên. Truy tới gốc bằng ĐO LIVE
+(không đoán tiếp):
+
+1. Tra mã nlm: `REQUIRED_COOKIES = [SID,HSID,SSID,APISID,SAPISID]` — chỉ 5, bản 19-cookie CÓ đủ
+   ⇒ nlm báo "đăng nhập thành công". Nhưng đó chỉ là sanity-check của nlm, KHÔNG phải điều Google đòi.
+2. Tái hiện request thật (httpx GET notebooklm.google.com): BỊ ĐẨY VỀ accounts.google.com/signin
+   ⇒ Google TỪ CHỐI bộ cookie. (Chữ "region" trong HTML chỉ là footer trang signin — URL là
+   /signin = lỗi AUTH, không phải chặn vùng; sandbox từng chạy 139 notebook nên vùng không chặn.)
+3. Thử `rotate_google_cookies` (endpoint accounts.google.com/RotateCookies của nlm): MINT THÀNH CÔNG
+   __Secure-1PSIDTS/3PSIDTS — nhưng VẪN bị đẩy signin ⇒ PSIDTS KHÔNG phải nút thắt (nlm tự mint).
+
+Nút thắt THẬT = cookie ĐĂNG NHẬP (LSID/__Host-GAPS, chỉ ở accounts.google.com) + ROTATION
+(__Secure-*PSIDRTS). Bản upload lấy từ myaccount.google.com (có 3 cookie myaccount: OSID/OTZ) nên
+hụt nhóm này; Google không chấp nhận replay session thiếu cookie đăng nhập từ IP sandbox. Bộ
+54-cookie hồi đầu chạy được vì có đủ.
+
+Vá validation (r239): LSID là CỔNG (thiếu ⇒ chặn, chỉ thẳng accounts.google.com/AccountChooser —
+trang "chọn tài khoản" ở đúng host accounts, đừng bấm vào tài khoản); *PSIDTS HẠ xuống chỉ ghi chú
+(nlm tự mint qua RotateCookies, không chặn); *PSIDRTS vẫn cảnh báo. Đã test: bản 19-cookie ĐỎ ở
+bước 2 với thông điệp đúng nút thắt.
+
+Đường chắc ăn khi phone không đủ: `nlm login` trên máy có browser (CDP lấy đủ jar) → nlm-auth-stage.
 # ★ v1.35.75 — r238: nlm-auth-import — 3 lỗi thật khi user upload cookie từ điện thoại (2026-07-29)
 
 Chạy import thật lần đầu với file user upload từ điện thoại (Firefox+Cookie-Editor), lộ 3 lỗi:

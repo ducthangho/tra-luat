@@ -4,6 +4,10 @@
 > thứ tự. Tham số/khóa response webapp: tra `references/API_CONTRACT.md` — KHÔNG đoán.
 > Bẫy vận hành ĐÃ TRẢ GIÁ (nhóm theo chủ đề, trích từ CHANGELOG/hồ sơ sự cố): `references/GOTCHAS.md`
 > — đọc TRƯỚC khi release / sửa registry / viết script mới / move-tách module (G2 v1.34.66).
+> Kiểm chứng hệ checkpoint (precheck-gate + WAL + resume/undo) trên LIVE: `references/CHECKPOINT_TEST_PLAN.md`.
+> Bootstrap Cowork nhanh — Project + direct-media, né Drive MCP: `references/COWORK_PROJECT.md`.
+> (r228: hai dòng trên là CON TRỎ SỐNG bắt buộc — trong gói cài, sổ lưu trữ không đi theo,
+> tài liệu chỉ được lịch sử trỏ sẽ MỒ CÔI thật và L9 nổ cờ đúng.)
 
 ---
 

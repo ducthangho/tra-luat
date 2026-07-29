@@ -1,3 +1,61 @@
+# ★ v1.35.64 — r228: trả nốt nợ r227 — r218/r219 đỏ TỪ GÓI ĐÃ BUNG; mỗi bối cảnh một khẳng định + vá DỮ LIỆU mồ côi (2026-07-29)
+
+> Món nợ r227 ghi rõ ở mục «Còn nợ»: `r218_docclaims_sach_khong_bao_gia` và
+> `r219_docclaims_l9_tu_tat_khi_quet_hep` đỏ khi chạy từ gói bung (LIVE 1377/1379), đã đỏ y hệt trên
+> 1.35.61 ⇒ CÓ SẴN. Cùng lớp bệnh r226/c: khẳng định của test/lớp guard ngầm giả định đang đứng trong
+> CÂY GIT (có `.git`, có lịch sử, có `references/changelog_archive/`).
+
+## Gốc — hai bệnh KHÁC NHAU dưới một triệu chứng
+
+| Ca | Gốc thật | Vá |
+|---|---|---|
+| `r218_sach_khong_bao_gia` | Chính TEST gọi `git rev-parse` để dựng SHA đối chứng — gói bung không có `.git` ⇒ `returncode != 0` ⇒ đỏ vì CHỖ CHẠY | Khuôn r227: mỗi bối cảnh một khẳng định (bảng dưới) |
+| `r219_l9_tu_tat_khi_quet_hep` | Ratchet `by_layer.L9 == 0` ĐỎ ĐÚNG: `CHECKPOINT_TEST_PLAN.md` + `COWORK_PROJECT.md` chỉ được `changelog_archive` (loại khỏi gói, `_RELEASE_EXCLUDE_DIRS`) trỏ ⇒ trong gói chúng MỒ CÔI THẬT, `DOC_NO_INBOUND_POINTER` ×2 | Vá DỮ LIỆU, KHÔNG nới guard: cấp con trỏ SỐNG trong `references/RUNBOOK.md` (header) — L9 phán đúng ở cả hai bối cảnh, giữ nguyên |
+
+## r218 — mỗi bối cảnh một khẳng định (không nhánh nào xanh vì im lặng)
+
+| Bối cảnh | Khẳng định |
+|---|---|
+| CÂY GIT (`.git` tồn tại) | như cũ: `git rev-parse` PHẢI chạy được, tài liệu đối chứng CÓ vế SHA thật, mọi lớp im |
+| GÓI CÀI | tài liệu đối chứng BỎ vế SHA (không SHA nào chứng minh đúng được khi không có `.git`), các lớp L1/L3/L5/L6/L7 vẫn phải im; kèm khẳng định RIÊNG: gói KHÔNG được mang `references/changelog_archive/` (có = tệp dev lọt bundle) |
+
+Xoá `.git` trong KHO ⇒ rơi vào nhánh gói, nhánh đó đòi archive phải VẮNG mà kho thật có archive ⇒ vẫn ĐỎ
+— không tồn tại đường «thiếu dữ kiện thì cho qua» (hướng «guard tự tắt» đã THỬ VÀ BÁC từ r227: L2 tắt khi
+clone nông làm chính ca test của nó đỏ trên runner).
+
+## Test khoá mới `r228_docclaims_goi_khong_mang_tai_lieu_mo_coi`
+
+Bắt NGAY TRONG CÂY GIT điều trước đây chỉ lộ khi bung gói: mọi phát hiện L9 (cờ LẪN advisory
+`DOC_POINTED_ONLY_BY_HISTORICAL`) phải rơi vào tệp KHÔNG được đóng gói (`_release_should_include` false).
+Tài liệu «chỉ lịch sử trỏ» trong cây git trông vô hại (advisory) nhưng vào gói là mồ côi thật — chính cái
+lỗ r218/r219 lọt. Một khẳng định chạy được ở CẢ HAI bối cảnh, dùng chung lượt quét memo r223.
+
+## Kèm đợt (trả nợ đúng dịp bump)
+
+- `.gitignore` + `dist/` — sản phẩm build cục bộ, đã nằm trong `_RELEASE_EXCLUDE_DIRS`, có/không có nó
+  làm đổi SHA cây làm việc so manifest.
+
+## Nghiệm thu
+
+- `tl --selftest` trong CÂY GIT: **1380/1380** (+1 ca r228).
+- `tl --selftest` **TỪ GÓI BUNG** v1.35.64 (bung ra thư mục tạm ngoài kho, output ghi file rồi mới
+  parse): **1380/1380** — món «Còn nợ» LIVE 1377/1379 của r227 đã trả.
+- Phản chứng chạy được, mỗi bối cảnh một chiều, cả ba lượt ĐỎ ĐÚNG CA (worktree `--detach` + bản gói
+  riêng, chạy xong dọn):
+  · CÂY GIT, gỡ 2 dòng con trỏ trong RUNBOOK.md → đúng MỘT ca đỏ `r228_docclaims_goi_khong_mang_tai_lieu_mo_coi`
+    (1379/1380; r219 VẪN XANH ở đó — chính cái lỗ chỉ-lộ-khi-bung-gói, nay có ca bắt ngay trong cây git);
+  · GÓI BUNG, bơm `references/MO_COI_R228.md` mồ côi + xoá `references/GOTCHAS.md` → r218_sach + r219_l9
+    + r228 cùng ĐỎ (xoá tệp trong gói bị bắt, không có nhánh «thiếu thì cho qua»);
+  · GÓI BUNG, bơm `references/changelog_archive/` vào gói → đúng MỘT ca đỏ r218_sach (khẳng định riêng
+    của nhánh gói không rỗng nghĩa).
+- Bẫy TỰ CẤP CON TRỎ, cắn ngay khi chạy phản chứng lượt đầu (ghi lại vì sẽ cắn tiếp): docstring ca r228
+  viết TRẦN tên hai tệp đủ đuôi ⇒ `scripts/*.py` là nguồn con trỏ sống của L9 ⇒ chính ca test tự cấp con
+  trỏ, phản chứng gỡ-RUNBOOK xanh oan 1380/1380. Sửa cách viết (không tên trần đủ đuôi trong scripts/).
+- `ruff check --select F` delta so master = **0**, đo CÙNG ruff 0.16.0 trên cả hai bản: tl.py 12 F821 +
+  0 F401 (y nền); tl_selftest.py 3931 F821 + 1 F401 = master y hệt (nền «3914» trong CLAUDE.md là số
+  của ruff đời cũ — đúng bài «thấy số lạ thì đo lại master trước khi nghi bản vá»).
+- 8 bước gate offline: đều rc=0.
+
 # ★ v1.35.63 — r227: ca r226/c đỏ khi chạy TỪ GÓI ĐÃ CÀI — test khẳng định về kho, chạy ở nơi không phải kho (2026-07-29)
 
 > Bắt được bằng phép thử chưa từng làm: bung bundle v1.35.62 vào `~/.claude/skills/tra-luat/` rồi chạy

@@ -21291,23 +21291,38 @@ def run() -> int:
     def _c218_sach_khong_bao_gia():
         """ĐỐI CHỨNG (không phải ca dễ): tài liệu chỉ chứa khẳng định ĐÚNG — đường dẫn có thật, SHA có
         thật, version ≤ hiện hành và có mục CHANGELOG, rNNN có trong CHANGELOG, `tl.py:1` trong tầm.
-        Nếu bất kỳ lớp nào báo giả ở đây thì lệnh vô dụng trên kho thật (150 cờ nhiễu = không ai đọc)."""
+        Nếu bất kỳ lớp nào báo giả ở đây thì lệnh vô dụng trên kho thật (150 cờ nhiễu = không ai đọc).
+
+        r228 — HAI BỐI CẢNH, hai khẳng định (khuôn r227; đo 29-07: ca này ĐỎ TỪ GÓI BUNG ngay ở
+        1.35.61 vì vế `git rev-parse` bên dưới CHỈ chạy được trong cây git):
+          · CÂY GIT → như cũ: rev-parse PHẢI chạy được, SHA thật + toàn bộ khẳng định đúng đều im;
+          · GÓI CÀI (không `.git`) → không SHA nào CHỨNG MINH đúng được ⇒ tài liệu đối chứng bỏ vế
+            SHA, các lớp còn lại (L1/L3/L5/L6/L7) vẫn phải im; kèm khẳng định RIÊNG của bối cảnh:
+            gói KHÔNG được mang `references/changelog_archive/` (có = tệp dev lọt bundle).
+        KHÔNG có nhánh «thiếu thì cho qua»: xoá `.git` trong KHO ⇒ rơi vào nhánh gói, mà nhánh gói
+        đòi changelog_archive phải VẮNG — kho thật có archive ⇒ vẫn ĐỎ, không lọt lưới."""
         import subprocess as _sp218b
         import tempfile as _tf218
-        _sha = _sp218b.run([("git"), "-C", str(_ROOT209), "rev-parse", "--short=8", "HEAD"],
-                           capture_output=True, text=True, encoding="utf-8", errors="replace",
-                           timeout=60)
-        if _sha.returncode != 0:
-            return False
-        _sha = _sha.stdout.strip()
+        _dong = [
+            "# Đối chứng",
+            "- Con trỏ mã: `scripts/tl.py:1` và `scripts/tl_core/workflow.py:1`.",
+            "- Xem thêm [gotchas](../tailieu/vandeban.md).",
+            "",
+        ]
+        if (_ROOT209 / ".git").exists():   # worktree để `.git` là TỆP ⇒ `.exists()` phủ cả hai (r227)
+            _sha = _sp218b.run([("git"), "-C", str(_ROOT209), "rev-parse", "--short=8", "HEAD"],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=60)
+            if _sha.returncode != 0:
+                return False
+            _dong.insert(1, f"- Bẫy nằm ở `references/GOTCHAS.md`, vá tại `{_sha.stdout.strip()}`"
+                            " (v1.35.50 — r217).")
+        else:
+            if (_ROOT209 / "references" / "changelog_archive").exists():
+                return False
+            _dong.insert(1, "- Bẫy nằm ở `references/GOTCHAS.md` (v1.35.50 — r217).")
         with _tf218.TemporaryDirectory() as td:
-            d = _r218_doc(td, "\n".join([
-                "# Đối chứng",
-                f"- Bẫy nằm ở `references/GOTCHAS.md`, vá tại `{_sha}` (v1.35.50 — r217).",
-                "- Con trỏ mã: `scripts/tl.py:1` và `scripts/tl_core/workflow.py:1`.",
-                "- Xem thêm [gotchas](../tailieu/vandeban.md).",
-                "",
-            ]))
+            d = _r218_doc(td, "\n".join(_dong))
             rc, j, _ = _r218_run("--path", str(d))
         return rc == 0 and j.get("ok") is True and j.get("flags") == [] and j.get("files_scanned") == 1
 
@@ -21614,6 +21629,32 @@ def run() -> int:
         return ok_xuoi and ok_nguoc and ok_ma and ok_memo
 
     _t110("r223_khung_test_khong_duoc_nuot_loi", _c223_khung_test_khong_duoc_nuot_loi)
+
+    def _c228_goi_khong_mang_tai_lieu_mo_coi():
+        """r228 — BẤT BIẾN ĐÓNG GÓI, bắt NGAY TRONG CÂY GIT điều trước đây chỉ lộ khi bung gói ra
+        chạy: tệp references/ ĐI THEO BUNDLE thì phải có con trỏ SỐNG. Vì sao: gói cài KHÔNG mang
+        `references/changelog_archive/` (cố ý, `_RELEASE_EXCLUDE_DIRS`) ⇒ tài liệu chỉ được LỊCH SỬ
+        trỏ — trong cây git là advisory `DOC_POINTED_ONLY_BY_HISTORICAL`, trông vô hại — sẽ MỒ CÔI
+        THẬT trong gói và L9 nổ cờ ĐÚNG ở đó. Đo 29-07 (đỏ y hệt trên 1.35.61, tức có sẵn): hai tệp
+        CHECKPOINT_TEST_PLAN + COWORK_PROJECT (đuôi .md — KHÔNG viết tên trần đủ đuôi ở đây: mọi
+        scripts/*.py là NGUỒN CON TRỎ SỐNG của L9, viết đủ tên là chính ca này tự cấp con trỏ và
+        phản chứng gỡ-RUNBOOK hoá xanh oan — đã cắn 29-07) chỉ được sổ lưu trữ trỏ ⇒ ratchet
+        `by_layer.L9 == 0` của ca r219_l9_tu_tat đỏ TỪ GÓI BUNG trong khi cây git xanh. Vá bằng DỮ
+        LIỆU (con trỏ sống trong RUNBOOK.md), KHÔNG nới guard — L9 đã phán đúng ở cả hai bối cảnh.
+
+        Khẳng định là MỘT cho cả hai bối cảnh (không cần tách nhánh vì không dựa vào .git): mọi phát
+        hiện L9 — cờ LẪN advisory — phải rơi vào tệp KHÔNG được đóng gói (`_release_should_include`
+        false). Phản chứng đã chạy 29-07: gỡ 2 dòng con trỏ trong RUNBOOK.md ⇒ 2 advisory L9 trên tệp
+        được-đóng-gói ⇒ ca này ĐỎ ngay trong cây git — đúng cái lỗ mà r218/r219 từng lọt."""
+        _rel228 = _mod215("release.py", "_rel228")
+        _, j = _r218_run_toankho()   # lượt quét chung (memo r223) — không quét lại toàn kho
+        _l9 = ([f for f in (j.get("flags") or []) if f.get("layer") == "L9"]
+               + [a for a in (j.get("advisories") or []) if a.get("layer") == "L9"])
+        _vi_pham = sorted(d["file"] for d in _l9
+                          if _rel228._release_should_include(_ROOT209 / d["file"], _ROOT209))
+        return "L9" not in (j.get("layers_skipped") or {}) and _vi_pham == []
+
+    _t110("r228_docclaims_goi_khong_mang_tai_lieu_mo_coi", _c228_goi_khong_mang_tai_lieu_mo_coi)
 
     def _c219_hai_manifest_egress_song_doi():
         """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho

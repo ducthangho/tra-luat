@@ -19,6 +19,10 @@ references/golden/fixtures/
 .tl_state/
 reports/
 
+# v1.35.64 (r228): dist/ là sản phẩm build cục bộ — đã nằm trong _RELEASE_EXCLUDE_DIRS nên có/không
+# có nó làm ĐỔI SHA cây làm việc so manifest; trả nợ đúng dịp bump.
+dist/
+
 # v1.34.68 (Q1 kế hoạch instruction-refactor-va-kho-tham-chieu): kho tham chiếu Claude Code clone dev-only
 # local (~1.495 commit + media) — KHÔNG commit vào skill git, KHÔNG vào bundle (đã loại ở _RELEASE_EXCLUDE_DIRS)
 claude-code-best-practice/

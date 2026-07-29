@@ -22000,6 +22000,87 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r226_nguong_l2_troi_theo_abbrev_va_ci_ghim", _c226_nguong_l2_troi_theo_abbrev_va_ci_ghim)
 
+    def _c229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de():
+        """r229 (Công báo Luật BHXH 41/2024 số 987+988): pdftotext ngắt dòng đẩy DẪN CHIẾU
+        'Điều N của Luật này' lên đầu dòng ⇒ _dieu_sequence_stats đếm 161 cho luật CÓ 141 Điều,
+        monotonic=False, kéo split_plan cắt sai ('part 2 = Điều 2..141'). Đo HAI CHIỀU."""
+        _f229 = _TL_MODULE._dieu_sequence_stats
+        # (a) BẢN SẠCH (tiêu đề có dấu chấm, không dẫn chiếu đầu dòng) — vá KHÔNG được đổi gì
+        sach = "Điều 1. Phạm vi\nnội dung\nĐiều 2. Đối tượng\nnội dung\nĐiều 3. Giải thích\n"
+        s = _f229(sach)
+        ok1 = s["count"] == 3 and s["first"] == 1 and s["last"] == 3 and s["monotonic"] is True
+        # (b) BẢN PDF: 3 tiêu đề THẬT + 2 dẫn chiếu bị ngắt dòng — phải BỎ dẫn chiếu
+        pdfy = ("Điều 1. Phạm vi\nngười lao động quy định tại\n"
+                "Điều 109 của Luật này được hưởng\nĐiều 2. Đối tượng\nđối tượng quy định tại\n"
+                "Điều 2 của Luật này bao gồm:\nĐiều 3. Giải thích\n")
+        p = _f229(pdfy)
+        ok2 = p["count"] == 3 and p["first"] == 1 and p["last"] == 3 and p["monotonic"] is True
+        # PHẢN CHỨNG: luật CŨ (không đòi dấu) trên đúng chuỗi này ra 5 & KHÔNG monotonic — nếu vế
+        # này sai thì fixture không còn tái hiện được bug, ca test thành xanh oan.
+        import re as _re229
+        cu = [int(x) for x in _re229.findall(r"(?mi)^\s*Điều\s+(\d+)\b", pdfy)]
+        ok3 = len(cu) == 5 and not all(b > a for a, b in zip(cu, cu[1:]))
+        # (c) FALLBACK: thể thức KHÔNG dấu chấm (tên điều cùng dòng) vẫn phải đếm được, không về 0
+        khongdau = "Điều 5 Quy định chung\nnội dung\nĐiều 6 Giải thích\n"
+        k = _f229(khongdau)
+        ok4 = k["count"] == 2 and k["first"] == 5 and k["last"] == 6
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de",
+          _c229_dieu_dan_chieu_dau_dong_khong_thanh_tieu_de)
+
+    def _c229_chunk_khong_cat_o_dan_chieu():
+        """r229 — hệ quả NẶNG hơn đếm sai: `_split_by_dieu_chunks` dùng CÙNG regex lỏng để CẮT, nên
+        chunk mở đầu ngay tại một dẫn chiếu ⇒ nguồn NLM bị xẻ GIỮA THÂN một Điều. Khẳng định ranh
+        giới chunk phải LIỀN MẠCH và chỉ rơi vào tiêu đề thật."""
+        _split = _TL_MODULE._split_by_dieu_chunks
+        # 4 Điều thật; trong thân Điều 2 có dẫn chiếu "Điều 99 của Luật này" BỊ NGẮT DÒNG lên đầu dòng
+        doc = ("Điều 1. Một\n" + ("x" * 400) + "\n"
+               "Điều 2. Hai\n" + ("y" * 300) + "\nquy định tại\n"
+               "Điều 99 của Luật này thì áp dụng\n" + ("z" * 300) + "\n"
+               "Điều 3. Ba\n" + ("w" * 400) + "\n"
+               "Điều 4. Bốn\n" + ("v" * 400) + "\n")
+        parts = _split(doc, max_chars=900)
+        nums = [(p["start_dieu"], p["end_dieu"]) for p in parts]
+        # (a) KHÔNG chunk nào bắt đầu/kết thúc ở 99 — 99 chỉ là dẫn chiếu, không phải Điều của văn bản
+        ok1 = all(99 not in (s, e) for s, e in nums)
+        # (b) ranh giới LIỀN MẠCH: part sau bắt đầu đúng = part trước + 1, và phủ kín 1..4
+        ok2 = bool(nums) and nums[0][0] == 1 and nums[-1][1] == 4
+        ok3 = all(nums[i + 1][0] == nums[i][1] + 1 for i in range(len(nums) - 1))
+        # (c) mỗi chunk phải MỞ ĐẦU bằng một tiêu đề Điều thật, không phải giữa câu
+        import re as _re229b
+        ok4 = all(_re229b.match(r"(?s)^\s*Điều\s+\d+\s*[.:]", p["text"]) for p in parts)
+        # (d) PHẢN CHỨNG: luật CŨ trên đúng fixture này CẮT ở dẫn chiếu 99 ⇒ fixture còn tái hiện bug
+        cu = [int(m.group(1)) for m in
+              _re229b.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)\b", doc)]
+        ok5 = 99 in cu
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r229_chunk_khong_cat_o_dan_chieu", _c229_chunk_khong_cat_o_dan_chieu)
+
+    def _c229_registry_doctor_noi_ro_co_so_dem():
+        """r229: `count` là TỔNG dòng nhưng mọi bucket chỉ tính trên phần ĐÃ LỌC (bỏ ref + own thuong)
+        ⇒ đọc 'count=90, missing_sohieu=19' ra '19/90' là SAI. Phải phơi `scanned` + `basis`."""
+        import importlib.util as _ilu229
+        _p229 = Path(__file__).resolve().parent / "registry_hygiene.py"
+        _sp = _ilu229.spec_from_file_location("_rh229", _p229)
+        _m = _ilu229.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        rows = [
+            {"drive_id": "d1", "name": "Luat_10-2020-QH14_Abc", "so_hieu": "10-2020-QH14", "row_kind": "own"},
+            {"drive_id": "d2", "name": "VBT_Khong_so_hieu", "so_hieu": "", "row_kind": "own"},
+            {"drive_id": "d3", "name": "ref_row", "so_hieu": "99-2020-QH14", "row_kind": "ref"},
+            {"drive_id": "d4", "name": "ban-goc.docx", "so_hieu": "", "row_kind": "own", "loai": "thuong"},
+        ]
+        rep = _m.analyze(rows)
+        # 4 dòng vào, chỉ 2 được quét (1 ref + 1 thuong bị loại)
+        ok1 = rep["count"] == 4 and rep["scanned"] == 2
+        ok2 = rep["skipped_ref"] == 1 and rep["skipped_own_thuong"] == 1
+        ok3 = bool(rep.get("basis")) and "scanned" in rep["basis"]
+        s = _m.build_doctor_summary(rep)
+        ok4 = s["count"] == 4 and s["scanned"] == 2
+        # H2: text sinh TỪ _DOCTOR_SUMMARY_KEYS ⇒ `scanned` phải có mặt ở CẢ text lẫn JSON
+        ok5 = "scanned" in _m._DOCTOR_SUMMARY_KEYS and "scanned=2" in _m.format_doctor_text(s)
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r229_registry_doctor_noi_ro_co_so_dem", _c229_registry_doctor_noi_ro_co_so_dem)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

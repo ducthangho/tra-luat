@@ -288,10 +288,16 @@ def _subject_sig(name: str) -> str:
 def analyze(rows: list[dict]) -> dict:
     by_so, by_name = defaultdict(list), defaultdict(list)
     root_rows, raw_rows, no_sohieu, title_mismatch, ghost_rows = [], [], [], [], []
+    # v1.35.65: ĐẾM phần bị loại. Trước đây `count` = TỔNG dòng còn mọi bucket chỉ tính trên phần ĐÃ LỌC
+    # ⇒ đọc "count=90, missing_sohieu=19" ra "19/90" là SAI (thật ra 19 trên ~34 dòng được quét; hồ sơ
+    # Luật BHXH có 56 dòng sohieu rỗng). Phơi `scanned` + `basis` như `sweep.corpus_basis` để hết đọc nhầm.
+    skipped_ref = skipped_thuong = 0
     for e in rows:
         if row_kind(e) == "ref":
+            skipped_ref += 1
             continue
         if is_own_thuong(e):
+            skipped_thuong += 1
             continue
         sh = row_sohieu(e)
         nk = name_key(e.get("name", ""))
@@ -322,6 +328,12 @@ def analyze(rows: list[dict]) -> dict:
         (conflict if len(sigs) > 1 else same_doc)[k] = v
     return {
         "count": len(rows),
+        "scanned": len(rows) - skipped_ref - skipped_thuong,
+        "skipped_ref": skipped_ref,
+        "skipped_own_thuong": skipped_thuong,
+        "basis": ("count = TỔNG dòng registry; MỌI bucket dưới đây chỉ tính trên `scanned` "
+                  "(= count − skipped_ref − skipped_own_thuong): dòng row_kind='ref' (mượn từ scope NỀN) "
+                  "và bản gốc loai='thuong' KHÔNG được quét vì chúng vốn không mang số hiệu/tên chuẩn."),
         "duplicate_sohieu": dup_so,
         "sohieu_conflict_different_doc": conflict,
         "sohieu_dup_same_doc": same_doc,
@@ -351,14 +363,20 @@ def compact(e: dict) -> dict:
 
 # H2: KHÓA tóm tắt top-level của registry-doctor. Dòng text SINH TỪ danh sách này → text & JSON DÙNG CHUNG
 # schema, KHÔNG THỂ lệch nhãn lần nữa (trước đây text in 'duplicate_sohieu/title_mismatch/rows' lệch JSON).
-_DOCTOR_SUMMARY_KEYS = ("count", "duplicate_sohieu_groups", "sohieu_conflict_groups", "duplicate_name_groups",
+_DOCTOR_SUMMARY_KEYS = ("count", "scanned", "duplicate_sohieu_groups", "sohieu_conflict_groups",
+                        "duplicate_name_groups",
                         "root_rows", "raw_name_rows", "missing_sohieu", "title_mismatch_candidates", "ghost_nlm_rows")
 
 
 def build_doctor_summary(rep: dict) -> dict:
-    """Đếm theo bucket → dict scalar top-level (cùng KHÓA cho text lẫn JSON)."""
+    """Đếm theo bucket → dict scalar top-level (cùng KHÓA cho text lẫn JSON).
+    v1.35.65: `scanned` đi kèm `count` — mọi bucket là trên `scanned`, KHÔNG phải trên `count`."""
     return {
         "count": rep["count"],
+        "scanned": rep.get("scanned", rep["count"]),
+        "skipped_ref": rep.get("skipped_ref", 0),
+        "skipped_own_thuong": rep.get("skipped_own_thuong", 0),
+        "basis": rep.get("basis", ""),
         "duplicate_sohieu_groups": len(rep["duplicate_sohieu"]),
         "sohieu_conflict_groups": len(rep.get("sohieu_conflict_different_doc", {})),
         "duplicate_name_groups": len(rep["duplicate_name"]),

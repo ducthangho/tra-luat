@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.74",
+  "skill_version": "1.35.75",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 197,
-  "total_bytes": 6831558,
-  "package_hash": "c5a7c830098d3c098c955a9f26bfcb5f07f4c2cd2946fe5997d1dd18ef4b577e",
-  "content_hash": "c5a7c830098d3c098c955a9f26bfcb5f07f4c2cd2946fe5997d1dd18ef4b577e",
+  "total_bytes": 6835686,
+  "package_hash": "8aa7bc8463c9f4099b3c3b782976694b9a4d1bee23170df60b87844dc7045cb6",
+  "content_hash": "8aa7bc8463c9f4099b3c3b782976694b9a4d1bee23170df60b87844dc7045cb6",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 262188,
-      "sha256": "cf76ff3de57afa069a6a0297404a64ec021ba94b5452dbd51e6bd7828bbec5aa"
+      "size": 264088,
+      "sha256": "56501d7234cd559db67b44ab2bfb7abec0da00111eae4b79c8d19223702e1789"
     },
     {
       "path": "CONTEXT.md",
@@ -64,12 +64,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "e31b9e36d775abaf9d5a8b9c9c330f14e1a71057f6f8ab5aa6095119ce1596cf"
+      "sha256": "568adf0440d05e4d6a60ba45427fd9333a7fdc9ef362a38ac58e5b805270ff4d"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "25fa2a962b6a704857f662fe17aeb0235333157ff4426679e2de0476ff752f67"
+      "sha256": "78d7fba669317004d28d0f7578918d18fe6c5275941a8b249687ca7e0230b6a5"
     },
     {
       "path": "agents/openai.yaml",
@@ -728,8 +728,8 @@
     },
     {
       "path": "scripts/nlm-auth-import.sh",
-      "size": 13465,
-      "sha256": "32dbb89158dc116c1ec05532d4a4e7b08fb0aa15e64de0e7d6c5eb43ce79fffe"
+      "size": 15693,
+      "sha256": "a2797935d4a9543e46f6b5fbd851c0e195dd191a08280dc4ce6ef6ae05087c29"
     },
     {
       "path": "scripts/nlm_cli.py",
@@ -784,7 +784,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "31df582996c2c33444655ac301d28e2c585235966e532ab000b783037f6985ae"
+      "sha256": "19c6a213424ce9dae00ce6ca58b0bc4043dfd99fcb36b1902694d06d629ba762"
     },
     {
       "path": "scripts/tl_boot.py",

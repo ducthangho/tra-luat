@@ -1,3 +1,28 @@
+# ★ v1.35.75 — r238: nlm-auth-import — 3 lỗi thật khi user upload cookie từ điện thoại (2026-07-29)
+
+Chạy import thật lần đầu với file user upload từ điện thoại (Firefox+Cookie-Editor), lộ 3 lỗi:
+
+## 1. Upload .json bị Google chuyển thành Google Docs
+`mimeType = application/vnd.google-apps.document` ⇒ `alt=media` KHÔNG tải được. Vá: dò
+mimeType trước; nếu là `vnd.google-apps.*` thì `files export mimeType=text/plain` rồi cắt BOM
+(Docs export chèn ﻿ đầu file ⇒ json.loads nổ "Unexpected UTF-8 BOM"). JSON THÂN sống sót qua
+Docs (không bị smart-quote) — chỉ BOM+CRLF, cắt BOM là đọc được.
+
+## 2. gws chặn --output ra ngoài cwd
+"--output resolves to ... outside the current directory". Script tải vào /tmp ⇒ chết. Vá: tải
+vào scripts/.tl_state/ (trong repo) rồi xoá qua trap. (Bug này che bởi `>/dev/null 2>&1` ban đầu.)
+
+## 3. Export THIẾU cookie ⇒ probe network_error (không phải lỗi mạng)
+Bản upload có 19/54 cookie: đủ 7 cookie ĐỊNH-DANH (SID/*PSID/HSID/SSID/APISID/SAPISID) nên nlm
+"đăng nhập thành công" — NHƯNG thiếu `__Secure-*PSIDTS` (dấu thời gian phiên) và `LSID`/
+`__Host-GAPS` (cookie đăng nhập, chỉ sống ở accounts.google.com) ⇒ API NotebookLM TỪ CHỐI, nlm
+báo "network_error: ValueError". Đó là vì export từ Gmail/myaccount HỤT nhóm __Host-*/LSID.
+
+Vá validation 3 TẦNG (chặn TRƯỚC khi nạp, thay vì để probe LIVE mới lộ): định-danh → *PSIDTS →
+LSID; thiếu bất kỳ ⇒ exit 2 + chỉ thẳng "export từ tab accounts.google.com" (nơi DUY NHẤT mang
+LSID/__Host-GAPS và thấy cả cookie .google.com). *PSIDRTS vẫn chỉ WARN (thiếu thì phiên ngắn).
+
+Đã kiểm: bản 19-cookie nay ĐỎ ở bước 2 (rc=2) với thông điệp đúng, KHÔNG đụng jar.
 # ★ v1.35.74 — r237: cookie harvest KHÔNG cần notebooklm.google.com (vá cho vùng bị chặn web) (2026-07-29)
 
 User đã cài Firefox + Cookie-Editor nhưng notebooklm.google.com bị chặn theo vùng ⇒ không mở

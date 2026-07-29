@@ -139,9 +139,22 @@ for i,f in enumerate(fs):
 fi
 if [ -n "$DRIVE_ID" ]; then
   command -v gws >/dev/null 2>&1 || { bad "cần gws để tải từ Drive — ./scripts/env-reimport.sh --no-nlm"; exit 1; }
-  SRC="$TMP/cookies.in"
-  gws drive files get --params "{\"fileId\":\"$DRIVE_ID\",\"alt\":\"media\"}" --output "$SRC" >/dev/null 2>&1
-  [ -s "$SRC" ] || { bad "không tải được fileId=$DRIVE_ID (sai id, hoặc gws không có quyền đọc)"; exit 1; }
+  # gws CHẶN --output ra ngoài thư mục hiện tại ⇒ tải vào TRONG repo rồi xoá (thêm vào trap).
+  mkdir -p scripts/.tl_state
+  SRC="scripts/.tl_state/.authdl.$$"
+  trap 'rm -f "'"$SRC"'"; rm -rf "$TMP"' EXIT
+  # Google có thể ĐÃ chuyển .json thành Google Docs khi upload (mimeType vnd.google-apps.*) — khi đó
+  # alt=media KHÔNG tải được, phải export text/plain. Đo 29-07: upload .json qua điện thoại ⇒ Docs.
+  MIME="$(gws drive files get --params "{\"fileId\":\"$DRIVE_ID\",\"fields\":\"mimeType\"}" 2>/dev/null | $PY -c 'import json,sys;print((json.load(sys.stdin) or {}).get("mimeType",""))' 2>/dev/null)"
+  if printf '%s' "$MIME" | grep -q 'application/vnd.google-apps'; then
+    warn "Drive đã chuyển file thành Google Docs ($MIME) — export text/plain để lấy lại JSON thô"
+    gws drive files export --params "{\"fileId\":\"$DRIVE_ID\",\"mimeType\":\"text/plain\"}" --output "$SRC" >/dev/null 2>&1
+  else
+    gws drive files get --params "{\"fileId\":\"$DRIVE_ID\",\"alt\":\"media\"}" --output "$SRC" >/dev/null 2>&1
+  fi
+  [ -s "$SRC" ] || { bad "không tải được fileId=$DRIVE_ID (sai id, gws không có quyền, hoặc export lỗi)"; exit 1; }
+  # Docs export chèn BOM (﻿) đầu file ⇒ json.loads nổ "Unexpected UTF-8 BOM". Cắt sớm.
+  $PY -c 'import sys,pathlib;p=pathlib.Path(sys.argv[1]);b=p.read_bytes();p.write_bytes(b[3:] if b[:3]==b"\xef\xbb\xbf" else b)' "$SRC"
   ok "tải từ Drive: $(stat -c%s "$SRC") byte"
 elif [ -n "$SRC" ]; then
   [ -s "$SRC" ] || { bad "file rỗng/không tồn tại: $SRC"; exit 1; }
@@ -181,19 +194,30 @@ if raw.lstrip().startswith("# Netscape") or "\t" in raw.split("\n")[0]:
 if not ck:
     print("  KHÔNG parse được: không phải JSON list/dict cũng không phải chuỗi header", file=sys.stderr)
     sys.exit(2)
-BAT_BUOC = ["SID", "__Secure-1PSID", "__Secure-3PSID", "HSID", "SSID", "APISID", "SAPISID"]
-thieu = [n for n in BAT_BUOC if not ck.get(n)]
 print(f"  parse được {len(ck)} cookie")
+# r238: BA TẦNG. Đo 29-07 (export 19 cookie ĐỎ ở probe): 7 cookie định-danh KHÔNG đủ — API
+# NotebookLM còn đòi cookie DẤU-THỜI-GIAN phiên (*PSIDTS) và cookie ĐĂNG NHẬP (LSID/__Host-GAPS,
+# chỉ sống ở accounts.google.com). Chặn TRƯỚC khi nạp, thay vì để probe LIVE mới lộ (đắt hơn).
+DINH_DANH = ["SID", "__Secure-1PSID", "__Secure-3PSID", "HSID", "SSID", "APISID", "SAPISID"]
+thieu = [n for n in DINH_DANH if not ck.get(n)]
+has_ts  = any(ck.get(n) for n in ("__Secure-1PSIDTS", "__Secure-3PSIDTS"))
+has_lsid = bool(ck.get("LSID"))
+has_rts = any(ck.get(n) for n in ("__Secure-1PSIDRTS", "__Secure-3PSIDRTS"))
+def _guide():
+    print("  → SỬA: mở tab accounts.google.com (đã đăng nhập) rồi Cookie-Editor Export JSON.", file=sys.stderr)
+    print("    accounts.google.com là NƠI DUY NHẤT mang LSID/__Host-GAPS *và* thấy cả cookie .google.com", file=sys.stderr)
+    print("    (SID/*PSIDTS/*PSIDRTS). Export từ Gmail/myaccount HỤT nhóm đăng nhập — đó là ca vừa lỗi.", file=sys.stderr)
+    print("    Đảm bảo Cookie-Editor export TOÀN BỘ cookie của trang, không lọc.", file=sys.stderr)
 if thieu:
-    print(f"  THIẾU cookie bắt buộc: {thieu}", file=sys.stderr)
-    print("  7 cookie này là cookie ĐĂNG NHẬP GOOGLE CHUNG trên .google.com — KHÔNG phải của", file=sys.stderr)
-    print("  notebooklm. Export từ tab Gmail hoặc myaccount.google.com (đã đăng nhập) là ĐỦ;", file=sys.stderr)
-    print("  KHÔNG cần mở notebooklm.google.com (trang web đó có thể bị chặn theo vùng — không sao,", file=sys.stderr)
-    print("  API NotebookLM chạy ở SANDBOX, không phải ở trình duyệt bạn).", file=sys.stderr)
-    sys.exit(2)
-rts = [n for n in ("__Secure-1PSIDRTS", "__Secure-3PSIDRTS") if ck.get(n)]
-print(f"  đủ {len(BAT_BUOC)} cookie phiên bắt buộc" + (f" · có rotation token {rts}" if rts else
-      "  ⚠ KHÔNG có rotation token — phiên sẽ không tự gia hạn, dùng được nhưng ngắn"))
+    print(f"  THIẾU cookie định-danh: {thieu}", file=sys.stderr); _guide(); sys.exit(2)
+if not has_ts:
+    print("  THIẾU __Secure-*PSIDTS (dấu thời gian phiên) — API NotebookLM sẽ TỪ CHỐI dù đăng nhập được.", file=sys.stderr)
+    print(f"  (đo 29-07: bản {len(ck)} cookie thiếu đúng nhóm này ⇒ probe network_error)", file=sys.stderr); _guide(); sys.exit(2)
+if not has_lsid:
+    print("  THIẾU LSID (cookie đăng nhập, sống ở accounts.google.com) — thường KÉO THEO thiếu ủy quyền API.", file=sys.stderr); _guide(); sys.exit(2)
+print(f"  đủ {len(DINH_DANH)} định-danh + *PSIDTS + LSID"
+      + (" · có rotation token (tự gia hạn)" if has_rts else
+         "\n  ⚠ KHÔNG có *PSIDRTS — phiên KHÔNG tự gia hạn, dùng được nhưng ngắn; re-export nếu chết sớm"))
 PY
 RC=$?; [ $RC -eq 0 ] || { bad "file cookie không dùng được (xem lý do trên)"; exit 2; }
 ok "định dạng + độ đủ: đạt"

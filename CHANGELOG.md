@@ -1,3 +1,27 @@
+# ★ v1.35.73 — r236: nlm-auth-import --watch (tự phát hiện file mới) + đính chính "script cài trên điện thoại" (2026-07-29)
+
+## Yêu cầu & giới hạn thật
+
+User muốn "script tự cài Firefox Android + addon + chạy lấy cookie tự động". Phần TRÊN ĐIỆN
+THOẠI KHÔNG script hoá được — ba rào cản độc lập: (1) container không có đường vào máy người
+dùng (chỉ egress qua proxy); (2) Android chưa root không cho script cài APK / lái GUI trình
+duyệt (cần chạm tay — tính năng bảo mật); (3) đăng nhập Google không tự động hoá an toàn được,
+và extension tự moi cả session Google là anti-pattern bảo mật. Bước "browser đã đăng nhập →
+sinh JSON session" BẮT BUỘC là hành động người-thật.
+
+## Cái tự động hoá ĐƯỢC: --watch
+
+Thêm `--watch <phút>` (mặc định 15): ghi mốc modifiedTime của bản mới nhất lúc bắt đầu, poll
+Drive mỗi 20s, khi có file khớp mới HƠN mốc thì tự nạp → probe LIVE → stage. Nhờ vậy luồng còn:
+[điện thoại] export JSON + lưu Drive · [sandbox] bật 1 lệnh, phần còn lại tự chạy.
+
+## Bug đã bắt trong lúc làm (ghi lại — lớp lỗi ĐO ĐƯỢC)
+
+`_pick_newest` bản đầu in bằng f-string có `\t` trong biểu thức — Python **3.11 CẤM backslash
+trong f-string** (chỉ 3.12+ mới cho). `2>/dev/null` NUỐT SyntaxError ⇒ hàm lặng lẽ trả rỗng ⇒
+`--watch` sẽ KHÔNG BAO GIỜ thấy file dù có thật. `bash -n` không bắt được (lỗi nằm trong Python
+nhúng). Sửa: bỏ f-string, dùng `%`-format. Bài học: inline Python trong .sh phải test HÀNH VI,
+không tin `bash -n`; và đừng để `2>/dev/null` che lỗi cú pháp của chính mình.
 # ★ v1.35.72 — r235: nlm-auth-import TỰ TÌM file trên Drive (bỏ bước tra fileId) (2026-07-29)
 
 Mục tiêu vận hành: người dùng chỉ có ĐIỆN THOẠI, muốn "cơ bản chỉ chạy script". Bản r233 bắt

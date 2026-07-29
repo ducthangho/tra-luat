@@ -13,10 +13,15 @@
 #   [Ở ĐÂY]      ./scripts/nlm-auth-import.sh          ← không cần fileId, tự tìm
 #
 #   ./nlm-auth-import.sh                       # TỰ TÌM trên Drive file tên chứa 'nlm-auth' (mới nhất)
+#   ./nlm-auth-import.sh --watch 15            # ĐỢI tới 15′ cho file MỚI xuất hiện rồi tự nạp
 #   ./nlm-auth-import.sh --drive-find <chuỗi>  # tự tìm theo chuỗi khác
 #   ./nlm-auth-import.sh --drive-id <fileId>   # nêu thẳng fileId
 #   ./nlm-auth-import.sh --file /path/x.json   # file đã có sẵn trong container
 #   ./nlm-auth-import.sh --no-stage            # nạp nhưng KHÔNG làm tươi bundle Drive
+#
+# Luồng "chỉ chạy 1 lệnh": ở đây bật --watch → trên điện thoại export JSON + lưu Drive →
+# sandbox tự phát hiện, tự nạp, tự probe LIVE, tự làm tươi bundle. (Cái export vẫn cần người
+# bấm — browser đã đăng nhập là hành động người-thật, không script hoá được.)
 #
 # Định dạng chấp nhận (theo extract_cookies_from_chrome_export của nlm):
 #   · JSON list  [{"name":"SID","value":"..."}, ...]   ← export của hầu hết extension
@@ -33,14 +38,15 @@ cd "$ROOT" || exit 1
 PY="${TL_PYTHON:-python3}"
 export PATH="$HOME/.local/bin:$PATH"
 
-SRC=""; DRIVE_ID=""; DO_STAGE=1; FIND=""
+SRC=""; DRIVE_ID=""; DO_STAGE=1; FIND=""; WATCH=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --file)       SRC="${2:-}"; shift ;;
     --drive-id)   DRIVE_ID="${2:-}"; shift ;;
     --drive-find) FIND="${2:-nlm-auth}"; shift ;;
+    --watch)      WATCH="${2:-15}"; shift ;;   # đợi tối đa N phút cho file MỚI xuất hiện trên Drive
     --no-stage)   DO_STAGE=0 ;;
-    -h|--help)  sed -n '2,26p' "$0"; exit 0 ;;
+    -h|--help)  sed -n '2,30p' "$0"; exit 0 ;;
     *) echo "✗ cờ lạ: $1" >&2; exit 1 ;;
   esac
   shift
@@ -57,6 +63,52 @@ command -v nlm >/dev/null 2>&1 || { bad "chưa có nlm — chạy ./scripts/env-
 TMP="$(mktemp -d)"; chmod 700 "$TMP"; trap 'rm -rf "$TMP"' EXIT
 
 say "1. Lấy file cookie"
+
+# Trả về "id<TAB>epoch<TAB>name" của bản MỚI NHẤT khớp $1, rỗng nếu không có. epoch từ modifiedTime.
+_pick_newest() {
+  gws drive files list --params "{\"q\":\"name contains '$1' and trashed = false\",\"orderBy\":\"modifiedTime desc\",\"pageSize\":1,\"fields\":\"files(id,name,modifiedTime)\"}" 2>/dev/null \
+  | $PY -c '
+import json,sys
+from datetime import datetime
+try:
+    fs=json.load(sys.stdin).get("files") or []
+except Exception:
+    fs=[]
+if fs:
+    f=fs[0]; mt=f.get("modifiedTime","")
+    try:
+        ep=int(datetime.fromisoformat(mt.replace("Z","+00:00")).timestamp())
+    except Exception:
+        ep=0
+    # KHÔNG dùng f-string: Python 3.11 cấm backslash trong biểu thức f-string (\t) — dùng %.
+    sys.stdout.write("%s\t%s\t%s" % (f["id"], ep, f.get("name","")))
+'
+}
+
+# --watch: đợi file MỚI (modifiedTime > mốc lúc bắt đầu) — để bạn export trên điện thoại lúc nào
+# cũng được, sandbox tự phát hiện rồi nạp. Không tự động hoá được cái export (browser+người), NHƯNG
+# tự động hoá được toàn bộ khâu sau đó.
+if [ -n "$WATCH" ] && [ -z "$DRIVE_ID" ] && [ -z "$SRC" ]; then
+  command -v gws >/dev/null 2>&1 || { bad "cần gws để watch Drive"; exit 1; }
+  W_FIND="${FIND:-nlm-auth}"
+  BASE="$(_pick_newest "$W_FIND" | cut -f2)"; BASE="${BASE:-0}"
+  DEADLINE=$(( $(date -u +%s) + WATCH * 60 ))
+  ok "watch: đợi file mới tên chứa '$W_FIND' trên Drive (tối đa ${WATCH}′)"
+  [ "$BASE" != "0" ] && printf '  \033[36m[..]\033[0m   mốc hiện tại: bản mới nhất @ epoch %s — chỉ nhận bản MỚI HƠN\n' "$BASE"
+  echo "        → Trên điện thoại: export cookie JSON (Cookie-Editor) rồi lưu vào Drive tên có '$W_FIND'."
+  while :; do
+    ROW="$(_pick_newest "$W_FIND")"
+    CID="$(printf '%s' "$ROW" | cut -f1)"; CEP="$(printf '%s' "$ROW" | cut -f2)"; CNAME="$(printf '%s' "$ROW" | cut -f3)"
+    if [ -n "$CID" ] && [ "${CEP:-0}" -gt "${BASE:-0}" ]; then
+      DRIVE_ID="$CID"; ok "phát hiện bản MỚI: $CNAME"; break
+    fi
+    if [ "$(date -u +%s)" -ge "$DEADLINE" ]; then
+      bad "hết ${WATCH}′ mà không có file mới. Chạy lại khi đã export xong, hoặc tăng --watch."; exit 1
+    fi
+    sleep 20
+  done
+fi
+
 # Không tham số nào ⇒ TỰ TÌM trên Drive. Mục tiêu: trên điện thoại bạn chỉ cần export rồi
 # lưu vào Drive; ở đây gõ đúng một lệnh, KHÔNG phải đi tra fileId.
 if [ -z "$DRIVE_ID" ] && [ -z "$SRC" ] && [ -z "$FIND" ]; then FIND="nlm-auth"; fi

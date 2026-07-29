@@ -22081,6 +22081,38 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r229_registry_doctor_noi_ro_co_so_dem", _c229_registry_doctor_noi_ro_co_so_dem)
 
+    def _c230_chunk_khong_nuot_khoi_dau_va_dieu_1():
+        """r230 (Luật BHXH 41/2024 khi đẩy NLM): `_chunk_records_from_text` chỉ chạy TỪ tiêu đề đầu
+        tiên ⇒ khối đầu văn bản BIẾN MẤT; thêm nữa guard PH2-08 loại oan `Điều 1.` vì dòng trước là
+        `NHỮNG QUY ĐỊNH CHUNG` (tiêu đề cơ cấu, không dấu kết câu). Đo thật: 183.428 → 182.678 (hụt
+        750) mà `warnings` RỖNG. Hai khẳng định: KHÔNG mất ký tự, và Điều 1 phải nằm trong chunk 1."""
+        import importlib.util as _ilu230
+        _p230 = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _sp = _ilu230.spec_from_file_location("_ck230", _p230)
+        _m = _ilu230.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        head = ("QUỐC HỘI\nLuật số: 41/2024/QH15\nLUẬT\nBẢO HIỂM XÃ HỘI\n"
+                "Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;\n\n"
+                "Chương I\nNHỮNG QUY ĐỊNH CHUNG\n\n")
+        # thân điều KẾT BẰNG DẤU CHẤM như văn bản thật ⇒ các Điều 2..8 qua guard bình thường;
+        # riêng Điều 1 vẫn phải nhờ vá r230 vì dòng trước nó là `NHỮNG QUY ĐỊNH CHUNG`.
+        body = "".join("Điều %d. Tên điều %d\n%s.\n" % (i, i, "x" * 300) for i in range(1, 9))
+        text = head + body
+        strat, recs = _m._chunk_records_from_text(text, name="T", max_chars=900)
+        ok1 = strat == "by_article" and len(recs) >= 2
+        # (a) BẤT BIẾN BẢO TOÀN: tổng ký tự chunk == tổng ký tự nguồn (không nuốt gì)
+        ok2 = sum(r["chars"] for r in recs) == len(text)
+        # (b) khối đầu + Điều 1 phải nằm trong chunk ĐẦU
+        ok3 = ("Luật số: 41/2024/QH15" in recs[0]["text"]) and ("Điều 1." in recs[0]["text"])
+        ok4 = recs[0]["start_dieu"] == 1 and recs[0]["start_char"] == 0
+        # (c) PHẢN CHỨNG: guard CŨ (chỉ nhận dòng trước rỗng/kết dấu câu) LOẠI `Điều 1.` ở fixture này
+        #     — nếu vế này sai thì fixture hết tái hiện bug, ca test sẽ xanh oan.
+        import re as _re230
+        _m1 = _re230.search(r"(?im)^\s*(Điều\s+1\s*[.:].*)$", text)
+        _prev = text[:_m1.start()].rstrip("\n").rsplit("\n", 1)[-1].rstrip()
+        ok5 = bool(_prev) and _prev[-1] not in ".;:!?…)”»"
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r230_chunk_khong_nuot_khoi_dau_va_dieu_1", _c230_chunk_khong_nuot_khoi_dau_va_dieu_1)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

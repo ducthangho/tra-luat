@@ -47,7 +47,15 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
         if not prev:
             return True
         last = prev.rsplit("\n", 1)[-1].rstrip()
-        return (not last) or last[-1] in ".;:!?…)\u201d\u00bb"
+        if (not last) or last[-1] in ".;:!?…)\u201d\u00bb":
+            return True
+        # v1.35.66 (r230): guard PH2-08 CHẶN OAN tiêu đề đứng ngay sau DÒNG CƠ CẤU không có dấu kết câu
+        # ("Chương I" / "NHỮNG QUY ĐỊNH CHUNG" / "Mục 1"). Ca thật: Luật BHXH 41/2024 — `Điều 1.` nằm
+        # ngay sau `NHỮNG QUY ĐỊNH CHUNG` ⇒ bị loại ⇒ rơi khỏi MỌI chunk (mất 750 ký tự: khối đầu
+        # văn bản + trọn Điều 1) mà `warnings` vẫn RỖNG.
+        if re.match(r"(?i)^\s*(chương|mục|phần|tiểu\s+mục)\b", last):
+            return True
+        return last == last.upper() and len(last) <= 120   # dòng TOÀN HOA = tiêu đề cơ cấu
     matches = [m for m in article_pat.finditer(text) if _is_heading(m)]
     if matches:
         boundaries = [(m.start(), (matches[i+1].start() if i+1 < len(matches) else len(text)), m.group(1).strip()) for i, m in enumerate(matches)]
@@ -65,6 +73,18 @@ def _chunk_records_from_text(text: str, *, name: str, max_chars: int) -> tuple[s
         if group_start is not None:
             chunk_text = text[group_start:group_end]
             records.append({"index": len(records)+1, "title": group_title or f"part{len(records)+1}", "start_char": group_start, "end_char": group_end, "start_dieu": start_dieu, "end_dieu": end_dieu, "chars": len(chunk_text), "text": chunk_text})
+        # v1.35.66 (r230) BẢO TOÀN NỘI DUNG: chunk chỉ chạy TỪ tiêu đề đầu tiên, nên mọi thứ đứng
+        # trước nó (khối đầu văn bản: cơ quan ban hành, SỐ HIỆU, tên luật, căn cứ — và cả một Điều bị
+        # `_is_heading` loại oan) BIẾN MẤT không dấu vết. Đo trên Luật BHXH 41/2024: total 183.428 ký
+        # tự nhưng tổng chunk chỉ 182.678 ⇒ hụt 750, `warnings` RỖNG. Nay gắn phần đầu vào chunk 1 —
+        # bất biến: tổng ký tự các chunk == tổng ký tự nguồn.
+        if records and boundaries and boundaries[0][0] > 0:
+            head = text[:boundaries[0][0]]
+            if head.strip():
+                r0 = records[0]
+                r0["text"] = head + r0["text"]
+                r0["start_char"] = 0
+                r0["chars"] = len(r0["text"])
         return "by_article", records
     # v1.34.38 (#2 log Chỉ thị) + v1.34.40 C.1 REDESIGN (log: chunk 191k lọt qua max-chars 90k + Phần V bị gộp
     # mất ranh giới): strategy by_heading cho văn kiện Đảng/Đề án KHÔNG có Điều. LUẬT MỚI (grill 2026-07-13):

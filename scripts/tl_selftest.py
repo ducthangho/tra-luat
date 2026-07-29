@@ -21656,6 +21656,122 @@ def run() -> int:
 
     _t110("r228_docclaims_goi_khong_mang_tai_lieu_mo_coi", _c228_goi_khong_mang_tai_lieu_mo_coi)
 
+    # ───── r229 (v1.35.65): tuổi cookie nlm KHÔNG được ra số ÂM khi mốc naive lệch múi giờ ─────
+    def _r229_tg():
+        import importlib as _il229
+        return _il229.import_module("tl_gws")
+
+    def _r229_jar(lv_delta=None, extracted_ago_s=None, aware=False):
+        """Dựng jar nlm giả: lv_delta = timedelta cộng vào now cho `last_validated` (naive, hoặc aware
+        khi aware=True); extracted_ago_s = số giây trước now cho `auth.json.extracted_at` (epoch)."""
+        import json as _js, time as _t
+        from datetime import datetime as _dt
+        out = {}
+        if lv_delta is not None:
+            _base = _dt.now().astimezone() if aware else _dt.now()
+            out["profiles/default/metadata.json"] = _js.dumps({"last_validated": (_base + lv_delta).isoformat()})
+        if extracted_ago_s is not None:
+            out["auth.json"] = _js.dumps({"extracted_at": _t.time() - extracted_ago_s})
+        return out
+
+    def _c229_tuoi_cookie_khong_ra_so_am():
+        """r229 — ĐO 29-07-2026 (sandbox UTC, jar stage từ máy UTC+7): `metadata.json.last_validated`
+        là ISO **NAIVE** do máy STAGE ghi theo giờ nó, còn `_nlm_auth_age_days` trừ `datetime.now()`
+        của máy ĐỌC ⇒ lệch 465,6' ⇒ tuổi ra **ÂM 0,3 ngày**; `nlm-auth-load` in "~-0 ngày tuổi".
+
+        Khẳng định: mốc ở TƯƠNG LAI quá dung sai đồng hồ thì KHÔNG được bịa số âm — phải rơi xuống
+        `extracted_at` (epoch, tz-safe) và trả TUỔI THẬT. Kèm 3 nhánh còn lại của quy tắc để vá không
+        trôi: mốc aware phải so tuyệt đối; lệch nhỏ trong dung sai NTP coi như vừa xác thực (0);
+        mốc tương lai ngoài dung sai phải trả None (tín hiệu "không dùng được", không phải 0)."""
+        from datetime import timedelta as _td
+        _tg = _r229_tg()
+        _lech = _td(hours=7, minutes=46)                     # đúng độ lệch đo được 29-07-2026
+        _age = _tg._nlm_auth_age_days(_r229_jar(lv_delta=_lech, extracted_ago_s=14.2 * 60))
+        ok_khong_am = _age is not None and _age >= 0
+        ok_dung_epoch = ok_khong_am and abs(_age * 1440 - 14.2) < 1.0
+        ok_none = _tg._nlm_lv_age_seconds(
+            (__import__("datetime").datetime.now() + _lech).isoformat()) is None
+        ok_jitter = _tg._nlm_lv_age_seconds(
+            (__import__("datetime").datetime.now() + _td(seconds=30)).isoformat()) == 0.0
+        _s = _tg._nlm_lv_age_seconds(
+            (__import__("datetime").datetime.now().astimezone() - _td(minutes=30)).isoformat())
+        ok_aware = _s is not None and abs(_s - 1800) < 90
+        return ok_khong_am and ok_dung_epoch and ok_none and ok_jitter and ok_aware
+
+    _t110("r229_tuoi_cookie_khong_ra_so_am", _c229_tuoi_cookie_khong_ra_so_am)
+
+    def _c229_chot_chong_ha_cap_khong_lat_vi_lech_mui_gio():
+        """r229 — hệ quả NẶNG nhất, không phải chuyện hiển thị: `_nlm_auth_load_downgrade` so tuổi
+        BUNDLE (mốc do máy STAGE ghi) với tuổi JAR CỤC BỘ (mốc do máy NÀY ghi). Hai gốc thời gian khác
+        múi ⇒ bundle từ máy đi TRƯỚC luôn ra tuổi âm ⇒ luôn `_b <= _l` ⇒ chốt phán "bundle tươi hơn"
+        và CHO GHI ĐÈ — mở toang đúng cái chốt r208c 3.1 dựng để chặn (nạp bản cũ đè cookie tươi =
+        tự giết phiên đang sống).
+
+        Ca dựng: bundle THẬT SỰ CŨ 3 ngày (theo epoch) nhưng mang `last_validated` naive ở TƯƠNG LAI;
+        jar cục bộ mới 10 phút ⇒ PHẢI kết luận HẠ CẤP. Trước vá: _b ≈ −466' ⇒ trả (False, "bundle tươi
+        hơn/bằng") ⇒ ghi đè. Khoá luôn CON SỐ hai phía để vá không lặng lẽ đổi gốc thời gian."""
+        from datetime import timedelta as _td
+        _tg = _r229_tg()
+        _bundle = _r229_jar(lv_delta=_td(hours=7, minutes=46), extracted_ago_s=3 * 86400)
+        _local = _r229_jar(lv_delta=-_td(minutes=10))
+        _dg, _why = _tg._nlm_auth_load_downgrade(_bundle, _local)
+        _b_min = _tg._nlm_auth_age_days(_bundle) * 1440
+        _l_min = _tg._nlm_auth_age_days(_local) * 1440
+        return _dg is True and 4310 < _b_min < 4330 and 9 < _l_min < 11 and "cũ hơn" in _why
+
+    _t110("r229_chot_chong_ha_cap_khong_lat_vi_lech_mui_gio",
+          _c229_chot_chong_ha_cap_khong_lat_vi_lech_mui_gio)
+
+    def _c229_van_uu_tien_last_validated_khi_dung_duoc():
+        """r229 PHẢN CHỨNG — vá không được nuốt mốc 2026-07-05. Khi `last_validated` DÙNG ĐƯỢC (cùng
+        máy, tuổi ≥ 0) thì vẫn phải ƯU TIÊN nó, KHÔNG rơi xuống `extracted_at`: nlm CLI bản mới không
+        ghi lại `extracted_at` sau `nlm login --force`, lấy epoch sẽ báo ~19 ngày dù vừa refresh xong
+        — đúng lỗi «cảnh báo LUÔN SAI sau khi đã làm đúng việc được khuyên» đã sửa hồi 2026-07-05.
+        Kèm: cookie tươi thì `_nlm_cookie_age_note` phải IM (không nhắc re-stage vô cớ)."""
+        from datetime import timedelta as _td
+        _tg = _r229_tg()
+        _jar = _r229_jar(lv_delta=-_td(minutes=10), extracted_ago_s=19 * 86400)
+        _age = _tg._nlm_auth_age_days(_jar)
+        return 9 < _age * 1440 < 11 and _tg._nlm_cookie_age_note(_age) == ""
+
+    _t110("r229_van_uu_tien_last_validated_khi_dung_duoc",
+          _c229_van_uu_tien_last_validated_khi_dung_duoc)
+
+    def _c229_mirror_nlm_ops_cung_quy_tac():
+        """r229 — `_nlm_auth_age_minutes` (tl_core/nlm_ops) là bản MIRROR và mang y hệt bug; nó nuôi
+        cảnh báo TRƯỚC LÔ (`NLM_COOKIE_BATCH_WARN_MIN`). Jar vừa `nlm-auth-load` từ máy khác múi giờ
+        còn nguyên mốc naive của máy đó ⇒ tuổi ÂM ⇒ ngưỡng im ĐÚNG LÚC CẦN NHẤT (ngay sau khi nạp
+        bundle — lúc cookie dễ cũ nhất). Chạy trên HOME GIẢ: không đụng jar thật của máy đang chạy.
+        Hàm này re-home __globals__ về namespace tl nên quy tắc phải viết INLINE — ca này khoá cả
+        việc hai bản mirror KHÔNG được trôi khỏi nhau (cùng jar ⇒ cùng kết luận).
+
+        HOME giả phải đặt CẢ `USERPROFILE` (khuôn `_env110` đã dùng ở r110/r115): `Path.home()` trên
+        Windows đi qua `ntpath.expanduser` — đọc USERPROFILE rồi HOMEDRIVE+HOMEPATH, **không đọc
+        HOME**. Bản đầu ca này chỉ đặt HOME ⇒ trên POSIX xanh mà `gate (windows-latest)` ĐỎ
+        (1383/1384, đo trên 2cadcf9): fake-home không có tác dụng, hàm đọc HOME thật của runner
+        (không có jar) ⇒ trả None. Lỗi của TEST, không phải của sản phẩm."""
+        import importlib as _il, json as _js, tempfile as _tf, time as _t
+        from datetime import datetime as _dt, timedelta as _td
+        _no = _il.import_module("tl_core.nlm_ops")
+        _hd = _tf.mkdtemp(prefix="tl229_")
+        _sv = _env110({"USERPROFILE": _hd, "HOME": _hd})
+        try:
+            _pd = Path(_hd) / ".notebooklm-mcp-cli" / "profiles" / "default"
+            _pd.mkdir(parents=True)
+            (_pd / "metadata.json").write_text(_js.dumps(
+                {"last_validated": (_dt.now() + _td(hours=7, minutes=46)).isoformat()}), encoding="utf-8")
+            (Path(_hd) / ".notebooklm-mcp-cli" / "auth.json").write_text(_js.dumps(
+                {"extracted_at": _t.time() - 20 * 86400}), encoding="utf-8")
+            # chốt fake-home THẬT SỰ ăn: nếu Path.home() còn trỏ home thật thì ca này vô nghĩa
+            _home_gia_an = Path.home() == Path(_hd)
+            _min = _no._nlm_auth_age_minutes()
+        finally:
+            _env110_restore(_sv)
+        # 20 ngày theo epoch (tz-safe), KHÔNG phải −466' theo mốc naive tương lai
+        return _home_gia_an and _min is not None and _min > 0 and abs(_min - 20 * 1440) < 60
+
+    _t110("r229_mirror_nlm_ops_cung_quy_tac", _c229_mirror_nlm_ops_cung_quy_tac)
+
     def _c219_hai_manifest_egress_song_doi():
         """F16c: tài liệu KHUYẾN NGHỊ restricted-egress làm MẶC ĐỊNH nhưng hiện vật không có trong kho
         (chỉ ghi 'tự dựng bằng cách thêm khóa') ⇒ người vận hành theo đúng khuyến nghị thì không có gì

@@ -1,3 +1,18 @@
+# ★ v1.35.68 — merge r229 vào nhánh r230/r231 (2026-07-29)
+
+Nhánh `claude/review-bhxh-law-profile-2m08hz` tách ra TRƯỚC khi r229 lên master nên phân kỳ thật:
+master có r229 (v1.35.65), nhánh có r230 (v1.35.66) + r231 (v1.35.67). Merge gộp cả hai ⇒ cây kết quả
+KHÁC mọi bản 1.35.67 phát hành trước đó, nên bump số mới thay vì giữ 1.35.67 (một số version = một cây).
+Xung đột chỉ ở 4 chỗ mang số version (VERSION · hằng `VERSION` tl.py · header SKILL.md · CHANGELOG);
+KHÔNG có xung đột logic — r229 chạm `nlm_ops`/`tl_gws`, r230/r231 chạm chunk + registry/enum.
+
+**Bẫy đã sập và gỡ được — GIẢI XUNG ĐỘT PHẢI GIỮ LINE ENDING.** Lượt gỡ đầu viết lại `SKILL.md` và
+`scripts/tl.py` bằng Python text-mode (`open(...,'w')`), nuốt CRLF→LF: SKILL.md 47966→47659 byte
+(đúng 307 byte = 307 dòng), tl.py 223463→221776 (1687 dòng). Nội dung ĐÚNG, chỉ line ending sai.
+Gate bắt: `golden-test` case `workflow_audit` lệch `kernel.size_bytes` 47966≠47659, kéo theo
+`determinism-audit` + test `r219_gotchas_nhan_trang_thai`. ⇒ Hai tệp này là CRLF TOÀN BỘ; sửa bằng
+script phải mở nhị phân hoặc `newline=''`. Đây là lý do golden 0-diff là GATE, không phải nghi lễ.
+
 # ★ v1.35.67 — r231: 4 vá bắt được khi dọn hồ sơ Luật BHXH (2026-07-29)
 
 ## Ca 1 — rổ 46 nuốt Nghị định và cả CÔNG VĂN
@@ -111,6 +126,63 @@ Tương tự `duplicate_sohieu_groups=0` trong khi dữ liệu có 2 nhóm trùn
 
 ## Kết quả
 `python scripts/tl.py --selftest` ⇒ **1383/1383** (thêm 3 ca r229: đếm · cắt-chunk · cơ-sở-đếm).
+# ★ v1.35.65 — r229: tuổi cookie NLM ra số ÂM vì mốc `last_validated` naive lệch múi giờ (2026-07-29)
+
+> Phát hiện khi bootstrap gws/nlm trong sandbox Claude Code on the web (UTC) từ bundle stage ở máy
+> UTC+7. `tl nlm-auth-load` in `~-0 ngày tuổi` — số âm, vô nghĩa. Không phải nhiễu hiển thị.
+
+## Gốc
+
+`profiles/default/metadata.json.last_validated` do nlm ghi theo **giờ của máy ghi nó** và là ISO
+**NAIVE** (`2026-07-29T18:04:42`, không tzinfo). `_nlm_auth_age_days` trừ thẳng `datetime.now()` của
+máy ĐỌC ⇒ trộn hai múi giờ. Đo được: lệch **465,6 phút** ⇒ tuổi = **−0,3 ngày**.
+
+Sai số bị chặn bởi biên múi giờ thực (UTC-12..UTC+14 ⇒ ≤14h ≈ 0,58 ngày) nên KHÔNG lật nổi ngưỡng
+14 ngày ở giữa dải — đừng thổi phồng. Cái đắt nằm ở ba chỗ khác:
+
+| # | Hệ quả | Mức |
+|---|---|---|
+| a | In tuổi ÂM — sai hiển nhiên, làm mất tin vào mọi cảnh báo cạnh nó | hiển thị |
+| b | SÁT ngưỡng 14 ngày thì nuốt mất cảnh báo re-stage | cảnh báo |
+| c | **`_nlm_auth_load_downgrade` so tuổi bundle (mốc máy STAGE) với tuổi jar cục bộ (mốc máy NÀY)** — hai gốc thời gian khác nhau ⇒ bundle từ máy đi trước LUÔN ra tuổi âm ⇒ luôn `_b <= _l` ⇒ chốt phán "bundle tươi hơn" và CHO GHI ĐÈ | **NẶNG** — mở toang chốt chống hạ cấp r208c 3.1 |
+
+(c) là thứ chốt r208c 3.1 sinh ra để chặn: nạp bản cũ đè lên jar tươi = tự giết phiên đang sống.
+
+## Vá — `_nlm_lv_age_seconds` (PURE, tl_gws)
+
+| Nhánh | Xử lý | Vì sao |
+|---|---|---|
+| có tzinfo | so tuyệt đối | đúng ở mọi máy |
+| naive, tuổi ≥ 0 | DÙNG | cùng máy: chính xác. Khác múi: chỉ ĐỘI LÊN ≤14h — lệch về phía cảnh báo SỚM, an toàn ⇒ giữ nguyên mốc 2026-07-05 «ưu tiên last_validated» |
+| naive, tương lai ≤ 120s | 0 | dung sai đồng hồ NTP |
+| naive, tương lai > 120s | **None** | mốc vô nghĩa với đồng hồ máy này ⇒ rơi xuống `extracted_at` (epoch — tz-safe), KHÔNG bịa số âm |
+
+Bản MIRROR `_nlm_auth_age_minutes` (tl_core/nlm_ops — nuôi cảnh báo trước lô
+`NLM_COOKIE_BATCH_WARN_MIN`) mang y hệt bug, vá cùng quy tắc nhưng viết **INLINE**: hàm này re-home
+`__globals__` về namespace tl (bẫy I11), thêm tên module-level ở đó sẽ NameError sau bind.
+
+## Test khoá (4 ca) + phản chứng HAI CHIỀU
+
+| Ca | Khẳng định | Gỡ vá |
+|---|---|---|
+| `r229_tuoi_cookie_khong_ra_so_am` | mốc tương lai ⇒ rơi xuống epoch, tuổi ≥ 0 và ĐÚNG (14,2′); kèm 3 nhánh aware/jitter/None | **ĐỎ** |
+| `r229_chot_chong_ha_cap_khong_lat_vi_lech_mui_gio` | bundle cũ 3 ngày + mốc naive tương lai vs jar cục bộ 10′ ⇒ PHẢI kết luận HẠ CẤP | **ĐỎ** |
+| `r229_mirror_nlm_ops_cung_quy_tac` | bản mirror trên HOME giả ⇒ 20 ngày theo epoch, không phải −466′ | **ĐỎ** |
+| `r229_van_uu_tien_last_validated_khi_dung_duoc` | PHẢN CHỨNG: last_validated dùng được thì vẫn ƯU TIÊN (epoch stale 19 ngày không được thắng) | XANH (đúng vai: guard hồi quy, không phải ca bắt bug) |
+
+Selftest **1384/1384**. Gỡ đúng 2 tệp logic (giữ test) ⇒ **1381/1384**, 3 ca trên đỏ.
+
+Ruff `--select F` DELTA so master = **0** cả 4 tệp: tl.py 12/0 · tl_gws.py 91/4 · nlm_ops.py 176/0 ·
+tl_selftest.py 3931/1. (Nền tl_selftest trong CLAUDE.md ghi 3914 đo ở v1.35.60 — đã trôi tự nhiên tới
+v1.35.64; tiêu chí là DELTA, không phải con số tuyệt đối.)
+
+## Không đổi
+
+Cờ `BUNDLE_ROTATION_TOKEN_EXPIRED` giữ nguyên — nó ĐÚNG và độc lập với bug này. Đo cùng phiên: jar
+tươi 14 phút vẫn có `__Secure-3PSIDRTS` hết hạn 4 phút (TTL loại cookie xoay ~10 phút) ⇒ cờ gần như
+luôn bật sau mỗi lần nạp; `nlm login --check` LIVE xanh (139 notebook) và `nlm-auth-status`
+`alive:true`. Cờ không phải phán quyết phiên chết, mà là cảnh báo ĐỘ BỀN: phiên không gia hạn được
+nữa, có thể chết đột ngột ⇒ đừng mở lô dài. Phán quyết vẫn thuộc về probe LIVE.
 
 # ★ v1.35.64 — r228: trả nốt nợ r227 — r218/r219 đỏ TỪ GÓI ĐÃ BUNG; mỗi bối cảnh một khẳng định + vá DỮ LIỆU mồ côi (2026-07-29)
 

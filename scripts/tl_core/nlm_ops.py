@@ -1305,7 +1305,18 @@ def _nlm_auth_age_minutes():
         meta = json.loads((base / "profiles" / "default" / "metadata.json").read_text(encoding="utf-8"))
         lv = meta.get("last_validated")
         if lv:
-            return (_dt.now() - _dt.fromisoformat(lv)).total_seconds() / 60.0
+            # v1.35.65: MIRROR quy tắc `_nlm_lv_age_seconds` (tl_gws) — viết INLINE vì hàm này re-home
+            # __globals__ về namespace tl (bẫy I11), thêm tên module-level ở đây sẽ NameError sau bind.
+            # Vì sao cần: jar vừa `nlm-auth-load` từ máy KHÁC MÚI GIỜ còn nguyên mốc naive của máy đó
+            # (đo 29-07-2026: −465,6') ⇒ tuổi ÂM ⇒ ngưỡng NLM_COOKIE_BATCH_WARN_MIN im đúng lúc cần
+            # nhất (ngay sau khi nạp bundle — lúc cookie dễ cũ nhất). Mốc ở TƯƠNG LAI quá dung sai
+            # đồng hồ ⇒ BỎ, rơi xuống `extracted_at` (epoch — tz-safe).
+            _t0 = _dt.fromisoformat(str(lv))
+            _age = ((_dt.now(_t0.tzinfo) if _t0.tzinfo else _dt.now()) - _t0).total_seconds()
+            if _age >= 0:
+                return _age / 60.0
+            if _age >= -120.0:                      # dung sai đồng hồ (NTP) — coi như vừa xác thực
+                return 0.0
     except Exception:  # noqa: BLE001
         pass
     try:

@@ -21743,28 +21743,32 @@ def run() -> int:
         còn nguyên mốc naive của máy đó ⇒ tuổi ÂM ⇒ ngưỡng im ĐÚNG LÚC CẦN NHẤT (ngay sau khi nạp
         bundle — lúc cookie dễ cũ nhất). Chạy trên HOME GIẢ: không đụng jar thật của máy đang chạy.
         Hàm này re-home __globals__ về namespace tl nên quy tắc phải viết INLINE — ca này khoá cả
-        việc hai bản mirror KHÔNG được trôi khỏi nhau (cùng jar ⇒ cùng kết luận)."""
-        import importlib as _il, json as _js, os as _os, tempfile as _tf, time as _t
+        việc hai bản mirror KHÔNG được trôi khỏi nhau (cùng jar ⇒ cùng kết luận).
+
+        HOME giả phải đặt CẢ `USERPROFILE` (khuôn `_env110` đã dùng ở r110/r115): `Path.home()` trên
+        Windows đi qua `ntpath.expanduser` — đọc USERPROFILE rồi HOMEDRIVE+HOMEPATH, **không đọc
+        HOME**. Bản đầu ca này chỉ đặt HOME ⇒ trên POSIX xanh mà `gate (windows-latest)` ĐỎ
+        (1383/1384, đo trên 2cadcf9): fake-home không có tác dụng, hàm đọc HOME thật của runner
+        (không có jar) ⇒ trả None. Lỗi của TEST, không phải của sản phẩm."""
+        import importlib as _il, json as _js, tempfile as _tf, time as _t
         from datetime import datetime as _dt, timedelta as _td
         _no = _il.import_module("tl_core.nlm_ops")
-        with _tf.TemporaryDirectory() as _hd:
-            _pd = _os.path.join(_hd, ".notebooklm-mcp-cli", "profiles", "default")
-            _os.makedirs(_pd)
-            with open(_os.path.join(_pd, "metadata.json"), "w", encoding="utf-8") as _f:
-                _f.write(_js.dumps({"last_validated": (_dt.now() + _td(hours=7, minutes=46)).isoformat()}))
-            with open(_os.path.join(_hd, ".notebooklm-mcp-cli", "auth.json"), "w", encoding="utf-8") as _f:
-                _f.write(_js.dumps({"extracted_at": _t.time() - 20 * 86400}))
-            _old = _os.environ.get("HOME")
-            _os.environ["HOME"] = _hd
-            try:
-                _min = _no._nlm_auth_age_minutes()
-            finally:
-                if _old is None:
-                    _os.environ.pop("HOME", None)
-                else:
-                    _os.environ["HOME"] = _old
+        _hd = _tf.mkdtemp(prefix="tl229_")
+        _sv = _env110({"USERPROFILE": _hd, "HOME": _hd})
+        try:
+            _pd = Path(_hd) / ".notebooklm-mcp-cli" / "profiles" / "default"
+            _pd.mkdir(parents=True)
+            (_pd / "metadata.json").write_text(_js.dumps(
+                {"last_validated": (_dt.now() + _td(hours=7, minutes=46)).isoformat()}), encoding="utf-8")
+            (Path(_hd) / ".notebooklm-mcp-cli" / "auth.json").write_text(_js.dumps(
+                {"extracted_at": _t.time() - 20 * 86400}), encoding="utf-8")
+            # chốt fake-home THẬT SỰ ăn: nếu Path.home() còn trỏ home thật thì ca này vô nghĩa
+            _home_gia_an = Path.home() == Path(_hd)
+            _min = _no._nlm_auth_age_minutes()
+        finally:
+            _env110_restore(_sv)
         # 20 ngày theo epoch (tz-safe), KHÔNG phải −466' theo mốc naive tương lai
-        return _min is not None and _min > 0 and abs(_min - 20 * 1440) < 60
+        return _home_gia_an and _min is not None and _min > 0 and abs(_min - 20 * 1440) < 60
 
     _t110("r229_mirror_nlm_ops_cung_quy_tac", _c229_mirror_nlm_ops_cung_quy_tac)
 

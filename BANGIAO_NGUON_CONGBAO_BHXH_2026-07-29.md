@@ -96,6 +96,25 @@ bảng/công thức tử tế. Thay bằng bản PDF sẽ sửa được 8 lỗi
 
 ---
 
+## 4c. Món #3 — hai PDF "mạo số hiệu": ĐÃ SỬA, và hoá ra còn là BẢN TRÙNG
+
+Mở ra đọc thì tên hai file **sai hẳn so với nội dung**, không chỉ mạo số hiệu:
+
+| drive_id | Tên CŨ (sai) | Thực chất là gì | Tên MỚI |
+|---|---|---|---|
+| `1GM6QY15…` | `DUTHAO_Luat_41_2024_QH15_Du_an_Luat_sua_doi_bo_sung_mot_so_dieu_cua_Luat_Bao_hiem_xa_hoi.pdf` | **Tờ trình Bộ Nội vụ** `/TTr-BNV`, dự thảo ngày 16/7/2026 | `DUTHAO_TTr-BNV_2026_To_trinh_du_an_Luat_sua_doi_Luat_BHXH_16-7-2026.pdf` |
+| `1UeiF7sK…` | `DUTHAO_Luat_41_2024_QH15_cua_Luat_sua_doi_bo_sung_mot.pdf` | **Công văn 7728/BNV-CTL&BHXH ngày 20/7/2026** báo cáo tiến độ | `CV_7728-BNV-CTL-BHXH_2026_Bao_cao_tien_do_du_an_Luat_BHXH.pdf` |
+
+**Và cả hai đều là bản TRÙNG của tài liệu ĐÃ đăng ký** — nên KHÔNG đăng ký mới (đúng dặn dò "không nạp trùng"):
+
+| File mồ côi | Trùng với dòng đã có | Độ giống |
+|---|---|---|
+| `1GM6QY15…` | `DUTHAO_To_trinh_BNV_Luat_sua_doi_bo_sung_Luat_BHXH_16-7-2026` (`1y1W3xHay…`) | **0.944** |
+| `1UeiF7sK…` | `DUTHAO_CV_7728-BNV_gui_UBVHXH_bao_cao_tien_do_Luat_BHXH` (`1tLz300Kz…`) | **0.885**, và ĐÚNG BẰNG 1248 ký tự cả hai bên |
+
+⇒ Đã `rename` qua webapp (rc ok cho cả hai). Rủi ro trích nhầm dự thảo làm luật hiện hành: **đã gỡ**.
+Còn lại là quyết định chính sách raw-twin (mục B7 báo cáo chính): đăng ký `loai=thuong` hay để mồ côi.
+
 ## 5. Việc tôi sẽ làm ngay khi có file .doc
 
 1. `reg-query --refresh --sohieu <số hiệu>` — dò trùng trước (đã làm: Luật 41 hiện `count=0`).

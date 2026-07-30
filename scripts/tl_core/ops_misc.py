@@ -1073,12 +1073,13 @@ def cmd_doctor(a) -> int:
         _ents = _manifest_entries(refresh=False)
         # A4: breakdown TỪNG cờ (không gộp 1 số) + điền sẵn notebook id để chạy 1 bước.
         _bd = {k: 0 for k in _drift_keys}
+        _cov_bd = _chunk_covered_sohieu(_ents)     # r253: phủ-bằng-chunk KHÔNG tính là nợ NLM
         for e in _ents:
-            _ef = set(_title_flags(e))
+            _ef = set(_title_flags(e, _cov_bd))
             for k in _drift_keys:
                 if k in _ef:
                     _bd[k] += 1
-        _drift_n = sum(1 for e in _ents if set(_drift_keys) & set(_title_flags(e)))
+        _drift_n = sum(1 for e in _ents if set(_drift_keys) & set(_title_flags(e, _cov_bd)))
         if _drift_n:
             _nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
             drift = {"total": _drift_n, "breakdown": dict(_bd), "notebook": _nb}

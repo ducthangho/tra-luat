@@ -1438,8 +1438,9 @@ def _sweep_report(entries: list) -> dict:
     fixable, needs, conflicts = _vbhn_year_fix_items(entries)
     _dk = ("NLM_STATUS_MISMATCH", "CORPUS_TRUE_NOT_ON_NLM", "NLM_NOTEBOOK_ID_MISSING")
     drift = {k: 0 for k in _dk}
+    _cov_dk = _chunk_covered_sohieu(entries)      # r253: phủ-bằng-chunk KHÔNG tính là nợ NLM
     for e in entries:
-        _ef = set(_title_flags(e))
+        _ef = set(_title_flags(e, _cov_dk))
         for k in _dk:
             if k in _ef:
                 drift[k] += 1

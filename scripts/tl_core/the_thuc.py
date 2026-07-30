@@ -1581,7 +1581,9 @@ def the_thuc_normalize(in_path, out_path, he=None):
     if he in (None, "auto"):
         # r141 (v1.34.81): auto dùng detect THẬT (5 hệ) — mẫu Luật auto ra vbqppl_qh → 14pt đúng NQ351.
         # PHẢI chèn \n tại </w:p> TRƯỚC khi strip tag — detect anchored "^Số:" cần ranh giới dòng (r140).
-        plain = re.sub(r"<[^>]+>", "", re.sub(r"</w:p>", "\n", doc[:200000]))[:6000]
+        # r252: cùng bệnh thiếu unescape như 2 reader kia — dùng CHUNG `plain_from_document_xml`
+        # (nó cũng chèn \n tại </w:p> TRƯỚC khi bóc tag, đúng yêu cầu neo dòng "^Số:" của r140).
+        plain = _imp("docx_markup").plain_from_document_xml(doc[:200000])[:6000]
         he_eff = _the_thuc_detect_he(plain)
     else:
         he_eff = str(he).replace("-", "_")   # nha_nuoc = alias cũ (.78): cỡ nhà nước 13pt, self-check auto

@@ -317,6 +317,22 @@ def _load_chunk_manifest(manifest_path: str) -> tuple[dict|None, list[str]]:
         return None, [f"MANIFEST_INVALID:{type(e).__name__}:{e}"]
 
 
+def _chunk_ingest_target(chunk_path: str | None) -> tuple[str | None, str | None]:
+    """r251 — đường tệp mà `profile-ingest` THỰC SỰ nhận, tính TRƯỚC và KHÔNG ghi gì.
+
+    Trả `(ingest_path, materialize_from)`. Chunk `.md` ⇒ `.docx` cùng thư mục (đường mà
+    `_chunk_md_to_docx` sẽ sinh ở bước apply); tệp khác ⇒ giữ nguyên, `materialize_from=None`.
+    Tách riêng để PLAN và APPLY dùng CÙNG một phép suy đường — plan in ra lệnh nào thì
+    apply chạy đúng lệnh đó (xem `_profile_ingest_chunks_plan`).
+    """
+    if not chunk_path:
+        return chunk_path, None
+    p = Path(chunk_path)
+    if p.suffix.lower() == ".md":
+        return str(p.with_suffix(".docx")), str(p)
+    return str(p), None
+
+
 def _profile_ingest_chunks_plan(a) -> dict:
     verify = _run_child_tl(["chunk-verify", a.manifest, "--json"])
     man, warnings = _load_chunk_manifest(a.manifest)
@@ -334,7 +350,12 @@ def _profile_ingest_chunks_plan(a) -> dict:
     for item in (man.get("chunks") or []):
         cp = item.get("path")
         expected = item.get("expected_name") or Path(cp or "chunk").stem
-        child = ["profile-ingest", str(cp), "--name", expected, "--source-quality", "digital", "--json"]
+        # r251: PLAN phải in ĐÚNG lệnh mà apply chạy. Trước đây plan in đường `.md` của chunk, nhưng
+        # `profile-ingest` KHÔNG nhận `.md` ⇒ ai chạy tay y nguyên lệnh trong plan ăn `rc=2
+        # UNSUPPORTED_EXTENSION` và kết luận pipeline chunk gãy — trong khi apply thì chạy được nhờ cầu
+        # nối r231 vật chất hoá `.docx`. Plan `ok:true` mà lệnh của nó không chạy nổi là plan NÓI DỐI.
+        ingest_path, materialize_from = _chunk_ingest_target(cp)
+        child = ["profile-ingest", str(ingest_path), "--name", expected, "--source-quality", "digital", "--json"]
         if profile:
             child += ["--profile", profile]
         if getattr(a, "allow_default", False):
@@ -343,7 +364,12 @@ def _profile_ingest_chunks_plan(a) -> dict:
             child.append("--skip-live-check")
         if getattr(a, "apply", False):
             child.append("--apply")
-        out["planned_child_commands"].append({"chunk_index": item.get("index"), "path": cp, "expected_name": expected, "command": child})
+        rec = {"chunk_index": item.get("index"), "path": cp, "expected_name": expected, "command": child}
+        if materialize_from:
+            rec["materialize_from"] = materialize_from
+            rec["materialize_note"] = ("chunk `.md` được vật chất hoá thành `.docx` (stdlib zipfile+XML) "
+                                       "NGAY TRƯỚC khi gọi profile-ingest — chạy tay thì tạo .docx trước.")
+        out["planned_child_commands"].append(rec)
     if not out["planned_child_commands"]:
         out["ok"] = False; out["warnings"].append("NO_CHUNKS_IN_MANIFEST")
     return out
@@ -419,10 +445,20 @@ def cmd_profile_ingest_chunks(a) -> int:
     for _i, rec in enumerate(_cmds, 1):
         print(f"[chunks] ({_i}/{_n}) {rec.get('expected_name')} …", file=sys.stderr, flush=True)
         _cmd = list(rec["command"])
-        # r231: đổi đường dẫn .md → .docx vừa vật chất hoá (profile-ingest không nhận .md)
-        for _k, _tok in enumerate(_cmd):
-            if isinstance(_tok, str) and _tok.endswith(".md") and Path(_tok).is_file():
-                _cmd[_k] = _chunk_md_to_docx(_tok)
+        # r231: profile-ingest không nhận .md ⇒ vật chất hoá .docx trước khi gọi con.
+        # r251: lệnh trong `rec` ĐÃ trỏ .docx (do plan tính qua `_chunk_ingest_target`), nên ở đây chỉ
+        # còn việc TẠO tệp đó từ `materialize_from`. Guard: đường sinh ra phải TRÙNG đường đã in trong
+        # plan — lệch nghĩa là hai phép suy đường đã trôi khỏi nhau, và plan lại nói dối lần nữa.
+        _src_md = rec.get("materialize_from")
+        if _src_md and Path(_src_md).is_file():
+            _made = _chunk_md_to_docx(_src_md)
+            if _made != _cmd[1]:
+                results.append({"ok": False, "error": "MATERIALIZE_PATH_MISMATCH", "made": _made,
+                                "planned": _cmd[1], "chunk_index": rec.get("chunk_index"),
+                                "path": rec.get("path"), "expected_name": rec.get("expected_name")})
+                _resume_note = (f"Đứt ở chunk {_i}/{_n}: đường .docx vật chất hoá ({_made}) LỆCH đường "
+                                f"trong plan ({_cmd[1]}) — không chạy con để tránh nạp sai tệp.")
+                break
         r = _run_child_tl(_cmd)
         r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
         results.append(r)

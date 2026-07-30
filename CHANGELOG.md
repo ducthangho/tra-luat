@@ -1,3 +1,223 @@
+# ★ v1.35.92 — r254b: test r251 ĐỎ GIẢ trên Windows CI — so chuỗi đường dẫn kiểu POSIX (2026-07-30)
+
+> PR #5 phơi ra: `gate (windows-latest)` **1405/1406**, `gate (ubuntu-latest)` XANH. Đúng một ca:
+> `r251_plan_chunk_in_dung_lenh_apply_chay`.
+
+`_c251_plan_chunk_in_dung_lenh_apply_chay` so **CHUỖI THÔ**:
+`_chunk_ingest_target("/x/y/a__part01.md") == "/x/y/a__part01.docx"`. Trên Windows
+`str(Path('/x/y/a.md').with_suffix('.docx'))` ra `\x\y\a.docx` ⇒ phép so sai. **CODE SẢN PHẨM ĐÚNG** —
+`_chunk_ingest_target` trả đường hợp lệ CỦA NỀN; chỉ khẳng định trong test là POSIX-only.
+
+**Lỗi CÓ SẴN từ r251 `73be7be`, KHÔNG do merge r254** — đo: `chunking.py` md5 `20f8ca516833` y nguyên
+qua `73be7be` → `296e5c0` → HEAD, và chuỗi `/x/y/a__part01.docx` đã nằm trong selftest từ `73be7be`.
+Nhánh đó **chưa lần nào chạy Windows CI** (không có PR); merge chỉ PHƠI nó ra.
+
+**Vá:** so bằng `Path(...) == Path(...)` — trên Windows `Path('\x\y\a') == Path('/x/y/a')` nên khẳng
+định GIỮ NGUYÊN ý nghĩa (đổi `.md`→`.docx`, GIỮ thư mục) mà chạy được cả hai nền. Kiểm bằng mô phỏng
+`PurePosixPath`/`PureWindowsPath`: cả hai `True` (trước vá: POSIX `True`, Windows `False`).
+
+> **Bài học, đúng §Bài học đắt giá:** "script đa nền phải CHẠY THẬT trên nền đó" áp cho **TEST** y như
+> code — 5 lỗi của r244 cũng không lỗi nào lộ ra bằng đọc code. Gate local (Linux) XANH TRỌN mà vẫn ĐỎ
+> trên Windows ⇒ **gate một nền không phải bằng chứng đủ để merge**; phải xem CI cả hai nền.
+> `tl_selftest.py` NẰM TRONG gói ⇒ cây đổi thì gói đổi, nên bump + deploy lại chứ không sửa lặng.
+
+# ★ v1.35.91 — r254: hợp nhất hai nhánh r251 SONG SONG (2026-07-30)
+
+> **Va chạm đánh số, ghi lại để người sau không tưởng mình đọc nhầm:** hai phiên chạy song song cùng
+> ngày 30-07 đều đặt tên **r251** và đều bump **v1.35.88** cho hai việc KHÁC NHAU:
+> - `4680d92`/`3f7275f` (vào master): *ba cờ đọc-sai của bộ soi registry* + vá `deploy-guard.ps1`;
+> - `73be7be` (nhánh `luat-bhxh-30-07`): *hai cổng XANH mà nói dối* (PLAN chunk in lệnh không chạy nổi).
+>
+> Không nhánh nào sai — chúng chỉ không thấy nhau. Giữ NGUYÊN cả hai commit (đã đẩy, viết lại lịch sử
+> còn tệ hơn); đánh số tiếp từ **v1.35.91/r254** để không có hai bản 1.35.88 khác nội dung trôi ra ngoài.
+> Bài học: quy ước "phiên nào bump thì phiên đó đẩy" (§Quy ước deploy mục 1) mới chặn được KHÂU ĐẨY —
+> KHÔNG chặn được hai phiên cùng CHỌN một số hiệu. Trước khi bump nên `git fetch origin master` đã.
+
+**Hai bên vá cùng MỘT LỚP lỗi (dòng chunk `__partNN` làm bộ soi hiểu nhầm) ở HAI chỗ khác nhau —
+bổ sung nhau, không trùng:**
+
+| | master r251 | nhánh r253 |
+|---|---|---|
+| chỗ vá | `_subject_sig` (classify + registry_hygiene) | `_title_flags` · `_ingest_missing_select` |
+| cờ chữa | `sohieu_conflict` GIẢ giữa canonical/part01/part02 | `CORPUS_TRUE_NOT_ON_NLM` + mời nạp TRÙNG |
+
+Merge tự động ghép SẠCH `registry_hygiene.py` `classify.py` `ingest_ops.py` `tl_selftest.py`
+(hai bên sửa hàm khác nhau); chỉ 5 xung đột dòng version/manifest, giải bằng tay lên 1.35.91.
+Đáng chú ý: `registry_hygiene.py` nay mang CẢ `skip_reason` (master) LẪN `_nlm_status_known_local`
+(nhánh) — hai bug độc lập của cùng một tệp, cả hai đều còn.
+
+Gate chạy lại SAU merge trên cây đã hợp nhất (không tin gate của từng nhánh riêng).
+
+# ★ v1.35.90 — r253: hai cờ "còn nợ NLM" mời nạp TRÙNG, và một bản sao từ vựng đã trôi lệch (2026-07-30)
+
+> Tiếp hồ sơ «Luật BHXH». Món chính là **B4** (dữ liệu) — xem PHỤ LỤC A.8 của
+> `rasoat/KETQUA_VIEC_TREO_BHXH_2026-07-30.md`; phần code dưới đây là hai footgun lộ ra khi làm B4.
+
+## 1. Cờ "phủ bằng chunk con" — suýt NHÂN ĐÔI Luật 41 trên notebook
+
+`Luat_41-2024-QH15` (183.428 ký tự > cap chunk 100k) được `profile-ingest-chunks` tách `part01`/`part02`
+rồi đẩy NLM. Dòng **canonical** giữ `corpus=true` mà **cố ý KHÔNG mang** `nlm_source_id` ⇒ cả
+`CORPUS_TRUE_NOT_ON_NLM` lẫn `ingest-missing` tưởng còn nợ và **mời nạp lại BẢN ĐẦY ĐỦ** — đúng loại rác
+đã phải dọn 69→74→71 hôm 29-07. Lượt 30-07 suýt chạy thật; chặn được vì `note` của dòng đó có ghi lý do.
+
+**Vá:** `_chunk_covered_sohieu(entries)` (regio, PURE) — tập số hiệu có ≥1 dòng `<base>__partNN` **CÙNG số
+hiệu ĐANG trên NLM**. `_title_flags(e, covered_sohieu=None)` nhận tham số TÙY CHỌN (mặc định None = giữ
+NGUYÊN hành vi cho 20+ caller không có row-set); `_ingest_missing_select` tự tính. Nối vào 3 chỗ đếm drift
+có sẵn danh sách dòng (`hygiene`, `ops_misc`, `resolve`).
+
+Ba vế phản chứng khoá trong test — thiếu vế nào thì bản vá này thành cái bịt miệng cờ:
+- chunk **chưa/đã rớt** khỏi NLM (kể cả `removed_*` gỡ có chủ đích) ⇒ KHÔNG phủ cho ai, canonical **kêu lại**;
+- chính dòng `__partNN` mà rớt NLM thì **VẪN kêu** — không được tự phủ cho mình;
+- **khác số hiệu** thì không ăn ké phủ của người khác.
+
+Đo trên kho thật: backlog **1 → 0**, và `covered_sohieu` đúng một phần tử `41-2024-QH15` (không quét rộng).
+
+## 2. `registry_hygiene` giữ BẢN SAO từ vựng `nlm_status` đã trôi lệch khỏi ADR-0010
+
+`title_flags` ở đó so `nlm_status` với **exact-set** `{pushed,synced,removed,removed_from_drive,deleted,
+trash,trashed}` — thiếu `active` (chính ADR-0010 nắn `live→active`) và thiếu MỌI biến thể `removed_<lý do>`
+(mà docstring bản chuẩn `_nlm_status_known` hứa là chạy được). Bản chuẩn theo **tiền tố**, bản sao theo
+**danh sách cứng** ⇒ hai nơi trả lời khác nhau cho cùng một câu hỏi.
+
+**Nói rõ mức độ:** đo 30-07 thì **chưa** false-fire THẬT — `analyze()` skip `row_kind=ref` và `own_thuong`
+TRƯỚC khi gắn cờ, mà 6 dòng `active` đều `ref` còn 10 dòng `removed_*` đều `own_thuong`. Vá vì cờ sẽ nổ
+ngay khi có dòng `own`/khác-`thuong` mang giá trị **đúng chuẩn**, và vì B4 vừa ghi thêm một họ
+`removed_<lý do>` mới vào sổ.
+
+Script này **cố ý đứng độc lập** (chỉ `import gas` lazy) nên KHÔNG import `tl_core`; giữ bản sao NHƯNG theo
+cùng **LUẬT tiền tố**, kèm test PARITY với `_nlm_status_known` trên cùng bộ mẫu + vế phản chứng
+(`added`/`live`/`ready`/`banana` VẪN phải kêu) + chốt chống tái nhiễm (exact-set cũ không được quay lại tệp).
+
+## 3. ĐÍNH CHÍNH PHỤ LỤC A.5 mục 3 — readback `register` KHÔNG phải lỗi cache
+
+A.5 đoán `register` báo `FIELDS_DROPPED_ON_WRITE`/`verified=false` oan là do readback đọc qua cache GAS
+TTL~600s, và đề xuất "bust cache trước khi kết luận". **Đọc code + đối chiếu server: việc đó ĐÃ LÀM RỒI.**
+Cả hai đường readback (`_verified_reg_upsert` N3 và `_verified_reg_write` batch ≤3) đều gọi
+`reg_get … refresh="true"`, và `regReadAll_(force)` phía GAS bỏ qua cache đọc thẳng Sheet khi `force`.
+Đo thực nghiệm trên kho thật (ghi lại ĐÚNG giá trị đang có, no-op): `verified=true`, `fields_dropped=null`.
+
+⇒ **Không vá gì cả** — giả thuyết sai thì đừng vá theo nó. Muốn truy tiếp thì cần lệnh/output GỐC của lượt
+đó; nghi vấn còn lại (chưa có bằng chứng) là race ghi liên tiếp: mỗi `reg_upsert` rewrite TOÀN BỘ sheet
+(tab tạm rồi swap), readback rơi đúng lúc swap của lượt kế có thể thấy bản chưa xong.
+
+selftest **1402/1402** (+2 ca r253). Ruff delta so `296e5c0` = 0 ở `tl.py` (12 F821/0 F401) và
+`registry_hygiene.py` (0/0); `tl_selftest.py` +22 F821 do CHÍNH test mới, đúng một tên mới
+`_chunk_covered_sohieu` — đã kiểm HÀNH VI: resolve sau import qua `_STUB_MAP['regio']`.
+
+# ★ v1.35.89 — r252: `&amp;` `&lt;` chui NGUYÊN VĂN vào kho — 3 reader .docx quên unescape (2026-07-30)
+
+> Bắt được khi đăng ký BC Bộ Nội vụ (hồ sơ Luật BHXH): `tl extract` trả `6193/BNV-CTL&amp;BHXH`, trong
+> khi GDoc trên Drive có `&` trần — webapp `exporttext` đọc đúng 3/3 chỗ. **Sai nằm ở đường ĐỌC của ta.**
+
+Ba nơi sản xuất tự bóc tag `word/document.xml` bằng `re.sub(r"<[^>]+>", "", xml)` mà **KHÔNG unescape
+entity**, nên `&amp;` `&lt;` `&gt;` `&quot;` vào kho y nguyên:
+
+| Reader | Đường ảnh hưởng |
+|---|---|
+| `_docx_unzip_text` (`lookup_ops`) | `tl extract` · `tl doc-text` — text này **ĐƯỢC CACHE và NUÔI CORPUS** ⇒ nặng nhất |
+| `_profile_read_probe_text` (`ingest_ops`) | cổng nạp PHÂN LOẠI (`sohieu`/`loai`/`title` suy từ text này) |
+| `_the_thuc_detect_he` (`the_thuc`) | dò hệ thể thức (neo dòng `^Số:`) |
+
+`normalize_document.py` thì VỐN ĐÃ unescape đúng ⇒ **hai đường đọc cùng một `.docx` cho hai kết quả
+khác nhau**, và cái sai lại là cái nuôi corpus. Với công thức thì nặng hơn dấu `&`: `a < b` hoá `a &lt; b`
+— đúng lớp nội dung mà đợt Công báo NĐ 159 đã phải canh (công thức Điều 11/14).
+
+**Vá:** gom về MỘT hàm `docx_markup.plain_from_document_xml()`; cả 3 reader gọi nó. Đặt ở `docx_markup`
+vì đó đã là nơi giữ mọi phép đọc `document.xml` — để đây không phải là chỗ thứ tư trôi lệch.
+
+**THỨ TỰ là phần dễ làm sai nhất:** `</w:p>`→newline → bóc tag → **RỒI MỚI** unescape. Làm ngược
+(unescape trước) thì `&lt;w:t&gt;` trong nội dung biến thành `<w:t>` và bị chính bước bóc tag **ăn mất
+chữ** — đổi một lỗi thành lỗi tệ hơn. Test có vế phản chứng chạy đúng thứ tự sai để chứng minh nó mất chữ.
+
+Đo 2 chiều: `6193/BNV-CTL&amp;BHXH` → `&BHXH` · `a &lt; b và c &gt; d, ký hiệu &quot;X&quot;` →
+`a < b và c > d, ký hiệu "X"`; nội dung `&lt;w:t&gt;`/`&lt;div&gt;` CÒN NGUYÊN. Test còn ghim rằng cả 3
+tệp reader đều dùng hàm chung và KHÔNG còn site bóc tag trần nào.
+
+⚠ **Cache cũ mang text SAI.** `extract_<id>.txt` đã sinh trước bản vá (và mọi bản `cache-build`
+consolidated dựng từ chúng) vẫn còn `&amp;` với tài liệu có dấu `&`. Corpus trên Drive KHÔNG hỏng —
+lỗi thuần ở phía đọc. Cách chữa: xoá cache extract rồi đọc lại; hồ sơ Luật BHXH đã xoá trong lượt này.
+
+`--selftest` **1400/1400**.
+
+# ★ v1.35.88 — r251: hai cổng XANH mà nói dối, bắt được khi làm nốt việc treo hồ sơ Luật BHXH (2026-07-30)
+
+## Ca 2 — plan ingest SUY METADATA TỪ TÊN TỆP khi máy thiếu `pdftotext`, không một lời cảnh báo
+
+Bắt được khi định đăng ký `BC 6193/BNV-CTL&BHXH` (mục §E.7 sổ treo). `_read_local_text_for_analysis` VẪN
+trả cảnh báo `PDFTOTEXT_NOT_AVAILABLE_TEXT_LAYER_UNKNOWN`, nhưng `_probe_pdf_quality` **VỨT nó** (`_txt, _ =`)
+⇒ **"máy này thiếu bộ bóc chữ" và "PDF là bản quét" cho probe RỖNG GIỐNG HỆT nhau**. Plan im lặng rơi về
+`_classify_doc_header("", filename)` — tức suy mọi thứ từ TÊN TỆP — mà vẫn `ok:true`, rc=0.
+
+Đo LIVE trên CÙNG tệp, CÙNG lệnh, chỉ khác việc container có `pdftotext`:
+
+| | thiếu `pdftotext` | có `pdftotext` |
+|---|---|---|
+| `sohieu` | `6193_2026_BNV` (rác) | `6193/BNV-CTL` |
+| `loai` | *(rỗng)* | `Báo cáo` |
+| `title` | tên tệp | trích yếu thật |
+| `doc_name` | `VB_6193_2026_BNV_BC_6193_2026_BNV_CTL_…` (nhân đôi tiền tố) | `BC_6193_2026_BNV_CTL_…` |
+| `header_chars` | 0 | 16000 |
+| **`plan_hash`** | `42ca6386…` | `71582728…` |
+
+`plan_hash` LỆCH là chỗ đau nhất: `--expected-plan-hash` lấy ở máy A **không dùng được** ở máy B, mà lý do
+lệch thì không hiện ra ở đâu. Và `BC 6193` hoá ra **KHÔNG phải bản quét** — nó là PDF do Word 2019 xuất, lớp
+text sạch **33.917 ký tự**; kết luận "scan" trước đó thuần là artefact của container thiếu poppler.
+
+**Vá:** `_probe_pdf_quality` trả thêm `tool_warn` — CHỈ dựng khi cảnh báo thuộc họ hạ tầng
+(`PDFTOTEXT_NOT_AVAILABLE` / `PDFTOTEXT_ERROR` / `PDFTOTEXT_NO_OUTPUT`); cả hai lane ingest phơi nó ra
+(`verify_gate.flags` cho `profile-ingest`, `warnings` cho `_vb_ingest_auto_plan` — lane này còn suy cả `cat`
+từ tên tệp nên im lặng là im lặng ghi sai). Hằng `_PDF_PROBE_TOOL_WARN` **phải re-export vào namespace `tl`**
+— bẫy I11 đã ĐỎ THẬT một lượt trong phiên vá: `bind` re-home `__globals__` nên hằng để ở `ingest_ops` làm
+hàm ném `NameError` NGAY trên đường chạy thật (rc=1), đọc code không thấy.
+
+**KHÔNG chạm chính sách `source_quality`:** `.pdf` vẫn luôn = `ocr` (⇒ cần `--ocr-verified` mới vào corpus).
+Đó là thiết kế, không phải lỗi — bản vá chỉ thôi nói dối về LÝ DO không đọc được chữ.
+
+Test dùng ĐẦU VÀO THẬT, KHÔNG monkeypatch (bịt `PATH` để `shutil.which` trả None — đúng cơ chế hỏng ngoài
+đời), kèm 3 vế phản chứng: tệp NGẮN (hình dạng PDF quét thật) · đọc được text bình thường · đuôi không bóc
+được text — cả ba đều KHÔNG được nổ cờ hạ tầng, để bản vá không đổi một lời nói dối thành một lời dọa oan.
+
+## Ca 1 — PLAN của `profile-ingest-chunks` in lệnh KHÔNG chạy nổi
+
+> Bắt được khi làm nốt việc treo của hồ sơ Luật BHXH: mục §5.4 sổ treo ghi "chunk-apply xuất `.md` mà
+> `profile-ingest` không nhận — CHƯA vá". Đo lại thì **r231 ĐÃ vá nhánh apply**; chỗ còn hở là **PLAN**.
+
+`chunk-apply` ghi `.md`; `profile-ingest` chỉ nhận doc/docx/odt/pdf/rtf/xls/xlsx. Cầu nối r231 vật chất
+hoá `.docx` — nhưng **CHỈ trong nhánh `--apply`**. Nhánh DRY vẫn in `planned_child_commands` trỏ đường
+`.md`, kèm `ok: true`. Ai làm theo plan (chạy tay từng lệnh con — đúng cách người ta soi một pipeline
+trước khi cho ghi) ăn `rc=2 UNSUPPORTED_EXTENSION` và kết luận pipeline chunk gãy. Đó chính là lý do lượt
+29-07 phải "lách bằng cách dựng .docx thủ công" dù cầu nối đã có sẵn trong cây.
+
+**Plan `ok:true` mà lệnh của nó không chạy nổi là plan NÓI DỐI** — cùng họ với bài học "cổng xanh nhờ
+`rc=0` là cổng có thể bị lừa", chỉ ngược chiều: ở đây rc=0 của *plan* che một lệnh chết chắc.
+
+**Vá:**
+- `_chunk_ingest_target(path)` — phép suy đường DUY NHẤT (`.md` ⇒ `.docx` cùng thư mục, tệp khác giữ
+  nguyên), KHÔNG ghi gì. PLAN và APPLY dùng CÙNG hàm này ⇒ lệnh in ra = lệnh chạy thật.
+- PLAN in đường `.docx` + thêm `materialize_from` (đường `.md` sinh ra nó) và `materialize_note`.
+- APPLY vật chất hoá từ `materialize_from`, và **guard `MATERIALIZE_PATH_MISMATCH`**: đường `_chunk_md_to_docx`
+  sinh ra phải TRÙNG đường plan đã in — lệch thì dừng, không gọi con (nếu hai phép suy đường trôi khỏi
+  nhau thì plan lại nói dối lần nữa, lần này im lặng).
+- Allowlist phần mở rộng của `profile-ingest` được ĐẶT TÊN: hằng `PROFILE_INGEST_ALLOWED_EXTS` (ở
+  namespace `tl` vì `ingest_ops.bind` re-home `__globals__` — bẫy I11). Trước đó là set trần trong thân
+  hàm nên không test nào neo vào được, và cầu nối chunk chỉ còn cách COPY danh sách rồi trôi lệch.
+
+**Đo HÀNH VI 2 chiều, không đọc code:** fixture 40 Điều / 86.479 ký tự → `chunk-apply` 5 chunk →
+`chunk-verify` 13/13 → chạy **y nguyên** 5 lệnh con mà plan in ra: **5/5 `rc=0 ok=true`**, số Điều
+9+9+9+9+4 = **40 = đúng số Điều fixture**. Phản chứng cùng cây: đường `.md` thô vẫn `rc=2
+UNSUPPORTED_EXTENSION` (không nới allowlist — nới là mở cửa cho `.md` bất kỳ vào corpus).
+
+## Chốt chung cho cả hai ca
+
+4 test `r251_`, mỗi test có vế phản chứng. `--selftest` **1399/1399**.
+**Đã kiểm PHẢN CHỨNG bằng cách GỠ VÁ:** gỡ ca 1 ⇒ `r251_plan_chunk_in_dung_lenh_apply_chay` ĐỎ · gỡ ca 2 ⇒
+`r251_thieu_bo_boc_chu_khac_pdf_ban_quet` ĐỎ · gỡ dòng re-export ⇒ `r251_hang_canh_bao_re_export_vao_tl` ĐỎ;
+phục hồi ⇒ 1399/1399. Test xanh vì bản vá, không xanh oan.
+
+Ruff `--select F` DELTA so master (đo lại trên `origin/master` sạch, so theo TÊN chứ không theo số lần):
+`tl.py` 12→12 · `chunking.py` 39→39 · `tl_selftest.py` **0 tên mới** · `ingest_ops.py` +1 tên = đúng
+`PROFILE_INGEST_ALLOWED_EXTS`, cùng lớp BY DESIGN với 363 tên re-home sẵn có trong tệp đó — đã kiểm
+HÀNH VI: cổng chặn `.md`, cho `.docx` qua. F401 = 0 (không đổi).
 # ★ v1.35.88 — r251: ba cờ đọc-sai của bộ soi registry (2026-07-30)
 
 Lượt rà tiếp hồ sơ «Luật BHXH». NLM chết cả lượt ⇒ chạy chế độ không-NLM (RASOAT_HOSO_LOOP §4b) và

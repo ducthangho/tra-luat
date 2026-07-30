@@ -204,6 +204,23 @@ def name_tail_key(name: str) -> str:
     return re.sub(r"\s+", " ", n).strip()
 
 
+def _nlm_status_known_local(status: str) -> bool:
+    """r253 — CỬA ĐỌC nlm_status theo ADR-0010, dạng TIỀN TỐ. Trước đây chỗ này giữ BẢN SAO exact-set
+    {pushed,synced,removed,removed_from_drive,deleted,trash,trashed} — đã TRÔI LỆCH khỏi bản chuẩn
+    `tl_core.classify._nlm_status_known`: thiếu `active` (ADR-0010 nắn live→active MỘT LẦN) và thiếu MỌI
+    biến thể `removed_<lý do>` (chính docstring bản chuẩn hứa `removed_superseded_by_VBHN` chạy được).
+    Script này CỐ Ý đứng độc lập (chỉ import `gas` lazy) nên KHÔNG import tl_core — giữ bản sao NHƯNG
+    theo cùng LUẬT tiền tố, không phải danh sách cứng, để không trôi lệch lần nữa.
+    Đo 30-07-2026: chưa false-fire THẬT vì `analyze()` skip row_kind=ref + own_thuong TRƯỚC khi gắn cờ
+    (6 dòng `active` đều ref; 10 dòng `removed_*` đều own_thuong) — vá vì cờ sẽ nổ ngay khi có dòng
+    own/khác-thuong mang các giá trị ĐÚNG CHUẨN đó."""
+    s = (status or "").strip().lower()
+    if not s:
+        return True
+    return (s.startswith("pushed") or s.startswith("synced") or s == "active"
+            or s.startswith("removed") or s.startswith("trash") or s == "deleted")
+
+
 def title_flags(e: dict) -> list[str]:
     flags = []
     name = e.get("name", "")
@@ -211,9 +228,7 @@ def title_flags(e: dict) -> list[str]:
     if e.get("nlm_source_id") and not name and not row_sohieu(e) and ((not cat) or cat in ("root", "(root)", "none", "null")):
         flags.append("NLM_GHOST_SOURCE")
     nlm_status = str(e.get("nlm_status") or "").strip().lower()
-    if e.get("nlm_source_id") and nlm_status and nlm_status not in {
-        "pushed", "synced", "removed", "removed_from_drive", "deleted", "trash", "trashed"
-    }:
+    if e.get("nlm_source_id") and nlm_status and not _nlm_status_known_local(nlm_status):
         flags.append("NLM_STATUS_MISMATCH")
     if (not cat) or cat in ("root", "(root)", "none", "null"):
         flags.append("ORPHAN_CAT")

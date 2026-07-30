@@ -178,12 +178,18 @@ def _ingest_missing_select(entries: list, cat: str | None = None, only_ids: set 
     """PURE (test offline): chọn văn bản corpus CHƯA trên NLM cần nạp. IDEMPOTENT — bỏ bản đã on NLM live. Yêu cầu
     drive_id, KHÔNG quarantine. Lọc theo cat (2 số đầu) / chỉ drive_id ∈ only_ids nếu truyền."""
     cc = re.sub(r"\D", "", str(cat))[:2] if cat else ""
+    # r253: số hiệu đã PHỦ bằng chunk con `__partNN` trên NLM → dòng CANONICAL không phải nợ nạp. Thiếu bước này,
+    # backlog mời nạp lại bản đầy đủ (Luật 41 183k ký tự) = NHÂN ĐÔI luật trên notebook — xem `_chunk_covered_sohieu`.
+    covered = _chunk_covered_sohieu(entries)
     out = []
     for e in entries or []:
         if str(e.get("corpus") or "").lower() != "true":
             continue
         if _entry_on_nlm_live(e):                 # đã trên NLM → bỏ (idempotent, chạy lại an toàn)
             continue
+        if covered and norm_sohieu(_entry_sohieu(e)) in covered \
+                and not _is_chunk_part_name(_entry_name(e)):
+            continue                              # phủ bằng chunk con — KHÔNG mời nạp bản canonical
         did = _entry_drive_id(e)
         if not did or _entry_quarantined(e):
             continue
@@ -965,6 +971,13 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
 _PDF_BROKEN_FONT_WARN = ("PDF_TEXT_LAYER_BROKEN_FONT: text-layer mất dấu (density<0.005) — Google-convert "
                          "thường xử được; apply verify bằng text GDoc sau convert; KHÔNG vội OCR")
 
+# r251: PHÂN BIỆT "PDF không có chữ" với "MÁY NÀY không đọc nổi chữ". Hai ca này trước đây cho probe RỖNG
+# giống hệt nhau, nên plan im lặng rơi về suy metadata TỪ TÊN TỆP mà vẫn `ok:true`. Xem `_probe_pdf_quality`.
+_PDF_PROBE_TOOL_WARN = ("PDF_TEXT_LAYER_NOT_READ_TOOLING: KHÔNG đọc được text-layer vì MÁY NÀY thiếu/lỗi bộ "
+                        "bóc chữ ({why}) — ĐÂY KHÔNG PHẢI kết luận 'PDF là bản quét'. Mọi trường phân loại "
+                        "(sohieu/loai/title/doc_name) đang suy TỪ TÊN TỆP, và plan_hash sẽ KHÁC máy có bộ bóc "
+                        "chữ. Cài `poppler-utils` (pdftotext) rồi chạy lại DRY, hoặc truyền --text-file/--name.")
+
 
 def _probe_pdf_quality(path: str) -> dict:
     """v1.34.58 (C-#9 — Q8=a): probe PDF đo MẬT ĐỘ DẤU tiếng Việt trên text-layer (tái dùng ngưỡng 0.005
@@ -972,17 +985,31 @@ def _probe_pdf_quality(path: str) -> dict:
     CID không map — ca 7 phụ lục CPTPP pdftotext ra text không dấu) → broken_font=True + text RỖNG (KHÔNG
     đem text hỏng đi phân loại; quyết định corpus DỜI sang apply: text GDoc sau convert). <200 chars →
     broken_font=False, text rỗng (PDF scan thật — giữ đường OCR cũ). Trả {text, source, broken_font};
-    hàm cũ `_profile_read_probe_text` giữ nguyên chữ ký cho các đuôi khác."""
+    hàm cũ `_profile_read_probe_text` giữ nguyên chữ ký cho các đuôi khác.
+
+    r251 (bằng chứng BC 6193/BNV-CTL&BHXH, hồ sơ Luật BHXH): `_read_local_text_for_analysis` VẪN trả cảnh
+    báo `PDFTOTEXT_NOT_AVAILABLE_TEXT_LAYER_UNKNOWN`, nhưng ở đây nó bị VỨT (`_txt, _ =`) ⇒ "thiếu bộ bóc
+    chữ" và "PDF quét thật" ra CÙNG một probe rỗng. Hậu quả đo được trên CÙNG tệp, CÙNG lệnh, chỉ khác việc
+    máy có `pdftotext`: `sohieu` `6193/BNV-CTL` → `6193_2026_BNV` (rác, suy từ tên tệp) · `loai` `Báo cáo`
+    → rỗng · `title` trích yếu thật → tên tệp · `doc_name` bị nhân đôi tiền tố · **`plan_hash` ĐỔI** (nên
+    `--expected-plan-hash` lấy ở máy này không dùng được ở máy kia) — tất cả với `ok:true`, rc=0, KHÔNG một
+    dòng cảnh báo. Nay trả thêm `tool_warn`: caller phơi ra plan để cổng xanh không nói dối nữa.
+    """
+    _warns: list[str] = []
     try:
-        _txt, _ = _read_local_text_for_analysis(Path(path))
-    except Exception:  # noqa: BLE001 — pdftotext lỗi → như probe rỗng (đường cũ)
-        _txt = ""
+        _txt, _warns = _read_local_text_for_analysis(Path(path))
+    except Exception as e:  # noqa: BLE001 — pdftotext lỗi → probe rỗng (đường cũ), NHƯNG phải nói ra lý do
+        _txt, _warns = "", [f"PDFTOTEXT_ERROR:{type(e).__name__}"]
+    # CHỈ ca hạ tầng (thiếu/lỗi/không ra output) mới là `tool_warn`; PDF quét thật không sinh cảnh báo nào.
+    _tool = next((w for w in (_warns or []) if str(w).startswith(("PDFTOTEXT_NOT_AVAILABLE", "PDFTOTEXT_ERROR",
+                                                                 "PDFTOTEXT_NO_OUTPUT"))), "")
+    _tw = _PDF_PROBE_TOOL_WARN.format(why=_tool) if _tool else ""
     if len(_txt or "") < 200:
-        return {"text": "", "source": "", "broken_font": False}
+        return {"text": "", "source": "", "broken_font": False, "tool_warn": _tw}
     _m = _text_quality_metrics(_txt)
     if _m["vietnamese_mark_density"] < 0.005 and _m["letters"] > 500:
-        return {"text": "", "source": "", "broken_font": True}
-    return {"text": _txt, "source": f"{path}#pdf-text-layer", "broken_font": False}
+        return {"text": "", "source": "", "broken_font": True, "tool_warn": _tw}
+    return {"text": _txt, "source": f"{path}#pdf-text-layer", "broken_font": False, "tool_warn": _tw}
 
 
 def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[str, str]:
@@ -1008,8 +1035,9 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
             _w = _dm.warn_line(_st, str(path))
             if _w:
                 print(_w, file=sys.stderr)
-            xml = re.sub(r"</w:p>", "\n", xml)
-            txt = re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
+            # r252: dùng CHUNG `plain_from_document_xml` — bản cũ quên unescape entity nên cổng nạp
+            # PHÂN LOẠI trên text còn `&amp;` (sohieu/loai/title suy từ đó). Xem docstring hàm đó.
+            txt = _dm.plain_from_document_xml(xml)
             if txt:
                 return txt, f"{path}#docx-local"
         except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → giữ hành vi cũ (probe rỗng)
@@ -1553,7 +1581,7 @@ def _pi_stage_plan(ctx):
               file=sys.stderr)
         return {"rc": 2}
     _source_check = validate_source_file(
-        f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt", ".xlsx", ".xls"},
+        f, allowed_exts=PROFILE_INGEST_ALLOWED_EXTS,
         direct_upload=(not bool(_from_drive)),
     )
     if not _source_check.get("ok"):
@@ -1603,6 +1631,10 @@ def _pi_stage_plan(ctx):
             gate["flags"] = [x for x in (gate.get("flags") or [])
                              if x not in ("NO_TEXT_FOR_VERIFY", "OCR_UNVERIFIED_NOT_CORPUS")]
             gate["flags"].append(_PDF_BROKEN_FONT_WARN)
+        if _pdf_q9p and _pdf_q9p.get("tool_warn"):
+            # r251: KHÔNG đọc được text-layer vì MÁY NÀY thiếu bộ bóc chữ ≠ "PDF là bản quét". Phải nói ra,
+            # vì mọi trường phân loại đang suy TỪ TÊN TỆP và plan_hash lệch theo máy (xem _probe_pdf_quality).
+            gate["flags"] = list(gate.get("flags") or []) + [_pdf_q9p["tool_warn"]]
         _dd54 = _dup_dieu_scan(probe_text)   # v1.34.54 A7a: profile = info-only (VBHN/mục lục lặp Điều bình thường)
         if _dd54.get("dup_count"):
             print(f"[tl] ℹ dup-Điều (A7a): {_dup_dieu_note(_dd54)} — info; nghi file trộn nhiều văn bản thì soi tay.",
@@ -3483,6 +3515,10 @@ def _vb_ingest_auto_plan(path: str, text_file: str | None = None, name: str = ""
         # v1.34.58 (C-#9, Q8=a): text-layer mất dấu ≠ không có text — cảnh báo đúng bệnh (Google-convert
         # thường xử được), KHÔNG dọa NO_PROBE_TEXT/OCR; gate không chặn từ probe local, apply verify GDoc.
         warnings.append(_PDF_BROKEN_FONT_WARN if _broken9 else "NO_PROBE_TEXT_FOR_AUTO_CAT")
+    if _pdf_q9 and _pdf_q9.get("tool_warn"):
+        # r251: cùng lý do như nhánh profile-ingest — "máy này thiếu bộ bóc chữ" ≠ "PDF là bản quét".
+        # Lane này còn nguy hơn: nó SUY cat/tên từ tên tệp (`fallback_info`) nên im lặng là im lặng ghi sai.
+        warnings.append(_pdf_q9["tool_warn"])
     if not merged.get("sohieu"):
         warnings.append("SOHIEU_MISSING")
     if cat_plan.get("confidence") in {"low", "missing"}:

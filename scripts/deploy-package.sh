@@ -201,30 +201,9 @@ fi
 [ "$LEAK" = 0 ] && ok "không có tệp dev-side/secrets trong gói"
 
 # 3c. quét token/khoá lọt vào NỘI DUNG tệp văn bản
-SCAN="$($PY - "$PKG" <<'PY'
-import re,sys,pathlib
-root=pathlib.Path(sys.argv[1])
-# mẫu bí mật THẬT, không bắt placeholder/ví dụ
-PATS=[("google_oauth_client_secret", re.compile(r'GOCSPX-[A-Za-z0-9_\-]{20,}')),
-      ("google_api_key",             re.compile(r'AIza[0-9A-Za-z_\-]{35}')),
-      ("gas_exec_token",             re.compile(r'AKfycb[0-9A-Za-z_\-]{50,}')),
-      ("private_key_block",          re.compile(r'-----BEGIN [A-Z ]*PRIVATE KEY-----')),
-      ("bearer_jwt",                 re.compile(r'eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.')),
-      ("google_oauth_refresh",       re.compile(r'1//0[A-Za-z0-9_\-]{30,}')),
-      ]
-TEXT={'.py','.md','.json','.gs','.txt','.yaml','.yml','.sh','.ps1','.cmd','.js','.html','.cfg','.ini','.toml'}
-hits=[]
-for f in root.rglob('*'):
-    if not f.is_file() or f.suffix.lower() not in TEXT: continue
-    try: s=f.read_text(encoding='utf-8',errors='ignore')
-    except Exception: continue
-    for name,rx in PATS:
-        for m in rx.finditer(s):
-            hits.append(f"{f.relative_to(root)}:{s[:m.start()].count(chr(10))+1}: {name}")
-for h in hits[:40]: print(h)
-sys.exit(1 if hits else 0)
-PY
-)"; SCAN_RC=$?
+# Bảng mẫu bí mật nằm ở scripts/pkg_secret_scan.py — DÙNG CHUNG với deploy-package.ps1. Không inline
+# lại ở đây: hai bảng mẫu SẼ trôi lệch, thêm mẫu bên này quên bên kia là đẩy lọt secret.
+SCAN="$($PY scripts/pkg_secret_scan.py "$PKG")"; SCAN_RC=$?
 if [ "$SCAN_RC" -ne 0 ]; then
   bad "QUÉT TOKEN BẮT ĐƯỢC BÍ MẬT trong gói — DỪNG, KHÔNG đẩy:"; echo "$SCAN" | sed 's/^/        /'
   LEAK=1

@@ -22327,6 +22327,33 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r231_cat46_chi_danh_cho_luat", _c231_cat46_chi_danh_cho_luat)
 
+    def _c244_script_deploy_khong_vao_goi():
+        """r244: 4 script deploy là dev-side — phải bị loại khỏi GÓI nhưng CÒN trong repo. Trần gói là
+        200 entries; thêm deploy-package.ps1 + deploy-guard.ps1 + pkg_secret_scan.py đã làm 199→202 ⇒
+        release-bundle chết IMPORT_LIMIT_EXCEEDED. Đo HAI CHIỀU: (a) có trong bảng loại, (b) tệp THẬT
+        vẫn nằm trong repo (loại khỏi gói KHÔNG phải xoá), (c) bảng loại vẫn giữ các tên cũ."""
+        _rel = _TL_MODULE._imp("tl_core.release") if hasattr(_TL_MODULE, "_imp") else None
+        try:
+            from tl_core import release as _rel
+        except Exception:
+            pass
+        if _rel is None:
+            return False
+        _ex = getattr(_rel, "_RELEASE_EXCLUDE_NAMES_ANYWHERE", None)
+        if not _ex:
+            return False
+        _moi = {"deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py"}
+        ok1 = _moi <= set(_ex)
+        # (b) PHẢN CHỨNG: loại khỏi gói không được đồng nghĩa với xoá khỏi cây — nếu vế này sai thì
+        # "loại" đã biến thành "mất tệp" mà test (a) vẫn xanh.
+        _here = Path(_TL_MODULE.__file__).resolve().parent
+        ok2 = all((_here / n).exists() for n in
+                  ("deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py"))
+        # (c) không được vô tình thay cả bảng
+        ok3 = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json"} <= set(_ex)
+        return ok1 and ok2 and ok3
+    _t110("r244_script_deploy_khong_vao_goi", _c244_script_deploy_khong_vao_goi)
+
     def _c231_chunk_docx_stdlib_doc_lai_duoc():
         """r231: `chunk-apply` ghi .md nhưng `profile-ingest` chỉ nhận doc/docx/… ⇒ pipeline chunk ĐỨT ở
         chính khớp nối. Cầu nối nay tự vật chất hoá .docx bằng stdlib (zipfile+XML, KHÔNG thêm phụ thuộc).

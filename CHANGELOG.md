@@ -1,3 +1,48 @@
+# ★ v1.35.81 — r244: bản deploy PowerShell ĐẦY ĐỦ, quét bí mật dùng chung, và trần 200 tệp của gói (2026-07-30)
+
+**`scripts/deploy-package.ps1`** — song sinh đầy đủ của `deploy-package.sh` cho Windows, thay hẳn
+`upload-skill-to-Package.ps1` (ngoài repo). Nằm TRONG repo nên `git pull` là có bản mới nhất, hết cảnh
+script deploy trôi lệch ở máy riêng. Cùng quy trình, cùng chốt, cùng mã lỗi (0/1/2/3).
+
+"Luôn đóng gói ra bản mới nhất" làm bằng CHẶN chứ không bằng nhắc: bước 0 tự `git fetch` và DỪNG nếu
+cây tụt sau `origin/master` (mục 2 quy ước) — build từ cây tụt sau chính là cách Package thụt lùi.
+`-Pull` thì tự fast-forward rồi ĐỌC LẠI VERSION; KHÔNG bao giờ tự merge/rebase.
+
+**`scripts/pkg_secret_scan.py`** — tách bảng mẫu bí mật thành NGUỒN SỰ THẬT DUY NHẤT cho cả hai đường.
+Nhét inline vào mỗi script = hai bảng mẫu, và chúng SẼ trôi lệch: thêm mẫu bên sh mà quên bên ps1 thì
+đường Windows đẩy lọt secret mà không ai biết.
+
+**Trần 200 tệp — đụng THẬT, không phải đề phòng.** Thêm 3 script làm entries 199 → 202 ⇒ `release-bundle`
+chết `IMPORT_LIMIT_EXCEEDED`. Bốn script deploy (`deploy-package.sh` · `deploy-package.ps1` ·
+`deploy-guard.ps1` · `pkg_secret_scan.py`) là dev-side thuần — phiên Cowork LIVE bootstrap TỪ zip thì
+không bao giờ tự deploy — nên vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE`. GIỮ trong repo/git, CHỈ loại khỏi
+GÓI, cùng tiền lệ `CLAUDE.md`/`.claude/`. Khoá bằng test **r244** đo BA VẾ, có phản chứng cho vế (b):
+tệp phải VẪN CÒN trong repo — nếu thiếu vế đó thì "loại khỏi gói" biến thành "mất tệp" mà test vẫn xanh.
+
+**Hai bẫy PowerShell sập ở lượt chạy đầu, đã vá và ghi lại trong chú thích code:**
+- `param([string[]]$Args)` — `$Args` là BIẾN TỰ ĐỘNG trong hàm PS, nên `@Args` nở ra mảng tự động RỖNG
+  thay vì đối số truyền vào ⇒ python chạy KHÔNG đối số, đọc stdin, EOF, **rc=0 và output rỗng**: gate
+  báo "rc=0" mà chẳng chạy gì. Đây là kiểu xanh-oan nguy hiểm nhất. Đổi thành `$Argv`.
+- `Get-Content -Raw` trên tệp RỖNG trả `$null` ⇒ `[regex]::Match` ném "Value cannot be null". Ép `[string]`.
+
+Cả hai chỉ lộ ra vì CHẠY THẬT: đã tải PowerShell 7.4.6 vào container để chạy chứ không đọc code suy diễn.
+
+**Thêm hai lỗi nữa cùng một họ — `-Force`, và nó không chỉ là chuyện đếm:**
+- Đặt tên zip probe bắt đầu bằng dấu `.` ⇒ trên Unix là tệp ẨN, `Test-Path` thấy có mà `Get-Item`
+  KHÔNG trả tệp ẩn khi thiếu `-Force` ⇒ ném "Could not find item". Đổi tên probe + thêm `-Force`.
+- `Get-ChildItem` cũng bỏ tệp ẩn khi thiếu `-Force`. Phát hiện nhờ ĐỐI CHIẾU PARITY: cùng zip
+  (sha `a69d3192…`) mà ps1 đếm 196 còn sh đếm 198 — hai tệp lệch là `.gitattributes`/`.gitignore`.
+  Nhưng cùng lệnh đó CHÍNH LÀ bộ tìm tệp secrets ⇒ đường Windows đang MÙ với `.env`, `.netrc`,
+  `.tl_secrets`. Đếm lệch chỉ là triệu chứng; lỗ an ninh là bệnh. Đã `-Force` mọi chỗ.
+
+**Và một lỗ trong chính `pkg_secret_scan.py` vừa viết:** lọc theo phần mở rộng nên MÙ với tệp KHÔNG có
+mở rộng — `pathlib` cho `Path('.env').suffix == ''`. Bơm `GOCSPX-…` vào `.env` thì bộ quét trả rc=0.
+Nay quét cả tệp không mở rộng, tự tránh nhị phân bằng NUL-check 8KB + trần 2MB. Phản chứng 3 vế:
+`.env` có secret → bắt · `credentials` (không mở rộng) → bắt · tệp nhị phân → bỏ đúng · cây sạch → rc=0.
+
+Ba lỗi này đều KHÔNG thể bắt bằng đọc code — chúng lộ ra vì chạy thật rồi ĐỐI CHIẾU HAI BẢN với nhau.
+Parity không phải nghi lễ: nó là cái duy nhất phát hiện đường Windows mù secrets.
+
 # ★ v1.35.80 — r243: port chốt chống thụt lùi sang PowerShell (2026-07-30)
 
 v1.35.79 cưỡng chế chốt cho đường Linux, nhưng đường Windows (`upload-skill-to-Package.ps1`) vẫn ghi đè

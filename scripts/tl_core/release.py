@@ -332,7 +332,13 @@ _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   #
 # v1.33.54: file local-only MỌI CẤP — config THẬT (chứa webappUrl/token) + CLAUDE.md dev. Phát hiện khi regen
 # manifest trên dev-tree: walk thư mục (không phải git ls-files) đã liệt kê + hash tra_luat_config.v2.json
 # vào RELEASE_MANIFEST (rò metadata + file_count lệch zip-set 115≠109 → release-verify trong gói FAIL).
+# v1.35.81: 4 script DEPLOY là dev-side thuần — phiên Cowork LIVE bootstrap TỪ zip thì không bao giờ tự
+# deploy, nên chúng chỉ chiếm slot. Đã đụng trần THẬT: thêm deploy-package.ps1 + deploy-guard.ps1 +
+# pkg_secret_scan.py làm entries 199 → 202 > 200 ⇒ release-bundle chết IMPORT_LIMIT_EXCEEDED. GIỮ trong
+# repo/git (dev `git pull` là có), CHỈ loại khỏi GÓI — cùng tiền lệ CLAUDE.md/.claude/Code.2.21.2k.gs.
 _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json",
+                                   "deploy-package.sh", "deploy-package.ps1",
+                                   "deploy-guard.ps1", "pkg_secret_scan.py",
                                    "Code.2.21.2k.gs",   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim
                                    "Code.2.21.2l.gs", "Code.2.21.2m.gs", "Code.2.21.2n.gs"}   # r194: bản cũ = dead-weight bundle, GIỮ repo/git chỉ loại khỏi GÓI (tiền lệ 2.21.2k); r198: current nay 2.21.2o — 2.21.2n xuống hàng cũ
 

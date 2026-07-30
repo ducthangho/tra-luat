@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.79",
+  "skill_version": "1.35.80",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 198,
-  "total_bytes": 6851669,
-  "package_hash": "a9327c3f2417c8485f2e22b6d36ce9c73e06ec9f71b3b280c33e35c33fa2b15a",
-  "content_hash": "a9327c3f2417c8485f2e22b6d36ce9c73e06ec9f71b3b280c33e35c33fa2b15a",
+  "file_count": 199,
+  "total_bytes": 6860346,
+  "package_hash": "52debe6f4031fb9ca000d7b13b1dbc3ea233927af2531fd34caa5bc1a51f3bdb",
+  "content_hash": "52debe6f4031fb9ca000d7b13b1dbc3ea233927af2531fd34caa5bc1a51f3bdb",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 272564,
-      "sha256": "543e2ed7d04c95596f32b06e60cf529ecd371a1458d1d1879603e021106671e3"
+      "size": 274750,
+      "sha256": "debde284a7d04a3031d8b13bb26a278ea27251acccba464ee24572539c58ed44"
     },
     {
       "path": "CONTEXT.md",
@@ -64,12 +64,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "ea7f03b3e7ce09f6ff058c9c9e013fbba698bd047489df8bdd629d2805867bb6"
+      "sha256": "fe8e7a682e460f90f65d9262d1b1a22bbb29260a727189c601d86672e9d559a0"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "04db44741d55d5cd985adba32c3477a10fe87ace7fe4cec9fc0a6e7795c3a859"
+      "sha256": "fba924bdf8f4fecbc68a9fa14298b474a6ed4bc6d92e5bdb835e7d92842703e3"
     },
     {
       "path": "agents/openai.yaml",
@@ -218,8 +218,8 @@
     },
     {
       "path": "references/DEV_TOOLING_GUIDE.md",
-      "size": 10604,
-      "sha256": "22cea8dc2564e965984ff0f7919dddd528e5cd983f405d9faa6f7fc3e29be2e2"
+      "size": 11442,
+      "sha256": "23e148ef4ab7d846af6fd97b1536159b4c4f78937c001a992890cbdbea238de6"
     },
     {
       "path": "references/DOCTRINE_APPENDIX.md",
@@ -667,6 +667,11 @@
       "sha256": "ec62cc3764568be67d93c0f803eb026b6d2e8dde94696e9e47748a78a92bf233"
     },
     {
+      "path": "scripts/deploy-guard.ps1",
+      "size": 5653,
+      "sha256": "34100d6a67e74f90b1cb719222da08daf58eb2aacd6f16cefa67ca9f1908ca96"
+    },
+    {
       "path": "scripts/deploy-package.sh",
       "size": 17477,
       "sha256": "978423f205aa64cb68348c4651e60e6e383c15f1d2e41c52242cd56d5b9823e1"
@@ -789,7 +794,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "75a3fa4ef9664cc4f2f5476ec8f6c82f13a32840373dd98bc1e76d12885efd6c"
+      "sha256": "5bc822cd3cb77422c38277adebad1bf0e5a552c6a058c1108b8fd4d06c0420fc"
     },
     {
       "path": "scripts/tl_boot.py",

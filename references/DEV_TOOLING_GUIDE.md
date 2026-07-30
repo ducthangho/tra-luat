@@ -186,6 +186,17 @@ cd "D:\Quốc hội"
 .\upload-skill-to-Package.ps1 -NoPush         # chỉ build + zip, KHÔNG đẩy Drive (test an toàn)
 .\upload-skill-to-Package.ps1 -NoTest         # bỏ selftest (nhanh hơn, chỉ khi vừa chạy selftest riêng)
 ```
+**Chốt chống thụt lùi (từ v1.35.80) — phải NỐI TAY vào script này.** `upload-skill-to-Package.ps1`
+nằm ngoài repo nên chốt không tự có hiệu lực. Thêm ĐÚNG 1 DÒNG, ngay TRƯỚC lệnh `drive-push`:
+
+```powershell
+& "<repo>\scripts\deploy-guard.ps1" -Version $ver; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+```
+`$ver` = version sắp đẩy (`(Get-Content VERSION).Trim()`). Chốt đọc tên Package trên Drive rồi so
+theo TỪNG THÀNH PHẦN SỐ: Drive **≥** bản sắp đẩy ⇒ `exit 3`, chặn trước khi ghi. Cố ý ghi đè:
+thêm `-ForceOlder`. Chạy tay để kiểm trước: `.\scripts\deploy-guard.ps1 -Version (Get-Content VERSION).Trim()`.
+rc: 0 = đẩy được · 3 = chặn thụt lùi · 4 = không đọc được Drive (fail-closed, KHÔNG đoán là an toàn).
+
 **Cần `gws auth login` xong trên máy chạy lệnh này** (quyền GHI Drive) — mới `drive-push` được. Zip xuất ra
 `D:\Quốc hội\tra-luat-skill-v<VER>-gws3env.zip`. Verify sau khi push:
 ```powershell

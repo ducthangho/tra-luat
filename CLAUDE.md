@@ -70,9 +70,12 @@ sau build từ master mới nhất và đã bao gồm việc của phiên trư�
    (`gws drive files get --params '{"fileId":"1H5kAt3SRVP7…","fields":"name,size,md5Checksum"}'`).
    Nếu version trên Drive **≥** version sắp đẩy ⇒ **DỪNG, hỏi user** — nghĩa là phiên khác vừa đẩy.
    Đây là chốt chống thụt lùi duy nhất; không có nó thì mục 1-2 chỉ là lời hứa.
-   **ĐÃ CƯỠNG CHẾ trong `deploy-package.sh` từ v1.35.79** (rc=3, chặn TRƯỚC `drive-push`; bằng-số cũng
-   chặn). Cố ý ghi đè: `--force-older`. Đường `.ps1` bên Windows CHƯA có chốt này — nếu deploy từ đó
-   thì phải tự kiểm mục 3 bằng tay.
+   **ĐÃ CƯỠNG CHẾ CẢ HAI ĐƯỜNG** (rc=3, chặn TRƯỚC `drive-push`; bằng-số cũng chặn):
+   - Linux/Cowork: `deploy-package.sh` bước 4, từ v1.35.79. Ghi đè cố ý: `--force-older`.
+   - Windows: `scripts/deploy-guard.ps1` từ v1.35.80. Ghi đè cố ý: `-ForceOlder`.
+     ⚠ `upload-skill-to-Package.ps1` nằm NGOÀI repo (`D:\Quốc hội\`) nên chốt chỉ có hiệu lực sau khi
+     NỐI 1 DÒNG vào đó, ngay TRƯỚC lệnh `drive-push` (xem DEV_TOOLING_GUIDE §10). Chưa nối ⇒ đường
+     Windows vẫn ghi đè im lặng như cũ.
 4. **SAU khi push:** không tin thông báo "đã đẩy". Tải lại từ Drive và đối chiếu **md5/sha256 + VERSION**
    (`deploy-package.sh` bước 5 làm sẵn). Chưa byte-match thì coi như CHƯA deploy.
 5. **Thêm/xoá tệp trong cây ⇒ tái sinh `RELEASE_MANIFEST.json`, và ghi lại golden NẾU số đếm kiểm kê đổi.**

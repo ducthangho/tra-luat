@@ -1,3 +1,35 @@
+# ★ v1.35.80 — r243: port chốt chống thụt lùi sang PowerShell (2026-07-30)
+
+v1.35.79 cưỡng chế chốt cho đường Linux, nhưng đường Windows (`upload-skill-to-Package.ps1`) vẫn ghi đè
+im lặng — hai đường vào CÙNG một fileId nên chốt một bên là chốt nửa vời.
+
+Thêm `scripts/deploy-guard.ps1`: dạng DROP-IN, nối vào script ngoài repo bằng ĐÚNG 1 DÒNG đặt ngay
+trước `drive-push` (khuôn ở DEV_TOOLING_GUIDE §10), cũng chạy tay được để kiểm trước khi đẩy. Làm kiểu
+drop-in vì `upload-skill-to-Package.ps1` ở `D:\Quốc hội\`, KHÔNG có trong repo ⇒ không sửa mù nội dung
+tệp mình chưa đọc.
+
+**So sánh theo [version] chứ KHÔNG theo chuỗi** — đây là cạm bẫy thật, không phải đề phòng suông:
+so chuỗi thì `'1.35.9' -gt '1.35.78'` ra ĐÚNG nhưng SAI về nghĩa. Cùng lý do bản sh dùng `sort -V`.
+
+**Đã TEST HÀNH VI bằng PowerShell 7.4.6 thật** (tải vào container để chạy, không đọc code suy diễn):
+| Drive | sắp đẩy | cờ | rc |
+|---|---|---|---|
+| 1.35.78 | 1.35.79 | — | 0 qua |
+| 1.35.79 | 1.35.79 | — | **3 chặn** (bằng số) |
+| 1.35.80 | 1.35.79 | — | **3 chặn** |
+| 1.35.80 | 1.35.79 | `-ForceOlder` | 0 qua (đã WARN) |
+| 1.35.78 | 1.35.9 | — | **3 chặn** (bẫy so chuỗi) |
+| 1.35.9 | 1.35.78 | — | 0 qua (bẫy so chuỗi, chiều ngược) |
+| tên người đặt tay | 1.35.79 | — | 0 qua + WARN (không chặn oan) |
+| tên rỗng | 1.35.79 | — | **4 fail-closed** |
+
+8/8 đúng. Đường sản xuất (gọi `gws` thật, Drive đang v1.35.79) cũng đã chạy: qua với 1.35.80, chặn với
+1.35.79. **PARITY** với bản sh kiểm riêng trên 5 ca so sánh — hai bản cho cùng phán quyết, gồm cả bẫy.
+
+Phân biệt hai loại lỗi, có chủ đích: KHÔNG ĐỌC ĐƯỢC Drive (gws chết/thiếu quyền/JSON hỏng) ⇒ `exit 4`
+**fail-closed**, không đoán là an toàn. Đọc được nhưng KHÔNG RÚT ĐƯỢC version từ tên ⇒ WARN và đi tiếp,
+vì tên file có thể do người đặt tay và ta ĐÃ biết trạng thái Drive.
+
 # ★ v1.35.79 — r242: cưỡng chế chốt CHỐNG THỤT LÙI khi đẩy Package (2026-07-30)
 
 v1.35.78 chốt quy ước deploy vào CLAUDE.md, nhưng mục 3 ("Drive ≥ version sắp đẩy ⇒ DỪNG") chỉ là

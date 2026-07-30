@@ -1,3 +1,30 @@
+# ★ v1.35.91 — r254: hợp nhất hai nhánh r251 SONG SONG (2026-07-30)
+
+> **Va chạm đánh số, ghi lại để người sau không tưởng mình đọc nhầm:** hai phiên chạy song song cùng
+> ngày 30-07 đều đặt tên **r251** và đều bump **v1.35.88** cho hai việc KHÁC NHAU:
+> - `4680d92`/`3f7275f` (vào master): *ba cờ đọc-sai của bộ soi registry* + vá `deploy-guard.ps1`;
+> - `73be7be` (nhánh `luat-bhxh-30-07`): *hai cổng XANH mà nói dối* (PLAN chunk in lệnh không chạy nổi).
+>
+> Không nhánh nào sai — chúng chỉ không thấy nhau. Giữ NGUYÊN cả hai commit (đã đẩy, viết lại lịch sử
+> còn tệ hơn); đánh số tiếp từ **v1.35.91/r254** để không có hai bản 1.35.88 khác nội dung trôi ra ngoài.
+> Bài học: quy ước "phiên nào bump thì phiên đó đẩy" (§Quy ước deploy mục 1) mới chặn được KHÂU ĐẨY —
+> KHÔNG chặn được hai phiên cùng CHỌN một số hiệu. Trước khi bump nên `git fetch origin master` đã.
+
+**Hai bên vá cùng MỘT LỚP lỗi (dòng chunk `__partNN` làm bộ soi hiểu nhầm) ở HAI chỗ khác nhau —
+bổ sung nhau, không trùng:**
+
+| | master r251 | nhánh r253 |
+|---|---|---|
+| chỗ vá | `_subject_sig` (classify + registry_hygiene) | `_title_flags` · `_ingest_missing_select` |
+| cờ chữa | `sohieu_conflict` GIẢ giữa canonical/part01/part02 | `CORPUS_TRUE_NOT_ON_NLM` + mời nạp TRÙNG |
+
+Merge tự động ghép SẠCH `registry_hygiene.py` `classify.py` `ingest_ops.py` `tl_selftest.py`
+(hai bên sửa hàm khác nhau); chỉ 5 xung đột dòng version/manifest, giải bằng tay lên 1.35.91.
+Đáng chú ý: `registry_hygiene.py` nay mang CẢ `skip_reason` (master) LẪN `_nlm_status_known_local`
+(nhánh) — hai bug độc lập của cùng một tệp, cả hai đều còn.
+
+Gate chạy lại SAU merge trên cây đã hợp nhất (không tin gate của từng nhánh riêng).
+
 # ★ v1.35.90 — r253: hai cờ "còn nợ NLM" mời nạp TRÙNG, và một bản sao từ vựng đã trôi lệch (2026-07-30)
 
 > Tiếp hồ sơ «Luật BHXH». Món chính là **B4** (dữ liệu) — xem PHỤ LỤC A.8 của
@@ -168,6 +195,57 @@ Ruff `--select F` DELTA so master (đo lại trên `origin/master` sạch, so th
 `tl.py` 12→12 · `chunking.py` 39→39 · `tl_selftest.py` **0 tên mới** · `ingest_ops.py` +1 tên = đúng
 `PROFILE_INGEST_ALLOWED_EXTS`, cùng lớp BY DESIGN với 363 tên re-home sẵn có trong tệp đó — đã kiểm
 HÀNH VI: cổng chặn `.md`, cho `.docx` qua. F401 = 0 (không đổi).
+# ★ v1.35.88 — r251: ba cờ đọc-sai của bộ soi registry (2026-07-30)
+
+Lượt rà tiếp hồ sơ «Luật BHXH». NLM chết cả lượt ⇒ chạy chế độ không-NLM (RASOAT_HOSO_LOOP §4b) và
+vá đúng những chỗ **công cụ nói sai về chính số nó in ra** — cả ba đều bắt được bằng cách ĐO LIVE rồi
+đối chiếu với báo cáo lượt trước, không suy từ đọc mã.
+
+**(1) `registry-doctor.basis` khai THIẾU phần mình loại.** v1.35.65 đã thêm `scanned`+`basis` để hết
+đọc "missing_sohieu=19 trên 90 dòng" — nhưng `basis` viết "loại ref + bản gốc `loai='thuong'`", trong
+khi `is_own_thuong` loại THÊM **mọi** dòng own `corpus=false` bất kể `loai`. Đo hồ sơ Luật BHXH: 33
+dòng bị loại mà chỉ 22 là `loai='thuong'`; 11 dòng còn lại có tên/số hiệu CHUẨN (TT 21-2025-TT-NHNN,
+BC 1104-BC-BHXH, 3 Phụ lục Thái Nguyên, CV 7728-BNV, BC 7692-BC-BNV…) và **5 trong số đó mang cờ
+`MISSING_SOHIEU` mà không vào bucket `missing_sohieu`** ⇒ ai đọc `missing_sohieu=25` cũng không có
+đường nào biết. Nay tách `skipped_own_corpus_false` thành số đếm RIÊNG (`scanned` = count − ba lớp) và
+`basis` kể đủ ba lớp kèm câu cảnh báo về cờ bị bỏ. Hàm `skip_reason` trả lý do từng dòng.
+*Không đổi phép lọc* — chỉ đổi phần KHAI BÁO: sửa phép lọc là đổi ngữ nghĩa hygiene, việc khác.
+
+**(2) `sohieu_conflict` GIẢ cho họ chunk.** 3 dòng cùng `41-2024-QH15` (canonical + `__part01__` +
+`__part02__`) cho 3 chữ ký `_subject_sig` khác nhau ⇒ bị xếp `sohieu_conflict_different_doc` = "văn bản
+KHÁC cùng số hiệu, NGUY HIỂM tra sai", dù chẻ chunk là CHỦ ĐÍCH (lách trần 100k của NLM). Nay bỏ hậu
+tố `__partNN__…` trước khi lấy chữ ký ⇒ `sohieu_conflict_groups` 1 → **0**, họ này về
+`sohieu_dup_same_doc` (đúng bản chất: một văn bản, ba dòng). Lượt trước định chữa bằng cách GHI CHÚ vào
+registry (journal `register-bulk_1785320950_22129`); đo lại 30-07 thấy `goc`/`title_vn`/`sua_doi` của cả
+ba dòng vẫn RỖNG — ghi chú không neo được, nên chữa ở CODE. Kèm **drift-lock hai mirror**
+`registry_hygiene._subject_sig` ↔ `classify._subject_sig`: docstring nói "Mirror" mà trước r251 không gì khoá.
+
+**(3) `ingest-missing` báo `backlog=0` trên manifest 3 ngày tuổi.** Đo 30-07: `tl ingest-missing --json`
+(không `--refresh`) trả `manifest_snapshot=2026-07-27T16:27` và `backlog=0`; CÙNG PHIÊN, `--refresh` trả
+`backlog=2` (Luật 41/2024 chờ nạp + BIDV thiếu số hiệu) và `sweep` cũng nói "2 chưa push NLM". `note`
+cũ có nhắc cache nhưng người đọc dừng ở dòng đầu ⇒ nay có `snapshot_age_s` + cờ TÊN `STALE_SNAPSHOT`
+(>1h, xa hẳn cache GAS ~600s), và khi `backlog=0` thì nói thẳng "số 0 trên snapshot cũ KHÔNG phải hết
+việc". Mốc không đọc được ⇒ `SNAPSHOT_TS_UNPARSEABLE`, không im lặng. Cùng họ bài học
+`reg-query --refresh` (nạp chồng 9 tài liệu 24-07): **số 0 trên dữ liệu nguội không phải là sạch.**
+
+**(4) `deploy-guard.ps1` fail-closed OAN ⇒ đường deploy Windows TẮC HẲN.** `gws` in banner
+`Using keyring backend: keyring` TRƯỚC JSON, guard gộp stderr (`2>&1`) rồi đổ THẲNG vào
+`ConvertFrom-Json` ⇒ chết ngay ký tự `U` ⇒ `exit 4` dù `gws` rc=0 và tên file đọc được bình thường.
+Đo 30-07: guard đỏ, mà `gws` trả đúng `tra-luat-skill-v1.35.87-gws3env.zip`. Twin `deploy-package.sh`
+KHÔNG vướng vì nó `sed` trên cả khối — đúng cảnh báo "hai bản sẽ trôi lệch" của §Quy ước deploy, lần
+này bên PS là bên CHẶN OAN chứ không phải bên đẩy lọt. Chữa: cắt phần ngoài JSON (`{` đầu → `}` cuối)
+rồi mới parse (vẫn parse JSON thật, không quay lại regex mò khoá), và in 5 dòng đầu khi parse vỡ để
+lần sau chẩn được ngay. Kèm bẫy môi trường: guard là **pwsh 7** — chạy bằng `powershell.exe` (5.1) thì
+vỡ ở `ParserError: Missing closing '}'` do cú pháp PS7, KHÔNG phải lỗi script.
+
+Bẫy gặp khi vá (3): thêm 2 hàm + 1 hằng vào `tl_core/ingest_ops.py` làm ĐỎ hai drift-lock cùng lúc —
+`r90` (tên top-level của module REBASE phải resolve qua `tl`) và `r81` (mọi tên trong `_STUB_MAP` phải
+CALLABLE). Hằng `_SNAPSHOT_STALE_S` phải re-export TRỰC TIẾP, không vào `_STUB_MAP`.
+
++4 test (`r251_doctor_basis_khai_dung_phan_bi_loai`, `r251_ingest_missing_bao_snapshot_nguoi`,
+`r251_chunk_khong_bi_doc_thanh_conflict`, `r251_deploy_guard_chiu_duoc_banner_gws`, mỗi test đều có
+phản chứng) → selftest **1399/1399**.
+ruff delta +2 (F821 `Path` + E702, đúng idiom sẵn có của `tl_selftest.py`).
 
 # ★ v1.35.87 — r250: nlm-auto-refresh.sh — tự phát hiện export mới trên Drive → import → mã hoá → xoá (2026-07-29)
 

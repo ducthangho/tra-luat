@@ -80,6 +80,24 @@ def is_own_thuong(e: dict) -> bool:
     return row_kind(e) == "own" and (loai == "thuong" or corpus in {"false", "thuong"})
 
 
+def skip_reason(e: dict) -> str:
+    """r251: LÝ DO thật một dòng bị loại khỏi phép quét — '' = được quét.
+
+    `is_own_thuong` loại HAI lớp khác nhau dưới một cái tên: bản gốc `loai='thuong'` VÀ **mọi** dòng own
+    `corpus=false` bất kể `loai`. Trước r251 cả hai dồn vào một số đếm tên `skipped_own_thuong` và `basis`
+    chỉ khai lớp thứ nhất ⇒ nhãn NÓI SAI phần mình loại. Đo 30-07 hồ sơ Luật BHXH: 33 dòng bị loại, chỉ
+    22 là `loai='thuong'`; 11 dòng còn lại là văn bản CÓ tên/loại chuẩn (Thông tư 21-2025-TT-NHNN, BC
+    1104-BC-BHXH, 3 Phụ lục Thái Nguyên, CV 7728-BNV…), trong đó 5 dòng mang cờ MISSING_SOHIEU nhưng
+    KHÔNG vào bucket `missing_sohieu` — người đọc `missing_sohieu=25` không có cách nào biết."""
+    if row_kind(e) == "ref":
+        return "ref"
+    if str(e.get("loai") or "").strip().lower() == "thuong":
+        return "own_thuong"
+    if str(e.get("corpus") or "").strip().lower() in {"false", "thuong"}:
+        return "own_corpus_false"
+    return ""
+
+
 def is_raw_name(name: str) -> bool:
     return bool(re.match(r"^\d+_\d{4}_[A-Z]+_\d{5,}", name or ""))
 
@@ -295,6 +313,7 @@ def _subject_sig(name: str) -> str:
     """KH1 Pha 1.5: chữ ký CHỦ ĐỀ của tên (bỏ đuôi file + doctype + số hiệu/năm + cơ quan TW) để phân biệt dup CÙNG
     văn bản (sidecar/khác format) vs văn bản KHÁC NHAU cùng số hiệu. Mirror tl._subject_sig."""
     s = strip_vn(re.sub(r"\.(docx?|pdf)$", "", name or "")).lower()
+    s = re.sub(r"__part\d+__.*$", "", s)   # r251 — GIỮ ĐỒNG BỘ với classify._subject_sig (xem chú giải ở đó)
     s = re.sub(r"\b(vbhn|vpqh|ubtvqh\d*|qh\d*|nd|cp|tt|nq|qd|ct|pl|tw|ttg|lctn|blds?|luat|bo|nghidinh|thongtu|quyetdinh|chithi|nghiquyet|hopnhat|goc)\b", " ", s)
     s = re.sub(r"\d", " ", s)
     return re.sub(r"[^a-z]", "", s)
@@ -306,13 +325,19 @@ def analyze(rows: list[dict]) -> dict:
     # v1.35.65: ĐẾM phần bị loại. Trước đây `count` = TỔNG dòng còn mọi bucket chỉ tính trên phần ĐÃ LỌC
     # ⇒ đọc "count=90, missing_sohieu=19" ra "19/90" là SAI (thật ra 19 trên ~34 dòng được quét; hồ sơ
     # Luật BHXH có 56 dòng sohieu rỗng). Phơi `scanned` + `basis` như `sweep.corpus_basis` để hết đọc nhầm.
-    skipped_ref = skipped_thuong = 0
+    skipped_ref = skipped_thuong = skipped_corpus_false = 0
     for e in rows:
-        if row_kind(e) == "ref":
+        # r251: TÁCH lý do loại — `skipped_own_thuong` chỉ còn nghĩa 'loai=thuong', phần own corpus=false
+        # đếm riêng, vì `basis` cũ khai thiếu đúng phần này (xem docstring skip_reason).
+        why = skip_reason(e)
+        if why == "ref":
             skipped_ref += 1
             continue
-        if is_own_thuong(e):
+        if why == "own_thuong":
             skipped_thuong += 1
+            continue
+        if why == "own_corpus_false":
+            skipped_corpus_false += 1
             continue
         sh = row_sohieu(e)
         nk = name_key(e.get("name", ""))
@@ -343,12 +368,18 @@ def analyze(rows: list[dict]) -> dict:
         (conflict if len(sigs) > 1 else same_doc)[k] = v
     return {
         "count": len(rows),
-        "scanned": len(rows) - skipped_ref - skipped_thuong,
+        "scanned": len(rows) - skipped_ref - skipped_thuong - skipped_corpus_false,
         "skipped_ref": skipped_ref,
         "skipped_own_thuong": skipped_thuong,
+        "skipped_own_corpus_false": skipped_corpus_false,
         "basis": ("count = TỔNG dòng registry; MỌI bucket dưới đây chỉ tính trên `scanned` "
-                  "(= count − skipped_ref − skipped_own_thuong): dòng row_kind='ref' (mượn từ scope NỀN) "
-                  "và bản gốc loai='thuong' KHÔNG được quét vì chúng vốn không mang số hiệu/tên chuẩn."),
+                  "(= count − skipped_ref − skipped_own_thuong − skipped_own_corpus_false). BA lớp bị loại: "
+                  "(1) row_kind='ref' — mượn từ scope NỀN, ngoài phạm vi hồ sơ; "
+                  "(2) loai='thuong' — bản gốc, vốn không mang số hiệu/tên chuẩn; "
+                  "(3) own corpus=false BẤT KỂ loai — kể cả văn bản CÓ tên/số hiệu chuẩn (r251: lớp này "
+                  "trước đây bị gộp vào (2) nên nhãn khai thiếu). Muốn con số trên TOÀN BỘ dòng own thì "
+                  "phải cộng lại (3) — cờ MISSING_SOHIEU trên dòng corpus=false KHÔNG vào bucket "
+                  "missing_sohieu."),
         "duplicate_sohieu": dup_so,
         "sohieu_conflict_different_doc": conflict,
         "sohieu_dup_same_doc": same_doc,
@@ -391,6 +422,7 @@ def build_doctor_summary(rep: dict) -> dict:
         "scanned": rep.get("scanned", rep["count"]),
         "skipped_ref": rep.get("skipped_ref", 0),
         "skipped_own_thuong": rep.get("skipped_own_thuong", 0),
+        "skipped_own_corpus_false": rep.get("skipped_own_corpus_false", 0),
         "basis": rep.get("basis", ""),
         "duplicate_sohieu_groups": len(rep["duplicate_sohieu"]),
         "sohieu_conflict_groups": len(rep.get("sohieu_conflict_different_doc", {})),

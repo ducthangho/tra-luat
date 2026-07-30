@@ -22376,6 +22376,124 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r249_bao_cao_rasoat_ngoai_goi", _c249_bao_cao_rasoat_ngoai_goi)
 
+    def _c251_doctor_basis_khai_dung_phan_bi_loai():
+        """r251: `basis` của registry-doctor khai "chỉ loại ref + loai='thuong'" nhưng `is_own_thuong`
+        loại THÊM **mọi** dòng own `corpus=false` bất kể loai ⇒ nhãn nói SAI phần mình loại. Đo LIVE
+        30-07 hồ sơ Luật BHXH: 33 dòng bị loại mà chỉ 22 là `loai='thuong'`; 11 dòng còn lại có tên/số
+        hiệu CHUẨN (TT 21-2025-TT-NHNN, BC 1104-BC-BHXH, 3 Phụ lục Thái Nguyên, CV 7728-BNV…), trong đó
+        5 dòng mang cờ MISSING_SOHIEU mà KHÔNG vào bucket `missing_sohieu`.
+        Khẳng định: đếm TÁCH hai lớp, tổng phải khớp `scanned`, và `basis` phải NÓI RA lớp corpus=false."""
+        import importlib.util as _ilu251
+        _p250 = Path(__file__).resolve().parent / "registry_hygiene.py"
+        _sp = _ilu251.spec_from_file_location("_rh251", _p250)
+        _m = _ilu251.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        rows = [
+            {"drive_id": "d1", "name": "Luat_10-2020-QH14_Abc", "so_hieu": "10-2020-QH14",
+             "row_kind": "own", "corpus": "true"},
+            {"drive_id": "d2", "name": "ref_row", "so_hieu": "99-2020-QH14", "row_kind": "ref"},
+            {"drive_id": "d3", "name": "ban-goc.docx", "so_hieu": "", "row_kind": "own", "loai": "thuong"},
+            # ca THẬT bị loại OAN dưới nhãn cũ: tên + loại CHUẨN, chỉ vì corpus=false
+            {"drive_id": "d4", "name": "TT_21-2025-TT-NHNN_Xep_hang_TCTD", "so_hieu": "21-2025-TT-NHNN",
+             "row_kind": "own", "loai": "Thông tư", "corpus": "false"},
+        ]
+        rep = _m.analyze(rows)
+        ok1 = rep["skipped_ref"] == 1 and rep["skipped_own_thuong"] == 1
+        ok2 = rep["skipped_own_corpus_false"] == 1          # d4 đếm RIÊNG, không gộp vào (2)
+        ok3 = (rep["count"] - rep["skipped_ref"] - rep["skipped_own_thuong"]
+               - rep["skipped_own_corpus_false"]) == rep["scanned"] == 1
+        # basis phải KHAI lớp corpus=false — đây chính là chỗ bản cũ nói thiếu
+        ok4 = "corpus=false" in rep["basis"] and "skipped_own_corpus_false" in rep["basis"]
+        # phơi qua CẢ summary (text/JSON dùng chung khoá) — không chỉ nằm trong rep nội bộ
+        s = _m.build_doctor_summary(rep)
+        ok5 = s.get("skipped_own_corpus_false") == 1
+        # PHẢN CHỨNG: dòng own corpus=true KHÔNG bị loại, nếu không thì luật đã quét quá tay
+        ok6 = _m.skip_reason(rows[0]) == "" and _m.skip_reason(rows[3]) == "own_corpus_false"
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r251_doctor_basis_khai_dung_phan_bi_loai", _c251_doctor_basis_khai_dung_phan_bi_loai)
+
+    def _c251_ingest_missing_bao_snapshot_nguoi():
+        """r251: đo 30-07 — `tl ingest-missing --json` (KHÔNG `--refresh`) trả snapshot 2026-07-27 và
+        `backlog=0`, trong khi `--refresh` cùng phiên trả `backlog=2` (Luật 41/2024 + BIDV) và `sweep`
+        cũng nói "2 chưa push NLM". Số 0 trên dữ liệu NGUỘI đọc thành "hết việc" ⇒ phải có CỜ TÊN
+        `STALE_SNAPSHOT`, không chỉ một câu trong `note`. Cùng họ bài học `reg-query --refresh`."""
+        from tl_core import ingest_ops as _io251
+        import datetime as _dt251
+        _now = _dt251.datetime.now(_dt251.timezone.utc)
+        _old = (_now - _dt251.timedelta(days=3)).isoformat().replace("+00:00", "Z")
+        _fresh = _now.isoformat().replace("+00:00", "Z")
+        # (a) snapshot CŨ + backlog 0 = ca nguy hiểm nhất → phải cảnh báo, và nói rõ 0 không phải sạch
+        age_old, warn_old = _io251._snapshot_stale_warn(_old, 0)
+        ok1 = age_old is not None and age_old > 3600 * 24 * 2
+        ok2 = any("STALE_SNAPSHOT" in w for w in warn_old)
+        ok3 = any("backlog=0" in w for w in warn_old)
+        # (b) PHẢN CHỨNG: snapshot TƯƠI thì KHÔNG được kêu (kêu bừa = người tắt não bỏ qua cờ)
+        age_new, warn_new = _io251._snapshot_stale_warn(_fresh, 0)
+        ok4 = age_new is not None and age_new < 120 and warn_new == []
+        # (c) backlog>0 trên snapshot cũ: vẫn cảnh báo cũ, nhưng KHÔNG dán câu "0 không phải sạch"
+        _, warn_old_b = _io251._snapshot_stale_warn(_old, 5)
+        ok5 = any("STALE_SNAPSHOT" in w for w in warn_old_b) and not any("backlog=0" in w for w in warn_old_b)
+        # (d) mốc không đọc được ⇒ nói thẳng là KHÔNG chứng minh được tươi, không im lặng
+        age_bad, warn_bad = _io251._snapshot_stale_warn("?", 0)
+        ok6 = age_bad is None and any("SNAPSHOT_TS_UNPARSEABLE" in w for w in warn_bad)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r251_ingest_missing_bao_snapshot_nguoi", _c251_ingest_missing_bao_snapshot_nguoi)
+
+    def _c251_chunk_khong_bi_doc_thanh_conflict():
+        """r251: 3 dòng cùng `41-2024-QH15` (canonical + `__part01__` + `__part02__`) bị `_subject_sig`
+        cho 3 chữ ký KHÁC nhau ⇒ registry-doctor xếp vào `sohieu_conflict_different_doc` = "văn bản KHÁC
+        cùng số hiệu, NGUY HIỂM tra sai". Đo LIVE 30-07: `sohieu_conflict_groups=1` cho đúng họ này, dù
+        chẻ chunk là CHỦ ĐÍCH (lách trần 100k của NLM). Lượt trước định chữa bằng cách ghi chú vào
+        registry — đo lại thấy `goc`/`title_vn` vẫn RỖNG, tức ghi chú không neo được; chữa ở CODE bền hơn.
+        Khẳng định: cùng chữ ký, xếp `same_doc`, và HAI bản mirror của hàm không được trôi khỏi nhau."""
+        import importlib.util as _ilu251b
+        from tl_core import classify as _cl251
+        _p = Path(__file__).resolve().parent / "registry_hygiene.py"
+        _sp = _ilu251b.spec_from_file_location("_rh251b", _p)
+        _m = _ilu251b.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        base = "Luat_41-2024-QH15_2024_Bao_hiem_xa_hoi"
+        p1 = base + "__part01__Dieu_1-64"
+        p2 = base + "__part02__Dieu_65-141"
+        ok1 = _m._subject_sig(base) == _m._subject_sig(p1) == _m._subject_sig(p2) != ""
+        # xếp loại: dup CÙNG văn bản, KHÔNG phải conflict
+        rows = [{"drive_id": f"d{i}", "name": n, "so_hieu": "41-2024-QH15", "row_kind": "own",
+                 "corpus": "true", "loai": "Luật"} for i, n in enumerate((base, p1, p2))]
+        rep = _m.analyze(rows)
+        ok2 = len(rep["sohieu_conflict_different_doc"]) == 0 and len(rep["sohieu_dup_same_doc"]) == 1
+        ok3 = _m.build_doctor_summary(rep)["sohieu_conflict_groups"] == 0
+        # PHẢN CHỨNG: phụ lục vs chính văn VẪN phải khác nhau — nếu không thì đã gộp quá tay
+        ok4 = (_m._subject_sig("ND_128-2026-ND-CP_Phu_luc")
+               != _m._subject_sig("ND_128-2026-ND-CP_SuaDoi_luat_gia"))
+        # DRIFT-LOCK hai mirror: docstring nói "Mirror tl._subject_sig" mà trước r251 không gì khoá
+        ok5 = all(_m._subject_sig(n) == _cl251._subject_sig(n) for n in
+                  (base, p1, p2, "ND_128-2026-ND-CP_Phu_luc", "VBHN_25-VBHN-VPQH_2022_Luat_NHNN"))
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r251_chunk_khong_bi_doc_thanh_conflict", _c251_chunk_khong_bi_doc_thanh_conflict)
+
+    def _c251_deploy_guard_chiu_duoc_banner_gws():
+        """r251: `gws` in banner 'Using keyring backend: keyring' TRƯỚC JSON, mà `deploy-guard.ps1` gộp
+        stderr (2>&1) rồi đổ THẲNG vào ConvertFrom-Json ⇒ chết ngay ký tự 'U' ⇒ exit 4 fail-closed ⇒
+        đường deploy WINDOWS tắc hẳn dù Drive đọc được bình thường (đo 30-07-2026: gws rc=0, tên file
+        đúng, guard vẫn đỏ). Twin `deploy-package.sh` KHÔNG vướng vì sed trên cả khối — đúng cảnh báo
+        'hai bản sẽ trôi lệch'. Khẳng định: guard CẮT phần ngoài JSON trước khi parse, và luật cắt đó
+        chạy đúng trên ĐÚNG chuỗi gws thật đã bắt được (mirror bằng Python ⇒ CI không cần pwsh)."""
+        _root = Path(_TL_MODULE.__file__).resolve().parent.parent
+        _g = (_root / "scripts" / "deploy-guard.ps1").read_text(encoding="utf-8", errors="replace")
+        ok1 = "($raw | ConvertFrom-Json)" not in _g          # không còn parse THẲNG chuỗi thô
+        ok2 = "$jsonText | ConvertFrom-Json" in _g and "LastIndexOf('}')" in _g
+        real = ('Using keyring backend: keyring\n{\n  "md5Checksum": "08b002ef",\n'
+                '  "name": "tra-luat-skill-v1.35.87-gws3env.zip",\n  "size": "2194484"\n}\n')
+        _lo, _hi = real.find("{"), real.rfind("}")
+        ok3 = _lo > 0 and _hi > _lo
+        ok4 = json.loads(real[_lo:_hi + 1]).get("name") == "tra-luat-skill-v1.35.87-gws3env.zip"
+        try:                                                 # PHẢN CHỨNG: chuỗi thô PHẢI vỡ
+            json.loads(real); ok5 = False
+        except Exception:
+            ok5 = True
+        _sh = (_root / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        ok6 = '"name":"' in _sh.replace(" ", "")              # twin sh rút tên bằng đường riêng
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r251_deploy_guard_chiu_duoc_banner_gws", _c251_deploy_guard_chiu_duoc_banner_gws)
+
     def _c231_chunk_docx_stdlib_doc_lai_duoc():
         """r231: `chunk-apply` ghi .md nhưng `profile-ingest` chỉ nhận doc/docx/… ⇒ pipeline chunk ĐỨT ở
         chính khớp nối. Cầu nối nay tự vật chất hoá .docx bằng stdlib (zipfile+XML, KHÔNG thêm phụ thuộc).

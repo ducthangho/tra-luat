@@ -1034,6 +1034,10 @@ def _subject_sig(name: str) -> str:
     """Chữ ký 'chủ đề' của tên: bỏ đuôi + doctype + số hiệu/năm + cơ quan TRUNG ƯƠNG (qh/cp/tw/nd/tt/nq…),
     GIỮ cơ quan bộ (bnv/byt/btc…) + từ chủ đề (phu_luc/sua_doi/treem…). Dùng để phân biệt dup thật vs phụ-lục/khác-cơ-quan."""
     s = _ascii_lower(re.sub(r"\.(docx?|pdf)$", "", name or ""))
+    # r251: hậu tố chunk `__partNN__Dieu_a-b` là CÙNG văn bản chẻ ra để lách trần 100k của NLM, không phải
+    # văn bản khác ⇒ bỏ trước khi lấy chữ ký. Không bỏ thì 3 dòng Luật 41/2024 (canonical + part01 + part02)
+    # ra 3 chữ ký khác nhau và registry-doctor báo `sohieu_conflict` GIẢ (đo LIVE 30-07).
+    s = re.sub(r"__part\d+__.*$", "", s)
     s = re.sub(r"\b(vbhn|vpqh|ubtvqh\d*|qh\d*|nd|cp|tt|nq|qd|ct|pl|tw|ttg|lctn|blds?|luat|bo|nghidinh|thongtu|quyetdinh|chithi|nghiquyet|hopnhat|goc)\b", " ", s)
     s = re.sub(r"\d", " ", s)
     return re.sub(r"[^a-z]", "", s)

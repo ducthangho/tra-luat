@@ -71,11 +71,20 @@ if ($PSBoundParameters.ContainsKey('DriveNameOverride')) {
     Write-Host ($raw -split "`n" | Select-Object -First 5 | ForEach-Object { "        $_" }) -ForegroundColor DarkGray
     exit 4
   }
-  # gws trả JSON; đọc bằng ConvertFrom-Json chứ không regex mò cả khối
+  # gws trả JSON; đọc bằng ConvertFrom-Json chứ không regex mò cả khối.
+  # r251: nhưng `gws` in BANNER trước JSON ('Using keyring backend: keyring') và ta gộp cả stderr
+  # (2>&1) ⇒ ConvertFrom-Json chết ngay ký tự 'U' ⇒ guard exit 4 fail-closed ⇒ ĐƯỜNG DEPLOY WINDOWS
+  # TẮC HẲN dù Drive đọc được bình thường (rc=0, tên file đúng). Đo 30-07-2026 trên máy Windows.
+  # Bản twin `deploy-package.sh` KHÔNG vướng vì nó sed trên cả khối — đúng cảnh báo "hai bản sẽ trôi
+  # lệch". Chữa: CẮT phần ngoài JSON (từ '{' đầu tới '}' cuối) rồi mới parse — vẫn parse JSON thật,
+  # không quay lại regex mò từng khoá.
+  $lo = $raw.IndexOf('{'); $hi = $raw.LastIndexOf('}')
+  $jsonText = if ($lo -ge 0 -and $hi -gt $lo) { $raw.Substring($lo, $hi - $lo + 1) } else { $raw }
   try {
-    $driveName = ($raw | ConvertFrom-Json).name
+    $driveName = ($jsonText | ConvertFrom-Json).name
   } catch {
     Write-Bad "không parse được JSON từ gws — KHÔNG kiểm được thụt lùi, fail-closed."
+    Write-Host ($raw -split "`n" | Select-Object -First 5 | ForEach-Object { "        $_" }) -ForegroundColor DarkGray
     exit 4
   }
 }

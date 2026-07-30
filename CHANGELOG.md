@@ -1,3 +1,38 @@
+# ★ v1.35.99 — r261: monkeypatch trong selftest phải đi ĐÚNG CỬA của stub-farm (2026-07-30)
+
+**ĐÍNH CHÍNH r260:** mục r260 ghi "selftest 1425/1425 rc=0 trong 55s". Con số ĐÚNG nhưng đo bằng
+`import tl; tl.selftest()`, KHÔNG phải lệnh gate chuẩn `python scripts/tl.py --selftest` — lệnh chuẩn
+lúc đó **treo >580s** và chưa một lượt nào hoàn thành. Tôi đã quy con số của đường phụ cho gate; đó là
+khẳng định vượt quá bằng chứng. Lỗi lộ ra khi `deploy-package.sh --push` chết ở bước 1.
+
+**Gốc rễ:** `tl.py` cài STUB uỷ quyền VĨNH VIỄN cho mọi tên trong `_STUB_MAP`:
+`def _stub(*a, **k): return getattr(_mod, _name)(*a, **k)` với `_mod` = submodule `tl_core.<x>`.
+Nên `setattr(_TL_MODULE, tên, fake)` **KHÔNG có tác dụng** với các tên đó — stub vẫn tra thuộc tính trên
+SUBMODULE và gọi hàm THẬT. Đường `import tl` che mất vì khi đó dict hàm tra TRÙNG `_TL_MODULE`; đường
+`python scripts/tl.py` (tl.py là `__main__`) thì lộ.
+
+Bằng chứng là ngăn xếp lấy bằng `PYTHONFAULTHANDLER=1 timeout -s ABRT`, không phải suy luận:
+```
+tl_selftest.py:22896 _r255_run · lookup_ops.py:1725 cmd_rasoat_loop
+lookup_ops.py:1705 _rasoat_expand_text   ← hàm THẬT, không phải fake
+tl.py:1608 _stub
+```
+`_rasoat_expand_text` fake bị bỏ qua ⇒ `cmd_rasoat_loop` chạy hàm thật trên dữ liệu thật với
+`max_iter=50` ⇒ **treo**, không phải "chậm". Ba lượt tôi đoán sai trước đó (block phá hermetic · tiến
+trình sót giành CPU · treo mạng) đều vì suy diễn thay vì lấy ngăn xếp.
+
+**Vá:** helper `_mp261`/`_mpr261` gán tên ở MỌI cửa — `_TL_MODULE` **và** mọi submodule `tl_core.*` đang
+nạp có thuộc tính đó — rồi hoàn nguyên cả hai. Áp cho cả 4 khối r255–r258, vì một fake không ăn thì test
+**xanh oan**: nó tưởng đang đo bản vá mà thực ra đo hàm thật.
+
+Bài học đắt: **đo selftest bằng đường KHÁC đường gate là không đo gì cả.** `import tl` và
+`python scripts/tl.py` KHÁC nhau ở chỗ `_TL_MODULE` trỏ vào dict nào; mọi test monkeypatch phải chạy
+bằng ĐÚNG lệnh gate mới có giá trị. Và khi một lệnh "chậm bất thường", lấy NGĂN XẾP trước khi đặt giả
+thuyết — `PYTHONFAULTHANDLER=1 timeout -s ABRT <n>` cho câu trả lời trong một lượt.
+
+Kiểm bằng ĐÚNG lệnh gate: `python3 scripts/tl.py --selftest` → **rc=0 · 56s · 1425/1425 · 19/19 case
+r255–r258 OK · 0 FAIL**.
+
 # ★ v1.35.98 — r260: 19 case r255–r258 vào `tl_selftest.py` + bịt cửa MẠNG trong test (2026-07-30)
 
 Bốn bản vá r255–r258 đã trên master từ trước mà **KHÔNG kèm chốt hồi quy của chính chúng** (đợt đó

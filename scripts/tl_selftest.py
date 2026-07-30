@@ -22800,6 +22800,35 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r253_registry_hygiene_vocab_parity", _c253_registry_hygiene_vocab_parity)
 
+    # ═══ r261 — CỬA MONKEYPATCH ĐÚNG (bắt được khi gate deploy treo 580s) ═══
+    # `tl.py` cài STUB uỷ quyền VĨNH VIỄN: `def _stub(*a, **k): return getattr(_mod, _name)(*a, **k)`
+    # với `_mod` = submodule `tl_core.<x>`. Nên gán `_TL_MODULE.<tên> = fake` KHÔNG có tác dụng cho mọi
+    # tên nằm trong `_STUB_MAP` — stub vẫn tra thuộc tính trên SUBMODULE và gọi hàm THẬT.
+    # Đường `import tl; tl.selftest()` che mất lỗi này (khi đó dict mà hàm tra TRÙNG `_TL_MODULE`);
+    # đường CHUẨN `python scripts/tl.py --selftest` thì lộ: `_rasoat_expand_text` fake bị bỏ qua ⇒
+    # cmd_rasoat_loop chạy hàm THẬT trên dữ liệu thật với max_iter=50 ⇒ gate treo, KHÔNG phải chậm.
+    # Vá: gán trên `_TL_MODULE` **VÀ** trên MỌI submodule tl_core đang nạp có thuộc tính đó; hoàn nguyên
+    # cả hai. Dùng cho cả 4 khối r255-r258 để không khối nào xanh-oan.
+    import sys as _sys261
+    _MODS261 = [_m for _n, _m in list(_sys261.modules.items())
+                if _n and _n.startswith("tl_core.") and _m is not None]
+
+    def _mp261(save, name, val):
+        """Gán `name`=val ở MỌI cửa; ghi lại bản cũ vào `save` để hoàn nguyên."""
+        if name not in save:
+            save[name] = ([(_TL_MODULE, getattr(_TL_MODULE, name, None))]
+                          + [(_m, getattr(_m, name)) for _m in _MODS261 if hasattr(_m, name)])
+        setattr(_TL_MODULE, name, val)
+        for _m in _MODS261:
+            if hasattr(_m, name):
+                setattr(_m, name, val)
+
+    def _mpr261(save):
+        for _name, _items in save.items():
+            for _obj, _old in _items:
+                if _old is not None:
+                    setattr(_obj, _name, _old)
+
     # ═══ r255 (v1.35.93) — P15: `rasoat-chongcheo` báo ✗thiếu-corpus cho VBHN ĐÃ CÓ (bare-VBHN chưa nới) ═══
     # 3 điểm so số hiệu của đường chongcheo bỏ sót cổng v1.33.47 (relation-check 681/694 + fetch_web 211 đã có):
     # subject_clusters.json ghi 11/11 số VBHN KHÔNG NĂM, corpus lưu year-qualified ⇒ so exact MISS SẠCH.
@@ -22834,21 +22863,19 @@ def run() -> int:
     #     unresolved_refs (phản chứng chống "vá quá tay làm im mọi cảnh báo").
     # HERMETIC: `target=` đưa cmd_rasoat_chongcheo vào nhánh load_creds + _read_doc_text (lookup_ops L1962)
     # = GỌI MẠNG THẬT khi env có TL_WEBAPP/TL_TOKEN → selftest TREO. Bịt cả hai; nhánh target vẫn được đi qua.
-    _sav251 = {k: getattr(_TL_MODULE, k) for k in ("_manifest_entries", "apply_profile_offline",
-                                                   "resolve_footnote_amendments", "_scan_inline_amendments",
-                                                   "load_creds", "_read_doc_text", "resolve_identity")}
+    _sav251 = {}
     try:
-        _TL_MODULE._manifest_entries = lambda *_a, **_k: [dict(x) for x in _E251]
-        _TL_MODULE.apply_profile_offline = lambda *_a, **_k: None
-        _TL_MODULE.resolve_footnote_amendments = lambda _t, entries=None: {
+        _mp261(_sav251, "_manifest_entries", lambda *_a, **_k: [dict(x) for x in _E251])
+        _mp261(_sav251, "apply_profile_offline", lambda *_a, **_k: None)
+        _mp261(_sav251, "resolve_footnote_amendments", lambda _t, entries=None: {
             "dieu_level_amendment_map": [{"marker": "1", "dieu": "2", "khoan": "1",
                                           "amending_sohieu": "19/VBHN-VPQH", "hieu_luc": None,
                                           "pending_effect": False, "loai": "sửa đổi"}],
-            "footnote_sohieu": [], "header_sohieu": [], "mapped_sohieu": ["19/VBHN-VPQH"], "footnote_count": 1}
-        _TL_MODULE._scan_inline_amendments = lambda _t: []
-        _TL_MODULE.load_creds = lambda *_a, **_k: None
-        _TL_MODULE._read_doc_text = lambda *_a, **_k: "NGUYEN VAN GIA (offline)"
-        _TL_MODULE.resolve_identity = lambda *_a, **_k: []
+            "footnote_sohieu": [], "header_sohieu": [], "mapped_sohieu": ["19/VBHN-VPQH"], "footnote_count": 1})
+        _mp261(_sav251, "_scan_inline_amendments", lambda _t: [])
+        _mp261(_sav251, "load_creds", lambda *_a, **_k: None)
+        _mp261(_sav251, "_read_doc_text", lambda *_a, **_k: "NGUYEN VAN GIA (offline)")
+        _mp261(_sav251, "resolve_identity", lambda *_a, **_k: [])
         _b251 = _hio.StringIO()
         with _hush(), _ctx27.redirect_stdout(_b251):
             _rc251 = _TL_MODULE.cmd_rasoat_chongcheo(argparse.Namespace(
@@ -22866,8 +22893,7 @@ def run() -> int:
     except Exception:
         cases.append(("r255_chongcheo_vbhn_members_not_reported_missing", False))
     finally:
-        for _k, _v in _sav251.items():
-            setattr(_TL_MODULE, _k, _v)
+        _mpr261(_sav251)
 
 
     # ═══ r256 (v1.35.94) — P15: `rasoat-loop` DỪNG SỚM, báo THIẾU gap (dry_rounds nằm trong ĐK vòng) ═══
@@ -22878,19 +22904,19 @@ def run() -> int:
         """Chạy cmd_rasoat_loop offline: seed = `cands`, lượt expand sau trả `expand2` (mặc định rỗng)."""
         _keys = ("_manifest_entries", "apply_profile_offline", "_frontier_doc_text",
                  "_rasoat_expand_text", "_resolve_deep_target", "_read_doc_text")
-        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _sav = {}
         _n = {"i": 0}
         try:
-            _TL_MODULE._manifest_entries = lambda *_a, **_k: []
-            _TL_MODULE.apply_profile_offline = lambda *_a, **_k: None
-            _TL_MODULE._frontier_doc_text = lambda _a: ("BASE TEXT", "gid0", "BASE")
+            _mp261(_sav, "_manifest_entries", lambda *_a, **_k: [])
+            _mp261(_sav, "apply_profile_offline", lambda *_a, **_k: None)
+            _mp261(_sav, "_frontier_doc_text", lambda _a: ("BASE TEXT", "gid0", "BASE"))
 
             def _exp(_t, _e):
                 _n["i"] += 1
                 return list(cands) if _n["i"] == 1 else list(expand2 or [])
-            _TL_MODULE._rasoat_expand_text = _exp
-            _TL_MODULE._resolve_deep_target = lambda *_a, **_k: (None, None, None, None)
-            _TL_MODULE._read_doc_text = lambda *_a, **_k: ""
+            _mp261(_sav, "_rasoat_expand_text", _exp)
+            _mp261(_sav, "_resolve_deep_target", lambda *_a, **_k: (None, None, None, None))
+            _mp261(_sav, "_read_doc_text", lambda *_a, **_k: "")
             _b = _hio.StringIO()
             with _hush(), _ctx27.redirect_stdout(_b):
                 _rc = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
@@ -22898,8 +22924,7 @@ def run() -> int:
                     dry_rounds=K, max_iter=max_iter, text_file=None, target="x"))
             return _rc, json.loads(_b.getvalue())
         finally:
-            for _k, _v in _sav.items():
-                setattr(_TL_MODULE, _k, _v)
+            _mpr261(_sav)
 
     def _r255_gaps(n):
         return [{"sohieu": "%d/2020/QH14" % i, "sohieu_norm": norm_sohieu("%d/2020/QH14" % i),
@@ -22944,10 +22969,10 @@ def run() -> int:
     def _r256_sweep(base_entries, vbhn_cands, inline=None):
         """Chạy cmd_corpus_relation_sweep offline với cmd_relation_check bơm tay (khuôn r93/r94)."""
         _keys = ("_manifest_entries", "load_creds", "cmd_relation_check")
-        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _sav = {}
         try:
-            _TL_MODULE._manifest_entries = lambda *_a, **_k: [dict(x) for x in base_entries]
-            _TL_MODULE.load_creds = lambda *_a, **_k: None
+            _mp261(_sav, "_manifest_entries", lambda *_a, **_k: [dict(x) for x in base_entries])
+            _mp261(_sav, "load_creds", lambda *_a, **_k: None)
 
             def _fake(_ns):
                 print(json.dumps({"ok": True,
@@ -22955,7 +22980,7 @@ def run() -> int:
                                   "vbhn_candidates": vbhn_cands,
                                   "missing_links": []}, ensure_ascii=False))
                 return 0
-            _TL_MODULE.cmd_relation_check = _fake
+            _mp261(_sav, "cmd_relation_check", _fake)
             _b = _hio.StringIO()
             with _hush(), _ctx27.redirect_stdout(_b):
                 _rc = _TL_MODULE.cmd_corpus_relation_sweep(argparse.Namespace(
@@ -22963,8 +22988,7 @@ def run() -> int:
                     limit=0, skip=0, out=None, refresh=False, json=True))
             return _rc, json.loads(_b.getvalue())
         finally:
-            for _k, _v in _sav.items():
-                setattr(_TL_MODULE, _k, _v)
+            _mpr261(_sav)
 
     # base: Luật 26-2018 (chuỗi base_key = 26-2018-QH14)
     _BASE253 = {"drive_id": "d26", "name": "Luat_26-2018-QH14_SuaDoi_TDTT", "so_hieu": "26-2018-QH14",

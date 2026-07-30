@@ -88,7 +88,27 @@ def _vbhn_year_fix_items(entries: list) -> tuple[list, list, list]:
                         cand.append({"drive_id": did2, "old_sohieu": key, "new_sohieu": key,
                                      "year": int(m2.group(2)), "name": nm2, "new_name": _new_nm,
                                      "mode": "name_only"})
-            continue                                  # sohieu đã có năm / không phải dạng VBHN chuẩn → bỏ
+                continue                              # sohieu đã có năm → hết việc với dòng này
+            # r276 (P15-F06): lớp VBHN thiếu CẢ segment 'VBHN' lẫn năm ('09-BGDDT' — tên VBHN_09-BGDDT_2024_…)
+            # trước đây rơi vào continue IM LẶNG: không fixable, không needs_year ⇒ điểm mù detector (đo kho
+            # nền 31-07: 5 dòng VBHN-BGDDT corpus=true lọt). Suy được năm → fixable `NN-YYYY-VBHN-AGENCY`;
+            # còn lại MỌI khóa VBHN không-năm khác (kể cả dị dạng '73-82-ND-CP') → needs_year mode='malformed'
+            # — khép hẳn lớp bỏ-sót im lặng, apply-path không đổi (chỉ ghi fixable).
+            m3 = re.fullmatch(r"(\d{1,4})-([A-Z][A-Z0-9D]+)", key)
+            _key_yearless = bool(key) and _sohieu_year(key) is None and not re.search(r"LCT[-/_]HDNN", key)
+            did3 = _entry_drive_id(e)
+            if _key_yearless and did3 and did3 not in seen:
+                seen.add(did3)
+                nm3 = _entry_name(e)
+                yr3 = _entry_issue_year(e)
+                if m3 and yr3:
+                    cand.append({"drive_id": did3, "old_sohieu": key,
+                                 "new_sohieu": f"{m3.group(1)}-{yr3}-VBHN-{m3.group(2)}", "year": yr3,
+                                 "name": nm3, "new_name": _name_inject_vbhn_year(nm3, m3.group(1), yr3, m3.group(2)),
+                                 "mode": "ministry_missing_segment"})
+                else:
+                    needs.append({"drive_id": did3, "sohieu": key, "name": nm3, "mode": "malformed"})
+            continue
         did = _entry_drive_id(e)
         if not did or did in seen:
             continue

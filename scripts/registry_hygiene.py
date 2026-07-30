@@ -322,6 +322,7 @@ def _subject_sig(name: str) -> str:
 def analyze(rows: list[dict]) -> dict:
     by_so, by_name = defaultdict(list), defaultdict(list)
     root_rows, raw_rows, no_sohieu, title_mismatch, ghost_rows = [], [], [], [], []
+    sohieu_khong_nam = []   # r276 (P15-F06): sohieu CÓ nhưng KHÔNG năm — vi phạm bất biến PHẢI-CÓ-NĂM
     # v1.35.65: ĐẾM phần bị loại. Trước đây `count` = TỔNG dòng còn mọi bucket chỉ tính trên phần ĐÃ LỌC
     # ⇒ đọc "count=90, missing_sohieu=19" ra "19/90" là SAI (thật ra 19 trên ~34 dòng được quét; hồ sơ
     # Luật BHXH có 56 dòng sohieu rỗng). Phơi `scanned` + `basis` như `sweep.corpus_basis` để hết đọc nhầm.
@@ -350,6 +351,16 @@ def analyze(rows: list[dict]) -> dict:
             ghost_rows.append(e)
         if sh:
             by_so[sh].append(e)
+            # r276 (P15-F06): bất biến «mọi số hiệu PHẢI có NĂM» — khóa không-năm làm mọi phép so khớp mờ
+            # nhiễu (đo 31-07: quét thô 3393 va chạm substring toàn do lớp này) và va collision tái-dùng-số.
+            # Trước đây KHÔNG bucket nào đếm lớp non-VBHN (Đảng/QĐ/NQ); VBHN chỉ hiện gián tiếp qua
+            # title_mismatch. Đếm TƯỜNG MINH + gắn lớp để trỏ đúng công cụ sửa (VBHN → `tl vbhn-year-fix`;
+            # còn lại → reg_upsert tay theo kế hoạch duyệt). LCT-HDNN (luật trước 1992, không mang năm) miễn.
+            if not re.search(r"(?<!\d)(19|20)\d{2}(?!\d)", sh) and not re.search(r"LCT[-/_]HDNN", sh):
+                lop = ("vbhn" if is_vbhn_entry(e)
+                       else "dang" if re.search(r"-(TW|VPTW)$", sh)
+                       else "khac")
+                sohieu_khong_nam.append({"lop": lop, "row": e})
         else:
             no_sohieu.append(e)
         if nk:
@@ -389,6 +400,7 @@ def analyze(rows: list[dict]) -> dict:
         "missing_sohieu": no_sohieu,
         "title_mismatch_rows": title_mismatch,
         "ghost_nlm_rows": ghost_rows,
+        "sohieu_khong_nam_rows": sohieu_khong_nam,
     }
 
 
@@ -411,7 +423,8 @@ def compact(e: dict) -> dict:
 # schema, KHÔNG THỂ lệch nhãn lần nữa (trước đây text in 'duplicate_sohieu/title_mismatch/rows' lệch JSON).
 _DOCTOR_SUMMARY_KEYS = ("count", "scanned", "duplicate_sohieu_groups", "sohieu_conflict_groups",
                         "duplicate_name_groups",
-                        "root_rows", "raw_name_rows", "missing_sohieu", "title_mismatch_candidates", "ghost_nlm_rows")
+                        "root_rows", "raw_name_rows", "missing_sohieu", "sohieu_khong_nam",
+                        "title_mismatch_candidates", "ghost_nlm_rows")
 
 
 def build_doctor_summary(rep: dict) -> dict:
@@ -430,6 +443,7 @@ def build_doctor_summary(rep: dict) -> dict:
         "root_rows": len(rep["root_rows"]),
         "raw_name_rows": len(rep["raw_name_rows"]),
         "missing_sohieu": len(rep["missing_sohieu"]),
+        "sohieu_khong_nam": len(rep.get("sohieu_khong_nam_rows", [])),
         "title_mismatch_candidates": len(rep["title_mismatch_rows"]),
         "ghost_nlm_rows": len(rep.get("ghost_nlm_rows", [])),
     }
@@ -469,6 +483,8 @@ def main(argv=None) -> int:
             "raw_name_rows": [compact(x) for x in rep["raw_name_rows"][:a.limit]],
             "title_mismatch": [compact(x) for x in rep["title_mismatch_rows"][:a.limit]],
             "ghost_nlm": [compact(x) for x in rep.get("ghost_nlm_rows", [])[:a.limit]],
+            "sohieu_khong_nam": [{"lop": x["lop"], **compact(x["row"])}
+                                 for x in rep.get("sohieu_khong_nam_rows", [])[:a.limit]],
         }
     }
     if a.json:

@@ -1,3 +1,28 @@
+# ★ v1.36.14 — r276: hai điểm mù detector cho bất biến «số hiệu PHẢI có NĂM» (P15-F06 — lệnh quét) (2026-07-31)
+
+F06 sổ P15 («cần lệnh quét + kế hoạch sửa registry riêng»). Đo TƯƠI kho nền 31-07 (sau các lượt dọn của
+phiên BHXH): 126 dòng sohieu không-năm, phân lớp: **A** 6 VBHN cấp bộ thiếu CẢ segment 'VBHN' lẫn năm
+('09-BGDDT') · **B** 20 văn bản Đảng ('27-NQ-TW', '101-QD-TW' — 10 dòng có năm ngay trong TÊN) · **D** 7
+khác cần năm tay (671-QD-BTTTT, 560-NQ-UBTVQH15…) · **E** 93 corpus=false sidecar (by-design không sửa) ·
+lớp thoái hóa corpus=true ("01") đã được dọn trước = 0.
+
+Hai điểm mù detector, cả hai vá trong bản này:
+1) `_vbhn_year_fix_items`: lớp A rơi vào `continue` IM LẶNG (không fixable, không needs_year) vì khóa
+   không khớp `NN-VBHN-XXX`. Nay: suy được năm → fixable `NN-YYYY-VBHN-AGENCY` (mode
+   `ministry_missing_segment`, đi CHUNG apply-path reg_upsert + journal + cổng conflict cũ); mọi khóa VBHN
+   không-năm còn lại (kể cả dị dạng '73-82-ND-CP') → needs_year mode='malformed'. Đo nền: 5 fixable BGDDT
+   (09→09-2024, 05→05-2023, 07→07-2023, 04→04-2026, 02→02-2026) + 1 malformed, 0 conflict.
+2) `registry_hygiene.analyze` (nuôi `tl registry-doctor`): KHÔNG bucket nào đếm khóa không-năm non-VBHN.
+   Nay bucket `sohieu_khong_nam` (phân lớp vbhn/dang/khac, miễn LCT-HDNN, chỉ trên `scanned` corpus=true
+   như mọi bucket) + khóa summary/text (khuôn H2 text=JSON) + samples. Đo nền: sohieu_khong_nam=33 = đúng
+   A6+B20+D7 phân lớp tay.
+
+KHÔNG ghi registry trong bản này — kế hoạch sửa dữ liệu từng dòng (33 dòng corpus=true) nằm ở
+`C:\qh\p15_review_core_2026-07-30\F06_KE_HOACH_SUA_SOHIEU_NEN.md`, CHỜ DUYỆT rồi mới apply
+(`tl --profile vbqppl vbhn-year-fix --apply` cho lớp A; reg_upsert tay theo bảng cho B/D).
+Selftest +1 case (3 vế vá + 5 phản chứng: year-qualified không đụng · NOYEAR chuẩn giữ nguyên ·
+corpus=false không year-fix · LCT-HDNN miễn · sohieu rỗng vẫn đi bucket missing_sohieu). 1437/1437.
+
 # ★ v1.36.13 — r275: `_vbhn_base_key` tie-break bất định trên chuỗi goc toàn-không-năm (P15-F04) (2026-07-31)
 
 F04 sổ P15 (phiên giữ sổ phát hiện, phiên land vá). `min(keys, key=_sohieu_base_sort_year)` trên SET —

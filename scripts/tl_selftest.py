@@ -23578,6 +23578,56 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3)
     _t110("r275_vbhn_base_key_tie_break", _c275_vbhn_base_key_tie_break)
 
+    def _c276_sohieu_khong_nam_detector():
+        """r276 (P15-F06): hai điểm mù detector cho bất biến «số hiệu PHẢI có NĂM»:
+        (a) `_vbhn_year_fix_items` — VBHN thiếu CẢ segment 'VBHN' lẫn năm ('09-BGDDT') rơi vào continue
+            IM LẶNG (không fixable/needs — đo kho nền 31-07: 5 dòng VBHN-BGDDT corpus=true lọt);
+        (b) registry-doctor không bucket nào đếm khóa không-năm NON-VBHN (Đảng/QĐ/NQ — 20+7 dòng thật).
+        Vá: (a) lớp ministry_missing_segment fixable + mọi khóa VBHN không-năm còn lại needs mode='malformed';
+        (b) bucket `sohieu_khong_nam` phân lớp vbhn/dang/khac trong registry_hygiene.analyze."""
+        _fx276 = [
+            {"drive_id": "m1", "name": "VBHN_09-BGDDT_2024_ND_86-2018_Hop_tac", "sohieu": "09-BGDDT",
+             "loai": "VBHN", "corpus": "true", "ngay_ban_hanh": "15/03/2024"},
+            {"drive_id": "m2", "name": "VBHN_73-82-ND-CP_Phu_luc", "sohieu": "73-82-ND-CP",
+             "loai": "VBHN", "corpus": "true"},
+            # PHẢN CHỨNG: đã year-qualified → KHÔNG đụng; NOYEAR chuẩn cũ vẫn fixable như trước
+            {"drive_id": "m3", "name": "VBHN_11-2025-VBHN-VPQH_2025_X", "sohieu": "11-2025-VBHN-VPQH",
+             "loai": "VBHN", "corpus": "true"},
+            {"drive_id": "m4", "name": "VBHN_61-VBHN-VPQH_2025_ATTP", "sohieu": "61/VBHN-VPQH",
+             "loai": "VBHN", "corpus": "true", "ngay_ban_hanh": "01/02/2025"},
+            # PHẢN CHỨNG: corpus=false sidecar KHÔNG year-fix (chính sách cũ giữ nguyên)
+            {"drive_id": "m5", "name": "VBHN_62-VBHN-VPQH_2026_XNC.docx", "sohieu": "62-VBHN-VPQH",
+             "loai": "VBHN", "corpus": "false"},
+        ]
+        _f, _n, _c = _TL_MODULE._vbhn_year_fix_items(_fx276)
+        _byid = {x["drive_id"]: x for x in _f}
+        ok1 = ("m1" in _byid and _byid["m1"]["new_sohieu"] == "09-2024-VBHN-BGDDT"
+               and _byid["m1"].get("mode") == "ministry_missing_segment")
+        ok2 = any(x.get("mode") == "malformed" and x["drive_id"] == "m2" for x in _n)
+        ok3 = ("m4" in _byid and _byid["m4"]["new_sohieu"] == "61-2025-VBHN-VPQH"
+               and all(x.get("drive_id") != "m3" for x in _f + _n)
+               and all(x.get("drive_id") != "m5" for x in _f + _n) and _c == [])
+        import registry_hygiene as _rh276
+        _rows276 = [
+            {"id": "a", "name": "VBHN_09-BGDDT_2024_X", "so_hieu": "09-BGDDT", "loai": "VBHN", "corpus": "true", "cat": "31"},
+            {"id": "b", "name": "NQ_27-NQ-TW_Phap_quyen", "so_hieu": "27-NQ-TW", "corpus": "true", "cat": "00"},
+            {"id": "c", "name": "QD_671-QD-BTTTT_Dinh_muc", "so_hieu": "671/QĐ-BTTTT", "corpus": "true", "cat": "31"},
+            # PHẢN CHỨNG: có năm / LCT-HDNN / sohieu rỗng / corpus=false — KHÔNG vào bucket
+            {"id": "d", "name": "Luat_41-2024-QH15_BHXH", "so_hieu": "41/2024/QH15", "corpus": "true", "cat": "20"},
+            {"id": "e", "name": "Luat_21-LCT-HDNN8_BVSK", "so_hieu": "21-LCT/HDNN8", "corpus": "true", "cat": "02"},
+            {"id": "f", "name": "rong.docx", "so_hieu": "", "corpus": "true", "cat": "31"},
+            {"id": "g", "name": "QD_66-QD-TW_raw.docx", "so_hieu": "66-QD-TW", "corpus": "false", "cat": "00"},
+        ]
+        _rep = _rh276.analyze(_rows276)
+        _kn = _rep["sohieu_khong_nam_rows"]
+        _lops = sorted((x["lop"], _rh276.row_id(x["row"])) for x in _kn)
+        ok4 = _lops == [("dang", "b"), ("khac", "c"), ("vbhn", "a")]
+        _sum = _rh276.build_doctor_summary(_rep)
+        ok5 = (_sum["sohieu_khong_nam"] == 3 and "sohieu_khong_nam=3" in _rh276.format_doctor_text(_sum)
+               and _sum["missing_sohieu"] == 1)
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+    _t110("r276_sohieu_khong_nam_detector", _c276_sohieu_khong_nam_detector)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

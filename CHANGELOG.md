@@ -1,3 +1,49 @@
+# ★ v1.36.5 — r267: PARITY 4 reader trên cùng tệp cache — U1 còn thiếu ở HAI chỗ nữa (2026-07-30)
+
+r266 (v1.36.4) vá `_doc_text_any` bỏ qua bộ lọc U1 và gọi chỗ mình vá là *"một choke-point"*. Rà lại vùng
+đó: **không phải một, mà BỐN** reader đọc cùng tệp `extract_<id>.txt`, và r266 mới đồng bộ hai:
+
+| reader | trước r267 |
+|---|---|
+| `_read_doc_text` (lookup_ops 2203) — bản chuẩn | `_sanitize_export_text(_strip_font_runs())` ✓ |
+| `_doc_text_any` (lookup_ops 2453) — r266 vá | ✓ |
+| **`cmd_xref`** (lookup_ops 1606) | chỉ `_strip_font_runs()` ✗ |
+| **`_frontier_doc_text`** (fetch_web 173) | chỉ `_strip_font_runs()` ✗ |
+
+Chính bất biến r266 tuyên bố — *"cache đọc ra phải qua ĐÚNG bộ lọc U1 như `_read_doc_text` đọc CÙNG tệp,
+không thì hai reader lệch byte"* — vẫn bị hai chỗ này vi phạm.
+
+**Và hậu quả KHÔNG dừng ở lệch byte — nó đổi KẾT QUẢ.** `_sanitize_export_text` **XOÁ** control-char (không
+thay bằng khoảng trắng), nên `\x0c` mà pdftotext để lại GIỮA một số hiệu sẽ được nối liền ở đường có U1,
+còn đường thiếu U1 thì regex `extract_refs` nuốt qua ranh giới. Đo trên CÙNG một tệp cache:
+
+```
+_read_doc_text (có U1)  → 2 dẫn chiếu: 59-2020-QH14 · 01-2021-ND-CP
+cmd_xref (thiếu U1)     → 1 dẫn chiếu, và SAI: mất hẳn 59/2020/QH14,
+                          còn 01/2021/NĐ-CP bị gán loai='Luật'
+```
+Tức **một dẫn chiếu biến mất** và **một dẫn chiếu bị gán sai loại**, cả hai IM LẶNG. Đường này nuôi
+`frontier-expand → missing_in_corpus` và `rasoat-loop → gaps_missing_in_corpus` ⇒ **danh sách văn bản cần
+tải bị thiếu mà không cổng nào kêu** — đúng lớp lỗi r256 vừa diệt ở chỗ khác.
+
+Vá: thêm `_sanitize_export_text(...)` tại đúng hai site, cùng hình dạng r266 (2 dòng).
+
+**GỐC RỄ, nêu rõ nhưng CỐ Ý KHÔNG tự làm:** đây là **bốn bản sao** của cùng một đoạn đọc-cache. Lớp lỗi này
+đã cắn HAI LẦN (r266 tìm ra và vá nửa; r267 tìm nốt nửa kia). Bản sao thứ năm sẽ xuất hiện. Dứt điểm là gộp
+về MỘT helper `_read_extract_cache(fid)` — nhưng đó là refactor chạm 4 chỗ và đổi đường của `_read_doc_text`,
+ngoài phạm vi bản vá này. **Đề xuất để người giữ quyết**, không bó kèm.
+
+**Phản chứng — 6 vế, trong đó 3 vế chống-vá-quá-tay:**
+· PARITY: 4 reader trên cùng tệp phải ra CÙNG tập dẫn chiếu, và phải ĐỦ 2 — vế khoá cả lớp lỗi, không chỉ 2 site;
+· bộ lọc phải CHỊU LỰC: bỏ nó đi thì kết quả KHÁC (nếu bằng nhau thì vế PARITY là no-op);
+· KHÔNG được nuốt `\n`/`\t`: text sạch qua **nguyên vẹn byte** (nuốt thì cấu trúc Điều vỡ mà PARITY vẫn xanh);
+· không chỉ `\x0c`: `\x00` `\x07` `\x1f` `\x7f` cũng phải nối lại số hiệu;
+· vế (a) của U1: lone-surrogate bị diệt;
+· khoá TĨNH cả hai site (chống ai gỡ ra mà 5 vế trên vẫn xanh nhờ `_read_doc_text` gánh hộ).
+
+Đo 2 CHIỀU: dán case vào cây CHƯA VÁ (`3e440ef`) → **ĐỎ đúng 1 case (1428/1429)**; trên bản vá →
+**1429/1429**.
+
 # ★ v1.36.4 — r266: `_doc_text_any` bỏ qua bộ lọc U1 — control-char (\x0c pdftotext) lọt cache/JSON, hai reader lệch byte (2026-07-30)
 
 P15 nhóm lookup, vùng treo «doc-text ~2140-2550» của bàn giao 30-07. `_doc_text_any` (A1 v1.34.60 — MỘT

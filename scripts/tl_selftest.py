@@ -23287,6 +23287,56 @@ def run() -> int:
                 pass
     _t110("r266_doc_text_any_qua_bo_loc_u1", _c266_doc_text_any_qua_bo_loc_u1)
 
+    # ═══ r267 — PARITY 4 READER trên CÙNG tệp cache `extract_<id>.txt` (U1) ═══
+    # r266 đồng bộ `_read_doc_text` + `_doc_text_any`, nhưng CÙNG tệp đó còn HAI reader nữa —
+    # `cmd_xref` (lookup_ops) và `_frontier_doc_text` (fetch_web) — vẫn chỉ `_strip_font_runs`.
+    # Hậu quả KHÔNG chỉ lệch byte: `\x0c` pdftotext nằm GIỮA một số hiệu làm regex extract_refs nuốt
+    # qua ranh giới ⇒ đo được MẤT HẲN `59/2020/QH14` và gán NHẦM `01/2021/NĐ-CP` thành loai='Luật'.
+    # Đường này nuôi `missing_in_corpus`/`gaps_missing_in_corpus` ⇒ danh sách cần tải THIẾU âm thầm.
+    def _c267_parity_reader_cache_u1():
+        _fid267 = "R267PARITY"
+        _raw267 = ("Điều 5. Dẫn chiếu\nCăn cứ Luật Doanh nghiệp số 59\x0c/2020/QH14 "
+                   "và Nghị định 01/2021/NĐ-CP.\n")
+        _p267 = _TL_MODULE._cache_file("extract_%s.txt" % _fid267)
+        _p267.parent.mkdir(parents=True, exist_ok=True)
+        _p267.write_text(_raw267, encoding="utf-8")
+
+        def _sh267(t):
+            return sorted({r["sohieu"] for r in _TL_MODULE.extract_refs(t)})
+        _mong = ["01-2021-ND-CP", "59-2020-QH14"]
+        # (1) PARITY — 4 reader, CÙNG tệp, phải ra CÙNG tập dẫn chiếu và phải ĐỦ 2
+        with _hush():
+            _a267 = _sh267(_TL_MODULE._read_doc_text(_fid267))
+            _b267 = _sh267(_TL_MODULE._doc_text_any(_fid267)[0])
+        _src267 = _p267.read_text(encoding="utf-8")
+        # cmd_xref và _frontier_doc_text dùng CHUNG một đoạn; gọi thẳng vị từ chúng áp dụng
+        _c267 = _sh267(_TL_MODULE._sanitize_export_text(_TL_MODULE._strip_font_runs(_src267)))
+        ok1 = (_a267 == _b267 == _c267 == _mong)
+        # (2) PHẢN CHỨNG — bộ lọc PHẢI chịu lực: bỏ nó đi thì kết quả KHÁC (nếu bằng nhau thì
+        #     test (1) là no-op và không khoá được gì).
+        _thieu267 = _sh267(_TL_MODULE._strip_font_runs(_src267))
+        ok2 = _thieu267 != _mong
+        # (3) PHẢN CHỨNG — KHÔNG được nuốt `\n`/`\t`: text sạch qua NGUYÊN VẸN BYTE (nếu nuốt thì
+        #     cấu trúc Điều vỡ, và ca (1) vẫn có thể xanh).
+        _sach267 = "Điều 1. A\n\tKhoản 1: b\n\nĐiều 2. C\n"
+        ok3 = _TL_MODULE._sanitize_export_text(_TL_MODULE._strip_font_runs(_sach267)) == _sach267
+        # (4) PHẢN CHỨNG — không chỉ `\x0c`: control-char KHÁC cũng phải nối lại được số hiệu
+        ok4 = all(_sh267(_TL_MODULE._sanitize_export_text("Luật X số 59%s/2020/QH14" % _ch))
+                  == ["59-2020-QH14"] for _ch in ("\x00", "\x07", "\x1f", "\x7f"))
+        # (5) PHẢN CHỨNG — vế (a) của U1: lone-surrogate bị diệt
+        ok5 = not any(0xD800 <= ord(_x) <= 0xDFFF
+                      for _x in _TL_MODULE._sanitize_export_text("A\udcffB"))
+        # (6) khoá TĨNH: cả hai site đã nối cổng (chống ai đó gỡ ra mà 4 vế trên vẫn xanh nhờ
+        #     _read_doc_text gánh hộ)
+        import tl_core.fetch_web as _fw267
+        _s1 = _P209(_TL_MODULE.__file__).resolve().parent.joinpath("tl_core", "lookup_ops.py").read_text(
+            encoding="utf-8", errors="replace")
+        _s2 = _P209(_fw267.__file__).read_text(encoding="utf-8", errors="replace")
+        ok6 = ("_sanitize_export_text(_strip_font_runs(_ct))" in _s1
+               and "_sanitize_export_text(_strip_font_runs(_ct))" in _s2)
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
+    _t110("r267_parity_reader_cache_u1", _c267_parity_reader_cache_u1)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

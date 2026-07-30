@@ -1603,7 +1603,12 @@ def cmd_xref(a) -> int:
             if _cf.exists():
                 _ct = _cf.read_text(encoding="utf-8", errors="replace")
                 if _ct.strip():
-                    text = _strip_font_runs(_ct)
+                    # r267 (P15 — đo 30-07): CÙNG tệp cache `extract_<id>.txt` có tới BỐN reader; r266 mới
+                    # đồng bộ hai (`_read_doc_text` + `_doc_text_any`). Thiếu U1 ở đây KHÔNG chỉ lệch byte —
+                    # `\x0c` pdftotext nằm GIỮA một số hiệu làm regex nuốt qua ranh giới: đo được MẤT HẲN
+                    # `59/2020/QH14` và gán NHẦM `01/2021/NĐ-CP` thành loai='Luật'. Đường này nuôi
+                    # `missing_in_corpus`/`gaps_missing_in_corpus` ⇒ danh sách văn bản cần tải THIẾU âm thầm.
+                    text = _sanitize_export_text(_strip_font_runs(_ct))
         except Exception:
             text = ""
         if not text:

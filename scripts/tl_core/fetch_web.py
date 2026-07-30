@@ -170,7 +170,9 @@ def _frontier_doc_text(a):
         if _cf.exists():
             _ct = _cf.read_text(encoding="utf-8", errors="replace")
             if _ct.strip():
-                text = _strip_font_runs(_ct)
+                # r267 (P15 — đo 30-07): twin của `cmd_xref`; xem chú thích ở lookup_ops. Thiếu U1 ⇒
+                # frontier-expand/rasoat-loop bóc thiếu dẫn chiếu trên CÙNG cache mà `_read_doc_text` bóc đủ.
+                text = _sanitize_export_text(_strip_font_runs(_ct))
     except Exception:
         text = ""
     if not text:

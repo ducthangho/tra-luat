@@ -16,7 +16,24 @@
 # rc: 0 = xong · 1 = gate đỏ · 2 = build/verify hỏng · 3 = đẩy hỏng (gồm CHẶN THỤT LÙI)
 set -uo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Xác định GỐC REPO và FAIL RÕ nếu không tìm được. Mặc định script ở <repo>/scripts nên gốc = lên
+# HAI cấp; nhưng copy script ra chỗ khác thì "lên hai cấp" trỏ đi đâu đó và bước 0 chết với thông
+# báo vô nghĩa kiểu "không thấy /VERSION" — người đọc không suy ra được nguyên nhân là SAI CHỖ ĐẶT.
+# (Đường ps1 đã sập thật một lượt: script ở D:\Quốc hội\ ⇒ đòi D:\VERSION.) Kiểm dấu hiệu repo.
+_is_repo() { [ -n "${1:-}" ] && [ -f "$1/VERSION" ] && [ -f "$1/scripts/tl.py" ]; }
+_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT=""
+for _c in "${TL_REPO:-}" "$(dirname "$_HERE")" "$_HERE" "$PWD"; do
+  if _is_repo "$_c"; then ROOT="$(cd "$_c" && pwd)"; break; fi
+done
+if [ -z "$ROOT" ]; then
+  printf '  \033[31m[FAIL]\033[0m Không tìm được gốc repo tra-luat (cần có VERSION + scripts/tl.py).\n' >&2
+  printf '         đã thử: TL_REPO=%s · lên-2-cấp=%s · thư-mục-script=%s · cwd=%s\n' \
+         "${TL_REPO:-<chưa đặt>}" "$(dirname "$_HERE")" "$_HERE" "$PWD" >&2
+  printf '         Chữa: chạy bản TRONG repo (scripts/deploy-package.sh), hoặc đặt TL_REPO=/duong/dan/repo.\n' >&2
+  printf '         Đừng để HAI bản script song song — chúng sẽ trôi lệch nhau.\n' >&2
+  exit 2
+fi
 cd "$ROOT" || exit 2
 PY="${TL_PYTHON:-python3}"
 TL="$PY scripts/tl.py"

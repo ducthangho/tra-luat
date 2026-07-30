@@ -39,14 +39,44 @@ param(
   [switch]$Pull,
   [switch]$ForceOlder,
   [string]$Out,
-  [string]$Python
+  [string]$Python,
+  [string]$Repo
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false   # native rc KHÔNG throw — ta tự kiểm $LASTEXITCODE
 
-$Root = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+# ── Xác định GỐC REPO, và FAIL RÕ RÀNG nếu không tìm được ──
+# Mặc định script nằm ở <repo>\scripts\ nên gốc repo = lên HAI cấp. Nhưng nếu ai copy script ra chỗ
+# khác (vd D:\Quốc hội\) thì "lên hai cấp" ra `D:\` và bước 0 chết với thông báo vô nghĩa
+# "Cannot find path 'D:\VERSION'" — người đọc không thể suy ra nguyên nhân thật là SAI CHỖ ĐẶT.
+# Đã sập thật một lượt. Nay: thử nhiều ứng viên, KIỂM dấu hiệu repo (VERSION + scripts/tl.py), và
+# nếu không đạt thì in ra ĐÃ THỬ NHỮNG ĐÂU + hai cách chữa.
+function Test-TlRepo {
+  param([string]$p)
+  if ([string]::IsNullOrWhiteSpace($p)) { return $false }
+  return (Test-Path (Join-Path $p 'VERSION')) -and (Test-Path (Join-Path $p 'scripts/tl.py'))
+}
+$here = Split-Path -Parent $PSCommandPath
+$cands = [ordered]@{}
+if ($Repo) { $cands['-Repo'] = $Repo }
+$cands['lên 2 cấp từ script (bố trí chuẩn <repo>\scripts\)'] = (Split-Path -Parent $here)
+$cands['thư mục của script (nếu script ở gốc repo)']          = $here
+$cands['thư mục đang đứng']                                    = (Get-Location).Path
+$Root = $null
+foreach ($k in $cands.Keys) {
+  if (Test-TlRepo $cands[$k]) { $Root = (Resolve-Path $cands[$k]).Path; break }
+}
+if (-not $Root) {
+  Write-Host "  [FAIL] Không tìm được gốc repo tra-luat (cần có VERSION + scripts/tl.py)." -ForegroundColor Red
+  foreach ($k in $cands.Keys) { Write-Host ("         đã thử [{0}]: {1}" -f $k, $cands[$k]) -ForegroundColor Red }
+  Write-Host '         Chữa — chọn MỘT:' -ForegroundColor Yellow
+  Write-Host '           (a) Chạy bản TRONG repo:  <repo>\scripts\deploy-package.cmd   ← khuyên dùng' -ForegroundColor Yellow
+  Write-Host '           (b) Giữ script ở chỗ khác thì nêu repo:  -Repo "C:\qh\tra-luat"' -ForegroundColor Yellow
+  Write-Host '         Đừng để HAI bản deploy-package.ps1 song song — chúng sẽ trôi lệch nhau.' -ForegroundColor Yellow
+  exit 2
+}
 Set-Location $Root
 $State = Join-Path $Root 'scripts/.tl_state/deploy'
 New-Item -ItemType Directory -Force -Path $State | Out-Null

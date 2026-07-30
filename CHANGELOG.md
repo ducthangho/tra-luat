@@ -1,3 +1,35 @@
+# ★ v1.35.85 — r248: script deploy phải NÓI RÕ khi bị đặt sai chỗ (2026-07-30)
+
+**Sự cố người dùng báo:** copy `deploy-package.ps1` + `.cmd` sang `D:\Quốc hội\` rồi chạy ⇒ chết ở bước 0
+với `Cannot find path 'D:\VERSION' because it does not exist.` Người đọc KHÔNG THỂ suy ra nguyên nhân
+thật là SAI CHỖ ĐẶT: script tính gốc repo bằng "lên HAI cấp từ vị trí của nó" (vì vốn nằm ở
+`<repo>/scripts/`), nên ở `D:\Quốc hội\` thì lên hai cấp ra `D:\`.
+
+Lỗi kép: (1) người dùng đặt sai chỗ, (2) **script báo lỗi mù mờ** — và (2) mới là khiếm khuyết của ta.
+Một thông báo chỉ đúng-về-mặt-kỹ-thuật mà không dẫn tới cách chữa thì vẫn là hỏng.
+
+Nay CẢ HAI bản thử nhiều ứng viên rồi KIỂM dấu hiệu repo (`VERSION` + `scripts/tl.py`):
+`-Repo`/`TL_REPO` → lên-2-cấp → thư-mục-script → cwd. Không đạt ⇒ in ĐÃ THỬ NHỮNG ĐÂU (từng đường dẫn,
+kèm nhãn vì sao thử) + hai cách chữa, `rc=2`. Thêm tham số `-Repo` (ps1) và biến `TL_REPO` (sh) để ai
+muốn giữ script ngoài repo vẫn chạy được.
+
+Vá cả bản `sh` dù chỉ bản `ps1` sập — cùng một giả định "lên hai cấp", parity là doctrine.
+
+**Test hai chiều, chạy thật (tải PowerShell 7.4.6, xong xoá):**
+| tình huống | ps1 | sh |
+|---|---|---|
+| đặt đúng `<repo>/scripts/` | chạy | chạy |
+| script NGOÀI repo, cwd cũng ngoài (đúng ca của user) | **rc=2 + chỉ rõ 3 đường đã thử** | **rc=2** |
+| script ngoài repo + `-Repo`/`TL_REPO` | chạy | chạy |
+| script ngoài repo nhưng cwd Ở TRONG repo | chạy (cwd cứu) | chạy |
+
+Ca cuối đáng ghi: lượt test đầu tôi chạy từ trong repo nên `cwd` cứu, phép thử KHÔNG chạm đường đỏ —
+phải dựng lại cwd trung tính mới tái hiện được. Fixture sai làm test xanh oan.
+
+Kèm bộ khởi chạy mỏng `deploy-tra-luat.cmd` (KHÔNG vào repo — người dùng tự đặt ở `D:\Quốc hội\`): chỉ
+`call` bản trong repo, sửa MỘT dòng `TL_REPO`. Cố ý không phải bản copy — hai bản song song sẽ trôi lệch,
+đúng cái bệnh vừa chữa xong ở r246 khi bỏ `upload-skill-to-Package.ps1`.
+
 # ★ v1.35.84 — r247: vỏ `.cmd` để double-click deploy (2026-07-30)
 
 Bỏ `upload-skill-to-Package.ps1` ở r246 làm mất luôn đường **double-click** — Windows KHÔNG chạy `.ps1`

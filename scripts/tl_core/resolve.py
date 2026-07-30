@@ -1126,12 +1126,21 @@ def _sohieu_typo_near(cited: str, entries: list, name_q: str = ""):
 
 
 def _vbhn_for_goc(sohieu_key: str, entries: list) -> list:
-    """Các entry VBHN/bản hợp nhất có 'goc' chứa số hiệu này → tín hiệu OUTDATED."""
+    """Các entry VBHN/bản hợp nhất có 'goc' chứa số hiệu này → tín hiệu OUTDATED.
+    r270: so THEO TẬP KHÓA `_goc_keys` (bóc từng phần ;,| rồi norm — cùng bộ với _vbhn_base_key), KHÔNG
+    substring trên blob JSON như trước: norm_sohieu(gtxt) giữ nguyên chuỗi số nên '6-2012-QH13' khớp LỌT
+    goc '16/2012/QH13' (không biên từ) ⇒ _classify_ref gắn OUTDATED giả «đã được VBHN bao phủ» cho dẫn
+    chiếu THIẾU thật trong corpus — che MISSING/TYPO, đúng chiều nguy hiểm (đo 31-07: cited '1-2020-QH14'
+    ↔ goc '41/2020/QH14' → OUTDATED). Đo 3 registry thật: goc chỉ chứa sohieu sạch/danh sách ;— exact-set
+    không mất ca nào so substring, chỉ mất ca khớp-lọt."""
+    key = norm_sohieu(str(sohieu_key or "").replace("_", "-"))
+    if not key:
+        return []
     out = []
     for e in entries:
         goc = e.get("goc")
         gtxt = json.dumps(goc, ensure_ascii=False) if isinstance(goc, (list, dict)) else str(goc or "")
-        if sohieu_key and norm_sohieu(sohieu_key).replace("/", "-") in norm_sohieu(gtxt).replace("/", "-"):
+        if gtxt and key in _goc_keys(e):
             if _is_vbhn_entry(e) or "VBHN" in gtxt.upper():
                 out.append(e)
     return out

@@ -23450,6 +23450,32 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8)
     _t110("r269_dedup_status_active_alias_chunk", _c269_dedup_status_active_alias_chunk)
 
+    def _c270_vbhn_for_goc_boundary():
+        """r270 (P15 rà resolve.py, đo 31-07): `_vbhn_for_goc` so SUBSTRING trên blob JSON đã norm —
+        norm_sohieu giữ nguyên chuỗi số nên cited '1-2020-QH14' khớp LỌT goc '41/2020/QH14' (không biên
+        từ) ⇒ `_classify_ref` gắn OUTDATED giả «đã được VBHN bao phủ» cho dẫn chiếu THIẾU thật trong
+        corpus — che MISSING/TYPO (chiều nguy hiểm: hàng đợi tải bỏ sót). Vá: so theo TẬP KHÓA _goc_keys."""
+        _v270 = {"name": "VBHN_99-2025-VBHN-VPQH_Xay_dung", "sohieu": "99-2025-VBHN-VPQH",
+                 "goc": "41/2020/QH14", "loai": "VBHN", "drive_id": "d270"}
+        ok1 = _TL_MODULE._vbhn_for_goc("1-2020-QH14", [_v270]) == []              # hết khớp-lọt
+        ok2 = _TL_MODULE._classify_ref({"sohieu": "1-2020-QH14", "name_phrase": "", "loai": ""},
+                                       [_v270])["flag"] == "MISSING"              # hạ nguồn: MISSING thật
+        # PHẢN CHỨNG — exact/;-list/JSON-list PHẢI còn khớp (không vá quá tay), prefix-lọt vẫn bị chặn:
+        ok3 = bool(_TL_MODULE._vbhn_for_goc("41-2020-QH14", [_v270]))
+        _vl = {"name": "VBHN_11-2025-VBHN-VPQH_TL", "sohieu": "11-2025-VBHN-VPQH",
+               "goc": "09/2012/QH13;28/2018/QH14", "loai": "VBHN", "drive_id": "d271"}
+        ok4 = (bool(_TL_MODULE._vbhn_for_goc("09-2012-QH13", [_vl]))
+               and bool(_TL_MODULE._vbhn_for_goc("28-2018-QH14", [_vl]))
+               and not _TL_MODULE._vbhn_for_goc("8-2018-QH14", [_vl]))
+        _vj = {"name": "VBHN_X", "sohieu": "12-2025-VBHN-VPQH", "goc": ["64/2025/QH15", "87/2025/QH15"],
+               "loai": "VBHN", "drive_id": "d272"}
+        ok5 = (bool(_TL_MODULE._vbhn_for_goc("64-2025-QH15", [_vj]))
+               and not _TL_MODULE._vbhn_for_goc("4-2025-QH15", [_vj]))
+        _nv = {"name": "Luat_XX", "sohieu": "50/2024/QH15", "goc": "41/2020/QH14", "drive_id": "d273"}
+        ok6 = not _TL_MODULE._vbhn_for_goc("41-2020-QH14", [_nv])                 # non-VBHN vẫn bị loại
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
+    _t110("r270_vbhn_for_goc_boundary", _c270_vbhn_for_goc_boundary)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

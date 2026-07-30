@@ -1,3 +1,19 @@
+# ★ v1.36.8 — r270: `_vbhn_for_goc` khớp-lọt substring trên blob JSON — OUTDATED giả che MISSING thật (2026-07-31)
+
+P15 rà resolve.py (tiếp). `_vbhn_for_goc` (nuôi cả HAI nhánh của `_classify_ref`: kiểm OUTDATED khi số hiệu
+khớp, và VBHN-coverage TRƯỚC TYPO/MISSING khi không khớp) so `norm_sohieu(key) in norm_sohieu(gtxt)` — substring
+KHÔNG biên từ trên blob JSON của trường goc. norm giữ nguyên chuỗi số ⇒ cited `1-2020-QH14` khớp LỌT goc
+`41/2020/QH14`, cited `6-2012-QH13` khớp `16/2012/QH13` (dẫn chiếu viết không số 0 dẫn đầu là ca thường gặp).
+Chiều nguy hiểm: dẫn chiếu THIẾU thật trong corpus bị gắn `OUTDATED — đã được VBHN 'X' bao phủ` (đo 31-07)
+⇒ xref/refs-audit/frontier bỏ nó khỏi hàng MISSING — danh sách văn bản cần tải THIẾU âm thầm (đúng lớp
+r256/r267 vừa diệt ở chỗ khác).
+
+VÁ: so theo TẬP KHÓA `_goc_keys` (bóc ;,| + norm từng phần — CÙNG bộ khoá _vbhn_base_key dùng). Đo 3 registry
+thật: goc chỉ chứa sohieu sạch (5 giá trị phân biệt, 2 quirk Drive-ID không khớp được gì) ⇒ exact-set không
+mất ca thật nào. Lưu ý mở rộng cố ý: `_goc_keys` đọc qua `_entry_goc` (goc|goc_luat|targets) — rộng hơn blob
+cũ (chỉ `goc`) nhưng đồng nhất với phần còn lại của resolve. Selftest +1 case (2 vế vá + 4 phản chứng
+exact/;-list/JSON-list/non-VBHN). 1432/1432.
+
 # ★ v1.36.7 — r269: cổng dedup `_dedup_status` hở 3 vế — từ vựng active trôi lệch, membership câm alias, thiếu parity bare-VBHN (2026-07-31)
 
 P15 rà `tl_core/resolve.py` (mục cuối nhóm lookup). `_dedup_status` là cổng chống-nạp-trùng nuôi

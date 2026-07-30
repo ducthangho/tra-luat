@@ -1,0 +1,22 @@
+[
+  {"drive_id": "1mGRs4vsTZDO9XBqXy6Jp_ZU6JcObttnvrGzQLauP54A",
+   "note": "TWIN: bản trùng IDENTICAL (doc-compare 31-07: jaccard 1.0, 56.875 ký tự) của canonical Luat_74-2025-QH15_Viec_lam 1PfTsnRYtcpTbMNqnr_4lO8n7GyWGmBmTSHC79IR66a0. Giữ quarantine, không nạp NLM."},
+  {"drive_id": "1n1ezVBAsrKzxeErxU6UnqKG128hhpwx8kdYaqpCoGAo",
+   "note": "TWIN: bản trùng nội dung (doc-compare 31-07: NEAR jaccard 1.0, chênh 1 ký tự/192.840) của canonical VBHN_18-2026-VBHN-VPQH 1gJn-6pjj2IMUU0F4K2HNV6L9f73YfSHHjUH2ZICPxos. Giữ quarantine."},
+  {"drive_id": "1FqSESXbEdh4mpEpT3-DXkBpITeVZ2jm8xXMZoEl-ax0",
+   "note": "BẢN CŨ: gần trùng canonical 1gJn-6pjj2IMUU0F4K2HNV6L9f73YfSHHjUH2ZICPxos (doc-compare 31-07: NEAR jaccard 0.9968, chênh 33 ký tự); tên thiếu năm, đã gỡ NLM (removed_by_user). Đề xuất quarantine — đang nằm chung cat 20 với canonical, dễ vớ nhầm."},
+  {"drive_id": "1K2i2rFACxlQdXfPO_GPZfbPZN0xxnRUZFHXcBvY0Tfo",
+   "note": "TWIN: bản trùng IDENTICAL (doc-compare 31-07: content_hash trùng, jaccard 1.0, 72.031 ký tự) của canonical VBHN_60-2026-VBHN-VPQH 1hUVmJ10lV-_tTP3ZMvSRWA7l4WSdZ0Y93iBsFZE_xo8. Set corpus=false, không nạp NLM."},
+  {"drive_id": "1Q0XmTbuwaNu6obtR1a5D-8e20UcI3IKTbeAc7T7gs3w",
+   "note": "NĂM SUY TỪ HEADER (doc-text 31-07): «Số: 40/VBHN-VPQH … ngày 16/3/2026», Luật BHYT hợp nhất ⇒ sohieu 40-2026-VBHN-VPQH; twin của canonical 1vMLpyEL6xcOStsjoLAblcs-4xvQO93dJXT-VuptLG48."},
+  {"drive_id": "12i-lNclnS72jHWH1jwvWYJx5wZtwrGm5i3papThKod4",
+   "note": "NĂM SUY TỪ HEADER (doc-text 31-07): «Số: 40/VBHN-VPQH … ngày 16/3/2026», Luật BHYT hợp nhất ⇒ sohieu 40-2026-VBHN-VPQH; twin của canonical 1vMLpyEL6xcOStsjoLAblcs-4xvQO93dJXT-VuptLG48."},
+  {"drive_id": "1pbLZB2xYGj9HCAiyrrVyPOMSaFHuui0YlrjzOwQ5yjw",
+   "note": "NĂM SUY TỪ HEADER (doc-text 31-07): «Số: 89/VBHN-VPQH … ngày 22/8/2025», Luật MTTQ VN ⇒ sohieu 89-2025-VBHN-VPQH; twin của canonical 1XoA7uoId7dlg6oxoCq2YHi8-tsOdoeQUJlgDtiF5-Yg."},
+  {"drive_id": "1jyM8uEKJRKmohcl4EQ8F1WpupoueR0gWor1IoT8xkOQ",
+   "note": "NĂM SUY TỪ ĐỐI CHIẾU (31-07): header nguồn KHÔNG in «Số:»; nội dung = Luật NSNN 89/2025/QH15 sđbs 145/2025/QH15, trùng nội dung canonical 89-2026-VBHN-VPQH 1myFf_DK9RMagho-kiibo_-HEJPdXaOOhx09CN4bf110 (sổ B3 26-07 đã đối chiếu) ⇒ sohieu 89-2026-VBHN-VPQH."},
+  {"drive_id": "1Qja1LwpJHCA_qYPrDF2hTpnV0QHomCms",
+   "note": "NĂM SUY TỪ HEADER (doc-text 31-07): «Số: 25/VBHN-VPQH … ngày 26/02/2025», Luật Kế toán ⇒ sohieu 25-2025-VBHN-VPQH; bản docx gốc, canonical GDoc 14R22X1A6FfxhVuhOGWA7ZlXKJBVHdJoCSa2oS-KLo4c."},
+  {"drive_id": "1ZK0wZiBwWBGq86bgnRlbX9kqvxuSq9DM",
+   "note": "NĂM SUY TỪ HEADER (doc-text 31-07): «Số: 25/VBHN-VPQH … ngày 29/12/2022», Luật NGÂN HÀNG NHÀ NƯỚC VN ⇒ sohieu 25-2022-VBHN-VPQH. COLLISION THẬT với Kế toán 25-2025: hai văn bản khác nhau từng chung sohieu 25-VBHN-VPQH."}
+]

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# nlm-auto-refresh.sh — TỰ ĐỘNG refresh NLM cho Routine bảo trì (không tương tác).
+#
+# Logic (STATELESS, so mốc modifiedTime trên Drive — không cần nhớ trạng thái giữa phiên):
+#   · Có file 'nlm-auth' MỚI HƠN bundle nlm_cred.enc  ⇒ export tươi user vừa thả vào Drive
+#       → import (nlm-auth-import.sh) → stage vào bundle mã hoá → XOÁ plaintext khỏi Drive (bảo mật).
+#   · Không có file mới                                 ⇒ keep-warm: nạp bundle, probe, stage lại nếu sống.
+#   · Probe cuối quyết định rc: 0 sống · 3 chết (cần re-harvest) · 2 gws/hạ tầng hỏng.
+#
+# Dành cho Routine phiên-mới: chỉ cần TL_TOKEN (môi trường inject). KHÔNG commit/push/sửa code.
+set -uo pipefail
+ROOT="${TL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+[ -f "$ROOT/scripts/tl.py" ] || { echo "✗ không thấy scripts/tl.py"; exit 2; }
+cd "$ROOT" || exit 2
+PY="${TL_PYTHON:-python3}"
+export PATH="$HOME/.local/bin:$PATH"
+
+say(){ printf '\n== %s ==\n' "$*"; }
+[ -n "${TL_TOKEN:-}" ] || { echo "✗ thiếu TL_TOKEN"; exit 2; }
+
+# ── 0. đảm bảo gws + nlm ──
+say "0. hạ tầng"
+command -v gws >/dev/null 2>&1 || $PY scripts/tl.py gws-bootstrap-cowork >/dev/null 2>&1 || { echo "✗ gws"; exit 2; }
+$PY scripts/tl.py gws-ping --env cowork >/dev/null 2>&1 || { echo "✗ gws-ping ĐỎ (gws auth hỏng)"; exit 2; }
+command -v nlm >/dev/null 2>&1 || $PY scripts/tl.py nlm-install >/dev/null 2>&1 || echo "  ⚠ nlm chưa cài được"
+echo "  gws OK"
+
+# ── 1. so mốc: có export MỚI HƠN bundle không? ──
+say "1. dò export mới trên Drive"
+BUNDLE_ID="$($PY -c 'import sys;sys.path.insert(0,"scripts");import tl;print(tl.NLM_CRED_FILEID)' 2>/dev/null)"
+_epoch(){ # in epoch modifiedTime của fileId $1 (0 nếu lỗi)
+  gws drive files get --params "{\"fileId\":\"$1\",\"fields\":\"modifiedTime\"}" 2>/dev/null \
+  | $PY -c 'import json,sys
+from datetime import datetime
+try:
+    mt=json.load(sys.stdin).get("modifiedTime","")
+    print(int(datetime.fromisoformat(mt.replace("Z","+00:00")).timestamp()))
+except Exception: print(0)'
+}
+BUNDLE_EP="$(_epoch "$BUNDLE_ID")"
+# file plaintext 'nlm-auth' mới nhất
+NEW_ROW="$(gws drive files list --params '{"q":"name contains \"nlm-auth\" and trashed = false","orderBy":"modifiedTime desc","pageSize":1,"fields":"files(id,name,modifiedTime)"}' 2>/dev/null \
+  | $PY -c 'import json,sys
+from datetime import datetime
+try:
+    fs=json.load(sys.stdin).get("files") or []
+    if fs:
+        f=fs[0]; ep=int(datetime.fromisoformat(f["modifiedTime"].replace("Z","+00:00")).timestamp())
+        sys.stdout.write("%s\t%s\t%s" % (f["id"], ep, f.get("name","")))
+except Exception: pass')"
+NEW_ID="$(printf '%s' "$NEW_ROW" | cut -f1)"; NEW_EP="$(printf '%s' "$NEW_ROW" | cut -f2)"; NEW_NAME="$(printf '%s' "$NEW_ROW" | cut -f3)"
+echo "  bundle epoch=$BUNDLE_EP · export mới nhất=${NEW_NAME:-<không có>} epoch=${NEW_EP:-0}"
+
+REFRESHED=0
+if [ -n "$NEW_ID" ] && [ "${NEW_EP:-0}" -gt "${BUNDLE_EP:-0}" ]; then
+  # ── 2a. có export tươi → import + stage + xoá plaintext ──
+  say "2. IMPORT export tươi ($NEW_NAME)"
+  if ./scripts/nlm-auth-import.sh --drive-id "$NEW_ID" 2>&1 | sed 's/^/  /'; then
+    REFRESHED=1
+    # chỉ xoá plaintext SAU khi import+stage thành công (đã mã hoá an toàn vào bundle)
+    gws drive files delete --params "{\"fileId\":\"$NEW_ID\"}" >/dev/null 2>&1 \
+      && echo "  ✓ đã xoá plaintext '$NEW_NAME' khỏi Drive (đã mã hoá vào bundle)" \
+      || echo "  ⚠ không xoá được plaintext '$NEW_NAME' — xoá tay cho an toàn"
+    rm -f "$ROOT/download.html" 2>/dev/null || true
+  else
+    echo "  ⚠ import export tươi THẤT BẠI — giữ nguyên plaintext để soi tay"
+  fi
+else
+  # ── 2b. không có export mới → keep-warm ──
+  say "2. keep-warm (không có export mới)"
+  $PY scripts/tl.py nlm-auth-load >/dev/null 2>&1 || true
+fi
+
+# ── 3. probe LIVE quyết định trạng thái ──
+say "3. probe LIVE"
+if CHK="$(nlm login --check 2>&1)" && printf '%s' "$CHK" | grep -qi valid; then
+  NB="$(printf '%s' "$CHK" | grep -oE 'Notebooks found: *[0-9]+' | grep -oE '[0-9]+' | head -1)"
+  $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1 || true   # luôn làm tươi bundle (idempotent)
+  echo "  ✓ NLM SỐNG (${NB:-?} notebook)$([ "$REFRESHED" = 1 ] && echo ' — vừa refresh từ export mới' || echo ' — keep-warm')"
+  exit 0
+fi
+echo "  🔴 NLM CHẾT — cần re-harvest cookie:"
+echo "     điện thoại: Firefox + Cookie Quick Manager → export toàn bộ cookie google → Drive"
+echo "     (tài khoản ducthangho@gmail.com, tên có 'nlm-auth'); Routine sau tự import."
+echo "     hoặc máy Code: nlm login && python scripts/tl.py nlm-auth-stage"
+exit 3

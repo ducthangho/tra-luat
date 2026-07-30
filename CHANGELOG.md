@@ -1,3 +1,22 @@
+# ★ v1.35.87 — r250: nlm-auto-refresh.sh — tự phát hiện export mới trên Drive → import → mã hoá → xoá (2026-07-29)
+
+(Đánh lại số từ r241/v1.35.78 vì phiên song song đã dùng r241–r249 cho việc khác — rebase lên master v1.35.86.)
+
+Hoàn tất tự động hóa refresh NLM (user chọn "tự import + tự xoá plaintext"). Hai mắt xích:
+- A (điện thoại→Drive): app Android autosync (Autosync for Google Drive / FolderSync) đồng bộ MỘT
+  CHIỀU Download/ → thư mục Drive ducthangho@gmail.com. Cookie Quick Manager export tên có
+  'nlm-auth' → tự lên Drive. (Cài 1 lần trên phone, ngoài repo.)
+- B: scripts/nlm-auto-refresh.sh — STATELESS theo modifiedTime: export 'nlm-auth' mới hơn bundle
+  nlm_cred.enc ⇒ import (nlm-auth-import.sh --drive-id) → stage vào bundle mã hoá → XOÁ plaintext
+  khỏi Drive THEO ĐÚNG ID (chỉ sau khi mã hoá xong); không có export mới ⇒ keep-warm. Probe cuối:
+  rc 0 sống / 3 chết (cần re-harvest) / 2 hạ tầng hỏng.
+
+Routine "giữ-ấm + cảnh báo" (trig_01ReWux8) đổi để gọi nlm-auto-refresh.sh ⇒ auto-refresh đầy đủ
+mỗi 6h: user chỉ cần thỉnh thoảng bấm Export trên điện thoại.
+
+Kiểm: keep-warm path LIVE (139 notebook, rc 0); so-mốc unit-test 3 ca; import --drive-id + delete
+theo ID chứng minh riêng. XOÁ CHỈ theo ID cụ thể, KHÔNG theo tên — bài học: một lần dọn test xoá
+theo tên 'Untitled' đã xoá nhầm 1 file image/png không thuộc phiên (permanent, không trong trash).
 # ★ v1.35.86 — r249: báo cáo lượt rà ra khỏi GÓI, vào thư mục `rasoat/` (2026-07-30)
 
 5 tệp sản phẩm-phiên đang chiếm slot trong gói mà runtime Cowork không bao giờ đọc:

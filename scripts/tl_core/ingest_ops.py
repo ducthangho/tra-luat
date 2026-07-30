@@ -322,6 +322,42 @@ def _ingest_ckpt_load_full(ckpt) -> dict:
     return out
 
 
+_SNAPSHOT_STALE_S = 3600      # > 1 giờ = quá xa cache GAS (~600s) ⇒ manifest CŨ THẬT, không phải nhiễu cache
+
+
+def _snapshot_age_seconds(ts: str) -> float | None:
+    """Tuổi (giây) của mốc `generatedAt` trong manifest. Khác `_manifest_cache_age_seconds` (mtime file
+    cache LOCAL): một cache vừa ghi lại có thể chứa manifest sinh từ mấy ngày trước."""
+    s = (ts or "").strip()
+    if not s or s == "?":
+        return None
+    try:
+        return max(0.0, time.time() - datetime.datetime.fromisoformat(
+            s.replace("Z", "+00:00")).timestamp())
+    except Exception:
+        return None
+
+
+def _snapshot_stale_warn(ts: str, backlog: int) -> tuple[float | None, list[str]]:
+    """r251: `backlog=0` trên manifest CŨ đọc ra thành "hết việc" — đúng cái bẫy đo được 30-07-2026:
+    `ingest-missing` (không `--refresh`) trả snapshot 27-07 và `backlog=0`, trong khi sự thật là 2
+    (Luật 41/2024 chờ nạp + BIDV thiếu số hiệu) — `sweep` cùng lúc đã nói "2 chưa push NLM". Cùng họ
+    với bài học `reg-query --refresh` (nạp chồng 9 tài liệu 24-07): SỐ 0 TRÊN DỮ LIỆU NGUỘI KHÔNG PHẢI
+    LÀ SẠCH. Note cũ có nhắc cache nhưng người đọc dừng ở dòng đầu ⇒ phải thành cờ có tên."""
+    age = _snapshot_age_seconds(ts)
+    warn: list[str] = []
+    if age is not None and age > _SNAPSHOT_STALE_S:
+        h = age / 3600.0
+        warn.append(f"STALE_SNAPSHOT: manifest sinh cách đây {h:.1f} giờ (mốc {ts}) — "
+                    f"CHẠY LẠI với `--refresh` trước khi tin con số này."
+                    + (" ⚠ `backlog=0` trên snapshot cũ KHÔNG có nghĩa hết việc: mọi dòng flip corpus "
+                       "sau mốc trên đều VÔ HÌNH ở đây." if not backlog else ""))
+    elif age is None:
+        warn.append(f"SNAPSHOT_TS_UNPARSEABLE: không đọc được mốc manifest ({ts!r}) ⇒ không chứng minh "
+                    "được dữ liệu tươi; dùng `--refresh` cho chắc.")
+    return age, warn
+
+
 def cmd_ingest_missing(a) -> int:
     """Nạp HÀNG LOẠT văn bản corpus CHƯA trên NLM (backlog) → source_add + ghi registry PER-ITEM. IDEMPOTENT nhiều lớp,
     DRY MẶC ĐỊNH. Định tuyến THEO CHỖ TRỐNG (base→overflow shard SẴN CÓ) — BẤT BIẾN: KHÔNG BAO GIỜ tạo notebook mới.
@@ -362,7 +398,10 @@ def cmd_ingest_missing(a) -> int:
         overflow_shard = _discover_overflow_from_registry(entries, base_nb)
     _skip_note = ([{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:60]} for e in no_sohieu]) if not allow_no_sohieu else []
     if not getattr(a, "apply", False):
+        _snap_age, _snap_warn = _snapshot_stale_warn(snapshot_ts, len(backlog))
         out = {"ok": True, "gate": "ingest-missing", "mode": "DRY", "manifest_snapshot": snapshot_ts,
+               "snapshot_age_s": None if _snap_age is None else int(_snap_age),
+               "warn": _snap_warn,
                "backlog": len(backlog), "to_ingest": len(targets), "skipped_no_sohieu": len(_skip_note),
                "base_notebook": base_nb, "overflow_shard": overflow_shard or None,
                "targets": [{"drive_id": _entry_drive_id(e), "sohieu": _entry_sohieu(e), "name": _entry_name(e)[:60]} for e in targets],
@@ -373,8 +412,12 @@ def cmd_ingest_missing(a) -> int:
         if getattr(a, "json", False):
             print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         else:
-            print(f"== ingest-missing DRY · snapshot={snapshot_ts} · backlog={len(backlog)} · nạp {len(targets)} (limit {lim}) · "
+            print(f"== ingest-missing DRY · snapshot={snapshot_ts}"
+                  f"{'' if _snap_age is None else f' (cách đây {_snap_age / 3600.0:.1f}h)'}"
+                  f" · backlog={len(backlog)} · nạp {len(targets)} (limit {lim}) · "
                   f"skip sohieu='' {len(_skip_note)} · base={base_nb[:12]} overflow={overflow_shard or '(chưa có)'} ==")
+            for _w in _snap_warn:
+                print(f"  🔴 {_w}")
             for e in targets:
                 print(f"  + {(_entry_sohieu(e) or '(?)'):18s} {_entry_name(e)[:54]}  [{_entry_drive_id(e)[:14]}]")
             for r in _skip_note[:10]:

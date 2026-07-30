@@ -1,3 +1,44 @@
+# ★ v1.35.88 — r251: ba cờ đọc-sai của bộ soi registry (2026-07-30)
+
+Lượt rà tiếp hồ sơ «Luật BHXH». NLM chết cả lượt ⇒ chạy chế độ không-NLM (RASOAT_HOSO_LOOP §4b) và
+vá đúng những chỗ **công cụ nói sai về chính số nó in ra** — cả ba đều bắt được bằng cách ĐO LIVE rồi
+đối chiếu với báo cáo lượt trước, không suy từ đọc mã.
+
+**(1) `registry-doctor.basis` khai THIẾU phần mình loại.** v1.35.65 đã thêm `scanned`+`basis` để hết
+đọc "missing_sohieu=19 trên 90 dòng" — nhưng `basis` viết "loại ref + bản gốc `loai='thuong'`", trong
+khi `is_own_thuong` loại THÊM **mọi** dòng own `corpus=false` bất kể `loai`. Đo hồ sơ Luật BHXH: 33
+dòng bị loại mà chỉ 22 là `loai='thuong'`; 11 dòng còn lại có tên/số hiệu CHUẨN (TT 21-2025-TT-NHNN,
+BC 1104-BC-BHXH, 3 Phụ lục Thái Nguyên, CV 7728-BNV, BC 7692-BC-BNV…) và **5 trong số đó mang cờ
+`MISSING_SOHIEU` mà không vào bucket `missing_sohieu`** ⇒ ai đọc `missing_sohieu=25` cũng không có
+đường nào biết. Nay tách `skipped_own_corpus_false` thành số đếm RIÊNG (`scanned` = count − ba lớp) và
+`basis` kể đủ ba lớp kèm câu cảnh báo về cờ bị bỏ. Hàm `skip_reason` trả lý do từng dòng.
+*Không đổi phép lọc* — chỉ đổi phần KHAI BÁO: sửa phép lọc là đổi ngữ nghĩa hygiene, việc khác.
+
+**(2) `sohieu_conflict` GIẢ cho họ chunk.** 3 dòng cùng `41-2024-QH15` (canonical + `__part01__` +
+`__part02__`) cho 3 chữ ký `_subject_sig` khác nhau ⇒ bị xếp `sohieu_conflict_different_doc` = "văn bản
+KHÁC cùng số hiệu, NGUY HIỂM tra sai", dù chẻ chunk là CHỦ ĐÍCH (lách trần 100k của NLM). Nay bỏ hậu
+tố `__partNN__…` trước khi lấy chữ ký ⇒ `sohieu_conflict_groups` 1 → **0**, họ này về
+`sohieu_dup_same_doc` (đúng bản chất: một văn bản, ba dòng). Lượt trước định chữa bằng cách GHI CHÚ vào
+registry (journal `register-bulk_1785320950_22129`); đo lại 30-07 thấy `goc`/`title_vn`/`sua_doi` của cả
+ba dòng vẫn RỖNG — ghi chú không neo được, nên chữa ở CODE. Kèm **drift-lock hai mirror**
+`registry_hygiene._subject_sig` ↔ `classify._subject_sig`: docstring nói "Mirror" mà trước r251 không gì khoá.
+
+**(3) `ingest-missing` báo `backlog=0` trên manifest 3 ngày tuổi.** Đo 30-07: `tl ingest-missing --json`
+(không `--refresh`) trả `manifest_snapshot=2026-07-27T16:27` và `backlog=0`; CÙNG PHIÊN, `--refresh` trả
+`backlog=2` (Luật 41/2024 chờ nạp + BIDV thiếu số hiệu) và `sweep` cũng nói "2 chưa push NLM". `note`
+cũ có nhắc cache nhưng người đọc dừng ở dòng đầu ⇒ nay có `snapshot_age_s` + cờ TÊN `STALE_SNAPSHOT`
+(>1h, xa hẳn cache GAS ~600s), và khi `backlog=0` thì nói thẳng "số 0 trên snapshot cũ KHÔNG phải hết
+việc". Mốc không đọc được ⇒ `SNAPSHOT_TS_UNPARSEABLE`, không im lặng. Cùng họ bài học
+`reg-query --refresh` (nạp chồng 9 tài liệu 24-07): **số 0 trên dữ liệu nguội không phải là sạch.**
+
+Bẫy gặp khi vá (3): thêm 2 hàm + 1 hằng vào `tl_core/ingest_ops.py` làm ĐỎ hai drift-lock cùng lúc —
+`r90` (tên top-level của module REBASE phải resolve qua `tl`) và `r81` (mọi tên trong `_STUB_MAP` phải
+CALLABLE). Hằng `_SNAPSHOT_STALE_S` phải re-export TRỰC TIẾP, không vào `_STUB_MAP`.
+
++3 test (`r251_doctor_basis_khai_dung_phan_bi_loai`, `r251_ingest_missing_bao_snapshot_nguoi`,
+`r251_chunk_khong_bi_doc_thanh_conflict`, mỗi test đều có phản chứng) → selftest **1398/1398**.
+ruff delta +2 (F821 `Path` + E702, đúng idiom sẵn có của `tl_selftest.py`).
+
 # ★ v1.35.87 — r250: nlm-auto-refresh.sh — tự phát hiện export mới trên Drive → import → mã hoá → xoá (2026-07-29)
 
 (Đánh lại số từ r241/v1.35.78 vì phiên song song đã dùng r241–r249 cho việc khác — rebase lên master v1.35.86.)

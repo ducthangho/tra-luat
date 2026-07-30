@@ -42,6 +42,25 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - Mọi số hiệu/tên VBQPPL phải có NĂM (VBHN thiếu năm = collision — số tái dùng theo năm).
 - Subagent KHÔNG được sửa `tl.py` canonical (bài học rogue-edit) — agent chỉ read-only; vá code do phiên chính làm.
 - registry claim NLM là ESTIMATE — slot/FULL/overflow phải neo `nlm-get`/`nlm-reconcile` LIVE.
+- **Cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA — phải đòi BẰNG CHỨNG DƯƠNG** (`N/N` với hai số BẰNG NHAU,
+  `"ok": true`), đừng tin rc. Bằng chứng đã trả giá (r244): `param([string[]]$Args)` trong PowerShell —
+  `$Args` là **BIẾN TỰ ĐỘNG** trong hàm nên `@Args` nở ra mảng RỖNG thay vì đối số truyền vào ⇒ python
+  chạy KHÔNG đối số, đọc stdin, EOF, **rc=0 + output rỗng**: gate báo xanh mà chẳng chạy gì.
+- **Script đa nền: PHẢI chạy THẬT trên nền đó, rồi ĐỐI CHIẾU PARITY hai bản trên cùng đầu vào.**
+  (r244: đã tải hẳn PowerShell 7.4.6 vào container để chạy.) 5 lỗi của lượt đó KHÔNG lỗi nào lộ ra bằng
+  đọc code; riêng **lỗ AN NINH** chỉ hiện vì hai bản đếm LỆCH (ps1 196 vs sh 198 trên cùng một zip) —
+  parity không phải nghi lễ, nó là thứ duy nhất bắt được.
+- **PowerShell — 3 bẫy đã trả giá** (r244; chú thích chi tiết nằm ngay tại code):
+  · `$Args` là biến tự động (xem trên) → đặt tên khác, vd `$Argv`.
+  · `Get-Content -Raw` trên tệp **RỖNG** trả `$null` → `[regex]::Match` ném "Value cannot be null"; ép `[string]`.
+  · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —
+  `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.
+- **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
+  `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
+  trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒
+  đường Windows từng mù hoàn toàn với secrets trong tệp ẩn. Nay quét cả tệp không mở rộng, tránh nhị
+  phân bằng NUL-check 8KB + trần 2MB. Bảng mẫu bí mật ĐỂ MỘT CHỖ: `scripts/pkg_secret_scan.py`, dùng
+  chung cho cả `sh` lẫn `ps1` — hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
 
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).
@@ -53,6 +72,13 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 ## Khi đóng gói
 Bump VERSION (3 chỗ) → CHANGELOG → selftest N/N → user tự chạy cmd (script tự loại .git/.claude/.githooks/
 CLAUDE.md/config/enc + quét token). Verify sau deploy: Package trả VERSION mới.
+
+**TRẦN 200 TỆP — cứng, `release-bundle` chết `IMPORT_LIMIT_EXCEEDED` chứ không cắt bớt âm thầm.**
+Đã đụng thật ở r244 (thêm 3 script deploy: 199 → 202). Thêm tệp mới mà gần trần thì cách chữa KHÔNG phải
+xoá tệp: xét xem nó có phải **dev-side** (runtime Cowork không cần) rồi cho vào
+`_RELEASE_EXCLUDE_NAMES_ANYWHERE` — GIỮ trong repo/git, CHỈ loại khỏi GÓI. Tiền lệ: `CLAUDE.md` ·
+`.claude/` · `Code.2.21.2k.gs` · 4 script deploy. Nhớ: thêm/xoá tệp ⇒ tái sinh `RELEASE_MANIFEST.json`
+và ghi lại golden nếu số đếm kiểm kê đổi (mục 5 §Quy ước deploy).
 
 ## Quy ước deploy (AI ĐẨY Package — chốt 30-07-2026)
 **Vì sao cần:** Package là MỘT fileId duy nhất (`SKILL_FILEID = 1H5kAt3SRVP7…`) và `drive-push` GHI ĐÈ nội

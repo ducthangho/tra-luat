@@ -22331,7 +22331,14 @@ def run() -> int:
         """r244: 4 script deploy là dev-side — phải bị loại khỏi GÓI nhưng CÒN trong repo. Trần gói là
         200 entries; thêm deploy-package.ps1 + deploy-guard.ps1 + pkg_secret_scan.py đã làm 199→202 ⇒
         release-bundle chết IMPORT_LIMIT_EXCEEDED. Đo HAI CHIỀU: (a) có trong bảng loại, (b) tệp THẬT
-        vẫn nằm trong repo (loại khỏi gói KHÔNG phải xoá), (c) bảng loại vẫn giữ các tên cũ."""
+        vẫn nằm trong repo (loại khỏi gói KHÔNG phải xoá), (c) bảng loại vẫn giữ các tên cũ.
+        r265 — HAI BỐI CẢNH, hai khẳng định (khuôn r227/r228; đo 30-07: ca này ĐỎ TỪ GÓI BUNG trên
+        MỌI Package v1.35.81→v1.36.2 vì vế (b) đòi tệp dev TỒN TẠI — trong gói chúng vắng ĐÚNG THIẾT KẾ):
+          · CÂY GIT → như cũ (a)+(b)+(c);
+          · GÓI CÀI (không `.git`) → (a)+(c) vẫn đo được (tl_core.release CÓ trong gói), còn (b)
+            LẬT NGƯỢC: cả 5 tệp deploy PHẢI VẮNG — còn tệp nào tức cơ chế loại thủng, dev lọt bundle.
+        KHÔNG có nhánh «thiếu thì cho qua»: xoá `.git` trong KHO ⇒ rơi nhánh gói, kho THẬT có đủ 5 tệp
+        ⇒ vẫn ĐỎ, không lọt lưới (phản chứng đã chạy 30-07)."""
         _rel = _TL_MODULE._imp("tl_core.release") if hasattr(_TL_MODULE, "_imp") else None
         try:
             from tl_core import release as _rel
@@ -22345,12 +22352,16 @@ def run() -> int:
         _moi = {"deploy-package.sh", "deploy-package.ps1", "deploy-package.cmd",
                 "deploy-guard.ps1", "pkg_secret_scan.py"}
         ok1 = _moi <= set(_ex)
-        # (b) PHẢN CHỨNG: loại khỏi gói không được đồng nghĩa với xoá khỏi cây — nếu vế này sai thì
-        # "loại" đã biến thành "mất tệp" mà test (a) vẫn xanh.
         _here = Path(_TL_MODULE.__file__).resolve().parent
-        ok2 = all((_here / n).exists() for n in
-                  ("deploy-package.sh", "deploy-package.ps1", "deploy-package.cmd",
-                   "deploy-guard.ps1", "pkg_secret_scan.py"))
+        _ten = ("deploy-package.sh", "deploy-package.ps1", "deploy-package.cmd",
+                "deploy-guard.ps1", "pkg_secret_scan.py")
+        if (_ROOT209 / ".git").exists():   # worktree để `.git` là TỆP ⇒ `.exists()` phủ cả hai (r227)
+            # (b) PHẢN CHỨNG: loại khỏi gói không được đồng nghĩa với xoá khỏi cây — nếu vế này sai
+            # thì "loại" đã biến thành "mất tệp" mà test (a) vẫn xanh.
+            ok2 = all((_here / n).exists() for n in _ten)
+        else:
+            # (b') GÓI BUNG: cả 5 tệp dev PHẢI VẮNG — còn tệp nào tức dev-side lọt bundle (r265).
+            ok2 = not any((_here / n).exists() for n in _ten)
         # (c) không được vô tình thay cả bảng
         ok3 = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json"} <= set(_ex)
         return ok1 and ok2 and ok3
@@ -22359,7 +22370,11 @@ def run() -> int:
     def _c249_bao_cao_rasoat_ngoai_goi():
         """r249: báo cáo/bàn giao của các lượt rà (thư mục `rasoat/`) là sản phẩm PHIÊN — loại khỏi GÓI
         nhưng CÒN trong repo. Đo qua CHÍNH hàm quyết định `_release_should_include`, không chỉ đọc bảng,
-        và có PHẢN CHỨNG: một tệp .md ở gốc repo vẫn phải ĐƯỢC nhận, nếu không thì luật đã quét quá tay."""
+        và có PHẢN CHỨNG: một tệp .md ở gốc repo vẫn phải ĐƯỢC nhận, nếu không thì luật đã quét quá tay.
+        r265 — HAI BỐI CẢNH (khuôn r227/r228; đo 30-07: đỏ từ gói bung vì (c) đòi rasoat/ ≥4 .md — trong
+        gói thư mục đó vắng ĐÚNG THIẾT KẾ): CÂY GIT → (c) như cũ; GÓI CÀI → rasoat/ PHẢI VẮNG. (a)(b)
+        chạy được ở CẢ HAI bối cảnh vì `_release_should_include` thuần logic đường dẫn, không stat tệp.
+        KHÔNG «thiếu thì cho qua»: xoá `.git` trong KHO ⇒ nhánh gói đòi rasoat/ vắng mà kho có ⇒ ĐỎ."""
         try:
             from tl_core import release as _rel
         except Exception:
@@ -22370,9 +22385,13 @@ def run() -> int:
         ok2 = _rel._release_should_include(_root / "rasoat" / "X_2026-01-01.md", _root) is False
         # (b) PHẢN CHỨNG: .md ở gốc KHÔNG bị loại oan (SKILL.md phải vào gói)
         ok3 = _rel._release_should_include(_root / "SKILL.md", _root) is True
-        # (c) loại khỏi gói KHÔNG phải xoá — 4 báo cáo phải CÒN trên đĩa
         _d = _root / "rasoat"
-        ok4 = _d.is_dir() and len(list(_d.glob("*.md"))) >= 4
+        if (_ROOT209 / ".git").exists():          # khuôn r227/r228 — hai bối cảnh, hai khẳng định
+            # (c) loại khỏi gói KHÔNG phải xoá — 4 báo cáo phải CÒN trên đĩa
+            ok4 = _d.is_dir() and len(list(_d.glob("*.md"))) >= 4
+        else:
+            # (c') GÓI BUNG: rasoat/ PHẢI VẮNG — có là sản phẩm phiên lọt bundle (r265).
+            ok4 = not _d.exists()
         return ok1 and ok2 and ok3 and ok4
     _t110("r249_bao_cao_rasoat_ngoai_goi", _c249_bao_cao_rasoat_ngoai_goi)
 
@@ -22475,11 +22494,14 @@ def run() -> int:
         đường deploy WINDOWS tắc hẳn dù Drive đọc được bình thường (đo 30-07-2026: gws rc=0, tên file
         đúng, guard vẫn đỏ). Twin `deploy-package.sh` KHÔNG vướng vì sed trên cả khối — đúng cảnh báo
         'hai bản sẽ trôi lệch'. Khẳng định: guard CẮT phần ngoài JSON trước khi parse, và luật cắt đó
-        chạy đúng trên ĐÚNG chuỗi gws thật đã bắt được (mirror bằng Python ⇒ CI không cần pwsh)."""
+        chạy đúng trên ĐÚNG chuỗi gws thật đã bắt được (mirror bằng Python ⇒ CI không cần pwsh).
+        r265 — HAI BỐI CẢNH (khuôn r227/r228; đo 30-07: đỏ từ gói bung vì đọc THẲNG hai script dev):
+          · CÂY GIT → như cũ: guard CẮT ngoài-JSON trước parse + twin sh rút tên đường riêng;
+          · GÓI CÀI (không `.git`) → deploy-guard.ps1 · deploy-package.ps1 · deploy-package.sh PHẢI
+            VẮNG (dev-side đã loại — còn là lọt bundle); luật cắt JSON (ok3..ok5, thuần Python trên
+            chuỗi gws THẬT) vẫn phải đứng ở MỌI bối cảnh.
+        KHÔNG «thiếu thì cho qua»: xoá `.git` trong KHO ⇒ nhánh gói đòi script VẮNG mà kho có ⇒ ĐỎ."""
         _root = Path(_TL_MODULE.__file__).resolve().parent.parent
-        _g = (_root / "scripts" / "deploy-guard.ps1").read_text(encoding="utf-8", errors="replace")
-        ok1 = "($raw | ConvertFrom-Json)" not in _g          # không còn parse THẲNG chuỗi thô
-        ok2 = "$jsonText | ConvertFrom-Json" in _g and "LastIndexOf('}')" in _g
         real = ('Using keyring backend: keyring\n{\n  "md5Checksum": "08b002ef",\n'
                 '  "name": "tra-luat-skill-v1.35.87-gws3env.zip",\n  "size": "2194484"\n}\n')
         _lo, _hi = real.find("{"), real.rfind("}")
@@ -22489,8 +22511,17 @@ def run() -> int:
             json.loads(real); ok5 = False
         except Exception:
             ok5 = True
-        _sh = (_root / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
-        ok6 = '"name":"' in _sh.replace(" ", "")              # twin sh rút tên bằng đường riêng
+        if (_ROOT209 / ".git").exists():          # khuôn r227/r228 — hai bối cảnh, hai khẳng định
+            _g = (_root / "scripts" / "deploy-guard.ps1").read_text(encoding="utf-8", errors="replace")
+            ok1 = "($raw | ConvertFrom-Json)" not in _g      # không còn parse THẲNG chuỗi thô
+            ok2 = "$jsonText | ConvertFrom-Json" in _g and "LastIndexOf('}')" in _g
+            _sh = (_root / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+            ok6 = '"name":"' in _sh.replace(" ", "")          # twin sh rút tên bằng đường riêng
+        else:
+            # GÓI BUNG: guard/twin là dev-side, PHẢI VẮNG — còn là lọt bundle (r265).
+            ok1 = not (_root / "scripts" / "deploy-guard.ps1").exists()
+            ok2 = not (_root / "scripts" / "deploy-package.ps1").exists()
+            ok6 = not (_root / "scripts" / "deploy-package.sh").exists()
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r251_deploy_guard_chiu_duoc_banner_gws", _c251_deploy_guard_chiu_duoc_banner_gws)
 

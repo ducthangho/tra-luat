@@ -1,3 +1,36 @@
+# ★ v1.36.3 — r265: selftest chạy ĐƯỢC từ gói bung — 3 case «loại-khỏi-gói» học khuôn hai-bối-cảnh (2026-07-30)
+
+Trả NỢ CÓ SẴN đã đo ở bàn giao 30-07: `python scripts/tl.py --selftest` chạy TỪ GÓI BUNG cho **1424/1427**
+— `r244_script_deploy_khong_vao_goi` (nợ từ v1.35.81) · `r249_bao_cao_rasoat_ngoai_goi` (v1.35.86) ·
+`r251_deploy_guard_chiu_duoc_banner_gws` (v1.35.88) — tức MỌI Package từ v1.35.81 tới v1.36.2 đều ship
+selftest ĐỎ khi chạy tại chỗ. Cả ba cùng một hình: khẳng định «tệp X bị loại khỏi GÓI nhưng CÒN trên đĩa»
+— vế «còn trên đĩa» chỉ đúng trong repo; từ gói bung tệp vắng ĐÚNG THIẾT KẾ.
+
+Vá theo ĐÚNG khuôn r227/r228 «HAI BỐI CẢNH, hai khẳng định», rẽ `(_ROOT209/".git").exists()` — nay CẢ 5 case
+dùng khuôn này (r218 · r226 · r244 · r249 · r251), KHÔNG case nào có nhánh «thiếu thì cho qua»:
+- **r244**: CÂY GIT → 5 tệp deploy PHẢI CÒN trên đĩa; GÓI → cả 5 PHẢI VẮNG (vế bảng-loại vẫn đo được ở cả
+  hai bối cảnh vì `tl_core.release` CÓ trong gói).
+- **r249**: CÂY GIT → `rasoat/` ≥4 .md; GÓI → `rasoat/` PHẢI VẮNG (`_release_should_include` thuần logic
+  đường dẫn, không stat tệp, nên hai vế kia đo cả hai bối cảnh).
+- **r251**: CÂY GIT → như cũ đọc NỘI DUNG `deploy-guard.ps1` + twin sh; GÓI → `deploy-guard.ps1` ·
+  `deploy-package.ps1` · `deploy-package.sh` PHẢI VẮNG; luật cắt JSON (ok3..ok5 — thuần Python trên chuỗi
+  gws THẬT) giữ nguyên ở MỌI bối cảnh.
+
+Bằng chứng (đo 30-07, container Linux, mọi output ra FILE rồi mới parse):
+| lượt | cây chạy | kết quả |
+|---|---|---|
+| nền | gói build từ master `320952a` (v1.36.2) bung ra | **1424/1427** — đúng 3 case trên, tái hiện nợ |
+| sau vá | repo (`python scripts/tl.py --selftest`) | **1427/1427** |
+| sau vá | gói v1.36.3 bung ra | **1427/1427** — nợ đã trả |
+| phản chứng 1 | copy repo XOÁ `.git` (bản vá THẬT) | 3 case **ĐỎ** (+r218/r226 đỏ đúng thiết kế khuôn) — xoá `.git` trong KHO không lọt lưới |
+| phản chứng 2 | gói bung BƠM `deploy-package.sh` + `deploy-guard.ps1` + `rasoat/*.md` | đúng 3 case **ĐỎ** trở lại — nhánh gói bắt được dev-side lọt bundle |
+| phản chứng 3 | biến thể QUÁ TAY «thiếu thì cho qua» trên CẢ HAI kịch bản trên | **XANH OAN cả hai** (1425 & 1427) ⇒ vế phản chứng của bản THẬT chính là thứ chịu lực |
+
+ruff delta so master = 0 (tl.py 12 F821/0 F401; tl_selftest 4033 F821/1 F401 — y hệt master, nền đã trôi
+từ mốc 3914 ghi trong CLAUDE.md do các đợt r255-r262, delta mới là chỉ tiêu). **0 dòng code sản xuất** —
+đụng DUY NHẤT `tl_selftest.py` (3 case) + bump version 3 chỗ (1.36.2→1.36.3 CÙNG ĐỘ DÀI ⇒ SKILL.md
+size giữ nguyên, không đụng golden size như vụ 1.35.99→1.36.0).
+
 # ★ v1.36.2 — r264: `doc-claims-check` PHỦ `docs/` — 19 tệp trước đây không cổng nào soi (2026-07-30)
 
 Ngay sau khi merge 2 tài liệu kế hoạch vào `docs/` (r263), tôi đã nói ra mặt sau của việc đó: `doc-claims-check`

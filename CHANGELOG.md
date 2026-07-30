@@ -1,3 +1,54 @@
+# ★ v1.36.0 — r262: selftest THỰC SỰ hermetic — chặn mạng + ghim creds giả (2026-07-30)
+
+`tl.py` tự khai ngay trong `selftest()`: *"A bare selftest must be hermetic"* — nhưng lời hứa đó chỉ đúng
+cho **CACHE** và **profile**. **MẠNG** và **CREDS** thì không, và đó là gốc của hai sự cố đã trả giá.
+
+**ĐO ĐƯỢC (không suy diễn):** bare selftest gọi **11 lần ra mạng THẬT** từ ≥6 chỗ —
+`tl_selftest.py` dòng 2646 · 5317 `_cap72` · 5596 `_cap75` · 7253 · 7261 · 15437 — tới
+`script.google.com/exec`, `oauth2.googleapis.com/token`, `drive/v3/files`. Đếm bằng cách bọc
+`urllib.request.urlopen`, không phải đọc code.
+
+Hậu quả KÉP:
+- **thời gian gate BẤT ĐỊNH**: `ingest_claim` 404 → retry 5s+15s, timeout GET 120s ⇒ có lượt **>580s**;
+  `deploy-package.sh --push` **chết ở bước 1** dù cây hoàn toàn lành. Tôi đã mất 5 lượt đoán sai nguyên
+  nhân (block phá hermetic · tiến trình sót giành CPU · treo mạng vĩnh viễn) trước khi chịu đo.
+- **KHÔNG hermetic theo CẢ HAI chiều**: máy KHÔNG creds thì `cmd_doc_text` → `load_creds` **`sys.exit`
+  CỨNG** (test r183) giết cả bộ trước khi in tổng — `rc=1` mà không một dòng `[FAIL]` nào, nhìn như hỏng
+  vô cớ; máy CÓ creds thì kết quả phụ thuộc mạng và webapp của người khác.
+
+**Vá ở MỘT chỗ, không phải 6.** Cả 6 chỗ đó là dò-PHỤ mà thất bại vốn đã được bỏ qua — chứng minh bằng
+cách chặn sạch mạng rồi chạy: **1425/1425, 0 test đỏ, còn NHANH HƠN 10s**. Sửa từng chỗ là 6 lần đoán ý
+test của người khác, đắt hơn và dễ làm sai ý hơn.
+
+`_selftest_seal_env()` (mới, gọi trong `selftest()`, hoàn nguyên ở `finally`):
+1. **MẠNG**: `urlopen` → `URLError` — ĐÚNG tín hiệu máy-không-mạng mà chính các nhánh fallback đó vốn đã
+   xử lý, KHÔNG phải exception lạ. Lối ra tường minh: `TL_SELFTEST_ALLOW_NET=1`.
+2. **CREDS**: chỉ ghim khi THIẾU (máy có creds thật KHÔNG bị đụng) — `TL_WEBAPP=https://tl-selftest.invalid/exec`;
+   `.invalid` là TLD **DỰ TRỮ RFC 2606**, không bao giờ resolve, nên kể cả ai tắt (1) vẫn không chạm máy thật.
+
+**Nghiệm thu 5 vế, gồm 2 phản chứng chịu lực:**
+
+| vế | kết quả |
+|---|---|
+| CÓ env thật (mode chuẩn) | rc=0 · 54s · **1425/1425** |
+| KHÔNG env (mode từng CHẾT ở r183) | rc=0 · 46s · **1425/1425** |
+| đếm lời gọi ra mạng | **0** |
+| PHẢN CHỨNG `TL_SELFTEST_ALLOW_NET=1` | **11** lời gọi trở lại ⇒ opt-out còn sống |
+| creds thật trước == sau selftest | True |
+
+Vế phản chứng thứ 4 là vế quan trọng nhất: thiếu nó thì một bản vá "chặn mạng" có thể **âm thầm xoá** năng
+lực chạy LIVE mà không ai biết. Test `r262` khoá cả 3 vế của hàm (chặn + opt-out + không-đè-creds-thật).
+
+**CÒN LẠI, cố ý không sửa:** `_gas_get_retry` vẫn ngủ 5s+15s khi gặp `URLError` (2 dòng `[gas-retry]` mỗi
+lượt). Bounded và tất định nên không còn hại, nhưng muốn bỏ thì phải đổi hằng retry của ĐƯỜNG SẢN XUẤT —
+ngoài phạm vi bản vá test này, và không nên đổi kèm.
+
+**ĐÍNH CHÍNH r261:** mục đó viết «`setattr(_TL_MODULE, tên, fake)` KHÔNG có tác dụng với mọi tên trong
+`_STUB_MAP`» — **quá mạnh**. `_STUB_MAP` có 846 tên, gồm `_doc_text_any`/`_gas`/`load_creds`, mà test
+r183/r110 chỉ vá `_TL_MODULE` **vẫn chạy đúng**. Phát biểu đúng: có bối cảnh (tuỳ `_TL_MODULE` trỏ vào dict
+nào — `__main__` hay module `tl`) mà cửa `_TL_MODULE` KHÔNG đủ; vá cả hai cửa như `_mp261` là an toàn cho
+mọi bối cảnh. Kết luận vận hành của r261 giữ nguyên, chỉ lời giải thích cơ chế bị siết lại.
+
 # ★ v1.35.99 — r261: monkeypatch trong selftest phải đi ĐÚNG CỬA của stub-farm (2026-07-30)
 
 **ĐÍNH CHÍNH r260:** mục r260 ghi "selftest 1425/1425 rc=0 trong 55s". Con số ĐÚNG nhưng đo bằng

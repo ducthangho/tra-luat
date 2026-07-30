@@ -23139,6 +23139,56 @@ def run() -> int:
                   and _o6.get("vbhn_first_self_docs") == 1))
 
 
+    # ═══ r262 — selftest PHẢI HERMETIC: chặn mạng + ghim creds giả (đo được 11 lời gọi mạng thật) ═══
+    # Khoá cả 3 vế của `_selftest_seal_env`, gồm 2 PHẢN CHỨNG chống "vá quá tay":
+    #  (1) thiếu creds + không opt-out → urlopen bị chặn bằng URLError + creds ghim `.invalid` (RFC 2606);
+    #  (2) PHẢN CHỨNG `TL_SELFTEST_ALLOW_NET=1` → urlopen KHÔNG bị thay (nếu vế này rơi thì bản vá đã âm
+    #      thầm xoá năng lực chạy LIVE, và không ai biết);
+    #  (3) PHẢN CHỨNG creds THẬT của người dùng KHÔNG bị đè, và còn nguyên sau hoàn nguyên.
+    def _c262_seal():
+        import urllib.request as _ur262, urllib.error as _ue262
+        _keys262 = ("TL_WEBAPP", "TL_TOKEN", "TL_SELFTEST_ALLOW_NET")
+        _envsav = {k: _hos.environ.get(k) for k in _keys262}
+        _u0 = _ur262.urlopen                       # trong selftest đây ĐANG là bản chặn của seal ngoài
+        try:
+            for k in _keys262:
+                _hos.environ.pop(k, None)
+            _undo = _TL_MODULE._selftest_seal_env()
+            _blocked = False
+            try:
+                _ur262.urlopen("https://tl-selftest.invalid/x")
+            except _ue262.URLError as _e:
+                _blocked = "TL_SELFTEST_NO_NET" in str(_e)
+            except Exception:                       # noqa: BLE001 — sai LOẠI lỗi cũng là fail
+                _blocked = False
+            ok1 = (_blocked
+                   and str(_hos.environ.get("TL_WEBAPP", "")).endswith(".invalid/exec")
+                   and _hos.environ.get("TL_TOKEN") == "tl_selftest_dummy")
+            _undo()
+            ok1 = ok1 and (_ur262.urlopen is _u0) and not _hos.environ.get("TL_WEBAPP")
+            # (2) PHẢN CHỨNG opt-out
+            _hos.environ["TL_SELFTEST_ALLOW_NET"] = "1"
+            _undo2 = _TL_MODULE._selftest_seal_env()
+            ok2 = _ur262.urlopen is _u0
+            _undo2()
+            _hos.environ.pop("TL_SELFTEST_ALLOW_NET", None)
+            # (3) PHẢN CHỨNG creds thật
+            _hos.environ["TL_WEBAPP"] = "https://that-cua-nguoi-dung/exec"
+            _hos.environ["TL_TOKEN"] = "tl_that"
+            _undo3 = _TL_MODULE._selftest_seal_env()
+            ok3 = _hos.environ["TL_WEBAPP"] == "https://that-cua-nguoi-dung/exec"
+            _undo3()
+            ok3 = ok3 and _hos.environ["TL_WEBAPP"] == "https://that-cua-nguoi-dung/exec"
+            return bool(ok1 and ok2 and ok3)
+        finally:
+            _ur262.urlopen = _u0
+            for _k, _v in _envsav.items():
+                if _v is None:
+                    _hos.environ.pop(_k, None)
+                else:
+                    _hos.environ[_k] = _v
+    cases.append(("r262_selftest_seal_net_and_creds", _c262_seal()))
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

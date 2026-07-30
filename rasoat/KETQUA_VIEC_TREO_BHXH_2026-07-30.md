@@ -3,25 +3,27 @@
 Lượt này KHÔNG rà lại từ đầu: chỉ làm nốt danh sách treo của
 `RASOAT_PROFILE_LUAT_BHXH_2026-07-29.md` §E và `KETQUA_DON_DU_LIEU_BHXH_2026-07-29.md` §5.
 
-**Phiên này KHÔNG GHI một dòng registry / Drive / NLM nào.** Mọi lệnh đã chạy đều chỉ-đọc hoặc DRY.
-Các món GHI nằm ở §7, chờ duyệt điểm chạm.
-
----
+> ⚠ **ĐỌC §1-§9 KÈM PHỤ LỤC A.** §1-§9 viết ở PHA 1, khi NLM còn chết và chưa có duyệt ghi — nên chúng
+> nói "chưa ghi gì" và "chờ duyệt". Sau đó người dùng cho phép `nlm-auth-load` + duyệt "làm theo khuyến
+> nghị", nên **PHA 2 đã GHI THẬT**: 4 bước NLM + 5 món G. Chỗ nào §1-§9 mâu thuẫn Phụ lục A thì
+> **Phụ lục A đúng** (nó đo sau). Bảng §0 dưới đây đã cập nhật cột kết quả cuối.
 
 ## 0. Kết quả gọn
 
 | # | Mục treo | Kết quả lượt này |
 |---|---|---|
-| 1-3 | Đẩy GDoc BIDV · nạp Luật 41 · gỡ 3 PDF thô | **CHẶN — NLM chết** (§1) |
-| 4 | `nlm-reconcile` neo trạng thái | **CHẶN — NLM chết** (§1) |
+| 1 | Đẩy GDoc BIDV | **XONG** (A.2) — 71→72 nguồn, cờ rụng |
+| 2 | nạp Luật 41 | **KHÔNG CHẠY — báo động giả**, đẩy nữa là nhân đôi luật (A.3) |
+| 3 | gỡ 3 PDF thô | **XONG** (A.2) — 72→69, `coverage_gap=0` |
+| 4 | `nlm-reconcile` neo trạng thái | **XONG** (A.2) — `desync_real=0`, `audit-physical clean` |
 | 5 | §E.3 — 2 PDF `DUTHAO_Luat_41_2024_QH15_*` | **ĐÓNG** — đã đổi tên xong, đo LIVE xác nhận (§3) |
-| 6 | §E.7 — đăng ký BC 6193 + raw-twin | **ĐÃ DỰNG PLAN DRY**, và lộ 1 lỗi CODE đã vá (§4, §7) |
+| 6 | §E.7 — đăng ký BC 6193 + raw-twin | **XONG** — BC 6193 vào corpus + NLM, 20 song sinh đã đăng ký (A.4) |
 | 7 | §E.8 — dọn locks + manifest-summary | **ĐÓNG — KHÔNG PHẢI RÁC**, cả hai nửa (§5) |
 | 8 | §E.10 — cơ sở đếm `registry-doctor` | **ĐÃ XONG TỪ r229**, không phải làm lại (§2) |
 | 9 | §5.3 — notebook `80742228` | **ĐÓNG** — 54/54 dòng thuộc hồ sơ KHÁC, 0 dòng BHXH (§6) |
 | 10 | §5.4 — `chunk-apply` xuất `.md` | **r231 đã vá nhánh apply; PLAN còn hở → vá r251** (§2) |
 | 11 | §E.9 — NQ Chính phủ cho VD-12 | **ĐÓNG, và đảo kết luận cũ** (§8) |
-| — | §E.6 — vocab `hieuluc` | Còn **2 dòng** dư việc (§9) |
+| — | §E.6 — vocab `hieuluc` | **XONG** — cờ DỰ THẢO 37 = nhãn 37, lệch 0 (A.4) |
 
 Hai mục treo (#8, #10) hoá ra **đã được vá từ lượt trước** mà bảng §E chưa kịp cập nhật — §E viết
 trước khi r229/r231 landed cùng ngày 29-07. Đã kiểm HÀNH VI, không chỉ đọc code.
@@ -340,3 +342,138 @@ XOÁ hẳn field thì phải đi `reg_clear` (webapp BỎ QUA giá trị rỗng 
 | Drive root | 63 mục · 26 mồ côi (phân loại ở §4a) · «Hồ sơ Luật» 10 tệp |
 | selftest | **1399/1399** · VERSION **1.35.88** |
 | ruff `--select F` | DELTA theo TÊN so master: `tl.py` 0 · `chunking.py` 0 · `tl_selftest.py` 0 · `ingest_ops.py` +1 (`PROFILE_INGEST_ALLOWED_EXTS`, re-home I11, đã kiểm hành vi) · F401 0 |
+
+---
+
+# PHỤ LỤC A — NLM đã sống lại: chạy nốt 4 bước + 5 món GHI (cùng ngày 30-07-2026)
+
+Người dùng cho phép `tl nlm-auth-load` và duyệt "thực hiện theo khuyến nghị". Phần này ghi những gì
+ĐÃ GHI THẬT.
+
+## A.1 Cài `nlm` + xác thực
+
+`tl nlm-install` (không cần `--resume` — container này không bị trần 45s/lệnh): tải Python 3.11
+standalone 30,9 MB từ Drive (md5 khớp) → cài `notebooklm-mcp-cli` → `nlm 0.9.4` tại
+`/root/.local/bin/nlm`. `doctor` gate `nlm CLI (fast-lane)` chuyển ✓.
+
+**Chẩn đoán đổi sau khi cài:** trước đó `why="nlm CLI không có trên PATH"` (không đo được gì); sau khi
+cài, `nlm rc=1: Profile 'default' not found` — tức container mới, CHƯA có bundle, **không phải** rotation
+token chết. `tl nlm-auth-load` → bundle **~0 ngày tuổi (2 phút)** ⇒ routine auto-refresh r250 đang chạy
+tốt. `alive=true`.
+
+## A.2 Bốn bước NLM
+
+| # | Việc | Kết quả |
+|---|---|---|
+| 1 | `nlm-add` GDoc BIDV | `source_id 3f1dd2e8…` ready · **71→72** nguồn · dòng BIDV `nlm_status=pushed` · cờ `CORPUS_TRUE_NOT_ON_NLM` rụng · journal `nlm-add-link_1785391381_4884` |
+| 2 | nạp `Luat_41-2024-QH15` | **KHÔNG CHẠY — báo động giả**, xem A.3 |
+| 3 | gỡ 3 PDF thô ngân hàng | **72→69** nguồn · `coverage_gap=0` · 3 con trỏ treo đã dọn (`nlm-reconcile_1785391865_13641`) |
+| 4 | neo trạng thái | `desync_real=0` · `coverage_gap=0` · `nlm_claim 69 = physical 69 = live 69` · `audit-physical clean=true` |
+
+**Trước khi gỡ, đã đo lỗ hổng nguồn — và phải đo tới HAI lần mới đúng.** Lần đầu so bản GDoc với text
+`pdftotext` của PDF thô: Agribank ra 2 byte, Vietcombank 4 byte ⇒ **hai PDF đó là bản QUÉT, không có
+lớp text**, so kiểu đó vô nghĩa. Phép đo đúng là so **nội dung NotebookLM đang giữ** (NLM tự OCR):
+
+| cặp | từ (thô → GDoc) | phủ 5-gram của bản thô trong GDoc |
+|---|---|---|
+| Agribank | 1020 → 1024 | 96,06% |
+| Vietcombank | 1971 → 1974 | 96,19% |
+| BIDV | 1032 → 1033 | 98,93% |
+
+Phần lệch là **rác OCR của bản thô** (`βηχη`, `bhχη`, `luru`, `jơng`, `oại` — GDoc không có), tức GDoc
+sạch hơn. Hai "lỗ hổng" tôi tưởng tìm được (ngày ký Agribank; `14/2025` của Vietcombank) đều là
+**regex của tôi tự bắt sai**: so lại sau khi bỏ SẠCH khoảng trắng thì `ngày23tháng6năm2026`,
+`10593/NHNo-ALCO`, `14/2025/TT-NHNN`, `15/09/2025`, `10838` đều CÓ ở cả hai bên. `coverage_gap=0` của
+`nlm-reconcile` sau khi gỡ là bằng chứng chốt.
+
+## A.3 Vì sao KHÔNG nạp Luật 41 — và footgun phải vá
+
+`note` của dòng canonical đã ghi sẵn: *"NLM đi qua 2 chunk part01/part02 nên dòng này corpus=true mà
+không mang nlm_source_id"*. Đo lại: 2 chunk đã `pushed`, `chunk-plan` cho `total 183.428 = part01
+99.043 + part02 84.385`, **hụt 0**, Điều 1..64 + 65..141 = đủ 141 Điều.
+
+⇒ Đẩy bản canonical nữa là **nhân đôi toàn bộ luật** trên notebook — đúng loại rác lượt trước phải dọn
+(69→74→71). Thêm nữa 183k > ngưỡng chunk 100k nên chính sách vốn không cho đẩy một nguồn cỡ đó.
+
+**`backlog=2 / to_ingest=1` là BÁO ĐỘNG GIẢ** — trạng thái đích đã đạt. Suýt nữa chính chỉ dẫn của
+lượt này làm hỏng notebook. Cờ `CORPUS_TRUE_NOT_ON_NLM` và `ingest-missing` chưa biết khái niệm "phủ
+bằng chunk con": chúng không tra dòng `__partNN__` cùng số hiệu đã `pushed`. **Việc cần làm (chưa
+làm):** dạy hai chỗ đó nhận diện phủ-bằng-chunk, để hết mời nạp trùng.
+
+## A.4 Năm món GHI — đã chạy
+
+| # | Việc | Kết quả |
+|---|---|---|
+| G1 | 2 dòng thiếu nhãn DỰ THẢO | xong (`register_1785392091_16548`, `…392106_16551`) |
+| G2 | 3 dòng `corpus` RỖNG → `false` | xong (`register_1785392000_15821`, `…392056_16541`, `…392075_16544`) — kiểm 1 dòng đầy đủ: CHỈ `corpus` đổi, `loai`/`cat`/`nlm_source_id`/`nlm_status`/`hieuluc`/`row_kind` nguyên vẹn |
+| G3 | đăng ký BC 6193 | GDoc `1h0OfDtHG0Hm…` · `corpus=true` · NLM `43a3b93c…` · **sohieu ĐÃ XOÁ** |
+| G4 | 4 `.docx` trung gian | `move` vào `_meta` (KHÔNG xoá — hồi được) |
+| G5 | 20 song sinh thô | đăng ký `loai=thuong · corpus=false · row_kind=own`, 42/42 đồng nhất |
+
+**G3 — số hiệu: đã xoá, và đây là lý do.** Đọc kỹ văn bản: khối đầu chỉ có `BỘ NỘI VỤ` / `BÁO CÁO` /
+`V/v tiến độ chuẩn bị…`, **không dòng `Số:`, không dòng ngày, không khối ký**; kết thúc `Trên đây là báo
+cáo của Bộ Nội vụ…/.`. Ba số `/BNV` trong thân đều là **dẫn chiếu văn bản KHÁC**: `3895` (23/4/2026),
+`6192` (xin ý kiến 34 Đoàn ĐBQH), `6193` (gửi lấy ý kiến phản biện xã hội UBTW MTTQ). Vậy `6193` trong
+tên tệp là số của **CÔNG VĂN**, không phải của báo cáo. Đã `--clear-cols sohieu --confirm yes` + ghi
+`note` giải thích. Tên chuẩn: `DUTHAO_VBT_BC_BNV_tien_do_va_noi_dung_lon_du_an_Luat_BHXH_2026`
+(profile-ingest tự thêm tiền tố `DUTHAO_` vì nhãn dự thảo).
+Đối chiếu GDoc ↔ PDF nguồn trước khi cho vào corpus: **5461 → 5464 từ, phủ 5-gram 98,52%, 0 từ thiếu**,
+mọi dẫn chiếu + mốc ngày còn đủ.
+
+**Nhất quán nhãn:** sau G5, 9 dòng song sinh `DUTHAO_*` mang cờ `DRAFT_NOT_EFFECTIVE` mà nhãn rỗng ⇒ đã
+gắn nhãn cho cả 9 (`reg_bulk` cols=hieuluc, patched 9/9). Nay **cờ 37 = nhãn 37, lệch 0**.
+
+## A.5 Ba cái bẫy công cụ gặp trong lượt ghi (ghi để không mất lần nữa)
+
+1. **`tl register` GHI NGAY, không DRY-by-default.** Tôi giả định sai và ghi sớm hơn dự định một dòng
+   (`13dQ-k8R…`). Đã kiểm ngay: chỉ `corpus` đổi, không hư hại phụ, journal undo được. Các lệnh khác
+   trong bộ này (`source-update-corpus`, `nlm-source-remove`, `nlm-reconcile`) đều DRY-by-default —
+   `register` là ngoại lệ.
+2. **`reg_bulk` nhận `cols` là CHUỖI phân tách bằng dấu phẩy, KHÔNG phải JSON.** GAS làm
+   `String(p.cols).split(',')` ⇒ truyền `["note"]` thì ALLOW rỗng và trả `cols không hợp lệ (phải thuộc
+   REG_COLS_)` — nghe như tên cột sai, thực ra là định dạng sai.
+3. **`register` báo `FIELDS_DROPPED_ON_WRITE` / `verified=false` cho 18/18 dòng mà THỰC TẾ ghi ĐỦ CẢ 18.**
+   Đo lại registry: `count 99→115`, `loai=thuong 26→42`, cả 18 dòng có `name`. Nguyên nhân: readback
+   xác minh đọc qua cache GAS (TTL ~600s) nên không thấy dòng nó vừa ghi. **Đây là cổng báo ĐỎ OAN** —
+   mặt ngược của bài học "rc=0 có thể bị lừa"; cả hai chiều đều phải đòi bằng chứng dương từ dữ liệu.
+   *Việc cần làm (chưa làm):* readback của `register` nên bust cache trước khi kết luận.
+
+## A.6 Vá code thêm trong lượt này
+
+- **r251 (v1.35.88)** — 2 cổng xanh mà nói dối: PLAN `profile-ingest-chunks` in lệnh không chạy nổi;
+  plan ingest suy metadata TỪ TÊN TỆP khi máy thiếu `pdftotext`.
+- **r252 (v1.35.89)** — `&amp;` `&lt;` chui NGUYÊN VĂN vào kho: 3 reader `.docx` bóc tag mà quên
+  unescape. Bắt được đúng lúc đối chiếu BC 6193: `tl extract` trả `6193/BNV-CTL&amp;BHXH` còn webapp
+  `exporttext` đọc `&` trần 3/3 chỗ ⇒ **sai ở đường đọc của ta, không phải ở corpus**. Gom về
+  `docx_markup.plain_from_document_xml()`. ⚠ cache `extract_*` cũ mang text sai — đã xoá cache của hồ
+  sơ này; hồ sơ khác nên xoá khi đọc lại.
+
+*Tự phê:* lúc bump VERSION tôi dùng `Path.write_text` cho `SKILL.md` — hàm đó **chuẩn hoá CRLF→LF**, làm
+mất 307 byte và `golden`/`selftest` đỏ. Đã `git checkout` rồi bump lại bằng byte. SKILL.md và
+tl_selftest.py là tệp CRLF; sửa chúng phải đi đường bytes.
+
+## A.7 Trạng thái cuối (đo sau bước cuối)
+
+| Chỉ số | Trước lượt | Sau lượt |
+|---|---|---|
+| registry `count` | 94 | **115** (+1 BC 6193 GDoc, +20 song sinh thô) |
+| `corpus` | true 46 / false 45 / **rỗng 3** | true 47 / false 68 / **rỗng 0** |
+| `hieuluc` | Còn 24 · rỗng 45 · DỰ THẢO 25 | Còn 24 · rỗng 54 · **DỰ THẢO 37** |
+| cờ DỰ THẢO vs nhãn | 27 vs 25 (lệch 2) | **37 vs 37 (lệch 0)** |
+| `loai=thuong` | 22 | **42** |
+| `CORPUS_TRUE_NOT_ON_NLM` | 2 | **1** (bản canonical Luật 41 — báo động giả, xem A.3) |
+| NLM nguồn | 71 (không đo được) | **70** LIVE (+BIDV +BC 6193, −3 PDF thô) |
+| `desync_real` / `coverage_gap` | — | **0 / 0** |
+| `nlm-audit-physical` | — | **clean=true** |
+| Drive root mồ côi | 26 | **2** (chỉ manifest + registry = hạ tầng) |
+| selftest / VERSION | 1395 / 1.35.86 | **1400 / 1.35.89** · gate xanh 8/8 |
+
+## A.8 Còn treo sang lượt sau
+
+1. **B4** — 10/10 tệp thế hệ 16.6.2026 vẫn nằm trong «Hồ sơ Luật» mà registry ghi
+   `nlm_status=removed_from_drive` (nói một việc KHÔNG xảy ra); `removed_family_still_pointing=10`.
+   Cần `superseded_by`/note thế hệ. NLM đang sống nên lượt sau làm được.
+2. **Vá cờ phủ-bằng-chunk** (A.3) — để `ingest-missing` hết mời nạp trùng bản canonical.
+3. **Vá readback `register`** (A.5 mục 3) — bust cache trước khi kết luận `verified`.
+4. Kho NỀN: `80742228` chưa khai topology · 2 dòng `Luat_74-2025-QH15` trùng · B2/B3/B5 cũ.
+5. Xoá cache `extract_*` của các hồ sơ KHÁC (hệ quả r252).

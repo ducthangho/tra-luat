@@ -1,3 +1,38 @@
+# ★ v1.35.89 — r252: `&amp;` `&lt;` chui NGUYÊN VĂN vào kho — 3 reader .docx quên unescape (2026-07-30)
+
+> Bắt được khi đăng ký BC Bộ Nội vụ (hồ sơ Luật BHXH): `tl extract` trả `6193/BNV-CTL&amp;BHXH`, trong
+> khi GDoc trên Drive có `&` trần — webapp `exporttext` đọc đúng 3/3 chỗ. **Sai nằm ở đường ĐỌC của ta.**
+
+Ba nơi sản xuất tự bóc tag `word/document.xml` bằng `re.sub(r"<[^>]+>", "", xml)` mà **KHÔNG unescape
+entity**, nên `&amp;` `&lt;` `&gt;` `&quot;` vào kho y nguyên:
+
+| Reader | Đường ảnh hưởng |
+|---|---|
+| `_docx_unzip_text` (`lookup_ops`) | `tl extract` · `tl doc-text` — text này **ĐƯỢC CACHE và NUÔI CORPUS** ⇒ nặng nhất |
+| `_profile_read_probe_text` (`ingest_ops`) | cổng nạp PHÂN LOẠI (`sohieu`/`loai`/`title` suy từ text này) |
+| `_the_thuc_detect_he` (`the_thuc`) | dò hệ thể thức (neo dòng `^Số:`) |
+
+`normalize_document.py` thì VỐN ĐÃ unescape đúng ⇒ **hai đường đọc cùng một `.docx` cho hai kết quả
+khác nhau**, và cái sai lại là cái nuôi corpus. Với công thức thì nặng hơn dấu `&`: `a < b` hoá `a &lt; b`
+— đúng lớp nội dung mà đợt Công báo NĐ 159 đã phải canh (công thức Điều 11/14).
+
+**Vá:** gom về MỘT hàm `docx_markup.plain_from_document_xml()`; cả 3 reader gọi nó. Đặt ở `docx_markup`
+vì đó đã là nơi giữ mọi phép đọc `document.xml` — để đây không phải là chỗ thứ tư trôi lệch.
+
+**THỨ TỰ là phần dễ làm sai nhất:** `</w:p>`→newline → bóc tag → **RỒI MỚI** unescape. Làm ngược
+(unescape trước) thì `&lt;w:t&gt;` trong nội dung biến thành `<w:t>` và bị chính bước bóc tag **ăn mất
+chữ** — đổi một lỗi thành lỗi tệ hơn. Test có vế phản chứng chạy đúng thứ tự sai để chứng minh nó mất chữ.
+
+Đo 2 chiều: `6193/BNV-CTL&amp;BHXH` → `&BHXH` · `a &lt; b và c &gt; d, ký hiệu &quot;X&quot;` →
+`a < b và c > d, ký hiệu "X"`; nội dung `&lt;w:t&gt;`/`&lt;div&gt;` CÒN NGUYÊN. Test còn ghim rằng cả 3
+tệp reader đều dùng hàm chung và KHÔNG còn site bóc tag trần nào.
+
+⚠ **Cache cũ mang text SAI.** `extract_<id>.txt` đã sinh trước bản vá (và mọi bản `cache-build`
+consolidated dựng từ chúng) vẫn còn `&amp;` với tài liệu có dấu `&`. Corpus trên Drive KHÔNG hỏng —
+lỗi thuần ở phía đọc. Cách chữa: xoá cache extract rồi đọc lại; hồ sơ Luật BHXH đã xoá trong lượt này.
+
+`--selftest` **1400/1400**.
+
 # ★ v1.35.88 — r251: hai cổng XANH mà nói dối, bắt được khi làm nốt việc treo hồ sơ Luật BHXH (2026-07-30)
 
 ## Ca 2 — plan ingest SUY METADATA TỪ TÊN TỆP khi máy thiếu `pdftotext`, không một lời cảnh báo

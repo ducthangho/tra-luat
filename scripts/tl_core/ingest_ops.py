@@ -986,8 +986,9 @@ def _profile_read_probe_text(path: str, text_file: str | None = None) -> tuple[s
             _w = _dm.warn_line(_st, str(path))
             if _w:
                 print(_w, file=sys.stderr)
-            xml = re.sub(r"</w:p>", "\n", xml)
-            txt = re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
+            # r252: dùng CHUNG `plain_from_document_xml` — bản cũ quên unescape entity nên cổng nạp
+            # PHÂN LOẠI trên text còn `&amp;` (sohieu/loai/title suy từ đó). Xem docstring hàm đó.
+            txt = _dm.plain_from_document_xml(xml)
             if txt:
                 return txt, f"{path}#docx-local"
         except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → giữ hành vi cũ (probe rỗng)

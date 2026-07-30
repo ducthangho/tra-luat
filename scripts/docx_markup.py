@@ -25,7 +25,7 @@ import html as _html
 import re
 
 __all__ = ["MODES", "MARK_OPEN", "MARK_CLOSE", "has_markup", "scan", "scan_file", "strip_markup",
-           "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload"]
+           "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload", "plain_from_document_xml"]
 
 MARK_OPEN = "⟦BỎ:"
 MARK_CLOSE = "⟧"
@@ -81,6 +81,25 @@ def chunk_payload(chunk: str) -> str:
     lọt giữa tag, để docx bị in đẹp (xuống dòng giữa các tag) không bị hiểu nhầm là có khoảng trắng."""
     x = _RE_SOFTBREAK.sub("<w:t> </w:t>", chunk or "")
     return "".join(_html.unescape(m.group(2)) for m in _RE_TEXTEL.finditer(x))
+
+
+def plain_from_document_xml(xml: str) -> str:
+    """r252 — `word/document.xml` (ĐÃ qua `strip_markup`) → text THUẦN. MỘT chỗ duy nhất cho mọi reader.
+
+    Vì sao phải gom về đây: ba nơi sản xuất tự bóc tag bằng `re.sub(r"<[^>]+>", "", xml)` và **QUÊN
+    UNESCAPE ENTITY** ⇒ `&amp;` `&lt;` `&gt;` `&quot;` chui NGUYÊN VĂN vào kho. `_docx_unzip_text`
+    (`tl extract`/`tl doc-text`) là nơi nặng nhất vì text của nó ĐƯỢC CACHE và NUÔI CORPUS — tức lỗi
+    nguyên văn nằm đúng lời hứa lõi của skill. Bằng chứng đo được (BC Bộ Nội vụ, hồ sơ Luật BHXH):
+    GDoc trên Drive có `6193/BNV-CTL&BHXH` (webapp `exporttext` đọc ra `&` trần, 3/3 chỗ), nhưng
+    `tl extract` trả `6193/BNV-CTL&amp;BHXH`. Với công thức thì nặng hơn: `a < b` hoá `a &lt; b`.
+    `normalize_document.py` VỐN ĐÃ unescape đúng ⇒ hai đường đọc cùng một .docx cho hai kết quả khác nhau.
+
+    THỨ TỰ BẮT BUỘC: `</w:p>`→newline · bóc tag · RỒI MỚI unescape. Unescape trước thì `&lt;abc&gt;`
+    trong nội dung biến thành `<abc>` và bị chính bước bóc tag ăn mất — đổi một lỗi thành một lỗi tệ hơn.
+    """
+    x = re.sub(r"</w:p>", "\n", xml or "")
+    x = _RE_TAG.sub("", x)
+    return re.sub(r"[ \t]+", " ", _html.unescape(x)).strip()
 
 
 def has_markup(xml: str) -> bool:

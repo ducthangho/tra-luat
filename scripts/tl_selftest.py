@@ -22563,6 +22563,47 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r251_hang_canh_bao_re_export_vao_tl", _c251_hang_canh_bao_re_export_vao_tl)
 
+    def _c252_entity_khong_chui_nguyen_van_vao_kho():
+        """r252: 3 reader .docx bóc tag bằng `re.sub(r"<[^>]+>","",xml)` mà QUÊN UNESCAPE ⇒ `&amp;`
+        `&lt;` `&gt;` `&quot;` chui NGUYÊN VĂN vào kho. Nặng nhất là `_docx_unzip_text` (`tl extract` /
+        `tl doc-text`) vì text của nó ĐƯỢC CACHE và NUÔI CORPUS — sai đúng lời hứa lõi của skill.
+        Bằng chứng LIVE (BC Bộ Nội vụ, hồ sơ Luật BHXH): GDoc trên Drive có `6193/BNV-CTL&BHXH`
+        (webapp `exporttext` đọc `&` trần, 3/3 chỗ) mà `tl extract` trả `...&amp;BHXH`.
+        Khẳng định: entity được giải, và THỨ TỰ đúng (bóc tag TRƯỚC, unescape SAU).
+        PHẢN CHỨNG: nội dung chứa chuỗi GIỐNG TAG đã escape (`&lt;w:t&gt;`) phải CÒN NGUYÊN — làm sai
+        thứ tự (unescape trước) thì chính bước bóc tag ăn mất chữ, tức đổi một lỗi thành lỗi tệ hơn."""
+        import importlib.util as _ilu252, html as _h252, re as _re252
+        _p = Path(__file__).resolve().parent / "docx_markup.py"
+        _sp = _ilu252.spec_from_file_location("_dm252", _p)
+        _dm = _ilu252.module_from_spec(_sp); _sp.loader.exec_module(_dm)
+        xml = ('<w:document><w:body>'
+               '<w:p><w:r><w:t>Công văn số 6193/BNV-CTL&amp;BHXH</w:t></w:r></w:p>'
+               '<w:p><w:r><w:t>a &lt; b và c &gt; d, ký hiệu &quot;X&quot;</w:t></w:r></w:p>'
+               '</w:body></w:document>')
+        out = _dm.plain_from_document_xml(xml)
+        ok1 = "6193/BNV-CTL&BHXH" in out and "&amp;" not in out
+        ok2 = "a < b và c > d" in out and 'ký hiệu "X"' in out
+        ok3 = "\n" in out                                  # </w:p> vẫn thành ranh giới dòng (neo "^Số:")
+        # PHẢN CHỨNG thứ tự
+        xml2 = '<w:document><w:body><w:p><w:r><w:t>thẻ &lt;w:t&gt; và &lt;div&gt;</w:t></w:r></w:p></w:body></w:document>'
+        keep = _dm.plain_from_document_xml(xml2)
+        ok4 = "<w:t>" in keep and "<div>" in keep
+        _bad = _re252.sub(r"<[^>]+>", "", _h252.unescape(xml2))   # thứ tự SAI
+        ok5 = "<w:t>" not in _bad                                 # đúng là mất chữ ⇒ phản chứng có nghĩa
+        # cả 3 reader sản xuất phải DÙNG CHUNG hàm này, không tự bóc tag nữa
+        _root = Path(__file__).resolve().parent
+        ok6 = True
+        for _f in ("tl_core/lookup_ops.py", "tl_core/ingest_ops.py", "tl_core/the_thuc.py"):
+            _s = (_root / _f).read_text(encoding="utf-8")
+            ok6 = ok6 and "plain_from_document_xml" in _s
+        # và KHÔNG còn site nào bóc tag trần trên document.xml trong 3 tệp đó
+        ok7 = True
+        for _f in ("tl_core/lookup_ops.py", "tl_core/ingest_ops.py", "tl_core/the_thuc.py"):
+            _s = (_root / _f).read_text(encoding="utf-8")
+            ok7 = ok7 and not _re252.search(r're\.sub\(r"<\[\^>\]\+>", "", *re\.sub\(r"</w:p>"', _s)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r252_entity_khong_chui_nguyen_van_vao_kho", _c252_entity_khong_chui_nguyen_van_vao_kho)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

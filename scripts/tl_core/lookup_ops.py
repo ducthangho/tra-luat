@@ -2278,8 +2278,9 @@ def _docx_unzip_text(path, mode: str = "strip") -> str:
         _w = _dm.warn_line(_st, str(path))
         if _w:
             print(_w, file=sys.stderr)
-        xml = re.sub(r"</w:p>", "\n", xml)
-        return re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", "", xml)).strip()
+        # r252: dùng CHUNG `plain_from_document_xml` — bản cũ bóc tag mà KHÔNG unescape entity nên
+        # `&amp;`/`&lt;` chui nguyên văn vào text ĐƯỢC CACHE và NUÔI CORPUS (xem docstring hàm đó).
+        return _dm.plain_from_document_xml(xml)
     except Exception:  # noqa: BLE001 — docx hỏng/mã hoá → coi như không đọc được
         return ""
 

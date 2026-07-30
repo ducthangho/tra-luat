@@ -1,3 +1,40 @@
+# ★ v1.35.96 — r258: `_vbhn_goc_map` — map "đã phủ" sai HAI HƯỚNG, hướng nguy hiểm là hướng ít ai để ý (2026-07-30)
+
+Nửa CÒN LẠI của cùng lệnh `corpus-relation-sweep` (r257 vá cổng `vbhn_broken`; đây là map coverage).
+Map này **SUPPRESS `amendments_missing`** nên khái niệm "in corpus" ở đây phải là LUẬT SERVER, giống cổng
+kia — sau r257+r258 hai nửa mới dùng chung MỘT khái niệm.
+
+`_entry_corpus_true` lệch **hai hướng cùng lúc**, và hướng đáng lo không phải hướng tôi cảnh báo lúc đầu:
+
+- **THIẾU `− ref`** (+ thiếu `− loai='thuong'`): dòng `row_kind='ref'` là dòng TRỎ-tham-chiếu, KHÔNG phải văn
+  bản sở hữu, mà vẫn được tính là VBHN đã phủ ⇒ **CHE MẤT `amendments_missing` THẬT**. Đây là
+  **over-suppression CÓ SẴN** — nguy hiểm hơn hẳn vế nới, vì nó làm lệnh im lặng bỏ qua văn bản cần tải.
+  Bằng chứng nằm ngay trong cùng hàm: lúc chọn `base_docs`, sweep viết
+  `not _entry_corpus_true(e) or _entry_row_kind(e) == "ref"` — tác giả BIẾT phải trừ `ref`, chỉ nửa map bỏ sót.
+- **BỎ SÓT `corpus='vbqppl'` + `row_kind='overflow'`**: server (`tl boot`) ĐẾM chúng là corpus, nên không tính
+  là đã-phủ mới là dương-tính-giả `amendments_missing` (giục tải bản gốc mà VBHN đã phủ).
+
+Vế quarantine y như r257: `"_ZZZ_QUARANTINE" in cat` bỏ sót nhãn `QUARANTINE` **trơ** ⇒ VBHN ĐÃ cách ly vẫn
+được tính là phủ (che gap). Dùng `_is_quarantine_cat` — hướng SIẾT.
+
+Bảng chân lý sau r258 (ai được tính là "đã phủ"): `true/own` ✓ (như cũ) · `vbqppl/own` ✓ **MỚI** ·
+`blank/overflow` ✓ **MỚI** · `true/ref` ✗ **ĐỔI** · `true/loai=thuong` ✗ **ĐỔI** · `true/cat=QUARANTINE` ✗
+**ĐỔI** · `true/cat=_ZZZ_QUARANTINE` ✗ (như cũ) · `false/own` ✗ (như cũ).
+
+Test **r258** (6 case) đo 2 CHIỀU: 0/6 trên nền `ba91cf9` → 6/6 trên bản vá. Case (1) khoá trực tiếp BẢNG
+CHÂN LÝ của `_vbhn_goc_map` (PURE, 8 dòng vào — 3 ra). Phản chứng chứng minh CHỊU LỰC bằng 3 bản vá QUÁ TAY,
+mỗi bản đỏ đúng trục của nó:
+· coi MỌI dòng VBHN là phủ → truth-table + `ref_row_not_coverage` + `bare_quarantine` ĐỎ (8/11);
+· giữ nới nhưng bỏ vế quarantine → truth-table + `bare_quarantine` ĐỎ, `ref` vẫn xanh (9/11);
+· nửa vời `corpus_true ∪ vbqppl` (thiếu `− ref`) → truth-table + `ref_row_not_coverage` ĐỎ (9/11).
+
+NÓI RÕ giới hạn: `r258_uncovered_amendment_still_reported` KHÔNG phân biệt được 3 bản quá tay trên (xanh ở
+cả ba, và xanh cả trên nền) — nó là **guard chống hồi quy**, không phải bằng chứng phân biệt. Giá trị phân
+biệt nằm ở 4 case còn lại. Ghi ra để không ai đọc "6/6" thành "6 bằng chứng độc lập".
+
+Vì sao gate cũ xanh: `r94_sweep_vbhn_first_covered` dựng VBHN coverage với `corpus:"true", row_kind:"own"` —
+đúng ô giao nhau của hai khái niệm, nên test xanh dù dùng vị từ nào.
+
 # ★ v1.35.95 — r257: `corpus-relation-sweep` — hai vị từ THÔ ở cổng `vbhn_broken` (2026-07-30)
 
 Cổng đủ-điều-kiện-`vbhn_broken` dùng 2 vị từ thô, cả hai lệch khuôn nhà — đúng lớp dương-tính-giả mà

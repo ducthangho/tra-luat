@@ -752,7 +752,18 @@ def _vbhn_goc_map(entries: list) -> dict:
     for e in entries or []:
         if _normalize_loai(str(e.get("loai") or "")) != "Văn bản hợp nhất":
             continue
-        if not _entry_corpus_true(e) or "_ZZZ_QUARANTINE" in str(_entry_cat(e)):
+        # r254 (P15, cùng gốc r253 — nửa CÒN LẠI của cùng một lệnh): map "đã phủ" này SUPPRESS
+        # amendments_missing, nên khái niệm "in corpus" ở đây phải là LUẬT SERVER, giống cổng vbhn_broken.
+        # `_entry_corpus_true` lệch HAI HƯỚNG, và hướng nguy hiểm là hướng ít ai để ý:
+        #  · THIẾU `− ref`: dòng row_kind='ref' là dòng TRỎ-tham-chiếu, KHÔNG phải văn bản sở hữu, mà vẫn được
+        #    tính là VBHN đã phủ ⇒ CHE MẤT amendments_missing THẬT. Chính hàm này lúc chọn base_docs đã viết
+        #    `not _entry_corpus_true(e) or _entry_row_kind(e) == "ref"` — tác giả biết phải trừ ref, nửa map bỏ sót.
+        #    Thiếu luôn `− loai='thuong'` (văn bản hành chính không bao giờ là VBHN phủ VBQPPL).
+        #  · BỎ SÓT `corpus='vbqppl'` + `row_kind='overflow'`: server (tl boot) ĐẾM chúng là corpus, nên không
+        #    tính là đã-phủ mới là dương-tính-giả amendments_missing (giục tải bản gốc đã có VBHN phủ).
+        # Vế quarantine: `"_ZZZ_QUARANTINE" in cat` bỏ sót nhãn 'QUARANTINE' trơ ⇒ VBHN đã cách ly vẫn được
+        # tính là phủ (che gap). Dùng helper — hướng SIẾT, an toàn.
+        if not _entry_is_corpus_effective(e) or _is_quarantine_cat(_entry_cat(e)):
             continue
         vb_label = _entry_sohieu(e) or str(_entry_name(e) or "")[:40]
         keys = set()

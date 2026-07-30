@@ -1,3 +1,38 @@
+# ★ v1.36.6 — r268: r264 máy-phụ-thuộc — vế SHA đòi cứng MỘT loại advisory trong khi loại đó theo OBJECT STORE từng máy (2026-07-30)
+
+(Đánh số lại từ r267/v1.36.5: phiên song song chiếm số trước tại `a4ebf74` — lần VA SỐ THỨ BA của chiến
+dịch; bản này rebase lên đúng master đó, KHÔNG đụng vùng họ sửa.)
+
+Người giữ chạy `deploy-package.cmd` trên máy Windows dev: gate ĐỎ ở selftest — **`r264_doc_claims_phu_docs`
+FAIL, 1427/1428** (7 gate còn lại xanh; r265/r266 đều [OK]). Đo tại chỗ trên máy đó:
+`git cat-file -t 1835b46` → **commit** (nhánh `…-dlbrut` đã xoá trên remote nhưng máy dev là nơi nhánh
+SINH RA — object còn trong store), Counter advisory: `SHA_NOT_REACHABLE_FROM_HEAD: 1` chứ KHÔNG phải
+`SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC` mà test đòi cứng `>= 1`. **Checker ĐÚNG** (flags rỗng, advisory vẫn
+sinh — chỉ khác LOẠI theo trạng thái object store); **test SAI kiểu máy-phụ-thuộc** — ảnh gương của đúng
+bẫy clone-shallow mà r264 tự ghi chú.
+
+Vá 2 phần, 0 dòng sản xuất:
+1. **Vế SHA của r264 rẽ theo BẰNG CHỨNG ĐO TẠI CHỖ** (`git cat-file -t 1835b46`): object là commit →
+   đòi `SHA_NOT_REACHABLE_FROM_HEAD >= 1`; không → đòi `SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC >= 1`.
+   KHÔNG «thiếu thì cho qua»: object thành REACHABLE (khôi phục nhánh) thì CẢ HAI vế đổ — đúng, vì tài
+   liệu hết là "ghi chép về commit đã mất".
+2. **Case MỚI `r268_l2_trichotomy_theo_trang_thai_object`**: khoá TRICHOTOMY của L2 trên mini-repo git
+   THẬT (khuôn r226), chạy MỌI máy: object VẮNG → NOT_A_COMMIT_IN_HISTORICAL_DOC (advisory); CÓ-nhưng-
+   UNREACHABLE (tạo nhánh, commit, xoá nhánh) → NOT_REACHABLE_FROM_HEAD; REACHABLE → IM TUYỆT ĐỐI + 0 cờ
+   cứng L2 + không nhãn kép. Chống flaky: SHA sống dùng bản 40-hex (sha 7 ký tự ~3.7% không chứa a-f →
+   L2 bỏ qua theo thiết kế).
+
+Phản chứng (chạy TRÊN CÂY CUỐI đã rebase, mỗi vế trọn selftest, output ra FILE):
+| lượt | kết quả |
+|---|---|
+| repo vá (nền a4ebf74 + r268) | **N/N** (số chốt ghi ở commit) |
+| BƠM HỎNG checker (historical L2 im lặng) | r264 **VÀ** r268 cùng ĐỎ — hai lưới độc lập cùng bắt |
+| checker hỏng + r264 QUÁ-TAY («thiếu thì cho qua») | r264 **XANH OAN**, r268 vẫn ĐỎ — vế chặt là vế chịu lực |
+
+Đo nền phía Windows = chính output người giữ dán (repro chuẩn; container không tái hiện được vì object
+vắng). Parity đóng vòng: máy Windows pull về chạy lại gate qua nhánh NOT_REACHABLE. Bump 1.36.5→1.36.6
+cùng độ dài ⇒ SKILL.md size giữ nguyên; file_count 195 không đổi ⇒ golden giữ nguyên.
+
 # ★ v1.36.5 — r267: PARITY 4 reader trên cùng tệp cache — U1 còn thiếu ở HAI chỗ nữa (2026-07-30)
 
 r266 (v1.36.4) vá `_doc_text_any` bỏ qua bộ lọc U1 và gọi chỗ mình vá là *"một choke-point"*. Rà lại vùng

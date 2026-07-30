@@ -23235,9 +23235,23 @@ def run() -> int:
         # 12 phát hiện KHÔNG bị mất — chỉ hạ cấp: 0 cờ CỨNG, vẫn đủ 11 PATH + 1 SHA ở advisory
         _d264 = _wf264._doc_claims_check(paths=[_kh264])
         _adv264 = [a["reason"] for a in _d264["advisories"]]
+        # r268 (đo máy giữ 30-07: ca này ĐỎ trên Windows dev — `git cat-file -t 1835b46` = commit): LOẠI
+        # advisory phụ thuộc OBJECT STORE từng máy — clone thường/CI không có object của nhánh …-dlbrut
+        # đã xoá (→ SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC), máy dev nơi nhánh sinh ra còn object nhưng
+        # UNREACHABLE (→ SHA_NOT_REACHABLE_FROM_HEAD; Counter đo máy giữ = 1). Vế SHA rẽ theo BẰNG CHỨNG
+        # ĐO TẠI CHỖ, KHÔNG nhánh «thiếu thì cho qua»: mỗi bối cảnh đòi ĐÚNG advisory của nó; object
+        # thành REACHABLE (ai khôi phục nhánh) thì CẢ HAI vế đổ — đúng, vì tài liệu hết là "ghi chép về
+        # commit đã mất". Trichotomy của CHECKER khoá riêng ở case r268 (mini-repo, chạy mọi máy).
+        import subprocess as _sp268a
+        _cf268 = _sp268a.run(["git", "-C", str(_ROOT209), "cat-file", "-t", "1835b46"],
+                             capture_output=True, text=True, timeout=60)
+        if _cf268.returncode == 0 and _cf268.stdout.strip() == "commit":
+            _sha268 = _adv264.count("SHA_NOT_REACHABLE_FROM_HEAD") >= 1
+        else:
+            _sha268 = _adv264.count("SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC") >= 1
         ok3 = (not _d264["flags"]
                and _adv264.count("PATH_MISSING_IN_HISTORICAL_DOC") >= 11
-               and _adv264.count("SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC") >= 1)
+               and _sha268)
         # PHẢN CHỨNG 1 — tệp KHÔNG historical vẫn phải bị bắt CỨNG cả HAI lớp (nếu vế này rơi thì việc
         # phủ `docs/` chỉ là trang trí). Thư mục TẠM: ngoài cây ⇒ không historical, và KHÔNG ghi vào repo.
         with _tf264.TemporaryDirectory(prefix="r264-") as _td264:
@@ -23336,6 +23350,58 @@ def run() -> int:
                and "_sanitize_export_text(_strip_font_runs(_ct))" in _s2)
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
     _t110("r267_parity_reader_cache_u1", _c267_parity_reader_cache_u1)
+
+    def _c268_l2_trichotomy_theo_trang_thai_object():
+        """r268 (đo máy giữ 30-07): r264 ĐỎ trên Windows dev vì `1835b46` còn OBJECT trong store (nhánh
+        …-dlbrut đã xoá nhưng object sống trong reflog/store) → L2 sinh SHA_NOT_REACHABLE_FROM_HEAD chứ
+        KHÔNG phải SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC — test cũ đòi cứng loại sau ⇒ MÁY-PHỤ-THUỘC
+        (container/CI xanh, máy dev đỏ; ảnh gương của bẫy clone-shallow r264 tự ghi). Khoá TRICHOTOMY
+        của L2 trên mini-repo git THẬT (khuôn r226 — không giả lập _doc_claims_git), chạy MỌI máy:
+        (a) object VẮNG → SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC (advisory — tài liệu lịch sử);
+        (b) object CÓ nhưng UNREACHABLE (nhánh đã xoá) → SHA_NOT_REACHABLE_FROM_HEAD;
+        (c) REACHABLE → IM TUYỆT ĐỐI (đối chứng — kêu bừa trên SHA sống là lệnh thành vô dụng).
+        Tài liệu đặt ĐÚNG đường docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md để ăn nhãn historical;
+        hai SHA sống dùng bản 40-hex ĐẦY ĐỦ (sha 7 ký tự có ~3.7% không chứa a-f → L2 bỏ qua → flaky)."""
+        import subprocess as _sp268
+        import tempfile as _tf268
+        _check = _TL_MODULE._doc_claims_check   # đường sản xuất: chính cmd_doc_claims_check gọi hàm này
+
+        def _git(cwd, *args):
+            _r = _sp268.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *args], cwd=str(cwd),
+                            capture_output=True, text=True, timeout=120)
+            return _r.returncode, _r.stdout.strip()
+        with _tf268.TemporaryDirectory() as _td:
+            _kho = Path(_td) / "kho"
+            (_kho / "docs").mkdir(parents=True)
+            if _git(_kho, "init", "-q")[0] != 0:
+                return False
+            _git(_kho, "config", "core.abbrev", "7")
+            _doc = _kho / "docs" / "KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md"
+            _doc.write_text("# T\n", encoding="utf-8")
+            _git(_kho, "add", "-A")
+            _git(_kho, "commit", "-q", "-m", "c1")
+            _rc1, _sha_r = _git(_kho, "rev-parse", "HEAD")           # (c) REACHABLE
+            _git(_kho, "checkout", "-q", "-b", "tam")
+            (_kho / "x.txt").write_text("x\n", encoding="utf-8")
+            _git(_kho, "add", "-A")
+            _git(_kho, "commit", "-q", "-m", "c2")
+            _rc2, _sha_u = _git(_kho, "rev-parse", "HEAD")           # (b) sẽ UNREACHABLE
+            _git(_kho, "checkout", "-q", "-")
+            _git(_kho, "branch", "-q", "-D", "tam")                  # xoá nhánh: object CÒN, unreachable
+            if not (_rc1 == 0 and _rc2 == 0 and len(_sha_r) == 40 and len(_sha_u) == 40
+                    and any("a" <= c <= "f" for c in _sha_u) and any("a" <= c <= "f" for c in _sha_r)):
+                return False
+            _doc.write_text(f"# T\n\nvá tại {_sha_u} (nhánh đã xoá), gốc {_sha_r}, còn fadedbc "
+                            "không tồn tại.\n", encoding="utf-8")
+            _j = _check(root=_kho)
+        _adv = [(a.get("claim"), a.get("reason")) for a in (_j.get("advisories") or [])]
+        okA = ("fadedbc", "SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC") in _adv            # (a) vắng
+        okB = (_sha_u, "SHA_NOT_REACHABLE_FROM_HEAD") in _adv                      # (b) unreachable
+        okC = all(c != _sha_r for c, _ in _adv)                                    # (c) reachable IM
+        okD = not [f for f in (_j.get("flags") or []) if f.get("layer") == "L2"]   # lịch sử ⇒ 0 cờ cứng L2
+        okE = all(c != _sha_u or r == "SHA_NOT_REACHABLE_FROM_HEAD" for c, r in _adv)  # không nhãn kép
+        return okA and okB and okC and okD and okE
+    _t110("r268_l2_trichotomy_theo_trang_thai_object", _c268_l2_trichotomy_theo_trang_thai_object)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

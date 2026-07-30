@@ -1,3 +1,37 @@
+# ★ v1.35.77 — r240: NLM chạy được từ điện thoại — jar phải LIST giữ domain, KHÔNG `nlm login --manual` (2026-07-29)
+
+## THÀNH CÔNG: cookie từ điện thoại nạp được, 139 notebook
+
+Chốt cả chuỗi r233–r239. User export bằng **Cookie Quick Manager** (đọc cookie MỌI domain) từ
+Firefox Android → bộ ĐỦ: có LSID/__Host-GAPS/__Host-1PLSID/3PLSID (accounts.google.com). Nạp →
+`nlm login --check` = **✓ Authentication valid! Notebooks found: 139**.
+
+## Bug CUỐI (đo LIVE): `nlm login --manual -f` LÀM PHẲNG jar → mất domain
+
+Bộ cookie ĐỦ vẫn ĐỎ khi nạp bằng `nlm login --manual`. Truy: nó lưu cookies.json DẠNG DICT phẳng
+(name→value). `_get_httpx_cookies` (nlm core/base.py) khi gặp dict phẳng đặt MỌI cookie vào
+`.google.com` ⇒ cookie host-scoped `LSID`/`__Host-GAPS` (accounts.google.com) sai host ⇒
+RotateCookies tới accounts.google.com không nhận đủ ⇒ Google đẩy signin. Bản CDP-harvest
+(`nlm login` thật) lưu cookies.json DẠNG LIST có `domain` nên `_get_httpx_cookies` giữ đúng host.
+
+Bằng chứng phân tách: replay httpx set ĐÚNG domain từng cookie ⇒ KHÔNG bị đẩy signin; cùng bộ đó
+qua `nlm login --manual` (phẳng) ⇒ bị đẩy signin. Khác biệt DUY NHẤT = domain.
+
+## Vá
+
+- Thêm `scripts/nlm_auth_convert.py`: nhận CQM `{"cookies":[…]}` / list thô / dict phẳng / header
+  → ghi cookies.json **LIST giữ domain** (schema CDP: domain/expires/httpOnly/…). Với input phẳng
+  gán domain theo TÊN (LSID/__Host-*/ACCOUNT_CHOOSER/SMSV→accounts.google.com, OSID→notebooklm,
+  còn lại→.google.com). VALIDATE identity 7 + LSID TRƯỚC khi ghi (thiếu ⇒ rc2, không đụng jar).
+- `nlm-auth-import.sh`: bỏ `nlm login --manual -f` (làm phẳng), gọi convert. Sửa 1 bug bash:
+  backtick trong chuỗi `ok "...\`tl …\`"` bị thực thi như command-substitution (`tl: not found`).
+
+Đã kiểm end-to-end: `./scripts/nlm-auth-import.sh --file <CQM export>` ⇒ jar LIST 35 cookie giữ
+domain, probe 139 notebook, stage bundle Drive (verify LIVE 300 nguồn). rc=0.
+
+## Cẩm nang phone (chốt): Firefox Android + **Cookie Quick Manager** (KHÔNG Cookie-Editor — chỉ
+tab hiện tại, hụt LSID) → export toàn bộ cookie google → Drive `ducthangho@gmail.com` → ở sandbox
+`./scripts/nlm-auth-import.sh`. Mọi thứ CÙNG account ducthangho@gmail.com (browser + Drive + gws).
 # ★ v1.35.76 — r239: nút thắt cookie NLM là LSID/đăng-nhập, KHÔNG phải PSIDTS (đo LIVE) (2026-07-29)
 
 Tiếp r238. User export lại nhưng vẫn 19 cookie thiếu nhóm phiên. Truy tới gốc bằng ĐO LIVE

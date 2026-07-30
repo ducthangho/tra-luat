@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.76",
+  "skill_version": "1.35.77",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 197,
-  "total_bytes": 6837893,
-  "package_hash": "6865af8a251a8dceccec85d85d71a6620245a06fff9734f13b693ee41a7d0d72",
-  "content_hash": "6865af8a251a8dceccec85d85d71a6620245a06fff9734f13b693ee41a7d0d72",
+  "file_count": 198,
+  "total_bytes": 6843571,
+  "package_hash": "d9fe1e53a00722986454de8efcef9496c909e31a94cf94c43a7424e4471915db",
+  "content_hash": "d9fe1e53a00722986454de8efcef9496c909e31a94cf94c43a7424e4471915db",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 266035,
-      "sha256": "98eddef7af9f4d36f61c375d5bbe2a84a13c56b2a300a2a4ae35e96391d5741e"
+      "size": 268527,
+      "sha256": "5db5dc4f00ef760cc0b84e11eaff476e59a1e65bd185ae3a327c9e75f25d744d"
     },
     {
       "path": "CONTEXT.md",
@@ -64,12 +64,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "9cefba859025b09c22558956710cdb9ce83e0397c884192347d57461a42b14bd"
+      "sha256": "debb13f5e8357a37b91ddb81b43e5d5f270a94e0a431e2b74193acce51521063"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "4c084c87c5f5a2a5da80f1b9ed9e05e82947e952d545f92ce66aa6dfabbf18ed"
+      "sha256": "1449af0875227c713a7db324a8d2af90fa9951f3e40f27e44d983e661a4b483f"
     },
     {
       "path": "agents/openai.yaml",
@@ -728,8 +728,13 @@
     },
     {
       "path": "scripts/nlm-auth-import.sh",
-      "size": 15953,
-      "sha256": "78440c7f9a7530c421e56dc5baa4923465244891775476f7577ae1d0f423da09"
+      "size": 12837,
+      "sha256": "c9cdb10ed5eb50f0eacf8f0f1262759f22da0a79a636b255fee5fe70b468b0b7"
+    },
+    {
+      "path": "scripts/nlm_auth_convert.py",
+      "size": 6302,
+      "sha256": "2a64375fa8524a226603da69f725d9ff6ff7aac81c7c5bb9ca218776973f955b"
     },
     {
       "path": "scripts/nlm_cli.py",
@@ -784,7 +789,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "e49a1e2fe784071fd2a7a00613fc4e852cadb9241af8cf64376fffb1dd262ad4"
+      "sha256": "090ebd50d0fee114c80fc13cae745936e3551d3a9fb1d30b2c2e5d50b2c625b8"
     },
     {
       "path": "scripts/tl_boot.py",

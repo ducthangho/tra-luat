@@ -164,80 +164,31 @@ else
 fi
 
 # ── 2. Kiểm định dạng + ĐỦ cookie, TRƯỚC khi đụng vào jar đang có ──
-say "2. Kiểm nội dung (chưa ghi đè gì)"
-$PY - "$SRC" <<'PY'
-import json, sys, pathlib
-raw = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="ignore").strip()
-ck = {}
-try:
-    d = json.loads(raw)
-    if isinstance(d, list):
-        for c in d:
-            if isinstance(c, dict) and c.get("name"): ck[str(c["name"])] = str(c.get("value", ""))
-    elif isinstance(d, dict):
-        ck = {str(k): str(v) for k, v in d.items()}
-except json.JSONDecodeError:
-    for it in raw.split(";"):
-        if "=" in it:
-            n, v = it.strip().split("=", 1)
-            if n.strip(): ck[n.strip()] = v
-# Netscape .txt KHÔNG được nlm hỗ trợ. Kiểm TRƯỚC `not ck`: tệp Netscape không có dấu ';'
-# nên parse ra rỗng và rơi vào thông báo chung vô ích — đúng ca hay gặp nhất, vì extension
-# phổ biến nhất ("Get cookies.txt LOCALLY") xuất chính định dạng này. ĐÃ ĐO: bản đầu của
-# script này in nhầm thông báo chung cho tệp Netscape.
-if raw.lstrip().startswith("# Netscape") or "\t" in raw.split("\n")[0]:
-    print("  Đây là định dạng Netscape (tab-separated) — nlm KHÔNG đọc được.", file=sys.stderr)
-    print("  Dùng extension export JSON, hoặc chuyển sang chuỗi header:", file=sys.stderr)
-    print("    awk -F'\\t' '!/^#/&&NF>=7{printf \"%s%s=%s\", s, $6, $7; s=\"; \"}' vao.txt > ra.header",
-          file=sys.stderr)
-    sys.exit(2)
-if not ck:
-    print("  KHÔNG parse được: không phải JSON list/dict cũng không phải chuỗi header", file=sys.stderr)
-    sys.exit(2)
-print(f"  parse được {len(ck)} cookie")
-# r238: BA TẦNG. Đo 29-07 (export 19 cookie ĐỎ ở probe): 7 cookie định-danh KHÔNG đủ — API
-# NotebookLM còn đòi cookie DẤU-THỜI-GIAN phiên (*PSIDTS) và cookie ĐĂNG NHẬP (LSID/__Host-GAPS,
-# chỉ sống ở accounts.google.com). Chặn TRƯỚC khi nạp, thay vì để probe LIVE mới lộ (đắt hơn).
-DINH_DANH = ["SID", "__Secure-1PSID", "__Secure-3PSID", "HSID", "SSID", "APISID", "SAPISID"]
-thieu = [n for n in DINH_DANH if not ck.get(n)]
-has_ts  = any(ck.get(n) for n in ("__Secure-1PSIDTS", "__Secure-3PSIDTS"))
-has_lsid = bool(ck.get("LSID"))
-has_rts = any(ck.get(n) for n in ("__Secure-1PSIDRTS", "__Secure-3PSIDRTS"))
-def _guide():
-    print("  → SỬA: mở tab accounts.google.com (đã đăng nhập) rồi Cookie-Editor Export JSON.", file=sys.stderr)
-    print("    accounts.google.com là NƠI DUY NHẤT mang LSID/__Host-GAPS *và* thấy cả cookie .google.com", file=sys.stderr)
-    print("    (SID/*PSIDTS/*PSIDRTS). Export từ Gmail/myaccount HỤT nhóm đăng nhập — đó là ca vừa lỗi.", file=sys.stderr)
-    print("    Đảm bảo Cookie-Editor export TOÀN BỘ cookie của trang, không lọc.", file=sys.stderr)
-if thieu:
-    print(f"  THIẾU cookie định-danh: {thieu}", file=sys.stderr); _guide(); sys.exit(2)
-# r239 (đo 29-07): LSID là CỔNG THẬT. Kiểm chứng LIVE: bản chỉ có định-danh (thiếu LSID/__Host/*RTS)
-# bị Google ĐẨY VỀ signin dù đã mint *PSIDTS qua RotateCookies ⇒ *PSIDTS KHÔNG phải nút thắt (nlm tự
-# mint). Nút thắt = cookie ĐĂNG NHẬP (LSID/__Host-GAPS) + ROTATION (*PSIDRTS), chỉ có ở accounts.google.com.
-if not has_lsid:
-    print("  THIẾU LSID — cookie ĐĂNG NHẬP (sống ở accounts.google.com). ĐÂY là nút thắt:", file=sys.stderr)
-    print("  đo LIVE 29-07: bộ cookie THIẾU LSID bị Google ĐẨY VỀ signin dù đã mint *PSIDTS.", file=sys.stderr)
-    _guide(); sys.exit(2)
-print(f"  đủ {len(DINH_DANH)} định-danh + LSID"
-      + ("" if has_ts else " (thiếu *PSIDTS — nlm sẽ tự mint qua RotateCookies, KHÔNG chặn)")
-      + (" · có *PSIDRTS (tự gia hạn)" if has_rts else
-         "\n  ⚠ thiếu *PSIDRTS — phiên KHÔNG tự gia hạn; nếu Google vẫn đẩy signin thì cần export lại đủ hơn"))
-PY
-RC=$?; [ $RC -eq 0 ] || { bad "file cookie không dùng được (xem lý do trên)"; exit 2; }
-ok "định dạng + độ đủ: đạt"
+say "2. Kiểm định dạng (chưa đụng jar sống)"
+# Netscape .txt KHÔNG được hỗ trợ — bắt sớm, nói rõ (extension phổ biến "Get cookies.txt LOCALLY"
+# xuất đúng định dạng này). Không có ';' nên helper cũng parse rỗng → thông điệp chung vô ích.
+if head -c 200 "$SRC" | grep -qE '^# Netscape|^\.[a-z].*\t.*\t' 2>/dev/null; then
+  bad "file là định dạng Netscape (tab-separated) — nlm KHÔNG đọc được."
+  echo "        Dùng extension export JSON (Cookie Quick Manager), KHÔNG phải Netscape .txt." >&2
+  exit 2
+fi
+ok "không phải Netscape"
 
-# ── 3. Sao lưu jar hiện có rồi nạp ──
-say "3. Nạp vào nlm"
+# ── 3. Chuyển → jar LIST giữ domain (r240: thay `nlm login --manual` vốn làm phẳng mất domain) ──
+say "3. Nạp vào nlm (jar LIST giữ domain)"
 JAR="$HOME/.notebooklm-mcp-cli"
+PDIR="$JAR/profiles/default"
 if [ -d "$JAR" ]; then
-  cp -a "$JAR" "$TMP/jar.bak" && ok "đã sao lưu jar hiện có (khôi phục được nếu nạp hỏng)"
+  cp -a "$JAR" "$TMP/jar.bak" && ok "đã sao lưu jar hiện có (khôi phục được nếu hỏng)"
 fi
-if nlm login --manual -f "$SRC" 2>&1 | sed 's/^/     /'; then
-  ok "nlm nhận cookie"
-else
-  bad "nlm TỪ CHỐI cookie"
-  [ -d "$TMP/jar.bak" ] && { rm -rf "$JAR"; cp -a "$TMP/jar.bak" "$JAR"; warn "đã khôi phục jar cũ"; }
-  exit 3
+# nlm_auth_convert VALIDATE trước (identity 7 + LSID) rồi mới ghi — thiếu ⇒ rc≠0, KHÔNG ghi jar.
+$PY scripts/nlm_auth_convert.py "$SRC" "$PDIR" "${TL_NLM_EMAIL:-ducthangho@gmail.com}"; CONV_RC=$?
+if [ "$CONV_RC" != 0 ]; then
+  bad "cookie KHÔNG dùng được (xem lý do trên) — jar cũ giữ nguyên"
+  [ -d "$TMP/jar.bak" ] && { rm -rf "$JAR"; cp -a "$TMP/jar.bak" "$JAR"; }
+  exit "$CONV_RC"
 fi
+ok "đã ghi jar (nlm sẽ tự mint *PSIDTS qua RotateCookies khi probe)"
 
 # ── 4. PHÁN QUYẾT = probe LIVE (không tin bước 3 báo thành công) ──
 say "4. Probe LIVE"
@@ -255,7 +206,7 @@ if [ "$DO_STAGE" = 1 ]; then
   if [ -z "${TL_TOKEN:-}" ]; then
     warn "thiếu TL_TOKEN — bỏ qua stage. Phiên sau sẽ phải nhập cookie lại."
   elif $PY scripts/tl.py nlm-auth-stage 2>&1 | tail -2 | sed 's/^/     /'; then
-    ok "bundle Drive đã tươi — phiên sau chỉ cần `tl nlm-auth-load`"
+    ok "bundle Drive đã tươi — phiên sau chỉ cần: tl nlm-auth-load"
   else
     warn "nlm-auth-stage lỗi — cookie ở ĐÂY vẫn dùng được, chỉ là chưa chia sẻ cho phiên khác"
   fi

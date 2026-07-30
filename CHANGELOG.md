@@ -1,3 +1,24 @@
+# ★ v1.35.98 — r260: 19 case r255–r258 vào `tl_selftest.py` + bịt cửa MẠNG trong test (2026-07-30)
+
+Bốn bản vá r255–r258 đã trên master từ trước mà **KHÔNG kèm chốt hồi quy của chính chúng** (đợt đó
+`tl_selftest.py` là vùng WIP của người giữ nên block test giao tay). Nay dán vào: **1406 → 1425**.
+
+Chèn ngay trước `ok = sum(1 for _, p in cases if p)`; giữ THỨ TỰ vì khối r258 dùng helper `_r256_sweep`
+định nghĩa trong khối r257. `tl_selftest.py` thuần **CRLF** nên block (viết LF) phải ép CRLF trước khi
+chèn — nếu không là trộn EOL trong repo `* -text` khoá byte, kéo theo manifest hash và `release-verify`.
+
+**Sửa một lỗi HERMETIC của chính block r255, bắt được khi chạy thật:** ca "lệnh thật rasoat-chongcheo"
+truyền `target="x"`, và `cmd_rasoat_chongcheo` ở nhánh `target` gọi `load_creds` + `_read_doc_text`
+(`lookup_ops.py:1962-1963`) ⇒ **GỌI MẠNG THẬT** khi env có `TL_WEBAPP`/`TL_TOKEN`. Harness ngoài
+`tl_selftest` chỉ thấy "hơi chậm"; đưa vào selftest thì **treo hẳn**. Đã bịt 3 cửa (`load_creds`,
+`_read_doc_text`, `resolve_identity`) — nhánh `target` vẫn được đi qua, chỉ không ra ngoài. Đo lại: mỗi
+khối ~140ms và cho **CÙNG kết quả dù có hay không** `TL_WEBAPP`/`TL_TOKEN`; đó là định nghĩa hermetic,
+không phải "chạy được trên máy tôi".
+
+Bài học: **selftest xanh trên harness KHÔNG chứng minh nó hermetic** — harness cho phép biến môi trường
+khác, và một lời gọi mạng chỉ tốn vài giây ở đó có thể thành treo vô hạn trong bộ 1400 case. Phép thử
+đúng là chạy CÙNG khối hai lần, một lần CÓ creds một lần KHÔNG, rồi đòi hai kết quả GIỐNG nhau.
+
 # ★ v1.35.97 — r259: đồng bộ số r trong CHÚ THÍCH `lookup_ops.py` (chỉ chú thích) (2026-07-30)
 
 Khiếm khuyết của CHÍNH đợt r255–r258: khi master bị phiên song song đẩy hai lần, tôi đánh số lại

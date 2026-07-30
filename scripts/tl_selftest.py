@@ -22800,6 +22800,321 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r253_registry_hygiene_vocab_parity", _c253_registry_hygiene_vocab_parity)
 
+    # ═══ r255 (v1.35.93) — P15: `rasoat-chongcheo` báo ✗thiếu-corpus cho VBHN ĐÃ CÓ (bare-VBHN chưa nới) ═══
+    # 3 điểm so số hiệu của đường chongcheo bỏ sót cổng v1.33.47 (relation-check 681/694 + fetch_web 211 đã có):
+    # subject_clusters.json ghi 11/11 số VBHN KHÔNG NĂM, corpus lưu year-qualified ⇒ so exact MISS SẠCH.
+    # Đo được: `--base 18/VBHN-VPQH` đẩy CẢ 4 thành viên VBHN của cụm vào unresolved_refs (= giục tải lại
+    # văn bản đã có). Và khoá CANONICAL là khoá THẤT BẠI: _cluster_for_base("18-2025-VBHN-VPQH") -> None.
+    _E251 = [
+        {"drive_id": "d18", "so_hieu": "18-2025-VBHN-VPQH", "name": "BLLD_18-2025-VBHN-VPQH_hop_nhat",
+         "loai": "Văn bản hợp nhất", "corpus": "true", "row_kind": "own", "cat": "05_Lao_dong",
+         "hieuluc": "Còn hiệu lực"},
+        {"drive_id": "d19", "so_hieu": "19-2025-VBHN-VPQH", "name": "Luat_BHXH_19-2025-VBHN-VPQH_hop_nhat",
+         "loai": "Văn bản hợp nhất", "corpus": "true", "row_kind": "own", "cat": "05_Lao_dong",
+         "hieuluc": "Còn hiệu lực"},
+    ]
+    # (1) THÀNH VIÊN cụm ghi bare → resolve ra entry year-qualified (trước r255: in_corpus=False)
+    _r251a = _resolve_cluster_member("19/VBHN-VPQH", "bảo hiểm xã hội", _E251)
+    cases.append(("r255_cluster_member_bare_vbhn_hits_year_qualified",
+                  _r251a.get("in_corpus") is True and _r251a.get("drive_id") == "d19"))
+    # (2) PHẢN CHỨNG — nới ĐÚNG 1 CHIỀU: query CÓ NĂM vẫn so CHẶT (giữ phân biệt collision theo năm),
+    #     không nới sang cơ quan khác, không nới sang số khác, và KHÔNG nới cho số hiệu LUẬT thường.
+    cases.append(("r255_no_widen_wrong_year_agency_number",
+                  _resolve_cluster_member("19-2024-VBHN-VPQH", "bảo hiểm xã hội", _E251).get("in_corpus") is False
+                  and _resolve_cluster_member("19/VBHN-BNV", "bảo hiểm xã hội", _E251).get("in_corpus") is False
+                  and _resolve_cluster_member("20/VBHN-VPQH", "bảo hiểm xã hội", _E251).get("in_corpus") is False
+                  and _dang_bare_key("74-2025-QH15") == ""))
+    # (3) _cluster_for_base: khoá CANONICAL (có năm) tìm ra cụm; số hiệu NGOÀI mọi cụm vẫn ∅ (phản chứng)
+    cases.append(("r255_cluster_for_base_year_qualified_and_negative",
+                  _cluster_for_base("18-2025-VBHN-VPQH")[0] == "lao_dong_xa_hoi"
+                  and _cluster_for_base("18/VBHN-VPQH")[0] == "lao_dong_xa_hoi"        # đường cũ KHÔNG hỏng
+                  and _cluster_for_base("999-2025-VBHN-VPQH")[0] is None
+                  and _cluster_for_base("")[0] is None))
+    # (4) LỆNH THẬT `rasoat-chongcheo`: cụm hết báo thiếu oan, và văn bản THẬT SỰ vắng vẫn còn trong
+    #     unresolved_refs (phản chứng chống "vá quá tay làm im mọi cảnh báo").
+    # HERMETIC: `target=` đưa cmd_rasoat_chongcheo vào nhánh load_creds + _read_doc_text (lookup_ops L1962)
+    # = GỌI MẠNG THẬT khi env có TL_WEBAPP/TL_TOKEN → selftest TREO. Bịt cả hai; nhánh target vẫn được đi qua.
+    _sav251 = {k: getattr(_TL_MODULE, k) for k in ("_manifest_entries", "apply_profile_offline",
+                                                   "resolve_footnote_amendments", "_scan_inline_amendments",
+                                                   "load_creds", "_read_doc_text", "resolve_identity")}
+    try:
+        _TL_MODULE._manifest_entries = lambda *_a, **_k: [dict(x) for x in _E251]
+        _TL_MODULE.apply_profile_offline = lambda *_a, **_k: None
+        _TL_MODULE.resolve_footnote_amendments = lambda _t, entries=None: {
+            "dieu_level_amendment_map": [{"marker": "1", "dieu": "2", "khoan": "1",
+                                          "amending_sohieu": "19/VBHN-VPQH", "hieu_luc": None,
+                                          "pending_effect": False, "loai": "sửa đổi"}],
+            "footnote_sohieu": [], "header_sohieu": [], "mapped_sohieu": ["19/VBHN-VPQH"], "footnote_count": 1}
+        _TL_MODULE._scan_inline_amendments = lambda _t: []
+        _TL_MODULE.load_creds = lambda *_a, **_k: None
+        _TL_MODULE._read_doc_text = lambda *_a, **_k: "NGUYEN VAN GIA (offline)"
+        _TL_MODULE.resolve_identity = lambda *_a, **_k: []
+        _b251 = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b251):
+            _rc251 = _TL_MODULE.cmd_rasoat_chongcheo(argparse.Namespace(
+                base="18/VBHN-VPQH", query=None, config=None, profile=None, refresh=False,
+                json=True, deterministic=True, text_file=None, target="x", no_auto_footnote=True))
+        _o251 = json.loads(_b251.getvalue())
+        _ur251 = set(_o251.get("unresolved_refs") or [])
+        _row251 = {r.get("sohieu"): r for r in (_o251.get("related") or [])}
+        cases.append(("r255_chongcheo_vbhn_members_not_reported_missing",
+                      _rc251 == 0
+                      and "19/VBHN-VPQH" not in _ur251                        # cụm + footnote: ĐÃ CÓ corpus
+                      and _row251.get("19/VBHN-VPQH", {}).get("in_corpus") is True
+                      and "74/2025/QH15" in _ur251                            # PHẢN CHỨNG: vắng thật vẫn báo
+                      and "14/VBHN-VPQH" in _ur251))                          # PHẢN CHỨNG: VBHN vắng thật vẫn báo
+    except Exception:
+        cases.append(("r255_chongcheo_vbhn_members_not_reported_missing", False))
+    finally:
+        for _k, _v in _sav251.items():
+            setattr(_TL_MODULE, _k, _v)
+
+
+    # ═══ r256 (v1.35.94) — P15: `rasoat-loop` DỪNG SỚM, báo THIẾU gap (dry_rounds nằm trong ĐK vòng) ═══
+    # `while frontier and dry_rounds < K and it < max_iter` — chạm K là thoát DÙ frontier còn; và ứng viên
+    # NGOÀI corpus cũng dry_rounds++ ⇒ càng tìm ra nhiều GAP càng dừng sớm. Đo được: 5 ứng viên ngoài corpus,
+    # K=2 → báo 2/5 GAP, frontier_remaining=3, mà max_iter=12 CHƯA HỀ chạm; thông điệp lại nói "chạm max-iter".
+    def _r255_run(cands, K=2, max_iter=12, expand2=None):
+        """Chạy cmd_rasoat_loop offline: seed = `cands`, lượt expand sau trả `expand2` (mặc định rỗng)."""
+        _keys = ("_manifest_entries", "apply_profile_offline", "_frontier_doc_text",
+                 "_rasoat_expand_text", "_resolve_deep_target", "_read_doc_text")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _n = {"i": 0}
+        try:
+            _TL_MODULE._manifest_entries = lambda *_a, **_k: []
+            _TL_MODULE.apply_profile_offline = lambda *_a, **_k: None
+            _TL_MODULE._frontier_doc_text = lambda _a: ("BASE TEXT", "gid0", "BASE")
+
+            def _exp(_t, _e):
+                _n["i"] += 1
+                return list(cands) if _n["i"] == 1 else list(expand2 or [])
+            _TL_MODULE._rasoat_expand_text = _exp
+            _TL_MODULE._resolve_deep_target = lambda *_a, **_k: (None, None, None, None)
+            _TL_MODULE._read_doc_text = lambda *_a, **_k: ""
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
+                    config=None, profile=None, refresh=False, json=True, deterministic=True,
+                    dry_rounds=K, max_iter=max_iter, text_file=None, target="x"))
+            return _rc, json.loads(_b.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    def _r255_gaps(n):
+        return [{"sohieu": "%d/2020/QH14" % i, "sohieu_norm": norm_sohieu("%d/2020/QH14" % i),
+                 "in_corpus": False, "priority": 1} for i in range(1, n + 1)]
+
+    # (1) 5 ứng viên ngoài corpus: PHẢI vét hết frontier và báo ĐỦ 5 GAP (trước r256: 2/5, còn dư 3)
+    _rc252, _o252 = _r255_run(_r255_gaps(5))
+    cases.append(("r256_loop_drains_frontier_reports_all_gaps",
+                  _rc252 == 0 and _o252.get("frontier_remaining") == 0
+                  and len(_o252.get("gaps_missing_in_corpus") or []) == 5
+                  and _o252.get("evaluated") == 5
+                  and _o252.get("stop_reason") == "frontier_empty"
+                  and _o252.get("converged") is True))
+    # (2) PHẢN CHỨNG — max_iter VẪN là trần cứng, KHÔNG bị bản vá nới: 20 ứng viên, max_iter=3
+    _rc252b, _o252b = _r255_run(_r255_gaps(20), K=2, max_iter=3)
+    cases.append(("r256_max_iter_still_hard_ceiling",
+                  _o252b.get("iterations") == 3 and _o252b.get("frontier_remaining") == 17
+                  and _o252b.get("stop_reason") == "max_iter"
+                  and _o252b.get("converged") is False
+                  and len(_o252b.get("gaps_missing_in_corpus") or []) == 3))
+    # (3) PHẢN CHỨNG — dry_rounds GIỮ vai trò tín hiệu hội tụ, KHÔNG bị vô hiệu hoá:
+    #     1 ứng viên duy nhất, frontier cạn nhưng dry_rounds=1 < K=2 ⇒ converged=False (không tự nhận hội tụ)
+    _rc252c, _o252c = _r255_run(_r255_gaps(1), K=2)
+    cases.append(("r256_dry_rounds_still_gates_converged",
+                  _o252c.get("frontier_remaining") == 0 and _o252c.get("dry_rounds") == 1
+                  and _o252c.get("stop_reason") == "frontier_empty"
+                  and _o252c.get("converged") is False))
+    # (4) PHẢN CHỨNG — KHÔNG lặp vô hạn khi expand cứ trả ứng viên: `seen` vẫn chặn, trần max_iter vẫn cắt.
+    _rc252d, _o252d = _r255_run(_r255_gaps(2) + [{"sohieu": "9/2020/QH14", "sohieu_norm": norm_sohieu("9/2020/QH14"),
+                                                  "in_corpus": True, "priority": 1}],
+                                K=2, max_iter=50, expand2=_r255_gaps(2))
+    cases.append(("r256_no_infinite_loop_seen_dedup_holds",
+                  _rc252d == 0 and _o252d.get("iterations") <= 3
+                  and _o252d.get("seen") == 3 and _o252d.get("frontier_remaining") == 0))
+
+
+    # ═══ r257 (v1.35.95) — P15: corpus-relation-sweep dùng vị từ THÔ ở cổng vbhn_broken ═══
+    # `str(ent.get("corpus")) != "true"` = site DUY NHẤT trong repo so cột corpus KHÔNG chuẩn hoá (28 site khác
+    # đều .lower()/helper) ⇒ VBHN corpus LÀNH mang 'vbqppl'/'TRUE'/' true' bị coi là NGOÀI corpus → có goc-tie là
+    # vào sources_to_add giục tải lại thứ đã có. Và `"_ZZZ_QUARANTINE" in cat` bỏ sót nhãn 'QUARANTINE' trơ ⇒
+    # VBHN ĐÃ cách ly lọt lưới. Cổng còn xét trên bản _summ_entry (THIẾU `loai`) nên luật server đọc thiếu trường.
+    def _r256_sweep(base_entries, vbhn_cands, inline=None):
+        """Chạy cmd_corpus_relation_sweep offline với cmd_relation_check bơm tay (khuôn r93/r94)."""
+        _keys = ("_manifest_entries", "load_creds", "cmd_relation_check")
+        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        try:
+            _TL_MODULE._manifest_entries = lambda *_a, **_k: [dict(x) for x in base_entries]
+            _TL_MODULE.load_creds = lambda *_a, **_k: None
+
+            def _fake(_ns):
+                print(json.dumps({"ok": True,
+                                  "inline_amendments": list(inline or []),
+                                  "vbhn_candidates": vbhn_cands,
+                                  "missing_links": []}, ensure_ascii=False))
+                return 0
+            _TL_MODULE.cmd_relation_check = _fake
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_corpus_relation_sweep(argparse.Namespace(
+                    config=None, profile=None, loai="Luật", cat=None, deep=True,
+                    limit=0, skip=0, out=None, refresh=False, json=True))
+            return _rc, json.loads(_b.getvalue())
+        finally:
+            for _k, _v in _sav.items():
+                setattr(_TL_MODULE, _k, _v)
+
+    # base: Luật 26-2018 (chuỗi base_key = 26-2018-QH14)
+    _BASE253 = {"drive_id": "d26", "name": "Luat_26-2018-QH14_SuaDoi_TDTT", "so_hieu": "26-2018-QH14",
+                "loai": "Luật", "corpus": "true", "row_kind": "own", "cat": "31"}
+
+    # (A) VBHN LÀNH mang corpus='vbqppl' (luật server VẪN tính là corpus), có goc-tie với base
+    #     → KHÔNG được coi là hỏng, KHÔNG được vào sources_to_add.
+    _vq253 = {"drive_id": "dvq", "name": "VBHN_64-2025_TDTT", "so_hieu": "64-2025-VBHN-VPQH",
+              "loai": "Văn bản hợp nhất", "corpus": "vbqppl", "row_kind": "own", "cat": "31",
+              "goc": "26-2018-QH14", "sua_doi": ""}
+    _rcA, _oA = _r256_sweep([_BASE253, _vq253],
+                            [{"entry": {"drive_id": "dvq", "sohieu": "64-2025-VBHN-VPQH",
+                                        "name": "VBHN_64-2025_TDTT", "cat": "31", "corpus": "vbqppl"},
+                               "flags": []}])
+    _pdA = (_oA.get("per_doc") or [{}])[0]
+    cases.append(("r257_sweep_corpus_vbqppl_not_flagged_broken",
+                  _rcA == 0 and (_pdA.get("vbhn_broken") or []) == []
+                  and _oA.get("sources_to_add_count") == 0
+                  and _pdA.get("vbhn_dropped_no_tie") is None))
+    # (B) cùng dữ liệu nhưng corpus='TRUE'/'True'/'VBQPPL' (lệch HOA-thường) — KHÔNG được coi là ngoài corpus.
+    #     RANH GIỚI CỐ Ý, khoá luôn để không ai "sửa" thành strip: khoảng trắng (' true') VẪN là NGOÀI corpus,
+    #     vì luật server GAS `String(o.corpus||'').toLowerCase()` (Code.2.21.2p.gs:2238) KHÔNG trim — ô có khoảng
+    #     trắng thì SERVER cũng không đếm. Đó là việc của registry-doctor, KHÔNG phải chỗ sweep tự lấp.
+    _ok253B = True
+    for _cv in ("TRUE", "True", "VBQPPL"):
+        _e = dict(_vq253, corpus=_cv)
+        _rcB, _oB = _r256_sweep([_BASE253, _e],
+                                [{"entry": {"drive_id": "dvq", "sohieu": "64-2025-VBHN-VPQH",
+                                            "name": "VBHN_64-2025_TDTT", "cat": "31", "corpus": _cv},
+                                   "flags": []}])
+        _ok253B = _ok253B and ((_oB.get("per_doc") or [{}])[0].get("vbhn_broken") or []) == []
+    cases.append(("r257_sweep_corpus_case_normalised_space_deliberately_not",
+                  _ok253B
+                  and _entry_is_corpus_effective({"corpus": " true", "row_kind": "own"}) is False
+                  and _entry_is_corpus_effective({"corpus": "TRUE", "row_kind": "own"}) is True))
+    # (C) PHẢN CHỨNG BẮT BUỘC (chống vá quá tay hoá suppression): VBHN HỎNG THẬT vẫn PHẢI bị gắn cờ —
+    #     3 đường độc lập: corpus='false' · cờ VBHN_MISSING_YEAR_OR_DATE · row_kind='ref'.
+    _mk253 = lambda did, sh, corpus, cat, rk="own": {
+        "drive_id": did, "name": "VBHN_x_" + did, "so_hieu": sh, "loai": "Văn bản hợp nhất",
+        "corpus": corpus, "row_kind": rk, "cat": cat, "goc": "26-2018-QH14", "sua_doi": ""}
+    _cand253 = lambda did, sh, corpus, cat, flags: {
+        "entry": {"drive_id": did, "sohieu": sh, "name": "VBHN_x_" + did, "cat": cat, "corpus": corpus},
+        "flags": flags}
+    _rcC, _oC = _r256_sweep(
+        [_BASE253,
+         _mk253("dfalse", "01-2020-VBHN-VPQH", "false", "31"),                       # ngoài corpus THẬT
+         _mk253("dflag", "02-2020-VBHN-VPQH", "true", "31"),                         # lành nhưng CÓ cờ hỏng
+         _mk253("dref", "03-2020-VBHN-VPQH", "true", "31", rk="ref")],               # row_kind=ref
+        [_cand253("dfalse", "01-2020-VBHN-VPQH", "false", "31", []),
+         _cand253("dflag", "02-2020-VBHN-VPQH", "true", "31", ["VBHN_MISSING_YEAR_OR_DATE"]),
+         _cand253("dref", "03-2020-VBHN-VPQH", "true", "31", [])])
+    _shC = sorted(x.get("sohieu") for x in ((_oC.get("per_doc") or [{}])[0].get("vbhn_broken") or []))
+    cases.append(("r257_broken_vbhn_still_flagged_3_ways",
+                  _shC == ["01-2020-VBHN-VPQH", "02-2020-VBHN-VPQH", "03-2020-VBHN-VPQH"]
+                  and _oC.get("sources_to_add_count") == 3))
+    # (D) Vế QUARANTINE: nhãn 'QUARANTINE' TRƠ (không có tiền tố _ZZZ_) trước r257 LỌT LƯỚI — nay phải bị bắt.
+    #     Kèm phản chứng: cat bình thường '31' KHÔNG bị coi là quarantine.
+    _rcD, _oD = _r256_sweep(
+        [_BASE253, _mk253("dq", "05-2020-VBHN-VPQH", "true", "QUARANTINE")],
+        [_cand253("dq", "05-2020-VBHN-VPQH", "true", "QUARANTINE", [])])
+    _pdD = (_oD.get("per_doc") or [{}])[0]
+    _rcD2, _oD2 = _r256_sweep(
+        [_BASE253, _mk253("dn", "06-2020-VBHN-VPQH", "true", "31")],
+        [_cand253("dn", "06-2020-VBHN-VPQH", "true", "31", [])])
+    cases.append(("r257_quarantine_bare_label_caught_normal_cat_not",
+                  [x.get("sohieu") for x in (_pdD.get("vbhn_broken") or [])] == ["05-2020-VBHN-VPQH"]
+                  and ((_oD2.get("per_doc") or [{}])[0].get("vbhn_broken") or []) == []))
+    # (E) goc-tie VẪN là chốt (v1.34.32 không bị nới): VBHN hỏng nhưng KHÔNG tie chuỗi base → drop, không cờ.
+    _rcE, _oE = _r256_sweep(
+        [_BASE253, dict(_mk253("dnotie", "07-2020-VBHN-VPQH", "false", "31"), goc="99-1999-QH10")],
+        [_cand253("dnotie", "07-2020-VBHN-VPQH", "false", "31", [])])
+    _pdE = (_oE.get("per_doc") or [{}])[0]
+    cases.append(("r257_goc_tie_gate_still_holds",
+                  (_pdE.get("vbhn_broken") or []) == [] and _pdE.get("vbhn_dropped_no_tie") == 1
+                  and _oE.get("sources_to_add_count") == 0))
+
+
+    # ═══ r258 (v1.35.96) — P15: _vbhn_goc_map dùng _entry_corpus_true ⇒ map "đã phủ" SAI HAI HƯỚNG ═══
+    # Map này SUPPRESS amendments_missing nên khái niệm "in corpus" phải là LUẬT SERVER (giống cổng
+    # vbhn_broken sau r257). `_entry_corpus_true` lệch 2 hướng: THIẾU `− ref` và `− loai=thuong` (⇒ dòng
+    # TRỎ-tham-chiếu được tính là VBHN đã phủ, CHE MẤT gap thật) · BỎ SÓT corpus='vbqppl' và
+    # row_kind='overflow' (server tl boot ĐẾM là corpus ⇒ không tính là phủ là dương-tính-giả).
+    # Vế quarantine `"_ZZZ_QUARANTINE" in cat` bỏ sót nhãn 'QUARANTINE' trơ ⇒ VBHN đã cách ly vẫn "phủ".
+    def _r257_vbhn(did, sh, corpus, *, rk="own", cat="31", loai="Văn bản hợp nhất", goc="77-2006-QH11"):
+        return {"drive_id": did, "name": "VBHN_" + did, "so_hieu": sh, "loai": loai,
+                "corpus": corpus, "row_kind": rk, "cat": cat, "goc": goc, "sua_doi": ""}
+
+    # (1) PURE — bảng chân lý của chính _vbhn_goc_map: ai được tính là "đã phủ 77-2006-QH11"
+    _m254 = _vbhn_goc_map([
+        _r257_vbhn("dtrue", "10-2025-VBHN-VPQH", "true"),                       # phủ (như cũ)
+        _r257_vbhn("dvq", "11-2025-VBHN-VPQH", "vbqppl"),                       # r258: NAY phủ (luật server)
+        _r257_vbhn("dov", "12-2025-VBHN-VPQH", "", rk="overflow"),              # r258: NAY phủ (luật server)
+        _r257_vbhn("dref", "13-2025-VBHN-VPQH", "true", rk="ref"),              # r258: NAY KHÔNG phủ (− ref)
+        _r257_vbhn("dth", "14-2025-VBHN-VPQH", "true", loai="thuong"),          # KHÔNG phủ (− thuong)
+        _r257_vbhn("dq", "15-2025-VBHN-VPQH", "true", cat="QUARANTINE"),        # r258: NAY KHÔNG phủ (nhãn trơ)
+        _r257_vbhn("dqz", "16-2025-VBHN-VPQH", "true", cat="_ZZZ_QUARANTINE"),  # KHÔNG phủ (như cũ)
+        _r257_vbhn("dfalse", "17-2025-VBHN-VPQH", "false"),                     # KHÔNG phủ (như cũ)
+    ])
+    cases.append(("r258_goc_map_server_rule_truth_table",
+                  sorted(_m254.get("77-2006-QH11") or []) ==
+                  ["10-2025-VBHN-VPQH", "11-2025-VBHN-VPQH", "12-2025-VBHN-VPQH"]))
+    # (2) LỆNH THẬT — VBHN 'vbqppl' phủ luật bị sửa ⇒ covered_by_vbhn, KHÔNG vào sources_to_add.
+    _BASE254 = {"drive_id": "d26", "name": "Luat_26-2018-QH14_SuaDoi_TDTT", "so_hieu": "26-2018-QH14",
+                "loai": "Luật", "corpus": "true", "row_kind": "own", "cat": "31"}
+    _INLINE254 = [{"amended_sohieu": "77-2006-QH11", "in_corpus": False}]
+    _rc2, _o2 = _r256_sweep([_BASE254, _r257_vbhn("dvq", "11-2025-VBHN-VPQH", "vbqppl")], [], _INLINE254)
+    _pd2 = (_o2.get("per_doc") or [{}])[0]
+    cases.append(("r258_sweep_vbqppl_vbhn_counts_as_covered",
+                  _rc2 == 0 and _pd2.get("amendments_missing") == []
+                  and [x.get("covered_by_vbhn") for x in (_pd2.get("covered_by_vbhn") or [])]
+                      == [["11-2025-VBHN-VPQH"]]
+                  and _o2.get("sources_to_add_count") == 0
+                  and _o2.get("covered_by_vbhn_count") == 1))
+    # (3) PHẢN CHỨNG hướng SIẾT — dòng row_kind='ref' KHÔNG được coi là phủ: gap PHẢI hiện lại.
+    #     (Trước r258 nó CHE gap — đây là over-suppression có sẵn, nguy hiểm hơn cả vế nới.)
+    _rc3, _o3 = _r256_sweep([_BASE254, _r257_vbhn("dref", "13-2025-VBHN-VPQH", "true", rk="ref")],
+                            [], _INLINE254)
+    _pd3 = (_o3.get("per_doc") or [{}])[0]
+    cases.append(("r258_ref_row_not_coverage_gap_resurfaces",
+                  [x.get("amended_sohieu") for x in (_pd3.get("amendments_missing") or [])] == ["77-2006-QH11"]
+                  and (_pd3.get("covered_by_vbhn") or []) == []
+                  and _o3.get("sources_to_add_count") == 1
+                  and (_o3.get("sources_to_add") or [{}])[0].get("reason") == "amended_base_not_in_corpus"))
+    # (4) PHẢN CHỨNG hướng SIẾT — nhãn quarantine TRƠ cũng không được coi là phủ.
+    _rc4, _o4 = _r256_sweep([_BASE254, _r257_vbhn("dq", "15-2025-VBHN-VPQH", "true", cat="QUARANTINE")],
+                            [], _INLINE254)
+    _pd4 = (_o4.get("per_doc") or [{}])[0]
+    cases.append(("r258_bare_quarantine_not_coverage",
+                  [x.get("amended_sohieu") for x in (_pd4.get("amendments_missing") or [])] == ["77-2006-QH11"]
+                  and (_pd4.get("covered_by_vbhn") or []) == []))
+    # (5) PHẢN CHỨNG BẮT BUỘC (chống "coverage hoá bộ nuốt-mọi-thứ"): KHÔNG có VBHN nào ⇒ gap vẫn báo ĐỦ;
+    #     và VBHN có goc TRỎ CHỖ KHÁC (không phủ luật bị sửa) cũng KHÔNG được tính là phủ.
+    _rc5a, _o5a = _r256_sweep([_BASE254], [], _INLINE254)
+    _rc5b, _o5b = _r256_sweep([_BASE254, _r257_vbhn("doth", "18-2025-VBHN-VPQH", "true", goc="99-1999-QH10")],
+                              [], _INLINE254)
+    _pd5a = (_o5a.get("per_doc") or [{}])[0]
+    _pd5b = (_o5b.get("per_doc") or [{}])[0]
+    cases.append(("r258_uncovered_amendment_still_reported",
+                  [x.get("amended_sohieu") for x in (_pd5a.get("amendments_missing") or [])] == ["77-2006-QH11"]
+                  and _o5a.get("sources_to_add_count") == 1
+                  and [x.get("amended_sohieu") for x in (_pd5b.get("amendments_missing") or [])] == ["77-2006-QH11"]
+                  and _o5b.get("sources_to_add_count") == 1))
+    # (6) Người tiêu thụ THỨ HAI của map vẫn chạy: base nằm trong chuỗi VBHN → vbhn_first_self (advisory).
+    _rc6, _o6 = _r256_sweep([_BASE254, _r257_vbhn("dvq2", "19-2025-VBHN-VPQH", "vbqppl", goc="26-2018-QH14")], [])
+    _pd6 = (_o6.get("per_doc") or [{}])[0]
+    cases.append(("r258_vbhn_first_self_still_works_with_server_rule",
+                  _pd6.get("vbhn_first_self") == ["19-2025-VBHN-VPQH"]
+                  and _o6.get("vbhn_first_self_docs") == 1))
+
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

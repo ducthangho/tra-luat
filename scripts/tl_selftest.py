@@ -23498,6 +23498,35 @@ def run() -> int:
         return bool(ok1 and ok2)
     _t110("r271_hieuluc_negation_first", _c271_hieuluc_negation_first)
 
+    def _c272_classify_ref_canonical_chon():
+        """r272 (P15 rà resolve.py, đo 31-07): `_classify_ref` lấy `by_sohieu[0]` = THỨ TỰ REGISTRY —
+        (a) bản .docx CÁCH LY đứng trước GDoc live thì canonical hiển thị là bản cách ly; (b) nhóm CHỈ toàn
+        bản cách ly/corpus=false vẫn flag=OK ⇒ frontier/refs-audit rút dẫn chiếu khỏi hàng cần tải dù corpus
+        CHƯA có bản dùng được. Vá: sort theo _entry_score + nhóm quarantined-only → MISSING."""
+        _q272 = {"name": "000.01_71-2019-QH14.docx", "sohieu": "71/2019/QH14", "corpus": "false",
+                 "cat": "99_quarantine", "drive_id": "d291"}
+        _l272 = {"name": "Luat_71-2019-QH14_GDoc", "sohieu": "71/2019/QH14", "corpus": "true",
+                 "nlm_status": "pushed", "nlm_source_id": "s291", "drive_id": "d292"}
+        _r272 = {"sohieu": "71-2019-QH14", "name_phrase": "", "loai": ""}
+        _o1 = _TL_MODULE._classify_ref(dict(_r272), [_q272, _l272])   # cách ly ĐỨNG TRƯỚC trong registry
+        ok1 = _o1["flag"] == "OK" and _o1["canonical"]["name"] == "Luat_71-2019-QH14_GDoc"
+        _o2 = _TL_MODULE._classify_ref(dict(_r272), [_q272])
+        ok2 = _o2["flag"] == "MISSING" and "cách ly" in _o2.get("note", "")
+        # PHẢN CHỨNG: live-only vẫn OK · corpus=false nhưng CÒN trên NLM (không quarantined #6) vẫn OK ·
+        # đường OUTDATED chạy trên canonical hiệu quả · MISSING thường không đổi
+        ok3 = _TL_MODULE._classify_ref(dict(_r272), [_l272])["flag"] == "OK"
+        _nr = {"name": "Ref_71-2019-QH14", "sohieu": "71/2019/QH14", "corpus": "false",
+               "nlm_status": "pushed", "nlm_source_id": "s292", "drive_id": "d293"}
+        ok4 = _TL_MODULE._classify_ref(dict(_r272), [_nr])["flag"] == "OK"
+        _vb = {"name": "VBHN_09-2025-VBHN-VPQH_X", "sohieu": "09-2025-VBHN-VPQH", "goc": "71/2019/QH14",
+               "corpus": "true", "drive_id": "d294", "loai": "VBHN"}
+        _o5 = _TL_MODULE._classify_ref(dict(_r272), [_q272, dict(_l272, hieuluc="Hết hiệu lực"), _vb])
+        ok5 = _o5["flag"] == "OUTDATED" and _o5["canonical"]["name"] == "Luat_71-2019-QH14_GDoc"
+        ok6 = _TL_MODULE._classify_ref({"sohieu": "999-2099-QH99", "name_phrase": "", "loai": ""},
+                                       [_l272])["flag"] == "MISSING"
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
+    _t110("r272_classify_ref_canonical_chon", _c272_classify_ref_canonical_chon)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1268,11 +1268,22 @@ def _classify_ref(ref: dict, entries: list, base_goc_keys: set | None = None) ->
     # year-qualified; trước đây miss → frontier/refs-audit gắn MISSING giả cho VBHN đã có).
     by_sohieu = [e for e in entries if _sohieu_query_hits_entry(cited, norm_sohieu(_entry_sohieu(e)))
                  or _sohieu_query_hits_entry(cited, _sohieu_key_entry(e))]
+    # r272: (a) chọn canonical theo ĐIỂM (trước lấy by_sohieu[0] = THỨ TỰ REGISTRY — bản .docx cách ly đứng
+    # trước GDoc live thì canonical hiển thị là bản cách ly); (b) nhóm chỉ toàn bản CÁCH LY/corpus=false
+    # (raw-twin đã quarantine mà bản dùng được CHƯA có) KHÔNG được xác nhận OK — đó là gap thật: frontier/
+    # refs-audit đọc OK sẽ rút nó khỏi hàng cần tải (đo 31-07: [quar-only] → flag OK, canonical=bản .docx).
+    by_sohieu.sort(key=_entry_score, reverse=True)
+    _bs_effective = [e for e in by_sohieu if not _entry_quarantined(e)]
     # 2) khớp theo TÊN (alias) — để bắt SOHIEU_MISMATCH khi số hiệu sai
     by_name = resolve_identity(ref["name_phrase"], entries, max_hits=3) if ref["name_phrase"] else []
     flag, canonical, conf, note = "OK", None, "", ""
-    if by_sohieu:
+    if by_sohieu and not _bs_effective:
         canonical = by_sohieu[0]
+        flag, conf = "MISSING", "medium"
+        note = (f"số hiệu '{cited}' CHỈ khớp bản đã cách ly/corpus=false ({_entry_name(canonical)[:60]}) — "
+                "corpus CHƯA có bản dùng được; nạp bản chuẩn (QT-5/fetch-route) trước khi rà")
+    elif by_sohieu:
+        canonical = _bs_effective[0]
         # số hiệu khớp; kiểm OUTDATED nếu có VBHN hợp nhất số này — TRỪ các ca B1:
         hl = _strip_accents(str(canonical.get("hieuluc") or canonical.get("hieu_luc") or "")).lower()
         # r271: vị từ CÒN-hiệu-lực phải NEGATION-FIRST — check cũ `"con" not in hl` coi «Không còn hiệu lực»

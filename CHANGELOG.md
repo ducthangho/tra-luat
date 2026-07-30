@@ -1,3 +1,18 @@
+# ★ v1.36.10 — r272: `_classify_ref` lấy `by_sohieu[0]` theo thứ tự registry — bản cách ly làm canonical, nhóm cách-ly-thuần vẫn OK (2026-07-31)
+
+P15 rà resolve.py (tiếp). Hai vế cùng gốc «không chọn lọc ứng viên»:
+(a) canonical = `by_sohieu[0]` — phần tử ĐẦU theo thứ tự registry, không sort điểm, không loại cách ly ⇒ bản
+    .docx raw-twin đã quarantine đứng trước GDoc live thì xref/refs-audit hiển thị canonical là bản cách ly;
+(b) nhóm CHỈ toàn bản cách ly/corpus=false (raw đã đăng ký, bản dùng được chưa nạp) vẫn `flag=OK` ⇒
+    frontier/refs-audit rút dẫn chiếu khỏi hàng MISSING — corpus khuyết mà không cổng nào kêu (cùng chiều
+    nguy hiểm r270). Đo 31-07: `[quar-only]` → OK, canonical=bản .docx cách ly.
+
+VÁ: sort `by_sohieu` theo `_entry_score` (vị từ chọn canonical dùng chung — phạt quarantine/orphan), canonical
+lấy từ nhóm KHÔNG-cách-ly; nhóm cách-ly-thuần → `MISSING` + note «CHỈ khớp bản đã cách ly… nạp bản chuẩn
+trước khi rà». `corpus=false` nhưng CÒN trên NLM không phải cách ly (#6 `_entry_quarantined`) — vẫn OK.
+Selftest +1 case (2 vế vá + 4 phản chứng: live-only OK · corpus=false-trên-NLM OK · đường OUTDATED chạy trên
+canonical hiệu quả · MISSING thường giữ nguyên). 1434/1434.
+
 # ★ v1.36.9 — r271: vị từ CÒN-hiệu-lực của `_classify_ref` đảo nghĩa trên «Không còn hiệu lực» (2026-07-31)
 
 P15 rà resolve.py (tiếp). Vế B1-suppress («bản CÒN hiệu lực → không OUTDATED») kiểm bằng `"con" not in hl` —

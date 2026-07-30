@@ -51,10 +51,38 @@ if [ "$VER" != "$V_TL" ] || [ "$VER" != "$V_SK" ]; then
 fi
 ok "khớp v$VER"
 
+# ── core.abbrev=7 — điều kiện TẤT ĐỊNH của gate, không phải tuỳ chọn ──
+# `doc-claims-check` suy tập độ-dài-SHA-ứng-viên từ `git rev-parse --short HEAD`. Git trả độ dài
+# TỐI THIỂU-DUY-NHẤT, trôi theo cả số commit lẫn commit đang ở HEAD (clone shallow 79 commit ⇒ 7;
+# sau `fetch --unshallow` 304 commit ⇒ 8). Đã ĐO trên cây này:
+#   abbrev=7 → golden ✓ · docclaims ✓ · determinism ✓ · selftest 1391/1391
+#   abbrev=8 → golden ✗ (case doc_claims_check_fixture) · determinism ✗ · selftest 1390/1391
+#            · docclaims 18 cờ SHA_NOT_A_COMMIT toàn FALSE POSITIVE (tiền tố UUID: notebook id
+#              `59e8d0de`, source id…) vì ngưỡng 8 coi mọi chuỗi 8 hex là SHA.
+# CI ghim bằng `git config --global core.abbrev 7`. Ở đây ghim REPO-LOCAL: hẹp hơn (không đụng
+# global của người dùng) mà vẫn đúng cơ chế.
+# ⚠ KHÔNG dùng env `GIT_CONFIG_*` để ghim: env thắng cả config của repo CON, nên nó đè luôn repo
+# tạm mà `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` tự dựng để đo chênh 7-vs-8 ⇒ test đó ĐỎ
+# (đã sập một lượt: 1390/1391). Config repo-local không có tật này — repo tạm có config riêng.
+# .git/config KHÔNG được commit ⇒ mỗi clone mới phải đặt lại, vì vậy script tự đặt.
+AB="$(git config --local core.abbrev 2>/dev/null || true)"
+if [ "$AB" != "7" ]; then
+  git config --local core.abbrev 7
+  warn "đã đặt core.abbrev=7 cho repo này (trước đó: '${AB:-<chưa đặt, git tự suy>}') — gate cần ngưỡng cố định, xem chú thích trong script"
+else
+  ok "core.abbrev=7 (khớp CI)"
+fi
+if [ -f .git/shallow ]; then
+  warn "repo đang SHALLOW — doc-claims-check sẽ đỏ vì SHA cũ không resolve được; chữa: git fetch --unshallow"
+fi
+
 # ─────────────────────────── 1. Gate offline ───────────────────────────
-# doc-claims-check: container clone SHALLOW nên SHA cũ trong changelog_archive không resolve
-# được → cờ SHA_NOT_A_COMMIT là KHUYẾT CỦA MÔI TRƯỜNG, không phải trích dẫn sai. Chỉ hạ thành
-# WARN khi TOÀN BỘ cờ đều là SHA_NOT_A_COMMIT *và* repo thật sự shallow; cờ khác ⇒ ĐỎ như thường.
+# doc-claims-check có HAI nguồn cờ giả, đã xử lý cả hai:
+#  (1) abbrev trôi — chặn tận gốc bằng core.abbrev=7 ở bước 0.
+#  (2) clone SHALLOW — SHA cũ trong changelog_archive không resolve được ⇒ SHA_NOT_A_COMMIT là
+#      KHUYẾT MÔI TRƯỜNG, không phải trích dẫn sai. Chữa dứt điểm: `git fetch --unshallow`
+#      (đã nghiệm: 79→304 commit thì 2 cờ đó về 0). Escape hatch dưới đây chỉ hạ WARN khi TOÀN BỘ
+#      cờ đều là SHA_NOT_A_COMMIT *và* repo thật sự shallow; cờ loại khác ⇒ ĐỎ như thường.
 if [ "$DO_TEST" = 1 ]; then
   say "1. Gate offline 8 bước"
   declare -A RC

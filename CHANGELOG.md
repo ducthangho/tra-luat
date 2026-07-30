@@ -1,3 +1,30 @@
+# ★ v1.35.78 — r241: `core.abbrev` là ĐIỀU KIỆN TẤT ĐỊNH của gate, không phải tuỳ chọn (2026-07-29)
+
+Truy ra từ việc `git fetch --unshallow` để dứt điểm 2 cờ `SHA_NOT_A_COMMIT` của doc-claims-check
+trong container remote. Unshallow ĐÚNG là cách chữa (79 → 304 commit, `ad413e7`/`78d6bfe` resolve
+được, 2 cờ về 0) — nhưng nó LỘ RA trôi dạt nguy hiểm hơn: `doc-claims-check` suy tập
+độ-dài-SHA-ứng-viên từ `git rev-parse --short HEAD`, mà git trả độ dài TỐI THIỂU-DUY-NHẤT — trôi
+theo cả SỐ COMMIT lẫn COMMIT ĐANG Ở HEAD. Repo phình ⇒ ngưỡng 7 → 8 ⇒ mọi chuỗi 8 hex thành SHA.
+
+ĐO trên cây này (không suy diễn):
+| ngưỡng | golden | docclaims | determinism | selftest |
+|---|---|---|---|---|
+| **7** | ✓ | ✓ 0 cờ | ✓ | N/N |
+| 8 | ✗ case `doc_claims_check_fixture` | ✗ **18 cờ TOÀN FALSE POSITIVE** | ✗ | N-1/N |
+
+18 cờ giả là tiền tố UUID bị nhận nhầm thành SHA: notebook id `59e8d0de`, `45739ff7`, `743ed200`,
+`dbe706a0`… Phạm vi ảnh hưởng RỘNG HƠN chú thích cũ: không chỉ L2 của docclaims mà kéo đỏ cả
+**golden và determinism** — golden được ghi ở ngưỡng 7.
+
+`scripts/deploy-package.sh` (thêm ở v1.35.69/r232) nay tự ghim `core.abbrev=7` REPO-LOCAL ở bước 0
+và cảnh báo khi repo còn shallow. CI ghim `--global`; repo-local hẹp hơn, không đụng config global
+của người dùng. `.git/config` KHÔNG được commit nên mỗi clone mới phải đặt lại ⇒ script tự đặt.
+
+**Cách ghim SAI đã thử và bị chính test bắt:** ban đầu tiêm qua env `GIT_CONFIG_*`. Env đó thắng cả
+config của repo CON, nên nó đè luôn repo tạm mà `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` tự dựng
+để đo chênh 7-vs-8 ⇒ đúng cái test khoá hành vi này ĐỎ. Config repo-local không có tật đó vì repo tạm
+mang config riêng. Ghi lại để đừng ai "tối giản" nó về env.
+
 # ★ v1.35.77 — r240: NLM chạy được từ điện thoại — jar phải LIST giữ domain, KHÔNG `nlm login --manual` (2026-07-29)
 
 ## THÀNH CÔNG: cookie từ điện thoại nạp được, 139 notebook

@@ -575,6 +575,27 @@ def _entry_on_nlm_live(e: dict) -> bool:
     return bool(_entry_nlm(e)) and not _nlm_status_removed(str(e.get("nlm_status") or ""))
 
 
+def _chunk_covered_sohieu(entries: list) -> set:
+    """r253: tập SỐ HIỆU đã được PHỦ bằng CHUNK CON — có ≥1 dòng tên `<base>__partNN` CÙNG số hiệu ĐANG trên NLM.
+    Vì sao cần: nguồn vượt ngưỡng chunk (Luật 41/2024/QH15 = 183.428 ký tự > cap 100k) được `profile-ingest-chunks`
+    TÁCH thành part01/part02 rồi đẩy; dòng CANONICAL giữ corpus=true mà KHÔNG mang nlm_source_id ⇒ cờ
+    CORPUS_TRUE_NOT_ON_NLM + `ingest-missing` tưởng còn NỢ và MỜI NẠP LẠI BẢN ĐẦY ĐỦ = NHÂN ĐÔI luật trên
+    notebook (đúng loại rác đã phải dọn 69→74→71 hồi 29-07; suýt tái diễn 30-07 — xem PHỤ LỤC A.3).
+    Chỉ tính chunk THẬT trên NLM: `__partNN` mà đã gỡ (removed_*) KHÔNG phủ cho ai. PURE, test offline.
+    Dùng LẠI `_is_chunk_part_name` (hygiene) chứ KHÔNG tự chép regex — bài học r253 chính là bản sao từ vựng
+    trôi lệch (registry_hygiene giữ exact-set nlm_status cũ)."""
+    out = set()
+    for e in entries or []:
+        if not _is_chunk_part_name(_entry_name(e)):
+            continue
+        if not _entry_on_nlm_live(e):
+            continue
+        sh = norm_sohieu(_entry_sohieu(e))
+        if sh:
+            out.add(sh)
+    return out
+
+
 def _entry_date_text(e: dict) -> str:
     for k in ("ngay_ban_hanh", "ngayBanHanh", "ngaybanhanh", "issued_date", "issue_date", "date", "ngay", "ban_hanh"):
         v = e.get(k)

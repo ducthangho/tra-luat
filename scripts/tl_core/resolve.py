@@ -425,7 +425,8 @@ def _source_map_one(q: str, entries: list[dict]) -> dict:
     draft_hits = [e for e in _pp_vals if _entry_is_draft(e)]
     if draft_hits:
         warnings.append(f"DRAFT_NOT_EFFECTIVE: {len(draft_hits)} nguồn là DỰ THẢO — chưa hiệu lực; không dùng như luật/văn bản đang có hiệu lực.")
-    nlm_gaps = [e for e in _pp_vals if "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(e)
+    _cov_pp = _chunk_covered_sohieu(_pp_vals)     # r253: phủ-bằng-chunk KHÔNG tính là nợ NLM
+    nlm_gaps = [e for e in _pp_vals if "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(e, _cov_pp)
                 and not _dup_of_live_sibling(e, _pp_vals)]
     if nlm_gaps:
         warnings.append(f"CORPUS_TRUE_NOT_ON_NLM: {len(nlm_gaps)} văn bản corpus=true nhưng chưa có nguồn NLM live "

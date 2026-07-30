@@ -178,12 +178,18 @@ def _ingest_missing_select(entries: list, cat: str | None = None, only_ids: set 
     """PURE (test offline): chọn văn bản corpus CHƯA trên NLM cần nạp. IDEMPOTENT — bỏ bản đã on NLM live. Yêu cầu
     drive_id, KHÔNG quarantine. Lọc theo cat (2 số đầu) / chỉ drive_id ∈ only_ids nếu truyền."""
     cc = re.sub(r"\D", "", str(cat))[:2] if cat else ""
+    # r253: số hiệu đã PHỦ bằng chunk con `__partNN` trên NLM → dòng CANONICAL không phải nợ nạp. Thiếu bước này,
+    # backlog mời nạp lại bản đầy đủ (Luật 41 183k ký tự) = NHÂN ĐÔI luật trên notebook — xem `_chunk_covered_sohieu`.
+    covered = _chunk_covered_sohieu(entries)
     out = []
     for e in entries or []:
         if str(e.get("corpus") or "").lower() != "true":
             continue
         if _entry_on_nlm_live(e):                 # đã trên NLM → bỏ (idempotent, chạy lại an toàn)
             continue
+        if covered and norm_sohieu(_entry_sohieu(e)) in covered \
+                and not _is_chunk_part_name(_entry_name(e)):
+            continue                              # phủ bằng chunk con — KHÔNG mời nạp bản canonical
         did = _entry_drive_id(e)
         if not did or _entry_quarantined(e):
             continue

@@ -22604,6 +22604,77 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r252_entity_khong_chui_nguyen_van_vao_kho", _c252_entity_khong_chui_nguyen_van_vao_kho)
 
+    # ═══ r253: cờ "phủ bằng chunk con" — CORPUS_TRUE_NOT_ON_NLM / ingest-missing KHÔNG mời nạp trùng ═══
+    # Bối cảnh (PHỤ LỤC A.3, 30-07-2026): Luật 41/2024/QH15 (183.428 ký tự > cap chunk 100k) được tách
+    # part01/part02 rồi đẩy NLM; dòng CANONICAL giữ corpus=true mà KHÔNG mang nlm_source_id ⇒ hai chỗ này
+    # tưởng còn NỢ và mời nạp lại BẢN ĐẦY ĐỦ = NHÂN ĐÔI luật trên notebook. Suýt chạy thật.
+    def _c253_phu_bang_chunk_khong_moi_nap_trung():
+        _base = "Luat_41-2024-QH15_2024_Bao_hiem_xa_hoi"
+        _canon = {"drive_id": "d_canon_1234567890", "name": _base, "so_hieu": "41/2024/QH15",
+                  "cat": "02_Bao_hiem", "corpus": "true", "nlm_source_id": "", "nlm_status": ""}
+        _p1 = {"drive_id": "d_p1_1234567890", "name": _base + "__part01__Dieu_1-64", "so_hieu": "41/2024/QH15",
+               "cat": "02_Bao_hiem", "corpus": "true", "nlm_source_id": "s1", "nlm_status": "pushed"}
+        _p2 = {"drive_id": "d_p2_1234567890", "name": _base + "__part02__Dieu_65-141", "so_hieu": "41/2024/QH15",
+               "cat": "02_Bao_hiem", "corpus": "true", "nlm_source_id": "s2", "nlm_status": "pushed"}
+        _rows = [_canon, _p1, _p2]
+        _cov = _chunk_covered_sohieu(_rows)
+        ok1 = _cov == {norm_sohieu("41/2024/QH15")}
+        # (a) cờ: canonical KHÔNG bị bắn khi truyền covered; VẪN bắn khi KHÔNG truyền (giữ hành vi cũ)
+        ok2 = "CORPUS_TRUE_NOT_ON_NLM" not in _title_flags(_canon, _cov)
+        ok3 = "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(_canon)
+        # (b) ingest-missing: canonical rơi khỏi backlog
+        ok4 = _ingest_missing_select(_rows) == []
+        # ═══ PHẢN CHỨNG 1: chunk CHƯA/ĐÃ RỚT khỏi NLM thì KHÔNG phủ cho ai — canonical PHẢI kêu lại ═══
+        _p1x = dict(_p1, nlm_source_id="", nlm_status="")
+        _p2x = dict(_p2, nlm_source_id="", nlm_status="")
+        _rows_x = [_canon, _p1x, _p2x]
+        ok5 = _chunk_covered_sohieu(_rows_x) == set()
+        ok6 = "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(_canon, _chunk_covered_sohieu(_rows_x))
+        ok7 = [_entry_drive_id(e) for e in _ingest_missing_select(_rows_x)] != []
+        # chunk bị GỠ CÓ CHỦ ĐÍCH (removed_*) cũng KHÔNG phủ (_entry_on_nlm_live=False)
+        _rows_r = [_canon, dict(_p1, nlm_status="removed_superseded_by_VBHN"),
+                   dict(_p2, nlm_status="removed_superseded_by_VBHN")]
+        ok8 = _chunk_covered_sohieu(_rows_r) == set()
+        # ═══ PHẢN CHỨNG 2: chính dòng __partNN mà rớt NLM thì VẪN phải kêu — không tự phủ cho mình ═══
+        _rows_self = [_p1x, _p2]          # part02 còn trên NLM ⇒ số hiệu "được phủ"…
+        _cov_self = _chunk_covered_sohieu(_rows_self)
+        ok9 = _cov_self == {norm_sohieu("41/2024/QH15")}
+        ok10 = "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(_p1x, _cov_self)   # …nhưng part01 rớt VẪN kêu
+        ok11 = [_entry_drive_id(e) for e in _ingest_missing_select(_rows_self)] == ["d_p1_1234567890"]
+        # ═══ PHẢN CHỨNG 3: KHÁC số hiệu thì không ăn ké phủ của người khác ═══
+        _other = {"drive_id": "d_other_123456789", "name": "Luat_99-2025-QH15_2025_Khac", "so_hieu": "99/2025/QH15",
+                  "cat": "02_Bao_hiem", "corpus": "true", "nlm_source_id": "", "nlm_status": ""}
+        ok12 = "CORPUS_TRUE_NOT_ON_NLM" in _title_flags(_other, _cov)
+        ok13 = [_entry_drive_id(e) for e in _ingest_missing_select([_canon, _p1, _p2, _other])] == ["d_other_123456789"]
+        return (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+                and ok9 and ok10 and ok11 and ok12 and ok13)
+    _t110("r253_phu_bang_chunk_khong_moi_nap_trung", _c253_phu_bang_chunk_khong_moi_nap_trung)
+
+    # r253: registry_hygiene giữ BẢN SAO exact-set nlm_status đã TRÔI LỆCH khỏi ADR-0010 (thiếu `active`
+    # + mọi biến thể `removed_<lý do>`). Chưa false-fire THẬT vì analyze() skip ref/own_thuong trước khi
+    # gắn cờ — nhưng nổ ngay khi có dòng own/khác-thuong mang giá trị ĐÚNG CHUẨN. Khoá PARITY với bản chuẩn.
+    def _c253_registry_hygiene_vocab_parity():
+        _rh253 = _imp("registry_hygiene")
+
+        def _fires(_st):
+            return "NLM_STATUS_MISMATCH" in _rh253.title_flags(
+                {"nlm_source_id": "s", "name": "X", "so_hieu": "1/2026", "cat": "02_Bao_hiem", "nlm_status": _st})
+        # ĐÚNG CHUẨN (ADR-0010) → KHÔNG được kêu
+        _good = ["pushed", "pushed_ok", "synced", "active", "removed", "removed_from_drive",
+                 "removed_superseded_by_VBHN", "removed_superseded_gen_16-7-2026", "removed_dedup",
+                 "deleted", "trash", "trashed", ""]
+        ok1 = not any(_fires(s) for s in _good)
+        # PHẢN CHỨNG: giá trị NGOÀI từ vựng VẪN phải kêu (nếu không, test trên vô nghĩa)
+        _bad = ["added", "live", "ready", "banana"]
+        ok2 = all(_fires(s) for s in _bad)
+        # PARITY với cửa đọc chuẩn tl_core.classify._nlm_status_known trên CÙNG bộ mẫu
+        ok3 = all((not _fires(s)) == _nlm_status_known(s) for s in _good + _bad)
+        # và KHÔNG còn exact-set cũ trong tệp (chống tái nhiễm khi ai đó "dọn lại")
+        _src253 = (Path(__file__).resolve().parent / "registry_hygiene.py").read_text(encoding="utf-8")
+        ok4 = '"removed_from_drive", "deleted", "trash", "trashed"' not in _src253
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r253_registry_hygiene_vocab_parity", _c253_registry_hygiene_vocab_parity)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

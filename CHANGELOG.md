@@ -1,3 +1,59 @@
+# ★ v1.35.90 — r253: hai cờ "còn nợ NLM" mời nạp TRÙNG, và một bản sao từ vựng đã trôi lệch (2026-07-30)
+
+> Tiếp hồ sơ «Luật BHXH». Món chính là **B4** (dữ liệu) — xem PHỤ LỤC A.8 của
+> `rasoat/KETQUA_VIEC_TREO_BHXH_2026-07-30.md`; phần code dưới đây là hai footgun lộ ra khi làm B4.
+
+## 1. Cờ "phủ bằng chunk con" — suýt NHÂN ĐÔI Luật 41 trên notebook
+
+`Luat_41-2024-QH15` (183.428 ký tự > cap chunk 100k) được `profile-ingest-chunks` tách `part01`/`part02`
+rồi đẩy NLM. Dòng **canonical** giữ `corpus=true` mà **cố ý KHÔNG mang** `nlm_source_id` ⇒ cả
+`CORPUS_TRUE_NOT_ON_NLM` lẫn `ingest-missing` tưởng còn nợ và **mời nạp lại BẢN ĐẦY ĐỦ** — đúng loại rác
+đã phải dọn 69→74→71 hôm 29-07. Lượt 30-07 suýt chạy thật; chặn được vì `note` của dòng đó có ghi lý do.
+
+**Vá:** `_chunk_covered_sohieu(entries)` (regio, PURE) — tập số hiệu có ≥1 dòng `<base>__partNN` **CÙNG số
+hiệu ĐANG trên NLM**. `_title_flags(e, covered_sohieu=None)` nhận tham số TÙY CHỌN (mặc định None = giữ
+NGUYÊN hành vi cho 20+ caller không có row-set); `_ingest_missing_select` tự tính. Nối vào 3 chỗ đếm drift
+có sẵn danh sách dòng (`hygiene`, `ops_misc`, `resolve`).
+
+Ba vế phản chứng khoá trong test — thiếu vế nào thì bản vá này thành cái bịt miệng cờ:
+- chunk **chưa/đã rớt** khỏi NLM (kể cả `removed_*` gỡ có chủ đích) ⇒ KHÔNG phủ cho ai, canonical **kêu lại**;
+- chính dòng `__partNN` mà rớt NLM thì **VẪN kêu** — không được tự phủ cho mình;
+- **khác số hiệu** thì không ăn ké phủ của người khác.
+
+Đo trên kho thật: backlog **1 → 0**, và `covered_sohieu` đúng một phần tử `41-2024-QH15` (không quét rộng).
+
+## 2. `registry_hygiene` giữ BẢN SAO từ vựng `nlm_status` đã trôi lệch khỏi ADR-0010
+
+`title_flags` ở đó so `nlm_status` với **exact-set** `{pushed,synced,removed,removed_from_drive,deleted,
+trash,trashed}` — thiếu `active` (chính ADR-0010 nắn `live→active`) và thiếu MỌI biến thể `removed_<lý do>`
+(mà docstring bản chuẩn `_nlm_status_known` hứa là chạy được). Bản chuẩn theo **tiền tố**, bản sao theo
+**danh sách cứng** ⇒ hai nơi trả lời khác nhau cho cùng một câu hỏi.
+
+**Nói rõ mức độ:** đo 30-07 thì **chưa** false-fire THẬT — `analyze()` skip `row_kind=ref` và `own_thuong`
+TRƯỚC khi gắn cờ, mà 6 dòng `active` đều `ref` còn 10 dòng `removed_*` đều `own_thuong`. Vá vì cờ sẽ nổ
+ngay khi có dòng `own`/khác-`thuong` mang giá trị **đúng chuẩn**, và vì B4 vừa ghi thêm một họ
+`removed_<lý do>` mới vào sổ.
+
+Script này **cố ý đứng độc lập** (chỉ `import gas` lazy) nên KHÔNG import `tl_core`; giữ bản sao NHƯNG theo
+cùng **LUẬT tiền tố**, kèm test PARITY với `_nlm_status_known` trên cùng bộ mẫu + vế phản chứng
+(`added`/`live`/`ready`/`banana` VẪN phải kêu) + chốt chống tái nhiễm (exact-set cũ không được quay lại tệp).
+
+## 3. ĐÍNH CHÍNH PHỤ LỤC A.5 mục 3 — readback `register` KHÔNG phải lỗi cache
+
+A.5 đoán `register` báo `FIELDS_DROPPED_ON_WRITE`/`verified=false` oan là do readback đọc qua cache GAS
+TTL~600s, và đề xuất "bust cache trước khi kết luận". **Đọc code + đối chiếu server: việc đó ĐÃ LÀM RỒI.**
+Cả hai đường readback (`_verified_reg_upsert` N3 và `_verified_reg_write` batch ≤3) đều gọi
+`reg_get … refresh="true"`, và `regReadAll_(force)` phía GAS bỏ qua cache đọc thẳng Sheet khi `force`.
+Đo thực nghiệm trên kho thật (ghi lại ĐÚNG giá trị đang có, no-op): `verified=true`, `fields_dropped=null`.
+
+⇒ **Không vá gì cả** — giả thuyết sai thì đừng vá theo nó. Muốn truy tiếp thì cần lệnh/output GỐC của lượt
+đó; nghi vấn còn lại (chưa có bằng chứng) là race ghi liên tiếp: mỗi `reg_upsert` rewrite TOÀN BỘ sheet
+(tab tạm rồi swap), readback rơi đúng lúc swap của lượt kế có thể thấy bản chưa xong.
+
+selftest **1402/1402** (+2 ca r253). Ruff delta so `296e5c0` = 0 ở `tl.py` (12 F821/0 F401) và
+`registry_hygiene.py` (0/0); `tl_selftest.py` +22 F821 do CHÍNH test mới, đúng một tên mới
+`_chunk_covered_sohieu` — đã kiểm HÀNH VI: resolve sau import qua `_STUB_MAP['regio']`.
+
 # ★ v1.35.89 — r252: `&amp;` `&lt;` chui NGUYÊN VĂN vào kho — 3 reader .docx quên unescape (2026-07-30)
 
 > Bắt được khi đăng ký BC Bộ Nội vụ (hồ sơ Luật BHXH): `tl extract` trả `6193/BNV-CTL&amp;BHXH`, trong

@@ -560,8 +560,11 @@ def _name_tail_key(name: str) -> str:
     return re.sub(r"\s+", " ", n).strip()
 
 
-def _title_flags(e: dict) -> list[str]:
-    """Cờ rủi ro từ log chạy thật: tên file có thể hẹp/sai so với metadata quan hệ VBQPPL."""
+def _title_flags(e: dict, covered_sohieu: set | None = None) -> list[str]:
+    """Cờ rủi ro từ log chạy thật: tên file có thể hẹp/sai so với metadata quan hệ VBQPPL.
+    r253 `covered_sohieu` (tùy chọn, từ `_chunk_covered_sohieu(entries)`): số hiệu đã PHỦ bằng chunk con
+    `__partNN` trên NLM → KHÔNG bắn CORPUS_TRUE_NOT_ON_NLM cho dòng canonical. Mặc định None = giữ NGUYÊN
+    hành vi cũ (20+ caller không có row-set vẫn gọi 1 tham số như trước)."""
     flags = []
     name = _entry_name(e)
     cat = _entry_cat(e)
@@ -573,9 +576,14 @@ def _title_flags(e: dict) -> list[str]:
     if _entry_on_nlm_live(e) and not _entry_nlm_notebook_id(e):
         flags.append("NLM_NOTEBOOK_ID_MISSING")
     if _entry_corpus_true(e) and (not _entry_on_nlm_live(e)) and not _is_quarantine_cat(cat) \
-            and not nlm_status.startswith("removed"):
+            and not nlm_status.startswith("removed") \
+            and not (covered_sohieu and norm_sohieu(_entry_sohieu(e)) in covered_sohieu
+                     and not _is_chunk_part_name(name)):
         # nlm_status 'removed*' (vd removed_superseded_by_VBHN/removed_below_nd) = đã gỡ khỏi NLM CÓ CHỦ ĐÍCH
         # (VBHN thay / dưới ngưỡng) → KHÔNG báo thiếu NLM. Chỉ flag khi THẬT SỰ thiếu (status rỗng/khác).
+        # r253: cũng KHÔNG báo khi số hiệu đã PHỦ bằng chunk con `__partNN` trên NLM (dòng canonical cố ý
+        # không mang source_id) — mời nạp lại bản đầy đủ = NHÂN ĐÔI luật. `and not _is_chunk_part_name(name)`:
+        # chính dòng part mà rớt khỏi NLM thì VẪN phải kêu, không được tự phủ cho mình.
         flags.append("CORPUS_TRUE_NOT_ON_NLM")
     if _entry_is_draft(e):
         flags.append("DRAFT_NOT_EFFECTIVE")

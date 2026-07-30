@@ -11,8 +11,9 @@
 #   ./scripts/deploy-package.sh --push           # ... rồi đẩy lên Drive/Package + verify sau đẩy
 #   ./scripts/deploy-package.sh --no-test        # bỏ gate (chỉ khi VỪA chạy gate riêng)
 #   ./scripts/deploy-package.sh --out /tmp/x.zip # chỉ định đường dẫn zip
+#   ./scripts/deploy-package.sh --push --force-older   # ghi đè dù Drive đang bản mới hơn/cùng số
 #
-# rc: 0 = xong · 1 = gate đỏ · 2 = build/verify hỏng · 3 = đẩy hỏng
+# rc: 0 = xong · 1 = gate đỏ · 2 = build/verify hỏng · 3 = đẩy hỏng (gồm CHẶN THỤT LÙI)
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,11 +23,12 @@ TL="$PY scripts/tl.py"
 STATE="scripts/.tl_state/deploy"
 mkdir -p "$STATE"
 
-DO_PUSH=0; DO_TEST=1; OUT=""
+DO_PUSH=0; DO_TEST=1; OUT=""; FORCE_OLDER=0
 while [ $# -gt 0 ]; do
   case "$1" in
-    --push)    DO_PUSH=1 ;;
-    --no-test) DO_TEST=0 ;;
+    --push)         DO_PUSH=1 ;;
+    --no-test)      DO_TEST=0 ;;
+    --force-older)  FORCE_OLDER=1 ;;
     --out)     OUT="${2:-}"; shift ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "✗ cờ lạ: $1 (xem --help)" >&2; exit 2 ;;
@@ -256,7 +258,31 @@ fi
 
 say "4. Đẩy lên Drive/Package"
 BEFORE="$(gws drive files get --params '{"fileId":"1H5kAt3SRVP7_xmLMIzcqyFtFc4VSDH0P","fields":"name,size,modifiedTime"}' 2>/dev/null)"
-echo "  Package HIỆN TẠI: $(echo "$BEFORE" | tr -d '\n ' | sed 's/.*"name":"\([^"]*\)".*/\1/')"
+D_NAME="$(echo "$BEFORE" | tr -d '\n ' | sed 's/.*"name":"\([^"]*\)".*/\1/')"
+echo "  Package HIỆN TẠI: ${D_NAME:-<không đọc được>}"
+
+# ── CHỐT CHỐNG THỤT LÙI (CLAUDE.md §Quy ước deploy mục 3) ──
+# Package là MỘT fileId, `drive-push` GHI ĐÈ và giữ fileId, KHÔNG có LockService như registry ⇒
+# last-writer-wins IM LẶNG. Sự cố 30-07-2026: hai phiên đẩy cùng fileId trong ~20 phút. Lần đó vô
+# hại vì phiên sau build từ master mới nhất, nhưng ngược chiều thì Package THỤT LÙI âm thầm và mọi
+# phiên Cowork mới bootstrap bản cũ. Không có chốt này thì mục 1-2 của quy ước chỉ là lời hứa.
+# Bằng NHAU cũng chặn: cùng số mà khác cây là đúng cái sai "một số version = một cây" cấm.
+D_VER="$(printf '%s' "$D_NAME" | sed -n 's/.*-v\([0-9][0-9.]*\)-.*/\1/p')"
+if [ -z "$D_VER" ]; then
+  warn "không rút được version từ tên Package ('${D_NAME:-rỗng}') — KHÔNG kiểm được thụt lùi, tự chịu trách nhiệm"
+elif [ "$(printf '%s\n%s\n' "$VER" "$D_VER" | sort -V | tail -1)" = "$D_VER" ]; then
+  if [ "$FORCE_OLDER" = 1 ]; then
+    warn "Drive đang v$D_VER $([ "$D_VER" = "$VER" ] && echo '=' || echo '>') v$VER sắp đẩy — GHI ĐÈ vì có --force-older"
+  else
+    bad "CHẶN THỤT LÙI: Drive đang v$D_VER, bản sắp đẩy v$VER — phiên khác vừa đẩy (hoặc cây này tụt sau)."
+    echo "        Chữa: git fetch origin master && (merge/rebase) → chạy lại gate → deploy lại." >&2
+    echo "        Cố ý ghi đè bản mới hơn/cùng số: thêm --force-older (đọc CLAUDE.md §Quy ước deploy trước)." >&2
+    exit 3
+  fi
+else
+  ok "Drive đang v$D_VER < v$VER sắp đẩy — không thụt lùi"
+fi
+
 $TL drive-push "$ZIP" --rename-to-file || { bad "drive-push lỗi (cần `gws auth login` có quyền GHI Drive)"; exit 3; }
 ok "đã đẩy"
 

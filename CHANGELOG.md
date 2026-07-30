@@ -1,3 +1,31 @@
+# ★ v1.35.79 — r242: cưỡng chế chốt CHỐNG THỤT LÙI khi đẩy Package (2026-07-30)
+
+v1.35.78 chốt quy ước deploy vào CLAUDE.md, nhưng mục 3 ("Drive ≥ version sắp đẩy ⇒ DỪNG") chỉ là
+VĂN BẢN — `deploy-package.sh` đọc tên Package trên Drive rồi chỉ IN ra, không so, không chặn. Chính
+quy ước đó viết "không có nó thì mục 1-2 chỉ là lời hứa", nên để nguyên là tự mâu thuẫn.
+
+Nay bước 4 rút version từ tên file Drive và so bằng `sort -V`:
+- Drive **>** bản sắp đẩy ⇒ `rc=3`, chặn **TRƯỚC** `drive-push` (không chạm Drive), in cách chữa.
+- Drive **=** bản sắp đẩy ⇒ CŨNG CHẶN. Cùng số mà khác cây là đúng cái sai "một số version = một cây"
+  đã cấm ở mục v1.35.68; muốn đẩy lại y nguyên thì cũng phải nói rõ ý định.
+- Cố ý ghi đè ⇒ `--force-older` (WARN rồi đi tiếp).
+- Không rút được version từ tên ⇒ WARN và đi tiếp, KHÔNG chặn oan (tên file có thể do người đặt tay).
+
+**Phản chứng end-to-end, không dùng test hook** — nhân bản cây rồi hạ số hiệu, Drive thật đang v1.35.78:
+| cây | cờ | rc | `drive-push` có được gọi? |
+|---|---|---|---|
+| v1.35.70 | — | **3** | KHÔNG |
+| v1.35.78 (bằng số) | — | **3** | KHÔNG |
+| v1.35.78 | `--force-older` | — | CÓ (đã WARN) |
+
+Đã kiểm Drive NGUYÊN VẸN sau hai lượt bị chặn: `md5=7cd1aacd…` và `modifiedTime` không đổi — chốt
+nằm trước đường ghi, không phải rollback sau khi đã đẩy. Vế `--force-older` đo bằng cách thay
+`drive-push` bằng bản giả CHỈ trong cây thử, nên chứng minh được nhánh đó xuyên qua mà không đụng
+Drive thật.
+
+Giới hạn còn lại, đã ghi vào CLAUDE.md mục 3: đường `upload-skill-to-Package.ps1` bên Windows CHƯA có
+chốt này ⇒ deploy từ đó phải tự kiểm bằng tay.
+
 # ★ v1.35.78 — r241: `core.abbrev` là ĐIỀU KIỆN TẤT ĐỊNH của gate, không phải tuỳ chọn (2026-07-29)
 
 Truy ra từ việc `git fetch --unshallow` để dứt điểm 2 cờ `SHA_NOT_A_COMMIT` của doc-claims-check

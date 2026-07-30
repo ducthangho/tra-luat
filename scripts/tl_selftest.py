@@ -22553,8 +22553,15 @@ def run() -> int:
         _ALLOW = {str(x).lower() for x in _TL_MODULE.PROFILE_INGEST_ALLOWED_EXTS}
         _t1, _f1 = _m._chunk_ingest_target("/x/y/a__part01.md")
         _t2, _f2 = _m._chunk_ingest_target("/x/y/b.pdf")
-        ok1 = (_t1 == "/x/y/a__part01.docx" and _f1 == "/x/y/a__part01.md"
-               and _t2 == "/x/y/b.pdf" and _f2 is None)
+        # r254 (CI windows-latest ĐỎ 1405/1406, ubuntu XANH): so bằng Path, KHÔNG so CHUỖI thô —
+        # `str(Path('/x/y/a.md').with_suffix('.docx'))` trên Windows ra '\\x\\y\\a.docx' nên phép so
+        # kiểu POSIX ĐỎ GIẢ, trong khi CODE SẢN PHẨM ĐÚNG (nó trả đường hợp lệ CỦA NỀN). Lỗi có sẵn từ
+        # r251 `73be7be` — nhánh đó không có PR nên chưa lần nào chạy Windows CI; merge chỉ PHƠI nó ra.
+        # Path('\\x\\y\\a') == Path('/x/y/a') trên Windows ⇒ khẳng định GIỮ NGUYÊN ý nghĩa (đổi
+        # .md→.docx, GIỮ thư mục) mà chạy được cả hai nền. Cùng bài học §Bài học đắt giá: script/test đa
+        # nền phải CHẠY THẬT trên nền đó — đọc code không lộ ra.
+        ok1 = (Path(_t1) == Path("/x/y/a__part01.docx") and Path(_f1) == Path("/x/y/a__part01.md")
+               and Path(_t2) == Path("/x/y/b.pdf") and _f2 is None)
         with _tf251.TemporaryDirectory() as td:
             meta = {"chunk_index": 1, "chunk_count": 1, "start_dieu": 1, "end_dieu": 1,
                     "chunk_sha256": "aa11bb22"}

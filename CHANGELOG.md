@@ -1,3 +1,26 @@
+# ★ v1.35.92 — r254b: test r251 ĐỎ GIẢ trên Windows CI — so chuỗi đường dẫn kiểu POSIX (2026-07-30)
+
+> PR #5 phơi ra: `gate (windows-latest)` **1405/1406**, `gate (ubuntu-latest)` XANH. Đúng một ca:
+> `r251_plan_chunk_in_dung_lenh_apply_chay`.
+
+`_c251_plan_chunk_in_dung_lenh_apply_chay` so **CHUỖI THÔ**:
+`_chunk_ingest_target("/x/y/a__part01.md") == "/x/y/a__part01.docx"`. Trên Windows
+`str(Path('/x/y/a.md').with_suffix('.docx'))` ra `\x\y\a.docx` ⇒ phép so sai. **CODE SẢN PHẨM ĐÚNG** —
+`_chunk_ingest_target` trả đường hợp lệ CỦA NỀN; chỉ khẳng định trong test là POSIX-only.
+
+**Lỗi CÓ SẴN từ r251 `73be7be`, KHÔNG do merge r254** — đo: `chunking.py` md5 `20f8ca516833` y nguyên
+qua `73be7be` → `296e5c0` → HEAD, và chuỗi `/x/y/a__part01.docx` đã nằm trong selftest từ `73be7be`.
+Nhánh đó **chưa lần nào chạy Windows CI** (không có PR); merge chỉ PHƠI nó ra.
+
+**Vá:** so bằng `Path(...) == Path(...)` — trên Windows `Path('\x\y\a') == Path('/x/y/a')` nên khẳng
+định GIỮ NGUYÊN ý nghĩa (đổi `.md`→`.docx`, GIỮ thư mục) mà chạy được cả hai nền. Kiểm bằng mô phỏng
+`PurePosixPath`/`PureWindowsPath`: cả hai `True` (trước vá: POSIX `True`, Windows `False`).
+
+> **Bài học, đúng §Bài học đắt giá:** "script đa nền phải CHẠY THẬT trên nền đó" áp cho **TEST** y như
+> code — 5 lỗi của r244 cũng không lỗi nào lộ ra bằng đọc code. Gate local (Linux) XANH TRỌN mà vẫn ĐỎ
+> trên Windows ⇒ **gate một nền không phải bằng chứng đủ để merge**; phải xem CI cả hai nền.
+> `tl_selftest.py` NẰM TRONG gói ⇒ cây đổi thì gói đổi, nên bump + deploy lại chứ không sửa lặng.
+
 # ★ v1.35.91 — r254: hợp nhất hai nhánh r251 SONG SONG (2026-07-30)
 
 > **Va chạm đánh số, ghi lại để người sau không tưởng mình đọc nhầm:** hai phiên chạy song song cùng

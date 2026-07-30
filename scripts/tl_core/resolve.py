@@ -126,7 +126,11 @@ def _vbhn_base_key(e: dict) -> str:
     keys = _goc_keys(e)
     if not keys:
         return ""
-    return min(keys, key=_sohieu_base_sort_year)
+    # r275 (P15-F04): _goc_keys là SET — mọi khóa KHÔNG NĂM đều sort-year 9999 (trừ LCT-HDNN=1987) ⇒ hòa
+    # điểm thì `min` ăn theo THỨ TỰ DUYỆT SET (hash seed từng process) ⇒ «query có LÀ base của VBHN không»
+    # (_source_map_one) có thể LẬT giữa hai lần chạy trên chuỗi goc bẩn toàn-không-năm. Tie-break phụ theo
+    # chính khóa (từ điển) cho TẤT ĐỊNH; chuỗi goc sạch (có năm) không đổi hành vi.
+    return min(keys, key=lambda k: (_sohieu_base_sort_year(k), k))
 
 
 def _source_map_one(q: str, entries: list[dict]) -> dict:

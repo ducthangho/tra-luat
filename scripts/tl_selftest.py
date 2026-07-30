@@ -23559,6 +23559,25 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3)
     _t110("r273_vbhn_gate_cutoff_dong", _c273_vbhn_gate_cutoff_dong)
 
+    def _c275_vbhn_base_key_tie_break():
+        """r275 (P15-F04): `_vbhn_base_key` = `min` trên SET với sort-key CHỈ theo năm — mọi khóa không năm
+        đều 9999 ⇒ hòa điểm thì thứ tự duyệt set (hash seed) quyết định ⇒ «query LÀ base của VBHN?» có thể
+        LẬT giữa hai process trên chuỗi goc bẩn toàn-không-năm. Vá: tie-break phụ theo chính khóa.
+        (Tất định xuyên-process đã đo riêng với 5 PYTHONHASHSEED — trong-process khoá bằng so kỳ vọng cứng.)"""
+        _d275 = {"name": "VBHN_X", "sohieu": "09-2025-VBHN-VPQH", "loai": "VBHN",
+                 "goc": "88-VBHN-VPQH;12-VBHN-VPQH;45-VBHN-VPQH"}
+        ok1 = _TL_MODULE._vbhn_base_key(_d275) == "12-VBHN-VPQH"     # tie toàn-không-năm → nhỏ nhất từ điển
+        # PHẢN CHỨNG: chuỗi SẠCH có năm — năm nhỏ nhất vẫn thắng (không đổi hành vi cũ)
+        _c275 = {"name": "VBHN_Y", "sohieu": "10-2025-VBHN-VPQH", "loai": "VBHN",
+                 "goc": "45/2019/QH14;57/2024/QH15;90/2025/QH15"}
+        ok2 = _TL_MODULE._vbhn_base_key(_c275) == "45-2019-QH14"
+        # PHẢN CHỨNG: LCT-HDNN (=1987) vẫn thắng khóa không-năm (9999)
+        _l275 = {"name": "VBHN_Z", "sohieu": "22-2025-VBHN-VPQH", "loai": "VBHN",
+                 "goc": "99-VBHN-VPQH;21-LCT-HDNN8"}
+        ok3 = _TL_MODULE._vbhn_base_key(_l275) == "21-LCT-HDNN8"
+        return bool(ok1 and ok2 and ok3)
+    _t110("r275_vbhn_base_key_tie_break", _c275_vbhn_base_key_tie_break)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -1,3 +1,16 @@
+# ★ v1.36.13 — r275: `_vbhn_base_key` tie-break bất định trên chuỗi goc toàn-không-năm (P15-F04) (2026-07-31)
+
+F04 sổ P15 (phiên giữ sổ phát hiện, phiên land vá). `min(keys, key=_sohieu_base_sort_year)` trên SET —
+mọi khóa không năm đều 9999 (trừ LCT-HDNN=1987) ⇒ hòa điểm thì thứ tự duyệt set (hash seed từng process)
+quyết định ⇒ vị từ «query có LÀ base của VBHN không» (quyết định VBHN-first redirect ở `_source_map_one`)
+có thể LẬT giữa hai lần chạy trên chuỗi goc bẩn toàn-không-năm. Chưa nổ trên data thật (goc corpus hiện có
+năm đủ — đo 31-07) — vá phòng lớp dữ-liệu-bẩn, cùng họ fixture r274.
+
+VÁ đúng đề xuất sổ: `min(keys, key=lambda k: (_sohieu_base_sort_year(k), k))` — tie-break phụ theo chính
+khóa. Đo tất định xuyên-process 5 PYTHONHASHSEED (1/7/42/999/31337) cùng ra `12-VBHN-VPQH`. PHẢN CHỨNG:
+chuỗi sạch có năm → năm nhỏ nhất vẫn thắng (hành vi cũ giữ nguyên); LCT-HDNN vẫn thắng khóa không-năm.
+Selftest +1 case. 1436/1436.
+
 # ★ v1.36.12 — r274: fixture selftest VBHN thiếu năm — siết 3 fixture bare VÔ TÌNH về khóa NN-YYYY-VBHN-XXX (2026-07-31)
 
 Mục «fixture thiếu năm» của backlog P15. Bất biến dự án: mọi số hiệu trong REGISTRY phải year-qualified

@@ -1,3 +1,31 @@
+# ★ v1.35.84 — r247: vỏ `.cmd` để double-click deploy (2026-07-30)
+
+Bỏ `upload-skill-to-Package.ps1` ở r246 làm mất luôn đường **double-click** — Windows KHÔNG chạy `.ps1`
+khi double-click (mở trong editor), và ExecutionPolicy mặc định có thể chặn. Đó chính là lý do đường cũ
+có vỏ `.cmd`. Trả lại: `scripts/deploy-package.cmd`.
+
+- Ưu tiên `pwsh` (7+, bản đã kiểm); chỉ có `powershell` 5.1 thì VẪN chạy nhưng NÓI RÕ 5.1 chưa kiểm và
+  gợi ý `winget install`. Không im lặng giả định tương thích.
+- `-ExecutionPolicy Bypass` chỉ cho TIẾN TRÌNH này, không đổi cài đặt máy.
+- `pause` CHỈ khi không có đối số (đường double-click, để cửa sổ không biến mất); gọi từ terminal/CI có
+  đối số thì trả rc ngay, không treo chờ.
+- Truyền thẳng mọi đối số cho `.ps1` và **giữ nguyên rc** (0/1/2/3) — vỏ bọc không được nuốt mã lỗi.
+
+Cũng thêm `deploy-package.cmd` vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE` (dev-side, gói giữ 197 tệp) và mở
+test **r244** lên 5 tên.
+
+**Giới hạn phải nói rõ: `.cmd` KHÔNG được test hành vi.** Container này là Linux, không có `cmd.exe`, và
+batch không có bản thay thế như PowerShell 7 trên Linux. Nên chỉ soi tĩnh, và bù bằng cách giảm bề mặt
+rủi ro theo đúng các bẫy batch đã biết:
+- **ASCII thuần + CRLF** cho cả hai tệp `.cmd` (kiểm bằng số: 0 ký tự >127, 0 LF lẻ). `cmd.exe` khó tính
+  với LF-only và với ký tự ngoài code page.
+- **KHÔNG nhúng đường dẫn có dấu** (`D:\Quốc hội`) vào `.cmd` — mời gọi lỗi code page. Tệp dọn lấy
+  `%~dp0` (thư mục của chính nó) nên Windows tự đưa đúng đường dẫn, không qua bước giải mã nào.
+- Không đọc biến được `set` TRONG cùng khối ngoặc (cần delayed expansion) — đã soi từng chỗ; các bộ đếm
+  chỉ đọc SAU vòng lặp. `if defined` thì an toàn trong khối vì nó xét lúc chạy.
+- Mốc thời gian lấy từ `wmic os get localdatetime`, KHÔNG dùng `%DATE%` (đổi định dạng theo locale máy).
+- Ngoặc trong `echo` nằm trong khối đều escape `^(` `^)`.
+
 # ★ v1.35.83 — r246: BỎ `upload-skill-to-Package.ps1`, một đường deploy cho mỗi nền (2026-07-30)
 
 Người giữ chốt: chuyển sang `deploy-package.ps1`, bỏ script cũ. Kể từ đây **không còn đường deploy nào

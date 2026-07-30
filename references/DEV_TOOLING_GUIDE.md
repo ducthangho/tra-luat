@@ -181,7 +181,9 @@ Lưu ý liên quan (đã vá trong skill v1.29.7 — script là lớp tiện d�
 **Đường CHÍNH THỨC, hai nền, CÙNG quy trình — cả hai ở TRONG repo nên `git pull` là có bản mới nhất:**
 
 ```powershell
-# Windows
+# Windows — double-click `deploy-package.cmd` cũng chạy được (Windows KHÔNG chạy .ps1 khi
+# double-click, và ExecutionPolicy mặc định có thể chặn; vỏ .cmd gỡ cả hai). Không đối số =
+# build-only, an toàn. Mọi đối số dưới đây truyền thẳng cho .cmd cũng được.
 .\scripts\deploy-package.ps1                    # gate + build + verify (KHÔNG đẩy)
 .\scripts\deploy-package.ps1 -Pull -Push        # lấy bản mới nhất rồi deploy
 .\scripts\deploy-package.ps1 -NoTest            # bỏ gate (CHỈ khi vừa chạy gate riêng ở commit NÀY)

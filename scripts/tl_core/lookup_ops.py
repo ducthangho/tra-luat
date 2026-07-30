@@ -1889,7 +1889,13 @@ def cmd_rasoat_chongcheo(a) -> int:
         if not corpus_loaded:
             return None                  # chưa nạp corpus → KHÔNG XÁC ĐỊNH (≠ thiếu)
         k = norm_sohieu(sh)
-        return any(norm_sohieu(_entry_sohieu(e)) == k for e in entries)
+        # r251 (P15 — repro: cụm lao_dong_xa_hoi báo ✗thiếu cho VBHN ĐÃ CÓ): đi qua cổng bare-VBHN
+        # v1.33.47 như relation-check (681/694) + frontier-expand (fetch_web 211) — footnote/cụm ghi số
+        # VBHN KHÔNG năm ('19/VBHN-VPQH') còn corpus lưu year-qualified ('19-2025-VBHN-VPQH') nên so
+        # exact MISS SẠCH. Docstring _sohieu_query_hits_entry nêu thẳng `in_corpus` là call-site của nó.
+        # GIỮ vế cũ (so thô) — nới chỉ THÊM, không thay hành vi đang đúng.
+        return any(_sohieu_query_hits_entry(k, _sohieu_key_entry(e))
+                   or norm_sohieu(_entry_sohieu(e)) == k for e in entries)
     related = []
     if c:
         for subj, sh in (c.get("members") or {}).items():
@@ -2579,15 +2585,25 @@ def _cluster_for_base(base_sh: str):
     if not bn:
         return None, None
     clusters = (_load_subject_clusters().get("clusters") or {})
+    # r251 (P15 — repro: `_cluster_for_base("18-2025-VBHN-VPQH") -> None` trong khi "18/VBHN-VPQH" -> cụm):
+    # subject_clusters.json ghi 11/11 số VBHN KHÔNG NĂM, còn số hiệu người rà lấy từ locate/reg-query LÀ
+    # dạng có năm (bất biến PHẢI-CÓ-NĂM) ⇒ KHOÁ CANONICAL chính là khoá THẤT BẠI, cụm=∅ + BASE_NO_CLUSTER
+    # dù cụm có thật. Nới ĐÚNG 1 CHIỀU của _sohieu_query_hits_entry, gọi với GIÁ TRỊ CỤM Ở VAI "query"
+    # (cụm là bên THIẾU năm) — chiều ngược helper cố ý không nới. Đây là KHỚP TRUY VẤN trên tệp cụm tay,
+    # KHÔNG phải khoá canonical/registry (doctrine _vbhn_bare_key). KHÔNG sửa dữ liệu subject_clusters.json:
+    # đổi sang dạng có năm là đổi dữ liệu, kéo theo _cluster_lookup + golden, ngoài phạm vi bản vá này.
+    def _ckey_hits(x) -> bool:
+        xk = norm_sohieu(x or "").replace("/", "-")
+        return bool(xk) and (xk == bn or _sohieu_query_hits_entry(xk, bn))
     for cname, c in clusters.items():
         keys = [c.get("base", "")] + list(c.get("base_aliases") or [])   # khớp cả Luật GỐC (vd 45/2019→cụm BLLĐ)
-        if any(x and norm_sohieu(x).replace("/", "-") == bn for x in keys):
+        if any(_ckey_hits(x) for x in keys):
             return cname, c
     # A4: reverse-map qua THÀNH VIÊN cụm — input là số hiệu VBHN/thành viên (vd 19/VBHN-VPQH) cũng tìm ra cụm
     # (trước đây chỉ khớp base=Luật gốc → truyền số hiệu VBHN vào rasoat-chongcheo trả cụm=∅ dù cluster-theo-tên đúng).
     for cname, c in clusters.items():
         for sh in (c.get("members") or {}).values():
-            if sh and norm_sohieu(sh).replace("/", "-") == bn:
+            if _ckey_hits(sh):                       # r251: cùng phép nới cho reverse-map qua THÀNH VIÊN cụm
                 return cname, c
     return None, None
 
@@ -2596,7 +2612,12 @@ def _resolve_cluster_member(sh: str, subj: str, entries: list[dict]) -> dict:
     lẫn NLĐ-đi-nước-ngoài): ưu tiên TÊN khớp chủ đề (subj) > còn-hiệu-lực > là VBHN > năm mới. GIỮ VBHN-first
     (chọn ĐÚNG bản hợp nhất của chủ đề, không tụt về Luật gốc)."""
     k = norm_sohieu(sh)
-    cands = [e for e in entries if norm_sohieu(_entry_sohieu(e)) == k]
+    # r251 (P15 — repro F1a: corpus có '19-2025-VBHN-VPQH' mà thành viên cụm '19/VBHN-VPQH' trả in_corpus=False):
+    # so qua cổng bare-VBHN v1.33.47 + dùng _sohieu_key_entry (bắt cả entry sohieu RỖNG, số nằm trong TÊN).
+    # GIỮ vế so thô. Hệ quả cố ý: `cands` rộng hơn ⇒ `ambiguous` có thể bật thêm — đúng nghĩa "số hiệu trỏ
+    # ≥2 văn bản khác nhau", thà báo trùng-số-hiệu còn hơn báo THIẾU oan (lớp lỗi v1.33.47).
+    cands = [e for e in entries
+             if _sohieu_query_hits_entry(k, _sohieu_key_entry(e)) or norm_sohieu(_entry_sohieu(e)) == k]
     if not cands:
         return {"in_corpus": False, "ambiguous": False}
 

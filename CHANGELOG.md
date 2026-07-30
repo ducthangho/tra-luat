@@ -1,3 +1,40 @@
+# ★ v1.35.93 — r255: `rasoat-chongcheo` HẾT báo ✗thiếu-corpus cho VBHN ĐÃ CÓ (2026-07-30)
+
+Rà P15 nhóm lookup + rà soát trên cây đóng băng bắt: cổng nới bare-VBHN **v1.33.47** đã vá
+`relation-check` (`lookup_ops.py:681,694`) và `frontier-expand` (`fetch_web.py:211`) nhưng **BỎ SÓT
+đường `rasoat-chongcheo`** — 3 điểm so số hiệu còn dùng vị từ thô `norm_sohieu(_entry_sohieu(e)) == k`:
+`_in_corpus` · `_resolve_cluster_member` · `_cluster_for_base`.
+
+Vì sao nổ CHẮC CHẮN, không phải giả thuyết: `references/subject_clusters.json` ghi **11/11 số hiệu VBHN
+KHÔNG NĂM** (`19/VBHN-VPQH`, `14/VBHN-VPQH`, `90/VBHN-VPQH`, `8/VBHN-BNV`…) còn corpus lưu
+**year-qualified** theo bất biến PHẢI-CÓ-NĂM (`19-2025-VBHN-VPQH`). `norm_sohieu` giữ nguyên cả hai dạng
+⇒ so exact MISS SẠCH. Đo được: `--base 18/VBHN-VPQH` đẩy **cả 4 thành viên VBHN của cụm** vào
+`unresolved_refs` — tức giục tải lại đúng những văn bản đã có, ngay chỗ doctrine dặn "verify `tl exists`/
+QT-5 trước khi nạp". Cùng LỚP LỖI mà `_vbhn_bare_key` sinh ra để diệt ("VBHN 88 Quảng cáo ĐÃ CÓ mà lần
+nào chạy cũng báo thiếu"), chỉ khác call-site.
+
+Bẫy thứ hai, ngược đời: **khoá CANONICAL chính là khoá THẤT BẠI.**
+`_cluster_for_base("18/VBHN-VPQH")` → `lao_dong_xa_hoi`, `_cluster_for_base("18-2025-VBHN-VPQH")` →
+`None` ⇒ người rà lấy số hiệu từ `locate`/`reg-query` (dạng có năm) thì mất luôn lớp cụm lĩnh vực, cờ
+báo `BASE_NO_CLUSTER` "E1 phủ HẠN CHẾ" mà nguyên nhân thật là lệch khuôn khoá. Ở đây gọi
+`_sohieu_query_hits_entry` với **giá trị cụm ở vai "query"** (cụm là bên THIẾU năm) — vẫn đúng phép nới
+1 CHIỀU, chiều ngược helper cố ý không nới.
+
+**KHÔNG sửa `subject_clusters.json` sang dạng có năm**: đó là đổi DỮ LIỆU, kéo theo `_cluster_lookup` +
+golden, và mỗi lần hợp nhất mới lại phải sửa tay — vá ở tầng SO KHỚP thì bao được mọi VBHN tương lai với
+zero bảo trì. Cả 3 chỗ GIỮ vế so thô cũ: nới chỉ THÊM, không thay hành vi đang đúng.
+
+Hệ quả CỐ Ý: `cands` của `_resolve_cluster_member` rộng hơn nên `ambiguous` có thể bật thêm — đúng nghĩa
+"số hiệu trỏ ≥2 văn bản khác nhau"; thà báo TRÙNG-SỐ-HIỆU còn hơn báo THIẾU oan.
+
+Test **r255** (4 case) đo 2 CHIỀU: 1/4 trên cây nền `ba91cf9` → 4/4 trên bản vá, và vế phản chứng XANH ở
+CẢ HAI (chứng minh không nới quá tay): năm KHÁC vẫn so chặt · cơ quan KHÁC không khớp · số KHÁC không
+khớp · `_dang_bare_key("74-2025-QH15") == ""` (số hiệu LUẬT thường không được nới) · số hiệu ngoài mọi
+cụm vẫn `∅` · văn bản vắng THẬT (`74/2025/QH15`, `14/VBHN-VPQH`) VẪN nằm trong `unresolved_refs`.
+
+Vì sao gate cũ xanh: test `cluster_dup_sohieu_disambig` dựng fixture `so_hieu: "14/VBHN-VPQH"` — **fixture
+tự vi phạm bất biến PHẢI-CÓ-NĂM**, nên khoá đúng cái hành vi sai. Fixture r255 dùng khoá có năm.
+
 # ★ v1.35.92 — r254b: test r251 ĐỎ GIẢ trên Windows CI — so chuỗi đường dẫn kiểu POSIX (2026-07-30)
 
 > PR #5 phơi ra: `gate (windows-latest)` **1405/1406**, `gate (ubuntu-latest)` XANH. Đúng một ca:

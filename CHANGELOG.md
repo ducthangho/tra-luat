@@ -1,3 +1,27 @@
+# ★ v1.35.97 — r259: đồng bộ số r trong CHÚ THÍCH `lookup_ops.py` (chỉ chú thích) (2026-07-30)
+
+Khiếm khuyết của CHÍNH đợt r255–r258: khi master bị phiên song song đẩy hai lần, tôi đánh số lại
+commit message + mục CHANGELOG + tên case test, **nhưng bỏ sót CHÚ THÍCH TRONG CODE** — chúng vẫn giữ
+số của lượt đánh đầu (`r251`–`r254`). Trên master hiện tại những số đó là việc của PHIÊN KHÁC:
+`r251` = "hai cổng XANH mà nói dối", `r252` = "`&amp;` `&lt;` chui nguyên văn vào kho",
+`r253` = "hai cờ còn-nợ-NLM mời nạp TRÙNG", `r254b` = "test r251 ĐỎ GIẢ trên Windows CI".
+
+Hậu quả: idiom truy vết "vX.Y.Z (bằng chứng) — fix" bị đứt theo CẢ HAI CHIỀU — grep `r255` trong code
+ra RỖNG, còn grep `r251` trong `lookup_ops.py` lại trúng chú thích của tôi trong khi `r251` ở CHANGELOG
+là fix của người khác. Người đọc sau sẽ tra chéo ra kết luận sai về lý do một dòng code tồn tại.
+
+Đổi ĐÚNG 7 chỗ, tất cả trong chú thích, neo bằng mốc `(P15` / `cùng gốc rNNN` / `y như rNNN` /
+`test rNNN khoá` để không quét sang chú thích rNNN của người khác trong cùng tệp:
+`r251 (P15`→`r255 (P15` ×3 · `r252 (P15`→`r256 (P15` · `r253 (P15`→`r257 (P15` · `r254 (P15`→`r258 (P15` ·
+`cùng gốc r253`→`cùng gốc r257`.
+
+**KHÔNG một dòng code nào đổi** — đã đo: `git diff` trên tệp có 0 dòng không-phải-chú-thích bị thay.
+Vì vậy 19 case r255–r258 và toàn bộ 8 gate phải cho SỐ Y HỆT trước/sau; đó chính là tiêu chí nghiệm thu
+của bản này, không phải "gate xanh" chung chung.
+
+Bài học giữ lại: đánh số lại một đợt là thao tác **BỐN mặt** — commit message · CHANGELOG · tên case
+test · CHÚ THÍCH CODE. Bỏ sót mặt nào thì mặt đó thành con trỏ chết, và mặt code là mặt sống lâu nhất.
+
 # ★ v1.35.96 — r258: `_vbhn_goc_map` — map "đã phủ" sai HAI HƯỚNG, hướng nguy hiểm là hướng ít ai để ý (2026-07-30)
 
 Nửa CÒN LẠI của cùng lệnh `corpus-relation-sweep` (r257 vá cổng `vbhn_broken`; đây là map coverage).

@@ -752,7 +752,7 @@ def _vbhn_goc_map(entries: list) -> dict:
     for e in entries or []:
         if _normalize_loai(str(e.get("loai") or "")) != "Văn bản hợp nhất":
             continue
-        # r254 (P15, cùng gốc r253 — nửa CÒN LẠI của cùng một lệnh): map "đã phủ" này SUPPRESS
+        # r258 (P15, cùng gốc r257 — nửa CÒN LẠI của cùng một lệnh): map "đã phủ" này SUPPRESS
         # amendments_missing, nên khái niệm "in corpus" ở đây phải là LUẬT SERVER, giống cổng vbhn_broken.
         # `_entry_corpus_true` lệch HAI HƯỚNG, và hướng nguy hiểm là hướng ít ai để ý:
         #  · THIẾU `− ref`: dòng row_kind='ref' là dòng TRỎ-tham-chiếu, KHÔNG phải văn bản sở hữu, mà vẫn được
@@ -873,7 +873,7 @@ def cmd_corpus_relation_sweep(a) -> int:
         for vc in (rc.get("vbhn_candidates") or []):
             fl = vc.get("flags") or []
             ent = vc.get("entry") or {}
-            # r253 (P15): cổng này TỪNG dùng 2 vị từ THÔ, cả hai lệch khuôn nhà — đúng lớp dương-tính-giả mà
+            # r257 (P15): cổng này TỪNG dùng 2 vị từ THÔ, cả hai lệch khuôn nhà — đúng lớp dương-tính-giả mà
             # VBHN-FIRST v1.34.32 sinh ra để diệt, chỉ khác chỗ.
             #  · `str(ent.get("corpus")) != "true"` là site DUY NHẤT trong repo so cột corpus mà KHÔNG chuẩn hoá
             #    (28 site khác đều .lower()/helper). Miền giá trị THẬT rộng hơn {true,false}: 'vbqppl' (luật
@@ -883,7 +883,7 @@ def cmd_corpus_relation_sweep(a) -> int:
             #    Dùng LUẬT SERVER (_entry_is_corpus_effective), KHÔNG dùng _entry_corpus_true — literal là bản SAI.
             #  · `"_ZZZ_QUARANTINE" in cat` bỏ sót biến thể nhãn 'QUARANTINE' trơ (thứ _is_quarantine_label_variant
             #    xác nhận có thật) ⇒ VBHN ĐÃ cách ly trong chuỗi base lọt lưới, KHÔNG được gắn cờ.
-            # Hai vế đi NGƯỢC hướng nhau (corpus: bớt cờ · quarantine: thêm cờ) nên test r253 khoá CẢ HAI chiều.
+            # Hai vế đi NGƯỢC hướng nhau (corpus: bớt cờ · quarantine: thêm cờ) nên test r257 khoá CẢ HAI chiều.
             _full = entry_by_drive_id.get(str(ent.get("drive_id") or "")) or ent
             if not (any(f in ("RAW_NAME_NOT_NLM", "VBHN_MISSING_YEAR_OR_DATE") for f in fl)
                     or not _entry_is_corpus_effective(_full)
@@ -1724,7 +1724,7 @@ def cmd_rasoat_loop(a) -> int:
     seen, frontier, evaluated, gaps = set(), [], [], []
     _rasoat_dedup_push(frontier, seen, _rasoat_expand_text(base_text, entries))
     dry_rounds, it = 0, 0
-    # r252 (P15 — repro: 5 ứng viên ngoài corpus, K=2 ⇒ báo 2/5 GAP, frontier_remaining=3, max_iter=12 CHƯA
+    # r256 (P15 — repro: 5 ứng viên ngoài corpus, K=2 ⇒ báo 2/5 GAP, frontier_remaining=3, max_iter=12 CHƯA
     # HỀ chạm): `dry_rounds` KHÔNG được nằm trong điều kiện vòng. Docstring nói "DỪNG khi frontier rỗng VÀ
     # dry_rounds≥K" (AND) nhưng code cài OR ⇒ chạm K là thoát dù frontier còn. Nặng nhất: ứng viên NGOÀI
     # corpus cũng dry_rounds++ (dòng dưới) mà GAP chính là SẢN PHẨM của lệnh ⇒ càng tìm ra nhiều gap càng
@@ -1930,7 +1930,7 @@ def cmd_rasoat_chongcheo(a) -> int:
         if not corpus_loaded:
             return None                  # chưa nạp corpus → KHÔNG XÁC ĐỊNH (≠ thiếu)
         k = norm_sohieu(sh)
-        # r251 (P15 — repro: cụm lao_dong_xa_hoi báo ✗thiếu cho VBHN ĐÃ CÓ): đi qua cổng bare-VBHN
+        # r255 (P15 — repro: cụm lao_dong_xa_hoi báo ✗thiếu cho VBHN ĐÃ CÓ): đi qua cổng bare-VBHN
         # v1.33.47 như relation-check (681/694) + frontier-expand (fetch_web 211) — footnote/cụm ghi số
         # VBHN KHÔNG năm ('19/VBHN-VPQH') còn corpus lưu year-qualified ('19-2025-VBHN-VPQH') nên so
         # exact MISS SẠCH. Docstring _sohieu_query_hits_entry nêu thẳng `in_corpus` là call-site của nó.
@@ -2626,7 +2626,7 @@ def _cluster_for_base(base_sh: str):
     if not bn:
         return None, None
     clusters = (_load_subject_clusters().get("clusters") or {})
-    # r251 (P15 — repro: `_cluster_for_base("18-2025-VBHN-VPQH") -> None` trong khi "18/VBHN-VPQH" -> cụm):
+    # r255 (P15 — repro: `_cluster_for_base("18-2025-VBHN-VPQH") -> None` trong khi "18/VBHN-VPQH" -> cụm):
     # subject_clusters.json ghi 11/11 số VBHN KHÔNG NĂM, còn số hiệu người rà lấy từ locate/reg-query LÀ
     # dạng có năm (bất biến PHẢI-CÓ-NĂM) ⇒ KHOÁ CANONICAL chính là khoá THẤT BẠI, cụm=∅ + BASE_NO_CLUSTER
     # dù cụm có thật. Nới ĐÚNG 1 CHIỀU của _sohieu_query_hits_entry, gọi với GIÁ TRỊ CỤM Ở VAI "query"
@@ -2653,7 +2653,7 @@ def _resolve_cluster_member(sh: str, subj: str, entries: list[dict]) -> dict:
     lẫn NLĐ-đi-nước-ngoài): ưu tiên TÊN khớp chủ đề (subj) > còn-hiệu-lực > là VBHN > năm mới. GIỮ VBHN-first
     (chọn ĐÚNG bản hợp nhất của chủ đề, không tụt về Luật gốc)."""
     k = norm_sohieu(sh)
-    # r251 (P15 — repro F1a: corpus có '19-2025-VBHN-VPQH' mà thành viên cụm '19/VBHN-VPQH' trả in_corpus=False):
+    # r255 (P15 — repro F1a: corpus có '19-2025-VBHN-VPQH' mà thành viên cụm '19/VBHN-VPQH' trả in_corpus=False):
     # so qua cổng bare-VBHN v1.33.47 + dùng _sohieu_key_entry (bắt cả entry sohieu RỖNG, số nằm trong TÊN).
     # GIỮ vế so thô. Hệ quả cố ý: `cands` rộng hơn ⇒ `ambiguous` có thể bật thêm — đúng nghĩa "số hiệu trỏ
     # ≥2 văn bản khác nhau", thà báo trùng-số-hiệu còn hơn báo THIẾU oan (lớp lỗi v1.33.47).

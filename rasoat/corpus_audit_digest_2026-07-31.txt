@@ -1,0 +1,141 @@
+nguồn: ca_round_17.json · coverage_complete=True · remaining=0
+pool_total=699 · clean(lượt cuối)=18 · proposals=108
+đề xuất duy nhất theo drive_id: 107
+
+### NAME_NONSTANDARD — 88 dòng
+| 1asc-wQ0Uhm4KAqNID… | 1 Luat sua 4 Luat.docx | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1IN8TN_3HTyUxLaccc… | 1. Luat ng VNDLVONN 2020.docx | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1NGVXxQCLUWrWG8NGC… | 112_NQ-CP_702934.docx | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1MZlRu4DcICseY1jpX… | 127/QĐ-TTg Chiến lược quốc gia về nghiên cứu, phát t | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1leJoyJKSEfljHj2wP… | 142919vie | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 18-39wTx-jZ9bLTzo5… | 33/2026/QĐ-TTg Danh mục hệ thống trí tuệ nhân tạo có | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1ZOTW36-6T58A5Vumr… | 353/2025/NĐ-CP Cơ chế thử nghiệm có kiểm soát trong  | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1T65C_hLSjIhDuhGmN… | 356/2025/NĐ-CP Quy định chi tiết và biện pháp thi hà | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1Weu1RNqWcBqV_CUHZ… | 44_2024_QH15_Duoc_583839 | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1aRKrGw6PEkRZvi1MI… | 80-nd-cp.signed.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1e1KpRRSHzTA1VOzWP… | 804/QĐ-TTg Danh mục bộ dữ liệu phục vụ phát triển tr | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1RY7HUHODAvBqUbhe5… | BC QUOC GIA VIEC LAM THOA DANG ILO.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1TKqDl_WgCuSxmUe_n… | CT VIEC LAM THOA DANG ILO.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 16qPnV5eCYtKyatND4… | Chỉ thị 04-CT/TW — Ban Bí thư về tăng cường lãnh đạo | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1U0L3gIJ9Feie_Hw5S… | GIOI VA HOAN THIEN CHINH SACH VIEC LAM.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1Lko21mOLzF6xGvP0H… | HD_05-HD-VPTW_The_thuc_van_ban_Dang | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1iPRtpW2WeXXpWo24p… | HD_36-HD-VPTW_The_thuc_van_ban_Dang | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1KQqd2uEI3Cgxu8bDJ… | HU_WCT_WIPO_Quyen_tac_gia_1996 | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1RBflhtskmUi9VAgYf… | KL_121-KL-TW_2025_Tong_ket_NQ_18 | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1FRIK04VpoHHs3Yqo2… | KL_126-KL-TW_2025_Tinh_gon_bo_may | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1egbmhuqh2kb7SuXG_… | KL_127-KL-TW_2025_Sap_xep_bo_may_thanh_tra | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1r0RZI4DSlEjcgB8f2… | KL_183-KL-TW_2025_Van_hanh_chinh_quyen_2_cap | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1AltajAI_Tjq7LKLHT… | KL_230-KL-TW_2026_Sap_xep_tinh_gon_hoi_quan_chung | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1yXg-_VuiMKr_u1ILw… | Luat Viec lam.docx | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1vfEleVCEV9jC78uBS… | Luat_105-2016-QH13 | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1PbhBNvTjY-_BE6k8e… | ND_04-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1HbKDfCgQlv6h355Az… | ND_07-2023-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1cyiqMEBzmKf311xSr… | ND_104-2003-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1SLtdALojT7nQfRg0N… | ND_104-2016-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1S8M1cxDOfhLfgkfR0… | ND_112-2021-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1Rd2TiJeXKKEgwhLY4… | ND_13-2024-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1_WEI7Hx2jVjyvRKZJ… | ND_131-2020-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1JId5ZW8D3tGSyI8Zy… | ND_141-2005-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1vSbARtx8N-XTNeoT1… | ND_141-2024-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1g3GZZ6lkR1EoXDGBe… | ND_143-2024-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1TnYK_Wh8s4IGoBHTc… | ND_155-2018-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1x3PwmSt4id_OiFoGw… | ND_16-2024-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1KBbR6_nvH_2cSNYUL… | ND_163-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1F2eZpavAmdN9_wSAl… | ND_165-2026-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1AjG5v8zv2mkWeopYs… | ND_18-2011-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1nbnKZFSpV305LV6yM… | ND_192-2026-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1bcPgUveoYhO6xiRkQ… | ND_20-2010-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1O03rJUPuV8tiSQfG4… | ND_24-2018-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1szl_gb98dUklC6JwK… | ND_318-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1MuguIBw8ghmh2ZOXu… | ND_338-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 15nnUsco2Uz_WoRQL_… | ND_352-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1c2a_sKiRJawq91rRb… | ND_372-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1V5XyD3cQbFnH_RtnT… | ND_374-2025-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1GYu9Ho0Pc3cMbbFaF… | ND_56-2021-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1zAvpCzi6IOPwRIUqY… | ND_58-2020-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1fOSaToFE0pEHkDWv_… | ND_63-2021-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1vJrNJ4Sk4R1JQOOaX… | ND_65-2017-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1l4d8QZAXVuRYYNO-y… | ND_88-2020-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1fN_A08I14egjMHWOa… | ND_88-2023-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1w8O92EYT6C6zkwDrO… | ND_90-2026-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 189-891-WSm4ZIGrNZ… | ND_93-2016-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1ViGpJQxOtsrm6-HP7… | ND_96-2023-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1Bo4bztIv9CkW34F3H… | ND_98-2021-ND-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 18_Ybzz8XHRnmilzgD… | NQ_112-NQ-CP | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1dT_-aJjtbs-qNkLdY… | NQ_18-NQ-TW_2017_Sap_xep_to_chuc_bo_may | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1plwNe8B_ze_F5uY0h… | NQ_2092-NQ-UBTVQH15_Tong_ra_soat_VBQPPL | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1MUofveIMigANx_9A-… | NQ_261-2025-QH15_Y_te | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1ALuqwk8FsTUfKWEgi… | NQ_27-NQ-TW_Nha_nuoc_phap_quyen | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1VMp21B1ykqbXxEYwN… | NQ_560-NQ-UBTVQH15_Giam_sat_VBQPPL | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1-cJIBBVgNLG-2MjuD… | NQ_60-NQ-TW_2025_Tiep_tuc_sap_xep_bo_may | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 131IlPteTvH7PnF_8u… | NQ_79-NQ-TW_2026_Phat_trien_kinh_te_nha_nuoc | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 12pqR1EifG7Vjw0MPy… | NQ_80-NQ-TW_Phat_trien_van_hoa_2026 | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1ZuFBXpzOjkuYNOZQy… | QD_178-QD-TW_2024_Kiem_soat_quyen_luc_PCTN_xay_dung_ | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1JKdkFoxpddN6RBw9M… | QD_21-2006-QD-BYT | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1Jk6MsnIKE3nMU3kMC… | QD_383-QD-TW_2025_Phong_luu_tru_Dang | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1jMXEIIaNgsRskFeqr… | QD_399-QD-TW_The_loai_tham_quyen_the_thuc_van_ban_Da | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1RIh5NUnJoWest7QBW… | QD_671-QD-BTTTT_Dinh_muc_chi_phi_PM | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1W51BIJab85csDT7bE… | TL_Cam_ket_SHTT_trong_cac_FTA_Cuc_SHTT | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1fWN-pMLQiG3Ft7_84… | TL_ILO_Danh_muc_cong_uoc_Viet_Nam_da_phe_chuan | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1PWj5iUJb1pcd5Q1TI… | TRI TUE NHAN TAO VA KHUYEN NGHI ILO.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1qDf3yPqHf-2pZ-SzK… | VBHN_02-BGDDT_2026_Quy_che_thi_TN_THPT | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1TFNqFciM4HCxGpzzq… | VBHN_04-BGDDT_2026_Day_them_hoc_them | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 17at9UmUpDi2NUyRns… | VBHN_2279-2023-VBHN-BLDTBXH_(ND_44_2016_140_2018_04_ | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1h0kl-G4-8l7r_rvOM… | VBT_BC_BHXH_HaNoi_thuc_hien_CS_BHXH_2025.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 13dQ-k8Rt68Vkb9ja4… | VBT_BC_BHXH_HaNoi_thuc_hien_chinh_sach_phap_luat_BHX | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 19_6Mp_8e1NQerD5ed… | VBT_PL_BC_BHXH_HaNoi_khao_sat_6-2026.pdf | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 18e7DoDOMQKf95EFG7… | VBT_PL_BC_BHXH_HaNoi_thuc_hien_chinh_sach_phap_luat_ | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1EHPwNl__llZVNl06f… | VK_DH_XIV_Bao_cao_chinh_tri | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1_ByfzJRjUhmIUz2_u… | VK_DH_XIV_Bao_cao_tong_ket_KTXH | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1HuLS_-elLqo0_qJ9x… | VK_DH_XIV_Chuong_trinh_hanh_dong | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 14IW02Fydko1Y0MSx2… | VK_DH_XIV_PL4_Danh_gia_KTXH | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1sWZB4Idkoxe1xrFyJ… | VK_DH_XIV_PL5_Tong_ket_xay_dung_Dang | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+| 1-Feyc6sgQNq83zQSl… | luat-dau-thau-so-22-2023-qh15-259737-d1.html | <Loai>_<sohieu>_<Chu_de> (chuẩn hoá tay) | 2 |
+
+### CAT_MISMATCH — 8 dòng
+| 1JjIPSLJ3Wjpw_15xc… | ∅ | 41 | 4 |
+| 1cdDxcgyXrnW370yEz… | ∅ | 41 | 4 |
+| 1cIREIoRm6h3P3J3At… | ∅ | 41 | 4 |
+| 1RObiuQRLtSQAW1gNo… | ∅ | 41 | 4 |
+| 1UfrxU3RIiwNo4qcrT… | ∅ | 41 | 4 |
+| 1tIHMc_kM_RKQ_T8dA… | ∅ | 41 | 4 |
+| 1qhwPZypiqwfCyRIvr… | ∅ | 41 | 4 |
+| 1Ks_Ynvw45lIbbtZNj… | Hồ sơ dự án Luật | 02 | 4 |
+
+### NAME_TRICH_YEU — 5 dòng
+| 1nHnfEQDEJao4E_kt8… | 010. Thong tu 10_2020_TT-BLDTBXH_ ve hop dong lao do | TT_10-2020-TT-BLDTBXH_bo_lao_dong_thuong_binh_va_xa_ | 2 |
+| 1iEiWmiBvd-WTFI2xe… | 118_2016_ND-CP_ngày 22/7/2016 của Chính phủ sửa đổi, | ND_118-2016-ND-CP_chinh_phu | 2 |
+| 18E2LhhCi53d9OFjNC… | EVFTA_PL_Nghi_dinh_thu_1_quy_tac_xuat_xu | ND_nghi_dinh_thu_1 | 2 |
+| 1FPU8yDZI59jif7VoW… | EVFTA_PL_Nghi_dinh_thu_2 | ND_nghi_dinh_thu_2 | 2 |
+| 14Ror8WsX8Hu4-zpWj… | VK_DH_XIV_NQ_Dai_hoi | NQ_dai_hoi_dai_bieu_toan_quoc_lan_thu_xiv | 2 |
+
+### CAT_LIKELY_WRONG — 4 dòng
+| 1-iPFLO80xTDvlBhTi… | 08_Dan_so_gia_dinh_tre_em_binh_dang_gioi | 10 | 3 |
+| 1JSadlq1Cv8OOfWFrV… | 13_Giao_duc_dao_tao | 10 | 3 |
+| 1uqmUbNC1Cat8-ntZA… | 20_Lao_dong | 02 | 3 |
+| 1wD6qMdqUEpuP-WAX9… | 03_Buu_chinh_vien_thong | 39 | 3 |
+
+### LOAI_MISMATCH — 1 dòng
+| 1d3i4NCh-Jo7gZhsmU… | Bộ luật | Phụ lục | 1 |
+
+### SOHIEU_MISMATCH — 1 dòng
+| 1auEnrsyEz2FsCW2y3… | 176-2025-ND-CP | 20-2021-ND-CP |  |
+
+### need_manual_read — 13
+  1aRKrGw6PEkRZvi1MI… | 80-nd-cp.signed.pdf | 
+  1asc-wQ0Uhm4KAqNID… | 1 Luat sua 4 Luat.docx | 
+  1-Feyc6sgQNq83zQSl… | luat-dau-thau-so-22-2023-qh15-259737-d1.html | 
+  1PWj5iUJb1pcd5Q1TI… | TRI TUE NHAN TAO VA KHUYEN NGHI ILO.pdf | 
+  1U0L3gIJ9Feie_Hw5S… | GIOI VA HOAN THIEN CHINH SACH VIEC LAM.pdf | 
+  1TKqDl_WgCuSxmUe_n… | CT VIEC LAM THOA DANG ILO.pdf | 
+  1RY7HUHODAvBqUbhe5… | BC QUOC GIA VIEC LAM THOA DANG ILO.pdf | 
+  1NGVXxQCLUWrWG8NGC… | 112_NQ-CP_702934.docx | 
+  1IN8TN_3HTyUxLaccc… | 1. Luat ng VNDLVONN 2020.docx | 
+  1yXg-_VuiMKr_u1ILw… | Luat Viec lam.docx | 
+  19_6Mp_8e1NQerD5ed… | VBT_PL_BC_BHXH_HaNoi_khao_sat_6-2026.pdf | 
+  1h0kl-G4-8l7r_rvOM… | VBT_BC_BHXH_HaNoi_thuc_hien_CS_BHXH_2025.pdf | 
+  12LisxttFh7oIbNita… | PERF_TEST_raw.txt | 
+
+### header_mismatch_no_proposal (lượt cuối) — 0
+
+errors: 2

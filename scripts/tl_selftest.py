@@ -22342,13 +22342,15 @@ def run() -> int:
         _ex = getattr(_rel, "_RELEASE_EXCLUDE_NAMES_ANYWHERE", None)
         if not _ex:
             return False
-        _moi = {"deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py"}
+        _moi = {"deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py",
+                "wire_deploy_guard.py"}
         ok1 = _moi <= set(_ex)
         # (b) PHẢN CHỨNG: loại khỏi gói không được đồng nghĩa với xoá khỏi cây — nếu vế này sai thì
         # "loại" đã biến thành "mất tệp" mà test (a) vẫn xanh.
         _here = Path(_TL_MODULE.__file__).resolve().parent
         ok2 = all((_here / n).exists() for n in
-                  ("deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py"))
+                  ("deploy-package.sh", "deploy-package.ps1", "deploy-guard.ps1", "pkg_secret_scan.py",
+                   "wire_deploy_guard.py"))
         # (c) không được vô tình thay cả bảng
         ok3 = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json"} <= set(_ex)
         return ok1 and ok2 and ok3

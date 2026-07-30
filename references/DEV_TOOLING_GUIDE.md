@@ -186,6 +186,19 @@ cd "D:\Quốc hội"
 .\upload-skill-to-Package.ps1 -NoPush         # chỉ build + zip, KHÔNG đẩy Drive (test an toàn)
 .\upload-skill-to-Package.ps1 -NoTest         # bỏ selftest (nhanh hơn, chỉ khi vừa chạy selftest riêng)
 ```
+**Nối chốt TỰ ĐỘNG (từ v1.35.82) — khỏi chèn tay.** Chạy một lần trên máy dev:
+
+```powershell
+python scripts\wire_deploy_guard.py --repo "C:\qh\tra-luat"            # DRY, xem sẽ chèn ở đâu
+python scripts\wire_deploy_guard.py --repo "C:\qh\tra-luat" --apply    # ghi thật (tự sao lưu .bak)
+```
+Tự tìm lệnh `drive-push` và chèn NGAY TRƯỚC nó (chèn sau thì chốt vô nghĩa); GIỮ nguyên CRLF/BOM;
+idempotent (chạy lại không chèn lần 2); KHÔNG thấy `drive-push` thì TỪ CHỐI rc=2 và in khối để bạn tự
+chèn, chứ không đoán chỗ. Khối chèn TỰ đọc `VERSION` từ `--repo`, không dựa vào tên biến trong script
+của bạn. Mặc định `--path` = `D:\Quốc hội\upload-skill-to-Package.ps1`.
+
+Hoặc chèn tay — khuôn bên dưới:
+
 **Chốt chống thụt lùi (từ v1.35.80) — phải NỐI TAY vào script này.** `upload-skill-to-Package.ps1`
 nằm ngoài repo nên chốt không tự có hiệu lực. Thêm ĐÚNG 1 DÒNG, ngay TRƯỚC lệnh `drive-push`:
 

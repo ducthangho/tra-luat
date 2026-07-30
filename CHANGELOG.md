@@ -1,3 +1,33 @@
+# ★ v1.35.82 — r245: nối chốt vào script deploy NGOÀI repo, tự động và fail-safe (2026-07-30)
+
+`upload-skill-to-Package.ps1` ở `D:\Quốc hội\`, KHÔNG có trong repo (đã kiểm: không trên đĩa, chưa từng
+vào git) nên phiên Claude không đọc/sửa được. Bảo người dùng tự chèn tay thì dễ chèn SAU lệnh
+`drive-push` — lúc đó chốt vô nghĩa vì đã ghi đè rồi.
+
+`scripts/wire_deploy_guard.py` — vá tự động, DRY mặc định, `--apply` mới ghi (sao lưu `.bak`):
+- Tự tìm lệnh `drive-push` (regex biên từ, bỏ dòng chú thích) và chèn **NGAY TRƯỚC** nó, giữ đúng thụt lề.
+- **KHÔNG thấy `drive-push` ⇒ TỪ CHỐI rc=2 và KHÔNG sửa tệp**, in khối để tự chèn. Không đoán chỗ:
+  đoán sai ở đây tệ hơn không làm gì.
+- **Idempotent** bằng marker — chạy lại không chèn lần 2.
+- **Giữ nguyên vỏ tệp: CRLF + BOM.** Chính bài học v1.35.68 (viết lại text-mode nuốt CRLF, mất 1
+  byte/dòng); script deploy Windows gần như chắc chắn CRLF, có thể có BOM.
+- Khối chèn **TỰ ĐỌC `VERSION`** từ `--repo`, KHÔNG dựa vào tên biến trong script người dùng — không
+  đoán được `$ver`/`$version`, đoán sai thì chốt chạy với version rỗng và mất tác dụng im lặng.
+- `--repo` bị kiểm ngay (phải có `VERSION` + `scripts/deploy-guard.ps1`), sai thì chết TẠI ĐÂY chứ không
+  để chết lúc deploy — lúc đó khó lần ra nguyên nhân.
+
+**Test 6 vế trên fixture giống thật (CRLF + BOM + `drive-push` thụt trong khối `if`):** DRY chỉ đúng dòng ·
+apply chèn + `.bak` · chạy lại idempotent (marker đếm 1) · BOM giữ và 0 LF lẻ · **chốt ở dòng 15 TRƯỚC
+`drive-push` dòng 19** · fixture không có `drive-push` → rc=2 và md5 KHÔNG đổi.
+
+**Kiểm CÚ PHÁP bằng chính `Parser` của PowerShell** (tải PowerShell 7.4.6 vào container, chạy rồi xoá):
+tệp đã vá parse 0 lỗi, bản `.bak` cũng parse 0 lỗi (chắc fixture vốn đúng), và `deploy-guard.ps1` +
+`deploy-package.ps1` cũng parse sạch. Chèn code vào script deploy của người khác mà chỉ "đọc thấy đúng"
+là không đủ — cú pháp sai ở đó làm hỏng đường release của họ.
+
+`wire_deploy_guard.py` cũng là dev-side (chỉ chạy ở máy dev để vá tệp ngoài repo) ⇒ vào
+`_RELEASE_EXCLUDE_NAMES_ANYWHERE`, gói giữ 198 tệp. Test **r244** mở rộng lên 5 tên, vẫn đo hai vế.
+
 # ★ v1.35.81 — r244: bản deploy PowerShell ĐẦY ĐỦ, quét bí mật dùng chung, và trần 200 tệp của gói (2026-07-30)
 
 **`scripts/deploy-package.ps1`** — song sinh đầy đủ của `deploy-package.sh` cho Windows, thay hẳn

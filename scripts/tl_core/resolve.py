@@ -319,12 +319,19 @@ def _source_map_one(q: str, entries: list[dict]) -> dict:
                                 "không dẫn chiếu số hiệu base / omnibus chưa xác định luật đích) — REVIEW khi rà, "
                                 "KHÔNG dừng workflow; verify goc/sua_doi nếu nghi thật.")
     qyear = _sohieu_year(qkey)
+    # r273: trần «luật đủ cũ để có thể đã có VBHN» phải ĐỘNG — hardcode `<= 2021` mục theo thời gian (đúng
+    # lời tự phê của S-8b về «nhánh-4 hardcode 2024 sẽ mục»): năm 2026 luật 2022-2024 đã kịp bị sửa 2024-2026
+    # mà gate im ⇒ false-clean. Chọn cur−2 ĐỒNG BỘ ngưỡng «rất mới» của S-8/S-8b (y ≥ cur−1/cur−2 = mới):
+    # luật cur−1/cur chưa kịp có VBHN → im là đúng; luật ≤ cur−2 thiếu VBHN → phải nhắc QT-5 web.
+    _vbhn_gate_cutoff = time.localtime().tm_year - 2
     # D (v1.33.18 — MERGE bundle-18, log rà 67: cặp gốc/sửa LỆCH PHA — 64-2006 HIV verdict OK 'đã hợp nhất'
     # nhưng luật sửa 71-2020 của CHÍNH chuỗi đó vẫn bị NO_VERIFIED_VBHN + QT5 đẩy vào web lượt-2): luật SỬA đã
     # nằm trong chuỗi goc của VBHN khác (amends_vbhn ≠ ∅, cờ AMENDS_OTHER_VBHN) thì nội dung của nó ĐÃ được
     # phản ánh trong VBHN của luật ĐÍCH — không đòi VBHN riêng cho nó nữa (đồng dạng nhánh omnibus AMENDS_OTHER).
-    if (not related_vbhn) and (not amends_vbhn) and qkey and direct \
-            and not any(_is_vbhn_entry(e) for e in direct) and (qyear is None or qyear <= 2021):
+    # r273b: canonical ĐÃ CONFIRM (registry.verified) không bị nhắc web mỗi lần quét — đồng bộ doctrine
+    # §confirm (A1 v1.32.0 đã suppress nhóm amendment-gate; web-gate nag trên bản đã rà kỹ = re-review noise).
+    if (not related_vbhn) and (not amends_vbhn) and qkey and direct and not _canon_confirmed \
+            and not any(_is_vbhn_entry(e) for e in direct) and (qyear is None or qyear <= _vbhn_gate_cutoff):
         warnings.append("NO_VERIFIED_VBHN_IN_CORPUS: manifest chưa có VBHN đã xác minh; KHÔNG kết luận là không tồn tại.")
         warnings.append("QT5_WEB_REQUIRED: chạy tìm web theo trích yếu/chủ đề + 'hợp nhất' (không tìm một lần theo số hiệu bản gốc).")
     elif (not related_vbhn) and (not amends_vbhn) and (not qkey) and canonical is not None and not _canon_is_vbhn \
@@ -333,7 +340,7 @@ def _source_map_one(q: str, entries: list[dict]) -> dict:
         # lấy chính BLHS làm ví dụ VBHN lỗi thời 135/VBHN-2025): gate trên đòi qkey+direct → truy vấn THEO TÊN
         # câm hoàn toàn = false-clean. Cùng điều kiện với gate sohieu, năm lấy từ CANONICAL thay vì query.
         _cyr = _sohieu_year(_sohieu_key_entry(canonical)) or _entry_issue_year(canonical)
-        if _cyr is None or _cyr <= 2021:
+        if not _canon_confirmed and (_cyr is None or _cyr <= _vbhn_gate_cutoff):
             warnings.append("NO_VERIFIED_VBHN_IN_CORPUS: manifest chưa có VBHN đã xác minh; KHÔNG kết luận là không tồn tại.")
             warnings.append("QT5_WEB_REQUIRED: chạy tìm web theo trích yếu/chủ đề + 'hợp nhất' (không tìm một lần theo số hiệu bản gốc).")
     # A1b (v1.33.2): nhóm SỬA DỒN DẬP (S10) phải cảnh báo CẢ khi corpus chưa có VBHN nào — trước chỉ gắn trong

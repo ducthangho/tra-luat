@@ -1,3 +1,23 @@
+# ★ v1.36.11 — r273: trần năm của gate NO_VERIFIED_VBHN hardcode 2021 — mục theo thời gian, false-clean cho luật 2022-2024 (2026-07-31)
+
+P15 rà resolve.py (tiếp — mục CHỐT của backlog CONFIRMED). Hai site trong `_source_map_one` (gate sohieu +
+gate A1 theo-tên) đòi `qyear <= 2021` mới nhắc NO_VERIFIED_VBHN_IN_CORPUS/QT5_WEB_REQUIRED. Hằng chết mục
+theo thời gian — chính S-8b trong CÙNG file đã tự phê «nhánh-4 hardcode 2024 sẽ mục» và dùng cur−2 động.
+Hệ quả 2026: luật 2022-2024 (đã kịp bị sửa 2024-2026, VBHN có thể đã có trên web) mà corpus chưa có VBHN
+→ source-map im hoàn toàn = false-clean đúng lớp A1 v1.33.2 từng vá cho truy vấn theo tên.
+
+VÁ: `_vbhn_gate_cutoff = cur−2` (đồng bộ ngưỡng «rất mới» S-8/S-8b: luật cur−1/cur chưa kịp có VBHN → im
+là đúng). Đo: 2018/2022/2023/2024 → nhắc web; 2025/2026 → im. Đây là NỚI CÓ CHỦ ĐÍCH (thêm cảnh báo cho
+lớp 2022-2024 trước đây im) — hàng đợi lượt-2 có thể tăng; S-8 vẫn hạ ưu tiên các ca VBHN mới như cũ.
+Selftest +1 case TƯƠNG ĐỐI theo năm hiện tại (chính test không mục): cur−2/cur−5 nhắc · cur−1/cur im ·
+có VBHN related thì đi đường VBHN_FIRST không đụng gate. 1435/1435.
+
+r273b (lộ ra khi chạy gate): (i) canonical ĐÃ CONFIRM nay cũng được miễn web-gate — đồng bộ doctrine
+§confirm A1 v1.32.0 (đã suppress nhóm amendment-gate; nag web trên bản đã rà kỹ = re-review noise);
+(ii) fixture r17b/r19 dùng năm CHẾT 2022 rơi vào trần mới → đổi bucket chính sang web_round2 làm lệch
+Ý ĐỊNH test (cô lập rel-low-conf) — chuyển fixture sang năm ĐỘNG base=cur−1/amend=cur theo khuôn r18,
+chính test cũng hết mục theo thời gian.
+
 # ★ v1.36.10 — r272: `_classify_ref` lấy `by_sohieu[0]` theo thứ tự registry — bản cách ly làm canonical, nhóm cách-ly-thuần vẫn OK (2026-07-31)
 
 P15 rà resolve.py (tiếp). Hai vế cùng gốc «không chọn lọc ứng viên»:

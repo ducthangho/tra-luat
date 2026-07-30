@@ -1532,8 +1532,15 @@ def run() -> int:
     # ═══ v1.33.4 (log chạy LIVE review-queue lần đầu — A1 backfill khống 2/5, A2 đếm không khớp; B1 status
     # thiếu verdict; C1/C2 điểm mù sweep) — r17_* ═══
     # (A1) canonical CONFIRMED (verdict OK + suppressor) KHÔNG còn thành relation_backfill khống → về clean.
-    _rq17_base_ok = dict(rel_fx[0], drive_id="tdkt2022", corpus="true", loai="Luật", verified="yes")
-    _rq17_amend = dict(rel_fx[1], drive_id="tdkt2026x")
+    # r273: fixture năm ĐỘNG (base=cur−1, amend=cur — khuôn r18): năm chết 2022 nay rơi vào trần cur−2 của
+    # gate NO_VERIFIED_VBHN (r273) → row đổi bucket chính sang web_round2, làm lệch Ý ĐỊNH test (cô lập
+    # hành vi rel-low-conf). Base cur−1 giữ gate web im đúng nghĩa «luật rất mới».
+    import time as _t17
+    _yr17 = _t17.localtime().tm_year
+    _rq17_base_ok = dict(rel_fx[0], drive_id="tdkt2022", corpus="true", loai="Luật", verified="yes",
+                         so_hieu=f"06/{_yr17-1}/QH15", name=f"Luat_06-{_yr17-1}-QH15_Thi_dua_Khen_thuong")
+    _rq17_amend = dict(rel_fx[1], drive_id="tdkt2026x", so_hieu=f"06/{_yr17}/QH16",
+                       name=f"Luat_06-{_yr17}-QH16_SuaDoi_Thi_dua_Khen_thuong")
     _rq17a = _review_queue_report([_rq17_base_ok, _rq17_amend], limit=None)
     cases.append(("r17_review_queue_no_fake_rel",
                   _rq17a["relation_backfill"] == [] and _rq17a["clean_count"] == 1
@@ -1543,7 +1550,8 @@ def run() -> int:
     # ứng viên toàn low-conf → bucket INFO `relation_low_confidence` (log: relation-check phủ định 3/3 ca
     # low-conf — bucket HÀNH ĐỘNG chỉ nhận strong/linked); vẫn kèm fix_command + flags_all (P2-1);
     # counts loại trừ nhau cộng đúng về tổng (A2).
-    _rq17_base_rev = dict(rel_fx[0], drive_id="tdkt2022b", corpus="true", loai="Luật")
+    _rq17_base_rev = dict(rel_fx[0], drive_id="tdkt2022b", corpus="true", loai="Luật",
+                          so_hieu=f"06/{_yr17-1}/QH15", name=f"Luat_06-{_yr17-1}-QH15_Thi_dua_Khen_thuong")
     _rq17b = _review_queue_report([_rq17_base_rev, _rq17_amend], limit=None)
     cases.append(("r17_review_queue_rel_low_conf_info",
                   _rq17b["relation_backfill"] == []
@@ -1610,9 +1618,9 @@ def run() -> int:
     # D cat trơ-vs-đủ) — r19_* ═══
     # (C) row rel (nay ở bucket relation_low_confidence — P2-2 v1.33.12) phải KÈM ứng viên cụ thể để soi ngay
     # (log: 'cổng báo có ứng viên mà không trả ứng viên nào') — _rq17b là ca UNLINKED 06/2026 quanh 06/2022.
-    _r19_cands = (_rq17b["relation_low_confidence"][0].get("candidates") or [])
+    _r19_cands = ((_rq17b["relation_low_confidence"] or [{}])[0].get("candidates") or [])
     cases.append(("r19_rel_row_carries_candidates",
-                  bool(_r19_cands) and any("06/2026" in c or "06-2026" in c for c in _r19_cands)))
+                  bool(_r19_cands) and any(f"06/{_yr17}" in c or f"06-{_yr17}" in c for c in _r19_cands)))
     # (B7) reg-query: trường loai + loai_canon trong row; parser nhận --loai.
     _r19_row = _reg_query_row({"drive_id": "x", "name": "Luat_X", "loai": "Luat"})
     _r19_ns = build_parser().parse_args(["reg-query", "--loai", "Luật", "--corpus"])
@@ -23526,6 +23534,30 @@ def run() -> int:
                                        [_l272])["flag"] == "MISSING"
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
     _t110("r272_classify_ref_canonical_chon", _c272_classify_ref_canonical_chon)
+
+    def _c273_vbhn_gate_cutoff_dong():
+        """r273 (P15 rà resolve.py): trần «luật đủ cũ để có thể đã có VBHN» của gate NO_VERIFIED_VBHN/
+        QT5_WEB_REQUIRED hardcode `<= 2021` — mục theo thời gian (đúng lời tự phê S-8b về hardcode 2024):
+        năm 2026 luật 2022-2024 đã kịp bị sửa mà source-map im = false-clean. Vá: cur−2 động, đồng bộ
+        ngưỡng «rất mới» S-8/S-8b. Test TƯƠNG ĐỐI theo năm hiện tại để chính nó không mục."""
+        import time as _tm273
+        _cur = _tm273.localtime().tm_year
+        def _f273(y):
+            _e = {"name": f"Luat_10-{y}-QH15_Thu_nghiem", "sohieu": f"10/{y}/QH15", "corpus": "true",
+                  "nlm_status": "pushed", "nlm_source_id": "s301", "drive_id": "d301"}
+            _o = _TL_MODULE._source_map_one(f"10/{y}/QH15", [_e])
+            return "QT5_WEB_REQUIRED" in _o["flags"] and "NO_VERIFIED_VBHN_IN_CORPUS" in _o["flags"]
+        ok1 = _f273(_cur - 2) and _f273(_cur - 5)          # đủ cũ → nhắc web (cur−2 là vế MỚI mở ra)
+        ok2 = not _f273(_cur - 1) and not _f273(_cur)      # PHẢN CHỨNG: luật rất mới vẫn IM (không vá quá tay)
+        # PHẢN CHỨNG: đã có VBHN related → gate này không đụng (đường VBHN_FIRST riêng)
+        _vb = {"name": f"VBHN_05-{_cur-1}-VBHN-VPQH_Thu_nghiem", "sohieu": f"05-{_cur-1}-VBHN-VPQH",
+               "goc": f"10/{_cur-4}/QH15", "loai": "VBHN", "corpus": "true", "drive_id": "d302"}
+        _base = {"name": f"Luat_10-{_cur-4}-QH15_Thu_nghiem", "sohieu": f"10/{_cur-4}/QH15",
+                 "corpus": "true", "drive_id": "d303"}
+        _o3 = _TL_MODULE._source_map_one(f"10/{_cur-4}/QH15", [_base, _vb])
+        ok3 = "QT5_WEB_REQUIRED" not in _o3["flags"] and "VBHN_FIRST_APPLIED" in _o3["flags"]
+        return bool(ok1 and ok2 and ok3)
+    _t110("r273_vbhn_gate_cutoff_dong", _c273_vbhn_gate_cutoff_dong)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

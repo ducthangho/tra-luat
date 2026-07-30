@@ -3088,13 +3088,13 @@ def run() -> int:
                   bool(_a1h) and _is_vbhn_entry(_a1h[0][0]) and _entry_score(_a1[0]) < _entry_score(_a1[1])))
     # B1: KHÔNG OUTDATED khi bản còn hiệu lực, và khi nằm trong chuỗi hợp nhất của VBHN đang xét
     _b1ents = [{"id": "g", "name": "BLLĐ", "so_hieu": "45/2019/QH15", "hieuluc": "Còn hiệu lực"},
-               {"id": "vb", "name": "VBHN BLLĐ", "so_hieu": "18/VBHN-VPQH", "loai": "VBHN", "goc": "45/2019/QH15"}]
+               {"id": "vb", "name": "VBHN BLLĐ", "so_hieu": "18-2022-VBHN-VPQH", "loai": "VBHN", "goc": "45/2019/QH15"}]
     cases.append(("b1_no_outdated_when_effective",
                   _classify_ref({"raw": "", "name_phrase": "", "sohieu": "45-2019-QH15"}, _b1ents)["flag"] != "OUTDATED"))
     cases.append(("b1_no_outdated_in_base_chain",
                   _classify_ref({"raw": "", "name_phrase": "", "sohieu": "124-2025-QH15"},
                                 [{"id": "x", "name": "GDNN", "so_hieu": "124/2025/QH15"},
-                                 {"id": "v", "name": "VBHN", "so_hieu": "18/VBHN-VPQH", "loai": "VBHN", "goc": "124/2025/QH15"}],
+                                 {"id": "v", "name": "VBHN", "so_hieu": "18-2025-VBHN-VPQH", "loai": "VBHN", "goc": "124/2025/QH15"}],
                                 base_goc_keys={"124-2025-QH15"})["flag"] != "OUTDATED"))
     # B3+B4: footnote-resolver bản đồ cấp Điều + PENDING_EFFECT
     _b3 = resolve_footnote_amendments(
@@ -4055,7 +4055,7 @@ def run() -> int:
         _er_rc10 = _emit_raw_no_gdoc("x.docx", True)
     cases.append(("emit_raw_no_gdoc_rc2", _er_rc10 == 2))
     # HỢP NHẤT Codex — _classify_ref kiểm VBHN-coverage TRƯỚC TYPO/MISSING (số hiệu gốc đã có VBHN → OUTDATED).
-    _vcov = [{"id": "v", "name": "VBHN_11-VBHN-VPQH_PCTH_thuoc_la", "so_hieu": "11/VBHN-VPQH", "cat": "45", "corpus": "true", "goc": "09/2012/QH13;28/2018/QH14"}]
+    _vcov = [{"id": "v", "name": "VBHN_11-2018-VBHN-VPQH_PCTH_thuoc_la", "so_hieu": "11-2018-VBHN-VPQH", "cat": "45", "corpus": "true", "goc": "09/2012/QH13;28/2018/QH14"}]
     _clv = _classify_ref({"raw": "x", "name_phrase": "PCTH thuoc la", "sohieu": "09-2012-QH13", "loai": "Luật"}, _vcov)
     cases.append(("xref_vbhn_coverage_before_typo", _clv["flag"] == "OUTDATED"))
     # Group B (log rà mới): _ingest_target dùng NOTEBOOK CỦA PROFILE (TL_NOTEBOOK_ID), không hard-code VBQPPL base.

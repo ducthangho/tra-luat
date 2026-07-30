@@ -1,3 +1,17 @@
+# ★ v1.36.12 — r274: fixture selftest VBHN thiếu năm — siết 3 fixture bare VÔ TÌNH về khóa NN-YYYY-VBHN-XXX (2026-07-31)
+
+Mục «fixture thiếu năm» của backlog P15. Bất biến dự án: mọi số hiệu trong REGISTRY phải year-qualified
+(`NN-YYYY-VBHN-XXX` — memory vbqppl-sohieu-must-have-year); fixture đóng vai «dòng registry» mà để bare thì
+phép so exact trong test TRÙNG KHỚP GIẢ — đúng cơ chế làm lớp bug bare-query↔year-entry (họ r255) lọt lưới:
+test xanh trên fixture bare, corpus thật year-qualified thì MISS SẠCH.
+
+Soi TOÀN BỘ ~25 fixture VBHN bare trong tl_selftest: đa số là BARE CỐ Ý (test chính lớp bare — cờ
+VBHN_BARE_NUMBER/REUSE_RISK, vbhn-year-fix, nới 1-chiều v1.33.47…) — GIỮ NGUYÊN. Chỉ 3 chỗ bare VÔ TÌNH
+(đóng vai dòng corpus, bareness không phải điều test nhắm): `_b1ents` ×2 (b1_no_outdated_* — VBHN che phủ
+«18/VBHN-VPQH» → `18-2022-VBHN-VPQH`/`18-2025-VBHN-VPQH`) và `_vcov` (xref_vbhn_coverage_before_typo —
+«11/VBHN-VPQH» → `11-2018-VBHN-VPQH`, đúng VBHN PCTH thuốc lá 2018 thật). Test-only, hành vi runtime không
+đổi; selftest 1435/1435 (các case này nay chạy trên hình dạng dữ liệu THẬT).
+
 # ★ v1.36.11 — r273: trần năm của gate NO_VERIFIED_VBHN hardcode 2021 — mục theo thời gian, false-clean cho luật 2022-2024 (2026-07-31)
 
 P15 rà resolve.py (tiếp — mục CHỐT của backlog CONFIRMED). Hai site trong `_source_map_one` (gate sohieu +

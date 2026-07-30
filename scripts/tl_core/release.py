@@ -339,7 +339,6 @@ _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   #
 _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_luat_config.v2.json",
                                    "deploy-package.sh", "deploy-package.ps1",
                                    "deploy-guard.ps1", "pkg_secret_scan.py",
-                                   "wire_deploy_guard.py",   # r245: chỉ dùng ở máy dev để vá script ngoài repo
                                    "Code.2.21.2k.gs",   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim
                                    "Code.2.21.2l.gs", "Code.2.21.2m.gs", "Code.2.21.2n.gs"}   # r194: bản cũ = dead-weight bundle, GIỮ repo/git chỉ loại khỏi GÓI (tiền lệ 2.21.2k); r198: current nay 2.21.2o — 2.21.2n xuống hàng cũ
 

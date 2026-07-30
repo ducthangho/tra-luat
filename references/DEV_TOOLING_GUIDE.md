@@ -157,7 +157,7 @@ HANDOFF.md thủ công từ đầu — giờ có thể trích + biên tập lạ
 4. python tl.py verify-integrity
 5. git add -A && git commit -m "..."
 6. (nếu đụng Code.gs) .\gas-deploy.ps1 -Message "..." -DryRun  →  bỏ -DryRun khi chắc
-7. (khi release) .\upload-skill-to-Package.ps1  (xem §9)
+7. (khi release) .\scripts\deploy-package.ps1 -Pull -Push   (Linux: `cd scripts` rồi `./deploy-package.sh --push` — xem §10)
 ```
 
 ## 9. Quy trình vận hành đóng gói sẵn (scripts tại `D:\Quốc hội\`, v1.29.7)
@@ -176,42 +176,59 @@ Lưu ý liên quan (đã vá trong skill v1.29.7 — script là lớp tiện d�
 - `extract` tự dùng cache consolidated của `cache-build` (hết cap 200k); resolver ưu tiên chính văn hơn phụ lục `PL_`.
 - `nlm-reconcile` tự refresh manifest khi thấy `unregistered` (nguồn vừa nlm-add hết bị báo oan).
 
-## 10. Build + upload skill lên Package
+## 10. Build + deploy skill lên Package
 
-Script `D:\Quốc hội\upload-skill-to-Package.ps1` (đã có sẵn từ trước, vừa sửa đường dẫn xuất zip):
-
-```powershell
-cd "D:\Quốc hội"
-.\upload-skill-to-Package.ps1                 # selftest + integrity + zip + push lên Drive/Package
-.\upload-skill-to-Package.ps1 -NoPush         # chỉ build + zip, KHÔNG đẩy Drive (test an toàn)
-.\upload-skill-to-Package.ps1 -NoTest         # bỏ selftest (nhanh hơn, chỉ khi vừa chạy selftest riêng)
-```
-**Nối chốt TỰ ĐỘNG (từ v1.35.82) — khỏi chèn tay.** Chạy một lần trên máy dev:
+**Đường CHÍNH THỨC, hai nền, CÙNG quy trình — cả hai ở TRONG repo nên `git pull` là có bản mới nhất:**
 
 ```powershell
-python scripts\wire_deploy_guard.py --repo "C:\qh\tra-luat"            # DRY, xem sẽ chèn ở đâu
-python scripts\wire_deploy_guard.py --repo "C:\qh\tra-luat" --apply    # ghi thật (tự sao lưu .bak)
+# Windows
+.\scripts\deploy-package.ps1                    # gate + build + verify (KHÔNG đẩy)
+.\scripts\deploy-package.ps1 -Pull -Push        # lấy bản mới nhất rồi deploy
+.\scripts\deploy-package.ps1 -NoTest            # bỏ gate (CHỈ khi vừa chạy gate riêng ở commit NÀY)
+.\scripts\deploy-package.ps1 -Push -ForceOlder  # cố ý ghi đè bản trên Drive
 ```
-Tự tìm lệnh `drive-push` và chèn NGAY TRƯỚC nó (chèn sau thì chốt vô nghĩa); GIỮ nguyên CRLF/BOM;
-idempotent (chạy lại không chèn lần 2); KHÔNG thấy `drive-push` thì TỪ CHỐI rc=2 và in khối để bạn tự
-chèn, chứ không đoán chỗ. Khối chèn TỰ đọc `VERSION` từ `--repo`, không dựa vào tên biến trong script
-của bạn. Mặc định `--path` = `D:\Quốc hội\upload-skill-to-Package.ps1`.
-
-Hoặc chèn tay — khuôn bên dưới:
-
-**Chốt chống thụt lùi (từ v1.35.80) — phải NỐI TAY vào script này.** `upload-skill-to-Package.ps1`
-nằm ngoài repo nên chốt không tự có hiệu lực. Thêm ĐÚNG 1 DÒNG, ngay TRƯỚC lệnh `drive-push`:
-
-```powershell
-& "<repo>\scripts\deploy-guard.ps1" -Version $ver; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+```bash
+# Linux/Cowork — cùng cờ, dạng dài. Cả hai script tự `cd` về gốc repo nên chạy từ đâu cũng đúng.
+cd scripts
+./deploy-package.sh              # build-only
+./deploy-package.sh --push
+./deploy-package.sh --no-test  ·  --force-older  ·  --out <zip>
 ```
-`$ver` = version sắp đẩy (`(Get-Content VERSION).Trim()`). Chốt đọc tên Package trên Drive rồi so
-theo TỪNG THÀNH PHẦN SỐ: Drive **≥** bản sắp đẩy ⇒ `exit 3`, chặn trước khi ghi. Cố ý ghi đè:
-thêm `-ForceOlder`. Chạy tay để kiểm trước: `.\scripts\deploy-guard.ps1 -Version (Get-Content VERSION).Trim()`.
-rc: 0 = đẩy được · 3 = chặn thụt lùi · 4 = không đọc được Drive (fail-closed, KHÔNG đoán là an toàn).
+
+**MẶC ĐỊNH KHÔNG ĐẨY.** Muốn đẩy thật phải nêu `-Push`/`--push`.
+
+`upload-skill-to-Package.ps1` (`D:\Quốc hội\`) đã **BỎ từ v1.35.83**: nằm ngoài repo nên trôi lệch theo
+từng máy và KHÔNG có chốt chống thụt lùi. `deploy-package.ps1` thay hẳn, chốt nằm sẵn bên trong.
+
+> 4 script deploy (`deploy-package.sh` · `deploy-package.ps1` · `deploy-guard.ps1` · `pkg_secret_scan.py`)
+> ở trong thư mục `scripts` của REPO nhưng **CỐ Ý không vào gói** (dev-side; phiên Cowork không deploy).
+> Vì vậy tài liệu này gọi tên tệp chứ không viết đường dẫn kiểu-trong-gói — con trỏ như thế sẽ chết
+> trong gói và `release-verify` bắt đúng (bài học r246).
+
+### Script làm gì — 5 bước, dừng ngay ở bước đầu tiên hỏng
+
+| Bước | Nội dung | rc khi hỏng |
+|---|---|---|
+| 0 | VERSION khớp 3 chỗ · ghim `core.abbrev=7` · cảnh báo shallow · **CHẶN nếu cây tụt sau `origin/master`** (`-Pull` = tự fast-forward rồi ĐỌC LẠI VERSION) | 1 |
+| 1 | Gate offline 8 bước (selftest · gen_instructions · workflow-audit · golden 0-diff · doc-claims-check · determinism · release-check --full · release-verify) | 1 |
+| 2 | `release-bundle` ×2, đòi **same-SHA** (tất định) | 2 |
+| 3 | Verify TRONG gói: VERSION · không có tệp dev-side/secrets · **quét bí mật** (`pkg_secret_scan.py`, dùng chung với bản sh) · `release-verify` | 2 |
+| 4 | **Chốt chống thụt lùi** (`deploy-guard.ps1`) rồi `drive-push` | 3 |
+| 5 | Tải lại từ Drive, đối chiếu **byte (sha256) + VERSION** | 3 |
+
+"Luôn đóng gói bản mới nhất" bảo đảm bằng **CHẶN ở bước 0**, không bằng nhắc: build từ cây tụt sau chính
+là cách Package bị thụt lùi. Bước 5 nghĩa là chưa byte-match thì coi như CHƯA deploy.
 
 **Cần `gws auth login` xong trên máy chạy lệnh này** (quyền GHI Drive) — mới `drive-push` được. Zip xuất ra
-`D:\Quốc hội\tra-luat-skill-v<VER>-gws3env.zip`. Verify sau khi push:
+THƯ MỤC CHA của repo (`release-bundle` từ chối ghi trong skill root, kẻo zip nuốt chính nó).
+
+Chạy chốt riêng (không đẩy gì) để xem Drive đang ở bản nào:
+```powershell
+.\scripts\deploy-guard.ps1 -Version (Get-Content VERSION).Trim()
+# rc 0 = đẩy được · 3 = chặn thụt lùi · 4 = không đọc được Drive (fail-closed)
+```
+
+Verify tay ngoài script, nếu muốn chắc thêm:
 ```powershell
 curl "https://drive.usercontent.google.com/download?id=1H5kAt3SRVP7_xmLMIzcqyFtFc4VSDH0P&export=download&confirm=t" -o pkg.zip
 unzip -p pkg.zip "*/VERSION"   # PHẢI khớp VERSION vừa build

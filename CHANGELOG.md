@@ -1,3 +1,35 @@
+# ★ v1.35.83 — r246: BỎ `upload-skill-to-Package.ps1`, một đường deploy cho mỗi nền (2026-07-30)
+
+Người giữ chốt: chuyển sang `deploy-package.ps1`, bỏ script cũ. Kể từ đây **không còn đường deploy nào
+thiếu chốt** — trước đó `upload-skill-to-Package.ps1` nằm ngoài repo nên (a) trôi lệch theo từng máy,
+(b) không có chốt chống thụt lùi, (c) phiên Claude không đọc/sửa được.
+
+Đường chính thức, hai nền, cùng quy trình — cả hai TRONG repo nên `git pull` là có bản mới nhất:
+`.\scripts\deploy-package.ps1 -Pull -Push` · `./scripts/deploy-package.sh --push`.
+
+**GỠ `scripts/wire_deploy_guard.py` (thêm ở r245, sống đúng một phiên bản).** Nó sinh ra CHỈ để vá
+`upload-skill-to-Package.ps1`; bỏ script đó thì bộ vá mất đối tượng. Giữ lại là dead tooling mà tài liệu
+vẫn trỏ tới — đúng loại doc-rot mà `doc-claims-check` sinh ra để bắt. Cần lại thì `git revert`.
+Test **r244** thu về 4 tên (bỏ tên thứ 5), vẫn đo hai vế.
+
+**Bẫy phát sinh, và repo tự dạy cách chữa đúng.** §10 viết lại có dòng `./scripts/deploy-package.sh` —
+`release-verify` ĐỎ ngay: `doc_pointers` bắt con trỏ đó CHẾT TRONG GÓI, vì chính 4 script deploy đã bị
+loại khỏi gói ở r244/r245. Cổng đúng, tài liệu sai.
+
+Lượt chữa ĐẦU đi sai đường: khoanh cặp vào `_POINTER_BASELINE` (tiền lệ `GOTCHAS.md → scripts/.tl_state`,
+"cố ý ngoài gói"). Test `r209_baseline_ratchet` ĐỎ ngay — baseline **khoá SỐ ĐẾM**, phình lên là phải sửa
+test có chủ đích. Đọc chú thích của chính test đó mới thấy nếp đã chốt: r218 hạ 10→4, r226 hạ 4→3 và ghi rõ
+*"sửa lời tài liệu thay vì khoanh nợ tiếp"* — cho ĐÚNG trường hợp tệp không có trong kho/gói. Nên đã GỠ
+mục baseline vừa thêm (giữ ratchet ở 3) và sửa LỜI: §10 gọi TÊN tệp, dòng chạy đổi thành `cd scripts` rồi
+`./deploy-package.sh --push` (cả hai script tự `cd` về gốc repo nên vẫn chạy đúng và vẫn copy-paste được),
+kèm một khối `>` nói thẳng 4 script này ở trong repo nhưng CỐ Ý ngoài gói. Cũng cân phương án loại luôn
+DEV_TOOLING_GUIDE khỏi gói rồi BỎ: `gen_instructions.py` có trỏ tới nó ⇒ sẽ sinh con trỏ chết MỚI.
+
+Viết lại DEV_TOOLING_GUIDE §10 quanh `deploy-package.ps1`: bảng 5 bước kèm rc khi hỏng, nêu rõ "luôn
+đóng gói bản mới nhất" được bảo đảm bằng CHẶN ở bước 0 chứ không bằng nhắc, và "chưa byte-match thì coi
+như CHƯA deploy" ở bước 5. Dọn nốt 3 chỗ còn trỏ script cũ: §Quy trình sửa code bước 7 (cả hai tệp),
+CLAUDE.md bước 7, và mục 1 §Quy ước deploy.
+
 # ★ v1.35.82 — r245: nối chốt vào script deploy NGOÀI repo, tự động và fail-safe (2026-07-30)
 
 `upload-skill-to-Package.ps1` ở `D:\Quốc hội\`, KHÔNG có trong repo (đã kiểm: không trên đĩa, chưa từng

@@ -33,7 +33,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
    phiên chính chỉ nhận kết luận — giữ context sạch (G5 §11 kế hoạch guard-va-boc-tl-core).
 6. `git diff` → CHANGELOG.md (mục ★ vX.Y.Z) → commit
 7. Deploy — xem "## Quy ước deploy" bên dưới. KHÔNG tự chạy khi user chưa duyệt.
-   Windows: user double-click `upload-skill-to-Package.cmd`. Linux/Cowork: `./scripts/deploy-package.sh --push`.
+   Windows: `.\scripts\deploy-package.ps1 -Pull -Push` · Linux/Cowork: `./scripts/deploy-package.sh --push`.
+   (Cả hai TRONG repo, cùng quy trình, cùng chốt. `upload-skill-to-Package.ps1/.cmd` đã bỏ từ v1.35.83.)
 
 ## Bài học đắt giá (đã trả giá, không lặp lại)
 - **Đối chiếu nhánh/patch ngoài: BẮT BUỘC test HÀNH VI 2 CHIỀU** (fixture họ chạy trên ta + phản chứng bơm vào
@@ -88,7 +89,7 @@ sau build từ master mới nhất và đã bao gồm việc của phiên trư�
 âm thầm, và mọi phiên Cowork mới bootstrap bản cũ.
 
 1. **Ai đẩy:** phiên nào bump VERSION cho đợt đó thì phiên ĐÓ đẩy, sau khi user duyệt. Phiên khác KHÔNG đẩy
-   trong lúc đợt đang mở. Hai đường (`upload-skill-to-Package.ps1` · `deploy-package.sh --push`) vào CÙNG
+   trong lúc đợt đang mở. Hai đường (`deploy-package.ps1 -Push` · `deploy-package.sh --push`) vào CÙNG
    fileId ⇒ quy ước áp dụng như nhau, không có ngoại lệ "tôi chỉ đẩy nhanh một bản".
 2. **TRƯỚC khi build:** `git fetch origin master` + xác nhận HEAD KHÔNG tụt sau `origin/master`. Tụt sau ⇒
    merge/rebase + chạy lại gate TRƯỚC, không build. (Build từ cây tụt sau = đóng gói bản thụt lùi.)
@@ -98,10 +99,11 @@ sau build từ master mới nhất và đã bao gồm việc của phiên trư�
    Đây là chốt chống thụt lùi duy nhất; không có nó thì mục 1-2 chỉ là lời hứa.
    **ĐÃ CƯỠNG CHẾ CẢ HAI ĐƯỜNG** (rc=3, chặn TRƯỚC `drive-push`; bằng-số cũng chặn):
    - Linux/Cowork: `deploy-package.sh` bước 4, từ v1.35.79. Ghi đè cố ý: `--force-older`.
-   - Windows: `scripts/deploy-guard.ps1` từ v1.35.80. Ghi đè cố ý: `-ForceOlder`.
-     ⚠ `upload-skill-to-Package.ps1` nằm NGOÀI repo (`D:\Quốc hội\`) nên chốt chỉ có hiệu lực sau khi
-     NỐI 1 DÒNG vào đó, ngay TRƯỚC lệnh `drive-push` (xem DEV_TOOLING_GUIDE §10). Chưa nối ⇒ đường
-     Windows vẫn ghi đè im lặng như cũ.
+   - Windows: `deploy-package.ps1` bước 4 (gọi `scripts/deploy-guard.ps1`), từ v1.35.80. Ghi đè cố ý:
+     `-ForceOlder`. Chạy chốt riêng để xem Drive đang ở bản nào:
+     `.\scripts\deploy-guard.ps1 -Version (Get-Content VERSION).Trim()`.
+   Từ v1.35.83 KHÔNG còn đường deploy nào thiếu chốt: `upload-skill-to-Package.ps1` (ngoài repo, không
+   có chốt, trôi lệch theo máy) đã BỎ — cả hai nền dùng script TRONG repo.
 4. **SAU khi push:** không tin thông báo "đã đẩy". Tải lại từ Drive và đối chiếu **md5/sha256 + VERSION**
    (`deploy-package.sh` bước 5 làm sẵn). Chưa byte-match thì coi như CHƯA deploy.
 5. **Thêm/xoá tệp trong cây ⇒ tái sinh `RELEASE_MANIFEST.json`, và ghi lại golden NẾU số đếm kiểm kê đổi.**

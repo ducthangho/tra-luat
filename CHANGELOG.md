@@ -1,3 +1,16 @@
+# ★ v1.36.9 — r271: vị từ CÒN-hiệu-lực của `_classify_ref` đảo nghĩa trên «Không còn hiệu lực» (2026-07-31)
+
+P15 rà resolve.py (tiếp). Vế B1-suppress («bản CÒN hiệu lực → không OUTDATED») kiểm bằng `"con" not in hl` —
+positive-substring. «Không còn hiệu lực» (strip-accents: `khong con hieu luc`) CHỨA `con` ⇒ bản ĐÃ HẾT hiệu
+lực bị coi là còn ⇒ OUTDATED bị nuốt, người rà tiếp tục rà bản cũ mà không được trỏ sang VBHN. Registry nền
+hiện dùng 10+ biến thể hieuluc tự do (đo 31-07: «Còn hiệu lực»/«Con hieu luc»/«Còn»/«Hết…thay bằng…»/«Đã
+được hợp nhất tại…»/…) — biến thể «Không còn…» là chuẩn TVPL, xuất hiện là nuốt ngay.
+
+VÁ: negation-first (`het/khong/bai bo/thay the/thay bang/chua` thắng), positive = `\bcon\b` (không ăn
+'cong') hoặc `hieu luc` — CÙNG ngữ nghĩa hai chỗ đã đúng: lookup_ops:2676 và _entry_score (phạt het/thay
+the). Đo trọn 11 biến thể từ vựng thật: 6 ca hết/chưa/không-rõ → OUTDATED, 4 ca còn (kể cả không dấu, kèm
+chú thích) → suppress, rỗng → OUTDATED (không biết ≠ còn). Selftest +1 case. 1433/1433.
+
 # ★ v1.36.8 — r270: `_vbhn_for_goc` khớp-lọt substring trên blob JSON — OUTDATED giả che MISSING thật (2026-07-31)
 
 P15 rà resolve.py (tiếp). `_vbhn_for_goc` (nuôi cả HAI nhánh của `_classify_ref`: kiểm OUTDATED khi số hiệu

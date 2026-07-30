@@ -23476,6 +23476,28 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
     _t110("r270_vbhn_for_goc_boundary", _c270_vbhn_for_goc_boundary)
 
+    def _c271_hieuluc_negation_first():
+        """r271 (P15 rà resolve.py, đo 31-07): vế B1-suppress của `_classify_ref` dùng `"con" not in hl` —
+        «Không còn hiệu lực» CHỨA 'con' ⇒ bị coi là CÒN hiệu lực ⇒ im OUTDATED cho đúng bản ĐÃ HẾT hiệu lực
+        (người rà tiếp tục rà bản cũ). Vá negation-first, cùng ngữ nghĩa lookup_ops/_entry_score.
+        Quét TRỌN từ vựng hieuluc đo được trên 3 registry thật 31-07 (kể cả bản không dấu)."""
+        _vb271 = {"name": "VBHN_08-2025-VBHN-VPQH_BHXH", "sohieu": "08-2025-VBHN-VPQH", "goc": "71/2006/QH11",
+                  "corpus": "true", "drive_id": "d281", "loai": "VBHN"}
+        def _f271(hl):
+            _b = {"name": "Luat_71-2006-QH11_BHXH_cu", "sohieu": "71/2006/QH11", "hieuluc": hl,
+                  "corpus": "true", "drive_id": "d282"}
+            return _TL_MODULE._classify_ref({"sohieu": "71-2006-QH11", "name_phrase": "", "loai": ""},
+                                            [_b, _vb271])["flag"]
+        # vế vá: negation phải THẮNG positive-substring
+        ok1 = all(_f271(h) == "OUTDATED" for h in
+                  ("Không còn hiệu lực", "Hết hiệu lực", "Hết hiệu lực - thay bằng 24-2026-VBHN-VPQH",
+                   "Chưa có hiệu lực", "", "Đã được hợp nhất tại 27-2026-VBHN-VPQH"))
+        # PHẢN CHỨNG (chống vá quá tay): mọi biến thể CÒN thật — kể cả không dấu, kèm chú thích — vẫn suppress
+        ok2 = all(_f271(h) == "OK" for h in
+                  ("Còn hiệu lực", "Con hieu luc", "Còn", "Còn hiệu lực (bản hợp nhất)"))
+        return bool(ok1 and ok2)
+    _t110("r271_hieuluc_negation_first", _c271_hieuluc_negation_first)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

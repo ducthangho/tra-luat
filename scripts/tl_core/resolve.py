@@ -1275,10 +1275,16 @@ def _classify_ref(ref: dict, entries: list, base_goc_keys: set | None = None) ->
         canonical = by_sohieu[0]
         # số hiệu khớp; kiểm OUTDATED nếu có VBHN hợp nhất số này — TRỪ các ca B1:
         hl = _strip_accents(str(canonical.get("hieuluc") or canonical.get("hieu_luc") or "")).lower()
+        # r271: vị từ CÒN-hiệu-lực phải NEGATION-FIRST — check cũ `"con" not in hl` coi «Không còn hiệu lực»
+        # là CÒN (substring 'con' nằm trong 'khong con') ⇒ im OUTDATED cho đúng bản đã hết hiệu lực. Cùng
+        # ngữ nghĩa lookup_ops (`"het" not in hl and "khong" not in hl`) + _entry_score (phạt 'het'/'thay the');
+        # thêm 'chua' («Chưa có hiệu lực» không phải còn) và \bcon\b (không ăn 'cong'/'condition').
+        _hl_neg = any(t in hl for t in ("het", "khong", "bai bo", "thay the", "thay bang", "chua"))
+        _hl_con = (not _hl_neg) and (bool(re.search(r"\bcon\b", hl)) or "hieu luc" in hl)
         in_base_chain = bool(base_goc_keys and cited.replace("/", "-") in base_goc_keys)
         _vbhn_hits = _vbhn_for_goc(cited, entries)
         if (_vbhn_hits and not _is_vbhn_entry(canonical)
-                and "con" not in hl                 # B1: bản CÒN hiệu lực → không OUTDATED
+                and not _hl_con                     # B1: bản CÒN hiệu lực (khai tường minh) → không OUTDATED
                 and not in_base_chain):             # B1: nằm trong chuỗi hợp nhất của chính VBHN đang xét → không OUTDATED
             # B5: NÊU RÕ số hiệu VBHN thay thế (đừng lặp lại số gốc → tránh đọc nhầm "VBHN cùng số").
             _vbhn_sh = _entry_sohieu(_vbhn_hits[0]) or ""

@@ -31,12 +31,23 @@ cũ có nhắc cache nhưng người đọc dừng ở dòng đầu ⇒ nay có 
 việc". Mốc không đọc được ⇒ `SNAPSHOT_TS_UNPARSEABLE`, không im lặng. Cùng họ bài học
 `reg-query --refresh` (nạp chồng 9 tài liệu 24-07): **số 0 trên dữ liệu nguội không phải là sạch.**
 
+**(4) `deploy-guard.ps1` fail-closed OAN ⇒ đường deploy Windows TẮC HẲN.** `gws` in banner
+`Using keyring backend: keyring` TRƯỚC JSON, guard gộp stderr (`2>&1`) rồi đổ THẲNG vào
+`ConvertFrom-Json` ⇒ chết ngay ký tự `U` ⇒ `exit 4` dù `gws` rc=0 và tên file đọc được bình thường.
+Đo 30-07: guard đỏ, mà `gws` trả đúng `tra-luat-skill-v1.35.87-gws3env.zip`. Twin `deploy-package.sh`
+KHÔNG vướng vì nó `sed` trên cả khối — đúng cảnh báo "hai bản sẽ trôi lệch" của §Quy ước deploy, lần
+này bên PS là bên CHẶN OAN chứ không phải bên đẩy lọt. Chữa: cắt phần ngoài JSON (`{` đầu → `}` cuối)
+rồi mới parse (vẫn parse JSON thật, không quay lại regex mò khoá), và in 5 dòng đầu khi parse vỡ để
+lần sau chẩn được ngay. Kèm bẫy môi trường: guard là **pwsh 7** — chạy bằng `powershell.exe` (5.1) thì
+vỡ ở `ParserError: Missing closing '}'` do cú pháp PS7, KHÔNG phải lỗi script.
+
 Bẫy gặp khi vá (3): thêm 2 hàm + 1 hằng vào `tl_core/ingest_ops.py` làm ĐỎ hai drift-lock cùng lúc —
 `r90` (tên top-level của module REBASE phải resolve qua `tl`) và `r81` (mọi tên trong `_STUB_MAP` phải
 CALLABLE). Hằng `_SNAPSHOT_STALE_S` phải re-export TRỰC TIẾP, không vào `_STUB_MAP`.
 
-+3 test (`r251_doctor_basis_khai_dung_phan_bi_loai`, `r251_ingest_missing_bao_snapshot_nguoi`,
-`r251_chunk_khong_bi_doc_thanh_conflict`, mỗi test đều có phản chứng) → selftest **1398/1398**.
++4 test (`r251_doctor_basis_khai_dung_phan_bi_loai`, `r251_ingest_missing_bao_snapshot_nguoi`,
+`r251_chunk_khong_bi_doc_thanh_conflict`, `r251_deploy_guard_chiu_duoc_banner_gws`, mỗi test đều có
+phản chứng) → selftest **1399/1399**.
 ruff delta +2 (F821 `Path` + E702, đúng idiom sẵn có của `tl_selftest.py`).
 
 # ★ v1.35.87 — r250: nlm-auto-refresh.sh — tự phát hiện export mới trên Drive → import → mã hoá → xoá (2026-07-29)

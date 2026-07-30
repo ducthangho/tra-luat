@@ -23251,6 +23251,42 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r264_doc_claims_phu_docs", _c264_doc_claims_docs)
 
+    def _c266_doc_text_any_qua_bo_loc_u1():
+        """r266: `_doc_text_any` (A1 — MỘT đường đọc text MỌI định dạng, nền của `tl doc-text`) bỏ qua
+        bộ lọc U1 `_sanitize_export_text` ở nhánh cache-read VÀ đường trả cuối — pdftotext nhả \x0c
+        giữa trang (chuẩn poppler, `_read_local_text_for_analysis` trả thô) ⇒ control-char vào cache
+        extract_<id>.txt (nuôi corpus/NLM) + JSON `text`/`--out` của doc-text (đúng lớp sự cố U1
+        v1.31.2: driver bash vỡ capture). Đo 30-07: cùng MỘT cache, `_read_doc_text` trả SẠCH còn
+        `_doc_text_any` trả nguyên \x0c/\x07 — HAI reader lệch byte."""
+        _fid = "R266FAKECACHE"
+        _cf = _TL_MODULE._cache_file(f"extract_{_fid}.txt")
+        _cf.parent.mkdir(parents=True, exist_ok=True)
+        dirty = "Số: 41/2024/QH15\n\x0cĐiều 1. Phạm vi\x07 điều chỉnh\n"
+        sach = "Số: 41/2024/QH15\nĐiều 1. Phạm vi điều chỉnh\n"
+        try:
+            # (a) fixture PHẢI tái hiện bug: chuỗi bẩn thật sự mang control-char — ai đổi fixture
+            # thành sạch thì vế này ĐỎ, không xanh oan.
+            ok1 = ("\x0c" in dirty) and ("\x07" in dirty)
+            _cf.write_text(dirty, encoding="utf-8")
+            with _hush():   # cảnh báo cache-không-chứng-nhận-markup là CHỦ ĐÍCH — nuốt khỏi console
+                _t1, _src = _TL_MODULE._doc_text_any(_fid)
+                _t2 = _TL_MODULE._read_doc_text(_fid)
+            ok2 = _src == "cache" and "\x0c" not in _t1 and "\x07" not in _t1
+            ok3 = _t1 == _t2                    # HAI reader cùng cache phải CÙNG BYTE (hết drift)
+            # (b) ĐỐI CHỨNG chống vá quá tay: text sạch qua đường cache phải NGUYÊN VĂN (giữ \n,
+            # giữ nội dung) — sanitize nuốt cả \n/\t thì vế này ĐỎ.
+            _cf.write_text(sach, encoding="utf-8")
+            with _hush():
+                _t3, _ = _TL_MODULE._doc_text_any(_fid)
+            ok4 = _t3 == sach
+            return ok1 and ok2 and ok3 and ok4
+        finally:
+            try:
+                _cf.unlink()
+            except Exception:  # noqa: BLE001 — dọn fixture best-effort
+                pass
+    _t110("r266_doc_text_any_qua_bo_loc_u1", _c266_doc_text_any_qua_bo_loc_u1)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

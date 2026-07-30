@@ -1,3 +1,33 @@
+# ★ v1.36.4 — r266: `_doc_text_any` bỏ qua bộ lọc U1 — control-char (\x0c pdftotext) lọt cache/JSON, hai reader lệch byte (2026-07-30)
+
+P15 nhóm lookup, vùng treo «doc-text ~2140-2550» của bàn giao 30-07. `_doc_text_any` (A1 v1.34.60 — MỘT
+đường đọc text MỌI định dạng, nền của `tl doc-text` + E1) KHÔNG áp `_sanitize_export_text` (U1 v1.31.2)
+ở HAI chỗ: nhánh cache-read trả `_ct` thô, và đường trả cuối chỉ `_strip_font_runs` trước khi GHI CACHE +
+trả. Nguồn bẩn có thật: `pdftotext` nhả form-feed `\x0c` giữa trang (`_read_local_text_for_analysis`
+trả thô, chỉ `errors="replace"`).
+
+**Hệ quả đo được (30-07, function-level offline):** cùng MỘT cache `extract_<id>.txt` chứa `\x0c`/`\x07`,
+`_read_doc_text` trả SẠCH còn `_doc_text_any` trả NGUYÊN control-char — hai reader lệch byte; và
+`cmd_doc_text` in `body` thẳng vào JSON `text`/`--out`/stdout (soi hết đường ra: không sanitize hạ nguồn)
+= đúng lớp sự cố U1 đã trả giá (driver bash vỡ capture). Cache bẩn còn NUÔI corpus/NLM.
+
+Vá 2 dòng, MỘT choke-point, ĐỒNG NHẤT chuẩn có sẵn (không phải chuẩn mới): cache-read và đường cuối đều
+qua `_sanitize_export_text(_strip_font_runs(…))` như `_read_doc_text` từ v1.31.2. + test
+`r266_doc_text_any_qua_bo_loc_u1` (1427→1428) với vế fixture-tái-hiện (`\x0c` phải CÓ trong chuỗi bẩn)
+và vế ĐỐI CHỨNG (text sạch qua NGUYÊN VĂN — chống vá quá tay nuốt `\n`).
+
+Phản chứng (mỗi vế chạy TRỌN selftest, output ra FILE):
+| lượt | kết quả |
+|---|---|
+| case r266 dán vào cây MASTER chưa vá | **ĐỎ đúng 1 case** (1427/1428) — fixture tái hiện bug |
+| repo đã vá | **1428/1428** |
+| biến thể QUÁ TAY (sanitize nuốt `\n` ở cache-read) | vế đối chứng ĐỎ, kèm `r121_doc_text_docx_unzip` cũng ĐỎ — HAI lưới độc lập cùng bắt |
+
+ruff: tl.py delta 0; lookup_ops +3 F821 = 4 lần xuất hiện của 2 TÊN CŨ (`_sanitize_export_text` ·
+`_strip_font_runs` — cùng file đã dùng ở `_read_doc_text`, trừ 1 lần cũ bị thay) — TĂNG hợp lệ theo khuôn
+re-home `__globals__`, hành vi resolve chứng minh bằng chính case r266 chạy qua `python scripts/tl.py
+--selftest`. Bump 1.36.3→1.36.4 cùng độ dài ⇒ SKILL.md size giữ nguyên.
+
 # ★ v1.36.3 — r265: selftest chạy ĐƯỢC từ gói bung — 3 case «loại-khỏi-gói» học khuôn hai-bối-cảnh (2026-07-30)
 
 Trả NỢ CÓ SẴN đã đo ở bàn giao 30-07: `python scripts/tl.py --selftest` chạy TỪ GÓI BUNG cho **1424/1427**

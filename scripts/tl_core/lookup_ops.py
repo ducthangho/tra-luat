@@ -2447,6 +2447,10 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                         _mk_warn("text lấy từ CACHE `extract_<id>.txt` KHÔNG kèm chứng nhận đã-lọc "
                                  "(cache cũ, hoặc do `tl extract` ghi từ export text/plain) — đọc lại "
                                  "bằng `--refresh`")
+                    # r266 (v1.36.4 — đo drift 30-07): cache đọc ra phải qua ĐÚNG bộ lọc U1 như
+                    # `_read_doc_text` đọc CÙNG tệp — không thì hai reader lệch byte, và control-char
+                    # (\x0c pdftotext để lại trong cache cũ) chui vào JSON `text`/`--out` của doc-text.
+                    _ct = _sanitize_export_text(_strip_font_runs(_ct))
                     _kd_gate(_ct, "cache")   # r215: đúng đường đã phục vụ ND 158 thiếu khối đầu
                     return _ct, "cache"
         except Exception:  # noqa: BLE001
@@ -2521,7 +2525,7 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                     pass
     if not text:
         return "", ""
-    text = _strip_font_runs(text)
+    text = _sanitize_export_text(_strip_font_runs(text))   # r266: U1 áp MỌI nguồn (pdf/docx từng lọt \x0c)
     if _mk_canon:
         try:
             _cf = _cache_file(f"extract_{fid}.txt")

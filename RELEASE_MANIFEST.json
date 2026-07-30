@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.0",
+  "skill_version": "1.36.1",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 193,
-  "total_bytes": 6941891,
-  "package_hash": "9d581b15ac679e17cf116bd524d5081a195fe4e6a44dbee78bdd6a968d8eb67a",
-  "content_hash": "9d581b15ac679e17cf116bd524d5081a195fe4e6a44dbee78bdd6a968d8eb67a",
+  "file_count": 195,
+  "total_bytes": 7023602,
+  "package_hash": "243808bf584883454640c7edcba8b34b97a26fee3f6f1cd4869f95d563798cf8",
+  "content_hash": "243808bf584883454640c7edcba8b34b97a26fee3f6f1cd4869f95d563798cf8",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 338424,
-      "sha256": "1bb1b71065bb3fbc60acc5762d54f4121a96075c771f32340cb0195792818dc5"
+      "size": 340918,
+      "sha256": "ee2aafb8ee883c7f8ceacc3170c25c13dc961b232db042f6d3edeb301c30855a"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 47965,
-      "sha256": "3a5dbf14840335a60d5511afbb971ac45c551f43192f994a78c68001a1372ab9"
+      "sha256": "23509c724c410ee2196b049394a35a769a590f0c52a9c1e3ce072467bd0357d9"
     },
     {
       "path": "VERSION",
       "size": 6,
-      "sha256": "0a140b4261f31b4d819ac34dc194bd013b1a40561f293e7148734d7912246fb4"
+      "sha256": "2e6b748761fab4b682a5e69f86782d83f67d79e508a40fec4b936ed0f772d978"
     },
     {
       "path": "agents/openai.yaml",
@@ -55,6 +55,16 @@
       "path": "docs/AUDIT_INGEST_DETERMINISM_v1.34.45.md",
       "size": 8704,
       "sha256": "b6afcafca105d81bf23a36937202b01a4bb3f0e7fd90eaf3a66b8c4b205af1bb"
+    },
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "size": 38398,
+      "sha256": "d4d0e5463342ad9209a1e07ae27f3b4e264c3f28c69041feb0bd57d78795d780"
+    },
+    {
+      "path": "docs/WORKFLOW_RASOAT_TU_DONG.md",
+      "size": 40819,
+      "sha256": "b66985ab9f741e164e0161054b01c601c6bdee6c6a5f4aa1f6a854f9585ebe5e"
     },
     {
       "path": "docs/adr/0001-canonical-only-versioning-bundle-protocol.md",
@@ -764,7 +774,7 @@
     {
       "path": "scripts/tl.py",
       "size": 227471,
-      "sha256": "a9920519de2d3b952d63909572ce95557f3e754ecfa7f8b99d9e6b61a10ced00"
+      "sha256": "891b1d1bd0fa2e1935ec799f27ff331d9873671855e4656f0016b38a6498f4b9"
     },
     {
       "path": "scripts/tl_boot.py",

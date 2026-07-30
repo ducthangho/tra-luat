@@ -1,3 +1,31 @@
+# ★ v1.36.1 — r263: merge `claude/legal-doc-review-architecture` (2 tài liệu kế hoạch rà soát) (2026-07-30)
+
+Merge `--no-ff` nhánh `claude/legal-doc-review-architecture-2al46n` theo yêu cầu người giữ. Nhánh rẽ khỏi
+master ở `ccad292` (26-07), master đã đi trước **93 commit**; nhánh chỉ THÊM 2 tệp, không sửa tệp nào ⇒
+merge sạch, 0 xung đột:
+`docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md` (269 dòng) · `docs/WORKFLOW_RASOAT_TU_DONG.md` (392 dòng).
+
+**Ba mặt rủi ro, đo TRƯỚC khi merge chứ không sau:**
+1. `doc-claims-check` quét roots `CHANGELOG.md`/`SKILL.md`/`CLAUDE.md`/`CONTEXT.md`/`references` — **KHÔNG
+   quét `docs/`** ⇒ 2 tệp này không thể sinh con-trỏ-chết cho gate. (Mặt sau của điều đó: nếu chúng CÓ
+   đường dẫn chết thì **không cổng nào bắt** — xem "còn nợ" bên dưới.)
+2. Xung đột: nhánh không sửa tệp nào của master ⇒ merge `ort` sạch.
+3. **VÀO GÓI**: `docs/` KHÔNG nằm trong `_RELEASE_EXCLUDE_DIRS` ⇒ manifest **193 → 195 tệp**
+   (+79KB: 38.398 + 40.819B), zip **194 → 196**, **trần 200 chỉ còn 4 slot**.
+
+Gate XANH TRỌN ngay lượt đầu: `golden`/`determinism` KHÔNG đỏ dù số đếm đổi — `SKILL.md` giữ đúng 47.965B
+(chuỗi `1.36.0`→`1.36.1` cùng độ dài) và `release_manifest_stable` **TÍNH** file_count chứ không GHIM.
+Vì vậy KHÔNG ghi lại golden (`git diff -- references/golden/` rỗng) — đúng R6, không "--write" theo phản xạ.
+
+**CÒN NỢ — hai điểm KHÔNG tự quyết, để người giữ định:**
+- **Slot gói.** 2 tệp này là tài liệu KẾ HOẠCH, đúng khuôn dev-side mà `CLAUDE.md` · `.claude/` ·
+  `changelog_archive` · `rasoat/` · 4 script deploy đã bị loại khỏi gói (GIỮ trong git). Nhưng loại cả
+  `docs/` sẽ kéo theo ~20 ADR **đang** trong gói ⇒ đó là ĐỔI CHÍNH SÁCH, không phải hệ quả của lệnh
+  "merge nhánh". Còn 4 slot: đợt thêm tệp kế tiếp phải quyết việc này trước.
+- **Nội dung có thể đã LỖI THỜI.** Nhánh commit cuối 26-07 và mô tả kế hoạch mà r209–r211 ĐÃ THI HÀNH;
+  master đi trước 93 commit. Tôi KHÔNG sửa tài liệu của người khác, nhưng nói rõ: `docs/` không được
+  `doc-claims-check` phủ, nên nếu 2 tệp này trỏ tới đường dẫn/lệnh đã đổi thì sẽ KHÔNG có cổng nào kêu.
+
 # ★ v1.36.0 — r262: selftest THỰC SỰ hermetic — chặn mạng + ghim creds giả (2026-07-30)
 
 `tl.py` tự khai ngay trong `selftest()`: *"A bare selftest must be hermetic"* — nhưng lời hứa đó chỉ đúng

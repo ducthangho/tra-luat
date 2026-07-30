@@ -1,3 +1,45 @@
+# ★ v1.35.95 — r257: `corpus-relation-sweep` — hai vị từ THÔ ở cổng `vbhn_broken` (2026-07-30)
+
+Cổng đủ-điều-kiện-`vbhn_broken` dùng 2 vị từ thô, cả hai lệch khuôn nhà — đúng lớp dương-tính-giả mà
+VBHN-FIRST v1.34.32 sinh ra để diệt, chỉ khác chỗ:
+
+1. `str(ent.get("corpus")) != "true"` — **site DUY NHẤT trong repo so cột `corpus` mà KHÔNG chuẩn hoá**
+   (28 site còn lại: `hygiene.py` ×12, `ops_misc.py` ×7, `ingest_ops.py` ×4, `nlm_ops.py`, `regio.py`… đều
+   `.lower()`/helper). Miền giá trị THẬT rộng hơn `{true,false}`: `vbqppl` (luật server `corpus∈{true,vbqppl}`
+   — `hygiene.py:3015,3025`; `cli.py:359` nói thẳng `--corpus true` literal "bỏ sót vbqppl/overflow"),
+   `thuong`, `""`, cùng mọi lệch HOA-thường ⇒ **VBHN corpus LÀNH bị coi là NGOÀI corpus**, có goc-tie là vào
+   `sources_to_add` với `reason="vbhn_broken_or_quarantine"` — giục tải lại đúng thứ đã có.
+2. `"_ZZZ_QUARANTINE" in cat` — bỏ sót biến thể nhãn `QUARANTINE` **trơ** (thứ `_is_quarantine_label_variant`
+   xác nhận có thật) ⇒ VBHN ĐÃ cách ly nằm trong chuỗi base **lọt lưới**, không được gắn cờ.
+
+Chọn `_entry_is_corpus_effective` (LUẬT SERVER), **không** `_entry_corpus_true`: repo tự khai literal là bản
+bỏ sót. Nhưng helper server-rule cần `row_kind`+`corpus`+**`loai`**, còn cổng này xét trên bản `_summ_entry`
+— bản đó **KHÔNG có `loai`** ⇒ nhánh "− thuong" đọc thiếu trường và nghiêng về suppression. Nên vá GỐC: tra
+entry ĐẦY ĐỦ theo `drive_id` (`entry_by_drive_id`, cùng mẹo sweep đã dùng cho `goc_by_drive_id`), fallback về
+bản summ khi không thấy — fallback giữ nguyên ca `"zzz"` của test r94.
+
+**RANH GIỚI CỐ Ý, đã khoá bằng test để không ai "sửa" thành `strip()`:** khoảng trắng (`' true'`) VẪN là NGOÀI
+corpus. Lượt test đầu tôi assert ngược (coi `' true'` là in-corpus) và case đỏ trên bản vá — **tôi sai, không
+phải code sai**: GAS `String(o.corpus||'').toLowerCase()` (`Code.2.21.2p.gs:2238`) KHÔNG trim, nên ô có khoảng
+trắng thì SERVER cũng không đếm. Thêm `strip()` là tự tạo lệch mới với `tl boot`. Ô bẩn là việc của
+`registry-doctor`, không phải chỗ sweep tự lấp.
+
+Hai vế đi NGƯỢC hướng nhau nên test khoá CẢ HAI chiều: vế corpus **bớt** cờ (suppression — hướng nguy hiểm),
+vế quarantine **thêm** cờ. Test **r257** (5 case) đo 2 CHIỀU: 1/5 trên nền `ba91cf9` → 5/5 trên bản vá; phản
+chứng chứng minh CHỊU LỰC bằng 3 bản vá QUÁ TAY bơm vào cây riêng:
+· bỏ vế corpus (nới in-corpus) → `r257_broken_vbhn_still_flagged_3_ways` + `goc_tie_gate` ĐỎ (3/5);
+· coi MỌI cat là quarantine → 3 vế "không gắn cờ bừa" ĐỎ (2/5);
+· bỏ chốt goc-tie v1.34.32 → chỉ `r257_goc_tie_gate_still_holds` ĐỎ (4/5).
+Phản chứng bắt buộc `r257_broken_vbhn_still_flagged_3_ways` khoá 3 đường hỏng ĐỘC LẬP vẫn phải bị bắt:
+`corpus='false'` · cờ `VBHN_MISSING_YEAR_OR_DATE` · `row_kind='ref'`.
+
+Vì sao gate cũ xanh: `r94_sweep_vbhn_tie_filter` dựng CẢ HAI ứng viên `corpus:"false"` — vế corpus không được
+kích, test xanh dù vị từ đúng hay sai.
+
+CÒN NỢ (F4, KHÔNG gộp vào đây): `_vbhn_goc_map` cũng dùng `_entry_corpus_true` ⇒ VBHN `corpus='vbqppl'` không
+được tính là "đã phủ" ⇒ `amendments_missing` dương-tính-giả. Cùng gốc, nhưng vá nó là nới **suppression** cho
+`covered_by_vbhn` — sai một nhịp là che mất văn bản thiếu THẬT, phải có phiếu thiết kế riêng.
+
 # ★ v1.35.94 — r256: `rasoat-loop` HẾT dừng sớm — GAP không còn bị nuốt (2026-07-30)
 
 `while frontier and dry_rounds < K and it < max_iter` — `dry_rounds` KHÔNG được nằm trong điều kiện

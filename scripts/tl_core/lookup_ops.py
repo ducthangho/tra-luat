@@ -790,9 +790,13 @@ def cmd_corpus_relation_sweep(a) -> int:
         return 1
     vbhn_goc = _vbhn_goc_map(entries)
     goc_by_drive_id = {}
+    # r253: entry ĐẦY ĐỦ theo drive_id — cổng đủ-điều-kiện-vbhn_broken phải xét trên entry THẬT, không xét
+    # trên bản `_summ_entry` (bản đó KHÔNG có `loai` nên luật server đọc thiếu trường và nghiêng về suppression).
+    entry_by_drive_id = {}
     for e in entries:
         did = _entry_drive_id(e)
         if did:
+            entry_by_drive_id[str(did)] = e
             ks = {norm_sohieu(p.strip()) for p in re.split(r"[;,]", str(_entry_goc(e) or "")) if p.strip()}
             ks |= {norm_sohieu(mt.group(1)) for mt in re.finditer(r"goc[_-]([0-9A-Za-z\-]{6,})",
                                                                   str(_entry_name(e) or ""), re.I)}
@@ -858,8 +862,21 @@ def cmd_corpus_relation_sweep(a) -> int:
         for vc in (rc.get("vbhn_candidates") or []):
             fl = vc.get("flags") or []
             ent = vc.get("entry") or {}
+            # r253 (P15): cổng này TỪNG dùng 2 vị từ THÔ, cả hai lệch khuôn nhà — đúng lớp dương-tính-giả mà
+            # VBHN-FIRST v1.34.32 sinh ra để diệt, chỉ khác chỗ.
+            #  · `str(ent.get("corpus")) != "true"` là site DUY NHẤT trong repo so cột corpus mà KHÔNG chuẩn hoá
+            #    (28 site khác đều .lower()/helper). Miền giá trị THẬT rộng hơn {true,false}: 'vbqppl' (luật
+            #    server corpus∈{true,vbqppl} — hygiene 3015/3025, cli 359 nói thẳng `--corpus true` literal
+            #    "bỏ sót vbqppl/overflow"), 'thuong', '', và mọi biến thể hoa/khoảng-trắng ⇒ VBHN corpus LÀNH bị
+            #    coi là NGOÀI corpus, có goc-tie là vào sources_to_add giục tải lại thứ đã có.
+            #    Dùng LUẬT SERVER (_entry_is_corpus_effective), KHÔNG dùng _entry_corpus_true — literal là bản SAI.
+            #  · `"_ZZZ_QUARANTINE" in cat` bỏ sót biến thể nhãn 'QUARANTINE' trơ (thứ _is_quarantine_label_variant
+            #    xác nhận có thật) ⇒ VBHN ĐÃ cách ly trong chuỗi base lọt lưới, KHÔNG được gắn cờ.
+            # Hai vế đi NGƯỢC hướng nhau (corpus: bớt cờ · quarantine: thêm cờ) nên test r253 khoá CẢ HAI chiều.
+            _full = entry_by_drive_id.get(str(ent.get("drive_id") or "")) or ent
             if not (any(f in ("RAW_NAME_NOT_NLM", "VBHN_MISSING_YEAR_OR_DATE") for f in fl)
-                    or str(ent.get("corpus")) != "true" or "_ZZZ_QUARANTINE" in str(ent.get("cat") or "")):
+                    or not _entry_is_corpus_effective(_full)
+                    or _is_quarantine_cat(_entry_cat(_full))):
                 continue
             _cand_goc = goc_by_drive_id.get(str(ent.get("drive_id") or ""), set())
             _cand_goc = _cand_goc | ({norm_sohieu(str(ent.get("sohieu") or ""))} - {""})

@@ -769,7 +769,10 @@ def cmd_workflow_audit(a) -> int:
 # READ-ONLY tuyệt đối: không ghi (trừ --out do người gọi chỉ định), không mạng, không GAS/NLM, không --fix.
 # Cờ là ĐẦU VÀO ĐỂ PHÂN XỬ, không phải phán quyết ⇒ mặc định rc=1 (không fail); --strict mới đẩy 1→2.
 _DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
-_DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references")
+# r264: +`docs` — trước đây `docs/` (19 tệp: 16 ADR + audit + 2 kế hoạch rà soát) KHÔNG được phủ, nên
+# con trỏ chết ở đó KHÔNG cổng nào bắt. Đo khi mở: 18/19 tệp SẠCH tuyệt đối; 12 cờ còn lại dồn hết vào
+# MỘT tệp và là NỘI DUNG của nó, không phải lỗi (xem _DOC_CLAIMS_HISTORICAL).
+_DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references", "docs")
 # r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4
 # (giàn giáo nháp). CỐ Ý DỪNG Ở ĐÂY — L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11`
 # bên dưới; đừng "bổ sung nốt" mà không đo lại.
@@ -780,8 +783,15 @@ _DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
 # ba chỗ này; không hạ cấp thì 8 phát hiện SỐNG bị chôn dưới 127 mục không ai sửa được (sửa sổ = viết
 # lại lịch sử). Phân định theo LOẠI TÀI LIỆU, không theo tuổi của tệp bị dẫn — git ở kho này chỉ có 265
 # commit trong khi skill già hơn thế, nên `--diff-filter=D` không phân định nổi.
+# r264: +`docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md`. Tệp này là bản KIỂM KÊ CON-TRỎ-CHẾT: nó nêu
+# `scripts/nlm_log.py` · `build_parts.py` · `tl_rebuild.sh` · `templates/_nguon-goc/` · `manifest_build.py`
+# CHÍNH VÌ chúng không tồn tại, và tự khai bằng chứng «`git log --all --diff-filter=ADR` RỖNG → chưa từng
+# tồn tại». Các đường dẫn đó là PHÁT HIỆN của tài liệu, không phải con trỏ để đi theo — đúng định nghĩa
+# §2.2 đã áp cho CHANGELOG/DOCTRINE_APPENDIX. Không hạ cấp thì 11 cờ này chặn gate vĩnh viễn và cách chữa
+# duy nhất là XOÁ nội dung phát hiện — tức phá tài liệu để làm vui lòng bộ kiểm.
 _DOC_CLAIMS_HISTORICAL = ("CHANGELOG.md", "references/changelog_archive/",
-                          "references/DOCTRINE_APPENDIX.md")
+                          "references/DOCTRINE_APPENDIX.md",
+                          "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md")
 _DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
 # §2.4 che nhiễu: token mang các ký tự này là GIÀN GIÁO/placeholder, không phải trích dẫn thật.
 _DOC_CLAIMS_NOISE_CHARS = "<>{}*$"
@@ -1167,7 +1177,13 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
         # tra ra commit thì AMBIGU, không phải sai ⇒ advisory. Tự hiệu chỉnh khi kho lớn lên, git nới
         # viết tắt thì ngưỡng nới theo.
         if len(sha) in ctx["sha_lens"]:
-            _add("L2", m.start(), sha, "SHA_NOT_A_COMMIT")
+            # r264: L1/L4/L8/L9 đã hạ cấp cho tài liệu LỊCH SỬ; L2 bị BỎ SÓT dù chú thích L4 ngay dưới
+            # tự nói khuôn đúng là «cùng khuôn L1/L8». Một bản GHI CHÉP dẫn commit không còn trong kho (nhánh
+            # đã xoá ⇒ unreachable; hoặc clone SHALLOW) là ghi chép, không phải con trỏ sống. Đo lúc mở: 0 cờ
+            # cứng loại này trên roots mặc định ⇒ KHÔNG mất phát hiện nào đang sống. Giá phải trả, nói thẳng:
+            # SHA gõ sai trong CHANGELOG từ nay là advisory chứ không chặn gate.
+            _add("L2", m.start(), sha, "SHA_NOT_A_COMMIT"
+                 if not historical else "SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC", advisory=historical)
         else:
             _add("L2", m.start(), sha, "SHA_LIKE_NOT_A_COMMIT", {"len": len(sha)}, advisory=True)
 

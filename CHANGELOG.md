@@ -1,3 +1,48 @@
+# ★ v1.36.2 — r264: `doc-claims-check` PHỦ `docs/` — 19 tệp trước đây không cổng nào soi (2026-07-30)
+
+Ngay sau khi merge 2 tài liệu kế hoạch vào `docs/` (r263), tôi đã nói ra mặt sau của việc đó: `doc-claims-check`
+quét roots `CHANGELOG.md`/`SKILL.md`/`CLAUDE.md`/`CONTEXT.md`/`references` — **không** có `docs/`, nên con trỏ
+chết ở đó KHÔNG cổng nào bắt. Nay phủ. Đo trước khi vá, không sau: `files_scanned` **35 → 54**.
+
+**Kết quả đo khi mở `docs/`: 12 cờ CỨNG, DỒN HẾT vào MỘT tệp** —
+`docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md` (11 `PATH_MISSING` + 1 `SHA_NOT_A_COMMIT`). 18 tệp còn lại
+(16 ADR + audit + `WORKFLOW_RASOAT_TU_DONG.md`) **SẠCH TUYỆT ĐỐI**.
+
+**Nhưng 12 cờ đó KHÔNG phải lỗi tài liệu — chúng là NỘI DUNG của tài liệu.** Tệp đó là một bản **kiểm kê
+con-trỏ-chết**: nó nêu `scripts/nlm_log.py` · `build_parts.py` · `tl_rebuild.sh` · `templates/_nguon-goc/` ·
+`manifest_build.py` **chính vì** chúng không tồn tại, và tự khai bằng chứng cho từng cái
+(«`git log --all --diff-filter=ADR` **RỖNG** → chưa từng tồn tại», «`manifest_build.py` thật ra ở
+`scripts/_fallback/`»). `1835b46` là commit của nhánh `…-dlbrut` **đã bị xoá** ⇒ unreachable vĩnh viễn.
+
+Nếu bắt cứng thì cách chữa duy nhất là **xoá phần phát hiện** — phá tài liệu để làm vui lòng bộ kiểm. Đó đúng
+là tình huống §2.2 đã giải cho `CHANGELOG`/`DOCTRINE_APPENDIX`: *tài liệu GHI LẠI QUÁ KHỨ được phép dẫn tệp
+đã xoá*. Nên xếp tệp này vào `_DOC_CLAIMS_HISTORICAL`.
+
+**Sửa kèm một BỎ SÓT của chính bộ kiểm:** `historical` hạ cấp L1/L4/L8/L9 nhưng **L2 (SHA) thì không** — dù
+chú thích L4 ngay dưới tự nói khuôn đúng là «cùng khuôn L1/L8». Một bản ghi chép dẫn commit không còn trong
+kho (nhánh đã xoá, hoặc clone SHALLOW) là ghi chép, không phải con trỏ sống ⇒ nay `SHA_NOT_A_COMMIT` thành
+`SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC` (advisory) cho tài liệu lịch sử. Đây cũng chính là cờ đỏ-giả đã cắn tôi
+đầu phiên này: clone shallow → 2 cờ `SHA_NOT_A_COMMIT` trong `changelog_archive`.
+
+**Giá phải trả, nói thẳng:** SHA gõ sai trong `CHANGELOG` từ nay là advisory chứ không chặn gate. Đo lúc mở:
+**0 cờ cứng loại này** trên roots mặc định ⇒ không mất phát hiện nào đang sống, nhưng đó là nhượng bộ có ý
+thức. Đường thay thế (bắt tác giả bỏ/ghi chú `1835b46`) tôi KHÔNG tự làm — trích dẫn đó có nghĩa, nó ghi bản
+nháp mà tài liệu này sửa.
+
+**Phản chứng ĐỐI XỨNG — hai thay đổi trên đều LÀM YẾU, nên phải chứng minh phần còn lại vẫn bắt:**
+
+| ca | kết quả |
+|---|---|
+| `docs/` **không**-historical, đường dẫn chết + SHA lạ | **`PATH_MISSING` + `SHA_NOT_A_COMMIT` — CỨNG cả hai** |
+| tệp historical, CÙNG hai lớp đó | advisory (11 + 1), **0 cờ cứng** |
+| `WORKFLOW_RASOAT_TU_DONG.md` (docs/, cùng đợt merge) | **KHÔNG** được ăn ké nhãn lịch sử |
+| `files_scanned` | 35 → **54** |
+| gate `--strict` | rc=0 |
+
+Vế đầu là vế cốt tử: thiếu nó thì việc "phủ `docs/`" chỉ là trang trí. Test `r264` khoá cả 5 vế; hằng nằm ở
+`tl_core.workflow` (KHÔNG re-export sang `tl`) nên test vào qua submodule theo idiom nhà — lượt đầu tôi viết
+`_TL_MODULE._DOC_CLAIMS_DEFAULT_PATHS` và test ĐỎ ngay, đó là cách phát hiện.
+
 # ★ v1.36.1 — r263: merge `claude/legal-doc-review-architecture` (2 tài liệu kế hoạch rà soát) (2026-07-30)
 
 Merge `--no-ff` nhánh `claude/legal-doc-review-architecture-2al46n` theo yêu cầu người giữ. Nhánh rẽ khỏi

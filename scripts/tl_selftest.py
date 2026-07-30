@@ -23189,6 +23189,37 @@ def run() -> int:
                     _hos.environ[_k] = _v
     cases.append(("r262_selftest_seal_net_and_creds", _c262_seal()))
 
+    # ═══ r264 — doc-claims-check PHỦ `docs/` (19 tệp trước đây không cổng nào soi) ═══
+    # Đo khi mở: 18/19 tệp SẠCH; 12 cờ dồn hết vào docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md và là NỘI
+    # DUNG của nó (bản KIỂM KÊ con-trỏ-chết, tự khai «git log --all --diff-filter=ADR RỖNG» cho từng đường
+    # dẫn) ⇒ xếp vào _DOC_CLAIMS_HISTORICAL. Kèm sửa L2 BỎ SÓT: SHA_NOT_A_COMMIT nay hạ cấp cho tài liệu
+    # lịch sử như L1/L4/L8/L9 vẫn làm. Hai thay đổi đó LÀM YẾU phát hiện ⇒ 2 vế phản chứng là BẮT BUỘC.
+    # Hằng nằm ở tl_core.workflow (KHÔNG re-export sang tl — vào qua submodule theo idiom nhà).
+    def _c264_doc_claims_docs():
+        import tempfile as _tf264, pathlib as _pl264
+        import tl_core.workflow as _wf264
+        _kh264 = "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md"
+        ok1 = "docs" in _wf264._DOC_CLAIMS_DEFAULT_PATHS          # chính việc được yêu cầu
+        ok2 = _kh264 in _wf264._DOC_CLAIMS_HISTORICAL
+        # 12 phát hiện KHÔNG bị mất — chỉ hạ cấp: 0 cờ CỨNG, vẫn đủ 11 PATH + 1 SHA ở advisory
+        _d264 = _wf264._doc_claims_check(paths=[_kh264])
+        _adv264 = [a["reason"] for a in _d264["advisories"]]
+        ok3 = (not _d264["flags"]
+               and _adv264.count("PATH_MISSING_IN_HISTORICAL_DOC") >= 11
+               and _adv264.count("SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC") >= 1)
+        # PHẢN CHỨNG 1 — tệp KHÔNG historical vẫn phải bị bắt CỨNG cả HAI lớp (nếu vế này rơi thì việc
+        # phủ `docs/` chỉ là trang trí). Thư mục TẠM: ngoài cây ⇒ không historical, và KHÔNG ghi vào repo.
+        with _tf264.TemporaryDirectory(prefix="r264-") as _td264:
+            _p264 = _pl264.Path(_td264) / "gia_dinh_la_adr.md"
+            _p264.write_text("# probe\nspan: `scripts/khong_he_ton_tai_r264.py`\n"
+                             "ngoai span: commit fadedbc khong co trong kho.\n", encoding="utf-8")
+            _r264 = {f["reason"] for f in _wf264._doc_claims_check(paths=[str(_p264)])["flags"]}
+        ok4 = {"PATH_MISSING", "SHA_NOT_A_COMMIT"} <= _r264
+        # PHẢN CHỨNG 2 — tệp kế hoạch CÒN LẠI trong docs/ KHÔNG được ăn ké nhãn lịch sử
+        ok5 = "docs/WORKFLOW_RASOAT_TU_DONG.md" not in _wf264._DOC_CLAIMS_HISTORICAL
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+    _t110("r264_doc_claims_phu_docs", _c264_doc_claims_docs)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

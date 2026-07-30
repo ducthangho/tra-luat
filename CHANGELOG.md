@@ -1,3 +1,33 @@
+# ★ v1.36.15 — r277: footnote-map câm trên VBHN cặn HYPERLINK/marker dính đôi + def_missing giả leading-zero (P15-F10+F11) (2026-07-31)
+
+F10 (P1) + F11 (P2) sổ P15 — vá GỘP 1 bản theo lệnh user (cùng vùng `resolve_footnote_amendments`); phiếu
+thiết kế + grill: `C:\qh\p15_review_core_2026-07-30\P15_PHIEU_r277.md`.
+
+**F10 — footnote-map CÂM không phân biệt được với "doc không có chú thích":** mốc `first` đòi def dạng
+`^[n]␣`, nhưng extract cache nền tồn tại SONG SONG ≥2 kiểu extract (78 doc chuẩn parse tốt vs 18 doc trượt
+mốc — đo 31-07 trên 403 file): 12 doc cặn field-code Word « HYPERLINK \l "_ftn(ref)N" » (di chứng export
+.docx — 39-VBHN Thư viện, 67-2026-VBHN SHTT 382 marker, 115-VPQH, BLLĐ 18-VBHN…) + 6 doc marker DÍNH ĐÔI
+«[n][n]» đầu dòng (KDBH 31-2026 '[8][8]', 8-2026-VBHN-BNV '[2][2]', 4231/4719-VBHN-BTP…). foot_region rỗng
+⇒ rescue lẫn body-loop tê liệt ⇒ footnote_count=0 CÂM trên ≈1059 marker: mất footnote_gate (_relation_audit
+ưu tiên footnote-map hơn heuristic), mất FOOTNOTE_AMENDMENT_NOT_IN_CORPUS (mất nhắc nạp QT-5), pending=0 giả.
+VÁ: 2 phép chuẩn hóa TRƯỚC mọi phép tách — strip cặn theo TRỌN CỤM `HYPERLINK \l "_ftn(ref)N"` (chữ
+HYPERLINK trần ngoài cụm KHÔNG bị đụng) + gộp `[n][n]`→`[n]` bằng backreference (CÙNG số mới gộp — chuỗi
+`[1][2][3]` khác số của case dedup cũ giữ nguyên).
+
+**F11 — def_missing GIẢ từ số Ô BIỂU MẪU zero-pad:** body-loop so marker bằng CHUỖI ⇒ '[01]'…'[12]' (ô Mẫu
+đơn NĐ 188-2025-NĐ-CP, ×2 bản identity-dup) ≠ def '[1]'…'[6]' ⇒ 12/12 dòng def_missing THÔ toàn corpus
+(2 dòng sau gom cấp-Điều) = 100% RÁC is_amend=True gán «Điều 72 khoản 4». VÁ: khóa marker CHUẨN int
+(`str(int(n))`) tại CẢ HAI điểm bắt (anchor thân + marks foot) + rescue số-trần thêm dung sai `0*`
+(superset hành vi cũ). GIỮ NGUYÊN guard `int(n)>max_foot` — sổ đã BÁC vế «guard nuốt marker thật» (0 ca
+trên corpus; guard đang là thứ duy nhất chặn nhiễu [07]-[12]).
+
+PHẢN CHỨNG (probe 2-process qua đường sản xuất `import tl`, master r276 vs bản vá, 403 extract nền +
+manifest 1315 — scripts/số liệu tại scratchpad phiên e53947f2 `probe_r277_*.py` + `corpus_{master,patched}.json`):
+**383/403 doc IDENTICAL từng trường · 18/18 doc câm HỒI SINH (908 dòng bản-đồ cấp Điều, 102 pending-effect
+lộ ra — riêng SHTT 340 dòng) · rác def_missing 12 thô→0 · 0 đổi-khác ngoài dự kiến · 2 chữ HYPERLINK
+ngoài cụm _ftn còn nguyên.** Selftest +4 case r277_* (hyperlink-residue + double-bracket RED-trước/GREEN-sau
+đo bằng fixture 2 phía; leading-zero 2 def_missing giả→0; guard >max_foot intact). 1441/1441.
+
 # ★ v1.36.14 — r276: hai điểm mù detector cho bất biến «số hiệu PHẢI có NĂM» (P15-F06 — lệnh quét) (2026-07-31)
 
 F06 sổ P15 («cần lệnh quét + kế hoạch sửa registry riêng»). Đo TƯƠI kho nền 31-07 (sau các lượt dọn của

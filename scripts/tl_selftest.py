@@ -3232,6 +3232,45 @@ def run() -> int:
                   _ftb["footnote_count"] == 1 and _mb.get("2", {}).get("dieu") == "59"
                   and _mb["2"]["amending_sohieu"] == "124-2025-QH15" and _mb["2"]["hieu_luc"] == "2026-01-01"
                   and not _mb["2"].get("def_missing")))
+    # r277 (P15-F10): cặn field-code Word « HYPERLINK \l "_ftn(ref)N" » đẩy def '[n]' khỏi đầu dòng ⇒ mốc
+    # `first` ^[n]␣ trượt → foot_region rỗng → footnote-map CÂM (đo 31-07: 18 VBHN nền, vd 39-VBHN Thư viện).
+    _f77a = resolve_footnote_amendments(
+        'Điều 9. Tài chính\n3. Kết quả HYPERLINK \\l "_ftn2" [2] được xử lý.\n\n'
+        ' HYPERLINK \\l "_ftnref1" [1] Luật số 116/2025/QH15 có căn cứ ban hành như sau: “Căn cứ Hiến pháp”.\n'
+        ' HYPERLINK \\l "_ftnref2" [2] Khoản này được bãi bỏ theo quy định tại khoản 17 Điều 43 của Luật An ninh mạng '
+        "số 116/2025/QH15, có hiệu lực kể từ ngày 01 tháng 7 năm 2026.\n", today="2026-06-26")
+    _m77a = {r["marker"]: r for r in _f77a["dieu_level_amendment_map"]}
+    cases.append(("r277_footnote_hyperlink_residue",
+                  _f77a["footnote_count"] == 1 and _m77a.get("2", {}).get("dieu") == "9"
+                  and _m77a["2"]["khoan"] == "3" and _m77a["2"]["amending_sohieu"] == "116-2025-QH15"
+                  and _m77a["2"]["pending_effect"] is True and "1" not in _m77a))
+    # r277 (P15-F10): marker DÍNH ĐÔI «[n][n]» đầu dòng (kiểu extract KDBH 31-2026 '[8][8]') cũng trượt `first`
+    # vì sau ']' là '[' — collapse backreference chỉ gộp CÙNG số ([1][2] khác số giữ nguyên, case dedup ở trên).
+    _f77b = resolve_footnote_amendments(
+        "Điều 30. Phí bảo hiểm\n1. nội dung [8]\n\n"
+        "[8][8] Điểm này được sửa đổi, bổ sung theo quy định tại khoản 2 Điều 1 của Luật số 139/2025/QH15 sửa đổi, "
+        "bổ sung một số điều của Luật Kinh doanh bảo hiểm, có hiệu lực kể từ ngày 01 tháng 7 năm 2026.\n", today="2026-06-26")
+    _m77b = {r["marker"]: r for r in _f77b["dieu_level_amendment_map"]}
+    cases.append(("r277_footnote_double_bracket",
+                  _f77b["footnote_count"] == 1 and _m77b.get("8", {}).get("dieu") == "30"
+                  and _m77b["8"]["khoan"] == "1" and _m77b["8"]["amending_sohieu"] == "139-2025-QH15"))
+    # r277 (P15-F11): số Ô BIỂU MẪU zero-pad '[01]…' ≠ def '[1]' khi so CHUỖI ⇒ trước đây body-loop sinh
+    # def_missing GIẢ is_amend=True gán Điều cuối (đo NĐ 188-2025 ×2 bản: 12/12 def_missing toàn corpus = rác).
+    _f77c = resolve_footnote_amendments(
+        "Điều 72. Điều khoản thi hành\n4. Ban hành kèm theo các mẫu.\n"
+        "[01]. Họ và tên: ......  [02]. Giới tính: ......\n[07]. Địa chỉ: ......\n\n"
+        "[1] Địa danh.\n[2] Ghi rõ họ tên.\n", today="2026-06-26")
+    cases.append(("r277_footnote_leading_zero_form_noise",
+                  _f77c["footnote_count"] == 0 and _f77c["dieu_level_amendment_map"] == []
+                  and _f77c.get("footnote_raw_count") == 0))
+    # r277 phản chứng: guard int(n)>max_foot GIỮ NGUYÊN sau F11 — marker thân [9] không def vẫn bị chặn im lặng.
+    _f77d = resolve_footnote_amendments(
+        "Điều 5. Phạm vi\n1. Nội dung [9] áp dụng.\n\n"
+        "[1] Khoản 1 Điều 5 được sửa đổi, bổ sung theo khoản 1 Điều 1 của Luật số 41/2024/QH15.\n", today="2026-06-26")
+    _m77d = {r["marker"]: r for r in _f77d["dieu_level_amendment_map"]}
+    cases.append(("r277_footnote_guard_gt_maxfoot_intact",
+                  _f77d["footnote_count"] == 1 and "1" in _m77d and "9" not in _m77d
+                  and not any(r.get("def_missing") for r in _f77d["dieu_level_amendment_map"])))
     # Footnote TRÍCH DẪN (is_amend=False — vd "[6] Điều 50 của Luật 71/2025 quy định như sau: 'Điều 50. Hiệu lực thi
     # hành…'") đặt trên TIÊU ĐỀ CHƯƠNG "ĐIỀU KHOẢN THI HÀNH" (sau Điều 217) — KHÔNG được gắn nhầm thành "Điều 217 ←
     # 71/2025" (false-positive Type-B cũ). Marker thật ([5] sửa Điều 154) vẫn nhận.

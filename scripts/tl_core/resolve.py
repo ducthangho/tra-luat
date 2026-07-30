@@ -1174,6 +1174,11 @@ def resolve_footnote_amendments(text: str, today: str | None = None, entries: li
     B2: hiệu_lực từ chú thích ('có hiệu lực kể từ ngày…') hoặc registry (entries) theo số hiệu luật sửa; pending_effect = hl>today."""
     import datetime as _dt
     txt = unicodedata.normalize("NFC", text or "")
+    # r277 (F10): extract .docx có thể còn cặn field-code Word « HYPERLINK \l "_ftn(ref)N" » và marker dính
+    # đôi «[n][n]» ⇒ def trượt mốc `first` ^[n]␣ dưới → foot_region rỗng → footnote-map CÂM không phân biệt
+    # được với "doc không có chú thích" (đo 31-07: 18 VBHN nền, ≈1059 marker). Chuẩn hóa TRƯỚC mọi phép tách.
+    txt = re.sub(r'HYPERLINK\s*\\+l\s*["“”]_ftn(?:ref)?\d{1,3}["“”]', " ", txt)
+    txt = re.sub(r"\[(\d{1,3})\](?:\[\1\])+", r"[\1]", txt)
     # L1: tách dấu dính số-khoản↔số-chú-thích
     txt = re.sub(r"(\d+)\.(\d+[a-zđ]?)\s*\[(\d{1,3})\]", r"\1.\2 [\3]", txt)
     txt = re.sub(r"(?<=[\dA-Za-zđ])\[(\d{1,3})\]", r" [\1]", txt)
@@ -1191,17 +1196,19 @@ def resolve_footnote_amendments(text: str, today: str | None = None, entries: li
         kh = _KHOAN_HEAD_RE.match(line)
         if kh: cur_khoan = kh.group(1)
         for mk in _MARK_RE.finditer(line):
-            anchor.setdefault(mk.group(1), (cur_dieu, cur_khoan))
+            # r277 (F11): khóa marker CHUẨN int — "[01]" số-ô-biểu-mẫu ≠ "[1]" def khi so CHUỖI làm
+            # processed-set trượt ⇒ sinh def_missing GIẢ is_amend=True (đo: 12/12 emit toàn corpus = rác NĐ 188).
+            anchor.setdefault(str(int(mk.group(1))), (cur_dieu, cur_khoan))
     # Tách def THEO MARKER (không phụ thuộc xuống dòng): mỗi [n] → tới [next]
     rows, processed = [], set()
-    marks = [(m.start(), m.end(), m.group(1)) for m in _MARK_RE.finditer(foot_region)]
+    marks = [(m.start(), m.end(), str(int(m.group(1)))) for m in _MARK_RE.finditer(foot_region)]   # r277 (F11): khóa chuẩn int
     bracketed = {n for _, _, n in marks}
     # Một số def đánh marker SỐ TRẦN đầu dòng (vd [2] bị viết "\n2 Điểm này được sửa đổi…") → _MARK_RE bỏ sót.
     # CHỈ cứu cho số CÓ anchor trong thân (là footnote thật) + theo sau là ngôn ngữ def (Điểm/Khoản/Điều/Cụm từ).
     for am in anchor:
         if am in bracketed:
             continue
-        bm = re.search(r"(?:^|\n)[ \t]*" + re.escape(am) + r"[ \t]+(?=(?:Điểm|Khoản|Điều|Cụm từ)\b)", foot_region)
+        bm = re.search(r"(?:^|\n)[ \t]*0*" + re.escape(am) + r"[ \t]+(?=(?:Điểm|Khoản|Điều|Cụm từ)\b)", foot_region)   # r277: 0* dung sai zero-pad
         if bm:
             marks.append((bm.start(), bm.end(), am))
     marks.sort()

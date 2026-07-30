@@ -1,3 +1,83 @@
+# ★ v1.35.88 — r251: hai cổng XANH mà nói dối, bắt được khi làm nốt việc treo hồ sơ Luật BHXH (2026-07-30)
+
+## Ca 2 — plan ingest SUY METADATA TỪ TÊN TỆP khi máy thiếu `pdftotext`, không một lời cảnh báo
+
+Bắt được khi định đăng ký `BC 6193/BNV-CTL&BHXH` (mục §E.7 sổ treo). `_read_local_text_for_analysis` VẪN
+trả cảnh báo `PDFTOTEXT_NOT_AVAILABLE_TEXT_LAYER_UNKNOWN`, nhưng `_probe_pdf_quality` **VỨT nó** (`_txt, _ =`)
+⇒ **"máy này thiếu bộ bóc chữ" và "PDF là bản quét" cho probe RỖNG GIỐNG HỆT nhau**. Plan im lặng rơi về
+`_classify_doc_header("", filename)` — tức suy mọi thứ từ TÊN TỆP — mà vẫn `ok:true`, rc=0.
+
+Đo LIVE trên CÙNG tệp, CÙNG lệnh, chỉ khác việc container có `pdftotext`:
+
+| | thiếu `pdftotext` | có `pdftotext` |
+|---|---|---|
+| `sohieu` | `6193_2026_BNV` (rác) | `6193/BNV-CTL` |
+| `loai` | *(rỗng)* | `Báo cáo` |
+| `title` | tên tệp | trích yếu thật |
+| `doc_name` | `VB_6193_2026_BNV_BC_6193_2026_BNV_CTL_…` (nhân đôi tiền tố) | `BC_6193_2026_BNV_CTL_…` |
+| `header_chars` | 0 | 16000 |
+| **`plan_hash`** | `42ca6386…` | `71582728…` |
+
+`plan_hash` LỆCH là chỗ đau nhất: `--expected-plan-hash` lấy ở máy A **không dùng được** ở máy B, mà lý do
+lệch thì không hiện ra ở đâu. Và `BC 6193` hoá ra **KHÔNG phải bản quét** — nó là PDF do Word 2019 xuất, lớp
+text sạch **33.917 ký tự**; kết luận "scan" trước đó thuần là artefact của container thiếu poppler.
+
+**Vá:** `_probe_pdf_quality` trả thêm `tool_warn` — CHỈ dựng khi cảnh báo thuộc họ hạ tầng
+(`PDFTOTEXT_NOT_AVAILABLE` / `PDFTOTEXT_ERROR` / `PDFTOTEXT_NO_OUTPUT`); cả hai lane ingest phơi nó ra
+(`verify_gate.flags` cho `profile-ingest`, `warnings` cho `_vb_ingest_auto_plan` — lane này còn suy cả `cat`
+từ tên tệp nên im lặng là im lặng ghi sai). Hằng `_PDF_PROBE_TOOL_WARN` **phải re-export vào namespace `tl`**
+— bẫy I11 đã ĐỎ THẬT một lượt trong phiên vá: `bind` re-home `__globals__` nên hằng để ở `ingest_ops` làm
+hàm ném `NameError` NGAY trên đường chạy thật (rc=1), đọc code không thấy.
+
+**KHÔNG chạm chính sách `source_quality`:** `.pdf` vẫn luôn = `ocr` (⇒ cần `--ocr-verified` mới vào corpus).
+Đó là thiết kế, không phải lỗi — bản vá chỉ thôi nói dối về LÝ DO không đọc được chữ.
+
+Test dùng ĐẦU VÀO THẬT, KHÔNG monkeypatch (bịt `PATH` để `shutil.which` trả None — đúng cơ chế hỏng ngoài
+đời), kèm 3 vế phản chứng: tệp NGẮN (hình dạng PDF quét thật) · đọc được text bình thường · đuôi không bóc
+được text — cả ba đều KHÔNG được nổ cờ hạ tầng, để bản vá không đổi một lời nói dối thành một lời dọa oan.
+
+## Ca 1 — PLAN của `profile-ingest-chunks` in lệnh KHÔNG chạy nổi
+
+> Bắt được khi làm nốt việc treo của hồ sơ Luật BHXH: mục §5.4 sổ treo ghi "chunk-apply xuất `.md` mà
+> `profile-ingest` không nhận — CHƯA vá". Đo lại thì **r231 ĐÃ vá nhánh apply**; chỗ còn hở là **PLAN**.
+
+`chunk-apply` ghi `.md`; `profile-ingest` chỉ nhận doc/docx/odt/pdf/rtf/xls/xlsx. Cầu nối r231 vật chất
+hoá `.docx` — nhưng **CHỈ trong nhánh `--apply`**. Nhánh DRY vẫn in `planned_child_commands` trỏ đường
+`.md`, kèm `ok: true`. Ai làm theo plan (chạy tay từng lệnh con — đúng cách người ta soi một pipeline
+trước khi cho ghi) ăn `rc=2 UNSUPPORTED_EXTENSION` và kết luận pipeline chunk gãy. Đó chính là lý do lượt
+29-07 phải "lách bằng cách dựng .docx thủ công" dù cầu nối đã có sẵn trong cây.
+
+**Plan `ok:true` mà lệnh của nó không chạy nổi là plan NÓI DỐI** — cùng họ với bài học "cổng xanh nhờ
+`rc=0` là cổng có thể bị lừa", chỉ ngược chiều: ở đây rc=0 của *plan* che một lệnh chết chắc.
+
+**Vá:**
+- `_chunk_ingest_target(path)` — phép suy đường DUY NHẤT (`.md` ⇒ `.docx` cùng thư mục, tệp khác giữ
+  nguyên), KHÔNG ghi gì. PLAN và APPLY dùng CÙNG hàm này ⇒ lệnh in ra = lệnh chạy thật.
+- PLAN in đường `.docx` + thêm `materialize_from` (đường `.md` sinh ra nó) và `materialize_note`.
+- APPLY vật chất hoá từ `materialize_from`, và **guard `MATERIALIZE_PATH_MISMATCH`**: đường `_chunk_md_to_docx`
+  sinh ra phải TRÙNG đường plan đã in — lệch thì dừng, không gọi con (nếu hai phép suy đường trôi khỏi
+  nhau thì plan lại nói dối lần nữa, lần này im lặng).
+- Allowlist phần mở rộng của `profile-ingest` được ĐẶT TÊN: hằng `PROFILE_INGEST_ALLOWED_EXTS` (ở
+  namespace `tl` vì `ingest_ops.bind` re-home `__globals__` — bẫy I11). Trước đó là set trần trong thân
+  hàm nên không test nào neo vào được, và cầu nối chunk chỉ còn cách COPY danh sách rồi trôi lệch.
+
+**Đo HÀNH VI 2 chiều, không đọc code:** fixture 40 Điều / 86.479 ký tự → `chunk-apply` 5 chunk →
+`chunk-verify` 13/13 → chạy **y nguyên** 5 lệnh con mà plan in ra: **5/5 `rc=0 ok=true`**, số Điều
+9+9+9+9+4 = **40 = đúng số Điều fixture**. Phản chứng cùng cây: đường `.md` thô vẫn `rc=2
+UNSUPPORTED_EXTENSION` (không nới allowlist — nới là mở cửa cho `.md` bất kỳ vào corpus).
+
+## Chốt chung cho cả hai ca
+
+4 test `r251_`, mỗi test có vế phản chứng. `--selftest` **1399/1399**.
+**Đã kiểm PHẢN CHỨNG bằng cách GỠ VÁ:** gỡ ca 1 ⇒ `r251_plan_chunk_in_dung_lenh_apply_chay` ĐỎ · gỡ ca 2 ⇒
+`r251_thieu_bo_boc_chu_khac_pdf_ban_quet` ĐỎ · gỡ dòng re-export ⇒ `r251_hang_canh_bao_re_export_vao_tl` ĐỎ;
+phục hồi ⇒ 1399/1399. Test xanh vì bản vá, không xanh oan.
+
+Ruff `--select F` DELTA so master (đo lại trên `origin/master` sạch, so theo TÊN chứ không theo số lần):
+`tl.py` 12→12 · `chunking.py` 39→39 · `tl_selftest.py` **0 tên mới** · `ingest_ops.py` +1 tên = đúng
+`PROFILE_INGEST_ALLOWED_EXTS`, cùng lớp BY DESIGN với 363 tên re-home sẵn có trong tệp đó — đã kiểm
+HÀNH VI: cổng chặn `.md`, cho `.docx` qua. F401 = 0 (không đổi).
+
 # ★ v1.35.87 — r250: nlm-auto-refresh.sh — tự phát hiện export mới trên Drive → import → mã hoá → xoá (2026-07-29)
 
 (Đánh lại số từ r241/v1.35.78 vì phiên song song đã dùng r241–r249 cho việc khác — rebase lên master v1.35.86.)

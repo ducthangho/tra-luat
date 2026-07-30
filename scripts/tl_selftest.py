@@ -22420,6 +22420,149 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r231_loai_tai_lieu_lam_viec_vao_enum", _c231_loai_tai_lieu_lam_viec_vao_enum)
 
+    def _c251_plan_chunk_in_dung_lenh_apply_chay():
+        """r251: cầu nối r231 vật chất hoá `.md`→`.docx` CHỈ ở nhánh apply, còn PLAN vẫn in đường `.md`
+        ⇒ ai chạy tay y nguyên lệnh trong plan ăn `rc=2 UNSUPPORTED_EXTENSION` rồi kết luận pipeline chunk
+        gãy (đúng thứ lượt 29-07 phải 'lách'). Plan `ok:true` mà lệnh của nó không chạy nổi là plan NÓI DỐI.
+        Khẳng định: (1) `_chunk_ingest_target` suy đúng đường; (2) lệnh trong plan trỏ tệp mà
+        `profile-ingest` NHẬN — neo vào chính hằng allowlist, KHÔNG neo một bản copy; (3) `materialize_from`
+        đi kèm và `_chunk_md_to_docx` sinh ĐÚNG đường plan đã in.
+        PHẢN CHỨNG: đường `.md` thô của manifest phải NẰM NGOÀI allowlist — nếu không, test vô nghĩa."""
+        import importlib.util as _ilu251, json as _j251, tempfile as _tf251
+        _p = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _sp = _ilu251.spec_from_file_location("_ck251", _p)
+        _m = _ilu251.module_from_spec(_sp); _sp.loader.exec_module(_m)
+        _ALLOW = {str(x).lower() for x in _TL_MODULE.PROFILE_INGEST_ALLOWED_EXTS}
+        _t1, _f1 = _m._chunk_ingest_target("/x/y/a__part01.md")
+        _t2, _f2 = _m._chunk_ingest_target("/x/y/b.pdf")
+        ok1 = (_t1 == "/x/y/a__part01.docx" and _f1 == "/x/y/a__part01.md"
+               and _t2 == "/x/y/b.pdf" and _f2 is None)
+        with _tf251.TemporaryDirectory() as td:
+            meta = {"chunk_index": 1, "chunk_count": 1, "start_dieu": 1, "end_dieu": 1,
+                    "chunk_sha256": "aa11bb22"}
+            md = Path(td) / "Z__part01__Dieu_1-1.md"
+            md.write_text("---\n" + _j251.dumps(meta) + "\n---\n\nĐiều 1. Phạm vi\nnội dung\n",
+                          encoding="utf-8")
+            man = Path(td) / "chunk_manifest.json"
+            man.write_text(_j251.dumps({"schema": "chunk_manifest.v1", "mode": "profile",
+                                        "source_file": str(Path(td) / "src.txt"), "source_hash": "h",
+                                        "chunk_count": 1,
+                                        "chunks": [{"index": 1, "path": str(md),
+                                                    "expected_name": md.stem, "sha256": "s"}]},
+                                       ensure_ascii=False), encoding="utf-8")
+
+            class _A:
+                manifest = str(man); apply = False; profile = None
+                allow_default = False; skip_live_check = False
+            # chunking.py nạp ĐỘC LẬP không có `_run_child_tl`/`_idempotency_contract_for_workflow`
+            # (chúng vào qua `bind` re-home __globals__ về tl). Test soi phần DỰNG LỆNH nên bơm stub cho
+            # hai móc đó — KHÔNG stub gì thuộc phép suy đường đang kiểm.
+            _m._run_child_tl = lambda *_a, **_k: {"ok": True}
+            _m._idempotency_contract_for_workflow = lambda *_a, **_k: {}
+            _plan = _m._profile_ingest_chunks_plan(_A())
+            _cmds = _plan.get("planned_child_commands") or []
+            ok2 = len(_cmds) == 1
+            _rec = _cmds[0] if ok2 else {}
+            _arg = _rec.get("command", ["", ""])[1]
+            ok3 = Path(_arg).suffix.lower() in _ALLOW          # lệnh plan in ra: profile-ingest NHẬN được
+            ok4 = _rec.get("materialize_from") == str(md)
+            ok5 = ok4 and _m._chunk_md_to_docx(_rec["materialize_from"]) == _arg
+            # PHẢN CHỨNG: .md thô vốn NGOÀI allowlist ⇒ plan cũ (in .md) đúng là không chạy được
+            ok6 = ".md" not in _ALLOW and Path(str(md)).suffix.lower() not in _ALLOW
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r251_plan_chunk_in_dung_lenh_apply_chay", _c251_plan_chunk_in_dung_lenh_apply_chay)
+
+    def _c251_allowlist_ingest_co_ten_va_dung_o_cong():
+        """r251: allowlist phần mở rộng của `profile-ingest` trước đây là set TRẦN trong thân hàm — không
+        neo được test nào vào, nên cầu nối chunk chỉ còn cách COPY danh sách rồi trôi lệch. Nay là hằng
+        `PROFILE_INGEST_ALLOWED_EXTS` và chính cổng `validate_source_file` dùng nó.
+        Khẳng định: hằng ở namespace tl (bẫy I11), cổng ghim đúng tên hằng, và HÀNH VI cổng thật:
+        `.docx` do cầu nối chunk sinh ra ĐI QUA, `.md` bị chặn."""
+        import importlib.util as _ilu, re as _re, tempfile as _tf
+        _V = getattr(_TL_MODULE, "PROFILE_INGEST_ALLOWED_EXTS", None)
+        ok1 = _V is not None and ".docx" in _V and ".pdf" in _V and ".md" not in _V
+        # ghim ĐÚNG cổng profile-ingest (các cổng ingest khác có allowlist riêng, hẹp hơn — không bắt oan)
+        _src = (Path(__file__).resolve().parent / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8")
+        ok2 = bool(_re.search(r"_source_check = validate_source_file\(\s*\n\s*f, "
+                              r"allowed_exts=PROFILE_INGEST_ALLOWED_EXTS,", _src))
+        ok3 = _src.count("PROFILE_INGEST_ALLOWED_EXTS") == 1
+        _p = Path(__file__).resolve().parent / "tl_core" / "ingest_contract.py"
+        _sp = _ilu.spec_from_file_location("_ic251", _p)
+        _ic = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_ic)
+        # .docx THẬT = bản do CHÍNH cầu nối chunk sinh. Cổng còn kiểm magic bytes + cấu trúc container
+        # ([Content_Types].xml) nên zip vá tạm sẽ đỏ vì lý do KHÁC và ta tưởng allowlist sai.
+        _pc = Path(__file__).resolve().parent / "tl_core" / "chunking.py"
+        _spc = _ilu.spec_from_file_location("_ck251b", _pc)
+        _mc = _ilu.module_from_spec(_spc); _spc.loader.exec_module(_mc)
+        with _tf.TemporaryDirectory() as td:
+            bad = Path(td) / "a.md"; bad.write_text("Điều 1. Phạm vi\n" + "x" * 64, encoding="utf-8")
+            good = Path(_mc._chunk_md_to_docx(str(bad)))
+            ok4 = _ic.validate_source_file(good, allowed_exts=_V).get("ok") is True
+            _r = _ic.validate_source_file(bad, allowed_exts=_V)
+            ok5 = _r.get("ok") is False and _r.get("error") == "UNSUPPORTED_EXTENSION"
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r251_allowlist_ingest_co_ten_va_dung_o_cong", _c251_allowlist_ingest_co_ten_va_dung_o_cong)
+
+    def _c251_thieu_bo_boc_chu_khac_pdf_ban_quet():
+        """r251: `_probe_pdf_quality` VỨT cảnh báo của `_read_local_text_for_analysis` (`_txt, _ =`) nên
+        'MÁY NÀY thiếu pdftotext' và 'PDF là bản quét' cho probe RỖNG GIỐNG HỆT nhau ⇒ plan im lặng suy
+        sohieu/loai/title/doc_name TỪ TÊN TỆP mà vẫn `ok:true`, rc=0. Đo LIVE trên BC 6193/BNV-CTL&BHXH
+        (hồ sơ Luật BHXH), CÙNG tệp CÙNG lệnh, chỉ khác việc máy có `pdftotext`: sohieu `6193/BNV-CTL` →
+        `6193_2026_BNV` · loai `Báo cáo` → rỗng · header_chars 16000 → 0 · doc_name nhân đôi tiền tố ·
+        **plan_hash 71582728… → 42ca6386…** (nên `--expected-plan-hash` không dùng chung được giữa hai máy).
+
+        Test này dùng ĐẦU VÀO THẬT, KHÔNG monkeypatch: bịt `PATH` để `shutil.which('pdftotext')` trả None
+        (đúng cơ chế hỏng ngoài đời), và dùng tệp thật cho các vế còn lại.
+        PHẢN CHỨNG (vế quan trọng nhất): probe rỗng vì tệp NGẮN — hình dạng của 'PDF quét thật' — phải
+        KHÔNG nổ cờ; nếu nổ thì ta chỉ đổi một lời nói dối thành một lời dọa oan."""
+        import os as _os251, tempfile as _tf251
+        _probe = _TL_MODULE._probe_pdf_quality
+        with _tf251.TemporaryDirectory() as td:
+            _pdf = Path(td) / "x.pdf"; _pdf.write_bytes(b"%PDF-1.4\n% khong co lop text\n")
+            _old_path = _os251.environ.get("PATH")
+            try:
+                _os251.environ["PATH"] = ""     # shutil.which → None (PATH rỗng ≠ None: không rơi CS_PATH)
+                r1 = _probe(str(_pdf))
+            finally:
+                if _old_path is None:
+                    _os251.environ.pop("PATH", None)
+                else:
+                    _os251.environ["PATH"] = _old_path
+            ok1 = "PDF_TEXT_LAYER_NOT_READ_TOOLING" in (r1.get("tool_warn") or "")
+            ok2 = "PDFTOTEXT_NOT_AVAILABLE" in (r1.get("tool_warn") or "") and r1["text"] == ""
+            # PHẢN CHỨNG — probe rỗng vì NGẮN (hình dạng PDF quét thật): KHÔNG được nổ cờ hạ tầng
+            _short = Path(td) / "short.txt"; _short.write_text("Điều 1. Ngắn.", encoding="utf-8")
+            ok3 = _probe(str(_short)).get("tool_warn") == ""
+            # đọc được text bình thường: KHÔNG nổ cờ, và text đi tiếp để phân loại
+            _long = Path(td) / "long.txt"
+            _txt = "Điều 1. Phạm vi điều chỉnh quy định về bảo hiểm xã hội bắt buộc. " * 12
+            _long.write_text(_txt, encoding="utf-8")
+            r3 = _probe(str(_long))
+            ok4 = r3.get("tool_warn") == "" and r3["text"].startswith("Điều 1. Phạm vi")
+            # đuôi KHÔNG bóc được text (không phải bệnh pdftotext) cũng KHÔNG được nổ cờ hạ tầng
+            _odd = Path(td) / "z.zzz"; _odd.write_bytes(b"x" * 400)
+            ok5 = _probe(str(_odd)).get("tool_warn") == ""
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r251_thieu_bo_boc_chu_khac_pdf_ban_quet", _c251_thieu_bo_boc_chu_khac_pdf_ban_quet)
+
+    def _c251_hang_canh_bao_re_export_vao_tl():
+        """r251 (bẫy I11 — đã ĐỎ THẬT một lượt trong phiên vá): `_probe_pdf_quality` bị `ingest_ops.bind`
+        re-home `__globals__` về namespace tl, nên hằng khai ở ingest_ops mà KHÔNG re-export sang tl thì
+        hàm ném `NameError: _PDF_PROBE_TOOL_WARN` NGAY trên đường chạy thật (rc=1) — đọc code không thấy.
+        Khẳng định: hằng có ở CẢ hai namespace, CÙNG giá trị, có ô `{why}` để nhét MÃ cảnh báo thật;
+        và anh em cùng lớp `_PDF_BROKEN_FONT_WARN` không bị rơi khi vá cái này."""
+        import importlib.util as _ilu
+        _p = Path(__file__).resolve().parent / "tl_core" / "ingest_ops.py"
+        _sp = _ilu.spec_from_file_location("_io251", _p)
+        _io = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_io)
+        _a = getattr(_TL_MODULE, "_PDF_PROBE_TOOL_WARN", None)
+        _b = getattr(_io, "_PDF_PROBE_TOOL_WARN", None)
+        ok1 = isinstance(_a, str) and bool(_a) and _a == _b
+        ok2 = "{why}" in (_b or "")
+        ok3 = getattr(_TL_MODULE, "_PDF_BROKEN_FONT_WARN", None) == getattr(_io, "_PDF_BROKEN_FONT_WARN", "x")
+        return ok1 and ok2 and ok3
+    _t110("r251_hang_canh_bao_re_export_vao_tl", _c251_hang_canh_bao_re_export_vao_tl)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

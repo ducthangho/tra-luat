@@ -7,8 +7,8 @@
   "root_name": "tra-luat",
   "file_count": 198,
   "total_bytes": 6847778,
-  "package_hash": "05e9961ce7b73a72d557a045cf65f54c9b778d4fd8275c68add6eadb6b0fa5da",
-  "content_hash": "05e9961ce7b73a72d557a045cf65f54c9b778d4fd8275c68add6eadb6b0fa5da",
+  "package_hash": "ff246f5e8774fe40356223386c44b3439bdacc779b2fee73b200d61d0b3071a1",
+  "content_hash": "ff246f5e8774fe40356223386c44b3439bdacc779b2fee73b200d61d0b3071a1",
   "required_missing": [],
   "files": [
     {
@@ -449,7 +449,7 @@
     {
       "path": "references/golden/workflow_audit.json",
       "size": 30589,
-      "sha256": "4dc3b2d2cfd64d9914a7009c640628ad003309c9a7ff2f7ff3cda912aea947f5"
+      "sha256": "aeabdc465f032179fb59a07f0954388401f24cdbcec107f09313bbbf708975af"
     },
     {
       "path": "references/linhvuc_phapdien.json",

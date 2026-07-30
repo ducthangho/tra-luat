@@ -1104,14 +1104,19 @@ def resolve_identity(q: str, entries: list, max_hits: int = 8) -> list:
 
 
 def _sohieu_typo_near(cited: str, entries: list, name_q: str = ""):
-    """Số hiệu dẫn-chiếu KHÔNG khớp exact nhưng CÓ near-match trong corpus → (entry, sohieu) gợi ý.
-    (1) cùng SỐ+NĂM, KHÁC mã cơ quan/loại (vd QH14↔QH15) = typo mã, không cần đối chiếu tên.
-    (2) cùng NĂM+mã, số thứ tự lệch 1 chữ số = typo số, CHỈ nhận khi tên (loai+name) đối chiếu DUY NHẤT 1 ứng viên (tránh dương tính giả)."""
+    """Số hiệu dẫn-chiếu KHÔNG khớp exact nhưng CÓ near-match trong corpus → gợi ý typo.
+    (1) cùng SỐ+NĂM, KHÁC mã cơ quan/loại (vd QH14↔QH15) = typo mã. r278/F12: tích lũy DUY-NHẤT-THEO-SỐ-HIỆU
+        (last-wins cũ trỏ bừa theo thứ tự manifest — nền có 26 nhóm (số,năm,họ) ≥2 mã đồng tồn tại hợp pháp:
+        TT đa-bộ, luật↔VBHN-VPQH cùng số+năm); ≥2 số hiệu → corroborate tên; vẫn mơ hồ → (None, [sh...])
+        để caller hạ conf + liệt kê, KHÔNG tự chọn.
+    (2) cùng NĂM+mã, số thứ tự lệch 1 chữ số = typo số, CHỈ nhận khi tên (loai+name) đối chiếu DUY NHẤT
+        1 SỐ HIỆU (r278: đếm theo số hiệu — identity-dup 2 bản/1 văn bản từng làm len(corro)=2 → từ chối oan).
+    Trả: None | (entry, sohieu) | (None, [sohieu, ...]) khi vế (1) mơ hồ ≥2."""
     m = _SOHIEU_PARTS_RE.fullmatch(cited or "")
     if not m:
         return None
     cn, cy, ca = m.group(1), m.group(2), m.group(3)
-    agency_hit, num_cands = None, []
+    agency_cands, num_cands = {}, []   # sh → entry đại diện (max _entry_score, tie giữ bản gặp trước — khuôn r272)
     for e in entries:
         sh = norm_sohieu(_entry_sohieu(e))
         if sh == cited:
@@ -1123,16 +1128,29 @@ def _sohieu_typo_near(cited: str, entries: list, name_q: str = ""):
         # P0-2: cùng SỐ+NĂM, KHÁC mã cơ quan = typo CHỈ KHI cùng HỌ loại văn bản (QH14↔QH15). Khác họ
         # (QH ↔ NQ-TW/NĐ-CP…) = tái dùng số+năm hợp pháp → KHÔNG phải typo (hết gợi ý ảo xuyên-không-gian).
         if en == cn and ey == cy and ea != ca and _doctype_family(ca) == _doctype_family(ea):
-            agency_hit = (e, sh)
+            if sh not in agency_cands or _entry_score(e) > _entry_score(agency_cands[sh]):
+                agency_cands[sh] = e
         elif ey == cy and ea == ca and _sohieu_num_typo(cn, en):
             num_cands.append((e, sh))
-    if agency_hit:
-        return agency_hit
+
+    def _corro_sh():
+        # tập SỐ HIỆU của các hit resolve theo tên — corroborate đếm theo số hiệu, miễn nhiễm identity-dup
+        return {norm_sohieu(_entry_sohieu(he)) for he, _s, _r in resolve_identity(name_q, entries, max_hits=8)}
+
+    if len(agency_cands) == 1:
+        sh, e = next(iter(agency_cands.items()))
+        return (e, sh)
+    if len(agency_cands) >= 2:
+        if name_q:
+            corro = sorted(agency_cands.keys() & _corro_sh())
+            if len(corro) == 1:
+                return (agency_cands[corro[0]], corro[0])
+        return (None, [sh for sh, _e in sorted(agency_cands.items(), key=lambda kv: (-_entry_score(kv[1]), kv[0]))])
     if name_q and num_cands:
-        hit_ids = {id(e) for e, _s, _r in resolve_identity(name_q, entries, max_hits=8)}
-        corro = [(e, sh) for e, sh in num_cands if id(e) in hit_ids]
+        corro = sorted({sh for _e, sh in num_cands} & _corro_sh())
         if len(corro) == 1:
-            return corro[0]
+            e = max((e for e, sh in num_cands if sh == corro[0]), key=_entry_score)
+            return (e, corro[0])
     return None
 
 
@@ -1331,11 +1349,20 @@ def _classify_ref(ref: dict, entries: list, base_goc_keys: set | None = None) ->
             flag, conf = "OUTDATED", "medium"
             note = (f"số hiệu gốc '{cited}' không là canonical trực tiếp nhưng đã được VBHN "
                     f"'{_entry_sohieu(canonical)}' bao phủ trong corpus → rà trên VBHN trước khi kết luận MISSING/TYPO")
-        elif _typo:
+        elif _typo and _typo[0] is not None:
             canonical = _typo[0]
             flag, conf = "DOC_TEXT_SOHIEU_TYPO", "high"
             note = (f"số hiệu dẫn '{cited}' KHÔNG có trong corpus; gần khớp '{_typo[1]}' "
                     f"(cùng số/năm, sai mã cơ quan/số thứ tự) → nhiều khả năng GÕ SAI, nên dùng '{_typo[1]}'")
+        elif _typo:
+            # r278/F12: ≥2 số hiệu near-match đồng tồn tại hợp pháp (TT đa-bộ / luật↔VBHN-VPQH cùng số+năm) —
+            # last-wins cũ trỏ bừa 1 bản theo thứ tự manifest (conf=high + canonical + «nên dùng X»), che
+            # MISSING khi cited là văn bản thứ ba VẮNG corpus. Nay: KHÔNG chọn, KHÔNG trỏ canonical, hạ conf.
+            _cands = _typo[1]
+            flag, conf = "DOC_TEXT_SOHIEU_TYPO", "low"
+            note = (f"số hiệu dẫn '{cited}' KHÔNG có trong corpus; {len(_cands)} ứng viên gần khớp cùng số+năm: "
+                    + ", ".join(f"'{s}'" for s in _cands[:3]) + ("…" if len(_cands) > 3 else "")
+                    + " — KHÔNG tự chọn; cited có thể là văn bản khác VẮNG corpus (MISSING) — kiểm tay trước khi dùng")
         elif by_name:
             cano = by_name[0][0]
             cano_sh = norm_sohieu(_entry_sohieu(cano))

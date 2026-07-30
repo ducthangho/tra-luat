@@ -4038,6 +4038,39 @@ def run() -> int:
                   and _sohieu_typo_near("39-2019-QH14", _p02ents, "Luật Đầu tư công") is None
                   and _doctype_family("QH13") == "QH" and _doctype_family("NQ-TW") == "TW"
                   and _doctype_family("QH14") == _doctype_family("QH15")))
+    # r278/F12: vế (1) agency-typo tích lũy DUY-NHẤT-THEO-SỐ-HIỆU — last-wins cũ trỏ bừa theo thứ tự manifest
+    # khi ≥2 mã đồng tồn tại hợp pháp (nền 31-07: 26 nhóm — TT đa-bộ, luật↔VBHN-VPQH cùng số+năm); mơ hồ →
+    # (None,[sh...]) caller hạ conf=low + KHÔNG canonical; đếm duy-nhất theo SỐ HIỆU miễn nhiễm identity-dup.
+    _r278a = [{"so_hieu": "01/2026/TT-BYT", "name": "Thong tu Bo Y te huong dan kham benh", "cat": "05"},
+              {"so_hieu": "01/2026/TT-BGDDT", "name": "Thong tu Bo Giao duc quy che thi", "cat": "10"}]
+    _r278u = _sohieu_typo_near("01-2026-TT-BCT", [_r278a[0]])
+    cases.append(("typo_agency_unique_direct",
+                  _r278u is not None and _r278u[0] is _r278a[0] and _r278u[1] == "01-2026-TT-BYT"))
+    _r278x = _sohieu_typo_near("01-2026-TT-BCT", _r278a)
+    _r278y = _sohieu_typo_near("01-2026-TT-BCT", list(reversed(_r278a)))
+    cases.append(("typo_agency_ambig_no_pick_deterministic",
+                  _r278x is not None and _r278x[0] is None
+                  and sorted(_r278x[1]) == ["01-2026-TT-BGDDT", "01-2026-TT-BYT"]
+                  and _r278y == _r278x))
+    _r278c = _sohieu_typo_near("01-2026-TT-BCT", _r278a, "Thông tư quy chế thi")
+    cases.append(("typo_agency_ambig_corro_name_picks_one",
+                  _r278c is not None and _r278c[0] is _r278a[1] and _r278c[1] == "01-2026-TT-BGDDT"))
+    _r278d = _sohieu_typo_near("02-2026-TT-BCT",
+                               [{"so_hieu": "02/2026/TT-BYT", "name": "TT 02 ban A", "cat": "05"},
+                                {"so_hieu": "02/2026/TT-BYT", "name": "TT 02 ban B dup", "cat": "05"}])
+    cases.append(("typo_agency_identity_dup_still_unique",
+                  _r278d is not None and _r278d[0] is not None and _r278d[1] == "02-2026-TT-BYT"))
+    _r278e = _sohieu_typo_near("41-2024-QH15",
+                               [{"so_hieu": "45/2024/QH15", "name": "Luat_45-2024-QH15_Di_san_van_hoa", "cat": "45"},
+                                {"so_hieu": "45/2024/QH15", "name": "Luat_45-2024-QH15_Di_san_van_hoa_ban2", "cat": "45"}],
+                               "Luật Di sản văn hóa")
+    cases.append(("typo_num_corro_counts_by_sohieu",
+                  _r278e is not None and _r278e[0] is not None and _r278e[1] == "45-2024-QH15"))
+    _r278f = _classify_ref({"raw": "k", "name_phrase": "", "sohieu": "01-2026-TT-BCT", "loai": ""}, _r278a)
+    cases.append(("xref_ambig_flag_low_no_canonical",
+                  _r278f["flag"] == "DOC_TEXT_SOHIEU_TYPO" and _r278f["confidence"] == "low"
+                  and "canonical" not in _r278f and "01-2026-TT-BYT" in _r278f["note"]
+                  and "01-2026-TT-BGDDT" in _r278f["note"] and "nên dùng" not in _r278f["note"]))
     # Bug P1-5 (log rà): văn bản PHI quy phạm (sohieu=∅ + "góp ý/kiến nghị/ý kiến") KHÔNG vào amendment_candidates
     # và KHÔNG escalate PAUSE; có ứng viên MANG SỐ HIỆU mới escalate.
     _p15base = [{"id": "base", "name": "VBHN_19-VBHN-VPQH_Bao_hiem_xa_hoi", "so_hieu": "19/VBHN-VPQH", "loai": "VBHN", "cat": "06", "corpus": "true"},

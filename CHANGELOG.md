@@ -1,3 +1,31 @@
+# ★ v1.36.16 — r278: `_sohieu_typo_near` vế (1) last-wins → duy-nhất-theo-số-hiệu + corroborate + AMBIG (P15-F12) (2026-07-31)
+
+F12 (P2) sổ P15; phiếu thiết kế + grill 8 câu: `C:\qh\p15_review_core_2026-07-30\P15_PHIEU_r278.md`.
+
+**Bệnh:** vế (1) agency-typo (cùng SỐ+NĂM, khác mã, cùng họ) GÁN ĐÈ `agency_hit` mỗi lần khớp — không
+tích lũy, không đòi duy nhất. Nền 31-07 có **26 nhóm (số,năm,họ) ≥2 mã đồng tồn tại HỢP PHÁP** (11 TT
+đa-bộ + 13 QH gồm cặp hệ thống luật QH15↔VBHN-VPQH cùng số+năm + 1 TW; probe phiên e53947f2): cited
+`01-2026-TT-BCT` (vắng corpus) duyệt xuôi gợi TT-BYT, duyệt ngược gợi TT-BGDDT — LẬT theo thứ tự
+manifest; caller gắn `DOC_TEXT_SOHIEU_TYPO` conf=**high** + canonical TRỎ THẲNG + note «nên dùng X»
+⇒ trỏ bừa 1 bản trong nhóm và CHE MISSING (cited nhiều khả năng là văn bản thứ ba vắng corpus).
+
+**VÁ (đúng đề xuất sổ, kết hợp cả hai vế):** tích lũy ứng viên vế (1) theo **SỐ HIỆU** (dict sh→entry
+đại diện max `_entry_score`, khuôn r272 — identity-dup 2 bản/1 văn bản không sinh mơ-hồ-giả); 1 số hiệu
+→ trả `(entry, sh)` NHƯ CŨ (conf high hợp lệ); ≥2 → corroborate tên (giao tập sohieu của
+`resolve_identity(name_q)` với tập ứng viên — đếm theo số hiệu), đúng 1 → nhận; vẫn mơ hồ → trả
+`(None, [sh...])` sort tất định `(-score, sh)`: caller giữ flag `DOC_TEXT_SOHIEU_TYPO` nhưng
+**conf=low + KHÔNG canonical** + note liệt kê ≤3 ứng viên và nhắc khả năng MISSING. Vế (2) sửa CÙNG
+bệnh đếm: `len(corro)==1` cũ đếm theo `id(e)` — identity-dup (NĐ 188×2 nền) làm 2 entry cùng sohieu
+đếm =2 → từ chối oan; nay đếm theo SỐ HIỆU duy nhất. GIỮ NGUYÊN: khác-họ → None (P0-2),
+VBHN-coverage-trước-TYPO, `--strict` xref vẫn đếm flag (mơ hồ vẫn là finding).
+
+PHẢN CHỨNG (probe qua đường sản xuất `import tl`, manifest nền 1315 snapshot — scratchpad phiên
+8f0ab7cf `probe_r278*.py`): **26/26 nhóm mồi cited-fake → AMBIG tất định xuôi=ngược, flip=0** (trước:
+lật theo manifest) · 8/8 case thiết kế đúng · demo sổ 01-2026 hết lật · 2 test P0-2 khác-họ +
+`xref_sohieu_typo_agency` (1-ứng-viên) giữ nguyên hành vi. Selftest +6 case r278 (unique-direct /
+ambig-tất-định-flip / corroborate-chọn-đúng / identity-dup-vẫn-unique / vế-2-đếm-theo-sohieu /
+classify-conf-low-không-canonical-không-«nên dùng»). 1447/1447.
+
 # ★ v1.36.15 — r277: footnote-map câm trên VBHN cặn HYPERLINK/marker dính đôi + def_missing giả leading-zero (P15-F10+F11) (2026-07-31)
 
 F10 (P1) + F11 (P2) sổ P15 — vá GỘP 1 bản theo lệnh user (cùng vùng `resolve_footnote_amendments`); phiếu

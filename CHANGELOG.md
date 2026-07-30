@@ -1,3 +1,34 @@
+# ★ v1.36.7 — r269: cổng dedup `_dedup_status` hở 3 vế — từ vựng active trôi lệch, membership câm alias, thiếu parity bare-VBHN (2026-07-31)
+
+P15 rà `tl_core/resolve.py` (mục cuối nhóm lookup). `_dedup_status` là cổng chống-nạp-trùng nuôi
+fetch-route/fetch-links/fetch-batch (`SKIP_DEDUP`/`REVIEW_DEDUP`/`FETCH`) — đúng chỗ đã gây sự cố nạp chồng
+9 tài liệu ATVSLĐ 24-07. Ba vế hở, cả ba ĐO ĐƯỢC trên registry thật hoặc probe pure:
+
+1) **Bản-sao-từ-vựng active thứ ba trôi lệch** (đúng lớp r253/r257 tự cảnh báo): resolve.py giữ exact-set
+   `("pushed","synced","added","live")` — THIẾU `active` (ADR-0010 nắn live→active nghĩa là 'live' không còn
+   được sinh ra, còn 'active' thì có THẬT: đo registry nền 9 dòng + BHXH 6 dòng), thiếu luôn ca status rỗng
+   nhưng CÓ `nlm_source_id` (5 dòng nền). Hệ quả: văn bản ĐANG trên NLM bị dedup coi là chưa có ⇒
+   fetch-batch xếp `action=FETCH` = mời tải/nạp lại. VÁ: bỏ hẳn bản sao từ vựng, dùng vị từ chuẩn
+   `_entry_on_nlm_live` (source_id + không removed*) ở CẢ HAI chỗ trong hàm. Đo 3 registry thật
+   (nền 1315 + BHXH 115 + ATVSLĐ 37): chuyển vị từ mất 0 dòng, được thêm 14+6 dòng.
+
+2) **Membership reason so EXACT**: resolve_identity trả reason `'alias/tukhoa:<terms>'` và `'name_tokens'`
+   (B2 port), nhưng gate so `"alias" in reasons` (membership list, exact) ⇒ KHÔNG BAO GIỜ khớp — hit alias
+   active mà `likely_in_corpus=false` (đo: query 'BHXH' ↔ entry title_vn 'Luật Bảo hiểm xã hội' active →
+   false). VÁ: chuẩn hoá `rkinds = {r.split(':')[0].split('/')[0]}` rồi so tập, thêm `name_tokens`.
+
+3) **Thiếu parity bare-VBHN v1.33.47**: query '88-VBHN-VPQH' (văn bản dẫn không năm) không khớp entry
+   year-qualified '88-2025-VBHN-VPQH' vì resolve_identity so exact ⇒ `in_corpus_active=false`, fetch-batch
+   chỉ REVIEW thay vì SKIP_DEDUP. VÁ: vòng bổ sung `_sohieu_query_hits_entry(qkey, _sohieu_key_entry(e))`
+   trên entry đang live khi chưa có by_sohieu.
+
+Vế thứ tư CÂN NHẮC rồi BỎ (kỷ luật r267 'vế phải chịu lực'): 'số hiệu phủ-bằng-chunk cũng là đã-có' —
+đo part __partNN thực tế mang sohieu + source_id nên resolve_identity tự thấy (6 decoy VBHN không đẩy
+nổi part khỏi top-6) ⇒ vế đó là no-op, không thêm.
+
+Selftest +1 case `r269_dedup_status_active_alias_chunk` (4 vế vá + 4 phản chứng: removed*+source_id sót
+KHÔNG active · query có năm vẫn so chặt · query không liên quan sạch · part đã gỡ không phủ).
+
 # ★ v1.36.6 — r268: r264 máy-phụ-thuộc — vế SHA đòi cứng MỘT loại advisory trong khi loại đó theo OBJECT STORE từng máy (2026-07-30)
 
 (Đánh số lại từ r267/v1.36.5: phiên song song chiếm số trước tại `a4ebf74` — lần VA SỐ THỨ BA của chiến

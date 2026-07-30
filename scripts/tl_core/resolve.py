@@ -1343,22 +1343,41 @@ def _dedup_status(q: str):
     rows = []
     by_sohieu = False   # khớp SỐ HIỆU + đang active ⇒ chắc chắn đã có
     by_name = False     # chỉ khớp tên/alias + active ⇒ KHẢ NĂNG đã có (cần review)
+    # r269: 'active' = ĐANG trên NLM thật — dùng vị từ chuẩn _entry_on_nlm_live (source_id + không removed*),
+    # KHÔNG giữ bản-sao-từ-vựng nlm_status thứ ba (bài học r253/r257: set cũ thiếu 'active' của ADR-0010
+    # live→active — đo registry nền 30-07: 9 dòng 'active' + 5 dòng status rỗng có source_id bị coi không-active
+    # ⇒ fetch-batch xếp action=FETCH cho văn bản ĐÃ có = mời nạp trùng).
+    qkey269 = norm_sohieu(q.replace("_", "-")) if _looks_like_sohieu_query(q) else ""
     for e, score, reasons in hits[:6]:
         st = str(e.get("nlm_status") or "").strip().lower()
-        is_active = st in ("pushed", "synced", "added", "live")
-        if is_active and "sohieu" in reasons:
+        is_active = _entry_on_nlm_live(e)
+        # r269: reasons chứa 'alias/tukhoa:<terms>' (không phải literal 'alias') và 'name_tokens' (B2 port) —
+        # membership exact cũ CÂM cả hai ⇒ likely_in_corpus=false dù resolver TÌM THẤY hit active (đo 31-07).
+        _rkinds = {str(r).split(":", 1)[0].split("/", 1)[0] for r in reasons}
+        if is_active and "sohieu" in _rkinds:
             by_sohieu = True
-        elif is_active and any(r in reasons for r in ("name_key", "name_substr", "alias")):
+        elif is_active and _rkinds & {"name_key", "name_substr", "alias", "name_tokens"}:
             by_name = True
         rows.append({"name": _entry_name(e), "so_hieu": _entry_sohieu(e), "status": st or "(rỗng)",
                      "active": is_active, "score": score, "match": reasons})
+    # r269: parity v1.33.47 — query bare-VBHN ('88-VBHN-VPQH') phải khớp entry year-qualified CÙNG số+cơ-quan
+    # (resolve_identity so exact nên miss ⇒ in_corpus_active=false, fetch-batch chỉ REVIEW thay vì SKIP_DEDUP).
+    if qkey269 and not by_sohieu:
+        for e in entries:
+            if _entry_on_nlm_live(e) and _sohieu_query_hits_entry(qkey269, _sohieu_key_entry(e)):
+                by_sohieu = True
+                if not any(r.get("name") == _entry_name(e) for r in rows):
+                    rows.insert(0, {"name": _entry_name(e), "so_hieu": _entry_sohieu(e),
+                                    "status": str(e.get("nlm_status") or "").strip().lower() or "(rỗng)",
+                                    "active": True, "score": "key", "match": ["sohieu_key"]})
+                break
     # Dò TÊN bằng token-overlap (bù chỗ resolve_identity hụt khi số hiệu chèn giữa tên chuẩn hóa)
     _STOP = {"luat", "bo", "nghi", "dinh", "thong", "tu", "quyet", "so", "ve", "cua", "va", "cac", "mot", "dieu"}
     qtok = {t for t in re.findall(r"[a-z0-9]+", _strip_accents(q).lower()) if len(t) >= 3 and t not in _STOP}
     if qtok and not by_sohieu:
         for e in entries:
             st = str(e.get("nlm_status") or "").strip().lower()
-            if st not in ("pushed", "synced", "added", "live"):
+            if not _entry_on_nlm_live(e):   # r269: cùng vị từ active với vòng trên (hết bản sao từ vựng)
                 continue
             subj = set(re.findall(r"[a-z0-9]+", _strip_accents(_entry_subject_text(e)).lower()))
             if len(qtok & subj) / len(qtok) >= 0.8:

@@ -23403,6 +23403,53 @@ def run() -> int:
         return okA and okB and okC and okD and okE
     _t110("r268_l2_trichotomy_theo_trang_thai_object", _c268_l2_trichotomy_theo_trang_thai_object)
 
+    def _c269_dedup_status_active_alias_chunk():
+        """r269 (P15 rà resolve.py, đo 31-07): `_dedup_status` — cổng dedup của fetch-route/fetch-batch — hở 4 vế:
+        (1) bản-sao-từ-vựng active `("pushed","synced","added","live")` THIẾU 'active' (ADR-0010 nắn live→active)
+            — đo registry nền: 9 dòng 'active' + 5 dòng status rỗng có source_id bị coi KHÔNG-active ⇒ fetch-batch
+            xếp action=FETCH cho văn bản ĐÃ CÓ (mời nạp trùng — đúng lớp sự cố 9 tài liệu ATVSLĐ 24-07);
+        (2) reasons của resolve_identity là 'alias/tukhoa:<terms>'/'name_tokens' nhưng membership so EXACT với
+            'alias' ⇒ hit alias active KHÔNG đặt likely_in_corpus;
+        (3) query bare-VBHN không hưởng nới 1-chiều v1.33.47 ⇒ in_corpus_active=false dù corpus có bản
+            year-qualified. (Vế 'chunk-covered' CÂN NHẮC rồi BỎ: part __partNN mang sohieu+source_id nên
+        resolve_identity tự thấy — đo thử 6 decoy VBHN vẫn không đẩy part khỏi top-6 ⇒ vế đó là no-op.)"""
+        _sav269: dict = {}
+        def _dd(ents, q):
+            _mp261(_sav269, "_manifest_entries", lambda *_a, **_k: [dict(x) for x in ents])
+            try:
+                return _TL_MODULE._dedup_status(q)[0]
+            finally:
+                _mpr261(_sav269); _sav269.clear()
+        _eA = {"name": "Luat_41-2024-QH15_BHXH", "sohieu": "41/2024/QH15", "nlm_status": "active",
+               "nlm_source_id": "s1", "corpus": "true", "drive_id": "dA"}
+        _eAl = {"name": "Luat_41-2024-QH15_An_sinh", "sohieu": "", "title_vn": "Luật Bảo hiểm xã hội",
+                "nlm_status": "pushed", "nlm_source_id": "s2", "corpus": "true", "drive_id": "dB"}
+        _eV = {"name": "VBHN_88-2025-VBHN-VPQH_Dau_tu", "sohieu": "88-2025-VBHN-VPQH",
+               "nlm_status": "pushed", "nlm_source_id": "s3", "corpus": "true", "drive_id": "dC"}
+        _c0 = {"name": "Luat_41-2024-QH15_BHXH", "sohieu": "41/2024/QH15", "corpus": "true", "drive_id": "dD"}
+        _p1 = {"name": "Luat_41-2024-QH15_BHXH__part01", "sohieu": "", "nlm_status": "pushed",
+               "nlm_source_id": "s5", "drive_id": "dE"}
+        _st = _dd([_eA], "41/2024/QH15")
+        ok1 = _st["in_corpus_active"] and _st["hits"][0]["active"]              # (1) status='active' là active
+        ok2 = _dd([_eAl], "BHXH")["likely_in_corpus"]                           # (2) alias/tukhoa đếm được
+        ok3 = _dd([_eV], "88-VBHN-VPQH")["in_corpus_active"]                    # (3) bare-VBHN parity
+        # (4) luật đã CHUNK (r253): part __partNN pushed+source_id, canonical corpus=true KHÔNG source_id
+        # → dedup phải nói ĐÃ CÓ (đường qua resolve_identity thấy part; khoá hành vi, chống regression).
+        _p1sh = dict(_p1, sohieu="41/2024/QH15")
+        ok4 = _dd([_c0, _p1sh], "41/2024/QH15")["in_corpus_active"]
+        # PHẢN CHỨNG (chống vá quá tay):
+        _eR = {"name": "Luat_45-2019-QH14", "sohieu": "45/2019/QH14", "nlm_status": "removed_by_user",
+               "nlm_source_id": "s7", "corpus": "false", "drive_id": "dF"}
+        _stR = _dd([_eR], "45/2019/QH14")
+        ok5 = not _stR["in_corpus_active"] and not _stR["likely_in_corpus"]     # removed* + source_id sót ≠ active
+        ok6 = not _dd([_eV], "88-2026-VBHN-VPQH")["in_corpus_active"]           # query CÓ năm vẫn so CHẶT
+        _stU = _dd([_eAl], "Luật Đất đai")
+        ok7 = not _stU["in_corpus_active"] and not _stU["likely_in_corpus"]     # không liên quan → sạch
+        _p1r = dict(_p1sh, nlm_status="removed_by_user")
+        ok8 = not _dd([_c0, _p1r], "41/2024/QH15")["in_corpus_active"]          # part đã gỡ → KHÔNG phủ
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8)
+    _t110("r269_dedup_status_active_alias_chunk", _c269_dedup_status_active_alias_chunk)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

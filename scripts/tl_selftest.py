@@ -22356,6 +22356,26 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r244_script_deploy_khong_vao_goi", _c244_script_deploy_khong_vao_goi)
 
+    def _c249_bao_cao_rasoat_ngoai_goi():
+        """r249: báo cáo/bàn giao của các lượt rà (thư mục `rasoat/`) là sản phẩm PHIÊN — loại khỏi GÓI
+        nhưng CÒN trong repo. Đo qua CHÍNH hàm quyết định `_release_should_include`, không chỉ đọc bảng,
+        và có PHẢN CHỨNG: một tệp .md ở gốc repo vẫn phải ĐƯỢC nhận, nếu không thì luật đã quét quá tay."""
+        try:
+            from tl_core import release as _rel
+        except Exception:
+            return False
+        _root = Path(_TL_MODULE.__file__).resolve().parent.parent
+        ok1 = "rasoat" in getattr(_rel, "_RELEASE_EXCLUDE_DIRS", set())
+        # (a) tệp trong rasoat/ bị LOẠI
+        ok2 = _rel._release_should_include(_root / "rasoat" / "X_2026-01-01.md", _root) is False
+        # (b) PHẢN CHỨNG: .md ở gốc KHÔNG bị loại oan (SKILL.md phải vào gói)
+        ok3 = _rel._release_should_include(_root / "SKILL.md", _root) is True
+        # (c) loại khỏi gói KHÔNG phải xoá — 4 báo cáo phải CÒN trên đĩa
+        _d = _root / "rasoat"
+        ok4 = _d.is_dir() and len(list(_d.glob("*.md"))) >= 4
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r249_bao_cao_rasoat_ngoai_goi", _c249_bao_cao_rasoat_ngoai_goi)
+
     def _c231_chunk_docx_stdlib_doc_lai_duoc():
         """r231: `chunk-apply` ghi .md nhưng `profile-ingest` chỉ nhận doc/docx/… ⇒ pipeline chunk ĐỨT ở
         chính khớp nối. Cầu nối nay tự vật chất hoá .docx bằng stdlib (zipfile+XML, KHÔNG thêm phụ thuộc).

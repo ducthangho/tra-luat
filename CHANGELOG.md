@@ -1,3 +1,25 @@
+# ★ v1.35.86 — r249: báo cáo lượt rà ra khỏi GÓI, vào thư mục `rasoat/` (2026-07-30)
+
+5 tệp sản phẩm-phiên đang chiếm slot trong gói mà runtime Cowork không bao giờ đọc:
+`KETQUA_DON_DU_LIEU_BHXH_2026-07-29.md` · `RASOAT_PROFILE_LUAT_BHXH_2026-07-29.md` ·
+`RASOAT_BLLD_18-VBHN-VPQH.md` · `RASOAT_BLLD_2026-06-27.md` · `BANGIAO_NGUON_CONGBAO_BHXH_2026-07-29.md`.
+Đã `git mv` cả 5 vào `rasoat/` và thêm `rasoat` vào `_RELEASE_EXCLUDE_DIRS`. Gói 198 → 193 tệp.
+
+**Chọn THƯ MỤC, không liệt kê từng tên** — đây là điểm thiết kế, không phải tiện tay: báo cáo sinh
+liên tục theo ngày, nên bảng tên sẽ trôi lệch ngay lượt rà sau và lại chiếm slot mà không ai nhớ vá.
+Thư mục thì bao được mọi báo cáo tương lai với zero bảo trì.
+
+**KHÔNG dùng `reports/` sẵn có** dù nó đã nằm trong `_RELEASE_EXCLUDE_DIRS`: `.gitignore` dòng 20 bỏ
+qua `reports/`, nên chuyển vào đó là MẤT tệp khỏi git — trái yêu cầu (giữ trong repo, chỉ loại khỏi
+gói). `rasoat/` là thư mục CÓ commit mà không vào gói, cùng khuôn `changelog_archive`.
+
+Test **r249** đo qua CHÍNH hàm quyết định `_release_should_include` chứ không chỉ đọc bảng, và có
+phản chứng: `rasoat/X.md` → loại · **`SKILL.md` ở gốc → VẪN nhận** (thiếu vế này thì một luật quét
+quá tay vẫn xanh) · 4 báo cáo phải CÒN trên đĩa (loại khỏi gói ≠ xoá tệp).
+
+Đã kiểm không tài liệu nào trỏ tới 5 tệp này nên `doc_pointers` không sinh con trỏ chết — khác với
+bẫy r246, nơi một đường dẫn trong §10 trỏ tới tệp cố ý ngoài gói và `release-verify` bắt đỏ.
+
 # ★ v1.35.85 — r248: script deploy phải NÓI RÕ khi bị đặt sai chỗ (2026-07-30)
 
 **Sự cố người dùng báo:** copy `deploy-package.ps1` + `.cmd` sang `D:\Quốc hội\` rồi chạy ⇒ chết ở bước 0

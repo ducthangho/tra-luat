@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.35.85",
+  "skill_version": "1.35.86",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 197,
-  "total_bytes": 6856041,
-  "package_hash": "eb637b99a89921a2f0c63b6f7512bda9494120e7b1b6b0335786a1c2f0bc126b",
-  "content_hash": "eb637b99a89921a2f0c63b6f7512bda9494120e7b1b6b0335786a1c2f0bc126b",
+  "file_count": 192,
+  "total_bytes": 6803034,
+  "package_hash": "d9e713268681242aec2e716b072d10eb6754ee28aedf40471b4ed86005a4084b",
+  "content_hash": "d9e713268681242aec2e716b072d10eb6754ee28aedf40471b4ed86005a4084b",
   "required_missing": [],
   "files": [
     {
@@ -22,14 +22,9 @@
       "sha256": "c4f56daf1354205d48aee0588d775ad89416ec22cd47f42f9eac39dfc5634a24"
     },
     {
-      "path": "BANGIAO_NGUON_CONGBAO_BHXH_2026-07-29.md",
-      "size": 14439,
-      "sha256": "9557538306db10f805de847bcded083cd28410440b27a7562579ef0f31a36c91"
-    },
-    {
       "path": "CHANGELOG.md",
-      "size": 289001,
-      "sha256": "d1b07c61ed3b03b24580782f7d509f3e62b67f6ad57acc6887597a8b1e184eb0"
+      "size": 290786,
+      "sha256": "33c8e7046aac4fc25603d4804d88c7b302da76c69a6b40f4afb83fba28fc349b"
     },
     {
       "path": "CONTEXT.md",
@@ -42,34 +37,14 @@
       "sha256": "b1f0e2247bf0d7b0acacb29e5de39ed58d8605937f546d009138b13ef4f2bb4e"
     },
     {
-      "path": "KETQUA_DON_DU_LIEU_BHXH_2026-07-29.md",
-      "size": 13089,
-      "sha256": "e9a1a9129702aeff7d3491b641da360ebb2aef3b3beb4ff00e8b186693fb511c"
-    },
-    {
-      "path": "RASOAT_BLLD_18-VBHN-VPQH.md",
-      "size": 4428,
-      "sha256": "e5ac6218eba63a6ae2ce20bc752d8ceee8ddd636b9b4f0e41a0f55eb211f3e8f"
-    },
-    {
-      "path": "RASOAT_BLLD_2026-06-27.md",
-      "size": 7899,
-      "sha256": "2833ff7d77988a9103e4f661c1c402aed805d5731da3976cce6f972389f68820"
-    },
-    {
-      "path": "RASOAT_PROFILE_LUAT_BHXH_2026-07-29.md",
-      "size": 16751,
-      "sha256": "1977a455fd80dd36a06cc9a30030430912efa0abdc2720cb5a7a22c50e06e6d1"
-    },
-    {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "a121dc3989bd1ac80be557b609751a214d59d1b60ed2bc3e9898d3b6ebe603f7"
+      "sha256": "4246ea0069c5eae1bfc0abd53a0410cc58fc8bea2968ce18ecadd0809ad9008d"
     },
     {
       "path": "VERSION",
       "size": 8,
-      "sha256": "9a7bc022e92ce2a5757f29bfcc448f08505a94a736c2389ae692d31ebb264a59"
+      "sha256": "16029f28f34e16c2f670fe1c7633c98f720e080e5299a1fe058321d33090822d"
     },
     {
       "path": "agents/openai.yaml",
@@ -784,7 +759,7 @@
     {
       "path": "scripts/tl.py",
       "size": 223484,
-      "sha256": "796a4c5f9e8b0eca97be21a5687bf08b402433f2ccbb9887d646813622939bd1"
+      "sha256": "6c62f222b304d00f1089f3d7cc82b182e4e12fc71a077dcf8b0eb6303ae54c67"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -908,8 +883,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 67654,
-      "sha256": "b83984ae38f890dfb3dad2479bf27147949921a2d719f88d849dbbddaf69d7ed"
+      "size": 68142,
+      "sha256": "538169bc3f3748259685ee9d7acf71d8337de8a0a6c7e3ebdc01fb5b580e6dd9"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -948,8 +923,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1633771,
-      "sha256": "d082a353e01c2b7fed3de8e1edbdbbbed65943fc83dd25f8e9245d16d3f7d35b"
+      "size": 1635097,
+      "sha256": "dbf8c7d4f4e9aa859917b21cabbe2f95372a4bbfc23a12c1ce1c00f24be93aea"
     },
     {
       "path": "scripts/tra_cuu.py",

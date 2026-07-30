@@ -325,7 +325,8 @@ def cmd_release_check(a) -> int:
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
                          ".claude", ".githooks", ".github",
                          "claude-code-best-practice",
-                         "changelog_archive"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim)
+                         "changelog_archive",
+                         "rasoat"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive).
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 

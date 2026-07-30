@@ -1,3 +1,39 @@
+# ★ v1.35.94 — r256: `rasoat-loop` HẾT dừng sớm — GAP không còn bị nuốt (2026-07-30)
+
+`while frontier and dry_rounds < K and it < max_iter` — `dry_rounds` KHÔNG được nằm trong điều kiện
+vòng: chạm K là thoát **dù frontier còn**. Docstring nói "DỪNG khi frontier rỗng **VÀ** dry_rounds≥K"
+(AND) nhưng code cài **OR**.
+
+Nặng nhất là vế thứ hai: ứng viên **NGOÀI corpus cũng `dry_rounds += 1`** — mà GAP chính là **SẢN PHẨM**
+của lệnh (`gaps_missing_in_corpus` = danh sách cần tải). Nên càng tìm ra nhiều gap càng dừng sớm: động
+lực bị đảo ngược. Đo được với 5 ứng viên ngoài corpus, K=2 mặc định:
+
+```
+{"iterations": 2, "seen": 5, "evaluated": 2, "frontier_remaining": 3,
+ "converged": false, "gaps_missing_in_corpus": ["1/2020/QH14","2/2020/QH14"]}
+```
+báo **2/5 GAP — mất 60%**, 3 ứng viên KHÔNG hề được đánh giá, và `max_iter=12` **chưa hề chạm**. Với base
+dẫn chiếu nhiều văn bản chưa nạp (ca thường gặp) thì chỉ cần 2 gap liên tiếp ở đầu hàng ưu tiên là cả lượt
+rà đứt — im lặng, `ok: true`, rc=0.
+
+Chẩn đoán còn SAI theo: nhánh not-converged in cứng `'CHƯA hội tụ (chạm max-iter)'` ⇒ người đọc đi tăng
+`--max-iter`, tăng bao nhiêu cũng vô ích vì nút thắt là `dry_rounds`. Nay phân biệt 3 trạng thái và thêm
+`stop_reason` (`frontier_empty` | `max_iter`) + `dry_rounds`/`max_iter`/`dry_rounds_target` vào JSON —
+doctrine "no silent caps": lệnh phải NÓI RA nó đã bỏ lại bao nhiêu và vì sao.
+
+Bản vá tối thiểu — CHỈ bỏ `dry_rounds < K` khỏi điều kiện vòng. `max_iter` vẫn là **trần cứng duy nhất**;
+`dry_rounds` **giữ nguyên** vai trò tín hiệu hội tụ ở `converged`, và nhờ vậy ca frontier-cạn-toàn-gap nay
+đạt `dry_rounds ≥ K` ⇒ `converged: true` — đúng bản chất "đã vét hết". Cờ `--dry-rounds` KHÔNG bị vô hiệu.
+
+Test **r256** (4 case) đo 2 CHIỀU: 0/4 trên cây nền `ba91cf9` → 4/4 trên bản vá. Ba vế phản chứng được
+CHỨNG MINH CHỊU LỰC bằng cách bơm bản vá QUÁ TAY vào cây riêng, mỗi bản chỉ làm ĐỎ đúng vế của nó:
+· bỏ luôn `max_iter` khỏi điều kiện vòng → chỉ `r256_max_iter_still_hard_ceiling` đỏ (3/4);
+· bỏ `dry_rounds >= K` khỏi `converged` → chỉ `r256_dry_rounds_still_gates_converged` đỏ (3/4).
+Vế thứ tư khoá `seen` chống lặp vô hạn khi expand cứ trả ứng viên mới.
+
+Vì sao gate cũ xanh: `rasoat_loop_dedup_priority_no_infinite` chỉ test helper PURE `_rasoat_dedup_push`,
+không chạm điều kiện dừng của `cmd_rasoat_loop`.
+
 # ★ v1.35.93 — r255: `rasoat-chongcheo` HẾT báo ✗thiếu-corpus cho VBHN ĐÃ CÓ (2026-07-30)
 
 Rà P15 nhóm lookup + rà soát trên cây đóng băng bắt: cổng nới bare-VBHN **v1.33.47** đã vá

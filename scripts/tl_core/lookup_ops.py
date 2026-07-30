@@ -1696,7 +1696,13 @@ def cmd_rasoat_loop(a) -> int:
     seen, frontier, evaluated, gaps = set(), [], [], []
     _rasoat_dedup_push(frontier, seen, _rasoat_expand_text(base_text, entries))
     dry_rounds, it = 0, 0
-    while frontier and dry_rounds < K and it < max_iter:
+    # r252 (P15 — repro: 5 ứng viên ngoài corpus, K=2 ⇒ báo 2/5 GAP, frontier_remaining=3, max_iter=12 CHƯA
+    # HỀ chạm): `dry_rounds` KHÔNG được nằm trong điều kiện vòng. Docstring nói "DỪNG khi frontier rỗng VÀ
+    # dry_rounds≥K" (AND) nhưng code cài OR ⇒ chạm K là thoát dù frontier còn. Nặng nhất: ứng viên NGOÀI
+    # corpus cũng dry_rounds++ (dòng dưới) mà GAP chính là SẢN PHẨM của lệnh ⇒ càng tìm ra nhiều gap càng
+    # dừng sớm, mất dữ liệu phát hiện IM LẶNG. `max_iter` vẫn là trần cứng duy nhất; `dry_rounds` giữ
+    # nguyên vai trò tín hiệu hội tụ ở `converged` (frontier cạn toàn-gap ⇒ dry_rounds≥K ⇒ HỘI TỤ, đúng).
+    while frontier and it < max_iter:
         it += 1
         c = frontier.pop(0)
         evaluated.append(c.get("sohieu_norm"))
@@ -1719,8 +1725,12 @@ def cmd_rasoat_loop(a) -> int:
                     and str(e.get("corpus") or "").lower() == "true" and not _entry_on_nlm_live(e)):
                 in_corpus_no_nlm.append(k); break
     gap_sh = sorted({c.get("sohieu") for c in gaps if c.get("sohieu")})
+    # r252: NÓI RÕ vì sao dừng (doctrine "no silent caps") — trước đây nhánh not-converged in cứng
+    # "chạm max-iter" nên ca dừng-vì-dry bị chẩn đoán SAI, người đọc đi tăng --max-iter mà vô ích.
+    stop_reason = "max_iter" if it >= max_iter and frontier else "frontier_empty"
     out = {"ok": True, "gate": "rasoat-loop", "base": base_name, "iterations": it, "seen": len(seen),
            "evaluated": len(evaluated), "frontier_remaining": len(frontier),
+           "stop_reason": stop_reason, "dry_rounds": dry_rounds, "max_iter": max_iter, "dry_rounds_target": K,
            "converged": (not frontier) and dry_rounds >= K,
            "gaps_missing_in_corpus": gap_sh, "in_corpus_not_on_nlm": sorted(set(in_corpus_no_nlm)),
            "note": "REPORT-ONLY: bản thiếu TRONG corpus chưa NLM → `tl ingest-missing --apply`; bản NGOÀI corpus (gaps) "
@@ -1728,8 +1738,11 @@ def cmd_rasoat_loop(a) -> int:
     if getattr(a, "json", False):
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
-        print(f"== rasoat-loop {base_name[:34]} · {it} vòng · seen={len(seen)} · "
-              f"{'HỘI TỤ' if out['converged'] else 'CHƯA hội tụ (chạm max-iter)'} ==")
+        _why252 = ("HỘI TỤ" if out["converged"] else
+                   (f"CHƯA hội tụ (chạm max-iter={max_iter}, còn {len(frontier)} ứng viên — tăng --max-iter)"
+                    if stop_reason == "max_iter" else
+                    f"frontier CẠN nhưng dry_rounds={dry_rounds} < {K} (chưa đủ vòng-cạn để chốt hội tụ)"))
+        print(f"== rasoat-loop {base_name[:34]} · {it} vòng · seen={len(seen)} · {_why252} ==")
         print(f"  GAP ngoài corpus ({len(gap_sh)}): {', '.join(gap_sh[:12])}")
         if out["in_corpus_not_on_nlm"]:
             print(f"  Trong corpus CHƯA NLM ({len(out['in_corpus_not_on_nlm'])}): {', '.join(out['in_corpus_not_on_nlm'][:10])} → tl ingest-missing --apply")

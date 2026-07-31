@@ -9,8 +9,8 @@ gói 195 tệp.
 - `rasoat/KETQUA_R4_2026-07-31.md` (lượt 29 — ⚠ §3 của nó CHẨN SAI, đã bị lượt 30 bác bỏ bằng dữ liệu)
 - `rasoat/KETQUA_R1_R3_…`, `KETQUA_R2_…`, `KETQUA_US_NLM_QUEUE_…` · phía P15: `KETQUA_NLM_QA_QB_QC_…`
 
-**KHÔNG chạy lại:** Việc 1-4 lượt 25 · Q-A/Q-B/Q-C · R-1 · R-2 · R-3 · **R-4 (đã đóng: 2/3 file xong,
-1/3 dừng có lý do)** · V-1 · V-2.
+**KHÔNG chạy lại:** Việc 1-4 lượt 25 · Q-A/Q-B/Q-C · R-1 · R-2 · R-3 · **R-4 (ĐÓNG HẲN — 3/3 file)** ·
+V-1 · V-2 · V-3.
 
 ## 1. ĐÍNH CHÍNH LỚN — «sheet-dup» chưa bao giờ tồn tại
 
@@ -37,12 +37,13 @@ trong 1 lệnh: **`sweep.duplicates.by_drive_id`** và **`registry-doctor.duplic
 
 ## 3. Việc ưu tiên
 
-### U-1. Quyết số phận GDoc khuyết `1N3KuSagQw-M8qzpK9Ia7IvNI-yPYztjtUwfUVMzRFKc`
-Drive convert PDF→GDoc **làm rơi số hiệu `3848` và ngày `29`** ở đầu văn bản (`Số: 3848 /BC-BHXH … ngày 29
-tháng 6 năm 2026` → `Số: /BC-BHXH … ngày tháng 6 năm 2026`). Xác nhận bằng 2 đường đọc độc lập. Dòng đang
-`corpus` RỖNG + `note` `CONVERT_LOSSY_KHONG_DUNG_LAM_CANONICAL…`, KHÔNG trên NLM. Bản corpus vẫn là PDF gốc
-`1h0kl-G4-8l7r_rvOMSlVlXu3su1IwSvU` (sid `52f8ac58`, còn sống trên `2d8c2fef`) ⇒ **corpus không hụt**.
-Chọn: (a) quarantine hẳn dòng GDoc; (b) vá 2 giá trị rồi verify token/ký tự lại rồi mới promote.
+### ~~U-1. Quyết số phận GDoc khuyết~~ — ĐÃ XONG (người dùng duyệt phương án vá)
+GDoc `1N3KuSagQw-M8qzpK9Ia7IvNI-yPYztjtUwfUVMzRFKc` đã được **vá lại đúng 2 giá trị Drive convert làm rơi**
+(`3848` số hiệu, `29` ngày) bằng `gws docs documents batchUpdate` / `replaceAllText`
+(2 request, mỗi request `occurrencesChanged: 1`, không sửa gì khác), **verify lại 0-lệch trên 2 đường đọc
+độc lập** (đa tập ký tự 42.673/42.673, thiếu 0 thừa 0), rồi promote: sid `32a31915-41af-4cc5-ab71-1ee35b35c67c`
+trên `2d8c2fef`, `corpus=true`; PDF gốc `1h0kl-G4…` hạ `corpus=false` + `removed_from_drive`.
+**R-4 ĐÓNG HẲN (2/2 file).**
 
 ### U-2. Nợ deploy — **phiên này bump VERSION nên phiên này đẩy** (chưa được duyệt ⇒ chưa chạy)
 master/nhánh nay **v1.36.19**. Theo §Quy ước deploy: `git fetch origin master` + không tụt sau → chạy
@@ -77,7 +78,11 @@ trước) · rọ 3c chờ vá auditor (bucket họ-tên-riêng + neo «Số:» 
 3. **Tách stdout khỏi stderr rồi mới parse JSON** — `2>&1` cho JSON hỏng/`count=None` giả.
 4. **Verify convert PDF→GDoc phải đo ĐA TẬP KÝ TỰ**, không dùng ratio thô (bảng làm ratio tụt còn 0.65 dù
    nội dung y hệt) và cũng đừng chỉ đếm token (token dính nhau che mất chênh lệch). Lượt 30: đa tập ký tự
-   bắt đúng 6 chữ số bị mất mà token suýt cho qua.
+   bắt đúng 6 chữ số bị mất mà token suýt cho qua. **Drive convert PDF→GDoc CÓ THỂ NUỐT số hiệu/ngày ở
+   đầu văn bản** — ca `1N3KuSag…` mất `3848` + `29`; luôn soi riêng khối tiêu đề.
+4b. **Verify SAU khi sửa nội dung BẮT BUỘC `doc-text --refresh`** (hoặc đối chiếu bằng đường đọc thứ hai):
+   `doc-text` không `--refresh` đọc cache `extract_<id>.txt` CŨ ⇒ báo vẫn thiếu dù đã vá xong. Lượt 30 đã
+   suýt kết luận "vá không ăn" vì bẫy này.
 5. **`nlm-content` đo nguồn sống/chết PHẢI kèm `--no-fallback`**.
 6. **Trạng thái `removed_*` tự nó KHÔNG phải lỗi** — chỉ sai khi join với LIVE thấy nguồn còn đó.
 7. **"Nguồn sống" ≠ "đáng ở trong corpus"** — đối chiếu bản sinh đôi trên Drive.

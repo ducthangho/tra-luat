@@ -159,6 +159,41 @@ def _verify_reg_result(rb: dict, expected: int) -> dict:
             "no_change": reg_ok and missed == 0 and patched < int(expected)}
 
 
+def _reg_rows_split_by_drive_id(rows, drive_id) -> tuple:
+    """r281 (bằng chứng LIVE 31-07-2026) PURE: tách rows của `reg_get` thành (exact, sidecar).
+
+    `doRegGet_` của webapp (Code 2.21.2p) lọc `o.drive_id === p.drive_id || o.src_id === p.drive_id`
+    ⇒ hỏi id của một FILE NGUỒN (.pdf/.docx nằm cạnh) trả THÊM dòng GDoc canonical đang trỏ `src_id`
+    về nó. **Đó KHÔNG phải sổ trùng**: đo nền 31-07-2026 = 1317 dòng / 1317 `drive_id` PHÂN BIỆT
+    (0 dòng trùng khoá), nhưng **162 id** rơi vào ca 2-dòng này. Ba lượt liên tiếp đã chẩn sai lớp
+    này thành "sheet-dup" vì đếm `len(rows)` / tin `rows[0]`:
+      · lượt 29 ca `19_6Mp_…` — CAS `--expect` chặn `EXPECT_AMBIGUOUS_ROWS count=2`, dừng cả R-4;
+      · lượt 21 ca `1Qja1Lwp…` Kế toán — ghi ĐẬU đúng dòng .docx nhưng readback đọc dòng GDoc nên
+        báo `FIELDS_DROPPED_ON_WRITE` + kết luận "CẤM reg-delete vì xoá cả hai dòng".
+    Phía GHI KHÔNG hề nở: `regUpsertOne_` khớp cột 0 (`drive_id`) và `doRegDelete_` khớp `o.drive_id`
+    — chỉ đường ĐỌC mới trả dư. Vì thế client phải tự chọn dòng có `drive_id` KHỚP KHOÁ; dòng còn
+    lại là sidecar, đưa vào thông điệp để người vận hành thấy ĐÚNG bệnh thay vì đoán trùng sổ.
+    Dòng KHÔNG echo cột `drive_id` (server cũ) tính vào exact — giữ nguyên hành vi cũ, không gãy."""
+    did = str(drive_id or "").strip()
+    _rows = [r for r in (rows or []) if isinstance(r, dict)]
+    if not did:
+        return (_rows, [])
+    exact, sidecar = [], []
+    for _r in _rows:
+        if str(_r.get("drive_id") or "").strip() == did or "drive_id" not in _r:
+            exact.append(_r)
+        else:
+            sidecar.append(_r)
+    return (exact, sidecar)
+
+
+def _reg_row_for_drive_id(rows, drive_id):
+    """r281 PURE: dòng registry KHỚP ĐÚNG `drive_id` (dòng mà mọi phép ghi sẽ đậu vào), None khi
+    không có. Thay cho `rows[0]` — xem `_reg_rows_split_by_drive_id` vì sao `rows[0]` sai."""
+    exact, _ = _reg_rows_split_by_drive_id(rows, drive_id)
+    return exact[0] if exact else None
+
+
 _REG_BULK_READBACK_MAX = 3   # v1.34.34: batch ≤N item mới readback field-level (cost +1 reg_get/item ~2-3s)
 
 
@@ -217,7 +252,10 @@ def _verified_reg_write_unlocked(g, items: list, cols) -> dict:
                     _rg = g.get("reg_get", drive_id=_did, refresh="true")
                     if not (isinstance(_rg, dict) and _rg.get("ok") is True and _rg.get("rows")):
                         return ["<readback_failed>"]
-                    _row = (_rg.get("rows") or [{}])[0]
+                    # r281: reg_get lọc drive_id HOẶC src_id ⇒ rows[0] có thể là dòng canonical khác.
+                    _row = _reg_row_for_drive_id(_rg.get("rows"), _did)
+                    if _row is None:
+                        return ["<readback_failed>"]
                 except Exception:  # noqa: BLE001
                     return ["<readback_failed>"]
                 return [c for c in _cols_list
@@ -351,8 +389,11 @@ def _verified_reg_upsert_unlocked(g, payload: dict) -> dict:
         try:
             rb = g.get("reg_get", drive_id=_did, refresh="true")
             _rows = (rb.get("rows") or []) if isinstance(rb, dict) and rb.get("ok") is True else []
-            if _rows:
-                _row = _rows[0] or {}
+            # r281 (ca `1Qja1Lwp…` Kế toán lượt 21): ghi ĐẬU đúng dòng .docx nhưng readback đọc
+            # `rows[0]` = dòng GDoc canonical (khớp nhờ src_id) ⇒ báo FIELDS_DROPPED_ON_WRITE KHỐNG
+            # rồi retry vô ích, và đẻ ra kết luận sai "sổ có 2 dòng cùng drive_id".
+            _row = _reg_row_for_drive_id(_rows, _did)
+            if _row is not None:
                 for k in fields:
                     want = str(payload.get(k) or "").strip()
                     got = str(_row.get(k) or "").strip()
@@ -383,8 +424,8 @@ def _verified_reg_upsert_unlocked(g, payload: dict) -> dict:
             try:
                 rb2 = g.get("reg_get", drive_id=_did, refresh="true")
                 _rows2 = (rb2.get("rows") or []) if isinstance(rb2, dict) and rb2.get("ok") is True else []
-                if _rows2:
-                    _row2 = _rows2[0] or {}
+                _row2 = _reg_row_for_drive_id(_rows2, _did)   # r281: KHÔNG rows[0] (nở theo src_id)
+                if _row2 is not None:
                     dropped = [d for d in dropped
                                if str(_row2.get(d["col"]) or "").strip() != str(d["want"]).strip()]
             except Exception:  # noqa: BLE001
@@ -404,8 +445,8 @@ def _verified_reg_upsert_unlocked(g, payload: dict) -> dict:
             try:
                 rb3 = g.get("reg_get", drive_id=_did, refresh="true")
                 _rows3 = (rb3.get("rows") or []) if isinstance(rb3, dict) and rb3.get("ok") is True else []
-                if _rows3:
-                    _row3 = _rows3[0] or {}
+                _row3 = _reg_row_for_drive_id(_rows3, _did)   # r281: KHÔNG rows[0] (nở theo src_id)
+                if _row3 is not None:
                     dropped = [d for d in dropped
                                if str(_row3.get(d["col"]) or "").strip() != str(d["want"]).strip()]
             except Exception:  # noqa: BLE001

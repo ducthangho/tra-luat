@@ -4105,6 +4105,69 @@ def run() -> int:
     cases.append(("r279_expect_absent_is_noop",
                   _expect_precondition_verdict(_r279row, [])["ok"] is True
                   and _expect_precondition_verdict(None, None)["ok"] is True))
+    # r281 (v1.36.19 — BẰNG CHỨNG LIVE 31-07-2026): `reg_get` của webapp lọc `drive_id === X || src_id === X`
+    # (Code 2.21.2p `doRegGet_`) ⇒ hỏi id một FILE NGUỒN trả KÈM dòng GDoc canonical trỏ src_id về nó. Đo nền:
+    # 1317 dòng / 1317 drive_id phân biệt (0 trùng khoá) nhưng 162 id dính ca 2-dòng. Đếm `len(rows)`/tin
+    # `rows[0]` đã đẻ ra BA chẩn đoán sai "sheet-dup" (ca 19_6Mp_ lượt 29 chặn cả R-4; ca 1Qja1Lwp Kế toán lượt 21).
+    _r281rows = [{"drive_id": "PDF_SRC", "name": "bao_cao.pdf", "corpus": "true", "src_id": ""},
+                 {"drive_id": "GDOC_CANON", "name": "bao_cao", "corpus": "true", "src_id": "PDF_SRC"}]
+    _r281ex, _r281sc = _reg_rows_split_by_drive_id(_r281rows, "PDF_SRC")
+    cases.append(("r281_split_sidecar_khong_phai_trung_so",
+                  len(_r281ex) == 1 and _r281ex[0]["drive_id"] == "PDF_SRC"
+                  and len(_r281sc) == 1 and _r281sc[0]["drive_id"] == "GDOC_CANON"))
+    # Hỏi id GDoc: dòng file nguồn KHÔNG khớp cả drive_id lẫn src_id ⇒ vẫn phải rơi ra khỏi exact.
+    _r281ex2, _r281sc2 = _reg_rows_split_by_drive_id(_r281rows, "GDOC_CANON")
+    cases.append(("r281_split_hoi_gdoc_chon_dung_dong",
+                  len(_r281ex2) == 1 and _r281ex2[0]["drive_id"] == "GDOC_CANON" and len(_r281sc2) == 1))
+    # `rows[0]` là CHÍNH cái bẫy: thứ tự server trả không bảo đảm dòng khớp khoá đứng đầu.
+    cases.append(("r281_row_for_drive_id_khong_lay_rows0",
+                  _reg_row_for_drive_id(list(reversed(_r281rows)), "PDF_SRC")["drive_id"] == "PDF_SRC"
+                  and _reg_row_for_drive_id(_r281rows, "GDOC_CANON")["drive_id"] == "GDOC_CANON"))
+    # Id CHỈ tồn tại dưới dạng src_id (chưa có dòng riêng) = KHÔNG có dòng — trước đây so kỳ vọng với dòng LẠ
+    # rồi ghi tiếp, tức chốt CAS "đậu" nhờ đọc nhầm văn bản khác.
+    cases.append(("r281_chi_la_src_id_thi_coi_nhu_khong_co_dong",
+                  _reg_row_for_drive_id([_r281rows[1]], "PDF_SRC") is None
+                  and _expect_precondition_verdict(_reg_row_for_drive_id([_r281rows[1]], "PDF_SRC"),
+                                                   ["corpus=true"])["error"] == "ROW_NOT_FOUND"))
+    # TRÙNG KHOÁ THẬT vẫn phải lộ (chốt EXPECT_AMBIGUOUS_ROWS không được vô hiệu hoá cùng lúc).
+    _r281dup = [{"drive_id": "SAME", "name": "ban A"}, {"drive_id": "SAME", "name": "ban B"}]
+    cases.append(("r281_trung_khoa_that_van_ambiguous",
+                  len(_reg_rows_split_by_drive_id(_r281dup, "SAME")[0]) == 2))
+    # Server cũ KHÔNG echo cột drive_id → giữ nguyên hành vi cũ (nhận dòng), không được gãy.
+    cases.append(("r281_server_khong_echo_drive_id_van_nhan",
+                  _reg_row_for_drive_id([{"corpus": "true"}], "X") == {"corpus": "true"}
+                  and _reg_rows_split_by_drive_id([], "X") == ([], [])))
+    # HÀNH VI (không chỉ hàm PURE) — dựng lại ĐÚNG ca Kế toán lượt 21: ghi `note` cho dòng file nguồn,
+    # `reg_get` trả dòng GDoc canonical TRƯỚC (khớp nhờ src_id). Bản cũ đọc rows[0] ⇒ báo
+    # FIELDS_DROPPED_ON_WRITE + retry vô ích + đẻ ra kết luận sai "sổ có 2 dòng cùng drive_id".
+    class _FakeG281(_FakeG):
+        def get(self, action, **kw):
+            self.gets.append((action, kw))
+            if action == "reg_upsert":
+                return {"ok": True, "updated": True}
+            if action == "reg_get":
+                return {"ok": True, "count": 2, "rows": [
+                    {"drive_id": "GDOC_CANON", "src_id": "PDF_SRC", "note": "ghi chu CU cua ban canonical"},
+                    {"drive_id": "PDF_SRC", "src_id": "", "note": "ghi chu MOI"}]}
+            return {"ok": False}
+    _g281 = _FakeG281()
+    _v281 = _verified_reg_upsert(_g281, {"drive_id": "PDF_SRC", "note": "ghi chu MOI"})
+    # Bằng chứng HAI CHIỀU: bản cũ (rows[0]) rơi vào nhánh vá-lỗi ⇒ `fields_retried`/`fields_dropped` xuất hiện
+    # và tốn thêm round-trip reg_upsert; bản này phải ĐI THẲNG — verified, KHÔNG retry, ĐÚNG 1 lần reg_upsert.
+    cases.append(("r281_readback_doc_dung_dong_khong_retry_khong",
+                  _v281.get("verified") is True and not _v281.get("fields_dropped")
+                  and not _v281.get("fields_retried") and not _v281.get("fields_retried_post")
+                  and _v281.get("error") != "FIELDS_DROPPED_ON_WRITE"
+                  and sum(1 for a, _kw in _g281.gets if a == "reg_upsert") == 1))
+    # Detector sổ hỏng THẬT: bucket đếm theo KHOÁ, KHÔNG lọc ref/thuong (trùng khoá là hỏng cấu trúc);
+    # cặp GDoc↔file-nguồn (ca 162 dòng trên nền) KHÔNG được tính là trùng.
+    _r281g = _hygiene_groups([{"drive_id": "SAME", "name": "A", "row_kind": "ref"},
+                              {"drive_id": "SAME", "name": "B"},
+                              {"drive_id": "PDF_SRC", "name": "bao_cao.pdf"},
+                              {"drive_id": "GDOC_CANON", "name": "bao_cao", "src_id": "PDF_SRC"}])
+    cases.append(("r281_sweep_detector_bat_trung_khoa_bo_qua_sidecar",
+                  list((_r281g.get("duplicates_by_drive_id") or {}).keys()) == ["SAME"]
+                  and len(_r281g["duplicates_by_drive_id"]["SAME"]) == 2))
     # r280 (P16-F01, P0 mất dữ liệu): `init-config` ghi đè trọn config ⇒ xoá trắng block `profiles`.
     # PURE `_merge_local_config`: template public LÊN TRÊN file cũ, KHÔNG được nuốt block dự án.
     _r280old = {"webappUrl": "https://old", "token": "T_OLD", "defaultProfile": "ATVSLD",

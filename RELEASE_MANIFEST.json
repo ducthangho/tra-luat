@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.18",
+  "skill_version": "1.36.19",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 195,
-  "total_bytes": 7153933,
-  "package_hash": "f45ad223cb475a22621c5466a0bc9b1409d04f4bc3e213a8501488fea059d17e",
-  "content_hash": "f45ad223cb475a22621c5466a0bc9b1409d04f4bc3e213a8501488fea059d17e",
+  "total_bytes": 7171929,
+  "package_hash": "97b6e7220ad7081e246927ff02f8820b6968198f8cfc52c6e5f43bb43a1b20c3",
+  "content_hash": "97b6e7220ad7081e246927ff02f8820b6968198f8cfc52c6e5f43bb43a1b20c3",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 382584,
-      "sha256": "46c3ef54a008c5bec85b657b906a2236d0bdea07d4357b57e86798c770182b27"
+      "size": 386592,
+      "sha256": "2eb191bfaf1a1d7fd676156a8ad9794bd299e027bae2c982b14e4d807aeedb9c"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 47966,
-      "sha256": "d35a4c18b8c89619e824025d8ffd0edaa7de21dcb5884d3859fb5c1e17fb11e8"
+      "sha256": "8bb804a47579717ec6f53324c405d933fcde10ab6a875420a77431cc0861cd7a"
     },
     {
       "path": "VERSION",
-      "size": 7,
-      "sha256": "e6b912426c320f151da42407e458ef1422480b5356b1e7f8ac1fd493651ce012"
+      "size": 8,
+      "sha256": "6802a5bea4b5e29ee7f79b5f241a4205690ba20427c833a744c694e47fa136a1"
     },
     {
       "path": "agents/openai.yaml",
@@ -358,8 +358,8 @@
     },
     {
       "path": "references/golden/hygiene_ops_plan_fixture_config.json",
-      "size": 3798,
-      "sha256": "a77aaef574ec1b7b61985d6128f2f3026a10e6ca48e5dc51b6284581188fa499"
+      "size": 3822,
+      "sha256": "961cc85501a8e3edae974103778867f066f30d6ba86e9eaee5da99395daefabd"
     },
     {
       "path": "references/golden/hygiene_reg_query_corpus.json",
@@ -368,8 +368,8 @@
     },
     {
       "path": "references/golden/hygiene_sweep_fixture.json",
-      "size": 4703,
-      "sha256": "c91624ec87a212a695119562083832bc72f534e84c9d4bf48c92bd7904c10e4a"
+      "size": 4725,
+      "sha256": "d1ec200ccdbb0e3102c4dd9959d6915f86843996f40847b683b5e24b42f86ec7"
     },
     {
       "path": "references/golden/hygiene_vbhn_year_fix_dry.json",
@@ -753,8 +753,8 @@
     },
     {
       "path": "scripts/registry_hygiene.py",
-      "size": 22973,
-      "sha256": "0ca909b70d66b0d47a14edff7e9c99031b0ede4b89ff123cea860741da47ece3"
+      "size": 24350,
+      "sha256": "c57a4fc99c2e02d5bfd30629b2216569e07df82571dc23af73e66dfe2d59d2fe"
     },
     {
       "path": "scripts/registry_orchestrator.py",
@@ -773,8 +773,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 228015,
-      "sha256": "82bd8e4aca45cf29c6ed490001bcafdb6f710f317d9a081bb078997b08fbb548"
+      "size": 228150,
+      "sha256": "b2b8994e536301014f3f793088d7571ef852f598af8c759cdc934c8019ab4273"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -828,8 +828,8 @@
     },
     {
       "path": "scripts/tl_core/hygiene.py",
-      "size": 223222,
-      "sha256": "de8438d80177b092335cbdd21931fd0c786359fae6967f9dc671057e75937a97"
+      "size": 225565,
+      "sha256": "1786fb038716e41748ef13400fdaeaf01bdcfbec141d7cd6991f4b28bc76e036"
     },
     {
       "path": "scripts/tl_core/ingest_contract.py",
@@ -843,8 +843,8 @@
     },
     {
       "path": "scripts/tl_core/ingest_ops.py",
-      "size": 260495,
-      "sha256": "f66b09f7a3a4cca7b086c7b4f473700bf54b954f8711c068545a6543b88ff63c"
+      "size": 260853,
+      "sha256": "87edb0ed1d0e4b576a438e4e514e1b1ee822ce611d1b536adbb01e076ecc81d5"
     },
     {
       "path": "scripts/tl_core/jsonio.py",
@@ -893,8 +893,8 @@
     },
     {
       "path": "scripts/tl_core/regio.py",
-      "size": 60440,
-      "sha256": "bd7f24c98bd9c632def732e641c5a33e1434f38a526074e310868889e05fe4da"
+      "size": 63395,
+      "sha256": "2141354b3f67664f80ebcd50d405fb6997a875ab8f8b52166152e8700a702ad6"
     },
     {
       "path": "scripts/tl_core/release.py",
@@ -908,8 +908,8 @@
     },
     {
       "path": "scripts/tl_core/source_ops.py",
-      "size": 83075,
-      "sha256": "6c601d4035cb3e81d971dda64cd110b38f282d1ed3e5ec37cc837e19370397e6"
+      "size": 84373,
+      "sha256": "d7b583f55c1c3104acbdd0fbbe447ffb8abb486c74c5264eb211e00dadee1187"
     },
     {
       "path": "scripts/tl_core/the_thuc.py",
@@ -938,8 +938,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1751512,
-      "sha256": "4b4b27057e21bcc5d36100f9d798f30b3a9c50c5c66b3d91f42a8efe0fa68b37"
+      "size": 1756987,
+      "sha256": "d0706fa9c70b756b387b83ce777658e8aa29de3bd972ef0ba7ad770fb4b0a141"
     },
     {
       "path": "scripts/tra_cuu.py",

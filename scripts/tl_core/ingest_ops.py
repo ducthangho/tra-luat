@@ -3127,7 +3127,10 @@ def _il_stage_readback(ctx):
         try:
             _rg = g.get("reg_get", drive_id=gdoc)
             _rg_ok = bool(_rg.get("ok"))
-            _rb_row = (_rg.get("rows") or [{}])[0] if _rg_ok else {}
+            # r281: reg_get lọc `drive_id || src_id` ⇒ rows[0] có thể là dòng KHÁC (bản canonical trỏ
+            # src_id về id này). Backfill sohieu/title_vn phải soi ĐÚNG dòng của gdoc, không thì so
+            # với dòng lạ rồi ghi đè oan.
+            _rb_row = (_reg_row_for_drive_id(_rg.get("rows"), gdoc) or {}) if _rg_ok else {}
         except Exception:  # noqa: BLE001
             _rb_row, _rg_ok = {}, False
         _need_sh = bool(sohieu) and norm_sohieu(str(_rb_row.get("sohieu") or "")) != norm_sohieu(sohieu)
@@ -3164,7 +3167,7 @@ def _il_stage_readback(ctx):
         _reg_rows = (_reg_read.get("rows") or []) if isinstance(_reg_read, dict) and _reg_read.get("ok") is True else []
     except Exception as _reg_exc:  # noqa: BLE001
         _reg_read, _reg_rows = {"error": f"{type(_reg_exc).__name__}: {_reg_exc}"}, []
-    _registry_row = (_reg_rows[0] or {}) if _reg_rows else {}
+    _registry_row = _reg_row_for_drive_id(_reg_rows, gdoc) or {}   # r281: KHÔNG rows[0] (reg_get nở theo src_id)
     _registry_checks = {
         "row_exists": bool(_registry_row),
         "drive_id": str(_registry_row.get("drive_id") or _registry_row.get("gdoc_id") or "") == str(gdoc),

@@ -321,6 +321,17 @@ def _subject_sig(name: str) -> str:
 
 def analyze(rows: list[dict]) -> dict:
     by_so, by_name = defaultdict(list), defaultdict(list)
+    # r281: HAI DÒNG CÙNG `drive_id` — lớp «sổ hỏng thật» mà TRƯỚC ĐÂY KHÔNG bucket nào đếm, nên ba
+    # lượt liên tiếp phải suy đoán từ `reg_get count=2` và suy SAI (reg_get còn khớp `src_id` — xem
+    # `_reg_rows_split_by_drive_id`). Đếm trên TOÀN BỘ dòng, TRƯỚC mọi phép loại ref/thuong/corpus-false:
+    # trùng khoá là hỏng cấu trúc, không phụ thuộc dòng đó có nằm trong phạm vi rà hay không.
+    # Đo nền 31-07-2026: 1317 dòng / 1317 drive_id phân biệt ⇒ bucket này = 0 (chứng minh được ĐIỀU ÂM).
+    by_drive_id = defaultdict(list)
+    for e in rows:
+        _rid = row_id(e)
+        if _rid:
+            by_drive_id[_rid].append(e)
+    dup_drive_id = {k: v for k, v in by_drive_id.items() if len(v) > 1}
     root_rows, raw_rows, no_sohieu, title_mismatch, ghost_rows = [], [], [], [], []
     sohieu_khong_nam = []   # r276 (P15-F06): sohieu CÓ nhưng KHÔNG năm — vi phạm bất biến PHẢI-CÓ-NĂM
     # v1.35.65: ĐẾM phần bị loại. Trước đây `count` = TỔNG dòng còn mọi bucket chỉ tính trên phần ĐÃ LỌC
@@ -391,6 +402,7 @@ def analyze(rows: list[dict]) -> dict:
                   "trước đây bị gộp vào (2) nên nhãn khai thiếu). Muốn con số trên TOÀN BỘ dòng own thì "
                   "phải cộng lại (3) — cờ MISSING_SOHIEU trên dòng corpus=false KHÔNG vào bucket "
                   "missing_sohieu."),
+        "duplicate_drive_id": dup_drive_id,   # r281 — trùng KHOÁ (sổ hỏng thật), tính trên count không phải scanned
         "duplicate_sohieu": dup_so,
         "sohieu_conflict_different_doc": conflict,
         "sohieu_dup_same_doc": same_doc,
@@ -421,7 +433,8 @@ def compact(e: dict) -> dict:
 
 # H2: KHÓA tóm tắt top-level của registry-doctor. Dòng text SINH TỪ danh sách này → text & JSON DÙNG CHUNG
 # schema, KHÔNG THỂ lệch nhãn lần nữa (trước đây text in 'duplicate_sohieu/title_mismatch/rows' lệch JSON).
-_DOCTOR_SUMMARY_KEYS = ("count", "scanned", "duplicate_sohieu_groups", "sohieu_conflict_groups",
+_DOCTOR_SUMMARY_KEYS = ("count", "scanned", "duplicate_drive_id_groups",
+                        "duplicate_sohieu_groups", "sohieu_conflict_groups",
                         "duplicate_name_groups",
                         "root_rows", "raw_name_rows", "missing_sohieu", "sohieu_khong_nam",
                         "title_mismatch_candidates", "ghost_nlm_rows")
@@ -437,6 +450,8 @@ def build_doctor_summary(rep: dict) -> dict:
         "skipped_own_thuong": rep.get("skipped_own_thuong", 0),
         "skipped_own_corpus_false": rep.get("skipped_own_corpus_false", 0),
         "basis": rep.get("basis", ""),
+        # r281: KHÔNG tính trên `scanned` — trùng khoá là hỏng cấu trúc, đếm trên TOÀN BỘ `count`.
+        "duplicate_drive_id_groups": len(rep.get("duplicate_drive_id", {})),
         "duplicate_sohieu_groups": len(rep["duplicate_sohieu"]),
         "sohieu_conflict_groups": len(rep.get("sohieu_conflict_different_doc", {})),
         "duplicate_name_groups": len(rep["duplicate_name"]),
@@ -473,6 +488,8 @@ def main(argv=None) -> int:
     out = {
         **summary,
         "samples": {
+            "duplicate_drive_id": {k: [compact(x) for x in v[:a.limit]]
+                                   for k, v in list(rep.get("duplicate_drive_id", {}).items())[:a.limit]},
             "duplicate_sohieu": {k: [compact(x) for x in v[:a.limit]]
                                   for k, v in list(rep["duplicate_sohieu"].items())[:a.limit]},
             "sohieu_conflict": {k: [compact(x) for x in v[:a.limit]]

@@ -198,6 +198,17 @@ def _hygiene_groups(entries: list[dict]) -> dict:
     dup_so = {k:v for k,v in by_so.items() if len(v) > 1}
     dup_name = {k:v for k,v in by_name.items() if len(v) > 1}
     dup_md5 = {k:v for k,v in by_md5.items() if len(v) > 1}
+    # r281: TRÙNG KHOÁ `drive_id` — lớp «sổ hỏng thật» mà mọi bucket cũ ĐỀU KHÔNG bắt (`identity` gom
+    # theo dedupe-key/md5, không theo khoá dòng). Vắng nó, ba lượt liên tiếp phải suy từ `reg_get count=2`
+    # và suy SAI: reg_get còn khớp `src_id` nên cặp «GDoc canonical + file nguồn» trả 2 dòng dù sổ SẠCH
+    # (xem `_reg_rows_split_by_drive_id`). Đếm trên TOÀN BỘ entries, KHÔNG lọc ref/thuong — trùng khoá là
+    # hỏng cấu trúc bất kể dòng thuộc phạm vi nào. Đo nền 31-07-2026: 1317 dòng / 1317 khoá ⇒ = 0.
+    by_did: dict[str, list] = {}
+    for e in entries:
+        _d = str(_entry_drive_id(e) or "").strip()
+        if _d:
+            by_did.setdefault(_d, []).append(e)
+    dup_drive_id = {k: v for k, v in by_did.items() if len(v) > 1}
     # C4 (v1.33.0): trùng số hiệu THẬT (≥2 corpus=true cùng phía, loại gốc+VBHN/phụ-lục/sidecar/quarantine) —
     # headline dùng số này; dup_so giữ nguyên làm số RAW tham khảo (dedup-plan/rà tay vẫn thấy đủ cụm).
     dup_so_real = {k: v for k, v in dup_so.items() if _sohieu_dup_group_real(v)}
@@ -285,7 +296,9 @@ def _hygiene_groups(entries: list[dict]) -> dict:
             "duplicates_by_sohieu_raw_active": dup_so_raw_active,
             "duplicates_by_name_active": dup_name_active,
             "duplicates_by_name": dup_name,
-            "duplicates_by_md5": dup_md5, "orphans": orphans, "treaties": treaties,
+            "duplicates_by_md5": dup_md5,
+            "duplicates_by_drive_id": dup_drive_id,   # r281 — trùng KHOÁ dòng (sổ hỏng thật)
+            "orphans": orphans, "treaties": treaties,
             "party_docs": party_docs,
             "vbhn_metadata_advisory": vbhn_metadata_advisory,
             "omnibus_title_advisory": omnibus_title_advisory,
@@ -1497,6 +1510,10 @@ def _sweep_report(entries: list) -> dict:
                        "by_name_active": len(g["duplicates_by_name_active"]),
                        "by_md5": len(g["duplicates_by_md5"]),
                        "by_name": len(g["duplicates_by_name"]), "identity": len(g["duplicate_identity_groups"]),
+                       # r281: `by_drive_id` = HAI DÒNG CÙNG KHOÁ (sổ hỏng cấu trúc) — KHÁC `identity`
+                       # (gom theo dedupe-key/md5). Đây là thước DUY NHẤT trả lời được «có sheet-dup không»;
+                       # `reg_get count=2` KHÔNG trả lời được vì còn khớp `src_id`.
+                       "by_drive_id": len(g.get("duplicates_by_drive_id") or {}),
                        "same_document": len(g["vbhn_same_document_dups"])},
         "orphans": len(g["orphans"]), "treaties": len(g.get("treaties") or []),
         "party_docs": len(g.get("party_docs") or []),   # B.7 v1.33.19: văn kiện Đảng không-số-hiệu hợp lệ
@@ -1581,6 +1598,14 @@ def _sweep_report(entries: list) -> dict:
             or rep["duplicates"]["by_sohieu_raw_active"] or rep["duplicates"]["by_name_active"]):
         acts.append("tl dedup-plan --apply   # dedup toàn corpus 1 lệnh (GIỮ canonical, set dup corpus=false; "
                     "gồm cả cụm ACTIVE by_sohieu_raw_active/by_name_active)")
+    # r281: trùng KHOÁ khác hẳn mọi lớp dup còn lại — KHÔNG có lệnh nào dọn được an toàn, vì `reg_delete`
+    # của webapp lọc `o.drive_id === key` ⇒ xoá CẢ CỤM chứ không xoá được đúng một dòng. Nói thẳng thay
+    # vì gợi ý một lệnh sẽ phá dữ liệu.
+    if rep["duplicates"].get("by_drive_id"):
+        acts.append(f"⚠ {rep['duplicates']['by_drive_id']} khoá drive_id có ≥2 DÒNG registry (sổ hỏng CẤU TRÚC) — "
+                    f"`tl reg-delete` xoá THEO KHOÁ nên sẽ xoá CẢ CỤM: dọn TAY trên Sheet `files` (giữ dòng đúng, "
+                    f"xoá dòng thừa) rồi chạy lại `tl sweep --refresh`. KHÔNG nhầm với ca `reg_get count=2` "
+                    f"của cặp GDoc↔file-nguồn (reg_get còn khớp `src_id`) — ca đó sổ SẠCH, bucket này = 0")
     if rep["loai_noncanonical"]:
         acts.append(f"tl backfill-loai --normalize --apply   # {rep['loai_noncanonical']} loai phi-chuẩn (FIELD ngoài "
                     f"enum — cần --normalize v1.30.1 vì mặc định CHỈ điền dòng RỖNG; khác LOAI_MISMATCH của "
@@ -1664,6 +1689,7 @@ def cmd_sweep(a) -> int:
               f"raw-active={rep['duplicates']['by_sohieu_raw_active']} — active GIẢM theo dedup, raw thì không) "
               f"md5={rep['duplicates']['by_md5']} name={rep['duplicates']['by_name']}"
               f"(active={rep['duplicates']['by_name_active']}) identity={rep['duplicates']['identity']} "
+              f"drive_id={rep['duplicates'].get('by_drive_id', 0)} "
               f"same_doc={rep['duplicates']['same_document']}")
         print(f"  orphans={rep['orphans']} (tách riêng hợp-lệ-không-số-hiệu: treaties={rep['treaties']} "
               f"party_docs={rep.get('party_docs', 0)}) "

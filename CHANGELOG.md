@@ -1,3 +1,44 @@
+# ★ v1.36.19 — r281: `reg_get` khớp CẢ `src_id` — «sheet-dup» ba lượt qua là CHẨN SAI (2026-07-31)
+
+**Bệnh:** `doRegGet_` của webapp (Code 2.21.2p) lọc `o.drive_id === p.drive_id || o.src_id === p.drive_id`.
+Hỏi id một **FILE NGUỒN** (.pdf/.docx nằm cạnh) vì thế trả **THÊM** dòng GDoc canonical đang trỏ `src_id` về
+nó — hai dòng cho **hai văn bản KHÁC NHAU**, sổ hoàn toàn SẠCH. Client thì đếm `len(rows)` và tin `rows[0]`,
+nên đọc ra "hai dòng cùng drive_id".
+
+**Bằng chứng LIVE (đo 31-07-2026 trên registry nền, read-only):** 1317 dòng / **1317 `drive_id` PHÂN BIỆT —
+0 dòng trùng khoá**; nhưng **162 id** rơi vào ca 2-dòng này. Hai ca từng bị kết luận là "sheet-dup" đều là ca
+này, `reg_get` trả rõ hai `drive_id` khác nhau:
+- `19_6Mp_…` (lượt 29) — dòng PDF gốc + dòng GDoc `1rWM57yW…` có `src_id=19_6Mp_…`; chốt CAS r279 trả
+  `EXPECT_AMBIGUOUS_ROWS count=2` ⇒ **chặn oan, dừng cả lô R-4**.
+- `1Qja1Lwp…` Kế toán (lượt 21) — dòng .docx quarantine + dòng GDoc `14R22X1A…` có `src_id=1Qja1Lwp…`;
+  `note` ghi ĐẬU đúng dòng .docx nhưng readback đọc `rows[0]` = dòng GDoc ⇒ báo `FIELDS_DROPPED_ON_WRITE`
+  khống + retry vô ích, rồi đẻ ra nếp «CẤM `reg-delete` vì xoá cả hai dòng».
+Phía GHI **chưa bao giờ** nở: `regUpsertOne_` khớp cột 0 (`drive_id`), `doRegDelete_` khớp `o.drive_id` —
+chỉ đường ĐỌC mới trả dư. `reg-query --live` cũng vốn đúng (lọc lại `drive_id` ở client, count=1) — nó
+KHÔNG "gộp dòng trùng" như sổ lượt 29 ghi.
+
+**VÁ (PURE, dùng chung):** `_reg_rows_split_by_drive_id(rows, drive_id) → (exact, sidecar)` +
+`_reg_row_for_drive_id`. Mọi đường đọc registry theo khoá nay chọn dòng có `drive_id` **KHỚP ĐÚNG**, thay cho
+`rows[0]`: chốt CAS `--expect` (source_ops), `_reg_row_get` (autofill/presence), `_rb_row` (`--clear-cols`),
+readback của `_journaled_reg_write` + `_verified_reg_upsert` (kể cả 2 vòng retry GET/POST), và hai readback
+registry của `ingest-local`. `EXPECT_AMBIGUOUS_ROWS` **giữ nguyên** nhưng nay chỉ nổ khi **≥2 dòng THẬT cùng
+khoá**; ca sidecar được liệt kê trong `sidecar_rows` + `note_sidecar` để người vận hành thấy ĐÚNG bệnh.
+`ingest-local` **KHÔNG** tạo dòng trùng — kết luận V-1 của lượt 29 bị bác bỏ bằng dữ liệu.
+
+**Detector cho lớp «sổ hỏng THẬT»** (trước nay KHÔNG bucket nào bắt — `identity` gom theo dedupe-key/md5,
+không theo khoá dòng): `sweep.duplicates.by_drive_id` + `registry-doctor.duplicate_drive_id_groups`, đếm trên
+**TOÀN BỘ** dòng (không lọc ref/thuong — trùng khoá là hỏng cấu trúc). Nền hiện tại = **0**, tức lần đầu
+chứng minh được ĐIỀU ÂM thay vì suy đoán. `next_actions` nói thẳng: trùng khoá thật phải dọn TAY trên Sheet,
+vì `reg_delete` lọc theo khoá nên sẽ xoá CẢ CỤM — **không** gợi ý một lệnh sẽ phá dữ liệu.
+
+**Kiểm (+8 case, selftest 1479/1479):** 7 PURE (tách sidecar hai chiều · `rows[0]` đảo thứ tự vẫn chọn đúng ·
+id chỉ-là-`src_id` = KHÔNG có dòng ⇒ `ROW_NOT_FOUND` chứ không so với dòng lạ · trùng khoá THẬT vẫn ambiguous ·
+server cũ không echo `drive_id` vẫn nhận · detector bắt trùng-khoá và BỎ QUA cặp sidecar) + 1 **HÀNH VI** dựng
+lại ca Kế toán qua `_verified_reg_upsert`. **Phản chứng chạy được:** đảo cả 3 readback về `rows[0]` ⇒ case
+hành vi ĐỎ (1478/1479), khôi phục ⇒ XANH. **LIVE hai chiều:** cùng lệnh thăm dò trên `19_6Mp_…` trước trả
+`EXPECT_AMBIGUOUS_ROWS count=2`, sau bản vá trả `EXPECT_MISMATCH` trên đúng dòng + `sidecar_rows`.
+Golden regen 2 fixture (`hygiene_sweep`, `hygiene_ops_plan`) — diff ĐÚNG 2 dòng `"by_drive_id": 0`.
+
 # ★ v1.36.18 — r280: `init-config` hết ghi đè trọn config — HOÀ + BACKUP + ATOMIC (P16-F01) (2026-07-31)
 
 Mở chiến dịch **P16** (vá nhóm ingest/profile — 10 phát hiện Pha 1 chưa ai vá). F01 (P0 mất dữ liệu).

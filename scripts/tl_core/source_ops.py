@@ -72,15 +72,10 @@ def _register_clear(a, g) -> int:
         return 2
 
     def _rb_row():
+        # r281: dùng CHUNG bộ chọn dòng với mọi đường đọc registry (reg_get nở theo src_id —
+        # xem `_reg_rows_split_by_drive_id`). Hành vi GIỮ NGUYÊN: đường này vốn đã lọc đúng khoá.
         rb = g.get("reg_get", drive_id=did, refresh="true")
-        rows = rb.get("rows") if isinstance(rb, dict) else None
-        for row in (rows or []):
-            if isinstance(row, dict) and str(row.get("drive_id") or "").strip() == did:
-                return row
-        # reg_get keyed theo drive_id — nhận hàng đầu nếu server không echo cột drive_id
-        if rows and isinstance(rows[0], dict) and "drive_id" not in rows[0]:
-            return rows[0]
-        return None
+        return _reg_row_for_drive_id(rb.get("rows") if isinstance(rb, dict) else None, did)
 
     try:
         pre = _rb_row()
@@ -143,8 +138,10 @@ def _reg_row_get(g, drive_id):
         return None
     if not isinstance(rb, dict):
         return None
-    _rows = rb.get("rows") or []
-    return dict(_rows[0]) if _rows else {}
+    # r281: `rows[0]` có thể là dòng GDoc canonical khớp nhờ `src_id` (reg_get lọc drive_id HOẶC
+    # src_id) ⇒ autofill/presence từng đọc NHẦM dòng của văn bản khác. Chọn dòng KHỚP ĐÚNG khoá.
+    _row = _reg_row_for_drive_id(rb.get("rows"), drive_id)
+    return dict(_row) if _row else {}
 
 
 def _reg_row_present(g, drive_id) -> bool | None:
@@ -444,17 +441,28 @@ def cmd_register(a) -> int:
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 3
         # count trước rows[0] (nếp đã trả giá): >1 dòng cùng drive_id = sổ hỏng, không đoán dòng nào.
-        if len(_rows_e) > 1:
-            print(json.dumps({"ok": False, "error": "EXPECT_AMBIGUOUS_ROWS", "count": len(_rows_e),
+        # r281 (v1.36.19): «cùng drive_id» phải hiểu ĐÚNG NGHĨA ĐEN. `reg_get` lọc `drive_id === X ||
+        # src_id === X` nên hỏi id một FILE NGUỒN trả kèm dòng GDoc canonical trỏ src_id về nó — đếm
+        # `len(rows)` biến ca BÌNH THƯỜNG (162/1317 id trên nền) thành báo động "sổ hỏng", chặn OAN cả
+        # lô R-4 lượt 29. Đếm/chọn trên dòng KHỚP ĐÚNG khoá; sidecar chỉ đi kèm để chẩn cho đúng bệnh.
+        _exact_e, _side_e = _reg_rows_split_by_drive_id(_rows_e, a.drive_id)
+        _side_note = ([{"drive_id": str(r.get("drive_id") or ""), "name": str(r.get("name") or "")[:80],
+                        "src_id": str(r.get("src_id") or "")} for r in _side_e[:5]] if _side_e else None)
+        if len(_exact_e) > 1:
+            print(json.dumps({"ok": False, "error": "EXPECT_AMBIGUOUS_ROWS", "count": len(_exact_e),
                               "drive_id": a.drive_id, "note": "nhiều dòng cùng drive_id — dọn trùng trước."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return 3
-        _v_exp = _expect_precondition_verdict(_rows_e[0] if _rows_e else None, _expects,
+        _v_exp = _expect_precondition_verdict(_exact_e[0] if _exact_e else None, _expects,
                                               known_cols=_REGISTER_EXPECT_COLS)
         if not _v_exp.get("ok"):
             print(json.dumps({"ok": False, "error": _v_exp.get("error"), "expect": _expects,
                               "mismatch": _v_exp.get("bad"),
                               **{k: _v_exp[k] for k in ("malformed", "unknown_cols") if k in _v_exp},
+                              **({"sidecar_rows": _side_note,
+                                  "note_sidecar": "r281: reg_get còn trả dòng khớp nhờ src_id (bản canonical "
+                                                  "trỏ về file nguồn này) — KHÔNG phải sổ trùng, chốt đã bỏ qua."}
+                                 if _side_note else {}),
                               "drive_id": a.drive_id, "note": "CHỐT CAS: giá trị hiện tại KHÁC kỳ vọng ⇒ nhiều "
                               "khả năng phiên khác vừa ghi dòng này. KHÔNG ghi gì. Đọc lại bằng `reg-query "
                               "--drive-id … --live`, đối chiếu sổ/phiên đang mở, rồi quyết."},

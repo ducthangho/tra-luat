@@ -81,6 +81,7 @@
   "schema": "ops_plan.v1",
   "sweep_summary": {
     "duplicates": {
+      "by_drive_id": 0,
       "by_md5": 0,
       "by_name": 0,
       "by_name_active": 0,

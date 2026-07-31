@@ -468,6 +468,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--row-kind", dest="row_kind", choices=["own", "overflow", "ref"],
                    help="(v1.29.7) sửa row_kind (own/overflow/ref) — vd chữa dòng bị gán nhầm overflow")
     p.add_argument("--force-unsafe", dest="force_unsafe", action="store_true", help="(v1.29.2) BỎ QUA precheck blocker — RỦI RO, tự chịu")
+    # r279 (va chạm 2 phiên 31-07-2026): CAS chống ghi song song. Lặp được: --expect corpus=true --expect nlm_status=pushed
+    p.add_argument("--expect", action="append", default=None, metavar="COL=VAL",
+                   help="(r279) CHỐT CAS: chỉ ghi nếu dòng ĐANG có COL=VAL (lặp được; VAL rỗng = kỳ vọng cột rỗng). "
+                        "Lệch ⇒ rc=3 KHÔNG ghi gì — nghĩa là phiên khác vừa đụng dòng này. Dùng cho mọi lô ghi khi "
+                        "có thể có phiên song song")
     # r208b 2.1 (báo cáo 25-07): mặc định TỰ SUY name (tên file Drive) + cat (folder cha) khi cột trống,
     # không suy được thì cảnh báo trong kết quả. Cờ này để tắt khi cố ý muốn dòng trống (hiếm).
     p.add_argument("--no-autofill", dest="no_autofill", action="store_true",

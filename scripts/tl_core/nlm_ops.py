@@ -1866,6 +1866,20 @@ def _source_remove_delete_verdict(r: dict) -> str:
     return "noop" if ("not found" in raw or "not_found" in raw or (m and m.group(1) == "0")) else "fail"
 
 
+def _nlm_remove_presence_verdict(listed_ok: bool, live_ids, sid: str) -> str:
+    """v1.36.17 (r279 — va chạm HAI PHIÊN 31-07-2026) PURE: sid còn SỐNG trên notebook TRƯỚC khi gỡ?
+    'present' | 'absent' (đã bị gỡ từ trước — nhiều khả năng phiên khác vừa làm) | 'list_failed'.
+
+    VÌ SAO CẦN — bằng chứng đã trả giá: `nlm_cli.source_delete` trả ok cho CẢ sid ĐÃ biến mất và raw
+    KHÔNG kèm deleted_count ⇒ `_source_remove_delete_verdict` cho 'deleted' KHỐNG. Ca thật: hai phiên
+    cùng gỡ sid 04e51f9c cách nhau 59 GIÂY, phiên sau vẫn in `deleted:1` — sổ ghi nhận công việc mà nó
+    không hề làm. `nlm-add` đã có cổng dedup-live đối chiếu LIVE trước khi ghi; đường GỠ thì chưa có
+    ⇒ đây là vế đối xứng còn thiếu. Không tin rc/ok — đòi bằng chứng DƯƠNG từ listing vật lý."""
+    if not listed_ok:
+        return "list_failed"
+    return "present" if str(sid) in {str(x) for x in (live_ids or [])} else "absent"
+
+
 def cmd_nlm_cross(a) -> int:
     """Cross-shard query qua CLI `nlm cross query` (thay MCP cross_notebook_query). Verify nguyên văn sau."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))  # nạp TL_*NOTEBOOK_ID từ config (không cần webapp)

@@ -1,3 +1,44 @@
+# ★ v1.36.17 — r279: chốt CHỐNG GHI SONG SONG cho đường NLM + registry (2026-07-31)
+
+**Bệnh (ca thật, có bằng chứng — không phải giả định):** 31-07-2026 HAI phiên cùng được duyệt một đợt
+việc và cùng ghi vào notebook `45739ff7` + registry. Sổ: `rasoat/KETQUA_NLM_QA_QB_QC_2026-07-31.md` §4.4
+(đối chiếu journal hai bên) và `rasoat/KETQUA_US_NLM_QUEUE_2026-07-31.md` §8.
+
+Cứu được lượt đó là nhờ **cổng dedup-live của `nlm-add`** — nó đối chiếu LIVE trước khi ghi nên chặn
+`ALREADY_ON_NOTEBOOK`, và chính cú chặn đó làm phiên kia phát hiện có tác nhân thứ hai. Nhưng hai đường
+ghi còn lại KHÔNG có cổng nào:
+
+1. **`nlm-source-remove` in `deleted` KHỐNG.** `nlm_cli.source_delete` trả ok cho CẢ sid ĐÃ biến mất và
+   raw không kèm `deleted_count`, nên `_source_remove_delete_verdict` cho `deleted`. Hai phiên gỡ cùng
+   sid `04e51f9c` cách nhau **59 giây**, phiên sau vẫn in `deleted:1` — nhận công việc nó không hề làm.
+2. **`register` đè im lặng.** Đường ghi đã journaled + verified-readback, nhưng verify chỉ trả lời «ta
+   ghi được gì», KHÔNG trả lời «ta có đè mất việc của ai không». LockService bảo đảm RMW nguyên tử nên
+   sổ không HỎNG — lost-update thì vẫn xảy ra êm ru, cả hai phiên đều `verified`.
+
+**VÁ — hai chốt, đối xứng với cổng dedup-live sẵn có:**
+
+- `_nlm_remove_presence_verdict` (PURE) + gắn vào `cmd_nlm_source_remove`: đo listing VẬT LÝ TƯƠI trước
+  khi gỡ. sid đã vắng ⇒ **KHÔNG gọi `source_delete`**, trả `noop` + `ALREADY_GONE_CONCURRENT` (ok vẫn
+  true — idempotent theo TRẠNG THÁI ĐÍCH, không theo lệnh). Không liệt kê được LIVE ⇒ **fail-closed**
+  (doctrine S13, như dedup gate), thoát bằng `--skip-live-check` (cờ mới). `--force` vẫn chỉ bỏ guard
+  con trỏ registry — hai mối lo khác nhau, hai cờ khác nhau.
+- `_expect_precondition_verdict` (PURE) + `register --expect COL=VAL` (lặp được): chốt **CAS** — đọc
+  dòng NGAY TRƯỚC khi ghi, lệch kỳ vọng ⇒ **rc=3, KHÔNG ghi gì**. Dùng đúng mã rc=3 của chốt chống thụt
+  lùi deploy: cùng nghĩa «phiên khác vừa đụng, DỪNG, để người quyết». VAL rỗng = kỳ vọng cột RỖNG; dòng
+  biến mất ⇒ `ROW_NOT_FOUND` (cũng là va chạm); cột lạ ⇒ `EXPECT_COL_UNKNOWN` — gõ nhầm tên cột mà cho
+  qua thì chốt thành «luôn khớp» = chốt bị lừa (họ lỗi rc=0-giả trong CLAUDE.md).
+
+**Kiểm:** selftest **1461/1461** (+12 case r279: 4 PURE presence · 6 PURE CAS · 3 HÀNH VI đầu-cuối qua
+`cmd_nlm_source_remove` gồm phản chứng «sid còn sống thì chốt phải TRONG SUỐT»). Full-gate 8/8 xanh.
+Ruff DELTA so master: `tl.py` 12 F821 / 0 F401 = **0 delta**; tên mới bị cờ đều thuộc lớp re-home
+BY DESIGN, đã kiểm HÀNH VI resolve thật qua `__globals__` của module tiêu thụ.
+
+**Bẫy đã sập trong chính lượt vá này (ghi lại để không lặp):** dùng `Path.write_text` để vá
+`tl_selftest.py` đã **nuốt CRLF toàn tệp** (23712 dòng → LF), diff phình thành 23794 dòng giả. Lộ ra
+KHÔNG phải nhờ đọc diff mà nhờ `RELEASE_MANIFEST.json` có `total_bytes` **GIẢM** 6404 byte trong khi
+bản vá chỉ THÊM code — con số âm vô lý là thứ duy nhất bắt được. Vá tệp CRLF phải đi `write_bytes`.
+
+
 # ★ v1.36.16 — r278: `_sohieu_typo_near` vế (1) last-wins → duy-nhất-theo-số-hiệu + corroborate + AMBIG (P15-F12) (2026-07-31)
 
 F12 (P2) sổ P15; phiếu thiết kế + grill 8 câu: `C:\qh\p15_review_core_2026-07-30\P15_PHIEU_r278.md`.

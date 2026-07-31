@@ -4066,6 +4066,45 @@ def run() -> int:
                                "Luật Di sản văn hóa")
     cases.append(("typo_num_corro_counts_by_sohieu",
                   _r278e is not None and _r278e[0] is not None and _r278e[1] == "45-2024-QH15"))
+    # r279 (v1.36.17 — VA CHẠM HAI PHIÊN 31-07-2026, bằng chứng: hai phiên cùng gỡ sid 04e51f9c cách 59s,
+    # phiên sau vẫn in `deleted:1`). Vế 1: chốt đo LIVE trước khi gỡ nguồn NLM.
+    cases.append(("r279_presence_absent_is_concurrent",
+                  _nlm_remove_presence_verdict(True, ["aaa", "bbb"], "zzz") == "absent"))
+    cases.append(("r279_presence_present_when_live",
+                  _nlm_remove_presence_verdict(True, ["aaa", "zzz"], "zzz") == "present"))
+    # Fail-closed: KHÔNG liệt kê được LIVE thì TUYỆT ĐỐI không được suy ra "vắng" (suy vậy = gỡ mù/báo khống).
+    cases.append(("r279_presence_list_failed_not_absent",
+                  _nlm_remove_presence_verdict(False, [], "zzz") == "list_failed"
+                  and _nlm_remove_presence_verdict(False, None, "zzz") != "absent"))
+    # id trong listing có thể là kiểu khác (str/int) — so phải chuẩn hoá, tránh 'absent' GIẢ ⇒ gỡ khống.
+    cases.append(("r279_presence_id_type_normalized",
+                  _nlm_remove_presence_verdict(True, [123], "123") == "present"))
+    # Vế 2: chốt CAS `register --expect col=val`.
+    _r279row = {"corpus": "true", "nlm_status": "pushed", "note": ""}
+    cases.append(("r279_expect_match_passes",
+                  _expect_precondition_verdict(_r279row, ["corpus=true", "nlm_status=pushed"])["ok"] is True))
+    _r279m = _expect_precondition_verdict(_r279row, ["nlm_status=removed_by_user"])
+    cases.append(("r279_expect_mismatch_blocks",
+                  _r279m["ok"] is False and _r279m["error"] == "EXPECT_MISMATCH"
+                  and _r279m["bad"][0]["got"] == "pushed" and _r279m["bad"][0]["want"] == "removed_by_user"))
+    # VAL rỗng = kỳ vọng cột RỖNG (phải PHÂN BIỆT với "không kỳ vọng gì") — nếp reg_clear đã trả giá.
+    cases.append(("r279_expect_empty_means_empty",
+                  _expect_precondition_verdict(_r279row, ["note="])["ok"] is True
+                  and _expect_precondition_verdict(_r279row, ["corpus="])["ok"] is False))
+    # Dòng biến mất giữa lúc đo và lúc ghi CŨNG là va chạm — không được coi là "không có gì để so" rồi cho qua.
+    cases.append(("r279_expect_row_missing_blocks",
+                  _expect_precondition_verdict(None, ["corpus=true"])["error"] == "ROW_NOT_FOUND"))
+    # Gõ nhầm tên cột mà im lặng cho qua = chốt LUÔN KHỚP = chốt bị lừa (họ lỗi rc=0-giả trong CLAUDE.md).
+    _r279u = _expect_precondition_verdict(_r279row, ["corpuss=true"], known_cols=_REGISTER_EXPECT_COLS)
+    cases.append(("r279_expect_unknown_col_rejected",
+                  _r279u["ok"] is False and _r279u["error"] == "EXPECT_COL_UNKNOWN"
+                  and _r279u["unknown_cols"] == ["corpuss"]))
+    cases.append(("r279_expect_malformed_rejected",
+                  _expect_precondition_verdict(_r279row, ["corpus"])["error"] == "EXPECT_MALFORMED"))
+    # Không truyền --expect ⇒ chốt TRONG SUỐT (không được đổi hành vi lệnh cũ).
+    cases.append(("r279_expect_absent_is_noop",
+                  _expect_precondition_verdict(_r279row, [])["ok"] is True
+                  and _expect_precondition_verdict(None, None)["ok"] is True))
     _r278f = _classify_ref({"raw": "k", "name_phrase": "", "sohieu": "01-2026-TT-BCT", "loai": ""}, _r278a)
     cases.append(("xref_ambig_flag_low_no_canonical",
                   _r278f["flag"] == "DOC_TEXT_SOHIEU_TYPO" and _r278f["confidence"] == "low"
@@ -10854,9 +10893,12 @@ def run() -> int:
         return _rc == 0 and _calls["claim"] is None and _calls["add"] == 1
     _t110("r117_nlm_add_url_path_no_claim", _c117_url_path_no_claim)
 
-    def _run_sr117(sids, apply=False, confirm="", force=False, entries=None, delete_results=None, reg_rows=None):
+    def _run_sr117(sids, apply=False, confirm="", force=False, entries=None, delete_results=None, reg_rows=None,
+                   live=None, skip_live_check=False):
         # Harness A-#12: cmd_nlm_source_remove — bắt source_delete/reg_get; registry qua manifest stub.
-        _calls = {"deletes": [], "reg_get": 0}
+        # r279: +live (None = sid còn sống | list sid sống | "fail" = không liệt kê được) + skip_live_check.
+        _calls = {"deletes": [], "reg_get": 0, "lists": []}
+        _live = live
         _dr = delete_results or {}
 
         class _G117r:
@@ -10873,6 +10915,16 @@ def run() -> int:
             def source_delete(self, sid, timeout=120):
                 _calls["deletes"].append(sid)
                 return _dr.get(sid, {"ok": True, "raw": "Deleted 1 source"})
+
+            def source_list(self, nb, skip_freshness=True, drive=False):
+                # r279: chốt presence đọc listing VẬT LÝ trước khi gỡ. Mặc định fake trả "sid CÒN sống"
+                # để các assertion cũ (force → có gọi delete) giữ nguyên nghĩa; `_live` override cho ca mới.
+                _calls["lists"].append(nb)
+                if _live is None:
+                    return {"ok": True, "sources": [{"id": s} for s in sids]}
+                if _live == "fail":
+                    return {"ok": False, "error": "LIST_FAILED"}
+                return {"ok": True, "sources": [{"id": s} for s in _live]}
         _keys = ("apply_profile_offline", "_imp", "_manifest_entries", "load_creds", "_gas",
                  "_apply_journal_start", "_journal_append")
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
@@ -10886,7 +10938,8 @@ def run() -> int:
             _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run117_sr"
             _TL_MODULE._journal_append = lambda rid, rec: None
             _ns = argparse.Namespace(source_id=list(sids), apply=apply, confirm=confirm, force=force,
-                                     refresh=False, json=True, config=None, profile=None)
+                                     refresh=False, json=True, config=None, profile=None,
+                                     skip_live_check=skip_live_check)
             _bo, _be = _io27.StringIO(), _io27.StringIO()
             with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
                 _rc = _TL_MODULE.cmd_nlm_source_remove(_ns)
@@ -10908,6 +10961,35 @@ def run() -> int:
         _rcf, _outf, _ef, _callsf = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True, entries=_ent_sr117)
         return _blocked and _rcf == 0 and _callsf["deletes"] == ["sidA117"]
     _t110("r117_source_remove_pointer_guard_blocks", _c117_sr_pointer_guard_blocks)
+
+    def _c279_sr_absent_is_noop_not_deleted():
+        # r279 HÀNH VI (ca thật 31-07-2026): sid đã bị phiên KHÁC gỡ trước ⇒ TUYỆT ĐỐI không gọi
+        # source_delete và KHÔNG được in "deleted" — phải là noop + cờ va chạm. Trước bản vá: deleted:1 KHỐNG.
+        _rc, _out, _e, _calls = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True,
+                                           entries=_ent_sr117, live=[])
+        return (_rc == 0 and _calls["deletes"] == []
+                and _out.get("counts", {}).get("deleted") == 0
+                and _out.get("counts", {}).get("noop") == 1
+                and _out["results"][0]["reason"] == "ALREADY_GONE_CONCURRENT")
+    _t110("r279_source_remove_absent_is_noop_not_deleted", _c279_sr_absent_is_noop_not_deleted)
+
+    def _c279_sr_live_fail_closed():
+        # Không liệt kê được LIVE ⇒ fail-closed (không gỡ mù); --skip-live-check mới cho qua.
+        _rc, _out, _e, _calls = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True,
+                                           entries=_ent_sr117, live="fail")
+        _closed = _rc == 2 and _calls["deletes"] == [] and _out["results"][0]["reason"] == "LIVE_CHECK_FAILED"
+        _rc2, _out2, _e2, _calls2 = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True,
+                                               entries=_ent_sr117, live="fail", skip_live_check=True)
+        return _closed and _rc2 == 0 and _calls2["deletes"] == ["sidA117"]
+    _t110("r279_source_remove_live_fail_closed", _c279_sr_live_fail_closed)
+
+    def _c279_sr_present_still_deletes():
+        # Phản chứng: sid CÒN sống thì chốt phải TRONG SUỐT — vẫn gỡ như cũ (chốt không được chặn ca hợp lệ).
+        _rc, _out, _e, _calls = _run_sr117(["sidA117"], apply=True, confirm="yes", force=True,
+                                           entries=_ent_sr117, live=["sidA117"])
+        return (_rc == 0 and _calls["deletes"] == ["sidA117"]
+                and _out.get("counts", {}).get("deleted") == 1 and _calls["lists"] == ["nbX"])
+    _t110("r279_source_remove_present_still_deletes", _c279_sr_present_still_deletes)
 
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).

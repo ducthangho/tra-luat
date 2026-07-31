@@ -287,6 +287,14 @@ def _register_cat_folder_ids() -> dict:
         return {}
 
 
+# r279 (v1.36.17): cột hợp lệ cho chốt CAS `register --expect col=val`. RỘNG hơn _REG_FIELDS (tập cột GHI
+# được) vì kỳ vọng có quyền neo vào cột CHỈ-ĐỌC — `on_nlm` chính là cột đắt nhất để neo khi chống va chạm
+# đường NLM. Gõ sai tên cột phải BÁO LỖI chứ không im lặng "khớp" ⇒ danh sách đóng.
+_REGISTER_EXPECT_COLS = ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc", "sua_doi",
+                         "nlm_source_id", "nlm_notebook_id", "nlm_status", "nlm_title", "tukhoa",
+                         "corpus", "title_vn", "row_kind", "on_nlm", "drive_id", "note")
+
+
 def cmd_register(a) -> int:
     # r179 T1 (ADR-0010): --nlm-status là TỪ VỰNG ĐÓNG — giá trị lạ (added/live/ready/typo mới) TỪ CHỐI rc=2
     # TRƯỚC mọi round-trip, kèm danh sách họ hợp lệ. Dữ liệu cũ đã nắn 1 lần bằng `backfill-nlm-status`
@@ -421,6 +429,37 @@ def cmd_register(a) -> int:
                                   "`tl reg-delete --drive-ids <id> --force`."},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
+    # r279 (v1.36.17) CHỐT CAS CHỐNG GHI SONG SONG: --expect col=val — đọc dòng NGAY TRƯỚC khi ghi, lệch
+    # kỳ vọng ⇒ rc=3 KHÔNG ghi. Verified-readback sẵn có chỉ trả lời "ta ghi được gì", KHÔNG trả lời "ta
+    # có đè mất việc của phiên khác không" (ca thật 31-07-2026: hai phiên cùng ghi một dòng, cả hai đều
+    # verified). rc=3 dùng ĐÚNG mã của chốt chống thụt lùi deploy — cùng nghĩa "phiên khác vừa đụng, DỪNG".
+    _expects = list(getattr(a, "expect", None) or [])
+    if _expects:
+        try:
+            _rg_e = g.get("reg_get", drive_id=a.drive_id, refresh="true")
+            _rows_e = (_rg_e.get("rows") or []) if isinstance(_rg_e, dict) and _rg_e.get("ok") is True else []
+        except Exception as _e_exp:  # noqa: BLE001 — không đọc được ⇒ fail-closed, KHÔNG ghi mù
+            print(json.dumps({"ok": False, "error": "EXPECT_READ_FAILED", "detail": str(_e_exp),
+                              "note": "--expect cần đọc dòng hiện tại để so; đọc lỗi ⇒ fail-closed, KHÔNG ghi."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 3
+        # count trước rows[0] (nếp đã trả giá): >1 dòng cùng drive_id = sổ hỏng, không đoán dòng nào.
+        if len(_rows_e) > 1:
+            print(json.dumps({"ok": False, "error": "EXPECT_AMBIGUOUS_ROWS", "count": len(_rows_e),
+                              "drive_id": a.drive_id, "note": "nhiều dòng cùng drive_id — dọn trùng trước."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 3
+        _v_exp = _expect_precondition_verdict(_rows_e[0] if _rows_e else None, _expects,
+                                              known_cols=_REGISTER_EXPECT_COLS)
+        if not _v_exp.get("ok"):
+            print(json.dumps({"ok": False, "error": _v_exp.get("error"), "expect": _expects,
+                              "mismatch": _v_exp.get("bad"),
+                              **{k: _v_exp[k] for k in ("malformed", "unknown_cols") if k in _v_exp},
+                              "drive_id": a.drive_id, "note": "CHỐT CAS: giá trị hiện tại KHÁC kỳ vọng ⇒ nhiều "
+                              "khả năng phiên khác vừa ghi dòng này. KHÔNG ghi gì. Đọc lại bằng `reg-query "
+                              "--drive-id … --live`, đối chiếu sổ/phiên đang mở, rồi quyết."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 3
     # reg_upsert: dùng khóa 'sohieu' (KHÔNG so_hieu) — xem API_CONTRACT.md mục 0
     payload = {"drive_id": a.drive_id}
     _REG_FIELDS = ("sohieu", "loai", "name", "cat", "linhvuc", "goc", "hieuluc",

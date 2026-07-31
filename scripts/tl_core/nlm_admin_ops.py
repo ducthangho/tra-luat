@@ -1334,7 +1334,40 @@ def cmd_nlm_source_remove(a) -> int:
                             "note": "dòng registry còn trỏ sid — gỡ sẽ tạo con trỏ treo; repoint/clear trước hoặc --force"})
             blocked += 1
             continue
-        _journal_append(run_id, {"t": "intent", "op": "nlm_source_delete", "key": sid, "set": {"irreversible": True}})
+        # r279 (v1.36.17) CHỐT CHỐNG GHI SONG SONG — vế đối xứng của cổng dedup-live bên `nlm-add`.
+        # `source_delete` trả ok cho CẢ sid đã biến mất ⇒ không đo LIVE thì in `deleted` KHỐNG (ca thật:
+        # hai phiên gỡ cùng sid cách 59s, phiên sau vẫn báo deleted:1). Đo listing VẬT LÝ TƯƠI trước khi gỡ.
+        _nb_gate = next((str(p.get("nlm_notebook_id") or "") for p in (row.get("pointers") or [])
+                         if str(p.get("nlm_notebook_id") or "").strip()), "")
+        _presence = "unknown"
+        if _nb_gate and not bool(getattr(a, "skip_live_check", False)):
+            try:
+                _lr = _nlm_source_list_cached(nc, _nb_gate, refresh=True)
+                _presence = _nlm_remove_presence_verdict(
+                    bool(_lr.get("ok")), [s.get("id") for s in (_lr.get("sources") or [])], sid)
+            except Exception:  # noqa: BLE001 — gate lỗi = không đo được, KHÔNG suy ra "vắng"
+                _presence = "list_failed"
+        if _presence == "absent":
+            # KHÔNG gọi source_delete: nguồn đã bị gỡ TRƯỚC ta. Báo noop + cờ va chạm để phiên sau biết
+            # công này của ai; ok vẫn true vì trạng thái ĐÍCH đã đạt (idempotent theo trạng thái, không theo lệnh).
+            _journal_append(run_id, {"t": "commit", "op": "nlm_source_delete", "key": sid, "ok": True,
+                                     "verify": {"verdict": "noop", "presence": "absent"}})
+            results.append({"source_id": sid, "action": "noop", "reason": "ALREADY_GONE_CONCURRENT",
+                            "notebook": _nb_gate,
+                            "note": "sid KHÔNG còn trên notebook TRƯỚC khi ta gỡ — nhiều khả năng phiên khác "
+                                    "vừa gỡ. KHÔNG gọi source_delete (tránh in 'deleted' khống). Nếu đang có "
+                                    "phiên song song: `git fetch origin master` + đối chiếu sổ trước khi ghi tiếp."})
+            continue
+        if _presence == "list_failed" and not bool(getattr(a, "skip_live_check", False)):
+            # Doctrine S13 (như dedup gate): KHÔNG liệt kê được LIVE → DỪNG, không gỡ mù.
+            results.append({"source_id": sid, "action": "skipped", "reason": "LIVE_CHECK_FAILED",
+                            "notebook": _nb_gate,
+                            "note": "không liệt kê được nguồn LIVE để xác minh sid còn sống (NLM auth/mạng?) — "
+                                    "fail-closed. Sửa `nlm login` rồi chạy lại; ép gỡ: --skip-live-check."})
+            blocked += 1
+            continue
+        _journal_append(run_id, {"t": "intent", "op": "nlm_source_delete", "key": sid,
+                                 "set": {"irreversible": True}, "presence": _presence})
         _dr = nc.source_delete(sid)
         verdict = _source_remove_delete_verdict(_dr)
         _journal_append(run_id, {"t": "commit", "op": "nlm_source_delete", "key": sid,

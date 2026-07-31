@@ -1226,6 +1226,7 @@ GENERATED_SPECS = [
          {"flags": ['--confirm'], "default": '', "help": 'bắt buộc "yes" khi --apply'},
          {"flags": ['--force'], "action": 'store_true', "help": 'gỡ CẢ sid còn con trỏ registry (rủi ro con trỏ treo — tự chịu)'},
          {"flags": ['--refresh'], "action": 'store_true', "help": 'ép tải lại manifest trước khi đối chiếu con trỏ'},
+         {"flags": ['--skip-live-check'], "dest": 'skip_live_check', "action": 'store_true', "help": '(r279) BỎ chốt đo nguồn LIVE trước khi gỡ (mặc định: sid đã vắng ⇒ noop ALREADY_GONE_CONCURRENT thay vì in "deleted" khống; không liệt kê được LIVE ⇒ fail-closed)'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'nlm-orphans', "handler": 'cmd_nlm_orphans',

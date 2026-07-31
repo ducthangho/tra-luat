@@ -426,6 +426,43 @@ def _verified_reg_upsert_unlocked(g, payload: dict) -> dict:
             **({"readback": readback} if readback != "OK" else {})}
 
 
+def _expect_precondition_verdict(row, expects, known_cols=None) -> dict:
+    """v1.36.17 (r279 — va chạm HAI PHIÊN 31-07-2026) PURE: chốt CAS (compare-and-swap) TRƯỚC khi GHI
+    registry — so giá trị ĐANG có với giá trị caller ĐÃ ĐỌC lúc lập kế hoạch. Lệch ⇒ có phiên khác vừa
+    ghi vào dòng này giữa lúc ta đo và lúc ta ghi ⇒ DỪNG, để người quyết (rc=3), KHÔNG ghi đè im lặng.
+
+    VÌ SAO CẦN: đường ghi registry đã journaled + verified-readback, nhưng verify chỉ trả lời "ta ghi
+    được gì" — KHÔNG trả lời "ta có đè mất việc của ai không". GAS LockService bảo đảm RMW nguyên tử
+    nên sổ không HỎNG, nhưng lost-update thì vẫn xảy ra êm ru. Cùng doctrine chốt chống thụt lùi của
+    §Quy ước deploy: đọc trạng thái đích ngay trước khi ghi, ≥ kỳ vọng thì dừng và hỏi.
+
+    expects = ['col=val', ...]; val RỖNG = kỳ vọng cột đang RỖNG. So sánh strip, phân biệt hoa thường.
+    Trả {'ok': bool, 'bad': [{col,want,got}], 'error': str|None}. row=None ⇒ ROW_NOT_FOUND (chặn — dòng
+    biến mất cũng là va chạm). Cột ngoài known_cols ⇒ EXPECT_COL_UNKNOWN: gõ nhầm tên cột mà im lặng
+    cho qua thì chốt biến thành "luôn khớp" = chốt bị lừa, đúng họ lỗi rc=0-giả trong CLAUDE.md."""
+    pairs, bad_syntax = [], []
+    for raw in (expects or []):
+        s = str(raw)
+        if "=" not in s:
+            bad_syntax.append(s); continue
+        col, want = s.split("=", 1)
+        pairs.append((col.strip(), want.strip()))
+    if bad_syntax:
+        return {"ok": False, "bad": [], "error": "EXPECT_MALFORMED", "malformed": bad_syntax}
+    if not pairs:
+        return {"ok": True, "bad": [], "error": None}
+    if known_cols:
+        unknown = sorted({c for c, _ in pairs if c not in set(known_cols)})
+        if unknown:
+            return {"ok": False, "bad": [], "error": "EXPECT_COL_UNKNOWN", "unknown_cols": unknown}
+    if row is None:
+        return {"ok": False, "bad": [{"col": c, "want": w, "got": None} for c, w in pairs],
+                "error": "ROW_NOT_FOUND"}
+    bad = [{"col": c, "want": w, "got": str((row or {}).get(c) or "").strip()}
+           for c, w in pairs if str((row or {}).get(c) or "").strip() != w]
+    return {"ok": not bad, "bad": bad, "error": "EXPECT_MISMATCH" if bad else None}
+
+
 def _journaled_reg_upsert(run_id: str, g, payload: dict, before: dict | None = None) -> dict:
     """Ghi reg_upsert CÓ NHẬT KÝ: intent{before} → verified upsert → commit{verify}. Trả verify dict."""
     did = str((payload or {}).get("drive_id") or "")

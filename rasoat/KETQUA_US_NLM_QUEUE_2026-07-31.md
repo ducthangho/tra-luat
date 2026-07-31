@@ -135,3 +135,78 @@ hệ quả của lượt 25.
   chủ đề · r vá auditor/doc-text · sheet-dup `1Qja1Lwp…` Kế toán (CẤM reg-delete) · 43 row_kind
   overflow · quarantine hẳn bản khuyết 176 (`1auEnrsy…`) · BC thẩm tra mẫu P9.
 - Deploy: nợ 0 (Drive = v1.36.16). Lượt này KHÔNG đụng code/deploy.
+
+---
+
+# VÒNG 2 (cùng ngày) — người dùng duyệt «theo khuyến nghị»
+
+Phê duyệt nguyên văn: «tôi duyệt theo khuyến nghị. hãy thực hiện» ⇒ thi hành Q-A, Q-B (ưu tiên
+45-2019), Q-C của §5.
+
+## 8. ★ PHÁT HIỆN LỚN: có TÁC NHÂN KHÁC ghi song song vào notebook 45739ff7
+
+Khi bắt tay làm Q-A, `nlm-add` bị cổng dedup chặn `ALREADY_ON_NOTEBOOK` với sid `52eb0e58…` — một
+nguồn KL_195 mà bản dump LIVE trước đó KHÔNG có. So khớp tập hợp 3 bản dump liên tiếp (v2→v3→v4) lộ ra
+notebook đang bị sửa TRONG LÚC đo, không phải do phiên này:
+
+| Đổi | Nguồn | Do ai |
+|---|---|---|
+| `+52eb0e58` KL_195-2025-KL-TW | xuất hiện | **KHÔNG phải tôi** |
+| `−9e985570` Luat_50-2024 Công đoàn (bản trùng) | biến mất | **KHÔNG phải tôi** |
+| `+6cce35ec` BLuat_45-2019 canonical (status 1→2) | xuất hiện | **KHÔNG phải tôi** |
+
+Bằng chứng phủ định: `tl journal` liệt kê ĐÚNG 13 run của phiên này (3 `nlm-source-remove`, 1 `nlm-add`
++link, 3 `register`, 5 `source-rename`) — KHÔNG có lệnh nào gỡ `9e985570` hay add `52eb0e58`/`6cce35ec`.
+Ba thay đổi đó đúng bằng ba khuyến nghị Q-A/Q-B/Q-C ⇒ nhiều khả năng người dùng đã giao cùng phê duyệt
+cho một phiên song song (nếp P15), hoặc tự chạy.
+
+**Ứng xử:** DỪNG mọi lệnh `add` (sẽ tạo trùng — cổng dedup đã chặn đúng 1 lần), chỉ đo lại rồi làm nốt
+phần CÒN THIẾU. Không ghi đè việc của phiên kia. Cùng doctrine "hai phiên song song ⇒ dừng, đối chiếu"
+của §Quy ước deploy.
+
+## 9. Kết quả vòng 2
+
+| Mục | Trạng thái | Ai làm |
+|---|---|---|
+| **Q-A** KL_195 | ✅ registry đã trỏ `52eb0e58…`, corpus=true, on_nlm=true, `desync_real`→**0** | phiên khác |
+| **Q-C** dup Công đoàn | ✅ chỉ còn `1e9d957b…` LIVE, `dup_physical`→**0** | phiên khác |
+| **Q-B** re-push canonical BLLĐ | ✅ `6cce35ec…` ready(status 2), registry đã nối | phiên khác |
+| **Q-B** gỡ docx thô 45-2019 | ✅ **PHIÊN NÀY LÀM** — sau khi verify canonical đọc được thật | `nlm-source-remove_1785463064_2269` + `register_1785463084_2631` |
+
+Tiền đề tôi tự đặt đã kiểm ĐỦ trước khi gỡ: canonical `1rjx9MLS…` là **Google Doc** thật (`gws drive
+files get`: mimeType `google-apps.document`, `trashed:false`), nguồn `6cce35ec` **status=2**, và
+`nlm-content 6cce35ec --no-fallback` rc=0 trả nguyên văn "Bộ luật số: 45/2019/QH14 … Điều 1. Phạm vi
+điều chỉnh". Chỉ khi đủ 3 bằng chứng mới gỡ `04e51f9c`.
+
+**Readback keyed** dòng docx thô `1zsmfCS1…`: count=1 · corpus=false · on_nlm=**false** ·
+nlm_status=removed_by_user.
+
+★ Ghi chú `FIELDS_DROPPED_ON_WRITE`: lệnh `register` này trả `verified:false` + cờ đó (2 lệnh register
+trước trả `verified:true`). Đã đối chiếu TOÀN BỘ 17 trường trước/sau: **chỉ đúng 2 trường mục tiêu đổi**
+(`nlm_status`, `on_nlm`), không mất gì. Nguyên nhân: webapp BỎ QUA field RỖNG (`goc`/`hieuluc`/
+`sua_doi`/`title_vn` vốn đã rỗng) — đúng hành vi đã biết trong CLAUDE.md, vô hại. **Bài học: cờ này
+không đồng nghĩa hỏng ghi — nhưng bắt buộc diff toàn dòng mới được kết luận.**
+
+## 10. Đối soát chốt sau vòng 2
+
+- `nlm-audit-physical` → **rc=0 "SẠCH — pointer khớp vật lý toàn scope"** (trước vòng 2: rc=1 với
+  `dup_physical=1` + `pointer_dead=1`).
+- `nlm-reconcile --all-notebooks` → `desync_real` = **0/0/0**; `coverage_gap` = **0**.
+- LIVE: 743ed200 = 299/300 · 45739ff7 = **292/300** (−docx thô +canonical, +KL195, −dup Công đoàn) ·
+  2d8c2fef = 22/300.
+- Còn 1 `unregistered_on_nlm` trên 45739ff7 = `c4f16911…` **`CU_ILO-128_Tro_cap_tan_tat_tuoi_gia`** —
+  nguồn điều ước nằm VẬT LÝ ở 45739ff7 nhưng registry trỏ 743ed200 (`foreign_skipped`, by title).
+  CÓ TRƯỚC lượt 25, ngoài phạm vi ⇒ để lại, có ghi.
+
+## 11. Còn treo sau vòng 2
+
+- **3 nguồn PDF `raw_on_nlm`** (`TL_ILO_2026` — đã xác minh mimeType `application/pdf`;
+  `VBT_PL_BC_BHXH_HaNoi_khao_sat_6-2026.pdf`; `VBT_BC_BHXH_HaNoi_thuc_hien_CS_BHXH_2025.pdf`).
+  **CHẶN KỸ THUẬT ở container này**: theo memory `nlm-add-pdf-drive-fail` phải download + MCP
+  `source_add source_type=file`, mà phiên này KHÔNG có MCP notebooklm. Cần phiên có MCP.
+  (Cụm `raw_on_nlm` từ 4 → **1 văn bản đã xong** (45-2019), còn 3 PDF.)
+- `c4f16911` CU_ILO-128 lệch notebook (trên).
+- `CORPUS_TRUE_NOT_ON_NLM` 53 — nợ CẤU TRÚC (trần 300/notebook), cần shard mới.
+- Ngoài phạm vi giữ nguyên: note dup↔bản chuẩn · lô 3b 43 tên · r vá auditor/doc-text · sheet-dup
+  `1Qja1Lwp…` Kế toán (CẤM reg-delete) · 43 row_kind overflow · quarantine hẳn `1auEnrsy…` · BC thẩm
+  tra mẫu P9. Deploy: nợ 0 (Drive = v1.36.16).

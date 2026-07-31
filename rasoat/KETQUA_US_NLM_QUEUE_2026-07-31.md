@@ -3,6 +3,15 @@
 Nguồn việc: `rasoat/PROMPT_US_NLM_QUEUE_2026-07-31.md` (master `0765e7a`) — 4 việc sau lượt 24.
 Sổ nền: `rasoat/KETQUA_GHI_BANGDUYET_CORPUS_AUDIT_2026-07-31.md` (`69b1819`).
 
+★★ **ĐỌC KÈM — hai sổ, một đợt việc.** Vòng 2 của sổ này (§8-§11) chạy SONG SONG với phiên **P15**
+trên cùng notebook 45739ff7; sổ phía kia là `rasoat/KETQUA_NLM_QA_QB_QC_2026-07-31.md` (lượt 26,
+commit `326c33d`) + bàn giao `rasoat/PROMPT_TIEP_NLM_2026-07-31c.md`. **Phân định quyền tác giả chính
+xác: §4.4 sổ lượt 26.** Tóm tắt: Q-A + Q-C + rename/add canonical do P15 làm; **gỡ raw `04e51f9c` +
+`register` do phiên này (`5c12dd6`) làm trước 59 giây**, P15 chạy trùng (idempotent, không hư hại).
+Trạng thái chốt được HAI phiên đo ĐỘC LẬP và trùng khớp: `nlm-audit-physical` rc=0 (`clean:true`),
+`desync_real` 0/0/0, `coverage_gap` 0. Bàn giao còn hiệu lực là bản **`…-31c.md`** (R-1…R-5), bản
+`…-31b.md` đã bị nó thay thế.
+
 ## 0. Điều kiện tiên quyết (ĐO, không suy)
 
 | Mục | Bằng chứng |

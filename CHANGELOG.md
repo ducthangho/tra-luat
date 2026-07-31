@@ -1,3 +1,56 @@
+# ★ v1.36.26 — r288/Pha 1-0: Helper 1 — HỢP ĐỒNG kết luận giao dịch (`tl_core/txn.py`), CHƯA gắn vào lệnh nào (2026-07-31)
+
+Pha 1-0 (§5 Mẫu A + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Một commit riêng, không kèm mục lỗi nào** —
+đúng acceptance §6.1. Mở đầu tranche **T2 (chặn máu)**: PRO-01 và ING-03 đều được kế hoạch chỉ định
+*"vá bằng Helper 1"*, nên hợp đồng phải chốt TRƯỚC, nếu không mỗi mục lại tự nghĩ ra một nửa-giải-pháp.
+
+**Vì sao cần.** Mẫu A chiếm **13/34** mục sổ audit (GATE-01, ING-03/05, PRO-01/06/07, RAS-04/05/10/11/12…).
+Dấu hiệu chung luôn là một trong hai: `ok` được **GÁN** thay vì được **TÍNH**; hoặc `ok` tính từ **HÌNH
+DẠNG** ("response có `fileId`") thay vì từ **KẾT QUẢ** ("bước register báo `upsert_done`"). Vá từng `if`
+rời thì mục thứ 14 tái sinh ở chỗ khác.
+
+**Hợp đồng (`scripts/tl_core/txn.py`, 5 điều):**
+1. nhận `(tên_bước, kết_quả, bắt_buộc?)` theo ĐÚNG thứ tự đã chạy;
+2. `ok` được **TÍNH**, không bao giờ được **GÁN** — `Txn.conclude()` **bỏ qua** `ok`/`rc` trong `extra`,
+   nên không ai dựng lại được `out = {**plan, "ok": True}` của PRO-01;
+3. bước bắt buộc hỏng ⇒ `Txn.guard()` **ném `TxnBlocked`** chặn mutation phía sau. Là **exception** chứ
+   không phải cờ, có chủ đích: cờ mà caller quên kiểm thì lại fail-open đúng kiểu cũ;
+4. `rc` **dẫn xuất** từ `ok` (`Txn.rc()`), không đặt tay;
+5. luôn phát ra *bước nào hỏng* + **`wrote` = ĐÃ GHI ĐƯỢC GÌ RỒI**, tách riêng **`uncertain`** =
+   mutation ÂM (không chứng minh được đã ghi, cũng không chứng minh được chưa ghi). Điều 5 không phải
+   trang trí: PRO-01 tháo con trỏ registry sau khi bước xoá đã hỏng mà `rc=0`, nên **không ai biết có
+   tài sản mồ côi** — bản kê `wrote`/`uncertain` là thứ duy nhất chỉ được đường về.
+
+**Vị ngữ `step_result_ok` FAIL-CLOSED** — chỗ ING-03 chết nằm đúng ở đây:
+`{"ok": false, "fileId": "1AbC", "upsert_done": false}` ⇒ **ÂM**; `{"fileId": "1AbC"}` (thiếu hẳn khoá
+`ok`) ⇒ **ÂM**, vì *"không có tin xấu"* không phải *"tin tốt"*; hình dạng lạ (str/int/list) ⇒ **ÂM**.
+`require_keys` là chỗ khai "đủ marker", và lý do hỏng **nêu đích danh** marker nào thiếu.
+
+**Test (+4 ca → 1502/1502), mỗi điều hợp đồng ít nhất một ca kèm phản chứng:**
+`r288_helper1_vi_ngu_ket_qua_duong_fail_closed` · `r288_helper1_ok_duoc_tinh_va_rc_dan_xuat` ·
+`r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi` · `r288_helper1_chua_gan_vao_lenh_nao`.
+
+Ca cuối khoá đúng câu *"CHƯA gắn vào lệnh nào"*: quét `tl_core/*.py` (trừ `txn.py`) không được có
+`Txn(`/`TxnBlocked`/`step_result_ok(`. Gộp việc gắn vào commit này thì nó ĐỎ; khi slice T2 gắn thật thì
+đây là chỗ ĐẦU TIÊN phải sửa — có chủ đích, không lọt im lặng.
+
+**ĐỎ-TRƯỚC (đo thật):** phá đúng ba điều của hợp đồng trong `txn.py` (thiếu khoá `ok` ⇒ coi là dương ·
+`conclude` cho gán đè · `guard` chỉ đánh dấu không ném) ⇒ `1499/1502`, ĐỎ **đúng ba** ca tương ứng, ca
+"chưa gắn" vẫn xanh. Sau khôi phục: `1502/1502`.
+
+**Kiểm kê tệp — TRẦN 200.** Thêm `scripts/tl_core/txn.py` ⇒ **195 → 196 tệp, còn 4 khe**. Đây là mã
+RUNTIME (T2/T3 sẽ dùng) nên KHÔNG loại khỏi gói được. Ai thêm tệp tiếp theo phải xét dev-side/
+`_RELEASE_EXCLUDE_NAMES_ANYWHERE` trước.
+
+**Golden ghi lại — ĐÚNG tiền lệ r238, đã kiểm trước khi commit.** Thêm tệp làm
+`workflow_audit.files_scanned` **69 → 70** ⇒ `golden` + `determinism` đỏ (determinism đỏ CHỈ vì check
+`golden_test` lồng bên trong). `git diff -- references/golden/` sau `--write` = **đúng 1 dòng**
+(`1 1 references/golden/workflow_audit.json`), không có thay đổi nào khác ⇒ là kiểm kê hợp lệ, không phải
+bug của thay đổi. Gate sau đó **8/8 PASS**.
+
+**ruff 0.15.8:** `txn.py` **0 F821 / 0 F401**. `tl.py` 12/0 (đúng nền). `tl_selftest.py` 4255 (master 4207):
++48 của 4 ca mới, cùng lớp BY DESIGN. F401 không đổi.
+
 # ★ v1.36.25 — r287/GATE-01b: golden-test CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi (2026-07-31)
 
 Slice **G0.1b** (§3.1 kế hoạch AUDIT_XAC_MINH 31-07). **Chỉ được làm SAU khi G0.1a (r286) xanh** — xem

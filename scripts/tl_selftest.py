@@ -24549,6 +24549,109 @@ def run() -> int:
                     and _payload.get("error") == "GOLDEN_RAW_UNSTABLE")
     _t110("r287_rc_khac_0_qua_lenh_that", _c287_rc_khac_0_qua_lenh_that)
 
+    # ═══ r288 (v1.36.26) — Pha 1-0: HỢP ĐỒNG Helper 1 (kết luận giao dịch, §5 Mẫu A + §6.1) ═══
+    # Helper CHƯA gắn vào lệnh nào (đúng acceptance §6.1) — các ca dưới khoá HỢP ĐỒNG, để 4 slice T2/T3
+    # sau DÙNG chứ không SỬA. Mỗi điều của hợp đồng có ít nhất một ca, kèm phản chứng.
+
+    def _c288_vi_ngu_ket_qua_duong_fail_closed():
+        # Điều 2 (ok TÍNH, không GÁN) bắt đầu từ vị ngữ: cái gì mới được TÍNH là "dương".
+        # Điểm chết của ING-03 nằm ĐÚNG ở đây — suy ra thành công từ sự CÓ MẶT của một trường khác.
+        _sr = _TL_MODULE.step_result_ok
+        duong = (_sr(True)[0] is True
+                 and _sr({"ok": True})[0] is True
+                 and _sr({"ok": True, "organize_done": True, "upsert_done": True, "file": {"id": "x"}},
+                         require_keys=("organize_done", "upsert_done", "file"))[0] is True)
+        am = (_sr(False)[0] is False and _sr(None)[0] is False
+              # ING-03 nguyên bản: response CÓ fileId nhưng ok:false + upsert_done:false ⇒ PHẢI âm
+              and _sr({"ok": False, "fileId": "1AbC", "upsert_done": False})[0] is False
+              # THIẾU khoá `ok` = ÂM. "Không có tin xấu" KHÔNG phải "tin tốt".
+              and _sr({"fileId": "1AbC"})[0] is False
+              and _sr("ok")[0] is False and _sr(1)[0] is False and _sr([{"ok": True}])[0] is False)
+        # đủ `ok` nhưng THIẾU marker ⇒ vẫn âm, và lý do phải NÊU ĐÍCH DANH marker thiếu (để đọc log là biết)
+        _ok4, _why4 = _sr({"ok": True, "organize_done": True}, require_keys=("organize_done", "upsert_done"))
+        marker = (_ok4 is False and "upsert_done" in _why4 and "organize_done" not in _why4)
+        return bool(duong and am and marker)
+    _t110("r288_helper1_vi_ngu_ket_qua_duong_fail_closed", _c288_vi_ngu_ket_qua_duong_fail_closed)
+
+    def _c288_ok_duoc_tinh_va_rc_dan_xuat():
+        # Điều 2 + điều 4. Kể cả khi caller CỐ gán `ok: True` vào envelope, kết luận vẫn phải là kết luận
+        # TÍNH ĐƯỢC — đây là phản chứng trực tiếp cho `out = {**plan, "ok": True, ...}` của PRO-01.
+        _T = _TL_MODULE.Txn
+        t1 = _T("op-xanh")
+        t1.record("b1", {"ok": True})
+        t1.record("b2", True)
+        xanh = (t1.ok() is True and t1.rc() == 0)
+        t2 = _T("op-do")
+        t2.record("b1", {"ok": True})
+        t2.record("b2", {"ok": False, "error": "GAS_500"})
+        t2.record("b3", {"ok": True})                      # bước SAU vẫn dương cũng không cứu được
+        do = (t2.ok() is False and t2.rc() == 2)
+        # gán đè bị BỎ QUA có chủ đích
+        _env = t2.conclude(ok=True, rc=0, plan="x")
+        khong_gan_de = (_env["ok"] is False and _env.get("plan") == "x" and "rc" not in _env
+                        and _env["txn"]["failed_step"] == "b2" and _env["txn"]["failed_error"] == "GAS_500"
+                        and _env.get("step") == "op-do:b2")
+        # sổ RỖNG ⇒ KHÔNG được coi là thành công (không có gì được chứng minh)
+        rong = (_T("op-rong").ok() is False and _T("op-rong").rc() == 2)
+        # bước KHÔNG bắt buộc hỏng thì không lật kết luận
+        t3 = _T("op-tuychon")
+        t3.record("b1", {"ok": True})
+        t3.record("phu", {"ok": False}, required=False)
+        tuy_chon = (t3.ok() is True and t3.rc() == 0)
+        return bool(xanh and do and khong_gan_de and rong and tuy_chon)
+    _t110("r288_helper1_ok_duoc_tinh_va_rc_dan_xuat", _c288_ok_duoc_tinh_va_rc_dan_xuat)
+
+    def _c288_chan_mutation_phia_sau_va_ke_da_ghi():
+        # Điều 3 (CHẶN, không chỉ đánh dấu) + điều 5 (đã ghi được gì rồi).
+        # Đây là kịch bản PRO-01 thu nhỏ: xoá nguồn NLM HỎNG, rồi vẫn định tháo con trỏ registry.
+        _T, _B = _TL_MODULE.Txn, _TL_MODULE.TxnBlocked
+        t = _T("profile-file-remove")
+        t.record("nlm_source_delete", {"ok": False, "error": "NLM_403"},
+                 mutating=True, wrote={"nlm_source_id": "s1"})
+        _da_chan = False
+        try:
+            t.guard("reg_delete")                          # PHẢI ném — không được đi tiếp
+        except _B as _e:
+            _da_chan = (_e.blocking_step == "nlm_source_delete" and _e.attempted == "reg_delete")
+        # `can_mutate` là cùng một sự thật, dạng vị ngữ
+        van_biet = (t.can_mutate() is False)
+        # bản kê: bước mutating ÂM KHÔNG vào `wrote` (chưa chứng minh được đã ghi) mà vào `uncertain`
+        ke = (t.wrote() == [] and [u["step"] for u in t.uncertain()] == ["nlm_source_delete"])
+        # Phản chứng: mọi bước dương ⇒ guard IM, và `wrote` kê ĐÚNG thứ đã ghi (đường về cho người dọn)
+        t2 = _T("profile-file-remove")
+        t2.record("nlm_source_delete", {"ok": True}, mutating=True, wrote={"nlm_source_id": "s1"})
+        t2.guard("reg_delete")
+        t2.record("reg_delete", {"ok": True, "removed": 1}, mutating=True, wrote={"registry_drive_ids": ["d1"]})
+        _w = t2.wrote()
+        khong_chan_oan = (t2.ok() is True and t2.uncertain() == []
+                          and [x["step"] for x in _w] == ["nlm_source_delete", "reg_delete"]
+                          and _w[1]["wrote"] == {"registry_drive_ids": ["d1"]})
+        # `skipped` phải PHÂN BIỆT được với hỏng: bỏ qua không lật `ok`, cũng không đếm là bước bắt buộc
+        t3 = _T("op")
+        t3.skipped("nlm_source_delete", "KHONG_YEU_CAU")
+        t3.record("reg_delete", {"ok": True})
+        bo_qua = (t3.ok() is True and t3.first_failure() is None
+                  and t3.steps[0].get("skipped") is True and t3.steps[0].get("ok") is None)
+        return bool(_da_chan and van_biet and ke and khong_chan_oan and bo_qua)
+    _t110("r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi", _c288_chan_mutation_phia_sau_va_ke_da_ghi)
+
+    def _c288_helper1_chua_gan_vao_lenh_nao():
+        # Acceptance §6.1: commit Pha 1-0 dựng helper + test, CHƯA gắn vào lệnh nào. Ca này khoá đúng câu
+        # đó — nếu ai gộp việc gắn vào cùng commit thì nó ĐỎ, buộc tách ra (và khi slice T2 gắn thật thì
+        # đây là chỗ ĐẦU TIÊN phải sửa, có chủ đích, không lọt im lặng).
+        import pathlib as _pl288
+        _root = _TL_MODULE.HERE
+        _dung = {"txn.py"}                       # chính module helper
+        _hits = []
+        for _p in sorted(_pl288.Path(_root / "tl_core").glob("*.py")):
+            if _p.name in _dung:
+                continue
+            _t = _p.read_text(encoding="utf-8", errors="replace")
+            if "Txn(" in _t or "TxnBlocked" in _t or "step_result_ok(" in _t:
+                _hits.append(_p.name)
+        return _hits == []
+    _t110("r288_helper1_chua_gan_vao_lenh_nao", _c288_helper1_chua_gan_vao_lenh_nao)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

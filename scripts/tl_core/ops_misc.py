@@ -1726,6 +1726,20 @@ def cmd_profile_file_remove(a) -> int:
     if not ids:
         print("[tl] profile-file-remove cần drive_id...", file=sys.stderr)
         return 2
+    # r282 (P16-F04, P0 mất dữ liệu): lệnh này KHÔNG có `_profile_policy_error` trong khi mọi đường GHI
+    # cùng lớp đều có (ingest_ops ×5, ops_misc:1429, profile_mgmt:79) — kể cả lệnh ANH EM `profile-file-add`
+    # (= cmd_profile_ingest). Hệ quả khi gõ SAI tên profile: `_profile_manifest_entries_for` trả manifest
+    # NỀN (1315 dòng), drive_id vẫn khớp nên KHÔNG rơi NO_MATCHING_PROFILE_ROWS, rồi `source_delete`
+    # (BẤT KHẢ NGHỊCH) + `trash` + `reg_delete` bắn thẳng vào registry/notebook NỀN, in ok:true rc=0.
+    # Khuôn giống cmd_profile_ingest: áp scope TRƯỚC → soi cổng → RỒI mới đọc manifest. Thứ tự này còn
+    # chặn luôn việc nạp manifest NỀN vào cache của profile-ma (F09) vì ta thoát TRƯỚC khi đọc.
+    try:
+        apply_profile_offline(getattr(a, "config", None), profile)
+    except (SystemExit, Exception):  # noqa: BLE001 — thiếu config KHÔNG được giết lệnh; cổng dưới tự fail-closed
+        pass
+    _perr = _profile_policy_error(require_registry=True, require_manifest=True, forbid_inherit=True)
+    if _perr:
+        return _emit_profile_policy_error(_perr, getattr(a, "json", False))
     entries, err = _profile_manifest_entries_for(profile, getattr(a, "config", None), getattr(a, "refresh", False))
     if err:
         print(json.dumps({"ok": False, "error": err}, ensure_ascii=False, indent=2), file=sys.stderr)

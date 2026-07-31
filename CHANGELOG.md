@@ -1,3 +1,26 @@
+# ★ v1.36.20 — r282: `profile-file-remove` có cổng bất biến profile — gõ sai tên không còn xoá vào registry/notebook NỀN (P16-F04) (2026-07-31)
+
+P16-F04 (P0 mất dữ liệu).
+
+**Bệnh:** `cmd_profile_file_remove` là đường GHI **phá huỷ nhất** của nhóm profile (xoá nguồn NLM — BẤT KHẢ
+NGHỊCH — + trash Drive + `reg_delete`) nhưng là đường DUY NHẤT không gọi `_profile_policy_error`, trong khi
+mọi đường cùng lớp đều có (ingest_ops ×5, ops_misc:1429, profile_mgmt:79) — kể cả lệnh ANH EM
+`profile-file-add` (= `cmd_profile_ingest`). Gõ sai `--profile-name` (lệch dấu/typo) ⇒
+`_profile_manifest_entries_for` trả manifest NỀN (1315 dòng); drive_id vẫn khớp nên KHÔNG rơi
+`NO_MATCHING_PROFILE_ROWS`; `load_creds` với tên sai làm `_scope_params()` rỗng ⇒ `source_delete` /
+`trash` / `reg_delete` bắn thẳng vào **notebook + registry NỀN**, in `{"ok":true}` rc=0.
+
+**VÁ:** đúng khuôn `cmd_profile_ingest` — `apply_profile_offline` → `_profile_policy_error(require_registry,
+require_manifest, forbid_inherit)` → **RỒI MỚI** đọc manifest. Thứ tự này quan trọng: đọc manifest TRƯỜC cổng
+nghĩa là đã kéo manifest NỀN về cache của profile-ma (họ F07/F09) dù sau đó có chặn. Profile-ma ⇒
+`PROFILE_CATEGORIES_OWN_REQUIRED` rc=2, không một lời gọi phá huỷ nào.
+
+**Kiểm (+5 case HÀNH VI qua `cmd_profile_file_remove` thật, đếm MỌI lời gọi phá huỷ; selftest 1482/1482):**
+phản chứng đo trên bản CHƯA VÁ — **3/5 ĐỎcVN**, 2 case còn lại xanh đúng thiết kế (cặp «KHÔNG ĐƯỢC ĐỔI»):
+profile dự án HỢP LỆ vẫn gỡ đủ 3 đường · corpus NỀN giữ nguyên hành vi (`_profile_policy_error` trả None
+theo thiết kế — không biến bản vá thành cổng chặn cả đường nền). Phủ thêm: registryDocId RỖNG (đúng lớp sự
+cố clobber 1.23.21) cũng bị chặn · **DRY cũng chặn** (DRY trên profile-ma vẫn kéo manifest nền về cache ma).
+
 # ★ v1.36.19 — r281: `load_creds` hết bỏ qua `config.defaultProfile` — lệnh GHI không còn âm thầm rơi về corpus NỀN (P16-F08) (2026-07-31)
 
 P16-F08 (P0 ghi nhầm corpus).

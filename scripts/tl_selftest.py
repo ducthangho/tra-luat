@@ -11205,6 +11205,107 @@ def run() -> int:
         return _p == "KHONG_TON_TAI" and not _reg and "PROFILE_NOT_FOUND" in _err
     _t110("r281_default_profile_ma_van_fail_closed", _c281_default_ma_khong_co_block)
 
+    def _run_filerm282(target_profile, env_scope, entries=None, apply=True):
+        """r282 HÀNH VI qua `cmd_profile_file_remove` THẬT. `env_scope` = env mà `apply_profile_offline`
+        để lại (mô phỏng profile-ma → scope RỖNG, vs profile thật → scope đủ). Đếm MỌI lời gọi phá huỷ."""
+        _calls282 = {"source_delete": [], "trash": [], "reg_delete": 0, "manifest_read": 0}
+
+        class _G282:
+            def get(self, action, **kw):
+                if action == "trash":
+                    _calls282["trash"].append(kw.get("fileId"))
+                return {"ok": True}
+
+            def post(self, action, **kw):
+                if action == "reg_delete":
+                    _calls282["reg_delete"] += 1
+                return {"ok": True}
+
+        class _NC282:
+            def source_delete(self, sid, timeout=120):
+                _calls282["source_delete"].append(sid)
+                return {"ok": True}
+
+        def _fake_entries(profile, config_path=None, refresh=False):
+            _calls282["manifest_read"] += 1
+            return list(entries or []), None
+
+        def _fake_apply(config_path=None, profile=None):
+            for _k in ("TL_PROFILE", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_CATEGORIES_MODE"):
+                os.environ.pop(_k, None)
+            for _k, _v in (env_scope or {}).items():
+                os.environ[_k] = _v
+        _keys282 = ("_profile_manifest_entries_for", "apply_profile_offline", "load_creds", "_gas", "_imp",
+                    "_apply_journal_start", "_journal_append")
+        _sav282 = {k: getattr(_TL_MODULE, k) for k in _keys282}
+        _savenv282 = {k: os.environ.get(k) for k in
+                      ("TL_PROFILE", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_CATEGORIES_MODE")}
+        _realimp282 = _TL_MODULE._imp
+        try:
+            _TL_MODULE._profile_manifest_entries_for = _fake_entries
+            _TL_MODULE.apply_profile_offline = _fake_apply
+            _TL_MODULE.load_creds = lambda *a, **k: None
+            _TL_MODULE._gas = lambda: _G282()
+            _TL_MODULE._imp = lambda name: (_NC282() if name == "nlm_cli" else _realimp282(name))
+            _TL_MODULE._apply_journal_start = lambda name, meta=None, **k: "run282"
+            _TL_MODULE._journal_append = lambda rid, rec: None
+            _ns = argparse.Namespace(drive_ids=["dX282"], target_profile=target_profile, profile=None,
+                                     config=None, refresh=False, apply=apply, confirm="yes",
+                                     delete_nlm=True, trash_drive=True, keep_registry=False, json=True)
+            _bo, _be = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                _rc = _TL_MODULE.cmd_profile_file_remove(_ns)
+            return _rc, _bo.getvalue() + _be.getvalue(), _calls282
+        finally:
+            for _k, _v in _sav282.items():
+                setattr(_TL_MODULE, _k, _v)
+            for _k, _v in _savenv282.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+
+    _ent282 = [{"drive_id": "dX282", "name": "Luat_X_282", "nlm_source_id": "sid282", "nlm_notebook_id": "nb282"}]
+    # profile-MA: `_apply_profile_env` xoá sạch scope (v1.33.48) ⇒ env chỉ còn TL_PROFILE = tên gõ sai.
+    _scope_ma282 = {"TL_PROFILE": "NQ8O"}
+    _scope_that282 = {"TL_PROFILE": "ATVSLD", "TL_REGISTRY_DOC_ID": "REG_AT",
+                      "TL_MANIFEST_ID": "MAN_AT", "TL_CATEGORIES_MODE": "own"}
+
+    def _c282_profile_ma_bi_chan_truoc_moi_thao_tac():
+        # P16-F04 LÕI: gõ sai tên profile ⇒ TUYỆT ĐỐI không source_delete (bất khả nghịch) / trash / reg_delete,
+        # và KHÔNG được đọc manifest (đọc = đã nạp manifest NỀN vào cache profile-ma — họ F09).
+        _rc, _out, _c = _run_filerm282("NQ8O", _scope_ma282, entries=_ent282)
+        return (_rc == 2 and _c["source_delete"] == [] and _c["trash"] == [] and _c["reg_delete"] == 0
+                and _c["manifest_read"] == 0 and "PROFILE_CATEGORIES_OWN_REQUIRED" in _out)
+    _t110("r282_file_remove_profile_ma_chan_truoc_khi_pha", _c282_profile_ma_bi_chan_truoc_moi_thao_tac)
+
+    def _c282_thieu_registry_id_cung_chan():
+        # Profile THẬT nhưng registryDocId rỗng = đúng lớp sự cố clobber 1.23.21 ⇒ cũng phải chặn.
+        _rc, _out, _c = _run_filerm282("ATVSLD", {"TL_PROFILE": "ATVSLD", "TL_CATEGORIES_MODE": "own"},
+                                       entries=_ent282)
+        return _rc == 2 and _c["source_delete"] == [] and "PROFILE_REGISTRY_ID_REQUIRED" in _out
+    _t110("r282_file_remove_thieu_registry_id_chan", _c282_thieu_registry_id_cung_chan)
+
+    def _c282_profile_that_van_chay():
+        # PHẢN CHỨNG: profile dự án HỢP LỆ ⇒ cổng TRONG SUỐT, vẫn gỡ đủ 3 đường như cũ (không chặn ca đúng).
+        _rc, _out, _c = _run_filerm282("ATVSLD", _scope_that282, entries=_ent282)
+        return (_rc == 0 and _c["source_delete"] == ["sid282"] and _c["trash"] == ["dX282"]
+                and _c["reg_delete"] == 1 and _c["manifest_read"] == 1)
+    _t110("r282_file_remove_profile_that_van_chay", _c282_profile_that_van_chay)
+
+    def _c282_corpus_nen_khong_bi_chan():
+        # PHẢN CHỨNG: corpus NỀN (vbqppl) — `_profile_policy_error` trả None theo thiết kế ⇒ giữ nguyên
+        # hành vi cũ, không được biến bản vá thành cổng chặn cả đường nền hợp lệ.
+        _rc, _out, _c = _run_filerm282(None, {"TL_PROFILE": "vbqppl"}, entries=_ent282)
+        return _rc == 0 and _c["source_delete"] == ["sid282"] and _c["reg_delete"] == 1
+    _t110("r282_file_remove_corpus_nen_giu_nguyen", _c282_corpus_nen_khong_bi_chan)
+
+    def _c282_dry_cung_khong_doc_manifest_khi_ma():
+        # Cổng phải chặn ở DRY luôn: DRY trên profile-ma vẫn kéo manifest NỀN về cache profile-ma (F09).
+        _rc, _out, _c = _run_filerm282("NQ8O", _scope_ma282, entries=_ent282, apply=False)
+        return _rc == 2 and _c["manifest_read"] == 0
+    _t110("r282_file_remove_dry_cung_chan_profile_ma", _c282_dry_cung_khong_doc_manifest_khi_ma)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

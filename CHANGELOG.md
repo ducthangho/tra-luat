@@ -1,3 +1,42 @@
+# ★ v1.36.23 — r285: bịt RÒ RỈ MONKEYPATCH trong selftest — khối r87 làm mọi test sau nó chạy trên bản GIẢ (P16-T02) — TEST-ONLY (2026-07-31)
+
+**Bệnh (P0 của bộ test, đo trực tiếp chứ không suy):** khối test `r87` khai
+`_keys86 = ("_gas","load_creds","apply_profile_offline","_apply_journal_start","_journal_append")` để
+khôi phục, nhưng bên trong (`:6672-6674`) còn thay THÊM **ba** tên nữa: `_manifest_entries` → `lambda: []`,
+`_reg_before_from_manifest` → `lambda: {}`, `_apply_gate` → `(True, {"ok": True})`. Ba tên đó KHÔNG nằm
+trong danh sách khôi phục ⇒ stub **sống tới hết `run()`**.
+
+**Hại đo được:** (i) mọi case sau `:6672` mà không tự thay `_manifest_entries` đều thấy **corpus RỖNG**;
+(ii) mọi case đi qua `_apply_gate` được cho qua **VÔ ĐIỀU KIỆN** — tức cổng preflight bất biến (`_apply_gate`,
+ADR) **chưa từng được kiểm** ở nửa sau bộ test. Đúng lớp `false-green-test-qua-bind` đã có trong sổ.
+
+**Cách phát hiện (một phép đo, không đoán):** cài `__setattr__` hook lên module `tl` rồi chạy
+`tl_selftest.run()` — ghi được **343 lần gán** `_manifest_entries`; lần gán từ `:6672` KHÔNG BAO GIỜ được
+trả về bản gốc. Tại điểm test mới của P16 chạy, `_TL_MODULE._manifest_entries.__qualname__` =
+`"run.<locals>.<lambda>"` (không phải hàm sản xuất) và trả `[]`.
+
+**BẰNG CHỨNG HẠI CÓ THẬT:** vá rò rỉ xong, `r97_no_nlm_add_stops_at_drive_registry` (`:7998`) **SẬP NGAY**
+(`JSONDecodeError` — lệnh không in nổi JSON vì đi đọc manifest thật). Nghĩa là test r97 xưa nay xanh **chỉ
+nhờ** stub rò từ khối khác; kịch bản «corpus trống ⇒ không trùng ⇒ nạp tiếp» của nó **chưa từng được khai
+báo**. Nay r97 tự khai `_manifest_entries = []` — cùng kịch bản, nhưng nói ra.
+
+**VÁ (chỉ `tl_selftest.py`, không đụng code sản xuất):**
+1. `_keys86` phủ TRỌN tập tên khối r87 thay (thêm `_manifest_entries`, `_reg_before_from_manifest`, `_apply_gate`).
+2. Khối r97 tự khai stub `_manifest_entries` của mình (+ thêm vào `_keys97` để khôi phục).
+3. **CHỐT CHẶN TÁI PHÁT** — `r285_khong_ro_ri_monkeypatch`: chụp ảnh MỌI hàm/lớp của module `tl` ở ĐẦU
+   `run()`, đối chiếu identity ở CUỐI; tên nào lệch là monkeypatch bị bỏ quên ⇒ case ĐỎ và **in đích danh**
+   danh sách tên để sửa được ngay, thay vì để nó âm thầm làm xanh giả các lượt sau.
+
+**Vùng ảnh hưởng đo được (không đoán):** chạy hermetic sau khi bịt rò rỉ ⇒ **đúng 3 test** lộ ra là
+xanh-giả, tất cả cùng họ `ingest_local`: `r97_no_nlm_add_stops_at_drive_registry`,
+`r114_no_nlm_add_never_counts_slots`, `r115_ingest_local_dead_cookie_autoswitch_addtay`. Cả ba được vá
+theo ĐÚNG nguyên tắc: **tự khai stub của chính nó** (`_manifest_entries = []` — vốn là kịch bản
+«corpus trống, không có dòng nào để dedup» của chính chúng), KHÔNG khôi phục rò rỉ để làm chúng xanh lại.
+
+**Chi phí ẩn cũng lộ ra:** trên máy CÓ creds thật, `_selftest_seal_env` cố ý KHÔNG chặn mạng (vế 3 của
+r262), nên ba test đó — khi mất stub — đi gọi webapp thật, mỗi lần retry 5s+15s ⇒ selftest vọt từ ~100s
+lên >10 phút. Sau khi khai stub tường minh: **103s, 1492/1492**. Hermetic (ép creds giả) cũng 1492/1492.
+
 # ★ v1.36.22 — r284: sửa test PHỤ THUỘC MÁY của r281/r283 (khung cô lập bỏ sót `HERE`) — TEST-ONLY (2026-07-31)
 
 **Ca thật, bắt lúc người giữ chạy `deploy-package.cmd` trên cây canonical (31-07):** gate DỪNG ở bước 1 —

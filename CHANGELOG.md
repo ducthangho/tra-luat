@@ -1,3 +1,38 @@
+# ★ v1.36.28 — r290/RAS-01 (vế `changes_pull`): "DRY" MÀ VẪN GHI — điều phối hết gọi action ghi trước cổng `--apply` (2026-07-31)
+
+Slice **R1** phần độc lập (§Pha 1D "[MỚI] Đóng riêng lỗ `changes_pull`"), mục **T2** thứ ba.
+Vế metadata/CLI của RAS-01 để **T3**; vế này vá được ngay và nặng hơn.
+
+**Bệnh (`scripts/registry_orchestrator.py`).** Ở `phase=boot`, `gas.post("changes_pull")` chạy **TRƯỚC**
+cổng `if args.dry or not args.apply` — trong khi chính nhánh DRY đó in ra
+*"chế độ DRY — không gọi action ghi"*. Lời in **SAI**, và sai theo hướng nguy hiểm nhất: người vận hành
+chạy "dry" để XEM, và tin là mình chưa động vào gì.
+
+**Nặng hơn audit mô tả — đã đọc mã GAS.** Audit nói `applySheet=true ⇒ GHI Sheet`, đúng. Nhưng
+`doChangesPull_` (`references/Code.2.21.2n.gs:1527`) **LUÔN** `sp.setProperty('TL_CHANGES_TOKEN', …)`
+**bất kể** `apply`/`applySheet` ⇒ nó **TIÊU THỤ cửa sổ delta**. Nghĩa là hạ xuống `applySheet=false`
+**KHÔNG cứu được**: một lượt "dry" vẫn **nuốt mất** thay đổi mà lượt `--apply` thật lẽ ra phải thấy.
+⇒ Chốt đúng là **KHÔNG GỌI**, không phải gọi-nhẹ-hơn.
+
+**Vá.** DRY (`--dry` **hoặc** thiếu `--apply` — hai đường vào cùng một cổng, bịt cả hai) ⇒ bỏ hẳn lời gọi,
+khai thẳng trạng thái mới `changes_state="not_probed"`. `decide()` xếp `not_probed` **cùng nhánh bảo thủ**
+với `no_baseline` (`regen2` + `changes_init`) và nêu lý do: *chưa đo thì chưa biết*. Đoán "chắc ít thay
+đổi" chính là lớp fail-open đang chữa.
+
+**Test (+3 ca → 1509/1509):**
+- `r290_orch_dry_khong_goi_action_ghi` — chạy `run()` THẬT với module `gas` GIẢ: DRY ⇒ **không `post`
+  action nào**, không `changes_pull`; kế hoạch lấy nhánh bảo thủ và **nói rõ vì sao**; kiểm **cả hai**
+  đường vào DRY.
+- `r290_orch_apply_van_goi_changes_pull` — PHẢN CHỨNG: `--apply` thật **vẫn** gọi `changes_pull`; vá
+  không được biến thành "bỏ hẳn tính năng".
+- `r290_orch_decide_not_probed_bao_thu` — `not_probed` cho kế hoạch **y hệt** `no_baseline`, lý do nêu DRY.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `registry_orchestrator.py` về HEAD (giữ test) ⇒ `1507/1509`, ĐỎ đúng
+hai ca hành vi mới; ca phản chứng `--apply` vẫn xanh (hành vi đó vốn đã đúng). Sau vá `1509/1509`.
+
+`python scripts/registry_orchestrator.py --selftest` = **22/22** trước và sau.
+**ruff 0.15.8:** `registry_orchestrator.py` **0 F821 / 0 F401**, y hệt master (delta 0). Full gate **8/8 PASS**.
+
 # ★ v1.36.27 — r289/PRO-01: `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau khi bước xoá đã hỏng (2026-07-31)
 
 Slice **P0** (§6.1-(b) + Pha 1C-tách-ra), **ưu tiên #2 toàn sổ audit** — chỉ sau GATE-03. Mục T2 thứ nhất.

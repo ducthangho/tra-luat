@@ -24783,6 +24783,77 @@ def run() -> int:
                 and _p["txn"]["failed_error"] == "KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU")
     _t110("r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh", _c289_khong_thao_tac_nao_khong_con_bao_xanh)
 
+    # ═══ r290 (v1.36.28) — RAS-01 vế `changes_pull`: "DRY" MÀ VẪN GHI (Slice R1, T2) ═══
+    # `registry_orchestrator.run()` gọi `gas.post("changes_pull")` ở phase=boot TRƯỚC cổng
+    # `if args.dry or not args.apply` — trong khi chính nhánh DRY in "chế độ DRY — không gọi action ghi".
+
+    def _run290(*, dry, apply_, phase="boot"):
+        """Chạy `registry_orchestrator.run()` THẬT với module `gas` GIẢ. Trả (plan, calls)."""
+        import sys as _sys290, types as _ty290, importlib as _il290
+        _calls = []
+
+        _fake = _ty290.ModuleType("gas")
+        _fake.get = lambda action, **kw: (_calls.append(("get", action, kw))
+                                          or {"ok": True, "version": "2.21.2p", "count": 0})
+        _fake.post = lambda action, **kw: (_calls.append(("post", action, kw))
+                                           or {"ok": True, "count": 0, "applied": 0, "sheetApplied": True})
+        _sav_gas = _sys290.modules.get("gas")
+        _sav_path = list(_sys290.path)
+        _sys290.modules["gas"] = _fake
+        if str(_TL_MODULE.HERE) not in _sys290.path:
+            _sys290.path.insert(0, str(_TL_MODULE.HERE))
+        try:
+            _ro = _il290.import_module("registry_orchestrator")
+            _ns = argparse.Namespace(phase=phase, dry=dry, apply=apply_, manifest=None, touched_drive=False,
+                                     min_version="2.13.7", regen_threshold=40, bulk_threshold=8,
+                                     tukhoa_threshold=8)
+            _b = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                _d = _ro.run(_ns)
+            return (_d or {}), _calls, _b.getvalue()
+        finally:
+            if _sav_gas is None:
+                _sys290.modules.pop("gas", None)
+            else:
+                _sys290.modules["gas"] = _sav_gas
+            _sys290.path[:] = _sav_path
+
+    def _c290_dry_khong_goi_action_ghi():
+        # LÕI: DRY ⇒ TUYỆT ĐỐI không `post` action nào. `changes_pull` không chỉ vá Sheet
+        # (applySheet mặc định true) mà `doChangesPull_` còn LUÔN ghi lại `TL_CHANGES_TOKEN` ⇒ TIÊU THỤ
+        # cửa sổ delta, nên `applySheet=false` cũng KHÔNG cứu được: một lượt "dry" nuốt mất thay đổi mà
+        # lượt --apply thật lẽ ra phải thấy. Vì vậy chốt là KHÔNG GỌI, không phải gọi-nhẹ-hơn.
+        _d, _c, _txt = _run290(dry=True, apply_=False)
+        _khong_post = not any(x[0] == "post" for x in _c)
+        _khong_pull = not any(x[1] == "changes_pull" for x in _c)
+        # và không được đoán bừa độ tươi: kế hoạch phải lấy nhánh BẢO THỦ + nói rõ vì sao
+        _bao_thu = {"regen2", "changes_init"} <= set(_d.get("plan") or [])
+        _noi_ro = any("changes_pull" in r and "DRY" in r for r in (_d.get("reasons") or []))
+        # cờ --dry và "không --apply" là HAI đường vào cùng một cổng — phải bịt cả hai
+        _d2, _c2, _ = _run290(dry=False, apply_=False)
+        _ca_hai = not any(x[0] == "post" for x in _c2)
+        return bool(_khong_post and _khong_pull and _bao_thu and _noi_ro and _ca_hai)
+    _t110("r290_orch_dry_khong_goi_action_ghi", _c290_dry_khong_goi_action_ghi)
+
+    def _c290_apply_van_goi_changes_pull():
+        # PHẢN CHỨNG: --apply THẬT vẫn phải gọi `changes_pull` — vá không được biến thành "bỏ hẳn tính năng".
+        _d, _c, _ = _run290(dry=False, apply_=True)
+        return any(x[0] == "post" and x[1] == "changes_pull" for x in _c)
+    _t110("r290_orch_apply_van_goi_changes_pull", _c290_apply_van_goi_changes_pull)
+
+    def _c290_decide_not_probed_bao_thu():
+        # Trạng thái mới `not_probed` phải xếp cùng nhánh bảo thủ với `no_baseline` — "chưa đo" KHÔNG
+        # được suy thành "chắc ít thay đổi" (đó đúng là lớp fail-open đang chữa), và lý do phải nêu DRY.
+        import sys as _sys290b, importlib as _il290b
+        if str(_TL_MODULE.HERE) not in _sys290b.path:
+            _sys290b.path.insert(0, str(_TL_MODULE.HERE))
+        _ro = _il290b.import_module("registry_orchestrator")
+        _np = _ro.decide("2.21.2p", "not_probed", None, 0)
+        _nb = _ro.decide("2.21.2p", "no_baseline", None, 0)
+        return (_np["plan"] == _nb["plan"]
+                and any("DRY" in r and "changes_pull" in r for r in _np["reasons"]))
+    _t110("r290_orch_decide_not_probed_bao_thu", _c290_decide_not_probed_bao_thu)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

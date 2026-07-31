@@ -1,3 +1,49 @@
+# ★ v1.36.25 — r287/GATE-01b: golden-test CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi (2026-07-31)
+
+Slice **G0.1b** (§3.1 kế hoạch AUDIT_XAC_MINH 31-07). **Chỉ được làm SAU khi G0.1a (r286) xanh** — xem
+bằng chứng thứ tự ở cuối mục này.
+
+**Bệnh (fail-open, `tl_core/workflow.py`):** `raw_stable` được TÍNH, thậm chí sinh `raw_diff`, nhưng
+`rec["ok"]` dẫn xuất **thuần** từ so sánh projection. Hệ quả: hai stdout **khác byte / cùng projection**
+vẫn cho `top ok=true, rc=0`, và `--write` vẫn **GHI ĐÈ fixture** từ một lệnh đang bất định. Đã **BÁO** mà
+**KHÔNG cưỡng chế** — vi phạm "kết quả tất định" của CONTEXT.md.
+
+**Vá:** `raw_stable=false` ⇒ case `ok=false` + mã lỗi **RIÊNG** `GOLDEN_RAW_UNSTABLE` ⇒ top `ok=false` ⇒
+`rc≠0`; ở `--write` thì **CẤM ghi/regen** (`written: false`, top `write_refused: true`). Mã lỗi để riêng
+CÓ CHỦ ĐÍCH: `GOLDEN_MISMATCH` (fixture lệch → xem lại thay đổi) và `GOLDEN_RAW_UNSTABLE` (lệnh bất định →
+**cấm** regen, phải làm tất định trước) là hai bệnh **chữa ngược nhau**; gộp một mã là mời người ta chạy
+`--write` cho xong. Kèm `raw_sha256_run2` để đọc được cả hai lượt.
+
+**Test characterization (ĐỎ-TRƯỚC / XANH-SAU), +3 ca → 1498/1498.** Harness bơm `_run_tl_json` GIẢ trả hai
+stdout **khác đúng 1 byte space / `json.loads` ra CÙNG dict**, và ghim `_golden_dir` vào **tempdir** — dù cổng
+có hỏng thì `--write` cũng không bao giờ đụng `references/golden/` thật.
+- `r287_golden_raw_drift_lam_do_gate` — bơm drift ⇒ top `ok=false` + `error=GOLDEN_RAW_UNSTABLE` + case
+  `ok=false`/`raw_diff` có nội dung. **Phản chứng:** không drift ⇒ cổng IM, lỗi đúng là `GOLDEN_FILE_MISSING`
+  (đã đi QUA cổng raw, chết ở bước so fixture) — cổng luôn-đỏ vô dụng y như cổng luôn-xanh.
+- `r287_write_cam_ghi_khi_raw_bat_dinh` — `--write` + drift ⇒ `write_refused=true`, mọi case `written=false`,
+  và thư mục golden **không sinh tệp nào**. **Phản chứng:** không drift ⇒ `--write` vẫn ghi đủ 20 tệp.
+- `r287_rc_khac_0_qua_lenh_that` — cưỡng chế phải tới **TẦNG LỆNH**: `cmd_golden_test` trả `rc≠0`, không chỉ
+  payload `ok=false`. `rc` mới là thứ `deploy-package.sh`/CI đọc; dừng ở payload thì cổng vẫn lọt.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `workflow.py` về HEAD, giữ nguyên test ⇒ `1495/1498` với ĐÚNG ba ca r287
+đỏ (ba ca r286 vẫn xanh). Sau vá `1498/1498`.
+
+**BẰNG CHỨNG THỨ TỰ — vì sao G0.1a phải xong TRƯỚC.** Ghép **riêng** bản cưỡng chế này vào cây
+`origin/master` (tức **có G0.1b, KHÔNG có G0.1a**) rồi chạy `golden-test` liên tiếp:
+
+```
+lượt 1..4: rc=0  top_ok=True   raw_stable=True
+lượt 5:    rc=2  top_ok=False  raw_stable=False  error=GOLDEN_RAW_UNSTABLE   ← ĐỎ CHẬP CHỜN
+```
+
+Trên nhánh này (**G0.1a + G0.1b**): 6 lượt liên tiếp `rc=0`, 20/20 case `ok`, `raw_stable=true` toàn bộ, và
+`sweep raw_sha256` **BẰNG NHAU cả 6 lượt** (`d2fd042e4d47…`). Đúng như §3.1 cảnh báo: cưỡng chế trước khi
+làm tất định = cổng đỏ chập chờn, tệ hơn không có cổng.
+
+**ruff 0.15.8 — delta so master:** `workflow.py` **26 F821 / 0 F401 = Y HỆT master** (delta 0).
+`tl.py` 12/0 (đúng nền, không đụng). `tl_selftest.py` 4250 (master 4207): +43 là `os`/`json`/`_TL_MODULE`
+của 3 ca mới — cùng lớp BY DESIGN. **Không phát sinh lớp cảnh báo mới; F401 không đổi.**
+
 # ★ v1.36.24 — r286/GATE-01a: `sweep` TẤT ĐỊNH ở RAW — đóng băng `snapshot_age_s` dưới deterministic mode (2026-07-31)
 
 Slice **G0.1a** (§3.1 + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Làm tất định TRƯỚC, cưỡng chế SAU** — đảo

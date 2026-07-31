@@ -1646,7 +1646,22 @@ def _golden_test(*, write: bool = False) -> dict:
             cases.append(rec)
             continue
         if not rec["raw_stable"]:
+            # r287 (v1.36.25 — Slice G0.1b): CƯỠNG CHẾ raw stability. TRƯỚC ĐÂY chỗ này chỉ GHI CHÚ
+            # `raw_diff` rồi đi tiếp: `rec["ok"]` dẫn xuất THUẦN từ so sánh projection, nên hai stdout
+            # KHÁC BYTE mà cùng projection vẫn cho `top ok=true, rc=0` — và `--write` vẫn GHI ĐÈ fixture
+            # từ một lệnh đang bất định. Đó là fail-open: đã BÁO mà KHÔNG cưỡng chế, vi phạm "kết quả
+            # tất định" của CONTEXT.md. Nay: case ok=false + mã lỗi RIÊNG `GOLDEN_RAW_UNSTABLE` ⇒ top
+            # ok=false ⇒ rc≠0; ở `--write` thì CẤM ghi/regen (`written: false`) — fixture chỉ được sinh
+            # từ lệnh đã chứng minh tất định, không phải từ ảnh chụp một lượt may.
+            # Thứ tự BẮT BUỘC: cổng này chỉ được bật SAU khi G0.1a (r286) làm `sweep` tất định ở RAW,
+            # nếu không thì đây là cổng ĐỎ CHẬP CHỜN — tệ hơn không có cổng.
             rec["raw_diff"] = _first_text_diff(_raw1, _raw2)
+            rec.update({"ok": False, "error": "GOLDEN_RAW_UNSTABLE",
+                        "raw_sha256_run2": hashlib.sha256(_raw2.encode("utf-8")).hexdigest()})
+            if write:
+                rec["written"] = False
+            cases.append(rec)
+            continue
         actual = projected_text1
         actual_hash = hashlib.sha256(actual.encode("utf-8")).hexdigest()
         rec["actual_sha256"] = actual_hash
@@ -1664,7 +1679,17 @@ def _golden_test(*, write: bool = False) -> dict:
                 rec["error"] = "GOLDEN_MISMATCH"
         cases.append(rec)
     ok = all(c.get("ok") for c in cases)
-    return {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    out = {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    # r287 (G0.1b): mã lỗi RIÊNG nổi lên TOP để người đọc phân biệt "fixture lệch" (GOLDEN_MISMATCH — sửa
+    # bằng cách xem lại thay đổi) với "lệnh bất định" (GOLDEN_RAW_UNSTABLE — CẤM regen, phải làm tất định
+    # trước). Hai bệnh khác nhau, cách chữa ngược nhau; gộp một mã là mời người ta chạy `--write` cho xong.
+    _raw_bad = [c["id"] for c in cases if c.get("error") == "GOLDEN_RAW_UNSTABLE"]
+    if _raw_bad:
+        out["error"] = "GOLDEN_RAW_UNSTABLE"
+        out["raw_unstable_cases"] = _raw_bad
+        if write:
+            out["write_refused"] = True
+    return out
 
 
 def cmd_golden_test(a) -> int:

@@ -24447,6 +24447,108 @@ def run() -> int:
         return bool(_counts_ok and _im_ok)
     _t110("r286_counts_va_ingest_missing_cung_mau", _c286_counts_va_ingest_missing_cung_mau)
 
+    # ═══ r287 (v1.36.25) — Slice G0.1b: CƯỠNG CHẾ raw stability trong golden-test ═══
+    # Trước vá: `raw_stable` được TÍNH, thậm chí sinh `raw_diff`, nhưng `rec["ok"]` dẫn xuất THUẦN từ so
+    # sánh projection ⇒ hai stdout KHÁC BYTE mà cùng projection vẫn `top ok=true, rc=0`, và `--write` vẫn
+    # GHI ĐÈ fixture từ một lệnh đang bất định. Fail-open: đã BÁO mà KHÔNG cưỡng chế.
+
+    def _harness287(fn, *, write, drift):
+        """Chạy `_golden_test` với `_run_tl_json` GIẢ: hai lượt cùng payload, khác byte khi `drift`.
+
+        Cô lập tuyệt đối: `_golden_dir` trỏ vào tempdir ⇒ dù cổng có hỏng thì `--write` cũng chỉ ghi vào
+        thư mục tạm, KHÔNG BAO GIỜ đụng `references/golden/` thật (ca này phải an toàn cả khi nó ĐỎ).
+        """
+        import tempfile as _tf287, pathlib as _pl287
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _payload = {"ok": True, "schema": "r287.v1", "n": 1, "note": "cùng projection"}
+        _s1 = json.dumps(_payload, ensure_ascii=False, indent=2)
+        _s2 = (_s1 + " ") if drift else _s1        # thêm 1 space: KHÁC BYTE, json.loads ra CÙNG dict
+        _turn = {"i": 0}
+
+        def _fake287(args, *, timeout=60, env_extra=None):
+            _turn["i"] += 1
+            _t = _s2 if (_turn["i"] % 2 == 0) else _s1
+            return {"ok": True, "cmd": [], "returncode": 0, "data": json.loads(_t),
+                    "parse_error": "", "stdout": _t}
+
+        _sav = {k: _g.get(k) for k in ("_run_tl_json", "_golden_dir")}
+        with _tf287.TemporaryDirectory() as _d:
+            try:
+                _g["_run_tl_json"] = _fake287
+                _g["_golden_dir"] = lambda: _pl287.Path(_d) / "golden"
+                _out = fn(write=write)
+                _files = sorted(p.name for p in (_pl287.Path(_d) / "golden").glob("*.json"))
+                return _out, _files
+            finally:
+                for _k, _v in _sav.items():
+                    _g[_k] = _v
+
+    def _c287_raw_drift_lam_do_gate():
+        # ĐẶC TẢ: bơm hai stdout KHÁC BYTE / CÙNG projection ⇒ PHẢI ĐỎ, với mã lỗi RIÊNG.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _gt = _g["_golden_test"]
+        _out, _ = _harness287(_gt, write=False, drift=True)
+        _c = _out["cases"][0]
+        do_dung_cach = (_out.get("ok") is False
+                        and _out.get("error") == "GOLDEN_RAW_UNSTABLE"
+                        and len(_out.get("raw_unstable_cases") or []) == _out["case_count"]
+                        and _c.get("ok") is False
+                        and _c.get("raw_stable") is False
+                        and _c.get("error") == "GOLDEN_RAW_UNSTABLE"
+                        and bool(_c.get("raw_diff")))
+        # PHẢN CHỨNG: KHÔNG bơm drift thì cổng phải IM — không được biến thành "luôn đỏ" (cổng luôn đỏ
+        # cũng vô dụng y như cổng luôn xanh). Fixture chưa tồn tại nên lỗi ĐÚNG phải là GOLDEN_FILE_MISSING,
+        # tức đã đi QUA cổng raw và chết ở bước so fixture — chứng minh cổng không nuốt oan.
+        _out2, _ = _harness287(_gt, write=False, drift=False)
+        khong_do_oan = (_out2["cases"][0].get("raw_stable") is True
+                        and _out2["cases"][0].get("error") == "GOLDEN_FILE_MISSING"
+                        and _out2.get("error") != "GOLDEN_RAW_UNSTABLE")
+        return bool(do_dung_cach and khong_do_oan)
+    _t110("r287_golden_raw_drift_lam_do_gate", _c287_raw_drift_lam_do_gate)
+
+    def _c287_write_cam_ghi_khi_raw_bat_dinh():
+        # `--write` là đường NGUY HIỂM nhất: ghi fixture từ lệnh bất định là ĐÓNG BĂNG cái ngẫu nhiên vào
+        # golden, rồi mọi lượt sau so với nó. Trước vá vẫn ghi (`written: true`). Nay: CẤM ghi, `ok=false`,
+        # `write_refused=true`, và thư mục golden phải KHÔNG có tệp nào được sinh ra.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _gt = _g["_golden_test"]
+        _out, _files = _harness287(_gt, write=True, drift=True)
+        cam_ghi = (_out.get("ok") is False
+                   and _out.get("error") == "GOLDEN_RAW_UNSTABLE"
+                   and _out.get("write_refused") is True
+                   and all(c.get("written") is False for c in _out["cases"])
+                   and _files == [])
+        # PHẢN CHỨNG: không drift thì `--write` vẫn phải ghi được (cổng chỉ chặn ĐÚNG ca bất định,
+        # không khoá luôn đường regen hợp lệ).
+        _out2, _files2 = _harness287(_gt, write=True, drift=False)
+        van_ghi_duoc = (_out2.get("ok") is True
+                        and all(c.get("written") is True for c in _out2["cases"])
+                        and len(_files2) == _out2["case_count"])
+        return bool(cam_ghi and van_ghi_duoc)
+    _t110("r287_write_cam_ghi_khi_raw_bat_dinh", _c287_write_cam_ghi_khi_raw_bat_dinh)
+
+    def _c287_rc_khac_0_qua_lenh_that():
+        # Cưỡng chế phải tới được TẦNG LỆNH: `cmd_golden_test` trả rc≠0 (không chỉ payload ok=false).
+        # rc là thứ `deploy-package.sh`/CI thật sự đọc — dừng ở payload là cổng vẫn lọt.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _cmd = _resolve286(_TL_MODULE.cmd_golden_test)
+        _out_box = {}
+
+        def _run_cmd(write, drift):
+            def _call(*, write=write):
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _cmd(build_parser().parse_args(
+                        ["golden-test", "--json"] + (["--write"] if write else [])))
+                _out_box["rc"] = _rc
+                return json.loads(_b.getvalue())
+            return _harness287(_call, write=write, drift=drift)
+
+        _payload, _ = _run_cmd(False, True)
+        return bool(_out_box.get("rc") not in (0, None)
+                    and _payload.get("error") == "GOLDEN_RAW_UNSTABLE")
+    _t110("r287_rc_khac_0_qua_lenh_that", _c287_rc_khac_0_qua_lenh_that)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

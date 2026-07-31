@@ -406,7 +406,8 @@ def cmd_ingest_missing(a) -> int:
     if not getattr(a, "apply", False):
         _snap_age, _snap_warn = _snapshot_stale_warn(snapshot_ts, len(backlog))
         out = {"ok": True, "gate": "ingest-missing", "mode": "DRY", "manifest_snapshot": snapshot_ts,
-               "snapshot_age_s": None if _snap_age is None else int(_snap_age),
+               # r286 (Slice G0.1a): cùng mẫu với `sweep`/`counts` — đóng băng tuổi-giây ở RAW.
+               "snapshot_age_s": _frozen_age_seconds(None if _snap_age is None else int(_snap_age), a),
                "warn": _snap_warn,
                "backlog": len(backlog), "to_ingest": len(targets), "skipped_no_sohieu": len(_skip_note),
                "base_notebook": base_nb, "overflow_shard": overflow_shard or None,

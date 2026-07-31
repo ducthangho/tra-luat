@@ -24319,6 +24319,134 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r276_sohieu_khong_nam_detector", _c276_sohieu_khong_nam_detector)
 
+    # ═══ r286 (v1.36.24) — Slice G0.1a: `sweep` TẤT ĐỊNH ở RAW, TRƯỚC khi G0.1b cưỡng chế ═══
+    # `snapshot_age_s` đã nằm trong volatile_keys ⇒ PROJECTION sạch, nhưng golden-test còn so RAW stdout
+    # hai lượt. Raw lệch mỗi khi tuổi cache vắt qua mốc GIÂY NGUYÊN giữa hai lần chạy — bất định THEO
+    # THỜI ĐIỂM, nên "20/20 raw_stable=true ở một lượt" KHÔNG chứng minh được gì. Đo THẬT trên cây này:
+    # hai lượt `sweep --json` cách 1,2s ⇒ 1284 vs 1285, và đó là KHÁC BIỆT DUY NHẤT của cả payload.
+
+    def _resolve286(fn):
+        """Gỡ stub `_STUB_MAP` để lấy HÀM THẬT đang chạy + globals THẬT của nó.
+
+        BẪY đã trả giá khi viết ca này: `_TL_MODULE.cmd_sweep` là STUB (`tl.py:_make_tl_stub`) ủy quyền
+        `getattr(tl_core.hygiene, 'cmd_sweep')`. Trong tiến trình SẠCH, hàm thật được re-home
+        `__globals__` về `tl.__dict__` nên monkeypatch `_TL_MODULE._manifest_entries` ăn (đó là lý do
+        ca r41 ở đầu tệp chạy được). Nhưng tới CUỐI dãy selftest, `tl_core.hygiene` đã bị nạp lại
+        (đường self-heal) ⇒ `hygiene.cmd_sweep.__globals__ is tl.__dict__` là **False** ⇒ patch trên
+        `_TL_MODULE` KHÔNG tới nơi, lệnh rơi xuống gọi webapp THẬT và chết vì seal-mạng (rc=2, stdout
+        rỗng). Vá đúng chỗ: patch trên globals của CHÍNH hàm sẽ chạy, không đoán theo tên module.
+        """
+        _seen = 0
+        while getattr(fn, "__tl_stub__", None) and _seen < 5:
+            _mk, _nm = fn.__tl_stub__
+            fn = getattr(getattr(_TL_MODULE, "_tl_" + _mk), _nm)
+            _seen += 1
+        return fn
+
+    def _run286(fn, argv, ages):
+        """Chạy `fn` với tuổi-cache TRÔI theo `ages`; trả (rc, stdout) từng lượt."""
+        _real = _resolve286(fn)
+        _g = _real.__globals__
+        _sav = {k: _g.get(k) for k in ("_manifest_entries", "_manifest_cache_age_seconds")}
+        _tick = iter(list(ages))
+        _g["_manifest_entries"] = lambda refresh=False: _fx30
+        _g["_manifest_cache_age_seconds"] = lambda *_a, **_k: next(_tick)
+        try:
+            _outs = []
+            for _ in range(len(ages)):
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _real(build_parser().parse_args(argv))
+                _outs.append((_rc, _b.getvalue()))
+            return _outs
+        finally:
+            for _k, _v in _sav.items():
+                _g[_k] = _v
+
+    def _c286_frozen_age_dong_bang_va_giu_none():
+        # HỢP ĐỒNG của helper: deterministic BẬT ⇒ mọi tuổi-giây thu về MỘT hằng (hai đầu vào khác nhau
+        # cho cùng một byte); deterministic TẮT ⇒ giá trị THẬT nguyên vẹn — không nới định nghĩa
+        # raw-stability, chỉ đóng băng dưới chế độ tất định; `None` luôn giữ `None` (chưa có snapshot là
+        # dữ kiện NGHIỆP VỤ, đổi thành 0 là nói dối "có snapshot, mới 0 giây").
+        _det = _TL_MODULE._tl_det
+
+        class _A286on:
+            deterministic = True
+
+        class _A286off:
+            deterministic = False
+
+        _sav286 = os.environ.get("TL_DETERMINISTIC")
+        try:
+            os.environ.pop("TL_DETERMINISTIC", None)   # tắt env: cờ args là thứ DUY NHẤT quyết định
+            on1 = _det.frozen_age_seconds(1284, _A286on())
+            on2 = _det.frozen_age_seconds(1285, _A286on())
+            off1 = _det.frozen_age_seconds(1284, _A286off())
+            off2 = _det.frozen_age_seconds(1285, _A286off())
+            none_on = _det.frozen_age_seconds(None, _A286on())
+            none_off = _det.frozen_age_seconds(None, _A286off())
+            os.environ["TL_DETERMINISTIC"] = "1"       # đường ENV — chính là đường subprocess golden dùng
+            env_on = _det.frozen_age_seconds(1284, None)
+        finally:
+            if _sav286 is None:
+                os.environ.pop("TL_DETERMINISTIC", None)
+            else:
+                os.environ["TL_DETERMINISTIC"] = _sav286
+        return (on1 == on2 == _det.FROZEN_AGE_S and env_on == _det.FROZEN_AGE_S
+                and off1 == 1284 and off2 == 1285
+                and none_on is None and none_off is None)
+    _t110("r286_frozen_age_dong_bang_va_giu_none", _c286_frozen_age_dong_bang_va_giu_none)
+
+    def _c286_sweep_raw_bat_bien_khi_tuoi_cache_troi():
+        # ĐẶC TẢ HÀNH VI — đây mới là ca ĐỎ-TRƯỚC thật: `sweep --json --deterministic` HAI lượt, giữa hai
+        # lượt cho đồng hồ tuổi-cache TRÔI 1284 → 1285 đúng như lúc vắt mốc giây. RAW stdout phải BẤT BIẾN
+        # TỪNG BYTE. Trước vá: hai lượt lệch đúng dòng `"snapshot_age_s"` ⇒ ĐỎ.
+        _r = _run286(_TL_MODULE.cmd_sweep, ["sweep", "--json", "--deterministic"], [1284.0, 1285.0])
+        if any(rc != 0 for rc, _ in _r):
+            return False
+        _dong_bang = (_r[0][1] == _r[1][1]
+                      and json.loads(_r[0][1]).get("snapshot_age_s") == _TL_MODULE._tl_det.FROZEN_AGE_S)
+        # PHẢN CHỨNG cùng ca: KHÔNG deterministic thì tuổi THẬT vẫn phải phơi ra — helper không được biến
+        # thành "luôn luôn 0" (thế là NỚI ĐỊNH NGHĨA, không phải làm tất định). Ghim `_DETERMINISTIC_ON`
+        # về False vì nó là biến toàn cục dính (main() bật là bật luôn cả tiến trình).
+        _sav_on = _TL_MODULE._DETERMINISTIC_ON
+        _sav_env = os.environ.get("TL_DETERMINISTIC")
+        try:
+            _TL_MODULE._DETERMINISTIC_ON = False
+            os.environ.pop("TL_DETERMINISTIC", None)
+            _r2 = _run286(_TL_MODULE.cmd_sweep, ["sweep", "--json"], [777.0])
+            _that = json.loads(_r2[0][1]).get("snapshot_age_s") if _r2[0][0] == 0 else None
+        finally:
+            _TL_MODULE._DETERMINISTIC_ON = _sav_on
+            if _sav_env is None:
+                os.environ.pop("TL_DETERMINISTIC", None)
+            else:
+                os.environ["TL_DETERMINISTIC"] = _sav_env
+        return bool(_dong_bang and _that == 777)
+    _t110("r286_sweep_raw_bat_bien_khi_tuoi_cache_troi", _c286_sweep_raw_bat_bien_khi_tuoi_cache_troi)
+
+    def _c286_counts_va_ingest_missing_cung_mau():
+        # Vá theo MẪU, không vá theo `if` của case golden duy nhất (§5 kế hoạch): `counts` và
+        # `ingest-missing` phơi CÙNG khoá `snapshot_age_s` từ CÙNG nguồn tuổi cache. Hai lệnh này chưa có
+        # golden case nào — bỏ sót thì lỗ còn nguyên mà gate KHÔNG BAO GIỜ thấy. Khoá ở đây.
+        _r = _run286(_TL_MODULE.cmd_counts, ["counts", "--json", "--deterministic"], [2001.0, 2002.0])
+        if any(rc != 0 for rc, _ in _r):
+            return False
+        _counts_ok = (_r[0][1] == _r[1][1]
+                      and json.loads(_r[0][1]).get("snapshot_age_s") == _TL_MODULE._tl_det.FROZEN_AGE_S)
+        # `ingest-missing` lấy tuổi qua `_snapshot_stale_warn` (nguồn KHÁC, cần snapshot_ts + backlog thật)
+        # nên khoá bằng hai vế: helper đóng băng đúng, VÀ đường phát ra của lệnh có đi qua bộ đóng băng.
+        import inspect as _insp286
+        _det = _TL_MODULE._tl_det
+
+        class _A286d:
+            deterministic = True
+
+        _im_ok = (_det.frozen_age_seconds(2001, _A286d()) == _det.frozen_age_seconds(2002, _A286d())
+                  and "_frozen_age_seconds(" in _insp286.getsource(_resolve286(_TL_MODULE.cmd_ingest_missing)))
+        return bool(_counts_ok and _im_ok)
+    _t110("r286_counts_va_ingest_missing_cung_mau", _c286_counts_va_ingest_missing_cung_mau)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

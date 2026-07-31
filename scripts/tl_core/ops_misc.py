@@ -2434,7 +2434,8 @@ def cmd_counts(a) -> int:
         rows.append(("registry_claim_target_nb", _claim_tgt,
                      f"nlm_notebook_id == đích ({_nb_target[:12]}…) + status live — ước lượng ĐÚNG SCOPE; chốt FULL vẫn bằng LIVE"))
     _age = _manifest_cache_age_seconds()
-    out = {"ok": True, "snapshot_age_s": None if _age is None else int(_age),
+    # r286 (Slice G0.1a): cùng mẫu với `sweep` — vá theo MẪU, không vá theo `if` của case golden duy nhất.
+    out = {"ok": True, "snapshot_age_s": _frozen_age_seconds(None if _age is None else int(_age), a),
            "counts": {k: v for k, v, _ in rows}, "basis": {k: b for k, _, b in rows},
            "target_notebook": _nb_target or None,
            "registry_claim_by_notebook": _registry_claim_by_notebook(entries),

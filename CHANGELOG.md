@@ -1,3 +1,64 @@
+# ★ v1.36.24 — r286/GATE-01a: `sweep` TẤT ĐỊNH ở RAW — đóng băng `snapshot_age_s` dưới deterministic mode (2026-07-31)
+
+Slice **G0.1a** (§3.1 + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Làm tất định TRƯỚC, cưỡng chế SAU** — đảo
+thứ tự là được một cổng ĐỎ CHẬP CHỜN, tệ hơn hiện trạng.
+
+**Bệnh:** `golden-test` so **hai** thứ: projection (đã scrub `volatile_keys`) **và RAW stdout hai lượt**.
+`snapshot_age_s` nằm trong `volatile_keys` nên projection sạch — nhưng RAW vẫn lệch mỗi khi tuổi cache vắt
+qua **mốc giây nguyên** giữa hai lần chạy. Bất định **theo thời điểm**, nên "20/20 `raw_stable=true`" ở một
+lượt may KHÔNG chứng minh được gì.
+
+**Bằng chứng DƯƠNG — chạy `golden-test` 3 lượt trên `origin/master` SẠCH (case `hygiene_sweep_fixture`):**
+
+```
+MASTER lượt 1: raw_sha256=9f67a94a3b8983d9  raw_stable=True
+MASTER lượt 2: raw_sha256=ae9ae946bdbd112e  raw_stable=True
+MASTER lượt 3: raw_sha256=62f55fc220f79652  raw_stable=False   ← ĐỎ THẬT, bắt tại chỗ
+```
+
+`raw_sha256` đổi **mỗi lượt**; tới lượt 3 thì `raw_stable` lật hẳn sang False. Đo trực tiếp `sweep --json`
+hai lượt cách 1,2s: `1284` vs `1285`, và đó là **khác biệt DUY NHẤT** của cả payload.
+
+**Vá:** thêm `tl_core.deterministic.frozen_age_seconds` + hằng `FROZEN_AGE_S` (và wrapper `_frozen_age_seconds`
+trong `tl.py` để nối `_DETERMINISTIC_ON`). Deterministic mode BẬT ⇒ tuổi-giây thu về một hằng **ở RAW**;
+TẮT ⇒ giá trị THẬT nguyên vẹn. **KHÔNG nới định nghĩa raw-stability** — giá trị vẫn được phát ra, chỉ là
+hằng dưới chế độ tất định. `None` giữ nguyên `None`: "chưa có snapshot" là dữ kiện NGHIỆP VỤ, đổi thành 0
+là nói dối "có snapshot, mới 0 giây".
+
+**Vá theo MẪU, không vá theo `if`** (§5 kế hoạch): áp cho **cả ba** nơi phơi `snapshot_age_s` —
+`cmd_sweep` (hygiene.py), `cmd_counts` (ops_misc.py), `cmd_ingest_missing` (ingest_ops.py). Hai lệnh sau
+chưa có golden case nào, bỏ sót thì lỗ còn nguyên mà gate không bao giờ thấy.
+
+**Acceptance G0.1a — `golden-test` 5 LƯỢT liên tiếp trên nhánh:** cả 5 lượt `top ok=true`, 20/20 case,
+`sweep raw_stable=true`, và `raw_sha256` **BẰNG NHAU cả 5 lượt** (`d2fd042e4d47…`) — bằng chứng mạnh hơn
+`raw_stable` đơn thuần, vì trên master chính con sha này đổi mỗi lượt.
+
+**Test rXX_ (ĐỎ-TRƯỚC / XANH-SAU), +3 ca → 1495/1495:**
+- `r286_frozen_age_dong_bang_va_giu_none` — hợp đồng helper: bật ⇒ 1284 và 1285 cho CÙNG một byte; tắt ⇒
+  giữ 1284/1285; `None` ⇒ `None`; phủ cả đường cờ `args` lẫn đường `TL_DETERMINISTIC` (đường subprocess golden).
+- `r286_sweep_raw_bat_bien_khi_tuoi_cache_troi` — HÀNH VI: chạy `cmd_sweep` hai lượt với đồng hồ tuổi-cache
+  TRÔI 1284→1285, RAW stdout phải bất biến TỪNG BYTE; kèm phản chứng "không deterministic ⇒ vẫn phơi 777".
+- `r286_counts_va_ingest_missing_cung_mau` — khoá hai nơi không có golden phủ.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên đúng ba điểm gọi, giữ nguyên helper + test ⇒ `1493/1495`, ĐỎ đúng hai ca
+hành vi, ca hợp đồng helper vẫn xanh (đúng: helper không bị hoàn nguyên). Sau vá `1495/1495`.
+
+**BẪY đã trả giá khi viết test (ghi lại, chú thích nằm ngay tại code):** `_TL_MODULE.cmd_sweep` là **STUB**
+(`_make_tl_stub`) ủy quyền `getattr(tl_core.hygiene, "cmd_sweep")`. Ở tiến trình SẠCH hàm thật được re-home
+`__globals__` về `tl.__dict__` nên monkeypatch `_TL_MODULE._manifest_entries` ăn — đó là lý do ca `r41` ở
+ĐẦU tệp chạy được. Nhưng tới CUỐI dãy selftest `tl_core.hygiene` đã bị nạp lại ⇒
+`hygiene.cmd_sweep.__globals__ is tl.__dict__` là **False** ⇒ patch KHÔNG tới nơi, lệnh rơi xuống gọi webapp
+THẬT rồi chết vì seal-mạng (`rc=2`, stdout RỖNG). Helper `_resolve286` nay gỡ stub và patch trên globals của
+**chính hàm sẽ chạy**, không đoán theo tên module.
+
+**ruff 0.15.8 — delta so master:** `tl.py` **12 F821 / 0 F401** (ĐÚNG nền CLAUDE.md, không đổi).
+`deterministic.py` 0/0. `hygiene.py` 558 (master 557) · `ops_misc.py` 399 (398) · `ingest_ops.py` 370 (369):
+mỗi tệp +1 = đúng tên `_frozen_age_seconds` re-home, cùng lớp BY DESIGN đã có. `tl_selftest.py` 4244 (4207):
++37 là `os`/`Path`/`json`/`_TL_MODULE` của 3 ca mới. **Không phát sinh lớp cảnh báo mới; F401 không đổi.**
+
+**Chưa làm ở đợt này (CÓ CHỦ ĐÍCH):** `raw_stable=false` vẫn CHƯA làm case đỏ — đó là Slice **G0.1b**, chỉ
+được làm SAU khi G0.1a xanh.
+
 # ★ v1.36.23 — r285/GATE-03: khung cô lập lọc ứng viên config theo TIỀN TỐ `/tmp/` ⇒ loại sạch trên Linux — TEST-ONLY (2026-07-31)
 
 **Ca thật, đo TRỰC TIẾP trên Linux/Cowork:** `python scripts/tl.py --selftest` → **1490/1491**, đúng **một** case ĐỎ:

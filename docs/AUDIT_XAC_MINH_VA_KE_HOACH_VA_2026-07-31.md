@@ -235,6 +235,20 @@ hotspot; không format hàng loạt; VERSION/CHANGELOG do integrator).
 9. **[MỚI] Ruff phải có trong môi trường gate trước khi tuyên bố "delta F = 0"** — container này
    không có ruff, nên tiêu chí đó **chưa đo được**; đo trên máy chuẩn hoặc cài vào gate.
 
+### Hai giả định của bản kế hoạch gốc — đã kiểm
+
+**(a) "Cần dựng test double cho GAS/NLM trước khi test được ING-03/PRO-01/RAS-02/03" — SAI, không cần slice mới.**
+Hạ tầng đã có sẵn và dùng rộng khắp: `tl_selftest.py` có **20+ chỗ** monkeypatch
+`_TL_MODULE._gas = lambda: _FkGas…` (dòng 4621, 4717, 5379, 5617, 6324, 7404, 7489…). Mọi test đỏ-trước
+của Pha 1B/1C/1D **dùng lại khuôn này**, không phát minh khuôn mới. Ghi rõ ở đây để 7 worker không mỗi
+người dựng một kiểu.
+
+**(b) "PRO-01 phụ thuộc PRO-02 → PRO-03" — SAI, đây là PHỤ THUỘC GIẢ.**
+Đo `cmd_profile_file_remove` (`ops_misc.py:~1730-1806`): dùng `_profile_policy_error` +
+`_profile_manifest_entries_for`, **không đọc marker, không gọi `_marker_mutation_guard`**. Nó là lỗi
+*kết luận giao dịch* (Mẫu A), không phải lỗi *marker* (Mẫu B). Xâu nó sau hai slice marker là **hoãn
+mục nguy hiểm nhất bảng lại sau hai việc không liên quan**. ⇒ Tách ra chạy song song, sớm.
+
 ### Sơ đồ phụ thuộc (đã cập nhật)
 
 ```text
@@ -244,16 +258,40 @@ Pha 0 — làm gate đáng tin
   ├─ [SỬA] G0.1b GATE-01  cưỡng chế raw_stable     (cưỡng chế SAU)
   └─ [BỎ]  G0.2  GATE-02  — r284 đã đóng
         │
+        ├─ [MỚI] Pha 1-0 — chốt hợp đồng 2 helper dùng chung (§6.1)   ← trước mọi slice Mẫu A/B
+        │
         ├─ Pha 1A — canonical ingest plan ── ING-02 ──┬─ ING-01
         │                                             └─ ING-07
         ├─ Pha 1B — fail-closed write ───── ING-03 ──── ING-04 ── ING-05
-        ├─ Pha 1C — marker/profile safety ─ PRO-02 ──── PRO-03 ── PRO-01
+        ├─ Pha 1C — marker/profile safety ─ PRO-02 ──── PRO-03
+        ├─ [MỚI] Slice P0 ───────────────── PRO-01   (ĐỘC LẬP — chạy song song, ưu tiên #2)
+        ├─ [MỚI] Slice R0 ───────────────── RAS-01(changes_pull) + RAS-05  (ĐỘC LẬP, script rời)
         └─ Pha 1D — rasoat writer/state ─── RAS-01 ──── RAS-08/09 ── RAS-02/03
 
 Pha 2 — correctness pipeline   (ingest: ING-06/08 · profile: PRO-04..08 · rasoat: RAS-04..16)
 Pha 3 — characterization các RISK destructive
+[MỚI] Pha 3.5 — RÀ THIỆT HẠI ĐÃ XẢY RA trên LIVE (read-only, §6.2)
 Pha 4 — full regression, smoke LIVE có phê duyệt, release
 ```
+
+### 6.1 [MỚI] Pha 1-0 — chốt hợp đồng hai helper TRƯỚC khi ai vá
+
+Kế hoạch gốc nói đúng *"nên chuẩn hoá helper kết luận transaction, không vá từng `if` rời"* nhưng
+**không định nghĩa helper đó**. Bảy worker sẽ mỗi người tự nghĩ ra một kiểu, và ta được bảy nửa-giải-pháp.
+Chốt hợp đồng **trước**, một commit riêng, không kèm mục lỗi nào:
+
+**Helper 1 — kết luận giao dịch (Mẫu A, phục vụ 13 mục).** Hợp đồng tối thiểu:
+- nhận danh sách `(tên_bước, kết_quả, bắt_buộc?)` theo đúng thứ tự đã chạy;
+- `ok` được **TÍNH**, không bao giờ được **GÁN**;
+- bước bắt buộc hỏng ⇒ chặn mọi mutation **phía sau**, không chỉ đánh dấu;
+- `rc` dẫn xuất từ `ok`, không đặt tay;
+- luôn phát ra *bước nào hỏng* + *đã ghi được gì rồi* (để người vận hành biết cần dọn gì).
+
+**Helper 2 — vị ngữ corpus hữu hiệu (Mẫu B, phục vụ RAS-13 + mọi chỗ đang so số hiệu trần).**
+Một hàm duy nhất trả lời "entry này có thật sự nằm trong corpus không", có tính `corpus`, quarantine cat,
+row_kind — thay cho `any(số hiệu khớp)` đang rải rác.
+
+Acceptance: hai helper có test riêng, **chưa gắn vào lệnh nào**; các slice sau *dùng*, không *sửa* chúng.
 
 ### Thứ tự làm theo RỦI RO THỰC (khác thứ tự pha — dùng khi phải cắt phạm vi)
 
@@ -357,7 +395,9 @@ mỗi đường đều đi qua `run_end` — chống tái phát ở nhánh thứ
 **[MỚI]** Phản chứng bắt buộc: marker v2 **bị xoá trường `fingerprint`** phải `validate` ĐỎ
 (hiện đang xanh) và phải chặn adopt.
 
-**Slice P2 — PRO-01.** `profile-file-remove` kiểm **kết quả dương** từng bước, dừng trước mutation kế tiếp.
+**[SỬA] Slice P0 — PRO-01 (TÁCH RA KHỎI PHA 1C — độc lập, ưu tiên #2, chạy song song ngay).**
+Xem §6-(b): lệnh này không đụng marker, xâu sau PRO-02/03 là phụ thuộc giả.
+`profile-file-remove` kiểm **kết quả dương** từng bước, dừng trước mutation kế tiếp.
 Registry chỉ được tháo khi các thao tác **được yêu cầu trước đó** đã thành công + readback.
 **[MỚI]** Bỏ `ok: True` gán cứng — `ok` phải **tính** từ kết quả. Xét lại `require_removed="no"`
 (đang tự tắt readback của chính bước xoá registry). Test ma trận `--delete-nlm` × `--trash-drive` ×
@@ -423,6 +463,44 @@ Giữ nguyên 7 mục bản gốc: NLM source ID journal chết/sai · profile d
 config-marker drift trước profile-ingest · orphan window create/adopt/promote · state CAS TOCTOU ·
 state newest khi mọi `modifiedTime` lỗi · kill giữa lúc ghi output local.
 **Dùng fake adapter/recorded response — không thử bằng destructive LIVE.**
+
+### 6.2 [MỚI] Pha 3.5 — Rà THIỆT HẠI ĐÃ XẢY RA (read-only)
+
+**Lỗ hổng lớn nhất còn lại của cả hai tài liệu gốc: chúng chỉ lo CHẶN thiệt hại tương lai, không hỏi
+thiệt hại nào ĐÃ xảy ra.** Các lỗi này không phải lý thuyết — chúng đã chạy trên LIVE bao lâu nay, và
+đúng bản chất của chúng là **hỏng IM LẶNG** (`ok:true`, `rc=0`). Vá xong mà không rà thì dữ liệu lệch
+vẫn nằm đó, và ta mất luôn manh mối vì bản vá làm triệu chứng biến mất.
+
+Toàn bộ mục dưới đây **đọc-only, không `--apply`**, chạy được ngay sau Pha 0 (không cần chờ vá xong):
+
+| Nguồn | Dấu vết cần tìm | Cách tìm (read-only) |
+|---|---|---|
+| **PRO-01** | Dòng registry đã bị tháo trong khi nguồn NLM / file Drive **vẫn còn** ⇒ tài sản mồ côi không còn đường tra | `tl nlm-orphans` · `tl nlm-reconcile` (không `--apply`) · đối chiếu file trong thư mục profile với registry |
+| **ING-03** | GDoc tồn tại nhưng **thiếu dòng registry** (commit một phần được nhận là xong) | cùng lớp đối chiếu Drive ↔ registry như trên |
+| **RAS-05** | Doc bị đánh `done='err'` ⇒ **vĩnh viễn** không có `tukhoa` | đọc file progress tìm mục `err*` · `reg-query` lọc dòng thiếu `tukhoa` · chạy lại worklist **bỏ qua** file progress để lấy số thật |
+| **ING-05** | Journal treo `inflight` giả (thiếu `run_end`) ở nhánh `--no-nlm-add` | `tl journal` liệt kê run không có `run_end` nhưng đã hoàn tất Drive+registry |
+| **RAS-07** | Đơn vị bị đánh `done` **sai** do tên file ≠ `payload.unit_id` | so `unit_id` trong từng `master/<unit>.json` với `f.stem` |
+| **RAS-11/12** | `BANG_MASTER.json` **đã ghi** từ input thiếu (rc=2 nhưng vẫn ghi) | `rasoat-merge --check` đối chiếu master hiện có với kết quả merge lại |
+| **RAS-13** | Kết luận "đã có trong corpus" dựa trên bản quarantine / `corpus=false` | chạy lại chồng chéo bằng Helper 2 (§6.1), so danh sách trước/sau |
+
+Kết quả Pha 3.5 là **một bản kê thiệt hại**, không phải bản vá. Việc sửa dữ liệu LIVE là quyết định
+riêng của người giữ, đi sau, có phê duyệt riêng — **không gộp vào tranche mã.**
+
+### 6.3 [MỚI] Gộp tranche phát hành
+
+18 commit **không** phải 18 lần deploy. Mỗi lần đẩy Package là một chu trình đầy đủ (full gate → duyệt →
+chốt chống thụt lùi → push → tải lại đối chiếu byte/VERSION), và mỗi lần là một cửa sổ để hai phiên song
+song ghi đè nhau (CLAUDE.md §Quy ước deploy). Gộp thành **4 tranche**:
+
+| Tranche | Gồm | Vì sao gộp |
+|---|---|---|
+| **T1 — gate** | #0, #1a, #1b | Không đổi hành vi sản xuất; phải xanh trước mọi thứ khác |
+| **T2 — chặn máu** | PRO-01, RAS-05, RAS-01(changes_pull), ING-03 | Bốn mục rủi ro cao nhất, độc lập nhau, không tranh file |
+| **T3 — định danh** | ING-01/02/04/05/07, PRO-02/03/04, RAS-01(metadata)/02/03/08/09 | Cùng Mẫu B, cùng cần Helper của Pha 1-0 |
+| **T4 — correctness** | Toàn bộ Pha 2 còn lại | Rủi ro thấp, gộp được |
+
+Sau **mỗi** tranche: full gate 8 bước + `RELEASE_MANIFEST.json` tái sinh nếu thêm/xoá tệp + kiểm
+`git diff -- references/golden/` trước commit.
 
 ---
 

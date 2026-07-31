@@ -1,3 +1,28 @@
+# ★ v1.36.19 — r281: `load_creds` hết bỏ qua `config.defaultProfile` — lệnh GHI không còn âm thầm rơi về corpus NỀN (P16-F08) (2026-07-31)
+
+P16-F08 (P0 ghi nhầm corpus).
+
+**Bệnh:** `load_creds` có nhánh tắt «đã có TL_WEBAPP+TL_TOKEN trong env thì khỏi đọc config», và vòng quét
+config bên trong nó bị bọc bởi `if profile:`. Hệ quả: khi người dùng KHÔNG gõ `--profile` (đường thường
+dùng nhất — vì đã khai `defaultProfile` trong config chính để khỏi gõ), `_apply_profile_env` KHÔNG BAO GIỜ
+chạy ⇒ `TL_PROFILE` không được đặt ⇒ `_active_profile()` trả `vbqppl` ⇒ **mọi lệnh GHI non-lazy đổ vào corpus
+NỀN trong im lặng**, và mọi guard profile (`_profile_policy_error`…) đều `return None` sớm vì profile chính là
+DEFAULT_PROFILE. `defaultProfile` vẫn được `_selected_profile_name` hỗ trợ đầy đủ — chỉ là nhánh này không gọi tới.
+
+**VÁ:** bỏ `if profile:` — quét config KỂ CẢ khi `profile=None`. Không đảo một thứ tự ưu tiên nào: chính
+`_selected_profile_name` xếp `--profile` > env `TL_PROFILE` > `config.defaultProfile` > `vbqppl`, nên bỏ guard
+là đủ. `_apply_unconfigured_profile_env` vẫn chỉ chạy khi CÓ `profile` mà không tìm ra config (giữ nguyên nghĩa).
+Thêm một dòng NHẮC in **1 lần/process** khi scope được chọn bởi `defaultProfile` (không phải do người gõ):
+scope ghi VÔ HÌNH đúng là thứ đã biến F08 thành P0. Chỉ in khi profile THẬT và khác nền — nền là trạng thái
+mặc định, nhắc mỗi lệnh là ồn vô ích.
+
+**Kiểm (+6 case HÀNH VI qua `load_creds` thật, HOME+cwd+env cô lập; selftest 1477/1477):** phản chứng đo
+trên chính bản CHƯA VÁ — **4/6 ĐỎcVN**, 2 case còn lại xanh đúng theo thiết kế (chúng là cặp «KHÔNG ĐƯỢC ĐỔI»).
+Phủ: `--profile` tường minh vẫn thắng · env `TL_PROFILE` export vẫn thắng `defaultProfile` (đường
+`state-get`/`state-put` + RASOAT_HOSO_LOOP §7 dựa vào nếp này — r214 đã trả giá một lần) · phiên env-only
+KHÔNG có config giữ nguyên · `defaultProfile` = nền thì KHÔNG in nhắc · `defaultProfile` trỏ tên không có block
+vẫn fail-closed PROFILE_NOT_FOUND + scope RỖNG (giữ nguyên v1.33.48, không mượn scope nền).
+
 # ★ v1.36.18 — r280: `init-config` hết ghi đè trọn config — HOÀ + BACKUP + ATOMIC (P16-F01) (2026-07-31)
 
 Mở chiến dịch **P16** (vá nhóm ingest/profile — 10 phát hiện Pha 1 chưa ai vá). F01 (P0 mất dữ liệu).

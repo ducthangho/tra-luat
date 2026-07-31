@@ -11116,6 +11116,95 @@ def run() -> int:
                     os.environ["TL_CONFIG_BACKUP_DIR"] = _prev
     _t110("r280_initcfg_file_cu_hong_van_duoc_backup", _c280_initcfg_file_cu_hong_van_backup)
 
+    def _run_loadcreds281(cfg_obj, profile=None, env_profile=None, env_creds=True, cfg_on_disk=True):
+        """r281 HÀNH VI qua `load_creds` THẬT: env có TL_WEBAPP/TL_TOKEN, config nằm ở HOME giả.
+        Trả (TL_PROFILE, TL_REGISTRY_DOC_ID, stderr) SAU khi chạy. Cô lập trọn env + HOME + cwd."""
+        import tempfile as _tf281
+        _keys281 = ("TL_WEBAPP", "TL_TOKEN", "TL_PROFILE", "TL_REGISTRY_DOC_ID", "TL_NOTEBOOK_ID",
+                    "TL_MANIFEST_ID", "TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_CATEGORIES_MODE",
+                    "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_OVERFLOW_NOTEBOOK_ID", "TL_PROFILE_ENV_OVERLAY",
+                    "HOME", "USERPROFILE")
+        _sav281 = {k: os.environ.get(k) for k in _keys281}
+        _cwd281 = os.getcwd()
+        _noted281 = getattr(_TL_MODULE._apply_profile_env, "_default_profile_noted", False)
+        with _tf281.TemporaryDirectory() as _d:
+            try:
+                for _k in _keys281:
+                    os.environ.pop(_k, None)
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)                    # _config_candidates quét cả cwd — cô lập luôn
+                _TL_MODULE._apply_profile_env._default_profile_noted = False   # dòng nhắc in 1 lần/process
+                if cfg_on_disk:
+                    with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
+                        json.dump(cfg_obj, _f, ensure_ascii=False)
+                if env_creds:
+                    os.environ["TL_WEBAPP"] = "https://env-webapp"
+                    os.environ["TL_TOKEN"] = "ENVTOK"
+                if env_profile:
+                    os.environ["TL_PROFILE"] = env_profile
+                _be = _io27.StringIO()
+                with _ctx27.redirect_stderr(_be):
+                    _TL_MODULE.load_creds(None, profile)
+                return (os.environ.get("TL_PROFILE"), os.environ.get("TL_REGISTRY_DOC_ID"), _be.getvalue())
+            finally:
+                os.chdir(_cwd281)
+                _TL_MODULE._apply_profile_env._default_profile_noted = _noted281
+                for _k, _v in _sav281.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+
+    _cfg281 = {"webappUrl": "https://cfg", "token": "CFGTOK", "defaultProfile": "ATVSLD",
+               "profiles": {"vbqppl": {"rootFolderId": "R_BASE", "registryDocId": "REG_NEN"},
+                            "ATVSLD": {"rootFolderId": "R_AT", "registryDocId": "REG_AT", "categories": "own"},
+                            "KHAC": {"rootFolderId": "R_K", "registryDocId": "REG_K", "categories": "own"}}}
+
+    def _c281_default_profile_duoc_ap():
+        # P16-F08 LÕI: env có creds + KHÔNG --profile ⇒ TRƯỚC vá: TL_PROFILE không được đặt, scope = nền
+        # vbqppl ⇒ mọi lệnh GHI đổ vào corpus nền im lặng. SAU vá: defaultProfile được áp + NÓI RA.
+        _p, _reg, _err = _run_loadcreds281(_cfg281)
+        return _p == "ATVSLD" and _reg == "REG_AT" and "config.defaultProfile" in _err
+    _t110("r281_default_profile_duoc_ap_khi_khong_co_co", _c281_default_profile_duoc_ap)
+
+    def _c281_co_profile_van_thang():
+        # PHẢN CHỨNG thứ tự ưu tiên 1: --profile TƯỜNG MINH vẫn thắng defaultProfile (không đảo ưu tiên).
+        _p, _reg, _err = _run_loadcreds281(_cfg281, profile="KHAC")
+        return _p == "KHAC" and _reg == "REG_K" and "config.defaultProfile" not in _err
+    _t110("r281_co_profile_tuong_minh_van_thang", _c281_co_profile_van_thang)
+
+    def _c281_env_profile_thang_default():
+        # PHẢN CHỨNG thứ tự ưu tiên 2: TL_PROFILE do người dùng export vẫn thắng defaultProfile
+        # (đường state-get/state-put + RASOAT_HOSO_LOOP §7 dựa vào đúng nếp này — r214 đã trả giá một lần).
+        _p, _reg, _err = _run_loadcreds281(_cfg281, env_profile="KHAC")
+        return _p == "KHAC" and _reg == "REG_K" and "config.defaultProfile" not in _err
+    _t110("r281_env_tl_profile_thang_default_profile", _c281_env_profile_thang_default)
+
+    def _c281_khong_config_khong_doi():
+        # PHẢN CHỨNG: KHÔNG có file config (phiên env-only thuần — đường mà nhánh này sinh ra để phục vụ)
+        # ⇒ không đổi gì, không nổ, không tự chế profile.
+        _p, _reg, _err = _run_loadcreds281(None, cfg_on_disk=False)
+        return _p is None and _reg is None and _err == ""
+    _t110("r281_env_only_khong_config_giu_nguyen", _c281_khong_config_khong_doi)
+
+    def _c281_default_la_nen_thi_im():
+        # PHẢN CHỨNG: defaultProfile CHÍNH LÀ nền (hoặc không khai) ⇒ áp scope nền, và KHÔNG in dòng nhắc
+        # (nền là trạng thái mặc định — nhắc mỗi lệnh là ồn vô ích).
+        _cfg_nen = {"webappUrl": "u", "token": "t", "profiles": {"vbqppl": {"registryDocId": "REG_NEN"}}}
+        _p, _reg, _err = _run_loadcreds281(_cfg_nen)
+        return _p == "vbqppl" and _reg == "REG_NEN" and "config.defaultProfile" not in _err
+    _t110("r281_default_la_nen_khong_in_nhac", _c281_default_la_nen_thi_im)
+
+    def _c281_default_ma_khong_co_block():
+        # PHẢN CHỨNG: defaultProfile trỏ tên KHÔNG có block ⇒ giữ nguyên fail-closed v1.33.48
+        # (PROFILE_NOT_FOUND + scope RỖNG), TUYỆT ĐỐI không mượn scope nền.
+        _cfg_ma = {"webappUrl": "u", "token": "t", "defaultProfile": "KHONG_TON_TAI",
+                   "profiles": {"vbqppl": {"registryDocId": "REG_NEN"}}}
+        _p, _reg, _err = _run_loadcreds281(_cfg_ma)
+        return _p == "KHONG_TON_TAI" and not _reg and "PROFILE_NOT_FOUND" in _err
+    _t110("r281_default_profile_ma_van_fail_closed", _c281_default_ma_khong_co_block)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

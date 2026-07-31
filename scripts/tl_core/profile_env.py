@@ -110,8 +110,17 @@ def _profile_lookup(profiles: dict, name: str) -> tuple[str, dict | None]:
 
 def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     profiles = _profiles_from_config(cfg)
+    _env_profile_before = (os.environ.get("TL_PROFILE") or "").strip()   # r281: đo TRƯỚC khi :129 ghi đè
     name0 = _selected_profile_name(profile, cfg)
     name, _hit = _profile_lookup(profiles, name0)
+    # r281 (P16-F08): scope KHÔNG do người gõ chọn (không --profile, không export TL_PROFILE) mà do
+    # `config.defaultProfile` quyết định thì phải NÓI RA MỘT LẦN — scope ghi vô hình đúng là thứ đã biến
+    # F08 thành P0. In 1 lần/process, chỉ khi profile THẬT và khác nền (nền = trạng thái mặc định, không ồn).
+    if (not profile) and (not _env_profile_before) and name != DEFAULT_PROFILE and name in profiles:
+        if not getattr(_apply_profile_env, "_default_profile_noted", False):
+            _apply_profile_env._default_profile_noted = True
+            print(f"[tl] profile = '{name}' (theo config.defaultProfile — KHÔNG phải --profile). "
+                  f"Muốn corpus nền: `--profile {DEFAULT_PROFILE}`.", file=sys.stderr)
     # v1.33.48 (rà Instruction 'Luật BHXH'): profile ĐƯỢC YÊU CẦU TƯỜNG MINH mà KHÔNG có trong config → KHÔNG
     # rơi ÂM THẦM về scope NỀN vbqppl nữa (trước: prof=fallback DEFAULT → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ
     # VBQPPL base trong khi TL_PROFILE=tên-dự-án → ghi/push NHẦM corpus nền, đúng lớp sự cố 1.23.21 mà
@@ -297,17 +306,23 @@ def load_creds(config_path: str | None = None, profile: str | None = None) -> No
     ENV (TL_WEBAPP+TL_TOKEN) ĐỦ để chạy — KHÔNG bắt buộc file config, KỂ CẢ khi có --profile (§9): scope chi tiết
     lấy qua TL_REGISTRY_DOC_ID/TL_MANIFEST_ID/… (env) hoặc config mặc định nếu tình cờ có."""
     if os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN") and not config_path:
-        if profile:
-            applied = False
-            for p in _config_candidates(None):            # best-effort áp scope từ config mặc định nếu có
-                if p and _path_exists_safe(p):
-                    cfg = _read_json_file(p)
-                    if cfg:
-                        _apply_profile_env(cfg, profile)
-                        applied = True
-                        break
-            if not applied:
-                _apply_unconfigured_profile_env(profile)
+        # r281 (P16-F08, P0 ghi nhầm corpus): vòng quét config này TRƯỚC ĐÂY nằm trong `if profile:` ⇒ khi
+        # env đã có TL_WEBAPP/TL_TOKEN mà người dùng KHÔNG gõ --profile thì `config.defaultProfile` bị BỎ QUA
+        # HOÀN TOÀN — `_apply_profile_env` không chạy, TL_PROFILE không được đặt, `_active_profile()` trả
+        # vbqppl ⇒ MỌI lệnh GHI non-lazy đổ vào corpus NỀN trong im lặng, và mọi guard profile đều return
+        # sớm vì profile == DEFAULT_PROFILE. Nay quét KỂ CẢ khi profile=None: `_selected_profile_name` tự
+        # xếp hạng --profile > env TL_PROFILE > config.defaultProfile > vbqppl, nên bỏ guard là đủ và
+        # KHÔNG đảo thứ tự ưu tiên nào (env TL_PROFILE do người dùng export vẫn thắng defaultProfile).
+        applied = False
+        for p in _config_candidates(None):            # best-effort áp scope từ config mặc định nếu có
+            if p and _path_exists_safe(p):
+                cfg = _read_json_file(p)
+                if cfg:
+                    _apply_profile_env(cfg, profile)
+                    applied = True
+                    break
+        if not applied and profile:
+            _apply_unconfigured_profile_env(profile)
         return
     for p in _config_candidates(config_path):
         if p and _path_exists_safe(p):

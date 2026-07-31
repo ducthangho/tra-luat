@@ -1,3 +1,35 @@
+# ★ v1.36.25 — r287: `determinism-audit` hết ĐỎ NGẪU NHIÊN vì probe công cụ NGOÀI (P16-T03) (2026-08-01)
+
+P16-T03 (P2 vận hành) — **ca thật, đã chặn deploy BA lần trong 31-07/01-08.**
+
+**Bệnh:** `determinism-audit` chạy `live-state-snapshot` HAI lần rồi `_live_state_diff`. Trong ảnh chụp có
+`command_versions.<tool>` — do `_cmd_version_probe` gọi **subprocess của công cụ NGOÀI** với timeout.
+Đo trên máy chuẩn: `nlm --version` mất **3,2 / 6,3 / 7,3 giây** (3 lần liên tiếp), timeout probe là **10s**.
+Dưới tải — hoặc đơn giản là xui — một ảnh `TimeoutExpired`, ảnh kia kịp ⇒ bốn đường
+`command_versions.nlm.{ok,error,returncode,version}` lệch ⇒ chỉ tiền tố `volatile` được miễn nên cả bốn
+vào `unexpected_changes` ⇒ `ok:false` ⇒ **gate ĐỎ, deploy DỪNG**. Đã quan sát lệch cả HAI chiều (lần
+timeout ở ảnh trước, lần ở ảnh sau) ⇒ đúng 50/50, không phải chỉ do tải.
+
+Đây **không phải** tính bất định của tl — là **nhiễu đo** của một công cụ bên ngoài. Nhưng
+`determinism-audit` lại chính là thứ sinh ra để chứng minh tính tất định, nên nó tự đỏ là mất hết ý nghĩa.
+(Đã loại trừ nguyên nhân đã biết: `~/.notebooklm-mcp-cli/chrome-port-map.json` = `{}`, không có PID chết.)
+
+**VÁ — miễn trừ CÓ ĐIỀU KIỆN, tuyệt đối không miễn mù:**
+- `_live_state_diff` chỉ bỏ qua thay đổi dưới `command_versions.<tool>.*` **khi CHÍNH PHÉP ĐO không ổn
+  định** — tức `ok` KHÁC NHAU giữa hai ảnh (một bên probe hỏng). Hai bên **cùng đo được** mà `version`
+  khác nhau ⇒ **VẪN BÁO**, vì đó là công cụ thật sự đổi phiên bản giữa hai lần chạy — điều đáng biết.
+- Ca được miễn mang `allowed_reason: "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH"` — **nói ra vì sao**, không miễn
+  im lặng (im lặng chính là cách một cổng biến thành cổng-luôn-cho-qua).
+- `_cmd_version_probe` timeout 10s → **25s**: 10s quá sát với 3-7s thật. Nới chỉ GIẢM nhiễu; phần còn lại
+  do miễn-trừ-có-điều-kiện xử. Chỉ tốn thêm thời gian khi công cụ thật sự treo.
+
+**Kiểm (+5 case gọi `_live_state_diff` THẬT trên hai tệp ảnh chụp, đúng đường `determinism-audit`;
+selftest 1502/1502):** phản chứng đo trên bản CHƯA VÁ — **3/5 ĐỎ**; 2 case còn lại xanh **đúng thiết kế**
+vì là cặp «KHÔNG ĐƯỢC ĐỔI». Phủ: miễn trừ đối xứng cả hai chiều timeout · **★version đổi THẬT vẫn bị báo**
+(phản chứng quan trọng nhất — miễn mù sẽ nuốt mất ca này) · **không nới lỏng đường nào ngoài
+`command_versions`** (thay đổi `registry.id` vẫn fail-closed nguyên vẹn) · hai ảnh giống hệt vẫn `ok`,
+0 thay đổi (bản vá không tự chế ra khác biệt).
+
 # ★ v1.36.24 — r286: profile GÕ SAI hết mượn được corpus NỀN ở đường ĐỌC (P16-F09) (2026-08-01)
 
 P16-F09 (P1 sai kết quả).

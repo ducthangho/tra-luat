@@ -11614,6 +11614,72 @@ def run() -> int:
                     os.environ[_k] = _v
     _t110("r286_chot_duoc_go_khi_doi_sang_profile_hop_le", _c286_chot_duoc_go_khi_quay_ve_profile_that)
 
+    def _diff287(before_cv, after_cv, extra_before=None, extra_after=None):
+        """r287: gọi `_live_state_diff` THẬT trên hai ảnh chụp ghi ra tệp (đúng đường determinism-audit)."""
+        # `_live_state_diff` là NỘI BỘ của tl_core.live (không có trong bind-list tl.py — đúng thiết kế,
+        # production gọi nó từ trong chính module). Lấy thẳng module: hàm ở đây ĐÃ được `bind()` rebase
+        # nên là ĐÚNG object mà đường sản xuất chạy, không phải bản chưa bind.
+        import tempfile as _tf287
+        import tl_core.live as _lv287
+        _b = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(before_cv), "volatile": {"generatedEpoch": 1}}
+        _a = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(after_cv), "volatile": {"generatedEpoch": 2}}
+        _b.update(extra_before or {})
+        _a.update(extra_after or {})
+        with _tf287.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _pb = os.path.join(_d, "b.json")
+            _pa = os.path.join(_d, "a.json")
+            for _p, _o in ((_pb, _b), (_pa, _a)):
+                with open(_p, "w", encoding="utf-8") as _f:
+                    json.dump(_o, _f, ensure_ascii=False)
+            return _lv287._live_state_diff(_pb, _pa)
+
+    _OK287 = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.4", "returncode": 0},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+    _TO287 = {"nlm": {"command": "nlm", "ok": False, "version": "", "returncode": None,
+                      "error": "TimeoutExpired: … timed out after 10 seconds"},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+
+    def _c287_probe_khong_on_dinh_duoc_mien():
+        # P16-T03 LÕI: một ảnh probe TIMEOUT, ảnh kia kịp ⇒ TRƯỚC vá: diff ok=false ⇒ gate deploy ĐỎ oan
+        # (đã chặn deploy 3 lần). Nay: miễn trừ, và phải NÓI RA lý do (không miễn im lặng).
+        _d = _diff287(_TO287, _OK287)
+        _cv = [c for c in _d["changes"] if c["path"].startswith("command_versions.nlm.")]
+        return (_d["ok"] is True and _d["unexpected_changes"] == [] and bool(_cv)
+                and all(c.get("allowed_reason") == "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH" for c in _cv))
+    _t110("r287_probe_ngoai_khong_on_dinh_duoc_mien", _c287_probe_khong_on_dinh_duoc_mien)
+
+    def _c287_doi_chieu_nguoc_cung_duoc_mien():
+        # Đối xứng: timeout ở ảnh SAU cũng phải được miễn (bệnh xảy ra cả hai chiều — đã gặp cả hai).
+        return _diff287(_OK287, _TO287)["ok"] is True
+    _t110("r287_mien_doi_xung_ca_hai_chieu", _c287_doi_chieu_nguoc_cung_duoc_mien)
+
+    def _c287_version_doi_that_van_bao():
+        # ★PHẢN CHỨNG QUAN TRỌNG NHẤT: hai bên CÙNG đo được (ok=True cả hai) mà version KHÁC nhau ⇒ công
+        # cụ thật sự đổi phiên bản giữa hai lần chạy — VẪN PHẢI BÁO. Miễn trừ mù sẽ nuốt mất ca này.
+        _moi = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.5", "returncode": 0},
+                "python": _OK287["python"]}
+        _d = _diff287(_OK287, _moi)
+        return (_d["ok"] is False
+                and any(c["path"] == "command_versions.nlm.version" for c in _d["unexpected_changes"]))
+    _t110("r287_version_doi_that_van_bi_bao", _c287_version_doi_that_van_bao)
+
+    def _c287_khong_noi_long_duong_khac():
+        # PHẢN CHỨNG: miễn trừ CHỈ áp cho `command_versions.<tool>` có probe hỏng — mọi đường khác giữ
+        # nguyên fail-closed (không được nhân tiện nới lỏng cả diff).
+        _d = _diff287(_TO287, _OK287, extra_before={"registry": {"id": "REG_A"}},
+                      extra_after={"registry": {"id": "REG_B"}})
+        return (_d["ok"] is False
+                and [c["path"] for c in _d["unexpected_changes"]] == ["registry.id"])
+    _t110("r287_khong_noi_long_duong_ngoai_command_versions", _c287_khong_noi_long_duong_khac)
+
+    def _c287_hai_anh_giong_het_van_ok():
+        # PHẢN CHỨNG: hai ảnh giống hệt ⇒ ok=true, 0 thay đổi (bản vá không tự chế ra khác biệt).
+        _d = _diff287(_OK287, _OK287)
+        return _d["ok"] is True and _d["summary"]["changed"] == 0
+    _t110("r287_hai_anh_giong_het_van_ok", _c287_hai_anh_giong_het_van_ok)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

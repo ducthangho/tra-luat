@@ -403,9 +403,12 @@ Registry chỉ được tháo khi các thao tác **được yêu cầu trước 
 (đang tự tắt readback của chính bước xoá registry). Test ma trận `--delete-nlm` × `--trash-drive` ×
 `--keep-registry`, mỗi ô có ca **bước con hỏng** ⇒ đòi `rc≠0` **và** registry còn nguyên.
 
-**Slice P3 — PRO-04.** Canonical profile key dùng chung cho lookup · sync · create/adopt · cache.
-Chặn collision **trước** khi ghi. Dual-read/migrate cache cũ; **không** rename/delete cache hàng loạt mù.
-**[MỚI]** Test parity hai nền (§3.2) — test chỉ chạy Linux sẽ **xanh giả**.
+**Slice P3 — PRO-04. NGƯỜI GIỮ ĐÃ CHỐT (31-07): làm theo kế hoạch — dual-read/migrate, KHÔNG rename hàng loạt.**
+Canonical profile key dùng chung cho lookup · sync · create/adopt · cache. Chặn collision **trước** khi ghi.
+Cache cũ: **dual-read** (đọc được cả đường cũ lẫn đường mới), migrate **từng profile khi nó được dùng**,
+**không** rename/delete cache hàng loạt mù. **[MỚI]** Test parity hai nền (§3.2) — test chỉ chạy Linux sẽ
+**xanh giả**. Trước khi migrate, chạy một lượt **đọc-only** kê số profile đang lệch hoa/thường trên máy
+thật (Pha 3.5 làm được) — con số đó quyết định migrate có đáng làm tự động hay chỉ cần cảnh báo.
 
 **Slice P4 — PRO-05/06/07/08.** Doctor kiểm MIME **manifest** (bỏ điều kiện khoá cứng `role=="registry"`).
 Missing profile/target ⇒ lỗi có cấu trúc, `rc≠0` (PRO-06, PRO-07). Bỏ `--force` giả **và** help tương
@@ -435,9 +438,16 @@ Sau khi vá client, triển khai CAS nguyên tử qua GAS `LockService`/revision
 
 **Ingest.** ING-06: planner và child dùng **chung** capability/extension registry — mọi member accepted
 phải tạo được child plan (quyết định rõ: hoặc bỏ `.txt/.md` khỏi `_ALLOWED_INGEST_EXTS`, hoặc cho child
-nhận chúng qua `--text-file`; **không để hai bảng**). ING-08: chốt support boundary — nếu direct script
-còn được hỗ trợ thì chuẩn hoá UTF-8 **và chỉ publish cache sau khi output thành công**; nếu không thì
-deprecate rõ, bắt buộc `tl cache-build`.
+nhận chúng qua `--text-file`; **không để hai bảng**).
+
+**ING-08 — NGƯỜI GIỮ ĐÃ CHỐT (31-07): `ingest_to_cache.py` chạy trực tiếp VẪN ĐƯỢC HỖ TRỢ.**
+⇒ Không deprecate. Phải làm cả hai việc:
+1. Chuẩn hoá UTF-8 cho stdout của script (đường trực tiếp hiện chết Unicode trên console cp1258).
+2. **Chỉ publish cache SAU KHI output thành công** — đây mới là phần sửa lỗi thật. Hiện
+   `_write_json_atomic` chạy **trước** `print(json.dumps(...))` (`ingest_to_cache.py:~745,754`), nên
+   ngay cả khi vá encoding thì bất kỳ lỗi nào sau lúc ghi cache vẫn để lại cache đã publish + `rc≠0`.
+   Đảo thứ tự, hoặc ghi cache vào staging rồi commit sau khi output xong.
+   Test: bơm lỗi ở bước in ⇒ khẳng định cache **không** được publish.
 
 **Rà soát loop.** RAS-04: thêm trạng thái `unreadable`; lỗi đọc **không** được tính dry round; output
 `converged=false` + hướng retry/pause actionable. RAS-10: định nghĩa frontier-rỗng là empty-pass/hội tụ
@@ -584,7 +594,236 @@ undo/cleanup kiểm chứng · **không dùng corpus nghiệp vụ thật làm f
 
 ---
 
-## 10. Ghi chú trạng thái cây
+## 10. Prompt bàn giao cho phiên vá
+
+Mỗi tranche một phiên riêng. Prompt viết **tự chứa** — phiên mới clone `master` sẽ không có tài liệu này,
+nên mỗi prompt đều mở đầu bằng lệnh đọc nó từ nhánh audit.
+
+**Trần 200 tệp:** manifest hiện 195 + tài liệu này = **196/200**. Tài liệu audit/kế hoạch là **dev-side**
+(phiên Cowork LIVE bootstrap từ zip không cần chúng). Khuyến nghị — *chưa làm, cần người giữ duyệt vì
+chạm mã sản xuất*: thêm tên hai tệp audit vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE` (`release.py:340`),
+GIỮ trong git, chỉ loại khỏi GÓI — đúng tiền lệ `CLAUDE.md`/`Code.2.21.2k.gs`. Làm rồi thì tái sinh
+`RELEASE_MANIFEST.json`. (Đã kiểm: tệp này **không** làm đỏ golden/doc-claims/release-check — golden dùng
+fixture nên không churn theo `docs/`.)
+
+### Phần dùng chung — dán vào ĐẦU mọi prompt bên dưới
+
+```
+Repo tra-luat. Đọc kế hoạch TRƯỚC khi làm:
+  git fetch origin claude/audit-errors-patch-plan-56x4rq
+  git show origin/claude/audit-errors-patch-plan-56x4rq:docs/AUDIT_XAC_MINH_VA_KE_HOACH_VA_2026-07-31.md
+
+Quy trình bắt buộc (CLAUDE.md — đọc luôn file đó, nó có trong repo):
+- Mỗi fix một test `rXX_` ĐỎ-TRƯỚC / XANH-SAU. Không có test đỏ trước thì chưa chứng minh được là fix.
+- `python scripts/tl.py --selftest` phải N/N (nền hiện tại 1491 ca).
+- ruff: tiêu chí là DELTA so master = 0, KHÔNG phải "0 tuyệt đối". Nền tl.py = 12 F821 / 0 F401,
+  và F401=0 là nhờ `# noqa` CÓ CHỦ ĐÍCH — ĐỪNG "dọn import thừa" ở đầu tl.py (gate đã đỏ 2 lượt vì việc
+  này). Môi trường thiếu ruff thì NÓI RÕ "chưa đo được", đừng bỏ qua im lặng.
+- Gate đỏ ⇒ đo lại trên `origin/master` sạch, so DELTA, trước khi nghi bản vá của mình.
+- Full gate 8 bước trước khi bump VERSION. Bump VERSION 3 chỗ (VERSION, hằng VERSION trong tl.py,
+  header SKILL.md) + CHANGELOG mục ★. Thêm/xoá tệp ⇒ tái sinh RELEASE_MANIFEST.json.
+- Bằng chứng phải DƯƠNG: `N/N` hai số BẰNG NHAU, `"ok": true`. KHÔNG tin `rc=0` — rc có thể bị lừa.
+
+CẤM: `--apply`, `source-delete`, `reg-delete`, `--clear-stale`, ghi LIVE, deploy, đọc/ghi secrets.
+Không dùng Drive MCP / Sheets MCP. Không để subagent sửa `tl.py` canonical.
+```
+
+### Prompt T1 — gate (làm TRƯỚC TIÊN, đang chặn deploy Linux)
+
+```
+Nhánh: claude/va-t1-gate (tạo từ origin/master).
+Phần kế hoạch liên quan: §2.1, §3.1, Slice G0.0/G0.1a/G0.1b, §6.3 tranche T1.
+
+Ba việc, ĐÚNG thứ tự này, mỗi việc một commit:
+
+(1) GATE-03 — selftest đang ĐỎ trên Linux (1490/1491), ca
+    `r284_khung_test_profile_khong_doc_config_that`.
+    `scripts/tl_selftest.py:11182` lọc ứng viên config bằng `startswith("/tmp/")` để loại hằng cuối
+    `/tmp/tra_luat_config.json`. Trên Linux `TemporaryDirectory()` trả `/tmp/tmpXXXX` ⇒ MỌI ứng viên
+    bị lọc sạch ⇒ `_cands=[]` ⇒ `bool(_cands)` False ⇒ FAIL. (Windows xanh vì /tmp không tồn tại.)
+    Vá: so BẰNG ĐÚNG hằng, không theo tiền tố. Thêm khẳng định hằng đó THỰC SỰ còn nằm trong
+    `_config_candidates(None)` — đổi hằng mà quên test thì phải đỏ tại đây, không lọc hụt im lặng.
+    TEST-ONLY, không đụng một dòng mã sản xuất.
+
+(2) GATE-01a — làm `sweep` TẤT ĐỊNH trước.
+    Golden case `hygiene_sweep_fixture` phơi `snapshot_age_s` ở RAW stdout; `volatile_keys` chỉ scrub ở
+    projection nên raw vẫn lệch khi tuổi cache vắt qua mốc giây. Deterministic mode phải đóng băng/scrub
+    nó ở RAW, hoặc thay input bằng fixture có clock cố định. KHÔNG nới định nghĩa raw-stability.
+    Acceptance: `golden-test` chạy ≥5 LƯỢT liên tiếp, `sweep` `raw_stable=true` MỌI lượt (1 lượt không đủ
+    — lỗi này bất định theo thời điểm; hiện 20/20 đang xanh nên dễ tưởng nhầm là không có gì để làm).
+
+(3) GATE-01b — cưỡng chế raw stability, CHỈ SAU KHI (2) xanh.
+    `scripts/tl_core/workflow.py:1624-1667`: `rec["ok"]` hiện chỉ dẫn xuất từ so sánh projection;
+    `raw_stable=false` chỉ ghi chú `raw_diff` rồi đi tiếp. Sửa: `raw_stable=false` ⇒ case `ok=false`
+    ⇒ top `ok=false` ⇒ `rc≠0` + error code riêng `GOLDEN_RAW_UNSTABLE`. Ở `--write`: CẤM ghi/regen
+    fixture khi raw bất định (hiện vẫn ghi).
+    Test characterization: bơm hai stdout KHÁC BYTE / CÙNG projection ⇒ PHẢI đỏ.
+
+TUYỆT ĐỐI không đảo thứ tự (2)(3): cưỡng chế trước khi làm tất định = gate đỏ CHẬP CHỜN, tệ hơn hiện tại.
+GATE-03 là lỗi ĐA NỀN — chạy thật trên nền đang có, và NÓI RÕ nền còn lại chưa kiểm (r284 đỏ vì bỏ qua
+đúng điều này).
+```
+
+### Prompt Pha 1-0 — chốt hợp đồng hai helper (trước T2/T3)
+
+```
+Nhánh: claude/va-p10-helpers (tạo từ origin/master sau khi T1 đã merge).
+Phần kế hoạch liên quan: §5 (hai mẫu lỗi), §6.1.
+
+Một commit, KHÔNG kèm mục lỗi nào. Chỉ dựng 2 helper + test riêng, CHƯA gắn vào lệnh nào.
+
+Helper 1 — kết luận giao dịch (phục vụ 13 mục Mẫu A: GATE-01, ING-03/05, PRO-01/06/07,
+RAS-04/05/10/11/12…). Hợp đồng tối thiểu:
+  - nhận danh sách (tên_bước, kết_quả, bắt_buộc?) theo ĐÚNG thứ tự đã chạy;
+  - `ok` được TÍNH, không bao giờ được GÁN;
+  - bước bắt buộc hỏng ⇒ CHẶN mọi mutation PHÍA SAU, không chỉ đánh dấu;
+  - `rc` dẫn xuất từ `ok`, không đặt tay;
+  - luôn phát ra: bước nào hỏng + ĐÃ GHI ĐƯỢC GÌ RỒI (người vận hành cần biết phải dọn gì).
+
+Helper 2 — vị ngữ "corpus hữu hiệu" (phục vụ RAS-13 + mọi chỗ đang so số hiệu trần):
+  một hàm duy nhất trả lời "entry này có THẬT SỰ nằm trong corpus không", có tính `corpus`,
+  quarantine cat, row_kind — thay cho `any(số hiệu khớp)` đang rải rác ở
+  `lookup_ops.py:1935-1944` và `:2670`.
+
+Lý do làm riêng: kế hoạch gốc nói đúng "chuẩn hoá helper, đừng vá từng `if` rời" nhưng không định nghĩa
+helper ⇒ 7 worker sẽ ra 7 nửa-giải-pháp. Các slice sau DÙNG hai helper này, không SỬA chúng.
+```
+
+### Prompt T2 — chặn máu (4 mục độc lập, không tranh file)
+
+```
+Nhánh: claude/va-t2-chan-mau. Phần kế hoạch: Slice P0, Slice R0, Slice I4, §6.2.
+Bốn mục KHÔNG tranh file, làm được song song, mỗi mục một commit:
+
+(1) PRO-01 — `ops_misc.py:~1730-1806` `cmd_profile_file_remove`. Nguy hiểm nhất bảng.
+    Hiện: kết quả `nlm source_delete` / `drive trash` CHỈ được ghi nhật ký, KHÔNG kiểm; `reg_delete`
+    chạy VÔ ĐIỀU KIỆN với `require_removed="no"`; kết luận `ok: True` GÁN CỨNG, `return 0`.
+    ⇒ Mọi bước con hỏng vẫn rc=0, mà con trỏ registry ĐÃ BỊ THÁO ⇒ tài sản mồ côi không còn đường tra.
+    Vá bằng Helper 1: kiểm KẾT QUẢ DƯƠNG từng bước, dừng trước mutation kế tiếp; registry chỉ được tháo
+    khi các thao tác ĐƯỢC YÊU CẦU TRƯỚC ĐÓ đã thành công + readback; bỏ `ok:True` gán cứng; xét lại
+    `require_removed="no"` (nó đang tự tắt readback của chính bước xoá registry).
+    Test ma trận `--delete-nlm` × `--trash-drive` × `--keep-registry`, mỗi ô có ca BƯỚC CON HỎNG ⇒
+    đòi `rc≠0` VÀ registry còn nguyên.
+    LƯU Ý: mục này KHÔNG phụ thuộc PRO-02/03 (đã đo: lệnh không đọc marker) — đừng chờ.
+
+(2) RAS-05 — `scripts/backfill_keywords_live.py`.
+    `:76` `if not r.get('ok'): done[gid]='err'` mà `done` chính là bộ lọc worklist (`:63`) ⇒ doc lỗi bị
+    loại VĨNH VIỄN. `:92,:100` `reg_bulk` KHÔNG kiểm `rb.get('ok')`, item đã đánh `done='ok'` từ TRƯỚC.
+    `:107` remaining==0 ⇒ in "XONG TẤT CẢ.", `main()` return None ⇒ rc=0.
+    Vá: checkpoint state `pending/inflight/committed/retryable/blocked`; lỗi vào `retryable` KHÔNG vào
+    `done`; chỉ commit progress sau `reg_bulk ok` + patched/readback dương; kết luận tính TỪ remaining thật; rc≠0 khi còn lỗi.
+
+(3) RAS-01 vế `changes_pull` — `scripts/registry_orchestrator.py:196`.
+    `gas.post("changes_pull")` (applySheet=true ⇒ GHI Sheet) chạy TRƯỚC cổng
+    `if args.dry or not args.apply` ở `:218` ⇒ gọi "dry" VẪN GHI.
+    Vá: không gọi action ghi nào trước cổng `--apply`. (Phần metadata/CLI của RAS-01 để T3 — vế này
+    độc lập và vá được ngay.)
+
+(4) ING-03 — `ingest_ops.py`. `grep upsert_done` toàn kho ra ĐÚNG 1 hit (`:1502`) và hit đó chỉ dùng để
+    ĐẶT TÊN BƯỚC LỖI. Caller `:1836` và `:3079` gate bằng `org.get("fileId")` ⇒ response `ok:false` +
+    `upsert_done:false` mà có `fileId` vẫn ĐI TIẾP.
+    Vá bằng Helper 1: đòi `ok=true` VÀ đủ marker (`organize_done`, `rename_done`, `upsert_done`,
+    readback row/file) trước khi chuyển stage. SỬA CẢ HAI call site — cùng một lỗ, hai chỗ.
+    Ma trận negative-input cho từng marker thiếu/sai.
+```
+
+### Prompt T3 — định danh (Mẫu B; cần Helper của Pha 1-0)
+
+```
+Nhánh: claude/va-t3-dinh-danh. Phần kế hoạch: Pha 1A, 1B (I5/I6), 1C (P1/P4), 1D (R1/R2/R3).
+Nguyên tắc chung của tranche: mỗi chỗ đang có HAI cách gọi tên một thứ ⇒ chọn MỘT nguồn sự thật,
+SINH bên còn lại từ nó, và thêm gate bắt drift.
+
+- ING-02: một builder plan-hash duy nhất. Cờ THIẾU đã đối chiếu bằng `--help` thật:
+  ingest-local thiếu `replace_sohieu`, `no_fallback`; profile-ingest thiếu `allow_dup_name`,
+  `no_nlm_add`, `no_fallback`. Cả hai chưa khoá hash sidecar/OCR manifest.
+  Test tham số hoá: đảo TỪNG cờ / đổi MỘT byte artifact ⇒ plan_hash phải đổi.
+- ING-01: `ocr.py:487-494` `_bridge_run_child_apply` chạy child DRY LÚC APPLY rồi tự gắn
+  `--expected-plan-hash` bằng hash vừa sinh ⇒ tự phê duyệt. Apply chỉ được nhận hash CALLER đã xác nhận.
+  Test TOCTOU: đổi sidecar/source/options giữa dry và apply ⇒ ZERO mutation.
+- ING-07: đã xác định BÊN NÀO SAI — mã thật tính sha256 ⇒ card `content-v3/SHA256` ĐÚNG, bảng cứng
+  `workflow.py:220` (`content-v2/CRC32`) LỖI THỜI. Xoá bảng cứng, sinh từ card. `workflow-audit --strict`
+  phải FAIL khi route lệch card (hiện xanh trong khi drift đã có thật).
+- ING-04: `ingest_ops.py:2202-2240`. Hai lỗ: (a) `drive_id` RỖNG làm nhánh mismatch bị bỏ qua — rỗng =
+  KHÔNG CHỨNG MINH ĐƯỢC, phải fail-closed; (b) `plan_hash`/`identity_hash` mới chỉ kiểm TỒN TẠI, phải
+  SO KHỚP với plan hiện hành. Journal commit ghi đủ: source hash, plan hash, identity, src/GDoc IDs, scope.
+- ING-05: nhánh `--no-nlm-add` (`:1975-1992`) return mà KHÔNG `run_end` ⇒ journal inflight giả.
+  Mọi terminal path ghi ĐÚNG MỘT `run_end`. Thêm test quét: mọi `return {"stop": "DONE"}` trong
+  ingest_ops.py đều phải đi qua run_end.
+- PRO-02/03: `fingerprint` vào `_marker_required_keys` cho v2 và BỎ điều kiện "nếu có" ở
+  `_marker_validate:1655` — đó chính là cửa hậu (bỏ trường fingerprint đi là qua sạch). `profile-adopt`
+  (`profile_mgmt.py:864-878`) chưa gọi `_marker_mutation_guard` lẫn `_marker_validate` ⇒ ghi đè marker
+  FINGERPRINT_MISMATCH. Phản chứng bắt buộc: marker v2 BỊ XOÁ `fingerprint` phải validate ĐỎ và chặn adopt.
+- PRO-04: canonical profile key dùng chung cho lookup/sync/create/adopt/cache; chặn collision TRƯỚC khi
+  ghi; cache cũ DUAL-READ + migrate từng profile khi được dùng, KHÔNG rename hàng loạt (người giữ đã chốt).
+  Test PARITY HAI NỀN — `Alpha`/`alpha` chỉ va trên Windows, test chỉ chạy Linux sẽ XANH GIẢ.
+- PRO-05/06/07/08: doctor kiểm MIME manifest (bỏ điều kiện khoá cứng `role=="registry"` ở
+  `profile_env.py:775`); profile-info/profile-sync missing ⇒ lỗi có cấu trúc + rc≠0 (đang `ok:True` gán
+  cứng / tập rỗng ⇒ ok); bỏ `--force` giả của profile-rename VÀ help tương ứng (`a.force` chưa từng
+  được đọc) — KHÔNG triển khai merge profile.
+- RAS-01 (vế metadata) + RAS-14: tách nested writer thành command metadata thật; DRY-RUN MẶC ĐỊNH
+  (`backfill_nlm_title.py` đang ngược: ghi là mặc định, `--dry` mới thoát; `backfill_keywords_live.py`
+  không có `--dry` nào); bỏ `argparse.REMAINDER` cho đường có cờ global.
+- RAS-08/09: áp profile TRƯỚC resolve meta folder — nhớ CẢ `tl.py:1298-1299` (tập bỏ qua `load_creds`
+  ở `main()`); chỉ đảo thứ tự trong handler mà quên chỗ này thì `--profile` vẫn không tới nơi.
+  Validator máy cho `rasoat_plan.v1` (root OBJECT, schema, claim, q_units, enum).
+- RAS-02/03: một helper `authoritative-newest` DÙNG CHUNG cho state-get và state-put (hiện get sắp theo
+  modifiedTime còn put đọc `olds[0]` — hai bên chọn hai bản khác nhau). State ĐÃ TỒN TẠI ⇒ bắt buộc
+  `expect_claim` (hiện toàn bộ khối CAS nằm trong `if expect:`). CAS nguyên tử qua GAS LockService
+  (ADR-0016) — KHÔNG tuyên bố single-writer hoàn tất nếu mới chỉ read-then-write phía client.
+```
+
+### Prompt T4 — correctness
+
+```
+Nhánh: claude/va-t4-correctness. Phần kế hoạch: Pha 2.
+
+- ING-06: `zip_ingest.py:39` `_ALLOWED_INGEST_EXTS` có `.txt/.md` mà `ingest_ops.py:2608`
+  `allowed_exts` thì không ⇒ member `.txt` lên plan rồi child chết chắc. Dùng CHUNG một registry —
+  hoặc bỏ `.txt/.md`, hoặc cho child nhận qua `--text-file`. KHÔNG để hai bảng.
+- ING-08 (người giữ đã chốt: đường trực tiếp VẪN HỖ TRỢ): chuẩn hoá UTF-8 cho stdout, VÀ — phần sửa lỗi
+  thật — chỉ publish cache SAU KHI output thành công. Hiện `_write_json_atomic` chạy TRƯỚC
+  `print(json.dumps(...))` (`ingest_to_cache.py:~745,754`) nên vá encoding thôi là chưa đủ.
+  Test: bơm lỗi ở bước in ⇒ cache KHÔNG được publish.
+- RAS-04: `lookup_ops.py:1750-1753` `except Exception: added = 0` làm lỗi đọc thành "không có gì mới".
+  Thêm trạng thái `unreadable`; lỗi đọc KHÔNG tính dry round; `converged=false` + retry/pause actionable.
+- RAS-10: frontier rỗng từ đầu ⇒ `converged=false` mà `ok=true`. Định nghĩa empty-pass rõ ràng;
+  khoá `max_iter, dry_rounds > 0`.
+- RAS-06/15: `rasoat_phuluc.py` `load_master` đã dùng chung `_rasoat_merge_units` nhưng THIẾU
+  `_rasoat_la_ban_sao` (đọc cả `*.bak.json`) và `_rasoat_trung_lap` (cổng trùng fail-closed).
+  `dedup():97` gặp key trùng thì `continue` ⇒ GIỮ BẢN ĐẦU, MẤT payload sau. Đưa cả 3 vào cùng một bộ.
+- RAS-07: `lookup_ops.py:3272` `uids = [f.stem …]` ⇒ TÊN FILE quyết định state. Phải khớp `payload.unit_id`.
+- RAS-11/12: `:3264` `write_text` chạy rồi `:3286` mới `return 2` ⇒ ghi trước báo lỗi sau; state JSON
+  hỏng chỉ nằm ở `hoa_giai.loi` mà `ok:true, rc=0`. Validate TOÀN BỘ input + state TRƯỚC write;
+  staging + atomic replace; lỗi reconcile làm CẢ giao dịch fail.
+- RAS-13: dùng Helper 2 (vị ngữ corpus hữu hiệu). Test: quarantine-only · corpus=false · ref · bare-VBHN.
+- RAS-16: `rasoat_phuluc.py:118,137` `dict.get(k, default)` chỉ thay khi THIẾU KHOÁ; `linh_vuc=""` ⇒
+  heading rỗng. Dùng `or`, không dùng default của `.get`.
+```
+
+### Prompt Pha 3.5 — rà thiệt hại LIVE (READ-ONLY, chạy được ngay sau T1)
+
+```
+Nhánh: không cần nhánh code — sản phẩm là MỘT BẢN KÊ, không phải bản vá.
+Phần kế hoạch: §6.2 (bảng 7 dấu vết).
+
+Nhiệm vụ: các lỗi trong sổ đã chạy trên LIVE bấy lâu và bản chất là hỏng IM LẶNG (`ok:true`, `rc=0`).
+Tìm xem THIỆT HẠI NÀO ĐÃ XẢY RA, trước khi bản vá làm triệu chứng biến mất.
+
+TUYỆT ĐỐI READ-ONLY: không `--apply`, không `reg-delete`, không `source-delete`, không sửa dữ liệu.
+Dùng đúng bảng 7 dấu vết ở §6.2 (tài sản mồ côi do PRO-01/ING-03 qua `nlm-orphans`/`nlm-reconcile`
+không --apply + đối chiếu Drive↔registry · doc mất `tukhoa` do RAS-05 · journal inflight giả do ING-05
+qua `tl journal` · đơn vị `done` sai do RAS-07 · master ghi từ input thiếu do RAS-11/12 qua
+`rasoat-merge --check` · kết luận corpus sai do RAS-13).
+
+Thêm một mục cho PRO-04: kê số profile đang lệch hoa/thường trên máy thật — con số đó quyết định
+migrate cache có đáng làm tự động hay chỉ cần cảnh báo.
+
+Giao: bảng "dấu vết → số lượng → bằng chứng → mức nghiêm trọng". Việc SỬA dữ liệu LIVE là quyết định
+riêng của người giữ, đi sau, duyệt riêng — KHÔNG gộp vào tranche mã.
+```
+
+## 11. Ghi chú trạng thái cây
 
 Lượt xác minh này **không sửa một dòng mã sản xuất nào**. Lệnh chạy đều là read-only/dry-run
 (`--selftest`, `golden-test --json`, `workflow-audit --strict --json`, `doc-claims-check --strict --json`,

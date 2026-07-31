@@ -399,9 +399,55 @@ def cmd_boot(a) -> int:
     return 0
 
 
-def save_local_config(config_json=None, webapp=None, token=None, manifest_id=None, out=None):
+def _merge_local_config(old: dict, new: dict) -> dict:
+    """r280 (P16-F01) — PURE: hoà `new` (template public / tham số rời) LÊN TRÊN `old` (file đang có).
+
+    Luật: khoá cấp 1 → `new` thắng KHI CÓ MẶT (khoá `old` mà `new` không nhắc thì GIỮ).
+    `profiles` → hoà theo TỪNG TÊN profile, và trong mỗi block lại hoà theo TỪNG Ô — vì đây chính
+    là thứ cần cứu: block dự án chỉ có ở `old` phải sống, ô người dùng ghim (`config-pin-registry`)
+    phải sống, còn ô template nhắc tới thì template thắng. Không đụng khoá nào khác.
+    """
+    if not isinstance(old, dict) or not old:
+        return dict(new or {})
+    merged = {**old, **(new or {})}
+    old_p, new_p = old.get("profiles"), (new or {}).get("profiles")
+    if isinstance(old_p, dict) and isinstance(new_p, dict):
+        out_p = dict(old_p)
+        for name, blk in new_p.items():
+            cur = out_p.get(name)
+            out_p[name] = {**cur, **blk} if isinstance(cur, dict) and isinstance(blk, dict) else blk
+        merged["profiles"] = out_p
+    elif isinstance(old_p, dict) and new_p is None:
+        merged["profiles"] = old_p
+    return merged
+
+
+def _heal_legacy_registry_doc_id(data: dict) -> bool:
+    """Blank registryDocId trỏ Doc legacy 1mATG (base + mọi profile). Trả True nếu có sửa.
+    r280: tách khỏi `cmd_init_config` để chạy được trên bản ĐÃ HOÀ — nếu chỉ heal template thì
+    id legacy nằm sẵn trong file cũ sẽ sống sót qua bước merge mới (xem sự cố 2026-06-30)."""
+    healed = False
+    if not isinstance(data, dict):
+        return False
+    if str(data.get("registryDocId") or "") == _LEGACY_REGISTRY_DOC_ID:
+        data["registryDocId"] = ""; healed = True
+    for blk in (data.get("profiles") or {}).values():
+        if isinstance(blk, dict) and str(blk.get("registryDocId") or "") == _LEGACY_REGISTRY_DOC_ID:
+            blk["registryDocId"] = ""; healed = True
+    return healed
+
+
+def save_local_config(config_json=None, webapp=None, token=None, manifest_id=None, out=None, replace=False):
     """Lưu cấu hình local để phiên trống KHÔNG phụ thuộc mirror Drive public (mirror nay private — F7/F7b).
-    Nguồn: chuỗi JSON đọc từ mirror qua Drive MCP, hoặc tham số rời."""
+    Nguồn: chuỗi JSON đọc từ mirror qua Drive MCP, hoặc tham số rời.
+
+    r280 (P16-F01, P0 mất dữ liệu): trước đây GHI ĐÈ TRỌN file đích bằng template public — không đọc
+    file cũ, không backup, không atomic ⇒ `tl init-config --from-public` (chính lệnh mà ≥5 thông điệp
+    lỗi của CLI khuyên chạy) XOÁ TRẮNG block `profiles` của mọi profile dự án. Nay: HOÀ lên file cũ
+    (`_merge_local_config`), BACKUP bản cũ ra `_config_backup_dir()` (ngoài cây skill — doctrine r193/r202,
+    backup chứa token), ghi ATOMIC (`_write_json_atomic`). `replace=True` = đường reset CỐ Ý, có cảnh báo.
+    Trả `(path, info)` — `info` cho caller in ra đã giữ/ghi đè những gì.
+    """
     data = {}
     if config_json:
         data = json.loads(config_json)
@@ -410,12 +456,36 @@ def save_local_config(config_json=None, webapp=None, token=None, manifest_id=Non
     if webapp: data["webappUrl"] = webapp
     if token: data["token"] = token
     if manifest_id: data["manifestId"] = manifest_id
-    if not (data.get("webappUrl") or data.get("TL_WEBAPP")) or not (data.get("token") or data.get("TL_TOKEN")):
-        raise ValueError("Thiếu webappUrl/token trong config")
     path = Path(out or (Path.home() / ".tra_luat_config.json"))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    return path
+    old = {}
+    try:
+        if path.is_file():
+            _cur = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(_cur, dict):
+                old = _cur
+    except Exception:  # noqa: BLE001
+        old = {}     # file cũ hỏng/không parse được → coi như trống, nhưng VẪN backup ở dưới
+    # ĐỌC file cũ ngay cả khi `replace`: bản cũ vẫn cần cho BACKUP và cho việc NÓI RA đã xoá những gì.
+    merged = data if replace else _merge_local_config(old, data)
+    _heal_legacy_registry_doc_id(merged)
+    # Kiểm BẤT BIẾN trên bản SẼ GHI (không phải trên riêng input): template thiếu token mà file cũ có
+    # thì kết quả vẫn dùng được — cái phải chặn là file ĐÍCH thiếu webapp/token.
+    if not (merged.get("webappUrl") or merged.get("TL_WEBAPP")) or not (merged.get("token") or merged.get("TL_TOKEN")):
+        raise ValueError("Thiếu webappUrl/token trong config")
+    _old_profiles = sorted((old.get("profiles") or {}).keys()) if isinstance(old.get("profiles"), dict) else []
+    backup = None
+    if path.is_file():
+        try:
+            _bkp = _config_backup_dir() / f"{path.name}.init-config.{time.strftime('%Y%m%dT%H%M%S')}.bak.json"
+            shutil.copyfile(str(path), str(_bkp))    # copy BYTE — giữ nguyên cả file cũ không parse được
+            backup = str(_bkp)
+        except Exception:  # noqa: BLE001
+            backup = None
+    _write_json_atomic(path, merged)
+    info = {"merged": not replace, "replaced": bool(replace), "backup": backup,
+            "profiles_giu": _old_profiles,
+            "profiles_sau": sorted((merged.get("profiles") or {}).keys()) if isinstance(merged.get("profiles"), dict) else []}
+    return path, info
 
 
 def public_download_text(fid: str, timeout: int = 180) -> str | None:
@@ -579,26 +649,31 @@ def cmd_init_config(a) -> int:
             return 2
     # AUTO-HEAL (sự cố 2026-06-30): template public hay set registryDocId = Doc legacy 1mATG → webapp mở Doc-as-Sheet →
     # đọc registry RỖNG (count=0 ẢO). Blank nó (base + mọi profile) → webapp auto-discover Sheet `tra_luat_registry` THẬT.
+    # r280: phép heal nay nằm TRONG save_local_config, chạy trên bản ĐÃ HOÀ (template + file cũ) — heal riêng
+    # template thì id legacy có sẵn trong file cũ sẽ sống sót qua merge. Ở đây chỉ còn phần BÁO cho người dùng.
     if config_json:
         try:
             import json as _jh
             _cj = _jh.loads(config_json)
-            _healed = False
-            if str(_cj.get("registryDocId") or "") == _LEGACY_REGISTRY_DOC_ID:
-                _cj["registryDocId"] = ""; _healed = True
-            for _pv in (_cj.get("profiles") or {}).values():
-                if isinstance(_pv, dict) and str(_pv.get("registryDocId") or "") == _LEGACY_REGISTRY_DOC_ID:
-                    _pv["registryDocId"] = ""; _healed = True
-            if _healed:
-                config_json = _jh.dumps(_cj, ensure_ascii=False)
+            if _heal_legacy_registry_doc_id(dict(_cj)):
                 print("[tl] ⚠ init-config AUTO-HEAL: registryDocId = Doc legacy 1mATG → ĐỂ RỖNG (webapp auto-discover "
                       "Sheet tra_luat_registry THẬT). Nên cập nhật template public để hết tái diễn.", file=sys.stderr)
         except Exception:  # noqa: BLE001
             pass
     try:
-        path = save_local_config(config_json, a.webapp, a.token, a.manifest_id, a.out)
+        path, _cfg_info = save_local_config(config_json, a.webapp, a.token, a.manifest_id, a.out,
+                                            replace=getattr(a, "replace", False))
     except Exception as e:  # noqa: BLE001
         print(f"[tl] init-config lỗi: {e}", file=sys.stderr); return 1
+    # r280 (P16-F01): NÓI RA đã giữ/xoá gì — im lặng chính là cách bản cũ làm mất block profiles.
+    _giu = _cfg_info.get("profiles_giu") or []
+    if _cfg_info.get("replaced"):
+        if _giu:
+            print(f"[tl] ⚠ init-config --replace: GHI ĐÈ TRỌN — {len(_giu)} block profiles bị XOÁ "
+                  f"({', '.join(_giu)}). Khôi phục: {_cfg_info.get('backup') or '(không backup được)'}", file=sys.stderr)
+    elif _giu:
+        print(f"[tl] init-config: HOÀ vào config có sẵn — giữ {len(_giu)} block profiles ({', '.join(_giu)})"
+              + (f"; backup {_cfg_info.get('backup')}" if _cfg_info.get("backup") else ""), file=sys.stderr)
     # FIX (log Chat): --from-public GỘP gws CRED + BINARY (find/GHI) + (--nlm) nlm — qua `_ensure_gws_nlm` (dùng chung `tl up`).
     _from_public = getattr(a, "from_public", False)
     note = ""

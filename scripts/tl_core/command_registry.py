@@ -551,6 +551,7 @@ GENERATED_SPECS = [
          {"flags": ['--token']},
          {"flags": ['--manifest-id'], "dest": 'manifest_id'},
          {"flags": ['--out']},
+         {"flags": ['--replace'], "action": 'store_true', "help": 'r280: GHI ĐÈ TRỌN thay vì HOÀ vào config có sẵn — XOÁ block profiles đang có (mặc định: hoà + backup)'},
      ]},
     {"name": 'doctor', "handler": 'cmd_doctor',
      "args": [

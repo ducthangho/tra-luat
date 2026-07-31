@@ -1,3 +1,36 @@
+# ★ v1.36.18 — r280: `init-config` hết ghi đè trọn config — HOÀ + BACKUP + ATOMIC (P16-F01) (2026-07-31)
+
+Mở chiến dịch **P16** (vá nhóm ingest/profile — 10 phát hiện Pha 1 chưa ai vá). F01 (P0 mất dữ liệu).
+
+**Bệnh:** `save_local_config` (ops_misc.py:405-418) khởi tạo `data = {}` rồi `json.loads(config_json)` —
+KHÔNG đọc file đích để hoà — và `path.write_text(...)` ghi đè thẳng `~/.tra_luat_config.json`: không backup
+(đối lập `profile-delete` đã có từ r202), không atomic (đối lập `_write_json_atomic`), không journal. `tl init-config
+--from-public` là lệnh mà **chính CLI khuyên chạy ở ≥5 thông điệp lỗi** (profile_env.py:325; profile_mgmt.py
+:339/1329/2170/2251) ⇒ sau khi token xoay, người dùng gõ đúng lệnh được khuyên thì **MẤT TRẮNG toàn bộ block
+`profiles`** (mọi profile dự án), CLI vẫn in «✓ đã lưu config». Hậu quả tiếp theo đúng lớp sự cố 1.23.21:
+`--profile <dự-án>` rơi PROFILE_NOT_FOUND, hoặc mọi lệnh GHI chạy trên scope nền vbqppl. Lớp sự cố này ĐÃ TỪNG
+BIẾT (auto-heal 2026-06-30) nhưng chỉ vá ĐÚNG 1 TRƯỜNG (`registryDocId` legacy), không vá phép ghi đè.
+
+**VÁ:** `_merge_local_config` (PURE) — template public HOÀ LÊN TRÊN file cũ: khoá cấp 1 → `new` thắng KHI
+CÓ MẮT (khoá cũ không được nhắc thì GIỮ — ví dụ `defaultProfile`); `profiles` hoà theo TẮNG TÊN, trong mỗi block
+lại hoà theo TẮNG Ô (block dự án chỉ có ở file cũ sống; ô người dùng ghim bằng `config-pin-registry` sống; ô
+template nhắc tới thì template thắng). `save_local_config` nay: đọc file đích → hoà → **BACKUP byte** ra
+`_config_backup_dir()` (NGOÀI cây skill — doctrine r193/r202, backup chứa token) → **`_write_json_atomic`**.
+Kể cả file cũ HỎcNG (không parse được) vẫn được backup nguyên byte trước khi thay. Kiểm bất biến
+webapp/token chuyển sang đo trên **bản SẼ GHI** (template thiếu token mà file cũ có thì kết quả vẫn dùng được;
+cái phải chặn là file ĐÍCH thiếu). AUTO-HEAL legacy `1mATG` tách thành `_heal_legacy_registry_doc_id` và nay
+chạy trên **bản ĐÃ HOÀ** — heal riêng template thì id legacy nằm sẵn trong file cũ sẽ sống sót qua bước merge mới
+(bẫy do chính bản vá này sinh ra, đã bịt). Đường reset CỐ Ý: cờ mới **`--replace`** — vẫn backup, và in
+CẢNH BÁO liệt kê đích danh block bị xoá + đường backup để hồi. Đường hoà cũng NÓI RA đã giữ những block nào
+— im lặng chính là cách bản cũ làm mất dữ liệu mà không ai biết.
+
+**Kiểm (+10 case, selftest 1471/1471):** 6 PURE `_merge_local_config`/`_heal_legacy` (giữ block dự án · ô ghim
+sống & template thắng · giữ khoá cũ không bị nhắc · heal trên bản đã hoà) + 4 HÀNH VI qua đường sản xuất
+`cmd_init_config` với file thật trong tempdir. **PHẢN CHỨNG:** (a) file cũ trống/không phải dict ⇒ merge = chính
+template (không tự chế thêm) · (b) template không có `profiles` ⇒ block cũ nguyên vẹn · (c) **phiên TRỐNG
+(chưa có config) — đúng đường mà lệnh này sinh ra — KHÔNG đổi hành vi**: rc=0, ghi đúng template, không backup,
+không cảnh báo · (d) file cũ HỎcNG vẫn được backup nguyên byte. Parser surface snapshot regen (thêm `--replace`).
+
 # ★ v1.36.17 — r279: chốt CHỐNG GHI SONG SONG cho đường NLM + registry (2026-07-31)
 
 **Bệnh (ca thật, có bằng chứng — không phải giả định):** 31-07-2026 HAI phiên cùng được duyệt một đợt

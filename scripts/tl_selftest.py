@@ -4105,6 +4105,41 @@ def run() -> int:
     cases.append(("r279_expect_absent_is_noop",
                   _expect_precondition_verdict(_r279row, [])["ok"] is True
                   and _expect_precondition_verdict(None, None)["ok"] is True))
+    # r280 (P16-F01, P0 mất dữ liệu): `init-config` ghi đè trọn config ⇒ xoá trắng block `profiles`.
+    # PURE `_merge_local_config`: template public LÊN TRÊN file cũ, KHÔNG được nuốt block dự án.
+    _r280old = {"webappUrl": "https://old", "token": "T_OLD", "defaultProfile": "ATVSLD",
+                "profiles": {"vbqppl": {"rootFolderId": "R_BASE", "registryDocId": "REG_GHIM"},
+                             "ATVSLD": {"rootFolderId": "R_AT", "notebookId": "NB_AT", "categories": "own"}}}
+    _r280new = {"webappUrl": "https://new", "token": "T_NEW",
+                "profiles": {"vbqppl": {"rootFolderId": "R_BASE2", "notebookId": "NB_BASE"}}}
+    _r280m = _merge_local_config(_r280old, _r280new)
+    cases.append(("r280_merge_giu_profile_du_an",
+                  _r280m["profiles"]["ATVSLD"] == _r280old["profiles"]["ATVSLD"]
+                  and sorted(_r280m["profiles"]) == ["ATVSLD", "vbqppl"]))
+    # Template thắng ở Ô nó NHẮC; ô người dùng ghim (config-pin-registry) mà template im lặng thì SỐNG.
+    cases.append(("r280_merge_o_ghim_song_o_template_thang",
+                  _r280m["profiles"]["vbqppl"]["registryDocId"] == "REG_GHIM"
+                  and _r280m["profiles"]["vbqppl"]["rootFolderId"] == "R_BASE2"
+                  and _r280m["profiles"]["vbqppl"]["notebookId"] == "NB_BASE"
+                  and _r280m["webappUrl"] == "https://new"))
+    # Khoá cấp 1 chỉ có ở file cũ (defaultProfile — chính khoá mà F08 phụ thuộc) KHÔNG được biến mất.
+    cases.append(("r280_merge_giu_khoa_cu_khong_bi_nhac",
+                  _r280m["defaultProfile"] == "ATVSLD"))
+    # PHẢN CHỨNG: file cũ TRỐNG/không phải dict ⇒ merge = chính template (không tự chế thêm gì).
+    cases.append(("r280_merge_old_rong_la_template",
+                  _merge_local_config({}, _r280new) == _r280new
+                  and _merge_local_config(None, _r280new) == _r280new))
+    # PHẢN CHỨNG: template KHÔNG có `profiles` ⇒ block cũ giữ NGUYÊN (không bị dựng lại rỗng).
+    cases.append(("r280_merge_template_khong_co_profiles",
+                  _merge_local_config(_r280old, {"token": "T2"})["profiles"] == _r280old["profiles"]))
+    # Heal legacy PHẢI chạy trên bản ĐÃ HOÀ: id legacy nằm ở FILE CŨ (template im lặng) vẫn phải bị blank.
+    _r280leg = _merge_local_config({"webappUrl": "u", "token": "t", "registryDocId": _LEGACY_REGISTRY_DOC_ID,
+                                    "profiles": {"P": {"registryDocId": _LEGACY_REGISTRY_DOC_ID}}},
+                                   {"token": "t2"})
+    _r280healed = _heal_legacy_registry_doc_id(_r280leg)
+    cases.append(("r280_heal_legacy_tren_ban_da_hoa",
+                  _r280healed is True and _r280leg["registryDocId"] == ""
+                  and _r280leg["profiles"]["P"]["registryDocId"] == ""))
     _r278f = _classify_ref({"raw": "k", "name_phrase": "", "sohieu": "01-2026-TT-BCT", "loai": ""}, _r278a)
     cases.append(("xref_ambig_flag_low_no_canonical",
                   _r278f["flag"] == "DOC_TEXT_SOHIEU_TYPO" and _r278f["confidence"] == "low"
@@ -10990,6 +11025,96 @@ def run() -> int:
         return (_rc == 0 and _calls["deletes"] == ["sidA117"]
                 and _out.get("counts", {}).get("deleted") == 1 and _calls["lists"] == ["nbX"])
     _t110("r279_source_remove_present_still_deletes", _c279_sr_present_still_deletes)
+
+    def _run_initcfg280(old_obj, new_obj, replace=False):
+        """r280 HÀNH VI qua ĐƯỜNG SẢN XUẤT `cmd_init_config` (không gọi thẳng save_local_config):
+        ghi file config thật trong tempdir, chạy lệnh, đọc lại file. `no_gws=True` để không đụng mạng."""
+        import tempfile as _tf280
+        with _tf280.TemporaryDirectory() as _d:
+            _cfgp = os.path.join(_d, "cfg.json")
+            _bkdir = os.path.join(_d, "_bak")
+            if old_obj is not None:
+                with open(_cfgp, "w", encoding="utf-8") as _f:
+                    json.dump(old_obj, _f, ensure_ascii=False)
+            _prev = os.environ.get("TL_CONFIG_BACKUP_DIR")
+            os.environ["TL_CONFIG_BACKUP_DIR"] = _bkdir
+            try:
+                _ns = argparse.Namespace(config_json=json.dumps(new_obj, ensure_ascii=False), from_public=False,
+                                         file=None, from_drive=False, file_id=None, env=None, webapp=None,
+                                         token=None, manifest_id=None, out=_cfgp, replace=replace,
+                                         no_gws=True, no_binary=True, nlm=False, config=None, profile=None)
+                _bo, _be = _io27.StringIO(), _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                    _rc = _TL_MODULE.cmd_init_config(_ns)
+                with open(_cfgp, encoding="utf-8") as _f:
+                    _after = json.load(_f)
+                _baks = sorted(os.listdir(_bkdir)) if os.path.isdir(_bkdir) else []
+                return _rc, _after, _baks, _be.getvalue()
+            finally:
+                if _prev is None:
+                    os.environ.pop("TL_CONFIG_BACKUP_DIR", None)
+                else:
+                    os.environ["TL_CONFIG_BACKUP_DIR"] = _prev
+
+    _r280cfg_old = {"webappUrl": "https://old", "token": "T_OLD", "defaultProfile": "ATVSLD",
+                    "profiles": {"vbqppl": {"rootFolderId": "R_BASE"},
+                                 "ATVSLD": {"rootFolderId": "R_AT", "notebookId": "NB_AT", "categories": "own"}}}
+    _r280cfg_new = {"webappUrl": "https://new", "token": "T_NEW", "profiles": {"vbqppl": {"rootFolderId": "R_B2"}}}
+
+    def _c280_initcfg_giu_profiles():
+        # P16-F01 HÀNH VI: lệnh mà CLI tự khuyên chạy (≥5 thông điệp lỗi) KHÔNG được xoá trắng block profiles.
+        _rc, _after, _baks, _err = _run_initcfg280(_r280cfg_old, _r280cfg_new)
+        return (_rc == 0 and "ATVSLD" in (_after.get("profiles") or {})
+                and _after["profiles"]["ATVSLD"]["notebookId"] == "NB_AT"
+                and _after.get("defaultProfile") == "ATVSLD"
+                and _after.get("webappUrl") == "https://new"
+                and len(_baks) == 1 and "ATVSLD" in _err)
+    _t110("r280_initcfg_merge_giu_block_profiles", _c280_initcfg_giu_profiles)
+
+    def _c280_initcfg_replace_co_y():
+        # Đường reset CỐ Ý vẫn phải làm được — nhưng phải NÓI RA đã xoá gì và vẫn có backup để hồi.
+        _rc, _after, _baks, _err = _run_initcfg280(_r280cfg_old, _r280cfg_new, replace=True)
+        return (_rc == 0 and "ATVSLD" not in (_after.get("profiles") or {})
+                and "defaultProfile" not in _after
+                and len(_baks) == 1 and "--replace" in _err and "XOÁ" in _err)
+    _t110("r280_initcfg_replace_co_canh_bao_va_backup", _c280_initcfg_replace_co_y)
+
+    def _c280_initcfg_phien_trong_van_chay():
+        # PHẢN CHỨNG: phiên TRỐNG (chưa có file config) — đường mà lệnh này sinh ra để phục vụ — không đổi:
+        # rc=0, ghi đúng template, KHÔNG có backup (không có gì để backup), không cảnh báo mất mát.
+        _rc, _after, _baks, _err = _run_initcfg280(None, _r280cfg_new)
+        return (_rc == 0 and _after == _r280cfg_new and _baks == [] and "profiles" not in _err)
+    _t110("r280_initcfg_phien_trong_khong_doi_hanh_vi", _c280_initcfg_phien_trong_van_chay)
+
+    def _c280_initcfg_file_cu_hong_van_backup():
+        # File cũ HỎNG (không parse được) — không được nuốt: vẫn ghi được bản mới NHƯNG phải backup byte bản hỏng.
+        import tempfile as _tf280b
+        with _tf280b.TemporaryDirectory() as _d:
+            _cfgp = os.path.join(_d, "cfg.json")
+            _bkdir = os.path.join(_d, "_bak")
+            with open(_cfgp, "w", encoding="utf-8") as _f:
+                _f.write('{"webappUrl": "https://old", "token": ')      # JSON CỤT
+            _prev = os.environ.get("TL_CONFIG_BACKUP_DIR")
+            os.environ["TL_CONFIG_BACKUP_DIR"] = _bkdir
+            try:
+                _ns = argparse.Namespace(config_json=json.dumps(_r280cfg_new, ensure_ascii=False), from_public=False,
+                                         file=None, from_drive=False, file_id=None, env=None, webapp=None,
+                                         token=None, manifest_id=None, out=_cfgp, replace=False,
+                                         no_gws=True, no_binary=True, nlm=False, config=None, profile=None)
+                _bo, _be = _io27.StringIO(), _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                    _rc = _TL_MODULE.cmd_init_config(_ns)
+                with open(_cfgp, encoding="utf-8") as _f:
+                    _after = json.load(_f)
+                _baks = sorted(os.listdir(_bkdir)) if os.path.isdir(_bkdir) else []
+                _bak_body = open(os.path.join(_bkdir, _baks[0]), encoding="utf-8").read() if _baks else ""
+                return _rc == 0 and _after == _r280cfg_new and len(_baks) == 1 and _bak_body.endswith('"token": ')
+            finally:
+                if _prev is None:
+                    os.environ.pop("TL_CONFIG_BACKUP_DIR", None)
+                else:
+                    os.environ["TL_CONFIG_BACKUP_DIR"] = _prev
+    _t110("r280_initcfg_file_cu_hong_van_duoc_backup", _c280_initcfg_file_cu_hong_van_backup)
 
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).

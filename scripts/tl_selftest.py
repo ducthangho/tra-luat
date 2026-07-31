@@ -11163,12 +11163,51 @@ def run() -> int:
                     else:
                         os.environ[_k] = _v
 
+    # Hằng cuối của `_config_candidates` (scripts/tl_core/profile_env.py) — ứng viên DUY NHẤT nằm ngoài
+    # HOME/cwd/HERE, nên là ứng viên duy nhất được miễn trong khung cô lập. Đặt một chỗ, dùng cho cả hai ca.
+    _HANG_CUOI_285 = "/tmp/tra_luat_config.json"
+
+    def _c285_hang_cuoi_van_con_va_la_ngoai_le_duy_nhat():
+        # r285 PHẢN CHỨNG cho phép miễn trừ của ca r284 ngay bên dưới: nếu ai đổi/xoá hằng cuối
+        # `/tmp/tra_luat_config.json` trong `_config_candidates`, phép miễn `c != _HANG_CUOI_285` thành
+        # VÔ NGHĨA và ca kia vẫn XANH im lặng (lọc hụt, không ai biết). Ca này bắt đúng chỗ đó: trong khung
+        # cô lập, hằng PHẢI còn trong danh sách ứng viên VÀ phải là ứng viên NGOÀI tempdir DUY NHẤT.
+        # Đổi hằng ⇒ đỏ tại đây; thêm một đường thoát ra kho thật ⇒ cũng đỏ tại đây.
+        import tempfile as _tf285
+        _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
+        _here = _TL_MODULE.HERE
+        _cwd = os.getcwd()
+        with _tf285.TemporaryDirectory() as _d:
+            try:
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                _TL_MODULE.HERE = Path(_d) / "scripts"
+                _all = _TL_MODULE._config_candidates(None)
+                _real = Path(_d).resolve()
+                _ngoai = [c for c in _all if not Path(c).resolve().is_relative_to(_real)]
+                return (_HANG_CUOI_285 in _all) and _ngoai == [_HANG_CUOI_285]
+            finally:
+                os.chdir(_cwd)
+                _TL_MODULE.HERE = _here
+                for _k, _v in _sav.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+    _t110("r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat", _c285_hang_cuoi_van_con_va_la_ngoai_le_duy_nhat)
+
     def _c284_khung_test_khong_doc_config_that():
         # r284 CHỐT CHẶN TÁI PHÁT (ca thật 31-07: user chạy deploy trên cây canonical, selftest 1483/1490 —
         # 7 case r281/r283 ĐỎ vì `tra_luat_config.v2.json` nằm CẠNH skill, mà `_config_candidates` xếp
         # `HERE.parent` TRƯỚC `~/.tra_luat_config.json`; worktree không có tệp đó nên xanh GIẢ).
         # Chốt: bên trong khung cô lập, MỌI ứng viên config phải nằm trong tempdir — không được có đường
-        # nào trỏ ra kho thật. `/tmp/...` là hằng cuối của hàm, không tồn tại trên máy Windows, bỏ qua.
+        # nào trỏ ra kho thật. Ứng viên DUY NHẤT được miễn là hằng cuối hàm `/tmp/tra_luat_config.json`.
+        # r285 GATE-03 (đo THẬT trên Linux 31-07: 1490/1491 — Windows xanh GIẢ vì /tmp không tồn tại):
+        # bản r284 lọc theo TIỀN TỐ `startswith("/tmp/")`. Trên Linux `TemporaryDirectory()` trả
+        # `/tmp/tmpXXXXXXXX` ⇒ MỌI ứng viên (đều nằm TRONG tempdir) khớp tiền tố và bị loại SẠCH ⇒
+        # `_cands == []` ⇒ `bool(_cands)` False ⇒ FAIL. Đúng lớp lỗi máy-phụ-thuộc mà chính r284 sinh
+        # ra để chặn, chỉ đảo nền. Vá: so BẰNG ĐÚNG hằng, không theo tiền tố (test-only).
         import tempfile as _tf284g
         _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
         _here = _TL_MODULE.HERE
@@ -11179,7 +11218,7 @@ def run() -> int:
                 os.environ["USERPROFILE"] = _d
                 os.chdir(_d)
                 _TL_MODULE.HERE = Path(_d) / "scripts"
-                _cands = [c for c in _TL_MODULE._config_candidates(None) if not c.startswith("/tmp/")]
+                _cands = [c for c in _TL_MODULE._config_candidates(None) if c != _HANG_CUOI_285]
                 _real = Path(_d).resolve()
                 return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
             finally:

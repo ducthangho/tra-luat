@@ -11516,6 +11516,104 @@ def run() -> int:
                 and _exp.get("treeHash") == "TH_D")
     _t110("r283_export_doc_dung_cache_profile", _c283_export_cung_theo_profile)
 
+    def _run_manifest286(cfg_obj, profile, gas_entries=None, cfg_on_disk=True):
+        """r286 HÀNH VI: áp profile qua `apply_profile_offline` THẬT rồi đọc `_manifest_entries` THẬT.
+        Trả (entries|None, lỗi, các thư mục cache ĐƯỢC TẠO). GAS giả LUÔN trả manifest NỀN — đúng như
+        webapp làm khi scope rỗng: đó chính là cái bẫy của F09.
+        Cô lập HOME + cwd + HERE (bài học r284: thiếu HERE là test phụ thuộc máy)."""
+        import tempfile as _tf286
+        _keys286 = ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID",
+                    "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_ROOT_FOLDER_ID",
+                    "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID",
+                    "TL_PROFILE_ENV_OVERLAY", "TL_WEBAPP", "TL_TOKEN", "HOME", "USERPROFILE")
+        _sav286 = {k: os.environ.get(k) for k in _keys286}
+        _savfn286 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "_gas_get_retry", "CACHE", "HERE")}
+        _cwd286 = os.getcwd()
+        _nen286 = list(gas_entries if gas_entries is not None
+                       else [{"drive_id": "dNEN", "so_hieu": "45/2024/QH15", "name": "Luat_NEN"}])
+        with _tf286.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            try:
+                for _k in _keys286:
+                    os.environ.pop(_k, None)
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                _TL_MODULE.HERE = Path(_d) / "scripts"
+                if cfg_on_disk:
+                    with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
+                        json.dump(cfg_obj, _f, ensure_ascii=False)
+                _cache286 = Path(_d) / ".tra_luat_cache"
+                _TL_MODULE.CACHE = _cache286
+                _TL_MODULE._gas = lambda: None
+                _TL_MODULE._gas_get_retry = lambda g, action, **kw: (
+                    {"ok": True, "entries": _nen286, "treeHash": "TH"} if action == "manifest_export"
+                    else {"ok": True})
+                _be = _io27.StringIO()
+                with _ctx27.redirect_stderr(_be):
+                    _TL_MODULE.apply_profile_offline(None, profile)
+                    try:
+                        _ents = _TL_MODULE._manifest_entries(refresh=False)
+                        _err = None
+                    except Exception as e:  # noqa: BLE001
+                        _ents, _err = None, str(e)
+                _dirs = sorted(p.name for p in _cache286.iterdir()) if _cache286.is_dir() else []
+                return _ents, _err, _dirs
+            finally:
+                os.chdir(_cwd286)
+                for _k, _v in _savfn286.items():
+                    setattr(_TL_MODULE, _k, _v)
+                for _k, _v in _sav286.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+
+    _cfg286 = {"webappUrl": "u", "token": "t",
+               "profiles": {"vbqppl": {"registryDocId": "REG_NEN"},
+                            "NQ80": {"registryDocId": "REG_80", "manifestId": "MAN_80", "categories": "own"}}}
+
+    def _c286_profile_ma_khong_muon_duoc_corpus_nen():
+        # P16-F09 LÕI: gõ sai 'NQ8O' (chữ O thay số 0) ⇒ TRƯỚC vá: trả TRỌN corpus NỀN dưới nhãn NQ8O.
+        # Nay fail-closed; và KHÔNG tạo thư mục cache mang tên ma — cache ma mới là thứ SỐNG SÓT sau lệnh.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ8O")
+        return _ents is None and "PROFILE_NOT_FOUND" in (_err or "") and "NQ8O" not in _dirs
+    _t110("r286_profile_ma_doc_fail_closed_khong_tao_cache", _c286_profile_ma_khong_muon_duoc_corpus_nen)
+
+    def _c286_profile_that_van_doc_duoc():
+        # PHẢN CHỨNG: profile THẬT ⇒ đọc bình thường (chốt không được chặn ca đúng).
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ80")
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN" and "NQ80" in _dirs
+    _t110("r286_profile_that_van_doc_binh_thuong", _c286_profile_that_van_doc_duoc)
+
+    def _c286_corpus_nen_van_doc_duoc():
+        # PHẢN CHỨNG: corpus NỀN (không truyền profile) không bị ảnh hưởng.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, None)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_corpus_nen_van_doc_binh_thuong", _c286_corpus_nen_van_doc_duoc)
+
+    def _c286_env_only_khong_config_van_chay():
+        # PHẢN CHỨNG §9: profile env-only (KHÔNG có file config nào) là đường HỢP LỆ —
+        # `_apply_unconfigured_profile_env` chạy, chốt phải được GỠ, không được chặn oan.
+        _ents, _err, _dirs = _run_manifest286(None, "ENVONLY", cfg_on_disk=False)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_env_only_profile_khong_bi_chan_oan", _c286_env_only_khong_config_van_chay)
+
+    def _c286_chot_duoc_go_khi_quay_ve_profile_that():
+        # Chốt là ENV ⇒ phải chứng minh nó được GỠ khi cùng-process chuyển sang profile hợp lệ; nếu không,
+        # một lần gõ sai sẽ làm hỏng mọi lệnh sau trong cùng tiến trình (vd `tl loop`).
+        _sav = {k: os.environ.get(k) for k in ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_PROFILE_ENV_OVERLAY")}
+        try:
+            os.environ["TL_PROFILE_MISSING"] = "NQ8O"
+            _TL_MODULE._apply_profile_env(_cfg286, "NQ80")
+            return os.environ.get("TL_PROFILE_MISSING") is None
+        finally:
+            for _k, _v in _sav.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+    _t110("r286_chot_duoc_go_khi_doi_sang_profile_hop_le", _c286_chot_duoc_go_khi_quay_ve_profile_that)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

@@ -1,3 +1,35 @@
+# ★ v1.36.24 — r286: profile GÕ SAI hết mượn được corpus NỀN ở đường ĐỌC (P16-F09) (2026-08-01)
+
+P16-F09 (P1 sai kết quả).
+
+**Bệnh:** v1.33.48 mới bịt đường **GHI** (profile yêu cầu tường minh mà không có trong config ⇒ scope
+RỖNG ⇒ guard hạ nguồn chặn). Đường **ĐỌC** vẫn thủng nguyên: `_apply_profile_env` vẫn đặt
+`TL_PROFILE = <tên ma>` ⇒ `_profile_cache_dir()` trỏ `CACHE/<tên ma>/`; `_load_manifest_full` gặp
+cache-miss thì gọi `manifest_export` với scope RỖNG ⇒ webapp trả **manifest NỀN** ⇒ `_atomic_write_text`
+ghi nó vào cache của profile-ma (**BỀN VỮNG — còn nguyên sau khi lệnh kết thúc**) ⇒ `exists` /
+`reg-query` / `locate` trả **corpus NỀN dưới NHÃN tên gõ sai**. Người dùng tin là đang xem hồ sơ dự án
+của mình, thực ra đang xem kho nền.
+
+**VÁ — chốt ở ĐÚNG MỘT CHỖ:** marker env `TL_PROFILE_MISSING`
+- **đặt** ở nhánh PROFILE_NOT_FOUND của `_apply_profile_env`;
+- **gỡ** ở nhánh profile hợp lệ (cùng-process đổi sang profile đúng thì phải chạy lại được — nếu không,
+  một lần gõ sai làm hỏng mọi lệnh sau trong cùng tiến trình, vd `tl loop`);
+- **gỡ** ở `_apply_unconfigured_profile_env` — profile env-only KHÔNG có file config là đường **HỢP LỆ**
+  theo §9, không được chặn oan;
+- **chặn** ở `_load_manifest_full`, **ĐẶT TRƯỚC `mkdir`** để đến cả thư mục cache của profile-ma cũng
+  không được tạo. Vá một chỗ phủ mọi lệnh đọc — mọi đường resolve theo số hiệu đều đi qua
+  `_manifest_entries` → hàm này;
+- thêm `TL_PROFILE_MISSING` vào `_PROFILE_ENV_OVERLAY_KEYS` để `_ProfileEnvGuard` và
+  `_base_manifest_entries` snapshot-restore đúng (đọc NỀN có chủ đích từ trong profile dự án vẫn chạy).
+
+**Kiểm (+5 case HÀNH VI qua `apply_profile_offline` + `_manifest_entries` THẬT; selftest 1497/1497 —
+xanh cả chế độ thường lẫn hermetic):** phản chứng đo trên bản CHƯA VÁ — **2/5 ĐỎ** (ca lõi profile-ma và
+ca gỡ-chốt); 3 case còn lại xanh **đúng thiết kế** vì là cặp «KHÔNG ĐƯỢC ĐỔI»: profile THẬT vẫn đọc ·
+corpus NỀN vẫn đọc · profile env-only §9 không bị chặn oan. Ca lõi kiểm THÊM: **thư mục cache mang tên
+ma KHÔNG được tạo** — cache-ma mới là thứ sống sót sau khi lệnh kết thúc.
+
+★Khung test đã dời `HERE` theo bài học r284 (không thì lại là test phụ thuộc máy).
+
 # ★ v1.36.23 — r285: bịt RÒ RỈ MONKEYPATCH trong selftest — khối r87 làm mọi test sau nó chạy trên bản GIẢ (P16-T02) — TEST-ONLY (2026-07-31)
 
 **Bệnh (P0 của bộ test, đo trực tiếp chứ không suy):** khối test `r87` khai

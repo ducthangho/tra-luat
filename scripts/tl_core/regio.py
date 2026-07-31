@@ -864,6 +864,17 @@ def _rebuild_manifest_index(full: dict) -> None:
 
 def _load_manifest_full(refresh: bool=False) -> dict:
     """Đọc manifest đầy đủ có entries. Ưu tiên cache do `tl boot`; nếu chưa có thì tải qua webapp."""
+    # r286 (P16-F09): CHỐT DUY NHẤT cho đường ĐỌC khi profile được yêu cầu tường minh mà KHÔNG có trong
+    # config. Không chặn ở đây thì: cache-miss → `manifest_export` với scope RỖNG → GAS trả manifest NỀN →
+    # `_atomic_write_text` ghi nó vào `CACHE/<tên ma>/manifest.json` (BỀN VỮNG, còn nguyên sau khi lệnh kết
+    # thúc) → `exists`/`reg-query`/`locate` trả corpus NỀN dưới NHÃN tên gõ sai. Đặt TRƯỚC `mkdir` để đến cả
+    # thư mục cache của profile-ma cũng không được tạo. Vá MỘT chỗ phủ mọi lệnh đọc (mọi đường resolve theo
+    # số hiệu đều đi qua `_manifest_entries` → hàm này). v1.33.48 mới chỉ bịt đường GHI.
+    _pmiss = (os.environ.get("TL_PROFILE_MISSING") or "").strip()
+    if _pmiss:
+        return {"ok": False, "error": (f"PROFILE_NOT_FOUND: '{_pmiss}' không có trong config.profiles — TỪ CHỐI "
+                                       f"đọc manifest (không mượn corpus NỀN dưới nhãn profile này). Kiểm chính "
+                                       f"tả, `tl profile-list`, hoặc thêm block profiles vào config.")}
     _profile_cache_dir().mkdir(parents=True, exist_ok=True)
     p = _cache_file("manifest.json")
     if p.exists() and not refresh:

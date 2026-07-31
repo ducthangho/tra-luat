@@ -128,6 +128,11 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     # LOUD → guard hạ nguồn tự chặn (NO_NOTEBOOK_ID, PROFILE_CATEGORIES_OWN_REQUIRED, registry-id-empty blocker).
     if _hit is None and name0 != DEFAULT_PROFILE:
         prof = {}
+        # r286 (P16-F09): v1.33.48 mới bịt đường GHI (scope rỗng ⇒ guard hạ nguồn chặn). Đường ĐỌC vẫn
+        # thủng: `_load_manifest_full` gặp cache-miss sẽ gọi `manifest_export` với scope RỖNG ⇒ GAS trả
+        # manifest NỀN ⇒ ghi vào `CACHE/<tên ma>/` (BỀN VỮNG) và `exists`/`reg-query` trả corpus nền dưới
+        # NHÃN của tên gõ sai. Marker này là chốt chặn ở ĐÚNG MỘT CHỖ (`_load_manifest_full`) phủ mọi lệnh đọc.
+        os.environ["TL_PROFILE_MISSING"] = str(name0)
         print(f"[tl] ⚠ PROFILE_NOT_FOUND: '{name0}' không có trong config.profiles ({', '.join(sorted(profiles)) or '∅'}) "
               f"— KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm "
               f"block profiles vào config (xem SKILL.md corpus_profile).", file=sys.stderr)
@@ -135,6 +140,7 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
         # An empty dict is a valid, explicitly configured profile. Truthiness here
         # used to fall back to vbqppl and could redirect writes into the base corpus.
         prof = _hit if _hit is not None else (profiles.get(DEFAULT_PROFILE) or {})
+        os.environ.pop("TL_PROFILE_MISSING", None)   # r286: profile HỢP LỆ ⇒ gỡ chốt (kể cả khi trước đó có)
     os.environ["TL_PROFILE"] = name
     mapping = {
         "rootFolderId": "TL_ROOT_FOLDER_ID",
@@ -290,6 +296,9 @@ def _apply_unconfigured_profile_env(profile: str | None) -> None:
     name = str(profile or "").strip()
     if not name:
         return
+    # r286 (P16-F09): đây là đường HỢP LỆ theo §9 — profile env-only, KHÔNG có file config nào để tra.
+    # Phải GỠ chốt PROFILE_NOT_FOUND (nếu lượt trước đặt), nếu không lệnh đọc bị chặn oan.
+    os.environ.pop("TL_PROFILE_MISSING", None)
     previous = os.environ.get("TL_PROFILE", "")
     if previous and previous != name:
         for key in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_REGISTRY_DOC_ID",

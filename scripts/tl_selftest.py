@@ -11294,6 +11294,15 @@ def run() -> int:
             def post(self, action, **kw):
                 if action == "reg_delete":
                     _calls282["reg_delete"] += 1
+                    # r289: fake này TRƯỚC ĐÂY trả `{"ok": True}` TRẦN — thiếu `removed`/`not_found`/
+                    # `skipped_live` mà API_CONTRACT §reg_delete khai là LUÔN có. Readback client của
+                    # PRO-01 đọc đúng ba trường đó, nên fake phải khớp HỢP ĐỒNG THẬT; giữ `{"ok": True}`
+                    # trần là bắt bản vá phải tin một `ok` trần — tức đúng cái bệnh đang chữa.
+                    try:
+                        _n = len(json.loads(kw.get("drive_ids") or "[]"))
+                    except Exception:  # noqa: BLE001
+                        _n = 0
+                    return {"ok": True, "requested": _n, "removed": _n, "not_found": 0, "skipped_live": 0}
                 return {"ok": True}
 
         class _NC282:
@@ -24635,22 +24644,144 @@ def run() -> int:
         return bool(_da_chan and van_biet and ke and khong_chan_oan and bo_qua)
     _t110("r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi", _c288_chan_mutation_phia_sau_va_ke_da_ghi)
 
-    def _c288_helper1_chua_gan_vao_lenh_nao():
-        # Acceptance §6.1: commit Pha 1-0 dựng helper + test, CHƯA gắn vào lệnh nào. Ca này khoá đúng câu
-        # đó — nếu ai gộp việc gắn vào cùng commit thì nó ĐỎ, buộc tách ra (và khi slice T2 gắn thật thì
-        # đây là chỗ ĐẦU TIÊN phải sửa, có chủ đích, không lọt im lặng).
+    # DANH SÁCH GẮN Helper 1 — cập nhật CÓ CHỦ ĐÍCH mỗi khi một slice gắn helper vào một module.
+    # r288 mở ca này với danh sách RỖNG (acceptance §6.1: "chưa gắn vào lệnh nào"). r289 (PRO-01) thêm
+    # `ops_misc.py`. Slice sau (ING-03 → `ingest_ops.py`) phải tự thêm tên mình ở đây — nghĩa là việc gắn
+    # helper vào một đường GHI mới không bao giờ lọt qua review im lặng.
+    _HELPER1_DA_GAN = {"ops_misc.py"}          # r289 PRO-01
+
+    def _c288_helper1_chi_gan_o_noi_da_khai():
         import pathlib as _pl288
-        _root = _TL_MODULE.HERE
-        _dung = {"txn.py"}                       # chính module helper
         _hits = []
-        for _p in sorted(_pl288.Path(_root / "tl_core").glob("*.py")):
-            if _p.name in _dung:
+        for _p in sorted(_pl288.Path(_TL_MODULE.HERE / "tl_core").glob("*.py")):
+            if _p.name == "txn.py":            # chính module helper
                 continue
             _t = _p.read_text(encoding="utf-8", errors="replace")
             if "Txn(" in _t or "TxnBlocked" in _t or "step_result_ok(" in _t:
                 _hits.append(_p.name)
-        return _hits == []
-    _t110("r288_helper1_chua_gan_vao_lenh_nao", _c288_helper1_chua_gan_vao_lenh_nao)
+        return set(_hits) == _HELPER1_DA_GAN
+    _t110("r288_helper1_chi_gan_o_noi_da_khai", _c288_helper1_chi_gan_o_noi_da_khai)
+
+    # ═══ r289 (v1.36.27) — PRO-01: `profile-file-remove` fail-closed (Slice P0, ưu tiên #2 sổ audit) ═══
+    # TRƯỚC: kết quả `nlm source_delete` / `drive trash` chỉ được ghi NHẬT KÝ, không kiểm; `reg_delete`
+    # chạy VÔ ĐIỀU KIỆN; `out = {**plan, "ok": True, ...}` GÁN CỨNG rồi `return 0`. Mọi bước con hỏng vẫn
+    # rc=0 mà con trỏ registry ĐÃ BỊ THÁO ⇒ tài sản MỒ CÔI và không ai đi tìm (vì rc=0).
+
+    def _run289(*, delete_nlm=False, trash_drive=False, keep_registry=False,
+                nlm_ok=True, trash_ok=True, reg_resp=None, ids=("d1",)):
+        """Chạy `cmd_profile_file_remove` --apply --confirm yes trên GAS/NLM GIẢ. Trả (rc, payload, calls)."""
+        _calls = []
+        _reg_default = {"ok": True, "removed": len(ids), "not_found": 0, "skipped_live": 0}
+
+        class _FkG289:
+            def get(self, action, **kw):
+                _calls.append(("get", action, kw))
+                return {"ok": True} if trash_ok else {"ok": False, "error": "DRIVE_403"}
+
+            def post(self, action, **kw):
+                _calls.append(("post", action, kw))
+                return _reg_default if reg_resp is None else reg_resp
+
+        class _FkNc289:
+            def source_delete(self, sid):
+                _calls.append(("nlm", "source_delete", {"sid": sid}))
+                return {"ok": True} if nlm_ok else {"ok": False, "error": "NLM_403"}
+
+        _real = _resolve286(_TL_MODULE.cmd_profile_file_remove)
+        _g = _real.__globals__
+        _names = ("apply_profile_offline", "_profile_policy_error", "_profile_manifest_entries_for",
+                  "_profile_live_source_ids", "_profile_deletable_sources", "load_creds", "_gas", "_imp",
+                  "_apply_journal_start", "_journal_append")
+        _sav = {k: _g.get(k) for k in _names}
+        _ents = [{"drive_id": i, "nlm_source_id": "s_" + i, "name": "N_" + i} for i in ids]
+        try:
+            _g["apply_profile_offline"] = lambda *a, **k: None
+            _g["_profile_policy_error"] = lambda **k: None
+            _g["_profile_manifest_entries_for"] = lambda *a, **k: (_ents, None)
+            _g["_profile_live_source_ids"] = lambda m: ["s_" + _e["drive_id"] for _e in m]
+            _g["_profile_deletable_sources"] = lambda e, s: (list(s), [])
+            _g["load_creds"] = lambda *a, **k: None
+            _g["_gas"] = lambda: _FkG289()
+            _g["_imp"] = lambda n: _FkNc289()
+            _g["_apply_journal_start"] = lambda *a, **k: "run289"
+            _g["_journal_append"] = lambda *a, **k: None
+            _b, _e2 = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e2):
+                _rc = _real(argparse.Namespace(
+                    config=None, profile=None, target_profile="P", refresh=False, drive_ids=list(ids),
+                    delete_nlm=delete_nlm, trash_drive=trash_drive, keep_registry=keep_registry,
+                    apply=True, confirm="yes", json=True))
+            _txt = (_b.getvalue() or "") + (_e2.getvalue() or "")
+            try:
+                _pay = json.loads(_txt)
+            except Exception:  # noqa: BLE001
+                _pay = {"_khong_parse_duoc": _txt[:400]}
+            return _rc, _pay, _calls
+        finally:
+            for _k, _v in _sav.items():
+                _g[_k] = _v
+
+    def _da_goi_reg_delete(calls):
+        return any(c[0] == "post" and c[1] == "reg_delete" for c in calls)
+
+    def _c289_duong_xanh_van_chay_du():
+        # PHẢN CHỨNG NỀN: cổng mới không được chặn oan đường hợp lệ. Cả 3 cờ bật, mọi bước dương ⇒
+        # rc=0, gọi đủ nlm+trash+reg_delete, và bản kê `wrote` liệt ĐÚNG 3 thứ đã ghi.
+        _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True)
+        _w = [x["step"] for x in _p.get("txn", {}).get("wrote", [])]
+        return (_rc == 0 and _p.get("ok") is True and _da_goi_reg_delete(_c)
+                and _w == ["nlm_source_delete:s_d1", "drive_trash:d1", "reg_delete"]
+                and _p["txn"]["uncertain"] == [] and _p["txn"]["failed_step"] is None)
+    _t110("r289_pfr_duong_xanh_van_chay_du", _c289_duong_xanh_van_chay_du)
+
+    def _c289_ma_tran_buoc_con_hong_khong_thao_registry():
+        # LÕI CỦA MỤC: ma trận `--delete-nlm` × `--trash-drive` × `--keep-registry`, mỗi ô có ca BƯỚC CON
+        # HỎNG ⇒ đòi rc≠0 VÀ registry CÒN NGUYÊN (không gọi `reg_delete` lần nào).
+        _oks = []
+        for _kr in (False, True):
+            # (a) NLM hỏng — trash bật hay tắt cũng phải chặn tới registry
+            for _tr in (False, True):
+                _rc, _p, _c = _run289(delete_nlm=True, trash_drive=_tr, keep_registry=_kr, nlm_ok=False)
+                _oks.append(_rc != 0 and _p.get("ok") is False and not _da_goi_reg_delete(_c))
+                if _tr:      # bước NLM hỏng ⇒ trash phía sau cũng bị CHẶN, không tạo thêm rác phải dọn
+                    _oks.append(not any(c[0] == "get" and c[1] == "trash" for c in _c)
+                                and _p.get("blocked", {}).get("blocking_step") == "nlm_source_delete:s_d1")
+            # (b) trash hỏng (NLM tắt) ⇒ vẫn phải chặn tới registry
+            _rc, _p, _c = _run289(trash_drive=True, keep_registry=_kr, trash_ok=False)
+            _oks.append(_rc != 0 and _p.get("ok") is False and not _da_goi_reg_delete(_c))
+        # (c) mọi bước con dương nhưng CHÍNH `reg_delete` hỏng ⇒ rc≠0 (trước đây `ok:True` gán cứng nuốt sạch)
+        _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True, reg_resp={"ok": False, "error": "GAS_500"})
+        _oks.append(_rc != 0 and _p.get("ok") is False and _p["txn"]["failed_step"] == "reg_delete")
+        return all(_oks)
+    _t110("r289_pfr_ma_tran_buoc_con_hong_khong_thao_registry", _c289_ma_tran_buoc_con_hong_khong_thao_registry)
+
+    def _c289_reg_delete_readback_khong_tin_ok_tran():
+        # `require_removed='no'` PHẢI giữ (lệnh này không hề ghi `nlm_status`; bật 'yes' là biến lệnh thành
+        # vô tác dụng — đổi fail-open lấy fail-silent). Chốt chuyển sang READBACK phía client: `ok=true`
+        # của response CHƯA phải bằng chứng dòng đã gỡ.
+        _rc0, _p0, _c0 = _run289()
+        _giu_co = any(c[0] == "post" and c[2].get("require_removed") == "no" for c in _c0)
+        # (1) ok=true nhưng server BỎ QUA dòng live ⇒ PHẢI đỏ
+        _rc1, _p1, _ = _run289(reg_resp={"ok": True, "removed": 0, "not_found": 0, "skipped_live": 1})
+        # (2) ok=true nhưng removed+not_found KHÔNG phủ hết requested ⇒ PHẢI đỏ
+        _rc2, _p2, _ = _run289(ids=("d1", "d2"),
+                               reg_resp={"ok": True, "removed": 1, "not_found": 0, "skipped_live": 0})
+        # (3) chạy lại sau lượt thành công một phần: dòng đã biến mất ⇒ `not_found` phủ nốt ⇒ KHÔNG đỏ oan
+        _rc3, _p3, _ = _run289(ids=("d1", "d2"),
+                               reg_resp={"ok": True, "removed": 1, "not_found": 1, "skipped_live": 0})
+        return (_rc0 == 0 and _giu_co
+                and _rc1 != 0 and "SKIPPED_LIVE" in str(_p1["txn"]["failed_error"])
+                and _rc2 != 0 and "KHONG_PHU_HET" in str(_p2["txn"]["failed_error"])
+                and _rc3 == 0 and _p3.get("ok") is True)
+    _t110("r289_pfr_reg_delete_readback_khong_tin_ok_tran", _c289_reg_delete_readback_khong_tin_ok_tran)
+
+    def _c289_khong_thao_tac_nao_khong_con_bao_xanh():
+        # `--keep-registry` mà không `--delete-nlm`/`--trash-drive` = lệnh KHÔNG LÀM GÌ. Trước đây in
+        # `ok:true, rc=0`. `ok` được TÍNH thì câu trả lời đúng là: chưa có gì được chứng minh.
+        _rc, _p, _c = _run289(keep_registry=True)
+        return (_rc != 0 and _p.get("ok") is False and _c == []
+                and _p["txn"]["failed_error"] == "KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU")
+    _t110("r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh", _c289_khong_thao_tac_nao_khong_con_bao_xanh)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

@@ -1,3 +1,70 @@
+# ★ v1.36.27 — r289/PRO-01: `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau khi bước xoá đã hỏng (2026-07-31)
+
+Slice **P0** (§6.1-(b) + Pha 1C-tách-ra), **ưu tiên #2 toàn sổ audit** — chỉ sau GATE-03. Mục T2 thứ nhất.
+Dùng **Helper 1** (`tl_core/txn.py`, r288) — DÙNG, không SỬA.
+
+**Bệnh (`ops_misc.py`, fail-open PHÁ HUỶ).** Kết quả `nlm source_delete` và `drive trash` chỉ được ghi
+**nhật ký**, không kiểm; `reg_delete` chạy **vô điều kiện**; rồi `out = {**plan, "ok": True, ...}`
+**GÁN CỨNG** + `return 0`. Hệ quả: mọi bước con hỏng vẫn `rc=0`, mà **con trỏ registry ĐÃ BỊ THÁO** —
+file Drive/nguồn NLM còn nguyên nhưng không còn dòng nào tra ra chúng. **Tài sản mồ côi, và vì `rc=0`
+nên không ai đi tìm.**
+
+**Vá.**
+- Từng bước đi qua `Txn.record(...)` — kết quả được **KIỂM**, không chỉ ghi nhật ký. Transport nổ
+  (`raise`) nay là bước **HỎNG**, không phải bước vắng mặt.
+- `Txn.guard()` **CHẶN** trước mỗi mutation kế tiếp: bước NLM hỏng ⇒ **không trash tiếp** (mỗi mutation
+  thừa là một thứ nữa phải dọn tay) và **không đụng `reg_delete`** ⇒ registry **CÒN NGUYÊN** ⇒ vẫn còn
+  đường tra ra tài sản.
+- `ok` được **TÍNH** (`Txn.conclude`), `rc` **dẫn xuất** (`Txn.rc`). Không còn `"ok": True` gán cứng.
+- Output kê `txn.wrote` (**đã ghi được gì rồi**) và `txn.uncertain` (mutation ÂM — chưa chứng minh được
+  đã ghi hay chưa). Hai việc dọn khác nhau nên để hai bảng khác nhau.
+- Hỏng ⇒ payload in ra **stderr** (khuôn sẵn có của chính lệnh này ở nhánh `NO_MATCHING_PROFILE_ROWS`).
+
+**`require_removed="no"` — ĐÃ XÉT LẠI, kết luận GIỮ NGUYÊN, có bằng chứng.** Kế hoạch ngờ cờ này "tự tắt
+readback". Đo lại: `require_removed='yes'` chỉ xoá dòng có `nlm_status` bắt đầu `removed*`
+(API_CONTRACT §`reg_delete`), mà **`profile-file-remove` không hề ghi `nlm_status` ở bất kỳ đường nào** ⇒
+bật `'yes'` sẽ đẩy gần như mọi dòng vào `skipped_live` và làm lệnh **vô tác dụng** — đổi một lỗi
+fail-open lấy một lỗi **fail-silent**. `'no'` giữ nguyên là hard-delete CÓ CHỦ ĐÍCH sau
+`--apply --confirm yes` (cùng lý lẽ đã ghi ở `source_ops.py:954`).
+
+Readback chuyển sang **phía client** (`_pfr_reg_delete_verdict`), vì `ok=true` của response **chưa phải**
+bằng chứng dòng đã gỡ: `skipped_live>0` vẫn đi kèm `ok=true` được. Luật: response dương **và**
+`skipped_live == 0` **và** `removed + not_found ≥ requested` (`not_found` được chấp nhận — chạy lại sau
+một lượt thành công một phần thì dòng đã biến mất, không phải lỗi mới).
+
+**Đổi hành vi có chủ đích:** `--keep-registry` mà không `--delete-nlm`/`--trash-drive` = lệnh **không làm
+gì**. Trước đây in `ok:true, rc=0`. `ok` được TÍNH thì câu trả lời đúng là *chưa có gì được chứng minh* ⇒
+`rc=2`, `error=KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU`.
+
+**Test (+4 ca → 1506/1506).**
+- `r289_pfr_duong_xanh_van_chay_du` — PHẢN CHỨNG NỀN: 3 cờ bật, mọi bước dương ⇒ `rc=0`, gọi đủ
+  nlm+trash+reg_delete, `txn.wrote` liệt **đúng 3** thứ đã ghi. Cổng không chặn oan đường hợp lệ.
+- `r289_pfr_ma_tran_buoc_con_hong_khong_thao_registry` — **ma trận** `--delete-nlm` × `--trash-drive` ×
+  `--keep-registry`, mỗi ô một ca bước-con-hỏng ⇒ `rc≠0` **và registry còn nguyên** (`reg_delete` không
+  được gọi lần nào); NLM hỏng ⇒ trash phía sau cũng bị chặn, `blocked.blocking_step` chỉ đúng thủ phạm.
+- `r289_pfr_reg_delete_readback_khong_tin_ok_tran` — `ok:true + skipped_live=1` ⇒ đỏ; `ok:true` mà
+  `removed+not_found` không phủ hết ⇒ đỏ; `not_found` phủ nốt ⇒ **không đỏ oan**. Kèm khẳng định
+  `require_removed='no'` vẫn được gửi.
+- `r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh`.
+
+**ĐỎ-TRƯỚC (đo thật):** dán lại nguyên thân hàm bản trước r289 (giữ test) ⇒ `1502/1506`, ĐỎ **đúng bốn**
+ca r289; 5 ca `r282` vẫn xanh.
+
+**Sửa kèm — fake `_G282.post` của r282 trả `{"ok": True}` TRẦN.** API_CONTRACT §`reg_delete` khai
+`removed`/`not_found`/`skipped_live` là **luôn có**; fake thiếu chúng thì readback mới buộc phải tin một
+`ok` trần — **đúng cái bệnh đang chữa**. Nay fake trả đúng hợp đồng thật. 5 ca r282 xanh trước lẫn sau.
+
+**Cập nhật danh sách gắn Helper 1:** `r288_helper1_chua_gan_vao_lenh_nao` → `r288_helper1_chi_gan_o_noi_da_khai`
+với allow-list `{"ops_misc.py"}`. Slice sau (ING-03 → `ingest_ops.py`) **phải tự thêm tên mình** — việc gắn
+helper vào một đường GHI mới không bao giờ lọt review im lặng.
+
+**Bẫy I11 đã va:** `_pfr_count`/`_pfr_reg_delete_verdict` là symbol MỚI trong `tl_core` ⇒ **phải** vào
+`_STUB_MAP["ops_misc"]`, nếu không thì `NameError` lúc chạy và `r90_rebase_module_names_resolvable` đỏ.
+
+**ruff 0.15.8:** `tl.py` 12 F821 / 0 F401 (đúng nền). `ops_misc.py` 403 vs 399 ở HEAD trước (+4 = tên
+re-home của khối mới), cùng lớp BY DESIGN. F401 không đổi. Full gate **8/8 PASS**,
+`git diff -- references/golden/` **rỗng**.
+
 # ★ v1.36.26 — r288/Pha 1-0: Helper 1 — HỢP ĐỒNG kết luận giao dịch (`tl_core/txn.py`), CHƯA gắn vào lệnh nào (2026-07-31)
 
 Pha 1-0 (§5 Mẫu A + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Một commit riêng, không kèm mục lỗi nào** —

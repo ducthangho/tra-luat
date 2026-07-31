@@ -11126,6 +11126,7 @@ def run() -> int:
                     "HOME", "USERPROFILE")
         _sav281 = {k: os.environ.get(k) for k in _keys281}
         _cwd281 = os.getcwd()
+        _here281 = _TL_MODULE.HERE
         _noted281 = getattr(_TL_MODULE._apply_profile_env, "_default_profile_noted", False)
         with _tf281.TemporaryDirectory() as _d:
             try:
@@ -11134,6 +11135,11 @@ def run() -> int:
                 os.environ["HOME"] = _d
                 os.environ["USERPROFILE"] = _d
                 os.chdir(_d)                    # _config_candidates quét cả cwd — cô lập luôn
+                # r284: và quét cả `HERE.parent`/`HERE` — trên máy CÓ `tra_luat_config.v2.json` cạnh skill
+                # (đúng máy chuẩn `D:\Quốc hội\tra-luat`) thì ứng viên ĐÓ thắng config trong HOME giả ⇒ test
+                # đọc phải config THẬT và ĐỎ. Không dời HERE thì đây là test PHỤ THUỘC MÁY (r281 xanh trong
+                # worktree không có file đó, đỏ trên cây canonical — bắt được lúc user chạy deploy 31-07).
+                _TL_MODULE.HERE = Path(_d) / "scripts"
                 _TL_MODULE._apply_profile_env._default_profile_noted = False   # dòng nhắc in 1 lần/process
                 if cfg_on_disk:
                     with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
@@ -11149,12 +11155,42 @@ def run() -> int:
                 return (os.environ.get("TL_PROFILE"), os.environ.get("TL_REGISTRY_DOC_ID"), _be.getvalue())
             finally:
                 os.chdir(_cwd281)
+                _TL_MODULE.HERE = _here281
                 _TL_MODULE._apply_profile_env._default_profile_noted = _noted281
                 for _k, _v in _sav281.items():
                     if _v is None:
                         os.environ.pop(_k, None)
                     else:
                         os.environ[_k] = _v
+
+    def _c284_khung_test_khong_doc_config_that():
+        # r284 CHỐT CHẶN TÁI PHÁT (ca thật 31-07: user chạy deploy trên cây canonical, selftest 1483/1490 —
+        # 7 case r281/r283 ĐỎ vì `tra_luat_config.v2.json` nằm CẠNH skill, mà `_config_candidates` xếp
+        # `HERE.parent` TRƯỚC `~/.tra_luat_config.json`; worktree không có tệp đó nên xanh GIẢ).
+        # Chốt: bên trong khung cô lập, MỌI ứng viên config phải nằm trong tempdir — không được có đường
+        # nào trỏ ra kho thật. `/tmp/...` là hằng cuối của hàm, không tồn tại trên máy Windows, bỏ qua.
+        import tempfile as _tf284g
+        _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
+        _here = _TL_MODULE.HERE
+        _cwd = os.getcwd()
+        with _tf284g.TemporaryDirectory() as _d:
+            try:
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                _TL_MODULE.HERE = Path(_d) / "scripts"
+                _cands = [c for c in _TL_MODULE._config_candidates(None) if not c.startswith("/tmp/")]
+                _real = Path(_d).resolve()
+                return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+            finally:
+                os.chdir(_cwd)
+                _TL_MODULE.HERE = _here
+                for _k, _v in _sav.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+    _t110("r284_khung_test_profile_khong_doc_config_that", _c284_khung_test_khong_doc_config_that)
 
     _cfg281 = {"webappUrl": "https://cfg", "token": "CFGTOK", "defaultProfile": "ATVSLD",
                "profiles": {"vbqppl": {"rootFolderId": "R_BASE", "registryDocId": "REG_NEN"},
@@ -11316,7 +11352,7 @@ def run() -> int:
                     "TL_META_FOLDER_ID", "TL_OVERFLOW_NOTEBOOK_ID", "TL_PROFILE_ENV_OVERLAY",
                     "TL_WEBAPP", "TL_TOKEN", "HOME", "USERPROFILE")
         _sav283 = {k: os.environ.get(k) for k in _keys283}
-        _savfn283 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "load_creds", "CACHE")}
+        _savfn283 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "load_creds", "CACHE", "HERE")}
         _cwd283 = os.getcwd()
 
         class _G283:
@@ -11336,6 +11372,7 @@ def run() -> int:
                 if cfg_obj is not None:
                     with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
                         json.dump(cfg_obj, _f, ensure_ascii=False)
+                _TL_MODULE.HERE = Path(_d) / "scripts"   # r284: cô lập cả ứng viên config CẠNH SKILL
                 _cache283 = Path(_d) / ".tra_luat_cache"
                 _TL_MODULE.CACHE = _cache283
                 _TL_MODULE._gas = lambda: _G283()

@@ -1,3 +1,28 @@
+# ★ v1.36.22 — r284: sửa test PHỤ THUỘC MÁY của r281/r283 (khung cô lập bỏ sót `HERE`) — TEST-ONLY (2026-07-31)
+
+**Ca thật, bắt lúc người giữ chạy `deploy-package.cmd` trên cây canonical (31-07):** gate DỪNG ở bước 1 —
+`selftest 1483/1490`, 7 case ĐỎ (6 của r281 + 1 của r283). Cùng commit `b1a86c8` chạy trong worktree
+`C:\qh\p16_wt` lại `1490/1490`. **Code sản xuất KHÔNG sai — bộ TEST của r281/r283 sai.**
+
+**Bệnh:** `_config_candidates` xếp ứng viên theo thứ tự `cwd` → **`HERE.parent`** → `HERE` →
+`~/.tra_luat_config.json`. Khung cô lập của r281/r283 chỉ dời `HOME`/`USERPROFILE`/`cwd`, **không dời
+`HERE`** — nên trên máy có `tra_luat_config.v2.json` nằm CẠNH skill (đúng máy chuẩn `D:\Quốc hội\tra-luat`,
+tệp này `.gitignore` nên không theo repo) thì ứng viên ĐÓ **thắng** config trong HOME giả: test đọc phải
+config THẬT của người dùng và đỏ. Worktree không có tệp đó ⇒ **xanh GIẢ**. Đây đúng lớp bug máy-phụ-thuộc
+mà GOTCHAS §4 đã ghi, chỉ khác chiều: lần này local-sạch xanh giả, máy-có-config mới đỏ.
+
+**Vá (chỉ `tl_selftest.py`):** hai khung `_run_loadcreds281` / `_run_snap283` dời luôn `_TL_MODULE.HERE`
+sang `<tempdir>/scripts` (khôi phục trong `finally`) ⇒ toàn bộ dãy ứng viên nằm trong tempdir.
+
+**CHỐT CHẶN TÁI PHÁT** — case mới `r284_khung_test_profile_khong_doc_config_that`: bên trong khung cô lập,
+**mọi** ứng viên do `_config_candidates(None)` trả về phải nằm trong tempdir (`/tmp/...` là hằng cuối hàm,
+không tồn tại trên Windows, được loại). Khung nào quên dời `HERE` sẽ đỏ ngay tại đây thay vì đỏ ở máy người khác.
+
+**Phản chứng (tái hiện ĐÚNG điều kiện cây canonical trong worktree bằng `tra_luat_config.v2.json` GIẢ —
+giá trị mồi, không có bí mật, tệp `.gitignore`):** trước vá **1483/1490 với ĐÚNG 7 case đỏ y hệt cây
+canonical**; sau vá **1490/1490** cùng điều kiện; bỏ tệp mồi đi vẫn **1491/1491**. Không đụng một dòng
+code sản xuất nào.
+
 # ★ v1.36.21 — r283: `cache-snapshot` — cổng treeHash FAIL-CLOSED + không ghi được `{}` đè index + đúng cache của profile (P16-F06 + P16-F14) (2026-07-31)
 
 P16-F06 (P0 mất dữ liệu) + P16-F14 (P1 sai kết quả) — **ba lỗ cùng nằm trong `cmd_cache_snapshot`**, cộng

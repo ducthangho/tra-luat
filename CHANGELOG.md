@@ -1,3 +1,30 @@
+# ★ v1.36.21 — r283: `cache-snapshot` — cổng treeHash FAIL-CLOSED + không ghi được `{}` đè index + đúng cache của profile (P16-F06 + P16-F14) (2026-07-31)
+
+P16-F06 (P0 mất dữ liệu) + P16-F14 (P1 sai kết quả) — **ba lỗ cùng nằm trong `cmd_cache_snapshot`**, cộng
+lại thành: một snapshot RÁC xoá trắng `manifest_index.json` (~3,4MB) của corpus NỀN và **báo THÀNH CÔNG**.
+
+**(a) F14 — `idxp` tính TRƯỚC khi áp profile.** `cache-snapshot` nằm trong `_CREDS_LAZY_CMDS` nên `main()`
+KHÔNG nạp creds/profile hộ; `load_creds` cũ chỉ chạy ở nhánh import KHÔNG-`--force` — tức SAU khi `idxp`
+đã chốt — và với `--force` thì không chạy lần nào; nhánh **export không áp profile lần nào cả**. Đứng ở
+profile dự án mà đọc/ghi index của NỀN. **Vá:** `apply_profile_offline` ở ĐẦU hàm, trước mọi phép tính
+đường dẫn (`_cache_file` đi qua `_profile_cache_dir()`).
+
+**(b) F06 — cổng treeHash FAIL-OPEN.** `if cur_th and snap_th and cur_th != snap_th` — thiếu BẤT KỲ vế nào
+(snapshot không có `treeHash`, hoặc `manifest_export` không trả/nổ) là cổng **im lặng cho qua**. **Vá:**
+FAIL-CLOSED cả hai chiều — thiếu treeHash ở bất kỳ đầu nào ⇒ `TREEHASH_KHONG_DOI_CHIEU_DUOC` rc=1; lời gọi
+`manifest_export` nổ cũng tính là «không đối chiếu được» (trước: exception lọt ra ngoài / cổng bỏ qua).
+
+**(c) F06 lõi mất dữ liệu — `sd.get("index") or {}`.** Snapshot thiếu/rỗng `index` ⇒ GHI `{}` ĐÈ file index
+rồi in `ok:true, gated:true`. **Vá:** kiểm NGUỒN trước — `index` phải là dict KHÔNG RỖNG, không thì
+`SNAPSHOT_INDEX_EMPTY` rc=2 và **KHÔNG đụng đích**. Cổng này `--force` **KHÔNG bỏ qua được**: `--force` nghĩa
+là «tôi chấp nhận snapshot CŨ», không phải «cho phép xoá index». Cả hai đường ghi (import + export `--out`)
+chuyển sang `_atomic_write_text`.
+
+**Kiểm (+8 case HÀNH VI qua `cmd_cache_snapshot` thật, cache dir thật trong HOME giả; selftest 1490/1490):**
+phản chứng đo trên bản CHƯA VÁ — **6/8 ĐỎ**, 2 case còn lại xanh đúng thiết kế (cặp «KHÔNG ĐƯỢC ĐỔI»:
+treeHash KHỚP thì import bình thường · treeHash LỆCH vẫn `TREEHASH_MISMATCH` rc=1 như cũ). Mọi case chặn
+đều kiểm thêm **index cũ còn NGUYÊN**; case F14 kiểm thêm **index của NỀN không bị tạo**.
+
 # ★ v1.36.20 — r282: `profile-file-remove` có cổng bất biến profile — gõ sai tên không còn xoá vào registry/notebook NỀN (P16-F04) (2026-07-31)
 
 P16-F04 (P0 mất dữ liệu).

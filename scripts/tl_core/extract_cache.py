@@ -358,7 +358,22 @@ def cmd_cache_build(a) -> int:
 
 def cmd_cache_snapshot(a) -> int:
     """WS5: export/import snapshot manifest_index để giảm ~7-8s/phiên boot. Import có CỔNG treeHash:
-    chỉ dùng nếu treeHash snapshot == treeHash manifest hiện hành (tránh cache cũ)."""
+    chỉ dùng nếu treeHash snapshot == treeHash manifest hiện hành (tránh cache cũ).
+
+    r283 (P16-F06 P0 + P16-F14 P1) — ba lỗ cùng nằm ở hàm này:
+      (a) `idxp` tính TRƯỚC khi áp profile ⇒ export/import đọc-ghi index của profile SAI (`cache-snapshot`
+          nằm trong `_CREDS_LAZY_CMDS` nên `main()` KHÔNG nạp creds/profile hộ; `load_creds` cũ chỉ chạy
+          ở nhánh import KHÔNG-`--force`, tức sau khi `idxp` đã chốt, và `--force` thì không chạy lần nào);
+      (b) cổng treeHash FAIL-OPEN: `if cur_th and snap_th and cur_th != snap_th` — thiếu BẤT KỲ vế nào
+          (snapshot không có treeHash, hoặc `manifest_export` không trả/nổ) là cổng im lặng cho qua;
+      (c) rồi `sd.get("index") or {}` GHI `{}` ĐÈ `manifest_index.json` (~3,4MB) mà vẫn in
+          `ok:true, gated:true`. Ba lỗ cộng lại: một snapshot rác xoá trắng index của corpus NỀN, báo THÀNH CÔNG.
+    """
+    # (a) áp scope TRƯỚC MỌI phép tính đường dẫn — `_cache_file` đi qua `_profile_cache_dir()`.
+    try:
+        apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    except (SystemExit, Exception):  # noqa: BLE001 — offline-first: thiếu config không được giết lệnh
+        pass
     idxp = _cache_file("manifest_index.json")
     if a.sub == "export":
         if not idxp.exists():
@@ -366,8 +381,9 @@ def cmd_cache_snapshot(a) -> int:
         outp = Path(getattr(a, "out", None) or "manifest_index.snapshot.json")
         data = json.loads(idxp.read_text(encoding="utf-8"))
         th = (data.get("_meta") or {}).get("treeHash")
-        outp.write_text(json.dumps({"treeHash": th, "profile": _active_profile(), "index": data}, ensure_ascii=False), encoding="utf-8")
-        print(json.dumps({"ok": True, "exported": str(outp), "treeHash": th,
+        _atomic_write_text(outp, json.dumps({"treeHash": th, "profile": _active_profile(), "index": data},
+                                            ensure_ascii=False))
+        print(json.dumps({"ok": True, "exported": str(outp), "treeHash": th, "profile": _active_profile(),
                           "entries": (data.get("_meta") or {}).get("entries_indexed")}, ensure_ascii=False, indent=2))
         return 0
     if a.sub == "import":
@@ -376,19 +392,40 @@ def cmd_cache_snapshot(a) -> int:
             print(f"[tl] cache-snapshot import: không thấy {snap}", file=sys.stderr); return 2
         sd = json.loads(snap.read_text(encoding="utf-8"))
         snap_th = sd.get("treeHash")
+        # (c) NGUỒN không dùng được thì KHÔNG được đụng đích. Kiểm TRƯỚC cổng treeHash, và KHÔNG cho
+        # `--force` bỏ qua: `--force` nghĩa là «tôi chấp nhận snapshot CŨ», không phải «cho phép xoá index».
+        _idx = sd.get("index")
+        if not isinstance(_idx, dict) or not _idx:
+            print(json.dumps({"ok": False, "flag": "SNAPSHOT_INDEX_EMPTY", "snapshot": str(snap),
+                              "note": "snapshot không có `index` dùng được — TỪ CHỐI ghi đè manifest_index "
+                                      "(ghi rỗng = xoá trắng index của profile). Dựng lại bằng `tl boot --refresh`."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
         if not getattr(a, "force", False):
-            # cổng treeHash: lấy treeHash manifest hiện hành (1 call nhẹ manifest_export) rồi đối chiếu
+            # (b) cổng treeHash FAIL-CLOSED: KHÔNG đối chiếu được thì TỪ CHỐI, không im lặng cho qua.
             load_creds(getattr(a, "config", None), getattr(a, "profile", None))
-            cur = _gas().get("manifest_export")
+            try:
+                cur = _gas().get("manifest_export") or {}
+            except Exception as e:  # noqa: BLE001
+                cur = {"_err": f"{type(e).__name__}: {e}"}
             cur_th = cur.get("treeHash")
-            if cur_th and snap_th and cur_th != snap_th:
+            if not snap_th or not cur_th:
+                print(json.dumps({"ok": False, "flag": "TREEHASH_KHONG_DOI_CHIEU_DUOC",
+                                  "snapshot": snap_th, "current": cur_th, "loi_manifest_export": cur.get("_err"),
+                                  "note": "thiếu treeHash ở snapshot hoặc ở manifest hiện hành ⇒ KHÔNG kết luận "
+                                          "được snapshot còn tươi. Từ chối import (fail-closed). `tl boot --refresh` "
+                                          "để dựng lại index, hoặc --force nếu CHẮC CHẮN snapshot đúng corpus này."},
+                                 ensure_ascii=False, indent=2), file=sys.stderr)
+                return 1
+            if cur_th != snap_th:
                 print(json.dumps({"ok": False, "flag": "TREEHASH_MISMATCH", "snapshot": snap_th, "current": cur_th,
                                   "note": "snapshot CŨ so với corpus hiện tại — bỏ qua. Dùng --force nếu chắc chắn, hoặc `tl boot --refresh`."},
                                  ensure_ascii=False, indent=2), file=sys.stderr)
                 return 1
         idxp.parent.mkdir(parents=True, exist_ok=True)
-        idxp.write_text(json.dumps(sd.get("index") or {}, ensure_ascii=False), encoding="utf-8")
-        print(json.dumps({"ok": True, "imported_to": str(idxp), "treeHash": snap_th, "gated": not getattr(a, "force", False)},
+        _atomic_write_text(idxp, json.dumps(_idx, ensure_ascii=False))
+        print(json.dumps({"ok": True, "imported_to": str(idxp), "treeHash": snap_th, "profile": _active_profile(),
+                          "gated": not getattr(a, "force", False)},
                          ensure_ascii=False, indent=2))
         return 0
     print("[tl] cache-snapshot cần: export | import", file=sys.stderr); return 2

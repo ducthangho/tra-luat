@@ -11306,6 +11306,152 @@ def run() -> int:
         return _rc == 2 and _c["manifest_read"] == 0
     _t110("r282_file_remove_dry_cung_chan_profile_ma", _c282_dry_cung_khong_doc_manifest_khi_ma)
 
+    def _run_snap283(sub, snap_obj=None, cur_export=None, force=False, profile=None,
+                     index_truoc=None, cfg_obj=None):
+        """r283 HÀNH VI qua `cmd_cache_snapshot` THẬT trên CACHE dir thật (HOME giả).
+        Trả (rc, out+err, nội-dung-manifest_index-SAU, đường-cache-đã-đụng)."""
+        import tempfile as _tf283
+        _keys283 = ("TL_PROFILE", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID", "TL_CATEGORIES_MODE",
+                    "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_ROOT_FOLDER_ID", "TL_NOTEBOOK_ID",
+                    "TL_META_FOLDER_ID", "TL_OVERFLOW_NOTEBOOK_ID", "TL_PROFILE_ENV_OVERLAY",
+                    "TL_WEBAPP", "TL_TOKEN", "HOME", "USERPROFILE")
+        _sav283 = {k: os.environ.get(k) for k in _keys283}
+        _savfn283 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "load_creds", "CACHE")}
+        _cwd283 = os.getcwd()
+
+        class _G283:
+            def get(self, action, **kw):
+                if action == "manifest_export":
+                    if cur_export == "raise":
+                        raise RuntimeError("manifest_export NỔ")
+                    return dict(cur_export or {})
+                return {"ok": True}
+        with _tf283.TemporaryDirectory() as _d:
+            try:
+                for _k in _keys283:
+                    os.environ.pop(_k, None)
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                if cfg_obj is not None:
+                    with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
+                        json.dump(cfg_obj, _f, ensure_ascii=False)
+                _cache283 = Path(_d) / ".tra_luat_cache"
+                _TL_MODULE.CACHE = _cache283
+                _TL_MODULE._gas = lambda: _G283()
+                _TL_MODULE.load_creds = lambda *a, **k: None
+                # cache dir ĐÍCH tính theo profile SẼ ĐƯỢC ÁP (nền = CACHE, dự án = CACHE/<tên>)
+                _dich = _cache283 if not profile or profile == "vbqppl" else _cache283 / profile
+                _dich.mkdir(parents=True, exist_ok=True)
+                _idxp283 = _dich / "manifest_index.json"
+                if index_truoc is not None:
+                    _idxp283.write_text(json.dumps(index_truoc, ensure_ascii=False), encoding="utf-8")
+                _snapp283 = os.path.join(_d, "snap.json")
+                if snap_obj is not None:
+                    with open(_snapp283, "w", encoding="utf-8") as _f:
+                        json.dump(snap_obj, _f, ensure_ascii=False)
+                _ns = argparse.Namespace(sub=sub, out=os.path.join(_d, "exported.json"),
+                                         in_file=_snapp283, force=force, profile=profile,
+                                         config=None, json=True, deterministic=False)
+                _bo, _be = _io27.StringIO(), _io27.StringIO()
+                with _ctx27.redirect_stdout(_bo), _ctx27.redirect_stderr(_be):
+                    _rc = _TL_MODULE.cmd_cache_snapshot(_ns)
+                _sau = None
+                if _idxp283.is_file():
+                    try:
+                        _sau = json.loads(_idxp283.read_text(encoding="utf-8"))
+                    except Exception:
+                        _sau = "HONG"
+                _exported = None
+                if os.path.isfile(_ns.out):
+                    _exported = json.loads(open(_ns.out, encoding="utf-8").read())
+                # index của corpus NỀN — phải chứng minh nó KHÔNG bị đụng khi đứng ở profile dự án (F14)
+                _nen_co = (_cache283 / "manifest_index.json").is_file()
+                return _rc, _bo.getvalue() + _be.getvalue(), _sau, _exported, _nen_co
+            finally:
+                os.chdir(_cwd283)
+                for _k, _v in _savfn283.items():
+                    setattr(_TL_MODULE, _k, _v)
+                for _k, _v in _sav283.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+
+    _idx283 = {"_meta": {"treeHash": "TH_CU", "entries_indexed": 1315}, "by_sohieu": {"a": 1}}
+
+    def _c283_snapshot_rong_khong_duoc_xoa_index():
+        # P16-F06 LÕI: snapshot KHÔNG có `index` ⇒ bản cũ ghi `{}` đè manifest_index 3,4MB rồi in ok:true.
+        # Nay: TỪ CHỐI, index cũ còn NGUYÊN.
+        _rc, _out, _sau, *_ = _run_snap283("import", snap_obj={"treeHash": "TH_CU"},
+                                          cur_export={"treeHash": "TH_CU"}, index_truoc=_idx283)
+        return _rc == 2 and _sau == _idx283 and "SNAPSHOT_INDEX_EMPTY" in _out
+    _t110("r283_snapshot_khong_co_index_khong_xoa_duoc", _c283_snapshot_rong_khong_duoc_xoa_index)
+
+    def _c283_force_cung_khong_duoc_xoa_index():
+        # --force nghĩa là «chấp nhận snapshot CŨ», KHÔNG phải «cho phép xoá index» ⇒ vẫn chặn.
+        _rc, _out, _sau, *_ = _run_snap283("import", snap_obj={"treeHash": "TH_X", "index": {}},
+                                          force=True, index_truoc=_idx283)
+        return _rc == 2 and _sau == _idx283 and "SNAPSHOT_INDEX_EMPTY" in _out
+    _t110("r283_force_khong_bo_qua_duoc_cong_index_rong", _c283_force_cung_khong_duoc_xoa_index)
+
+    def _c283_thieu_treehash_fail_closed():
+        # P16-F06 vế cổng: thiếu treeHash ở SNAPSHOT hoặc ở manifest hiện hành ⇒ TRƯỚC vá cổng im lặng
+        # cho qua (fail-OPEN). Nay fail-CLOSED cả hai chiều.
+        _a = _run_snap283("import", snap_obj={"index": {"x": 1}}, cur_export={"treeHash": "TH"},
+                          index_truoc=_idx283)
+        _b = _run_snap283("import", snap_obj={"treeHash": "TH", "index": {"x": 1}}, cur_export={},
+                          index_truoc=_idx283)
+        return (_a[0] == 1 and _a[2] == _idx283 and "TREEHASH_KHONG_DOI_CHIEU_DUOC" in _a[1]
+                and _b[0] == 1 and _b[2] == _idx283 and "TREEHASH_KHONG_DOI_CHIEU_DUOC" in _b[1])
+    _t110("r283_thieu_treehash_fail_closed_ca_hai_chieu", _c283_thieu_treehash_fail_closed)
+
+    def _c283_manifest_export_no_cung_fail_closed():
+        # `manifest_export` NỔ (mạng/webapp) ⇒ cũng là "không đối chiếu được" ⇒ từ chối, không nuốt lỗi.
+        _rc, _out, _sau, *_ = _run_snap283("import", snap_obj={"treeHash": "TH", "index": {"x": 1}},
+                                          cur_export="raise", index_truoc=_idx283)
+        return _rc == 1 and _sau == _idx283 and "TREEHASH_KHONG_DOI_CHIEU_DUOC" in _out
+    _t110("r283_manifest_export_no_van_fail_closed", _c283_manifest_export_no_cung_fail_closed)
+
+    def _c283_treehash_khop_van_import():
+        # PHẢN CHỨNG: treeHash KHỚP + index hợp lệ ⇒ cổng TRONG SUỐT, import đúng như cũ.
+        _moi = {"_meta": {"treeHash": "TH_MOI"}, "by_sohieu": {"b": 2}}
+        _rc, _out, _sau, *_ = _run_snap283("import", snap_obj={"treeHash": "TH_MOI", "index": _moi},
+                                          cur_export={"treeHash": "TH_MOI"}, index_truoc=_idx283)
+        return _rc == 0 and _sau == _moi and '"ok": true' in _out
+    _t110("r283_treehash_khop_van_import_duoc", _c283_treehash_khop_van_import)
+
+    def _c283_treehash_lech_van_chan_nhu_cu():
+        # PHẢN CHỨNG: hành vi TREEHASH_MISMATCH cũ không được đổi (rc=1, không ghi).
+        _rc, _out, _sau, *_ = _run_snap283("import", snap_obj={"treeHash": "TH_CU", "index": {"x": 1}},
+                                          cur_export={"treeHash": "TH_MOI"}, index_truoc=_idx283)
+        return _rc == 1 and _sau == _idx283 and "TREEHASH_MISMATCH" in _out
+    _t110("r283_treehash_lech_giu_nguyen_hanh_vi", _c283_treehash_lech_van_chan_nhu_cu)
+
+    _cfg283 = {"webappUrl": "u", "token": "t",
+               "profiles": {"vbqppl": {"registryDocId": "REG_NEN"},
+                            "DUAN": {"registryDocId": "REG_D", "manifestId": "MAN_D", "categories": "own"}}}
+
+    def _c283_import_dung_cache_cua_profile():
+        # P16-F14: `idxp` từng tính TRƯỚC khi áp profile ⇒ đứng ở profile DUAN mà ghi vào index của NỀN.
+        # Nay ghi ĐÚNG cache dir của DUAN, và cache NỀN không bị đụng.
+        _moi = {"_meta": {"treeHash": "TH_D"}, "by_sohieu": {"d": 1}}
+        _rc, _out, _sau, _exp, _nen = _run_snap283("import", snap_obj={"treeHash": "TH_D", "index": _moi},
+                                                   cur_export={"treeHash": "TH_D"}, profile="DUAN",
+                                                   index_truoc={"_meta": {"treeHash": "CU_D"}}, cfg_obj=_cfg283)
+        # `_sau` đọc từ cache dir của DUAN; `_nen` chứng minh index của corpus NỀN KHÔNG bị tạo/đụng.
+        return _rc == 0 and _sau == _moi and _nen is False and '"profile": "DUAN"' in _out
+    _t110("r283_import_ghi_dung_cache_profile", _c283_import_dung_cache_cua_profile)
+
+    def _c283_export_cung_theo_profile():
+        # P16-F14 chiều EXPORT: nhánh export TRƯỚC ĐÂY không áp profile lần nào ⇒ luôn export index NỀN.
+        _rc, _out, _sau, _exp, _nen = _run_snap283("export", profile="DUAN",
+                                             index_truoc={"_meta": {"treeHash": "TH_D", "entries_indexed": 7}},
+                                             cfg_obj=_cfg283)
+        return (_rc == 0 and isinstance(_exp, dict) and _exp.get("profile") == "DUAN"
+                and _exp.get("treeHash") == "TH_D")
+    _t110("r283_export_doc_dung_cache_profile", _c283_export_cung_theo_profile)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

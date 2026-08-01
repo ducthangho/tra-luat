@@ -1,3 +1,42 @@
+# ★ v1.36.38 — HOÀ NHÁNH lượt 8: master land T0-E/P16, KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `74f62e2` (r297 v1.36.34 *"`--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10"*
++ r298 v1.36.35 *"diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06)"*).
+
+**Rà trùng việc — ĐO TRƯỚC KHI HOÀ, không đoán.** `git diff --numstat 9465d2a..origin/master` trên 5 tệp
+của nhánh này (`tl_core/txn.py` · `tl_core/ops_misc.py` · `tl_core/registry_orchestrator.py` ·
+`tl_core/ingest_ops.py` · `backfill_keywords_live.py`) trả **RỖNG** — master lượt này không chạm tệp nào
+của T2. Tám tệp master đụng: `CHANGELOG.md` `RELEASE_MANIFEST.json` `SKILL.md` `VERSION`
+`scripts/ingest_to_cache.py` `scripts/normalize_document.py` `scripts/tl.py` `scripts/tl_selftest.py`.
+`tl_selftest.py` **auto-merge sạch** (master thêm/sửa ca ở vùng khác); 5 xung đột còn lại đều là
+**hằng phiên bản + kiểm kê**, không phải logic.
+
+**Va số hiệu test:** master vừa dùng `r297` và `r298`, trùng dải nhánh này định dùng tiếp. Số hiệu test
+mới của nhánh **đánh từ `r299`** trở đi.
+
+**Va số hiệu bản:** nhánh này đã có mục `v1.36.34`/`v1.36.35` (hoà lượt 4/5) trong khi master mang về
+`v1.36.34`/`v1.36.35` của riêng nó (r297/r298) — cùng số, khác nội dung. Giữ **cả hai** khối như các lượt
+trước; bản hoà này bump lên **v1.36.38** (cao hơn cả hai bên) để không kéo dài va chạm.
+
+**BẪY ĐÃ TRẢ GIÁ Ở CHÍNH LƯỢT NÀY — hoà xung đột bằng `pathlib.read_text()/write_text()` NUỐT CRLF.**
+`SKILL.md` và `scripts/tl.py` trong cây này dùng **CRLF**; `read_text()` dịch CRLF→LF khi ĐỌC và
+`write_text()` ghi LF ⇒ gỡ 3 dòng marker mà **toàn tệp bị viết lại**: `SKILL.md` 48.031 → 47.724 B
+(mất đúng 307 B = 307 dòng), `tl.py` mất 1.763 B. Gate bắt được, và bắt bằng **đường vòng**:
+`r219_gotchas_nhan_trang_thai` đỏ vì nó khẳng định GOTCHAS.md phải chứa **kích thước ĐO ĐƯỢC** của
+`SKILL.md` — số đo đổi thì khẳng định sai. `golden` + `determinism` đỏ theo. **Không có test nào nói
+"CRLF"** cả; thứ cứu được là một test neo vào SỐ ĐO THẬT thay vì vào hình dạng.
+
+Chữa: khôi phục CRLF theo byte (`read_bytes` → `replace(b"\n", b"\r\n")` → `write_bytes`), và `VERSION`
+ghi **không newline cuối** (7 B — đúng như f326473 lẫn master; `echo >` thêm `\n` thành 8 B). Sau chữa,
+`golden` + `determinism` tự XANH lại **mà KHÔNG cần `--write`** — bằng chứng dương rằng hai gate đó đỏ vì
+hỏng dòng-kết, không phải vì kiểm kê đổi hợp lệ (R6 giữ nguyên: không ghi lại golden cho lượt này).
+Lần sau hoà xung đột: sửa bằng byte, hoặc `git checkout --ours/--theirs` + patch tối thiểu — ĐỪNG
+round-trip tệp qua text API.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên — `_ingest_commit_verdict`/`_INGEST_COMMIT_MARKERS` tại
+`_pi_stage_write` + `_il_stage_write` (ING-03), `Txn(`/guard (PRO-01), `not_probed` (RAS-01),
+`tukhoa_progress.v2` (RAS-05), `tl_core/txn.py` (Helper 1).
+
 # ★ v1.36.37 — HOÀ NHÁNH lượt 7: master chạm `ingest_ops.py` nhưng KHÔNG chạm ING-03 (2026-08-01)
 
 Hoà `master` `9465d2a` (r296 v1.36.33 — *"HỌ regex `Điều N` nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15"*).
@@ -650,6 +689,99 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+# ★ v1.36.35 — r298: diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06) (2026-08-01)
+
+W0 đặt mục tiêu "khôi phục gate ĐÁNG TIN **trước khi** dùng gate chứng nhận bản vá tiếp theo". Ba ca dưới
+đây làm đúng điều W0 sợ: chúng **xanh vô điều kiện** — không đầu vào nào khiến chúng đỏ — nên vùng lớp điều
+phối coi như KHÔNG có test. Bản này không sửa hành vi sản phẩm nào; nó sửa **năng lực đo** của bộ test.
+
+**A. `_sua_nong211` — `ok3` là hằng đúng theo TỪ VỰNG, không theo luật.** Hàm nhận
+`(phan_loai, chan_dung, moi_truong)` nhưng **không hề đọc `moi_truong`**, rồi `ok3` khẳng định *"không tồn
+tại đầu vào nào khiến máy vá tại LIVE"* bằng cách dò chuỗi con `"live"` trong kết quả. Từ vựng trả về chỉ có
+`phan_loai_la` · `va_tai_canonical` · `gom_va_sau_luot_ra` — **không chuỗi nào chứa `"live"`**, nên `ok3`
+đúng vì cấu trúc hàm chứ không vì luật đúng. Nay bất biến thật được nói rõ ("ĐÍCH vá độc lập với NƠI phát
+hiện") và `_sua_nong211_vi_pham` dựng THẾ GIỚI VI PHẠM để cùng phép đo ấy falsify được.
+
+**B. `_pha0_run211` — `nlm_query_calls` là HẰNG SỐ 0.** Trường này được trả `0` ở **cả hai** nhánh `return`,
+trong khi `ok3`/`ok4` của `r211_pha0_chan_som_truoc_khi_tieu_nlm` kiểm đúng hằng ấy. Nay ĐẾM THẬT, lấy từ
+**LỆNH mà chính tài liệu khai** ở `PHA0_GATE_v1` (`gate[k][0]`), nên còn bắt thêm được DRIFT TÀI LIỆU.
+
+ĐO A/B (bản CŨ chép nguyên văn từ `a3abc11`, chạy cùng bộ assertion):
+
+| Đầu vào | CŨ | MỚI |
+|---|---|---|
+| cổng THẬT, mọi tổ hợp | 0 call | 0 call |
+| cổng bị nhét `tl nlm-query` vào b6 | **0 call** ⇒ ca ĐỎ | **1 call** ⇒ ca XANH |
+| nhét lệnh truy vấn NHƯNG chặn đứng ở b1 | 0 call | 0 call (chưa chạm b5/b6 — đây mới là nội dung thật của lời hứa "dừng sớm khi CHƯA tiêu call nào") |
+
+Bản CŨ: **16 tổ hợp đầu vào ⇒ tập giá trị `{0}`** — hằng số, tức `ok3/ok4` xanh vô điều kiện.
+
+**C. `r210_loop_khong_ghi_trong_cay` + `r210_agent_prompt_dung_schema` — LINT TÀI LIỆU đội lốt vế CHẠY.**
+Hai ca này chỉ parse `WRITE_PATHS_v1` và dò chuỗi trong prose: KHÔNG chạy vòng nào, KHÔNG `git status`,
+KHÔNG `release-verify` — trong khi kế hoạch hứa cả ba. **Không đổi tên ca** (`references/RASOAT_HOSO_LOOP.md:211`
+trỏ tới tên `r210_loop_khong_ghi_trong_cay`; đổi tên là đứt con trỏ tài liệu), chỉ **hạ tuyên bố tại chỗ**
+cho đúng cái đang đo, và thêm vế CHẠY thật.
+
+Bằng chứng việc này không lý thuyết: vì nghiệm thu là lint tài liệu mà lỗi `rasoat-loop` cài **OR thay AND**
+(mất tới **60% GAP**, rc=0, im lặng) sống sót qua **cả Đợt 2 lẫn Đợt 3**, mãi r256 mới bị bắt.
+
+**Test:** +3 ca `r298_*` → **1547/1547**, 0 FAIL.
+- `r298_sua_nong_phep_do_falsify_duoc` — phép đo bắt thế giới vi phạm (`True`) và tha luật thật (`False`); bất biến "đích vá độc lập nơi phát hiện" giữ ở luật thật, PHÁ ở luật vi phạm (2 chiều).
+- `r298_pha0_dem_call_truy_van_that` — bảng A/B ở trên; kèm vế phân biệt canary (`notebook_get`) với lệnh truy vấn, thiếu vế này thì ca (a) vô nghĩa.
+- `r298_worklist_chay_kho_a3_a6` — **chạy khô A3→A6 trên ĐƯỜNG SẢN XUẤT**: `cmd_state_put`/`cmd_state_get` THẬT trên GAS giả **CÓ TRẠNG THÁI** (upload ghi thật, trash xoá thật). Khoá bất biến *state cập nhật sau MỖI đơn vị*: 3 ảnh chụp phải là `done,pending,pending` → `done,done,pending` → `done,done,done`, 4 upload (1 tạo mới + 3 lượt), 3 trash, còn đúng 1 bản. ★ PHẢN CHỨNG: biến thể **gom ghi một phát cuối lượt** cho 3 ảnh chụp `pending` y hệt nhau ⇒ phép đo phân biệt được.
+
+Ruff DELTA: hạng mục **0** (E702/E401/E701/E731/E741/F401 y nguyên); F821 **+5** toàn bộ rơi vào tên đã có
+nền — `_TL_MODULE` 2119→2121 · `argparse` 188→190 · `Path` 267→268; **không tên nào mới xuất hiện từ 0**.
+
+★ ĐỔI SỐ hai lần khi land: bản này ra đời mang `r296/v1.36.33`, nhưng phiên P16 land `r296` (F15) rồi
+`r297` (F10) trước ⇒ dời sang **r298/v1.36.35**. Ba ca test và mọi chú thích đã đổi theo; khối `r296_*`
+và `r297` của P16 giữ nguyên (hai vùng dòng rời nhau, không giẫm).
+
+# ★ v1.36.34 — r297: `--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10 (2026-08-01)
+
+**Bật `--as-appendix` KHÔNG phải chuyện nhãn.** `normalize_document` khi đó đặt `body=""`, `khoi_dau=""`
+— mà **r215 nói rõ khối đầu là NGUỒN DUY NHẤT chứng minh danh tính văn bản** — gán T1 `ok:true` **vô
+điều kiện**, đổi `coverage` thành `appendix_only` và `document_variant` thành `appendix` ⇒ **đổi luôn
+`doc_key`**. Nghĩa là **TOÀN VĂN một Luật bị lưu thành phụ lục, mất danh tính, không qua kiểm cấu
+trúc — mà vẫn `ok:true` rc=0**. Một suy đoán rẻ tiền không được phép gây hậu quả đắt như vậy trong im lặng.
+
+**Bệnh (`ingest_to_cache.py`)** — `_ap_hint = (so_hieu + " " + title).lower()` rồi `any(k in _ap_hint …)`
+với `("phu_luc","phu luc","phuluc","phụ lục","-pl","_pl")`. Hai khuyết:
+
+- **(a) quét CẢ TIÊU ĐỀ.** Luật/Nghị định CÓ phụ lục thường ghi thẳng «… và Phụ lục …» ngay trên
+  tiêu đề ⇒ chính TOÀN VĂN bị đóng dấu phụ lục. Đây là ca ĐÃ ĐO ở journal Pha 1 (A/B cùng một file nguồn).
+- **(b) khớp-con.** `-pl`/`_pl` trúng bất kỳ chỗ nào hai chữ đó đứng sau `-`/`_` — ví dụ số hiệu
+  `29/2024/TT-PLTW` của cơ quan viết tắt bắt đầu bằng «PL».
+
+**Vá — bốn lớp, không lớp nào thừa:**
+
+1. **Hẹp lại**: hàm `suy_doan_phu_luc(so_hieu)` chỉ đọc **SỐ HIỆU** (bỏ hẳn tiêu đề), tách token ở mọi
+   ký tự không phải chữ/số (nên `_` và `-` là ranh giới), khớp **token NGUYÊN VẸN** `pl` / `pl<số>` /
+   `phuluc`, hoặc cặp token liền kề `phu|phụ` + `luc|lục`.
+2. **Nói ra**: tự bật thì in cảnh báo NHIỀU DÒNG ra stderr, kể đích danh cái giá (mất khối đầu, bỏ T1,
+   đổi doc_key) và chỉ luôn cách chữa. Trước đây tuyệt đối im lặng.
+3. **Tắt được**: cờ `--no-as-appendix` cho ca số hiệu có chữ «PL» nhưng tệp là toàn văn.
+4. **Nội dung PHỦ QUYẾT** (`normalize_document.py`): cha truyền `--as-appendix-auto` để báo «đây là
+   SUY ĐOÁN, không phải người gõ». Ở ca đó, nếu `split_articles(raw)` ra **≥2 Điều** ⇒ **DỪNG rc=2**
+   với `APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU` (fail-CLOSED), để người quyết.
+
+**★ RANH GIỚI CỐ Ý GIỮ: `--as-appendix` gõ TƯỜNG MINH đi thẳng, không đụng.** Phụ lục/mẫu CÓ Điều nội
+bộ là hợp lệ — chính nhánh đó vẫn gọi `split_articles(raw)` cho ca này. Cổng mới CHỈ soi ca suy đoán;
+siết lây sang quyền của người dùng là siết quá tay. Ca `r297_as_appendix_tuong_minh_khong_bi_phu_quyet`
+**xanh cả trước lẫn sau vá — CÓ CHỦ ĐÍCH**, nó canh đúng ranh giới đó.
+
+`--no-as-appendix` và `--as-appendix-auto` là cờ của hai **script** `ingest_to_cache.py` /
+`normalize_document.py`; `tl cache-build` chuyển cờ qua `nargs=REMAINDER` ⇒ **parser-surface của `tl`
+KHÔNG đổi**, không cần regen `parser_surface.json`.
+
+**PHẢN CHỨNG — 5/6 ĐỎ trên bản chưa vá** (selftest 1539/1544). Ca xanh là ca «không được đổi» nói trên.
+★Ba ca đầu đỏ vì symbol chưa tồn tại, nên **mỗi ca TỰ MANG phản chứng của chính nó**: khẳng định luôn
+rằng **LUẬT CŨ (viết inline trong test) trả SAI trên đúng fixture đó** — nếu vế này hỏng thì fixture
+không còn tái hiện được bệnh, đúng khuôn r229 của kho. Ca «không mất độ phủ» khẳng định cả luật cũ lẫn
+luật mới đều NHẬN 5 số hiệu phụ lục thật, để bản vá không đổi dương-tính-giả thành âm-tính-giả.
+
+Selftest **1544/1544**. Ruff: `ingest_to_cache.py` + `normalize_document.py` giữ nguyên **6 lỗi nền,
+delta 0** (`re` thêm vào dòng import sẵn có nên E401 không tăng).
 
 # ★ v1.36.33 — r296: HỌ regex "Điều N" nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15 (2026-08-01)
 

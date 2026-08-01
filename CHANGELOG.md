@@ -1,3 +1,52 @@
+# ★ v1.36.26 — r291: `docs/` RA KHỎI GÓI — trả 19/200 slot + đóng 3 con trỏ TREO (T0-G) (2026-08-01)
+
+Q1 **user CHỐT 01-08: đưa `docs/` ra khỏi gói.** Cùng khuôn `rasoat` (r249) và `changelog_archive`
+(v1.34.69): **GIỮ trong git, CHỈ loại khỏi GÓI**.
+
+**Vì sao:** `docs/` là hồ sơ THIẾT KẾ của người giữ — 3 tệp kế hoạch/audit + 16 ADR. Runtime agent
+không đọc chúng, nhưng chúng ăn **19/200 slot import**, trong khi quỹ **chỉ còn 4** (r244 đã đụng trần
+THẬT: 199→202 làm `release-bundle` chết `IMPORT_LIMIT_EXCEEDED`). Trả quỹ về **23**.
+
+**Đo (đối chiếu số dự kiến của kế hoạch — khớp trọn):**
+
+| | trước | sau |
+|---|---|---|
+| manifest `file_count` | 195 | **176** (−19: 3 `docs/*.md` + 16 `docs/adr/*.md`) |
+| quỹ slot /200 | 4 | **23** |
+| `_doc_pointer_findings` fail | 0 | **0** |
+| `_doc_bare_tool_findings` fail | 0 | **0** |
+
+**Ba con trỏ TREO phải sửa CÙNG LƯỢT** — sau khi `docs/` rời gói, tệp NẰM TRONG gói mà trỏ vào
+`docs/` là chỉ đúng lớp lỗi `r289` vừa diệt. Kế hoạch chỉ nêu ca (1); (2) và (3) do quét vét cạn
+toàn bộ tệp-trong-manifest mà ra:
+
+1. `SKILL.md:306` — hàng bảng `` | `docs/adr/` | `` → đổi sang khuôn *(ADR — dev-only)* của hàng ngay dưới.
+2. `CONTEXT.md:4` — "Quyết định kiến trúc ở `docs/adr/`" → chú rõ **cây nguồn dev, KHÔNG trong gói**.
+3. `scripts/tl_core/the_thuc.py:105` — "(nối theo trình tự 5 bước — docs/adr/0009)" → chú rõ ngoài gói.
+
+⚠ **Guard H9 KHÔNG bắt được cả ba**: regex `_doc_pointer_findings` chỉ khớp tiền tố
+`references|templates|scripts`; ca (3) còn nằm trong `.py` mà doc-set của guard chỉ gồm `.md`.
+Đây là **khoảng mù đã biết**, thuộc GATE-04 (T0-F) — không mở rộng trong bản này.
+
+**KHÔNG đụng** `_DOC_CLAIMS_DEFAULT_PATHS` (`workflow.py:775`): nó quét **CÂY DEV**, không phải gói ⇒
+`docs/` VẪN chịu `doc-claims-check` đúng như r264 đặt ra. Loại khỏi gói không hạ một cổng nào.
+
+**Test `r291_docs_ngoai_goi`** (đỏ-trước/xanh-sau, phản chứng 2 chiều): (1) `"docs"` ∈
+`_RELEASE_EXCLUDE_DIRS`; (2) không mục manifest nào bắt đầu bằng `docs/`; (3) `file_count` giảm
+**đúng 19** so mốc 195 — ratchet có chủ đích, cùng nếp `r209_baseline_ratchet`; (4) **phản chứng**:
+19 tệp `docs/*.md` VẪN còn trên đĩa (giữ trong git) và mỗi tệp bị `_release_should_include` loại
+**đúng vì khoá `docs`** — chặn ca xanh-giả "vắng khỏi gói vì lý do khác".
+
+**Golden `workflow_audit.json` regen CÓ CHỦ ĐÍCH — đúng MỘT dòng:** `size_bytes` của `SKILL.md`
+47.966 → **47.990** (thẻ workflow-audit chụp kích thước kernel). Không khoá nào khác đổi; đã đối
+chiếu bằng `git diff` trước khi ghi. `references/GOTCHAS.md:16` cập nhật cùng lượt (test `r219`
+khoá kích thước SKILL.md theo số ghi ở đó): **47.990B, đệm 138B** tới WARN 48.128.
+
+⚠ **Số đợt `r291` KHÔNG khớp version `1.36.26` — CÓ CHỦ ĐÍCH.** Lúc land, `r288`/`r289`/`r290` đều đã
+có mã trong cây nhưng CHƯA commit (ba phiên song song). Bản này land TRƯỚC nên lấy version kế tiếp
+còn trống; lấy `1.36.29` để khớp số đợt sẽ **bịa ra ba version chưa từng tồn tại** và phá tính đơn
+điệu mà `deploy-guard` dựa vào. Ba đợt kia land sau sẽ lấy `1.36.27+`.
+
 # ★ v1.36.25 — r287: `determinism-audit` hết ĐỎ NGẪU NHIÊN vì probe công cụ NGOÀI (P16-T03) (2026-08-01)
 
 P16-T03 (P2 vận hành) — **ca thật, đã chặn deploy BA lần trong 31-07/01-08.**

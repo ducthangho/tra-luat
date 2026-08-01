@@ -1,7 +1,8 @@
 # CONTEXT — Ngôn ngữ chung của dự án tra-luat
 
 Thuật ngữ chuẩn dùng trong SKILL.md, CHANGELOG, commit message và các phiên làm việc.
-File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết định kiến trúc ở `docs/adr/`.
+File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết định kiến trúc ở `docs/adr/`
+(cây nguồn dev — r291: KHÔNG nằm trong gói phát hành).
 
 ## Bản thể & phát hành
 

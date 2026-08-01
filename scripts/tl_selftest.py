@@ -20716,6 +20716,32 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r209_cay_that_va_phan_chung", _c209_cay_that_va_phan_chung)
 
+    def _c291_docs_ngoai_goi():
+        # T0-G (Q1 user CHỐT 01-08) — `docs/` GIỮ trong git, LOẠI khỏi GÓI (khuôn rasoat r249).
+        # Bốn vế cố ý lấy từ BỐN nguồn khác nhau, để không vế nào chứng minh chính nó:
+        #   (1) hằng chính sách · (2) sản phẩm manifest · (3) số đo ratchet · (4) CÂY THẬT.
+        # Vế (4) là phản chứng chống XANH-GIẢ: "vắng khỏi gói" có thể do .gitignore, do suffix,
+        # do tên bị loại — nên phải chứng minh chúng vắng ĐÚNG VÌ khoá `docs`, và vẫn CÒN trên đĩa.
+        root = _ROOT209
+        ok1 = "docs" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return ok1
+        j = _j209.loads(mf.read_text(encoding="utf-8"))
+        paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+        ok2 = not [p for p in paths if p.startswith("docs/")]
+        # RATCHET có chủ đích (nếp r209_baseline_ratchet): mốc 195 là số đo TRƯỚC r291. Thêm/bớt
+        # tệp trong gói ⇒ test này ĐỎ và phải sửa CÓ CHỦ ĐÍCH, kèm kê khai slot (trần 200).
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 19 == 195
+        d = root / "docs"
+        tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
+        ok4 = (len(tren_dia) == 19
+               and all(not _rel209._release_should_include(q, root) for q in tren_dia)
+               and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
+                       for q in tren_dia))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+
     def _c209_skill_md_khong_tro_file_ma():
         # H0 nghiệm thu: MỌI con trỏ references/|templates/|scripts/ trong SKILL.md tồn tại trên đĩa
         # (glob * bỏ qua; con trỏ thư mục khớp PREFIX — nhớ ca scripts/tl_core/).

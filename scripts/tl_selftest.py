@@ -7946,7 +7946,15 @@ def run() -> int:
             if action == "bootstrap":
                 return {"inboxFolderId": "inbox97"}
             if action in ("organize", "ingest_commit"):   # r205: đường ingest_commit (thiếu 'file' → readback qua _verify_convert_readback như cũ)
-                return {"ok": True, "fileId": "gdoc97", "srcId": "src97"}
+                # r291: fake này TRƯỚC ĐÂY trả `ok/fileId/srcId` TRẦN — thiếu ba marker `*_done` và `row`
+                # mà `doIngestCommit_` (Code.2.21.2p.gs:846-881) khai là LUÔN có khi `ok:true`. Cổng
+                # ING-03 đọc đúng bộ đó, nên fake phải khớp HỢP ĐỒNG THẬT; giữ bản trần là bắt bản vá
+                # phải tin một `ok` trần — đúng cái bệnh đang chữa (cùng bài học fake `_G282` ở r289).
+                # VẪN CỐ Ý bỏ `file`: đó là chủ đích gốc của ca này (ép đi đường dự phòng
+                # `_verify_convert_readback`), và cổng r291 KHÔNG đòi `file` — xem `_INGEST_COMMIT_MARKERS`.
+                return {"ok": True, "fileId": "gdoc97", "srcId": "src97",
+                        "organize_done": True, "rename_done": True, "upsert_done": True,
+                        "row": {"drive_id": "gdoc97", "src_id": "src97"}}
             if action == "reg_get":
                 return {"ok": True, "rows": [{"drive_id": "gdoc97", "src_id": "src97",
                                                 "name": "Luat_01-2026-QH16_Test",
@@ -9798,7 +9806,9 @@ def run() -> int:
                     return reg_get_resp
                 if action in ("organize", "ingest_commit"):   # r205: ingest_commit đếm chung 'organize' (số lần ghi Drive)
                     _calls["organize"] += 1
-                    return {"ok": True, "fileId": "GD114", "srcId": "SRC114"}
+                    return {"ok": True, "fileId": "GD114", "srcId": "SRC114",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "GD114", "src_id": "SRC114"}}
                 return {"ok": True, "fileId": "GD114"}
 
             def post(self, action, **kw):
@@ -9932,7 +9942,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb114"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd114", "srcId": "sr114"}
+                    return {"ok": True, "fileId": "gd114", "srcId": "sr114",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd114", "src_id": "sr114"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd114", "src_id": "sr114",
                                                    "name": "Luat_01-2026-QH16_Test",
@@ -10395,7 +10407,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb115"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd115", "srcId": "sr115"}
+                    return {"ok": True, "fileId": "gd115", "srcId": "sr115",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd115", "src_id": "sr115"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd115", "src_id": "sr115",
                                                    "name": "Luat_01-2026-QH16_Test",
@@ -10563,7 +10577,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb116"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd116", "srcId": "sr116"}
+                    return {"ok": True, "fileId": "gd116", "srcId": "sr116",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd116", "src_id": "sr116"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd116", "src_id": "sr116",
                                                    "name": "Luat_02-2026-QH16_Test116",
@@ -18488,7 +18504,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb191"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd191", "srcId": "sr191"}
+                    return {"ok": True, "fileId": "gd191", "srcId": "sr191",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd191", "src_id": "sr191"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd191", "src_id": "sr191",
                                                   "name": "Nghi_dinh_158_Test",
@@ -24839,7 +24857,8 @@ def run() -> int:
     # r288 mở ca này với danh sách RỖNG (acceptance §6.1: "chưa gắn vào lệnh nào"). r289 (PRO-01) thêm
     # `ops_misc.py`. Slice sau (ING-03 → `ingest_ops.py`) phải tự thêm tên mình ở đây — nghĩa là việc gắn
     # helper vào một đường GHI mới không bao giờ lọt qua review im lặng.
-    _HELPER1_DA_GAN = {"ops_misc.py"}          # r289 PRO-01
+    _HELPER1_DA_GAN = {"ops_misc.py",          # r289 PRO-01
+                       "ingest_ops.py"}        # r291 ING-03
 
     def _c288_helper1_chi_gan_o_noi_da_khai():
         import pathlib as _pl288
@@ -25044,6 +25063,104 @@ def run() -> int:
         return (_np["plan"] == _nb["plan"]
                 and any("DRY" in r and "changes_pull" in r for r in _np["reasons"]))
     _t110("r290_orch_decide_not_probed_bao_thu", _c290_decide_not_probed_bao_thu)
+
+    # ═══ r291 (v1.36.30) — ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG ═══
+    # `grep upsert_done` toàn kho ra ĐÚNG 1 hit (`ingest_ops.py:1502`) và hit đó chỉ dùng để ĐẶT TÊN
+    # bước lỗi — không gate gì. Cả HAI call site (`_pi_stage_write` ~:1836, `_il_stage_write` ~:3080)
+    # gate bằng `org.get("fileId")`, mà `doIngestCommit_` đặt `out.fileId` NGAY SAU organize, TRƯỚC
+    # register/readback ⇒ `ok:false` + `upsert_done:false` mà vẫn có `fileId` ⇒ commit MỘT PHẦN được
+    # nhận là thành công: GDoc tồn tại mà THIẾU dòng registry (registry lệch Drive, không ai biết).
+
+    def _org291(**over):
+        """Response `ingest_commit` ĐẦY ĐỦ theo đúng hình dạng server (Code.2.21.2p.gs:846-881)."""
+        _base = {"ok": True, "organize_done": True, "rename_done": True, "upsert_done": True,
+                 "fileId": "1GDOC291", "srcId": "1SRC291",
+                 "row": {"drive_id": "1GDOC291"}, "file": {"id": "1GDOC291", "name": "N.gdoc"},
+                 "src_file": {"id": "1SRC291"}}
+        _base.update(over)
+        return _base
+
+    def _c291_verdict_doi_du_marker():
+        # HỢP ĐỒNG cổng: đọc ĐÚNG bộ marker server tự dùng để tính `out.ok`.
+        _v = _TL_MODULE._ingest_commit_verdict
+        _okw = {"register": "true"}
+        _duong = _v(_org291(), _okw).get("ok") is True
+        # Bản mẫu ING-03 nguyên văn: ok:false + upsert_done:false NHƯNG CÓ fileId ⇒ PHẢI ÂM
+        _bai_hoc = _v(_org291(ok=False, upsert_done=False), _okw).get("ok") is False
+        # từng marker thiếu/sai ⇒ âm, và lý do NÊU ĐÍCH DANH marker đó
+        _tung_marker = []
+        for _k in ("organize_done", "rename_done", "upsert_done", "row"):
+            _r = _v(_org291(**{_k: False}), _okw)
+            _tung_marker.append(_r.get("ok") is False and _k in str(_r.get("error")))
+        # marker VẮNG MẶT hẳn (không phải False) cũng phải âm — "không có tin xấu" ≠ "tin tốt"
+        _thieu_han = _org291(); _thieu_han.pop("upsert_done")
+        _vang = _v(_thieu_han, _okw).get("ok") is False
+        # thiếu hẳn khoá `ok`, hoặc response không phải dict ⇒ âm (fail-closed)
+        _khong_ok = _org291(); _khong_ok.pop("ok")
+        _tho = (_v(_khong_ok, _okw).get("ok") is False and _v(None, _okw).get("ok") is False
+                and _v("1GDOC291", _okw).get("ok") is False)
+        # PHẢN CHỨNG: call KHÔNG yêu cầu ghi registry ⇒ KHÔNG được đòi `row` (đỏ oan đường hợp lệ).
+        # Đúng luật server: out.ok = … && (register!=='true' || row).
+        _khong_reg = _org291(); _khong_reg.pop("row")
+        _mien_row = (_v(_khong_reg, {"register": "false"}).get("ok") is True
+                     and _v(_khong_reg, {"register": "true"}).get("ok") is False)
+        # `file` CO Y KHONG nam trong cong (chu thich tai `_INGEST_COMMIT_MARKERS`): ca hai stage
+        # READBACK da fail-closed tren `file` qua duong du phong `_verify_convert_readback` DANG
+        # HOAT DONG. Khang dinh TUONG MINH o day de ai them `file` vao cong phai doc ly do truoc.
+        _khong_file = _org291(); _khong_file.pop("file")
+        _mien_file = (_v(_khong_file, _okw).get("ok") is True
+                      and "file" not in _TL_MODULE._INGEST_COMMIT_MARKERS)
+        return bool(_duong and _bai_hoc and all(_tung_marker) and _vang and _tho
+                    and _mien_row and _mien_file)
+    _t110("r291_ingest_commit_verdict_doi_du_marker", _c291_verdict_doi_du_marker)
+
+    def _c291_ca_hai_call_site_deu_co_cong():
+        # "SỬA CẢ HAI — sửa một chỗ là để lại lỗ y hệt ở chỗ kia" (§Slice I4). Khoá bằng cách đọc mã:
+        # mỗi stage WRITE phải GỌI cổng, và không stage nào còn gate CHỈ bằng `if not gdoc:`.
+        import inspect as _insp291
+        _oks = []
+        for _fn in (_TL_MODULE._pi_stage_write, _TL_MODULE._il_stage_write):
+            _src = _insp291.getsource(_resolve286(_fn))
+            _oks.append("_ingest_commit_verdict(" in _src and "if not gdoc:" not in _src)
+        return len(_oks) == 2 and all(_oks)
+    _t110("r291_ca_hai_call_site_deu_co_cong", _c291_ca_hai_call_site_deu_co_cong)
+
+    def _c291_stage_write_chan_commit_mot_phan():
+        # HÀNH VI qua `_il_stage_write` THẬT (đường ingest-local): bơm response commit-MỘT-PHẦN (có
+        # fileId, thiếu marker) ⇒ PHẢI rc=2 VÀ journal `_step_ok` phải ghi FALSE — nếu journal vẫn ghi
+        # `bool(gdoc)` như cũ thì `--resume` sau này đọc journal và tưởng stage organize đã xong.
+        # `_step`/`_step_ok` đến từ ctx (không phải globals) và `okw` do chính stage dựng (register=true).
+        _real = _resolve286(_TL_MODULE._il_stage_write)
+        _g = _real.__globals__
+        _names = ("_ingest_commit_supported", "_ingest_commit_call")
+        _sav = {k: _g.get(k) for k in _names}
+        _steps = []
+
+        def _chay(org):
+            _steps.clear()
+            _g["_ingest_commit_supported"] = lambda g: True
+            _g["_ingest_commit_call"] = lambda g, okw: org
+            _b, _e = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e):
+                _r = _real({"g": object(), "fid": "1UP291", "name": "Luat_01-2026-QH16_X", "cat": "20",
+                            "sohieu": "01-2026-QH15", "goc": "", "loai": "Luật", "hieuluc": "Còn",
+                            "run_id": "run291", "_prev": {},
+                            "_step": lambda *a, **k: None,
+                            "_step_ok": lambda name, key, ok, **k: _steps.append((name, bool(ok)))})
+            return _r, _e.getvalue()
+        try:
+            # (1) commit MỘT PHẦN: có fileId, ok:false, upsert_done:false ⇒ CHẶN, journal ghi FALSE
+            _r1, _err1 = _chay(_org291(ok=False, upsert_done=False))
+            _chan = (_r1.get("rc") == 2 and _steps == [("organize", False)] and "upsert_done" in _err1)
+            # (2) PHẢN CHỨNG: response ĐỦ marker ⇒ đi tiếp bình thường, journal ghi TRUE
+            _r2, _ = _chay(_org291())
+            _di_tiep = (_r2.get("gdoc") == "1GDOC291" and _r2.get("rc") is None
+                        and _steps == [("organize", True)])
+        finally:
+            for _k, _v in _sav.items():
+                _g[_k] = _v
+        return bool(_chan and _di_tiep)
+    _t110("r291_stage_write_chan_commit_mot_phan", _c291_stage_write_chan_commit_mot_phan)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

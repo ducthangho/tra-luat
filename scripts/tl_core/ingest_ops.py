@@ -1506,6 +1506,46 @@ def _ingest_commit_call(g, okw: dict) -> dict:
     return r
 
 
+# r291 (ING-03, P1 — Slice I4): marker BẮT BUỘC của `ingest_commit`. Lấy ĐÚNG theo định nghĩa server
+# (`doIngestCommit_`, references/Code.2.21.2p.gs:846-881): ba marker LUÔN có mặt dạng bool (khởi tạo
+# false), `rename_done` tự true khi không yêu cầu đổi tên, `upsert_done` tự true khi không yêu cầu ghi
+# registry. Server tự tính `out.ok` từ đúng bộ này — client chỉ việc ĐỌC, thay vì suy ra thành công từ
+# sự CÓ MẶT của `fileId`.
+#
+# `file` CỐ Ý KHÔNG nằm trong bộ này, dù kế hoạch ghi "readback row/file" — đã đo: cả hai stage READBACK
+# (`_pi_stage_readback` :1900-1916 và `_il_stage_readback`) đều rẽ nhánh `if _via_commit and org.get("file")`
+# → dựng readback từ response, NGƯỢC LẠI gọi `_verify_convert_readback` (thêm call Drive, **cùng bộ phép
+# kiểm**), rồi `if not rb_convert.get("ok"): return rc=2`. Nghĩa là `file` ĐÃ fail-closed ở ngay stage sau,
+# qua một đường dự phòng ĐANG HOẠT ĐỘNG. Đưa `file` vào cổng này là XOÁ đường dự phòng đó — mở rộng phạm
+# vi và thêm rủi ro, trong khi lỗ ING-03 (`ok:false` + `upsert_done:false` mà có `fileId`) đã bịt kín.
+# `row` thì NGƯỢC LẠI: không có đường nào khác kiểm dòng registry ở stage này — và "GDoc tồn tại nhưng
+# THIẾU dòng registry" chính là thiệt hại §6.2 Pha 3.5 liệt cho ING-03. Nên `row` BẮT BUỘC khi register.
+_INGEST_COMMIT_MARKERS = ("organize_done", "rename_done", "upsert_done")
+
+
+def _ingest_commit_verdict(org, okw=None) -> dict:
+    """r291 (ING-03): kết luận `ingest_commit` bằng KẾT QUẢ, không bằng HÌNH DẠNG.
+
+    TRƯỚC: cả hai call site gate bằng `org.get("fileId")` ⇒ response `ok:false` + `upsert_done:false`
+    mà có `fileId` **vẫn đi tiếp** — commit MỘT PHẦN được nhận là thành công, GDoc tồn tại mà thiếu dòng
+    registry (registry lệch Drive, và không ai biết). `grep upsert_done` toàn kho ra ĐÚNG 1 hit và hit
+    đó chỉ dùng để **đặt tên bước lỗi**, không gate gì.
+
+    `row` chỉ bắt buộc khi call CÓ yêu cầu ghi registry (`register='true'`) — đúng luật server:
+    `out.ok = organize_done && rename_done && upsert_done && file && (register!=='true' || row)`.
+    Đòi `row` cả khi không register là đỏ OAN đường hợp lệ. Vì sao `file` không vào bộ marker: xem
+    chú thích ở `_INGEST_COMMIT_MARKERS`.
+    """
+    _need = list(_INGEST_COMMIT_MARKERS)
+    if str((okw or {}).get("register", "")).strip().lower() == "true":
+        _need.append("row")
+    _ok, _why = step_result_ok(org, require_keys=_need)
+    if _ok:
+        return {"ok": True, "markers_checked": _need}
+    return {"ok": False, "error": _why, "markers_checked": _need,
+            "step": (org.get("step") if isinstance(org, dict) else "") or "ingest_commit"}
+
+
 def _ingest_commit_readback(resp: dict, *, expected_name: str, src_id: str, expected_src_name: str,
                             expected_folder_id: str) -> dict:
     """r198 (ADR-0014): dựng convert_readback.v1 từ file/src_file TRONG response ingest_commit — 0 call thêm,
@@ -1835,10 +1875,18 @@ def _pi_stage_write(ctx):
             return {"rc": 2}
         org = _ingest_commit_call(g, okw)
     gdoc = org.get("fileId")
-    if not gdoc:
+    # r291 (ING-03) — call site 1/2 (profile-ingest). `bool(fileId)` KHÔNG phải bằng chứng commit xong:
+    # `doIngestCommit_` đặt `out.fileId` ngay sau organize, TRƯỚC register/readback ⇒ `ok:false` +
+    # `upsert_done:false` mà vẫn có `fileId`. Nay đòi ĐỦ marker theo đúng luật server.
+    # Nhánh sheet (`_is_sheet`) KHÔNG đi qua `ingest_commit` ⇒ giữ nguyên phép kiểm `fileId` cũ;
+    # `okw` cũng chỉ tồn tại ở nhánh non-sheet nên biểu thức điều kiện phải LƯỜI, đừng đảo thứ tự.
+    _icv = _ingest_commit_verdict(org, okw) if _via_commit else {"ok": bool(gdoc)}
+    if not (gdoc and _icv.get("ok")):
         print(json.dumps({"ok": False,
                           "step": ("copy_convert_sheets" if _is_sheet else
-                                   (org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                                   (_icv.get("step") or org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                          **({"error": _icv["error"], "markers_checked": _icv.get("markers_checked")}
+                             if _via_commit and not _icv.get("ok") else {}),
                           "detail": org},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return {"rc": 2}
@@ -3080,10 +3128,16 @@ def _il_stage_write(ctx):
         org = _ingest_commit_call(g, okw)
         gdoc = org.get("fileId")
         src_docx = org.get("srcId")
-        _step_ok("organize", fid, bool(gdoc), gdoc=gdoc, srcId=src_docx)
-        if not gdoc:
+        # r291 (ING-03) — call site 2/2 (ingest-local). CÙNG MỘT LỖ, HAI CHỖ: sửa một chỗ là để lại lỗ
+        # y hệt ở chỗ kia. Journal cũng phải ghi kết luận THẬT, không phải `bool(gdoc)` — nếu không thì
+        # `--resume` sau này đọc journal và tưởng stage organize đã xong.
+        _icv = _ingest_commit_verdict(org, okw)
+        _step_ok("organize", fid, bool(gdoc and _icv.get("ok")), gdoc=gdoc, srcId=src_docx)
+        if not (gdoc and _icv.get("ok")):
             print(json.dumps({"ok": False,
-                              "step": ((org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                              "step": (_icv.get("step") or org.get("step") or "ingest_commit"),
+                              **({"error": _icv["error"], "markers_checked": _icv.get("markers_checked")}
+                                 if not _icv.get("ok") else {}),
                               "journal": run_id, "detail": org}, ensure_ascii=False), file=sys.stderr)
             return {"rc": 2}
     return {"gdoc": gdoc, "src_docx": src_docx, "org": org, "_via_commit": _via_commit,

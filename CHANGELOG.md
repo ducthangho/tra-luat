@@ -1,3 +1,58 @@
+# ★ v1.36.30 — r291/ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG — vá CẢ HAI call site (2026-08-01)
+
+Slice **I4** (Pha 1B), mục **T2** thứ tư. Dùng **Helper 1** (`tl_core/txn.py` → `step_result_ok`).
+
+**Bệnh.** `grep upsert_done` toàn kho ra **đúng 1 hit** (`ingest_ops.py:1502`) và hit đó chỉ dùng để
+**đặt tên bước lỗi** — không gate gì. Cả **hai** call site (`_pi_stage_write` ~`:1836` cho profile-ingest,
+`_il_stage_write` ~`:3080` cho ingest-local) gate bằng `org.get("fileId")`. Mà `doIngestCommit_`
+(`references/Code.2.21.2p.gs:854`) đặt `out.fileId` **ngay sau organize, TRƯỚC register/readback** ⇒
+response `ok:false` + `upsert_done:false` vẫn **có** `fileId` ⇒ **commit MỘT PHẦN được nhận là thành
+công**: GDoc tồn tại mà **thiếu dòng registry** — registry lệch Drive, và không ai biết (đúng thiệt hại
+§6.2 Pha 3.5 liệt cho ING-03).
+
+**Vá.** `_ingest_commit_verdict(org, okw)` dùng chung cho **cả hai** call site — đòi `ok=true` **và** đủ
+marker theo **đúng luật server**:
+`out.ok = organize_done && rename_done && upsert_done && file && (register!=='true' || row)`.
+`row` chỉ bắt buộc khi call **có** yêu cầu ghi registry (đòi luôn là đỏ OAN đường hợp lệ).
+Ở call site 2, `_step_ok("organize", …)` nay ghi **kết luận thật** thay vì `bool(gdoc)` — nếu không thì
+`--resume` sau này đọc journal và tưởng stage organize đã xong.
+
+**`file` CỐ Ý không nằm trong cổng, dù kế hoạch ghi "readback row/file".** Đã đo: cả hai stage READBACK
+(`_pi_stage_readback:1900-1916`, `_il_stage_readback`) rẽ nhánh `if _via_commit and org.get("file")` →
+dựng readback từ response, **ngược lại** gọi `_verify_convert_readback` (thêm call Drive, **cùng bộ phép
+kiểm**), rồi `if not rb_convert.get("ok"): return rc=2`. Nghĩa là `file` **đã fail-closed ở stage ngay
+sau**, qua một đường dự phòng **đang hoạt động**. Đưa `file` vào cổng này là **xoá** đường dự phòng đó —
+mở rộng phạm vi + thêm rủi ro, trong khi lỗ ING-03 đã bịt kín. `row` thì ngược lại: **không có** đường
+nào khác kiểm dòng registry ở stage này. Ca test khẳng định **tường minh** việc miễn `file`, để ai muốn
+thêm phải đọc lý do trước.
+
+**Test (+3 ca → 1523/1523):**
+- `r291_ingest_commit_verdict_doi_du_marker` — bản mẫu ING-03 nguyên văn (`ok:false` + `upsert_done:false`
+  **có** `fileId`) ⇒ ÂM; từng marker thiếu/sai ⇒ ÂM và lý do **nêu đích danh** marker đó; marker **vắng
+  mặt hẳn** ⇒ ÂM ("không có tin xấu" ≠ "tin tốt"); thiếu khoá `ok` / không phải dict ⇒ ÂM.
+  **Phản chứng:** `register='false'` ⇒ không đòi `row`; thiếu `file` ⇒ vẫn dương.
+- `r291_ca_hai_call_site_deu_co_cong` — đọc mã: **mỗi** stage WRITE phải gọi cổng và **không** stage nào
+  còn gate chỉ bằng `if not gdoc:`.
+- `r291_stage_write_chan_commit_mot_phan` — HÀNH VI qua `_il_stage_write` thật: bơm commit-một-phần ⇒
+  `rc=2` **và** journal ghi `False`. Phản chứng: đủ marker ⇒ đi tiếp, journal ghi `True`.
+
+**ĐỎ-TRƯỚC (đo thật, hai lượt):** hoàn nguyên **cả hai** cổng về `bool(fileId)` ⇒ `1521/1523`, đỏ đúng
+hai ca. Rồi hoàn nguyên **chỉ call site 2/2** ⇒ **vẫn `1521/1523`** — chứng minh trực tiếp câu
+*"sửa một chỗ là để lại lỗ y hệt ở chỗ kia"* không lọt được qua bộ test này.
+
+**Sửa kèm — 6 fake `ingest_commit` trong selftest trả `{"ok": True, "fileId", "srcId"}` TRẦN**
+(r97, r114 ×2, r115, r116, r191), thiếu ba marker `*_done` và `row` mà `doIngestCommit_` khai là **luôn
+có** khi `ok:true`. Fake trần bắt bản vá phải tin một `ok` trần — **đúng cái bệnh đang chữa** (cùng bài
+học fake `_G282` ở r289). Nay khớp hợp đồng thật; r97 **vẫn cố ý bỏ `file`** vì đó là chủ đích gốc của ca
+đó (ép đi đường dự phòng `_verify_convert_readback`) — và cổng r291 không đòi `file`.
+
+**Bẫy I11:** `_ingest_commit_verdict` vào `_STUB_MAP["ingest_ops"]`; hằng `_INGEST_COMMIT_MARKERS`
+re-export **trực tiếp** (tuple — vào `_STUB_MAP` là vỡ r81). Allow-list Helper 1 nay
+`{"ops_misc.py", "ingest_ops.py"}`.
+
+**ruff 0.15.8:** `tl.py` 12 F821 / 0 F401 (đúng nền). `ingest_ops.py` 371 vs 370 ở HEAD trước (+1 = tên
+re-home mới), cùng lớp BY DESIGN. Full gate **8/8 PASS**, `git diff -- references/golden/` rỗng.
+
 # ★ v1.36.29 — HOÀ NHÁNH: T1+T2 (gate + chặn máu) gặp P16-T02/F09/T03 của master (2026-08-01)
 
 Nhánh `claude/va-t1-gate-nlvoj9` và `master` chạy **song song** từ `19a6adf` (v1.36.22). Hoà lại tại đây.

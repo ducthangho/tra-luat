@@ -46,6 +46,13 @@ def bind(tl_module):
 
 def run() -> int:
     cases = []
+    # r285 (P16, TEST-ONLY): ẢNH CHỤP mọi hàm/lớp của module tl TRƯỚC khi chạy case nào. Test ở đây
+    # monkeypatch `_TL_MODULE` rất nhiều; khối nào quên khôi phục thì stub SỐNG TIẾP và làm mọi test
+    # SAU đó xanh GIẢ (ca thật: khối r87 rò `_manifest_entries`→[] + `_apply_gate`→pass-vô-điều-kiện,
+    # phát hiện 31-07 khi test r285 đọc phải manifest rỗng). Đối chiếu lại ở CUỐI `run()`.
+    import types as _ty285
+    _snap285 = {k: v for k, v in vars(_TL_MODULE).items()
+                if isinstance(v, (_ty285.FunctionType, _ty285.BuiltinFunctionType, type))}
     cases.append(("norm_sohieu", norm_sohieu("113/2025/QH15") == "113-2025-QH15"
                   and norm_sohieu("95/2026/NĐ-CP") == "95-2026-ND-CP"))
     cases.append(("norm_vbhn_vpqh_short", norm_sohieu("19/VPQH") == "19-VBHN-VPQH"
@@ -6549,7 +6556,14 @@ def run() -> int:
                 self.markers[fid] = body
                 return {"ok": True, "fileId": fid}
             return {"ok": True}
-    _keys86 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append")
+    # r285 (P16, TEST-ONLY — RÒ RỈ MONKEYPATCH): khối r87 phía dưới (~:6672-6674) còn thay THÊM
+    # `_manifest_entries`, `_reg_before_from_manifest`, `_apply_gate` nhưng BA tên đó không nằm trong
+    # danh sách khôi phục ⇒ stub SỐNG TIẾP tới hết `run()`. Hậu quả đo được: mọi test SAU đó mà không tự
+    # thay `_manifest_entries` đều thấy manifest RỖNG, và mọi test đi qua `_apply_gate` đều được cho qua
+    # VÔ ĐIỀU KIỆN — xanh GIẢ hàng loạt (đúng lớp `false-green-test-qua-bind`). Danh sách khôi phục PHẢI
+    # phủ TRỌN tập tên bị thay trong khối; `r285_khong_ro_ri_monkeypatch` dưới cuối `run()` canh việc này.
+    _keys86 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append",
+               "_manifest_entries", "_reg_before_from_manifest", "_apply_gate")
     _sav86 = {k: getattr(_TL_MODULE, k) for k in _keys86}
     _jrn86 = []
     try:
@@ -7942,9 +7956,13 @@ def run() -> int:
         def post(self, action, **kw):
             self.calls.append(("post", action))
             return {"ok": True, "fileId": "up97"}
+    # r285: khối này TRƯỚC ĐÂY chạy được nhờ stub `_manifest_entries` RÒ RỈ từ khối r87 (:6672) — tức
+    # xanh GIẢ: kịch bản «manifest rỗng ⇒ không trùng ⇒ nạp tiếp» chưa từng được khai báo ở đây. Nay
+    # khai TƯỜNG MINH đúng kịch bản đó (corpus trống, không có dòng nào để dedup).
     _keys97 = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-               "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+               "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+               "_manifest_entries")
     _sav97 = {k: getattr(_TL_MODULE, k) for k in _keys97}
     _realimp97 = _TL_MODULE._imp
     import tempfile as _tf97
@@ -7966,6 +7984,7 @@ def run() -> int:
         _jr97 = []
         _TL_MODULE._journal_append = lambda rid, rec: _jr97.append(rec)
         _TL_MODULE._imp = lambda name: (_NlmBoom97() if name == "nlm_cli" else _realimp97(name))
+        _TL_MODULE._manifest_entries = lambda refresh=False: []      # r285: khai tường minh (trước: rò từ r87)
         with _tf97.NamedTemporaryFile(suffix=".docx", delete=False) as _f97:
             _fp97 = _f97.name
         with _zf63.ZipFile(_fp97, "w") as _z97:
@@ -9894,7 +9913,8 @@ def run() -> int:
         # chặn oan OVERFLOW_ROOM_UNKNOWN).
         _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                  "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+                 "_manifest_entries")   # r285: khai TƯỜNG MINH (trước: rò rỉ từ khối r87)
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         import tempfile as _tf114
@@ -9936,6 +9956,9 @@ def run() -> int:
                 "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
             _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb114", None)
             _TL_MODULE._gas = lambda: _G114()
+            # r285: corpus TRỐNG là kịch bản CỦA CHÍNH ca này (không có dòng nào để dedup) —
+            # trước đây nó mượn stub rò rỉ từ khối r87 nên chưa từng được khai ra.
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
             _TL_MODULE._ingest_target = _boom_target
             _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
             _TL_MODULE._apply_journal_start = lambda *a, **k: "run114"
@@ -10352,7 +10375,8 @@ def run() -> int:
         # B1/Q3a: cookie chết ở preflight → TỰ CHUYỂN add-tay (rc=0, nlm=SKIPPED_BY_FLAG), KHÔNG abort NLM_NOT_READY.
         _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                  "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+                 "_manifest_entries")   # r285: khai TƯỜNG MINH (trước: rò rỉ từ khối r87)
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         import tempfile as _tf
@@ -10392,6 +10416,9 @@ def run() -> int:
                 "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
             _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb115", None)
             _TL_MODULE._gas = lambda: _G115i()
+            # r285: corpus TRỐNG là kịch bản CỦA CHÍNH ca này (không có dòng nào để dedup) —
+            # trước đây nó mượn stub rò rỉ từ khối r87 nên chưa từng được khai ra.
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
             _TL_MODULE._ingest_target = lambda g, sh, nm: (_ for _ in ()).throw(AssertionError("target in dead-cookie"))
             _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
             _TL_MODULE._apply_journal_start = lambda *a, **k: "run115i"
@@ -11536,6 +11563,170 @@ def run() -> int:
         return (_rc == 0 and isinstance(_exp, dict) and _exp.get("profile") == "DUAN"
                 and _exp.get("treeHash") == "TH_D")
     _t110("r283_export_doc_dung_cache_profile", _c283_export_cung_theo_profile)
+
+    def _run_manifest286(cfg_obj, profile, gas_entries=None, cfg_on_disk=True):
+        """r286 HÀNH VI: áp profile qua `apply_profile_offline` THẬT rồi đọc `_manifest_entries` THẬT.
+        Trả (entries|None, lỗi, các thư mục cache ĐƯỢC TẠO). GAS giả LUÔN trả manifest NỀN — đúng như
+        webapp làm khi scope rỗng: đó chính là cái bẫy của F09.
+        Cô lập HOME + cwd + HERE (bài học r284: thiếu HERE là test phụ thuộc máy)."""
+        import tempfile as _tf286
+        _keys286 = ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID",
+                    "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_ROOT_FOLDER_ID",
+                    "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID",
+                    "TL_PROFILE_ENV_OVERLAY", "TL_WEBAPP", "TL_TOKEN", "HOME", "USERPROFILE")
+        _sav286 = {k: os.environ.get(k) for k in _keys286}
+        _savfn286 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "_gas_get_retry", "CACHE", "HERE")}
+        _cwd286 = os.getcwd()
+        _nen286 = list(gas_entries if gas_entries is not None
+                       else [{"drive_id": "dNEN", "so_hieu": "45/2024/QH15", "name": "Luat_NEN"}])
+        with _tf286.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            try:
+                for _k in _keys286:
+                    os.environ.pop(_k, None)
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                _TL_MODULE.HERE = Path(_d) / "scripts"
+                if cfg_on_disk:
+                    with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
+                        json.dump(cfg_obj, _f, ensure_ascii=False)
+                _cache286 = Path(_d) / ".tra_luat_cache"
+                _TL_MODULE.CACHE = _cache286
+                _TL_MODULE._gas = lambda: None
+                _TL_MODULE._gas_get_retry = lambda g, action, **kw: (
+                    {"ok": True, "entries": _nen286, "treeHash": "TH"} if action == "manifest_export"
+                    else {"ok": True})
+                _be = _io27.StringIO()
+                with _ctx27.redirect_stderr(_be):
+                    _TL_MODULE.apply_profile_offline(None, profile)
+                    try:
+                        _ents = _TL_MODULE._manifest_entries(refresh=False)
+                        _err = None
+                    except Exception as e:  # noqa: BLE001
+                        _ents, _err = None, str(e)
+                _dirs = sorted(p.name for p in _cache286.iterdir()) if _cache286.is_dir() else []
+                return _ents, _err, _dirs
+            finally:
+                os.chdir(_cwd286)
+                for _k, _v in _savfn286.items():
+                    setattr(_TL_MODULE, _k, _v)
+                for _k, _v in _sav286.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+
+    _cfg286 = {"webappUrl": "u", "token": "t",
+               "profiles": {"vbqppl": {"registryDocId": "REG_NEN"},
+                            "NQ80": {"registryDocId": "REG_80", "manifestId": "MAN_80", "categories": "own"}}}
+
+    def _c286_profile_ma_khong_muon_duoc_corpus_nen():
+        # P16-F09 LÕI: gõ sai 'NQ8O' (chữ O thay số 0) ⇒ TRƯỚC vá: trả TRỌN corpus NỀN dưới nhãn NQ8O.
+        # Nay fail-closed; và KHÔNG tạo thư mục cache mang tên ma — cache ma mới là thứ SỐNG SÓT sau lệnh.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ8O")
+        return _ents is None and "PROFILE_NOT_FOUND" in (_err or "") and "NQ8O" not in _dirs
+    _t110("r286_profile_ma_doc_fail_closed_khong_tao_cache", _c286_profile_ma_khong_muon_duoc_corpus_nen)
+
+    def _c286_profile_that_van_doc_duoc():
+        # PHẢN CHỨNG: profile THẬT ⇒ đọc bình thường (chốt không được chặn ca đúng).
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ80")
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN" and "NQ80" in _dirs
+    _t110("r286_profile_that_van_doc_binh_thuong", _c286_profile_that_van_doc_duoc)
+
+    def _c286_corpus_nen_van_doc_duoc():
+        # PHẢN CHỨNG: corpus NỀN (không truyền profile) không bị ảnh hưởng.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, None)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_corpus_nen_van_doc_binh_thuong", _c286_corpus_nen_van_doc_duoc)
+
+    def _c286_env_only_khong_config_van_chay():
+        # PHẢN CHỨNG §9: profile env-only (KHÔNG có file config nào) là đường HỢP LỆ —
+        # `_apply_unconfigured_profile_env` chạy, chốt phải được GỠ, không được chặn oan.
+        _ents, _err, _dirs = _run_manifest286(None, "ENVONLY", cfg_on_disk=False)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_env_only_profile_khong_bi_chan_oan", _c286_env_only_khong_config_van_chay)
+
+    def _c286_chot_duoc_go_khi_quay_ve_profile_that():
+        # Chốt là ENV ⇒ phải chứng minh nó được GỠ khi cùng-process chuyển sang profile hợp lệ; nếu không,
+        # một lần gõ sai sẽ làm hỏng mọi lệnh sau trong cùng tiến trình (vd `tl loop`).
+        _sav = {k: os.environ.get(k) for k in ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_PROFILE_ENV_OVERLAY")}
+        try:
+            os.environ["TL_PROFILE_MISSING"] = "NQ8O"
+            _TL_MODULE._apply_profile_env(_cfg286, "NQ80")
+            return os.environ.get("TL_PROFILE_MISSING") is None
+        finally:
+            for _k, _v in _sav.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+    _t110("r286_chot_duoc_go_khi_doi_sang_profile_hop_le", _c286_chot_duoc_go_khi_quay_ve_profile_that)
+
+    def _diff287(before_cv, after_cv, extra_before=None, extra_after=None):
+        """r287: gọi `_live_state_diff` THẬT trên hai ảnh chụp ghi ra tệp (đúng đường determinism-audit)."""
+        # `_live_state_diff` là NỘI BỘ của tl_core.live (không có trong bind-list tl.py — đúng thiết kế,
+        # production gọi nó từ trong chính module). Lấy thẳng module: hàm ở đây ĐÃ được `bind()` rebase
+        # nên là ĐÚNG object mà đường sản xuất chạy, không phải bản chưa bind.
+        import tempfile as _tf287
+        import tl_core.live as _lv287
+        _b = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(before_cv), "volatile": {"generatedEpoch": 1}}
+        _a = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(after_cv), "volatile": {"generatedEpoch": 2}}
+        _b.update(extra_before or {})
+        _a.update(extra_after or {})
+        with _tf287.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _pb = os.path.join(_d, "b.json")
+            _pa = os.path.join(_d, "a.json")
+            for _p, _o in ((_pb, _b), (_pa, _a)):
+                with open(_p, "w", encoding="utf-8") as _f:
+                    json.dump(_o, _f, ensure_ascii=False)
+            return _lv287._live_state_diff(_pb, _pa)
+
+    _OK287 = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.4", "returncode": 0},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+    _TO287 = {"nlm": {"command": "nlm", "ok": False, "version": "", "returncode": None,
+                      "error": "TimeoutExpired: … timed out after 10 seconds"},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+
+    def _c287_probe_khong_on_dinh_duoc_mien():
+        # P16-T03 LÕI: một ảnh probe TIMEOUT, ảnh kia kịp ⇒ TRƯỚC vá: diff ok=false ⇒ gate deploy ĐỎ oan
+        # (đã chặn deploy 3 lần). Nay: miễn trừ, và phải NÓI RA lý do (không miễn im lặng).
+        _d = _diff287(_TO287, _OK287)
+        _cv = [c for c in _d["changes"] if c["path"].startswith("command_versions.nlm.")]
+        return (_d["ok"] is True and _d["unexpected_changes"] == [] and bool(_cv)
+                and all(c.get("allowed_reason") == "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH" for c in _cv))
+    _t110("r287_probe_ngoai_khong_on_dinh_duoc_mien", _c287_probe_khong_on_dinh_duoc_mien)
+
+    def _c287_doi_chieu_nguoc_cung_duoc_mien():
+        # Đối xứng: timeout ở ảnh SAU cũng phải được miễn (bệnh xảy ra cả hai chiều — đã gặp cả hai).
+        return _diff287(_OK287, _TO287)["ok"] is True
+    _t110("r287_mien_doi_xung_ca_hai_chieu", _c287_doi_chieu_nguoc_cung_duoc_mien)
+
+    def _c287_version_doi_that_van_bao():
+        # ★PHẢN CHỨNG QUAN TRỌNG NHẤT: hai bên CÙNG đo được (ok=True cả hai) mà version KHÁC nhau ⇒ công
+        # cụ thật sự đổi phiên bản giữa hai lần chạy — VẪN PHẢI BÁO. Miễn trừ mù sẽ nuốt mất ca này.
+        _moi = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.5", "returncode": 0},
+                "python": _OK287["python"]}
+        _d = _diff287(_OK287, _moi)
+        return (_d["ok"] is False
+                and any(c["path"] == "command_versions.nlm.version" for c in _d["unexpected_changes"]))
+    _t110("r287_version_doi_that_van_bi_bao", _c287_version_doi_that_van_bao)
+
+    def _c287_khong_noi_long_duong_khac():
+        # PHẢN CHỨNG: miễn trừ CHỈ áp cho `command_versions.<tool>` có probe hỏng — mọi đường khác giữ
+        # nguyên fail-closed (không được nhân tiện nới lỏng cả diff).
+        _d = _diff287(_TO287, _OK287, extra_before={"registry": {"id": "REG_A"}},
+                      extra_after={"registry": {"id": "REG_B"}})
+        return (_d["ok"] is False
+                and [c["path"] for c in _d["unexpected_changes"]] == ["registry.id"])
+    _t110("r287_khong_noi_long_duong_ngoai_command_versions", _c287_khong_noi_long_duong_khac)
+
+    def _c287_hai_anh_giong_het_van_ok():
+        # PHẢN CHỨNG: hai ảnh giống hệt ⇒ ok=true, 0 thay đổi (bản vá không tự chế ra khác biệt).
+        _d = _diff287(_OK287, _OK287)
+        return _d["ok"] is True and _d["summary"]["changed"] == 0
+    _t110("r287_hai_anh_giong_het_van_ok", _c287_hai_anh_giong_het_van_ok)
 
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
@@ -24854,6 +25045,15 @@ def run() -> int:
                 and any("DRY" in r and "changes_pull" in r for r in _np["reasons"]))
     _t110("r290_orch_decide_not_probed_bao_thu", _c290_decide_not_probed_bao_thu)
 
+
+    # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
+    # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó
+    # chạy trên bản giả mà không ai biết (xanh GIẢ). In đích danh để sửa được ngay.
+    _leak285 = sorted(k for k, v in _snap285.items() if getattr(_TL_MODULE, k, None) is not v)
+    if _leak285:
+        print(f"  [rò rỉ monkeypatch] {len(_leak285)} tên KHÔNG được khôi phục: {', '.join(_leak285[:12])}",
+              file=_hsys.stderr)
+    cases.append(("r285_khong_ro_ri_monkeypatch", not _leak285))
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

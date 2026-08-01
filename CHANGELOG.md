@@ -1,3 +1,31 @@
+# ★ v1.36.29 — HOÀ NHÁNH: T1+T2 (gate + chặn máu) gặp P16-T02/F09/T03 của master (2026-08-01)
+
+Nhánh `claude/va-t1-gate-nlvoj9` và `master` chạy **song song** từ `19a6adf` (v1.36.22). Hoà lại tại đây.
+
+**⚠ VA CHẠM SỐ HIỆU — đọc kỹ khi tra CHANGELOG.** Hai nhánh **dùng trùng** số `rXX` và nhãn version cho
+**việc khác nhau**:
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch trong selftest (P16-T02) | GATE-03 — lọc ứng viên config theo tiền tố `/tmp/` |
+| r286 / v1.36.24 | profile gõ sai hết mượn corpus NỀN ở đường ĐỌC (P16-F09) | GATE-01a — `sweep` tất định ở RAW |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên vì probe công cụ NGOÀI (P16-T03) | GATE-01b — cưỡng chế raw stability |
+
+**KHÔNG đánh số lại lịch sử** (sẽ phải sửa tên test `rXX_`, chú thích mã và 6 thông điệp commit — churn
+lớn, rủi ro cao, không đổi hành vi). **Tên ca test KHÔNG trùng nhau**, nên selftest không bị ảnh hưởng;
+chỉ tra cứu theo số là mơ hồ. Từ v1.36.29 trở đi đánh số **tiếp từ r291**, không tái dùng.
+
+**Giải xung đột (6 tệp):** `VERSION`/`tl.py`/`SKILL.md` → **v1.36.29**, cao hơn cả hai nhánh (đơn điệu tăng).
+`CHANGELOG.md` → **giữ CẢ HAI** khối mục. `RELEASE_MANIFEST.json` → **tái sinh** (196 tệp).
+`tl_selftest.py` → **giữ CẢ HAI** khối, và đặt chốt `r285_khong_ro_ri_monkeypatch` của master **SAU CÙNG**:
+nó so với ảnh chụp đầu `run()` nên phải chạy sau MỌI khối monkeypatch, kể cả các khối r286–r290 mới.
+
+**Kiểm tra chéo có giá trị:** chốt rò-rỉ monkeypatch mới của master (r285/P16-T02) chạy **sau** toàn bộ
+khối r286–r290 của nhánh này và báo **0 tên không được khôi phục** — xác nhận độc lập rằng các khung
+`_run286`/`_run289`/`_run290` khôi phục sạch trạng thái.
+
+**Gate sau hoà: 8/8 PASS · selftest 1520/1520 · `git diff -- references/golden/` rỗng · 196 tệp.**
+
 # ★ v1.36.28 — r290/RAS-01 (vế `changes_pull`): "DRY" MÀ VẪN GHI — điều phối hết gọi action ghi trước cổng `--apply` (2026-07-31)
 
 Slice **R1** phần độc lập (§Pha 1D "[MỚI] Đóng riêng lỗ `changes_pull`"), mục **T2** thứ ba.
@@ -309,6 +337,109 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.25 — r287: `determinism-audit` hết ĐỎ NGẪU NHIÊN vì probe công cụ NGOÀI (P16-T03) (2026-08-01)
+
+P16-T03 (P2 vận hành) — **ca thật, đã chặn deploy BA lần trong 31-07/01-08.**
+
+**Bệnh:** `determinism-audit` chạy `live-state-snapshot` HAI lần rồi `_live_state_diff`. Trong ảnh chụp có
+`command_versions.<tool>` — do `_cmd_version_probe` gọi **subprocess của công cụ NGOÀI** với timeout.
+Đo trên máy chuẩn: `nlm --version` mất **3,2 / 6,3 / 7,3 giây** (3 lần liên tiếp), timeout probe là **10s**.
+Dưới tải — hoặc đơn giản là xui — một ảnh `TimeoutExpired`, ảnh kia kịp ⇒ bốn đường
+`command_versions.nlm.{ok,error,returncode,version}` lệch ⇒ chỉ tiền tố `volatile` được miễn nên cả bốn
+vào `unexpected_changes` ⇒ `ok:false` ⇒ **gate ĐỎ, deploy DỪNG**. Đã quan sát lệch cả HAI chiều (lần
+timeout ở ảnh trước, lần ở ảnh sau) ⇒ đúng 50/50, không phải chỉ do tải.
+
+Đây **không phải** tính bất định của tl — là **nhiễu đo** của một công cụ bên ngoài. Nhưng
+`determinism-audit` lại chính là thứ sinh ra để chứng minh tính tất định, nên nó tự đỏ là mất hết ý nghĩa.
+(Đã loại trừ nguyên nhân đã biết: `~/.notebooklm-mcp-cli/chrome-port-map.json` = `{}`, không có PID chết.)
+
+**VÁ — miễn trừ CÓ ĐIỀU KIỆN, tuyệt đối không miễn mù:**
+- `_live_state_diff` chỉ bỏ qua thay đổi dưới `command_versions.<tool>.*` **khi CHÍNH PHÉP ĐO không ổn
+  định** — tức `ok` KHÁC NHAU giữa hai ảnh (một bên probe hỏng). Hai bên **cùng đo được** mà `version`
+  khác nhau ⇒ **VẪN BÁO**, vì đó là công cụ thật sự đổi phiên bản giữa hai lần chạy — điều đáng biết.
+- Ca được miễn mang `allowed_reason: "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH"` — **nói ra vì sao**, không miễn
+  im lặng (im lặng chính là cách một cổng biến thành cổng-luôn-cho-qua).
+- `_cmd_version_probe` timeout 10s → **25s**: 10s quá sát với 3-7s thật. Nới chỉ GIẢM nhiễu; phần còn lại
+  do miễn-trừ-có-điều-kiện xử. Chỉ tốn thêm thời gian khi công cụ thật sự treo.
+
+**Kiểm (+5 case gọi `_live_state_diff` THẬT trên hai tệp ảnh chụp, đúng đường `determinism-audit`;
+selftest 1502/1502):** phản chứng đo trên bản CHƯA VÁ — **3/5 ĐỎ**; 2 case còn lại xanh **đúng thiết kế**
+vì là cặp «KHÔNG ĐƯỢC ĐỔI». Phủ: miễn trừ đối xứng cả hai chiều timeout · **★version đổi THẬT vẫn bị báo**
+(phản chứng quan trọng nhất — miễn mù sẽ nuốt mất ca này) · **không nới lỏng đường nào ngoài
+`command_versions`** (thay đổi `registry.id` vẫn fail-closed nguyên vẹn) · hai ảnh giống hệt vẫn `ok`,
+0 thay đổi (bản vá không tự chế ra khác biệt).
+
+# ★ v1.36.24 — r286: profile GÕ SAI hết mượn được corpus NỀN ở đường ĐỌC (P16-F09) (2026-08-01)
+
+P16-F09 (P1 sai kết quả).
+
+**Bệnh:** v1.33.48 mới bịt đường **GHI** (profile yêu cầu tường minh mà không có trong config ⇒ scope
+RỖNG ⇒ guard hạ nguồn chặn). Đường **ĐỌC** vẫn thủng nguyên: `_apply_profile_env` vẫn đặt
+`TL_PROFILE = <tên ma>` ⇒ `_profile_cache_dir()` trỏ `CACHE/<tên ma>/`; `_load_manifest_full` gặp
+cache-miss thì gọi `manifest_export` với scope RỖNG ⇒ webapp trả **manifest NỀN** ⇒ `_atomic_write_text`
+ghi nó vào cache của profile-ma (**BỀN VỮNG — còn nguyên sau khi lệnh kết thúc**) ⇒ `exists` /
+`reg-query` / `locate` trả **corpus NỀN dưới NHÃN tên gõ sai**. Người dùng tin là đang xem hồ sơ dự án
+của mình, thực ra đang xem kho nền.
+
+**VÁ — chốt ở ĐÚNG MỘT CHỖ:** marker env `TL_PROFILE_MISSING`
+- **đặt** ở nhánh PROFILE_NOT_FOUND của `_apply_profile_env`;
+- **gỡ** ở nhánh profile hợp lệ (cùng-process đổi sang profile đúng thì phải chạy lại được — nếu không,
+  một lần gõ sai làm hỏng mọi lệnh sau trong cùng tiến trình, vd `tl loop`);
+- **gỡ** ở `_apply_unconfigured_profile_env` — profile env-only KHÔNG có file config là đường **HỢP LỆ**
+  theo §9, không được chặn oan;
+- **chặn** ở `_load_manifest_full`, **ĐẶT TRƯỚC `mkdir`** để đến cả thư mục cache của profile-ma cũng
+  không được tạo. Vá một chỗ phủ mọi lệnh đọc — mọi đường resolve theo số hiệu đều đi qua
+  `_manifest_entries` → hàm này;
+- thêm `TL_PROFILE_MISSING` vào `_PROFILE_ENV_OVERLAY_KEYS` để `_ProfileEnvGuard` và
+  `_base_manifest_entries` snapshot-restore đúng (đọc NỀN có chủ đích từ trong profile dự án vẫn chạy).
+
+**Kiểm (+5 case HÀNH VI qua `apply_profile_offline` + `_manifest_entries` THẬT; selftest 1497/1497 —
+xanh cả chế độ thường lẫn hermetic):** phản chứng đo trên bản CHƯA VÁ — **2/5 ĐỎ** (ca lõi profile-ma và
+ca gỡ-chốt); 3 case còn lại xanh **đúng thiết kế** vì là cặp «KHÔNG ĐƯỢC ĐỔI»: profile THẬT vẫn đọc ·
+corpus NỀN vẫn đọc · profile env-only §9 không bị chặn oan. Ca lõi kiểm THÊM: **thư mục cache mang tên
+ma KHÔNG được tạo** — cache-ma mới là thứ sống sót sau khi lệnh kết thúc.
+
+★Khung test đã dời `HERE` theo bài học r284 (không thì lại là test phụ thuộc máy).
+
+# ★ v1.36.23 — r285: bịt RÒ RỈ MONKEYPATCH trong selftest — khối r87 làm mọi test sau nó chạy trên bản GIẢ (P16-T02) — TEST-ONLY (2026-07-31)
+
+**Bệnh (P0 của bộ test, đo trực tiếp chứ không suy):** khối test `r87` khai
+`_keys86 = ("_gas","load_creds","apply_profile_offline","_apply_journal_start","_journal_append")` để
+khôi phục, nhưng bên trong (`:6672-6674`) còn thay THÊM **ba** tên nữa: `_manifest_entries` → `lambda: []`,
+`_reg_before_from_manifest` → `lambda: {}`, `_apply_gate` → `(True, {"ok": True})`. Ba tên đó KHÔNG nằm
+trong danh sách khôi phục ⇒ stub **sống tới hết `run()`**.
+
+**Hại đo được:** (i) mọi case sau `:6672` mà không tự thay `_manifest_entries` đều thấy **corpus RỖNG**;
+(ii) mọi case đi qua `_apply_gate` được cho qua **VÔ ĐIỀU KIỆN** — tức cổng preflight bất biến (`_apply_gate`,
+ADR) **chưa từng được kiểm** ở nửa sau bộ test. Đúng lớp `false-green-test-qua-bind` đã có trong sổ.
+
+**Cách phát hiện (một phép đo, không đoán):** cài `__setattr__` hook lên module `tl` rồi chạy
+`tl_selftest.run()` — ghi được **343 lần gán** `_manifest_entries`; lần gán từ `:6672` KHÔNG BAO GIỜ được
+trả về bản gốc. Tại điểm test mới của P16 chạy, `_TL_MODULE._manifest_entries.__qualname__` =
+`"run.<locals>.<lambda>"` (không phải hàm sản xuất) và trả `[]`.
+
+**BẰNG CHỨNG HẠI CÓ THẬT:** vá rò rỉ xong, `r97_no_nlm_add_stops_at_drive_registry` (`:7998`) **SẬP NGAY**
+(`JSONDecodeError` — lệnh không in nổi JSON vì đi đọc manifest thật). Nghĩa là test r97 xưa nay xanh **chỉ
+nhờ** stub rò từ khối khác; kịch bản «corpus trống ⇒ không trùng ⇒ nạp tiếp» của nó **chưa từng được khai
+báo**. Nay r97 tự khai `_manifest_entries = []` — cùng kịch bản, nhưng nói ra.
+
+**VÁ (chỉ `tl_selftest.py`, không đụng code sản xuất):**
+1. `_keys86` phủ TRỌN tập tên khối r87 thay (thêm `_manifest_entries`, `_reg_before_from_manifest`, `_apply_gate`).
+2. Khối r97 tự khai stub `_manifest_entries` của mình (+ thêm vào `_keys97` để khôi phục).
+3. **CHỐT CHẶN TÁI PHÁT** — `r285_khong_ro_ri_monkeypatch`: chụp ảnh MỌI hàm/lớp của module `tl` ở ĐẦU
+   `run()`, đối chiếu identity ở CUỐI; tên nào lệch là monkeypatch bị bỏ quên ⇒ case ĐỎ và **in đích danh**
+   danh sách tên để sửa được ngay, thay vì để nó âm thầm làm xanh giả các lượt sau.
+
+**Vùng ảnh hưởng đo được (không đoán):** chạy hermetic sau khi bịt rò rỉ ⇒ **đúng 3 test** lộ ra là
+xanh-giả, tất cả cùng họ `ingest_local`: `r97_no_nlm_add_stops_at_drive_registry`,
+`r114_no_nlm_add_never_counts_slots`, `r115_ingest_local_dead_cookie_autoswitch_addtay`. Cả ba được vá
+theo ĐÚNG nguyên tắc: **tự khai stub của chính nó** (`_manifest_entries = []` — vốn là kịch bản
+«corpus trống, không có dòng nào để dedup» của chính chúng), KHÔNG khôi phục rò rỉ để làm chúng xanh lại.
+
+**Chi phí ẩn cũng lộ ra:** trên máy CÓ creds thật, `_selftest_seal_env` cố ý KHÔNG chặn mạng (vế 3 của
+r262), nên ba test đó — khi mất stub — đi gọi webapp thật, mỗi lần retry 5s+15s ⇒ selftest vọt từ ~100s
+lên >10 phút. Sau khi khai stub tường minh: **103s, 1492/1492**. Hermetic (ép creds giả) cũng 1492/1492.
 
 # ★ v1.36.22 — r284: sửa test PHỤ THUỘC MÁY của r281/r283 (khung cô lập bỏ sót `HERE`) — TEST-ONLY (2026-07-31)
 

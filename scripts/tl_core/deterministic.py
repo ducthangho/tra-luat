@@ -50,29 +50,6 @@ def deterministic_enabled(args: Any = None, *, default_on: bool = False) -> bool
     return str(os.environ.get("TL_DETERMINISTIC") or "").strip().lower() in TRUTHY
 
 
-# r286 (v1.36.24 — Slice G0.1a): đồng hồ ĐÓNG BĂNG cho các trường "tuổi tính bằng GIÂY".
-# `snapshot_age_s` được liệt trong VOLATILE_JSON_KEYS nên projection scrub được, nhưng golden-test còn so
-# RAW stdout hai lượt: raw vẫn lệch khi tuổi cache vắt qua mốc giây nguyên giữa hai lần chạy (đo THẬT:
-# hai lượt cách 1,2s ⇒ 1284 vs 1285, và đó là KHÁC BIỆT DUY NHẤT của cả payload). Bất định THEO THỜI ĐIỂM
-# ⇒ 20/20 raw_stable=true ở một lượt may KHÔNG chứng minh được gì. Vì G0.1b sắp cưỡng chế
-# `raw_stable=false ⇒ ok=false`, phải đóng băng ở RAW TRƯỚC, nếu không gate ĐỎ CHẬP CHỜN.
-FROZEN_AGE_S = 0
-
-
-def frozen_age_seconds(value: Any, args: Any = None, *, default_on: bool = False) -> Any:
-    """Trả tuổi-giây đã ĐÓNG BĂNG khi deterministic mode bật; nguyên trạng khi tắt.
-
-    `None` giữ nguyên `None`: "chưa có snapshot" là dữ kiện NGHIỆP VỤ, không phải nhiễu thời gian —
-    đổi nó thành 0 là nói dối ("có snapshot, mới 0 giây"). Chỉ con số tuổi mới bị đóng băng.
-    Không nới định nghĩa raw-stability: giá trị vẫn được PHÁT ra, chỉ là hằng dưới deterministic mode.
-    """
-    if value is None:
-        return None
-    if deterministic_enabled(args, default_on=default_on):
-        return FROZEN_AGE_S
-    return value
-
-
 def unique_preserve_order(items) -> list[str]:
     seen = set()
     out: list[str] = []

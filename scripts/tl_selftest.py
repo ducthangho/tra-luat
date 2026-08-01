@@ -11730,6 +11730,96 @@ def run() -> int:
         return _d["ok"] is True and _d["summary"]["changed"] == 0
     _t110("r287_hai_anh_giong_het_van_ok", _c287_hai_anh_giong_het_van_ok)
 
+    # ═══ r288 (v1.36.26) — GATE-01: raw drift phải được GIẢI THÍCH TRỌN bởi khoá ĐÃ KHAI ═══
+    # Audit lõi 31-07 chẩn `golden-test` ghi `raw_stable:false` mà vẫn `ok:true` là gate xanh giả — ĐÚNG
+    # cơ chế. Nhưng ĐO ra triệu chứng NGƯỢC với cách audit/kế hoạch hiểu: 20 case golden chỉ 1 case
+    # raw-unstable (`sweep`), dòng lệch DUY NHẤT là `snapshot_age_s` — vốn ĐÃ khai volatile, tức lành.
+    # Cưỡng chế "raw_stable=false ⇒ ok=false" trần trụi (đề xuất gốc) làm gate ĐỎ NGAY ở case lành đó.
+    #
+    # ★ KHE HỞ THẬT (đo được, cả audit lẫn kế hoạch đều không nêu): `audit_projection` chỉ scrub theo
+    #   khoá đã khai, còn `_json_dumps(deterministic=True)` SẮP XẾP khoá ⇒ stdout lệch THỨ TỰ KHOÁ cho
+    #   projection y hệt. Đây đúng là lớp bug iteration-order của set/dict — bản cũ trả ok=true trọn vẹn.
+    # ★ Patch phải đặt trên MODULE `tl_core.workflow`: đã ĐO `_golden_test.__globals__ is
+    #   tl_core.workflow.__dict__` (bind COPY-globals như ocr.py, KHÔNG rebase về namespace tl như
+    #   ingest_ops) — patch nhầm chỗ là test xanh GIẢ.
+    import tl_core.workflow as _w288
+
+    def _raw288(pairs):
+        import json as _j288
+        return _j288.dumps(dict(pairs), ensure_ascii=False, indent=2) + chr(10)
+
+    def _golden288(raws, *, volatile=None, write=False):
+        """Chạy `_golden_test` THẬT trên một case bịa; `raws` = stdout của hai lượt liên tiếp."""
+        import json as _j288, tempfile as _tf288
+        from pathlib import Path as _P288
+        _seq, _td = list(raws), _tf288.mkdtemp()
+        _names = ("_GOLDEN_CASES", "_run_tl_json", "_golden_ensure_fixtures", "_golden_dir",
+                  "_golden_args", "_golden_env")
+        _saved = {k: getattr(_w288, k) for k in _names}
+        try:
+            _w288._GOLDEN_CASES = [{"id": "c288", "file": "c288.json", "args": ["x288"],
+                                    "volatile_keys": list(volatile or [])}]
+            _w288._golden_ensure_fixtures = lambda: None
+            _w288._golden_dir = lambda: _P288(_td)
+            _w288._golden_args = lambda case: ["x288"]
+            _w288._golden_env = lambda case: {}
+            _w288._run_tl_json = lambda args, **kw: (lambda s: {"stdout": s, "returncode": 0,
+                                                               "data": _j288.loads(s)})(_seq.pop(0))
+            return _w288._golden_test(write=write), _P288(_td) / "c288.json"
+        finally:
+            for _k, _v in _saved.items():
+                setattr(_w288, _k, _v)
+
+    # nội dung Y HỆT, chỉ khác THỨ TỰ KHOÁ ⇒ projection trùng, raw lệch
+    _ORDER288 = (_raw288([("schema", "x.v1"), ("alpha", 1), ("beta", 2)]),
+                 _raw288([("schema", "x.v1"), ("beta", 2), ("alpha", 1)]))
+    # chỉ khác Ở KHOÁ ĐÃ KHAI volatile ⇒ lành, phải GIỮ XANH (chính là ca `sweep` ngoài đời)
+    _VOL288 = (_raw288([("schema", "x.v1"), ("snapshot_age_s", 10)]),
+               _raw288([("schema", "x.v1"), ("snapshot_age_s", 11)]))
+
+    def _c288_helper_quy_dung_khoa():
+        # đơn vị: lệch ở dòng có khoá ⇒ quy được; lệch ở PHẦN TỬ MẢNG ⇒ quy_được_hết=False (fail-closed).
+        _k1, _a1 = _w288._raw_drift_keys(*_VOL288)
+        _k2, _a2 = _w288._raw_drift_keys('{\n  "arr": [\n    1\n  ]\n}', '{\n  "arr": [\n    2\n  ]\n}')
+        _k3, _a3 = _w288._raw_drift_keys(_VOL288[0], _VOL288[0])
+        return (_k1 == ["snapshot_age_s"] and _a1 is True
+                and _k2 == [] and _a2 is False          # ★ [] mà attributed=False: KHÔNG được đọc thành "sạch"
+                and _k3 == [] and _a3 is True)
+    _t110("r288_helper_quy_dong_lech_ve_khoa", _c288_helper_quy_dung_khoa)
+
+    def _c288_thu_tu_khoa_lech_bi_bat():
+        # ★ CA LÕI: projection ỔN ĐỊNH (đã sort) nhưng stdout BẤT ĐỊNH thật. Trước vá: ok=true.
+        _res, _ = _golden288(_ORDER288)
+        _c = _res["cases"][0]
+        return (_res["ok"] is False and _c["ok"] is False
+                and _c["projection_stable"] is True and _c["raw_stable"] is False
+                and _c["error"] == "RAW_UNSTABLE_UNDECLARED"
+                and _c["raw_drift_undeclared"] == ["alpha", "beta"])
+    _t110("r288_raw_lech_khoa_chua_khai_lam_do_case", _c288_thu_tu_khoa_lech_bi_bat)
+
+    def _c288_write_tu_choi_ghi_fixture():
+        # Lỗ NẶNG NHẤT của bản cũ: `--write` đóng băng luôn cái bất định vào golden. Nay phải TỪ CHỐI ghi.
+        _res, _p = _golden288(_ORDER288, write=True)
+        return (_res["ok"] is False and _res["cases"][0].get("written") is False
+                and not _p.exists())
+    _t110("r288_write_khong_ghi_fixture_khi_drift_chua_khai", _c288_write_tu_choi_ghi_fixture)
+
+    def _c288_khoa_da_khai_van_xanh():
+        # ★ PHẢN CHỨNG GIỮ `sweep` SỐNG: lệch đúng khoá đã khai volatile ⇒ KHÔNG được làm đỏ case.
+        _res, _ = _golden288(_VOL288, volatile=["snapshot_age_s"], write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is False and _c["ok"] is True
+                and _c.get("error") is None and _c["raw_drift_undeclared"] == [])
+    _t110("r288_drift_khoa_da_khai_khong_lam_do", _c288_khoa_da_khai_van_xanh)
+
+    def _c288_raw_on_dinh_khong_doi_gi():
+        # PHẢN CHỨNG: hai lượt stdout giống hệt ⇒ đường cũ nguyên vẹn, không sinh trường lạ.
+        _res, _ = _golden288((_VOL288[0], _VOL288[0]), write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is True and _c["ok"] is True
+                and "raw_drift_undeclared" not in _c)
+    _t110("r288_raw_on_dinh_giu_nguyen_duong_cu", _c288_raw_on_dinh_khong_doi_gi)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(
@@ -20819,6 +20909,87 @@ def run() -> int:
         return not bad
     _t110("r209_skill_md_khong_tro_file_ma", _c209_skill_md_khong_tro_file_ma)
 
+    def _c289_bare_tool_findings_pure():
+        # H9b: helper thuần — bắt tên công cụ TRẦN trong backtick (dạng `nlm_qa.py verify` mà
+        # _doc_pointer_findings MÙ vì đòi tiền tố thư mục). Khớp theo BASENAME trong package-set.
+        f = _rel209._doc_bare_tool_findings
+        pkg = ["scripts/co.py", "scripts/_fallback/boot.py", "references/y.md"]
+        strict = frozenset({"SKILL.md"})
+        # (a) tên trần THIẾU ở tài liệu SỐNG ⇒ fail; tên trần CÓ (kể cả nằm sâu _fallback/) ⇒ im
+        r = f({"SKILL.md": "chạy `ghost.py` rồi `co.py`, và `boot.py` nữa"}, pkg,
+              strict_docs=strict, baseline=frozenset())
+        ok1 = (r["bare_tools_fail"] == [("SKILL.md", "ghost.py")]) and not r["bare_tools_ok"]
+        # (b) token CÓ tiền tố thư mục ⇒ BỎ QUA (đã do _doc_pointer_findings gác, không đếm hai lần)
+        r2 = f({"SKILL.md": "xem `scripts/ghost2.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok2 = r2["bare_tools_ok"] and r2["bare_tools_checked"] == 0
+        # (c) NGOÀI backtick ⇒ không xét (tránh nuốt văn xuôi thường)
+        r3 = f({"SKILL.md": "chạy ghost3.py đi"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok3 = r3["bare_tools_ok"] and r3["bare_tools_checked"] == 0
+        # (d) tài liệu NGOÀI strict ⇒ advisory, KHÔNG chặn
+        r4 = f({"references/KHAC.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok4 = r4["bare_tools_ok"] and r4["bare_tools_advisory"] == [("references/KHAC.md", "ghost.py")]
+        # (e) baseline im lặng — và khớp theo CẶP: cùng tên ở doc KHÁC vẫn ĐỎ
+        bl = frozenset({("SKILL.md", "ghost.py")})
+        r5 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=bl)
+        ok5 = r5["bare_tools_ok"] and r5["bare_tools_baseline"] == [("SKILL.md", "ghost.py")]
+        r6 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        r6b = f({"references/K2.md": "`ghost.py`"}, pkg,
+                strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        ok6 = r6["bare_tools_ok"] and (not r6b["bare_tools_ok"])
+        # (f) manifest rỗng ⇒ fail-closed (đồng nhất với hai guard anh em)
+        r7 = f({"SKILL.md": "`co.py`"}, [], strict_docs=strict, baseline=frozenset())
+        ok7 = not r7["bare_tools_ok"]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r289_bare_tool_findings_pure", _c289_bare_tool_findings_pure)
+
+    def _c289_cay_that_bare_tools():
+        # H9b nghiệm thu CÂY THẬT: 0 fail ở tài liệu SỐNG sau khi dọn 7 tên ma của SKILL.md +
+        # `nlm_qa.py` của QUY_TRINH. Package-set lấy từ RELEASE_MANIFEST (nguồn sự thật của guard
+        # sản xuất) — KHÔNG mô phỏng bằng rglob đĩa: cây dev rộng hơn gói ⇒ xanh giả.
+        # PHẢN CHỨNG 2 CHIỀU: bơm lại đúng dòng SKILL.md §7 TRƯỚC-r289 ⇒ ĐỎ đúng 4 tên ma
+        # (`nlm_sources.py` CÓ THẬT trong gói nên phải im — chứng minh guard không bắt bừa).
+        root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return True
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        docs = {}
+        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
+            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
+        r = _rel209._doc_bare_tool_findings(docs, paths)
+        ok1 = r["bare_tools_ok"] and r["bare_tools_fail"] == []
+        ok2 = len(r["bare_tools_advisory"]) >= 30      # DOCTRINE lưu trữ vẫn ĐƯỢC BÁO, không nuốt
+        ok3 = len(r["bare_tools_baseline"]) == 1       # placeholder `file.py` — ratchet đang gài
+        cu = ("- **NLM:** `nlm_push.py` · `nlm_qa.py` · `nlm_sources.py` (`-S`) · "
+              "`nlm_map.py` · `dedup_gate2.py`.")
+        r2 = _rel209._doc_bare_tool_findings({"SKILL.md": cu}, paths)
+        ok4 = (not r2["bare_tools_ok"]) and set(r2["bare_tools_fail"]) == {
+            ("SKILL.md", "nlm_push.py"), ("SKILL.md", "nlm_qa.py"),
+            ("SKILL.md", "nlm_map.py"), ("SKILL.md", "dedup_gate2.py")}
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r289_cay_that_bare_tools", _c289_cay_that_bare_tools)
+
+    def _c289_khong_con_lenh_ma_nlm_qa():
+        # r289/V2: `nlm_qa` là LỆNH MA (scripts/nlm_qa.py chưa từng có; không subcommand nào tên
+        # nlm-qa). Nó từng rò vào 4 tệp SỐNG, kể cả THẺ MÁY ĐỌC rasoat_hoso.json — tức bước A5
+        # VERIFY của Loop A trỏ vào hư không. Khoá: 3 tệp quy trình + thẻ không được nhắc lại,
+        # và lệnh thay thế `nlm-query --strict-scope` phải CÓ THẬT trong command registry.
+        root = _ROOT209
+        song = ["references/QUY_TRINH_RA_SOAT_3_TANG.md", "references/RASOAT_HOSO_LOOP.md",
+                "references/workflows/rasoat_hoso.json", "SKILL.md"]
+        ban = [p for p in song
+               if "nlm_qa" in (root / p).read_text(encoding="utf-8", errors="replace")]
+        ok1 = ban == []
+        from tl_core import command_registry as _cr289
+        _specs = getattr(_cr289, "GENERATED_SPECS", None)
+        names = {str(s.get("name") or "") for s in (_specs or [])}
+        ok2 = bool(_specs) and ("nlm-query" in names) and ("nlm-qa" not in names) and ("nlm_qa" not in names)
+        loop = (root / "references/RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        ok3 = "--strict-scope" in loop
+        return ok1 and ok2 and ok3
+    _t110("r289_khong_con_lenh_ma_nlm_qa", _c289_khong_con_lenh_ma_nlm_qa)
+
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
         # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
@@ -21904,6 +22075,121 @@ def run() -> int:
             ok7 = _r5.returncode == 0 and _j5.get("so_lech") == 0 and _j5.get("da_ghi") is False
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
+
+    # ═══ r290 (v1.36.2x) — T1-a Làn A: VALIDATE TRỌN TRƯỚC KHI GHI (RAS-06/07/11/12/15/16) ═══
+    # Audit lõi 31-07. Cùng một mẫu bệnh với r216 nhưng ở các nhánh r216 chưa phủ: lệnh phát hiện lỗi,
+    # trả rc=2 — MÀ ĐÃ GHI ĐÈ xong bảng master. Đo A/B trên cây HEAD trước khi vá (đường sản xuất thật):
+    #   RAS-11 input hỏng : da_ghi=True,  BẢNG MASTER BỊ GHI ĐÈ bằng bản THIẾU
+    #   RAS-12 state hỏng : rc=0, ok=True (lỗi chỉ nằm trong field phụ `hoa_giai_state.loi`)
+    #   RAS-07 tên≠unit_id: unit-a→done (đơn vị CHƯA HỀ RÀ), unit-b→pending (dù master của nó có thật)
+    #   RAS-15/16 phụ lục : bản sao lưu bị GỘP (đếm hai lần) + heading LĨNH VỰC rỗng
+    _MASTER290 = {"unit_id": "unit-001", "van_ban": "212-2025-ND-CP", "ten": "ND 212",
+                  "phat_hien": [{"key": "VD-10", "linh_vuc": "", "hinh_thuc": "nghiên cứu"}]}
+
+    def _tl290(*args):
+        import subprocess as _sp290, sys as _sy290
+        _r = _sp290.run([_sy290.executable, str(_ROOT209 / "scripts" / "tl.py"), *args],
+                        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        try:
+            _j = json.loads(_r.stdout[_r.stdout.find("{"):])
+        except Exception:  # noqa: BLE001
+            _j = {}
+        return _r.returncode, _j
+
+    def _c290_merge_validate_truoc_khi_ghi():
+        """RAS-11 + RAS-12, chạy ĐÚNG đường sản xuất (subprocess) — cái đã cắn là hành vi của LỆNH."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            _out = Path(_td) / "BANG_MASTER.json"
+            # (0) PHẢN CHỨNG: hồ sơ SẠCH vẫn ghi như cũ — bản vá không siết quá tay
+            _rc0, _j0 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok0 = _rc0 == 0 and _j0.get("da_ghi") is True and _out.is_file()
+            _truoc = _out.read_bytes()
+            # (a) RAS-11: thêm file JSON HỎNG ⇒ KHÔNG được ghi đè bảng master đang có
+            (_d / "unit-002.json").write_text("{ khong phai json", encoding="utf-8")
+            _rc1, _j1 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok1 = (_rc1 == 2 and _j1.get("error") == "NGUON_HONG_KHONG_DOC_DUOC"
+                   and _j1.get("da_ghi") is False and _out.read_bytes() == _truoc
+                   and [x["nguon"] for x in _j1.get("nguon_hong") or []] == ["unit-002.json"])
+            (_d / "unit-002.json").unlink()
+            # (b) RAS-12: --state hỏng ⇒ transaction ĐỎ và KHÔNG ghi master (trước: rc=0/ok=true/đã ghi)
+            _out2 = Path(_td) / "BANG_MASTER_2.json"
+            _st = Path(_td) / "state.json"; _st.write_text("{ hong", encoding="utf-8")
+            _rc2, _j2 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out2),
+                               "--state", str(_st), "--json")
+            ok2 = (_rc2 == 2 and _j2.get("ok") is False and _j2.get("da_ghi") is False
+                   and str(_j2.get("error") or "").startswith("STATE_HONG_KHONG_DOC_DUOC")
+                   and not _out2.exists())
+            # (c) fail-closed khi KHÔNG chứng minh được đơn vị nào đã xong (thiếu unit_id + có --state)
+            _d3 = Path(_td) / "m3"; _d3.mkdir()
+            (_d3 / "x.json").write_text(json.dumps({"van_ban": [], "noi_dung": [{"key": "K1"}]},
+                                                   ensure_ascii=False), encoding="utf-8")
+            _out3 = Path(_td) / "BANG_MASTER_3.json"
+            _st3 = Path(_td) / "state3.json"
+            _st3.write_text(json.dumps({"q_units": []}, ensure_ascii=False), encoding="utf-8")
+            _rc3, _j3 = _tl290("rasoat-merge", "--in", str(_d3), "--out", str(_out3),
+                               "--state", str(_st3), "--json")
+            ok3 = (_rc3 == 2 and _j3.get("error") == "STATE_HOA_GIAI_THIEU_UNIT_ID"
+                   and _j3.get("da_ghi") is False and not _out3.exists())
+        return ok0 and ok1 and ok2 and ok3
+    _t110("r290_merge_validate_tron_truoc_khi_ghi", _c290_merge_validate_truoc_khi_ghi)
+
+    def _c290_state_hoa_giai_neo_unit_id():
+        """RAS-07: hoà giải state phải neo `payload.unit_id`, KHÔNG phải `f.stem`.
+
+        Bản cũ SAI CẢ HAI CHIỀU cùng lúc (đo được): đánh done cho đơn vị chưa hề rà, đồng thời đẩy về
+        pending đơn vị đã có master — tức vừa bỏ sót vừa rà lại."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            # tên file 'unit-a' NHƯNG nội dung là 'unit-b'
+            (_d / "unit-a.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-b"),
+                                                       ensure_ascii=False), encoding="utf-8")
+            _st = Path(_td) / "state.json"
+            _st.write_text(json.dumps({"schema": "rasoat_plan.v1",
+                                       "q_units": [{"unit_id": "unit-a", "trang_thai": "doing"},
+                                                   {"unit_id": "unit-b", "trang_thai": "doing"}]},
+                                      ensure_ascii=False), encoding="utf-8")
+            _rc, _j = _tl290("rasoat-merge", "--in", str(_d), "--out", str(Path(_td) / "M.json"),
+                             "--state", str(_st), "--json")
+            _cuoi = {u["unit_id"]: u["trang_thai"]
+                     for u in json.loads(_st.read_text(encoding="utf-8"))["q_units"]}
+            # phải NÓI RA chuyện tên file lệch nội dung, không im lặng
+            _lech = (_j.get("hoa_giai_state") or {}).get("ten_file_lech_unit_id") or []
+            return (_rc == 0 and _cuoi == {"unit-a": "pending", "unit-b": "done"}
+                    and [x["file"] for x in _lech] == ["unit-a.json"])
+    _t110("r290_state_hoa_giai_neo_unit_id_khong_neo_ten_file", _c290_state_hoa_giai_neo_unit_id)
+
+    def _c290_phuluc_truc_tiep_ngang_wrapper():
+        """RAS-15 + RAS-16 + RAS-06: chạy THẲNG `rasoat_phuluc.py` phải có cùng cổng như wrapper merge."""
+        import subprocess as _sp290, sys as _sy290, tempfile as _tf290
+        _script = str(_ROOT209 / "scripts" / "rasoat_phuluc.py")
+
+        def _run(_indir, _outdir):
+            return _sp290.run([_sy290.executable, _script, "--in", str(_indir), "--out-dir", str(_outdir)],
+                              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            # RAS-15: bản sao lưu để lẫn ⇒ phải BỎ QUA và KHAI BÁO (trước: gộp ⇒ đếm hai lần)
+            (_d / "unit-001.bak.truoc.json").write_text(json.dumps(_MASTER290, ensure_ascii=False),
+                                                        encoding="utf-8")
+            _od = Path(_td) / "out"
+            _r = _run(_d, _od)
+            _md = "".join(f.read_text(encoding="utf-8") for f in sorted(_od.rglob("*.md"))) if _od.is_dir() else ""
+            ok1 = _r.returncode == 0 and "BỎ QUA" in (_r.stdout + _r.stderr)
+            # RAS-16: `linh_vuc: ""` ⇒ "(Chưa phân loại)", KHÔNG phải heading rỗng
+            ok2 = "CHƯA PHÂN LOẠI" in _md.upper() and "**LĨNH VỰC **" not in _md
+            # RAS-06: hai phiếu TRÙNG key (tên khác nhau, không phải .bak) ⇒ fail-closed, không dựng phụ lục
+            (_d / "unit-002.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-002"),
+                                                         ensure_ascii=False), encoding="utf-8")
+            _r2 = _run(_d, Path(_td) / "out2")
+            ok3 = _r2.returncode != 0 and "TRÙNG LẶP" in (_r2.stdout + _r2.stderr)
+        return ok1 and ok2 and ok3
+    _t110("r290_phuluc_truc_tiep_cung_cong_voi_wrapper", _c290_phuluc_truc_tiep_ngang_wrapper)
+
 
     # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════
     # Bối cảnh (lượt rà 6+7, 27-07): đối chiếu bản kho ↔ bản Công báo ra ND 159 lệch 17 điểm, ND 158
@@ -24194,8 +24480,17 @@ def run() -> int:
                              "ngoai span: commit fadedbc khong co trong kho.\n", encoding="utf-8")
             _r264 = {f["reason"] for f in _wf264._doc_claims_check(paths=[str(_p264)])["flags"]}
         ok4 = {"PATH_MISSING", "SHA_NOT_A_COMMIT"} <= _r264
-        # PHẢN CHỨNG 2 — tệp kế hoạch CÒN LẠI trong docs/ KHÔNG được ăn ké nhãn lịch sử
-        ok5 = "docs/WORKFLOW_RASOAT_TU_DONG.md" not in _wf264._DOC_CLAIMS_HISTORICAL
+        # PHẢN CHỨNG 2 — nhãn lịch sử KHÔNG được LAN ra cả `docs/`.
+        # ★ r289/Q2 (user chốt 01-08) ĐẢO vế cũ: r264 khoá «WORKFLOW_RASOAT_TU_DONG.md KHÔNG được
+        #   historical» để chứng minh việc phủ `docs/` có răng. Nay CẢ HAI tài liệu kế hoạch đã chuyển
+        #   LƯU TRỮ có chủ đích (tự khai ở dòng đầu; đường dẫn/lệnh trong thân là PHÁT HIỆN của tài liệu,
+        #   không phải con trỏ để đi theo — nguồn sự thật vận hành đã dời sang `references/`).
+        #   Ý ĐỒ GỐC vẫn được giữ, chỉ đổi cách khoá: (a) nhãn phải đúng là tài liệu ĐÃ KHAI, và
+        #   (b) TUYỆT ĐỐI không được khai cả thư mục `docs/` — làm thế thì ADR và mọi tệp docs/ khác
+        #   hết bị bắt cứng, đúng cái "trang trí" mà r264 sinh ra để chặn. Vế răng-thật nằm ở ok4.
+        ok5 = ("docs/WORKFLOW_RASOAT_TU_DONG.md" in _wf264._DOC_CLAIMS_HISTORICAL
+               and not any(str(_h264).rstrip("/") in ("docs", "docs/adr")
+                           for _h264 in _wf264._DOC_CLAIMS_HISTORICAL))
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r264_doc_claims_phu_docs", _c264_doc_claims_docs)
 
@@ -24554,12 +24849,13 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r276_sohieu_khong_nam_detector", _c276_sohieu_khong_nam_detector)
 
-    # ═══ r286 (v1.36.24) — Slice G0.1a: `sweep` TẤT ĐỊNH ở RAW, TRƯỚC khi G0.1b cưỡng chế ═══
-    # `snapshot_age_s` đã nằm trong volatile_keys ⇒ PROJECTION sạch, nhưng golden-test còn so RAW stdout
-    # hai lượt. Raw lệch mỗi khi tuổi cache vắt qua mốc GIÂY NGUYÊN giữa hai lần chạy — bất định THEO
-    # THỜI ĐIỂM, nên "20/20 raw_stable=true ở một lượt" KHÔNG chứng minh được gì. Đo THẬT trên cây này:
-    # hai lượt `sweep --json` cách 1,2s ⇒ 1284 vs 1285, và đó là KHÁC BIỆT DUY NHẤT của cả payload.
-
+    # r294 (hoà nhánh v1.36.34) — GỠ 3 ca `r286_*` (đóng băng `snapshot_age_s` ở RAW) và helper của chúng:
+    # phiên khác đã land GATE-01 theo thiết kế KHÁC trên master (`3f614de` r288 v1.36.28 — quy raw drift về
+    # KHOÁ ĐÃ KHAI) và trong chính commit đó đã CÂN NHẮC RỒI BÁC phương án đóng băng: "raw hết là raw, mất
+    # luôn khả năng phát hiện bất định THẬT". ĐO trên cây này sau khi tắt đóng băng: `golden-test` 6 lượt,
+    # lượt 3 và 6 có `sweep raw_stable=False` với `raw_drift_keys=['snapshot_age_s']`, `undeclared=[]`
+    # ⇒ `ok=True`, `rc=0`. Tức cơ chế của họ MỘT MÌNH giữ `sweep` xanh, và giữ được cả THÔNG TIN drift.
+    # `_resolve286` GIỮ LẠI (r289/r290/r291 dùng) — xem mục ★ v1.36.34 CHANGELOG.
     def _resolve286(fn):
         """Gỡ stub `_STUB_MAP` để lấy HÀM THẬT đang chạy + globals THẬT của nó.
 
@@ -24577,110 +24873,6 @@ def run() -> int:
             fn = getattr(getattr(_TL_MODULE, "_tl_" + _mk), _nm)
             _seen += 1
         return fn
-
-    def _run286(fn, argv, ages):
-        """Chạy `fn` với tuổi-cache TRÔI theo `ages`; trả (rc, stdout) từng lượt."""
-        _real = _resolve286(fn)
-        _g = _real.__globals__
-        _sav = {k: _g.get(k) for k in ("_manifest_entries", "_manifest_cache_age_seconds")}
-        _tick = iter(list(ages))
-        _g["_manifest_entries"] = lambda refresh=False: _fx30
-        _g["_manifest_cache_age_seconds"] = lambda *_a, **_k: next(_tick)
-        try:
-            _outs = []
-            for _ in range(len(ages)):
-                _b = _io27.StringIO()
-                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
-                    _rc = _real(build_parser().parse_args(argv))
-                _outs.append((_rc, _b.getvalue()))
-            return _outs
-        finally:
-            for _k, _v in _sav.items():
-                _g[_k] = _v
-
-    def _c286_frozen_age_dong_bang_va_giu_none():
-        # HỢP ĐỒNG của helper: deterministic BẬT ⇒ mọi tuổi-giây thu về MỘT hằng (hai đầu vào khác nhau
-        # cho cùng một byte); deterministic TẮT ⇒ giá trị THẬT nguyên vẹn — không nới định nghĩa
-        # raw-stability, chỉ đóng băng dưới chế độ tất định; `None` luôn giữ `None` (chưa có snapshot là
-        # dữ kiện NGHIỆP VỤ, đổi thành 0 là nói dối "có snapshot, mới 0 giây").
-        _det = _TL_MODULE._tl_det
-
-        class _A286on:
-            deterministic = True
-
-        class _A286off:
-            deterministic = False
-
-        _sav286 = os.environ.get("TL_DETERMINISTIC")
-        try:
-            os.environ.pop("TL_DETERMINISTIC", None)   # tắt env: cờ args là thứ DUY NHẤT quyết định
-            on1 = _det.frozen_age_seconds(1284, _A286on())
-            on2 = _det.frozen_age_seconds(1285, _A286on())
-            off1 = _det.frozen_age_seconds(1284, _A286off())
-            off2 = _det.frozen_age_seconds(1285, _A286off())
-            none_on = _det.frozen_age_seconds(None, _A286on())
-            none_off = _det.frozen_age_seconds(None, _A286off())
-            os.environ["TL_DETERMINISTIC"] = "1"       # đường ENV — chính là đường subprocess golden dùng
-            env_on = _det.frozen_age_seconds(1284, None)
-        finally:
-            if _sav286 is None:
-                os.environ.pop("TL_DETERMINISTIC", None)
-            else:
-                os.environ["TL_DETERMINISTIC"] = _sav286
-        return (on1 == on2 == _det.FROZEN_AGE_S and env_on == _det.FROZEN_AGE_S
-                and off1 == 1284 and off2 == 1285
-                and none_on is None and none_off is None)
-    _t110("r286_frozen_age_dong_bang_va_giu_none", _c286_frozen_age_dong_bang_va_giu_none)
-
-    def _c286_sweep_raw_bat_bien_khi_tuoi_cache_troi():
-        # ĐẶC TẢ HÀNH VI — đây mới là ca ĐỎ-TRƯỚC thật: `sweep --json --deterministic` HAI lượt, giữa hai
-        # lượt cho đồng hồ tuổi-cache TRÔI 1284 → 1285 đúng như lúc vắt mốc giây. RAW stdout phải BẤT BIẾN
-        # TỪNG BYTE. Trước vá: hai lượt lệch đúng dòng `"snapshot_age_s"` ⇒ ĐỎ.
-        _r = _run286(_TL_MODULE.cmd_sweep, ["sweep", "--json", "--deterministic"], [1284.0, 1285.0])
-        if any(rc != 0 for rc, _ in _r):
-            return False
-        _dong_bang = (_r[0][1] == _r[1][1]
-                      and json.loads(_r[0][1]).get("snapshot_age_s") == _TL_MODULE._tl_det.FROZEN_AGE_S)
-        # PHẢN CHỨNG cùng ca: KHÔNG deterministic thì tuổi THẬT vẫn phải phơi ra — helper không được biến
-        # thành "luôn luôn 0" (thế là NỚI ĐỊNH NGHĨA, không phải làm tất định). Ghim `_DETERMINISTIC_ON`
-        # về False vì nó là biến toàn cục dính (main() bật là bật luôn cả tiến trình).
-        _sav_on = _TL_MODULE._DETERMINISTIC_ON
-        _sav_env = os.environ.get("TL_DETERMINISTIC")
-        try:
-            _TL_MODULE._DETERMINISTIC_ON = False
-            os.environ.pop("TL_DETERMINISTIC", None)
-            _r2 = _run286(_TL_MODULE.cmd_sweep, ["sweep", "--json"], [777.0])
-            _that = json.loads(_r2[0][1]).get("snapshot_age_s") if _r2[0][0] == 0 else None
-        finally:
-            _TL_MODULE._DETERMINISTIC_ON = _sav_on
-            if _sav_env is None:
-                os.environ.pop("TL_DETERMINISTIC", None)
-            else:
-                os.environ["TL_DETERMINISTIC"] = _sav_env
-        return bool(_dong_bang and _that == 777)
-    _t110("r286_sweep_raw_bat_bien_khi_tuoi_cache_troi", _c286_sweep_raw_bat_bien_khi_tuoi_cache_troi)
-
-    def _c286_counts_va_ingest_missing_cung_mau():
-        # Vá theo MẪU, không vá theo `if` của case golden duy nhất (§5 kế hoạch): `counts` và
-        # `ingest-missing` phơi CÙNG khoá `snapshot_age_s` từ CÙNG nguồn tuổi cache. Hai lệnh này chưa có
-        # golden case nào — bỏ sót thì lỗ còn nguyên mà gate KHÔNG BAO GIỜ thấy. Khoá ở đây.
-        _r = _run286(_TL_MODULE.cmd_counts, ["counts", "--json", "--deterministic"], [2001.0, 2002.0])
-        if any(rc != 0 for rc, _ in _r):
-            return False
-        _counts_ok = (_r[0][1] == _r[1][1]
-                      and json.loads(_r[0][1]).get("snapshot_age_s") == _TL_MODULE._tl_det.FROZEN_AGE_S)
-        # `ingest-missing` lấy tuổi qua `_snapshot_stale_warn` (nguồn KHÁC, cần snapshot_ts + backlog thật)
-        # nên khoá bằng hai vế: helper đóng băng đúng, VÀ đường phát ra của lệnh có đi qua bộ đóng băng.
-        import inspect as _insp286
-        _det = _TL_MODULE._tl_det
-
-        class _A286d:
-            deterministic = True
-
-        _im_ok = (_det.frozen_age_seconds(2001, _A286d()) == _det.frozen_age_seconds(2002, _A286d())
-                  and "_frozen_age_seconds(" in _insp286.getsource(_resolve286(_TL_MODULE.cmd_ingest_missing)))
-        return bool(_counts_ok and _im_ok)
-    _t110("r286_counts_va_ingest_missing_cung_mau", _c286_counts_va_ingest_missing_cung_mau)
 
     # ═══ r287 (v1.36.25) — Slice G0.1b: CƯỠNG CHẾ raw stability trong golden-test ═══
     # Trước vá: `raw_stable` được TÍNH, thậm chí sinh `raw_diff`, nhưng `rec["ok"]` dẫn xuất THUẦN từ so
@@ -24725,11 +24917,11 @@ def run() -> int:
         _out, _ = _harness287(_gt, write=False, drift=True)
         _c = _out["cases"][0]
         do_dung_cach = (_out.get("ok") is False
-                        and _out.get("error") == "GOLDEN_RAW_UNSTABLE"
+                        and _out.get("error") == "RAW_UNSTABLE_UNDECLARED"
                         and len(_out.get("raw_unstable_cases") or []) == _out["case_count"]
                         and _c.get("ok") is False
                         and _c.get("raw_stable") is False
-                        and _c.get("error") == "GOLDEN_RAW_UNSTABLE"
+                        and _c.get("error") == "RAW_UNSTABLE_UNDECLARED"
                         and bool(_c.get("raw_diff")))
         # PHẢN CHỨNG: KHÔNG bơm drift thì cổng phải IM — không được biến thành "luôn đỏ" (cổng luôn đỏ
         # cũng vô dụng y như cổng luôn xanh). Fixture chưa tồn tại nên lỗi ĐÚNG phải là GOLDEN_FILE_MISSING,
@@ -24737,7 +24929,7 @@ def run() -> int:
         _out2, _ = _harness287(_gt, write=False, drift=False)
         khong_do_oan = (_out2["cases"][0].get("raw_stable") is True
                         and _out2["cases"][0].get("error") == "GOLDEN_FILE_MISSING"
-                        and _out2.get("error") != "GOLDEN_RAW_UNSTABLE")
+                        and _out2.get("error") != "RAW_UNSTABLE_UNDECLARED")
         return bool(do_dung_cach and khong_do_oan)
     _t110("r287_golden_raw_drift_lam_do_gate", _c287_raw_drift_lam_do_gate)
 
@@ -24749,7 +24941,7 @@ def run() -> int:
         _gt = _g["_golden_test"]
         _out, _files = _harness287(_gt, write=True, drift=True)
         cam_ghi = (_out.get("ok") is False
-                   and _out.get("error") == "GOLDEN_RAW_UNSTABLE"
+                   and _out.get("error") == "RAW_UNSTABLE_UNDECLARED"
                    and _out.get("write_refused") is True
                    and all(c.get("written") is False for c in _out["cases"])
                    and _files == [])
@@ -24781,7 +24973,7 @@ def run() -> int:
 
         _payload, _ = _run_cmd(False, True)
         return bool(_out_box.get("rc") not in (0, None)
-                    and _payload.get("error") == "GOLDEN_RAW_UNSTABLE")
+                    and _payload.get("error") == "RAW_UNSTABLE_UNDECLARED")
     _t110("r287_rc_khac_0_qua_lenh_that", _c287_rc_khac_0_qua_lenh_that)
 
     # ═══ r288 (v1.36.26) — Pha 1-0: HỢP ĐỒNG Helper 1 (kết luận giao dịch, §5 Mẫu A + §6.1) ═══

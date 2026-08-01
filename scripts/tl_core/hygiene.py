@@ -1642,8 +1642,7 @@ def cmd_sweep(a) -> int:
             rep["nlm_live"] = {"ok": False, "error": str(_le)[:200]}
     # v1.30.1 (#7): kèm tuổi snapshot để người đọc biết số liệu tươi tới đâu (impure — thêm ở tầng lệnh, giữ _sweep_report PURE)
     _age = _manifest_cache_age_seconds()
-    # r286 (Slice G0.1a): deterministic mode ⇒ đóng băng tuổi-giây ở RAW (xem `_frozen_age_seconds`).
-    rep["snapshot_age_s"] = _frozen_age_seconds(None if _age is None else int(_age), a)
+    rep["snapshot_age_s"] = None if _age is None else int(_age)
     if getattr(a, "json", False) or getattr(a, "out", None):
         _emit_json_payload(rep, getattr(a, "out", None))
     else:

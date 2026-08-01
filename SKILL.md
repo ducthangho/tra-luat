@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.36.33 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.36.34 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -122,12 +122,12 @@ QUARANTINE = corpus:false (cách ly). **Quyết định 26/6 (giữ tới khi B�
 > # 1 LỆNH DUY NHẤT — tự curl config(public)+zip+gws+creds, KHÔNG cần Drive MCP:
 > sh scripts/tl_fetch.sh --setup --nlm
 > #   → curl CONFIG public→$HOME/.tra_luat_config.json (ĐẦU TIÊN) → init-config → ping → gws(direct-media) → boot → nlm(uv)
-> #   Nếu curl config trả trang login (CHƯA public) → exit 10, in 2 cách: chạy set-package-public.cmd HOẶC Drive MCP fileId.
+> #   Nếu curl config trả trang login (CHƯA public) → exit 10, in 2 cách: webapp action `share` HOẶC Drive MCP fileId.
 > # subsequent (nhanh): cd "$(cat ~/.tl_fetch/ROOT)" && python3 scripts/tl.py <args>
 > ```
 > `tl_fetch.sh` curl PUBLIC vào **`$HOME/.tl_fetch`** (KHÔNG `/tmp` — sticky bit: file rác owner `nobody` chặn `curl -o`→exit23).
 > **Thứ tự (user yêu cầu): CONFIG(apps script) + GWS cred TRƯỚC** → rồi nlm. gws trước nlm để Python tải qua direct-media nhanh.
-> Fallback config: webapp `download` (token) → Drive MCP. Bật public 1 lần bằng `set-package-public.cmd` (xem §Đóng gói).
+> Fallback config: webapp `download` (token) → Drive MCP. Bật public 1 lần bằng webapp action `share` (`API_CONTRACT.md` §share → `ANYONE_WITH_LINK/VIEW`).
 >
 > **Còn local (mount lành):** `python scripts/tl_boot.py …` THAY cho `tl.py` — tự strip NUL; báo rõ + exit≠0 thay vì
 > im lặng exit 0 (cơ chế `_parts/` ĐÃ BỎ — xem đầu `tl_boot.py`). tl.py hỏng/cắt cụt → `tl verify-integrity` soi,
@@ -226,7 +226,7 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 
 ## 5. HAI KIỂU CẤU TRÚC (tự nhận diện)
 - **Kiểu Điều** (Hiến pháp/Luật/Bộ luật/NĐ/TT/NQ): Phần/Chương/Mục/Điều/Khoản/Điểm. Tra "Điều 7 khoản 2 điểm a".
-- **Kiểu Mục Đảng** (văn kiện, NQ/KL/CT của Đảng): bố cục La Mã/số — Profile B heuristic; xem trước `split_structure.py f.txt deep auto` rồi mới tra.
+- **Kiểu Mục Đảng** (văn kiện, NQ/KL/CT của Đảng): bố cục La Mã/số — Profile B heuristic (`verify_deep.py`); xem trước cấu trúc bằng `tl extract` rồi mới tra.
 
 ## 6. TRA CỨU NHANH
 - Đảo thứ tự được: "khoản 2 Điều 7" = "Điều 7 khoản 2". Mặc định prefix (Điều 7 trả cả khoản/điểm con); `--exact` chỉ đúng đơn vị.
@@ -235,8 +235,8 @@ Cờ `--profile/--config/--deterministic/--json` nhận ở mọi lệnh; `--out
 
 ## 7. BẢN ĐỒ SCRIPT (đầu mối qua `tl`; danh sách đầy đủ + lý do: DOCTRINE_APPENDIX)
 - **Khởi động/hạ tầng:** `tl.py` · `gas.py` (client webapp) · `contract_check.py` · `apply_gs_patches.py` (áp patch .gs) · `boot.py` · `common.py` · `cache.py` · `manifest_build.py`.
-- **Nạp/sắp xếp:** `ingest_to_cache.py` · `standardize_name.py` · `preingest_gate.py` (QT-2) · `import_drive_link.py` · `sapxep.py` · `normalize_document.py` · `split_structure.py`.
-- **NLM:** `nlm_push.py` · `nlm_qa.py` · `nlm_sources.py` (`-S`) · `nlm_map.py` · `dedup_gate2.py`.
+- **Nạp/sắp xếp:** `ingest_to_cache.py` · `standardize_name.py` · `preingest_gate.py` (QT-2) · `sapxep.py` · `normalize_document.py`.
+- **NLM:** `nlm_sources.py` (`-S`); còn lại hợp nhất vào `tl`: `nlm-add` · `nlm-query --strict-scope` (VERIFY) · `nlm-reconcile` · `dedup-plan`.
 - **Rà soát/registry:** `registry_orchestrator.py` · `rasoat_worksheet.py` · `rasoat_phuluc.py` · `backfill_keywords_live.py` · `backfill_nlm_title.py` · `vbhn_query.py` (QT-5) · `vb_status.py`.
 - **Tra cứu/Instruction:** `tra_cuu.py` · `keywords.py` · `verify_deep.py` · `gen_instructions.py` (sinh/audit Instruction có `SKILL_OF_RECORD` + external-ingest gate).
 

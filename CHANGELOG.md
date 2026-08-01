@@ -1,3 +1,54 @@
+# ★ v1.36.34 — HOÀ NHÁNH lượt 4: BỎ bản GATE-01 của tôi, lấy thiết kế của master (2026-08-01)
+
+Hoà `master` `5df7f39` (3 commit mới: `3f614de` r288 · `00611fe` r289 · `5df7f39` r290) vào nhánh.
+PR #6 lại `dirty`. **Master vẫn KHÔNG đụng 4 mục T2 + Helper 1** (đo trên `2b6da92..5df7f39`:
+`txn.py`/`ops_misc.py`/`registry_orchestrator.py`/`ingest_ops.py`/`backfill_keywords_live.py` — không tệp
+nào trong diff). Nhưng `3f614de` là **GATE-01**, trùng `r286`+`r287` của nhánh này.
+
+**Đây KHÔNG phải trùng lặp đơn thuần — là BẤT ĐỒNG THIẾT KẾ, và họ đã cân nhắc rồi BÁC cả hai phương án
+của tôi.** Commit `3f614de` ghi thẳng:
+- bác (a) `raw_stable=false ⇒ ok=false` **trần trụi** — chính là `r287` của tôi — vì làm thế thì `sweep`
+  ĐỎ NGAY dù lành;
+- bác (b) **scrub/đóng băng** `snapshot_age_s` khỏi raw — chính là `r286` của tôi — vì *"raw hết là raw,
+  mất luôn khả năng phát hiện bất định THẬT"*.
+
+Thay vào đó họ làm cách thứ ba: `_raw_drift_keys()` quy **mọi dòng stdout lệch** về khoá JSON; khoá ngoài
+`volatile|path`, **hoặc** dòng không quy được về khoá nào ⇒ `RAW_UNSTABLE_UNDECLARED`, fail-closed,
+`--write` từ chối ghi.
+
+**ĐO, KHÔNG TRANH LUẬN.** Tắt đóng băng của tôi rồi chạy `golden-test` 6 lượt:
+
+```
+lượt 1,2,4,5: sweep raw_stable=True                                          → ok=True
+lượt 3, 6   : sweep raw_stable=False  drift_keys=['snapshot_age_s']  undeclared=[]  → ok=True, rc=0
+```
+
+⇒ Cơ chế của họ **một mình** giữ `sweep` xanh, **và giữ được cả thông tin drift** (`raw_drift_keys` vẫn
+ghi ra). Đóng băng của tôi làm mất đúng thông tin ấy. **Lập luận của họ đúng.**
+
+**Quyết định — theo đúng nguyên tắc người giữ đặt ra (*"đã được phiên khác xử lý thì bỏ qua"*):**
+- **GỠ `r286`** — helper `frozen_age_seconds`/`FROZEN_AGE_S` (`deterministic.py`), wrapper
+  `_frozen_age_seconds` (`tl.py`), **3 điểm gọi** (`cmd_sweep`/`cmd_counts`/`cmd_ingest_missing`), **3 ca test**.
+- **GỠ `r287`** — nhánh cưỡng chế trần trụi trong `_golden_test`; lấy **nguyên** nhánh quy-khoá của họ.
+  Giữ cả hai thì nhánh quy-khoá của họ thành **mã chết** (cưỡng chế trần trụi chặn sớm hơn).
+- **GIỮ `_resolve286`** — `r289`/`r290`/`r291` vẫn dùng để gỡ stub `_STUB_MAP` khi monkeypatch.
+- **GIỮ + CHỈNH khối tóm tắt top-level của tôi** (`error`/`raw_unstable_cases`/`write_refused` ở đầu
+  payload) — trỏ sang mã `RAW_UNSTABLE_UNDECLARED` của họ. Đây là phần **bổ sung TRÊN** thiết kế của họ,
+  không đụng cơ chế: bản của họ chỉ đặt lỗi **theo case**, nên CI/`deploy-package.sh` phải duyệt 20 case
+  mới biết. Nay đọc được ngay ở đầu payload.
+- **GIỮ + CHỈNH 3 ca `r287_*`** sang mã lỗi của họ — chúng phủ thứ 5 ca `r288_*` không phủ: envelope
+  top-level, `rc≠0` **qua lệnh thật** (`cmd_golden_test`, thứ CI đọc), và `--write` **không sinh tệp nào**.
+
+Kết quả: **một** cơ chế (của họ), **hai** bộ test (8 ca: 5 `r288_*` + 3 `r287_*`).
+
+**Số ca: 1526 → 1534** (+11 của master, −3 ca `r286` đã gỡ). Gate **8/8 PASS**.
+`golden-test` 6 lượt trên cây cuối: `rc=0` cả 6, lượt 6 có `raw_stable=False` nhưng `undeclared=[]` ⇒ xanh
+**đúng lý do**. ruff delta 0 (`tl.py` 12 · `workflow.py` 26 · `deterministic.py` 0 — bằng master).
+
+**Va chạm số hiệu nay 7 lần** (thêm `r288`: master v1.36.28 = GATE-01 quy-khoá · nhánh v1.36.26 = Helper 1;
+`r289`: master v1.36.29 = cổng con-trỏ-trần · nhánh v1.36.27 = PRO-01; `r290`: master v1.36.30 =
+`rasoat-merge` · nhánh v1.36.28 = RAS-01). Đánh số tiếp từ **r295**.
+
 # ★ v1.36.33 — HOÀ NHÁNH lượt 3: GỠ bản vá TRÙNG của tôi vì phiên khác đã vá cùng lỗi, tốt hơn (2026-08-01)
 
 Hoà `master` `2b6da92` (r292 v1.36.27) vào `claude/va-t1-gate-nlvoj9`. PR #6 chuyển `mergeable_state`
@@ -539,6 +590,103 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.30 — r290: `rasoat-merge` fail-CLOSED + ghi ATOMIC · `rasoat_phuluc.py` ngang cổng với wrapper (2026-08-01)
+
+Land hộ tranche của phiên khác (làn A — RAS-06/07/11/12/15/16).
+
+**RAS-11 — ghi đè bảng master rồi mới báo lỗi.** Bản cũ nhét nguồn hỏng vào `bo_qua` rồi **VẪN**
+`write_text` bảng master dựng từ phần input hợp lệ, xong mới `return 2`. Người vận hành thấy rc=2 sẽ
+sửa file hỏng rồi chạy lại — nhưng **bản đúng để đối chiếu đã mất từ lượt đó**. Nay nguồn KHÔNG ĐỌC
+ĐƯỢC ⇒ `NGUON_HONG_KHONG_DOC_DUOC`, `da_ghi:false`, bảng master GIỮ NGUYÊN.
+
+**RAS-12 — `--state` hỏng mà lệnh vẫn `ok:true`.** Bản cũ bọc trọn khối hoà giải state trong
+`try/except` rồi nhét lỗi vào `hoa_giai["loi"]`, trong khi `ok = not bo_qua` ⇒ rc=0. Nay fail-CLOSED.
+
+**RAS-07 — `f.stem` KHÔNG phải định danh đơn vị.** File `unit-a.json` mang `unit_id: unit-b` làm state
+đánh DONE cho `unit-a` (đơn vị **chưa hề được rà**) và bỏ sót `unit-b`. Nguồn sự thật là **PAYLOAD**;
+thiếu `unit_id` ⇒ fail-closed, và báo `ten_file_lech_unit_id` để người vận hành thấy.
+
+**Thứ tự lại cho đúng:** toàn bộ cổng chạy TRƯỚC mọi thao tác ghi; ghi bằng `_write_text_atomic`
+(staging + `os.replace`) thay `write_text` trần — bị kill giữa chừng không để lại bảng master CỤT.
+
+**RAS-15/16 (`rasoat_phuluc.py`) — chạy THẲNG script phải ngang cổng với `tl rasoat-merge`.**
+Lọc bản sao lưu dùng CHUNG `_rasoat_la_ban_sao` (bản cũ `glob("*.json")` nuốt cả `*.bak*.json` ⇒ đếm
+phát hiện HAI LẦN — đúng sự cố r216, chỉ khác đường vào); cổng TRÙNG dùng chung `_rasoat_trung_lap`
+(bản cũ `dedup()` lặng lẽ GIỮ bản đầu, VỨT bản sau ⇒ mất phát hiện mà không ai biết); và
+`(x or "").strip() or MẶC_ĐỊNH` thay `dict.get(k, mặc_định)` — `linh_vuc: ""` (template để trống) lọt
+qua nguyên vẹn và sinh **heading RỖNG** trong phụ lục TRÌNH.
+
+**Nghiệm thu:** selftest **1514/1514** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **CỐ Ý KHÔNG land kèm** hai làn khác đang lẫn trong `lookup_ops.py`: **T1-c** (RAS-04/10/13 —
+`cmd_rasoat_loop`/`_rasoat_corpus_hieu_luc`, chú thích tự khai "r290/T1-c" nhưng **test tên `r291_*`**)
+và **r293** (RAS-02/03/08/09 — `_rasoat_state_*`). Cả hai còn nguyên trong cây cho chủ của chúng.
+Đã đo: **không** tham chiếu chéo giữa ba làn, nên tách rời an toàn.
+
+# ★ v1.36.29 — r289: cổng CON-TRỎ-TRẦN + diệt LỆNH MA + Q2/Q3 tài liệu (2026-08-01)
+
+Land hộ tranche của phiên khác (phiên B viết; phiên này rà độc lập + land theo yêu cầu user).
+
+**Bệnh (GATE-03b).** Guard H9 `_doc_pointer_findings` chỉ bắt con trỏ **CÓ TIỀN TỐ THƯ MỤC**
+(`references/…`, `scripts/…`). Tên công cụ **TRẦN** trong backtick — `nlm_qa.py`, `split_structure.py` —
+lọt sạch. Ca thật: `nlm_log.py add` sống từ v1.29.4 đến v1.35.44 mà không cổng nào kêu.
+
+**Vá.** `_doc_bare_tool_findings()`: quét token khớp `*.py|sh|ps1|cmd|gs` **bên trong span backtick**,
+chỉ token **không chứa `/`** (dạng có tiền tố đã do `_doc_pointer_findings` gác — không đếm hai lần),
+đối chiếu **BASENAME** trong package-set nên `boot.py` ở `scripts/_fallback/` vẫn hợp lệ. Nối vào
+`_verify_release_manifest` (`DOC_BARE_TOOLS_NOT_IN_PACKAGE`) + khoá `bare_tools` trong `release_verify.v1`.
+**Ratchet 2 tầng:** fail-closed cho **3 tài liệu chỉ-dẫn-vận-hành-SỐNG**, còn lại **advisory** — bật
+fail-closed toàn bộ là **82 mục đỏ ngày đầu**, guard sẽ bị vô hiệu hoá (bài học §0.8).
+
+**Diệt lệnh ma.** `nlm_qa verify` KHÔNG tồn tại (không script, không subcommand) mà đã rò vào **4 tệp
+SỐNG** kể cả thẻ máy-đọc `rasoat_hoso.json` ⇒ bước **A5 VERIFY** của Loop A trỏ vào hư không. Thay bằng
+`tl nlm-query --source-id <sid> --strict-scope` (xác minh có thật trong `command_registry`).
+`SKILL.md` §7 bỏ **7 tên script MA**; `set-package-public.cmd` → webapp action `share`.
+
+**Q3 — `INSTALL.md`.** Ba dòng RA LỆNH deploy `Code.2.21.2i.gs`/`2.21.2h` trong khi gói **chỉ có**
+`2.21.2o`/`2.21.2p` ⇒ chỉ dẫn cài đặt SAI BẢN đang được phát hành. Sửa cả ba về **2.21.2p**.
+
+**Q2 — hai tài liệu kế hoạch** chuyển **LƯU TRỮ có chủ đích** (`_DOC_CLAIMS_HISTORICAL`), tự khai ở
+dòng đầu. Ca `r264` được **ĐẢO vế `ok5` cho khớp**, và vế mới **mạnh hơn vế cũ**: (a) nhãn phải đúng
+tài liệu ĐÃ KHAI, **và** (b) TUYỆT ĐỐI không được khai cả thư mục `docs/`/`docs/adr` — làm thế thì mọi
+ADR hết bị bắt cứng, đúng cái "trang trí" mà r264 sinh ra để chặn. Vế răng-thật vẫn ở `ok4`.
+
+**Đo:** `_doc_bare_tool_findings` trên tài liệu SỐNG **fail 8 → 0** (advisory 73, baseline 1).
+**Nghiệm thu:** selftest **1511/1511** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **Khoảng mù CÒN LẠI, không mở trong bản này** (GATE-04/T0-F): doc-set của guard vẫn chỉ là
+`references/*.md` **không đệ quy** + `SKILL.md` = **30/53** tệp `.md` trong gói; và **không** guard nào
+với tới `references/workflows/*.json` (thẻ máy đọc, `.json` ≠ `.md`).
+
+# ★ v1.36.28 — r288: `golden-test` hết ĐI QUA raw drift KHÔNG KHAI — GATE-01 fail-CLOSED (2026-08-01)
+
+Land hộ tranche của phiên khác (mã do phiên A viết, phiên này rà + land theo yêu cầu user).
+
+**Bệnh (GATE-01).** `golden-test` so fixture theo **projection** đã scrub khoá volatile. Nhưng phần
+**raw** thì chỉ ghi `raw_stable` rồi **đi tiếp**: raw lệch mà projection trùng ⇒ vẫn `ok:true`. Nghĩa là
+một thay đổi hành vi THẬT có thể chui qua cổng, miễn nó rơi vào vùng đã bị scrub.
+
+**Vì sao KHÔNG cưỡng chế `raw_stable=false ⇒ ok=false` trần trụi** (đơn thuốc đầu của audit): làm thế
+thì ca `sweep` ĐỎ NGAY dù hoàn toàn lành — dòng lệch duy nhất là `snapshot_age_s`, vốn **đã khai**
+volatile. Đơn thuốc đúng: **raw drift phải được GIẢI THÍCH TRỌN bởi khoá đã khai**.
+
+**Vá.** `_raw_drift_keys(a, b)` quy drift về **TẬP KHOÁ** (đường dẫn khoá, đệ quy). Nếu tập ấy ⊄ tập
+`volatile_keys` đã khai ⇒ `RAW_UNSTABLE_UNDECLARED`, **fail-CLOSED**. Và `--write` **từ chối ghi
+fixture** khi còn drift chưa khai — chốt này quan trọng hơn cả vế đọc: nếu không có nó thì cách "chữa"
+tự nhiên khi gặp đỏ lại chính là ghi đè fixture, tức hợp thức hoá drift.
+
+**Năm ca `r288_*`** (đỏ-trước/xanh-sau): helper quy đúng về khoá · thứ tự khoá lệch **bị bắt** ·
+`--write` từ chối ghi khi drift chưa khai · drift **khoá ĐÃ khai** vẫn xanh (chống báo giả) · raw ổn
+định thì không đổi gì (chống tác dụng phụ).
+
+**Nghiệm thu:** selftest **1508/1508** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **Số đợt `r288` < version `1.36.28`** — có chủ đích: r291/r292 đã land trước (xem CHANGELOG dưới),
+version phải đơn điệu. `rNNN` là mã thay đổi, KHÔNG phải bộ đếm phát hành.
 
 # ★ v1.36.27 — r292: ca `r284` hết PHỤ THUỘC NỀN TẢNG — CI ubuntu ĐỎ suốt 4 bản vì bộ lọc TIỀN TỐ `/tmp/` (2026-08-01)
 

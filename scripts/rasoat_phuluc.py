@@ -36,7 +36,7 @@ Cách dùng:
   rasoat_phuluc.py --in master.json --out-dir .
   rasoat_phuluc.py --in thu_muc_cac_luat/ --out-dir .   # gộp nhiều file
 """
-import argparse, json, re, hashlib, datetime, unicodedata
+import argparse, json, re, hashlib, datetime, sys, unicodedata
 from pathlib import Path
 
 
@@ -69,14 +69,23 @@ def load_master(p):
     CHUỖI thành TỪNG KÝ TỰ rồi mới chết ở nơi khác ("'str' object has no attribute 'get'") — hỏng
     IM LẶNG trước, báo lỗi sai chỗ sau. Nay: khuôn lạ FAIL-CLOSED, nói rõ file nào."""
     path = Path(p)
-    files = sorted(path.glob("*.json")) if path.is_dir() else [path]
     try:
         import sys as _sys
         _sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from tl_core.lookup_ops import _rasoat_merge_units
+        from tl_core.lookup_ops import _rasoat_la_ban_sao, _rasoat_merge_units, _rasoat_trung_lap
     except Exception as e:  # noqa: BLE001
         raise SystemExit(f"[rasoat_phuluc] không nạp được tl_core.lookup_ops ({e}) — chạy từ trong "
                          f"cây skill, hoặc dựng bảng master trước bằng `tl rasoat-merge`.")
+    # r290 (RAS-15 — audit lõi 31-07): lọc BẢN SAO LƯU y như `tl rasoat-merge`. Bản cũ `glob("*.json")`
+    # nuốt cả `*.bak*.json`, nên chạy TRỰC TIẾP script này trên cùng thư mục mà wrapper đã lọc sạch lại
+    # đếm phát hiện HAI LẦN — chính sự cố r216 đo được 27-07 (40 → 53 phát hiện, 13 mã VD trùng), chỉ
+    # khác đường vào. Cùng một hàm `_rasoat_la_ban_sao` để hai đường không thể trôi khỏi nhau.
+    _tat_ca = sorted(path.glob("*.json")) if path.is_dir() else [path]
+    _ban_sao = [f for f in _tat_ca if path.is_dir() and _rasoat_la_ban_sao(f.name)]
+    files = [f for f in _tat_ca if f not in _ban_sao]
+    if _ban_sao:
+        print(f"[rasoat_phuluc] BỎ QUA {len(_ban_sao)} bản sao lưu: "
+              f"{', '.join(f.name for f in _ban_sao)}", file=sys.stderr)
     docs = []
     for f in files:
         try:
@@ -89,6 +98,15 @@ def load_master(p):
         raise SystemExit(f"[rasoat_phuluc] KHUÔN KHÔNG NHẬN RA: {ten}. Chờ 1 trong 2: khuôn bảng "
                          f"master (van_ban=DANH SÁCH + noi_dung) hoặc khuôn §6 master/<unit>.json "
                          f"(phat_hien). File có CẢ hai khoá cũng bị từ chối — không đoán.")
+    # r290 (RAS-06 — audit lõi 31-07): cổng TRÙNG r216 trước đây CHỈ có ở `tl rasoat-merge`. Chạy thẳng
+    # script này với hai phiếu trùng `key`, `dedup()` lặng lẽ GIỮ BẢN ĐẦU và VỨT bản sau — mất phát hiện
+    # mà không ai biết. Dùng chung `_rasoat_trung_lap` để phụ lục không bao giờ sinh ra từ nguồn đã trùng.
+    _trung = _rasoat_trung_lap(docs)
+    if _trung.get("key") or _trung.get("unit_id"):
+        raise SystemExit(f"[rasoat_phuluc] TRÙNG LẶP GIỮA CÁC NGUỒN — không dựng phụ lục. "
+                         f"key={[x.get('gia_tri') for x in _trung.get('key') or []]} "
+                         f"unit_id={[x.get('gia_tri') for x in _trung.get('unit_id') or []]}. "
+                         f"Mỗi phát hiện chỉ nằm ở MỘT phiếu, mỗi `unit_id` chỉ một file.")
     return merged.get("co_quan", ""), merged.get("van_ban", []), merged.get("noi_dung", [])
 
 
@@ -116,7 +134,10 @@ def dedup(items):
 def group_by_linhvuc(items):
     g = {}
     for it in items:
-        g.setdefault(it.get("linh_vuc", "(Chưa phân loại)"), []).append(it)
+        # r290 (RAS-16 — audit lõi 31-07): `dict.get(khoá, mặc_định)` CHỈ thay khi khoá VẮNG MẶT;
+        # `linh_vuc: ""` (rất thường gặp — template để trống) lọt qua nguyên vẹn và sinh heading RỖNG
+        # trong phụ lục trình. Phải chuẩn hoá theo GIÁ TRỊ, không theo sự tồn tại của khoá.
+        g.setdefault((it.get("linh_vuc") or "").strip() or "(Chưa phân loại)", []).append(it)
     return g
 
 
@@ -133,7 +154,8 @@ def table_03(van_ban):
         L.append(f"| | **LĨNH VỰC {lv.upper()}** | | | | |")
         loai_g = {}
         for r in rows:
-            loai_g.setdefault(r.get("loai", "Bộ luật, luật của Quốc hội"), []).append(r)
+            # r290 (RAS-16): cùng lớp lỗi với `linh_vuc` ngay trên — `loai: ""` sinh dòng phân nhóm rỗng.
+            loai_g.setdefault((r.get("loai") or "").strip() or "Bộ luật, luật của Quốc hội", []).append(r)
         for loai, rs in loai_g.items():
             L.append(f"| | *{loai}* | | | | |")
             for r in rs:

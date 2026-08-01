@@ -49,8 +49,20 @@
   `pending` toàn phần trừ khi anchor vỡ** (văn bản nền đổi `text_hash`).
 - `loai` đơn vị: `ra_soat | doi_chieu_bo_sung` (cặp đơn-vị-done × văn-bản-mới, chỉ so phần giao).
 - `muc_chac_chan` phát hiện (ghi trong master, không ở đây): `chac_chan | can_kiem_tra | cho_verify_nlm`.
-- `q_ingest.trang_thai`: `cho_tai | cho_nguoi_tai | dry_planned | staged | flipped | out_of_scope`.
+- `q_ingest.trang_thai`: `cho_tai | cho_nguoi_tai | dry_planned | staged | flipped | out_of_scope |
+  da_quyet | da_quyet_va_thi_hanh` — hai giá trị cuối cho mục người thẩm tra đã quyết (giữ/không thay,
+  hoặc đã thi hành); lời quyết nguyên văn để ở `ghi_chu`, **không nhét vào `trang_thai`**.
 - `q_nlm.trang_thai`: `pending | added | failed`.
+- `q_verify.trang_thai`: `cho_tra_no | dat | khong_dat | no_treo`. (`no_treo` = nợ được **khai là giới hạn**
+  khi đóng hồ sơ, không phải nợ đang chờ xử.) Trước r300 hàng đợi này **không có enum nào được khai** —
+  hồ sơ thật đã tự dùng khoá `ly_do` với từ vựng riêng; giữ `ly_do` làm ghi chú, `trang_thai` là trường máy đọc.
+- `q_approvals.trang_thai`: `cho_duyet | da_duyet_va_da_chay | da_quyet`.
+- `vong_doi.trang_thai` (mục 7): `dang_ra | tam_ngung | da_dong | da_dong_co_gioi_han`.
+
+> **Luật chung cho MỌI hàng đợi:** `trang_thai` chỉ nhận token trong enum. Diễn giải đi kèm ⇒ `ghi_chu`;
+> giá trị cũ trước khi chuẩn hoá ⇒ `trang_thai_goc`. Đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025`: 7 mục đã trôi
+> thành **câu văn xuôi** (`"DA_QUYET_VA_DA_THI_HANH: lua chon (b) — nap lai CHI VAO CACHE"`) ⇒ máy không tự
+> kiểm được điều kiện đóng. Enum không cưỡng chế thì sổ sẽ tự chế thêm từ vựng.
 
 ## 4. Hằng số vận hành (chốt 26-07 — kickoff từng hồ sơ override được)
 
@@ -79,3 +91,59 @@ state cập nhật sau MỖI đơn vị nên mất tối đa 1 đơn vị dở.
 - Phân tầng đơn vị: `scripts/rasoat_worksheet.py` (chấm SÂU/ĐỐI CHIẾU/—; sinh `NHAT_KY_NLM_<sh>.csv`).
 - Tổng hợp cuối: `scripts/rasoat_phuluc.py --in master/` (Pha 4 — hàm thuần từ thư mục master, chạy lại
   bao nhiêu lần cũng được). Quy trình nền: `references/QUY_TRINH_RA_SOAT_3_TANG.md`.
+
+## 7. Vòng đời HỒ SƠ (r300) — đóng, và mở hồ sơ kế tiếp
+
+`rasoat_plan.v1` vốn có trạng thái cho **đơn vị rà**, **không có** cho **hồ sơ**. Hệ quả đo được trên
+`h7-3nd-bhxh-2025`: người thẩm tra chốt "đã đóng" mà **không có gì trong file nói nó đóng**, trong khi còn
+5 đầu mối treo (claim chưa nhả · 1 duyệt `cho_duyet` · 3 nợ kiểm chéo · 5 văn bản chưa lấy được · 7 trạng
+thái văn xuôi). Khối `vong_doi` biến "đóng" thành trạng thái máy đọc được, và buộc mọi đầu mối phải được
+**định đoạt tường minh** — xử, hoặc khai là giới hạn.
+
+```json
+"vong_doi": {
+  "trang_thai": "da_dong_co_gioi_han",
+  "mo_luc": "…", "dong_luc": "…", "dong_boi": "…",
+  "san_pham_cuoi": ["BAO_CAO_RA_SOAT.md", "BANG_MASTER.json", "phuluc/"],
+  "gioi_han_da_biet": [{"loai": "…", "so_luong": 0, "chi_tiet": []}],
+  "dinh_doat": {"q_units": "…", "q_ingest": "…", "q_nlm": "…", "q_verify": "…", "q_approvals": "…"},
+  "anchor_con_hieu_luc": false, "ly_do_anchor": "…",
+  "skill_version_luc_dong": "…"
+}
+```
+
+### 7.1 Điều kiện đóng — 6 vế
+
+Đủ **cả 6** ⇒ `da_dong`. Thiếu vế nào mà vẫn đóng ⇒ **`da_dong_co_gioi_han`** kèm mục tương ứng trong
+`gioi_han_da_biet` (bắt buộc; không có mục = không được đóng).
+
+1. `q_units`: 0 mục `pending`/`doing` (`blocked` ⇒ khai giới hạn).
+2. `q_approvals`: 0 mục `cho_duyet`; mỗi mục còn lại có kết cục tường minh.
+3. `q_verify`: mọi mục có `trang_thai` thuộc enum; còn `cho_tra_no` ⇒ chuyển `no_treo` **và** khai giới hạn.
+4. `q_ingest`: mọi mục thuộc enum; `cho_tai`/`cho_nguoi_tai` còn lại ⇒ khai giới hạn.
+5. `session_claim` **đã nhả** (`id: null` + `released_at`).
+6. Sản phẩm cuối gộp/kết xuất được: `tl rasoat-merge --check` rc=0 · `rasoat_phuluc.py --in <master/>` rc=0.
+
+> **Bất biến:** đóng hồ sơ là **ĐÓNG BĂNG, không phải dọn** — KHÔNG xoá `master/`, `rasoat_bugs.md`,
+> `rasoat_approvals.json`, các `BIEN_BAN_*`.
+
+### 7.2 Sau khi đóng — Loop C được phép gì
+
+Hồ sơ đóng KHÔNG làm phát hiện hết giá trị (luật có thể sửa sau khi trình ⇒ `resolved_by_amendment`).
+Nhưng Loop C **chỉ được chạy khi `anchor_con_hieu_luc: true`**; `false` ⇒ **BỎ QUA hồ sơ và NÓI RA lý do**
+(`ly_do_anchor`), không im lặng thoát.
+
+Đo 01-08: `anchor.text_hash` của hồ sơ BHXH là **địa chỉ định vị, không phải hash** — 40 phát hiện ·
+82 `doc_deps` · **82/82 điền · 0/82 khớp `sha256:<64hex>`**; registry/manifest không có trường `text_hash`.
+⇒ chạy Loop C theo đặc tả hiện hành sẽ ra **STALE giả 100%**. Chỉ bật `true` sau khi anchor được di trú
+(tách `locator` khỏi `text_hash`, tính lại bằng `doc_identity._content_hash`).
+
+### 7.3 Điều kiện mở hồ sơ kế tiếp
+
+1. Hồ sơ trước ở trạng thái terminal (`da_dong` / `da_dong_co_gioi_han` / `tam_ngung` có lý do).
+2. **`--out-dir` MỚI** — `rasoat_phuluc.py --in` gộp CẢ THƯ MỤC; trộn hai hồ sơ = bảng master phồng
+   (tiền lệ r216: bản sao lẫn trong `master/` làm 40 → 53 phát hiện).
+3. `session_claim` hồ sơ trước đã nhả (tránh stale-takeover 30′ đánh thức nhầm).
+4. Kickoff khai lại `quota` (NLM/TVPL) và `max_units_per_session` — quota là của LƯỢT, không kế thừa.
+5. Khai `skill_version_toi_thieu`: nhiều bất biến đường ghi chỉ được cưỡng chế từ **v1.36.20** (r281/r282).
+6. Nợ `no_treo` của hồ sơ trước phải được **nêu lại** trong kickoff mới nếu cùng phạm vi văn bản.

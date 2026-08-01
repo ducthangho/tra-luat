@@ -1,3 +1,23 @@
+# ★ v1.36.40 — HOÀ NHÁNH lượt 10: master land VÒNG ĐỜI HỒ SƠ (r300), KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `1a06ff1` (r300 v1.36.37 — *"VÒNG ĐỜI HỒ SƠ — 'đã đóng' thành trạng thái MÁY ĐỌC ĐƯỢC"*).
+
+**Rà trùng việc — đo trước khi hoà.** `git diff --numstat 7469d8c..origin/master` trên 5 tệp T2
+(`tl_core/txn.py` · `tl_core/ops_misc.py` · `registry_orchestrator.py` · `tl_core/ingest_ops.py` ·
+`backfill_keywords_live.py`) trả **RỖNG**. Mười tệp master đụng đều ngoài vùng T2, trong đó phần code
+mới nằm ở `tl_core/lookup_ops.py` (+70) và `tl_selftest.py` (+79); `tl.py` chỉ nhận **2 dòng** khai tên
+`_rasoat_vong_doi_*` vào bảng stub. `tl_selftest.py` auto-merge sạch.
+
+**Gỡ xung đột theo byte + đối chứng kích thước.** `SKILL.md` **48.031 B** (bằng đúng trước hoà — master
+chỉ đổi dòng phiên bản), `VERSION` **7 B** không newline cuối. `tl.py` **229.953 → 230.117 B** và
+**CRLF 1.763 → 1.765**: +2 dòng, khớp ĐÚNG net +2 của master ⇒ tăng là do nội dung master vào, không
+phải dòng-kết hỏng. Đây là cách đọc số đúng — "kích thước đổi" tự nó không nói gì, phải đối chiếu với
+delta ĐÃ BIẾT của bên kia.
+
+**Va số hiệu test:** master vừa dùng `r300` ⇒ test mới của nhánh đánh **từ `r301`**.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
+
 # ★ v1.36.39 — HOÀ NHÁNH lượt 9: master land P16-F11+F26 (OCR/chunks), KHÔNG chạm tệp nào của T2 (2026-08-01)
 
 Hoà `master` `7469d8c` (r299 v1.36.36 — *"cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply`
@@ -711,6 +731,42 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+# ★ v1.36.37 — r300: VÒNG ĐỜI HỒ SƠ — "đã đóng" thành trạng thái MÁY ĐỌC ĐƯỢC, không còn là lời nói (2026-08-01)
+
+**Bệnh (đo trên hồ sơ THẬT, không phải giả định).** `rasoat_plan.v1` có trạng thái cho ĐƠN VỊ RÀ nhưng
+**KHÔNG có cho HỒ SƠ**. Hệ quả trên `h7-3nd-bhxh-2025` (out-dir `p14_h7h8_rasoat_2026-07-26`): người thẩm
+tra chốt "đã đóng" mà **state không có khoá nào nói thế**, trong khi còn **5 đầu mối treo** —
+(1) `session_claim` chưa nhả (`phien-2026-07-27-c`, treo từ 27-07); (2) `q_approvals` còn **1 `cho_duyet`**;
+(3) 3 nợ kiểm chéo chưa định đoạt; (4) `q_ingest` còn **5 văn bản chưa bao giờ lấy được**
+(3 `cho_tai` + 2 `cho_nguoi_tai`); (5) **7 trạng thái đã trôi thành câu văn xuôi**
+(`"DA_QUYET_VA_DA_THI_HANH: lua chon (b) — nap lai CHI VAO CACHE"`) ⇒ máy không tự kiểm được điều kiện đóng.
+Đóng hồ sơ là tuyên bố "đã rà đủ"; để 5 văn bản hụt biến mất im lặng là **báo cáo sai phạm vi**.
+
+→ **Vá = một khối schema + HAI HÀM THUẦN, không phải prose.** `references/RASOAT_PLAN_SCHEMA.md` §7 đặc tả
+khối `vong_doi` (trạng thái · `gioi_han_da_biet` · `dinh_doat` · `anchor_con_hieu_luc`), 6 điều kiện đóng,
+6 điều kiện mở hồ sơ kế tiếp. §3 lấp nốt hai lỗ hổng đo được: `q_verify` **chưa từng có enum nào được khai**
+(hồ sơ thật đã tự dùng khoá `ly_do` với từ vựng riêng) và `q_ingest`/`q_approvals` thiếu token cho "đã quyết".
+
+**Vì sao là HÀM chứ không phải tài liệu:** đúng bài học GATE-06 (r298) — nghiệm thu bằng lint tài liệu
+chứng nhận RỖNG. `_rasoat_vong_doi_findings` trả 6 vế hỏng; `_rasoat_vong_doi_dong_hop_le` fail-CLOSED ba
+kiểu tự lừa: khai `da_dong` khi còn vế hỏng · khai `da_dong_co_gioi_han` mà `gioi_han_da_biet` **RỖNG**
+(đóng im lặng — thứ đã xảy ra thật) · `trang_thai` ngoài enum. Chưa khai `vong_doi` ⇒ không phán (hồ sơ đang rà).
+
+**Loop C sau khi đóng:** chỉ chạy khi `anchor_con_hieu_luc: true`; `false` ⇒ **BỎ QUA hồ sơ và NÓI RA lý do**.
+Đo: 82/82 `doc_deps.text_hash` của hồ sơ BHXH là **địa chỉ định vị**, 0/82 khớp `sha256:<64hex>` ⇒ chạy
+Loop C theo đặc tả hiện hành sẽ ra **STALE giả 100%**.
+
+**Bẫy hạ tầng gặp khi land (ghi lại cho lượt sau):** hằng cấp module tham chiếu từ trong hàm `tl_core`
+**KHÔNG resolve qua `tl`** (bind COPY-globals, ADR-0002) — `r90` bắt; và stub farm **chỉ nhận callable** nên
+hằng cũng không khai được vào `_STUB_MAP` — `r81` bắt. Vì vậy từ vựng đóng nằm trong **hàm thuần**
+`_rasoat_vong_doi_enums()`, không phải hằng.
+
+Test: `r300_vong_doi_sau_ve_dieu_kien_dong` (phá RIÊNG LẺ từng vế trong 7 ca — sạch-thì-True không đủ, hàm
+rỗng cũng qua) · `r300_vong_doi_dong_fail_closed` (6 khẳng định, gồm 3 kiểu tự lừa) ·
+`r300_dac_ta_vong_doi_khop_ma` (chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong mã).
+Thẻ `rasoat_hoso.json`: +1 `stop_conditions` (đóng hồ sơ ≠ đóng gói phiên) +1 `rules` (điều kiện Loop C).
+`RASOAT_HOSO_LOOP.md` §8b. selftest **1557/1557**.
+
 # ★ v1.36.36 — r299: cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply` chạy được (P16-F11+F26) (2026-08-01)
 
 **F11 — SCOPE KHÔNG ĐI THEO XUỐNG TIẾN TRÌNH CON.** `ocr.py` nhánh `vbqppl` KHÔNG forward `--profile`,

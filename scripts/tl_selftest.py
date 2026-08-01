@@ -21047,6 +21047,85 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r289_khong_con_lenh_ma_nlm_qa", _c289_khong_con_lenh_ma_nlm_qa)
 
+    def _c300_vong_doi_sach():
+        # Trạng thái ĐỦ ĐIỀU KIỆN ĐÓNG (§7.1) — dùng làm nền cho mọi phản chứng dưới.
+        return {"q_units": [{"trang_thai": "done"}],
+                "q_approvals": [{"trang_thai": "da_duyet_va_da_chay"}],
+                "q_verify": [{"trang_thai": "dat"}],
+                "q_ingest": [{"trang_thai": "flipped"}],
+                "session_claim": {"id": None, "released_at": "2026-08-01"}}
+
+    def _c300_sau_ve_dong():
+        # r300: 6 vế điều kiện đóng là HÀNH VI (hàm thuần), không phải prose. Mỗi vế phá riêng lẻ
+        # phải nổi ĐÚNG mã của nó — nếu chỉ khoá "sạch thì True" thì hàm rỗng cũng qua.
+        from tl_core import lookup_ops as _lo300
+        f = _lo300._rasoat_vong_doi_findings
+        ok0 = f(_c300_vong_doi_sach())["du_dieu_kien"] is True
+        pha = [
+            ("q_units", [{"trang_thai": "doing"}], "q_units_con_pending_hoac_doing"),
+            ("q_approvals", [{"trang_thai": "cho_duyet"}], "q_approvals_con_cho_duyet"),
+            ("q_verify", [{"trang_thai": "cho_tra_no"}], "q_verify_con_cho_tra_no"),
+            ("q_verify", [{"ly_do": "DA_TRA_NO"}], "q_verify_thieu_trang_thai_enum"),
+            ("q_ingest", [{"trang_thai": "cho_tai"}], "q_ingest_con_van_ban_chua_lay_duoc"),
+            ("q_ingest", [{"trang_thai": "DA_QUYET: giu ban kho"}], "q_ingest_trang_thai_ngoai_enum"),
+            ("session_claim", {"id": "phien-x", "ts": "…"}, "session_claim_chua_nha"),
+        ]
+        for khoa, val, ma in pha:
+            st = _c300_vong_doi_sach()
+            st[khoa] = val
+            r = f(st)
+            if r["du_dieu_kien"] or ma not in r["ve_hong"]:
+                return False
+        # claim rỗng hẳn (None) cũng tính là đã nhả
+        st = _c300_vong_doi_sach()
+        st["session_claim"] = None
+        return ok0 and f(st)["du_dieu_kien"] is True
+    _t110("r300_vong_doi_sau_ve_dieu_kien_dong", _c300_sau_ve_dong)
+
+    def _c300_dong_fail_closed():
+        # Ba kiểu TỰ LỪA phải bị chặn: khai da_dong khi còn vế hỏng · da_dong_co_gioi_han mà giới hạn
+        # RỖNG (đóng im lặng — đã xảy ra thật trên hồ sơ BHXH) · trang_thai ngoài enum.
+        from tl_core import lookup_ops as _lo300
+        g = _lo300._rasoat_vong_doi_dong_hop_le
+        ok1 = g({})["ok"] is True                                   # chưa khai vòng đời ⇒ không phán
+        st = _c300_vong_doi_sach()
+        st["vong_doi"] = {"trang_thai": "da_dong"}
+        ok2 = g(st)["ok"] is True                                   # sạch + khai da_dong ⇒ hợp lệ
+        st2 = _c300_vong_doi_sach()
+        st2["q_approvals"] = [{"trang_thai": "cho_duyet"}]
+        st2["vong_doi"] = {"trang_thai": "da_dong"}
+        r2 = g(st2)
+        ok3 = (not r2["ok"]) and any(x.startswith("KHAI_DA_DONG_NHUNG_CON_VE_HONG") for x in r2["loi"])
+        st3 = dict(st2)
+        st3["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han", "gioi_han_da_biet": []}
+        ok4 = "DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG" in g(st3)["loi"]
+        st4 = dict(st2)
+        st4["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han",
+                                            "gioi_han_da_biet": [{"loai": "de_xuat_chua_dinh_doat"}]}
+        ok5 = g(st4)["ok"] is True                                  # có khai giới hạn ⇒ chấp nhận
+        st5 = _c300_vong_doi_sach()
+        st5["vong_doi"] = {"trang_thai": "dong_roi"}
+        ok6 = any(x.startswith("TRANG_THAI_NGOAI_ENUM") for x in g(st5)["loi"])
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r300_vong_doi_dong_fail_closed", _c300_dong_fail_closed)
+
+    def _c300_dac_ta_khop_ma():
+        # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
+        from tl_core import lookup_ops as _lo300
+        _sch = (_ROOT209 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8", errors="replace")
+        ok1 = "## 7. Vòng đời HỒ SƠ" in _sch
+        _e300 = _lo300._rasoat_vong_doi_enums()
+        ok2 = all(t in _sch for t in _e300["vong_doi"])
+        ok3 = all(t in _sch for t in _e300["q_verify"]) and all(t in _sch for t in _e300["q_ingest"])
+        _the = _j209.loads((_ROOT209 / "references" / "workflows" / "rasoat_hoso.json")
+                           .read_text(encoding="utf-8"))
+        ok4 = any("DONG HO SO" in str(s) for s in (_the.get("stop_conditions") or []))
+        ok5 = any("anchor_con_hieu_luc" in str(s) for s in (_the.get("rules") or []))
+        _loop = (_ROOT209 / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        ok6 = "§8b" in _loop and "anchor_con_hieu_luc" in _loop
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r300_dac_ta_vong_doi_khop_ma", _c300_dac_ta_khop_ma)
+
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
         # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);

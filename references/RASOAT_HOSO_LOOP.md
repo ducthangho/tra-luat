@@ -250,6 +250,22 @@ trình**. **KHÔNG `/compact` giữa phiên rà** — bàn giao qua file trung t
 Nghi thức: xong/trả đơn vị đang cầm → đẩy sổ → cập nhật state + note bàn giao → NHẢ claim → kết sổ registry
 (`tl manifest`; `tl ops-plan` đổ việc vệ sinh vào Q-APPROVALS chờ duyệt, KHÔNG tự `--apply`).
 
+**§8b. ĐÓNG HỒ SƠ (khác đóng gói phiên) — r300.** Đóng gói = kết thúc MỘT LƯỢT; đóng hồ sơ = kết thúc CẢ
+HỒ SƠ. Đặc tả đầy đủ: `references/RASOAT_PLAN_SCHEMA.md` §7 (khối `vong_doi` + 6 điều kiện đóng + 6 điều
+kiện mở hồ sơ kế tiếp). Ba điều dễ sai nhất:
+
+- **"Đóng" phải nằm TRONG FILE.** Đo 01-08 trên hồ sơ thật: người thẩm tra chốt đã đóng mà state không có
+  khoá nào nói thế, còn treo 5 đầu mối (claim chưa nhả · 1 `cho_duyet` · nợ kiểm chéo · văn bản chưa lấy
+  được · trạng thái văn xuôi). Thiếu vế nào ⇒ **`da_dong_co_gioi_han`** + khai vào `gioi_han_da_biet`;
+  **cấm đóng im lặng**.
+- **Đóng là ĐÓNG BĂNG, không phải dọn** — không xoá `master/`, `rasoat_bugs.md`, `rasoat_approvals.json`,
+  `BIEN_BAN_*`.
+- **Loop C chỉ chạy khi `vong_doi.anchor_con_hieu_luc: true`.** `false` ⇒ BỎ QUA hồ sơ và **nói ra lý do**;
+  chạy bừa trên anchor chưa di trú sẽ ra STALE giả 100% (§4 cảnh báo cùng chuyện).
+
+Mở hồ sơ kế tiếp: **`--out-dir` MỚI** (dùng lại thư mục cũ = bảng master phồng — `rasoat_phuluc.py --in`
+gộp CẢ thư mục), claim cũ đã nhả, kickoff khai lại quota, ghi `skill_version_toi_thieu`.
+
 ## §9bis. QUY ƯỚC GHI (r218)
 
 **Một bài học — một lượt ghi.** Không gộp nhiều phát hiện vào một lần ghi tài liệu: cách đánh số lúc nháp

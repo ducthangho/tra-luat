@@ -32,7 +32,7 @@ Cách dùng tiêu biểu:
   # 2 — URL công khai
   ingest_to_cache.py --so-hieu 79/2025/NĐ-CP --url "https://vbpl.vn/.../vanban.docx" --method url
 """
-import argparse, atexit, contextlib, hashlib, json, os, platform, shutil, subprocess, sys, tempfile, time, unicodedata, urllib.request, urllib.parse
+import argparse, atexit, contextlib, hashlib, json, os, platform, re, shutil, subprocess, sys, tempfile, time, unicodedata, urllib.request, urllib.parse
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -463,6 +463,32 @@ def fetch_url(url: str, *, source_policy: str = "public-https", max_bytes: int =
     return dst, m
 
 
+def suy_doan_phu_luc(so_hieu: str) -> tuple:
+    """r297 (P16-F10) — suy đoán «tệp này CHỈ là phụ lục» CHỈ TỪ SỐ HIỆU, theo TOKEN có ranh giới.
+    Trả `(bat, ly_do)`; `ly_do` rỗng khi không suy đoán.
+
+    Bản cũ: `_ap_hint = (so_hieu + " " + title).lower()` rồi `any(k in _ap_hint ...)` với
+    `("phu_luc","phu luc","phuluc","phụ lục","-pl","_pl")`. HAI khuyết, cộng lại thành mất dữ liệu:
+      (a) quét CẢ TIÊU ĐỀ — Luật/Nghị định CÓ phụ lục thường ghi thẳng «… và Phụ lục …» trên tiêu đề,
+          nên chính TOÀN VĂN bị đóng dấu là phụ lục;
+      (b) `-pl`/`_pl` khớp KHỚP-CON, trúng bất kỳ chỗ nào có hai chữ đó liền nhau.
+    Hậu quả ở `normalize_document`: `body=""` (bỏ phân tích thân), `khoi_dau=""` — mà r215 nói rõ khối
+    đầu là NGUỒN DUY NHẤT chứng minh danh tính — T1 bị đặt `ok:true` vô điều kiện, `coverage` thành
+    `appendix_only`, `document_variant` đổi ⇒ ĐỔI LUÔN doc_key. Toàn bộ diễn ra IM LẶNG với `ok:true` rc=0.
+
+    Nay: chỉ `so_hieu`; tách token ở mọi ký tự không phải chữ/số (nên `_`/`-` là ranh giới); khớp token
+    NGUYÊN VẸN `pl`/`pl<số>`/`phuluc`, hoặc cặp token liền kề `phu|phụ` + `luc|lục`.
+    """
+    s = unicodedata.normalize("NFC", str(so_hieu or "")).lower()
+    toks = [t for t in re.split(r"[^0-9a-zà-ỹ]+", s) if t]
+    for i, t in enumerate(toks):
+        if re.fullmatch(r"pl\d*", t) or t == "phuluc":
+            return True, f"token số hiệu {t!r} = phụ lục"
+        if t in ("phu", "phụ") and i + 1 < len(toks) and toks[i + 1] in ("luc", "lục"):
+            return True, "cụm 'phụ lục' trong số hiệu"
+    return False, ""
+
+
 def run_normalize(input_path: str, so_hieu: str, title: str, variant: str,
                   cache_dir: str, extra: dict) -> dict:
     """Gọi normalize_document.py (đã vá: VBHN, markdown, full_text) với số hiệu KHÓA."""
@@ -492,6 +518,8 @@ def run_normalize(input_path: str, so_hieu: str, title: str, variant: str,
         cmd += ["--aliases", extra["aliases"]]
     if extra.get("as_appendix"):
         cmd += ["--as-appendix"]
+    if extra.get("as_appendix_auto"):        # r297: báo cho con biết đây là SUY ĐOÁN ⇒ nội dung được quyền phủ quyết
+        cmd += ["--as-appendix-auto"]
     if extra.get("loc_congbao"):        # r217: chuyển thẳng cho normalize_document (đường nạp DUY NHẤT)
         cmd += ["--loc-congbao"]
     if extra.get("loc_congbao_audit"):
@@ -587,6 +615,9 @@ def main():
                     help="Nếu số hiệu đã bị VBHN còn hiệu lực hợp nhất (vb_status) => NẠP VBHN thay thế.")
     ap.add_argument("--as-appendix", action="store_true",
                     help="Văn bản CHỈ là phụ lục/mẫu (không có Điều nghị định): lưu nguyên khối phu_luc, không ép thành Điều.")
+    ap.add_argument("--no-as-appendix", dest="no_as_appendix", action="store_true",
+                    help="(r297) TẮT suy đoán phụ lục theo số hiệu. Dùng khi số hiệu có chữ 'PL' nhưng "
+                         "tệp là TOÀN VĂN văn bản. Không ảnh hưởng --as-appendix gõ tường minh.")
     ap.add_argument("--loc-congbao", dest="loc_congbao", action="store_true",
                     help="(r217) Nguồn bóc từ PDF Công báo: BỎ dòng chạy đầu trang + dòng số trang + khối chữ ký "
                          "số. Không bật thì chỉ KHAI BÁO vào verify_flags (cảnh báo, KHÔNG chặn).")
@@ -611,10 +642,23 @@ def main():
                     args.token = args.token or _c.get("token") or _c.get("TL_TOKEN") or ""
                     if args.webapp and args.token:
                         break
-    # Tự nhận diện file phụ lục theo số hiệu/tiêu đề
-    _ap_hint = (args.so_hieu + " " + args.title).lower()
-    if any(k in _ap_hint for k in ("phu_luc", "phu luc", "phuluc", "phụ lục", "-pl", "_pl")):
-        args.as_appendix = True
+    # r297 (P16-F10): tự nhận diện phụ lục — CHỈ theo SỐ HIỆU, theo TOKEN, và KHÔNG BAO GIỜ IM LẶNG.
+    # Suy đoán này ĐỔI CÁCH LƯU cả văn bản (xem `suy_doan_phu_luc`), nên nó phải (1) hẹp, (2) nói ra,
+    # (3) tắt được, và (4) chịu PHỦ QUYẾT của nội dung thật ở `normalize_document` (`--as-appendix-auto`).
+    args.as_appendix_auto = False
+    if not args.as_appendix:
+        _ap_bat, _ap_ly_do = suy_doan_phu_luc(args.so_hieu)
+        if _ap_bat and args.no_as_appendix:
+            sys.stderr.write(f"[cache-build] ⓘ số hiệu gợi ý phụ lục ({_ap_ly_do}) nhưng có "
+                             f"--no-as-appendix ⇒ nạp như văn bản THƯỜNG.\n")
+        elif _ap_bat:
+            args.as_appendix = True
+            args.as_appendix_auto = True
+            sys.stderr.write(
+                f"[cache-build] ⚠ TỰ BẬT --as-appendix vì {_ap_ly_do} (số hiệu {args.so_hieu!r}).\n"
+                f"[cache-build]   ⇒ lưu NGUYÊN KHỐI vào `phu_luc`: KHÔNG tách Điều, KHÔNG giữ khối đầu\n"
+                f"[cache-build]   (danh tính văn bản), KHÔNG kiểm T1, và doc_key mang biến thể `appendix`.\n"
+                f"[cache-build]   Nếu đây là TOÀN VĂN văn bản, chạy lại với --no-as-appendix.\n")
 
     # ----- VBHN-FIRST: số hiệu bị thay thế => chuyển hướng nạp VBHN hợp nhất -----
     redirect_note = None
@@ -701,6 +745,7 @@ def main():
         "goc": goc,
         "aliases": aliases,
         "as_appendix": args.as_appendix,
+        "as_appendix_auto": getattr(args, "as_appendix_auto", False),    # r297
         "loc_congbao": getattr(args, "loc_congbao", False),              # r217
         "loc_congbao_audit": getattr(args, "loc_congbao_audit", ""),     # r217
     }

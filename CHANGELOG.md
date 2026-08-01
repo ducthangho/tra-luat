@@ -1,3 +1,49 @@
+# ★ v1.36.34 — r297: `--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10 (2026-08-01)
+
+**Bật `--as-appendix` KHÔNG phải chuyện nhãn.** `normalize_document` khi đó đặt `body=""`, `khoi_dau=""`
+— mà **r215 nói rõ khối đầu là NGUỒN DUY NHẤT chứng minh danh tính văn bản** — gán T1 `ok:true` **vô
+điều kiện**, đổi `coverage` thành `appendix_only` và `document_variant` thành `appendix` ⇒ **đổi luôn
+`doc_key`**. Nghĩa là **TOÀN VĂN một Luật bị lưu thành phụ lục, mất danh tính, không qua kiểm cấu
+trúc — mà vẫn `ok:true` rc=0**. Một suy đoán rẻ tiền không được phép gây hậu quả đắt như vậy trong im lặng.
+
+**Bệnh (`ingest_to_cache.py`)** — `_ap_hint = (so_hieu + " " + title).lower()` rồi `any(k in _ap_hint …)`
+với `("phu_luc","phu luc","phuluc","phụ lục","-pl","_pl")`. Hai khuyết:
+
+- **(a) quét CẢ TIÊU ĐỀ.** Luật/Nghị định CÓ phụ lục thường ghi thẳng «… và Phụ lục …» ngay trên
+  tiêu đề ⇒ chính TOÀN VĂN bị đóng dấu phụ lục. Đây là ca ĐÃ ĐO ở journal Pha 1 (A/B cùng một file nguồn).
+- **(b) khớp-con.** `-pl`/`_pl` trúng bất kỳ chỗ nào hai chữ đó đứng sau `-`/`_` — ví dụ số hiệu
+  `29/2024/TT-PLTW` của cơ quan viết tắt bắt đầu bằng «PL».
+
+**Vá — bốn lớp, không lớp nào thừa:**
+
+1. **Hẹp lại**: hàm `suy_doan_phu_luc(so_hieu)` chỉ đọc **SỐ HIỆU** (bỏ hẳn tiêu đề), tách token ở mọi
+   ký tự không phải chữ/số (nên `_` và `-` là ranh giới), khớp **token NGUYÊN VẸN** `pl` / `pl<số>` /
+   `phuluc`, hoặc cặp token liền kề `phu|phụ` + `luc|lục`.
+2. **Nói ra**: tự bật thì in cảnh báo NHIỀU DÒNG ra stderr, kể đích danh cái giá (mất khối đầu, bỏ T1,
+   đổi doc_key) và chỉ luôn cách chữa. Trước đây tuyệt đối im lặng.
+3. **Tắt được**: cờ `--no-as-appendix` cho ca số hiệu có chữ «PL» nhưng tệp là toàn văn.
+4. **Nội dung PHỦ QUYẾT** (`normalize_document.py`): cha truyền `--as-appendix-auto` để báo «đây là
+   SUY ĐOÁN, không phải người gõ». Ở ca đó, nếu `split_articles(raw)` ra **≥2 Điều** ⇒ **DỪNG rc=2**
+   với `APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU` (fail-CLOSED), để người quyết.
+
+**★ RANH GIỚI CỐ Ý GIỮ: `--as-appendix` gõ TƯỜNG MINH đi thẳng, không đụng.** Phụ lục/mẫu CÓ Điều nội
+bộ là hợp lệ — chính nhánh đó vẫn gọi `split_articles(raw)` cho ca này. Cổng mới CHỈ soi ca suy đoán;
+siết lây sang quyền của người dùng là siết quá tay. Ca `r297_as_appendix_tuong_minh_khong_bi_phu_quyet`
+**xanh cả trước lẫn sau vá — CÓ CHỦ ĐÍCH**, nó canh đúng ranh giới đó.
+
+`--no-as-appendix` và `--as-appendix-auto` là cờ của hai **script** `ingest_to_cache.py` /
+`normalize_document.py`; `tl cache-build` chuyển cờ qua `nargs=REMAINDER` ⇒ **parser-surface của `tl`
+KHÔNG đổi**, không cần regen `parser_surface.json`.
+
+**PHẢN CHỨNG — 5/6 ĐỎ trên bản chưa vá** (selftest 1539/1544). Ca xanh là ca «không được đổi» nói trên.
+★Ba ca đầu đỏ vì symbol chưa tồn tại, nên **mỗi ca TỰ MANG phản chứng của chính nó**: khẳng định luôn
+rằng **LUẬT CŨ (viết inline trong test) trả SAI trên đúng fixture đó** — nếu vế này hỏng thì fixture
+không còn tái hiện được bệnh, đúng khuôn r229 của kho. Ca «không mất độ phủ» khẳng định cả luật cũ lẫn
+luật mới đều NHẬN 5 số hiệu phụ lục thật, để bản vá không đổi dương-tính-giả thành âm-tính-giả.
+
+Selftest **1544/1544**. Ruff: `ingest_to_cache.py` + `normalize_document.py` giữ nguyên **6 lỗi nền,
+delta 0** (`re` thêm vào dòng import sẵn có nên E401 không tăng).
+
 # ★ v1.36.33 — r296: HỌ regex "Điều N" nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15 (2026-08-01)
 
 **Luật sửa đổi CHÈN THÊM điều bằng cách đánh số `7a`/`7b`/`7đ`. Toàn bộ họ khuôn nhận diện tiêu đề

@@ -201,6 +201,9 @@ def main():
     ap.add_argument("--aliases", default="", help="Số hiệu tra cứu bổ sung, phân tách ';'")
     ap.add_argument("--as-appendix", action="store_true",
                     help="Văn bản CHỈ là phụ lục/mẫu: lưu nguyên khối phu_luc, không ép thành Điều, không FATAL.")
+    ap.add_argument("--as-appendix-auto", dest="as_appendix_auto", action="store_true",
+                    help="(r297) --as-appendix này do lệnh cha SUY ĐOÁN từ số hiệu, KHÔNG do người gõ. "
+                         "Nội dung được quyền PHỦ QUYẾT: thấy thân Điều thật thì DỪNG thay vì lưu sai.")
     ap.add_argument("--recorded-at", default="",
                     help="timestamp provenance tường minh; mặc định bỏ để cùng input tạo cùng cache bytes")
     ap.add_argument("--loc-congbao", dest="loc_congbao", action="store_true",
@@ -256,6 +259,23 @@ def main():
         _cb_flags.extend(co_rac_congbao(raw))
 
     if a.as_appendix:
+        # r297 (P16-F10) — PHỦ QUYẾT THEO NỘI DUNG, chỉ áp cho ca SUY ĐOÁN. Nhánh này bỏ `khoi_dau`
+        # (r215: nguồn DUY NHẤT chứng minh danh tính), bỏ kiểm T1, và đổi `document_variant` ⇒ đổi
+        # doc_key. Cái giá đó chấp nhận được khi NGƯỜI gõ `--as-appendix`; KHÔNG chấp nhận được khi nó
+        # đến từ một phép đoán trên chuỗi số hiệu. Nên: đoán mà nội dung có thân Điều thật ⇒ DỪNG
+        # (fail-CLOSED), để người quyết — chứ không lặng lẽ lưu toàn văn Luật thành phụ lục rồi rc=0.
+        # ★`--as-appendix` gõ TƯỜNG MINH đi thẳng, không đụng: phụ lục/mẫu CÓ Điều nội bộ là hợp lệ
+        #  (chính nhánh này giữ `split_articles(raw)` cho ca đó).
+        if getattr(a, "as_appendix_auto", False):
+            _n_dieu297 = len(split_articles(raw) or {})
+            if _n_dieu297 >= 2:
+                print(json.dumps({"error": "APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU",
+                                  "articles_found": _n_dieu297,
+                                  "hint": "Số hiệu gợi ý phụ lục nhưng nội dung có thân Điều — nhiều khả "
+                                          "năng đây là TOÀN VĂN. Chạy lại với --no-as-appendix để nạp "
+                                          "bình thường, hoặc --as-appendix tường minh nếu thật sự là phụ lục."},
+                                 ensure_ascii=False))
+                sys.exit(2)
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
         phu_luc = raw.strip()

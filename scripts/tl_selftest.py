@@ -22323,6 +22323,91 @@ def run() -> int:
         return not _vp296
     _t110("r296_khong_con_bay_ranh_gioi_ngay_sau_so", _c296_khong_con_bay_trong_ma_san_xuat)
 
+    # ═══ r297 (v1.36.34) — P16-F10: `--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con ═══
+    # Bật `--as-appendix` KHÔNG phải chuyện nhãn: `normalize_document` khi đó đặt `body=""`,
+    # `khoi_dau=""` (r215 nói rõ khối đầu là NGUỒN DUY NHẤT chứng minh danh tính), gán T1
+    # `ok:true` VÔ ĐIỀU KIỆN, `coverage=appendix_only`, `document_variant=appendix` ⇒ ĐỔI doc_key.
+    # Tức là TOÀN VĂN một Luật bị lưu thành phụ lục, mất danh tính, không qua kiểm cấu trúc — mà vẫn
+    # `ok:true` rc=0. Suy đoán rẻ tiền không được phép gây hậu quả đắt như vậy một cách IM LẶNG.
+    _CU297 = ("phu_luc", "phu luc", "phuluc", "phụ lục", "-pl", "_pl")   # LUẬT CŨ, giữ để phản chứng
+
+    def _cu297(so_hieu, title=""):
+        """Tái hiện ĐÚNG luật cũ: ghép số hiệu + TIÊU ĐỀ rồi khớp-con."""
+        return any(k in (so_hieu + " " + title).lower() for k in _CU297)
+
+    def _itc297():
+        """Nạp THẲNG scripts/ingest_to_cache.py — script chạy độc lập (subprocess), KHÔNG qua bind."""
+        import importlib.util as _ilu297
+        _sp297 = _ilu297.spec_from_file_location("ingest_to_cache_nobind_r297",
+                                                 _ROOT209 / "scripts" / "ingest_to_cache.py")
+        _m297 = _ilu297.module_from_spec(_sp297)
+        _sp297.loader.exec_module(_m297)
+        return _m297
+
+    def _c297_khong_dinh_tieu_de():
+        # (a) — hại ĐÃ ĐO ở Pha 1: Luật CÓ phụ lục thường ghi thẳng "… và Phụ lục …" trên TIÊU ĐỀ.
+        _sh, _ti = "45/2019/QH14", "Bộ luật Lao động và Phụ lục danh mục nghề nặng nhọc"
+        _moi = _itc297().suy_doan_phu_luc(_sh)[0]
+        return _moi is False and _cu297(_sh, _ti) is True   # vế 2: fixture còn tái hiện được bug
+    _t110("r297_suy_doan_phu_luc_khong_dinh_den_tieu_de", _c297_khong_dinh_tieu_de)
+
+    def _c297_token_nguyen_ven():
+        # (b) — "-pl"/"_pl" khớp-con: số hiệu của cơ quan viết tắt bắt đầu bằng PL cũng trúng.
+        _sh = "29/2024/TT-PLTW"
+        _moi = _itc297().suy_doan_phu_luc(_sh)[0]
+        return _moi is False and _cu297(_sh) is True
+    _t110("r297_suy_doan_phu_luc_token_phai_nguyen_ven", _c297_token_nguyen_ven)
+
+    def _c297_khong_mat_do_phu():
+        # ★"KHÔNG ĐƯỢC ĐỔI": siết khuôn tuyệt đối không được LÀM MẤT ca phụ lục THẬT. Cả luật cũ lẫn
+        # luật mới đều phải nhận — nếu ca này đỏ thì bản vá đã đổi thành âm-tính-giả, hại hơn bệnh cũ.
+        _that = ["45-2019-QH14-PL1", "45-2019-QH14_pl", "PHU_LUC-2024", "phuluc-05", "Phụ lục IV/2023"]
+        _f = _itc297().suy_doan_phu_luc
+        return all(_f(s)[0] is True and _cu297(s) is True for s in _that)
+    _t110("r297_suy_doan_phu_luc_van_bat_du_ca_phu_luc_that", _c297_khong_mat_do_phu)
+
+    _LUAT297 = ("LUẬT\nSố: 45/2019/QH14\n\nCăn cứ Hiến pháp;\n\n"
+                "Điều 1. Phạm vi điều chỉnh\nNội dung điều 1.\n\n"
+                "Điều 2. Đối tượng áp dụng\nNội dung điều 2.\n\n"
+                "Điều 3. Giải thích từ ngữ\nNội dung điều 3.\n")
+    _PL297 = "PHỤ LỤC I\nDANH MỤC NGHỀ NẶNG NHỌC\n\n1. Nghề A\n2. Nghề B\n"
+
+    def _nd297(noi_dung, extra):
+        """Chạy `normalize_document.py` THẬT bằng subprocess — đúng đường mà `cache-build` đi."""
+        import subprocess as _sp, tempfile as _tf297
+        with _tf297.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "in.txt")
+            with open(_src, "w", encoding="utf-8") as _f:
+                _f.write(noi_dung)
+            _cmd = [_hsys.executable, "-X", "utf8",
+                    str(_ROOT209 / "scripts" / "normalize_document.py"),
+                    "--input", _src, "--number-symbol", "45-2019-QH14-PL1",
+                    "--out", _hos.path.join(_d, "o.json")] + list(extra)
+            _p = _sp.run(_cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            return _p.returncode, (_p.stdout or "")
+
+    def _c297_phu_quyet_chan_toan_van():
+        # Cổng CHÍNH: số hiệu đoán là phụ lục nhưng nội dung có thân Điều ⇒ DỪNG (fail-CLOSED),
+        # thay vì lưu toàn văn Luật thành phụ lục rồi báo ok:true.
+        _rc, _out = _nd297(_LUAT297, ["--as-appendix", "--as-appendix-auto"])
+        return _rc == 2 and "APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU" in _out
+    _t110("r297_phu_quyet_noi_dung_chan_toan_van_bi_doan_nham", _c297_phu_quyet_chan_toan_van)
+
+    def _c297_tuong_minh_khong_bi_phu_quyet():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): người gõ `--as-appendix` TƯỜNG MINH thì đi thẳng.
+        # Phụ lục/mẫu CÓ Điều nội bộ là hợp lệ — chính nhánh đó giữ `split_articles(raw)` cho ca này.
+        # Cổng mới CHỈ soi ca SUY ĐOÁN; nếu ca này đỏ nghĩa là đã siết lây sang quyền của người dùng.
+        _rc, _out = _nd297(_LUAT297, ["--as-appendix"])
+        return _rc == 0 and '"ok": true' in _out
+    _t110("r297_as_appendix_tuong_minh_khong_bi_phu_quyet", _c297_tuong_minh_khong_bi_phu_quyet)
+
+    def _c297_phu_luc_that_van_qua():
+        # Phụ lục THẬT (0 Điều) đi qua cổng tự động bình thường — cổng không chặn bừa.
+        _rc, _out = _nd297(_PL297, ["--as-appendix", "--as-appendix-auto"])
+        return _rc == 0 and '"coverage": "appendix_only"' in _out
+    _t110("r297_phu_luc_that_van_qua_duoc_cong_tu_dong", _c297_phu_luc_that_van_qua)
+
+
 
 
     # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════

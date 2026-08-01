@@ -22504,6 +22504,183 @@ def run() -> int:
         return _rc == 0 and '"coverage": "appendix_only"' in _out
     _t110("r297_phu_luc_that_van_qua_duoc_cong_tu_dong", _c297_phu_luc_that_van_qua)
 
+    # ═══ r299 (v1.36.36) — P16-F11 + P16-F26: cầu nối OCR/chunks ═══
+    # F11: cầu nối KHÔNG chuyển `--config`/`--profile` xuống tiến trình CON. Mà cả ba lệnh cầu nối
+    #      (`ingest-ocr`, `profile-ingest-ocr`, `profile-ingest-chunks`) đều nằm trong
+    #      `_CREDS_LAZY_CMDS` ⇒ `main()` cũng KHÔNG áp profile hộ. Con vì thế tự dò `_config_candidates`
+    #      và tự chọn profile theo `config.defaultProfile`: cha được chỉ scope A, con GHI vào scope B,
+    #      im lặng. Cùng lớp bệnh F08 (r281), chỉ khác là đi qua ranh giới TIẾN TRÌNH.
+    # F26: `profile-ingest-chunks --apply` CHƯA BAO GIỜ chạy được — plan chỉ nối `--apply` TRẦN, trong
+    #      khi `authorize_apply` đòi CẢ `--confirm yes` LẪN `--expected-plan-hash` ⇒ CONFIRM_REQUIRED
+    #      100%. `ocr.py` đã có khuôn HAI BƯỚC đúng từ v1.34.53/C1; nhánh chunks bị sót.
+    import tl_core.ocr as _ocr299         # `_bridge_ocr_plan` là NỘI BỘ ocr.py (không có trong bind-list —
+    import tl_core.chunking as _ch299     #  đúng thiết kế); lấy thẳng module = đúng object đường sản xuất chạy.
+
+    class _A299:
+        pass
+
+    class _stub_child299:
+        """Thay `_run_child_tl` ở ĐÚNG HAI namespace mà đường sản xuất tra tên. ĐO ĐƯỢC, không đoán —
+        và cả hai đều KHÔNG phải `_TL_MODULE`:
+
+        · `_profile_ingest_chunks_plan` gọi `chunk-verify` ⇒ giải tên từ `tl_core.chunking.__dict__`
+          (bind của chunking/ocr SAO CHÉP tên tl vào globals RIÊNG, KHÔNG rebase `__globals__`).
+        · DRY/apply nằm trong `_bridge_run_child_apply`. Tên này chunking lấy từ tl, nhưng vật trong
+          `tl.__dict__` KHÔNG phải hàm thật — nó là `_stub` CHUYỂN TIẾP LƯỜI của `_STUB_MAP`
+          (`return getattr(_mod, _name)(*a, **kw)`). Nghĩa là thân hàm luôn chạy trong namespace của
+          MODULE GỐC ⇒ `_run_child_tl` ở đó giải từ `tl_core.ocr.__dict__`.
+          ★Hệ quả tổng quát: patch `_TL_MODULE.<tên>` KHÔNG chặn được lời gọi NẰM TRONG một hàm lấy
+           qua bind-list — phải patch MODULE GỐC. Đây chính là bài học harness r114 kho đã ghi
+           ("patch `_TL_MODULE._run_child_tl` không ăn"), nay có cơ chế kèm theo.
+        Thiếu một trong hai thì stub không ăn, con chạy THẬT (đụng mạng/Drive) và test đo nhầm.
+        Khôi phục TRỌN cả hai tên trong `__exit__` (kỷ luật r285)."""
+
+        def __init__(self, fn):
+            self.fn = fn
+
+        def __enter__(self):
+            self._sav = (_ch299._run_child_tl, _ocr299._run_child_tl)
+            _ch299._run_child_tl = self.fn
+            _ocr299._run_child_tl = self.fn
+            return self
+
+        def __exit__(self, *_e):
+            _ch299._run_child_tl, _ocr299._run_child_tl = self._sav
+            return False
+
+    def _plan_ocr299(mode, **kw):
+        import tempfile as _tf299
+        with _tf299.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "s.pdf")
+            _txt = _hos.path.join(_d, "s.txt")
+            _cfg = _hos.path.join(_d, "cfg.json")
+            with open(_src, "wb") as _f:
+                _f.write(b"%PDF-1.4\n")
+            for _p, _c in ((_txt, "Điều 1. A\n"), (_cfg, "{}")):
+                with open(_p, "w", encoding="utf-8") as _f:
+                    _f.write(_c)
+            _a = _A299()
+            _a.file, _a.text_file, _a.ocr_verified, _a.apply = _src, _txt, True, False
+            _a.config, _a.profile = _cfg, "vbqppl"
+            for _k in ("name", "sohieu", "goc", "hieuluc", "loai", "cat", "chunk_max_chars"):
+                setattr(_a, _k, None)
+            for _k, _v in kw.items():
+                setattr(_a, _k, _v)
+            return _ocr299._bridge_ocr_plan(_a, mode=mode), _src, _cfg
+
+    def _c299_ocr_forward_ca_hai_nhanh():
+        for _mode in ("vbqppl", "profile"):
+            _p, _src, _cfg = _plan_ocr299(_mode, cat=("hinh-su" if _mode == "vbqppl" else None))
+            _c = _p.get("planned_child_dry") or []
+            if not ("--config" in _c and _c[_c.index("--config") + 1] == _cfg):
+                return False
+            if not ("--profile" in _c and _c[_c.index("--profile") + 1] == "vbqppl"):
+                return False
+        return True
+    _t110("r299_bridge_ocr_forward_config_va_profile_ca_hai_nhanh", _c299_ocr_forward_ca_hai_nhanh)
+
+    def _c299_ocr_duong_tep_van_o_index_1():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): cờ mới nối ở CUỐI, `child[1]` vẫn phải là ĐƯỜNG TỆP —
+        # guard hạ nguồn (khuôn r251) đọc đúng ô đó. Chèn cờ vào giữa là làm hỏng một cổng khác.
+        for _mode in ("vbqppl", "profile"):
+            _p, _src, _cfg = _plan_ocr299(_mode, cat=("hinh-su" if _mode == "vbqppl" else None))
+            _c = _p.get("planned_child_dry") or []
+            if len(_c) < 2 or _c[1] != _src:
+                return False
+        return True
+    _t110("r299_bridge_ocr_duong_tep_van_o_index_1", _c299_ocr_duong_tep_van_o_index_1)
+
+    def _plan_chunks299(apply_):
+        """Dựng manifest chunk thật rồi gọi `_profile_ingest_chunks_plan` — trả (plan, cfg, thumuc)."""
+        import tempfile as _tf299
+        _d = _tf299.mkdtemp()
+        _md = _hos.path.join(_d, "c1.md")
+        _man = _hos.path.join(_d, "m.json")
+        _cfg = _hos.path.join(_d, "cfg.json")
+        with open(_md, "w", encoding="utf-8") as _f:
+            _f.write("---\n{}\n---\nĐiều 1. A\n")
+        with open(_cfg, "w", encoding="utf-8") as _f:
+            _f.write("{}")
+        with open(_man, "w", encoding="utf-8") as _f:
+            json.dump({"schema": "chunk_manifest.v1", "mode": "profile", "source_file": _md,
+                       "source_hash": "h", "chunk_count": 1,
+                       "chunks": [{"index": 1, "path": _md, "expected_name": "c1", "sha256": "s"}]},
+                      _f, ensure_ascii=False)
+        _a = _A299()
+        _a.manifest, _a.apply, _a.profile, _a.config = _man, apply_, "vbqppl", _cfg
+        _a.allow_default = _a.skip_live_check = False
+        _a.confirm = "yes"
+        _a.continue_on_error = False
+        with _stub_child299(lambda *_x, **_k: {"ok": True, "json": {}}):
+            return _ch299._profile_ingest_chunks_plan(_a), _cfg, _a
+
+    def _c299_chunks_plan_co_command_dry():
+        _p, _cfg, _a = _plan_chunks299(True)
+        _rec = (_p.get("planned_child_commands") or [{}])[0]
+        _dry, _cmd = _rec.get("command_dry"), _rec.get("command") or []
+        return (isinstance(_dry, list) and "--apply" not in _dry
+                and "--apply" in _cmd and _cmd[_cmd.index("--apply") + 1:_cmd.index("--apply") + 3] == ["--confirm", "yes"]
+                and len(_dry) > 1 and _dry[1] == _cmd[1])      # đường tệp ở index 1 của CẢ HAI
+    _t110("r299_chunks_plan_tach_command_dry_va_apply_co_confirm", _c299_chunks_plan_co_command_dry)
+
+    def _c299_chunks_forward_config():
+        _p, _cfg, _a = _plan_chunks299(False)
+        _cmd = ((_p.get("planned_child_commands") or [{}])[0]).get("command") or []
+        return ("--config" in _cmd and _cmd[_cmd.index("--config") + 1] == _cfg
+                and "--profile" in _cmd and _cmd[_cmd.index("--profile") + 1] == "vbqppl")
+    _t110("r299_chunks_forward_config_va_profile", _c299_chunks_forward_config)
+
+    def _c299_chunks_apply_chay_hai_buoc():
+        """Đường APPLY THẬT: phải gọi con HAI lần — DRY (không --apply) lấy `plan_hash`, rồi apply kèm
+        `--expected-plan-hash` ĐÚNG hash đó. Bản cũ gọi MỘT lần với `--apply` trần ⇒ chết CONFIRM_REQUIRED."""
+        _p, _cfg, _a = _plan_chunks299(True)
+        _goi = []
+
+        def _fake299(cmd, *_x, **_k):
+            _goi.append(list(cmd))
+            if "--apply" in cmd:
+                return {"ok": True, "json": {"applied": True}}
+            return {"ok": True, "json": {"plan_hash": "HASH299"}}
+        with _stub_child299(_fake299), _hush():   # lệnh in JSON + tiến độ per-chunk — không xả ra console deploy
+            _rc = _ch299.cmd_profile_ingest_chunks(_a)
+        # bỏ lần gọi `chunk-verify` của plan; còn lại phải đúng 2 lần cho 1 chunk
+        _con = [c for c in _goi if c and c[0] == "profile-ingest"]
+        return (_rc == 0 and len(_con) == 2
+                and "--apply" not in _con[0]
+                and "--apply" in _con[1] and "--confirm" in _con[1]
+                and _con[1][-2:] == ["--expected-plan-hash", "HASH299"])
+    _t110("r299_chunks_apply_chay_hai_buoc_va_chen_expected_plan_hash", _c299_chunks_apply_chay_hai_buoc)
+
+    def _c299_chunks_dry_hong_thi_dung_truoc_side_effect():
+        """DRY không trả `plan_hash` ⇒ KHÔNG được chạy lệnh apply (fail TRƯỚC side-effect)."""
+        _p, _cfg, _a = _plan_chunks299(True)
+        _goi = []
+
+        def _fake299b(cmd, *_x, **_k):
+            _goi.append(list(cmd))
+            return {"ok": True, "json": {}}              # không có plan_hash
+        with _stub_child299(_fake299b), _hush():
+            _rc = _ch299.cmd_profile_ingest_chunks(_a)
+        _con = [c for c in _goi if c and c[0] == "profile-ingest"]
+        return _rc != 0 and len(_con) == 1 and "--apply" not in _con[0]
+    _t110("r299_chunks_dry_hong_thi_khong_chay_apply", _c299_chunks_dry_hong_thi_dung_truoc_side_effect)
+
+    def _c299_authorize_apply_van_doi_ca_hai():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): cổng của CON giữ nguyên fail-CLOSED. Ca này chứng minh
+        # vì sao `--apply` TRẦN không thể chạy — tức F26 là bệnh THẬT chứ không phải suy diễn — và canh
+        # cho lượt sau đừng "chữa" F26 bằng cách nới cổng con.
+        import tl_core.ingest_contract as _ic299
+        _thieu_hash = _ic299.authorize_apply(apply=True, confirm="yes", expected_plan_hash=None,
+                                             actual_plan_hash="H")
+        _thieu_confirm = _ic299.authorize_apply(apply=True, confirm=None, expected_plan_hash="H",
+                                                actual_plan_hash="H")
+        _du = _ic299.authorize_apply(apply=True, confirm="yes", expected_plan_hash="H", actual_plan_hash="H")
+        return (_thieu_hash.get("error") == "EXPECTED_PLAN_HASH_REQUIRED"
+                and _thieu_confirm.get("error") == "CONFIRM_REQUIRED"
+                and _du.get("ok") is True)
+    _t110("r299_authorize_apply_van_doi_ca_confirm_lan_hash", _c299_authorize_apply_van_doi_ca_hai)
+
+
 
 
 

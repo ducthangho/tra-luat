@@ -1,3 +1,57 @@
+# ★ v1.36.31 — r292/RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." (2026-08-01)
+
+Slice **R0** (§Pha 1B), mục **T2 cuối cùng** — tranche "chặn máu" đóng lại tại đây.
+
+**Ba lỗ, cùng Mẫu A (§5), cộng lại thành một mất mát im lặng có kèm lời báo thành công:**
+1. `prog['done']` **vừa** là sổ-đã-xong **vừa** là **bộ lọc worklist** (`:63`). Doc `exporttext` lỗi bị
+   ghi `done[gid]='err'` (`:76`) ⇒ **loại VĨNH VIỄN** khỏi mọi đợt sau. Không log, không rc.
+2. `reg_bulk` (`:92`, `:100`) **không kiểm `rb['ok']`**, chỉ cộng `patched` — mà item đã bị đánh
+   `done='ok'` từ **TRƯỚC** lúc gọi (`:84`) ⇒ lô ghi hỏng vẫn coi như xong.
+3. `remaining` (`:104`) tính lại từ chính `done` **đã nhiễm** ⇒ `remaining==0` ⇒ in **"XONG TẤT CẢ."**,
+   `main()` return `None` ⇒ **rc=0**.
+
+**Vá — state machine tường minh** (`schema: tukhoa_progress.v2`):
+`committed` (đã ghi **và** đã đối chiếu) · `blocked` (kết cục XÁC ĐỊNH: không bóc được từ khoá nào —
+chạy lại vẫn thế) · `retryable` (HỎNG, **phải** thử lại) · `inflight` (đã bóc, **chưa** có xác nhận ghi).
+**Chỉ `committed`/`blocked` mới rời worklist** — đó là toàn bộ lỗ (1).
+
+- Lỗi `exporttext` ⇒ `retryable`, **không** phải "xong".
+- Bóc xong ⇒ `inflight`, **chưa** commit. `reg_bulk` đi qua `reg_bulk_verdict`: `ok=true` **chưa đủ** —
+  `patched < gửi` nghĩa là phần hụt **chưa** được ghi ⇒ **cả lô** về `retryable`. Chỉ lô được xác nhận
+  mới chuyển `committed`.
+- `remaining` tính từ worklist **thật** (sổ không còn bị nhiễm); `ok` và `rc` **dẫn xuất** từ nó.
+  `rc≠0` khi còn việc; "XONG TẤT CẢ." chỉ in khi thật sự hết. `sys.exit(main() or 0)` — trước đây
+  `main()` return `None` nên rc luôn 0.
+- `save_progress` **ATOMIC** (`.tmp` + `os.replace`) và nằm trong `finally`: Ctrl-C/hết giờ/nổ giữa
+  chừng vẫn giữ được sổ, và `inflight` còn lại tự quay về hàng đợi đợt sau.
+
+**Đọc được sổ v1 là BẮT BUỘC, không phải tiện nghi.** File `tukhoa_progress.json` v1 đang nằm trên máy
+người giữ và **chính nó là bằng chứng thiệt hại** mà §6.2 Pha 3.5 cần (danh sách doc bị `err`). Vứt đi
+là mất manh mối. `migrate_progress`: `ok`→`committed` · `empty`→`blocked(EMPTY_KEYWORDS)` ·
+**`err*`→`retryable`**. Vế cuối chính là bản vá: doc từng bị `err` **quay lại** worklist.
+
+**Test (+3 ca → 1526/1526):**
+- `r292_bkl_migrate_v1_dua_doc_loi_quay_lai` — ánh xạ v1→v2 đúng; `g3`/`g4` (từng `err`) **quay lại**
+  hàng đợi còn `g1`/`g2` rời; migrate **bất biến** khi chạy lại; sổ rỗng/hỏng ⇒ khung sạch, không nổ.
+- `r292_bkl_reg_bulk_verdict_khong_tin_ok_tran` — `ok:true` + `patched` **hụt** ⇒ ÂM (lý do nêu số);
+  thiếu khoá `ok` / không phải dict ⇒ ÂM; `patched` dư ⇒ vẫn dương.
+- `r292_bkl_main_khong_con_bao_xong_oan` — **end-to-end qua `main()` thật**, 4 kịch bản:
+  (A) `exporttext` hỏng ⇒ `rc≠0`, cả hai doc `retryable`, **không** in "XONG TẤT CẢ."; rồi chạy lại
+  lượt hai **vẫn thấy đủ 2 doc** (trước vá: mất vĩnh viễn).
+  (B) `reg_bulk` hỏng ⇒ không đánh dấu xong, cả lô `retryable`, `rc≠0`; `ok:true` mà `patched` hụt
+  cũng vậy. (C) **Phản chứng:** mọi thứ dương ⇒ `rc=0`, `committed`, in "XONG TẤT CẢ.".
+  (D) không bóc được từ khoá ⇒ `blocked`, rời worklist, `rc=0` (kết cục xác định ≠ lỗi).
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `backfill_keywords_live.py` về HEAD (giữ test) ⇒ `1523/1526`,
+ĐỎ đúng ba ca r292. Sau vá `1526/1526`.
+
+**ruff 0.15.8:** `backfill_keywords_live.py` **0 F821 / 0 F401** — y hệt master (delta 0).
+`tl.py` 12/0 (đúng nền, không đụng). Full gate **8/8 PASS**, `git diff -- references/golden/` rỗng.
+
+**TRANCHE T2 ĐÓNG.** Bốn mục "chặn máu" + Helper 1 đã xong: PRO-01 (r289) · RAS-01 vế `changes_pull`
+(r290) · ING-03 (r291) · RAS-05 (r292), trên nền Helper 1 (r288). Tiếp theo là **T3 — định danh**
+(Mẫu B; cần Helper 2 của Pha 1-0).
+
 # ★ v1.36.30 — r291/ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG — vá CẢ HAI call site (2026-08-01)
 
 Slice **I4** (Pha 1B), mục **T2** thứ tư. Dùng **Helper 1** (`tl_core/txn.py` → `step_result_ok`).

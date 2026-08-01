@@ -25162,6 +25162,158 @@ def run() -> int:
         return bool(_chan and _di_tiep)
     _t110("r291_stage_write_chan_commit_mot_phan", _c291_stage_write_chan_commit_mot_phan)
 
+    # ═══ r292 (v1.36.31) — RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG (Slice R0, T2) ═══
+    # Ba lỗ cùng Mẫu A: (1) `done` vừa là sổ-đã-xong VỪA là BỘ LỌC worklist ⇒ doc `exporttext` lỗi bị
+    # ghi `done[gid]='err'` và **loại VĨNH VIỄN**; (2) `reg_bulk` không kiểm `ok`, mà item đã đánh
+    # `done='ok'` từ TRƯỚC lúc gọi; (3) `remaining` tính từ chính `done` đã nhiễm ⇒ in "XONG TẤT CẢ."
+    # và `main()` return None ⇒ rc=0. Báo thành công cho một việc chưa xong.
+
+    def _bkl292():
+        """Nạp `backfill_keywords_live` với `gas`/`keywords`/`verify_deep` GIẢ. Trả (module, calls)."""
+        import sys as _s292, types as _t292, importlib as _i292
+        _calls = []
+        _fg = _t292.ModuleType("gas")
+        _fg.get = lambda action, **kw: (_calls.append(("get", action, kw)) or _BOX292["exporttext"](kw))
+        _fg.post = lambda action, **kw: (_calls.append(("post", action, kw)) or _BOX292["regbulk"](kw))
+        _fk = _t292.ModuleType("keywords"); _fk.extract_keywords = lambda rec: _BOX292["kw"](rec)
+        _fv = _t292.ModuleType("verify_deep"); _fv.split_articles = lambda t: [t]
+        _sav = {n: _s292.modules.get(n) for n in ("gas", "keywords", "verify_deep", "backfill_keywords_live")}
+        for _n, _m in (("gas", _fg), ("keywords", _fk), ("verify_deep", _fv)):
+            _s292.modules[_n] = _m
+        _s292.modules.pop("backfill_keywords_live", None)
+        if str(_TL_MODULE.HERE) not in _s292.path:
+            _s292.path.insert(0, str(_TL_MODULE.HERE))
+        try:
+            return _i292.import_module("backfill_keywords_live"), _calls, _sav
+        except Exception:
+            for _n, _m in _sav.items():
+                if _m is None:
+                    _s292.modules.pop(_n, None)
+                else:
+                    _s292.modules[_n] = _m
+            raise
+
+    _BOX292 = {"exporttext": lambda kw: {"ok": True, "text": "Điều 1. X"},
+               "regbulk": lambda kw: {"ok": True, "patched": 99},
+               "kw": lambda rec: "tu,khoa"}
+
+    def _c292_migrate_v1_dua_doc_loi_QUAY_LAI():
+        # LỖ (1): sổ v1 đang nằm trên máy người giữ là BẰNG CHỨNG thiệt hại (§6.2 Pha 3.5) — phải ĐỌC
+        # ĐƯỢC, không được vứt. Ánh xạ: ok→committed · empty→blocked · err*→RETRYABLE.
+        # Chính vế cuối là bản vá: doc từng bị `err` nay QUAY LẠI worklist thay vì mất vĩnh viễn.
+        import sys as _s
+        _m, _c, _sav = _bkl292()
+        try:
+            _v1 = {"done": {"g1": "ok", "g2": "empty", "g3": "err", "g4": "err:HTTP 500"},
+                   "patched": 7, "empty": 1, "err": 2}
+            _p = _m.migrate_progress(_v1)
+            _anh_xa = (_p["state"] == {"g1": "committed", "g2": "blocked",
+                                       "g3": "retryable", "g4": "retryable"}
+                       and _p["patched"] == 7 and _p["schema"] == _m.PROGRESS_SCHEMA)
+            _wl = [{"drive_id": g} for g in ("g1", "g2", "g3", "g4", "g5")]
+            # g3/g4 (từng 'err') PHẢI quay lại hàng đợi; g1/g2 là kết cục ⇒ rời hàng đợi
+            _quay_lai = [w["drive_id"] for w in _m.pending(_wl, _p)] == ["g3", "g4", "g5"]
+            # v2 nạp lại không bị migrate lần hai (bất biến)
+            _idem = _m.migrate_progress(_p)["state"] == _p["state"]
+            # sổ rỗng/hỏng ⇒ khung v2 sạch, không nổ
+            _rong = _m.migrate_progress(None)["state"] == {} and _m.migrate_progress({})["state"] == {}
+            return bool(_anh_xa and _quay_lai and _idem and _rong)
+        finally:
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r292_bkl_migrate_v1_dua_doc_loi_quay_lai", _c292_migrate_v1_dua_doc_loi_QUAY_LAI)
+
+    def _c292_reg_bulk_verdict_khong_tin_ok_tran():
+        # LỖ (2): `ok=true` CHƯA đủ — lô có thể `patched < gửi` (dòng không khớp drive_id); phần hụt
+        # CHƯA được ghi nên cả lô phải quay về `retryable`, không được đánh dấu xong.
+        import sys as _s
+        _m, _c, _sav = _bkl292()
+        try:
+            _v = _m.reg_bulk_verdict
+            return bool(_v({"ok": True, "patched": 3}, 3)[0] is True
+                        and _v({"ok": True, "patched": 5}, 3)[0] is True        # dư không sao
+                        and _v({"ok": True, "patched": 2}, 3)[0] is False       # HỤT ⇒ âm
+                        and "HUT" in _v({"ok": True, "patched": 2}, 3)[1]
+                        and _v({"ok": False, "error": "GAS_500"}, 3)[0] is False
+                        and _v({"patched": 3}, 3)[0] is False                   # thiếu khoá ok ⇒ âm
+                        and _v(None, 3)[0] is False and _v("ok", 3)[0] is False)
+        finally:
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r292_bkl_reg_bulk_verdict_khong_tin_ok_tran", _c292_reg_bulk_verdict_khong_tin_ok_tran)
+
+    def _c292_main_khong_con_bao_xong_oan():
+        # HÀNH VI end-to-end qua `main()` THẬT. Ba kịch bản, mỗi cái khoá một lỗ.
+        import sys as _s, tempfile as _tf292, json as _j292, pathlib as _pl292
+        _m, _calls, _sav = _bkl292()
+        _sav_argv = list(_s.argv)
+        try:
+            with _tf292.TemporaryDirectory() as _d:
+                _man = _pl292.Path(_d) / "man.json"
+                _man.write_text(_j292.dumps({"entries": [
+                    {"drive_id": "g1", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s1", "name": "A", "so_hieu": "1/2026"},
+                    {"drive_id": "g2", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s2", "name": "B", "so_hieu": "2/2026"}]}), encoding="utf-8")
+
+                def _chay(prog_path):
+                    _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man),
+                               "--progress", str(prog_path), "--batch", "40"]
+                    _b, _e = _io27.StringIO(), _io27.StringIO()
+                    with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e):
+                        _rc = _m.main()
+                    _js = [ln for ln in _b.getvalue().splitlines() if ln.startswith("{")]
+                    return _rc, (_j292.loads(_js[-1]) if _js else {}), _b.getvalue() + _e.getvalue()
+
+                # (A) LỖ (1): `exporttext` hỏng ⇒ rc≠0, doc vào `retryable`, KHÔNG in "XONG TẤT CẢ."
+                _BOX292["exporttext"] = lambda kw: {"ok": False, "error": "EXPORT_403"}
+                _p1 = _pl292.Path(_d) / "p1.json"
+                _rcA, _oA, _txtA = _chay(_p1)
+                _stA = _j292.loads(_p1.read_text(encoding="utf-8"))["state"]
+                _A = (_rcA != 0 and _oA.get("ok") is False and _oA.get("con_lai") == 2
+                      and _stA == {"g1": "retryable", "g2": "retryable"}
+                      and "XONG TẤT CẢ" not in _txtA)
+                # …và chạy lại LẦN HAI vẫn thấy đủ 2 doc (trước vá: mất vĩnh viễn)
+                _BOX292["exporttext"] = lambda kw: {"ok": True, "text": "Điều 1. X"}
+                _rcA2, _oA2, _ = _chay(_p1)
+                _A2 = (_rcA2 == 0 and _oA2.get("con_lai") == 0 and _oA2.get("xu_ly_dot_nay") == 2)
+
+                # (B) LỖ (2): `reg_bulk` hỏng ⇒ KHÔNG đánh dấu xong, cả lô về `retryable`, rc≠0
+                _BOX292["regbulk"] = lambda kw: {"ok": False, "error": "GAS_500"}
+                _p2 = _pl292.Path(_d) / "p2.json"
+                _rcB, _oB, _txtB = _chay(_p2)
+                _stB = _j292.loads(_p2.read_text(encoding="utf-8"))["state"]
+                _B = (_rcB != 0 and _oB.get("con_lai") == 2
+                      and set(_stB.values()) == {"retryable"} and "XONG TẤT CẢ" not in _txtB)
+                # `ok:true` mà patched HỤT cũng phải về retryable
+                _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 1}
+                _p3 = _pl292.Path(_d) / "p3.json"
+                _rcB2, _oB2, _ = _chay(_p3)
+                _B2 = (_rcB2 != 0 and set(_j292.loads(_p3.read_text(encoding="utf-8"))["state"].values()) == {"retryable"})
+
+                # (C) PHẢN CHỨNG: mọi thứ dương ⇒ rc=0, "XONG TẤT CẢ.", state committed
+                _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 2}
+                _p4 = _pl292.Path(_d) / "p4.json"
+                _rcC, _oC, _txtC = _chay(_p4)
+                _stC = _j292.loads(_p4.read_text(encoding="utf-8"))["state"]
+                _C = (_rcC == 0 and _oC.get("ok") is True and _oC.get("con_lai") == 0
+                      and set(_stC.values()) == {"committed"} and "XONG TẤT CẢ" in _txtC)
+                # (D) không bóc được từ khoá = kết cục XÁC ĐỊNH ⇒ `blocked`, rời worklist, rc=0
+                _BOX292["kw"] = lambda rec: ""
+                _p5 = _pl292.Path(_d) / "p5.json"
+                _rcD, _oD, _ = _chay(_p5)
+                _D = (_rcD == 0 and _oD.get("con_lai") == 0 and _oD.get("bo_qua_co_ly_do") == 2
+                      and set(_j292.loads(_p5.read_text(encoding="utf-8"))["state"].values()) == {"blocked"})
+                return bool(_A and _A2 and _B and _B2 and _C and _D)
+        finally:
+            _BOX292["exporttext"] = lambda kw: {"ok": True, "text": "Điều 1. X"}
+            _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 99}
+            _BOX292["kw"] = lambda rec: "tu,khoa"
+            _s.argv = _sav_argv
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r292_bkl_main_khong_con_bao_xong_oan", _c292_main_khong_con_bao_xong_oan)
+
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó

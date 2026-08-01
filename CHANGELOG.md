@@ -1,3 +1,37 @@
+# ★ v1.36.30 — r290: `rasoat-merge` fail-CLOSED + ghi ATOMIC · `rasoat_phuluc.py` ngang cổng với wrapper (2026-08-01)
+
+Land hộ tranche của phiên khác (làn A — RAS-06/07/11/12/15/16).
+
+**RAS-11 — ghi đè bảng master rồi mới báo lỗi.** Bản cũ nhét nguồn hỏng vào `bo_qua` rồi **VẪN**
+`write_text` bảng master dựng từ phần input hợp lệ, xong mới `return 2`. Người vận hành thấy rc=2 sẽ
+sửa file hỏng rồi chạy lại — nhưng **bản đúng để đối chiếu đã mất từ lượt đó**. Nay nguồn KHÔNG ĐỌC
+ĐƯỢC ⇒ `NGUON_HONG_KHONG_DOC_DUOC`, `da_ghi:false`, bảng master GIỮ NGUYÊN.
+
+**RAS-12 — `--state` hỏng mà lệnh vẫn `ok:true`.** Bản cũ bọc trọn khối hoà giải state trong
+`try/except` rồi nhét lỗi vào `hoa_giai["loi"]`, trong khi `ok = not bo_qua` ⇒ rc=0. Nay fail-CLOSED.
+
+**RAS-07 — `f.stem` KHÔNG phải định danh đơn vị.** File `unit-a.json` mang `unit_id: unit-b` làm state
+đánh DONE cho `unit-a` (đơn vị **chưa hề được rà**) và bỏ sót `unit-b`. Nguồn sự thật là **PAYLOAD**;
+thiếu `unit_id` ⇒ fail-closed, và báo `ten_file_lech_unit_id` để người vận hành thấy.
+
+**Thứ tự lại cho đúng:** toàn bộ cổng chạy TRƯỚC mọi thao tác ghi; ghi bằng `_write_text_atomic`
+(staging + `os.replace`) thay `write_text` trần — bị kill giữa chừng không để lại bảng master CỤT.
+
+**RAS-15/16 (`rasoat_phuluc.py`) — chạy THẲNG script phải ngang cổng với `tl rasoat-merge`.**
+Lọc bản sao lưu dùng CHUNG `_rasoat_la_ban_sao` (bản cũ `glob("*.json")` nuốt cả `*.bak*.json` ⇒ đếm
+phát hiện HAI LẦN — đúng sự cố r216, chỉ khác đường vào); cổng TRÙNG dùng chung `_rasoat_trung_lap`
+(bản cũ `dedup()` lặng lẽ GIỮ bản đầu, VỨT bản sau ⇒ mất phát hiện mà không ai biết); và
+`(x or "").strip() or MẶC_ĐỊNH` thay `dict.get(k, mặc_định)` — `linh_vuc: ""` (template để trống) lọt
+qua nguyên vẹn và sinh **heading RỖNG** trong phụ lục TRÌNH.
+
+**Nghiệm thu:** selftest **1514/1514** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **CỐ Ý KHÔNG land kèm** hai làn khác đang lẫn trong `lookup_ops.py`: **T1-c** (RAS-04/10/13 —
+`cmd_rasoat_loop`/`_rasoat_corpus_hieu_luc`, chú thích tự khai "r290/T1-c" nhưng **test tên `r291_*`**)
+và **r293** (RAS-02/03/08/09 — `_rasoat_state_*`). Cả hai còn nguyên trong cây cho chủ của chúng.
+Đã đo: **không** tham chiếu chéo giữa ba làn, nên tách rời an toàn.
+
 # ★ v1.36.29 — r289: cổng CON-TRỎ-TRẦN + diệt LỆNH MA + Q2/Q3 tài liệu (2026-08-01)
 
 Land hộ tranche của phiên khác (phiên B viết; phiên này rà độc lập + land theo yêu cầu user).

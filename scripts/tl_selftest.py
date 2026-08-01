@@ -22036,6 +22036,121 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
 
+    # ═══ r290 (v1.36.2x) — T1-a Làn A: VALIDATE TRỌN TRƯỚC KHI GHI (RAS-06/07/11/12/15/16) ═══
+    # Audit lõi 31-07. Cùng một mẫu bệnh với r216 nhưng ở các nhánh r216 chưa phủ: lệnh phát hiện lỗi,
+    # trả rc=2 — MÀ ĐÃ GHI ĐÈ xong bảng master. Đo A/B trên cây HEAD trước khi vá (đường sản xuất thật):
+    #   RAS-11 input hỏng : da_ghi=True,  BẢNG MASTER BỊ GHI ĐÈ bằng bản THIẾU
+    #   RAS-12 state hỏng : rc=0, ok=True (lỗi chỉ nằm trong field phụ `hoa_giai_state.loi`)
+    #   RAS-07 tên≠unit_id: unit-a→done (đơn vị CHƯA HỀ RÀ), unit-b→pending (dù master của nó có thật)
+    #   RAS-15/16 phụ lục : bản sao lưu bị GỘP (đếm hai lần) + heading LĨNH VỰC rỗng
+    _MASTER290 = {"unit_id": "unit-001", "van_ban": "212-2025-ND-CP", "ten": "ND 212",
+                  "phat_hien": [{"key": "VD-10", "linh_vuc": "", "hinh_thuc": "nghiên cứu"}]}
+
+    def _tl290(*args):
+        import subprocess as _sp290, sys as _sy290
+        _r = _sp290.run([_sy290.executable, str(_ROOT209 / "scripts" / "tl.py"), *args],
+                        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        try:
+            _j = json.loads(_r.stdout[_r.stdout.find("{"):])
+        except Exception:  # noqa: BLE001
+            _j = {}
+        return _r.returncode, _j
+
+    def _c290_merge_validate_truoc_khi_ghi():
+        """RAS-11 + RAS-12, chạy ĐÚNG đường sản xuất (subprocess) — cái đã cắn là hành vi của LỆNH."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            _out = Path(_td) / "BANG_MASTER.json"
+            # (0) PHẢN CHỨNG: hồ sơ SẠCH vẫn ghi như cũ — bản vá không siết quá tay
+            _rc0, _j0 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok0 = _rc0 == 0 and _j0.get("da_ghi") is True and _out.is_file()
+            _truoc = _out.read_bytes()
+            # (a) RAS-11: thêm file JSON HỎNG ⇒ KHÔNG được ghi đè bảng master đang có
+            (_d / "unit-002.json").write_text("{ khong phai json", encoding="utf-8")
+            _rc1, _j1 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok1 = (_rc1 == 2 and _j1.get("error") == "NGUON_HONG_KHONG_DOC_DUOC"
+                   and _j1.get("da_ghi") is False and _out.read_bytes() == _truoc
+                   and [x["nguon"] for x in _j1.get("nguon_hong") or []] == ["unit-002.json"])
+            (_d / "unit-002.json").unlink()
+            # (b) RAS-12: --state hỏng ⇒ transaction ĐỎ và KHÔNG ghi master (trước: rc=0/ok=true/đã ghi)
+            _out2 = Path(_td) / "BANG_MASTER_2.json"
+            _st = Path(_td) / "state.json"; _st.write_text("{ hong", encoding="utf-8")
+            _rc2, _j2 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out2),
+                               "--state", str(_st), "--json")
+            ok2 = (_rc2 == 2 and _j2.get("ok") is False and _j2.get("da_ghi") is False
+                   and str(_j2.get("error") or "").startswith("STATE_HONG_KHONG_DOC_DUOC")
+                   and not _out2.exists())
+            # (c) fail-closed khi KHÔNG chứng minh được đơn vị nào đã xong (thiếu unit_id + có --state)
+            _d3 = Path(_td) / "m3"; _d3.mkdir()
+            (_d3 / "x.json").write_text(json.dumps({"van_ban": [], "noi_dung": [{"key": "K1"}]},
+                                                   ensure_ascii=False), encoding="utf-8")
+            _out3 = Path(_td) / "BANG_MASTER_3.json"
+            _st3 = Path(_td) / "state3.json"
+            _st3.write_text(json.dumps({"q_units": []}, ensure_ascii=False), encoding="utf-8")
+            _rc3, _j3 = _tl290("rasoat-merge", "--in", str(_d3), "--out", str(_out3),
+                               "--state", str(_st3), "--json")
+            ok3 = (_rc3 == 2 and _j3.get("error") == "STATE_HOA_GIAI_THIEU_UNIT_ID"
+                   and _j3.get("da_ghi") is False and not _out3.exists())
+        return ok0 and ok1 and ok2 and ok3
+    _t110("r290_merge_validate_tron_truoc_khi_ghi", _c290_merge_validate_truoc_khi_ghi)
+
+    def _c290_state_hoa_giai_neo_unit_id():
+        """RAS-07: hoà giải state phải neo `payload.unit_id`, KHÔNG phải `f.stem`.
+
+        Bản cũ SAI CẢ HAI CHIỀU cùng lúc (đo được): đánh done cho đơn vị chưa hề rà, đồng thời đẩy về
+        pending đơn vị đã có master — tức vừa bỏ sót vừa rà lại."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            # tên file 'unit-a' NHƯNG nội dung là 'unit-b'
+            (_d / "unit-a.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-b"),
+                                                       ensure_ascii=False), encoding="utf-8")
+            _st = Path(_td) / "state.json"
+            _st.write_text(json.dumps({"schema": "rasoat_plan.v1",
+                                       "q_units": [{"unit_id": "unit-a", "trang_thai": "doing"},
+                                                   {"unit_id": "unit-b", "trang_thai": "doing"}]},
+                                      ensure_ascii=False), encoding="utf-8")
+            _rc, _j = _tl290("rasoat-merge", "--in", str(_d), "--out", str(Path(_td) / "M.json"),
+                             "--state", str(_st), "--json")
+            _cuoi = {u["unit_id"]: u["trang_thai"]
+                     for u in json.loads(_st.read_text(encoding="utf-8"))["q_units"]}
+            # phải NÓI RA chuyện tên file lệch nội dung, không im lặng
+            _lech = (_j.get("hoa_giai_state") or {}).get("ten_file_lech_unit_id") or []
+            return (_rc == 0 and _cuoi == {"unit-a": "pending", "unit-b": "done"}
+                    and [x["file"] for x in _lech] == ["unit-a.json"])
+    _t110("r290_state_hoa_giai_neo_unit_id_khong_neo_ten_file", _c290_state_hoa_giai_neo_unit_id)
+
+    def _c290_phuluc_truc_tiep_ngang_wrapper():
+        """RAS-15 + RAS-16 + RAS-06: chạy THẲNG `rasoat_phuluc.py` phải có cùng cổng như wrapper merge."""
+        import subprocess as _sp290, sys as _sy290, tempfile as _tf290
+        _script = str(_ROOT209 / "scripts" / "rasoat_phuluc.py")
+
+        def _run(_indir, _outdir):
+            return _sp290.run([_sy290.executable, _script, "--in", str(_indir), "--out-dir", str(_outdir)],
+                              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            # RAS-15: bản sao lưu để lẫn ⇒ phải BỎ QUA và KHAI BÁO (trước: gộp ⇒ đếm hai lần)
+            (_d / "unit-001.bak.truoc.json").write_text(json.dumps(_MASTER290, ensure_ascii=False),
+                                                        encoding="utf-8")
+            _od = Path(_td) / "out"
+            _r = _run(_d, _od)
+            _md = "".join(f.read_text(encoding="utf-8") for f in sorted(_od.rglob("*.md"))) if _od.is_dir() else ""
+            ok1 = _r.returncode == 0 and "BỎ QUA" in (_r.stdout + _r.stderr)
+            # RAS-16: `linh_vuc: ""` ⇒ "(Chưa phân loại)", KHÔNG phải heading rỗng
+            ok2 = "CHƯA PHÂN LOẠI" in _md.upper() and "**LĨNH VỰC **" not in _md
+            # RAS-06: hai phiếu TRÙNG key (tên khác nhau, không phải .bak) ⇒ fail-closed, không dựng phụ lục
+            (_d / "unit-002.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-002"),
+                                                         ensure_ascii=False), encoding="utf-8")
+            _r2 = _run(_d, Path(_td) / "out2")
+            ok3 = _r2.returncode != 0 and "TRÙNG LẶP" in (_r2.stdout + _r2.stderr)
+        return ok1 and ok2 and ok3
+    _t110("r290_phuluc_truc_tiep_cung_cong_voi_wrapper", _c290_phuluc_truc_tiep_ngang_wrapper)
+
+
     # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════
     # Bối cảnh (lượt rà 6+7, 27-07): đối chiếu bản kho ↔ bản Công báo ra ND 159 lệch 17 điểm, ND 158
     # lệch 111 điểm, và kết luận là KHÔNG BẢN NÀO TRÙM BẢN NÀO ⇒ thay trọn gói là đánh đổi mù. Còn

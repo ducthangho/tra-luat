@@ -3241,6 +3241,17 @@ def cmd_rasoat_merge(a) -> int:
                                  fix="mỗi phát hiện chỉ được nằm ở MỘT phiếu và mỗi `unit_id` chỉ "
                                      "một file; bản sao lưu đặt NGOÀI thư mục master/"), True)
         return 2
+    # r290 (RAS-11 — audit lõi 31-07): nguồn KHÔNG ĐỌC ĐƯỢC phải fail-CLOSED y như cổng trùng r216 ngay
+    # trên. Bản cũ nhét `hong` vào `bo_qua` rồi VẪN `write_text` bảng master dựng từ phần input hợp lệ,
+    # xong mới `return 2` — tức đã ghi đè bảng bằng bản THIẾU trong khi lệnh báo lỗi. Người vận hành thấy
+    # rc=2 sẽ sửa file hỏng rồi chạy lại, nhưng bản đúng để đối chiếu đã mất từ lượt đó. Cùng một hậu quả
+    # mà r216 sinh ra để chặn: "bảng master sai mà vẫn ghi đè thì lần chạy sau không còn bản đúng".
+    if hong:
+        _print_json_or_text(dict(nen, ok=False, error="NGUON_HONG_KHONG_DOC_DUOC", da_ghi=False,
+                                 bo_qua=bo_qua, nguon_hong=hong,
+                                 fix="sửa hoặc bỏ các file JSON hỏng rồi chạy lại; bảng master GIỮ "
+                                     "NGUYÊN để còn đối chiếu"), True)
+        return 2
     # r216 — `--check`: đối chiếu bảng master đang có với kết quả merge, KHÔNG ghi đè.
     if bool(getattr(a, "check", False)):
         cu_p = Path(out_path)
@@ -3261,21 +3272,40 @@ def cmd_rasoat_merge(a) -> int:
                                  "bảng master ĐI TRƯỚC tầng unit: chép phát hiện về `master/<unit>.json` "
                                  "rồi merge lại, ĐỪNG merge đè — merge lấy unit làm nguồn."), True)
         return 0 if (not lech and not bo_qua) else 2
-    Path(out_path).write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
     # Hoà giải state (khe hở H8): CHỈ khi người gọi trỏ --state; sửa tại chỗ là quyết định của họ.
-    hoa_giai = None
+    # r290 (RAS-12 + RAS-07): TOÀN BỘ khối này chuyển lên TRƯỚC mọi thao tác ghi. Bản cũ bọc trọn nó
+    # trong một `try/except` rồi nhét lỗi vào `hoa_giai["loi"]`, trong khi `ok = not bo_qua` ⇒ `--state`
+    # hỏng mà lệnh vẫn `ok:true`, rc=0, và bảng master thì đã ghi xong từ dòng trên.
+    hoa_giai, _st_moi = None, None
     st_path = str(getattr(a, "state", "") or "").strip()
     if st_path and Path(st_path).is_file():
         try:
             st = json.loads(Path(st_path).read_text(encoding="utf-8"))
-            uids = [f.stem for f in files if f.suffix == ".json"]
-            st2, thay_doi = _rasoat_state_reconcile(st, uids)
-            if thay_doi and not bool(getattr(a, "dry_run", False)):
-                Path(st_path).write_text(json.dumps(st2, ensure_ascii=False, indent=2), encoding="utf-8")
-            hoa_giai = {"state": st_path, "thay_doi": thay_doi,
-                        "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
         except Exception as e:  # noqa: BLE001
-            hoa_giai = {"state": st_path, "loi": str(e)}
+            _print_json_or_text(dict(nen, ok=False, error="STATE_HONG_KHONG_DOC_DUOC: " + str(e),
+                                     da_ghi=False, bo_qua=bo_qua, state=st_path,
+                                     fix="sửa file --state rồi chạy lại; CHƯA ghi gì cả"), True)
+            return 2
+        # RAS-07: `f.stem` KHÔNG phải định danh đơn vị. File `unit-a.json` mang `unit_id: unit-b` làm
+        # state đánh DONE cho unit-a — đơn vị chưa hề được rà — và bỏ sót unit-b. Nguồn sự thật là
+        # PAYLOAD; thiếu `unit_id` thì không chứng minh được đơn vị nào đã xong ⇒ fail-closed.
+        _uid_theo_file = [(_n, str((_d or {}).get("unit_id") or "").strip()) for _n, _d in docs]
+        _thieu_uid = [_n for _n, _u in _uid_theo_file if not _u]
+        if _thieu_uid:
+            _print_json_or_text(dict(nen, ok=False, error="STATE_HOA_GIAI_THIEU_UNIT_ID", da_ghi=False,
+                                     bo_qua=bo_qua, thieu_unit_id=_thieu_uid,
+                                     fix="mỗi phiếu `master/<unit>.json` phải mang `unit_id`; KHÔNG suy "
+                                         "ra từ tên file vì tên có thể lệch nội dung"), True)
+            return 2
+        _ten_lech = [{"file": _n, "unit_id": _u} for _n, _u in _uid_theo_file if Path(_n).stem != _u]
+        _st_moi, thay_doi = _rasoat_state_reconcile(st, [_u for _, _u in _uid_theo_file])
+        hoa_giai = {"state": st_path, "thay_doi": thay_doi, "ten_file_lech_unit_id": _ten_lech,
+                    "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
+    # Mọi cổng đã qua ⇒ MỚI được ghi. Atomic (staging + os.replace): bản cũ `write_text` thẳng, bị kill
+    # giữa chừng là để lại bảng master CỤT — đúng rủi ro "write_text chưa atomic" audit đã nêu.
+    _write_text_atomic(Path(out_path), json.dumps(merged, ensure_ascii=False, indent=2) + "\n")
+    if _st_moi is not None and hoa_giai.get("da_ghi"):
+        _write_text_atomic(Path(st_path), json.dumps(_st_moi, ensure_ascii=False, indent=2) + "\n")
     out = dict(nen, ok=not bo_qua, da_ghi=True,
                nguon=merged.get("_nguon"), thieu_o_metadata=merged.get("_thieu_o_metadata"))
     out.update({"bo_qua": bo_qua, "hoa_giai_state": hoa_giai,

@@ -22133,7 +22133,7 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
 
-    # ═══ r290 (v1.36.2x) — T1-a Làn A: VALIDATE TRỌN TRƯỚC KHI GHI (RAS-06/07/11/12/15/16) ═══
+    # ═══ r290 (v1.36.30) — T1-a Làn A: VALIDATE TRỌN TRƯỚC KHI GHI (RAS-06/07/11/12/15/16) ═══
     # Audit lõi 31-07. Cùng một mẫu bệnh với r216 nhưng ở các nhánh r216 chưa phủ: lệnh phát hiện lỗi,
     # trả rc=2 — MÀ ĐÃ GHI ĐÈ xong bảng master. Đo A/B trên cây HEAD trước khi vá (đường sản xuất thật):
     #   RAS-11 input hỏng : da_ghi=True,  BẢNG MASTER BỊ GHI ĐÈ bằng bản THIẾU
@@ -24268,6 +24268,236 @@ def run() -> int:
                   _rc252d == 0 and _o252d.get("iterations") <= 3
                   and _o252d.get("seen") == 3 and _o252d.get("frontier_remaining") == 0))
 
+    # ═══ r295 (v1.36.32) — T1-c Làn A: MỘT định nghĩa hội tụ (RAS-04 + RAS-10, audit lõi 31-07) ═══
+    # ★ ĐỔI SỐ khi land (01-08): khối này ra đời mang mã `r291_*`/`r290/T1-c`, nhưng CẢ HAI số đã bị
+    #   chiếm bởi bản land trước (r291 = `docs/` ra khỏi gói/T0-G · r290 = rasoat-merge fail-CLOSED),
+    #   nên CẢ HAI nửa T1-c (vòng rà + state, mã cũ `r291_*`/`r293_*`) được gom về MỘT mã `r295`.
+    #   Biến cục bộ nửa state còn giữ hậu tố `293` (vd `_rc293c`) — cố ý không đổi: chúng là tên cục bộ
+    #   trong `run()`, không phải mã ca, và đổi thêm chỉ làm nhiễu diff mà không thêm thông tin.
+    # Đặt NGAY SAU r255/r256 vì cùng đối tượng và dùng chung khuôn `_r255_run` — `_mp261` vá Ở MỌI CỬA
+    # (tl + mọi module giữ bản sao globals), khác hẳn setattr trần chỉ vá một cửa.
+    # RAS-04 và RAS-10 nhìn thì ngược nhau (một bên đòi lỗi KHÔNG được tính là hội tụ, bên kia đòi
+    # frontier-rỗng-từ-đầu PHẢI là hội tụ) — thực ra là hai vế của MỘT định nghĩa:
+    #     converged = frontier cạn ∧ khong_doc_duoc = 0 ∧ (dry_rounds ≥ K ∨ chưa từng có ứng viên nào)
+    # A/B trên cây HEAD trước khi vá: hai lỗi đọc ⇒ dry_rounds=2 chạm K ⇒ **converged:true, rc=0**, tức
+    # lệnh tuyên bố "đã soi hết" trong khi chưa hề nhìn vào hai văn bản; frontier rỗng từ đầu ⇒
+    # **converged:false** vĩnh viễn vì dry_rounds=0 < K.
+    def _r295_run(cands, K=2, max_iter=12, doc_loi=False):
+        """Như `_r255_run` nhưng ứng viên IN-CORPUS có gid THẬT, và đường đọc có thể ném lỗi."""
+        _sav, _n = {}, {"i": 0}
+        try:
+            _mp261(_sav, "_manifest_entries", lambda *_a, **_k: [])
+            _mp261(_sav, "apply_profile_offline", lambda *_a, **_k: None)
+            _mp261(_sav, "_entry_on_nlm_live", lambda _e: True)
+            _mp261(_sav, "_frontier_doc_text", lambda _a: ("BASE TEXT", "gid0", "BASE"))
+
+            def _exp295(_t, _e):
+                _n["i"] += 1
+                return list(cands) if _n["i"] == 1 else []
+            _mp261(_sav, "_rasoat_expand_text", _exp295)
+            _mp261(_sav, "_resolve_deep_target", lambda _sh, *_a, **_k: (None, "gid-" + str(_sh), None, None))
+
+            def _read295(*_a, **_k):
+                if doc_loi:
+                    raise RuntimeError("gws chet")
+                return "RUOT VAN BAN"
+            _mp261(_sav, "_read_doc_text", _read295)
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
+                    config=None, profile=None, refresh=False, json=True, deterministic=True,
+                    dry_rounds=K, max_iter=max_iter, text_file=None, target="x"))
+            return _rc, json.loads(_b.getvalue())
+        finally:
+            _mpr261(_sav)
+
+    _CAND295 = [{"sohieu": "10/2020/ND-CP", "sohieu_norm": norm_sohieu("10/2020/ND-CP"),
+                 "in_corpus": True, "priority": 1},
+                {"sohieu": "11/2020/ND-CP", "sohieu_norm": norm_sohieu("11/2020/ND-CP"),
+                 "in_corpus": True, "priority": 1}]
+
+    # RAS-04: lỗi đọc vào sổ RIÊNG `khong_doc_duoc`, KHÔNG đụng `dry_rounds`, và CHẶN hội tụ + rc≠0
+    _rc295a, _o295a = _r295_run(_CAND295, doc_loi=True)
+    cases.append(("r295_loi_doc_khong_thanh_hoi_tu",
+                  _rc295a == 2 and _o295a.get("converged") is False and _o295a.get("ok") is False
+                  and _o295a.get("dry_rounds") == 0
+                  and len(_o295a.get("khong_doc_duoc") or []) == 2))
+    # RAS-10: base không dẫn đi đâu ⇒ HỘI TỤ THẬT, có `stop_reason` riêng để không chẩn đoán nhầm
+    _rc295b, _o295b = _r295_run([])
+    cases.append(("r295_frontier_rong_tu_dau_la_hoi_tu",
+                  _rc295b == 0 and _o295b.get("converged") is True
+                  and _o295b.get("stop_reason") == "frontier_empty_ngay_tu_dau"
+                  and _o295b.get("dry_rounds") == 0))
+    # ★ PHẢN CHỨNG chống siết-quá-tay: đọc ĐƯỢC mà không sinh ứng viên mới ⇒ vẫn hội tụ, rc=0 y như cũ
+    _rc295c, _o295c = _r295_run(_CAND295)
+    cases.append(("r295_doc_duoc_van_hoi_tu_nhu_cu",
+                  _rc295c == 0 and _o295c.get("converged") is True and _o295c.get("ok") is True
+                  and _o295c.get("dry_rounds") == 2 and (_o295c.get("khong_doc_duoc") or []) == []))
+    # ★ PHẢN CHỨNG RANH GIỚI (bắt được nhờ r256 đỏ): ứng viên IN-CORPUS mà KHÔNG giải được GDoc id là
+    #   sổ KHÁC — chỉ BÁO, KHÔNG chặn hội tụ, KHÔNG đổi rc. Gộp hai sổ làm đỏ
+    #   `r256_no_infinite_loop_seen_dedup_holds` và siết quá phạm vi RAS-04 (nói về `_read_doc_text`).
+    _sav295, _n295 = {}, {"i": 0}
+    try:
+        _mp261(_sav295, "_manifest_entries", lambda *_a, **_k: [])
+        _mp261(_sav295, "apply_profile_offline", lambda *_a, **_k: None)
+        _mp261(_sav295, "_entry_on_nlm_live", lambda _e: True)
+        _mp261(_sav295, "_frontier_doc_text", lambda _a: ("BASE TEXT", "gid0", "BASE"))
+
+        def _exp295b(_t, _e):
+            _n295["i"] += 1
+            return list(_CAND295) if _n295["i"] == 1 else []
+        _mp261(_sav295, "_rasoat_expand_text", _exp295b)
+        _mp261(_sav295, "_resolve_deep_target", lambda *_a, **_k: (None, None, None, None))
+        _mp261(_sav295, "_read_doc_text", lambda *_a, **_k: "")
+        _b295 = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b295):
+            _rc295d = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
+                config=None, profile=None, refresh=False, json=True, deterministic=True,
+                dry_rounds=2, max_iter=12, text_file=None, target="x"))
+        _o295d = json.loads(_b295.getvalue())
+    finally:
+        _mpr261(_sav295)
+    cases.append(("r295_khong_co_ban_doc_chi_bao_khong_chan_hoi_tu",
+                  _rc295d == 0 and _o295d.get("converged") is True
+                  and (_o295d.get("khong_doc_duoc") or []) == []
+                  and len(_o295d.get("khong_co_ban_doc") or []) == 2))
+
+    # ═══ r295 (tiếp) — RAS-13: "có trong corpus" phải là CORPUS-HIỆU-LỰC ═══
+    # Trước vá, `rasoat-chongcheo` so số hiệu trên TOÀN `entries` nên dòng đã hạ `corpus=false`, dòng
+    # quarantine, dòng `row_kind=ref` đều làm lệnh kết luận "ĐÃ CÓ trong corpus" — giấu mất đúng khoảng
+    # trống mà lệnh sinh ra để tìm. Đo A/B trên cây HEAD: cả ba ca đều `in_corpus:true`.
+    _f295 = _TL_MODULE._rasoat_corpus_hieu_luc
+    cases.append(("r295_corpus_hieu_luc_predicate",
+                  _f295({"corpus": "true", "cat": "01", "row_kind": "own"}) is True
+                  and _f295({"corpus": "TRUE", "cat": "01", "row_kind": "own"}) is True
+                  # ★ THIẾU CỘT `corpus` ⇒ True: "không biết" ≠ "ngoài corpus". Biến không-biết thành
+                  #   loại-bỏ là ÂM TÍNH GIẢ — chính chốt S3 trong `cmd_rasoat_chongcheo` cấm điều đó,
+                  #   và siết vế ấy đã làm đỏ `cluster_dup_sohieu_disambig` (fixture không có cột corpus).
+                  and _f295({"cat": "01", "row_kind": "own"}) is True
+                  and _f295({"corpus": "false", "cat": "01", "row_kind": "own"}) is False
+                  and _f295({"corpus": "FALSE", "cat": "01", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "_ZZZ_QUARANTINE_taluat", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "QUARANTINE", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "01", "row_kind": "ref"}) is False))
+
+    def _ent295(**kw):
+        return [dict({"so_hieu": "20/2021/ND-CP", "name": "ND 20/2021", "cat": "01",
+                      "row_kind": "own", "drive_id": "d1"}, **kw)]
+    _rm295f = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem", _ent295(corpus="false"))
+    _rm295q = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem",
+                                                 _ent295(corpus="true", cat="_ZZZ_QUARANTINE_taluat"))
+    _rm295r = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem",
+                                                 _ent295(corpus="true", row_kind="ref"))
+    _rm295t = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem", _ent295(corpus="true"))
+    cases.append(("r295_cluster_member_khong_nhan_dong_ngoai_corpus",
+                  _rm295f.get("in_corpus") is False and _rm295q.get("in_corpus") is False
+                  and _rm295r.get("in_corpus") is False
+                  # phải NÓI RA là có bản mang đúng số hiệu nhưng NGOÀI corpus — im lặng thì người đọc
+                  # tưởng kho chưa từng có văn bản này và đi tải lại đúng bản đã cố ý hạ/cách ly
+                  and [x["name"] for x in _rm295f.get("khop_so_hieu_ngoai_corpus") or []] == ["ND 20/2021"]
+                  # ★ PHẢN CHỨNG: dòng corpus THẬT vẫn nhận bình thường
+                  and _rm295t.get("in_corpus") is True and _rm295t.get("name") == "ND 20/2021"))
+
+    # ═══ r295 — T1-d Làn A: state rà hồ sơ (RAS-02/03/08/09, audit lõi 31-07) ═══
+    # A/B đo trên cây HEAD trước khi vá, CHẠY `cmd_state_put` THẬT với GAS giả:
+    #   RAS-02 state đã có mà KHÔNG truyền --expect-claim ⇒ **rc=0, ĐÃ upload** — đè thẳng claim phiên khác
+    #   RAS-03 hai bản trùng tên, --expect-claim khớp bản CŨ ⇒ **rc=0, ĐÃ upload** — xoá mất bản MỚI
+    #   RAS-09 root `[]` / `q_units` sai enum ⇒ **rc=0, ĐÃ upload rác** vào nguồn sự thật điều phối
+    #   RAS-08 `metaFolderId` chỉ nạp được qua profile ⇒ **rc=2 META_FOLDER_ID_TRỐNG** (áp profile SAU khi
+    #          đã giải folder nên `--profile` bị bỏ qua sạch)
+    class _FakeG293:
+        def __init__(self, files, docs):
+            self.files, self.docs, self.goi = files, docs, []
+
+        def get(self, action, **kw):
+            self.goi.append(("get", action, kw))
+            if action == "list":
+                return {"items": list(self.files)}
+            if action == "info":
+                return {"file": {"modifiedTime": next((f.get("mt", "") for f in self.files
+                                                       if f["id"] == kw.get("fileId")), "")}}
+            if action == "download":
+                import base64 as _b293
+                return {"b64": _b293.b64encode(json.dumps(self.docs[kw.get("fileId")],
+                                                          ensure_ascii=False).encode()).decode()}
+            return {"ok": True}
+
+        def post(self, action, **kw):
+            self.goi.append(("post", action, kw))
+            return {"fileId": "moi", "ok": True}
+
+    def _put293(files, docs, body, expect=None, env_meta="F_META", profile_nap=None):
+        """Chạy `cmd_state_put` THẬT; trả (rc, out, da_upload)."""
+        import tempfile as _tf293
+        _sav = {}
+        _g293 = _FakeG293(files, docs)
+        _p293 = Path(_tf293.mkdtemp()) / "in.json"
+        _p293.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+        _env_cu = _hos.environ.get("TL_META_FOLDER_ID")
+        try:
+            _mp261(_sav, "load_creds", lambda *_a, **_k: None)
+            _mp261(_sav, "_gas", lambda: _g293)
+            _mp261(_sav, "_apply_journal_start", lambda *_a, **_k: "rid293")
+            _mp261(_sav, "_journal_append", lambda *_a, **_k: None)
+
+            def _apo293(_cfg=None, _prof=None, *_a, **_k):
+                if profile_nap:
+                    _hos.environ["TL_META_FOLDER_ID"] = profile_nap
+            _mp261(_sav, "apply_profile_offline", _apo293)
+            if env_meta is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = env_meta
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_state_put(argparse.Namespace(
+                    config=None, profile="P", name="rasoat_state.json", in_file=str(_p293),
+                    dry_run=False, folder_id="", json=True, expect_claim=expect, deterministic=True))
+            _txt = _b.getvalue()
+            return (_rc, json.loads(_txt[_txt.find("{"):]) if "{" in _txt else {},
+                    any(c[0] == "post" and c[1] == "upload" for c in _g293.goi))
+        finally:
+            _mpr261(_sav)
+            if _env_cu is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = _env_cu
+
+    _ST293 = {"schema": "rasoat_plan.v1", "session_claim": {"id": "PHIEN-MOI"}}
+    _F1_293 = [{"id": "f1", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T10:00:00Z"}]
+    _D1_293 = {"f1": {"schema": "rasoat_plan.v1", "session_claim": {"id": "A"}}}
+
+    # RAS-02 — state ĐÃ TỒN TẠI thì `--expect-claim` là BẮT BUỘC (ADR-0016 single-writer)
+    _rc293, _o293, _up293 = _put293(_F1_293, _D1_293, _ST293, expect=None)
+    cases.append(("r295_state_put_da_ton_tai_bat_buoc_expect_claim",
+                  _rc293 == 2 and _o293.get("error") == "THIEU_EXPECT_CLAIM" and _up293 is False))
+    # RAS-03 — CAS phải soi bản MỚI NHẤT, không phải `olds[0]` thô. `list` cố ý trả bản CŨ TRƯỚC.
+    _F2_293 = [{"id": "cu", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T09:00:00Z"},
+               {"id": "moi", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T11:00:00Z"}]
+    _D2_293 = {"cu": {"schema": "rasoat_plan.v1", "session_claim": {"id": "A"}},
+               "moi": {"schema": "rasoat_plan.v1", "session_claim": {"id": "B"}}}
+    _rc293b, _o293b, _up293b = _put293(_F2_293, _D2_293, _ST293, expect="A")
+    cases.append(("r295_state_put_cas_soi_ban_moi_nhat",
+                  _rc293b == 2 and _o293b.get("error") == "CLAIM_LECH"
+                  and _o293b.get("claim_tren_drive") == "B" and _up293b is False))
+    # ★ PHẢN CHỨNG: expect khớp bản MỚI ⇒ vẫn ghi được (không biến CAS thành chặn-tất-cả)
+    _rc293c, _o293c, _up293c = _put293(_F2_293, _D2_293, _ST293, expect="B")
+    cases.append(("r295_state_put_expect_khop_ban_moi_van_ghi", _rc293c == 0 and _up293c is True))
+    # RAS-09 — JSON hợp lệ CHƯA phải state hợp lệ
+    _rc293d, _o293d, _up293d = _put293([], {}, ["khong", "phai", "state"])
+    _rc293e, _o293e, _up293e = _put293([], {}, {"schema": "rasoat_plan.v1",
+                                                "q_units": [{"trang_thai": "xong"}]})
+    cases.append(("r295_state_put_validate_rasoat_plan_v1",
+                  _rc293d == 2 and _o293d.get("error") == "STATE_KHONG_HOP_LE" and _up293d is False
+                  and _rc293e == 2 and _o293e.get("error") == "STATE_KHONG_HOP_LE" and _up293e is False
+                  and any("unit_id" in str(x) for x in (_o293e.get("loi") or []))))
+    # RAS-08 — áp profile TRƯỚC khi giải `_meta/` (trước vá: rc=2 META_FOLDER_ID_TRỐNG)
+    _rc293f, _o293f, _up293f = _put293([], {}, _ST293, env_meta=None, profile_nap="F_TU_PROFILE")
+    cases.append(("r295_state_ap_profile_truoc_khi_giai_meta_folder", _rc293f == 0 and _up293f is True))
+    # ★ PHẢN CHỨNG: tạo-mới (chưa có bản nào) vẫn được miễn `--expect-claim` như thiết kế
+    _rc293g, _o293g, _up293g = _put293([], {}, _ST293, expect=None)
+    cases.append(("r295_state_put_tao_moi_van_duoc_mien_expect_claim",
+                  _rc293g == 0 and _o293g.get("ok") is True and _up293g is True))
 
     # ═══ r257 (v1.35.95) — P15: corpus-relation-sweep dùng vị từ THÔ ở cổng vbhn_broken ═══
     # `str(ent.get("corpus")) != "true"` = site DUY NHẤT trong repo so cột corpus KHÔNG chuẩn hoá (28 site khác

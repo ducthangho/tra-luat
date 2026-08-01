@@ -1,3 +1,24 @@
+# ★ v1.36.36 — HOÀ NHÁNH lượt 6: master land T3/rà-soát, T2 của nhánh này không bị đụng (2026-08-01)
+
+Hoà `master` `81c9715` (2 commit: `7795938` r295 v1.36.32 — *"rà soát: MỘT định nghĩa hội tụ +
+corpus-hiệu-lực dùng chung + state single-writer hết fail-OPEN"*; `81c9715` r295b — regen manifest).
+
+**Rà trùng việc (đo `a3abc11..81c9715` trên 5 tệp của nhánh này): KHÔNG tệp nào bị đụng.**
+`txn.py` · `ops_misc.py` · `registry_orchestrator.py` · `ingest_ops.py` · `backfill_keywords_live.py` —
+master chỉ chạm `lookup_ops.py`, `tl.py`, `tl_selftest.py`. Bốn mục T2 + Helper 1 **còn nguyên**, đã kiểm
+bằng dấu vết mã: `Txn("profile-file-remove")` ×1 · `not_probed` ×5 · `_ingest_commit_verdict(org, okw)` ×2
+(**cả hai** call site) · `tukhoa_progress.v2` ×1 · `txn.py` tồn tại.
+
+**Đáng chú ý — master đang tiến vào T3.** `r295` land *"corpus-hiệu-lực dùng chung"* = đúng **Helper 2**
+của Pha 1-0 (§6.1), và *"state single-writer hết fail-OPEN"* = **RAS-02/RAS-03**. Tức tranche T3 đang được
+phiên khác làm. Nhánh này **không** đụng T3, nên không có xung đột việc — nhưng nếu định làm tiếp T3 thì
+phải rà lại §6.1/§Pha 1D trên master mới, đừng dựng lại Helper 2.
+
+**Số ca 1537 → 1549** (+12 của `r295`). Gate **8/8 PASS**. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md`
+→ **v1.36.36**; `CHANGELOG` giữ cả hai khối; `RELEASE_MANIFEST` tái sinh; `tl_selftest.py` auto-merge sạch.
+
+**Số hiệu: master đã dùng `r295`/`r295b`** ⇒ nhánh này đánh số tiếp từ **r296** (trước ghi r295 — chỉnh lại).
+
 # ★ v1.36.35 — HOÀ NHÁNH lượt 5: master vá nốt khuyết BÁO GIẢ của chính GATE-01 (2026-08-01)
 
 Hoà `master` `a3abc11` (r294 v1.36.31 — *"GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng
@@ -610,6 +631,75 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.32 — r295: rà soát — MỘT định nghĩa hội tụ + corpus-hiệu-lực dùng chung + state single-writer hết fail-OPEN (2026-08-01)
+
+Đóng 7 phát hiện Làn A của `AUDIT_CORE_TRA_LUAT_2026-07-31`: **RAS-04 · RAS-10 · RAS-13** (vòng rà) và
+**RAS-02 · RAS-03 · RAS-08 · RAS-09** (state). Mọi số dưới đây đo bằng A/B trên HAI cây (bản HEAD bung ra
+thư mục tạm vs cây đã vá), chạy ĐÚNG đường sản xuất.
+
+**A. `rasoat-loop` — MỘT định nghĩa hội tụ duy nhất (RAS-04 + RAS-10).** Hai mục này trong sổ audit trông
+như ngược chiều nhau — một bên đòi lỗi đọc KHÔNG được tính là hội tụ, bên kia đòi frontier-rỗng-từ-đầu PHẢI
+là hội tụ — thực ra là hai vế của cùng một định nghĩa:
+
+```
+khong_doc_duoc   = ứng viên IN-CORPUS CÓ bản đọc được nhưng đọc HỎNG → CHẶN hội tụ, rc=2
+khong_co_ban_doc = ứng viên IN-CORPUS không giải được GDoc id        → CHỈ BÁO, không chặn
+dry_rounds       = chỉ tăng khi đã đọc THÀNH CÔNG mà không sinh ứng viên mới
+converged        = frontier cạn ∧ khong_doc_duoc = 0 ∧ (dry_rounds ≥ K ∨ chưa từng có ứng viên nào)
+```
+
+ĐO TRƯỚC VÁ: hai lỗi đọc liên tiếp ⇒ `dry_rounds`=2 chạm K ⇒ **`converged:true`, rc=0** — lệnh tuyên bố
+"đã soi hết" trong khi chưa hề nhìn vào hai văn bản đó (mất phát hiện IM LẶNG, đúng lớp bệnh r256).
+Frontier rỗng ngay từ đầu ⇒ **`converged:false`** vĩnh viễn vì `dry_rounds`=0 < K.
+
+★ RANH GIỚI PHẢI GIỮ (bắt được lúc chạy full suite): gộp "không có bản đọc" vào "đọc hỏng" làm ĐỎ
+`r256_no_infinite_loop_seen_dedup_holds` (harness của nó cho `_resolve_deep_target` trả gid=None và khoá
+`rc=0`). Registry có dòng hợp lệ không kèm Drive là chuyện thường; coi đó là "lệnh hỏng" nằm NGOÀI phạm vi
+RAS-04 (nói về `_read_doc_text`). Nay hai sổ riêng, cả hai đều được BÁO (doctrine "no silent caps").
+
+**B. `rasoat-chongcheo` — corpus-hiệu-lực dùng chung (RAS-13).** Thêm `_rasoat_corpus_hieu_luc` cho CẢ HAI
+call-site (`_in_corpus` và `_resolve_cluster_member`) — trước đây chỉ nhánh `ambiguous` biết tới quarantine
+còn `in_corpus` thì không, hai định nghĩa lệch nhau trong CÙNG một tệp. ĐO TRƯỚC VÁ: dòng `corpus=false`,
+dòng cat quarantine, dòng `row_kind=ref` đều cho **`in_corpus:true`** — giấu mất đúng khoảng trống mà lệnh
+chồng-chéo sinh ra để tìm. Khớp số hiệu nhưng ngoài corpus ⇒ NÓI RA `khop_so_hieu_ngoai_corpus`.
+
+★ RANH GIỚI THỨ HAI: predicate loại ĐÚNG `corpus == "false"`, **KHÔNG** dùng `_entry_corpus_true` (nó đòi
+`== "true"` nên coi THIẾU CỘT là ngoài corpus). "Không biết" ≠ "ngoài corpus"; biến không-biết thành loại-bỏ
+là ÂM TÍNH GIẢ — chính chốt S3 trong hàm đó cấm điều này, và siết vế ấy đã làm ĐỎ
+`cluster_dup_sohieu_disambig` (fixture không có cột `corpus`).
+
+**C. `state-get`/`state-put` — single-writer hết fail-OPEN (RAS-02/03/08/09).** ĐO TRƯỚC VÁ, chạy
+`cmd_state_put` THẬT với GAS giả:
+
+| Ca | TRƯỚC | SAU |
+|---|---|---|
+| state đã tồn tại, KHÔNG truyền `--expect-claim` | **rc=0, ĐÃ UPLOAD** — đè thẳng claim phiên khác | rc=2 `THIEU_EXPECT_CLAIM` |
+| hai bản trùng tên, `--expect-claim` khớp bản CŨ | **rc=0, ĐÃ UPLOAD** — xoá mất state bản MỚI | rc=2 `CLAIM_LECH`, `claim_tren_drive:"B"` |
+| body root là `[]` / `q_units` sai enum | **rc=0, ĐÃ UPLOAD RÁC** | rc=2 `STATE_KHONG_HOP_LE` |
+| `metaFolderId` chỉ nạp được qua profile | **rc=2 META_FOLDER_ID_TRỐNG** (áp profile SAU khi đã giải `_meta/`) | rc=0 giải được |
+
+RAS-03 là ca nặng nhất: `state-get` chọn bản MỚI NHẤT theo `modifiedTime` còn `state-put` so CAS với
+`olds[0]` THÔ ⇒ hai lệnh nhìn HAI tài liệu khác nhau, và ca trùng tên là có thật (chính mã cũ đã phải in
+`CO_n_BAN_TRUNG_TEN`). Nay một helper `_rasoat_state_newest` dùng chung cho cả hai; khi MỌI lượt hỏng
+`modifiedTime` thì xếp tất định theo `id` và NÓI RA (đóng luôn một rủi ro audit nêu riêng).
+`--expect-claim` nay BẮT BUỘC khi state đã tồn tại; chỉ tạo-mới được miễn (ADR-0016).
+
+**Test:** +12 ca `r295_*` → **1529/1529**, 0 FAIL. Mỗi nhóm đều có PHẢN CHỨNG chống siết-quá-tay (đọc được
+vẫn hội tụ rc=0 như cũ · dòng corpus THẬT vẫn nhận · `--expect-claim` khớp bản MỚI vẫn ghi được · tạo-mới
+vẫn được miễn cờ). Ruff DELTA: `tl.py` 0 · `lookup_ops` +10 · `tl_selftest` +14 — toàn bộ là F821 lớp
+rehomed-global ĐÃ có nền (`_TL_MODULE` 2102→2110, `argparse` 185→188, `_entry_cat` 12→14,
+`apply_profile_offline` 10→12); **không tên nào mới xuất hiện từ 0**.
+
+**BẪY ĐÃ TRẢ GIÁ (ghi để lượt sau khỏi mắc):** hàm/hằng MỚI trong `tl_core/*` **phải khai trong bảng export
+của `tl.py`** (`_STUB_MAP`), nếu không thì `NameError` trên đường sản xuất — `_rasoat_corpus_hieu_luc` ban
+đầu KHÔNG có trong `cmd_rasoat_chongcheo.__globals__`, đo trước khi viết test mới bắt được. Còn hằng mức
+module thì phải re-export tay (như `_RASOAT_STATE_ALLOWED`) ⇒ đã đưa từ vựng đóng VÀO TRONG hàm validate cho
+hết đường trôi. Test vá monkeypatch phải dùng `_mp261`/`_mpr261` (vá ở MỌI CỬA), `setattr(_TL_MODULE, …)`
+trần là KHÔNG đủ.
+
+(Nhân tiện: sửa nhãn phiên bản của khối test `r290` từ placeholder `v1.36.2x` thành `v1.36.30` — số thật mà
+r290 đã land.)
 
 # ★ v1.36.31 — r294: GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng với projection (2026-08-01)
 

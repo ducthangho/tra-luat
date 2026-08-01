@@ -11778,13 +11778,19 @@ def run() -> int:
                _raw288([("schema", "x.v1"), ("snapshot_age_s", 11)]))
 
     def _c288_helper_quy_dung_khoa():
-        # đơn vị: lệch ở dòng có khoá ⇒ quy được; lệch ở PHẦN TỬ MẢNG ⇒ quy_được_hết=False (fail-closed).
+        # đơn vị. ★ r294 ĐỔI HỢP ĐỒNG: trả ĐƯỜNG DẪN (tuple gốc→lá) thay tên khoá lá.
+        #   Ca phần tử MẢNG trước đây ra `([], False)`; nay quy được về chính khoá chứa nó
+        #   (`('arr',)`, True). KHÔNG phải nới lỏng: nếu `arr` chưa khai thì người gọi vẫn ĐỎ —
+        #   ca `r294_mang_trong_khoa_chua_khai_van_do` khoá đúng KẾT QUẢ đó, thay vì khoá cơ chế.
         _k1, _a1 = _w288._raw_drift_keys(*_VOL288)
         _k2, _a2 = _w288._raw_drift_keys('{\n  "arr": [\n    1\n  ]\n}', '{\n  "arr": [\n    2\n  ]\n}')
         _k3, _a3 = _w288._raw_drift_keys(_VOL288[0], _VOL288[0])
-        return (_k1 == ["snapshot_age_s"] and _a1 is True
-                and _k2 == [] and _a2 is False          # ★ [] mà attributed=False: KHÔNG được đọc thành "sạch"
-                and _k3 == [] and _a3 is True)
+        # dòng NGOÀI mọi khoá (banner không phải JSON) vẫn phải fail-closed
+        _k4, _a4 = _w288._raw_drift_keys('banner A\n{\n  "x": 1\n}', 'banner B\n{\n  "x": 1\n}')
+        return (_k1 == [("snapshot_age_s",)] and _a1 is True
+                and _k2 == [("arr",)] and _a2 is True
+                and _k3 == [] and _a3 is True
+                and _k4 == [] and _a4 is False)         # ★ [] mà attributed=False: KHÔNG được đọc thành "sạch"
     _t110("r288_helper_quy_dong_lech_ve_khoa", _c288_helper_quy_dung_khoa)
 
     def _c288_thu_tu_khoa_lech_bi_bat():
@@ -11819,6 +11825,57 @@ def run() -> int:
         return (_c["raw_stable"] is True and _c["ok"] is True
                 and "raw_drift_undeclared" not in _c)
     _t110("r288_raw_on_dinh_giu_nguyen_duong_cu", _c288_raw_on_dinh_khong_doi_gi)
+
+    # ═══ r294 — GATE-01 hết BÁO GIẢ vì BẤT ĐỐI XỨNG quy-khoá ═══
+    # `audit_projection` che TRỌN CÂY CON của khoá đã khai (`out[key] = "<volatile>"`), còn
+    # `_raw_drift_keys` của r288 chỉ rút TÊN KHOÁ LÁ ⇒ drift bên trong khoá container ĐÃ KHAI
+    # sinh khoá lá "chưa khai" ⇒ RAW_UNSTABLE_UNDECLARED = BÁO GIẢ. Ca thật đã tái hiện được:
+    # `doc_claims_check_fixture` khai volatile `basis`, mà `basis` là dict 13 trường (`max_r`,
+    # `changelog_versions`, `sha_lens` là MẢNG…). Khi CHANGELOG.md bị ghi đúng vào khe giữa hai
+    # lượt chạy con — tức ĐÚNG LÚC LAND một bản — `max_r` nhảy số ⇒ gate ĐỎ oan.
+    _NEST294 = (_raw288([("schema", "x.v1"), ("basis", {"max_r": 292, "sha_lens": [7, 7]})]),
+                _raw288([("schema", "x.v1"), ("basis", {"max_r": 293, "sha_lens": [7, 8]})]))
+
+    def _c294_drift_trong_khoa_da_khai_khong_bao_gia():
+        # ĐỎ TRƯỚC / XANH SAU: khai `basis` volatile ⇒ mọi drift BÊN TRONG nó phải được tha,
+        # y như projection đã che trọn cây con ấy.
+        _res, _ = _golden288(_NEST294, volatile=["basis"], write=True)
+        _c = _res["cases"][0]
+        return (_c["projection_stable"] is True and _c["raw_stable"] is False
+                and _c["ok"] is True and _c.get("error") is None
+                and _c["raw_drift_undeclared"] == []
+                and "basis.max_r" in _c["raw_drift_keys"])
+    _t110("r294_drift_trong_khoa_da_khai_khong_bao_gia", _c294_drift_trong_khoa_da_khai_khong_bao_gia)
+
+    # lệch THỨ TỰ KHOÁ bên trong `basis`: projection (đã sort) vẫn ỔN ĐỊNH nên tới được nhánh raw.
+    # Nếu lệch GIÁ TRỊ mà không khai gì thì projection cũng lệch ⇒ bị chặn sớm hơn ở
+    # AUDIT_PROJECTION_UNSTABLE, KHÔNG tới nhánh này — đo được, nên ca dưới cố ý dùng lệch thứ tự.
+    _NESTORD294 = (_raw288([("schema", "x.v1"), ("basis", {"alpha": 1, "beta": 2})]),
+                   _raw288([("schema", "x.v1"), ("basis", {"beta": 2, "alpha": 1})]))
+
+    def _c294_drift_trong_khoa_chua_khai_van_do():
+        # PHẢN CHỨNG 1: KHÔNG được nới thành "cứ lồng nhau là tha". Cùng khuôn lồng nhưng KHÔNG khai
+        # `basis` ⇒ vẫn ĐỎ, và báo cáo chỉ đúng ĐƯỜNG DẪN `basis.alpha`, không phải tên lá trần.
+        _res, _ = _golden288(_NESTORD294, write=True)
+        _c = _res["cases"][0]
+        return (_c["projection_stable"] is True and _c["ok"] is False
+                and _c["error"] == "RAW_UNSTABLE_UNDECLARED"
+                and "basis.alpha" in _c["raw_drift_undeclared"])
+    _t110("r294_drift_trong_khoa_chua_khai_van_do", _c294_drift_trong_khoa_chua_khai_van_do)
+
+    def _c294_mang_trong_khoa_chua_khai_van_do():
+        # PHẢN CHỨNG 2: ca PHẦN TỬ MẢNG đổi cơ chế (nay quy được về khoá chứa) nhưng KẾT QUẢ giữ
+        # nguyên — khoá chứa chưa khai thì vẫn ĐỎ. Đây là vế bảo đảm r294 không mở lỗ fail-OPEN.
+        _arr = (_raw288([("schema", "x.v1"), ("arr", [1])]),
+                _raw288([("schema", "x.v1"), ("arr", [2])]))
+        _do, _ = _golden288(_arr, write=True)
+        _xanh, _ = _golden288(_arr, volatile=["arr"], write=True)
+        # khoá KẾT QUẢ (đỏ/xanh), KHÔNG khoá mã lỗi: chưa khai thì có thể bị chặn sớm hơn ở
+        # AUDIT_PROJECTION_UNSTABLE — vẫn là ĐỎ, vẫn là fail-closed, đó mới là điều cần bảo đảm.
+        return (_do["cases"][0]["ok"] is False
+                and _xanh["cases"][0]["ok"] is True
+                and _xanh["cases"][0]["raw_drift_undeclared"] == [])
+    _t110("r294_mang_trong_khoa_chua_khai_van_do", _c294_mang_trong_khoa_chua_khai_van_do)
 
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).

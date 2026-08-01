@@ -1662,9 +1662,18 @@ def _golden_test(*, write: bool = False) -> dict:
             #   (b) scrub/đóng băng `snapshot_age_s` khỏi raw → raw hết là raw, mất luôn khả năng phát
             #       hiện bất định THẬT, và tự mâu thuẫn với chính điều "không nới định nghĩa raw-stability".
             rec["raw_diff"] = _first_text_diff(_raw1, _raw2)
+            # r294: `_raw_drift_keys` nay trả ĐƯỜNG DẪN khoá (tuple gốc→lá). Một đường dẫn coi là ĐÃ
+            # KHAI nếu BẤT KỲ mắt xích nào của nó được khai — ĐỐI XỨNG với `audit_projection`, vốn che
+            # TRỌN CÂY CON của khoá đã khai (`deterministic.py`: `out[key] = "<volatile>"`). Trước r294
+            # phép so là `k not in ...` trên TÊN KHOÁ LÁ ⇒ drift bên trong một khoá container ĐÃ KHAI
+            # (vd `basis` của `doc_claims_check_fixture` — dict 13 trường) sinh khoá lá chưa khai ⇒
+            # RAW_UNSTABLE_UNDECLARED = BÁO GIẢ, đúng cái hậu quả mà chú thích trên đã BÁC phương án (a)
+            # để tránh. Báo cáo vẫn in dạng `cha.con` cho người đọc; phép so dùng TUPLE nên khoá có dấu
+            # chấm trong tên không bị tách nhầm.
+            _khai294 = volatile_keys | path_keys
             _drift_keys, _all_attributed = _raw_drift_keys(_raw1, _raw2)
-            _undeclared = [k for k in _drift_keys if k not in (volatile_keys | path_keys)]
-            rec["raw_drift_keys"] = _drift_keys
+            _undeclared = [".".join(p) for p in _drift_keys if not (set(p) & _khai294)]
+            rec["raw_drift_keys"] = [".".join(p) for p in _drift_keys]
             rec["raw_drift_undeclared"] = _undeclared
             rec["raw_drift_attributed"] = _all_attributed
             if _undeclared or not _all_attributed:
@@ -1758,24 +1767,52 @@ def _unique_preserve_order(items) -> list[str]:
         out.append(s)
     return out
 
-def _raw_drift_keys(a: str, b: str) -> tuple[list[str], bool]:
+def _raw_key_paths_by_line(text: str) -> list[tuple]:
+    """r294: với MỖI dòng của `text`, trả ĐƯỜNG DẪN khoá JSON (tuple gốc→lá) chứa dòng đó.
+
+    Dựa vào ĐỘ THỤT: stdout của gate luôn là JSON `indent=2` (`deterministic.py` `_json_dumps`), nên
+    độ thụt CHÍNH LÀ độ sâu lồng. Dòng `"k":` ở thụt d là con của khoá gần nhất có thụt < d.
+    Dòng KHÔNG phải khoá (phần tử mảng, ngoặc đóng/mở) nhận đường dẫn của khoá đang mở — nhờ vậy một
+    phần tử mảng lệch bên trong khoá ĐÃ KHAI không còn bị coi là "không quy được".
+    Dòng ở NGOÀI mọi khoá (vd banner không phải JSON) nhận `()` ⇒ người gọi vẫn fail-closed.
+    """
+    import re as _re294
+    out, stack = [], []          # stack: [(thụt, tên khoá), …]
+    for ln in text.splitlines():
+        s = ln.lstrip()
+        ind = len(ln) - len(s)
+        while stack and stack[-1][0] >= ind:
+            stack.pop()
+        m = _re294.match(r'"((?:[^"\\]|\\.)*)"\s*:', s)
+        if m:
+            out.append(tuple(k for _i, k in stack) + (m.group(1),))
+            stack.append((ind, m.group(1)))
+        else:
+            out.append(tuple(k for _i, k in stack))
+    return out
+
+
+def _raw_drift_keys(a: str, b: str) -> tuple[list[tuple], bool]:
     """r288 (GATE-01 — audit lõi 31-07): quy MỌI dòng stdout lệch giữa hai lượt về KHOÁ JSON của nó.
 
-    Trả `(danh sách khoá lệch đã sắp xếp, quy_được_hết)`. Dòng lệch nào KHÔNG khớp `"key":` (ngoặc
-    đóng/mở, phần tử mảng, dòng trống) ⇒ `quy_được_hết=False`, và người gọi PHẢI fail-closed. Tuyệt đối
-    không được đọc "không quy được khoá nào" thành "không có khoá nào lệch" — đó đúng là chỗ fail-OPEN
-    mà GATE-01 sinh ra để chặn.
+    r294: trả **ĐƯỜNG DẪN** khoá (tuple gốc→lá) thay cho tên khoá lá, để phép so của người gọi ĐỐI XỨNG
+    được với `audit_projection` — vốn che TRỌN CÂY CON của khoá đã khai. Bản r288 trả tên lá nên drift
+    nằm BÊN TRONG một khoá container đã khai bị hô là chưa khai ⇒ BÁO GIẢ.
+
+    Trả `(danh sách đường dẫn đã sắp xếp, quy_được_hết)`. Dòng lệch nào nằm NGOÀI mọi khoá ⇒
+    `quy_được_hết=False`, và người gọi PHẢI fail-closed. Tuyệt đối không được đọc "không quy được khoá
+    nào" thành "không có khoá nào lệch" — đó đúng là chỗ fail-OPEN mà GATE-01 sinh ra để chặn.
     """
-    import difflib as _dl288, re as _re288
+    import difflib as _dl288
     a_lines, b_lines = a.splitlines(), b.splitlines()
+    a_paths, b_paths = _raw_key_paths_by_line(a), _raw_key_paths_by_line(b)
     keys, attributed = set(), True
     for tag, i1, i2, j1, j2 in _dl288.SequenceMatcher(None, a_lines, b_lines, autojunk=False).get_opcodes():
         if tag == "equal":
             continue
-        for ln in a_lines[i1:i2] + b_lines[j1:j2]:
-            m = _re288.match(r'\s*"((?:[^"\\]|\\.)*)"\s*:', ln)
-            if m:
-                keys.add(m.group(1))
+        for p in a_paths[i1:i2] + b_paths[j1:j2]:
+            if p:
+                keys.add(p)
             else:
                 attributed = False
     return sorted(keys), attributed

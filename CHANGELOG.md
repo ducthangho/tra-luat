@@ -1,3 +1,23 @@
+# ★ v1.36.35 — HOÀ NHÁNH lượt 5: master vá nốt khuyết BÁO GIẢ của chính GATE-01 (2026-08-01)
+
+Hoà `master` `a3abc11` (r294 v1.36.31 — *"GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng
+với projection"*). Đây chính là **khuyết điểm #1 mà `r288` tự khai và cố ý để lại**: `audit_projection`
+che TRỌN cây con của khoá đã khai, còn `_raw_drift_keys` chỉ rút **tên khoá lá** bằng regex ⇒ drift bên
+trong cây con của một khoá volatile đã khai sinh khoá lá không có trong `volatile_keys` ⇒ báo giả. Nay
+họ quy theo **đường dẫn khoá**, đối xứng với projection.
+
+**Master VẪN không đụng 4 mục T2 + Helper 1** (đo `5df7f39..a3abc11`) ⇒ không có việc nào của nhánh này
+bị trùng thêm.
+
+**Phần của nhánh này sống nguyên qua lượt hoà, không phải sửa gì:** khối tóm tắt top-level
+(`error`/`raw_unstable_cases`/`write_refused`) vẫn khớp mã `RAW_UNSTABLE_UNDECLARED` — họ giữ nguyên mã
+lỗi, chỉ đổi **cách quy khoá**. Ba ca `r287_*` cũng không phải chỉnh. Đúng như thiết kế: phần tôi bổ sung
+nằm **trên** cơ chế của họ chứ không **trong** nó, nên cơ chế đổi mà phần bổ sung không gãy.
+
+**Số ca 1534 → 1537** (+3 của `r294`). Gate **8/8 PASS**, `golden` + `determinism` + `release-verify`
+đều `ok:true`. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md` → **v1.36.35**; `CHANGELOG` giữ cả hai khối;
+`RELEASE_MANIFEST` tái sinh; `workflow.py` và `tl_selftest.py` **auto-merge sạch**.
+
 # ★ v1.36.34 — HOÀ NHÁNH lượt 4: BỎ bản GATE-01 của tôi, lấy thiết kế của master (2026-08-01)
 
 Hoà `master` `5df7f39` (3 commit mới: `3f614de` r288 · `00611fe` r289 · `5df7f39` r290) vào nhánh.
@@ -590,6 +610,61 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.31 — r294: GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng với projection (2026-08-01)
+
+**Khuyết do chính phiên land r288 đo được và khai trong commit r288 ("để phiên sau vá"); người rà độc
+lập TÁI HIỆN ĐƯỢC BẰNG THỰC NGHIỆM. Nay vá.**
+
+**Bệnh — BẤT ĐỐI XỨNG quy-khoá.** `audit_projection` che **TRỌN CÂY CON** của khoá đã khai
+(`deterministic.py`: `out[key] = "<volatile>"`, không đệ quy xuống dưới). Còn `_raw_drift_keys` của
+r288 chỉ rút **TÊN KHOÁ LÁ** bằng regex `"key":` trên chính dòng lệch. Hai bên đo hai thứ khác nhau ⇒
+**drift nằm BÊN TRONG một khoá container ĐÃ KHAI sinh ra khoá lá "chưa khai"** ⇒
+`RAW_UNSTABLE_UNDECLARED` = **BÁO GIẢ**. Đúng cái hậu quả mà chú thích của r288 nói là đã BÁC phương
+án (a) để tránh.
+
+**Ca thật, đã tái hiện trên ĐƯỜNG SẢN XUẤT trước khi vá** (`_golden_test` thật, không phải helper):
+case `doc_claims_check_fixture` khai `volatile_keys: ["basis","detail"]`, mà `basis` là dict 13 trường
+(`max_r`, `changelog_versions`, `sha_lens` là MẢNG…). Cho `max_r` nhảy 292→293 giữa hai lượt:
+
+```
+projection_stable : True          ← basis đã bị che trọn, projection y hệt
+raw_stable        : False
+raw_drift_keys    : ['max_r']     ← chỉ có TÊN LÁ
+raw_drift_undeclared: ['max_r']   ← 'max_r' không có trong {'basis'}  ⇒ ĐỎ OAN
+ok / error        : False / RAW_UNSTABLE_UNDECLARED
+```
+
+Kích hoạt là **ĐUA**: cần `CHANGELOG.md`/`VERSION` bị ghi đúng vào khe giữa hai lượt chạy con của
+chính case đó — tức **đúng lúc land một bản**. Nên nó chưa nổ qua 5 lần land ngày 01-08, nhưng đúng
+lớp rủi ro vừa làm CI đỏ 5 run liên tiếp ở `r284`.
+
+**Vá.** Thêm `_raw_key_paths_by_line()`: với MỖI dòng, quy ra **ĐƯỜNG DẪN khoá** (tuple gốc→lá) dựa
+vào **ĐỘ THỤT** — stdout của gate luôn là JSON `indent=2` nên độ thụt CHÍNH LÀ độ sâu lồng.
+`_raw_drift_keys` nay trả đường dẫn thay vì tên lá; người gọi coi một đường dẫn là ĐÃ KHAI nếu
+**BẤT KỲ mắt xích nào** của nó được khai — **đối xứng đúng với phép che trọn cây con của projection**.
+Phép so dùng **TUPLE** (`set(p) & _khai294`) nên khoá có dấu chấm trong tên không bị tách nhầm; báo cáo
+vẫn in dạng `cha.con` cho người đọc.
+
+**Fail-CLOSED giữ nguyên, không mở lỗ:**
+- Dòng nằm NGOÀI mọi khoá (banner không phải JSON) ⇒ đường dẫn rỗng ⇒ `quy_được_hết=False` ⇒ vẫn ĐỎ.
+- Drift trong khoá container **CHƯA khai** ⇒ vẫn ĐỎ, và nay báo đúng `basis.alpha` thay vì `alpha` trần.
+
+**Ba ca `r294_*` (đỏ-trước/xanh-sau, phản chứng 2 chiều):**
+1. `r294_drift_trong_khoa_da_khai_khong_bao_gia` — khai `basis` ⇒ drift bên trong được tha, `ok:true`,
+   `raw_drift_undeclared == []`, và `raw_drift_keys` chứa `basis.max_r` (chứng minh đã quy theo đường dẫn).
+2. `r294_drift_trong_khoa_chua_khai_van_do` — **không** khai ⇒ vẫn ĐỎ với `basis.alpha`. Cố ý dùng lệch
+   **THỨ TỰ KHOÁ** để projection vẫn ổn định; lệch GIÁ TRỊ mà không khai gì thì bị chặn sớm hơn ở
+   `AUDIT_PROJECTION_UNSTABLE`, không tới được nhánh này (đã đo).
+3. `r294_mang_trong_khoa_chua_khai_van_do` — phần tử MẢNG: chưa khai ⇒ ĐỎ, đã khai ⇒ XANH.
+
+**Ca `r288_helper_quy_dong_lech_ve_khoa` được CẬP NHẬT theo hợp đồng mới** (trả tuple đường dẫn; phần
+tử mảng nay quy được về khoá chứa thay vì "không quy được"). **KHÔNG phải nới lỏng** — kết quả đỏ/xanh
+giữ nguyên, và ca (3) ở trên khoá đúng KẾT QUẢ đó thay vì khoá cơ chế. Ca còn bổ sung vế banner-ngoài-
+JSON để giữ bằng chứng fail-closed.
+
+**Nghiệm thu:** selftest **1517/1517** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
 
 # ★ v1.36.30 — r290: `rasoat-merge` fail-CLOSED + ghi ATOMIC · `rasoat_phuluc.py` ngang cổng với wrapper (2026-08-01)
 

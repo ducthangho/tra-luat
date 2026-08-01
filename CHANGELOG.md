@@ -1,3 +1,30 @@
+# ★ v1.36.28 — r288: `golden-test` hết ĐI QUA raw drift KHÔNG KHAI — GATE-01 fail-CLOSED (2026-08-01)
+
+Land hộ tranche của phiên khác (mã do phiên A viết, phiên này rà + land theo yêu cầu user).
+
+**Bệnh (GATE-01).** `golden-test` so fixture theo **projection** đã scrub khoá volatile. Nhưng phần
+**raw** thì chỉ ghi `raw_stable` rồi **đi tiếp**: raw lệch mà projection trùng ⇒ vẫn `ok:true`. Nghĩa là
+một thay đổi hành vi THẬT có thể chui qua cổng, miễn nó rơi vào vùng đã bị scrub.
+
+**Vì sao KHÔNG cưỡng chế `raw_stable=false ⇒ ok=false` trần trụi** (đơn thuốc đầu của audit): làm thế
+thì ca `sweep` ĐỎ NGAY dù hoàn toàn lành — dòng lệch duy nhất là `snapshot_age_s`, vốn **đã khai**
+volatile. Đơn thuốc đúng: **raw drift phải được GIẢI THÍCH TRỌN bởi khoá đã khai**.
+
+**Vá.** `_raw_drift_keys(a, b)` quy drift về **TẬP KHOÁ** (đường dẫn khoá, đệ quy). Nếu tập ấy ⊄ tập
+`volatile_keys` đã khai ⇒ `RAW_UNSTABLE_UNDECLARED`, **fail-CLOSED**. Và `--write` **từ chối ghi
+fixture** khi còn drift chưa khai — chốt này quan trọng hơn cả vế đọc: nếu không có nó thì cách "chữa"
+tự nhiên khi gặp đỏ lại chính là ghi đè fixture, tức hợp thức hoá drift.
+
+**Năm ca `r288_*`** (đỏ-trước/xanh-sau): helper quy đúng về khoá · thứ tự khoá lệch **bị bắt** ·
+`--write` từ chối ghi khi drift chưa khai · drift **khoá ĐÃ khai** vẫn xanh (chống báo giả) · raw ổn
+định thì không đổi gì (chống tác dụng phụ).
+
+**Nghiệm thu:** selftest **1508/1508** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **Số đợt `r288` < version `1.36.28`** — có chủ đích: r291/r292 đã land trước (xem CHANGELOG dưới),
+version phải đơn điệu. `rNNN` là mã thay đổi, KHÔNG phải bộ đếm phát hành.
+
 # ★ v1.36.27 — r292: ca `r284` hết PHỤ THUỘC NỀN TẢNG — CI ubuntu ĐỎ suốt 4 bản vì bộ lọc TIỀN TỐ `/tmp/` (2026-08-01)
 
 **Ca thật, đã ĐỎ CI bốn bản liên tiếp** (r285 · r286 · r287 · r291) mà máy Windows **luôn xanh** ⇒ không ai

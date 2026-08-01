@@ -11697,6 +11697,96 @@ def run() -> int:
         return _d["ok"] is True and _d["summary"]["changed"] == 0
     _t110("r287_hai_anh_giong_het_van_ok", _c287_hai_anh_giong_het_van_ok)
 
+    # ═══ r288 (v1.36.26) — GATE-01: raw drift phải được GIẢI THÍCH TRỌN bởi khoá ĐÃ KHAI ═══
+    # Audit lõi 31-07 chẩn `golden-test` ghi `raw_stable:false` mà vẫn `ok:true` là gate xanh giả — ĐÚNG
+    # cơ chế. Nhưng ĐO ra triệu chứng NGƯỢC với cách audit/kế hoạch hiểu: 20 case golden chỉ 1 case
+    # raw-unstable (`sweep`), dòng lệch DUY NHẤT là `snapshot_age_s` — vốn ĐÃ khai volatile, tức lành.
+    # Cưỡng chế "raw_stable=false ⇒ ok=false" trần trụi (đề xuất gốc) làm gate ĐỎ NGAY ở case lành đó.
+    #
+    # ★ KHE HỞ THẬT (đo được, cả audit lẫn kế hoạch đều không nêu): `audit_projection` chỉ scrub theo
+    #   khoá đã khai, còn `_json_dumps(deterministic=True)` SẮP XẾP khoá ⇒ stdout lệch THỨ TỰ KHOÁ cho
+    #   projection y hệt. Đây đúng là lớp bug iteration-order của set/dict — bản cũ trả ok=true trọn vẹn.
+    # ★ Patch phải đặt trên MODULE `tl_core.workflow`: đã ĐO `_golden_test.__globals__ is
+    #   tl_core.workflow.__dict__` (bind COPY-globals như ocr.py, KHÔNG rebase về namespace tl như
+    #   ingest_ops) — patch nhầm chỗ là test xanh GIẢ.
+    import tl_core.workflow as _w288
+
+    def _raw288(pairs):
+        import json as _j288
+        return _j288.dumps(dict(pairs), ensure_ascii=False, indent=2) + chr(10)
+
+    def _golden288(raws, *, volatile=None, write=False):
+        """Chạy `_golden_test` THẬT trên một case bịa; `raws` = stdout của hai lượt liên tiếp."""
+        import json as _j288, tempfile as _tf288
+        from pathlib import Path as _P288
+        _seq, _td = list(raws), _tf288.mkdtemp()
+        _names = ("_GOLDEN_CASES", "_run_tl_json", "_golden_ensure_fixtures", "_golden_dir",
+                  "_golden_args", "_golden_env")
+        _saved = {k: getattr(_w288, k) for k in _names}
+        try:
+            _w288._GOLDEN_CASES = [{"id": "c288", "file": "c288.json", "args": ["x288"],
+                                    "volatile_keys": list(volatile or [])}]
+            _w288._golden_ensure_fixtures = lambda: None
+            _w288._golden_dir = lambda: _P288(_td)
+            _w288._golden_args = lambda case: ["x288"]
+            _w288._golden_env = lambda case: {}
+            _w288._run_tl_json = lambda args, **kw: (lambda s: {"stdout": s, "returncode": 0,
+                                                               "data": _j288.loads(s)})(_seq.pop(0))
+            return _w288._golden_test(write=write), _P288(_td) / "c288.json"
+        finally:
+            for _k, _v in _saved.items():
+                setattr(_w288, _k, _v)
+
+    # nội dung Y HỆT, chỉ khác THỨ TỰ KHOÁ ⇒ projection trùng, raw lệch
+    _ORDER288 = (_raw288([("schema", "x.v1"), ("alpha", 1), ("beta", 2)]),
+                 _raw288([("schema", "x.v1"), ("beta", 2), ("alpha", 1)]))
+    # chỉ khác Ở KHOÁ ĐÃ KHAI volatile ⇒ lành, phải GIỮ XANH (chính là ca `sweep` ngoài đời)
+    _VOL288 = (_raw288([("schema", "x.v1"), ("snapshot_age_s", 10)]),
+               _raw288([("schema", "x.v1"), ("snapshot_age_s", 11)]))
+
+    def _c288_helper_quy_dung_khoa():
+        # đơn vị: lệch ở dòng có khoá ⇒ quy được; lệch ở PHẦN TỬ MẢNG ⇒ quy_được_hết=False (fail-closed).
+        _k1, _a1 = _w288._raw_drift_keys(*_VOL288)
+        _k2, _a2 = _w288._raw_drift_keys('{\n  "arr": [\n    1\n  ]\n}', '{\n  "arr": [\n    2\n  ]\n}')
+        _k3, _a3 = _w288._raw_drift_keys(_VOL288[0], _VOL288[0])
+        return (_k1 == ["snapshot_age_s"] and _a1 is True
+                and _k2 == [] and _a2 is False          # ★ [] mà attributed=False: KHÔNG được đọc thành "sạch"
+                and _k3 == [] and _a3 is True)
+    _t110("r288_helper_quy_dong_lech_ve_khoa", _c288_helper_quy_dung_khoa)
+
+    def _c288_thu_tu_khoa_lech_bi_bat():
+        # ★ CA LÕI: projection ỔN ĐỊNH (đã sort) nhưng stdout BẤT ĐỊNH thật. Trước vá: ok=true.
+        _res, _ = _golden288(_ORDER288)
+        _c = _res["cases"][0]
+        return (_res["ok"] is False and _c["ok"] is False
+                and _c["projection_stable"] is True and _c["raw_stable"] is False
+                and _c["error"] == "RAW_UNSTABLE_UNDECLARED"
+                and _c["raw_drift_undeclared"] == ["alpha", "beta"])
+    _t110("r288_raw_lech_khoa_chua_khai_lam_do_case", _c288_thu_tu_khoa_lech_bi_bat)
+
+    def _c288_write_tu_choi_ghi_fixture():
+        # Lỗ NẶNG NHẤT của bản cũ: `--write` đóng băng luôn cái bất định vào golden. Nay phải TỪ CHỐI ghi.
+        _res, _p = _golden288(_ORDER288, write=True)
+        return (_res["ok"] is False and _res["cases"][0].get("written") is False
+                and not _p.exists())
+    _t110("r288_write_khong_ghi_fixture_khi_drift_chua_khai", _c288_write_tu_choi_ghi_fixture)
+
+    def _c288_khoa_da_khai_van_xanh():
+        # ★ PHẢN CHỨNG GIỮ `sweep` SỐNG: lệch đúng khoá đã khai volatile ⇒ KHÔNG được làm đỏ case.
+        _res, _ = _golden288(_VOL288, volatile=["snapshot_age_s"], write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is False and _c["ok"] is True
+                and _c.get("error") is None and _c["raw_drift_undeclared"] == [])
+    _t110("r288_drift_khoa_da_khai_khong_lam_do", _c288_khoa_da_khai_van_xanh)
+
+    def _c288_raw_on_dinh_khong_doi_gi():
+        # PHẢN CHỨNG: hai lượt stdout giống hệt ⇒ đường cũ nguyên vẹn, không sinh trường lạ.
+        _res, _ = _golden288((_VOL288[0], _VOL288[0]), write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is True and _c["ok"] is True
+                and "raw_drift_undeclared" not in _c)
+    _t110("r288_raw_on_dinh_giu_nguyen_duong_cu", _c288_raw_on_dinh_khong_doi_gi)
+
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
         _rc, _out, _e, _calls = _run_sr117(

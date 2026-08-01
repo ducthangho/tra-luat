@@ -1646,7 +1646,30 @@ def _golden_test(*, write: bool = False) -> dict:
             cases.append(rec)
             continue
         if not rec["raw_stable"]:
+            # r288 (GATE-01 — audit lõi 31-07): raw drift HẾT là ghi chú quan sát. Mọi dòng stdout lệch phải
+            # QUY được về một khoá ĐÃ KHAI trong `volatile_keys`/`path_keys` của chính case; chạm khoá CHƯA
+            # KHAI — hoặc có dòng không quy được về khoá nào — ⇒ case ĐỎ và `--write` TỪ CHỐI ghi fixture
+            # (lỗ nặng nhất của bản cũ: đóng băng luôn cái bất định vào golden).
+            # ★ ĐO TRƯỚC KHI VÁ (31-07, scripts/.tl_state/deploy/golden.out): 20 case, ĐÚNG 1 case
+            #   raw-unstable (`sweep`), dòng lệch DUY NHẤT là `snapshot_age_s` — vốn ĐÃ khai volatile.
+            #   Nên bản vá này giữ `sweep` XANH. Hai phương án từng cân nhắc và BÁC:
+            #   (a) "raw_stable=false ⇒ ok=false" trần trụi → gate ĐỎ NGAY ở case hoàn toàn lành;
+            #   (b) scrub/đóng băng `snapshot_age_s` khỏi raw → raw hết là raw, mất luôn khả năng phát
+            #       hiện bất định THẬT, và tự mâu thuẫn với chính điều "không nới định nghĩa raw-stability".
             rec["raw_diff"] = _first_text_diff(_raw1, _raw2)
+            _drift_keys, _all_attributed = _raw_drift_keys(_raw1, _raw2)
+            _undeclared = [k for k in _drift_keys if k not in (volatile_keys | path_keys)]
+            rec["raw_drift_keys"] = _drift_keys
+            rec["raw_drift_undeclared"] = _undeclared
+            rec["raw_drift_attributed"] = _all_attributed
+            if _undeclared or not _all_attributed:
+                rec.update({"ok": False, "error": "RAW_UNSTABLE_UNDECLARED", "written": False,
+                            "note": ("stdout lệch ở khoá CHƯA khai volatile/path — khai vào case nếu đúng là "
+                                     "giá trị volatile, KHÔNG nới định nghĩa raw-stability"
+                                     if _undeclared else
+                                     "stdout lệch ở dòng KHÔNG quy được về khoá JSON nào ⇒ fail-closed")})
+                cases.append(rec)
+                continue
         actual = projected_text1
         actual_hash = hashlib.sha256(actual.encode("utf-8")).hexdigest()
         rec["actual_sha256"] = actual_hash
@@ -1717,6 +1740,29 @@ def _unique_preserve_order(items) -> list[str]:
         seen.add(s)
         out.append(s)
     return out
+
+def _raw_drift_keys(a: str, b: str) -> tuple[list[str], bool]:
+    """r288 (GATE-01 — audit lõi 31-07): quy MỌI dòng stdout lệch giữa hai lượt về KHOÁ JSON của nó.
+
+    Trả `(danh sách khoá lệch đã sắp xếp, quy_được_hết)`. Dòng lệch nào KHÔNG khớp `"key":` (ngoặc
+    đóng/mở, phần tử mảng, dòng trống) ⇒ `quy_được_hết=False`, và người gọi PHẢI fail-closed. Tuyệt đối
+    không được đọc "không quy được khoá nào" thành "không có khoá nào lệch" — đó đúng là chỗ fail-OPEN
+    mà GATE-01 sinh ra để chặn.
+    """
+    import difflib as _dl288, re as _re288
+    a_lines, b_lines = a.splitlines(), b.splitlines()
+    keys, attributed = set(), True
+    for tag, i1, i2, j1, j2 in _dl288.SequenceMatcher(None, a_lines, b_lines, autojunk=False).get_opcodes():
+        if tag == "equal":
+            continue
+        for ln in a_lines[i1:i2] + b_lines[j1:j2]:
+            m = _re288.match(r'\s*"((?:[^"\\]|\\.)*)"\s*:', ln)
+            if m:
+                keys.add(m.group(1))
+            else:
+                attributed = False
+    return sorted(keys), attributed
+
 
 def _first_text_diff(expected: str, actual: str) -> dict:
     exp_lines = expected.splitlines()

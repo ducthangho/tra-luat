@@ -1,3 +1,59 @@
+# ★ v1.36.33 — HOÀ NHÁNH lượt 3: GỠ bản vá TRÙNG của tôi vì phiên khác đã vá cùng lỗi, tốt hơn (2026-08-01)
+
+Hoà `master` `2b6da92` (r292 v1.36.27) vào `claude/va-t1-gate-nlvoj9`. PR #6 chuyển `mergeable_state`
+`unstable` → **`dirty`** (xung đột) nên phải hoà trước khi làm tiếp.
+
+**PHÁT HIỆN CHÍNH: một phiên khác đã vá ĐÚNG lỗi GATE-03 mà `r285` của nhánh này vá.** Không phải hai lỗi
+giống nhau — **cùng một lỗi, cùng một dòng**: bộ lọc tiền tố `startswith("/tmp/")` trong khung cô lập của
+ca `r284`, nuốt sạch cả 5 ứng viên hợp lệ trên Linux.
+
+Bản của họ **BAO TRỌN** bản của tôi, nên **GIỮ BẢN CỦA HỌ, GỠ BẢN CỦA TÔI**:
+
+| | Nhánh này (`r285`) | Master (`r292`, GIỮ) |
+|---|---|---|
+| Cách lọc | so bằng đúng hằng | so bằng đúng hằng (như nhau) |
+| Hằng escape còn trong danh sách | ca RIÊNG `r285_hang_cuoi_…` | `ok1`, **trong chính ca `r284`** |
+| Loại **đúng một** mục | *(không có)* | **`ok2`** — bắt "lọc quá tay" **NGAY TẠI NGUYÊN NHÂN** |
+| Ứng viên còn lại nằm trong tempdir | `_ngoai == [hằng]` | `ok3 ∧ ok4` |
+
+`ok1 ∧ ok2 ∧ ok4` **suy ra** đúng mệnh đề ca của tôi khẳng định, **cộng thêm** `ok2` mà tôi không có.
+Giữ cả hai = hai bản cùng một fix, và **hai tên cho cùng một literal** (`_HANG_CUOI_285` vs `_ESCAPE284`)
+⇒ hai nguồn sự thật cho một hằng. ⇒ Gỡ ca `r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat`
+(**1527 → 1526 ca**), để lại chú thích tại chỗ nêu lý do.
+
+**GỠ RỒI CÓ MẤT ĐỘ PHỦ KHÔNG — ĐO, KHÔNG ĐOÁN.** Hai đột biến đúng bằng hai mệnh đề ca đã gỡ khẳng định,
+chạy trên cây sau khi gỡ:
+
+```
+đổi hằng escape trong profile_env.py     ⇒ 1525/1526, [FAIL] r284_khung_test_profile_khong_doc_config_that
+thêm ứng viên "/etc/…" (thoát ra kho thật) ⇒ 1525/1526, [FAIL] r284_khung_test_profile_khong_doc_config_that
+```
+
+Cả hai đều bị ca `r284` của master bắt. **Mất 0 độ phủ.**
+
+**Ghi nhận cho lần sau:** CI của họ ĐỎ **bốn bản liên tiếp** (`r285`·`r286`·`r287`·`r291`) vì đúng ca này,
+trong khi máy Windows luôn xanh. Nhánh này vá cùng lỗi ở `r285` nhưng **không** đẩy lên master, nên hai
+phiên trả giá song song cho một lỗi. Bài học thao tác: mục nào CI đang đỏ trên master thì nên hỏi/đẩy sớm
+thay vì ôm trong nhánh dài.
+
+**⚠ BẢNG VA CHẠM SỐ HIỆU — thêm dòng (nay 5 lần):**
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch selftest (P16-T02) | GATE-03 *(nay đã gỡ, lấy bản master `r292`)* |
+| r286 / v1.36.24 | profile gõ sai — đường ĐỌC (P16-F09) | GATE-01a |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên (P16-T03) | GATE-01b |
+| r291 / v1.36.26 vs v1.36.30 | `docs/` ra khỏi GÓI (T0-G) | ING-03 |
+| **r292 / v1.36.27 vs v1.36.31** | **ca `r284` hết phụ thuộc nền tảng** | **RAS-05** |
+
+Từ đây đánh số tiếp từ **r293**.
+
+**Giải xung đột (6 tệp):** `tl_selftest.py` → lấy **phía master** cho cả 2 hunk của ca `r284`, rồi gỡ ca
+trùng của tôi. `VERSION`/`tl.py`/`SKILL.md` → **v1.36.33**. `CHANGELOG.md` → giữ **cả hai** khối.
+`RELEASE_MANIFEST.json` → **tái sinh** (177 tệp, không đổi số).
+
+**Gate sau hoà: 8/8 PASS · selftest 1526/1526 · golden khớp · 177 tệp.**
+
 # ★ v1.36.32 — HOÀ NHÁNH lượt 2: T2 (chặn máu) gặp T0-G `docs/` ra khỏi gói của master (2026-08-01)
 
 Lượt hoà thứ hai giữa `claude/va-t1-gate-nlvoj9` và `master` (master `a739c93` = r291 v1.36.26, T0-G).
@@ -483,6 +539,49 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.27 — r292: ca `r284` hết PHỤ THUỘC NỀN TẢNG — CI ubuntu ĐỎ suốt 4 bản vì bộ lọc TIỀN TỐ `/tmp/` (2026-08-01)
+
+**Ca thật, đã ĐỎ CI bốn bản liên tiếp** (r285 · r286 · r287 · r291) mà máy Windows **luôn xanh** ⇒ không ai
+thấy khi đo cục bộ. Đo `gh run view --log-failed`: mỗi lần đúng **MỘT** ca —
+`r284_khung_test_profile_khong_doc_config_that` (`1501/1502`, rồi `1502/1503` sau khi r291 thêm 1 ca).
+
+**Bệnh.** Khung cô lập của `r284` trỏ `HOME`/`USERPROFILE`/`cwd`/`HERE` vào `TemporaryDirectory()`, rồi
+khẳng định *mọi* ứng viên `_config_candidates` phải nằm trong tempdir. Hằng CUỐI của
+`_config_candidates` (`profile_env.py:67`) là `"/tmp/tra_luat_config.json"` — escape hatch cố ý, không bao
+giờ nằm trong tempdir — nên phải loại trước khi khẳng định. Bản cũ loại nó bằng **TIỀN TỐ**:
+
+```python
+_cands = [c for c in _config_candidates(None) if not c.startswith("/tmp/")]
+```
+
+Trên **Linux**, `TemporaryDirectory()` **nằm trong `/tmp/`** (`/tmp/tmpXXXXXXXX`) ⇒ tiền tố ấy nuốt **SẠCH
+cả 5 ứng viên hợp lệ**, `_cands` rỗng, `bool(_cands)` = `False` ⇒ ĐỎ. Trên **Windows** tempdir là
+`C:\Users\…\Temp\…` nên chỉ đúng hằng bị loại ⇒ XANH. **Mô phỏng đối chiếu hai nền tảng (đo trước khi vá):**
+
+| nền tảng | ứng viên thô | bộ lọc CŨ `startswith('/tmp/')` | bộ lọc MỚI `!= hằng` |
+|---|---|---|---|
+| ubuntu | 6 | **0 ⇒ `bool()` False ⇒ ĐỎ** | 5 ⇒ xanh |
+| windows | 6 | 5 ⇒ xanh | 5 ⇒ xanh |
+
+**Vá.** Loại **đúng một hằng theo GIÁ TRỊ**, không theo tiền tố ⇒ tất định trên mọi nền tảng. Nhân dịp
+siết ca cho nó không thể xanh-giả nữa — 4 vế thay cho 2:
+
+- `ok1` — hằng escape **phải CÒN** trong danh sách thô. Ai đổi/bỏ nó thì bộ lọc thành vô nghĩa và ca này
+  sẽ chứng nhận RỖNG; nay ĐỎ ngay tại chỗ.
+- `ok2` — loại **đúng MỘT** mục. **Đây là vế bắt chính bệnh cũ:** bộ lọc tiền tố loại 6/6 trên Linux ⇒
+  `ok2` ĐỎ **tại đúng nguyên nhân**, thay vì đỏ mơ hồ ở `bool(_cands)`.
+- `ok3` — còn ứng viên (bất biến cũ).
+- `ok4` — mọi ứng viên còn lại nằm TRONG khung cô lập (bất biến gốc r284, giữ nguyên).
+
+⚠ **Bài học chung, không riêng ca này:** *"lọc phần tử không mong muốn bằng TIỀN TỐ ĐƯỜNG DẪN"* là mẫu
+hỏng khi tiền tố ấy cũng là **thư mục tạm của nền tảng**. Ca này còn là ví dụ sạch của việc **một ca
+xanh trên máy dev vẫn có thể sai** — chỉ CI mới lộ ra; và cả **`r284` — bản vá cho "test phụ thuộc máy" —
+tự nó lại phụ thuộc máy**.
+
+- Test: `1503/1503` (Windows). Không thêm ca mới — **siết ca sẵn có** từ 2 vế lên 4 vế.
+- Không đổi kích thước `SKILL.md` (chỉ đổi số version, cùng độ dài) ⇒ golden `workflow_audit.json` và
+  `GOTCHAS.md:16` **giữ nguyên**.
 
 # ★ v1.36.26 — r291: `docs/` RA KHỎI GÓI — trả 19/200 slot + đóng 3 con trỏ TREO (T0-G) (2026-08-01)
 

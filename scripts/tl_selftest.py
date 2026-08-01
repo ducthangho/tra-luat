@@ -11206,51 +11206,27 @@ def run() -> int:
                     else:
                         os.environ[_k] = _v
 
-    # Hằng cuối của `_config_candidates` (scripts/tl_core/profile_env.py) — ứng viên DUY NHẤT nằm ngoài
-    # HOME/cwd/HERE, nên là ứng viên duy nhất được miễn trong khung cô lập. Đặt một chỗ, dùng cho cả hai ca.
-    _HANG_CUOI_285 = "/tmp/tra_luat_config.json"
-
-    def _c285_hang_cuoi_van_con_va_la_ngoai_le_duy_nhat():
-        # r285 PHẢN CHỨNG cho phép miễn trừ của ca r284 ngay bên dưới: nếu ai đổi/xoá hằng cuối
-        # `/tmp/tra_luat_config.json` trong `_config_candidates`, phép miễn `c != _HANG_CUOI_285` thành
-        # VÔ NGHĨA và ca kia vẫn XANH im lặng (lọc hụt, không ai biết). Ca này bắt đúng chỗ đó: trong khung
-        # cô lập, hằng PHẢI còn trong danh sách ứng viên VÀ phải là ứng viên NGOÀI tempdir DUY NHẤT.
-        # Đổi hằng ⇒ đỏ tại đây; thêm một đường thoát ra kho thật ⇒ cũng đỏ tại đây.
-        import tempfile as _tf285
-        _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
-        _here = _TL_MODULE.HERE
-        _cwd = os.getcwd()
-        with _tf285.TemporaryDirectory() as _d:
-            try:
-                os.environ["HOME"] = _d
-                os.environ["USERPROFILE"] = _d
-                os.chdir(_d)
-                _TL_MODULE.HERE = Path(_d) / "scripts"
-                _all = _TL_MODULE._config_candidates(None)
-                _real = Path(_d).resolve()
-                _ngoai = [c for c in _all if not Path(c).resolve().is_relative_to(_real)]
-                return (_HANG_CUOI_285 in _all) and _ngoai == [_HANG_CUOI_285]
-            finally:
-                os.chdir(_cwd)
-                _TL_MODULE.HERE = _here
-                for _k, _v in _sav.items():
-                    if _v is None:
-                        os.environ.pop(_k, None)
-                    else:
-                        os.environ[_k] = _v
-    _t110("r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat", _c285_hang_cuoi_van_con_va_la_ngoai_le_duy_nhat)
+    # r293 (hoà nhánh v1.36.33) — GỠ ca `r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat` của
+    # nhánh này: PHIÊN KHÁC đã vá CÙNG lỗi trên master (`2b6da92` r292 v1.36.27) và bản của họ BAO TRỌN
+    # bản của tôi. Ca `r284` ngay dưới nay có 4 vế: ok1 (hằng escape còn trong danh sách thô) ∧ ok2 (loại
+    # ĐÚNG MỘT mục — bắt 'lọc quá tay' NGAY TẠI NGUYÊN NHÂN, thứ bản tôi không có) ∧ ok4 (mọi ứng viên
+    # còn lại nằm trong khung cô lập) ⇒ suy ra đúng mệnh đề ca đã gỡ khẳng định (`hằng escape là ứng viên
+    # NGOÀI tempdir DUY NHẤT`). Giữ cả hai = hai bản cùng một fix + HAI tên cho CÙNG một literal
+    # (`_HANG_CUOI_285` và `_ESCAPE284`) ⇒ hai nguồn sự thật. Xem mục ★ v1.36.33 CHANGELOG.
 
     def _c284_khung_test_khong_doc_config_that():
         # r284 CHỐT CHẶN TÁI PHÁT (ca thật 31-07: user chạy deploy trên cây canonical, selftest 1483/1490 —
         # 7 case r281/r283 ĐỎ vì `tra_luat_config.v2.json` nằm CẠNH skill, mà `_config_candidates` xếp
         # `HERE.parent` TRƯỚC `~/.tra_luat_config.json`; worktree không có tệp đó nên xanh GIẢ).
         # Chốt: bên trong khung cô lập, MỌI ứng viên config phải nằm trong tempdir — không được có đường
-        # nào trỏ ra kho thật. Ứng viên DUY NHẤT được miễn là hằng cuối hàm `/tmp/tra_luat_config.json`.
-        # r285 GATE-03 (đo THẬT trên Linux 31-07: 1490/1491 — Windows xanh GIẢ vì /tmp không tồn tại):
-        # bản r284 lọc theo TIỀN TỐ `startswith("/tmp/")`. Trên Linux `TemporaryDirectory()` trả
-        # `/tmp/tmpXXXXXXXX` ⇒ MỌI ứng viên (đều nằm TRONG tempdir) khớp tiền tố và bị loại SẠCH ⇒
-        # `_cands == []` ⇒ `bool(_cands)` False ⇒ FAIL. Đúng lớp lỗi máy-phụ-thuộc mà chính r284 sinh
-        # ra để chặn, chỉ đảo nền. Vá: so BẰNG ĐÚNG hằng, không theo tiền tố (test-only).
+        # nào trỏ ra kho thật.
+        # r292 — CA PHỤ THUỘC NỀN TẢNG (CI ubuntu ĐỎ liên tục r284→r291, Windows xanh; đo `--log-failed`:
+        # `1501/1502` rồi `1502/1503`, luôn đúng MỘT ca là ca này). Bộ lọc cũ loại theo TIỀN TỐ `/tmp/`.
+        # Trên Linux `TemporaryDirectory()` NẰM TRONG `/tmp/` ⇒ tiền tố ấy nuốt SẠCH cả 5 ứng viên hợp lệ,
+        # `_cands` rỗng, `bool(_cands)` = False ⇒ ĐỎ. Trên Windows tempdir là `C:\...\Temp\...` nên chỉ
+        # hằng bị loại ⇒ XANH. Nay loại ĐÚNG MỘT hằng escape theo GIÁ TRỊ — tất định trên mọi nền tảng.
+        _ESCAPE284 = "/tmp/tra_luat_config.json"   # hằng CUỐI của `_config_candidates` (profile_env.py:67):
+        # escape hatch CỐ Ý cho môi trường không HOME; tuyệt đối KHÔNG nằm trong tempdir ở bất kỳ nền tảng nào.
         import tempfile as _tf284g
         _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
         _here = _TL_MODULE.HERE
@@ -11261,9 +11237,19 @@ def run() -> int:
                 os.environ["USERPROFILE"] = _d
                 os.chdir(_d)
                 _TL_MODULE.HERE = Path(_d) / "scripts"
-                _cands = [c for c in _TL_MODULE._config_candidates(None) if c != _HANG_CUOI_285]
+                _raw = _TL_MODULE._config_candidates(None)
+                _cands = [c for c in _raw if c != _ESCAPE284]
                 _real = Path(_d).resolve()
-                return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                # (a) hằng escape PHẢI còn trong danh sách thô: ai đó đổi/bỏ nó thì bộ lọc dưới thành
+                #     vô nghĩa và ca này sẽ chứng nhận RỖNG — bắt ngay tại đây thay vì xanh giả.
+                ok1 = _ESCAPE284 in _raw
+                # (b) loại ĐÚNG MỘT mục — chốt chặn chính bệnh của bộ lọc tiền tố cũ: LỌC QUÁ TAY.
+                #     Trên Linux bộ lọc cũ loại 6/6; vế này làm ca đó ĐỎ ngay tại nguyên nhân.
+                ok2 = len(_cands) == len(_raw) - 1
+                ok3 = bool(_cands)
+                # (c) mọi ứng viên còn lại phải NẰM TRONG khung cô lập (bất biến gốc của r284)
+                ok4 = all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                return ok1 and ok2 and ok3 and ok4
             finally:
                 os.chdir(_cwd)
                 _TL_MODULE.HERE = _here

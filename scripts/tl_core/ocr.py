@@ -470,9 +470,20 @@ def _bridge_ocr_plan(a, *, mode: str) -> dict:
         for flag in ("allow_default", "skip_live_check"):
             if getattr(a, flag, False):
                 child.append("--" + flag.replace("_", "-"))
-        prof = getattr(a, "profile", None)
-        if prof:
-            child += ["--profile", prof]
+    # r299 (P16-F11) — SCOPE PHẢI ĐI THEO XUỐNG CON, cho CẢ HAI nhánh.
+    # Trước: nhánh `vbqppl` KHÔNG forward `--profile`, và KHÔNG nhánh nào forward `--config`. Cầu nối
+    # lại nằm trong `_CREDS_LAZY_CMDS` nên `main()` cũng không áp profile hộ ⇒ tiến trình CON tự dò lại
+    # config theo `_config_candidates` và tự chọn profile theo `config.defaultProfile`. Kết quả: lệnh
+    # cha được chỉ scope A, lệnh con GHI vào scope B — im lặng. Đây đúng lớp bệnh F08 (r281) đã trả giá,
+    # chỉ khác là đi qua ranh giới tiến trình. (Env `TL_*` thì kế thừa được, nhưng `--config` KHÔNG có
+    # đường nào đi ngoài dòng lệnh.)
+    # Đặt CUỐI, sau khi hai nhánh đã dựng xong: giữ `child[1]` là đường tệp cho guard hạ nguồn.
+    _cfg299 = getattr(a, "config", None)
+    if _cfg299:
+        child += ["--config", str(_cfg299)]
+    _prof299 = getattr(a, "profile", None)
+    if _prof299:
+        child += ["--profile", str(_prof299)]
     # v1.34.53 (C1 — log phiên OCR 2026-07-15: bridge gọi với --apply --confirm yes nhưng planned_child_command
     # THIẾU --confirm yes → child authorize_apply chết CONFIRM_REQUIRED 100%, phải bypass bridge gọi thẳng):
     # forward --confirm yes; child còn đòi --expected-plan-hash CHÍNH plan con (bridge không biết trước) →

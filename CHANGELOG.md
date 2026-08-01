@@ -1,3 +1,25 @@
+# ★ v1.36.39 — HOÀ NHÁNH lượt 9: master land P16-F11+F26 (OCR/chunks), KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `7469d8c` (r299 v1.36.36 — *"cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply`
+chạy được (P16-F11+F26)"*).
+
+**Rà trùng việc — đo trước khi hoà.** `git diff --numstat 74f62e2..origin/master` trên 5 tệp T2
+(`tl_core/txn.py` · `tl_core/ops_misc.py` · `registry_orchestrator.py` · `tl_core/ingest_ops.py` ·
+`backfill_keywords_live.py`) trả **RỖNG**. Tám tệp master đụng: `CHANGELOG.md` `RELEASE_MANIFEST.json`
+`SKILL.md` `VERSION` `scripts/tl.py` `tl_core/chunking.py` `tl_core/ocr.py` `tl_selftest.py`.
+`tl_selftest.py` auto-merge sạch (master thêm 177 dòng ca mới ở vùng khác); 5 xung đột còn lại là hằng
+phiên bản + kiểm kê.
+
+**Áp bài học CRLF của lượt 8 — lần này gỡ xung đột THEO BYTE ngay từ đầu.** Marker git viết theo dòng-kết
+của chính tệp (`SKILL.md` và `tl.py` là CRLF), nên `read_bytes` → `replace(khối-marker-CRLF)` →
+`write_bytes`; `VERSION` ghi 7 B không newline cuối. Đối chứng kích thước sau gỡ: `SKILL.md` **48.031 B**
+và `tl.py` **229.953 B** — **BẰNG ĐÚNG** trước hoà, đúng như lượt 8 sau khi đã chữa. Số đo là thứ xác
+nhận, không phải "gate xanh".
+
+**Va số hiệu test:** master vừa dùng `r299` ⇒ test mới của nhánh đánh **từ `r300`**.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
+
 # ★ v1.36.38 — HOÀ NHÁNH lượt 8: master land T0-E/P16, KHÔNG chạm tệp nào của T2 (2026-08-01)
 
 Hoà `master` `74f62e2` (r297 v1.36.34 *"`--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10"*
@@ -689,6 +711,55 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+# ★ v1.36.36 — r299: cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply` chạy được (P16-F11+F26) (2026-08-01)
+
+**F11 — SCOPE KHÔNG ĐI THEO XUỐNG TIẾN TRÌNH CON.** `ocr.py` nhánh `vbqppl` KHÔNG forward `--profile`,
+và **KHÔNG nhánh nào** forward `--config` (kể cả `chunking.py`). Cả ba lệnh cầu nối (`ingest-ocr`,
+`profile-ingest-ocr`, `profile-ingest-chunks`) lại nằm trong `_CREDS_LAZY_CMDS` ⇒ `main()` cũng **không
+áp profile hộ**. Con vì thế tự dò lại config theo `_config_candidates` và tự chọn profile theo
+`config.defaultProfile`: **cha được chỉ scope A, con GHI vào scope B — im lặng.** Đây đúng lớp bệnh F08
+(r281) đã trả giá, chỉ khác là đi qua ranh giới TIẾN TRÌNH; env `TL_*` thì kế thừa được, còn `--config`
+**không có đường nào đi** ngoài dòng lệnh.
+→ Vá: forward `--config` + `--profile` cho **CẢ HAI** nhánh `ocr.py` (gộp về MỘT chỗ, bỏ đoạn forward
+riêng ở nhánh `else`), và forward `--config` ở `chunking.py`. Cờ nối ở **CUỐI** để `child[1]` vẫn là
+đường tệp — guard hạ nguồn (khuôn r251) đọc đúng ô đó.
+
+**F26 — `profile-ingest-chunks --apply` CHƯA BAO GIỜ CHẠY ĐƯỢC.** Plan chỉ nối `--apply` TRẦN, trong khi
+`authorize_apply` (`ingest_contract.py`) đòi **CẢ** `--confirm yes` **LẪN** `--expected-plan-hash` ⇒
+`CONFIRM_REQUIRED` 100%. `ocr.py` đã vá ĐÚNG bệnh này từ **v1.34.53/C1** bằng khuôn HAI BƯỚC
+(`_bridge_run_child_apply`: chạy DRY lấy `plan_hash` → apply kèm `--expected-plan-hash`), và khuôn đó ĐÃ
+re-export sang namespace tl. Nhánh chunks bị **sót** — đúng bài học *"vá một reader chưa phải vá xong bẫy"*.
+→ Vá: plan tách `command_dry` (không `--apply`) và `command` (có `--apply --confirm yes`); vòng apply gọi
+`_bridge_run_child_apply` để chèn `--expected-plan-hash` lúc CHẠY (hash tất định theo NỘI DUNG chunk, mà
+chunk vừa được vật chất hoá ngay trước đó nên bridge không thể biết trước). DRY hỏng ⇒ **dừng TRƯỚC mọi
+side-effect**, trả kèm `child_dry_result` (cùng tên khoá với `ocr.py` — một hợp đồng).
+Guard `MATERIALIZE_PATH_MISMATCH` (r251) giữ nguyên: đường tệp ở index 1 của **cả hai** lệnh.
+
+## ★ PHÁT HIỆN KÈM (harness) — bind-list `tl.py` là STUB CHUYỂN TIẾP LƯỜI
+
+Mất một vòng chẩn đoán mới ra, ghi lại kèm CƠ CHẾ: vật nằm trong `tl.__dict__` cho một symbol của
+`tl_core/*` **không phải hàm thật** mà là `_stub` của `_STUB_MAP`:
+`def _stub(*a, **kw): return getattr(_mod, _name)(*a, **kw)`. Nghĩa là **thân hàm LUÔN chạy trong
+namespace của MODULE GỐC**. Hệ quả cho mọi test về sau:
+
+- patch `_TL_MODULE.<tên>` **KHÔNG** chặn được lời gọi **nằm trong** một hàm lấy qua bind-list —
+  phải patch **module gốc**;
+- đo được: `_bridge_run_child_apply` lấy từ chunking có `__globals__ is tl.__dict__` (vì là stub), nhưng
+  lời gọi `_run_child_tl` bên trong lại giải từ `tl_core.ocr.__dict__`;
+- thêm nữa, bind của `chunking`/`ocr` **SAO CHÉP** tên tl vào globals riêng (không rebase `__globals__`
+  như `extract_cache`), nên `chunk-verify` trong plan lại giải từ `tl_core.chunking.__dict__`.
+
+Kho đã có bài học r114 *("patch `_TL_MODULE._run_child_tl` không ăn")* nhưng chỉ ghi TRIỆU CHỨNG; nay có
+cơ chế. Lớp `_stub_child299` thay đúng hai namespace và khôi phục trọn (kỷ luật r285).
+
+**PHẢN CHỨNG — 5/7 ĐỎ trên bản chưa vá** (selftest 1549/1554). Hai ca xanh đều là ca **"KHÔNG ĐƯỢC ĐỔI"
+có chủ đích**: (1) `child[1]` vẫn là đường tệp — cấm chèn cờ vào giữa; (2) `authorize_apply` vẫn đòi CẢ
+`confirm` LẪN `hash` — vừa chứng minh F26 là bệnh THẬT, vừa canh cho lượt sau đừng "chữa" F26 bằng cách
+nới cổng của con.
+
+Selftest **1554/1554**. Ruff **delta 0** (thêm tham chiếu chéo `_bridge_run_child_apply`, bớt
+`_run_child_tl` — bù trừ đúng 1).
+
 # ★ v1.36.35 — r298: diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06) (2026-08-01)
 
 W0 đặt mục tiêu "khôi phục gate ĐÁNG TIN **trước khi** dùng gate chứng nhận bản vá tiếp theo". Ba ca dưới

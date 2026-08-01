@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.38",
+  "skill_version": "1.36.39",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7361110,
-  "package_hash": "fd4d838a21bcb75576f5ce54b1d4929da9b99ee6bb45928305c43a2061a2ceae",
-  "content_hash": "fd4d838a21bcb75576f5ce54b1d4929da9b99ee6bb45928305c43a2061a2ceae",
+  "total_bytes": 7380887,
+  "package_hash": "869aafef755d8e99137cff19bd02fb8f32cc46a40b82c8fa274a1b7c1eeb54a9",
+  "content_hash": "869aafef755d8e99137cff19bd02fb8f32cc46a40b82c8fa274a1b7c1eeb54a9",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 494635,
-      "sha256": "426ee13b1e4fbeef534e7a12edd15c07891717b72fda47e33bf7c85fca61c2f8"
+      "size": 500410,
+      "sha256": "1e2e60a78ba9d32d2175de7d1bdb4e7e2c672fe551047b25af9e7b1af8afd497"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "09cdd45ddda9d239ccd0f3f9ea4babb5079aab16ee1e53ed3af0616e7ea7c9c0"
+      "sha256": "4f7b36442095a166f80b1cbd2a366855b11b2da88178bafc469e9b5bc73f0be7"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "4b29cdd223961e07f45450fd58c627f9cd90626bc6fcf76910328938cb6677e6"
+      "sha256": "034e42f30a5a75119e19c8c0ab4e40420b4f6423eb7470f6f9734cc15aa58839"
     },
     {
       "path": "agents/openai.yaml",
@@ -679,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 229953,
-      "sha256": "fb96095ce28b4aebc3119a8e98734ee336528b253f701f1a3db3fcf168534568"
+      "sha256": "600d294969d43f078655ccea66e27aeac1b6ab7db41474240a5ef39b933a2a28"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -693,8 +693,8 @@
     },
     {
       "path": "scripts/tl_core/chunking.py",
-      "size": 28726,
-      "sha256": "7226eba306b216a3226b356a83961c7fb4cf82e5bf01d85d00c2736d30bd7ce6"
+      "size": 30849,
+      "sha256": "9423abbfc862eff97d5670c6f4920755cefd3f9055f1a707b38446e36374774e"
     },
     {
       "path": "scripts/tl_core/classify.py",
@@ -778,8 +778,8 @@
     },
     {
       "path": "scripts/tl_core/ocr.py",
-      "size": 31508,
-      "sha256": "99dc9b60e417b25dbc0da66ef644c7dc4135644488d030e20d47effc2fad25a4"
+      "size": 32469,
+      "sha256": "6c4eaf1e32803930ae488971d935143c00f07a48a23665e4935a5917e13b4016"
     },
     {
       "path": "scripts/tl_core/ops_misc.py",
@@ -848,8 +848,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1915830,
-      "sha256": "fa9b11ad24a4e6929263df8952bca47e990711e5af12f12ef5b888c960aab493"
+      "size": 1926748,
+      "sha256": "3b2301254ebcc14a842e586fcde396ce66ed34ec2e9564d1915e880c3b1d070a"
     },
     {
       "path": "scripts/tra_cuu.py",

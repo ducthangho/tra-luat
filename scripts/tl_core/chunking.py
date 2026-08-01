@@ -358,13 +358,27 @@ def _profile_ingest_chunks_plan(a) -> dict:
         child = ["profile-ingest", str(ingest_path), "--name", expected, "--source-quality", "digital", "--json"]
         if profile:
             child += ["--profile", profile]
+        # r299 (P16-F11, cùng họ với `ocr.py`): `--config` cũng phải đi theo xuống con. Cầu nối nằm
+        # trong `_CREDS_LAZY_CMDS` nên `main()` không áp hộ; thiếu nó thì con TỰ DÒ `_config_candidates`
+        # và có thể ghi vào scope khác scope người gõ đã chỉ cho lệnh cha.
+        _cfg299 = getattr(a, "config", None)
+        if _cfg299:
+            child += ["--config", str(_cfg299)]
         if getattr(a, "allow_default", False):
             child.append("--allow-default")
         if getattr(a, "skip_live_check", False):
             child.append("--skip-live-check")
-        if getattr(a, "apply", False):
-            child.append("--apply")
-        rec = {"chunk_index": item.get("index"), "path": cp, "expected_name": expected, "command": child}
+        # r299 (P16-F26): `--apply` TRẦN ⇒ `authorize_apply` (ingest_contract) trả `CONFIRM_REQUIRED`
+        # 100% vì nó đòi CẢ `--confirm yes` LẪN `--expected-plan-hash`. Nghĩa là
+        # `profile-ingest-chunks --apply` CHƯA BAO GIỜ chạy được. `ocr.py` đã vá ĐÚNG bệnh này từ
+        # v1.34.53/C1 bằng khuôn HAI BƯỚC (`_bridge_run_child_apply`: chạy DRY lấy `plan_hash` → apply
+        # kèm `--expected-plan-hash`), và khuôn đó ĐÃ re-export sang namespace tl ⇒ ở đây gọi thẳng.
+        # Sót nhánh này đúng là bài học "vá một reader chưa phải vá xong bẫy".
+        # `command_dry` LUÔN có; `command` chỉ khác khi apply — giữ y khuôn `planned_child_dry` /
+        # `planned_child_command` của `ocr.py`, và ĐƯỜNG TỆP vẫn ở index 1 ở CẢ HAI (guard r251).
+        rec = {"chunk_index": item.get("index"), "path": cp, "expected_name": expected,
+               "command_dry": list(child),
+               "command": (child + ["--apply", "--confirm", "yes"]) if getattr(a, "apply", False) else list(child)}
         if materialize_from:
             rec["materialize_from"] = materialize_from
             rec["materialize_note"] = ("chunk `.md` được vật chất hoá thành `.docx` (stdlib zipfile+XML) "
@@ -459,7 +473,14 @@ def cmd_profile_ingest_chunks(a) -> int:
                 _resume_note = (f"Đứt ở chunk {_i}/{_n}: đường .docx vật chất hoá ({_made}) LỆCH đường "
                                 f"trong plan ({_cmd[1]}) — không chạy con để tránh nạp sai tệp.")
                 break
-        r = _run_child_tl(_cmd)
+        # r299 (P16-F26): chạy HAI BƯỚC — DRY lấy `plan_hash` của CHÍNH plan con rồi apply kèm
+        # `--expected-plan-hash`. Bridge không thể biết trước hash đó (nó tất định theo NỘI DUNG chunk,
+        # mà chunk vừa được vật chất hoá xong ở ngay trên), nên phải chèn lúc CHẠY. Fail ở DRY thì
+        # dừng TRƯỚC mọi side-effect và trả nguyên kết quả DRY để chẩn được.
+        r, _dry_fail = _bridge_run_child_apply({"planned_child_dry": list(rec["command_dry"]),
+                                                "planned_child_command": _cmd})
+        if _dry_fail is not None:
+            r = {**r, "child_dry_result": _dry_fail}      # cùng tên khoá với `ocr.py` — một hợp đồng
         r.update({"chunk_index": rec.get("chunk_index"), "path": rec.get("path"), "expected_name": rec.get("expected_name")})
         results.append(r)
         print("[chunks-jsonl] " + json.dumps({"i": _i, "n": _n, "ok": bool(r.get("ok")),

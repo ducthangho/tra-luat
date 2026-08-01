@@ -2114,8 +2114,15 @@ def _strip_font_runs(text: str) -> str:
                    if not _FONT_RUN_RE.match(ln.rstrip("\r\n")))
 
 def _slice_dieu(text: str, dieu: str) -> str:
+    # r296 (P16-F15): điểm DỪNG phải nhận cả Điều có HẬU TỐ CHỮ (7a/7b/7đ — điều được luật sửa đổi CHÈN
+    # THÊM). Bản cũ dùng `Điều\s+\d+\b` làm lookahead: ở "Điều 7a" thì `\d+` ăn "7" rồi `\b` đòi ranh giới
+    # giữa "7" và "a" — cả hai là ký tự từ nên KHÔNG có ranh giới ⇒ lookahead TRƯỢT ⇒ lát cắt chạy tiếp
+    # qua 7a/7b. Đo được: hỏi Điều 7 thì trả về nguyên văn của CẢ 7, 7a và 7b — tức trả nội dung điều KHÁC
+    # dưới danh nghĩa điều được hỏi. Với skill mà hợp đồng là "đúng từng chữ", đó là sai lệch NỘI DUNG.
+    # ★ Phần NEO (`{dieu}\b`) ĐÚNG và phải GIỮ NGUYÊN: chính `\b` đó chặn "Điều 7" khớp nhầm vào "Điều 7a".
+    #   Neo không sai — chỉ điểm dừng sai.
     import re as _re
-    m = _re.search(rf"(?mi)^\s*Điều\s+{_re.escape(str(dieu))}\b.*?(?=^\s*Điều\s+\d+\b|\Z)", text or "", _re.S)
+    m = _re.search(rf"(?mi)^\s*Điều\s+{_re.escape(str(dieu))}\b.*?(?=^\s*Điều\s+\d+[a-zđ]*\b|\Z)", text or "", _re.S)
     return m.group(0).strip() if m else f"[không thấy Điều {dieu}]"
 
 def _split_source_ids(values: list[str] | None, combined: str = "") -> list[str]:

@@ -1,3 +1,22 @@
+# ★ v1.36.37 — HOÀ NHÁNH lượt 7: master chạm `ingest_ops.py` nhưng KHÔNG chạm ING-03 (2026-08-01)
+
+Hoà `master` `9465d2a` (r296 v1.36.33 — *"HỌ regex `Điều N` nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15"*).
+
+**Rà trùng việc — lần này master CÓ chạm `ingest_ops.py`, tệp của ING-03.** Kiểm kỹ chỗ chạm:
+`_dieu_head_marks` (`:1397`, nhánh LÙI của regex tiêu đề Điều). Đo trực tiếp trên diff — **0 lần** chạm
+`_ingest_commit_verdict` / `_INGEST_COMMIT_MARKERS` / `_pi_stage_write` / `_il_stage_write`.
+⇒ Cùng tệp, **khác vùng hoàn toàn**, `git` auto-merge sạch. Không có bản vá nào phải bỏ.
+
+Bốn tệp còn lại (`txn.py` · `ops_misc.py` · `registry_orchestrator.py` · `backfill_keywords_live.py`)
+master không đụng. T2 nguyên vẹn, kiểm bằng dấu vết mã: `Txn("profile-file-remove")` ×1 · `not_probed` ×5 ·
+`_ingest_commit_verdict(org, okw)` ×2 · `tukhoa_progress.v2` ×1.
+
+**Số ca 1549 → 1558** (+9 của `r296`). Gate **8/8 PASS**. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md` →
+**v1.36.37**; `CHANGELOG` giữ cả hai khối; `RELEASE_MANIFEST` tái sinh; `ingest_ops.py` + `tl_selftest.py`
+auto-merge sạch.
+
+**Số hiệu: master đã dùng tới `r296`** ⇒ nhánh này đánh số tiếp từ **r297**.
+
 # ★ v1.36.36 — HOÀ NHÁNH lượt 6: master land T3/rà-soát, T2 của nhánh này không bị đụng (2026-08-01)
 
 Hoà `master` `81c9715` (2 commit: `7795938` r295 v1.36.32 — *"rà soát: MỘT định nghĩa hội tụ +
@@ -631,6 +650,56 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.33 — r296: HỌ regex "Điều N" nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15 (2026-08-01)
+
+**Luật sửa đổi CHÈN THÊM điều bằng cách đánh số `7a`/`7b`/`7đ`. Toàn bộ họ khuôn nhận diện tiêu đề
+Điều đặt ranh giới `\b` NGAY SAU cụm chữ số — mà giữa "7" và "a" cả hai đều là ký tự từ nên KHÔNG có
+ranh giới ⇒ khuôn TRƯỢT.** Một lỗi, ba loại hại tuỳ vai trò của khuôn trong hàm — cả ba đều ĐO ĐƯỢC
+trên đường sản xuất trước khi vá, không suy diễn:
+
+1. **điểm DỪNG** — `_slice_dieu` (`nlm_ops`), `_DIEU_ANY` (`tl.py`, điểm dừng của `extract_dieu`),
+   nhánh LÙI của `_dieu_head_marks` (`ingest_ops`). Lát cắt chạy tiếp qua 7a/7b ⇒ **trả NGUYÊN VĂN
+   của điều KHÁC dưới danh nghĩa điều được hỏi**. Đây là hại NẶNG NHẤT: skill có hợp đồng "đúng từng
+   chữ", nên đây là sai lệch NỘI DUNG chứ không phải trình bày. Đo: hỏi Điều 7 → nhận về trọn 7 + 7a + 7b.
+2. **BẮT tham chiếu** — `_legal_refs` (`lookup_ops`). "khoản 1 Điều 7a" KHÔNG sinh ra ref nào (đo
+   được). Hàm này dùng để dò **stale-ref**, nên bỏ sót = **fail-OPEN**: bản tự ghép trỏ sai vào Điều 7a
+   đi lọt cổng.
+3. **NHẬN DẠNG** — `_focus_block` (`lookup_ops`) tụt xuống nhánh tìm-chuỗi, trả một CỬA SỔ
+   ±1500/5000 ký tự thay vì đúng khối Điều (so sánh official↔candidate do đó đối chiếu nhầm vùng);
+   `short_title` (`rasoat_worksheet.py`) trả **rỗng** cho mọi Điều được chèn thêm.
+
+**★ QUÉT CẢ HỌ, KHÔNG VÁ MỘT CHỖ.** Đề bài chỉ nêu `_slice_dieu` + `_DIEU_ANY`. Chốt chặn tự động
+(xem dưới) khi chạy trên bản CHƯA VÁ lòi thêm **3 vị trí sản xuất nữa** mà rà bằng mắt đã bỏ sót:
+`ingest_ops:1400`, `lookup_ops:1429`, `lookup_ops:2223`. Riêng `ingest_ops` là ca sách giáo khoa của
+bài học "vá một reader chưa phải vá xong bẫy": nhánh CHÍNH đã biết hậu tố từ **r229**, nhánh LÙI ngay
+dòng dưới thì không.
+
+**★ NEO KHÔNG ĐỤNG — đây là ranh giới phải giữ.** `^\s*Điều\s+{n}\b` phải GIỮ `\b`: chính nó chặn
+"Điều 7" khớp nhầm vào "Điều 7a". Neo đúng, chỉ điểm dừng sai. Ca
+`r296_neo_khong_noi_long_dieu_7_van_khong_khop_7a` **xanh cả TRƯỚC lẫn SAU vá — CÓ CHỦ ĐÍCH**: nó
+không đo bản vá, nó canh cho lượt sau đừng "tiện tay" nới luôn neo.
+
+**Hậu tố nằm NGOÀI group bắt số** ở `_dieu_head_marks` và `_focus_block`, để `int(m.group(1))` ở hạ
+nguồn giữ nguyên hợp đồng. `_focus_block` có hậu tố thì chuyển sang `_slice_dieu` (nhận `str`) thay vì
+`extract_dieu` (khoá `int`) — **KHÔNG đổi chữ ký `extract_dieu`/`_DIEU_HEAD` và KHÔNG đụng
+`extract --dieu type=int`**: đó là giới hạn của parser, thuộc phạm vi khác, đổi ở đây sẽ kéo theo regen
+parser-surface không cần thiết.
+
+**CHỐT CHẶN TÁI PHÁT** `r296_khong_con_bay_ranh_gioi_ngay_sau_so`: quét mã SẢN XUẤT, cấm khuôn «Điều»
++ `\s+` + `\d+` DÍNH LIỀN `\b`. Lọc theo **GIÁ TRỊ dòng, không theo tiền tố đường dẫn** (bài học r292 —
+CI ubuntu). Phạm vi CÓ GIỚI HẠN và **nói ra chứ không cắt im lặng**: bỏ qua `tl_selftest.py` (r229 CỐ Ý
+giữ luật CŨ làm phản chứng — cấm ở đó là cấm đúng thứ chứng minh fixture còn tái hiện được bug) và bỏ
+qua dòng CHÚ THÍCH (bản vá phải được quyền trích lại khuôn cũ để giải thích). Bẫy nằm trong dòng code
+có chú thích đuôi thì VẪN bị bắt.
+
+**PHẢN CHỨNG — 8/9 ĐỎ trên bản chưa vá** (selftest 1528/1538 — trong đó 8 ca r296; hai ca «version khớp» đỏ thêm là HỆ QUẢ CỦA PHÉP ĐO (revert `tl.py` kéo VERSION về bản cũ), không phải phát hiện; đo bằng `git checkout --` 5 tệp code,
+GIỮ nguyên tệp test). Ca xanh duy nhất là ca "KHÔNG ĐƯỢC ĐỔI" nói trên. Chốt chặn khi đỏ in ĐÍCH DANH
+đủ 5 vị trí: `tl.py:456 · ingest_ops.py:1400 · lookup_ops.py:1429 · lookup_ops.py:2146 · nlm_ops.py:2118`.
+
+Selftest **1538/1538**. Ruff delta **+10 F821, đúng khuôn bind** (`_TL_MODULE.<tên>` ×9 trong test +
+`_slice_dieu` tham chiếu chéo module ×1 trong `lookup_ops` — tệp này vốn đã có hàng trăm F821 cùng khuôn);
+mọi loại lỗi khác KHÔNG đổi; `tl.py` giữ nền 12 F821 / 0 F401.
 
 # ★ v1.36.32 — r295: rà soát — MỘT định nghĩa hội tụ + corpus-hiệu-lực dùng chung + state single-writer hết fail-OPEN (2026-08-01)
 

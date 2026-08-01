@@ -22247,6 +22247,123 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r290_phuluc_truc_tiep_cung_cong_voi_wrapper", _c290_phuluc_truc_tiep_ngang_wrapper)
 
+    # ═══ r296 (v1.36.33) — P16-F15: CẢ HỌ regex "Điều N" phải nhận HẬU TỐ CHỮ (7a/7b/7đ) ═══
+    # Luật sửa đổi CHÈN THÊM điều bằng cách đánh số 7a/7b/7đ. Khuôn cũ đặt ranh giới `\b` NGAY SAU cụm
+    # số: giữa "7" và "a" cả hai đều là ký tự từ nên KHÔNG có ranh giới ⇒ khuôn TRƯỢT. Tuỳ vai trò của
+    # khuôn trong hàm mà cùng một lỗi ra ba loại hại KHÁC nhau — cả ba đều đo được, không suy diễn:
+    #   (1) điểm DỪNG  (`_slice_dieu`, `_DIEU_ANY`, nhánh lùi `_dieu_head_marks`) ⇒ trả NỘI DUNG CỦA
+    #       ĐIỀU KHÁC dưới danh nghĩa điều được hỏi — nặng nhất, vì skill hợp đồng "đúng từng chữ";
+    #   (2) BẮT tham chiếu (`_legal_refs`) ⇒ bỏ sót ref = fail-OPEN cho cổng dò stale-ref;
+    #   (3) NHẬN DẠNG (`_focus_block`, `short_title`) ⇒ tụt xuống nhánh lùi / trả rỗng.
+    # ★NEO thì KHÔNG đụng: `^\s*Điều\s+{n}\b` phải giữ `\b` — chính nó chặn "Điều 7" khớp vào "Điều 7a".
+    _TXT296 = ("Điều 7. Nguyên tắc chung\n1. Nội dung của Điều 7.\n\n"
+               "Điều 7a. Điều bổ sung thứ nhất\n1. Nội dung RIÊNG của Điều 7a.\n\n"
+               "Điều 7b. Điều bổ sung thứ hai\n1. Nội dung RIÊNG của Điều 7b.\n\n"
+               "Điều 8. Điều kế tiếp\n1. Nội dung của Điều 8.\n")
+
+    def _c296_slice_dung_truoc_hau_to():
+        # (1) hại NẶNG NHẤT: hỏi Điều 7 mà nhận về nguyên văn của cả 7a lẫn 7b.
+        b = _TL_MODULE._slice_dieu(_TXT296, "7")
+        return (b.startswith("Điều 7.") and "Điều 7a" not in b and "Điều 7b" not in b
+                and "Nội dung của Điều 7." in b)
+    _t110("r296_slice_dieu_dung_truoc_dieu_hau_to_chu", _c296_slice_dung_truoc_hau_to)
+
+    def _c296_slice_hoi_thang_hau_to():
+        # Hỏi THẲNG "7a": NEO vốn đã đúng, nhưng điểm dừng hỏng nên vẫn nuốt luôn 7b — tức ngay cả
+        # truy vấn hợp lệ nhất cũng sai. Ca này phân định rạch ròi "neo đúng / dừng sai".
+        b = _TL_MODULE._slice_dieu(_TXT296, "7a")
+        return b.startswith("Điều 7a.") and "RIÊNG của Điều 7a" in b and "Điều 7b" not in b
+    _t110("r296_slice_dieu_hoi_thang_dieu_hau_to_chu", _c296_slice_hoi_thang_hau_to)
+
+    def _c296_extract_dieu_dung_truoc_hau_to():
+        # `extract_dieu` lấy điểm dừng từ `_DIEU_ANY` của tl.py — đường sản xuất qua bind, không tự
+        # tiêm `_DIEU_ANY` vào module (tiêm tay là đúng bẫy false-green-test-qua-bind).
+        b = _TL_MODULE.extract_dieu(_TXT296, 7) or ""
+        return b.startswith("Điều 7.") and "Điều 7a" not in b
+    _t110("r296_extract_dieu_dung_truoc_dieu_hau_to_chu", _c296_extract_dieu_dung_truoc_hau_to)
+
+    def _c296_legal_refs_bat_hau_to():
+        # (2) fail-OPEN: "khoản 1 Điều 7a" trước vá KHÔNG sinh ra ref nào ⇒ bản tự ghép trỏ sai vào
+        # Điều 7a đi lọt cổng stale-ref mà không ai thấy.
+        r = _TL_MODULE._legal_refs("Áp dụng khoản 1 Điều 7a và Điều 7 và khoản 2 Điều 8 của Luật này.")
+        return "khoản 1 Điều 7a" in r and "Điều 7" in r and "khoản 2 Điều 8" in r
+    _t110("r296_legal_refs_bat_duoc_ref_hau_to_chu", _c296_legal_refs_bat_hau_to)
+
+    def _c296_dieu_head_marks_nhanh_lui():
+        # Nhánh CHÍNH của `_dieu_head_marks` đã biết hậu tố từ r229; nhánh LÙI thì không — đúng lớp
+        # "vá một reader, sót reader còn lại". Fixture thể thức KHÔNG-dấu-chấm ép chạy nhánh lùi.
+        _d296 = ("Điều 5 Quy định chung\nnội dung\n"
+                 "Điều 5a Quy định bổ sung\nnội dung\n"
+                 "Điều 6 Giải thích\nnội dung\n")
+        ms = _TL_MODULE._dieu_head_marks(_d296)
+        return (len(ms) == 3 and ms[1].group(0).strip().startswith("Điều 5a")
+                and [m.group(1) for m in ms] == ["5", "5", "6"])   # hậu tố NGOÀI group(1): int() hạ nguồn không đổi
+    _t110("r296_dieu_head_marks_nhanh_lui_thay_dieu_hau_to_chu", _c296_dieu_head_marks_nhanh_lui)
+
+    def _c296_focus_block_hau_to():
+        # (3) trước vá `_focus_block` không nhận ra "Điều 7a" là một Điều ⇒ rơi xuống nhánh tìm-chuỗi
+        # và trả một CỬA SỔ ±1500/5000 ký tự (ở fixture này là gần trọn văn bản, bắt đầu từ Điều 7).
+        blk = _TL_MODULE._focus_block(_TXT296, "Điều 7a")
+        return blk.startswith("Điều 7a.") and "Điều 7b" not in blk
+    _t110("r296_focus_block_cat_dung_dieu_hau_to_chu", _c296_focus_block_hau_to)
+
+    def _r296_rasoat_worksheet_nobind():
+        """Nạp THẲNG scripts/rasoat_worksheet.py — script này chạy độc lập (subprocess), KHÔNG qua
+        tl/bind, nên gọi qua bind sẽ không chứng minh được đường sản xuất của nó."""
+        import importlib.util as _ilu296
+        _sp296 = _ilu296.spec_from_file_location("rasoat_worksheet_nobind_r296",
+                                                 _ROOT209 / "scripts" / "rasoat_worksheet.py")
+        _m296 = _ilu296.module_from_spec(_sp296)
+        _sp296.loader.exec_module(_m296)
+        return _m296
+
+    def _c296_short_title_hau_to():
+        _rw296 = _r296_rasoat_worksheet_nobind()
+        return (_rw296.short_title("Điều 7a. Điều bổ sung thứ nhất\nnội dung") == "Điều bổ sung thứ nhất"
+                and _rw296.short_title("Điều 7. Nguyên tắc chung\nnội dung") == "Nguyên tắc chung")
+    _t110("r296_short_title_khong_rong_voi_dieu_hau_to_chu", _c296_short_title_hau_to)
+
+    def _c296_neo_khong_noi_long():
+        # ★PHẢN CHỨNG "KHÔNG ĐƯỢC ĐỔI" (xanh TRƯỚC lẫn SAU vá — CÓ CHỦ ĐÍCH): nới điểm DỪNG tuyệt đối
+        # không được nới lây sang NEO. Văn bản CHỈ có Điều 7a, hỏi "Điều 7" ⇒ phải báo KHÔNG THẤY.
+        # Nếu ai đó "tiện tay" đổi neo thành `\d+[a-zđ]*` thì ca này ĐỎ ngay — đó là việc của nó.
+        _chi_7a = "Điều 7a. Chỉ có điều này\n1. Nội dung.\n"
+        return (_TL_MODULE._slice_dieu(_chi_7a, "7").startswith("[không thấy Điều 7]")
+                and _TL_MODULE._focus_block(_chi_7a, "Điều 7") == ""
+                and (_TL_MODULE.extract_dieu(_chi_7a, 7) or "") == "")
+    _t110("r296_neo_khong_noi_long_dieu_7_van_khong_khop_7a", _c296_neo_khong_noi_long)
+
+    def _c296_khong_con_bay_trong_ma_san_xuat():
+        """CHỐT CHẶN TÁI PHÁT: cấm khuôn «Điều», `\\s+`, rồi `\\d+` DÍNH LIỀN `\\b` trong mã SẢN XUẤT.
+        Chính khuôn đó là bẫy — không có ranh giới giữa chữ số và chữ cái nên mọi Điều hậu tố bị trượt.
+        Quét theo GIÁ TRỊ dòng (không theo tiền tố đường dẫn — bài học r292/CI-ubuntu).
+        ★Phạm vi CÓ GIỚI HẠN và NÓI RA, không cắt im lặng:
+          · BỎ QUA `tl_selftest.py` — r229 CỐ Ý giữ luật CŨ làm phản chứng ("nếu vế này sai thì fixture
+            không còn tái hiện được bug"); cấm ở đó là cấm đúng thứ chứng minh fixture còn sống.
+          · BỎ QUA dòng CHÚ THÍCH — bản vá phải được quyền trích lại khuôn cũ để giải thích (r296 và
+            r229 đều có). Bẫy nằm giữa dòng code kèm chú thích đuôi thì VẪN bị bắt.
+        Đo lúc land: 5 vi phạm trên bản chưa vá (tl.py · ingest_ops · lookup_ops ×2 · nlm_ops) → 0."""
+        import re as _re296g
+        _bay296 = _re296g.compile(r"Điều\\s\+\(?\\d\+\)?\\b")
+        _vp296 = []
+        for _p296 in sorted((_ROOT209 / "scripts").rglob("*.py")):
+            if _p296.name == "tl_selftest.py":
+                continue
+            try:
+                _src296 = _p296.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            for _i296, _ln296 in enumerate(_src296.splitlines(), 1):
+                if _ln296.strip().startswith("#"):
+                    continue
+                if _bay296.search(_ln296):
+                    _vp296.append(_p296.name + ":" + str(_i296))
+        if _vp296:
+            print("  [r296 bẫy ranh-giới-sau-số] còn ở: " + ", ".join(_vp296[:12]), file=_hsys.stderr)
+        return not _vp296
+    _t110("r296_khong_con_bay_ranh_gioi_ngay_sau_so", _c296_khong_con_bay_trong_ma_san_xuat)
+
+
 
     # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════
     # Bối cảnh (lượt rà 6+7, 27-07): đối chiếu bản kho ↔ bản Công báo ra ND 159 lệch 17 điểm, ND 158

@@ -1397,7 +1397,11 @@ def _dieu_head_marks(text: str) -> list:
     """Danh sách match TIÊU ĐỀ Điều. Không thấy tiêu đề đúng thể thức → lùi về luật cũ, để văn bản
     kiểu 'Điều 5 Quy định chung' (tên cùng dòng, không dấu) KHÔNG tệ đi so với trước."""
     marks = list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)[a-zđ]?[ \t]*(?:[.:]|$)", text or ""))
-    return marks if marks else list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)\b", text or ""))
+    # r296 (P16-F15, cùng họ): nhánh CHÍNH đã biết hậu tố chữ từ r229, nhưng nhánh LÙI thì không —
+    # đúng lớp "vá một reader, sót reader còn lại". Văn bản thể thức không-dấu-chấm mà có Điều chèn
+    # thêm ("Điều 5a Quy định…") mất ranh giới ⇒ `_split_by_dieu_chunks` gộp 5a vào thân Điều 5.
+    # Hậu tố nằm NGOÀI group(1) y như nhánh chính, để `int(m.group(1))` ở hạ nguồn giữ nguyên hợp đồng.
+    return marks if marks else list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)[a-zđ]?\b", text or ""))
 
 
 def _split_by_dieu_chunks(text: str, max_chars: int = 100000) -> list[dict]:

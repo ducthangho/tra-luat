@@ -1426,8 +1426,17 @@ def _vbhn_verify_flags(text: str, expect_title: str = "", expect_gocs: list[str]
 
 def _focus_block(text: str, focus: str) -> str:
     focus = (focus or "").strip()
-    m = re.search(r"(?iu)\bĐiều\s+(\d+)\b", focus)
+    # r296 (P16-F15, cùng họ): `(\d+)\b` không nhận nổi focus "Điều 7a" ⇒ rơi thẳng xuống nhánh tìm-chuỗi
+    # và trả về một CỬA SỔ ±1500/5000 ký tự thay vì đúng khối Điều — so sánh official↔candidate (:1449)
+    # do đó đối chiếu nhầm vùng. Tách hậu tố chữ ra group RIÊNG: không hậu tố thì giữ nguyên đường
+    # `extract_dieu` (khoá int, không đổi hợp đồng); CÓ hậu tố thì đi `_slice_dieu` — hàm nhận str và
+    # sau r296 đã dừng đúng chỗ. (`_slice_dieu` là symbol của `nlm_ops`, resolve qua namespace tl sau
+    # bind — cùng khuôn với mọi tham chiếu chéo module khác trong tệp này.)
+    m = re.search(r"(?iu)\bĐiều\s+(\d+)([a-zđ]*)\b", focus)
     if m:
+        if m.group(2):
+            blk = _slice_dieu(text or "", m.group(1) + m.group(2))
+            return "" if blk.startswith("[không thấy Điều") else blk
         return extract_dieu(text or "", int(m.group(1))) or ""
     pos = _strip_accents(text or "").lower().find(_strip_accents(focus).lower())
     if pos < 0:
@@ -2219,8 +2228,11 @@ def _norm_compare_text(s: str) -> str:
 
 def _legal_refs(text: str) -> list[str]:
     """Rút các tham chiếu kiểu 'khoản 1 Điều 90' để bắt stale-ref trong bản tự ghép."""
+    # r296 (P16-F15, cùng họ): `\d+\b` làm tham chiếu tới điều có HẬU TỐ CHỮ rơi mất HOÀN TOÀN —
+    # "khoản 1 Điều 7a" không sinh ra ref nào (đo được). Hàm này dùng để BẮT stale-ref, nên bỏ sót ref là
+    # fail-OPEN: bản tự ghép trỏ sai vào Điều 7a sẽ đi qua mà không ai thấy.
     out = []
-    for m in re.finditer(r"(?iu)\b(?:khoản\s+\d+\s+)?Điều\s+\d+\b", text or ""):
+    for m in re.finditer(r"(?iu)\b(?:khoản\s+\d+\s+)?Điều\s+\d+[a-zđ]*\b", text or ""):
         ref = re.sub(r"\s+", " ", m.group(0).strip())
         if ref not in out:
             out.append(ref)

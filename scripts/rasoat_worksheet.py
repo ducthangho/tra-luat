@@ -95,7 +95,9 @@ def article_items(doc):
 
 def short_title(text, limit=120):
     # #9: lấy TRỌN tiêu đề trên dòng rồi rút gọn ở RANH GIỚI TỪ (không cắt giữa chữ) + dấu … báo đã rút.
-    m = re.match(r"\s*Điều\s+\d+\.\s*([^\n]+)", text)
+    # r296 (P16-F15, cùng họ): `\d+\.` đòi dấu chấm NGAY sau số ⇒ "Điều 7a. …" không khớp và phiếu rà soát
+    # ra tiêu đề RỖNG cho mọi điều được chèn thêm.
+    m = re.match(r"\s*Điều\s+\d+[a-zđ]*\.\s*([^\n]+)", text, re.I)
     if not m:
         return ""
     s = m.group(1).strip().rstrip(". ")

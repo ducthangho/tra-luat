@@ -15,7 +15,7 @@ description: >-
   Drive MCP.
 ---
 
-# tra-luat — LÕI VẬN HÀNH (v1.36.31 — KERNEL)
+# tra-luat — LÕI VẬN HÀNH (v1.36.32 — KERNEL)
 > Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
 
 > Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
@@ -303,5 +303,5 @@ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --archive ../
 | `references/workflows/*.json` | Workflow cards máy-đọc (schema, risk, idempotency) |
 | `references/golden/*.json` | Golden fixtures tất định |
 | `CONTEXT.md` (gốc repo) | Từ điển thuật ngữ chuẩn của dự án |
-| `docs/adr/` | Quyết định kiến trúc (ADR-0001 bundle-protocol, ADR-0002 bind-giàn-giáo) |
+| *(ADR — dev-only)* | Cây nguồn dev, thư mục `docs/adr/`; quyết định kiến trúc (ADR-0001 bundle-protocol) |
 | *(CHANGELOG sâu — dev-only)* | Cây nguồn dev, thư mục `changelog_archive`; kernel giữ 10 version gần nhất |

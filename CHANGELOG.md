@@ -1,3 +1,40 @@
+# ★ v1.36.32 — HOÀ NHÁNH lượt 2: T2 (chặn máu) gặp T0-G `docs/` ra khỏi gói của master (2026-08-01)
+
+Lượt hoà thứ hai giữa `claude/va-t1-gate-nlvoj9` và `master` (master `a739c93` = r291 v1.36.26, T0-G).
+
+**Đã KIỂM TRÙNG VIỆC trước khi hoà — master CHƯA đụng mục nào của T2.** Đo trực tiếp trên
+`19a6adf..a739c93`: `ops_misc.py` · `registry_orchestrator.py` · `ingest_ops.py` ·
+`backfill_keywords_live.py` đều **không** nằm trong diff của master; và mã master vẫn còn nguyên cả bốn
+dấu vết lỗi (`"ok": True, "nlm_deletes"` gán cứng ×1 · `if not gdoc:` ×2 · `done[gid] = 'err'` ×1 ·
+`gas.post("changes_pull")` ở `:195` trước cổng). ⇒ Bốn bản vá T2 **không** thừa, không có việc nào phải bỏ.
+
+**⚠ BẢNG VA CHẠM SỐ HIỆU — cập nhật (thêm dòng v1.36.26):**
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch trong selftest (P16-T02) | GATE-03 |
+| r286 / v1.36.24 | profile gõ sai hết mượn corpus NỀN đường ĐỌC (P16-F09) | GATE-01a |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên (P16-T03) | GATE-01b |
+| **r291 / v1.36.26** | **`docs/` ra khỏi GÓI (T0-G)** | **Helper 1 `tl_core/txn.py` (Pha 1-0)** |
+
+Lưu ý số `r291` bị dùng **hai lần với hai version khác nhau**: master `r291`=v1.36.26 (docs) và nhánh này
+`r291`=v1.36.30 (ING-03). Tên ca test vẫn **không** trùng. Từ đây đánh số tiếp từ **r293**.
+
+**Giải xung đột:** `VERSION`/`tl.py`/`SKILL.md` → **v1.36.32** (cao hơn cả hai). `CHANGELOG.md` → giữ
+**cả hai** khối. `RELEASE_MANIFEST.json` → **tái sinh**. `references/golden/workflow_audit.json`,
+`CONTEXT.md`, `GOTCHAS.md`, `release.py`, `the_thuc.py`, `tl_selftest.py` → auto-merge sạch.
+
+**RATCHET kiểm kê của master ĐỎ ĐÚNG LÚC — và đó là điểm tốt.** Ca `r291_docs_ngoai_goi` (master) khoá
+`len(paths) + 19 == 195`; sau khi hoà thành 196 nên nó **ĐỎ**, đúng như chú thích của chính nó yêu cầu
+(*"thêm/bớt tệp trong gói ⇒ test này ĐỎ và phải sửa CÓ CHỦ ĐÍCH, kèm kê khai slot"*).
+
+**KÊ KHAI SLOT: 195 → 196.** Đúng **một** tệp được thêm vào gói: `scripts/tl_core/txn.py` — Helper 1
+(Pha 1-0, r288), lõi kết luận giao dịch mà PRO-01 và ING-03 đều dùng; là mã **runtime** nên không loại
+khỏi gói được. Sau khi `docs/` ra khỏi gói (T0-G), **trần 200 còn 24 khe** (196 trong gói + 19 `docs/`
+ngoài gói = 215 trên đĩa).
+
+**Gate sau hoà: 8/8 PASS · selftest 1527/1527 · 177 tệp trong `RELEASE_MANIFEST` · golden khớp.**
+
 # ★ v1.36.31 — r292/RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." (2026-08-01)
 
 Slice **R0** (§Pha 1B), mục **T2 cuối cùng** — tranche "chặn máu" đóng lại tại đây.
@@ -446,6 +483,55 @@ gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflo
 **NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
 cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
 (đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
+
+# ★ v1.36.26 — r291: `docs/` RA KHỎI GÓI — trả 19/200 slot + đóng 3 con trỏ TREO (T0-G) (2026-08-01)
+
+Q1 **user CHỐT 01-08: đưa `docs/` ra khỏi gói.** Cùng khuôn `rasoat` (r249) và `changelog_archive`
+(v1.34.69): **GIỮ trong git, CHỈ loại khỏi GÓI**.
+
+**Vì sao:** `docs/` là hồ sơ THIẾT KẾ của người giữ — 3 tệp kế hoạch/audit + 16 ADR. Runtime agent
+không đọc chúng, nhưng chúng ăn **19/200 slot import**, trong khi quỹ **chỉ còn 4** (r244 đã đụng trần
+THẬT: 199→202 làm `release-bundle` chết `IMPORT_LIMIT_EXCEEDED`). Trả quỹ về **23**.
+
+**Đo (đối chiếu số dự kiến của kế hoạch — khớp trọn):**
+
+| | trước | sau |
+|---|---|---|
+| manifest `file_count` | 195 | **176** (−19: 3 `docs/*.md` + 16 `docs/adr/*.md`) |
+| quỹ slot /200 | 4 | **23** |
+| `_doc_pointer_findings` fail | 0 | **0** |
+| `_doc_bare_tool_findings` fail | 0 | **0** |
+
+**Ba con trỏ TREO phải sửa CÙNG LƯỢT** — sau khi `docs/` rời gói, tệp NẰM TRONG gói mà trỏ vào
+`docs/` là chỉ đúng lớp lỗi `r289` vừa diệt. Kế hoạch chỉ nêu ca (1); (2) và (3) do quét vét cạn
+toàn bộ tệp-trong-manifest mà ra:
+
+1. `SKILL.md:306` — hàng bảng `` | `docs/adr/` | `` → đổi sang khuôn *(ADR — dev-only)* của hàng ngay dưới.
+2. `CONTEXT.md:4` — "Quyết định kiến trúc ở `docs/adr/`" → chú rõ **cây nguồn dev, KHÔNG trong gói**.
+3. `scripts/tl_core/the_thuc.py:105` — "(nối theo trình tự 5 bước — docs/adr/0009)" → chú rõ ngoài gói.
+
+⚠ **Guard H9 KHÔNG bắt được cả ba**: regex `_doc_pointer_findings` chỉ khớp tiền tố
+`references|templates|scripts`; ca (3) còn nằm trong `.py` mà doc-set của guard chỉ gồm `.md`.
+Đây là **khoảng mù đã biết**, thuộc GATE-04 (T0-F) — không mở rộng trong bản này.
+
+**KHÔNG đụng** `_DOC_CLAIMS_DEFAULT_PATHS` (`workflow.py:775`): nó quét **CÂY DEV**, không phải gói ⇒
+`docs/` VẪN chịu `doc-claims-check` đúng như r264 đặt ra. Loại khỏi gói không hạ một cổng nào.
+
+**Test `r291_docs_ngoai_goi`** (đỏ-trước/xanh-sau, phản chứng 2 chiều): (1) `"docs"` ∈
+`_RELEASE_EXCLUDE_DIRS`; (2) không mục manifest nào bắt đầu bằng `docs/`; (3) `file_count` giảm
+**đúng 19** so mốc 195 — ratchet có chủ đích, cùng nếp `r209_baseline_ratchet`; (4) **phản chứng**:
+19 tệp `docs/*.md` VẪN còn trên đĩa (giữ trong git) và mỗi tệp bị `_release_should_include` loại
+**đúng vì khoá `docs`** — chặn ca xanh-giả "vắng khỏi gói vì lý do khác".
+
+**Golden `workflow_audit.json` regen CÓ CHỦ ĐÍCH — đúng MỘT dòng:** `size_bytes` của `SKILL.md`
+47.966 → **47.990** (thẻ workflow-audit chụp kích thước kernel). Không khoá nào khác đổi; đã đối
+chiếu bằng `git diff` trước khi ghi. `references/GOTCHAS.md:16` cập nhật cùng lượt (test `r219`
+khoá kích thước SKILL.md theo số ghi ở đó): **47.990B, đệm 138B** tới WARN 48.128.
+
+⚠ **Số đợt `r291` KHÔNG khớp version `1.36.26` — CÓ CHỦ ĐÍCH.** Lúc land, `r288`/`r289`/`r290` đều đã
+có mã trong cây nhưng CHƯA commit (ba phiên song song). Bản này land TRƯỚC nên lấy version kế tiếp
+còn trống; lấy `1.36.29` để khớp số đợt sẽ **bịa ra ba version chưa từng tồn tại** và phá tính đơn
+điệu mà `deploy-guard` dựa vào. Ba đợt kia land sau sẽ lấy `1.36.27+`.
 
 # ★ v1.36.25 — r287: `determinism-audit` hết ĐỎ NGẪU NHIÊN vì probe công cụ NGOÀI (P16-T03) (2026-08-01)
 

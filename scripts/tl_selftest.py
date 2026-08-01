@@ -11195,7 +11195,14 @@ def run() -> int:
         # 7 case r281/r283 ĐỎ vì `tra_luat_config.v2.json` nằm CẠNH skill, mà `_config_candidates` xếp
         # `HERE.parent` TRƯỚC `~/.tra_luat_config.json`; worktree không có tệp đó nên xanh GIẢ).
         # Chốt: bên trong khung cô lập, MỌI ứng viên config phải nằm trong tempdir — không được có đường
-        # nào trỏ ra kho thật. `/tmp/...` là hằng cuối của hàm, không tồn tại trên máy Windows, bỏ qua.
+        # nào trỏ ra kho thật.
+        # r292 — CA PHỤ THUỘC NỀN TẢNG (CI ubuntu ĐỎ liên tục r284→r291, Windows xanh; đo `--log-failed`:
+        # `1501/1502` rồi `1502/1503`, luôn đúng MỘT ca là ca này). Bộ lọc cũ loại theo TIỀN TỐ `/tmp/`.
+        # Trên Linux `TemporaryDirectory()` NẰM TRONG `/tmp/` ⇒ tiền tố ấy nuốt SẠCH cả 5 ứng viên hợp lệ,
+        # `_cands` rỗng, `bool(_cands)` = False ⇒ ĐỎ. Trên Windows tempdir là `C:\...\Temp\...` nên chỉ
+        # hằng bị loại ⇒ XANH. Nay loại ĐÚNG MỘT hằng escape theo GIÁ TRỊ — tất định trên mọi nền tảng.
+        _ESCAPE284 = "/tmp/tra_luat_config.json"   # hằng CUỐI của `_config_candidates` (profile_env.py:67):
+        # escape hatch CỐ Ý cho môi trường không HOME; tuyệt đối KHÔNG nằm trong tempdir ở bất kỳ nền tảng nào.
         import tempfile as _tf284g
         _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
         _here = _TL_MODULE.HERE
@@ -11206,9 +11213,19 @@ def run() -> int:
                 os.environ["USERPROFILE"] = _d
                 os.chdir(_d)
                 _TL_MODULE.HERE = Path(_d) / "scripts"
-                _cands = [c for c in _TL_MODULE._config_candidates(None) if not c.startswith("/tmp/")]
+                _raw = _TL_MODULE._config_candidates(None)
+                _cands = [c for c in _raw if c != _ESCAPE284]
                 _real = Path(_d).resolve()
-                return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                # (a) hằng escape PHẢI còn trong danh sách thô: ai đó đổi/bỏ nó thì bộ lọc dưới thành
+                #     vô nghĩa và ca này sẽ chứng nhận RỖNG — bắt ngay tại đây thay vì xanh giả.
+                ok1 = _ESCAPE284 in _raw
+                # (b) loại ĐÚNG MỘT mục — chốt chặn chính bệnh của bộ lọc tiền tố cũ: LỌC QUÁ TAY.
+                #     Trên Linux bộ lọc cũ loại 6/6; vế này làm ca đó ĐỎ ngay tại nguyên nhân.
+                ok2 = len(_cands) == len(_raw) - 1
+                ok3 = bool(_cands)
+                # (c) mọi ứng viên còn lại phải NẰM TRONG khung cô lập (bất biến gốc của r284)
+                ok4 = all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                return ok1 and ok2 and ok3 and ok4
             finally:
                 os.chdir(_cwd)
                 _TL_MODULE.HERE = _here

@@ -1,3 +1,46 @@
+# ★ v1.36.27 — r292: ca `r284` hết PHỤ THUỘC NỀN TẢNG — CI ubuntu ĐỎ suốt 4 bản vì bộ lọc TIỀN TỐ `/tmp/` (2026-08-01)
+
+**Ca thật, đã ĐỎ CI bốn bản liên tiếp** (r285 · r286 · r287 · r291) mà máy Windows **luôn xanh** ⇒ không ai
+thấy khi đo cục bộ. Đo `gh run view --log-failed`: mỗi lần đúng **MỘT** ca —
+`r284_khung_test_profile_khong_doc_config_that` (`1501/1502`, rồi `1502/1503` sau khi r291 thêm 1 ca).
+
+**Bệnh.** Khung cô lập của `r284` trỏ `HOME`/`USERPROFILE`/`cwd`/`HERE` vào `TemporaryDirectory()`, rồi
+khẳng định *mọi* ứng viên `_config_candidates` phải nằm trong tempdir. Hằng CUỐI của
+`_config_candidates` (`profile_env.py:67`) là `"/tmp/tra_luat_config.json"` — escape hatch cố ý, không bao
+giờ nằm trong tempdir — nên phải loại trước khi khẳng định. Bản cũ loại nó bằng **TIỀN TỐ**:
+
+```python
+_cands = [c for c in _config_candidates(None) if not c.startswith("/tmp/")]
+```
+
+Trên **Linux**, `TemporaryDirectory()` **nằm trong `/tmp/`** (`/tmp/tmpXXXXXXXX`) ⇒ tiền tố ấy nuốt **SẠCH
+cả 5 ứng viên hợp lệ**, `_cands` rỗng, `bool(_cands)` = `False` ⇒ ĐỎ. Trên **Windows** tempdir là
+`C:\Users\…\Temp\…` nên chỉ đúng hằng bị loại ⇒ XANH. **Mô phỏng đối chiếu hai nền tảng (đo trước khi vá):**
+
+| nền tảng | ứng viên thô | bộ lọc CŨ `startswith('/tmp/')` | bộ lọc MỚI `!= hằng` |
+|---|---|---|---|
+| ubuntu | 6 | **0 ⇒ `bool()` False ⇒ ĐỎ** | 5 ⇒ xanh |
+| windows | 6 | 5 ⇒ xanh | 5 ⇒ xanh |
+
+**Vá.** Loại **đúng một hằng theo GIÁ TRỊ**, không theo tiền tố ⇒ tất định trên mọi nền tảng. Nhân dịp
+siết ca cho nó không thể xanh-giả nữa — 4 vế thay cho 2:
+
+- `ok1` — hằng escape **phải CÒN** trong danh sách thô. Ai đổi/bỏ nó thì bộ lọc thành vô nghĩa và ca này
+  sẽ chứng nhận RỖNG; nay ĐỎ ngay tại chỗ.
+- `ok2` — loại **đúng MỘT** mục. **Đây là vế bắt chính bệnh cũ:** bộ lọc tiền tố loại 6/6 trên Linux ⇒
+  `ok2` ĐỎ **tại đúng nguyên nhân**, thay vì đỏ mơ hồ ở `bool(_cands)`.
+- `ok3` — còn ứng viên (bất biến cũ).
+- `ok4` — mọi ứng viên còn lại nằm TRONG khung cô lập (bất biến gốc r284, giữ nguyên).
+
+⚠ **Bài học chung, không riêng ca này:** *"lọc phần tử không mong muốn bằng TIỀN TỐ ĐƯỜNG DẪN"* là mẫu
+hỏng khi tiền tố ấy cũng là **thư mục tạm của nền tảng**. Ca này còn là ví dụ sạch của việc **một ca
+xanh trên máy dev vẫn có thể sai** — chỉ CI mới lộ ra; và cả **`r284` — bản vá cho "test phụ thuộc máy" —
+tự nó lại phụ thuộc máy**.
+
+- Test: `1503/1503` (Windows). Không thêm ca mới — **siết ca sẵn có** từ 2 vế lên 4 vế.
+- Không đổi kích thước `SKILL.md` (chỉ đổi số version, cùng độ dài) ⇒ golden `workflow_audit.json` và
+  `GOTCHAS.md:16` **giữ nguyên**.
+
 # ★ v1.36.26 — r291: `docs/` RA KHỎI GÓI — trả 19/200 slot + đóng 3 con trỏ TREO (T0-G) (2026-08-01)
 
 Q1 **user CHỐT 01-08: đưa `docs/` ra khỏi gói.** Cùng khuôn `rasoat` (r249) và `changelog_archive`

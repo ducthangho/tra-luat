@@ -44,7 +44,8 @@
     "context cham nguong cung 60% (do tai ranh gioi don vi) -> dong goi",
     "moi don vi con lai deu blocked boi CUNG mot loi (chan dung that) -> bao nguoi 1 dong",
     "can ngan sach NLM (mac dinh 60 call/ho so) hoac quota TVPL bao het that",
-    "max-iter fail-safe cua rasoat-loop"
+    "max-iter fail-safe cua rasoat-loop",
+    "DONG HO SO (khac dong goi phien): du 6 ve §7.1 RASOAT_PLAN_SCHEMA -> vong_doi.trang_thai=da_dong; thieu ve nao -> da_dong_co_gioi_han + khai gioi_han_da_biet (CAM dong im lang)"
   ],
   "rules": [
     "phien chinh (dang cam session_claim) la BEN GHI DUY NHAT; agent ra read-only; worker Q-NLM chi goi NLM, tra JSON ve phien chinh",
@@ -53,7 +54,8 @@
     "state bien dong NAM NGOAI cay skill (package_hash) - chi MAU rong (templates/) nam trong cay",
     "khong /compact giua phien ra - ban giao qua file trung thuc hon tom tat co mat mat",
     "degrade-and-continue: loi co duong vong = workaround (don vi van den done), khong co = blocker (don vi blocked, KHONG gia done) - ca hai deu ghi so rasoat_bugs.md du 8 truong va VONG VAN TIEN",
-    "sua nong CHI khi chan dung toan cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE, loi le thi gom va sau luot ra"
+    "sua nong CHI khi chan dung toan cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE, loi le thi gom va sau luot ra",
+    "Loop C chi chay khi vong_doi.anchor_con_hieu_luc=true; false -> BO QUA ho so va NOI RA ly do (anchor chua di tru -> STALE gia 100%)"
   ],
   "idempotency_contract": {
     "unit_of_progress": "1 don vi ra = 1 file master/<unit>.json + 1 lan cap nhat state",

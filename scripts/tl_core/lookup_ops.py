@@ -2965,6 +2965,76 @@ def _rasoat_check_lech(cu, moi):
     return lech
 
 
+def _rasoat_vong_doi_enums():
+    """PURE (r300): từ vựng đóng của vòng đời hồ sơ — `RASOAT_PLAN_SCHEMA.md` §3/§7.
+
+    CỐ Ý là HÀM chứ không phải hằng cấp module: `tl.py` bind COPY-globals (ADR-0002) và stub farm
+    chỉ nhận callable — hằng module tham chiếu từ trong hàm sẽ KHÔNG resolve qua `tl` (r90/r81 bắt)."""
+    return {"vong_doi": ("dang_ra", "tam_ngung", "da_dong", "da_dong_co_gioi_han"),
+            "q_verify": ("cho_tra_no", "dat", "khong_dat", "no_treo"),
+            "q_ingest": ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped",
+                         "out_of_scope", "da_quyet", "da_quyet_va_thi_hanh")}
+
+
+def _rasoat_vong_doi_findings(state):
+    """PURE (r300): 6 điều kiện ĐÓNG HỒ SƠ — `references/RASOAT_PLAN_SCHEMA.md` §7.1.
+
+    Vì sao là hàm chứ không phải prose: đo 01-08 trên hồ sơ thật `h7-3nd-bhxh-2025`, người thẩm tra
+    chốt "đã đóng" mà state KHÔNG có khoá nào nói thế, còn treo 5 đầu mối (claim chưa nhả · 1 duyệt
+    `cho_duyet` · 3 nợ kiểm chéo · 5 văn bản chưa lấy được · 7 trạng thái đã trôi thành câu văn xuôi).
+    Prose không chặn được chuyện đó; hàm này chặn.
+
+    Trả `{ve_hong: [...], du_dieu_kien: bool}` — `du_dieu_kien=True` ⇒ được đặt `da_dong`; False ⇒ CHỈ
+    được `da_dong_co_gioi_han` **và** mỗi vế hỏng phải có mục trong `vong_doi.gioi_han_da_biet`
+    (kiểm ở `_rasoat_vong_doi_dong_hop_le`). Hàm KHÔNG đọc đĩa, KHÔNG gọi mạng."""
+    st = state if isinstance(state, dict) else {}
+
+    def _q(k):
+        return [x for x in (st.get(k) or []) if isinstance(x, dict)]
+
+    _E = _rasoat_vong_doi_enums()
+    ve = []
+    if any(str(u.get("trang_thai")) in ("pending", "doing") for u in _q("q_units")):
+        ve.append("q_units_con_pending_hoac_doing")
+    if any(str(a.get("trang_thai")) == "cho_duyet" for a in _q("q_approvals")):
+        ve.append("q_approvals_con_cho_duyet")
+    qv = _q("q_verify")
+    if any(str(v.get("trang_thai")) not in _E["q_verify"] for v in qv):
+        ve.append("q_verify_thieu_trang_thai_enum")
+    elif any(str(v.get("trang_thai")) == "cho_tra_no" for v in qv):
+        ve.append("q_verify_con_cho_tra_no")
+    if any(str(i.get("trang_thai")) not in _E["q_ingest"] for i in _q("q_ingest")):
+        ve.append("q_ingest_trang_thai_ngoai_enum")
+    elif any(str(i.get("trang_thai")) in ("cho_tai", "cho_nguoi_tai") for i in _q("q_ingest")):
+        ve.append("q_ingest_con_van_ban_chua_lay_duoc")
+    cl = st.get("session_claim")
+    if not (cl is None or (isinstance(cl, dict) and cl.get("id") is None and cl.get("released_at"))):
+        ve.append("session_claim_chua_nha")
+    return {"ve_hong": ve, "du_dieu_kien": not ve}
+
+
+def _rasoat_vong_doi_dong_hop_le(state):
+    """PURE (r300): trạng thái `vong_doi` có KHỚP thực tế các hàng đợi không — fail-CLOSED.
+
+    Chặn đúng ba kiểu tự lừa: (a) khai `da_dong` trong khi còn vế hỏng; (b) khai
+    `da_dong_co_gioi_han` mà `gioi_han_da_biet` RỖNG (đóng im lặng — thứ đã xảy ra thật);
+    (c) `trang_thai` ngoài enum."""
+    st = state if isinstance(state, dict) else {}
+    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else None
+    if vd is None:
+        return {"ok": True, "loi": [], "ghi_chu": "chưa khai vòng đời — hồ sơ đang rà"}
+    loi = []
+    tt = str(vd.get("trang_thai") or "")
+    if tt not in _rasoat_vong_doi_enums()["vong_doi"]:
+        loi.append(f"TRANG_THAI_NGOAI_ENUM:{tt}")
+    f = _rasoat_vong_doi_findings(st)
+    if tt == "da_dong" and not f["du_dieu_kien"]:
+        loi.append("KHAI_DA_DONG_NHUNG_CON_VE_HONG:" + ",".join(f["ve_hong"]))
+    if tt == "da_dong_co_gioi_han" and not (vd.get("gioi_han_da_biet") or []):
+        loi.append("DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG")
+    return {"ok": not loi, "loi": loi, "ve_hong": f["ve_hong"]}
+
+
 def _rasoat_unit_shape(d):
     """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
     `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.

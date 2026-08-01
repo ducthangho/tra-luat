@@ -791,7 +791,12 @@ _DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
 # duy nhất là XOÁ nội dung phát hiện — tức phá tài liệu để làm vui lòng bộ kiểm.
 _DOC_CLAIMS_HISTORICAL = ("CHANGELOG.md", "references/changelog_archive/",
                           "references/DOCTRINE_APPENDIX.md",
-                          "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md")
+                          "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+                          # r289/Q2 (user chốt 01-08): cả HAI tài liệu kế hoạch chuyển LƯU TRỮ. Chúng tự khai
+                          # ở dòng đầu; đường dẫn/lệnh trong thân là PHÁT HIỆN của tài liệu (tệp đã chết,
+                          # lệnh đã đổi tên), KHÔNG phải con trỏ để đi theo. Nguồn sự thật VẬN HÀNH đã dời
+                          # sang `references/RASOAT_HOSO_LOOP.md` + `RASOAT_PLAN_SCHEMA.md` + thẻ rasoat_hoso.
+                          "docs/WORKFLOW_RASOAT_TU_DONG.md")
 _DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
 # §2.4 che nhiễu: token mang các ký tự này là GIÀN GIÁO/placeholder, không phải trích dẫn thật.
 _DOC_CLAIMS_NOISE_CHARS = "<>{}*$"

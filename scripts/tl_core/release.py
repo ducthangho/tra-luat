@@ -610,6 +610,59 @@ def _doc_pointer_findings(doc_texts: dict, manifest_paths, *, archive_docs=_POIN
             "pointers_baseline": baseline_hits, "pointers_ok": not fail}
 
 
+# r289 (H9b): LỚP THỨ HAI của guard con trỏ — tên công cụ viết TRẦN trong backtick, KHÔNG tiền tố thư mục.
+# `_doc_pointer_findings` đòi tiền tố `references/|templates/|scripts/` nên MÙ với dạng `nlm_qa.py verify`.
+# Ca thật đã trả giá: chỉ dẫn SỐNG «Ghi mỗi truy vấn NLM bằng `nlm_log.py add`» (QUY_TRINH) sống từ
+# v1.29.4 tới v1.35.44 mà KHÔNG cổng nào kêu — chỉ bị bắt bằng rà tay. Đo 01-08 trên gói 195 file:
+# 82 tên trần thiếu / 30 tài liệu, trong đó 57 nằm ở DOCTRINE_APPENDIX (lưu trữ). Vì vậy fail-closed
+# CHỈ cho tài liệu CHỈ-DẪN-VẬN-HÀNH-SỐNG; phần còn lại advisory — bật fail-closed toàn bộ = 82 mục đỏ
+# ngày đầu và guard sẽ bị vô hiệu hoá cho xong (đúng bài học §0.8 của H9).
+# Đối chiếu theo BASENAME trong package-set: `boot.py` nằm ở `scripts/_fallback/boot.py` vẫn hợp lệ.
+_BARE_TOOL_STRICT_DOCS = frozenset({
+    "SKILL.md",                                   # LÕI: bản đồ script + đường boot/cấp cứu
+    "references/QUY_TRINH_RA_SOAT_3_TANG.md",     # quy trình rà 3 tầng (PHA0_GATE_v1, BUG_LEDGER_v1)
+    "references/RASOAT_HOSO_LOOP.md",             # kịch bản vòng lặp + prompt agent tl-rasoat
+})
+_BARE_TOOL_BASELINE = frozenset({
+    # placeholder mô tả DẠNG con trỏ (`file.py:dòng`), không phải tệp thật — cùng họ `scripts/ten_file.py`
+    ("references/RASOAT_HOSO_LOOP.md", "file.py"),
+})
+_BARE_TOOL_SPAN_RE = re.compile(r"`([^`\n]{1,200})`")
+_BARE_TOOL_NAME_RE = re.compile(
+    r"(?<![A-Za-z0-9_./\-])([A-Za-z0-9_][A-Za-z0-9_.\-]*\.(?:py|sh|ps1|cmd|gs))(?![A-Za-z0-9_.\-/])")
+
+
+def _doc_bare_tool_findings(doc_texts: dict, manifest_paths, *, strict_docs=_BARE_TOOL_STRICT_DOCS,
+                            baseline=_BARE_TOOL_BASELINE) -> dict:
+    """PURE (r289/H9b): quét tên công cụ viết TRẦN (`nlm_qa.py`, `tl_rebuild.sh`) bên trong span backtick
+    và đối chiếu BASENAME với PACKAGE-SET. Chỉ xét token KHÔNG chứa `/` — dạng có tiền tố thư mục đã do
+    `_doc_pointer_findings` gác. Ratchet 2 tầng: tài liệu ngoài `strict_docs` → ADVISORY; cặp
+    (tài_liệu, tên) trong `baseline` → im lặng; cặp MỚI ở tài liệu SỐNG ⇒ fail-closed.
+    Manifest rỗng ⇒ mọi tên fail-closed (đồng nhất với hai guard anh em)."""
+    names = {str(p).rsplit("/", 1)[-1] for p in (manifest_paths or [])}
+    fail, advisory, baseline_hits, checked = [], [], [], 0
+    for doc in sorted(doc_texts or {}):
+        text = str(doc_texts.get(doc) or "")
+        hits = set()
+        for span in _BARE_TOOL_SPAN_RE.findall(text):
+            for tok in _BARE_TOOL_NAME_RE.findall(span):
+                if "/" not in tok:
+                    hits.add(tok)
+        for tok in sorted(hits):
+            checked += 1
+            if tok in names:
+                continue
+            pair = (doc, tok)
+            if pair in baseline:
+                baseline_hits.append(pair)
+            elif doc in strict_docs:
+                fail.append(pair)
+            else:
+                advisory.append(pair)
+    return {"bare_tools_checked": checked, "bare_tools_fail": fail, "bare_tools_advisory": advisory,
+            "bare_tools_baseline": baseline_hits, "bare_tools_ok": not fail}
+
+
 def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
     root = root.resolve()
     raw_files = manifest.get("files") if isinstance(manifest, dict) else None
@@ -724,6 +777,12 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         errors.append("DOC_POINTERS_NOT_IN_PACKAGE:" +
                       ",".join(f"{d}->{l}" for d, l in doc_pointers["pointers_fail"][:10]))
         ok = False
+    # r289 (H9b): lớp con trỏ TRẦN — xem _doc_bare_tool_findings. Fail-closed cho tài liệu SỐNG.
+    bare_tools = _doc_bare_tool_findings(_doc_texts, sorted(expected))
+    if not bare_tools["bare_tools_ok"]:
+        errors.append("DOC_BARE_TOOLS_NOT_IN_PACKAGE:" +
+                      ",".join(f"{d}->{t}" for d, t in bare_tools["bare_tools_fail"][:10]))
+        ok = False
     package_hash_current_expected = hashlib.sha256("\n".join(
         f"{c['path']}\0{c.get('actual_size', -1)}\0{c.get('actual_sha256')}"
         for c in checks if c.get("actual_sha256")
@@ -748,6 +807,7 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         "required_missing": required_missing,
         "skill_links": skill_links,
         "doc_pointers": doc_pointers,
+        "bare_tools": bare_tools,
         "errors": errors,
         "package_hash_expected": manifest.get("package_hash"),
         "package_hash_current": package_hash_current_expected,

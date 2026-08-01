@@ -27,7 +27,7 @@
     "A2 nhan vai: `state-get` doc _meta/rasoat_state.json tu Drive -> ghi session_claim (id + gio + con tro tien do) -> `state-put --expect-claim <id cu>` (r213: KHONG can nguoi duyet; chot chan = danh sach ten dong + folder _meta bat buoc + expect-claim)",
     "A3 lay don vi pending uu tien cao nhat (SAU truoc, uu tien NLM-ready; nguon chua vao NLM -> phat hien mang muc_chac_chan=cho_verify_nlm)",
     "A4 ra 3 tang (T1 cache tat dinh -> T2 quet tho -> T3 dao sau) + frontier-expand; NLM chet -> che do khong-NLM (quet cache truc tiep)",
-    "A5 VERIFY tung phat hien (nlm_qa verify; nguyen van CHI tu cache/raw); fail verify -> KHONG ghi",
+    "A5 VERIFY tung phat hien (tl nlm-query --strict-scope; nguyen van CHI tu cache/raw); fail verify -> KHONG ghi",
     "A6 ghi master/<unit>.json (kem anchor + muc_chac_chan) local --out-dir NGOAI cay skill -> danh done -> `state-put` cap nhat state SAU MOI don vi (khong don cuoi phien)",
     "A7 ung vien moi -> Q-INGEST (lan staged, gom LO duyet 1 lan); nguon flip xong -> Q-NLM worker tuan tu nap sau",
     "A8 dong goi CHU DONG: nguong context 40% mem / 60% cung do tai RANH GIOI don vi (chat: max_units_per_session=6) -> checkpoint + note ban giao + NHA claim"

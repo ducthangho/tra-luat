@@ -20869,6 +20869,87 @@ def run() -> int:
         return not bad
     _t110("r209_skill_md_khong_tro_file_ma", _c209_skill_md_khong_tro_file_ma)
 
+    def _c289_bare_tool_findings_pure():
+        # H9b: helper thuần — bắt tên công cụ TRẦN trong backtick (dạng `nlm_qa.py verify` mà
+        # _doc_pointer_findings MÙ vì đòi tiền tố thư mục). Khớp theo BASENAME trong package-set.
+        f = _rel209._doc_bare_tool_findings
+        pkg = ["scripts/co.py", "scripts/_fallback/boot.py", "references/y.md"]
+        strict = frozenset({"SKILL.md"})
+        # (a) tên trần THIẾU ở tài liệu SỐNG ⇒ fail; tên trần CÓ (kể cả nằm sâu _fallback/) ⇒ im
+        r = f({"SKILL.md": "chạy `ghost.py` rồi `co.py`, và `boot.py` nữa"}, pkg,
+              strict_docs=strict, baseline=frozenset())
+        ok1 = (r["bare_tools_fail"] == [("SKILL.md", "ghost.py")]) and not r["bare_tools_ok"]
+        # (b) token CÓ tiền tố thư mục ⇒ BỎ QUA (đã do _doc_pointer_findings gác, không đếm hai lần)
+        r2 = f({"SKILL.md": "xem `scripts/ghost2.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok2 = r2["bare_tools_ok"] and r2["bare_tools_checked"] == 0
+        # (c) NGOÀI backtick ⇒ không xét (tránh nuốt văn xuôi thường)
+        r3 = f({"SKILL.md": "chạy ghost3.py đi"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok3 = r3["bare_tools_ok"] and r3["bare_tools_checked"] == 0
+        # (d) tài liệu NGOÀI strict ⇒ advisory, KHÔNG chặn
+        r4 = f({"references/KHAC.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok4 = r4["bare_tools_ok"] and r4["bare_tools_advisory"] == [("references/KHAC.md", "ghost.py")]
+        # (e) baseline im lặng — và khớp theo CẶP: cùng tên ở doc KHÁC vẫn ĐỎ
+        bl = frozenset({("SKILL.md", "ghost.py")})
+        r5 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=bl)
+        ok5 = r5["bare_tools_ok"] and r5["bare_tools_baseline"] == [("SKILL.md", "ghost.py")]
+        r6 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        r6b = f({"references/K2.md": "`ghost.py`"}, pkg,
+                strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        ok6 = r6["bare_tools_ok"] and (not r6b["bare_tools_ok"])
+        # (f) manifest rỗng ⇒ fail-closed (đồng nhất với hai guard anh em)
+        r7 = f({"SKILL.md": "`co.py`"}, [], strict_docs=strict, baseline=frozenset())
+        ok7 = not r7["bare_tools_ok"]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r289_bare_tool_findings_pure", _c289_bare_tool_findings_pure)
+
+    def _c289_cay_that_bare_tools():
+        # H9b nghiệm thu CÂY THẬT: 0 fail ở tài liệu SỐNG sau khi dọn 7 tên ma của SKILL.md +
+        # `nlm_qa.py` của QUY_TRINH. Package-set lấy từ RELEASE_MANIFEST (nguồn sự thật của guard
+        # sản xuất) — KHÔNG mô phỏng bằng rglob đĩa: cây dev rộng hơn gói ⇒ xanh giả.
+        # PHẢN CHỨNG 2 CHIỀU: bơm lại đúng dòng SKILL.md §7 TRƯỚC-r289 ⇒ ĐỎ đúng 4 tên ma
+        # (`nlm_sources.py` CÓ THẬT trong gói nên phải im — chứng minh guard không bắt bừa).
+        root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return True
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        docs = {}
+        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
+            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
+        r = _rel209._doc_bare_tool_findings(docs, paths)
+        ok1 = r["bare_tools_ok"] and r["bare_tools_fail"] == []
+        ok2 = len(r["bare_tools_advisory"]) >= 30      # DOCTRINE lưu trữ vẫn ĐƯỢC BÁO, không nuốt
+        ok3 = len(r["bare_tools_baseline"]) == 1       # placeholder `file.py` — ratchet đang gài
+        cu = ("- **NLM:** `nlm_push.py` · `nlm_qa.py` · `nlm_sources.py` (`-S`) · "
+              "`nlm_map.py` · `dedup_gate2.py`.")
+        r2 = _rel209._doc_bare_tool_findings({"SKILL.md": cu}, paths)
+        ok4 = (not r2["bare_tools_ok"]) and set(r2["bare_tools_fail"]) == {
+            ("SKILL.md", "nlm_push.py"), ("SKILL.md", "nlm_qa.py"),
+            ("SKILL.md", "nlm_map.py"), ("SKILL.md", "dedup_gate2.py")}
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r289_cay_that_bare_tools", _c289_cay_that_bare_tools)
+
+    def _c289_khong_con_lenh_ma_nlm_qa():
+        # r289/V2: `nlm_qa` là LỆNH MA (scripts/nlm_qa.py chưa từng có; không subcommand nào tên
+        # nlm-qa). Nó từng rò vào 4 tệp SỐNG, kể cả THẺ MÁY ĐỌC rasoat_hoso.json — tức bước A5
+        # VERIFY của Loop A trỏ vào hư không. Khoá: 3 tệp quy trình + thẻ không được nhắc lại,
+        # và lệnh thay thế `nlm-query --strict-scope` phải CÓ THẬT trong command registry.
+        root = _ROOT209
+        song = ["references/QUY_TRINH_RA_SOAT_3_TANG.md", "references/RASOAT_HOSO_LOOP.md",
+                "references/workflows/rasoat_hoso.json", "SKILL.md"]
+        ban = [p for p in song
+               if "nlm_qa" in (root / p).read_text(encoding="utf-8", errors="replace")]
+        ok1 = ban == []
+        from tl_core import command_registry as _cr289
+        _specs = getattr(_cr289, "GENERATED_SPECS", None)
+        names = {str(s.get("name") or "") for s in (_specs or [])}
+        ok2 = bool(_specs) and ("nlm-query" in names) and ("nlm-qa" not in names) and ("nlm_qa" not in names)
+        loop = (root / "references/RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        ok3 = "--strict-scope" in loop
+        return ok1 and ok2 and ok3
+    _t110("r289_khong_con_lenh_ma_nlm_qa", _c289_khong_con_lenh_ma_nlm_qa)
+
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
         # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
@@ -24244,8 +24325,17 @@ def run() -> int:
                              "ngoai span: commit fadedbc khong co trong kho.\n", encoding="utf-8")
             _r264 = {f["reason"] for f in _wf264._doc_claims_check(paths=[str(_p264)])["flags"]}
         ok4 = {"PATH_MISSING", "SHA_NOT_A_COMMIT"} <= _r264
-        # PHẢN CHỨNG 2 — tệp kế hoạch CÒN LẠI trong docs/ KHÔNG được ăn ké nhãn lịch sử
-        ok5 = "docs/WORKFLOW_RASOAT_TU_DONG.md" not in _wf264._DOC_CLAIMS_HISTORICAL
+        # PHẢN CHỨNG 2 — nhãn lịch sử KHÔNG được LAN ra cả `docs/`.
+        # ★ r289/Q2 (user chốt 01-08) ĐẢO vế cũ: r264 khoá «WORKFLOW_RASOAT_TU_DONG.md KHÔNG được
+        #   historical» để chứng minh việc phủ `docs/` có răng. Nay CẢ HAI tài liệu kế hoạch đã chuyển
+        #   LƯU TRỮ có chủ đích (tự khai ở dòng đầu; đường dẫn/lệnh trong thân là PHÁT HIỆN của tài liệu,
+        #   không phải con trỏ để đi theo — nguồn sự thật vận hành đã dời sang `references/`).
+        #   Ý ĐỒ GỐC vẫn được giữ, chỉ đổi cách khoá: (a) nhãn phải đúng là tài liệu ĐÃ KHAI, và
+        #   (b) TUYỆT ĐỐI không được khai cả thư mục `docs/` — làm thế thì ADR và mọi tệp docs/ khác
+        #   hết bị bắt cứng, đúng cái "trang trí" mà r264 sinh ra để chặn. Vế răng-thật nằm ở ok4.
+        ok5 = ("docs/WORKFLOW_RASOAT_TU_DONG.md" in _wf264._DOC_CLAIMS_HISTORICAL
+               and not any(str(_h264).rstrip("/") in ("docs", "docs/adr")
+                           for _h264 in _wf264._DOC_CLAIMS_HISTORICAL))
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r264_doc_claims_phu_docs", _c264_doc_claims_docs)
 

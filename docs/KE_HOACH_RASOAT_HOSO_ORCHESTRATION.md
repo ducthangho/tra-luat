@@ -1,7 +1,25 @@
 # KẾ HOẠCH — LỚP ĐIỀU PHỐI RÀ SOÁT HỒ SƠ DỰ THẢO LUẬT (trên skill tra-luat)
 
-> Trạng thái: ĐỀ XUẤT (chưa triển khai). Phạm vi: lớp điều phối phía trên skill — KHÔNG đụng `scripts/tl.py`
-> trừ khi nêu rõ. Nguồn gốc: phiên kiến trúc 2026-07-25.
+> # ⛔ TÀI LIỆU LƯU TRỮ — HỒ SƠ THIẾT KẾ, KHÔNG PHẢI CHỈ DẪN VẬN HÀNH
+>
+> Đóng băng ở lượt 26-07-2026. **Nguồn sự thật VẬN HÀNH** nằm ở `references/`:
+> `RASOAT_HOSO_LOOP.md` (kịch bản Loop A/B/C + prompt agent `tl-rasoat`) · `RASOAT_PLAN_SCHEMA.md`
+> (schema state) · `workflows/rasoat_hoso.json` (thẻ có cổng máy) · `QUY_TRINH_RA_SOAT_3_TANG.md`.
+> **Lệch nhau ⇒ `references/` THẮNG.**
+>
+> Đợt 1–3 và "Đợt 5" ĐÃ THI HÀNH; Đợt 4 (H7/H8) đã chạy LIVE 26-07 và có biên bản nghiệm thu
+> (`p14_h7h8_rasoat_2026-07-26/BIEN_BAN_H7_H8.md`) — **câu "chưa triển khai" của bản gốc đã sai từ lâu**.
+>
+> ⚠ **Mọi con số trong §0/§D/§E là ẢNH CHỤP 25–26/07 và đã trôi**: manifest, baseline H9, headroom
+> SKILL.md, và 7/15 neo `file:dòng`. Bản đo lại + backlog còn hiệu lực nằm ngoài kho tại
+> `_docs_lam_viec\KE_HOACH_HOP_NHAT_2026-08-01.md`.
+>
+> ⚠ Các đường dẫn kiểu `scripts/nlm_log.py`, `scripts/build_parts.py`, `templates/_nguon-goc/` trong thân là
+> **PHÁT HIỆN của tài liệu** (tệp đã chết / dương tính giả), **KHÔNG phải con trỏ để đi theo** — đó là lý do
+> tệp này được xếp lưu trữ trong `_DOC_CLAIMS_HISTORICAL`.
+>
+> Phạm vi gốc: lớp điều phối phía trên skill — KHÔNG đụng `scripts/tl.py` trừ khi nêu rõ.
+> Nguồn gốc: phiên kiến trúc 2026-07-25.
 > **Nền đo:** bản này đối chiếu trên `v1.35.38` (`ccad292`). Bản đầu (`1835b46`, nhánh
 > `claude/legal-document-review-architecture-dlbrut`) đối chiếu trên `v1.35.32` (`96b56f4`) — xem §0.
 > Tài liệu nền: `references/QUY_TRINH_RA_SOAT_3_TANG.md` · `references/CHECKPOINT_TEST_PLAN.md` · ADR-0001 · ADR-0004.

@@ -49,7 +49,7 @@ references/MERGE_V1.19.2.md       ← quyết định best-of-both v1.19.2      
 references/PATCH_REPORT.sample.md ← report thật khi áp (32/32, audit 5/5, node OK)          [MỚI]
 ```
 
-> Deploy `references/Code.2.21.2i.gs`; sau deploy webapp phải là **2.21.2i**. Chạy `tl ping` + `contract_check.py --audit` để xác minh.
+> Deploy `references/Code.2.21.2p.gs`; sau deploy webapp phải là **2.21.2p**. Chạy `tl ping` + `contract_check.py --audit` để xác minh.
 
 ## 4 hướng đã làm
 1. **Hợp đồng API sống** (`references/API_CONTRACT.md`): ~70 action, GET/POST + tham số bắt buộc/
@@ -75,7 +75,7 @@ references/PATCH_REPORT.sample.md ← report thật khi áp (32/32, audit 5/5, n
 - **F5** treeHash manifest_export cùng cơ sở corpus với regen2 (đang lệch → so luôn khác).
 - **F4** appProperties về chữ thường (regen2 nhặt đúng sohieu). **F6** khai tử regen legacy. **F7** gỡ public-share mirror chứa token.
 > Phần LÕI vận hành (SKILL/CLI/reference) đóng dấu live/post-deploy 2.21.2i (bản `.gs` hiện hành = `Code.2.21.2i.gs`).
-> Các bản `.gs` tới 2.21.2h là lịch sử; bản cần deploy là `Code.2.21.2i.gs` và `ping` phải trả `2.21.2i`.
+> Các bản `.gs` tới 2.21.2o là lịch sử; bản cần deploy là `Code.2.21.2p.gs` và `ping` phải trả `2.21.2p`.
 
 ## Tạo `Code.gs` 2.21.1 hợp nhất (hướng (2) — apply_gs_patches.py)
 Thay vì dán tay 25 cụm vá, dùng script có ANCHOR NGHIÊM NGẶT (dry-run mặc định):
@@ -107,7 +107,7 @@ python scripts/apply_gs_patches.py --in /duong/dan/Code.gs --write --out Code.2.
 2. Chép đè theo cây trên vào bộ skill `tra-luat` (giữ các script/reference cũ khác nguyên vẹn —
    gói này chỉ THÊM file mới + THAY `SKILL.md` và `VERSION`).
 3. Cập nhật lại bộ skill ở nơi anh vẫn quản lý/đăng skill (cùng chỗ đã version v1.15.x).
-4. Webapp cần deploy **2.21.2h** (từ `references/Code.2.21.2h.gs`); gói đã bump contract+EXPECT lên 2.21.2h.
+4. Webapp cần deploy **2.21.2p** (từ `references/Code.2.21.2p.gs`); contract + `tl.py EXPECT_VERSION` đồng bộ 2.21.2p.
 
 ## Config (kèm trong gói) — `tra_luat_config.v2.json`
 > ⚠️ **File này CHỨA TOKEN webapp (bí mật).** KHÔNG chia sẻ/đẩy gói lên nơi công khai. Chỉ dùng cục bộ.

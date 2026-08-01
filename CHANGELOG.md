@@ -1,3 +1,39 @@
+# ★ v1.36.29 — r289: cổng CON-TRỎ-TRẦN + diệt LỆNH MA + Q2/Q3 tài liệu (2026-08-01)
+
+Land hộ tranche của phiên khác (phiên B viết; phiên này rà độc lập + land theo yêu cầu user).
+
+**Bệnh (GATE-03b).** Guard H9 `_doc_pointer_findings` chỉ bắt con trỏ **CÓ TIỀN TỐ THƯ MỤC**
+(`references/…`, `scripts/…`). Tên công cụ **TRẦN** trong backtick — `nlm_qa.py`, `split_structure.py` —
+lọt sạch. Ca thật: `nlm_log.py add` sống từ v1.29.4 đến v1.35.44 mà không cổng nào kêu.
+
+**Vá.** `_doc_bare_tool_findings()`: quét token khớp `*.py|sh|ps1|cmd|gs` **bên trong span backtick**,
+chỉ token **không chứa `/`** (dạng có tiền tố đã do `_doc_pointer_findings` gác — không đếm hai lần),
+đối chiếu **BASENAME** trong package-set nên `boot.py` ở `scripts/_fallback/` vẫn hợp lệ. Nối vào
+`_verify_release_manifest` (`DOC_BARE_TOOLS_NOT_IN_PACKAGE`) + khoá `bare_tools` trong `release_verify.v1`.
+**Ratchet 2 tầng:** fail-closed cho **3 tài liệu chỉ-dẫn-vận-hành-SỐNG**, còn lại **advisory** — bật
+fail-closed toàn bộ là **82 mục đỏ ngày đầu**, guard sẽ bị vô hiệu hoá (bài học §0.8).
+
+**Diệt lệnh ma.** `nlm_qa verify` KHÔNG tồn tại (không script, không subcommand) mà đã rò vào **4 tệp
+SỐNG** kể cả thẻ máy-đọc `rasoat_hoso.json` ⇒ bước **A5 VERIFY** của Loop A trỏ vào hư không. Thay bằng
+`tl nlm-query --source-id <sid> --strict-scope` (xác minh có thật trong `command_registry`).
+`SKILL.md` §7 bỏ **7 tên script MA**; `set-package-public.cmd` → webapp action `share`.
+
+**Q3 — `INSTALL.md`.** Ba dòng RA LỆNH deploy `Code.2.21.2i.gs`/`2.21.2h` trong khi gói **chỉ có**
+`2.21.2o`/`2.21.2p` ⇒ chỉ dẫn cài đặt SAI BẢN đang được phát hành. Sửa cả ba về **2.21.2p**.
+
+**Q2 — hai tài liệu kế hoạch** chuyển **LƯU TRỮ có chủ đích** (`_DOC_CLAIMS_HISTORICAL`), tự khai ở
+dòng đầu. Ca `r264` được **ĐẢO vế `ok5` cho khớp**, và vế mới **mạnh hơn vế cũ**: (a) nhãn phải đúng
+tài liệu ĐÃ KHAI, **và** (b) TUYỆT ĐỐI không được khai cả thư mục `docs/`/`docs/adr` — làm thế thì mọi
+ADR hết bị bắt cứng, đúng cái "trang trí" mà r264 sinh ra để chặn. Vế răng-thật vẫn ở `ok4`.
+
+**Đo:** `_doc_bare_tool_findings` trên tài liệu SỐNG **fail 8 → 0** (advisory 73, baseline 1).
+**Nghiệm thu:** selftest **1511/1511** · release-verify --strict rc=0 · workflow-audit --strict rc=0 ·
+golden-test rc=0 · determinism-audit --strict rc=0 · doc-claims-check --strict rc=0 · ruff F delta 0.
+
+⚠ **Khoảng mù CÒN LẠI, không mở trong bản này** (GATE-04/T0-F): doc-set của guard vẫn chỉ là
+`references/*.md` **không đệ quy** + `SKILL.md` = **30/53** tệp `.md` trong gói; và **không** guard nào
+với tới `references/workflows/*.json` (thẻ máy đọc, `.json` ≠ `.md`).
+
 # ★ v1.36.28 — r288: `golden-test` hết ĐI QUA raw drift KHÔNG KHAI — GATE-01 fail-CLOSED (2026-08-01)
 
 Land hộ tranche của phiên khác (mã do phiên A viết, phiên này rà + land theo yêu cầu user).

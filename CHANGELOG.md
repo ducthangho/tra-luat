@@ -1,3 +1,51 @@
+# ★ v1.36.35 — r298: diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06) (2026-08-01)
+
+W0 đặt mục tiêu "khôi phục gate ĐÁNG TIN **trước khi** dùng gate chứng nhận bản vá tiếp theo". Ba ca dưới
+đây làm đúng điều W0 sợ: chúng **xanh vô điều kiện** — không đầu vào nào khiến chúng đỏ — nên vùng lớp điều
+phối coi như KHÔNG có test. Bản này không sửa hành vi sản phẩm nào; nó sửa **năng lực đo** của bộ test.
+
+**A. `_sua_nong211` — `ok3` là hằng đúng theo TỪ VỰNG, không theo luật.** Hàm nhận
+`(phan_loai, chan_dung, moi_truong)` nhưng **không hề đọc `moi_truong`**, rồi `ok3` khẳng định *"không tồn
+tại đầu vào nào khiến máy vá tại LIVE"* bằng cách dò chuỗi con `"live"` trong kết quả. Từ vựng trả về chỉ có
+`phan_loai_la` · `va_tai_canonical` · `gom_va_sau_luot_ra` — **không chuỗi nào chứa `"live"`**, nên `ok3`
+đúng vì cấu trúc hàm chứ không vì luật đúng. Nay bất biến thật được nói rõ ("ĐÍCH vá độc lập với NƠI phát
+hiện") và `_sua_nong211_vi_pham` dựng THẾ GIỚI VI PHẠM để cùng phép đo ấy falsify được.
+
+**B. `_pha0_run211` — `nlm_query_calls` là HẰNG SỐ 0.** Trường này được trả `0` ở **cả hai** nhánh `return`,
+trong khi `ok3`/`ok4` của `r211_pha0_chan_som_truoc_khi_tieu_nlm` kiểm đúng hằng ấy. Nay ĐẾM THẬT, lấy từ
+**LỆNH mà chính tài liệu khai** ở `PHA0_GATE_v1` (`gate[k][0]`), nên còn bắt thêm được DRIFT TÀI LIỆU.
+
+ĐO A/B (bản CŨ chép nguyên văn từ `a3abc11`, chạy cùng bộ assertion):
+
+| Đầu vào | CŨ | MỚI |
+|---|---|---|
+| cổng THẬT, mọi tổ hợp | 0 call | 0 call |
+| cổng bị nhét `tl nlm-query` vào b6 | **0 call** ⇒ ca ĐỎ | **1 call** ⇒ ca XANH |
+| nhét lệnh truy vấn NHƯNG chặn đứng ở b1 | 0 call | 0 call (chưa chạm b5/b6 — đây mới là nội dung thật của lời hứa "dừng sớm khi CHƯA tiêu call nào") |
+
+Bản CŨ: **16 tổ hợp đầu vào ⇒ tập giá trị `{0}`** — hằng số, tức `ok3/ok4` xanh vô điều kiện.
+
+**C. `r210_loop_khong_ghi_trong_cay` + `r210_agent_prompt_dung_schema` — LINT TÀI LIỆU đội lốt vế CHẠY.**
+Hai ca này chỉ parse `WRITE_PATHS_v1` và dò chuỗi trong prose: KHÔNG chạy vòng nào, KHÔNG `git status`,
+KHÔNG `release-verify` — trong khi kế hoạch hứa cả ba. **Không đổi tên ca** (`references/RASOAT_HOSO_LOOP.md:211`
+trỏ tới tên `r210_loop_khong_ghi_trong_cay`; đổi tên là đứt con trỏ tài liệu), chỉ **hạ tuyên bố tại chỗ**
+cho đúng cái đang đo, và thêm vế CHẠY thật.
+
+Bằng chứng việc này không lý thuyết: vì nghiệm thu là lint tài liệu mà lỗi `rasoat-loop` cài **OR thay AND**
+(mất tới **60% GAP**, rc=0, im lặng) sống sót qua **cả Đợt 2 lẫn Đợt 3**, mãi r256 mới bị bắt.
+
+**Test:** +3 ca `r298_*` → **1547/1547**, 0 FAIL.
+- `r298_sua_nong_phep_do_falsify_duoc` — phép đo bắt thế giới vi phạm (`True`) và tha luật thật (`False`); bất biến "đích vá độc lập nơi phát hiện" giữ ở luật thật, PHÁ ở luật vi phạm (2 chiều).
+- `r298_pha0_dem_call_truy_van_that` — bảng A/B ở trên; kèm vế phân biệt canary (`notebook_get`) với lệnh truy vấn, thiếu vế này thì ca (a) vô nghĩa.
+- `r298_worklist_chay_kho_a3_a6` — **chạy khô A3→A6 trên ĐƯỜNG SẢN XUẤT**: `cmd_state_put`/`cmd_state_get` THẬT trên GAS giả **CÓ TRẠNG THÁI** (upload ghi thật, trash xoá thật). Khoá bất biến *state cập nhật sau MỖI đơn vị*: 3 ảnh chụp phải là `done,pending,pending` → `done,done,pending` → `done,done,done`, 4 upload (1 tạo mới + 3 lượt), 3 trash, còn đúng 1 bản. ★ PHẢN CHỨNG: biến thể **gom ghi một phát cuối lượt** cho 3 ảnh chụp `pending` y hệt nhau ⇒ phép đo phân biệt được.
+
+Ruff DELTA: hạng mục **0** (E702/E401/E701/E731/E741/F401 y nguyên); F821 **+5** toàn bộ rơi vào tên đã có
+nền — `_TL_MODULE` 2119→2121 · `argparse` 188→190 · `Path` 267→268; **không tên nào mới xuất hiện từ 0**.
+
+★ ĐỔI SỐ hai lần khi land: bản này ra đời mang `r296/v1.36.33`, nhưng phiên P16 land `r296` (F15) rồi
+`r297` (F10) trước ⇒ dời sang **r298/v1.36.35**. Ba ca test và mọi chú thích đã đổi theo; khối `r296_*`
+và `r297` của P16 giữ nguyên (hai vùng dòng rời nhau, không giẫm).
+
 # ★ v1.36.34 — r297: `--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10 (2026-08-01)
 
 **Bật `--as-appendix` KHÔNG phải chuyện nhãn.** `normalize_document` khi đó đặt `body=""`, `khoi_dau=""`

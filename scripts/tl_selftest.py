@@ -21068,8 +21068,15 @@ def run() -> int:
         return rows, bad
 
     def _c210_loop_khong_ghi_trong_cay():
-        # H3: MỌI đường ghi lúc chạy phải NGOÀI cây skill (state biến động lọt cây ⇒ package_hash lệch,
-        # release-verify/golden ĐỎ — r193/r202 đã trả giá). PHẢN CHỨNG 2 CHIỀU ở cuối.
+        # H3: tài liệu PHẢI KHAI đường ghi, và MỌI đường đã khai phải NGOÀI cây skill (state biến động
+        # lọt cây ⇒ package_hash lệch, release-verify/golden ĐỎ — r193/r202 đã trả giá).
+        # ★ PHẠM VI THẬT (hạ tuyên bố ở r298 — GATE-06/T0-E): ca này là LINT KHAI BÁO trên khối
+        #   `WRITE_PATHS_v1`. Nó KHÔNG chạy vòng nào, KHÔNG `git status`, KHÔNG `release-verify`, nên
+        #   KHÔNG chứng minh được lúc chạy máy có ghi đúng chỗ đã khai hay không. Trước r298 dòng này
+        #   tự nhận là vế CHẠY — và chính lối nghiệm-thu-bằng-lint ấy để lọt lỗi `rasoat-loop` cài OR
+        #   thay AND (mất tới 60% GAP, rc=0, im lặng) suốt cả Đợt 2 lẫn Đợt 3, mãi r256 mới bắt được.
+        #   Vế CHẠY nay do `r298_worklist_chay_kho_a3_a6` gánh.
+        # PHẢN CHỨNG 2 CHIỀU ở cuối.
         rows, bad = _write_paths210(_LOOP210)
         ok1 = rows is not None and len(rows) >= 3 and not bad
         ok2 = any(r.startswith("_meta/") for r in (rows or [])) and any("<out-dir>" in r for r in (rows or []))
@@ -21100,6 +21107,9 @@ def run() -> int:
     def _c210_agent_prompt_dung_schema():
         # H4: prompt agent phải trả ĐÚNG bộ trường của mẫu master (drift = phiên chính ghi hụt dữ liệu),
         # và phải khai ranh giới read-only + cấm nguyên-văn-từ-RAG.
+        # ★ PHẠM VI THẬT (hạ tuyên bố ở r298 — GATE-06/T0-E): so BỘ TRƯỜNG giữa mẫu JSON và prose, tức
+        #   LINT TÀI LIỆU. Không dựng agent, không chạy prompt ⇒ không chứng minh agent thật trả đúng
+        #   schema. Đây là guard chống DRIFT giữa hai tài liệu, đừng đọc thành bảo chứng hành vi.
         tp = _ROOT210 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
         nd = _j209.loads(tp.read_text(encoding="utf-8"))["noi_dung"][0]
         ok1 = all(('"' + k + '"') in _LOOP210 for k in nd if not k.startswith("_"))
@@ -21251,10 +21261,35 @@ def run() -> int:
     def _sua_nong211(phan_loai, chan_dung, moi_truong):
         """PURE: luật sửa nóng — CHỈ chặn đứng toàn cục mới được bỏ vòng rà đi vá, và vá ở CANONICAL
         theo quy trình (test rXX_ + deploy tay). Không có nhánh nào vá tại LIVE: deploy là bước tay
-        nên vá tại chỗ sẽ bị đè ở lần deploy sau, và mọi kết luận sau đó hết tái lập."""
+        nên vá tại chỗ sẽ bị đè ở lần deploy sau, và mọi kết luận sau đó hết tái lập.
+
+        r298 (GATE-06 — T0-E): bất biến THẬT của luật là "ĐÍCH vá độc lập với NƠI phát hiện lỗi", nên
+        `moi_truong` cố ý KHÔNG đổi kết quả. Trước r298 điều đó không được KIỂM: `ok3` dưới đây khẳng
+        định "không đầu vào nào khiến máy vá tại LIVE" nhưng nó đúng vì TỪ VỰNG trả về (`phan_loai_la` ·
+        `va_tai_canonical` · `gom_va_sau_luot_ra`) không chứa chuỗi con `"live"` — hằng đúng theo cấu
+        trúc hàm, KHÔNG phải theo luật. Chứng nhận rỗng đúng vùng lớp điều phối mà W0 sợ nhất.
+        Nay `_sua_nong211_vi_pham` dựng THẾ GIỚI VI PHẠM để cùng phép đo ấy falsify được."""
         if phan_loai not in ("workaround", "blocker"):
             return "phan_loai_la"
-        return "va_tai_canonical" if chan_dung else "gom_va_sau_luot_ra"
+        if not chan_dung:
+            return "gom_va_sau_luot_ra"
+        return "va_tai_canonical"           # kể cả khi moi_truong == "live" — đó LÀ bất biến
+
+    def _sua_nong211_vi_pham(phan_loai, chan_dung, moi_truong):
+        """Thế giới VI PHẠM, chỉ để PHẢN CHỨNG: vá ngay tại NƠI phát hiện. Nếu phép đo của `ok3` có nội
+        dung thì nó PHẢI bắt được hàm này; nếu không bắt được thì phép đo ấy vô nghĩa với cả luật thật."""
+        if phan_loai not in ("workaround", "blocker"):
+            return "phan_loai_la"
+        if not chan_dung:
+            return "gom_va_sau_luot_ra"
+        return "va_tai_live" if moi_truong == "live" else "va_tai_canonical"
+
+    def _co_va_tai_live211(fn):
+        """PURE: tồn tại đầu vào nào khiến `fn` vá tại LIVE không? Dùng CHUNG cho luật thật và luật vi
+        phạm — một phép đo chỉ có nội dung khi đã soi được HAI thế giới và trả kết quả KHÁC nhau."""
+        return any("live" in fn(pl, cd, mt)
+                   for pl in ("workaround", "blocker", "linh_tinh")
+                   for cd in (True, False) for mt in ("live", "canonical"))
 
     def _c211_sua_nong_chi_khi_chan_dung():
         # H5: "sửa nóng CHỈ khi chặn đứng; còn lại gom vá sau lượt rà" — và LIVE không bao giờ là nơi vá.
@@ -21262,9 +21297,9 @@ def run() -> int:
                   for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
         ok2 = all(_sua_nong211(pl, True, mt) == "va_tai_canonical"
                   for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
-        # PHẢN CHỨNG: không tồn tại đầu vào nào khiến máy vá tại LIVE
-        ok3 = not [1 for pl in ("workaround", "blocker", "linh_tinh") for cd in (True, False)
-                   for mt in ("live", "canonical") if "live" in _sua_nong211(pl, cd, mt)]
+        # PHẢN CHỨNG: không tồn tại đầu vào nào khiến máy vá tại LIVE (nội dung của phép đo này do
+        # `r298_sua_nong_phep_do_falsify_duoc` bảo chứng — xem ghi chú ở đó)
+        ok3 = not _co_va_tai_live211(_sua_nong211)
         ok4 = _sua_nong211("nghiem_trong", True, "live") == "phan_loai_la"  # hạng lạ ⇒ không tự suy diễn
         blk, _e = _block211(_QT211, "BUG_LEDGER_v1")
         ok5 = blk is not None and blk.get("sua_nong") \
@@ -21274,28 +21309,61 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r211_sua_nong_chi_khi_chan_dung", _c211_sua_nong_chi_khi_chan_dung)
 
+    def _c298_sua_nong_phep_do_falsify_duoc():
+        """r298 (GATE-06 — T0-E): chứng minh phép đo của `ok3` (r211) PHÂN BIỆT ĐƯỢC, tức nó không
+        xanh vô điều kiện. ĐỎ TRƯỚC: trên cây trước r298 ca này không chạy nổi — suite chưa hề dựng
+        thế giới vi phạm nào để soi, và đó CHÍNH LÀ bệnh: `ok3` chưa bao giờ được chứng minh là có
+        thể sai. Ai gỡ `_sua_nong211_vi_pham` hoặc làm nó hết vi phạm thì ca này ĐỎ ngay."""
+        ok1 = _co_va_tai_live211(_sua_nong211_vi_pham) is True    # phép đo BẮT được thế giới vi phạm
+        ok2 = _co_va_tai_live211(_sua_nong211) is False           # …và luật THẬT thì sạch
+        # bất biến "ĐÍCH vá độc lập với NƠI phát hiện": luật thật GIỮ, luật vi phạm PHÁ (2 chiều)
+        ok3 = all(_sua_nong211(pl, cd, "live") == _sua_nong211(pl, cd, "canonical")
+                  for pl in ("workaround", "blocker", "linh_tinh") for cd in (True, False))
+        ok4 = any(_sua_nong211_vi_pham(pl, cd, "live") != _sua_nong211_vi_pham(pl, cd, "canonical")
+                  for pl in ("workaround", "blocker") for cd in (True, False))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r298_sua_nong_phep_do_falsify_duoc", _c298_sua_nong_phep_do_falsify_duoc)
+
+    # r298 (GATE-06 — T0-E): `nlm_query_calls` từng là HẰNG SỐ 0 ở CẢ HAI nhánh return, trong khi
+    # `ok3`/`ok4` của `r211_pha0_chan_som_truoc_khi_tieu_nlm` kiểm chính hằng đó ⇒ tự chứng minh.
+    # Nay ĐẾM THẬT, và đếm theo LỆNH mà chính tài liệu khai ở `PHA0_GATE_v1` (`gate[k][0]`), nên test
+    # còn bắt được cả DRIFT TÀI LIỆU: ai nhét một lệnh truy vấn vào cổng là đỏ.
+    _NLM_TRUY_VAN298 = ("nlm-query", "nlm_query", "notebook-query", "notebook_query", "nlm-ask")
+
+    def _la_call_truy_van298(lenh):
+        """PURE: lệnh này có TIÊU một call TRUY VẤN NLM không? Canary `nlm-auth-status <nb>` dùng
+        `notebook_get` — theo đúng dòng `ngan_sach_truoc_cong` của tài liệu, KHÔNG trừ ngân sách 60."""
+        return any(t in str(lenh or "").lower() for t in _NLM_TRUY_VAN298)
+
     def _pha0_run211(gate, hong, can_nlm=True):
         """PURE: chạy cổng PHA 0 theo ĐÚNG thứ tự đã khai (b1–b4 trước; b5–b6 CHỈ khi lượt cần NLM).
         Trả: đã chạy bước nào · có dừng sớm không · chế độ NLM · làn ghi · số call TRUY VẤN NLM đã tiêu
-        (cổng không bao giờ được tiêu call truy vấn nào — canary là notebook_get, ngoài ngân sách 60)."""
+        (cổng không bao giờ được tiêu call truy vấn nào — canary là notebook_get, ngoài ngân sách 60).
+
+        r298 (GATE-06 — T0-E): `nlm_query_calls` ĐẾM THẬT, lấy từ LỆNH mà chính tài liệu khai
+        (`gate[k][0]`) — bước nào CHẠY thì lệnh của bước đó đã tiêu. Trước r298 trường này là HẰNG SỐ 0
+        ở CẢ HAI nhánh `return`, mà `ok3`/`ok4` lại kiểm đúng hằng ấy ⇒ chứng nhận rỗng. Đếm theo lệnh
+        khai còn được thêm một tầng: nhét lệnh truy vấn vào cổng là test ĐỎ (bắt drift TÀI LIỆU)."""
         truoc = [k for k in gate if k[:2] in ("b1", "b2", "b3", "b4")]
         sau = [k for k in gate if k[:2] in ("b5", "b6")]
-        da_chay, so, lan_ghi, che_do = [], [], "mo", "nlm"
+        da_chay, so, lan_ghi, che_do, calls = [], [], "mo", "nlm", 0
         for k in truoc + (sau if can_nlm else []):
             da_chay.append(k[:2])
+            if _la_call_truy_van298((gate[k] or [""])[0]):
+                calls += 1                      # bước đã CHẠY ⇒ lệnh của nó đã tiêu
             if k[:2] not in hong:
                 continue
             verdict = (gate[k] or [""])[-1]
             if verdict == "chan_dung":
                 return {"da_chay": da_chay, "dung_som": True, "bao_1_dong": True, "che_do": che_do,
-                        "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so + [k[:2]]}
+                        "lan_ghi": lan_ghi, "nlm_query_calls": calls, "so": so + [k[:2]]}
             so.append(k[:2])
             if verdict == "chan_lan_ghi":
                 lan_ghi = "dung"
             elif verdict == "co_fallback":
                 che_do = "khong_nlm"
         return {"da_chay": da_chay, "dung_som": False, "bao_1_dong": False, "che_do": che_do,
-                "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so}
+                "lan_ghi": lan_ghi, "nlm_query_calls": calls, "so": so}
 
     def _c211_pha0_chan_som_truoc_khi_tieu_nlm():
         # H6: PHA 0 mở rộng — doctor/precheck/profile + canary probe LIVE. Hỏng chặn đứng ⇒ DỪNG SỚM khi
@@ -21330,6 +21398,35 @@ def run() -> int:
         ok9 = (gate.get("ngan_sach_truoc_cong") or [""])[0].startswith("0 call truy van NLM")
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9
     _t110("r211_pha0_chan_som_truoc_khi_tieu_nlm", _c211_pha0_chan_som_truoc_khi_tieu_nlm)
+
+    def _c298_pha0_dem_call_truy_van_that():
+        """r298 (GATE-06 — T0-E): `nlm_query_calls` phải ĐẾM THẬT chứ không phải hằng 0.
+        ĐỎ TRƯỚC (đo được): trên bản cũ, `ok4` dưới đây ra 0 thay vì 1 — cổng bị nhét lệnh TRUY VẤN
+        mà máy vẫn báo "0 call", và `r211_pha0_*` vẫn xanh. Đó đúng là chứng nhận rỗng."""
+        gate, _e = _block211(_QT211, "PHA0_GATE_v1")
+        if gate is None:
+            return False
+        _k6 = [k for k in gate if k[:2] == "b6"]
+        if len(_k6) != 1:
+            return False
+        # (a) cổng THẬT: không bước nào là lệnh truy vấn ⇒ 0 call ở MỌI tổ hợp
+        ok1 = _pha0_run211(gate, set())["nlm_query_calls"] == 0
+        ok2 = _pha0_run211(gate, {"b6"})["nlm_query_calls"] == 0
+        ok3 = _pha0_run211(gate, set(), can_nlm=False)["nlm_query_calls"] == 0
+        # (b) PHẢN CHỨNG: nhét lệnh TRUY VẤN vào b6 ⇒ phép đo PHẢI thấy (bản cũ ra 0 ⇒ ĐỎ)
+        _gia_q = dict(gate)
+        _gia_q[_k6[0]] = ["tl nlm-query --json"] + list(gate[_k6[0]][1:])
+        ok4 = _pha0_run211(_gia_q, set())["nlm_query_calls"] == 1
+        # (c) chặn đứng ở b1 ⇒ chưa chạm b5/b6 nên VẪN 0, dù b6 là lệnh truy vấn — đây mới là nội dung
+        #     thật của lời hứa "dừng sớm khi CHƯA tiêu call truy vấn nào"
+        ok5 = _pha0_run211(_gia_q, {"b1"})["nlm_query_calls"] == 0
+        # (d) lượt KHÔNG cần NLM ⇒ không probe ⇒ 0
+        ok6 = _pha0_run211(_gia_q, set(), can_nlm=False)["nlm_query_calls"] == 0
+        # (e) phép đo phân biệt được canary (notebook_get) với lệnh truy vấn — nếu không, (a) vô nghĩa
+        ok7 = (not _la_call_truy_van298("tl nlm-auth-status <notebook_id> --json")) \
+            and _la_call_truy_van298("tl nlm-query --json")
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r298_pha0_dem_call_truy_van_that", _c298_pha0_dem_call_truy_van_that)
 
     def _c211_kickoff_du_muc_va_hang_so():
         # H6: hợp đồng giao việc ĐỦ 8 mục, mục nào không có mặc định thì phải hỏi, và bộ hằng số
@@ -24660,6 +24757,132 @@ def run() -> int:
     _rc293g, _o293g, _up293g = _put293([], {}, _ST293, expect=None)
     cases.append(("r295_state_put_tao_moi_van_duoc_mien_expect_claim",
                   _rc293g == 0 and _o293g.get("ok") is True and _up293g is True))
+
+    # ═══ r298 (GATE-06 — T0-E): CHẠY KHÔ worklist A3→A6 trên ĐƯỜNG SẢN XUẤT ═══
+    # Hai ca `r210_loop_khong_ghi_trong_cay` / `r210_agent_prompt_dung_schema` là LINT TÀI LIỆU (đã hạ
+    # tuyên bố tại chỗ). Ca này gánh vế CHẠY: `cmd_state_put` + `cmd_state_get` THẬT trên GAS giả CÓ
+    # TRẠNG THÁI (upload ghi thật, trash xoá thật), khoá đúng bất biến kịch bản hứa ở A3→A6 —
+    # **state cập nhật sau MỖI đơn vị**, không gom một phát cuối lượt (phiên chết giữa chừng ⇒ mất dấu).
+    class _FakeG298:
+        """GAS giả CÓ TRẠNG THÁI — khác `_FakeG293` (vô trạng thái) ở chỗ đọc-sau-ghi thấy bản vừa ghi,
+        nhờ vậy vòng A3→A6 mới chạy khô được đầu-cuối thay vì mô phỏng."""
+
+        def __init__(self):
+            self.files, self.docs, self.n, self.up, self.trash = [], {}, 0, 0, 0
+
+        def get(self, action, **kw):
+            if action == "list":
+                return {"items": list(self.files)}
+            if action == "info":
+                return {"file": {"modifiedTime": next((f.get("mt", "") for f in self.files
+                                                       if f["id"] == kw.get("fileId")), "")}}
+            if action == "download":
+                import base64 as _b298
+                return {"b64": _b298.b64encode(json.dumps(self.docs[kw.get("fileId")],
+                                                          ensure_ascii=False).encode()).decode()}
+            if action == "trash":
+                _oid = kw.get("fileId")
+                self.trash += 1
+                self.files = [f for f in self.files if f["id"] != _oid]
+                self.docs.pop(_oid, None)
+                return {"ok": True}
+            return {"ok": True}
+
+        def post(self, action, **kw):
+            if action == "upload":
+                import base64 as _b298
+                self.n += 1
+                self.up += 1
+                _fid = "u%d" % self.n
+                self.files.append({"id": _fid, "name": kw.get("name"), "type": "file",
+                                   "mt": "2026-08-01T10:%02d:00Z" % self.n})
+                self.docs[_fid] = json.loads(_b298.b64decode(kw.get("b64")).decode("utf-8"))
+                return {"fileId": _fid, "ok": True}
+            return {"ok": True}
+
+    def _phien298(g, fn):
+        """Chạy `fn()` với GAS giả `g` đã gắn vào đường sản xuất (khuôn `_put293`)."""
+        import tempfile as _tf298
+        _sav, _env_cu = {}, _hos.environ.get("TL_META_FOLDER_ID")
+        try:
+            _mp261(_sav, "load_creds", lambda *_a, **_k: None)
+            _mp261(_sav, "_gas", lambda: g)
+            _mp261(_sav, "_apply_journal_start", lambda *_a, **_k: "rid298")
+            _mp261(_sav, "_journal_append", lambda *_a, **_k: None)
+            _mp261(_sav, "apply_profile_offline", lambda *_a, **_k: None)
+            _hos.environ["TL_META_FOLDER_ID"] = "F_META"
+            return fn(_tf298.mkdtemp())
+        finally:
+            _mpr261(_sav)
+            if _env_cu is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = _env_cu
+
+    def _ghi298(tmp, body, expect=None):
+        _p = Path(tmp) / ("s%d.json" % abs(hash(json.dumps(body, sort_keys=True))))
+        _p.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+        _b = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b):
+            _rc = _TL_MODULE.cmd_state_put(argparse.Namespace(
+                config=None, profile="P", name="rasoat_state.json", in_file=str(_p),
+                dry_run=False, folder_id="", json=True, expect_claim=expect, deterministic=True))
+        return _rc
+
+    def _doc298():
+        _b = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b):
+            _rc = _TL_MODULE.cmd_state_get(argparse.Namespace(
+                config=None, profile="P", name="rasoat_state.json", folder_id="",
+                json=True, deterministic=True))
+        _t = _b.getvalue()
+        return _rc, (json.loads(_t[_t.find("{"):]) if "{" in _t else {})
+
+    def _worklist298(gom_cuoi_luot=False):
+        """A3→A6 cho 3 đơn vị. `gom_cuoi_luot=True` dựng thế giới VI PHẠM (chỉ ghi một phát ở cuối)
+        để chứng minh phép đo dưới đây PHÂN BIỆT ĐƯỢC — không có nó thì lời hứa 'sau MỖI đơn vị'
+        lại là một chứng nhận rỗng nữa."""
+        g = _FakeG298()
+        anh_chup = []
+
+        def _than(tmp):
+            _plan = {"schema": "rasoat_plan.v1", "session_claim": {"id": "S298"},
+                     "q_units": [{"unit_id": "U%d" % i, "loai": "ra_soat", "trang_thai": "pending"}
+                                 for i in range(3)]}
+            _ghi298(tmp, _plan, expect=None)          # A2: tạo mới ⇒ được miễn expect-claim
+            for i in range(3):                        # A3→A6: mỗi vòng = MỘT đơn vị
+                _rc_g, _out = _doc298()
+                _st = (_out or {}).get("state") or {}
+                _st["q_units"][i]["trang_thai"] = "done"
+                if not gom_cuoi_luot:
+                    _ghi298(tmp, _st, expect="S298")
+                anh_chup.append([u["trang_thai"] for u in (_doc298()[1].get("state") or {})
+                                 .get("q_units", [])])
+                if gom_cuoi_luot:
+                    _plan = _st
+            if gom_cuoi_luot:
+                _ghi298(tmp, _plan, expect="S298")
+            return anh_chup
+        return _phien298(g, _than), g
+
+    def _c298_worklist_chay_kho_a3_a6():
+        _chup, _g = _worklist298()
+        # (a) sau MỖI đơn vị, state TRÊN DRIVE đã tiến đúng một nấc — đọc lại bằng `cmd_state_get` thật
+        ok1 = _chup == [["done", "pending", "pending"],
+                        ["done", "done", "pending"],
+                        ["done", "done", "done"]]
+        ok2 = _g.up == 4                      # 1 tạo mới + 3 lần ghi sau mỗi đơn vị
+        ok3 = len(_g.files) == 1              # dọn bản cũ ⇒ không đẻ bản trùng tên
+        ok4 = _g.trash == 3
+        # (b) ★ PHẢN CHỨNG: gom ghi một phát cuối lượt ⇒ phép đo PHẢI thấy khác. Không có vế này thì
+        #     ok1 lại là "xanh vô điều kiện" đúng bệnh GATE-06 mà T0-E sinh ra để diệt.
+        _chup_xau, _g_xau = _worklist298(gom_cuoi_luot=True)
+        ok5 = _chup_xau == [["pending", "pending", "pending"],
+                            ["pending", "pending", "pending"],
+                            ["pending", "pending", "pending"]]
+        ok6 = _chup != _chup_xau and _g_xau.up == 2
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r298_worklist_chay_kho_a3_a6", _c298_worklist_chay_kho_a3_a6)
 
     # ═══ r257 (v1.35.95) — P15: corpus-relation-sweep dùng vị từ THÔ ở cổng vbhn_broken ═══
     # `str(ent.get("corpus")) != "true"` = site DUY NHẤT trong repo so cột corpus KHÔNG chuẩn hoá (28 site khác

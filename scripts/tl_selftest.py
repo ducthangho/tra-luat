@@ -27410,6 +27410,79 @@ def run() -> int:
 
     _t110("r317_khong_an_lem_chu_that", _c317_khong_an_lem_chu_that)
 
+    # ---- r318: hai bộ lọc rác Công báo sai trên CHÍNH bản Công báo (đo 02-08) ---------------
+    _R318_KY4 = ("Người ký: CỔNG THÔNG TIN ĐIỆN TỬ CHÍNH PHỦ\nEmail: thongtinchinhphu@chinhphu.vn\n"
+                 "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\nThời gian ký: 22.08.2025 15:10:29 +07:00\n")
+    _R318_KY3 = ("Ký bởi: CÔNG BÁO NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                 "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\nNgày ký: 2026-03-05 13:25:42 +07:00\n")
+    _R318_THAN = ("\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n\n"
+                  "LUẬT\nĐiều 1. Phạm vi điều chỉnh\nNội dung.\n")
+
+    def _c318_chu_ky_so_bat_ca_hai_bien_the():
+        """CHIỀU THUẬN — khối chữ ký số Công báo có ÍT NHẤT HAI biến thể; bản cũ chỉ bắt bộ 4.
+
+        Đo 02-08: 54-2025 (CB 1083+1084) dùng «Người ký/Email/Cơ quan/Thời gian ký» → bắt 4/4;
+        19-2026 (CB 133) dùng «Ký bởi/Cơ quan/Ngày ký» → `chu_ky_so=0`, CẢ BA dòng chui vào
+        KHỐI ĐẦU — mà khối đầu là nguồn DUY NHẤT chứng minh danh tính (r215)."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318")
+        r4 = _m.loc_rac_congbao(_R318_KY4 + _R318_THAN)
+        r3 = _m.loc_rac_congbao(_R318_KY3 + _R318_THAN)
+        ok1 = r4["counts"]["chu_ky_so"] == 4 and "Người ký:" not in r4["text"]
+        ok2 = r3["counts"]["chu_ky_so"] == 3 and "Ký bởi:" not in r3["text"]   # ← ĐỎ trước r318
+        # ★khối đầu phải bắt đầu ĐÚNG ở quốc hiệu sau khi lọc — đó mới là điều người dùng thấy
+        ok3 = all(x["text"].lstrip().startswith("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM") for x in (r3, r4))
+        # thân văn bản KHÔNG được suy suyển
+        ok4 = all("Điều 1. Phạm vi điều chỉnh" in x["text"] for x in (r3, r4))
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r318_chu_ky_so_bat_ca_hai_bien_the", _c318_chu_ky_so_bat_ca_hai_bien_the)
+
+    def _c318_khong_nuot_than_van_ban():
+        """CHIỀU NGƯỢC — nới nhận dạng khối chữ ký KHÔNG được ăn vào chữ THẬT.
+
+        Dãy nhãn phải có `nguoi_ky` mới tính là khối chữ ký; thiếu nó thì hai-ba dòng thân bài
+        vô tình mở đầu bằng «Cơ quan:»/«Ngày ký:» đủ để nuốt mất quy phạm."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318b")
+        # (1) dãy 3 dòng nhãn NHƯNG KHÔNG có người ký ⇒ KHÔNG bỏ
+        _gia = ("Cơ quan: Bộ Tài chính\nNgày ký: 01/01/2026\nEmail: abc@btc.gov.vn\n") + _R318_THAN
+        r = _m.loc_rac_congbao(_gia)
+        ok1 = r["counts"]["chu_ky_so"] == 0 and "Cơ quan: Bộ Tài chính" in r["text"]
+        # (2) chỉ 2 dòng nhãn (có cả người ký) vẫn DƯỚI ngưỡng 3 ⇒ KHÔNG bỏ
+        r2 = _m.loc_rac_congbao("Người ký: X\nCơ quan: Y\n" + _R318_THAN)
+        ok2 = r2["counts"]["chu_ky_so"] == 0
+        # (3) phản chứng NỘI TẠI của r217 vẫn đứng: giữ + bỏ = vào, và text ra = join(giữ)
+        ok3 = r["dong_vao"] == r["dong_ra"] + len(r["bo"])
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r318_khong_nuot_than_van_ban", _c318_khong_nuot_than_van_ban)
+
+    def _c318_dau_muc_dung_ca_hai_chieu():
+        """CẢ HAI CHIỀU trên CÙNG một tệp — `CB_DAU_MUC` cũ vừa bỏ sót vừa bắt nhầm.
+
+        Đo trên 54-2025: nhãn THẬT «VĂN BẢN PHÁP LUẬT KHÁC» (dòng 10) KHÔNG khớp mẫu cũ, còn
+        dòng thứ ba của tiêu đề «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / VĂN BẢN QUY PHẠM
+        PHÁP LUẬT» (dòng 1578) thì BỊ khớp."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318c")
+        # (1) ÂM TÍNH GIẢ cũ: nhãn mục thật phải được KHAI BÁO
+        r1 = _m.loc_rac_congbao("VĂN BẢN PHÁP LUẬT KHÁC\n" + _R318_THAN)
+        ok1 = any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r1["canh_bao"])
+        # (2) DƯƠNG TÍNH GIẢ cũ: dòng nối của tiêu đề Chương KHÔNG được báo
+        r2 = _m.loc_rac_congbao(_R318_THAN + "\nChương VI\nHIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG\n"
+                                             "VĂN BẢN QUY PHẠM PHÁP LUẬT\n\nĐiều 53. Thời điểm.\n")
+        ok2 = not any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r2["canh_bao"])
+        # (3) họ cũ vẫn phải bắt khi nó đứng MỘT MÌNH (không nới thành bỏ sót ngược lại)
+        r3 = _m.loc_rac_congbao("VĂN BẢN QUY PHẠM PHÁP LUẬT\n" + _R318_THAN)
+        ok3 = any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r3["canh_bao"])
+        # (4) ★LỜI KHUYÊN: câu cũ («cắt tay tới dòng mang số hiệu») NGUY HIỂM HƠN thứ nó cảnh báo —
+        #     VBHN đặt «Số: …» ở KHỐI KÝ CUỐI, làm theo đúng chữ là xoá sạch Chương I→N.
+        _c = [c for c in r1["canh_bao"] if c.startswith("DAU_MUC_CONG_BAO_CON_LAI")][0]
+        ok4 = ("bỏ ĐÚNG" in _c) and ("ĐỪNG cắt" in _c) and ("KHỐI KÝ CUỐI" in _c)
+        # (5) KHAI BÁO chứ KHÔNG tự bỏ (giữ nguyên quyết định r217: bytes corpus đã nạp không đổi)
+        ok5 = "VĂN BẢN PHÁP LUẬT KHÁC" in r1["text"]
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+
+    _t110("r318_dau_muc_dung_ca_hai_chieu", _c318_dau_muc_dung_ca_hai_chieu)
+
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó

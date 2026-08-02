@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.49",
+  "skill_version": "1.36.50",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7562210,
-  "package_hash": "983593231cfe7b297325ae1358704889928aa3109e153790f4a51820843a22d9",
-  "content_hash": "983593231cfe7b297325ae1358704889928aa3109e153790f4a51820843a22d9",
+  "total_bytes": 7576726,
+  "package_hash": "f654648ba85e61debbb0743191060b6b4828138185142e423101c97fc310337a",
+  "content_hash": "f654648ba85e61debbb0743191060b6b4828138185142e423101c97fc310337a",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 551591,
-      "sha256": "8cf731edd6fbdfcce1d9effd6d6dab8e5379f3dd7feb6f9ad8a9ce9f298a72f8"
+      "size": 556866,
+      "sha256": "fc9dcdca81232f5faa4621890627332b2aa17047afe203be09ae70cba9bc13ef"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "7c5e4a4a735ad78174a614d54d91d22bb473807b262888bf852df88038ec6620"
+      "sha256": "cc69d0fed581002f9becb7a2e304c25a9cc9f0c8e459d09c835cecb891e7aa24"
     },
     {
       "path": "VERSION",
-      "size": 8,
-      "sha256": "168e9e6c4fb72dcef0c676cdef6321cad1282f89aa85dfebfd45e55c44602013"
+      "size": 7,
+      "sha256": "9be3d309aebe5f5229fdf54947529d996d151d406f22cad40ffbdb5bc0f9a4c8"
     },
     {
       "path": "agents/openai.yaml",
@@ -679,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 230429,
-      "sha256": "7cd465a89779b1796b1c9f4d1e42bca2a4a5af557fca32b99f34cb958aeb1d29"
+      "sha256": "b9249e0aa8a3e47e8ff14dd69fce17cde0bdfd316efc262f619557131dd2dd4a"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -848,8 +848,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1996513,
-      "sha256": "2ef4e04e8ab588aaabefb83dfa7d745b3aad7a6ee09b2e5cd1bf8b33b26fa548"
+      "size": 2002144,
+      "sha256": "788e805dd20225f83322a1d95ab94ca51add1daa32924b732ca42dff26ab2a4e"
     },
     {
       "path": "scripts/tra_cuu.py",
@@ -873,8 +873,8 @@
     },
     {
       "path": "scripts/verify_deep.py",
-      "size": 24740,
-      "sha256": "c5f25f2cec3365ef0985486712b90f46991a1b4fc058cd259d3b25236053770b"
+      "size": 28351,
+      "sha256": "c051d67248bddb294071ebb69bebe8cd780839983727ddb4729280776843bb3f"
     },
     {
       "path": "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",

@@ -14,7 +14,7 @@ Phạm vi: 2 mục của lượt bảo trì kho. **KHÔNG** gỡ quarantine 41/2
 | 2a. `19-2026-VBHN-VPQH` — bản còn markup sửa đổi | ✅ **Có nguồn thay thế đo đạt** | Công báo 133 (.docx) · 141/141 Điều · 0 số rác · markup={strike:2} = 2 DẤU CÁCH (ngoại lệ có bằng chứng, người dùng đã chốt) |
 | 2b. `54-2025-VBHN-VPQH` — khối đầu là chrome trang web | ✅ **Có nguồn thay thế đo đạt** | Công báo 1083+1084 (.pdf text) · 72 Điều · khối đầu sạch sau khi cắt 1 dòng nhãn mục |
 | 2c. `89-2026-VBHN-VPQH` — khối đầu thiếu VPQH + «Số:» | ✅ **Có nguồn thay thế đo đạt** | Công báo 222 (.docx) · 79 Điều · `verify_flags` RỖNG · VPQH+«Số:» nằm ở KHỐI KÝ CUỐI (đúng bố cục VBHN) |
-| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1/§4.3 (r314+r315, v1.36.48) và §4.2/§4.6 (r316+r317, v1.36.49) ĐÃ VÁ trong chính nhánh này**; còn §4.4, §4.5 |
+| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **CẢ SÁU ĐÃ VÁ trong chính nhánh này**: §4.1/§4.3 → r314+r315 (v1.36.48) · §4.2/§4.6-phần-RÒ → r316+r317 (v1.36.49) · §4.4/§4.5 → r318 (v1.36.50). Còn duy nhất §4.6 phần KHẾ ƯỚC (`requirements.txt`) |
 
 **Không có thao tác GHI DỮ LIỆU nào trong lượt này** — không ghi registry, không ghi Drive, không
 đụng NLM. (Có sửa MÃ: r314+r315 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
@@ -363,11 +363,23 @@ Mẫu `^\s*(?:VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHẦN\s+…)\s*$` (`
 *(Chú ý khi đọc cờ: chỉ số dòng trong cảnh báo tính trên văn bản **TRƯỚC** lọc, không phải sau —
 `con_dau_muc` liệt kê trên `lines` gốc.)*
 
+> ✅ **ĐÃ VÁ — r318 (v1.36.50), cùng nhánh này.** Mẫu nhận thêm `VĂN BẢN PHÁP LUẬT KHÁC` (+ tiền tố
+> `PHẦN` tuỳ chọn); loại trừ dương-tính-giả bằng phép nhìn lui ≤2 dòng không-trống (gặp
+> `Chương|Phần|Mục <số>` đứng một mình ⇒ là tiêu đề bị xuống dòng, không báo); lời khuyên viết lại,
+> chỉ đúng dòng cần bỏ + cảnh báo TƯỜNG MINH đừng cắt theo neo `Số:`.
+> Nghiệm thu 54-2025: cảnh báo chuyển từ dòng **1578** (tiêu đề Chương) sang dòng **10** (nhãn THẬT).
+> ★GIỮ quyết định gốc r217: chỉ KHAI BÁO, KHÔNG tự bỏ — bytes corpus đã nạp không đổi.
+
 ### 4.5 Khối chữ ký số Công báo có biến thể **3 dòng**, `CB_CHU_KY_SO` chỉ khớp mẫu 4 dòng
 
 PDF `19-2026` mở đầu bằng `Ký bởi:` / `Cơ quan:` / `Ngày ký:` (3 dòng) — `--loc-congbao` báo
 `chu_ky_so=0`, ba dòng chrome này **lọt vào khối đầu**. PDF `54-2025` dùng mẫu 4 dòng
 (`Người ký:` / `Email:` / `Cơ quan:` / `Thời gian ký:`) và bị bỏ đúng 4/4.
+
+> ✅ **ĐÃ VÁ — r318 (v1.36.50), cùng nhánh này.** Tập nhãn đóng + dò dãy liền 3–4 dòng, thứ tự tự do,
+> thử dãy DÀI trước. ★Dãy bắt buộc chứa nhãn người-ký, nếu không thì vài dòng thân bài mở đầu bằng
+> «Cơ quan:»/«Ngày ký:» đủ để nuốt mất quy phạm (ca `r318_khong_nuot_than_van_ban` khoá).
+> Nghiệm thu 19-2026: `chu_ky_so` 0 → **3**, khối đầu bắt đầu đúng ở quốc hiệu, 141/141 Điều giữ nguyên.
 
 ### 4.6 (phụ) Thiếu `python-docx` ⇒ **số neo hình vẽ lọt vào thân Điều**
 
@@ -402,22 +414,36 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 1. **Ghi note mục 1** — chờ chạy trên máy có config (lệnh nguyên văn ở §2). Payload đã commit.
 2. **Chép đè 3 record cache** — chờ máy có `~/.tra_luat_cache/docs/`; phải `doc-compare` với bản cũ
    và quyết về `method_rank` 95 → 50 (§3.6).
-3. **Phát hiện công cụ §4** — bốn cái **ĐÃ VÁ** trong chính nhánh này:
-   **§4.1→r314 · §4.3→r315** (v1.36.48) · **§4.2→r316 · §4.6 phần RÒ→r317** (v1.36.49).
-   Cổng lượt cuối: selftest **1598/1598** · ruff F **delta so master = 0** · golden 0-diff ·
+3. **Phát hiện công cụ §4** — **CẢ SÁU ĐÃ VÁ** trong chính nhánh này:
+   **§4.1→r314 · §4.3→r315** (v1.36.48) · **§4.2→r316 · §4.6 phần RÒ→r317** (v1.36.49) ·
+   **§4.4+§4.5→r318** (v1.36.50).
+   Cổng lượt cuối: selftest **1604/1604** · ruff F **delta so master = 0** · golden 0-diff ·
    determinism ok · doc-claims 9/9 layer = 0 · `release-verify` 177/177 + `package_hash` khớp ·
    `RELEASE_MANIFEST.json` đã tái sinh.
-   Còn treo: **§4.4** (`CB_DAU_MUC` sai cả hai chiều — lời khuyên kèm theo sẽ xoá Chương I–V) ·
-   **§4.5** (`CB_CHU_KY_SO` bỏ sót mẫu 3 dòng) · **§4.6 phần khế ước** (`requirements.txt` vẫn khai
-   stdlib-only, mà `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn).
+   **§4.4/§4.5 → r318 (v1.36.50)**: khối chữ ký số 3 dòng hết lọt vào khối đầu (19-2026:
+   `chu_ky_so` 0→3) · nhãn mục hết sai hai chiều (54-2025: cờ chuyển từ dòng 1578 sang dòng 10)
+   · lời khuyên «cắt tới dòng Số:» — thứ sẽ xoá sạch thân VBHN — đã thay bằng chỉ dẫn an toàn.
+   Còn treo DUY NHẤT: **§4.6 phần khế ước** (`requirements.txt` vẫn khai stdlib-only, mà `pypdf`
+   KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn).
    ⚠ **Hai bẫy đã dính khi vá, ghi vì không cái nào lộ ra bằng đọc code:**
    (a) bump VERSION bằng `read_text()/write_text()` nuốt 307 CRLF của `SKILL.md` + 1766 của `tl.py`
    (`.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ phải `read_bytes()/write_bytes()`);
    bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ.
    (b) regex `wp14?` parse ra `"wp1"`+`"4"` tuỳ chọn nên KHÔNG khớp `wp:` trần ⇒ nửa số bị bỏ, ra
    chuỗi CỤT trông như đã sửa xong; chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`.
+   (c) `\b` KHÔNG khớp trước dấu gạch dưới ⇒ lượt đánh số lại đổi được chú thích mà SÓT tên ca
+   selftest (`r313_…`), đúng lúc master vừa mang `r313_anchor_*` vào — hai thay đổi khác nhau dùng
+   chung tiền tố. Đổi số phải theo TÊN ĐẦY ĐỦ, tường minh.
+   (d) phép giải xung đột merge ghi `VERSION` thêm ký tự xuống dòng cuối (7B→8B); `package_hash`
+   tính trên byte THẬT nên phải so byte với master TRƯỚC khi commit, không chỉ so nội dung.
 
-4. **Memory topic `rasoat-hoso-orchestration-plan`** — container này KHÔNG có công cụ memory
+5. **⚠ ĐỤNG SỐ đã xảy ra trong lượt này:** master tiến lên `c24a8b3` (Merge PR #12) và lấy
+   **r313 + v1.36.47** cho RAS-17 — trùng số nhánh này đang dùng. Đã nhường số theo tiền lệ
+   r309/PR #9 trong CLAUDE.md: r313→r314 … r316→r317, v1.36.47/48 → v1.36.48/49, rồi mới hoà
+   master. Bài học: nhánh mở LÂU phải `git fetch origin master` + đối chiếu `max_r` **trước mỗi
+   lượt bump**, không chỉ lúc mở nhánh.
+
+6. **Memory topic `rasoat-hoso-orchestration-plan`** — container này KHÔNG có công cụ memory
    (giống lượt 24/26 đã ghi trong `KETQUA_NLM_QA_QB_QC_2026-07-31.md:169`). Nội dung cần thêm ở §6.
 
 ---

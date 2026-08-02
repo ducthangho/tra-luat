@@ -140,9 +140,28 @@ def preamble_of(raw):
 CB_DONG_CHAY = re.compile(
     r"^\s*(?:\d{1,4}\s+)?CÔNG\s+BÁO\s*/\s*Số\s+[^/\n]*/\s*Ngày\s+\d{1,2}\s*-\s*\d{1,2}\s*-\s*\d{4}\s*(?:\d{1,4}\s*)?$")
 CB_SO_TRANG = re.compile(r"^\s*\d{1,4}\s*$")
-CB_CHU_KY_SO = (re.compile(r"^\s*Người\s+ký\s*:"), re.compile(r"^\s*Email\s*:"),
-                re.compile(r"^\s*Cơ\s+quan\s*:"), re.compile(r"^\s*Thời\s+gian\s+ký\s*:"))
-CB_DAU_MUC = re.compile(r"^\s*(?:VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHẦN\s+VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT)\s*$")
+# r318: khối chữ ký số Công báo có ÍT NHẤT HAI biến thể. Bản cũ ghép CỨNG đúng bộ 4 nhãn theo
+# ĐÚNG thứ tự (Người ký/Email/Cơ quan/Thời gian ký) nên biến thể 3 dòng lọt sạch. Đo 02-08:
+#   · 54-2025 (CB 1083+1084): «Người ký:/Email:/Cơ quan:/Thời gian ký:»  → bắt đủ 4/4
+#   · 19-2026 (CB 133):       «Ký bởi:/Cơ quan:/Ngày ký:»                → chu_ky_so=0, CẢ BA
+#     dòng chui vào KHỐI ĐẦU (khối đầu là nguồn DUY NHẤT chứng minh danh tính — r215).
+# Nay: tập NHÃN đóng + dò DÃY LIỀN 3–4 dòng mà MỌI dòng đều khớp một nhãn.
+CB_CHU_KY_NHAN = (
+    ("nguoi_ky", re.compile(r"^\s*(?:Người\s+ký|Ký\s+bởi)\s*:")),
+    ("co_quan",  re.compile(r"^\s*Cơ\s+quan\s*:")),
+    ("thoi_gian", re.compile(r"^\s*(?:Thời\s+gian\s+ký|Ngày\s+ký)\s*:")),
+    ("email",    re.compile(r"^\s*Email\s*:")),
+)
+CB_CHU_KY_SO = tuple(p for _, p in CB_CHU_KY_NHAN)   # giữ tên cũ cho caller ngoài (tương thích)
+# r318: nhãn MỤC của Công báo. Bản cũ CHỈ có họ «VĂN BẢN QUY PHẠM PHÁP LUẬT» ⇒ bỏ sót nhãn THẬT
+# «VĂN BẢN PHÁP LUẬT KHÁC» (đo trên 54-2025, dòng 10) — mà lại KHỚP NHẦM dòng thứ ba của một
+# TIÊU ĐỀ CHƯƠNG bị xuống dòng (dòng 1578: «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / VĂN BẢN
+# QUY PHẠM PHÁP LUẬT»). Sai CẢ HAI CHIỀU trên CÙNG một tệp.
+CB_DAU_MUC = re.compile(r"^\s*(?:PHẦN\s+)?VĂN\s+BẢN\s+"
+                        r"(?:QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHÁP\s+LUẬT\s+KHÁC)\s*$")
+# Dòng MỞ ĐẦU một tiêu đề chia phần của VĂN BẢN (Chương/Phần/Mục + số). Nhãn mục Công báo KHÔNG
+# bao giờ đứng ngay sau dòng như vậy ⇒ dùng làm phép loại trừ dương-tính-giả.
+CB_TIEU_DE_CHIA = re.compile(r"^\s*(?:Chương|Phần|Mục)\s+[IVXLCDM\d]+\s*$", re.I)
 
 
 def loc_rac_congbao(raw):
@@ -185,10 +204,25 @@ def loc_rac_congbao(raw):
     for i, ln in enumerate(lines):
         if i not in bo and CB_SO_TRANG.match(ln) and _ke_dong_chay(i):
             bo[i] = "so_trang"
-    for i in range(n - 3):
-        if all(CB_CHU_KY_SO[k].match(lines[i + k]) for k in range(4)):
-            for k in range(4):
-                bo.setdefault(i + k, "chu_ky_so")
+    # r318: dò DÃY LIỀN 3–4 dòng mà MỌI dòng khớp một nhãn chữ-ký-số, THỨ TỰ TỰ DO (hai biến thể
+    # Công báo xếp nhãn khác nhau). Thử dãy DÀI trước để không cắt cụt khối 4 dòng thành 3.
+    # ★ĐÒI dãy phải có nhãn `nguoi_ky`: đó là thứ neo «đây là khối chữ ký», nếu không thì hai dòng
+    #  thân bài vô tình bắt đầu bằng «Cơ quan:»/«Ngày ký:» đủ để nuốt mất chữ THẬT.
+    def _nhan_chu_ky(ln):
+        for ten, pat in CB_CHU_KY_NHAN:
+            if pat.match(ln):
+                return ten
+        return None
+
+    for i in range(n):
+        for L in (4, 3):
+            if i + L > n or any((i + k) in bo for k in range(L)):
+                continue
+            tens = [_nhan_chu_ky(lines[i + k]) for k in range(L)]
+            if all(tens) and "nguoi_ky" in tens:
+                for k in range(L):
+                    bo.setdefault(i + k, "chu_ky_so")
+                break
 
     giu = [ln for i, ln in enumerate(lines) if i not in bo]
     out = "\n".join(giu)
@@ -196,11 +230,31 @@ def loc_rac_congbao(raw):
         raise AssertionError("LOC_CONGBAO_PHAN_CHUNG_HONG: %d giữ + %d bỏ ≠ %d dòng vào" % (len(giu), len(bo), n))
 
     canh_bao = []
-    con_dau_muc = [i + 1 for i, ln in enumerate(lines) if i not in bo and CB_DAU_MUC.match(ln)]
+    # r318: LOẠI TRỪ dương-tính-giả — nhãn mục thật KHÔNG bao giờ là dòng nối của một tiêu đề
+    # Chương/Phần/Mục. Nhìn lui tối đa 2 dòng KHÔNG-TRỐNG; gặp «Chương VI» ⇒ đây là tiêu đề bị
+    # xuống dòng, không phải nhãn mục.
+    def _la_duoi_tieu_de(i):
+        thay = 0
+        for j in range(i - 1, -1, -1):
+            if not lines[j].strip():
+                continue
+            if CB_TIEU_DE_CHIA.match(lines[j]):
+                return True
+            thay += 1
+            if thay >= 2:
+                return False
+        return False
+
+    con_dau_muc = [i + 1 for i, ln in enumerate(lines)
+                   if i not in bo and CB_DAU_MUC.match(ln) and not _la_duoi_tieu_de(i)]
     if con_dau_muc:
-        canh_bao.append("DAU_MUC_CONG_BAO_CON_LAI: dòng %s — nhãn mục của Công báo, KHÔNG tự bỏ được "
-                        "(Công báo in tên cơ quan hai lần; cắt máy sẽ ăn vào khối đầu). Cắt tay tới dòng "
-                        "mang số hiệu (`Số: …` / `Luật số: …`) rồi nạp lại."
+        # r318: lời khuyên CŨ («cắt tay tới dòng mang số hiệu») NGUY HIỂM HƠN thứ nó cảnh báo —
+        # với VBHN, dòng «Số: …» nằm ở KHỐI KÝ CUỐI bản, làm theo đúng chữ là XOÁ SẠCH Chương I→N.
+        # Nay chỉ tay đúng dòng cần bỏ, và nói rõ phạm vi: bỏ ĐÚNG dòng đó, không cắt theo neo.
+        canh_bao.append("DAU_MUC_CONG_BAO_CON_LAI: dòng %s — nhãn MỤC của Công báo (không thuộc văn "
+                        "bản), CỐ Ý không tự bỏ. Cách sửa: bỏ ĐÚNG (các) dòng nêu trên rồi nạp lại. "
+                        "★ĐỪNG cắt từ đầu bản tới dòng «Số: …»: với VBHN dòng đó nằm ở KHỐI KÝ CUỐI, "
+                        "cắt theo neo sẽ xoá sạch thân văn bản."
                         % ", ".join(str(x) for x in con_dau_muc))
     sot = [i + 1 for i, ln in enumerate(lines) if i not in bo and "CÔNG BÁO/" in ln.replace("  ", " ")]
     if sot:

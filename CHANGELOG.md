@@ -1,3 +1,75 @@
+# ★ v1.36.50 — r318: hai bộ lọc rác Công báo sai trên CHÍNH bản Công báo — khối chữ ký số 3 dòng lọt vào khối đầu · nhãn mục sai CẢ HAI CHIỀU (2026-08-02)
+
+Đóng nốt §4.4 và §4.5 của lượt bảo trì kho 02-08 (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md`).
+Cả hai đều nằm trong `loc_rac_congbao` (r217) — bộ lọc dựng riêng cho bản Công báo, mà lại sai
+trên đúng hai bản Công báo đem ra dùng.
+
+## r318a — khối chữ ký số có ÍT NHẤT HAI biến thể, bản cũ chỉ bắt bộ 4
+
+**Bệnh.** `CB_CHU_KY_SO` ghép CỨNG đúng 4 nhãn theo ĐÚNG thứ tự
+(`Người ký:` / `Email:` / `Cơ quan:` / `Thời gian ký:`). Đo 02-08:
+
+| bản | khối chữ ký in ra | bản cũ bắt được |
+|---|---|---|
+| 54-2025 · CB 1083+1084 | `Người ký:` `Email:` `Cơ quan:` `Thời gian ký:` (4 dòng) | 4/4 ✅ |
+| 19-2026 · CB 133 | `Ký bởi:` `Cơ quan:` `Ngày ký:` (**3 dòng**) | **0** ❌ |
+
+Ba dòng đó nằm ngay ĐẦU bản bóc ⇒ chui thẳng vào **khối đầu** — mà khối đầu là nguồn **DUY NHẤT**
+chứng minh danh tính văn bản (r215). Đo trên record thật:
+
+```
+trước: khoi_dau = 'Ký bởi: CÔNG BÁO NƯỚC CỘNG HÒA…\nCơ quan: VĂN PHÒNG CHÍNH PHỦ\nNgày ký: 2026-03-05…'
+sau  : khoi_dau = 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc…'      (141/141 Điều giữ nguyên)
+```
+
+**Vá.** Tập NHÃN đóng `CB_CHU_KY_NHAN` (`Người ký`|`Ký bởi` · `Cơ quan` · `Thời gian ký`|`Ngày ký` ·
+`Email`) + dò **DÃY LIỀN 3–4 dòng, THỨ TỰ TỰ DO**, thử dãy DÀI trước để không cắt cụt khối 4 thành 3.
+★Dãy **BẮT BUỘC chứa nhãn người-ký** — đó là thứ neo «đây là khối chữ ký»; thiếu chốt đó thì
+hai-ba dòng thân bài vô tình mở đầu bằng «Cơ quan:»/«Ngày ký:» đủ để **nuốt mất quy phạm**
+(ca `r318_khong_nuot_than_van_ban` khoá đúng điều này). Tên cũ `CB_CHU_KY_SO` giữ lại cho caller ngoài.
+
+## r318b — `CB_DAU_MUC` sai CẢ HAI CHIỀU trên CÙNG một tệp
+
+Đo trên `54-2025`:
+
+* **ÂM TÍNH GIẢ — dòng 10:** nhãn mục THẬT của Công báo là `VĂN BẢN PHÁP LUẬT KHÁC`, KHÔNG nằm
+  trong mẫu cũ (mẫu chỉ có họ «VĂN BẢN QUY PHẠM PHÁP LUẬT») ⇒ rác thật đi lọt.
+* **DƯƠNG TÍNH GIẢ — dòng 1578:** đó là dòng thứ BA của một TIÊU ĐỀ CHƯƠNG bị xuống dòng —
+  «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / **VĂN BẢN QUY PHẠM PHÁP LUẬT**» — bị báo là nhãn mục.
+
+**Và lời khuyên đi kèm còn nguy hiểm hơn thứ nó cảnh báo.** Câu cũ: *«Cắt tay tới dòng mang số hiệu
+(`Số: …` / `Luật số: …`) rồi nạp lại»*. Với **VBHN**, dòng `Số: …` nằm ở **KHỐI KÝ CUỐI bản**
+(đã đo: `19/VBHN-VPQH` ở vị trí 183.972/184.114) ⇒ làm theo đúng chữ là **XOÁ SẠCH Chương I→N**.
+Người vận hành làm đúng như tài liệu bảo thì mất trọn thân văn bản.
+
+**Vá.** (1) mẫu nhận cả `VĂN BẢN PHÁP LUẬT KHÁC` và tiền tố `PHẦN` tuỳ chọn; (2) LOẠI TRỪ
+dương-tính-giả bằng phép nhìn lui tối đa 2 dòng không-trống — gặp `Chương|Phần|Mục <số>` đứng
+một mình ⇒ đây là tiêu đề bị xuống dòng, KHÔNG báo; (3) viết lại lời khuyên: chỉ đúng (các) dòng
+cần bỏ, kèm cảnh báo TƯỜNG MINH đừng cắt theo neo `Số:`.
+
+★**GIỮ NGUYÊN quyết định gốc của r217: chỉ KHAI BÁO, KHÔNG tự bỏ** nhãn mục — bytes của corpus đã
+nạp không đổi. r318 chỉ làm cho phép khai báo TRỎ ĐÚNG CHỖ và lời khuyên không phản chủ.
+Ca `r318_dau_muc_dung_ca_hai_chieu` khoá cả năm vế: âm-tính-giả, dương-tính-giả, họ cũ vẫn bắt,
+lời khuyên có đủ cảnh báo, và nhãn vẫn CÒN trong text (không tự bỏ).
+
+**Nghiệm thu trên hai bản Công báo thật:**
+
+| | trước r318 | sau r318 |
+|---|---|---|
+| 19-2026 `chu_ky_so` | 0 (3 dòng chrome vào khối đầu) | **3** — khối đầu bắt đầu đúng ở quốc hiệu |
+| 54-2025 `chu_ky_so` | 4 | **4** (không đổi) |
+| 54-2025 cảnh báo nhãn mục | dòng **1578** (tiêu đề Chương) | dòng **10** (nhãn mục THẬT) |
+| số Điều | 141 · 72 | **141 · 72** (không suy suyển) |
+
+**Cổng.** selftest **1604/1604** (thêm 3 ca: 1 thuận + 2 ngược) · ruff F **delta so master = 0**
+(`verify_deep.py` sạch · `tl_selftest.py` 1 F401 + 4325 F821) · golden 0-diff · determinism ok ·
+`release-verify` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
+
+**Ghi thêm — bẫy `VERSION` mất byte:** lượt hoà master, phép giải xung đột của tôi ghi lại `VERSION`
+kèm ký tự xuống dòng cuối (7B → 8B). `.gitattributes` khoá `* -text` vì `package_hash` tính trên
+byte THẬT ⇒ đã nắn về đúng khuôn master (7B, KHÔNG newline). Thêm một biến thể của cùng bài học
+CRLF ở v1.36.48: **mọi thao tác trên tệp trong gói phải so byte với master trước khi commit.**
+
 # ★ v1.36.49 — r316: `scan_file` hết FAIL-OPEN (docx không đọc được ≠ sạch markup) · r317: trị đo DrawingML hết lọt vào thân Điều (2026-08-02)
 
 Hai lỗ của **đường ĐỌC .docx**, cùng lộ ra ở lượt bảo trì kho 02-08 khi nạp thật hai bản Công báo

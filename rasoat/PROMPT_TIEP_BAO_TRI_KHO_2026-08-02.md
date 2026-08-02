@@ -82,11 +82,11 @@ trộn ~900 ký tự căn cứ ban hành của 4 luật khác vào **thân Đi�
 
 ---
 
-## VIỆC 3 — Lượt VÁ CODE: còn 2,5/6 phát hiện (biên bản §4)
+## VIỆC 3 — Lượt VÁ CODE: **CẢ SÁU ĐÃ VÁ**, còn đúng phần khế ước (biên bản §4)
 
-Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. **Bốn cái đã vá trong nhánh này**
-(r314→r317, v1.36.48+v1.36.49, gate xanh: selftest 1598/1598 · ruff delta 0 · golden 0-diff ·
-release-verify 177/177). Còn lại:
+Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. Sáu cái đã vá trong nhánh này
+(r314→r318, v1.36.48→v1.36.50; gate: selftest **1604/1604** · ruff delta 0 · golden 0-diff ·
+determinism ok · release-verify 177/177 + package_hash khớp). Còn lại ĐÚNG MỘT việc:
 
 | # | Lỗi | Vì sao ưu tiên |
 |---|---|---|
@@ -94,8 +94,8 @@ release-verify 177/177). Còn lại:
 | ~~§4.3~~ | ~~Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN»~~ | ✅ **ĐÃ VÁ — r315 (v1.36.48)**, cùng nhánh này |
 | ~~§4.2~~ | ~~`scan_file` FAIL-OPEN: docx không đọc được → báo «sạch markup»~~ | ✅ **ĐÃ VÁ — r316 (v1.36.49)**, cùng nhánh này |
 | §4.6 (còn PHẦN KHẾ ƯỚC) | Phần RÒ ✅ **ĐÃ VÁ — r317 (v1.36.49)**: `wp:`/`wp14:` hết lọt vào thân Điều, nghiệm thu 3 số rác → 0 trên cả hai bản. **Chưa vá:** `requirements.txt` vẫn khai stdlib-only | r317 cứu được nhánh không-`python-docx`, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r315) |
-| §4.4 | `CB_DAU_MUC` sai CẢ HAI CHIỀU; lời khuyên kèm theo nếu làm theo đúng chữ sẽ XOÁ Chương I–V | Cảnh báo nguy hiểm hơn thứ nó cảnh báo |
-| §4.5 | `CB_CHU_KY_SO` chỉ khớp mẫu 4 dòng, bỏ sót biến thể 3 dòng ⇒ chrome lọt vào khối đầu | Bẩn khối đầu, không sai nội dung |
+| ~~§4.4~~ | ~~`CB_DAU_MUC` sai CẢ HAI CHIỀU + lời khuyên sẽ XOÁ Chương I–V~~ | ✅ **ĐÃ VÁ — r318 (v1.36.50)**, cùng nhánh này |
+| ~~§4.5~~ | ~~`CB_CHU_KY_SO` bỏ sót biến thể 3 dòng ⇒ chrome lọt vào khối đầu~~ | ✅ **ĐÃ VÁ — r318 (v1.36.50)**, cùng nhánh này |
 
 Quy trình bắt buộc: bump VERSION 3 chỗ · test `rXXX_` cho TỪNG cái · `--selftest` N/N ·
 `git diff` → CHANGELOG (★ vX.Y.Z) → commit. Deploy CHỜ DUYỆT (xem CLAUDE.md §Quy ước deploy).
@@ -129,7 +129,10 @@ python scripts/tl.py profile-info --profile "Luật BHXH" --json
 ## Ràng buộc (giữ nguyên)
 
 * Mọi lệnh mang `--profile "Luật BHXH"` — **và kiểm `profile-info` để chắc cờ đó có tác dụng thật**.
-* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.49** (r314→r317).
+* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.50** (r314→r318, đã hoà master `c24a8b3`).
+* ⚠ Nhánh mở LÂU: `git fetch origin master` + đối chiếu `max_r` **trước MỖI lượt bump**, không chỉ
+  lúc mở nhánh. Lượt này đã ĐỤNG SỐ với PR #12 (master lấy r313/v1.36.47 cho RAS-17) và phải
+  đánh số lại r313→r314 … r316→r317 trước khi hoà.
 * Registry: `reg-query --refresh` dò trùng trên dữ liệu TƯƠI trước · readback `--live` hẹp sau ·
   cân nhắc `--expect COL=VAL` khi đường ghi có hỗ trợ.
 * 2–3 phiên chạy song song trên cùng cây canonical ⇒ `git status -sb` trước mọi commit + phép kiểm

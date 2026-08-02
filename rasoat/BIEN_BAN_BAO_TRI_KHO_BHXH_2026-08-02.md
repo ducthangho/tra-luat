@@ -14,7 +14,7 @@ Phạm vi: 2 mục của lượt bảo trì kho. **KHÔNG** gỡ quarantine 41/2
 | 2a. `19-2026-VBHN-VPQH` — bản còn markup sửa đổi | ✅ **Có nguồn thay thế đo đạt** | Công báo 133 (.docx) · 141/141 Điều · 0 số rác · markup={strike:2} = 2 DẤU CÁCH (ngoại lệ có bằng chứng, người dùng đã chốt) |
 | 2b. `54-2025-VBHN-VPQH` — khối đầu là chrome trang web | ✅ **Có nguồn thay thế đo đạt** | Công báo 1083+1084 (.pdf text) · 72 Điều · khối đầu sạch sau khi cắt 1 dòng nhãn mục |
 | 2c. `89-2026-VBHN-VPQH` — khối đầu thiếu VPQH + «Số:» | ✅ **Có nguồn thay thế đo đạt** | Công báo 222 (.docx) · 79 Điều · `verify_flags` RỖNG · VPQH+«Số:» nằm ở KHỐI KÝ CUỐI (đúng bố cục VBHN) |
-| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1 và §4.3 ĐÃ VÁ (r313+r314, v1.36.47) trong chính nhánh này**; 4 cái còn lại chờ lượt vá riêng |
+| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1/§4.3 (r313+r314, v1.36.47) và §4.2/§4.6 (r315+r316, v1.36.48) ĐÃ VÁ trong chính nhánh này**; còn §4.4, §4.5 |
 
 **Không có thao tác GHI DỮ LIỆU nào trong lượt này** — không ghi registry, không ghi Drive, không
 đụng NLM. (Có sửa MÃ: r313+r314 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
@@ -316,6 +316,14 @@ mà mặc định «sạch» khi không đọc được là fail-open. Hôm nay 
 sẽ CÓ HẠI ngay khi có reader chịu được tên entry `\` (LibreOffice/Word đều mở được tệp này).
 **Vá đề xuất:** `scan_file` trả `{"_unreadable": True}` thay vì `{}` và để caller khai báo LOUD.
 
+> ✅ **ĐÃ VÁ — r315 (v1.36.48), cùng nhánh này.** `scan_file` trả `{UNREADABLE: True}`; `warn_line`
+> có nhánh KÊU TO riêng; `normalize_document` khai `MARKUP_KHONG_DOC_DUOC` **tách khỏi**
+> `MARKUP_SUA_DOI`; `lookup_ops` khai `markup_unreadable` + `markup_found=True` (fail-CLOSED).
+> ★Phát hiện thêm **ca thứ hai** của cùng lỗ, nằm sẵn trong selftest: `r188_docx_reader_bounded_wired`
+> ĐANG đòi `sum(scan_file(bomb).values()) == 0` cho docx vượt trần zip-bomb — tức khế ước cũ ghi
+> thành văn rằng «không đo được ⇒ báo sạch». Ca đó đã đổi sang đòi cờ `UNREADABLE`.
+> Tài liệu SẠCH vẫn IM LẶNG (ca `r315_tai_lieu_sach_van_im_lang` giữ chốt).
+
 ### 4.3 `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là **THIẾU THƯ VIỆN**
 
 `pdf_text_layer_chars()` (`ingest_to_cache.py:211`) thử `pdfplumber` rồi `pypdf`; thiếu **cả hai** →
@@ -372,6 +380,18 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 | 89-2026 `verify_flags` | 1 cờ | **0 — rỗng** |
 
 ⇒ `python-docx` (và `pypdf`) thực chất là **phụ thuộc bắt buộc để nạp đúng**, không phải tuỳ chọn.
+
+> ✅ **ĐÃ VÁ (phần RÒ) — r316 (v1.36.48), cùng nhánh này.** `drop_drawing_measures()` bỏ nội dung
+> element thuộc `wp:`/`wp14:` TRƯỚC khi bóc tag, ở **cả hai** reader bóc-tag (`plain_from_document_xml`
+> và `_docx_zip_text`). Nghiệm thu end-to-end (chặn `python-docx` để ép đúng nhánh rò): 19-2026 và
+> 89-2026 đều **3 số rác → 0**, số Điều giữ nguyên 141/79.
+> Ba bất biến khoá bằng test: không-drawing ⇒ chuỗi ra = chuỗi vào · text-box sống sót · số dài
+> THẬT trong `w:t` không bị đụng.
+> ⚠ **Bẫy giữa chừng:** regex đầu viết `wp14?` — parse ra `"wp1"`+`"4"` tuỳ chọn nên KHÔNG khớp
+> `wp:` trần; `wp14:pctWidth` bị bỏ còn `wp:posOffset` vẫn lọt, ra chuỗi số **CỤT** trông như đã
+> sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`.
+> **CHƯA vá phần khế ước:** `requirements.txt` vẫn khai stdlib-only. r316 làm nhánh không-`python-docx`
+> hết rò, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r314). Lượt riêng.
 `requirements.txt` hiện nói ngược lại. **Vá đề xuất:** hoặc thêm vào `requirements.txt`, hoặc để
 `doctor`/`precheck` CẢNH BÁO LOUD khi thiếu, kèm hệ quả cụ thể.
 
@@ -382,15 +402,21 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 1. **Ghi note mục 1** — chờ chạy trên máy có config (lệnh nguyên văn ở §2). Payload đã commit.
 2. **Chép đè 3 record cache** — chờ máy có `~/.tra_luat_cache/docs/`; phải `doc-compare` với bản cũ
    và quyết về `method_rank` 95 → 50 (§3.6).
-3. **Phát hiện công cụ §4** — §4.1 (r313) và §4.3 (r314) **ĐÃ VÁ ở v1.36.47** trong nhánh này:
-   selftest **1594/1594** · ruff F **delta so master = 0** · golden 0-diff · determinism ok ·
-   `release-verify` 177/177 + `package_hash` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
-   Còn treo, xếp hạng đề nghị: §4.2 (fail-open pháp lý) → §4.6 (`requirements.txt` khai thiếu
-   phụ thuộc bắt buộc) → §4.4 → §4.5.
-   ⚠ **Bẫy đã dính khi vá:** bump VERSION bằng `read_text()/write_text()` nuốt 307 CRLF của
-   `SKILL.md` + 1766 của `tl.py` (chế độ text dịch CRLF→LF) — `.gitattributes` khoá `* -text`
-   CHÍNH VÌ manifest hash là byte thật. Mọi sửa tệp trong gói phải đi `read_bytes()/write_bytes()`.
-   Bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo `SKILL.md.stat().st_size`).
+3. **Phát hiện công cụ §4** — bốn cái **ĐÃ VÁ** trong chính nhánh này:
+   **§4.1→r313 · §4.3→r314** (v1.36.47) · **§4.2→r315 · §4.6 phần RÒ→r316** (v1.36.48).
+   Cổng lượt cuối: selftest **1598/1598** · ruff F **delta so master = 0** · golden 0-diff ·
+   determinism ok · doc-claims 9/9 layer = 0 · `release-verify` 177/177 + `package_hash` khớp ·
+   `RELEASE_MANIFEST.json` đã tái sinh.
+   Còn treo: **§4.4** (`CB_DAU_MUC` sai cả hai chiều — lời khuyên kèm theo sẽ xoá Chương I–V) ·
+   **§4.5** (`CB_CHU_KY_SO` bỏ sót mẫu 3 dòng) · **§4.6 phần khế ước** (`requirements.txt` vẫn khai
+   stdlib-only, mà `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn).
+   ⚠ **Hai bẫy đã dính khi vá, ghi vì không cái nào lộ ra bằng đọc code:**
+   (a) bump VERSION bằng `read_text()/write_text()` nuốt 307 CRLF của `SKILL.md` + 1766 của `tl.py`
+   (`.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ phải `read_bytes()/write_bytes()`);
+   bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ.
+   (b) regex `wp14?` parse ra `"wp1"`+`"4"` tuỳ chọn nên KHÔNG khớp `wp:` trần ⇒ nửa số bị bỏ, ra
+   chuỗi CỤT trông như đã sửa xong; chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`.
+
 4. **Memory topic `rasoat-hoso-orchestration-plan`** — container này KHÔNG có công cụ memory
    (giống lượt 24/26 đã ghi trong `KETQUA_NLM_QA_QB_QC_2026-07-31.md:169`). Nội dung cần thêm ở §6.
 

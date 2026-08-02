@@ -1,3 +1,85 @@
+# ★ v1.36.48 — r315: `scan_file` hết FAIL-OPEN (docx không đọc được ≠ sạch markup) · r316: trị đo DrawingML hết lọt vào thân Điều (2026-08-02)
+
+Hai lỗ của **đường ĐỌC .docx**, cùng lộ ra ở lượt bảo trì kho 02-08 khi nạp thật hai bản Công báo
+(`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.2, §4.6). Cả hai đều làm hỏng **nguyên văn** —
+đúng lời hứa lõi của skill — mà không cổng nào kêu.
+
+## r315 — `docx_markup.scan_file` báo «sạch markup» cho tệp KHÔNG ĐỌC ĐƯỢC
+
+**Bệnh.** Bản cũ nuốt mọi exception rồi `return scan("")`, tức trả dict đếm TOÀN 0. Docstring gọi đó
+là chủ ý, nhưng markup là **TÍN HIỆU PHÁP LÝ** — chính đầu tệp `docx_markup.py` viết «lỗi ĐÚNG-SAI về
+nội dung pháp luật». Một cổng an toàn pháp lý mặc định «sạch» khi không đo được là fail-OPEN.
+
+**Hai ca THẬT, độc lập nhau:**
+
+1. **Container CDN đóng gói sai** (đo 02-08): `.docx` Công báo tải qua `g7.cdnchinhphu.vn` đặt tên
+   entry bằng `\` thay `/` — 19-2026: **33/40** entry · 89-2026: **30/37** ⇒ không có
+   `word/document.xml` theo tên chuẩn. `scan_file` trả `{}` và người rà kết luận «SẠCH markup»;
+   sự thật sau khi nắn tên entry là `strike=2`. Word/LibreOffice mở tệp đó **bình thường** ⇒ chỉ
+   cần một reader chịu tên `\` là markup đi thẳng vào kho mà không ai khai.
+2. **Ca thứ hai nằm sẵn trong chính selftest**: `r188_docx_reader_bounded_wired` ĐANG khẳng định
+   `sum(scan_file(bomb).values()) == 0` cho docx **vượt trần zip-bomb**. Tức khế ước cũ ghi thành
+   văn rằng «không đo được ⇒ báo sạch». Ca đó nay đổi sang đòi cờ `UNREADABLE`; phần còn lại của
+   r188 (reader bounded, không OOM, docx thường vẫn đọc, cap đọc đúng từ env) giữ nguyên.
+
+**Vá.** `scan_file` trả `{UNREADABLE: True}` (hằng mới, xuất trong `__all__`) thay vì dict-toàn-0.
+`warn_line` có nhánh riêng KÊU TO «KHÔNG ĐỌC ĐƯỢC container … CHƯA biết có markup hay không (KHÔNG
+phải 'sạch')». `normalize_document` khai `MARKUP_KHONG_DOC_DUOC` vào `verify_flags` — **tách khỏi**
+câu `MARKUP_SUA_DOI` (câu đó khẳng định CÓ markup và đếm được; ở đây ta chưa biết gì).
+`lookup_ops` khai `markup_unreadable` riêng và để `markup_found=True` (fail-CLOSED).
+★Tài liệu SẠCH vẫn IM LẶNG như cũ — ca `r315_tai_lieu_sach_van_im_lang` giữ chốt đó, để cảnh báo
+không thành tiếng ồn và bất biến «văn bản sạch giữ NGUYÊN bytes cache» của r182 không vỡ.
+
+## r316 — toạ độ DrawingML chui vào thân Điều
+
+**Bệnh.** Phép bóc tag `<[^>]+>`→`""` giữ **MỌI** nút text, kể cả trị đo trong `<w:drawing>`. Đo trên
+2 bản Công báo (nhánh KHÔNG python-docx):
+
+| | trị lọt vào text |
+|---|---|
+| 19-2026 | `2927786221920` trong **khối đầu** + 2 số trong **Điều 141** |
+| 89-2026 | `315848953340` trong khối đầu · **Điều 72** dính chuỗi **59 CHỮ SỐ** · 1 số ở Điều 79 |
+
+Chỉ có ba loại nút rò, cùng là DrawingML: `wp:posOffset`, `wp14:pctWidth`, `wp14:pctHeight`.
+Nhánh **python-docx KHÔNG dính** (nó chỉ đọc `w:p`/`w:tbl`) ⇒ **cùng một .docx cho hai kết quả khác
+nhau tuỳ máy có hay không có `python-docx`** — mà `requirements.txt` khai stdlib-only, nên máy cài
+sạch chạy đúng nhánh RÒ.
+
+**Vá.** `drop_drawing_measures()` — bỏ nội dung element thuộc hai namespace `wp:`/`wp14:`, gọi
+**TRƯỚC** khi bóc tag, tại **cả hai** reader bóc-tag: `plain_from_document_xml` (r252 — đường của
+`tl extract`/`tl doc-text` + cổng phân loại ingest) và `_docx_zip_text` (`normalize_document`).
+
+★**Vì sao nhắm hai namespace chứ không xoá cả `<w:drawing>`:** chữ THẬT trong hình nằm ở
+`w:txbxContent`/`a:t` — xoá cả khối drawing là ăn mất text-box, mà letterhead VBQPPL đôi khi nằm
+đúng đó. `wp:`/`wp14:` (WordprocessingDrawing) không chứa text tài liệu: mọi lá là trị đo.
+
+**Ba bất biến được khoá bằng test** (`r316_khong_an_lem_chu_that`): tài liệu KHÔNG có drawing ⇒
+chuỗi ra **= chuỗi vào** (bytes bất biến cho corpus đã nạp) · text-box trong drawing SỐNG SÓT ·
+**số dài THẬT trong `w:t` không bị đụng** (văn bản luật có số tài khoản/mã số thuế — ai "vá" bằng
+cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ, và phải ĐỎ).
+
+**Nghiệm thu end-to-end** (chặn `python-docx` để ép đúng nhánh rò, nạp thật 2 bản Công báo):
+
+| | trước | sau |
+|---|---|---|
+| 19-2026 · 141 Điều | 3 số rác | **0** |
+| 89-2026 · 79 Điều | 3 số rác | **0** |
+
+**Bẫy đã dính giữa chừng, ghi vì nó không lộ ra khi đọc code:** bản vá đầu viết regex `wp14?` —
+cái đó parse ra `"wp1"` + `"4"` tuỳ chọn nên **KHÔNG khớp `wp:` trần**. Kết quả: `wp14:pctWidth` bị
+bỏ còn `wp:posOffset` vẫn lọt, ra một chuỗi số **CỤT** (`-7299958220` → `-729995822`) trông y như
+đã sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`; ca
+`r316_tri_do_drawing_khong_lot_vao_than_dieu` đòi CẢ HAI namespace nên bắt được đột biến đó.
+
+**Cổng.** selftest **1598/1598** (thêm 4 ca: 2 chiều thuận + 2 chiều ngược; sửa khế ước 1 ca r188) ·
+ruff F **delta so master = 0** trên cả 4 tệp đụng tới (`docx_markup.py` sạch · `normalize_document.py`
+1 F401 · `tl_selftest.py` 1 F401 + 4325 F821 · `tl_core/lookup_ops.py` 563 F821) · golden 0-diff ·
+determinism ok · `release-verify` 177/177 + `package_hash` khớp.
+
+**Còn treo (§4.6 chưa xong phần khế ước):** `requirements.txt` vẫn khai «uses only Python standard
+library». r316 làm nhánh không-`python-docx` hết rò, nhưng `pypdf` thì KHÔNG có đường thay thế —
+thiếu nó là mọi PDF bị chặn (r314). Sửa khế ước cài đặt của gói là lượt riêng.
+
 # ★ v1.36.47 — r313: cổng T1 số hiệu nhận dạng GẠCH CHÉO · r314: thiếu thư viện dò PDF không còn bị gọi là «bản SCAN» (2026-08-02)
 
 Hai cổng CÙNG một bệnh: **báo sai thủ phạm**. Cả hai đều đỏ/xanh nghe rất thuyết phục, và cả hai đều

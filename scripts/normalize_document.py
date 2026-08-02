@@ -18,7 +18,8 @@ sys.path.insert(0, str(HERE))
 from verify_deep import (split_articles, t1_structure, ROMAN_PAT, extract_appendix,  # noqa: E402
                          appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao)
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
-from docx_markup import MODES, has_markup, strip_markup, resolve_mode, warn_line, scan_file  # noqa: E402  (r182)
+from docx_markup import (MODES, UNREADABLE, has_markup, strip_markup, resolve_mode,  # noqa: E402  (r182)
+                         warn_line, scan_file, drop_drawing_measures)                # noqa: E402  (r315/r316)
 
 
 def _clean_md_artifacts(t: str) -> str:
@@ -56,6 +57,10 @@ def _docx_zip_text(path: str, mode: str = "strip") -> tuple:
     with zipfile.ZipFile(path) as _z:
         xml = read_member_bounded(_z, "word/document.xml").decode("utf-8", "replace")
     xml, st = strip_markup(xml, mode)
+    # r316: bỏ TRỊ ĐO DrawingML TRƯỚC khi bóc tag — nếu không, toạ độ EMU (`wp:posOffset`,
+    # `wp14:pctWidth/pctHeight`) chui vào thân Điều. Nhánh python-docx dưới đây KHÔNG dính,
+    # nên thiếu nó thì CÙNG một .docx cho hai kết quả khác nhau tuỳ máy. Xem docstring hàm.
+    xml = drop_drawing_measures(xml)
     # GIỮ bảng: xuống dòng theo đoạn & hàng bảng, tab giữa ô
     xml = (xml.replace("</w:p>", "\n")
               .replace("</w:tr>", "\n")
@@ -315,7 +320,13 @@ def main():
 
     # r182: markup sửa đổi là TÍN HIỆU PHÁP LÝ (bản đang sửa ≠ bản hiệu lực) — ghi vào record để
     # người tra thấy ngay. CHỈ ghi khi CÓ markup ⇒ văn bản sạch giữ NGUYÊN bytes cache như trước.
-    if _mk_st:
+    if _mk_st.get(UNREADABLE):
+        # r315: KHÔNG đọc được container ≠ sạch markup. Phải khai vào record, KHÔNG được lẫn vào
+        # câu MARKUP_SUA_DOI (câu đó khẳng định CÓ markup và đếm được — ở đây ta chưa biết gì).
+        rep["flags"].append("MARKUP_KHONG_DOC_DUOC: không mở được container .docx để đếm markup — "
+                            "CHƯA biết bản này có phải dự thảo đang sửa hay không (KHÔNG phải 'sạch'). "
+                            "Kiểm tay trước khi trích dẫn như quy phạm.")
+    elif _mk_st:
         rep["flags"].append("MARKUP_SUA_DOI: " + ", ".join(f"{k}={v}" for k, v in _mk_st.items())
                             + f" (che_do={_mk_mode}) — chữ w:del/gạch-ngang ĐÃ BỎ, w:ins là chữ MỚI THÊM")
 

@@ -18463,7 +18463,12 @@ def run() -> int:
 
     def _c188_docx_reader_bounded_wired():
         # document.xml vượt trần (env cap 1MB) → _docx_unzip_text trả "" fail-safe (không OOM) và
-        # docx_markup.scan_file trả 0 thể; docx thường (dưới trần) vẫn đọc bình thường.
+        # docx_markup.scan_file KHAI `UNREADABLE`; docx thường (dưới trần) vẫn đọc bình thường.
+        # ★r315 ĐỔI KHẾ ƯỚC ở dòng scan_file: bản gốc r188 đòi `sum(...) == 0`, tức docx vượt trần
+        #  được báo là SẠCH MARKUP. Đó chính là fail-open r315 đi chữa — và là ca THỨ HAI của nó
+        #  (ca thứ nhất: container CDN đặt tên entry bằng '\'). Vượt trần = KHÔNG ĐO ĐƯỢC, không
+        #  phải "đo được và bằng 0". Phần còn lại của r188 (reader bounded, không OOM, docx thường
+        #  vẫn đọc được, cap đọc đúng từ env) GIỮ NGUYÊN.
         import zipfile as _zf188
         _sv_env = os.environ.get("TL_DOCX_XML_MAX_MB")
         try:
@@ -18479,7 +18484,9 @@ def run() -> int:
                 _dm188 = __import__("docx_markup")
                 return (_TL_MODULE._docx_unzip_text(_big) == ""
                         and "văn bản 188" in _TL_MODULE._docx_unzip_text(_ok_doc)
-                        and sum(_dm188.scan_file(_big).values()) == 0
+                        and _dm188.scan_file(_big).get(_dm188.UNREADABLE) is True
+                        and not _dm188.scan_file(_ok_doc).get(_dm188.UNREADABLE)
+                        and sum(_dm188.scan_file(_ok_doc).values()) == 0
                         and _ie187.docx_xml_max_bytes() == 1024 * 1024)
         finally:
             if _sv_env is None:
@@ -27203,6 +27210,121 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4)
 
     _t110("r314_do_duoc_0_van_la_ban_scan", _c314_do_duoc_0_van_la_ban_scan)
+
+    # ---- r315 + r316: hai lỗ của đường đọc .docx (đo 02-08 trên 2 bản Công báo) -----------
+    def _r315_docx(alias):
+        import importlib.util as _ilu315
+        _sp = _ilu315.spec_from_file_location(alias, _ROOT209 / "scripts" / "docx_markup.py")
+        _m = _ilu315.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _r315_make_docx(path, doc_xml, *, backslash=False):
+        """Dựng .docx tối thiểu. `backslash=True` tái hiện container HỎNG của CDN Công báo:
+        tên entry dùng '\\' nên KHÔNG có 'word/document.xml' theo tên chuẩn (Word vẫn mở được)."""
+        import zipfile as _zf315
+        name = "word\\document.xml" if backslash else "word/document.xml"
+        with _zf315.ZipFile(path, "w", _zf315.ZIP_DEFLATED) as _z:
+            _z.writestr(name, doc_xml)
+        return str(path)
+
+    _R315_MARKUP = ('<w:document><w:body><w:p><w:r><w:rPr><w:strike/></w:rPr>'
+                    '<w:t>chữ đã gạch</w:t></w:r></w:p></w:body></w:document>')
+    _R315_SACH = ('<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi điều chỉnh</w:t>'
+                  '</w:r></w:p></w:body></w:document>')
+
+    def _c315_khong_doc_duoc_khong_phai_sach_markup():
+        """CHIỀU THUẬN — container không đọc được phải KHAI BÁO, không được im như tài liệu sạch.
+
+        Ca thật 02-08: .docx Công báo qua `g7.cdnchinhphu.vn` đặt tên 33/40 entry bằng '\\' ⇒
+        `scan_file` nuốt exception, trả mọi-thể-=-0, và tôi đã kết luận SAI «SẠCH markup».
+        Sự thật (sau khi nắn tên entry): `strike=2`. Word/LibreOffice mở tệp đó bình thường ⇒
+        chỉ cần một reader chịu tên '\\' là markup đi thẳng vào kho mà không ai khai."""
+        import tempfile as _tf315
+        _m = _r315_docx("docx_markup_r315")
+        with _tf315.TemporaryDirectory() as _td:
+            _p = _Path315 = __import__("pathlib").Path(_td)
+            _hong = _r315_make_docx(_p / "hong.docx", _R315_MARKUP, backslash=True)
+            _tot = _r315_make_docx(_p / "tot.docx", _R315_MARKUP)
+            _st_hong, _st_tot = _m.scan_file(_hong), _m.scan_file(_tot)
+            # (1) hỏng ⇒ cờ UNREADABLE, KHÔNG phải dict đếm toàn 0
+            ok1 = _st_hong.get(_m.UNREADABLE) is True and "strike" not in _st_hong
+            # (2) ★ĐỐI CHỨNG QUYẾT ĐỊNH: CÙNG nội dung, chỉ khác cách đặt tên entry — bản đọc được
+            #     phải thấy strike. Đây là ca chứng minh "hỏng" KHÁC "sạch", không phải trùng hợp.
+            ok2 = _st_tot.get("strike") == 1 and not _st_tot.get(_m.UNREADABLE)
+            # (3) cảnh báo phải KÊU TO và nói đúng bản chất (chưa biết ≠ sạch)
+            _w = _m.warn_line(_st_hong, "hong.docx")
+            ok3 = "KHÔNG ĐỌC ĐƯỢC" in _w and "KHÔNG phải 'sạch'" in _w
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r315_khong_doc_duoc_khong_phai_sach_markup", _c315_khong_doc_duoc_khong_phai_sach_markup)
+
+    def _c315_tai_lieu_sach_van_im_lang():
+        """CHIỀU NGƯỢC — đừng biến mọi thứ thành tiếng ồn: tài liệu SẠCH vẫn phải IM.
+
+        Nếu `warn_line` kêu cả với tài liệu sạch thì cảnh báo mất giá trị, và ca r182
+        «văn bản sạch giữ NGUYÊN bytes cache» cũng vỡ."""
+        import tempfile as _tf315b
+        _m = _r315_docx("docx_markup_r315b")
+        with _tf315b.TemporaryDirectory() as _td:
+            _p = __import__("pathlib").Path(_td)
+            _st = _m.scan_file(_r315_make_docx(_p / "sach.docx", _R315_SACH))
+            ok1 = not _st.get(_m.UNREADABLE) and not any(_st.values())
+            ok2 = _m.warn_line(_st, "sach.docx") == ""          # IM LẶNG
+            # tệp không tồn tại cũng là "không đọc được", không phải "sạch"
+            ok3 = _m.scan_file(str(_p / "khong-co.docx")).get(_m.UNREADABLE) is True
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r315_tai_lieu_sach_van_im_lang", _c315_tai_lieu_sach_van_im_lang)
+
+    def _c316_tri_do_drawing_khong_lot_vao_than_dieu():
+        """CHIỀU THUẬN — toạ độ EMU của DrawingML KHÔNG được thành chữ của văn bản.
+
+        Đo 02-08: 19-2026 có `2927786221920` ngay trong khối đầu và 2 số ở Điều 141; 89-2026 có
+        Điều 72 dính chuỗi **59 chữ số**. Nhánh python-docx KHÔNG dính ⇒ cùng một .docx cho hai
+        kết quả khác nhau tuỳ máy CÓ hay KHÔNG có python-docx."""
+        _m = _r315_docx("docx_markup_r316")
+        _xml = ('<w:p><w:r><w:drawing><wp:anchor>'
+                '<wp:posOffset>2927786221920</wp:posOffset>'
+                '<wp14:pctWidth>0</wp14:pctWidth><wp14:pctHeight>12345678901</wp14:pctHeight>'
+                '</wp:anchor></w:drawing></w:r>'
+                '<w:r><w:t>Điều 141. Hiệu lực thi hành</w:t></w:r></w:p>')
+        _out = _m.drop_drawing_measures(_xml)
+        # (1) ★CẢ HAI namespace: `wp:` TRẦN và `wp14:`. Bản vá đầu viết `wp14?` — regex đó parse ra
+        #     "wp1"+"4" tuỳ chọn nên KHÔNG khớp `wp:` trần: `wp14:pctWidth` bị bỏ còn
+        #     `wp:posOffset` vẫn lọt, ra chuỗi số CỤT trông như đã sửa xong. Ca này bắt đúng đột biến đó.
+        ok1 = "2927786221920" not in _out and "12345678901" not in _out
+        # (2) chữ THẬT của văn bản còn nguyên
+        ok2 = "Điều 141. Hiệu lực thi hành" in _out
+        # (3) NỐI VÀO ĐƯỜNG CHẠY THẬT (bài học r219: guard không nối vào gate chỉ là tài liệu)
+        _plain = _m.plain_from_document_xml(_xml)
+        ok3 = ("2927786221920" not in _plain and "12345678901" not in _plain
+               and "Điều 141. Hiệu lực thi hành" in _plain)
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r316_tri_do_drawing_khong_lot_vao_than_dieu", _c316_tri_do_drawing_khong_lot_vao_than_dieu)
+
+    def _c316_khong_an_lem_chu_that():
+        """CHIỀU NGƯỢC — ba thứ TUYỆT ĐỐI không được mất khi dọn trị đo."""
+        _m = _r315_docx("docx_markup_r316b")
+        # (1) ★BẤT BIẾN BYTES: tài liệu KHÔNG có drawing ⇒ chuỗi ra = chuỗi VÀO. Vỡ cái này là
+        #     mọi record cache đã nạp đổi text_hash — đúng thứ r182 đã cẩn thận giữ.
+        _sach = "<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi</w:t></w:r></w:p></w:body></w:document>"
+        ok1 = _m.drop_drawing_measures(_sach) == _sach
+        # (2) ★TEXT-BOX trong drawing là chữ THẬT (letterhead VBQPPL hay nằm đó) — xoá cả khối
+        #     `w:drawing` sẽ ăn mất nó, nên phép dọn phải nhắm ĐÚNG hai namespace trị-đo.
+        _tb = ('<w:drawing><wp:anchor><wp:posOffset>999888777666</wp:posOffset>'
+               '<w:txbxContent><w:p><w:r><w:t>VĂN PHÒNG QUỐC HỘI</w:t></w:r></w:p>'
+               '</w:txbxContent></wp:anchor></w:drawing>')
+        _o2 = _m.drop_drawing_measures(_tb)
+        ok2 = "999888777666" not in _o2 and "VĂN PHÒNG QUỐC HỘI" in _o2
+        # (3) ★SỐ THẬT trong w:t phải SỐNG: văn bản luật có số dài (số hiệu tài khoản, mã số thuế…).
+        #     Nếu ai "vá" bằng cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ — và phải ĐỎ.
+        _num = "<w:p><w:r><w:t>Tài khoản số 1234567890123 tại Kho bạc.</w:t></w:r></w:p>"
+        ok3 = "1234567890123" in _m.plain_from_document_xml(_m.drop_drawing_measures(_num))
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r316_khong_an_lem_chu_that", _c316_khong_an_lem_chu_that)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

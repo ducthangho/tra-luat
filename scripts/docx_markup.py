@@ -24,8 +24,12 @@ Zero-dependency (chỉ stdlib) — dùng được cả từ normalize_document.p
 import html as _html
 import re
 
-__all__ = ["MODES", "MARK_OPEN", "MARK_CLOSE", "has_markup", "scan", "scan_file", "strip_markup",
-           "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload", "plain_from_document_xml"]
+__all__ = ["MODES", "MARK_OPEN", "MARK_CLOSE", "UNREADABLE", "has_markup", "scan", "scan_file",
+           "strip_markup", "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload",
+           "plain_from_document_xml", "drop_drawing_measures"]
+
+# r315: khoá đánh dấu «KHÔNG ĐỌC ĐƯỢC container» — KHÁC HẲN «đọc được và sạch markup».
+UNREADABLE = "_unreadable"
 
 MARK_OPEN = "⟦BỎ:"
 MARK_CLOSE = "⟧"
@@ -50,6 +54,19 @@ _RE_RPR = re.compile(r"<w:rPr\b[^>]*>.*?</w:rPr>", re.S)
 _RE_STRIKE = re.compile(r"<w:(?:d)?strike\b[^>]*/?>")
 _RE_VAL = re.compile(r'w:val\s*=\s*"([^"]*)"')
 _RE_TAG = re.compile(r"<[^>]+>")
+# r316: TRỊ ĐO của DrawingML lọt vào TEXT. Phép bóc tag `<[^>]+>`→"" giữ MỌI nút text, kể cả trị
+# toạ độ/kích thước trong `<w:drawing>` ⇒ số EMU chui vào thân Điều. Đo 02-08 trên 2 bản Công báo:
+# 19-2026 có `2927786221920` trong khối đầu + 2 số ở Điều 141 · 89-2026 có Điều 72 dính chuỗi
+# **59 CHỮ SỐ** (nhiều trị dính liền). Nhánh python-docx KHÔNG dính (nó chỉ đọc w:p/w:tbl) ⇒ cùng
+# một .docx cho hai kết quả khác nhau tuỳ máy CÓ hay KHÔNG có python-docx.
+# ★Vì sao chỉ nhắm `wp:`/`wp14:` mà KHÔNG xoá cả `<w:drawing>`: chữ THẬT trong hình nằm ở
+#  `w:txbxContent` (w:t) hoặc `a:t` — xoá cả khối drawing là ăn mất text-box (letterhead VBQPPL
+#  đôi khi nằm trong text-box). Hai namespace này (WordprocessingDrawing) KHÔNG chứa text tài
+#  liệu: mọi lá của chúng là trị đo (posOffset/pctWidth/pctHeight) hoặc từ khoá canh lề.
+# ★`wp(?:14)?` chứ KHÔNG phải `wp14?` — cái sau parse ra "wp1" + "4" tuỳ chọn, tức KHÔNG khớp
+#  `wp:` trần. Đã đo hụt đúng lỗi này một lượt: `wp14:pctWidth` bị bỏ còn `wp:posOffset` vẫn lọt,
+#  ra một chuỗi số CỤT trông như đã sửa xong.
+_RE_DRAWING_MEASURE = re.compile(r"<(wp(?:14)?):([A-Za-z0-9]+)(?:\s[^>]*)?>[^<]*</\1:\2>")
 _RE_SOFTBREAK = re.compile(r"<w:(?:tab|br|cr)\b[^>]*/?>")
 _OFF = {"0", "false", "off", "none"}
 
@@ -98,8 +115,19 @@ def plain_from_document_xml(xml: str) -> str:
     trong nội dung biến thành `<abc>` và bị chính bước bóc tag ăn mất — đổi một lỗi thành một lỗi tệ hơn.
     """
     x = re.sub(r"</w:p>", "\n", xml or "")
+    x = drop_drawing_measures(x)        # r316: TRƯỚC khi bóc tag, xem docstring hàm đó
     x = _RE_TAG.sub("", x)
     return re.sub(r"[ \t]+", " ", _html.unescape(x)).strip()
+
+
+def drop_drawing_measures(xml: str) -> str:
+    """r316 — bỏ TRỊ ĐO DrawingML (`wp:`/`wp14:`) trước khi bóc tag, giữ nguyên text trong hình.
+
+    PHẢI gọi TRƯỚC `_RE_TAG.sub` — gọi sau thì các trị đã hoà vào text, không còn phân biệt được
+    với con số của văn bản (vd «Điều 141» cạnh «7823203810000»).
+    Tài liệu KHÔNG có drawing ⇒ chuỗi ra = chuỗi vào (bytes bất biến cho corpus đã nạp).
+    """
+    return _RE_DRAWING_MEASURE.sub("", xml or "")
 
 
 def has_markup(xml: str) -> bool:
@@ -124,14 +152,26 @@ def scan(xml: str) -> dict:
 
 
 def scan_file(path) -> dict:
-    """Đếm markup của MỘT file .docx (thuần đọc). Không mở được/không phải docx → mọi thể = 0."""
+    """Đếm markup của MỘT file .docx (thuần đọc).
+
+    Không mở được/không phải docx ⇒ trả `{UNREADABLE: True}` — **KHÔNG** trả mọi-thể-=-0.
+
+    r315: bản cũ nuốt mọi exception rồi `return scan("")`, tức docx hỏng được báo là **SẠCH
+    MARKUP**. Docstring cũ gọi đó là chủ ý, nhưng markup là TÍN HIỆU PHÁP LÝ (xem đầu tệp:
+    «lỗi ĐÚNG-SAI về nội dung pháp luật») — một cổng an toàn pháp lý mặc định «sạch» khi không
+    đọc được là fail-OPEN. Ca thật 02-08: .docx Công báo tải qua `g7.cdnchinhphu.vn` đóng gói
+    SAI (33/40 entry đặt tên bằng `\\` thay `/`) nên không có `word/document.xml` theo tên chuẩn
+    ⇒ `scan_file` báo `{}` và người rà kết luận «SẠCH markup»; sự thật là `strike=2`. Lần đó vô
+    hại vì đường NẠP fail-closed chặn trước — nhưng Word/LibreOffice mở được tệp ấy bình thường,
+    nên chỉ cần một reader chịu tên entry `\\` là markup đi thẳng vào kho mà không ai khai.
+    """
     import zipfile
     try:
         from tl_core.ingest_engine import read_member_bounded   # r188 SEC-01: chống zip-bomb
         with zipfile.ZipFile(path) as z:
             return scan(read_member_bounded(z, "word/document.xml").decode("utf-8", "replace"))
-    except Exception:  # noqa: BLE001 — docx hỏng/mã hoá/không phải zip/vượt trần → coi như sạch markup
-        return scan("")
+    except Exception:  # noqa: BLE001 — docx hỏng/mã hoá/không phải zip/vượt trần → KHAI BÁO, không đoán
+        return {UNREADABLE: True}
 
 
 def resolve_mode(mode: str, *, is_draft: bool) -> str:
@@ -211,6 +251,13 @@ def strip_markup(xml: str, mode: str = "strip") -> tuple:
 def warn_line(stats: dict, where: str = "") -> str:
     """Câu cảnh báo 1 dòng (rỗng nếu tài liệu sạch). Caller in ra stderr."""
     st = stats or {}
+    # r315: «không đọc được» phải KÊU TO chứ không im như tài liệu sạch — đây là câu trả lời
+    # «CHƯA BIẾT», và với tín hiệu pháp lý thì chưa-biết KHÔNG được lặng lẽ thành đã-sạch.
+    if st.get(UNREADABLE):
+        return (f"[docx-markup] ⚠ {where or 'tài liệu'} KHÔNG ĐỌC ĐƯỢC container .docx — "
+                "CHƯA biết có markup sửa đổi hay không (KHÔNG phải 'sạch'). Hay gặp: zip đặt tên "
+                "entry bằng '\\' nên thiếu 'word/document.xml' (bản Công báo tải qua CDN), tệp mã "
+                "hoá, hoặc không phải .docx. Kiểm bằng tay trước khi trích dẫn như quy phạm.")
     if not any(st.get(k) for k in ("del", "ins", "strike", "move_from", "move_to")):
         return ""
     bits = [f"{k}={st[k]}" for k in ("del", "strike", "move_from", "ins", "move_to") if st.get(k)]

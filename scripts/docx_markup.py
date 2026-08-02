@@ -28,7 +28,7 @@ __all__ = ["MODES", "MARK_OPEN", "MARK_CLOSE", "UNREADABLE", "has_markup", "scan
            "strip_markup", "warn_line", "resolve_mode", "xml_chunk_text", "chunk_payload",
            "plain_from_document_xml", "drop_drawing_measures"]
 
-# r315: khoá đánh dấu «KHÔNG ĐỌC ĐƯỢC container» — KHÁC HẲN «đọc được và sạch markup».
+# r316: khoá đánh dấu «KHÔNG ĐỌC ĐƯỢC container» — KHÁC HẲN «đọc được và sạch markup».
 UNREADABLE = "_unreadable"
 
 MARK_OPEN = "⟦BỎ:"
@@ -54,7 +54,7 @@ _RE_RPR = re.compile(r"<w:rPr\b[^>]*>.*?</w:rPr>", re.S)
 _RE_STRIKE = re.compile(r"<w:(?:d)?strike\b[^>]*/?>")
 _RE_VAL = re.compile(r'w:val\s*=\s*"([^"]*)"')
 _RE_TAG = re.compile(r"<[^>]+>")
-# r316: TRỊ ĐO của DrawingML lọt vào TEXT. Phép bóc tag `<[^>]+>`→"" giữ MỌI nút text, kể cả trị
+# r317: TRỊ ĐO của DrawingML lọt vào TEXT. Phép bóc tag `<[^>]+>`→"" giữ MỌI nút text, kể cả trị
 # toạ độ/kích thước trong `<w:drawing>` ⇒ số EMU chui vào thân Điều. Đo 02-08 trên 2 bản Công báo:
 # 19-2026 có `2927786221920` trong khối đầu + 2 số ở Điều 141 · 89-2026 có Điều 72 dính chuỗi
 # **59 CHỮ SỐ** (nhiều trị dính liền). Nhánh python-docx KHÔNG dính (nó chỉ đọc w:p/w:tbl) ⇒ cùng
@@ -115,13 +115,13 @@ def plain_from_document_xml(xml: str) -> str:
     trong nội dung biến thành `<abc>` và bị chính bước bóc tag ăn mất — đổi một lỗi thành một lỗi tệ hơn.
     """
     x = re.sub(r"</w:p>", "\n", xml or "")
-    x = drop_drawing_measures(x)        # r316: TRƯỚC khi bóc tag, xem docstring hàm đó
+    x = drop_drawing_measures(x)        # r317: TRƯỚC khi bóc tag, xem docstring hàm đó
     x = _RE_TAG.sub("", x)
     return re.sub(r"[ \t]+", " ", _html.unescape(x)).strip()
 
 
 def drop_drawing_measures(xml: str) -> str:
-    """r316 — bỏ TRỊ ĐO DrawingML (`wp:`/`wp14:`) trước khi bóc tag, giữ nguyên text trong hình.
+    """r317 — bỏ TRỊ ĐO DrawingML (`wp:`/`wp14:`) trước khi bóc tag, giữ nguyên text trong hình.
 
     PHẢI gọi TRƯỚC `_RE_TAG.sub` — gọi sau thì các trị đã hoà vào text, không còn phân biệt được
     với con số của văn bản (vd «Điều 141» cạnh «7823203810000»).
@@ -156,7 +156,7 @@ def scan_file(path) -> dict:
 
     Không mở được/không phải docx ⇒ trả `{UNREADABLE: True}` — **KHÔNG** trả mọi-thể-=-0.
 
-    r315: bản cũ nuốt mọi exception rồi `return scan("")`, tức docx hỏng được báo là **SẠCH
+    r316: bản cũ nuốt mọi exception rồi `return scan("")`, tức docx hỏng được báo là **SẠCH
     MARKUP**. Docstring cũ gọi đó là chủ ý, nhưng markup là TÍN HIỆU PHÁP LÝ (xem đầu tệp:
     «lỗi ĐÚNG-SAI về nội dung pháp luật») — một cổng an toàn pháp lý mặc định «sạch» khi không
     đọc được là fail-OPEN. Ca thật 02-08: .docx Công báo tải qua `g7.cdnchinhphu.vn` đóng gói
@@ -251,7 +251,7 @@ def strip_markup(xml: str, mode: str = "strip") -> tuple:
 def warn_line(stats: dict, where: str = "") -> str:
     """Câu cảnh báo 1 dòng (rỗng nếu tài liệu sạch). Caller in ra stderr."""
     st = stats or {}
-    # r315: «không đọc được» phải KÊU TO chứ không im như tài liệu sạch — đây là câu trả lời
+    # r316: «không đọc được» phải KÊU TO chứ không im như tài liệu sạch — đây là câu trả lời
     # «CHƯA BIẾT», và với tín hiệu pháp lý thì chưa-biết KHÔNG được lặng lẽ thành đã-sạch.
     if st.get(UNREADABLE):
         return (f"[docx-markup] ⚠ {where or 'tài liệu'} KHÔNG ĐỌC ĐƯỢC container .docx — "

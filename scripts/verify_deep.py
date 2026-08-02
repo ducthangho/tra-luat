@@ -81,7 +81,7 @@ def sohieu_corroborated(so_hieu, raw):
         return True
     # VBHN: khoá registry mang NĂM tiêm thêm (bất biến NN-YYYY-VBHN-XXX, chống tái dùng số)
     # còn bản in chính thức KHÔNG có năm ⇒ chấp nhận dạng không-năm là khớp.
-    # r313 (v1.36.47) — nhánh nới-không-năm này CHẾT LẶNG với số hiệu dạng GẠCH CHÉO. r221 vá
+    # r314 (v1.36.48) — nhánh nới-không-năm này CHẾT LẶNG với số hiệu dạng GẠCH CHÉO. r221 vá
     # chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` LUÔN là khoá registry;
     # nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN ("Số hiệu canonical, vd
     # 18/VBHN-VPQH") và đường nạp chuyển THẲNG chuỗi đó xuống đây ⇒ '19/2026/VBHN-VPQH' trượt

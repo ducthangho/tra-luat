@@ -2622,7 +2622,7 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                         try:   # r183: khai số đếm thật để caller/JSON nói được ĐÃ lọc cái gì
                             _dm2 = _imp("docx_markup")
                             _st2 = _dm2.scan_file(p)
-                            # r315: TÁCH «không đọc được» khỏi «đọc được và có markup». Trước đây
+                            # r316: TÁCH «không đọc được» khỏi «đọc được và có markup». Trước đây
                             # `any(...)` trên dict rỗng ⇒ markup_found=False, tức docx hỏng được
                             # khai là SẠCH. Nay khai riêng, và markup_found để True (fail-CLOSED:
                             # chưa-biết KHÔNG được lặng lẽ thành đã-sạch cho một tín hiệu pháp lý).

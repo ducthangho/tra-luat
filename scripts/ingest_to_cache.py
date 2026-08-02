@@ -212,7 +212,7 @@ class PdfProbeUnavailableError(RuntimeError):
     """KHÔNG ĐO ĐƯỢC lớp text (thiếu cả pdfplumber lẫn pypdf) — CHƯA biết gì về tài liệu.
 
     ★KHÔNG kế thừa ScannedPDFError: hai chuyện khác hẳn nhau và phải ra hai lối xử lý khác nhau
-    (sửa MÁY vs đổi NGUỒN). Gộp họ là tái lập đúng cái lỗi mà r314 đi chữa."""
+    (sửa MÁY vs đổi NGUỒN). Gộp họ là tái lập đúng cái lỗi mà r315 đi chữa."""
 
 
 def _pdf_chars_pdfplumber(path: str, max_pages: int):
@@ -246,7 +246,7 @@ def pdf_text_layer_chars(path: str, max_pages: int = 5):
 
     Trả **None** khi KHÔNG đo được (thiếu/hỏng cả hai đường dò) — KHÁC HẲN 0 = đo được và RỖNG.
 
-    r314 (v1.36.47): trước đây thiếu cả hai thư viện cũng `return 0`, mà 0 nghĩa là «PDF scan»
+    r315 (v1.36.48): trước đây thiếu cả hai thư viện cũng `return 0`, mà 0 nghĩa là «PDF scan»
     ⇒ khuyết tật của MÁY bị báo thành thuộc tính của TÀI LIỆU, kèm lời khuyên đi tìm nguồn khác.
     `requirements.txt` khai «uses only Python standard library» nên CÀI SẠCH LÀ KHÔNG CÓ CÁI NÀO
     ⇒ MỌI PDF đều bị chặn oan. Đo 02-08 trên `54-2025-g7.pdf` (PDF text thật, pdftotext bóc
@@ -266,7 +266,7 @@ def assert_pdf_not_scanned(path: str, min_chars: int = 120) -> None:
     """Chặn PDF scan: < min_chars text trên các trang đầu => coi là scan -> raise.
     Quy tắc cứng (người dùng): PDF scan TUYỆT ĐỐI KHÔNG tải/nạp, đi tìm nguồn khác.
 
-    r314: «không đo được» vẫn fail-CLOSED (không nạp mù), nhưng ném lỗi KHÁC + thông điệp chỉ
+    r315: «không đo được» vẫn fail-CLOSED (không nạp mù), nhưng ném lỗi KHÁC + thông điệp chỉ
     đúng người phải sửa. Vẫn chặn, nhưng không còn vu cho tài liệu."""
     n = pdf_text_layer_chars(path)
     if n is None:
@@ -836,7 +836,7 @@ if __name__ == "__main__":
                           "action": "switch_source", "message": str(e)},
                          ensure_ascii=False))
         sys.exit(5)   # exit 5 = PDF scan, đổi nguồn web khác
-    # r314: PHẢI đứng TRƯỚC `except Exception`, và KHÔNG được gộp vào nhánh scanned_pdf ở trên —
+    # r315: PHẢI đứng TRƯỚC `except Exception`, và KHÔNG được gộp vào nhánh scanned_pdf ở trên —
     # hai lối xử lý khác nhau: đây là «sửa MÁY rồi chạy lại CÙNG lệnh», kia là «đổi NGUỒN».
     # exit 6 riêng để agent-loop/script không nuốt thành `ingest_failed` chung chung.
     except PdfProbeUnavailableError as e:

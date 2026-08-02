@@ -1,10 +1,10 @@
-# ★ v1.36.48 — r315: `scan_file` hết FAIL-OPEN (docx không đọc được ≠ sạch markup) · r316: trị đo DrawingML hết lọt vào thân Điều (2026-08-02)
+# ★ v1.36.49 — r316: `scan_file` hết FAIL-OPEN (docx không đọc được ≠ sạch markup) · r317: trị đo DrawingML hết lọt vào thân Điều (2026-08-02)
 
 Hai lỗ của **đường ĐỌC .docx**, cùng lộ ra ở lượt bảo trì kho 02-08 khi nạp thật hai bản Công báo
 (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.2, §4.6). Cả hai đều làm hỏng **nguyên văn** —
 đúng lời hứa lõi của skill — mà không cổng nào kêu.
 
-## r315 — `docx_markup.scan_file` báo «sạch markup» cho tệp KHÔNG ĐỌC ĐƯỢC
+## r316 — `docx_markup.scan_file` báo «sạch markup» cho tệp KHÔNG ĐỌC ĐƯỢC
 
 **Bệnh.** Bản cũ nuốt mọi exception rồi `return scan("")`, tức trả dict đếm TOÀN 0. Docstring gọi đó
 là chủ ý, nhưng markup là **TÍN HIỆU PHÁP LÝ** — chính đầu tệp `docx_markup.py` viết «lỗi ĐÚNG-SAI về
@@ -30,7 +30,7 @@ câu `MARKUP_SUA_DOI` (câu đó khẳng định CÓ markup và đếm được;
 ★Tài liệu SẠCH vẫn IM LẶNG như cũ — ca `r315_tai_lieu_sach_van_im_lang` giữ chốt đó, để cảnh báo
 không thành tiếng ồn và bất biến «văn bản sạch giữ NGUYÊN bytes cache» của r182 không vỡ.
 
-## r316 — toạ độ DrawingML chui vào thân Điều
+## r317 — toạ độ DrawingML chui vào thân Điều
 
 **Bệnh.** Phép bóc tag `<[^>]+>`→`""` giữ **MỌI** nút text, kể cả trị đo trong `<w:drawing>`. Đo trên
 2 bản Công báo (nhánh KHÔNG python-docx):
@@ -77,16 +77,16 @@ ruff F **delta so master = 0** trên cả 4 tệp đụng tới (`docx_markup.py
 determinism ok · `release-verify` 177/177 + `package_hash` khớp.
 
 **Còn treo (§4.6 chưa xong phần khế ước):** `requirements.txt` vẫn khai «uses only Python standard
-library». r316 làm nhánh không-`python-docx` hết rò, nhưng `pypdf` thì KHÔNG có đường thay thế —
-thiếu nó là mọi PDF bị chặn (r314). Sửa khế ước cài đặt của gói là lượt riêng.
+library». r317 làm nhánh không-`python-docx` hết rò, nhưng `pypdf` thì KHÔNG có đường thay thế —
+thiếu nó là mọi PDF bị chặn (r315). Sửa khế ước cài đặt của gói là lượt riêng.
 
-# ★ v1.36.47 — r313: cổng T1 số hiệu nhận dạng GẠCH CHÉO · r314: thiếu thư viện dò PDF không còn bị gọi là «bản SCAN» (2026-08-02)
+# ★ v1.36.48 — r314: cổng T1 số hiệu nhận dạng GẠCH CHÉO · r315: thiếu thư viện dò PDF không còn bị gọi là «bản SCAN» (2026-08-02)
 
 Hai cổng CÙNG một bệnh: **báo sai thủ phạm**. Cả hai đều đỏ/xanh nghe rất thuyết phục, và cả hai đều
 đẩy người vận hành đi sửa nhầm chỗ. Không cái nào lộ ra khi đọc mã — cùng lộ ra ở lượt bảo trì kho
 02-08 khi nạp thật ba bản Công báo (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.1, §4.3).
 
-## r313 — `sohieu_corroborated` mù với dạng số hiệu gạch chéo
+## r314 — `sohieu_corroborated` mù với dạng số hiệu gạch chéo
 
 **Bệnh.** r221 vá chiều «khoá registry gạch-nối vs bản in gạch-chéo» và mặc định `so_hieu` truyền vào
 LUÔN là khoá registry. Nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN — nguyên văn
@@ -110,7 +110,7 @@ LUÔN là khoá registry. Nhưng `ingest_to_cache --help` lại bảo người d
 mở toang một cổng khác. Test `r313_khong_noi_regex_dung_chung` khoá đúng điều này: nó ĐỎ nếu ai
 đó "vá" bằng cách sửa regex chung.
 
-## r314 — `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là THIẾU THƯ VIỆN
+## r315 — `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là THIẾU THƯ VIỆN
 
 **Bệnh.** `pdf_text_layer_chars` thử `pdfplumber` rồi `pypdf`; thiếu **cả hai** thì `return 0` — mà 0
 nghĩa là «PDF scan». Khuyết tật của MÁY bị báo thành thuộc tính của TÀI LIỆU, kèm lời khuyên

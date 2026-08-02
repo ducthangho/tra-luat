@@ -56,9 +56,9 @@ nhánh đó không có `--expect` (biên bản §2). Chống va chạm = bước
 
 Ba bản Công báo đã đo đạt, sha256 + URL + lệnh nguyên văn ở biên bản §3.1 và §3.6.
 **Cần môi trường:** `poppler-utils` (pdftotext) · `pip install pypdf cffi`.
-`pypdf` là BẮT BUỘC: thiếu nó thì **mọi PDF bị chặn** — sau r314 thông điệp đã đúng thủ phạm
+`pypdf` là BẮT BUỘC: thiếu nó thì **mọi PDF bị chặn** — sau r315 thông điệp đã đúng thủ phạm
 (`reason: pdf_probe_unavailable`, exit 6, kèm lệnh cài) chứ không còn vu cho tài liệu là «bản SCAN».
-`python-docx` nay chỉ còn là TUỲ CHỌN: sau r316 nhánh không-`python-docx` không nhét số neo hình
+`python-docx` nay chỉ còn là TUỲ CHỌN: sau r317 nhánh không-`python-docx` không nhét số neo hình
 vẽ vào thân Điều nữa (nghiệm thu: 3 số rác → 0 trên cả hai bản .docx).
 
 | Số hiệu | Nguồn | Đo được |
@@ -85,22 +85,22 @@ trộn ~900 ký tự căn cứ ban hành của 4 luật khác vào **thân Đi�
 ## VIỆC 3 — Lượt VÁ CODE: còn 2,5/6 phát hiện (biên bản §4)
 
 Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. **Bốn cái đã vá trong nhánh này**
-(r313→r316, v1.36.47+v1.36.48, gate xanh: selftest 1598/1598 · ruff delta 0 · golden 0-diff ·
+(r314→r317, v1.36.48+v1.36.49, gate xanh: selftest 1598/1598 · ruff delta 0 · golden 0-diff ·
 release-verify 177/177). Còn lại:
 
 | # | Lỗi | Vì sao ưu tiên |
 |---|---|---|
-| ~~§4.1~~ | ~~`_VBHN_WITHYEAR_RE` chỉ nhận gạch nối ⇒ `T1-nhẹ` dương tính giả~~ | ✅ **ĐÃ VÁ — r313 (v1.36.47)**, cùng nhánh này |
-| ~~§4.3~~ | ~~Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN»~~ | ✅ **ĐÃ VÁ — r314 (v1.36.47)**, cùng nhánh này |
-| ~~§4.2~~ | ~~`scan_file` FAIL-OPEN: docx không đọc được → báo «sạch markup»~~ | ✅ **ĐÃ VÁ — r315 (v1.36.48)**, cùng nhánh này |
-| §4.6 (còn PHẦN KHẾ ƯỚC) | Phần RÒ ✅ **ĐÃ VÁ — r316 (v1.36.48)**: `wp:`/`wp14:` hết lọt vào thân Điều, nghiệm thu 3 số rác → 0 trên cả hai bản. **Chưa vá:** `requirements.txt` vẫn khai stdlib-only | r316 cứu được nhánh không-`python-docx`, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r314) |
+| ~~§4.1~~ | ~~`_VBHN_WITHYEAR_RE` chỉ nhận gạch nối ⇒ `T1-nhẹ` dương tính giả~~ | ✅ **ĐÃ VÁ — r314 (v1.36.48)**, cùng nhánh này |
+| ~~§4.3~~ | ~~Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN»~~ | ✅ **ĐÃ VÁ — r315 (v1.36.48)**, cùng nhánh này |
+| ~~§4.2~~ | ~~`scan_file` FAIL-OPEN: docx không đọc được → báo «sạch markup»~~ | ✅ **ĐÃ VÁ — r316 (v1.36.49)**, cùng nhánh này |
+| §4.6 (còn PHẦN KHẾ ƯỚC) | Phần RÒ ✅ **ĐÃ VÁ — r317 (v1.36.49)**: `wp:`/`wp14:` hết lọt vào thân Điều, nghiệm thu 3 số rác → 0 trên cả hai bản. **Chưa vá:** `requirements.txt` vẫn khai stdlib-only | r317 cứu được nhánh không-`python-docx`, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r315) |
 | §4.4 | `CB_DAU_MUC` sai CẢ HAI CHIỀU; lời khuyên kèm theo nếu làm theo đúng chữ sẽ XOÁ Chương I–V | Cảnh báo nguy hiểm hơn thứ nó cảnh báo |
 | §4.5 | `CB_CHU_KY_SO` chỉ khớp mẫu 4 dòng, bỏ sót biến thể 3 dòng ⇒ chrome lọt vào khối đầu | Bẩn khối đầu, không sai nội dung |
 
 Quy trình bắt buộc: bump VERSION 3 chỗ · test `rXXX_` cho TỪNG cái · `--selftest` N/N ·
 `git diff` → CHANGELOG (★ vX.Y.Z) → commit. Deploy CHỜ DUYỆT (xem CLAUDE.md §Quy ước deploy).
 
-⚠ **Bẫy đã dính khi vá r313/r314 — đọc trước khi sửa bất kỳ tệp nào trong gói:** bump VERSION bằng
+⚠ **Bẫy đã dính khi vá r314/r315 — đọc trước khi sửa bất kỳ tệp nào trong gói:** bump VERSION bằng
 `pathlib.read_text()/write_text()` **nuốt 307 CRLF của `SKILL.md` và 1766 của `tl.py`** (chế độ text
 dịch CRLF→LF). `.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ phải đi
 `read_bytes()/write_bytes()`. Bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo
@@ -129,7 +129,7 @@ python scripts/tl.py profile-info --profile "Luật BHXH" --json
 ## Ràng buộc (giữ nguyên)
 
 * Mọi lệnh mang `--profile "Luật BHXH"` — **và kiểm `profile-info` để chắc cờ đó có tác dụng thật**.
-* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.48** (r313→r316).
+* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.49** (r314→r317).
 * Registry: `reg-query --refresh` dò trùng trên dữ liệu TƯƠI trước · readback `--live` hẹp sau ·
   cân nhắc `--expect COL=VAL` khi đường ghi có hỗ trợ.
 * 2–3 phiên chạy song song trên cùng cây canonical ⇒ `git status -sb` trước mọi commit + phép kiểm

@@ -14,10 +14,10 @@ Phạm vi: 2 mục của lượt bảo trì kho. **KHÔNG** gỡ quarantine 41/2
 | 2a. `19-2026-VBHN-VPQH` — bản còn markup sửa đổi | ✅ **Có nguồn thay thế đo đạt** | Công báo 133 (.docx) · 141/141 Điều · 0 số rác · markup={strike:2} = 2 DẤU CÁCH (ngoại lệ có bằng chứng, người dùng đã chốt) |
 | 2b. `54-2025-VBHN-VPQH` — khối đầu là chrome trang web | ✅ **Có nguồn thay thế đo đạt** | Công báo 1083+1084 (.pdf text) · 72 Điều · khối đầu sạch sau khi cắt 1 dòng nhãn mục |
 | 2c. `89-2026-VBHN-VPQH` — khối đầu thiếu VPQH + «Số:» | ✅ **Có nguồn thay thế đo đạt** | Công báo 222 (.docx) · 79 Điều · `verify_flags` RỖNG · VPQH+«Số:» nằm ở KHỐI KÝ CUỐI (đúng bố cục VBHN) |
-| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1/§4.3 (r313+r314, v1.36.47) và §4.2/§4.6 (r315+r316, v1.36.48) ĐÃ VÁ trong chính nhánh này**; còn §4.4, §4.5 |
+| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1/§4.3 (r314+r315, v1.36.48) và §4.2/§4.6 (r316+r317, v1.36.49) ĐÃ VÁ trong chính nhánh này**; còn §4.4, §4.5 |
 
 **Không có thao tác GHI DỮ LIỆU nào trong lượt này** — không ghi registry, không ghi Drive, không
-đụng NLM. (Có sửa MÃ: r313+r314 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
+đụng NLM. (Có sửa MÃ: r314+r315 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
 (`$SCRATCH/cache{B..F}`, ngoài repo, ephemeral theo container).
 
 ---
@@ -292,7 +292,7 @@ Cả 3 văn bản đều báo `T1-nhẹ: số '…' không thấy ở khối đ�
 gạch chéo, và **hết sạch** khi nạp bằng dạng gạch nối — dù tệp y hệt. Cùng họ lỗi với
 ★ v1.35.57/r221 (`re.escape(so_hieu.split("/")[0])`).
 
-> ✅ **ĐÃ VÁ — r313 (v1.36.47), cùng nhánh này.** Nắn ngăn cách của BẢN SAO cục bộ ngay trước
+> ✅ **ĐÃ VÁ — r314 (v1.36.48), cùng nhánh này.** Nắn ngăn cách của BẢN SAO cục bộ ngay trước
 > `fullmatch`; **KHÔNG** nới `_VBHN_WITHYEAR_RE` dùng chung (ở `classify`/`hygiene`/`resolve`/
 > `lookup_ops` nó canh đúng bất biến khoá registry). Khoá bằng 2 ca:
 > `r313_sohieu_corroborated_nhan_dang_gach_cheo` (chiều thuận + PARITY hai dạng) và
@@ -316,7 +316,7 @@ mà mặc định «sạch» khi không đọc được là fail-open. Hôm nay 
 sẽ CÓ HẠI ngay khi có reader chịu được tên entry `\` (LibreOffice/Word đều mở được tệp này).
 **Vá đề xuất:** `scan_file` trả `{"_unreadable": True}` thay vì `{}` và để caller khai báo LOUD.
 
-> ✅ **ĐÃ VÁ — r315 (v1.36.48), cùng nhánh này.** `scan_file` trả `{UNREADABLE: True}`; `warn_line`
+> ✅ **ĐÃ VÁ — r316 (v1.36.49), cùng nhánh này.** `scan_file` trả `{UNREADABLE: True}`; `warn_line`
 > có nhánh KÊU TO riêng; `normalize_document` khai `MARKUP_KHONG_DOC_DUOC` **tách khỏi**
 > `MARKUP_SUA_DOI`; `lookup_ops` khai `markup_unreadable` + `markup_found=True` (fail-CLOSED).
 > ★Phát hiện thêm **ca thứ hai** của cùng lỗ, nằm sẵn trong selftest: `r188_docx_reader_bounded_wired`
@@ -341,7 +341,7 @@ Thông điệp còn CHỈ SAI đường sửa — *«hãy chuyển sang nguồn 
 săn nguồn không tồn tại, trong khi lỗi nằm ở máy mình. **Vá đề xuất:** tách «không đo được» khỏi
 «đo được = 0»; thiếu thư viện ⇒ `PDF_PROBE_UNAVAILABLE` + hướng dẫn cài, KHÔNG kết luận về tài liệu.
 
-> ✅ **ĐÃ VÁ — r314 (v1.36.47), cùng nhánh này.** `pdf_text_layer_chars` trả `None` = KHÔNG ĐO ĐƯỢC
+> ✅ **ĐÃ VÁ — r315 (v1.36.48), cùng nhánh này.** `pdf_text_layer_chars` trả `None` = KHÔNG ĐO ĐƯỢC
 > (khác hẳn `0`); lớp lỗi riêng `PdfProbeUnavailableError` **không** kế thừa `ScannedPDFError`;
 > handler `__main__` thêm `reason: "pdf_probe_unavailable"` + `action: "install_dep"` + **exit 6**.
 > Vẫn fail-CLOSED, chỉ đổi thông điệp về đúng thủ phạm. Tiện thể sửa lỗi **cộng dồn** giữa hai
@@ -381,7 +381,7 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 
 ⇒ `python-docx` (và `pypdf`) thực chất là **phụ thuộc bắt buộc để nạp đúng**, không phải tuỳ chọn.
 
-> ✅ **ĐÃ VÁ (phần RÒ) — r316 (v1.36.48), cùng nhánh này.** `drop_drawing_measures()` bỏ nội dung
+> ✅ **ĐÃ VÁ (phần RÒ) — r317 (v1.36.49), cùng nhánh này.** `drop_drawing_measures()` bỏ nội dung
 > element thuộc `wp:`/`wp14:` TRƯỚC khi bóc tag, ở **cả hai** reader bóc-tag (`plain_from_document_xml`
 > và `_docx_zip_text`). Nghiệm thu end-to-end (chặn `python-docx` để ép đúng nhánh rò): 19-2026 và
 > 89-2026 đều **3 số rác → 0**, số Điều giữ nguyên 141/79.
@@ -390,8 +390,8 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 > ⚠ **Bẫy giữa chừng:** regex đầu viết `wp14?` — parse ra `"wp1"`+`"4"` tuỳ chọn nên KHÔNG khớp
 > `wp:` trần; `wp14:pctWidth` bị bỏ còn `wp:posOffset` vẫn lọt, ra chuỗi số **CỤT** trông như đã
 > sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`.
-> **CHƯA vá phần khế ước:** `requirements.txt` vẫn khai stdlib-only. r316 làm nhánh không-`python-docx`
-> hết rò, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r314). Lượt riêng.
+> **CHƯA vá phần khế ước:** `requirements.txt` vẫn khai stdlib-only. r317 làm nhánh không-`python-docx`
+> hết rò, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r315). Lượt riêng.
 `requirements.txt` hiện nói ngược lại. **Vá đề xuất:** hoặc thêm vào `requirements.txt`, hoặc để
 `doctor`/`precheck` CẢNH BÁO LOUD khi thiếu, kèm hệ quả cụ thể.
 
@@ -403,7 +403,7 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 2. **Chép đè 3 record cache** — chờ máy có `~/.tra_luat_cache/docs/`; phải `doc-compare` với bản cũ
    và quyết về `method_rank` 95 → 50 (§3.6).
 3. **Phát hiện công cụ §4** — bốn cái **ĐÃ VÁ** trong chính nhánh này:
-   **§4.1→r313 · §4.3→r314** (v1.36.47) · **§4.2→r315 · §4.6 phần RÒ→r316** (v1.36.48).
+   **§4.1→r314 · §4.3→r315** (v1.36.48) · **§4.2→r316 · §4.6 phần RÒ→r317** (v1.36.49).
    Cổng lượt cuối: selftest **1598/1598** · ruff F **delta so master = 0** · golden 0-diff ·
    determinism ok · doc-claims 9/9 layer = 0 · `release-verify` 177/177 + `package_hash` khớp ·
    `RELEASE_MANIFEST.json` đã tái sinh.

@@ -18464,8 +18464,8 @@ def run() -> int:
     def _c188_docx_reader_bounded_wired():
         # document.xml vượt trần (env cap 1MB) → _docx_unzip_text trả "" fail-safe (không OOM) và
         # docx_markup.scan_file KHAI `UNREADABLE`; docx thường (dưới trần) vẫn đọc bình thường.
-        # ★r315 ĐỔI KHẾ ƯỚC ở dòng scan_file: bản gốc r188 đòi `sum(...) == 0`, tức docx vượt trần
-        #  được báo là SẠCH MARKUP. Đó chính là fail-open r315 đi chữa — và là ca THỨ HAI của nó
+        # ★r316 ĐỔI KHẾ ƯỚC ở dòng scan_file: bản gốc r188 đòi `sum(...) == 0`, tức docx vượt trần
+        #  được báo là SẠCH MARKUP. Đó chính là fail-open r316 đi chữa — và là ca THỨ HAI của nó
         #  (ca thứ nhất: container CDN đặt tên entry bằng '\'). Vượt trần = KHÔNG ĐO ĐƯỢC, không
         #  phải "đo được và bằng 0". Phần còn lại của r188 (reader bounded, không OOM, docx thường
         #  vẫn đọc được, cap đọc đúng từ env) GIỮ NGUYÊN.
@@ -27078,7 +27078,7 @@ def run() -> int:
     _t110("r310_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
 
 
-    # ---- r313 + r314: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
+    # ---- r314 + r315: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
     def _mod313(fname, alias):
         """Nạp THẲNG scripts/<fname> — KHÔNG qua tl/bind (bẫy false-green r212)."""
         import importlib.util as _ilu313
@@ -27092,12 +27092,12 @@ def run() -> int:
 
         r221 vá chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` luôn là KHOÁ.
         Nhưng `ingest_to_cache --help` bảo người dùng gõ dạng IN ('vd 18/VBHN-VPQH') và đường
-        nạp chuyển thẳng chuỗi đó xuống ⇒ trước r313, dạng gạch chéo trượt `fullmatch`, mất
+        nạp chuyển thẳng chuỗi đó xuống ⇒ trước r314, dạng gạch chéo trượt `fullmatch`, mất
         phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08, CÙNG tệp: gạch chéo 3/3 cờ oan · gạch nối 0/3.
         """
         f = _mod313("verify_deep.py", "verify_deep_r313").sohieu_corroborated
         _doc19 = "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n"
-        # (1) dạng IN (gạch chéo) — ca ĐỎ trước r313
+        # (1) dạng IN (gạch chéo) — ca ĐỎ trước r314
         ok1 = f("19/2026/VBHN-VPQH", _doc19)
         # (2) ★PARITY là bất biến thật: cùng tài liệu thì hai dạng PHẢI cho CÙNG câu trả lời.
         #     Ca này bắt được bản vá NỬA VỜI mà ca (1) đơn lẻ có thể bỏ lọt.
@@ -27127,7 +27127,7 @@ def run() -> int:
         ok5 = not f("///", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
         # ★GIỚI HẠN CÓ CHỦ Ý, ghi ra để không ai tưởng là lỗ: bản in KHÔNG mang năm nên NĂM sai
         #  vẫn khớp ('19/2027' ≡ '19/2026' trên cùng bản in). Đó là phép nới của r221, KHÔNG
-        #  phải hệ quả của r313 — chốt lại đây để sau này ai siết năm thì siết CÓ Ý THỨC.
+        #  phải hệ quả của r314 — chốt lại đây để sau này ai siết năm thì siết CÓ Ý THỨC.
         ok6 = f("19/2027/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
 
@@ -27136,7 +27136,7 @@ def run() -> int:
     def _c314_thieu_thu_vien_khong_bi_goi_la_ban_scan():
         """CHIỀU THUẬN — thiếu pdfplumber+pypdf phải ra lỗi CỦA MÁY, không phải phán về TÀI LIỆU.
 
-        Trước r314, `pdf_text_layer_chars` thiếu cả hai thư viện cũng `return 0`, mà 0 = «PDF
+        Trước r315, `pdf_text_layer_chars` thiếu cả hai thư viện cũng `return 0`, mà 0 = «PDF
         scan» ⇒ máy thiếu thư viện bị báo thành «bản SCAN» + khuyên đi tìm nguồn khác. Mà
         `requirements.txt` khai stdlib-only ⇒ CÀI SẠCH LÀ CHẶN MỌI PDF. Đo 02-08 trên
         `54-2025-g7.pdf` (pdftotext bóc 167.433 ký tự): chưa cài pypdf ⇒ reason=scanned_pdf ·
@@ -27160,7 +27160,7 @@ def run() -> int:
                 _s = str(_e)
                 ok3 = ("KHUYẾT CỦA MÁY" in _s) and ("pip install pypdf" in _s)
             except _m.ScannedPDFError:
-                ok2 = ok3 = False     # ← đúng cái lỗi r314 đi chữa
+                ok2 = ok3 = False     # ← đúng cái lỗi r315 đi chữa
         finally:
             for _k, _v in _sav.items():
                 (_hsys.modules.pop(_k, None) if _v == "___absent___" else _hsys.modules.__setitem__(_k, _v))
@@ -27173,7 +27173,7 @@ def run() -> int:
     def _c314_do_duoc_0_van_la_ban_scan():
         """CHIỀU NGƯỢC — cái đắt nhất: đừng nới tới mức PDF scan THẬT lọt qua.
 
-        Quy tắc cứng của người dùng: PDF scan TUYỆT ĐỐI không nạp. r314 chỉ tách «không đo được»
+        Quy tắc cứng của người dùng: PDF scan TUYỆT ĐỐI không nạp. r315 chỉ tách «không đo được»
         ra khỏi «đo được = 0»; đo được 0 thì vẫn phải là ScannedPDFError như cũ.
         """
         _m = _mod313("ingest_to_cache.py", "ingest_to_cache_r314b")
@@ -27211,7 +27211,7 @@ def run() -> int:
 
     _t110("r314_do_duoc_0_van_la_ban_scan", _c314_do_duoc_0_van_la_ban_scan)
 
-    # ---- r315 + r316: hai lỗ của đường đọc .docx (đo 02-08 trên 2 bản Công báo) -----------
+    # ---- r316 + r317: hai lỗ của đường đọc .docx (đo 02-08 trên 2 bản Công báo) -----------
     def _r315_docx(alias):
         import importlib.util as _ilu315
         _sp = _ilu315.spec_from_file_location(alias, _ROOT209 / "scripts" / "docx_markup.py")

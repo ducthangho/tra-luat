@@ -787,6 +787,18 @@ def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
         if role == "registry" and mime and mime != REGISTRY_SHEET_MIME:
             finds.append({"check": "REGISTRY_NOT_SHEET_MIME", "severity": "critical", "profile": name,
                           "fileId": fid, "mime": mime, "note": "registry PHẢI là Google Sheet."})
+        # r320 (PRO-05): TRƯỚC ĐÂY kiểm MIME bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có
+        # phép kiểm loại nào. Một Google Doc đặt ở `manifestId`, parent đúng, đi qua doctor SẠCH TRƠN
+        # (đo: 0 finding) trong khi chính nó là thứ không đọc được — manifest được upload
+        # `mime=application/json`, `convert=false` (`_create_profile_manifest_json`) rồi tải về JSON-parse.
+        # Cố ý KHÔNG đòi đúng `application/json`: Drive có thể trả `text/plain` cho JSON upload, và bản
+        # text đó vẫn parse được — siết theo chuỗi MIME chính xác là đỏ OAN. Bất biến THẬT là "không phải
+        # tệp Google-native": native cần export mới ra nội dung, nên KHÔNG có đường nào đọc thành JSON.
+        if role == "manifest" and mime and mime.startswith("application/vnd.google-apps."):
+            finds.append({"check": "MANIFEST_NOT_JSON_MIME", "severity": "critical", "profile": name,
+                          "fileId": fid, "mime": mime,
+                          "note": "manifest PHẢI là tệp JSON thường (upload convert=false) — bản "
+                                  "Google-native không JSON-parse được; trỏ lại file .json thật."})
         if info.get("trashed"):
             finds.append({"check": f"{role.upper()}_TRASHED", "severity": "critical", "profile": name,
                           "fileId": fid, "note": f"{role} đang trong Trash — restore hoặc trỏ file khác."})

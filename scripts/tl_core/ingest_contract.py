@@ -18,6 +18,17 @@ PLAN_SCHEMA = "ingest_plan.v2"
 MAX_DIRECT_UPLOAD_BYTES = 35 * 1024 * 1024
 _CONFIRM_VALUE = "yes"
 
+# r320 (ING-06): NGUỒN SỰ THẬT DUY NHẤT cho "đuôi nạp được". Trước đây tập này bị khai HAI LẦN, lệch
+# nhau: ZIP planner (`zip_ingest._ALLOWED_INGEST_EXTS`) nhận thêm `.txt`/`.md`, còn child `ingest-local`
+# (`_il_stage_plan` → `validate_source_file`) từ chối đúng hai đuôi đó bằng `UNSUPPORTED_EXTENSION`.
+# Hệ quả: planner hứa một kế hoạch mà child CHẮC CHẮN không thực hiện được — member vào plan rồi chết
+# ở bước sau, đúng lớp "nguồn sự thật nhân đôi" của sổ audit.
+#
+# Chọn THU planner về đúng năng lực child, KHÔNG nới child ra: nới nghĩa là cho phép upload `.txt`/`.md`
+# rồi convert — đó là quyết định TÍNH NĂNG (đổi thứ được ghi vào corpus), không phải sửa lỗi lệch sổ.
+# Muốn mở thì mở tường minh ở đây, một chỗ, và cả hai phía nhận cùng lúc.
+INGEST_LOCAL_EXTS = frozenset({".doc", ".docx", ".pdf", ".rtf", ".odt"})
+
 
 def _nfc(value: Any) -> Any:
     """Normalize text without changing business meaning or path separators."""

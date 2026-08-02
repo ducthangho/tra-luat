@@ -36,7 +36,9 @@ def bind(tl_module) -> None:
 
 
 # ───────────────────────── safe dry-run helpers: zip/OCR/chunk ─────────────────────────
-_ALLOWED_INGEST_EXTS = {".doc", ".docx", ".pdf", ".txt", ".md", ".rtf", ".odt"}
+# r320 (ING-06): lấy TỪ hợp đồng dùng chung thay vì khai lại — bản khai lại đã trôi lệch khỏi child
+# (thừa `.txt`/`.md`). Giữ nguyên TÊN cũ để mọi call site trong tệp này không phải đổi.
+from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _ALLOWED_INGEST_EXTS   # noqa: E402
 
 _IGNORED_ZIP_NAMES = {".ds_store", "thumbs.db"}
 _WINDOWS_RESERVED = {"con", "prn", "aux", "nul", *(f"com{i}" for i in range(1, 10)),

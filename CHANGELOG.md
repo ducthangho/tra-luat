@@ -1,3 +1,92 @@
+# ★ v1.36.52 — r320: ĐÓNG 4 mục CUỐI của sổ audit 31-07 — PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06 (2026-08-02)
+
+Bốn mục này là **toàn bộ phần còn lại** của nhóm "chưa có bằng chứng độc lập" (§Phụ lục kế hoạch: 6 mục,
+`RAS-14` đóng ở r310, `ING-03` tự tái hiện xong). Theo đúng dặn dò "dựng repro TRƯỚC", mỗi mục được tái
+hiện trên cây hôm nay rồi mới vá — **cả 4 đều CONFIRMED, sổ audit không mục nào bịa**.
+
+**T0-C trước khi mở Làn B (bắt buộc theo kế hoạch §III.2).** Đo ranh giới tệp với P16: `profile_mgmt.py`
+chạm gần nhất r268 · `profile_env.py` r286 (P16 dừng ở đây) · `zip_ingest.py` r268 · `ingest_ops.py`
+**r312** nhưng diff chỉ 1 hunk trong `_il_stage_plan`, **0 lần** chạm `_resume_identity_gate`. Không giao ⇒
+mở được.
+
+## PRO-03 + PRO-09 — guard marker viết đúng, test xanh, CHƯA TỪNG CHẠY
+
+**Nặng hơn sổ.** Sổ nói "`profile-adopt` không dùng mutation guard". Đo ra: `_marker_mutation_guard` (có từ
+r184, ADR-0012 §4 khai là **guard chung cho mọi mutation profile**) có **0 call site sản xuất** trong toàn
+kho — 3 tham chiếu duy nhất là định nghĩa, dòng khai `_STUB_MAP`, và **một ca test gọi thẳng**. Cùng lớp
+"chứng nhận RỖNG" mà r298 đã diệt 3 ca.
+
+- **PRO-03**: adopt tự dựng lại ba điều kiện rời (đọc lỗi / trùng marker / tên profile khác). Marker **hỏng
+  nội dung** lọt sạch: `FINGERPRINT_MISMATCH` cho cả ba điều kiện đều False ⇒ rơi thẳng vào `_marker_write`
+  = **ghi đè bản hỏng** (self-heal ngầm), đúng thứ ADR-0012 cấm. Đo: guard trả `MARKER_INVALID` cho chính ca
+  đó, adopt cho qua. Nay adopt định tuyến qua guard.
+- **PRO-09** (nâng từ mục RISK, theo §I.5 kế hoạch): `profile-delete` — mutation **nặng nhất** họ profile
+  (xoá nguồn NLM **bất khả nghịch** → trash Drive → gỡ config) — **không đọc marker ở bất kỳ đâu**. Nay guard
+  đứng **sau** cổng `--confirm` (DRY không tốn call mạng) và **trước** mutation ĐẦU TIÊN; chặn ⇒
+  `PROFILE_DELETE_MARKER_GUARD` rc=2, chưa xoá gì. Transport nổ = "mù trạng thái", KHÔNG phải "sạch".
+
+**Breaking có chủ đích:** adopt/delete lên marker không hợp lệ nay DỪNG thay vì tự chữa. Đường repair đã
+thiết kế sẵn (ADR-0012 §3): `profile-backfill-markers --profile-name <tên> --apply --force`.
+
+## PRO-05 — kiểm MIME bị khoá nhầm sau `role == "registry"`
+
+Nhánh `manifest` **không có phép kiểm loại nào**. Đo: Google Doc đặt ở `manifestId`, parent đúng ⇒ doctor
+**0 finding**, trong khi chính nó là thứ không đọc được (manifest upload `mime=application/json`,
+`convert=false` rồi tải về JSON-parse).
+
+Bất biến chọn là **"không phải tệp Google-native"**, không phải "đúng `application/json`": Drive có thể trả
+`text/plain` cho JSON upload và bản đó vẫn parse được — siết theo chuỗi MIME chính xác là **đỏ oan**. Ca test
+khoá cả hai chiều: `application/json` và `text/plain` **không** đỏ; Doc **và** Sheet đều bị bắt.
+
+## ING-04 — `if _jd and …` coi VẮNG MẶT là hợp lệ
+
+`_resume_identity_gate` so `journal.drive_id` với dòng canonical, nhưng bọc trong `if _jd and …` ⇒ journal ghi
+`drive_id=""` thì **bỏ qua so sánh**. Đo đúng kịch bản sổ: journal cũ (`drive_id=""`, có `identity_hash`) +
+registry đã trỏ sang GDoc **hoàn toàn khác** ⇒ cổng trả `None` = **cấp quyền ghi**. Đo thêm trên hàm THẬT:
+`source_sha256` **0 lần**; `identity_hash`/`plan_hash` chỉ bị kiểm **CÓ MẶT**, không đối chiếu **GIÁ TRỊ**.
+
+Nay: journal thiếu `drive_id` mà registry ĐÃ có dòng canonical ⇒ `RESUME_JOURNAL_NO_DRIVE_ID`.
+
+★ **Lượt đầu tôi siết QUÁ TAY và chính phản chứng bắt được**: bản vá ban đầu chặn cả khi người gọi khai
+`--drive-id` KHỚP canonical — mà khai rồi thì cổng phía trên đã đối chiếu, tức nguồn ĐÃ được chứng minh bằng
+đường khác. Thêm vế `not drive_id`. Ma trận 5 ca nay đều đúng.
+
+## ING-06 — tập đuôi khai HAI LẦN, đã trôi lệch
+
+ZIP planner `{.doc .docx .pdf .txt .md .rtf .odt}` vs child `ingest-local` `{.docx .doc .pdf .rtf .odt}`.
+Khe hở = đúng **`.txt`, `.md`** như sổ nêu. Chạy `validate_source_file` THẬT với fixture hợp lệ từng đuôi
+(zip có `[Content_Types].xml`+`word/document.xml`, `%PDF-`, OLE header, `{\rtf`): 5 đuôi `ok=True`, đúng 2
+đuôi đó trả `UNSUPPORTED_EXTENSION`. Planner hứa kế hoạch mà child **chắc chắn** không làm được.
+
+Nguồn sự thật DUY NHẤT nay ở `ingest_contract.INGEST_LOCAL_EXTS`; cả hai phía đọc từ đó. **Chọn THU planner
+về đúng năng lực child, KHÔNG nới child**: nới = cho upload `.txt`/`.md` rồi convert = quyết định **tính năng**
+(đổi thứ được ghi vào corpus), không phải sửa lỗi lệch sổ. Muốn mở thì mở tường minh ở một chỗ.
+
+**Test (+5 ca → 1598/1598).** `r320_pro03_adopt_va_delete_deu_qua_guard` · `r320_pro09_delete_chan_truoc_mutation_dau_tien`
+(khoá **THỨ TỰ** trong mã: guard < `nc.source_delete(` và < `g.get("trash"`, nhưng > `CONFIRM_YES_REQUIRED`) ·
+`r320_pro05_manifest_sai_loai_bi_bat` (4 phản chứng) · `r320_ing04_journal_thieu_drive_id_khong_cap_quyen`
+(ma trận 5 ca) · `r320_ing06_planner_va_child_cung_mot_nguon` (+ phản chứng đuôi hợp lệ vẫn qua cả hai phía).
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên 5 tệp sản xuất về HEAD, GIỮ test ⇒ **1593/1598**, đỏ đúng **cả 5** ca
+r320, **không ca nào khác**. Sau vá 1598/1598.
+
+**Một ca CÓ SẴN đỏ — đúng, và nó đang mã hoá con bệnh.** `r107_zip_content_identity_normalized` dùng member
+`.txt` làm filler rồi khẳng định `plan.ok` — tức khẳng định planner **phải nhận** một đuôi không nạp được.
+Chủ đề thật của ca là **chuẩn hoá đường dẫn** (`./a` ≡ `a` cho `idempotency_key`, `plan_hash` khác), hoàn toàn
+không liên quan đuôi. Giữ NGUYÊN VĂN khẳng định, chỉ đổi filler sang `.docx`. Bằng chứng đổi filler là trung
+tính: ở lượt ĐỎ-TRƯỚC ca này **vẫn xanh** (`.docx` hợp lệ ở cả hai phía trước lẫn sau vá).
+
+**Và một check CÙNG LỚP trong `determinism-audit`.** `zip_member_order_stable` (`release.py:141`) cũng dùng
+member `.txt` làm filler rồi kèm vế `zp.ok`. Chủ đề của nó là **ổn định thứ tự member** (`zi1 == zi2` — vế này
+**vẫn đúng** sau vá); chỉ vế `ok` gãy vì 0 member được nhận. Đổi filler sang `.docx`, khẳng định gốc nguyên vẹn.
+Hai chỗ này (`r107` + `zip_member_order_stable`) là bằng chứng phụ rằng ING-06 có thật: khe hở đủ lâu để **hai**
+bộ kiểm khác nhau vô tình dựa vào nó.
+
+★ **Hai lỗi trong chính TEST của tôi, tự bắt được:** (1) soi `cmd_profile_adopt` — nó chỉ là wrapper
+`_ProfileEnvGuard` 181 ký tự, thân thật ở `_cmd_profile_adopt_impl`; soi nhầm wrapper thì test **xanh giả** vì
+chuỗi nào cũng vắng mặt. (2) neo thứ tự vào chuỗi `trash_assets` — chuỗi này có mặt SỚM trong dict `plan` nên
+phép so vị trí sai; đổi neo sang `g.get("trash"`.
+
 # ★ v1.36.51 — r319: đính chính KHẾ ƯỚC phụ thuộc — `requirements.txt` khai «stdlib-only» đúng với overlay core nhưng SAI với đường nạp (2026-08-02)
 
 Đóng nốt phần KHẾ ƯỚC của §4.6 — mảnh cuối cùng của sáu phát hiện công cụ lượt bảo trì kho 02-08.

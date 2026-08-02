@@ -8754,11 +8754,17 @@ def run() -> int:
         cases.append(("r107_source_magic_and_structure",
                       _bad_source107.get("ok") is False and _good_source107.get("ok") is True))
 
+        # r314 (ING-06): đuôi filler đổi `.txt` → `.docx`. Chủ đề của ca này là CHUẨN HOÁ đường dẫn
+        # (`./a` ≡ `a` cho idempotency_key, nhưng plan_hash khác) — hoàn toàn không liên quan tới đuôi.
+        # `.txt` chỉ tình cờ được chọn làm filler, mà nó nằm đúng khe hở ING-06: planner nhận trong khi
+        # child `ingest-local` CHẮC CHẮN trả UNSUPPORTED_EXTENSION. Giữ `.txt` ở đây nghĩa là ca test
+        # KHẲNG ĐỊNH planner phải nhận một đuôi không nạp được — tức mã hoá chính con bệnh vào gate.
+        # Khẳng định gốc giữ NGUYÊN VĂN, chỉ đổi filler sang đuôi thật sự nạp được.
         _z1_107, _z2_107 = Path(_d107) / "one.zip", Path(_d107) / "two.zip"
         with _zf107.ZipFile(_z1_107, "w") as _z107:
-            _z107.writestr("./a.txt", "same")
+            _z107.writestr("./a.docx", "same")
         with _zf107.ZipFile(_z2_107, "w") as _z107:
-            _z107.writestr("a.txt", "same")
+            _z107.writestr("a.docx", "same")
         _zp1_107 = _zip107._zip_plan(str(_z1_107), mode="vbqppl", cat="01")
         _zp2_107 = _zip107._zip_plan(str(_z2_107), mode="vbqppl", cat="01")
         cases.append(("r107_zip_content_identity_normalized",
@@ -8769,7 +8775,7 @@ def run() -> int:
                       not _zip107._zip_is_safe_member("CON.txt")
                       and not _zip107._zip_is_safe_member("folder/name. ")))
         with _zf107.ZipFile(_z1_107, "w") as _z107:
-            _z107.writestr("a.txt", "tampered-after-plan")
+            _z107.writestr("a.docx", "tampered-after-plan")   # r314: theo filler mới ở trên
         _tamper107 = ""
         try:
             _zip107._safe_extract_zip_for_ingest(str(_z1_107), str(Path(_d107) / "out"), plan=_zp1_107)
@@ -27162,6 +27168,130 @@ def run() -> int:
     _t110("r310_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
 
 
+    # ═══ r320 (v1.36.52) — T2-a/T2-c/T2-d: 4 mục CUỐI của sổ audit 31-07 đã tự dựng repro ═══
+    # PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06. Cả 5 đều thuộc mẫu lỗi A (kết luận bằng HÌNH DẠNG /
+    # coi VẮNG MẶT là hợp lệ) hoặc mẫu "nguồn sự thật nhân đôi" — hai mẫu chi phối của sổ audit.
+
+    def _c314_pro03_adopt_va_delete_deu_qua_guard():
+        # PRO-03 + PRO-09. `_marker_mutation_guard` có từ r184, ADR-0012 §4 khai là guard CHUNG, nhưng
+        # ĐO ĐƯỢC: 0 call site sản xuất — chỉ một ca test gọi thẳng. Guard đúng mà chưa từng chạy.
+        import inspect as _i314
+        _gd = _TL_MODULE._marker_mutation_guard
+        _body = _TL_MODULE._marker_body("HoSoX", {"rootFolderId": "R", "metaFolderId": "M",
+                                                  "registryDocId": "REG", "manifestId": "MAN",
+                                                  "notebookId": "NB"})
+        _hong = dict(_body); _hong["registryDocId"] = "BI_DOI"      # sửa tay ⇒ fingerprint lệch
+        _mr_hong = {"found": True, "marker": _hong, "marker_file_ids": ["MK1"], "fileId": "MK1", "error": ""}
+        _mr_lanh = {"found": True, "marker": _body, "marker_file_ids": ["MK1"], "fileId": "MK1", "error": ""}
+        _chan = (_gd(_mr_hong, "HoSoX") or {}).get("error") == "MARKER_INVALID"
+        _cho_qua = _gd(_mr_lanh, "HoSoX") is None                  # phản chứng: marker lành KHÔNG bị chặn
+        # ...và HAI đường ghi PHẢI gọi guard (không tự dựng lại điều kiện rời)
+        # `cmd_profile_adopt` chỉ là wrapper `_ProfileEnvGuard` 2 dòng — thân thật ở `_impl`. Soi nhầm
+        # wrapper thì test XANH GIẢ vì chuỗi nào cũng vắng mặt.
+        _src_adopt = _i314.getsource(_resolve286(_TL_MODULE._cmd_profile_adopt_impl))
+        _src_del = _i314.getsource(_resolve286(_TL_MODULE.cmd_profile_delete))
+        _noi_tuyen = ("_marker_mutation_guard(" in _src_adopt) and ("_marker_mutation_guard(" in _src_del)
+        # chuỗi ba-điều-kiện cũ của adopt phải BIẾN MẤT (nếu còn là còn đường vòng qua guard)
+        _het_duong_vong = "PROFILE_MARKER_NAME_CONFLICT" not in _src_adopt
+        return bool(_chan and _cho_qua and _noi_tuyen and _het_duong_vong)
+    _t110("r320_pro03_adopt_va_delete_deu_qua_guard", _c314_pro03_adopt_va_delete_deu_qua_guard)
+
+    def _c314_pro09_delete_chan_truoc_mutation_dau_tien():
+        # PRO-09: guard phải đứng TRƯỚC mutation ĐẦU TIÊN. Đặt sau thì nguồn NLM đã xoá (BẤT KHẢ NGHỊCH)
+        # rồi, chặn cũng vô nghĩa. Khoá bằng THỨ TỰ trong mã: vị trí guard < vị trí `source_delete`.
+        import inspect as _i314
+        _src = _i314.getsource(_resolve286(_TL_MODULE.cmd_profile_delete))
+        _i_guard = _src.find("_marker_mutation_guard(")
+        _i_nlm = _src.find("nc.source_delete(")          # vòng xoá nguồn NLM (BẤT KHẢ NGHỊCH)
+        _i_trash = _src.find('g.get("trash"')            # vòng trash Drive — KHÔNG neo vào chuỗi
+        _i_confirm = _src.find("CONFIRM_YES_REQUIRED")   # `trash_assets`, nó có mặt sớm trong dict `plan`
+        return bool(_i_guard > 0 and _i_nlm > 0 and _i_trash > 0 and _i_confirm > 0
+                    and _i_guard < _i_nlm                 # trước khi xoá nguồn NLM
+                    and _i_guard < _i_trash               # trước khi trash Drive
+                    and _i_confirm < _i_guard             # nhưng SAU cổng confirm (DRY không tốn call)
+                    and "PROFILE_DELETE_MARKER_GUARD" in _src)
+    _t110("r320_pro09_delete_chan_truoc_mutation_dau_tien", _c314_pro09_delete_chan_truoc_mutation_dau_tien)
+
+    def _c314_pro05_manifest_sai_loai_bi_bat():
+        # PRO-05: kiểm MIME từng bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có phép kiểm
+        # loại nào; Google Doc đặt ở manifestId, parent đúng ⇒ doctor SẠCH TRƠN (đo: 0 finding).
+        _f = _TL_MODULE._doctor_check_profile
+        _P = {"rootFolderId": "R", "metaFolderId": "M", "registryDocId": "REG",
+              "manifestId": "MAN", "notebookId": "NB"}
+        _SHEET = _TL_MODULE.REGISTRY_SHEET_MIME
+        _GDOC = "application/vnd.google-apps.document"
+
+        def _chay(man_mime, man_extra=None):
+            return [x["check"] for x in _f("HoSoX", _P, {
+                "REG": {"mimeType": _SHEET, "parents": ["M"]},
+                "MAN": dict({"mimeType": man_mime, "parents": ["M"]}, **(man_extra or {}))})]
+        _bat = _chay(_GDOC) == ["MANIFEST_NOT_JSON_MIME"]
+        # PHẢN CHỨNG 1: `application/json` và `text/plain` đều KHÔNG được đỏ oan — Drive trả text/plain
+        # cho JSON upload là chuyện thường, và bản text đó vẫn parse được.
+        _khong_do_oan = _chay("application/json") == [] and _chay("text/plain") == []
+        # PHẢN CHỨNG 2: Sheet ở manifestId cũng là native ⇒ vẫn bắt (không chỉ bắt riêng Doc)
+        _bat_ca_sheet = _chay(_SHEET) == ["MANIFEST_NOT_JSON_MIME"]
+        # PHẢN CHỨNG 3: cổng KHÁC của manifest không bị vá này nuốt mất
+        _con_song = set(_chay(_GDOC, {"parents": ["NGOAI"], "trashed": True})) == {
+            "MANIFEST_NOT_JSON_MIME", "MANIFEST_TRASHED", "MISPLACED_ASSET"}
+        # PHẢN CHỨNG 4: registry vẫn theo luật RIÊNG của nó (phải là Sheet)
+        _reg_giu = [x["check"] for x in _f("HoSoX", _P, {
+            "REG": {"mimeType": _GDOC, "parents": ["M"]},
+            "MAN": {"mimeType": "application/json", "parents": ["M"]}})] == ["REGISTRY_NOT_SHEET_MIME"]
+        return bool(_bat and _khong_do_oan and _bat_ca_sheet and _con_song and _reg_giu)
+    _t110("r320_pro05_manifest_sai_loai_bi_bat", _c314_pro05_manifest_sai_loai_bi_bat)
+
+    def _c314_ing04_journal_thieu_drive_id_khong_cap_quyen():
+        # ING-04: `if _jd and …` BỎ QUA so sánh khi journal ghi `drive_id=""` — đúng ca sổ audit nêu.
+        # Journal rỗng drive_id là "CHƯA chứng minh được nguồn", không phải "đã chứng minh là khớp".
+        _G = _resolve286(_TL_MODULE._resume_identity_gate)
+        _head = {"t": "run_start", "name": "Luat X", "drive_id": "",
+                 "identity_hash": "IH", "plan_hash": "PH"}
+
+        def _e(**kw):
+            return (_G(journal="run-cu", name="Luat X", journal_head=_head, **kw) or {}).get("error")
+        _chan = _e(apply=True, drive_id="", canon_drive_id="GD_MOI") == "RESUME_JOURNAL_NO_DRIVE_ID"
+        # PHẢN CHỨNG 1 (bắt được lỗi siết-quá-tay của chính bản vá ở lượt đầu): khai `--drive-id` KHỚP
+        # canonical = ĐÃ chứng minh nguồn bằng đường khác ⇒ phải CHO QUA.
+        _khai_dung = _e(apply=True, drive_id="GD_MOI", canon_drive_id="GD_MOI") is None
+        # PHẢN CHỨNG 2: khai lệch vẫn rơi vào cổng CŨ, không bị vá mới nuốt mất
+        _khai_lech = _e(apply=True, drive_id="GD_KHAC", canon_drive_id="GD_MOI") == "RESUME_IDENTITY_MISMATCH"
+        # PHẢN CHỨNG 3: registry CHƯA có dòng canonical ⇒ không có gì để đối chiếu ⇒ không chặn oan
+        _chua_co = _e(apply=True, drive_id="", canon_drive_id="") is None
+        # PHẢN CHỨNG 4: journal CÓ drive_id nhưng lệch ⇒ vẫn là MISMATCH (đường cũ nguyên vẹn)
+        _head2 = dict(_head, drive_id="GD_CU")
+        _cu_nguyen = (_G(apply=True, journal="run-cu", drive_id="", name="Luat X",
+                         canon_drive_id="GD_MOI", journal_head=_head2) or {}).get(
+                             "error") == "RESUME_IDENTITY_MISMATCH"
+        return bool(_chan and _khai_dung and _khai_lech and _chua_co and _cu_nguyen)
+    _t110("r320_ing04_journal_thieu_drive_id_khong_cap_quyen",
+          _c314_ing04_journal_thieu_drive_id_khong_cap_quyen)
+
+    def _c314_ing06_planner_va_child_cung_mot_nguon():
+        # ING-06: tập đuôi từng được khai HAI LẦN và đã trôi lệch — planner nhận `.txt`/`.md` mà child
+        # `ingest-local` CHẮC CHẮN trả UNSUPPORTED_EXTENSION. Nay MỘT nguồn sự thật.
+        import tempfile as _t314, os as _o314
+        import tl_core.zip_ingest as _z314
+        from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _EXTS, validate_source_file as _vsf
+        _mot_nguon = set(_z314._ALLOWED_INGEST_EXTS) == set(_EXTS)
+        _het_khe_ho = not (set(_z314._ALLOWED_INGEST_EXTS) - set(_EXTS))
+        # HÀNH VI: `.txt`/`.md` nay bị planner skip ĐÚNG lý do child sẽ nêu (không còn hứa suông)
+        with _t314.TemporaryDirectory() as _d:
+            _hanh_vi = True
+            for _ext in (".txt", ".md"):
+                _p = _o314.path.join(_d, "x" + _ext)
+                open(_p, "wb").write("Điều 1.\n".encode("utf-8") * 5)
+                _hanh_vi = _hanh_vi and (_ext not in _z314._ALLOWED_INGEST_EXTS) and (
+                    _vsf(_p, allowed_exts=_EXTS).get("error") == "UNSUPPORTED_EXTENSION")
+            # PHẢN CHỨNG: đuôi thật sự nạp được vẫn qua CẢ HAI phía (vá không thu quá tay)
+            _phan_chung = True
+            for _ext in (".pdf", ".rtf"):
+                _p = _o314.path.join(_d, "y" + _ext)
+                open(_p, "wb").write(b"%PDF-1.7\n" + b"x" * 200 if _ext == ".pdf" else b"{\\rtf1 x}")
+                _phan_chung = _phan_chung and (_ext in _z314._ALLOWED_INGEST_EXTS) and (
+                    _vsf(_p, allowed_exts=_EXTS).get("ok") is True)
+        return bool(_mot_nguon and _het_khe_ho and _hanh_vi and _phan_chung)
+    _t110("r320_ing06_planner_va_child_cung_mot_nguon", _c314_ing06_planner_va_child_cung_mot_nguon)
     # ---- r314 + r315: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
     def _mod314(fname, alias):
         """Nạp THẲNG scripts/<fname> — KHÔNG qua tl/bind (bẫy false-green r212)."""

@@ -23,8 +23,9 @@ Cấu trúc master: xem templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json
   - "bãi bỏ toàn bộ"                            -> 06-BN (Phụ lục IV)
   - "tạm ngưng/ngừng toàn bộ"                   -> 07-BN (Phụ lục V)
   - "nghiên cứu" / "mục f" / "chờ"             -> KHÔNG vào phụ lục (đưa danh sách Mục F)
-  - còn lại (sửa đổi/bổ sung/thay thế/bãi bỏ một phần/tạm ngưng hiệu lực/giải thích/hướng dẫn)
+  - sửa đổi/bổ sung/thay thế/bãi bỏ một phần/tạm ngưng hiệu lực/giải thích/hướng dẫn
                                                -> 04-BN (Phụ lục II)
+  - RỖNG hoặc ngoài từ vựng                    -> FAIL-CLOSED (không dựng phụ lục)
 
 Dedup: theo "key" nếu có; nếu trống thì theo (van_ban + can_cu + hinh_thuc) chuẩn hóa.
 Giữ bản đầu, gộp các văn bản trùng vào ghi chú, ĐẾM MỘT LẦN (đúng nguyên tắc Mục D).
@@ -46,10 +47,33 @@ def _norm(s):
     return re.sub(r"\s+", " ", s)
 
 
+class HinhThucKhongHopLe(ValueError):
+    """v1.36.45 (r311/DOC-01) — `hinh_thuc` RỖNG hoặc ngoài từ vựng. Trước đây hai ca này rơi
+    ÂM THẦM về "04"; nay nổ ra để `main()` gom lại và FAIL-CLOSED."""
+
+
+# v1.36.45 (r311/DOC-01) — nhóm 04 nay là NHẬN DIỆN DƯƠNG, không còn là cái sọt "còn lại".
+# Cố ý khớp CHỨA (không khớp bằng) vì người nhập hay viết kèm phạm vi ("sửa đổi, bổ sung Điều 54"):
+# giữ nguyên hành vi cho mọi giá trị HỢP LỆ đang chạy, chỉ chặn cái ngoài từ vựng.
+_HINH_THUC_04 = ("sửa đổi", "bổ sung", "thay thế", "bãi bỏ một phần",
+                 "tạm ngưng hiệu lực", "tạm ngừng hiệu lực", "giải thích", "hướng dẫn")
+
+
 def route(hinh_thuc):
+    """v1.36.45 (r311/DOC-01 — đo LIVE 02-08): FAIL-CLOSED thay cho fallback "04".
+
+    Bằng chứng bản cũ: `route("ban hanh moi") == "04"` (đáng lẽ 05), `route("bai bo toan bo") == "04"`
+    (đáng lẽ 06), `route("") == route("xyz la gi") == "04"`. Nghĩa là MỘT lỗi gõ dấu trong bảng master
+    đủ để một đề xuất "ban hành mới" bị đếm sang Mẫu 04-BN — sai cả phụ lục lẫn số liệu Mục D, và
+    KHÔNG có tín hiệu nào. Chính `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`_canh_bao_hinh_thuc`)
+    và `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md:272` đã chốt "không để route() fallback im lặng".
+
+    Chọn FAIL-CLOSED chứ KHÔNG bỏ dấu để đoán ý: `RASOAT_HOSO_LOOP.md:177` đã bắt buộc "CHỈ dùng giá
+    trị trong `_vocab_hinh_thuc`" ⇒ đoán ý ở tầng định tuyến phụ lục là thêm nguồn chân lý thứ hai.
+    Thứ tự nhánh là RÀNG BUỘC: "chờ bổ sung căn cứ" chứa "bổ sung" nên nhánh F PHẢI đứng trước 04."""
     h = _norm(hinh_thuc)
     if not h:
-        return "04"
+        raise HinhThucKhongHopLe("`hinh_thuc` RỖNG")
     if "ban hành mới" in h:
         return "05"
     if "bãi bỏ toàn bộ" in h:
@@ -58,7 +82,9 @@ def route(hinh_thuc):
         return "07"
     if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
         return "F"
-    return "04"
+    if any(k in h for k in _HINH_THUC_04):
+        return "04"
+    raise HinhThucKhongHopLe(f"{str(hinh_thuc)!r} ngoài từ vựng")
 
 
 def load_master(p):
@@ -206,6 +232,19 @@ def main():
 
     co_quan, van_ban, noi_dung = load_master(a.inp)
     noi_dung = dedup(noi_dung)
+
+    # v1.36.45 (r311/DOC-01): kiểm TRỌN BỘ trước khi dựng, báo MỘT LẦN đủ mọi dòng sai — cùng lối
+    # "nói rõ file nào" của load_master. Nổ giữa vòng lặp thì người nhập phải sửa từng dòng một lượt.
+    _sai = []
+    for _i, it in enumerate(noi_dung, 1):
+        try:
+            route(it.get("hinh_thuc"))
+        except HinhThucKhongHopLe as e:
+            _sai.append(f"  #{_i} key={it.get('key') or '(trống)'} · van_ban={it.get('van_ban') or '(trống)'} → {e}")
+    if _sai:
+        raise SystemExit(f"[rasoat_phuluc] HÌNH THỨC XỬ LÝ KHÔNG HỢP LỆ ({len(_sai)} dòng) — KHÔNG dựng "
+                         "phụ lục. CHỈ dùng giá trị trong `_vocab_hinh_thuc` của "
+                         "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json:\n" + "\n".join(_sai))
 
     buckets = {"04": [], "05": [], "06": [], "07": [], "F": []}
     for it in noi_dung:

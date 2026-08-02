@@ -2854,6 +2854,35 @@ def _il_stage_plan(ctx):
             print(f"[tl] ⚠ --replace-sohieu: {len(_dups_f1)} dòng cũ CÙNG số hiệu (lỏng-năm) sẽ SONG SONG "
                   f"tồn tại tới khi hạ bản — làm theo plan.replace_sohieu.post_steps SAU khi bản mới verify.",
                   file=sys.stderr)
+    # v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): cổng F1 ở trên chỉ chạy khi `if sohieu and …`.
+    # Đo thật trên 1319 dòng: 31 cụm / 66 dòng CÙNG `src_id` mà `drive_id` đôi một KHÁC — tức MỘT tệp
+    # nguồn đã ingest ≥2 lần, mỗi lần đẻ một GDoc + một dòng mới; 26/31 cụm có `sohieu` RỖNG nên cổng F1
+    # KHÔNG bao giờ chạy cho chúng. `--drive-id` là đường dễ dính nhất: người dùng trỏ lại đúng tệp nguồn
+    # đã nạp, `_resolve_drive_id_source` vui vẻ convert tiếp, và cổng duy nhất lại đứng sau `if sohieu`.
+    # Neo theo `src_id` (tệp NGUỒN) chứ không theo `drive_id` (GDoc kết quả — mỗi lần convert một id mới).
+    if _from_drive and not _prev and not getattr(a, "skip_live_check", False):
+        try:
+            _live_i9 = _manifest_entries(refresh=False)
+        except (SystemExit, Exception):  # noqa: BLE001 — cổng F1 ở trên đã fail-closed cho ca đọc hỏng
+            _live_i9 = []
+        _same_src = [e for e in _live_i9
+                     if str(e.get("src_id") or "").strip() == _from_drive
+                     and _entry_is_corpus_effective(e)]
+        if _same_src and not getattr(a, "replace_sohieu", False):
+            print(json.dumps({"ok": False, "step": "src_id_dedup_live", "aborted": True,
+                              "reason": "SOURCE_ALREADY_INGESTED", "src_id": _from_drive,
+                              "rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:80],
+                                        "sohieu": _entry_sohieu(e) or "", "cat": _entry_cat(e),
+                                        "row_kind": _entry_row_kind(e) or "",
+                                        "corpus": str(e.get("corpus") or "")} for e in _same_src[:10]],
+                              "note": "Tệp NGUỒN này đã được ingest trước đó — nạp tiếp sẽ đẻ thêm GDoc + dòng "
+                                      "registry TRÙNG (cổng số hiệu KHÔNG bắt được khi sohieu rỗng). Soi cụm: "
+                                      "`tl hygiene scan --json` → duplicates_by_src_id. Nạp lại CÓ CHỦ ĐÍCH: "
+                                      "--replace-sohieu (hạ bản cũ sau khi bản mới verify); tiếp tục dở dang: "
+                                      "--resume; ép bỏ (tự chịu rủi ro trùng): --skip-live-check."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return {"rc": 2}
+
     if not getattr(a, "apply", False):
         plan["mode"] = "DRY"
         plan["note"] = (("--apply để chạy: dùng file Drive có sẵn (bỏ upload)→organize(convert/cat/stamp/register)"

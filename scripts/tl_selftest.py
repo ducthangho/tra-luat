@@ -21316,20 +21316,170 @@ def run() -> int:
 
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
-        # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
         # so_hieu mẫu theo chuẩn bất biến NN-YYYY-VBHN-XXX.
+        # v1.36.45 (r311/DOC-01): ok3 TRƯỚC ĐÂY khoá `route("ban hanh moi") == "04"` — tức khoá CHÍNH
+        # CÁI BUG làm kỳ vọng, nên không ai sửa được nó mà không làm đỏ selftest. Nay đảo chiều: bẫy
+        # không-dấu phải FAIL-CLOSED (xem r311_route_hinh_thuc_fail_closed cho bộ ca đầy đủ).
         tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
         d = _j209.loads(tp.read_text(encoding="utf-8"))
         co, vb, nd = _rp209.load_master(str(tp))
         ok1 = bool(co) and len(vb) == 1 and len(nd) == 1
         vocab = d.get("_vocab_hinh_thuc") or {}
         ok2 = len(vocab) == 10 and all(_rp209.route(k) == v for k, v in vocab.items())
-        ok3 = _rp209.route("sua doi bo sung") == "04" and _rp209.route("ban hanh moi") == "04"
+        ok3 = True
+        for _bad209 in ("sua doi bo sung", "ban hanh moi"):
+            try:
+                _rp209.route(_bad209); ok3 = False
+            except _rp209.HinhThucKhongHopLe:
+                pass
         ok4 = _re209.fullmatch(r"\d+-\d{4}-VBHN-[A-Z]+", vb[0].get("so_hieu") or "") is not None
         ok5 = (nd[0].get("muc_chac_chan") in (d.get("_muc_chac_chan_enum") or [])
                and (nd[0].get("anchor") or {}).get("ttl_ngay") == 90)
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r209_master_template_va_vocab", _c209_master_template_va_vocab)
+
+    def _c311_route_hinh_thuc_fail_closed():
+        """v1.36.45 (r311/DOC-01 — đo LIVE 02-08): `route()` KHÔNG còn dồn im lặng về "04".
+
+        Bản cũ trả "04" cho CẢ "ban hanh moi" (đáng lẽ 05), "bai bo toan bo" (đáng lẽ 06), "" và
+        "xyz la gi" ⇒ một lỗi gõ dấu đủ để đổi phụ lục VÀ số liệu Mục D mà không có tín hiệu nào."""
+        import os as _os311
+        import subprocess as _sp311
+        import sys as _sys311
+        import tempfile as _tf311
+        _tp311 = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        _vocab = (_j209.loads(_tp311.read_text(encoding="utf-8")).get("_vocab_hinh_thuc") or {})
+        # (a) TỪ VỰNG HỢP LỆ vẫn định tuyến y như cũ — fail-closed KHÔNG được siết vào luồng đang chạy.
+        ok0 = len(_vocab) == 10 and all(_rp209.route(k) == v for k, v in _vocab.items())
+        # Giá trị hợp lệ VIẾT KÈM PHẠM VI là cách người nhập thật hay dùng ⇒ phải còn chạy.
+        ok1 = (_rp209.route("sửa đổi, bổ sung Điều 54") == "04"
+               and _rp209.route("Bãi bỏ toàn bộ") == "06"
+               and _rp209.route("tạm ngưng hiệu lực toàn bộ") == "04")
+        # (b) FAIL-CLOSED: rỗng / khoảng trắng / None / không dấu / ngoài từ vựng.
+        ok2 = True
+        for _bad in ("", "   ", None, "ban hanh moi", "bai bo toan bo", "sua doi bo sung", "xyz la gi"):
+            try:
+                _rp209.route(_bad); ok2 = False                       # ĐỎ trước r311 (mọi ca trả "04")
+            except _rp209.HinhThucKhongHopLe:
+                pass
+        # (c) "chờ bổ sung căn cứ" CHỨA "bổ sung" ⇒ khoá THỨ TỰ nhánh: F phải xét trước 04.
+        ok3 = _rp209.route("chờ bổ sung căn cứ") == "F"
+        # (d) ĐƯỜNG SẢN XUẤT: subprocess trên bảng master có 1 dòng sai — phải rc≠0, KHÔNG ghi phụ lục,
+        #     và nêu ĐÍCH DANH dòng sai. A/B: cùng bảng đó sửa đúng chính tả thì rc=0 và rơi vào 05.
+        def _master311(ht):
+            return {"co_quan": "CQ", "van_ban": [{"so_hieu": "18-2025-VBHN-VPQH", "ten": "X"}],
+                    "noi_dung": [{"key": "VD-A", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": "sửa đổi, bổ sung"},
+                                 {"key": "VD-B", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": ht}]}
+        _env311 = dict(_os311.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+
+        def _chay311(ht, sub):
+            with _tf311.TemporaryDirectory() as _d:
+                _f = _P209(_d) / "master.json"
+                _f.write_text(_j209.dumps(_master311(ht), ensure_ascii=False), encoding="utf-8")
+                _od = _P209(_d) / sub
+                _r = _sp311.run([_sys311.executable, str(_ROOT209 / "scripts" / "rasoat_phuluc.py"),
+                                 "--in", str(_f), "--out-dir", str(_od)],
+                                capture_output=True, text=True, encoding="utf-8", env=_env311, timeout=120)
+                return _r, (_od / "PHU_LUC_03_07_BN_TONG_HOP.md").is_file(), (_r.stdout or "").strip()
+        _rx, _co_file, _ = _chay311("ban hanh moi", "xau")
+        _msg = (_rx.stderr or "") + (_rx.stdout or "")
+        ok4 = (_rx.returncode != 0 and "HÌNH THỨC XỬ LÝ KHÔNG HỢP LỆ" in _msg
+               and "VD-B" in _msg and not _co_file)                   # ĐỎ trước r311 (rc=0, im lặng)
+        _ry, _co_file2, _so = _chay311("ban hành mới", "tot")
+        _out311 = {}
+        try:
+            _out311 = _j209.loads(_so.splitlines()[-1])
+        except Exception:  # noqa: BLE001
+            pass
+        ok5 = (_ry.returncode == 0 and _co_file2
+               and _out311.get("counts", {}).get("05") == 1
+               and _out311.get("counts", {}).get("04") == 1)
+        # (e) PHẢN CHỨNG — tái hiện THUẬT TOÁN CŨ trên chính dữ liệu này: cái sọt "còn lại → 04" nuốt
+        #     gọn "ban hanh moi". Chứng minh test cắn nếu ai đó revert, không chỉ "bản mới chạy xanh".
+        def _route_cu(h):
+            h = _rp209._norm(h)
+            if not h:
+                return "04"
+            if "ban hành mới" in h:
+                return "05"
+            if "bãi bỏ toàn bộ" in h:
+                return "06"
+            if ("tạm ngưng toàn bộ" in h) or ("tạm ngừng toàn bộ" in h):
+                return "07"
+            if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
+                return "F"
+            return "04"
+        ok6 = all(_route_cu(x) == "04" for x in ("", "   ", "ban hanh moi", "bai bo toan bo", "xyz la gi"))
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r311_route_hinh_thuc_fail_closed", _c311_route_hinh_thuc_fail_closed)
+
+    def _c312_src_id_dup_lo_dien():
+        """v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): nhân đôi theo TỆP NGUỒN (`src_id`).
+
+        Đo thật trên 1319 dòng tab `files`: 31 cụm / 66 dòng cùng `src_id` mà `drive_id` đôi một KHÁC.
+        Ba detector đang có đều MÙ: 26/31 cụm `sohieu` RỖNG · 27/31 cụm `name` khác nhau (bản Việt
+        «Phu_luc_2-A» vs bản Anh «Annex_2-A» của CÙNG phụ lục) · md5 tính trên GDoc đã convert nên mỗi
+        lần một khác · 31/31 cụm `drive_id` đôi một khác nên khoá chính cũng không bắt."""
+        from tl_core.hygiene import _hygiene_groups as _hg312, _src_id_dup_groups as _sd312
+        # Fixture DỰNG THEO ĐÚNG hình dạng cụm thật (EVFTA): cùng src_id, drive_id khác, sohieu RỖNG,
+        # tên Việt/Anh khác nhau, md5 khác nhau.
+        _fx = [
+            {"id": "g1", "drive_id": "g1", "src_id": "SRC-A", "name": "EVFTA_PL_Phu_luc_2-A",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m1"},
+            {"id": "g2", "drive_id": "g2", "src_id": "SRC-A", "name": "EVFTA_PL_Annex_2-A_Bieu_thue",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m2"},
+        ]
+        _g = _hg312(_fx)
+        ok0 = len(_sd312(_fx)) == 1 and len(_g["duplicates_by_src_id"]) == 1   # ĐỎ trước r312 (không có khoá)
+        # BẰNG CHỨNG MÙ — chính cụm này KHÔNG hiện ra ở ba detector cũ. Đây là lý do phải có detector riêng;
+        # nếu ai đó "gộp cho gọn" vào một trong ba, vế này ĐỎ.
+        ok1 = (not _g["duplicates_by_sohieu"] and not _g["duplicates_by_name"]
+               and not _g["duplicates_by_md5"])
+        # PHẢN CHỨNG 1: cùng src_id NHƯNG cùng drive_id = MỘT dòng đọc hai lần, KHÔNG phải nhân đôi.
+        _fx2 = [dict(_fx[0]), dict(_fx[0])]
+        ok2 = len(_sd312(_fx2)) == 0
+        # PHẢN CHỨNG 2: src_id RỖNG không được gom thành một cụm khổng lồ.
+        _fx3 = [dict(e, src_id="") for e in _fx]
+        ok3 = len(_sd312(_fx3)) == 0
+        # PHẢN CHỨNG 3: không corpus-effective ⇒ ngoài tầm (đã hạ bản/quarantine rồi thì hết là nợ).
+        _fx4 = [dict(e, corpus="false") for e in _fx]
+        ok4 = len(_sd312(_fx4)) == 0
+        # PHẢN CHỨNG 4: row_kind=ref là con trỏ, không phải bản nạp.
+        _fx5 = [dict(e, row_kind="ref") for e in _fx]
+        ok5 = len(_sd312(_fx5)) == 0
+        # Cụm 3 dòng (có thật: src_id 1bAT9Ad… x3) vẫn ra ĐÚNG MỘT cụm, không tách đôi.
+        _fx6 = _fx + [dict(_fx[0], id="g3", drive_id="g3", name="EVFTA_PL_Phu_luc_2-A_ban_3", md5="m3")]
+        _s6 = _sd312(_fx6)
+        ok6 = len(_s6) == 1 and len(next(iter(_s6.values()))) == 3
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r312_src_id_dup_lo_dien", _c312_src_id_dup_lo_dien)
+
+    def _c312_cong_ingest_chan_nguon_da_nap():
+        """v1.36.46 (r312/ING-09): cổng `src_id_dedup_live` trong `_il_stage_plan`.
+
+        Cổng F1 cũ đứng SAU `if sohieu and …` ⇒ 26/31 cụm thật (sohieu rỗng) không bao giờ được xét.
+        Test đọc THẲNG mã nguồn stage vì thân stage gọi mạng — khoá VỊ TRÍ và ĐIỀU KIỆN, hai thứ đã sai."""
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8", errors="replace")
+        _blk = _src[_src.find("def _il_stage_plan"):_src.find("def _il_stage_confirm")]
+        ok0 = "SOURCE_ALREADY_INGESTED" in _blk and "src_id_dedup_live" in _blk
+        # Cổng mới KHÔNG được nấp sau `if sohieu` — phải neo `_from_drive`, độc lập với số hiệu.
+        _i_new = _blk.find("src_id_dedup_live")
+        _i_f1 = _blk.find("if sohieu and not _prev")
+        ok1 = _i_f1 != -1 and _i_new > _i_f1                      # nằm SAU cổng F1, KHÔNG lồng trong nó
+        # CHỈ lấy DÒNG điều kiện (không lấy cả thân) — thân có `replace_sohieu` nên so chuỗi cả khối
+        # sẽ báo nhầm là "có dính số hiệu".
+        _i_cond = _blk.find("if _from_drive and not _prev")
+        _cond = _blk[_i_cond:_blk.find("\n", _i_cond)]
+        ok2 = _i_cond != -1 and "_from_drive" in _cond and "sohieu" not in _cond  # cổng KHÔNG gate theo số hiệu
+        # Neo theo src_id (tệp NGUỒN), KHÔNG theo drive_id (GDoc kết quả — mỗi lần convert một id mới).
+        ok3 = 'str(e.get("src_id") or "").strip() == _from_drive' in _blk
+        # Có đường thoát tường minh + chặn TRƯỚC khi rẽ DRY/apply (chặn cả DRY = thấy sớm, không ghi gì).
+        ok4 = all(t in _blk for t in ("--skip-live-check", "--replace-sohieu", "--resume"))
+        ok5 = _blk.find('plan["mode"] = "DRY"') > _i_new
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r312_cong_ingest_chan_nguon_da_nap", _c312_cong_ingest_chan_nguon_da_nap)
 
     def _c209_bang_c_du_truong():
         # H1b: qua rasoat_phuluc, phụ lục 04 KHÔNG rơi mất mức chắc chắn + cite (nối vào cột Ghi chú).

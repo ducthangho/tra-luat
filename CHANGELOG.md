@@ -1,3 +1,109 @@
+# ★ v1.36.46 — r312: ING-09 — nhân đôi theo TỆP NGUỒN (`src_id`) lộ diện; cổng ingest hết nấp sau `if sohieu` (2026-08-02)
+
+Đóng ING-09. Khác với ba mục trước, mục này **đo được trên registry LIVE** (1319 dòng, tab `files`) chứ
+không suy từ mã.
+
+**Bệnh — đo LIVE 02-08 bằng `gws sheets +read` trên tab RAW.** 31 cụm / 66 dòng CÙNG `src_id` mà
+`drive_id` **đôi một KHÁC** — tức MỘT tệp nguồn đã được ingest ≥2 lần, mỗi lần convert ra một GDoc mới
+và đẻ thêm một dòng registry. 25/31 cụm mọi dòng `corpus=true` (nhân đôi THẬT trong corpus, không phải
+bản đã hạ). Mẫu điển hình là phụ lục EVFTA: cùng một tệp nguồn ra hai dòng
+«EVFTA_PL_Phu_luc_2-A» và «EVFTA_PL_Annex_2-A_Bieu_thue».
+
+**Vì sao KHÔNG detector nào thấy — bốn cái mù CÙNG LÚC** (đo trên chính 31 cụm đó):
+
+| tầng | kết quả | vì sao mù |
+|---|---|---|
+| `duplicates_by_sohieu` | 26/31 cụm `sohieu` RỖNG | phụ lục hiệp định không có số hiệu |
+| `duplicates_by_name` | 27/31 cụm tên KHÁC nhau | bản Việt «Phu_luc_2-A» vs bản Anh «Annex_2-A» của CÙNG phụ lục |
+| `duplicates_by_md5` | md5 khác | md5 tính trên GDoc ĐÃ convert — mỗi lần convert một md5 |
+| khoá chính `drive_id` | 31/31 cụm đôi một khác | mỗi dòng một GDoc riêng |
+
+`src_id` là thứ **DUY NHẤT** còn nối chúng về cùng một tệp nguồn — và đó chính là ý «detector sheet-dup
+phải đặt ở tầng đọc RAW SHEET»: `drive_id` bị tầng chuẩn hoá đổi tên thành `id`/`gdoc_id`, còn cụm trùng
+thì chỉ nhìn thấy được khi soi theo cột nguồn.
+
+**Lỗ ở đường GHI.** Cổng dedup F1 (r191) trong `_il_stage_plan` đứng sau `if sohieu and not _prev …` ⇒
+với 26/31 cụm (sohieu rỗng) nó **KHÔNG bao giờ chạy**. `--drive-id` là đường dễ dính nhất: người dùng trỏ
+lại đúng tệp nguồn đã nạp, `_resolve_drive_id_source` vui vẻ convert tiếp, không cổng nào cản.
+
+**Vá.**
+
+1. **`_src_id_dup_groups` (`tl_core/hygiene.py`)** — detector RIÊNG, gom theo `src_id`, chỉ tính dòng
+   corpus-effective và **đòi `drive_id` đôi một KHÁC** (trùng `drive_id` = một dòng đọc hai lần, KHÔNG
+   phải nhân đôi). Vào `_hygiene_groups` + counter `duplicates_by_src_id` + `samples` + dòng in
+   `dup_src_id=` của `tl hygiene scan`.
+2. **Cổng `src_id_dedup_live` trong `_il_stage_plan`** — neo `_from_drive`, **độc lập số hiệu**, chặn
+   **TRƯỚC** khi rẽ DRY/apply (thấy sớm, không ghi gì). Lý do neo `src_id` chứ không `drive_id`: `drive_id`
+   là GDoc KẾT QUẢ, mỗi lần convert một id mới nên không bao giờ trùng. Đường thoát tường minh:
+   `--replace-sohieu` (thay bản có chủ đích) · `--resume` (tiếp tục dở dang) · `--skip-live-check` (tự chịu).
+3. **`_src_id_dup_groups` khai trong bảng stub `hygiene` của `tl.py`** — `bind()` re-home `__globals__` của
+   mọi hàm tl_core về namespace tl, nên helper MỚI không khai ở đó sẽ `NameError` LÚC CHẠY dù import đúng.
+   (Đã cắn thật trong lượt này — ghi lại để lần sau thêm helper thì nhớ.)
+
+**Bằng chứng dương.** selftest **1590/1590**. Detector chạy trên registry LIVE trả **26 cụm / 55 dòng**.
+MUTATION 2 lượt, mỗi lượt đỏ ĐÚNG một ca:
+· bỏ điều kiện `drive_id` đôi một khác ⇒ `r312_src_id_dup_lo_dien` ĐỎ;
+· thêm lại `and sohieu` vào điều kiện cổng (đúng cách ING-09 tái phát) ⇒ `r312_cong_ingest_chan_nguon_da_nap` ĐỎ.
+`r312_src_id_dup_lo_dien` khoá luôn **BẰNG CHỨNG MÙ**: cùng một cụm fixture, ba detector cũ đều trả rỗng —
+ai "gộp cho gọn" vào một trong ba thì vế đó đỏ.
+ruff: **0 TÊN F821 MỚI** trên cả hai tệp chạm (tập tên riêng biệt BẰNG NHAU hai bên: hygiene 128, ingest_ops
+104); số đếm tăng +3 / +7 thuần tuý vì thêm call-site của helper vốn đã resolve qua stub-farm.
+
+# ★ v1.36.45 — r311: DOC-01 — `route()` hết nuốt lỗi chính tả `hinh_thuc`; ca test đang KHOÁ hành vi hỏng được đảo chiều (2026-08-02)
+
+Đóng DOC-01 của sổ audit — lỗi mà chính kho này đã tự khai từ lâu mà chưa ai vá.
+
+**Bệnh — đo LIVE 02-08, chạy lại được.** `route()` (`scripts/rasoat_phuluc.py`) khớp chuỗi CÓ DẤU cố định,
+còn `_norm()` chỉ lower + NFC + gộp khoảng trắng — KHÔNG bỏ dấu. Mọi giá trị không dấu / sai chính tả /
+ngoài từ vựng rơi vào nhánh cuối `return "04"`:
+
+| đầu vào | bản cũ trả | đáng lẽ |
+|---|---|---|
+| `"ban hành mới"` | `05` | ✓ |
+| `"ban hanh moi"` | `04` | `05` hoặc FAIL-CLOSED |
+| `"Bãi bỏ toàn bộ"` | `06` | ✓ |
+| `"bai bo toan bo"` | `04` | `06` hoặc FAIL-CLOSED |
+| `""` / `"   "` | `04` | FAIL-CLOSED |
+| `"xyz la gi"` | `04` | FAIL-CLOSED |
+
+MỘT lỗi gõ dấu trong bảng master đủ để một đề xuất **ban hành mới** bị đếm sang Mẫu 04-BN — sai cả
+phụ lục lẫn số liệu Mục D của Báo cáo, và không có tín hiệu nào. `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json`
+(`_canh_bao_hinh_thuc`) đã tự khai nguy cơ này, và `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md:272` đã chốt
+*"không để `route()` fallback im lặng"* — bản vá này là trả nợ một quyết định đã có.
+
+**Vì sao nằm lại lâu — có một ca test KHOÁ ĐÚNG HÀNH VI HỎNG.** `tl_selftest.py` (r209, `ok3`) viết
+`_rp209.route("ban hanh moi") == "04"`, kèm chú thích *"bẫy không-dấu KHOÁ LẠI làm bằng chứng"*. Ý định
+ban đầu là chứng minh dòng cảnh báo trong doc là THẬT, nhưng hệ quả là bug trở thành **kỳ vọng có cổng
+bảo vệ**: ai sửa `route()` cho đúng đều làm selftest ĐỎ. Ghi lại để không lặp: **khoá một hành vi HỎNG
+bằng test là biến nó thành hợp đồng** — muốn lưu bằng chứng thì khoá ở chỗ PHẢN CHỨNG (tái hiện thuật
+toán cũ ngay trong test), đừng khoá trên hàm đang chạy.
+
+**Vá.**
+
+1. **`route()` FAIL-CLOSED** (`HinhThucKhongHopLe`) với `hinh_thuc` RỖNG hoặc ngoài từ vựng. Nhóm 04 nay
+   là **nhận diện DƯƠNG** (`_HINH_THUC_04`), không còn là cái sọt *"còn lại"*.
+   Chọn FAIL-CLOSED chứ KHÔNG bỏ dấu để đoán ý: `RASOAT_HOSO_LOOP.md:177` đã bắt buộc *"CHỈ dùng giá trị
+   trong `_vocab_hinh_thuc`"* ⇒ đoán ý ngay tại tầng định tuyến phụ lục là thêm nguồn chân lý thứ hai.
+2. **Khớp CHỨA, không khớp BẰNG** — người nhập hay viết kèm phạm vi (*"sửa đổi, bổ sung Điều 54"*).
+   10/10 giá trị `_vocab_hinh_thuc` và các biến thể kèm phạm vi định tuyến **y như cũ** ⇒ fail-closed
+   không siết vào luồng rà hồ sơ đang chạy.
+   Thứ tự nhánh là RÀNG BUỘC: `"chờ bổ sung căn cứ"` chứa `"bổ sung"` nên nhánh **F phải đứng trước 04**.
+3. **`main()` kiểm TRỌN BỘ trước khi dựng**, báo MỘT LẦN đủ mọi dòng sai (kèm `key` + `van_ban`) rồi
+   `SystemExit` — cùng lối *"nói rõ file nào"* của `load_master`. Nổ giữa vòng lặp thì người nhập phải
+   sửa từng dòng một lượt.
+4. **Đảo chiều ca test cũ** + thêm `r311_route_hinh_thuc_fail_closed`: 10/10 từ vựng đúng bucket · biến thể
+   kèm phạm vi giữ hành vi · 7 ca xấu FAIL-CLOSED · thứ tự nhánh F-trước-04 · **đường sản xuất**
+   (subprocess `rasoat_phuluc.py`): bảng master có 1 dòng sai ⇒ rc≠0, nêu ĐÍCH DANH `VD-B`, **KHÔNG ghi**
+   file phụ lục; A/B cùng bảng đó sửa đúng chính tả ⇒ rc=0 và rơi vào **05** · PHẢN CHỨNG tái hiện
+   thuật toán cũ ngay trong test.
+5. `_canh_bao_hinh_thuc` (template) + `RASOAT_HOSO_LOOP.md:177` sửa lời — hai chỗ này đang tả hành vi cũ
+   (*"rơi ÂM THẦM vào phụ lục 04"*) nên sau bản vá là SAI.
+
+**Bằng chứng dương.** selftest **1588/1588**. MUTATION: hoàn nguyên đúng hai vế của bản vá (rỗng→`"04"`,
+fallback cuối→`"04"`) ⇒ **1586/1588**, đỏ đúng `r311_route_hinh_thuc_fail_closed` +
+`r209_master_template_va_vocab`. ruff DELTA so `origin/master` = **0** trên cả ba tệp chạm
+(`rasoat_phuluc.py` 1 F541 · `tl_selftest.py` 4325 F821 + 1 F401 · `tl.py` 12 F821 — bằng nhau hai bên).
+
 # ★ v1.36.44 — r310: RAS-01 (vế metadata/CLI) + RAS-14 — `rasoat` hết `argparse.REMAINDER`; đường GHI đòi `--apply` tường minh (2026-08-02)
 
 Đóng **hai mục cuối** của Làn A sổ audit 31-07. Vế `changes_pull` của RAS-01 đã land ở r304; vế này là

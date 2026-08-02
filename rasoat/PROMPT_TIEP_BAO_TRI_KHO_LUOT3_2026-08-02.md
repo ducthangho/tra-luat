@@ -2,6 +2,10 @@
 
 Dán nguyên khối này vào phiên mới. Chạy trên **máy Windows có config** (`D:\Quốc hội\tra-luat`).
 
+> **Trạng thái: LƯỢT BẢO TRÌ KHO ĐÃ ĐÓNG TRỌN.** Cả 2 mục xong 02-08 (người dùng duyệt «đồng ý cả 2»):
+> VIỆC 1 đã ghi + readback chứng minh · VIỆC 2 đóng bằng kết luận **KHÔNG ĐÈ**.
+> File này còn lại để (a) chặn làm lại, (b) bàn giao **3 việc SINH RA** từ lượt đó: VIỆC 3, VIỆC 4.
+
 ---
 
 ## ⚠ ĐỌC TRƯỚC — bốn thứ ĐỪNG làm lại
@@ -24,11 +28,20 @@ Dán nguyên khối này vào phiên mới. Chạy trên **máy Windows có conf
 
 ---
 
-## VIỆC 1 — Ghi note chống tái phát: CHỜ ĐÚNG MỘT QUYẾT ĐỊNH CỦA NGƯỜI DÙNG
+## VIỆC 1 — ✅ ĐÃ THI HÀNH 02-08 (người dùng duyệt). ĐỪNG CHẠY LẠI.
 
-Mọi thứ đã sẵn sàng; chỉ vướng chỗ **cả hai prompt cũ chỉ SAI SỔ**.
+Ghi vào **sổ NỀN `vbqppl`** — **không** phải sheet profile như hai prompt cũ chỉ dẫn.
+`patched:1 · missed:0 · verified:true`, journal `register-bulk_1785679205_23488`;
+**readback keyed: 746 ký tự, giữ nguyên note cũ 51 ký tự làm tiền tố**; `cat`/`corpus`/`nlm_status`/
+`row_kind` đo lại sau khi ghi đều **y nguyên** (quarantine giữ, không có `corpus=true`).
 
-Đo được (lượt 2 §1): dòng nằm **vật lý ở registry NỀN `vbqppl`**, không ở sheet profile «Luật BHXH».
+⚠ Payload đã đổi tên → **`rasoat/DA_THI_HANH_note_41-2024_bulk_2026-08-02.json`**.
+**Chạy lại là ĐÈ MẤT phần nối của phiên khác** — `--bulk` ghi đè cả ô, không cộng dồn.
+Nếu sau này cần nối thêm: đọc `reg_get` lấy note HIỆN TẠI, soạn payload mới trên nền đó.
+
+Dưới đây giữ lại làm **khuôn mẫu cho mọi lượt ghi `note` về sau** (lượt 2 §1 + §1b):
+
+Dòng nằm **vật lý ở registry NỀN `vbqppl`**, không ở sheet profile «Luật BHXH».
 
 ```
 reg_get(drive_id=1Ds95…, profile='Luật BHXH') → ok=True, n_rows=0
@@ -39,7 +52,7 @@ reg-query --profile "Luật BHXH"  → vẫn thấy, nhưng envelope khai "scope
 `reg_bulk` là **UPDATE-only, KHÔNG insert** ⇒ ghi bằng `--profile "Luật BHXH"` **không tạo dòng rác**
 nhưng là **NO-OP báo `missed`**. Rủi ro thật: tưởng đã ghi xong.
 
-**→ Hỏi người dùng: ghi vào sổ NỀN `vbqppl` (đúng nơi dòng tồn tại) hay dừng?** Được duyệt thì chạy:
+**Trình tự đã dùng (giữ nguyên cho lượt ghi `note` sau) — thay tên payload bằng payload MỚI:**
 
 ```powershell
 cd "D:\Quốc hội\tra-luat"     # hoặc worktree SẠCH tại origin/master
@@ -68,7 +81,7 @@ trên đường ĐƠN, mà đường đơn không ghi được `note`; nhánh `-
 
 ---
 
-## VIỆC 2 — Mục «3 khiếm khuyết nguồn»: ĐỀ NGHỊ ĐÓNG bằng kết luận «không đè»
+## VIỆC 2 — ✅ ĐÃ ĐÓNG 02-08 bằng kết luận «KHÔNG ĐÈ» (người dùng duyệt)
 
 Bảng đo (lượt 2 §2) — CŨ = record đang dùng, MỚI = bản Công báo:
 

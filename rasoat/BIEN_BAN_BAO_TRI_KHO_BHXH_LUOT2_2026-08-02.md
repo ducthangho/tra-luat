@@ -4,8 +4,9 @@ Tiếp `rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` (lượt 1, container we
 Cây chạy: worktree SẠCH `D:\Quốc hội\baotri_wt` tại `origin/master` = `705104e` = **v1.36.51** (r314→r319).
 Cache thật: `C:\Users\admin\.tra_luat_cache\docs\` · cache TẠM: scratchpad phiên (ephemeral).
 
-> **KHÔNG có thao tác GHI nào trong lượt này.** Không ghi registry, không đè cache, không đụng Drive/NLM.
-> Toàn bộ số đo từ lệnh ĐỌC + nạp vào cache TẠM ngoài kho.
+> **Thao tác GHI duy nhất của lượt này: 1 ô `note` trên 1 dòng registry NỀN** (§1b, sau khi người dùng
+> duyệt tường minh). Không đè cache, không đụng Drive/NLM, không đổi bất kỳ cột nào khác.
+> Mọi số đo khác từ lệnh ĐỌC + nạp vào cache TẠM ngoài kho.
 
 ---
 
@@ -13,8 +14,8 @@ Cache thật: `C:\Users\admin\.tra_luat_cache\docs\` · cache TẠM: scratchpad 
 
 | Mục | Trạng thái | Cốt lõi |
 |---|---|---|
-| 1. Ghi note chống tái phát | ⏸ **CHỜ DUYỆT — và prompt chỉ SAI SỔ** | Dòng nằm ở registry **NỀN `vbqppl`**, không ở sheet profile «Luật BHXH» như cả hai prompt chỉ dẫn (§1) |
-| 2. Chép đè 3 record cache | 🛑 **KHUYẾN NGHỊ KHÔNG ĐÈ cả ba** | Đo từng Điều: bản thay thế **không chữa** khiếm khuyết đã nêu, và làm MẤT thứ khác (§2) |
+| 1. Ghi note chống tái phát | ✅ **ĐÃ THI HÀNH — người dùng duyệt, readback chứng minh** | Ghi vào registry **NỀN `vbqppl`** (không phải sheet profile như cả hai prompt chỉ dẫn) — §1 + §1b |
+| 2. Chép đè 3 record cache | ✅ **ĐÓNG bằng kết luận KHÔNG ĐÈ — người dùng duyệt** | Đo từng Điều: bản thay thế **không chữa** khiếm khuyết đã nêu, và làm MẤT thứ khác (§2) |
 | — | ✅ Nghiệm thu r318 trên dữ liệu thật | Cờ chuyển từ dòng dương-tính-giả sang dòng nhãn THẬT; lời khuyên nguy hiểm đã hết (§3) |
 | — | ⚠ 2 tiền đề của lượt 1 KHÔNG tái lập | «container .docx hỏng» và một phần bảng khiếm khuyết (§4) |
 | — | 🔶 1 khiếm khuyết THẬT mới lộ, chưa xử | Chú thích hợp nhất bị nhét vào **thân Điều CUỐI** (§5) |
@@ -49,8 +50,36 @@ Kiểm lại hai khẳng định kỹ thuật của lượt 1 trên mã v1.36.51
 * Nhánh `--bulk` **không có cổng `--apply`/`--confirm`** (ghi ngay sau `_apply_gate`) và **không** chạm
   `--expect` ⇒ chống va chạm chỉ có thể làm thủ công: đọc `reg_get` ngay sát lệnh ghi.
 
-**Chưa thi hành — chờ người dùng chốt sổ ghi.** Payload `rasoat/pending_note_41-2024_bulk_2026-08-02.json`
-giữ nguyên, nội dung đã đối chiếu: note cũ 51 ký tự là tiền tố đúng của chuỗi 746 ký tự.
+---
+
+## 1b. Mục 1 — ĐÃ THI HÀNH (người dùng duyệt tường minh «đồng ý cả 2»)
+
+Ghi vào **sổ NỀN `vbqppl`**, đúng nơi dòng tồn tại. Trình tự đã chạy:
+
+| Bước | Kết quả |
+|---|---|
+| `manifest --profile vbqppl` | `count 1319 corpus=668`, treeHash `7cde69d7-668`, 7,2s |
+| `boot --refresh --profile vbqppl` | `entries_indexed 1319`, registry `1C21i65w…` |
+| `precheck --profile vbqppl --cols note --json` | **`blockers: []`, `warnings: []`** — 3 check `ok:true`, snapshot 5s |
+| đọc `reg_get` TƯƠI **ngay sát** lệnh ghi | note LIVE = **đúng 51 ký tự**, khớp tiền tố kỳ vọng |
+| `register --bulk … --cols note --profile vbqppl` | `patched: 1 · missed: 0 · verified: true` · journal `register-bulk_1785679205_23488` |
+| **readback keyed** (`reg_get refresh=true`) | **746 ký tự**, `startswith(note cũ) = True`, đúng 1 dòng |
+
+⚠ Vì `--bulk` **không có `--expect`** (CAS r279 chỉ nằm trên đường ĐƠN, mà đường đơn không ghi được
+`note`), chống va chạm được làm bằng **một script gộp đọc-kiểm-rồi-mới-ghi**: đọc `reg_get`, so bằng
+máy với chuỗi 51 ký tự kỳ vọng, **lệch thì thoát rc=3 và không ghi gì**. Không so bằng mắt.
+
+**Các cột khác giữ NGUYÊN** (đo lại sau khi ghi — chứng minh chỉ chạm đúng 1 ô):
+
+```
+cat        = '_ZZZ_QUARANTINE_taluat'      corpus     = 'false'
+nlm_status = 'removed_superseded_by_VBHN'  row_kind   = 'own'
+sohieu     = '41-2024-QH15'                name       = 'Luat_41-2024-QH15_Bao_hiem_xa_hoi'
+```
+
+⇒ Quarantine giữ nguyên, **không** có `corpus=true`. Payload đã đổi tên thành
+`rasoat/DA_THI_HANH_note_41-2024_bulk_2026-08-02.json` để không ai chạy lại (chạy lại sau khi phiên khác
+nối thêm note = **đè mất phần nối của họ**; đổi tên khiến lệnh cũ gãy TO thay vì clobber im lặng).
 
 ---
 
@@ -185,15 +214,17 @@ giữ nguyên chú thích ở trường riêng. Đó là một lượt VÁ MÃ �
 
 ## 6. Việc còn treo
 
-1. **Mục 1** — chờ người dùng chốt: ghi note vào sổ **NỀN `vbqppl`** (đúng nơi dòng tồn tại) hay dừng.
-   Lệnh đã sẵn sàng, chỉ đổi `--profile "Luật BHXH"` → `--profile vbqppl`, giữ nguyên trình tự
-   đọc-`reg_get` → cổng ghi → `register --bulk` → readback keyed.
-2. **Mục 2** — khuyến nghị ĐÓNG bằng kết luận «không đè»; nếu người dùng vẫn muốn xử 1 dòng nhãn mục của
-   54-2025 thì đi nguồn `.doc`/`.docx` Công báo chứ không phải PDF.
-3. **Tách chú thích hợp nhất khỏi Điều cuối** (§5) — lượt vá mã riêng.
-4. **Đính chính §4.2 của biên bản lượt 1** (§4 trên đây).
-5. **VIỆC 4 của prompt lượt 1** (echo `registry_scope`) — *đã có một phần*: `reg-query` **đã** trả
+**Cả hai mục của lượt bảo trì kho ĐÃ ĐÓNG** (người dùng duyệt 02-08: «đồng ý cả 2»).
+~~Mục 1~~ → thi hành, readback chứng minh (§1b). ~~Mục 2~~ → đóng bằng kết luận **KHÔNG ĐÈ**.
+
+Còn lại là việc SINH RA từ lượt này, **không** thuộc phạm vi đã duyệt:
+
+1. **Tách chú thích hợp nhất khỏi Điều cuối** (§5) — lượt vá mã riêng, cần test khoá cả hai chiều.
+2. **Đính chính §4.2 của biên bản lượt 1** (§4 trên đây) — «container .docx hỏng» không tái lập.
+3. **VIỆC 4 của prompt lượt 1** (echo `registry_scope`) — *đã có một phần*: `reg-query` **đã** trả
    `scope` + cờ `BASE_SCOPE_HIT`. Phần còn thiếu là WARN LOUD khi `--profile` ≠ nền mà `registryDocId` rỗng.
+4. Nếu sau này vẫn muốn bỏ **1 dòng nhãn mục** ở khối đầu `54-2025`: đi nguồn `.doc`/`.docx` Công báo,
+   **KHÔNG dùng PDF**, và quyết `method_rank 95→50` trước.
 
 ## 7. Điều kiện môi trường (máy này, để tái lập)
 

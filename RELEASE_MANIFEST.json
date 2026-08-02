@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.40",
+  "skill_version": "1.36.41",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7401720,
-  "package_hash": "98fe33f80c8445c8b8dd8ffa4d5edd1a3c84d12bc614b14d0486f8748fcc2e0a",
-  "content_hash": "98fe33f80c8445c8b8dd8ffa4d5edd1a3c84d12bc614b14d0486f8748fcc2e0a",
+  "total_bytes": 7411732,
+  "package_hash": "030f87d54b7315846a8ef4be40a2c8f22d257270b28601d7bd41ba7663828761",
+  "content_hash": "030f87d54b7315846a8ef4be40a2c8f22d257270b28601d7bd41ba7663828761",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 505320,
-      "sha256": "844784888c02af36a13d7a0c85dc1e44644f3e04e50768c4212b72e1892e72b2"
+      "size": 512944,
+      "sha256": "a23e2fdfba99675e9b997ee868f63ce4293cf4255af0b21cbd3da1ef01e56f6c"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "b9b121a9a51b8663e31f52e0bc1de804a5d15f65001287d1f2e8a3133bb038aa"
+      "sha256": "e6b2d28baf176cedc119b51d977bd7a71a8000135a52fe7a1c9e2ab9b234127e"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "4273ef19257565dce2ca58604462eb825522fcd49a3ff792cb36181d7028522c"
+      "sha256": "0645d687cf59540446f1d2c9b869d00ba5adf0c778cf93f7da0bb5f470b1bf63"
     },
     {
       "path": "agents/openai.yaml",
@@ -679,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 230117,
-      "sha256": "c2af065dceb1c336f11a7579a5cb0936a9f922ef4553fdcd9811d32373a32287"
+      "sha256": "eb25559dc284018c474c1c13befd61d51ffbd436be6d6397278d8a34be5a33ae"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -848,8 +848,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1931727,
-      "sha256": "a1c988f413c5c903c3b651247cd45392b22bb4105d7a70a7d29abc801a311208"
+      "size": 1934115,
+      "sha256": "5b20408ab64537cd98e0adf2f842760bf2a36d6bff9b36d7accd7c49f2841f2f"
     },
     {
       "path": "scripts/tra_cuu.py",

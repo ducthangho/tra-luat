@@ -1,4 +1,74 @@
-# ★ v1.36.40 — HOÀ NHÁNH lượt 10: master land VÒNG ĐỜI HỒ SƠ (r300), KHÔNG chạm tệp nào của T2 (2026-08-01)
+# ★ v1.36.41 — r307: sổ hết KHAI HAI NGHĨA cho MỘT version — hạ cấp nhật ký nhánh T2 + cổng «một version ⇒ một đợt» (2026-08-02)
+
+**Bối cảnh.** `dfb9418` merge PR #6 (tranche T2: RAS-05 · ING-03 · Helper `tl_core/txn.py`). Nhánh
+`claude/va-t1-gate-nlvoj9` phát triển song song nhiều ngày và giữ **dải số riêng** trong khi master đã
+tiêu dải đó cho việc khác ⇒ sau merge, sổ khai **15 số version hai lần với nội dung MÂU THUẪN**
+(`v1.36.23`…`v1.36.37`) và 8 số đợt (`r285`…`r292`) mang hai nghĩa.
+
+**Gate KHÔNG bắt lớp này** — CI xanh trên `88c41e3`, gate local 8/8 xanh, mà sổ vẫn hỏng. Đó là lỗ,
+không phải may: không cổng nào từng đọc CHANGELOG như một BẢNG KHOÁ.
+
+**Đo (không đoán) — bất biến chọn để khoá là «một version ⇒ đúng một số đợt»:**
+
+| cây | vi phạm |
+|---|---|
+| `1a06ff1` (master TRƯỚC merge) | **0** |
+| `references/changelog_archive/*.md` (toàn bộ) | **0** |
+| `dfb9418` (SAU merge) | **5** — v1.36.26 `[r288,r291]` · v1.36.27 `[r289,r292]` · v1.36.28 `[r288,r290]` · v1.36.30 `[r290,r291]` · v1.36.31 `[r292,r294]` |
+
+Nền = 0 tuyệt đối ⇒ cổng KHÔNG cần danh sách miễn trừ. (Trùng version *có sẵn* `v1.35.65`/`v1.35.88`
+là **cùng một đợt** tách hai mục — `r229`/`r229`, `r251`/`r251` — nên bất biến này tha đúng chỗ; một
+cổng "tiêu đề version không được lặp" trần trụi sẽ đỏ oan hai ca đó.)
+
+**Vá — hai lớp, cố ý KHÔNG đụng lớp thứ ba:**
+
+1. **Tiêu đề version:** 18 mục gốc-nhánh hạ từ `#` xuống `##` kèm nhãn *[nhật ký nhánh T2 — số hiệu
+   NỘI BỘ của nhánh]*. Toàn văn GIỮ NGUYÊN. An toàn với gate vì `_doc_claims_context` lấy
+   `changelog_versions`/`changelog_rs` từ **TOÀN VĂN** chứ không từ dòng tiêu đề, còn `changelog_headings`
+   đếm mọi dòng mở đầu bằng `#` — `##` vẫn được đếm ⇒ `basis` không đổi vì việc hạ cấp.
+2. **Tên ca test** (nguồn sự thật theo §6 quy ước số đợt): 20 ca đổi tiền tố về dải trống —
+   `r287→r301` (GATE-01b, 3 ca) · `r288→r302` (Helper 1, 4) · `r289→r303` (PRO-01, 4) ·
+   `r290→r304` (RAS-01 vế `changes_pull`, 3) · `r291→r305` (ING-03, 3) · `r292→r306` (RAS-05, 3).
+   `r285`/`r286` của nhánh KHÔNG cấp số mới: mã của chúng đã bị GỠ trong lúc hoà (lấy bản master), không
+   còn ca test nào. Đổi kèm **20 hàm `_cNNN_…` tương ứng** (40 chỗ) — để tên ca và tên hàm không nói hai
+   số khác nhau, đúng cái bẫy "nhãn trong mã tự khai `r290` trong khi test tên `r291_*`" đã suýt làm land
+   nhầm 109 dòng. Đổi theo **CẶP rút từ chính dòng `_t110`**, KHÔNG đổi theo tiền tố: master cũng có
+   `_c287…_c292` của riêng nó, thay mù sẽ phá. (Một hàm có hậu tố VIẾT HOA —
+   `_c292_migrate_v1_dua_doc_loi_QUAY_LAI` — nên bảng dò chữ-thường bỏ sót; bắt được vì đếm 20 cặp
+   không khớp 19 dòng dò ra.)
+3. **KHÔNG đánh số lại PROSE trong nhật ký nhánh.** Đây là quyết định có chủ đích, không phải bỏ sót:
+   trong khối đó `r285`–`r292` vừa là số của nhánh vừa là **tham chiếu tới r của master** (dòng
+   "3f614de r288 · 00611fe r289 · 5df7f39 r290" là commit MASTER; bảng "Nhánh này (r285) | Master (r292,
+   GIỮ)" đối chiếu hai bên). Thay mù sẽ phá chính bảng ghi lại vụ va số. Nhật ký là SỬ LIỆU — giữ nguyên,
+   nhãn hoá, và ánh xạ ở đây.
+
+**Cổng mới:** `r307_changelog_mot_version_mot_dot` — quét `CHANGELOG.md` + toàn bộ
+`references/changelog_archive/*.md`, đỏ nếu một version được hai mục `# ★` khai với số đợt KHÁC nhau.
+Ca **TỰ MANG PHẢN CHỨNG**: bơm hai dòng giả cùng version khác đợt vào bản sao trong bộ nhớ và khẳng
+định vị ngữ BẮT được — nếu không, ca chỉ chứng minh "hôm nay sổ sạch" chứ không chứng minh cổng chạy.
+
+**Việc còn nợ:** nhật ký nhánh vẫn nói `r288 = Helper 1` trong khi ca test nay là `r302_helper1_*`.
+Bảng ánh xạ trên là cầu nối; ai tra ngược từ prose phải đi qua nó.
+
+# ★ v1.36.40 — r301–r306: LAND tranche T2 «chặn máu» qua PR #6 — kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG (2026-08-01)
+
+Mục CHÍNH DANH trên sổ master cho `dfb9418` (merge `claude/va-t1-gate-nlvoj9`). Nhật ký hoà nhánh 10
+lượt nằm ngay dưới, đã hạ cấp — xem v1.36.41 để biết vì sao.
+
+| đợt (mới) | (số cũ của nhánh) | nội dung | ca test |
+|---|---|---|---|
+| r301 | r287 | `golden-test` CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi | 3 |
+| r302 | r288 | Helper 1 `tl_core/txn.py` — HỢP ĐỒNG kết luận giao dịch, tính `ok` từ KẾT QUẢ | 4 |
+| r303 | r289 | PRO-01 `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau bước xoá hỏng | 4 |
+| r304 | r290 | RAS-01 vế `changes_pull` — "DRY" mà vẫn GHI: điều phối hết gọi action ghi trước `--apply` | 3 |
+| r305 | r291 | ING-03 `ingest_commit` — đòi `ok=true` VÀ đủ 3 marker + `row`, vá CẢ HAI call site | 3 |
+| r306 | r292 | RAS-05 `backfill_keywords_live` — hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." | 3 |
+
+Mã: `tl_core/txn.py` (mới) · `ingest_ops.py` · `backfill_keywords_live.py` · `ops_misc.py` ·
+`registry_orchestrator.py` · `workflow.py` · `tl.py`. Nhánh đã rebase lên `1a06ff1`, chứa TRỌN master
+(behind 0 / ahead 19), CI gate xanh trên `88c41e3`.
+
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.40 — HOÀ NHÁNH lượt 10: master land VÒNG ĐỜI HỒ SƠ (r300), KHÔNG chạm tệp nào của T2 (2026-08-01)
 
 Hoà `master` `1a06ff1` (r300 v1.36.37 — *"VÒNG ĐỜI HỒ SƠ — 'đã đóng' thành trạng thái MÁY ĐỌC ĐƯỢC"*).
 
@@ -18,7 +88,7 @@ delta ĐÃ BIẾT của bên kia.
 
 **Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
 
-# ★ v1.36.39 — HOÀ NHÁNH lượt 9: master land P16-F11+F26 (OCR/chunks), KHÔNG chạm tệp nào của T2 (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.39 — HOÀ NHÁNH lượt 9: master land P16-F11+F26 (OCR/chunks), KHÔNG chạm tệp nào của T2 (2026-08-01)
 
 Hoà `master` `7469d8c` (r299 v1.36.36 — *"cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply`
 chạy được (P16-F11+F26)"*).
@@ -40,7 +110,7 @@ nhận, không phải "gate xanh".
 
 **Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
 
-# ★ v1.36.38 — HOÀ NHÁNH lượt 8: master land T0-E/P16, KHÔNG chạm tệp nào của T2 (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.38 — HOÀ NHÁNH lượt 8: master land T0-E/P16, KHÔNG chạm tệp nào của T2 (2026-08-01)
 
 Hoà `master` `74f62e2` (r297 v1.36.34 *"`--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10"*
 + r298 v1.36.35 *"diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06)"*).
@@ -79,7 +149,7 @@ round-trip tệp qua text API.
 `_pi_stage_write` + `_il_stage_write` (ING-03), `Txn(`/guard (PRO-01), `not_probed` (RAS-01),
 `tukhoa_progress.v2` (RAS-05), `tl_core/txn.py` (Helper 1).
 
-# ★ v1.36.37 — HOÀ NHÁNH lượt 7: master chạm `ingest_ops.py` nhưng KHÔNG chạm ING-03 (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.37 — HOÀ NHÁNH lượt 7: master chạm `ingest_ops.py` nhưng KHÔNG chạm ING-03 (2026-08-01)
 
 Hoà `master` `9465d2a` (r296 v1.36.33 — *"HỌ regex `Điều N` nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15"*).
 
@@ -98,7 +168,7 @@ auto-merge sạch.
 
 **Số hiệu: master đã dùng tới `r296`** ⇒ nhánh này đánh số tiếp từ **r297**.
 
-# ★ v1.36.36 — HOÀ NHÁNH lượt 6: master land T3/rà-soát, T2 của nhánh này không bị đụng (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.36 — HOÀ NHÁNH lượt 6: master land T3/rà-soát, T2 của nhánh này không bị đụng (2026-08-01)
 
 Hoà `master` `81c9715` (2 commit: `7795938` r295 v1.36.32 — *"rà soát: MỘT định nghĩa hội tụ +
 corpus-hiệu-lực dùng chung + state single-writer hết fail-OPEN"*; `81c9715` r295b — regen manifest).
@@ -119,7 +189,7 @@ phải rà lại §6.1/§Pha 1D trên master mới, đừng dựng lại Helper 
 
 **Số hiệu: master đã dùng `r295`/`r295b`** ⇒ nhánh này đánh số tiếp từ **r296** (trước ghi r295 — chỉnh lại).
 
-# ★ v1.36.35 — HOÀ NHÁNH lượt 5: master vá nốt khuyết BÁO GIẢ của chính GATE-01 (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.35 — HOÀ NHÁNH lượt 5: master vá nốt khuyết BÁO GIẢ của chính GATE-01 (2026-08-01)
 
 Hoà `master` `a3abc11` (r294 v1.36.31 — *"GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng
 với projection"*). Đây chính là **khuyết điểm #1 mà `r288` tự khai và cố ý để lại**: `audit_projection`
@@ -139,7 +209,7 @@ nằm **trên** cơ chế của họ chứ không **trong** nó, nên cơ chế 
 đều `ok:true`. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md` → **v1.36.35**; `CHANGELOG` giữ cả hai khối;
 `RELEASE_MANIFEST` tái sinh; `workflow.py` và `tl_selftest.py` **auto-merge sạch**.
 
-# ★ v1.36.34 — HOÀ NHÁNH lượt 4: BỎ bản GATE-01 của tôi, lấy thiết kế của master (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.34 — HOÀ NHÁNH lượt 4: BỎ bản GATE-01 của tôi, lấy thiết kế của master (2026-08-01)
 
 Hoà `master` `5df7f39` (3 commit mới: `3f614de` r288 · `00611fe` r289 · `5df7f39` r290) vào nhánh.
 PR #6 lại `dirty`. **Master vẫn KHÔNG đụng 4 mục T2 + Helper 1** (đo trên `2b6da92..5df7f39`:
@@ -190,7 +260,7 @@ Kết quả: **một** cơ chế (của họ), **hai** bộ test (8 ca: 5 `r288_
 `r289`: master v1.36.29 = cổng con-trỏ-trần · nhánh v1.36.27 = PRO-01; `r290`: master v1.36.30 =
 `rasoat-merge` · nhánh v1.36.28 = RAS-01). Đánh số tiếp từ **r295**.
 
-# ★ v1.36.33 — HOÀ NHÁNH lượt 3: GỠ bản vá TRÙNG của tôi vì phiên khác đã vá cùng lỗi, tốt hơn (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.33 — HOÀ NHÁNH lượt 3: GỠ bản vá TRÙNG của tôi vì phiên khác đã vá cùng lỗi, tốt hơn (2026-08-01)
 
 Hoà `master` `2b6da92` (r292 v1.36.27) vào `claude/va-t1-gate-nlvoj9`. PR #6 chuyển `mergeable_state`
 `unstable` → **`dirty`** (xung đột) nên phải hoà trước khi làm tiếp.
@@ -246,7 +316,7 @@ trùng của tôi. `VERSION`/`tl.py`/`SKILL.md` → **v1.36.33**. `CHANGELOG.md`
 
 **Gate sau hoà: 8/8 PASS · selftest 1526/1526 · golden khớp · 177 tệp.**
 
-# ★ v1.36.32 — HOÀ NHÁNH lượt 2: T2 (chặn máu) gặp T0-G `docs/` ra khỏi gói của master (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.32 — HOÀ NHÁNH lượt 2: T2 (chặn máu) gặp T0-G `docs/` ra khỏi gói của master (2026-08-01)
 
 Lượt hoà thứ hai giữa `claude/va-t1-gate-nlvoj9` và `master` (master `a739c93` = r291 v1.36.26, T0-G).
 
@@ -283,7 +353,7 @@ ngoài gói = 215 trên đĩa).
 
 **Gate sau hoà: 8/8 PASS · selftest 1527/1527 · 177 tệp trong `RELEASE_MANIFEST` · golden khớp.**
 
-# ★ v1.36.31 — r292/RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.31 — r292/RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." (2026-08-01)
 
 Slice **R0** (§Pha 1B), mục **T2 cuối cùng** — tranche "chặn máu" đóng lại tại đây.
 
@@ -337,7 +407,7 @@ là mất manh mối. `migrate_progress`: `ok`→`committed` · `empty`→`block
 (r290) · ING-03 (r291) · RAS-05 (r292), trên nền Helper 1 (r288). Tiếp theo là **T3 — định danh**
 (Mẫu B; cần Helper 2 của Pha 1-0).
 
-# ★ v1.36.30 — r291/ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG — vá CẢ HAI call site (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.30 — r291/ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG — vá CẢ HAI call site (2026-08-01)
 
 Slice **I4** (Pha 1B), mục **T2** thứ tư. Dùng **Helper 1** (`tl_core/txn.py` → `step_result_ok`).
 
@@ -392,7 +462,7 @@ re-export **trực tiếp** (tuple — vào `_STUB_MAP` là vỡ r81). Allow-lis
 **ruff 0.15.8:** `tl.py` 12 F821 / 0 F401 (đúng nền). `ingest_ops.py` 371 vs 370 ở HEAD trước (+1 = tên
 re-home mới), cùng lớp BY DESIGN. Full gate **8/8 PASS**, `git diff -- references/golden/` rỗng.
 
-# ★ v1.36.29 — HOÀ NHÁNH: T1+T2 (gate + chặn máu) gặp P16-T02/F09/T03 của master (2026-08-01)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.29 — HOÀ NHÁNH: T1+T2 (gate + chặn máu) gặp P16-T02/F09/T03 của master (2026-08-01)
 
 Nhánh `claude/va-t1-gate-nlvoj9` và `master` chạy **song song** từ `19a6adf` (v1.36.22). Hoà lại tại đây.
 
@@ -420,7 +490,7 @@ khối r286–r290 của nhánh này và báo **0 tên không được khôi ph�
 
 **Gate sau hoà: 8/8 PASS · selftest 1520/1520 · `git diff -- references/golden/` rỗng · 196 tệp.**
 
-# ★ v1.36.28 — r290/RAS-01 (vế `changes_pull`): "DRY" MÀ VẪN GHI — điều phối hết gọi action ghi trước cổng `--apply` (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.28 — r290/RAS-01 (vế `changes_pull`): "DRY" MÀ VẪN GHI — điều phối hết gọi action ghi trước cổng `--apply` (2026-07-31)
 
 Slice **R1** phần độc lập (§Pha 1D "[MỚI] Đóng riêng lỗ `changes_pull`"), mục **T2** thứ ba.
 Vế metadata/CLI của RAS-01 để **T3**; vế này vá được ngay và nặng hơn.
@@ -455,7 +525,7 @@ hai ca hành vi mới; ca phản chứng `--apply` vẫn xanh (hành vi đó v�
 `python scripts/registry_orchestrator.py --selftest` = **22/22** trước và sau.
 **ruff 0.15.8:** `registry_orchestrator.py` **0 F821 / 0 F401**, y hệt master (delta 0). Full gate **8/8 PASS**.
 
-# ★ v1.36.27 — r289/PRO-01: `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau khi bước xoá đã hỏng (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.27 — r289/PRO-01: `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau khi bước xoá đã hỏng (2026-07-31)
 
 Slice **P0** (§6.1-(b) + Pha 1C-tách-ra), **ưu tiên #2 toàn sổ audit** — chỉ sau GATE-03. Mục T2 thứ nhất.
 Dùng **Helper 1** (`tl_core/txn.py`, r288) — DÙNG, không SỬA.
@@ -522,7 +592,7 @@ helper vào một đường GHI mới không bao giờ lọt review im lặng.
 re-home của khối mới), cùng lớp BY DESIGN. F401 không đổi. Full gate **8/8 PASS**,
 `git diff -- references/golden/` **rỗng**.
 
-# ★ v1.36.26 — r288/Pha 1-0: Helper 1 — HỢP ĐỒNG kết luận giao dịch (`tl_core/txn.py`), CHƯA gắn vào lệnh nào (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.26 — r288/Pha 1-0: Helper 1 — HỢP ĐỒNG kết luận giao dịch (`tl_core/txn.py`), CHƯA gắn vào lệnh nào (2026-07-31)
 
 Pha 1-0 (§5 Mẫu A + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Một commit riêng, không kèm mục lỗi nào** —
 đúng acceptance §6.1. Mở đầu tranche **T2 (chặn máu)**: PRO-01 và ING-03 đều được kế hoạch chỉ định
@@ -575,7 +645,7 @@ bug của thay đổi. Gate sau đó **8/8 PASS**.
 **ruff 0.15.8:** `txn.py` **0 F821 / 0 F401**. `tl.py` 12/0 (đúng nền). `tl_selftest.py` 4255 (master 4207):
 +48 của 4 ca mới, cùng lớp BY DESIGN. F401 không đổi.
 
-# ★ v1.36.25 — r287/GATE-01b: golden-test CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.25 — r287/GATE-01b: golden-test CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi (2026-07-31)
 
 Slice **G0.1b** (§3.1 kế hoạch AUDIT_XAC_MINH 31-07). **Chỉ được làm SAU khi G0.1a (r286) xanh** — xem
 bằng chứng thứ tự ở cuối mục này.
@@ -621,7 +691,7 @@ làm tất định = cổng đỏ chập chờn, tệ hơn không có cổng.
 `tl.py` 12/0 (đúng nền, không đụng). `tl_selftest.py` 4250 (master 4207): +43 là `os`/`json`/`_TL_MODULE`
 của 3 ca mới — cùng lớp BY DESIGN. **Không phát sinh lớp cảnh báo mới; F401 không đổi.**
 
-# ★ v1.36.24 — r286/GATE-01a: `sweep` TẤT ĐỊNH ở RAW — đóng băng `snapshot_age_s` dưới deterministic mode (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.24 — r286/GATE-01a: `sweep` TẤT ĐỊNH ở RAW — đóng băng `snapshot_age_s` dưới deterministic mode (2026-07-31)
 
 Slice **G0.1a** (§3.1 + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Làm tất định TRƯỚC, cưỡng chế SAU** — đảo
 thứ tự là được một cổng ĐỎ CHẬP CHỜN, tệ hơn hiện trạng.
@@ -682,7 +752,7 @@ mỗi tệp +1 = đúng tên `_frozen_age_seconds` re-home, cùng lớp BY DESIG
 **Chưa làm ở đợt này (CÓ CHỦ ĐÍCH):** `raw_stable=false` vẫn CHƯA làm case đỏ — đó là Slice **G0.1b**, chỉ
 được làm SAU khi G0.1a xanh.
 
-# ★ v1.36.23 — r285/GATE-03: khung cô lập lọc ứng viên config theo TIỀN TỐ `/tmp/` ⇒ loại sạch trên Linux — TEST-ONLY (2026-07-31)
+## ★ [nhật ký nhánh T2 — số hiệu NỘI BỘ của nhánh, KHÔNG phải version master] ★ v1.36.23 — r285/GATE-03: khung cô lập lọc ứng viên config theo TIỀN TỐ `/tmp/` ⇒ loại sạch trên Linux — TEST-ONLY (2026-07-31)
 
 **Ca thật, đo TRỰC TIẾP trên Linux/Cowork:** `python scripts/tl.py --selftest` → **1490/1491**, đúng **một** case ĐỎ:
 `r284_khung_test_profile_khong_doc_config_that` — tức chính **chốt chặn tái phát mà r284 vừa thêm** lại đổ

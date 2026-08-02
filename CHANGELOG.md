@@ -1,3 +1,64 @@
+# ★ v1.36.53 — r321: RAS-17 vế `rasoat-merge` — neo hỏng hết đi lọt vào bảng master (2026-08-02)
+
+**Nối tiếp r313, KHÔNG chồng lấn.** r313 dựng khuôn (`_rasoat_anchor_khuon`) + cưỡng chế cờ vòng đời
+(`_rasoat_anchor_hop_le`). Mục này đóng vế còn lại, và là vế mà bản kiểm lõi nêu ĐÍCH DANH:
+«`_rasoat_unit_shape` không chạm `anchor` ⇒ `rasoat-merge` nuốt trọn».
+
+**Đo trên chính master `c24a8b3` (đã có r313), hồ sơ BHXH thật — 82/82 ô neo sai khuôn:**
+```
+tl rasoat-merge --in <master/> --json  →  ok: true · so_phat_hien: 40 · KHÔNG một khoá nào nhắc anchor
+```
+Cổng vòng đời của r313 không bịt được lỗ này: nó chỉ bắn khi hồ sơ **đã khai `vong_doi`**, còn
+`rasoat-merge` chạy từ lượt rà ĐẦU TIÊN và là đường sản phẩm cuối (§7.1 điều kiện đóng số 6 gọi thẳng
+`rasoat-merge --check` rc=0 — tức bảng master có thể nghiệm thu XANH trong khi 82/82 neo hỏng).
+
+**Vá.** `_rasoat_anchor_quet(docs)` — thuần, giữ thứ tự, trả từng ô hỏng kèm `nguon`/`key`/`so_hieu`/`i`
+để người sửa biết mở FILE nào, PHÁT HIỆN nào. Luật hợp lệ và từ vựng `loai` dùng **chung**
+`_rasoat_anchor_khuon()` của r313 — một nguồn chân lý, không đẻ bộ từ vựng thứ hai rồi để hai bên trôi
+khỏi nhau (có ca khoá riêng bất biến này). `cmd_rasoat_merge` khai `so_anchor_hong` + `anchor_hong` ở
+**MỌI** chế độ kể cả `--check`/`--dry-run`; `--anchor-strict` ⇒ rc=2 và **KHÔNG ghi**, đặt cùng chỗ với
+cổng r216/r290 (TRƯỚC mọi thao tác ghi).
+
+**Vì sao KHÔNG strict mặc định:** hồ sơ đang lưu giữ 82/82 ô sai khuôn — bật mặc định là chặn đứng mọi
+hồ sơ CŨ vì một lỗi lượt rà không gây ra và **chưa có đường sửa trọn**. Đúng khuôn r312 với ING-09:
+chặn cái MỚI, khai cái CŨ, không dọn lén.
+
+**Đo lại phần DỮ LIỆU (02-08) — sửa hai điều bàn giao cũ ghi sai:**
+
+| lớp | n | di trú tự động được? |
+|---|---|---|
+| `cache:<slug>` (± `#<8hex>`) | 47 | **ĐƯỢC** — cache giữ `text_hash` 64hex thật; 2 ô có `#<8hex>` đều KHỚP tiền tố bản hiện hành |
+| hex 16 ký tự (2 giá trị) | 17 | **KHÔNG** — khớp **0** bản, kể cả mọi `cache_bak_*` ⇒ không truy nguyên được |
+| `congbao:…` | 17 | **KHÔNG** — không có record cache |
+| `gdoc:…` | 1 | **KHÔNG** |
+
+1. «cache `docs/*.json` = 0 record» là đo trong **container rỗng**; trên máy giữ hồ sơ có đủ 11 bản.
+2. «mã ghi hexdigest TRẦN thiếu tiền tố (`build_cache.py:83`)» là **nhầm trường**: ô đó là `text_hash`
+   của RECORD CACHE (64hex thật, đúng), không phải `anchor.doc_deps[].text_hash` (do agent rà điền tay).
+
+⇒ Câu «tính lại bằng `_content_hash`» ở `RASOAT_PLAN_SCHEMA.md` §7.2 **chỉ đúng cho lớp `cache:`**. Áp cho
+cả 82 là thay giá trị không rõ nguồn bằng giá trị TƯƠI — khẳng định một độ tươi chưa hề kiểm, đúng thứ
+`anchor_con_hieu_luc` sinh ra để chặn. §7.2 nay ghi rõ phân rã này; ô không truy nguyên được thì ĐỂ TRỐNG.
+
+**Test** (3 ca, đều HÀNH VI — không grep chuỗi, vì lệnh này thuần cục bộ nên chạy thật được):
+`r321_anchor_quet_gan_nguon` (8 khẳng định — 3 lớp `loai` phá riêng lẻ, ô đúng không đẻ vế giả, dep
+không-phải-dict vẫn tính, thứ tự tất định) · `r321_quet_khop_findings_r313` (bất biến: số ô hỏng và
+phân lớp của hai đường soi phải BẰNG NHAU) · `r321_merge_lo_dien_va_strict_fail_closed` (rc + payload +
+**FILE CÓ BỊ GHI KHÔNG**, gồm cả chế độ `--check`).
+
+**Mutation** (mỗi vế hoàn nguyên riêng, đo trên chính bản này): bịt `_rasoat_anchor_quet` ⇒ đỏ đúng 3 ca
+mới · gỡ `return 2` của cổng (báo lỗi nhưng VẪN ghi — đúng lớp bệnh r290) ⇒ đỏ đúng ca strict.
+selftest **1614/1614** (đo SAU khi rebase lên r320); ruff F821 **0 tên mới** trên cả 4 tệp đụng tới
+(so tập TÊN, không so số đếm — `lookup_ops.py` 563→564 là THÊM CALL-SITE của helper vốn đã stub, đúng
+ca xanh đã ghi trong checklist).
+
+**Vế GHI DỮ LIỆU: CHỐT KHÔNG LÀM — và đó là kết cục ĐÚNG, không phải nợ.** Hồ sơ BHXH đã
+`da_dong_co_gioi_han` (người thẩm tra chốt 01-08, claim đã nhả) và `vong_doi` của nó ĐÃ tự khai chính
+xác: `anchor_con_hieu_luc: false` + `ly_do_anchor` mô tả đúng RAS-17. Tức hệ thống đang ở trạng thái
+TỰ MÔ TẢ ĐÚNG — Loop C bỏ qua hồ sơ này đúng như thiết kế, không có lỗi nào đang chảy máu. Sửa 82 ô
+tại chỗ là ghi đè một hồ sơ đã ký, phá bất biến §7.1 «đóng hồ sơ là ĐÓNG BĂNG, không phải dọn», mà
+đổi lại KHÔNG được gì: 35/82 ô vẫn hỏng ⇒ `anchor_con_hieu_luc` vẫn phải là `false`. Người dùng chốt
+**để nguyên** (02-08). Ghi lại đây để lượt sau đừng mở lại như một "việc còn treo".
 # ★ v1.36.52 — r320: ĐÓNG 4 mục CUỐI của sổ audit 31-07 — PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06 (2026-08-02)
 
 Bốn mục này là **toàn bộ phần còn lại** của nhóm "chưa có bằng chứng độc lập" (§Phụ lục kế hoạch: 6 mục,

@@ -21394,6 +21394,111 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r313_khuon_khop_dac_ta_va_tl", _c313_khuon_khop_dac_ta_va_tl)
 
+    def _c321_anchor_quet_gan_nguon():
+        """v1.36.53 (r321/RAS-17 vế merge): `_rasoat_anchor_quet` CHỈ ĐÍCH DANH ô hỏng.
+
+        r313 đếm để phán cờ vòng đời; hàm này phải trả về ĐỦ để mở đúng file, đúng phát hiện."""
+        from tl_core import lookup_ops as _lo321
+        q = _lo321._rasoat_anchor_quet
+        _H = "sha256:" + ("a" * 64)
+
+        def _u(th, key="VD-01"):
+            return {"phat_hien": [{"key": key, "anchor": {"doc_deps": [
+                {"so_hieu": "41-2024-QH15", "text_hash": th}]}}]}
+        r = q([("unit-001.json", _u("cache:41-2024-qh15--consolidated"))])
+        ok0 = (len(r) == 1 and r[0]["nguon"] == "unit-001.json" and r[0]["key"] == "VD-01"
+               and r[0]["so_hieu"] == "41-2024-QH15" and r[0]["i"] == 0)
+        # Từ vựng `loai` dùng CHUNG với r313 — ba lớp, mỗi lớp phá riêng lẻ.
+        ok1 = r[0]["loai"] == "locator_trong_hash"
+        ok2 = q([("u.json", _u(""))])[0]["loai"] == "rong"
+        ok3 = q([("u.json", _u("a87061b41d2c788b"))])[0]["loai"] == "sai_khuon"   # ô thật hồ sơ BHXH
+        # Ô ĐÚNG khuôn ⇒ KHÔNG đẻ vế hỏng giả.
+        ok4 = q([("u.json", _u(_H))]) == []
+        # Khuôn KHÁC unit_v1 không bị quét nhầm; rác không làm vỡ.
+        ok5 = (q([("BANG.json", {"noi_dung": []})]) == [] and q([("la.json", {"x": 1})]) == []
+               and q([("none.json", None)]) == [] and q([]) == [] and q(None) == [])
+        # dep KHÔNG phải dict ⇒ vẫn tính là hỏng, không nuốt.
+        ok6 = q([("u.json", {"phat_hien": [{"key": "K", "anchor": {"doc_deps": ["rac"]}}]})])[0]["loai"] == "sai_khuon"
+        # GIỮ THỨ TỰ đầu vào ⇒ tất định (điều kiện để golden/determinism khoá được).
+        _uu = _u("cache:x")
+        ok7 = [x["nguon"] for x in q([("a.json", _uu), ("b.json", _uu)])] == ["a.json", "b.json"]
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r321_anchor_quet_gan_nguon", _c321_anchor_quet_gan_nguon)
+
+    def _c321_quet_khop_findings_r313():
+        """r321: hai đường soi neo KHÔNG được trôi khỏi nhau.
+
+        `_rasoat_anchor_quet` (đích danh, cho merge) và `_rasoat_anchor_findings` (đếm, cho cờ vòng
+        đời) dùng chung `_rasoat_anchor_khuon()`. Khoá bất biến: SỐ ô hỏng hai bên đếm phải BẰNG NHAU
+        — nếu mai ai đó sửa khuôn ở một đường, ca này đỏ thay vì để hai bên phán khác nhau âm thầm."""
+        from tl_core import lookup_ops as _lo321
+        _H = "sha256:" + ("b" * 64)
+        _u = {"phat_hien": [
+            {"key": "VD-01", "anchor": {"doc_deps": [
+                {"so_hieu": "A-2024-QH15", "text_hash": "cache:a--consolidated"},
+                {"so_hieu": "B-2024-QH15", "text_hash": _H},
+                {"so_hieu": "C-2024-QH15", "text_hash": ""}]}},
+            {"key": "VD-02", "anchor": {"doc_deps": [
+                {"so_hieu": "D-2024-QH15", "text_hash": "a87061b41d2c788b"}]}}]}
+        f = _lo321._rasoat_anchor_findings([_u])
+        q = _lo321._rasoat_anchor_quet([("unit-001.json", _u)])
+        ok0 = f["tong"] == 4 and f["ok"] == 1
+        ok1 = len(q) == f["tong"] - f["ok"] == 3
+        # Phân lớp cũng phải khớp, không chỉ tổng số.
+        _dem = {"rong": 0, "locator_trong_hash": 0, "sai_khuon": 0}
+        for x in q:
+            _dem[x["loai"]] += 1
+        ok2 = (_dem["rong"] == f["rong"] and _dem["locator_trong_hash"] == f["locator_trong_hash"]
+               and _dem["sai_khuon"] == f["sai_khuon"])
+        return ok0 and ok1 and ok2
+    _t110("r321_quet_khop_findings_r313", _c321_quet_khop_findings_r313)
+
+    def _c321_merge_lo_dien_va_strict_fail_closed():
+        """r321: `tl rasoat-merge` KHAI neo hỏng ở mọi chế độ; `--anchor-strict` chặn TRƯỚC khi ghi.
+
+        Test HÀNH VI qua chính `cmd_rasoat_merge` (lệnh thuần cục bộ, không mạng) chứ không grep mã:
+        vế đã hỏng ở lớp bệnh này là «ghi rồi mới báo lỗi» (r290), nên thứ phải khoá là FILE CÓ BỊ
+        GHI KHÔNG — chứ không phải chuỗi nào có mặt trong nguồn."""
+        import contextlib as _ct321, io as _io321, json as _j321, tempfile as _tf321
+        from types import SimpleNamespace as _NS321
+        from pathlib import Path as _P321
+        from tl_core import lookup_ops as _lo321
+
+        def _chay(th, strict, check=False):
+            with _tf321.TemporaryDirectory() as _d:
+                _m = _P321(_d) / "master"
+                _m.mkdir()
+                (_m / "unit-001.json").write_text(_j321.dumps(
+                    {"unit_id": "u1", "van_ban": "41-2024-QH15", "phat_hien": [
+                        {"key": "VD-01", "hinh_thuc": "sua_luat", "anchor": {"doc_deps": [
+                            {"so_hieu": "41-2024-QH15", "text_hash": th}]}}]},
+                    ensure_ascii=False), encoding="utf-8")
+                _out = _P321(_d) / "BANG_MASTER.json"
+                _buf = _io321.StringIO()
+                with _ct321.redirect_stdout(_buf):
+                    rc = _lo321.cmd_rasoat_merge(_NS321(
+                        in_dir=str(_m), out=str(_out), state=None, dry_run=False,
+                        check=check, anchor_strict=strict, json=True))
+                return rc, _j321.loads(_buf.getvalue()), _out.exists()
+
+        _bad, _good = "cache:41-2024-qh15--consolidated", "sha256:" + ("c" * 64)
+        # (a) strict + neo hỏng ⇒ rc=2, ok:false, và bảng master KHÔNG được ghi.
+        rc_a, js_a, co_a = _chay(_bad, True)
+        ok0 = rc_a == 2 and js_a.get("ok") is False and js_a.get("error") == "ANCHOR_SAI_KHUON"
+        ok1 = co_a is False and js_a.get("da_ghi") is False
+        # (b) KHÔNG strict ⇒ vẫn chạy (hồ sơ CŨ không bị chặn đứng) NHƯNG phải KHAI, kèm đích danh.
+        rc_b, js_b, co_b = _chay(_bad, False)
+        ok2 = rc_b == 0 and js_b.get("so_anchor_hong") == 1 and co_b is True
+        ok3 = (js_b.get("anchor_hong") or [{}])[0].get("key") == "VD-01"
+        # (c) strict + neo ĐÚNG khuôn ⇒ không chặn nhầm, vẫn ghi.
+        rc_c, js_c, co_c = _chay(_good, True)
+        ok4 = rc_c == 0 and js_c.get("so_anchor_hong") == 0 and co_c is True
+        # (d) `--check` (KHÔNG ghi đè) cũng phải khai — đây là chế độ người dùng chạy để nghiệm thu.
+        _rc_d, js_d, _co_d = _chay(_bad, False, check=True)
+        ok5 = js_d.get("so_anchor_hong") == 1
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r321_merge_lo_dien_va_strict_fail_closed", _c321_merge_lo_dien_va_strict_fail_closed)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

@@ -89,7 +89,9 @@ phân loại lệch TRÌNH BÀY vs lệch NỘI DUNG bằng cách bỏ hết d�
 
 ### 2.2 Vì sao 54-2025 (nguồn PDF) tệ hơn hẳn
 
-32/72 Điều bị **trộn chú thích hợp nhất vào thân Điều**, +10.886 ký tự. Nguyên văn phần chèn thêm
+32/72 Điều bị **trộn chú thích hợp nhất vào thân Điều**: **+7.239 ký tự** đo trên chuỗi ĐÃ CHUẨN HOÁ
+khoảng trắng (chênh thô toàn bộ `articles` là +10.886, nhưng phần dôi là khoảng trắng dàn trang của PDF —
+dùng số chuẩn hoá mới là chữ thật thêm vào). Nguyên văn phần chèn thêm
 ở Điều 21 (mẫu lặp lại +211 ký tự trên nhiều Điều):
 
 > «4 Điều này được sửa đổi, bổ sung theo quy định tại khoản 3 Điều 1 của Luật số 87/2025/QH15 …

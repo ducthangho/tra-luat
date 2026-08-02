@@ -295,8 +295,8 @@ gạch chéo, và **hết sạch** khi nạp bằng dạng gạch nối — dù 
 > ✅ **ĐÃ VÁ — r314 (v1.36.48), cùng nhánh này.** Nắn ngăn cách của BẢN SAO cục bộ ngay trước
 > `fullmatch`; **KHÔNG** nới `_VBHN_WITHYEAR_RE` dùng chung (ở `classify`/`hygiene`/`resolve`/
 > `lookup_ops` nó canh đúng bất biến khoá registry). Khoá bằng 2 ca:
-> `r313_sohieu_corroborated_nhan_dang_gach_cheo` (chiều thuận + PARITY hai dạng) và
-> `r313_khong_noi_regex_dung_chung` (chiều ngược — ĐỎ nếu ai vá bằng cách nới regex chung).
+> `r314_sohieu_corroborated_nhan_dang_gach_cheo` (chiều thuận + PARITY hai dạng) và
+> `r314_khong_noi_regex_dung_chung` (chiều ngược — ĐỎ nếu ai vá bằng cách nới regex chung).
 
 ### 4.2 `.docx` tải từ `g7.cdnchinhphu.vn` là container HỎNG — và `scan_file` FAIL-OPEN che mất
 
@@ -322,7 +322,7 @@ sẽ CÓ HẠI ngay khi có reader chịu được tên entry `\` (LibreOffice/W
 > ★Phát hiện thêm **ca thứ hai** của cùng lỗ, nằm sẵn trong selftest: `r188_docx_reader_bounded_wired`
 > ĐANG đòi `sum(scan_file(bomb).values()) == 0` cho docx vượt trần zip-bomb — tức khế ước cũ ghi
 > thành văn rằng «không đo được ⇒ báo sạch». Ca đó đã đổi sang đòi cờ `UNREADABLE`.
-> Tài liệu SẠCH vẫn IM LẶNG (ca `r315_tai_lieu_sach_van_im_lang` giữ chốt).
+> Tài liệu SẠCH vẫn IM LẶNG (ca `r316_tai_lieu_sach_van_im_lang` giữ chốt).
 
 ### 4.3 `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là **THIẾU THƯ VIỆN**
 
@@ -346,7 +346,7 @@ săn nguồn không tồn tại, trong khi lỗi nằm ở máy mình. **Vá đ�
 > handler `__main__` thêm `reason: "pdf_probe_unavailable"` + `action: "install_dep"` + **exit 6**.
 > Vẫn fail-CLOSED, chỉ đổi thông điệp về đúng thủ phạm. Tiện thể sửa lỗi **cộng dồn** giữa hai
 > đường dò (bản cũ nuôi chung biến `total`). Khoá bằng
-> `r314_thieu_thu_vien_khong_bi_goi_la_ban_scan` + `r314_do_duoc_0_van_la_ban_scan`.
+> `r315_thieu_thu_vien_khong_bi_goi_la_ban_scan` + `r315_do_duoc_0_van_la_ban_scan`.
 > **Chưa làm:** `requirements.txt` vẫn khai stdlib-only (đụng khế ước cài đặt của gói — tách lượt).
 
 ### 4.4 `CB_DAU_MUC` sai CẢ HAI CHIỀU trên cùng một tệp

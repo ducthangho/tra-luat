@@ -21304,6 +21304,90 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r300_vong_doi_dong_fail_closed", _c300_dong_fail_closed)
 
+    def _c313_anchor_khuon_findings():
+        # r313 (RAS-17, phần MÃ+GUARD — KHÔNG đụng dữ liệu): phân loại doc_deps theo KHUÔN.
+        # Ca dựng lại ĐÚNG lớp bệnh đã đo trên hồ sơ BHXH: 82/82 ĐIỀN ĐỦ mà 0/82 là hash thật —
+        # nên phép đếm "rỗng/thiếu" MÙ hoàn toàn, phải soi khuôn mới thấy.
+        from tl_core import lookup_ops as _lo313
+        f = _lo313._rasoat_anchor_findings
+        H = "sha256:" + "ab" * 32                      # 64 hex ⇒ hợp khuôn
+        def unit(deps):
+            return [{"phat_hien": [{"anchor": {"doc_deps": deps}}]}]
+        r = f(unit([{"so_hieu": "A", "text_hash": H}]))
+        ok1 = r["san_sang"] and r["ok"] == 1 and r["tong"] == 1
+        # (a) ĐỊA CHỈ nhét vào ô hash — đúng dạng `cite` thật đang dùng
+        r2 = f(unit([{"so_hieu": "B", "text_hash": "cache:18-2025-VBHN-VPQH#dieu54"}]))
+        ok2 = (not r2["san_sang"]) and r2["locator_trong_hash"] == 1 and r2["ok"] == 0
+        # (b) rỗng vs (c) rác — phân biệt được, không gộp một rọ
+        r3 = f(unit([{"so_hieu": "C", "text_hash": ""}, {"so_hieu": "D", "text_hash": "deadbeef"}]))
+        ok3 = r3["rong"] == 1 and r3["sai_khuon"] == 1 and r3["ok"] == 0
+        # (d) hash ĐÚNG ĐỘ DÀI nhưng CHỮ HOA / thiếu tiền tố ⇒ vẫn SAI (khuôn đóng, không nới)
+        r4 = f(unit([{"text_hash": "sha256:" + "AB" * 32}, {"text_hash": "ab" * 32}]))
+        ok4 = r4["ok"] == 0 and r4["sai_khuon"] == 2
+        # (e) `locator` là trường RIÊNG — đếm tách, và KHÔNG cứu được text_hash hỏng
+        r5 = f(unit([{"text_hash": "cache:x#y", "locator": "cache:x#y"}]))
+        ok5 = r5["co_locator"] == 1 and r5["locator_trong_hash"] == 1 and not r5["san_sang"]
+        # (f) tong=0 ⇒ KHÔNG san_sang (rỗng không phải "sạch" — đây là fail-closed, không vacuous)
+        ok6 = (not f([])["san_sang"]) and f([])["tong"] == 0 and not f(None)["san_sang"]
+        # (g) đọc được CẢ khuôn bảng `noi_dung` lẫn khuôn §6 `phat_hien`
+        r7 = f([{"noi_dung": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}])
+        ok7 = r7["ok"] == 1 and r7["san_sang"]
+        # (h) rác đủ kiểu KHÔNG được ném lỗi (hàm đo, không phải hàm phán)
+        r8 = f([None, "chuoi", {"phat_hien": "khong-phai-list"}, {"phat_hien": [None, {"anchor": 5}]}])
+        ok8 = r8["tong"] == 0
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    _t110("r313_anchor_khuon_findings", _c313_anchor_khuon_findings)
+
+    def _c313_anchor_con_hieu_luc_fail_closed():
+        # r313 (RAS-17): cưỡng chế `vong_doi.anchor_con_hieu_luc`. TRƯỚC r313 cờ này CHỈ sống trong
+        # prose + 1 ca kiểm *tài liệu có nhắc chữ đó không* — không mã nào chặn việc khai bừa `true`,
+        # mà khai `true` là Loop C chạy trên anchor chưa di trú ⇒ STALE giả 100%.
+        from tl_core import lookup_ops as _lo313
+        g = _lo313._rasoat_anchor_hop_le
+        H = "sha256:" + "cd" * 32
+        good = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}]
+        bad = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": "cache:a#b"}]}}]}]
+        # (a) khai true + anchor ĐÃ di trú ⇒ qua
+        ok1 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, good)["ok"] is True
+        # (b) khai true + anchor CHƯA di trú ⇒ ĐỎ, và lỗi phải NÓI RA số đếm
+        r2 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, bad)
+        ok2 = (not r2["ok"]) and any(x.startswith("ANCHOR_KHAI_TRUE_NHUNG_CHUA_DI_TRU") for x in r2["loi"]) \
+            and "locator_trong_hash=1" in r2["loi"][0]
+        # (c) khai true mà KHÔNG đưa đơn vị ⇒ ĐỎ. Không kiểm được thì không được khai —
+        #     im lặng tin lời khai chính là đường STALE giả lọt.
+        r3 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, None)
+        ok3 = (not r3["ok"]) and "ANCHOR_KHAI_TRUE_NHUNG_KHONG_DUA_DON_VI_DE_KIEM" in r3["loi"]
+        # (d) khai false TƯỜNG MINH mà thiếu lý do ⇒ ĐỎ (§7.2 "không im lặng thoát")
+        r4 = g({"vong_doi": {"anchor_con_hieu_luc": False}}, None)
+        ok4 = (not r4["ok"]) and "ANCHOR_FALSE_NHUNG_THIEU_LY_DO" in r4["loi"]
+        ok5 = g({"vong_doi": {"anchor_con_hieu_luc": False, "ly_do_anchor": "chưa di trú"}}, None)["ok"] is True
+        # (e) cờ VẮNG HẲN ⇒ KHÔNG đỏ (hồ sơ đang rà chưa tới bước khai — ratchet siết chiều khai SAI,
+        #     không siết chiều CHƯA KHAI; đỏ oan ngày đầu là cách guard bị vô hiệu hoá, bài học §0.8)
+        ok6 = g({"vong_doi": {"trang_thai": "dang_ra"}}, None)["ok"] is True
+        ok7 = g({}, None)["ok"] is True and g(None, None)["ok"] is True
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r313_anchor_con_hieu_luc_fail_closed", _c313_anchor_con_hieu_luc_fail_closed)
+
+    def _c313_khuon_khop_dac_ta_va_tl():
+        # r313: ba vế lấy từ BA nguồn khác nhau — không vế nào tự chứng minh chính nó.
+        # (a) khuôn trong MÃ đúng thứ đặc tả §7.2 viết
+        from tl_core import lookup_ops as _lo313
+        _R313 = _P209(__file__).resolve().parent.parent
+        ok1 = _lo313._rasoat_anchor_khuon()["text_hash"] == r"^sha256:[0-9a-f]{64}$"
+        _spec = (_R313 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8")
+        ok2 = "sha256:<64hex>" in _spec and "anchor_con_hieu_luc" in _spec
+        # (b) TEMPLATE khai `locator` TÁCH khỏi `text_hash`, và text_hash mẫu HỢP khuôn
+        _tp = _j209.loads((_R313 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json")
+                          .read_text(encoding="utf-8"))
+        _dep = _tp["noi_dung"][0]["anchor"]["doc_deps"][0]
+        ok3 = "locator" in _dep and _re209.match(r"^sha256:[0-9a-f]{64}$", _dep["text_hash"])
+        # (c) ba hàm ĐÃ bind qua tl.py (ADR-0002 copy-globals) — thiếu bind thì agent gọi là NameError
+        _tl_src = (_R313 / "scripts" / "tl.py").read_text(encoding="utf-8")
+        ok4 = all(("'" + n + "'") in _tl_src for n in
+                  ("_rasoat_anchor_khuon", "_rasoat_anchor_findings", "_rasoat_anchor_hop_le"))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r313_khuon_khop_dac_ta_va_tl", _c313_khuon_khop_dac_ta_va_tl)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300
@@ -27079,7 +27163,7 @@ def run() -> int:
 
 
     # ---- r314 + r315: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
-    def _mod313(fname, alias):
+    def _mod314(fname, alias):
         """Nạp THẲNG scripts/<fname> — KHÔNG qua tl/bind (bẫy false-green r212)."""
         import importlib.util as _ilu313
         _sp = _ilu313.spec_from_file_location(alias, _ROOT209 / "scripts" / fname)
@@ -27087,7 +27171,7 @@ def run() -> int:
         _sp.loader.exec_module(_m)
         return _m
 
-    def _c313_sohieu_corroborated_nhan_dang_gach_cheo():
+    def _c314_sohieu_corroborated_nhan_dang_gach_cheo():
         """CHIỀU THUẬN — nới không-năm của VBHN phải chạy với CẢ dạng khoá LẪN dạng in.
 
         r221 vá chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` luôn là KHOÁ.
@@ -27095,7 +27179,7 @@ def run() -> int:
         nạp chuyển thẳng chuỗi đó xuống ⇒ trước r314, dạng gạch chéo trượt `fullmatch`, mất
         phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08, CÙNG tệp: gạch chéo 3/3 cờ oan · gạch nối 0/3.
         """
-        f = _mod313("verify_deep.py", "verify_deep_r313").sohieu_corroborated
+        f = _mod314("verify_deep.py", "verify_deep_r314").sohieu_corroborated
         _doc19 = "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n"
         # (1) dạng IN (gạch chéo) — ca ĐỎ trước r314
         ok1 = f("19/2026/VBHN-VPQH", _doc19)
@@ -27107,16 +27191,16 @@ def run() -> int:
         ok3 = f("54/2025/VBHN-VPQH", _doc54) and f("54/2025/VBHN-VPQH", _doc54) == f("54-2025-VBHN-VPQH", _doc54)
         return bool(ok1 and ok2 and ok3)
 
-    _t110("r313_sohieu_corroborated_nhan_dang_gach_cheo", _c313_sohieu_corroborated_nhan_dang_gach_cheo)
+    _t110("r314_sohieu_corroborated_nhan_dang_gach_cheo", _c314_sohieu_corroborated_nhan_dang_gach_cheo)
 
-    def _c313_khong_noi_regex_dung_chung():
+    def _c314_khong_noi_regex_dung_chung():
         """CHIỀU NGƯỢC — nới ngăn cách KHÔNG được biến thành nới cổng.
 
         ★Chốt đắt nhất: `_VBHN_WITHYEAR_RE` còn dùng ở classify/hygiene/resolve/lookup_ops để
          canh BẤT BIẾN KHOÁ registry (CHỈ gạch nối, NN-YYYY-VBHN-XXX). Nếu ai đó 'vá' bằng cách
          nới regex dùng chung thay vì nắn bản sao cục bộ, ca này ĐỎ — và đó đúng là điều phải xảy ra.
         """
-        _m = _mod313("verify_deep.py", "verify_deep_r313b")
+        _m = _mod314("verify_deep.py", "verify_deep_r314b")
         f = _m.sohieu_corroborated
         ok1 = _m._VBHN_WITHYEAR_RE.fullmatch("19/2026/VBHN-VPQH") is None      # regex CHUNG còn nguyên
         ok2 = _m._VBHN_WITHYEAR_RE.fullmatch("19-2026-VBHN-VPQH") is not None  # …và vẫn nhận khoá thật
@@ -27131,9 +27215,9 @@ def run() -> int:
         ok6 = f("19/2027/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
         return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
 
-    _t110("r313_khong_noi_regex_dung_chung", _c313_khong_noi_regex_dung_chung)
+    _t110("r314_khong_noi_regex_dung_chung", _c314_khong_noi_regex_dung_chung)
 
-    def _c314_thieu_thu_vien_khong_bi_goi_la_ban_scan():
+    def _c315_thieu_thu_vien_khong_bi_goi_la_ban_scan():
         """CHIỀU THUẬN — thiếu pdfplumber+pypdf phải ra lỗi CỦA MÁY, không phải phán về TÀI LIỆU.
 
         Trước r315, `pdf_text_layer_chars` thiếu cả hai thư viện cũng `return 0`, mà 0 = «PDF
@@ -27142,7 +27226,7 @@ def run() -> int:
         `54-2025-g7.pdf` (pdftotext bóc 167.433 ký tự): chưa cài pypdf ⇒ reason=scanned_pdf ·
         cài rồi ⇒ ok:true, 72 Điều. CÙNG một tệp.
         """
-        _m = _mod313("ingest_to_cache.py", "ingest_to_cache_r314")
+        _m = _mod314("ingest_to_cache.py", "ingest_to_cache_r315")
         _sav = {k: _hsys.modules.get(k, "___absent___") for k in ("pdfplumber", "pypdf")}
         try:
             # None trong sys.modules ⇒ `import X` ném ImportError (chặn thư viện, hermetic)
@@ -27168,15 +27252,15 @@ def run() -> int:
         ok4 = not issubclass(_m.PdfProbeUnavailableError, _m.ScannedPDFError)
         return bool(ok1 and ok2 and ok3 and ok4)
 
-    _t110("r314_thieu_thu_vien_khong_bi_goi_la_ban_scan", _c314_thieu_thu_vien_khong_bi_goi_la_ban_scan)
+    _t110("r315_thieu_thu_vien_khong_bi_goi_la_ban_scan", _c315_thieu_thu_vien_khong_bi_goi_la_ban_scan)
 
-    def _c314_do_duoc_0_van_la_ban_scan():
+    def _c315_do_duoc_0_van_la_ban_scan():
         """CHIỀU NGƯỢC — cái đắt nhất: đừng nới tới mức PDF scan THẬT lọt qua.
 
         Quy tắc cứng của người dùng: PDF scan TUYỆT ĐỐI không nạp. r315 chỉ tách «không đo được»
         ra khỏi «đo được = 0»; đo được 0 thì vẫn phải là ScannedPDFError như cũ.
         """
-        _m = _mod313("ingest_to_cache.py", "ingest_to_cache_r314b")
+        _m = _mod314("ingest_to_cache.py", "ingest_to_cache_r315b")
         _sav_fn = _m.pdf_text_layer_chars
         try:
             # (1) đo ĐƯỢC và = 0 ⇒ vẫn là bản SCAN (KHÔNG được đổi sang lỗi thiếu thư viện)
@@ -27209,17 +27293,17 @@ def run() -> int:
             _m._pdf_chars_pdfplumber, _m._pdf_chars_pypdf = _sav_a, _sav_b
         return bool(ok1 and ok2 and ok3 and ok4)
 
-    _t110("r314_do_duoc_0_van_la_ban_scan", _c314_do_duoc_0_van_la_ban_scan)
+    _t110("r315_do_duoc_0_van_la_ban_scan", _c315_do_duoc_0_van_la_ban_scan)
 
     # ---- r316 + r317: hai lỗ của đường đọc .docx (đo 02-08 trên 2 bản Công báo) -----------
-    def _r315_docx(alias):
-        import importlib.util as _ilu315
-        _sp = _ilu315.spec_from_file_location(alias, _ROOT209 / "scripts" / "docx_markup.py")
-        _m = _ilu315.module_from_spec(_sp)
+    def _r316_docx(alias):
+        import importlib.util as _ilu316
+        _sp = _ilu316.spec_from_file_location(alias, _ROOT209 / "scripts" / "docx_markup.py")
+        _m = _ilu316.module_from_spec(_sp)
         _sp.loader.exec_module(_m)
         return _m
 
-    def _r315_make_docx(path, doc_xml, *, backslash=False):
+    def _r316_make_docx(path, doc_xml, *, backslash=False):
         """Dựng .docx tối thiểu. `backslash=True` tái hiện container HỎNG của CDN Công báo:
         tên entry dùng '\\' nên KHÔNG có 'word/document.xml' theo tên chuẩn (Word vẫn mở được)."""
         import zipfile as _zf315
@@ -27228,24 +27312,24 @@ def run() -> int:
             _z.writestr(name, doc_xml)
         return str(path)
 
-    _R315_MARKUP = ('<w:document><w:body><w:p><w:r><w:rPr><w:strike/></w:rPr>'
+    _R316_MARKUP = ('<w:document><w:body><w:p><w:r><w:rPr><w:strike/></w:rPr>'
                     '<w:t>chữ đã gạch</w:t></w:r></w:p></w:body></w:document>')
-    _R315_SACH = ('<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi điều chỉnh</w:t>'
+    _R316_SACH = ('<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi điều chỉnh</w:t>'
                   '</w:r></w:p></w:body></w:document>')
 
-    def _c315_khong_doc_duoc_khong_phai_sach_markup():
+    def _c316_khong_doc_duoc_khong_phai_sach_markup():
         """CHIỀU THUẬN — container không đọc được phải KHAI BÁO, không được im như tài liệu sạch.
 
         Ca thật 02-08: .docx Công báo qua `g7.cdnchinhphu.vn` đặt tên 33/40 entry bằng '\\' ⇒
         `scan_file` nuốt exception, trả mọi-thể-=-0, và tôi đã kết luận SAI «SẠCH markup».
         Sự thật (sau khi nắn tên entry): `strike=2`. Word/LibreOffice mở tệp đó bình thường ⇒
         chỉ cần một reader chịu tên '\\' là markup đi thẳng vào kho mà không ai khai."""
-        import tempfile as _tf315
-        _m = _r315_docx("docx_markup_r315")
-        with _tf315.TemporaryDirectory() as _td:
+        import tempfile as _tf316
+        _m = _r316_docx("docx_markup_r316")
+        with _tf316.TemporaryDirectory() as _td:
             _p = _Path315 = __import__("pathlib").Path(_td)
-            _hong = _r315_make_docx(_p / "hong.docx", _R315_MARKUP, backslash=True)
-            _tot = _r315_make_docx(_p / "tot.docx", _R315_MARKUP)
+            _hong = _r316_make_docx(_p / "hong.docx", _R316_MARKUP, backslash=True)
+            _tot = _r316_make_docx(_p / "tot.docx", _R316_MARKUP)
             _st_hong, _st_tot = _m.scan_file(_hong), _m.scan_file(_tot)
             # (1) hỏng ⇒ cờ UNREADABLE, KHÔNG phải dict đếm toàn 0
             ok1 = _st_hong.get(_m.UNREADABLE) is True and "strike" not in _st_hong
@@ -27257,33 +27341,33 @@ def run() -> int:
             ok3 = "KHÔNG ĐỌC ĐƯỢC" in _w and "KHÔNG phải 'sạch'" in _w
         return bool(ok1 and ok2 and ok3)
 
-    _t110("r315_khong_doc_duoc_khong_phai_sach_markup", _c315_khong_doc_duoc_khong_phai_sach_markup)
+    _t110("r316_khong_doc_duoc_khong_phai_sach_markup", _c316_khong_doc_duoc_khong_phai_sach_markup)
 
-    def _c315_tai_lieu_sach_van_im_lang():
+    def _c316_tai_lieu_sach_van_im_lang():
         """CHIỀU NGƯỢC — đừng biến mọi thứ thành tiếng ồn: tài liệu SẠCH vẫn phải IM.
 
         Nếu `warn_line` kêu cả với tài liệu sạch thì cảnh báo mất giá trị, và ca r182
         «văn bản sạch giữ NGUYÊN bytes cache» cũng vỡ."""
-        import tempfile as _tf315b
-        _m = _r315_docx("docx_markup_r315b")
-        with _tf315b.TemporaryDirectory() as _td:
+        import tempfile as _tf316b
+        _m = _r316_docx("docx_markup_r316b")
+        with _tf316b.TemporaryDirectory() as _td:
             _p = __import__("pathlib").Path(_td)
-            _st = _m.scan_file(_r315_make_docx(_p / "sach.docx", _R315_SACH))
+            _st = _m.scan_file(_r316_make_docx(_p / "sach.docx", _R316_SACH))
             ok1 = not _st.get(_m.UNREADABLE) and not any(_st.values())
             ok2 = _m.warn_line(_st, "sach.docx") == ""          # IM LẶNG
             # tệp không tồn tại cũng là "không đọc được", không phải "sạch"
             ok3 = _m.scan_file(str(_p / "khong-co.docx")).get(_m.UNREADABLE) is True
         return bool(ok1 and ok2 and ok3)
 
-    _t110("r315_tai_lieu_sach_van_im_lang", _c315_tai_lieu_sach_van_im_lang)
+    _t110("r316_tai_lieu_sach_van_im_lang", _c316_tai_lieu_sach_van_im_lang)
 
-    def _c316_tri_do_drawing_khong_lot_vao_than_dieu():
+    def _c317_tri_do_drawing_khong_lot_vao_than_dieu():
         """CHIỀU THUẬN — toạ độ EMU của DrawingML KHÔNG được thành chữ của văn bản.
 
         Đo 02-08: 19-2026 có `2927786221920` ngay trong khối đầu và 2 số ở Điều 141; 89-2026 có
         Điều 72 dính chuỗi **59 chữ số**. Nhánh python-docx KHÔNG dính ⇒ cùng một .docx cho hai
         kết quả khác nhau tuỳ máy CÓ hay KHÔNG có python-docx."""
-        _m = _r315_docx("docx_markup_r316")
+        _m = _r316_docx("docx_markup_r317")
         _xml = ('<w:p><w:r><w:drawing><wp:anchor>'
                 '<wp:posOffset>2927786221920</wp:posOffset>'
                 '<wp14:pctWidth>0</wp14:pctWidth><wp14:pctHeight>12345678901</wp14:pctHeight>'
@@ -27302,11 +27386,11 @@ def run() -> int:
                and "Điều 141. Hiệu lực thi hành" in _plain)
         return bool(ok1 and ok2 and ok3)
 
-    _t110("r316_tri_do_drawing_khong_lot_vao_than_dieu", _c316_tri_do_drawing_khong_lot_vao_than_dieu)
+    _t110("r317_tri_do_drawing_khong_lot_vao_than_dieu", _c317_tri_do_drawing_khong_lot_vao_than_dieu)
 
-    def _c316_khong_an_lem_chu_that():
+    def _c317_khong_an_lem_chu_that():
         """CHIỀU NGƯỢC — ba thứ TUYỆT ĐỐI không được mất khi dọn trị đo."""
-        _m = _r315_docx("docx_markup_r316b")
+        _m = _r316_docx("docx_markup_r317b")
         # (1) ★BẤT BIẾN BYTES: tài liệu KHÔNG có drawing ⇒ chuỗi ra = chuỗi VÀO. Vỡ cái này là
         #     mọi record cache đã nạp đổi text_hash — đúng thứ r182 đã cẩn thận giữ.
         _sach = "<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi</w:t></w:r></w:p></w:body></w:document>"
@@ -27324,7 +27408,7 @@ def run() -> int:
         ok3 = "1234567890123" in _m.plain_from_document_xml(_m.drop_drawing_measures(_num))
         return bool(ok1 and ok2 and ok3)
 
-    _t110("r316_khong_an_lem_chu_that", _c316_khong_an_lem_chu_that)
+    _t110("r317_khong_an_lem_chu_that", _c317_khong_an_lem_chu_that)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

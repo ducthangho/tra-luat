@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.48",
+  "skill_version": "1.36.49",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7545266,
-  "package_hash": "143f309397bc870ba19c6aee780139474db687132541279ea728c881b386c9cf",
-  "content_hash": "143f309397bc870ba19c6aee780139474db687132541279ea728c881b386c9cf",
+  "total_bytes": 7562210,
+  "package_hash": "983593231cfe7b297325ae1358704889928aa3109e153790f4a51820843a22d9",
+  "content_hash": "983593231cfe7b297325ae1358704889928aa3109e153790f4a51820843a22d9",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 547549,
-      "sha256": "58c94d9438b2f76c5ac4982afed9014b56ba9ee0b441d91f1567d5257dddae55"
+      "size": 551591,
+      "sha256": "8cf731edd6fbdfcce1d9effd6d6dab8e5379f3dd7feb6f9ad8a9ce9f298a72f8"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "2638cfa429eec9d15790000d238d7484cac06b87eb8efe8886b904a68b160cb9"
+      "sha256": "7c5e4a4a735ad78174a614d54d91d22bb473807b262888bf852df88038ec6620"
     },
     {
       "path": "VERSION",
-      "size": 7,
-      "sha256": "fe0d58d0f57c6e206d7e6d77eb0f3ff2ae1bf8b49e95850b162999ac46a8cd8d"
+      "size": 8,
+      "sha256": "168e9e6c4fb72dcef0c676cdef6321cad1282f89aa85dfebfd45e55c44602013"
     },
     {
       "path": "agents/openai.yaml",
@@ -153,8 +153,8 @@
     },
     {
       "path": "references/RASOAT_HOSO_LOOP.md",
-      "size": 24288,
-      "sha256": "7d777ea722549a5ce6970bde074aec8df77b357be2abb22de2fddd87b2c17cd2"
+      "size": 24315,
+      "sha256": "59eeb9bd650b71a4a56007d5cf9d7bbbbb8a33e54795f499effed3b03f2d0ad2"
     },
     {
       "path": "references/RASOAT_PLAN_SCHEMA.md",
@@ -559,7 +559,7 @@
     {
       "path": "scripts/docx_markup.py",
       "size": 16946,
-      "sha256": "32af676f73b25717aaeb2fa2be83bc5808a7f47f4b3043ec7d3796f5c278fcab"
+      "sha256": "126ce38880908c46d0e0bc1dd926df949044a8180c2ac89acca2d5157afe5438"
     },
     {
       "path": "scripts/env-reimport.sh",
@@ -594,7 +594,7 @@
     {
       "path": "scripts/ingest_to_cache.py",
       "size": 44640,
-      "sha256": "64a3f3573d9912eeab253c758f66ae99730a0967975b7fd39f3f043083e4710e"
+      "sha256": "9c3929b9a2ce39275259735d892af10f0c1c20f87f318fcad5782ff5fffebf26"
     },
     {
       "path": "scripts/keywords.py",
@@ -639,7 +639,7 @@
     {
       "path": "scripts/normalize_document.py",
       "size": 23932,
-      "sha256": "cc2127d60184aa9d031a55a462702c48da930a71a4b635d9cbc455c67ce02baa"
+      "sha256": "2efc13667ea0f8cf12371196c85292a5906678c980c45a91359a2fe5867557ba"
     },
     {
       "path": "scripts/provenance.py",
@@ -678,8 +678,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 230286,
-      "sha256": "097ef1b76c3a214d8645392217ad514e071e0f7dc1178c6023725a963fbe97a3"
+      "size": 230429,
+      "sha256": "7cd465a89779b1796b1c9f4d1e42bca2a4a5af557fca32b99f34cb958aeb1d29"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -763,8 +763,8 @@
     },
     {
       "path": "scripts/tl_core/lookup_ops.py",
-      "size": 252797,
-      "sha256": "3df2a3dd546f2d4be921b533f432b9e146d4edeb36927d228c016d6e91d1aefa"
+      "size": 258953,
+      "sha256": "92f2fb37932742205fa021364ad5f3a59ef9e8b3ac9576ea3e8d760f212af694"
     },
     {
       "path": "scripts/tl_core/nlm_admin_ops.py",
@@ -848,8 +848,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1989983,
-      "sha256": "01b19120556cd6c16bd0436bcb1114158132837da5c9f6e0d9c920fd6838c1f7"
+      "size": 1996513,
+      "sha256": "2ef4e04e8ab588aaabefb83dfa7d745b3aad7a6ee09b2e5cd1bf8b33b26fa548"
     },
     {
       "path": "scripts/tra_cuu.py",
@@ -874,12 +874,12 @@
     {
       "path": "scripts/verify_deep.py",
       "size": 24740,
-      "sha256": "6d62786af5beec984aa5a005576ffe93f6d01e358f2e98dcf17f613419293c56"
+      "sha256": "c5f25f2cec3365ef0985486712b90f46991a1b4fc058cd259d3b25236053770b"
     },
     {
       "path": "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",
-      "size": 2773,
-      "sha256": "ea2b4cd86cc9c6f7710e51d6f1362111dec12ba361e7741491e3e5e0ae8edac1"
+      "size": 2818,
+      "sha256": "28e2c162d68de41931f26eb0d5a1a22c57e9c7663e3cddcd9bdad5afbd85ad8a"
     },
     {
       "path": "tl-setup.cmd",

@@ -27,7 +27,7 @@ nội dung pháp luật». Một cổng an toàn pháp lý mặc định «sạc
 phải 'sạch')». `normalize_document` khai `MARKUP_KHONG_DOC_DUOC` vào `verify_flags` — **tách khỏi**
 câu `MARKUP_SUA_DOI` (câu đó khẳng định CÓ markup và đếm được; ở đây ta chưa biết gì).
 `lookup_ops` khai `markup_unreadable` riêng và để `markup_found=True` (fail-CLOSED).
-★Tài liệu SẠCH vẫn IM LẶNG như cũ — ca `r315_tai_lieu_sach_van_im_lang` giữ chốt đó, để cảnh báo
+★Tài liệu SẠCH vẫn IM LẶNG như cũ — ca `r316_tai_lieu_sach_van_im_lang` giữ chốt đó, để cảnh báo
 không thành tiếng ồn và bất biến «văn bản sạch giữ NGUYÊN bytes cache» của r182 không vỡ.
 
 ## r317 — toạ độ DrawingML chui vào thân Điều
@@ -53,7 +53,7 @@ sạch chạy đúng nhánh RÒ.
 `w:txbxContent`/`a:t` — xoá cả khối drawing là ăn mất text-box, mà letterhead VBQPPL đôi khi nằm
 đúng đó. `wp:`/`wp14:` (WordprocessingDrawing) không chứa text tài liệu: mọi lá là trị đo.
 
-**Ba bất biến được khoá bằng test** (`r316_khong_an_lem_chu_that`): tài liệu KHÔNG có drawing ⇒
+**Ba bất biến được khoá bằng test** (`r317_khong_an_lem_chu_that`): tài liệu KHÔNG có drawing ⇒
 chuỗi ra **= chuỗi vào** (bytes bất biến cho corpus đã nạp) · text-box trong drawing SỐNG SÓT ·
 **số dài THẬT trong `w:t` không bị đụng** (văn bản luật có số tài khoản/mã số thuế — ai "vá" bằng
 cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ, và phải ĐỎ).
@@ -69,7 +69,7 @@ cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ, và phải ĐỎ
 cái đó parse ra `"wp1"` + `"4"` tuỳ chọn nên **KHÔNG khớp `wp:` trần**. Kết quả: `wp14:pctWidth` bị
 bỏ còn `wp:posOffset` vẫn lọt, ra một chuỗi số **CỤT** (`-7299958220` → `-729995822`) trông y như
 đã sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`; ca
-`r316_tri_do_drawing_khong_lot_vao_than_dieu` đòi CẢ HAI namespace nên bắt được đột biến đó.
+`r317_tri_do_drawing_khong_lot_vao_than_dieu` đòi CẢ HAI namespace nên bắt được đột biến đó.
 
 **Cổng.** selftest **1598/1598** (thêm 4 ca: 2 chiều thuận + 2 chiều ngược; sửa khế ước 1 ca r188) ·
 ruff F **delta so master = 0** trên cả 4 tệp đụng tới (`docx_markup.py` sạch · `normalize_document.py`
@@ -107,7 +107,7 @@ LUÔN là khoá registry. Nhưng `ingest_to_cache --help` lại bảo người d
 **Vá.** Nắn ngăn cách của **bản sao cục bộ** ngay trước `fullmatch`
 (`verify_deep.py:84`). ★KHÔNG nới `_VBHN_WITHYEAR_RE` dùng chung: ở `classify`/`hygiene`/`resolve`/
 `lookup_ops` nó đang canh ĐÚNG bất biến khoá registry (CHỈ gạch nối, `NN-YYYY-VBHN-XXX`) — nới ở đó là
-mở toang một cổng khác. Test `r313_khong_noi_regex_dung_chung` khoá đúng điều này: nó ĐỎ nếu ai
+mở toang một cổng khác. Test `r314_khong_noi_regex_dung_chung` khoá đúng điều này: nó ĐỎ nếu ai
 đó "vá" bằng cách sửa regex chung.
 
 ## r315 — `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là THIẾU THƯ VIỆN
@@ -152,6 +152,51 @@ trên cả 4 tệp đụng tới (`tl.py` 12 F821 · `tl_selftest.py` 1 F401 + 4
 dịch CRLF→LF). `.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ mọi sửa tệp trong
 gói phải đi `read_bytes()/write_bytes()`. Phát hiện nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo
 `SKILL.md.stat().st_size`) — một cổng canh việc khác lại bắt được đúng lỗi này.
+# ★ v1.36.47 — r313: RAS-17 phần MÃ + GUARD — khuôn `anchor.text_hash`, tách `locator`, cưỡng chế `anchor_con_hieu_luc` (2026-08-02)
+
+**Phạm vi có chủ đích: MÃ + GUARD, KHÔNG đụng DỮ LIỆU.** Di trú 82 giá trị anchor là việc GHI, tách riêng.
+
+**Bệnh.** `RASOAT_PLAN_SCHEMA.md` §7.2 đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025`: **82/82 `doc_deps` ĐIỀN ĐỦ,
+0/82 khớp `sha256:<64hex>`** — ô `text_hash` đang chứa ĐỊA CHỈ ĐỊNH VỊ. Vì «điền đủ» nên không cổng nào
+kêu; Loop C chạy lên sẽ báo **STALE giả 100%**. Đây là lớp bệnh «trường CÓ giá trị nhưng SAI LOẠI» —
+đếm rỗng/thiếu MÙ hoàn toàn, phải soi KHUÔN mới thấy.
+
+**Đo trước khi vá (quyết định được phép fail-closed hay không):**
+- `doc_deps` xuất hiện trong **0 tệp `.py`** — RAS-17 phần mã là **greenfield**, chưa validator nào.
+- `anchor_con_hieu_luc` chỉ sống trong **prose + 1 ca selftest kiểm *tài liệu có nhắc chữ đó không***
+  — **không mã nào cưỡng chế**. Đúng lớp tự-lừa mà `_rasoat_vong_doi_dong_hop_le` (r300) sinh ra để chặn.
+- Quét toàn kho: chỉ **3** giá trị `text_hash` literal, **không giá trị hỏng nào** (template hợp khuôn;
+  hai chỗ còn lại là skeleton/ellipsis tài liệu). ⇒ 82 giá trị xấu nằm **hoàn toàn ở hồ sơ runtime**
+  (`--out-dir`), ngoài kho ⇒ **cưỡng chế được mà không đỏ oan**.
+
+**Vá — ba hàm PURE (`tl_core/lookup_ops.py`), đã bind qua `tl.py` (ADR-0002):**
+1. `_rasoat_anchor_khuon()` — khuôn đóng `^sha256:[0-9a-f]{64}$` + dấu hiệu địa chỉ. **CỐ Ý là HÀM**,
+   không phải hằng cấp module — cùng lý do `_rasoat_vong_doi_enums`: `tl.py` bind COPY-globals, stub farm
+   chỉ nhận callable; hằng module tra từ trong hàm KHÔNG resolve qua `tl` (r90/r81 bắt).
+2. `_rasoat_anchor_findings(units)` — phân loại từng dep: `ok` / `rong` / **`locator_trong_hash`** /
+   `sai_khuon`, đếm riêng `co_locator`. Đọc **CẢ** khuôn §6 `phat_hien` lẫn bảng `noi_dung`.
+   `san_sang` ⇔ có ≥1 dep **VÀ** mọi dep `ok` — `tong=0` KHÔNG phải «sạch».
+3. `_rasoat_anchor_hop_le(state, units)` — fail-CLOSED ba vế: khai `true` mà **không đưa đơn vị để kiểm**
+   ⇒ ĐỎ (không kiểm được thì không được khai); khai `true` mà chưa `san_sang` ⇒ ĐỎ **kèm số đếm**;
+   khai `false` tường minh mà thiếu `ly_do_anchor` ⇒ ĐỎ (§7.2 «không im lặng thoát»).
+   **Cờ VẮNG HẲN ⇒ KHÔNG đỏ** — hồ sơ đang rà chưa tới bước khai; ratchet siết chiều khai SAI, không siết
+   chiều CHƯA KHAI (đỏ oan ngày đầu = guard bị vô hiệu hoá, bài học §0.8).
+
+**Tách `locator`:** khai báo khuôn ở `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` +
+`references/RASOAT_HOSO_LOOP.md` nay có **`locator` là trường RIÊNG** cạnh `text_hash`. Hai thứ khác bản
+chất: hash đổi khi NỘI DUNG đổi (đúng thứ Loop C cần), địa chỉ thì không.
+
+**Bằng chứng DƯƠNG (3 mutation, không tin `rc=0`):**
+- nới khuôn (cho hex trần / CHỮ HOA) ⇒ `r313_anchor_khuon_findings` + `r313_khuon_khop_dac_ta_va_tl` **ĐỎ**
+- bỏ cổng «khai true mà không đưa đơn vị» ⇒ `r313_anchor_con_hieu_luc_fail_closed` **ĐỎ**
+- cho `tong=0` là `san_sang` (vacuous) ⇒ `r313_anchor_khuon_findings` **ĐỎ**
+
+**Selftest 1593/1593** (master 1590, +3 ca). Ruff **DELTA = 0** cả ba tệp, không tên F821 nào mới.
+
+**CÒN NỢ (KHÔNG làm ở đợt này):** di trú **82** giá trị anchor của hồ sơ BHXH — tách địa chỉ sang
+`locator`, tính lại hash bằng `doc_identity._content_hash`, rồi mới được đặt `anchor_con_hieu_luc: true`.
+Con số 82 phải **đếm lại LIVE** trước khi di trú. Guard ở đợt này chính là thứ sẽ **chặn** việc bật cờ
+trước khi di trú xong.
 
 # ★ v1.36.46 — r312: ING-09 — nhân đôi theo TỆP NGUỒN (`src_id`) lộ diện; cổng ingest hết nấp sau `if sohieu` (2026-08-02)
 

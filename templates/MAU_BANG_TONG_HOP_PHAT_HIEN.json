@@ -43,7 +43,7 @@
       "muc_chac_chan": "chac_chan",
       "anchor": {
         "doc_deps": [
-          {"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000", "dieu": ["54"]}
+          {"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000", "locator": "cache:18-2025-VBHN-VPQH#dieu54", "dieu": ["54"]}
         ],
         "cite": "cache:18-2025-VBHN-VPQH#dieu54",
         "skill_version": "1.35.45",

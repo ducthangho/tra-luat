@@ -1528,6 +1528,7 @@ _STUB_MAP = {
         '_rasoat_la_ban_sao', '_rasoat_trung_lap', '_rasoat_check_lech',   # r216 (note CUỐI dòng — I11)
         '_rasoat_vong_doi_enums',
         '_rasoat_vong_doi_findings', '_rasoat_vong_doi_dong_hop_le',   # r300 vòng đời hồ sơ (note CUỐI dòng — I11)
+        '_rasoat_anchor_khuon', '_rasoat_anchor_findings', '_rasoat_anchor_hop_le',   # r313 RAS-17 khuôn anchor (note CUỐI dòng — I11)
         '_docpatch_norm', '_docpatch_vung_doc', '_docpatch_vung_ghi', '_docpatch_ap',
         '_docpatch_tim_file', '_docpatch_sha', '_docpatch_cache_dir', 'cmd_doc_patch',   # r217 sửa-theo-điểm (note CUỐI dòng — I11)
         '_rasoat_corpus_hieu_luc',   # r295 RAS-13 predicate corpus-hiệu-lực dùng chung (note CUỐI dòng — I11)

@@ -1,3 +1,54 @@
+# ★ v1.36.46 — r312: ING-09 — nhân đôi theo TỆP NGUỒN (`src_id`) lộ diện; cổng ingest hết nấp sau `if sohieu` (2026-08-02)
+
+Đóng ING-09. Khác với ba mục trước, mục này **đo được trên registry LIVE** (1319 dòng, tab `files`) chứ
+không suy từ mã.
+
+**Bệnh — đo LIVE 02-08 bằng `gws sheets +read` trên tab RAW.** 31 cụm / 66 dòng CÙNG `src_id` mà
+`drive_id` **đôi một KHÁC** — tức MỘT tệp nguồn đã được ingest ≥2 lần, mỗi lần convert ra một GDoc mới
+và đẻ thêm một dòng registry. 25/31 cụm mọi dòng `corpus=true` (nhân đôi THẬT trong corpus, không phải
+bản đã hạ). Mẫu điển hình là phụ lục EVFTA: cùng một tệp nguồn ra hai dòng
+«EVFTA_PL_Phu_luc_2-A» và «EVFTA_PL_Annex_2-A_Bieu_thue».
+
+**Vì sao KHÔNG detector nào thấy — bốn cái mù CÙNG LÚC** (đo trên chính 31 cụm đó):
+
+| tầng | kết quả | vì sao mù |
+|---|---|---|
+| `duplicates_by_sohieu` | 26/31 cụm `sohieu` RỖNG | phụ lục hiệp định không có số hiệu |
+| `duplicates_by_name` | 27/31 cụm tên KHÁC nhau | bản Việt «Phu_luc_2-A» vs bản Anh «Annex_2-A» của CÙNG phụ lục |
+| `duplicates_by_md5` | md5 khác | md5 tính trên GDoc ĐÃ convert — mỗi lần convert một md5 |
+| khoá chính `drive_id` | 31/31 cụm đôi một khác | mỗi dòng một GDoc riêng |
+
+`src_id` là thứ **DUY NHẤT** còn nối chúng về cùng một tệp nguồn — và đó chính là ý «detector sheet-dup
+phải đặt ở tầng đọc RAW SHEET»: `drive_id` bị tầng chuẩn hoá đổi tên thành `id`/`gdoc_id`, còn cụm trùng
+thì chỉ nhìn thấy được khi soi theo cột nguồn.
+
+**Lỗ ở đường GHI.** Cổng dedup F1 (r191) trong `_il_stage_plan` đứng sau `if sohieu and not _prev …` ⇒
+với 26/31 cụm (sohieu rỗng) nó **KHÔNG bao giờ chạy**. `--drive-id` là đường dễ dính nhất: người dùng trỏ
+lại đúng tệp nguồn đã nạp, `_resolve_drive_id_source` vui vẻ convert tiếp, không cổng nào cản.
+
+**Vá.**
+
+1. **`_src_id_dup_groups` (`tl_core/hygiene.py`)** — detector RIÊNG, gom theo `src_id`, chỉ tính dòng
+   corpus-effective và **đòi `drive_id` đôi một KHÁC** (trùng `drive_id` = một dòng đọc hai lần, KHÔNG
+   phải nhân đôi). Vào `_hygiene_groups` + counter `duplicates_by_src_id` + `samples` + dòng in
+   `dup_src_id=` của `tl hygiene scan`.
+2. **Cổng `src_id_dedup_live` trong `_il_stage_plan`** — neo `_from_drive`, **độc lập số hiệu**, chặn
+   **TRƯỚC** khi rẽ DRY/apply (thấy sớm, không ghi gì). Lý do neo `src_id` chứ không `drive_id`: `drive_id`
+   là GDoc KẾT QUẢ, mỗi lần convert một id mới nên không bao giờ trùng. Đường thoát tường minh:
+   `--replace-sohieu` (thay bản có chủ đích) · `--resume` (tiếp tục dở dang) · `--skip-live-check` (tự chịu).
+3. **`_src_id_dup_groups` khai trong bảng stub `hygiene` của `tl.py`** — `bind()` re-home `__globals__` của
+   mọi hàm tl_core về namespace tl, nên helper MỚI không khai ở đó sẽ `NameError` LÚC CHẠY dù import đúng.
+   (Đã cắn thật trong lượt này — ghi lại để lần sau thêm helper thì nhớ.)
+
+**Bằng chứng dương.** selftest **1590/1590**. Detector chạy trên registry LIVE trả **26 cụm / 55 dòng**.
+MUTATION 2 lượt, mỗi lượt đỏ ĐÚNG một ca:
+· bỏ điều kiện `drive_id` đôi một khác ⇒ `r312_src_id_dup_lo_dien` ĐỎ;
+· thêm lại `and sohieu` vào điều kiện cổng (đúng cách ING-09 tái phát) ⇒ `r312_cong_ingest_chan_nguon_da_nap` ĐỎ.
+`r312_src_id_dup_lo_dien` khoá luôn **BẰNG CHỨNG MÙ**: cùng một cụm fixture, ba detector cũ đều trả rỗng —
+ai "gộp cho gọn" vào một trong ba thì vế đó đỏ.
+ruff: **0 TÊN F821 MỚI** trên cả hai tệp chạm (tập tên riêng biệt BẰNG NHAU hai bên: hygiene 128, ingest_ops
+104); số đếm tăng +3 / +7 thuần tuý vì thêm call-site của helper vốn đã resolve qua stub-farm.
+
 # ★ v1.36.45 — r311: DOC-01 — `route()` hết nuốt lỗi chính tả `hinh_thuc`; ca test đang KHOÁ hành vi hỏng được đảo chiều (2026-08-02)
 
 Đóng DOC-01 của sổ audit — lỗi mà chính kho này đã tự khai từ lâu mà chưa ai vá.

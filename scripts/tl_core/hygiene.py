@@ -184,6 +184,35 @@ def _quarantine_clear_stale(run_id: str, g, rows: list[dict]) -> tuple[int, list
     return ok_n, fail
 
 
+def _src_id_dup_groups(entries: list[dict]) -> dict:
+    """v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): TRÙNG theo `src_id` — MỘT tệp nguồn đã được
+    ingest ≥2 lần, mỗi lần đẻ một GDoc + một dòng registry MỚI.
+
+    Vì sao phải có detector RIÊNG: cụm này VÔ HÌNH với cả ba detector đang có. Đo trên 1319 dòng thật
+    (tab `files`, 31 cụm / 66 dòng, 25 cụm mọi dòng corpus=true):
+      · `duplicates_by_sohieu` mù  — 26/31 cụm có `sohieu` RỖNG (phụ lục hiệp định EVFTA không có số hiệu);
+      · `duplicates_by_name`   mù  — 27/31 cụm tên KHÁC nhau (bản Việt «Phu_luc_2-A» vs bản Anh «Annex_2-A»
+                                     của CÙNG một phụ lục);
+      · `duplicates_by_md5`    mù  — md5 tính trên GDoc đã convert, mỗi lần convert ra một md5 khác;
+      · khoá chính cũng mù     — 31/31 cụm `drive_id` ĐÔI MỘT KHÁC (mỗi dòng một GDoc riêng).
+    `src_id` là thứ DUY NHẤT còn nối chúng về cùng một tệp nguồn.
+
+    Trả {src_id: [entry…]} cho cụm ≥2 dòng corpus-effective và `drive_id` không trùng nhau (drive_id
+    trùng = cùng một dòng đọc hai lần, không phải nhân đôi)."""
+    by: dict[str, list] = {}
+    for e in entries or []:
+        if _entry_row_kind(e) == "ref":
+            continue
+        s = str(e.get("src_id") or "").strip()
+        if s and _entry_is_corpus_effective(e):
+            by.setdefault(s, []).append(e)
+    out = {}
+    for s, v in by.items():
+        if len(v) > 1 and len({_entry_drive_id(x) for x in v}) == len(v):
+            out[s] = v
+    return out
+
+
 def _hygiene_groups(entries: list[dict]) -> dict:
     own_entries = [e for e in entries if _entry_row_kind(e) != "ref"]
     hygiene_entries = [e for e in own_entries if not _entry_is_own_thuong(e)]
@@ -281,7 +310,8 @@ def _hygiene_groups(entries: list[dict]) -> dict:
     loai_noncanonical = [e for e in hygiene_entries if _loai_is_noncanonical(e)]
     reconcile_clusters = _reconcile_clusters(hygiene_entries)
     duplicate_identity_groups = [c for c in reconcile_clusters if len(c.get("entries") or []) > 1]
-    return {"duplicates_by_sohieu": dup_so, "duplicates_by_sohieu_real": dup_so_real,
+    return {"duplicates_by_src_id": _src_id_dup_groups(entries),
+            "duplicates_by_sohieu": dup_so, "duplicates_by_sohieu_real": dup_so_real,
             "duplicates_by_sohieu_raw_active": dup_so_raw_active,
             "duplicates_by_name_active": dup_name_active,
             "duplicates_by_name": dup_name,
@@ -322,6 +352,8 @@ def cmd_hygiene(a) -> int:
                # phụ-lục/quarantine lành) — trước đây 2 khóa cùng in raw → '93 trùng' báo động giả.
                "duplicates_by_sohieu": len(groups["duplicates_by_sohieu_real"]),
                "duplicate_sohieu_groups_raw": len(groups["duplicates_by_sohieu"]),
+               # r312/ING-09: nhân đôi theo TỆP NGUỒN — ba detector kia mù (xem _src_id_dup_groups).
+               "duplicates_by_src_id": len(groups["duplicates_by_src_id"]),
                "duplicate_identity_groups": len(groups["duplicate_identity_groups"]),
                "duplicates_by_name": len(groups["duplicates_by_name"]),
                "duplicates_by_md5": len(groups["duplicates_by_md5"]),
@@ -345,6 +377,7 @@ def cmd_hygiene(a) -> int:
                                             "quarantine": [_summ_entry(x) for x in c["quarantine"][:5]]}
                                            for c in clusters[:10]],
                            "duplicates_by_md5": {k:[_summ_entry(x) for x in v[:5]] for k,v in list(groups["duplicates_by_md5"].items())[:10]},
+                           "duplicates_by_src_id": {k: [_summ_entry(x) for x in v[:5]] for k, v in list(groups["duplicates_by_src_id"].items())[:20]},
                            "duplicate_identity_groups": [{"key": c.get("key"), "canonical": _summ_entry(c.get("canonical")),
                                                           "entries": [_summ_entry(x) for x in (c.get("entries") or [])[:5]]}
                                                          for c in groups["duplicate_identity_groups"][:10]],
@@ -361,7 +394,8 @@ def cmd_hygiene(a) -> int:
             print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
         else:
             print(f"entries={out['entries']} dup_sohieu_raw={out['duplicate_sohieu_groups_raw']} dup_identity={out['duplicate_identity_groups']} dup_name={out['duplicates_by_name']} "
-                  f"dup_md5={out['duplicates_by_md5']} orphans={out['orphans']} reconcile_clusters={out['reconcile_clusters']} "
+                  f"dup_md5={out['duplicates_by_md5']} dup_src_id={out['duplicates_by_src_id']} "
+                  f"orphans={out['orphans']} reconcile_clusters={out['reconcile_clusters']} "
                   f"title_mismatch={out['title_mismatch_candidates']} vbhn_advisory={out['vbhn_metadata_advisory']} "
                   f"omnibus_advisory={out['omnibus_title_advisory']} "
                   f"same_doc_dups={out['vbhn_same_document_dups']} quarantine_candidates={out['quarantine_candidates']}")

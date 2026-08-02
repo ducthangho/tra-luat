@@ -21415,6 +21415,72 @@ def run() -> int:
         return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r311_route_hinh_thuc_fail_closed", _c311_route_hinh_thuc_fail_closed)
 
+    def _c312_src_id_dup_lo_dien():
+        """v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): nhân đôi theo TỆP NGUỒN (`src_id`).
+
+        Đo thật trên 1319 dòng tab `files`: 31 cụm / 66 dòng cùng `src_id` mà `drive_id` đôi một KHÁC.
+        Ba detector đang có đều MÙ: 26/31 cụm `sohieu` RỖNG · 27/31 cụm `name` khác nhau (bản Việt
+        «Phu_luc_2-A» vs bản Anh «Annex_2-A» của CÙNG phụ lục) · md5 tính trên GDoc đã convert nên mỗi
+        lần một khác · 31/31 cụm `drive_id` đôi một khác nên khoá chính cũng không bắt."""
+        from tl_core.hygiene import _hygiene_groups as _hg312, _src_id_dup_groups as _sd312
+        # Fixture DỰNG THEO ĐÚNG hình dạng cụm thật (EVFTA): cùng src_id, drive_id khác, sohieu RỖNG,
+        # tên Việt/Anh khác nhau, md5 khác nhau.
+        _fx = [
+            {"id": "g1", "drive_id": "g1", "src_id": "SRC-A", "name": "EVFTA_PL_Phu_luc_2-A",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m1"},
+            {"id": "g2", "drive_id": "g2", "src_id": "SRC-A", "name": "EVFTA_PL_Annex_2-A_Bieu_thue",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m2"},
+        ]
+        _g = _hg312(_fx)
+        ok0 = len(_sd312(_fx)) == 1 and len(_g["duplicates_by_src_id"]) == 1   # ĐỎ trước r312 (không có khoá)
+        # BẰNG CHỨNG MÙ — chính cụm này KHÔNG hiện ra ở ba detector cũ. Đây là lý do phải có detector riêng;
+        # nếu ai đó "gộp cho gọn" vào một trong ba, vế này ĐỎ.
+        ok1 = (not _g["duplicates_by_sohieu"] and not _g["duplicates_by_name"]
+               and not _g["duplicates_by_md5"])
+        # PHẢN CHỨNG 1: cùng src_id NHƯNG cùng drive_id = MỘT dòng đọc hai lần, KHÔNG phải nhân đôi.
+        _fx2 = [dict(_fx[0]), dict(_fx[0])]
+        ok2 = len(_sd312(_fx2)) == 0
+        # PHẢN CHỨNG 2: src_id RỖNG không được gom thành một cụm khổng lồ.
+        _fx3 = [dict(e, src_id="") for e in _fx]
+        ok3 = len(_sd312(_fx3)) == 0
+        # PHẢN CHỨNG 3: không corpus-effective ⇒ ngoài tầm (đã hạ bản/quarantine rồi thì hết là nợ).
+        _fx4 = [dict(e, corpus="false") for e in _fx]
+        ok4 = len(_sd312(_fx4)) == 0
+        # PHẢN CHỨNG 4: row_kind=ref là con trỏ, không phải bản nạp.
+        _fx5 = [dict(e, row_kind="ref") for e in _fx]
+        ok5 = len(_sd312(_fx5)) == 0
+        # Cụm 3 dòng (có thật: src_id 1bAT9Ad… x3) vẫn ra ĐÚNG MỘT cụm, không tách đôi.
+        _fx6 = _fx + [dict(_fx[0], id="g3", drive_id="g3", name="EVFTA_PL_Phu_luc_2-A_ban_3", md5="m3")]
+        _s6 = _sd312(_fx6)
+        ok6 = len(_s6) == 1 and len(next(iter(_s6.values()))) == 3
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r312_src_id_dup_lo_dien", _c312_src_id_dup_lo_dien)
+
+    def _c312_cong_ingest_chan_nguon_da_nap():
+        """v1.36.46 (r312/ING-09): cổng `src_id_dedup_live` trong `_il_stage_plan`.
+
+        Cổng F1 cũ đứng SAU `if sohieu and …` ⇒ 26/31 cụm thật (sohieu rỗng) không bao giờ được xét.
+        Test đọc THẲNG mã nguồn stage vì thân stage gọi mạng — khoá VỊ TRÍ và ĐIỀU KIỆN, hai thứ đã sai."""
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8", errors="replace")
+        _blk = _src[_src.find("def _il_stage_plan"):_src.find("def _il_stage_confirm")]
+        ok0 = "SOURCE_ALREADY_INGESTED" in _blk and "src_id_dedup_live" in _blk
+        # Cổng mới KHÔNG được nấp sau `if sohieu` — phải neo `_from_drive`, độc lập với số hiệu.
+        _i_new = _blk.find("src_id_dedup_live")
+        _i_f1 = _blk.find("if sohieu and not _prev")
+        ok1 = _i_f1 != -1 and _i_new > _i_f1                      # nằm SAU cổng F1, KHÔNG lồng trong nó
+        # CHỈ lấy DÒNG điều kiện (không lấy cả thân) — thân có `replace_sohieu` nên so chuỗi cả khối
+        # sẽ báo nhầm là "có dính số hiệu".
+        _i_cond = _blk.find("if _from_drive and not _prev")
+        _cond = _blk[_i_cond:_blk.find("\n", _i_cond)]
+        ok2 = _i_cond != -1 and "_from_drive" in _cond and "sohieu" not in _cond  # cổng KHÔNG gate theo số hiệu
+        # Neo theo src_id (tệp NGUỒN), KHÔNG theo drive_id (GDoc kết quả — mỗi lần convert một id mới).
+        ok3 = 'str(e.get("src_id") or "").strip() == _from_drive' in _blk
+        # Có đường thoát tường minh + chặn TRƯỚC khi rẽ DRY/apply (chặn cả DRY = thấy sớm, không ghi gì).
+        ok4 = all(t in _blk for t in ("--skip-live-check", "--replace-sohieu", "--resume"))
+        ok5 = _blk.find('plan["mode"] = "DRY"') > _i_new
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r312_cong_ingest_chan_nguon_da_nap", _c312_cong_ingest_chan_nguon_da_nap)
+
     def _c209_bang_c_du_truong():
         # H1b: qua rasoat_phuluc, phụ lục 04 KHÔNG rơi mất mức chắc chắn + cite (nối vào cột Ghi chú).
         tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"

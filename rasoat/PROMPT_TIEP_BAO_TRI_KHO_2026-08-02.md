@@ -55,8 +55,11 @@ nhánh đó không có `--expect` (biên bản §2). Chống va chạm = bước
 ## VIỆC 2 — Chép đè 3 record cache (nguồn đã tìm + đo xong)
 
 Ba bản Công báo đã đo đạt, sha256 + URL + lệnh nguyên văn ở biên bản §3.1 và §3.6.
-**Cần môi trường:** `poppler-utils` (pdftotext) · `pip install pypdf cffi python-docx`
-— thiếu thì cổng PDF báo NHẦM «bản SCAN» và `.docx` bị nhét số neo hình vẽ vào thân Điều (§4.3, §4.6).
+**Cần môi trường:** `poppler-utils` (pdftotext) · `pip install pypdf cffi`.
+`pypdf` là BẮT BUỘC: thiếu nó thì **mọi PDF bị chặn** — sau r314 thông điệp đã đúng thủ phạm
+(`reason: pdf_probe_unavailable`, exit 6, kèm lệnh cài) chứ không còn vu cho tài liệu là «bản SCAN».
+`python-docx` nay chỉ còn là TUỲ CHỌN: sau r316 nhánh không-`python-docx` không nhét số neo hình
+vẽ vào thân Điều nữa (nghiệm thu: 3 số rác → 0 trên cả hai bản .docx).
 
 | Số hiệu | Nguồn | Đo được |
 |---|---|---|

@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.41",
+  "skill_version": "1.36.42",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7411732,
-  "package_hash": "030f87d54b7315846a8ef4be40a2c8f22d257270b28601d7bd41ba7663828761",
-  "content_hash": "030f87d54b7315846a8ef4be40a2c8f22d257270b28601d7bd41ba7663828761",
+  "total_bytes": 7424069,
+  "package_hash": "e3c8ab1d07f0962ecc7b12ff032dd1abfab5aa0c037d0115af569596cd5edb89",
+  "content_hash": "e3c8ab1d07f0962ecc7b12ff032dd1abfab5aa0c037d0115af569596cd5edb89",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 512944,
-      "sha256": "a23e2fdfba99675e9b997ee868f63ce4293cf4255af0b21cbd3da1ef01e56f6c"
+      "size": 516841,
+      "sha256": "03e7118d8c6e3e546cc582fac31711c2c12e782171827e39b898bc6b96bc4300"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "e6b2d28baf176cedc119b51d977bd7a71a8000135a52fe7a1c9e2ab9b234127e"
+      "sha256": "e6faff32e2c5126818bfbc1c042690e7480aacb8673fceec5405d2c4608098b9"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "0645d687cf59540446f1d2c9b869d00ba5adf0c778cf93f7da0bb5f470b1bf63"
+      "sha256": "e3b83fe92f278c9a98ae60e65d3dcc2443420b4d057151cd66775512b39d5b9d"
     },
     {
       "path": "agents/openai.yaml",
@@ -679,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 230117,
-      "sha256": "eb25559dc284018c474c1c13befd61d51ffbd436be6d6397278d8a34be5a33ae"
+      "sha256": "6c08966d80c147fa8ae20e40d8bdd55958ea9f94369bd752458e88aabb1abfb5"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -803,8 +803,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 72461,
-      "sha256": "8b94d01a09d81b36a9f8ad9d0e76e3746d2ca7ace5b01c0e736a3c4832590970"
+      "size": 74515,
+      "sha256": "3d9a534a5512b2460ebece7bdc1410a5ce9c93186297db26d24b98935fba3cf8"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -848,8 +848,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 1934115,
-      "sha256": "5b20408ab64537cd98e0adf2f842760bf2a36d6bff9b36d7accd7c49f2841f2f"
+      "size": 1940501,
+      "sha256": "9fb189bc55f381d198721773864e623643f89e831f7225e1299089b95fa6ac4a"
     },
     {
       "path": "scripts/tra_cuu.py",

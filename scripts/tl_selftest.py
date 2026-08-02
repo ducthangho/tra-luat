@@ -20886,13 +20886,43 @@ def run() -> int:
 
     def _c209_cay_that_va_phan_chung():
         # H9 nghiệm thu trên CÂY THẬT: 0 cặp fail sau H0+H1; advisory (DOCTRINE) vẫn ĐƯỢC BÁO;
-        # đủ 10 baseline hit (ratchet đang gài, không vacuous). PHẢN CHỨNG 2 CHIỀU: bơm đúng
+        # baseline hit đủ số (ratchet đang gài, không vacuous). PHẢN CHỨNG 2 CHIỀU: bơm đúng
         # dòng SKILL.md TRƯỚC-H0 → guard phải ĐỎ đúng 2 con trỏ ma.
+        #
+        # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
+        # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
+        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
+        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return True
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        pset = set(paths)
         docs = {}
-        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
-            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
-        paths = []
+        for rel in sorted(p for p in paths if p.lower().endswith(".md")):
+            fp = root / rel
+            if fp.is_file():
+                docs[rel] = fp.read_text(encoding="utf-8", errors="replace")
+        r = _rel209._doc_pointer_findings(docs, paths)
+        ok1 = r["pointers_ok"] and r["pointers_fail"] == []
+        ok2 = len(r["pointers_advisory"]) >= 30
+        ok3 = len(r["pointers_baseline"]) == 3   # r218 trả 6 nợ, r226 trả thêm 1 (xem _POINTER_BASELINE)
+        # (d) tầm ĐÃ mở thật: 4 tệp .md ngoài `references/` mức 1 phải CÓ trong doc-set (r308/GATE-04),
+        #     nếu không thì ok1 xanh chỉ vì quét ít đi — đúng kiểu tự-chứng-minh mà T0-E vừa diệt.
+        ok4 = {"CHANGELOG.md", "INSTALL.md", "CONTEXT.md",
+               "scripts/_fallback/README.md"} <= set(docs)
+        cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
+        r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
+        ok5 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
+            ("SKILL.md", "scripts/tl_rebuild.sh"), ("SKILL.md", "scripts/build_parts.py")}
+        # (e) khoảng lệch đĩa-vs-gói CÓ THẬT — nếu rỗng thì (f)/(g) vacuous. Khoảng này là CƠ CHẾ, không
+        #     phải ngẫu nhiên: `_RELEASE_EXCLUDE_NAMES_ANYWHERE` cố ý GIỮ tệp dev-side trong git mà loại
+        #     khỏi gói (CLAUDE.md §TRẦN 200 TỆP). Đo 02-08: 11 tệp (4 `.gs` cũ · 2 changelog_archive ·
+        #     4 script deploy · pkg_secret_scan.py).
+        disk_only = []
         for sub in ("scripts", "references", "templates"):
             base = root / sub
             if base.is_dir():
@@ -20900,20 +20930,71 @@ def run() -> int:
                     if not q.is_file():
                         continue
                     rp = q.relative_to(root).as_posix()
-                    # mô phỏng package-set: loại runtime/cache như release walk
                     if "/.tl_state/" in ("/" + rp) or "__pycache__" in rp or rp.endswith(".pyc"):
                         continue
-                    paths.append(rp)
-        r = _rel209._doc_pointer_findings(docs, paths)
-        ok1 = r["pointers_ok"] and r["pointers_fail"] == []
-        ok2 = len(r["pointers_advisory"]) >= 30
-        ok3 = len(r["pointers_baseline"]) == 3   # r218 trả 6 nợ, r226 trả thêm 1 (xem _POINTER_BASELINE)
-        cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
-        r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
-        ok4 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
-            ("SKILL.md", "scripts/tl_rebuild.sh"), ("SKILL.md", "scripts/build_parts.py")}
-        return ok1 and ok2 and ok3 and ok4
+                    if rp not in pset:
+                        disk_only.append(rp)
+        ok6 = len(disk_only) > 0
+        # (f)+(g) PHÉP ĐO A/B trên CÙNG tài liệu: nguồn MANIFEST (đúng) phải ĐỎ; nguồn ĐĨA (bản cũ)
+        #         XANH — chính là con đường mà con trỏ hỏng đi lọt tới `release-verify`.
+        probe = sorted(disk_only)[0] if disk_only else ""
+        doc_probe = {"SKILL.md": "chạy `%s` nhé" % probe}
+        r3 = _rel209._doc_pointer_findings(doc_probe, paths)
+        ok7 = (not r3["pointers_ok"]) and r3["pointers_fail"] == [("SKILL.md", probe)]
+        r4 = _rel209._doc_pointer_findings(doc_probe, sorted(pset | set(disk_only)))
+        ok8 = r4["pointers_ok"]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
     _t110("r209_cay_that_va_phan_chung", _c209_cay_that_va_phan_chung)
+
+    def _c308_docset_lay_tu_manifest():
+        # r308 (T0-F/GATE-04): chứng minh WIRING trong `_verify_release_manifest` — doc-set lấy từ
+        # MANIFEST chứ không glob đĩa. Ca r209 ở trên gọi THẲNG helper nên không phủ đoạn nối; đây là
+        # chỗ từng sai. Cây GIẢ dựng tại chỗ để mỗi vế falsify được, không dựa vào cây thật.
+        import tempfile as _tf308, hashlib as _hl308
+        with _tf308.TemporaryDirectory() as _td:
+            root = _P209(_td)
+            files = {
+                "SKILL.md": "lõi skill\n",
+                # .md NGOÀI `references/` mức 1 — nguồn cũ MÙ hẳn; nay phải fail-closed
+                "CONTEXT.md": "chạy scripts/ma_song.py cho việc này\n",
+                # tài liệu LƯU TRỮ (r308 xếp hạng) — nhắc tên tệp đã xoá ⇒ advisory, KHÔNG đỏ
+                "CHANGELOG.md": "★ v0.0.1: bỏ scripts/ma_luu_tru.py\n",
+                "references/SONG.md": "xem references/SONG.md\n",
+                "scripts/tl.py": "x = 1\n",
+            }
+            for rel, body in files.items():
+                fp = root / rel
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(body, encoding="utf-8")
+            # tệp CÓ trên đĩa, NGOÀI gói (đúng lớp `_RELEASE_EXCLUDE_NAMES_ANYWHERE`): con trỏ hỏng
+            # trong nó KHÔNG được tính — quét nó là bắt gate CÂY chịu trách nhiệm cho thứ ngoài artifact.
+            (root / "references" / "NGOAI_GOI.md").write_text(
+                "chạy scripts/ma_ngoai_goi.py\n", encoding="utf-8")
+            entries = []
+            for rel in sorted(files):
+                raw = (root / rel).read_bytes()
+                entries.append({"path": rel, "size": len(raw),
+                                "sha256": _hl308.sha256(raw).hexdigest()})
+            basis = "\n".join("%s\0%d\0%s" % (e["path"], e["size"], e["sha256"]) for e in entries)
+            man = {"schema": "release_manifest.v1", "files": entries,
+                   "package_hash": _hl308.sha256(basis.encode("utf-8")).hexdigest()}
+            res = _rel209._verify_release_manifest(root, man)
+            dp = res.get("doc_pointers") or {}
+            fail, adv = set(dp.get("pointers_fail") or []), set(dp.get("pointers_advisory") or [])
+            scanned = {d for d, _ in fail | adv}
+            ok1 = ("CONTEXT.md", "scripts/ma_song.py") in fail          # (a) tầm ĐÃ mở
+            ok2 = ("CHANGELOG.md", "scripts/ma_luu_tru.py") in adv      # (b) lưu trữ ⇒ advisory
+            ok3 = ("CHANGELOG.md", "scripts/ma_luu_tru.py") not in fail #     …và KHÔNG đỏ
+            ok4 = "references/NGOAI_GOI.md" not in scanned              # (c) ngoài gói ⇒ ngoài tầm
+            # (d) phản chứng: bỏ CHANGELOG khỏi hạng lưu trữ ⇒ đúng cặp đó phải ĐỎ. Không có vế này thì
+            #     ok2/ok3 xanh cả khi guard mù tịt với CHANGELOG.
+            dp2 = _rel209._doc_pointer_findings(
+                {"CHANGELOG.md": files["CHANGELOG.md"]}, sorted(f["path"] for f in entries),
+                archive_docs=frozenset(), baseline=frozenset())
+            ok5 = (not dp2["pointers_ok"]) and dp2["pointers_fail"] == [
+                ("CHANGELOG.md", "scripts/ma_luu_tru.py")]
+            return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r308_docset_lay_tu_manifest", _c308_docset_lay_tu_manifest)
 
     def _c291_docs_ngoai_goi():
         # T0-G (Q1 user CHỐT 01-08) — `docs/` GIỮ trong git, LOẠI khỏi GÓI (khuôn rasoat r249).
@@ -21046,20 +21127,26 @@ def run() -> int:
             return True
         paths = sorted(str(x.get("path") or "") for x in
                        (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        # r308 (T0-F/GATE-04): doc-set = MỌI *.md trong manifest, khớp guard sản xuất. Lớp TRẦN mở tầm
+        # MIỄN PHÍ — đo 02-08: checked 160→237, FAIL 0→0, advisory 73→95 (4 tệp mới đều ngoài strict_docs).
         docs = {}
-        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
-            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
+        for rel in sorted(p for p in paths if p.lower().endswith(".md")):
+            fp = root / rel
+            if fp.is_file():
+                docs[rel] = fp.read_text(encoding="utf-8", errors="replace")
         r = _rel209._doc_bare_tool_findings(docs, paths)
         ok1 = r["bare_tools_ok"] and r["bare_tools_fail"] == []
         ok2 = len(r["bare_tools_advisory"]) >= 30      # DOCTRINE lưu trữ vẫn ĐƯỢC BÁO, không nuốt
         ok3 = len(r["bare_tools_baseline"]) == 1       # placeholder `file.py` — ratchet đang gài
+        ok3b = {"CHANGELOG.md", "INSTALL.md", "CONTEXT.md",
+                "scripts/_fallback/README.md"} <= set(docs)   # tầm ĐÃ mở thật, không xanh vì quét ít
         cu = ("- **NLM:** `nlm_push.py` · `nlm_qa.py` · `nlm_sources.py` (`-S`) · "
               "`nlm_map.py` · `dedup_gate2.py`.")
         r2 = _rel209._doc_bare_tool_findings({"SKILL.md": cu}, paths)
         ok4 = (not r2["bare_tools_ok"]) and set(r2["bare_tools_fail"]) == {
             ("SKILL.md", "nlm_push.py"), ("SKILL.md", "nlm_qa.py"),
             ("SKILL.md", "nlm_map.py"), ("SKILL.md", "dedup_gate2.py")}
-        return ok1 and ok2 and ok3 and ok4
+        return ok1 and ok2 and ok3 and ok3b and ok4
     _t110("r289_cay_that_bare_tools", _c289_cay_that_bare_tools)
 
     def _c289_khong_con_lenh_ma_nlm_qa():

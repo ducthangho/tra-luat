@@ -2806,6 +2806,67 @@ def run() -> int:
                   and os.environ.get("TL_BASE_ALSO") == "1"))
     _apply_profile_env(cfg6, "vbqppl")
 
+    # ═══ r325 (VIỆC 4.2 sổ bảo trì kho): profile dự án CÓ THẬT mà `registryDocId` RỖNG ⇒ mọi lệnh ĐỌC
+    # registry rơi về SỔ NỀN. Đường GHI đã fail-closed từ 1.23.21; đường ĐỌC tới nay vẫn IM LẶNG —
+    # đúng cái làm `--profile` thành NO-OP mà người dùng không hề biết. Phải WARN LOUD (stderr). ═══
+    import io as _io325, contextlib as _cl325
+    _cfg325 = {"schema": 2, "defaultProfile": "vbqppl", "profiles": {
+        "vbqppl": {"manifestId": "m1", "notebookId": "n1", "rootFolderId": "r1", "registryDocId": "g1"},
+        "p_rong": {"manifestId": "m9", "notebookId": "n9", "rootFolderId": "r9", "categories": "own"},
+        "p_du":   {"manifestId": "m8", "notebookId": "n8", "rootFolderId": "r8",
+                   "registryDocId": "g8", "categories": "own"},
+    }}
+
+    def _cap325(cfgx, name):
+        """→ (stderr, TL_REGISTRY_DOC_ID) sau khi áp profile; reset chốt 1-lần để đo lặp được."""
+        if hasattr(_apply_profile_env, "_reg_empty_noted"):
+            _apply_profile_env._reg_empty_noted.clear()
+        _buf = _io325.StringIO()
+        with _cl325.redirect_stderr(_buf):
+            _apply_profile_env(cfgx, name)
+        return _buf.getvalue(), (os.environ.get("TL_REGISTRY_DOC_ID") or "")
+
+    # (1) BẮT: profile thật + registryDocId rỗng → cảnh báo LOUD, nêu đích danh profile và sổ nền
+    _e1, _r1_325 = _cap325(_cfg325, "p_rong")
+    cases.append(("r325_warn_khi_registry_id_rong",
+                  "PROFILE_REGISTRY_ID_EMPTY" in _e1 and "p_rong" in _e1 and "vbqppl" in _e1
+                  and _r1_325 == ""))
+    # (2) CHIỀU NGƯỢC — profile có registryDocId đủ → TUYỆT ĐỐI im (cảnh báo oan làm người ta bỏ đọc cảnh báo)
+    _e2, _r2_325 = _cap325(_cfg325, "p_du")
+    cases.append(("r325_du_registry_id_thi_im", "PROFILE_REGISTRY_ID_EMPTY" not in _e2 and _r2_325 == "g8"))
+    # (3) CHIỀU NGƯỢC — NỀN để rỗng là BÌNH THƯỜNG (webapp tự tìm Sheet theo tên) → không báo
+    _cfg325b = {"schema": 2, "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"manifestId": "m1", "notebookId": "n1", "rootFolderId": "r1"}}}
+    _e3, _ = _cap325(_cfg325b, "vbqppl")
+    cases.append(("r325_nen_rong_khong_bao", "PROFILE_REGISTRY_ID_EMPTY" not in _e3))
+    # (4) KHÔNG chồng lên PROFILE_NOT_FOUND (tên ma đã có cảnh báo riêng, hai câu cùng lúc là nhiễu)
+    _e4, _ = _cap325(_cfg325, "ten_ma_khong_co")
+    cases.append(("r325_khong_chong_profile_not_found",
+                  "PROFILE_NOT_FOUND" in _e4 and "PROFILE_REGISTRY_ID_EMPTY" not in _e4))
+    # (5) env do NGƯỜI DÙNG export vẫn tính là CÓ → không báo oan
+    os.environ["TL_REGISTRY_DOC_ID"] = "nguoi_dung_dat"
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _buf5 = _io325.StringIO()
+    with _cl325.redirect_stderr(_buf5):
+        _apply_profile_env(_cfg325, "p_rong")
+    cases.append(("r325_env_nguoi_dung_dat_thi_im", "PROFILE_REGISTRY_ID_EMPTY" not in _buf5.getvalue()))
+    os.environ.pop("TL_REGISTRY_DOC_ID", None)
+    # (6) ồn ĐÚNG MỘT LẦN mỗi profile mỗi process
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _b6a, _b6b = _io325.StringIO(), _io325.StringIO()
+    with _cl325.redirect_stderr(_b6a):
+        _apply_profile_env(_cfg325, "p_rong")
+    with _cl325.redirect_stderr(_b6b):
+        _apply_profile_env(_cfg325, "p_rong")
+    cases.append(("r325_warn_chi_mot_lan",
+                  "PROFILE_REGISTRY_ID_EMPTY" in _b6a.getvalue()
+                  and "PROFILE_REGISTRY_ID_EMPTY" not in _b6b.getvalue()))
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _apply_profile_env(cfg6, "vbqppl")
+
     # ═══ v1.30.1 (xử log LIVE 2026-07-03: #1 nlm-install 45s / #7 corpus lệch / #4 loai phi-chuẩn) — r7_* ═══
     # (#1) máy trạng thái cài nlm: bước kế dò từ ĐĨA (fetch→extract→install→done), idempotent.
     import tempfile as _tf7
@@ -22737,6 +22798,43 @@ def run() -> int:
         ok5 = _t5 == "" and _r5["articles"] == 0 and _r5["thieu"] == ["khoi_dau"]
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r215_consolidated_text_dung_lai_du_khoi_dau_va_phu_luc", _c215_consolidated_text)
+
+    def _c325_dung_lai_khong_danh_roi_duoi_vbhn():
+        """r325 — KHỐI ĐUÔI VBHN phải được NỐI LẠI khi dựng toàn văn từ record.
+
+        r323 tách «XÁC THỰC VĂN BẢN HỢP NHẤT» + chú thích hợp nhất ra `xac_thuc`/`chu_thich` (đúng:
+        thân Điều cuối hết nhả chú thích như quy phạm) nhưng KHÔNG đụng `_consolidated_text` — mà
+        đây là đường dựng lại toàn văn nuôi `doc-text` mặc định và ghi đè `extract_<id>.txt`.
+        Không nối lại = im lặng đánh rơi, ĐÚNG bẫy r215 đã trả giá với `phu_luc`."""
+        _ec = _mod215("extract_cache.py", "_ec325")
+        _arts = {"1": "Điều 1. Phạm vi điều chỉnh\nNghị định này…", "2": "Điều 2. Đối tượng áp dụng\nNgười…"}
+        _XT325 = "XÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\nLê Quang Mạnh"
+        _CT325 = ("[1] Luật Nhà giáo số 73/2025/QH15 có căn cứ ban hành như sau: …\n"
+                  "[2] Khoản này được sửa đổi theo điểm a khoản 1 Điều 2 của Luật số 74/2025/QH15, "
+                  "có hiệu lực kể từ ngày 01 tháng 7 năm 2025.")
+        # (1) record r323+ : CẢ HAI khối được nối lại, đúng thứ tự bố cục (phụ lục → xác thực → chú thích)
+        _t1, _r1 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215,
+                                           "xac_thuc": _XT325, "chu_thich": _CT325})
+        ok1 = ("XÁC THỰC VĂN BẢN HỢP NHẤT" in _t1 and "[1] Luật Nhà giáo" in _t1
+               and _r1["xac_thuc"] is True and _r1["chu_thich"] is True
+               and _t1.index("PHỤ LỤC I") < _t1.index("XÁC THỰC VĂN BẢN HỢP NHẤT") < _t1.index("[1] Luật Nhà giáo"))
+        # (2) KHÔNG mất chữ: dài hơn bản không-có-đuôi ĐÚNG bằng hai khối (+ 2 dấu nối)
+        _t2, _r2 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215})
+        ok2 = len(_t1) == len(_t2) + len("\n\n") * 2 + len(_XT325) + len(_CT325)
+        # (3) CHIỀU NGƯỢC — record dựng TRƯỚC r323 (KHÔNG có hai khoá): chuỗi ra Y HỆT bản cũ, cờ False.
+        #     Đây là điều kiện để bản vá này an toàn BẤT KỂ r323 đã land hay chưa.
+        ok3 = (_r2["xac_thuc"] is False and _r2["chu_thich"] is False
+               and "XÁC THỰC" not in _t2 and "[1]" not in _t2)
+        # (4) khoá RỖNG (văn bản thật sự không có đuôi) cũng bất động, không đẻ dấu nối thừa
+        _t4, _r4 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215,
+                                           "xac_thuc": "", "chu_thich": ""})
+        ok4 = _t4 == _t2 and _r4["xac_thuc"] is False
+        # (5) chỉ có MỘT trong hai khối → nối đúng cái có, không chèn khoảng trống cho cái vắng
+        _t5, _ = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "chu_thich": _CT325})
+        ok5 = _t5.endswith(_CT325) and "XÁC THỰC" not in _t5 and not _t5.endswith("\n\n" + "\n\n" + _CT325)
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r325_dung_lai_khong_danh_roi_duoi_vbhn", _c325_dung_lai_khong_danh_roi_duoi_vbhn)
+
 
     def _c215_thieu_khoi_dau_pure():
         """Cổng «text vào thẳng thân» — bắt đúng ca, và KHÔNG đẻ báo động giả trên corpus đang chạy."""

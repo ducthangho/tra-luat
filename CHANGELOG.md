@@ -1,3 +1,58 @@
+# ★ v1.36.57 — r325: nối lại KHỐI ĐUÔI VBHN khi dựng toàn văn + WARN đường ĐỌC registry (2026-08-02)
+
+Hai việc bàn giao còn lại của lượt bảo trì kho LƯỢT 3. Sổ:
+`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_LUOT3_2026-08-02.md`.
+
+★**Phạm vi lượt này ĐÃ THU HẸP có chủ đích.** VIỆC 3 (khối chú thích đọng trong thân Điều cuối) tôi
+đã vá xong và đo trọn, nhưng đo lại origin ngay trước khi commit thì **PR #18 (`r323`,
+`claude/r323-tach-duoi-vbhn`) đang mở và làm CÙNG việc, RỘNG HƠN**: nó tách cả bảng «XÁC THỰC VĂN
+BẢN HỢP NHẤT» chứ không chỉ khối `[n]`, và bắt được `[n]` xuất hiện **inline trong 9/141 Điều** của
+`19-2026` — thứ mà phép đo của tôi (chạy trên thân Điều đã qua đường nạp) **không thấy**. Bản của họ
+tốt hơn ⇒ **tôi GỠ TRỌN bản vá trùng của mình** (`verify_deep.chu_thich_start` + nhánh trong
+`normalize_document` + 3 ca test), giữ đúng phần KHÔNG trùng. Cùng doctrine với `c2971dd`.
+
+**(A) r325 — lỗ CÒN LẠI sau r323: `_consolidated_text` không nối lại khối đuôi.** r323 tách
+«XÁC THỰC…» + chú thích hợp nhất ra `xac_thuc`/`chu_thich` (đúng và cần), nhưng **không đụng**
+`tl_core/extract_cache.py`. Mà đó là đường **dựng lại TOÀN VĂN từ record** — đường nuôi `doc-text`
+mặc định và **ghi đè khoá cache chuẩn `extract_<id>.txt`** (nguồn nuôi corpus/NLM). Tách ra trường
+riêng mà không nối lại ở đó = **im lặng đánh rơi**, ĐÚNG BẪY r215 đã trả giá với `phu_luc` (khi đó
+mất 6.030 ký tự phụ lục mà record VẪN CÓ lưu). Quy mô nếu để nguyên: `40-2026` mất **40.406 ký tự**
+chú thích, và `xac_thuc` chính là **bằng chứng danh tính** (VPQH + «Số:») mà r215 sinh ra để bảo vệ.
+
+Vá: `_consolidated_text` nối lại cả hai khối, thứ tự theo bố cục đo được (phụ lục → **xác thực** →
+**chú thích**), `rep` thêm hai cờ, dòng nhãn `doc-text` khai thêm «xác thực»/«chú thích».
+★**Forward-compatible, KHÔNG phụ thuộc thứ tự merge**: record dựng trước r323 không có hai khoá ⇒ cả
+hai rỗng ⇒ chuỗi ra **Y HỆT** bản cũ. Nên bản vá này an toàn kể cả khi r323 chưa land.
++1 ca `r325_dung_lai_khong_danh_roi_duoi_vbhn` (5 vế, gồm chiều ngược record-cũ-bất-động và ca chỉ
+có MỘT trong hai khối).
+
+**(B) VIỆC 4.2 — đường ĐỌC registry rơi về sổ NỀN trong im lặng.** Profile dự án **có thật** trong
+config mà `registryDocId` **rỗng** ⇒ `TL_REGISTRY_DOC_ID` không được đặt ⇒ webapp `regSS_` rơi nhánh
+auto-discover = sổ NỀN, người dùng đọc dòng nền dưới nhãn profile đang chọn. Đường GHI đã fail-closed
+từ 1.23.21 (`PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE`, rc=2 — vá cho sự cố 2026-06-30); đường
+ĐỌC tới nay vẫn im, và `scope`/`BASE_SCOPE_HIT` (r179 T7) chỉ nói được KHI ĐÃ CÓ dòng trả về.
+Nay `_apply_profile_env` in `PROFILE_REGISTRY_ID_EMPTY` ra stderr — **cảnh báo, KHÔNG chặn** (đọc sổ
+nền là hợp lệ; cái sai là im lặng), 1 lần/profile/process. Giữ IM ba chiều ngược: nền `vbqppl` rỗng
+là bình thường · profile có id đủ · người dùng tự export env. Không chồng lên `PROFILE_NOT_FOUND`.
+Chứng minh trên ĐƯỜNG SẢN XUẤT (`tl --config … --profile … profile-info`), không chỉ qua bind.
++6 ca `r325_*`.
+
+**(C) VIỆC 4.1 — đính chính §4.2 biên bản lượt 1** (chỉ `rasoat/`, ngoài gói): «.docx Công báo là
+container HỎNG (33/40 · 30/37 entry dùng `\`)» là **SAI**. Lượt 3 **đo lại ĐỘC LẬP** trên tệp
+89-2026 còn trên đĩa, sha256 khớp tuyệt đối `source.sha256` của record cache ⇒ **0 entry** dùng
+backslash, `word/document.xml` có đúng tên chuẩn, `python-docx` mở thẳng (775 đoạn). Hỏng nằm ở
+**đường tải của container web**, không ở tệp Công báo; lượt 1 đo sai vì `bash -c` **nuốt backslash**.
+★Đồng thời bắt được **mẫu số sai ở CẢ HAI sổ trước**: tệp này chỉ có **10** entry, không phải 37 —
+nên «30/37» lẫn «0/37» đều không phải số của tệp này (lượt 2 đúng kết luận nhưng bê nguyên mẫu số).
+**Bản vá r316 (`scan_file` hết fail-open) giữ nguyên, vẫn đúng vì lý do riêng của nó** — nó vá cổng
+an toàn pháp lý mặc định «sạch» khi mù, không phải vá container.
+
+★**Bẫy trả giá trong lượt này:** (1) `Path.write_text()` trên Windows **dịch `\n` → `\r\n`** — sửa
+một dòng làm cả tệp đổi kết dòng, `git diff` phồng 45 → 1.061 dòng, mà CI có bước *«Force LF
+checkout (hash parity với manifest)»*. (2) Kho này **kết dòng TRỘN THEO TỆP** (`verify_deep.py` LF ·
+`tl_selftest.py`/`tl.py`/`SKILL.md` CRLF) ⇒ quy tắc «ép hết về LF» là SAI, phải nắn theo **blob của
+chính tệp đó**. (3) `VERSION` khai ở **BA nơi** (`VERSION` · `scripts/tl.py` · `SKILL.md`) — quên
+một chỗ thì `r65_bundle_export_meta_and_guard` / `skill_md_version_matches_VERSION` bắt.
 # ★ v1.36.56 — r324: REL-05 + NLM-08 — cổng gói mù một tệp bắt buộc, doc kernel dạy van F7 đã chết (2026-08-02)
 
 **Hai mục P2 của sổ audit 01-08. Đo tận nơi TRƯỚC khi vá — và phép đo đã lật một phần đề bài.**

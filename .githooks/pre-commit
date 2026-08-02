@@ -12,4 +12,42 @@ if [ -n "$bad" ]; then
   echo "Go stage: git restore --staged <file>. Neu CHAC CHAN co y: git commit --no-verify." >&2
   exit 1
 fi
+
+# ── EOL-FLIP GUARD ────────────────────────────────────────────────────────────
+# Vi sao can: .gitattributes ghim `* -text` CO CHU DICH (v1.33.61 — manifest hash
+# theo BYTE THAT, parity Windows/Linux). Doi lai, git KHONG chuan hoa gi ca, nen
+# mot lan `read_text()` + `write_text()` tren Windows la doi CA TEP tu LF sang
+# CRLF (hoac nguoc lai) — diff no ra toan bo tep, golden/manifest lech, ma khong
+# cong nao noi ro nguyen nhan. Truoc day moi phien phai TU DEM CRLF bang tay;
+# day la nghi le, khong phai bao dam. Hook nay bien no thanh CO CHE:
+# so DANG xuong dong cua ban STAGE voi ban HEAD, lech dang => CHAN.
+# Chi so sanh tep DA CO trong HEAD (tep moi: tuy tac gia chon dang).
+_eol_dang() {  # doc stdin -> in ra: crlf | lf | mixed | none | binary
+  _b=$(cat); _nul=$(printf '%s' "$_b" | tr -dc '\000' | wc -c)
+  [ "$_nul" -gt 0 ] && { echo binary; return; }
+  _cr=$(printf '%s' "$_b" | tr -dc '\r' | wc -c)
+  _lf=$(printf '%s' "$_b" | tr -dc '\n' | wc -c)
+  if [ "$_lf" -eq 0 ]; then echo none
+  elif [ "$_cr" -eq 0 ]; then echo lf
+  elif [ "$_cr" -eq "$_lf" ]; then echo crlf
+  else echo mixed; fi
+}
+eolbad=""
+for f in $staged; do
+  git cat-file -e "HEAD:$f" 2>/dev/null || continue          # tep moi -> bo qua
+  d_old=$(git cat-file blob "HEAD:$f" | _eol_dang)
+  d_new=$(git cat-file blob ":$f"     | _eol_dang)
+  [ "$d_old" = binary ] && continue
+  [ "$d_old" = "$d_new" ] || eolbad="$eolbad$f: $d_old -> $d_new
+"
+done
+if [ -n "$eolbad" ]; then
+  echo "" >&2
+  echo "=== pre-commit CHAN: DANG XUONG DONG bi doi (eol-flip) ===" >&2
+  printf '%s' "$eolbad" >&2
+  echo "Repo nay ghim byte (* -text): doi CRLF<->LF lam golden/manifest lech." >&2
+  echo "Chua: sua lai bang read_bytes/write_bytes (dung Edit tool), dung read_text+write_text." >&2
+  echo "Neu THAT SU co y doi dang: git commit --no-verify." >&2
+  exit 1
+fi
 exit 0

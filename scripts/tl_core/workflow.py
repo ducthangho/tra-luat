@@ -1701,7 +1701,19 @@ def _golden_test(*, write: bool = False) -> dict:
                 rec["error"] = "GOLDEN_MISMATCH"
         cases.append(rec)
     ok = all(c.get("ok") for c in cases)
-    return {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    out = {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    # r293 (hoà nhánh): mã lỗi RIÊNG nổi lên TOP để người đọc phân biệt "fixture lệch" (GOLDEN_MISMATCH —
+    # chữa bằng cách xem lại thay đổi) với "lệnh bất định" (RAW_UNSTABLE_UNDECLARED — CẤM regen, phải làm
+    # tất định trước). Hai bệnh khác nhau, cách chữa NGƯỢC nhau; gộp một mã là mời người ta chạy `--write`
+    # cho xong. Cơ chế phát hiện là của r288 (quy-khoá) — khối này CHỈ nổi kết luận lên đầu payload để
+    # CI/`deploy-package.sh` đọc được mà không phải duyệt 20 case.
+    _raw_bad = [c["id"] for c in cases if c.get("error") == "RAW_UNSTABLE_UNDECLARED"]
+    if _raw_bad:
+        out["error"] = "RAW_UNSTABLE_UNDECLARED"
+        out["raw_unstable_cases"] = _raw_bad
+        if write:
+            out["write_refused"] = True
+    return out
 
 
 def cmd_golden_test(a) -> int:

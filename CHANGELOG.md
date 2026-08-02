@@ -1,3 +1,736 @@
+# ★ v1.36.40 — HOÀ NHÁNH lượt 10: master land VÒNG ĐỜI HỒ SƠ (r300), KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `1a06ff1` (r300 v1.36.37 — *"VÒNG ĐỜI HỒ SƠ — 'đã đóng' thành trạng thái MÁY ĐỌC ĐƯỢC"*).
+
+**Rà trùng việc — đo trước khi hoà.** `git diff --numstat 7469d8c..origin/master` trên 5 tệp T2
+(`tl_core/txn.py` · `tl_core/ops_misc.py` · `registry_orchestrator.py` · `tl_core/ingest_ops.py` ·
+`backfill_keywords_live.py`) trả **RỖNG**. Mười tệp master đụng đều ngoài vùng T2, trong đó phần code
+mới nằm ở `tl_core/lookup_ops.py` (+70) và `tl_selftest.py` (+79); `tl.py` chỉ nhận **2 dòng** khai tên
+`_rasoat_vong_doi_*` vào bảng stub. `tl_selftest.py` auto-merge sạch.
+
+**Gỡ xung đột theo byte + đối chứng kích thước.** `SKILL.md` **48.031 B** (bằng đúng trước hoà — master
+chỉ đổi dòng phiên bản), `VERSION` **7 B** không newline cuối. `tl.py` **229.953 → 230.117 B** và
+**CRLF 1.763 → 1.765**: +2 dòng, khớp ĐÚNG net +2 của master ⇒ tăng là do nội dung master vào, không
+phải dòng-kết hỏng. Đây là cách đọc số đúng — "kích thước đổi" tự nó không nói gì, phải đối chiếu với
+delta ĐÃ BIẾT của bên kia.
+
+**Va số hiệu test:** master vừa dùng `r300` ⇒ test mới của nhánh đánh **từ `r301`**.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
+
+# ★ v1.36.39 — HOÀ NHÁNH lượt 9: master land P16-F11+F26 (OCR/chunks), KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `7469d8c` (r299 v1.36.36 — *"cầu nối OCR/chunks — scope đi theo xuống con · chunks `--apply`
+chạy được (P16-F11+F26)"*).
+
+**Rà trùng việc — đo trước khi hoà.** `git diff --numstat 74f62e2..origin/master` trên 5 tệp T2
+(`tl_core/txn.py` · `tl_core/ops_misc.py` · `registry_orchestrator.py` · `tl_core/ingest_ops.py` ·
+`backfill_keywords_live.py`) trả **RỖNG**. Tám tệp master đụng: `CHANGELOG.md` `RELEASE_MANIFEST.json`
+`SKILL.md` `VERSION` `scripts/tl.py` `tl_core/chunking.py` `tl_core/ocr.py` `tl_selftest.py`.
+`tl_selftest.py` auto-merge sạch (master thêm 177 dòng ca mới ở vùng khác); 5 xung đột còn lại là hằng
+phiên bản + kiểm kê.
+
+**Áp bài học CRLF của lượt 8 — lần này gỡ xung đột THEO BYTE ngay từ đầu.** Marker git viết theo dòng-kết
+của chính tệp (`SKILL.md` và `tl.py` là CRLF), nên `read_bytes` → `replace(khối-marker-CRLF)` →
+`write_bytes`; `VERSION` ghi 7 B không newline cuối. Đối chứng kích thước sau gỡ: `SKILL.md` **48.031 B**
+và `tl.py` **229.953 B** — **BẰNG ĐÚNG** trước hoà, đúng như lượt 8 sau khi đã chữa. Số đo là thứ xác
+nhận, không phải "gate xanh".
+
+**Va số hiệu test:** master vừa dùng `r299` ⇒ test mới của nhánh đánh **từ `r300`**.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên.
+
+# ★ v1.36.38 — HOÀ NHÁNH lượt 8: master land T0-E/P16, KHÔNG chạm tệp nào của T2 (2026-08-01)
+
+Hoà `master` `74f62e2` (r297 v1.36.34 *"`--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con — P16-F10"*
++ r298 v1.36.35 *"diệt 3 test TỰ-CHỨNG-MINH — gate hết chứng nhận RỖNG ở lớp điều phối (T0-E/GATE-06)"*).
+
+**Rà trùng việc — ĐO TRƯỚC KHI HOÀ, không đoán.** `git diff --numstat 9465d2a..origin/master` trên 5 tệp
+của nhánh này (`tl_core/txn.py` · `tl_core/ops_misc.py` · `tl_core/registry_orchestrator.py` ·
+`tl_core/ingest_ops.py` · `backfill_keywords_live.py`) trả **RỖNG** — master lượt này không chạm tệp nào
+của T2. Tám tệp master đụng: `CHANGELOG.md` `RELEASE_MANIFEST.json` `SKILL.md` `VERSION`
+`scripts/ingest_to_cache.py` `scripts/normalize_document.py` `scripts/tl.py` `scripts/tl_selftest.py`.
+`tl_selftest.py` **auto-merge sạch** (master thêm/sửa ca ở vùng khác); 5 xung đột còn lại đều là
+**hằng phiên bản + kiểm kê**, không phải logic.
+
+**Va số hiệu test:** master vừa dùng `r297` và `r298`, trùng dải nhánh này định dùng tiếp. Số hiệu test
+mới của nhánh **đánh từ `r299`** trở đi.
+
+**Va số hiệu bản:** nhánh này đã có mục `v1.36.34`/`v1.36.35` (hoà lượt 4/5) trong khi master mang về
+`v1.36.34`/`v1.36.35` của riêng nó (r297/r298) — cùng số, khác nội dung. Giữ **cả hai** khối như các lượt
+trước; bản hoà này bump lên **v1.36.38** (cao hơn cả hai bên) để không kéo dài va chạm.
+
+**BẪY ĐÃ TRẢ GIÁ Ở CHÍNH LƯỢT NÀY — hoà xung đột bằng `pathlib.read_text()/write_text()` NUỐT CRLF.**
+`SKILL.md` và `scripts/tl.py` trong cây này dùng **CRLF**; `read_text()` dịch CRLF→LF khi ĐỌC và
+`write_text()` ghi LF ⇒ gỡ 3 dòng marker mà **toàn tệp bị viết lại**: `SKILL.md` 48.031 → 47.724 B
+(mất đúng 307 B = 307 dòng), `tl.py` mất 1.763 B. Gate bắt được, và bắt bằng **đường vòng**:
+`r219_gotchas_nhan_trang_thai` đỏ vì nó khẳng định GOTCHAS.md phải chứa **kích thước ĐO ĐƯỢC** của
+`SKILL.md` — số đo đổi thì khẳng định sai. `golden` + `determinism` đỏ theo. **Không có test nào nói
+"CRLF"** cả; thứ cứu được là một test neo vào SỐ ĐO THẬT thay vì vào hình dạng.
+
+Chữa: khôi phục CRLF theo byte (`read_bytes` → `replace(b"\n", b"\r\n")` → `write_bytes`), và `VERSION`
+ghi **không newline cuối** (7 B — đúng như f326473 lẫn master; `echo >` thêm `\n` thành 8 B). Sau chữa,
+`golden` + `determinism` tự XANH lại **mà KHÔNG cần `--write`** — bằng chứng dương rằng hai gate đó đỏ vì
+hỏng dòng-kết, không phải vì kiểm kê đổi hợp lệ (R6 giữ nguyên: không ghi lại golden cho lượt này).
+Lần sau hoà xung đột: sửa bằng byte, hoặc `git checkout --ours/--theirs` + patch tối thiểu — ĐỪNG
+round-trip tệp qua text API.
+
+**Dấu vết 5 mục T2 sau hoà:** kiểm lại còn nguyên — `_ingest_commit_verdict`/`_INGEST_COMMIT_MARKERS` tại
+`_pi_stage_write` + `_il_stage_write` (ING-03), `Txn(`/guard (PRO-01), `not_probed` (RAS-01),
+`tukhoa_progress.v2` (RAS-05), `tl_core/txn.py` (Helper 1).
+
+# ★ v1.36.37 — HOÀ NHÁNH lượt 7: master chạm `ingest_ops.py` nhưng KHÔNG chạm ING-03 (2026-08-01)
+
+Hoà `master` `9465d2a` (r296 v1.36.33 — *"HỌ regex `Điều N` nhận HẬU TỐ CHỮ (7a/7b/7đ) — P16-F15"*).
+
+**Rà trùng việc — lần này master CÓ chạm `ingest_ops.py`, tệp của ING-03.** Kiểm kỹ chỗ chạm:
+`_dieu_head_marks` (`:1397`, nhánh LÙI của regex tiêu đề Điều). Đo trực tiếp trên diff — **0 lần** chạm
+`_ingest_commit_verdict` / `_INGEST_COMMIT_MARKERS` / `_pi_stage_write` / `_il_stage_write`.
+⇒ Cùng tệp, **khác vùng hoàn toàn**, `git` auto-merge sạch. Không có bản vá nào phải bỏ.
+
+Bốn tệp còn lại (`txn.py` · `ops_misc.py` · `registry_orchestrator.py` · `backfill_keywords_live.py`)
+master không đụng. T2 nguyên vẹn, kiểm bằng dấu vết mã: `Txn("profile-file-remove")` ×1 · `not_probed` ×5 ·
+`_ingest_commit_verdict(org, okw)` ×2 · `tukhoa_progress.v2` ×1.
+
+**Số ca 1549 → 1558** (+9 của `r296`). Gate **8/8 PASS**. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md` →
+**v1.36.37**; `CHANGELOG` giữ cả hai khối; `RELEASE_MANIFEST` tái sinh; `ingest_ops.py` + `tl_selftest.py`
+auto-merge sạch.
+
+**Số hiệu: master đã dùng tới `r296`** ⇒ nhánh này đánh số tiếp từ **r297**.
+
+# ★ v1.36.36 — HOÀ NHÁNH lượt 6: master land T3/rà-soát, T2 của nhánh này không bị đụng (2026-08-01)
+
+Hoà `master` `81c9715` (2 commit: `7795938` r295 v1.36.32 — *"rà soát: MỘT định nghĩa hội tụ +
+corpus-hiệu-lực dùng chung + state single-writer hết fail-OPEN"*; `81c9715` r295b — regen manifest).
+
+**Rà trùng việc (đo `a3abc11..81c9715` trên 5 tệp của nhánh này): KHÔNG tệp nào bị đụng.**
+`txn.py` · `ops_misc.py` · `registry_orchestrator.py` · `ingest_ops.py` · `backfill_keywords_live.py` —
+master chỉ chạm `lookup_ops.py`, `tl.py`, `tl_selftest.py`. Bốn mục T2 + Helper 1 **còn nguyên**, đã kiểm
+bằng dấu vết mã: `Txn("profile-file-remove")` ×1 · `not_probed` ×5 · `_ingest_commit_verdict(org, okw)` ×2
+(**cả hai** call site) · `tukhoa_progress.v2` ×1 · `txn.py` tồn tại.
+
+**Đáng chú ý — master đang tiến vào T3.** `r295` land *"corpus-hiệu-lực dùng chung"* = đúng **Helper 2**
+của Pha 1-0 (§6.1), và *"state single-writer hết fail-OPEN"* = **RAS-02/RAS-03**. Tức tranche T3 đang được
+phiên khác làm. Nhánh này **không** đụng T3, nên không có xung đột việc — nhưng nếu định làm tiếp T3 thì
+phải rà lại §6.1/§Pha 1D trên master mới, đừng dựng lại Helper 2.
+
+**Số ca 1537 → 1549** (+12 của `r295`). Gate **8/8 PASS**. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md`
+→ **v1.36.36**; `CHANGELOG` giữ cả hai khối; `RELEASE_MANIFEST` tái sinh; `tl_selftest.py` auto-merge sạch.
+
+**Số hiệu: master đã dùng `r295`/`r295b`** ⇒ nhánh này đánh số tiếp từ **r296** (trước ghi r295 — chỉnh lại).
+
+# ★ v1.36.35 — HOÀ NHÁNH lượt 5: master vá nốt khuyết BÁO GIẢ của chính GATE-01 (2026-08-01)
+
+Hoà `master` `a3abc11` (r294 v1.36.31 — *"GATE-01 hết BÁO GIẢ — quy drift theo ĐƯỜNG DẪN khoá, đối xứng
+với projection"*). Đây chính là **khuyết điểm #1 mà `r288` tự khai và cố ý để lại**: `audit_projection`
+che TRỌN cây con của khoá đã khai, còn `_raw_drift_keys` chỉ rút **tên khoá lá** bằng regex ⇒ drift bên
+trong cây con của một khoá volatile đã khai sinh khoá lá không có trong `volatile_keys` ⇒ báo giả. Nay
+họ quy theo **đường dẫn khoá**, đối xứng với projection.
+
+**Master VẪN không đụng 4 mục T2 + Helper 1** (đo `5df7f39..a3abc11`) ⇒ không có việc nào của nhánh này
+bị trùng thêm.
+
+**Phần của nhánh này sống nguyên qua lượt hoà, không phải sửa gì:** khối tóm tắt top-level
+(`error`/`raw_unstable_cases`/`write_refused`) vẫn khớp mã `RAW_UNSTABLE_UNDECLARED` — họ giữ nguyên mã
+lỗi, chỉ đổi **cách quy khoá**. Ba ca `r287_*` cũng không phải chỉnh. Đúng như thiết kế: phần tôi bổ sung
+nằm **trên** cơ chế của họ chứ không **trong** nó, nên cơ chế đổi mà phần bổ sung không gãy.
+
+**Số ca 1534 → 1537** (+3 của `r294`). Gate **8/8 PASS**, `golden` + `determinism` + `release-verify`
+đều `ok:true`. Giải xung đột: `VERSION`/`tl.py`/`SKILL.md` → **v1.36.35**; `CHANGELOG` giữ cả hai khối;
+`RELEASE_MANIFEST` tái sinh; `workflow.py` và `tl_selftest.py` **auto-merge sạch**.
+
+# ★ v1.36.34 — HOÀ NHÁNH lượt 4: BỎ bản GATE-01 của tôi, lấy thiết kế của master (2026-08-01)
+
+Hoà `master` `5df7f39` (3 commit mới: `3f614de` r288 · `00611fe` r289 · `5df7f39` r290) vào nhánh.
+PR #6 lại `dirty`. **Master vẫn KHÔNG đụng 4 mục T2 + Helper 1** (đo trên `2b6da92..5df7f39`:
+`txn.py`/`ops_misc.py`/`registry_orchestrator.py`/`ingest_ops.py`/`backfill_keywords_live.py` — không tệp
+nào trong diff). Nhưng `3f614de` là **GATE-01**, trùng `r286`+`r287` của nhánh này.
+
+**Đây KHÔNG phải trùng lặp đơn thuần — là BẤT ĐỒNG THIẾT KẾ, và họ đã cân nhắc rồi BÁC cả hai phương án
+của tôi.** Commit `3f614de` ghi thẳng:
+- bác (a) `raw_stable=false ⇒ ok=false` **trần trụi** — chính là `r287` của tôi — vì làm thế thì `sweep`
+  ĐỎ NGAY dù lành;
+- bác (b) **scrub/đóng băng** `snapshot_age_s` khỏi raw — chính là `r286` của tôi — vì *"raw hết là raw,
+  mất luôn khả năng phát hiện bất định THẬT"*.
+
+Thay vào đó họ làm cách thứ ba: `_raw_drift_keys()` quy **mọi dòng stdout lệch** về khoá JSON; khoá ngoài
+`volatile|path`, **hoặc** dòng không quy được về khoá nào ⇒ `RAW_UNSTABLE_UNDECLARED`, fail-closed,
+`--write` từ chối ghi.
+
+**ĐO, KHÔNG TRANH LUẬN.** Tắt đóng băng của tôi rồi chạy `golden-test` 6 lượt:
+
+```
+lượt 1,2,4,5: sweep raw_stable=True                                          → ok=True
+lượt 3, 6   : sweep raw_stable=False  drift_keys=['snapshot_age_s']  undeclared=[]  → ok=True, rc=0
+```
+
+⇒ Cơ chế của họ **một mình** giữ `sweep` xanh, **và giữ được cả thông tin drift** (`raw_drift_keys` vẫn
+ghi ra). Đóng băng của tôi làm mất đúng thông tin ấy. **Lập luận của họ đúng.**
+
+**Quyết định — theo đúng nguyên tắc người giữ đặt ra (*"đã được phiên khác xử lý thì bỏ qua"*):**
+- **GỠ `r286`** — helper `frozen_age_seconds`/`FROZEN_AGE_S` (`deterministic.py`), wrapper
+  `_frozen_age_seconds` (`tl.py`), **3 điểm gọi** (`cmd_sweep`/`cmd_counts`/`cmd_ingest_missing`), **3 ca test**.
+- **GỠ `r287`** — nhánh cưỡng chế trần trụi trong `_golden_test`; lấy **nguyên** nhánh quy-khoá của họ.
+  Giữ cả hai thì nhánh quy-khoá của họ thành **mã chết** (cưỡng chế trần trụi chặn sớm hơn).
+- **GIỮ `_resolve286`** — `r289`/`r290`/`r291` vẫn dùng để gỡ stub `_STUB_MAP` khi monkeypatch.
+- **GIỮ + CHỈNH khối tóm tắt top-level của tôi** (`error`/`raw_unstable_cases`/`write_refused` ở đầu
+  payload) — trỏ sang mã `RAW_UNSTABLE_UNDECLARED` của họ. Đây là phần **bổ sung TRÊN** thiết kế của họ,
+  không đụng cơ chế: bản của họ chỉ đặt lỗi **theo case**, nên CI/`deploy-package.sh` phải duyệt 20 case
+  mới biết. Nay đọc được ngay ở đầu payload.
+- **GIỮ + CHỈNH 3 ca `r287_*`** sang mã lỗi của họ — chúng phủ thứ 5 ca `r288_*` không phủ: envelope
+  top-level, `rc≠0` **qua lệnh thật** (`cmd_golden_test`, thứ CI đọc), và `--write` **không sinh tệp nào**.
+
+Kết quả: **một** cơ chế (của họ), **hai** bộ test (8 ca: 5 `r288_*` + 3 `r287_*`).
+
+**Số ca: 1526 → 1534** (+11 của master, −3 ca `r286` đã gỡ). Gate **8/8 PASS**.
+`golden-test` 6 lượt trên cây cuối: `rc=0` cả 6, lượt 6 có `raw_stable=False` nhưng `undeclared=[]` ⇒ xanh
+**đúng lý do**. ruff delta 0 (`tl.py` 12 · `workflow.py` 26 · `deterministic.py` 0 — bằng master).
+
+**Va chạm số hiệu nay 7 lần** (thêm `r288`: master v1.36.28 = GATE-01 quy-khoá · nhánh v1.36.26 = Helper 1;
+`r289`: master v1.36.29 = cổng con-trỏ-trần · nhánh v1.36.27 = PRO-01; `r290`: master v1.36.30 =
+`rasoat-merge` · nhánh v1.36.28 = RAS-01). Đánh số tiếp từ **r295**.
+
+# ★ v1.36.33 — HOÀ NHÁNH lượt 3: GỠ bản vá TRÙNG của tôi vì phiên khác đã vá cùng lỗi, tốt hơn (2026-08-01)
+
+Hoà `master` `2b6da92` (r292 v1.36.27) vào `claude/va-t1-gate-nlvoj9`. PR #6 chuyển `mergeable_state`
+`unstable` → **`dirty`** (xung đột) nên phải hoà trước khi làm tiếp.
+
+**PHÁT HIỆN CHÍNH: một phiên khác đã vá ĐÚNG lỗi GATE-03 mà `r285` của nhánh này vá.** Không phải hai lỗi
+giống nhau — **cùng một lỗi, cùng một dòng**: bộ lọc tiền tố `startswith("/tmp/")` trong khung cô lập của
+ca `r284`, nuốt sạch cả 5 ứng viên hợp lệ trên Linux.
+
+Bản của họ **BAO TRỌN** bản của tôi, nên **GIỮ BẢN CỦA HỌ, GỠ BẢN CỦA TÔI**:
+
+| | Nhánh này (`r285`) | Master (`r292`, GIỮ) |
+|---|---|---|
+| Cách lọc | so bằng đúng hằng | so bằng đúng hằng (như nhau) |
+| Hằng escape còn trong danh sách | ca RIÊNG `r285_hang_cuoi_…` | `ok1`, **trong chính ca `r284`** |
+| Loại **đúng một** mục | *(không có)* | **`ok2`** — bắt "lọc quá tay" **NGAY TẠI NGUYÊN NHÂN** |
+| Ứng viên còn lại nằm trong tempdir | `_ngoai == [hằng]` | `ok3 ∧ ok4` |
+
+`ok1 ∧ ok2 ∧ ok4` **suy ra** đúng mệnh đề ca của tôi khẳng định, **cộng thêm** `ok2` mà tôi không có.
+Giữ cả hai = hai bản cùng một fix, và **hai tên cho cùng một literal** (`_HANG_CUOI_285` vs `_ESCAPE284`)
+⇒ hai nguồn sự thật cho một hằng. ⇒ Gỡ ca `r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat`
+(**1527 → 1526 ca**), để lại chú thích tại chỗ nêu lý do.
+
+**GỠ RỒI CÓ MẤT ĐỘ PHỦ KHÔNG — ĐO, KHÔNG ĐOÁN.** Hai đột biến đúng bằng hai mệnh đề ca đã gỡ khẳng định,
+chạy trên cây sau khi gỡ:
+
+```
+đổi hằng escape trong profile_env.py     ⇒ 1525/1526, [FAIL] r284_khung_test_profile_khong_doc_config_that
+thêm ứng viên "/etc/…" (thoát ra kho thật) ⇒ 1525/1526, [FAIL] r284_khung_test_profile_khong_doc_config_that
+```
+
+Cả hai đều bị ca `r284` của master bắt. **Mất 0 độ phủ.**
+
+**Ghi nhận cho lần sau:** CI của họ ĐỎ **bốn bản liên tiếp** (`r285`·`r286`·`r287`·`r291`) vì đúng ca này,
+trong khi máy Windows luôn xanh. Nhánh này vá cùng lỗi ở `r285` nhưng **không** đẩy lên master, nên hai
+phiên trả giá song song cho một lỗi. Bài học thao tác: mục nào CI đang đỏ trên master thì nên hỏi/đẩy sớm
+thay vì ôm trong nhánh dài.
+
+**⚠ BẢNG VA CHẠM SỐ HIỆU — thêm dòng (nay 5 lần):**
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch selftest (P16-T02) | GATE-03 *(nay đã gỡ, lấy bản master `r292`)* |
+| r286 / v1.36.24 | profile gõ sai — đường ĐỌC (P16-F09) | GATE-01a |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên (P16-T03) | GATE-01b |
+| r291 / v1.36.26 vs v1.36.30 | `docs/` ra khỏi GÓI (T0-G) | ING-03 |
+| **r292 / v1.36.27 vs v1.36.31** | **ca `r284` hết phụ thuộc nền tảng** | **RAS-05** |
+
+Từ đây đánh số tiếp từ **r293**.
+
+**Giải xung đột (6 tệp):** `tl_selftest.py` → lấy **phía master** cho cả 2 hunk của ca `r284`, rồi gỡ ca
+trùng của tôi. `VERSION`/`tl.py`/`SKILL.md` → **v1.36.33**. `CHANGELOG.md` → giữ **cả hai** khối.
+`RELEASE_MANIFEST.json` → **tái sinh** (177 tệp, không đổi số).
+
+**Gate sau hoà: 8/8 PASS · selftest 1526/1526 · golden khớp · 177 tệp.**
+
+# ★ v1.36.32 — HOÀ NHÁNH lượt 2: T2 (chặn máu) gặp T0-G `docs/` ra khỏi gói của master (2026-08-01)
+
+Lượt hoà thứ hai giữa `claude/va-t1-gate-nlvoj9` và `master` (master `a739c93` = r291 v1.36.26, T0-G).
+
+**Đã KIỂM TRÙNG VIỆC trước khi hoà — master CHƯA đụng mục nào của T2.** Đo trực tiếp trên
+`19a6adf..a739c93`: `ops_misc.py` · `registry_orchestrator.py` · `ingest_ops.py` ·
+`backfill_keywords_live.py` đều **không** nằm trong diff của master; và mã master vẫn còn nguyên cả bốn
+dấu vết lỗi (`"ok": True, "nlm_deletes"` gán cứng ×1 · `if not gdoc:` ×2 · `done[gid] = 'err'` ×1 ·
+`gas.post("changes_pull")` ở `:195` trước cổng). ⇒ Bốn bản vá T2 **không** thừa, không có việc nào phải bỏ.
+
+**⚠ BẢNG VA CHẠM SỐ HIỆU — cập nhật (thêm dòng v1.36.26):**
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch trong selftest (P16-T02) | GATE-03 |
+| r286 / v1.36.24 | profile gõ sai hết mượn corpus NỀN đường ĐỌC (P16-F09) | GATE-01a |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên (P16-T03) | GATE-01b |
+| **r291 / v1.36.26** | **`docs/` ra khỏi GÓI (T0-G)** | **Helper 1 `tl_core/txn.py` (Pha 1-0)** |
+
+Lưu ý số `r291` bị dùng **hai lần với hai version khác nhau**: master `r291`=v1.36.26 (docs) và nhánh này
+`r291`=v1.36.30 (ING-03). Tên ca test vẫn **không** trùng. Từ đây đánh số tiếp từ **r293**.
+
+**Giải xung đột:** `VERSION`/`tl.py`/`SKILL.md` → **v1.36.32** (cao hơn cả hai). `CHANGELOG.md` → giữ
+**cả hai** khối. `RELEASE_MANIFEST.json` → **tái sinh**. `references/golden/workflow_audit.json`,
+`CONTEXT.md`, `GOTCHAS.md`, `release.py`, `the_thuc.py`, `tl_selftest.py` → auto-merge sạch.
+
+**RATCHET kiểm kê của master ĐỎ ĐÚNG LÚC — và đó là điểm tốt.** Ca `r291_docs_ngoai_goi` (master) khoá
+`len(paths) + 19 == 195`; sau khi hoà thành 196 nên nó **ĐỎ**, đúng như chú thích của chính nó yêu cầu
+(*"thêm/bớt tệp trong gói ⇒ test này ĐỎ và phải sửa CÓ CHỦ ĐÍCH, kèm kê khai slot"*).
+
+**KÊ KHAI SLOT: 195 → 196.** Đúng **một** tệp được thêm vào gói: `scripts/tl_core/txn.py` — Helper 1
+(Pha 1-0, r288), lõi kết luận giao dịch mà PRO-01 và ING-03 đều dùng; là mã **runtime** nên không loại
+khỏi gói được. Sau khi `docs/` ra khỏi gói (T0-G), **trần 200 còn 24 khe** (196 trong gói + 19 `docs/`
+ngoài gói = 215 trên đĩa).
+
+**Gate sau hoà: 8/8 PASS · selftest 1527/1527 · 177 tệp trong `RELEASE_MANIFEST` · golden khớp.**
+
+# ★ v1.36.31 — r292/RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG rồi in "XONG TẤT CẢ." (2026-08-01)
+
+Slice **R0** (§Pha 1B), mục **T2 cuối cùng** — tranche "chặn máu" đóng lại tại đây.
+
+**Ba lỗ, cùng Mẫu A (§5), cộng lại thành một mất mát im lặng có kèm lời báo thành công:**
+1. `prog['done']` **vừa** là sổ-đã-xong **vừa** là **bộ lọc worklist** (`:63`). Doc `exporttext` lỗi bị
+   ghi `done[gid]='err'` (`:76`) ⇒ **loại VĨNH VIỄN** khỏi mọi đợt sau. Không log, không rc.
+2. `reg_bulk` (`:92`, `:100`) **không kiểm `rb['ok']`**, chỉ cộng `patched` — mà item đã bị đánh
+   `done='ok'` từ **TRƯỚC** lúc gọi (`:84`) ⇒ lô ghi hỏng vẫn coi như xong.
+3. `remaining` (`:104`) tính lại từ chính `done` **đã nhiễm** ⇒ `remaining==0` ⇒ in **"XONG TẤT CẢ."**,
+   `main()` return `None` ⇒ **rc=0**.
+
+**Vá — state machine tường minh** (`schema: tukhoa_progress.v2`):
+`committed` (đã ghi **và** đã đối chiếu) · `blocked` (kết cục XÁC ĐỊNH: không bóc được từ khoá nào —
+chạy lại vẫn thế) · `retryable` (HỎNG, **phải** thử lại) · `inflight` (đã bóc, **chưa** có xác nhận ghi).
+**Chỉ `committed`/`blocked` mới rời worklist** — đó là toàn bộ lỗ (1).
+
+- Lỗi `exporttext` ⇒ `retryable`, **không** phải "xong".
+- Bóc xong ⇒ `inflight`, **chưa** commit. `reg_bulk` đi qua `reg_bulk_verdict`: `ok=true` **chưa đủ** —
+  `patched < gửi` nghĩa là phần hụt **chưa** được ghi ⇒ **cả lô** về `retryable`. Chỉ lô được xác nhận
+  mới chuyển `committed`.
+- `remaining` tính từ worklist **thật** (sổ không còn bị nhiễm); `ok` và `rc` **dẫn xuất** từ nó.
+  `rc≠0` khi còn việc; "XONG TẤT CẢ." chỉ in khi thật sự hết. `sys.exit(main() or 0)` — trước đây
+  `main()` return `None` nên rc luôn 0.
+- `save_progress` **ATOMIC** (`.tmp` + `os.replace`) và nằm trong `finally`: Ctrl-C/hết giờ/nổ giữa
+  chừng vẫn giữ được sổ, và `inflight` còn lại tự quay về hàng đợi đợt sau.
+
+**Đọc được sổ v1 là BẮT BUỘC, không phải tiện nghi.** File `tukhoa_progress.json` v1 đang nằm trên máy
+người giữ và **chính nó là bằng chứng thiệt hại** mà §6.2 Pha 3.5 cần (danh sách doc bị `err`). Vứt đi
+là mất manh mối. `migrate_progress`: `ok`→`committed` · `empty`→`blocked(EMPTY_KEYWORDS)` ·
+**`err*`→`retryable`**. Vế cuối chính là bản vá: doc từng bị `err` **quay lại** worklist.
+
+**Test (+3 ca → 1526/1526):**
+- `r292_bkl_migrate_v1_dua_doc_loi_quay_lai` — ánh xạ v1→v2 đúng; `g3`/`g4` (từng `err`) **quay lại**
+  hàng đợi còn `g1`/`g2` rời; migrate **bất biến** khi chạy lại; sổ rỗng/hỏng ⇒ khung sạch, không nổ.
+- `r292_bkl_reg_bulk_verdict_khong_tin_ok_tran` — `ok:true` + `patched` **hụt** ⇒ ÂM (lý do nêu số);
+  thiếu khoá `ok` / không phải dict ⇒ ÂM; `patched` dư ⇒ vẫn dương.
+- `r292_bkl_main_khong_con_bao_xong_oan` — **end-to-end qua `main()` thật**, 4 kịch bản:
+  (A) `exporttext` hỏng ⇒ `rc≠0`, cả hai doc `retryable`, **không** in "XONG TẤT CẢ."; rồi chạy lại
+  lượt hai **vẫn thấy đủ 2 doc** (trước vá: mất vĩnh viễn).
+  (B) `reg_bulk` hỏng ⇒ không đánh dấu xong, cả lô `retryable`, `rc≠0`; `ok:true` mà `patched` hụt
+  cũng vậy. (C) **Phản chứng:** mọi thứ dương ⇒ `rc=0`, `committed`, in "XONG TẤT CẢ.".
+  (D) không bóc được từ khoá ⇒ `blocked`, rời worklist, `rc=0` (kết cục xác định ≠ lỗi).
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `backfill_keywords_live.py` về HEAD (giữ test) ⇒ `1523/1526`,
+ĐỎ đúng ba ca r292. Sau vá `1526/1526`.
+
+**ruff 0.15.8:** `backfill_keywords_live.py` **0 F821 / 0 F401** — y hệt master (delta 0).
+`tl.py` 12/0 (đúng nền, không đụng). Full gate **8/8 PASS**, `git diff -- references/golden/` rỗng.
+
+**TRANCHE T2 ĐÓNG.** Bốn mục "chặn máu" + Helper 1 đã xong: PRO-01 (r289) · RAS-01 vế `changes_pull`
+(r290) · ING-03 (r291) · RAS-05 (r292), trên nền Helper 1 (r288). Tiếp theo là **T3 — định danh**
+(Mẫu B; cần Helper 2 của Pha 1-0).
+
+# ★ v1.36.30 — r291/ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG — vá CẢ HAI call site (2026-08-01)
+
+Slice **I4** (Pha 1B), mục **T2** thứ tư. Dùng **Helper 1** (`tl_core/txn.py` → `step_result_ok`).
+
+**Bệnh.** `grep upsert_done` toàn kho ra **đúng 1 hit** (`ingest_ops.py:1502`) và hit đó chỉ dùng để
+**đặt tên bước lỗi** — không gate gì. Cả **hai** call site (`_pi_stage_write` ~`:1836` cho profile-ingest,
+`_il_stage_write` ~`:3080` cho ingest-local) gate bằng `org.get("fileId")`. Mà `doIngestCommit_`
+(`references/Code.2.21.2p.gs:854`) đặt `out.fileId` **ngay sau organize, TRƯỚC register/readback** ⇒
+response `ok:false` + `upsert_done:false` vẫn **có** `fileId` ⇒ **commit MỘT PHẦN được nhận là thành
+công**: GDoc tồn tại mà **thiếu dòng registry** — registry lệch Drive, và không ai biết (đúng thiệt hại
+§6.2 Pha 3.5 liệt cho ING-03).
+
+**Vá.** `_ingest_commit_verdict(org, okw)` dùng chung cho **cả hai** call site — đòi `ok=true` **và** đủ
+marker theo **đúng luật server**:
+`out.ok = organize_done && rename_done && upsert_done && file && (register!=='true' || row)`.
+`row` chỉ bắt buộc khi call **có** yêu cầu ghi registry (đòi luôn là đỏ OAN đường hợp lệ).
+Ở call site 2, `_step_ok("organize", …)` nay ghi **kết luận thật** thay vì `bool(gdoc)` — nếu không thì
+`--resume` sau này đọc journal và tưởng stage organize đã xong.
+
+**`file` CỐ Ý không nằm trong cổng, dù kế hoạch ghi "readback row/file".** Đã đo: cả hai stage READBACK
+(`_pi_stage_readback:1900-1916`, `_il_stage_readback`) rẽ nhánh `if _via_commit and org.get("file")` →
+dựng readback từ response, **ngược lại** gọi `_verify_convert_readback` (thêm call Drive, **cùng bộ phép
+kiểm**), rồi `if not rb_convert.get("ok"): return rc=2`. Nghĩa là `file` **đã fail-closed ở stage ngay
+sau**, qua một đường dự phòng **đang hoạt động**. Đưa `file` vào cổng này là **xoá** đường dự phòng đó —
+mở rộng phạm vi + thêm rủi ro, trong khi lỗ ING-03 đã bịt kín. `row` thì ngược lại: **không có** đường
+nào khác kiểm dòng registry ở stage này. Ca test khẳng định **tường minh** việc miễn `file`, để ai muốn
+thêm phải đọc lý do trước.
+
+**Test (+3 ca → 1523/1523):**
+- `r291_ingest_commit_verdict_doi_du_marker` — bản mẫu ING-03 nguyên văn (`ok:false` + `upsert_done:false`
+  **có** `fileId`) ⇒ ÂM; từng marker thiếu/sai ⇒ ÂM và lý do **nêu đích danh** marker đó; marker **vắng
+  mặt hẳn** ⇒ ÂM ("không có tin xấu" ≠ "tin tốt"); thiếu khoá `ok` / không phải dict ⇒ ÂM.
+  **Phản chứng:** `register='false'` ⇒ không đòi `row`; thiếu `file` ⇒ vẫn dương.
+- `r291_ca_hai_call_site_deu_co_cong` — đọc mã: **mỗi** stage WRITE phải gọi cổng và **không** stage nào
+  còn gate chỉ bằng `if not gdoc:`.
+- `r291_stage_write_chan_commit_mot_phan` — HÀNH VI qua `_il_stage_write` thật: bơm commit-một-phần ⇒
+  `rc=2` **và** journal ghi `False`. Phản chứng: đủ marker ⇒ đi tiếp, journal ghi `True`.
+
+**ĐỎ-TRƯỚC (đo thật, hai lượt):** hoàn nguyên **cả hai** cổng về `bool(fileId)` ⇒ `1521/1523`, đỏ đúng
+hai ca. Rồi hoàn nguyên **chỉ call site 2/2** ⇒ **vẫn `1521/1523`** — chứng minh trực tiếp câu
+*"sửa một chỗ là để lại lỗ y hệt ở chỗ kia"* không lọt được qua bộ test này.
+
+**Sửa kèm — 6 fake `ingest_commit` trong selftest trả `{"ok": True, "fileId", "srcId"}` TRẦN**
+(r97, r114 ×2, r115, r116, r191), thiếu ba marker `*_done` và `row` mà `doIngestCommit_` khai là **luôn
+có** khi `ok:true`. Fake trần bắt bản vá phải tin một `ok` trần — **đúng cái bệnh đang chữa** (cùng bài
+học fake `_G282` ở r289). Nay khớp hợp đồng thật; r97 **vẫn cố ý bỏ `file`** vì đó là chủ đích gốc của ca
+đó (ép đi đường dự phòng `_verify_convert_readback`) — và cổng r291 không đòi `file`.
+
+**Bẫy I11:** `_ingest_commit_verdict` vào `_STUB_MAP["ingest_ops"]`; hằng `_INGEST_COMMIT_MARKERS`
+re-export **trực tiếp** (tuple — vào `_STUB_MAP` là vỡ r81). Allow-list Helper 1 nay
+`{"ops_misc.py", "ingest_ops.py"}`.
+
+**ruff 0.15.8:** `tl.py` 12 F821 / 0 F401 (đúng nền). `ingest_ops.py` 371 vs 370 ở HEAD trước (+1 = tên
+re-home mới), cùng lớp BY DESIGN. Full gate **8/8 PASS**, `git diff -- references/golden/` rỗng.
+
+# ★ v1.36.29 — HOÀ NHÁNH: T1+T2 (gate + chặn máu) gặp P16-T02/F09/T03 của master (2026-08-01)
+
+Nhánh `claude/va-t1-gate-nlvoj9` và `master` chạy **song song** từ `19a6adf` (v1.36.22). Hoà lại tại đây.
+
+**⚠ VA CHẠM SỐ HIỆU — đọc kỹ khi tra CHANGELOG.** Hai nhánh **dùng trùng** số `rXX` và nhãn version cho
+**việc khác nhau**:
+
+| Số | Trên `master` | Trên nhánh gate/T2 |
+|---|---|---|
+| r285 / v1.36.23 | bịt rò rỉ monkeypatch trong selftest (P16-T02) | GATE-03 — lọc ứng viên config theo tiền tố `/tmp/` |
+| r286 / v1.36.24 | profile gõ sai hết mượn corpus NỀN ở đường ĐỌC (P16-F09) | GATE-01a — `sweep` tất định ở RAW |
+| r287 / v1.36.25 | determinism-audit hết đỏ ngẫu nhiên vì probe công cụ NGOÀI (P16-T03) | GATE-01b — cưỡng chế raw stability |
+
+**KHÔNG đánh số lại lịch sử** (sẽ phải sửa tên test `rXX_`, chú thích mã và 6 thông điệp commit — churn
+lớn, rủi ro cao, không đổi hành vi). **Tên ca test KHÔNG trùng nhau**, nên selftest không bị ảnh hưởng;
+chỉ tra cứu theo số là mơ hồ. Từ v1.36.29 trở đi đánh số **tiếp từ r291**, không tái dùng.
+
+**Giải xung đột (6 tệp):** `VERSION`/`tl.py`/`SKILL.md` → **v1.36.29**, cao hơn cả hai nhánh (đơn điệu tăng).
+`CHANGELOG.md` → **giữ CẢ HAI** khối mục. `RELEASE_MANIFEST.json` → **tái sinh** (196 tệp).
+`tl_selftest.py` → **giữ CẢ HAI** khối, và đặt chốt `r285_khong_ro_ri_monkeypatch` của master **SAU CÙNG**:
+nó so với ảnh chụp đầu `run()` nên phải chạy sau MỌI khối monkeypatch, kể cả các khối r286–r290 mới.
+
+**Kiểm tra chéo có giá trị:** chốt rò-rỉ monkeypatch mới của master (r285/P16-T02) chạy **sau** toàn bộ
+khối r286–r290 của nhánh này và báo **0 tên không được khôi phục** — xác nhận độc lập rằng các khung
+`_run286`/`_run289`/`_run290` khôi phục sạch trạng thái.
+
+**Gate sau hoà: 8/8 PASS · selftest 1520/1520 · `git diff -- references/golden/` rỗng · 196 tệp.**
+
+# ★ v1.36.28 — r290/RAS-01 (vế `changes_pull`): "DRY" MÀ VẪN GHI — điều phối hết gọi action ghi trước cổng `--apply` (2026-07-31)
+
+Slice **R1** phần độc lập (§Pha 1D "[MỚI] Đóng riêng lỗ `changes_pull`"), mục **T2** thứ ba.
+Vế metadata/CLI của RAS-01 để **T3**; vế này vá được ngay và nặng hơn.
+
+**Bệnh (`scripts/registry_orchestrator.py`).** Ở `phase=boot`, `gas.post("changes_pull")` chạy **TRƯỚC**
+cổng `if args.dry or not args.apply` — trong khi chính nhánh DRY đó in ra
+*"chế độ DRY — không gọi action ghi"*. Lời in **SAI**, và sai theo hướng nguy hiểm nhất: người vận hành
+chạy "dry" để XEM, và tin là mình chưa động vào gì.
+
+**Nặng hơn audit mô tả — đã đọc mã GAS.** Audit nói `applySheet=true ⇒ GHI Sheet`, đúng. Nhưng
+`doChangesPull_` (`references/Code.2.21.2n.gs:1527`) **LUÔN** `sp.setProperty('TL_CHANGES_TOKEN', …)`
+**bất kể** `apply`/`applySheet` ⇒ nó **TIÊU THỤ cửa sổ delta**. Nghĩa là hạ xuống `applySheet=false`
+**KHÔNG cứu được**: một lượt "dry" vẫn **nuốt mất** thay đổi mà lượt `--apply` thật lẽ ra phải thấy.
+⇒ Chốt đúng là **KHÔNG GỌI**, không phải gọi-nhẹ-hơn.
+
+**Vá.** DRY (`--dry` **hoặc** thiếu `--apply` — hai đường vào cùng một cổng, bịt cả hai) ⇒ bỏ hẳn lời gọi,
+khai thẳng trạng thái mới `changes_state="not_probed"`. `decide()` xếp `not_probed` **cùng nhánh bảo thủ**
+với `no_baseline` (`regen2` + `changes_init`) và nêu lý do: *chưa đo thì chưa biết*. Đoán "chắc ít thay
+đổi" chính là lớp fail-open đang chữa.
+
+**Test (+3 ca → 1509/1509):**
+- `r290_orch_dry_khong_goi_action_ghi` — chạy `run()` THẬT với module `gas` GIẢ: DRY ⇒ **không `post`
+  action nào**, không `changes_pull`; kế hoạch lấy nhánh bảo thủ và **nói rõ vì sao**; kiểm **cả hai**
+  đường vào DRY.
+- `r290_orch_apply_van_goi_changes_pull` — PHẢN CHỨNG: `--apply` thật **vẫn** gọi `changes_pull`; vá
+  không được biến thành "bỏ hẳn tính năng".
+- `r290_orch_decide_not_probed_bao_thu` — `not_probed` cho kế hoạch **y hệt** `no_baseline`, lý do nêu DRY.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `registry_orchestrator.py` về HEAD (giữ test) ⇒ `1507/1509`, ĐỎ đúng
+hai ca hành vi mới; ca phản chứng `--apply` vẫn xanh (hành vi đó vốn đã đúng). Sau vá `1509/1509`.
+
+`python scripts/registry_orchestrator.py --selftest` = **22/22** trước và sau.
+**ruff 0.15.8:** `registry_orchestrator.py` **0 F821 / 0 F401**, y hệt master (delta 0). Full gate **8/8 PASS**.
+
+# ★ v1.36.27 — r289/PRO-01: `profile-file-remove` FAIL-CLOSED — hết tháo con trỏ registry sau khi bước xoá đã hỏng (2026-07-31)
+
+Slice **P0** (§6.1-(b) + Pha 1C-tách-ra), **ưu tiên #2 toàn sổ audit** — chỉ sau GATE-03. Mục T2 thứ nhất.
+Dùng **Helper 1** (`tl_core/txn.py`, r288) — DÙNG, không SỬA.
+
+**Bệnh (`ops_misc.py`, fail-open PHÁ HUỶ).** Kết quả `nlm source_delete` và `drive trash` chỉ được ghi
+**nhật ký**, không kiểm; `reg_delete` chạy **vô điều kiện**; rồi `out = {**plan, "ok": True, ...}`
+**GÁN CỨNG** + `return 0`. Hệ quả: mọi bước con hỏng vẫn `rc=0`, mà **con trỏ registry ĐÃ BỊ THÁO** —
+file Drive/nguồn NLM còn nguyên nhưng không còn dòng nào tra ra chúng. **Tài sản mồ côi, và vì `rc=0`
+nên không ai đi tìm.**
+
+**Vá.**
+- Từng bước đi qua `Txn.record(...)` — kết quả được **KIỂM**, không chỉ ghi nhật ký. Transport nổ
+  (`raise`) nay là bước **HỎNG**, không phải bước vắng mặt.
+- `Txn.guard()` **CHẶN** trước mỗi mutation kế tiếp: bước NLM hỏng ⇒ **không trash tiếp** (mỗi mutation
+  thừa là một thứ nữa phải dọn tay) và **không đụng `reg_delete`** ⇒ registry **CÒN NGUYÊN** ⇒ vẫn còn
+  đường tra ra tài sản.
+- `ok` được **TÍNH** (`Txn.conclude`), `rc` **dẫn xuất** (`Txn.rc`). Không còn `"ok": True` gán cứng.
+- Output kê `txn.wrote` (**đã ghi được gì rồi**) và `txn.uncertain` (mutation ÂM — chưa chứng minh được
+  đã ghi hay chưa). Hai việc dọn khác nhau nên để hai bảng khác nhau.
+- Hỏng ⇒ payload in ra **stderr** (khuôn sẵn có của chính lệnh này ở nhánh `NO_MATCHING_PROFILE_ROWS`).
+
+**`require_removed="no"` — ĐÃ XÉT LẠI, kết luận GIỮ NGUYÊN, có bằng chứng.** Kế hoạch ngờ cờ này "tự tắt
+readback". Đo lại: `require_removed='yes'` chỉ xoá dòng có `nlm_status` bắt đầu `removed*`
+(API_CONTRACT §`reg_delete`), mà **`profile-file-remove` không hề ghi `nlm_status` ở bất kỳ đường nào** ⇒
+bật `'yes'` sẽ đẩy gần như mọi dòng vào `skipped_live` và làm lệnh **vô tác dụng** — đổi một lỗi
+fail-open lấy một lỗi **fail-silent**. `'no'` giữ nguyên là hard-delete CÓ CHỦ ĐÍCH sau
+`--apply --confirm yes` (cùng lý lẽ đã ghi ở `source_ops.py:954`).
+
+Readback chuyển sang **phía client** (`_pfr_reg_delete_verdict`), vì `ok=true` của response **chưa phải**
+bằng chứng dòng đã gỡ: `skipped_live>0` vẫn đi kèm `ok=true` được. Luật: response dương **và**
+`skipped_live == 0` **và** `removed + not_found ≥ requested` (`not_found` được chấp nhận — chạy lại sau
+một lượt thành công một phần thì dòng đã biến mất, không phải lỗi mới).
+
+**Đổi hành vi có chủ đích:** `--keep-registry` mà không `--delete-nlm`/`--trash-drive` = lệnh **không làm
+gì**. Trước đây in `ok:true, rc=0`. `ok` được TÍNH thì câu trả lời đúng là *chưa có gì được chứng minh* ⇒
+`rc=2`, `error=KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU`.
+
+**Test (+4 ca → 1506/1506).**
+- `r289_pfr_duong_xanh_van_chay_du` — PHẢN CHỨNG NỀN: 3 cờ bật, mọi bước dương ⇒ `rc=0`, gọi đủ
+  nlm+trash+reg_delete, `txn.wrote` liệt **đúng 3** thứ đã ghi. Cổng không chặn oan đường hợp lệ.
+- `r289_pfr_ma_tran_buoc_con_hong_khong_thao_registry` — **ma trận** `--delete-nlm` × `--trash-drive` ×
+  `--keep-registry`, mỗi ô một ca bước-con-hỏng ⇒ `rc≠0` **và registry còn nguyên** (`reg_delete` không
+  được gọi lần nào); NLM hỏng ⇒ trash phía sau cũng bị chặn, `blocked.blocking_step` chỉ đúng thủ phạm.
+- `r289_pfr_reg_delete_readback_khong_tin_ok_tran` — `ok:true + skipped_live=1` ⇒ đỏ; `ok:true` mà
+  `removed+not_found` không phủ hết ⇒ đỏ; `not_found` phủ nốt ⇒ **không đỏ oan**. Kèm khẳng định
+  `require_removed='no'` vẫn được gửi.
+- `r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh`.
+
+**ĐỎ-TRƯỚC (đo thật):** dán lại nguyên thân hàm bản trước r289 (giữ test) ⇒ `1502/1506`, ĐỎ **đúng bốn**
+ca r289; 5 ca `r282` vẫn xanh.
+
+**Sửa kèm — fake `_G282.post` của r282 trả `{"ok": True}` TRẦN.** API_CONTRACT §`reg_delete` khai
+`removed`/`not_found`/`skipped_live` là **luôn có**; fake thiếu chúng thì readback mới buộc phải tin một
+`ok` trần — **đúng cái bệnh đang chữa**. Nay fake trả đúng hợp đồng thật. 5 ca r282 xanh trước lẫn sau.
+
+**Cập nhật danh sách gắn Helper 1:** `r288_helper1_chua_gan_vao_lenh_nao` → `r288_helper1_chi_gan_o_noi_da_khai`
+với allow-list `{"ops_misc.py"}`. Slice sau (ING-03 → `ingest_ops.py`) **phải tự thêm tên mình** — việc gắn
+helper vào một đường GHI mới không bao giờ lọt review im lặng.
+
+**Bẫy I11 đã va:** `_pfr_count`/`_pfr_reg_delete_verdict` là symbol MỚI trong `tl_core` ⇒ **phải** vào
+`_STUB_MAP["ops_misc"]`, nếu không thì `NameError` lúc chạy và `r90_rebase_module_names_resolvable` đỏ.
+
+**ruff 0.15.8:** `tl.py` 12 F821 / 0 F401 (đúng nền). `ops_misc.py` 403 vs 399 ở HEAD trước (+4 = tên
+re-home của khối mới), cùng lớp BY DESIGN. F401 không đổi. Full gate **8/8 PASS**,
+`git diff -- references/golden/` **rỗng**.
+
+# ★ v1.36.26 — r288/Pha 1-0: Helper 1 — HỢP ĐỒNG kết luận giao dịch (`tl_core/txn.py`), CHƯA gắn vào lệnh nào (2026-07-31)
+
+Pha 1-0 (§5 Mẫu A + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Một commit riêng, không kèm mục lỗi nào** —
+đúng acceptance §6.1. Mở đầu tranche **T2 (chặn máu)**: PRO-01 và ING-03 đều được kế hoạch chỉ định
+*"vá bằng Helper 1"*, nên hợp đồng phải chốt TRƯỚC, nếu không mỗi mục lại tự nghĩ ra một nửa-giải-pháp.
+
+**Vì sao cần.** Mẫu A chiếm **13/34** mục sổ audit (GATE-01, ING-03/05, PRO-01/06/07, RAS-04/05/10/11/12…).
+Dấu hiệu chung luôn là một trong hai: `ok` được **GÁN** thay vì được **TÍNH**; hoặc `ok` tính từ **HÌNH
+DẠNG** ("response có `fileId`") thay vì từ **KẾT QUẢ** ("bước register báo `upsert_done`"). Vá từng `if`
+rời thì mục thứ 14 tái sinh ở chỗ khác.
+
+**Hợp đồng (`scripts/tl_core/txn.py`, 5 điều):**
+1. nhận `(tên_bước, kết_quả, bắt_buộc?)` theo ĐÚNG thứ tự đã chạy;
+2. `ok` được **TÍNH**, không bao giờ được **GÁN** — `Txn.conclude()` **bỏ qua** `ok`/`rc` trong `extra`,
+   nên không ai dựng lại được `out = {**plan, "ok": True}` của PRO-01;
+3. bước bắt buộc hỏng ⇒ `Txn.guard()` **ném `TxnBlocked`** chặn mutation phía sau. Là **exception** chứ
+   không phải cờ, có chủ đích: cờ mà caller quên kiểm thì lại fail-open đúng kiểu cũ;
+4. `rc` **dẫn xuất** từ `ok` (`Txn.rc()`), không đặt tay;
+5. luôn phát ra *bước nào hỏng* + **`wrote` = ĐÃ GHI ĐƯỢC GÌ RỒI**, tách riêng **`uncertain`** =
+   mutation ÂM (không chứng minh được đã ghi, cũng không chứng minh được chưa ghi). Điều 5 không phải
+   trang trí: PRO-01 tháo con trỏ registry sau khi bước xoá đã hỏng mà `rc=0`, nên **không ai biết có
+   tài sản mồ côi** — bản kê `wrote`/`uncertain` là thứ duy nhất chỉ được đường về.
+
+**Vị ngữ `step_result_ok` FAIL-CLOSED** — chỗ ING-03 chết nằm đúng ở đây:
+`{"ok": false, "fileId": "1AbC", "upsert_done": false}` ⇒ **ÂM**; `{"fileId": "1AbC"}` (thiếu hẳn khoá
+`ok`) ⇒ **ÂM**, vì *"không có tin xấu"* không phải *"tin tốt"*; hình dạng lạ (str/int/list) ⇒ **ÂM**.
+`require_keys` là chỗ khai "đủ marker", và lý do hỏng **nêu đích danh** marker nào thiếu.
+
+**Test (+4 ca → 1502/1502), mỗi điều hợp đồng ít nhất một ca kèm phản chứng:**
+`r288_helper1_vi_ngu_ket_qua_duong_fail_closed` · `r288_helper1_ok_duoc_tinh_va_rc_dan_xuat` ·
+`r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi` · `r288_helper1_chua_gan_vao_lenh_nao`.
+
+Ca cuối khoá đúng câu *"CHƯA gắn vào lệnh nào"*: quét `tl_core/*.py` (trừ `txn.py`) không được có
+`Txn(`/`TxnBlocked`/`step_result_ok(`. Gộp việc gắn vào commit này thì nó ĐỎ; khi slice T2 gắn thật thì
+đây là chỗ ĐẦU TIÊN phải sửa — có chủ đích, không lọt im lặng.
+
+**ĐỎ-TRƯỚC (đo thật):** phá đúng ba điều của hợp đồng trong `txn.py` (thiếu khoá `ok` ⇒ coi là dương ·
+`conclude` cho gán đè · `guard` chỉ đánh dấu không ném) ⇒ `1499/1502`, ĐỎ **đúng ba** ca tương ứng, ca
+"chưa gắn" vẫn xanh. Sau khôi phục: `1502/1502`.
+
+**Kiểm kê tệp — TRẦN 200.** Thêm `scripts/tl_core/txn.py` ⇒ **195 → 196 tệp, còn 4 khe**. Đây là mã
+RUNTIME (T2/T3 sẽ dùng) nên KHÔNG loại khỏi gói được. Ai thêm tệp tiếp theo phải xét dev-side/
+`_RELEASE_EXCLUDE_NAMES_ANYWHERE` trước.
+
+**Golden ghi lại — ĐÚNG tiền lệ r238, đã kiểm trước khi commit.** Thêm tệp làm
+`workflow_audit.files_scanned` **69 → 70** ⇒ `golden` + `determinism` đỏ (determinism đỏ CHỈ vì check
+`golden_test` lồng bên trong). `git diff -- references/golden/` sau `--write` = **đúng 1 dòng**
+(`1 1 references/golden/workflow_audit.json`), không có thay đổi nào khác ⇒ là kiểm kê hợp lệ, không phải
+bug của thay đổi. Gate sau đó **8/8 PASS**.
+
+**ruff 0.15.8:** `txn.py` **0 F821 / 0 F401**. `tl.py` 12/0 (đúng nền). `tl_selftest.py` 4255 (master 4207):
++48 của 4 ca mới, cùng lớp BY DESIGN. F401 không đổi.
+
+# ★ v1.36.25 — r287/GATE-01b: golden-test CƯỠNG CHẾ raw stability — `raw_stable=false` ⇒ rc≠0, `--write` CẤM ghi (2026-07-31)
+
+Slice **G0.1b** (§3.1 kế hoạch AUDIT_XAC_MINH 31-07). **Chỉ được làm SAU khi G0.1a (r286) xanh** — xem
+bằng chứng thứ tự ở cuối mục này.
+
+**Bệnh (fail-open, `tl_core/workflow.py`):** `raw_stable` được TÍNH, thậm chí sinh `raw_diff`, nhưng
+`rec["ok"]` dẫn xuất **thuần** từ so sánh projection. Hệ quả: hai stdout **khác byte / cùng projection**
+vẫn cho `top ok=true, rc=0`, và `--write` vẫn **GHI ĐÈ fixture** từ một lệnh đang bất định. Đã **BÁO** mà
+**KHÔNG cưỡng chế** — vi phạm "kết quả tất định" của CONTEXT.md.
+
+**Vá:** `raw_stable=false` ⇒ case `ok=false` + mã lỗi **RIÊNG** `GOLDEN_RAW_UNSTABLE` ⇒ top `ok=false` ⇒
+`rc≠0`; ở `--write` thì **CẤM ghi/regen** (`written: false`, top `write_refused: true`). Mã lỗi để riêng
+CÓ CHỦ ĐÍCH: `GOLDEN_MISMATCH` (fixture lệch → xem lại thay đổi) và `GOLDEN_RAW_UNSTABLE` (lệnh bất định →
+**cấm** regen, phải làm tất định trước) là hai bệnh **chữa ngược nhau**; gộp một mã là mời người ta chạy
+`--write` cho xong. Kèm `raw_sha256_run2` để đọc được cả hai lượt.
+
+**Test characterization (ĐỎ-TRƯỚC / XANH-SAU), +3 ca → 1498/1498.** Harness bơm `_run_tl_json` GIẢ trả hai
+stdout **khác đúng 1 byte space / `json.loads` ra CÙNG dict**, và ghim `_golden_dir` vào **tempdir** — dù cổng
+có hỏng thì `--write` cũng không bao giờ đụng `references/golden/` thật.
+- `r287_golden_raw_drift_lam_do_gate` — bơm drift ⇒ top `ok=false` + `error=GOLDEN_RAW_UNSTABLE` + case
+  `ok=false`/`raw_diff` có nội dung. **Phản chứng:** không drift ⇒ cổng IM, lỗi đúng là `GOLDEN_FILE_MISSING`
+  (đã đi QUA cổng raw, chết ở bước so fixture) — cổng luôn-đỏ vô dụng y như cổng luôn-xanh.
+- `r287_write_cam_ghi_khi_raw_bat_dinh` — `--write` + drift ⇒ `write_refused=true`, mọi case `written=false`,
+  và thư mục golden **không sinh tệp nào**. **Phản chứng:** không drift ⇒ `--write` vẫn ghi đủ 20 tệp.
+- `r287_rc_khac_0_qua_lenh_that` — cưỡng chế phải tới **TẦNG LỆNH**: `cmd_golden_test` trả `rc≠0`, không chỉ
+  payload `ok=false`. `rc` mới là thứ `deploy-package.sh`/CI đọc; dừng ở payload thì cổng vẫn lọt.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên `workflow.py` về HEAD, giữ nguyên test ⇒ `1495/1498` với ĐÚNG ba ca r287
+đỏ (ba ca r286 vẫn xanh). Sau vá `1498/1498`.
+
+**BẰNG CHỨNG THỨ TỰ — vì sao G0.1a phải xong TRƯỚC.** Ghép **riêng** bản cưỡng chế này vào cây
+`origin/master` (tức **có G0.1b, KHÔNG có G0.1a**) rồi chạy `golden-test` liên tiếp:
+
+```
+lượt 1..4: rc=0  top_ok=True   raw_stable=True
+lượt 5:    rc=2  top_ok=False  raw_stable=False  error=GOLDEN_RAW_UNSTABLE   ← ĐỎ CHẬP CHỜN
+```
+
+Trên nhánh này (**G0.1a + G0.1b**): 6 lượt liên tiếp `rc=0`, 20/20 case `ok`, `raw_stable=true` toàn bộ, và
+`sweep raw_sha256` **BẰNG NHAU cả 6 lượt** (`d2fd042e4d47…`). Đúng như §3.1 cảnh báo: cưỡng chế trước khi
+làm tất định = cổng đỏ chập chờn, tệ hơn không có cổng.
+
+**ruff 0.15.8 — delta so master:** `workflow.py` **26 F821 / 0 F401 = Y HỆT master** (delta 0).
+`tl.py` 12/0 (đúng nền, không đụng). `tl_selftest.py` 4250 (master 4207): +43 là `os`/`json`/`_TL_MODULE`
+của 3 ca mới — cùng lớp BY DESIGN. **Không phát sinh lớp cảnh báo mới; F401 không đổi.**
+
+# ★ v1.36.24 — r286/GATE-01a: `sweep` TẤT ĐỊNH ở RAW — đóng băng `snapshot_age_s` dưới deterministic mode (2026-07-31)
+
+Slice **G0.1a** (§3.1 + §6.1 kế hoạch AUDIT_XAC_MINH 31-07). **Làm tất định TRƯỚC, cưỡng chế SAU** — đảo
+thứ tự là được một cổng ĐỎ CHẬP CHỜN, tệ hơn hiện trạng.
+
+**Bệnh:** `golden-test` so **hai** thứ: projection (đã scrub `volatile_keys`) **và RAW stdout hai lượt**.
+`snapshot_age_s` nằm trong `volatile_keys` nên projection sạch — nhưng RAW vẫn lệch mỗi khi tuổi cache vắt
+qua **mốc giây nguyên** giữa hai lần chạy. Bất định **theo thời điểm**, nên "20/20 `raw_stable=true`" ở một
+lượt may KHÔNG chứng minh được gì.
+
+**Bằng chứng DƯƠNG — chạy `golden-test` 3 lượt trên `origin/master` SẠCH (case `hygiene_sweep_fixture`):**
+
+```
+MASTER lượt 1: raw_sha256=9f67a94a3b8983d9  raw_stable=True
+MASTER lượt 2: raw_sha256=ae9ae946bdbd112e  raw_stable=True
+MASTER lượt 3: raw_sha256=62f55fc220f79652  raw_stable=False   ← ĐỎ THẬT, bắt tại chỗ
+```
+
+`raw_sha256` đổi **mỗi lượt**; tới lượt 3 thì `raw_stable` lật hẳn sang False. Đo trực tiếp `sweep --json`
+hai lượt cách 1,2s: `1284` vs `1285`, và đó là **khác biệt DUY NHẤT** của cả payload.
+
+**Vá:** thêm `tl_core.deterministic.frozen_age_seconds` + hằng `FROZEN_AGE_S` (và wrapper `_frozen_age_seconds`
+trong `tl.py` để nối `_DETERMINISTIC_ON`). Deterministic mode BẬT ⇒ tuổi-giây thu về một hằng **ở RAW**;
+TẮT ⇒ giá trị THẬT nguyên vẹn. **KHÔNG nới định nghĩa raw-stability** — giá trị vẫn được phát ra, chỉ là
+hằng dưới chế độ tất định. `None` giữ nguyên `None`: "chưa có snapshot" là dữ kiện NGHIỆP VỤ, đổi thành 0
+là nói dối "có snapshot, mới 0 giây".
+
+**Vá theo MẪU, không vá theo `if`** (§5 kế hoạch): áp cho **cả ba** nơi phơi `snapshot_age_s` —
+`cmd_sweep` (hygiene.py), `cmd_counts` (ops_misc.py), `cmd_ingest_missing` (ingest_ops.py). Hai lệnh sau
+chưa có golden case nào, bỏ sót thì lỗ còn nguyên mà gate không bao giờ thấy.
+
+**Acceptance G0.1a — `golden-test` 5 LƯỢT liên tiếp trên nhánh:** cả 5 lượt `top ok=true`, 20/20 case,
+`sweep raw_stable=true`, và `raw_sha256` **BẰNG NHAU cả 5 lượt** (`d2fd042e4d47…`) — bằng chứng mạnh hơn
+`raw_stable` đơn thuần, vì trên master chính con sha này đổi mỗi lượt.
+
+**Test rXX_ (ĐỎ-TRƯỚC / XANH-SAU), +3 ca → 1495/1495:**
+- `r286_frozen_age_dong_bang_va_giu_none` — hợp đồng helper: bật ⇒ 1284 và 1285 cho CÙNG một byte; tắt ⇒
+  giữ 1284/1285; `None` ⇒ `None`; phủ cả đường cờ `args` lẫn đường `TL_DETERMINISTIC` (đường subprocess golden).
+- `r286_sweep_raw_bat_bien_khi_tuoi_cache_troi` — HÀNH VI: chạy `cmd_sweep` hai lượt với đồng hồ tuổi-cache
+  TRÔI 1284→1285, RAW stdout phải bất biến TỪNG BYTE; kèm phản chứng "không deterministic ⇒ vẫn phơi 777".
+- `r286_counts_va_ingest_missing_cung_mau` — khoá hai nơi không có golden phủ.
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên đúng ba điểm gọi, giữ nguyên helper + test ⇒ `1493/1495`, ĐỎ đúng hai ca
+hành vi, ca hợp đồng helper vẫn xanh (đúng: helper không bị hoàn nguyên). Sau vá `1495/1495`.
+
+**BẪY đã trả giá khi viết test (ghi lại, chú thích nằm ngay tại code):** `_TL_MODULE.cmd_sweep` là **STUB**
+(`_make_tl_stub`) ủy quyền `getattr(tl_core.hygiene, "cmd_sweep")`. Ở tiến trình SẠCH hàm thật được re-home
+`__globals__` về `tl.__dict__` nên monkeypatch `_TL_MODULE._manifest_entries` ăn — đó là lý do ca `r41` ở
+ĐẦU tệp chạy được. Nhưng tới CUỐI dãy selftest `tl_core.hygiene` đã bị nạp lại ⇒
+`hygiene.cmd_sweep.__globals__ is tl.__dict__` là **False** ⇒ patch KHÔNG tới nơi, lệnh rơi xuống gọi webapp
+THẬT rồi chết vì seal-mạng (`rc=2`, stdout RỖNG). Helper `_resolve286` nay gỡ stub và patch trên globals của
+**chính hàm sẽ chạy**, không đoán theo tên module.
+
+**ruff 0.15.8 — delta so master:** `tl.py` **12 F821 / 0 F401** (ĐÚNG nền CLAUDE.md, không đổi).
+`deterministic.py` 0/0. `hygiene.py` 558 (master 557) · `ops_misc.py` 399 (398) · `ingest_ops.py` 370 (369):
+mỗi tệp +1 = đúng tên `_frozen_age_seconds` re-home, cùng lớp BY DESIGN đã có. `tl_selftest.py` 4244 (4207):
++37 là `os`/`Path`/`json`/`_TL_MODULE` của 3 ca mới. **Không phát sinh lớp cảnh báo mới; F401 không đổi.**
+
+**Chưa làm ở đợt này (CÓ CHỦ ĐÍCH):** `raw_stable=false` vẫn CHƯA làm case đỏ — đó là Slice **G0.1b**, chỉ
+được làm SAU khi G0.1a xanh.
+
+# ★ v1.36.23 — r285/GATE-03: khung cô lập lọc ứng viên config theo TIỀN TỐ `/tmp/` ⇒ loại sạch trên Linux — TEST-ONLY (2026-07-31)
+
+**Ca thật, đo TRỰC TIẾP trên Linux/Cowork:** `python scripts/tl.py --selftest` → **1490/1491**, đúng **một** case ĐỎ:
+`r284_khung_test_profile_khong_doc_config_that` — tức chính **chốt chặn tái phát mà r284 vừa thêm** lại đổ
+trên nền khác. Đường deploy Linux/Cowork (`deploy-package.sh` bước 1 chạy selftest) **ĐỎ ngay**, trong khi
+đường Windows XANH.
+
+**Bệnh (`tl_selftest.py:11182`, bản r284):**
+
+```python
+_cands = [c for c in _TL_MODULE._config_candidates(None) if not c.startswith("/tmp/")]
+return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+```
+
+Bộ lọc tiền tố `/tmp/` sinh ra để loại **hằng cuối hàm** `/tmp/tra_luat_config.json` (comment ghi rõ:
+*"không tồn tại trên máy Windows, bỏ qua"*). Nhưng trên Linux `tempfile.TemporaryDirectory()` trả
+`/tmp/tmpXXXXXXXX` ⇒ **MỌI ứng viên đều bắt đầu bằng `/tmp/`** và bị loại sạch ⇒ `_cands == []` ⇒
+`bool(_cands)` False ⇒ FAIL. Windows xanh **GIẢ** chỉ vì `/tmp` không tồn tại ở đó. Đúng **cùng lớp lỗi
+máy-phụ-thuộc mà r284 sinh ra để chặn**, chỉ đảo nền — vì r284 chỉ được kiểm trên Windows
+(CLAUDE.md §"Script đa nền: PHẢI chạy THẬT trên nền đó, rồi ĐỐI CHIẾU PARITY").
+
+**Vá (chỉ `tl_selftest.py`, KHÔNG đụng một dòng mã sản xuất):** so **BẰNG ĐÚNG hằng**, không theo tiền tố:
+`if c != _HANG_CUOI_285` với `_HANG_CUOI_285 = "/tmp/tra_luat_config.json"`.
+
+**Chốt chặn lọc hụt im lặng** — case mới `r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat`: trong khung
+cô lập, hằng đó **phải còn** trong `_config_candidates(None)` **VÀ** phải là ứng viên NẰM NGOÀI tempdir
+**DUY NHẤT**. Ai đổi/xoá hằng ⇒ đỏ tại đây chứ không phải miễn trừ trở thành vô nghĩa mà test vẫn xanh;
+ai thêm một đường thoát ra kho thật cũng đỏ tại đây.
+
+**Bằng chứng DƯƠNG (Linux, container này):**
+- **Đỏ-TRƯỚC:** `== tl selftest 1490/1491 ==`, `[FAIL] r284_khung_test_profile_khong_doc_config_that`.
+- **XANH-SAU:** `== tl selftest 1492/1492 ==` (hai số BẰNG NHAU), cả `r284_` lẫn `r285_` `[OK]`.
+- **Phản chứng đột biến:** đổi hằng trong `profile_env.py` thành `/tmp/tra_luat_config_DOI_TEN.json`
+  ⇒ `== tl selftest 1490/1492 ==` với `[FAIL] r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat`
+  (và `[FAIL] r284_`). Đã khôi phục nguyên trạng `profile_env.py`.
+- **ruff (`ruff 0.15.8`):** `tl.py` = **12 F821 / 0 F401** — đúng nền CLAUDE.md, delta 0 (không đụng tệp này).
+  `tl_selftest.py` 4222 F821 vs master 4207 (+15) — toàn bộ là `os`/`Path`/`_TL_MODULE` của case mới,
+  đúng lớp BY DESIGN đã có sẵn; **không phát sinh lớp cảnh báo mới**, F401 giữ nguyên 1.
+
+**Bẫy đã va trong chính lượt này (ghi lại để khỏi trả giá lần hai):** `SKILL.md` và `scripts/tl.py` là tệp
+**CRLF**. Sửa version bằng `Path.write_text()` của Python (text mode) đã **âm thầm đổi trọn CRLF→LF** —
+`git diff` 3492 dòng ở `tl.py`, 307 dòng ở `SKILL.md`, `SKILL.md` tụt 47966→47659 byte — và làm ĐỎ **bốn**
+gate cùng lúc (`selftest r219_gotchas_nhan_trang_thai`, `golden` case `workflow_audit` lệch `size_bytes`,
+`determinism`, `release-verify`). Không lỗi nào chỉ thẳng vào nguyên nhân. Sửa version ở hai tệp này phải
+đi **byte-level** (`read_bytes`/`write_bytes`) hoặc công cụ giữ nguyên line ending.
+
+**NỀN CÒN LẠI CHƯA KIỂM:** bản vá này được chạy THẬT trên **Linux**. **Windows chưa đo ở lượt này** —
+cần người giữ chạy `python scripts\tl.py --selftest` và đối chiếu **1492/1492** để đóng parity hai nền
+(đúng điều r284 bỏ qua và vì thế sinh ra GATE-03).
 # ★ v1.36.37 — r300: VÒNG ĐỜI HỒ SƠ — "đã đóng" thành trạng thái MÁY ĐỌC ĐƯỢC, không còn là lời nói (2026-08-01)
 
 **Bệnh (đo trên hồ sơ THẬT, không phải giả định).** `rasoat_plan.v1` có trạng thái cho ĐƠN VỊ RÀ nhưng

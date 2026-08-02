@@ -53,7 +53,9 @@ def decide(version, changes_state, delta_count, curate_gap, *,
            tukhoa_gap=None, tukhoa_threshold=8, phase="boot", end_regen=False):
     """Trả {plan:[action...], has_reg_bulk:bool, reasons:[...]}.
 
-    changes_state ∈ {'ok','no_baseline','unsupported','error'}.
+    changes_state ∈ {'ok','no_baseline','unsupported','error','not_probed'}.
+    'not_probed' (r290/RAS-01) = DRY nên CHƯA hỏi changes_pull — xem `run()`. Xếp cùng nhánh bảo thủ với
+    'no_baseline' là ĐÚNG: chưa đo thì chưa biết, và đoán "chắc ít thay đổi" là đúng lớp fail-open đang chữa.
     delta_count   = số file đổi mà changes_pull đã vá (None nếu không rõ).
     curate_gap    = số dòng có nlm_source_id nhưng THIẾU nlm_title (None nếu chưa biết).
     tukhoa_gap    = số doc GDoc on-NLM thiếu `tukhoa`, ĐÃ loại orphan (None nếu chưa biết). (v1.15.0)
@@ -70,6 +72,10 @@ def decide(version, changes_state, delta_count, curate_gap, *,
             reasons.append("Cuối phiên + có thay đổi cấu trúc Drive (--touched-drive) ⇒ regen2 đối soát nguồn chân lý.")
         else:
             reasons.append("Cuối phiên, KHÔNG đụng cấu trúc Drive ⇒ bỏ regen2 (~25s no-op), chỉ manifest_export.")
+    elif changes_state == "not_probed":
+        plan += ["regen2", "changes_init"]
+        reasons.append("DRY: CHƯA gọi changes_pull (nó GHI — xem r290/RAS-01) ⇒ chưa biết độ tươi, "
+                       "kế hoạch lấy nhánh bảo thủ. Chạy lại với --apply để đo thật.")
     elif changes_state in ("no_baseline", "unsupported", "error"):
         plan += ["regen2", "changes_init"]
         reasons.append("Chưa có baseline changes (token trống/không hỗ trợ) ⇒ regen2 1 lần dựng nền + changes_init.")
@@ -189,8 +195,22 @@ def run(args):
     print(f"[orch] webapp version = {version}")
 
     changes_state, delta_count = "error", None
-    if args.phase == "boot":
-        # changes_pull rẻ: vá Sheet tươi (mặc định applySheet=true).
+    # ── r290 (RAS-01 vế changes_pull, P1): "DRY" MÀ VẪN GHI ─────────────────────────────────────────
+    # TRƯỚC: `gas.post("changes_pull")` chạy ngay ở đây, TRƯỚC cổng `if args.dry or not args.apply` phía
+    # dưới — trong khi chính nhánh DRY đó in "chế độ DRY — không gọi action ghi". Lời in là SAI:
+    #   (a) `changes_pull` mặc định `applySheet=true` ⇒ VÁ THẲNG Sheet registry;
+    #   (b) nặng hơn: `doChangesPull_` (references/Code.2.21.2n.gs) LUÔN `sp.setProperty('TL_CHANGES_TOKEN', …)`
+    #       BẤT KỂ `apply`/`applySheet` ⇒ nó TIÊU THỤ cửa sổ delta. Nên `applySheet=false` KHÔNG cứu được:
+    #       một lượt "dry" vẫn nuốt mất thay đổi mà lượt --apply thật lẽ ra phải thấy.
+    # ⇒ Cách duy nhất đúng: DRY thì KHÔNG GỌI. Không đoán bừa độ tươi — khai thẳng `not_probed` và để
+    # `decide()` lấy nhánh bảo thủ (đoán "chắc ít thay đổi" chính là fail-open đang chữa).
+    _dry = bool(args.dry or not args.apply)
+    if args.phase == "boot" and _dry:
+        changes_state, delta_count = "not_probed", None
+        print("[orch] DRY ⇒ BỎ QUA changes_pull (action GHI: vá Sheet + tiêu thụ token delta). "
+              "Kế hoạch dưới đây lấy nhánh bảo thủ; --apply mới đo độ tươi thật.")
+    elif args.phase == "boot":
+        # changes_pull rẻ: vá Sheet tươi (mặc định applySheet=true). CHỈ chạy ở đường --apply.
         try:
             res = gas.post("changes_pull")
             changes_state, delta_count = _parse_changes(res)

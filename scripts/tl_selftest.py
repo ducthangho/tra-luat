@@ -26094,6 +26094,35 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r298_worklist_chay_kho_a3_a6", _c298_worklist_chay_kho_a3_a6)
 
+    # ═══ r326 (v1.36.58) — T0-F: CON TRỎ TÊN CA trong tài liệu phải RESOLVE ═══
+    # `references/RASOAT_HOSO_LOOP.md` §7 trỏ ĐÍCH DANH hai tên ca để phân vai KHAI BÁO vs CHẠY (r326 hạ
+    # tuyên bố quá tầm ở đó — trước r326 câu ấy nhận `r210_loop_khong_ghi_trong_cay` "khoá" cả vế CHẠY).
+    # Cả kế hoạch lẫn CHANGELOG r298 đều TƯỞNG `doc-claims-check` giữ con trỏ ấy — ĐÃ ĐO 02-08: KHÔNG.
+    # `_DOC_CLAIMS_R_RE` = `\br(\d{2,4})[a-z]?\b`, mà `_` là ký tự TỪ nên `\b` KHÔNG khớp sau `r210` ⇒
+    # `findall` trả RỖNG cho cả một tên ca BỊA hoàn toàn. Tức đổi/xoá tên ca thì tài liệu trỏ vào hư
+    # không mà 5 cổng vẫn XANH — đúng lớp bệnh GATE-06, chỉ khác tầng: con trỏ tài liệu KHÔNG AI GIỮ.
+    def _c326_con_tro_ten_ca_resolve():
+        _dk325 = set(re.findall(r'_t110\(\s*"([A-Za-z0-9_]+)"',
+                                (_ROOT210 / "scripts" / "tl_selftest.py")
+                                .read_text(encoding="utf-8", errors="replace")))
+        _hai325 = {"r210_loop_khong_ghi_trong_cay", "r298_worklist_chay_kho_a3_a6"}
+        # (a) bảng tên bóc từ NGUỒN phải khớp THỰC TẾ đã chạy (hai tên này đăng ký TRƯỚC ca này) —
+        #     chống trường hợp regex bóc rác rồi mọi phép so dưới thành xanh vô điều kiện.
+        _daco325 = {n for n, _ in cases}
+        ok1 = bool(_dk325) and _hai325 <= _dk325 and _hai325 <= _daco325
+        # (b) MỌI con trỏ `rNNN_snake` trong kịch bản phải là ca CÓ THẬT (fail-closed nếu trỏ rỗng)
+        _ct325 = set(re.findall(r"`(r\d{2,4}[a-z]?_[A-Za-z0-9_]+)`", _LOOP210))
+        ok2 = len(_ct325) >= 2 and _ct325 <= _dk325
+        # (c) đúng HAI VAI đang được trỏ — mất một vế là §7 lại gộp KHAI BÁO với CHẠY như trước r326
+        ok3 = _hai325 <= _ct325
+        # (d) ★ PHẢN CHỨNG: bộ bóc con trỏ phải BẮT được tên bịa, và tên bịa KHÔNG được resolve.
+        #     Thiếu vế này thì (b) chỉ chứng minh "không có gì để kiểm", không phải "kiểm rồi và sạch".
+        _gia325 = set(re.findall(r"`(r\d{2,4}[a-z]?_[A-Za-z0-9_]+)`",
+                                 "kịch bản trỏ `r999_ten_ma_khong_ton_tai` vào hư không"))
+        ok4 = _gia325 == {"r999_ten_ma_khong_ton_tai"} and not (_gia325 <= _dk325)
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r326_con_tro_ten_ca_resolve", _c326_con_tro_ten_ca_resolve)
+
     # ═══ r257 (v1.35.95) — P15: corpus-relation-sweep dùng vị từ THÔ ở cổng vbhn_broken ═══
     # `str(ent.get("corpus")) != "true"` = site DUY NHẤT trong repo so cột corpus KHÔNG chuẩn hoá (28 site khác
     # đều .lower()/helper) ⇒ VBHN corpus LÀNH mang 'vbqppl'/'TRUE'/' true' bị coi là NGOÀI corpus → có goc-tie là

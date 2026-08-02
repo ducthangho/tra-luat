@@ -425,6 +425,7 @@ _RELEASE_REQUIRED_FILES = [
     "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",   # r209/H1: mẫu bảng master rà soát — bên đọc rasoat_phuluc.py
     "references/RASOAT_HOSO_LOOP.md",               # r210/H3-H4: kịch bản vòng lặp + prompt agent tl-rasoat (SKILL.md trỏ tới)
     "references/RASOAT_PLAN_SCHEMA.md",             # r209/H2: đặc tả state biến động (rasoat_plan.v1)
+    "references/QUY_TRINH_RA_SOAT_3_TANG.md",       # r324/REL-05: quy trình rà 3 tầng (PHA0_GATE_v1, BUG_LEDGER_v1)
 ]
 
 _RELEASE_REQUIRED_WORKFLOWS = [

@@ -28078,6 +28078,51 @@ def run() -> int:
 
     _t110("r319_khong_bien_tuy_chon_thanh_chan_cung", _c319_khong_bien_tuy_chon_thanh_chan_cung)
 
+    # ═══ r324 — REL-05 + NLM-08 (sổ audit 01-08, cả hai P2) ═══
+    # REL-05: `references/QUY_TRINH_RA_SOAT_3_TANG.md` (chứa PHA0_GATE_v1 + BUG_LEDGER_v1) đã nằm trong
+    # `_BARE_TOOL_STRICT_DOCS` nên guard bare-tool ĐỌC nó — nhưng KHÔNG cổng nào bắt nó VẮNG MẶT: rơi khỏi
+    # gói thì `release-verify` vẫn xanh. Khoá bằng HÀNH VI (root giả thiếu tệp ⇒ phải nêu ĐÍCH DANH + ok
+    # false), không chỉ kiểm tư cách thành viên: danh sách còn đó mà đường gọi bị bỏ là bài học r321.
+    def _c324_rel05_quy_trinh_3_tang_bat_buoc():
+        import tempfile as _tf324
+        from pathlib import Path as _P324
+        _n324 = "references/QUY_TRINH_RA_SOAT_3_TANG.md"
+        if _n324 not in _rel209._RELEASE_REQUIRED_FILES:
+            return False
+        with _tf324.TemporaryDirectory() as _d324:
+            _kq324 = _rel209._verify_release_manifest(
+                _P324(_d324), {"schema": "release_manifest.v1", "files": []}, strict=False)
+        if _kq324.get("ok") or _n324 not in (_kq324.get("required_missing") or []):
+            return False
+        return (_ROOT209 / "references" / "QUY_TRINH_RA_SOAT_3_TANG.md").is_file()
+
+    _t110("r324_rel05_quy_trinh_3_tang_trong_required", _c324_rel05_quy_trinh_3_tang_bat_buoc)
+
+    # NLM-08: r208d đã đổi van F7 sang CANARY LIVE (bỏ chặn-theo-tuổi), nhưng doc-set kernel vẫn dạy hành
+    # vi CŨ suốt nhiều bản — SKILL.md «cookie >50′ → CHẶN», KERNEL_APPENDIX còn khai cả TÊN HẰNG lẫn MÃ
+    # LỖI đã gỡ khỏi mã. Lệch đúng chiều nguy hiểm: dạy người vận hành TỰ DỪNG LÔ — thứ §4b tầng 3 CẤM.
+    # Khoá HAI CHIỀU: doc không được hồi sinh tên đã chết, VÀ thứ doc hứa phải CÓ THẬT trong mã (bài học
+    # r321 «đã có hàm ≠ đã có đường gọi», soi ngược lại chính đường sản xuất `cmd_ingest_missing`).
+    def _c324_nlm08_doc_f7_khop_canary():
+        _chet324 = ("NLM_COOKIE_BATCH_MAX_MIN", "NLM_COOKIE_TOO_OLD_FOR_BATCH")
+        _sk324 = (_ROOT209 / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        _ka324 = (_ROOT209 / "references" / "KERNEL_APPENDIX.md").read_text(encoding="utf-8", errors="replace")
+        for _t324 in (_sk324, _ka324):
+            if any(_x324 in _t324 for _x324 in _chet324):
+                return False
+        if "canary LIVE" not in _sk324:
+            return False
+        if not ("NLM_AUTH_DEAD_BEFORE_BATCH" in _ka324 and "NLM_COOKIE_BATCH_WARN_MIN" in _ka324):
+            return False
+        import inspect as _ins324
+        import tl_core.ingest_ops as _io324
+        _src324 = _ins324.getsource(_io324.cmd_ingest_missing)
+        return ("NLM_AUTH_DEAD_BEFORE_BATCH" in _src324
+                and _TL_MODULE.NLM_COOKIE_BATCH_WARN_MIN == 50
+                and not hasattr(_TL_MODULE, "NLM_COOKIE_BATCH_MAX_MIN"))
+
+    _t110("r324_nlm08_doc_f7_khop_canary_live", _c324_nlm08_doc_f7_khop_canary)
+
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó

@@ -1,3 +1,37 @@
+# ★ v1.36.56 — r324: REL-05 + NLM-08 — cổng gói mù một tệp bắt buộc, doc kernel dạy van F7 đã chết (2026-08-02)
+
+**Hai mục P2 của sổ audit 01-08. Đo tận nơi TRƯỚC khi vá — và phép đo đã lật một phần đề bài.**
+
+**REL-05 — `release-verify` mù với `references/QUY_TRINH_RA_SOAT_3_TANG.md`.** Tệp chứa `PHA0_GATE_v1`
++ `BUG_LEDGER_v1` đã có mặt trong `_BARE_TOOL_STRICT_DOCS` (guard bare-tool ĐỌC nó) nhưng **0 hit**
+trong `_RELEASE_REQUIRED_FILES` ⇒ rơi khỏi gói thì **không cổng nào đỏ**. Đưa vào danh sách bắt buộc.
+Ca `r324_rel05_quy_trinh_3_tang_trong_required` khoá bằng **HÀNH VI**, không phải tư cách thành viên:
+dựng root giả thiếu đúng tệp đó → `_verify_release_manifest` phải nêu **ĐÍCH DANH** trong
+`required_missing` **và** trả `ok:false`. (Chỉ kiểm «có trong list» là lặp lại bẫy r321 «đã có hàm ≠
+đã có đường gọi».)
+
+**NLM-08 — doc kernel dạy van F7 đã bị GỠ từ r208d.** Đo được ba nơi:
+- `SKILL.md:171` khai «cookie >**50′** trước lô API >1 nguồn → **CHẶN**»;
+- `references/KERNEL_APPENDIX.md` §E khai cả hằng `NLM_COOKIE_BATCH_MAX_MIN` lẫn mã lỗi
+  `NLM_COOKIE_TOO_OLD_FOR_BATCH` — **cả hai không còn trong mã**, chính ca
+  `r208d_f7_canary_thay_chan_theo_tuoi` đang khoá `not hasattr(…MAX_MIN)`;
+- docstring `_nlm_preflight_report` (`nlm_ops.py`) tự khai «van F7 vẫn dùng nó — GIỮ NGUYÊN ngưỡng».
+
+Hành vi THẬT trong `cmd_ingest_missing`: `len(to_add) > 1` → **canary LIVE**; `alive is False` ⇒ rc=2
+`NLM_AUTH_DEAD_BEFORE_BATCH` **trước mọi side-effect**; `alive=None` KHÔNG kết luận ⇒ KHÔNG chặn (M2);
+tuổi >50′ (`NLM_COOKIE_BATCH_WARN_MIN`) **chỉ CẢNH BÁO**. Doc lệch đúng chiều nguy hiểm — dạy người vận
+hành tự dừng lô, thứ §4b tầng 3 CẤM. Sửa cả ba nơi; ca `r324_nlm08_doc_f7_khop_canary_live` khoá **HAI
+CHIỀU**: doc-set kernel không được hồi sinh tên đã chết, **và** thứ doc hứa phải có thật trong đường sản
+xuất (soi `inspect.getsource(cmd_ingest_missing)`).
+
+★ **`SKILL.md` giữ NGUYÊN 48.031 B.** Câu F7 mới cân **đúng 84 byte** bằng câu cũ, nên
+`references/golden/workflow_audit.json` (`size_bytes: 48031`) và ghi chú «đệm 97B» ở
+`references/GOTCHAS.md:16` **không phải sửa theo**. Đổi độ dài kernel là kéo theo 3 tệp khác.
+
+★ **Nơi thứ TƯ là BÁO GIẢ.** `docs/WORKFLOW_RASOAT_TU_DONG.md:277` cũng chứa tên hằng đã gỡ, nhưng đọc
+kỹ thì nó đang **MÔ TẢ ĐÚNG** việc đổi tên của r208d («…đổi tên `…MAX_MIN` → `…WARN_MIN`, vẫn 50′ nhưng
+chỉ CẢNH BÁO»), không dạy hành vi cũ ⇒ **KHÔNG sửa**. Sổ audit khai «3 nơi» là chính xác; quét theo TÊN
+rồi vá tất là cách làm hỏng một tài liệu đang đúng.
 # ★ v1.36.55 — r323: khối đuôi VBHN đọng trong THÂN ĐIỀU CUỐI (chú thích hợp nhất + bảng XÁC THỰC) (2026-08-02)
 
 **Triệu chứng đo được trên cache THẬT (02-08), 3/3 record VBHN nhiễm, 0 record khác:**

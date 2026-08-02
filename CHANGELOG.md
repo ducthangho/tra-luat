@@ -1,3 +1,50 @@
+# ★ v1.36.42 — r308: GATE-04 mở tầm guard con trỏ ra MỌI `*.md` TRONG GÓI + GATE-05 test dựng package-set đúng nguồn (2026-08-02)
+
+**Bối cảnh.** Hai lớp guard con trỏ tài liệu (`_doc_pointer_findings` r209 · `_doc_bare_tool_findings`
+r289) chỉ quét `references/*.md` **không đệ quy** + `SKILL.md`. Tài liệu ĐI THEO GÓI mà nằm ngoài
+khoảng đó thì **không cổng nào gác con trỏ** — đúng lớp bệnh REL-01/H9 sinh ra để chặn.
+
+**Đo trên gói 177 tệp (02-08), không chép niềm tin từ kế hoạch:**
+
+| | kế hoạch nói | ĐO ĐƯỢC |
+|---|---|---|
+| `.md` trong gói | 53 | **34** (T0-G đã bỏ 19 tệp `docs/`) |
+| tầm guard cũ | 30/53 | **30/34** |
+| ngoài tầm | — | `CHANGELOG.md` · `INSTALL.md` · `CONTEXT.md` · `scripts/_fallback/README.md` |
+| mở tầm ⇒ pointer FAIL | ~56 ước | **0 → 40** (CHANGELOG 24 + INSTALL 16) |
+| mở tầm ⇒ bare-tool FAIL | — | **0 → 0** (advisory 73→95) — lớp này mở **MIỄN PHÍ** |
+
+**1. GATE-04 — doc-set lấy từ MANIFEST, không glob đĩa.** Chỗ gọi trong `_verify_release_manifest`
+duyệt `expected` (package-set) lấy mọi `*.md`. Bịt hai khoảng mù **ngược chiều nhau** của nguồn cũ:
+*(a) THIẾU* — 4 tài liệu trên đi theo gói mà không ai gác; *(b) THỪA* — `.md` nằm trong `references/`
+trên ĐĨA nhưng bị release-exclude vẫn bị quét, tức bắt gate CÂY chịu trách nhiệm cho thứ KHÔNG vào
+artifact. Doc-set nay tự đóng theo kiểm kê: thêm `.md` vào gói là guard phủ ngay.
+
+**2. Phân hạng LƯU TRỮ trước khi mở tầm** — `CHANGELOG.md` + `INSTALL.md` vào `_POINTER_ARCHIVE_DOCS`
+(advisory). Không phải né: `CHANGELOG` chép các bản phát hành ĐÃ QUA nên tất yếu nhắc tên tệp TỪNG
+tồn tại (`Code.2.21.2n.gs`, `changelog_archive/`, 4 script deploy dev-side) — sửa thân = viết lại lịch sử;
+`INSTALL.md` khối `:7` TỰ KHAI “layout GỐC v1.x (tham chiếu lịch sử), nguồn chân lý = VERSION + SKILL.md +
+CHANGELOG” (Q3 chốt 01-08). Không xếp hạng trước thì guard đỏ **40 mục ngày đầu và sẽ bị vô hiệu hoá**
+— đúng bài học §0.8. `CONTEXT.md` + `scripts/_fallback/README.md` vào **thẳng fail-closed, 0 đồng**.
+
+**3. GATE-05 — `r209_cay_that_va_phan_chung` dựng package-set SAI NGUỒN.** Ca này dùng `rglob` trên
+ĐĨA thay vì đọc manifest ⇒ con trỏ tới tệp **có-trên-đĩa-nhưng-ngoài-gói** QUA test mà ĐỎ ở
+`release-verify`. Đo khoảng lệch: **11 tệp** (4 `.gs` cũ · 2 `changelog_archive` · 4 script deploy ·
+`pkg_secret_scan.py`) — cơ chế `_RELEASE_EXCLUDE_NAMES_ANYWHERE`, không phải ngẫu nhiên. Nay đọc
+`RELEASE_MANIFEST.json` theo khuôn `r289_cay_that_bare_tools`, doc-set mở khớp guard sản xuất, và thêm
+**phép đo A/B chạy vĩnh viễn**: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật,
+đã bịt. `r289_cay_that_bare_tools` mở doc-set theo, kèm vế `ok3b` chống “xanh vì quét ít đi”.
+
+**Bằng chứng DƯƠNG (mutation, không tin `rc=0`):**
+- Trả doc-set về glob đĩa ⇒ `r308_docset_lay_tu_manifest` **ĐỎ** (1578/1579). Ca mới này test
+  **WIRING** trong `_verify_release_manifest` trên cây GIẢ — ca r209 gọi THẲNG helper nên không phủ
+  đoạn nối, đúng chỗ từng sai.
+- Bỏ `CHANGELOG`+`INSTALL` khỏi hạng lưu trữ ⇒ **40 pointer FAIL** (24+16) ⇒ phân hạng là **chịu lực**,
+  không phải hai tài liệu đã sạch sẵn.
+- Sau vá: pointer checked **193→299** FAIL **0** advisory **64→104**; bare checked **160→237** FAIL **0**.
+
+**Selftest 1579/1579** (master 1578, +1 ca). Ruff **DELTA = 0** cả ba tệp, **không tên F821 nào mới từ 0**.
+
 # ★ v1.36.41 — r307: sổ hết KHAI HAI NGHĨA cho MỘT version — hạ cấp nhật ký nhánh T2 + cổng «một version ⇒ một đợt» (2026-08-02)
 
 **Bối cảnh.** `dfb9418` merge PR #6 (tranche T2: RAS-05 · ING-03 · Helper `tl_core/txn.py`). Nhánh

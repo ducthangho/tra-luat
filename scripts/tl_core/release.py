@@ -555,7 +555,22 @@ def _skill_links_findings(skill_text: str, manifest_paths) -> dict:
 # 10 nợ cũ khoanh BASELINE dưới. Fail-closed CHỈ với cặp MỚI ở tài liệu SỐNG — không baseline thì guard đỏ
 # 80 mục ngay ngày đầu và sẽ bị vô hiệu hoá (bài học §0.8 kế hoạch). Gỡ nợ = XOÁ mục baseline (ratchet:
 # sửa baseline = sửa code = qua ruff→selftest→CHANGELOG→review; test r209 khoá số đếm).
-_POINTER_ARCHIVE_DOCS = frozenset({"references/DOCTRINE_APPENDIX.md"})
+# r308 (T0-F/GATE-04): doc-set mở từ «references/*.md KHÔNG đệ quy + SKILL.md» ra «MỌI *.md CÓ TRONG
+# MANIFEST» — xem chỗ gọi trong _verify_release_manifest. Đo 02-08 trên gói 177 tệp: 34 .md, tầm cũ phủ
+# 30, ngoài tầm 4 (CHANGELOG · INSTALL · CONTEXT · scripts/_fallback/README). Mở tầm ⇒ pointer FAIL 0→40
+# (CHANGELOG 24 + INSTALL 16), bare-tool FAIL 0→0 (advisory 73→95 — lớp trần mở MIỄN PHÍ).
+# Hai tệp dưới vào hạng LƯU TRỮ vì bản chất là SỬ, không phải chỉ dẫn vận hành sống:
+#   CHANGELOG.md — chép các bản phát hành ĐÃ QUA nên tất yếu nhắc tên tệp TỪNG tồn tại
+#     (`Code.2.21.2n.gs`, `changelog_archive/`, 4 script deploy dev-side). Sửa thân = viết lại lịch sử.
+#   INSTALL.md   — khối `:7` TỰ KHAI "layout GỐC v1.x (tham chiếu lịch sử), nguồn chân lý = VERSION +
+#     SKILL.md + CHANGELOG" (Q3 chốt 01-08; r289 đã sửa 3 dòng MỆNH LỆNH deploy về `2.21.2p`, 14 nhắc
+#     `.gs` còn lại CỐ Ý giữ vì đang kể lịch sử bản vá).
+# CONTEXT.md + scripts/_fallback/README.md vào thẳng FAIL-CLOSED, 0 đồng (đo: 0 fail).
+_POINTER_ARCHIVE_DOCS = frozenset({
+    "references/DOCTRINE_APPENDIX.md",
+    "CHANGELOG.md",
+    "INSTALL.md",
+})
 # r218: TRẢ NỢ 6/10 mục. `doc-claims-check` (lệnh mới, đường quét độc lập) dựng lại ĐÚNG 6 cặp dưới đây
 # từ con số 0 — tức danh sách khoanh nợ này chính xác, chỉ là chưa ai trả. Đã sửa thân tài liệu nên chúng
 # không còn là hit; ratchet hạ 10 → 4, đi ĐÚNG chiều (ratchet chặn THÊM miễn trừ, không chặn bớt):
@@ -760,17 +775,24 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
             if not skill_links["links_ok"]:
                 errors.append("SKILL_LINKS_NOT_IN_PACKAGE:" + ",".join(skill_links["links_missing"][:10]))
                 ok = False
-    # r209 (H9): guard RATCHET con trỏ tài liệu SỐNG (references/|templates/|scripts/) trên
-    # SKILL.md + references/*.md — xem _doc_pointer_findings. Cặp MỚI đứt ⇒ fail-closed.
+    # r209 (H9): guard RATCHET con trỏ tài liệu SỐNG (references/|templates/|scripts/) — xem
+    # _doc_pointer_findings. Cặp MỚI đứt ⇒ fail-closed.
+    # r308 (T0-F/GATE-04): doc-set lấy từ MANIFEST (`expected`), không còn glob đĩa `references/*.md`.
+    # Hai khoảng mù của nguồn cũ, cả hai đều đo được trên gói 177 tệp:
+    #   (a) THIẾU — .md trong gói nhưng ngoài `references/` mức 1: CHANGELOG · INSTALL · CONTEXT ·
+    #       scripts/_fallback/README (4 tệp). Tài liệu ĐI THEO GÓI mà không cổng nào gác con trỏ.
+    #   (b) THỪA — .md nằm trong `references/` trên ĐĨA nhưng bị release-exclude: quét chúng là bắt
+    #       gate CÂY chịu trách nhiệm cho thứ KHÔNG vào artifact (cùng họ xanh-giả của REL-01).
+    # Đọc theo `expected` nên cũng tự đóng theo mọi thay đổi kiểm kê — thêm .md vào gói là guard phủ ngay.
     _doc_texts = {}
-    _doc_list = sorted((root / "references").glob("*.md")) if (root / "references").is_dir() else []
-    if _sk_path.exists():
-        _doc_list.append(_sk_path)
-    for _dp in _doc_list:
+    for _rel in sorted(k for k in expected if k.lower().endswith(".md")):
+        _dp = root / _rel
+        if not _dp.is_file():
+            continue          # tệp thiếu/không phải tệp đã do vòng `checks` ở trên báo — không báo hai lần
         try:
-            _doc_texts[_dp.relative_to(root).as_posix()] = _dp.read_text(encoding="utf-8", errors="replace")
+            _doc_texts[_rel] = _dp.read_text(encoding="utf-8", errors="replace")
         except OSError as _dp_err:
-            errors.append(f"DOC_POINTER_UNREADABLE:{_dp.name}:{type(_dp_err).__name__}")
+            errors.append(f"DOC_POINTER_UNREADABLE:{_rel}:{type(_dp_err).__name__}")
             ok = False
     doc_pointers = _doc_pointer_findings(_doc_texts, sorted(expected))
     if not doc_pointers["pointers_ok"]:

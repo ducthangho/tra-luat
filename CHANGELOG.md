@@ -53,6 +53,17 @@ ruff F: `ops_misc.py` và `tl.py` **delta = 0**; `tl_selftest.py` **delta theo T
 của `_TL_MODULE` tăng 2149 → 2151 vì hai ca mới tham chiếu đúng cái tên module được gán ĐỘNG
 (`g["_TL_MODULE"] = tl_module`) mà master đã chấp nhận 2149 lần; không sinh loại phát hiện mới.
 
+**Bẫy ĐA NỀN — gate `windows-latest` bắt ca r316 của tôi, Linux thì xanh.** Fixture «container
+hỏng» dựng bằng `writestr("word\\document.xml", …)`: `ZipInfo.__init__` có
+`if os.sep != "/" and os.sep in filename: filename = filename.replace(os.sep, "/")` ⇒ trên
+Windows fixture bị NẮN THÀNH HỢP LỆ, `scan_file` đọc được, ca đỏ oan (1605/1606). Đo thêm mới
+thấy sâu hơn: `_RealGetContents` cũng dựng lại `ZipInfo(tên)` LÚC ĐỌC, nên trên Windows
+**không có cách nào** dựng được dạng backslash — tức container kiểu CDN THẬT SỰ đọc được ở đó
+(khớp việc Word mở tệp ấy bình thường). Sửa: ca TỰ KIỂM fixture trước khi kiểm hành vi, chỉ
+đòi dạng backslash khi nền thật sự làm nó hỏng, và khoá khế ước bằng dạng **THIẾU HẲN member**
+— dựng được trên MỌI nền. Đã đối chiếu PARITY bằng cách chạy CHÍNH selftest dưới `os.sep='\\'`:
+**1606/1606 ở cả hai ngữ nghĩa**. Đúng bài học CLAUDE.md — Linux xanh không nói gì về Windows.
+
 **Ghi thêm — chính test của r319 bắt lỗi của r319.** Ca «không còn khai sai» ban đầu kiểm CHUỖI CON
 `uses only Python standard library`, mà bản `requirements.txt` mới lại TRÍCH LẠI câu đó để ghi bối
 cảnh («…trước r319 là SAI») ⇒ ĐỎ oan. Đã đổi sang kiểm **DÒNG KHAI cũ nguyên văn**. Bài học nhỏ mà

@@ -27303,13 +27303,29 @@ def run() -> int:
         _sp.loader.exec_module(_m)
         return _m
 
-    def _r316_make_docx(path, doc_xml, *, backslash=False):
-        """Dựng .docx tối thiểu. `backslash=True` tái hiện container HỎNG của CDN Công báo:
-        tên entry dùng '\\' nên KHÔNG có 'word/document.xml' theo tên chuẩn (Word vẫn mở được)."""
-        import zipfile as _zf315
-        name = "word\\document.xml" if backslash else "word/document.xml"
-        with _zf315.ZipFile(path, "w", _zf315.ZIP_DEFLATED) as _z:
-            _z.writestr(name, doc_xml)
+    def _r316_make_docx(path, doc_xml, *, backslash=False, thieu_member=False):
+        """Dựng .docx tối thiểu — ba dạng: bình thường · tên entry '\\' · THIẾU HẲN member.
+
+        `backslash=True` tái hiện container HỎNG của CDN Công báo (Word vẫn mở được, nhưng
+        `word/document.xml` theo tên chuẩn thì KHÔNG có).
+
+        ★BẪY ĐA NỀN đã đỏ THẬT trên gate `windows-latest` (chính ca này, 1605/1606): KHÔNG truyền
+         tên chứa '\\' vào `ZipInfo(...)` — `ZipInfo.__init__` có `if os.sep != "/" and os.sep in
+         filename: filename = filename.replace(os.sep, "/")`, mà trên Windows `os.sep == "\\"` ⇒
+         fixture "hỏng" bị NẮN THÀNH HỢP LỆ, `scan_file` đọc được và ca test đỏ OAN. Gán
+         `.filename` SAU khi dựng thì không đi qua phép nắn đó. Đúng bài học CLAUDE.md: thứ gì
+         đa nền phải CHẠY THẬT trên nền đó rồi ĐỐI CHIẾU PARITY — Linux xanh không nói gì về Windows.
+        """
+        import zipfile as _zf316
+        with _zf316.ZipFile(path, "w", _zf316.ZIP_DEFLATED) as _z:
+            if thieu_member:
+                _z.writestr("word/styles.xml", "<x/>")   # có tệp, nhưng KHÔNG có document.xml
+            elif backslash:
+                _zi = _zf316.ZipInfo("word/placeholder.xml")
+                _zi.filename = "word\\document.xml"      # gán SAU ⇒ không bị nắn os.sep
+                _z.writestr(_zi, doc_xml)
+            else:
+                _z.writestr("word/document.xml", doc_xml)
         return str(path)
 
     _R316_MARKUP = ('<w:document><w:body><w:p><w:r><w:rPr><w:strike/></w:rPr>'
@@ -27328,16 +27344,30 @@ def run() -> int:
         _m = _r316_docx("docx_markup_r316")
         with _tf316.TemporaryDirectory() as _td:
             _p = _Path315 = __import__("pathlib").Path(_td)
+            import zipfile as _zfck
             _hong = _r316_make_docx(_p / "hong.docx", _R316_MARKUP, backslash=True)
             _tot = _r316_make_docx(_p / "tot.docx", _R316_MARKUP)
+            _thieu = _r316_make_docx(_p / "thieu.docx", _R316_MARKUP, thieu_member=True)
+            # ★TỰ KIỂM FIXTURE trước khi kiểm hành vi. Trên Windows, `_RealGetContents` dựng lại
+            #  `ZipInfo(tên)` LÚC ĐỌC nên '\\'→'/' bị nắn ở CẢ chiều đọc ⇒ container kiểu CDN
+            #  THẬT SỰ đọc được ở đó, không có gì "hỏng" để kiểm (khớp việc Word mở tệp ấy bình
+            #  thường). Vậy: dạng backslash CHỈ được đòi khi nền này thật sự làm nó hỏng; còn khế
+            #  ước luôn được kiểm bằng dạng THIẾU MEMBER — dựng được trên MỌI nền.
+            with _zfck.ZipFile(_hong) as _zz:
+                _hong_that = "word/document.xml" not in _zz.namelist()
             _st_hong, _st_tot = _m.scan_file(_hong), _m.scan_file(_tot)
-            # (1) hỏng ⇒ cờ UNREADABLE, KHÔNG phải dict đếm toàn 0
-            ok1 = _st_hong.get(_m.UNREADABLE) is True and "strike" not in _st_hong
+            # (1) KHÔNG đọc được ⇒ cờ UNREADABLE, KHÔNG phải dict đếm toàn 0
+            ok1 = _m.scan_file(_thieu).get(_m.UNREADABLE) is True          # nền nào cũng chạy
+            if _hong_that:                                                  # Linux/macOS
+                ok1 = ok1 and _st_hong.get(_m.UNREADABLE) is True and "strike" not in _st_hong
             # (2) ★ĐỐI CHỨNG QUYẾT ĐỊNH: CÙNG nội dung, chỉ khác cách đặt tên entry — bản đọc được
             #     phải thấy strike. Đây là ca chứng minh "hỏng" KHÁC "sạch", không phải trùng hợp.
             ok2 = _st_tot.get("strike") == 1 and not _st_tot.get(_m.UNREADABLE)
             # (3) cảnh báo phải KÊU TO và nói đúng bản chất (chưa biết ≠ sạch)
-            _w = _m.warn_line(_st_hong, "hong.docx")
+            # neo vào dạng hỏng-THẬT trên MỌI nền (`_thieu`), KHÔNG vào `_st_hong` — trên
+            # Windows bản backslash ĐỌC ĐƯỢC nên warn_line ở đó là câu MARKUP, không phải
+            # câu "không đọc được" (đã đỏ thật ở lượt mô phỏng os.sep='\\').
+            _w = _m.warn_line(_m.scan_file(_thieu), "thieu.docx")
             ok3 = "KHÔNG ĐỌC ĐƯỢC" in _w and "KHÔNG phải 'sạch'" in _w
         return bool(ok1 and ok2 and ok3)
 

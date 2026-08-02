@@ -787,7 +787,7 @@ def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
         if role == "registry" and mime and mime != REGISTRY_SHEET_MIME:
             finds.append({"check": "REGISTRY_NOT_SHEET_MIME", "severity": "critical", "profile": name,
                           "fileId": fid, "mime": mime, "note": "registry PHẢI là Google Sheet."})
-        # r314 (PRO-05): TRƯỚC ĐÂY kiểm MIME bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có
+        # r320 (PRO-05): TRƯỚC ĐÂY kiểm MIME bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có
         # phép kiểm loại nào. Một Google Doc đặt ở `manifestId`, parent đúng, đi qua doctor SẠCH TRƠN
         # (đo: 0 finding) trong khi chính nó là thứ không đọc được — manifest được upload
         # `mime=application/json`, `convert=false` (`_create_profile_manifest_json`) rồi tải về JSON-parse.

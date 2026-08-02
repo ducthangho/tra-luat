@@ -1,4 +1,4 @@
-# ★ v1.36.48 — r314: ĐÓNG 4 mục CUỐI của sổ audit 31-07 — PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06 (2026-08-02)
+# ★ v1.36.52 — r320: ĐÓNG 4 mục CUỐI của sổ audit 31-07 — PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06 (2026-08-02)
 
 Bốn mục này là **toàn bộ phần còn lại** của nhóm "chưa có bằng chứng độc lập" (§Phụ lục kế hoạch: 6 mục,
 `RAS-14` đóng ở r310, `ING-03` tự tái hiện xong). Theo đúng dặn dò "dựng repro TRƯỚC", mỗi mục được tái
@@ -62,13 +62,13 @@ Nguồn sự thật DUY NHẤT nay ở `ingest_contract.INGEST_LOCAL_EXTS`; cả
 về đúng năng lực child, KHÔNG nới child**: nới = cho upload `.txt`/`.md` rồi convert = quyết định **tính năng**
 (đổi thứ được ghi vào corpus), không phải sửa lỗi lệch sổ. Muốn mở thì mở tường minh ở một chỗ.
 
-**Test (+5 ca → 1598/1598).** `r314_pro03_adopt_va_delete_deu_qua_guard` · `r314_pro09_delete_chan_truoc_mutation_dau_tien`
+**Test (+5 ca → 1598/1598).** `r320_pro03_adopt_va_delete_deu_qua_guard` · `r320_pro09_delete_chan_truoc_mutation_dau_tien`
 (khoá **THỨ TỰ** trong mã: guard < `nc.source_delete(` và < `g.get("trash"`, nhưng > `CONFIRM_YES_REQUIRED`) ·
-`r314_pro05_manifest_sai_loai_bi_bat` (4 phản chứng) · `r314_ing04_journal_thieu_drive_id_khong_cap_quyen`
-(ma trận 5 ca) · `r314_ing06_planner_va_child_cung_mot_nguon` (+ phản chứng đuôi hợp lệ vẫn qua cả hai phía).
+`r320_pro05_manifest_sai_loai_bi_bat` (4 phản chứng) · `r320_ing04_journal_thieu_drive_id_khong_cap_quyen`
+(ma trận 5 ca) · `r320_ing06_planner_va_child_cung_mot_nguon` (+ phản chứng đuôi hợp lệ vẫn qua cả hai phía).
 
 **ĐỎ-TRƯỚC (đo thật):** hoàn nguyên 5 tệp sản xuất về HEAD, GIỮ test ⇒ **1593/1598**, đỏ đúng **cả 5** ca
-r314, **không ca nào khác**. Sau vá 1598/1598.
+r320, **không ca nào khác**. Sau vá 1598/1598.
 
 **Một ca CÓ SẴN đỏ — đúng, và nó đang mã hoá con bệnh.** `r107_zip_content_identity_normalized` dùng member
 `.txt` làm filler rồi khẳng định `plan.ok` — tức khẳng định planner **phải nhận** một đuôi không nạp được.
@@ -87,6 +87,303 @@ bộ kiểm khác nhau vô tình dựa vào nó.
 chuỗi nào cũng vắng mặt. (2) neo thứ tự vào chuỗi `trash_assets` — chuỗi này có mặt SỚM trong dict `plan` nên
 phép so vị trí sai; đổi neo sang `g.get("trash"`.
 
+# ★ v1.36.51 — r319: đính chính KHẾ ƯỚC phụ thuộc — `requirements.txt` khai «stdlib-only» đúng với overlay core nhưng SAI với đường nạp (2026-08-02)
+
+Đóng nốt phần KHẾ ƯỚC của §4.6 — mảnh cuối cùng của sáu phát hiện công cụ lượt bảo trì kho 02-08.
+r317 đã làm nhánh không-`python-docx` hết rò, nhưng `pypdf` **không có đường thay thế**: thiếu nó là
+chặn cứng mọi PDF, mà không tệp nào trong kho nói ra điều đó.
+
+**Bệnh — khai sai đúng chỗ đắt nhất.** `requirements.txt` chỉ có hai dòng chú thích, dòng đầu là
+*«tra-luat overlay core uses only Python standard library.»* Câu đó ĐÚNG với overlay core
+(`tl.py`, `contract_check.py`) và SAI với **đường nạp tài liệu** (`ingest_to_cache` →
+`normalize_document`). `INSTALL.md` còn khẳng định mạnh hơn: *«không cài gì thêm; overlay core dùng
+stdlib»*. Người vận hành làm đúng như tài liệu ⇒ máy KHÔNG có `pypdf` ⇒ mọi `.pdf` bị chặn, và
+(trước r315) còn bị báo nhầm thành «bản SCAN» của TÀI LIỆU.
+
+Đo 02-08 trên `54-2025-VBHN-VPQH` — PDF text thật, `pdftotext` bóc **167.433 ký tự**, riêng trang 1
+có 2.536:
+
+| | kết quả |
+|---|---|
+| cài theo đúng tài liệu (không `pypdf`) | `{"ok": false, "reason": "scanned_pdf"…}` — chặn |
+| sau `pip install pypdf` | `{"ok": true, "n_articles": 72}` |
+
+CÙNG một tệp.
+
+**Vá — ba lớp, vì một mình tài liệu không đủ.**
+
+1. **`requirements.txt` nói thật và VẪN cài được.** Khai `pypdf>=4.0` là phụ thuộc THẬT của đường
+   nạp PDF; ghi rõ `python-docx` là TUỲ CHỌN (r317 đã cứu nhánh không-lib) và tách riêng hai NHỊ
+   PHÂN HỆ THỐNG mà `pip` không cài được (`pdftotext` bắt buộc · `antiword`/`catdoc` cho `.doc` cũ).
+   Mỗi mục kèm HẬU QUẢ cụ thể, không phải danh sách trơ.
+2. **`tl doctor` tự kiểm** — `_doc_dep_probe()` + dòng `optional phụ thuộc nạp tài liệu`. Đây mới là
+   phần bền: người ta không đọc `requirements.txt`, nhưng có chạy `doctor`. Thiếu `pypdf` ⇒
+   `✗ … pypdf|pdfplumber THIẾU ⇒ MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315).
+   Cài: pip install pypdf`.
+   ★Tên có tiền tố `optional` — nếp sẵn có (`optional rasoat/backfill`) để check báo ĐỎ mà **KHÔNG
+   lật rc**: máy không bao giờ nạp PDF không đáng bị `doctor` báo hỏng.
+3. **Đồng bộ tài liệu**: `INSTALL.md` (câu «không cài gì thêm» nay sai) · `references/DEPENDENCIES.md`
+   §9 (bảng 4 dòng: mức + thiếu-thì-sao).
+   ★**KHÔNG đụng `SKILL.md`.** Bản vá đầu có thêm một câu vào §9 và làm kernel phình 48.031 →
+   48.152 B, **vượt trần KERNEL-DIET 47 KB (48.128)** ⇒ `r127_kernel_warn_wired_in_audit`,
+   `r128_kernel_diet_under_warn` và `r219_gotchas_nhan_trang_thai` ĐỎ cùng lúc. Đã revert:
+   kernel = bất biến + CON TRỎ, §9 vốn đã trỏ sang `DEPENDENCIES.md` — chi tiết thuộc về đó
+   (chính là lý do file đó được tách ra từ SKILL.md §9 ở Pha F v1.34.0). Ba cổng bắt đúng việc.
+
+**Bẫy I11 LẶP LẠI — đã dính thật giữa lượt này.** `_doc_dep_probe` là helper tl_core MỚI; `bind()`
+re-home `__globals__` của mọi hàm tl_core về namespace `tl`, nên symbol không khai trong bảng stub
+`ops_misc` của `tl.py` sẽ **`NameError` LÚC CHẠY** dù import đúng — `tl doctor` gãy ngay lần chạy
+đầu. Đúng bẫy r312 đã ghi cho `_src_id_dup_groups`. Ca `r319_khong_bien_tuy_chon_thanh_chan_cung`
+nay khoá luôn vế đó (`'_doc_dep_probe'` phải có mặt trong `tl.py`).
+
+**Cổng.** selftest **1606/1606** (thêm 2 ca: 1 thuận + 1 ngược) · golden 0-diff · determinism ok ·
+`release-verify` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
+ruff F: `ops_misc.py` và `tl.py` **delta = 0**; `tl_selftest.py` **delta theo TÊN = 0** — chỉ số lần
+của `_TL_MODULE` tăng 2149 → 2151 vì hai ca mới tham chiếu đúng cái tên module được gán ĐỘNG
+(`g["_TL_MODULE"] = tl_module`) mà master đã chấp nhận 2149 lần; không sinh loại phát hiện mới.
+
+**Bẫy ĐA NỀN — gate `windows-latest` bắt ca r316 của tôi, Linux thì xanh.** Fixture «container
+hỏng» dựng bằng `writestr("word\\document.xml", …)`: `ZipInfo.__init__` có
+`if os.sep != "/" and os.sep in filename: filename = filename.replace(os.sep, "/")` ⇒ trên
+Windows fixture bị NẮN THÀNH HỢP LỆ, `scan_file` đọc được, ca đỏ oan (1605/1606). Đo thêm mới
+thấy sâu hơn: `_RealGetContents` cũng dựng lại `ZipInfo(tên)` LÚC ĐỌC, nên trên Windows
+**không có cách nào** dựng được dạng backslash — tức container kiểu CDN THẬT SỰ đọc được ở đó
+(khớp việc Word mở tệp ấy bình thường). Sửa: ca TỰ KIỂM fixture trước khi kiểm hành vi, chỉ
+đòi dạng backslash khi nền thật sự làm nó hỏng, và khoá khế ước bằng dạng **THIẾU HẲN member**
+— dựng được trên MỌI nền. Đã đối chiếu PARITY bằng cách chạy CHÍNH selftest dưới `os.sep='\\'`:
+**1606/1606 ở cả hai ngữ nghĩa**. Đúng bài học CLAUDE.md — Linux xanh không nói gì về Windows.
+
+**Ghi thêm — chính test của r319 bắt lỗi của r319.** Ca «không còn khai sai» ban đầu kiểm CHUỖI CON
+`uses only Python standard library`, mà bản `requirements.txt` mới lại TRÍCH LẠI câu đó để ghi bối
+cảnh («…trước r319 là SAI») ⇒ ĐỎ oan. Đã đổi sang kiểm **DÒNG KHAI cũ nguyên văn**. Bài học nhỏ mà
+lặp đi lặp lại trong đợt này: **kiểm chuỗi con trên văn bản có trích dẫn lịch sử là kiểm sai chỗ.**
+
+# ★ v1.36.50 — r318: hai bộ lọc rác Công báo sai trên CHÍNH bản Công báo — khối chữ ký số 3 dòng lọt vào khối đầu · nhãn mục sai CẢ HAI CHIỀU (2026-08-02)
+
+Đóng nốt §4.4 và §4.5 của lượt bảo trì kho 02-08 (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md`).
+Cả hai đều nằm trong `loc_rac_congbao` (r217) — bộ lọc dựng riêng cho bản Công báo, mà lại sai
+trên đúng hai bản Công báo đem ra dùng.
+
+## r318a — khối chữ ký số có ÍT NHẤT HAI biến thể, bản cũ chỉ bắt bộ 4
+
+**Bệnh.** `CB_CHU_KY_SO` ghép CỨNG đúng 4 nhãn theo ĐÚNG thứ tự
+(`Người ký:` / `Email:` / `Cơ quan:` / `Thời gian ký:`). Đo 02-08:
+
+| bản | khối chữ ký in ra | bản cũ bắt được |
+|---|---|---|
+| 54-2025 · CB 1083+1084 | `Người ký:` `Email:` `Cơ quan:` `Thời gian ký:` (4 dòng) | 4/4 ✅ |
+| 19-2026 · CB 133 | `Ký bởi:` `Cơ quan:` `Ngày ký:` (**3 dòng**) | **0** ❌ |
+
+Ba dòng đó nằm ngay ĐẦU bản bóc ⇒ chui thẳng vào **khối đầu** — mà khối đầu là nguồn **DUY NHẤT**
+chứng minh danh tính văn bản (r215). Đo trên record thật:
+
+```
+trước: khoi_dau = 'Ký bởi: CÔNG BÁO NƯỚC CỘNG HÒA…\nCơ quan: VĂN PHÒNG CHÍNH PHỦ\nNgày ký: 2026-03-05…'
+sau  : khoi_dau = 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc…'      (141/141 Điều giữ nguyên)
+```
+
+**Vá.** Tập NHÃN đóng `CB_CHU_KY_NHAN` (`Người ký`|`Ký bởi` · `Cơ quan` · `Thời gian ký`|`Ngày ký` ·
+`Email`) + dò **DÃY LIỀN 3–4 dòng, THỨ TỰ TỰ DO**, thử dãy DÀI trước để không cắt cụt khối 4 thành 3.
+★Dãy **BẮT BUỘC chứa nhãn người-ký** — đó là thứ neo «đây là khối chữ ký»; thiếu chốt đó thì
+hai-ba dòng thân bài vô tình mở đầu bằng «Cơ quan:»/«Ngày ký:» đủ để **nuốt mất quy phạm**
+(ca `r318_khong_nuot_than_van_ban` khoá đúng điều này). Tên cũ `CB_CHU_KY_SO` giữ lại cho caller ngoài.
+
+## r318b — `CB_DAU_MUC` sai CẢ HAI CHIỀU trên CÙNG một tệp
+
+Đo trên `54-2025`:
+
+* **ÂM TÍNH GIẢ — dòng 10:** nhãn mục THẬT của Công báo là `VĂN BẢN PHÁP LUẬT KHÁC`, KHÔNG nằm
+  trong mẫu cũ (mẫu chỉ có họ «VĂN BẢN QUY PHẠM PHÁP LUẬT») ⇒ rác thật đi lọt.
+* **DƯƠNG TÍNH GIẢ — dòng 1578:** đó là dòng thứ BA của một TIÊU ĐỀ CHƯƠNG bị xuống dòng —
+  «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / **VĂN BẢN QUY PHẠM PHÁP LUẬT**» — bị báo là nhãn mục.
+
+**Và lời khuyên đi kèm còn nguy hiểm hơn thứ nó cảnh báo.** Câu cũ: *«Cắt tay tới dòng mang số hiệu
+(`Số: …` / `Luật số: …`) rồi nạp lại»*. Với **VBHN**, dòng `Số: …` nằm ở **KHỐI KÝ CUỐI bản**
+(đã đo: `19/VBHN-VPQH` ở vị trí 183.972/184.114) ⇒ làm theo đúng chữ là **XOÁ SẠCH Chương I→N**.
+Người vận hành làm đúng như tài liệu bảo thì mất trọn thân văn bản.
+
+**Vá.** (1) mẫu nhận cả `VĂN BẢN PHÁP LUẬT KHÁC` và tiền tố `PHẦN` tuỳ chọn; (2) LOẠI TRỪ
+dương-tính-giả bằng phép nhìn lui tối đa 2 dòng không-trống — gặp `Chương|Phần|Mục <số>` đứng
+một mình ⇒ đây là tiêu đề bị xuống dòng, KHÔNG báo; (3) viết lại lời khuyên: chỉ đúng (các) dòng
+cần bỏ, kèm cảnh báo TƯỜNG MINH đừng cắt theo neo `Số:`.
+
+★**GIỮ NGUYÊN quyết định gốc của r217: chỉ KHAI BÁO, KHÔNG tự bỏ** nhãn mục — bytes của corpus đã
+nạp không đổi. r318 chỉ làm cho phép khai báo TRỎ ĐÚNG CHỖ và lời khuyên không phản chủ.
+Ca `r318_dau_muc_dung_ca_hai_chieu` khoá cả năm vế: âm-tính-giả, dương-tính-giả, họ cũ vẫn bắt,
+lời khuyên có đủ cảnh báo, và nhãn vẫn CÒN trong text (không tự bỏ).
+
+**Nghiệm thu trên hai bản Công báo thật:**
+
+| | trước r318 | sau r318 |
+|---|---|---|
+| 19-2026 `chu_ky_so` | 0 (3 dòng chrome vào khối đầu) | **3** — khối đầu bắt đầu đúng ở quốc hiệu |
+| 54-2025 `chu_ky_so` | 4 | **4** (không đổi) |
+| 54-2025 cảnh báo nhãn mục | dòng **1578** (tiêu đề Chương) | dòng **10** (nhãn mục THẬT) |
+| số Điều | 141 · 72 | **141 · 72** (không suy suyển) |
+
+**Cổng.** selftest **1604/1604** (thêm 3 ca: 1 thuận + 2 ngược) · ruff F **delta so master = 0**
+(`verify_deep.py` sạch · `tl_selftest.py` 1 F401 + 4325 F821) · golden 0-diff · determinism ok ·
+`release-verify` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
+
+**Ghi thêm — bẫy `VERSION` mất byte:** lượt hoà master, phép giải xung đột của tôi ghi lại `VERSION`
+kèm ký tự xuống dòng cuối (7B → 8B). `.gitattributes` khoá `* -text` vì `package_hash` tính trên
+byte THẬT ⇒ đã nắn về đúng khuôn master (7B, KHÔNG newline). Thêm một biến thể của cùng bài học
+CRLF ở v1.36.48: **mọi thao tác trên tệp trong gói phải so byte với master trước khi commit.**
+
+# ★ v1.36.49 — r316: `scan_file` hết FAIL-OPEN (docx không đọc được ≠ sạch markup) · r317: trị đo DrawingML hết lọt vào thân Điều (2026-08-02)
+
+Hai lỗ của **đường ĐỌC .docx**, cùng lộ ra ở lượt bảo trì kho 02-08 khi nạp thật hai bản Công báo
+(`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.2, §4.6). Cả hai đều làm hỏng **nguyên văn** —
+đúng lời hứa lõi của skill — mà không cổng nào kêu.
+
+## r316 — `docx_markup.scan_file` báo «sạch markup» cho tệp KHÔNG ĐỌC ĐƯỢC
+
+**Bệnh.** Bản cũ nuốt mọi exception rồi `return scan("")`, tức trả dict đếm TOÀN 0. Docstring gọi đó
+là chủ ý, nhưng markup là **TÍN HIỆU PHÁP LÝ** — chính đầu tệp `docx_markup.py` viết «lỗi ĐÚNG-SAI về
+nội dung pháp luật». Một cổng an toàn pháp lý mặc định «sạch» khi không đo được là fail-OPEN.
+
+**Hai ca THẬT, độc lập nhau:**
+
+1. **Container CDN đóng gói sai** (đo 02-08): `.docx` Công báo tải qua `g7.cdnchinhphu.vn` đặt tên
+   entry bằng `\` thay `/` — 19-2026: **33/40** entry · 89-2026: **30/37** ⇒ không có
+   `word/document.xml` theo tên chuẩn. `scan_file` trả `{}` và người rà kết luận «SẠCH markup»;
+   sự thật sau khi nắn tên entry là `strike=2`. Word/LibreOffice mở tệp đó **bình thường** ⇒ chỉ
+   cần một reader chịu tên `\` là markup đi thẳng vào kho mà không ai khai.
+2. **Ca thứ hai nằm sẵn trong chính selftest**: `r188_docx_reader_bounded_wired` ĐANG khẳng định
+   `sum(scan_file(bomb).values()) == 0` cho docx **vượt trần zip-bomb**. Tức khế ước cũ ghi thành
+   văn rằng «không đo được ⇒ báo sạch». Ca đó nay đổi sang đòi cờ `UNREADABLE`; phần còn lại của
+   r188 (reader bounded, không OOM, docx thường vẫn đọc, cap đọc đúng từ env) giữ nguyên.
+
+**Vá.** `scan_file` trả `{UNREADABLE: True}` (hằng mới, xuất trong `__all__`) thay vì dict-toàn-0.
+`warn_line` có nhánh riêng KÊU TO «KHÔNG ĐỌC ĐƯỢC container … CHƯA biết có markup hay không (KHÔNG
+phải 'sạch')». `normalize_document` khai `MARKUP_KHONG_DOC_DUOC` vào `verify_flags` — **tách khỏi**
+câu `MARKUP_SUA_DOI` (câu đó khẳng định CÓ markup và đếm được; ở đây ta chưa biết gì).
+`lookup_ops` khai `markup_unreadable` riêng và để `markup_found=True` (fail-CLOSED).
+★Tài liệu SẠCH vẫn IM LẶNG như cũ — ca `r316_tai_lieu_sach_van_im_lang` giữ chốt đó, để cảnh báo
+không thành tiếng ồn và bất biến «văn bản sạch giữ NGUYÊN bytes cache» của r182 không vỡ.
+
+## r317 — toạ độ DrawingML chui vào thân Điều
+
+**Bệnh.** Phép bóc tag `<[^>]+>`→`""` giữ **MỌI** nút text, kể cả trị đo trong `<w:drawing>`. Đo trên
+2 bản Công báo (nhánh KHÔNG python-docx):
+
+| | trị lọt vào text |
+|---|---|
+| 19-2026 | `2927786221920` trong **khối đầu** + 2 số trong **Điều 141** |
+| 89-2026 | `315848953340` trong khối đầu · **Điều 72** dính chuỗi **59 CHỮ SỐ** · 1 số ở Điều 79 |
+
+Chỉ có ba loại nút rò, cùng là DrawingML: `wp:posOffset`, `wp14:pctWidth`, `wp14:pctHeight`.
+Nhánh **python-docx KHÔNG dính** (nó chỉ đọc `w:p`/`w:tbl`) ⇒ **cùng một .docx cho hai kết quả khác
+nhau tuỳ máy có hay không có `python-docx`** — mà `requirements.txt` khai stdlib-only, nên máy cài
+sạch chạy đúng nhánh RÒ.
+
+**Vá.** `drop_drawing_measures()` — bỏ nội dung element thuộc hai namespace `wp:`/`wp14:`, gọi
+**TRƯỚC** khi bóc tag, tại **cả hai** reader bóc-tag: `plain_from_document_xml` (r252 — đường của
+`tl extract`/`tl doc-text` + cổng phân loại ingest) và `_docx_zip_text` (`normalize_document`).
+
+★**Vì sao nhắm hai namespace chứ không xoá cả `<w:drawing>`:** chữ THẬT trong hình nằm ở
+`w:txbxContent`/`a:t` — xoá cả khối drawing là ăn mất text-box, mà letterhead VBQPPL đôi khi nằm
+đúng đó. `wp:`/`wp14:` (WordprocessingDrawing) không chứa text tài liệu: mọi lá là trị đo.
+
+**Ba bất biến được khoá bằng test** (`r317_khong_an_lem_chu_that`): tài liệu KHÔNG có drawing ⇒
+chuỗi ra **= chuỗi vào** (bytes bất biến cho corpus đã nạp) · text-box trong drawing SỐNG SÓT ·
+**số dài THẬT trong `w:t` không bị đụng** (văn bản luật có số tài khoản/mã số thuế — ai "vá" bằng
+cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ, và phải ĐỎ).
+
+**Nghiệm thu end-to-end** (chặn `python-docx` để ép đúng nhánh rò, nạp thật 2 bản Công báo):
+
+| | trước | sau |
+|---|---|---|
+| 19-2026 · 141 Điều | 3 số rác | **0** |
+| 89-2026 · 79 Điều | 3 số rác | **0** |
+
+**Bẫy đã dính giữa chừng, ghi vì nó không lộ ra khi đọc code:** bản vá đầu viết regex `wp14?` —
+cái đó parse ra `"wp1"` + `"4"` tuỳ chọn nên **KHÔNG khớp `wp:` trần**. Kết quả: `wp14:pctWidth` bị
+bỏ còn `wp:posOffset` vẫn lọt, ra một chuỗi số **CỤT** (`-7299958220` → `-729995822`) trông y như
+đã sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`; ca
+`r317_tri_do_drawing_khong_lot_vao_than_dieu` đòi CẢ HAI namespace nên bắt được đột biến đó.
+
+**Cổng.** selftest **1598/1598** (thêm 4 ca: 2 chiều thuận + 2 chiều ngược; sửa khế ước 1 ca r188) ·
+ruff F **delta so master = 0** trên cả 4 tệp đụng tới (`docx_markup.py` sạch · `normalize_document.py`
+1 F401 · `tl_selftest.py` 1 F401 + 4325 F821 · `tl_core/lookup_ops.py` 563 F821) · golden 0-diff ·
+determinism ok · `release-verify` 177/177 + `package_hash` khớp.
+
+**Còn treo (§4.6 chưa xong phần khế ước):** `requirements.txt` vẫn khai «uses only Python standard
+library». r317 làm nhánh không-`python-docx` hết rò, nhưng `pypdf` thì KHÔNG có đường thay thế —
+thiếu nó là mọi PDF bị chặn (r315). Sửa khế ước cài đặt của gói là lượt riêng.
+
+# ★ v1.36.48 — r314: cổng T1 số hiệu nhận dạng GẠCH CHÉO · r315: thiếu thư viện dò PDF không còn bị gọi là «bản SCAN» (2026-08-02)
+
+Hai cổng CÙNG một bệnh: **báo sai thủ phạm**. Cả hai đều đỏ/xanh nghe rất thuyết phục, và cả hai đều
+đẩy người vận hành đi sửa nhầm chỗ. Không cái nào lộ ra khi đọc mã — cùng lộ ra ở lượt bảo trì kho
+02-08 khi nạp thật ba bản Công báo (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.1, §4.3).
+
+## r314 — `sohieu_corroborated` mù với dạng số hiệu gạch chéo
+
+**Bệnh.** r221 vá chiều «khoá registry gạch-nối vs bản in gạch-chéo» và mặc định `so_hieu` truyền vào
+LUÔN là khoá registry. Nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN — nguyên văn
+*«Số hiệu canonical, vd 18/VBHN-VPQH»* — và đường nạp chuyển THẲNG chuỗi đó xuống `verify_deep`.
+`_VBHN_WITHYEAR_RE` là `^(\d+)-(\d{4})-VBHN-(.+)$`, chỉ nhận gạch nối ⇒ `19/2026/VBHN-VPQH` trượt
+`fullmatch`, mất luôn phép nới «bản in không mang năm», đẻ ra `T1-nhẹ` OAN.
+
+**Đo 02-08 trên 3 bản Công báo, CÙNG tệp, chỉ đổi cách gõ số hiệu:**
+
+| số hiệu truyền vào | 19-2026 | 54-2025 | 89-2026 |
+|---|---|---|---|
+| `NN/YYYY/VBHN-VPQH` (dạng in — đúng như `--help` dạy) | `T1-nhẹ` | `T1-nhẹ` | `T1-nhẹ` |
+| `NN-YYYY-VBHN-XXX` (khoá registry) | — | — | — |
+
+3/3 cờ oan → 0/3. Cùng họ với ★ v1.35.57/r221 (`re.escape(so_hieu.split("/")[0])`): cả hai lần
+đều là **giả định về DẠNG chuỗi ở biên giữa khoá registry và bản in**.
+
+**Vá.** Nắn ngăn cách của **bản sao cục bộ** ngay trước `fullmatch`
+(`verify_deep.py:84`). ★KHÔNG nới `_VBHN_WITHYEAR_RE` dùng chung: ở `classify`/`hygiene`/`resolve`/
+`lookup_ops` nó đang canh ĐÚNG bất biến khoá registry (CHỈ gạch nối, `NN-YYYY-VBHN-XXX`) — nới ở đó là
+mở toang một cổng khác. Test `r314_khong_noi_regex_dung_chung` khoá đúng điều này: nó ĐỎ nếu ai
+đó "vá" bằng cách sửa regex chung.
+
+## r315 — `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là THIẾU THƯ VIỆN
+
+**Bệnh.** `pdf_text_layer_chars` thử `pdfplumber` rồi `pypdf`; thiếu **cả hai** thì `return 0` — mà 0
+nghĩa là «PDF scan». Khuyết tật của MÁY bị báo thành thuộc tính của TÀI LIỆU, kèm lời khuyên
+*«hãy chuyển sang nguồn web TEXT khác»* ⇒ người vận hành đi săn nguồn không tồn tại. Nặng hơn:
+`requirements.txt` khai *«uses only Python standard library»* nên **cài sạch là không có cái nào**
+⇒ toàn bộ đường nạp PDF chết, với thông điệp chỉ sai hướng.
+
+**Đo 02-08 trên `54-2025-g7.pdf`** (PDF text THẬT — `pdftotext` bóc 167.433 ký tự, riêng trang 1 có 2.536):
+
+| | kết quả |
+|---|---|
+| chưa cài `pypdf` | `{"ok": false, "reason": "scanned_pdf", "message": "…chỉ 0 ký tự text ở trang đầu…"}` |
+| đã cài `pypdf` | `{"ok": true, "n_articles": 72}` |
+
+CÙNG một tệp.
+
+**Vá.**
+
+1. `pdf_text_layer_chars` trả **`None` = KHÔNG ĐO ĐƯỢC**, khác hẳn `0` = đo được và rỗng. Tách hai
+   đường dò thành `_pdf_chars_pdfplumber` / `_pdf_chars_pypdf`, mỗi cái tự trả `None` khi câm.
+   ★Đồng thời sửa lỗi **CỘNG DỒN** của bản cũ: hai đường dò nuôi CHUNG biến `total`, nên pdfplumber
+   hỏng giữa chừng rồi pypdf chạy tiếp là cộng CHỒNG lên phần dở dang.
+2. `PdfProbeUnavailableError` — lớp lỗi RIÊNG, **KHÔNG** kế thừa `ScannedPDFError` (gộp họ là tái lập
+   đúng cái lỗi đang chữa). Vẫn **fail-CLOSED** — không nạp mù — nhưng thông điệp chỉ đúng người phải
+   sửa: *«ĐÂY LÀ KHUYẾT CỦA MÁY… ĐỪNG đi tìm nguồn khác. pip install pypdf»*.
+3. Handler `__main__` thêm nhánh `reason: "pdf_probe_unavailable"` + `action: "install_dep"` + **exit 6**
+   (5 vẫn là «PDF scan, đổi nguồn»), để agent-loop/script không nuốt thành `ingest_failed` chung chung.
+
+**Chưa làm ở lượt này:** `requirements.txt` vẫn khai stdlib-only. `pypdf`/`python-docx` thực chất là
+phụ thuộc BẮT BUỘC để nạp đúng (thiếu `python-docx` thì trị `wp:posOffset` lọt vào thân Điều — biên bản
+§4.6). Việc đó đụng khế ước cài đặt của gói nên tách lượt riêng.
+
+**Cổng.** selftest **1594/1594** (thêm 4 ca: 2 chiều thuận + 2 chiều ngược) · ruff F **delta so master = 0**
+trên cả 4 tệp đụng tới (`tl.py` 12 F821 · `tl_selftest.py` 1 F401 + 4325 F821 · `ingest_to_cache.py`
+1 F401 · `verify_deep.py` sạch) · golden 0-diff · determinism ok · `release-verify` khớp.
+
+**Bẫy đã dính trong chính lượt này, ghi để không lặp:** bump VERSION bằng
+`pathlib.read_text()/write_text()` đã **nuốt 307 CRLF của SKILL.md và 1766 của `tl.py`** (chế độ text
+dịch CRLF→LF). `.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ mọi sửa tệp trong
+gói phải đi `read_bytes()/write_bytes()`. Phát hiện nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo
+`SKILL.md.stat().st_size`) — một cổng canh việc khác lại bắt được đúng lỗi này.
 # ★ v1.36.47 — r313: RAS-17 phần MÃ + GUARD — khuôn `anchor.text_hash`, tách `locator`, cưỡng chế `anchor_con_hieu_luc` (2026-08-02)
 
 **Phạm vi có chủ đích: MÃ + GUARD, KHÔNG đụng DỮ LIỆU.** Di trú 82 giá trị anchor là việc GHI, tách riêng.

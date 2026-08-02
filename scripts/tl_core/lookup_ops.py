@@ -2620,7 +2620,17 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                         text, src = t, "docx"
                         _meta["markup_filter_ran"] = _mode != "raw"
                         try:   # r183: khai số đếm thật để caller/JSON nói được ĐÃ lọc cái gì
-                            _meta["markup_found"] = any(_imp("docx_markup").scan_file(p).values())
+                            _dm2 = _imp("docx_markup")
+                            _st2 = _dm2.scan_file(p)
+                            # r316: TÁCH «không đọc được» khỏi «đọc được và có markup». Trước đây
+                            # `any(...)` trên dict rỗng ⇒ markup_found=False, tức docx hỏng được
+                            # khai là SẠCH. Nay khai riêng, và markup_found để True (fail-CLOSED:
+                            # chưa-biết KHÔNG được lặng lẽ thành đã-sạch cho một tín hiệu pháp lý).
+                            if _st2.get(_dm2.UNREADABLE):
+                                _meta["markup_unreadable"] = True
+                                _meta["markup_found"] = True
+                            else:
+                                _meta["markup_found"] = any(_st2.values())
                         except Exception:  # noqa: BLE001
                             pass
                 elif kind == "pdf" or (kind == "" and head.startswith(b"%PDF")):

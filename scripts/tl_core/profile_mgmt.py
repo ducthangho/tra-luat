@@ -519,7 +519,7 @@ def cmd_profile_delete(a) -> int:
                "note": "Chưa xóa gì. Tách shared_source_id trước rồi chạy lại để tránh purge một phần."}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
         return 2
-    # r314 (PRO-09 · ADR-0012 §4 — nâng từ mục RISK của sổ audit): `profile-delete` là mutation NẶNG
+    # r320 (PRO-09 · ADR-0012 §4 — nâng từ mục RISK của sổ audit): `profile-delete` là mutation NẶNG
     # NHẤT của họ profile (xoá nguồn NLM **bất khả nghịch** → trash Drive → gỡ config) mà TRƯỚC ĐÂY
     # không đọc marker ở BẤT KỲ đâu — chạy khi trạng thái định danh hoàn toàn mù. Guard phải đứng
     # TRƯỚC mutation ĐẦU TIÊN: đặt sau đây thì nguồn NLM đã xoá rồi, chặn cũng vô nghĩa.
@@ -883,7 +883,7 @@ def _cmd_profile_adopt_impl(a) -> int:
     _marker_result = None
     if _meta_id:
         _old_mk = _marker_read(g, folder, meta_id=_meta_id)
-        # r314 (PRO-03 · ADR-0012 §4): mutation marker đi qua GUARD CHUNG `_marker_mutation_guard`,
+        # r320 (PRO-03 · ADR-0012 §4): mutation marker đi qua GUARD CHUNG `_marker_mutation_guard`,
         # KHÔNG tự dựng lại ba điều kiện rời. Chuỗi cũ kiểm đúng ba thứ — đọc lỗi / trùng marker /
         # tên profile khác — nên marker HỎNG NỘI DUNG lọt sạch: `FINGERPRINT_MISMATCH` cho cả ba điều
         # kiện đều False ⇒ rơi thẳng vào nhánh `_marker_write` = GHI ĐÈ bản hỏng (self-heal ngầm),

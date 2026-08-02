@@ -2285,7 +2285,7 @@ def _resume_identity_gate(*, apply: bool, journal: str, drive_id: str, name: str
             return {"error": "RESUME_IDENTITY_MISMATCH", "journal_drive_id": _jd,
                     "registry_drive_id": str(canon_drive_id).strip(),
                     "note": "Fingerprint journal không còn khớp dòng registry — nguồn đã đổi; replan."}
-        # r314 (ING-04 · ADR-0011/D5): `if _jd and …` ở trên BỎ QUA so sánh khi journal ghi
+        # r320 (ING-04 · ADR-0011/D5): `if _jd and …` ở trên BỎ QUA so sánh khi journal ghi
         # `drive_id=""` — mà đó chính là ca sổ audit nêu. Đo được: journal cũ (`drive_id=""`, có
         # identity_hash) + registry ĐÃ trỏ sang GDoc HOÀN TOÀN KHÁC ⇒ cổng trả None = CẤP QUYỀN GHI.
         # Journal rỗng drive_id là "chưa chứng minh được nguồn", KHÔNG phải "đã chứng minh là khớp";
@@ -2669,7 +2669,7 @@ def _il_stage_plan(ctx):
     if not (f and Path(f).exists()):
         print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
               file=sys.stderr); return {"rc": 2}
-    # r314 (ING-06): đọc TỪ hợp đồng dùng chung — tập literal ở đây từng là bản khai THỨ HAI, và ZIP
+    # r320 (ING-06): đọc TỪ hợp đồng dùng chung — tập literal ở đây từng là bản khai THỨ HAI, và ZIP
     # planner đã trôi lệch khỏi nó (thừa `.txt`/`.md`).
     from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _IL_EXTS
     _source_check = validate_source_file(

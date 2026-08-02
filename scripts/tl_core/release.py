@@ -137,7 +137,7 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
 
             # Same zip contents with different member order must produce same dry-run plan after scrub.
             # Use in-process _zip_plan here to avoid nested CLI fan-out during strict audit; CLI path is covered by golden/smoke cases.
-            # r314 (ING-06): filler `.txt` → `.docx`. Chủ đề của check này là ỔN ĐỊNH THỨ TỰ member
+            # r320 (ING-06): filler `.txt` → `.docx`. Chủ đề của check này là ỔN ĐỊNH THỨ TỰ member
             # (`zi1 == zi2`), không liên quan đuôi; `.txt` chỉ tình cờ nằm đúng khe hở planner↔child vừa
             # bịt, làm vế `plan.ok` gãy vì 0 member được nhận. Khẳng định gốc giữ nguyên.
             z1, z2 = tdp / "a.zip", tdp / "b.zip"

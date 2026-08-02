@@ -18,7 +18,7 @@ PLAN_SCHEMA = "ingest_plan.v2"
 MAX_DIRECT_UPLOAD_BYTES = 35 * 1024 * 1024
 _CONFIRM_VALUE = "yes"
 
-# r314 (ING-06): NGUỒN SỰ THẬT DUY NHẤT cho "đuôi nạp được". Trước đây tập này bị khai HAI LẦN, lệch
+# r320 (ING-06): NGUỒN SỰ THẬT DUY NHẤT cho "đuôi nạp được". Trước đây tập này bị khai HAI LẦN, lệch
 # nhau: ZIP planner (`zip_ingest._ALLOWED_INGEST_EXTS`) nhận thêm `.txt`/`.md`, còn child `ingest-local`
 # (`_il_stage_plan` → `validate_source_file`) từ chối đúng hai đuôi đó bằng `UNSUPPORTED_EXTENSION`.
 # Hệ quả: planner hứa một kế hoạch mà child CHẮC CHẮN không thực hiện được — member vào plan rồi chết

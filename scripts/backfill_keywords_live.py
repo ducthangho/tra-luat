@@ -133,12 +133,30 @@ def main():
     ap.add_argument('--batch', type=int, default=40, help='vá reg_bulk mỗi N doc')
     ap.add_argument('--all', action='store_true', help='cả doc chưa lên NLM (mặc định chỉ NLM)')
     ap.add_argument('--progress', default=PROG)
+    # r310 (RAS-01 vế metadata/CLI): script này TRƯỚC ĐÂY không có đường chạy chỉ-đọc nào — mọi lần gọi
+    # đều đi thẳng vào `exporttext` + `reg_bulk` + ghi checkpoint. `tl rasoat keywords` thiếu `--apply`
+    # nay bơm cờ này. DRY = KHÔNG `exporttext`, KHÔNG `reg_bulk`, và KHÔNG lưu checkpoint: một lượt "dry"
+    # mà vẫn dịch sổ tiến độ thì đúng là bệnh RAS-01 đang chữa, chỉ đổi chỗ.
+    ap.add_argument('--dry', action='store_true',
+                    help='chỉ-đọc: kê worklist rồi dừng — không exporttext, không reg_bulk, không ghi checkpoint')
     a = ap.parse_args()
 
     prog = load_progress(a.progress)
     st, rs = prog['state'], prog['reason']
     wl_all = worklist(a.manifest, not a.all)
     wl = pending(wl_all, prog)
+
+    if a.dry:
+        out = {'ok': True, 'dry': True, 'con_lai': len(wl), 'tong_worklist': len(wl_all),
+               'da_chot': sum(1 for v in st.values() if v == 'committed'),
+               'thu_lai': sum(1 for v in st.values() if v == 'retryable'),
+               'treo_inflight': sum(1 for v in st.values() if v == 'inflight'),
+               'bo_qua_co_ly_do': sum(1 for v in st.values() if v == 'blocked'),
+               'vi_du': [w['drive_id'] for w in wl[:5]],
+               'ghi_chu': 'DRY — chưa gọi exporttext/reg_bulk, checkpoint KHÔNG đổi. Thêm --apply '
+                          '(qua `tl rasoat keywords … --apply`) để ghi thật.'}
+        print(json.dumps(out, ensure_ascii=False))
+        return 0
     _lai = sum(1 for w in wl if st.get(w['drive_id']) in ('retryable', 'inflight'))
     print(f"[worklist] còn {len(wl)} doc cần bóc tukhoa "
           f"(đã chốt {sum(1 for v in st.values() if v == 'committed')}, "

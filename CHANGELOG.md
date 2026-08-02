@@ -1,3 +1,85 @@
+# ★ v1.36.44 — r310: RAS-01 (vế metadata/CLI) + RAS-14 — `rasoat` hết `argparse.REMAINDER`; đường GHI đòi `--apply` tường minh (2026-08-02)
+
+Đóng **hai mục cuối** của Làn A sổ audit 31-07. Vế `changes_pull` của RAS-01 đã land ở r304; vế này là
+phần được hoãn sang T3 (commit `c8cdd02` ghi rõ *"vế metadata/CLI để T3"*).
+
+**Bệnh — MỘT dòng, HAI lỗ ngược nhau.** `cli.py` khai `rasoat` bằng đúng hai positional: `sub` và
+`rest=argparse.REMAINDER`. REMAINDER nuốt trọn phần đuôi dòng lệnh, nên:
+
+- **(a) RAS-01.** KHÔNG cờ nào của `rasoat` được KHAI. Ba nhánh `keywords`/`titles`/`orchestrate` đều
+  GHI registry thật (`reg_bulk` · `changes_pull`) nhưng **vô hình** với `tool-inventory` và
+  `workflow-audit --strict`: không meta, không cổng, không ai đối chiếu. `validate_registry` chỉ duyệt
+  `COMMAND_META` — mà registry chỉ biết tên TOP-LEVEL, nên mọi writer nằm dưới một subcommand đều lọt.
+  Cổng `WRITE_CMD_NO_GATE` chỉ soi được thứ nó NHÌN THẤY. Cộng thêm: `backfill_keywords_live.py` không
+  có chế độ DRY nào — mọi lần gọi đều đi thẳng `exporttext` → `reg_bulk` → ghi checkpoint.
+- **(b) RAS-14.** `--profile` gõ SAU sub bị đẩy NGUYÊN cho script con. `backfill_nlm_title.py` có
+  `--profile` RIÊNG — đó là profile của **nlm CLI**, không phải corpus profile của tl. Nên
+  `tl rasoat titles --profile "Luật BHXH"` **đổi nghĩa trong im lặng**: corpus profile của tl không
+  được áp (scope rơi về nền `vbqppl`), script con lại nhận tên hồ sơ làm profile nlm. Và vì `rasoat`
+  nằm trong `_CREDS_LAZY_CMDS` nên `load_creds` cũng không chạy — không có đường nào đặt `TL_PROFILE`.
+
+**Vá.**
+
+1. **`RASOAT_SPECS` (`tl_core/command_registry.py`) — spec dữ liệu cho 5 nhánh.** `register_rasoat`
+   sinh subparser THẬT; `rasoat_child_argv` dựng argv script con TỪ NAMESPACE đã parse. Cờ script con
+   được ánh xạ TƯỜNG MINH bằng khoá `child`; `child=None` = cờ chỉ sống ở tầng tl.
+2. **`--profile` thuộc về tl**, gõ trước hay sau subcommand đều được, và `apply_profile_offline` chạy
+   **TRƯỚC** dispatch. Profile của nlm CLI đổi tên thành **`--nlm-profile`** ⇒ hai nghĩa hết chồng nhau.
+   Cùng lớp: `--selftest` của bộ điều phối thành `--orchestrator-selftest` (`--selftest` ở tầng tl bị
+   `main()` đọc TRƯỚC dispatch — trùng tên là chạy nhầm selftest của tl).
+3. **Đường GHI đòi `--apply` TƯỜNG MINH; chạy trần là CHỈ-ĐỌC.** Thiếu `--apply` ⇒ tl bơm `dry_flag`
+   của script con. `backfill_keywords_live.py` được thêm `--dry`: kê worklist rồi dừng — KHÔNG
+   `exporttext`, KHÔNG `reg_bulk`, và **KHÔNG ghi checkpoint** (một lượt "dry" mà vẫn dịch sổ tiến độ
+   thì đúng là bệnh RAS-01, chỉ đổi chỗ). Writer nào KHÔNG khai `dry_flag` ⇒ **fail-CLOSED**:
+   `RASOAT_WRITE_NEEDS_APPLY` rc=2, không rơi xuống subprocess.
+4. **`NESTED_COMMAND_META` + `all_command_meta()`** — registry biết lệnh LỒNG. `validate_registry`
+   resolve theo ĐƯỜNG DẪN (`_parser_for_path`) nên `rasoat keywords` đi qua đủ bộ cổng như lệnh
+   top-level; `registry_summary` kê cả 5 (thêm `counts.nested`). Lưới chiều ngược
+   `RASOAT_SUB_NOT_IN_REGISTRY`: thêm sub GHI mới mà quên meta là gate ĐỎ, không tái diễn lỗ cũ.
+5. **Hai thứ vốn đã hỏng, nay đúng:** `--no-auto-cache` được `cmd_rasoat` ĐỌC từ lâu
+   (`getattr(a, "no_auto_cache", False)`) nhưng **chưa từng được khai ở đâu** — REMAINDER nuốt mất nên
+   nó luôn `False`; nay là cờ thật. Và `--json` do tl nuốt nên `tl rasoat <sub> --json` hết `rc=2`.
+
+**Test (+7 ca → 1586/1586).** `r310_rasoat_sub_la_lenh_that_khong_con_remainder` (bề mặt parser + cờ lạ
+bị TỪ CHỐI) · `r310_ras14_profile_sau_sub_thuoc_ve_tl` (HAI CHIỀU: tl giữ `--profile`, mà
+`--nlm-profile` vẫn xuống được script con — vá không được thành "bỏ hẳn tính năng") ·
+`r310_chay_tran_chi_doc_apply_moi_ghi` (+ phản chứng: nhánh không-ghi không tự sinh `--dry`; positional
+và alias `--sohieu`/`--file` vẫn map) · `r310_writer_khong_co_dry_bi_tu_choi` (fail-CLOSED + phản chứng
+`--apply` vẫn đi tiếp) · `r310_ap_profile_offline_truoc_dispatch` (đo THỨ TỰ: profile TRƯỚC
+`subprocess.call`) · `r310_audit_nhin_thay_moi_writer_long` (+ ĐỎ-hoá tại chỗ: gỡ cổng ⇒
+`WRITE_CMD_NO_GATE`, gỡ meta ⇒ `RASOAT_SUB_NOT_IN_REGISTRY`) · `r310_bkl_dry_khong_dong_gi` (+ phản
+chứng: bỏ `--dry` ⇒ có call, có checkpoint).
+
+**ĐỎ-TRƯỚC (đo thật).** Hoàn nguyên `cli.py` + `lookup_ops.py` + `backfill_keywords_live.py` về HEAD,
+GIỮ nguyên test ⇒ **1574/1586**, đỏ đúng **cả 7** ca r310 (+ `r64_registry_validate_clean` và 4 ca
+kernel-size — nhiễu của cây nửa-vời, xanh lại khi khôi phục). Sau vá **1586/1586**.
+
+**Hai ca CÓ SẴN đỏ — cả hai đều đúng, sửa theo tín hiệu chứ không đạp qua:**
+
+- `r64_registry_meta_invariants` khoá `counts.total == len(COMMAND_META)`. Bề mặt meta nay gồm cả lệnh
+  lồng ⇒ bất biến GIỮ NGUYÊN Ý NGHĨA (counts khớp bảng meta), chỉ mở đúng bằng bề mặt mà
+  `registry_summary` thật sự kê, thêm khoá `nested` và phép cộng hai bảng. Bọc `try` vì ca này chạy ở
+  mức module của `run()` (chưa có `_t110`) — một `AttributeError` ở đó làm **sập cả suite** thay vì báo
+  một ca đỏ, đúng lúc cần đo ĐỎ-TRƯỚC thì lại không đo được gì.
+- `r77a_parser_surface_matches_snapshot` là drift-lock của bề mặt parser — nó ĐỎ đúng như thiết kế.
+  Diff **đo trước khi ghi lại**: đúng `rasoat` đổi hash + 5 khoá `rasoat <sub>` thêm mới, **không khoá
+  nào khác động**. Ghi lại bằng `TL_WRITE_PARSER_SURFACE=1`.
+
+**Bẫy đã trả giá khi viết ca này — ghi lại vì tái diễn được.** `python scripts/tl.py --selftest` chạy
+tl.py là `__main__`, rồi `tl_selftest` `import tl` nạp tl.py **LẦN HAI** thành module `tl`; lần nạp sau
+REBASE `__globals__` của hàm `tl_core` sang `tl.__dict__`, trong khi `_TL_MODULE` là `__main__`. Hệ quả:
+`_mp261` **ăn** với tên là STUB (`apply_profile_offline` ủy quyền sang `tl_core.profile_env`, mà
+`_MODS261` có patch) nhưng **KHÔNG ăn** với tên chỉ sống trong namespace tl (`subprocess`,
+`_healed_script_path`) — lệnh lặng lẽ rơi xuống chạy script con THẬT và `rc` là rc của script đó, không
+có lỗi nào chỉ thẳng vào nguyên nhân. Vá đúng chỗ: patch trên globals của CHÍNH hàm sẽ chạy
+(`_resolve286`), y khuôn ca r287. Kèm theo: mọi `parse_args`/`main()` trong ca mới đều bọc `SystemExit`
+— `_t110` chỉ bắt `Exception`, nên một hồi quy ở bề mặt CLI sẽ **giết cả suite** thay vì làm đỏ đúng ca
+của nó (đo được điều này ở lượt ĐỎ-TRƯỚC đầu tiên).
+
+**Tài liệu.** `references/RUNBOOK.md` §H thêm mục r310: bảng lệnh DRY-vs-`--apply` cho cả 5 nhánh + hai
+điểm dễ vấp (`--nlm-profile`, `--orchestrator-selftest`). Dòng `tl rasoat keywords --json` cũ GIỮ
+NGUYÊN và vẫn đúng — nó là đường fallback-plan khi thiếu script thật.
+
 # ★ v1.36.43 — r309: thẻ máy đọc `references/workflows/*.json` vào tầm guard con trỏ (T0-F/1c) (2026-08-02)
 
 **Bối cảnh.** r308 mở doc-set ra mọi `*.md` trong gói, nhưng lọc theo đuôi `.md` nên 27 **thẻ máy

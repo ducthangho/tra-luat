@@ -1198,7 +1198,7 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 159,
+    "checked_commands": 164,
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",

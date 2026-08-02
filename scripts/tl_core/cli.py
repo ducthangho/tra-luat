@@ -506,9 +506,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--apply", action="store_true"); p.add_argument("--confirm"); p.add_argument("--to-cat", dest="to_cat"); p.set_defaults(fn=cmd_hygiene, hsub="reconcile")
 
 
-    p = sub.add_parser("rasoat")
-    p.add_argument("sub", help="keywords|titles|worksheet|phuluc|orchestrate")
-    p.add_argument("rest", nargs=argparse.REMAINDER); p.set_defaults(fn=cmd_rasoat)
+    # r309 (RAS-01 vế metadata/CLI · RAS-14): `rasoat` hết `argparse.REMAINDER`. Trước đây cả sub lẫn đuôi
+    # dòng lệnh là hai positional thô ⇒ không cờ nào được KHAI: ba đường GHI (keywords/titles/orchestrate)
+    # vô hình với tool-inventory/workflow-audit --strict, và `--profile` gõ SAU sub bị đẩy nguyên cho script
+    # con (RAS-14 — `backfill_nlm_title.py` có `--profile` RIÊNG nghĩa khác hẳn). Spec + meta ở
+    # tl_core/command_registry.py (RASOAT_SPECS / NESTED_COMMAND_META); cổng `--apply` ở cmd_rasoat.
+    p = sub.add_parser("rasoat", help="rà soát/backfill: keywords|titles|worksheet|phuluc|orchestrate")
+    _tl_registry.register_rasoat(p, sys.modules[__name__])
     p = sub.add_parser("cache-build", help="B2: dựng cache cấu trúc docs/<sh>--consolidated.json (wrapper ingest_to_cache.py) cho `rasoat worksheet`; chain --gdoc-id/--input, tự nạp config")
     p.add_argument("sohieu", nargs="?", help="số hiệu canonical (vd 19/VBHN-VPQH)")
     p.add_argument("rest", nargs=argparse.REMAINDER, help="cờ chuyển thẳng cho ingest_to_cache.py: --gdoc-id/--input/--goc/--method/--nlm-source-id/--vbhn-first…")

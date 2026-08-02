@@ -1107,7 +1107,11 @@ def _rasoat_fallback_plan(sub: str, script: str, rest: list[str]) -> dict:
 
 def _rasoat_map_positional(sub: str, rest) -> list:
     """#4: positional ĐẦU (số hiệu/file) → cờ chính của script rasoat đích (worksheet→--so-hieu, phuluc→--in),
-    để `tl rasoat worksheet 18/VBHN-VPQH` chạy như `... --so-hieu 18/VBHN-VPQH`. No-op nếu đã có cờ / là -h / sub khác."""
+    để `tl rasoat worksheet 18/VBHN-VPQH` chạy như `... --so-hieu 18/VBHN-VPQH`. No-op nếu đã có cờ / là -h / sub khác.
+
+    r309: đường DISPATCH không còn dùng hàm này (positional/alias nay do argparse lo — `fills` +
+    `flags:["--so-hieu","--sohieu","--so_hieu"]` trong RASOAT_SPECS). GIỮ lại vì nó là bản mô tả gọn nhất
+    của quy ước positional, và ca `rasoat_worksheet_positional_maps_so_hieu` vẫn khoá quy ước đó."""
     rest = list(rest or [])
     # B1: ALIAS cờ — skill dùng `--sohieu` (không gạch) nhưng worksheet đòi `--so-hieu`; phuluc đòi `--in` thay `--file`.
     # Chuẩn hoá để KHỎI nhớ flag riêng từng script con (§14: dùng lệnh sẵn có, đừng bắt nhớ chi tiết). No-op nếu khác.
@@ -1148,19 +1152,32 @@ def _rasoat_autocache_worksheet(rest: list, a) -> None:
 
 
 def cmd_rasoat(a) -> int:
-    """Passthrough tới script rà soát/backfill nếu có; nếu thiếu thì in fallback plan có cấu trúc."""
-    table = {
-        "keywords": "backfill_keywords_live.py",
-        "titles": "backfill_nlm_title.py",
-        "worksheet": "rasoat_worksheet.py",
-        "phuluc": "rasoat_phuluc.py",
-        "orchestrate": "registry_orchestrator.py",
-    }
-    script = table.get(a.sub)
-    if not script:
-        print(f"[tl] rasoat <sub> ∈ {list(table)}", file=sys.stderr)
+    """Passthrough tới script rà soát/backfill nếu có; nếu thiếu thì in fallback plan có cấu trúc.
+
+    r309 (RAS-01 vế metadata/CLI · RAS-14) — ba thay đổi HÀNH VI, mỗi cái vá một lỗ:
+      1. argv script con dựng từ NAMESPACE đã parse (`rasoat_child_argv`), không còn `argparse.REMAINDER`.
+      2. `apply_profile_offline` chạy TRƯỚC dispatch — script con thừa hưởng đúng TL_PROFILE/scope. Trước
+         đây `rasoat` nằm trong `_CREDS_LAZY_CMDS` nên `load_creds` KHÔNG chạy, và REMAINDER lại nuốt mất
+         `--profile`: script con ghi registry theo scope NỀN dù người gõ đã chỉ định hồ sơ (RAS-14).
+      3. Đường GHI đòi `--apply` TƯỜNG MINH. Thiếu `--apply` ⇒ bơm `dry_flag` của script con; script GHI
+         mà KHÔNG có chế độ DRY ⇒ TỪ CHỐI (fail-CLOSED) chứ không chạy liều — "chạy trần" phải chỉ-đọc."""
+    spec = _tl_registry.RASOAT_SPEC_BY_NAME.get(getattr(a, "sub", None) or "")
+    if not spec:
+        print(f"[tl] rasoat <sub> ∈ {list(_tl_registry.RASOAT_SPEC_BY_NAME)}", file=sys.stderr)
         return 1
-    rest = _rasoat_map_positional(a.sub, a.rest)
+    script = spec["script"]
+    # (2) scope TRƯỚC dispatch — offline (rasoat là lệnh creds-lazy, không được đòi token ở đây).
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    apply_on = bool(getattr(a, "apply", False))
+    # (3) cổng ghi fail-CLOSED: writer không có đường DRY thì KHÔNG có "chạy trần an toàn".
+    if spec.get("writes") and not apply_on and not spec.get("dry_flag"):
+        print(json.dumps({"ok": False, "error": "RASOAT_WRITE_NEEDS_APPLY", "sub": a.sub, "script": script,
+                          "write_scope": spec["writes"],
+                          "fix": f"`tl rasoat {a.sub} … --apply` để GHI; script con này KHÔNG có chế độ DRY "
+                                 "nên chạy trần bị từ chối thay vì ghi im lặng."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    rest = _tl_registry.rasoat_child_argv(spec, a, apply_on=apply_on)
     if a.sub == "worksheet" and not getattr(a, "no_auto_cache", False):
         _rasoat_autocache_worksheet(rest, a)        # #3: tự dựng cache nếu thiếu (auto-chain ingest)
     name = script[:-3] if script.endswith(".py") else script
@@ -1171,7 +1188,8 @@ def cmd_rasoat(a) -> int:
     if fb.exists():
         return subprocess.call([sys.executable, str(fb)] + rest)
     plan = _rasoat_fallback_plan(a.sub, script, rest)
-    if "--json" in rest:
+    # `--json` nay do tl NUỐT (vòng inject cuối build_parser) chứ không còn nằm trong `rest` — đọc namespace.
+    if getattr(a, "json", False) or "--json" in rest:
         print(json.dumps(plan, ensure_ascii=False, indent=2))
     else:
         print(f"[tl] optional script chưa có: {script}. Đây là overlay core, không phải gói rasoat đầy đủ.", file=sys.stderr)

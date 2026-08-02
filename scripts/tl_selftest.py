@@ -5264,13 +5264,25 @@ def run() -> int:
         _ok64 = _ok64 and _e64.code == 2
     cases.append(("r64_generated_parsers_behavior", _ok64))
     # meta invariants: mọi spec sinh đều có meta generated=True; counts nhất quán; summary schema chuẩn.
-    _sum64 = _reg64.registry_summary()
-    cases.append(("r64_registry_meta_invariants",
-                  all(_reg64.COMMAND_META.get(sp["name"], {}).get("generated") for sp in _reg64.GENERATED_SPECS)
-                  and _sum64["counts"]["generated_parsers"] == len(_reg64.GENERATED_SPECS)
-                  and _sum64["schema"] == "command_registry.v1"
-                  and _sum64["counts"]["total"] == len(_reg64.COMMAND_META)
-                  and all(m["risk"] in ("low", "medium", "high") for m in _reg64.COMMAND_META.values())))
+    # r309 (RAS-01): bề mặt meta nay gồm CẢ lệnh LỒNG (`rasoat keywords`…) — `total` phải đếm theo
+    # `all_command_meta()`, không phải riêng COMMAND_META. Bất biến GIỮ NGUYÊN Ý NGHĨA (counts khớp bảng
+    # meta), chỉ mở đúng bằng bề mặt mà `registry_summary` thật sự kê; `nested` khoá riêng phần mới.
+    # Bọc try: ca này chạy Ở MỨC MODULE của `run()` (chưa có `_t110`), nên một AttributeError ở đây làm
+    # SẬP CẢ suite thay vì báo 1 ca đỏ — đúng lúc cần đo ĐỎ-TRƯỚC thì lại không đo được gì.
+    try:
+        _sum64 = _reg64.registry_summary()
+        _all64 = _reg64.all_command_meta()
+        _inv64 = bool(
+            all(_reg64.COMMAND_META.get(sp["name"], {}).get("generated") for sp in _reg64.GENERATED_SPECS)
+            and _sum64["counts"]["generated_parsers"] == len(_reg64.GENERATED_SPECS)
+            and _sum64["schema"] == "command_registry.v1"
+            and _sum64["counts"]["total"] == len(_all64)
+            and _sum64["counts"]["nested"] == len(_reg64.NESTED_COMMAND_META)
+            and len(_all64) == len(_reg64.COMMAND_META) + len(_reg64.NESTED_COMMAND_META)
+            and all(m["risk"] in ("low", "medium", "high") for m in _all64.values()))
+    except Exception:   # noqa: BLE001
+        _inv64 = False
+    cases.append(("r64_registry_meta_invariants", _inv64))
     # ═══ v1.33.59 (Pha G) — r65_*: siết-6 contract + bundle-export/guard + golden {FIXTURES}/raw-stability ═══
     import tl_core.command_registry as _reg65
     import tl_core.workflow as _w65
@@ -26612,6 +26624,247 @@ def run() -> int:
             for _n, _mm in _sav.items():
                 (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
     _t110("r306_bkl_main_khong_con_bao_xong_oan", _c306_main_khong_con_bao_xong_oan)
+
+
+    # ═══ r309 (v1.36.43) — RAS-01 vế metadata/CLI + RAS-14: `rasoat` hết argparse.REMAINDER ═══
+    # BỆNH KÉP của một dòng `p.add_argument("rest", nargs=argparse.REMAINDER)`:
+    #   (a) không cờ nào được KHAI ⇒ ba đường GHI registry (keywords/titles/orchestrate) VÔ HÌNH với
+    #       tool-inventory và workflow-audit --strict — cổng WRITE_CMD_NO_GATE chỉ soi cái nó nhìn thấy;
+    #   (b) RAS-14: `--profile` gõ SAU sub bị đẩy nguyên cho script con, mà `backfill_nlm_title.py` có
+    #       `--profile` RIÊNG (profile nlm CLI) ⇒ corpus profile của tl KHÔNG được áp, script con nhận nhầm.
+
+    def _ps309(parser, argv):
+        """parse_args KHÔNG ném SystemExit. `_t110` chỉ bắt Exception, mà argparse thoát bằng SystemExit
+        (BaseException) ⇒ một hồi quy ở bề mặt `rasoat` sẽ GIẾT cả suite thay vì làm đỏ đúng ca của nó —
+        đo được điều này khi chạy ĐỎ-TRƯỚC. Trả None nếu parser từ chối."""
+        try:
+            with _hush():
+                return parser.parse_args(argv)
+        except SystemExit:
+            return None
+
+    def _c309_sub_la_lenh_that_khong_con_remainder():
+        # Bề mặt parser: `rasoat` phải là subparsers THẬT với 5 nhánh, KHÔNG còn positional `rest`.
+        import argparse as _ap309
+        _p309 = build_parser()
+        _sub309 = next(a for a in _p309._actions if isinstance(a, _ap309._SubParsersAction))
+        _ras = _sub309.choices["rasoat"]
+        _nested = next((a for a in _ras._actions if isinstance(a, _ap309._SubParsersAction)), None)
+        _co_nested = _nested is not None and sorted(_nested.choices) == sorted(
+            s["name"] for s in _reg64.RASOAT_SPECS)
+        _het_remainder = all(a.nargs != _ap309.REMAINDER for a in _ras._actions)
+        # `tl rasoat` TRẦN không được dispatch (main() rẽ nhánh help theo `fn is None`)
+        _tran_khong_fn = getattr(_ps309(_p309, ["rasoat"]), "fn", None) is None
+        # ...còn mỗi sub thì PHẢI có handler
+        _sub_co_fn = all(getattr(_ps309(_p309, ["rasoat", n]), "fn", None) is not None
+                         for n in ("keywords", "titles", "orchestrate"))
+        # cờ LẠ nay bị TỪ CHỐI (trước: REMAINDER nuốt và đẩy xuống script con)
+        try:
+            with _hush():
+                _p309.parse_args(["rasoat", "keywords", "--khong-ton-tai", "x"])
+            _tu_choi_co_la = False
+        except SystemExit as _e:
+            _tu_choi_co_la = _e.code == 2
+        return bool(_co_nested and _het_remainder and _tran_khong_fn and _sub_co_fn and _tu_choi_co_la)
+    _t110("r309_rasoat_sub_la_lenh_that_khong_con_remainder", _c309_sub_la_lenh_that_khong_con_remainder)
+
+    def _c309_ras14_profile_sau_sub_thuoc_ve_tl():
+        # RAS-14 (bằng chứng HAI CHIỀU). Chiều 1: `--profile` sau sub được TL parse, KHÔNG rơi xuống argv
+        # script con. Chiều 2: profile của nlm CLI vẫn gửi được — qua `--nlm-profile` — nên vá KHÔNG
+        # biến thành "bỏ hẳn tính năng".
+        _p309 = build_parser()
+        _ns = _ps309(_p309, ["rasoat", "titles", "--from-nlm", "nb1", "--profile", "Luật BHXH"])
+        if _ns is None:
+            return False
+        _argv = _reg64.rasoat_child_argv(_reg64.RASOAT_SPEC_BY_NAME["titles"], _ns, apply_on=False)
+        _tl_giu = getattr(_ns, "profile", None) == "Luật BHXH" and "--profile" not in _argv
+        _ns2 = _ps309(_p309, ["rasoat", "titles", "--from-nlm", "nb1", "--nlm-profile", "dev",
+                              "--profile", "Luật BHXH"])
+        if _ns2 is None:
+            return False
+        _argv2 = _reg64.rasoat_child_argv(_reg64.RASOAT_SPEC_BY_NAME["titles"], _ns2, apply_on=True)
+        _hai_nghia_tach = (getattr(_ns2, "profile", None) == "Luật BHXH"
+                           and "--profile" in _argv2
+                           and _argv2[_argv2.index("--profile") + 1] == "dev")
+        # `--profile` đặt TRƯỚC subcommand vẫn sống (SUPPRESS không đè) — hồi quy P4-03
+        _truoc = getattr(_ps309(_p309, ["--profile", "P", "rasoat", "keywords"]), "profile", None) == "P"
+        return bool(_tl_giu and _hai_nghia_tach and _truoc)
+    _t110("r309_ras14_profile_sau_sub_thuoc_ve_tl", _c309_ras14_profile_sau_sub_thuoc_ve_tl)
+
+    def _c309_chay_tran_chi_doc_apply_moi_ghi():
+        # Cổng GHI: thiếu `--apply` ⇒ argv script con mang `dry_flag`; có `--apply` ⇒ KHÔNG mang.
+        # PHẢN CHỨNG kèm theo: nhánh không-ghi (worksheet/phuluc) không được tự dựng `--dry` từ đâu ra.
+        _p309 = build_parser()
+
+        def _argv(sub, extra=()):
+            _ns = _ps309(_p309, ["rasoat", sub] + list(extra))
+            if _ns is None:
+                return []
+            _sp = _reg64.RASOAT_SPEC_BY_NAME[sub]
+            return _reg64.rasoat_child_argv(_sp, _ns, apply_on=bool(getattr(_ns, "apply", False)))
+        _tran = ("--dry" in _argv("keywords", ["--manifest", "m.json"])
+                 and "--dry" in _argv("titles", ["--from-nlm", "nb"])
+                 and _argv("orchestrate")[:2] == ["boot", "--dry"])
+        _apply = ("--dry" not in _argv("keywords", ["--manifest", "m.json", "--apply"])
+                  and "--dry" not in _argv("titles", ["--from-nlm", "nb", "--apply"])
+                  and "--apply" in _argv("orchestrate", ["end", "--apply"])
+                  and "--dry" not in _argv("orchestrate", ["end", "--apply"]))
+        _khong_ghi = ("--dry" not in _argv("worksheet", ["18/VBHN-VPQH"])
+                      and "--dry" not in _argv("phuluc", ["m.json"]))
+        # positional vẫn map sang cờ chính (hồi quy #4) + alias `--sohieu`/`--file`
+        _pos = (_argv("worksheet", ["18/VBHN-VPQH"])[:2] == ["--so-hieu", "18/VBHN-VPQH"]
+                and _argv("worksheet", ["--sohieu", "x"])[:2] == ["--so-hieu", "x"]
+                and _argv("phuluc", ["m.json"])[:2] == ["--in", "m.json"]
+                and _argv("phuluc", ["--file", "m.json"])[:2] == ["--in", "m.json"])
+        return bool(_tran and _apply and _khong_ghi and _pos)
+    _t110("r309_chay_tran_chi_doc_apply_moi_ghi", _c309_chay_tran_chi_doc_apply_moi_ghi)
+
+    def _c309_writer_khong_co_dry_bi_tu_choi():
+        # Fail-CLOSED: writer KHÔNG khai `dry_flag` thì "chạy trần" phải bị TỪ CHỐI (rc=2), không được
+        # rơi xuống subprocess. Đây là lưới cho sub GHI thêm sau này — chính lớp lỗi RAS-01 đang chữa.
+        import io as _io309, contextlib as _c309m, types as _t309, json as _j309
+        # Patch trên globals của HÀM THẬT (xem bẫy hai-module-tl ghi ở ca kế tiếp), không qua _mp261.
+        _g309 = _resolve286(_TL_MODULE.cmd_rasoat).__globals__
+        _goi = []
+        _sav309 = {k: _g309.get(k) for k in ("apply_profile_offline", "subprocess", "_healed_script_path")}
+        _sav_map = dict(_reg64.RASOAT_SPEC_BY_NAME)
+        try:
+            _g309["apply_profile_offline"] = lambda *a, **k: None
+            _g309["subprocess"] = _t309.SimpleNamespace(call=lambda *a, **k: _goi.append(a) or 0)
+            _g309["_healed_script_path"] = lambda n: "/gia/" + n + ".py"
+            _reg64.RASOAT_SPEC_BY_NAME["ghi-khong-dry"] = {
+                "name": "ghi-khong-dry", "script": "khong_ton_tai.py", "writes": "registry",
+                "dry_flag": None, "args": []}
+            _ns = _t309.SimpleNamespace(sub="ghi-khong-dry", apply=False, config=None, profile=None, json=True)
+            _err = _io309.StringIO()
+            with _c309m.redirect_stderr(_err), _c309m.redirect_stdout(_io309.StringIO()):
+                _rc = cmd_rasoat(_ns)
+            _payload = _j309.loads(_err.getvalue().strip().splitlines()[-1])
+            _tu_choi = (_rc == 2 and _payload.get("ok") is False
+                        and _payload.get("error") == "RASOAT_WRITE_NEEDS_APPLY" and not _goi)
+            # PHẢN CHỨNG: cùng spec đó, có `--apply` ⇒ ĐƯỢC đi tiếp tới dispatch (vá không được biến
+            # thành "chặn sạch đường ghi").
+            _ns2 = _t309.SimpleNamespace(sub="ghi-khong-dry", apply=True, config=None, profile=None, json=True)
+            with _c309m.redirect_stderr(_io309.StringIO()), _c309m.redirect_stdout(_io309.StringIO()):
+                _rc2 = cmd_rasoat(_ns2)
+            return bool(_tu_choi and _rc2 == 0 and len(_goi) == 1)
+        finally:
+            _reg64.RASOAT_SPEC_BY_NAME.clear()
+            _reg64.RASOAT_SPEC_BY_NAME.update(_sav_map)
+            for _k, _v in _sav309.items():
+                _g309[_k] = _v
+    _t110("r309_writer_khong_co_dry_bi_tu_choi", _c309_writer_khong_co_dry_bi_tu_choi)
+
+    def _c309_ap_profile_offline_truoc_dispatch():
+        # `rasoat` nằm trong `_CREDS_LAZY_CMDS` ⇒ main() KHÔNG gọi load_creds. Nếu handler cũng không áp
+        # profile thì script con ghi theo scope NỀN. Đo THỨ TỰ: profile phải được áp TRƯỚC subprocess.call.
+        #
+        # BẪY ĐÃ TRẢ GIÁ khi viết ca này (cùng lớp với `_resolve286`, ghi lại vì nó tái diễn được):
+        # `python scripts/tl.py --selftest` chạy tl.py là `__main__`, rồi `tl_selftest` `import tl` nạp
+        # tl.py LẦN HAI thành module `tl` — lần nạp sau REBASE `__globals__` của hàm tl_core sang
+        # `tl.__dict__`, trong khi `_TL_MODULE` là `__main__`. Hệ quả: `_mp261` ăn với tên là STUB
+        # (`apply_profile_offline` → nó ủy quyền sang `tl_core.profile_env`, mà `_MODS261` có patch),
+        # nhưng KHÔNG ăn với tên chỉ sống trong namespace tl (`subprocess`, `_healed_script_path`) —
+        # lệnh rơi xuống chạy script con THẬT, `rc` là rc của script đó. Vá đúng chỗ: patch trên
+        # globals của CHÍNH hàm sẽ chạy (`_resolve286`), y như ca r287.
+        import types as _t309, io as _io309, contextlib as _c309m
+        _g309 = _resolve286(_TL_MODULE.cmd_rasoat).__globals__
+        _nhat_ky = []
+        _sav309 = {k: _g309.get(k) for k in ("apply_profile_offline", "subprocess", "_healed_script_path")}
+        try:
+            _g309["apply_profile_offline"] = lambda cfg=None, prof=None: _nhat_ky.append(("profile", cfg, prof))
+            _g309["subprocess"] = _t309.SimpleNamespace(
+                call=lambda argv, **k: _nhat_ky.append(("call", list(argv))) or 0)
+            _g309["_healed_script_path"] = lambda n: "/gia/" + n + ".py"
+            _ns = _t309.SimpleNamespace(sub="keywords", apply=False, config="/tmp/c.json",
+                                        profile="Luật BHXH", manifest="m.json", budget=None, batch=None,
+                                        all=False, progress=None, json=False)
+            with _c309m.redirect_stdout(_io309.StringIO()), _c309m.redirect_stderr(_io309.StringIO()):
+                _rc = cmd_rasoat(_ns)
+            _thu_tu = ([k for k, *_ in _nhat_ky] == ["profile", "call"]
+                       and _nhat_ky[0][1:] == ("/tmp/c.json", "Luật BHXH"))
+            _argv_con = _nhat_ky[1][1] if len(_nhat_ky) > 1 else []
+            return bool(_rc == 0 and _thu_tu and "--manifest" in _argv_con and "--dry" in _argv_con)
+        finally:
+            for _k, _v in _sav309.items():
+                _g309[_k] = _v
+    _t110("r309_ap_profile_offline_truoc_dispatch", _c309_ap_profile_offline_truoc_dispatch)
+
+    def _c309_audit_nhin_thay_moi_writer_long():
+        # Inventory/strict audit phải THẤY ba đường ghi lồng, và validate_registry phải soi được chúng.
+        _sum = _reg64.registry_summary()
+        _co_mat = all(f"rasoat {n}" in _sum["commands"] for n in
+                      ("keywords", "titles", "orchestrate", "worksheet", "phuluc"))
+        _ghi = all(_sum["commands"][f"rasoat {n}"]["write_scope"] == "registry"
+                   and _sum["commands"][f"rasoat {n}"]["read_only"] is False
+                   and _sum["commands"][f"rasoat {n}"]["supports_dry_run"] is True
+                   for n in ("keywords", "titles", "orchestrate"))
+        _p309 = build_parser()
+        _rv = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                       contracts=_IDEMPOTENCY_CONTRACTS)
+        _sach = bool(_rv.get("ok")) and _rv.get("issues") == []
+        # ĐỎ-TRƯỚC hoá: writer lồng THIẾU cổng phải bị bắt (nếu không thì lưới này chỉ là trang trí)
+        _sav_meta = dict(_reg64.NESTED_COMMAND_META)
+        try:
+            _reg64.NESTED_COMMAND_META["rasoat keywords"] = dict(_sav_meta["rasoat keywords"],
+                                                                 supports_dry_run=False)
+            _rv2 = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                            contracts=_IDEMPOTENCY_CONTRACTS)
+            _bat_duoc = "WRITE_CMD_NO_GATE:rasoat keywords" in _rv2.get("issues", [])
+            # ...và sub GHI thêm mới mà QUÊN meta cũng bị bắt (chiều ngược)
+            _reg64.NESTED_COMMAND_META.clear()
+            _reg64.NESTED_COMMAND_META.update(_sav_meta)
+            _reg64.NESTED_COMMAND_META.pop("rasoat titles")
+            _rv3 = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                            contracts=_IDEMPOTENCY_CONTRACTS)
+            _bat_thieu_meta = "RASOAT_SUB_NOT_IN_REGISTRY:titles" in _rv3.get("issues", [])
+        finally:
+            _reg64.NESTED_COMMAND_META.clear()
+            _reg64.NESTED_COMMAND_META.update(_sav_meta)
+        return bool(_co_mat and _ghi and _sach and _bat_duoc and _bat_thieu_meta)
+    _t110("r309_audit_nhin_thay_moi_writer_long", _c309_audit_nhin_thay_moi_writer_long)
+
+    def _c309_bkl_dry_khong_dong_gi():
+        # Vế script con: `--dry` KHÔNG gọi exporttext/reg_bulk và KHÔNG ghi checkpoint. Một "dry" mà vẫn
+        # dịch sổ tiến độ chính là bệnh RAS-01, chỉ đổi chỗ.
+        import sys as _s, tempfile as _tf309, pathlib as _pl309, io as _io309, contextlib as _ctx309
+        import json as _j309b
+        _m, _calls, _sav = _bkl292()
+        _sav_argv = _s.argv
+        try:
+            with _tf309.TemporaryDirectory() as _d:
+                _man = _pl309.Path(_d) / "m.json"
+                _man.write_text(_j309b.dumps({"entries": [
+                    {"drive_id": "g1", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s1", "name": "A", "so_hieu": "1/2026"},
+                    {"drive_id": "g2", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s2", "name": "B", "so_hieu": "2/2026"}]}), encoding="utf-8")
+                _prog = _pl309.Path(_d) / "p.json"
+                _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man),
+                           "--progress", str(_prog), "--dry"]
+                _b = _io309.StringIO()
+                try:
+                    # argparse thoát bằng SystemExit (BaseException) — `_t110` không bắt được ⇒ thiếu
+                    # `--dry` sẽ GIẾT cả suite thay vì làm đỏ ca này. Bắt tại chỗ.
+                    with _ctx309.redirect_stdout(_b), _ctx309.redirect_stderr(_io309.StringIO()):
+                        _rc = _m.main()
+                except SystemExit as _e:
+                    _rc = _e.code if isinstance(_e.code, int) else 2
+                _js = [ln for ln in _b.getvalue().splitlines() if ln.startswith("{")]
+                _out = _j309b.loads(_js[-1]) if _js else {}
+                _dry = (_rc == 0 and _out.get("dry") is True and _out.get("con_lai") == 2
+                        and not _calls and not _prog.exists())
+                # PHẢN CHỨNG: bỏ `--dry` ⇒ script ĐI đường ghi thật (có call, có checkpoint)
+                _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man), "--progress", str(_prog)]
+                with _ctx309.redirect_stdout(_io309.StringIO()), _ctx309.redirect_stderr(_io309.StringIO()):
+                    _m.main()
+                _that = bool(_calls) and _prog.exists()
+                return bool(_dry and _that)
+        finally:
+            _s.argv = _sav_argv
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r309_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

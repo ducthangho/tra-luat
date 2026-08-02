@@ -597,6 +597,33 @@ python scripts/tl.py hygiene plan <số hiệu/tên> --json
 python scripts/tl.py rasoat keywords --json   # trả RASOAT_FALLBACK_PLAN nếu thiếu script thật
 ```
 
+### r309 — `rasoat <sub>` là lệnh THẬT, đường GHI đòi `--apply`
+
+Từ v1.36.43, `tl rasoat` không còn nuốt trọn đuôi dòng lệnh (`argparse.REMAINDER`). Mỗi nhánh là một
+subcommand khai đủ cờ, nên `tl rasoat <sub> --help` liệt kê được, cờ gõ sai bị TỪ CHỐI ngay thay vì rơi
+xuống script con, và `tool-inventory`/`workflow-audit --strict` nhìn thấy cả ba đường ghi.
+
+**Chạy trần = CHỈ ĐỌC. Muốn ghi phải gõ `--apply`.**
+
+```bash
+python scripts/tl.py rasoat keywords --manifest tra_luat_manifest.json            # DRY: kê worklist, KHÔNG ghi
+python scripts/tl.py rasoat keywords --manifest tra_luat_manifest.json --apply    # GHI registry (tukhoa)
+python scripts/tl.py rasoat titles --from-nlm <notebook_id>                       # DRY
+python scripts/tl.py rasoat titles --from-nlm <notebook_id> --apply --export      # GHI registry (nlm_title)
+python scripts/tl.py rasoat orchestrate boot                                      # DRY (chỉ in KẾ HOẠCH)
+python scripts/tl.py rasoat orchestrate end --apply --touched-drive               # GHI
+python scripts/tl.py rasoat worksheet 18/VBHN-VPQH --out-dir .                    # chỉ ghi file cục bộ
+python scripts/tl.py rasoat phuluc master.json --out-dir .                        # chỉ ghi file cục bộ
+```
+
+Hai điểm dễ vấp:
+
+- **`--profile` giờ thuộc về `tl`** (corpus profile), gõ TRƯỚC hay SAU subcommand đều được, và được áp
+  offline TRƯỚC khi gọi script con. Muốn truyền profile của **nlm CLI** cho `backfill_nlm_title.py` thì
+  dùng `--nlm-profile` — trước r309 hai nghĩa này đổi chỗ cho nhau trong im lặng (RAS-14).
+- **`--selftest` của bộ điều phối** đổi tên thành `--orchestrator-selftest` (`--selftest` ở tầng `tl` là
+  selftest của chính `tl`, main() đọc nó TRƯỚC khi dispatch).
+
 Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + số hiệu/hiệu lực; bản trùng/orphan chỉ đưa `QUARANTINE`, không trash, và chỉ chạy apply khi đã có xác nhận. `hygiene plan` không đưa cụm thiếu canonical vào tập apply; đọc `skipped_clusters[].skip_reason=MISSING_CANONICAL_REVIEW_ONLY` để rà tay. `hygiene scan` cũng đếm `title_mismatch_candidates` để soi các dòng tên file/metadata lệch trước khi rà soát, gồm `VBHN_BARE_NUMBER`/`VBHN_MISSING_YEAR_OR_DATE`, bộ cờ VBHN cấp Bộ `VBHN_MINISTRY_SCOPE`/`VBHN_MINISTRY_MISSING_YEAR`/`VBHN_MINISTRY_NAME_MISSING_YEAR`, `NLM_STATUS_MISMATCH`, `NLM_NOTEBOOK_ID_MISSING`, và `CORPUS_TRUE_NOT_ON_NLM`. `duplicate_sohieu_groups_raw` là thống kê thô; ưu tiên đọc `duplicate_identity_groups` khi quyết định dọn thật.
 
 ### v1.17.24 amendment gate best-combined

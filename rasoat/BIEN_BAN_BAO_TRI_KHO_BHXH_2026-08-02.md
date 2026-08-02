@@ -14,10 +14,10 @@ Phạm vi: 2 mục của lượt bảo trì kho. **KHÔNG** gỡ quarantine 41/2
 | 2a. `19-2026-VBHN-VPQH` — bản còn markup sửa đổi | ✅ **Có nguồn thay thế đo đạt** | Công báo 133 (.docx) · 141/141 Điều · 0 số rác · markup={strike:2} = 2 DẤU CÁCH (ngoại lệ có bằng chứng, người dùng đã chốt) |
 | 2b. `54-2025-VBHN-VPQH` — khối đầu là chrome trang web | ✅ **Có nguồn thay thế đo đạt** | Công báo 1083+1084 (.pdf text) · 72 Điều · khối đầu sạch sau khi cắt 1 dòng nhãn mục |
 | 2c. `89-2026-VBHN-VPQH` — khối đầu thiếu VPQH + «Số:» | ✅ **Có nguồn thay thế đo đạt** | Công báo 222 (.docx) · 79 Điều · `verify_flags` RỖNG · VPQH+«Số:» nằm ở KHỐI KÝ CUỐI (đúng bố cục VBHN) |
-| — | ⚠ 5 phát hiện CÔNG CỤ | §4 — có phát hiện làm ĐỎ/XANH SAI cổng, cần lượt vá riêng |
+| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **§4.1 và §4.3 ĐÃ VÁ (r313+r314, v1.36.47) trong chính nhánh này**; 4 cái còn lại chờ lượt vá riêng |
 
-**Không có thao tác GHI nào được thực hiện trong lượt này** — không ghi registry, không ghi Drive,
-không đụng NLM, không sửa `tl.py`. Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
+**Không có thao tác GHI DỮ LIỆU nào trong lượt này** — không ghi registry, không ghi Drive, không
+đụng NLM. (Có sửa MÃ: r313+r314 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
 (`$SCRATCH/cache{B..F}`, ngoài repo, ephemeral theo container).
 
 ---
@@ -289,10 +289,14 @@ _VBHN_WITHYEAR_RE.fullmatch('54-2025-VBHN-VPQH') → True     corroborated(...) 
 ```
 
 Cả 3 văn bản đều báo `T1-nhẹ: số '…' không thấy ở khối đầu lẫn khối ký cuối` khi nạp bằng dạng
-gạch chéo, và **hết sạch** khi nạp bằng dạng gạch nối — dù tệp y hệt. Cùng họ lỗi với ★ CHANGELOG
-dòng 4066 (`re.escape(so_hieu.split("/")[0])`).
-**Vá đề xuất:** chuẩn hoá `so_hieu` qua `norm_sohieu()` TRƯỚC khi `fullmatch`, khoá bằng ca
-`rXXX_sohieu_corroborated_nhan_dang_gach_cheo`.
+gạch chéo, và **hết sạch** khi nạp bằng dạng gạch nối — dù tệp y hệt. Cùng họ lỗi với
+★ v1.35.57/r221 (`re.escape(so_hieu.split("/")[0])`).
+
+> ✅ **ĐÃ VÁ — r313 (v1.36.47), cùng nhánh này.** Nắn ngăn cách của BẢN SAO cục bộ ngay trước
+> `fullmatch`; **KHÔNG** nới `_VBHN_WITHYEAR_RE` dùng chung (ở `classify`/`hygiene`/`resolve`/
+> `lookup_ops` nó canh đúng bất biến khoá registry). Khoá bằng 2 ca:
+> `r313_sohieu_corroborated_nhan_dang_gach_cheo` (chiều thuận + PARITY hai dạng) và
+> `r313_khong_noi_regex_dung_chung` (chiều ngược — ĐỎ nếu ai vá bằng cách nới regex chung).
 
 ### 4.2 `.docx` tải từ `g7.cdnchinhphu.vn` là container HỎNG — và `scan_file` FAIL-OPEN che mất
 
@@ -328,6 +332,14 @@ chưa cài pypdf : {"ok": false, "reason": "scanned_pdf", "message": "…chỉ 0
 Thông điệp còn CHỈ SAI đường sửa — *«hãy chuyển sang nguồn web TEXT khác»* — đẩy người vận hành đi
 săn nguồn không tồn tại, trong khi lỗi nằm ở máy mình. **Vá đề xuất:** tách «không đo được» khỏi
 «đo được = 0»; thiếu thư viện ⇒ `PDF_PROBE_UNAVAILABLE` + hướng dẫn cài, KHÔNG kết luận về tài liệu.
+
+> ✅ **ĐÃ VÁ — r314 (v1.36.47), cùng nhánh này.** `pdf_text_layer_chars` trả `None` = KHÔNG ĐO ĐƯỢC
+> (khác hẳn `0`); lớp lỗi riêng `PdfProbeUnavailableError` **không** kế thừa `ScannedPDFError`;
+> handler `__main__` thêm `reason: "pdf_probe_unavailable"` + `action: "install_dep"` + **exit 6**.
+> Vẫn fail-CLOSED, chỉ đổi thông điệp về đúng thủ phạm. Tiện thể sửa lỗi **cộng dồn** giữa hai
+> đường dò (bản cũ nuôi chung biến `total`). Khoá bằng
+> `r314_thieu_thu_vien_khong_bi_goi_la_ban_scan` + `r314_do_duoc_0_van_la_ban_scan`.
+> **Chưa làm:** `requirements.txt` vẫn khai stdlib-only (đụng khế ước cài đặt của gói — tách lượt).
 
 ### 4.4 `CB_DAU_MUC` sai CẢ HAI CHIỀU trên cùng một tệp
 
@@ -370,9 +382,15 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 1. **Ghi note mục 1** — chờ chạy trên máy có config (lệnh nguyên văn ở §2). Payload đã commit.
 2. **Chép đè 3 record cache** — chờ máy có `~/.tra_luat_cache/docs/`; phải `doc-compare` với bản cũ
    và quyết về `method_rank` 95 → 50 (§3.6).
-3. **Sáu phát hiện công cụ §4** — cần lượt VÁ CODE riêng (bump VERSION 3 chỗ · test `rXXX_` cho từng
-   cái · CHANGELOG · selftest N/N). Xếp hạng đề nghị: §4.1 và §4.3 trước (chặn thao tác hằng ngày,
-   vá rất nhỏ) → §4.2 (fail-open pháp lý) → §4.4/§4.5/§4.6.
+3. **Phát hiện công cụ §4** — §4.1 (r313) và §4.3 (r314) **ĐÃ VÁ ở v1.36.47** trong nhánh này:
+   selftest **1594/1594** · ruff F **delta so master = 0** · golden 0-diff · determinism ok ·
+   `release-verify` 177/177 + `package_hash` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
+   Còn treo, xếp hạng đề nghị: §4.2 (fail-open pháp lý) → §4.6 (`requirements.txt` khai thiếu
+   phụ thuộc bắt buộc) → §4.4 → §4.5.
+   ⚠ **Bẫy đã dính khi vá:** bump VERSION bằng `read_text()/write_text()` nuốt 307 CRLF của
+   `SKILL.md` + 1766 của `tl.py` (chế độ text dịch CRLF→LF) — `.gitattributes` khoá `* -text`
+   CHÍNH VÌ manifest hash là byte thật. Mọi sửa tệp trong gói phải đi `read_bytes()/write_bytes()`.
+   Bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo `SKILL.md.stat().st_size`).
 4. **Memory topic `rasoat-hoso-orchestration-plan`** — container này KHÔNG có công cụ memory
    (giống lượt 24/26 đã ghi trong `KETQUA_NLM_QA_QB_QC_2026-07-31.md:169`). Nội dung cần thêm ở §6.
 

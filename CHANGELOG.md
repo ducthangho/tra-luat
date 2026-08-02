@@ -1,3 +1,76 @@
+# ★ v1.36.47 — r313: cổng T1 số hiệu nhận dạng GẠCH CHÉO · r314: thiếu thư viện dò PDF không còn bị gọi là «bản SCAN» (2026-08-02)
+
+Hai cổng CÙNG một bệnh: **báo sai thủ phạm**. Cả hai đều đỏ/xanh nghe rất thuyết phục, và cả hai đều
+đẩy người vận hành đi sửa nhầm chỗ. Không cái nào lộ ra khi đọc mã — cùng lộ ra ở lượt bảo trì kho
+02-08 khi nạp thật ba bản Công báo (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md` §4.1, §4.3).
+
+## r313 — `sohieu_corroborated` mù với dạng số hiệu gạch chéo
+
+**Bệnh.** r221 vá chiều «khoá registry gạch-nối vs bản in gạch-chéo» và mặc định `so_hieu` truyền vào
+LUÔN là khoá registry. Nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN — nguyên văn
+*«Số hiệu canonical, vd 18/VBHN-VPQH»* — và đường nạp chuyển THẲNG chuỗi đó xuống `verify_deep`.
+`_VBHN_WITHYEAR_RE` là `^(\d+)-(\d{4})-VBHN-(.+)$`, chỉ nhận gạch nối ⇒ `19/2026/VBHN-VPQH` trượt
+`fullmatch`, mất luôn phép nới «bản in không mang năm», đẻ ra `T1-nhẹ` OAN.
+
+**Đo 02-08 trên 3 bản Công báo, CÙNG tệp, chỉ đổi cách gõ số hiệu:**
+
+| số hiệu truyền vào | 19-2026 | 54-2025 | 89-2026 |
+|---|---|---|---|
+| `NN/YYYY/VBHN-VPQH` (dạng in — đúng như `--help` dạy) | `T1-nhẹ` | `T1-nhẹ` | `T1-nhẹ` |
+| `NN-YYYY-VBHN-XXX` (khoá registry) | — | — | — |
+
+3/3 cờ oan → 0/3. Cùng họ với ★ v1.35.57/r221 (`re.escape(so_hieu.split("/")[0])`): cả hai lần
+đều là **giả định về DẠNG chuỗi ở biên giữa khoá registry và bản in**.
+
+**Vá.** Nắn ngăn cách của **bản sao cục bộ** ngay trước `fullmatch`
+(`verify_deep.py:84`). ★KHÔNG nới `_VBHN_WITHYEAR_RE` dùng chung: ở `classify`/`hygiene`/`resolve`/
+`lookup_ops` nó đang canh ĐÚNG bất biến khoá registry (CHỈ gạch nối, `NN-YYYY-VBHN-XXX`) — nới ở đó là
+mở toang một cổng khác. Test `r313_khong_noi_regex_dung_chung` khoá đúng điều này: nó ĐỎ nếu ai
+đó "vá" bằng cách sửa regex chung.
+
+## r314 — `assert_pdf_not_scanned` báo «bản SCAN» khi thực ra là THIẾU THƯ VIỆN
+
+**Bệnh.** `pdf_text_layer_chars` thử `pdfplumber` rồi `pypdf`; thiếu **cả hai** thì `return 0` — mà 0
+nghĩa là «PDF scan». Khuyết tật của MÁY bị báo thành thuộc tính của TÀI LIỆU, kèm lời khuyên
+*«hãy chuyển sang nguồn web TEXT khác»* ⇒ người vận hành đi săn nguồn không tồn tại. Nặng hơn:
+`requirements.txt` khai *«uses only Python standard library»* nên **cài sạch là không có cái nào**
+⇒ toàn bộ đường nạp PDF chết, với thông điệp chỉ sai hướng.
+
+**Đo 02-08 trên `54-2025-g7.pdf`** (PDF text THẬT — `pdftotext` bóc 167.433 ký tự, riêng trang 1 có 2.536):
+
+| | kết quả |
+|---|---|
+| chưa cài `pypdf` | `{"ok": false, "reason": "scanned_pdf", "message": "…chỉ 0 ký tự text ở trang đầu…"}` |
+| đã cài `pypdf` | `{"ok": true, "n_articles": 72}` |
+
+CÙNG một tệp.
+
+**Vá.**
+
+1. `pdf_text_layer_chars` trả **`None` = KHÔNG ĐO ĐƯỢC**, khác hẳn `0` = đo được và rỗng. Tách hai
+   đường dò thành `_pdf_chars_pdfplumber` / `_pdf_chars_pypdf`, mỗi cái tự trả `None` khi câm.
+   ★Đồng thời sửa lỗi **CỘNG DỒN** của bản cũ: hai đường dò nuôi CHUNG biến `total`, nên pdfplumber
+   hỏng giữa chừng rồi pypdf chạy tiếp là cộng CHỒNG lên phần dở dang.
+2. `PdfProbeUnavailableError` — lớp lỗi RIÊNG, **KHÔNG** kế thừa `ScannedPDFError` (gộp họ là tái lập
+   đúng cái lỗi đang chữa). Vẫn **fail-CLOSED** — không nạp mù — nhưng thông điệp chỉ đúng người phải
+   sửa: *«ĐÂY LÀ KHUYẾT CỦA MÁY… ĐỪNG đi tìm nguồn khác. pip install pypdf»*.
+3. Handler `__main__` thêm nhánh `reason: "pdf_probe_unavailable"` + `action: "install_dep"` + **exit 6**
+   (5 vẫn là «PDF scan, đổi nguồn»), để agent-loop/script không nuốt thành `ingest_failed` chung chung.
+
+**Chưa làm ở lượt này:** `requirements.txt` vẫn khai stdlib-only. `pypdf`/`python-docx` thực chất là
+phụ thuộc BẮT BUỘC để nạp đúng (thiếu `python-docx` thì trị `wp:posOffset` lọt vào thân Điều — biên bản
+§4.6). Việc đó đụng khế ước cài đặt của gói nên tách lượt riêng.
+
+**Cổng.** selftest **1594/1594** (thêm 4 ca: 2 chiều thuận + 2 chiều ngược) · ruff F **delta so master = 0**
+trên cả 4 tệp đụng tới (`tl.py` 12 F821 · `tl_selftest.py` 1 F401 + 4325 F821 · `ingest_to_cache.py`
+1 F401 · `verify_deep.py` sạch) · golden 0-diff · determinism ok · `release-verify` khớp.
+
+**Bẫy đã dính trong chính lượt này, ghi để không lặp:** bump VERSION bằng
+`pathlib.read_text()/write_text()` đã **nuốt 307 CRLF của SKILL.md và 1766 của `tl.py`** (chế độ text
+dịch CRLF→LF). `.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ mọi sửa tệp trong
+gói phải đi `read_bytes()/write_bytes()`. Phát hiện nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo
+`SKILL.md.stat().st_size`) — một cổng canh việc khác lại bắt được đúng lỗi này.
+
 # ★ v1.36.46 — r312: ING-09 — nhân đôi theo TỆP NGUỒN (`src_id`) lộ diện; cổng ingest hết nấp sau `if sohieu` (2026-08-02)
 
 Đóng ING-09. Khác với ba mục trước, mục này **đo được trên registry LIVE** (1319 dòng, tab `files`) chứ

@@ -27071,6 +27071,140 @@ def run() -> int:
     _t110("r310_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
 
 
+    # ---- r313 + r314: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
+    def _mod313(fname, alias):
+        """Nạp THẲNG scripts/<fname> — KHÔNG qua tl/bind (bẫy false-green r212)."""
+        import importlib.util as _ilu313
+        _sp = _ilu313.spec_from_file_location(alias, _ROOT209 / "scripts" / fname)
+        _m = _ilu313.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _c313_sohieu_corroborated_nhan_dang_gach_cheo():
+        """CHIỀU THUẬN — nới không-năm của VBHN phải chạy với CẢ dạng khoá LẪN dạng in.
+
+        r221 vá chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` luôn là KHOÁ.
+        Nhưng `ingest_to_cache --help` bảo người dùng gõ dạng IN ('vd 18/VBHN-VPQH') và đường
+        nạp chuyển thẳng chuỗi đó xuống ⇒ trước r313, dạng gạch chéo trượt `fullmatch`, mất
+        phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08, CÙNG tệp: gạch chéo 3/3 cờ oan · gạch nối 0/3.
+        """
+        f = _mod313("verify_deep.py", "verify_deep_r313").sohieu_corroborated
+        _doc19 = "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n"
+        # (1) dạng IN (gạch chéo) — ca ĐỎ trước r313
+        ok1 = f("19/2026/VBHN-VPQH", _doc19)
+        # (2) ★PARITY là bất biến thật: cùng tài liệu thì hai dạng PHẢI cho CÙNG câu trả lời.
+        #     Ca này bắt được bản vá NỬA VỜI mà ca (1) đơn lẻ có thể bỏ lọt.
+        ok2 = f("19/2026/VBHN-VPQH", _doc19) == f("19-2026-VBHN-VPQH", _doc19)
+        # (3) số hiệu CHỈ có ở khối XÁC THỰC cuối bài (bố cục VBHN thật), dạng gạch chéo
+        _doc54 = "x" * 9000 + "\nVĂN PHÒNG QUỐC HỘI\nSố: 54/VBHN-VPQH\n" + "y" * 500
+        ok3 = f("54/2025/VBHN-VPQH", _doc54) and f("54/2025/VBHN-VPQH", _doc54) == f("54-2025-VBHN-VPQH", _doc54)
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r313_sohieu_corroborated_nhan_dang_gach_cheo", _c313_sohieu_corroborated_nhan_dang_gach_cheo)
+
+    def _c313_khong_noi_regex_dung_chung():
+        """CHIỀU NGƯỢC — nới ngăn cách KHÔNG được biến thành nới cổng.
+
+        ★Chốt đắt nhất: `_VBHN_WITHYEAR_RE` còn dùng ở classify/hygiene/resolve/lookup_ops để
+         canh BẤT BIẾN KHOÁ registry (CHỈ gạch nối, NN-YYYY-VBHN-XXX). Nếu ai đó 'vá' bằng cách
+         nới regex dùng chung thay vì nắn bản sao cục bộ, ca này ĐỎ — và đó đúng là điều phải xảy ra.
+        """
+        _m = _mod313("verify_deep.py", "verify_deep_r313b")
+        f = _m.sohieu_corroborated
+        ok1 = _m._VBHN_WITHYEAR_RE.fullmatch("19/2026/VBHN-VPQH") is None      # regex CHUNG còn nguyên
+        ok2 = _m._VBHN_WITHYEAR_RE.fullmatch("19-2026-VBHN-VPQH") is not None  # …và vẫn nhận khoá thật
+        # số hiệu SAI vẫn phải bị bắt, bất kể dạng ngăn cách
+        ok3 = not f("20/2026/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        ok4 = not f("99/2099/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        # rác nén ra chuỗi rỗng: sau khi thay '/'→'-' vẫn phải RỚT, không được khớp mọi văn bản
+        ok5 = not f("///", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        # ★GIỚI HẠN CÓ CHỦ Ý, ghi ra để không ai tưởng là lỗ: bản in KHÔNG mang năm nên NĂM sai
+        #  vẫn khớp ('19/2027' ≡ '19/2026' trên cùng bản in). Đó là phép nới của r221, KHÔNG
+        #  phải hệ quả của r313 — chốt lại đây để sau này ai siết năm thì siết CÓ Ý THỨC.
+        ok6 = f("19/2027/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
+
+    _t110("r313_khong_noi_regex_dung_chung", _c313_khong_noi_regex_dung_chung)
+
+    def _c314_thieu_thu_vien_khong_bi_goi_la_ban_scan():
+        """CHIỀU THUẬN — thiếu pdfplumber+pypdf phải ra lỗi CỦA MÁY, không phải phán về TÀI LIỆU.
+
+        Trước r314, `pdf_text_layer_chars` thiếu cả hai thư viện cũng `return 0`, mà 0 = «PDF
+        scan» ⇒ máy thiếu thư viện bị báo thành «bản SCAN» + khuyên đi tìm nguồn khác. Mà
+        `requirements.txt` khai stdlib-only ⇒ CÀI SẠCH LÀ CHẶN MỌI PDF. Đo 02-08 trên
+        `54-2025-g7.pdf` (pdftotext bóc 167.433 ký tự): chưa cài pypdf ⇒ reason=scanned_pdf ·
+        cài rồi ⇒ ok:true, 72 Điều. CÙNG một tệp.
+        """
+        _m = _mod313("ingest_to_cache.py", "ingest_to_cache_r314")
+        _sav = {k: _hsys.modules.get(k, "___absent___") for k in ("pdfplumber", "pypdf")}
+        try:
+            # None trong sys.modules ⇒ `import X` ném ImportError (chặn thư viện, hermetic)
+            _hsys.modules["pdfplumber"] = None
+            _hsys.modules["pypdf"] = None
+            # (1) KHÔNG đo được ⇒ None, KHÁC HẲN 0. Đường dò không chạm tệp nên path giả là đủ.
+            ok1 = _m.pdf_text_layer_chars("/khong/co/that.pdf") is None
+            # (2) vẫn fail-CLOSED (không nạp mù) nhưng ném ĐÚNG lớp lỗi
+            try:
+                _m.assert_pdf_not_scanned("/khong/co/that.pdf")
+                ok2 = ok3 = False
+            except _m.PdfProbeUnavailableError as _e:
+                ok2 = True
+                # (3) thông điệp phải nói RÕ hai điều: lỗi thuộc về MÁY, và cách sửa cụ thể
+                _s = str(_e)
+                ok3 = ("KHUYẾT CỦA MÁY" in _s) and ("pip install pypdf" in _s)
+            except _m.ScannedPDFError:
+                ok2 = ok3 = False     # ← đúng cái lỗi r314 đi chữa
+        finally:
+            for _k, _v in _sav.items():
+                (_hsys.modules.pop(_k, None) if _v == "___absent___" else _hsys.modules.__setitem__(_k, _v))
+        # (4) hai lớp lỗi PHẢI tách họ — gộp là handler `__main__` lại nhập hai lối xử lý làm một
+        ok4 = not issubclass(_m.PdfProbeUnavailableError, _m.ScannedPDFError)
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r314_thieu_thu_vien_khong_bi_goi_la_ban_scan", _c314_thieu_thu_vien_khong_bi_goi_la_ban_scan)
+
+    def _c314_do_duoc_0_van_la_ban_scan():
+        """CHIỀU NGƯỢC — cái đắt nhất: đừng nới tới mức PDF scan THẬT lọt qua.
+
+        Quy tắc cứng của người dùng: PDF scan TUYỆT ĐỐI không nạp. r314 chỉ tách «không đo được»
+        ra khỏi «đo được = 0»; đo được 0 thì vẫn phải là ScannedPDFError như cũ.
+        """
+        _m = _mod313("ingest_to_cache.py", "ingest_to_cache_r314b")
+        _sav_fn = _m.pdf_text_layer_chars
+        try:
+            # (1) đo ĐƯỢC và = 0 ⇒ vẫn là bản SCAN (KHÔNG được đổi sang lỗi thiếu thư viện)
+            _m.pdf_text_layer_chars = lambda *_a, **_k: 0
+            try:
+                _m.assert_pdf_not_scanned("bat_ky.pdf"); ok1 = False
+            except _m.PdfProbeUnavailableError:
+                ok1 = False
+            except _m.ScannedPDFError:
+                ok1 = True
+            # (2) đo được và ĐỦ ngưỡng ⇒ không ném gì
+            _m.pdf_text_layer_chars = lambda *_a, **_k: 2536   # trang 1 của 54-2025-g7.pdf đo thật
+            try:
+                _m.assert_pdf_not_scanned("bat_ky.pdf"); ok2 = True
+            except Exception:  # noqa: BLE001
+                ok2 = False
+        finally:
+            _m.pdf_text_layer_chars = _sav_fn
+        # (3) ★KHÔNG CỘNG DỒN hai đường dò: bản cũ nuôi CHUNG biến `total` nên pdfplumber hỏng
+        #     giữa chừng rồi pypdf chạy tiếp là cộng CHỒNG. Đường dò nào trả số TRƯỚC thì thắng.
+        _sav_a, _sav_b = _m._pdf_chars_pdfplumber, _m._pdf_chars_pypdf
+        try:
+            _m._pdf_chars_pdfplumber = lambda *_a, **_k: 5
+            _m._pdf_chars_pypdf = lambda *_a, **_k: 7
+            ok3 = _m.pdf_text_layer_chars("bat_ky.pdf") == 5          # 5, KHÔNG phải 12
+            # đường 1 câm ⇒ rơi xuống đường 2 (chứ không phải bỏ luôn)
+            _m._pdf_chars_pdfplumber = lambda *_a, **_k: None
+            ok4 = _m.pdf_text_layer_chars("bat_ky.pdf") == 7
+        finally:
+            _m._pdf_chars_pdfplumber, _m._pdf_chars_pypdf = _sav_a, _sav_b
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r314_do_duoc_0_van_la_ban_scan", _c314_do_duoc_0_van_la_ban_scan)
+
+
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó
     # chạy trên bản giả mà không ai biết (xanh GIẢ). In đích danh để sửa được ngay.

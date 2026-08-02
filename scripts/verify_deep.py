@@ -81,7 +81,15 @@ def sohieu_corroborated(so_hieu, raw):
         return True
     # VBHN: khoá registry mang NĂM tiêm thêm (bất biến NN-YYYY-VBHN-XXX, chống tái dùng số)
     # còn bản in chính thức KHÔNG có năm ⇒ chấp nhận dạng không-năm là khớp.
-    m = _VBHN_WITHYEAR_RE.fullmatch(so_hieu)
+    # r313 (v1.36.47) — nhánh nới-không-năm này CHẾT LẶNG với số hiệu dạng GẠCH CHÉO. r221 vá
+    # chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` LUÔN là khoá registry;
+    # nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN ("Số hiệu canonical, vd
+    # 18/VBHN-VPQH") và đường nạp chuyển THẲNG chuỗi đó xuống đây ⇒ '19/2026/VBHN-VPQH' trượt
+    # fullmatch, mất luôn phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08 trên 3 bản Công báo, CÙNG tệp:
+    # gõ gạch chéo ⇒ 3/3 cờ oan · gõ gạch nối ⇒ 0/3.
+    # ★Chỉ nắn NGĂN CÁCH của BẢN SAO cục bộ — KHÔNG nới `_VBHN_WITHYEAR_RE` dùng chung, vì ở
+    #  classify/hygiene/resolve/lookup_ops nó canh ĐÚNG bất biến khoá registry (chỉ gạch nối).
+    m = _VBHN_WITHYEAR_RE.fullmatch(so_hieu.replace("/", "-"))
     return bool(m and _sohieu_fold("{}-VBHN-{}".format(m.group(1), m.group(3))) in scope)
 
 

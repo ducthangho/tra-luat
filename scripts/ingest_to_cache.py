@@ -208,31 +208,72 @@ class ScannedPDFError(RuntimeError):
     """PDF không có lớp text máy đọc (bản scan/ảnh). KHÔNG nạp — phải đổi nguồn web khác."""
 
 
-def pdf_text_layer_chars(path: str, max_pages: int = 5) -> int:
-    """Đếm ký tự text trích được từ <= max_pages trang đầu. 0 ~ PDF scan/ảnh."""
-    total = 0
+class PdfProbeUnavailableError(RuntimeError):
+    """KHÔNG ĐO ĐƯỢC lớp text (thiếu cả pdfplumber lẫn pypdf) — CHƯA biết gì về tài liệu.
+
+    ★KHÔNG kế thừa ScannedPDFError: hai chuyện khác hẳn nhau và phải ra hai lối xử lý khác nhau
+    (sửa MÁY vs đổi NGUỒN). Gộp họ là tái lập đúng cái lỗi mà r314 đi chữa."""
+
+
+def _pdf_chars_pdfplumber(path: str, max_pages: int):
+    """Trả số ký tự đo được, hoặc None nếu KHÔNG đo được bằng đường này."""
     try:
         import pdfplumber  # type: ignore
+    except Exception:  # noqa: BLE001 — thiếu thư viện: câu trả lời là "không biết", không phải 0
+        return None
+    try:
         with pdfplumber.open(path) as pdf:
-            for pg in pdf.pages[:max_pages]:
-                total += len((pg.extract_text() or "").strip())
-        return total
-    except Exception:
-        pass
+            return sum(len((pg.extract_text() or "").strip()) for pg in pdf.pages[:max_pages])
+    except Exception:  # noqa: BLE001 — có thư viện mà đọc hỏng cũng là "không đo được"
+        return None
+
+
+def _pdf_chars_pypdf(path: str, max_pages: int):
+    """Trả số ký tự đo được, hoặc None nếu KHÔNG đo được bằng đường này."""
     try:
         from pypdf import PdfReader  # type: ignore
+    except Exception:  # noqa: BLE001
+        return None
+    try:
         r = PdfReader(path)
-        for pg in r.pages[:max_pages]:
-            total += len((pg.extract_text() or "").strip())
-    except Exception:
-        return total
-    return total
+        return sum(len((pg.extract_text() or "").strip()) for pg in r.pages[:max_pages])
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def pdf_text_layer_chars(path: str, max_pages: int = 5):
+    """Đếm ký tự text trích được từ <= max_pages trang đầu.
+
+    Trả **None** khi KHÔNG đo được (thiếu/hỏng cả hai đường dò) — KHÁC HẲN 0 = đo được và RỖNG.
+
+    r314 (v1.36.47): trước đây thiếu cả hai thư viện cũng `return 0`, mà 0 nghĩa là «PDF scan»
+    ⇒ khuyết tật của MÁY bị báo thành thuộc tính của TÀI LIỆU, kèm lời khuyên đi tìm nguồn khác.
+    `requirements.txt` khai «uses only Python standard library» nên CÀI SẠCH LÀ KHÔNG CÓ CÁI NÀO
+    ⇒ MỌI PDF đều bị chặn oan. Đo 02-08 trên `54-2025-g7.pdf` (PDF text thật, pdftotext bóc
+    167.433 ký tự, riêng trang 1 có 2.536): chưa cài pypdf ⇒ `{"reason":"scanned_pdf",…0 ký tự…}`
+    · cài pypdf ⇒ `{"ok":true,"n_articles":72}`. CÙNG một tệp.
+    ★Đồng thời sửa lỗi CỘNG DỒN: bản cũ nuôi CHUNG biến `total` cho cả hai đường dò, nên
+     pdfplumber hỏng giữa chừng rồi pypdf chạy tiếp là cộng CHỒNG lên phần dở dang.
+    """
+    for _probe in (_pdf_chars_pdfplumber, _pdf_chars_pypdf):
+        n = _probe(path, max_pages)
+        if n is not None:
+            return n
+    return None
 
 
 def assert_pdf_not_scanned(path: str, min_chars: int = 120) -> None:
     """Chặn PDF scan: < min_chars text trên các trang đầu => coi là scan -> raise.
-    Quy tắc cứng (người dùng): PDF scan TUYỆT ĐỐI KHÔNG tải/nạp, đi tìm nguồn khác."""
+    Quy tắc cứng (người dùng): PDF scan TUYỆT ĐỐI KHÔNG tải/nạp, đi tìm nguồn khác.
+
+    r314: «không đo được» vẫn fail-CLOSED (không nạp mù), nhưng ném lỗi KHÁC + thông điệp chỉ
+    đúng người phải sửa. Vẫn chặn, nhưng không còn vu cho tài liệu."""
     n = pdf_text_layer_chars(path)
+    if n is None:
+        raise PdfProbeUnavailableError(
+            "KHÔNG ĐO ĐƯỢC lớp text của PDF: thiếu (hoặc hỏng) cả `pdfplumber` lẫn `pypdf`. "
+            "ĐÂY LÀ KHUYẾT CỦA MÁY, KHÔNG phải kết luận về tài liệu — ĐỪNG đi tìm nguồn khác. "
+            "Cài rồi chạy lại CÙNG lệnh: pip install pypdf")
     if n < min_chars:
         raise ScannedPDFError(
             f"PDF có vẻ là bản SCAN (chỉ {n} ký tự text ở trang đầu). "
@@ -795,6 +836,14 @@ if __name__ == "__main__":
                           "action": "switch_source", "message": str(e)},
                          ensure_ascii=False))
         sys.exit(5)   # exit 5 = PDF scan, đổi nguồn web khác
+    # r314: PHẢI đứng TRƯỚC `except Exception`, và KHÔNG được gộp vào nhánh scanned_pdf ở trên —
+    # hai lối xử lý khác nhau: đây là «sửa MÁY rồi chạy lại CÙNG lệnh», kia là «đổi NGUỒN».
+    # exit 6 riêng để agent-loop/script không nuốt thành `ingest_failed` chung chung.
+    except PdfProbeUnavailableError as e:
+        print(json.dumps({"ok": False, "reason": "pdf_probe_unavailable",
+                          "action": "install_dep", "install": "pip install pypdf",
+                          "message": str(e)}, ensure_ascii=False))
+        sys.exit(6)   # exit 6 = KHÔNG đo được (thiếu thư viện), KHÔNG kết luận gì về tài liệu
     except Exception as e:  # noqa: BLE001
         print(json.dumps({"ok": False, "reason": "ingest_failed",
                           "error": f"{type(e).__name__}: {e}"}, ensure_ascii=False))

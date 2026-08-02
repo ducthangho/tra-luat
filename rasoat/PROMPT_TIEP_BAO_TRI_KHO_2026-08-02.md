@@ -85,15 +85,22 @@ Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. X�
 
 | # | Lỗi | Vì sao ưu tiên |
 |---|---|---|
-| §4.1 | `_VBHN_WITHYEAR_RE` chỉ nhận số hiệu GẠCH NỐI ⇒ `T1-nhẹ` dương tính giả cho dạng gạch chéo mà chính `--help` bảo gõ | Chặn thao tác hằng ngày, vá 1 dòng (`norm_sohieu` trước `fullmatch`) |
-| §4.3 | Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN», lại còn chỉ sai đường sửa | Cài sạch = đường PDF chết hoàn toàn |
+| ~~§4.1~~ | ~~`_VBHN_WITHYEAR_RE` chỉ nhận gạch nối ⇒ `T1-nhẹ` dương tính giả~~ | ✅ **ĐÃ VÁ — r313 (v1.36.47)**, cùng nhánh này |
+| ~~§4.3~~ | ~~Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN»~~ | ✅ **ĐÃ VÁ — r314 (v1.36.47)**, cùng nhánh này |
 | §4.2 | `docx_markup.scan_file` FAIL-OPEN: docx không đọc được → báo «sạch markup» | Markup là tín hiệu ĐÚNG-SAI pháp lý; sẽ có hại ngay khi có reader chịu tên entry `\` |
+| §4.6 | Thiếu `python-docx` ⇒ trị `wp:posOffset` lọt vào thân Điều (Điều 72 của 89-2026 dính chuỗi 59 chữ số). r314 CHƯA đụng `requirements.txt` | Khế ước cài đặt của gói đang khai SAI: `pypdf`/`python-docx` thực chất BẮT BUỘC |
 | §4.4 | `CB_DAU_MUC` sai CẢ HAI CHIỀU; lời khuyên kèm theo nếu làm theo đúng chữ sẽ XOÁ Chương I–V | Cảnh báo nguy hiểm hơn thứ nó cảnh báo |
 | §4.5 | `CB_CHU_KY_SO` chỉ khớp mẫu 4 dòng, bỏ sót biến thể 3 dòng ⇒ chrome lọt vào khối đầu | Bẩn khối đầu, không sai nội dung |
-| §4.6 | Thiếu `python-docx` ⇒ trị `wp:posOffset` lọt vào thân Điều (Điều 72 của 89-2026 dính chuỗi 59 chữ số) | Sửa bằng `requirements.txt` hoặc cảnh báo ở `doctor` |
 
 Quy trình bắt buộc: bump VERSION 3 chỗ · test `rXXX_` cho TỪNG cái · `--selftest` N/N ·
 `git diff` → CHANGELOG (★ vX.Y.Z) → commit. Deploy CHỜ DUYỆT (xem CLAUDE.md §Quy ước deploy).
+
+⚠ **Bẫy đã dính khi vá r313/r314 — đọc trước khi sửa bất kỳ tệp nào trong gói:** bump VERSION bằng
+`pathlib.read_text()/write_text()` **nuốt 307 CRLF của `SKILL.md` và 1766 của `tl.py`** (chế độ text
+dịch CRLF→LF). `.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ phải đi
+`read_bytes()/write_bytes()`. Bắt được nhờ `r219_gotchas_nhan_trang_thai` ĐỎ (nó neo
+`SKILL.md.stat().st_size`) — nếu không có ca đó thì lỗi này lọt vào gói mà gate vẫn xanh.
+Và: sửa tệp NẰM TRONG gói ⇒ **tái sinh `RELEASE_MANIFEST.json`** (kể cả khi chỉ sửa CHANGELOG).
 
 ---
 
@@ -117,7 +124,7 @@ python scripts/tl.py profile-info --profile "Luật BHXH" --json
 ## Ràng buộc (giữ nguyên)
 
 * Mọi lệnh mang `--profile "Luật BHXH"` — **và kiểm `profile-info` để chắc cờ đó có tác dụng thật**.
-* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang v1.36.46.
+* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.47** (r313+r314).
 * Registry: `reg-query --refresh` dò trùng trên dữ liệu TƯƠI trước · readback `--live` hẹp sau ·
   cân nhắc `--expect COL=VAL` khi đường ghi có hỗ trợ.
 * 2–3 phiên chạy song song trên cùng cây canonical ⇒ `git status -sb` trước mọi commit + phép kiểm

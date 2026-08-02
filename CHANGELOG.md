@@ -1,3 +1,40 @@
+# ★ v1.36.54 — r322: RAS-18 — `doc-patch` để lại `text_hash` CŨ, bằng chứng đối sánh phải VÔ HIỆU (2026-08-02)
+
+**Sổ audit tả mục này là «`doc-patch` cố ý không tính lại `text_hash` ⇒ anchor sai âm thầm». Đo tận
+nơi thì lời tả đó ĐÚNG phần mô tả mà SAI phần quy lỗi — và bệnh thật nặng hơn:**
+
+| khẳng định trong sổ | đo được 02-08 |
+|---|---|
+| không tính lại `text_hash` | **ĐÚNG**, và lý do r217 nêu là THẬT: record không giữ bố cục dòng của `norm` ⇒ *không có cách* tính lại trong CÙNG miền băm. **Tính lại mới là sai** — đó là thay giá trị không rõ nguồn bằng giá trị TƯƠI |
+| «chỉ thiếu ghi chú» | **SAI.** `tra_cuu.py` dùng `text_hash` làm **bằng chứng đối sánh LIÊN NGUỒN** (`--expected-content-hash` từ bundle/NotebookLM). Sau một lượt patch, thân ĐÃ lệch mà hash VẪN khớp bundle ⇒ cổng fail-closed báo **KHỚP** đúng trên ca nó sinh ra để chặn, rồi trả nguyên văn đã sửa như thể bundle xác nhận |
+| «đã có cảnh báo trong `verify_flags`» | **CÓ NHƯNG VÔ HÌNH**: `provenance.py` 0 tham chiếu `verify_flags`, `tra_cuu.py` 0 tham chiếu; JSON ra chỉ có `content_hash`/`warnings`/`units`. Không đường đọc nào lộ nó |
+| — | **FAIL-OPEN chưa ai khai**: r217 ghi cờ trong `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai bốc hơi mà lệnh vẫn rc=0. (11/11 record hiện có đều là list ⇒ bẫy đang NGỦ, không phải đang chảy máu) |
+
+**Ba vế, mỗi vế một ca khoá riêng:**
+
+1. **Cổng** — `tra_cuu.py`: `--expected-content-hash` KHỚP + record có `doc_patch.lich_su`
+   ⇒ `hash_khop_nhung_da_doc_patch`, **rc=3, không trả nguyên văn**. Không tính lại hash; từ chối
+   chính cái "khớp" đã vô hiệu. `--allow-stale` vẫn là đường vượt (cùng cổng với nhánh lệch sẵn có),
+   và nhánh `hash_mismatch` cũ **không bị cướp**.
+2. **Lộ diện** — `provenance.build_warnings`: thêm mã `doc_patch_text_hash_cu` (level `warn`), nên
+   mọi đường đọc dựng cảnh báo đều khai, kể cả khi không ai truyền `--expected-content-hash`.
+3. **Fail-open** — `cmd_doc_patch`: **TẠO** `verify_flags` khi record chưa có, thay vì lặng lẽ bỏ.
+
+**Khoá vào `doc_patch.lich_su`** (trường CÓ CẤU TRÚC, ghi vô điều kiện) chứ không dò chuỗi
+`"DOC_PATCH:"` trong `verify_flags`: văn xuôi đổi một chữ là phép dò gãy IM LẶNG, mà `verify_flags`
+lại đúng là trường có thể vắng mặt.
+
+**Hai bệnh NỀN đo được cùng lượt, CỐ Ý không vá kèm** (ngoài phạm vi RAS-18, đã ghi tại chỗ):
+- `tra_cuu.py` **không** `reconfigure(encoding="utf-8")` như `tl.py` (tl.py:86/94) ⇒ trên máy chuẩn
+  Windows (stdout pipe = cp1258) mọi payload tiếng Việt vỡ `UnicodeEncodeError`. Nhánh
+  `hash_mismatch` CŨ vỡ y hệt — bệnh có trước r322.
+- `find_units` duyệt `doc["structure"]` như **list đơn vị**, còn record cache thật (**11/11**, do
+  `build_cache.py:84` + `normalize_document.py:347` ghi) để `structure` là **dict đếm** ⇒ duyệt dict
+  ra chuỗi rồi `AttributeError`. Cổng r322 nằm TRƯỚC `find_units` nên chặn đúng ở cả hai hình dạng.
+
+Test: `r322_cong_hash_vo_hieu_sau_doc_patch` (5 nhánh, chạy subprocess đường sản xuất) ·
+`r322_provenance_lo_doc_patch` · `r322_verify_flags_vang_van_phai_khai` (đường GHI thật).
+
 # ★ v1.36.53 — r321: RAS-17 vế `rasoat-merge` — neo hỏng hết đi lọt vào bảng master (2026-08-02)
 
 **Nối tiếp r313, KHÔNG chồng lấn.** r313 dựng khuôn (`_rasoat_anchor_khuon`) + cưỡng chế cờ vòng đời

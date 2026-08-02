@@ -1,4 +1,4 @@
-# ★ v1.36.43 — r309: RAS-01 (vế metadata/CLI) + RAS-14 — `rasoat` hết `argparse.REMAINDER`; đường GHI đòi `--apply` tường minh (2026-08-02)
+# ★ v1.36.44 — r310: RAS-01 (vế metadata/CLI) + RAS-14 — `rasoat` hết `argparse.REMAINDER`; đường GHI đòi `--apply` tường minh (2026-08-02)
 
 Đóng **hai mục cuối** của Làn A sổ audit 31-07. Vế `changes_pull` của RAS-01 đã land ở r304; vế này là
 phần được hoãn sang T3 (commit `c8cdd02` ghi rõ *"vế metadata/CLI để T3"*).
@@ -40,18 +40,18 @@ phần được hoãn sang T3 (commit `c8cdd02` ghi rõ *"vế metadata/CLI đ�
    (`getattr(a, "no_auto_cache", False)`) nhưng **chưa từng được khai ở đâu** — REMAINDER nuốt mất nên
    nó luôn `False`; nay là cờ thật. Và `--json` do tl nuốt nên `tl rasoat <sub> --json` hết `rc=2`.
 
-**Test (+7 ca → 1586/1586).** `r309_rasoat_sub_la_lenh_that_khong_con_remainder` (bề mặt parser + cờ lạ
-bị TỪ CHỐI) · `r309_ras14_profile_sau_sub_thuoc_ve_tl` (HAI CHIỀU: tl giữ `--profile`, mà
+**Test (+7 ca → 1586/1586).** `r310_rasoat_sub_la_lenh_that_khong_con_remainder` (bề mặt parser + cờ lạ
+bị TỪ CHỐI) · `r310_ras14_profile_sau_sub_thuoc_ve_tl` (HAI CHIỀU: tl giữ `--profile`, mà
 `--nlm-profile` vẫn xuống được script con — vá không được thành "bỏ hẳn tính năng") ·
-`r309_chay_tran_chi_doc_apply_moi_ghi` (+ phản chứng: nhánh không-ghi không tự sinh `--dry`; positional
-và alias `--sohieu`/`--file` vẫn map) · `r309_writer_khong_co_dry_bi_tu_choi` (fail-CLOSED + phản chứng
-`--apply` vẫn đi tiếp) · `r309_ap_profile_offline_truoc_dispatch` (đo THỨ TỰ: profile TRƯỚC
-`subprocess.call`) · `r309_audit_nhin_thay_moi_writer_long` (+ ĐỎ-hoá tại chỗ: gỡ cổng ⇒
-`WRITE_CMD_NO_GATE`, gỡ meta ⇒ `RASOAT_SUB_NOT_IN_REGISTRY`) · `r309_bkl_dry_khong_dong_gi` (+ phản
+`r310_chay_tran_chi_doc_apply_moi_ghi` (+ phản chứng: nhánh không-ghi không tự sinh `--dry`; positional
+và alias `--sohieu`/`--file` vẫn map) · `r310_writer_khong_co_dry_bi_tu_choi` (fail-CLOSED + phản chứng
+`--apply` vẫn đi tiếp) · `r310_ap_profile_offline_truoc_dispatch` (đo THỨ TỰ: profile TRƯỚC
+`subprocess.call`) · `r310_audit_nhin_thay_moi_writer_long` (+ ĐỎ-hoá tại chỗ: gỡ cổng ⇒
+`WRITE_CMD_NO_GATE`, gỡ meta ⇒ `RASOAT_SUB_NOT_IN_REGISTRY`) · `r310_bkl_dry_khong_dong_gi` (+ phản
 chứng: bỏ `--dry` ⇒ có call, có checkpoint).
 
 **ĐỎ-TRƯỚC (đo thật).** Hoàn nguyên `cli.py` + `lookup_ops.py` + `backfill_keywords_live.py` về HEAD,
-GIỮ nguyên test ⇒ **1574/1586**, đỏ đúng **cả 7** ca r309 (+ `r64_registry_validate_clean` và 4 ca
+GIỮ nguyên test ⇒ **1574/1586**, đỏ đúng **cả 7** ca r310 (+ `r64_registry_validate_clean` và 4 ca
 kernel-size — nhiễu của cây nửa-vời, xanh lại khi khôi phục). Sau vá **1586/1586**.
 
 **Hai ca CÓ SẴN đỏ — cả hai đều đúng, sửa theo tín hiệu chứ không đạp qua:**
@@ -76,9 +76,46 @@ có lỗi nào chỉ thẳng vào nguyên nhân. Vá đúng chỗ: patch trên g
 — `_t110` chỉ bắt `Exception`, nên một hồi quy ở bề mặt CLI sẽ **giết cả suite** thay vì làm đỏ đúng ca
 của nó (đo được điều này ở lượt ĐỎ-TRƯỚC đầu tiên).
 
-**Tài liệu.** `references/RUNBOOK.md` §H thêm mục r309: bảng lệnh DRY-vs-`--apply` cho cả 5 nhánh + hai
+**Tài liệu.** `references/RUNBOOK.md` §H thêm mục r310: bảng lệnh DRY-vs-`--apply` cho cả 5 nhánh + hai
 điểm dễ vấp (`--nlm-profile`, `--orchestrator-selftest`). Dòng `tl rasoat keywords --json` cũ GIỮ
 NGUYÊN và vẫn đúng — nó là đường fallback-plan khi thiếu script thật.
+
+# ★ v1.36.43 — r309: thẻ máy đọc `references/workflows/*.json` vào tầm guard con trỏ (T0-F/1c) (2026-08-02)
+
+**Bối cảnh.** r308 mở doc-set ra mọi `*.md` trong gói, nhưng lọc theo đuôi `.md` nên 27 **thẻ máy
+đọc** `references/workflows/*.json` vẫn nằm ngoài tầm. Thẻ là chỉ dẫn VẬN HÀNH y như `.md`, chỉ khác
+định dạng — con trỏ chết trong thẻ hỏng đúng thứ gói mang đi.
+
+**Đo trên gói 177 tệp (02-08):**
+
+| tập | con trỏ | ĐỨT |
+|---|---|---|
+| `references/workflows/*.json` (27 thẻ) | 4 | **1** |
+| **mọi** `.json` trong gói (57 tệp) | 48 | **12** |
+
+**Quyết định phạm vi: CHỈ thẻ workflow, KHÔNG phải mọi `.json`.** 11/12 mục đứt còn lại nằm ở
+`references/golden/*.json` — ĐẦU RA GHI SẴN của test, con trỏ đứt là CỐ Ý (rõ nhất:
+`references/KHONG_CO_FILE.md`, chính là mồi cho bộ dò tệp-thiếu). Gác chúng = đỏ oan ngày đầu
+⇒ guard bị vô hiệu hoá, đúng bài học §0.8. **Ranh giới này có test khoá cả HAI chiều.**
+
+**Mục ĐỨT duy nhất — SỬA LỜI THẺ, KHÔNG baseline.** `doc_claims_check.json` (khối `plan`) trỏ
+`references/changelog_archive/` — thư mục dev-only (`_RELEASE_EXCLUDE_DIRS`). Lời thẻ **ĐÚNG với mã**
+(`workflow.py:1001-1004` có đọc archive, có `is_dir()` nên vắng thì suy biến êm) — tức không phải tài
+liệu cũ. Nhưng **tiền lệ r184 trên CHÍNH con trỏ này** (SKILL.md từng trỏ `references/changelog_archive/`,
+gây gạch xanh-giả 4 test) đã chốt: «**không nới auditor, sửa con trỏ**». Nên sửa lời thẻ cho nói rõ
+kho lưu trữ là dev-only/ngoài gói — vừa hết con trỏ chết, vừa **thêm thông tin** cho người đọc runtime,
+và **không thêm mục miễn trừ nào** (ratchet giữ nguyên độ chặt: baseline vẫn 3).
+
+**Bằng chứng DƯƠNG (3 mutation, không tin `rc=0`):**
+- trả lại lời thẻ CŨ ⇒ cặp đứt hiện lại đúng 1 mục
+- thu doc-set về chỉ `.md` ⇒ `r309_the_workflow_trong_tam_guard` **ĐỎ** (1579/1580)
+- mở tầm sang **mọi** `.json` (golden lọt vào) ⇒ cũng **ĐỎ** — ranh giới khoá hai chiều
+
+**Lớp trần (`_doc_bare_tool_findings`) không đổi gì:** đo được 0 span backtick trong thẻ JSON ⇒
+0 checked. Ghi lại để phiên sau khỏi đi đo lại.
+
+Sau vá: pointer checked **300→303** FAIL **0** adv 104 baseline 3. **Selftest 1580/1580** (master 1579, +1 ca).
+Ruff **DELTA = 0** cả ba tệp, không tên F821 nào mới.
 
 # ★ v1.36.42 — r308: GATE-04 mở tầm guard con trỏ ra MỌI `*.md` TRONG GÓI + GATE-05 test dựng package-set đúng nguồn (2026-08-02)
 

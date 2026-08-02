@@ -5264,7 +5264,7 @@ def run() -> int:
         _ok64 = _ok64 and _e64.code == 2
     cases.append(("r64_generated_parsers_behavior", _ok64))
     # meta invariants: mọi spec sinh đều có meta generated=True; counts nhất quán; summary schema chuẩn.
-    # r309 (RAS-01): bề mặt meta nay gồm CẢ lệnh LỒNG (`rasoat keywords`…) — `total` phải đếm theo
+    # r310 (RAS-01): bề mặt meta nay gồm CẢ lệnh LỒNG (`rasoat keywords`…) — `total` phải đếm theo
     # `all_command_meta()`, không phải riêng COMMAND_META. Bất biến GIỮ NGUYÊN Ý NGHĨA (counts khớp bảng
     # meta), chỉ mở đúng bằng bề mặt mà `registry_summary` thật sự kê; `nested` khoá riêng phần mới.
     # Bọc try: ca này chạy Ở MỨC MODULE của `run()` (chưa có `_t110`), nên một AttributeError ở đây làm
@@ -21008,6 +21008,60 @@ def run() -> int:
             return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r308_docset_lay_tu_manifest", _c308_docset_lay_tu_manifest)
 
+    def _c309_the_workflow_trong_tam_guard():
+        # r309 (T0-F/1c): THẺ MÁY ĐỌC `references/workflows/*.json` vào tầm guard con trỏ. Ca khoá CẢ HAI
+        # vế của quyết định: thẻ VÀO tầm, và `references/golden/*.json` ĐỨNG NGOÀI — ranh giới là phần
+        # dễ trôi nhất, vì «mở cho .json» nghe như một luật đơn giản cho tới lúc đo.
+        import tempfile as _tf309, hashlib as _hl309
+        with _tf309.TemporaryDirectory() as _td:
+            root = _P209(_td)
+            files = {
+                "SKILL.md": "lõi\n",
+                # thẻ vận hành: con trỏ hỏng ⇒ PHẢI đỏ
+                "references/workflows/the_hong.json": '{"plan":["chạy scripts/ma_the.py"]}\n',
+                # đầu ra ghi sẵn của test: con trỏ hỏng là CỐ Ý (mồi cho bộ dò tệp-thiếu) ⇒ PHẢI im
+                "references/golden/fixture_moi.json": '{"path":"references/KHONG_CO_FILE.md"}\n',
+                "scripts/tl.py": "x = 1\n",
+            }
+            for rel, body in files.items():
+                fp = root / rel
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(body, encoding="utf-8")
+            entries = []
+            for rel in sorted(files):
+                raw = (root / rel).read_bytes()
+                entries.append({"path": rel, "size": len(raw),
+                                "sha256": _hl309.sha256(raw).hexdigest()})
+            basis = "\n".join("%s\0%d\0%s" % (e["path"], e["size"], e["sha256"]) for e in entries)
+            man = {"schema": "release_manifest.v1", "files": entries,
+                   "package_hash": _hl309.sha256(basis.encode("utf-8")).hexdigest()}
+            dp = (_rel209._verify_release_manifest(root, man).get("doc_pointers") or {})
+            fail = set(dp.get("pointers_fail") or [])
+            scanned = {d for d, _ in fail | set(dp.get("pointers_advisory") or [])}
+            ok1 = ("references/workflows/the_hong.json", "scripts/ma_the.py") in fail   # thẻ TRONG tầm
+            ok2 = "references/golden/fixture_moi.json" not in scanned                   # golden NGOÀI tầm
+        # Cây THẬT: thẻ được quét thật (không phải chỉ đúng trên cây giả) và 0 đứt sau khi sửa lời thẻ.
+        root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return ok1 and ok2
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        cards = {p: (root / p).read_text(encoding="utf-8", errors="replace")
+                 for p in paths if p.startswith("references/workflows/") and p.endswith(".json")
+                 and (root / p).is_file()}
+        ok3 = len(cards) >= 20 and "references/workflows/doc_claims_check.json" in cards
+        r = _rel209._doc_pointer_findings(cards, paths)
+        ok4 = r["pointers_ok"] and r["pointers_fail"] == []
+        ok5 = r["pointers_checked"] > 0        # thẻ CÓ con trỏ để gác — không xanh vì rỗng
+        # phản chứng: trả lại đúng lời thẻ TRƯỚC r309 ⇒ ĐỎ đúng con trỏ dev-only đã gỡ
+        cu = "L6 số hiệu đợt rNNN, tra CHANGELOG.md + references/changelog_archive/*.md"
+        r2 = _rel209._doc_pointer_findings({"references/workflows/doc_claims_check.json": cu}, paths)
+        ok6 = (not r2["pointers_ok"]) and r2["pointers_fail"] == [
+            ("references/workflows/doc_claims_check.json", "references/changelog_archive/")]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r309_the_workflow_trong_tam_guard", _c309_the_workflow_trong_tam_guard)
+
     def _c291_docs_ngoai_goi():
         # T0-G (Q1 user CHỐT 01-08) — `docs/` GIỮ trong git, LOẠI khỏi GÓI (khuôn rasoat r249).
         # Bốn vế cố ý lấy từ BỐN nguồn khác nhau, để không vế nào chứng minh chính nó:
@@ -26626,7 +26680,7 @@ def run() -> int:
     _t110("r306_bkl_main_khong_con_bao_xong_oan", _c306_main_khong_con_bao_xong_oan)
 
 
-    # ═══ r309 (v1.36.43) — RAS-01 vế metadata/CLI + RAS-14: `rasoat` hết argparse.REMAINDER ═══
+    # ═══ r310 (v1.36.44) — RAS-01 vế metadata/CLI + RAS-14: `rasoat` hết argparse.REMAINDER ═══
     # BỆNH KÉP của một dòng `p.add_argument("rest", nargs=argparse.REMAINDER)`:
     #   (a) không cờ nào được KHAI ⇒ ba đường GHI registry (keywords/titles/orchestrate) VÔ HÌNH với
     #       tool-inventory và workflow-audit --strict — cổng WRITE_CMD_NO_GATE chỉ soi cái nó nhìn thấy;
@@ -26666,7 +26720,7 @@ def run() -> int:
         except SystemExit as _e:
             _tu_choi_co_la = _e.code == 2
         return bool(_co_nested and _het_remainder and _tran_khong_fn and _sub_co_fn and _tu_choi_co_la)
-    _t110("r309_rasoat_sub_la_lenh_that_khong_con_remainder", _c309_sub_la_lenh_that_khong_con_remainder)
+    _t110("r310_rasoat_sub_la_lenh_that_khong_con_remainder", _c309_sub_la_lenh_that_khong_con_remainder)
 
     def _c309_ras14_profile_sau_sub_thuoc_ve_tl():
         # RAS-14 (bằng chứng HAI CHIỀU). Chiều 1: `--profile` sau sub được TL parse, KHÔNG rơi xuống argv
@@ -26689,7 +26743,7 @@ def run() -> int:
         # `--profile` đặt TRƯỚC subcommand vẫn sống (SUPPRESS không đè) — hồi quy P4-03
         _truoc = getattr(_ps309(_p309, ["--profile", "P", "rasoat", "keywords"]), "profile", None) == "P"
         return bool(_tl_giu and _hai_nghia_tach and _truoc)
-    _t110("r309_ras14_profile_sau_sub_thuoc_ve_tl", _c309_ras14_profile_sau_sub_thuoc_ve_tl)
+    _t110("r310_ras14_profile_sau_sub_thuoc_ve_tl", _c309_ras14_profile_sau_sub_thuoc_ve_tl)
 
     def _c309_chay_tran_chi_doc_apply_moi_ghi():
         # Cổng GHI: thiếu `--apply` ⇒ argv script con mang `dry_flag`; có `--apply` ⇒ KHÔNG mang.
@@ -26717,7 +26771,7 @@ def run() -> int:
                 and _argv("phuluc", ["m.json"])[:2] == ["--in", "m.json"]
                 and _argv("phuluc", ["--file", "m.json"])[:2] == ["--in", "m.json"])
         return bool(_tran and _apply and _khong_ghi and _pos)
-    _t110("r309_chay_tran_chi_doc_apply_moi_ghi", _c309_chay_tran_chi_doc_apply_moi_ghi)
+    _t110("r310_chay_tran_chi_doc_apply_moi_ghi", _c309_chay_tran_chi_doc_apply_moi_ghi)
 
     def _c309_writer_khong_co_dry_bi_tu_choi():
         # Fail-CLOSED: writer KHÔNG khai `dry_flag` thì "chạy trần" phải bị TỪ CHỐI (rc=2), không được
@@ -26753,7 +26807,7 @@ def run() -> int:
             _reg64.RASOAT_SPEC_BY_NAME.update(_sav_map)
             for _k, _v in _sav309.items():
                 _g309[_k] = _v
-    _t110("r309_writer_khong_co_dry_bi_tu_choi", _c309_writer_khong_co_dry_bi_tu_choi)
+    _t110("r310_writer_khong_co_dry_bi_tu_choi", _c309_writer_khong_co_dry_bi_tu_choi)
 
     def _c309_ap_profile_offline_truoc_dispatch():
         # `rasoat` nằm trong `_CREDS_LAZY_CMDS` ⇒ main() KHÔNG gọi load_creds. Nếu handler cũng không áp
@@ -26788,7 +26842,7 @@ def run() -> int:
         finally:
             for _k, _v in _sav309.items():
                 _g309[_k] = _v
-    _t110("r309_ap_profile_offline_truoc_dispatch", _c309_ap_profile_offline_truoc_dispatch)
+    _t110("r310_ap_profile_offline_truoc_dispatch", _c309_ap_profile_offline_truoc_dispatch)
 
     def _c309_audit_nhin_thay_moi_writer_long():
         # Inventory/strict audit phải THẤY ba đường ghi lồng, và validate_registry phải soi được chúng.
@@ -26822,7 +26876,7 @@ def run() -> int:
             _reg64.NESTED_COMMAND_META.clear()
             _reg64.NESTED_COMMAND_META.update(_sav_meta)
         return bool(_co_mat and _ghi and _sach and _bat_duoc and _bat_thieu_meta)
-    _t110("r309_audit_nhin_thay_moi_writer_long", _c309_audit_nhin_thay_moi_writer_long)
+    _t110("r310_audit_nhin_thay_moi_writer_long", _c309_audit_nhin_thay_moi_writer_long)
 
     def _c309_bkl_dry_khong_dong_gi():
         # Vế script con: `--dry` KHÔNG gọi exporttext/reg_bulk và KHÔNG ghi checkpoint. Một "dry" mà vẫn
@@ -26864,7 +26918,7 @@ def run() -> int:
             _s.argv = _sav_argv
             for _n, _mm in _sav.items():
                 (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
-    _t110("r309_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
+    _t110("r310_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

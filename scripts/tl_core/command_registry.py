@@ -1551,7 +1551,7 @@ def register_generated(sub, tl_module) -> list[str]:
     return made
 
 
-# ───── r309 (RAS-01 vế metadata/CLI · RAS-14): `rasoat <sub>` là LỆNH THẬT, hết argparse.REMAINDER ─────
+# ───── r310 (RAS-01 vế metadata/CLI · RAS-14): `rasoat <sub>` là LỆNH THẬT, hết argparse.REMAINDER ─────
 # BỆNH. `rasoat` khai đúng hai thứ: một positional `sub` và `rest=argparse.REMAINDER`. REMAINDER nuốt TRỌN
 # phần đuôi dòng lệnh, nên:
 #   (a) KHÔNG cờ nào của `rasoat` được KHAI ⇒ ba đường GHI (`keywords`/`titles`/`orchestrate` — cả ba đều
@@ -1915,7 +1915,7 @@ COMMAND_META = {
 }
 
 
-# r309 (RAS-01 vế metadata/CLI): meta cho lệnh LỒNG `<cha> <con>`. Trước đây registry chỉ biết tên
+# r310 (RAS-01 vế metadata/CLI): meta cho lệnh LỒNG `<cha> <con>`. Trước đây registry chỉ biết tên
 # TOP-LEVEL nên mọi writer nằm dưới một subcommand đều VÔ HÌNH với `tool-inventory`/`workflow-audit
 # --strict` — đúng ba đường GHI của `rasoat`. Khoá = ĐƯỜNG DẪN đầy đủ ngăn bằng dấu cách.
 # `deterministic_json_required=False`: handler chung là `cmd_rasoat` (passthrough sang script con), không
@@ -1938,7 +1938,7 @@ def all_command_meta() -> dict:
 def registry_summary() -> dict:
     """E3: cho tool-inventory — metadata rút gọn, sort key tất định.
 
-    r309: gộp cả lệnh LỒNG (`rasoat keywords`…) — inventory phải kê MỌI public writer, kể cả writer nằm
+    r310: gộp cả lệnh LỒNG (`rasoat keywords`…) — inventory phải kê MỌI public writer, kể cả writer nằm
     dưới một subcommand. `counts.nested` tách riêng để đọc được delta khi thêm/bớt nhánh lồng."""
     _all = all_command_meta()
     cmds = {}
@@ -1965,7 +1965,7 @@ _CONTRACT_REQUIRED = {"ingest", "nlm-add", "recat", "source-rename", "source-del
 
 
 def _parser_for_path(sub, name: str):
-    """r309: resolve tên lệnh (kể cả LỒNG, `"rasoat keywords"`) → parser. None nếu không có nhánh nào."""
+    """r310: resolve tên lệnh (kể cả LỒNG, `"rasoat keywords"`) → parser. None nếu không có nhánh nào."""
     parts = name.split()
     p = sub.choices.get(parts[0])
     for seg in parts[1:]:
@@ -2044,7 +2044,7 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
         used = {m["idempotency_contract"] for m in all_command_meta().values() if m["idempotency_contract"]}
         for k in sorted(set(contracts) - used):
             warnings.append(f"CONTRACT_UNREFERENCED_BY_REGISTRY:{k}")
-    # r309 (RAS-01): chiều NGƯỢC cho nhánh `rasoat` — mỗi sub trong RASOAT_SPECS PHẢI có meta. Không có
+    # r310 (RAS-01): chiều NGƯỢC cho nhánh `rasoat` — mỗi sub trong RASOAT_SPECS PHẢI có meta. Không có
     # lưới này thì thêm một sub GHI mới lại tái diễn đúng lỗ cũ: writer chạy được mà audit không biết.
     for _s in RASOAT_SPECS:
         if f"rasoat {_s['name']}" not in NESTED_COMMAND_META:

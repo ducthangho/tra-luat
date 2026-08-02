@@ -597,9 +597,9 @@ python scripts/tl.py hygiene plan <số hiệu/tên> --json
 python scripts/tl.py rasoat keywords --json   # trả RASOAT_FALLBACK_PLAN nếu thiếu script thật
 ```
 
-### r309 — `rasoat <sub>` là lệnh THẬT, đường GHI đòi `--apply`
+### r310 — `rasoat <sub>` là lệnh THẬT, đường GHI đòi `--apply`
 
-Từ v1.36.43, `tl rasoat` không còn nuốt trọn đuôi dòng lệnh (`argparse.REMAINDER`). Mỗi nhánh là một
+Từ v1.36.44, `tl rasoat` không còn nuốt trọn đuôi dòng lệnh (`argparse.REMAINDER`). Mỗi nhánh là một
 subcommand khai đủ cờ, nên `tl rasoat <sub> --help` liệt kê được, cờ gõ sai bị TỪ CHỐI ngay thay vì rơi
 xuống script con, và `tool-inventory`/`workflow-audit --strict` nhìn thấy cả ba đường ghi.
 
@@ -620,7 +620,7 @@ Hai điểm dễ vấp:
 
 - **`--profile` giờ thuộc về `tl`** (corpus profile), gõ TRƯỚC hay SAU subcommand đều được, và được áp
   offline TRƯỚC khi gọi script con. Muốn truyền profile của **nlm CLI** cho `backfill_nlm_title.py` thì
-  dùng `--nlm-profile` — trước r309 hai nghĩa này đổi chỗ cho nhau trong im lặng (RAS-14).
+  dùng `--nlm-profile` — trước r310 hai nghĩa này đổi chỗ cho nhau trong im lặng (RAS-14).
 - **`--selftest` của bộ điều phối** đổi tên thành `--orchestrator-selftest` (`--selftest` ở tầng `tl` là
   selftest của chính `tl`, main() đọc nó TRƯỚC khi dispatch).
 

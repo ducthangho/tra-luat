@@ -506,7 +506,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--apply", action="store_true"); p.add_argument("--confirm"); p.add_argument("--to-cat", dest="to_cat"); p.set_defaults(fn=cmd_hygiene, hsub="reconcile")
 
 
-    # r309 (RAS-01 vế metadata/CLI · RAS-14): `rasoat` hết `argparse.REMAINDER`. Trước đây cả sub lẫn đuôi
+    # r310 (RAS-01 vế metadata/CLI · RAS-14): `rasoat` hết `argparse.REMAINDER`. Trước đây cả sub lẫn đuôi
     # dòng lệnh là hai positional thô ⇒ không cờ nào được KHAI: ba đường GHI (keywords/titles/orchestrate)
     # vô hình với tool-inventory/workflow-audit --strict, và `--profile` gõ SAU sub bị đẩy nguyên cho script
     # con (RAS-14 — `backfill_nlm_title.py` có `--profile` RIÊNG nghĩa khác hẳn). Spec + meta ở

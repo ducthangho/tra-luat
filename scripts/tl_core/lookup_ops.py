@@ -1109,7 +1109,7 @@ def _rasoat_map_positional(sub: str, rest) -> list:
     """#4: positional ĐẦU (số hiệu/file) → cờ chính của script rasoat đích (worksheet→--so-hieu, phuluc→--in),
     để `tl rasoat worksheet 18/VBHN-VPQH` chạy như `... --so-hieu 18/VBHN-VPQH`. No-op nếu đã có cờ / là -h / sub khác.
 
-    r309: đường DISPATCH không còn dùng hàm này (positional/alias nay do argparse lo — `fills` +
+    r310: đường DISPATCH không còn dùng hàm này (positional/alias nay do argparse lo — `fills` +
     `flags:["--so-hieu","--sohieu","--so_hieu"]` trong RASOAT_SPECS). GIỮ lại vì nó là bản mô tả gọn nhất
     của quy ước positional, và ca `rasoat_worksheet_positional_maps_so_hieu` vẫn khoá quy ước đó."""
     rest = list(rest or [])
@@ -1154,7 +1154,7 @@ def _rasoat_autocache_worksheet(rest: list, a) -> None:
 def cmd_rasoat(a) -> int:
     """Passthrough tới script rà soát/backfill nếu có; nếu thiếu thì in fallback plan có cấu trúc.
 
-    r309 (RAS-01 vế metadata/CLI · RAS-14) — ba thay đổi HÀNH VI, mỗi cái vá một lỗ:
+    r310 (RAS-01 vế metadata/CLI · RAS-14) — ba thay đổi HÀNH VI, mỗi cái vá một lỗ:
       1. argv script con dựng từ NAMESPACE đã parse (`rasoat_child_argv`), không còn `argparse.REMAINDER`.
       2. `apply_profile_offline` chạy TRƯỚC dispatch — script con thừa hưởng đúng TL_PROFILE/scope. Trước
          đây `rasoat` nằm trong `_CREDS_LAZY_CMDS` nên `load_creds` KHÔNG chạy, và REMAINDER lại nuốt mất

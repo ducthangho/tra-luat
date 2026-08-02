@@ -133,7 +133,7 @@ def main():
     ap.add_argument('--batch', type=int, default=40, help='vá reg_bulk mỗi N doc')
     ap.add_argument('--all', action='store_true', help='cả doc chưa lên NLM (mặc định chỉ NLM)')
     ap.add_argument('--progress', default=PROG)
-    # r309 (RAS-01 vế metadata/CLI): script này TRƯỚC ĐÂY không có đường chạy chỉ-đọc nào — mọi lần gọi
+    # r310 (RAS-01 vế metadata/CLI): script này TRƯỚC ĐÂY không có đường chạy chỉ-đọc nào — mọi lần gọi
     # đều đi thẳng vào `exporttext` + `reg_bulk` + ghi checkpoint. `tl rasoat keywords` thiếu `--apply`
     # nay bơm cờ này. DRY = KHÔNG `exporttext`, KHÔNG `reg_bulk`, và KHÔNG lưu checkpoint: một lượt "dry"
     # mà vẫn dịch sổ tiến độ thì đúng là bệnh RAS-01 đang chữa, chỉ đổi chỗ.

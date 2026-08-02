@@ -138,6 +138,28 @@ Nhưng Loop C **chỉ được chạy khi `anchor_con_hieu_luc: true`**; `false`
 ⇒ chạy Loop C theo đặc tả hiện hành sẽ ra **STALE giả 100%**. Chỉ bật `true` sau khi anchor được di trú
 (tách `locator` khỏi `text_hash`, tính lại bằng `doc_identity._content_hash`).
 
+**Đo lại 02-08 (r321) — phân rã 82 ô, vì "di trú" KHÔNG phải một việc đồng nhất:**
+
+| lớp | n | tự động di trú được? |
+|---|---|---|
+| `cache:<slug>` (± `#<8hex>`) | 47 | **ĐƯỢC** — `~/.tra_luat_cache/docs/<slug>.json` giữ `text_hash` 64hex thật; hai ô có `#<8hex>` đều KHỚP tiền tố bản cache hiện hành |
+| hex 16 ký tự (2 giá trị, `158-2025-ND-CP` + `41-2024-QH15`) | 17 | **KHÔNG** — dò cả `~/.tra_luat_cache/docs` lẫn mọi `cache_bak_*`: khớp **0** bản, kể cả bản lưu ⇒ không truy nguyên được |
+| `congbao:<số>#pdf`/`#meta` | 17 | **KHÔNG** — không có record cache; phải lấy lại từ Công báo |
+| `gdoc:<id>` | 1 | **KHÔNG** — phải lấy lại từ Drive |
+
+⚠ Vì 17 ô **không truy nguyên được**, câu "tính lại bằng `_content_hash`" ở trên chỉ đúng cho lớp
+`cache:`. Áp cho cả 82 là SAI: nó thay một giá trị không rõ nguồn bằng một giá trị TƯƠI, tức khẳng
+định một độ tươi **chưa hề kiểm** — đúng thứ mà `anchor_con_hieu_luc` sinh ra để chặn. Ô nào không
+truy nguyên được thì **để trống** và giữ `anchor_con_hieu_luc:false` + `ly_do_anchor`.
+(Ghi chú: bản đo 01-08 nói "cache `docs/*.json` = 0 record" là đo trong **container rỗng**; trên máy
+giữ hồ sơ, `~/.tra_luat_cache/docs/` có đủ 11 bản consolidated.)
+
+Cưỡng chế phía `rasoat-merge` (r321): `tl rasoat-merge` khai `so_anchor_hong` + `anchor_hong`
+(đích danh `nguon`/`key`/`so_hieu`) ở **MỌI** chế độ, kể cả `--check`; `--anchor-strict` ⇒ rc=2 và
+**KHÔNG ghi** bảng master (cùng khuôn fail-closed r216/r290). KHÔNG bật mặc định — hồ sơ cũ giữ
+82/82 ô sai khuôn, chặn đứng chúng vì một lỗi lượt rà không gây ra là đổi một báo cáo sai lấy một
+công cụ không dùng được.
+
 ### 7.3 Điều kiện mở hồ sơ kế tiếp
 
 1. Hồ sơ trước ở trạng thái terminal (`da_dong` / `da_dong_co_gioi_han` / `tam_ngung` có lý do).

@@ -965,6 +965,7 @@ GENERATED_SPECS = [
          {"flags": ['--state'], "help": 'kèm HOÀ GIẢI state: đơn vị doing mà ĐÃ có master → done, không có → pending'},
          {"flags": ['--dry-run'], "dest": 'dry_run', "action": 'store_true', "help": 'không ghi lại --state (vẫn xuất bảng master)'},
          {"flags": ['--check'], "action": 'store_true', "help": 'r216: ĐỐI CHIẾU bảng master đang có với kết quả merge, KHÔNG ghi đè; lệch ⇒ rc=2 kèm danh sách'},
+         {"flags": ['--anchor-strict'], "dest": 'anchor_strict', "action": 'store_true', "help": 'r321 (RAS-17): anchor.doc_deps[].text_hash sai khuôn sha256:<64hex> ⇒ rc=2, KHÔNG ghi. Mặc định chỉ khai so_anchor_hong'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'state-get', "handler": 'cmd_state_get',

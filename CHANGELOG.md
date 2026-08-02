@@ -1,3 +1,49 @@
+# ★ v1.36.47 — r313: RAS-17 phần MÃ + GUARD — khuôn `anchor.text_hash`, tách `locator`, cưỡng chế `anchor_con_hieu_luc` (2026-08-02)
+
+**Phạm vi có chủ đích: MÃ + GUARD, KHÔNG đụng DỮ LIỆU.** Di trú 82 giá trị anchor là việc GHI, tách riêng.
+
+**Bệnh.** `RASOAT_PLAN_SCHEMA.md` §7.2 đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025`: **82/82 `doc_deps` ĐIỀN ĐỦ,
+0/82 khớp `sha256:<64hex>`** — ô `text_hash` đang chứa ĐỊA CHỈ ĐỊNH VỊ. Vì «điền đủ» nên không cổng nào
+kêu; Loop C chạy lên sẽ báo **STALE giả 100%**. Đây là lớp bệnh «trường CÓ giá trị nhưng SAI LOẠI» —
+đếm rỗng/thiếu MÙ hoàn toàn, phải soi KHUÔN mới thấy.
+
+**Đo trước khi vá (quyết định được phép fail-closed hay không):**
+- `doc_deps` xuất hiện trong **0 tệp `.py`** — RAS-17 phần mã là **greenfield**, chưa validator nào.
+- `anchor_con_hieu_luc` chỉ sống trong **prose + 1 ca selftest kiểm *tài liệu có nhắc chữ đó không***
+  — **không mã nào cưỡng chế**. Đúng lớp tự-lừa mà `_rasoat_vong_doi_dong_hop_le` (r300) sinh ra để chặn.
+- Quét toàn kho: chỉ **3** giá trị `text_hash` literal, **không giá trị hỏng nào** (template hợp khuôn;
+  hai chỗ còn lại là skeleton/ellipsis tài liệu). ⇒ 82 giá trị xấu nằm **hoàn toàn ở hồ sơ runtime**
+  (`--out-dir`), ngoài kho ⇒ **cưỡng chế được mà không đỏ oan**.
+
+**Vá — ba hàm PURE (`tl_core/lookup_ops.py`), đã bind qua `tl.py` (ADR-0002):**
+1. `_rasoat_anchor_khuon()` — khuôn đóng `^sha256:[0-9a-f]{64}$` + dấu hiệu địa chỉ. **CỐ Ý là HÀM**,
+   không phải hằng cấp module — cùng lý do `_rasoat_vong_doi_enums`: `tl.py` bind COPY-globals, stub farm
+   chỉ nhận callable; hằng module tra từ trong hàm KHÔNG resolve qua `tl` (r90/r81 bắt).
+2. `_rasoat_anchor_findings(units)` — phân loại từng dep: `ok` / `rong` / **`locator_trong_hash`** /
+   `sai_khuon`, đếm riêng `co_locator`. Đọc **CẢ** khuôn §6 `phat_hien` lẫn bảng `noi_dung`.
+   `san_sang` ⇔ có ≥1 dep **VÀ** mọi dep `ok` — `tong=0` KHÔNG phải «sạch».
+3. `_rasoat_anchor_hop_le(state, units)` — fail-CLOSED ba vế: khai `true` mà **không đưa đơn vị để kiểm**
+   ⇒ ĐỎ (không kiểm được thì không được khai); khai `true` mà chưa `san_sang` ⇒ ĐỎ **kèm số đếm**;
+   khai `false` tường minh mà thiếu `ly_do_anchor` ⇒ ĐỎ (§7.2 «không im lặng thoát»).
+   **Cờ VẮNG HẲN ⇒ KHÔNG đỏ** — hồ sơ đang rà chưa tới bước khai; ratchet siết chiều khai SAI, không siết
+   chiều CHƯA KHAI (đỏ oan ngày đầu = guard bị vô hiệu hoá, bài học §0.8).
+
+**Tách `locator`:** khai báo khuôn ở `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` +
+`references/RASOAT_HOSO_LOOP.md` nay có **`locator` là trường RIÊNG** cạnh `text_hash`. Hai thứ khác bản
+chất: hash đổi khi NỘI DUNG đổi (đúng thứ Loop C cần), địa chỉ thì không.
+
+**Bằng chứng DƯƠNG (3 mutation, không tin `rc=0`):**
+- nới khuôn (cho hex trần / CHỮ HOA) ⇒ `r313_anchor_khuon_findings` + `r313_khuon_khop_dac_ta_va_tl` **ĐỎ**
+- bỏ cổng «khai true mà không đưa đơn vị» ⇒ `r313_anchor_con_hieu_luc_fail_closed` **ĐỎ**
+- cho `tong=0` là `san_sang` (vacuous) ⇒ `r313_anchor_khuon_findings` **ĐỎ**
+
+**Selftest 1593/1593** (master 1590, +3 ca). Ruff **DELTA = 0** cả ba tệp, không tên F821 nào mới.
+
+**CÒN NỢ (KHÔNG làm ở đợt này):** di trú **82** giá trị anchor của hồ sơ BHXH — tách địa chỉ sang
+`locator`, tính lại hash bằng `doc_identity._content_hash`, rồi mới được đặt `anchor_con_hieu_luc: true`.
+Con số 82 phải **đếm lại LIVE** trước khi di trú. Guard ở đợt này chính là thứ sẽ **chặn** việc bật cờ
+trước khi di trú xong.
+
 # ★ v1.36.46 — r312: ING-09 — nhân đôi theo TỆP NGUỒN (`src_id`) lộ diện; cổng ingest hết nấp sau `if sohieu` (2026-08-02)
 
 Đóng ING-09. Khác với ba mục trước, mục này **đo được trên registry LIVE** (1319 dòng, tab `files`) chứ

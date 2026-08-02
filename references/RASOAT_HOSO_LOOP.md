@@ -169,7 +169,7 @@ TRẢ VỀ (final message = JSON THUẦN, không văn xuôi, không bọc ```):
  "phat_hien": [{"key":"","linh_vuc":"","van_ban":"","can_cu":"","phan_tich":"",
    "hinh_thuc":"","lo_trinh":"","tieu_chi":"","ghi_chu":"",
    "muc_chac_chan":"chac_chan|can_kiem_tra|cho_verify_nlm",
-   "anchor":{"doc_deps":[{"so_hieu":"","text_hash":"","dieu":[]}],"cite":"","skill_version":"",
+   "anchor":{"doc_deps":[{"so_hieu":"","text_hash":"sha256:<64hex>","locator":"","dieu":[]}],"cite":"","skill_version":"",
              "verified_at":"","ttl_ngay":90}}],
  "ung_vien_nap": [{"so_hieu":"","ly_do":""}], "dieu_lien_quan_moi": []}
 

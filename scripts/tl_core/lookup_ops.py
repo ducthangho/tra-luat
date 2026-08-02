@@ -3053,6 +3053,109 @@ def _rasoat_vong_doi_dong_hop_le(state):
     return {"ok": not loi, "loi": loi, "ve_hong": f["ve_hong"]}
 
 
+def _rasoat_anchor_khuon():
+    """PURE (r313/RAS-17): khuôn ĐÓNG của `anchor.doc_deps[]` — `RASOAT_PLAN_SCHEMA.md` §7.2.
+
+    `text_hash` phải là HASH NỘI DUNG (`sha256:<64hex>`), KHÔNG phải địa chỉ định vị. Địa chỉ đi
+    trường RIÊNG `locator` — hai thứ khác bản chất: hash đổi khi NỘI DUNG đổi (đó là điều Loop C cần
+    biết), địa chỉ thì không. Nhét địa chỉ vào ô hash làm phép so «còn tươi?» luôn LỆCH ⇒ STALE giả.
+
+    CỐ Ý là HÀM chứ không phải hằng cấp module — cùng lý do `_rasoat_vong_doi_enums`: `tl.py` bind
+    COPY-globals (ADR-0002) và stub farm chỉ nhận callable; hằng module tra từ trong hàm KHÔNG resolve
+    qua `tl` (r90/r81 bắt)."""
+    return {"text_hash": r"^sha256:[0-9a-f]{64}$",
+            # dấu hiệu ĐỊA CHỈ bị nhét vào ô hash — lấy từ chính dạng `cite` đang dùng
+            # (`cache:18-2025-VBHN-VPQH#dieu54`), xem template MAU_BANG_TONG_HOP_PHAT_HIEN.json.
+            "locator_dau_hieu": ("cache:", "drive:", "nlm:", "#", "/")}
+
+
+def _rasoat_anchor_findings(units):
+    """PURE (r313/RAS-17): phân loại TỪNG `anchor.doc_deps[]` trong các đơn vị rà.
+
+    Vì sao cần: đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025` — **82/82 `doc_deps` ĐIỀN ĐỦ, 0/82 khớp
+    `sha256:<64hex>`**; ô `text_hash` đang chứa ĐỊA CHỈ ĐỊNH VỊ. «Điền đủ» nên không cổng nào kêu,
+    mà Loop C chạy lên sẽ báo **STALE giả 100%** (`RASOAT_PLAN_SCHEMA.md` §7.2). Đây là lớp bệnh
+    «trường có giá trị nhưng SAI LOẠI» — đếm rỗng/thiếu không bắt được, phải soi KHUÔN.
+
+    Trả `{tong, ok, rong, locator_trong_hash, sai_khuon, co_locator, mau, san_sang}`.
+    `san_sang=True` ⇔ có ít nhất 1 dep VÀ mọi dep đều `ok` — tiền đề DUY NHẤT để đặt
+    `vong_doi.anchor_con_hieu_luc: true` (cưỡng chế ở `_rasoat_anchor_hop_le`).
+    Hàm KHÔNG đọc đĩa, KHÔNG gọi mạng, KHÔNG sửa gì — chỉ ĐO."""
+    k = _rasoat_anchor_khuon()
+    rx = re.compile(k["text_hash"])
+    tong = ok = rong = loc_in_hash = sai = co_loc = 0
+    mau = []
+    for u in (units if isinstance(units, list) else []):
+        if not isinstance(u, dict):
+            continue
+        # nhận CẢ hai khuôn (§6 `phat_hien` lẫn bảng `noi_dung`) — cùng doctrine _rasoat_unit_shape
+        rows = u.get("phat_hien") if isinstance(u.get("phat_hien"), list) else u.get("noi_dung")
+        for r in (rows if isinstance(rows, list) else []):
+            if not isinstance(r, dict):
+                continue
+            anc = r.get("anchor") if isinstance(r.get("anchor"), dict) else {}
+            for dep in (anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []):
+                tong += 1
+                if not isinstance(dep, dict):
+                    sai += 1
+                    continue
+                if str(dep.get("locator") or "").strip():
+                    co_loc += 1
+                th = str(dep.get("text_hash") or "").strip()
+                if not th:
+                    rong += 1
+                    loai = "rong"
+                elif rx.match(th):
+                    ok += 1
+                    continue
+                elif any(s in th for s in k["locator_dau_hieu"]):
+                    loc_in_hash += 1
+                    loai = "locator_trong_hash"
+                else:
+                    sai += 1
+                    loai = "sai_khuon"
+                if len(mau) < 10:
+                    mau.append({"so_hieu": str(dep.get("so_hieu") or ""), "loai": loai,
+                                "text_hash": th[:80]})
+    return {"tong": tong, "ok": ok, "rong": rong, "locator_trong_hash": loc_in_hash,
+            "sai_khuon": sai, "co_locator": co_loc, "mau": mau,
+            "san_sang": bool(tong) and ok == tong}
+
+
+def _rasoat_anchor_hop_le(state, units=None):
+    """PURE (r313/RAS-17): fail-CLOSED cho `vong_doi.anchor_con_hieu_luc` — `RASOAT_PLAN_SCHEMA.md` §7.2.
+
+    TRƯỚC r313 KHÔNG mã nào cưỡng chế cờ này: nó chỉ sống trong prose + một ca selftest kiểm *tài liệu
+    có nhắc chữ đó không*. Tức đúng lớp tự-lừa mà `_rasoat_vong_doi_dong_hop_le` sinh ra để chặn —
+    khai `true` là Loop C chạy, không ai đối chiếu anchor có di trú thật chưa.
+
+    Ba vế, mỗi vế chặn một kiểu:
+      (a) khai `true` mà KHÔNG đưa đơn vị để kiểm ⇒ ĐỎ. Không kiểm được thì không được khai — im lặng
+          tin lời khai chính là cách STALE giả lọt.
+      (b) khai `true` mà anchor chưa `san_sang` ⇒ ĐỎ, kèm SỐ ĐẾM để biết còn bao xa.
+      (c) khai `false` TƯỜNG MINH mà thiếu `ly_do_anchor` ⇒ ĐỎ (§7.2 «BỎ QUA hồ sơ và NÓI RA lý do»).
+    Cờ VẮNG HẲN ⇒ ghi chú advisory, KHÔNG đỏ: hồ sơ đang rà chưa tới bước khai, đỏ ở đây là đỏ oan
+    ngày đầu ⇒ guard sẽ bị vô hiệu hoá (bài học §0.8). Ratchet siết theo chiều khai SAI, không siết
+    chiều CHƯA KHAI."""
+    st = state if isinstance(state, dict) else {}
+    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else None
+    if vd is None:
+        return {"ok": True, "loi": [], "findings": None,
+                "ghi_chu": "chưa khai vòng đời — hồ sơ đang rà"}
+    loi = []
+    f = _rasoat_anchor_findings(units) if units is not None else None
+    if vd.get("anchor_con_hieu_luc") is True:
+        if f is None:
+            loi.append("ANCHOR_KHAI_TRUE_NHUNG_KHONG_DUA_DON_VI_DE_KIEM")
+        elif not f["san_sang"]:
+            loi.append("ANCHOR_KHAI_TRUE_NHUNG_CHUA_DI_TRU:"
+                       f"ok={f['ok']}/{f['tong']},locator_trong_hash={f['locator_trong_hash']},"
+                       f"rong={f['rong']},sai_khuon={f['sai_khuon']}")
+    elif "anchor_con_hieu_luc" in vd and not str(vd.get("ly_do_anchor") or "").strip():
+        loi.append("ANCHOR_FALSE_NHUNG_THIEU_LY_DO")
+    return {"ok": not loi, "loi": loi, "findings": f}
+
+
 def _rasoat_unit_shape(d):
     """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
     `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.

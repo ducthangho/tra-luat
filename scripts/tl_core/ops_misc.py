@@ -1040,6 +1040,40 @@ def _drift_hint_lines(bd: dict, nb: str) -> list[str]:
     return out
 
 
+def _doc_dep_probe() -> list:
+    """r319 — PURE-đọc: phụ thuộc NGOÀI thư viện chuẩn của đường NẠP tài liệu, kèm HẬU QUẢ cụ thể.
+
+    Vì sao cần: `requirements.txt` khai «uses only Python standard library» — đúng với overlay core
+    (`tl.py`/`contract_check.py`) nhưng SAI với đường nạp (`ingest_to_cache`/`normalize_document`).
+    Hệ quả đo được 02-08: máy cài sạch không có `pypdf` ⇒ `assert_pdf_not_scanned` không đo được lớp
+    text ⇒ CHẶN mọi .pdf (r315). Trước r319 không lệnh nào nói ra điều đó trước khi đâm vào tường.
+
+    `bat_buoc=True` = thiếu là CHẶN CỨNG một đường nạp; `False` = giảm chất lượng, vẫn chạy."""
+    import shutil as _sh319
+
+    def _co_mod(ten):
+        try:
+            __import__(ten)
+            return True
+        except Exception:  # noqa: BLE001 — import hỏng cũng coi như không có
+            return False
+
+    return [
+        {"ten": "pypdf|pdfplumber", "bat_buoc": True,
+         "co": _co_mod("pypdf") or _co_mod("pdfplumber"),
+         "hau_qua": "MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). Cài: pip install pypdf"},
+        {"ten": "pdftotext (poppler-utils)", "bat_buoc": True,
+         "co": bool(_sh319.which("pdftotext")),
+         "hau_qua": "không bóc được text .pdf. Cài: apt-get install poppler-utils"},
+        {"ten": "python-docx", "bat_buoc": False, "co": _co_mod("docx"),
+         "hau_qua": "vẫn đọc .docx bằng nhánh bóc-tag (r317 đã hết rò trị đo DrawingML); "
+                    "có lib thì cấu trúc đoạn/bảng sát bản gốc hơn"},
+        {"ten": "antiword|catdoc", "bat_buoc": False,
+         "co": bool(_sh319.which("antiword") or _sh319.which("catdoc")),
+         "hau_qua": "không đọc được .doc CŨ (binary); .docx/.pdf không ảnh hưởng"},
+    ]
+
+
 def cmd_doctor(a) -> int:
     """Chẩn đoán phiên trống: script lõi (gốc HOẶC _fallback), optional, credential,
     API_CONTRACT↔tl EXPECT, webapp ping, (--deep) manifest_export + exporttext-scope probe. (--offline) bỏ phần webapp."""
@@ -1071,6 +1105,17 @@ def cmd_doctor(a) -> int:
     missing_opt = [fn for fn in optional if not where(fn)]
     add("optional rasoat/backfill", not missing_opt,
         "đủ" if not missing_opt else f"thiếu {len(missing_opt)} (chỉ ảnh hưởng tl rasoat): {', '.join(missing_opt[:5])}")
+    # r319: KHAI phụ thuộc NGOÀI stdlib của đường NẠP tài liệu. Trước đây không có chỗ nào nói ra:
+    # `requirements.txt` khai "stdlib only" nên máy cài sạch KHÔNG có `pypdf` ⇒ MỌI .pdf bị chặn
+    # (r315), mà người vận hành chỉ biết khi đã đâm vào tường giữa lượt nạp. Tên bắt đầu bằng
+    # "optional" ⇒ báo ĐỎ to nhưng KHÔNG lật rc (đúng nếp `optional rasoat/backfill`): máy không
+    # bao giờ nạp PDF vẫn xanh.
+    _dep = _doc_dep_probe()
+    _thieu_cung = [d for d in _dep if d["bat_buoc"] and not d["co"]]
+    _thieu_mem = [d for d in _dep if not d["bat_buoc"] and not d["co"]]
+    add("optional phụ thuộc nạp tài liệu", not _thieu_cung,
+        "đủ" + (f" (thiếu tuỳ chọn: {', '.join(d['ten'] for d in _thieu_mem)})" if _thieu_mem else "")
+        if not _thieu_cung else " · ".join(f"{d['ten']} THIẾU ⇒ {d['hau_qua']}" for d in _thieu_cung))
     cfg_paths = [Path(a.config)] if a.config else [Path.home()/".tra_luat_config.json", Path("/tmp/tra_luat_config.json")]
     cfg_hit = next((x for x in cfg_paths if x and x.exists()), None)
     env_ok = bool(os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN"))

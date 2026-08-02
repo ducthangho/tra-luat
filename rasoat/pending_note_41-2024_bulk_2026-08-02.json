@@ -1,0 +1,4 @@
+[
+  {"drive_id": "1Ds95NoIdZyRutHGsMS85N4hB61Nglz5eeg0vRZ-XqYM",
+   "note": "Đã xóa khỏi NLM; thay bằng VBHN 19/VBHN-VPQH (2026) · 02-08-2026 (lượt bảo trì kho): QUARANTINE ĐÚNG — superseded_by VBHN 19-2026-VBHN-VPQH, doctrine VBHN-first. KHÔNG gỡ quarantine, KHÔNG đặt corpus=true. Tiền đề «gỡ sau khi có bản ban hành» của Q-APPROVALS gốc ĐÃ BỊ BÁC ở lượt 8 (28-07-2026): cache chỉ có 1 record 41-2024-qh15--consolidated và nó LÀ bản chính thức (variant=consolidated, in_force, official, verified, đủ 141 Điều), không phải dự thảo. Bản Công báo 987+988 đã nạp vào CACHE ở lượt 12 (bổ sung khối đầu + bỏ markup, cache-only: 0 ghi Drive, 0 đụng registry, 0 vào corpus), nghiệm thu lượt 13 (6/6 record, 10/10 cổng). Đối chiếu kho vs Công báo sau bộ lọc r217: 141/141 Điều khớp, 15 chỗ lệch đều là TRÌNH BÀY (Mục N. vs Mục N)."}
+]

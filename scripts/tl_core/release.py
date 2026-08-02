@@ -784,8 +784,20 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
     #   (b) THỪA — .md nằm trong `references/` trên ĐĨA nhưng bị release-exclude: quét chúng là bắt
     #       gate CÂY chịu trách nhiệm cho thứ KHÔNG vào artifact (cùng họ xanh-giả của REL-01).
     # Đọc theo `expected` nên cũng tự đóng theo mọi thay đổi kiểm kê — thêm .md vào gói là guard phủ ngay.
+    # r309 (T0-F/1c): thêm THẺ MÁY ĐỌC `references/workflows/*.json` vào doc-set. Thẻ là chỉ dẫn vận hành
+    # y như .md, chỉ khác định dạng, mà TRƯỚC r309 không guard nào với tới vì lọc theo đuôi `.md`.
+    # Đo 02-08 (gói 177 tệp): 27 thẻ · 4 con trỏ · 1 ĐỨT — `doc_claims_check.json` trỏ
+    # `references/changelog_archive/` (dev-only, `_RELEASE_EXCLUDE_DIRS`). Đã SỬA LỜI THẺ, KHÔNG baseline:
+    # đúng tiền lệ r184 trên CHÍNH con trỏ này ở SKILL.md — «không nới auditor, sửa con trỏ».
+    # CỐ Ý KHÔNG mở sang `.json` khác: `references/golden/*.json` là ĐẦU RA GHI SẴN của test, đo được
+    # 11 con trỏ đứt mà PHẢI đứt — gồm `references/KHONG_CO_FILE.md`, chính là mồi cho bộ dò tệp-thiếu.
+    # Gác chúng = đỏ oan ngày đầu ⇒ guard bị vô hiệu hoá (bài học §0.8). Ranh giới này có test khoá.
+    def _guarded_doc(rel: str) -> bool:
+        low = rel.lower()
+        return low.endswith(".md") or (low.startswith("references/workflows/") and low.endswith(".json"))
+
     _doc_texts = {}
-    for _rel in sorted(k for k in expected if k.lower().endswith(".md")):
+    for _rel in sorted(k for k in expected if _guarded_doc(k)):
         _dp = root / _rel
         if not _dp.is_file():
             continue          # tệp thiếu/không phải tệp đã do vòng `checks` ở trên báo — không báo hai lần

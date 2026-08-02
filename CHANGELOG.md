@@ -1,3 +1,40 @@
+# ★ v1.36.43 — r309: thẻ máy đọc `references/workflows/*.json` vào tầm guard con trỏ (T0-F/1c) (2026-08-02)
+
+**Bối cảnh.** r308 mở doc-set ra mọi `*.md` trong gói, nhưng lọc theo đuôi `.md` nên 27 **thẻ máy
+đọc** `references/workflows/*.json` vẫn nằm ngoài tầm. Thẻ là chỉ dẫn VẬN HÀNH y như `.md`, chỉ khác
+định dạng — con trỏ chết trong thẻ hỏng đúng thứ gói mang đi.
+
+**Đo trên gói 177 tệp (02-08):**
+
+| tập | con trỏ | ĐỨT |
+|---|---|---|
+| `references/workflows/*.json` (27 thẻ) | 4 | **1** |
+| **mọi** `.json` trong gói (57 tệp) | 48 | **12** |
+
+**Quyết định phạm vi: CHỈ thẻ workflow, KHÔNG phải mọi `.json`.** 11/12 mục đứt còn lại nằm ở
+`references/golden/*.json` — ĐẦU RA GHI SẴN của test, con trỏ đứt là CỐ Ý (rõ nhất:
+`references/KHONG_CO_FILE.md`, chính là mồi cho bộ dò tệp-thiếu). Gác chúng = đỏ oan ngày đầu
+⇒ guard bị vô hiệu hoá, đúng bài học §0.8. **Ranh giới này có test khoá cả HAI chiều.**
+
+**Mục ĐỨT duy nhất — SỬA LỜI THẺ, KHÔNG baseline.** `doc_claims_check.json` (khối `plan`) trỏ
+`references/changelog_archive/` — thư mục dev-only (`_RELEASE_EXCLUDE_DIRS`). Lời thẻ **ĐÚNG với mã**
+(`workflow.py:1001-1004` có đọc archive, có `is_dir()` nên vắng thì suy biến êm) — tức không phải tài
+liệu cũ. Nhưng **tiền lệ r184 trên CHÍNH con trỏ này** (SKILL.md từng trỏ `references/changelog_archive/`,
+gây gạch xanh-giả 4 test) đã chốt: «**không nới auditor, sửa con trỏ**». Nên sửa lời thẻ cho nói rõ
+kho lưu trữ là dev-only/ngoài gói — vừa hết con trỏ chết, vừa **thêm thông tin** cho người đọc runtime,
+và **không thêm mục miễn trừ nào** (ratchet giữ nguyên độ chặt: baseline vẫn 3).
+
+**Bằng chứng DƯƠNG (3 mutation, không tin `rc=0`):**
+- trả lại lời thẻ CŨ ⇒ cặp đứt hiện lại đúng 1 mục
+- thu doc-set về chỉ `.md` ⇒ `r309_the_workflow_trong_tam_guard` **ĐỎ** (1579/1580)
+- mở tầm sang **mọi** `.json` (golden lọt vào) ⇒ cũng **ĐỎ** — ranh giới khoá hai chiều
+
+**Lớp trần (`_doc_bare_tool_findings`) không đổi gì:** đo được 0 span backtick trong thẻ JSON ⇒
+0 checked. Ghi lại để phiên sau khỏi đi đo lại.
+
+Sau vá: pointer checked **300→303** FAIL **0** adv 104 baseline 3. **Selftest 1580/1580** (master 1579, +1 ca).
+Ruff **DELTA = 0** cả ba tệp, không tên F821 nào mới.
+
 # ★ v1.36.42 — r308: GATE-04 mở tầm guard con trỏ ra MỌI `*.md` TRONG GÓI + GATE-05 test dựng package-set đúng nguồn (2026-08-02)
 
 **Bối cảnh.** Hai lớp guard con trỏ tài liệu (`_doc_pointer_findings` r209 · `_doc_bare_tool_findings`

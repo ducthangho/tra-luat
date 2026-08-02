@@ -20945,6 +20945,41 @@ def run() -> int:
                        for q in tren_dia))
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c307_changelog_mot_version_mot_dot():
+        # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
+        # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version
+        # HAI LẦN với nội dung mâu thuẫn (nhánh giữ dải số riêng trong khi master đã tiêu dải đó).
+        # Nền ĐO TRƯỚC merge (`1a06ff1`) = 0 vi phạm, archive cũng 0 ⇒ cổng KHÔNG cần miễn trừ.
+        # Cố ý KHÔNG dùng vị ngữ "tiêu đề version không được lặp": v1.35.65 và v1.35.88 lặp HỢP LỆ
+        # vì là CÙNG một đợt tách hai mục (r229/r229, r251/r251) — vị ngữ theo SỐ ĐỢT tha đúng chỗ.
+        root = _ROOT209
+
+        def _viol(txt):
+            m = {}
+            for ln in txt.split("\n"):
+                g = _re209.match(r"^# \u2605 v(1\.\d+\.\d+)\b(.*)$", ln)
+                if not g:
+                    continue
+                rs = _re209.findall(r"\br(\d{2,4}[a-z]?)\b", g.group(2))
+                m.setdefault(g.group(1), set()).update(rs[:1])
+            return {v: sorted(r) for v, r in m.items() if len(r) > 1}
+
+        files = [p for p in [root / "CHANGELOG.md"] if p.exists()]
+        arc = root / "references" / "changelog_archive"
+        if arc.is_dir():
+            files.extend(sorted(arc.glob("*.md")))
+        ok1 = len(files) >= 1
+        ok2 = all(not _viol(f.read_text(encoding="utf-8", errors="replace")) for f in files)
+        # PHẢN CHỨNG TỰ MANG: thiếu vế này thì ca chỉ chứng minh "hôm nay sổ sạch", KHÔNG chứng minh
+        # cổng còn chạy — đúng lỗi TỰ-CHỨNG-MINH mà r298/T0-E vừa diệt ba ca.
+        gia = ("# \u2605 v1.36.41 \u2014 r307: mục thật\nthân bài\n"
+               "# \u2605 v1.36.41 \u2014 r999: mục giả CÙNG version KHÁC đợt\n")
+        ok3 = _viol(gia) == {"1.36.41": ["307", "999"]}
+        # ... và phải THA khi hai mục cùng version CÙNG đợt (khuôn v1.35.88/r251 có thật trên cây).
+        that = "# \u2605 v1.35.88 \u2014 r251: vế một\n# \u2605 v1.35.88 \u2014 r251: vế hai\n"
+        ok4 = _viol(that) == {}
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r307_changelog_mot_version_mot_dot", _c307_changelog_mot_version_mot_dot)
 
     def _c209_skill_md_khong_tro_file_ma():
         # H0 nghiệm thu: MỌI con trỏ references/|templates/|scripts/ trong SKILL.md tồn tại trên đĩa
@@ -25878,7 +25913,7 @@ def run() -> int:
                 for _k, _v in _sav.items():
                     _g[_k] = _v
 
-    def _c287_raw_drift_lam_do_gate():
+    def _c301_raw_drift_lam_do_gate():
         # ĐẶC TẢ: bơm hai stdout KHÁC BYTE / CÙNG projection ⇒ PHẢI ĐỎ, với mã lỗi RIÊNG.
         _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
         _gt = _g["_golden_test"]
@@ -25899,9 +25934,9 @@ def run() -> int:
                         and _out2["cases"][0].get("error") == "GOLDEN_FILE_MISSING"
                         and _out2.get("error") != "RAW_UNSTABLE_UNDECLARED")
         return bool(do_dung_cach and khong_do_oan)
-    _t110("r287_golden_raw_drift_lam_do_gate", _c287_raw_drift_lam_do_gate)
+    _t110("r301_golden_raw_drift_lam_do_gate", _c301_raw_drift_lam_do_gate)
 
-    def _c287_write_cam_ghi_khi_raw_bat_dinh():
+    def _c301_write_cam_ghi_khi_raw_bat_dinh():
         # `--write` là đường NGUY HIỂM nhất: ghi fixture từ lệnh bất định là ĐÓNG BĂNG cái ngẫu nhiên vào
         # golden, rồi mọi lượt sau so với nó. Trước vá vẫn ghi (`written: true`). Nay: CẤM ghi, `ok=false`,
         # `write_refused=true`, và thư mục golden phải KHÔNG có tệp nào được sinh ra.
@@ -25920,9 +25955,9 @@ def run() -> int:
                         and all(c.get("written") is True for c in _out2["cases"])
                         and len(_files2) == _out2["case_count"])
         return bool(cam_ghi and van_ghi_duoc)
-    _t110("r287_write_cam_ghi_khi_raw_bat_dinh", _c287_write_cam_ghi_khi_raw_bat_dinh)
+    _t110("r301_write_cam_ghi_khi_raw_bat_dinh", _c301_write_cam_ghi_khi_raw_bat_dinh)
 
-    def _c287_rc_khac_0_qua_lenh_that():
+    def _c301_rc_khac_0_qua_lenh_that():
         # Cưỡng chế phải tới được TẦNG LỆNH: `cmd_golden_test` trả rc≠0 (không chỉ payload ok=false).
         # rc là thứ `deploy-package.sh`/CI thật sự đọc — dừng ở payload là cổng vẫn lọt.
         _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
@@ -25942,13 +25977,13 @@ def run() -> int:
         _payload, _ = _run_cmd(False, True)
         return bool(_out_box.get("rc") not in (0, None)
                     and _payload.get("error") == "RAW_UNSTABLE_UNDECLARED")
-    _t110("r287_rc_khac_0_qua_lenh_that", _c287_rc_khac_0_qua_lenh_that)
+    _t110("r301_rc_khac_0_qua_lenh_that", _c301_rc_khac_0_qua_lenh_that)
 
     # ═══ r288 (v1.36.26) — Pha 1-0: HỢP ĐỒNG Helper 1 (kết luận giao dịch, §5 Mẫu A + §6.1) ═══
     # Helper CHƯA gắn vào lệnh nào (đúng acceptance §6.1) — các ca dưới khoá HỢP ĐỒNG, để 4 slice T2/T3
     # sau DÙNG chứ không SỬA. Mỗi điều của hợp đồng có ít nhất một ca, kèm phản chứng.
 
-    def _c288_vi_ngu_ket_qua_duong_fail_closed():
+    def _c302_vi_ngu_ket_qua_duong_fail_closed():
         # Điều 2 (ok TÍNH, không GÁN) bắt đầu từ vị ngữ: cái gì mới được TÍNH là "dương".
         # Điểm chết của ING-03 nằm ĐÚNG ở đây — suy ra thành công từ sự CÓ MẶT của một trường khác.
         _sr = _TL_MODULE.step_result_ok
@@ -25966,9 +26001,9 @@ def run() -> int:
         _ok4, _why4 = _sr({"ok": True, "organize_done": True}, require_keys=("organize_done", "upsert_done"))
         marker = (_ok4 is False and "upsert_done" in _why4 and "organize_done" not in _why4)
         return bool(duong and am and marker)
-    _t110("r288_helper1_vi_ngu_ket_qua_duong_fail_closed", _c288_vi_ngu_ket_qua_duong_fail_closed)
+    _t110("r302_helper1_vi_ngu_ket_qua_duong_fail_closed", _c302_vi_ngu_ket_qua_duong_fail_closed)
 
-    def _c288_ok_duoc_tinh_va_rc_dan_xuat():
+    def _c302_ok_duoc_tinh_va_rc_dan_xuat():
         # Điều 2 + điều 4. Kể cả khi caller CỐ gán `ok: True` vào envelope, kết luận vẫn phải là kết luận
         # TÍNH ĐƯỢC — đây là phản chứng trực tiếp cho `out = {**plan, "ok": True, ...}` của PRO-01.
         _T = _TL_MODULE.Txn
@@ -25994,9 +26029,9 @@ def run() -> int:
         t3.record("phu", {"ok": False}, required=False)
         tuy_chon = (t3.ok() is True and t3.rc() == 0)
         return bool(xanh and do and khong_gan_de and rong and tuy_chon)
-    _t110("r288_helper1_ok_duoc_tinh_va_rc_dan_xuat", _c288_ok_duoc_tinh_va_rc_dan_xuat)
+    _t110("r302_helper1_ok_duoc_tinh_va_rc_dan_xuat", _c302_ok_duoc_tinh_va_rc_dan_xuat)
 
-    def _c288_chan_mutation_phia_sau_va_ke_da_ghi():
+    def _c302_chan_mutation_phia_sau_va_ke_da_ghi():
         # Điều 3 (CHẶN, không chỉ đánh dấu) + điều 5 (đã ghi được gì rồi).
         # Đây là kịch bản PRO-01 thu nhỏ: xoá nguồn NLM HỎNG, rồi vẫn định tháo con trỏ registry.
         _T, _B = _TL_MODULE.Txn, _TL_MODULE.TxnBlocked
@@ -26028,7 +26063,7 @@ def run() -> int:
         bo_qua = (t3.ok() is True and t3.first_failure() is None
                   and t3.steps[0].get("skipped") is True and t3.steps[0].get("ok") is None)
         return bool(_da_chan and van_biet and ke and khong_chan_oan and bo_qua)
-    _t110("r288_helper1_chan_mutation_phia_sau_va_ke_da_ghi", _c288_chan_mutation_phia_sau_va_ke_da_ghi)
+    _t110("r302_helper1_chan_mutation_phia_sau_va_ke_da_ghi", _c302_chan_mutation_phia_sau_va_ke_da_ghi)
 
     # DANH SÁCH GẮN Helper 1 — cập nhật CÓ CHỦ ĐÍCH mỗi khi một slice gắn helper vào một module.
     # r288 mở ca này với danh sách RỖNG (acceptance §6.1: "chưa gắn vào lệnh nào"). r289 (PRO-01) thêm
@@ -26037,7 +26072,7 @@ def run() -> int:
     _HELPER1_DA_GAN = {"ops_misc.py",          # r289 PRO-01
                        "ingest_ops.py"}        # r291 ING-03
 
-    def _c288_helper1_chi_gan_o_noi_da_khai():
+    def _c302_helper1_chi_gan_o_noi_da_khai():
         import pathlib as _pl288
         _hits = []
         for _p in sorted(_pl288.Path(_TL_MODULE.HERE / "tl_core").glob("*.py")):
@@ -26047,7 +26082,7 @@ def run() -> int:
             if "Txn(" in _t or "TxnBlocked" in _t or "step_result_ok(" in _t:
                 _hits.append(_p.name)
         return set(_hits) == _HELPER1_DA_GAN
-    _t110("r288_helper1_chi_gan_o_noi_da_khai", _c288_helper1_chi_gan_o_noi_da_khai)
+    _t110("r302_helper1_chi_gan_o_noi_da_khai", _c302_helper1_chi_gan_o_noi_da_khai)
 
     # ═══ r289 (v1.36.27) — PRO-01: `profile-file-remove` fail-closed (Slice P0, ưu tiên #2 sổ audit) ═══
     # TRƯỚC: kết quả `nlm source_delete` / `drive trash` chỉ được ghi NHẬT KÝ, không kiểm; `reg_delete`
@@ -26111,7 +26146,7 @@ def run() -> int:
     def _da_goi_reg_delete(calls):
         return any(c[0] == "post" and c[1] == "reg_delete" for c in calls)
 
-    def _c289_duong_xanh_van_chay_du():
+    def _c303_duong_xanh_van_chay_du():
         # PHẢN CHỨNG NỀN: cổng mới không được chặn oan đường hợp lệ. Cả 3 cờ bật, mọi bước dương ⇒
         # rc=0, gọi đủ nlm+trash+reg_delete, và bản kê `wrote` liệt ĐÚNG 3 thứ đã ghi.
         _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True)
@@ -26119,9 +26154,9 @@ def run() -> int:
         return (_rc == 0 and _p.get("ok") is True and _da_goi_reg_delete(_c)
                 and _w == ["nlm_source_delete:s_d1", "drive_trash:d1", "reg_delete"]
                 and _p["txn"]["uncertain"] == [] and _p["txn"]["failed_step"] is None)
-    _t110("r289_pfr_duong_xanh_van_chay_du", _c289_duong_xanh_van_chay_du)
+    _t110("r303_pfr_duong_xanh_van_chay_du", _c303_duong_xanh_van_chay_du)
 
-    def _c289_ma_tran_buoc_con_hong_khong_thao_registry():
+    def _c303_ma_tran_buoc_con_hong_khong_thao_registry():
         # LÕI CỦA MỤC: ma trận `--delete-nlm` × `--trash-drive` × `--keep-registry`, mỗi ô có ca BƯỚC CON
         # HỎNG ⇒ đòi rc≠0 VÀ registry CÒN NGUYÊN (không gọi `reg_delete` lần nào).
         _oks = []
@@ -26140,9 +26175,9 @@ def run() -> int:
         _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True, reg_resp={"ok": False, "error": "GAS_500"})
         _oks.append(_rc != 0 and _p.get("ok") is False and _p["txn"]["failed_step"] == "reg_delete")
         return all(_oks)
-    _t110("r289_pfr_ma_tran_buoc_con_hong_khong_thao_registry", _c289_ma_tran_buoc_con_hong_khong_thao_registry)
+    _t110("r303_pfr_ma_tran_buoc_con_hong_khong_thao_registry", _c303_ma_tran_buoc_con_hong_khong_thao_registry)
 
-    def _c289_reg_delete_readback_khong_tin_ok_tran():
+    def _c303_reg_delete_readback_khong_tin_ok_tran():
         # `require_removed='no'` PHẢI giữ (lệnh này không hề ghi `nlm_status`; bật 'yes' là biến lệnh thành
         # vô tác dụng — đổi fail-open lấy fail-silent). Chốt chuyển sang READBACK phía client: `ok=true`
         # của response CHƯA phải bằng chứng dòng đã gỡ.
@@ -26160,15 +26195,15 @@ def run() -> int:
                 and _rc1 != 0 and "SKIPPED_LIVE" in str(_p1["txn"]["failed_error"])
                 and _rc2 != 0 and "KHONG_PHU_HET" in str(_p2["txn"]["failed_error"])
                 and _rc3 == 0 and _p3.get("ok") is True)
-    _t110("r289_pfr_reg_delete_readback_khong_tin_ok_tran", _c289_reg_delete_readback_khong_tin_ok_tran)
+    _t110("r303_pfr_reg_delete_readback_khong_tin_ok_tran", _c303_reg_delete_readback_khong_tin_ok_tran)
 
-    def _c289_khong_thao_tac_nao_khong_con_bao_xanh():
+    def _c303_khong_thao_tac_nao_khong_con_bao_xanh():
         # `--keep-registry` mà không `--delete-nlm`/`--trash-drive` = lệnh KHÔNG LÀM GÌ. Trước đây in
         # `ok:true, rc=0`. `ok` được TÍNH thì câu trả lời đúng là: chưa có gì được chứng minh.
         _rc, _p, _c = _run289(keep_registry=True)
         return (_rc != 0 and _p.get("ok") is False and _c == []
                 and _p["txn"]["failed_error"] == "KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU")
-    _t110("r289_pfr_khong_thao_tac_nao_khong_con_bao_xanh", _c289_khong_thao_tac_nao_khong_con_bao_xanh)
+    _t110("r303_pfr_khong_thao_tac_nao_khong_con_bao_xanh", _c303_khong_thao_tac_nao_khong_con_bao_xanh)
 
     # ═══ r290 (v1.36.28) — RAS-01 vế `changes_pull`: "DRY" MÀ VẪN GHI (Slice R1, T2) ═══
     # `registry_orchestrator.run()` gọi `gas.post("changes_pull")` ở phase=boot TRƯỚC cổng
@@ -26205,7 +26240,7 @@ def run() -> int:
                 _sys290.modules["gas"] = _sav_gas
             _sys290.path[:] = _sav_path
 
-    def _c290_dry_khong_goi_action_ghi():
+    def _c304_dry_khong_goi_action_ghi():
         # LÕI: DRY ⇒ TUYỆT ĐỐI không `post` action nào. `changes_pull` không chỉ vá Sheet
         # (applySheet mặc định true) mà `doChangesPull_` còn LUÔN ghi lại `TL_CHANGES_TOKEN` ⇒ TIÊU THỤ
         # cửa sổ delta, nên `applySheet=false` cũng KHÔNG cứu được: một lượt "dry" nuốt mất thay đổi mà
@@ -26220,15 +26255,15 @@ def run() -> int:
         _d2, _c2, _ = _run290(dry=False, apply_=False)
         _ca_hai = not any(x[0] == "post" for x in _c2)
         return bool(_khong_post and _khong_pull and _bao_thu and _noi_ro and _ca_hai)
-    _t110("r290_orch_dry_khong_goi_action_ghi", _c290_dry_khong_goi_action_ghi)
+    _t110("r304_orch_dry_khong_goi_action_ghi", _c304_dry_khong_goi_action_ghi)
 
-    def _c290_apply_van_goi_changes_pull():
+    def _c304_apply_van_goi_changes_pull():
         # PHẢN CHỨNG: --apply THẬT vẫn phải gọi `changes_pull` — vá không được biến thành "bỏ hẳn tính năng".
         _d, _c, _ = _run290(dry=False, apply_=True)
         return any(x[0] == "post" and x[1] == "changes_pull" for x in _c)
-    _t110("r290_orch_apply_van_goi_changes_pull", _c290_apply_van_goi_changes_pull)
+    _t110("r304_orch_apply_van_goi_changes_pull", _c304_apply_van_goi_changes_pull)
 
-    def _c290_decide_not_probed_bao_thu():
+    def _c304_decide_not_probed_bao_thu():
         # Trạng thái mới `not_probed` phải xếp cùng nhánh bảo thủ với `no_baseline` — "chưa đo" KHÔNG
         # được suy thành "chắc ít thay đổi" (đó đúng là lớp fail-open đang chữa), và lý do phải nêu DRY.
         import sys as _sys290b, importlib as _il290b
@@ -26239,7 +26274,7 @@ def run() -> int:
         _nb = _ro.decide("2.21.2p", "no_baseline", None, 0)
         return (_np["plan"] == _nb["plan"]
                 and any("DRY" in r and "changes_pull" in r for r in _np["reasons"]))
-    _t110("r290_orch_decide_not_probed_bao_thu", _c290_decide_not_probed_bao_thu)
+    _t110("r304_orch_decide_not_probed_bao_thu", _c304_decide_not_probed_bao_thu)
 
     # ═══ r291 (v1.36.30) — ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG ═══
     # `grep upsert_done` toàn kho ra ĐÚNG 1 hit (`ingest_ops.py:1502`) và hit đó chỉ dùng để ĐẶT TÊN
@@ -26257,7 +26292,7 @@ def run() -> int:
         _base.update(over)
         return _base
 
-    def _c291_verdict_doi_du_marker():
+    def _c305_verdict_doi_du_marker():
         # HỢP ĐỒNG cổng: đọc ĐÚNG bộ marker server tự dùng để tính `out.ok`.
         _v = _TL_MODULE._ingest_commit_verdict
         _okw = {"register": "true"}
@@ -26289,9 +26324,9 @@ def run() -> int:
                       and "file" not in _TL_MODULE._INGEST_COMMIT_MARKERS)
         return bool(_duong and _bai_hoc and all(_tung_marker) and _vang and _tho
                     and _mien_row and _mien_file)
-    _t110("r291_ingest_commit_verdict_doi_du_marker", _c291_verdict_doi_du_marker)
+    _t110("r305_ingest_commit_verdict_doi_du_marker", _c305_verdict_doi_du_marker)
 
-    def _c291_ca_hai_call_site_deu_co_cong():
+    def _c305_ca_hai_call_site_deu_co_cong():
         # "SỬA CẢ HAI — sửa một chỗ là để lại lỗ y hệt ở chỗ kia" (§Slice I4). Khoá bằng cách đọc mã:
         # mỗi stage WRITE phải GỌI cổng, và không stage nào còn gate CHỈ bằng `if not gdoc:`.
         import inspect as _insp291
@@ -26300,9 +26335,9 @@ def run() -> int:
             _src = _insp291.getsource(_resolve286(_fn))
             _oks.append("_ingest_commit_verdict(" in _src and "if not gdoc:" not in _src)
         return len(_oks) == 2 and all(_oks)
-    _t110("r291_ca_hai_call_site_deu_co_cong", _c291_ca_hai_call_site_deu_co_cong)
+    _t110("r305_ca_hai_call_site_deu_co_cong", _c305_ca_hai_call_site_deu_co_cong)
 
-    def _c291_stage_write_chan_commit_mot_phan():
+    def _c305_stage_write_chan_commit_mot_phan():
         # HÀNH VI qua `_il_stage_write` THẬT (đường ingest-local): bơm response commit-MỘT-PHẦN (có
         # fileId, thiếu marker) ⇒ PHẢI rc=2 VÀ journal `_step_ok` phải ghi FALSE — nếu journal vẫn ghi
         # `bool(gdoc)` như cũ thì `--resume` sau này đọc journal và tưởng stage organize đã xong.
@@ -26337,7 +26372,7 @@ def run() -> int:
             for _k, _v in _sav.items():
                 _g[_k] = _v
         return bool(_chan and _di_tiep)
-    _t110("r291_stage_write_chan_commit_mot_phan", _c291_stage_write_chan_commit_mot_phan)
+    _t110("r305_stage_write_chan_commit_mot_phan", _c305_stage_write_chan_commit_mot_phan)
 
     # ═══ r292 (v1.36.31) — RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG (Slice R0, T2) ═══
     # Ba lỗ cùng Mẫu A: (1) `done` vừa là sổ-đã-xong VỪA là BỘ LỌC worklist ⇒ doc `exporttext` lỗi bị
@@ -26374,7 +26409,7 @@ def run() -> int:
                "regbulk": lambda kw: {"ok": True, "patched": 99},
                "kw": lambda rec: "tu,khoa"}
 
-    def _c292_migrate_v1_dua_doc_loi_QUAY_LAI():
+    def _c306_migrate_v1_dua_doc_loi_QUAY_LAI():
         # LỖ (1): sổ v1 đang nằm trên máy người giữ là BẰNG CHỨNG thiệt hại (§6.2 Pha 3.5) — phải ĐỌC
         # ĐƯỢC, không được vứt. Ánh xạ: ok→committed · empty→blocked · err*→RETRYABLE.
         # Chính vế cuối là bản vá: doc từng bị `err` nay QUAY LẠI worklist thay vì mất vĩnh viễn.
@@ -26398,9 +26433,9 @@ def run() -> int:
         finally:
             for _n, _mm in _sav.items():
                 (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
-    _t110("r292_bkl_migrate_v1_dua_doc_loi_quay_lai", _c292_migrate_v1_dua_doc_loi_QUAY_LAI)
+    _t110("r306_bkl_migrate_v1_dua_doc_loi_quay_lai", _c306_migrate_v1_dua_doc_loi_QUAY_LAI)
 
-    def _c292_reg_bulk_verdict_khong_tin_ok_tran():
+    def _c306_reg_bulk_verdict_khong_tin_ok_tran():
         # LỖ (2): `ok=true` CHƯA đủ — lô có thể `patched < gửi` (dòng không khớp drive_id); phần hụt
         # CHƯA được ghi nên cả lô phải quay về `retryable`, không được đánh dấu xong.
         import sys as _s
@@ -26417,9 +26452,9 @@ def run() -> int:
         finally:
             for _n, _mm in _sav.items():
                 (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
-    _t110("r292_bkl_reg_bulk_verdict_khong_tin_ok_tran", _c292_reg_bulk_verdict_khong_tin_ok_tran)
+    _t110("r306_bkl_reg_bulk_verdict_khong_tin_ok_tran", _c306_reg_bulk_verdict_khong_tin_ok_tran)
 
-    def _c292_main_khong_con_bao_xong_oan():
+    def _c306_main_khong_con_bao_xong_oan():
         # HÀNH VI end-to-end qua `main()` THẬT. Ba kịch bản, mỗi cái khoá một lỗ.
         import sys as _s, tempfile as _tf292, json as _j292, pathlib as _pl292
         _m, _calls, _sav = _bkl292()
@@ -26489,7 +26524,7 @@ def run() -> int:
             _s.argv = _sav_argv
             for _n, _mm in _sav.items():
                 (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
-    _t110("r292_bkl_main_khong_con_bao_xong_oan", _c292_main_khong_con_bao_xong_oan)
+    _t110("r306_bkl_main_khong_con_bao_xong_oan", _c306_main_khong_con_bao_xong_oan)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

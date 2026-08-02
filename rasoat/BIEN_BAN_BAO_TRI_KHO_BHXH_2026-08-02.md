@@ -300,6 +300,50 @@ gạch chéo, và **hết sạch** khi nạp bằng dạng gạch nối — dù 
 
 ### 4.2 `.docx` tải từ `g7.cdnchinhphu.vn` là container HỎNG — và `scan_file` FAIL-OPEN che mất
 
+> ⛔ **ĐÍNH CHÍNH (ghi ở lượt 3, 02-08-2026) — NỬA ĐẦU TIÊU ĐỀ VÀ ĐOẠN NGAY DƯỚI LÀ SAI.**
+>
+> **Cái sai:** «tệp `.docx` Công báo là container hỏng, tên entry dùng `\`, 33/40 và 30/37 entry».
+> Lượt 2 đo lại trên **ĐÚNG tệp đó** (sha256 khớp tuyệt đối): **0/40 và 0/37** entry dùng `\`;
+> `word/document.xml` mang đúng tên chuẩn; `python-docx` mở thẳng, không cần bước sửa zip nào.
+>
+> **Nguyên nhân thật:** hỏng nằm ở **đường tải của container web** đã dùng ở lượt 1, **không** ở
+> tệp Công báo. Cùng một URL, tải bằng đường khác cho ra tệp lành.
+>
+> **Vì sao lượt 1 đo ra 33/40:** `bash -c "…'\\\\'…"` **nuốt backslash**, nên detector tự viết
+> so với một chuỗi rỗng ⇒ báo số vi phạm SAI. (Cùng họ bẫy: `bash -c` nuốt backslash cũng từng
+> làm một detector khác báo «0 vi phạm» GIẢ theo chiều ngược lại.) Muốn đo lại: viết ra tệp
+> `.py`, dùng `chr(92)`, **đừng** truyền backslash qua `bash -c`.
+>
+> **Cái KHÔNG bị đính chính — nửa sau tiêu đề vẫn đúng:** `scan_file()` fail-open (không đọc được
+> container ⇒ trả «mọi thể = 0» ⇒ bị đọc thành «SẠCH markup») là khuyết tật THẬT, độc lập với
+> việc tệp kia lành hay hỏng. **Bản vá r316 (v1.36.49) giữ nguyên, vẫn đúng vì lý do riêng của nó**
+> — nó vá một cổng an toàn pháp lý mặc định «sạch» khi mù, chứ không vá cái container.
+> Ca `r188_docx_reader_bounded_wired` (khế ước cũ ghi thành văn rằng «không đo được ⇒ báo sạch»)
+> cũng đã đổi đúng, giữ nguyên.
+>
+> **ĐO LẦN BA — ĐỘC LẬP (lượt 3), trên tệp 89-2026 CÒN TRÊN ĐĨA** (`C:\Users\admin\Downloads\
+> 89_VBHN-VPQH_699557.docx`), sha256 `f84637a1…8573234` **khớp tuyệt đối** `source.sha256` của
+> record cache `89-2026-vbhn-vpqh--consolidated` ⇒ đúng tệp đã nạp, không phải bản khác:
+>
+> ```
+> tổng entry                 : 10
+> entry có backslash         :  0        ← lượt 1 khai 30
+> có 'word/document.xml'     : True      ← lượt 1 khai KHÔNG có
+> python-docx mở thẳng       : OK, 775 đoạn
+> ```
+>
+> ⇒ **Đính chính được xác nhận độc lập**, không chỉ chép của lượt 2.
+>
+> ★ **Nhưng MẪU SỐ của cả hai sổ trước đều sai**: lượt 1 ghi «30/**37**», lượt 2 ghi «0/**37**» —
+> tệp này chỉ có **10** entry. Nghĩa là con số `/37` **không đến từ tệp này**. Giả thuyết khớp với
+> kết luận «hỏng ở đường tải»: lượt 1 đo trên tệp lấy qua **đường tải container web** (một tệp
+> KHÁC, 37 entry, phần lớn tên dùng `\`), còn tệp lành chỉ có 10 entry; lượt 2 đo đúng tệp lành
+> nhưng **bê nguyên mẫu số 37 của lượt 1** nên ra «0/37». Chưa chứng minh được giả thuyết này vì
+> tệp hỏng kia không còn. **Số đo đáng tin duy nhất hiện có là 0/10 ở trên.**
+>
+> Tệp `.docx` nguồn của **19-2026 / 40-2026** thì đã mất thật (tệp tạm `tra_luat_ingest_*.docx`),
+> nên vế «0/40» của lượt 2 vẫn **chưa** có phép đo độc lập.
+
 Tên entry trong zip dùng `\` thay `/` (19-2026: 33/40 entry · 89-2026: 30/37) ⇒ **không có**
 `word/document.xml` theo tên chuẩn. Đường nạp fail-CLOSED đúng
 (`SOURCE_CONTAINER_READ_FAILED`), nhưng `docx_markup.scan_file()` (`docx_markup.py:133`)

@@ -1,3 +1,34 @@
+# ★ v1.36.58 — r326: hạ tuyên bố quá tầm ở `RASOAT_HOSO_LOOP.md` §7, và bịt ĐIỂM MÙ con trỏ TÊN CA (2026-08-03)
+
+Nối tiếp T0-E/GATE-06 (r298). Lần đó ba ca tự-chứng-minh đã bị hạ tuyên bố **trong `scripts/tl_selftest.py`**,
+nhưng phạm vi T0-E chốt là CHỈ tệp đó ⇒ câu tuyên bố trong tài liệu vẫn nguyên.
+
+**Bệnh 1 — câu ở `references/RASOAT_HOSO_LOOP.md` §7 tuyên bố quá tầm.** Nguyên văn cũ: «Đường ghi hợp lệ —
+máy đọc được, guard `r210_loop_khong_ghi_trong_cay` khoá:». Đo lại chính ca đó: nó chỉ **lint khối khai báo
+`WRITE_PATHS_v1`** — không chạy vòng nào, không `git status`, không `release-verify`.
+
+**Vá 1.** Tách HAI TẦM: `r210_loop_khong_ghi_trong_cay` khoá **KHAI BÁO**; vế **CHẠY** do
+`r298_worklist_chay_kho_a3_a6` gánh (chạy khô A3→A6 trên `cmd_state_put`/`cmd_state_get` THẬT).
+**KHÔNG đổi tên ca** — dòng đó là con trỏ tới tên.
+
+**Bệnh 2 — điểm mù: KHÔNG cổng nào giữ con trỏ TÊN CA trong tài liệu.** Cả kế hoạch lẫn CHANGELOG r298
+đều tưởng `doc-claims-check` giữ con trỏ ấy — ĐÃ ĐO: KHÔNG. `_DOC_CLAIMS_R_RE` đòi `` sau `r210`, mà `_`
+là ký tự TỪ nên `findall` trả RỖNG cho cả một tên ca bịa hoàn toàn. Đổi/xoá tên ca thì tài liệu trỏ vào hư
+không mà **cả 5 cổng vẫn XANH** — cùng lớp bệnh GATE-06, khác tầng.
+
+**Vá 2 — `r326_con_tro_ten_ca_resolve`.** Bóc MỌI con trỏ `` `rNNN_snake` `` trong kịch bản, đối chiếu bảng
+tên đăng ký `_t110` bóc từ nguồn; fail-closed khi không bóc được con trỏ nào. Chống xanh-vô-điều-kiện bằng
+hai vế: (a) hai tên đó phải có trong `cases` đã CHẠY; (b) ★ phản chứng — bộ bóc phải BẮT được tên bịa và
+tên bịa KHÔNG được resolve.
+
+**Bằng chứng dương.** Phản chứng chạy THẬT, mỗi lượt đỏ ĐÚNG một ca: đổi tên ca được trỏ ⇒ ĐỎ;
+xoá sạch con trỏ ⇒ vẫn ĐỎ (fail-closed). Tài liệu khôi phục byte-identical sau mỗi lượt (sha256 + CRLF=0).
+
+**Ghi lại để lần sau khỏi trả giá:** đợt này bị chiếm số **bốn lần** (r313→r322→r324 đều bị lấy mất,
+chốt ở r326). Đo merge với master: **5/5 xung đột đều là tệp PHÁI SINH** (`CHANGELOG` · `RELEASE_MANIFEST` ·
+`SKILL.md` · `VERSION` · `tl.py`), còn `tl_selftest.py` và `RASOAT_HOSO_LOOP.md` auto-merge SẠCH — bằng chứng
+thực nghiệm cho đánh số trì hoãn của ADR-0017.
+
 # ★ v1.36.57 — r325: nối lại KHỐI ĐUÔI VBHN khi dựng toàn văn + WARN đường ĐỌC registry (2026-08-02)
 
 Hai việc bàn giao còn lại của lượt bảo trì kho LƯỢT 3. Sổ:

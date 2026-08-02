@@ -14,10 +14,10 @@ Phạm vi: 2 mục của lượt bảo trì kho. **KHÔNG** gỡ quarantine 41/2
 | 2a. `19-2026-VBHN-VPQH` — bản còn markup sửa đổi | ✅ **Có nguồn thay thế đo đạt** | Công báo 133 (.docx) · 141/141 Điều · 0 số rác · markup={strike:2} = 2 DẤU CÁCH (ngoại lệ có bằng chứng, người dùng đã chốt) |
 | 2b. `54-2025-VBHN-VPQH` — khối đầu là chrome trang web | ✅ **Có nguồn thay thế đo đạt** | Công báo 1083+1084 (.pdf text) · 72 Điều · khối đầu sạch sau khi cắt 1 dòng nhãn mục |
 | 2c. `89-2026-VBHN-VPQH` — khối đầu thiếu VPQH + «Số:» | ✅ **Có nguồn thay thế đo đạt** | Công báo 222 (.docx) · 79 Điều · `verify_flags` RỖNG · VPQH+«Số:» nằm ở KHỐI KÝ CUỐI (đúng bố cục VBHN) |
-| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **CẢ SÁU ĐÃ VÁ trong chính nhánh này**: §4.1/§4.3 → r314+r315 (v1.36.48) · §4.2/§4.6-phần-RÒ → r316+r317 (v1.36.49) · §4.4/§4.5 → r318 (v1.36.50). Còn duy nhất §4.6 phần KHẾ ƯỚC (`requirements.txt`) |
+| — | ⚠ 6 phát hiện CÔNG CỤ | §4 — **CẢ SÁU ĐÃ VÁ TRỌN trong chính nhánh này, không còn treo**: §4.1/§4.3 → r314+r315 (v1.36.48) · §4.2/§4.6-phần-RÒ → r316+r317 (v1.36.49) · §4.4/§4.5 → r318 (v1.36.50) · §4.6-phần-KHẾ-ƯỚC → r319 (v1.36.51) |
 
 **Không có thao tác GHI DỮ LIỆU nào trong lượt này** — không ghi registry, không ghi Drive, không
-đụng NLM. (Có sửa MÃ: r314+r315 ở §4.1/§4.3, gate xanh — xem cuối §5.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
+đụng NLM. (Có sửa MÃ: r314→r319 cho cả sáu phát hiện §4, gate xanh — xem §5 mục 3.) Toàn bộ số đo dưới đây từ lệnh ĐỌC + ingest vào cache TẠM
 (`$SCRATCH/cache{B..F}`, ngoài repo, ephemeral theo container).
 
 ---
@@ -402,8 +402,12 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 > ⚠ **Bẫy giữa chừng:** regex đầu viết `wp14?` — parse ra `"wp1"`+`"4"` tuỳ chọn nên KHÔNG khớp
 > `wp:` trần; `wp14:pctWidth` bị bỏ còn `wp:posOffset` vẫn lọt, ra chuỗi số **CỤT** trông như đã
 > sửa xong. Chỉ đếm lại trên tệp thật mới thấy. Đúng là `wp(?:14)?`.
-> **CHƯA vá phần khế ước:** `requirements.txt` vẫn khai stdlib-only. r317 làm nhánh không-`python-docx`
-> hết rò, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r315). Lượt riêng.
+> ✅ **PHẦN KHẾ ƯỚC CŨNG ĐÃ VÁ — r319 (v1.36.51).** `requirements.txt` khai `pypdf>=4.0` là phụ
+> thuộc THẬT của đường nạp PDF + tách rõ tuỳ-chọn (`python-docx`) và nhị-phân-hệ-thống
+> (`pdftotext`, `antiword`/`catdoc`), mỗi mục kèm HẬU QUẢ. `tl doctor` thêm dòng
+> `optional phụ thuộc nạp tài liệu` (tiền tố `optional` ⇒ báo ĐỎ mà không lật rc).
+> `INSTALL.md` + `references/DEPENDENCIES.md` §9 đồng bộ. KHÔNG đụng `SKILL.md`: thêm một câu
+> vào đó làm kernel vượt trần KERNEL-DIET 47 KB ⇒ 3 cổng đỏ; chi tiết thuộc `DEPENDENCIES.md`.
 `requirements.txt` hiện nói ngược lại. **Vá đề xuất:** hoặc thêm vào `requirements.txt`, hoặc để
 `doctor`/`precheck` CẢNH BÁO LOUD khi thiếu, kèm hệ quả cụ thể.
 
@@ -417,14 +421,14 @@ Nhánh bóc-tag dự phòng nhặt cả trị `wp:posOffset`. Đo trước/sau k
 3. **Phát hiện công cụ §4** — **CẢ SÁU ĐÃ VÁ** trong chính nhánh này:
    **§4.1→r314 · §4.3→r315** (v1.36.48) · **§4.2→r316 · §4.6 phần RÒ→r317** (v1.36.49) ·
    **§4.4+§4.5→r318** (v1.36.50).
-   Cổng lượt cuối: selftest **1604/1604** · ruff F **delta so master = 0** · golden 0-diff ·
+   Cổng lượt cuối: selftest **1606/1606** · ruff F **delta so master = 0** · golden 0-diff ·
    determinism ok · doc-claims 9/9 layer = 0 · `release-verify` 177/177 + `package_hash` khớp ·
    `RELEASE_MANIFEST.json` đã tái sinh.
    **§4.4/§4.5 → r318 (v1.36.50)**: khối chữ ký số 3 dòng hết lọt vào khối đầu (19-2026:
    `chu_ky_so` 0→3) · nhãn mục hết sai hai chiều (54-2025: cờ chuyển từ dòng 1578 sang dòng 10)
    · lời khuyên «cắt tới dòng Số:» — thứ sẽ xoá sạch thân VBHN — đã thay bằng chỉ dẫn an toàn.
-   Còn treo DUY NHẤT: **§4.6 phần khế ước** (`requirements.txt` vẫn khai stdlib-only, mà `pypdf`
-   KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn).
+   **§4.6 phần khế ước → r319 (v1.36.51)**: `requirements.txt` khai `pypdf` là phụ thuộc thật,
+   `tl doctor` tự kiểm và nói HẬU QUẢ. ⇒ **CẢ SÁU phát hiện §4 đã đóng, không còn treo gì.**
    ⚠ **Hai bẫy đã dính khi vá, ghi vì không cái nào lộ ra bằng đọc code:**
    (a) bump VERSION bằng `read_text()/write_text()` nuốt 307 CRLF của `SKILL.md` + 1766 của `tl.py`
    (`.gitattributes` khoá `* -text` CHÍNH VÌ manifest hash là byte thật ⇒ phải `read_bytes()/write_bytes()`);

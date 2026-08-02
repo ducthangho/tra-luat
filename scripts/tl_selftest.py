@@ -27483,6 +27483,60 @@ def run() -> int:
 
     _t110("r318_dau_muc_dung_ca_hai_chieu", _c318_dau_muc_dung_ca_hai_chieu)
 
+    # ---- r319: khế ước phụ thuộc — `requirements.txt` khai SAI đúng chỗ đắt nhất -------------
+    def _c319_khai_dung_phu_thuoc_nap_tai_lieu():
+        """CHIỀU THUẬN — thiếu `pypdf` phải bị KHAI ra TRƯỚC khi đâm vào tường.
+
+        `requirements.txt` khai «uses only Python standard library» — đúng với overlay core, SAI
+        với đường nạp: thiếu `pypdf` là CHẶN mọi .pdf (r315). Trước r319 không lệnh nào nói ra."""
+        _sav = {k: _hsys.modules.get(k, "___absent___") for k in ("pypdf", "pdfplumber")}
+        try:
+            _hsys.modules["pypdf"] = None
+            _hsys.modules["pdfplumber"] = None
+            _dep = _TL_MODULE._doc_dep_probe()
+            _pdf = [d for d in _dep if d["ten"] == "pypdf|pdfplumber"]
+            ok1 = len(_pdf) == 1 and _pdf[0]["co"] is False and _pdf[0]["bat_buoc"] is True
+            # hậu quả phải CỤ THỂ + kèm cách sửa, không phải "thiếu thư viện" chung chung
+            ok2 = "pdf" in _pdf[0]["hau_qua"].lower() and "pip install pypdf" in _pdf[0]["hau_qua"]
+        finally:
+            for _k, _v in _sav.items():
+                (_hsys.modules.pop(_k, None) if _v == "___absent___" else _hsys.modules.__setitem__(_k, _v))
+        # ★`requirements.txt` phải VỪA khai `pypdf` VỪA còn hợp lệ cho `pip install -r`
+        _req = (_ROOT209 / "requirements.txt").read_text(encoding="utf-8")
+        _goi = [l.strip() for l in _req.splitlines() if l.strip() and not l.strip().startswith("#")]
+        ok3 = any(g.startswith("pypdf") for g in _goi)
+        # KHÔNG còn KHAI SAI, và phải chỉ được đường tự kiểm.
+        # ★Kiểm theo DÒNG KHAI cũ nguyên văn, KHÔNG theo chuỗi con: bản mới TRÍCH LẠI câu cũ để
+        #  ghi bối cảnh («…trước r319 là SAI»), nên kiểm chuỗi con sẽ ĐỎ oan — đã dính một lượt.
+        _dong_cu = "# tra-luat overlay core uses only Python standard library."
+        ok4 = all(l.strip() != _dong_cu for l in _req.splitlines()) and "doctor" in _req
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r319_khai_dung_phu_thuoc_nap_tai_lieu", _c319_khai_dung_phu_thuoc_nap_tai_lieu)
+
+    def _c319_khong_bien_tuy_chon_thanh_chan_cung():
+        """CHIỀU NGƯỢC — hai thứ KHÔNG được làm quá tay.
+
+        (a) `python-docx`/`antiword` là TUỲ CHỌN: r317 đã làm nhánh không-lib hết rò, nên khai
+            chúng là bắt buộc sẽ chặn oan những máy chạy .docx hoàn toàn bình thường.
+        (b) Dòng doctor phải mang tiền tố `optional` — nếp có sẵn để check ĐỎ mà KHÔNG lật rc;
+            máy không bao giờ nạp PDF không đáng bị doctor báo hỏng."""
+        _dep = _TL_MODULE._doc_dep_probe()
+        _theo_ten = {d["ten"]: d for d in _dep}
+        ok1 = _theo_ten["python-docx"]["bat_buoc"] is False
+        ok2 = _theo_ten["antiword|catdoc"]["bat_buoc"] is False
+        # mọi mục phải đủ khoá + có câu hậu quả (không được để rỗng cho có)
+        ok3 = all(set(d) >= {"ten", "bat_buoc", "co", "hau_qua"} and d["hau_qua"].strip() for d in _dep)
+        # ★NỐI VÀO ĐƯỜNG CHẠY THẬT: doctor phải có dòng đó, và tên bắt đầu bằng 'optional'
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ops_misc.py").read_text(encoding="utf-8")
+        ok4 = '"optional phụ thuộc nạp tài liệu"' in _src
+        # ★bẫy I11 (r312 đã trả giá): helper tl_core MỚI phải khai trong bảng stub của tl.py,
+        #  không thì `bind()` re-home __globals__ ⇒ NameError LÚC CHẠY (đã dính thật ở lượt này).
+        ok5 = "'_doc_dep_probe'" in (_ROOT209 / "scripts" / "tl.py").read_text(encoding="utf-8")
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+
+    _t110("r319_khong_bien_tuy_chon_thanh_chan_cung", _c319_khong_bien_tuy_chon_thanh_chan_cung)
+
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó

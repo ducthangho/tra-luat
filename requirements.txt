@@ -1,2 +1,25 @@
-# tra-luat overlay core uses only Python standard library.
-# Keep this file so `pip install -r requirements.txt` in SKILL/RUNBOOK is valid.
+# tra-luat — phụ thuộc runtime
+#
+# LÕI OVERLAY (`scripts/tl.py`, `contract_check.py`) CHỈ dùng thư viện chuẩn — điều đó KHÔNG đổi.
+# Nhưng ĐƯỜNG NẠP TÀI LIỆU (`ingest_to_cache.py` → `normalize_document.py`) thì KHÔNG: bản khai
+# «uses only Python standard library» trước r319 là SAI, và sai đúng chỗ đắt nhất.
+#
+# ĐO ĐƯỢC 02-08-2026 trên `54-2025-VBHN-VPQH` (PDF text thật, pdftotext bóc 167.433 ký tự):
+#   · chưa cài pypdf ⇒ {"ok": false, "reason": "scanned_pdf" …}  ← máy thiếu thư viện bị báo
+#     thành thuộc tính TÀI LIỆU, kèm lời khuyên đi tìm nguồn khác (r315 đã sửa thông điệp,
+#     nhưng vẫn CHẶN vì thật sự không đo được).
+#   · đã cài pypdf   ⇒ {"ok": true, "n_articles": 72}.        CÙNG một tệp.
+#
+# BẮT BUỘC cho đường nạp PDF — thiếu là CHẶN CỨNG, không phải giảm chất lượng:
+pypdf>=4.0
+#
+# TUỲ CHỌN (không đưa vào danh sách cài để giữ `pip install -r requirements.txt` nhẹ):
+#   · python-docx  — đọc .docx sát cấu trúc gốc hơn. Thiếu vẫn chạy: nhánh bóc-tag từ r317 đã
+#                    hết rò trị đo DrawingML vào thân Điều.
+#
+# NHỊ PHÂN HỆ THỐNG (pip KHÔNG cài được, phải qua trình quản lý gói của máy):
+#   · pdftotext (poppler-utils) — BẮT BUỘC để bóc text .pdf:  apt-get install poppler-utils
+#   · antiword hoặc catdoc      — chỉ cần cho .doc CŨ (binary): apt-get install catdoc
+#
+# Kiểm nhanh máy có đủ chưa (r319):  python scripts/tl.py doctor --json
+#   → dòng `optional phụ thuộc nạp tài liệu` liệt kê thứ thiếu + HẬU QUẢ cụ thể.

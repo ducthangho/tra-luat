@@ -55,7 +55,7 @@ nhánh đó không có `--expect` (biên bản §2). Chống va chạm = bước
 ## VIỆC 2 — Chép đè 3 record cache (nguồn đã tìm + đo xong)
 
 Ba bản Công báo đã đo đạt, sha256 + URL + lệnh nguyên văn ở biên bản §3.1 và §3.6.
-**Cần môi trường:** `poppler-utils` (pdftotext) · `pip install pypdf cffi`.
+**Cần môi trường:** `poppler-utils` (pdftotext) · `pip install -r requirements.txt` (r319 đã khai `pypdf` trong đó) · kiểm bằng `tl doctor`.
 `pypdf` là BẮT BUỘC: thiếu nó thì **mọi PDF bị chặn** — sau r315 thông điệp đã đúng thủ phạm
 (`reason: pdf_probe_unavailable`, exit 6, kèm lệnh cài) chứ không còn vu cho tài liệu là «bản SCAN».
 `python-docx` nay chỉ còn là TUỲ CHỌN: sau r317 nhánh không-`python-docx` không nhét số neo hình
@@ -82,18 +82,18 @@ trộn ~900 ký tự căn cứ ban hành của 4 luật khác vào **thân Đi�
 
 ---
 
-## VIỆC 3 — Lượt VÁ CODE: **CẢ SÁU ĐÃ VÁ**, còn đúng phần khế ước (biên bản §4)
+## VIỆC 3 — Lượt VÁ CODE: **XONG CẢ SÁU, không còn treo** (biên bản §4)
 
-Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. Sáu cái đã vá trong nhánh này
-(r314→r318, v1.36.48→v1.36.50; gate: selftest **1604/1604** · ruff delta 0 · golden 0-diff ·
-determinism ok · release-verify 177/177 + package_hash khớp). Còn lại ĐÚNG MỘT việc:
+Không phát hiện nào lộ ra bằng đọc code; đều do chạy thật. Sáu cái đã vá TRỌN trong nhánh này
+(r314→r319, v1.36.48→v1.36.51; gate: selftest **1606/1606** · ruff delta 0 · golden 0-diff ·
+determinism ok · doc-claims 9/9 layer = 0 · release-verify 177/177 + package_hash khớp):
 
 | # | Lỗi | Vì sao ưu tiên |
 |---|---|---|
 | ~~§4.1~~ | ~~`_VBHN_WITHYEAR_RE` chỉ nhận gạch nối ⇒ `T1-nhẹ` dương tính giả~~ | ✅ **ĐÃ VÁ — r314 (v1.36.48)**, cùng nhánh này |
 | ~~§4.3~~ | ~~Thiếu `pypdf`/`pdfplumber` ⇒ MỌI PDF bị kết luận «bản SCAN»~~ | ✅ **ĐÃ VÁ — r315 (v1.36.48)**, cùng nhánh này |
 | ~~§4.2~~ | ~~`scan_file` FAIL-OPEN: docx không đọc được → báo «sạch markup»~~ | ✅ **ĐÃ VÁ — r316 (v1.36.49)**, cùng nhánh này |
-| §4.6 (còn PHẦN KHẾ ƯỚC) | Phần RÒ ✅ **ĐÃ VÁ — r317 (v1.36.49)**: `wp:`/`wp14:` hết lọt vào thân Điều, nghiệm thu 3 số rác → 0 trên cả hai bản. **Chưa vá:** `requirements.txt` vẫn khai stdlib-only | r317 cứu được nhánh không-`python-docx`, nhưng `pypdf` KHÔNG có đường thay thế — thiếu nó là mọi PDF bị chặn (r315) |
+| ~~§4.6~~ | ~~Trị đo DrawingML lọt vào thân Điều + `requirements.txt` khai sai~~ | ✅ **ĐÃ VÁ — r317 (v1.36.49)** phần RÒ · **r319 (v1.36.51)** phần KHẾ ƯỚC |
 | ~~§4.4~~ | ~~`CB_DAU_MUC` sai CẢ HAI CHIỀU + lời khuyên sẽ XOÁ Chương I–V~~ | ✅ **ĐÃ VÁ — r318 (v1.36.50)**, cùng nhánh này |
 | ~~§4.5~~ | ~~`CB_CHU_KY_SO` bỏ sót biến thể 3 dòng ⇒ chrome lọt vào khối đầu~~ | ✅ **ĐÃ VÁ — r318 (v1.36.50)**, cùng nhánh này |
 
@@ -129,7 +129,7 @@ python scripts/tl.py profile-info --profile "Luật BHXH" --json
 ## Ràng buộc (giữ nguyên)
 
 * Mọi lệnh mang `--profile "Luật BHXH"` — **và kiểm `profile-info` để chắc cờ đó có tác dụng thật**.
-* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.50** (r314→r318, đã hoà master `c24a8b3`).
+* Skill tối thiểu v1.36.20 cho thao tác ghi; nhánh này đang **v1.36.51** (r314→r319, đã hoà master `c24a8b3`).
 * ⚠ Nhánh mở LÂU: `git fetch origin master` + đối chiếu `max_r` **trước MỖI lượt bump**, không chỉ
   lúc mở nhánh. Lượt này đã ĐỤNG SỐ với PR #12 (master lấy r313/v1.36.47 cho RAS-17) và phải
   đánh số lại r313→r314 … r316→r317 trước khi hoà.

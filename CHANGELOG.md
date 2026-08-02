@@ -1,3 +1,63 @@
+# ★ v1.36.51 — r319: đính chính KHẾ ƯỚC phụ thuộc — `requirements.txt` khai «stdlib-only» đúng với overlay core nhưng SAI với đường nạp (2026-08-02)
+
+Đóng nốt phần KHẾ ƯỚC của §4.6 — mảnh cuối cùng của sáu phát hiện công cụ lượt bảo trì kho 02-08.
+r317 đã làm nhánh không-`python-docx` hết rò, nhưng `pypdf` **không có đường thay thế**: thiếu nó là
+chặn cứng mọi PDF, mà không tệp nào trong kho nói ra điều đó.
+
+**Bệnh — khai sai đúng chỗ đắt nhất.** `requirements.txt` chỉ có hai dòng chú thích, dòng đầu là
+*«tra-luat overlay core uses only Python standard library.»* Câu đó ĐÚNG với overlay core
+(`tl.py`, `contract_check.py`) và SAI với **đường nạp tài liệu** (`ingest_to_cache` →
+`normalize_document`). `INSTALL.md` còn khẳng định mạnh hơn: *«không cài gì thêm; overlay core dùng
+stdlib»*. Người vận hành làm đúng như tài liệu ⇒ máy KHÔNG có `pypdf` ⇒ mọi `.pdf` bị chặn, và
+(trước r315) còn bị báo nhầm thành «bản SCAN» của TÀI LIỆU.
+
+Đo 02-08 trên `54-2025-VBHN-VPQH` — PDF text thật, `pdftotext` bóc **167.433 ký tự**, riêng trang 1
+có 2.536:
+
+| | kết quả |
+|---|---|
+| cài theo đúng tài liệu (không `pypdf`) | `{"ok": false, "reason": "scanned_pdf"…}` — chặn |
+| sau `pip install pypdf` | `{"ok": true, "n_articles": 72}` |
+
+CÙNG một tệp.
+
+**Vá — ba lớp, vì một mình tài liệu không đủ.**
+
+1. **`requirements.txt` nói thật và VẪN cài được.** Khai `pypdf>=4.0` là phụ thuộc THẬT của đường
+   nạp PDF; ghi rõ `python-docx` là TUỲ CHỌN (r317 đã cứu nhánh không-lib) và tách riêng hai NHỊ
+   PHÂN HỆ THỐNG mà `pip` không cài được (`pdftotext` bắt buộc · `antiword`/`catdoc` cho `.doc` cũ).
+   Mỗi mục kèm HẬU QUẢ cụ thể, không phải danh sách trơ.
+2. **`tl doctor` tự kiểm** — `_doc_dep_probe()` + dòng `optional phụ thuộc nạp tài liệu`. Đây mới là
+   phần bền: người ta không đọc `requirements.txt`, nhưng có chạy `doctor`. Thiếu `pypdf` ⇒
+   `✗ … pypdf|pdfplumber THIẾU ⇒ MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315).
+   Cài: pip install pypdf`.
+   ★Tên có tiền tố `optional` — nếp sẵn có (`optional rasoat/backfill`) để check báo ĐỎ mà **KHÔNG
+   lật rc**: máy không bao giờ nạp PDF không đáng bị `doctor` báo hỏng.
+3. **Đồng bộ tài liệu**: `INSTALL.md` (câu «không cài gì thêm» nay sai) · `references/DEPENDENCIES.md`
+   §9 (bảng 4 dòng: mức + thiếu-thì-sao).
+   ★**KHÔNG đụng `SKILL.md`.** Bản vá đầu có thêm một câu vào §9 và làm kernel phình 48.031 →
+   48.152 B, **vượt trần KERNEL-DIET 47 KB (48.128)** ⇒ `r127_kernel_warn_wired_in_audit`,
+   `r128_kernel_diet_under_warn` và `r219_gotchas_nhan_trang_thai` ĐỎ cùng lúc. Đã revert:
+   kernel = bất biến + CON TRỎ, §9 vốn đã trỏ sang `DEPENDENCIES.md` — chi tiết thuộc về đó
+   (chính là lý do file đó được tách ra từ SKILL.md §9 ở Pha F v1.34.0). Ba cổng bắt đúng việc.
+
+**Bẫy I11 LẶP LẠI — đã dính thật giữa lượt này.** `_doc_dep_probe` là helper tl_core MỚI; `bind()`
+re-home `__globals__` của mọi hàm tl_core về namespace `tl`, nên symbol không khai trong bảng stub
+`ops_misc` của `tl.py` sẽ **`NameError` LÚC CHẠY** dù import đúng — `tl doctor` gãy ngay lần chạy
+đầu. Đúng bẫy r312 đã ghi cho `_src_id_dup_groups`. Ca `r319_khong_bien_tuy_chon_thanh_chan_cung`
+nay khoá luôn vế đó (`'_doc_dep_probe'` phải có mặt trong `tl.py`).
+
+**Cổng.** selftest **1606/1606** (thêm 2 ca: 1 thuận + 1 ngược) · golden 0-diff · determinism ok ·
+`release-verify` khớp · `RELEASE_MANIFEST.json` đã tái sinh.
+ruff F: `ops_misc.py` và `tl.py` **delta = 0**; `tl_selftest.py` **delta theo TÊN = 0** — chỉ số lần
+của `_TL_MODULE` tăng 2149 → 2151 vì hai ca mới tham chiếu đúng cái tên module được gán ĐỘNG
+(`g["_TL_MODULE"] = tl_module`) mà master đã chấp nhận 2149 lần; không sinh loại phát hiện mới.
+
+**Ghi thêm — chính test của r319 bắt lỗi của r319.** Ca «không còn khai sai» ban đầu kiểm CHUỖI CON
+`uses only Python standard library`, mà bản `requirements.txt` mới lại TRÍCH LẠI câu đó để ghi bối
+cảnh («…trước r319 là SAI») ⇒ ĐỎ oan. Đã đổi sang kiểm **DÒNG KHAI cũ nguyên văn**. Bài học nhỏ mà
+lặp đi lặp lại trong đợt này: **kiểm chuỗi con trên văn bản có trích dẫn lịch sử là kiểm sai chỗ.**
+
 # ★ v1.36.50 — r318: hai bộ lọc rác Công báo sai trên CHÍNH bản Công báo — khối chữ ký số 3 dòng lọt vào khối đầu · nhãn mục sai CẢ HAI CHIỀU (2026-08-02)
 
 Đóng nốt §4.4 và §4.5 của lượt bảo trì kho 02-08 (`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_2026-08-02.md`).

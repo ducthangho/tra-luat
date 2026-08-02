@@ -182,7 +182,8 @@ Nếu kết quả có `WARN=OMNIBUS_NARROW_TITLE_CHECK` hoặc `TITLE_METADATA_M
 
 ## v1.17.15 — ghi chú cài đặt
 ```bash
-pip install -r requirements.txt  # không cài gì thêm; overlay core dùng stdlib
+pip install -r requirements.txt  # overlay core (tl.py/contract_check.py) vẫn stdlib; dòng này
+                                 # cài `pypdf` cho ĐƯỜNG NẠP PDF — thiếu là CHẶN mọi .pdf (r319)
 python scripts/tl.py --config config.json ping  # phải ra 2.21.2i
 python scripts/tl.py --config config.json extract --sohieu 18-VPQH --find "Phụ lục IV"
 ```

@@ -21316,20 +21316,104 @@ def run() -> int:
 
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
-        # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
         # so_hieu mẫu theo chuẩn bất biến NN-YYYY-VBHN-XXX.
+        # v1.36.45 (r311/DOC-01): ok3 TRƯỚC ĐÂY khoá `route("ban hanh moi") == "04"` — tức khoá CHÍNH
+        # CÁI BUG làm kỳ vọng, nên không ai sửa được nó mà không làm đỏ selftest. Nay đảo chiều: bẫy
+        # không-dấu phải FAIL-CLOSED (xem r311_route_hinh_thuc_fail_closed cho bộ ca đầy đủ).
         tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
         d = _j209.loads(tp.read_text(encoding="utf-8"))
         co, vb, nd = _rp209.load_master(str(tp))
         ok1 = bool(co) and len(vb) == 1 and len(nd) == 1
         vocab = d.get("_vocab_hinh_thuc") or {}
         ok2 = len(vocab) == 10 and all(_rp209.route(k) == v for k, v in vocab.items())
-        ok3 = _rp209.route("sua doi bo sung") == "04" and _rp209.route("ban hanh moi") == "04"
+        ok3 = True
+        for _bad209 in ("sua doi bo sung", "ban hanh moi"):
+            try:
+                _rp209.route(_bad209); ok3 = False
+            except _rp209.HinhThucKhongHopLe:
+                pass
         ok4 = _re209.fullmatch(r"\d+-\d{4}-VBHN-[A-Z]+", vb[0].get("so_hieu") or "") is not None
         ok5 = (nd[0].get("muc_chac_chan") in (d.get("_muc_chac_chan_enum") or [])
                and (nd[0].get("anchor") or {}).get("ttl_ngay") == 90)
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r209_master_template_va_vocab", _c209_master_template_va_vocab)
+
+    def _c311_route_hinh_thuc_fail_closed():
+        """v1.36.45 (r311/DOC-01 — đo LIVE 02-08): `route()` KHÔNG còn dồn im lặng về "04".
+
+        Bản cũ trả "04" cho CẢ "ban hanh moi" (đáng lẽ 05), "bai bo toan bo" (đáng lẽ 06), "" và
+        "xyz la gi" ⇒ một lỗi gõ dấu đủ để đổi phụ lục VÀ số liệu Mục D mà không có tín hiệu nào."""
+        import os as _os311
+        import subprocess as _sp311
+        import sys as _sys311
+        import tempfile as _tf311
+        _tp311 = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        _vocab = (_j209.loads(_tp311.read_text(encoding="utf-8")).get("_vocab_hinh_thuc") or {})
+        # (a) TỪ VỰNG HỢP LỆ vẫn định tuyến y như cũ — fail-closed KHÔNG được siết vào luồng đang chạy.
+        ok0 = len(_vocab) == 10 and all(_rp209.route(k) == v for k, v in _vocab.items())
+        # Giá trị hợp lệ VIẾT KÈM PHẠM VI là cách người nhập thật hay dùng ⇒ phải còn chạy.
+        ok1 = (_rp209.route("sửa đổi, bổ sung Điều 54") == "04"
+               and _rp209.route("Bãi bỏ toàn bộ") == "06"
+               and _rp209.route("tạm ngưng hiệu lực toàn bộ") == "04")
+        # (b) FAIL-CLOSED: rỗng / khoảng trắng / None / không dấu / ngoài từ vựng.
+        ok2 = True
+        for _bad in ("", "   ", None, "ban hanh moi", "bai bo toan bo", "sua doi bo sung", "xyz la gi"):
+            try:
+                _rp209.route(_bad); ok2 = False                       # ĐỎ trước r311 (mọi ca trả "04")
+            except _rp209.HinhThucKhongHopLe:
+                pass
+        # (c) "chờ bổ sung căn cứ" CHỨA "bổ sung" ⇒ khoá THỨ TỰ nhánh: F phải xét trước 04.
+        ok3 = _rp209.route("chờ bổ sung căn cứ") == "F"
+        # (d) ĐƯỜNG SẢN XUẤT: subprocess trên bảng master có 1 dòng sai — phải rc≠0, KHÔNG ghi phụ lục,
+        #     và nêu ĐÍCH DANH dòng sai. A/B: cùng bảng đó sửa đúng chính tả thì rc=0 và rơi vào 05.
+        def _master311(ht):
+            return {"co_quan": "CQ", "van_ban": [{"so_hieu": "18-2025-VBHN-VPQH", "ten": "X"}],
+                    "noi_dung": [{"key": "VD-A", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": "sửa đổi, bổ sung"},
+                                 {"key": "VD-B", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": ht}]}
+        _env311 = dict(_os311.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+
+        def _chay311(ht, sub):
+            with _tf311.TemporaryDirectory() as _d:
+                _f = _P209(_d) / "master.json"
+                _f.write_text(_j209.dumps(_master311(ht), ensure_ascii=False), encoding="utf-8")
+                _od = _P209(_d) / sub
+                _r = _sp311.run([_sys311.executable, str(_ROOT209 / "scripts" / "rasoat_phuluc.py"),
+                                 "--in", str(_f), "--out-dir", str(_od)],
+                                capture_output=True, text=True, encoding="utf-8", env=_env311, timeout=120)
+                return _r, (_od / "PHU_LUC_03_07_BN_TONG_HOP.md").is_file(), (_r.stdout or "").strip()
+        _rx, _co_file, _ = _chay311("ban hanh moi", "xau")
+        _msg = (_rx.stderr or "") + (_rx.stdout or "")
+        ok4 = (_rx.returncode != 0 and "HÌNH THỨC XỬ LÝ KHÔNG HỢP LỆ" in _msg
+               and "VD-B" in _msg and not _co_file)                   # ĐỎ trước r311 (rc=0, im lặng)
+        _ry, _co_file2, _so = _chay311("ban hành mới", "tot")
+        _out311 = {}
+        try:
+            _out311 = _j209.loads(_so.splitlines()[-1])
+        except Exception:  # noqa: BLE001
+            pass
+        ok5 = (_ry.returncode == 0 and _co_file2
+               and _out311.get("counts", {}).get("05") == 1
+               and _out311.get("counts", {}).get("04") == 1)
+        # (e) PHẢN CHỨNG — tái hiện THUẬT TOÁN CŨ trên chính dữ liệu này: cái sọt "còn lại → 04" nuốt
+        #     gọn "ban hanh moi". Chứng minh test cắn nếu ai đó revert, không chỉ "bản mới chạy xanh".
+        def _route_cu(h):
+            h = _rp209._norm(h)
+            if not h:
+                return "04"
+            if "ban hành mới" in h:
+                return "05"
+            if "bãi bỏ toàn bộ" in h:
+                return "06"
+            if ("tạm ngưng toàn bộ" in h) or ("tạm ngừng toàn bộ" in h):
+                return "07"
+            if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
+                return "F"
+            return "04"
+        ok6 = all(_route_cu(x) == "04" for x in ("", "   ", "ban hanh moi", "bai bo toan bo", "xyz la gi"))
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r311_route_hinh_thuc_fail_closed", _c311_route_hinh_thuc_fail_closed)
 
     def _c209_bang_c_du_truong():
         # H1b: qua rasoat_phuluc, phụ lục 04 KHÔNG rơi mất mức chắc chắn + cite (nối vào cột Ghi chú).

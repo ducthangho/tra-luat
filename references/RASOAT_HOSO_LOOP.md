@@ -175,7 +175,8 @@ TRẢ VỀ (final message = JSON THUẦN, không văn xuôi, không bọc ```):
 
 QUY TẮC ĐIỀN:
 - `hinh_thuc` CHỈ dùng giá trị trong `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`_vocab_hinh_thuc`) —
-  sai chính tả/không dấu sẽ rơi ÂM THẦM vào phụ lục 04.
+  từ v1.36.45 (r311) sai chính tả/không dấu/để trống làm `rasoat_phuluc.py` DỪNG (fail-closed, nêu đích
+  danh dòng sai) chứ không còn rơi âm thầm vào phụ lục 04.
 - `so_hieu` PHẢI có NĂM (chuẩn `NN-YYYY-VBHN-XXX`).
 - Phát hiện chưa qua kiểm chéo NLM ⇒ `muc_chac_chan="cho_verify_nlm"` (phiên chính sẽ xếp vào Q-VERIFY).
 - Không chắc ⇒ nói KHÔNG CÓ / để `can_kiem_tra`; cấm bịa số hiệu, ngày, nội dung.

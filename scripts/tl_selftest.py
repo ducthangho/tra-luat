@@ -21388,6 +21388,163 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r313_khuon_khop_dac_ta_va_tl", _c313_khuon_khop_dac_ta_va_tl)
 
+    # ═══ r320 (RAS-17 phần DỮ LIỆU) — ĐƯỜNG ĐI QUA cổng r313, không phải đường vòng ═══
+    # r313 chặn được việc khai `anchor_con_hieu_luc: true` khi anchor chưa di trú, nhưng KHÔNG có đường
+    # nào để di trú ⇒ cổng đứng đó vĩnh viễn. Ba ca dưới khoá đường đó, và khoá luôn hai thứ dễ mất
+    # nhất khi «cho gọn»: hash phải theo phạm vi dep TỰ KHAI, và hash cũ HỢP KHUÔN thì KHÔNG ghi đè.
+    def _c320_anchor_di_tru_ke_hoach():
+        from tl_core import lookup_ops as _lo320
+        _P, _H = _lo320._rasoat_anchor_pham_vi, _lo320._rasoat_anchor_tinh_hash
+        _KH = _lo320._rasoat_anchor_migrate_plan
+        _DOC = {"so_hieu": "A", "articles": {"9": "Điều 9 ...", "10": "Điều 10 ...",
+                                             "54": "Điều 54. Mức hưởng ...", "55": "Điều 55 ..."},
+                "full_text": "Toàn văn ..."}
+
+        def _res(sh):
+            return (_DOC, "") if sh == "A" else (None, "CACHE_KHONG_TIM_THAY")
+
+        def unit(deps):
+            return [{"phat_hien": [{"anchor": {"doc_deps": deps}}]}]
+        # (a) phạm vi: BỎ TRÙNG + sắp theo SỐ. Sắp theo CHUỖI sẽ ra ["10","9"] ⇒ cùng nội dung hai hash.
+        ok1 = (_P({"dieu": ["55", "54", "54"]}) == {"loai": "dieu", "dieu": ["54", "55"]}
+               and _P({"dieu": ["10", "9"]})["dieu"] == ["9", "10"] and _P({})["loai"] == "toan_van")
+        # (b) thứ tự KHAI khác nhau ⇒ CÙNG hash; và hash phạm vi Điều ≠ hash toàn văn (không lẫn phạm vi)
+        _h54 = _H(_DOC, _P({"dieu": ["54"]}))["text_hash"]
+        _ha = _H(_DOC, _P({"dieu": ["54", "55"]}))["text_hash"]
+        _hb = _H(_DOC, _P({"dieu": ["55", "54"]}))["text_hash"]
+        ok2 = (_ha == _hb and _re209.match(r"^sha256:[0-9a-f]{64}$", _ha)
+               and _H(_DOC, _P({}))["text_hash"] not in ("", _ha, _h54))
+        # (c) thiếu Điều trong cache ⇒ fail-CLOSED, KHÔNG hash phần đọc được rồi gọi là xong
+        _r3 = _H(_DOC, _P({"dieu": ["54", "99"]}))
+        ok3 = (_r3["text_hash"] == "" and _r3["ly_do"].startswith("THIEU_DIEU_TRONG_CACHE")
+               and _H({"articles": {"1": "   "}}, _P({"dieu": ["1"]}))["text_hash"] == ""
+               and _H({}, _P({}))["ly_do"] == "CACHE_KHONG_CO_TOAN_VAN")
+        # (d) ĐÚNG lớp bệnh đo trên hồ sơ BHXH: địa chỉ nằm trong ô hash, `locator` trống ⇒ tách + tính lại
+        _p4 = _KH(unit([{"so_hieu": "A", "text_hash": "cache:A#dieu54", "dieu": ["54"]}]), _res)
+        _d4 = _p4["ke_hoach"][0]
+        ok4 = (_p4["di_tru"] == 1 and _d4["dat"]["locator"] == "cache:A#dieu54"
+               and _d4["dat"]["text_hash"] == _h54)
+        # (e) đã có `locator` KHÁC ⇒ bỏ qua CẢ dep. Hai địa chỉ khác nhau = một cái sai; máy không chọn hộ.
+        _p5 = _KH(unit([{"so_hieu": "A", "text_hash": "cache:A#dieu54",
+                         "locator": "cache:A#dieu55", "dieu": ["54"]}]), _res)
+        ok5 = (_p5["bo_qua"] == 1 and _p5["ke_hoach"][0]["ly_do"] == "XUNG_DOT_LOCATOR"
+               and "dat" not in _p5["ke_hoach"][0])
+        # (f) hash HỢP KHUÔN mà tính lại ra khác ⇒ `lech_noi_dung`, KHÔNG ghi đè: lệch chính là tín hiệu
+        #     văn bản nền đã đổi mà Loop C cần đọc. Ghi đè cho «sạch bảng» là xoá phát hiện, xoá im lặng.
+        _p6 = _KH(unit([{"so_hieu": "A", "text_hash": "sha256:" + "ab" * 32, "dieu": ["54"]}]), _res)
+        ok6 = (_p6["lech_noi_dung"] == 1 and _p6["di_tru"] == 0 and "dat" not in _p6["ke_hoach"][0]
+               and _p6["ke_hoach"][0]["text_hash_tinh_lai"] == _h54)
+        ok7 = _KH(unit([{"so_hieu": "A", "text_hash": _h54, "dieu": ["54"]}]), _res)["khong_can"] == 1
+        # (g) không tra được nguồn ⇒ bỏ qua, KHÔNG để lại `text_hash` rỗng (đó là đổi bệnh, không phải chữa)
+        _p8 = _KH(unit([{"so_hieu": "Z", "text_hash": "cache:Z#d1", "dieu": ["1"]}]), _res)
+        ok8 = (_p8["bo_qua"] == 1 and _p8["ke_hoach"][0]["ly_do"] == "CACHE_KHONG_TIM_THAY"
+               and _p8["ke_hoach"][0]["tach_duoc_locator"] is True)
+        # (h) KHÔNG bơm nguồn ⇒ tuyệt đối không tự bịa hash
+        _p9 = _KH(unit([{"so_hieu": "A", "text_hash": "cache:A#d54", "dieu": ["54"]}]))
+        ok9 = _p9["di_tru"] == 0 and _p9["ke_hoach"][0]["ly_do"] == "KHONG_CO_NGUON_DE_TINH_HASH"
+        # (i) rác đủ kiểu KHÔNG được ném lỗi (hàm lập kế hoạch, không phải hàm phán)
+        ok10 = _KH([None, "x", {"phat_hien": [None, {"anchor": 5}]}], _res)["tong"] == 0
+        return (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9 and ok10)
+    _t110("r320_anchor_di_tru_ke_hoach", _c320_anchor_di_tru_ke_hoach)
+
+    def _c320_anchor_ap_dung_fail_closed_toan_lo():
+        from tl_core import lookup_ops as _lo320b
+        _KH, _AP = _lo320b._rasoat_anchor_migrate_plan, _lo320b._rasoat_anchor_ap_dung
+        _DOC = {"so_hieu": "A", "articles": {"54": "Điều 54 ..."}}
+        _u = [{"phat_hien": [{"anchor": {"doc_deps": [
+            {"so_hieu": "A", "text_hash": "cache:A#dieu54", "dieu": ["54"]},
+            {"so_hieu": "Z", "text_hash": "cache:Z#dieu1", "dieu": ["1"]}]}}]}]
+        _p = _KH(_u, lambda sh: ((_DOC, "") if sh == "A" else (None, "CACHE_KHONG_TIM_THAY")))
+        _r = _AP(_u, _p["ke_hoach"])
+        _dep = _r["units"][0]["phat_hien"][0]["anchor"]["doc_deps"]
+        ok1 = (_r["ok"] and _r["so_dep"] == 1 and _r["don_vi_doi"] == [0]
+               and _dep[0]["text_hash"].startswith("sha256:") and _dep[0]["locator"] == "cache:A#dieu54")
+        # dep KHÔNG di trú được phải NGUYÊN VẸN — không nửa vời tách địa chỉ rồi bỏ ô hash rỗng
+        ok2 = _dep[1]["text_hash"] == "cache:Z#dieu1" and "locator" not in _dep[1]
+        # đầu vào KHÔNG bị sửa tại chỗ (deepcopy) — DRY của lệnh dựa hẳn vào tính chất này
+        ok3 = _u[0]["phat_hien"][0]["anchor"]["doc_deps"][0]["text_hash"] == "cache:A#dieu54"
+        # FAIL-CLOSED TOÀN LÔ: một `vi_tri` không dẫn tới dep ⇒ KHÔNG áp dòng nào (khuôn _docpatch_ap)
+        _xau = list(_p["ke_hoach"]) + [{"hanh_dong": "di_tru", "dat": {"text_hash": "sha256:" + "cd" * 32},
+                                        "vi_tri": {"don_vi": 9, "khoa": "phat_hien", "hang": 0, "dep": 0}}]
+        _r2 = _AP(_u, _xau)
+        ok4 = ((not _r2["ok"]) and _r2["so_dep"] == 0 and _r2["don_vi_doi"] == []
+               and _r2["loi"][0]["ly_do"].startswith("VI_TRI_KHONG_DAN_TOI_DEP")
+               and _r2["units"][0]["phat_hien"][0]["anchor"]["doc_deps"][0]["text_hash"] == "cache:A#dieu54")
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r320_anchor_ap_dung_fail_closed_toan_lo", _c320_anchor_ap_dung_fail_closed_toan_lo)
+
+    def _c320_di_tru_qua_duoc_cong_r313():
+        """Chạy ĐÚNG đường sản xuất (subprocess `tl rasoat-anchor`), env HOME trỏ thư mục trống — cùng
+        khuôn r226: lệnh đọc file cục bộ mà thiếu tên trong `_CREDS_LAZY_CMDS` thì main() sys.exit
+        TRƯỚC handler trên runner clone sạch, stdout RỖNG, và ca này gãy ở bước parse JSON.
+
+        Vế cuối là thứ đáng giá nhất: SAU khi di trú, `_rasoat_anchor_hop_le` mới cho khai
+        `anchor_con_hieu_luc: true` — chứng minh cổng r313 mở được bằng ĐƯỜNG DI TRÚ, không phải nới cổng."""
+        import json as _js320
+        import subprocess as _sp320
+        import sys as _sys320
+        import tempfile as _tf320
+        from tl_core import lookup_ops as _lo320c
+        with _tf320.TemporaryDirectory() as _td:
+            _m, _c = Path(_td) / "master", Path(_td) / "cache" / "docs"
+            _m.mkdir()
+            _c.mkdir(parents=True)
+            (Path(_td) / "home").mkdir()
+            (_c / "a.json").write_text(_js320.dumps(
+                {"so_hieu": "18/2025/VBHN-VPQH", "aliases": ["18/2025/VBHN-VPQH"],
+                 "articles": {"54": "Điều 54. Mức hưởng ..."}}, ensure_ascii=False), encoding="utf-8")
+            _f = _m / "unit-320.json"
+            _f.write_text(_js320.dumps({"unit_id": "u320", "phat_hien": [{"key": "VD-320", "anchor": {
+                "doc_deps": [{"so_hieu": "18/2025/VBHN-VPQH",
+                              "text_hash": "cache:18-2025-VBHN-VPQH#dieu54", "dieu": ["54"]}]}}]},
+                ensure_ascii=False), encoding="utf-8")
+            _env = dict(os.environ)
+            for _k in ("TL_WEBAPP", "TL_TOKEN", "TRA_LUAT_CACHE", "TL_CACHE_DIR"):
+                _env.pop(_k, None)
+            _env["HOME"] = _env["USERPROFILE"] = str(Path(_td) / "home")
+
+            def _run(*extra):
+                return _sp320.run([_sys320.executable, str(_ROOT209 / "scripts" / "tl.py"), "rasoat-anchor",
+                                   "--in", str(_m), "--cache-dir", str(Path(_td) / "cache"), "--json", *extra],
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                  timeout=180, env=_env, cwd=str(Path(_td) / "home"))
+            _truoc = _f.read_bytes()
+            _r1 = _run()
+            if _r1.returncode != 0 or not _r1.stdout.lstrip().startswith("{"):
+                return False
+            _j1 = _js320.loads(_r1.stdout[_r1.stdout.find("{"):])
+            # DRY: nói được sẽ đổi gì, và KHÔNG đụng file
+            ok1 = (_j1["che_do"] == "DRY" and _j1["da_ghi"] is False and _j1["ke_hoach"]["di_tru"] == 1
+                   and _j1["findings_truoc"]["locator_trong_hash"] == 1
+                   and _j1["findings_sau"]["san_sang"] is True and _f.read_bytes() == _truoc)
+            # --apply mà THIẾU --confirm ⇒ rc=2, vẫn không ghi (không có chế độ ghi ngầm)
+            _r2 = _run("--apply")
+            _j2 = _js320.loads(_r2.stdout[_r2.stdout.find("{"):])
+            ok2 = (_r2.returncode == 2 and _j2.get("error") == "NEED_CONFIRM"
+                   and _j2.get("da_ghi") is False and _f.read_bytes() == _truoc)
+            _r3 = _run("--apply", "--confirm", "yes")
+            _j3 = _js320.loads(_r3.stdout[_r3.stdout.find("{"):])
+            _dep = _js320.loads(_f.read_text(encoding="utf-8"))["phat_hien"][0]["anchor"]["doc_deps"][0]
+            ok3 = (_r3.returncode == 0 and _j3["da_ghi"] is True and _j3["so_dep_da_doi"] == 1
+                   and _re209.match(r"^sha256:[0-9a-f]{64}$", _dep["text_hash"])
+                   and _dep["locator"] == "cache:18-2025-VBHN-VPQH#dieu54")
+            # sao lưu để NGOÀI master/ — bản sao lẫn trong đó từng làm bảng master phồng 40 → 53 (r216)
+            _bak = list((Path(_td) / "_anchor_bak").glob("unit-320.*.json"))
+            ok4 = (len(_bak) == 1 and _js320.loads(_bak[0].read_text(encoding="utf-8"))
+                   ["phat_hien"][0]["anchor"]["doc_deps"][0]["text_hash"].startswith("cache:")
+                   and list(_m.glob("*.json")) == [_f])
+            # chạy LẠI ⇒ không còn gì để di trú (idempotent), và hash vừa ghi đúng là hash tính lại
+            _j5 = _js320.loads(_run().stdout[_run().stdout.find("{"):])
+            ok5 = _j5["ke_hoach"]["di_tru"] == 0 and _j5["ke_hoach"]["khong_can"] == 1
+            # VẾ CHỐT: cổng r313 — TRƯỚC di trú ĐỎ, SAU di trú XANH trên CÙNG bộ đơn vị
+            _sau = [_js320.loads(_f.read_text(encoding="utf-8"))]
+            _cu = [_js320.loads(_truoc.decode("utf-8"))]
+            _st = {"vong_doi": {"anchor_con_hieu_luc": True}}
+            ok6 = (_lo320c._rasoat_anchor_hop_le(_st, _cu)["ok"] is False
+                   and _lo320c._rasoat_anchor_hop_le(_st, _sau)["ok"] is True)
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r320_di_tru_qua_duoc_cong_r313", _c320_di_tru_qua_duoc_cong_r313)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

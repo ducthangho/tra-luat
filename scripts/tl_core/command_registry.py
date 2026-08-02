@@ -967,6 +967,17 @@ GENERATED_SPECS = [
          {"flags": ['--check'], "action": 'store_true', "help": 'r216: ĐỐI CHIẾU bảng master đang có với kết quả merge, KHÔNG ghi đè; lệch ⇒ rc=2 kèm danh sách'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
+    # ── r320 (RAS-17 phần DỮ LIỆU): đường ĐI QUA cổng r313 — di trú anchor, không phải nới cổng ──
+    {"name": 'rasoat-anchor', "handler": 'cmd_rasoat_anchor',
+     "help": 'DI TRÚ anchor hồ sơ rà: tách ĐỊA CHỈ khỏi ô `text_hash` sang `locator` + tính lại hash bằng _content_hash trên phạm vi dep tự khai. DRY mặc định; --apply --confirm yes để GHI. Không mạng, không NLM',
+     "args": [
+         {"flags": ['--in'], "dest": 'in_dir', "required": True, "help": 'thư mục master/ (hoặc 1 file .json)'},
+         {"flags": ['--cache-dir'], "dest": 'cache_dir', "help": 'thư mục cache văn bản; mặc định env TRA_LUAT_CACHE / ~/.tra_luat_cache'},
+         {"flags": ['--state'], "help": 'kèm ĐO `anchor_con_hieu_luc` sau di trú (read-only, không ghi state)'},
+         {"flags": ['--apply'], "action": 'store_true', "help": 'GHI thật (mặc định DRY)'},
+         {"flags": ['--confirm'], "help": 'phải là `yes` khi --apply'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
     {"name": 'state-get', "handler": 'cmd_state_get',
      "help": 'READ-ONLY: đọc state rà hồ sơ từ Drive _meta/ (WRITE_PATHS_v1). rc=3 = chưa có (lượt đầu), KHÔNG phải lỗi',
      "args": [
@@ -1867,6 +1878,9 @@ COMMAND_META = {
     # r217: GHI record cache cục bộ (không mạng) — có --confirm và DRY mặc định vì đây là sửa NGUỒN
     # pháp lý đang phục vụ tra cứu; risk medium chứ không low, dù phạm vi ghi chỉ là "local".
     "doc-patch":             _m("medium", False, "local", True, True, True, "rasoat_hoso", None, False, "lookup_ops", generated=True),
+    # r320: GHI phiếu rà cục bộ (không mạng) — CÙNG hạng doc-patch: --confirm + DRY mặc định, risk
+    # medium chứ không low, vì ghi sai ở đây là ghi vào chính bằng chứng của hồ sơ đã đóng.
+    "rasoat-anchor":         _m("medium", False, "local", True, True, True, "rasoat_hoso", None, False, "lookup_ops", generated=True),
     "footnote-map":          _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "cluster":               _m("low", True, "none", False, False, False, None, None, False, None, generated=True),
     "rasoat-chongcheo":      _m("low", True, "none", False, False, False, None, None, False, None, generated=True),

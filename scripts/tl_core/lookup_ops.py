@@ -3166,6 +3166,287 @@ def _rasoat_anchor_hop_le(state, units=None):
     return {"ok": not loi, "loi": loi, "findings": f}
 
 
+def _rasoat_anchor_pham_vi(dep):
+    """PURE (r320/RAS-17 phần DỮ LIỆU): phạm vi hash HẸP NHẤT mà chính dep đã khai.
+
+    `dieu` có giá trị ⇒ hash CHỈ các Điều đó; rỗng ⇒ toàn văn. Vì sao hẹp nhất chứ không phải cho gọn
+    một hash toàn văn: dep chỉ trỏ Điều 54 mà hash cả văn bản thì MỌI sửa đổi ở Điều khác cũng làm nó
+    STALE — vẫn đúng lớp bệnh STALE giả mà r313 sinh ra để diệt, chỉ thô hơn một bậc.
+
+    Số Điều được CHUẨN HOÁ về chuỗi, BỎ TRÙNG (khai `["54","54"]` mà nối hai lần thì hash khác hash
+    của cùng nội dung), và sắp theo SỐ tăng dần — thứ tự phải TẤT ĐỊNH, nếu không cùng nội dung ra hai
+    hash khác nhau tuỳ thứ tự người rà gõ. Tên không thuần số xếp sau, theo thứ tự chữ."""
+    d = dep if isinstance(dep, dict) else {}
+    raw = d.get("dieu")
+    if isinstance(raw, (str, int)):
+        raw = [raw]
+    seen, dieu = set(), []
+    for x in (raw if isinstance(raw, list) else []):
+        s = str(x).strip()
+        if s and s not in seen:
+            seen.add(s)
+            dieu.append(s)
+    dieu.sort(key=lambda s: (0, int(s), "") if s.isdigit() else (1, 0, s))
+    return {"loai": "dieu" if dieu else "toan_van", "dieu": dieu}
+
+
+def _rasoat_anchor_tinh_hash(doc, pham_vi):
+    """PURE (r320): `sha256:<64hex>` của phạm vi `pham_vi` trên MỘT record cache — hoặc lý do KHÔNG tính được.
+
+    Dùng thẳng `doc_identity._content_hash` (đúng thứ `RASOAT_PLAN_SCHEMA.md` §7.2 chốt), nên chuẩn hoá
+    nội dung là CÙNG MỘT luật với lớp identity — không đẻ ra chiều băm thứ hai.
+    Fail-CLOSED mọi ngả: thiếu Điều trong cache / cache không có toàn văn / rỗng sau chuẩn hoá đều trả
+    `text_hash` RỖNG kèm lý do. Không có đường nào trả hash của chuỗi rỗng — hai văn bản không đọc được
+    mà cùng hash là cách STALE giả quay lại bằng cửa sau."""
+    dc = doc if isinstance(doc, dict) else {}
+    pv = pham_vi if isinstance(pham_vi, dict) else {"loai": "toan_van", "dieu": []}
+    if pv.get("loai") == "dieu":
+        arts = dc.get("articles") if isinstance(dc.get("articles"), dict) else {}
+        thieu = [n for n in pv.get("dieu") or [] if not str(arts.get(n) or "").strip()]
+        if thieu:
+            return {"text_hash": "", "ly_do": "THIEU_DIEU_TRONG_CACHE:" + ",".join(thieu)}
+        text = "\n".join(str(arts.get(n) or "") for n in pv.get("dieu") or [])
+    else:
+        text = str(dc.get("full_text") or "")
+        if not text.strip():
+            return {"text_hash": "", "ly_do": "CACHE_KHONG_CO_TOAN_VAN"}
+    h = _content_hash(text)
+    if not h:
+        return {"text_hash": "", "ly_do": "RONG_SAU_CHUAN_HOA"}
+    return {"text_hash": "sha256:" + h, "ly_do": ""}
+
+
+def _rasoat_anchor_migrate_plan(units, doc_resolver=None):
+    """PURE (r320/RAS-17 phần DỮ LIỆU): KẾ HOẠCH di trú từng `anchor.doc_deps[]`. Không đọc đĩa,
+    không mạng, không sửa gì — `doc_resolver(so_hieu) -> (record|None, ly_do)` bơm từ ngoài (lệnh bơm
+    bản đọc cache, selftest bơm fixture). r313 đã CHẶN việc bật `anchor_con_hieu_luc` khi anchor chưa
+    di trú; hàm này là đường ĐI QUA cổng đó, không phải đường vòng.
+
+    Hai vế của một dep, xét ĐỘC LẬP:
+      (1) tách ĐỊA CHỈ khỏi ô `text_hash` sang `locator` — chỉ khi `locator` còn trống. Đã có `locator`
+          KHÁC ⇒ `XUNG_DOT_LOCATOR`, bỏ qua CẢ dep: hai địa chỉ khác nhau nghĩa là một trong hai sai,
+          máy không được chọn hộ.
+      (2) tính lại `text_hash` trên phạm vi dep tự khai (`_rasoat_anchor_pham_vi`).
+
+    **KHÔNG ghi đè một `text_hash` đã HỢP KHUÔN**, kể cả khi tính lại ra giá trị khác: lệch ở đây là
+    tín hiệu văn bản nền ĐÃ ĐỔI (`lech_noi_dung`) — đúng thứ Loop C cần đọc. Ghi đè cho «sạch bảng» là
+    xoá mất phát hiện, và xoá im lặng."""
+    k = _rasoat_anchor_khuon()
+    rx = re.compile(k["text_hash"])
+    ke_hoach, theo_ly_do = [], {}
+    di_tru = khong_can = lech = bo_qua = 0
+    cache_doc = {}
+    for iu, u in enumerate(units if isinstance(units, list) else []):
+        if not isinstance(u, dict):
+            continue
+        khoa = "phat_hien" if isinstance(u.get("phat_hien"), list) else "noi_dung"
+        for ir, r in enumerate(u.get(khoa) if isinstance(u.get(khoa), list) else []):
+            if not isinstance(r, dict):
+                continue
+            anc = r.get("anchor") if isinstance(r.get("anchor"), dict) else {}
+            for idp, dep in enumerate(anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []):
+                if not isinstance(dep, dict):
+                    continue
+                vt = {"don_vi": iu, "khoa": khoa, "hang": ir, "dep": idp}
+                th = str(dep.get("text_hash") or "").strip()
+                loc = str(dep.get("locator") or "").strip()
+                so_hieu = str(dep.get("so_hieu") or "").strip()
+                pv = _rasoat_anchor_pham_vi(dep)
+                row = {"vi_tri": vt, "so_hieu": so_hieu, "pham_vi": pv, "text_hash_cu": th[:80]}
+                dat = {}
+                # vế (1) — địa chỉ nằm trong ô hash
+                if not rx.match(th) and th and any(s in th for s in k["locator_dau_hieu"]):
+                    if not loc:
+                        dat["locator"] = th
+                    elif loc != th:
+                        row.update({"hanh_dong": "bo_qua", "ly_do": "XUNG_DOT_LOCATOR",
+                                    "locator_dang_co": loc})
+                        ke_hoach.append(row)
+                        bo_qua += 1
+                        theo_ly_do["XUNG_DOT_LOCATOR"] = theo_ly_do.get("XUNG_DOT_LOCATOR", 0) + 1
+                        continue
+                # vế (2) — tính lại hash
+                if not so_hieu:
+                    ly_do = "THIEU_SO_HIEU"
+                elif doc_resolver is None:
+                    ly_do = "KHONG_CO_NGUON_DE_TINH_HASH"
+                else:
+                    if so_hieu not in cache_doc:
+                        try:
+                            cache_doc[so_hieu] = doc_resolver(so_hieu)
+                        except Exception as e:  # noqa: BLE001
+                            cache_doc[so_hieu] = (None, "NGUON_NEM_LOI: " + str(e))
+                    doc, ly_do = cache_doc[so_hieu]
+                    if doc is None:
+                        ly_do = ly_do or "CACHE_KHONG_TIM_THAY"
+                    else:
+                        kq = _rasoat_anchor_tinh_hash(doc, pv)
+                        ly_do = kq["ly_do"]
+                        if kq["text_hash"]:
+                            if rx.match(th):
+                                # hash cũ đã hợp khuôn: chỉ ĐO, KHÔNG đụng (xem docstring)
+                                row["text_hash_tinh_lai"] = kq["text_hash"]
+                                if kq["text_hash"] == th:
+                                    row.update({"hanh_dong": "khong_can", "ly_do": "HASH_DA_DUNG_VA_CON_TUOI"})
+                                    khong_can += 1
+                                else:
+                                    row.update({"hanh_dong": "lech_noi_dung",
+                                                "ly_do": "HASH_HOP_KHUON_NHUNG_LECH_NOI_DUNG"})
+                                    lech += 1
+                                ke_hoach.append(row)
+                                theo_ly_do[row["ly_do"]] = theo_ly_do.get(row["ly_do"], 0) + 1
+                                continue
+                            dat["text_hash"] = kq["text_hash"]
+                if dat.get("text_hash"):
+                    row.update({"hanh_dong": "di_tru", "dat": dat, "ly_do": ""})
+                    di_tru += 1
+                else:
+                    if rx.match(th) and not dat:
+                        # hợp khuôn nhưng KHÔNG kiểm lại được: vẫn `khong_can` (không có gì để sửa),
+                        # song phải NÓI RA là chưa đối chiếu — im lặng ở đây là khai «tươi» hộ.
+                        row.update({"hanh_dong": "khong_can", "ly_do": "HASH_DA_HOP_KHUON",
+                                    "chua_kiem_lai": ly_do})
+                        khong_can += 1
+                    else:
+                        # tách được địa chỉ nhưng KHÔNG tính được hash ⇒ vẫn bỏ qua CẢ dep: để lại
+                        # `text_hash` rỗng là biến bệnh «sai loại» thành bệnh «thiếu», không phải chữa.
+                        row.update({"hanh_dong": "bo_qua", "ly_do": ly_do or "KHONG_TINH_DUOC_HASH",
+                                    "tach_duoc_locator": bool(dat.get("locator"))})
+                        bo_qua += 1
+                    theo_ly_do[row["ly_do"]] = theo_ly_do.get(row["ly_do"], 0) + 1
+                ke_hoach.append(row)
+    return {"tong": len(ke_hoach), "di_tru": di_tru, "khong_can": khong_can,
+            "lech_noi_dung": lech, "bo_qua": bo_qua, "theo_ly_do": theo_ly_do,
+            "ke_hoach": ke_hoach, "mau": ke_hoach[:10]}
+
+
+def _rasoat_anchor_ap_dung(units, ke_hoach):
+    """PURE (r320): áp kế hoạch lên BẢN SAO các đơn vị — KHÔNG đọc/ghi file, KHÔNG in.
+
+    FAIL-CLOSED TOÀN LÔ như `_docpatch_ap`: một `vi_tri` không dẫn tới đúng dep thì KHÔNG áp dòng nào.
+    Nửa lô đã sửa trên một hồ sơ rà là để lại thứ không ai mô tả nổi — đắt hơn hẳn việc chạy lại."""
+    import copy as _copy
+    ra = _copy.deepcopy(units if isinstance(units, list) else [])
+    rows = [r for r in (ke_hoach or []) if isinstance(r, dict) and r.get("hanh_dong") == "di_tru"]
+    dich, loi = [], []
+    for r in rows:
+        vt = r.get("vi_tri") if isinstance(r.get("vi_tri"), dict) else {}
+        try:
+            u = ra[int(vt.get("don_vi"))]
+            dep = u[str(vt.get("khoa"))][int(vt.get("hang"))]["anchor"]["doc_deps"][int(vt.get("dep"))]
+            if not isinstance(dep, dict):
+                raise TypeError("dep không phải dict")
+        except Exception as e:  # noqa: BLE001
+            loi.append({"vi_tri": vt, "ly_do": "VI_TRI_KHONG_DAN_TOI_DEP: " + str(e)})
+            continue
+        dich.append((dep, r.get("dat") or {}, int(vt.get("don_vi"))))
+    if loi:
+        return {"ok": False, "units": units, "so_dep": 0, "don_vi_doi": [], "loi": loi}
+    doi = set()
+    for dep, dat, iu in dich:
+        dep.update(dat)
+        doi.add(iu)
+    return {"ok": True, "units": ra, "so_dep": len(dich), "don_vi_doi": sorted(doi), "loi": []}
+
+
+def cmd_rasoat_anchor(a) -> int:
+    """r320 (RAS-17 phần DỮ LIỆU) — DI TRÚ anchor của hồ sơ rà. DRY mặc định; GHI phải `--apply --confirm yes`.
+
+    r313 đóng phần MÃ+GUARD: khuôn `sha256:<64hex>`, tách `locator`, và cưỡng chế `anchor_con_hieu_luc`.
+    Nó CHẶN được việc khai bừa nhưng KHÔNG có đường đi qua — 82 giá trị anchor đo 01-08 trên hồ sơ BHXH
+    vẫn là ĐỊA CHỈ nằm trong ô hash. Lệnh này là đường đó: tách địa chỉ sang `locator`, tính lại
+    `text_hash` bằng `_content_hash` trên phạm vi dep tự khai, rồi ĐO lại bằng chính
+    `_rasoat_anchor_findings`/`_rasoat_anchor_hop_le` để biết đã đủ điều kiện bật cờ chưa.
+
+    Không mạng, không NLM, không webapp — chỉ đọc `master/*.json` + cache văn bản cục bộ.
+    rc=0 chạy sạch · rc=2 lỗi/không áp được."""
+    inp = str(getattr(a, "in_dir", "") or "").strip()
+    nen = {"schema": "rasoat_anchor.v1", "in": inp}
+    p = Path(inp) if inp else None
+    if not p or not p.exists():
+        _print_json_or_text(dict(nen, ok=False, error="IN_KHONG_TON_TAI: " + (inp or "(trống)")), True)
+        return 2
+    tat_ca = sorted(p.glob("*.json")) if p.is_dir() else [p]
+    ban_sao = [f for f in tat_ca if p.is_dir() and _rasoat_la_ban_sao(f.name)]
+    files = [f for f in tat_ca if f not in ban_sao]
+    units, ten, hong = [], [], []
+    for f in files:
+        try:
+            units.append(json.loads(f.read_text(encoding="utf-8")))
+            ten.append(f)
+        except Exception as e:  # noqa: BLE001
+            hong.append({"nguon": f.name, "ly_do": "JSON_HONG: " + str(e)})
+    # Nguồn KHÔNG đọc được ⇒ fail-CLOSED y như `rasoat-merge` (r290): di trú trên tập thiếu file rồi
+    # báo "xong" là đúng cách một phần hồ sơ ở lại bản cũ mà không ai biết.
+    if hong:
+        _print_json_or_text(dict(nen, ok=False, error="NGUON_KHONG_DOC_DUOC", da_ghi=False, hong=hong), True)
+        return 2
+    cache_dir = _docpatch_cache_dir(a)
+
+    def _resolver(so_hieu):
+        hits = _docpatch_tim_file(so_hieu, cache_dir)
+        if not hits:
+            return (None, "CACHE_KHONG_TIM_THAY")
+        if len(hits) > 1:
+            return (None, "CACHE_IDENTITY_CONFLICT:" + ",".join(x.name for x in hits))
+        return (json.loads(hits[0].read_text(encoding="utf-8")), "")
+
+    plan = _rasoat_anchor_migrate_plan(units, _resolver)
+    truoc = _rasoat_anchor_findings(units)
+    kq = _rasoat_anchor_ap_dung(units, plan["ke_hoach"])
+    if not kq["ok"]:
+        _print_json_or_text(dict(nen, ok=False, error="KE_HOACH_KHONG_AP_DUOC", da_ghi=False,
+                                 loi=kq["loi"]), True)
+        return 2
+    sau = _rasoat_anchor_findings(kq["units"])
+    nen.update({"cache_dir": cache_dir, "so_file": len(files),
+                "bo_qua_ban_sao": [{"nguon": f.name, "ly_do": "BAN_SAO_LUU_BI_BO_QUA"} for f in ban_sao],
+                "ke_hoach": {x: plan[x] for x in ("tong", "di_tru", "khong_can", "lech_noi_dung",
+                                                  "bo_qua", "theo_ly_do")},
+                "mau": plan["mau"], "findings_truoc": truoc, "findings_sau": sau})
+    st_file = str(getattr(a, "state", "") or "").strip()
+    if st_file and Path(st_file).is_file():
+        try:
+            st = json.loads(Path(st_file).read_text(encoding="utf-8"))
+            nen["anchor_hop_le_sau"] = {k2: v for k2, v in
+                                        _rasoat_anchor_hop_le(st, kq["units"]).items() if k2 != "findings"}
+        except Exception as e:  # noqa: BLE001
+            nen["anchor_hop_le_sau"] = {"ok": False, "loi": ["STATE_KHONG_DOC_DUOC: " + str(e)]}
+    if not bool(getattr(a, "apply", False)):
+        _print_json_or_text(dict(nen, ok=True, che_do="DRY", da_ghi=False,
+                                 note="thêm `--apply --confirm yes` để GHI (tự sao lưu + nhật ký)"), True)
+        return 0
+    if str(getattr(a, "confirm", "") or "") != "yes":
+        _print_json_or_text(dict(nen, ok=False, error="NEED_CONFIRM", da_ghi=False,
+                                 note="rasoat-anchor GHI ĐÈ phiếu rà — thêm `--confirm yes`"), True)
+        return 2
+    rid = _journal_new_run_id("rasoat-anchor")
+    bak_dir = (p.parent if p.is_dir() else p.parent) / "_anchor_bak"
+    bak_dir.mkdir(parents=True, exist_ok=True)
+    _journal_append(rid, {"t": "run_start", "cmd": "rasoat-anchor", "in": str(p),
+                          "so_dep": kq["so_dep"], "so_don_vi": len(kq["don_vi_doi"])})
+    da_ghi = []
+    for iu in kq["don_vi_doi"]:
+        tgt = ten[iu]
+        # Sao lưu ĐỂ NGOÀI master/: bản sao lẫn trong đó từng làm bảng master phồng 40 → 53 (r216).
+        bak = bak_dir / f"{tgt.stem}.{rid}.json"
+        bak.write_bytes(tgt.read_bytes())
+        _journal_append(rid, {"t": "intent", "op": "rasoat_anchor", "key": str(tgt),
+                              "set": {"bak": str(bak), "sha_truoc": _docpatch_sha(tgt)}})
+        tmp = tgt.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(kq["units"][iu], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        os.replace(str(tmp), str(tgt))
+        _journal_append(rid, {"t": "commit", "op": "rasoat_anchor", "key": str(tgt), "ok": True,
+                              "bak": str(bak), "sha_sau": _docpatch_sha(tgt)})
+        da_ghi.append({"file": tgt.name, "bak": str(bak)})
+    _journal_append(rid, {"t": "run_end", "ok": True,
+                          "counts": {"dep": kq["so_dep"], "file": len(da_ghi)}})
+    _print_json_or_text(dict(nen, ok=True, che_do="APPLY", da_ghi=True, journal=rid,
+                             so_dep_da_doi=kq["so_dep"], file_da_ghi=da_ghi,
+                             undo="chép lại từ " + str(bak_dir) + " (mỗi file một bản `.{run_id}.json`)"), True)
+    return 0
+
+
 def _rasoat_unit_shape(d):
     """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
     `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.

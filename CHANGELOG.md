@@ -1,3 +1,66 @@
+# ★ v1.36.52 — r320: RAS-17 phần DỮ LIỆU — `tl rasoat-anchor`, đường ĐI QUA cổng r313 (2026-08-02)
+
+**Phạm vi: MÃ của đường di trú. KHÔNG di trú 82 giá trị anchor của hồ sơ BHXH ở đợt này** — hồ sơ đó nằm
+trong `--out-dir` runtime, NGOÀI kho; con số 82 (`RASOAT_PLAN_SCHEMA.md` §7.2, đo 01-08) phải **đếm lại
+LIVE** bằng chính lệnh này trước khi chạy `--apply`. Đợt này giao *đường*, không giao *lượt ghi*.
+
+**Bệnh — không phải bug mới, mà là CỔNG KHÔNG CÓ CỬA.** r313 (v1.36.47) khoá `anchor.text_hash` vào khuôn
+`sha256:<64hex>`, tách `locator`, và cưỡng chế `anchor_con_hieu_luc`. Chặn thì được, nhưng **không mã nào
+di trú được giá trị cũ** ⇒ cổng đứng đó vĩnh viễn: hồ sơ nào cũng `san_sang=false`, Loop C không bao giờ
+chạy, và áp lực thực tế sẽ đổ vào việc **nới cổng** chứ không vào việc chữa dữ liệu. Đợt này mở cửa.
+
+**Vá — bốn hàm PURE (`tl_core/lookup_ops.py`) + một lệnh, đã bind qua `tl.py` (ADR-0002):**
+1. `_rasoat_anchor_pham_vi(dep)` — phạm vi hash HẸP NHẤT dep **tự khai**: `dieu` có giá trị ⇒ chỉ các Điều
+   đó (bỏ trùng, **sắp theo SỐ**); rỗng ⇒ toàn văn. Sắp theo CHUỖI là bẫy im lặng: `["10","9"]` vs `["9","10"]`
+   ra hai hash cho cùng một nội dung.
+2. `_rasoat_anchor_tinh_hash(doc, pv)` — `sha256:` + `doc_identity._content_hash` trên đúng phạm vi đó.
+   Thiếu Điều trong cache / cache không có toàn văn / rỗng sau chuẩn hoá ⇒ **RỖNG kèm lý do**, không có
+   đường nào trả hash-của-rỗng.
+3. `_rasoat_anchor_migrate_plan(units, doc_resolver)` — kế hoạch từng dep. **KHÔNG đọc đĩa**: nguồn bơm từ
+   ngoài, nên hàm test được và lệnh không có đường tự bịa hash khi thiếu nguồn.
+4. `_rasoat_anchor_ap_dung(units, ke_hoach)` — áp lên **bản sao**, FAIL-CLOSED TOÀN LÔ (khuôn `_docpatch_ap`).
+
+**Ba luật đắt nhất, đều là luật KHÔNG LÀM:**
+- **KHÔNG ghi đè `text_hash` đã hợp khuôn**, kể cả khi tính lại ra khác ⇒ xếp `lech_noi_dung`. Lệch chính là
+  tín hiệu văn bản nền ĐÃ ĐỔI mà Loop C cần đọc; ghi đè cho «sạch bảng» là xoá phát hiện, xoá im lặng.
+- **KHÔNG tách nửa vời**: tách được địa chỉ mà không tính được hash ⇒ bỏ qua CẢ dep. Để lại ô hash rỗng chỉ
+  là đổi bệnh «trường sai LOẠI» thành bệnh «trường THIẾU» — bệnh sau thì mọi phép đếm rỗng đều thấy, nhưng
+  dữ liệu vẫn hỏng y hệt.
+- **KHÔNG chọn hộ**: `locator` đang có KHÁC địa chỉ trong ô hash ⇒ `XUNG_DOT_LOCATOR`, người quyết.
+
+**Lệnh `tl rasoat-anchor --in <master/>`** — DRY mặc định, GHI đòi `--apply --confirm yes` (hạng `medium`
+cùng `doc-patch`: ghi sai ở đây là ghi vào chính bằng chứng của hồ sơ đã đóng). Sao lưu ra `_anchor_bak/`
+**NGOÀI** `master/` — bản sao lẫn vào trong đó từng làm bảng master phồng 40 → 53 (r216). Báo cả
+`findings_truoc`/`findings_sau` bằng chính `_rasoat_anchor_findings`, nên «đã đủ điều kiện bật cờ chưa» là
+số đo, không phải lời khai. Chạy lại lượt hai ⇒ `di_tru=0` (idempotent) và mọi dep đổi trạng thái sang
+`khong_can`/`lech_noi_dung` — tức lệnh này cũng là phép ĐO độ tươi, không chỉ phép sửa.
+
+**Tên trong `_CREDS_LAZY_CMDS`** (bài học r226): lệnh chỉ đọc `master/*.json` + cache cục bộ, nhưng thiếu
+dòng khai đó thì trên runner clone SẠCH `main()` `sys.exit` **TRƯỚC** handler ⇒ stdout rỗng, ca test gãy ở
+bước parse JSON chứ không ở chỗ hỏng thật.
+
+**Bằng chứng DƯƠNG (4 mutation, không tin `rc=0`):**
+- sắp số Điều theo CHUỖI thay vì theo SỐ ⇒ `r320_anchor_di_tru_ke_hoach` **ĐỎ**
+- cho phép ghi đè hash đã hợp khuôn ⇒ `r320_anchor_di_tru_ke_hoach` + `r320_di_tru_qua_duoc_cong_r313` **ĐỎ**
+- áp NỬA LÔ thay vì fail-closed toàn lô ⇒ `r320_anchor_ap_dung_fail_closed_toan_lo` **ĐỎ**
+- bỏ `rasoat-anchor` khỏi `_CREDS_LAZY_CMDS` ⇒ `r320_di_tru_qua_duoc_cong_r313` **ĐỎ**
+
+Ca `r320_di_tru_qua_duoc_cong_r313` chạy ĐÚNG đường sản xuất (subprocess, `HOME` trỏ thư mục trống) và khoá
+vế chốt: **cùng một bộ đơn vị, `_rasoat_anchor_hop_le` ĐỎ trước di trú và XANH sau di trú** — cổng r313 mở
+được bằng đường di trú, không phải bằng nới cổng.
+
+**Cổng.** selftest **1609/1609** (master 1606, +3 ca) · `gen_instructions` 38/38 · `workflow-audit` ok ·
+`golden` 0-diff · `doc-claims-check` ok · `determinism` ok · `release-check --full` ok ·
+`release-verify --strict` **177/177**. Golden ghi lại vì kiểm kê lệnh đổi THẬT (`checked_commands` 164→165,
+`total` 164→165, `generated_parsers` 152→153, `tool_inventory` thêm đúng một tên) — đã soi
+`git diff -- references/golden/` trước khi commit, không tệp nào khác đổi. `RELEASE_MANIFEST.json` tái sinh,
+số tệp **177 không đổi** (không thêm/xoá tệp).
+
+ruff F: DELTA theo TÊN = 0 trên `tl.py` (12 F821, y nguyên) và `tl_selftest.py` (344 tên, +8 lần gọi tên cũ);
+`lookup_ops.py` **+1 TÊN: `_content_hash`** — cố ý, đó là tên của `doc_identity` đã khai trong bảng stub
+`tl.py` và được re-home qua `bind()`; đã kiểm HÀNH VI (ca (b) và ca đường-sản-xuất đều gọi tới nó và xanh),
+không phải tên chết. `command_registry.py` 0 → 0.
+
 # ★ v1.36.51 — r319: đính chính KHẾ ƯỚC phụ thuộc — `requirements.txt` khai «stdlib-only» đúng với overlay core nhưng SAI với đường nạp (2026-08-02)
 
 Đóng nốt phần KHẾ ƯỚC của §4.6 — mảnh cuối cùng của sáu phát hiện công cụ lượt bảo trì kho 02-08.

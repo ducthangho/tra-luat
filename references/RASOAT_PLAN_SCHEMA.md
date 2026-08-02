@@ -138,6 +138,20 @@ Nhưng Loop C **chỉ được chạy khi `anchor_con_hieu_luc: true`**; `false`
 ⇒ chạy Loop C theo đặc tả hiện hành sẽ ra **STALE giả 100%**. Chỉ bật `true` sau khi anchor được di trú
 (tách `locator` khỏi `text_hash`, tính lại bằng `doc_identity._content_hash`).
 
+**Đường di trú (r320): `tl rasoat-anchor --in <master/>`** — DRY mặc định, GHI phải `--apply --confirm yes`
+(tự sao lưu ra `_anchor_bak/` NGOÀI `master/` + nhật ký undo). Ba luật của nó, cố định:
+
+1. **Phạm vi hash = phạm vi HẸP NHẤT dep tự khai.** `dieu` có giá trị ⇒ hash CHỈ các Điều đó (bỏ trùng,
+   sắp theo SỐ ⇒ thứ tự khai không đổi hash); `dieu` rỗng ⇒ toàn văn. Hash toàn văn cho một dep chỉ trỏ
+   Điều 54 sẽ STALE mỗi lần Điều khác đổi — vẫn là STALE giả, chỉ thô hơn một bậc.
+2. **KHÔNG ghi đè `text_hash` đã hợp khuôn**, kể cả khi tính lại ra khác: lệch = văn bản nền ĐÃ ĐỔI
+   (`lech_noi_dung`), đúng thứ Loop C cần đọc. Ghi đè cho «sạch bảng» là xoá phát hiện, xoá im lặng.
+3. **Fail-CLOSED mọi ngả:** thiếu Điều trong cache / không tra được số hiệu / `locator` đang có KHÁC địa chỉ
+   trong ô hash ⇒ **bỏ qua CẢ dep**, không tách nửa vời rồi để ô hash rỗng (đó là đổi bệnh «sai loại» thành
+   bệnh «thiếu», không phải chữa).
+
+Cổng r313 (`_rasoat_anchor_hop_le`) vẫn là thứ quyết định: chỉ khi `findings.san_sang` mới khai được `true`.
+
 ### 7.3 Điều kiện mở hồ sơ kế tiếp
 
 1. Hồ sơ trước ở trạng thái terminal (`da_dong` / `da_dong_co_gioi_han` / `tam_ngung` có lý do).

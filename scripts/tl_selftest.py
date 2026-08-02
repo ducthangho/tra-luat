@@ -21297,6 +21297,90 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r300_vong_doi_dong_fail_closed", _c300_dong_fail_closed)
 
+    def _c313_anchor_khuon_findings():
+        # r313 (RAS-17, phần MÃ+GUARD — KHÔNG đụng dữ liệu): phân loại doc_deps theo KHUÔN.
+        # Ca dựng lại ĐÚNG lớp bệnh đã đo trên hồ sơ BHXH: 82/82 ĐIỀN ĐỦ mà 0/82 là hash thật —
+        # nên phép đếm "rỗng/thiếu" MÙ hoàn toàn, phải soi khuôn mới thấy.
+        from tl_core import lookup_ops as _lo313
+        f = _lo313._rasoat_anchor_findings
+        H = "sha256:" + "ab" * 32                      # 64 hex ⇒ hợp khuôn
+        def unit(deps):
+            return [{"phat_hien": [{"anchor": {"doc_deps": deps}}]}]
+        r = f(unit([{"so_hieu": "A", "text_hash": H}]))
+        ok1 = r["san_sang"] and r["ok"] == 1 and r["tong"] == 1
+        # (a) ĐỊA CHỈ nhét vào ô hash — đúng dạng `cite` thật đang dùng
+        r2 = f(unit([{"so_hieu": "B", "text_hash": "cache:18-2025-VBHN-VPQH#dieu54"}]))
+        ok2 = (not r2["san_sang"]) and r2["locator_trong_hash"] == 1 and r2["ok"] == 0
+        # (b) rỗng vs (c) rác — phân biệt được, không gộp một rọ
+        r3 = f(unit([{"so_hieu": "C", "text_hash": ""}, {"so_hieu": "D", "text_hash": "deadbeef"}]))
+        ok3 = r3["rong"] == 1 and r3["sai_khuon"] == 1 and r3["ok"] == 0
+        # (d) hash ĐÚNG ĐỘ DÀI nhưng CHỮ HOA / thiếu tiền tố ⇒ vẫn SAI (khuôn đóng, không nới)
+        r4 = f(unit([{"text_hash": "sha256:" + "AB" * 32}, {"text_hash": "ab" * 32}]))
+        ok4 = r4["ok"] == 0 and r4["sai_khuon"] == 2
+        # (e) `locator` là trường RIÊNG — đếm tách, và KHÔNG cứu được text_hash hỏng
+        r5 = f(unit([{"text_hash": "cache:x#y", "locator": "cache:x#y"}]))
+        ok5 = r5["co_locator"] == 1 and r5["locator_trong_hash"] == 1 and not r5["san_sang"]
+        # (f) tong=0 ⇒ KHÔNG san_sang (rỗng không phải "sạch" — đây là fail-closed, không vacuous)
+        ok6 = (not f([])["san_sang"]) and f([])["tong"] == 0 and not f(None)["san_sang"]
+        # (g) đọc được CẢ khuôn bảng `noi_dung` lẫn khuôn §6 `phat_hien`
+        r7 = f([{"noi_dung": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}])
+        ok7 = r7["ok"] == 1 and r7["san_sang"]
+        # (h) rác đủ kiểu KHÔNG được ném lỗi (hàm đo, không phải hàm phán)
+        r8 = f([None, "chuoi", {"phat_hien": "khong-phai-list"}, {"phat_hien": [None, {"anchor": 5}]}])
+        ok8 = r8["tong"] == 0
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    _t110("r313_anchor_khuon_findings", _c313_anchor_khuon_findings)
+
+    def _c313_anchor_con_hieu_luc_fail_closed():
+        # r313 (RAS-17): cưỡng chế `vong_doi.anchor_con_hieu_luc`. TRƯỚC r313 cờ này CHỈ sống trong
+        # prose + 1 ca kiểm *tài liệu có nhắc chữ đó không* — không mã nào chặn việc khai bừa `true`,
+        # mà khai `true` là Loop C chạy trên anchor chưa di trú ⇒ STALE giả 100%.
+        from tl_core import lookup_ops as _lo313
+        g = _lo313._rasoat_anchor_hop_le
+        H = "sha256:" + "cd" * 32
+        good = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}]
+        bad = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": "cache:a#b"}]}}]}]
+        # (a) khai true + anchor ĐÃ di trú ⇒ qua
+        ok1 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, good)["ok"] is True
+        # (b) khai true + anchor CHƯA di trú ⇒ ĐỎ, và lỗi phải NÓI RA số đếm
+        r2 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, bad)
+        ok2 = (not r2["ok"]) and any(x.startswith("ANCHOR_KHAI_TRUE_NHUNG_CHUA_DI_TRU") for x in r2["loi"]) \
+            and "locator_trong_hash=1" in r2["loi"][0]
+        # (c) khai true mà KHÔNG đưa đơn vị ⇒ ĐỎ. Không kiểm được thì không được khai —
+        #     im lặng tin lời khai chính là đường STALE giả lọt.
+        r3 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, None)
+        ok3 = (not r3["ok"]) and "ANCHOR_KHAI_TRUE_NHUNG_KHONG_DUA_DON_VI_DE_KIEM" in r3["loi"]
+        # (d) khai false TƯỜNG MINH mà thiếu lý do ⇒ ĐỎ (§7.2 "không im lặng thoát")
+        r4 = g({"vong_doi": {"anchor_con_hieu_luc": False}}, None)
+        ok4 = (not r4["ok"]) and "ANCHOR_FALSE_NHUNG_THIEU_LY_DO" in r4["loi"]
+        ok5 = g({"vong_doi": {"anchor_con_hieu_luc": False, "ly_do_anchor": "chưa di trú"}}, None)["ok"] is True
+        # (e) cờ VẮNG HẲN ⇒ KHÔNG đỏ (hồ sơ đang rà chưa tới bước khai — ratchet siết chiều khai SAI,
+        #     không siết chiều CHƯA KHAI; đỏ oan ngày đầu là cách guard bị vô hiệu hoá, bài học §0.8)
+        ok6 = g({"vong_doi": {"trang_thai": "dang_ra"}}, None)["ok"] is True
+        ok7 = g({}, None)["ok"] is True and g(None, None)["ok"] is True
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r313_anchor_con_hieu_luc_fail_closed", _c313_anchor_con_hieu_luc_fail_closed)
+
+    def _c313_khuon_khop_dac_ta_va_tl():
+        # r313: ba vế lấy từ BA nguồn khác nhau — không vế nào tự chứng minh chính nó.
+        # (a) khuôn trong MÃ đúng thứ đặc tả §7.2 viết
+        from tl_core import lookup_ops as _lo313
+        _R313 = _P209(__file__).resolve().parent.parent
+        ok1 = _lo313._rasoat_anchor_khuon()["text_hash"] == r"^sha256:[0-9a-f]{64}$"
+        _spec = (_R313 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8")
+        ok2 = "sha256:<64hex>" in _spec and "anchor_con_hieu_luc" in _spec
+        # (b) TEMPLATE khai `locator` TÁCH khỏi `text_hash`, và text_hash mẫu HỢP khuôn
+        _tp = _j209.loads((_R313 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json")
+                          .read_text(encoding="utf-8"))
+        _dep = _tp["noi_dung"][0]["anchor"]["doc_deps"][0]
+        ok3 = "locator" in _dep and _re209.match(r"^sha256:[0-9a-f]{64}$", _dep["text_hash"])
+        # (c) ba hàm ĐÃ bind qua tl.py (ADR-0002 copy-globals) — thiếu bind thì agent gọi là NameError
+        _tl_src = (_R313 / "scripts" / "tl.py").read_text(encoding="utf-8")
+        ok4 = all(("'" + n + "'") in _tl_src for n in
+                  ("_rasoat_anchor_khuon", "_rasoat_anchor_findings", "_rasoat_anchor_hop_le"))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r313_khuon_khop_dac_ta_va_tl", _c313_khuon_khop_dac_ta_va_tl)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

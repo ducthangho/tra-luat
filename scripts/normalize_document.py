@@ -16,7 +16,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from verify_deep import (split_articles, t1_structure, ROMAN_PAT, extract_appendix,  # noqa: E402
-                         appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao)
+                         appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao,
+                         tach_duoi_vbhn)                                             # noqa: E402  (r322)
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
 from docx_markup import (MODES, UNREADABLE, has_markup, strip_markup, resolve_mode,  # noqa: E402  (r182)
                          warn_line, scan_file, drop_drawing_measures)                # noqa: E402  (r316/r317)
@@ -285,6 +286,7 @@ def main():
         body = ""           # không phân tích thân
         phu_luc = raw.strip()
         khoi_dau = ""       # r215: cả văn bản LÀ phụ lục ⇒ không có khối đầu riêng để giữ
+        xac_thuc = chu_thich = ""   # r322: phụ lục/mẫu độc lập không có khối đuôi VBHN
         arts = split_articles(raw)   # giữ Điều nội bộ của mẫu (nếu có), KHÔNG bắt buộc
         rep = {"flags": ["APPENDIX: nạp dạng phụ lục/mẫu — không kiểm cấu trúc Điều nghị định"]}
         rep["t1"] = {"tier": "T1", "ok": True, "fatal": False, "articles_found": len(arts)}
@@ -296,6 +298,12 @@ def main():
         _ap = appendix_start(raw)
         body = raw[:_ap] if _ap >= 0 else raw
         phu_luc = raw[_ap:].strip() if _ap >= 0 else ""
+        # r322: TÁCH KHỐI ĐUÔI VBHN (bảng «XÁC THỰC VĂN BẢN HỢP NHẤT» + danh sách chú thích hợp
+        # nhất «[n] …») khỏi THÂN trước khi bóc Điều — nếu không, cả hai đọng vào thân ĐIỀU CUỐI và
+        # trích nguyên văn sẽ nhả chú thích ra như thể là quy phạm (đo 02-08-2026: 40-2026 Điều 52
+        # có 40.406/40.637 ký tự là khối đuôi). Đặt SAU bước tách phụ lục để đúng với cả hai thứ tự
+        # đuôi-vs-phụ-lục; hai khối được GIỮ vào trường riêng chứ KHÔNG bỏ đi.
+        body, xac_thuc, chu_thich = tach_duoi_vbhn(body)
         # r215 (CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN): GIỮ khối đầu văn bản. Trước r215 phần này bị
         # `split_articles` bỏ im lặng (`parts[0]`) nên record consolidated không lưu số hiệu/ngày ban
         # hành/căn cứ ⇒ mọi bản dựng lại từ `articles` là văn bản KHÔNG CÓ DANH TÍNH.
@@ -348,12 +356,18 @@ def main():
                       "articles": len(nums), "terminal_article": (nums[-1] if nums else 0),
                       "has_phu_luc": bool(phu_luc), "phu_luc_chars": len(phu_luc),
                       "has_khoi_dau": bool(khoi_dau), "khoi_dau_chars": len(khoi_dau),
+                      "has_chu_thich": bool(chu_thich), "chu_thich_chars": len(chu_thich),
+                      "has_xac_thuc": bool(xac_thuc), "xac_thuc_chars": len(xac_thuc),
                       "is_appendix": bool(getattr(a, "as_appendix", False))},
         "coverage": coverage, "verify_flags": rep["flags"],
         "khoi_dau": khoi_dau,          # r215: khối đầu văn bản — nguồn DUY NHẤT chứng minh danh tính
         "articles": {str(n): arts[n] for n in nums},
         "has_phu_luc": bool(phu_luc),
         "phu_luc": phu_luc,
+        # r322: khối đuôi VBHN — GIỮ, không bỏ. `chu_thich` mang thông tin pháp lý («khoản này do
+        # luật nào sửa, hiệu lực từ bao giờ»); `xac_thuc` là bằng chứng danh tính (VPQH + 'Số:').
+        "chu_thich": chu_thich,
+        "xac_thuc": xac_thuc,
     }
     if _mk_st:
         record["markup"] = _mk_st

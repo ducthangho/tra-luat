@@ -1,3 +1,72 @@
+# ★ v1.36.55 — r323: khối đuôi VBHN đọng trong THÂN ĐIỀU CUỐI (chú thích hợp nhất + bảng XÁC THỰC) (2026-08-02)
+
+**Triệu chứng đo được trên cache THẬT (02-08), 3/3 record VBHN nhiễm, 0 record khác:**
+
+```
+40-2026-VBHN-VPQH  Điều 52 : thân 40.637 ký tự — quy phạm chỉ    231  (99,4% là khối đuôi · 114 neo)
+19-2026-VBHN-VPQH  Điều 141: thân  8.573 ký tự — khối đuôi      4.073
+89-2026-VBHN-VPQH  Điều  79: thân  1.124 ký tự — khối đuôi      1.031
+54-2025-VBHN-VPQH  Điều 72 : 0 neo — sạch, KHÔNG bị đụng
+```
+
+VBHN kết thúc bằng hai khối **không phải quy phạm** đứng sau Điều cuối: bảng «XÁC THỰC VĂN BẢN HỢP
+NHẤT» (NĐ250 mục XIII) và danh sách định nghĩa chú thích hợp nhất «[n] …». Đường **ĐỌC**
+(`resolve.resolve_footnote_amendments`) cắt khối chú thích từ lâu; đường **NẠP** thì KHÔNG — nên cả
+hai đọng vào thân Điều cuối của record cache. Hệ quả: **trích nguyên văn Điều cuối nhả chú thích ra
+như thể là quy phạm**, và `19-2026` chính là VBHN đang thay thế Luật BHXH 41/2024.
+
+★**Bộ dò đã tồn tại nhưng chẩn đoán SAI ĐỊA CHỈ.** Cờ mềm sẵn có (`verify_deep` §1b, «Điều cuối dài
+bất thường») ĐÃ bắn trên `40-2026` — nhưng ghi là *«nghi phụ lục/mẫu chưa tách»*, nên không ai truy
+đúng nguyên nhân; và nó chỉ bắt 1/3 vì `19-2026`/`89-2026` lọt dưới ngưỡng 8000/8×.
+
+**Vá.** `verify_deep.tach_duoi_vbhn()` (PURE) + `vbhn_duoi_start()` dò **từ Điều ĐẦU TIÊN trở đi**.
+`normalize_document` gọi nó **sau** bước tách phụ lục nên đúng với cả hai thứ tự đuôi-vs-phụ-lục.
+
+★**Bản nháp neo ở Điều CUỐI (theo khuôn `appendix_start`) và ĐÃ HỎNG trên dữ liệu thật** — chỉ lộ ra
+lúc nạp lại record thật, đọc mã không thấy: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật
+khác** («[7] Điều 31 của Luật … quy định như sau: "Điều 31. Thẻ bảo hiểm y tế…"»), nên `ART_SPLIT`
+khớp SÂU TRONG khối đuôi và marker CUỐI CÙNG nằm SAU cả «[1]» lẫn «XÁC THỰC» ⇒ trả `-1` ⇒ **không cắt
+gì**. `40-2026` (114 chú thích) hỏng TRỌN; `19-2026` (10 chú thích) thoát chỉ vì trích ít — **thử mỗi
+nó thì bản nháp trông như ĐÚNG**. Phụ lục không có lớp bệnh này nên `appendix_start` giữ điểm neo cũ;
+hai bên **cố ý khác nhau**. Ca khoá: `r323_chu_thich_trich_dan_dieu_khong_lam_truot_moc`.
+Khối đầu (r215) do chính điểm neo Điều-đầu bảo vệ; marker INLINE (9/141 Điều của `19-2026` có marker
+giữa dòng) do khuôn neo **ĐẦU DÒNG** bảo vệ. Hai khối được **GIỮ** vào trường riêng
+`chu_thich` / `xac_thuc` (+ 4 trường đếm trong `structure`) chứ **không bỏ đi**: chú thích mang thông
+tin pháp lý «khoản này do luật nào sửa, hiệu lực từ bao giờ», còn khối xác thực là bằng chứng danh
+tính (VPQH + «Số:»). Không record nào mất một ký tự nào.
+
+★**Mốc «khối chú thích bắt đầu ở đâu» nay là MỘT định nghĩa** — `tl._FOOT_DEF_FIRST` (đường đọc) và
+`verify_deep.VBHN_CHU_THICH_DEF` (đường nạp), khoá bằng drift-lock `r323_khuon_chu_thich_khong_duoc_lech`
+(khuôn `r80_discovery_sites_mirror`). ★Hằng phải đặt ở **`tl.py`** chứ không phải `tl_core/resolve.py`:
+`resolve.bind()` REBASE `__globals__` từng hàm sang namespace sống của tl ⇒ hằng khai bên resolve là
+**mã chết**, hàm vẫn tra trong globals của tl. Khai thử ở resolve cho **NameError ngay trên đường sản
+xuất** — chính selftest bắt được (đúng lý do `_MARK_RE` xưa nay nằm ở `tl.py`).
+
+**Tiền kiểm chống cờ giả (chạy trước khi vá):** sau khi cắt, `TERMINAL_PAT` vẫn khớp **3/3** Điều
+cuối, và **0/3** còn trượt cờ «Điều cuối dài bất thường» ⇒ bản vá không đẻ cờ mới.
+
+**Cổng:** selftest **1621/1621** (1617 + 4 ca mới) · release-verify --strict rc=0 · determinism /
+doc-claims / workflow-audit --strict rc=0 · ruff F **delta +2** — báo trung thực: cả hai **cùng lớp
+F821-do-bind đã có sẵn** (`resolve.py` nền đã 360 F821 gồm cả `_MARK_RE`; `_TL_MODULE` trong selftest
+đã 2.159; kho **chưa từng** dùng `noqa: F821`) ⇒ với lớp hằng-qua-bind, "delta 0" là bất khả.
+
+**ĐÃ CHỮA DỮ LIỆU (2/3 record), nạp lại bằng chính bản vá này** — `cache-build --method exportdocx
+--gdoc-id`, giữ `method_rank=95`/`verified`; nạp **cache tạm** đo **8/8 cổng** rồi mới chép đè, bản cũ
+sao lưu ở `~/.tra_luat_cache/cache_bak_r323_2026-08-02/`:
+
+```
+40-2026  Điều 52 : thân 40.637 →   230   · chú thích 46.198 tách riêng · neo trong thân 114 → 0
+19-2026  Điều 141: thân  8.573 → 4.500   · chú thích  4.010 tách riêng · neo trong thân  10 → 0
+```
+
+Cổng 7 («0 ký tự QUY PHẠM nào đổi») so **sau khi bỏ hết khoảng trắng**: `40-2026` 0/51 Điều lệch;
+`19-2026` 0/140 lệch thực, 2 Điều (80·115) khác **chỉ ở khoảng trắng** — và đó là bản mới **SỬA ĐƯỢC**
+lỗi dính chữ «hủy bỏ|quyết định» mà lượt 12 đã ghi vào sổ. ⇒ So tuyệt đối là **sai chiều**: nó sẽ chặn
+chính bản vá tốt hơn.
+
+⚠ **`89-2026-VBHN-VPQH` CHƯA chữa được** — record không có `source.gdoc_id` (`method=file`,
+`rank=50`/`staged`) nên không có đường `exportdocx` để nạp lại mà giữ hạng. Cần người quyết nguồn.
+
 # ★ v1.36.54 — r322: RAS-18 — `doc-patch` để lại `text_hash` CŨ, bằng chứng đối sánh phải VÔ HIỆU (2026-08-02)
 
 **Sổ audit tả mục này là «`doc-patch` cố ý không tính lại `text_hash` ⇒ anchor sai âm thầm». Đo tận
@@ -34,6 +103,7 @@ lại đúng là trường có thể vắng mặt.
 
 Test: `r322_cong_hash_vo_hieu_sau_doc_patch` (5 nhánh, chạy subprocess đường sản xuất) ·
 `r322_provenance_lo_doc_patch` · `r322_verify_flags_vang_van_phai_khai` (đường GHI thật).
+
 
 # ★ v1.36.53 — r321: RAS-17 vế `rasoat-merge` — neo hỏng hết đi lọt vào bảng master (2026-08-02)
 

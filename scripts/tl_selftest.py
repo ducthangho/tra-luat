@@ -23751,6 +23751,130 @@ def run() -> int:
         return ok1 and ok2 and ok3
     _t110("r217_ingest_file_khong_doc_bang_locale", _c217_ingest_file_khong_doc_bang_locale)
 
+    # ═════ r323 — KHỐI ĐUÔI VBHN đọng trong THÂN ĐIỀU CUỐI (bảng XÁC THỰC + chú thích hợp nhất) ═════
+    # Đo 02-08-2026 trên cache THẬT — 3/3 record VBHN nhiễm, 0 record khác:
+    #     40-2026 Điều 52 : thân 40.637 mà quy phạm chỉ  231  (99,4% là khối đuôi · 114 neo)
+    #     19-2026 Điều 141: thân  8.573 — khối đuôi 4.073
+    #     89-2026 Điều  79: thân  1.124 — khối đuôi 1.031
+    # Đường ĐỌC (`resolve.resolve_footnote_amendments`) cắt khối chú thích từ lâu; đường NẠP thì KHÔNG
+    # ⇒ trích nguyên văn Điều cuối nhả chú thích ra NHƯ THỂ LÀ QUY PHẠM. Cờ mềm sẵn có ("Điều cuối dài
+    # bất thường", verify_deep §1b) CHỈ bắt được 40-2026 và còn chẩn đoán SAI ĐỊA CHỈ ("nghi phụ lục
+    # chưa tách"); 19-2026 và 89-2026 lọt dưới ngưỡng 8000/8×.
+    _VBHN323 = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                "Độc lập - Tự do - Hạnh phúc\n\n"
+                "VĂN PHÒNG QUỐC HỘI\n\n"
+                "Số: 99/VBHN-VPQH\n\n"
+                "LUẬT THỬ NGHIỆM\n\n"
+                "Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;\n\n"
+                "Điều 1. Phạm vi điều chỉnh\n"
+                "Luật này quy định về việc thử nghiệm[1] cho mục đích kiểm thử.\n\n"
+                "Điều 2. Giải thích từ ngữ\n"
+                "Trong Luật này, thử nghiệm là phép kiểm.\n\n"
+                "Điều 3. Quy định chi tiết\n"
+                "Chính phủ quy định chi tiết các điều, khoản được giao trong Luật.\n\n"
+                " \n\tXÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\n\n\nNguyễn Văn A\n \n\n"
+                "[1] Luật Sửa đổi số 11/2025/QH15 có căn cứ ban hành như sau:\n"
+                "“Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;”\n"
+                "[2] Khoản này được sửa đổi, bổ sung theo quy định tại khoản 1 Điều 2 của Luật số\n"
+                "11/2025/QH15, có hiệu lực kể từ ngày 01 tháng 7 năm 2026.\n")
+    # ĐỐI CHỨNG: nghị định thường — KHÔNG có khối đuôi VBHN.
+    _ND323 = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n\nCHÍNH PHỦ\nSố: 12/2025/NĐ-CP\n\n"
+              "Điều 1. Phạm vi điều chỉnh\nNội dung điều 1.\n\n"
+              "Điều 2. Đối tượng áp dụng\nNội dung điều 2.\n\n"
+              "Điều 3. Hiệu lực thi hành\nNghị định này có hiệu lực từ ngày 01 tháng 7 năm 2025.\n")
+
+    def _nd323(noi_dung, sohieu):
+        """Chạy `normalize_document.py` THẬT bằng subprocess — đúng đường `cache-build` đi (doctrine
+        false-green-test-qua-bind: gọi qua đường ĐÃ BIND không chứng minh được đường sản xuất)."""
+        import json as _j323, subprocess as _sp323, tempfile as _tf323
+        with _tf323.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "in.txt")
+            _out = _hos.path.join(_d, "o.json")
+            with open(_src, "w", encoding="utf-8") as _f:
+                _f.write(noi_dung)
+            _p = _sp323.run([_hsys.executable, "-X", "utf8",
+                             str(_ROOT209 / "scripts" / "normalize_document.py"),
+                             "--input", _src, "--number-symbol", sohieu, "--out", _out,
+                             "--document-variant", "consolidated"],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if _p.returncode != 0:
+                return _p.returncode, None
+            with open(_out, encoding="utf-8") as _f:
+                return 0, _j323.load(_f)
+
+    def _c323_khuon_khong_lech():
+        """DRIFT-LOCK: mốc «khối chú thích bắt đầu ở đâu» phải là MỘT định nghĩa. `tl_core` chưa bao
+        giờ import script gốc `scripts/` nên KHÔNG dùng chung được bằng import — bất biến này là thứ
+        DUY NHẤT giữ hai bên khỏi trôi (cùng khuôn r80_discovery_sites_mirror).
+        ★So với `tl._FOOT_DEF_FIRST` chứ KHÔNG phải `resolve._FOOT_DEF_FIRST`: `resolve.bind()` rebase
+        `__globals__` sang namespace của tl, nên hằng khai bên resolve là MÃ CHẾT — khai thử ở đó cho
+        NameError ngay trên đường sản xuất, chính selftest bắt được."""
+        return (_r217_verify_deep_nobind().VBHN_CHU_THICH_DEF.pattern
+                == _TL_MODULE._FOOT_DEF_FIRST.pattern)
+    _t110("r323_khuon_chu_thich_khong_duoc_lech", _c323_khuon_khong_lech)
+
+    def _c323_tach_duoi_qua_duong_nap():
+        """(a) thân Điều CUỐI sạch cả hai khối · (b) hai khối được GIỮ vào trường riêng chứ không bỏ ·
+        (c) quy phạm thật của Điều cuối còn nguyên · (d) marker INLINE giữa văn bản KHÔNG bị cắt oan ·
+        (e) khối đầu (r215) không suy suyển vì phép cắt nằm ở ĐUÔI."""
+        _rc, _r = _nd323(_VBHN323, "99-2026-VBHN-VPQH")
+        if _rc != 0 or not _r:
+            return False
+        _arts = _r["articles"]
+        _last = _arts[max(_arts, key=lambda k: int(k))]
+        ok_a = ("XÁC THỰC" not in _last) and ("[1]" not in _last) and ("[2]" not in _last)
+        ok_b = (_r.get("chu_thich") or "").startswith("[1]") \
+            and "XÁC THỰC VĂN BẢN HỢP NHẤT" in (_r.get("xac_thuc") or "")
+        ok_c = "Quy định chi tiết" in _last and "Chính phủ quy định chi tiết" in _last
+        ok_d = "[1]" in _arts["1"]        # tham chiếu inline là NỘI DUNG, không phải mốc cắt
+        _st = _r["structure"]
+        ok_e = bool(_st["has_chu_thich"]) and _st["chu_thich_chars"] > 0 and bool(_st["has_xac_thuc"])
+        ok_f = "VĂN PHÒNG QUỐC HỘI" in (_r.get("khoi_dau") or "")
+        return ok_a and ok_b and ok_c and ok_d and ok_e and ok_f
+    _t110("r323_tach_duoi_vbhn_qua_duong_nap_that", _c323_tach_duoi_qua_duong_nap)
+
+    def _c323_khong_co_duoi_thi_bat_bien():
+        """CHIỀU NGƯỢC (bắt siết-quá-tay): tài liệu KHÔNG có khối đuôi phải đi qua NGUYÊN VẸN —
+        chuỗi ra = chuỗi vào, hai trường mới rỗng, thân Điều cuối không hụt chữ nào. Nghiệm trên
+        cache thật: 54-2025 (0 neo) giữ đúng 107.985 ký tự trước/sau phép tách."""
+        _vd323 = _r217_verify_deep_nobind()
+        _than, _xt, _ct = _vd323.tach_duoi_vbhn(_ND323)
+        if not (_than == _ND323 and _xt == "" and _ct == ""):
+            return False
+        _rc, _r = _nd323(_ND323, "12-2025-ND-CP")
+        if _rc != 0 or not _r:
+            return False
+        _arts = _r["articles"]
+        _last = _arts[max(_arts, key=lambda k: int(k))]
+        return ((_r.get("chu_thich") or "") == "" and (_r.get("xac_thuc") or "") == ""
+                and _r["structure"]["has_chu_thich"] is False
+                and _r["structure"]["has_xac_thuc"] is False
+                and "Nghị định này có hiệu lực" in _last)
+    _t110("r323_khong_co_duoi_thi_bat_bien", _c323_khong_co_duoi_thi_bat_bien)
+
+    def _c323_chu_thich_trich_dan_dieu_khong_lam_truot_moc():
+        """PHẢN CHỨNG cho bản nháp: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật khác**
+        nên `ART_SPLIT` khớp SÂU TRONG khối đuôi. Bản nháp neo ở marker «Điều N.» CUỐI CÙNG ⇒ mốc rơi
+        SAU cả «[1]» lẫn «XÁC THỰC» ⇒ `vbhn_duoi_start` trả -1 ⇒ **KHÔNG CẮT GÌ**.
+        Đo dữ liệu thật 02-08: `40-2026` (114 chú thích) hỏng TRỌN — thân Điều 52 giữ nguyên 40.637
+        ký tự trong khi quy phạm thật chỉ 231; `19-2026` (10 chú thích) thoát chỉ vì trích ít, nên
+        nếu chỉ thử trên nó thì bản nháp trông như ĐÚNG. Nay neo ở Điều ĐẦU."""
+        _vd = _r217_verify_deep_nobind()
+        _doc = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n\nVĂN PHÒNG QUỐC HỘI\nSố: 98/VBHN-VPQH\n\n"
+                "Điều 1. Phạm vi điều chỉnh\nLuật này quy định về A[1].\n\n"
+                "Điều 2. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2026.\n\n"
+                " \n\tXÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\n\nNguyễn Văn A\n\n"
+                "[1] Điều 31 của Luật số 51/2025/QH15 quy định như sau:\n"
+                "“Điều 31. Thẻ bảo hiểm y tế\nThẻ bảo hiểm y tế được cấp cho người tham gia.”\n")
+        _than, _xt, _ct = _vd.tach_duoi_vbhn(_doc)
+        ok_a = _than != _doc and _ct.startswith("[1]") and "XÁC THỰC VĂN BẢN HỢP NHẤT" in _xt
+        ok_b = "Thẻ bảo hiểm y tế" not in _than      # Điều BỊ TRÍCH DẪN không được ở lại thân
+        ok_c = "Phạm vi điều chỉnh" in _than and "có hiệu lực thi hành từ ngày 01 tháng 7" in _than
+        ok_d = "VĂN PHÒNG QUỐC HỘI" in _than and "Số: 98/VBHN-VPQH" in _than   # khối đầu không bị cắt oan
+        return ok_a and ok_b and ok_c and ok_d
+    _t110("r323_chu_thich_trich_dan_dieu_khong_lam_truot_moc",
+          _c323_chu_thich_trich_dan_dieu_khong_lam_truot_moc)
+
     # ───────────────────────── r218: doc-claims-check (kiểm trích dẫn cơ học) ─────────────────────────
     # Doctrine tra-luat (false-green-test-qua-bind): gọi qua đường ĐÃ BIND không chứng minh gì ⇒ MỌI ca
     # dưới đây chạy `python scripts/tl.py doc-claims-check ...` như người dùng thật, đọc rc THẬT + JSON thật.

@@ -246,6 +246,42 @@ def main():
         sys.exit("Cần truyền doc.json hoặc --cache-id.")
 
     current_hash = doc.get("text_hash") or doc.get("content_hash") or ""
+
+    # r322 (RAS-18): cổng ngay dưới so `text_hash` để CHỨNG MINH thân cache còn khớp bản mà nguồn
+    # định vị (NotebookLM/bundle) đã thấy. `doc-patch` (r217) sửa thân record mà giữ nguyên
+    # `text_hash` ⇒ sau một lượt patch, hash VẪN khớp bundle trong khi thân ĐÃ lệch: cổng fail-closed
+    # báo KHỚP đúng trên ca nó sinh ra để chặn, và trả nguyên văn đã sửa như thể bundle xác nhận.
+    # Không tính lại hash (không tính lại được trong cùng miền băm — xem r217): bằng chứng đã vô hiệu
+    # thì phải vô hiệu RA MẶT, tức từ chối chính cái "khớp" đó. `--allow-stale` vẫn là đường vượt,
+    # cùng cổng với nhánh lệch — người vượt phải khai ra mình đang vượt.
+    # Đòi ĐÚNG KIỂU list, không chỉ truthy — xem ghi chú cùng lượt trong `provenance.build_warnings`:
+    # một `lich_su` là chuỗi sẽ vừa bật cổng vừa khai số lượt bịa.
+    _dp = doc.get("doc_patch")
+    _ls_raw = _dp.get("lich_su") if isinstance(_dp, dict) else None
+    _dp_lich_su = _ls_raw if isinstance(_ls_raw, list) else []
+    if (args.expected_content_hash and current_hash and args.expected_content_hash == current_hash
+            and _dp_lich_su and not args.allow_stale):
+        payload = {
+            "error": "hash_khop_nhung_da_doc_patch",
+            "message": "expected-content-hash KHỚP nhưng bằng chứng đã VÔ HIỆU: record qua "
+                       f"{len(_dp_lich_su)} lượt `doc-patch`, thân đã sửa mà `text_hash` vẫn là hash "
+                       "của bản nguồn TRƯỚC khi sửa. Hash khớp ở đây không chứng minh thân còn khớp "
+                       "nguồn định vị. Hoàn tác (`tl doc-patch --undo`) hoặc nạp lại nguồn; cần trả "
+                       "kết quả bất chấp thì khai `--allow-stale`.",
+            "expected_content_hash": args.expected_content_hash,
+            "current_content_hash": current_hash,
+            "doc_patch_so_luot": len(_dp_lich_su),
+            "doc_patch_run_id": [str(x.get("run_id") or "") for x in _dp_lich_su if isinstance(x, dict)],
+            "number_symbol": doc.get("number_symbol", ""),
+            "title": doc.get("title", ""),
+        }
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            print(f"HASH_KHOP_NHUNG_DA_DOC_PATCH: {payload['message']}", file=sys.stderr)
+            print(json.dumps(payload, ensure_ascii=False, indent=2), file=sys.stderr)
+        sys.exit(3)
+
     if args.expected_content_hash and current_hash and args.expected_content_hash != current_hash and not args.allow_stale:
         payload = {
             "error": "hash_mismatch",

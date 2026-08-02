@@ -4038,11 +4038,15 @@ def cmd_doc_patch(a) -> int:
                     "diem": [{"ma": r["ma"], "vung": r["vung"], "tim": r["tim"], "thay": r["thay"],
                               "ly_do": r["ly_do"]} for r in kq["ket_qua"]]})
     rec["doc_patch"] = {"lich_su": lich_su}
+    # r322 (RAS-18): TẠO `verify_flags` khi record chưa có, thay vì lặng lẽ bỏ cảnh báo. Bản r217
+    # ghi có điều kiện `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai «hash đã cũ» bốc
+    # hơi đúng lúc cần nhất, mà lệnh vẫn rc=0. Cảnh báo biến mất theo hình dạng dữ liệu là fail-OPEN.
     vf = rec.get("verify_flags")
-    if isinstance(vf, list):
-        vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
-                  "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
-                  % (len(kq["ket_qua"]), rid))
+    if not isinstance(vf, list):
+        vf = rec["verify_flags"] = []
+    vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
+              "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
+              % (len(kq["ket_qua"]), rid))
     tmp = target.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(rec, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(str(tmp), str(target))

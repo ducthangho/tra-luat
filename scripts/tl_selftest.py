@@ -21499,6 +21499,158 @@ def run() -> int:
         return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r321_merge_lo_dien_va_strict_fail_closed", _c321_merge_lo_dien_va_strict_fail_closed)
 
+    # ═════ r322 (RAS-18): `doc-patch` để lại `text_hash` CŨ ⇒ bằng chứng đối sánh phải VÔ HIỆU ═════
+    # Đo trước khi vá (02-08): `doc-patch` (r217) sửa thân record mà KHÔNG tính lại `text_hash` — lý
+    # do r217 nêu là THẬT (record không giữ bố cục dòng của `norm`, không tính lại được trong cùng
+    # miền băm). Lỗi nằm chỗ khác: điều đó chỉ ghi vào `verify_flags`, mà `provenance.py` và
+    # `tra_cuu.py` đều 0 tham chiếu trường ấy ⇒ KHÔNG đường đọc nào lộ. Trong khi `tra_cuu.py` lại
+    # dùng `text_hash` làm bằng chứng đối sánh liên nguồn: sau patch, hash VẪN khớp bundle còn thân
+    # ĐÃ lệch ⇒ cổng fail-closed báo KHỚP đúng trên ca nó sinh ra để chặn.
+    def _c322_cong_hash_vo_hieu_sau_doc_patch():
+        """r322 vế CỔNG — chạy ĐÚNG đường sản xuất (`subprocess tra_cuu.py`).
+
+        Khoá HÀNH VI chứ không grep chuỗi: thứ phải chứng minh là lệnh CÓ TỪ CHỐI hay không, và từ
+        chối ĐÚNG ca — không được chặn nhầm record sạch (làm vậy là đổi một lỗi im lặng lấy một cổng
+        không ai dùng nổi), không được nuốt mất nhánh `hash_mismatch` sẵn có."""
+        import json as _js322, os as _os322, subprocess as _sp322, sys as _sys322, tempfile as _tf322
+        _H = "a" * 64
+
+        def _doc(co_patch):
+            # `structure` để dạng LIST đơn vị — đúng hình dạng `find_units` đòi (`label`/`level`/
+            # `text`). ⚠ Ghi lại một khác biệt ĐO ĐƯỢC 02-08, NGOÀI phạm vi r322: record cache thật
+            # (11/11, do `build_cache.py:84` + `normalize_document.py:347` ghi) để `structure` là
+            # DICT ĐẾM, nên `tra_cuu --cache-id` duyệt dict ra chuỗi rồi `AttributeError`. Cổng
+            # r322 nằm TRƯỚC `find_units` nên vẫn chặn đúng ở cả hai hình dạng; ca này dùng hình
+            # dạng list để kiểm được luôn nhánh trả kết quả bình thường.
+            d = {"schema": "tra-luat-bundle/1.9", "doc_key": "y--consolidated",
+                 "so_hieu": "158/2025/NĐ-CP", "number_symbol": "158/2025/NĐ-CP", "aliases": [],
+                 "title": "Nghị định thử", "text_hash": _H, "chars": 40, "verify_flags": [],
+                 "khoi_dau": "CHÍNH PHỦ", "articles": {"8": "Điều 8. người sử dụng lao động."},
+                 "phu_luc": "",
+                 "structure": [{"label": "Điều 8", "level": "article",
+                                "text": "Điều 8. người sử dụng lao động."}]}
+            if co_patch:
+                d["doc_patch"] = {"lich_su": [{"run_id": "doc-patch-XYZ", "so_diem": 1,
+                                               "delta_chars": 0, "sha_truoc": "0" * 64}]}
+            return d
+
+        def _chay(co_patch, expected, *extra, dp_raw=None):
+            with _tf322.TemporaryDirectory() as _td:
+                _cd = Path(_td) / "cache"
+                (_cd / "docs").mkdir(parents=True)
+                _d = _doc(co_patch)
+                if dp_raw is not None:
+                    _d["doc_patch"] = dp_raw
+                (_cd / "docs" / "y--consolidated.json").write_text(
+                    _js322.dumps(_d, ensure_ascii=False), encoding="utf-8")
+                p = _sp322.run([_sys322.executable, str(_ROOT209 / "scripts" / "tra_cuu.py"),
+                                "--cache-id", "158/2025/NĐ-CP", "--cache-dir", str(_cd),
+                                "--cite", "Điều 8", "--json", *(("--expected-content-hash", expected)
+                                                                if expected else ()), *extra],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=180,
+                               # ⚠ `tra_cuu.py` KHÔNG tự `reconfigure(encoding="utf-8")` như `tl.py`
+                               # (tl.py:86/94) ⇒ trên máy chuẩn Windows (stdout pipe = cp1258) mọi
+                               # payload tiếng Việt vỡ `UnicodeEncodeError`. Bệnh NỀN, có trước r322
+                               # (nhánh `hash_mismatch` cũ vỡ y hệt) — khai env cho ca chạy được,
+                               # KHÔNG lặng lẽ vá giùm ở đây.
+                               env=dict(_os322.environ, PYTHONIOENCODING="utf-8"))
+                out = p.stdout + p.stderr
+                return p.returncode, (_js322.loads(out[out.find("{"):out.rfind("}") + 1])
+                                      if "{" in out else {})
+
+        # (a) ★ca bệnh: hash KHỚP nhưng record đã doc-patch ⇒ TỪ CHỐI, không trả nguyên văn.
+        rc_a, js_a = _chay(True, _H)
+        ok0 = rc_a == 3 and js_a.get("error") == "hash_khop_nhung_da_doc_patch"
+        ok1 = js_a.get("doc_patch_so_luot") == 1 and js_a.get("doc_patch_run_id") == ["doc-patch-XYZ"]
+        # (b) record SẠCH, hash khớp ⇒ vẫn trả bình thường (không chặn nhầm người vô can).
+        rc_b, js_b = _chay(False, _H)
+        ok2 = rc_b == 0 and js_b.get("count", 0) >= 1
+        # (c) `--allow-stale` ⇒ đường vượt vẫn thông, cùng cổng với nhánh lệch sẵn có.
+        rc_c, _js_c = _chay(True, _H, "--allow-stale")
+        ok3 = rc_c == 0
+        # (d) hash LỆCH ⇒ vẫn là `hash_mismatch` cũ, cổng mới KHÔNG cướp nhánh của cổng cũ.
+        rc_d, js_d = _chay(True, "b" * 64)
+        ok4 = rc_d == 3 and js_d.get("error") == "hash_mismatch"
+        # (e) KHÔNG khai `--expected-content-hash` ⇒ không có bằng chứng nào để vô hiệu ⇒ không chặn,
+        #     nhưng phải LỘ bằng cảnh báo (vế `provenance`, khoá riêng ở ca dưới).
+        rc_e, js_e = _chay(True, "")
+        ok5 = rc_e == 0 and any(x.get("code") == "doc_patch_text_hash_cu"
+                                for x in (js_e.get("warnings") or []))
+        # (f) `lich_su` sai KIỂU (chuỗi truthy / doc_patch không phải dict) ⇒ KHÔNG được bật cổng.
+        #     Bản đầu r322 dùng `or []` nên chuỗi lọt qua và khai `doc_patch_so_luot` bịa theo `len()`
+        #     — chặn dựa trên số bịa thì cổng nói dối đúng lúc người ta tin nó nhất.
+        ok6 = all(_chay(False, _H, dp_raw=x)[0] == 0 for x in ("rác", {"lich_su": "rác"}, {}, None))
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r322_cong_hash_vo_hieu_sau_doc_patch", _c322_cong_hash_vo_hieu_sau_doc_patch)
+
+    def _c322_provenance_lo_doc_patch():
+        """r322 vế LỘ DIỆN — `build_warnings` phải khai record đã doc-patch.
+
+        Khoá vào `doc_patch.lich_su` (trường CÓ CẤU TRÚC, `cmd_doc_patch` ghi vô điều kiện) chứ không
+        dò chuỗi 'DOC_PATCH:' trong `verify_flags`: văn xuôi đổi một chữ là phép dò gãy IM LẶNG, và
+        chính `verify_flags` mới là trường có thể vắng mặt."""
+        import importlib.util as _ilu322
+        _sp = _ilu322.spec_from_file_location("provenance_r322", _ROOT209 / "scripts" / "provenance.py")
+        _m = _ilu322.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+
+        def _codes(meta):
+            return {x["code"] for x in _m.build_warnings(meta)}
+        _nen = {"doc_status": "promulgated", "verified_at": "2026-08-01", "document_variant": "vbhn",
+                "consolidation_checked": True}
+        # (a) có lịch sử patch ⇒ PHẢI khai.
+        ok0 = "doc_patch_text_hash_cu" in _codes(dict(_nen, doc_patch={"lich_su": [{"run_id": "r"}]}))
+        # (b) không patch ⇒ KHÔNG khai (cảnh báo bắn bừa thì người đọc học cách bỏ qua nó).
+        ok1 = "doc_patch_text_hash_cu" not in _codes(dict(_nen))
+        ok2 = "doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch={"lich_su": []}))
+        # (c) hình dạng lạ (doc_patch không phải dict / lich_su không phải list) ⇒ không được nổ.
+        ok3 = ("doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch="rác"))
+               and "doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch={"lich_su": "rác"})))
+        # (d) thông điệp phải nói rõ hash là của bản TRƯỚC khi sửa — đó là thứ người đọc cần biết.
+        _w = [x for x in _m.build_warnings(dict(_nen, doc_patch={"lich_su": [{"run_id": "r"}]}))
+              if x["code"] == "doc_patch_text_hash_cu"][0]
+        ok4 = _w["level"] == "warn" and "TRƯỚC khi sửa" in _w["message"]
+        return ok0 and ok1 and ok2 and ok3 and ok4
+    _t110("r322_provenance_lo_doc_patch", _c322_provenance_lo_doc_patch)
+
+    def _c322_verify_flags_vang_van_phai_khai():
+        """r322 vế FAIL-OPEN — record KHÔNG có `verify_flags` thì `doc-patch` phải TẠO, không bỏ qua.
+
+        Bản r217 ghi có điều kiện `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai «hash đã
+        cũ» bốc hơi mà lệnh vẫn rc=0. Chạy đường sản xuất thật (subprocess) vì đây là đường GHI."""
+        import json as _js322b, os as _os322b, subprocess as _sp322b, sys as _sys322b, tempfile as _tf322b
+        _rec = {"schema": "tra-luat-bundle/1.9", "doc_key": "z--consolidated",
+                "so_hieu": "158/2025/NĐ-CP", "number_symbol": "158/2025/NĐ-CP", "aliases": [],
+                "chars": 40, "khoi_dau": "CHÍNH PHỦ",     # ★CỐ Ý không có khoá `verify_flags`
+                "articles": {"8": "Điều 8. ngưởi sử dụng lao động."},
+                "phu_luc": "", "structure": {"khoi_dau_chars": 9, "phu_luc_chars": 0}}
+        with _tf322b.TemporaryDirectory() as _td:
+            _cd = Path(_td) / "cache"
+            (_cd / "docs").mkdir(parents=True)
+            _tgt = _cd / "docs" / "z--consolidated.json"
+            _tgt.write_text(_js322b.dumps(_rec, ensure_ascii=False), encoding="utf-8")
+            _dm = Path(_td) / "diem.json"
+            _dm.write_text(_js322b.dumps({"so_hieu": "158/2025/NĐ-CP",
+                                          "diem": [{"ma": "VD-34", "vung": "dieu:8", "tim": "ngưởi",
+                                                    "thay": "người", "ly_do": "đối chiếu Công báo"}]},
+                                         ensure_ascii=False), encoding="utf-8")
+            p = _sp322b.run([_sys322b.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-patch",
+                             "158/2025/NĐ-CP", "--diem", str(_dm), "--apply", "--confirm", "yes",
+                             "--cache-dir", str(_cd), "--json"],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace",
+                            timeout=180, env=dict(_os322b.environ,
+                                                  TL_JOURNAL_DIR=str(Path(_td) / "journal")))
+            _d = _js322b.loads(_tgt.read_text(encoding="utf-8"))
+            ok0 = p.returncode == 0 and _d["articles"]["8"] == "Điều 8. người sử dụng lao động."
+            # ★khẳng định chính: cảnh báo KHÔNG được bốc hơi chỉ vì record thiếu khoá chứa nó.
+            ok1 = isinstance(_d.get("verify_flags"), list) and any(
+                x.startswith("DOC_PATCH:") for x in _d["verify_flags"])
+            # và trường CÓ CẤU TRÚC — thứ `provenance`/`tra_cuu` khoá vào — vẫn phải đủ.
+            ok2 = len((_d.get("doc_patch") or {}).get("lich_su") or []) == 1
+        return ok0 and ok1 and ok2
+    _t110("r322_verify_flags_vang_van_phai_khai", _c322_verify_flags_vang_van_phai_khai)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

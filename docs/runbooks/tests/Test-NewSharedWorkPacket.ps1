@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('ready', 'paused', 'prereq', 'prompts', 'all')]
+    [ValidateSet('ready', 'paused', 'prereq', 'create', 'prompts', 'all')]
     [string]$Case = 'all'
 )
 
@@ -186,6 +186,70 @@ function Invoke-MissingToolTest {
     }
 }
 
+function Invoke-IssueCreationTest {
+    $RepoRoot = [System.IO.Path]::GetFullPath(
+        (Join-Path $PSScriptRoot '..\..\..')
+    )
+    $Suffix = [Guid]::NewGuid().ToString('N')
+    $ShimRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-shims-$Suffix"
+    $GitShim = Join-Path $ShimRoot 'git.cmd'
+    $GhShim = Join-Path $ShimRoot 'gh.cmd'
+    $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-create-$Suffix.md"
+    $OriginalPath = $env:PATH
+    $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+    [void](New-Item -ItemType Directory -Path $ShimRoot)
+    $GitShimBody = @(
+        '@echo off',
+        'if "%~3"=="rev-parse" if "%~4"=="--show-toplevel" (echo D:\repo& exit /b 0)',
+        'if "%~3"=="fetch" exit /b 0',
+        'if "%~3"=="rev-parse" if "%~4"=="origin/master" (echo 1111111111111111111111111111111111111111& exit /b 0)',
+        'if "%~3"=="show" (echo 1.36.59& exit /b 0)',
+        'exit /b 9'
+    ) -join [Environment]::NewLine
+    $GhShimBody = @(
+        '@echo off',
+        'if "%~1"=="auth" exit /b 0',
+        'if "%~1"=="repo" (echo {"nameWithOwner":"example/tra-luat"}& exit /b 0)',
+        'if "%~1"=="pr" (echo []& exit /b 0)',
+        'if "%~1"=="issue" (echo https://github.com/example/tra-luat/issues/77& exit /b 0)',
+        'exit /b 9'
+    ) -join [Environment]::NewLine
+    [System.IO.File]::WriteAllText($GitShim, $GitShimBody, $Utf8NoBom)
+    [System.IO.File]::WriteAllText($GhShim, $GhShimBody, $Utf8NoBom)
+
+    try {
+        $env:PATH = "$ShimRoot;$env:SystemRoot\System32"
+        $Output = ((& $PowerShellPath -NoProfile -File $ScriptPath `
+            -RepoPath $RepoRoot `
+            -BodyOutputPath $BodyPath `
+            -NoClipboard 2>&1) | Out-String).Trim()
+        $ExitCode = $LASTEXITCODE
+
+        if ($ExitCode -ne 0) {
+            throw "Issue creation flow failed with exit code $ExitCode. Output: $Output"
+        }
+
+        $Summary = $Output | ConvertFrom-Json
+        if ($Summary.issue_url -ne 'https://github.com/example/tra-luat/issues/77') {
+            throw "Unexpected issue URL: $($Summary.issue_url)"
+        }
+        if ($Summary.status -ne 'ready_for_claim' -or $Summary.dry_run) {
+            throw "Unexpected creation summary: $Output"
+        }
+        if (-not (Test-Path -LiteralPath $BodyPath -PathType Leaf)) {
+            throw 'Successful issue creation must retain the exact submitted body.'
+        }
+    }
+    finally {
+        $env:PATH = $OriginalPath
+        Remove-Item -LiteralPath $BodyPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $GitShim -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $GhShim -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $ShimRoot -Force -ErrorAction SilentlyContinue
+    }
+}
+
 if ($Case -in @('ready', 'all')) {
     Invoke-ReadyPacketTest
     Write-Output 'PASS: zero open PR generates a ready work packet'
@@ -199,6 +263,11 @@ if ($Case -in @('paused', 'all')) {
 if ($Case -in @('prereq', 'all')) {
     Invoke-MissingToolTest
     Write-Output 'PASS: live preflight fails closed when required tools are missing'
+}
+
+if ($Case -in @('create', 'all')) {
+    Invoke-IssueCreationTest
+    Write-Output 'PASS: live flow creates one Issue through the external CLI boundary'
 }
 
 if ($Case -in @('prompts', 'all')) {

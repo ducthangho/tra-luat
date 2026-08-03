@@ -8,7 +8,9 @@ param(
 
     [string]$BodyOutputPath,
 
-    [switch]$DryRun
+    [switch]$DryRun,
+
+    [switch]$NoClipboard
 )
 
 Set-StrictMode -Version Latest
@@ -269,7 +271,7 @@ if (-not $DryRun) {
         throw "GitHub trả thành công nhưng không tìm thấy Issue URL. Output: $IssueOutput"
     }
 
-    if (Get-Command Set-Clipboard -ErrorAction SilentlyContinue) {
+    if (-not $NoClipboard -and (Get-Command Set-Clipboard -ErrorAction SilentlyContinue)) {
         Set-Clipboard -Value $IssueUrl
     }
 }

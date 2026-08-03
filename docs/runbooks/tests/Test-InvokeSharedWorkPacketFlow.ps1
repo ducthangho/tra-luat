@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [ValidateSet('preview', 'create_guard', 'create', 'reviewer', 'all')]
     [string]$Case = 'all'
@@ -42,10 +42,27 @@ function Get-D0SourceFiles {
 }
 
 function Invoke-PreviewTest {
+    $HelpText = (Get-Help $ControllerPath -Examples | Out-String)
+    if ($HelpText.IndexOf('D:\Quốc hội\tra-luat', [System.StringComparison]::Ordinal) -lt 0) {
+        throw 'Controller help did not preserve the Vietnamese canonical path.'
+    }
+
     $Suffix = [Guid]::NewGuid().ToString('N')
-    $SnapshotPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-preview-$Suffix.json"
-    $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-preview-$Suffix.md"
+    $TestRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-preview-Quốc hội-$Suffix"
+    $RepoRoot = Join-Path $TestRoot 'repo'
+    $GitShim = Join-Path $TestRoot 'git.cmd'
+    $GhShim = Join-Path $TestRoot 'gh.cmd'
+    $GitStatusPath = Join-Path $TestRoot 'git-status.txt'
+    $GitLogPath = Join-Path $TestRoot 'git-calls.log'
+    $GhLogPath = Join-Path $TestRoot 'gh-calls.log'
+    $SnapshotPath = Join-Path $TestRoot 'forbidden-snapshot.json'
+    $SnapshotBodyPath = Join-Path $TestRoot 'forbidden-snapshot.md'
+    $BodyPath = Join-Path $TestRoot 'packet.md'
     $SourceFiles = @(Get-D0SourceFiles)
+    $OriginalGitLog = $env:WP_FLOW_PREVIEW_GIT_LOG
+    $OriginalGhLog = $env:WP_FLOW_PREVIEW_GH_LOG
+    $OriginalGitStatus = $env:WP_FLOW_PREVIEW_GIT_STATUS
+    $OriginalRepo = $env:WP_FLOW_PREVIEW_REPO
     $Snapshot = [ordered]@{
         repo_slug        = 'example/tra-luat'
         base_sha         = '0123456789abcdef0123456789abcdef01234567'
@@ -57,17 +74,81 @@ function Invoke-PreviewTest {
         bootstrap_ready  = $true
         bootstrap_missing = @()
     }
+
+    [void](New-Item -ItemType Directory -Path $RepoRoot -Force)
+    foreach ($RelativePath in $SourceFiles) {
+        $SourcePath = Join-Path $RepoRoot $RelativePath
+        [void](New-Item -ItemType Directory -Path (Split-Path -Parent $SourcePath) -Force)
+        [System.IO.File]::WriteAllText($SourcePath, "fixture`n", $Utf8NoBom)
+    }
     [System.IO.File]::WriteAllText(
         $SnapshotPath,
         ($Snapshot | ConvertTo-Json -Depth 5),
         $Utf8NoBom
     )
+    $GitShimBody = @(
+        '@echo off',
+        'echo %*>>"%WP_FLOW_PREVIEW_GIT_LOG%"',
+        'if "%~3"=="rev-parse" if "%~4"=="--show-toplevel" (echo %WP_FLOW_PREVIEW_REPO%& exit /b 0)',
+        'if "%~3"=="fetch" exit /b 0',
+        'if "%~3"=="rev-parse" if "%~4"=="origin/master" (echo 1111111111111111111111111111111111111111& exit /b 0)',
+        'if "%~3"=="show" (echo 1.36.59& exit /b 0)',
+        'if "%~3"=="cat-file" exit /b 0',
+        'if "%~3"=="status" (type "%WP_FLOW_PREVIEW_GIT_STATUS%"& exit /b 0)',
+        'exit /b 9'
+    ) -join [Environment]::NewLine
+    $GhShimBody = @(
+        '@echo off',
+        'echo %*>>"%WP_FLOW_PREVIEW_GH_LOG%"',
+        'if "%~1"=="auth" exit /b 0',
+        'if "%~1"=="repo" (echo {"nameWithOwner":"example/tra-luat"}& exit /b 0)',
+        'if "%~1"=="pr" (echo []& exit /b 0)',
+        'exit /b 9'
+    ) -join [Environment]::NewLine
+    [System.IO.File]::WriteAllText($GitShim, $GitShimBody, $Utf8NoBom)
+    [System.IO.File]::WriteAllLines(
+        $GitStatusPath,
+        @($SourceFiles | ForEach-Object { "?? $_" }),
+        $Utf8NoBom
+    )
+    [System.IO.File]::WriteAllText($GhShim, $GhShimBody, $Utf8NoBom)
 
     try {
+        $env:WP_FLOW_PREVIEW_GIT_LOG = $GitLogPath
+        $env:WP_FLOW_PREVIEW_GH_LOG = $GhLogPath
+        $env:WP_FLOW_PREVIEW_GIT_STATUS = $GitStatusPath
+        $env:WP_FLOW_PREVIEW_REPO = $RepoRoot
+
+        $OriginalErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $SnapshotOutput = ((& $PowerShellPath -NoProfile -File $ControllerPath `
+                -Action Preview `
+                -CanonicalRepoPath $RepoRoot `
+                -SnapshotPath $SnapshotPath `
+                -BodyOutputPath $SnapshotBodyPath `
+                -NoClipboard 2>&1) | Out-String).Trim()
+            $SnapshotExitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $OriginalErrorActionPreference
+        }
+        if ($SnapshotExitCode -eq 0) {
+            throw 'Public Preview unexpectedly accepted a snapshot that bypasses live measurement.'
+        }
+        if ($SnapshotOutput.IndexOf('SnapshotPath', [System.StringComparison]::Ordinal) -lt 0) {
+            throw "Snapshot bypass rejection did not identify SnapshotPath. Output: $SnapshotOutput"
+        }
+        if (Test-Path -LiteralPath $SnapshotBodyPath) {
+            throw 'Rejected snapshot bypass must not create a packet body.'
+        }
+
         $Output = ((& $PowerShellPath -NoProfile -File $ControllerPath `
             -Action Preview `
-            -SnapshotPath $SnapshotPath `
+            -CanonicalRepoPath $RepoRoot `
             -BodyOutputPath $BodyPath `
+            -GitCommand $GitShim `
+            -GhCommand $GhShim `
             -NoClipboard) | Out-String).Trim()
         if ($LASTEXITCODE -ne 0) {
             throw "Preview failed with exit code $LASTEXITCODE. Output: $Output"
@@ -89,10 +170,42 @@ function Invoke-PreviewTest {
         if (-not (Test-Path -LiteralPath $BodyPath -PathType Leaf)) {
             throw 'Preview did not create the requested packet body.'
         }
+
+        $GitCalls = [System.IO.File]::ReadAllLines($GitLogPath) -join "`n"
+        if ($GitCalls.IndexOf('fetch origin --prune', [System.StringComparison]::Ordinal) -lt 0) {
+            throw 'Preview did not fetch origin --prune.'
+        }
+        if ($GitCalls.IndexOf('status --porcelain=v1 --untracked-files=all --', [System.StringComparison]::Ordinal) -lt 0) {
+            throw 'Preview did not measure the canonical D0 source status.'
+        }
+        $GhCalls = [System.IO.File]::ReadAllLines($GhLogPath) -join "`n"
+        foreach ($ExpectedCall in @('auth status', 'repo view', 'pr list')) {
+            if ($GhCalls.IndexOf($ExpectedCall, [System.StringComparison]::Ordinal) -lt 0) {
+                throw "Preview did not run gh $ExpectedCall."
+            }
+        }
+        if ($GhCalls.IndexOf('issue ', [System.StringComparison]::Ordinal) -ge 0) {
+            throw 'Preview must not call the GitHub Issue API.'
+        }
     }
     finally {
-        Remove-Item -LiteralPath $SnapshotPath -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $BodyPath -Force -ErrorAction SilentlyContinue
+        $env:WP_FLOW_PREVIEW_GIT_LOG = $OriginalGitLog
+        $env:WP_FLOW_PREVIEW_GH_LOG = $OriginalGhLog
+        $env:WP_FLOW_PREVIEW_GIT_STATUS = $OriginalGitStatus
+        $env:WP_FLOW_PREVIEW_REPO = $OriginalRepo
+        if (Test-Path -LiteralPath $TestRoot -PathType Container) {
+            $ResolvedTestRoot = (Resolve-Path -LiteralPath $TestRoot).Path
+            $ResolvedTempRoot = [System.IO.Path]::GetFullPath(
+                [System.IO.Path]::GetTempPath()
+            ).TrimEnd('\') + '\'
+            if (-not $ResolvedTestRoot.StartsWith(
+                    $ResolvedTempRoot,
+                    [System.StringComparison]::OrdinalIgnoreCase
+                )) {
+                throw "Refusing to remove test directory outside temp: $ResolvedTestRoot"
+            }
+            Remove-Item -LiteralPath $ResolvedTestRoot -Recurse -Force
+        }
     }
 }
 
@@ -119,7 +232,7 @@ function Invoke-CreateGuardTest {
 
 function Invoke-CreateExecutorTest {
     $Suffix = [Guid]::NewGuid().ToString('N')
-    $TestRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-create-$Suffix"
+    $TestRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-create-Quốc hội-$Suffix"
     $RepoRoot = Join-Path $TestRoot 'repo'
     $GitShim = Join-Path $TestRoot 'git.cmd'
     $GhShim = Join-Path $TestRoot 'gh.cmd'
@@ -235,7 +348,7 @@ function Invoke-CreateExecutorTest {
 
 function Invoke-PrepareReviewerTest {
     $Suffix = [Guid]::NewGuid().ToString('N')
-    $TestRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-review-$Suffix"
+    $TestRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-flow-review-Quốc hội-$Suffix"
     $RepoRoot = Join-Path $TestRoot 'repo'
     $OriginRoot = Join-Path $TestRoot 'origin.git'
     $ReviewWorktree = Join-Path $TestRoot "reviewer's worktree"
@@ -401,4 +514,8 @@ if ($Case -in @('reviewer', 'all')) {
     $PassedCount += 1
 }
 
-Write-Output "PASS: $PassedCount/$PassedCount selected shared-work-packet flow tests"
+$ExpectedCount = if ($Case -eq 'all') { 4 } else { 1 }
+if ($PassedCount -ne $ExpectedCount) {
+    throw "Expected $ExpectedCount selected flow tests, observed $PassedCount."
+}
+Write-Output "RESULT: $PassedCount/$ExpectedCount"

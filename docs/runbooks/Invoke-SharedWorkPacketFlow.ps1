@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Runs the D0 shared-work-packet workflow with explicit permission gates.
 
@@ -36,8 +36,6 @@ param(
     [string]$Action,
 
     [string]$CanonicalRepoPath,
-
-    [string]$SnapshotPath,
 
     [string]$BodyOutputPath,
 
@@ -187,9 +185,6 @@ switch ($Action) {
             DryRun     = $true
             NoClipboard = $true
         }
-        if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
-            $PacketArguments.SnapshotPath = $SnapshotPath
-        }
         if (-not [string]::IsNullOrWhiteSpace($BodyOutputPath)) {
             $PacketArguments.BodyOutputPath = $BodyOutputPath
         }
@@ -223,10 +218,6 @@ switch ($Action) {
         if (-not $ConfirmCreateIssue) {
             throw 'CreateExecutor creates a real GitHub Issue. Re-run only with explicit -ConfirmCreateIssue permission.'
         }
-        if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
-            throw 'CreateExecutor cannot use -SnapshotPath because snapshots are preview-only.'
-        }
-
         $PacketArguments = @{
             RepoPath    = $CanonicalRepoPath
             GitCommand  = $GitCommand

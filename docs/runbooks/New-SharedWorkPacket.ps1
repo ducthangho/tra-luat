@@ -44,6 +44,13 @@ $ExpectedD0SourceFiles = @(
     'docs/research/2026-08-03-phan-bien-protocol-da-phien.md'
 )
 
+$RequiredBootstrapPaths = @(
+    'docs/prompts/CODEX_EXECUTOR_D0.md',
+    'docs/prompts/CLAUDE_REVIEWER_D0.md',
+    'docs/runbooks/New-SharedWorkPacket.ps1',
+    'docs/runbooks/Fill-SharedWorkPacketPrompt.ps1'
+)
+
 function Assert-D0SourceInventory {
     param(
         [Parameter(Mandatory)]
@@ -160,6 +167,12 @@ if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
     $SourceStatus = @(
         Assert-D0SourceStatus -StatusLines @($Snapshot.source_status) -SourceFiles $SourceFiles
     )
+    if (-not ($Snapshot.PSObject.Properties.Name -contains 'bootstrap_ready')) {
+        throw 'Snapshot thiếu bootstrap_ready; không thể xác minh template đã sống trên base.'
+    }
+    if (-not ($Snapshot.PSObject.Properties.Name -contains 'bootstrap_missing')) {
+        throw 'Snapshot thiếu bootstrap_missing.'
+    }
 }
 else {
     if (-not (Get-Command $GitCommand -ErrorAction SilentlyContinue)) {
@@ -205,6 +218,17 @@ else {
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($Version)) {
         throw 'Không đọc được VERSION từ origin/master.'
     }
+
+    $BootstrapMissing = [System.Collections.Generic.List[string]]::new()
+    foreach ($BootstrapPath in $RequiredBootstrapPaths) {
+        $BootstrapSpec = "${BaseSha}:$BootstrapPath"
+        $BootstrapOutput = ((& $GitCommand -C $RepoPath cat-file -e $BootstrapSpec 2>&1) |
+            Out-String).Trim()
+        if ($LASTEXITCODE -ne 0) {
+            [void]$BootstrapMissing.Add($BootstrapPath)
+        }
+    }
+    $BootstrapReady = ($BootstrapMissing.Count -eq 0)
 
     Push-Location -LiteralPath $RepoPath
     try {
@@ -253,12 +277,18 @@ else {
         open_prs     = $LiveOpenPrs
         source_files = $SourceFiles
         source_status = $SourceStatus
+        bootstrap_ready = $BootstrapReady
+        bootstrap_missing = @($BootstrapMissing)
     }
 }
 
 $OpenPrs = @($Snapshot.open_prs)
 
-if ($OpenPrs.Count -eq 0) {
+if (-not [bool]$Snapshot.bootstrap_ready) {
+    $PacketStatus = 'PAUSE_BOOTSTRAP_NOT_LANDED'
+    $OpenPrLines = @('- Trạng thái PR không thể làm packet ready khi bootstrap chưa sống trên base.')
+}
+elseif ($OpenPrs.Count -eq 0) {
     $PacketStatus = 'ready_for_claim'
     $OpenPrLines = @('- Không có PR mở tại observed_at; vẫn phải đo lại lúc claim.')
 }
@@ -283,6 +313,13 @@ $FileLines = @(
         '- `' + $_ + '` — source_status: `' + $SourceStatusByPath[$_] + '`'
     }
 )
+$BootstrapReadyText = ([bool]$Snapshot.bootstrap_ready).ToString().ToLowerInvariant()
+$BootstrapMissingText = if (@($Snapshot.bootstrap_missing).Count -eq 0) {
+    '(none)'
+}
+else {
+    (@($Snapshot.bootstrap_missing) | ForEach-Object { '`' + $_ + '`' }) -join ', '
+}
 
 $BodyLines = @(
     "# Work Packet — $PacketId (alias: wp-d0-protocol-constitution)",
@@ -304,6 +341,8 @@ $BodyLines = @(
     "- base_sha_observed: $($Snapshot.base_sha)",
     "- VERSION tại base: $($Snapshot.version)",
     "- open_pr_count: $($OpenPrs.Count)",
+    "- bootstrap_on_base: $BootstrapReadyText",
+    "- bootstrap_missing: $BootstrapMissingText",
     ''
 )
 $BodyLines += $OpenPrLines
@@ -311,6 +350,7 @@ $BodyLines += @(
     '',
     'Mọi dữ liệu trong mục này phải được kiểm lại khi claim và ngay trước khi mở PR/land.',
     'Base/quyền sở hữu lệch snapshot thì `PAUSE`; không âm thầm rebase hoặc giả định cửa sổ 0-PR còn mở.',
+    'Không tạo Issue thật trước khi bootstrap đã land trên base; nếu không, Android sẽ gặp liên kết prompt chết.',
     '',
     '## 3. Mục tiêu',
     '',
@@ -327,7 +367,12 @@ $BodyLines += @(
     'Prompt dùng chung:',
     '',
     '- Executor: `docs/prompts/CODEX_EXECUTOR_D0.md`;',
-    '- Reviewer: `docs/prompts/CLAUDE_REVIEWER_D0.md`.',
+    '- Reviewer: `docs/prompts/CLAUDE_REVIEWER_D0.md`;',
+    '- Điền late-bound prompt: `docs/runbooks/Fill-SharedWorkPacketPrompt.ps1`.',
+    '',
+    'Trình tự: bootstrap land trước → script tạo Issue và in `fill_executor_command` → Codex',
+    'ghi `REVIEW_READY` kèm `reviewer_fill_command` → người dùng chạy filler reviewer và hai',
+    'lệnh dựng detached worktree → dán prompt đã điền vào một phiên Claude mới.',
     '',
     '## 3A. Nguồn nội dung',
     '',
@@ -444,7 +489,11 @@ $Body = ($BodyLines -join "`n") + "`n"
 
 $IssueUrl = $null
 $IssueNumber = $null
+$FillExecutorCommand = $null
 if (-not $DryRun) {
+    if (-not [bool]$Snapshot.bootstrap_ready) {
+        throw "Bootstrap chưa land trên origin/master; không tạo Issue có liên kết chết. Thiếu: $(@($Snapshot.bootstrap_missing) -join ', ')"
+    }
     $IssueTitle = '[WP D0] Land hiến pháp docs-only cho protocol đa phiên'
     $IssueOutput = ((& $GhCommand issue create --repo $Snapshot.repo_slug --title $IssueTitle `
         --body-file $BodyOutputPath 2>&1) | Out-String).Trim()
@@ -475,6 +524,13 @@ if (-not $DryRun) {
     if (-not $NoClipboard -and (Get-Command Set-Clipboard -ErrorAction SilentlyContinue)) {
         Set-Clipboard -Value $IssueUrl
     }
+
+    $PromptFillerPath = Join-Path $PSScriptRoot 'Fill-SharedWorkPacketPrompt.ps1'
+    $FillerLiteral = "'" + $PromptFillerPath.Replace("'", "''") + "'"
+    $IssueLiteral = "'" + $IssueUrl.Replace("'", "''") + "'"
+    $BranchLiteral = "'" + $Branch.Replace("'", "''") + "'"
+    $RepoLiteral = "'" + $RepoPath.Replace("'", "''") + "'"
+    $FillExecutorCommand = "& $FillerLiteral -Role executor -IssueNumber $IssueNumber -BaseSha $($Snapshot.base_sha) -Generation 1 -Branch $BranchLiteral -IssueUrl $IssueLiteral -RepoPath $RepoLiteral"
 }
 
 [ordered]@{
@@ -488,4 +544,7 @@ if (-not $DryRun) {
     branch            = $Branch
     base_sha          = $Snapshot.base_sha
     observed_at       = $Snapshot.observed_at
+    fill_executor_command = $FillExecutorCommand
+    bootstrap_ready   = [bool]$Snapshot.bootstrap_ready
+    bootstrap_missing = @($Snapshot.bootstrap_missing)
 } | ConvertTo-Json -Compress

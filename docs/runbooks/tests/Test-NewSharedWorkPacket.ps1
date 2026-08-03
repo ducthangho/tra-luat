@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [ValidateSet('ready', 'paused', 'inventory', 'prereq', 'create', 'prompts', 'all')]
+    [ValidateSet('ready', 'paused', 'bootstrap', 'inventory', 'prereq', 'create', 'prompts', 'fill_executor', 'fill_reviewer', 'fill_leftover', 'all')]
     [string]$Case = 'all'
 )
 
@@ -9,6 +9,9 @@ $ErrorActionPreference = 'Stop'
 
 $ScriptPath = [System.IO.Path]::GetFullPath(
     (Join-Path $PSScriptRoot '..\New-SharedWorkPacket.ps1')
+)
+$PromptFillerPath = [System.IO.Path]::GetFullPath(
+    (Join-Path $PSScriptRoot '..\Fill-SharedWorkPacketPrompt.ps1')
 )
 $PowerShellPath = (Get-Process -Id $PID).Path
 
@@ -119,6 +122,8 @@ function Invoke-ReadyPacketTest {
         open_prs    = @()
         source_files = @(Get-D0SourceFiles)
         source_status = @(Get-D0SourceStatus)
+        bootstrap_ready = $true
+        bootstrap_missing = @()
     })
 
     Assert-Contains -Text $Body -Expected '# Work Packet — wp{{ISSUE_NUMBER}} (alias: wp-d0-protocol-constitution)'
@@ -128,6 +133,7 @@ function Invoke-ReadyPacketTest {
     Assert-Contains -Text $Body -Expected '- base_sha_observed: 0123456789abcdef0123456789abcdef01234567'
     Assert-Contains -Text $Body -Expected '- Không có PR mở tại observed_at; vẫn phải đo lại lúc claim.'
     Assert-Contains -Text $Body -Expected 'docs/prompts/CODEX_EXECUTOR_D0.md'
+    Assert-Contains -Text $Body -Expected 'docs/runbooks/Fill-SharedWorkPacketPrompt.ps1'
     Assert-Contains -Text $Body -Expected '## 4. Write-set (ĐÍCH DANH, 23 đường)'
     Assert-Contains -Text $Body -Expected '`docs/adr/0033-durable-inbox-va-reconciler.md`'
     Assert-Contains -Text $Body -Expected '`docs/research/2026-08-03-phan-bien-protocol-da-phien.md`'
@@ -150,6 +156,8 @@ function Invoke-PausedPacketTest {
         observed_at = '2026-08-03T12:30:00+07:00'
         source_files = @(Get-D0SourceFiles)
         source_status = @(Get-D0SourceStatus)
+        bootstrap_ready = $true
+        bootstrap_missing = @()
         open_prs    = @(
             [ordered]@{
                 number      = 42
@@ -166,6 +174,25 @@ function Invoke-PausedPacketTest {
     Assert-Contains -Text $Body -Expected 'https://github.com/example/tra-luat/pull/42'
 }
 
+function Invoke-BootstrapNotLandedTest {
+    $Body = Invoke-SnapshotPreview -Name 'bootstrap' -Snapshot ([ordered]@{
+        repo_slug        = 'example/tra-luat'
+        base_sha         = '0123456789abcdef0123456789abcdef01234567'
+        version          = '1.36.59'
+        observed_at      = '2026-08-03T12:00:00Z'
+        open_prs         = @()
+        source_files     = @(Get-D0SourceFiles)
+        source_status    = @(Get-D0SourceStatus)
+        bootstrap_ready  = $false
+        bootstrap_missing = @('docs/runbooks/Fill-SharedWorkPacketPrompt.ps1')
+    })
+
+    Assert-Contains -Text $Body -Expected '- Status: PAUSE_BOOTSTRAP_NOT_LANDED'
+    Assert-Contains -Text $Body -Expected 'bootstrap_on_base: false'
+    Assert-Contains -Text $Body -Expected '`docs/runbooks/Fill-SharedWorkPacketPrompt.ps1`'
+    Assert-Contains -Text $Body -Expected 'Không tạo Issue thật trước khi bootstrap đã land'
+}
+
 function Invoke-DirtyInventoryTest {
     $Suffix = [Guid]::NewGuid().ToString('N')
     $SnapshotPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-inventory-$Suffix.json"
@@ -179,6 +206,8 @@ function Invoke-DirtyInventoryTest {
         open_prs      = @()
         source_files  = @(Get-D0SourceFiles)
         source_status = @(Get-D0SourceStatus | Select-Object -First 22)
+        bootstrap_ready = $true
+        bootstrap_missing = @()
     }
     [System.IO.File]::WriteAllText(
         $SnapshotPath,
@@ -243,6 +272,9 @@ function Invoke-PromptContractTest {
     Assert-Contains -Text $CodexPrompt -Expected 'Nếu worktree đã tồn tại'
     Assert-Contains -Text $CodexPrompt -Expected 'planned:docs/PROTOCOL_DA_PHIEN.md'
     Assert-Contains -Text $CodexPrompt -Expected '$env:GIT_CONFIG_KEY_0 = ''core.abbrev'''
+    Assert-Contains -Text $CodexPrompt -Expected 'reviewer_fill_command:'
+    Assert-Contains -Text $CodexPrompt -Expected 'Fill-SharedWorkPacketPrompt.ps1'' -Role reviewer'
+    Assert-Contains -Text $CodexPrompt -Expected '{{REPO_PATH_PS}}'
     Assert-NotContains -Text $CodexPrompt -Unexpected 'git config core.abbrev 7'
     Assert-NotContains -Text $CodexPrompt -Unexpected 'baseline ~314'
 
@@ -261,11 +293,195 @@ function Invoke-PromptContractTest {
     Assert-Contains -Text $ClaudePrompt -Expected 'Giai đoạn 1 — cơ học'
     Assert-Contains -Text $ClaudePrompt -Expected 'planned:docs/PROTOCOL_DA_PHIEN.md'
     Assert-Contains -Text $ClaudePrompt -Expected 'export GIT_CONFIG_KEY_0=core.abbrev'
+    Assert-Contains -Text $ClaudePrompt -Expected 'Các tham chiếu ADR-0001 còn lại trong `SKILL.md`'
+    Assert-Contains -Text $ClaudePrompt -Expected 'không phải finding ở D0'
     Assert-NotContains -Text $ClaudePrompt -Unexpected 'worktree add'
     Assert-NotContains -Text $ClaudePrompt -Unexpected 'fetch origin'
     Assert-NotContains -Text $ClaudePrompt -Unexpected 'config core.abbrev'
     Assert-NotContains -Text $ClaudePrompt -Unexpected 'baseline ~314'
     Assert-NotContains -Text $ClaudePrompt -Unexpected 'D:\Quốc hội\_docs_lam_viec'
+}
+
+function Invoke-FillExecutorPromptTest {
+    $OutputPath = Join-Path ([System.IO.Path]::GetTempPath()) (
+        'wp77-executor-' + [Guid]::NewGuid().ToString('N') + '.md'
+    )
+    $BaseSha = '0123456789abcdef0123456789abcdef01234567'
+    $ExecutorWorktree = 'D:\Quốc hội\tra-luat-wt\wp77-codex'
+    $RepoPath = "D:\O'Brien\tra-luat"
+
+    try {
+        $Output = ((& $PowerShellPath -NoProfile -File $PromptFillerPath `
+            -Role executor `
+            -IssueNumber 77 `
+            -IssueUrl 'https://github.com/example/tra-luat/issues/77' `
+            -BaseSha $BaseSha `
+            -Generation 2 `
+            -Branch 'agent/wp77-g2-codex' `
+            -RepoPath $RepoPath `
+            -Worktree $ExecutorWorktree `
+            -OutputPath $OutputPath `
+            -NoClipboard 2>&1) | Out-String).Trim()
+        $ExitCode = $LASTEXITCODE
+        if ($ExitCode -ne 0) {
+            throw "Executor prompt filler failed with exit code $ExitCode. Output: $Output"
+        }
+
+        $Summary = $Output | ConvertFrom-Json
+        if (-not $Summary.ok -or $Summary.role -ne 'executor') {
+            throw "Unexpected executor filler summary: $Output"
+        }
+        if ($Summary.prompt_output_path -ne $OutputPath) {
+            throw "Unexpected filled prompt path: $($Summary.prompt_output_path)"
+        }
+        if ($Summary.clipboard -ne 'disabled') {
+            throw "-NoClipboard was not honored: $Output"
+        }
+
+        $Filled = [System.IO.File]::ReadAllText($OutputPath)
+        Assert-NotContains -Text $Filled -Unexpected '{{'
+        Assert-Contains -Text $Filled -Expected 'work packet `wp77`, generation'
+        Assert-Contains -Text $Filled -Expected '`2`, tại `https://github.com/example/tra-luat/issues/77`'
+        Assert-Contains -Text $Filled -Expected 'branch là `agent/wp77-g2-codex`'
+        Assert-Contains -Text $Filled -Expected $ExecutorWorktree
+        Assert-Contains -Text $Filled `
+            -Expected "& 'D:\O''Brien\tra-luat\docs\runbooks\Fill-SharedWorkPacketPrompt.ps1'"
+        Assert-Contains -Text $Filled -Expected "-RepoPath 'D:\O''Brien\tra-luat'"
+    }
+    finally {
+        Remove-Item -LiteralPath $OutputPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-FillReviewerPromptTest {
+    $OutputPath = Join-Path ([System.IO.Path]::GetTempPath()) (
+        'wp77-reviewer-' + [Guid]::NewGuid().ToString('N') + '.md'
+    )
+    $BaseSha = '0123456789abcdef0123456789abcdef01234567'
+    $HeadSha = 'fedcba9876543210fedcba9876543210fedcba98'
+    $RepoPath = 'D:\Quốc hội\tra-luat'
+    $ReviewWorktree = 'D:\Quốc hội\tra-luat-review-wp77'
+    $InvalidBranchOutputPath = Join-Path ([System.IO.Path]::GetTempPath()) (
+        'wp77-invalid-branch-' + [Guid]::NewGuid().ToString('N') + '.md'
+    )
+
+    try {
+        $Output = ((& $PowerShellPath -NoProfile -File $PromptFillerPath `
+            -Role reviewer `
+            -IssueNumber 77 `
+            -IssueUrl 'https://github.com/example/tra-luat/issues/77' `
+            -BaseSha $BaseSha `
+            -HeadSha $HeadSha `
+            -Generation 2 `
+            -Branch 'agent/wp77-g2-codex' `
+            -RepoPath $RepoPath `
+            -Worktree $ReviewWorktree `
+            -OutputPath $OutputPath `
+            -NoClipboard 2>&1) | Out-String).Trim()
+        $ExitCode = $LASTEXITCODE
+        if ($ExitCode -ne 0) {
+            throw "Reviewer prompt filler failed with exit code $ExitCode. Output: $Output"
+        }
+
+        $Summary = $Output | ConvertFrom-Json
+        if (-not $Summary.ok -or $Summary.role -ne 'reviewer') {
+            throw "Unexpected reviewer filler summary: $Output"
+        }
+        if (@($Summary.review_setup_commands).Count -ne 2) {
+            throw "Reviewer filler must return exactly two user setup commands: $Output"
+        }
+        Assert-Contains -Text $Summary.review_setup_commands[0] `
+            -Expected "git -C 'D:\Quốc hội\tra-luat' fetch origin 'agent/wp77-g2-codex'"
+        Assert-Contains -Text $Summary.review_setup_commands[1] `
+            -Expected "worktree add --detach 'D:\Quốc hội\tra-luat-review-wp77' '$HeadSha'"
+
+        $Filled = [System.IO.File]::ReadAllText($OutputPath)
+        Assert-NotContains -Text $Filled -Unexpected '{{'
+        Assert-Contains -Text $Filled -Expected 'D:/Quốc hội/tra-luat-review-wp77'
+        Assert-Contains -Text $Filled -Expected $HeadSha
+
+        $OriginalErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $InvalidBranchResult = ((& $PowerShellPath -NoProfile -File $PromptFillerPath `
+                -Role reviewer `
+                -IssueNumber 77 `
+                -BaseSha $BaseSha `
+                -HeadSha $HeadSha `
+                -Generation 2 `
+                -Branch '--upload-pack=evil' `
+                -OutputPath $InvalidBranchOutputPath `
+                -NoClipboard 2>&1) | Out-String).Trim()
+            if ($LASTEXITCODE -eq 0) {
+                throw 'Prompt filler accepted a branch that Git could parse as an option.'
+            }
+            Assert-Contains -Text $InvalidBranchResult `
+                -Expected 'INVALID_BRANCH'
+            if (Test-Path -LiteralPath $InvalidBranchOutputPath) {
+                throw 'Invalid branch validation must not create a filled prompt.'
+            }
+        }
+        finally {
+            $ErrorActionPreference = $OriginalErrorActionPreference
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $OutputPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $InvalidBranchOutputPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-FillPromptLeftoverTest {
+    $Suffix = [Guid]::NewGuid().ToString('N')
+    $TemplateRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-fill-template-$Suffix"
+    $TemplatePath = Join-Path $TemplateRoot 'CODEX_EXECUTOR_D0.md'
+    $OutputPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-fill-leftover-$Suffix.md"
+    $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [void](New-Item -ItemType Directory -Path $TemplateRoot)
+    [System.IO.File]::WriteAllText(
+        $TemplatePath,
+        'packet={{PACKET_ID}} unknown={{unknown_token}} mixed={{Issue_Number}} blank={{ }}',
+        $Utf8NoBom
+    )
+
+    $OriginalErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $Output = ((& $PowerShellPath -NoProfile -File $PromptFillerPath `
+            -Role executor `
+            -IssueNumber 77 `
+            -BaseSha '0123456789abcdef0123456789abcdef01234567' `
+            -TemplateRoot $TemplateRoot `
+            -OutputPath $OutputPath `
+            -NoClipboard 2>&1) | Out-String).Trim()
+        $ExitCode = $LASTEXITCODE
+        if ($ExitCode -eq 0) {
+            throw 'Prompt filler unexpectedly accepted an unresolved placeholder.'
+        }
+        Assert-Contains -Text $Output -Expected '{{unknown_token}}'
+        Assert-Contains -Text $Output -Expected '{{Issue_Number}}'
+        Assert-Contains -Text $Output -Expected '{{ }}'
+        if (Test-Path -LiteralPath $OutputPath) {
+            throw 'Failed placeholder validation must not create a filled prompt.'
+        }
+    }
+    finally {
+        $ErrorActionPreference = $OriginalErrorActionPreference
+        Remove-Item -LiteralPath $OutputPath -Force -ErrorAction SilentlyContinue
+        if (Test-Path -LiteralPath $TemplateRoot -PathType Container) {
+            $ResolvedTemplateRoot = (Resolve-Path -LiteralPath $TemplateRoot).Path
+            $ResolvedTempRoot = [System.IO.Path]::GetFullPath(
+                [System.IO.Path]::GetTempPath()
+            ).TrimEnd('\') + '\'
+            if (-not $ResolvedTemplateRoot.StartsWith(
+                    $ResolvedTempRoot,
+                    [System.StringComparison]::OrdinalIgnoreCase
+                )) {
+                throw "Refusing to remove test directory outside temp: $ResolvedTemplateRoot"
+            }
+            Remove-Item -LiteralPath $ResolvedTemplateRoot -Recurse -Force
+        }
+    }
 }
 
 function Invoke-MissingToolTest {
@@ -333,6 +549,7 @@ function Invoke-IssueCreationTest {
         'if "%~3"=="fetch" exit /b 0',
         'if "%~3"=="rev-parse" if "%~4"=="origin/master" (echo 1111111111111111111111111111111111111111& exit /b 0)',
         'if "%~3"=="show" (echo 1.36.59& exit /b 0)',
+        'if "%~3"=="cat-file" exit /b 0',
         'if "%~3"=="status" (type "%WP_GIT_STATUS%"& exit /b 0)',
         'exit /b 9'
     ) -join [Environment]::NewLine
@@ -383,6 +600,12 @@ function Invoke-IssueCreationTest {
         if ($Summary.branch -ne 'agent/wp77-g1-codex') {
             throw "Unexpected executor branch: $($Summary.branch)"
         }
+        Assert-Contains -Text $Summary.fill_executor_command `
+            -Expected 'Fill-SharedWorkPacketPrompt.ps1'
+        Assert-Contains -Text $Summary.fill_executor_command `
+            -Expected '-Role executor -IssueNumber 77'
+        Assert-Contains -Text $Summary.fill_executor_command `
+            -Expected '-BaseSha 1111111111111111111111111111111111111111'
         if (-not (Test-Path -LiteralPath $BodyPath -PathType Leaf)) {
             throw 'Successful issue creation must retain the exact submitted body.'
         }
@@ -453,6 +676,12 @@ if ($Case -in @('paused', 'all')) {
     [void]$PassedCases.Add('paused')
 }
 
+if ($Case -in @('bootstrap', 'all')) {
+    Invoke-BootstrapNotLandedTest
+    Write-Output 'PASS: missing bootstrap on base pauses packet creation for Android safety'
+    [void]$PassedCases.Add('bootstrap')
+}
+
 if ($Case -in @('inventory', 'all')) {
     Invoke-DirtyInventoryTest
     Write-Output 'PASS: packet generation rejects a clean or missing D0 source'
@@ -477,8 +706,26 @@ if ($Case -in @('prompts', 'all')) {
     [void]$PassedCases.Add('prompts')
 }
 
+if ($Case -in @('fill_executor', 'all')) {
+    Invoke-FillExecutorPromptTest
+    Write-Output 'PASS: executor prompt filler resolves all late-bound values'
+    [void]$PassedCases.Add('fill_executor')
+}
+
+if ($Case -in @('fill_reviewer', 'all')) {
+    Invoke-FillReviewerPromptTest
+    Write-Output 'PASS: reviewer prompt filler emits detached worktree setup for the user'
+    [void]$PassedCases.Add('fill_reviewer')
+}
+
+if ($Case -in @('fill_leftover', 'all')) {
+    Invoke-FillPromptLeftoverTest
+    Write-Output 'PASS: prompt filler fails closed when any placeholder remains'
+    [void]$PassedCases.Add('fill_leftover')
+}
+
 $Total = $PassedCases.Count
-$ExpectedTotal = if ($Case -eq 'all') { 6 } else { 1 }
+$ExpectedTotal = if ($Case -eq 'all') { 10 } else { 1 }
 if ($Total -ne $ExpectedTotal) {
     throw "Expected $ExpectedTotal test cases for -Case $Case, observed $Total."
 }

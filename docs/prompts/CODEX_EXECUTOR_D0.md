@@ -217,6 +217,7 @@ executor: codex
 base_sha: {{BASE_SHA}}
 head_sha: <HEAD_SHA_THỰC>
 branch: {{BRANCH}}
+reviewer_fill_command: & '{{REPO_PATH_PS}}\docs\runbooks\Fill-SharedWorkPacketPrompt.ps1' -Role reviewer -IssueNumber {{ISSUE_NUMBER}} -BaseSha {{BASE_SHA}} -HeadSha <HEAD_SHA_THỰC> -Generation {{GENERATION}} -Branch '{{BRANCH}}' -RepoPath '{{REPO_PATH_PS}}'
 changed_files:
   - <path>
 commands_and_results:
@@ -229,6 +230,10 @@ Trong `changed_files`, liệt kê đủ đường thực tế và xác nhận ch
 của write-set Issue. Ghi 5 cổng JSON, selftest N/N + `[FAIL]`=0, diffstat,
 derived diff rỗng và CI. PR phải ghi Claude review read-only; không merge trước
 `cross_approved` gắn đúng head SHA.
+
+Thay `<HEAD_SHA_THỰC>` trong `reviewer_fill_command` bằng SHA vừa commit. Người
+dùng chạy lệnh đó để nhận prompt Claude đã điền cùng đúng hai lệnh PowerShell
+dựng detached review worktree; Claude không tự chạy hai lệnh chuẩn bị này.
 
 Claude chỉ review đúng `head_sha` này. Mọi commit mới làm approval cũ hết hiệu
 lực và cần `REVIEW_READY` mới.

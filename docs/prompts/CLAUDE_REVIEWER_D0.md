@@ -129,6 +129,15 @@ journal/inbox; 0026 rollout/cutover/hai chân trời; 0031↔F1-04; 0032 ratchet
 integration-head base; credential boundary; rollback lease/start + durable
 event; LIVE approval; Android end-to-end.
 
+## Không bắt nhầm false-positive D0
+
+- Các tham chiếu ADR-0001 còn lại trong `SKILL.md` là trạng thái dự kiến trước
+  activation F4, nên tự thân chúng **không phải finding ở D0**. Byte-lock lịch
+  sử của `SKILL.md` cũng thuộc promotion gate sau D0.
+- Chỉ tạo finding nếu diff D0 thực sự chạm `SKILL.md`, hoặc tài liệu D0 tuyên bố
+  runtime/protocol mới đã được kích hoạt dù F4 chưa hoàn tất.
+- Tiền tố `planned:` là nhãn đích tương lai, không phải broken link.
+
 ## Định dạng finding
 
 Mỗi finding phải có:

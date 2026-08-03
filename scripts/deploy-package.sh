@@ -36,6 +36,10 @@ if [ -z "$ROOT" ]; then
 fi
 cd "$ROOT" || exit 2
 PY="${TL_PYTHON:-python3}"
+# v1.36.60 (r328) — song sinh với khối ép UTF-8 đầu deploy-package.ps1: bơm UTF-8 xuống MỌI script con
+# không tự cứng hoá (pkg_secret_scan.py, gen_instructions.py…). tl.py tự lo (tl.py:86/94); CI khai y hệt.
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
 TL="$PY scripts/tl.py"
 STATE="scripts/.tl_state/deploy"
 mkdir -p "$STATE"
@@ -171,7 +175,17 @@ ZIP="${OUT:-$BUILD_DIR/tra-luat-skill-v${VER}-gws3env.zip}"
 ZIP2="$BUILD_DIR/.tl-reproducibility-probe.zip"
 rm -f "$ZIP" "$ZIP2"
 
-jget() { $PY -c "import json,sys;print(json.load(open(sys.argv[1])).get(sys.argv[2]) or '')" "$1" "$2" 2>/dev/null; }
+# v1.36.60 (r328) — ÉP UTF-8 CẢ HAI CHIỀU, y như bản ps1. Bản cũ `open(...)` KHÔNG nêu encoding nên
+# dùng codec LOCALE. Trên Linux/Cowork locale là UTF-8 ⇒ vô hại, nhưng ĐO 03-08-2026 bằng Git Bash
+# trên máy chuẩn Windows (locale cp1258, CÙNG tệp JSON): `json.load(open(f))` GIẢI ra mojibake
+# (`ố` → U+2018 U+00E1 U+00BB), và với đường dẫn chứa `Ố` (U+1ED0 = e1 bb 90 — byte 0x90 KHÔNG ĐỊNH
+# NGHĨA trong cp1258) thì ném thẳng UnicodeDecodeError. `2>/dev/null` NUỐT lỗi ⇒ jget trả RỖNG ⇒
+# script báo "release-bundle báo ok nhưng KHÔNG có zip thật: '<rỗng>'" — sai địa chỉ, im lặng.
+# `reconfigure` chiều RA: mirror tl.py:86, kẻo `print` lại vỡ charmap ở đúng ký tự vừa đọc đúng.
+# `newline='\n'`: ĐO được khi đối chiếu parity — trên Git Bash/Windows `print` dịch `\n`→`\r\n`, mà
+# `$( )` chỉ nuốt `\n` nên đường dẫn còn ĐUÔI `\r` ⇒ `[ -s "$z" ]` trượt trên tệp CÓ THẬT. (Có sẵn từ
+# bản cũ, không phải do vá này; vá luôn vì đó chính là byte cuối làm hai bản LỆCH trên cùng đầu vào.)
+jget() { $PY -c "import json,sys;sys.stdout.reconfigure(encoding='utf-8',newline='\n');print(json.load(open(sys.argv[1],encoding='utf-8')).get(sys.argv[2]) or '')" "$1" "$2" 2>/dev/null; }
 
 $TL release-bundle --out "$ZIP"  --json > "$STATE/bundle1.out" 2>&1 || { bad "release-bundle lỗi — soi $STATE/bundle1.out"; exit 2; }
 $TL release-bundle --out "$ZIP2" --json > "$STATE/bundle2.out" 2>&1 || { bad "release-bundle (lần 2) lỗi"; exit 2; }

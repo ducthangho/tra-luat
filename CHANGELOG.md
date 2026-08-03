@@ -1,3 +1,100 @@
+# ★ v1.36.60 — r328: đường dẫn NGOÀI ASCII vỡ ở khớp JSON của HAI script deploy (2026-08-03)
+
+**`deploy-package.ps1` chết `[FAIL] release-bundle báo ok nhưng KHÔNG có zip thật` + exit 2 — trong khi
+zip ĐÃ build đúng** (`file_count 177`, `reproducible true`, `bundle_sha256` khớp cả hai lượt). Đường
+vòng đang dùng là chạy qua junction ASCII `C:\qh\…` cho hết dấu; đó là NÉ, không phải vá.
+
+`tl.py` ghi JSON **UTF-8** (tl.py:86 `reconfigure`), nhưng PowerShell **GIẢI** stdout của lệnh native
+bằng `[Console]::OutputEncoding` — ĐO trên máy chuẩn: **windows-1258** (ANSI codepage VN), không phải
+UTF-8. `bundle1.out` vì thế chứa mojibake **ghi thẳng ra đĩa**:
+
+```
+"out": "D:\Quá»‘c há»™i\tra-luat\…"      ← thay vì  D:\Quốc hội\tra-luat\…
+```
+
+⇒ `Test-Path $out` trả **false cho tệp CÓ THẬT** ⇒ bước 2 dừng. Cắn MỌI đường dẫn ngoài ASCII, gồm cả
+đường canonical `D:\Quốc hội\…`. (Phiếu ban đầu đoán cp1252; đo ra **cp1258** — cùng ánh xạ 0x91→U+2018
+nên bằng chứng round-trip không phân biệt được hai bảng mã.)
+
+★**Vì sao sống lâu mà không ai thấy:** `deploy-package.cmd` `chcp 65001` TRƯỚC khi gọi pwsh ⇒ đường
+double-click SẠCH BỆNH. Đúng cách CLAUDE.md dạy gõ (`.\scripts\deploy-package.ps1 -Pull -Push` thẳng
+trong pwsh) thì KHÔNG qua .cmd ⇒ dính. Hai đường vào cùng script, một đường mù.
+
+**★ ĐO ĐƯỢC — SỬA CHỖ ĐỌC LÀ VÔ TÁC DỤNG** (cùng đầu vào, ambient cp1258):
+
+| bản vá thử | kết quả |
+|---|---|
+| chỉ `-Encoding utf8` ở chỗ ĐỌC | `EQ=False` · `Test-Path=False` — **không cứu được gì** |
+| chỉ `[Console]::OutputEncoding = UTF8` | `EQ=True` · `Test-Path=True` — **vế chịu lực** |
+
+Mojibake đóng băng ngay khâu GIẢI; tới lúc `Get-Content` chạy thì tệp trên đĩa đã sai rồi. Ghim cả hai
+chiều là để khỏi lệ thuộc mặc định theo phiên bản PowerShell, **không** phải vì chiều đọc tự nó chữa được.
+
+**Vá — `scripts/deploy-package.ps1`:** `[Console]::OutputEncoding` + `$OutputEncoding` = UTF-8 (no BOM);
+`$PSDefaultParameterValues['Out-File:Encoding']='utf8'` (toán tử `*>` gọi Out-File bên dưới); ghim
+`-Encoding utf8` cho **cả 9** lời gọi `Get-Content … -Raw`; xuất `PYTHONUTF8`/`PYTHONIOENCODING` xuống
+script con KHÔNG tự cứng hoá (`pkg_secret_scan.py`, `gen_instructions.py` — `tl.py` tự lo, ta gọi thẳng
+nhiều script khác; CI khai y hệt hai biến này).
+
+**★ TWIN `sh` MẮC CÙNG BỆNH — tìm ra nhờ ĐỐI CHIẾU PARITY, không phải đọc code** (đúng cảnh báo
+CLAUDE.md: *«hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt»*). `jget()` dùng
+`open()` **không nêu encoding** ⇒ codec LOCALE. Linux/Cowork locale UTF-8 nên vô hại — nhưng đo bằng
+Git Bash trên máy chuẩn (locale **cp1258**), CÙNG tệp JSON:
+
+- `ố` (U+1ED1 = `e1 bb 91`, 0x91 CÓ trong cp1258) → giải ra `U+2018 U+00E1 U+00BB` = **mojibake im lặng**.
+  Nó *có vẻ* chạy được vì `print` mã hoá LẠI bằng đúng codec sai đó nên lỗi **tự triệt tiêu** — một sự
+  sống sót tình cờ, không phải tính đúng đắn.
+- `Ố` (U+1ED0 = `e1 bb 90`, byte **0x90 KHÔNG ĐỊNH NGHĨA**) → `UnicodeDecodeError` thẳng. Mà `jget` có
+  `2>/dev/null` nên **NUỐT lỗi** rồi trả RỖNG ⇒ script báo *"KHÔNG có zip thật: '&lt;rỗng&gt;'"* — sai
+  địa chỉ, im lặng, không lần ra được nguyên nhân.
+
+Vá: `open(…, encoding='utf-8')` + `sys.stdout.reconfigure(encoding='utf-8', newline='\n')`.
+`newline='\n'` là **byte cuối cùng làm hai bản LỆCH**: trên Git Bash/Windows `print` dịch `\n`→`\r\n`
+mà `$( )` chỉ nuốt `\n`, nên đường dẫn còn ĐUÔI `\r` ⇒ `[ -s "$z" ]` trượt trên tệp có thật. (Có sẵn từ
+bản cũ, không do vá này — nhưng đo parity thì nó lòi ra, nên vá luôn.)
+
+**BẰNG CHỨNG (chạy THẬT, không đọc code — bài học r244):**
+- `deploy-package.ps1 -NoTest` chạy TRỌN trong worktree `D:\Quốc hội\…` ⇒ **rc=0**, bước 2 same-SHA
+  `51a06b16a1968ea2…` · 2.487.725 byte, bước 3 `178 tệp`, quét bí mật sạch, release-verify trong gói ok.
+- **MUTATION**: gỡ ĐÚNG một dòng `[Console]::OutputEncoding` ⇒ trở lại đúng triệu chứng gốc
+  `[FAIL] release-bundle báo ok nhưng KHÔNG có zip thật` + **rc=2**, đúng ở bước 2.
+- **PARITY hai bản trên CÙNG đầu vào** (cùng `release-bundle`, rút khoá `out`): **BYTE-MATCH `True`** —
+  `443a5c5175e1bb91632068e1bb99695c…` cho cả hai; chốt `[ -s "$z" ]` của sh PASS trên chuỗi vừa rút.
+
+**★★ MUTATION BẮT ĐƯỢC LỖI CỦA CHÍNH BỘ TEST — hai vế đầu XANH GIẢ, đã vá.** Đột biến M1/M2/M3 (ps1)
+đỏ đúng ca của nó, nhưng **M4 (gỡ `encoding='utf-8'` khỏi `open()` của `jget`) SỐNG SÓT cả ba ca**. Hai
+nguyên nhân ĐỘC LẬP, cùng hướng — đúng khuôn «hai lỗi độc lập mà cùng hướng» của §Bài học CLAUDE.md:
+
+1. **Guard khớp NHẦM NỬA KIA CỦA DÒNG.** Vị ngữ ban đầu là `"encoding='utf-8'" in dòng_jget`. Nhưng
+   dòng đó chứa chuỗi ấy **HAI LẦN** — một ở `open(...)`, một ở `reconfigure(...)`. Gỡ khỏi `open()`
+   thì bản sao ở `reconfigure()` vẫn làm vị ngữ ĐÚNG ⇒ guard xanh trên đúng thứ nó sinh ra để chặn.
+   Vá: soi **TỪNG lời gọi** bằng regex riêng (`open\(sys\.argv\[1\],encoding='utf-8'\)` và
+   `reconfigure\(encoding='utf-8',newline='\n'\)`), không dò chuỗi trên cả dòng.
+2. **`tl.py:93` CHE mất đột biến ở vế hành vi.** `os.environ.setdefault("PYTHONUTF8","1")` nằm sẵn
+   trong environ của tiến trình selftest và **truyền xuống tiến trình con**, nên `open()` TRẦN trong
+   payload vẫn ra UTF-8 ⇒ đột biến vô hình. Vá: chạy payload với env **thù địch** — `PYTHONUTF8=0`,
+   bỏ `PYTHONIOENCODING`, `LC_ALL=LANG=C`. Nay đột biến đỏ trên **CẢ HAI nền** (Linux: locale→ASCII ⇒
+   `UnicodeDecodeError`; Windows: cp1258 ⇒ mojibake), không chỉ trên máy dev.
+
+Đo lại sau khi vá: bản đã vá `ok4=True okD=True` · bản đột biến M4 `ok4=False okD=False`.
+★ Bài học chung: **vị ngữ dò chuỗi trên CẢ DÒNG là mù khi dòng có hai lời gọi cùng hình dạng**; và
+**tiến trình con thừa kế env của bộ test có thể chữa lành đúng khuyết tật đang đo** — muốn đo khuyết
+tật môi trường thì phải DỰNG môi trường đó, đừng để env của suite rò vào.
+⚠ Ghi chú đo đạc: chạy 4 suite SONG SONG làm vài ca chia sẻ cache/HOME đỏ giả (`r3_config_write_journaled`,
+`profile_config_lifecycle`, `r40_resolve_registry_doc_id_layers`; số trôi 1634–1636). Số CHỐT phải đo
+**chạy MỘT MÌNH**: nền `HEAD` = **1635/1635**, bản vá = **1638/1638** (đúng +3 ca, không mất ca nào).
+
+**Ba ca test (mỗi ca một vế, mutation riêng):**
+1. `r328_deploy_ep_utf8_hai_chieu` — chốt chống tái phát, khuôn HAI BỐI CẢNH r265 (cây git đòi đủ 4
+   dấu hiệu ở cả hai script; gói bung đòi ba script deploy VẮNG vì là dev-side).
+2. `r328_json_ngoai_ascii_khong_qua_codec_ansi` — HÀNH VI thuần Python (chạy được cả hai nền CI, không
+   cần pwsh): tái hiện cả hai mức hỏng (mojibake im lặng · `UnicodeDecodeError`), và chạy THẬT payload
+   `-c` **rút từ chính `deploy-package.sh`** (không chép lại — chép là trôi lệch), đòi stdout ra đúng
+   byte UTF-8 và KHÔNG có đuôi `\r`.
+3. `r328_ps1_roundtrip_pwsh_that` — đầu-cuối qua **pwsh THẬT**, đúng hình dạng `Invoke-Py`/`Get-Content`.
+   **TỰ KIỂM CHỨNG chống xanh giả:** đòi CẢ HAI vế — bản chưa vá phải LỆCH *và* bản đã vá phải KHỚP;
+   môi trường không tái hiện nổi bệnh thì ca ĐỎ chứ không xanh suông. Không có pwsh ⇒ bỏ qua (ca 1+2 phủ).
+
 # ★ v1.36.59 — r327: phép dò auth của `gws` có timeout NGẮN HƠN phí thật ⇒ `is_available()` nói dối (2026-08-03)
 
 **`drive-push` trượt ở bước đẩy cuối dù gate 8/8 xanh, nhiều phiên liền. Chẩn đoán cũ «hỏng tạm, chạy

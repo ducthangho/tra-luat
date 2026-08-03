@@ -1,6 +1,6 @@
 # ADR-0001 — Chỉ canonical đánh version; nhánh song song giao nộp bundle không-version
 
-- **Trạng thái:** Accepted (2026-07-09, phiên grilling)
+- **Trạng thái:** Superseded by ADR-0017 (2026-08-03)
 - **Bối cảnh:** Skill được phát triển đồng thời ở nhiều phiên (Code local, Cowork, Chat, Codex). Đã xảy ra
   3 lần nhánh song song tự đánh số trùng canonical (bundle "1.33.44/45", Codex "1.33.49", Pha B "1.33.54"
   — trùng số nhưng KHÁC nội dung) và 1 lần tự publish thẳng lên Drive Package (1.33.46) đè kênh phát hành,

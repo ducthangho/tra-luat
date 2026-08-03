@@ -1,3 +1,21 @@
+# ★ v1.36.65 — r333: land cứu hộ bộ hiến pháp D0 từ tree đã neo, không kéo code WIP (2026-08-04)
+
+**Nguồn cứu hộ được chốt theo đường A:** tag `rescue/d0-2026-08-04` trỏ root tree `dacc4e76`;
+`docs/` lấy từ tree `2db90d43`. PR chỉ mang phần hiến pháp đã đối chứng, không cherry-pick parent
+`d347129` vì parent đó còn 19 tệp code WIP chưa review.
+
+- Land 21 Markdown dev-side: `PROTOCOL_DA_PHIEN.md`, kế hoạch triển khai, ADR-0017–0033 và hai báo cáo research.
+- ADR-0001 đổi `Accepted` → `Superseded by ADR-0017`; thay đổi này đi cùng chính ADR-0017 trong một commit.
+- `CONTEXT.md` cứu hộ vẫn được giữ an toàn trong tag + bản sao ngoài repo, nhưng chưa land ở đợt này: bản đó
+  trỏ tới `scripts/test_fragments/wp` và `scripts/tl_test_fragments_bundled.py` là code D0 chưa tồn tại;
+  `release-verify` đã fail-closed đúng với `DOC_POINTERS_NOT_IN_PACKAGE`, nên không hạ cổng để ép xanh.
+- Kế hoạch dùng đúng blob `d83cec6b` 24.532 byte của tree đã neo, không dùng biến thể 30.392 byte ở `6c148d3`.
+
+**Ratchet có chủ đích:** `docs/**/*.md` tăng 21 → 42; Package vẫn 177 tệp vì `docs/` là dev-side,
+phép kiểm cây thật tăng 198 → 219 nhưng không nới trần import Package 200. TDD RED trước sửa: selftest
+`1642/1644`, chỉ `r209_cay_that_va_phan_chung` và `r291_docs_ngoai_goi` đỏ; loại `CONTEXT.md` treo
+khỏi write-set và cập nhật ratchet là hai thay đổi tương ứng, không đổi runtime/Drive/NLM.
+
 # ★ v1.36.64 — r332: một controller PowerShell điều phối trọn vòng D0 Codex → Claude (2026-08-04)
 
 **Ba giai đoạn trước đây cần nhiều lệnh rời nay có một entrypoint máy đọc được:**

@@ -21974,6 +21974,195 @@ def run() -> int:
                 and res.get("fixedMatch") is True      # bản vá PHẢI chữa được
                 and res.get("fixedExists") is True)    # và đường dẫn đọc lại PHẢI trỏ tệp thật
     _t110("r328_ps1_roundtrip_pwsh_that", _c328_ps1_roundtrip_pwsh_that)
+    # ═══ r330 — timeout ĐƯỜNG GHI: hằng chọn KHÔNG ĐO ⇒ `update_content` 120s CHẶN THẬT lượt deploy ═══
+    # r327 vá phép DÒ; đường GHI vẫn nguyên hằng cứng. Gói 2.487.725 B chết `gws timeout sau 120.0s`,
+    # đặt `TL_GWS_TIMEOUT=900` thì đẩy XONG + BYTE-MATCH ⇒ knob đúng việc nhưng MẶC ĐỊNH vẫn là tường.
+    # ★KHÔNG chờ thật: giả `subprocess` để vừa GHI LẠI ngân sách thực nhận, vừa mô phỏng lệnh tốn N giây.
+    import contextlib as _ctx330, subprocess as _sp330, types as _ty330
+    _ENVK330 = ("TL_GWS_TIMEOUT", "TL_GWS_WRITE_TIMEOUT", "TL_GWS_AUTH_TIMEOUT", "TL_GWS_VERSION_TIMEOUT")
+
+    @_ctx330.contextmanager
+    def _env330(env):
+        keep = {k: os.environ.get(k) for k in _ENVK330}
+        try:
+            for k in _ENVK330:
+                os.environ.pop(k, None)
+            os.environ.update(env)
+            yield
+        finally:
+            for k in _ENVK330:
+                os.environ.pop(k, None)
+            os.environ.update({k: v for k, v in keep.items() if v is not None})
+
+    def _op330(args):
+        """Nhận DẠNG lệnh gws từ argv. `--upload` là thứ tách update_content khỏi _files_update và
+        upload khỏi mkdir — cùng động từ `update`/`create`, khác hẳn chi phí (có TẢI vs metadata)."""
+        a = [str(x) for x in args]
+        up = "--upload" in a
+        if "update" in a:
+            return "update_content" if up else "files_update"
+        if "create" in a:
+            return "upload" if up else "mkdir"
+        if "--output" in a:
+            return "download"
+        return "other"
+
+    def _fake_sp330(cost=0.0):
+        """(fake_subprocess, seen) — lệnh TỐN cost giây: ngân sách nhỏ hơn ⇒ TimeoutExpired.
+        seen ghi [(dạng_lệnh, timeout_thực_nhận)] để khẳng định TRỰC TIẾP vào NGÂN SÁCH, không đoán."""
+        seen = []
+
+        def _r(args, **kw):
+            tmo = kw.get("timeout")
+            seen.append((_op330(args), tmo))
+            if tmo is not None and tmo < cost:
+                raise _sp330.TimeoutExpired(args, tmo)
+            return _ty330.SimpleNamespace(returncode=0, stderr="", stdout='{"id":"F1","name":"p.zip"}')
+        return _ty330.SimpleNamespace(run=_r, TimeoutExpired=_sp330.TimeoutExpired), seen
+
+    def _with330(gb, sp, env, fn):
+        _osp, _oexe = gb.subprocess, gb.gws_exe
+        try:
+            gb.subprocess, gb.gws_exe = sp, (lambda: "/fake/gws")
+            with _env330(env):
+                return fn()
+        finally:
+            gb.subprocess, gb.gws_exe = _osp, _oexe
+
+    def _c330_write_du_gio_cho_goi_that():
+        """VẾ 1 — ngân sách đường GHI phải PHỦ ca THẬT. 150s nằm GIỮA trần cũ (120s, đã chứng minh
+        CHẶN gói 2,49MB) và ca nới rộng chạy xong ⇒ bản cũ GwsError, bản vá xong.
+        ★Bằng chứng NỘI TẠI của bệnh (cùng họ r327): lệnh CÕNG CẢ GÓI lại có ngân sách chỉ gấp 2× lệnh
+        metadata thuần (120s vs mkdir 60s) — trong khi chỉ nó mới co giãn theo băng thông."""
+        gb = _imp("gws_bridge")
+        _p330 = str(_ROOT209 / "VERSION")
+        sp, seen = _fake_sp330(cost=150.0)
+        r = _with330(gb, sp, {}, lambda: gb.update_content("F1", _p330, mime="application/zip"))
+        b = dict(seen)
+        ok1 = (r or {}).get("ok") is True and b.get("update_content", 0) >= 600.0
+        sp2, seen2 = _fake_sp330(cost=150.0)
+        r2 = _with330(gb, sp2, {}, lambda: gb.upload("p.zip", _p330, mime="application/zip"))
+        ok2 = (r2 or {}).get("ok") is True and dict(seen2).get("upload", 0) >= 600.0
+        sp3, seen3 = _fake_sp330()
+        _with330(gb, sp3, {}, lambda: gb.mkdir("d"))
+        ok3 = b.get("update_content", 0) > dict(seen3).get("mkdir", 0)
+        return ok1 and ok2 and ok3
+    _t110("r330_write_du_gio_cho_goi_that", _c330_write_du_gio_cho_goi_that)
+
+    def _c330_write_knob_chi_nang_khong_ha():
+        """VẾ 2 — `TL_GWS_WRITE_TIMEOUT` là SÀN RIÊNG nhóm GHI CÓ TẢI: NÂNG được, HẠ thì KHÔNG.
+        Cho hạ thì MỘT con số san phẳng cả nhóm (upload/update/download mặc định khác nhau) — đúng cái
+        bẫy r327 đã vá, chỉ đổi phạm vi. Và nó KHÔNG được chạm lệnh ĐỌC."""
+        gb = _imp("gws_bridge")
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "900"}):
+            okA = gb._timeout(600.0, write=True) == 900.0
+            okB = gb._timeout(30.0) == 30.0                      # lệnh ĐỌC không dính sàn của nhóm GHI
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "100"}):
+            okC = gb._timeout(600.0, write=True) == 600.0        # KHÔNG hạ
+        with _env330({"TL_GWS_TIMEOUT": "1200"}):
+            okD = gb._timeout(600.0, write=True) == 1200.0       # sàn CHUNG vẫn nâng được nhóm GHI
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "900", "TL_GWS_TIMEOUT": "1200"}):
+            okE = gb._timeout(600.0, write=True) == 1200.0       # hai sàn ⇒ lấy CAO nhất
+        with _env330({"TL_GWS_AUTH_TIMEOUT": "45", "TL_GWS_WRITE_TIMEOUT": "900"}):
+            okF = gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 45.0   # knob RIÊNG vẫn thắng mọi sàn
+        # `download` KHÔNG đi qua `_run` (stdout phải là BYTES) ⇒ điểm mù kinh điển: r327 đã dính đúng
+        # kiểu này với TL_GWS_TIMEOUT. Kiểm bằng HÀNH VI, không đọc mã.
+        sp, seen = _fake_sp330()
+
+        def _dl():
+            try:
+                gb.download("F1", str(_ROOT209 / "_khong_ton_tai_r330.bin"))
+            except Exception:      # noqa: BLE001  — fake không ghi file ⇒ raise; chỉ cần NGÂN SÁCH
+                pass
+        _with330(gb, sp, {"TL_GWS_WRITE_TIMEOUT": "900"}, _dl)
+        okG = dict(seen).get("download") == 900.0
+        return okA and okB and okC and okD and okE and okF and okG
+    _t110("r330_write_knob_chi_nang_khong_ha", _c330_write_knob_chi_nang_khong_ha)
+
+    def _c330_write_env_meo_khong_vo_hieu():
+        """VẾ 3 — knob MỚI cũng không được thành công tắc TẮT timeout: 0/âm ⇒ chết tức thì, inf/1e400 ⇒
+        treo vô hạn (gws wedge = mất luôn đường fallback). Rác/rỗng ⇒ về mặc định."""
+        gb = _imp("gws_bridge")
+        oks = []
+        for v in ("0", "0.0", "-5", "inf", "-inf", "nan", "1e400", "rác", "", "   "):
+            with _env330({"TL_GWS_WRITE_TIMEOUT": v}):
+                oks.append(gb._timeout(600.0, write=True) == 600.0)
+        with _env330({"TL_GWS_WRITE_TIMEOUT": " 750.5 "}):
+            oks.append(gb._timeout(600.0, write=True) == 750.5)
+        return all(oks) and len(oks) == 11
+    _t110("r330_write_env_meo_khong_vo_hieu", _c330_write_env_meo_khong_vo_hieu)
+
+    def _c330_timeout_khuyen_dung_huong():
+        """VẾ 4 — bệnh r327 LẶP Ở ĐƯỜNG GHI: `timeout` ≠ `mất quyền`, mà mọi thông điệp hỏng của
+        drive-push đều chỉ sang `gws auth login`. `r327_probe_error_lo_dien` khoá cho phép DÒ; đây khoá
+        cho ROUTE (khi phép dò chết vì timeout) và cho chính đường GHI.
+        Lưu ý phép khẳng định: câu vá CỐ Ý chứa «ĐỪNG `gws auth login`» nên không thể assert bằng
+        «không có chuỗi auth login» — phải đòi ĐỦ ĐÔI: nêu knob ĐÚNG + phủ định lời khuyên SAI."""
+        _g330 = _imp("tl_gws")
+        _hint, _route = _g330._gws_timeout_hint, _g330._drive_push_route
+        h = _hint("GwsError: gws timeout sau 120.0s")
+        okA = "TL_GWS_WRITE_TIMEOUT" in h and "ĐỪNG" in h
+        okB = _hint("gws rc=1: PERMISSION_DENIED") == ""      # KHÔNG đổ oan cho ngân sách khi mất quyền thật
+        _, n1 = _route("gws", False, False, probe_error="gws timeout sau 120.0s")
+        okC = "TL_GWS_TIMEOUT" in n1 and "ĐỪNG" in n1
+        _, n2 = _route("gws", False, False)                   # không rõ lý do ⇒ GIỮ NGUYÊN lời cũ
+        okD = "gws auth login" in n2 and "ĐỪNG" not in n2
+        _, n3 = _route("auto", False, True, probe_error="gws timeout sau 120.0s")
+        okE = "FALLBACK" in n3 and "TIMEOUT" in n3
+        _, n4 = _route("auto", False, False, probe_error="gws timeout sau 120.0s")
+        _a4 = n4.split("hoặc (b)")[0]                         # vế (a) = gws; vế (b) là gcloud, kệ nó
+        okF = "TL_GWS_WRITE_TIMEOUT" in _a4 and "ĐỪNG" in _a4
+        return okA and okB and okC and okD and okE and okF
+    _t110("r330_timeout_khuyen_dung_huong", _c330_timeout_khuyen_dung_huong)
+
+    def _c330_deploy_msg_khong_chay_lenh():
+        """VẾ 5 — CÙNG bệnh, dạng NẶNG NHẤT. Ở `deploy-package.sh` lời khuyên sai hướng không chỉ được
+        IN mà bị CHẠY: backtick trong chuỗi nháy KÉP của bash là THAY THẾ LỆNH, nên mỗi lần drive-push
+        hỏng thì `gws auth login` KHỞI CHẠY THẬT (và thông điệp in ra output của nó thay vì tên lệnh).
+        ★ Twin `ps1` KHÔNG dính — nháy ĐƠN của PowerShell coi backtick là ký tự thường ⇒ đúng lớp lệch
+          hai nền mà chỉ CHẠY THẬT mới thấy (bài học r244: parity là thứ duy nhất bắt được).
+        ★ TỰ KIỂM CHỨNG, chống XANH GIẢ: đòi CẢ HAI — dòng CŨ phải TÁI HIỆN được bệnh (gws bị gọi) và
+          dòng MỚI phải sạch. Harness không tái hiện nổi bệnh thì ca ĐỎ, thà đỏ hơn xanh mà không đo gì."""
+        import re as _re330, shutil as _sh330, subprocess as _sp330, tempfile as _tf330
+        _shp = (_ROOT209 / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        _psp = (_ROOT209 / "scripts" / "deploy-package.ps1").read_text(encoding="utf-8", errors="replace")
+        _m = _re330.search(r'bad "(drive-push lỗi[^"]*)"', _shp)
+        _n = _re330.search(r"Bad '(drive-push lỗi[^']*)'", _psp)
+        if not _m or not _n:
+            return False
+        okA = _m.group(1) == _n.group(1)                 # PARITY hai nền: CÙNG MỘT CÂU
+        okB = "`" not in _m.group(1)                     # hết thay-thế-lệnh
+        okC = "TL_GWS_WRITE_TIMEOUT" in _m.group(1) and "ĐỪNG" in _m.group(1)
+        # ★ ĐÃ TRẢ GIÁ: gọi `["bash", …]` theo TÊN từ Python trên Windows trúng **app-execution alias
+        #   của WSL** (`C:\\Windows\\System32\\bash.exe`) chứ không phải Git Bash — nó trả rc=1 với
+        #   stdout UTF-16 «Catastrophic failure», stderr RỖNG, tức HỎNG CÂM. `shutil.which` lại ra Git
+        #   Bash: hai bên PHÂN GIẢI KHÁC NHAU. Phải dùng đường dẫn TUYỆT ĐỐI, và phải THỬ bash chạy nổi
+        #   đã (`exit 7`) — để phân biệt «môi trường không chạy được bash» với «bệnh không tái hiện».
+        _bash = _sh330.which("bash")
+
+        def _bash_dung_duoc():
+            try:
+                return _sp330.run([_bash, "-c", "exit 7"], capture_output=True, timeout=60).returncode == 7
+            except Exception:      # noqa: BLE001
+                return False
+        if not _bash or not _bash_dung_duoc():
+            return okA and okB and okC                   # không có bash dùng được ⇒ ba vế tĩnh vẫn phủ
+        _new = [ln for ln in _shp.split("\n") if 'drive-push "$ZIP"' in ln]
+        if len(_new) != 1:
+            return False
+        _old = ('$TL drive-push "$ZIP" --rename-to-file || { bad "drive-push lỗi '
+                '(cần `gws auth login` có quyền GHI Drive)"; exit 3; }')
+
+        def _goi(line):
+            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng."""
+            with _tf330.TemporaryDirectory() as _td:
+                _sp = os.path.join(_td, "p.sh")
+                with open(_sp, "w", encoding="utf-8", newline="\n") as _f:
+                    _f.write("bad(){ :; }\ngws(){ echo CALLED >> goi.txt; }\nTL=false\nZIP=x\n" + line + "\n")
+                _sp330.run([_bash, "p.sh"], cwd=_td, capture_output=True, timeout=60)
+                return os.path.exists(os.path.join(_td, "goi.txt"))
+        return okA and okB and okC and _goi(_old) and not _goi(_new[0])
+    _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
 
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.

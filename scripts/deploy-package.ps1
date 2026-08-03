@@ -340,7 +340,9 @@ if ($ForceOlder) { & $guard -Version $VER -ForceOlder } else { & $guard -Version
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & $PY @PYARGS 'scripts/tl.py' 'drive-push' $ZIP '--rename-to-file'
-if ($LASTEXITCODE -ne 0) { Bad 'drive-push lỗi (cần `gws auth login` có quyền GHI Drive)'; exit 3 }
+# r330 — thông điệp GIỮ PARITY với deploy-package.sh (cùng câu, không ký tự nháy nào): timeout ≠ mất
+# quyền. Bản ps1 KHÔNG dính bẫy thay-thế-lệnh của bash (nháy ĐƠN PowerShell coi backtick là thường).
+if ($LASTEXITCODE -ne 0) { Bad 'drive-push lỗi — nếu dòng lỗi ngay trên có chữ timeout thì KHÔNG phải mất quyền: ĐỪNG đi gws auth login, hãy chạy lại với TL_GWS_WRITE_TIMEOUT=900 (hoặc TL_GWS_TIMEOUT=900). Chỉ lỗi quyền thật mới cần gws auth login có quyền GHI Drive.'; exit 3 }
 Ok 'đã đẩy'
 
 # ═════════════════ 5. Verify SAU đẩy — byte-match ═════════════════

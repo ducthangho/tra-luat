@@ -1514,19 +1514,40 @@ def _gcloud_access_token() -> tuple[str, str]:
     return tok, ""
 
 
-def _drive_push_route(via: str, gws_ok: bool, gcloud_ok: bool) -> tuple[str, str]:
-    """PURE (test offline): chọn đường drive-push. auto = gws trước (đường chuẩn), chết → gcloud LOUD."""
+# r330 — bệnh r327 LẶP Ở ĐƯỜNG GHI: mọi thông điệp hỏng của drive-push đều chỉ sang `gws auth login`,
+# nhưng TIMEOUT ≠ MẤT QUYỀN. Người vận hành đọc xong đi cấp quyền lại = mất buổi mà bệnh còn nguyên
+# (đúng vết r327 đã trả giá ở phép dò). Ca `r327_probe_error_lo_dien` khoá chuyện này cho phép DÒ;
+# đây khoá cho đường GHI + cho chính ROUTE khi phép dò hỏng vì timeout.
+_GWS_TIMEOUT_FIX = ("gws TIMEOUT — KHÔNG phải mất quyền, ĐỪNG `gws auth login`. Nâng ngân sách rồi chạy "
+                    "lại: TL_GWS_WRITE_TIMEOUT=900 (đường ghi) hoặc TL_GWS_TIMEOUT=900 (sàn chung mọi lệnh gws)")
+
+
+def _gws_timeout_hint(err: str) -> str:
+    """PURE: lỗi gws có phải TIMEOUT không → câu khắc phục ĐÚNG HƯỚNG; rỗng nếu KHÔNG phải timeout
+    (đừng đổ oan cho ngân sách khi thật sự mất quyền — sai hướng ngược lại cũng tốn y hệt)."""
+    return _GWS_TIMEOUT_FIX if "timeout" in (err or "").lower() else ""
+
+
+def _drive_push_route(via: str, gws_ok: bool, gcloud_ok: bool, probe_error: str = "") -> tuple[str, str]:
+    """PURE (test offline): chọn đường drive-push. auto = gws trước (đường chuẩn), chết → gcloud LOUD.
+    probe_error (r330): lý do phép dò gws hỏng — `availability_detail()["probe_error"]` mà r327 đã KHAI
+    sẵn nhưng CHƯA AI ĐỌC. Timeout ⇒ lời khuyên phải là NÂNG NGÂN SÁCH, không phải đi xin quyền lại."""
     v = (via or "auto").strip().lower()
+    tmo = _gws_timeout_hint(probe_error)
     if v == "gws":
-        return ("gws", "") if gws_ok else ("", "gws chưa sẵn/auth (--via gws ép) — `gws auth login` hoặc bỏ --via để auto-fallback gcloud")
+        if gws_ok:
+            return "gws", ""
+        return "", ((f"{tmo} — hoặc bỏ --via để auto-fallback gcloud") if tmo else
+                    "gws chưa sẵn/auth (--via gws ép) — `gws auth login` hoặc bỏ --via để auto-fallback gcloud")
     if v == "gcloud":
         return ("gcloud", "") if gcloud_ok else ("", "gcloud không sẵn/chưa login drive-scope — `gcloud auth login --enable-gdrive-access`")
     if gws_ok:
         return "gws", ""
     if gcloud_ok:
-        return "gcloud", "[FALLBACK→gcloud] gws chưa sẵn/auth → dùng token gcloud (OAuth production, không hạn-7-ngày)"
-    return "", ("cả gws lẫn gcloud đều chưa sẵn sàng — (a) `gws auth login`; hoặc (b) cài gcloud + "
-                "`gcloud auth login --enable-gdrive-access` rồi chạy lại.")
+        return "gcloud", ("[FALLBACK→gcloud] " + (tmo if tmo else "gws chưa sẵn/auth")
+                          + " → dùng token gcloud (OAuth production, không hạn-7-ngày)")
+    return "", ("cả gws lẫn gcloud đều chưa sẵn sàng — (a) " + (tmo if tmo else "`gws auth login`")
+                + "; hoặc (b) cài gcloud + `gcloud auth login --enable-gdrive-access` rồi chạy lại.")
 
 
 def _gcloud_drive_update(token: str, fid: str, path: str, mime: str, new_name: str | None = None) -> dict:
@@ -1603,10 +1624,13 @@ def cmd_drive_push(a) -> int:
     via = (getattr(a, "via", None) or "auto").strip().lower()
     gb = _imp("gws_bridge")
     gws_ok = (via != "gcloud") and gb.is_available()
+    # r330: đọc LÝ DO phép dò hỏng (r327 khai sẵn `probe_error`) để khuyên ĐÚNG HƯỚNG. Chỉ đọc khi ĐÃ dò
+    # — `via=gcloud` cố tình bỏ qua phép dò, gọi availability_detail() ở đó sẽ CHẠY phép dò 120s vô ích.
+    perr = "" if via == "gcloud" else (gb.availability_detail().get("probe_error") or "")
     gtok, gerr = ("", "")
     if via == "gcloud" or (via == "auto" and not gws_ok):
         gtok, gerr = _gcloud_access_token()
-    route, note = _drive_push_route(via, gws_ok, bool(gtok))
+    route, note = _drive_push_route(via, gws_ok, bool(gtok), probe_error=perr)
     if not route:
         print(f"[drive-push] ✗ {note}" + (f" (gcloud: {gerr})" if gerr else ""), file=sys.stderr)
         return 3
@@ -1625,8 +1649,12 @@ def cmd_drive_push(a) -> int:
                 print(f"[drive-push] ⚠ gws update lỗi ({type(e).__name__}: {e}) → [FALLBACK→gcloud]…", file=sys.stderr)
                 route = "gcloud"
             else:
+                # r330: ĐÂY là dòng người vận hành đọc lúc deploy chết. Trước đó nó im về ngân sách nên
+                # ca THẬT («gws timeout sau 120.0s» trên gói 2,49MB) đọc như lỗi quyền → đi `gws auth login`.
+                _fix = _gws_timeout_hint(f"{type(e).__name__}: {e}")
                 print(f"[drive-push] ✗ update lỗi: {type(e).__name__}: {e}"
-                      + (f" (gcloud cũng không sẵn: {gerr})" if via == "auto" else ""), file=sys.stderr)
+                      + (f" (gcloud cũng không sẵn: {gerr})" if via == "auto" else "")
+                      + (f"\n  KHẮC PHỤC: {_fix}" if _fix else ""), file=sys.stderr)
                 return 4
         if route == "gws":
             f = (r or {}).get("file") or {}

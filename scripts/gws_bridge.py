@@ -8,6 +8,7 @@ Nhóm A (read) hiện thực đầy đủ ở GĐ1; B (write an toàn) / C (writ
 is_available(): PATH + version==pin + auth!=none, cache theo phiên (env TL_GWS_DISABLE=1 → False để test fallback).
 Timeout CHỈNH ĐƯỢC bằng env (r327): TL_GWS_AUTH_TIMEOUT · TL_GWS_VERSION_TIMEOUT (đè riêng từng phép dò)
 và TL_GWS_TIMEOUT (SÀN chung cho MỌI lệnh gws — chỉ NÂNG, không hạ). Xem `_timeout()`.
+r330: thêm TL_GWS_WRITE_TIMEOUT — SÀN cho riêng nhóm lệnh GHI CÓ TẢI (upload/update_content/download).
 BẢO MẬT: KHÔNG in/echo credential — chỉ gọi --version / auth status / drive files.
 """
 from __future__ import annotations
@@ -65,24 +66,52 @@ def _env_timeout(name: str) -> float | None:
     return v if (v > 0 and v != float("inf")) else None   # nan: mọi so sánh False ⇒ tự rơi về None
 
 
-def _timeout(default: float, knob: str | None = None) -> float:
-    """Timeout hiệu lực = knob RIÊNG (đè hẳn) → TL_GWS_TIMEOUT (SÀN, chỉ NÂNG) → default.
+# ─────────────── timeout ĐƯỜNG GHI: hằng chọn theo CẢM GIÁC cũng là BỆNH (r330) ───────────────
+# r327 vá phép DÒ; đường GHI thì chưa ai đo. `update_content` 120s ĐÃ CHẶN THẬT một lượt deploy gói
+# 2.487.725 B (`GwsError: gws timeout sau 120.0s`) — đặt `TL_GWS_TIMEOUT=900` rồi chạy lại thì XONG +
+# BYTE-MATCH. ĐO trên máy chuẩn Windows, CÙNG đường mã (bảng đầy đủ ở CHANGELOG ★v1.36.62):
+#   update_content 2,49MB: 6,1 · 11,5 · 7,5 s (03-08) · 9,8 · 19,3 · 13,2 s (04-08)   → max 19,3
+#   upload 2,49MB: 6,9 · 11,8 · 5,5 · 18,9 s   ·   download 2,49MB: 6,8 · 4,0 · 3,5 s
+#   phí CỐ ĐỊNH (payload 1KB): update 3,3–5,7 s · upload 2,8–3,1 s   ·   mkdir 2,8–3,3 · rename 1,9–2,2
+# ★Vì sao KHÔNG áp công thức r327 («2,4× ca chậm nhất ĐO được»): ở r327 phép đo ĐÃ TRÙM vùng hỏng
+#  (15–50 s vắt qua trần 20 s). Ở đây MỌI mẫu đo được đều thuộc vùng LÀNH — 2,4×19,3 = 46 s, tức THẤP
+#  HƠN cả 120 s vốn ĐÃ hỏng. Áp máy móc sẽ làm bệnh NẶNG HƠN. Neo đúng là CA HỎNG QUAN SÁT ĐƯỢC.
+# ★Chọn hằng bằng BĂNG THÔNG suy ra, không bằng cảm giác: phí ≈ (3–6 s cố định) + kích thước/băng thông.
+#  Đo được ≈ 130–500 kB/s. Ca hỏng: 2,49MB KHÔNG xong trong 120 s ⇒ băng thông thực ≤ ~21 kB/s (chậm
+#  hơn ca lành 6–24×; VPN/tether/nghẽn là đủ). Trần 600 s phủ tới ~4,2 kB/s — tức còn chịu được ca xấu
+#  hơn ca đã hỏng ~5× nữa, mà vẫn CÓ BIÊN (gws wedge không treo phiên vô hạn).
+# ★Bất đối xứng chi phí (khác r327, phải nói rõ): chờ thừa ở đây tốn wall-time THẬT chứ không chỉ trong
+#  ca đã hỏng. Vẫn chọn hào phóng vì deploy là việc HIẾM + có người ngồi xem (Ctrl-C được), còn chờ
+#  thiếu thì giết một lượt đẩy ĐANG CHẠY ĐÚNG rồi rơi xuống gcloud thiếu Drive scope ⇒ [FAIL] cứng.
+# ★CHỈ nâng lệnh CÓ TẢI. mkdir/rename/delete đo được 1,9–3,3 s và KHÔNG mang payload nên không co giãn
+#  theo băng thông — giữ nguyên 60/60/30 s (dư 18–27×). «Không sửa cái đang đúng» — cùng lý lẽ r327 giữ
+#  `--version` ở 30 s.
+def _timeout(default: float, knob: str | None = None, *, write: bool = False) -> float:
+    """Timeout hiệu lực = knob RIÊNG (đè hẳn) → SÀN (chỉ NÂNG): TL_GWS_WRITE_TIMEOUT cho lệnh GHI CÓ
+    TẢI, rồi TL_GWS_TIMEOUT cho MỌI lệnh → default.
     SÀN chứ KHÔNG phải đè: máy chậm khai TL_GWS_TIMEOUT=120 phải nâng phép dò 30s lên 120s mà KHÔNG
-    được hạ download (300s) xuống 120s — hạ trần một cách vô tình chính là cái bẫy đang vá ở đây."""
+    được hạ download (600s) xuống 120s — hạ trần một cách vô tình chính là cái bẫy đang vá ở đây.
+    TL_GWS_WRITE_TIMEOUT cũng CHỈ NÂNG, và đó là chủ đích: nó phủ NHIỀU lệnh có mặc định KHÁC nhau, cho
+    hạ thì MỘT con số sẽ SAN PHẲNG cả nhóm — vẫn đúng cái bẫy trên, chỉ đổi phạm vi (r330)."""
     if knob:
         v = _env_timeout(knob)
         if v is not None:
             return v
-    floor = _env_timeout("TL_GWS_TIMEOUT")
-    return max(default, floor) if floor is not None else default
+    out = default
+    for name in (("TL_GWS_WRITE_TIMEOUT",) if write else ()) + ("TL_GWS_TIMEOUT",):
+        floor = _env_timeout(name)
+        if floor is not None:
+            out = max(out, floor)
+    return out
 
 
 def _run(args: list[str], *, timeout: float = 30.0, cwd: str | None = None,
-         knob: str | None = None) -> str:
+         knob: str | None = None, write: bool = False) -> str:
     """Chạy `gws <args>` → stdout. gws thiếu / rc!=0 / timeout → GwsError (transport sẽ fallback GAS).
     cwd: gws giới hạn --output PHẢI trong thư mục làm việc → export đặt cwd=thư mục tạm + tên file tương đối.
-    knob: tên env đè timeout cho RIÊNG lệnh này (phép dò); mọi lệnh đều ăn SÀN TL_GWS_TIMEOUT."""
-    timeout = _timeout(timeout, knob)   # giải ở ĐÚNG MỘT chỗ ⇒ thông điệp lỗi khai timeout THẬT đã dùng
+    knob: tên env đè timeout cho RIÊNG lệnh này (phép dò); mọi lệnh đều ăn SÀN TL_GWS_TIMEOUT.
+    write: lệnh GHI CÓ TẢI ⇒ ăn thêm SÀN TL_GWS_WRITE_TIMEOUT (r330)."""
+    timeout = _timeout(timeout, knob, write=write)   # giải ở ĐÚNG MỘT chỗ ⇒ thông điệp lỗi khai timeout THẬT đã dùng
     exe = gws_exe()
     if not exe:
         raise GwsError("gws not found (PATH / ~/.local/bin)")
@@ -263,7 +292,7 @@ def upload(name: str, path: str, parents=None, mime: str | None = None,
             "--upload", upbase, "--format", "json"]
     if mime:
         args += ["--upload-content-type", mime]
-    f = _json(_run(args, timeout=180.0, cwd=updir))
+    f = _json(_run(args, timeout=600.0, cwd=updir, write=True))   # r330: 180s → 600s (xem khối ĐO)
     return {"ok": True, "file": normalize_file(f)}
 
 
@@ -285,8 +314,9 @@ def download(file_id: str, dest: str, export_mime: str | None = None, **_) -> di
                 "--output", dbase]
     try:
         # KHÔNG đi qua _run (stdout phải là BYTES, không decode) ⇒ gọi _timeout() TAY, nếu không đây là
-        # lệnh gws DUY NHẤT mà SÀN TL_GWS_TIMEOUT không với tới (r327).
-        p = subprocess.run(args, cwd=ddir, capture_output=True, timeout=_timeout(300.0))
+        # lệnh gws DUY NHẤT mà SÀN TL_GWS_TIMEOUT không với tới (r327) — và cũng là lệnh CÓ TẢI duy nhất
+        # lọt SÀN TL_GWS_WRITE_TIMEOUT nếu quên `write=True` (r330). 300s → 600s: cùng lớp truyền tải.
+        p = subprocess.run(args, cwd=ddir, capture_output=True, timeout=_timeout(600.0, write=True))
     except subprocess.TimeoutExpired as e:
         raise GwsError("gws download timeout") from e
     if p.returncode != 0:
@@ -302,8 +332,9 @@ def download(file_id: str, dest: str, export_mime: str | None = None, **_) -> di
 
 
 def update_content(file_id: str, path: str, mime: str | None = None, **_) -> dict:
-    """Thay NỘI DUNG file Drive sẵn (giữ nguyên fileId) — cho xoay vòng secrets tại chỗ.
-    `files update --params {fileId} --upload <path>`."""
+    """Thay NỘI DUNG file Drive sẵn (giữ nguyên fileId) — cho xoay vòng secrets tại chỗ, và là ĐƯỜNG ĐẨY
+    PACKAGE của `drive-push`. `files update --params {fileId} --upload <path>`.
+    600s (r330) thay 120s: 120s ĐÃ CHẶN THẬT một lượt deploy gói 2,49MB — xem khối ĐO ở đầu tệp."""
     ap = os.path.abspath(path)
     updir, upbase = os.path.dirname(ap), os.path.basename(ap)
     args = ["drive", "files", "update",
@@ -311,7 +342,7 @@ def update_content(file_id: str, path: str, mime: str | None = None, **_) -> dic
             "--upload", upbase, "--format", "json"]
     if mime:
         args += ["--upload-content-type", mime]
-    f = _json(_run(args, timeout=120.0, cwd=updir))
+    f = _json(_run(args, timeout=600.0, cwd=updir, write=True))
     return {"ok": True, "file": normalize_file(f)}
 
 

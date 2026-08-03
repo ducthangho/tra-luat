@@ -1,3 +1,85 @@
+# ★ v1.36.62 — r330: timeout ĐƯỜNG GHI của `gws` chọn KHÔNG ĐO ⇒ `update_content` 120s CHẶN THẬT lượt deploy (2026-08-04)
+
+**Nối tiếp r327 — cùng một bệnh, nấc kế tiếp.** r327 vá phép DÒ (`auth status` 20s→120s) nên `drive-push`
+ĐÃ đi đúng tuyến gws; nó chết ngay ở bước sau, lần này là timeout của CHÍNH lệnh upload:
+
+```
+[drive-push] ✗ update lỗi: GwsError: gws timeout sau 120.0s
+(gcloud cũng không sẵn: gcloud auth print-access-token timed out after 30 seconds)
+```
+
+`update_content()` gọi `_run(..., timeout=120.0)` — hằng CỨNG, chưa ai đo. Gói deploy chỉ **2.487.725 B**
+mà vượt 120s. Đặt `TL_GWS_TIMEOUT=900` rồi chạy lại thì đẩy XONG + **BYTE-MATCH** (Drive md5
+`839a7177b4089098ad7d96f4a9234f11` = local) ⇒ knob của r327 làm đúng việc, nhưng **mặc định vẫn là tường**
+nên lượt deploy sau lại đâm vào đó trừ khi người vận hành nhớ khai env.
+
+## ĐO (máy chuẩn Windows, CÙNG đường mã, artifact TEST rồi xoá — KHÔNG đụng `SKILL_FILEID`)
+
+`update_content` theo CỠ payload — đo nhiều cỡ để **tách phí CỐ ĐỊNH khỏi phí THEO BYTE**:
+
+| cỡ payload | lượt đo | ghi chú |
+|---|---|---|
+| 1 KB | 3,3 · 5,7 · 3,5 s | = phí CỐ ĐỊNH (spawn + keyring + 1 vòng API) |
+| **2,49 MB** (đúng cỡ gói) | 6,1 · 11,5 · 7,5 s (03-08) · 9,8 · 19,3 · 13,2 s (04-08) | **max 19,3 s** |
+| 10 MB | 27,6 · 48,5 · 21,1 s | |
+| 25 MB | 42,5 · 46,7 · 30,8 s | |
+
+Các lệnh còn lại (payload 2,49 MB nếu có tải):
+
+| op | lượt đo | max | mặc định cũ | nay |
+|---|---|---:|---:|---:|
+| `upload` | 6,9 · 11,8 · 5,5 · 18,9 s (2,49MB) · 22,7 s (10MB) · 44,6 s (25MB) | 44,6 | 180 s | **600 s** |
+| `download` | 6,8 · 4,0 · 3,5 s | 6,8 | 300 s | **600 s** |
+| `copy_convert` (docx→GDoc) | 4,7 · 5,0 · 5,7 s | 5,7 | 180 s | GIỮ |
+| `mkdir` | 2,8 · 3,3 · 2,9 s | 3,3 | 60 s | GIỮ |
+| `_files_update` (rename) | 2,2 · 1,9 · 2,2 s | 2,2 | 60 s | GIỮ |
+
+★**Vì sao KHÔNG áp công thức r327 («2,4× ca chậm nhất ĐO được»)** — đây là điểm dễ sai nhất của đợt này.
+Ở r327 phép đo ĐÃ TRÙM vùng hỏng (15–50 s vắt qua trần 20 s) nên nhân 2,4 là hợp lệ. Ở đây **mọi mẫu đo
+được đều thuộc vùng LÀNH**: 2,4 × 19,3 = **46 s**, tức **THẤP HƠN cả 120 s vốn ĐÃ hỏng** — áp máy móc sẽ
+làm bệnh **nặng hơn**. Neo đúng phải là **ca hỏng QUAN SÁT ĐƯỢC**, không phải median ngày lành.
+
+★**Chọn hằng bằng BĂNG THÔNG suy ra:** phí ≈ (3–6 s cố định) + kích thước ÷ băng thông. Đo được
+**~170–850 kB/s**. Ca hỏng: 2,49 MB không xong trong 120 s ⇒ băng thông thực **≤ ~21 kB/s** (chậm hơn ca
+lành 8–40×; VPN/tether/nghẽn là đủ). Trần **600 s** phủ tới **~4,2 kB/s** — còn chịu được ca xấu hơn ca đã
+hỏng ~5× nữa, mà vẫn CÓ BIÊN (gws wedge không treo phiên vô hạn).
+
+★**Bất đối xứng chi phí — khác r327, phải nói rõ:** ở phép dò, chờ thừa chỉ tốn giây trong ca ĐÃ hỏng
+(cache 1 lần/phiên). Ở đường GHI, chờ thừa tốn wall-time THẬT. Vẫn chọn hào phóng vì deploy là việc HIẾM
+và **có người ngồi xem** (Ctrl-C được), còn chờ thiếu thì giết một lượt đẩy ĐANG CHẠY ĐÚNG rồi rơi xuống
+gcloud thiếu Drive scope ⇒ `[FAIL]` cứng.
+
+## Vá (5 vế, mỗi vế một ca test + mutation riêng)
+
+1. **`update_content` 120→600 s · `upload` 180→600 s · `download` 300→600 s.** CHỈ nâng lệnh **CÓ TẢI** —
+   chỉ chúng mới co giãn theo băng thông. `mkdir`/`rename`/`delete` đo 1,9–3,3 s (dư 18–27×) và
+   `copy_convert` 5,7 s (server-side, không cõng payload local) ⇒ **GIỮ NGUYÊN**. *«Không sửa cái đang
+   đúng»* — cùng lý lẽ r327 giữ `--version` ở 30 s.
+2. **Knob riêng `TL_GWS_WRITE_TIMEOUT`** theo đúng khuôn `_timeout(default, knob)` sẵn có, nhưng là
+   **SÀN (chỉ NÂNG)** chứ không đè — và đó là chủ đích: nó phủ NHIỀU lệnh có mặc định KHÁC nhau, cho hạ
+   thì MỘT con số sẽ **san phẳng cả nhóm**, đúng cái bẫy r327 đã vá, chỉ đổi phạm vi. Hợp thành:
+   `knob riêng (đè hẳn) → max(TL_GWS_WRITE_TIMEOUT, TL_GWS_TIMEOUT, default)`.
+3. **`download()` vẫn là điểm mù** — nó KHÔNG đi qua `_run` (stdout phải là BYTES) nên r327 đã phải gọi
+   `_timeout()` tay; quên `write=True` thì nó là lệnh CÓ TẢI duy nhất lọt sàn mới. Khoá bằng HÀNH VI
+   (đọc ngân sách thực nhận), không đọc mã.
+4. **Thông điệp SAI HƯỚNG — bệnh r327 lặp ở đường GHI.** `_drive_push_route` khuyên `gws auth login` cho
+   MỌI kiểu hỏng, mà **timeout ≠ mất quyền**. r327 đã KHAI sẵn `probe_error` nhưng **chưa ai đọc** — nay
+   route nhận `probe_error` và `cmd_drive_push` in câu KHẮC PHỤC đúng hướng khi lỗi ghi là timeout.
+   Cùng họ bài học r321/r322/r327: *«đã có lời khai» ≠ «có ai đọc lời khai»*.
+5. ★**Cùng bệnh, dạng NẶNG NHẤT — ở `deploy-package.sh` lời khuyên sai hướng bị CHẠY, không chỉ in.**
+   ``bad "... (cần `gws auth login` có quyền GHI Drive)"`` — **backtick trong chuỗi nháy KÉP của bash
+   THAY THẾ LỆNH**. Mỗi lần `drive-push` hỏng, `gws auth login` **khởi chạy thật**, và thông điệp in ra
+   *output của nó* thay vì tên lệnh. Twin `ps1` KHÔNG dính (nháy ĐƠN của PowerShell coi backtick là ký tự
+   thường) ⇒ đúng lớp **lệch hai nền** mà chỉ CHẠY THẬT mới thấy — bài học r244 lặp nguyên văn. Nay hai
+   bản mang **CÙNG MỘT CÂU, không ký tự nháy nào**, và ca test đối chiếu parity + chạy dòng thật.
+
+Test (5 ca, giả `subprocess` để **ghi lại ngân sách thực nhận** + mô phỏng lệnh tốn N giây, không chờ
+thật): `r330_write_du_gio_cho_goi_that` (phí 150 s — nằm GIỮA trần cũ 120 s và trần mới — phải xong, và
+ngân sách lệnh CÓ TẢI phải **lớn hơn** lệnh metadata) · `r330_write_knob_chi_nang_khong_ha` (gồm vế
+`download` lọt sàn) · `r330_write_env_meo_khong_vo_hieu` · `r330_timeout_khuyen_dung_huong` ·
+`r330_deploy_msg_khong_chay_lenh` (TỰ KIỂM CHỨNG: dòng CŨ phải tái hiện được việc `gws` bị gọi, dòng MỚI
+phải sạch — không tái hiện nổi thì ca ĐỎ).
+
 # ★ v1.36.61 — r329: bootstrap công cụ work-packet D0 + kê khai slot docs 19→21 (2026-08-03)
 
 **Bốn tệp mới NGOÀI GÓI** (tác giả Codex, nhánh `codex/work-packet-bootstrap`):

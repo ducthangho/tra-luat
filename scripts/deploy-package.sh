@@ -293,7 +293,13 @@ else
   ok "Drive đang v$D_VER < v$VER sắp đẩy — không thụt lùi"
 fi
 
-$TL drive-push "$ZIP" --rename-to-file || { bad "drive-push lỗi (cần `gws auth login` có quyền GHI Drive)"; exit 3; }
+# r330 — HAI lỗi ở đúng dòng này, đều đã ĐO:
+# (1) BACKTICK trong chuỗi NHÁY KÉP của bash là THAY THẾ LỆNH, không phải trích dẫn ⇒ bản cũ
+#     `gws auth login` bị CHẠY THẬT mỗi lần drive-push hỏng (và thông điệp in ra output của nó thay vì
+#     tên lệnh). Twin ps1 KHÔNG dính vì chuỗi nháy ĐƠN của PowerShell coi backtick là ký tự thường —
+#     đúng kiểu lệch hai nền mà chỉ chạy thật mới thấy. Nay: KHÔNG dùng ký tự nháy nào trong thông điệp.
+# (2) Lời khuyên SAI HƯỚNG: timeout ≠ mất quyền (bệnh r327, nay lặp ở đường GHI — xem CHANGELOG r330).
+$TL drive-push "$ZIP" --rename-to-file || { bad "drive-push lỗi — nếu dòng lỗi ngay trên có chữ timeout thì KHÔNG phải mất quyền: ĐỪNG đi gws auth login, hãy chạy lại với TL_GWS_WRITE_TIMEOUT=900 (hoặc TL_GWS_TIMEOUT=900). Chỉ lỗi quyền thật mới cần gws auth login có quyền GHI Drive."; exit 3; }
 ok "đã đẩy"
 
 # ─────────────────────────── 5. Verify SAU đẩy (byte-match) ───────────────────────────

@@ -1,3 +1,59 @@
+# ★ v1.36.59 — r327: phép dò auth của `gws` có timeout NGẮN HƠN phí thật ⇒ `is_available()` nói dối (2026-08-03)
+
+**`drive-push` trượt ở bước đẩy cuối dù gate 8/8 xanh, nhiều phiên liền. Chẩn đoán cũ «hỏng tạm, chạy
+lại là được» SAI — và chính cái làm nó sống lâu là bệnh phụ thuộc MẠNG nên thỉnh thoảng tự khỏi.**
+
+`gws_bridge.auth_method()` gọi `_run(["auth","status"], timeout=20.0)` — hằng CỨNG, không env knob.
+Nhưng `gws auth status` liệt kê 34 API + gọi mạng. ĐO trên máy chuẩn Windows, CÙNG đường mã đó:
+
+| lượt đo | phí `gws auth status` |
+|---|---|
+| 02-08-2026 (3 lượt) | 29,1 · 39,7 · 50,5 s |
+| 03-08-2026 (3 lượt, đo lại lúc vá) | 18,9 · 15,4 · 17,1 s |
+| `gws --version` cùng tiến trình (đã gánh cold-start) | **3,7 s** |
+
+⇒ phí thật **dao động 15–50 s quanh trần 20 s**: phép dò **lật đỏ/xanh theo mạng**, không hỏng hẳn —
+nên `gws auth status` chạy tay vẫn ra `"auth_method":"oauth2"` rc=0 mà `tl` lại kết luận «gws chưa sẵn».
+Dây chuyền: `auth_method()`→`None` → `is_available()`→False → `cmd_drive_push` tính `gws_ok=False` →
+`_drive_push_route` rơi xuống gcloud → gcloud thiếu Drive scope ⇒ **`[FAIL] drive-push`**, dù gws SỐNG.
+`--via gws` KHÔNG cứu: nó vẫn đọc chính `gws_ok` từ phép dò hỏng.
+
+★**Bằng chứng nội tại có sẵn mà không ai đọc:** ngay dòng trên, `--version` được **30 s** kèm chú thích
+«bù gws cold-start», còn `auth status` — việc **nặng hơn hẳn** — chỉ được **20 s**. *Phép dò chậm nhất
+mang ngân sách ngắn nhất.* Đo mới còn cho thấy ngược hơn nữa: `--version` thật ra chỉ tốn **3,7 s** (dư
+8×), tức toàn bộ ngân sách rộng rãi đang nằm ở phép dò KHÔNG cần.
+
+**Vá (4 vế, mỗi vế một ca test + mutation riêng):**
+1. `_auth_probe()` **120 s** (≈2,4× ca chậm nhất từng đo) thay 20 s. `--version` **GIỮ 30 s** — đã đo dư
+   8×, không sửa cái đang đúng.
+2. **Env knob**, chỉnh không cần sửa mã: `TL_GWS_AUTH_TIMEOUT` · `TL_GWS_VERSION_TIMEOUT` (đè riêng
+   từng phép dò) và `TL_GWS_TIMEOUT` = **SÀN chung cho MỌI lệnh gws**. Sàn **chỉ NÂNG**: khai
+   `TL_GWS_TIMEOUT=120` nâng phép dò 30 s→120 s mà **không** hạ `download` 300 s→120 s — hạ trần một
+   cách vô tình chính là cái bẫy đang vá. Giải timeout ở **đúng một chỗ** (`_run`) nên thông điệp lỗi
+   khai đúng ngân sách đã dùng; `download()` không đi qua `_run` (stdout phải là BYTES) nên gọi
+   `_timeout()` tay — nếu quên, đó là lệnh gws DUY NHẤT sàn không với tới.
+3. **Env méo KHÔNG được biến knob thành công tắc TẮT timeout**: `0`/âm ⇒ chết tức thì, `inf`/`1e400` ⇒
+   treo vô hạn (gws wedge = phiên treo, mất luôn đường fallback). `_env_timeout()` chỉ nhận số **dương
+   hữu hạn**; rác/rỗng/`nan` ⇒ về mặc định.
+4. **Lộ diện lý do** — vì sao bệnh sống lâu: lỗi bị **NUỐT**. `auth_method()` nuốt `GwsError` nên
+   «dò không xong» và «dò xong, chưa auth bao giờ» **cùng** trả `None`; `availability_detail()` không
+   phân biệt nổi ⇒ người vận hành đọc `auth=None` rồi đi `gws auth login` — **sai hướng, không phải lỗi
+   quyền**. Tách `_auth_probe() -> (method, err)`, thêm khoá `probe_error` vào `availability_detail()`
+   (`transport-info --json` phơi sẵn). Cùng họ bài học r321/r322: *«đã có hàm» ≠ «có đường gọi»;
+   «đã có lời khai» ≠ «có ai đọc lời khai»* — lần này là **«đã có lỗi» ≠ «lỗi có lối ra»**.
+
+★**Bất đối xứng chi phí** (lý do chọn hào phóng): chờ THỪA chỉ tốn giây trong ca ĐÃ hỏng — phép dò cache
+1 lần/phiên và chỉ chạy khi binary `gws` có thật; chờ THIẾU thì trả lời **SAI** rồi định tuyến ngầm sang
+đường chết. Ngân sách timeout của một phép dò không phải chỗ để tiết kiệm.
+
+Đo end-to-end sau vá, gws THẬT trên máy chuẩn: `availability_detail()` → `ok:true`,
+`auth_method:"oauth2"`, `probe_error:""` trong 14,7 s.
+
+Test (4 ca, giả `subprocess` để **ghi lại ngân sách thực nhận** + mô phỏng lệnh tốn N giây, không chờ
+thật): `r327_auth_probe_du_gio_cho_gws_that` (phí 25 s — nằm GIỮA trần cũ 20 s và ca chậm nhất 50 s —
+phải ok=True, và ngân sách auth phải **lớn hơn** `--version`) · `r327_env_knob_chinh_duoc_timeout` ·
+`r327_env_meo_khong_vo_hieu_timeout` · `r327_probe_error_lo_dien`.
+
 # ★ v1.36.58 — r326: hạ tuyên bố quá tầm ở `RASOAT_HOSO_LOOP.md` §7, và bịt ĐIỂM MÙ con trỏ TÊN CA (2026-08-03)
 
 Nối tiếp T0-E/GATE-06 (r298). Lần đó ba ca tự-chứng-minh đã bị hạ tuyên bố **trong `scripts/tl_selftest.py`**,

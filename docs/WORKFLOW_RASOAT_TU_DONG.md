@@ -127,7 +127,7 @@ State sống-còn trên Drive `_meta/` của profile; sổ nặng ở local `--o
 | — Q-NLM (trong state) | Drive | nguồn chờ nạp NotebookLM: `pending/added/failed` — worker §4a drain tuần tự | nạp NLM là LÀM GIÀU về sau, không chặn rà (đơn vị rà được ngay khi cache xong) |
 | `master/<unit>.json` (thư mục) | **local `--out-dir`**, đẩy Drive ở checkpoint/Pha 4 (chat: mỗi đơn vị/lô nhỏ) | sổ phát hiện — 1 file/đơn vị rà, schema `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` | append-only ở mức thư mục; `rasoat_phuluc.py --in master/` gộp khi tổng hợp; mỗi `noi_dung[]` mang `anchor` + `muc_chac_chan` (H1b) |
 | `_meta/rasoat_bugs.md` | local, đẩy cùng checkpoint | Q-BUGS: lỗi skill gặp giữa chừng | mỗi mục: VERSION đo được + lệnh tái hiện + workaround đã dùng + phân loại workaround/blocker |
-| `_meta/rasoat_approvals.json` | local, đẩy cùng checkpoint | Q-APPROVALS: các dry-plan (kèm `plan_hash`) đã gom, chờ duyệt lô | người duyệt đọc 1 bảng, chấp thuận → máy chạy chuỗi `--apply --confirm yes --expected-plan-hash` |
+| `<out-dir>/rasoat_approvals.json` | local, đẩy cùng checkpoint | Q-APPROVALS: các dry-plan (kèm `plan_hash`) đã gom, chờ duyệt lô | người duyệt đọc 1 bảng, chấp thuận → máy chạy chuỗi `--apply --confirm yes --expected-plan-hash` |
 | — Q-VERIFY (trong state) | Drive | phát hiện ghi trong chế độ không-NLM (`muc_chac_chan="cho_verify_nlm"`) chờ trả nợ kiểm chéo `nlm_qa` | cookie sống lại → một lượt trả nợ tuần tự, đạt thì nâng hạng (§4b) |
 
 **NEO PHỤ THUỘC của mỗi phát hiện** (điều kiện của Loop C — P5), thêm vào mỗi dòng `noi_dung[]`:

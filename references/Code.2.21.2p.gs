@@ -250,7 +250,8 @@ function dispatchAction_(action, p){
   switch(action){
     case 'ping':         return {ok:true, pong:true, ts:new Date().toISOString(), version:APP_VERSION,
       schema_version:APP_VERSION, registry_schema:'reg_cols_row_kind_v1',
-      registry_cols:(typeof REG_COLS_ === 'undefined' ? null : REG_COLS_.length)};
+      registry_cols:(typeof REG_COLS_ === 'undefined' ? null : REG_COLS_.length),
+      capabilities:['rasoat_state_cas']};
     case 'bootstrap':    return doBootstrap_(p);      // v2.14.0: tạo/kiểm VBQPPL+_HOP_NAP+Van_ban_thuong + tự-kiểm ghi
     case 'fetch_url_to_drive': return doFetchUrlToDrive_(p);  // v2.15.0: tải URL ungated .doc/.docx về _HOP_NAP
     case 'organize':     return doOrganize_(p);     // v2.13.2: convert+rename+move+stamp+register 1 RTT
@@ -265,6 +266,7 @@ function dispatchAction_(action, p){
     case 'ingest':       return doIngest_(p);
     case 'fetch':        return doFetch_(p);
     case 'upload':       return doUpload_(p);
+    case 'rasoat_state_cas': return doRasoatStateCas_(p); // r324: ADR-0016 atomic single-writer
     case 'createtext':   return doCreateText_(p);
     case 'copy_convert': return doCopyConvert_(p);
     case 'listext':      return doListExt_(p);        // v2.8.0
@@ -356,6 +358,74 @@ function doUpload_(p){
   var mime=p.mime || inferMime_(p.name);
   var blob=Utilities.newBlob(bytes, mime, p.name);
   return createFromBlob_(p, bytes, mime, blob, p.sourceUrl || 'upload');
+}
+
+// r324 / ADR-0016: compare-and-swap state rà soát TRONG MỘT ScriptLock.
+// Client không thể ghép list/read/upload/trash thành CAS xuyên host: hai client có thể
+// cùng đọc một claim rồi cùng ghi. Action hẹp này là cổng ghi duy nhất cho hai
+// tên state duy nhất trong WRITE_PATHS_v1; create-first, rồi dọn bản cũ khi vẫn giữ lock.
+function doRasoatStateCas_(p){
+  var folderId=String(p.folderId||'').trim(), name=String(p.name||'').trim();
+  if(!folderId) return {ok:false,error:'META_FOLDER_ID_TRONG'};
+  if(name!=='rasoat_state.json')
+    return {ok:false,error:'STATE_NAME_NOT_ALLOWED:'+name};
+  if(!p.b64) return {ok:false,error:'THIEU_B64'};
+  var bytes;
+  try { bytes=Utilities.base64Decode(p.b64); }
+  catch(e) { return {ok:false,error:'B64_KHONG_HOP_LE:'+String(e)}; }
+  if(bytes.length>CONFIG.UPLOAD_MAX_BYTES) return {ok:false,error:'STATE_QUA_LON'};
+  var text=Utilities.newBlob(bytes).getDataAsString('UTF-8'), incoming;
+  try { incoming=JSON.parse(text); }
+  catch(e2) { return {ok:false,error:'STATE_JSON_HONG:'+String(e2)}; }
+  if(!incoming || Object.prototype.toString.call(incoming)!=='[object Object]')
+    return {ok:false,error:'STATE_ROOT_KHONG_PHAI_OBJECT'};
+  if(name==='rasoat_state.json' && String(incoming.schema||'')!=='rasoat_plan.v1')
+    return {ok:false,error:'STATE_SCHEMA_SAI:'+String(incoming.schema)};
+
+  return withRegLock_(function(){
+    var files=listChildren_(folderId).filter(function(x){
+      return String(x.name||'')===name &&
+        String(x.mimeType||'')!=='application/vnd.google-apps.folder';
+    });
+    files.sort(function(a,b){
+      var ak=String(a.modifiedTime||'')+'\u0000'+String(a.id||'');
+      var bk=String(b.modifiedTime||'')+'\u0000'+String(b.id||'');
+      return ak<bk?1:(ak>bk?-1:0);
+    });
+    var expect=String(p.expect_claim||'').trim(), current='';
+    if(files.length && !expect)
+      return {ok:false,error:'THIEU_EXPECT_CLAIM',old_count:files.length};
+    if(files.length){
+      try {
+        var oldText=DriveApp.getFileById(files[0].id).getBlob().getDataAsString('UTF-8');
+        var oldObj=JSON.parse(oldText);
+        current=String(((oldObj||{}).session_claim||{}).id||'');
+      } catch(e3) {
+        return {ok:false,error:'EXPECT_CLAIM_KHONG_KIEM_DUOC',detail:String(e3),
+                old_count:files.length};
+      }
+      if(current!==expect)
+        return {ok:false,error:'CLAIM_LECH',claim_tren_drive:current,
+                claim_ky_vong:expect,old_count:files.length};
+    }
+
+    var blob=Utilities.newBlob(bytes,'application/json',name);
+    var created=Drive.Files.create({name:name,parents:[folderId]},blob,
+      {supportsAllDrives:true,fields:'id,name,mimeType,modifiedTime'});
+    var cleanup=[];
+    files.forEach(function(old){
+      if(String(old.id||'')===String(created.id||'')) return;
+      try {
+        anyById_(old.id).setTrashed(true);
+        cleanup.push({fileId:old.id,ok:true});
+      } catch(e4) {
+        cleanup.push({fileId:old.id,ok:false,error:String(e4)});
+      }
+    });
+    var clean=cleanup.every(function(x){return x.ok===true;});
+    return {ok:true,fileId:created.id,name:name,bytes:bytes.length,old_count:files.length,
+            cleanup:cleanup,don_sach:clean,action_atomic:true};
+  });
 }
 // createtext: nhận TEXT THUẦN (đã normalize/clean) → tạo Google Doc trực tiếp.
 //   Đối xứng exporttext; là đường "đẩy bản clean lên Drive" (KHÁC upload nhận file gốc base64).

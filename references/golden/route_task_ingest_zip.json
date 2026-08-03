@@ -1,7 +1,7 @@
 {
   "idempotency": {
     "duplicate_guard": "zip-slip safe extraction + per-file source hash/path + child ingest duplicate guards",
-    "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
+    "idempotency_key": "sha256(content-v3: NFC portable_path+sha256+size từng member accepted, sort)+mode+cat_or_profile",
     "journal_key": "batch item path + child pipeline journal",
     "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",
     "resume_behavior": "rerun same zip apply; accepted members are re-planned and child pipelines perform duplicate/readback gates",
@@ -9,7 +9,7 @@
     "rollback_hint": "use per-child journals plus live-state-diff; undo registry per run before any Drive/NLM cleanup",
     "schema": "idempotency_contract.v1"
   },
-  "idempotency_key": "sha256(content-v2: norm_path+crc32+size từng member accepted, sort)+mode+cat_or_profile",
+  "idempotency_key": "sha256(content-v3: NFC portable_path+sha256+size từng member accepted, sort)+mode+cat_or_profile",
   "note": "Đây là router READ-ONLY. Không ghi Drive/registry/NLM. Dùng để chọn workflow trước khi thực thi.",
   "ok": true,
   "readback_command": "ingest-zip <file.zip> --cat <NN> --json then inspect each child_result; run live-state-diff after smoke",

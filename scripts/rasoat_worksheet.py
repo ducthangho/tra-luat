@@ -115,14 +115,28 @@ def scan(text):
     return flags
 
 
+def _safe_output_dir(raw):
+    out = Path(raw).expanduser().resolve()
+    skill_root = Path(__file__).resolve().parent.parent
+    if out == skill_root or skill_root in out.parents:
+        raise ValueError(f"OUT_DIR_TRONG_CAY_SKILL:{out}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--so-hieu", required=True)
     ap.add_argument("--variant", default="consolidated")
     ap.add_argument("--cache-dir", default=DEFAULT_CACHE)
-    ap.add_argument("--out-dir", default=".")
+    ap.add_argument("--out-dir", required=True,
+                    help="thư mục output bắt buộc, phải nằm ngoài cây skill")
     ap.add_argument("--title", default="")
     a = ap.parse_args()
+
+    try:
+        out = _safe_output_dir(a.out_dir)
+    except ValueError as e:
+        raise SystemExit(f"[rasoat_worksheet] {e}") from e
 
     doc, key = load_doc(a.so_hieu, a.variant, a.cache_dir)
     title = a.title or doc.get("title") or a.so_hieu
@@ -147,7 +161,7 @@ def main():
     n_low = len(items) - n_deep - n_cross
 
     today = datetime.date.today().isoformat()
-    out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
+    out.mkdir(parents=True, exist_ok=True)
 
     # ---- (1)+(2) PHIẾU CÔNG TÁC (markdown) ----
     ws = out / f"PHIEU_CONG_TAC_{re.sub(r'[^A-Za-z0-9]+','_',a.so_hieu)}.md"

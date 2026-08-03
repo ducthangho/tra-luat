@@ -553,6 +553,10 @@ def cmd_route_task(a) -> int:
                     recommended.append(cmd)
         if wf_id == "write_new_tool":
             recommended = ["tool-inventory --json", "route-task --task <task> --json", "edit-skill", "workflow-audit --json", "release-check --json"]
+    _card_idempotency = card.get("idempotency_contract")
+    idempotency = (dict(_card_idempotency)
+                   if isinstance(_card_idempotency, dict) and _card_idempotency
+                   else _idempotency_contract_for_workflow(wf_id))
     out = {
         "ok": bool(card.get("ok", True)),
         "schema": "route_task.v1",
@@ -565,11 +569,11 @@ def cmd_route_task(a) -> int:
         "requires_apply": risk in {"medium", "high"},
         "requires_readback": risk == "high" or wf_id in {"convert_rename", "ingest_local", "ingest_zip", "ocr_ingest", "chunk_ingest"},
         "stop_conditions": card.get("stop_conditions", []),
-        "idempotency": _idempotency_contract_for_workflow(wf_id),
-        "idempotency_key": (_idempotency_contract_for_workflow(wf_id) or {}).get("idempotency_key"),
-        "resume_command": (_idempotency_contract_for_workflow(wf_id) or {}).get("resume_command"),
-        "readback_command": (_idempotency_contract_for_workflow(wf_id) or {}).get("readback_command"),
-        "rollback_hint": (_idempotency_contract_for_workflow(wf_id) or {}).get("rollback_hint"),
+        "idempotency": idempotency,
+        "idempotency_key": idempotency.get("idempotency_key"),
+        "resume_command": idempotency.get("resume_command"),
+        "readback_command": idempotency.get("readback_command"),
+        "rollback_hint": idempotency.get("rollback_hint"),
         "note": "Đây là router READ-ONLY. Không ghi Drive/registry/NLM. Dùng để chọn workflow trước khi thực thi.",
     }
     _print_json_or_text(out, getattr(a, "json", False))

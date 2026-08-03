@@ -1630,7 +1630,8 @@ RASOAT_SPECS = [
          {"flags": ["--so-hieu", "--sohieu", "--so_hieu"], "dest": "so_hieu", "child": "--so-hieu"},
          {"flags": ["--variant"], "child": "--variant"},
          {"flags": ["--cache-dir"], "child": "--cache-dir"},
-         {"flags": ["--out-dir"], "child": "--out-dir"},
+         {"flags": ["--out-dir"], "child": "--out-dir", "required": True,
+          "help": "thư mục output BẮT BUỘC và phải nằm ngoài cây skill"},
          {"flags": ["--title"], "child": "--title"},
          # Cờ này VỐN đã được `cmd_rasoat` đọc (`getattr(a, "no_auto_cache", False)`) nhưng CHƯA TỪNG được
          # khai ở đâu — REMAINDER nuốt mất nên nó luôn False. Nay khai thật ở tầng tl (không chuyển xuống).
@@ -1643,7 +1644,8 @@ RASOAT_SPECS = [
          {"dest": "target", "nargs": "?", "metavar": "in", "fills": "inp",
           "help": "file master.json hoặc thư mục .json (tương đương --in)"},
          {"flags": ["--in", "--file"], "dest": "inp", "child": "--in"},
-         {"flags": ["--out-dir"], "child": "--out-dir"},
+         {"flags": ["--out-dir"], "child": "--out-dir", "required": True,
+          "help": "thư mục output BẮT BUỘC và phải nằm ngoài cây skill"},
          {"flags": ["--title"], "child": "--title"},
      ]},
 ]

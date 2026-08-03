@@ -1,10 +1,13 @@
 # tra-luat — HỢP ĐỒNG API SỐNG (webapp Apps Script)
 
 > **Phiên bản deploy đã đóng dấu (LIVE): `2.21.2p`** · đã xác minh `ping.version=2.21.2p`, `registry_schema=reg_cols_row_kind_v1` (27 cột) · = 2.21.2n (profile_catalog + drive_info_bulk r185/WP5) ⊕ `ingest_commit` (r198/ADR-0014 — gộp organize+register+readback 1 RTT, sub-step marker) ⊕ **2.21.2p ATOMIC registry RMW** (KI-25 `withRegLock_` ôm TRỌN đọc-sửa-ghi · KI-26 `ensureRegTabs_` không tạo tab rỗng khi đang swap · KI-27 chốt chặn `REGISTRY_SHRINK_REFUSED` + sao lưu xoay vòng `files_bak_<ts>` + `reg_bak_list`/`reg_bak_restore`); `tl.py EXPECT_VERSION=2.21.2p`. *(Dấu này PHẢI khớp EXPECT_VERSION — drift-lock r119 khoá.)*
-> **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema`. Nếu KHÁC
+> **CÁCH XÁC MINH PHIÊN BẢN (làm đầu phiên):** `gas.get('ping')` → `version/schema_version/registry_schema/capabilities`. Nếu KHÁC
 > `2.21.2p`: server đã trôi version → đối chiếu deploy. (Nếu `< 2.21.2l` thì thiếu regen2 own-scope/guard → deploy lại
 > `Code.2.21.2p.gs` qua clasp -i giữ URL; version-gate vẫn CHẶN regen2 profile cho tới khi đủ.) (Header `.gs` ghi `v2.8.0` là
 > nhãn cũ, KHÔNG phải phiên bản deploy; nguồn sự thật = `ping.version`.)
+> Riêng CAS state rà soát là feature-gated trong cùng nhãn `2.21.2p`: chỉ được ghi khi
+> `ping.capabilities` có `rasoat_state_cas`. LIVE p cũ thiếu capability sẽ bị client từ chối
+> trước mutation; deploy source p hiện hành và verify ping trước khi dùng.
 >
 > **Slot theo notebook (LIVE từ 2.21.2g):** `nlm_slots`/`nlm_preflight`/`nlm_dedup` đếm theo
 > `nlm_notebook_id == notebookId`; dòng RỖNG quy về `baseNotebookId`=VBQPPL nền (VBQPPL vẫn đếm đúng không
@@ -49,7 +52,7 @@
 (`source_delete` của NLM MCP: bất khả nghịch — hỏi người dùng trước.)
 
 **Bắt buộc POST (body lớn, không nhét query string được):**
-`upload` (b64) · `importext` (files[]) · `batch` (ops[]) · `reg_bulk` (items[]) · `createtext` (text dài) ·
+`upload` (b64) · `rasoat_state_cas` (b64) · `importext` (files[]) · `batch` (ops[]) · `reg_bulk` (items[]) · `createtext` (text dài) ·
 `reg_delete` (drive_ids[]). Còn lại GET được (kể cả `reg_upsert`).
 
 **Hằng số chốt (config mirror là nguồn sự thật):**
@@ -65,7 +68,7 @@
 
 | action | GET/POST | params bắt buộc | params tùy chọn | response (khóa chính) |
 |---|---|---|---|---|
-| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2m', schema_version:'2.21.2m', registry_schema:'reg_cols_row_kind_v1', registry_cols` |
+| `ping` | GET | — | — | `ok, pong, ts, version:'2.21.2p', schema_version:'2.21.2p', registry_schema:'reg_cols_row_kind_v1', registry_cols, capabilities[]` |
 | `config` | GET | — | — | `ok, version:'2.11.0', config, rootFolderId` (không lộ token) |
 | `readconfig` | GET | — | — | `ok, mirrored, configFileId?, updated?, downloadUrl?, config` |
 | `writeconfig` | GET | — | `webappUrl` | `ok, configFileId, name, rootFolderId, downloadUrl, config` |
@@ -112,6 +115,7 @@ folder → `refreshcats` để map đúng. Token đặt ở Script Property; mir
 | `ingest` | GET | `url` | `title, cat`\|`folderId, convert, share, register, force, soHieu/nam/loai/coquan/hieuLuc` | `ok, fileId, name, mime, converted, sha256, bytes, viewUrl, note` / `ok,skipped,reason,existing` | URL công khai → Drive (server-side, dedup sha256) |
 | `fetch` | GET | `url` | `title, cat`\|`folderId, share` | `ok, fileId, name, mime` | tải raw không convert/không dedup |
 | `upload` | **POST** | `b64`, `name` | `mime, cat`\|`folderId, convert, props, force, sourceUrl` | (như `ingest`) | bytes base64 từ container (≤35MB) |
+| `rasoat_state_cas` | **POST** | `b64`, `name='rasoat_state.json'`, `folderId` | `expect_claim` (bắt buộc khi state đã tồn tại) | `ok, fileId, old_count, cleanup[], don_sach, action_atomic:true` / `ok:false,error:THIEU_EXPECT_CLAIM\|CLAIM_LECH\|…` | LockService ôm list/read/compare/create/cleanup; không share/register, client không fallback upload rời |
 | `createtext` | **POST** | `text` | `name`\|`title, cat`\|`folderId, share, register, sourceUrl` | `ok, fileId, name, created, viewUrl, downloadUrl` | text đã normalize → GDoc (giữ newline) |
 | `copy_convert` | GET | `fileId` | `name`\|`title, cat`\|`folderId, toType, share, register` | `ok, fileId, name, mime, srcFileId, srcName, folderId, viewUrl` | file `.docx/.doc/.pdf` ĐÃ ở Drive → GDoc/GSheet (luồng đúng nhất) |
 | `fetch_url_to_drive` | GET | `url` | — | `ok, fileId, gdocId, docxId, name, isDoc` / `ok:false, reason:'gated'` | DISCOVERY .doc/.docx ungated → `_HOP_NAP`. ✓ đã vá ở 2.21.2b |

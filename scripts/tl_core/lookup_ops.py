@@ -2886,7 +2886,9 @@ def _resolve_base_gdoc(base: str, entries: list[dict]):
 #      ở đây, MỘT nguồn chân lý dùng chung cho cả `tl rasoat-merge` lẫn `rasoat_phuluc.py`.
 
 # I11: HẰNG re-export trực tiếp sang tl.py (hàm rebase đọc globals tl).
-_RASOAT_STATE_ALLOWED = ("rasoat_state.json", "rasoat_approvals.json")
+# Chỉ state có schema/validator và CAS contract. Q-APPROVALS là sổ nặng local
+# `<out-dir>/rasoat_approvals.json`; chưa có schema Drive thì KHÔNG quảng cáo như write-path.
+_RASOAT_STATE_ALLOWED = ("rasoat_state.json",)
 _RASOAT_BANG_SCHEMA = "mau_bang_tong_hop_phat_hien.v1"
 # Ô metadata Phụ lục 03 KHÔNG suy được từ khuôn §6 — để RỖNG và báo lên, TUYỆT ĐỐI không bịa.
 _RASOAT_VB_META_FIELDS = ("linh_vuc", "loai", "so_hieu", "ngay", "ten",
@@ -2998,10 +3000,14 @@ def _rasoat_vong_doi_enums():
 
     CỐ Ý là HÀM chứ không phải hằng cấp module: `tl.py` bind COPY-globals (ADR-0002) và stub farm
     chỉ nhận callable — hằng module tham chiếu từ trong hàm sẽ KHÔNG resolve qua `tl` (r90/r81 bắt)."""
-    return {"vong_doi": ("dang_ra", "tam_ngung", "da_dong", "da_dong_co_gioi_han"),
+    return {"q_units": ("pending", "doing", "done", "blocked", "stale"),
+            "loai_unit": ("ra_soat", "doi_chieu_bo_sung"),
+            "vong_doi": ("dang_ra", "tam_ngung", "da_dong", "da_dong_co_gioi_han"),
             "q_verify": ("cho_tra_no", "dat", "khong_dat", "no_treo"),
+            "q_approvals": ("cho_duyet", "da_duyet_va_da_chay", "da_quyet"),
             "q_ingest": ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped",
-                         "out_of_scope", "da_quyet", "da_quyet_va_thi_hanh")}
+                         "out_of_scope", "da_quyet", "da_quyet_va_thi_hanh"),
+            "q_nlm": ("pending", "added", "failed")}
 
 
 def _rasoat_vong_doi_findings(state):
@@ -3024,6 +3030,8 @@ def _rasoat_vong_doi_findings(state):
     ve = []
     if any(str(u.get("trang_thai")) in ("pending", "doing") for u in _q("q_units")):
         ve.append("q_units_con_pending_hoac_doing")
+    if any(str(u.get("trang_thai")) in ("blocked", "stale") for u in _q("q_units")):
+        ve.append("q_units_con_blocked_hoac_stale")
     if any(str(a.get("trang_thai")) == "cho_duyet" for a in _q("q_approvals")):
         ve.append("q_approvals_con_cho_duyet")
     qv = _q("q_verify")
@@ -3031,13 +3039,28 @@ def _rasoat_vong_doi_findings(state):
         ve.append("q_verify_thieu_trang_thai_enum")
     elif any(str(v.get("trang_thai")) == "cho_tra_no" for v in qv):
         ve.append("q_verify_con_cho_tra_no")
+    if any(str(v.get("trang_thai")) == "no_treo" for v in qv):
+        ve.append("q_verify_con_no_treo")
     if any(str(i.get("trang_thai")) not in _E["q_ingest"] for i in _q("q_ingest")):
         ve.append("q_ingest_trang_thai_ngoai_enum")
     elif any(str(i.get("trang_thai")) in ("cho_tai", "cho_nguoi_tai") for i in _q("q_ingest")):
         ve.append("q_ingest_con_van_ban_chua_lay_duoc")
     cl = st.get("session_claim")
-    if not (cl is None or (isinstance(cl, dict) and cl.get("id") is None and cl.get("released_at"))):
+    if not (isinstance(cl, dict) and cl.get("id") is None
+            and str(cl.get("released_at") or "").strip()):
         ve.append("session_claim_chua_nha")
+    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else {}
+    if str(vd.get("trang_thai") or "") in ("da_dong", "da_dong_co_gioi_han"):
+        products = {str(x or "").strip().lower().rstrip("/") for x in (vd.get("san_pham_cuoi") or [])
+                    if isinstance(x, str)}
+        if "bang_master.json" not in products or "phuluc" not in products:
+            ve.append("san_pham_cuoi_thieu_bang_master_hoac_phuluc")
+        receipts = vd.get("kiem_tra_san_pham") if isinstance(vd.get("kiem_tra_san_pham"), dict) else {}
+        needed = ("rasoat_merge_check", "rasoat_phuluc")
+        if any(not isinstance(receipts.get(k), dict)
+               or type(receipts[k].get("rc")) is not int  # bool == 0 trong Python; phải chặn `false`
+               or receipts[k].get("rc") != 0 for k in needed):
+            ve.append("kiem_tra_san_pham_thieu_receipt_rc0")
     return {"ve_hong": ve, "du_dieu_kien": not ve}
 
 
@@ -3048,9 +3071,13 @@ def _rasoat_vong_doi_dong_hop_le(state):
     `da_dong_co_gioi_han` mà `gioi_han_da_biet` RỖNG (đóng im lặng — thứ đã xảy ra thật);
     (c) `trang_thai` ngoài enum."""
     st = state if isinstance(state, dict) else {}
-    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else None
-    if vd is None:
+    vd_raw = st.get("vong_doi")
+    if vd_raw is None:
         return {"ok": True, "loi": [], "ghi_chu": "chưa khai vòng đời — hồ sơ đang rà"}
+    if not isinstance(vd_raw, dict):
+        return {"ok": False, "loi": ["VONG_DOI_KHONG_PHAI_OBJECT:" + type(vd_raw).__name__],
+                "ve_hong": _rasoat_vong_doi_findings(st)["ve_hong"]}
+    vd = vd_raw
     loi = []
     tt = str(vd.get("trang_thai") or "")
     if tt not in _rasoat_vong_doi_enums()["vong_doi"]:
@@ -3058,8 +3085,15 @@ def _rasoat_vong_doi_dong_hop_le(state):
     f = _rasoat_vong_doi_findings(st)
     if tt == "da_dong" and not f["du_dieu_kien"]:
         loi.append("KHAI_DA_DONG_NHUNG_CON_VE_HONG:" + ",".join(f["ve_hong"]))
-    if tt == "da_dong_co_gioi_han" and not (vd.get("gioi_han_da_biet") or []):
-        loi.append("DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG")
+    if tt == "da_dong_co_gioi_han":
+        gh = vd.get("gioi_han_da_biet")
+        if not isinstance(gh, list) or not gh:
+            loi.append("DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG")
+        else:
+            declared = {str(x.get("loai") or "").strip() for x in gh if isinstance(x, dict)}
+            missing = [x for x in f["ve_hong"] if x not in declared]
+            if missing:
+                loi.append("GIOI_HAN_CHUA_BAO_PHU_VE_HONG:" + ",".join(missing))
     return {"ok": not loi, "loi": loi, "ve_hong": f["ve_hong"]}
 
 
@@ -3186,13 +3220,25 @@ def _rasoat_anchor_quet(docs):
     rx = re.compile(k["text_hash"])
     ra = []
     for ten, d in (docs or []):
-        if not isinstance(d, dict) or _rasoat_unit_shape(d) != "unit_v1":
+        if not isinstance(d, dict):
             continue
-        for ph in (d.get("phat_hien") or []):
+        shape = _rasoat_unit_shape(d)
+        if shape not in ("unit_v1", "bang_v1"):
+            continue
+        rows = d.get("phat_hien") if shape == "unit_v1" else d.get("noi_dung")
+        for ph in (rows or []):
             if not isinstance(ph, dict):
                 continue
-            anc = ph.get("anchor") if isinstance(ph.get("anchor"), dict) else {}
-            deps = anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []
+            anc = ph.get("anchor")
+            if not isinstance(anc, dict):
+                ra.append({"nguon": ten, "key": str(ph.get("key") or ""), "i": None,
+                           "so_hieu": "", "loai": "anchor_thieu", "text_hash": ""})
+                continue
+            deps = anc.get("doc_deps")
+            if not isinstance(deps, list) or not deps:
+                ra.append({"nguon": ten, "key": str(ph.get("key") or ""), "i": None,
+                           "so_hieu": "", "loai": "doc_deps_thieu", "text_hash": ""})
+                continue
             for i, dep in enumerate(deps):
                 th = str(dep.get("text_hash") or "").strip() if isinstance(dep, dict) else ""
                 if isinstance(dep, dict) and rx.match(th):
@@ -3372,10 +3418,7 @@ def _rasoat_state_validate(obj) -> tuple:
     namespace `tl` (chúng phải re-export tay như `_RASOAT_STATE_ALLOWED` ở `tl.py`), nên hằng rời là một
     nguồn `NameError` chỉ lộ trên đường sản xuất. Chỉ hàm này dùng ⇒ giữ tại chỗ, hết đường trôi.
     """
-    _TT_UNIT = ("pending", "doing", "done", "blocked", "stale")
-    _TT_INGEST = ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped", "out_of_scope")
-    _TT_NLM = ("pending", "added", "failed")
-    _LOAI_UNIT = ("ra_soat", "doi_chieu_bo_sung")
+    _E = _rasoat_vong_doi_enums()
     errs = []
     if not isinstance(obj, dict):
         return False, ["ROOT_KHONG_PHAI_OBJECT:" + type(obj).__name__]
@@ -3385,9 +3428,12 @@ def _rasoat_state_validate(obj) -> tuple:
     if _sc is not None:
         if not isinstance(_sc, dict):
             errs.append("SESSION_CLAIM_KHONG_PHAI_OBJECT")
+        elif _sc.get("id") is None and str(_sc.get("released_at") or "").strip():
+            pass
         elif not str(_sc.get("id") or "").strip():
-            errs.append("SESSION_CLAIM_THIEU_ID")
-    for _khoa, _tt_hop_le in (("q_units", _TT_UNIT), ("q_ingest", _TT_INGEST), ("q_nlm", _TT_NLM)):
+            errs.append("SESSION_CLAIM_THIEU_ID_HOAC_RELEASED_AT")
+    for _khoa in ("q_units", "q_ingest", "q_nlm", "q_verify", "q_approvals"):
+        _tt_hop_le = _E[_khoa]
         _q = obj.get(_khoa)
         if _q is None:
             continue
@@ -3399,14 +3445,17 @@ def _rasoat_state_validate(obj) -> tuple:
                 errs.append(f"{_khoa.upper()}[{_i}]_KHONG_PHAI_OBJECT")
                 continue
             _tt = str(_x.get("trang_thai") or "")
-            if _tt and _tt not in _tt_hop_le:
+            if _tt not in _tt_hop_le:
                 errs.append(f"{_khoa.upper()}[{_i}].trang_thai_NGOAI_ENUM:{_tt}")
             if _khoa == "q_units":
                 if not str(_x.get("unit_id") or "").strip():
                     errs.append(f"Q_UNITS[{_i}]_THIEU_unit_id")
                 _loai = str(_x.get("loai") or "")
-                if _loai and _loai not in _LOAI_UNIT:
+                if _loai and _loai not in _E["loai_unit"]:
                     errs.append(f"Q_UNITS[{_i}].loai_NGOAI_ENUM:{_loai}")
+    _vd = _rasoat_vong_doi_dong_hop_le(obj)
+    if not _vd.get("ok"):
+        errs.extend("VONG_DOI:" + str(x) for x in (_vd.get("loi") or []))
     return (not errs), errs
 
 
@@ -3525,11 +3574,12 @@ def cmd_state_put(a) -> int:
     --confirm; đổi lại nó bị khoá bằng BA chốt máy:
       1. `_rasoat_state_scope` — chỉ đúng tên trong WRITE_PATHS_v1, fail-CLOSED;
       2. folder đích BẮT BUỘC là `_meta/` (--folder-id / TL_META_FOLDER_ID), không có mặc định root;
-      3. `--expect-claim` — TỪ CHỐI ghi khi `session_claim.id` trên Drive khác kỳ vọng (single-writer).
+      3. `--expect-claim` — so-sánh-và-ghi NGUYÊN TỬ trong GAS khi
+         `session_claim.id` trên Drive khác kỳ vọng (single-writer).
     register/share="false" ⇒ KHÔNG vào registry, KHÔNG chia sẻ link (mặc định `upload` là
     ANYONE_WITH_LINK — state để mở link công khai là rò rỉ, phải tắt TƯỜNG MINH).
-    THỨ TỰ AN TOÀN: tạo bản MỚI trước → mới dọn bản cũ. Chết giữa chừng = tồn 2 bản, `state-get`
-    lấy bản mới nhất và lượt `state-put` sau dọn nốt; đảo thứ tự thì chết giữa chừng = MẤT state."""
+    MỌI bước list/read/compare/create/cleanup nằm trong CÙNG script lock phía GAS. Client
+    KHÔNG fallback về chuỗi list/upload/trash cũ: server chưa có action nguyên tử thì fail-closed."""
     apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))   # r295 RAS-08 (xem state-get)
     name = str(getattr(a, "name", "") or "rasoat_state.json").strip()
     src = str(getattr(a, "in_file", "") or "").strip()
@@ -3565,83 +3615,68 @@ def cmd_state_put(a) -> int:
     if dry:
         _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": True, "dry_run": True,
                              "name": name, "folderId": fid, "bytes": len(body.encode("utf-8")),
-                             "se_lam": ["upload bản mới (register/share=false)", "trash bản cũ trùng tên"]}, True)
+                             "se_lam": ["GAS rasoat_state_cas: giữ ScriptLock",
+                                        "so claim + tạo bản mới + dọn bản cũ trong cùng lock"]}, True)
         return 0
     try:
         load_creds(getattr(a, "config", None), getattr(a, "profile", None))
         g = _gas()
-        olds = _rasoat_state_find(g, fid, name)
+        ping = _gas_get_retry(g, "ping")
+        caps = ping.get("capabilities") if isinstance(ping, dict) else None
+        if not isinstance(caps, list) or "rasoat_state_cas" not in caps:
+            _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                                 "step": "capability_check",
+                                 "error": "GAS_CHUA_HO_TRO_RASOAT_STATE_CAS",
+                                 "detail": ping,
+                                 "fix": "deploy references/Code.2.21.2p.gs rồi kiểm "
+                                        "ping.capabilities có rasoat_state_cas."}, True)
+            return 2
     except SystemExit as e:
         _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
                              "error": "CAN_WEBAPP_LIVE: " + str(e)}, True)
         return 2
     except Exception as e:  # noqa: BLE001
         _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
-                             "error": "LIST_FAILED: " + str(e)}, True)
+                             "error": "GAS_INIT_FAILED: " + str(e)}, True)
         return 2
     expect = str(getattr(a, "expect_claim", "") or "").strip()
-    # r295 (RAS-02, audit lõi 31-07): state ĐÃ TỒN TẠI thì `--expect-claim` là BẮT BUỘC. Bản cũ bọc trọn
-    # khối CAS trong `if expect:` ⇒ không truyền cờ là bỏ qua sạch chốt single-writer, ghi đè thẳng
-    # claim của phiên khác — trái ADR-0016, và đúng thứ chốt thứ 3 trong docstring hứa là có.
-    # Chỉ create-first (chưa có bản nào) mới được miễn.
-    if olds and not expect:
+    # r324: CAS ở client (list/read/compare/upload/trash) chỉ an toàn trong MỘT process. Hai host
+    # có thể cùng so thấy claim cũ rồi cùng ghi. ADR-0016 đã chốt LockService + RMW phía GAS,
+    # nên action này là cổng ghi duy nhất; tuyệt đối không fallback về `upload`.
+    rid = _apply_journal_start("state-put", {"name": name, "folderId": fid,
+                                              "expect_claim": expect or None,
+                                              "action": "rasoat_state_cas"})
+    try:
+        up = g.post("rasoat_state_cas", b64=_b64_text(body), name=name,
+                    folderId=fid, expect_claim=expect)
+    except Exception as e:  # noqa: BLE001
+        up = {"ok": False, "error": "GAS_CALL_FAILED: " + str(e)}
+    new_id = up.get("fileId") or up.get("id") if isinstance(up, dict) else None
+    if not isinstance(up, dict) or up.get("ok") is not True or not new_id:
+        err = str((up or {}).get("error") or "") if isinstance(up, dict) else "GAS_RESPONSE_KHONG_PHAI_OBJECT"
+        if not err or "unknown action" in err.lower() or "không hợp lệ" in err.lower():
+            err = "GAS_CHUA_HO_TRO_RASOAT_STATE_CAS"
+        _journal_append(rid, {"t": "commit", "op": "rasoat_state_cas", "ok": False,
+                              "error": err})
         _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
-                             "error": "THIEU_EXPECT_CLAIM", "so_ban_tren_drive": len(olds),
-                             "note": "state đã tồn tại ⇒ PHẢI `--expect-claim <id claim đang cầm>` "
-                                     "(single-writer, ADR-0016). Lấy id bằng `tl state-get --json` → "
-                                     "`state.session_claim.id`. Chỉ lượt TẠO MỚI mới được bỏ cờ này."}, True)
+                             "step": "rasoat_state_cas", "error": err,
+                             "claim_tren_drive": ((up or {}).get("claim_tren_drive")
+                                                   if isinstance(up, dict) else None),
+                             "claim_ky_vong": ((up or {}).get("claim_ky_vong")
+                                                if isinstance(up, dict) else expect),
+                             "so_ban_tren_drive": ((up or {}).get("old_count")
+                                                    if isinstance(up, dict) else None),
+                             "detail": up, "journal": rid,
+                             "fix": "deploy references/Code.2.21.2p.gs có action "
+                                    "rasoat_state_cas; client không fallback về upload rời."}, True)
         return 2
-    if expect:
-        import base64 as _b64
-        cur_claim, doc_ok = "", False
-        if olds:
-            # r295 (RAS-03): so CAS với bản MỚI NHẤT — cùng helper `state-get` dùng để đọc. Bản cũ lấy
-            # `olds[0]` THÔ nên khi có bản trùng tên, CAS soi bản CŨ rồi cho ghi đè bản MỚI.
-            _pick_cas, _cb_cas = _rasoat_state_newest(g, olds)
-            try:
-                r = _gas_get_retry(g, "download", fileId=str((_pick_cas or {}).get("id")))
-                cur = json.loads(_b64.b64decode(r["b64"]).decode("utf-8"))
-                cur_claim = str(((cur or {}).get("session_claim") or {}).get("id") or "")
-                doc_ok = True
-            except Exception:  # noqa: BLE001
-                doc_ok = False
-        # FAIL-CLOSED: không đọc được bản trên Drive thì KHÔNG kết luận "chắc là khớp".
-        if olds and not doc_ok:
-            _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
-                                 "error": "EXPECT_CLAIM_KHONG_KIEM_DUOC — có bản trên Drive nhưng "
-                                          "đọc/parse hỏng; từ chối ghi đè."}, True)
-            return 2
-        if olds and cur_claim != expect:
-            _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
-                                 "error": "CLAIM_LECH", "claim_tren_drive": cur_claim,
-                                 "claim_ky_vong": expect,
-                                 "note": "phiên khác đang cầm claim — theo §9 stale-claim takeover: "
-                                         "chỉ chiếm quyền khi claim quá hạn mà con trỏ tiến độ KHÔNG nhích."}, True)
-            return 2
-    rid = _apply_journal_start("state-put", {"name": name, "folderId": fid, "old": len(olds)})
-    up = g.post("upload", b64=_b64_text(body), name=name, mime="application/json",
-                folderId=fid, convert="false", register="false", share="false", force="true")
-    new_id = up.get("fileId") or up.get("id")
-    if not new_id:
-        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False, "step": "upload",
-                             "detail": up, "journal": rid}, True)
-        return 2
-    _journal_append(rid, {"t": "commit", "op": "state_upload", "key": new_id, "ok": True})
-    cleanup = []
-    for old in olds:
-        oid = str(old.get("id") or "")
-        if not oid or oid == new_id:
-            continue
-        _journal_append(rid, {"t": "intent", "op": "drive_trash", "key": oid, "set": {"restore": "action restore"}})
-        try:
-            tr = g.get("trash", fileId=oid, confirm="yes")
-        except Exception as e:  # noqa: BLE001
-            tr = {"ok": False, "error": str(e)}
-        _journal_append(rid, {"t": "commit", "op": "drive_trash", "key": oid, "ok": bool(tr.get("ok"))})
-        cleanup.append({"fileId": oid, "ok": bool(tr.get("ok"))})
-    don_ok = all(x.get("ok") for x in cleanup)
+    _journal_append(rid, {"t": "commit", "op": "rasoat_state_cas", "key": new_id,
+                          "ok": True, "old_count": up.get("old_count")})
+    cleanup = up.get("cleanup") or []
+    don_ok = bool(up.get("don_sach", not cleanup or all(x.get("ok") for x in cleanup)))
     _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": True, "name": name, "folderId": fid,
                          "fileId": new_id, "bytes": len(body.encode("utf-8")),
+                         "action_atomic": True, "old_count": up.get("old_count", 0),
                          "don_ban_cu": cleanup, "don_sach": don_ok, "journal": rid,
                          "note": None if don_ok else "bản cũ chưa dọn hết — state-get vẫn đúng "
                                                      "(lấy bản mới nhất), lượt state-put sau dọn tiếp."}, True)

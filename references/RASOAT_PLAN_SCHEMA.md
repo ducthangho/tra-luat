@@ -105,6 +105,10 @@ thái văn xuôi). Khối `vong_doi` biến "đóng" thành trạng thái máy �
   "trang_thai": "da_dong_co_gioi_han",
   "mo_luc": "…", "dong_luc": "…", "dong_boi": "…",
   "san_pham_cuoi": ["BAO_CAO_RA_SOAT.md", "BANG_MASTER.json", "phuluc/"],
+  "kiem_tra_san_pham": {
+    "rasoat_merge_check": {"rc": 0, "checked_at": "…"},
+    "rasoat_phuluc": {"rc": 0, "checked_at": "…"}
+  },
   "gioi_han_da_biet": [{"loai": "…", "so_luong": 0, "chi_tiet": []}],
   "dinh_doat": {"q_units": "…", "q_ingest": "…", "q_nlm": "…", "q_verify": "…", "q_approvals": "…"},
   "anchor_con_hieu_luc": false, "ly_do_anchor": "…",
@@ -122,7 +126,10 @@ thái văn xuôi). Khối `vong_doi` biến "đóng" thành trạng thái máy �
 3. `q_verify`: mọi mục có `trang_thai` thuộc enum; còn `cho_tra_no` ⇒ chuyển `no_treo` **và** khai giới hạn.
 4. `q_ingest`: mọi mục thuộc enum; `cho_tai`/`cho_nguoi_tai` còn lại ⇒ khai giới hạn.
 5. `session_claim` **đã nhả** (`id: null` + `released_at`).
-6. Sản phẩm cuối gộp/kết xuất được: `tl rasoat-merge --check` rc=0 · `rasoat_phuluc.py --in <master/>` rc=0.
+6. Sản phẩm cuối gộp/kết xuất được: `san_pham_cuoi` có `BANG_MASTER.json` +
+   `phuluc/`, đồng thời `kiem_tra_san_pham.rasoat_merge_check.rc=0` và
+   `kiem_tra_san_pham.rasoat_phuluc.rc=0`. Hai receipt này ghi lại kết quả `tl rasoat-merge --check`
+   và `rasoat_phuluc.py --in <master/>`; thiếu receipt = chưa chứng minh đã đóng.
 
 > **Bất biến:** đóng hồ sơ là **ĐÓNG BĂNG, không phải dọn** — KHÔNG xoá `master/`, `rasoat_bugs.md`,
 > `rasoat_approvals.json`, các `BIEN_BAN_*`.

@@ -8,10 +8,128 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 
 - **Canonical** — cây git chính thức duy nhất tại `D:\Quốc hội\tra-luat` (remote `github.com/ducthangho/tra-luat`).
   Chỉ canonical được đánh số VERSION và publish. Số version không phát từ canonical là không hợp lệ.
-- **Nhánh song song** — phiên làm việc khác (Cowork/Chat/Codex…) sửa skill trên bản copy. Sản phẩm hợp lệ duy nhất
-  của nhánh song song là **bundle** (không phải version mới, không phải publish). Xem ADR-0001.
-- **Bundle** — zip giao nộp từ nhánh song song: giữ nguyên VERSION fork-point, kèm `BUNDLE_META.json`
-  (commit gốc, danh sách file đổi, test thêm). Canonical merge bundle rồi mới đánh số.
+- **Nhánh song song** — task làm việc trong branch/worktree riêng, không đánh version và không publish. Bàn giao
+  bình thường bằng **PR bàn giao**; chỉ dùng bundle khi task không truy cập được Git. Xem ADR-0017.
+- **Work packet** — phạm vi tự đủ của một task, lưu trong GitHub Issue: mục tiêu, write set, tiêu chí hoàn tất,
+  phụ thuộc và prompt bàn giao. Task chỉ nhận việc sau khi claim được work packet.
+- **Mission** — Issue cha bao một mục tiêu có thể cần nhiều work packet và khai mission envelope cùng acceptance
+  gate. Mission chỉ hoàn tất khi gate xanh và không còn packet mở hoặc bị chặn.
+- **Mission envelope** — trần hữu hạn cho số packet, độ sâu kế nhiệm, số lần thử và thời gian chạy; chạm trần
+  chuyển mission sang PAUSE để chờ quyết định thay vì tự sinh thêm việc.
+- **Write set** — tập đường dẫn chính xác hoặc prefix thư mục mà claim lease cho phép executor sửa, được chuẩn
+  hóa theo quy tắc path portable trước khi so giao. Diff ngoài write set không đủ điều kiện bàn giao.
+- **Change-impact rule** — quan hệ có hướng từ đường dẫn kích hoạt tới phần write closure và các check bắt buộc,
+  dùng để biểu diễn coupling ẩn mà danh sách file khai tay không cho thấy. Không gọi là “nhóm tệp” vì chiều
+  ngược lại có thể không tạo cùng tác động.
+- **Change-impact ratchet** — luật biến một coupling máy vừa phát hiện nhưng policy chưa khai thành nợ hạ tầng
+  bắt buộc: packet hiện tại dừng và finding phải được phân loại thành rule/land obligation, gỡ invariant động
+  hoặc ngoại lệ có hạn; sau review packet nội dung mới nhận generation mới. Gate không tự viết policy và lỗi test
+  thông thường không tự bị suy diễn thành coupling.
+- **Effective write set** — closure bắc cầu của write set khai báo dưới change-impact policy canonical. Lease,
+  kiểm giao nhau và diff gate dùng tập hiệu lực này; policy đổi có thể làm packet phải cấp generation mới.
+- **Test fragment** — tệp regression test nguồn do đúng một packet sở hữu, đặt theo ID bền
+  `scripts/test_fragments/wp<issue>_<slug>.py`; worker auto-discover fragment nhưng không cùng sửa test harness.
+- **Bundled test module** — module test phái sinh được phiên land sinh tất định từ toàn bộ test fragment để đưa
+  vào release bundle tại `planned:scripts/tl_test_fragments_bundled.py`. Fragment vẫn giữ trong Git nhưng bị loại khỏi
+  bundle; worker không được sửa module này.
+- **Planned path** — ký hiệu `planned:<repo-relative-path>` chỉ đích đến đã chốt nhưng chưa tồn tại ở
+  protocol cutover hiện hành; packet kích hoạt phải thay ký hiệu này bằng đường dẫn repo thật trong cùng diff.
+- **Claim lease** — quyền ghi có hạn do dispatcher cấp cho đúng một executor trên một work packet, ràng buộc
+  branch, effective write set và generation. Assignee/label chỉ hiển thị lease, không phải khóa.
+- **Generation (claim)** — fencing token tăng mỗi lần claim được cấp lại; kết quả từ generation cũ không đủ điều
+  kiện bàn giao dù worker cũ hoạt động trở lại.
+- **Executor** — Claude hoặc Codex được work packet chỉ định làm bên ghi duy nhất trên feature branch. Chỉ đổi
+  executor sau khi dispatcher đã thu hồi claim cũ.
+- **Reviewer chéo** — nền tảng còn lại kiểm PR ở chế độ read-only; không triển khai đồng thời cùng executor.
+- **Worker cloud** — executor chạy ngoài máy canonical, chỉ thao tác work packet, feature branch, PR và gate
+  offline bằng quyền GitHub tối thiểu; không mang credential hay quyền ghi hệ thống LIVE.
+- **Môi trường thực thi** — trường bắt buộc của work packet, nhận `cloud` hoặc `local`, độc lập với trường
+  executor (`claude` hoặc `codex`). `cloud` là mặc định; `local` chỉ dùng khi packet cần tài nguyên cục bộ,
+  kiểm thử Windows hoặc người dùng chọn rõ.
+- **Định tuyến cloud-first** — dispatcher tôn trọng môi trường đã khai báo và không tự đổi `cloud` ↔ `local`.
+  Nếu môi trường đó không khả dụng, packet chuyển `PAUSE`; GitHub Issue/PR vẫn là trạng thái bền dùng chung
+  giữa máy tính, Android và các giao diện chat.
+- **Handoff có cấu trúc** — kết quả máy đọc được mà executor bắt buộc xuất khi kết thúc: trạng thái, tóm tắt,
+  file đã đổi, bằng chứng test, việc còn lại, đề xuất packet kế nhiệm và failure fingerprint. Đây là đầu vào duy
+  nhất để dispatcher tự tạo prompt tiếp nối; lời kể tự do trong chat không đủ để sinh việc.
+- **Khóa chống sinh trùng** — khóa ổn định gắn với từng đề xuất kế nhiệm trong một mission/generation; dispatcher
+  chỉ tạo một work packet cho mỗi khóa dù workflow bị chạy lại hoặc nhận cùng handoff nhiều lần.
+- **Packet kế nhiệm** — work packet được dispatcher sinh từ handoff đã qua kiểm tra. Packet cloud được khởi chạy
+  ngay; packet local nằm trong hàng đợi và tự chạy khi Windows host trực tuyến, không bị tự đổi sang cloud.
+- **Workflow tin cậy** — workflow điều phối/gọi agent chỉ lấy định nghĩa từ nhánh canonical; mã trên feature
+  branch không được thay đổi workflow đang cầm credential hoặc tự nâng quyền cho lần chạy hiện tại.
+- **Provider broker** — đích an ninh cho worker cloud: broker nhận danh tính GitHub OIDC và thay mặt runner gọi
+  nhà cung cấp, áp quota/phạm vi từng lần chạy để raw API key không nằm trên runner. Khóa provider riêng có giới
+  hạn trong GitHub Secret chỉ là phương án chuyển tiếp.
+- **Security paths** — workflow, policy, guard, CODEOWNERS và cấu hình điều phối; worker thường không được sửa.
+  Thay đổi các đường dẫn này cần packet hạ tầng được người dùng duyệt riêng và không được tự kích hoạt.
+- **Local controller** — tiến trình Python chạy bằng Windows Scheduled Task dưới tài khoản ít quyền, lấy packet
+  `local` đã có lease từ GitHub, tạo worktree và gọi Claude/Codex ở chế độ headless. Đây không phải generic
+  self-hosted GitHub runner và không được giữ credential LIVE.
+- **Headless worker run** — lần chạy agent tự động bằng CLI, có heartbeat/PR/handoff nhưng không được hứa sẽ hiện
+  thành chat tương tác trong ứng dụng. Remote/chat chỉ là đường can thiệp thủ công khi packet PAUSE hoặc blocked.
+- **Draft land PR** — PR tích hợp do dispatcher được phép chuẩn bị tự động sau khi các packet đủ điều kiện; chưa
+  có quyền merge canonical và không đồng nghĩa với phát hành.
+- **Cổng apply** — operation tất định `land apply` của control plane, chỉ nhận phê duyệt tường minh của người có
+  thẩm quyền cho đúng mission và head SHA đã qua land gate. Skill local, comment GitHub và workflow dispatch chỉ
+  là các client; deploy/publish LIVE vẫn là cổng thứ hai độc lập.
+- **Lệnh điều phối** — tập lệnh đóng (`/mission`, `/packet`, `/land prepare|apply`) gửi qua Issue/PR để điều khiển
+  từ máy tính hoặc Android. Chỉ lệnh của actor có trong allowlist canonical và đang có quyền GitHub `maintain`
+  trở lên mới có hiệu lực; mọi lệnh hợp lệ hoặc bị từ chối đều có audit.
+- **Dữ liệu agent không mang quyền** — comment, review và handoff do worker/reviewer tạo chỉ là dữ liệu đầu vào;
+  không thể tăng mission envelope, mở quyền LIVE, sửa security paths hoặc tự cấp quyền điều phối.
+- **Mức bảo đảm review** — trạng thái tường minh của packet: `cross_approved` (nền tảng còn lại),
+  `same_provider_approved` (phiên độc lập cùng nền tảng) hoặc `review_deferred` (chưa có reviewer). Không được
+  trình bày fallback như cross-review thành công.
+- **Circuit breaker nhà cung cấp** — trạng thái dispatcher tạm ngừng gọi một nhà cung cấp sau lỗi quota/rate-limit
+  đã phân loại. Lỗi khả dụng không tiêu thụ attempt triển khai; dispatcher chỉ thử lại sau thời điểm reset.
+- **Spec hash** — hash của nội dung work packet đã đóng băng khi vào `ready`; mọi thay đổi mục tiêu, acceptance,
+  write set, dependency, executor hoặc môi trường tạo revision mới và làm lease cũ mất hiệu lực.
+- **State projection** — JSON hiện thời trong comment do dispatcher sở hữu, dùng để đọc nhanh trạng thái Issue
+  nhưng không còn là bản sao duy nhất. Label, assignee và project board chỉ là hình chiếu UI.
+- **State event journal** — chuỗi comment sự kiện mà dispatcher chỉ nối thêm, mỗi revision mang hash trạng thái
+  và hash sự kiện trước. Nó cho phép phát hiện projection bị mất/sửa và phục hồi tất định; đứt chuỗi thì PAUSE.
+- **Recovery snapshot** — bản sao JSON xoay vòng của state/journal dùng khi mission đang chạy; artifact có thời
+  hạn chỉ là backup. Khi land, final state hash được neo vào commit canonical để tồn tại lâu dài.
+- **Durable inbox** — tập command/handoff đã tồn tại thành object GitHub có ID trước khi dispatcher xử lý. Workflow
+  trigger chỉ đánh thức reconciler, không được coi là chính hàng đợi hay bằng chứng event đã được tiêu thụ.
+- **Reconciler** — single writer đọc durable inbox theo thứ tự tất định, áp transition idempotent và ghi checkpoint
+  nối hash. Nó chạy cả theo wake-up lẫn lịch định kỳ để thu hồi event bị workflow bỏ hoặc lỗi.
+- **Vòng đời packet** — `proposed → ready → leased → running → reviewing → accepted → integrated → landed`,
+  với các nhánh `paused`, `blocked`, `cancelled` và `stale`; chỉ dispatcher tuần tự được chuyển trạng thái.
+- **Mission integration branch** — nhánh `mission/<issue>/integration` từ base SHA cố định, nhận tuần tự các PR
+  packet đã qua gate. Packet không PR thẳng vào canonical; draft land PR duy nhất đi từ integration vào canonical.
+- **Stale generation** — generation đã bị thu hồi; mọi heartbeat/push/handoff bị từ chối và branch/PR chỉ còn
+  để tham khảo. Generation mới không tự cherry-pick từ stale branch để tránh nhập kết quả chưa được xác nhận.
+- **Preserve** — lệnh có thẩm quyền giữ branch/PR stale quá thời hạn lưu mặc định; nếu không preserve, remote
+  stale được dọn có audit sau khi mission kết thúc cộng 30 ngày, còn commit SHA cuối vẫn nằm trong projection/journal.
+- **Budget guard** — giới hạn song song, số lần gọi agent, phút cloud và quota token/chi phí theo provider trong
+  mission envelope. Các trần độc lập và trần chạm trước thắng; `max_packets` không hứa đủ invocation để dùng hết
+  mọi packet/attempt. Cảnh báo ở 80%, đạt 100% thì PAUSE; chỉ actor có thẩm quyền mới được tăng và có audit.
+- **Awaiting land** — trạng thái mission đã tích hợp hết packet và có draft land PR/gate xanh nhưng đang chờ
+  người có thẩm quyền gọi `land apply` cho exact head SHA; không sinh thêm packet và chưa được gọi là complete.
+- **Mission complete** — canonical đã nhận kết quả, land gate kiểm lại xanh, không còn lease/packet mở và báo cáo
+  cuối đã ghi. Deploy chỉ nằm trong completion khi acceptance criteria của mission khai rõ yêu cầu LIVE đó.
+- **Promotion gate** — điều kiện đo được để bật nấc tự động hóa tiếp theo; mỗi nấc có kill switch và có thể quay
+  về nấc trước mà không mở thêm quyền canonical/LIVE.
+- **Foundation horizon** — phạm vi cam kết của rollout pha 1–2: repo giảm conflict và có protocol/gate an toàn
+  cho các phiên do người dùng khởi chạy; chưa được gọi là điều phối tự trị.
+- **Protocol cutover** — mốc SHA bật worker protocol mới sau khi mọi PR ghi kiểu cũ đã merge, đóng hoặc chuyển
+  đổi. Không duy trì hai lane v0/v1 lâu dài; branch cũ phải rebase/chuyển packet trước khi tiếp tục.
+- **Automation horizon** — roadmap pha 3–8, chỉ promote từng epic sau bằng chứng của nấc trước. Hoàn tất horizon
+  này mới được tuyên bố tự sinh kế nhiệm, tiếp tục khi host tắt và land xuyên thiết bị.
+- **Dispatcher shadow** — chế độ dispatcher dùng fixture/dry-run để kiểm durable inbox, reconcile, state,
+  lease/effective write set và handoff nhưng không gọi model, tạo branch hay thay đổi Issue thật.
+- **Phiên land** — vai trò tuần tự trên canonical, độc quyền gán release/test ledger, hợp nhất changelog, tái sinh
+  manifest, chạy gate phát hành, merge và deploy sau khi được người dùng cho phép.
+- **ID work-packet** — định danh bền `wp<issue>_<slug>` cho test và artifact của worker; không mang số release và
+  không bị đổi tên khi land.
+- **Changelog fragment** — ghi chú thay đổi riêng của một work packet tại `changelog.d/wp-<issue>.md`; phiên land
+  hợp nhất fragment vào changelog canonical rồi mới gán release.
+- **PR bàn giao** — pull request từ nhánh song song để canonical review và tích hợp; giữ commit gốc, diff và bằng
+  chứng test nhưng không trao quyền bump version hoặc deploy cho nhánh.
+- **Bundle** — zip bàn giao dự phòng khi task không truy cập được Git: giữ nguyên VERSION fork-point, kèm
+  `BUNDLE_META.json` (commit gốc, danh sách file đổi, test thêm). Canonical nhập bundle rồi mới đánh số.
 - **LIVE (Package)** — file zip trên Drive Package (fileId cố định) mà Cowork/Chat thực tải qua `tl_fetch.sh`.
   LIVE có thể TRỄ so canonical (drift) — kết luận "skill có lỗi X" phải nói rõ đo trên LIVE hay canonical.
 - **Deploy** — `tl drive-push` đưa zip canonical lên LIVE, giữ fileId. Luật vận hành: **xanh là deploy ngay**
@@ -21,6 +139,20 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 
 ## Chất lượng & gate
 
+- **EOL canonical** — mọi tệp text dùng LF, riêng script `*.cmd`/`*.bat` dùng CRLF; binary không qua biến đổi
+  text. Index, working tree, artifact và checkout Windows/Linux phải cùng chính sách này.
+- **Maintenance mission EOL** — đợt hạ tầng tuần tự có một **operational freeze/drain**: ngừng nhận writer mới
+  và đưa mọi writer đang sống về trạng thái đã push, bàn giao hoặc hủy trước khi đổi EOL. Trước khi dispatcher
+  tồn tại, người vận hành cưỡng chế freeze; về sau `PAUSE` và việc ngừng cấp lease cưỡng chế cùng bất biến đó.
+- **EOL base** — commit canonical đầu tiên hoàn tất policy và renormalize EOL. Mọi branch/worktree sinh trước
+  mốc này phải rebase lên EOL base trước khi được phép tiếp tục ghi hoặc nhận lease mới.
+- **Worker gate** — gate PR dùng lease/write-set, EOL và các kiểm thử offline với **manifest tạm** ngoài repo;
+  không đọc manifest committed như nguồn đúng cho feature branch và không yêu cầu worker cập nhật tệp phái sinh
+  canonical.
+- **Kích hoạt worker** — promotion boundary bật đồng thời deferred numbering và worker gate dùng manifest tạm.
+  Có một vế mà thiếu vế kia thì dispatcher chưa được cấp packet worker.
+- **Land gate** — gate tuần tự sau tích hợp: gán release, hợp nhất changelog, tái sinh manifest committed và chạy
+  full parity Windows–Linux trước khi canonical được merge hoặc deploy.
 - **Gate xanh** — đủ bộ: `--selftest` + `workflow-audit --strict` + `golden-test` + `determinism-audit --strict`
   + `gen_instructions --selftest` + `release-bundle` ×2 cùng SHA-256 + `release-verify` trong gói giải nén.
 - **Ingest thành công** — mọi hậu điều bắt buộc của phạm vi đã chọn đều được đọc lại và xác nhận đúng. Kết quả
@@ -180,6 +312,11 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 
 ## Kiến trúc skill
 
+- **Work-packet skill** — skill model-invoked cho vòng đời executor: preflight, lease, worktree, worker gate và
+  handoff; Claude và Codex dùng adapter riêng nhưng cùng đọc một protocol.
+- **Cross-review skill** — skill model-invoked cho reviewer chéo read-only trên PR.
+- **Land-packets skill** — client user-invoked cho prepare/apply từ phiên local; nó gọi cùng operation control
+  plane như GitHub/Android và không tự sở hữu doctrine hay thẩm quyền merge.
 - **Kernel (SKILL.md)** — doctrine agent đọc mỗi phiên; đích Pha F: 20-35KB, chỉ bất biến + con trỏ references.
   Quy trình đổi kernel: draft ở tệp nháp CỤC BỘ trong `references/` (tên đang dùng: `SKILL_KERNEL_DRAFT.md`;
   KHÔNG commit — chưa từng có trong lịch sử git) → user duyệt → thay thật → re-import.

@@ -232,7 +232,7 @@ tl --profile "<hồ sơ>" state-put --in <out-dir>/rasoat_state.json --expect-cl
 
 `state-put` **KHÔNG có `--confirm`** — và đó là chủ đích: mượn cổng duyệt (`profile-file-add --apply`)
 là bắt người xen MỖI lần chốt state, phá nghiệm thu ≤2 lần xen của H7. Đổi lại nó bị khoá bằng ba chốt
-máy: (1) danh sách tên ĐÓNG `rasoat_state.json`/`rasoat_approvals.json`, fail-CLOSED với mọi tên khác
+máy: (1) danh sách tên ĐÓNG chỉ `rasoat_state.json`, fail-CLOSED với mọi tên khác
 hoặc có đường dẫn; (2) folder đích BẮT BUỘC là `_meta/` (`--folder-id`/`TL_META_FOLDER_ID`, không có
 mặc định root); (3) `--expect-claim` từ chối ghi khi `session_claim.id` trên Drive đã khác (single-writer
 §9). File ghi lên `register="false" share="false"` ⇒ KHÔNG vào registry, KHÔNG mở link công khai.

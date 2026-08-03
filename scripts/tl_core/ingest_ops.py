@@ -2834,18 +2834,24 @@ def _il_stage_plan(ctx):
     # trùng dòng corpus-effective ⇒ CHẶN rc=2. Ca THAY BẢN thoát bằng cờ tường minh --replace-sohieu
     # (in dòng cũ + chuỗi hạ bản sau nạp). --resume bỏ qua (identity/plan-hash gate đã giữ);
     # --skip-live-check bỏ qua CÓ CHỦ ĐÍCH (cùng ngữ nghĩa 'bỏ dedup cross-run', rủi ro tự chịu).
-    if sohieu and not _prev and not getattr(a, "skip_live_check", False):
+    _live_dedup_entries = None
+    if (sohieu or _from_drive) and not _prev and not getattr(a, "skip_live_check", False):
         try:
-            _live_f1 = _manifest_entries(refresh=True)
+            # Cả khoá số hiệu lẫn src_id cùng dựa trên MỘT ảnh registry LIVE. Không được dùng cache
+            # hoặc biến lỗi đọc thành []: làm vậy sẽ mở cổng ingest đúng lúc không thể chứng minh
+            # nguồn chưa tồn tại.
+            _live_dedup_entries = _manifest_entries(refresh=True)
         except (SystemExit, Exception) as _f1e:  # noqa: BLE001
-            print(json.dumps({"ok": False, "step": "sohieu_dedup_live", "error": "LIVE_REGISTRY_UNAVAILABLE",
+            _dedup_step = "sohieu_dedup_live" if sohieu else "src_id_dedup_live"
+            print(json.dumps({"ok": False, "step": _dedup_step, "error": "LIVE_REGISTRY_UNAVAILABLE",
                               "detail": str(_f1e)[:200],
-                              "note": "F1 r191: dedup số hiệu phải đo trên registry LIVE — không đọc được thì "
+                              "note": "Dedup số hiệu/src_id phải đo trên registry LIVE — không đọc được thì "
                                       "KHÔNG xác minh được trùng (fail-closed, mirror S13). Sửa creds/`tl boot` "
                                       "rồi chạy lại; ép bỏ (tự chịu rủi ro trùng): --skip-live-check."},
                              ensure_ascii=False, indent=2), file=sys.stderr)
             return {"rc": 2}
-        _dups_f1 = [e for e in _ingest_dedup_sohieu_live(sohieu, _live_f1)
+    if sohieu and _live_dedup_entries is not None:
+        _dups_f1 = [e for e in _ingest_dedup_sohieu_live(sohieu, _live_dedup_entries)
                     if not (_from_drive and str(_entry_drive_id(e) or "") == _from_drive)]
         if _dups_f1:
             _rows_f1 = [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:80],
@@ -2876,12 +2882,8 @@ def _il_stage_plan(ctx):
     # KHÔNG bao giờ chạy cho chúng. `--drive-id` là đường dễ dính nhất: người dùng trỏ lại đúng tệp nguồn
     # đã nạp, `_resolve_drive_id_source` vui vẻ convert tiếp, và cổng duy nhất lại đứng sau `if sohieu`.
     # Neo theo `src_id` (tệp NGUỒN) chứ không theo `drive_id` (GDoc kết quả — mỗi lần convert một id mới).
-    if _from_drive and not _prev and not getattr(a, "skip_live_check", False):
-        try:
-            _live_i9 = _manifest_entries(refresh=False)
-        except (SystemExit, Exception):  # noqa: BLE001 — cổng F1 ở trên đã fail-closed cho ca đọc hỏng
-            _live_i9 = []
-        _same_src = [e for e in _live_i9
+    if _from_drive and _live_dedup_entries is not None:
+        _same_src = [e for e in _live_dedup_entries
                      if str(e.get("src_id") or "").strip() == _from_drive
                      and _entry_is_corpus_effective(e)]
         if _same_src and not getattr(a, "replace_sohieu", False):

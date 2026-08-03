@@ -926,6 +926,13 @@ def _load_manifest_full(refresh: bool=False) -> dict:
             full = json.loads(base64.b64decode(d["b64"]).decode("utf-8"))
         except Exception as e:
             return {"ok": False, "error": f"parse manifest JSON lỗi: {e}"}
+    # r324/ING-10: cả GWS lẫn GAS fallback phải cùng một hợp đồng. Trước đây
+    # nhánh GAS chấp nhận `{ok:true}`/object lạ, ghi cache, rồi `_manifest_entries` biến nó
+    # thành `[]` — fail-open ngay tại cổng dedup ingest.
+    if not isinstance(full, dict) or not any(isinstance(full.get(k), list)
+                                             for k in ("entries", "files", "rows")):
+        return {"ok": False, "error": "manifest thiếu entries/files/rows (list) — từ chối cache",
+                "manifestId": mid}
     full["manifestId"] = mid
     full.setdefault("ok", True)
     _atomic_write_text(p, json.dumps(full, ensure_ascii=False))
@@ -959,7 +966,18 @@ def _manifest_entries(refresh: bool=False, *, heal_dirty: bool=True) -> list[dic
                 _mk.unlink()
         except Exception:  # noqa: BLE001
             pass
-    return m.get("entries") or m.get("files") or m.get("rows") or []
+    seen_list = False
+    for key in ("entries", "files", "rows"):
+        if key in m:
+            rows = m.get(key)
+            if not isinstance(rows, list):
+                raise RuntimeError(f"MANIFEST_{key.upper()}_KHONG_PHAI_LIST")
+            seen_list = True
+            if rows:
+                return rows
+    if seen_list:
+        return []
+    raise RuntimeError("MANIFEST_THIEU_ENTRIES_FILES_ROWS_LIST")
 
 
 def _sohieu_key_entry(e: dict) -> str:

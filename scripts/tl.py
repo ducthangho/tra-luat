@@ -1604,7 +1604,8 @@ _STUB_MAP = {
         'cmd_profile_delete', 'cmd_profile_doctor', 'cmd_profile_files', 'cmd_profile_index', 'cmd_profile_info', 'cmd_profile_list',
         'cmd_profile_manifest', 'cmd_profile_rebuild_registry', 'cmd_profile_rename', 'cmd_profile_use',
         # P1 marker (v1.34.22, ADR-0003)
-        '_marker_body', '_marker_validate', '_marker_diff', '_marker_find_in_items', '_marker_read', '_marker_write',
+        '_marker_body', '_marker_validate', '_marker_diff', '_marker_profile_delete_identity',
+        '_marker_find_in_items', '_marker_list_items', '_marker_read', '_marker_write',
         '_marker_fingerprint', '_marker_required_keys', '_marker_mutation_guard',   # r184 (ADR-0012)
         '_migration_plan_finalize',   # r186 (ADR-0012 R2) — bẫy I11: symbol mới PHẢI re-export
         '_config_candidates_report', '_profile_sync_rows', '_cmd_profile_sync_impl', '_cmd_profile_backfill_markers_impl',

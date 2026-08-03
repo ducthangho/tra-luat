@@ -17703,14 +17703,16 @@ def run() -> int:
                "registryDocId": "rg", "manifestId": "mf"}
         _fp = _TL_MODULE._marker_fingerprint(_v2)
         _ok_v1, _ = _v({"schema": "tra_luat_profile.v1", "profile": "p", "rootFolderId": "r"})
-        _ok_v2, _ = _v(dict(_v2))
+        _ok_v2, _e_v2 = _v(dict(_v2))
         _ok_fp, _ = _v({**_v2, "fingerprint": _fp})
         _bad_fp, _e_fp = _v({**_v2, "fingerprint": "0" * 64})
         _miss_meta, _e_meta = _v({k: v for k, v in _v2.items() if k != "metaFolderId"})
         _miss_reg, _e_reg = _v({k: v for k, v in _v2.items() if k != "registryDocId"})
-        _lite_ok, _ = _v({"schema": "tra_luat_profile.v2", "profile": "p", "rootFolderId": "r",
-                          "metaFolderId": "m", "manifestScope": "inherit"})
-        return (_ok_v1 and _ok_v2 and _ok_fp
+        _lite = {"schema": "tra_luat_profile.v2", "profile": "p", "rootFolderId": "r",
+                 "metaFolderId": "m", "manifestScope": "inherit"}
+        _lite["fingerprint"] = _TL_MODULE._marker_fingerprint(_lite)
+        _lite_ok, _ = _v(_lite)
+        return (_ok_v1 and not _ok_v2 and "FINGERPRINT_MISSING" in _e_v2 and _ok_fp
                 and not _bad_fp and "FINGERPRINT_MISMATCH" in _e_fp
                 and not _miss_meta and any("META_FOLDER_ID" in e for e in _e_meta)
                 and not _miss_reg and any("REGISTRY_DOC_ID" in e for e in _e_reg)
@@ -18642,16 +18644,21 @@ def run() -> int:
                 and _TL_MODULE._ingest_dedup_sohieu_live("", _ents) == [])
     _t110("r191_dedup_sohieu_29_khong_bat_oan_129", _c191_dedup_sohieu_no_bat_oan)
 
-    def _run191_ingest(ns_over=None, ents=None, pdf_stats=None, src_ext=".docx"):
+    def _run191_ingest(ns_over=None, ents=None, pdf_stats=None, src_ext=".docx", manifest_error=None):
         # Harness ingest-local dùng chung F1/F4 (khuôn r114 + mock _manifest_entries ghi lại refresh-arg).
         import zipfile as _zf191
         _keys = ["load_creds", "apply_profile_offline", "_profile_policy_error", "_valid_cats",
                  "_load_phapdien", "_ingest_local_cat_gate", "_resolve_nlm_notebook", "_gas",
                  "_ingest_target", "_verify_convert_readback", "_apply_journal_start", "_journal_append",
-                 "_manifest_entries", "_verified_reg_upsert", "_imp"]
+                 "_manifest_entries", "_verified_reg_upsert", "_imp", "_resolve_drive_id_source"]
         if pdf_stats is not None:
             _keys.append("_pdf_text_layer_stats")
-        _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
+        _mods191 = [_TL_MODULE] + [m for n, m in list(_hsys.modules.items())
+                                   if n.startswith("tl_core.") and m is not None]
+        _sav = {k: [(m, getattr(m, k)) for m in _mods191 if hasattr(m, k)] for k in _keys}
+        def _set191(k, v):
+            for _m, _old in _sav[k]:
+                setattr(_m, k, v)
         _realimp = _TL_MODULE._imp
         _mrefresh = []
 
@@ -18680,27 +18687,31 @@ def run() -> int:
             def __getattr__(self, k):
                 raise AssertionError("nlm_cli không được đụng trong --no-nlm-add (r191)")
         try:
-            _TL_MODULE.load_creds = lambda *a, **k: None
-            _TL_MODULE.apply_profile_offline = lambda *a, **k: None
-            _TL_MODULE._profile_policy_error = lambda **k: None
-            _TL_MODULE._valid_cats = lambda *a, **k: {"01_An_ninh_quoc_gia"}
-            _TL_MODULE._load_phapdien = lambda: {}
-            _TL_MODULE._ingest_local_cat_gate = lambda cat, folders, pd: {
+            _set191("load_creds", lambda *a, **k: None)
+            _set191("apply_profile_offline", lambda *a, **k: None)
+            _set191("_profile_policy_error", lambda **k: None)
+            _set191("_valid_cats", lambda *a, **k: {"01_An_ninh_quoc_gia"})
+            _set191("_load_phapdien", lambda: {})
+            _set191("_ingest_local_cat_gate", lambda cat, folders, pd: {
                 "official": {"ten": "An ninh", "folder": "01_An_ninh_quoc_gia"}, "folder_exists": True,
-                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
-            _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb191", None)
-            _TL_MODULE._gas = lambda: _G191()
-            _TL_MODULE._ingest_target = (lambda *a, **k:
-                                         (_ for _ in ()).throw(AssertionError("no target: --no-nlm-add")))
-            _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
-            _TL_MODULE._apply_journal_start = lambda *a, **k: "run191"
-            _TL_MODULE._journal_append = lambda rid, rec: None
-            _TL_MODULE._manifest_entries = (lambda refresh=False, **kw:
-                                            (_mrefresh.append(refresh), list(ents or []))[1])
-            _TL_MODULE._verified_reg_upsert = lambda g, item, **kw: {"verified": True}
-            _TL_MODULE._imp = lambda name: (_BoomNC191() if name == "nlm_cli" else _realimp(name))
+                "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""})
+            _set191("_resolve_nlm_notebook", lambda nid: ("nb191", None))
+            _set191("_gas", lambda: _G191())
+            _set191("_ingest_target", (lambda *a, **k:
+                                       (_ for _ in ()).throw(AssertionError("no target: --no-nlm-add"))))
+            _set191("_verify_convert_readback", lambda g, **kw: {"ok": True, "checks": []})
+            _set191("_apply_journal_start", lambda *a, **k: "run191")
+            _set191("_journal_append", lambda rid, rec: None)
+            def _manifest191(refresh=False, **kw):
+                _mrefresh.append(refresh)
+                if manifest_error:
+                    raise RuntimeError(str(manifest_error))
+                return list(ents or [])
+            _set191("_manifest_entries", _manifest191)
+            _set191("_verified_reg_upsert", lambda g, item, **kw: {"verified": True})
+            _set191("_imp", lambda name: (_BoomNC191() if name == "nlm_cli" else _realimp(name)))
             if pdf_stats is not None:
-                _TL_MODULE._pdf_text_layer_stats = lambda p: dict(pdf_stats)
+                _set191("_pdf_text_layer_stats", lambda p: dict(pdf_stats))
             with _tf110.NamedTemporaryFile(suffix=src_ext, delete=False) as _f:
                 _fp = _f.name
             if src_ext == ".pdf":
@@ -18709,6 +18720,8 @@ def run() -> int:
                 with _zf191.ZipFile(_fp, "w") as _z:
                     _z.writestr("[Content_Types].xml", "<Types/>")
                     _z.writestr("word/document.xml", "<document>t191</document>")
+            _set191("_resolve_drive_id_source", lambda g, did: {
+                "ok": True, "local_path": _fp, "sha256": _TL_MODULE._sha256_file(Path(_fp))})
             _ns = argparse.Namespace(
                 file=_fp, name="Nghi_dinh_158_Test", sohieu="158/2025/NĐ-CP", cat="01", goc="",
                 hieuluc="", loai="Nghị định", apply=False, resume=False, auto_plan=False, text_file=None,
@@ -18728,8 +18741,10 @@ def run() -> int:
             os.unlink(_fp)
             return _rc, _plan, _be.getvalue(), _mrefresh, _ns
         finally:
-            for _k, _v in _sav.items():
-                setattr(_TL_MODULE, _k, _v)
+            # Khôi phục mọi cửa đã patch; không suy module nào là cửa thật.
+            for _k, _items in _sav.items():
+                for _m, _v in _items:
+                    setattr(_m, _k, _v)
 
     def _c191_ingest_sohieu_dup_dry_blocks():
         # F1 TDD (a) — bẫy thật 23-07: nạp lại 158-2025-ND-CP KHÔNG cờ → DRY rc=2, đo LIVE (refresh=True).
@@ -21277,10 +21292,11 @@ def run() -> int:
             r = f(st)
             if r["du_dieu_kien"] or ma not in r["ve_hong"]:
                 return False
-        # claim rỗng hẳn (None) cũng tính là đã nhả
+        # Thiếu hẳn claim KHÔNG chứng minh đã nhả; phải có id:null + released_at.
         st = _c300_vong_doi_sach()
         st["session_claim"] = None
-        return ok0 and f(st)["du_dieu_kien"] is True
+        return (ok0 and f(st)["du_dieu_kien"] is False
+                and "session_claim_chua_nha" in f(st)["ve_hong"])
     _t110("r300_vong_doi_sau_ve_dieu_kien_dong", _c300_sau_ve_dong)
 
     def _c300_dong_fail_closed():
@@ -21288,26 +21304,37 @@ def run() -> int:
         # RỖNG (đóng im lặng — đã xảy ra thật trên hồ sơ BHXH) · trang_thai ngoài enum.
         from tl_core import lookup_ops as _lo300
         g = _lo300._rasoat_vong_doi_dong_hop_le
+        _proof300 = {"san_pham_cuoi": ["BANG_MASTER.json", "phuluc/"],
+                     "kiem_tra_san_pham": {"rasoat_merge_check": {"rc": 0},
+                                           "rasoat_phuluc": {"rc": 0}}}
         ok1 = g({})["ok"] is True                                   # chưa khai vòng đời ⇒ không phán
         st = _c300_vong_doi_sach()
-        st["vong_doi"] = {"trang_thai": "da_dong"}
+        st["vong_doi"] = {"trang_thai": "da_dong", **_proof300}
         ok2 = g(st)["ok"] is True                                   # sạch + khai da_dong ⇒ hợp lệ
         st2 = _c300_vong_doi_sach()
         st2["q_approvals"] = [{"trang_thai": "cho_duyet"}]
-        st2["vong_doi"] = {"trang_thai": "da_dong"}
+        st2["vong_doi"] = {"trang_thai": "da_dong", **_proof300}
         r2 = g(st2)
         ok3 = (not r2["ok"]) and any(x.startswith("KHAI_DA_DONG_NHUNG_CON_VE_HONG") for x in r2["loi"])
         st3 = dict(st2)
-        st3["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han", "gioi_han_da_biet": []}
+        st3["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han", "gioi_han_da_biet": [],
+                            **_proof300}
         ok4 = "DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG" in g(st3)["loi"]
         st4 = dict(st2)
         st4["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han",
-                                            "gioi_han_da_biet": [{"loai": "de_xuat_chua_dinh_doat"}]}
-        ok5 = g(st4)["ok"] is True                                  # có khai giới hạn ⇒ chấp nhận
+                            "gioi_han_da_biet": [{"loai": "q_approvals_con_cho_duyet"}],
+                            **_proof300}
+        ok5 = g(st4)["ok"] is True                                  # khai ĐÚNG vế hỏng ⇒ chấp nhận
         st5 = _c300_vong_doi_sach()
         st5["vong_doi"] = {"trang_thai": "dong_roi"}
         ok6 = any(x.startswith("TRANG_THAI_NGOAI_ENUM") for x in g(st5)["loi"])
-        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+        st6 = _c300_vong_doi_sach()
+        st6["vong_doi"] = "da_dong"
+        ok7 = "VONG_DOI_KHONG_PHAI_OBJECT:str" in g(st6)["loi"]
+        st7 = _c300_vong_doi_sach()
+        st7["vong_doi"] = {"trang_thai": "da_dong"}
+        ok8 = any("kiem_tra_san_pham_thieu_receipt_rc0" in x for x in g(st7)["loi"])
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
     _t110("r300_vong_doi_dong_fail_closed", _c300_dong_fail_closed)
 
     def _c313_anchor_khuon_findings():
@@ -21818,15 +21845,14 @@ def run() -> int:
         _src = (_ROOT209 / "scripts" / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8", errors="replace")
         _blk = _src[_src.find("def _il_stage_plan"):_src.find("def _il_stage_confirm")]
         ok0 = "SOURCE_ALREADY_INGESTED" in _blk and "src_id_dedup_live" in _blk
-        # Cổng mới KHÔNG được nấp sau `if sohieu` — phải neo `_from_drive`, độc lập với số hiệu.
+        # Cổng mới dùng MỘT ảnh LIVE chung cho số hiệu/src_id; điều kiện phải mở khi CHỈ có `_from_drive`.
         _i_new = _blk.find("src_id_dedup_live")
-        _i_f1 = _blk.find("if sohieu and not _prev")
-        ok1 = _i_f1 != -1 and _i_new > _i_f1                      # nằm SAU cổng F1, KHÔNG lồng trong nó
-        # CHỈ lấy DÒNG điều kiện (không lấy cả thân) — thân có `replace_sohieu` nên so chuỗi cả khối
-        # sẽ báo nhầm là "có dính số hiệu".
-        _i_cond = _blk.find("if _from_drive and not _prev")
+        _i_f1 = _blk.find("if (sohieu or _from_drive) and not _prev")
+        ok1 = _i_f1 != -1 and _i_new > _i_f1
+        _i_cond = _blk.find("if _from_drive and _live_dedup_entries is not None")
         _cond = _blk[_i_cond:_blk.find("\n", _i_cond)]
-        ok2 = _i_cond != -1 and "_from_drive" in _cond and "sohieu" not in _cond  # cổng KHÔNG gate theo số hiệu
+        ok2 = (_i_cond != -1 and "_from_drive" in _cond and "sohieu" not in _cond
+               and "_manifest_entries(refresh=False)" not in _blk)
         # Neo theo src_id (tệp NGUỒN), KHÔNG theo drive_id (GDoc kết quả — mỗi lần convert một id mới).
         ok3 = 'str(e.get("src_id") or "").strip() == _from_drive' in _blk
         # Có đường thoát tường minh + chặn TRƯỚC khi rẽ DRY/apply (chặn cả DRY = thấy sớm, không ghi gì).
@@ -22421,17 +22447,20 @@ def run() -> int:
         # CHIỀU NGƯỢC — mọi lối thoát khỏi `_meta/` đều phải bị chặn:
         _xau = ["", None, "   ", "x.json", "../rasoat_state.json", "a/rasoat_state.json",
                 "a\\rasoat_state.json", ".rasoat_state.json", "rasoat_state.json.bak",
-                "tra_luat_registry", "RASOAT_STATE.JSON"]
+                "rasoat_approvals.json", "tra_luat_registry", "RASOAT_STATE.JSON"]
         ok1 = all(_m._rasoat_state_scope(n)[0] is False for n in _xau)
         ok2 = all(isinstance(_m._rasoat_state_scope(n)[1], str) and _m._rasoat_state_scope(n)[1]
                   for n in _xau)                                     # lý do TỪ CHỐI luôn nói ra
         _src = (_ROOT209 / "scripts" / "tl_core" / "lookup_ops.py").read_text(encoding="utf-8", errors="replace")
-        _blk = _src[_src.find("def cmd_state_put"):]
-        # `upload` mặc định ANYONE_WITH_LINK + ghi registry ⇒ state để mặc định là RÒ RỈ + bẩn registry.
-        # Khoá 3 tham số này ở NGUỒN: mất một cái là đỏ, không đợi ai đọc lại code.
-        ok3 = all(s in _blk for s in ('register="false"', 'share="false"', 'force="true"'))
-        # THỨ TỰ AN TOÀN: upload bản mới TRƯỚC, trash bản cũ SAU (đảo lại = chết giữa chừng mất state)
-        ok4 = _blk.find('g.post("upload"') < _blk.find('g.get("trash"')
+        _blk = _src[_src.find("def cmd_state_put"):_src.find("def cmd_rasoat_merge")]
+        # r324: cổng ghi duy nhất là CAS server-side; client không fallback sang upload rời.
+        ok3 = ('g.post("rasoat_state_cas"' in _blk and 'g.post("upload"' not in _blk
+               and 'action_atomic' in _blk)
+        # GAS giữ CÙNG ScriptLock cho list/read/compare/create/cleanup và vẫn create-first.
+        _gs = (_ROOT209 / "references" / "Code.2.21.2p.gs").read_text(encoding="utf-8", errors="replace")
+        _gblk = _gs[_gs.find("function doRasoatStateCas_"):_gs.find("function doCreateText_")]
+        ok4 = ("withRegLock_(function()" in _gblk
+               and _gblk.find("Drive.Files.create") < _gblk.find("setTrashed(true)"))
         # không có --confirm là CHỦ ĐÍCH, nhưng cổng thật phải được khai trong registry
         import tl_core.command_registry as _cr213
         ok5 = (_cr213.COMMAND_META["state-put"].get("builtin_gate") == "rasoat_state_scope_guard"
@@ -25653,11 +25682,16 @@ def run() -> int:
     #   RAS-08 `metaFolderId` chỉ nạp được qua profile ⇒ **rc=2 META_FOLDER_ID_TRỐNG** (áp profile SAU khi
     #          đã giải folder nên `--profile` bị bỏ qua sạch)
     class _FakeG293:
-        def __init__(self, files, docs):
-            self.files, self.docs, self.goi = files, docs, []
+        def __init__(self, files, docs, unsupported=False):
+            self.files, self.docs, self.goi = list(files), dict(docs), []
+            self.unsupported, self.writes, self.n = unsupported, 0, 0
 
         def get(self, action, **kw):
             self.goi.append(("get", action, kw))
+            if action == "ping":
+                return ({"ok": True, "version": "2.21.2p", "capabilities": []}
+                        if self.unsupported else
+                        {"ok": True, "version": "2.21.2p", "capabilities": ["rasoat_state_cas"]})
             if action == "list":
                 return {"items": list(self.files)}
             if action == "info":
@@ -25671,13 +25705,42 @@ def run() -> int:
 
         def post(self, action, **kw):
             self.goi.append(("post", action, kw))
-            return {"fileId": "moi", "ok": True}
+            if action != "rasoat_state_cas" or self.unsupported:
+                return {"ok": False, "error": "unknown action: " + str(action)}
+            import base64 as _b293
+            olds = [f for f in self.files if f.get("name") == kw.get("name")
+                    and f.get("type") != "folder"]
+            expect = str(kw.get("expect_claim") or "")
+            if olds and not expect:
+                return {"ok": False, "error": "THIEU_EXPECT_CLAIM", "old_count": len(olds)}
+            if olds:
+                newest = sorted(olds, key=lambda f: (str(f.get("mt") or ""), str(f.get("id") or "")),
+                                reverse=True)[0]
+                cur = str(((self.docs.get(newest.get("id")) or {}).get("session_claim") or {}).get("id") or "")
+                if cur != expect:
+                    return {"ok": False, "error": "CLAIM_LECH", "claim_tren_drive": cur,
+                            "claim_ky_vong": expect, "old_count": len(olds)}
+            self.n += 1
+            fid = "cas%d" % self.n
+            incoming = json.loads(_b293.b64decode(kw.get("b64")).decode("utf-8"))
+            old_ids = {str(f.get("id")) for f in olds}
+            self.files = [f for f in self.files if str(f.get("id")) not in old_ids]
+            for oid in old_ids:
+                self.docs.pop(oid, None)
+            self.files.append({"id": fid, "name": kw.get("name"), "type": "file",
+                               "mt": "2026-08-03T10:%02d:00Z" % self.n})
+            self.docs[fid] = incoming
+            self.writes += 1
+            return {"fileId": fid, "ok": True, "old_count": len(olds),
+                    "cleanup": [{"fileId": x, "ok": True} for x in sorted(old_ids)],
+                    "don_sach": True, "action_atomic": True}
 
-    def _put293(files, docs, body, expect=None, env_meta="F_META", profile_nap=None):
+    def _put293(files, docs, body, expect=None, env_meta="F_META", profile_nap=None,
+                unsupported=False):
         """Chạy `cmd_state_put` THẬT; trả (rc, out, da_upload)."""
         import tempfile as _tf293
         _sav = {}
-        _g293 = _FakeG293(files, docs)
+        _g293 = _FakeG293(files, docs, unsupported=unsupported)
         _p293 = Path(_tf293.mkdtemp()) / "in.json"
         _p293.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
         _env_cu = _hos.environ.get("TL_META_FOLDER_ID")
@@ -25702,7 +25765,7 @@ def run() -> int:
                     dry_run=False, folder_id="", json=True, expect_claim=expect, deterministic=True))
             _txt = _b.getvalue()
             return (_rc, json.loads(_txt[_txt.find("{"):]) if "{" in _txt else {},
-                    any(c[0] == "post" and c[1] == "upload" for c in _g293.goi))
+                    _g293.writes > 0)
         finally:
             _mpr261(_sav)
             if _env_cu is None:
@@ -25745,6 +25808,11 @@ def run() -> int:
     _rc293g, _o293g, _up293g = _put293([], {}, _ST293, expect=None)
     cases.append(("r295_state_put_tao_moi_van_duoc_mien_expect_claim",
                   _rc293g == 0 and _o293g.get("ok") is True and _up293g is True))
+    # r324: server cũ chưa có CAS phải dừng; client không được fallback về upload rời.
+    _rc293h, _o293h, _up293h = _put293([], {}, _ST293, unsupported=True)
+    cases.append(("r324_state_put_server_cu_fail_closed_khong_fallback_upload",
+                  _rc293h == 2 and _o293h.get("error") == "GAS_CHUA_HO_TRO_RASOAT_STATE_CAS"
+                  and _up293h is False))
 
     # ═══ r298 (GATE-06 — T0-E): CHẠY KHÔ worklist A3→A6 trên ĐƯỜNG SẢN XUẤT ═══
     # Hai ca `r210_loop_khong_ghi_trong_cay` / `r210_agent_prompt_dung_schema` là LINT TÀI LIỆU (đã hạ
@@ -25759,6 +25827,8 @@ def run() -> int:
             self.files, self.docs, self.n, self.up, self.trash = [], {}, 0, 0, 0
 
         def get(self, action, **kw):
+            if action == "ping":
+                return {"ok": True, "version": "2.21.2p", "capabilities": ["rasoat_state_cas"]}
             if action == "list":
                 return {"items": list(self.files)}
             if action == "info":
@@ -25777,16 +25847,33 @@ def run() -> int:
             return {"ok": True}
 
         def post(self, action, **kw):
-            if action == "upload":
+            if action == "rasoat_state_cas":
                 import base64 as _b298
+                olds = [f for f in self.files if f.get("name") == kw.get("name")]
+                expect = str(kw.get("expect_claim") or "")
+                if olds and not expect:
+                    return {"ok": False, "error": "THIEU_EXPECT_CLAIM", "old_count": len(olds)}
+                if olds:
+                    newest = sorted(olds, key=lambda f: (f.get("mt", ""), f.get("id", "")),
+                                    reverse=True)[0]
+                    current = str(((self.docs.get(newest["id"]) or {}).get("session_claim") or {}).get("id") or "")
+                    if current != expect:
+                        return {"ok": False, "error": "CLAIM_LECH", "claim_tren_drive": current}
                 self.n += 1
                 self.up += 1
                 _fid = "u%d" % self.n
+                _old_ids = {f["id"] for f in olds}
+                self.files = [f for f in self.files if f["id"] not in _old_ids]
+                for _oid in _old_ids:
+                    self.docs.pop(_oid, None)
+                self.trash += len(_old_ids)
                 self.files.append({"id": _fid, "name": kw.get("name"), "type": "file",
                                    "mt": "2026-08-01T10:%02d:00Z" % self.n})
                 self.docs[_fid] = json.loads(_b298.b64decode(kw.get("b64")).decode("utf-8"))
-                return {"fileId": _fid, "ok": True}
-            return {"ok": True}
+                return {"fileId": _fid, "ok": True, "old_count": len(olds),
+                        "cleanup": [{"fileId": x, "ok": True} for x in sorted(_old_ids)],
+                        "don_sach": True, "action_atomic": True}
+            return {"ok": False, "error": "unknown action: " + str(action)}
 
     def _phien298(g, fn):
         """Chạy `fn()` với GAS giả `g` đã gắn vào đường sản xuất (khuôn `_put293`)."""
@@ -27267,13 +27354,16 @@ def run() -> int:
                   and "--dry" not in _argv("titles", ["--from-nlm", "nb", "--apply"])
                   and "--apply" in _argv("orchestrate", ["end", "--apply"])
                   and "--dry" not in _argv("orchestrate", ["end", "--apply"]))
-        _khong_ghi = ("--dry" not in _argv("worksheet", ["18/VBHN-VPQH"])
-                      and "--dry" not in _argv("phuluc", ["m.json"]))
+        _od = str(_P110(_tf110.gettempdir()) / "r310-out")
+        _khong_ghi = ("--dry" not in _argv("worksheet", ["18/VBHN-VPQH", "--out-dir", _od])
+                      and "--dry" not in _argv("phuluc", ["m.json", "--out-dir", _od]))
         # positional vẫn map sang cờ chính (hồi quy #4) + alias `--sohieu`/`--file`
-        _pos = (_argv("worksheet", ["18/VBHN-VPQH"])[:2] == ["--so-hieu", "18/VBHN-VPQH"]
-                and _argv("worksheet", ["--sohieu", "x"])[:2] == ["--so-hieu", "x"]
-                and _argv("phuluc", ["m.json"])[:2] == ["--in", "m.json"]
-                and _argv("phuluc", ["--file", "m.json"])[:2] == ["--in", "m.json"])
+        _pos = (_argv("worksheet", ["18/VBHN-VPQH", "--out-dir", _od])[:2]
+                == ["--so-hieu", "18/VBHN-VPQH"]
+                and _argv("worksheet", ["--sohieu", "x", "--out-dir", _od])[:2]
+                == ["--so-hieu", "x"]
+                and _argv("phuluc", ["m.json", "--out-dir", _od])[:2] == ["--in", "m.json"]
+                and _argv("phuluc", ["--file", "m.json", "--out-dir", _od])[:2] == ["--in", "m.json"])
         return bool(_tran and _apply and _khong_ghi and _pos)
     _t110("r310_chay_tran_chi_doc_apply_moi_ghi", _c309_chay_tran_chi_doc_apply_moi_ghi)
 
@@ -27953,6 +28043,275 @@ def run() -> int:
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
 
     _t110("r319_khong_bien_tuy_chon_thanh_chan_cung", _c319_khong_bien_tuy_chon_thanh_chan_cung)
+
+    # ---- r323: ingest-local nguồn Drive phải fail-closed khi registry LIVE không đọc được --------
+    def _c323_ingest_drive_blank_sohieu_registry_fail_closed():
+        """ING-01: src_id dedup không được biến lỗi registry thành danh sách rỗng rồi cho DRY đi tiếp."""
+        _rc, _plan, _err, _refresh, _ = _run191_ingest(
+            ns_over={"file": None, "drive_id": "SRC-R323", "sohieu": ""},
+            manifest_error="LIVE_DOWN_R323")
+        return (_rc == 2 and not _plan.get("mode") and _refresh == [True]
+                and "src_id_dedup_live" in _err and "LIVE_REGISTRY_UNAVAILABLE" in _err)
+
+    _t110("r323_ingest_drive_blank_sohieu_registry_fail_closed",
+          _c323_ingest_drive_blank_sohieu_registry_fail_closed)
+
+    def _c324_manifest_entries_malformed_live_fail_closed():
+        _saved = {}
+        try:
+            _mp261(_saved, "_load_manifest_full", lambda *a, **k: {
+                "ok": True, "manifestId": "M324", "message": "shape lạ"})
+            try:
+                _TL_MODULE._manifest_entries(refresh=True)
+                return False
+            except RuntimeError as _e:
+                _blocked = "MANIFEST_THIEU_ENTRIES_FILES_ROWS_LIST" in str(_e)
+            _mp261(_saved, "_load_manifest_full", lambda *a, **k: {
+                "ok": True, "entries": [], "files": [{"drive_id": "D324"}]})
+            return (_blocked and _TL_MODULE._manifest_entries(refresh=True)
+                    == [{"drive_id": "D324"}])
+        finally:
+            _mpr261(_saved)
+
+    _t110("r324_manifest_live_malformed_shape_fail_closed",
+          _c324_manifest_entries_malformed_live_fail_closed)
+
+    def _c323_route_task_uses_loaded_card_idempotency():
+        """WF-01: router không được phủ metadata mới của card bằng bảng tĩnh đã cũ hoặc thiếu."""
+        for _task in ("ingest_zip", "ocr_pdf_scan", "large_doc_chunk"):
+            _buf = _io110.StringIO()
+            with _ctx110.redirect_stdout(_buf):
+                _rc = cmd_route_task(argparse.Namespace(
+                    task=_task, task_pos=None, json=True, deterministic=True))
+            _out = json.loads(_buf.getvalue())
+            _card_contract = (_out.get("workflow") or {}).get("idempotency_contract")
+            if (_rc != 0 or not isinstance(_card_contract, dict) or not _card_contract
+                    or _out.get("idempotency") != _card_contract
+                    or _out.get("idempotency_key") != _card_contract.get("idempotency_key")
+                    or _out.get("resume_command") != _card_contract.get("resume_command")
+                    or _out.get("readback_command") != _card_contract.get("readback_command")
+                    or _out.get("rollback_hint") != _card_contract.get("rollback_hint")):
+                return False
+        return True
+
+    _t110("r323_route_task_card_idempotency_authoritative",
+          _c323_route_task_uses_loaded_card_idempotency)
+
+    def _c323_marker_business_list_error_fail_closed():
+        class _G(_FkG183):
+            def get(self, action, **kw):
+                if action == "list":
+                    self.calls.append((action, kw))
+                    return {"ok": False, "error": "PERMISSION_DENIED"}
+                return super().get(action, **kw)
+        _g = _G(_body183)
+        _w = _TL_MODULE._marker_write(_g, "meta323", dict(_body183), run_id=None)
+        _r = _TL_MODULE._marker_read(_g, "root323", meta_id="meta323")
+        return (_w.get("ok") is False and _w.get("status") == "PARTIAL"
+                and _w.get("enumerate_ok") is False and _w.get("proven_single") is False
+                and "MARKER_LIST_FAILED" in str(_w.get("enumerate_error"))
+                and _r.get("found") is False and "MARKER_LIST_FAILED" in str(_r.get("error")))
+
+    _t110("r323_marker_business_list_error_fail_closed",
+          _c323_marker_business_list_error_fail_closed)
+
+    def _c323_profile_delete_destructive_requires_manifest_and_marker():
+        import types as _types323
+        _saved = {}
+        class _G:
+            def get(self, action, **kw):
+                if action == "list":
+                    return {"ok": True, "items": []}
+                raise AssertionError(f"Drive mutation không được gọi: {action}")
+        class _NC:
+            def __init__(self): self.deleted = []
+            def source_delete(self, sid):
+                self.deleted.append(sid)
+                return {"ok": True}
+        _nc = _NC()
+        _refresh_seen = []
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _cfgp = _P110(_d) / "config.json"
+                _cfg0 = {"defaultProfile": "vbqppl", "profiles": {
+                    "vbqppl": {"rootFolderId": "R0"},
+                    "P323": {"rootFolderId": "R323", "metaFolderId": "M323",
+                             "registryDocId": "REG323", "manifestId": "MAN323",
+                             "notebookId": "NB323"}}}
+                _cfgp.write_text(json.dumps(_cfg0, ensure_ascii=False), encoding="utf-8")
+                _mp261(_saved, "_gas", lambda: _G())
+                _mp261(_saved, "_imp", lambda name: _nc)
+                _ns = _types323.SimpleNamespace(
+                    name="P323", config=str(_cfgp), refresh=False, apply=True, confirm="yes",
+                    delete_nlm_sources=True, trash_assets=False, json=True, deterministic=True)
+
+                def _manifest_ok(*args, **kwargs):
+                    _refresh_seen.append(bool(args[2] if len(args) > 2 else kwargs.get("refresh")))
+                    return ([{"drive_id": "D323", "nlm_source_id": "S323",
+                              "nlm_status": "pushed"}], None)
+                def _manifest_fail(*args, **kwargs):
+                    _refresh_seen.append(bool(args[2] if len(args) > 2 else kwargs.get("refresh")))
+                    return [], "MANIFEST_DOWN"
+                _mp261(_saved, "_profile_manifest_entries_for", _manifest_ok)
+                _err1 = _io110.StringIO()
+                with _ctx110.redirect_stderr(_err1):
+                    _rc1 = _TL_MODULE.cmd_profile_delete(_ns)
+
+                _mp261(_saved, "_profile_manifest_entries_for", _manifest_fail)
+                _err2 = _io110.StringIO()
+                with _ctx110.redirect_stderr(_err2):
+                    _rc2 = _TL_MODULE.cmd_profile_delete(_ns)
+
+                # Trash-only cũng là phá hủy: manifest refresh lỗi phải chặn trước marker/Drive.
+                _ns_trash_manifest = _types323.SimpleNamespace(
+                    name="P323", config=str(_cfgp), refresh=False, apply=True, confirm="yes",
+                    delete_nlm_sources=False, trash_assets=True, json=True, deterministic=True)
+                _err2_trash = _io110.StringIO()
+                with _ctx110.redirect_stderr(_err2_trash):
+                    _rc2_trash = _TL_MODULE.cmd_profile_delete(_ns_trash_manifest)
+
+                # Marker v2 hợp lệ nhưng root khác config: trước r324 vẫn xóa S323.
+                _cfgp.write_text(json.dumps(_cfg0, ensure_ascii=False), encoding="utf-8")
+                _mp261(_saved, "_profile_manifest_entries_for", _manifest_ok)
+                _prof_drift = dict(_cfg0["profiles"]["P323"], rootFolderId="R-MARKER")
+                _marker_drift = _TL_MODULE._marker_body("P323", _prof_drift,
+                                                        now="2026-08-03T00:00:00Z")
+                _mp261(_saved, "_marker_read", lambda *a, **k: {
+                    "found": True, "marker": _marker_drift, "marker_file_ids": ["MK323"]})
+                _err3 = _io110.StringIO()
+                with _ctx110.redirect_stderr(_err3):
+                    _rc3 = _TL_MODULE.cmd_profile_delete(_ns)
+
+                _after = json.loads(_cfgp.read_text(encoding="utf-8"))
+                _prof_match = _cfg0["profiles"]["P323"]
+                _marker_match = _TL_MODULE._marker_body("P323", _prof_match,
+                                                        now="2026-08-03T00:00:00Z")
+                _identity_ok = not _TL_MODULE._marker_profile_delete_identity(
+                    _marker_match, _prof_match, delete_nlm=True)
+                _inherit_ok = not _TL_MODULE._marker_profile_delete_identity(
+                    {"schema": "tra_luat_profile.v2", "rootFolderId": "RI", "metaFolderId": "MI"},
+                    {"rootFolderId": "RI", "metaFolderId": "MI"}, trash_assets=True)
+                # Hai profile trỏ cùng registry: trash-assets phải chặn trước marker/mutation.
+                _cfg_shared = json.loads(json.dumps(_cfg0))
+                _cfg_shared["profiles"]["P-KHAC"] = {"rootFolderId": "R323",
+                                                       "registryDocId": "REG323"}
+                _cfgp.write_text(json.dumps(_cfg_shared, ensure_ascii=False), encoding="utf-8")
+                _ns_trash = _types323.SimpleNamespace(
+                    name="P323", config=str(_cfgp), refresh=False, apply=True, confirm="yes",
+                    delete_nlm_sources=False, trash_assets=True, json=True, deterministic=True)
+                _err4 = _io110.StringIO()
+                with _ctx110.redirect_stderr(_err4):
+                    _rc4 = _TL_MODULE.cmd_profile_delete(_ns_trash)
+                _after_shared = json.loads(_cfgp.read_text(encoding="utf-8"))
+                return (_rc1 == 2 and "MARKER_NOT_FOUND" in _err1.getvalue()
+                        and _rc2 == 2 and "PROFILE_DELETE_MANIFEST_UNAVAILABLE" in _err2.getvalue()
+                        and _rc2_trash == 2
+                        and "PROFILE_DELETE_MANIFEST_UNAVAILABLE" in _err2_trash.getvalue()
+                        and _rc3 == 2 and "PROFILE_DELETE_MARKER_CONFIG_DRIFT" in _err3.getvalue()
+                        and _refresh_seen and all(_refresh_seen)
+                        and _identity_ok and _inherit_ok
+                        and _rc4 == 2 and "PROFILE_DELETE_SHARED_ASSETS" in _err4.getvalue()
+                        and not _nc.deleted and _after == _cfg0 and _after_shared == _cfg_shared)
+        finally:
+            _mpr261(_saved)
+
+    _t110("r323_profile_delete_destructive_fail_closed",
+          _c323_profile_delete_destructive_requires_manifest_and_marker)
+
+    def _c323_state_validator_full_vocab_and_lifecycle():
+        _valid = {"schema": "rasoat_plan.v1",
+                  "session_claim": {"id": None, "released_at": "2026-08-03T00:00:00Z"},
+                  "q_units": [{"unit_id": "u1", "trang_thai": "done", "loai": "ra_soat"}],
+                  "q_ingest": [{"trang_thai": "da_quyet"}],
+                  "q_nlm": [{"trang_thai": "added"}],
+                  "q_verify": [{"trang_thai": "dat"}],
+                  "q_approvals": [{"trang_thai": "da_duyet_va_da_chay"}],
+                  "vong_doi": {"trang_thai": "da_dong",
+                                "san_pham_cuoi": ["BANG_MASTER.json", "phuluc/"],
+                                "kiem_tra_san_pham": {
+                                    "rasoat_merge_check": {"rc": 0},
+                                    "rasoat_phuluc": {"rc": 0}}}}
+        _ok, _errs = _TL_MODULE._rasoat_state_validate(_valid)
+        _bad = json.loads(json.dumps(_valid))
+        _bad["q_units"][0]["trang_thai"] = "pending"
+        _bad["q_verify"][0]["trang_thai"] = "DA_TRA_NO"
+        _bad["q_approvals"][0]["trang_thai"] = "xong"
+        _bok, _berrs = _TL_MODULE._rasoat_state_validate(_bad)
+        _rc, _out, _uploaded = _put293([], {}, _bad)
+        _missing_claim = json.loads(json.dumps(_valid)); _missing_claim.pop("session_claim")
+        _blocked = json.loads(json.dumps(_valid)); _blocked["q_units"][0]["trang_thai"] = "blocked"
+        _no_treo = json.loads(json.dumps(_valid)); _no_treo["q_verify"][0]["trang_thai"] = "no_treo"
+        _wrong_type = json.loads(json.dumps(_valid)); _wrong_type["vong_doi"] = "da_dong"
+        _limited = json.loads(json.dumps(_valid))
+        _limited["q_units"][0]["trang_thai"] = "blocked"
+        _limited["q_verify"][0]["trang_thai"] = "no_treo"
+        _limited["vong_doi"] = {
+            **json.loads(json.dumps(_valid["vong_doi"])),
+            "trang_thai": "da_dong_co_gioi_han",
+            "gioi_han_da_biet": [{"loai": "khong_lien_quan"}],
+        }
+        _limited_ok = json.loads(json.dumps(_limited))
+        _limited_ok["vong_doi"]["gioi_han_da_biet"] = [
+            {"loai": "q_units_con_blocked_hoac_stale", "so_luong": 1},
+            {"loai": "q_verify_con_no_treo", "so_luong": 1}]
+        _receipt_bool = json.loads(json.dumps(_valid))
+        _receipt_bool["vong_doi"]["kiem_tra_san_pham"]["rasoat_merge_check"]["rc"] = False
+        _edge_results = [_TL_MODULE._rasoat_state_validate(x) for x in
+                         (_missing_claim, _blocked, _no_treo, _wrong_type, _limited)]
+        _limited_pass, _limited_errs = _TL_MODULE._rasoat_state_validate(_limited_ok)
+        _receipt_bool_ok, _receipt_bool_errs = _TL_MODULE._rasoat_state_validate(_receipt_bool)
+        return (_ok and not _errs and not _bok
+                and any("Q_VERIFY" in e for e in _berrs)
+                and any("Q_APPROVALS" in e for e in _berrs)
+                and any("VONG_DOI:KHAI_DA_DONG" in e for e in _berrs)
+                and all(not r[0] for r in _edge_results)
+                and any("GIOI_HAN_CHUA_BAO_PHU" in e for e in _edge_results[-1][1])
+                and _limited_pass and not _limited_errs
+                and not _receipt_bool_ok
+                and any("receipt_rc0" in e for e in _receipt_bool_errs)
+                and _rc == 2 and _out.get("error") == "STATE_KHONG_HOP_LE" and not _uploaded)
+
+    _t110("r323_state_validator_full_vocab_and_lifecycle",
+          _c323_state_validator_full_vocab_and_lifecycle)
+
+    def _c323_anchor_strict_sees_missing_and_bang_shape():
+        _unit = {"unit_id": "u", "phat_hien": [{"key": "U-1"},
+                                                   {"key": "U-2", "anchor": {"doc_deps": []}}]}
+        _bang = {"schema": "mau_bang_tong_hop_phat_hien.v1",
+                 "noi_dung": [{"key": "B-1", "anchor": {"doc_deps": [
+                     {"so_hieu": "A", "text_hash": "cache:a#dieu1"}]}}]}
+        _f = _TL_MODULE._rasoat_anchor_quet([("unit.json", _unit), ("bang.json", _bang)])
+        return ([x["loai"] for x in _f] == ["anchor_thieu", "doc_deps_thieu", "locator_trong_hash"]
+                and [x["key"] for x in _f] == ["U-1", "U-2", "B-1"])
+
+    _t110("r323_anchor_strict_missing_and_bang_shape",
+          _c323_anchor_strict_sees_missing_and_bang_shape)
+
+    def _c323_rasoat_outputs_must_be_external():
+        _rw = _r296_rasoat_worksheet_nobind()
+        _blocked = 0
+        for _f in (_rw._safe_output_dir, _rp209._safe_output_dir):
+            try:
+                _f(str(_ROOT209 / "outputs-in-tree"))
+            except ValueError as _e:
+                _blocked += int("OUT_DIR_TRONG_CAY_SKILL" in str(_e))
+        _parser = build_parser()
+        with _hush():
+            try:
+                _parser.parse_args(["rasoat", "worksheet", "18/VBHN-VPQH"])
+                _requires = False
+            except SystemExit:
+                _requires = True
+        with _tf110.TemporaryDirectory() as _d:
+            _ns = _parser.parse_args(["rasoat", "phuluc", "master.json", "--out-dir", _d])
+            _argv = __import__("tl_core.command_registry", fromlist=["rasoat_child_argv"])
+            _spec = _argv.RASOAT_SPEC_BY_NAME["phuluc"]
+            _child = _argv.rasoat_child_argv(_spec, _ns)
+            _external = _rp209._safe_output_dir(_d) == _P110(_d).resolve()
+        return _blocked == 2 and _requires and "--out-dir" in _child and _external
+
+    _t110("r323_rasoat_outputs_require_external_dir",
+          _c323_rasoat_outputs_must_be_external)
 
 
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.

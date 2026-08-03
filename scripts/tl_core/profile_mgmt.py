@@ -482,20 +482,40 @@ def cmd_profile_delete(a) -> int:
     name, prof = _profile_lookup(profs, name0)
     found = isinstance(prof, dict)
     prof = prof if found else {}
+    _delete_nlm = bool(getattr(a, "delete_nlm_sources", False))
+    _trash_assets = bool(getattr(a, "trash_assets", False))
+    _destructive = _delete_nlm or _trash_assets
+    # r324/PRO-10: xóa nguồn NLM/trash asset là phá hủy; manifest cache cũ có thể chưa
+    # thấy ownership vừa đổi. Mọi đường phá hủy LUÔN refresh và fail-closed nếu refresh lỗi.
+    _manifest_refresh = True if _destructive else bool(getattr(a, "refresh", False))
     entries, merr = (_profile_manifest_entries_for(
-        name, getattr(a, "config", None), getattr(a, "refresh", False)) if prof else ([], None))
+        name, getattr(a, "config", None), _manifest_refresh) if prof else ([], None))
     source_ids = _profile_live_source_ids(entries)
     # (MERGE Claude, an toàn) GUARD shared_source_id: KHÔNG xóa nguồn NLM dùng chung ≥2 drive_id (xóa 1 gãy link kia — đúng
     # 2 FALSE-LINK hiện có). Tách deletable/blocked; chỉ xóa deletable, báo blocked để sửa shared trước.
     nlm_deletable, nlm_blocked_shared = _profile_deletable_sources(entries, source_ids)
-    plan = {"ok": found and name != DEFAULT_PROFILE,
+    _assets = _profile_asset_ids(prof)
+    _shared_assets = []
+    if _trash_assets:
+        for _asset in _assets:
+            # `_profile_asset_owners` cố ý chỉ soi registry/manifest cho cổng adopt. Delete
+            # phải soi CẢ root/meta: config hỏng trỏ chung folder mà trash root sẽ phá profile kia.
+            _fid = str(_asset.get("fileId") or "")
+            _other_owners = sorted(
+                n for n, p in profs.items() if n != name
+                and any(str(x.get("fileId") or "") == _fid for x in _profile_asset_ids(p)))
+            if _other_owners:
+                _shared_assets.append({**_asset, "other_owners": _other_owners})
+    plan = {"ok": (found and name != DEFAULT_PROFILE and not (_destructive and merr)
+                   and not (_trash_assets and _shared_assets)),
             "mode": "APPLY" if getattr(a, "apply", False) else "DRY",
-            "config": path, "profile": name, "assets": _profile_asset_ids(prof),
+            "config": path, "profile": name, "assets": _assets,
+            "shared_assets": _shared_assets,
             "manifest_error": merr, "manifest_rows": len(entries),
             "nlm_source_count": len(source_ids), "nlm_source_ids": source_ids[:50],
             "nlm_deletable": nlm_deletable[:50], "nlm_blocked_shared_source_id": nlm_blocked_shared,
-            "delete_nlm_sources": bool(getattr(a, "delete_nlm_sources", False)),
-            "trash_assets": bool(getattr(a, "trash_assets", False)),
+            "delete_nlm_sources": _delete_nlm,
+            "trash_assets": _trash_assets,
             "default_mode": "detach (gỡ config, GIỮ Drive+NLM) trừ khi có --delete-nlm-sources/--trash-assets",
             "note": "DRY mặc định. --apply --confirm yes gỡ profile khỏi config (backup trước); NLM/Drive cần cờ riêng. "
                     "Detach giữ marker nên profile vẫn tồn tại trên Drive và profile-sync có thể materialize lại config. "
@@ -504,7 +524,9 @@ def cmd_profile_delete(a) -> int:
         plan["shared_warning"] = (f"⚠ {len(nlm_blocked_shared)} nguồn NLM DÙNG CHUNG source_id với văn bản KHÁC — "
                                   "KHÔNG xóa (gãy link). Sửa shared_source_id trước khi purge.")
     if not plan["ok"]:
-        plan["error"] = "PROFILE_DELETE_PLAN_INVALID"
+        plan["error"] = ("PROFILE_DELETE_SHARED_ASSETS" if _trash_assets and _shared_assets
+                         else ("PROFILE_DELETE_MANIFEST_UNAVAILABLE"
+                               if _destructive and merr else "PROFILE_DELETE_PLAN_INVALID"))
         print(json.dumps(plan, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     if not getattr(a, "apply", False):
@@ -526,16 +548,30 @@ def cmd_profile_delete(a) -> int:
     # Chỉ chạy ở đường APPLY (DRY đã return ở trên) ⇒ không thêm call mạng cho đường xem-kế-hoạch.
     _mk_meta = str((prof or {}).get("metaFolderId") or "").strip()
     _mk_root = str((prof or {}).get("rootFolderId") or "").strip()
-    if _mk_meta or _mk_root:
+    if _destructive:
         try:
-            _mk_read = _marker_read(_gas(), _mk_root or _mk_meta, meta_id=_mk_meta or None)
+            _mk_read = (_marker_read(_gas(), _mk_root or _mk_meta, meta_id=_mk_meta or None)
+                        if (_mk_meta or _mk_root) else {"found": False, "marker_file_ids": []})
         except Exception as e:  # noqa: BLE001 — transport nổ là "mù trạng thái", KHÔNG phải "sạch"
             _mk_read = {"error": f"{type(e).__name__}: {e}"}
-        _mk_blk = _marker_mutation_guard(_mk_read, name)
+        _mk_blk = _marker_mutation_guard(_mk_read, name, require_found=True)
         if _mk_blk:
             out = {**plan, "ok": False, "error": "PROFILE_DELETE_MARKER_GUARD", "marker_guard": _mk_blk,
                    "note": "CHƯA xoá gì — trạng thái marker mơ hồ/không hợp lệ. Repair bằng "
                            "`profile-backfill-markers --profile-name <tên> --apply --force` rồi chạy lại."}
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+            return 2
+        # Marker v1 chỉ chứng minh profile/root và `_marker_diff` cố ý bỏ qua field thiếu để
+        # giữ reader compatibility. Mức bằng chứng đó KHÔNG đủ cho xóa phá hủy: phải có v2
+        # và khớp chính xác mọi ID mà thao tác sắp dùng, trước mutation đầu tiên.
+        _mk_identity = _marker_profile_delete_identity(
+            (_mk_read or {}).get("marker") or {}, prof,
+            delete_nlm=_delete_nlm, trash_assets=_trash_assets)
+        if _mk_identity:
+            out = {**plan, "ok": False, "error": "PROFILE_DELETE_MARKER_CONFIG_DRIFT",
+                   "identity_errors": _mk_identity,
+                   "note": "CHƯA xoá gì — marker v2 phải khớp config ở mọi ID tài nguyên "
+                           "sắp xóa. Sync/repair marker rồi lập lại dry-plan."}
             print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
             return 2
     # (MERGE Claude) backup config TRƯỚC khi gỡ → hồi phục được
@@ -1660,7 +1696,7 @@ def _marker_body(name: str, prof: dict, existing: dict | None = None, now: str |
 
 def _marker_validate(d) -> tuple:
     """PURE (ADR-0012/r184): reader hiểu CẢ v1 lẫn v2. v1 = mức kiểm cũ (compat 1 phiên bản);
-    v2 = bộ trường bắt buộc theo loại profile (_marker_required_keys) + fingerprint (nếu có) phải khớp
+    v2 = bộ trường bắt buộc theo loại profile (_marker_required_keys) + fingerprint bắt buộc phải khớp
     canonical recompute. Trả (ok, errors[])."""
     if not isinstance(d, dict):
         return False, ["NOT_A_DICT"]
@@ -1673,13 +1709,16 @@ def _marker_validate(d) -> tuple:
         if not (_v if isinstance(_v, dict) else str(_v or "").strip()):
             errs.append(f"{re.sub(r'(?<!^)(?=[A-Z])', '_', k).upper()}_EMPTY"
                         if k != "rootFolderId" else "ROOT_FOLDER_ID_EMPTY")
-    if _sch == _PROFILE_MARKER_SCHEMA_V2 and str(d.get("fingerprint") or ""):
-        if str(d.get("fingerprint")) != _marker_fingerprint(d):
+    if _sch == _PROFILE_MARKER_SCHEMA_V2:
+        if not str(d.get("fingerprint") or ""):
+            errs.append("FINGERPRINT_MISSING")
+        elif str(d.get("fingerprint")) != _marker_fingerprint(d):
             errs.append("FINGERPRINT_MISMATCH")
     return (not errs), errs
 
 
-def _marker_mutation_guard(mr: dict, expect_profile: str | None = None) -> dict | None:
+def _marker_mutation_guard(mr: dict, expect_profile: str | None = None,
+                           require_found: bool = False) -> dict | None:
     """Chốt ADR-0012: mutation profile chỉ chạy khi trạng thái marker KHÔNG mơ hồ. Nhận kết quả
     _marker_read; trả None nếu an toàn, dict lỗi actionable nếu phải CHẶN (đọc lỗi / duplicate /
     marker không hợp lệ / marker thuộc profile khác). Lệnh ĐỌC vẫn được phép với cảnh báo —
@@ -1694,6 +1733,10 @@ def _marker_mutation_guard(mr: dict, expect_profile: str | None = None) -> dict 
         return {"error": "MARKER_AMBIGUOUS_DUPLICATE", "marker_file_ids": ids,
                 "note": "Nhiều marker cùng tên trong _meta — chạy profile-doctor rồi "
                         "profile-backfill-markers --force để repair trước khi mutation."}
+    if require_found and not mr.get("found"):
+        return {"error": "MARKER_NOT_FOUND",
+                "note": "Mutation phá hủy đòi marker hợp lệ làm bằng chứng định danh. Chạy "
+                        "profile-backfill-markers --profile-name <tên> --apply --force trước."}
     if mr.get("found"):
         _ok, _errs = _marker_validate(mr.get("marker"))
         if not _ok:
@@ -1844,12 +1887,56 @@ def _marker_diff(marker: dict, prof: dict) -> list:
     return out
 
 
+def _marker_profile_delete_identity(marker: dict, prof: dict, *, delete_nlm=False,
+                                    trash_assets=False) -> list:
+    """PURE: bằng chứng định danh TỐI THIỂU cho `profile-delete` phá hủy.
+
+    Reader chung vẫn chấp nhận marker v1 một phiên bản; riêng delete không được dùng
+    compatibility đó làm quyền xóa. Trả danh sách lỗi; rỗng = marker v2 khớp config."""
+    marker = marker if isinstance(marker, dict) else {}
+    prof = prof if isinstance(prof, dict) else {}
+    errors = []
+    if str(marker.get("schema") or "") != "tra_luat_profile.v2":
+        errors.append({"field": "schema", "error": "MARKER_V2_REQUIRED",
+                       "marker": marker.get("schema")})
+    keys = [("rootFolderId", True), ("metaFolderId", True)]
+    if delete_nlm:
+        keys += [("notebookId", True), ("registryDocId", True), ("manifestId", True)]
+    elif trash_assets:
+        # Profile inherit/non-own có thể không sở hữu hai asset này. Cả hai cùng rỗng =
+        # không có đích xóa; chỉ một phía có ID thì vẫn là drift và phải chặn.
+        keys += [("registryDocId", False), ("manifestId", False)]
+    for key, required in keys:
+        mv, cv = str(marker.get(key) or "").strip(), str(prof.get(key) or "").strip()
+        if not mv or not cv:
+            if required or mv or cv:
+                errors.append({"field": key, "error": "IDENTITY_MISSING",
+                               "marker": mv, "config": cv})
+        elif mv != cv:
+            errors.append({"field": key, "error": "IDENTITY_MISMATCH",
+                           "marker": mv, "config": cv})
+    return errors
+
+
 def _marker_find_in_items(items: list) -> dict | None:
     """PURE: tìm file marker trong danh sách items (con folder + con _meta đã gộp)."""
     for it in items or []:
         if str(it.get("type")) != "folder" and str(it.get("name")) == _PROFILE_MARKER_NAME:
             return it
     return None
+
+
+def _marker_list_items(g, folder_id: str) -> list:
+    """Đọc danh sách Drive theo hợp đồng fail-closed; business error không phải folder rỗng."""
+    res = _gas_get_retry(g, "list", folderId=str(folder_id))
+    if not isinstance(res, dict):
+        raise RuntimeError("MARKER_LIST_INVALID_RESPONSE")
+    if res.get("ok") is False:
+        raise RuntimeError(f"MARKER_LIST_FAILED:{res.get('error') or res.get('message') or 'UNKNOWN'}")
+    items = res.get("items")
+    if not isinstance(items, list):
+        raise RuntimeError("MARKER_LIST_ITEMS_MISSING")
+    return items
 
 
 def _marker_read(g, root_id: str, meta_id: str | None = None) -> dict:
@@ -1860,13 +1947,13 @@ def _marker_read(g, root_id: str, meta_id: str | None = None) -> dict:
     try:
         mid = str(meta_id or "")
         if not mid:
-            items = (_gas_get_retry(g, "list", folderId=str(root_id)) or {}).get("items") or []
+            items = _marker_list_items(g, str(root_id))
             meta = next((x for x in items if str(x.get("type")) == "folder" and str(x.get("name")) == "_meta"), None)
             mid = str((meta or {}).get("id") or "")
             out["meta_folder_id"] = mid
         if not mid:
             return out
-        mitems = (_gas_get_retry(g, "list", folderId=mid) or {}).get("items") or []
+        mitems = _marker_list_items(g, mid)
         # #7 (v1.34.30): phơi MỌI file marker cùng tên → doctor phát hiện DUPLICATE (retry đứt tạo 2 bản).
         out["marker_file_ids"] = [str(x.get("id") or "") for x in mitems
                                   if str(x.get("type")) != "folder" and str(x.get("name")) == _PROFILE_MARKER_NAME]
@@ -1929,7 +2016,7 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
     phases["readback_full"] = verified
 
     def _list_other_markers():
-        _mitems = (_gas_get_retry(g, "list", folderId=str(meta_id)) or {}).get("items") or []
+        _mitems = _marker_list_items(g, str(meta_id))
         return [str(_it.get("id") or "") for _it in _mitems
                 if str(_it.get("type")) != "folder" and str(_it.get("name")) == _PROFILE_MARKER_NAME
                 and str(_it.get("id") or "") and str(_it.get("id") or "") != fid]
@@ -1937,14 +2024,16 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
     # #7 (v1.34.30): upload force=true LUÔN tạo fileId mới → self-heal quét _meta trash MỌI marker khác fid.
     # r184: lỗi list là PARTIAL tường minh, không còn nuốt im lặng.
     trashed = []
+    enumerate_error = None
     enumerate_ok = False
     _to_trash = {str(old_id)} if (old_id and str(old_id) != fid) else set()
     if verified and fid:
         try:
             _to_trash.update(_list_other_markers())
             enumerate_ok = True
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             enumerate_ok = False
+            enumerate_error = f"{type(e).__name__}: {e}"
     phases["enumerate"] = enumerate_ok
     if verified and enumerate_ok:
         for _oid in sorted(_to_trash):
@@ -1958,11 +2047,13 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
     # prove-one: bản mới đã chứng minh tồn tại bằng readback trực tiếp; ở đây chứng minh
     # KHÔNG CÒN bản nào khác (danh sách tươi sau cleanup).
     proven_single = False
+    prove_single_error = None
     if verified and cleanup_ok:
         try:
             proven_single = not _list_other_markers()
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             proven_single = False
+            prove_single_error = f"{type(e).__name__}: {e}"
     phases["prove_single"] = proven_single
     ok = (bool((up or {}).get("ok")) and bool(fid) and verified
           and enumerate_ok and cleanup_ok and proven_single)
@@ -1971,12 +2062,16 @@ def _marker_write(g, meta_id: str, body: dict, old_id: str = "", run_id: str | N
         _journal_append(run_id, {"t": "commit", "op": "marker_write", "key": key, "ok": ok,
                                  "verify": {"fileId": fid, "old_fileId": str(old_id or ""),
                                             "trashed_old": trashed, "status": status, "phases": phases,
-                                            "error": (up or {}).get("error"),
+                                            "phase_errors": {"enumerate": enumerate_error,
+                                                             "prove_single": prove_single_error},
+                                            "error": ((up or {}).get("error") or enumerate_error
+                                                      or prove_single_error),
                                             "repair": (None if ok else
                                                        "tl profile-doctor — kiểm marker duplicate/verify rồi "
                                                        "profile-backfill-markers --force cho profile này")}})
     return {"ok": ok, "status": status, "verified": verified, "enumerate_ok": enumerate_ok,
             "cleanup_ok": cleanup_ok, "proven_single": proven_single, "phases": phases,
+            "enumerate_error": enumerate_error, "prove_single_error": prove_single_error,
             "fileId": fid, "trashed_old": trashed, "upload": up}
 
 

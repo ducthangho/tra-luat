@@ -223,12 +223,26 @@ def table_xuly(items, kind):
     return "\n".join(L), n
 
 
+def _safe_output_dir(raw):
+    out = Path(raw).expanduser().resolve()
+    skill_root = Path(__file__).resolve().parent.parent
+    if out == skill_root or skill_root in out.parents:
+        raise ValueError(f"OUT_DIR_TRONG_CAY_SKILL:{out}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True, help="file master.json hoặc thư mục .json")
-    ap.add_argument("--out-dir", default=".")
+    ap.add_argument("--out-dir", required=True,
+                    help="thư mục output bắt buộc, phải nằm ngoài cây skill")
     ap.add_argument("--title", default="")
     a = ap.parse_args()
+
+    try:
+        out = _safe_output_dir(a.out_dir)
+    except ValueError as e:
+        raise SystemExit(f"[rasoat_phuluc] {e}") from e
 
     co_quan, van_ban, noi_dung = load_master(a.inp)
     noi_dung = dedup(noi_dung)
@@ -251,7 +265,7 @@ def main():
         buckets[route(it.get("hinh_thuc"))].append(it)
 
     today = datetime.date.today().isoformat()
-    out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
+    out.mkdir(parents=True, exist_ok=True)
     f = out / "PHU_LUC_03_07_BN_TONG_HOP.md"
 
     NAMES = {"04": ("Phụ lục II", "Mẫu 04-BN", "đề xuất sửa đổi, bổ sung; thay thế; tạm ngưng hiệu lực, bãi bỏ một phần"),

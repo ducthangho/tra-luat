@@ -143,6 +143,11 @@ if (-not (Test-Path -LiteralPath $TemplatePath -PathType Leaf)) {
 }
 $PromptText = [System.IO.File]::ReadAllText($TemplatePath)
 
+if ($Role -eq 'executor') {
+    $WorktreeLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $Worktree
+    $PromptText = $PromptText.Replace("'{{WORKTREE}}'", $WorktreeLiteral)
+}
+
 $ReplacementMap = [ordered]@{
     '{{ISSUE_URL}}'       = $IssueUrl
     '{{ISSUE_NUMBER}}'    = [string]$IssueNumber

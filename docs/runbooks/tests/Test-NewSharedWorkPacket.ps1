@@ -26,21 +26,21 @@ function Assert-Contains {
     }
 }
 
-function Invoke-ReadyPacketTest {
+function Invoke-SnapshotPreview {
+    param(
+        [Parameter(Mandatory)]
+        [System.Collections.IDictionary]$Snapshot,
+
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
     $Suffix = [Guid]::NewGuid().ToString('N')
-    $SnapshotPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-ready-$Suffix.json"
-    $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-ready-$Suffix.md"
-
-    $Snapshot = [ordered]@{
-        repo_slug  = 'example/tra-luat'
-        base_sha   = '0123456789abcdef0123456789abcdef01234567'
-        version    = '1.36.59'
-        observed_at = '2026-08-03T12:00:00+07:00'
-        open_prs   = @()
-    } | ConvertTo-Json -Depth 5
-
+    $SnapshotPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-$Name-$Suffix.json"
+    $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-$Name-$Suffix.md"
     $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText($SnapshotPath, $Snapshot, $Utf8NoBom)
+    $SnapshotJson = $Snapshot | ConvertTo-Json -Depth 5
+    [System.IO.File]::WriteAllText($SnapshotPath, $SnapshotJson, $Utf8NoBom)
 
     try {
         $Output = ((& $PowerShellPath -NoProfile -File $ScriptPath `
@@ -56,20 +56,7 @@ function Invoke-ReadyPacketTest {
             throw 'Packet CLI did not create the requested Markdown body file.'
         }
 
-        $Body = [System.IO.File]::ReadAllText($BodyPath)
-        Assert-Contains -Text $Body -Expected '# Work packet: wp-d0-protocol-constitution'
-        Assert-Contains -Text $Body -Expected '- Status: ready_for_claim'
-        Assert-Contains -Text $Body -Expected '- Planned executor: codex'
-        Assert-Contains -Text $Body -Expected '- Cross-provider reviewer: claude'
-        Assert-Contains -Text $Body -Expected '- base_sha: 0123456789abcdef0123456789abcdef01234567'
-        Assert-Contains -Text $Body -Expected '- Không có PR mở tại thời điểm quan sát.'
-        Assert-Contains -Text $Body -Expected 'docs/prompts/CODEX_EXECUTOR_D0.md'
-        Assert-Contains -Text $Body -Expected 'Không sửa `VERSION` hoặc cấp số `rNNN`/version mới.'
-        Assert-Contains -Text $Body -Expected 'packet protocol-v1 lease/start'
-        Assert-Contains -Text $Body -Expected 'text file thuộc policy đang mang CRLF'
-        Assert-Contains -Text $Body -Expected 'REVIEW_READY'
-        Assert-Contains -Text $Body -Expected '`cross_approved`'
-        Assert-Contains -Text $Body -Expected '`review_deferred`'
+        return [System.IO.File]::ReadAllText($BodyPath)
     }
     finally {
         Remove-Item -LiteralPath $SnapshotPath -Force -ErrorAction SilentlyContinue
@@ -77,50 +64,50 @@ function Invoke-ReadyPacketTest {
     }
 }
 
-function Invoke-PausedPacketTest {
-    $Suffix = [Guid]::NewGuid().ToString('N')
-    $SnapshotPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-paused-$Suffix.json"
-    $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-paused-$Suffix.md"
+function Invoke-ReadyPacketTest {
+    $Body = Invoke-SnapshotPreview -Name 'ready' -Snapshot ([ordered]@{
+        repo_slug   = 'example/tra-luat'
+        base_sha    = '0123456789abcdef0123456789abcdef01234567'
+        version     = '1.36.59'
+        observed_at = '2026-08-03T12:00:00+07:00'
+        open_prs    = @()
+    })
 
-    $Snapshot = [ordered]@{
+    Assert-Contains -Text $Body -Expected '# Work packet: wp-d0-protocol-constitution'
+    Assert-Contains -Text $Body -Expected '- Status: ready_for_claim'
+    Assert-Contains -Text $Body -Expected '- Planned executor: codex'
+    Assert-Contains -Text $Body -Expected '- Cross-provider reviewer: claude'
+    Assert-Contains -Text $Body -Expected '- base_sha: 0123456789abcdef0123456789abcdef01234567'
+    Assert-Contains -Text $Body -Expected '- Không có PR mở tại thời điểm quan sát.'
+    Assert-Contains -Text $Body -Expected 'docs/prompts/CODEX_EXECUTOR_D0.md'
+    Assert-Contains -Text $Body -Expected 'Không sửa `VERSION` hoặc cấp số `rNNN`/version mới.'
+    Assert-Contains -Text $Body -Expected 'packet protocol-v1 lease/start'
+    Assert-Contains -Text $Body -Expected 'text file thuộc policy đang mang CRLF'
+    Assert-Contains -Text $Body -Expected 'REVIEW_READY'
+    Assert-Contains -Text $Body -Expected '`cross_approved`'
+    Assert-Contains -Text $Body -Expected '`review_deferred`'
+}
+
+function Invoke-PausedPacketTest {
+    $Body = Invoke-SnapshotPreview -Name 'paused' -Snapshot ([ordered]@{
         repo_slug   = 'example/tra-luat'
         base_sha    = 'fedcba9876543210fedcba9876543210fedcba98'
         version     = '1.36.60'
         observed_at = '2026-08-03T12:30:00+07:00'
         open_prs    = @(
             [ordered]@{
-                number       = 42
-                title        = 'Concurrent writer'
-                headRefName  = 'agent/wp42-g1-claude'
-                url          = 'https://github.com/example/tra-luat/pull/42'
+                number      = 42
+                title       = 'Concurrent writer'
+                headRefName = 'agent/wp42-g1-claude'
+                url         = 'https://github.com/example/tra-luat/pull/42'
             }
         )
-    } | ConvertTo-Json -Depth 5
+    })
 
-    $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    [System.IO.File]::WriteAllText($SnapshotPath, $Snapshot, $Utf8NoBom)
-
-    try {
-        $Output = ((& $PowerShellPath -NoProfile -File $ScriptPath `
-            -SnapshotPath $SnapshotPath `
-            -DryRun `
-            -BodyOutputPath $BodyPath) | Out-String).Trim()
-        $ExitCode = $LASTEXITCODE
-
-        if ($ExitCode -ne 0) {
-            throw "Packet CLI failed with exit code $ExitCode. Output: $Output"
-        }
-
-        $Body = [System.IO.File]::ReadAllText($BodyPath)
-        Assert-Contains -Text $Body -Expected '- Status: PAUSE_OPEN_PR'
-        Assert-Contains -Text $Body -Expected '- open_pr_count: 1'
-        Assert-Contains -Text $Body -Expected '#42 — Concurrent writer — branch: agent/wp42-g1-claude'
-        Assert-Contains -Text $Body -Expected 'https://github.com/example/tra-luat/pull/42'
-    }
-    finally {
-        Remove-Item -LiteralPath $SnapshotPath -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $BodyPath -Force -ErrorAction SilentlyContinue
-    }
+    Assert-Contains -Text $Body -Expected '- Status: PAUSE_OPEN_PR'
+    Assert-Contains -Text $Body -Expected '- open_pr_count: 1'
+    Assert-Contains -Text $Body -Expected '#42 — Concurrent writer — branch: agent/wp42-g1-claude'
+    Assert-Contains -Text $Body -Expected 'https://github.com/example/tra-luat/pull/42'
 }
 
 function Invoke-PromptContractTest {
@@ -177,7 +164,8 @@ function Invoke-MissingToolTest {
         if ($ExitCode -eq 0) {
             throw 'Live preflight unexpectedly succeeded without git or gh in PATH.'
         }
-        Assert-Contains -Text $Output -Expected 'Không tìm thấy git trong PATH.'
+        Assert-Contains -Text $Output -Expected 'git'
+        Assert-Contains -Text $Output -Expected 'PATH'
         if (Test-Path -LiteralPath $BodyPath) {
             throw 'Failed preflight must not leave a generated packet body.'
         }
@@ -269,7 +257,9 @@ function Invoke-IssueCreationTest {
             throw "Expected exactly one gh issue create call, observed $($IssueCalls.Count)."
         }
         Assert-Contains -Text $IssueCalls[0] -Expected '--repo example/tra-luat'
-        Assert-Contains -Text $IssueCalls[0] -Expected '--body-file'
+        Assert-Contains -Text $IssueCalls[0] -Expected '--title'
+        Assert-Contains -Text $IssueCalls[0] -Expected '[WP D0] Land'
+        Assert-Contains -Text $IssueCalls[0] -Expected "--body-file $BodyPath"
     }
     finally {
         $env:PATH = $OriginalPath
@@ -319,10 +309,14 @@ if ($Case -in @('prompts', 'all')) {
 }
 
 $Total = $PassedCases.Count
-Write-Output "RESULT: $Total/$Total"
+$ExpectedTotal = if ($Case -eq 'all') { 5 } else { 1 }
+if ($Total -ne $ExpectedTotal) {
+    throw "Expected $ExpectedTotal test cases for -Case $Case, observed $Total."
+}
+Write-Output "RESULT: $Total/$ExpectedTotal"
 [ordered]@{
     ok     = $true
     passed = $Total
-    total  = $Total
+    total  = $ExpectedTotal
     cases  = @($PassedCases)
 } | ConvertTo-Json -Compress

@@ -1,3 +1,20 @@
+# ★ v1.36.61 — r329: bootstrap công cụ work-packet D0 + kê khai slot docs 19→21 (2026-08-03)
+
+**Bốn tệp mới NGOÀI GÓI** (tác giả Codex, nhánh `codex/work-packet-bootstrap`):
+`docs/runbooks/New-SharedWorkPacket.ps1` — script tạo Shared Work Packet (GitHub Issue): tự đo
+base_sha/PR-mở/23 nguồn D0, đòi `source_status` đúng M/untracked, `DryRun`/`SnapshotPath`,
+packet_id = `wp<số Issue thật>` qua hai bước create→edit, fail-closed mọi nhánh lỗi;
+cặp prompt `docs/prompts/CODEX_EXECUTOR_D0.md` + `docs/prompts/CLAUDE_REVIEWER_D0.md`
+(one-executor-per-packet, reviewer read-only tuyệt đối, approval gắn head SHA); bộ test
+`docs/runbooks/tests/Test-NewSharedWorkPacket.ps1` — 6 ca có shim git/gh, kể cả prompt-contract
+test khoá bất biến của chính hai prompt. Đo độc lập 03-08: 6/6 hai lượt chạy; DryRun trên cây
+canonical thật `ok:true` `ready_for_claim`.
+
+**Vế mã duy nhất: kê khai slot ratchet.** CI PR #25 đỏ `r291_docs_ngoai_goi` (1637/1638, CẢ HAI nền)
+vì `docs/**/*.md` 19 → 21 — **đỏ ĐÚNG THIẾT KẾ ratchet** («thêm/bớt tệp ⇒ đỏ, sửa CÓ CHỦ ĐÍCH kèm
+kê khai slot»), không phải hồi quy. Kê khai: mốc 196 → 198 (gói giữ 177 + 21 docs ngoài gói;
+trần 200 còn 2 khe theo phép đếm ratchet). Không đổi hành vi runtime nào.
+
 # ★ v1.36.60 — r328: đường dẫn NGOÀI ASCII vỡ ở khớp JSON của HAI script deploy (2026-08-03)
 
 **`deploy-package.ps1` chết `[FAIL] release-bundle báo ok nhưng KHÔNG có zip thật` + exit 2 — trong khi

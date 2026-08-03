@@ -21157,10 +21157,13 @@ def run() -> int:
         #     và ING-03 (r291-gate) đều dùng. Là mã RUNTIME nên KHÔNG loại khỏi gói được.
         # Cổng này ĐỎ đúng lúc phải đỏ: nó bắt được đúng tệp đó khi hai nhánh hoà vào nhau.
         # Sau khi `docs/` ra khỏi gói (T0-G), trần 200 còn **24 khe** (196 + 19 docs ngoài gói = 215 trên đĩa).
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 19 == 196
+        # KÊ KHAI SLOT (r329/v1.36.61 — PR #25 bootstrap work-packet D0): 196 → **198**. Thêm đúng HAI
+        # tệp docs NGOÀI GÓI: docs/prompts/CODEX_EXECUTOR_D0.md + docs/prompts/CLAUDE_REVIEWER_D0.md
+        # (.ps1 runbook/tests không tính — ratchet đếm *.md). Gói giữ 177; tổng 198/trần 200 — còn 2 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 21 == 198
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 19
+        ok4 = (len(tren_dia) == 21
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

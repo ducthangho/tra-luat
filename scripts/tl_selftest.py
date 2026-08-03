@@ -21822,6 +21822,156 @@ def run() -> int:
         return okA and okB
     _t110("r327_probe_error_lo_dien", _c327_probe_error_lo_dien)
 
+    # ── r328: ĐƯỜNG DẪN NGOÀI ASCII vỡ ở khớp JSON của hai script deploy ─────────────────────────
+    # ĐO 03-08-2026 trên máy chuẩn: `[Console]::OutputEncoding` = **windows-1258**, nên PowerShell
+    # GIẢI stdout UTF-8 của python bằng cp1258 ⇒ `bundle1.out` chứa mojibake GHI THẲNG RA ĐĨA
+    # (`D:\\Quá»‘c há»™i\\…`) ⇒ `Test-Path $out` false trên tệp CÓ THẬT ⇒ deploy chết exit 2 dù zip
+    # build đúng. Twin `sh` mắc CÙNG bệnh ở `jget` (`open()` không nêu encoding ⇒ codec LOCALE).
+    _R328_UNIT = "\u1ed1"          # 'ố' U+1ED1 = e1 bb 91 — 0x91 hợp lệ trong cp1258 (mojibake IM LẶNG)
+    _R328_HARD = "\u1ed0"          # 'Ố' U+1ED0 = e1 bb 90 — 0x90 KHÔNG ĐỊNH NGHĨA ⇒ ném thẳng
+
+    def _c328_deploy_ep_utf8_hai_chieu():
+        """r328 VẾ 1 — CHỐT CHỐNG TÁI PHÁT (khuôn hai bối cảnh r265). Đây là vế GREP, cố ý: nó chỉ giữ
+        cho bản vá không bị dọn đi; phần HÀNH VI nằm ở hai ca r328 bên dưới.
+        ★ Vì sao đòi CẢ HAI chiều: đã ĐO, chỉ ghim chiều ĐỌC là VÔ TÁC DỤNG — mojibake đóng băng ngay
+          khâu GIẢI, tệp trên đĩa đã sai (`-Encoding utf8` khi đọc → EQ=False; `[Console]::OutputEncoding`
+          → EQ=True). Ai gỡ dòng OutputEncoding mà giữ `-Encoding utf8` sẽ thấy ca này ĐỎ.
+        ★ GÓI BUNG (không `.git`): ba script deploy là dev-side, PHẢI VẮNG — còn là lọt bundle (r265)."""
+        import re as _re328
+        _root = _ROOT209
+        if not (_root / ".git").exists():
+            return (not (_root / "scripts" / "deploy-package.ps1").exists()
+                    and not (_root / "scripts" / "deploy-package.sh").exists()
+                    and not (_root / "scripts" / "deploy-guard.ps1").exists())
+        _ps1 = (_root / "scripts" / "deploy-package.ps1").read_text(encoding="utf-8", errors="replace")
+        _sh = (_root / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        # chiều ĐỌC stdout tiến trình con — VẾ CHỊU LỰC
+        ok1 = "[Console]::OutputEncoding = $Utf8NoBom" in _ps1
+        # chiều GHI của toán tử `*>` (nó gọi Out-File bên dưới) — khỏi lệ thuộc mặc định theo bản PS
+        ok2 = "$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'" in _ps1
+        # MỌI `Get-Content … -Raw` phải ghim encoding; đếm chỗ CHƯA ghim phải = 0
+        _gc = _re328.findall(r"Get-Content [^\n]*?-Raw(?! -Encoding utf8)", _ps1)
+        ok3 = len(_gc) == 0 and _ps1.count("-Raw -Encoding utf8") >= 9
+        # twin sh: jget phải nêu encoding CẢ HAI chiều (ĐỌC tệp + GHI stdout).
+        # ★ ĐO BẰNG MUTATION, KHÔNG đoán: bản đầu viết `"encoding='utf-8'" in dòng` ⇒ đột biến gỡ
+        #   encoding khỏi `open()` VẪN XANH, vì vế `reconfigure(encoding='utf-8',…)` cùng dòng đã làm
+        #   chuỗi đó đúng. Guard khớp NHẦM NỬA KIA của dòng = guard không guard. Nay soi TỪNG lời gọi.
+        _jg = _re328.search(r"^jget\(\) \{.*$", _sh, _re328.M)
+        _ln = _jg.group(0) if _jg else ""
+        ok4 = (bool(_jg)
+               and bool(_re328.search(r"open\(\s*sys\.argv\[1\]\s*,\s*encoding='utf-8'\s*\)", _ln))
+               and bool(_re328.search(r"reconfigure\(\s*encoding='utf-8'\s*,\s*newline='\\n'\s*\)", _ln)))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r328_deploy_ep_utf8_hai_chieu", _c328_deploy_ep_utf8_hai_chieu)
+
+    def _c328_json_ngoai_ascii_khong_qua_codec_ansi():
+        """r328 VẾ 2 — HÀNH VI, thuần Python nên chạy được trên CẢ HAI nền CI (không cần pwsh).
+        (a) Tái hiện ĐÚNG cơ chế: byte UTF-8 của tl.py bị GIẢI bằng codec ANSI ⇒ chuỗi KHÁC bản gốc.
+            Hai mức độ, cả hai đều làm hỏng deploy nhưng khác cách:
+              · 'ố' (0x91 CÓ trong cp1258) → mojibake IM LẶNG, `Test-Path` false, không ai biết vì sao;
+              · 'Ố' (0x90 KHÔNG ĐỊNH NGHĨA) → UnicodeDecodeError; `jget` có `2>/dev/null` nên NUỐT lỗi
+                rồi trả RỖNG ⇒ sh báo "KHÔNG có zip thật: '<rỗng>'" — sai địa chỉ.
+        (b) Chạy THẬT payload `-c` RÚT TỪ chính deploy-package.sh (không chép lại — chép là trôi lệch):
+            đòi stdout ra ĐÚNG byte UTF-8, và KHÔNG có đuôi '\\r' (bẫy `$( )` chỉ nuốt '\\n')."""
+        import json as _j328, os as _o328, re as _re328, subprocess as _sp328
+        import sys as _s328, tempfile as _tf328
+        want = "D:\\Qu%sc h%si\\tra-luat-skill-v1.36.60-gws3env.zip" % (_R328_UNIT, "\u1ed9")
+        raw = _j328.dumps({"ok": True, "out": want}, ensure_ascii=False).encode("utf-8")
+        # (a1) giải bằng cp1258 (ĐÚNG [Console]::OutputEncoding đo được) ⇒ PHẢI khác bản gốc
+        okA = _j328.loads(raw.decode("cp1258"))["out"] != want
+        # (a2) giải bằng UTF-8 ⇒ PHẢI bằng bản gốc  (nếu vế này hỏng thì phép đo vô nghĩa)
+        okB = _j328.loads(raw.decode("utf-8"))["out"] == want
+        # (a3) 'Ố' — codec ANSI ném thẳng, không phải chỉ méo
+        hard = _j328.dumps({"out": "D:\\QU%sC" % _R328_HARD}, ensure_ascii=False).encode("utf-8")
+        try:
+            hard.decode("cp1258"); okC = False
+        except UnicodeDecodeError:
+            okC = True
+        if not (_ROOT209 / ".git").exists():
+            return okA and okB and okC          # gói bung: không có script sh để rút payload
+        _sh = (_ROOT209 / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        _m = _re328.search(r'^jget\(\) \{ \$PY -c "([^"]+)"', _sh, _re328.M)
+        if not _m:
+            return False                        # đổi hình dạng jget ⇒ ca này phải ĐỎ để người sửa biết
+        # ★ MÔI TRƯỜNG THÙ ĐỊCH — BẮT BUỘC, đã ĐO: chạy payload với env THỪA KẾ thì đột biến gỡ
+        #   `encoding='utf-8'` khỏi `open()` VẪN XANH, vì tl.py:93 `setdefault("PYTHONUTF8","1")` nằm
+        #   sẵn trong environ của tiến trình selftest và truyền xuống con ⇒ con chạy UTF-8 mode nên
+        #   `open()` trần cũng ra UTF-8. Gỡ đúng ba biến đó thì `open()` trần rơi về codec LOCALE:
+        #   Linux `LC_ALL=C` → ASCII ⇒ UnicodeDecodeError · Windows → cp1258 ⇒ mojibake. Đỏ CẢ HAI nền.
+        _env = dict(_o328.environ)
+        _env["PYTHONUTF8"] = "0"
+        _env.pop("PYTHONIOENCODING", None)
+        _env["LC_ALL"] = _env["LANG"] = "C"
+        with _tf328.TemporaryDirectory() as _td:
+            _f = _td + "/b.out"
+            open(_f, "wb").write(raw)
+            _r = _sp328.run([_s328.executable, "-c", _m.group(1), _f, "out"],
+                            capture_output=True, timeout=60, env=_env)
+            okD = _r.returncode == 0 and _r.stdout == want.encode("utf-8") + b"\n"
+        return okA and okB and okC and okD
+    _t110("r328_json_ngoai_ascii_khong_qua_codec_ansi", _c328_json_ngoai_ascii_khong_qua_codec_ansi)
+
+    def _c328_ps1_roundtrip_pwsh_that():
+        """r328 VẾ 3 — HÀNH VI ĐẦU-CUỐI qua pwsh THẬT, đúng đường `Invoke-Py`/`Get-Content` của ps1
+        (bài học r244: script đa nền phải CHẠY trên nền đó, đọc code không lộ ra lớp lỗi này).
+        ★ TỰ KIỂM CHỨNG, chống XANH GIẢ: harness đòi CẢ HAI — bản CHƯA vá phải LỆCH *và* bản ĐÃ vá
+          phải KHỚP. Nếu môi trường không tái hiện nổi bệnh (ambient đã UTF-8, ép hostile thất bại)
+          thì vế 'brokenMatch' hoá True và ca ĐỎ — thà đỏ còn hơn xanh mà chẳng đo được gì.
+        ★ Không có pwsh (container Cowork) ⇒ bỏ qua: vế 1 (grep) + vế 2 (thuần Python) vẫn phủ."""
+        import json as _j328, os as _o328, shutil as _sh328, subprocess as _sp328, sys as _s328
+        import tempfile as _tf328
+        if not _sh328.which("pwsh"):
+            return True
+        harness = (
+            "param([string]$Py,[string]$Emit,[string]$Want,[string]$Work)\n"
+            "$u8 = [System.Text.UTF8Encoding]::new($false)\n"
+            "$save = [Console]::OutputEncoding\n"
+            # cp1258 = ambient THẬT của máy dev; Latin1 (có sẵn mọi nền) là bản lùi cho Linux runner
+            "try { $hostile = [System.Text.Encoding]::GetEncoding(1258) }\n"
+            "catch { $hostile = [System.Text.Encoding]::Latin1 }\n"
+            "$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'\n"
+            "function Get-Out([bool]$Fix, [string]$Tag) {\n"
+            "  [Console]::OutputEncoding = $hostile\n"
+            "  if ($Fix) { [Console]::OutputEncoding = $u8 }\n"
+            "  $f = Join-Path $Work \"x_$Tag.out\"\n"
+            "  & $Py $Emit $Want *> $f\n"          # ĐÚNG hình dạng Invoke-Py
+            "  $t = if ($Fix) { [string](Get-Content $f -Raw -Encoding utf8) }\n"
+            "       else      { [string](Get-Content $f -Raw) }\n"
+            "  return ($t | ConvertFrom-Json).out\n"
+            "}\n"
+            "try {\n"
+            "  $broken = Get-Out $false 'broken'\n"
+            "  $fixed  = Get-Out $true  'fixed'\n"
+            "} finally { [Console]::OutputEncoding = $save }\n"
+            "$res = [ordered]@{ brokenMatch = ($broken -eq $Want)\n"
+            "                   fixedMatch  = ($fixed  -eq $Want)\n"
+            "                   fixedExists = [bool](Test-Path $fixed) }\n"
+            "[IO.File]::WriteAllText((Join-Path $Work 'res.json'),"
+            " (ConvertTo-Json $res -Compress), $u8)\n"
+        )
+        emit = (
+            "import json, os, sys\n"
+            "sys.stdout.reconfigure(encoding='utf-8')\n"   # y hệt tl.py:86 — nguồn byte UTF-8
+            "sys.stdout.write(json.dumps({'ok': True, 'out': os.path.abspath(sys.argv[1])},"
+            " ensure_ascii=False) + '\\n')\n"
+        )
+        with _tf328.TemporaryDirectory() as _td:
+            _hp, _ep = _o328.path.join(_td, "h.ps1"), _o328.path.join(_td, "emit.py")
+            open(_hp, "w", encoding="utf-8").write(harness)
+            open(_ep, "w", encoding="utf-8").write(emit)
+            want = _o328.path.join(_td, "Qu%sc h%si" % (_R328_UNIT, "\u1ed9"))
+            _o328.makedirs(want, exist_ok=True)
+            _r = _sp328.run(["pwsh", "-NoProfile", "-File", _hp, _s328.executable, _ep, want, _td],
+                            capture_output=True, timeout=180)
+            _rp = _o328.path.join(_td, "res.json")
+            if _r.returncode != 0 or not _o328.path.exists(_rp):
+                return False
+            res = _j328.loads(open(_rp, encoding="utf-8").read())
+        return (res.get("brokenMatch") is False        # bệnh PHẢI tái hiện được
+                and res.get("fixedMatch") is True      # bản vá PHẢI chữa được
+                and res.get("fixedExists") is True)    # và đường dẫn đọc lại PHẢI trỏ tệp thật
+    _t110("r328_ps1_roundtrip_pwsh_that", _c328_ps1_roundtrip_pwsh_that)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

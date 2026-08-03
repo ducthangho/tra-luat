@@ -1,3 +1,36 @@
+# ★ v1.36.63 — r331: `.codex/` (worktree agent Codex) không có trong bảng loại trừ ⇒ gate ĐỎ theo NƠI CHẠY (2026-08-04)
+
+**Triệu chứng khó tin nhất: cùng một commit, chạy chỗ này XANH chỗ kia ĐỎ.** Deploy từ main checkout
+(`tra-luat` gốc) ăn gate đỏ ở `release-check` + `release-verify`, trong khi CÙNG commit `0cea4a7`
+build từ worktree sạch thì xanh và đẩy Package v1.36.62 byte-match trót lọt.
+
+**Manifest LÀNH — đỏ hoàn toàn do tệp THỪA.** Bằng chứng dương từ `relverify.out`:
+
+```
+"expected_file_count": 177,  "checked_file_count": 177,  "failed": []
+"extra_files": [ 200 mục ]   ← 200/200 đều thuộc .codex/
+```
+
+`_RELEASE_EXCLUDE_DIRS` có `.claude` nhưng THIẾU `.codex`. Agent Codex đặt worktree ở
+`.codex/worktrees/<nhánh>/`, **mỗi worktree là một BẢN SAO ĐẦY ĐỦ của kho** (có `VERSION`, `SKILL.md`,
+`RELEASE_MANIFEST.json` riêng) — 4 worktree đang sống. Cây phát hành quét trúng chúng ⇒ mọi lượt gate
+chạy từ main checkout đều đỏ, còn worktree sạch không có `.codex/` nên không ai thấy.
+
+★ **Cạm bẫy đã suýt sập: lời khuyên tự động của deploy SAI ở ca này.** `[WARN] cây đã đổi so với manifest
+— chữa: release-manifest --out RELEASE_MANIFEST.json` đúng cho ca thêm/xoá tệp THẬT (bài học r238), nhưng
+ở đây nó sẽ **nướng 4 bản sao kho vào manifest** trong khi trần gói là **200 tệp CỨNG**. Đọc `failed: []`
++ `177/177` TRƯỚC khi tin lời khuyên: manifest không hề cũ.
+
+**Vá:** `+.codex` vào `_RELEASE_EXCLUDE_DIRS` (đúng khuôn `.claude`: GIỮ trong repo, CHỈ loại khỏi gói)
+và `+.codex/` vào `.gitignore`. Gói vẫn 177 tệp — **không tệp nào ra/vào**, nên không đụng kê khai slot.
+
+★ **Bẫy phụ, sập THẬT lúc viết bản vá này** (bắt được trước commit, đã khoá bằng vế 4 của ca test):
+trong cú pháp `.gitignore`, `#` **chỉ** mở chú thích khi ĐỨNG ĐẦU DÒNG. Viết `.codex/   # ghi chú` thì
+cả cụm thành MỘT pattern và **không bỏ qua gì cả** — im lặng, không lỗi, không cảnh báo.
+
+Ca `r331_codex_ngoai_cay_phat_hanh`: 4 vế từ 4 nguồn — hằng chính sách · HÀNH VI trên cây tổng hợp (kèm
+đối chứng cùng tên tệp ngoài `.codex/` phải VÀO gói) · loại đúng vì khoá `.codex` · `.gitignore` dòng độc lập.
+
 # ★ v1.36.62 — r330: timeout ĐƯỜNG GHI của `gws` chọn KHÔNG ĐO ⇒ `update_content` 120s CHẶN THẬT lượt deploy (2026-08-04)
 
 **Nối tiếp r327 — cùng một bệnh, nấc kế tiếp.** r327 vá phép DÒ (`auth status` 20s→120s) nên `drive-push`

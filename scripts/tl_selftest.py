@@ -22164,6 +22164,44 @@ def run() -> int:
         return okA and okB and okC and _goi(_old) and not _goi(_new[0])
     _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
 
+    # ═══ r331 — `.codex/` (gốc worktree agent Codex) KHÔNG được tính vào cây phát hành ═══
+    def _c331_codex_ngoai_cay_phat_hanh():
+        # BỆNH ĐO 04-08-2026: agent Codex đặt worktree ở `.codex/worktrees/<nhánh>/`, mỗi worktree là
+        # MỘT BẢN SAO ĐẦY ĐỦ của kho. `_RELEASE_EXCLUDE_DIRS` có `.claude` mà THIẾU `.codex` ⇒
+        # `release-verify` đếm chúng vào `extra_files`: 200 mục, 100% thuộc `.codex/`, trong khi
+        # `failed: []` và `expected/checked = 177/177` (manifest LÀNH). Hậu quả: gate ĐỎ ở MỌI lượt
+        # chạy từ main checkout, còn worktree sạch vẫn XANH — đỏ theo NƠI CHẠY, không theo nội dung.
+        # Bốn vế lấy từ BỐN nguồn khác nhau để không vế nào tự chứng minh mình:
+        #   (1) hằng chính sách · (2) HÀNH VI trên cây tổng hợp · (3) đúng KHOÁ `.codex` gây loại
+        #   · (4) .gitignore — vế văn bản, chống đúng cái bẫy đã sập khi viết bản vá này.
+        import tempfile as _tf331
+        from pathlib import Path as _P331
+        from tl_core import release as _rel331
+        ok1 = ".codex" in _rel331._RELEASE_EXCLUDE_DIRS
+
+        # (2) HÀNH VI trên cây TỔNG HỢP (không phụ thuộc máy có .codex thật hay không — CI thì không).
+        #     Đối chứng cùng tên tệp ở NGOÀI `.codex/` phải VÀO gói: nếu cả hai cùng bị loại thì phép
+        #     đo này vô nghĩa (có thể do suffix/tên), nên đối chứng là phần chịu lực của vế.
+        with _tf331.TemporaryDirectory() as _d331:
+            _r331 = _P331(_d331)
+            trong = _r331 / ".codex" / "worktrees" / "nhanh-x" / "scripts" / "tl.py"
+            ngoai = _r331 / "scripts" / "tl.py"
+            for q in (trong, ngoai):
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x", encoding="utf-8")
+            ok2 = (not _rel331._release_should_include(trong, _r331)
+                   and _rel331._release_should_include(ngoai, _r331))
+            # (3) loại ĐÚNG VÌ khoá `.codex`, không phải vì khoá khác lẫn trong đường dẫn.
+            ok3 = set(trong.relative_to(_r331).parts) & _rel331._RELEASE_EXCLUDE_DIRS == {".codex"}
+
+        # (4) `.gitignore`: `.codex/` phải là dòng ĐỘC LẬP. Trong cú pháp gitignore, `#` chỉ mở chú
+        #     thích khi ĐỨNG ĐẦU DÒNG — viết `.codex/   # ghi chú` thì cả cụm thành MỘT pattern và
+        #     KHÔNG bỏ qua gì cả. Bẫy này đã sập THẬT lúc viết r331 (bắt được trước khi commit).
+        _gi = (_ROOT209 / ".gitignore").read_text(encoding="utf-8", errors="replace")
+        ok4 = any(ln.strip() == ".codex/" for ln in _gi.splitlines())
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r331_codex_ngoai_cay_phat_hanh", _c331_codex_ngoai_cay_phat_hanh)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

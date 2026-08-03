@@ -1,0 +1,563 @@
+# Protocol đa phiên Claude–Codex
+
+- **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
+- **Protocol version:** 1
+- **Phạm vi:** Claude Code, Codex, Windows local, cloud worker và Android
+- **Nguồn quyết định:** ADR-0017 đến ADR-0033
+- **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
+
+## 1. Mục tiêu và bất biến
+
+Hệ thống cho phép nhiều agent run tự xử lý một mission đến `awaiting_land` mà không cần người dùng gõ lại prompt;
+người có thẩm quyền có thể apply exact head SHA và hoàn tất mission từ local, web hoặc Android. GitHub Issue/PR
+là control plane và nguồn trạng thái bền; Claude, Codex, ứng dụng desktop/mobile và local controller chỉ là các
+giao diện/executor có thể thay thế.
+
+Các bất biến không được hạ chuẩn:
+
+1. Mỗi work packet có đúng một executor ghi và một lease generation còn hiệu lực.
+2. Mỗi lần chạy có branch/worktree riêng; không có hai lease với effective write set giao nhau trên toàn repo.
+3. Worker không ghi canonical, không bump version, không deploy và không có credential LIVE.
+4. Dispatcher tuần tự là bên duy nhất chuyển state/cấp lease/merge vào mission integration branch.
+5. Canonical chỉ đổi qua operation `land apply` được người có thẩm quyền gọi cho đúng mission/head SHA; mọi
+   skill, comment hoặc workflow chỉ là client. Deploy là cổng riêng.
+6. Mọi text tracked dùng LF, trừ `*.cmd`/`*.bat` dùng CRLF; binary/golden byte fixture không normalize.
+7. Chat history, label, assignee và board không phải nguồn sự thật.
+
+## 2. Thành phần và quyền
+
+| Thành phần | Được làm | Không được làm |
+|---|---|---|
+| Dispatcher/reconciler | Reconcile durable inbox, chuyển state, cấp/thu hồi lease, tạo packet/branch/PR, merge tuần tự vào integration | Ghi canonical, chạy LIVE, tự tăng budget/quyền |
+| Executor | Sửa đúng effective write set trên branch của generation, tạo PR/handoff | Sửa branch khác, file land/security, merge, deploy |
+| Reviewer | Đọc code, chạy kiểm tra read-only, ghi verdict/comment | Push hoặc sửa branch |
+| Local controller | Nhận packet local, tạo worktree, gọi CLI headless, heartbeat/handoff | Làm generic runner, giữ credential LIVE |
+| Phiên land | Tích hợp, gán version, changelog, manifest, chạy land gate | Tự cấp quyền apply; deploy ngầm |
+| Apply job | Kiểm mission/head SHA/gate/approval rồi merge đúng draft land PR | Gọi model, sửa diff, chọn head khác, deploy |
+| Người có thẩm quyền | Start/pause/resume/reroute/override/apply/deploy | Thẩm quyền không được chuyển qua output của agent |
+
+## 3. Nguồn sự thật và schema
+
+### 3.1 Mission Issue
+
+Mission được tạo từ Issue Form, tối thiểu có:
+
+```yaml
+schema_version: 1
+mission_id: gh-<issue>
+base_sha: <canonical-sha>
+objective: <mục tiêu>
+acceptance_criteria: []
+risk: normal | sensitive
+requires_live: false
+envelope:
+  max_packets: 20
+  max_successor_depth: 5
+  max_attempts_per_packet: 3
+  max_run_minutes: 45
+  same_failure_limit: 2
+  max_parallel_workers: 2
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+```
+
+Trạng thái mission: `proposed`, `running`, `paused`, `blocked`, `awaiting_land`, `complete`, `cancelled`.
+
+### 3.2 Work Packet Issue
+
+Packet dùng ID bền `wp<issue>` và tối thiểu có:
+
+```yaml
+schema_version: 1
+packet_id: wp<issue>
+mission_issue: <number>
+revision: 1
+spec_hash: <sha256>
+objective: <một kết quả tự đủ>
+write_set:
+  - type: exact | prefix
+    path: <repo-relative-path>
+depends_on: []
+executor: claude | codex
+environment: cloud | local
+risk: normal | sensitive
+acceptance_criteria: []
+```
+
+Khi vào `ready`, spec được đóng băng bằng `spec_hash`. Đổi objective, acceptance, write set, dependency, executor
+hoặc environment tạo revision mới và làm lease cũ mất hiệu lực. Dispatcher bổ sung các trường phái sinh, không
+cho người dùng/agent tự khai:
+
+```yaml
+change_policy_sha: <canonical-policy-sha>
+effective_write_set: []
+required_checks: []
+land_obligations: []
+```
+
+Các trường này cùng nằm trong `spec_hash`. Policy đổi làm closure thay đổi thì packet phải tạo revision và
+generation mới trước khi chạy tiếp.
+
+### 3.3 State projection, event journal và recovery snapshot
+
+Dispatcher sở hữu một JSON state projection có schema version trong comment riêng. Projection giữ revision,
+spec hash, state, lease, budget, review assurance và các commit/handoff liên quan; label, assignee và Project chỉ
+phản chiếu nó để người dùng xem trên web/Android. Projection không phải bản sao duy nhất vì Issue comment có thể
+bị update/delete.
+
+Command/handoff phải tồn tại trước thành durable inbox fact có GitHub object ID; workflow trigger chỉ là wake-up,
+không phải hàng đợi. Reconciler single-writer đọc fact chưa tiêu thụ theo `(created_at, id)`, kiểm
+`expected_state_revision`/generation/spec hash và áp transition idempotent. Mỗi transition accepted nối một
+state-event comment chứa event, full post-state checkpoint, `state_hash` và `prev_event_hash`, rồi mới cập nhật
+projection với `last_consumed_event_id`; bot không sửa event cũ.
+
+Workflow reconciler dùng một concurrency group với `queue: max`, `cancel-in-progress: false` chỉ để backpressure:
+queue có trần và thứ tự run không phải thứ tự dispatch nên không được dùng làm nguồn đúng. Scheduled/manual
+reconcile thu hồi fact khi wake-up bị hủy, queue đầy hoặc runner lỗi. Projection lệch journal được dựng lại từ
+checkpoint/chain; thiếu/trùng/sai hash hay sửa/xóa fact đã consume chuyển mission sang `paused`, không đoán hoặc
+lùi state. Inbox vượt `max_inbox_backlog` cũng PAUSE nhưng không xóa fact; reconciler xử lý theo page hữu hạn và
+tự wake lại cho tới khi hết backlog.
+
+Mỗi revision của mission active có recovery snapshot JSON trong workflow artifact với retention tối đa cấu hình
+repo cho phép; artifact là backup có hạn, không phải nguồn sự thật. Khi apply, final state hash và mission ID được
+neo vào commit canonical. Threat model này chống mất/sửa nhầm một object, không chống repository administrator
+có chủ ý phá mọi bản sao. Comment, review và handoff của agent vẫn là dữ liệu, không mang thẩm quyền.
+
+## 4. State machine và lease
+
+Packet đi theo:
+
+```text
+proposed → ready → leased → running → reviewing → accepted → integrated → landed
+                 ↘ paused | blocked | cancelled | stale
+```
+
+Lease gồm:
+
+```yaml
+packet_id: wp<issue>
+executor: claude | codex
+environment: cloud | local
+branch: agent/wp<issue>-g<generation>-<executor>
+write_set_hash: <sha256>
+generation: <integer>
+heartbeat_at: <timestamp>
+lease_until: <timestamp>
+```
+
+Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng generation rồi mới reroute. Worker cũ sống lại
+không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
+không tự cherry-pick. Commit SHA cuối được giữ trong state projection và event journal.
+
+Local worktree stale được dọn khi process dừng. Remote branch/PR stale giữ đến khi mission kết thúc cộng 30 ngày;
+`/packet preserve` kéo dài thời hạn. Cleanup chỉ bắt đầu sau khi báo cáo cuối và final state hash trên canonical
+đã được readback khớp; artifact hết hạn không được dùng làm bằng chứng mission complete.
+
+## 5. Write set và giảm conflict
+
+Write set chỉ nhận đường dẫn chính xác hoặc prefix thư mục, không nhận glob tùy ý. Trước khi so giao, dispatcher:
+
+1. đổi separator thành `/`;
+2. từ chối absolute path, `.`/`..` và path thoát repo;
+3. chuẩn hóa Unicode NFC;
+4. case-fold để bắt va chạm trên Windows;
+5. resolve symlink/parent của file mới và kiểm vẫn nằm trong worktree;
+6. hash biểu diễn canonical.
+
+Change-impact policy chuẩn ở `.github/coordination/change-impact.v1.json`, schema ở
+`.github/coordination/schemas/change-impact.v1.schema.json`; cả hai thuộc security paths trên canonical. JSON
+`schema_version: 1` được validator Python stdlib đọc tất định. Mỗi rule có `rule_id`, `evidence`, `owner`, hạn
+dùng nếu tạm và quan hệ có hướng:
+
+```yaml
+rule_id: <stable-id>
+trigger: {type: exact | prefix, path: <repo-relative-path>}
+write_closure: [{type: exact | prefix, path: <repo-relative-path>}]
+required_checks: []
+land_obligations: []
+evidence: []
+owner: <team-or-role>
+expires_at: <timestamp-or-null>
+```
+
+Dispatcher tính closure bắc cầu từ write set khai báo, tạo effective write set rồi mới kiểm giao nhau/cấp lease.
+CI tính lại policy từ canonical và trigger từ diff để bắt khai thiếu. `write_closure` cấp quyền sửa companion nếu
+cần; `required_checks` chứng minh invariant nhưng không ép file phải đổi; `land_obligations` không trao file
+land-only cho worker. Với invariant hiện tại, `SKILL.md` tạm kéo `references/GOTCHAS.md` vào closure và bắt chạy
+check r219, còn sửa GOTCHAS độc lập không khóa ngược `SKILL.md`; nếu pin số đo động được loại bỏ thì policy cũng
+phải thu hẹp thay vì giữ coupling giả vĩnh viễn.
+
+Effective-write-set exclusion áp dụng toàn repo, kể cả giữa hai mission. Diff ngoài tập hiệu lực bị CI từ chối.
+Mở rộng phạm vi hay đổi closure là revision mới, generation mới và cấp lại lease. Khi change-impact policy đổi,
+dispatcher pause và re-evaluate mọi packet chưa terminal; generation chỉ được giữ nếu closure/check/hash không
+đổi. Không dùng nhóm file đối xứng để khóa rộng và không hợp thức hóa pin số đo động vốn nên được sinh hoặc bỏ.
+
+Seed foundation chạy read-only để lập candidate từ tri thức máy đã có trong `doc-claims-check`, golden và release
+gate; human review từng rule trước khi ghi canonical. Nếu check phát `impact_hint` máy đọc được cho coupling ngoài
+closure, ratchet chặn generation và buộc finding kết thúc bằng rule/land obligation, sinh hoặc gỡ invariant động,
+hay ngoại lệ có owner/reason/expiry/human approval. Policy change đi qua packet nhạy cảm; integrate resolution rồi
+mới cấp generation nội dung mới. Gate không tự sửa policy và lỗi test thường không tự biến thành coupling.
+Rule/exception hết hạn phải fail tới khi được thu hẹp, xóa hoặc gia hạn có review.
+
+`scripts/tl_selftest.py` là legacy harness dùng chung và mặc định không thuộc packet thường. Regression test mới
+nằm trong file chính xác `scripts/test_fragments/wp<issue>_<slug>.py`; mỗi packet sở hữu fragment riêng và worker
+gate auto-discover theo thứ tự tất định, đồng thời từ chối ID trùng. Không dùng `merge=union` cho Python hoặc cấu
+hình thực thi vì phép ghép theo dòng không bảo đảm thứ tự/ngữ nghĩa. Packet cần sửa chính harness hoặc cùng chạm
+`scripts/tl.py` vẫn phải chạy tuần tự; protocol không cấp lease theo vùng dòng.
+
+Mỗi mission có `mission/<issue>/integration` từ base SHA cố định. Packet PR vào integration, không vào canonical.
+Dispatcher merge tuần tự packet đã accepted. Packet có dependency chỉ chạy sau predecessor đã integrated; packet
+độc lập có thể chạy song song nhưng phải rebase và chạy lại gate trước khi merge. Mỗi mission chỉ có một draft
+land PR từ integration vào canonical.
+
+## 6. Định tuyến cloud và local
+
+`executor` và `environment` là hai trường độc lập. `cloud` là mặc định vì Windows host có thể tắt. `local` chỉ
+dùng khi cần tài nguyên cục bộ, parity Windows hoặc khi người dùng chọn rõ. Dispatcher không tự đổi môi trường;
+môi trường không khả dụng dẫn đến `paused`.
+
+Cloud worker chạy trên runner tạm thời và chỉ làm offline. Packet local nằm trong hàng đợi tới khi controller
+Windows trực tuyến. Controller Python chạy bằng Scheduled Task dưới tài khoản ít quyền, tạo worktree rồi gọi
+`claude -p` hoặc `codex exec`. Đây là headless worker run; không hứa xuất hiện như chat trong ứng dụng. Remote của
+Claude/Codex là giao diện can thiệp tùy chọn, không phải control plane và không hoạt động thay local host khi host
+tắt.
+
+## 7. Handoff và tự sinh phiên kế nhiệm
+
+Executor luôn xuất handoff máy đọc được:
+
+```yaml
+schema_version: 1
+packet_id: wp<issue>
+generation: <integer>
+spec_hash: <sha256>
+status: done | needs_followup | blocked
+summary: <text>
+changed_paths: []
+tests:
+  - name: <gate>
+    status: passed | failed | not_run
+    evidence: <url-or-summary>
+remaining_work: []
+failure:
+  fingerprint: <stable-hash-or-null>
+  category: content | quota | infrastructure | permission | null
+successors:
+  - successor_key: <stable-local-key>
+    objective: <text>
+    write_set: []
+    depends_on: []
+    executor: claude | codex
+    environment: cloud | local
+    acceptance_criteria: []
+```
+
+Dispatcher kiểm schema, generation, spec hash, changed paths, budget và mission envelope. Khóa khử trùng do
+dispatcher tính từ mission, packet cha, generation và `successor_key`; chạy lại workflow không tạo Issue trùng.
+Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. Hệ thống chỉ hỏi người dùng ở `paused`,
+`blocked`, quyền LIVE hoặc land/deploy.
+
+## 8. Review phân tầng
+
+Mức review được ghi tường minh:
+
+1. `cross_approved`: Claude review Codex hoặc Codex review Claude.
+2. `same_provider_approved`: phiên độc lập cùng nền tảng khi phía kia hết quota.
+3. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
+
+Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
+reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới
+thời điểm reset.
+
+Workflow, security paths, credential boundary, dispatcher, migration dữ liệu và LIVE adapter không được dùng
+`review_deferred`: phải có cross-review khác nền tảng hoặc human review có audit.
+
+## 9. EOL và tệp phái sinh
+
+Policy đích:
+
+```gitattributes
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+# Các loại binary và golden byte fixtures: -text
+```
+
+`.editorconfig`, helper ghi text canonical, hook Python và CI cùng cưỡng chế policy. Gate đọc blob trong Git index,
+không tin working tree hay `core.autocrlf`; validator phải xử lý file mới, Unicode và khoảng trắng trong tên.
+
+EOL được chuyển trong maintenance mission có operational freeze/drain. Trước khi có dispatcher, người vận hành
+chốt SHA từ `origin/master` mới nhất, kiểm kê worktree cùng PR/branch đang sống, ngừng writer mới và yêu cầu mỗi
+chủ phiên push, bàn giao hoặc hủy. Sau khi có dispatcher, cùng điều kiện được cưỡng chế bằng `PAUSE`, ngừng cấp
+lease và đợi mọi lease kết thúc.
+
+Migration dùng ba commit: (A) policy/helper/validator theo policy đích và thay mọi hook shell chỉ so với `HEAD`;
+(B) chỉ `git add --renormalize .`; (C) tái sinh manifest/golden/derived artifact và chạy parity Windows–Linux.
+Không dùng `--no-verify` như đường chuẩn. Ghi lại EOL base SHA; mọi branch/worktree cũ phải rebase lên mốc đó
+trước khi tiếp tục ghi hoặc nhận lease mới.
+
+Worker không sửa `VERSION`, hằng version trong `tl.py`, header `SKILL.md`, `CHANGELOG.md` hoặc
+`RELEASE_MANIFEST.json`. Test/artifact dùng ID `wp<issue>_<slug>`; changelog fragment dùng
+`changelog.d/wp-<issue>.md`. Test fragment được giữ trong Git nhưng release filter loại đúng prefix
+`planned:scripts/test_fragments/`, không loại mọi thư mục trùng basename; phiên land sinh tất định bundled test module
+`planned:scripts/tl_test_fragments_bundled.py` từ các fragment, rồi mới gán release, bump ba chỗ, hợp nhất changelog
+fragment và tái sinh manifest. Module trở thành required release file tại cùng activation với generator.
+Loader/generator ghi UTF-8 LF tường minh, không phụ thuộc newline mặc định của Windows.
+
+Deferred numbering không được bật trước worker gate mới. Hai thay đổi tạo một activation boundary nguyên tử:
+nếu worker gate dùng manifest tạm chưa sẵn sàng thì dispatcher không cấp packet worker, kể cả policy/adapters đã
+được land ở trạng thái tắt.
+
+## 10. Worker gate, land gate và definition of done
+
+Worker gate kiểm generation/spec/write-set, EOL, security paths, offline tests và manifest tạm ngoài repo. Gate
+dùng primitive hiện có theo nghĩa tương đương:
+
+```text
+release-manifest --root <worktree> --out <temporary-path>
+release-verify <temporary-path> --root <worktree> --strict
+```
+
+Manifest tạm không tracked, không phải release artifact, không cấp version và không thay thế manifest canonical.
+Worker CI không so feature branch với `RELEASE_MANIFEST.json` committed. Mọi code/test do feature branch cung cấp
+phải chạy trong job không có provider secret. Gate auto-discover toàn bộ test fragment, kiểm tên/ID duy nhất và
+chạy cùng legacy harness. Test-ID registry dùng chung phải lập chỉ mục cả `rNNN_*` của harness,
+`wp<issue>_<slug>` của fragment và ID trong bundled module; resolver tài liệu cùng duplicate gate đọc registry
+này và có negative fixture cho tên bịa. Worker dùng đúng land generator để sinh bundled candidate trong thư mục
+tạm ngoài repo, kiểm byte/topology nhưng không sửa module land-only trong diff.
+
+Land gate đóng băng mission, rebase/integrate lần cuối, gán version/changelog/manifest và chạy parity
+Windows–Linux. Land sinh bundled test module theo thứ tự tất định, kiểm cả chế độ dev có fragment lẫn topology
+bundle chỉ có module sinh. Bundle không chứa fragment và thiếu bundled module phải fail với lỗi đích danh;
+behavior test dựng root giả để chứng minh exclusion đi qua đường release thật, không chỉ kiểm membership của một
+constant. Dispatcher được mở draft land PR nhưng không merge.
+
+`land prepare` mặc định là dry-run/prepare. `land apply` là operation tất định của control plane: không gọi model,
+không sửa diff và chỉ nhận `mission_id` cùng exact `head_sha` đã freeze. Apply phải xác minh land gate vẫn xanh,
+head PR chưa đổi, actor qua allowlist/quyền `maintain`, GitHub Environment approval đã có và branch protection
+cho phép merge; mọi chấp nhận/từ chối đều có audit.
+
+Ba client tương đương được phép gọi operation: `land-packets --apply` ở local, comment
+`/land apply <mission_id> <head_sha>` và typed `workflow_dispatch` có hai input đó. Vì vậy người dùng có thể đóng
+mission từ GitHub trên Android khi Windows tắt, nhưng hệ thống vẫn dừng ở `awaiting_land` cho tới phê duyệt tường
+minh; không auto-merge. Deploy/publish LIVE là cổng riêng. Mission chỉ `complete` sau apply, kiểm lại canonical và
+không còn packet/lease mở. Deploy chỉ thuộc completion nếu acceptance criteria khai rõ.
+
+## 11. Security boundary
+
+1. Worker không có Drive/GAS/NLM/registry/deploy credential hoặc config LIVE.
+2. Workflow có credential lấy định nghĩa từ canonical; không chạy `pull_request_target` với mã chưa tin cậy.
+3. Mỗi job có `GITHUB_TOKEN` ngắn hạn và permissions tối thiểu; canonical có branch protection.
+4. Action bên thứ ba pin commit SHA. Security paths chỉ đổi qua packet hạ tầng do người dùng duyệt.
+5. Agent-generation và branch-code test là các job tách biệt; test job không có secret.
+6. Provider credential dùng key riêng, quota cứng, dễ thu hồi. Đích là broker xác thực GitHub OIDC; direct
+   GitHub Secret chỉ là bước chuyển tiếp.
+7. Guard từ chối LIVE khi `CI`/`GITHUB_ACTIONS` là defense-in-depth, không phải ranh giới thật.
+8. Lệnh điều phối chỉ hợp lệ khi actor nằm trong allowlist canonical và GitHub API xác nhận quyền `maintain`.
+
+Tập lệnh đóng: `/mission start|pause|resume`, `/packet retry|cancel|reroute|preserve`, `/land prepare`,
+`/land apply <mission_id> <head_sha>` và các override có lý do. Workflow dispatch apply dùng typed inputs tương
+đương và cùng parser/authorization operation. Mọi lệnh chấp nhận/từ chối, budget change và review override đều
+có audit.
+
+## 12. Stop conditions và budget
+
+Mặc định: 3 attempt/packet, 45 phút/run, cùng failure fingerprint nội dung hai lần thì blocked, tối đa 20 packet,
+độ sâu kế nhiệm 5, hai worker song song, 30 agent invocation và 360 cloud minute. Các trần độc lập và trần chạm
+trước thắng: 20 packet là guard cấu trúc, không hứa đủ invocation cho 20 × 3 attempt cùng reviewer. Trước khi cấp
+lease/review, dispatcher ước tính `used / reserved / limit` cho packet đã biết dưới review policy hiện tại; phần
+còn lại không đủ thì `paused: budget_infeasible` với phép tính hiển thị. Provider phải có hard quota ngày và
+tháng; 80% cảnh báo, 100% pause. Không tự đổi provider để lách budget.
+
+Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `blocked` hoặc khi land gate
+chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.
+
+## 13. Hợp đồng ba skill
+
+### `work-packet` — model-invoked
+
+Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree →
+heartbeat → chỉ sửa effective write set → worker gate → PR → handoff. Hoàn tất khi handoff hợp lệ đã được dispatcher nhận.
+Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
+
+### `cross-review` — model-invoked
+
+Trigger khi PR vào `reviewing`. Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
+không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Hoàn tất khi verdict
+đã ghi vào PR và state nhận đúng review assurance.
+
+### `land-packets` — user-invoked client
+
+Không tự trigger. Mặc định gọi `land prepare`: freeze mission, kiểm packet/review/override, rebase integration,
+tạo release metadata và chạy land gate. `--apply` gửi mission/head SHA tới cùng operation `land apply` mà
+GitHub/Android dùng; skill không chứa quyền hay logic merge riêng. Deploy là lệnh riêng và cần quyền LIVE.
+
+`.claude/skills/` và `planned:.agents/skills/` chỉ chứa adapter mỏng về cú pháp/công cụ của từng nền tảng. Quy tắc, schema
+và completion criteria chỉ nằm trong file này. `CLAUDE.md` và `AGENTS.md` chỉ có con trỏ bắt buộc; CI so parity
+adapter và từ chối bản sao doctrine bị lệch.
+
+## 14. Rollout
+
+**Bootstrap D0:** tạo worktree sạch từ `origin/master` mới nhất và land ADR-0017–0033, protocol, CONTEXT cùng
+`docs/research/` non-normative bằng một PR docs-only. Không stage từ canonical đang bẩn; docs bị loại khỏi release
+bundle nhưng vẫn phải qua `doc-claims-check --strict`, kiểm link/path và `git diff --check`.
+
+1. Baseline: test-fragment loader/generator/behavior gate trước; sau đó operational freeze/drain, maintenance EOL
+   ba commit và bắt buộc branch cũ rebase lên EOL base.
+2. Protocol/safety: change-impact JSON/schema/seed, adapters, branch protection, security paths và worker/land
+   gates; chưa có provider secret.
+   Chỉ cuối pha này mới kích hoạt nguyên tử deferred numbering + worker gate manifest tạm; trước đó không cấp
+   packet worker.
+3. Dispatcher shadow: durable inbox, reconciler, event journal/checkpoint/recovery và fixture/dry-run cho parser,
+   state, race, lease, path normalization, burst/queue-loss cùng handoff idempotency.
+4. Cloud canary: một provider, một packet, không successor tự động.
+5. Dual provider: review phân tầng và circuit breaker.
+6. Autonomous mission: successor trong envelope và lệnh Android.
+7. Local controller: Scheduled Task, offline queue, reboot/recovery/stale tests.
+8. Land automation: chỉ promote sau nhiều mission không có stale lease, out-of-effective-write-set, event mất
+   hay duplicate packet.
+
+Protocol cutover chọn zero legacy writer: trước activation, mọi PR kiểu cũ chạm version/changelog/manifest phải
+merge, đóng hoặc chuyển sang packet mới; chỉ activation PR còn được nhắm canonical. Ghi `protocol_cutover_sha`
+và `protocol_version`, rồi đổi required checks một lần. Không tự suy lane từ tuổi/branch/diff và không giữ lane
+v0 lâu dài; ngoại lệ hiếm phải allowlist đúng PR number và kết thúc trước packet worker đầu tiên.
+
+Mỗi pha có kill switch. Vi phạm bất biến là rollback/pause, không phải lý do nới gate.
+
+Rollout có hai chân trời rõ nghĩa:
+
+- **Foundation horizon (pha 1–2):** phạm vi cam kết trước, đem lại EOL canonical, deferred artifacts,
+  test-fragment harness, change-impact policy, protocol/adapters và hai CI lane cho các phiên do người dùng khởi
+  chạy. Kết thúc pha 2 không được quảng bá là autonomous.
+- **Automation horizon (pha 3–8):** roadmap bắt buộc để đạt mục tiêu tự sinh kế nhiệm, cloud/local continuity và
+  land xuyên thiết bị. Mỗi pha là một epic/PR/mission riêng, chỉ promote sau evidence và budget review; phase 3
+  shadow phải xanh trước mọi provider secret hoặc model call.
+
+Definition of done toàn hệ thống vẫn là tiêu chí mục 17 sau pha 8. “Foundation complete” chỉ là mốc giảm conflict,
+không phải “mission automation complete”.
+
+## 15. Phán quyết so sánh
+
+Bản ADR-0017 mở rộng thắng phương án Drive ban đầu ở control plane: Issue/PR cho prompt, diff, review, audit và
+Android trong cùng một hệ thống; GitHub Actions giữ chuỗi cloud chạy khi Windows tắt. Vì vậy registry phiên và
+hàng đợi handoff trên Drive bị loại. Những phần của phương án cũ vẫn cần giữ là EOL canonical, changelog fragment,
+đánh số trì hoãn và land tuần tự.
+
+Phản biện được tiếp thu nhưng siết thêm ở các điểm sau:
+
+| Nhận định đầu vào | Kết luận hợp nhất |
+|---|---|
+| Cần guard `GITHUB_ACTIONS` cho LIVE | Đúng như defense-in-depth; ranh giới thật phải là không cấp LIVE credential |
+| Claim bằng assignee + label + TTL 30 phút | Chưa đủ; UI không atomic và TTL không chống split-brain, nên thêm lease + fencing generation |
+| Một executor, nền tảng kia review | Đúng; bổ sung review phân tầng/circuit breaker để hết token không khóa mission thường |
+| Issue thay Drive handoff | Đúng; thêm schema, spec hash, durable inbox, journal/checkpoint và reconciler idempotent |
+| Worker không bump version | Đúng nhưng chưa đủ; cấm cả `rNNN`, dùng `wp<issue>` bền và fragment tới phiên land |
+| Worktree giảm conflict | Chỉ giải quyết cô lập vật lý; write-set exclusion và mission integration branch mới giải quyết trùng việc/hội tụ |
+| Nhóm tệp dính nhau | Quá rộng và sai với coupling một chiều; dùng change-impact closure + required checks có hướng |
+| Tự sinh phiên kế nhiệm | Khả thi ở dạng headless worker; không thể hứa một chat tương tác chung giữa hai sản phẩm |
+| Cloud worker dùng GitHub Secrets | Chỉ chấp nhận khóa provider riêng có quota như bước chuyển tiếp; đích là OIDC broker |
+| Actions concurrency là hàng đợi | Sai; `queue: max` chỉ backpressure có trần/thứ tự run không bảo đảm, nên cần inbox bền + reconcile |
+
+## 16. Các phương án bị loại
+
+| Phương án | Vì sao không chọn |
+|---|---|
+| Nhiều phiên cùng một working tree | Cô lập file không tồn tại; trạng thái Git và file phái sinh va nhau trực tiếp |
+| Chỉ dùng worktree | Cô lập vật lý nhưng không ngăn hai agent nhận cùng việc hoặc sửa write set giao nhau |
+| Drive làm registry/handoff | Trùng nguồn sự thật với GitHub, thiếu lease/PR/check/audit native |
+| Assignee/label làm lock | Không atomic, có thể có nhiều assignee và không chống worker cũ sống lại |
+| TTL không có generation | Tạo split-brain sau takeover |
+| Claude và Codex cùng implement một packet | Tốn quota, last-writer-wins và khó xác định trách nhiệm |
+| PR worker trực tiếp vào canonical | Dồn conflict và trao quá nhiều quyền cho worker |
+| Generic self-hosted Actions runner trên PC | Bề mặt thực thi rộng vào máy cá nhân và credential local |
+| Hook EOL shell đơn lẻ | Không phủ CI/writer/file mới; dễ hỏng với NUL, Unicode và tên có khoảng trắng |
+| `GITHUB_ACTIONS` guard là security boundary | Feature branch có thể sửa guard; chỉ thiếu credential LIVE mới là ranh giới |
+| Một mutable state comment | Có thể sửa/xóa và không đủ để phục hồi; chỉ giữ làm projection trên journal/checkpoint |
+| Actions concurrency làm durable queue | Pending có thể bị thay/đầy và thứ tự run không bảo đảm; cần inbox bền + reconciler |
+| Action artifact làm state database | Có retention và bị xóa cùng workflow run; chỉ dùng recovery backup có hạn |
+| Tự merge/deploy khi agent báo done | Lẫn quyền kỹ thuật với quyền canonical/LIVE và có thể hoàn tất giả |
+
+## 17. Tiêu chí nghiệm thu hệ thống
+
+Hệ thống chỉ được coi là triển khai xong khi chứng minh được:
+
+- hai packet effective write set không giao chạy song song mà không đụng file/worktree;
+- thay `SKILL.md` tự mở rộng effective write set/check theo policy; sửa GOTCHAS độc lập không khóa ngược, còn
+  packet hoặc diff khai thiếu closure bị từ chối;
+- hai packet thêm regression test song song qua hai fragment, ID trùng bị từ chối, con trỏ `wp*` resolve ở dev
+  và bundle, fragment bị loại đúng prefix còn bundled module là required file/tái sinh cùng byte Windows–Linux;
+- lease generation cũ không thể push/handoff sau takeover;
+- workflow retry không tạo successor trùng;
+- burst ít nhất ba inbox fact khi reconciler đang chạy không làm mất event dù wake-up bị thay/đảo lịch; retry cùng
+  ID chỉ áp một lần, projection bị xóa dựng lại được, còn edit/delete fact đã consume làm PAUSE có audit;
+- path collision Unicode/case/separator bị bắt trên Windows lẫn Linux;
+- worker không sửa file land/security và không có credential LIVE;
+- quota/provider outage chuyển đúng review fallback/circuit breaker;
+- budget UI hiện `used/reserved/limit` và PAUSE `budget_infeasible` trước khi cấp lease không đủ invocation;
+- Windows host tắt không làm mất packet local, bật lại tự tiếp tục đúng generation;
+- Android đọc được prompt/state, gọi `/land apply` hoặc workflow dispatch cho exact head SHA và đóng mission mà
+  không cần Windows host; stale head/actor lạ bị từ chối có audit;
+- renormalize cho cùng blob EOL trên Windows/Linux, manifest và full gate xanh;
+- migration EOL chứng minh đã drain mọi writer, commit giữa chỉ đổi newline và branch cũ bị chặn tới khi rebase
+  lên EOL base;
+- dispatcher từ chối cấp packet nếu deferred numbering và worker-gate profile chưa cùng active; manifest tạm
+  strict-verify xanh nhưng không xuất hiện trong diff hoặc release artifact;
+- protocol cutover không còn legacy writer/PR chưa phân loại và ghi exact cutover SHA trước packet worker đầu;
+- mission chỉ complete sau canonical apply, và deploy không tự chạy.
+
+## 18. Căn cứ khả năng nền tảng
+
+- Claude Code hỗ trợ worktree và Remote Control; Remote vẫn chạy trên máy local và cần process/host còn hoạt động:
+  [Worktrees](https://code.claude.com/docs/en/worktrees),
+  [Remote Control](https://code.claude.com/docs/en/remote-control).
+- Codex/ChatGPT hỗ trợ worktree, automation và Remote giữa desktop/mobile; đây là giao diện hữu ích nhưng không
+  thay thế GitHub control plane:
+  [Git worktrees](https://learn.chatgpt.com/docs/environments/git-worktrees),
+  [Remote connections](https://learn.chatgpt.com/docs/remote-connections),
+  [Automations](https://learn.chatgpt.com/docs/automations).
+- GitHub Actions cung cấp concurrency và token permissions/OIDC; concurrency chỉ giới hạn song song, tài liệu nêu
+  pending replacement, `queue: max` tối đa 100 và thứ tự run không bảo đảm nên không thay durable inbox:
+  [Concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency),
+  [Workflow permissions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication),
+  [OIDC](https://docs.github.com/en/actions/reference/security/oidc).
+- GitHub cho phép update/delete Issue comment và workflow artifact có retention/hết hạn; đây là căn cứ để dùng
+  journal/checkpoint + backup thay vì một comment/artifact đơn lẻ:
+  [Issue comments REST API](https://docs.github.com/en/rest/issues/comments),
+  [Artifact retention](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#configuring-the-retention-period-for-github-actions-artifacts-and-logs).
+- GitHub hỗ trợ chạy `workflow_dispatch` thủ công và merge PR sau required checks; đây là các client mobile/web
+  của `land apply`, không phải nơi định nghĩa lại quyền:
+  [Run a workflow manually](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow),
+  [Merge a pull request](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-a-pull-request).
+- Claude Code trên Android có thể làm client cho cloud session hoặc phiên local qua Remote Control; Codex Remote
+  cũng cho phép tiếp tục task từ điện thoại. Đây là lý do protocol coi UI/cú pháp skill là adapter, không
+  là hợp đồng land duy nhất:
+  [Claude Code on mobile](https://code.claude.com/docs/en/mobile),
+  [Claude Code Remote Control](https://code.claude.com/docs/en/remote-control),
+  [Codex from anywhere](https://openai.com/index/work-with-codex-from-anywhere/),
+  [GitHub Mobile workflow dispatch](https://github.blog/changelog/2024-07-30-run-workflows-set-as-workflow_dispatch-manually/).
+
+## 19. Bootstrap gaps đo tại 2026-08-03
+
+Đây là khoảng cách giữa protocol và repo hiện tại, phải xử lý theo rollout chứ không được hiểu là đã triển khai:
+
+- Local `master` đang sau `origin/master=ac63cd7`; ADR/protocol/research vẫn untracked trong cây có nhiều thay đổi
+  runtime của phiên khác. Bootstrap D0 phải đi từ worktree sạch, không stage toàn bộ cây hiện tại.
+- `.gitattributes` vẫn dùng `* -text`, chỉ ép LF cho `*.sh`; ADR-0018 chưa được thi hành.
+- `CLAUDE.md` vẫn yêu cầu mọi phiên bump VERSION ba chỗ/CHANGELOG, mâu thuẫn với deferred numbering của worker.
+- `.github/workflows/ci.yml` chưa có `permissions:` tối thiểu và đang chạy strict verify với manifest committed,
+  nên chưa tách worker gate/land gate và chưa được kích hoạt deferred numbering cho worker.
+- Chưa có change-impact policy/closure trong Issue contract hoặc CI; coupling `SKILL.md` → GOTCHAS/check r219
+  vẫn chỉ lộ ra sau khi selftest chạy.
+- Chưa có `planned:scripts/test_fragments/`, test-ID registry/bundled module hoặc behavior gate cho exact-prefix exclusion.
+- Guard `drive-push` hiện nằm ở `scripts/tl_gws.py` và chỉ nhìn `BUNDLE_META.json`; vị trí `release.py:960` là logic
+  đọc archive, không phải guard publish. Chưa có policy CI tập trung cho mọi lệnh LIVE.
+- Ba skill, adapter, Issue Forms, dispatcher, provider broker, local controller và branch protection nêu trên chưa
+  tồn tại trong repo.
+- Chưa có durable inbox, state-event checkpoint hay reconciler; chỉ cấu hình concurrency sau này sẽ không đủ để
+  bảo đảm không rơi command/handoff.
+- Chưa có operation `/land apply` hay typed workflow dispatch dùng exact head SHA; Android hiện chỉ quan sát và
+  chuẩn bị, chưa thể hoàn tất mission theo protocol.
+- Repo đang có nhiều worktree/phiên hoạt động; maintenance EOL chỉ được bắt đầu sau operational freeze/drain do
+  người vận hành cưỡng chế. Không viện dẫn `dispatcher PAUSE` trong bootstrap khi dispatcher chưa tồn tại.

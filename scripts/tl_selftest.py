@@ -21160,10 +21160,13 @@ def run() -> int:
         # KÊ KHAI SLOT (r329/v1.36.61 — PR #25 bootstrap work-packet D0): 196 → **198**. Thêm đúng HAI
         # tệp docs NGOÀI GÓI: docs/prompts/CODEX_EXECUTOR_D0.md + docs/prompts/CLAUDE_REVIEWER_D0.md
         # (.ps1 runbook/tests không tính — ratchet đếm *.md). Gói giữ 177; tổng 198/trần 200 — còn 2 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 21 == 198
+        # KÊ KHAI SLOT (r333/v1.36.65 — cứu hộ bộ hiến pháp D0): 21 → **42** Markdown dưới `docs/`.
+        # Thêm 2 protocol/plan + 17 ADR 0017–0033 + 2 báo cáo research, đều dev-side/ngoài gói.
+        # Gói vẫn 177; phép ratchet cây thật = 177 + 42 = 219. Không nới trần Package 200.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 42 == 219
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 21
+        ok4 = (len(tren_dia) == 42
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

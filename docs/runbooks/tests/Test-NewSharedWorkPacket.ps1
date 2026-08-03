@@ -307,7 +307,7 @@ function Invoke-FillExecutorPromptTest {
         'wp77-executor-' + [Guid]::NewGuid().ToString('N') + '.md'
     )
     $BaseSha = '0123456789abcdef0123456789abcdef01234567'
-    $ExecutorWorktree = 'D:\Quốc hội\tra-luat-wt\wp77-codex'
+    $ExecutorWorktree = "D:\Quốc hội\O'Brien\tra-luat-wt\wp77-codex"
     $RepoPath = "D:\O'Brien\tra-luat"
 
     try {
@@ -343,7 +343,11 @@ function Invoke-FillExecutorPromptTest {
         Assert-Contains -Text $Filled -Expected 'work packet `wp77`, generation'
         Assert-Contains -Text $Filled -Expected '`2`, tại `https://github.com/example/tra-luat/issues/77`'
         Assert-Contains -Text $Filled -Expected 'branch là `agent/wp77-g2-codex`'
-        Assert-Contains -Text $Filled -Expected $ExecutorWorktree
+        Assert-Contains -Text $Filled -Expected "- ``$ExecutorWorktree``: worktree sạch của executor."
+        Assert-Contains -Text $Filled `
+            -Expected "git -C 'D:\Quốc hội\O''Brien\tra-luat-wt\wp77-codex' rev-parse HEAD"
+        Assert-Contains -Text $Filled `
+            -Expected "Set-Location 'D:\Quốc hội\O''Brien\tra-luat-wt\wp77-codex'"
         Assert-Contains -Text $Filled `
             -Expected "& 'D:\O''Brien\tra-luat\docs\runbooks\Fill-SharedWorkPacketPrompt.ps1'"
         Assert-Contains -Text $Filled -Expected "-RepoPath 'D:\O''Brien\tra-luat'"

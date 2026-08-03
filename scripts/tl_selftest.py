@@ -21712,6 +21712,116 @@ def run() -> int:
         return ok0 and ok1 and ok2
     _t110("r322_verify_flags_vang_van_phai_khai", _c322_verify_flags_vang_van_phai_khai)
 
+    # ═══ r327 — phép dò auth của gws: hằng CỨNG 20s < phí THẬT (đo 15–50s) ⇒ is_available() nói dối ═══
+    # `gws auth status` liệt kê 34 API + gọi mạng. Trần 20s nằm GIỮA vùng dao động nên phép dò lật
+    # đỏ/xanh theo mạng: chạy tay ra `oauth2`, mà tl kết luận "gws chưa sẵn" → drive-push rơi xuống
+    # gcloud (thiếu Drive scope) ⇒ [FAIL] mọi lượt deploy. KHÔNG chờ thật: giả `subprocess` để vừa GHI
+    # LẠI ngân sách timeout thực nhận, vừa mô phỏng lệnh tốn N giây.
+    import contextlib as _ctx327, subprocess as _sp327, types as _ty327
+    _ENVK327 = ("TL_GWS_TIMEOUT", "TL_GWS_AUTH_TIMEOUT", "TL_GWS_VERSION_TIMEOUT", "TL_GWS_DISABLE")
+
+    @_ctx327.contextmanager
+    def _env327(env):
+        keep = {k: os.environ.get(k) for k in _ENVK327}
+        try:
+            for k in _ENVK327:
+                os.environ.pop(k, None)
+            os.environ.update(env)
+            yield
+        finally:
+            for k in _ENVK327:
+                os.environ.pop(k, None)
+            os.environ.update({k: v for k, v in keep.items() if v is not None})
+
+    def _fake_sp327(auth_cost, auth_out='{"auth_method": "oauth2"}'):
+        """(fake_subprocess, seen) — `auth status` TỐN auth_cost giây: ngân sách nhỏ hơn ⇒ TimeoutExpired.
+        seen ghi [(loại_phép_dò, timeout_thực_nhận)] để khẳng định trực tiếp vào NGÂN SÁCH, không đoán."""
+        seen = []
+
+        def _run327(args, **kw):
+            tmo, is_auth = kw.get("timeout"), ("status" in args)
+            seen.append(("auth" if is_auth else "version", tmo))
+            if tmo is not None and tmo < (auth_cost if is_auth else 0.0):
+                raise _sp327.TimeoutExpired(args, tmo)
+            return _ty327.SimpleNamespace(returncode=0, stderr="",
+                                          stdout=(auth_out if is_auth else "gws 0.22.5"))
+        return _ty327.SimpleNamespace(run=_run327, TimeoutExpired=_sp327.TimeoutExpired), seen
+
+    def _avail327(gb, sp, env):
+        _osp, _oexe = gb.subprocess, gb.gws_exe
+        try:
+            gb.subprocess, gb.gws_exe = sp, (lambda: "/fake/gws")
+            with _env327(env):
+                gb.reset_cache()
+                return gb.availability_detail(force=True)
+        finally:
+            gb.subprocess, gb.gws_exe = _osp, _oexe
+            gb.reset_cache()
+
+    def _c327_auth_probe_du_gio_cho_gws_that():
+        """VẾ 1 — ngân sách phép dò auth phải PHỦ phí thật. 25s nằm GIỮA trần cũ (20s) và ca chậm nhất
+        đo được (50s): bản cũ ⇒ ok=False dù gws trả `oauth2`; bản vá ⇒ ok=True."""
+        gb = _imp("gws_bridge")
+        sp, seen = _fake_sp327(auth_cost=25.0)
+        d = _avail327(gb, sp, {})
+        b = dict(seen)
+        ok1 = d.get("ok") is True and d.get("auth_method") == "oauth2"
+        ok2 = b.get("auth", 0) >= 60.0
+        # Bằng chứng NỘI TẠI của bệnh cũ: phép dò NẶNG hơn hẳn (34 API + mạng) lại có ngân sách NGẮN
+        # hơn `--version` (20s < 30s). Khoá lại chiều đúng để không tái diễn.
+        ok3 = b.get("auth", 0) > b.get("version", 0)
+        return ok1 and ok2 and ok3
+    _t110("r327_auth_probe_du_gio_cho_gws_that", _c327_auth_probe_du_gio_cho_gws_that)
+
+    def _c327_env_knob_chinh_duoc_timeout():
+        """VẾ 2 — chỉnh được KHÔNG cần sửa mã: knob riêng ĐÈ hẳn; TL_GWS_TIMEOUT là SÀN (chỉ NÂNG)."""
+        gb = _imp("gws_bridge")
+        sp, seen = _fake_sp327(auth_cost=25.0)
+        d = _avail327(gb, sp, {"TL_GWS_AUTH_TIMEOUT": "10"})      # đè hẳn, kể cả HẠ dưới mặc định
+        okA = d.get("ok") is False and dict(seen).get("auth") == 10.0
+        sp2, seen2 = _fake_sp327(auth_cost=180.0)
+        d2 = _avail327(gb, sp2, {"TL_GWS_TIMEOUT": "240"})        # sàn nâng MỌI lệnh gws cùng lúc
+        okB = (d2.get("ok") is True and dict(seen2).get("auth") == 240.0
+               and dict(seen2).get("version") == 240.0)
+        sp3, seen3 = _fake_sp327(auth_cost=25.0)
+        _avail327(gb, sp3, {"TL_GWS_TIMEOUT": "240", "TL_GWS_AUTH_TIMEOUT": "45"})
+        okC = dict(seen3).get("auth") == 45.0 and dict(seen3).get("version") == 240.0  # riêng THẮNG sàn
+        with _env327({"TL_GWS_TIMEOUT": "60"}):
+            # SÀN, KHÔNG phải đè: nâng phép dò 30s→60s mà TUYỆT ĐỐI không hạ download 300s→60s.
+            okD = gb._timeout(30.0) == 60.0 and gb._timeout(300.0) == 300.0
+        return okA and okB and okC and okD
+    _t110("r327_env_knob_chinh_duoc_timeout", _c327_env_knob_chinh_duoc_timeout)
+
+    def _c327_env_meo_khong_vo_hieu_timeout():
+        """VẾ 3 — knob "cho dễ thở" KHÔNG được biến thành công tắc tắt timeout. 0/âm ⇒ chết tức thì,
+        inf/1e400 ⇒ treo vô hạn (gws wedge = phiên treo, không còn fallback). Rác ⇒ về mặc định."""
+        gb = _imp("gws_bridge")
+        oks = []
+        for v in ("0", "0.0", "-5", "inf", "-inf", "nan", "1e400", "rác", "", "   "):
+            with _env327({"TL_GWS_AUTH_TIMEOUT": v, "TL_GWS_TIMEOUT": v}):
+                oks.append(gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 120.0
+                           and gb._timeout(300.0) == 300.0)
+        with _env327({"TL_GWS_AUTH_TIMEOUT": " 45.5 "}):     # số hợp lệ (kể cả thừa khoảng trắng) vẫn ăn
+            oks.append(gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 45.5)
+        return all(oks) and len(oks) == 11
+    _t110("r327_env_meo_khong_vo_hieu_timeout", _c327_env_meo_khong_vo_hieu_timeout)
+
+    def _c327_probe_error_lo_dien():
+        """VẾ 4 — vì sao bệnh SỐNG LÂU: lỗi bị NUỐT. «dò không xong» và «dò xong, chưa auth» CÙNG trả
+        None ⇒ người vận hành đọc `auth=None` rồi đi `gws auth login` (sai hướng — không phải lỗi quyền).
+        Hai ca đó nay phải PHÂN BIỆT ĐƯỢC ở availability_detail()."""
+        gb = _imp("gws_bridge")
+        sp, _ = _fake_sp327(auth_cost=999.0)
+        d = _avail327(gb, sp, {"TL_GWS_AUTH_TIMEOUT": "5"})
+        okA = (d.get("ok") is False and d.get("auth_method") is None
+               and "timeout" in (d.get("probe_error") or "").lower())
+        sp2, _ = _fake_sp327(auth_cost=0.0, auth_out='{"auth_method": "none"}')
+        d2 = _avail327(gb, sp2, {})
+        okB = (d2.get("ok") is False and d2.get("auth_method") == "none"
+               and (d2.get("probe_error") or "") == "")     # KHÔNG đổ oan cho phép dò
+        return okA and okB
+    _t110("r327_probe_error_lo_dien", _c327_probe_error_lo_dien)
+
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
         from tl_core import lookup_ops as _lo300

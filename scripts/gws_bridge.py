@@ -6,6 +6,8 @@ Vai: backend transport Drive direct-API ở env Code/Cowork (PRIMARY; GAS = FALL
 Cú pháp gws (v0.22): `gws <service> <resource> <method> --params '{JSON}'` (KHÔNG key=value).
 Nhóm A (read) hiện thực đầy đủ ở GĐ1; B (write an toàn) / C (write rủi ro) scaffold → GĐ2/GĐ3.
 is_available(): PATH + version==pin + auth!=none, cache theo phiên (env TL_GWS_DISABLE=1 → False để test fallback).
+Timeout CHỈNH ĐƯỢC bằng env (r327): TL_GWS_AUTH_TIMEOUT · TL_GWS_VERSION_TIMEOUT (đè riêng từng phép dò)
+và TL_GWS_TIMEOUT (SÀN chung cho MỌI lệnh gws — chỉ NÂNG, không hạ). Xem `_timeout()`.
 BẢO MẬT: KHÔNG in/echo credential — chỉ gọi --version / auth status / drive files.
 """
 from __future__ import annotations
@@ -40,9 +42,47 @@ def gws_exe() -> str | None:
     return None
 
 
-def _run(args: list[str], *, timeout: float = 30.0, cwd: str | None = None) -> str:
+# ───────────────────────── timeout: hằng CỨNG là BỆNH (r327) ─────────────────────────
+# `gws auth status` liệt kê 34 API + gọi mạng. ĐO trên máy chuẩn Windows, CÙNG đường mã này:
+#   02-08-2026: 29,1 / 39,7 / 50,5 s   ·   03-08-2026: 18,9 / 15,4 / 17,1 s
+# ⇒ phí thật DAO ĐỘNG 15–50 s quanh trần CŨ 20 s: phép dò LẬT đỏ/xanh theo mạng, không phải hỏng hẳn —
+# nên `gws auth status` chạy tay vẫn ra `oauth2` mà tl lại kết luận "gws chưa sẵn". Hậu quả dây chuyền:
+# auth_method()=None → is_available()=False → drive-push rơi xuống gcloud (thiếu Drive scope) ⇒ [FAIL]
+# mọi lượt deploy, dù gws hoàn toàn SỐNG. Chẩn đoán cũ «chạy lại là được» SAI vì bệnh phụ thuộc mạng.
+# ★Bất đối xứng chi phí: chờ THỪA chỉ tốn giây trong ca ĐÃ hỏng (phép dò cache 1 lần/phiên, và chỉ chạy
+#  khi binary gws CÓ THẬT); chờ THIẾU trả lời SAI rồi định tuyến ngầm sang đường chết ⇒ hào phóng có lãi.
+def _env_timeout(name: str) -> float | None:
+    """Đọc timeout từ env; CHỈ nhận số DƯƠNG HỮU HẠN. Rỗng/rác/≤0/nan/inf ⇒ None → dùng mặc định.
+    (0 hay âm truyền vào subprocess.run là timeout TỨC THÌ, inf là treo vô hạn — env méo KHÔNG được
+    biến knob "chỉnh cho dễ thở" thành công tắc vô hiệu hoá timeout.)"""
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return None
+    try:
+        v = float(raw)
+    except ValueError:
+        return None
+    return v if (v > 0 and v != float("inf")) else None   # nan: mọi so sánh False ⇒ tự rơi về None
+
+
+def _timeout(default: float, knob: str | None = None) -> float:
+    """Timeout hiệu lực = knob RIÊNG (đè hẳn) → TL_GWS_TIMEOUT (SÀN, chỉ NÂNG) → default.
+    SÀN chứ KHÔNG phải đè: máy chậm khai TL_GWS_TIMEOUT=120 phải nâng phép dò 30s lên 120s mà KHÔNG
+    được hạ download (300s) xuống 120s — hạ trần một cách vô tình chính là cái bẫy đang vá ở đây."""
+    if knob:
+        v = _env_timeout(knob)
+        if v is not None:
+            return v
+    floor = _env_timeout("TL_GWS_TIMEOUT")
+    return max(default, floor) if floor is not None else default
+
+
+def _run(args: list[str], *, timeout: float = 30.0, cwd: str | None = None,
+         knob: str | None = None) -> str:
     """Chạy `gws <args>` → stdout. gws thiếu / rc!=0 / timeout → GwsError (transport sẽ fallback GAS).
-    cwd: gws giới hạn --output PHẢI trong thư mục làm việc → export đặt cwd=thư mục tạm + tên file tương đối."""
+    cwd: gws giới hạn --output PHẢI trong thư mục làm việc → export đặt cwd=thư mục tạm + tên file tương đối.
+    knob: tên env đè timeout cho RIÊNG lệnh này (phép dò); mọi lệnh đều ăn SÀN TL_GWS_TIMEOUT."""
+    timeout = _timeout(timeout, knob)   # giải ở ĐÚNG MỘT chỗ ⇒ thông điệp lỗi khai timeout THẬT đã dùng
     exe = gws_exe()
     if not exe:
         raise GwsError("gws not found (PATH / ~/.local/bin)")
@@ -80,7 +120,9 @@ def _drive(method: list[str], params: dict, *, timeout: float = 30.0):
 
 # ───────────────────────── availability ─────────────────────────
 def version() -> str:
-    out = _run(["--version"], timeout=30.0)   # 30s: bù gws cold-start (keyring/kết nối lần đầu phiên)
+    # 30s: bù gws cold-start (keyring/kết nối lần đầu phiên). ĐO 03-08-2026 (lệnh gws ĐẦU của tiến trình,
+    # tức ĐÃ gánh cold-start): 3,7s ⇒ dư 8× — giữ nguyên mặc định, chỉ thêm knob (r327).
+    out = _run(["--version"], timeout=30.0, knob="TL_GWS_VERSION_TIMEOUT")
     m = re.search(r"(\d+\.\d+\.\d+)", out)
     if m:
         return m.group(1)
@@ -88,12 +130,21 @@ def version() -> str:
     return lines[0] if lines else ""
 
 
-def auth_method() -> str | None:
+def _auth_probe() -> tuple[str | None, str]:
+    """(auth_method, err) — 120s vì phí ĐO được là 15–50s (xem khối ghi chú timeout ở trên): trần cũ 20s
+    nằm GIỮA vùng dao động nên phép dò lật đỏ/xanh theo mạng. 120s ≈ 2,4× ca chậm nhất từng đo.
+    Tách khỏi auth_method() để is_available() KHAI ĐƯỢC LÝ DO hỏng: bệnh này sống lâu vì lỗi bị NUỐT —
+    probe-timeout và «chưa auth bao giờ» CÙNG trả None, availability_detail() không phân biệt nổi, nên
+    người vận hành đọc `auth=None` rồi đi `gws auth login` (sai hướng, không phải lỗi quyền)."""
     try:
-        st = _json(_run(["auth", "status"], timeout=20.0))
-    except GwsError:
-        return None
-    return st.get("auth_method") if isinstance(st, dict) else None
+        st = _json(_run(["auth", "status"], timeout=120.0, knob="TL_GWS_AUTH_TIMEOUT"))
+    except GwsError as e:
+        return None, str(e)
+    return (st.get("auth_method") if isinstance(st, dict) else None), ""
+
+
+def auth_method() -> str | None:
+    return _auth_probe()[0]
 
 
 def is_available(force: bool = False) -> bool:
@@ -103,14 +154,16 @@ def is_available(force: bool = False) -> bool:
         return False
     if _AVAIL_CACHE is not None and not force:
         return bool(_AVAIL_CACHE["ok"])
-    info: dict[str, Any] = {"ok": False, "version": None, "version_match": False, "auth_method": None}
+    info: dict[str, Any] = {"ok": False, "version": None, "version_match": False, "auth_method": None,
+                            "probe_error": ""}   # r327: KHAI lý do — "không dò được" ≠ "dò xong, chưa auth"
     try:
         info["version"] = version()
         info["version_match"] = (info["version"] == PINNED_VERSION)
-        info["auth_method"] = auth_method()
+        info["auth_method"], info["probe_error"] = _auth_probe()
         info["ok"] = bool(info["version_match"] and info["auth_method"] and info["auth_method"] != "none")
-    except GwsError:
+    except GwsError as e:
         info["ok"] = False
+        info["probe_error"] = str(e)    # version() ném ⇒ auth chưa kịp chạy; giữ lỗi ĐẦU TIÊN gặp
     _AVAIL_CACHE = info
     return bool(info["ok"])
 
@@ -231,7 +284,9 @@ def download(file_id: str, dest: str, export_mime: str | None = None, **_) -> di
                 "--params", json.dumps({"fileId": file_id, "alt": "media", "supportsAllDrives": True}),
                 "--output", dbase]
     try:
-        p = subprocess.run(args, cwd=ddir, capture_output=True, timeout=300.0)  # stdout dạng BYTES (không decode)
+        # KHÔNG đi qua _run (stdout phải là BYTES, không decode) ⇒ gọi _timeout() TAY, nếu không đây là
+        # lệnh gws DUY NHẤT mà SÀN TL_GWS_TIMEOUT không với tới (r327).
+        p = subprocess.run(args, cwd=ddir, capture_output=True, timeout=_timeout(300.0))
     except subprocess.TimeoutExpired as e:
         raise GwsError("gws download timeout") from e
     if p.returncode != 0:

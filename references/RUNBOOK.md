@@ -222,6 +222,12 @@ Router `scripts/transport.py` (`drive_op`/`run_batch`) định tuyến theo nhó
 - **Confirm-gate THEO LÔ**: `transport.run_batch(items, confirmed=False)` → `ConfirmRequired` liệt kê CẢ lô; xác nhận 1 lần (`confirmed=True`) rồi chạy hết. Đơn lẻ: `drive_op(op, confirmed=True)`.
 - **Fallback ồn ào**: gws chết/`TL_GWS_DISABLE=1` → stderr `[FALLBACK→GAS] op=…` rồi gọi GAS (trừ `upload`).
 - **Ngoại lệ chặn**: `ConfirmRequired` (C chưa confirm) · `DeferToShell` (D ở Chat) · `DeferToMCP` (mcp in-process, mang `.spec` để Claude gọi tool).
+- **Timeout phép dò (r327)**: `gws auth status` tốn **15–50s** (liệt kê 34 API + gọi mạng) — trần cũ 20s
+  nằm GIỮA vùng đó nên `is_available()` lật đỏ/xanh theo mạng, kéo `drive-push` rơi xuống gcloud thiếu
+  Drive scope ⇒ `[FAIL]` dù gws SỐNG. Nay 120s, chỉnh được: `TL_GWS_AUTH_TIMEOUT` ·
+  `TL_GWS_VERSION_TIMEOUT` (đè riêng) · `TL_GWS_TIMEOUT` (SÀN chung, **chỉ nâng**).
+  ⚠ **Thấy `auth=None` ĐỪNG vội `gws auth login`** — đọc `probe_error` trong `tl transport-info --json`
+  trước: có chữ `timeout` nghĩa là **không dò được**, KHÔNG phải mất quyền.
 
 **A0.8 — Đo end-to-end (Code, gws auth oauth2; read=median 3 mẫu, mutate=1 mẫu).**
 

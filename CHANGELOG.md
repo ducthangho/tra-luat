@@ -1,3 +1,20 @@
+# ★ v1.36.64 — r332: một controller PowerShell điều phối trọn vòng D0 Codex → Claude (2026-08-04)
+
+**Ba giai đoạn trước đây cần nhiều lệnh rời nay có một entrypoint máy đọc được:**
+`docs/runbooks/Invoke-SharedWorkPacketFlow.ps1` bọc hai primitive đã harden
+`New-SharedWorkPacket.ps1` và `Fill-SharedWorkPacketPrompt.ps1` thành `Preview`, `CreateExecutor` và
+`PrepareReviewer`.
+
+- `Preview` luôn đo LIVE: auth/fetch/base/bootstrap/23 nguồn/PR; không nhận snapshot bypass và không gọi Issue API.
+- `CreateExecutor` chỉ tạo Issue thật khi có cờ `-ConfirmCreateIssue`, rồi điền prompt Codex và copy clipboard.
+- `PrepareReviewer` kiểm nhánh đúng `agent/wp<N>-g<G>-codex`, fetch lại và đòi `FETCH_HEAD` khớp exact
+  `REVIEW_READY` head trước khi dựng worktree detached/sạch; prompt Claude chỉ vào clipboard sau mọi gate.
+- Controller không push, mở/merge PR, đăng verdict, bump version hoặc deploy; các quyền này vẫn là cổng riêng.
+
+Regression `Test-InvokeSharedWorkPacketFlow.ps1`: `4/4` trên Windows PowerShell 5.1 và PowerShell 7, gồm
+đường dẫn `Quốc hội`, dấu nháy đơn, help UTF-8 BOM + LF, snapshot rejection, live shims và stale-head fail-close.
+Bộ bootstrap cũ vẫn `10/10`; CI Ubuntu/Windows của PR #31 và review Standards/Spec đều xanh, 0 finding.
+
 # ★ v1.36.63 — r331: `.codex/` (worktree agent Codex) không có trong bảng loại trừ ⇒ gate ĐỎ theo NƠI CHẠY (2026-08-04)
 
 **Triệu chứng khó tin nhất: cùng một commit, chạy chỗ này XANH chỗ kia ĐỎ.** Deploy từ main checkout

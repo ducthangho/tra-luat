@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.63",
+  "skill_version": "1.36.64",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 177,
-  "total_bytes": 7782122,
-  "package_hash": "3911eec8d81a99da8f3aae059b3ff4cb5d8a31e88c66aa2c02f0f401f5d3da55",
-  "content_hash": "3911eec8d81a99da8f3aae059b3ff4cb5d8a31e88c66aa2c02f0f401f5d3da55",
+  "total_bytes": 7783522,
+  "package_hash": "2814defbd9e6e9320a40731e24a863339f61809f221ed9407c877080c9eb0ec4",
+  "content_hash": "2814defbd9e6e9320a40731e24a863339f61809f221ed9407c877080c9eb0ec4",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 619951,
-      "sha256": "d52542fbb2cd4a96f23337d75bcbd5d47506adc5034ee71b9c132c53702410ef"
+      "size": 621351,
+      "sha256": "707239be368c01c913e0068d4ad08762b06bea489eec3eafa27fd7977f5c626c"
     },
     {
       "path": "CONTEXT.md",
@@ -39,12 +39,12 @@
     {
       "path": "SKILL.md",
       "size": 48031,
-      "sha256": "0b65c212062d7043f3114ad65cfb1d5504920bf0c48479b2aba9cfa169713c22"
+      "sha256": "803fd5abe6ed3d9814dbef14e6b2081438a26eeb5a5d8bf4bd06f4af2a30be7f"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "8b44e9520d151cf46c8235fd3525aede9f57b2140e999a6bae68f7193e21267a"
+      "sha256": "143d2d5126c9f8a3fe298bad4dcc25e3e283f0ace6c95e8dbde7d094d349e265"
     },
     {
       "path": "agents/openai.yaml",
@@ -679,7 +679,7 @@
     {
       "path": "scripts/tl.py",
       "size": 231500,
-      "sha256": "ce1c8910f0e991663f82deee5dd504a9fd4436f4df4b78b8f2b2772fc8142ce5"
+      "sha256": "30fd81f353cad4b7738e5cf2ce98fcb3c79272e7b544345f548afe5201b87c7e"
     },
     {
       "path": "scripts/tl_boot.py",

@@ -1,8 +1,6 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
-    [string]$RepoPath = [System.IO.Path]::GetFullPath(
-        (Join-Path $PSScriptRoot '..\..')
-    ),
+    [string]$RepoPath,
 
     [string]$SnapshotPath,
 
@@ -15,6 +13,12 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrWhiteSpace($RepoPath)) {
+    $RepoPath = [System.IO.Path]::GetFullPath(
+        (Join-Path $PSScriptRoot '..\..')
+    )
+}
 
 if ([string]::IsNullOrWhiteSpace($BodyOutputPath)) {
     $BodyOutputPath = Join-Path ([System.IO.Path]::GetTempPath()) (
@@ -95,12 +99,19 @@ else {
         throw "Không kiểm được danh sách PR đang mở.`n$OpenPrJson"
     }
 
+    if ($OpenPrJson.Trim() -eq '[]') {
+        $LiveOpenPrs = @()
+    }
+    else {
+        $LiveOpenPrs = @($OpenPrJson | ConvertFrom-Json)
+    }
+
     $Snapshot = [pscustomobject]@{
         repo_slug   = $RepoSlug
         base_sha    = $BaseSha
         version     = $Version
         observed_at = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
-        open_prs    = @($OpenPrJson | ConvertFrom-Json)
+        open_prs    = $LiveOpenPrs
     }
 }
 

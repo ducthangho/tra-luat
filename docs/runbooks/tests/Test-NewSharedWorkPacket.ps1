@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [ValidateSet('ready', 'paused', 'prereq', 'create', 'prompts', 'all')]
     [string]$Case = 'all'
@@ -21,7 +21,7 @@ function Assert-Contains {
         [string]$Expected
     )
 
-    if (-not $Text.Contains($Expected, [System.StringComparison]::Ordinal)) {
+    if ($Text.IndexOf($Expected, [System.StringComparison]::Ordinal) -lt 0) {
         throw "Expected generated packet to contain: $Expected"
     }
 }
@@ -163,9 +163,11 @@ function Invoke-MissingToolTest {
         'wp-missing-tool-' + [Guid]::NewGuid().ToString('N') + '.md'
     )
     $OriginalPath = $env:PATH
+    $OriginalErrorActionPreference = $ErrorActionPreference
 
     try {
         $env:PATH = ''
+        $ErrorActionPreference = 'Continue'
         $Output = ((& $PowerShellPath -NoProfile -File $ScriptPath `
             -RepoPath $RepoRoot `
             -DryRun `
@@ -182,6 +184,7 @@ function Invoke-MissingToolTest {
     }
     finally {
         $env:PATH = $OriginalPath
+        $ErrorActionPreference = $OriginalErrorActionPreference
         Remove-Item -LiteralPath $BodyPath -Force -ErrorAction SilentlyContinue
     }
 }
@@ -194,8 +197,14 @@ function Invoke-IssueCreationTest {
     $ShimRoot = Join-Path ([System.IO.Path]::GetTempPath()) "wp-shims-$Suffix"
     $GitShim = Join-Path $ShimRoot 'git.cmd'
     $GhShim = Join-Path $ShimRoot 'gh.cmd'
+    $GhLogPath = Join-Path $ShimRoot 'gh-calls.log'
+    $WrapperPath = Join-Path $ShimRoot 'invoke-with-clipboard-guard.ps1'
     $BodyPath = Join-Path ([System.IO.Path]::GetTempPath()) "wp-create-$Suffix.md"
     $OriginalPath = $env:PATH
+    $OriginalGhLog = $env:WP_GH_LOG
+    $OriginalScriptUnderTest = $env:WP_SCRIPT_UNDER_TEST
+    $OriginalRepoUnderTest = $env:WP_REPO_UNDER_TEST
+    $OriginalBodyUnderTest = $env:WP_BODY_UNDER_TEST
     $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
     [void](New-Item -ItemType Directory -Path $ShimRoot)
@@ -209,6 +218,7 @@ function Invoke-IssueCreationTest {
     ) -join [Environment]::NewLine
     $GhShimBody = @(
         '@echo off',
+        'echo %*>>"%WP_GH_LOG%"',
         'if "%~1"=="auth" exit /b 0',
         'if "%~1"=="repo" (echo {"nameWithOwner":"example/tra-luat"}& exit /b 0)',
         'if "%~1"=="pr" (echo []& exit /b 0)',
@@ -217,13 +227,20 @@ function Invoke-IssueCreationTest {
     ) -join [Environment]::NewLine
     [System.IO.File]::WriteAllText($GitShim, $GitShimBody, $Utf8NoBom)
     [System.IO.File]::WriteAllText($GhShim, $GhShimBody, $Utf8NoBom)
+    $WrapperBody = @(
+        '$ErrorActionPreference = ''Stop''',
+        'function Set-Clipboard { throw ''CLIPBOARD_CALLED'' }',
+        '& $env:WP_SCRIPT_UNDER_TEST -RepoPath $env:WP_REPO_UNDER_TEST -BodyOutputPath $env:WP_BODY_UNDER_TEST -NoClipboard'
+    ) -join [Environment]::NewLine
+    [System.IO.File]::WriteAllText($WrapperPath, $WrapperBody, $Utf8NoBom)
 
     try {
         $env:PATH = "$ShimRoot;$env:SystemRoot\System32"
-        $Output = ((& $PowerShellPath -NoProfile -File $ScriptPath `
-            -RepoPath $RepoRoot `
-            -BodyOutputPath $BodyPath `
-            -NoClipboard 2>&1) | Out-String).Trim()
+        $env:WP_GH_LOG = $GhLogPath
+        $env:WP_SCRIPT_UNDER_TEST = $ScriptPath
+        $env:WP_REPO_UNDER_TEST = $RepoRoot
+        $env:WP_BODY_UNDER_TEST = $BodyPath
+        $Output = ((& $PowerShellPath -NoProfile -File $WrapperPath 2>&1) | Out-String).Trim()
         $ExitCode = $LASTEXITCODE
 
         if ($ExitCode -ne 0) {
@@ -240,37 +257,72 @@ function Invoke-IssueCreationTest {
         if (-not (Test-Path -LiteralPath $BodyPath -PathType Leaf)) {
             throw 'Successful issue creation must retain the exact submitted body.'
         }
+
+        if (-not (Test-Path -LiteralPath $GhLogPath -PathType Leaf)) {
+            throw 'The gh boundary did not produce an invocation log.'
+        }
+        $IssueCalls = @(
+            [System.IO.File]::ReadAllLines($GhLogPath) |
+            Where-Object { $_.StartsWith('issue create ', [System.StringComparison]::Ordinal) }
+        )
+        if ($IssueCalls.Count -ne 1) {
+            throw "Expected exactly one gh issue create call, observed $($IssueCalls.Count)."
+        }
+        Assert-Contains -Text $IssueCalls[0] -Expected '--repo example/tra-luat'
+        Assert-Contains -Text $IssueCalls[0] -Expected '--body-file'
     }
     finally {
         $env:PATH = $OriginalPath
+        $env:WP_GH_LOG = $OriginalGhLog
+        $env:WP_SCRIPT_UNDER_TEST = $OriginalScriptUnderTest
+        $env:WP_REPO_UNDER_TEST = $OriginalRepoUnderTest
+        $env:WP_BODY_UNDER_TEST = $OriginalBodyUnderTest
         Remove-Item -LiteralPath $BodyPath -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $GitShim -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $GhShim -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $GhLogPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $WrapperPath -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $ShimRoot -Force -ErrorAction SilentlyContinue
     }
 }
 
+$PassedCases = [System.Collections.Generic.List[string]]::new()
+
 if ($Case -in @('ready', 'all')) {
     Invoke-ReadyPacketTest
     Write-Output 'PASS: zero open PR generates a ready work packet'
+    [void]$PassedCases.Add('ready')
 }
 
 if ($Case -in @('paused', 'all')) {
     Invoke-PausedPacketTest
     Write-Output 'PASS: open PR generates a paused work packet'
+    [void]$PassedCases.Add('paused')
 }
 
 if ($Case -in @('prereq', 'all')) {
     Invoke-MissingToolTest
     Write-Output 'PASS: live preflight fails closed when required tools are missing'
+    [void]$PassedCases.Add('prereq')
 }
 
 if ($Case -in @('create', 'all')) {
     Invoke-IssueCreationTest
     Write-Output 'PASS: live flow creates one Issue through the external CLI boundary'
+    [void]$PassedCases.Add('create')
 }
 
 if ($Case -in @('prompts', 'all')) {
     Invoke-PromptContractTest
     Write-Output 'PASS: prompt pair preserves exclusive executor and SHA-bound review'
+    [void]$PassedCases.Add('prompts')
 }
+
+$Total = $PassedCases.Count
+Write-Output "RESULT: $Total/$Total"
+[ordered]@{
+    ok     = $true
+    passed = $Total
+    total  = $Total
+    cases  = @($PassedCases)
+} | ConvertTo-Json -Compress

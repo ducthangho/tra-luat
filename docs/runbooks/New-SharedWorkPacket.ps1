@@ -92,6 +92,7 @@ function Assert-D0SourceInventory {
 function Assert-D0SourceStatus {
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [string[]]$StatusLines,
 
         [Parameter(Mandatory)]
@@ -149,6 +150,7 @@ if (-not (Test-Path -LiteralPath $BodyParent -PathType Container)) {
     throw "Body output directory does not exist: $BodyParent"
 }
 
+$AlreadyLanded = $false
 if (-not [string]::IsNullOrWhiteSpace($SnapshotPath)) {
     if (-not $DryRun) {
         throw 'Snapshot mode is preview-only and requires -DryRun.'
@@ -266,9 +268,26 @@ else {
     if ($LASTEXITCODE -ne 0) {
         throw "Không đo được source_status của 23 nguồn D0: $($RawSourceStatus -join "`n")"
     }
-    $SourceStatus = @(
-        Assert-D0SourceStatus -StatusLines $RawSourceStatus -SourceFiles $SourceFiles
-    )
+    if ($RawSourceStatus.Count -eq 0 -and $DryRun) {
+        $BaseDiffArgs = @('-C', $RepoPath, 'diff', '--quiet', $BaseSha, '--') + $SourceFiles
+        $BaseDiffOutput = ((& $GitCommand @BaseDiffArgs 2>&1) | Out-String).Trim()
+        $BaseDiffExitCode = $LASTEXITCODE
+        if ($BaseDiffExitCode -eq 0) {
+            $AlreadyLanded = $true
+            $SourceStatus = @()
+        }
+        elseif ($BaseDiffExitCode -eq 1) {
+            throw '23 nguồn D0 sạch trong worktree nhưng chưa khớp origin/master; không thể kết luận already_landed.'
+        }
+        else {
+            throw "Không đối chiếu được 23 nguồn D0 với origin/master.`n$BaseDiffOutput"
+        }
+    }
+    else {
+        $SourceStatus = @(
+            Assert-D0SourceStatus -StatusLines $RawSourceStatus -SourceFiles $SourceFiles
+        )
+    }
     $Snapshot = [pscustomobject]@{
         repo_slug    = $RepoSlug
         base_sha     = $BaseSha
@@ -283,6 +302,25 @@ else {
 }
 
 $OpenPrs = @($Snapshot.open_prs)
+
+if ($AlreadyLanded) {
+    [ordered]@{
+        ok               = $true
+        dry_run          = $true
+        status           = 'already_landed'
+        body_output_path = $null
+        issue_url        = $null
+        issue_number     = $null
+        packet_id        = $null
+        branch           = $null
+        base_sha         = $Snapshot.base_sha
+        observed_at      = $Snapshot.observed_at
+        fill_executor_command = $null
+        bootstrap_ready   = [bool]$Snapshot.bootstrap_ready
+        bootstrap_missing = @($Snapshot.bootstrap_missing)
+    } | ConvertTo-Json -Compress
+    return
+}
 
 if (-not [bool]$Snapshot.bootstrap_ready) {
     $PacketStatus = 'PAUSE_BOOTSTRAP_NOT_LANDED'

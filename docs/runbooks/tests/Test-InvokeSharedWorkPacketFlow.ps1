@@ -58,6 +58,7 @@ function Invoke-PreviewTest {
     $SnapshotPath = Join-Path $TestRoot 'forbidden-snapshot.json'
     $SnapshotBodyPath = Join-Path $TestRoot 'forbidden-snapshot.md'
     $BodyPath = Join-Path $TestRoot 'packet.md'
+    $AlreadyLandedBodyPath = Join-Path $TestRoot 'already-landed.md'
     $SourceFiles = @(Get-D0SourceFiles)
     $OriginalGitLog = $env:WP_FLOW_PREVIEW_GIT_LOG
     $OriginalGhLog = $env:WP_FLOW_PREVIEW_GH_LOG
@@ -95,6 +96,7 @@ function Invoke-PreviewTest {
         'if "%~3"=="show" (echo 1.36.59& exit /b 0)',
         'if "%~3"=="cat-file" exit /b 0',
         'if "%~3"=="status" (type "%WP_FLOW_PREVIEW_GIT_STATUS%"& exit /b 0)',
+        'if "%~3"=="diff" exit /b 0',
         'exit /b 9'
     ) -join [Environment]::NewLine
     $GhShimBody = @(
@@ -169,6 +171,41 @@ function Invoke-PreviewTest {
         }
         if (-not (Test-Path -LiteralPath $BodyPath -PathType Leaf)) {
             throw 'Preview did not create the requested packet body.'
+        }
+
+        [System.IO.File]::WriteAllText($GitStatusPath, '', $Utf8NoBom)
+        $OriginalErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $AlreadyLandedOutput = ((& $PowerShellPath -NoProfile -File $ControllerPath `
+                -Action Preview `
+                -CanonicalRepoPath $RepoRoot `
+                -BodyOutputPath $AlreadyLandedBodyPath `
+                -GitCommand $GitShim `
+                -GhCommand $GhShim `
+                -NoClipboard 2>&1) | Out-String).Trim()
+            $AlreadyLandedExitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $OriginalErrorActionPreference
+        }
+        if ($AlreadyLandedExitCode -ne 0) {
+            throw "Preview of a fully landed D0 source must return JSON, not fail. Output: $AlreadyLandedOutput"
+        }
+        $AlreadyLandedResult = $AlreadyLandedOutput | ConvertFrom-Json
+        if (-not [bool]$AlreadyLandedResult.ok -or
+                $AlreadyLandedResult.status -cne 'already_landed') {
+            throw "Unexpected already-landed Preview result: $AlreadyLandedOutput"
+        }
+        if (-not [bool]$AlreadyLandedResult.dry_run -or
+                -not [bool]$AlreadyLandedResult.issue_creation_gated -or
+                $null -ne $AlreadyLandedResult.issue_number -or
+                $null -ne $AlreadyLandedResult.next_action) {
+            throw "Already-landed Preview must remain terminal, dry-run and Issue-gated: $AlreadyLandedOutput"
+        }
+        if ($null -ne $AlreadyLandedResult.body_output_path -or
+                (Test-Path -LiteralPath $AlreadyLandedBodyPath)) {
+            throw 'Already-landed Preview must not generate a stale packet body.'
         }
 
         $GitCalls = [System.IO.File]::ReadAllLines($GitLogPath) -join "`n"

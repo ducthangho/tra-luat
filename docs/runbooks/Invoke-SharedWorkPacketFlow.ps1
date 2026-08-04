@@ -4,7 +4,9 @@ Runs the D0 shared-work-packet workflow with explicit permission gates.
 
 .DESCRIPTION
 Preview measures the canonical source and generates the packet body without
-creating a GitHub Issue. CreateExecutor creates one real Issue only when
+creating a GitHub Issue. If all D0 sources already match origin/master, it
+returns terminal status already_landed without generating a stale body.
+CreateExecutor creates one real Issue only when
 -ConfirmCreateIssue is present, fills the Codex executor prompt, and normally
 copies that prompt to the clipboard. PrepareReviewer fills the SHA-pinned
 Claude reviewer prompt, fetches the packet branch, and creates and verifies a
@@ -208,7 +210,7 @@ switch ($Action) {
             observed_at           = $Packet.observed_at
             bootstrap_ready       = [bool]$Packet.bootstrap_ready
             bootstrap_missing     = @($Packet.bootstrap_missing)
-            next_action           = 'CreateExecutor'
+            next_action           = if ($Packet.status -eq 'already_landed') { $null } else { 'CreateExecutor' }
             issue_creation_gated  = $true
         }
         [Console]::WriteLine((ConvertTo-AsciiSafeJson -Value $Result))

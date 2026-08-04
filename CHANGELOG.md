@@ -1,3 +1,17 @@
+# ★ v1.36.66 — r334: Preview nhận biết bộ D0 đã land và trả JSON terminal (2026-08-04)
+
+`Invoke-SharedWorkPacketFlow.ps1 -Action Preview` trước đây chết ở PowerShell binder khi cả 23 nguồn D0
+đã sạch sau landing: `git status` trả mảng rỗng, nên caller chỉ thấy `Cannot bind ... empty array` thay vì
+kết quả máy đọc được. TDD khóa đúng public seam trước khi sửa (RED trên Windows PowerShell 5.1).
+
+- Preview nay trả `ok:true`, `status:"already_landed"`, `next_action:null`; không sinh packet body và mọi
+  trường Issue/packet/branch đều `null`.
+- Chỉ kết luận terminal khi đủ 23 đường trên đĩa, `source_status` rỗng và diff của chúng khớp đúng
+  `origin/master`; clean nhưng lệch base vẫn fail-closed.
+- `CreateExecutor` không được nới quyền: không có `-DryRun` thì nguồn sạch vẫn bị từ chối trước Issue API.
+- Regression chạy qua controller thật với biên `git`/`gh` giả lập; giữ parity PowerShell 5.1/7 và chứng minh
+  `gh issue create` không được gọi. Không đổi runtime pháp luật, Drive hoặc NLM.
+
 # ★ v1.36.65 — r333: land cứu hộ bộ hiến pháp D0 từ tree đã neo, không kéo code WIP (2026-08-04)
 
 **Nguồn cứu hộ được chốt theo đường A:** tag `rescue/d0-2026-08-04` trỏ root tree `dacc4e76`;

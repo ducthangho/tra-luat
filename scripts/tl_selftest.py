@@ -28744,6 +28744,538 @@ def run() -> int:
     _t110("r324_nlm08_doc_f7_khop_canary_live", _c324_nlm08_doc_f7_khop_canary)
 
 
+    # ═══ F1-01 / wp41 — deterministic test-fragment loader (ADR-0031) ═══
+    # Test qua interface của deep internal module; fixture chỉ dùng TemporaryDirectory, không chạm repo.
+    import builtins as _bi41, importlib as _il41, tempfile as _tf41
+    from pathlib import Path as _P41
+
+    def _write_fragment41(root, stem, body="return True"):
+        path = _P41(root) / f"{stem}.py"
+        path.write_text(
+            f'TEST_ID = "{stem}"\n\n'
+            f'def run(tl_module):\n    {body}\n',
+            encoding="utf-8", newline="\n")
+        return path
+
+    def _write_source41(root, name, source):
+        path = _P41(root) / name
+        path.write_text(source, encoding="utf-8", newline="\n")
+        return path
+
+    def _hostile_exception41(body):
+        return (
+            'class _Meta(type):\n'
+            '    @property\n'
+            '    def __name__(cls):\n'
+            '        raise SystemExit(0)\n\n'
+            'class Boom(Exception, metaclass=_Meta):\n'
+            '    pass\n\n'
+            f'{body}\n')
+
+    def _error_code41(loader, fn):
+        try:
+            fn()
+        except loader.FragmentError as exc:
+            return exc.code
+        return ""
+
+    def _c41_fragment_zero():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            loaded = loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write", "r3_bust_cache_after_write"))
+        return loaded == ()
+
+    _t110("wp41_fragment_loader_zero", _c41_fragment_zero)
+
+    def _c41_fragment_one():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_loader_one")
+            loaded = loader.load_fragment_cases(root)
+            return (len(loaded) == 1 and loaded[0].test_id == "wp41_loader_one"
+                    and loaded[0].run(object()) is True)
+
+    _t110("wp41_fragment_loader_one", _c41_fragment_one)
+
+    def _c41_fragment_many_deterministic():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_loader_zulu")
+            _write_fragment41(root, "wp41_loader_alpha")
+            first = loader.load_fragment_cases(root)
+            second = loader.load_fragment_cases(root)
+        expected = ["wp41_loader_alpha", "wp41_loader_zulu"]
+        return ([case.test_id for case in first] == expected
+                and [case.test_id for case in second] == expected)
+
+    _t110("wp41_fragment_loader_many_deterministic", _c41_fragment_many_deterministic)
+
+    def _c41_duplicate_fragment_path():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            path = _write_fragment41(root, "wp41_duplicate_path")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, candidate_paths=(path, path)))
+        return code == "DUPLICATE_FRAGMENT_PATH"
+
+    _t110("wp41_fragment_duplicate_path_rejected", _c41_duplicate_fragment_path)
+
+    def _c41_duplicate_wp_id():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_duplicate_id")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, existing_ids=("wp41_duplicate_id",)))
+        return code == "DUPLICATE_TEST_ID"
+
+    _t110("wp41_fragment_duplicate_wp_id_rejected", _c41_duplicate_wp_id)
+
+    def _c41_grandfather_exact_only():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            allowed = loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write", "r3_bust_cache_after_write")) == ()
+            too_many = _error_code41(loader, lambda: loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write",) * 3))
+            other = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, existing_ids=("legacy_x", "legacy_x")))
+        return allowed and too_many == "DUPLICATE_TEST_ID" and other == "DUPLICATE_TEST_ID"
+
+    _t110("wp41_fragment_grandfather_exact_only", _c41_grandfather_exact_only)
+
+    def _c41_malformed_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_malformed_contract.py", 'TEST_ID = "wp41_malformed_contract"\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_malformed_contract_rejected", _c41_malformed_contract)
+
+    def _c41_syntax_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_syntax_error.py", 'TEST_ID = "wp41_syntax_error"\ndef run(:\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_SYNTAX"
+
+    _t110("wp41_fragment_syntax_error_diagnosable", _c41_syntax_error)
+
+    def _c41_hostile_syntax_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_syntax_error_alpha.py",
+                'import builtins\n\n'
+                'class _Meta(type):\n'
+                '    def __getattribute__(cls, name):\n'
+                '        if name == "__name__":\n'
+                '            raise KeyboardInterrupt()\n'
+                '        return super().__getattribute__(name)\n\n'
+                'class Boom(SyntaxError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_compile = builtins.compile\n\n'
+                'def hostile_compile(source, filename, mode, *args, **kwargs):\n'
+                '    if filename == "wp41_hostile_syntax_error_beta.py":\n'
+                '        raise Boom("fixture syntax blocked")\n'
+                '    return _original_compile(source, filename, mode, *args, **kwargs)\n\n'
+                'builtins.compile = hostile_compile\n'
+                'TEST_ID = "wp41_hostile_syntax_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_syntax_error_beta")
+            original_compile = _bi41.compile
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _bi41.compile = original_compile
+        return code == "FRAGMENT_SYNTAX"
+
+    _t110(
+        "wp41_fragment_hostile_syntax_error_name_diagnosable",
+        _c41_hostile_syntax_error_name)
+
+    def _c41_import_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_import_error.py", 'raise RuntimeError("boom")\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_import_error_diagnosable", _c41_import_error)
+
+    def _c41_system_exit_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_system_exit_import.py", "raise SystemExit(0)\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_system_exit_import_diagnosable", _c41_system_exit_import)
+
+    def _c41_keyboard_interrupt_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_keyboard_interrupt_import.py", "raise KeyboardInterrupt()\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_keyboard_interrupt_import_diagnosable", _c41_keyboard_interrupt_import)
+
+    def _c41_hostile_exception_name_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_import.py",
+                _hostile_exception41("raise Boom()"))
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_import_diagnosable",
+        _c41_hostile_exception_name_import)
+
+    def _c41_system_exit_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_system_exit_run", "raise SystemExit(0)")
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_system_exit_run_diagnosable", _c41_system_exit_run)
+
+    def _c41_keyboard_interrupt_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_keyboard_interrupt_run", "raise KeyboardInterrupt()")
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110(
+        "wp41_fragment_keyboard_interrupt_run_diagnosable",
+        _c41_keyboard_interrupt_run)
+
+    def _c41_hostile_exception_name_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_run.py",
+                _hostile_exception41(
+                    'TEST_ID = "wp41_hostile_exception_name_run"\n\n'
+                    'def run(tl_module):\n'
+                    '    raise Boom()'))
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_run_diagnosable",
+        _c41_hostile_exception_name_run)
+
+    def _c41_fragment_read_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            target = _write_fragment41(root, "wp41_read_error")
+            original_read_text = _P41.read_text
+
+            def blocked_read_text(path, *args, **kwargs):
+                if path == target:
+                    raise OSError("fixture read blocked")
+                return original_read_text(path, *args, **kwargs)
+
+            _P41.read_text = blocked_read_text
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _P41.read_text = original_read_text
+        return code == "FRAGMENT_READ"
+
+    _t110("wp41_fragment_read_error_diagnosable", _c41_fragment_read_error)
+
+    def _c41_hostile_read_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_read_error_alpha.py",
+                'import pathlib\n\n'
+                'class _Meta(type):\n'
+                '    @property\n'
+                '    def __name__(cls):\n'
+                '        raise SystemExit(0)\n\n'
+                'class Boom(OSError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_read_text = pathlib.Path.read_text\n\n'
+                'def blocked_read_text(path, *args, **kwargs):\n'
+                '    if path.name == "wp41_hostile_read_error_beta.py":\n'
+                '        raise Boom()\n'
+                '    return _original_read_text(path, *args, **kwargs)\n\n'
+                'pathlib.Path.read_text = blocked_read_text\n'
+                'TEST_ID = "wp41_hostile_read_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_read_error_beta")
+            original_read_text = _P41.read_text
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _P41.read_text = original_read_text
+        return code == "FRAGMENT_READ"
+
+    _t110(
+        "wp41_fragment_hostile_read_error_name_diagnosable",
+        _c41_hostile_read_error_name)
+
+    def _c41_signature_system_exit():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_signature_system_exit.py",
+                'TEST_ID = "wp41_signature_system_exit"\n\n'
+                'class Run:\n'
+                '    @property\n'
+                '    def __signature__(self):\n'
+                '        raise SystemExit(0)\n'
+                '    def __call__(self, tl_module):\n'
+                '        return True\n\n'
+                'run = Run()\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_signature_system_exit_diagnosable", _c41_signature_system_exit)
+
+    def _c41_hostile_exception_name_signature():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_signature.py",
+                _hostile_exception41(
+                    'TEST_ID = "wp41_hostile_exception_name_signature"\n\n'
+                    'class Run:\n'
+                    '    @property\n'
+                    '    def __signature__(self):\n'
+                    '        raise Boom()\n'
+                    '    def __call__(self, tl_module):\n'
+                    '        return True\n\n'
+                    'run = Run()'))
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_signature_diagnosable",
+        _c41_hostile_exception_name_signature)
+
+    def _c41_result_bool_system_exit():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_result_bool_system_exit.py",
+                'TEST_ID = "wp41_result_bool_system_exit"\n\n'
+                'class Result:\n'
+                '    def __bool__(self):\n'
+                '        raise SystemExit(0)\n\n'
+                'def run(tl_module):\n'
+                '    return Result()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: bool(loaded[0].run(object())))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_result_bool_system_exit_diagnosable", _c41_result_bool_system_exit)
+
+    def _c41_async_run_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_async_run.py",
+                'TEST_ID = "wp41_async_run"\n\n'
+                'async def run(tl_module):\n'
+                '    raise AssertionError("must not be deferred")\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_async_run_rejected", _c41_async_run_contract)
+
+    def _c41_generator_run_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_generator_run.py",
+                'TEST_ID = "wp41_generator_run"\n\n'
+                'def run(tl_module):\n'
+                '    raise AssertionError("must not be deferred")\n'
+                '    yield True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_generator_run_rejected", _c41_generator_run_contract)
+
+    def _c41_deferred_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_deferred_result.py",
+                'TEST_ID = "wp41_deferred_result"\n\n'
+                'async def deferred():\n'
+                '    raise AssertionError("must not be deferred")\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_deferred_result_rejected", _c41_deferred_result)
+
+    def _c41_generator_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_generator_result.py",
+                'TEST_ID = "wp41_generator_result"\n\n'
+                'def deferred():\n'
+                '    yield True\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_generator_result_rejected", _c41_generator_result)
+
+    def _c41_async_generator_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_async_generator_result.py",
+                'TEST_ID = "wp41_async_generator_result"\n\n'
+                'async def deferred():\n'
+                '    yield True\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_async_generator_result_rejected", _c41_async_generator_result)
+
+    def _c41_custom_awaitable_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_custom_awaitable_result.py",
+                'TEST_ID = "wp41_custom_awaitable_result"\n\n'
+                'class Deferred:\n'
+                '    def __await__(self):\n'
+                '        if False:\n'
+                '            yield None\n'
+                '        return True\n\n'
+                'def run(tl_module):\n'
+                '    return Deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_custom_awaitable_result_rejected", _c41_custom_awaitable_result)
+
+    def _c41_path_traversal():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as parent:
+            root = _P41(parent) / "fragments"; root.mkdir()
+            outside = _write_fragment41(parent, "wp41_outside")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, candidate_paths=(outside,)))
+        return code == "PATH_TRAVERSAL"
+
+    _t110("wp41_fragment_path_traversal_rejected", _c41_path_traversal)
+
+    def _c41_invalid_fragment_path():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "not-a-packet.py", "x = 1\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "INVALID_FRAGMENT_PATH"
+
+    _t110("wp41_fragment_invalid_path_rejected", _c41_invalid_fragment_path)
+
+    def _c41_invalid_diagnostic_deterministic():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            alpha = _write_source41(root, "alpha.txt", "x = 1\n")
+            zulu = _write_source41(root, "zulu.txt", "x = 1\n")
+            observed = []
+            for candidates in ((zulu, alpha), (alpha, zulu)):
+                try:
+                    loader.load_fragment_cases(root, candidate_paths=candidates)
+                except loader.FragmentPathError as exc:
+                    observed.append((exc.code, exc.fragment))
+        return observed == [("INVALID_FRAGMENT_PATH", "alpha.txt")] * 2
+
+    _t110("wp41_fragment_invalid_diagnostic_deterministic", _c41_invalid_diagnostic_deterministic)
+
+    def _c41_path_id_mismatch():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_path_name.py",
+                'TEST_ID = "wp41_other_name"\n\ndef run(tl_module):\n    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp41_fragment_path_id_mismatch_rejected", _c41_path_id_mismatch)
+
+    def _c41_test_id_subclass():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_test_id_subclass.py",
+                'class TestId(str):\n'
+                '    def __ne__(self, other):\n'
+                '        raise SystemExit(0)\n'
+                '    def __hash__(self):\n'
+                '        raise SystemExit(0)\n\n'
+                'TEST_ID = TestId("wp41_test_id_subclass")\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_test_id_subclass_rejected", _c41_test_id_subclass)
+
+    def _c41_cwd_independent():
+        loader = _il41.import_module("tl_core.test_fragments")
+        old_cwd = _hos.getcwd()
+        with _tf41.TemporaryDirectory() as parent:
+            root = _P41(parent) / "fragments"; root.mkdir()
+            elsewhere = _P41(parent) / "elsewhere"; elsewhere.mkdir()
+            _write_fragment41(root, "wp41_cwd_beta")
+            _write_fragment41(root, "wp41_cwd_alpha")
+            try:
+                _hos.chdir(elsewhere)
+                ids = [case.test_id for case in loader.load_fragment_cases(root)]
+            finally:
+                _hos.chdir(old_cwd)
+        return ids == ["wp41_cwd_alpha", "wp41_cwd_beta"]
+
+    _t110("wp41_fragment_cwd_independent", _c41_cwd_independent)
+
+    def _c41_fragment_discovery_adapter():
+        loader = _il41.import_module("tl_core.test_fragments")
+        fragment_root = _P41(__file__).resolve().parent / "test_fragments"
+        existing_ids = [name for name, _ in cases]
+        existing_ids.append("wp41_fragment_discovery_adapter")
+        try:
+            loaded = loader.load_fragment_cases(fragment_root, existing_ids=existing_ids)
+        except loader.FragmentError as exc:
+            print(f"  [fragment-loader] {exc}", file=_hsys.stderr)
+            raise
+        for fragment in loaded:
+            _t110(fragment.test_id, lambda fragment=fragment: fragment.run(globals()["_TL_MODULE"]))
+        return True
+
+    _t110("wp41_fragment_discovery_adapter", _c41_fragment_discovery_adapter)
+
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó
     # chạy trên bản giả mà không ai biết (xanh GIẢ). In đích danh để sửa được ngay.

@@ -28746,7 +28746,7 @@ def run() -> int:
 
     # ═══ F1-01 / wp41 — deterministic test-fragment loader (ADR-0031) ═══
     # Test qua interface của deep internal module; fixture chỉ dùng TemporaryDirectory, không chạm repo.
-    import importlib as _il41, tempfile as _tf41
+    import builtins as _bi41, importlib as _il41, tempfile as _tf41
     from pathlib import Path as _P41
 
     def _write_fragment41(root, stem, body="return True"):
@@ -28862,6 +28862,40 @@ def run() -> int:
 
     _t110("wp41_fragment_syntax_error_diagnosable", _c41_syntax_error)
 
+    def _c41_hostile_syntax_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_syntax_error_alpha.py",
+                'import builtins\n\n'
+                'class _Meta(type):\n'
+                '    def __getattribute__(cls, name):\n'
+                '        if name == "__name__":\n'
+                '            raise KeyboardInterrupt()\n'
+                '        return super().__getattribute__(name)\n\n'
+                'class Boom(SyntaxError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_compile = builtins.compile\n\n'
+                'def hostile_compile(source, filename, mode, *args, **kwargs):\n'
+                '    if filename == "wp41_hostile_syntax_error_beta.py":\n'
+                '        raise Boom("fixture syntax blocked")\n'
+                '    return _original_compile(source, filename, mode, *args, **kwargs)\n\n'
+                'builtins.compile = hostile_compile\n'
+                'TEST_ID = "wp41_hostile_syntax_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_syntax_error_beta")
+            original_compile = _bi41.compile
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _bi41.compile = original_compile
+        return code == "FRAGMENT_SYNTAX"
+
+    _t110(
+        "wp41_fragment_hostile_syntax_error_name_diagnosable",
+        _c41_hostile_syntax_error_name)
+
     def _c41_import_error():
         loader = _il41.import_module("tl_core.test_fragments")
         with _tf41.TemporaryDirectory() as root:
@@ -28961,6 +28995,39 @@ def run() -> int:
         return code == "FRAGMENT_READ"
 
     _t110("wp41_fragment_read_error_diagnosable", _c41_fragment_read_error)
+
+    def _c41_hostile_read_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_read_error_alpha.py",
+                'import pathlib\n\n'
+                'class _Meta(type):\n'
+                '    @property\n'
+                '    def __name__(cls):\n'
+                '        raise SystemExit(0)\n\n'
+                'class Boom(OSError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_read_text = pathlib.Path.read_text\n\n'
+                'def blocked_read_text(path, *args, **kwargs):\n'
+                '    if path.name == "wp41_hostile_read_error_beta.py":\n'
+                '        raise Boom()\n'
+                '    return _original_read_text(path, *args, **kwargs)\n\n'
+                'pathlib.Path.read_text = blocked_read_text\n'
+                'TEST_ID = "wp41_hostile_read_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_read_error_beta")
+            original_read_text = _P41.read_text
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _P41.read_text = original_read_text
+        return code == "FRAGMENT_READ"
+
+    _t110(
+        "wp41_fragment_hostile_read_error_name_diagnosable",
+        _c41_hostile_read_error_name)
 
     def _c41_signature_system_exit():
         loader = _il41.import_module("tl_core.test_fragments")

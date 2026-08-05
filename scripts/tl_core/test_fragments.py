@@ -106,9 +106,9 @@ def _load_one(path: Path) -> FragmentCase:
         source = path.read_text(encoding="utf-8")
         code = compile(source, path.name, "exec", dont_inherit=True)
     except OSError as exc:
-        raise FragmentReadError("FRAGMENT_READ", path.name, type(exc).__name__) from exc
+        raise FragmentReadError("FRAGMENT_READ", path.name) from exc
     except (SyntaxError, UnicodeError) as exc:
-        raise FragmentSyntaxError("FRAGMENT_SYNTAX", path.name, type(exc).__name__) from exc
+        raise FragmentSyntaxError("FRAGMENT_SYNTAX", path.name) from exc
 
     namespace = {"__file__": str(path), "__name__": f"_tl_test_fragment_{path.stem}", "__package__": None}
     try:

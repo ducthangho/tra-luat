@@ -22,6 +22,8 @@ import time       # noqa: F401
 import zipfile    # noqa: F401
 from pathlib import Path  # noqa: F401
 
+from tl_core.test_fragments import FragmentError, find_test_id_pointers, load_test_id_index
+
 _TL = None
 
 
@@ -773,10 +775,10 @@ _DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
 # con trỏ chết ở đó KHÔNG cổng nào bắt. Đo khi mở: 18/19 tệp SẠCH tuyệt đối; 12 cờ còn lại dồn hết vào
 # MỘT tệp và là NỘI DUNG của nó, không phải lỗi (xem _DOC_CLAIMS_HISTORICAL).
 _DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references", "docs")
-# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4
-# (giàn giáo nháp). CỐ Ý DỪNG Ở ĐÂY — L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11`
-# bên dưới; đừng "bổ sung nốt" mà không đo lại.
-_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
+# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4.
+# Hai đề xuất lịch sử L10/L11 đã ĐO và BỊ BÁC (xem `_DOC_CLAIMS_BAC_L10_L11`). F1-02 dùng L12 cho
+# test-ID pointer vì đây là invariant mới, không hồi sinh hai lớp đã bác.
+_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L12")
 # §2.2 nói thẳng: «tài liệu lịch sử được phép dẫn tệp đã xoá». Ba nguồn dưới đây GHI LẠI QUÁ KHỨ, không
 # phải con trỏ để đi theo — DOCTRINE_APPENDIX tự khai «TOÀN BỘ thân SKILL.md trước refactor v1.16.0,
 # GIỮ NGUYÊN để tra cứu lý do», changelog thì theo định nghĩa là sổ. Đo 28-07: 127/134 cờ L1 nằm ở đúng
@@ -1039,10 +1041,20 @@ def _doc_claims_context(root: Path) -> dict:
             commands, cmd_src = set(_ps), _DOC_CLAIMS_PARSER_SURFACE
     except (OSError, ValueError):
         pass
+    test_id_index, test_id_error = None, None
+    try:
+        test_id_index = load_test_id_index(root)
+    except FragmentError as exc:
+        test_id_error = {"code": exc.code, "fragment": exc.fragment, "detail": exc.detail}
+    test_id_kinds = {}
+    if test_id_index is not None:
+        for entry in test_id_index.entries:
+            test_id_kinds[entry.kind] = test_id_kinds.get(entry.kind, 0) + 1
     return {"version": cur, "version_text": ver_txt, "changelog_versions": cl_versions,
             "changelog_rs": cl_rs, "floor_version": floor_v, "floor_r": floor_r, "max_r": max_r,
             "pyindex": pyindex, "root": root, "_deleted": None, "toplevel": toplevel,
-            "sha_lens": sha_lens, "commands": commands,
+            "sha_lens": sha_lens, "commands": commands, "test_id_index": test_id_index,
+            "test_id_error": test_id_error,
             "basis": {"version": ver_txt, "sha_lens": sorted(sha_lens),
                       "changelog_files": len(_cl_files),
                       "changelog_versions": len(cl_versions), "changelog_rs": len(cl_rs),
@@ -1051,6 +1063,8 @@ def _doc_claims_context(root: Path) -> dict:
                       "floor_r": floor_r, "max_r": max_r,
                       "commands_source": cmd_src,
                       "commands_known": len(commands) if commands else 0,
+                      "test_ids_known": len(test_id_index.entries) if test_id_index is not None else 0,
+                      "test_id_kinds": test_id_kinds,
                       "layers_bac": dict(_DOC_CLAIMS_BAC_L10_L11),
                       "note": "tập tra cứu = CHANGELOG.md + references/changelog_archive/*.md, quét "
                               "toàn văn; dưới sàn ⇒ advisory (khuyết của sổ, không phải trích dẫn sai)"}}
@@ -1106,7 +1120,7 @@ def _doc_claims_sha_state(ctx: dict, sha: str) -> str:
 
 def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
                          root: Path, ctx: dict) -> list:
-    """Sáu lớp kiểm CƠ HỌC. Mỗi phát hiện là dict; `_advisory=True` ⇒ xếp vào advisories (không fail
+    """Các lớp kiểm CƠ HỌC. Mỗi phát hiện là dict; `_advisory=True` ⇒ xếp vào advisories (không fail
     --strict). Ranh giới cờ-vs-advisory là điều KHIẾN báo cáo dùng được: cái máy CHẮC CHẮN sai mới là cờ."""
     out = []
     rel = _doc_claims_rel(doc, root)
@@ -1286,6 +1300,15 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
             if not cmd or cmd in ctx["commands"]:
                 continue
             _add("L8", sp.start(), "tl " + cmd, "TL_COMMAND_UNKNOWN", advisory=historical)
+
+    # ── L12 (F1-02): con trỏ tên ca selftest legacy/packet dùng CHUNG resolver của fragment loader ──
+    test_ids = ctx.get("test_id_index")
+    if test_ids is not None:
+        for sp in _DOC_CLAIMS_SPAN_RE.finditer(nofence):
+            for test_id, offset in find_test_id_pointers(sp.group(1)):
+                if test_ids.resolve(test_id) is None:
+                    _add("L12", sp.start() + 1 + offset, test_id, "TEST_ID_UNKNOWN",
+                         advisory=historical)
     return out
 
 
@@ -1358,6 +1381,11 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
                 "missing_paths": sorted(bad), "usage_error": True}
     ctx = _doc_claims_context(root)
     flags, advisories, checked = [], [], 0
+    if ctx.get("test_id_error"):
+        flags.append({"layer": "L12", "file": "scripts/tl_selftest.py", "line": 1,
+                      "claim": "test-id-index", "reason": "TEST_ID_INDEX_UNAVAILABLE",
+                      "detail": ctx["test_id_error"]})
+        checked += 1
     scanned = {}
     for f in files:
         try:
@@ -1394,6 +1422,8 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
         skipped["L8"] = "thiếu " + _DOC_CLAIMS_PARSER_SURFACE
     if not l9_ran:
         skipped["L9"] = "lượt quét không đủ rộng (cần SKILL.md + ≥1 tệp references/)"
+    if ctx.get("test_id_index") is None:
+        skipped["L12"] = "không dựng được shared test-ID index"
     return {"ok": not flags, "schema": _DOC_CLAIMS_SCHEMA, "roots": roots,
             "files_scanned": len(files), "claims_flagged": checked,
             "flags": flags, "advisories": advisories,

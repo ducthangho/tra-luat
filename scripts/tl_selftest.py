@@ -29276,6 +29276,187 @@ def run() -> int:
 
     _t110("wp41_fragment_discovery_adapter", _c41_fragment_discovery_adapter)
 
+    # F1-02 / wp42 — index/resolver dùng chung cho legacy và packet test IDs.
+    def _c42_test_id_index_resolves_legacy_wp_and_fake():
+        loader = _il41.import_module("tl_core.test_fragments")
+        legacy_ids = ["r210_loop_khong_ghi_trong_cay",
+                      "r3_bust_cache_after_write", "r3_bust_cache_after_write"]
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp42_pointer_exists")
+            fragments = loader.load_fragment_cases(root, existing_ids=legacy_ids)
+            index = loader.build_test_id_index(legacy_ids, fragments)
+        legacy = index.resolve("r210_loop_khong_ghi_trong_cay")
+        packet = index.resolve("wp42_pointer_exists")
+        return (legacy is not None and legacy.kind == "legacy"
+                and packet is not None and packet.kind == "packet"
+                and index.resolve("r999_ten_ma_khong_ton_tai") is None
+                and index.resolve("wp999_ten_ma_khong_ton_tai") is None)
+
+    _t110("wp42_test_id_index_resolves_legacy_wp_and_fake",
+          _c42_test_id_index_resolves_legacy_wp_and_fake)
+
+    def _c42_test_id_index_discovers_legacy_source():
+        loader = _il41.import_module("tl_core.test_fragments")
+        index = loader.load_test_id_index(_ROOT210)
+        with _tf41.TemporaryDirectory() as tmp:
+            root = _P41(tmp)
+            scripts_dir = root / "scripts"
+            fragment_dir = scripts_dir / "test_fragments"
+            fragment_dir.mkdir(parents=True)
+            _write_source41(
+                scripts_dir, "tl_selftest.py",
+                'def run():\n'
+                '    cases = []\n'
+                '    cases.append(("r210_metadata_known", True))\n')
+            _write_source41(
+                fragment_dir, "wp42_metadata_only.py",
+                'from pathlib import Path\n'
+                'TEST_ID = "wp42_metadata_only"\n'
+                'Path(__file__).with_suffix(".executed").write_text("boom")\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            metadata_index = loader.load_test_id_index(root)
+            side_effect = fragment_dir / "wp42_metadata_only.executed"
+            metadata_safe = (metadata_index.resolve("wp42_metadata_only") is not None
+                             and not side_effect.exists())
+        return (index.resolve("r210_loop_khong_ghi_trong_cay") is not None
+                and index.resolve("r298_worklist_chay_kho_a3_a6") is not None
+                and index.resolve("r326_con_tro_ten_ca_resolve") is not None
+                and index.resolve("wp41_fragment_loader_zero") is not None
+                and index.resolve("wp41_fragment_discovery_adapter") is not None
+                and metadata_safe)
+
+    _t110("wp42_test_id_index_discovers_legacy_source",
+          _c42_test_id_index_discovers_legacy_source)
+
+    def _doc_claims_fixture42(pointer_text):
+        with _tf41.TemporaryDirectory() as tmp:
+            root = _P41(tmp)
+            scripts_dir = root / "scripts"
+            fragment_dir = scripts_dir / "test_fragments"
+            docs_dir = root / "docs"
+            fragment_dir.mkdir(parents=True)
+            docs_dir.mkdir()
+            _write_source41(
+                scripts_dir, "tl_selftest.py",
+                'def run():\n'
+                '    cases = []\n'
+                '    _t110("r210_loop_khong_ghi_trong_cay", lambda: True)\n')
+            _write_fragment41(fragment_dir, "wp42_pointer_exists")
+            doc = docs_dir / "pointer.md"
+            doc.write_text(pointer_text, encoding="utf-8", newline="\n")
+            return _TL_MODULE._doc_claims_check([str(doc)], root=root)
+
+    def _c42_doc_claims_resolves_legacy_and_wp():
+        out = _doc_claims_fixture42(
+            "Legacy `r210_loop_khong_ghi_trong_cay`; packet `wp42_pointer_exists`.\n")
+        basis = out.get("basis") or {}
+        return (out.get("ok") is True and not out.get("flags")
+                and basis.get("test_ids_known") == 2
+                and "L12" not in (out.get("layers_skipped") or {}))
+
+    _t110("wp42_doc_claims_resolves_legacy_and_wp",
+          _c42_doc_claims_resolves_legacy_and_wp)
+
+    def _c42_doc_claims_rejects_fake_test_ids():
+        out = _doc_claims_fixture42(
+            "Fake `r999_ten_ma_khong_ton_tai`; fake `wp999_ten_ma_khong_ton_tai`.\n")
+        flags = [flag for flag in (out.get("flags") or [])
+                 if flag.get("reason") == "TEST_ID_UNKNOWN"]
+        return (out.get("ok") is False
+                and [flag.get("claim") for flag in flags]
+                == ["r999_ten_ma_khong_ton_tai", "wp999_ten_ma_khong_ton_tai"])
+
+    _t110("wp42_doc_claims_rejects_fake_test_ids",
+          _c42_doc_claims_rejects_fake_test_ids)
+
+    def _c42_test_id_index_collision_policy():
+        loader = _il41.import_module("tl_core.test_fragments")
+        grandfather = loader.build_test_id_index(
+            ["r3_bust_cache_after_write", "r3_bust_cache_after_write"])
+
+        def _duplicate_code(ids):
+            try:
+                loader.build_test_id_index(ids)
+            except loader.FragmentDuplicateError as exc:
+                return exc.code
+            return ""
+
+        fragment = loader.FragmentCase(
+            test_id="wp42_collision", run=lambda _tl: True,
+            source_path=_P41("wp42_collision.py"))
+        try:
+            loader.build_test_id_index(["wp42_collision"], [fragment])
+        except loader.FragmentDuplicateError as exc:
+            cross_source = exc.code
+        else:
+            cross_source = ""
+
+        return (grandfather.resolve("r3_bust_cache_after_write") is not None
+                and _duplicate_code(["r210_loop_khong_ghi_trong_cay"] * 2)
+                == "DUPLICATE_TEST_ID"
+                and _duplicate_code(["r3_bust_cache_after_write"] * 3)
+                == "DUPLICATE_TEST_ID"
+                and cross_source == "DUPLICATE_TEST_ID")
+
+    _t110("wp42_test_id_index_collision_policy",
+          _c42_test_id_index_collision_policy)
+
+    def _c42_computed_test_id_rejected():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_computed_test_id.py",
+                'TEST_ID = "wp42_computed_" + "test_id"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp42_fragment_computed_test_id_rejected",
+          _c42_computed_test_id_rejected)
+
+    def _c42_duplicate_literal_test_id_rejected():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_duplicate_literal.py",
+                'TEST_ID = "wp42_duplicate_literal"\n'
+                'TEST_ID = "wp42_duplicate_literal"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp42_fragment_duplicate_literal_test_id_rejected",
+          _c42_duplicate_literal_test_id_rejected)
+
+    def _c42_path_mismatch_precedes_missing_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_mismatch_missing_run.py",
+                'TEST_ID = "wp42_other_missing_run"\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp42_fragment_path_mismatch_precedes_missing_run",
+          _c42_path_mismatch_precedes_missing_run)
+
+    def _c42_path_mismatch_precedes_async_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_mismatch_async_run.py",
+                'TEST_ID = "wp42_other_async_run"\n\n'
+                'async def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp42_fragment_path_mismatch_precedes_async_run",
+          _c42_path_mismatch_precedes_async_run)
+
     # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
     # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó
     # chạy trên bản giả mà không ai biết (xanh GIẢ). In đích danh để sửa được ngay.
@@ -29284,6 +29465,22 @@ def run() -> int:
         print(f"  [rò rỉ monkeypatch] {len(_leak285)} tên KHÔNG được khôi phục: {', '.join(_leak285[:12])}",
               file=_hsys.stderr)
     cases.append(("r285_khong_ro_ri_monkeypatch", not _leak285))
+
+    # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
+    # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.
+    def _c42_complete_runtime_test_ids_unique():
+        loader = _il41.import_module("tl_core.test_fragments")
+        guard_id = "wp42_complete_runtime_test_ids_unique"
+        try:
+            loader.build_test_id_index([name for name, _ in cases] + [guard_id])
+        except loader.FragmentDuplicateError as exc:
+            print(f"  [test-id-registry] {exc}", file=_hsys.stderr)
+            return False
+        return True
+
+    _t110("wp42_complete_runtime_test_ids_unique",
+          _c42_complete_runtime_test_ids_unique)
+
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:
         print(f"  [{'OK' if p else 'FAIL'}] {n}")

@@ -94,8 +94,8 @@ T0 không thêm provider secret vào GitHub.
 ### F1 — Test fragment và bundled topology
 
 Pha này tuần tự vì chạm legacy harness/release. Đích file đã chốt:
-`planned:scripts/test_fragments/`, `planned:scripts/tl_core/test_fragments.py` và
-`planned:scripts/tl_test_fragments_bundled.py`.
+`scripts/test_fragments/`, `scripts/tl_core/test_fragments.py` và
+`scripts/tl_test_fragments_bundled.py`.
 
 | Packet | Write set chính | Kết quả | Nghiệm thu |
 |---|---|---|---|

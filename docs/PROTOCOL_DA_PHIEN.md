@@ -301,8 +301,8 @@ trước khi tiếp tục ghi hoặc nhận lease mới.
 Worker không sửa `VERSION`, hằng version trong `tl.py`, header `SKILL.md`, `CHANGELOG.md` hoặc
 `RELEASE_MANIFEST.json`. Test/artifact dùng ID `wp<issue>_<slug>`; changelog fragment dùng
 `changelog.d/wp-<issue>.md`. Test fragment được giữ trong Git nhưng release filter loại đúng prefix
-`planned:scripts/test_fragments/`, không loại mọi thư mục trùng basename; phiên land sinh tất định bundled test module
-`planned:scripts/tl_test_fragments_bundled.py` từ các fragment, rồi mới gán release, bump ba chỗ, hợp nhất changelog
+`scripts/test_fragments/`, không loại mọi thư mục trùng basename; phiên land sinh tất định bundled test module
+`scripts/tl_test_fragments_bundled.py` từ các fragment, rồi mới gán release, bump ba chỗ, hợp nhất changelog
 fragment và tái sinh manifest. Module trở thành required release file tại cùng activation với generator.
 Loader/generator ghi UTF-8 LF tường minh, không phụ thuộc newline mặc định của Windows.
 
@@ -550,7 +550,8 @@ Hệ thống chỉ được coi là triển khai xong khi chứng minh được:
   nên chưa tách worker gate/land gate và chưa được kích hoạt deferred numbering cho worker.
 - Chưa có change-impact policy/closure trong Issue contract hoặc CI; coupling `SKILL.md` → GOTCHAS/check r219
   vẫn chỉ lộ ra sau khi selftest chạy.
-- Chưa có `planned:scripts/test_fragments/`, test-ID registry/bundled module hoặc behavior gate cho exact-prefix exclusion.
+- Mission F1 #40 đã land `scripts/test_fragments/`, test-ID registry/bundled module và behavior gate cho
+  exact-prefix exclusion; việc giữ bundled module đồng bộ với generator trên real tree thuộc gate riêng.
 - Guard `drive-push` hiện nằm ở `scripts/tl_gws.py` và chỉ nhìn `BUNDLE_META.json`; vị trí `release.py:960` là logic
   đọc archive, không phải guard publish. Chưa có policy CI tập trung cho mọi lệnh LIVE.
 - Ba skill, adapter, Issue Forms, dispatcher, provider broker, local controller và branch protection nêu trên chưa

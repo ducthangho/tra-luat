@@ -1,3 +1,15 @@
+# ★ v1.36.67 — r335: kích hoạt topology test-fragment F1 (2026-08-06)
+
+Mission F1 chuyển selftest sang mô hình fragment dành cho nhánh phát triển nhưng vẫn giữ gói phát hành
+độc lập với thư mục fragment: loader tự chọn topology, generator tạo một bundled module tất định, và
+release fail-closed nếu module bắt buộc đó bị thiếu.
+
+- Năm packet F1 đã được review và tích hợp tuần tự; canary `wp45_fragment_canary` chứng minh legacy
+  selftest, dev fragment và generated bundle cùng chạy đúng một lần với cùng kết quả.
+- `scripts/tl_test_fragments_bundled.py` trở thành release-required file; `scripts/test_fragments/`
+  vẫn là dev-only và không lọt vào manifest/zip. Gói tiếp tục bị chặn ở trần dưới 200 tệp.
+- Activation chỉ đổi topology test/release cục bộ; không push, deploy, truy cập LIVE hoặc secret.
+
 # ★ v1.36.66 — r334: Preview nhận biết bộ D0 đã land và trả JSON terminal (2026-08-04)
 
 `Invoke-SharedWorkPacketFlow.ps1 -Action Preview` trước đây chết ở PowerShell binder khi cả 23 nguồn D0

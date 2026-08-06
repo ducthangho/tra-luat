@@ -386,6 +386,7 @@ def _portable_release_relpath(rel: str) -> bool:
 
 _RELEASE_REQUIRED_FILES = [
     "VERSION",
+    "scripts/tl_test_fragments_bundled.py",
     "scripts/tl_core/__init__.py",
     "scripts/tl_core/deterministic.py",
     "scripts/tl_core/jsonio.py",

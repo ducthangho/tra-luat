@@ -21168,7 +21168,11 @@ def run() -> int:
         # KÊ KHAI SLOT (r333/v1.36.65 — cứu hộ bộ hiến pháp D0): 21 → **42** Markdown dưới `docs/`.
         # Thêm 2 protocol/plan + 17 ADR 0017–0033 + 2 báo cáo research, đều dev-side/ngoài gói.
         # Gói vẫn 177; phép ratchet cây thật = 177 + 42 = 219. Không nới trần Package 200.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 42 == 219
+        # KÊ KHAI SLOT (r335/v1.36.67 — activation Mission F1): 177 → **179**. Thêm đúng HAI
+        # runtime file: loader/generator `scripts/tl_core/test_fragments.py` và generated release module
+        # `scripts/tl_test_fragments_bundled.py`. Dev fragments vẫn ngoài gói; còn 21 khe dưới trần 200.
+        # Phép ratchet cây thật = 179 + 42 = 221.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 42 == 221
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 42
@@ -29652,7 +29656,7 @@ def run() -> int:
 
             result["file_count"] = len(zip_names)
             result["topology_ok"] = (
-                bundled_rel not in release44._RELEASE_REQUIRED_FILES
+                bundled_rel in release44._RELEASE_REQUIRED_FILES
                 and manifest.get("ok") is True
                 and manifest.get("required_missing") == []
                 and verified.get("ok") is True
@@ -29673,10 +29677,10 @@ def run() -> int:
             missing_verify = release44._verify_release_manifest(
                 candidate, manifest, strict=True)
             result["missing_named"] = (
-                missing_manifest.get("ok") is True
-                and bundled_rel not in (missing_manifest.get("required_missing") or [])
+                missing_manifest.get("ok") is False
+                and bundled_rel in (missing_manifest.get("required_missing") or [])
                 and missing_verify.get("ok") is False
-                and bundled_rel not in (missing_verify.get("required_missing") or [])
+                and bundled_rel in (missing_verify.get("required_missing") or [])
                 and any(item.get("path") == bundled_rel
                         and item.get("error") == "MISSING"
                         for item in (missing_verify.get("failed") or []))

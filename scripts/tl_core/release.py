@@ -469,6 +469,8 @@ def _release_should_include(path: Path, root: Path) -> bool:
         rel = path.relative_to(root)
     except ValueError:
         return False
+    if len(rel.parts) > 2 and rel.parts[:2] == ("scripts", "test_fragments"):
+        return False
     parts = set(rel.parts)
     if parts & _RELEASE_EXCLUDE_DIRS:
         return False

@@ -203,6 +203,72 @@ def cmd_determinism_audit(a) -> int:
     return 0 if out.get("ok") else 2
 
 
+def _test_fragments_check(root: str | Path) -> dict:
+    """Compare the land-only bundled module with the sole source generator."""
+    repo_root = Path(root)
+    fragment_root = repo_root / "scripts" / "test_fragments"
+    bundled_path = repo_root / "scripts" / "tl_test_fragments_bundled.py"
+    payload = {
+        "ok": False,
+        "schema": "test_fragments_check.v1",
+        "fragment_root": "scripts/test_fragments",
+        "bundled_module": "scripts/tl_test_fragments_bundled.py",
+    }
+    if not fragment_root.is_dir():
+        return {**payload, "status": "invalid", "error": "FRAGMENT_ROOT_MISSING"}
+    if not bundled_path.is_file():
+        return {**payload, "status": "missing", "error": "BUNDLED_MODULE_MISSING"}
+
+    try:
+        from tl_core.test_fragments import generate_bundled_module_bytes
+        expected = generate_bundled_module_bytes(fragment_root)
+    except Exception as exc:  # noqa: BLE001 — gate converts generator/input faults to data
+        return {
+            **payload,
+            "status": "invalid",
+            "error": "GENERATED_BUNDLE_INPUT_INVALID",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    try:
+        actual = bundled_path.read_bytes()
+    except OSError as exc:
+        return {
+            **payload,
+            "status": "unreadable",
+            "error": "BUNDLED_MODULE_READ_FAILED",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+
+    expected_sha256 = hashlib.sha256(expected).hexdigest()
+    actual_sha256 = hashlib.sha256(actual).hexdigest()
+    if actual != expected:
+        return {
+            **payload,
+            "status": "stale",
+            "error": "GENERATED_BUNDLE_STALE",
+            "expected_sha256": expected_sha256,
+            "actual_sha256": actual_sha256,
+            "expected_bytes": len(expected),
+            "actual_bytes": len(actual),
+        }
+    return {
+        **payload,
+        "ok": True,
+        "status": "current",
+        "expected_sha256": expected_sha256,
+        "actual_sha256": actual_sha256,
+        "expected_bytes": len(expected),
+        "actual_bytes": len(actual),
+    }
+
+
+def cmd_test_fragments_check(a) -> int:
+    """Opt-in land gate for committed generated test-bundle freshness."""
+    payload = _test_fragments_check(getattr(a, "root", None) or HERE.parent)
+    _print_json_or_text(payload, getattr(a, "json", False))
+    return 0 if payload.get("ok") else 2
+
+
 def cmd_release_check(a) -> int:
     """Offline deterministic acceptance harness. No subprocess, no Drive/NLM writes."""
     out_dir = Path(getattr(a, "out_dir", None) or tempfile.mkdtemp(prefix="tl_release_check_"))

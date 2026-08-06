@@ -7,6 +7,7 @@
     "release"
   ],
   "recommended_commands": [
+    "test-fragments-check --root <repo> --json",
     "release-verify RELEASE_MANIFEST.json --json",
     "release-verify RELEASE_MANIFEST.json --strict --json"
   ],
@@ -14,23 +15,29 @@
   "requires_apply": false,
   "requires_readback": true,
   "plan": [
+    "verify generated test bundle is current on the real source tree",
     "read manifest",
     "check each path exists",
     "compare size and sha256",
     "report extras"
   ],
   "verify": [
+    "test-fragments-check status current",
     "package_hash_match true",
     "no failed file checks",
     "required files present"
   ],
   "stop_conditions": [
+    "GENERATED_BUNDLE_STALE",
+    "BUNDLED_MODULE_MISSING",
     "MANIFEST_READ_FAILED",
     "MISSING file",
     "sha256 mismatch",
     "required missing"
   ],
   "rules": [
+    "test-fragments-check is a land-only obligation; workers generate candidates outside the repo",
+    "worker packets do not modify scripts/tl_test_fragments_bundled.py",
     "strict mode treats extra files as error",
     "non-strict warns extra files only"
   ],

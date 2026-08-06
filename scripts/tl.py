@@ -1287,7 +1287,7 @@ def _optional_bool_flag(v):
 # gws-ping/transport-info = chẩn đoán transport gws, KHÔNG cần webapp creds.
 _CREDS_LAZY_CMDS = frozenset({
     "boot", "locate", "exists", "source-map", "relation-check", "relation-backfill", "external-ingest",
-    "instructions", "instruction-audit", "tool-inventory", "route-task", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "release-bundle", "bundle-export", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook", "link-priority", "profile-info", "config-pin-registry", "profile-list", "profile-use",
+    "instructions", "instruction-audit", "tool-inventory", "route-task", "workflow-audit", "determinism-audit", "golden-test", "release-check", "release-manifest", "release-verify", "test-fragments-check", "release-bundle", "bundle-export", "live-readiness", "live-contract-check", "live-state-snapshot", "live-state-diff", "live-smoke-plan", "deploy-plan", "rollback-plan", "final-acceptance", "go-live-runbook", "link-priority", "profile-info", "config-pin-registry", "profile-list", "profile-use",
     "profile-rename", "profile-delete", "profile-files", "profile-manifest", "profile-create", "profile-ingest",
     "profile-file-add", "profile-file-remove", "ingest-ocr", "profile-ingest-ocr", "ingest-zip", "profile-ingest-zip", "profile-ingest-chunks", "ocr-analyze", "ocr-run", "ocr-verify", "chunk-plan", "chunk-apply", "chunk-verify",
     "slot-audit", "vbhn-check", "vbhn-verify", "vbhn-compare", "vbhn-normalize", "rasoat",
@@ -1646,7 +1646,7 @@ _STUB_MAP = {
         '_sha256_file', '_write_text_atomic',   # I11
         '_release_secret_findings',   # r193 cổng quét token trong bundle (note CUỐI dòng — I11)
         '_build_release_manifest', '_release_should_include', '_skill_links_findings', '_verify_release_manifest', 'cmd_bundle_export', 'cmd_determinism_audit', 'cmd_release_bundle',
-        'cmd_release_check', 'cmd_release_manifest', 'cmd_release_verify',
+        'cmd_release_check', 'cmd_release_manifest', 'cmd_release_verify', 'cmd_test_fragments_check',
     ],
     "resolve": [
         '_dedupe_key_entry', '_doctype_family', '_is_source_sidecar', '_sohieu_num_typo', 'resolve_body_effective_dates',   # I11

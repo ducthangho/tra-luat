@@ -81,6 +81,12 @@ GENERATED_SPECS = [
           "help": "SHA-256 archive mong đợi (dùng với --archive) để chốt byte đã giao"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "test-fragments-check", "handler": "cmd_test_fragments_check",
+     "help": "LAND-ONLY READ-ONLY: fail nếu bundled test module committed lệch generator trên source tree",
+     "args": [
+         {"flags": ["--root"], "help": "repo root chứa scripts/test_fragments; mặc định HERE.parent"},
+         {"flags": ["--json"], "action": "store_true"},
+     ]},
     {"name": "bundle-export", "handler": "cmd_bundle_export",
      "help": "NHÁNH SONG SONG: xuất bundle giao nộp (zip + BUNDLE_META.json, GIỮ VERSION fork-point) — ADR-0001; không đổi version, không drive-push",
      "args": [
@@ -1746,6 +1752,7 @@ COMMAND_META = {
     "determinism-audit":    _m("low", True, "none", False, False, True, "workflow_audit", None, True, "release", True),
     "release-manifest":     _m("low", False, "local", False, True, True, "release_manifest", None, True, "release", True),
     "release-verify":       _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),
+    "test-fragments-check": _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),
     "release-bundle":       _m("medium", False, "local", False, False, True, "release_bundle", None, True, "release", True),
     "bundle-export":        _m("low", False, "local", False, False, True, "bundle_export", None, True, "release", True),
     "release-check":        _m("medium", False, "local", False, False, True, "release_check", None, True, "release", generated=True),

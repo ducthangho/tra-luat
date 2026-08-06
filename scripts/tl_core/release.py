@@ -384,8 +384,6 @@ def _portable_release_relpath(rel: str) -> bool:
     parts = rel.split("/")
     return bool(parts) and all(_portable_release_component(part) for part in parts)
 
-_RELEASE_BUNDLED_TEST_MODULE = "scripts/tl_test_fragments_bundled.py"
-
 _RELEASE_REQUIRED_FILES = [
     "VERSION",
     "scripts/tl_core/__init__.py",
@@ -415,7 +413,6 @@ _RELEASE_REQUIRED_FILES = [
     "SKILL.md",
     "CHANGELOG.md",
     "scripts/tl.py",
-    _RELEASE_BUNDLED_TEST_MODULE,
     "scripts/gen_instructions.py",
     "references/API_CONTRACT.md",
     "references/workflows/workflow_card.schema.json",

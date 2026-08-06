@@ -436,16 +436,28 @@ def load_bundled_fragment_cases(bundled_path: str | Path, *,
     return tuple(loaded)
 
 
+def _runtime_fragment_topology(scripts_root: str | Path) -> tuple[str, Path | None]:
+    """Select the sole active source without losing bundle cases to an empty dev root."""
+    scripts = Path(scripts_root)
+    fragment_root = scripts / "test_fragments"
+    if fragment_root.exists() and _discover_fragment_paths(fragment_root):
+        return "dev", fragment_root
+    bundled_path = scripts / _BUNDLED_MODULE_NAME
+    if bundled_path.exists():
+        return "bundle", bundled_path
+    return "none", None
+
+
 def load_runtime_fragment_cases(scripts_root: str | Path, *,
                                 existing_ids: Iterable[str] = ()) -> tuple[FragmentCase, ...]:
     """Prefer auditable dev fragments; fall back to the release bundled adapter."""
-    scripts = Path(scripts_root)
-    fragment_root = scripts / "test_fragments"
-    if fragment_root.exists():
-        return load_fragment_cases(fragment_root, existing_ids=existing_ids)
-    bundled_path = scripts / _BUNDLED_MODULE_NAME
-    if bundled_path.exists():
-        return load_bundled_fragment_cases(bundled_path, existing_ids=existing_ids)
+    topology, path = _runtime_fragment_topology(scripts_root)
+    if path is None:
+        return ()
+    if topology == "dev":
+        return load_fragment_cases(path, existing_ids=existing_ids)
+    if topology == "bundle":
+        return load_bundled_fragment_cases(path, existing_ids=existing_ids)
     return ()
 
 
@@ -472,12 +484,13 @@ def load_test_id_index(repo_root: str | Path) -> TestIdIndex:
     """Load the shared index without executing packet fragment code."""
     root = Path(repo_root)
     registered = discover_harness_test_ids(root / "scripts" / "tl_selftest.py")
-    fragment_root = root / "scripts" / "test_fragments"
-    bundled_path = root / "scripts" / _BUNDLED_MODULE_NAME
-    if fragment_root.exists():
-        fragments = discover_fragment_test_ids(fragment_root)
-    elif bundled_path.exists():
-        fragments = discover_bundled_test_ids(bundled_path)
+    topology, path = _runtime_fragment_topology(root / "scripts")
+    if path is None:
+        return _build_test_id_index(registered, ())
+    if topology == "dev":
+        fragments = discover_fragment_test_ids(path)
+    elif topology == "bundle":
+        fragments = discover_bundled_test_ids(path)
     else:
         fragments = ()
     return _build_test_id_index(registered, fragments)

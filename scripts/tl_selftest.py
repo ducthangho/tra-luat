@@ -7379,30 +7379,18 @@ def run() -> int:
                   and getattr(_ns87p, "offline", False) is True))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
-
-    def _copy_release_candidate44(source_root, candidate_root):
-        """Copy exactly the manifest-selected source tree for pre-land gates."""
-        for entry in _build_release_manifest(source_root)["files"]:
-            source = source_root / entry["path"]
-            target = candidate_root / entry["path"]
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(source.read_bytes())
-
     with _tf65.TemporaryDirectory() as _d65:
-        from tl_core import test_fragments as _tfrag65
-        _source65 = Path(HERE).parent
-        _candidate65 = Path(_d65) / "candidate"
-        _copy_release_candidate44(_source65, _candidate65)
-        _bundled65 = _candidate65 / "scripts" / "tl_test_fragments_bundled.py"
-        _bundled65.write_bytes(_tfrag65.generate_bundled_module_bytes(
-            _source65 / "scripts" / "test_fragments"))
         _out65 = Path(_d65) / "b.zip"
         with _hush():
             _rc65 = cmd_bundle_export(argparse.Namespace(
-                root=str(_candidate65), out=str(_out65), note="r65", json=True))
-        with _zf65.ZipFile(_out65) as _z65:
-            _names65 = _z65.namelist()
-            _meta65 = json.loads(_z65.read([n for n in _names65 if n.endswith("BUNDLE_META.json")][0]).decode("utf-8"))
+                root=None, out=str(_out65), note="r65", json=True))
+        _names65, _meta65 = [], {}
+        if _rc65 == 0 and _out65.is_file():
+            with _zf65.ZipFile(_out65) as _z65:
+                _names65 = _z65.namelist()
+                _meta65 = json.loads(_z65.read(
+                    [n for n in _names65 if n.endswith("BUNDLE_META.json")][0]
+                ).decode("utf-8"))
         (Path(_d65) / "BUNDLE_META.json").write_text("{}", encoding="utf-8")
         _blocks65 = _imp("tl_gws")._bundle_meta_blocks_push(Path(_d65))
         _clean65 = Path(_d65) / "clean"
@@ -29582,20 +29570,33 @@ def run() -> int:
                 '_t110("r44_bundle_legacy", lambda: True)\n',
                 encoding="utf-8", newline="\n")
 
+            empty_scripts = parent / "empty" / "scripts"
+            (empty_scripts / "test_fragments").mkdir(parents=True)
+            (empty_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (empty_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_empty_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
             dev_cases = runtime_loader(dev_scripts)
             bundle_cases = runtime_loader(bundle_scripts)
+            empty_cases = runtime_loader(empty_scripts)
             dev_index = loader.load_test_id_index(dev_scripts.parent)
             bundle_index = loader.load_test_id_index(bundle_scripts.parent)
+            empty_index = loader.load_test_id_index(empty_scripts.parent)
         return (
             [case.test_id for case in dev_cases]
             == ["wp44_dev_alpha", "wp44_dev_beta"]
             and [case.test_id for case in bundle_cases]
             == ["wp44_bundle_alpha", "wp44_bundle_beta"]
+            and [case.test_id for case in empty_cases]
+            == ["wp44_bundle_alpha", "wp44_bundle_beta"]
             and dev_index.resolve("wp44_dev_alpha") is not None
             and dev_index.resolve("wp44_bundle_alpha") is None
             and bundle_index.resolve("wp44_bundle_alpha") is not None
             and bundle_index.resolve("wp44_dev_alpha") is None
-            and all(case.run(globals()["_TL_MODULE"]) for case in (*dev_cases, *bundle_cases))
+            and empty_index.resolve("wp44_bundle_alpha") is not None
+            and all(case.run(globals()["_TL_MODULE"])
+                    for case in (*dev_cases, *bundle_cases, *empty_cases))
         )
 
     _t110("wp44_dev_topology_prefers_fragments",
@@ -29620,7 +29621,11 @@ def run() -> int:
             parent = _P41(parent)
             source_root = _P41(__file__).resolve().parent.parent
             candidate = parent / "candidate"
-            _copy_release_candidate44(source_root, candidate)
+            for entry in release44._build_release_manifest(source_root)["files"]:
+                source = source_root / entry["path"]
+                target = candidate / entry["path"]
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(source.read_bytes())
 
             fragment_root = candidate / "scripts" / "test_fragments"
             fragment_root.mkdir(parents=True)
@@ -29647,7 +29652,7 @@ def run() -> int:
 
             result["file_count"] = len(zip_names)
             result["topology_ok"] = (
-                bundled_rel in release44._RELEASE_REQUIRED_FILES
+                bundled_rel not in release44._RELEASE_REQUIRED_FILES
                 and manifest.get("ok") is True
                 and manifest.get("required_missing") == []
                 and verified.get("ok") is True
@@ -29668,10 +29673,10 @@ def run() -> int:
             missing_verify = release44._verify_release_manifest(
                 candidate, manifest, strict=True)
             result["missing_named"] = (
-                missing_manifest.get("ok") is False
-                and bundled_rel in (missing_manifest.get("required_missing") or [])
+                missing_manifest.get("ok") is True
+                and bundled_rel not in (missing_manifest.get("required_missing") or [])
                 and missing_verify.get("ok") is False
-                and bundled_rel in (missing_verify.get("required_missing") or [])
+                and bundled_rel not in (missing_verify.get("required_missing") or [])
                 and any(item.get("path") == bundled_rel
                         and item.get("error") == "MISSING"
                         for item in (missing_verify.get("failed") or []))

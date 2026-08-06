@@ -7379,10 +7379,27 @@ def run() -> int:
                   and getattr(_ns87p, "offline", False) is True))
     # bundle-export + guard (ADR-0001)
     import tempfile as _tf65, zipfile as _zf65
+
+    def _copy_release_candidate44(source_root, candidate_root):
+        """Copy exactly the manifest-selected source tree for pre-land gates."""
+        for entry in _build_release_manifest(source_root)["files"]:
+            source = source_root / entry["path"]
+            target = candidate_root / entry["path"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+
     with _tf65.TemporaryDirectory() as _d65:
+        from tl_core import test_fragments as _tfrag65
+        _source65 = Path(HERE).parent
+        _candidate65 = Path(_d65) / "candidate"
+        _copy_release_candidate44(_source65, _candidate65)
+        _bundled65 = _candidate65 / "scripts" / "tl_test_fragments_bundled.py"
+        _bundled65.write_bytes(_tfrag65.generate_bundled_module_bytes(
+            _source65 / "scripts" / "test_fragments"))
         _out65 = Path(_d65) / "b.zip"
         with _hush():
-            _rc65 = cmd_bundle_export(argparse.Namespace(root=None, out=str(_out65), note="r65", json=True))
+            _rc65 = cmd_bundle_export(argparse.Namespace(
+                root=str(_candidate65), out=str(_out65), note="r65", json=True))
         with _zf65.ZipFile(_out65) as _z65:
             _names65 = _z65.namelist()
             _meta65 = json.loads(_z65.read([n for n in _names65 if n.endswith("BUNDLE_META.json")][0]).decode("utf-8"))
@@ -29262,11 +29279,12 @@ def run() -> int:
 
     def _c41_fragment_discovery_adapter():
         loader = _il41.import_module("tl_core.test_fragments")
-        fragment_root = _P41(__file__).resolve().parent / "test_fragments"
+        scripts_root = _P41(__file__).resolve().parent
         existing_ids = [name for name, _ in cases]
         existing_ids.append("wp41_fragment_discovery_adapter")
         try:
-            loaded = loader.load_fragment_cases(fragment_root, existing_ids=existing_ids)
+            loaded = loader.load_runtime_fragment_cases(
+                scripts_root, existing_ids=existing_ids)
         except loader.FragmentError as exc:
             print(f"  [fragment-loader] {exc}", file=_hsys.stderr)
             raise
@@ -29532,6 +29550,139 @@ def run() -> int:
 
     _t110("wp43_release_excludes_only_canonical_fragment_prefix",
           _c43_release_excludes_only_canonical_fragment_prefix)
+
+    # F1-04 / wp44 — dev chạy source fragments; release chỉ ship bundled adapter.
+    def _c44_dev_topology_prefers_fragments():
+        loader = _il41.import_module("tl_core.test_fragments")
+        runtime_loader = getattr(loader, "load_runtime_fragment_cases", None)
+        if not callable(runtime_loader):
+            return False
+        with _tf41.TemporaryDirectory() as parent:
+            parent = _P41(parent)
+            bundled_source = parent / "bundled-source"
+            bundled_source.mkdir()
+            _write_fragment41(bundled_source, "wp44_bundle_beta")
+            _write_fragment41(bundled_source, "wp44_bundle_alpha")
+            bundled_bytes = loader.generate_bundled_module_bytes(bundled_source)
+
+            dev_scripts = parent / "dev" / "scripts"
+            dev_fragments = dev_scripts / "test_fragments"
+            dev_fragments.mkdir(parents=True)
+            _write_fragment41(dev_fragments, "wp44_dev_beta")
+            _write_fragment41(dev_fragments, "wp44_dev_alpha")
+            (dev_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (dev_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_dev_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
+            bundle_scripts = parent / "bundle" / "scripts"
+            bundle_scripts.mkdir(parents=True)
+            (bundle_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (bundle_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_bundle_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
+            dev_cases = runtime_loader(dev_scripts)
+            bundle_cases = runtime_loader(bundle_scripts)
+            dev_index = loader.load_test_id_index(dev_scripts.parent)
+            bundle_index = loader.load_test_id_index(bundle_scripts.parent)
+        return (
+            [case.test_id for case in dev_cases]
+            == ["wp44_dev_alpha", "wp44_dev_beta"]
+            and [case.test_id for case in bundle_cases]
+            == ["wp44_bundle_alpha", "wp44_bundle_beta"]
+            and dev_index.resolve("wp44_dev_alpha") is not None
+            and dev_index.resolve("wp44_bundle_alpha") is None
+            and bundle_index.resolve("wp44_bundle_alpha") is not None
+            and bundle_index.resolve("wp44_dev_alpha") is None
+            and all(case.run(globals()["_TL_MODULE"]) for case in (*dev_cases, *bundle_cases))
+        )
+
+    _t110("wp44_dev_topology_prefers_fragments",
+          _c44_dev_topology_prefers_fragments)
+
+    _release_fixture_cache44 = {}
+
+    def _release_fixture44():
+        if _release_fixture_cache44:
+            return _release_fixture_cache44
+        import types as _ty44
+        import zipfile as _zf44
+        from tl_core import release as release44
+
+        bundled_rel = "scripts/tl_test_fragments_bundled.py"
+        result = {
+            "topology_ok": False,
+            "missing_named": False,
+            "file_count": 0,
+        }
+        with _tf41.TemporaryDirectory() as parent:
+            parent = _P41(parent)
+            source_root = _P41(__file__).resolve().parent.parent
+            candidate = parent / "candidate"
+            _copy_release_candidate44(source_root, candidate)
+
+            fragment_root = candidate / "scripts" / "test_fragments"
+            fragment_root.mkdir(parents=True)
+            _write_fragment41(fragment_root, "wp44_release_hidden")
+            bundled_bytes = _il41.import_module(
+                "tl_core.test_fragments").generate_bundled_module_bytes(fragment_root)
+            bundled_path = candidate / bundled_rel
+            bundled_path.write_bytes(bundled_bytes)
+
+            manifest = release44._build_release_manifest(candidate)
+            verified = release44._verify_release_manifest(candidate, manifest, strict=True)
+            manifest_paths = [entry["path"] for entry in manifest["files"]]
+            out_zip = parent / "candidate-release.zip"
+            args = _ty44.SimpleNamespace(
+                root=str(candidate), out=str(out_zip), top="tra-luat", json=True)
+            with _hush():
+                bundle_rc = release44.cmd_release_bundle(args)
+            zip_names = []
+            zip_bundled_bytes = b""
+            if bundle_rc == 0 and out_zip.is_file():
+                with _zf44.ZipFile(out_zip) as archive:
+                    zip_names = archive.namelist()
+                    zip_bundled_bytes = archive.read(f"tra-luat/{bundled_rel}")
+
+            result["file_count"] = len(zip_names)
+            result["topology_ok"] = (
+                bundled_rel in release44._RELEASE_REQUIRED_FILES
+                and manifest.get("ok") is True
+                and manifest.get("required_missing") == []
+                and verified.get("ok") is True
+                and manifest_paths.count(bundled_rel) == 1
+                and not any(path.startswith("scripts/test_fragments/")
+                            for path in manifest_paths)
+                and bundle_rc == 0
+                and zip_names.count(f"tra-luat/{bundled_rel}") == 1
+                and not any(name.startswith("tra-luat/scripts/test_fragments/")
+                            for name in zip_names)
+                and zip_bundled_bytes == bundled_bytes
+                and len(zip_names) == manifest["file_count"] + 1
+                and len(zip_names) < 200
+            )
+
+            bundled_path.unlink()
+            missing_manifest = release44._build_release_manifest(candidate)
+            missing_verify = release44._verify_release_manifest(
+                candidate, manifest, strict=True)
+            result["missing_named"] = (
+                missing_manifest.get("ok") is False
+                and bundled_rel in (missing_manifest.get("required_missing") or [])
+                and missing_verify.get("ok") is False
+                and bundled_rel in (missing_verify.get("required_missing") or [])
+                and any(item.get("path") == bundled_rel
+                        and item.get("error") == "MISSING"
+                        for item in (missing_verify.get("failed") or []))
+            )
+        _release_fixture_cache44.update(result)
+        return _release_fixture_cache44
+
+    _t110("wp44_release_bundle_topology_under_200",
+          lambda: _release_fixture44()["topology_ok"])
+    _t110("wp44_missing_bundled_module_named",
+          lambda: _release_fixture44()["missing_named"])
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
     # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.

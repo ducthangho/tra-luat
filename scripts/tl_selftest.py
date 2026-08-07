@@ -28755,7 +28755,8 @@ def run() -> int:
 
     # ═══ F1-01 / wp41 — deterministic test-fragment loader (ADR-0031) ═══
     # Test qua interface của deep internal module; fixture chỉ dùng TemporaryDirectory, không chạm repo.
-    import builtins as _bi41, importlib as _il41, tempfile as _tf41
+    import builtins as _bi41, importlib as _il41, os as _os41
+    import subprocess as _sp41, tempfile as _tf41
     from pathlib import Path as _P41
 
     def _write_fragment41(root, stem, body="return True"):
@@ -28987,20 +28988,50 @@ def run() -> int:
 
     def _c41_fragment_read_error():
         loader = _il41.import_module("tl_core.test_fragments")
-        with _tf41.TemporaryDirectory() as root:
-            target = _write_fragment41(root, "wp41_read_error")
-            original_read_text = _P41.read_text
-
-            def blocked_read_text(path, *args, **kwargs):
-                if path == target:
-                    raise OSError("fixture read blocked")
-                return original_read_text(path, *args, **kwargs)
-
-            _P41.read_text = blocked_read_text
+        # v1.36.67 (CI master 31205216133 / wp51) — fix ca tự dựng path lệch sau resolve,
+        # không ăn may theo TEMP tên dài; nền không dựng được thì FAIL LOUD.
+        with _tf41.TemporaryDirectory() as parent:
+            physical_root = _P41(parent) / "physical"
+            linked_root = _P41(parent) / "linked"
+            physical_root.mkdir()
+            if _os41.name == "nt":
+                junction_result = _sp41.run(
+                    [_os41.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", "mklink", "/J",
+                     str(linked_root), str(physical_root)],
+                    capture_output=True, text=True, encoding="utf-8", errors="replace")
+                if junction_result.returncode != 0:
+                    raise AssertionError(
+                        "JUNCTION_CREATE_FAILED:"
+                        f"{junction_result.returncode}:{junction_result.stderr.strip()}")
+            else:
+                try:
+                    linked_root.symlink_to(physical_root, target_is_directory=True)
+                except OSError as exc:
+                    raise AssertionError("DIRECTORY_SYMLINK_CREATE_FAILED") from exc
             try:
-                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+                if linked_root == linked_root.resolve(strict=True):
+                    raise AssertionError("PATH_MISMATCH_NOT_CREATED")
+                target = _write_fragment41(linked_root, "wp41_read_error")
+                if target == target.resolve(strict=True):
+                    raise AssertionError("FRAGMENT_PATH_MISMATCH_NOT_CREATED")
+                original_read_text = _P41.read_text
+
+                def blocked_read_text(path, *args, **kwargs):
+                    if path.name == "wp41_read_error.py":
+                        raise OSError("fixture read blocked")
+                    return original_read_text(path, *args, **kwargs)
+
+                _P41.read_text = blocked_read_text
+                try:
+                    code = _error_code41(
+                        loader, lambda: loader.load_fragment_cases(linked_root))
+                finally:
+                    _P41.read_text = original_read_text
             finally:
-                _P41.read_text = original_read_text
+                if _os41.name == "nt":
+                    linked_root.rmdir()
+                else:
+                    linked_root.unlink()
         return code == "FRAGMENT_READ"
 
     _t110("wp41_fragment_read_error_diagnosable", _c41_fragment_read_error)

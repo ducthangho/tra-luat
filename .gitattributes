@@ -1,8 +1,62 @@
-# v1.33.61: KHOÁ BYTE toàn repo — không eol-normalize (manifest hash byte thật; CI/Windows/Linux parity).
-* -text
-# tl_fetch.sh chạy trên Cowork Linux — CRLF trong shell script = "\r: command not found".
-# Ép LF cho mọi .sh bất kể autocrlf máy dev Windows.
-*.sh text eol=lf
+# F2-A (ADR-0018) — EOL CANONICAL THEO LOẠI TỆP, thay cho byte-lock `* -text` (v1.33.61).
+# Vì sao đổi: `* -text` bảo git ĐỪNG chuẩn hoá gì cả, nên DẠNG xuống dòng của mỗi tệp là dạng
+# mà công cụ cuối cùng ghi nó để lại. Một lần `read_text()` + `write_text()` trên Windows lật CẢ
+# tệp LF→CRLF, manifest hash byte thật nên hash lệch, diff nở ra toàn bộ tệp mà không dòng nào
+# nói ra nguyên nhân. `.githooks/pre-commit` và `scripts/contract_check.py` trước nay tồn tại chỉ
+# để CHE lớp hỏng đó. Policy dưới đây XOÁ lớp hỏng: checkout và artifact không còn phụ thuộc nền
+# tảng hay công cụ đã ghi tệp. Đổi byte có chủ đích được gói trong migration ba commit F2-A/B/C.
+* text=auto eol=lf
 
-# v1.33.59: golden fixtures so BYTE — cấm mọi eol-normalize
+# Script Windows CHỈ chạy đúng với CRLF (`cmd.exe` không nuốt LF-only ở mọi ca). Git lưu LF trong
+# index và chỉ vật chất hoá CRLF lúc checkout ⇒ blob vẫn tất định trên cả hai OS.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# v1.33.59 (GIỮ NGUYÊN): golden fixtures so BYTE — cấm mọi eol-normalize. ADR-0018 giữ golden byte
+# fixture và binary ở `-text`.
 references/golden/** -text
+
+# ── BINARY: khai TƯỜNG MINH, không dựa vào phép đoán ──────────────────────────────────────────
+# ADR-0018 nói "binary tiếp tục `-text`" nhưng trước F2-A không dòng nào khai điều đó — chỗ dựa
+# duy nhất là heuristic NUL của `text=auto`. Heuristic ấy hụt đúng ở tệp binary KHÔNG có NUL
+# trong vùng dò: một PDF `%PDF-…` toàn byte in được sẽ bị hô là text, rồi CR DỮ LIỆU của nó bị
+# ai đó "sửa" thành LF và tệp hỏng. Khai `-text` là hợp đồng; NUL chỉ còn là lưới cuối.
+#
+# Đo 07-08-2026: cây hiện KHÔNG tracked tệp binary nào (0 blob chứa NUL trên 286 tệp). Nên danh
+# sách này KHÔNG được chép tay — một danh sách chép tay thì thiếu sót của nó đi thẳng vào cả hai
+# nơi (policy và test) rồi hai bên gật đầu với nhau. Nó được SUY RA từ chính bảng extension mà
+# pipeline ingest/loader của kho đang dùng:
+#
+#   PROFILE_INGEST_ALLOWED_EXTS  scripts/tl.py                    .docx .doc .pdf .rtf .odt .xlsx .xls
+#   INGEST_LOCAL_EXTS            scripts/tl_core/ingest_contract.py  .doc .docx .pdf .rtf .odt
+#   OCR_SOURCE_EXTS              scripts/tl_core/ingest_contract.py  .pdf .png .jpg .jpeg .tif .tiff
+#   _MIME_BY_EXT                 scripts/tl.py                    dùng để loại `text/*` khỏi hợp nhất
+#
+# Hợp nhất ba tập rồi bỏ mọi đuôi có MIME `text/*` ⇒ ĐÚNG 12 họ dưới đây. `wp49_eol_policy_index_blobs`
+# neo vào chính bốn hằng đó, nên thêm đuôi mới vào allowlist ingest mà quên khai `-text` ở đây sẽ
+# làm selftest ĐỎ — đúng khuôn r251 ("đặt tên thay vì set trần trong thân hàm, để test neo vào
+# HỢP ĐỒNG chứ không vào một bản COPY sẽ trôi lệch").
+#
+# `.rtf` nằm trong danh sách vì phép suy ra đưa nó vào (MIME `application/rtf`, có mặt ở cả
+# PROFILE_INGEST_ALLOWED_EXTS lẫn INGEST_LOCAL_EXTS), không phải vì ai đó nhớ ra nó.
+*.pdf -text
+*.doc -text
+*.docx -text
+*.rtf -text
+*.odt -text
+*.xls -text
+*.xlsx -text
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.tif -text
+*.tiff -text
+
+# Không đến từ bảng ingest, khai riêng vì lý do riêng: `.zip` là output của `release-bundle`.
+*.zip -text
+
+# Secrets mã hoá và bytecode: đã nằm trong `_RELEASE_EXCLUDE_SUFFIXES` (scripts/tl_core/release.py)
+# nên không vào gói, nhưng nếu lọt vào cây thì cũng không được chuẩn hoá.
+*.enc -text
+*.pyc -text
+*.pyo -text

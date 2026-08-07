@@ -29,6 +29,15 @@ _CONFIRM_VALUE = "yes"
 # Muốn mở thì mở tường minh ở đây, một chỗ, và cả hai phía nhận cùng lúc.
 INGEST_LOCAL_EXTS = frozenset({".doc", ".docx", ".pdf", ".rtf", ".odt"})
 
+# F2-A (ADR-0018), khuôn r251: đuôi nguồn đi đường OCR (ảnh + PDF scan). Trước đây là set trần
+# trong thân `ingest_ops._profile_source_quality`; ĐẶT TÊN ở đây — cạnh hợp đồng anh em
+# `INGEST_LOCAL_EXTS` — để vừa là nguồn sự thật cho routing OCR, vừa là nguồn SUY RA khai báo
+# `-text` của các họ ảnh trong `.gitattributes`. Cổng `wp49_eol_policy_index_blobs` neo vào đây,
+# nên mở thêm một đuôi ảnh mà quên khai `-text` sẽ làm selftest đỏ ngay.
+# Ở `ingest_contract` chứ không ở `ingest_ops` vì hàm bên đó bị `bind` re-home `__globals__` về
+# namespace tl (bẫy I11) nên không tra được hằng module-level của chính nó — đã đo bằng NameError.
+OCR_SOURCE_EXTS = frozenset({".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"})
+
 
 def _nfc(value: Any) -> Any:
     """Normalize text without changing business meaning or path separators."""

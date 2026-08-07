@@ -420,6 +420,12 @@ _RELEASE_EXCLUDE_NAMES = {
     "before.json", "after.json",
     "live_state_before.json", "live_state_after.json", "live_state_diff.json",
     "release_check_report.json", "determinism_report.json",
+    # F2-A (ADR-0018): `.editorconfig` là config DEV-SIDE, cùng hạng với `.githooks/`/`.github/`
+    # (đã loại qua _RELEASE_EXCLUDE_DIRS) — runtime agent trong gói không đọc nó. Không loại thì
+    # nó vừa ăn 1 khe trong trần 200 (kê khai slot 179 ở tl_selftest r291_docs_ngoai_goi hoá đỏ),
+    # vừa bị `release-verify --strict` hô extra_files vì manifest chưa có. Loại theo TÊN vì tệp
+    # nằm ở gốc kho, không có thư mục riêng để khoá.
+    ".editorconfig",
 }
 
 _RELEASE_WINDOWS_RESERVED = {
@@ -1345,8 +1351,28 @@ def cmd_release_bundle(a) -> int:
 # ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
 
 
+def _canonical_text(text: str) -> str:
+    """CRLF và CR đơn lẻ -> LF. Đây là phép chuẩn hoá text canonical của ADR-0018.
+
+    F2-A dựng hàm này vì `newline="\\n"` KHÔNG đủ và chỗ hụt rất dễ đọc nhầm: nó chỉ tắt phép
+    dịch `\\n`→`\\r\\n` của Python lúc GHI, nó không đụng tới `\\r` đã nằm sẵn TRONG chuỗi. Tức là
+    mọi artifact phái sinh dựng từ nội dung đọc ở một tệp CRLF (hoặc từ stdout một tiến trình
+    Windows) vẫn ra CRLF, kể cả khi ghi qua writer "đã ghim LF". Đúng lớp hỏng mà `.gitattributes`
+    một mình không chặn được, vì tệp phái sinh sinh ra rồi mới tới lượt git nhìn thấy.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _write_text_atomic(path: Path, text: str) -> None:
+    """Writer text CANONICAL + NGUYÊN TỬ: UTF-8, LF, không phụ thuộc OS hay `core.autocrlf`.
+
+    Đây là seam DUY NHẤT cho artifact tracked/derived — golden (`workflow.py` `golden-test
+    --write`), `RELEASE_MANIFEST.json`, determinism/release report, chunk manifest, OCR text.
+    Giữ nguyên ngữ nghĩa nguyên tử của v1.33.56 (F7): ghi ra tmp CÙNG thư mục rồi `os.replace`,
+    nên không ai đọc được bản nửa vời và không có race đổi-tên-qua-volume.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
+    text = _canonical_text(text)
     _fd, _tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
     with os.fdopen(_fd, "w", encoding="utf-8", errors="replace", newline="\n") as _f:   # v1.33.56 (F7): tmp duy nhất
         _f.write(text)

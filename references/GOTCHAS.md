@@ -37,10 +37,10 @@
 - **Golden `workflow_audit` NHÚNG size SKILL.md + files_scanned** — mọi chỉnh SKILL.md/thêm file runtime
   phải `golden-test --write` LẠI (CÓ CHỦ ĐÍCH, diff phải giải thích được từng dòng) rồi mới manifest.
   **Golden diff bất ngờ = BUG — DỪNG, cấm --write che.**
-- `[B]` **«Repo ghi LF, riêng COMMANDS.md CRLF» — THIẾU (đo 28-07).** EOL theo TỆP: **8 tệp CRLF toàn
-  phần** — gồm `SKILL.md`, `tl.py`, `tl_selftest.py`, `COMMANDS.md` — 200 tệp LF, 0 hỗn hợp. **Sửa
-  bằng BYTE**: `write_text` nuốt sạch CR CẢ TỆP (r219 trả giá). COMMANDS.md: không mass-strip
-  trailing-space (125 dòng vốn có ` |` + CR).
+- `[B]` **«Khoá byte `* -text`, sửa EOL bằng BYTE» — BỊ BÁC (F2, ADR-0018).** `.gitattributes` ép
+  LF mọi text (`*.cmd`/`*.bat` CRLF; golden + binary `-text`); `.githooks/eol_policy.py` chặn CRLF
+  vào index, hook và CI chung lõi. Phái sinh ghi qua `_write_text_atomic` (canonical LF);
+  `newline="\n"` KHÔNG đủ — không đụng `\r` có sẵn.
 - **Commit message qua `-F <file>`** (tiếng Việt an toàn); secret-guard hook quét trước.
 - Gate phải kiểm **rc THẬT từng lệnh, output ra file rồi mới parse** — `cmd | python -c ...` từng NUỐT rc
   → commit lọt khi gate ĐỎ (xem `.claude/commands/gate.md`).

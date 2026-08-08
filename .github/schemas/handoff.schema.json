@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "handoff.schema.json",
+  "title": "Executor handoff",
+  "description": "Tap TRUONG cua khoi handoff Executor. Nguon normative duy nhat: docs/PROTOCOL_DA_PHIEN.md §7. Schema nay CHI hinh thuc hoa truong va enum; moi doctrine (khi nao bat buoc xuat handoff, evidence phai duong ra sao, ai duoc tao review co tham quyen) o lai §7 va KHONG duoc chep vao day - mot ban sao doctrine bi lech la loi, khong phai tien loi. `additionalProperties` mo co chu dinh: §7 chot tap truong TOI THIEU, khong phai tap dong; handoff that da land mang them truong ngu canh ben (branch, pr, superseded_head_sha...).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "spec_hash",
+    "provider",
+    "role",
+    "session_id",
+    "head_sha",
+    "status",
+    "next_role",
+    "manual_next_action",
+    "copyable_prompt"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+    "generation": {"type": "integer", "minimum": 1},
+    "spec_hash": {"$ref": "#/$defs/sha256"},
+    "provider": {"enum": ["claude", "codex"]},
+    "role": {"const": "executor"},
+    "session_id": {"type": "string", "minLength": 1},
+    "base_sha": {"$ref": "#/$defs/git_oid"},
+    "head_sha": {"$ref": "#/$defs/git_oid"},
+    "status": {"enum": ["done", "needs_followup", "blocked"]},
+    "summary": {"type": "string", "minLength": 1},
+    "changed_paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test_result"}},
+    "test_selection": {"$ref": "#/$defs/test_selection"},
+    "remaining_work": {"type": "array"},
+    "next_role": {"enum": ["reviewer", "executor", "land_operator", "human", null]},
+    "manual_next_action": {"type": ["string", "null"]},
+    "copyable_prompt": {"type": ["string", "null"]},
+    "failure": {"$ref": "#/$defs/failure"},
+    "successors": {"type": "array", "items": {"$ref": "#/$defs/successor"}}
+  },
+  "$defs": {
+    "sha256": {
+      "description": "SHA-256 dang hex thuong, du 64 ky tu.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "git_oid": {
+      "description": "Git object id, cho phep null o cac truong §7 khai `<git-oid-or-null>`.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{7,40}$"
+    },
+    "gate_tier": {
+      "description": "Tier gate T0-T5, docs/PROTOCOL_DA_PHIEN.md §10.1.",
+      "enum": ["T0", "T1", "T2", "T3", "T4", "T5"]
+    },
+    "test_result": {
+      "description": "Mot ket qua gate trong `tests[]`. §7 doi du ten + trang thai + bang chung, va test khong chay phai ghi `not_run` CUNG LY DO - nen `not_run` keo theo `reason` bat buoc. Dinh nghia o DAY va duoc review/land `$ref` toi, de mot ban duy nhat khong troi lech.",
+      "type": "object",
+      "required": ["name", "status", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["passed", "failed", "not_run"]},
+        "evidence": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "if": {"type": "object", "required": ["status"], "properties": {"status": {"const": "not_run"}}},
+      "then": {"required": ["reason"]}
+    },
+    "test_selection": {
+      "description": "Selector evidence, §7 + §10.1.",
+      "type": "object",
+      "required": ["gate_tier", "tested_sha"],
+      "additionalProperties": true,
+      "properties": {
+        "gate_tier": {"$ref": "#/$defs/gate_tier"},
+        "selector_policy_sha": {"type": ["string", "null"]},
+        "tested_sha": {"$ref": "#/$defs/git_oid"},
+        "selected_groups": {"type": "array", "items": {"type": "string"}},
+        "full_fallback_reason": {"type": ["string", "null"]}
+      }
+    },
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "properties": {
+        "fingerprint": {"type": ["string", "null"]},
+        "category": {"enum": ["content", "quota", "infrastructure", "permission", null]}
+      }
+    },
+    "successor": {
+      "description": "Seed cua packet ke nhiem, §7. Khoa khu trung do dispatcher tinh, khong phai truong o day.",
+      "type": "object",
+      "required": ["successor_key", "objective"],
+      "additionalProperties": true,
+      "properties": {
+        "successor_key": {"type": "string", "minLength": 1},
+        "objective": {"type": "string", "minLength": 1},
+        "write_set": {"type": "array"},
+        "depends_on": {"type": "array"},
+        "executor": {"enum": ["claude", "codex"]},
+        "environment": {"enum": ["cloud", "local"]},
+        "acceptance_criteria": {"type": "array"}
+      }
+    }
+  }
+}

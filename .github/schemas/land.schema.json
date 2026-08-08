@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "land.schema.json",
+  "title": "Land authorization / land evidence",
+  "description": "docs/PROTOCOL_DA_PHIEN.md §7 noi thang «Land evidence tach approval khoi thao tac», va khoi land evidence doi `authorization_url` tro toi mot approval BEN rieng biet. Vi vay schema nay co HAI bien the: `land_authorization` (quyet dinh cua approver, §10.2) va `land_evidence` (thao tac cua land operator, khoi §7). Chung phan biet nhau bang truong DAU: co `merge_commit` la evidence, co `decision` la authorization - khong bien the nao nhan ca hai. Doctrine (dieu kien apply, allowlist/`maintain`, Environment approval, branch protection, het han) o lai §10.2 va KHONG chep vao day. LUU Y hinh thuc hoa: §7 chi chot khoi land evidence; khoi authorization CHUA co block normative trong protocol, nen bien the do CHI doi cac truong ma §7/§10.2 goi ten dich danh.",
+  "oneOf": [
+    {"$ref": "#/$defs/land_evidence"},
+    {"$ref": "#/$defs/land_authorization"}
+  ],
+  "$defs": {
+    "land_evidence": {
+      "title": "Land evidence",
+      "description": "Khoi land evidence, §7.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "mission_id",
+        "generation",
+        "provider",
+        "role",
+        "session_id",
+        "input_packet_generations",
+        "authorized_head_sha",
+        "approver",
+        "authorization_url",
+        "land_operator",
+        "merge_method",
+        "merge_commit",
+        "pre_merge_checks",
+        "post_merge_checks",
+        "bookkeeping"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": {"type": "integer", "minimum": 1},
+        "mission_id": {"$ref": "#/$defs/mission_id"},
+        "generation": {"type": "integer", "minimum": 1},
+        "provider": {"enum": ["claude", "codex", "human", "github-actions"]},
+        "role": {"const": "land_operator"},
+        "session_id": {"type": "string", "minLength": 1},
+        "input_packet_generations": {"type": "array"},
+        "authorized_head_sha": {"$ref": "handoff.schema.json#/$defs/git_oid"},
+        "approver": {"type": "string", "minLength": 1},
+        "authorization_url": {"type": "string", "minLength": 1},
+        "land_operator": {"type": "string", "minLength": 1},
+        "merge_method": {"enum": ["merge", "squash", "rebase"]},
+        "merge_commit": {"$ref": "handoff.schema.json#/$defs/git_oid"},
+        "pre_merge_checks": {"type": "array"},
+        "post_merge_checks": {"type": "array"},
+        "bookkeeping": {"type": "array"},
+        "tests": {"type": "array", "items": {"$ref": "handoff.schema.json#/$defs/test_result"}}
+      }
+    },
+    "land_authorization": {
+      "title": "Land authorization",
+      "description": "Quyet dinh approval ben ma `authorization_url` cua land evidence tro toi, §10.2. `approver` hoac `actor` - evidence that dung `actor`, khoi §7 goi la `approver`; doi it nhat mot trong hai thay vi tu dat ten moi.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "mission_id",
+        "decision",
+        "authorized_head_sha"
+      ],
+      "additionalProperties": true,
+      "anyOf": [
+        {"required": ["approver"]},
+        {"required": ["actor"]}
+      ],
+      "properties": {
+        "schema_version": {"type": "integer", "minimum": 1},
+        "mission_id": {"$ref": "#/$defs/mission_id"},
+        "decision": {"enum": ["pending", "approved", "rejected"]},
+        "authorized_head_sha": {"$ref": "handoff.schema.json#/$defs/git_oid"},
+        "approver": {"type": "string", "minLength": 1},
+        "actor": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "provider": {"enum": ["claude", "codex", "human", "github-actions"]},
+        "merge_method": {"enum": ["merge", "squash", "rebase"]},
+        "review_assurance": {
+          "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]
+        },
+        "authorization_status": {"enum": ["active", "expired", "revoked", "superseded"]}
+      }
+    },
+    "mission_id": {
+      "description": "Mission ID ben dang `gh-<issue>`, §3.1.",
+      "type": "string",
+      "pattern": "^gh-[0-9]+$"
+    }
+  }
+}

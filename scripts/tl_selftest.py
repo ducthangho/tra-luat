@@ -21171,13 +21171,15 @@ def run() -> int:
         # KÊ KHAI SLOT (r335/v1.36.67 — activation Mission F1): 177 → **179**. Thêm đúng HAI
         # runtime file: loader/generator `scripts/tl_core/test_fragments.py` và generated release module
         # `scripts/tl_test_fragments_bundled.py`. Dev fragments vẫn ngoài gói; còn 21 khe dưới trần 200.
-        # KÊ KHAI SLOT (WP57/F3-00 — governance baseline): 42 → **43** Markdown dưới `docs/`.
+        # KÊ KHAI SLOT (WP57/F3-00 rev2 — governance baseline): 42 → **43** Markdown dưới `docs/`.
         # Thêm đúng ADR-0034; ADR vẫn dev-side/ngoài gói nên package giữ 179 và trần 200 không đổi.
-        # Phép ratchet cây thật = 179 + 43 = 222.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 43 == 222
+        # KÊ KHAI SLOT (WP57/F3-00 rev3 — automation-first): 43 → **47** Markdown dưới `docs/`.
+        # Thêm hai research note, ADR-0035 và manual successor prompt; cả bốn đều dev-side/ngoài gói.
+        # Phép ratchet cây thật = 179 + 47 = 226; trần package 200 không đổi.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 47 == 226
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 43
+        ok4 = (len(tren_dia) == 47
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

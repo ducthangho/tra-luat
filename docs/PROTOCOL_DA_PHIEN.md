@@ -2,9 +2,9 @@
 
 - **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
 - **Protocol version:** 1
-- **Governance baseline:** MCR-54-01, chấp thuận ngày 2026-08-08
+- **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08
 - **Phạm vi:** Claude Code, Codex, Windows local, cloud worker và Android
-- **Nguồn quyết định:** ADR-0017 đến ADR-0034
+- **Nguồn quyết định:** ADR-0017 đến ADR-0035
 - **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
 
 ## 1. Mục tiêu và bất biến
@@ -27,6 +27,8 @@ Các bất biến không được hạ chuẩn:
 8. Một phiên chỉ giữ một vai trò trên một đơn vị công việc: execute một Packet, review một PR hoặc land một
    exact head. Substep nằm trong cùng Packet Spec không bị tách vụn; việc ngoài spec sang successor Packet.
 9. Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực.
+10. GitHub durable facts và deterministic reconciler single-writer là authority cho transition; model, adapter,
+    workflow trigger và prompt chỉ là worker/client có thể thay thế, không tự cấp quyền hoặc tự nối chuỗi vai trò.
 
 ## 2. Thành phần và quyền
 
@@ -287,6 +289,14 @@ Windows trực tuyến. Controller Python chạy bằng Scheduled Task dưới t
 Claude/Codex là giao diện can thiệp tùy chọn, không phải control plane và không hoạt động thay local host khi host
 tắt.
 
+GitHub Agentic Workflows (`gh-aw`) có thể được thử nghiệm như một implementation của provider adapter vì hỗ trợ
+worker Codex/Claude, sandbox và safe outputs. Nó không được giữ projection, chọn transition, tự phê duyệt hoặc
+thay reconciler. Khi còn public preview, workflow Markdown phải compile thành lock file được pin/review; token và
+tool permission tối thiểu; input không tin cậy không đi vào job có quyền ghi; mọi write đi qua safe output đã được
+validator của reconciler kiểm exact identity. Adapter phải có feature flag, kill switch, quota và đường quay về
+deterministic runner mà không đổi schema/state. Không dùng chuỗi `workflow_run` làm state machine: giới hạn chain,
+quyền của downstream workflow và lịch chạy không tạo ra durable ordering hay authority.
+
 ## 7. Handoff và tự sinh phiên kế nhiệm
 
 Executor luôn xuất handoff máy đọc được:
@@ -308,7 +318,16 @@ tests:
   - name: <gate>
     status: passed | failed | not_run
     evidence: <url-or-summary>
+test_selection:
+  gate_tier: T0 | T1 | T2 | T3 | T4 | T5
+  selector_policy_sha: <git-oid-or-policy-hash>
+  tested_sha: <git-oid>
+  selected_groups: []
+  full_fallback_reason: <reason-or-null>
 remaining_work: []
+next_role: reviewer | executor | land_operator | human | null
+manual_next_action: <action-or-null>
+copyable_prompt: <prompt-or-null>
 failure:
   fingerprint: <stable-hash-or-null>
   category: content | quota | infrastructure | permission | null
@@ -324,7 +343,14 @@ successors:
 
 Executor đăng handoff/evidence lên Packet Issue và PR trước khi state rời `running`. Test evidence phải có lệnh,
 rc đọc trực tiếp và bằng chứng dương (`N/N`, `ok=true`, số file/hash...), không chỉ “passed”. `changed_paths` phải
-khớp diff của exact `head_sha`; test không chạy phải ghi `not_run` cùng lý do.
+khớp diff của exact `head_sha`; `tested_sha` phải bằng head được đề nghị review; test không chạy phải ghi
+`not_run` cùng lý do. Selector evidence phải ghi tier, policy/catalog identity, nhóm đã chọn và lý do fallback;
+không được chỉ ghi “affected tests passed”.
+
+Khi dispatcher/reviewer automation chưa được promote, mỗi phiên còn phải điền `next_role`,
+`manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex mới. Prompt phải neo
+mission/packet/revision/generation/exact SHA, vai trò, phạm vi, gate và stop conditions; nó là tiện ích bootstrap,
+không phải lease, approval hay authority. Mẫu chuẩn ở `docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md`.
 
 Reviewer xuất evidence độc lập:
 
@@ -373,6 +399,13 @@ Dispatcher kiểm schema, generation, spec hash, changed paths, budget và missi
 dispatcher tính từ mission, packet cha, generation và `successor_key`; chạy lại workflow không tạo Issue trùng.
 Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. Hệ thống chỉ hỏi người dùng ở `paused`,
 `blocked`, quyền LIVE hoặc land/deploy.
+
+Với handoff Executor `status: done`, reconciler phải đọc lại PR head và so đồng thời mission revision, Packet
+revision/spec hash, generation, lease, `head_sha`, `tested_sha`, changed paths và gate policy. Chỉ khi tất cả khớp,
+nó mới ghi transition `running → reviewing` idempotent rồi dispatch một Reviewer mới, context/worktree độc lập và
+read-only mặc định. Executor không tự tạo review có thẩm quyền; nếu chưa có automation, nó chỉ xuất prompt thủ
+công nói trên và dừng. Reviewer `changes_requested` tạo finding có stable ID; reconciler trả đúng Packet/generation
+về executor/rework, còn commit mới luôn làm verdict/CI/authorization của head cũ hết hiệu lực.
 
 ## 8. Review phân tầng
 
@@ -431,6 +464,33 @@ nếu worker gate dùng manifest tạm chưa sẵn sàng thì dispatcher không 
 được land ở trạng thái tắt.
 
 ## 10. Worker gate, land gate và definition of done
+
+### 10.1 Gate selftest phân tầng và fail-closed
+
+Không chạy toàn bộ legacy selftest sau mọi thao tác nhỏ. Gate classifier và aggregator vẫn luôn chạy và quyết
+định tier theo changed paths, change-impact closure, risk, test catalog, runner/policy identity và checkpoint:
+
+| Tier | Checkpoint | Yêu cầu tối thiểu |
+|---|---|---|
+| T0 | inner loop của Executor | test/fragment trực tiếp cho thay đổi; không phải promotion evidence |
+| T1 | packet worker gate | affected fragments/groups cùng always-on write-set, EOL, security, manifest/package và selector guards |
+| T2 | trước `ready_for_rereview` | chạy lại T1 trên exact head; full nếu packet sensitive hoặc classifier yêu cầu |
+| T3 | integration freeze/`land prepare` | full selftest và release gates trên Windows + Linux cho frozen integration SHA |
+| T4 | canonical/`merge_group` | full trên candidate canonical, hoặc reuse duy nhất evidence T3 khi toàn bộ exact identity khớp |
+| T5 | exact release artifact | full smoke/verify trên bundle/artifact có hash sẽ phát hành |
+
+Unknown/unmapped path, selector/catalog/runner/shared fixture hoặc global state thay đổi, security/workflow,
+release/manifest/package, EOL hay gate policy thay đổi phải fallback full; classifier lỗi/không đọc được cũng
+fallback full. Top-level path filter hoặc job `skipped` không phải evidence: classifier + aggregator bắt buộc tạo
+kết quả dương và chặn merge khi required tier thiếu. Evidence chỉ được reuse khi tested SHA/tree, policy/catalog,
+runner, OS/runtime matrix và artifact hash (nếu có) khớp chính xác; head hoặc một identity đổi thì chạy lại.
+
+Selector chỉ được activate sau khi legacy harness đã tách thành callable/group cô lập, duration được đo, full có
+thể chạy song song an toàn, và shadow 2–4 tuần chứng minh affected selection không bỏ sót failure so với full.
+Trước activation, T1/T2 vẫn chạy full theo policy hiện hành. Lọc output sau khi eager harness đã chạy hoặc shard
+theo modulo không được coi là tối ưu hay isolation hợp lệ.
+
+### 10.2 Worker/land gate và trạng thái hoàn tất
 
 Worker gate kiểm generation/spec/write-set, EOL, security paths, offline tests và manifest tạm ngoài repo. Gate
 dùng primitive hiện có theo nghĩa tương đương:
@@ -553,13 +613,15 @@ bundle nhưng vẫn phải qua `doc-claims-check --strict`, kiểm link/path và
    gates; chưa có provider secret.
    Chỉ cuối pha này mới kích hoạt nguyên tử deferred numbering + worker gate manifest tạm; trước đó không cấp
    packet worker.
-3. Dispatcher shadow: durable inbox, reconciler, event journal/checkpoint/recovery và fixture/dry-run cho parser,
+3. Test economics: instrument duration, tách callable/group, dọn global state, parallel full, shadow selector
+   2–4 tuần rồi mới activate gate T0–T5 fail-closed.
+4. Dispatcher shadow: durable inbox, reconciler, event journal/checkpoint/recovery và fixture/dry-run cho parser,
    state, race, lease, path normalization, burst/queue-loss cùng handoff idempotency.
-4. Cloud canary: một provider, một packet, không successor tự động.
-5. Dual provider: review phân tầng và circuit breaker.
-6. Autonomous mission: successor trong envelope và lệnh Android.
-7. Local controller: Scheduled Task, offline queue, reboot/recovery/stale tests.
-8. Land automation: chỉ promote sau nhiều mission không có stale lease, out-of-effective-write-set, event mất
+5. Cloud canary: một provider, một packet, không successor tự động; `gh-aw` chỉ là adapter canary có kill switch.
+6. Dual provider: auto-dispatch Reviewer mới, review phân tầng và circuit breaker.
+7. Autonomous mission: successor trong envelope và lệnh Android.
+8. Local controller: Scheduled Task, offline queue, reboot/recovery/stale tests.
+9. Land automation: chỉ promote sau nhiều mission không có stale lease, out-of-effective-write-set, event mất
    hay duplicate packet.
 
 Protocol cutover chọn zero legacy writer: trước activation, mọi PR kiểu cũ chạm version/changelog/manifest phải
@@ -574,11 +636,11 @@ Rollout có hai chân trời rõ nghĩa:
 - **Foundation horizon (pha 1–2):** phạm vi cam kết trước, đem lại EOL canonical, deferred artifacts,
   test-fragment harness, change-impact policy, protocol/adapters và hai CI lane cho các phiên do người dùng khởi
   chạy. Kết thúc pha 2 không được quảng bá là autonomous.
-- **Automation horizon (pha 3–8):** roadmap bắt buộc để đạt mục tiêu tự sinh kế nhiệm, cloud/local continuity và
+- **Automation horizon (pha 3–9):** roadmap bắt buộc để đạt mục tiêu tự sinh kế nhiệm, cloud/local continuity và
   land xuyên thiết bị. Mỗi pha là một epic/PR/mission riêng, chỉ promote sau evidence và budget review; phase 3
-  shadow phải xanh trước mọi provider secret hoặc model call.
+  test-economics và phase 4 shadow phải xanh trước mọi provider secret hoặc model call.
 
-Definition of done toàn hệ thống vẫn là tiêu chí mục 17 sau pha 8. “Foundation complete” chỉ là mốc giảm conflict,
+Definition of done toàn hệ thống vẫn là tiêu chí mục 17 sau pha 9. “Foundation complete” chỉ là mốc giảm conflict,
 không phải “mission automation complete”.
 
 ## 15. Phán quyết so sánh

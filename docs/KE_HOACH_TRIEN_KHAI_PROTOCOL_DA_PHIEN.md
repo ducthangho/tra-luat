@@ -49,6 +49,12 @@ read-only hoặc pilot thủ công với write set do người giữ đối chi�
 - PR hạ tầng nhạy cảm phải cross-review hoặc human review; không dùng `review_deferred`.
 - Same-provider fallback phải là phiên read-only độc lập và ghi assurance thấp hơn; không giả thành cross-review.
 - Executor có thể được ủy quyền làm Land Operator cho exact SHA nhưng không tự trở thành Reviewer/Approver.
+- GitHub facts + deterministic reconciler single-writer giữ authority; Executor chỉ phát evidence, reconciler
+  mới dispatch Reviewer độc lập. Agent hoặc workflow không tự nối vai trò/transition.
+- GitHub Agentic Workflows chỉ là provider adapter/canary sau interface chung, có pinned lock, safe outputs,
+  permission tối thiểu và kill switch; public preview không được làm state machine.
+- Cho tới khi auto-dispatch được promote, mọi phiên phải đóng gói handoff và prompt Claude/Codex có thể sao chép
+  cho vai trò kế tiếp, neo exact SHA/generation và stop conditions.
 - Trước activation, foundation PR được land tuần tự theo quy trình release cũ; không chạy song song
   hai PR cùng chạm `scripts/tl.py`, `scripts/tl_selftest.py`, release policy hoặc metadata.
 - Sau activation, tối đa hai executor ghi; dispatcher chỉ cấp lease sau khi closure của hai packet không giao.
@@ -63,7 +69,8 @@ flowchart LR
     F1 --> EOL["F2: EOL migration"]
     EOL --> S1["F3: Protocol + safety"]
     S1 --> CUT["F4: Zero-legacy cutover"]
-    CUT --> A3["A3: Dispatcher shadow"]
+    CUT --> A2["A2: Test economics + tiered gates"]
+    A2 --> A3["A3: Dispatcher shadow"]
     A3 --> A4["A4: Cloud canary"]
     A4 --> A5["A5: Dual provider"]
     A5 --> A6["A6: Successor + Android"]
@@ -137,13 +144,13 @@ Sau F2, có thể chạy tối đa hai packet trong các nhóm ghi không giao. 
 
 | Packet | Nhóm ghi | Nội dung | Phụ thuộc |
 |---|---|---|---|
-| F3-00 | Governance contract | glossary; Mission Change Request/revision; evidence; review assurance; Approver/Land Operator; ADR | MCR-54-01 |
+| F3-00 | Governance contract | glossary; MCR/revision; durable orchestration; `gh-aw` adapter boundary; tiered selftest; manual successor prompt; review/land authority; ADR | MCR-54-02 |
 | F3-01 | GitHub schema | Issue Forms mission/packet/change request, JSON schema handoff/review/land/state/command | F2, F3-00 |
 | F3-02 | Impact policy | policy/schema/stdlib validator, closure có hướng, candidate report read-only | F2, F3-00 |
 | F3-03 | Agent adapters | `work-packet`, `cross-review`, `land-packets`; `CLAUDE.md` và `AGENTS.md` chỉ trỏ protocol | F2, F3-00 |
 | F3-04 | Security | permissions tối thiểu, security paths, CODEOWNERS, cấm LIVE credential trong worker | F2, F3-00 |
 | F3-05 | Derived metadata | `planned:changelog.d/`, worker cấm version/r number, land-owned metadata | F1, F2, F3-00 |
-| F3-06 | Worker gate | manifest tạm ngoài repo, fragment tests, evidence/write-set/EOL/security checks, không provider secret | F3-01…05 |
+| F3-06 | Worker gate | classifier + aggregator; manifest tạm ngoài repo; fragment tests; evidence/write-set/EOL/security checks; không provider secret | F3-01…05 |
 | F3-07 | Land gate | generate bundled/changelog/version/manifest, parity, dry-run `land prepare` | F3-01…06 |
 | F3-08 | Adapter parity | test Claude/Codex adapter cùng schema, role/session boundary, stop condition và completion contract | F3-03, F3-06 |
 
@@ -160,6 +167,24 @@ Không cho F3-06 và deferred numbering active riêng. Cả hai chỉ bật tron
 
 Foundation gate chỉ xanh khi hai canary cùng qua worker gate, merge tuần tự vào integration và land mà
 không ai sửa release metadata trên worker branch.
+
+### A2 — Test economics và gate selftest phân tầng
+
+Pha này được ưu tiên ngay sau F4 và trước model orchestration để giảm chi phí của mọi canary sau. Không activate
+selector bằng cách lọc output của harness eager hoặc shard modulo; full suite hiện hành vẫn là oracle trong thời
+gian shadow.
+
+| Packet | Kết quả | Nghiệm thu/promotion |
+|---|---|---|
+| A2-01 | duration/event instrumentation và stable catalog cho 1.696 ca | báo top cost theo group/callable; instrumentation không đổi verdict |
+| A2-02 | tách callable/group, fake clock/temp và cleanup global state | group chạy độc lập, đảo thứ tự không đổi kết quả |
+| A2-03 | bỏ subprocess/golden lặp, cache parser an toàn, sửa nghĩa/help `release-check --full` | golden chỉ chạy một lần/checkpoint; help và behavior cùng test |
+| A2-04 | parallel full theo process/group trên Windows + Linux | tổng hợp tất định, failure/log không mất, serial/full parity |
+| A2-05 | affected-test selector chạy shadow 2–4 tuần | mọi T1/T2 selection so với full; false-negative bằng 0; unknown luôn full |
+| A2-06 | activate policy T0–T5, exact-identity reuse và rollback switch | classifier + aggregator required; fixture path/risk/catalog/security/release/EOL fail-closed |
+
+Promotion gate A2: median packet feedback giảm có số đo; T3 full hai OS vẫn giữ; không đổi số/ý nghĩa ca test;
+selector policy/catalog/runner được version hóa và evidence đủ để dựng lại vì sao một group chạy hoặc bị bỏ.
 
 ### A3 — Dispatcher shadow, chưa gọi model
 
@@ -184,10 +209,11 @@ retry cùng ID chỉ apply một lần; chain hỏng chuyển `paused` có audit
 ### A4 — Cloud canary một provider
 
 1. A4-01: provider-neutral executor interface và output schema.
-2. A4-02: chọn provider canary theo credential có thể scope/quota; không dùng session token cá nhân chép
-   vào prompt hay repo.
+2. A4-02: implementation canary có thể là GitHub Agentic Workflows hoặc runner native sau cùng interface;
+   `gh-aw` Markdown compile/pin lock, safe outputs, read-only mặc định và feature flag/kill switch.
 3. A4-03: OIDC broker là đích; secret provider trực tiếp chỉ là bước chuyển tiếp có owner/expiry.
-4. A4-04: một packet offline, `max_parallel_workers=1`, không successor, không security path.
+4. A4-04: chọn provider theo credential có thể scope/quota; một packet offline,
+   `max_parallel_workers=1`, không successor/security path và không dùng session token cá nhân chép vào prompt/repo.
 5. A4-05: thu hồi credential và quota test; workflow branch code không nhìn thấy credential.
 
 Nếu tài khoản không có credential automation được hỗ trợ, A4 `paused`; không lách bằng raw cookie/token.
@@ -195,10 +221,14 @@ Nếu tài khoản không có credential automation được hỗ trợ, A4 `pau
 ### A5 — Dual provider và review phân tầng
 
 - A5-01: adapter Claude và Codex cùng executor contract.
-- A5-02: reviewer read-only, verdict schema `approve|changes_requested|blocked`.
-- A5-03: `cross_approved`, `human_audited`, `same_provider_approved`, `review_deferred` và các risk không được defer.
+- A5-02: reconciler nhận Executor evidence, validate exact identity rồi tự dispatch reviewer context/worktree mới,
+  read-only; verdict schema `approve|changes_requested|blocked`.
+- A5-03: `cross_approved`, `human_audited` (GitHub identity bền, độc lập, audit evidence + verdict trên exact SHA),
+  `same_provider_approved`, `review_deferred` và các risk không được defer.
 - A5-04: rate-limit/quota fingerprint, reset time và circuit breaker; quota failure không tính attempt nội dung.
 - A5-05: canary hai packet không giao; Claude review Codex và Codex review Claude.
+- A5-06: `changes_requested` trả stable finding IDs cho Executor generation hợp lệ; commit mới tự thu hồi verdict,
+  CI và authorization cũ; approve mới cho phép frontier kế tiếp.
 
 ### A6 — Successor tự động và Android
 
@@ -239,6 +269,7 @@ out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ b�
 | D0–F2 | 1 | canonical bẩn, release metadata/EOL/harness là nút toàn cục |
 | F3 trước activation | 2 do người giữ | worktree riêng, write set/closure đối chiếu thủ công |
 | F4 canary | 2 | một Claude, một Codex; không giao effective write set |
+| A2 test economics | 1 với harness/runner; 2 cho read-only profiling | full oracle giữ tuần tự tới khi isolation/parallel parity xanh |
 | A3 shadow | 2 | chỉ fake store/dry-run; zero model/secret/canonical write |
 | A4 cloud canary | 1 | một provider, một packet, không successor |
 | A5–A8 | 2 mặc định | dispatcher cấp lease; integration/land vẫn single-writer |

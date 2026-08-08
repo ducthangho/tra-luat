@@ -99,16 +99,23 @@ affected_packets: []
 landed_work_impact: none | corrective_packet | revert_packet
 risk_change: none | increased | decreased
 decision: pending | approved | rejected
-approved_by: <actor-or-null>
+decision_source: human
+approved_by: <human-actor-or-null>
+decision_url: <durable-url-or-null>
 supersedes_revision: <integer>
 ```
 
 Dispatcher chuyển phần bị ảnh hưởng sang `paused: change_requested`, ngừng cấp lease/merge, rồi lập impact analysis:
 Packet không ảnh hưởng được giữ; Packet đổi objective/acceptance/write-set/dependency/executor/environment phải có
 revision và generation mới; Packet không còn cần chuyển `cancelled`; kết quả đã landed chỉ được sửa bằng corrective
-hoặc revert Packet. Human/authorized policy phê duyệt exact Change Request trước khi Mission revision/plan hash mới
-có hiệu lực. Nếu outcome, quyền LIVE hoặc security boundary đổi căn bản, tạo Mission mới và chuyển Mission cũ
-`cancelled: superseded` thay vì viết lại lịch sử.
+hoặc revert Packet. MCR material chỉ có hiệu lực khi human ghi quyết định bền cho exact Change Request; ủy quyền land
+không đồng thời là quyền duyệt MCR.
+
+Sau quyết định `approved`, dispatcher atomically ghi event cài Mission revision/plan hash mới, thu hồi mọi lease bị ảnh
+hưởng, tăng generation, cài các Packet revision tương ứng, tính lại closure rồi readback state/hash. Chỉ các Mission hoặc
+Packet đủ điều kiện mới chuyển `paused` về `running`/`ready`; bất kỳ bước hay readback nào hỏng thì vẫn `paused`. Quyết
+định `rejected` giữ revision cũ và chỉ resume sau khi event/readback của quyết định đó khớp. Nếu outcome, quyền LIVE
+hoặc security boundary đổi căn bản, tạo Mission mới và chuyển Mission cũ `cancelled: superseded` thay vì viết lại lịch sử.
 
 ### 3.2 Work Packet Issue
 
@@ -292,8 +299,8 @@ spec_hash: <sha256>
 provider: claude | codex
 role: executor
 session_id: <stable-run-id>
-base_sha: <sha256>
-head_sha: <sha256-or-null>
+base_sha: <git-oid>
+head_sha: <git-oid-or-null>
 status: done | needs_followup | blocked
 summary: <text>
 changed_paths: []
@@ -324,9 +331,11 @@ Reviewer xuất evidence độc lập:
 ```yaml
 schema_version: 1
 packet_id: wp<issue>
-reviewer_provider: claude | codex | human
+generation: <integer>
+provider: claude | codex | human
+role: reviewer
 session_id: <stable-run-id>
-reviewed_sha: <sha256>
+reviewed_sha: <git-oid>
 independent_from_executor_session: true
 review_axes: [spec, standards_security]
 tests: []
@@ -341,12 +350,17 @@ Land evidence tách approval khỏi thao tác:
 ```yaml
 schema_version: 1
 mission_id: gh-<issue>
-authorized_head_sha: <sha256>
+generation: <land-attempt-integer>
+provider: claude | codex | human | github-actions
+role: land_operator
+session_id: <stable-run-id>
+input_packet_generations: []
+authorized_head_sha: <git-oid>
 approver: <actor>
 authorization_url: <durable-url>
 land_operator: <actor>
 merge_method: merge | squash | rebase
-merge_commit: <sha256>
+merge_commit: <git-oid>
 pre_merge_checks: []
 post_merge_checks: []
 bookkeeping: []

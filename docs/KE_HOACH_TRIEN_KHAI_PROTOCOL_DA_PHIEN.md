@@ -2,7 +2,7 @@
 
 - **Trạng thái:** Kế hoạch thi công chi tiết
 - **Ngày chốt:** 2026-08-03
-- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0033
+- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0034
 - **Mục tiêu:** từ repo hiện tại đi tới hai executor Claude/Codex chạy song song an toàn, tự bàn giao,
   tiếp tục qua Windows/cloud/Android và land có phê duyệt.
 

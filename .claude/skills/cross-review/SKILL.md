@@ -1,55 +1,53 @@
 ---
 name: cross-review
-description: Review chéo khác provider một PR packet của protocol đa phiên (tra-luat) — hai trục Spec và Standards/Security, không sửa file, xuất verdict approve/changes_requested/blocked có bằng chứng ĐO ĐƯỢC. Dùng khi packet vào trạng thái reviewing.
+description: Review chéo khác provider một PR packet của protocol đa phiên (tra-luat) trên nền Claude Code — cách đo, cách chạy sandbox, cách ghi verdict. Quy tắc review nằm ở docs/PROTOCOL_DA_PHIEN.md, tệp này chỉ là cú pháp.
 argument-hint: "[so-issue-packet] [so-PR]"
 ---
 
 # Adapter `cross-review` — Claude Code
 
-**Đây là ADAPTER, không phải nguồn quy tắc.** Quy tắc ở `docs/PROTOCOL_DA_PHIEN.md` §8 (review phân
-tầng) và §13. Lệch nhau thì protocol đúng.
+**ĐỌC `docs/PROTOCOL_DA_PHIEN.md` TRƯỚC.** Mức review, quyền của reviewer, và định nghĩa hoàn tất
+nằm ở **§8** và **§13** — kể cả việc verdict phải ghi vào **PR** và reviewer **không sửa branch**.
+Tệp này **cố ý KHÔNG chép lại** chúng.
 
-## Điều kiện tiên quyết — kiểm trước, không giả định
+## Cách ĐO — phần thuộc về nền này
 
-**Reviewer PHẢI khác provider với executor.** executor `claude` ⇒ reviewer `codex`; executor `codex`
-⇒ reviewer `claude`. Máy trạng thái chặn vi phạm bằng mã thoát 4, nhưng đừng dựa vào nó để phát hiện
-muộn — kiểm nhãn `executor:*` của Issue trước.
+Đọc code là **chưa đủ**. Ba phép tối thiểu, và phép thứ ba là phép hay bị bỏ nhất:
 
-**Reviewer KHÔNG sửa branch** (§8). `changes_requested` trả việc về executor. Muốn sửa thì đó là lượt
-executor, và nó ăn vào trần.
+1. **Tự chạy lại gate** trên checkout Temp SẠCH, mã thoát trực tiếp từng tiến trình. Không đọc lại
+   số của executor.
+2. **Phản chứng hai chiều** dưới đúng điều kiện bản vá khai là nó chữa: đỏ trước / xanh sau.
+3. **Mutation test.** Bơm đột biến vào chính chỗ vừa sửa; test **phải ĐỎ**. Đột biến nào **sống sót**
+   là một lỗ hổng của suite ⇒ đó là finding, kèm số ca đỏ. Test xanh khi bị đột biến là test rỗng,
+   và suite rỗng thì mọi con số phía trên đều vô nghĩa.
 
-## Hai trục, và trục nào cũng phải ĐO
+Bằng chứng dương: `N/N` hai số BẰNG NHAU, `"ok": true`. **`rc=0` không phải bằng chứng.**
 
-**Spec** — đối chiếu từng dòng `acceptance_criteria` của revision hiện hành. Lấy body qua GraphQL và
-**tái lập `spec_hash`**; lệch ⇒ spec đã trôi, DỪNG. Kiểm `git diff --numstat base..HEAD` khớp đúng
-`write_set`, không thừa không thiếu.
+## Chạy provider kia — và KHOÁ PHẠM VI
 
-**Standards/Security** — đọc code là **chưa đủ**. Ba phép tối thiểu:
+```bash
+codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> - < PROMPT.md
+```
 
-1. **Gate tự chạy lại** trên checkout Temp SẠCH, rc trực tiếp từng tiến trình. Không đọc lại số của
-   executor.
-2. **Phản chứng hai chiều** dưới đúng điều kiện mà bản vá khai là nó chữa: đỏ trước sửa / xanh sau sửa.
-3. **Mutation test** — bơm đột biến vào chính chỗ vừa sửa; test **phải ĐỎ**. Test xanh khi bị đột biến
-   là test rỗng, và một suite rỗng thì mọi con số phía trên đều vô nghĩa.
+**Dựng sandbox biệt lập** chứa sẵn `SPEC.md` · `diff.patch` · `numstat.txt` · trích protocol · bản sao
+cây sau sửa — rồi cấm reviewer đọc ra ngoài thư mục đó. Đây **không** phải cẩn thận thừa: lượt đầu
+chạy với phạm vi mở, agent quét ra ngoài kho, đọc nhầm transcript phiên, 40 phút không ra kết luận.
+Sandbox cũng cho reviewer tự do đột biến bản sao mà không chạm kho thật.
 
-Bằng chứng dương: `N/N` hai số BẰNG NHAU, `"ok": true`. **rc=0 không phải bằng chứng** — nó bị lừa được.
+## Ghi verdict
 
-## Verdict
-
-`approve` · `changes_requested` · `blocked`. Mỗi finding phải kèm **bằng chứng chạy được** (lệnh + số),
-không phải nhận xét. Ghi verdict vào Issue kèm **provider của lượt này**, rồi:
+Verdict `approve` / `changes_requested` / `blocked` ghi vào **PR** (§13). Mỗi finding kèm **bằng chứng
+chạy được** — lệnh + số — không phải nhận xét. Đồng thời ghi transition vào Issue qua máy trạng thái:
 
 ```bash
 python .claude/dev/packet_loop.py record-review --packet <n> --provider <claude|codex> \
     --verdict <approve|changes_requested|blocked> [--finding "<mô tả>" ...]
-python .claude/dev/packet_loop.py next-comment  --packet <n>     # lấy văn bản, ĐĂNG lên Issue
-python .claude/dev/packet_loop.py mark-posted   --packet <n> --url <url>
+python .claude/dev/packet_loop.py next-comment  --packet <n>
+python .claude/dev/packet_loop.py mark-posted   --packet <n> --url <url comment THẬT>
 ```
 
-Cùng một finding lặp lần thứ 2 ⇒ máy trạng thái trả mã 3 và chuyển `blocked`. Đó là **cố ý**: cùng một
-lỗi lặp lại nghĩa là vòng lặp không sửa nổi nó, đốt thêm lượt chỉ là đốt ngân sách. Báo người.
+Vân tay finding bỏ qua hoa/thường, khoảng trắng **và dấu câu** — nên đừng trông chờ diễn đạt lại nhẹ
+sẽ thành finding mới. Cùng một lỗi lặp lần thứ 2 ⇒ máy trạng thái dừng và chuyển `blocked`: cùng một
+lỗi lặp lại nghĩa là vòng lặp không sửa nổi nó, đốt thêm lượt chỉ là đốt ngân sách.
 
-## `approve` KHÔNG phải merge
-
-`approve` chuyển packet sang `awaiting_merge` và **vòng lặp hết quyền ở đó**. Merge do người làm sau
-khi duyệt, bằng **merge commit**, không squash khi packet nhiều commit.
+`approve` chuyển packet sang `awaiting_merge` và **vòng lặp hết quyền ở đó** — merge là việc của người.

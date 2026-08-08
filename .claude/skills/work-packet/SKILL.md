@@ -1,59 +1,63 @@
 ---
 name: work-packet
-description: Thực thi MỘT work packet của protocol đa phiên (tra-luat) — preflight spec/lease/worktree, chỉ sửa trong write set, chạy worker gate, mở PR, handoff. Dùng khi nhận một Issue packet có lease hợp lệ.
+description: Thực thi MỘT work packet của protocol đa phiên (tra-luat) trên nền Claude Code — dựng worktree, gọi máy trạng thái cưỡng chế stop conditions, chạy gate, mở PR. Quy tắc nằm ở docs/PROTOCOL_DA_PHIEN.md, tệp này chỉ là cú pháp.
 argument-hint: "[so-issue-packet]"
 ---
 
 # Adapter `work-packet` — Claude Code
 
-**Đây là ADAPTER, không phải nguồn quy tắc.** Quy tắc, schema, completion criteria chỉ nằm ở
-`docs/PROTOCOL_DA_PHIEN.md`. Nếu tệp này và protocol nói khác nhau thì **protocol đúng, tệp này sai** —
-sửa tệp này, đừng sửa protocol để khớp với nó.
+**ĐỌC `docs/PROTOCOL_DA_PHIEN.md` TRƯỚC.** Trình tự bắt buộc, điều kiện từ chối việc, và định
+nghĩa hoàn tất của skill này nằm ở **§13**; schema packet ở **§3.2**; write set ở **§5**; stop
+conditions ở **§12**. Tệp này **cố ý KHÔNG tóm tắt** chúng — một bản tóm tắt là một bản sao, và bản
+sao thì trôi lệch rồi mâu thuẫn với bản gốc. Ở đây chỉ có **cú pháp và công cụ của nền này**.
 
-Đọc trước khi làm bất cứ gì: `docs/PROTOCOL_DA_PHIEN.md` §3.2 (schema packet), §5 (write set),
-§12 (stop conditions), §13 (hợp đồng skill này). Và `CLAUDE.md` cho quy trình sửa code của kho.
+Quy trình sửa code, ngưỡng ruff, quy ước deploy của kho: `CLAUDE.md`.
 
-## Trình tự bắt buộc (§13)
+## Cú pháp của nền — phần duy nhất thuộc về tệp này
 
-1. **Đọc protocol** — không làm theo trí nhớ.
-2. **Preflight**: lấy body Issue qua GraphQL (KHÔNG `gh issue view -q .body`), tái lập `spec_hash`
-   theo công thức ghi cuối Issue, đối chiếu với giá trị khai. **Lệch ⇒ DỪNG**, spec đã trôi.
-3. **Worktree riêng**, cắt từ `origin/master`; ghi đường dẫn + branch + base SHA vào Issue.
-   Ghim `core.autocrlf=false` `core.eol=lf` `core.abbrev=7`.
-4. **Chỉ sửa đúng `write_set`.** Cần đụng path ngoài write-set ⇒ **không tự mở rộng**: mở revision
-   mới hoặc packet mới, kèm bằng chứng đo được.
-5. **Worker gate** — xem `/gate`. rc đọc TRỰC TIẾP từng tiến trình, không qua pipe. Bằng chứng dương:
-   `N/N` hai số BẰNG NHAU, `"ok": true`. **rc=0 không phải bằng chứng.**
-6. **PR + handoff** — báo cáo số đo lên Issue, rồi bàn cho reviewer khác provider.
-
-## Cưỡng chế — không bỏ qua được
-
-Mọi transition đi qua máy trạng thái; nó là thứ giữ trần, không phải thiện chí của agent:
+**Preflight spec.** Lấy body Issue qua GraphQL, KHÔNG `gh issue view -q .body`:
 
 ```bash
-python .claude/dev/packet_loop.py init --packet <n> --mission <m> --executor <claude|codex> --reviewer <bên kia>
-python .claude/dev/packet_loop.py begin-attempt --packet <n> --provider <provider của mình>
-python .claude/dev/packet_loop.py next-comment --packet <n>      # lấy văn bản, ĐĂNG lên Issue
-python .claude/dev/packet_loop.py mark-posted  --packet <n> --url <url comment>
+gh api graphql -f query='{repository(owner:"ducthangho",name:"tra-luat"){issue(number:<n>){body}}}'
 ```
 
-Mã thoát: `0` đi tiếp · `2` sai cú pháp · `3` **DỪNG theo chốt** · `4` vi phạm cross-provider ·
-`5` còn comment chưa đăng. Gặp `3` hoặc `4` thì **báo người**, không tự gỡ.
+Tái lập `spec_hash` theo công thức ghi ở cuối chính Issue đó, đối chiếu giá trị khai. **Lệch ⇒ DỪNG.**
 
-Quota/rate-limit làm hỏng một lượt thì **trả lượt**, đừng để nó ăn vào trần nội dung (§8):
-`void-attempt --packet <n> --reason quota`.
+**Worktree riêng**, cắt từ `origin/master`, ghim EOL để hash khớp manifest:
 
-## Ranh giới cứng
+```bash
+git config core.autocrlf false && git config core.eol lf && git config core.abbrev 7
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPYCACHEPREFIX=<ngoài cây>        # __pycache__ rơi vào scripts/test_fragments/ làm ĐỎ selftest
+```
 
-Vòng lặp tự do tới **TRƯỚC merge**, không hơn. Trước khi làm bất cứ việc nào dưới đây, chạy
-`python .claude/dev/packet_loop.py guard --action <merge|deploy|live|secrets|force-push|delete-branch|delete-worktree|edit-other-spec>`
-— nó **luôn** thoát mã 3 và **không có cờ nới**. Có cờ nới là không có chốt.
+**Gate**: `/gate`. **Đọc mã thoát TRỰC TIẾP từng tiến trình, không qua pipe.**
 
-Riêng kho này: `gh pr merge --auto` **land NGAY** (private + free plan ⇒ không có required checks),
-nên nó nằm trong nhóm cấm, không phải "merge có chờ".
+**Máy trạng thái** — mọi transition đi qua đây, không có đường tắt:
 
-## Nghiệm thu
+```bash
+python .claude/dev/packet_loop.py init          --packet <n> --mission <m> \
+                                                --executor <claude|codex> --reviewer <bên kia>
+python .claude/dev/packet_loop.py begin-attempt --packet <n> --provider <provider của mình>
+python .claude/dev/packet_loop.py next-comment  --packet <n>     # lấy văn bản → ĐĂNG lên Issue
+python .claude/dev/packet_loop.py mark-posted   --packet <n> --url <url comment THẬT của Issue đó>
+python .claude/dev/packet_loop.py void-attempt  --packet <n> --reason quota   # xem §8
+python .claude/dev/packet_loop.py status        --packet <n>
+```
 
-Hoàn tất khi handoff hợp lệ đã được nhận — **không phải** khi gate local xanh. Với packet đụng
-parity Windows–Linux, nghiệm thu thật là **CI xanh trọn trên cả hai nền**; đọc log bằng
-`gh api repos/.../actions/jobs/<id>/logs` (`gh run view --job … --log` rụng step).
+Mã thoát khác 0 nghĩa là **DỪNG và báo người** — script tự giải thích lý do trên stderr. Không tìm
+đường vòng: `init` không dựng lại được lên state đã có, `void-attempt` không gỡ được `blocked`,
+`mark-posted` không nhận URL bịa. Cả ba đều đã bị bịt sau khi cross-review vòng 1 lách qua được.
+
+**Trước mọi việc ngoài ranh giới** (merge, deploy, LIVE, secrets, force-push, xoá branch/worktree,
+sửa spec packet khác):
+
+```bash
+python .claude/dev/packet_loop.py guard --action merge
+```
+
+Nó **luôn** dừng và **không có cờ nới**. Riêng kho này: `gh pr merge --auto` **land NGAY** (private +
+free plan ⇒ không có required checks), nên nó thuộc nhóm cấm chứ không phải "merge có chờ".
+
+**Đọc log CI**: `gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs` — `gh run view --job … --log`
+rụng step.

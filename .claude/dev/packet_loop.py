@@ -57,12 +57,16 @@ def _fingerprint(text: str) -> str:
     """Vân tay nội dung của một finding.
 
     Chuẩn hoá trước khi băm để "cùng một lỗi, diễn đạt lệch vài khoảng trắng / hoa
-    thường" vẫn đếm là MỘT. Không cố làm ngữ nghĩa — chỉ cần đủ để trần đếm đúng thứ
-    nó hứa đếm; reviewer diễn đạt lại hoàn toàn thì đó là finding khác, và test
+    thường / dấu câu" vẫn đếm là MỘT. Không cố làm ngữ nghĩa — chỉ cần đủ để trần đếm
+    đúng thứ nó hứa đếm; reviewer diễn đạt lại hoàn toàn thì đó là finding khác, và test
     `case_finding_khac_nhau_khong_bi_chan` khoá đúng hành vi đó.
+
+    DẤU CÂU bị loại là do review chéo bắt được (cross-review vòng 1, provider codex):
+    `"manifest lech"` và `"manifest lech."` ra HAI vân tay khác nhau ⇒ trần same-failure
+    lách được chỉ bằng một dấu chấm, mà điều đó xảy ra được cả khi KHÔNG ai cố tình.
     """
-    norm = re.sub(r"\s+", " ", text.strip().casefold())
-    return hashlib.sha256(norm.encode("utf-8")).hexdigest()[:12]
+    khong_dau = "".join(c if (c.isalnum() or c.isspace()) else " " for c in text.casefold())
+    return hashlib.sha256(re.sub(r"\s+", " ", khong_dau).strip().encode("utf-8")).hexdigest()[:12]
 
 
 def _state_path(state_dir: Path, packet: int) -> Path:
@@ -106,6 +110,27 @@ def _require_posted(st: dict) -> None:
              f"#{st['packet']} rồi chạy `mark-posted --url <url>` trước khi đi tiếp.")
 
 
+def _kiem_url_comment(url: str, packet: int) -> None:
+    """Bắt buộc URL comment là thật, và thuộc ĐÚNG Issue của packet này.
+
+    Review chéo vòng 1 (provider codex) bắt được: `mark-posted --url
+    https://example.invalid/not-posted` trả rc=0 rồi advance được — nghĩa là "dấu vết bền"
+    chỉ cần một chuỗi bất kỳ. Chốt mà nhận chuỗi bất kỳ thì không phải chốt.
+
+    Không xác minh được comment CÓ THẬT trên GitHub từ đây (script cố ý không chạm mạng),
+    nhưng ép đúng dạng + đúng số Issue đã loại sạch lớp "gõ đại cho qua".
+    """
+    mau = re.compile(r"^https://github\.com/[\w.-]+/[\w.-]+/(issues|pull)/(\d+)"
+                     r"#issuecomment-\d+$")
+    m = mau.match(url)
+    if not m:
+        _die(RC_USAGE, f"URL_COMMENT_LA: `{url}` không đúng dạng "
+                       "`https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`.")
+    if int(m.group(2)) != packet:
+        _die(RC_USAGE, f"URL_SAI_ISSUE: comment trỏ Issue #{m.group(2)} nhưng packet là "
+                       f"wp{packet}. Transition phải ghi vào ĐÚNG Issue của packet.")
+
+
 def cmd_init(a, state_dir: Path) -> int:
     if a.executor == a.reviewer:
         _die(RC_PROVIDER,
@@ -115,8 +140,13 @@ def cmd_init(a, state_dir: Path) -> int:
         if prov not in PROVIDERS:
             _die(RC_USAGE, f"PROVIDER_LA: {who}=`{prov}` không thuộc {PROVIDERS}")
     p = _state_path(state_dir, a.packet)
-    if p.exists() and not a.force:
-        _die(RC_USAGE, f"DA_TON_TAI: {p} — dùng --force nếu thật sự muốn dựng lại.")
+    if p.exists():
+        # KHÔNG có `--force`. Review chéo vòng 1 (provider codex) bắt được: `init --force`
+        # xoá sạch lịch sử VÀ đổi được vai, nên executor cũ tự review chính việc mình vừa
+        # làm — vừa lách cross-provider vừa reset trần. Dựng lại vòng lặp là hành vi của
+        # NGƯỜI: xoá tệp state bằng tay, một việc nhìn thấy được, không phải một cờ.
+        _die(RC_USAGE, f"DA_TON_TAI: {p}. Vòng lặp đang chạy thì KHÔNG dựng lại được — "
+                       "muốn bắt đầu lại thì người xoá tệp state bằng tay.")
     st = {
         "schema": SCHEMA,
         "packet": a.packet,
@@ -178,6 +208,15 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
         _die(RC_USAGE, f"LY_DO_LA: `{a.reason}` không thuộc {sorted(hop_le)}. "
                        "Lỗi NỘI DUNG thì phải tiêu thụ lượt.")
     st = _load(state_dir, a.packet)
+    # Hai chốt dưới đây là do review chéo vòng 1 (provider codex) bắt được, và đó là lỗ
+    # hổng NGHIÊM TRỌNG NHẤT của bản đầu: `void-attempt` vừa bỏ qua `_require_posted` vừa
+    # đặt state về `ready`, nên sau khi chạm trần (`begin-attempt` rc=3, state `blocked`)
+    # chỉ cần gọi nó một lần là GỠ ĐƯỢC blocked và chạy tiếp — tức trần 3 lượt và cả
+    # same-failure-limit đều lách được bằng một lệnh hợp lệ. Trần lách được là không có trần.
+    if st["state"] == "blocked":
+        _die(RC_STOP, f"BLOCKED: wp{a.packet} đã dừng — `void-attempt` KHÔNG phải đường gỡ. "
+                      "Cần người.")
+    _require_posted(st)
     if not st["attempts"]:
         _die(RC_USAGE, "KHONG_CO_LUOT_DE_TRA.")
     bo = st["attempts"].pop()
@@ -209,6 +248,20 @@ def cmd_record_review(a, state_dir: Path) -> int:
 
     if not a.finding:
         _die(RC_USAGE, "THIEU_FINDING: verdict khác `approve` phải kèm ít nhất một --finding.")
+    if a.verdict == "blocked":
+        # Review chéo vòng 1 (provider codex): bản đầu coi `blocked` y hệt
+        # `changes_requested` ⇒ reviewer nói "blocked, cần người" mà state vẫn `reviewing`
+        # và vòng lặp chạy tiếp như không có gì. Verdict mạnh nhất mà không có hiệu lực
+        # thì reviewer mất đúng cái phanh của mình.
+        for text in a.finding:
+            fp = _fingerprint(text)
+            rec = st["findings"].setdefault(fp, {"count": 0, "text": text.strip()})
+            rec["count"] += 1
+        st["state"] = "blocked"
+        _queue(st, f"**DỪNG — reviewer `{a.provider}` ra verdict `blocked`.** "
+                   f"{'; '.join(t.strip()[:160] for t in a.finding)}. Cần người quyết.")
+        _save(state_dir, st)
+        _die(RC_STOP, "VERDICT_BLOCKED: reviewer yêu cầu dừng, không tự đi tiếp.")
     hit = []
     for text in a.finding:
         fp = _fingerprint(text)
@@ -252,6 +305,7 @@ def cmd_guard(a, state_dir: Path) -> int:
 
 def cmd_mark_posted(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
+    _kiem_url_comment(a.url, a.packet)
     if not st["pending_comments"]:
         _die(RC_USAGE, "KHONG_CO_GI_CHUA_DANG.")
     body = st["pending_comments"].pop(0)
@@ -306,7 +360,6 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--mission", type=int, required=True)
     q.add_argument("--executor", required=True)
     q.add_argument("--reviewer", required=True)
-    q.add_argument("--force", action="store_true")
 
     q = sub.add_parser("begin-attempt"); q.set_defaults(fn=cmd_begin_attempt)
     q.add_argument("--packet", type=int, required=True)

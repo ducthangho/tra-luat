@@ -230,8 +230,37 @@ def case_ly_do_void_ngoai_allowlist_bi_chan(sd: Path) -> bool:
     return r.returncode == RC_USAGE and "LY_DO_LA" in r.stderr
 
 
+def case_state_dir_mac_dinh_bi_gitignore_phu(sd: Path) -> bool:
+    """State MAC DINH khong duoc lam ban `git status`.
+
+    Ban dau mac dinh la `.claude/dev/.state` — chay mot lenh la `git status` co ngay mot muc
+    `??`. Trong kho nay cay ban keo theo ca gate, va state la runtime artifact chu khong phai
+    ma nguon. Chua bang cach tai dung ten `.tl_state` MA `.gitignore` DA phu san (dong 22,
+    doctrine v1.34.2), thay vi sua `.gitignore` — path do nam ngoai write-set cua packet.
+
+    Ca nay hoi CHINH CLI xem mac dinh cua no o dau (khong doan), roi doi chieu voi `.gitignore`
+    THAT cua kho. Doi ten thu muc, hoac go dong ignore, deu lam ca do.
+    """
+    r = subprocess.run([sys.executable, str(_LOOP), "where"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != RC_OK:
+        print(f"    `where` phai tra 0, thuc te rc={r.returncode}")
+        return False
+    # `where` in JSON ensure_ascii ⇒ thuan ASCII ⇒ khong dinh cp1258 cua pipe tren may nay.
+    duong = Path(json.loads(r.stdout)["state_dir"])
+    goc = Path(__file__).resolve().parent.parent.parent
+    mau = {d.strip().rstrip("/") for d in (goc / ".gitignore").read_text(
+        encoding="utf-8").splitlines() if d.strip() and not d.strip().startswith("#")}
+    phu = mau & set(duong.parts)
+    if not phu:
+        print(f"    thu muc state mac dinh {duong.parent} KHONG duoc .gitignore phu")
+        return False
+    return True
+
+
 CASES = [
     case_tran_3_luot_chan_luot_4,
+    case_state_dir_mac_dinh_bi_gitignore_phu,
     case_loi_quota_khong_tieu_thu_attempt,
     case_ly_do_void_ngoai_allowlist_bi_chan,
     case_cung_finding_lap_2_lan_thi_blocked,

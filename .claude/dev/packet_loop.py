@@ -275,6 +275,18 @@ def cmd_status(a, state_dir: Path) -> int:
     return RC_OK if st["state"] != "blocked" else RC_STOP
 
 
+def cmd_where(a, state_dir: Path) -> int:
+    """In đường dẫn state dir dưới dạng JSON ASCII — kênh KHÔNG MẤT MÁT.
+
+    Không phải tiện ích: trên máy Windows này stdout/stderr qua pipe là **cp1258**, nên mọi
+    chuỗi có dấu (kho nằm dưới `D:\\Quốc hội\\…`) bị méo khi bên đọc decode UTF-8. `json.dumps`
+    mặc định `ensure_ascii=True` nên đường dẫn ra thành `\\uXXXX` — thuần ASCII, đọc lại đúng
+    từng ký tự. Test dựa vào ĐÂY chứ không parse câu lỗi tiếng Việt.
+    """
+    sys.stdout.write(json.dumps({"state_dir": str(state_dir)}) + "\n")
+    return RC_OK
+
+
 def cmd_next_comment(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     if not st["pending_comments"]:
@@ -323,12 +335,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     q = sub.add_parser("next-comment"); q.set_defaults(fn=cmd_next_comment)
     q.add_argument("--packet", type=int, required=True)
+
+    sub.add_parser("where").set_defaults(fn=cmd_where)
     return p
 
 
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
-    state_dir = Path(a.state_dir) if a.state_dir else Path(__file__).resolve().parent / ".state"
+    # `.tl_state` chứ không phải `.state`: tên NÀY đã được `.gitignore:22` phủ sẵn (doctrine
+    # v1.34.2 — "runtime artifact, không vào repo/manifest"). Đo rồi mới đổi: bản đầu dùng
+    # `.state` làm `git status` bẩn ngay lượt chạy đầu tiên, mà trong kho này cây bẩn kéo theo
+    # cả gate. Chữa bằng cách tái dùng tên đã ignore, KHÔNG sửa `.gitignore` — path đó nằm
+    # ngoài write-set của packet.
+    state_dir = Path(a.state_dir) if a.state_dir else Path(__file__).resolve().parent / ".tl_state"
     return a.fn(a, state_dir)
 
 

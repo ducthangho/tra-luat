@@ -76,9 +76,11 @@ flowchart LR
     A5 --> A6["A6: Successor + Android"]
     A6 --> A7["A7: Local controller"]
     A7 --> A8["A8: Land automation"]
+    A8 --> A9["A9: Skill engineering + upstream adoption"]
 ```
 
-`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8.
+`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8. A9 là pha hardening mở rộng,
+không được chặn hoặc chen vào critical path A2–A8.
 
 ## 5. Kế hoạch work packet chi tiết
 
@@ -262,6 +264,29 @@ core; không tạo generic self-hosted runner.
 Promotion gate A8: chạy nhiều mission liên tiếp không stale lease, event loss, duplicate packet,
 out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ bị từ chối có audit.
 
+### A9 — Skill engineering và tiếp nhận upstream có kiểm soát
+
+Pha này chỉ bắt đầu sau khi A8 đã promote. Không vendor/cài toàn bộ một bộ skill cộng đồng vào runtime package;
+mọi tiếp nhận phải provider-neutral, pin exact upstream identity, có provenance và qua behavior fixtures. Workflow,
+plugin hoặc persona bên ngoài chỉ là adapter/tư vấn, không được nhận authority dispatch, review, land, merge hay deploy.
+
+| Packet | Kết quả | Nghiệm thu/promotion |
+|---|---|---|
+| A9-01 | inventory nguồn, license, exact upstream commit/version, telemetry/network surface và owner/update policy | lock/provenance dựng lại được; auto-update từ nhánh động bị cấm; chưa đổi runtime |
+| A9-02 | skill `source-driven-legal-development` provider-neutral | ưu tiên nguồn chính thức; ghi version/ngày hiệu lực/deep link; nội dung truy xuất là dữ liệu không đáng tin; conflict với protocol/spec phải được báo, không tự giải quyết |
+| A9-03 | skill conformance/eval harness | fixture kiểm trigger, progressive disclosure, tool allowlist/denylist, prompt injection, one-task/one-role, exact-SHA drift và package/token budget |
+| A9-04 | verification evidence contract và negative/mutation fixtures cho completion claim | claim gắn command mới chạy, exact identity, runner/OS, rc + số đếm dương; gate giả hoặc thiếu bằng chứng phải fail |
+| A9-05 | review-feedback intake dùng stable finding ID | finding neo reviewed SHA/spec; Executor xác minh rồi sửa và chỉ phát `ready_for_rereview`; commit mới thu hồi verdict/evidence cũ; reply đúng review thread khi có |
+| A9-06 | sandbox pilot allowlist `verification-before-completion`, `systematic-debugging`, `receiving-code-review` | user-level/dev-side, pin version, telemetry off, zero authority; đo trigger conflict, token/latency và có rollback |
+| A9-07 | snapshot/reference dev-side đã pin cho Claude/Codex adapter practices | không vào runtime package; claim về provider feature được đối chiếu tài liệu chính thức; update chỉ qua reviewed diff |
+
+A9 không tạo một self-review lane mới. Chỉ deterministic reconciler của A3–A8 được dispatch task Reviewer độc lập;
+persona/skill không gọi persona có authority. Pattern đo-trước-tối-ưu được triển khai tại A2, không trì hoãn sang A9.
+
+Promotion gate A9: behavior và negative fixtures xanh; provenance/license/pin đầy đủ; không tăng authority hoặc
+network surface ngoài allowlist; pilot chứng minh lợi ích đo được và không vi phạm one-task/one-role. Nếu không đạt,
+giữ upstream ở trạng thái tài liệu tham khảo dev-side hoặc rollback khỏi sandbox.
+
 ## 6. Ma trận song song theo pha
 
 | Pha | Số writer tối đa | Điều kiện |
@@ -273,6 +298,7 @@ out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ b�
 | A3 shadow | 2 | chỉ fake store/dry-run; zero model/secret/canonical write |
 | A4 cloud canary | 1 | một provider, một packet, không successor |
 | A5–A8 | 2 mặc định | dispatcher cấp lease; integration/land vẫn single-writer |
+| A9 skill engineering | 2 nếu write set không giao | core skill/eval single-writer; upstream research/pilot chỉ read-only hoặc sandbox độc lập |
 
 ## 7. Runbook cài đặt và kiểm tra Windows
 
@@ -509,6 +535,9 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - Windows reboot/local recovery và cloud-host-off test;
 - Android stale-head/unauthorized-actor test;
 - mission chỉ `complete` sau canonical readback; deploy không tự chạy.
+- upstream skill/reference có exact pin, provenance, license và network/telemetry inventory;
+- skill conformance fixtures bắt được prompt injection, authority escalation và completion claim thiếu bằng chứng;
+- không upstream persona/plugin nào có quyền tự dispatch Reviewer, merge, land hoặc deploy.
 
 ## 12. Nguồn khả năng nền tảng
 
@@ -521,3 +550,6 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - [Codex Windows sandbox](https://openai.com/index/building-codex-windows-sandbox/)
 - [GitHub Actions concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
 - [GitHub workflow dispatch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
+- [Superpowers](https://github.com/obra/superpowers)
+- [Agent Skills](https://github.com/addyosmani/agent-skills)
+- [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice)

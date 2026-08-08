@@ -33,7 +33,7 @@ Các bất biến không được hạ chuẩn:
 | Thành phần | Được làm | Không được làm |
 |---|---|---|
 | Dispatcher/reconciler | Reconcile durable inbox, chuyển state, cấp/thu hồi lease, tạo packet/branch/PR, merge tuần tự vào integration | Ghi canonical, chạy LIVE, tự tăng budget/quyền |
-| Executor | Sửa đúng effective write set trên branch của generation, tạo PR/handoff | Sửa branch khác, tự review/approve, merge dưới vai Executor, deploy |
+| Executor | Sửa đúng effective write set trên branch của generation, tạo PR/handoff | Sửa branch khác, file land/security, tự review/approve, merge dưới vai Executor, deploy |
 | Reviewer | Đọc code, chạy kiểm tra read-only trên exact SHA, ghi verdict/comment | Dùng worktree ghi của Executor, push hoặc sửa branch |
 | Local controller | Nhận packet local, tạo worktree, gọi CLI headless, heartbeat/handoff | Làm generic runner, giữ credential LIVE |
 | Phiên land | Tích hợp, gán version, changelog, manifest, chạy land gate | Tự cấp approval; deploy ngầm |
@@ -379,8 +379,10 @@ Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. H�
 Mức review được ghi tường minh:
 
 1. `cross_approved`: Claude review Codex hoặc Codex review Claude.
-2. `same_provider_approved`: phiên mới, context/worktree riêng và read-only cùng nền tảng khi phía kia hết quota.
-3. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
+2. `human_audited`: người audit có danh tính bền trên GitHub, độc lập với Executor/tác giả, tự đọc spec/diff, ghi
+   evidence audit và verdict bền, đồng thời neo cả hai vào exact `reviewed_sha`.
+3. `same_provider_approved`: phiên mới, context/worktree riêng và read-only cùng nền tảng khi phía kia hết quota.
+4. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
 
 Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
 reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới

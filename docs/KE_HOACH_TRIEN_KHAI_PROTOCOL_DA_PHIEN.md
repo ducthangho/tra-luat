@@ -143,7 +143,7 @@ Sau F2, có thể chạy tối đa hai packet trong các nhóm ghi không giao. 
 | F3-03 | Agent adapters | `work-packet`, `cross-review`, `land-packets`; `CLAUDE.md` và `AGENTS.md` chỉ trỏ protocol | F2, F3-00 |
 | F3-04 | Security | permissions tối thiểu, security paths, CODEOWNERS, cấm LIVE credential trong worker | F2, F3-00 |
 | F3-05 | Derived metadata | `planned:changelog.d/`, worker cấm version/r number, land-owned metadata | F1, F2, F3-00 |
-| F3-06 | Worker gate | manifest tạm ngoài repo, evidence/write-set/EOL/security checks, không provider secret | F3-01…05 |
+| F3-06 | Worker gate | manifest tạm ngoài repo, fragment tests, evidence/write-set/EOL/security checks, không provider secret | F3-01…05 |
 | F3-07 | Land gate | generate bundled/changelog/version/manifest, parity, dry-run `land prepare` | F3-01…06 |
 | F3-08 | Adapter parity | test Claude/Codex adapter cùng schema, role/session boundary, stop condition và completion contract | F3-03, F3-06 |
 
@@ -196,7 +196,7 @@ Nếu tài khoản không có credential automation được hỗ trợ, A4 `pau
 
 - A5-01: adapter Claude và Codex cùng executor contract.
 - A5-02: reviewer read-only, verdict schema `approve|changes_requested|blocked`.
-- A5-03: `cross_approved`, `same_provider_approved`, `review_deferred` và các risk không được defer.
+- A5-03: `cross_approved`, `human_audited`, `same_provider_approved`, `review_deferred` và các risk không được defer.
 - A5-04: rate-limit/quota fingerprint, reset time và circuit breaker; quota failure không tính attempt nội dung.
 - A5-05: canary hai packet không giao; Claude review Codex và Codex review Claude.
 

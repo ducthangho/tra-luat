@@ -76,9 +76,11 @@ flowchart LR
     A5 --> A6["A6: Successor + Android"]
     A6 --> A7["A7: Local controller"]
     A7 --> A8["A8: Land automation"]
+    A8 --> A9["A9: Skill engineering + upstream adoption"]
 ```
 
-`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8.
+`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8. A9 là pha hardening mở rộng,
+không được chặn hoặc chen vào critical path A2–A8.
 
 ## 5. Kế hoạch work packet chi tiết
 
@@ -262,6 +264,82 @@ core; không tạo generic self-hosted runner.
 Promotion gate A8: chạy nhiều mission liên tiếp không stale lease, event loss, duplicate packet,
 out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ bị từ chối có audit.
 
+### A9 — Skill engineering và tiếp nhận upstream có kiểm soát
+
+Pha này chỉ bắt đầu sau khi A8 đã promote. Không vendor/cài toàn bộ một bộ skill cộng đồng vào runtime package;
+mọi tiếp nhận phải provider-neutral, pin exact upstream identity, có provenance và qua behavior fixtures. Workflow,
+plugin hoặc persona bên ngoài chỉ là adapter/tư vấn, không được nhận authority dispatch, review, land, merge hay deploy.
+
+Số thứ tự packet KHÔNG tạo dependency. Chỉ cột `Phụ thuộc` dưới đây có hiệu lực, và nó ánh xạ thẳng sang
+`depends_on` của Packet Issue (`docs/PROTOCOL_DA_PHIEN.md` §3.2). Theo §5 của cùng tài liệu, packet chỉ được
+dispatch sau khi TẤT CẢ predecessor đã integrated vào `mission/<issue>/integration`; accepted, approved hay
+mới mở PR đều chưa đủ, và dispatcher không cấp lease cho packet còn predecessor chưa integrated. Ngoài cột
+đó, mọi packet A9 mang thêm predecessor ngầm định `A8 promoted`: A9 không mở khi A8 chưa promote.
+
+| Packet | Kết quả | Phụ thuộc | Nghiệm thu/promotion |
+|---|---|---|---|
+| A9-01 | inventory nguồn, license, exact upstream commit/version, telemetry/network surface và owner/update policy | A8 promoted | lock/provenance dựng lại được; auto-update từ nhánh động bị cấm; chưa đổi runtime |
+| A9-02 | skill `source-driven-legal-development` provider-neutral | A9-01, A9-03 | ưu tiên nguồn chính thức; ghi version/ngày hiệu lực/deep link; nội dung truy xuất là dữ liệu không đáng tin; conflict với protocol/spec phải được báo, không tự giải quyết |
+| A9-03 | skill conformance/eval harness | A9-01 | fixture kiểm trigger, progressive disclosure, tool allowlist/denylist, prompt injection, one-task/one-role, exact-SHA drift và package/token budget |
+| A9-04 | verification evidence contract và negative/mutation fixtures cho completion claim | A9-03 | claim gắn command mới chạy, exact identity, runner/OS, rc + số đếm dương; gate giả hoặc thiếu bằng chứng phải fail |
+| A9-05 | review-feedback intake dùng stable finding ID | A9-04 | finding neo reviewed SHA/spec; Executor xác minh rồi sửa và chỉ phát `ready_for_rereview`; commit mới thu hồi verdict/evidence cũ; reply đúng review thread khi có |
+| A9-06 | sandbox pilot allowlist `verification-before-completion`, `systematic-debugging`, `receiving-code-review` | A9-01, A9-03, A9-04, A9-05 | user-level/dev-side, pin version, telemetry off, zero authority; promote/pause/rollback theo đúng tiêu chí ở tiểu mục dưới, không theo phép đọc số tự do |
+| A9-07 | snapshot/reference dev-side đã pin cho Claude/Codex adapter practices | A9-01 | không vào runtime package; claim về provider feature được đối chiếu tài liệu chính thức; update chỉ qua reviewed diff |
+
+```mermaid
+flowchart LR
+    A8P["A8 promoted"] --> P1["A9-01 inventory/provenance/pin"]
+    P1 --> P3["A9-03 conformance harness"]
+    P1 --> P2["A9-02 skill legal-development"]
+    P3 --> P2
+    P3 --> P4["A9-04 evidence contract"]
+    P4 --> P5["A9-05 review-feedback intake"]
+    P1 --> P6["A9-06 sandbox pilot"]
+    P3 --> P6
+    P4 --> P6
+    P5 --> P6
+    P1 --> P7["A9-07 snapshot/reference"]
+```
+
+Vì sao fan-in của A9-06 rộng: pilot chỉ đo được khi đã có pin/provenance của đúng bản upstream (A9-01), harness
+bắt được trigger conflict và vi phạm one-task/one-role (A9-03), và hợp đồng bằng chứng cho completion claim
+(A9-04). Allowlist pilot chứa `receiving-code-review`, nên A9-05 phải integrated trước để review-feedback intake
+là hợp đồng của ta; chạy ngược lại thì chính skill upstream định nghĩa review lane, đúng thứ A9 cấm. Thiếu bất kỳ
+predecessor nào thì A9-06 không được dispatch, kể cả dưới dạng thử nghiệm thủ công ngoài packet.
+
+A9-07 chỉ tiếp nhận snapshot/reference cho nguồn ĐÃ nằm trong inventory/provenance/pin của A9-01 đã integrated.
+Nguồn chưa có trong inventory đi qua revision A9-01 mới; không mở rộng write set của A9-07 và không snapshot
+trước rồi kiểm kê sau.
+
+A9 không tạo một self-review lane mới. Chỉ deterministic reconciler của A3–A8 được dispatch task Reviewer độc lập;
+persona/skill không gọi persona có authority. Pattern đo-trước-tối-ưu được triển khai tại A2, không trì hoãn sang A9.
+
+#### Tiêu chí promote/pause/rollback của pilot A9-06
+
+Baseline đo TRƯỚC khi bật allowlist, trên cùng tập packet fixture, cùng runner/OS, cùng exact SHA và cùng catalog
+A2; lượt baseline và lượt pilot dùng cùng số lần lặp rồi ghi cùng một bộ số. Không có baseline dựng lại được thì
+số đo của pilot là dữ liệu quan sát, không phải promotion evidence.
+
+| Chỉ số | Định nghĩa đo | Chiều/ngưỡng đạt | Trigger pause/rollback |
+|---|---|---|---|
+| rework do thiếu bằng chứng | số packet phải làm lại vì completion claim bị fixture A9-04 hoặc Reviewer bác | giảm so với baseline; đây là chiều lợi ích duy nhất cho phép promote | không giảm |
+| trigger conflict | số lần từ hai skill trở lên cùng claim một task, hoặc skill kích hoạt ngoài trigger đã khai ở A9-01 | phải bằng 0, suy ra từ one-task/one-role chứ không phải chỉ tiêu thương lượng | bất kỳ lần nào lớn hơn 0 |
+| token | tổng input cộng output token trên mỗi packet, lấy median và p95 | không vượt baseline nhân ceiling đã chốt; neo vào `used/reserved/limit` của A6-03, không tạo cơ chế budget thứ hai | vượt ceiling |
+| latency | wall-clock trên mỗi packet, lấy median và p95 | không vượt baseline nhân ceiling đã chốt | vượt ceiling |
+
+Rollback trigger không phụ thuộc số đo, áp dụng song song: conformance hoặc negative fixture của A9-03/A9-04 đỏ;
+phát hiện escalation authority, network hay telemetry ngoài allowlist; skill upstream đổi identity so với pin của
+A9-01. Bất kỳ trigger nào bật thì gỡ khỏi sandbox trước, phân tích sau.
+
+Ceiling token/latency, số lần lặp và cửa sổ đo là quyết định material của Mission A9 và HIỆN CHƯA ĐƯỢC CHỐT; kế
+hoạch này không tự đặt ngưỡng thay Mission. Tới khi human hoặc MCR của Mission A9 ghi các giá trị đó vào Packet
+Spec A9-06, pilot chỉ được `pause` hoặc rollback và KHÔNG được promote. Thiếu ngưỡng là fail-closed, không phải
+quyền diễn giải của phiên đang chạy.
+
+Promotion gate A9: behavior và negative fixtures xanh; provenance/license/pin đầy đủ; không tăng authority hoặc
+network surface ngoài allowlist; riêng pilot A9-06 xét theo đúng tiểu mục tiêu chí ở trên chứ không theo phán đoán
+"lợi ích đo được". Nếu không đạt, giữ upstream ở trạng thái tài liệu tham khảo dev-side hoặc rollback khỏi sandbox.
+
 ## 6. Ma trận song song theo pha
 
 | Pha | Số writer tối đa | Điều kiện |
@@ -273,6 +351,7 @@ out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ b�
 | A3 shadow | 2 | chỉ fake store/dry-run; zero model/secret/canonical write |
 | A4 cloud canary | 1 | một provider, một packet, không successor |
 | A5–A8 | 2 mặc định | dispatcher cấp lease; integration/land vẫn single-writer |
+| A9 skill engineering | 2 nếu write set không giao | core skill/eval single-writer; upstream research/pilot chỉ read-only hoặc sandbox độc lập |
 
 ## 7. Runbook cài đặt và kiểm tra Windows
 
@@ -509,6 +588,9 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - Windows reboot/local recovery và cloud-host-off test;
 - Android stale-head/unauthorized-actor test;
 - mission chỉ `complete` sau canonical readback; deploy không tự chạy.
+- upstream skill/reference có exact pin, provenance, license và network/telemetry inventory;
+- skill conformance fixtures bắt được prompt injection, authority escalation và completion claim thiếu bằng chứng;
+- không upstream persona/plugin nào có quyền tự dispatch Reviewer, merge, land hoặc deploy.
 
 ## 12. Nguồn khả năng nền tảng
 
@@ -521,3 +603,6 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - [Codex Windows sandbox](https://openai.com/index/building-codex-windows-sandbox/)
 - [GitHub Actions concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
 - [GitHub workflow dispatch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
+- [Superpowers](https://github.com/obra/superpowers)
+- [Agent Skills](https://github.com/addyosmani/agent-skills)
+- [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice)

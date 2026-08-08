@@ -70,6 +70,18 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - Không dùng Drive MCP/Sheets MCP để sửa corpus/registry.
 - Không dùng RAG/NLM để trả NGUYÊN VĂN điều luật — nguyên văn chỉ từ nguồn đã verify (extract/web official).
 
+## Protocol đa phiên — CON TRỎ, không phải bản sao
+Làm việc theo work packet / cross-review / land: **nguồn quy tắc duy nhất là
+`docs/PROTOCOL_DA_PHIEN.md`** (§3.2 schema packet · §5 write set · §8 review phân tầng · §12 stop
+conditions · §13 hợp đồng ba skill). Lộ trình ở `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`.
+Adapter cho nền này — MỎNG, chỉ cú pháp/công cụ, KHÔNG chép doctrine:
+`.claude/skills/work-packet/SKILL.md` · `.claude/skills/cross-review/SKILL.md` ·
+`.claude/skills/land-packets/SKILL.md`. Adapter lệch protocol thì ADAPTER sai.
+Trần vòng lặp và các chốt dừng do `.claude/dev/packet_loop.py` CƯỠNG CHẾ bằng mã thoát khác 0
+(3 = dừng theo chốt, 4 = vi phạm cross-provider, 5 = còn transition chưa ghi vào Issue);
+phản chứng cho từng chốt ở `.claude/dev/packet_loop_test.py`. **Vòng lặp tự do tới TRƯỚC merge,
+không hơn** — merge/deploy/LIVE là quyết định của người.
+
 ## Khi đóng gói
 Bump VERSION (3 chỗ) → CHANGELOG → selftest N/N → user tự chạy cmd (script tự loại .git/.claude/.githooks/
 CLAUDE.md/config/enc + quét token). Verify sau deploy: Package trả VERSION mới.

@@ -39,23 +39,48 @@ def _init(state_dir: Path, packet: int = 999, executor: str = "codex",
                  "--executor", executor, "--reviewer", reviewer)
 
 
-def _url(packet: int = 999, n: int = 1) -> str:
-    """URL comment DUNG DANG va DUNG so Issue.
+_DEM = [0]      # bo dem toan cuc: moi URL trong ca phien test phai DUY NHAT
 
-    Bao gio cung dung URL that-dang trong test: ban dau suite dung
-    `https://example.invalid/...` va chinh vi the ma no KHONG bat duoc lo hong
-    "mark-posted nhan chuoi bat ky" — review cheo vong 1 (provider codex) chi thang vao
-    day. Mot suite dung du lieu gia thi no dang khoa cai gia.
+
+def _url(packet: int = 999, n: int = None) -> str:
+    """URL comment DUNG KHO, DUNG so Issue, va KHONG trung lai.
+
+    Ban dau suite dung `https://example.invalid/...` — va chinh vi the ma no KHONG bat duoc
+    lo hong "mark-posted nhan chuoi bat ky" (cross-review vong 1). Mot suite dung du lieu
+    gia thi no dang khoa cai gia.
+
+    Bo dem toan cuc la vi vong 2 bat them lo "mot URL tai dung cho hai body": nay moi URL
+    chi tieu thu duoc mot comment, nen test cung phai cap URL moi cho tung transition.
     """
+    if n is None:
+        _DEM[0] += 1
+        n = _DEM[0]
     return f"https://github.com/ducthangho/tra-luat/issues/{packet}#issuecomment-{n}"
 
 
 def _dang_het(state_dir: Path, packet: int = 999) -> None:
     """Dang moi comment dang cho — de ca sau khong bi chan boi RC_UNPOSTED."""
-    for i in range(50):
-        r = _chay(state_dir, "mark-posted", "--packet", str(packet), "--url", _url(packet, i + 1))
+    for _ in range(50):
+        r = _chay(state_dir, "mark-posted", "--packet", str(packet), "--url", _url(packet))
         if r.returncode != RC_OK:
             return
+
+
+def _luot(sd: Path, i: int, packet: int = 999) -> subprocess.CompletedProcess:
+    """Chay TRON mot luot noi dung: mo luot -> review `changes_requested` voi finding RIENG.
+
+    Phai di tron nhu vay vi may trang thai (sau cross-review vong 2) chi cho `begin-attempt`
+    tu `ready`/`reviewing` — khong con goi lien tiep tu `running` duoc nua. Finding rieng
+    tung luot de khong cham same-failure-limit khi ca dang do TRAN LUOT.
+    """
+    r = _chay(sd, "begin-attempt", "--packet", str(packet), "--provider", "codex")
+    _dang_het(sd, packet)
+    if r.returncode != RC_OK:
+        return r
+    r = _chay(sd, "record-review", "--packet", str(packet), "--provider", "claude",
+              "--verdict", "changes_requested", "--finding", f"loi rieng biet so {i}")
+    _dang_het(sd, packet)
+    return r
 
 
 def _trang_thai(state_dir: Path, packet: int = 999) -> dict:
@@ -72,11 +97,10 @@ def case_tran_3_luot_chan_luot_4(sd: Path) -> bool:
     """
     _init(sd); _dang_het(sd)
     for i in range(3):
-        r = _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex")
+        r = _luot(sd, i)
         if r.returncode != RC_OK:
             print(f"    luot {i+1} le ra phai qua, rc={r.returncode} {r.stderr.strip()[:80]}")
             return False
-        _dang_het(sd)
     r = _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex")
     if r.returncode != RC_STOP or "TRAN_LUOT" not in r.stderr:
         print(f"    luot 4 phai DUNG rc=3/TRAN_LUOT, thuc te rc={r.returncode}")
@@ -279,8 +303,8 @@ def case_void_attempt_khong_go_duoc_blocked(sd: Path) -> bool:
     lenh hop le la chay tiep duoc. Tran lach duoc bang mot lenh thi khong phai tran.
     """
     _init(sd); _dang_het(sd)
-    for _ in range(3):
-        _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    for i in range(3):
+        _luot(sd, i)
     if _chay(sd, "begin-attempt", "--packet", "999",
              "--provider", "codex").returncode != RC_STOP:
         return False
@@ -393,8 +417,173 @@ def case_verdict_blocked_thi_phai_blocked(sd: Path) -> bool:
                       "--provider", "codex").returncode == RC_STOP)
 
 
+# ─────── 7 ca sinh ra tu cross-review vong 2 (provider codex) ───────
+
+def case_transition_la_bi_chan(sd: Path) -> bool:
+    """[blocker] Lenh phai hop le voi STATE, khong chi voi `blocked`.
+
+    Vong 2 chi ra: `record-review --verdict approve` chay duoc tu `ready` khi CHUA co luot
+    nao (rc=0, attempts_used=0, state `awaiting_merge`) — tuc duyet mot packet chua ai lam;
+    va `begin-attempt` mo lai duoc tu `awaiting_merge` — tuc packet da duyet quay lai chay.
+    """
+    _init(sd); _dang_het(sd)
+    r = _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+              "--verdict", "approve")
+    if r.returncode != RC_STOP or "TRANSITION_LA" not in r.stderr:
+        print(f"    approve tu `ready` le ra bi chan, rc={r.returncode}")
+        return False
+    if _trang_thai(sd)["state"] != "ready":
+        return False
+    # di den `awaiting_merge` mot cach hop le roi thu mo lai
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    _chay(sd, "record-review", "--packet", "999", "--provider", "claude", "--verdict", "approve")
+    _dang_het(sd)
+    if _trang_thai(sd)["state"] != "awaiting_merge":
+        return False
+    r = _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex")
+    return r.returncode == RC_STOP and "TRANSITION_LA" in r.stderr
+
+
+def case_void_attempt_khong_hoan_luot_da_review(sd: Path) -> bool:
+    """[blocker] Khong duoc tra lai mot luot DA bi review.
+
+    Vong 2: chuoi `begin-attempt -> record-review -> void-attempt` deu rc=0, lap ba lan ma
+    `attempts_used` dung yen o 1 ⇒ tran 3 luot vo hieu bang loi khac han vong 1.
+    """
+    _init(sd); _dang_het(sd)
+    _luot(sd, 0)                                  # het luot nay state = `reviewing`
+    r = _chay(sd, "void-attempt", "--packet", "999", "--reason", "quota")
+    if r.returncode != RC_STOP or "TRANSITION_LA" not in r.stderr:
+        print(f"    void sau review le ra bi chan, rc={r.returncode}")
+        return False
+    _dang_het(sd)
+    if _trang_thai(sd)["attempts_used"] != 1:     # luot da tieu thu thi phai o nguyen
+        return False
+    for i in range(1, 3):
+        _luot(sd, i)
+    return _chay(sd, "begin-attempt", "--packet", "999",
+                 "--provider", "codex").returncode == RC_STOP
+
+
+def case_fingerprint_khong_gop_oan_toan_tu(sd: Path) -> bool:
+    """[major] Chieu NGUOC cua ca dau cau: hai finding KHAC nhau khong duoc gop.
+
+    Hoi quy do chinh ban va vong 1: xoa sach ky tu khong phai chu/so lam
+    `state == blocked` va `state != blocked` ra CUNG van tay ⇒ vong lap chet oan o luot 2.
+    Chat mot chieu ma hong chieu kia thi te hon la khong sua.
+    """
+    _init(sd); _dang_het(sd)
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    r1 = _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+               "--verdict", "changes_requested", "--finding", "state == blocked")
+    _dang_het(sd)
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    r2 = _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+               "--verdict", "changes_requested", "--finding", "state != blocked")
+    _dang_het(sd)
+    if r1.returncode != RC_OK or r2.returncode != RC_OK:
+        print(f"    `==` va `!=` bi gop oan: rc={r1.returncode}/{r2.returncode}")
+        return False
+    return len(_trang_thai(sd)["findings"]) == 2
+
+
+def case_url_sai_kho_hoac_di_dang_bi_chan(sd: Path) -> bool:
+    """[major] `..` va repo cua nguoi khac khong duoc lot.
+
+    Vong 2: ban va dau dung `[\\w.-]+` cho owner/repo, ma `.` nam trong lop do nen
+    `https://github.com/../repo/issues/999#issuecomment-1` LOT, va `attacker/repo` cung lot.
+    """
+    _init(sd)
+    for xau in ("https://github.com/../repo/issues/999#issuecomment-1",
+                "https://github.com/attacker/repo/issues/999#issuecomment-1",
+                "https://GITHUB.com/ducthangho/tra-luat/issues/999#issuecomment-1",
+                "https://github.com:443/ducthangho/tra-luat/issues/999#issuecomment-1",
+                "https://user@github.com/ducthangho/tra-luat/issues/999#issuecomment-1"):
+        r = _chay(sd, "mark-posted", "--packet", "999", "--url", xau)
+        if r.returncode != RC_USAGE or "URL_COMMENT_LA" not in r.stderr:
+            print(f"    URL `{xau}` le ra bi chan, rc={r.returncode}")
+            return False
+    return _chay(sd, "mark-posted", "--packet", "999", "--url", _url()).returncode == RC_OK
+
+
+def case_url_tai_dung_bi_chan(sd: Path) -> bool:
+    """[major] MOT url khong chung minh duoc HAI body.
+
+    Vong 2: hai lan `mark-posted` cung URL deu rc=0 voi hai body khac nhau ⇒ dau vet ben
+    chi la mot con so lap lai.
+    """
+    _init(sd)
+    u = _url()
+    if _chay(sd, "mark-posted", "--packet", "999", "--url", u).returncode != RC_OK:
+        return False
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex")   # sinh comment moi
+    r = _chay(sd, "mark-posted", "--packet", "999", "--url", u)
+    return r.returncode == RC_USAGE and "URL_TAI_DUNG" in r.stderr
+
+
+def case_mark_posted_theo_thu_tu_fifo(sd: Path) -> bool:
+    """[major] Comment phai duoc tieu thu theo THU TU sinh ra.
+
+    Vong 2: mutation `pop(0)` -> `pop()` song sot qua suite. Gan nham URL cho body la audit
+    trail SAI — te hon la khong co.
+
+    Ca dau tien VIET SAI cua chinh dot nay: no dang hai comment lien tiep, ma
+    `_require_posted` ep dang truoc moi transition nen hang doi khong bao gio qua MOT phan
+    tu — FIFO va LIFO cho ket qua y het. Phai di dung duong sinh HAI comment trong MOT lenh:
+    `record-review` cham same-failure vua xep comment review vua xep comment DUNG.
+    """
+    _init(sd); _dang_het(sd)
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+          "--verdict", "changes_requested", "--finding", "loi lap lai")
+    _dang_het(sd)
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+          "--verdict", "changes_requested", "--finding", "loi lap lai")   # -> 2 comment cho
+    if _trang_thai(sd)["pending_comments"] != 2:
+        print("    can dung 2 comment cho de phan biet FIFO/LIFO")
+        return False
+    u1, u2 = _url(), _url()
+    if (_chay(sd, "mark-posted", "--packet", "999", "--url", u1).returncode != RC_OK
+            or _chay(sd, "mark-posted", "--packet", "999", "--url", u2).returncode != RC_OK):
+        return False
+    st = json.loads((sd / "wp999.json").read_text(encoding="utf-8"))
+    hai = st["posted"][-2:]
+    if hai[0]["url"] != u1 or hai[1]["url"] != u2:
+        return False
+    if not hai[0]["body"].startswith("Review "):
+        print(f"    body dau phai la comment review, thuc te: {hai[0]['body'][:60]}")
+        return False
+    return "DỪNG" in hai[1]["body"]
+
+
+def case_record_review_khi_blocked_bi_chan(sd: Path) -> bool:
+    """[major] Da `blocked` thi `record-review` cung phai dung.
+
+    Vong 2: mutation bo blocked-guard trong `record-review` song sot (19/19, 0 ca do) —
+    suite chi khoa `begin-attempt` va `status`, bo sot chinh lenh cua reviewer.
+    """
+    _init(sd); _dang_het(sd)
+    _chay(sd, "begin-attempt", "--packet", "999", "--provider", "codex"); _dang_het(sd)
+    _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+          "--verdict", "blocked", "--finding", "can nguoi")
+    _dang_het(sd)
+    if _trang_thai(sd)["state"] != "blocked":
+        return False
+    r = _chay(sd, "record-review", "--packet", "999", "--provider", "claude",
+              "--verdict", "approve")
+    return r.returncode == RC_STOP and "BLOCKED" in r.stderr
+
+
 CASES = [
     case_tran_3_luot_chan_luot_4,
+    case_transition_la_bi_chan,
+    case_void_attempt_khong_hoan_luot_da_review,
+    case_fingerprint_khong_gop_oan_toan_tu,
+    case_url_sai_kho_hoac_di_dang_bi_chan,
+    case_url_tai_dung_bi_chan,
+    case_mark_posted_theo_thu_tu_fifo,
+    case_record_review_khi_blocked_bi_chan,
     case_state_dir_mac_dinh_bi_gitignore_phu,
     case_void_attempt_khong_go_duoc_blocked,
     case_void_attempt_cung_phai_co_dau_vet,

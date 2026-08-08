@@ -76,9 +76,8 @@ Làm việc theo work packet / cross-review / land: **nguồn quy tắc duy nh�
 Adapter của nền này (MỎNG, chỉ cú pháp/công cụ): `.claude/skills/work-packet/SKILL.md` ·
 `.claude/skills/cross-review/SKILL.md` · `.claude/skills/land-packets/SKILL.md`.
 Adapter lệch protocol thì ADAPTER sai.
-Các chốt dừng do `.claude/dev/packet_loop.py` CƯỠNG CHẾ bằng mã thoát khác 0 — chạy `--help` để biết
-lệnh, phản chứng cho từng chốt ở `.claude/dev/packet_loop_test.py`. **Vòng lặp tự do tới TRƯỚC merge,
-không hơn.**
+Stop conditions (§12) được CƯỠNG CHẾ bằng `.claude/dev/packet_loop.py` — chạy `--help`; phản chứng
+cho từng chốt ở `.claude/dev/packet_loop_test.py`.
 
 ## Khi đóng gói
 Bump VERSION (3 chỗ) → CHANGELOG → selftest N/N → user tự chạy cmd (script tự loại .git/.claude/.githooks/

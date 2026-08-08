@@ -52,6 +52,37 @@ FORBIDDEN_ACTIONS = {
 
 RC_OK, RC_USAGE, RC_STOP, RC_PROVIDER, RC_UNPOSTED = 0, 2, 3, 4, 5
 
+# Kho mà transition được phép ghi vào. Không suy ra từ `git remote` cho có vẻ tổng quát:
+# reviewer chạy trong sandbox KHÔNG phải kho git, và một chốt chỉ hoạt động khi có kho thì
+# không phải chốt. Hằng số ở đây là deterministic và đọc được bằng mắt.
+REPO = "ducthangho/tra-luat"
+
+# Máy trạng thái THẬT SỰ là một máy trạng thái. Cross-review vòng 2 (provider codex) bắt
+# được: bản trước chỉ kiểm `blocked`, nên `approve` chạy được từ `ready` khi CHƯA có lượt
+# nào (rc=0, `attempts_used=0`), và `begin-attempt` mở lại được từ `awaiting_merge` — tức
+# packet đã duyệt xong vẫn quay lại chạy tiếp. Bảng dưới đây là nguồn duy nhất cho câu hỏi
+# "lệnh này được phép chạy từ trạng thái nào".
+TRANSITION_HOP_LE = {
+    # `reviewing` = vừa bị `changes_requested`, executor được mở lượt sửa tiếp.
+    "begin-attempt": ("ready", "reviewing"),
+    # Chỉ review được thứ ĐANG chạy. Chặn `approve` khi chưa ai làm gì, và chặn review lại
+    # một packet đã `awaiting_merge`.
+    "record-review": ("running",),
+    # Chỉ trả được lượt CHƯA bị review. Sau `record-review` thì lượt đó đã tiêu thụ nội
+    # dung — vòng 2 chỉ ra chuỗi `begin-attempt → record-review → void-attempt` lặp ba lần
+    # làm `attempts_used` đứng yên ở 1, tức trần 3 lượt vô hiệu bằng lối khác.
+    "void-attempt": ("running",),
+}
+
+
+def _kiem_transition(st: dict, lenh: str) -> None:
+    if st["state"] == "blocked":
+        _die(RC_STOP, f"BLOCKED: wp{st['packet']} đã dừng — cần người gỡ, không tự đi tiếp.")
+    hop_le = TRANSITION_HOP_LE[lenh]
+    if st["state"] not in hop_le:
+        _die(RC_STOP, f"TRANSITION_LA: `{lenh}` không chạy được từ state `{st['state']}` "
+                      f"(chỉ từ {list(hop_le)}).")
+
 
 def _fingerprint(text: str) -> str:
     """Vân tay nội dung của một finding.
@@ -61,12 +92,20 @@ def _fingerprint(text: str) -> str:
     đúng thứ nó hứa đếm; reviewer diễn đạt lại hoàn toàn thì đó là finding khác, và test
     `case_finding_khac_nhau_khong_bi_chan` khoá đúng hành vi đó.
 
-    DẤU CÂU bị loại là do review chéo bắt được (cross-review vòng 1, provider codex):
-    `"manifest lech"` và `"manifest lech."` ra HAI vân tay khác nhau ⇒ trần same-failure
-    lách được chỉ bằng một dấu chấm, mà điều đó xảy ra được cả khi KHÔNG ai cố tình.
+    Chuẩn hoá đi qua HAI lần sửa, và lần thứ hai là hồi quy do chính lần thứ nhất:
+
+    · vòng 1 (codex): `"manifest lech"` vs `"manifest lech."` ra HAI vân tay ⇒ trần
+      same-failure lách được chỉ bằng một dấu chấm, kể cả khi không ai cố tình.
+    · vòng 2 (codex): bản vá xoá SẠCH ký tự không phải chữ/số thì `state == blocked` và
+      `state != blocked` ra CÙNG vân tay ⇒ hai finding thật sự khác nhau bị gộp, vòng lặp
+      chết oan ở lượt 2. Chặt một chiều mà hỏng chiều kia thì tệ hơn là không sửa.
+
+    Nên chỉ bỏ dấu câu CÂU và ký tự trích dẫn; giữ nguyên TOÁN TỬ. Đặc biệt KHÔNG bỏ `!`:
+    bỏ nó thì `a != b` thành `a = b`, trùng luôn với `a = b` — đúng lớp lỗi vừa sửa.
     """
-    khong_dau = "".join(c if (c.isalnum() or c.isspace()) else " " for c in text.casefold())
-    return hashlib.sha256(re.sub(r"\s+", " ", khong_dau).strip().encode("utf-8")).hexdigest()[:12]
+    bo = set(".,;:?\"'`()[]{}«»“”‘’")
+    sach = "".join(" " if c in bo else c for c in text.casefold())
+    return hashlib.sha256(re.sub(r"\s+", " ", sach).strip().encode("utf-8")).hexdigest()[:12]
 
 
 def _state_path(state_dir: Path, packet: int) -> Path:
@@ -110,25 +149,35 @@ def _require_posted(st: dict) -> None:
              f"#{st['packet']} rồi chạy `mark-posted --url <url>` trước khi đi tiếp.")
 
 
-def _kiem_url_comment(url: str, packet: int) -> None:
-    """Bắt buộc URL comment là thật, và thuộc ĐÚNG Issue của packet này.
+def _kiem_url_comment(url: str, packet: int, da_dung: set) -> None:
+    """Bắt buộc URL comment là thật, thuộc ĐÚNG kho + ĐÚNG Issue, và CHƯA từng dùng.
 
-    Review chéo vòng 1 (provider codex) bắt được: `mark-posted --url
-    https://example.invalid/not-posted` trả rc=0 rồi advance được — nghĩa là "dấu vết bền"
-    chỉ cần một chuỗi bất kỳ. Chốt mà nhận chuỗi bất kỳ thì không phải chốt.
+    Ba lớp, mỗi lớp do một lượt review chéo bắt được:
 
-    Không xác minh được comment CÓ THẬT trên GitHub từ đây (script cố ý không chạm mạng),
-    nhưng ép đúng dạng + đúng số Issue đã loại sạch lớp "gõ đại cho qua".
+    · vòng 1: `--url https://example.invalid/not-posted` rc=0 rồi advance được ⇒ "dấu vết
+      bền" chỉ cần một chuỗi bất kỳ.
+    · vòng 2: bản vá đầu dùng `[\\w.-]+` cho owner/repo, mà `.` nằm trong lớp đó nên
+      `https://github.com/../repo/issues/205#issuecomment-1` LỌT, và repo của người khác
+      (`attacker/repo`) cũng lọt. Nay ghim thẳng `REPO` — transition của packet này chỉ có
+      một chỗ hợp lệ để nằm.
+    · vòng 2: MỘT url tái dùng cho HAI body khác nhau đều rc=0 ⇒ `mark-posted` không chứng
+      minh được body nào đã đăng. Nay một URL chỉ tiêu thụ được một comment.
+
+    Vẫn không xác minh comment CÓ THẬT trên GitHub (script cố ý không chạm mạng) — nhưng ba
+    lớp trên đã loại sạch lớp "gõ đại cho qua".
     """
-    mau = re.compile(r"^https://github\.com/[\w.-]+/[\w.-]+/(issues|pull)/(\d+)"
-                     r"#issuecomment-\d+$")
+    mau = re.compile(r"\Ahttps://github\.com/" + re.escape(REPO)
+                     + r"/(?:issues|pull)/(\d+)#issuecomment-(\d+)\Z")
     m = mau.match(url)
     if not m:
         _die(RC_USAGE, f"URL_COMMENT_LA: `{url}` không đúng dạng "
-                       "`https://github.com/<owner>/<repo>/issues/<n>#issuecomment-<id>`.")
-    if int(m.group(2)) != packet:
-        _die(RC_USAGE, f"URL_SAI_ISSUE: comment trỏ Issue #{m.group(2)} nhưng packet là "
+                       f"`https://github.com/{REPO}/issues/<n>#issuecomment-<id>`.")
+    if int(m.group(1)) != packet:
+        _die(RC_USAGE, f"URL_SAI_ISSUE: comment trỏ Issue #{m.group(1)} nhưng packet là "
                        f"wp{packet}. Transition phải ghi vào ĐÚNG Issue của packet.")
+    if url in da_dung:
+        _die(RC_USAGE, f"URL_TAI_DUNG: `{url}` đã dùng cho một comment khác. "
+                       "Mỗi transition là một comment riêng — một URL không chứng minh được hai body.")
 
 
 def cmd_init(a, state_dir: Path) -> int:
@@ -173,8 +222,7 @@ def cmd_init(a, state_dir: Path) -> int:
 def cmd_begin_attempt(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     _require_posted(st)
-    if st["state"] == "blocked":
-        _die(RC_STOP, f"BLOCKED: wp{a.packet} đã dừng — cần người gỡ, không tự đi tiếp.")
+    _kiem_transition(st, "begin-attempt")
     used = len(st["attempts"])
     if used >= st["max_attempts"]:
         st["state"] = "blocked"
@@ -208,15 +256,14 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
         _die(RC_USAGE, f"LY_DO_LA: `{a.reason}` không thuộc {sorted(hop_le)}. "
                        "Lỗi NỘI DUNG thì phải tiêu thụ lượt.")
     st = _load(state_dir, a.packet)
-    # Hai chốt dưới đây là do review chéo vòng 1 (provider codex) bắt được, và đó là lỗ
-    # hổng NGHIÊM TRỌNG NHẤT của bản đầu: `void-attempt` vừa bỏ qua `_require_posted` vừa
-    # đặt state về `ready`, nên sau khi chạm trần (`begin-attempt` rc=3, state `blocked`)
-    # chỉ cần gọi nó một lần là GỠ ĐƯỢC blocked và chạy tiếp — tức trần 3 lượt và cả
-    # same-failure-limit đều lách được bằng một lệnh hợp lệ. Trần lách được là không có trần.
-    if st["state"] == "blocked":
-        _die(RC_STOP, f"BLOCKED: wp{a.packet} đã dừng — `void-attempt` KHÔNG phải đường gỡ. "
-                      "Cần người.")
+    # Ba chốt, do hai lượt review chéo bắt được — đây là lệnh bị đục nhiều nhất:
+    # · vòng 1: nó bỏ qua `_require_posted` VÀ đặt state về `ready`, nên sau khi chạm trần
+    #   (`begin-attempt` rc=3, state `blocked`) chỉ cần gọi nó một lần là GỠ ĐƯỢC blocked.
+    # · vòng 2: nó vẫn chạy được từ `reviewing`, tức hoàn lại một lượt ĐÃ bị review — chuỗi
+    #   `begin-attempt → record-review → void-attempt` lặp mãi mà `attempts_used` đứng yên.
+    # `_kiem_transition` bịt cả hai: chỉ `running` mới trả lượt được, và `blocked` thì dừng.
     _require_posted(st)
+    _kiem_transition(st, "void-attempt")
     if not st["attempts"]:
         _die(RC_USAGE, "KHONG_CO_LUOT_DE_TRA.")
     bo = st["attempts"].pop()
@@ -232,8 +279,7 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
 def cmd_record_review(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     _require_posted(st)
-    if st["state"] == "blocked":
-        _die(RC_STOP, f"BLOCKED: wp{a.packet} đã dừng — cần người gỡ.")
+    _kiem_transition(st, "record-review")
     if a.provider != st["reviewer"]:
         _die(RC_PROVIDER,
              f"CROSS_PROVIDER_VI_PHAM: review phải do `{st['reviewer']}` chạy, "
@@ -305,9 +351,12 @@ def cmd_guard(a, state_dir: Path) -> int:
 
 def cmd_mark_posted(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
-    _kiem_url_comment(a.url, a.packet)
+    _kiem_url_comment(a.url, a.packet, {p["url"] for p in st["posted"]})
     if not st["pending_comments"]:
         _die(RC_USAGE, "KHONG_CO_GI_CHUA_DANG.")
+    # FIFO — `pop(0)`, KHÔNG phải `pop()`. Comment phải khớp đúng transition sinh ra nó;
+    # lấy từ cuối là gán nhầm URL cho body, và audit trail gán nhầm còn tệ hơn không có.
+    # Cross-review vòng 2 chỉ ra suite chưa khoá thứ tự này (mutation `pop(0)→pop()` sống sót).
     body = st["pending_comments"].pop(0)
     st["posted"].append({"url": a.url, "body": body})
     _save(state_dir, st)

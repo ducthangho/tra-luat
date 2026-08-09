@@ -537,16 +537,29 @@ def _release_root_from_arg(p: str | None) -> Path:
     return root
 
 
+_NESTED_REPO_MARKERS = ("SKILL.md", "VERSION", "scripts/tl.py")
+
+
 def _is_nested_repo_copy(d: Path) -> bool:
     """Thư mục `d` có phải GỐC của một bản sao kho tra-luat không?
 
-    Dấu hiệu = `SKILL.md` VÀ `VERSION` cùng nằm ngay tại `d`. Đo 09-08-2026 trên cây dev thật
-    (36 `SKILL.md` + 24 `VERSION`): cặp này chỉ đồng hiện ở gốc kho và ở các bản sao kho
-    (`.claude/worktrees/*`, `.codex/worktrees/*`, `work/f2-d-reopen-writer`) — 9 `SKILL.md` của
-    `claude-code-best-practice/**/.claude/skills/*` KHÔNG có `VERSION` kèm nên không bị bắt nhầm.
+    Dấu hiệu = CẢ BA marker `_NESTED_REPO_MARKERS` cùng nằm dưới `d`. Đo 09-08-2026 trên cây dev thật
+    (36 `SKILL.md` + 24 `VERSION`): cặp `SKILL.md`+`VERSION` chỉ đồng hiện ở gốc kho và ở các bản sao
+    kho (`.claude/worktrees/*`, `.codex/worktrees/*`, `work/f2-d-reopen-writer`) — 9 `SKILL.md` của
+    `claude-code-best-practice/**/.claude/skills/*` không có `VERSION` kèm nên không bị bắt nhầm.
+
+    `scripts/tl.py` là marker THỨ BA, thêm sau finding WP68-R2-CODEX-01. Chỉ hai marker đầu là ĐỦ ĐỂ
+    VA CHẠM: kho có 4 thư mục mức-1 THUỘC GÓI (`agents` `references` `scripts` `templates`), và chỉ
+    cần thả `SKILL.md`+`VERSION` vào một trong số đó là cả subtree bị loại khỏi gói — `agents/` mất
+    `agents/openai.yaml`. Bản sao kho THẬT luôn có `scripts/tl.py` (worktree lẫn gói bung đều có),
+    còn một thư mục con thuộc gói thì không bao giờ chứa `scripts/tl.py` bên trong nó.
+
+    Đây là lớp GIẢM XÁC SUẤT va chạm, KHÔNG phải lớp an toàn: lớp fail-closed thật nằm ở
+    `_verify_release_manifest` (`missing_from_current_manifest` hạ `ok`), vì nó chặn MỌI luật loại-trừ
+    nuốt nhầm tệp thuộc gói chứ không riêng vị từ này.
     """
     try:
-        return (d / "SKILL.md").is_file() and (d / "VERSION").is_file()
+        return all((d / m).is_file() for m in _NESTED_REPO_MARKERS)
     except OSError:
         return False
 
@@ -903,6 +916,22 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
     missing_from_current_manifest = sorted(expected_paths - current_paths)
     if strict and extra:
         ok = False
+    # wp68/F3-03 (finding WP68-R2-CODEX-01, reviewer Codex vòng 2 — ĐÃ TÁI LẬP ĐỘC LẬP):
+    # `missing_from_current_manifest` trước nay được TÍNH rồi chỉ đem đi BÁO CÁO, không hạ `ok`.
+    # Nó nghĩa là: có tệp NẰM TRONG manifest mà bộ dựng gói hiện tại KHÔNG còn nhặt nữa ⇒ `release-bundle`
+    # sẽ phát hành gói THIẾU tệp đó, im lặng, rc=0. Vòng `checks` ở trên không cứu được vì nó soi tệp
+    # trên ĐĨA (tệp vẫn còn, hash vẫn đúng) chứ không soi tệp có được ĐÓNG GÓI hay không.
+    # Đo trên cây thật (thả `agents/SKILL.md` + `agents/VERSION` vào thư mục THUỘC GÓI `agents/`):
+    #   trước wp68: extra_files=2  ⇒ ĐỎ (đúng, hai marker là tệp lạ)
+    #   wp68 chưa có chốt này: ok=true, rc=0, extra_files=0, mà missing=["agents/openai.yaml"] ⇒ XANH GIẢ
+    #     và ZIP ra 179 entry, KHÔNG có `agents/openai.yaml`.
+    # Vì sao fail-closed KHÔNG kèm `strict`, khác `extra`: `extra` là "cây bẩn hơn gói" — ở cây dev đó là
+    # chuyện thường nên chỉ chặn khi strict. Còn đây là "gói THIẾU tệp đã khai" — khuyết tật của chính
+    # artifact, sai ở MỌI chế độ. Cùng hạng với `required_missing` ngay dưới, nên đặt cạnh nó.
+    # Chốt này KHÔNG chỉ vá riêng ca marker: nó chặn MỌI luật loại-trừ (cũ lẫn mới) lỡ nuốt tệp thuộc gói.
+    if missing_from_current_manifest:
+        ok = False
+        errors.append("EXPECTED_FILES_NOT_PACKAGED:" + ",".join(missing_from_current_manifest[:10]))
     required_missing = [x for x in (list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)) if not (root / x).exists()]
     if required_missing:
         ok = False

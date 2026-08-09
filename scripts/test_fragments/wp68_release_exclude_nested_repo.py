@@ -85,20 +85,65 @@ def _kiem_vi_tu(tl_release) -> bool:
     la_ban_sao = getattr(tl_release, "_is_nested_repo_copy", None)
     if not callable(la_ban_sao):
         return True
+    du = ("SKILL.md", "VERSION", "scripts/tl.py")
     with tempfile.TemporaryDirectory(prefix="wp68_vitu_") as tmp:
         base = Path(tmp).resolve()
-        ca = {"du_cap": ("SKILL.md", "VERSION"), "chi_skill": ("SKILL.md",), "chi_version": ("VERSION",),
-              "rong": ()}
-        mong_doi = {"du_cap": True, "chi_skill": False, "chi_version": False, "rong": False}
+        ca = {"du_ba_marker": du, "thieu_tl_py": ("SKILL.md", "VERSION"),
+              "chi_skill": ("SKILL.md",), "chi_version": ("VERSION",), "rong": ()}
+        # `thieu_tl_py` = ĐÚNG hình dạng va chạm của WP68-R2-CODEX-01: một thư mục THUỘC GÓI bị thả
+        # `SKILL.md`+`VERSION`. Nó PHẢI trả False, nếu không cả subtree bị loại khỏi gói.
+        mong_doi = {"du_ba_marker": True, "thieu_tl_py": False,
+                    "chi_skill": False, "chi_version": False, "rong": False}
         for ten, tep in ca.items():
             d = base / ten
             d.mkdir()
             for t in tep:
-                (d / t).write_text("x\n", encoding="utf-8", newline="")
+                p = d / t
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("x\n", encoding="utf-8", newline="")
             if la_ban_sao(d) is not mong_doi[ten]:
                 return False
         # Thư mục KHÔNG tồn tại phải trả False, không được ném.
         return la_ban_sao(base / "khong_ton_tai") is False
+
+
+def _kiem_khong_nuot_tep_thuoc_goi(root: Path, tl_module, manifest_chuan) -> bool:
+    """WP68-R2-CODEX-01 — TẦNG 2 (fail-closed), khoá độc lập với vị từ.
+
+    Phản chứng: manifest KHAI một tệp mà bộ dựng gói hiện tại KHÔNG nhặt. Ở đây dựng đúng ca đó bằng
+    một tệp nằm dưới `docs/` — `docs` bị `_RELEASE_EXCLUDE_DIRS` loại — rồi NHÉT nó vào manifest.
+    Tệp CÓ THẬT trên đĩa và hash ĐÚNG, nên vòng `checks` (soi đĩa) sẽ xanh; thứ DUY NHẤT có thể làm
+    cổng đỏ là luật `missing_from_current_manifest`. Vì thế ca này đỏ ⟺ tầng fail-closed còn sống.
+
+    Cố ý KHÔNG đi qua vị từ bản-sao-lồng: nếu dùng ca marker thì tầng 1 (3 marker) sẽ chặn trước và
+    ca này xanh vì lý do khác ⇒ mất răng. Hai tầng phải được khoá bằng hai ca độc lập.
+    """
+    import copy
+    import hashlib
+
+    d = root / "docs"
+    d.mkdir(parents=True, exist_ok=True)
+    p = d / "wp68_ngoai_goi.md"
+    noi_dung = b"wp68 fail-closed probe\n"
+    p.write_bytes(noi_dung)
+
+    if tl_module._release_should_include(p, root):
+        return False          # tiền đề hỏng: `docs/` phải bị loại, nếu không ca vô nghĩa
+
+    gia = copy.deepcopy(manifest_chuan)
+    gia["files"] = list(gia["files"]) + [{
+        "path": "docs/wp68_ngoai_goi.md", "size": len(noi_dung),
+        "sha256": hashlib.sha256(noi_dung).hexdigest(),
+    }]
+    gia["files"].sort(key=lambda f: f["path"])
+    gia["package_hash"] = hashlib.sha256("\n".join(
+        "%s\0%d\0%s" % (f["path"], f["size"], f["sha256"]) for f in gia["files"]).encode("utf-8")).hexdigest()
+
+    rv = tl_module._verify_release_manifest(root, gia, strict=True)
+    p.unlink()
+    return (rv.get("ok") is False
+            and "docs/wp68_ngoai_goi.md" in (rv.get("missing_from_current_manifest") or [])
+            and any(str(e).startswith("EXPECTED_FILES_NOT_PACKAGED") for e in (rv.get("errors") or [])))
 
 
 def _do(root: Path, tl_module, manifest_chuan):
@@ -157,5 +202,6 @@ def run(tl_module) -> bool:
             and fc_long == fc_sach           # 3. gốc kho không bị tự loại — kiểm kê giữ nguyên
             and thieu_long == []
             and hash_long == hash_sach       # 4. package_hash không phụ thuộc NƠI CHẠY
-            and _kiem_vi_tu(tl_release)      # chốt phụ: vị từ không bắt nhầm (bỏ qua nếu vắng hàm)
+            and _kiem_vi_tu(tl_release)      # 5. WP68-R2-01 tầng 1: vị từ đòi ĐỦ BA marker
+            and _kiem_khong_nuot_tep_thuoc_goi(root, tl_module, manifest_chuan)   # 6. tầng 2 fail-closed
         )

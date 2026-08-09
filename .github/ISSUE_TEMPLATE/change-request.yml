@@ -1,0 +1,23 @@
+{
+  "name": "Mission change request",
+  "description": "Create a change request using docs/PROTOCOL_DA_PHIEN.md section 3.1.1.",
+  "title": "[MCR] ",
+  "labels": ["coord:mission", "state:proposed"],
+  "body": [
+    {"type": "markdown", "attributes": {"value": "Fill every field below. Normative source: `docs/PROTOCOL_DA_PHIEN.md` section 3.1.1."}},
+    {"type": "input", "id": "schema_version", "attributes": {"label": "schema_version", "value": "1"}, "validations": {"required": true}},
+    {"type": "input", "id": "change_request_id", "attributes": {"label": "change_request_id", "placeholder": "mcr-54-03"}, "validations": {"required": true}},
+    {"type": "input", "id": "mission_issue", "attributes": {"label": "mission_issue", "placeholder": "54"}, "validations": {"required": true}},
+    {"type": "input", "id": "requested_by", "attributes": {"label": "requested_by"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "reason", "attributes": {"label": "reason"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "proposed_changes", "attributes": {"label": "proposed_changes", "render": "json", "placeholder": "[\"change\"]"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "affected_packets", "attributes": {"label": "affected_packets", "render": "json", "placeholder": "[\"wp60\"]"}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "landed_work_impact", "attributes": {"label": "landed_work_impact", "options": ["none", "corrective_packet", "revert_packet"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "risk_change", "attributes": {"label": "risk_change", "options": ["none", "increased", "decreased"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "decision", "attributes": {"label": "decision", "options": ["pending", "approved", "rejected"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "decision_source", "attributes": {"label": "decision_source", "options": ["human"]}, "validations": {"required": true}},
+    {"type": "input", "id": "approved_by", "attributes": {"label": "approved_by", "value": "null"}, "validations": {"required": true}},
+    {"type": "input", "id": "decision_url", "attributes": {"label": "decision_url", "value": "null"}, "validations": {"required": true}},
+    {"type": "input", "id": "supersedes_revision", "attributes": {"label": "supersedes_revision", "placeholder": "3"}, "validations": {"required": true}}
+  ]
+}

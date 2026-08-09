@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/schemas/handoff.schema.json",
+  "title": "Executor handoff",
+  "description": "Field and enum contract; normative source: docs/PROTOCOL_DA_PHIEN.md section 7.",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": 1},
+    "packet_id": {"type": "string", "pattern": "wp[1-9][0-9]*"},
+    "generation": {"type": "integer", "minimum": 1},
+    "spec_hash": {"$ref": "#/$defs/sha256"},
+    "provider": {"enum": ["claude", "codex"]},
+    "role": {"const": "executor"},
+    "session_id": {"type": "string", "minLength": 1},
+    "base_sha": {"$ref": "#/$defs/git_oid"},
+    "head_sha": {"$ref": "#/$defs/git_oid_or_null"},
+    "status": {"enum": ["done", "needs_followup", "blocked"]},
+    "summary": {"type": "string"},
+    "changed_paths": {"type": "array", "items": {"type": "string"}},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
+    "test_selection": {"$ref": "#/$defs/test_selection"},
+    "remaining_work": {"type": "array", "items": {"type": "string"}},
+    "next_role": {"type": ["string", "null"], "enum": ["reviewer", "executor", "land_operator", "human", null]},
+    "manual_next_action": {"type": ["string", "null"]},
+    "copyable_prompt": {"type": ["string", "null"]},
+    "failure": {"$ref": "#/$defs/failure"},
+    "successors": {"type": "array", "items": {"$ref": "#/$defs/successor"}}
+  },
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "spec_hash",
+    "provider",
+    "role",
+    "session_id",
+    "head_sha",
+    "status",
+    "next_role",
+    "manual_next_action",
+    "copyable_prompt"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "git_oid": {"type": "string", "pattern": "[0-9a-f]{40}"},
+    "git_oid_or_null": {"oneOf": [{"$ref": "#/$defs/git_oid"}, {"type": "null"}]},
+    "sha256": {"type": "string", "pattern": "[0-9a-f]{64}"},
+    "test": {"oneOf": [{"$ref": "#/$defs/test_passed"}, {"$ref": "#/$defs/test_not_run"}]},
+    "test_passed": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["passed", "failed"]},
+        "evidence": {"type": "string"}
+      },
+      "required": ["name", "status", "evidence"],
+      "additionalProperties": true
+    },
+    "test_not_run": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"const": "not_run"},
+        "evidence": {"type": "string"},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["name", "status", "evidence", "reason"],
+      "additionalProperties": true
+    },
+    "test_selection": {
+      "type": "object",
+      "properties": {
+        "gate_tier": {"enum": ["T0", "T1", "T2", "T3", "T4", "T5"]},
+        "selector_policy_sha": {"type": "string", "minLength": 1},
+        "tested_sha": {"$ref": "#/$defs/git_oid"},
+        "selected_groups": {"type": "array", "items": {"type": "string"}},
+        "full_fallback_reason": {"type": ["string", "null"]}
+      },
+      "required": ["gate_tier", "selector_policy_sha", "tested_sha", "selected_groups", "full_fallback_reason"],
+      "additionalProperties": true
+    },
+    "failure": {
+      "type": "object",
+      "properties": {
+        "fingerprint": {"type": ["string", "null"]},
+        "category": {"type": ["string", "null"], "enum": ["content", "quota", "infrastructure", "permission", null]}
+      },
+      "required": ["fingerprint", "category"],
+      "additionalProperties": true
+    },
+    "successor": {
+      "type": "object",
+      "properties": {
+        "successor_key": {"type": "string"},
+        "objective": {"type": "string"},
+        "write_set": {"type": "array"},
+        "depends_on": {"type": "array"},
+        "executor": {"enum": ["claude", "codex"]},
+        "environment": {"enum": ["cloud", "local"]},
+        "acceptance_criteria": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["successor_key", "objective", "write_set", "depends_on", "executor", "environment", "acceptance_criteria"],
+      "additionalProperties": true
+    }
+  }
+}

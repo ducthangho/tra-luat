@@ -1,0 +1,21 @@
+{
+  "name": "Mission",
+  "description": "Create a mission using the fields in docs/PROTOCOL_DA_PHIEN.md section 3.1.",
+  "title": "[Mission] ",
+  "labels": ["coord:mission", "state:proposed"],
+  "body": [
+    {"type": "markdown", "attributes": {"value": "Fill every field below. Normative source: `docs/PROTOCOL_DA_PHIEN.md` section 3.1."}},
+    {"type": "input", "id": "schema_version", "attributes": {"label": "schema_version", "value": "1"}, "validations": {"required": true}},
+    {"type": "input", "id": "mission_id", "attributes": {"label": "mission_id", "placeholder": "gh-123"}, "validations": {"required": true}},
+    {"type": "input", "id": "revision", "attributes": {"label": "revision", "value": "1"}, "validations": {"required": true}},
+    {"type": "input", "id": "plan_hash", "attributes": {"label": "plan_hash", "placeholder": "64 lowercase hex characters"}, "validations": {"required": true}},
+    {"type": "input", "id": "supersedes_revision", "attributes": {"label": "supersedes_revision", "value": "null"}, "validations": {"required": true}},
+    {"type": "input", "id": "change_request", "attributes": {"label": "change_request", "value": "null"}, "validations": {"required": true}},
+    {"type": "input", "id": "base_sha", "attributes": {"label": "base_sha", "placeholder": "40 lowercase hex characters"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "objective", "attributes": {"label": "objective"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "acceptance_criteria", "attributes": {"label": "acceptance_criteria", "render": "json", "placeholder": "[\"criterion\"]"}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "risk", "attributes": {"label": "risk", "options": ["normal", "sensitive"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "requires_live", "attributes": {"label": "requires_live", "options": ["false", "true"]}, "validations": {"required": true}},
+    {"type": "textarea", "id": "envelope", "attributes": {"label": "envelope", "render": "json", "placeholder": "{\"max_packets\":20}"}, "validations": {"required": true}}
+  ]
+}

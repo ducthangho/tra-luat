@@ -1,0 +1,21 @@
+{
+  "name": "Work packet",
+  "description": "Create a packet using the fields in docs/PROTOCOL_DA_PHIEN.md section 3.2.",
+  "title": "[WP] ",
+  "labels": ["coord:packet", "state:proposed"],
+  "body": [
+    {"type": "markdown", "attributes": {"value": "Fill every field below. Normative source: `docs/PROTOCOL_DA_PHIEN.md` section 3.2."}},
+    {"type": "input", "id": "schema_version", "attributes": {"label": "schema_version", "value": "1"}, "validations": {"required": true}},
+    {"type": "input", "id": "packet_id", "attributes": {"label": "packet_id", "placeholder": "wp123"}, "validations": {"required": true}},
+    {"type": "input", "id": "mission_issue", "attributes": {"label": "mission_issue", "placeholder": "54"}, "validations": {"required": true}},
+    {"type": "input", "id": "revision", "attributes": {"label": "revision", "value": "1"}, "validations": {"required": true}},
+    {"type": "input", "id": "spec_hash", "attributes": {"label": "spec_hash", "placeholder": "64 lowercase hex characters"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "objective", "attributes": {"label": "objective"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "write_set", "attributes": {"label": "write_set", "render": "json", "placeholder": "[{\"type\":\"exact\",\"path\":\"path/to/file\"}]"}, "validations": {"required": true}},
+    {"type": "textarea", "id": "depends_on", "attributes": {"label": "depends_on", "render": "json", "placeholder": "[]"}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "executor", "attributes": {"label": "executor", "options": ["claude", "codex"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "environment", "attributes": {"label": "environment", "options": ["cloud", "local"]}, "validations": {"required": true}},
+    {"type": "dropdown", "id": "risk", "attributes": {"label": "risk", "options": ["normal", "sensitive"]}, "validations": {"required": true}},
+    {"type": "textarea", "id": "acceptance_criteria", "attributes": {"label": "acceptance_criteria", "render": "json", "placeholder": "[\"criterion\"]"}, "validations": {"required": true}}
+  ]
+}

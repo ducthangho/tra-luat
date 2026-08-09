@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/schemas/land.schema.json",
+  "title": "Land authorization or evidence",
+  "description": "Field and enum contract; normative source: docs/PROTOCOL_DA_PHIEN.md section 7.",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": 1},
+    "authorization_id": {"type": "string"},
+    "decision": {"enum": ["approved", "rejected"]},
+    "mission_id": {"type": "string", "pattern": "gh-[1-9][0-9]*"},
+    "mission_revision": {"type": "integer", "minimum": 1},
+    "change_request": {"type": ["string", "null"]},
+    "packet_issue": {"type": "integer", "minimum": 1},
+    "packet_id": {"type": "string", "pattern": "wp[1-9][0-9]*"},
+    "packet_revision": {"type": "integer", "minimum": 1},
+    "packet_generation": {"type": "integer", "minimum": 1},
+    "spec_hash": {"$ref": "#/$defs/sha256"},
+    "pr": {"type": "string"},
+    "authorized_head_sha": {"$ref": "#/$defs/git_oid"},
+    "authorized_tree_sha": {"$ref": "#/$defs/git_oid"},
+    "authorized_base_sha": {"$ref": "#/$defs/git_oid"},
+    "target_branch": {"type": "string"},
+    "integration_mode": {"type": "string"},
+    "actor": {"type": "string"},
+    "issued_at": {"type": "string"},
+    "expires_at": {"type": ["string", "null"]},
+    "review_assurance": {"enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]},
+    "executor_evidence_ids": {"type": "array", "items": {"type": "integer"}},
+    "reviewer_evidence_ids": {"type": "array", "items": {"type": "integer"}},
+    "ci_run_id": {"type": "integer"},
+    "ci_check_run_ids": {"type": "array", "items": {"type": "integer"}},
+    "cumulative_changed_paths": {"type": "integer", "minimum": 0},
+    "blocking_findings": {"type": "array"},
+    "advisory_findings_deferred": {"type": "array"},
+    "authorization_status": {"type": "string"},
+    "land_evidence_id": {"type": "string"},
+    "generation": {"type": "integer", "minimum": 1},
+    "provider": {"enum": ["claude", "codex", "human", "github-actions"]},
+    "role": {"enum": ["approver_land_operator", "land_operator"]},
+    "session_id": {"type": "string", "minLength": 1},
+    "input_packet_generations": {"type": "array", "items": {"type": "string"}},
+    "approver": {"type": "string"},
+    "authorization_url": {"type": "string"},
+    "land_operator": {"type": "string"},
+    "merge_method": {"enum": ["merge", "squash", "rebase"]},
+    "merge_commit": {"$ref": "#/$defs/git_oid"},
+    "pre_merge_checks": {"type": "array"},
+    "post_merge_checks": {"type": "array"},
+    "bookkeeping": {"type": "array"},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}}
+  },
+  "oneOf": [
+    {
+      "required": ["schema_version", "authorization_id", "decision", "mission_id", "authorized_head_sha", "actor", "role", "session_id"]
+    },
+    {
+      "required": [
+        "schema_version",
+        "land_evidence_id",
+        "mission_id",
+        "generation",
+        "provider",
+        "role",
+        "session_id",
+        "input_packet_generations",
+        "authorized_head_sha",
+        "approver",
+        "authorization_url",
+        "land_operator",
+        "merge_method",
+        "merge_commit",
+        "pre_merge_checks",
+        "post_merge_checks",
+        "bookkeeping"
+      ]
+    }
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "git_oid": {"type": "string", "pattern": "[0-9a-f]{40}"},
+    "sha256": {"type": "string", "pattern": "[0-9a-f]{64}"},
+    "test": {"oneOf": [{"$ref": "#/$defs/test_passed"}, {"$ref": "#/$defs/test_not_run"}]},
+    "test_passed": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["passed", "failed"]},
+        "evidence": {"type": "string"}
+      },
+      "required": ["name", "status", "evidence"],
+      "additionalProperties": true
+    },
+    "test_not_run": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"const": "not_run"},
+        "evidence": {"type": "string"},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["name", "status", "evidence", "reason"],
+      "additionalProperties": true
+    }
+  }
+}

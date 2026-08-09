@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/schemas/state.schema.json",
+  "title": "Durable state projection",
+  "description": "Field and enum contract; normative source: docs/PROTOCOL_DA_PHIEN.md section 3.3.",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": 1},
+    "mission_issue": {"type": "integer", "minimum": 1},
+    "mission_revision": {"type": "integer", "minimum": 1},
+    "mission_state": {"enum": ["proposed", "running", "paused", "blocked", "awaiting_land", "complete", "cancelled"]},
+    "packet_id": {"type": ["string", "null"], "pattern": "wp[1-9][0-9]*"},
+    "packet_revision": {"type": ["integer", "null"], "minimum": 1},
+    "spec_hash": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "packet_state": {"type": ["string", "null"], "enum": ["proposed", "ready", "leased", "running", "reviewing", "accepted", "integrated", "landed", "paused", "blocked", "cancelled", "stale", null]},
+    "lease": {"oneOf": [{"$ref": "#/$defs/lease"}, {"type": "null"}]},
+    "budget": {"$ref": "#/$defs/budget"},
+    "review_assurance": {"type": ["string", "null"], "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred", null]},
+    "head_sha": {"$ref": "#/$defs/git_oid_or_null"},
+    "tested_sha": {"$ref": "#/$defs/git_oid_or_null"},
+    "handoff_url": {"type": ["string", "null"]},
+    "commit_shas": {"type": "array", "items": {"$ref": "#/$defs/git_oid"}},
+    "last_consumed_event_id": {"type": "integer", "minimum": 0}
+  },
+  "required": ["schema_version", "mission_issue", "mission_revision", "mission_state", "last_consumed_event_id"],
+  "additionalProperties": true,
+  "$defs": {
+    "git_oid": {"type": "string", "pattern": "[0-9a-f]{40}"},
+    "git_oid_or_null": {"oneOf": [{"$ref": "#/$defs/git_oid"}, {"type": "null"}]},
+    "sha256": {"type": "string", "pattern": "[0-9a-f]{64}"},
+    "lease": {
+      "type": "object",
+      "properties": {
+        "packet_id": {"type": "string", "pattern": "wp[1-9][0-9]*"},
+        "executor": {"enum": ["claude", "codex"]},
+        "environment": {"enum": ["cloud", "local"]},
+        "branch": {"type": "string"},
+        "write_set_hash": {"$ref": "#/$defs/sha256"},
+        "generation": {"type": "integer", "minimum": 1},
+        "heartbeat_at": {"type": "string"},
+        "lease_until": {"type": "string"}
+      },
+      "required": ["packet_id", "executor", "environment", "branch", "write_set_hash", "generation", "heartbeat_at", "lease_until"],
+      "additionalProperties": true
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "used": {"type": "integer", "minimum": 0},
+        "reserved": {"type": "integer", "minimum": 0},
+        "limit": {"type": "integer", "minimum": 0}
+      },
+      "required": ["used", "reserved", "limit"],
+      "additionalProperties": true
+    }
+  }
+}

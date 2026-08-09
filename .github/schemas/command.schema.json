@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/schemas/command.schema.json",
+  "title": "Authorized command",
+  "description": "Field and enum contract; normative source: docs/PROTOCOL_DA_PHIEN.md section 11.",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": 1},
+    "command": {"enum": ["/mission start", "/mission pause", "/mission resume", "/packet retry", "/packet cancel", "/packet reroute", "/packet preserve", "/land prepare", "/land apply"]},
+    "mission_id": {"type": "string", "pattern": "gh-[1-9][0-9]*"},
+    "packet_id": {"type": "string", "pattern": "wp[1-9][0-9]*"},
+    "head_sha": {"$ref": "#/$defs/git_oid"},
+    "reason": {"type": ["string", "null"]},
+    "actor": {"type": "string", "minLength": 1},
+    "expected_state_revision": {"type": "integer", "minimum": 0}
+  },
+  "required": ["schema_version", "command", "actor", "expected_state_revision"],
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {"properties": {"command": {"enum": ["/mission start", "/mission pause", "/mission resume", "/land prepare"]}}},
+      "then": {"required": ["mission_id"]}
+    },
+    {
+      "if": {"properties": {"command": {"enum": ["/packet retry", "/packet cancel", "/packet reroute", "/packet preserve"]}}},
+      "then": {"required": ["packet_id", "reason"]}
+    },
+    {
+      "if": {"properties": {"command": {"const": "/land apply"}}},
+      "then": {"required": ["mission_id", "head_sha"]}
+    }
+  ],
+  "$defs": {
+    "git_oid": {"type": "string", "pattern": "[0-9a-f]{40}"}
+  }
+}

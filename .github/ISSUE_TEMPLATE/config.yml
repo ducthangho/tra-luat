@@ -1,0 +1,10 @@
+{
+  "blank_issues_enabled": true,
+  "contact_links": [
+    {
+      "name": "Protocol source",
+      "url": "https://github.com/ducthangho/tra-luat/blob/master/docs/PROTOCOL_DA_PHIEN.md",
+      "about": "Read the normative field definitions before filing a coordination artifact."
+    }
+  ]
+}

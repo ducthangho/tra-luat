@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/schemas/review.schema.json",
+  "title": "Reviewer evidence",
+  "description": "Field and enum contract; normative source: docs/PROTOCOL_DA_PHIEN.md sections 7-8.",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": 1},
+    "packet_id": {"type": "string", "pattern": "wp[1-9][0-9]*"},
+    "generation": {"type": "integer", "minimum": 1},
+    "provider": {"enum": ["claude", "codex", "human"]},
+    "role": {"const": "reviewer"},
+    "session_id": {"type": "string", "minLength": 1},
+    "reviewed_sha": {"$ref": "#/$defs/git_oid"},
+    "independent_from_executor_session": {"const": true},
+    "review_axes": {
+      "type": "array",
+      "items": {"enum": ["spec", "standards_security"]},
+      "uniqueItems": true,
+      "contains": {"const": "spec"},
+      "allOf": [{"contains": {"const": "standards_security"}}]
+    },
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
+    "findings": {"type": "array"},
+    "verdict": {"enum": ["approve", "changes_requested", "blocked"]},
+    "assurance": {"enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]},
+    "evidence_url": {"type": "string", "pattern": "https://github[.]com/.+"}
+  },
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "provider",
+    "role",
+    "session_id",
+    "reviewed_sha",
+    "independent_from_executor_session",
+    "review_axes",
+    "tests",
+    "findings",
+    "verdict",
+    "assurance"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "git_oid": {"type": "string", "pattern": "[0-9a-f]{40}"},
+    "test": {"oneOf": [{"$ref": "#/$defs/test_passed"}, {"$ref": "#/$defs/test_not_run"}]},
+    "test_passed": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["passed", "failed"]},
+        "evidence": {"type": "string"}
+      },
+      "required": ["name", "status", "evidence"],
+      "additionalProperties": true
+    },
+    "test_not_run": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"const": "not_run"},
+        "evidence": {"type": "string"},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["name", "status", "evidence", "reason"],
+      "additionalProperties": true
+    }
+  }
+}

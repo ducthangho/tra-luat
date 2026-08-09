@@ -248,6 +248,26 @@ _EXPECTED_REQUIRED: dict[tuple[str, str], set[str]] = {
         "evidence",
         "reason",
     },
+    ("handoff.schema.json", "/$defs/test_selection/required"): {
+        "gate_tier",
+        "selector_policy_sha",
+        "tested_sha",
+        "selected_groups",
+        "full_fallback_reason",
+    },
+    ("handoff.schema.json", "/$defs/failure/required"): {
+        "fingerprint",
+        "category",
+    },
+    ("handoff.schema.json", "/$defs/successor/required"): {
+        "successor_key",
+        "objective",
+        "write_set",
+        "depends_on",
+        "executor",
+        "environment",
+        "acceptance_criteria",
+    },
     ("review.schema.json", "/required"): {
         "schema_version",
         "packet_id",
@@ -331,12 +351,20 @@ _EXPECTED_REQUIRED: dict[tuple[str, str], set[str]] = {
         "heartbeat_at",
         "lease_until",
     },
+    ("state.schema.json", "/$defs/budget/required"): {
+        "used",
+        "reserved",
+        "limit",
+    },
     ("command.schema.json", "/required"): {
         "schema_version",
         "command",
         "actor",
         "expected_state_revision",
     },
+    ("command.schema.json", "/allOf/0/then/required"): {"mission_id"},
+    ("command.schema.json", "/allOf/1/then/required"): {"packet_id", "reason"},
+    ("command.schema.json", "/allOf/2/then/required"): {"mission_id", "head_sha"},
 }
 
 _ALLOWED_SCHEMA_KEYWORDS = {

@@ -136,8 +136,20 @@ def run_full_gate(master_sha):
     root = run_git_step("locate worktree", ["git", "rev-parse", "--show-toplevel"], os.environ)
     if not root:
         return False
+    local_env_text = run_git_step(
+        "enumerate repository-local Git environment",
+        ["git", "rev-parse", "--local-env-vars"],
+        os.environ,
+    )
+    if local_env_text is None:
+        return False
     with tempfile.TemporaryDirectory(prefix="wp52_pre_push_gate_") as tmp:
         gate_env = os.environ.copy()
+        for name in local_env_text.splitlines():
+            gate_env.pop(name, None)
+        for name in list(gate_env):
+            if name.startswith("GIT_CONFIG_KEY_") or name.startswith("GIT_CONFIG_VALUE_"):
+                gate_env.pop(name, None)
         gate_env["PYTHONDONTWRITEBYTECODE"] = "1"
         gate_env["PYTHONPYCACHEPREFIX"] = os.path.join(tmp, "pycache")
         gate_env["PYTHONUTF8"] = "1"

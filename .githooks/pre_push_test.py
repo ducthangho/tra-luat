@@ -237,6 +237,18 @@ def case_zero_rc_without_positive_evidence_blocks_master(root):
     )
 
 
+def case_absolute_git_dir_does_not_redirect_snapshot(root):
+    fx = PushFixture(root)
+    fx.install_gate_stubs()
+    linked_env = os.environ.copy()
+    linked_env["GIT_DIR"] = str(fx.work / ".git")
+    pushed = fx.push("HEAD:refs/heads/master", env=linked_env)
+    return (
+        pushed.returncode == 0
+        and fx.remote_ref("refs/heads/master").returncode == 0
+    )
+
+
 def case_multi_ref_is_atomic_and_delete_tag_are_ignored(root):
     fx = PushFixture(root)
     _run(["git", "branch", "legacy", fx.legacy], cwd=fx.work, check=True)
@@ -310,6 +322,7 @@ CASES = [
     case_master_requires_green_full_gate,
     case_master_gates_exact_pushed_snapshot,
     case_zero_rc_without_positive_evidence_blocks_master,
+    case_absolute_git_dir_does_not_redirect_snapshot,
     case_multi_ref_is_atomic_and_delete_tag_are_ignored,
     case_missing_required_object_blocks_push,
     case_unexpected_gate_exception_blocks_master,

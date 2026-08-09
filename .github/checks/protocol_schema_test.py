@@ -302,7 +302,12 @@ def _split_key(body):
         key = _scalar(body[:j + 1])
         rest = body[j + 1:]
         if not rest.startswith(":"):
-            raise YamlError("thieu dau hai cham sau khoa trich dan: %r" % body)
+            # KHONG phai khoa: day la mot SCALAR TRICH DAN dung mot minh, vd phan tu day
+            # `- 'ghi chu co dau hai cham: o giua'`. YAML that chap nhan no, nen tu choi o day la
+            # nghiem KHAC YAML chu khong phai nghiem hon. Tra None de nguoi goi quyet dinh:
+            # `_parse_seq` coi no la scalar, con `_parse_map` van nem "dong khong phai cap khoa" -
+            # fail-closed giu nguyen o cho no thuc su co nghia.
+            return None
         return key, rest[1:].strip()
     for j, ch in enumerate(body):
         if ch == ":" and (j + 1 == len(body) or body[j + 1] == " "):
@@ -2096,6 +2101,35 @@ def _dump_rc(tmp, name, text):
     return _run(["--dump-document", str(path), "--format", "yaml", "--json"])
 
 
+def case_yaml_scalar_trich_dan_lam_phan_tu_day(tmp):
+    """`- 'co dau hai cham: o giua'` la YAML HOP LE va la cach duy nhat viet mot muc
+    `remaining_work`/`bookkeeping` chua `: `.
+
+    Tim ra bang chinh cach dung: khoi handoff cua phien nay khong parse duoc vi bo phan tich doi mot
+    dau hai cham sau khoa trich dan. Fail-closed la dung khi tai lieu SAI; o day tai lieu DUNG, nen tu
+    choi no la nghiem KHAC YAML - dung loai lech ma `case_dump_cat_binh_luan_dung_nghia_yaml` chan o
+    chieu nguoc lai. Ve thu hai giu fail-closed: cung chuoi do dung mot minh trong ANH XA van rc 2.
+    """
+    text = ("remaining_work:\n"
+            "  - 'ghi chu co dau hai cham: o giua'\n"
+            "  - \"nhay kep cung duoc: nhu the nay\"\n"
+            "  - khong trich dan\n")
+    rc, payload, out = _dump_rc(tmp, "seq-quoted.yaml", text)
+    if rc != RC_OK or payload is None:
+        print("  ! rc=%s (cho 0); %s" % (rc, out[:300]))
+        return False
+    want = ["ghi chu co dau hai cham: o giua", "nhay kep cung duoc: nhu the nay", "khong trich dan"]
+    if payload.get("remaining_work") != want:
+        print("  ! phan tu day sai: %r" % (payload.get("remaining_work"),))
+        return False
+
+    rc2, _, _ = _dump_rc(tmp, "map-quoted.yaml", "a: 1\n'chuoi tran khong phai cap khoa'\n")
+    if rc2 != RC_LOAD:
+        print("  ! scalar tran trong anh xa phai rc 2, gap rc=%s" % rc2)
+        return False
+    return True
+
+
 def case_yaml_tab_bi_tu_choi(tmp):
     rc, _, _ = _dump_rc(tmp, "tab.yaml", "a:\n\tb: 1\n")
     return rc == RC_LOAD
@@ -2372,6 +2406,7 @@ CASES = [
     case_form_spec_khong_bat_buoc_thi_do,
     case_form_them_truong_phai_sinh_thi_do,
     case_form_thieu_protocol_thi_rc2_khong_phai_xanh,
+    case_yaml_scalar_trich_dan_lam_phan_tu_day,
     case_yaml_tab_bi_tu_choi,
     case_yaml_anchor_alias_bi_tu_choi,
     case_yaml_nhieu_document_bi_tu_choi,

@@ -537,6 +537,60 @@ def _release_root_from_arg(p: str | None) -> Path:
     return root
 
 
+def _is_nested_repo_copy(d: Path) -> bool:
+    """Thư mục `d` có phải GỐC của một bản sao kho tra-luat không?
+
+    Dấu hiệu = `SKILL.md` VÀ `VERSION` cùng nằm ngay tại `d`. Đo 09-08-2026 trên cây dev thật
+    (36 `SKILL.md` + 24 `VERSION`): cặp này chỉ đồng hiện ở gốc kho và ở các bản sao kho
+    (`.claude/worktrees/*`, `.codex/worktrees/*`, `work/f2-d-reopen-writer`) — 9 `SKILL.md` của
+    `claude-code-best-practice/**/.claude/skills/*` KHÔNG có `VERSION` kèm nên không bị bắt nhầm.
+    """
+    try:
+        return (d / "SKILL.md").is_file() and (d / "VERSION").is_file()
+    except OSError:
+        return False
+
+
+def _under_nested_repo_copy(rel: Path, root: Path) -> bool:
+    """F3-03 (#54): loại bản sao kho lồng theo DẤU HIỆU, không theo TÊN.
+
+    Cùng lớp bệnh với `.codex` ở `_RELEASE_EXCLUDE_DIRS` (xem chú thích 04-08-2026): một thư mục
+    con là BẢN SAO ĐẦY ĐỦ của kho ⇒ `_build_release_manifest` walk THƯ MỤC (không hỏi git) nên
+    đếm hết nó vào `extra_files`, `release-verify --strict` ĐỎ theo NƠI CHẠY chứ không theo nội
+    dung — manifest vẫn LÀNH (`failed: []`, `expected/checked` bằng nhau). `.gitignore` không cứu
+    được vì bộ dựng manifest không đi qua git.
+
+    Vì sao KHÔNG chỉ thêm tên `work` vào `_RELEASE_EXCLUDE_DIRS` — đã ĐO trên cây tạm dựng từ
+    base `578724e`, bản sao kho đặt ở 4 chỗ, cùng một đầu vào (184 tệp lồng mỗi ca):
+
+        nơi đặt bản sao          THEO TÊN (+`work`)   THEO DẤU HIỆU (hàm này)
+        work/f3-03-nested        extra_files 0        extra_files 0
+        .codex/worktrees/x       extra_files 0        extra_files 0
+        agent/wp99-g1-codex      extra_files 184  ←   extra_files 0
+        sandbox/copy             extra_files 184  ←   extra_files 0
+
+    `agent/wp<issue>-g<gen>-<executor>` KHÔNG phải ví dụ bịa: đó chính là khuôn tên nhánh/worktree
+    §4 `docs/PROTOCOL_DA_PHIEN.md` khai. Bảng tên sẽ trôi lệch ngay lượt sau — đúng lý do
+    `_RELEASE_EXCLUDE_DIRS` đã chọn khoá THƯ MỤC thay vì liệt kê từng báo cáo.
+
+    ★ CHỐT chống tự loại GỐC KHO (nếu thủng thì `file_count` về 0 và mọi cổng XANH GIẢ — đúng loại
+    "cổng xanh nhờ rc=0" CLAUDE.md cảnh báo): vòng lặp chỉ duyệt TỔ TIÊN của `rel`, tức
+    `rel.parts[:-1]`, nên `root` KHÔNG BAO GIỜ nằm trong tập được thử. Gốc kho có đủ
+    `SKILL.md`+`VERSION` mà vẫn được giữ — đo trên cây sạch: `file_count` 179, `required_missing`
+    rỗng, `SKILL.md` và `VERSION` đều còn trong gói. Ca này có test khoá.
+
+    Bản vá chữa `.codex`/`.claude` bằng CÙNG cơ chế (mọi worktree đều là bản sao đủ), nhưng KHÔNG
+    thay `_RELEASE_EXCLUDE_DIRS`: `rasoat`/`docs`/`changelog_archive` là thư mục nội dung, KHÔNG
+    phải bản sao kho, nên vẫn phải loại theo tên. Hai lớp bổ sung nhau, không lớp nào thừa.
+    """
+    cur = root
+    for name in rel.parts[:-1]:
+        cur = cur / name
+        if _is_nested_repo_copy(cur):
+            return True
+    return False
+
+
 def _release_should_include(path: Path, root: Path) -> bool:
     try:
         rel = path.relative_to(root)
@@ -546,6 +600,11 @@ def _release_should_include(path: Path, root: Path) -> bool:
         return False
     parts = set(rel.parts)
     if parts & _RELEASE_EXCLUDE_DIRS:
+        return False
+    # Đặt SAU phép loại theo tên (rẻ, thuần tập hợp) là CỐ Ý: `.claude`/`.codex`/
+    # `claude-code-best-practice` chiếm phần lớn cây dev và đã bị chặn ở dòng trên, nên phép dò
+    # tổ tiên tốn stat dưới đây chỉ chạy trên phần cây còn ứng cử. Ngữ nghĩa không phụ thuộc thứ tự.
+    if _under_nested_repo_copy(rel, root):
         return False
     if path.suffix.lower() in _RELEASE_EXCLUDE_SUFFIXES:
         return False

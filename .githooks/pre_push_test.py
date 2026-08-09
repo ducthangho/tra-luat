@@ -327,19 +327,68 @@ def case_unexpected_gate_exception_blocks_master(root):
 
 
 def case_missing_python_blocks_with_reason(root):
-    fx = PushFixture(root)
     restricted_path = root / "git-only-path"
     restricted_path.mkdir()
-    git_copy = restricted_path / Path(GIT_EXE).name
-    shutil.copy2(GIT_EXE, git_copy)
     no_python_env = os.environ.copy()
     no_python_env["PATH"] = str(restricted_path)
-    pushed = fx.push("HEAD:refs/heads/no-python", env=no_python_env)
-    return (
-        pushed.returncode != 0
-        and "Python is required" in pushed.stderr
-        and fx.remote_ref("refs/heads/no-python").returncode != 0
+    if shutil.which("python", path=no_python_env["PATH"]) is not None:
+        raise AssertionError("wp66 harness restricted PATH unexpectedly contains python")
+    if shutil.which("python3", path=no_python_env["PATH"]) is not None:
+        raise AssertionError("wp66 harness restricted PATH unexpectedly contains python3")
+
+    fx = PushFixture(root)
+    candidates = [GIT_EXE]
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        if directory:
+            candidate = shutil.which("git", path=directory)
+            if candidate:
+                candidates.append(candidate)
+
+    runnable_git = None
+    probe_failures = []
+    seen = set()
+    for candidate in candidates:
+        identity = os.path.normcase(os.path.realpath(candidate))
+        if identity in seen:
+            continue
+        seen.add(identity)
+        try:
+            probe = _run(
+                [candidate, "ls-remote", str(fx.remote)], cwd=root, env=no_python_env
+            )
+        except OSError as exc:
+            probe_failures.append("%s: %r" % (candidate, exc))
+            continue
+        if probe.returncode == 0:
+            runnable_git = candidate
+            break
+        probe_failures.append(
+            "%s: rc=%d stdout=%r stderr=%r"
+            % (candidate, probe.returncode, probe.stdout[-500:], probe.stderr[-500:])
+        )
+    if runnable_git is None:
+        raise AssertionError(
+            "wp66 harness could not resolve a runnable git under restricted PATH: %s"
+            % "; ".join(probe_failures)
+        )
+
+    pushed = _run(
+        [runnable_git, "push", "origin", "HEAD:refs/heads/no-python"],
+        cwd=fx.work,
+        env=no_python_env,
     )
+    remote_ref = fx.remote_ref("refs/heads/no-python")
+    if (
+        pushed.returncode == 0
+        or "Python is required" not in pushed.stderr
+        or remote_ref.returncode == 0
+    ):
+        raise AssertionError(
+            "wp66 hook did not block the missing-Python push with the required reason: "
+            "push_rc=%d remote_ref_rc=%d stderr_tail=%r"
+            % (pushed.returncode, remote_ref.returncode, pushed.stderr[-2000:])
+        )
+    return True
 
 
 CASES = [

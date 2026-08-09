@@ -114,9 +114,22 @@ if "--selftest" in sys.argv:
         configured = subprocess.check_output(
             ["git", "config", "--global", "--get-all", "safe.directory"], text=True
         ).splitlines()
-        normalized = {os.path.normcase(os.path.abspath(value)) for value in configured}
-        if os.path.normcase(os.path.abspath(expected_safe)) not in normalized:
-            print("fixture source gitdir is absent from isolated safe.directory")
+        same_directory = False
+        for value in configured:
+            try:
+                same_directory = os.path.samefile(value, expected_safe)
+            except OSError:
+                same_directory = (
+                    os.path.normcase(os.path.abspath(value))
+                    == os.path.normcase(os.path.abspath(expected_safe))
+                )
+            if same_directory:
+                break
+        if not same_directory:
+            print(
+                "fixture source gitdir is absent from isolated safe.directory: "
+                + repr({"expected": expected_safe, "configured": configured})
+            )
             raise SystemExit(11)
     with tempfile.TemporaryDirectory(prefix="wp52_abbrev_") as tmp:
         subprocess.run(["git", "init", "--quiet", tmp], check=True)
@@ -253,6 +266,8 @@ def case_absolute_git_dir_does_not_redirect_snapshot(root):
     linked_env["GIT_DIR"] = str(fx.work / ".git")
     linked_env["WP52_EXPECT_SAFE_DIRECTORY"] = str(fx.work / ".git")
     pushed = fx.push("HEAD:refs/heads/master", env=linked_env)
+    if pushed.returncode != 0:
+        print("  linked-worktree push stderr:\n" + pushed.stderr[-4000:])
     return (
         pushed.returncode == 0
         and fx.remote_ref("refs/heads/master").returncode == 0

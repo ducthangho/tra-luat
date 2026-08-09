@@ -1,0 +1,44 @@
+name: Mission Change Request
+description: Mo mot Mission Change Request theo docs/PROTOCOL_DA_PHIEN.md §3.1.1
+title: "[MCR] "
+labels:
+  - coord:mission
+  - state:proposed
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nguon normative cua khoi duoi day: `docs/PROTOCOL_DA_PHIEN.md` §3.1.1. Form nay chi thu thap
+        TRUONG; quy tac o lai trong protocol - doc §3.1.1 truoc khi dien.
+
+        Kho chua co label rieng cho MCR nen form muon `coord:mission`.
+  - type: textarea
+    id: spec
+    attributes:
+      label: Change Request spec (khoi YAML §3.1.1)
+      description: Giu nguyen tap truong. Thay gia tri placeholder, dung xoa khoa.
+      render: yaml
+      value: |
+        schema_version: 1
+        change_request_id: mcr-<mission>-<sequence>
+        mission_issue: <number>
+        requested_by: <actor>
+        reason: <text>
+        proposed_changes: []
+        affected_packets: []
+        landed_work_impact: none | corrective_packet | revert_packet
+        risk_change: none | increased | decreased
+        decision: pending | approved | rejected
+        decision_source: human
+        approved_by: <human-actor-or-null>
+        decision_url: <durable-url-or-null>
+        supersedes_revision: <integer>
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact analysis so bo
+      description: Packet nao giu, packet nao can revision/generation moi, packet nao chuyen cancelled, va ket qua da landed bi anh huong ra sao.
+    validations:
+      required: false

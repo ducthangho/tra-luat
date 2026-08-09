@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "review.schema.json",
+  "title": "Reviewer evidence",
+  "description": "Tap TRUONG cua khoi reviewer evidence, docs/PROTOCOL_DA_PHIEN.md §7 va §8. Chi hinh thuc hoa truong va enum; quy tac o lai §7/§8. `tests[]` dung chung dinh nghia voi handoff qua `$ref`.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "provider",
+    "role",
+    "session_id",
+    "reviewed_sha",
+    "independent_from_executor_session",
+    "review_axes",
+    "tests",
+    "verdict",
+    "assurance",
+    "findings"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+    "generation": {"type": "integer", "minimum": 1},
+    "provider": {"enum": ["claude", "codex", "human"]},
+    "role": {"const": "reviewer"},
+    "session_id": {"type": "string", "minLength": 1},
+    "reviewed_sha": {"$ref": "handoff.schema.json#/$defs/git_oid"},
+    "independent_from_executor_session": {
+      "description": "Khoi §7 khai dung `true`. Xem docs/PROTOCOL_DA_PHIEN.md §7 va §8.",
+      "type": "boolean",
+      "const": true
+    },
+    "review_axes": {
+      "description": "Hai truc review khai trong khoi §7. Xem docs/PROTOCOL_DA_PHIEN.md §7 va §13.",
+      "type": "array",
+      "items": {"enum": ["spec", "standards_security"]},
+      "allOf": [
+        {"contains": {"const": "spec"}},
+        {"contains": {"const": "standards_security"}}
+      ]
+    },
+    "tests": {"type": "array", "items": {"$ref": "handoff.schema.json#/$defs/test_result"}},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+    "verdict": {"enum": ["approve", "changes_requested", "blocked"]},
+    "assurance": {
+      "description": "Bon muc review, docs/PROTOCOL_DA_PHIEN.md §8.",
+      "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]
+    },
+    "evidence_url": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "finding": {
+      "description": "Finding co stable ID, docs/PROTOCOL_DA_PHIEN.md §7. Hai dang: chuoi ID tran, hoac object mang them severity/file/line.",
+      "anyOf": [
+        {"type": "string", "minLength": 1},
+        {
+          "type": "object",
+          "required": ["id"],
+          "additionalProperties": true,
+          "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "severity": {"type": "string", "minLength": 1},
+            "file": {"type": "string"},
+            "line": {"type": "integer"},
+            "evidence": {"type": "string"},
+            "blocking": {"type": "boolean"}
+          }
+        }
+      ]
+    }
+  }
+}

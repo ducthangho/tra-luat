@@ -1,0 +1,52 @@
+name: Mission
+description: Mo mot Mission Issue theo docs/PROTOCOL_DA_PHIEN.md §3.1
+title: "[Mission] "
+labels:
+  - coord:mission
+  - state:proposed
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nguon normative cua khoi duoi day: `docs/PROTOCOL_DA_PHIEN.md` §3.1. Form nay chi thu thap
+        TRUONG; quy tac o lai trong protocol - doc §3.1 truoc khi dien.
+
+        `.github/checks/protocol_schema_test.py --check-form` doi chieu tap truong NGUOC ve §3.1.
+  - type: textarea
+    id: spec
+    attributes:
+      label: Mission spec (khoi YAML §3.1)
+      description: Giu nguyen tap truong. Thay gia tri placeholder, dung xoa khoa.
+      render: yaml
+      value: |
+        schema_version: 1
+        mission_id: gh-<issue>
+        revision: 1
+        plan_hash: <sha256>
+        supersedes_revision: null
+        change_request: null
+        base_sha: <canonical-sha>
+        objective: <muc tieu>
+        acceptance_criteria: []
+        risk: normal | sensitive
+        requires_live: false
+        envelope:
+          max_packets: 20
+          max_successor_depth: 5
+          max_attempts_per_packet: 3
+          max_run_minutes: 45
+          same_failure_limit: 2
+          max_parallel_workers: 2
+          max_agent_invocations: 30
+          max_cloud_minutes: 360
+          max_inbox_backlog: 100
+          provider_budgets: {}
+    validations:
+      required: true
+  - type: textarea
+    id: nguon-quyet-dinh
+    attributes:
+      label: Nguon quyet dinh
+      description: Link ben toi quyet dinh, MCR hoac roadmap lam can cu cho mission nay.
+    validations:
+      required: false

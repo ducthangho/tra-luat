@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state.schema.json",
+  "title": "State projection",
+  "description": "Tap TRUONG cua JSON state projection, docs/PROTOCOL_DA_PHIEN.md §3.3 (cong §3.1, §4, §12). Chi hinh thuc hoa truong va enum; quy tac reconcile va PAUSE o lai §3.3.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "mission_id",
+    "mission_revision",
+    "mission_state",
+    "packets",
+    "last_consumed_event_id",
+    "state_hash"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "mission_id": {"$ref": "land.schema.json#/$defs/mission_id"},
+    "mission_revision": {"type": "integer", "minimum": 1},
+    "mission_state": {
+      "description": "Trang thai mission, docs/PROTOCOL_DA_PHIEN.md §3.1.",
+      "enum": ["proposed", "running", "paused", "blocked", "awaiting_land", "complete", "cancelled"]
+    },
+    "plan_hash": {"$ref": "handoff.schema.json#/$defs/sha256"},
+    "generation": {"type": "integer", "minimum": 1},
+    "last_consumed_event_id": {"type": ["string", "integer", "null"]},
+    "state_hash": {"$ref": "handoff.schema.json#/$defs/sha256"},
+    "prev_event_hash": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "packets": {"type": "array", "items": {"$ref": "#/$defs/packet_projection"}}
+  },
+  "$defs": {
+    "packet_projection": {
+      "type": "object",
+      "required": ["packet_id", "revision", "spec_hash", "state", "generation"],
+      "additionalProperties": true,
+      "properties": {
+        "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+        "revision": {"type": "integer", "minimum": 1},
+        "spec_hash": {"$ref": "handoff.schema.json#/$defs/sha256"},
+        "state": {
+          "description": "Trang thai packet, docs/PROTOCOL_DA_PHIEN.md §4; thuat ngu hoan tat o §10.2.",
+          "enum": [
+            "proposed",
+            "ready",
+            "leased",
+            "running",
+            "reviewing",
+            "accepted",
+            "integrated",
+            "landed",
+            "paused",
+            "blocked",
+            "cancelled",
+            "stale"
+          ]
+        },
+        "generation": {"type": "integer", "minimum": 1},
+        "lease": {"$ref": "#/$defs/lease"},
+        "budget": {"$ref": "#/$defs/budget"},
+        "review_assurance": {
+          "enum": [
+            "cross_approved",
+            "same_provider_approved",
+            "human_audited",
+            "review_deferred",
+            null
+          ]
+        },
+        "head_sha": {"$ref": "handoff.schema.json#/$defs/git_oid_or_null"},
+        "handoff_url": {"type": ["string", "null"]}
+      }
+    },
+    "lease": {
+      "description": "Khoi lease, docs/PROTOCOL_DA_PHIEN.md §4. `null` khi packet khong dang giu lease.",
+      "type": ["object", "null"],
+      "required": [
+        "packet_id",
+        "executor",
+        "environment",
+        "branch",
+        "write_set_hash",
+        "generation",
+        "heartbeat_at",
+        "lease_until"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+        "executor": {"enum": ["claude", "codex"]},
+        "environment": {"enum": ["cloud", "local"]},
+        "branch": {"type": "string", "minLength": 1},
+        "write_set_hash": {"$ref": "handoff.schema.json#/$defs/sha256"},
+        "generation": {"type": "integer", "minimum": 1},
+        "heartbeat_at": {"type": "string", "minLength": 1},
+        "lease_until": {"type": "string", "minLength": 1}
+      }
+    },
+    "budget": {
+      "description": "`used / reserved / limit`, docs/PROTOCOL_DA_PHIEN.md §12.",
+      "type": ["object", "null"],
+      "required": ["used", "reserved", "limit"],
+      "additionalProperties": true,
+      "properties": {
+        "used": {"type": "integer", "minimum": 0},
+        "reserved": {"type": "integer", "minimum": 0},
+        "limit": {"type": ["integer", "null"], "minimum": 0}
+      }
+    }
+  }
+}

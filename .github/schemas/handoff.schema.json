@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "handoff.schema.json",
+  "title": "Executor handoff",
+  "description": "Tap TRUONG cua khoi handoff Executor, docs/PROTOCOL_DA_PHIEN.md §7. Chi hinh thuc hoa truong va enum; quy tac o lai §7. `additionalProperties` mo vi §7 chot tap truong TOI THIEU.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "spec_hash",
+    "provider",
+    "role",
+    "session_id",
+    "head_sha",
+    "status",
+    "next_role",
+    "manual_next_action",
+    "copyable_prompt"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+    "generation": {"type": "integer", "minimum": 1},
+    "spec_hash": {"$ref": "#/$defs/sha256"},
+    "provider": {"enum": ["claude", "codex"]},
+    "role": {"const": "executor"},
+    "session_id": {"type": "string", "minLength": 1},
+    "base_sha": {"$ref": "#/$defs/git_oid"},
+    "head_sha": {"$ref": "#/$defs/git_oid_or_null"},
+    "status": {"enum": ["done", "needs_followup", "blocked"]},
+    "summary": {"type": "string", "minLength": 1},
+    "changed_paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test_result"}},
+    "test_selection": {"$ref": "#/$defs/test_selection"},
+    "remaining_work": {"type": "array"},
+    "next_role": {"enum": ["reviewer", "executor", "land_operator", "human", null]},
+    "manual_next_action": {"type": ["string", "null"]},
+    "copyable_prompt": {"type": ["string", "null"]},
+    "failure": {"$ref": "#/$defs/failure"},
+    "successors": {"type": "array", "items": {"$ref": "#/$defs/successor"}}
+  },
+  "$defs": {
+    "sha256": {
+      "description": "SHA-256 dang hex thuong, du 64 ky tu.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "git_oid": {
+      "description": "Git object id DAY DU 40 hex, KHONG null - dung cho `<git-oid>` cua docs/PROTOCOL_DA_PHIEN.md §7.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "git_oid_or_null": {
+      "description": "Git object id day du 40 hex HOAC null - dung dung cho `<git-oid-or-null>` cua docs/PROTOCOL_DA_PHIEN.md §7.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "gate_tier": {
+      "description": "Tier gate T0-T5, docs/PROTOCOL_DA_PHIEN.md §10.1.",
+      "enum": ["T0", "T1", "T2", "T3", "T4", "T5"]
+    },
+    "test_result": {
+      "description": "Mot phan tu `tests[]`, docs/PROTOCOL_DA_PHIEN.md §7. Dinh nghia MOT ban o day; review/land `$ref` toi.",
+      "type": "object",
+      "required": ["name", "status", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "status": {"enum": ["passed", "failed", "not_run"]},
+        "evidence": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "if": {"type": "object", "required": ["status"], "properties": {"status": {"const": "not_run"}}},
+      "then": {"required": ["reason"]}
+    },
+    "test_selection": {
+      "description": "Selector evidence, docs/PROTOCOL_DA_PHIEN.md §7 va §10.1.",
+      "type": "object",
+      "required": ["gate_tier", "tested_sha"],
+      "additionalProperties": true,
+      "properties": {
+        "gate_tier": {"$ref": "#/$defs/gate_tier"},
+        "selector_policy_sha": {"type": ["string", "null"], "minLength": 1},
+        "tested_sha": {"$ref": "#/$defs/git_oid"},
+        "selected_groups": {"type": "array", "items": {"type": "string"}},
+        "full_fallback_reason": {"type": ["string", "null"]}
+      }
+    },
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "properties": {
+        "fingerprint": {"type": ["string", "null"]},
+        "category": {"enum": ["content", "quota", "infrastructure", "permission", null]}
+      }
+    },
+    "successor": {
+      "description": "Seed cua packet ke nhiem, docs/PROTOCOL_DA_PHIEN.md §7.",
+      "type": "object",
+      "required": ["successor_key", "objective"],
+      "additionalProperties": true,
+      "properties": {
+        "successor_key": {"type": "string", "minLength": 1},
+        "objective": {"type": "string", "minLength": 1},
+        "write_set": {"type": "array"},
+        "depends_on": {"type": "array"},
+        "executor": {"enum": ["claude", "codex"]},
+        "environment": {"enum": ["cloud", "local"]},
+        "acceptance_criteria": {"type": "array"}
+      }
+    }
+  }
+}

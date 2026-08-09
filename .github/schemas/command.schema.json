@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "command.schema.json",
+  "title": "Orchestration command",
+  "description": "Tap lenh dong cua docs/PROTOCOL_DA_PHIEN.md §11, cong typed input cua §10.2. Chi hinh thuc hoa truong va enum; allowlist actor, quyen va audit o lai §10.2/§11.",
+  "type": "object",
+  "required": ["schema_version", "command", "actor"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "command": {
+      "enum": [
+        "/mission start",
+        "/mission pause",
+        "/mission resume",
+        "/packet retry",
+        "/packet cancel",
+        "/packet reroute",
+        "/packet preserve",
+        "/land prepare",
+        "/land apply"
+      ]
+    },
+    "actor": {"type": "string", "minLength": 1},
+    "client": {
+      "description": "Ba client tuong duong, docs/PROTOCOL_DA_PHIEN.md §10.2.",
+      "enum": ["land_packets_cli", "issue_comment", "workflow_dispatch"]
+    },
+    "mission_id": {"$ref": "land.schema.json#/$defs/mission_id"},
+    "packet_id": {"type": "string", "pattern": "^wp[0-9]+$"},
+    "head_sha": {"$ref": "handoff.schema.json#/$defs/git_oid"},
+    "override": {"type": "boolean"},
+    "reason": {"type": "string", "minLength": 1},
+    "issued_at": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"type": "object", "required": ["command"], "properties": {"command": {"const": "/land apply"}}},
+      "then": {"required": ["mission_id", "head_sha"]}
+    },
+    {
+      "if": {"type": "object", "required": ["override"], "properties": {"override": {"const": true}}},
+      "then": {"required": ["reason"]}
+    }
+  ]
+}

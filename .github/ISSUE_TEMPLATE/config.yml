@@ -1,0 +1,12 @@
+# Giu blank issue MO co chu dinh. Ba form o day phuc vu Mission/Packet/MCR cua
+# docs/PROTOCOL_DA_PHIEN.md; issue thuong (bug, cau hoi, ghi chu van hanh) van phai mo duoc ma
+# khong bi ep vao mot khuon dieu phoi khong hop. Dong cua blank issue la mot thay doi CHINH SACH
+# ve cach kho nhan bao cao, khong phai he qua phu cua mot packet hinh thuc hoa schema.
+blank_issues_enabled: true
+contact_links:
+  - name: Protocol da phien Claude-Codex
+    url: https://github.com/ducthangho/tra-luat/blob/master/docs/PROTOCOL_DA_PHIEN.md
+    about: Nguon normative cua Mission (§3.1), Mission Change Request (§3.1.1) va Work Packet (§3.2). Doc truoc khi mo mot trong ba form tren.
+  - name: Mau handoff phien ke nhiem
+    url: https://github.com/ducthangho/tra-luat/blob/master/docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md
+    about: Goi handoff bat buoc va prompt sao chep duoc cho Reviewer/Executor ke tiep.

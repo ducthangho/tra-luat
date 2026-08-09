@@ -1,0 +1,45 @@
+name: Work Packet
+description: Mo mot Work Packet Issue theo docs/PROTOCOL_DA_PHIEN.md §3.2
+title: "[WP] "
+labels:
+  - coord:packet
+  - state:proposed
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nguon normative cua khoi duoi day: `docs/PROTOCOL_DA_PHIEN.md` §3.2. Form nay chi thu thap
+        TRUONG; quy tac o lai trong protocol - doc §3.2 truoc khi dien.
+
+        Bon truong cua khoi thu hai §3.2 - `change_policy_sha`, `effective_write_set`, `required_checks`,
+        `land_obligations` - co y KHONG co mat trong form nay; xem §3.2.
+  - type: textarea
+    id: spec
+    attributes:
+      label: Packet spec (khoi YAML §3.2)
+      description: Giu nguyen tap truong. Thay gia tri placeholder, dung xoa khoa.
+      render: yaml
+      value: |
+        schema_version: 1
+        packet_id: wp<issue>
+        mission_issue: <number>
+        revision: 1
+        spec_hash: <sha256>
+        objective: <mot ket qua tu du>
+        write_set:
+          - type: exact | prefix
+            path: <repo-relative-path>
+        depends_on: []
+        executor: claude | codex
+        environment: cloud | local
+        risk: normal | sensitive
+        acceptance_criteria: []
+    validations:
+      required: true
+  - type: textarea
+    id: nguon-quyet-dinh
+    attributes:
+      label: Nguon quyet dinh
+      description: Link ben toi Mission revision, MCR hoac dong roadmap lam can cu cho packet nay.
+    validations:
+      required: false

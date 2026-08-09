@@ -537,10 +537,33 @@ def _release_root_from_arg(p: str | None) -> Path:
     return root
 
 
+_NESTED_REPO_MARKERS = (("SKILL.md",), ("VERSION",), ("scripts", "tl.py"))
+
+
+def _is_nested_repo_copy(directory: Path) -> bool:
+    """Recognize a complete nested tra-luat tree without trusting its directory name."""
+    markers = (directory.joinpath(*parts) for parts in _NESTED_REPO_MARKERS)
+    return all(marker.is_file() and not marker.is_symlink() for marker in markers)
+
+
+def _under_nested_repo_copy(path: Path, root: Path) -> bool:
+    """Return whether ``path`` is below a nested repo root, never the release root itself."""
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        return False
+    for depth in range(1, len(rel.parts)):
+        if _is_nested_repo_copy(root.joinpath(*rel.parts[:depth])):
+            return True
+    return False
+
+
 def _release_should_include(path: Path, root: Path) -> bool:
     try:
         rel = path.relative_to(root)
     except ValueError:
+        return False
+    if _under_nested_repo_copy(path, root):
         return False
     if len(rel.parts) > 2 and rel.parts[:2] == ("scripts", "test_fragments"):
         return False
@@ -833,6 +856,9 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
     expected_paths = set(expected)
     extra = sorted(current_paths - expected_paths)
     missing_from_current_manifest = sorted(expected_paths - current_paths)
+    if missing_from_current_manifest:
+        ok = False
+        errors.append("CURRENT_MANIFEST_PATHS_NOT_INCLUDED:" + ",".join(missing_from_current_manifest[:10]))
     if strict and extra:
         ok = False
     required_missing = [x for x in (list(_RELEASE_REQUIRED_FILES) + list(_RELEASE_REQUIRED_WORKFLOWS)) if not (root / x).exists()]

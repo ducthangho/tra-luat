@@ -99,17 +99,22 @@ import os
 import pathlib
 import subprocess
 import sys
+import tempfile
 
 if os.environ.get("WP52_GATE_CRASH"):
     raise RuntimeError("fixture gate crash")
 if os.environ.get("WP52_GATE_FAIL") and "--selftest" in sys.argv:
     print("0/1 dat")
     raise SystemExit(9)
+if os.environ.get("WP52_GATE_SILENT") and "--selftest" in sys.argv:
+    raise SystemExit(0)
 if "--selftest" in sys.argv:
-    subprocess.run(["git", "config", "core.abbrev", "8"], check=True)
-    effective = subprocess.check_output(
-        ["git", "config", "--get", "core.abbrev"], text=True
-    ).strip()
+    with tempfile.TemporaryDirectory(prefix="wp52_abbrev_") as tmp:
+        subprocess.run(["git", "init", "--quiet", tmp], check=True)
+        subprocess.run(["git", "config", "core.abbrev", "8"], cwd=tmp, check=True)
+        effective = subprocess.check_output(
+            ["git", "config", "--get", "core.abbrev"], cwd=tmp, text=True
+        ).strip()
     if effective != "8":
         print("fixture local core.abbrev override was masked: " + effective)
         raise SystemExit(10)
@@ -117,26 +122,54 @@ if "release-bundle" in sys.argv:
     out = pathlib.Path(sys.argv[sys.argv.index("--out") + 1])
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(b"wp52 deterministic fixture bundle\\n")
-print(json.dumps({"ok": True, "expected": 179, "checked": 179}))
+    print(json.dumps({
+        "ok": True,
+        "file_count": 179,
+        "reproducible": True,
+        "bundle_sha256": "a" * 64,
+    }))
+elif "release-verify" in sys.argv:
+    print(json.dumps({
+        "ok": True,
+        "expected_file_count": 179,
+        "checked_file_count": 179,
+        "failed": [],
+        "extra_files": [],
+        "missing_from_current_manifest": [],
+        "required_missing": [],
+        "errors": [],
+    }))
+else:
+    print(json.dumps({"ok": True}))
 if "--selftest" in sys.argv:
     print("1/1 dat")
 """
         (scripts / "tl.py").write_text(tl_stub, encoding="utf-8", newline="\n")
-        for name in ("tl_boot.py", "gen_instructions.py"):
-            (scripts / name).write_text("print('1/1 dat')\n", encoding="utf-8", newline="\n")
+        (scripts / "tl_boot.py").write_text(
+            "print('tl fixture')\n", encoding="utf-8", newline="\n"
+        )
+        (scripts / "gen_instructions.py").write_text(
+            "print('1/1 dat')\n", encoding="utf-8", newline="\n"
+        )
         for name in (
             "__init__.py", "deterministic.py", "jsonio.py", "workflow.py", "release.py",
             "live.py", "zip_ingest.py", "ocr.py", "chunking.py", "command_registry.py",
         ):
             (core / name).write_text("# gate fixture\n", encoding="utf-8", newline="\n")
-        for name in ("eol_policy.py", "eol_policy_test.py"):
-            (hooks / name).write_text("print('1/1 dat')\n", encoding="utf-8", newline="\n")
+        (hooks / "eol_policy.py").write_text(
+            "print('{\"ok\": true, \"violations\": []}')\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        (hooks / "eol_policy_test.py").write_text(
+            "print('1/1 dat')\n", encoding="utf-8", newline="\n"
+        )
         (checks / "bundle_fragment_check.py").write_text(
             "print('{\"ok\": true}')\n", encoding="utf-8", newline="\n"
         )
         _run(
-            ["git", "add", "scripts", ".github/checks", ".githooks/eol_policy.py",
-             ".githooks/eol_policy_test.py"],
+            ["git", "add", "scripts", ".github/checks", ".githooks/pre-push",
+             ".githooks/eol_policy.py", ".githooks/eol_policy_test.py"],
             cwd=self.work,
             check=True,
         )
@@ -165,6 +198,43 @@ def case_master_requires_green_full_gate(root):
         return False
     allowed = fx.push("HEAD:refs/heads/master")
     return allowed.returncode == 0 and fx.remote_ref("refs/heads/master").returncode == 0
+
+
+def case_master_gates_exact_pushed_snapshot(root):
+    fx = PushFixture(root)
+    fx.install_gate_stubs()
+    tl_path = fx.work / "scripts" / "tl.py"
+    green_source = tl_path.read_text(encoding="utf-8")
+    marker = "import tempfile\n\n"
+    if green_source.count(marker) != 1:
+        raise AssertionError("fixture tl.py import marker drifted")
+    red_source = green_source.replace(
+        marker,
+        marker + "if '--selftest' in sys.argv:\n    raise SystemExit(9)\n\n",
+    )
+    tl_path.write_text(red_source, encoding="utf-8", newline="\n")
+    _run(["git", "commit", "--quiet", "-am", "red candidate"], cwd=fx.work, check=True)
+    red_candidate = _run(["git", "rev-parse", "HEAD"], cwd=fx.work, check=True).stdout.strip()
+    tl_path.write_text(green_source, encoding="utf-8", newline="\n")
+    _run(["git", "commit", "--quiet", "-am", "green current tree"], cwd=fx.work, check=True)
+
+    pushed = fx.push("%s:refs/heads/master" % red_candidate)
+    return (
+        pushed.returncode != 0
+        and fx.remote_ref("refs/heads/master").returncode != 0
+    )
+
+
+def case_zero_rc_without_positive_evidence_blocks_master(root):
+    fx = PushFixture(root)
+    fx.install_gate_stubs()
+    silent_env = os.environ.copy()
+    silent_env["WP52_GATE_SILENT"] = "1"
+    pushed = fx.push("HEAD:refs/heads/master", env=silent_env)
+    return (
+        pushed.returncode != 0
+        and fx.remote_ref("refs/heads/master").returncode != 0
+    )
 
 
 def case_multi_ref_is_atomic_and_delete_tag_are_ignored(root):
@@ -238,6 +308,8 @@ def case_missing_python_blocks_with_reason(root):
 CASES = [
     case_writer_branch_requires_eol_ancestry,
     case_master_requires_green_full_gate,
+    case_master_gates_exact_pushed_snapshot,
+    case_zero_rc_without_positive_evidence_blocks_master,
     case_multi_ref_is_atomic_and_delete_tag_are_ignored,
     case_missing_required_object_blocks_push,
     case_unexpected_gate_exception_blocks_master,

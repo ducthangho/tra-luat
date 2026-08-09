@@ -17,9 +17,11 @@ else
 fi
 
 exec "$PY" -c '
-import subprocess
 import hashlib
+import json
 import os
+import re
+import subprocess
 import sys
 import tempfile
 
@@ -27,7 +29,66 @@ EOL_BASE = "1880346d2be3c0be9a93de7624ee108d99b6c88c"
 ZERO = b"0"
 
 
-def run_command(label, args, root, env):
+def positive_evidence(kind, stdout):
+    text = stdout.strip()
+    if kind == "compile":
+        expected = "WP52_PY_COMPILE_OK=13"
+        return text == expected, text or "missing compile sentinel"
+    if kind == "selftest":
+        pairs = re.findall(r"(\d+)/(\d+)", text)
+        if not pairs:
+            return False, "missing N/N selftest evidence"
+        passed, total = (int(value) for value in pairs[-1])
+        return passed == total and total > 0, "%d/%d" % (passed, total)
+    if kind == "version":
+        return bool(re.match(r"^tl\s+\S+", text)), text or "missing version evidence"
+    try:
+        payload = json.loads(text)
+    except (TypeError, ValueError) as exc:
+        return False, "invalid JSON evidence: %s" % exc
+    if not isinstance(payload, dict) or payload.get("ok") is not True:
+        return False, "JSON evidence lacks ok=true"
+    if kind == "eol_json" and payload.get("violations"):
+        return False, "EOL survey reports violations"
+    if kind == "fragment_json" and payload.get("failed"):
+        return False, "bundle fragment check reports failures"
+    if kind == "doc_json" and payload.get("flags"):
+        return False, "doc claims reports flags"
+    if kind == "verify_json":
+        expected = payload.get("expected_file_count")
+        checked = payload.get("checked_file_count")
+        if not isinstance(expected, int) or expected <= 0 or checked != expected:
+            return False, "release verify expected/checked mismatch"
+        for key in (
+            "failed",
+            "extra_files",
+            "missing_from_current_manifest",
+            "required_missing",
+            "errors",
+        ):
+            if payload.get(key):
+                return False, "release verify reports %s" % key
+        return True, "ok=true expected=checked=%d" % expected
+    if kind == "bundle_json":
+        if payload.get("file_count") != 179 or payload.get("reproducible") is not True:
+            return False, "release bundle lacks 179-file reproducible evidence"
+        digest = payload.get("bundle_sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            return False, "release bundle lacks SHA-256 evidence"
+        return True, "ok=true files=179 sha256=%s" % digest
+    return True, "ok=true"
+
+
+def write_failure_output(stdout, stderr):
+    for value in (stdout, stderr):
+        if value.strip():
+            tail = value.rstrip()[-4000:]
+            if len(value.rstrip()) > len(tail):
+                sys.stderr.write("... output truncated ...\n")
+            sys.stderr.write(tail + "\n")
+
+
+def run_command(label, args, root, env, evidence_kind):
     proc = subprocess.run(
         args,
         cwd=root,
@@ -39,32 +100,42 @@ def run_command(label, args, root, env):
         errors="replace",
     )
     if proc.returncode == 0:
-        sys.stderr.write("pre-push gate OK: %s\n" % label)
-        return True
+        valid, evidence = positive_evidence(evidence_kind, proc.stdout)
+        if valid:
+            sys.stderr.write("pre-push gate OK: %s (%s)\n" % (label, evidence))
+            return True
+        sys.stderr.write(
+            "pre-push BLOCKED: gate %s returned rc=0 without positive evidence: %s.\n"
+            % (label, evidence)
+        )
+        write_failure_output(proc.stdout, proc.stderr)
+        return False
     sys.stderr.write("pre-push BLOCKED: gate %s failed (rc=%d).\n" % (label, proc.returncode))
-    if proc.stdout.strip():
-        sys.stderr.write(proc.stdout.rstrip() + "\n")
-    if proc.stderr.strip():
-        sys.stderr.write(proc.stderr.rstrip() + "\n")
+    write_failure_output(proc.stdout, proc.stderr)
     return False
 
 
-def run_full_gate():
-    root_proc = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
+def run_git_step(label, args, env):
+    proc = subprocess.run(
+        args,
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
     )
-    if root_proc.returncode != 0 or not root_proc.stdout.strip():
-        sys.stderr.write(
-            "pre-push BLOCKED: cannot locate the worktree for the master gate (rc=%d).\n"
-            % root_proc.returncode
-        )
+    if proc.returncode == 0:
+        return proc.stdout.strip()
+    sys.stderr.write("pre-push BLOCKED: %s failed (rc=%d).\n" % (label, proc.returncode))
+    write_failure_output(proc.stdout, proc.stderr)
+    return None
+
+
+def run_full_gate(master_sha):
+    root = run_git_step("locate worktree", ["git", "rev-parse", "--show-toplevel"], os.environ)
+    if not root:
         return False
-    root = root_proc.stdout.strip()
     with tempfile.TemporaryDirectory(prefix="wp52_pre_push_gate_") as tmp:
         gate_env = os.environ.copy()
         gate_env["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -75,52 +146,114 @@ def run_full_gate():
         with open(gate_config, "w", encoding="utf-8", newline="\n") as stream:
             stream.write("[core]\n\tabbrev = 7\n")
         gate_env["GIT_CONFIG_GLOBAL"] = gate_config
+
+        snapshot = os.path.join(tmp, "snapshot")
+        cloned = run_git_step(
+            "clone exact master-gate snapshot",
+            ["git", "clone", "--quiet", "--no-local", "--no-checkout", root, snapshot],
+            gate_env,
+        )
+        if cloned is None:
+            return False
+        checked_out = run_git_step(
+            "checkout exact master-gate snapshot",
+            ["git", "-C", snapshot, "checkout", "--quiet", "--detach", master_sha],
+            gate_env,
+        )
+        if checked_out is None:
+            return False
+        readback = run_git_step(
+            "read back master-gate snapshot",
+            ["git", "-C", snapshot, "rev-parse", "HEAD"],
+            gate_env,
+        )
+        if readback != master_sha:
+            sys.stderr.write(
+                "pre-push BLOCKED: master-gate snapshot readback mismatch (%s != %s).\n"
+                % (readback or "missing", master_sha)
+            )
+            return False
+        abbrev = run_git_step(
+            "read back core.abbrev",
+            ["git", "-C", snapshot, "config", "--get", "core.abbrev"],
+            gate_env,
+        )
+        if abbrev != "7":
+            sys.stderr.write(
+                "pre-push BLOCKED: master-gate snapshot requires effective core.abbrev=7; got %s.\n"
+                % (abbrev or "missing")
+            )
+            return False
+        sys.stderr.write("pre-push gate OK: exact snapshot %s, core.abbrev=7\n" % master_sha)
+
+        compile_targets = [
+            "scripts/tl.py",
+            "scripts/tl_boot.py",
+            "scripts/gen_instructions.py",
+            "scripts/tl_core/__init__.py",
+            "scripts/tl_core/deterministic.py",
+            "scripts/tl_core/jsonio.py",
+            "scripts/tl_core/workflow.py",
+            "scripts/tl_core/release.py",
+            "scripts/tl_core/live.py",
+            "scripts/tl_core/zip_ingest.py",
+            "scripts/tl_core/ocr.py",
+            "scripts/tl_core/chunking.py",
+            "scripts/tl_core/command_registry.py",
+        ]
+        compile_code = (
+            "import py_compile; paths="
+            + repr(compile_targets)
+            + "; [py_compile.compile(path, doraise=True) for path in paths]; "
+            + "print(\"WP52_PY_COMPILE_OK=%d\" % len(paths))"
+        )
         commands = [
+            ("py_compile", [sys.executable, "-c", compile_code], "compile"),
             (
-                "py_compile",
-                [
-                    sys.executable,
-                    "-m",
-                    "py_compile",
-                    "scripts/tl.py",
-                    "scripts/tl_boot.py",
-                    "scripts/gen_instructions.py",
-                    "scripts/tl_core/__init__.py",
-                    "scripts/tl_core/deterministic.py",
-                    "scripts/tl_core/jsonio.py",
-                    "scripts/tl_core/workflow.py",
-                    "scripts/tl_core/release.py",
-                    "scripts/tl_core/live.py",
-                    "scripts/tl_core/zip_ingest.py",
-                    "scripts/tl_core/ocr.py",
-                    "scripts/tl_core/chunking.py",
-                    "scripts/tl_core/command_registry.py",
-                ],
+                "eol-policy selftest",
+                [sys.executable, ".githooks/eol_policy_test.py"],
+                "selftest",
             ),
-            ("eol-policy selftest", [sys.executable, ".githooks/eol_policy_test.py"]),
-            ("eol-policy survey", [sys.executable, ".githooks/eol_policy.py", "--all", "--json"]),
+            (
+                "eol-policy survey",
+                [sys.executable, ".githooks/eol_policy.py", "--all", "--json"],
+                "eol_json",
+            ),
             (
                 "bundled-fragment check",
                 [sys.executable, ".github/checks/bundle_fragment_check.py", "--json"],
+                "fragment_json",
             ),
-            ("gen_instructions selftest", [sys.executable, "scripts/gen_instructions.py", "--selftest"]),
-            ("tl selftest", [sys.executable, "scripts/tl.py", "--selftest"]),
+            (
+                "gen_instructions selftest",
+                [sys.executable, "scripts/gen_instructions.py", "--selftest"],
+                "selftest",
+            ),
+            ("tl selftest", [sys.executable, "scripts/tl.py", "--selftest"], "selftest"),
             (
                 "workflow-audit strict",
                 [sys.executable, "scripts/tl.py", "workflow-audit", "--strict", "--json"],
+                "json",
             ),
-            ("golden-test", [sys.executable, "scripts/tl.py", "golden-test", "--json"]),
+            (
+                "golden-test",
+                [sys.executable, "scripts/tl.py", "golden-test", "--json"],
+                "json",
+            ),
             (
                 "doc-claims-check strict",
                 [sys.executable, "scripts/tl.py", "doc-claims-check", "--strict", "--json"],
+                "doc_json",
             ),
             (
                 "determinism-audit strict",
                 [sys.executable, "scripts/tl.py", "determinism-audit", "--strict", "--json"],
+                "json",
             ),
             (
                 "release-check full",
                 [sys.executable, "scripts/tl.py", "release-check", "--full", "--json"],
+                "json",
             ),
             (
                 "release-verify strict",
@@ -132,18 +265,20 @@ def run_full_gate():
                     "--strict",
                     "--json",
                 ],
+                "verify_json",
             ),
         ]
-        for label, args in commands:
-            if not run_command(label, args, root, gate_env):
+        for label, args, evidence_kind in commands:
+            if not run_command(label, args, snapshot, gate_env, evidence_kind):
                 return False
         bundles = [os.path.join(tmp, "a.zip"), os.path.join(tmp, "b.zip")]
         for number, bundle in enumerate(bundles, 1):
             if not run_command(
                 "release-bundle %d" % number,
                 [sys.executable, "scripts/tl.py", "release-bundle", "--out", bundle, "--json"],
-                root,
+                snapshot,
                 gate_env,
+                "bundle_json",
             ):
                 return False
         digests = []
@@ -159,14 +294,15 @@ def run_full_gate():
         return run_command(
             "tl_boot smoke",
             [sys.executable, "scripts/tl_boot.py", "--version"],
-            root,
+            snapshot,
             gate_env,
+            "version",
         )
 
 
 def main():
     rows = sys.stdin.buffer.read().splitlines()
-    master_requested = False
+    master_sha = None
     for number, raw in enumerate(rows, 1):
         fields = raw.split()
         if len(fields) != 4:
@@ -177,9 +313,12 @@ def main():
             continue
         if local_sha and set(local_sha) == {ZERO[0]}:
             continue
-        if remote_ref == b"refs/heads/master":
-            master_requested = True
         sha = local_sha.decode("ascii", "strict")
+        if remote_ref == b"refs/heads/master":
+            if master_sha is not None and master_sha != sha:
+                sys.stderr.write("pre-push BLOCKED: conflicting master updates in one push.\n")
+                return 1
+            master_sha = sha
         proc = subprocess.run(
             ["git", "merge-base", "--is-ancestor", EOL_BASE, sha],
             stdout=subprocess.PIPE,
@@ -199,7 +338,7 @@ def main():
                 % (ref, proc.returncode, detail or "git merge-base failed")
             )
         return 1
-    if master_requested and not run_full_gate():
+    if master_sha is not None and not run_full_gate(master_sha):
         return 1
     return 0
 

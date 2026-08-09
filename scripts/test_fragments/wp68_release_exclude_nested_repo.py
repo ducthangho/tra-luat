@@ -34,7 +34,8 @@ from pathlib import Path
 TEST_ID = "wp68_release_exclude_nested_repo"
 
 # Sàn chống RỖNG: bản sao lồng phải đủ lớn để ca DƯƠNG có nghĩa. Nếu hợp đồng required-files co lại
-# về vài tệp thì ca này phải ĐỎ chứ không được đúng một cách vô nghĩa. Đo 09-08-2026: 78 tệp bắt buộc.
+# về vài tệp thì ca này phải ĐỎ chứ không được đúng một cách vô nghĩa.
+# Đo 09-08-2026: 42 `_RELEASE_REQUIRED_FILES` + 25 `_RELEASE_REQUIRED_WORKFLOWS` = 67 tệp bắt buộc.
 _SAN_TEP_LONG = 20
 
 _NOI_DAT_BAN_SAO = ("agent", "wp99-g1-codex")
@@ -56,7 +57,7 @@ def _dung_cay(root: Path, tl_release) -> int:
     return len(can)
 
 
-def _dat_ban_sao_long(root: Path, tl_release) -> Path:
+def _dat_ban_sao_long(root: Path) -> Path:
     """Chép cây `root` vào một thư mục con ⇒ bản sao ĐẦY ĐỦ (có cả SKILL.md lẫn VERSION ở gốc nó)."""
     dich = root.joinpath(*_NOI_DAT_BAN_SAO)
     dich.mkdir(parents=True, exist_ok=True)
@@ -141,7 +142,7 @@ def run(tl_module) -> bool:
             return False
 
         # ── ca DƯƠNG: cùng cây đó, thêm một bản sao kho lồng ───────────────────────────────────
-        dich = _dat_ban_sao_long(root, tl_release)
+        dich = _dat_ban_sao_long(root)
         so_tep_long = sum(1 for p in dich.rglob("*") if p.is_file())
         if so_tep_long < _SAN_TEP_LONG:
             return False                  # bản sao rỗng ⇒ ca dương vô nghĩa

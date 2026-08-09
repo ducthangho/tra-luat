@@ -579,6 +579,15 @@ def _under_nested_repo_copy(rel: Path, root: Path) -> bool:
     `SKILL.md`+`VERSION` mà vẫn được giữ — đo trên cây sạch: `file_count` 179, `required_missing`
     rỗng, `SKILL.md` và `VERSION` đều còn trong gói. Ca này có test khoá.
 
+    Hai số của REVIEWER ĐỘC LẬP (wp68 R1, Codex, 09-08-2026) — chúng trả lời "thủng thì SAO", không
+    chỉ "có thủng không", nên chép lại đây thay vì bắt lượt sau đo lại:
+      · Gọi NHẦM `root` = THƯ MỤC CHA của gốc gói: `file_count` về 0 THẬT, nhưng `required_missing`
+        = 67 ⇒ `ok=false`. Ca xấu nhất FAIL-CLOSED, không xanh giả. (Mọi caller production đều
+        truyền `HERE.parent` / `_release_root_from_arg` / gốc gói — không caller nào truyền cha.)
+      · Bản sao KHÔNG ĐẦY ĐỦ — khoảng mù đã biết của vị từ: copy chỉ `SKILL.md` ⇒ 1 `extra_files`;
+        copy chỉ `scripts/` ⇒ 78 `extra_files`. Vị từ bỏ sót chúng ĐÚNG THIẾT KẾ và `--strict` vẫn
+        ĐỎ ⇒ khoảng mù làm cổng đỏ DƯ, KHÔNG làm cổng xanh giả. Đó là lý do nó chấp nhận được.
+
     Bản vá chữa `.codex`/`.claude` bằng CÙNG cơ chế (mọi worktree đều là bản sao đủ), nhưng KHÔNG
     thay `_RELEASE_EXCLUDE_DIRS`: `rasoat`/`docs`/`changelog_archive` là thư mục nội dung, KHÔNG
     phải bản sao kho, nên vẫn phải loại theo tên. Hai lớp bổ sung nhau, không lớp nào thừa.

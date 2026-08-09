@@ -48,6 +48,20 @@ jobs:
           # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
           # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
           fetch-depth: 0
+      # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
+      # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
+      - name: PR head contains required EOL base
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EOL_BASE_SHA: 1880346d2be3c0be9a93de7624ee108d99b6c88c
+        run: |
+          set -eu
+          test -n "$PR_HEAD_SHA"
+          git cat-file -e "${PR_HEAD_SHA}^{commit}"
+          git cat-file -e "${EOL_BASE_SHA}^{commit}"
+          git merge-base --is-ancestor "$EOL_BASE_SHA" "$PR_HEAD_SHA"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -59,6 +73,8 @@ jobs:
       # này là lớp hỏng theo NỀN TẢNG.
       - name: eol-policy selftest
         run: python .githooks/eol_policy_test.py
+      - name: pre-push selftest
+        run: python .githooks/pre_push_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #

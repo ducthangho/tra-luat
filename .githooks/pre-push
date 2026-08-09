@@ -1,0 +1,392 @@
+#!/bin/sh
+# tra-luat pre-push guard (dev-side only).
+# Activate per clone: git config core.hooksPath .githooks
+# Coverage is limited to configured local clones; this is not server-side enforcement.
+# Deliberate escape hatch: git push --no-verify (use only with explicit owner intent).
+# The master gate mirrors offline CI, except this suite itself: running pre_push_test.py
+# here would recursively invoke pre-push through its real-push fixtures.
+
+if command -v python >/dev/null 2>&1; then
+  PY=python
+elif command -v python3 >/dev/null 2>&1; then
+  PY=python3
+else
+  echo "pre-push BLOCKED: Python is required for the fail-closed writer guard." >&2
+  echo "Configure core.hooksPath=.githooks and install Python; --no-verify is a deliberate bypass." >&2
+  exit 1
+fi
+
+exec "$PY" -c '
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+EOL_BASE = "1880346d2be3c0be9a93de7624ee108d99b6c88c"
+ZERO = b"0"
+
+
+def positive_evidence(kind, stdout):
+    text = stdout.strip()
+    if kind == "compile":
+        expected = "WP52_PY_COMPILE_OK=13"
+        return text == expected, text or "missing compile sentinel"
+    if kind == "selftest":
+        pairs = re.findall(r"(\d+)/(\d+)", text)
+        if not pairs:
+            return False, "missing N/N selftest evidence"
+        passed, total = (int(value) for value in pairs[-1])
+        return passed == total and total > 0, "%d/%d" % (passed, total)
+    if kind == "version":
+        return bool(re.match(r"^tl\s+\S+", text)), text or "missing version evidence"
+    try:
+        payload = json.loads(text)
+    except (TypeError, ValueError) as exc:
+        return False, "invalid JSON evidence: %s" % exc
+    if not isinstance(payload, dict) or payload.get("ok") is not True:
+        return False, "JSON evidence lacks ok=true"
+    if kind == "eol_json" and payload.get("violations"):
+        return False, "EOL survey reports violations"
+    if kind == "fragment_json" and payload.get("failed"):
+        return False, "bundle fragment check reports failures"
+    if kind == "doc_json" and payload.get("flags"):
+        return False, "doc claims reports flags"
+    if kind == "verify_json":
+        expected = payload.get("expected_file_count")
+        checked = payload.get("checked_file_count")
+        if not isinstance(expected, int) or expected <= 0 or checked != expected:
+            return False, "release verify expected/checked mismatch"
+        for key in (
+            "failed",
+            "extra_files",
+            "missing_from_current_manifest",
+            "required_missing",
+            "errors",
+        ):
+            if payload.get(key):
+                return False, "release verify reports %s" % key
+        return True, "ok=true expected=checked=%d" % expected
+    if kind == "bundle_json":
+        if payload.get("file_count") != 179 or payload.get("reproducible") is not True:
+            return False, "release bundle lacks 179-file reproducible evidence"
+        digest = payload.get("bundle_sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            return False, "release bundle lacks SHA-256 evidence"
+        return True, "ok=true files=179 sha256=%s" % digest
+    return True, "ok=true"
+
+
+def write_failure_output(stdout, stderr):
+    for value in (stdout, stderr):
+        if value.strip():
+            tail = value.rstrip()[-4000:]
+            if len(value.rstrip()) > len(tail):
+                sys.stderr.write("... output truncated ...\n")
+            sys.stderr.write(tail + "\n")
+
+
+def git_config_quote(value):
+    if "\n" in value or "\r" in value or "\x00" in value:
+        raise ValueError("unsafe newline or NUL in Git config path")
+    return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+
+def run_command(label, args, root, env, evidence_kind):
+    proc = subprocess.run(
+        args,
+        cwd=root,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if proc.returncode == 0:
+        valid, evidence = positive_evidence(evidence_kind, proc.stdout)
+        if valid:
+            sys.stderr.write("pre-push gate OK: %s (%s)\n" % (label, evidence))
+            return True
+        sys.stderr.write(
+            "pre-push BLOCKED: gate %s returned rc=0 without positive evidence: %s.\n"
+            % (label, evidence)
+        )
+        write_failure_output(proc.stdout, proc.stderr)
+        return False
+    sys.stderr.write("pre-push BLOCKED: gate %s failed (rc=%d).\n" % (label, proc.returncode))
+    write_failure_output(proc.stdout, proc.stderr)
+    return False
+
+
+def run_git_step(label, args, env):
+    proc = subprocess.run(
+        args,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if proc.returncode == 0:
+        return proc.stdout.strip()
+    sys.stderr.write("pre-push BLOCKED: %s failed (rc=%d).\n" % (label, proc.returncode))
+    write_failure_output(proc.stdout, proc.stderr)
+    return None
+
+
+def run_full_gate(master_sha):
+    root = run_git_step("locate worktree", ["git", "rev-parse", "--show-toplevel"], os.environ)
+    if not root:
+        return False
+    source_git_dir = run_git_step(
+        "locate source gitdir",
+        ["git", "rev-parse", "--absolute-git-dir"],
+        os.environ,
+    )
+    source_common_dir = run_git_step(
+        "locate source common gitdir",
+        ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        os.environ,
+    )
+    if not source_git_dir or not source_common_dir:
+        return False
+    local_env_text = run_git_step(
+        "enumerate repository-local Git environment",
+        ["git", "rev-parse", "--local-env-vars"],
+        os.environ,
+    )
+    if local_env_text is None:
+        return False
+    with tempfile.TemporaryDirectory(prefix="wp52_pre_push_gate_") as tmp:
+        gate_env = os.environ.copy()
+        for name in local_env_text.splitlines():
+            gate_env.pop(name, None)
+        for name in list(gate_env):
+            if name.startswith("GIT_CONFIG_KEY_") or name.startswith("GIT_CONFIG_VALUE_"):
+                gate_env.pop(name, None)
+        gate_env["PYTHONDONTWRITEBYTECODE"] = "1"
+        gate_env["PYTHONPYCACHEPREFIX"] = os.path.join(tmp, "pycache")
+        gate_env["PYTHONUTF8"] = "1"
+        gate_env["PYTHONIOENCODING"] = "utf-8"
+        gate_config = os.path.join(tmp, "gitconfig")
+        with open(gate_config, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write("[core]\n\tabbrev = 7\n[safe]\n")
+            seen_safe = set()
+            for safe_path in (root, source_git_dir, source_common_dir):
+                key = os.path.normcase(os.path.normpath(safe_path))
+                if key in seen_safe:
+                    continue
+                seen_safe.add(key)
+                stream.write("\tdirectory = %s\n" % git_config_quote(safe_path))
+        gate_env["GIT_CONFIG_GLOBAL"] = gate_config
+
+        snapshot = os.path.join(tmp, "snapshot")
+        cloned = run_git_step(
+            "clone exact master-gate snapshot",
+            ["git", "clone", "--quiet", "--no-local", "--no-checkout", root, snapshot],
+            gate_env,
+        )
+        if cloned is None:
+            return False
+        checked_out = run_git_step(
+            "checkout exact master-gate snapshot",
+            ["git", "-C", snapshot, "checkout", "--quiet", "--detach", master_sha],
+            gate_env,
+        )
+        if checked_out is None:
+            return False
+        readback = run_git_step(
+            "read back master-gate snapshot",
+            ["git", "-C", snapshot, "rev-parse", "HEAD"],
+            gate_env,
+        )
+        if readback != master_sha:
+            sys.stderr.write(
+                "pre-push BLOCKED: master-gate snapshot readback mismatch (%s != %s).\n"
+                % (readback or "missing", master_sha)
+            )
+            return False
+        abbrev = run_git_step(
+            "read back core.abbrev",
+            ["git", "-C", snapshot, "config", "--get", "core.abbrev"],
+            gate_env,
+        )
+        if abbrev != "7":
+            sys.stderr.write(
+                "pre-push BLOCKED: master-gate snapshot requires effective core.abbrev=7; got %s.\n"
+                % (abbrev or "missing")
+            )
+            return False
+        sys.stderr.write("pre-push gate OK: exact snapshot %s, core.abbrev=7\n" % master_sha)
+
+        compile_targets = [
+            "scripts/tl.py",
+            "scripts/tl_boot.py",
+            "scripts/gen_instructions.py",
+            "scripts/tl_core/__init__.py",
+            "scripts/tl_core/deterministic.py",
+            "scripts/tl_core/jsonio.py",
+            "scripts/tl_core/workflow.py",
+            "scripts/tl_core/release.py",
+            "scripts/tl_core/live.py",
+            "scripts/tl_core/zip_ingest.py",
+            "scripts/tl_core/ocr.py",
+            "scripts/tl_core/chunking.py",
+            "scripts/tl_core/command_registry.py",
+        ]
+        compile_code = (
+            "import py_compile; paths="
+            + repr(compile_targets)
+            + "; [py_compile.compile(path, doraise=True) for path in paths]; "
+            + "print(\"WP52_PY_COMPILE_OK=%d\" % len(paths))"
+        )
+        commands = [
+            ("py_compile", [sys.executable, "-c", compile_code], "compile"),
+            (
+                "eol-policy selftest",
+                [sys.executable, ".githooks/eol_policy_test.py"],
+                "selftest",
+            ),
+            (
+                "eol-policy survey",
+                [sys.executable, ".githooks/eol_policy.py", "--all", "--json"],
+                "eol_json",
+            ),
+            (
+                "bundled-fragment check",
+                [sys.executable, ".github/checks/bundle_fragment_check.py", "--json"],
+                "fragment_json",
+            ),
+            (
+                "gen_instructions selftest",
+                [sys.executable, "scripts/gen_instructions.py", "--selftest"],
+                "selftest",
+            ),
+            ("tl selftest", [sys.executable, "scripts/tl.py", "--selftest"], "selftest"),
+            (
+                "workflow-audit strict",
+                [sys.executable, "scripts/tl.py", "workflow-audit", "--strict", "--json"],
+                "json",
+            ),
+            (
+                "golden-test",
+                [sys.executable, "scripts/tl.py", "golden-test", "--json"],
+                "json",
+            ),
+            (
+                "doc-claims-check strict",
+                [sys.executable, "scripts/tl.py", "doc-claims-check", "--strict", "--json"],
+                "doc_json",
+            ),
+            (
+                "determinism-audit strict",
+                [sys.executable, "scripts/tl.py", "determinism-audit", "--strict", "--json"],
+                "json",
+            ),
+            (
+                "release-check full",
+                [sys.executable, "scripts/tl.py", "release-check", "--full", "--json"],
+                "json",
+            ),
+            (
+                "release-verify strict",
+                [
+                    sys.executable,
+                    "scripts/tl.py",
+                    "release-verify",
+                    "RELEASE_MANIFEST.json",
+                    "--strict",
+                    "--json",
+                ],
+                "verify_json",
+            ),
+        ]
+        for label, args, evidence_kind in commands:
+            if not run_command(label, args, snapshot, gate_env, evidence_kind):
+                return False
+        bundles = [os.path.join(tmp, "a.zip"), os.path.join(tmp, "b.zip")]
+        for number, bundle in enumerate(bundles, 1):
+            if not run_command(
+                "release-bundle %d" % number,
+                [sys.executable, "scripts/tl.py", "release-bundle", "--out", bundle, "--json"],
+                snapshot,
+                gate_env,
+                "bundle_json",
+            ):
+                return False
+        digests = []
+        for bundle in bundles:
+            with open(bundle, "rb") as stream:
+                digests.append(hashlib.sha256(stream.read()).hexdigest())
+        if digests[0] != digests[1]:
+            sys.stderr.write(
+                "pre-push BLOCKED: release bundles are not deterministic: %s.\n" % digests
+            )
+            return False
+        sys.stderr.write("pre-push gate OK: release-bundle sha256=%s\n" % digests[0])
+        return run_command(
+            "tl_boot smoke",
+            [sys.executable, "scripts/tl_boot.py", "--version"],
+            snapshot,
+            gate_env,
+            "version",
+        )
+
+
+def main():
+    rows = sys.stdin.buffer.read().splitlines()
+    master_sha = None
+    for number, raw in enumerate(rows, 1):
+        fields = raw.split()
+        if len(fields) != 4:
+            sys.stderr.write("pre-push BLOCKED: malformed stdin row %d.\n" % number)
+            return 1
+        _local_ref, local_sha, remote_ref, _remote_sha = fields
+        if not remote_ref.startswith(b"refs/heads/"):
+            continue
+        if local_sha and set(local_sha) == {ZERO[0]}:
+            continue
+        sha = local_sha.decode("ascii", "strict")
+        if remote_ref == b"refs/heads/master":
+            if master_sha is not None and master_sha != sha:
+                sys.stderr.write("pre-push BLOCKED: conflicting master updates in one push.\n")
+                return 1
+            master_sha = sha
+        proc = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", EOL_BASE, sha],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if proc.returncode == 0:
+            continue
+        ref = remote_ref.decode("utf-8", "replace")
+        if proc.returncode == 1:
+            sys.stderr.write(
+                "pre-push BLOCKED: %s does not contain the required EOL base.\n" % ref
+            )
+        else:
+            detail = proc.stderr.decode("utf-8", "replace").strip()
+            sys.stderr.write(
+                "pre-push BLOCKED: cannot verify EOL ancestry for %s (rc=%d): %s\n"
+                % (ref, proc.returncode, detail or "git merge-base failed")
+            )
+        return 1
+    if master_sha is not None and not run_full_gate(master_sha):
+        return 1
+    return 0
+
+
+try:
+    result = main()
+except BaseException as exc:
+    sys.stderr.write(
+        "pre-push BLOCKED: unexpected writer-guard failure: %s: %s\n"
+        % (exc.__class__.__name__, exc)
+    )
+    result = 1
+raise SystemExit(result)
+'

@@ -88,6 +88,12 @@ def write_failure_output(stdout, stderr):
             sys.stderr.write(tail + "\n")
 
 
+def git_config_quote(value):
+    if "\n" in value or "\r" in value or "\x00" in value:
+        raise ValueError("unsafe newline or NUL in Git config path")
+    return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+
 def run_command(label, args, root, env, evidence_kind):
     proc = subprocess.run(
         args,
@@ -136,6 +142,18 @@ def run_full_gate(master_sha):
     root = run_git_step("locate worktree", ["git", "rev-parse", "--show-toplevel"], os.environ)
     if not root:
         return False
+    source_git_dir = run_git_step(
+        "locate source gitdir",
+        ["git", "rev-parse", "--absolute-git-dir"],
+        os.environ,
+    )
+    source_common_dir = run_git_step(
+        "locate source common gitdir",
+        ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        os.environ,
+    )
+    if not source_git_dir or not source_common_dir:
+        return False
     local_env_text = run_git_step(
         "enumerate repository-local Git environment",
         ["git", "rev-parse", "--local-env-vars"],
@@ -156,7 +174,14 @@ def run_full_gate(master_sha):
         gate_env["PYTHONIOENCODING"] = "utf-8"
         gate_config = os.path.join(tmp, "gitconfig")
         with open(gate_config, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write("[core]\n\tabbrev = 7\n")
+            stream.write("[core]\n\tabbrev = 7\n[safe]\n")
+            seen_safe = set()
+            for safe_path in (root, source_git_dir, source_common_dir):
+                key = os.path.normcase(os.path.normpath(safe_path))
+                if key in seen_safe:
+                    continue
+                seen_safe.add(key)
+                stream.write("\tdirectory = %s\n" % git_config_quote(safe_path))
         gate_env["GIT_CONFIG_GLOBAL"] = gate_config
 
         snapshot = os.path.join(tmp, "snapshot")

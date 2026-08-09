@@ -109,6 +109,15 @@ if os.environ.get("WP52_GATE_FAIL") and "--selftest" in sys.argv:
 if os.environ.get("WP52_GATE_SILENT") and "--selftest" in sys.argv:
     raise SystemExit(0)
 if "--selftest" in sys.argv:
+    expected_safe = os.environ.get("WP52_EXPECT_SAFE_DIRECTORY")
+    if expected_safe:
+        configured = subprocess.check_output(
+            ["git", "config", "--global", "--get-all", "safe.directory"], text=True
+        ).splitlines()
+        normalized = {os.path.normcase(os.path.abspath(value)) for value in configured}
+        if os.path.normcase(os.path.abspath(expected_safe)) not in normalized:
+            print("fixture source gitdir is absent from isolated safe.directory")
+            raise SystemExit(11)
     with tempfile.TemporaryDirectory(prefix="wp52_abbrev_") as tmp:
         subprocess.run(["git", "init", "--quiet", tmp], check=True)
         subprocess.run(["git", "config", "core.abbrev", "8"], cwd=tmp, check=True)
@@ -242,6 +251,7 @@ def case_absolute_git_dir_does_not_redirect_snapshot(root):
     fx.install_gate_stubs()
     linked_env = os.environ.copy()
     linked_env["GIT_DIR"] = str(fx.work / ".git")
+    linked_env["WP52_EXPECT_SAFE_DIRECTORY"] = str(fx.work / ".git")
     pushed = fx.push("HEAD:refs/heads/master", env=linked_env)
     return (
         pushed.returncode == 0

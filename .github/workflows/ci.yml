@@ -67,6 +67,8 @@ jobs:
           python-version: "3.12"
       - name: py_compile
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+      - name: change-impact policy
+        run: python .github/checks/change_impact_validate.py --json
       # F2-A (ADR-0018): validator EOL dùng CHUNG với `.githooks/pre-commit`. Hook chỉ phủ máy
       # dev đã bật `core.hooksPath`; CI là đường TỰ ĐỘNG, và guard không nối vào đường tự động
       # thì guard chỉ là tài liệu (bài học r225). Chạy trên CẢ ubuntu lẫn windows vì cả lớp hỏng

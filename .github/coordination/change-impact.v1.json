@@ -1,0 +1,525 @@
+{
+  "schema_version": 1,
+  "policy_id": "change-impact.v1",
+  "candidate_rules": [
+    {
+      "rule_id": "skill-md-gotchas-size-pin",
+      "trigger": {
+        "type": "exact",
+        "path": "SKILL.md"
+      },
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "references/GOTCHAS.md"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py --selftest",
+        "python scripts/tl.py doc-claims-check --strict --json"
+      ],
+      "land_obligations": [
+        "Before expiry, replace scripts/tl_selftest.py ok3 with a generated measurement or remove the prose assertion, then shrink this one-way closure; do not renew it indefinitely."
+      ],
+      "evidence": [
+        "references/GOTCHAS.md:16 pins the hand-written SKILL.md measurement at 47,724 bytes and 404 bytes of WARN headroom.",
+        "scripts/tl_selftest.py:25151-25154 recomputes SKILL.md stat().st_size and requires its formatted value to occur in GOTCHAS.md; measured on base 578724e as SKILL.md=47,724 bytes and GOTCHAS.md=12,266 bytes.",
+        "Direction is intentionally one-way: changing SKILL.md can stale the prose pin, while changing references/GOTCHAS.md independently does not require locking SKILL.md.",
+        "Remediation is to make ok3 calculate/render the measurement or delete the assertion, then narrow policy; expiry is a seven-day review window based on the repository's daily release cadence, not a measured fact about the invariant."
+      ],
+      "owner": "mission-54-impact-policy",
+      "expires_at": "2026-08-16T00:00:00Z"
+    },
+    {
+      "rule_id": "skill-md-kernel-reference-links",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": "SKILL.md"
+        },
+        {
+          "type": "prefix",
+          "path": "references"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "SKILL.md"
+        },
+        {
+          "type": "prefix",
+          "path": "references"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py workflow-audit --strict --json"
+      ],
+      "land_obligations": [],
+      "evidence": [
+        "scripts/tl_core/workflow.py:727-737 reads SKILL.md, extracts every references/ link, and fails workflow-audit when any target is missing.",
+        "references/golden/workflow_audit.json:1182-1187 records links_checked=15, links_missing=[], links_ok=true on base 578724e.",
+        "The same predicate can fail after either side changes: SKILL.md can add/rename a pointer, and references/ can remove/rename its target; therefore trigger and closure include both directions."
+      ],
+      "owner": "mission-54-impact-policy",
+      "expires_at": null
+    },
+    {
+      "rule_id": "runtime-py-added-moves-golden",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": "scripts/apply_gs_patches.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/backfill_keywords_live.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/backfill_nlm_title.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/build_cache.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/cache.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/common.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/contract_check.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/docx_markup.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/gas.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/gen_instructions.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/gws_bridge.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/gws_cred_store.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/ingest_to_cache.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/keywords.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/mcp_bridge.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/nlm_auth_convert.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/nlm_cli.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/nlm_sources.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/normalize_document.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/pkg_secret_scan.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/provenance.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/rasoat_phuluc.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/rasoat_worksheet.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/registry_hygiene.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/registry_orchestrator.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/sapxep.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/standardize_name.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_boot.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_gws.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_selftest.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_test_fragments_bundled.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tra_cuu.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/transport.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/vb_status.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/vbhn_query.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/verify_deep.py"
+        },
+        {
+          "type": "prefix",
+          "path": "scripts/tl_core"
+        },
+        {
+          "type": "prefix",
+          "path": "scripts/_fallback"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "references/golden/workflow_audit.json"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py workflow-audit --strict --json",
+        "python scripts/tl.py golden-test --json"
+      ],
+      "land_obligations": [
+        "When adding a new top-level scripts/*.py runtime file, add its exact path to this rule in the same reviewed policy change; never replace this list with prefix scripts because that would incorrectly cover scripts/test_fragments/."
+      ],
+      "evidence": [
+        "scripts/tl_core/workflow.py:742-751 scans only non-recursive directory.glob('*.py') in scripts/, scripts/tl_core/, and scripts/_fallback/.",
+        "references/golden/workflow_audit.json:1196 records py_size.files_scanned=72 on base 578724e, so adding a scanned runtime module moves the golden output.",
+        "The exact top-level list plus tl_core/_fallback prefixes intentionally excludes scripts/test_fragments/: Path.glob('*.py') is non-recursive and fragment source has a separate generated-bundle rule."
+      ],
+      "owner": "mission-54-impact-policy",
+      "expires_at": null
+    },
+    {
+      "rule_id": "test-fragments-generated-bundle",
+      "trigger": {
+        "type": "prefix",
+        "path": "scripts/test_fragments"
+      },
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "scripts/tl_test_fragments_bundled.py"
+        }
+      ],
+      "required_checks": [
+        "python .github/checks/bundle_fragment_check.py --json",
+        "python scripts/tl.py --selftest"
+      ],
+      "land_obligations": [],
+      "evidence": [
+        "scripts/tl_selftest.py:29592-29614 generates the bundled module bytes from source fragments and tests dev, bundle, and empty topologies.",
+        "scripts/tl_core/release.py:459-461 names scripts/tl_test_fragments_bundled.py in _RELEASE_REQUIRED_FILES, while scripts/test_fragments/ remains dev-only.",
+        "scripts/tl_selftest.py:29653-29718 proves the release contains exactly one bundled module, contains no scripts/test_fragments/ paths, and fails when the generated module is missing."
+      ],
+      "owner": "mission-54-impact-policy",
+      "expires_at": null
+    },
+    {
+      "rule_id": "release-manifest-tracks-tree",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": ".gitattributes"
+        },
+        {
+          "type": "exact",
+          "path": ".gitignore"
+        },
+        {
+          "type": "exact",
+          "path": "CHANGELOG.md"
+        },
+        {
+          "type": "exact",
+          "path": "CONTEXT.md"
+        },
+        {
+          "type": "exact",
+          "path": "INSTALL.md"
+        },
+        {
+          "type": "exact",
+          "path": "requirements.txt"
+        },
+        {
+          "type": "exact",
+          "path": "SKILL.md"
+        },
+        {
+          "type": "exact",
+          "path": "tl-setup.cmd"
+        },
+        {
+          "type": "exact",
+          "path": "tl-setup.ps1"
+        },
+        {
+          "type": "exact",
+          "path": "tra_luat_config.example.json"
+        },
+        {
+          "type": "exact",
+          "path": "VERSION"
+        },
+        {
+          "type": "prefix",
+          "path": "agents"
+        },
+        {
+          "type": "prefix",
+          "path": "references"
+        },
+        {
+          "type": "prefix",
+          "path": "scripts"
+        },
+        {
+          "type": "prefix",
+          "path": "templates"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "RELEASE_MANIFEST.json"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json"
+      ],
+      "land_obligations": [
+        "Do not regenerate for paths excluded by release.py; narrow this candidate when the dispatcher gains first-class release inclusion predicates."
+      ],
+      "evidence": [
+        "scripts/tl_core/release.py:576-630 builds the manifest from the included tree with path, sha256, and size; scripts/tl_core/release.py:760-848 verifies those entries and required files.",
+        "RELEASE_MANIFEST.json on base 578724e has schema release_manifest.v1 and file_count=179.",
+        "scripts/tl_core/release.py:394-399 excludes .github, docs, .githooks and other dev-only directories; therefore this packet's five .github paths do not move the manifest.",
+        "The broad included-root prefixes are conservative candidates; release.py exclusions remain authoritative and the required check prevents a false manifest rewrite."
+      ],
+      "owner": "mission-54-impact-policy",
+      "expires_at": null
+    },
+    {
+      "rule_id": "version-triple",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": "VERSION"
+        },
+        {
+          "type": "exact",
+          "path": "SKILL.md"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "VERSION"
+        },
+        {
+          "type": "exact",
+          "path": "SKILL.md"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py --selftest"
+      ],
+      "land_obligations": [],
+      "evidence": [
+        "VERSION:1, SKILL.md:18, and scripts/tl.py:103 carry the release version; all three measure 1.36.67 on base 578724e.",
+        "scripts/tl_selftest.py:4011-4016 enforces that the SKILL.md header contains v+VERSION; scripts/tl_selftest.py:3525 also pins the webapp EXPECT_VERSION independently."
+      ],
+      "owner": "release-owner",
+      "expires_at": null
+    },
+    {
+      "rule_id": "api-contract-expect-version",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": "references/API_CONTRACT.md"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "references/API_CONTRACT.md"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py --selftest"
+      ],
+      "land_obligations": [],
+      "evidence": [
+        "scripts/tl.py:98 sets EXPECT_VERSION=2.21.2p and references/API_CONTRACT.md:1-5 stamps the live contract with 2.21.2p on base 578724e.",
+        "scripts/tl_selftest.py:12650-12656 reads the first 400 characters of API_CONTRACT.md and fails r119_api_contract_version_stamp_matches_expect unless it contains the exact EXPECT_VERSION."
+      ],
+      "owner": "api-contract-owner",
+      "expires_at": null
+    },
+    {
+      "rule_id": "ingest-ext-allowlist-gitattributes",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": ".gitattributes"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_core/ingest_contract.py"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": ".gitattributes"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_core/ingest_contract.py"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py --selftest",
+        "python .githooks/eol_policy_test.py"
+      ],
+      "land_obligations": [],
+      "evidence": [
+        "scripts/tl.py:840 defines PROFILE_INGEST_ALLOWED_EXTS; scripts/tl_core/ingest_contract.py:30 and :40 define INGEST_LOCAL_EXTS and OCR_SOURCE_EXTS.",
+        ".gitattributes:31-57 states that the union of those runtime allowlists, minus text MIME families, is exactly 12 binary extension families and declares all 12 as -text.",
+        "scripts/test_fragments/wp49_eol_policy_index_blobs.py:100-149 derives the extension set from the live constants and fails wp49_eol_policy_index_blobs if .gitattributes omits or invents a family; measured set size is 12 on base 578724e."
+      ],
+      "owner": "ingest-and-eol-owners",
+      "expires_at": null
+    },
+    {
+      "rule_id": "parser-surface-golden",
+      "trigger": [
+        {
+          "type": "exact",
+          "path": "scripts/tl_core/cli.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl_core/command_registry.py"
+        },
+        {
+          "type": "exact",
+          "path": "scripts/tl.py"
+        }
+      ],
+      "write_closure": [
+        {
+          "type": "exact",
+          "path": "references/golden/parser_surface.json"
+        }
+      ],
+      "required_checks": [
+        "python scripts/tl.py --selftest"
+      ],
+      "land_obligations": [
+        "Regenerate parser_surface.json only for an intentional reviewed CLI change; inspect the per-command diff before landing."
+      ],
+      "evidence": [
+        "scripts/tl_selftest.py:6003-6058 canonicalizes every subcommand action and handler, hashes each command, compares 197 command entries in references/golden/parser_surface.json, and reports r77a_parser_surface_matches_snapshot.",
+        "Measured clean detached worktree at base 578724e: python scripts/tl.py --selftest passed 1696/1696; r77a_parser_surface_matches_snapshot was green.",
+        "Counterexample in that same clean worktree: temporarily adding --f3-02-parser-surface-probe to gws-ping in scripts/tl_core/cli.py changed the total to 1695/1696 and stderr named exactly [r77a] LỆCH bề mặt parser tại: ['gws-ping']; the temporary edit was then reverted byte-for-byte.",
+        "Delta was exactly one failing case, r77a_parser_surface_matches_snapshot; git diff --exit-code confirmed scripts/tl_core/cli.py and references/golden/parser_surface.json were clean after the probe, and parser_surface.json was never written."
+      ],
+      "owner": "cli-surface-owner",
+      "expires_at": null
+    }
+  ],
+  "unproven_candidates": [],
+  "land_obligations": [
+    {
+      "obligation_id": "deploy-script-parity",
+      "description": "When deploy scripts change, a human land operator must run the real scripts on their supported platforms and compare behavior on the same input. This is not a change-impact rule until an automated check enforces it.",
+      "evidence": [
+        "CLAUDE.md:45-58 records the paid lesson that cross-platform scripts require real execution and parity comparison, including a security defect found only because outputs differed 196 versus 198.",
+        ".github/workflows/ci.yml:1-118 contains no automated deploy-script parity step on base 578724e; therefore encoding deploy-script-parity as a machine rule would be an unenforced promise."
+      ],
+      "owner": "land-operator"
+    }
+  ]
+}

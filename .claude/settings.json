@@ -12,7 +12,20 @@
       "Bash(python scripts/tl.py counts:*)",
       "Bash(python scripts/tl.py sweep:*)",
       "Bash(python scripts/tl.py review-queue:*)",
-      "Bash(python scripts/tl.py reg-query:*)"
+      "Bash(python scripts/tl.py reg-query:*)",
+      "Bash(python3 scripts/tl.py --selftest:*)",
+      "Bash(python3 scripts/tl.py counts:*)",
+      "Bash(python3 scripts/tl.py sweep:*)",
+      "Bash(python3 scripts/tl.py review-queue:*)",
+      "Bash(python3 scripts/tl.py reg-query:*)",
+      "Bash(python3 -m ruff check:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(python .githooks/eol_policy:*)",
+      "Bash(python3 .githooks/eol_policy:*)",
+      "Bash(python .github/coordination/reviewer_bootstrap/core/controller.py:*)",
+      "Bash(python3 .github/coordination/reviewer_bootstrap/core/controller.py:*)",
+      "Bash(python /tmp/claude-0/:*)",
+      "Bash(python3 /tmp/claude-0/:*)"
     ],
     "ask": [
       "Bash(git commit:*)",

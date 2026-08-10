@@ -42,7 +42,8 @@ COVERAGE = {
         "Windows executable suffixes on argv[0]: gh.exe, curl.cmd, wget.bat",
         "shell-string form: subprocess.run('gh api /user', shell=True) - first token only",
         "quoted shell-string executable paths, including Windows paths containing spaces",
-        "the constant subprocess executable= override",
+        "the constant subprocess executable= override, including paths containing spaces",
+        "constant argv[0] list elements that are executable paths containing spaces",
         "os.system / os.popen",
     ),
     "not_covered": (
@@ -159,7 +160,7 @@ def _resolve_call(func_node, modules, funcs):
 _WINDOWS_EXEC_SUFFIXES = (".exe", ".com", ".bat", ".cmd", ".ps1")
 
 
-def _tool_name(argv0):
+def _tool_name(argv0, shell_string=True):
     """Tên công cụ đã chuẩn hoá từ argv[0], hoặc None.
 
     Hai dạng bản trước bỏ lọt, cả hai đều là cách gọi hoàn toàn bình thường:
@@ -169,15 +170,18 @@ def _tool_name(argv0):
     """
     if not argv0:
         return None
-    # Dạng shell string: lấy executable đầu, kể cả đường dẫn có khoảng trắng được quote. Không cố
-    # parse toàn bộ shell grammar; phần còn lại không ảnh hưởng binary thực sự được gọi ở đầu.
-    stripped = argv0.strip()
-    if stripped[:1] in ("'", '"'):
-        quote = stripped[0]
-        end = stripped.find(quote, 1)
-        head = stripped[1:end] if end >= 1 else stripped[1:]
+    # A shell string needs tokenisation, including a quoted executable. By contrast argv[0] in a
+    # list and the executable= override already are whole tokens: splitting them corrupts a
+    # legitimate Windows path such as C:\Program Files\GitHub CLI\gh.exe.
+    text = argv0.strip()
+    if not shell_string:
+        head = text
+    elif text[:1] in ("'", '"'):
+        quote = text[0]
+        end = text.find(quote, 1)
+        head = text[1:end] if end >= 1 else text[1:]
     else:
-        head = stripped.split()[0] if stripped else ""
+        head = text.split()[0] if text else ""
     head = os.path.basename(head.replace("\\", "/"))
     lowered = head.lower()
     for suffix in _WINDOWS_EXEC_SUFFIXES:
@@ -217,12 +221,16 @@ def _scan_escape_paths(directory, allowed):
             if called and called.split(".")[0] == "subprocess" and (node.args or keywords):
                 first = node.args[0] if node.args else keywords.get("args")
                 argv0 = _const_str(first)
-                if argv0 is None and isinstance(first, (ast.List, ast.Tuple)) and first.elts:
+                argv_is_sequence = isinstance(first, (ast.List, ast.Tuple))
+                if argv0 is None and argv_is_sequence and first.elts:
                     argv0 = _const_str(first.elts[0])
                 # `executable=` thay binary thật mà vẫn giữ argv để truyền cho process. Nếu nó là
                 # hằng, đó là bằng chứng mạnh hơn argv[0] và phải được quét trước.
                 executable = _const_str(keywords.get("executable"))
-                tool = _tool_name(executable if executable is not None else argv0)
+                if executable is not None:
+                    tool = _tool_name(executable, shell_string=False)
+                else:
+                    tool = _tool_name(argv0, shell_string=not argv_is_sequence)
                 if tool in NETWORK_TOOLS:
                     entry = (name, "subprocess:%s" % tool)
                     if entry not in allowed:

@@ -33,6 +33,7 @@ module thì gán được mọi thứ. Cái ba lớp trên bảo đảm là **kh
 hỗ trợ**, và mọi lối vòng đều fail-closed có tên gọi, thay vì chạy im lặng.
 """
 
+import math
 import re
 from collections.abc import Mapping
 from types import MappingProxyType
@@ -370,7 +371,7 @@ def _assert_not_tampered(_snapshot=_CLOSED_NAMES, _table=_OPERATIONS):
 
 
 def _scan_credential_surface(op_name, param, value):
-    """Duyệt đệ quy một tham số `object`, từ chối khoá/giá trị trông như credential."""
+    """Duyệt một tham số và mọi phần tử lồng, từ chối credential và dữ liệu ngoài JSON."""
     nodes = 0
     stack = [(value, param, 0)]
     while stack:
@@ -390,16 +391,61 @@ def _scan_credential_surface(op_name, param, value):
             )
         if isinstance(node, dict):
             for key, sub in node.items():
-                child = "%s.%s" % (path, key)
-                if isinstance(key, str) and _key_is_credential(key, sub):
-                    raise CredentialSurfaceError(op_name, param, child, "key name %r" % key)
+                if isinstance(key, str):
+                    key_text = key
+                elif isinstance(key, bytes):
+                    key_text = key.decode("utf-8", errors="replace")
+                else:
+                    raise ParameterError(
+                        op_name,
+                        "operation %r parameter %r rejected before execution - object key at "
+                        "%s must be a string, got %s"
+                        % (op_name, param, path, type(key).__name__),
+                    )
+                child = "%s.%s" % (path, key_text)
+                if _key_is_credential(key_text, sub):
+                    raise CredentialSurfaceError(
+                        op_name, param, child, "key name %r" % key_text
+                    )
+                if not isinstance(key, str):
+                    raise ParameterError(
+                        op_name,
+                        "operation %r parameter %r rejected before execution - object key at "
+                        "%s must be a string, got bytes" % (op_name, param, child),
+                    )
                 stack.append((sub, child, depth + 1))
-        elif isinstance(node, (list, tuple)):
+        elif isinstance(node, list):
             for index, sub in enumerate(node):
                 stack.append((sub, "%s[%d]" % (path, index), depth + 1))
         elif isinstance(node, str):
             if _CREDENTIAL_VALUE.search(node):
                 raise CredentialSurfaceError(op_name, param, path, "value shape")
+        elif isinstance(node, (bytes, bytearray)):
+            text = bytes(node).decode("utf-8", errors="replace")
+            if _CREDENTIAL_VALUE.search(text):
+                raise CredentialSurfaceError(op_name, param, path, "value shape")
+            raise ParameterError(
+                op_name,
+                "operation %r parameter %r rejected before execution - non-JSON bytes at %s"
+                % (op_name, param, path),
+            )
+        elif isinstance(node, float):
+            if not math.isfinite(node):
+                raise ParameterError(
+                    op_name,
+                    "operation %r parameter %r rejected before execution - non-JSON "
+                    "non-finite float at %s" % (op_name, param, path),
+                )
+        elif node is None or isinstance(node, (bool, int)):
+            pass
+        else:
+            # Do not repr/str caller objects: either can execute hostile Python or disclose the
+            # value. A type name is enough to make the rejection actionable without leaking it.
+            raise ParameterError(
+                op_name,
+                "operation %r parameter %r rejected before execution - non-JSON value of type "
+                "%s at %s" % (op_name, param, type(node).__name__, path),
+            )
 
 
 def schema():
@@ -416,6 +462,8 @@ def schema():
         # Ràng buộc payload được CÔNG BỐ, không chôn trong regex: người gọi phải biết trước cái gì
         # bị chặn, nếu không họ chỉ phát hiện ra lúc bị từ chối giữa production.
         "credential_surface": {
+            "scope": "all parameter values, including scalar values and nested object keys/values",
+            "value_domain": "JSON-compatible values only; unsupported Python objects fail closed",
             "rule": "a key is judged on its whole word set, not a substring and not the last word "
                     "alone: a secret noun plus a carrier word is rejected (authorization_header, "
                     "client_secret_value), a secret noun with a measure word or a descriptor tail "
@@ -428,8 +476,9 @@ def schema():
             "measure_words_that_neutralise_token": sorted(_MEASURE_WORDS),
             "descriptor_tails_that_neutralise": sorted(_DESCRIPTOR_TAILS),
             "rejected_key_tail_key_qualifiers": sorted(_SECRET_KEY_QUALIFIERS),
-            "rejected_value_shapes": "known credential prefixes (ghp_, github_pat_, sk-ant-, "
-                                     "AKIA, xox*, GOCSPX-, PEM private key headers)",
+            "rejected_value_shapes": "known credential prefixes (GitHub, OpenAI, Anthropic, "
+                                     "Slack, Google OAuth, AWS), Bearer/Basic schemes, and PEM "
+                                     "private key headers; byte strings are decoded fail-closed",
             "max_depth": _MAX_PAYLOAD_DEPTH,
             "max_nodes": _MAX_PAYLOAD_NODES,
         },
@@ -457,6 +506,25 @@ def validate(name, params, _closed=_CLOSED_NAMES):
     _assert_not_tampered()
     if not isinstance(params, dict):
         raise ParameterError(name, "operation %r: params must be an object" % name)
+
+    # The public Python seam can receive a dict that has not passed through JSON. Reject key
+    # types before set/sort/join, and never invoke repr/str on an arbitrary caller object.
+    for raw_name, value in params.items():
+        if isinstance(raw_name, str):
+            continue
+        if isinstance(raw_name, bytes):
+            key_text = raw_name.decode("utf-8", errors="replace")
+            if _key_is_credential(key_text, value):
+                raise CredentialSurfaceError(
+                    name, key_text, key_text, "parameter name %r" % key_text
+                )
+        else:
+            key_text = "<%s>" % type(raw_name).__name__
+        raise ParameterError(
+            name,
+            "operation %r rejected before execution - parameter name %s must be a string, got %s"
+            % (name, key_text, type(raw_name).__name__),
+        )
 
     spec = _OPERATIONS[name]["params"]
     given = set(params)

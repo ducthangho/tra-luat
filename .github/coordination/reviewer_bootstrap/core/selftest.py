@@ -2371,6 +2371,154 @@ def ra01_regression_r2_06_scanner_handles_quoted_and_executable_forms():
     assert "quoted" in covered and "executable=" in covered, covered
 
 
+@test
+def ra01_regression_g4_01_hardlinked_manifest_and_sidecar_are_refused():
+    """Containment applies to the two sealed documents, not only artifact entries."""
+    for sealed_name in (artifacts.MANIFEST_NAME, artifacts.SIDECAR_NAME):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "run")
+            _run_cli("produce", "--out", root, "--run-id", "g4-hardlink")
+            inside = os.path.join(root, sealed_name)
+            outside = os.path.join(tmp, "outside-" + sealed_name)
+            os.replace(inside, outside)
+            os.link(outside, inside)
+            assert os.stat(inside).st_nlink >= 2, "fixture did not create a hard link"
+            report = artifacts.verify(root)
+            assert report["ok"] is False, (sealed_name, report)
+            assert any(
+                item["locator"] == sealed_name and "hard link" in item["reason"]
+                for item in report["rejected_locators"]
+            ), (sealed_name, report)
+
+
+@test
+def ra01_regression_g4_02_top_level_parameter_keys_fail_closed_without_repr():
+    """Non-string public-Python parameter names get structured errors before set/sort/join."""
+    class HostileKey:
+        def __hash__(self):
+            return 1
+
+        def __repr__(self):
+            raise RuntimeError("hostile repr must never run")
+
+    cases = (
+        ({b"GH_TOKEN": "opaque"}, operations.CredentialSurfaceError, "GH_TOKEN"),
+        ({"repo": REPO, b"GH_TOKEN": "opaque"},
+         operations.CredentialSurfaceError, "GH_TOKEN"),
+        ({b"repo": REPO, "issue_number": 77}, operations.ParameterError, "repo"),
+        ({17: "value"}, operations.ParameterError, "int"),
+        ({HostileKey(): "value"}, operations.ParameterError, "HostileKey"),
+    )
+    for index, (params, error_type, expected_text) in enumerate(cases):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = _store(tmp, "g4-parameter-key-%d.json" % index)
+            try:
+                store.call("read_issue", params)
+            except error_type as exc:
+                assert expected_text in str(exc), (expected_text, str(exc))
+            else:
+                raise AssertionError("a non-string parameter name was accepted")
+            assert store.calls == [], "parameter rejection happened after execution began"
+            assert len(store.ledger) == 0, "rejected parameter reached the ledger"
+
+
+@test
+def ra01_regression_g4_03_bytes_credentials_and_non_json_values_fail_before_execution():
+    """The Python seam rejects bytes credentials and every non-JSON value before side effects."""
+    marker = "ghp_" + "Z" * 20
+
+    class HostileValue:
+        def __repr__(self):
+            raise RuntimeError("hostile repr must never run")
+
+    cases = (
+        ({b"GH_TOKEN": "opaque"}, operations.CredentialSurfaceError, "GH_TOKEN"),
+        ({"note": b"ghp_0123456789abcdefghijkl"},
+         operations.CredentialSurfaceError, "payload.note"),
+        ({"nested": [{"authorization": bytearray(b"Bearer opaque-token")}]},
+         operations.CredentialSurfaceError, "payload.nested[0].authorization"),
+        ({"note": b"benign-bytes"}, operations.ParameterError, "bytes"),
+        ({"note": {marker}}, operations.ParameterError, "set"),
+        ({"note": frozenset({"benign"})}, operations.ParameterError, "frozenset"),
+        ({"note": complex(1, 2)}, operations.ParameterError, "complex"),
+        ({"note": HostileValue()}, operations.ParameterError, "HostileValue"),
+    )
+    for index, (payload, error_type, expected_text) in enumerate(cases):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = _store(tmp, "g4-non-json-%d.json" % index)
+            try:
+                store.call(
+                    "post_heartbeat",
+                    {
+                        "repo": REPO,
+                        "issue_number": 77,
+                        "reconcile_key": "g4-non-json-%d" % index,
+                        "payload": payload,
+                    },
+                )
+            except error_type as exc:
+                message = str(exc)
+                assert expected_text in message, (expected_text, message)
+                assert marker not in message, "hostile value leaked into a diagnostic"
+            else:
+                raise AssertionError("a bytes credential or non-JSON value was accepted")
+            assert store.calls == [], "rejection happened after operation execution began"
+            assert len(store.ledger) == 0, "rejected data reached the ledger"
+
+
+@test
+def ra01_regression_g4_04_restart_idempotence_rejects_lossy_json_values():
+    """Tuple coercion and non-finite floats cannot create a restart-only 409 or invalid JSON."""
+    values = (("tuple-becomes-list-after-reload",), float("nan"), float("inf"), float("-inf"))
+    for index, value in enumerate(values):
+        with tempfile.TemporaryDirectory() as tmp:
+            ledger_path = os.path.join(tmp, "ledger.json")
+            params = {
+                "repo": REPO,
+                "issue_number": 77,
+                "reconcile_key": "g4-restart-%d" % index,
+                "payload": {"value": value},
+            }
+            for attempt in range(2):
+                store = _store(tmp, "ledger.json")
+                try:
+                    store.call("post_heartbeat", params)
+                except operations.ParameterError as exc:
+                    assert "before execution" in str(exc), str(exc)
+                else:
+                    raise AssertionError(
+                        "lossy/non-standard JSON value was accepted on attempt %d" % attempt
+                    )
+                assert store.calls == [], "rejected value executed on attempt %d" % attempt
+                assert len(store.ledger) == 0, "rejected value persisted on attempt %d" % attempt
+            assert not os.path.exists(ledger_path), "rejected value created a ledger file"
+
+
+@test
+def ra01_regression_g4_05_scanner_covers_windows_paths_with_spaces():
+    """List argv and executable= are whole tokens even when a Windows path contains spaces."""
+    cases = {
+        "list_path.py": (
+            "import subprocess\n"
+            "subprocess.run([r'C:\\Program Files\\GitHub CLI\\gh.exe', 'api'])\n"
+        ),
+        "executable_path.py": (
+            "import subprocess\n"
+            "subprocess.run(['harmless'], "
+            "executable=r'C:\\Program Files\\GitHub CLI\\gh.exe')\n"
+        ),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        for filename, source in cases.items():
+            with open(os.path.join(tmp, filename), "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(source)
+        offenders = _scan_escape_paths(tmp, allowed=set())
+    for filename in cases:
+        assert (filename, "subprocess:gh") in offenders, (filename, offenders)
+    covered = " ".join(scanner.COVERAGE["covered"]).lower()
+    assert "paths containing spaces" in covered, covered
+
+
 def main():
     passed = 0
     failed = []

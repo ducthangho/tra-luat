@@ -112,11 +112,32 @@ def _read_regular(path, locator):
     vẫn còn nguyên một cửa.
     """
     try:
-        if os.path.islink(path):
-            raise LocatorError(locator, "is a symlink")
-        with open(path, "rb") as handle:
-            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-                raise LocatorError(locator, "is not a regular file")
+        on_disk = os.lstat(path)
+    except OSError as exc:
+        raise LocatorError(locator, "cannot be inspected: %s" % exc) from exc
+    if stat.S_ISLNK(on_disk.st_mode):
+        raise LocatorError(locator, "is a symlink")
+    # Reject directories/FIFOs/devices before open: a FIFO may block forever, while hostile
+    # manifest input must become a failed report rather than a traceback or a hang.
+    if not stat.S_ISREG(on_disk.st_mode):
+        raise LocatorError(locator, "is not a regular file")
+    try:
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(fd, "rb") as handle:
+            opened = os.fstat(handle.fileno())
+            if not stat.S_ISREG(opened.st_mode):
+                raise LocatorError(locator, "is not a regular file after open")
+            if (on_disk.st_dev, on_disk.st_ino) != (opened.st_dev, opened.st_ino):
+                raise LocatorError(locator, "path and opened file are different objects")
+            # A hardlink is regular and path/fd identity matches, but the same inode still has a
+            # second name outside run_root. The sealed documents keep the same single-link
+            # containment invariant as artifacts created by this module.
+            if opened.st_nlink != 1:
+                raise LocatorError(
+                    locator,
+                    "has %d hard links - it is reachable from outside run_root"
+                    % opened.st_nlink,
+                )
             return handle.read()
     except LocatorError:
         raise

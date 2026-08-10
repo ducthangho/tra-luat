@@ -402,6 +402,12 @@ def _scan_credential_surface(op_name, param, value):
                         "%s must be a string, got %s"
                         % (op_name, param, path, type(key).__name__),
                     )
+                # A token can itself be used as a JSON object key. Reject it before constructing
+                # ``child``: otherwise the credential is copied into the diagnostic path.
+                if _CREDENTIAL_VALUE.search(key_text):
+                    raise CredentialSurfaceError(
+                        op_name, param, path, "credential-shaped object key"
+                    )
                 child = "%s.%s" % (path, key_text)
                 if _key_is_credential(key_text, sub):
                     raise CredentialSurfaceError(
@@ -511,20 +517,35 @@ def validate(name, params, _closed=_CLOSED_NAMES):
     # types before set/sort/join, and never invoke repr/str on an arbitrary caller object.
     for raw_name, value in params.items():
         if isinstance(raw_name, str):
-            continue
-        if isinstance(raw_name, bytes):
+            key_text = raw_name
+            is_bytes_name = False
+        elif isinstance(raw_name, bytes):
             key_text = raw_name.decode("utf-8", errors="replace")
-            if _key_is_credential(key_text, value):
-                raise CredentialSurfaceError(
-                    name, key_text, key_text, "parameter name %r" % key_text
-                )
+            is_bytes_name = True
         else:
             key_text = "<%s>" % type(raw_name).__name__
-        raise ParameterError(
-            name,
-            "operation %r rejected before execution - parameter name %s must be a string, got %s"
-            % (name, key_text, type(raw_name).__name__),
-        )
+            raise ParameterError(
+                name,
+                "operation %r rejected before execution - parameter name %s must be a string, "
+                "got %s" % (name, key_text, type(raw_name).__name__),
+            )
+        if _CREDENTIAL_VALUE.search(key_text):
+            raise CredentialSurfaceError(
+                name, "<parameters>", "<parameters>", "credential-shaped parameter name"
+            )
+        # Preserve the closed-operation diagnostic for ordinary string extras (for example
+        # ``token`` remains an unexpected parameter). Bytes names cannot enter JSON and need a
+        # fail-closed classification here, before set/sort can mix incomparable key types.
+        if is_bytes_name and _key_is_credential(key_text, value):
+            raise CredentialSurfaceError(
+                name, key_text, key_text, "parameter name %r" % key_text
+            )
+        if not isinstance(raw_name, str):
+            raise ParameterError(
+                name,
+                "operation %r rejected before execution - parameter name %s must be a string, "
+                "got bytes" % (name, key_text),
+            )
 
     spec = _OPERATIONS[name]["params"]
     given = set(params)
@@ -548,6 +569,9 @@ def validate(name, params, _closed=_CLOSED_NAMES):
 
     for pname, value in params.items():
         meta = spec[pname]
+        # Scan before all value-bearing validation. Enum/format errors must not become an oracle
+        # that repeats a credential supplied by the caller.
+        _scan_credential_surface(name, pname, value)
         if not _TYPE_CHECKS[meta["type"]](value):
             raise ParameterError(
                 name,
@@ -557,18 +581,15 @@ def validate(name, params, _closed=_CLOSED_NAMES):
         if "enum" in meta and value not in meta["enum"]:
             raise ParameterError(
                 name,
-                "operation %r parameter %r must be one of %s, got %r"
-                % (name, pname, ", ".join(meta["enum"]), value),
+                "operation %r parameter %r must be one of %s"
+                % (name, pname, ", ".join(meta["enum"])),
             )
         if "format" in meta:
             pattern, human = _FORMATS[meta["format"]]
             if not pattern.fullmatch(value):
                 raise ParameterError(
                     name,
-                    "operation %r parameter %r rejected before execution - must be %s, got %r"
-                    % (name, pname, human, value),
+                    "operation %r parameter %r rejected before execution - must be %s"
+                    % (name, pname, human),
                 )
-        # ZERO credential ràng buộc mọi dữ liệu được persist. Chỉ quét object bỏ lọt chính
-        # `reconcile_key` - một chuỗi được dùng nguyên làm khoá ledger bền.
-        _scan_credential_surface(name, pname, value)
     return dict(params)

@@ -2372,7 +2372,7 @@ def ra01_regression_r2_06_scanner_handles_quoted_and_executable_forms():
 
 
 @test
-def ra01_regression_g4_01_hardlinked_manifest_and_sidecar_are_refused():
+def wp77_g4_hardlinked_manifest_and_sidecar_are_refused():
     """Containment applies to the two sealed documents, not only artifact entries."""
     for sealed_name in (artifacts.MANIFEST_NAME, artifacts.SIDECAR_NAME):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2392,7 +2392,7 @@ def ra01_regression_g4_01_hardlinked_manifest_and_sidecar_are_refused():
 
 
 @test
-def ra01_regression_g4_02_top_level_parameter_keys_fail_closed_without_repr():
+def wp77_g4_top_level_parameter_keys_fail_closed_without_repr():
     """Non-string public-Python parameter names get structured errors before set/sort/join."""
     class HostileKey:
         def __hash__(self):
@@ -2423,7 +2423,7 @@ def ra01_regression_g4_02_top_level_parameter_keys_fail_closed_without_repr():
 
 
 @test
-def ra01_regression_g4_03_bytes_credentials_and_non_json_values_fail_before_execution():
+def wp77_g4_bytes_credentials_and_non_json_values_fail_before_execution():
     """The Python seam rejects bytes credentials and every non-JSON value before side effects."""
     marker = "ghp_" + "Z" * 20
 
@@ -2467,7 +2467,7 @@ def ra01_regression_g4_03_bytes_credentials_and_non_json_values_fail_before_exec
 
 
 @test
-def ra01_regression_g4_04_restart_idempotence_rejects_lossy_json_values():
+def wp77_g4_restart_idempotence_rejects_lossy_json_values():
     """Tuple coercion and non-finite floats cannot create a restart-only 409 or invalid JSON."""
     values = (("tuple-becomes-list-after-reload",), float("nan"), float("inf"), float("-inf"))
     for index, value in enumerate(values):
@@ -2495,7 +2495,7 @@ def ra01_regression_g4_04_restart_idempotence_rejects_lossy_json_values():
 
 
 @test
-def ra01_regression_g4_05_scanner_covers_windows_paths_with_spaces():
+def wp77_g4_scanner_covers_windows_paths_with_spaces():
     """List argv and executable= are whole tokens even when a Windows path contains spaces."""
     cases = {
         "list_path.py": (
@@ -2517,6 +2517,56 @@ def ra01_regression_g4_05_scanner_covers_windows_paths_with_spaces():
         assert (filename, "subprocess:gh") in offenders, (filename, offenders)
     covered = " ".join(scanner.COVERAGE["covered"]).lower()
     assert "paths containing spaces" in covered, covered
+
+
+@test
+def wp77_g4_credential_shaped_object_keys_are_refused_without_disclosure():
+    """Credential-shaped string and bytes keys fail before execution without echoing the key."""
+    marker = "ghp_" + "Q" * 20
+    for index, key in enumerate((marker, marker.encode("ascii"))):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = _store(tmp, "wp77-credential-key-%d.json" % index)
+            try:
+                store.call(
+                    "post_heartbeat",
+                    {
+                        "repo": REPO,
+                        "issue_number": 77,
+                        "reconcile_key": "wp77-credential-key-%d" % index,
+                        "payload": {key: "benign"},
+                    },
+                )
+            except operations.CredentialSurfaceError as exc:
+                assert marker not in str(exc), "credential key leaked into a diagnostic"
+            else:
+                raise AssertionError("a credential-shaped object key was accepted")
+            assert store.calls == [], "credential key rejection happened after execution"
+            assert len(store.ledger) == 0, "credential key reached the ledger"
+
+
+@test
+def wp77_g4_enum_and_format_credentials_are_scanned_before_diagnostics():
+    """Enum/format errors cannot disclose a credential before the credential scanner runs."""
+    marker = "ghp_" + "R" * 20
+    for index, field in enumerate(("verdict", "reviewed_sha")):
+        params = {
+            "repo": REPO,
+            "issue_number": 77,
+            "reconcile_key": "wp77-validation-order-%d" % index,
+            "reviewed_sha": HEAD_OID,
+            "verdict": "approve",
+        }
+        params[field] = marker
+        with tempfile.TemporaryDirectory() as tmp:
+            store = _store(tmp, "wp77-validation-order-%d.json" % index)
+            try:
+                store.call("post_verdict", params)
+            except operations.CredentialSurfaceError as exc:
+                assert marker not in str(exc), "credential value leaked into a diagnostic"
+            else:
+                raise AssertionError("credential-shaped %s was not scanned first" % field)
+            assert store.calls == [], "credential rejection happened after execution"
+            assert len(store.ledger) == 0, "credential value reached the ledger"
 
 
 def main():

@@ -141,9 +141,25 @@ nhánh tiền-EOL — đừng dùng nó làm bằng chứng land.
 | Nhánh | Bằng chứng (rc trực tiếp) | Decision |
 |---|---|---|
 | `origin/claude/cuu-viec-treo-2026-08-03` | 2 commit riêng (`d347129…`, `6c148d3…`), 40 path đổi từ merge-base; so exact tip với canonical: 19 blob giống, **21 blob khác**; 9 test name `r323_/r324_` thêm bởi branch đều `git grep` canonical rc=**1**. Chưa có evidence hành vi hai chiều | `rebase` |
-| `origin/claude/ras-17-data-pr13-windows-bjovq2` | `git grep -q 'rasoat-anchor' <branch> -- scripts/` rc=**0**; trên canonical rc=**1** ⇒ tính năng `tl rasoat-anchor` VẮNG ở canonical | `rebase` |
+| `origin/claude/ras-17-data-pr13-windows-bjovq2` | Behavioral A/B trên exact tip/canonical, cùng fixture và command dưới đây: tip rc=**0**, lập 1 migration; canonical rc=**2**, CLI bác subcommand. Control trên tip không đủ Điều trả 0 migration + lý do fail-closed ⇒ khác biệt là hành vi, không phải lỗi dựng môi trường | `rebase` |
 | `origin/claude/nlm-registry-sheet-dup-s22fk7` | 2 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:rasoat/KETQUA_R281_V1_V2_V3_2026-07-31.md` rc=**128** | `rebase` |
 | `origin/claude/audit-errors-patch-plan-56x4rq` | 1 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:docs/AUDIT_XAC_MINH_VA_KE_HOACH_VA_2026-07-31.md` rc=**128** | `finish rồi rebase` |
+
+Behavioral evidence row 49 (mỗi tree detached ở đúng SHA; env credential/cache bị bỏ, `HOME` trỏ thư mục
+trống; không dùng `GIT_CONFIG_*`):
+
+- Positive fixture: `master/unit.json` có một dep `so_hieu=18/2025/VBHN-VPQH`,
+  `text_hash=cache:18-2025-VBHN-VPQH#dieu54`, `dieu=["54"]`; `cache/docs/a.json` khai cùng số hiệu và
+  `articles.54="Điều 54. Mức hưởng ..."`. Chạy từ mỗi tree:
+  `python scripts\tl.py rasoat-anchor --in ..\wp63-row49-fixtures\positive\master --cache-dir ..\wp63-row49-fixtures\positive\cache --json`.
+  Exact tip `411b3f3fb74945934a82c8dc203cd523e0d31cf0`: rc=**0**,
+  `che_do=DRY`, `da_ghi=false`, `ke_hoach.di_tru=1`, `locator_trong_hash: 1→0`,
+  `findings_sau.san_sang=true`. Canonical `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb`: rc=**2**,
+  `invalid choice: 'rasoat-anchor'`.
+- Negative/control fixture: giữ cache trên nhưng dep yêu cầu `dieu=["99"]` và locator `#dieu99`. Cùng
+  command với `positive` đổi thành `negative` trên exact tip: rc=**0**, `ke_hoach.di_tru=0`,
+  `ke_hoach.bo_qua=1`, `THIEU_DIEU_TRONG_CACHE:99`, `findings_sau.san_sang=false`. Control này chứng minh
+  runner/CLI đã dựng đúng và fixture làm thay đổi kết quả theo dữ liệu đầu vào.
 
 Đối chiếu: `69 close + 3 rebase + 1 finish rồi rebase = 73`; phân lớp chính:
 `69 ancestor + 4 non-ancestor = 73`.
@@ -205,7 +221,7 @@ nếu khác chỉ là corroboration lịch sử.
 | 46 | `origin/claude/r323-tach-duoi-vbhn` | `9775d867eeaa` | `2026-08-03T00:38:04+07:00` | `ducthangho` — tác giả PR #18 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 47 | `origin/claude/r325-noi-lai-duoi-vbhn` | `1bdc16c73421` | `2026-08-03T02:04:23+07:00` | `ducthangho` — tác giả PR #20 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 48 | `origin/claude/ras-01-ras-14-metadata-cli-bi25ke` | `93a7dab7a4d4` | `2026-08-02T07:14:58+00:00` | `ducthangho` — tác giả PR #10 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
-| 49 | `origin/claude/ras-17-data-pr13-windows-bjovq2` | `411b3f3fb749` | `2026-08-02T13:36:58+00:00` | `unknown` | `rebase` | `rasoat-anchor` CÓ trên nhánh (grep rc=0), VẮNG trên canonical (rc=1) — tính năng chưa land |
+| 49 | `origin/claude/ras-17-data-pr13-windows-bjovq2` | `411b3f3fb749` | `2026-08-02T13:36:58+00:00` | `unknown` | `rebase` | Behavioral A/B §4.3: cùng positive fixture, tip rc=0 (`di_tru=1`, `san_sang=true`), canonical rc=2 (`invalid choice: 'rasoat-anchor'`); negative control trên tip rc=0 (`di_tru=0`, `THIEU_DIEU_TRONG_CACHE:99`) |
 | 50 | `origin/claude/ras17-merge-gate-anchor` | `d8a3acee53b3` | `2026-08-02T20:42:11+07:00` | `ducthangho` — tác giả PR #15 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 51 | `origin/claude/ras18-doc-patch-hash-vo-hieu` | `cbe21dc88274` | `2026-08-02T23:22:04+07:00` | `ducthangho` — tác giả PR #17 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 52 | `origin/claude/rasoat-luat-bhxh-pending-svev2v` | `296e5c078e6d` | `2026-07-30T07:16:05+00:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |

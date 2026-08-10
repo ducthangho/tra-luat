@@ -53,11 +53,46 @@ _TYPE_CHECKS = {
 # Vì sao TỪ CHỐI chứ không scrub: scrub sửa dữ liệu của người gọi một cách im lặng - đúng lớp lỗi
 # "khử trùng lặp nuốt mất nội dung" mà chính packet này đang chặn ở chỗ khác (409 CONFLICT). Từ
 # chối đích danh để người gọi biết mình vừa suýt ghi credential vào sổ bền.
-_CREDENTIAL_KEY = re.compile(
-    r"token|secret|password|passwd|credential|api[_-]?key|private[_-]?key|bearer|cookie|"
-    r"session[_-]?id|access[_-]?key|auth",
-    re.I,
+# Khớp theo TỪ CUỐI của khoá, KHÔNG phải substring.
+#
+# Bản trước dùng `re.search` trên cả chuỗi và chặn nhầm hàng loạt khoá hợp lệ mà chính protocol
+# này dùng: `session_id` (dính `session_id`), `authorization_url` (dính `auth`), `token_budget`
+# (dính `token`). Một ràng buộc an ninh chặn nhầm dữ liệu hợp lệ sẽ bị người dùng vô hiệu hoá,
+# và lúc đó nó không còn bảo vệ gì nữa - chặn nhầm là một cách hỏng, không phải "an toàn hơn".
+#
+# Quy tắc: credential nằm ở DANH TỪ CUỐI. `access_token` là token; `token_budget` là budget.
+_SECRET_TAILS = frozenset(
+    {
+        "token", "tokens", "secret", "secrets", "password", "passwords", "passwd", "pwd",
+        "credential", "credentials", "cookie", "cookies", "passphrase", "auth",
+        "authorization", "bearer", "otp",
+    }
 )
+
+# `key` một mình quá chung (`reconcile_key`, `sort_key`, `public_key`), nên chỉ chặn khi có
+# định ngữ làm nó thành bí mật.
+_SECRET_KEY_QUALIFIERS = frozenset(
+    {"api", "secret", "private", "access", "signing", "encryption", "master", "auth", "session",
+     "client", "app", "service", "consumer"}
+)
+
+
+def _split_words(key):
+    """Tách khoá thành từ - hiểu cả snake_case, kebab-case, dotted và camelCase."""
+    spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(key))
+    return [w for w in re.split(r"[^A-Za-z0-9]+", spaced.lower()) if w]
+
+
+def _key_is_credential(key):
+    words = _split_words(key)
+    if not words:
+        return False
+    tail = words[-1]
+    if tail in _SECRET_TAILS:
+        return True
+    if tail in ("key", "keys"):
+        return (words[-2] if len(words) > 1 else "") in _SECRET_KEY_QUALIFIERS
+    return False
 
 # Hình dạng credential thật, khớp trên GIÁ TRỊ. Một khoá vô hại (`note`) vẫn có thể chở token.
 _CREDENTIAL_VALUE = re.compile(
@@ -69,6 +104,19 @@ _CREDENTIAL_VALUE = re.compile(
 # Trần độ sâu/kích thước: một payload lồng vô hạn là DoS cho chính bộ quét.
 _MAX_PAYLOAD_DEPTH = 12
 _MAX_PAYLOAD_NODES = 4096
+
+# ── Format máy đọc được cho giá trị chuỗi ────────────────────────────────────
+# `reviewed_sha: string` là chưa đủ: audit gọi `post_verdict` với "not-a-sha" và với một chuỗi
+# hình `ghp_…`, cả hai đều được PERSIST vào sổ bền. Verdict neo vào một thứ không phải commit thì
+# nó không neo vào đâu cả - §1 bất biến 9 đòi "exact SHA", và một SHA viết tắt cũng KHÔNG exact.
+GIT_OID_RE = re.compile(r"^[0-9a-f]{40}$")
+
+_FORMATS = {
+    "git_oid": (
+        GIT_OID_RE,
+        "a full lowercase 40-hex Git object id (abbreviated or non-hex values are not exact SHAs)",
+    ),
+}
 
 _OPERATIONS_SOURCE = {
     "read_issue": {
@@ -130,7 +178,7 @@ _OPERATIONS_SOURCE = {
             "repo": {"type": "string", "required": True},
             "issue_number": {"type": "integer", "required": True},
             "reconcile_key": {"type": "string", "required": True},
-            "reviewed_sha": {"type": "string", "required": True},
+            "reviewed_sha": {"type": "string", "required": True, "format": "git_oid"},
             "verdict": {
                 "type": "string",
                 "required": True,
@@ -244,7 +292,7 @@ def _scan_credential_surface(op_name, param, value):
         if isinstance(node, dict):
             for key, sub in node.items():
                 child = "%s.%s" % (path, key)
-                if isinstance(key, str) and _CREDENTIAL_KEY.search(key):
+                if isinstance(key, str) and _key_is_credential(key):
                     raise CredentialSurfaceError(op_name, param, child, "key name %r" % key)
                 stack.append((sub, child, depth + 1))
         elif isinstance(node, (list, tuple)):
@@ -266,11 +314,20 @@ def schema():
             "validate() compares against a frozenset snapshot bound at import time",
             "runtime drift of the private table raises OperationSetTamperedError by name",
         ],
+        # Ràng buộc payload được CÔNG BỐ, không chôn trong regex: người gọi phải biết trước cái gì
+        # bị chặn, nếu không họ chỉ phát hiện ra lúc bị từ chối giữa production.
         "credential_surface": {
-            "top_level_parameter_names": "rejected",
-            "nested_object_keys": "rejected",
-            "credential_shaped_string_values": "rejected",
+            "rule": "a key is rejected when its LAST word is a secret noun; substring matching is "
+                    "not used, so session_id / authorization_url / token_budget / author / "
+                    "cookie_policy are accepted",
+            "rejected_key_tails": sorted(_SECRET_TAILS),
+            "rejected_key_tail_key_qualifiers": sorted(_SECRET_KEY_QUALIFIERS),
+            "rejected_value_shapes": "known credential prefixes (ghp_, github_pat_, sk-ant-, "
+                                     "AKIA, xox*, GOCSPX-, PEM private key headers)",
+            "max_depth": _MAX_PAYLOAD_DEPTH,
+            "max_nodes": _MAX_PAYLOAD_NODES,
         },
+        "formats": {name_: human for name_, (_rx, human) in _FORMATS.items()},
         "operations": {
             name: {
                 "kind": spec["kind"],
@@ -329,6 +386,14 @@ def validate(name, params, _closed=_CLOSED_NAMES):
                 "operation %r parameter %r must be one of %s, got %r"
                 % (name, pname, ", ".join(meta["enum"]), value),
             )
+        if "format" in meta:
+            pattern, human = _FORMATS[meta["format"]]
+            if not pattern.match(value):
+                raise ParameterError(
+                    name,
+                    "operation %r parameter %r rejected before execution - must be %s, got %r"
+                    % (name, pname, human, value),
+                )
         if meta["type"] == "object":
             _scan_credential_surface(name, pname, value)
     return dict(params)

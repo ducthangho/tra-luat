@@ -24,10 +24,12 @@ diễn ĐÚNG thủ thuật của auditor và đòi bị TỪ CHỐI; ID finding
 """
 
 import ast
+import contextlib
 import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -43,6 +45,9 @@ from core.ledger import Ledger  # noqa: E402
 
 CONTROLLER = os.path.join(_HERE, "controller.py")
 REPO = "ducthangho/tra-luat"
+# Git OID ĐẦY ĐỦ. Fixture cũ dùng "abc" và "b044f8b1" (viết tắt) - và chúng đi lọt, đó chính là
+# bằng chứng `reviewed_sha: string` không đủ.
+HEAD_OID = "b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb"
 EXPECTED_OPERATIONS = (
     "post_heartbeat",
     "post_verdict",
@@ -74,6 +79,15 @@ _ESCAPE_SCANNER_LIMITS = (
 )
 
 TESTS = []
+
+
+class PlatformUnsupported(Exception):
+    """Nền này KHÔNG cho thực hiện phép thử - báo LỚN, không nuốt thành 'passed'.
+
+    Chỉ dùng khi hệ điều hành từ chối dựng được FIXTURE (vd Windows không cho tạo symlink nếu
+    thiếu quyền), và CHỈ khi bất biến tương ứng còn một phép thử khác chạy được ở mọi nền. Skip mà
+    không có đối trọng portable thì đúng là "xanh vì chẳng chạy gì" - lớp lỗi của #54.
+    """
 
 
 def test(fn):
@@ -124,6 +138,36 @@ def _const_str(node):
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
 
 
+def _alias_map(tree):
+    """Bảng alias của một tệp: alias module -> module thật, và alias hàm -> 'module.hàm'.
+
+    Không có bảng này thì `import subprocess as sp` + `sp.run(["gh", ...])` cho `offenders=[]`,
+    và bộ quét chỉ bắt được kẻ tấn công không biết đổi tên - tức là không bắt được ai.
+    """
+    modules, funcs = {}, {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".")[0]
+                modules[alias.asname or root] = root
+        elif isinstance(node, ast.ImportFrom):
+            module = (node.module or "").split(".")[0]
+            for alias in node.names:
+                funcs[alias.asname or alias.name] = "%s.%s" % (module, alias.name)
+    return modules, funcs
+
+
+def _resolve_call(func_node, modules, funcs):
+    """Tên gọi đã CANONICAL hoá qua bảng alias, hoặc None."""
+    dotted = _dotted(func_node)
+    if dotted is None:
+        return None
+    head, _dot, rest = dotted.partition(".")
+    if not rest:
+        return funcs.get(head, head)
+    return "%s.%s" % (modules.get(head, head), rest)
+
+
 def _scan_escape_paths(directory, allowed):
     """Đường thoát mà `Import`/`ImportFrom` KHÔNG thấy (finding wp77-g1-sec-02).
 
@@ -132,10 +176,11 @@ def _scan_escape_paths(directory, allowed):
     """
     offenders = []
     for name, tree in _parse_dir(directory):
+        modules, funcs = _alias_map(tree)
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
-            called = _dotted(node.func)
+            called = _resolve_call(node.func, modules, funcs)
             if called in ("importlib.import_module", "__import__") and node.args:
                 target = _const_str(node.args[0])
                 if target and target.split(".")[0] in FORBIDDEN_IMPORTS:
@@ -170,6 +215,7 @@ def _scan_unguarded_env_access(path):
     """
     with open(path, "r", encoding="utf-8") as fh:
         tree = ast.parse(fh.read(), filename=os.path.basename(path))
+    modules, funcs = _alias_map(tree)
 
     guarded = []
     for node in ast.walk(tree):
@@ -189,14 +235,14 @@ def _scan_unguarded_env_access(path):
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
-            called = _dotted(node.func)
+            called = _resolve_call(node.func, modules, funcs)
             if called in ("os.getenv", "os.environ.get", "os.environ.pop", "os.environ.setdefault"):
                 literal = _const_str(node.args[0]) if node.args else None
                 if literal and _SENSITIVE_LITERAL.match(literal.upper()):
                     note(node.lineno, "%s(%r)" % (called, literal))
-            if called == "os.environ.update":
-                note(node.lineno, "os.environ.update(...)")
-        elif isinstance(node, ast.Subscript) and _dotted(node.value) == "os.environ":
+            if called in ("os.environ.update", "os.environ.copy"):
+                note(node.lineno, "%s(...)" % called)
+        elif isinstance(node, ast.Subscript) and _resolve_call(node.value, modules, funcs) == "os.environ":
             literal = _const_str(node.slice)
             if literal and _SENSITIVE_LITERAL.match(literal.upper()):
                 note(node.lineno, "os.environ[%r]" % literal)
@@ -211,6 +257,21 @@ def _run_cli(*argv):
         timeout=120,
     )
     return proc.returncode, proc.stdout, proc.stderr
+
+
+def _portable_child_env(extra):
+    """Env tối thiểu chạy được python trên MỌI nền, cộng thêm `extra`.
+
+    Đọc `os.environ` ở đây là đọc các biến VÔ HẠI (PATH, SYSTEMROOT...) và bộ quét
+    `_scan_unguarded_env_access` chỉ chặn hằng nhạy cảm, nên không có mâu thuẫn.
+    """
+    base = {}
+    for key in ("PATH", "SYSTEMROOT", "SystemRoot", "COMSPEC", "TEMP", "TMP", "WINDIR", "LANG"):
+        value = os.environ.get(key)
+        if value is not None:
+            base[key] = value
+    base.update(extra)
+    return base
 
 
 def _store(tmp, name="ledger.json"):
@@ -288,7 +349,7 @@ def ra01_wrong_type_and_enum_rejected():
                 "repo": REPO,
                 "issue_number": 77,
                 "reconcile_key": "k",
-                "reviewed_sha": "abc",
+                "reviewed_sha": HEAD_OID,
                 "verdict": "looks_good_to_me",
             },
         )
@@ -803,8 +864,6 @@ def ra01_regression_sec01_verify_refuses_escaping_locator_in_hostile_manifest():
 @test
 def ra01_regression_sec01_verify_refuses_symlink_even_when_content_hash_matches():
     """Hash khớp KHÔNG được chứng nhận nhầm đối tượng: symlink ra ngoài phải bị từ chối."""
-    if not hasattr(os, "symlink"):
-        raise AssertionError("platform without symlink support - test cannot make its claim")
     with tempfile.TemporaryDirectory() as tmp:
         root = os.path.join(tmp, "run")
         _run_cli("produce", "--out", root, "--run-id", "r1")
@@ -815,14 +874,86 @@ def ra01_regression_sec01_verify_refuses_symlink_even_when_content_hash_matches(
         with open(outside, "wb") as fh:
             fh.write(content)  # nội dung y hệt ⇒ SHA-256 vẫn khớp manifest
         os.remove(victim)
-        os.symlink(outside, victim)
-        assert artifacts.sha256_file(victim) == artifacts.sha256_bytes(content)
+        # Fixture THẬT trước. Chỉ đúng một lỗi được phép chuyển sang mô phỏng: Windows
+        # ERROR_PRIVILEGE_NOT_HELD (1314) khi tài khoản không có quyền tạo symlink. Mọi lỗi khác
+        # vẫn ném - "skip vì lỗi lạ" là cách êm ái nhất để mất một phép thử an ninh.
+        simulated = None
+        try:
+            os.symlink(outside, victim)
+            print("     symlink_fixture=real")
+        except OSError as exc:
+            if getattr(exc, "winerror", None) != 1314:
+                raise
+            simulated = exc
+            shutil.copyfile(outside, victim)
+            print("     symlink_fixture=simulated_winerror_1314")
+        if simulated is not None:
+            with _simulated_symlink(victim):
+                _assert_symlink_locator_refused(root)
+            return
+        _assert_symlink_locator_refused(root)
+
+
+@contextlib.contextmanager
+def _simulated_symlink(victim):
+    """Bắt `os.path.islink`/`os.lstat` khai `victim` là symlink, chỉ trong khối này.
+
+    Mô phỏng ở TẦNG hệ thống tệp mà `artifacts` thật sự hỏi, nên nhánh Windows vẫn đi qua đúng
+    hai phép kiểm đang được bảo vệ: `islink` trong `safe_locator` và `lstat`+`S_ISREG` trong
+    `verify`. Bỏ một trong hai ra khỏi code thì nhánh mô phỏng cũng ĐỎ - đó là điều kiện để mô
+    phỏng có giá trị làm bằng chứng.
+    """
+    target = os.path.abspath(victim)
+    real_islink, real_lstat = os.path.islink, os.lstat
+
+    def fake_islink(path):
+        return os.path.abspath(path) == target or real_islink(path)
+
+    def fake_lstat(path, *a, **kw):
+        result = real_lstat(path, *a, **kw)
+        if os.path.abspath(path) == target:
+            fields = list(result)
+            fields[0] = stat.S_IFLNK | 0o777
+            return os.stat_result(tuple(fields))
+        return result
+
+    os.path.islink, os.lstat = fake_islink, fake_lstat
+    try:
+        yield
+    finally:
+        os.path.islink, os.lstat = real_islink, real_lstat
+
+
+def _assert_symlink_locator_refused(root):
+    report = artifacts.verify(root)
+    assert report["ok"] is False, "a symlink out of run_root was certified because its hash matched"
+    # Hai lớp cùng bắt được ca này; chấp nhận lớp nào bắt trước, nhưng PHẢI gọi đúng tên locator.
+    named = [r["locator"] for r in report["rejected_locators"]] + report["not_regular_files"]
+    assert "corpus/cases.json" in named, report
+    assert "corpus" in report["missing_categories"], report
+
+
+@test
+def ra01_regression_sec01_verify_refuses_non_regular_file_portable():
+    """Bất biến no-follow, kiểm được ở MỌI nền - không cần quyền tạo symlink.
+
+    Đây là đối trọng của test symlink ngay trên: nền nào skip test kia thì vẫn còn test này, nên
+    bất biến "verify chỉ chứng nhận TỆP THƯỜNG" không bao giờ đi vắng hoàn toàn. Một skip không có
+    đối trọng chính là "xanh vì chẳng chạy gì".
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        victim = os.path.join(root, "corpus", "cases.json")
+        os.remove(victim)
+        os.makedirs(victim)  # thư mục không phải tệp thường, và có ở mọi hệ điều hành
         report = artifacts.verify(root)
-        assert report["ok"] is False, "a symlink out of run_root was certified because its hash matched"
-        # Hai lớp cùng bắt được ca này; chấp nhận lớp nào bắt trước, nhưng PHẢI gọi đúng tên locator.
-        named = [r["locator"] for r in report["rejected_locators"]] + report["not_regular_files"]
-        assert "corpus/cases.json" in named, report
+        assert report["ok"] is False, "a directory standing in for an artifact was certified"
+        assert "corpus/cases.json" in report["not_regular_files"], report
         assert "corpus" in report["missing_categories"], report
+        rc, _out, err = _run_cli("verify", "--root", root)
+        assert rc != 0
+        assert "NOT A REGULAR FILE: corpus/cases.json" in err, err
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -862,7 +993,7 @@ def ra01_core_reads_zero_credentials_with_fakes_injected():
                     "repo": REPO,
                     "issue_number": 77,
                     "reconcile_key": "kv",
-                    "reviewed_sha": "b044f8b1",
+                    "reviewed_sha": HEAD_OID,
                     "verdict": "approve",
                 },
             )
@@ -910,13 +1041,16 @@ def ra01_regression_spec02_explicit_child_env_is_scrubbed_too():
     """`env=` tường minh cũng phải bị lọc - không chỉ đường kế thừa."""
     marker = "FAKE-EXPLICIT-CHILD-ENV"
     reader = "import os,sys; sys.stdout.write(os.environ.get('AWS_SECRET_ACCESS_KEY') or 'ABSENT')"
+    # env tường minh phải dựng từ environment THẬT của nền: hằng "/usr/bin:/bin" làm child chết
+    # trên Windows (thiếu SYSTEMROOT/PATH hợp lệ) - hỏng vì fixture, không vì bất biến.
+    hostile_env = _portable_child_env({"AWS_SECRET_ACCESS_KEY": marker})
     with guards.EnvGuard() as recorder:
         proc = subprocess.run(
             [sys.executable, "-c", reader],
             capture_output=True,
             text=True,
             timeout=120,
-            env={"AWS_SECRET_ACCESS_KEY": marker, "PATH": "/usr/bin:/bin"},
+            env=hostile_env,
         )
         exposures = [e["name"] for e in recorder.child_env_exposures]
     assert proc.stdout.strip() == "ABSENT", proc.stdout
@@ -1149,21 +1283,433 @@ def ra01_seed_fixture_has_exactly_one_definition():
     assert callable(fake_github.seeded_store)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# F. Vòng audit thứ hai — sáu finding độc lập trên head dc0dbf42
+# ─────────────────────────────────────────────────────────────────────────────
+@test
+def ra01_regression_a2_01_manifest_cannot_narrow_its_own_obligations():
+    """PHẢN CHỨNG AUDIT: manifest reseal với entries=[] và required_categories=[] vẫn ok=true.
+
+    Gốc lỗi là một câu hỏi sai: verify() hỏi CHÍNH tài liệu đang bị kiểm xem nó có nghĩa vụ gì.
+    Sidecar chỉ chứng minh tài liệu không đổi kể từ lúc niêm phong - nó không cấp thẩm quyền cho
+    nội dung bên trong.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        manifest["entries"] = []
+        manifest["required_categories"] = []
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["manifest_hash_ok"] is True, "fixture sai - sidecar phải vẫn khớp"
+        assert report["ok"] is False, "an EMPTY manifest was certified"
+        assert report["verified_files"] == 0
+        assert report["manifest_invalid"], report
+        rc, _out, err = _run_cli("verify", "--root", root)
+        assert rc != 0, "verify CLI returned rc=0 for an empty manifest"
+        assert "MANIFEST INVALID" in err, err
+
+
+@test
+def ra01_regression_a2_01_manifest_dropping_one_category_is_refused():
+    """Biến thể tinh vi hơn: giữ 4 hạng mục, bỏ 1, và sửa required_categories cho khớp."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        manifest["entries"] = [e for e in manifest["entries"] if e["category"] != "cleanup_record"]
+        manifest["required_categories"] = [c for c in artifacts.REQUIRED_CATEGORIES
+                                           if c != "cleanup_record"]
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["ok"] is False, "manifest dropped an obligation and was still certified"
+        assert report["manifest_invalid"], report
+
+
+@test
+def ra01_regression_a2_02_ntfs_stream_and_dos_device_locators_refused():
+    """PHẢN CHỨNG AUDIT: `carrier.txt:payload` (NTFS ADS) và `NUL`/`CON` được chấp nhận ở bản trước.
+
+    Cả hai đều làm manifest chứng nhận một thứ KHÔNG phải tệp trong thư mục: ADS giấu dữ liệu
+    trong stream của tệp khác, còn `NUL` nuốt mọi ghi và trả rỗng mọi đọc.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        aset = artifacts.ArtifactSet(os.path.join(tmp, "run"), "devices")
+        for bad in (
+            "carrier.txt:payload",
+            "sub/carrier.txt:payload",
+            "NUL", "CON", "PRN", "AUX", "COM1", "LPT9",
+            "nul.txt", "con.log", "COM1.json",
+            "NUL.", "CON ",
+            "trailing.",
+            "trailing ",
+        ):
+            try:
+                aset.add("source", bad, "x")
+            except artifacts.LocatorError:
+                pass
+            else:
+                raise AssertionError("unsafe Windows locator accepted: %r" % bad)
+        # Tên bình thường có chứa chuỗi thiết bị vẫn phải đi lọt - ràng buộc không được quá tay.
+        for good in ("console.txt", "nullable.json", "aux_data/notes.txt", "com10.txt"):
+            aset.add("source", good, "x")
+
+
+@test
+def ra01_regression_a2_01_malformed_entry_fields_are_refused():
+    """Kiểu của TỪNG trường trong entry cũng là đầu vào không tin cậy.
+
+    Mutation audit tìm ra chỗ này: bỏ kiểm `sha256`/`bytes` mà không test nào đỏ. Một entry với
+    `sha256: null` sẽ không bao giờ khớp và chỉ hiện ra dưới dạng hash_mismatch mơ hồ, còn
+    `bytes: "lots"` thì đi thẳng vào báo cáo mà không ai chặn.
+    """
+    for field, value in (
+        ("sha256", None), ("sha256", "nothex"), ("sha256", "ab" * 32 + "zz"),
+        ("bytes", "lots"), ("bytes", -1), ("bytes", True),
+        ("locator", 42), ("locator", None),
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "run")
+            _run_cli("produce", "--out", root, "--run-id", "r1")
+            manifest = _load_manifest(root)
+            manifest["entries"][0][field] = value
+            _reseal(root, manifest)
+            report = artifacts.verify(root)
+            assert report["ok"] is False, (field, value, report)
+            assert report["manifest_invalid"], (field, value, report)
+            assert report["missing_categories"] == list(artifacts.REQUIRED_CATEGORIES), report
+
+
+@test
+def ra01_regression_a2_02_add_refuses_a_target_that_is_not_a_regular_file():
+    """`os.open` thành công KHÔNG có nghĩa ta đang giữ một tệp thường.
+
+    Trên Windows `NUL` mở được và nuốt mọi thứ, và ở đó không có `O_NOFOLLOW`. POSIX không dựng
+    được ca đó bằng tệp thật, nên hệ điều hành được mô phỏng ở ĐÚNG một điểm - `os.fstat` - còn
+    logic đang bị kiểm thì vẫn là logic thật. Cùng nguyên tắc với nhánh symlink mô phỏng.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        aset = artifacts.ArtifactSet(os.path.join(tmp, "run"), "fstat")
+        real_fstat = os.fstat
+
+        def fake_fstat(fd, *a, **kw):
+            result = real_fstat(fd, *a, **kw)
+            fields = list(result)
+            fields[0] = stat.S_IFCHR | 0o666  # thiết bị ký tự, giống NUL
+            return os.stat_result(tuple(fields))
+
+        os.fstat = fake_fstat
+        try:
+            aset.add("source", "looks_ordinary.txt", "x")
+        except artifacts.LocatorError as exc:
+            assert "regular file" in exc.reason, exc.reason
+        else:
+            raise AssertionError("add() accepted a non-regular-file target")
+        finally:
+            os.fstat = real_fstat
+        assert aset.entries == [], "a refused target was still recorded in the manifest"
+
+
+@test
+def ra01_regression_a2_02_hostile_manifest_with_stream_or_device_locator_is_refused():
+    """Chặn ở CẢ HAI đầu: manifest thù địch khai locator ADS/device cũng phải verify ĐỎ đích danh.
+
+    Chặn lúc ghi là chưa đủ - manifest có thể do người khác soạn, và sidecar vẫn khớp.
+    """
+    for hostile in ("carrier.txt:payload", "NUL", "com1.json"):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "run")
+            _run_cli("produce", "--out", root, "--run-id", "r1")
+            manifest = _load_manifest(root)
+            manifest["entries"].append(
+                {
+                    "category": "source",
+                    "locator": hostile,
+                    "sha256": artifacts.sha256_bytes(b"x"),
+                    "bytes": 1,
+                }
+            )
+            _reseal(root, manifest)
+            report = artifacts.verify(root)
+            assert report["manifest_hash_ok"] is True, "fixture sai - sidecar phải vẫn khớp"
+            assert report["ok"] is False, "hostile locator certified: %r" % hostile
+            assert any(r["locator"] == hostile for r in report["rejected_locators"]), (hostile, report)
+            rc, _out, err = _run_cli("verify", "--root", root)
+            assert rc != 0 and hostile in err, (rc, err)
+
+
+@test
+def ra01_regression_a2_03_child_process_credential_read_is_detected_with_marker_present():
+    """PHẢN CHỨNG AUDIT: test ZERO-credential trước đây FALSE-GREEN.
+
+    Guard scrub marker TRƯỚC khi child chạy, nên child không bao giờ có gì để đọc - và một mutant
+    cho `cmd_produce` đọc `os.getenv("GH_" + "TOKEN")` vẫn xanh toàn suite.
+
+    Ở đây marker VẪN HIỆN DIỆN trong env của child, và recorder được cài TRONG child trước khi
+    import controller. Phát hiện vì thế không còn ăn theo scrub.
+    """
+    marker = "FAKE-ghp-444444444444444444444444444444444444"
+    with tempfile.TemporaryDirectory() as tmp:
+        probe = os.path.join(tmp, "probe.py")
+        out_json = os.path.join(tmp, "reads.json")
+        run_dir = os.path.join(tmp, "run")
+        with open(probe, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(
+                "import json, os, sys\n"
+                "sys.path.insert(0, %r)\n" % _PARENT
+                + "from core import guards\n"
+                "rec = guards.EnvAccessRecorder(os.environ)\n"
+                "os.environ = rec\n"
+                "from core import controller\n"  # import SAU khi recorder đã tại chỗ
+                "rc = controller.main(['produce', '--out', %r, '--run-id', 'probe'])\n" % run_dir
+                + "json.dump({'rc': rc, 'sensitive_reads': rec.sensitive_reads(),\n"
+                "           'marker_present': os.environ.get('GH_TOKEN') is not None},\n"
+                "          open(%r, 'w', encoding='utf-8'))\n" % out_json
+            )
+        env = _portable_child_env({"GH_TOKEN": marker})
+        proc = subprocess.run(
+            [sys.executable, probe], capture_output=True, text=True, timeout=120, env=env
+        )
+        assert proc.returncode == 0, proc.stderr
+        with open(out_json, "r", encoding="utf-8") as fh:
+            result = json.load(fh)
+        assert result["rc"] == 0, result
+        # Bằng chứng dương là fixture CÓ răng: marker thật sự nằm trong env của child.
+        assert result["marker_present"] is True, "marker never reached the child - test is vacuous"
+        assert result["sensitive_reads"] == [], result["sensitive_reads"]
+        for dirpath, _dirs, files in os.walk(run_dir):
+            for name in files:
+                with open(os.path.join(dirpath, name), "rb") as fh:
+                    assert marker.encode() not in fh.read(), name
+
+
+@test
+def ra01_regression_a2_03_detection_works_without_scrubbing():
+    """Tách PHÁT HIỆN khỏi SCRUB: tắt scrub thì child NHẬN được biến, mà recorder vẫn ghi nhận."""
+    marker = "FAKE-NO-SCRUB-CHILD"
+    reader = "import os,sys; sys.stdout.write(os.environ.get('GH_TOKEN') or 'ABSENT')"
+    with guards.EnvGuard(inject={"GH_TOKEN": marker}, scrub_child_env=False) as recorder:
+        proc = subprocess.run(
+            [sys.executable, "-c", reader], capture_output=True, text=True, timeout=120
+        )
+        exposures = [e["name"] for e in recorder.child_env_exposures]
+    assert proc.stdout.strip() == marker, "scrub_child_env=False must not alter the child env"
+    assert "GH_TOKEN" in exposures, exposures
+
+
+@test
+def ra01_regression_a2_07_positional_child_env_is_covered_too():
+    """`env` truyền bằng VỊ TRÍ (tham số thứ 11 của Popen) phải đi qua cùng một đường.
+
+    Chỉ đọc `kwargs["env"]` là bỏ lọt một chữ ký hợp lệ của stdlib - và kẻ bỏ lọt nó sẽ không
+    biết mình đã bỏ lọt, vì `subprocess.run` luôn dùng keyword.
+    """
+    marker = "FAKE-POSITIONAL-CHILD-ENV"
+    reader = "import os,sys; sys.stdout.write(os.environ.get('GITHUB_TOKEN') or 'ABSENT')"
+    hostile_env = _portable_child_env({"GITHUB_TOKEN": marker})
+    with guards.EnvGuard() as recorder:
+        # Popen(args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell,
+        #       cwd, env) - đếm đủ chín tham số đệm để `env` rơi đúng vị trí thứ 11.
+        proc = subprocess.Popen(
+            [sys.executable, "-c", reader],
+            -1, None, None, subprocess.PIPE, None, None, True, False, None, hostile_env,
+        )
+        out, _err = proc.communicate(timeout=120)
+        exposures = [e["name"] for e in recorder.child_env_exposures]
+    assert out.decode().strip() == "ABSENT", out
+    assert "GITHUB_TOKEN" in exposures, exposures
+
+
+@test
+def ra01_regression_a2_04_escape_scanner_canonicalizes_import_aliases():
+    """PHẢN CHỨNG AUDIT: `import subprocess as sp` / `import importlib as il` cho offenders=[]."""
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "aliased.py"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(
+                "import subprocess as sp\n"
+                "import importlib as il\n"
+                "import os as o\n"
+                "from subprocess import run as r\n"
+                "from importlib import import_module as im\n"
+                "def go():\n"
+                "    sp.run(['gh', 'api', '/user'])\n"
+                "    il.import_module('requests')\n"
+                "    o.system('curl https://example.invalid')\n"
+                "    r(['curl', '-s', 'https://example.invalid'])\n"
+                "    im('httpx')\n"
+            )
+        offenders = set(_scan_escape_paths(tmp, allowed=set()))
+        for expected in (
+            ("aliased.py", "subprocess:gh"),
+            ("aliased.py", "dynamic-import:requests"),
+            ("aliased.py", "shell:os.system"),
+            ("aliased.py", "subprocess:curl"),
+            ("aliased.py", "dynamic-import:httpx"),
+        ):
+            assert expected in offenders, (expected, sorted(offenders))
+
+
+@test
+def ra01_regression_a2_05_benign_payload_keys_are_not_blocked():
+    """PHẢN CHỨNG AUDIT: regex substring chặn nhầm dữ liệu hợp lệ của chính protocol này.
+
+    Fixture là payload THẬT theo hình dạng RA-02/RA-03 sẽ gửi, không phải ví dụ bịa - một bộ lọc
+    an ninh chặn nhầm dữ liệu thật sẽ bị gỡ ra, và lúc đó nó không bảo vệ gì nữa.
+    """
+    benign = {
+        "session_id": "codex-audit-wp77-g2-20260810",
+        "authorization_url": "https://github.com/ducthangho/tra-luat/issues/76#issuecomment-1",
+        "token_budget": 120000,
+        "author": "ducthangho",
+        "cookie_policy": "none",
+        "public_key": "ssh-ed25519 AAAA...",
+        "reconcile_key": "gh77-heartbeat-g2-claude-01",
+        "sort_key": "created_at",
+        "auth_method": "oidc",
+        "nested": {"idempotency_key": "abc", "tokens_used": 41, "authorization_url": "https://x"},
+    }
+    # Payload THẬT theo hình dạng RA-03 sẽ gửi - lấy nguyên các trường của heartbeat và verdict
+    # đang dùng trên chính #77, chứ không phải {"state": "running"} cho dễ.
+    real_heartbeat = {
+        "schema_version": 1, "event": "executor_heartbeat",
+        "reconcile_key": "gh77-heartbeat-g2-claude-01", "packet_id": "wp77",
+        "mission_issue": 76, "generation": 2, "attempt": 2, "max_attempts_per_packet": 2,
+        "spec_hash": "890c5a1b071f79985c43db560897d6624934735072380c54af8103c2363cf02b",
+        "session_id": "session-abc", "role": "executor", "provider": "claude",
+        "branch": "agent/wp77-g2-claude", "base_sha": HEAD_OID,
+        "heartbeat_at": "2026-08-10T06:30:00Z", "lease_until": "2026-08-10T07:43:09Z",
+        "authorization_url": "https://github.com/ducthangho/tra-luat/issues/77#issuecomment-1",
+        "token_budget": 120000, "author": "ducthangho",
+    }
+    real_verdict = {
+        "schema_version": 1, "event": "reviewer_verdict", "review_axes": ["spec", "standards_security"],
+        "independent_from_executor_session": True, "assurance": "cross_approved",
+        "session_id": "codex-audit-wp77-g2-20260810", "author": "codex",
+        "findings": [{"id": "wp77-g1-sec-01", "severity": "P1", "title": "artifact locator escape"}],
+        "cookie_policy": "none", "sort_key": "created_at",
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        result = store.call(
+            "post_heartbeat",
+            {"repo": REPO, "issue_number": 77, "reconcile_key": "k-benign", "payload": benign},
+        )
+        assert result["created"] is True
+        store.call(
+            "post_heartbeat",
+            {"repo": REPO, "issue_number": 77, "reconcile_key": "k-real-hb", "payload": real_heartbeat},
+        )
+        store.call(
+            "post_verdict",
+            {"repo": REPO, "issue_number": 77, "reconcile_key": "k-real-vd",
+             "reviewed_sha": HEAD_OID, "verdict": "changes_requested", "payload": real_verdict},
+        )
+        assert len(store.ledger) == 3, len(store.ledger)
+    # Ràng buộc phải được CÔNG BỐ, không chôn trong regex.
+    surface = operations.schema()["credential_surface"]
+    assert surface["rejected_key_tails"] and surface["max_depth"] and surface["max_nodes"]
+
+
+@test
+def ra01_regression_a2_05_secret_keys_still_refused_by_name():
+    """Đối trọng của test trên: thu hẹp bộ lọc KHÔNG được làm nó ngừng bắt credential thật."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        for key in (
+            "token", "access_token", "refresh_token", "apiKey", "X-Api-Key", "client_secret",
+            "password", "passwd", "credentials", "basic_auth", "authorization", "set-cookie",
+            "aws_secret_access_key", "private_key", "session_key", "passphrase",
+        ):
+            try:
+                store.call(
+                    "post_heartbeat",
+                    {"repo": REPO, "issue_number": 77, "reconcile_key": "k",
+                     "payload": {key: "value"}},
+                )
+            except operations.CredentialSurfaceError as exc:
+                assert key in str(exc), (key, str(exc))
+            else:
+                raise AssertionError("credential key accepted: %r" % key)
+        assert len(store.ledger) == 0
+
+
+@test
+def ra01_regression_a2_06_post_verdict_requires_a_full_git_oid():
+    """PHẢN CHỨNG AUDIT: `reviewed_sha` chỉ kiểm là `string`; "not-a-sha" và `ghp_…` được PERSIST.
+
+    Verdict neo vào một thứ không phải commit thì nó không neo vào đâu - §1 bất biến 9 đòi exact
+    SHA, và SHA viết tắt cũng KHÔNG exact.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        base = {"repo": REPO, "issue_number": 77, "verdict": "approve"}
+        for bad in (
+            "not-a-sha",
+            "ghp_0123456789abcdefghij0123456789abcdef",
+            "b044f8b1",                                     # viết tắt
+            HEAD_OID[:-1],                                  # thiếu 1 ký tự
+            HEAD_OID + "a",                                 # thừa 1 ký tự
+            HEAD_OID.upper(),                               # hoa - không canonical
+            "g" * 40,                                       # đủ dài, không phải hex
+            "",
+        ):
+            try:
+                store.call("post_verdict", dict(base, reconcile_key="k", reviewed_sha=bad))
+            except operations.ParameterError as exc:
+                assert "reviewed_sha" in str(exc), str(exc)
+            else:
+                raise AssertionError("post_verdict accepted a non-OID reviewed_sha: %r" % bad)
+        assert len(store.ledger) == 0, "a rejected verdict still reached the ledger"
+        ok = store.call("post_verdict", dict(base, reconcile_key="k-ok", reviewed_sha=HEAD_OID))
+        assert ok["created"] is True
+        assert len(store.ledger) == 1
+    assert operations.schema()["formats"]["git_oid"]
+
+
+@test
+def ra01_regression_a2_06_environ_copy_still_works_under_the_guard():
+    """PHẢN CHỨNG AUDIT: `os.environ.copy()` ném AttributeError khi recorder đang thay chỗ.
+
+    Thư viện con thường gọi đúng thứ đó ngay trước khi tạo subprocess. Một guard làm hỏng code
+    lành là guard sẽ bị gỡ ra - và lúc đó nó không canh gì nữa.
+    """
+    marker = "FAKE-COPY-PROBE-TOKEN"
+    with guards.EnvGuard(inject={"GH_TOKEN": marker}) as recorder:
+        snapshot = os.environ.copy()
+        assert isinstance(snapshot, dict)
+        assert snapshot.get("GH_TOKEN") == marker
+        # Sao chép toàn bộ environment LÀ một lần đọc credential, và phải được ghi nhận.
+        assert "GH_TOKEN" in recorder.sensitive_reads()
+        assert len(os.environ) == len(snapshot)
+
+
 def main():
     passed = 0
     failed = []
+    skipped = []
     for fn in TESTS:
         try:
             fn()
+        except PlatformUnsupported as exc:
+            skipped.append((fn.__name__, str(exc)))
+            print("  [SKIP] %s -- %s" % (fn.__name__, exc))
         except Exception as exc:  # noqa: BLE001 - suite phải báo cáo mọi kiểu lỗi
             failed.append((fn.__name__, "%s: %s" % (type(exc).__name__, exc)))
             print("  [FAIL] %s -- %s: %s" % (fn.__name__, type(exc).__name__, exc))
         else:
             passed += 1
             print("  [OK] %s" % fn.__name__)
-    total = len(TESTS)
+    # Hai số phải BẰNG NHAU, và mẫu số KHÔNG gồm test bị skip - nếu gồm thì một nền không chạy
+    # được fixture sẽ làm gate đỏ vì lý do sai. Test skip được liệt kê ĐÍCH DANH ngay dưới, để
+    # "N/N" không bao giờ che giấu một phép thử đã biến mất.
+    total = len(TESTS) - len(skipped)
     print("== ra01 core selftest %d/%d ==" % (passed, total))
-    return 0 if passed == total else 1
+    if skipped:
+        print("== skipped %d (platform cannot build the fixture) ==" % len(skipped))
+        for name, reason in skipped:
+            print("   - %s: %s" % (name, reason))
+    return 0 if not failed else 1
 
 
 if __name__ == "__main__":

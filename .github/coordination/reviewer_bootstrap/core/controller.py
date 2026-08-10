@@ -151,6 +151,8 @@ def cmd_verify(args):
         sys.stderr.write("UNSAFE LOCATOR: %s (%s)\n" % (item["locator"], item["reason"]))
     for name in report["not_regular_files"]:
         sys.stderr.write("NOT A REGULAR FILE: %s\n" % name)
+    if report["manifest_invalid"]:
+        sys.stderr.write("MANIFEST INVALID: %s\n" % report["manifest_invalid"])
     if not report["manifest_hash_ok"] and report["manifest_present"]:
         sys.stderr.write("MANIFEST TAMPERED: %s\n" % artifacts.MANIFEST_NAME)
     return RC_VERIFY_FAILED

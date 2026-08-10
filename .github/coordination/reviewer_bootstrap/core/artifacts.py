@@ -40,7 +40,10 @@ import json
 import ntpath
 import os
 import posixpath
+import re
 import stat
+
+_SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 MANIFEST_NAME = "manifest.json"
 SIDECAR_NAME = "manifest.sha256"
@@ -76,6 +79,22 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
+# Tên thiết bị DOS. Trên Windows chúng phân giải thành THIẾT BỊ chứ không phải tệp, ở BẤT KỲ thư
+# mục nào, và kể cả khi có phần mở rộng (`NUL.txt`) hoặc dấu chấm/khoảng trắng ở cuối. Ghi vào
+# `NUL` là ghi vào hư vô mà `open()` vẫn báo thành công - manifest sẽ chứng nhận một tệp không
+# tồn tại.
+_DOS_DEVICES = frozenset(
+    {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$"}
+    | {"COM%d" % i for i in range(1, 10)}
+    | {"LPT%d" % i for i in range(1, 10)}
+)
+
+
+def _is_dos_device(component):
+    stem = component.split(".")[0].rstrip(" .").upper()
+    return stem in _DOS_DEVICES
+
+
 def _is_absolute_anywhere(locator):
     """Tuyệt đối theo BẤT KỲ nền nào - một manifest di chuyển được giữa Windows và POSIX."""
     return (
@@ -97,6 +116,14 @@ def safe_locator(root, locator):
         raise LocatorError(locator, "locator contains a NUL byte")
     if "\\" in locator:
         raise LocatorError(locator, "backslash is not a portable separator; use '/'")
+    if any(ord(ch) < 32 for ch in locator):
+        raise LocatorError(locator, "locator contains a control character")
+    # Dấu hai chấm phục vụ HAI thứ trên Windows và cả hai đều là lối thoát: NTFS alternate data
+    # stream (`carrier.txt:payload` - dữ liệu nằm trong stream, thư mục KHÔNG có tệp độc lập nào,
+    # mà hash vẫn khớp) và đường dẫn drive-relative (`C:x`). Không có ca dùng hợp lệ nào trong
+    # locator portable, nên chặn thẳng thay vì cố phân biệt.
+    if ":" in locator:
+        raise LocatorError(locator, "':' is not portable (NTFS data stream or drive-relative path)")
     if _is_absolute_anywhere(locator):
         raise LocatorError(locator, "absolute paths are not locators")
 
@@ -108,6 +135,10 @@ def safe_locator(root, locator):
             raise LocatorError(locator, "'.' component is not allowed")
         if part == "..":
             raise LocatorError(locator, "parent-directory escape ('..') is not allowed")
+        if part != part.rstrip(" ."):
+            raise LocatorError(locator, "component %r ends with a dot or space" % part)
+        if _is_dos_device(part):
+            raise LocatorError(locator, "component %r is a reserved DOS device name" % part)
 
     root_abs = os.path.abspath(str(root))
     target = os.path.join(root_abs, *parts)
@@ -158,6 +189,11 @@ class ArtifactSet:
         flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
         fd = os.open(target, flags, 0o600)
         with os.fdopen(fd, "wb") as fh:
+            # fstat trên CHÍNH descriptor vừa mở: `os.open` thành công không có nghĩa ta đang giữ
+            # một tệp thường. Trên Windows `NUL` mở được và nuốt mọi thứ; O_NOFOLLOW thì không tồn
+            # tại ở đó. Kiểm sau khi mở là phép kiểm duy nhất không có khe TOCTOU.
+            if not stat.S_ISREG(os.fstat(fh.fileno()).st_mode):
+                raise LocatorError(relative_name, "target is not a regular file after open")
             fh.write(data)
         self.entries.append(
             {
@@ -230,6 +266,7 @@ def verify(run_root):
         "missing_categories": [],
         "rejected_locators": [],
         "not_regular_files": [],
+        "manifest_invalid": None,
         "verified_files": 0,
     }
 
@@ -253,9 +290,59 @@ def verify(run_root):
         # Manifest bị sửa sau khi niêm phong. Dừng ở đây: mọi entry bên trong nó đã mất thẩm quyền.
         return report
 
-    manifest = json.loads(raw.decode("utf-8"))
+    # ── Manifest là ĐẦU VÀO KHÔNG TIN CẬY, kể cả về SCHEMA của chính nó ─────────────────────
+    # Lỗ đã bị bắt: một manifest reseal với {"entries": [], "required_categories": []} trả
+    # `ok=true`, `verified_files=0`. Vì `verify()` hỏi chính manifest xem nó có nghĩa vụ gì.
+    # Nghĩa vụ do MODULE quy định, không phải do tài liệu đang bị kiểm tự khai.
+    try:
+        manifest = json.loads(raw.decode("utf-8"))
+    except ValueError as exc:
+        report["manifest_invalid"] = "manifest is not valid JSON: %s" % exc
+        return report
+    if not isinstance(manifest, dict):
+        report["manifest_invalid"] = "manifest is not an object"
+        return report
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        report["manifest_invalid"] = "unsupported schema_version %r" % manifest.get("schema_version")
+        return report
+    def _invalid(reason):
+        report["manifest_invalid"] = reason
+        # Vẫn NÊU ĐỦ năm hạng mục còn thiếu. "Manifest hỏng" mà không nói thiếu gì thì người đọc
+        # không sửa được - cùng lý do vì sao xoá artifact phải gọi đúng tên tệp.
+        report["missing_categories"] = list(REQUIRED_CATEGORIES)
+        return report
+
+    entries = manifest.get("entries")
+    if not isinstance(entries, list) or not entries:
+        return _invalid("manifest declares no entries")
+    declared = manifest.get("required_categories")
+    if declared != list(REQUIRED_CATEGORIES):
+        return _invalid(
+            "manifest narrowed its own obligations - required_categories must be %s, got %r"
+            % (list(REQUIRED_CATEGORIES), declared)
+        )
+    self_block = manifest.get("self") or {}
+    if self_block.get("locator") != MANIFEST_NAME:
+        return _invalid("manifest does not describe itself")
+
     present = set()
-    for entry in manifest["entries"]:
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return _invalid("malformed entry: %r" % (entry,))
+        locator_value, sha_value, bytes_value = (
+            entry.get("locator"), entry.get("sha256"), entry.get("bytes"),
+        )
+        if not isinstance(locator_value, str):
+            return _invalid("entry locator must be a string, got %r" % (locator_value,))
+        if not isinstance(sha_value, str) or not _SHA256_HEX.match(sha_value):
+            return _invalid("entry %r has a malformed sha256: %r" % (locator_value, sha_value))
+        if not isinstance(bytes_value, int) or isinstance(bytes_value, bool) or bytes_value < 0:
+            return _invalid("entry %r has a malformed byte count: %r" % (locator_value, bytes_value))
+        if entry.get("category") not in REQUIRED_CATEGORIES:
+            report["rejected_locators"].append(
+                {"locator": locator_value, "reason": "unknown category %r" % entry.get("category")}
+            )
+            continue
         locator = entry["locator"]
         try:
             path = safe_locator(root, locator)
@@ -276,11 +363,12 @@ def verify(run_root):
         present.add(entry["category"])
         report["verified_files"] += 1
 
-    report["missing_categories"] = [
-        c for c in manifest.get("required_categories", REQUIRED_CATEGORIES) if c not in present
-    ]
+    # Đối chiếu với HẰNG của module, KHÔNG với danh sách manifest tự khai.
+    report["missing_categories"] = [c for c in REQUIRED_CATEGORIES if c not in present]
     report["ok"] = (
         report["manifest_hash_ok"]
+        and report["manifest_invalid"] is None
+        and report["verified_files"] > 0
         and not report["missing_files"]
         and not report["hash_mismatches"]
         and not report["missing_categories"]

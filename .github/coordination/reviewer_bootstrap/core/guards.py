@@ -102,6 +102,22 @@ class EnvAccessRecorder(MutableMapping):
     def __len__(self):
         return len(self._wrapped)
 
+    def copy(self):
+        """`os.environ.copy()` phải còn dùng được khi recorder đang thay chỗ nó.
+
+        `MutableMapping` KHÔNG cấp `.copy()`, nên bản trước làm `os.environ.copy()` ném
+        AttributeError - và thư viện con hay gọi đúng thứ đó ngay trước khi tạo subprocess. Một
+        guard làm hỏng code lành là guard sẽ bị gỡ ra, nên nó phải trong suốt.
+
+        Sao chép là một lần ĐỌC TOÀN BỘ environment, kể cả biến nhạy cảm, nên nó được ghi nhận -
+        im lặng ở đây sẽ là một lối đọc credential không ai thấy.
+        """
+        snapshot = dict(self._wrapped)
+        for key in snapshot:
+            if is_sensitive(key):
+                self._note(key)
+        return snapshot
+
     # ── truy vấn ────────────────────────────────────────────────────────────
     def sensitive_reads(self):
         """Danh sách (đã khử trùng lặp, giữ thứ tự) các khoá nhạy cảm đã bị đọc hoặc bị trao đi."""
@@ -229,12 +245,13 @@ class EnvGuard:
         "real_boundary": "a process started without the credential in its environment at all",
     }
 
-    def __init__(self, inject=None, guard_subprocess=True):
+    def __init__(self, inject=None, guard_subprocess=True, scrub_child_env=True):
         self.recorder = None
         self._saved_environ = None
         self._inject = dict(inject or {})
         self._restore = {}
         self._guard_subprocess = bool(guard_subprocess)
+        self._scrub_child_env = bool(scrub_child_env)
         self._saved_popen = None
 
     # ── phủ subprocess ──────────────────────────────────────────────────────
@@ -270,12 +287,18 @@ class EnvGuard:
                         recorder.note_child_exposure(key, argv0)
                         continue
                     scrubbed[key] = value
-                if where == "pos":
-                    rest = list(rest)
-                    rest[self._ENV_INDEX_IN_REST] = scrubbed
-                    rest = tuple(rest)
-                else:
-                    kwargs["env"] = scrubbed
+                # PHÁT HIỆN và SCRUB là hai việc TÁCH RỜI. Ghi nhận ở trên chạy luôn; scrub thì
+                # tuỳ chọn. Vì sao phải tách: khi guard vừa phát hiện vừa bịt, một phép thử "child
+                # có đọc credential không" trở thành FALSE-GREEN - child không bao giờ nhận marker
+                # nên chẳng chứng minh được gì, và một mutant cho code đọc GH_TOKEN vẫn xanh. Suite
+                # dùng scrub_child_env=False khi cần chứng minh chính khả năng PHÁT HIỆN.
+                if self._scrub_child_env:
+                    if where == "pos":
+                        rest = list(rest)
+                        rest[self._ENV_INDEX_IN_REST] = scrubbed
+                        rest = tuple(rest)
+                    else:
+                        kwargs["env"] = scrubbed
                 super().__init__(args, *rest, **kwargs)
 
         subprocess.Popen = _GuardedPopen

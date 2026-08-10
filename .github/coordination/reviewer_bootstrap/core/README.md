@@ -47,6 +47,29 @@ dừng ở việc đọc code: nó **chạy được** năm thủ thuật vượ
 | `wp77-g1-sec-03` | `payload={"token": ...}` được persist nguyên vào ledger | chọn đường **(b)** — ràng buộc payload: quét đệ quy khoá + hình dạng giá trị, **từ chối** đích danh (không scrub) | `ra01_regression_sec03_*` (4) |
 | `wp77-g1-dup-01` | seed fake-store chép đôi ở `controller.py` và `selftest.py` | một nguồn duy nhất `fake_github.seeded_store()` | `ra01_seed_fixture_has_exactly_one_definition` |
 
+## Vòng audit thứ hai — sáu finding độc lập trên head `dc0dbf42`
+
+Vòng một sửa đúng chỗ nhưng chưa đủ sâu. Sáu lỗ tiếp theo, mỗi cái có test `ra01_regression_a2_*`
+và **counter-mutant đã chạy** chứng minh test biết ĐỎ.
+
+| # | lỗ hổng | vì sao nó tồn tại | đóng bằng |
+|---|---|---|---|
+| 1 | manifest reseal `entries: [], required_categories: []` vẫn `ok=true` | `verify()` hỏi CHÍNH tài liệu đang bị kiểm xem nó có nghĩa vụ gì | nghĩa vụ lấy từ hằng `REQUIRED_CATEGORIES` của module; validate schema; đòi `verified_files > 0` |
+| 2 | `carrier.txt:payload` (NTFS ADS), `NUL`, `CON` lọt | chỉ nghĩ tới `..` và đường tuyệt đối, quên ngữ nghĩa riêng của Windows | chặn `:`, tên thiết bị DOS (kể cả có đuôi/chấm/space cuối), ký tự điều khiển; `fstat` sau `os.open` |
+| 3 | test ZERO-credential **false-green** | guard vừa phát hiện vừa scrub ⇒ child không bao giờ có marker để mà đọc | recorder cài **trong child** trước khi import controller, marker vẫn hiện diện; thêm `scrub_child_env=False` tách phát hiện khỏi scrub |
+| 4 | scanner lọt `import subprocess as sp` | so tên gọi theo chữ, không canonical hoá | bảng alias cho cả `import X as Y` lẫn `from X import f as g` |
+| 5 | chặn nhầm `session_id`, `authorization_url`, `token_budget`, `author`, `cookie_policy` | regex substring không neo | quyết theo **từ cuối** của khoá; ràng buộc được công bố trong `schema()` |
+| 6 | `post_verdict` nhận `reviewed_sha` bất kỳ | khai `type: string` là chưa đủ | format `git_oid` — đúng 40 hex thường; viết tắt cũng bị từ chối |
+
+Kèm một lỗi tương thích P2: `os.environ.copy()` ném `AttributeError` khi recorder đang thay chỗ —
+`MutableMapping` không cấp `.copy()`, mà thư viện con hay gọi đúng thứ đó trước khi tạo subprocess.
+Nay `.copy()` hoạt động và **được ghi nhận như một lần đọc** nếu có biến nhạy cảm.
+
+Về `52/53` trên Windows: nguyên nhân là **fixture**, không phải bất biến — `os.symlink` đòi quyền
+riêng. Test đó nay báo `[SKIP]` có nêu lý do (không phải `[FAIL]`, cũng không phải im lặng thành
+`passed`), và bất biến no-follow vẫn được kiểm ở mọi nền bằng
+`ra01_regression_sec01_verify_refuses_non_regular_file_portable` dùng thư mục thay cho symlink.
+
 ## Điều lõi này KHÔNG hứa
 
 Ba tuyên bố bị **thu hẹp có chủ đích** so với g1, và mỗi cái có test đòi phần "không phủ" phải

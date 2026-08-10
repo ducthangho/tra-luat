@@ -206,8 +206,12 @@ def _scan_escape_paths(directory, allowed):
             if not isinstance(node, ast.Call):
                 continue
             called = _resolve_call(node.func, modules, funcs)
-            if called in ("importlib.import_module", "__import__") and node.args:
-                target = _const_str(node.args[0])
+            # Tham số KEYWORD là cùng một lời gọi: `subprocess.run(args=[...])` và
+            # `importlib.import_module(name="requests")` hợp lệ y hệt dạng vị trí. Chỉ đọc
+            # `node.args` là bỏ lọt một nửa cách gọi hợp lệ của chính stdlib.
+            keywords = {kw.arg: kw.value for kw in node.keywords if kw.arg}
+            if called in ("importlib.import_module", "__import__") and (node.args or keywords):
+                target = _const_str(node.args[0] if node.args else keywords.get("name"))
                 if target and target.split(".")[0] in FORBIDDEN_IMPORTS:
                     entry = (name, "dynamic-import:%s" % target.split(".")[0])
                     if entry not in allowed:
@@ -216,8 +220,8 @@ def _scan_escape_paths(directory, allowed):
                 entry = (name, "shell:%s" % called)
                 if entry not in allowed:
                     offenders.append(entry)
-            if called and called.split(".")[0] == "subprocess" and node.args:
-                first = node.args[0]
+            if called and called.split(".")[0] == "subprocess" and (node.args or keywords):
+                first = node.args[0] if node.args else keywords.get("args")
                 argv0 = _const_str(first)
                 if argv0 is None and isinstance(first, (ast.List, ast.Tuple)) and first.elts:
                     argv0 = _const_str(first.elts[0])
@@ -1964,6 +1968,266 @@ def ra01_regression_a3_05_environb_read_is_recorded():
         reads = recorder.sensitive_reads()
     assert value == marker.encode(), value
     assert "GH_TOKEN" in reads, reads
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# H. Vòng audit thứ tư — năm finding trên head ab5b3c2
+# ─────────────────────────────────────────────────────────────────────────────
+@test
+def ra01_regression_a4_01_case_variant_locators_are_one_file():
+    """PHẢN CHỨNG AUDIT: năm hạng mục dùng locator chỉ khác HOA/THƯỜNG.
+
+    Trên Windows và macOS đó là MỘT tệp: `os.listdir` thấy đúng một artifact, `samefile` là True,
+    mà `verify()` vẫn `ok=true`, `verified_files=5`. So chuỗi nguyên không trả lời được câu hỏi
+    "có phải cùng một tệp không" - protocol §5 đã nói phải NFC + case-fold, chỗ này quên áp.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        aset = artifacts.ArtifactSet(os.path.join(tmp, "run"), "case")
+        aset.add("source", "Source.txt", "x")
+        for clash in ("SOURCE.txt", "source.TXT", "SoUrCe.TxT"):
+            try:
+                aset.add("corpus", clash, "x")
+            except artifacts.LocatorError as exc:
+                assert "already recorded" in exc.reason, exc.reason
+            else:
+                raise AssertionError("case-variant locator accepted: %r" % clash)
+        # Unicode: `é` dựng sẵn và `é` tổ hợp là cùng tên tệp trên macOS.
+        aset.add("corpus", "café.txt", "x")
+        try:
+            aset.add("per_case_matrix", "café.txt", "x")
+        except artifacts.LocatorError:
+            pass
+        else:
+            raise AssertionError("NFD/NFC locator pair accepted as two files")
+    assert artifacts.locator_identity("Source.txt") == artifacts.locator_identity("SOURCE.TXT")
+
+
+@test
+def ra01_regression_a4_01_two_locators_on_one_inode_are_refused():
+    """Danh tính VẬT LÝ, không chỉ tên: hard link cho hai tên khác nhau trỏ cùng một inode."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        source = next(e for e in manifest["entries"] if e["category"] == "source")
+        twin = "source/twin.txt"
+        try:
+            os.link(os.path.join(root, source["locator"].replace("/", os.sep)),
+                    os.path.join(root, twin.replace("/", os.sep)))
+        except (OSError, NotImplementedError, AttributeError) as exc:
+            raise PlatformUnsupported("cannot create a hard link here: %s" % exc)
+        manifest["entries"] = [e for e in manifest["entries"] if e["category"] != "corpus"] + [
+            {"category": "corpus", "locator": twin, "sha256": source["sha256"],
+             "bytes": source["bytes"]}
+        ]
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["ok"] is False, "two names for one inode were certified as two artifacts"
+        assert report["manifest_invalid"] and "same file" in report["manifest_invalid"], report
+
+
+@test
+def ra01_regression_a4_02_write_side_refuses_a_symlinked_target():
+    """PHẢN CHỨNG AUDIT: containment lúc GHI vẫn thủng trên Windows.
+
+    `fstat` ĐI THEO symlink tới một tệp thường, nên riêng nó không phân biệt được "tệp thật" với
+    "symlink trỏ tới tệp thật"; Windows lại không có `O_NOFOLLOW`. Test trước chỉ thay symlink SAU
+    khi `produce`, nên chỉ chứng minh đường ĐỌC.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        os.makedirs(root)
+        outside = os.path.join(tmp, "OUTSIDE.txt")
+        with open(outside, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("OUTSIDE\n")
+        victim = os.path.join(root, "planted.txt")
+        try:
+            os.symlink(outside, victim)
+            print("     write_symlink_fixture=real")
+            simulated = False
+        except OSError as exc:
+            if getattr(exc, "winerror", None) != 1314:
+                raise
+            shutil.copyfile(outside, victim)
+            print("     write_symlink_fixture=simulated_winerror_1314")
+            simulated = True
+        aset = artifacts.ArtifactSet(root, "plant")
+        context = _simulated_symlink(victim) if simulated else contextlib.nullcontext()
+        with context:
+            try:
+                aset.add("source", "planted.txt", "OVERWRITTEN")
+            except artifacts.LocatorError as exc:
+                assert "symlink" in exc.reason or "different objects" in exc.reason, exc.reason
+            else:
+                raise AssertionError("write followed a symlink out of run_root")
+        with open(outside, "r", encoding="utf-8") as fh:
+            assert fh.read() == "OUTSIDE\n", "the file outside run_root was truncated"
+        assert aset.entries == []
+
+
+@test
+def ra01_regression_a4_01_verify_refuses_case_variant_duplicates():
+    """Đường KIỂM cũng phải case-fold, không chỉ đường ghi.
+
+    Trên POSIX `Source.txt` và `SOURCE.txt` là hai tệp thật, nên phép kiểm inode không bắt được -
+    chỉ so tên đã chuẩn hoá mới bắt. Manifest phải hợp lệ trên MỌI nền, kể cả nền case-insensitive.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        source = next(e for e in manifest["entries"] if e["category"] == "source")
+        twin_locator = source["locator"].upper()
+        twin_path = os.path.join(root, twin_locator.replace("/", os.sep))
+        os.makedirs(os.path.dirname(twin_path), exist_ok=True)
+        with open(twin_path, "wb") as fh:
+            fh.write(b"different content\n")
+        manifest["entries"] = [e for e in manifest["entries"] if e["category"] != "corpus"] + [
+            {"category": "corpus", "locator": twin_locator,
+             "sha256": artifacts.sha256_bytes(b"different content\n"), "bytes": 18}
+        ]
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["ok"] is False, "case-variant locators were certified as two artifacts"
+        assert report["manifest_invalid"] and "duplicate" in report["manifest_invalid"], report
+
+
+@test
+def ra01_regression_a4_02_finalize_refuses_a_symlinked_manifest():
+    """Đường ghi của CHÍNH manifest không đi qua `safe_locator`, nên đây là chỗ duy nhất cô lập
+    được lớp no-follow của `_open_regular_for_write`.
+
+    Test `planted.txt` ở trên bị `safe_locator` chặn trước, nên nó KHÔNG chứng minh được lớp này -
+    đúng kiểu "mutant sống sót vì lớp khác che". Ở đây `manifest.json` được cắm sẵn thành symlink
+    trỏ ra ngoài `run_root` TRƯỚC khi `finalize()` chạy.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        os.makedirs(root)
+        outside = os.path.join(tmp, "OUTSIDE.json")
+        with open(outside, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("OUTSIDE\n")
+        planted = os.path.join(root, artifacts.MANIFEST_NAME)
+        try:
+            os.symlink(outside, planted)
+            print("     finalize_symlink_fixture=real")
+        except OSError as exc:
+            if getattr(exc, "winerror", None) != 1314:
+                raise
+            raise PlatformUnsupported("cannot create a symlink here: %s" % exc)
+        aset = artifacts.ArtifactSet(root, "planted-manifest")
+        for category, name in (
+            ("source", "s.txt"), ("corpus", "c.txt"), ("per_case_matrix", "m.txt"),
+            ("runner_env_digest", "e.txt"), ("cleanup_record", "r.txt"),
+        ):
+            aset.add(category, name, "x")
+        try:
+            aset.finalize()
+        except artifacts.LocatorError as exc:
+            assert "symlink" in exc.reason or "different objects" in exc.reason, exc.reason
+        else:
+            raise AssertionError("finalize wrote through a symlink out of run_root")
+        with open(outside, "r", encoding="utf-8") as fh:
+            assert fh.read() == "OUTSIDE\n", "the file outside run_root was overwritten"
+
+
+@test
+def ra01_regression_a4_03_bytes_environment_keys_are_recognised():
+    """PHẢN CHỨNG AUDIT: `is_sensitive(b"GH_TOKEN")` là False, nên `env=` dạng bytes đi qua sạch."""
+    assert guards.is_sensitive(b"GH_TOKEN") is True
+    assert guards.is_sensitive(b"AWS_SECRET_ACCESS_KEY") is True
+    assert guards.is_sensitive(b"PATH") is False
+    recorder = guards.EnvAccessRecorder({b"GH_TOKEN": b"x", b"PATH": b"/bin"})
+    recorder.copy()
+    assert "GH_TOKEN" in recorder.sensitive_reads(), recorder.sensitive_reads()
+    # Và đường thật: `env=` bytes truyền cho Popen phải bị ghi nhận VÀ scrub.
+    marker = b"FAKE-BYTES-CHILD-ENV"
+    reader = "import os,sys; sys.stdout.write(os.environ.get('GH_TOKEN') or 'ABSENT')"
+    hostile = {k.encode(): v.encode() for k, v in _portable_child_env({}).items()}
+    hostile[b"GH_TOKEN"] = marker
+    with guards.EnvGuard() as rec:
+        proc = subprocess.run(
+            [sys.executable, "-c", reader], capture_output=True, text=True, timeout=120, env=hostile
+        )
+        exposures = [e["name"] for e in rec.child_env_exposures]
+    assert proc.stdout.strip() == "ABSENT", proc.stdout
+    assert "GH_TOKEN" in exposures, exposures
+
+
+@test
+def ra01_regression_a4_04_aws_temporary_keys_and_lowercase_schemes_refused():
+    """PHẢN CHỨNG AUDIT: `ASIA…` (khoá TẠM), `bearer …` và `basic …` chữ thường vẫn lọt."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        for index, payload in enumerate((
+            {"aws_access_key_id": "ASIAY34FZKBOKMUTVV7A"},
+            {"aws_access_key_id": "AKIAIOSFODNN7EXAMPLE"},
+            {"principal": "AROAJ2UCCR6DPCEXAMPLE"},
+            {"note": "bearer sk-live-0123456789abcdef"},
+            {"note": "basic YWxhZGRp"},
+            {"note": "BASIC YWxhZGRpbjpvcGVu"},
+        )):
+            try:
+                store.call("post_heartbeat", {"repo": REPO, "issue_number": 77,
+                                              "reconcile_key": "k%d" % index, "payload": payload})
+            except operations.CredentialSurfaceError:
+                pass
+            else:
+                raise AssertionError("credential accepted: %r" % payload)
+        assert len(store.ledger) == 0
+
+
+@test
+def ra01_regression_a4_04_existence_flags_are_not_credentials():
+    """Đối trọng: cờ TỒN TẠI không phải credential. `authorization_header_present=False` là boolean."""
+    benign = {
+        "authorization_header_present": False,
+        "credential_rotation_enabled": True,
+        "token_count": 12,
+        "secret_scan_status": "clean",
+        "auth_required": True,
+        "cookie_count": 0,
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        result = store.call(
+            "post_heartbeat",
+            {"repo": REPO, "issue_number": 77, "reconcile_key": "k-flags", "payload": benign},
+        )
+        assert result["created"] is True
+        # Nhưng vật chứa THẬT vẫn phải bị chặn - ngoại lệ cờ là HẸP, không phải cửa sau.
+        for hostile in ({"authorization_header": "Bearer x"}, {"remaining_tokens_header": "x"}):
+            try:
+                store.call("post_heartbeat", {"repo": REPO, "issue_number": 77,
+                                              "reconcile_key": "k-h", "payload": hostile})
+            except operations.CredentialSurfaceError:
+                pass
+            else:
+                raise AssertionError("carrier accepted after the flag exception: %r" % hostile)
+    assert operations.schema()["credential_surface"]["flag_tails_that_outrank_carriers"]
+
+
+@test
+def ra01_regression_a4_05_scanner_reads_keyword_arguments():
+    """PHẢN CHỨNG AUDIT: `run(args=[...])` và `import_module(name=...)` cho `offenders=[]`.
+
+    Cả hai là cách gọi HỢP LỆ của chính stdlib, và `covered` lại tuyên bố phủ constant argv/target
+    - tức claim rộng hơn detector, đúng lớp lỗi đã bị bắt ở `sec-02`.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "kw.py"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(
+                "import subprocess\n"
+                "import importlib\n"
+                "def go():\n"
+                "    subprocess.run(args=['gh', 'api', '/user'])\n"
+                "    importlib.import_module(name='requests')\n"
+            )
+        offenders = set(_scan_escape_paths(tmp, allowed=set()))
+        assert ("kw.py", "subprocess:gh") in offenders, sorted(offenders)
+        assert ("kw.py", "dynamic-import:requests") in offenders, sorted(offenders)
+    assert any("keyword" in c for c in guards.STATIC_SCANNER_COVERAGE["covered"]), \
+        "keyword-argument coverage is not declared"
 
 
 def main():

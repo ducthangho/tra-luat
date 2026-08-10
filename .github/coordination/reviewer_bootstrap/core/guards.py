@@ -46,6 +46,14 @@ SENSITIVE_PREFIXES = (
 
 
 def is_sensitive(name):
+    """Nhận cả khoá `str` lẫn `bytes`.
+
+    Thiếu nhánh bytes thì `str(b"GH_TOKEN")` ra `"b'GH_TOKEN'"` - không khớp tiền tố nào, nên
+    `os.environb` và một `env=` dạng bytes truyền cho `Popen` đi qua sạch: không ghi nhận, không
+    scrub. Bằng chứng "không đọc credential" khi đó chỉ đúng cho một nửa kiểu dữ liệu.
+    """
+    if isinstance(name, (bytes, bytearray)):
+        name = bytes(name).decode("utf-8", "replace")
     upper = str(name).upper()
     return any(upper.startswith(p) for p in SENSITIVE_PREFIXES)
 
@@ -60,6 +68,7 @@ STATIC_SCANNER_COVERAGE = {
         "module aliases: import subprocess as sp / from subprocess import run as r",
         "one level of variable aliasing: runner = sp.run then runner([...])",
         "subprocess calls whose argv[0] is a constant network tool",
+        "the same calls written with keyword arguments: run(args=[...]), import_module(name=...)",
         "os.system / os.popen",
     ),
     "not_covered": (
@@ -101,9 +110,16 @@ class EnvAccessRecorder(MutableMapping):
             key = key.decode("utf-8", "replace")
         self.reads.append(str(key))
 
+    @staticmethod
+    def _text(value):
+        """Tên biến luôn báo cáo dạng text, dù env dùng khoá bytes - `b'GH_TOKEN'` không phải tên."""
+        if isinstance(value, (bytes, bytearray)):
+            return bytes(value).decode("utf-8", "replace")
+        return str(value)
+
     def note_child_exposure(self, key, argv0):
         """Ghi nhận một biến nhạy cảm suýt (hoặc đã) đi vào environment của tiến trình con."""
-        self.child_env_exposures.append({"name": str(key), "child": str(argv0)})
+        self.child_env_exposures.append({"name": self._text(key), "child": self._text(argv0)})
         self._note(key)
 
     def __getitem__(self, key):

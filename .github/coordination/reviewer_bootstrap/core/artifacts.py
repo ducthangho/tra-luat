@@ -42,19 +42,51 @@ import os
 import posixpath
 import re
 import stat
+import unicodedata
 
 # `\Z` + fullmatch, không phải `$` + match: `$` khớp cả trước newline cuối chuỗi.
 _SHA256_HEX = re.compile(r"[0-9a-f]{64}\Z")
 
 
+def locator_identity(locator):
+    """Khoá so sánh CANONICAL của một locator (protocol §5: NFC + case-fold).
+
+    So chuỗi nguyên là sai trên Windows và macOS: `Source.txt` và `SOURCE.txt` là HAI locator
+    khác nhau nhưng CÙNG một tệp, nên năm hạng mục có thể cùng trỏ một file mà phép kiểm trùng
+    không thấy gì. Cũng chuẩn hoá Unicode, vì `é` dựng sẵn và `é` tổ hợp cho cùng tên tệp trên
+    macOS mà khác chuỗi.
+    """
+    return unicodedata.normalize("NFC", str(locator)).casefold()
+
+
 def _open_regular_for_write(path, locator):
-    """Mở để GHI, từ chối symlink và mọi thứ không phải tệp thường - kiểm trên chính descriptor."""
+    """Mở để GHI, từ chối symlink và mọi thứ không phải tệp thường.
+
+    Ba lớp, vì không lớp nào một mình đủ trên mọi nền:
+      islink TRƯỚC khi mở - lớp duy nhất còn tác dụng ở Windows, nơi O_NOFOLLOW không tồn tại;
+      O_NOFOLLOW           - đóng khe TOCTOU trên POSIX;
+      lstat vs fstat SAU khi mở - `fstat` ĐI THEO symlink tới một tệp thường, nên riêng nó không
+                             phân biệt được "tệp thật" với "symlink trỏ tới tệp thật"; so danh
+                             tính (st_dev, st_ino) của đường dẫn với của descriptor thì phân biệt
+                             được, và bắt luôn ca bị tráo giữa hai lời gọi.
+    """
+    if os.path.islink(path):
+        raise LocatorError(locator, "target is a symlink")
     flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
     fd = os.open(path, flags, 0o600)
     handle = os.fdopen(fd, "wb")
-    if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+    try:
+        opened = os.fstat(handle.fileno())
+        if not stat.S_ISREG(opened.st_mode):
+            raise LocatorError(locator, "target is not a regular file after open")
+        on_disk = os.lstat(path)
+        if not stat.S_ISREG(on_disk.st_mode):
+            raise LocatorError(locator, "path is not a regular file (symlink or device)")
+        if (on_disk.st_dev, on_disk.st_ino) != (opened.st_dev, opened.st_ino):
+            raise LocatorError(locator, "path and opened file are different objects")
+    except BaseException:
         handle.close()
-        raise LocatorError(locator, "target is not a regular file after open")
+        raise
     return handle
 
 
@@ -207,8 +239,12 @@ class ArtifactSet:
             )
         if relative_name in (MANIFEST_NAME, SIDECAR_NAME):
             raise ValueError("artifact name %r collides with manifest files" % relative_name)
-        if any(e["locator"] == relative_name for e in self.entries):
-            raise LocatorError(relative_name, "locator already recorded in this manifest")
+        identity = locator_identity(relative_name)
+        if any(locator_identity(e["locator"]) == identity for e in self.entries):
+            raise LocatorError(
+                relative_name,
+                "locator already recorded in this manifest (case-folded and NFC-normalised)",
+            )
         target = safe_locator(self.run_root, relative_name)
         if isinstance(data, str):
             data = data.encode("utf-8")
@@ -357,14 +393,16 @@ def verify(run_root):
     # cùng trỏ MỘT tệp vẫn cho ok=true, verified_files=5, trong khi acceptance đòi SHA-256 cho
     # TỪNG file. Đếm entry không thay được đếm OBJECT rời nhau.
     seen_locators = set()
+    seen_objects = {}
     present = set()
     for entry in entries:
         if not isinstance(entry, dict):
             return _invalid("malformed entry: %r" % (entry,))
-        if entry.get("locator") in seen_locators:
-            return _invalid("duplicate locator %r - each artifact needs its own file"
-                            % (entry.get("locator"),))
-        seen_locators.add(entry.get("locator"))
+        identity = locator_identity(entry.get("locator"))
+        if identity in seen_locators:
+            return _invalid("duplicate locator %r - each artifact needs its own file "
+                            "(compared case-folded and NFC-normalised)" % (entry.get("locator"),))
+        seen_locators.add(identity)
         locator_value, sha_value, bytes_value = (
             entry.get("locator"), entry.get("sha256"), entry.get("bytes"),
         )
@@ -393,6 +431,17 @@ def verify(run_root):
         if not stat.S_ISREG(mode):
             report["not_regular_files"].append(locator)
             continue
+        # Danh tính VẬT LÝ, không phải tên: hai locator khác chuỗi vẫn có thể là CÙNG một inode
+        # (hard link, hoặc trùng tên sau khi hệ tệp case-fold). Tên là thứ manifest tự khai;
+        # (st_dev, st_ino) là thứ hệ tệp trả lời.
+        st_info = os.lstat(path)
+        object_id = (st_info.st_dev, st_info.st_ino)
+        if object_id in seen_objects:
+            return _invalid(
+                "locators %r and %r are the same file on disk - five categories need five files"
+                % (seen_objects[object_id], locator)
+            )
+        seen_objects[object_id] = locator
         if sha256_file(path) != entry["sha256"]:
             report["hash_mismatches"].append(locator)
             continue

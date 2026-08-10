@@ -87,6 +87,13 @@ _DESCRIPTOR_TAILS = frozenset(
     }
 )
 
+# Từ CUỐI nói về SỰ TỒN TẠI hay SỐ LƯỢNG, không về giá trị. Đây là nhóm DUY NHẤT thắng được
+# "vật chứa": `authorization_header_present` là một cờ boolean, không phải một header thật.
+_FLAG_TAILS = frozenset(
+    {"present", "enabled", "disabled", "required", "missing", "set", "configured", "count",
+     "status", "expected", "supported"}
+)
+
 # Từ biến `token(s)` thành ĐƠN VỊ ĐO. `requested_tokens` là số lượng, không phải credential.
 _MEASURE_WORDS = frozenset(
     {
@@ -140,8 +147,17 @@ def _key_is_credential(key):
 
     if not has_secret_noun and not key_is_secret:
         return False
-    # Vật chứa thắng mọi thứ: có danh từ bí mật + vật chứa nghĩa là giá trị thật nằm ngay đây.
+    # Cờ tồn tại/số lượng thắng vật chứa: `authorization_header_present` là boolean, không phải
+    # header thật. Đây là ngoại lệ HẸP có chủ đích - `remaining_tokens_header` (tail `header`)
+    # vẫn bị chặn, vì `header` không nói gì về sự tồn tại.
+    if tail in _FLAG_TAILS:
+        return False
+    # Vật chứa thắng phần còn lại: danh từ bí mật + vật chứa nghĩa là giá trị thật nằm ngay đây.
     if has_carrier:
+        return True
+    # `access_key`/`api_key` là credential kể cả khi đuôi là descriptor: `aws_access_key_id` vẫn
+    # là một nửa của cặp khoá AWS, và giá trị `ASIA…`/`AKIA…` đi thẳng vào đó.
+    if key_is_secret:
         return True
     # Đơn vị đo trung hoà `token(s)`, nhưng KHÔNG trung hoà `secret`/`password`/`credential`.
     if wordset & _MEASURE_WORDS and not (wordset & (_SECRET_NOUNS - {"token", "tokens"})):
@@ -153,10 +169,15 @@ def _key_is_credential(key):
 # Hình dạng credential thật, khớp trên GIÁ TRỊ. Một khoá vô hại (`note`) vẫn có thể chở token.
 _CREDENTIAL_VALUE = re.compile(
     r"gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|sk-ant-[A-Za-z0-9\-_]{16,}|"
-    r"sk-[A-Za-z0-9]{32,}|AKIA[0-9A-Z]{16}|xox[abposr]-[A-Za-z0-9-]{10,}|GOCSPX-[A-Za-z0-9_-]{16,}|"
+    r"sk-[A-Za-z0-9]{32,}|xox[abposr]-[A-Za-z0-9-]{10,}|GOCSPX-[A-Za-z0-9_-]{16,}|"
     r"-----BEGIN [A-Z ]*PRIVATE KEY-----|"
+    # AWS: KHÔNG chỉ AKIA. `ASIA` là khoá TẠM (STS) - đúng thứ một agent hay cầm - và còn
+    # AROA/AIDA/ANPA/ABIA/ACCA cho các loại principal khác.
+    r"(?:AKIA|ASIA|AROA|AIDA|ANPA|ANVA|ABIA|ACCA|AGPA|AIPA)[0-9A-Z]{16}|"
     # Lược đồ HTTP Authorization: giá trị thật đi kèm chính nó, dù khoá có vô hại đến đâu.
-    r"\bBearer\s+\S+|\bBasic\s+[A-Za-z0-9+/=]{8,}"
+    # `(?i:...)` chỉ áp cho TÊN lược đồ - HTTP không phân biệt hoa thường ở đó, còn phần thân
+    # base64 thì có, nên không được bật IGNORECASE cho cả biểu thức (sẽ nuốt nhầm `akia…`).
+    r"(?i:bearer)\s+\S+|(?i:basic)\s+[A-Za-z0-9+/=]{4,}"
 )
 
 # Trần độ sâu/kích thước: một payload lồng vô hạn là DoS cho chính bộ quét.
@@ -385,6 +406,7 @@ def schema():
                     "authorization_url, cookie_policy, auth_method)",
             "secret_nouns": sorted(_SECRET_NOUNS),
             "carrier_words_that_force_rejection": sorted(_CARRIER_WORDS),
+            "flag_tails_that_outrank_carriers": sorted(_FLAG_TAILS),
             "measure_words_that_neutralise_token": sorted(_MEASURE_WORDS),
             "descriptor_tails_that_neutralise": sorted(_DESCRIPTOR_TAILS),
             "rejected_key_tail_key_qualifiers": sorted(_SECRET_KEY_QUALIFIERS),

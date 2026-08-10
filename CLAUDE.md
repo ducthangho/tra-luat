@@ -36,6 +36,24 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
    Windows: `.\scripts\deploy-package.ps1 -Pull -Push` · Linux/Cowork: `./scripts/deploy-package.sh --push`.
    (Cả hai TRONG repo, cùng quy trình, cùng chốt. `upload-skill-to-Package.ps1/.cmd` đã bỏ từ v1.35.83.)
 
+## Post lên GitHub: LUÔN kèm `copyable_prompt` cho bước KẾ TIẾP
+Mọi comment bàn giao lên Issue/PR (handoff, stop evidence, verdict, reconcile, báo cáo cuối phiên)
+PHẢI có một khối ```text chứa prompt DÙNG NGAY ĐƯỢC cho phiên kế tiếp. Không có nó thì người giữ
+phải tự gõ lại bằng tay mỗi lượt — đó là chi phí thật, và là lý do quy ước này nằm ở ĐÂY chứ không
+chỉ ở `docs/PROTOCOL_DA_PHIEN.md` §7: phiên nào không đọc protocol thì bỏ sót đúng chỗ đó.
+Áp dụng cả khi phiên KHÔNG chạy dưới protocol đa phiên — "bước kế tiếp" thì lượt nào cũng có.
+
+Prompt phải NEO đủ để phiên mới khỏi hỏi lại: vai trò (và vai KHÔNG được kiêm) · issue/PR/packet
++ revision/generation · exact SHA cần đọc (head đổi ⇒ verdict/CI/uỷ quyền cũ hết hiệu lực) · phạm
+vi ghi · lệnh gate kèm con số phải đạt · điều kiện DỪNG. Ghi lệnh chép-dán chạy được, không mô tả
+bằng lời. `next_role` + `manual_next_action` đi kèm, không thay thế.
+
+Hai bẫy đã trả giá: **đừng đặt ngoặc nhọn** trong body/comment — lớp đọc strip mất nội dung bên
+trong (đo được ở #77: lệch đúng 6 byte); dùng CHỮ HOA hoặc ví dụ cụ thể. Và nếu phiên sau cần chạy
+lại một phép thử mà phiên này KHÔNG chạy được, ghi `not_run` + cách chạy vào chính prompt đó —
+mượn kết quả của phiên khác là lớp lỗi `exact_hash_only` dưới tên khác.
+Mẫu chuẩn: `docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md`.
+
 ## Bài học đắt giá (đã trả giá, không lặp lại)
 - **Đối chiếu nhánh/patch ngoài: BẮT BUỘC test HÀNH VI 2 CHIỀU** (fixture họ chạy trên ta + phản chứng bơm vào
   bản họ), KHÔNG grep chuỗi. Mỗi PORT/REJECT phải có bằng chứng chạy được, khoá bằng test rXX_.

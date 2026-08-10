@@ -41,6 +41,8 @@ COVERAGE = {
         "the same calls written with keyword arguments: run(args=[...]), import_module(name=...)",
         "Windows executable suffixes on argv[0]: gh.exe, curl.cmd, wget.bat",
         "shell-string form: subprocess.run('gh api /user', shell=True) - first token only",
+        "quoted shell-string executable paths, including Windows paths containing spaces",
+        "the constant subprocess executable= override",
         "os.system / os.popen",
     ),
     "not_covered": (
@@ -167,8 +169,15 @@ def _tool_name(argv0):
     """
     if not argv0:
         return None
-    # Dạng shell string: lấy token đầu. Không cố parse shell - chỉ cần biết binary nào được gọi.
-    head = argv0.strip().split()[0] if argv0.strip() else ""
+    # Dạng shell string: lấy executable đầu, kể cả đường dẫn có khoảng trắng được quote. Không cố
+    # parse toàn bộ shell grammar; phần còn lại không ảnh hưởng binary thực sự được gọi ở đầu.
+    stripped = argv0.strip()
+    if stripped[:1] in ("'", '"'):
+        quote = stripped[0]
+        end = stripped.find(quote, 1)
+        head = stripped[1:end] if end >= 1 else stripped[1:]
+    else:
+        head = stripped.split()[0] if stripped else ""
     head = os.path.basename(head.replace("\\", "/"))
     lowered = head.lower()
     for suffix in _WINDOWS_EXEC_SUFFIXES:
@@ -210,7 +219,10 @@ def _scan_escape_paths(directory, allowed):
                 argv0 = _const_str(first)
                 if argv0 is None and isinstance(first, (ast.List, ast.Tuple)) and first.elts:
                     argv0 = _const_str(first.elts[0])
-                tool = _tool_name(argv0)
+                # `executable=` thay binary thật mà vẫn giữ argv để truyền cho process. Nếu nó là
+                # hằng, đó là bằng chứng mạnh hơn argv[0] và phải được quét trước.
+                executable = _const_str(keywords.get("executable"))
+                tool = _tool_name(executable if executable is not None else argv0)
                 if tool in NETWORK_TOOLS:
                     entry = (name, "subprocess:%s" % tool)
                     if entry not in allowed:

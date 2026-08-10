@@ -111,12 +111,19 @@ def _read_regular(path, locator):
     đều không thấy. Ràng buộc containment áp cho entry mà không áp cho tài liệu mô tả chúng thì
     vẫn còn nguyên một cửa.
     """
-    if os.path.islink(path):
-        raise LocatorError(locator, "is a symlink")
-    with open(path, "rb") as handle:
-        if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
-            raise LocatorError(locator, "is not a regular file")
-        return handle.read()
+    try:
+        if os.path.islink(path):
+            raise LocatorError(locator, "is a symlink")
+        with open(path, "rb") as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise LocatorError(locator, "is not a regular file")
+            return handle.read()
+    except LocatorError:
+        raise
+    except OSError as exc:
+        # Directory/device/permission race đều là đầu vào thù địch. Contract của verify() là báo
+        # cáo máy đọc được, không để OSError của host thoát thành traceback.
+        raise LocatorError(locator, "cannot be read as a regular file: %s" % exc) from exc
 
 MANIFEST_NAME = "manifest.json"
 SIDECAR_NAME = "manifest.sha256"

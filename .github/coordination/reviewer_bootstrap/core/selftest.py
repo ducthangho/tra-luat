@@ -33,6 +33,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _PARENT = os.path.dirname(_HERE)
@@ -1926,27 +1927,37 @@ def ra01_regression_a4_02_finalize_refuses_a_symlinked_manifest():
         with open(outside, "w", encoding="utf-8", newline="\n") as fh:
             fh.write("OUTSIDE\n")
         planted = os.path.join(root, artifacts.MANIFEST_NAME)
+        simulated = False
         try:
             os.symlink(outside, planted)
             print("     finalize_symlink_fixture=real")
         except OSError as exc:
             if getattr(exc, "winerror", None) != 1314:
                 raise
-            raise PlatformUnsupported("cannot create a symlink here: %s" % exc)
+            # Portable control đi qua ĐÚNG finalize -> _open_regular_for_write, không bị
+            # safe_locator che như planted artifact test ở trên. Tệp thường đóng vai victim;
+            # _simulated_symlink làm hai filesystem query của implementation trả nhánh symlink.
+            shutil.copyfile(outside, planted)
+            simulated = True
+            print("     finalize_symlink_fixture=simulated_winerror_1314")
         aset = artifacts.ArtifactSet(root, "planted-manifest")
         for category, name in (
             ("source", "s.txt"), ("corpus", "c.txt"), ("per_case_matrix", "m.txt"),
             ("runner_env_digest", "e.txt"), ("cleanup_record", "r.txt"),
         ):
             aset.add(category, name, "x")
-        try:
-            aset.finalize()
-        except artifacts.LocatorError as exc:
-            assert "symlink" in exc.reason or "different objects" in exc.reason, exc.reason
-        else:
-            raise AssertionError("finalize wrote through a symlink out of run_root")
+        context = _simulated_symlink(planted) if simulated else contextlib.nullcontext()
+        with context:
+            try:
+                aset.finalize()
+            except artifacts.LocatorError as exc:
+                assert "symlink" in exc.reason or "different objects" in exc.reason, exc.reason
+            else:
+                raise AssertionError("finalize wrote through a symlink out of run_root")
         with open(outside, "r", encoding="utf-8") as fh:
             assert fh.read() == "OUTSIDE\n", "the file outside run_root was overwritten"
+        with open(planted, "r", encoding="utf-8") as fh:
+            assert fh.read() == "OUTSIDE\n", "portable victim was modified before refusal"
 
 
 @test
@@ -1986,6 +1997,9 @@ def ra01_regression_a4_04_aws_temporary_keys_and_lowercase_schemes_refused():
         store = _store(tmp)
         for index, payload in enumerate((
             {"aws_access_key_id": "ASIAY34FZKBOKMUTVV7A"},
+            # Đối trọng cô lập detector theo GIÁ TRỊ. Chỉ dùng aws_access_key_id sẽ bị detector
+            # theo TÊN che, nên mutant bỏ tiền tố ASIA vẫn sống mà không chứng minh được gì.
+            {"note": "ASIAY34FZKBOKMUTVV7A"},
             {"aws_access_key_id": "AKIAIOSFODNN7EXAMPLE"},
             {"principal": "AROAJ2UCCR6DPCEXAMPLE"},
             {"note": "bearer sk-live-0123456789abcdef"},
@@ -2207,6 +2221,154 @@ def ra01_regression_a5_04_scanner_normalises_exe_suffix_and_shell_string():
         assert _scan_escape_paths(tmp, allowed=set()) == []
     covered = " ".join(scanner.COVERAGE["covered"])
     assert "gh.exe" in covered and "shell-string" in covered, covered
+
+
+@test
+def ra01_regression_r2_01_published_schema_cannot_widen_an_enum():
+    """A consumer mutating ``schema()`` must not widen the validator's closed contract."""
+    published = operations.schema()
+    verdicts = published["operations"]["post_verdict"]["params"]["verdict"]["enum"]
+    verdicts.append("pwn")
+    accepted = False
+    try:
+        operations.validate("post_verdict", {
+            "repo": REPO,
+            "issue_number": 77,
+            "reconcile_key": "schema-r2-01",
+            "reviewed_sha": HEAD_OID,
+            "verdict": "pwn",
+        })
+        accepted = True
+    except operations.ParameterError:
+        pass
+    finally:
+        # Trên cây lỗi, list công bố và list nội bộ là cùng object. Khôi phục để một failure
+        # không làm nhiễu các test sau; trên cây đúng đây chỉ sửa bản sao của caller.
+        if "pwn" in verdicts:
+            verdicts.remove("pwn")
+    assert not accepted, "mutating schema() widened the closed verdict enum"
+
+
+@test
+def ra01_regression_r2_02_scalar_credential_is_refused_before_persist():
+    """ZERO credential applies to persisted scalar parameters, not only object payload leaves."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        marker = "ghp_" + "A" * 20
+        try:
+            store.call("post_heartbeat", {
+                "repo": REPO,
+                "issue_number": 77,
+                "reconcile_key": marker,
+                "payload": {"status": "ok"},
+            })
+        except operations.CredentialSurfaceError as exc:
+            assert "reconcile_key" in str(exc), str(exc)
+        else:
+            raise AssertionError("credential-shaped reconcile_key was accepted")
+        assert len(store.ledger) == 0, "credential-shaped reconcile_key reached the ledger"
+
+
+@test
+def ra01_regression_r2_03_cached_popen_reference_is_guarded():
+    """A Popen class cached before guard entry must still be detected and scrubbed."""
+    saved_popen = subprocess.Popen
+    marker = "FAKE-CACHED-POPEN-CREDENTIAL"
+    with guards.EnvGuard(inject={"GH_TOKEN": marker}) as recorder:
+        child = saved_popen(
+            [sys.executable, "-c", "import os; print(os.environ.get('GH_TOKEN', ''))"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        stdout, stderr = child.communicate(timeout=15)
+        assert child.returncode == 0, stderr
+        reads = recorder.sensitive_reads()
+    assert stdout.strip() == "", "cached Popen leaked the injected credential to a child"
+    assert "GH_TOKEN" in reads, reads
+
+
+@test
+def ra01_regression_r2_04_concurrent_ledger_writers_keep_both_keys():
+    """Two processes recording distinct keys must neither lose data nor fight over one tmp file."""
+    child_code = (
+        "import os,sys,time;sys.path.insert(0,sys.argv[1]);from core.ledger import Ledger;"
+        "ledger=Ledger(sys.argv[2]);open(sys.argv[4],'w').close();"
+        "\nwhile not os.path.exists(sys.argv[5]): time.sleep(.001)\n"
+        "ledger.record(sys.argv[3], {'key':sys.argv[3]})"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        for trial in range(3):
+            trial_root = os.path.join(tmp, str(trial))
+            os.makedirs(trial_root)
+            ledger_path = os.path.join(trial_root, "ledger.json")
+            go = os.path.join(trial_root, "go")
+            children = []
+            for index in range(2):
+                ready = os.path.join(trial_root, "ready-%d" % index)
+                children.append(subprocess.Popen(
+                    [sys.executable, "-c", child_code, _PARENT, ledger_path,
+                     "key-%d" % index, ready, go],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                ))
+            deadline = time.monotonic() + 15
+            ready_paths = [os.path.join(trial_root, "ready-%d" % i) for i in range(2)]
+            while not all(os.path.exists(path) for path in ready_paths):
+                if time.monotonic() >= deadline:
+                    for child in children:
+                        child.kill()
+                    raise AssertionError("ledger race children did not reach the barrier")
+                time.sleep(0.005)
+            with open(go, "w", encoding="ascii"):
+                pass
+            failures = []
+            for child in children:
+                _stdout, stderr = child.communicate(timeout=15)
+                if child.returncode:
+                    failures.append(stderr.strip().splitlines()[-1] if stderr.strip() else
+                                    "rc=%d" % child.returncode)
+            assert failures == [], failures
+            assert set(Ledger(ledger_path).keys()) == {"key-0", "key-1"}
+
+
+@test
+def ra01_regression_r2_05_nonregular_manifest_returns_a_failed_report():
+    """A directory at manifest.json is hostile input, not an uncaught PermissionError."""
+    with tempfile.TemporaryDirectory() as tmp:
+        os.mkdir(os.path.join(tmp, artifacts.MANIFEST_NAME))
+        with open(os.path.join(tmp, artifacts.SIDECAR_NAME), "w",
+                  encoding="ascii", newline="\n") as fh:
+            fh.write("0" * 64 + "\n")
+        report = artifacts.verify(tmp)
+        assert report["ok"] is False, report
+        assert any(item["locator"] == artifacts.MANIFEST_NAME
+                   for item in report["rejected_locators"]), report
+
+
+@test
+def ra01_regression_r2_06_scanner_handles_quoted_and_executable_forms():
+    """Quoted shell binaries and the executable= override are constant executable forms."""
+    cases = {
+        "quoted.py": (
+            "import subprocess\n"
+            "subprocess.run('\\\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\\\" api /user', "
+            "shell=True)\n"
+        ),
+        "executable.py": (
+            "import subprocess\n"
+            "subprocess.run(['python'], executable='gh.exe')\n"
+        ),
+    }
+    for filename, source in cases.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, filename), "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(source)
+            offenders = _scan_escape_paths(tmp, allowed=set())
+            assert (filename, "subprocess:gh") in offenders, (filename, offenders)
+    covered = " ".join(scanner.COVERAGE["covered"])
+    assert "quoted" in covered and "executable=" in covered, covered
 
 
 def main():

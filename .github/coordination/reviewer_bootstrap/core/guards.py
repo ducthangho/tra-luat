@@ -279,6 +279,7 @@ class EnvGuard:
             "os.environ.copy() and the PEP 584 union operators (| and |=)",
             "os.environb on POSIX - the bytes-keyed second view of the same environment",
             "environment handed to children created via subprocess.Popen (run/call/check_output)",
+            "subprocess.Popen class references cached before guard entry",
         ),
         "not_covered": (
             "os.execve / posix_spawn called directly, bypassing subprocess",
@@ -297,6 +298,7 @@ class EnvGuard:
         self._guard_subprocess = bool(guard_subprocess)
         self._scrub_child_env = bool(scrub_child_env)
         self._saved_popen = None
+        self._saved_popen_init = None
         self._saved_environb = None
 
     # ── phủ subprocess ──────────────────────────────────────────────────────
@@ -316,37 +318,39 @@ class EnvGuard:
     def _install_subprocess_guard(self):
         recorder = self.recorder
         self._saved_popen = subprocess.Popen
-        saved_popen = self._saved_popen
+        self._saved_popen_init = self._saved_popen.__init__
+        saved_init = self._saved_popen_init
 
-        class _GuardedPopen(saved_popen):
-            def __init__(inner, args, *rest, **kwargs):
-                env, where = self._effective_env(rest, kwargs)
-                # `env=None` nghĩa là child kế thừa environment ở tầng OS. Đọc mapping THÔ chứ
-                # không đọc qua recorder: recorder sẽ ghi mọi khoá thành "lần đọc" và làm nhiễu
-                # đúng cái tín hiệu ta đang muốn giữ sạch.
-                inherited = self._saved_environ if env is None else env
-                argv0 = args[0] if isinstance(args, (list, tuple)) and args else args
-                scrubbed = {}
-                for key, value in dict(inherited).items():
-                    if is_sensitive(key):
-                        recorder.note_child_exposure(key, argv0)
-                        continue
-                    scrubbed[key] = value
-                # PHÁT HIỆN và SCRUB là hai việc TÁCH RỜI. Ghi nhận ở trên chạy luôn; scrub thì
-                # tuỳ chọn. Vì sao phải tách: khi guard vừa phát hiện vừa bịt, một phép thử "child
-                # có đọc credential không" trở thành FALSE-GREEN - child không bao giờ nhận marker
-                # nên chẳng chứng minh được gì, và một mutant cho code đọc GH_TOKEN vẫn xanh. Suite
-                # dùng scrub_child_env=False khi cần chứng minh chính khả năng PHÁT HIỆN.
-                if self._scrub_child_env:
-                    if where == "pos":
-                        rest = list(rest)
-                        rest[self._ENV_INDEX_IN_REST] = scrubbed
-                        rest = tuple(rest)
-                    else:
-                        kwargs["env"] = scrubbed
-                super().__init__(args, *rest, **kwargs)
+        # Vá __init__ của CHÍNH class, giống NetworkGuard. Chỉ gán lại `subprocess.Popen` tạo một
+        # class con mới và bỏ lọt mọi tham chiếu tới class cũ đã được cache trước khi guard vào.
+        def guarded_init(inner, args, *rest, **kwargs):
+            env, where = self._effective_env(rest, kwargs)
+            # `env=None` nghĩa là child kế thừa environment ở tầng OS. Đọc mapping THÔ chứ
+            # không đọc qua recorder: recorder sẽ ghi mọi khoá thành "lần đọc" và làm nhiễu
+            # đúng cái tín hiệu ta đang muốn giữ sạch.
+            inherited = self._saved_environ if env is None else env
+            argv0 = args[0] if isinstance(args, (list, tuple)) and args else args
+            scrubbed = {}
+            for key, value in dict(inherited).items():
+                if is_sensitive(key):
+                    recorder.note_child_exposure(key, argv0)
+                    continue
+                scrubbed[key] = value
+            # PHÁT HIỆN và SCRUB là hai việc TÁCH RỜI. Ghi nhận ở trên chạy luôn; scrub thì
+            # tuỳ chọn. Vì sao phải tách: khi guard vừa phát hiện vừa bịt, một phép thử "child
+            # có đọc credential không" trở thành FALSE-GREEN - child không bao giờ nhận marker
+            # nên chẳng chứng minh được gì, và một mutant cho code đọc GH_TOKEN vẫn xanh. Suite
+            # dùng scrub_child_env=False khi cần chứng minh chính khả năng PHÁT HIỆN.
+            if self._scrub_child_env:
+                if where == "pos":
+                    rest = list(rest)
+                    rest[self._ENV_INDEX_IN_REST] = scrubbed
+                    rest = tuple(rest)
+                else:
+                    kwargs["env"] = scrubbed
+            saved_init(inner, args, *rest, **kwargs)
 
-        subprocess.Popen = _GuardedPopen
+        self._saved_popen.__init__ = guarded_init
 
     def __enter__(self):
         self._saved_environ = os.environ
@@ -368,8 +372,10 @@ class EnvGuard:
 
     def __exit__(self, *exc):
         if self._saved_popen is not None:
+            self._saved_popen.__init__ = self._saved_popen_init
             subprocess.Popen = self._saved_popen
             self._saved_popen = None
+            self._saved_popen_init = None
         if self._saved_environb is not None:
             os.environb = self._saved_environb
             self._saved_environb = None

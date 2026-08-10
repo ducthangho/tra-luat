@@ -34,6 +34,7 @@ hỗ trợ**, và mọi lối vòng đều fail-closed có tên gọi, thay vì 
 """
 
 import re
+from collections.abc import Mapping
 from types import MappingProxyType
 
 SCHEMA_VERSION = 1
@@ -277,16 +278,27 @@ _OPERATIONS_SOURCE = {
 }
 
 
+def _freeze_value(value):
+    """Đóng băng đệ quy cả container lồng trong metadata (đặc biệt là enum list)."""
+    if isinstance(value, dict):
+        return MappingProxyType({key: _freeze_value(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_value(item) for item in value)
+    return value
+
+
+def _public_value(value):
+    """Tạo bản JSON-data độc lập; caller sửa schema công bố không được sửa contract nội bộ."""
+    if isinstance(value, Mapping):
+        return {key: _public_value(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_public_value(item) for item in value]
+    return value
+
+
 def _freeze_spec(spec):
-    """Đóng băng một spec tới tận lá - proxy nông vẫn cho sửa params bên trong."""
-    return MappingProxyType(
-        {
-            "kind": spec["kind"],
-            "params": MappingProxyType(
-                {p: MappingProxyType(dict(meta)) for p, meta in spec["params"].items()}
-            ),
-        }
-    )
+    """Đóng băng một spec tới tận lá - proxy nông vẫn để lọt enum list khả biến."""
+    return _freeze_value(spec)
 
 
 _OPERATIONS = {name: _freeze_spec(spec) for name, spec in _OPERATIONS_SOURCE.items()}
@@ -425,7 +437,7 @@ def schema():
         "operations": {
             name: {
                 "kind": spec["kind"],
-                "params": {p: dict(meta) for p, meta in spec["params"].items()},
+                "params": {p: _public_value(meta) for p, meta in spec["params"].items()},
             }
             for name, spec in _OPERATIONS.items()
         },
@@ -488,6 +500,7 @@ def validate(name, params, _closed=_CLOSED_NAMES):
                     "operation %r parameter %r rejected before execution - must be %s, got %r"
                     % (name, pname, human, value),
                 )
-        if meta["type"] == "object":
-            _scan_credential_surface(name, pname, value)
+        # ZERO credential ràng buộc mọi dữ liệu được persist. Chỉ quét object bỏ lọt chính
+        # `reconcile_key` - một chuỗi được dùng nguyên làm khoá ledger bền.
+        _scan_credential_surface(name, pname, value)
     return dict(params)

@@ -33,7 +33,9 @@ Mọi mục `close` chỉ được THỰC THI sau khi owner được xác nhận
 - Enforcement packet: [#52](https://github.com/ducthangho/tra-luat/issues/52) — `state:landed`.
 - Reconcile gần nhất: [#63 comment 5237539078](https://github.com/ducthangho/tra-luat/issues/63#issuecomment-5237539078).
 - Artifact tiền nhiệm: PR [#64](https://github.com/ducthangho/tra-luat/pull/64), head
-  `86dc0705c796d4436df00d7accc47e219282c858` (Draft, chưa merge). Xem §6 — sai lệch đã sửa.
+  `86dc0705c796d4436df00d7accc47e219282c858` — **ĐÃ ĐÓNG** (không merge) theo chỉ đạo chủ kho, được
+  THAY THẾ bởi PR #80 mang chính artifact này. Xem §6 — sai lệch đã sửa. Nhánh
+  `codex/f2-d-reopen-writer` không bị xoá; nó CHỨA EOL base nên không nằm trong 73 nhánh legacy.
 
 Readback fail-closed, rc đọc trực tiếp:
 

@@ -50,6 +50,29 @@ def is_sensitive(name):
     return any(upper.startswith(p) for p in SENSITIVE_PREFIXES)
 
 
+# Phạm vi phủ của BỘ QUÉT TĨNH, khai ở đây để CLI `coverage` in ra được như dữ liệu thay vì
+# chôn trong docstring của suite. Một bộ quét tĩnh không bao giờ phủ hết; điều bắt buộc là nó
+# phải NÓI phần nó không phủ.
+STATIC_SCANNER_COVERAGE = {
+    "covered": (
+        "plain import / from-import of a forbidden module",
+        "importlib.import_module and __import__ with a constant target, including builtins.__import__",
+        "module aliases: import subprocess as sp / from subprocess import run as r",
+        "one level of variable aliasing: runner = sp.run then runner([...])",
+        "subprocess calls whose argv[0] is a constant network tool",
+        "os.system / os.popen",
+    ),
+    "not_covered": (
+        "import target computed at runtime: importlib.import_module(name_from_variable)",
+        "argv built dynamically: subprocess.run([tool_var, ...])",
+        "indirection through getattr(subprocess, 'run') or a dict/list of callables",
+        "variable aliasing chained more than one level, or rebound inside a branch",
+        "eval / exec / compile, ctypes, direct syscalls",
+    ),
+    "real_boundary": "a network namespace (unshare -n) - static scanning is a smoke alarm, not a wall",
+}
+
+
 class NetworkAccessBlocked(RuntimeError):
     """Ném khi có bất kỳ lời gọi mạng nào. Đích danh, tức thời - không timeout, không treo."""
 
@@ -65,12 +88,17 @@ class EnvAccessRecorder(MutableMapping):
     gộp chung vào một câu trả lời thay vì để người đọc phải hỏi hai lần.
     """
 
-    def __init__(self, wrapped):
+    def __init__(self, wrapped, note_into=None):
         self._wrapped = wrapped
-        self.reads = []
-        self.child_env_exposures = []
+        # `note_into` cho phép recorder của `os.environb` ghi vào CÙNG sổ với recorder của
+        # `os.environ`: hai mapping, một câu trả lời.
+        self._sink = note_into
+        self.reads = [] if note_into is None else note_into.reads
+        self.child_env_exposures = [] if note_into is None else note_into.child_env_exposures
 
     def _note(self, key):
+        if isinstance(key, bytes):
+            key = key.decode("utf-8", "replace")
         self.reads.append(str(key))
 
     def note_child_exposure(self, key, argv0):
@@ -112,11 +140,32 @@ class EnvAccessRecorder(MutableMapping):
         Sao chép là một lần ĐỌC TOÀN BỘ environment, kể cả biến nhạy cảm, nên nó được ghi nhận -
         im lặng ở đây sẽ là một lối đọc credential không ai thấy.
         """
+        return self._snapshot()
+
+    def _snapshot(self):
         snapshot = dict(self._wrapped)
         for key in snapshot:
             if is_sensitive(key):
                 self._note(key)
         return snapshot
+
+    # `dict | mapping` (PEP 584). `MutableMapping` KHÔNG cấp các toán tử này, nên bản trước
+    # `os.environ | {}` chạy bình thường NGOÀI guard và ném TypeError DƯỚI guard. Một guard chỉ
+    # hoạt động khi không ai dùng cú pháp hiện đại thì không phải guard, chỉ là bẫy.
+    def __or__(self, other):
+        merged = self._snapshot()
+        merged.update(other)
+        return merged
+
+    def __ror__(self, other):
+        merged = dict(other)
+        merged.update(self._snapshot())
+        return merged
+
+    def __ior__(self, other):
+        for key, value in dict(other).items():
+            self._wrapped[key] = value
+        return self
 
     # ── truy vấn ────────────────────────────────────────────────────────────
     def sensitive_reads(self):
@@ -235,11 +284,14 @@ class EnvGuard:
     COVERAGE = {
         "covered": (
             "in-process reads through os.environ / os.getenv",
+            "os.environ.copy() and the PEP 584 union operators (| and |=)",
+            "os.environb on POSIX - the bytes-keyed second view of the same environment",
             "environment handed to children created via subprocess.Popen (run/call/check_output)",
         ),
         "not_covered": (
             "os.execve / posix_spawn called directly, bypassing subprocess",
             "credentials already read into a variable before the guard was installed",
+            "a saved reference to the real os.environ captured before the guard",
             "files on disk holding credentials (this guard watches the environment only)",
         ),
         "real_boundary": "a process started without the credential in its environment at all",
@@ -253,6 +305,7 @@ class EnvGuard:
         self._guard_subprocess = bool(guard_subprocess)
         self._scrub_child_env = bool(scrub_child_env)
         self._saved_popen = None
+        self._saved_environb = None
 
     # ── phủ subprocess ──────────────────────────────────────────────────────
     # Popen(args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd,
@@ -311,6 +364,12 @@ class EnvGuard:
             self._saved_environ[key] = value
         self.recorder = EnvAccessRecorder(self._saved_environ)
         os.environ = self.recorder
+        # POSIX có `os.environb` - MỘT mapping thứ hai vào cùng environment, khoá dạng bytes.
+        # Không bọc nó thì `os.environb[b"GH_TOKEN"]` là một lối đọc credential mà recorder mù hoàn
+        # toàn, và bằng chứng "không đọc biến nhạy cảm" chỉ đúng cho một nửa API.
+        self._saved_environb = getattr(os, "environb", None)
+        if self._saved_environb is not None:
+            os.environb = EnvAccessRecorder(self._saved_environb, note_into=self.recorder)
         if self._guard_subprocess:
             self._install_subprocess_guard()
         return self.recorder
@@ -319,6 +378,9 @@ class EnvGuard:
         if self._saved_popen is not None:
             subprocess.Popen = self._saved_popen
             self._saved_popen = None
+        if self._saved_environb is not None:
+            os.environb = self._saved_environb
+            self._saved_environb = None
         os.environ = self._saved_environ
         for key, value in self._restore.items():
             if value is None:

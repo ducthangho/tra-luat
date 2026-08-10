@@ -69,14 +69,10 @@ FORBIDDEN_IMPORTS = {
 # và KHÔNG hứa bắt được argv dựng động (xem `_ESCAPE_SCANNER_LIMITS`).
 NETWORK_TOOLS = {"gh", "curl", "wget", "git", "ssh", "scp", "nc", "ncat", "openssl", "pip", "npm"}
 
-# Khai giới hạn của chính bộ quét, BẰNG MÁY. g1 tuyên bố scanner chứng minh "không có lối ra
-# mạng"; auditor phá bằng `importlib.import_module` và `subprocess`. Bản này phủ thêm hai đường đó
-# nhưng KHÔNG nâng claim lên "mọi lối ra" - một bộ quét tĩnh không thể có claim đó.
-_ESCAPE_SCANNER_LIMITS = (
-    "import target computed at runtime (importlib.import_module(name_from_variable))",
-    "argv built dynamically (subprocess.run([tool_var, ...]))",
-    "eval/exec, ctypes, direct syscalls",
-)
+# Giới hạn của chính bộ quét được khai ở `guards.STATIC_SCANNER_COVERAGE` để CLI `coverage` in ra
+# được như dữ liệu. Suite chỉ đọc lại, không giữ bản sao thứ hai - hai bản sẽ trôi lệch, và bên
+# quên cập nhật chính là bên công bố một claim rộng hơn thứ mình phủ.
+_ESCAPE_SCANNER_LIMITS = guards.STATIC_SCANNER_COVERAGE["not_covered"]
 
 TESTS = []
 
@@ -154,6 +150,28 @@ def _alias_map(tree):
             module = (node.module or "").split(".")[0]
             for alias in node.names:
                 funcs[alias.asname or alias.name] = "%s.%s" % (module, alias.name)
+
+    # Một tầng alias qua BIẾN: `runner = sp.run` rồi `runner([...])`. Bản trước mù với đường này,
+    # nên đổi tên hai lần là thoát - và "đổi tên hai lần" không phải kỹ thuật cao siêu gì.
+    for _ in range(3):  # lặp vài lượt để `a = sp; b = a.run` cũng hội tụ
+        changed = False
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+                continue
+            target = node.targets[0]
+            if not isinstance(target, ast.Name):
+                continue
+            resolved = _resolve_call(node.value, modules, funcs)
+            if resolved and funcs.get(target.id) != resolved:
+                # Chỉ nhận alias trỏ tới thứ ta THỰC SỰ quan tâm, để không nuốt mọi phép gán.
+                root = resolved.split(".")[0]
+                if root in FORBIDDEN_IMPORTS or root in ("subprocess", "importlib", "os", "builtins"):
+                    funcs[target.id] = resolved
+                    if "." not in resolved:
+                        modules[target.id] = resolved
+                    changed = True
+        if not changed:
+            break
     return modules, funcs
 
 
@@ -164,8 +182,15 @@ def _resolve_call(func_node, modules, funcs):
         return None
     head, _dot, rest = dotted.partition(".")
     if not rest:
-        return funcs.get(head, head)
-    return "%s.%s" % (modules.get(head, head), rest)
+        resolved = funcs.get(head, head)
+    else:
+        base = funcs.get(head) or modules.get(head, head)
+        resolved = "%s.%s" % (base, rest)
+    # `builtins.__import__` và `__import__` là CÙNG một hàm; ghi hai tên cho cùng một thứ là mời
+    # người ta đi vòng qua tên còn lại.
+    if resolved.startswith("builtins."):
+        resolved = resolved[len("builtins."):]
+    return resolved
 
 
 def _scan_escape_paths(directory, allowed):
@@ -1366,6 +1391,9 @@ def ra01_regression_a2_01_malformed_entry_fields_are_refused():
     """
     for field, value in (
         ("sha256", None), ("sha256", "nothex"), ("sha256", "ab" * 32 + "zz"),
+        # Cùng lớp lỗi với reviewed_sha: `$` khớp cả trước newline cuối chuỗi, nên một sha kèm
+        # xuống dòng phải bị bắt là MANIFEST HỎNG, không phải trôi xuống thành hash_mismatch mơ hồ.
+        ("sha256", "a" * 64 + "\n"), ("sha256", " " + "a" * 64),
         ("bytes", "lots"), ("bytes", -1), ("bytes", True),
         ("locator", 42), ("locator", None),
     ):
@@ -1608,7 +1636,9 @@ def ra01_regression_a2_05_benign_payload_keys_are_not_blocked():
         assert len(store.ledger) == 3, len(store.ledger)
     # Ràng buộc phải được CÔNG BỐ, không chôn trong regex.
     surface = operations.schema()["credential_surface"]
-    assert surface["rejected_key_tails"] and surface["max_depth"] and surface["max_nodes"]
+    assert surface["secret_nouns"] and surface["max_depth"] and surface["max_nodes"]
+    assert surface["carrier_words_that_force_rejection"], surface
+    assert surface["measure_words_that_neutralise_token"], surface
 
 
 @test
@@ -1682,6 +1712,258 @@ def ra01_regression_a2_06_environ_copy_still_works_under_the_guard():
         # Sao chép toàn bộ environment LÀ một lần đọc credential, và phải được ghi nhận.
         assert "GH_TOKEN" in recorder.sensitive_reads()
         assert len(os.environ) == len(snapshot)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# G. Vòng audit thứ ba — năm finding spec trên head c4784728
+# ─────────────────────────────────────────────────────────────────────────────
+@test
+def ra01_regression_a3_01_carrier_keys_refused_and_measure_keys_accepted():
+    """PHẢN CHỨNG AUDIT: bộ lọc "từ cuối" hỏng theo CẢ HAI hướng cùng lúc.
+
+    Lọt: `authorization_header`, `client_secret_value` được persist.
+    Chặn nhầm: `requested_tokens`, `remaining_tokens` (con số) bị từ chối.
+    Sửa false-positive bằng cách nới từ cuối thì tự tay mở lại false-negative, nên test này đòi
+    CẢ HAI chiều trong cùng một phép chạy.
+    """
+    must_refuse = {
+        "authorization_header": "Bearer opaque",
+        "client_secret_value": "opaque",
+        "auth_header": "opaque",
+        "token_value": "opaque",
+        "credential_blob": "opaque",
+        "password_field": "opaque",
+        "secret_material": "opaque",
+        "api_key_string": "opaque",
+        # Vật chứa + đơn vị đo trong CÙNG một khoá: đây là ca duy nhất mà danh sách vật chứa thật
+        # sự gánh việc. Thiếu nó thì "đơn vị đo trung hoà token" sẽ nuốt luôn cả header thật.
+        "remaining_tokens_header": "Bearer opaque",
+        "token_budget_value": "opaque",
+    }
+    must_accept = {
+        "requested_tokens": 4096,
+        "remaining_tokens": 120,
+        "total_tokens": 8192,
+        "prompt_tokens": 12,
+        "completion_tokens": 34,
+        "tokens_used": 46,
+        "token_budget": 120000,
+        "authorization_url": "https://github.com/ducthangho/tra-luat/issues/77",
+        "auth_method": "oidc",
+        "cookie_policy": "none",
+        "author": "ducthangho",
+        "session_id": "abc",
+        "public_key": "ssh-ed25519 AAAA",
+        "reconcile_key": "gh77-x",
+        "credential_count": 0,
+        "secret_scan_status": "clean",
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        for key, value in must_refuse.items():
+            try:
+                store.call(
+                    "post_heartbeat",
+                    {"repo": REPO, "issue_number": 77, "reconcile_key": "k",
+                     "payload": {key: value}},
+                )
+            except operations.CredentialSurfaceError as exc:
+                assert key in str(exc), (key, str(exc))
+            else:
+                raise AssertionError("credential carrier accepted: %r" % key)
+        assert len(store.ledger) == 0, "a refused payload reached the ledger"
+        result = store.call(
+            "post_heartbeat",
+            {"repo": REPO, "issue_number": 77, "reconcile_key": "k-measures",
+             "payload": must_accept},
+        )
+        assert result["created"] is True
+        assert len(store.ledger) == 1
+
+
+@test
+def ra01_regression_a3_01_authorization_scheme_in_a_value_is_refused():
+    """Giá trị mang lược đồ Authorization bị bắt kể cả dưới khoá hoàn toàn vô hại."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        for payload in ({"note": "Bearer sk-live-0123456789"}, {"note": "Basic YWxhZGRpbjpvcGVu"}):
+            try:
+                store.call(
+                    "post_heartbeat",
+                    {"repo": REPO, "issue_number": 77, "reconcile_key": "k", "payload": payload},
+                )
+            except operations.CredentialSurfaceError:
+                pass
+            else:
+                raise AssertionError("authorization scheme accepted in a value: %r" % payload)
+        assert len(store.ledger) == 0
+
+
+@test
+def ra01_regression_a3_02_git_oid_rejects_trailing_newline():
+    """PHẢN CHỨNG AUDIT: `^...$` + `.match()` nhận `40hex + newline`, và nó được PERSIST.
+
+    Trong Python `$` khớp cả TRƯỚC một newline cuối chuỗi. Schema công bố "full lowercase 40-hex",
+    nên nhận thêm ký tự xuống dòng là schema nói một đằng, code làm một nẻo.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        base = {"repo": REPO, "issue_number": 77, "verdict": "approve"}
+        for bad in (HEAD_OID + "\n", HEAD_OID + "\r\n", HEAD_OID + " ", "\n" + HEAD_OID,
+                    HEAD_OID + "\n" + HEAD_OID):
+            try:
+                store.call("post_verdict", dict(base, reconcile_key="k", reviewed_sha=bad))
+            except operations.ParameterError as exc:
+                assert "reviewed_sha" in str(exc), str(exc)
+            else:
+                raise AssertionError("reviewed_sha accepted with stray whitespace: %r" % bad)
+        assert len(store.ledger) == 0
+    # Cùng lớp lỗi ở manifest: sha256 của entry cũng phải fullmatch.
+    assert artifacts._SHA256_HEX.fullmatch("a" * 64)
+    assert not artifacts._SHA256_HEX.fullmatch("a" * 64 + "\n")
+
+
+@test
+def ra01_regression_a3_03_scanner_catches_builtins_import_and_variable_alias():
+    """PHẢN CHỨNG AUDIT: `builtins.__import__('requests')` và `runner = sp.run; runner([...])`.
+
+    Cả hai đều cho `offenders=[]` ở bản trước, và không nằm trong `not_covered` - tức là claim
+    rộng hơn thứ detector thật sự phủ.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "indirect.py"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(
+                "import builtins\n"
+                "import subprocess as sp\n"
+                "import importlib as il\n"
+                "def go():\n"
+                "    builtins.__import__('requests')\n"
+                "    runner = sp.run\n"
+                "    runner(['gh', 'api', '/user'])\n"
+                "    importer = il.import_module\n"
+                "    importer('httpx')\n"
+            )
+        offenders = set(_scan_escape_paths(tmp, allowed=set()))
+        for expected in (
+            ("indirect.py", "dynamic-import:requests"),
+            ("indirect.py", "subprocess:gh"),
+            ("indirect.py", "dynamic-import:httpx"),
+        ):
+            assert expected in offenders, (expected, sorted(offenders))
+    # Phần CÒN LẠI phải được khai, không được im lặng.
+    limits = guards.STATIC_SCANNER_COVERAGE["not_covered"]
+    assert limits, "a static scanner that claims no limits is lying"
+    joined = " ".join(limits)
+    assert "getattr" in joined and "dynamically" in joined, limits
+    rc, out, _err = _run_cli("coverage")
+    assert rc == 0
+    assert json.loads(out)["static_scanner"]["not_covered"]
+
+
+@test
+def ra01_regression_a3_04_manifest_itself_must_be_a_regular_file():
+    """PHẢN CHỨNG AUDIT: `manifest.json`/`manifest.sha256` được mở thẳng, không no-follow.
+
+    Ràng buộc containment áp cho entry mà không áp cho chính tài liệu mô tả chúng thì vẫn còn
+    nguyên một cửa: manifest có thể là symlink trỏ ra ngoài `run_root`.
+    """
+    for victim_name in (artifacts.MANIFEST_NAME, artifacts.SIDECAR_NAME):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "run")
+            _run_cli("produce", "--out", root, "--run-id", "r1")
+            victim = os.path.join(root, victim_name)
+            outside = os.path.join(tmp, "outside_" + victim_name)
+            shutil.move(victim, outside)
+            try:
+                os.symlink(outside, victim)
+                print("     manifest_symlink_fixture=real")
+            except OSError as exc:
+                if getattr(exc, "winerror", None) != 1314:
+                    raise
+                shutil.copyfile(outside, victim)
+                print("     manifest_symlink_fixture=simulated_winerror_1314")
+                with _simulated_symlink(victim):
+                    report = artifacts.verify(root)
+                assert report["ok"] is False, victim_name
+                assert any(r["locator"] == victim_name for r in report["rejected_locators"]), report
+                continue
+            report = artifacts.verify(root)
+            assert report["ok"] is False, "a symlinked %s was accepted" % victim_name
+            assert any(r["locator"] == victim_name for r in report["rejected_locators"]), report
+            rc, _out, err = _run_cli("verify", "--root", root)
+            assert rc != 0 and victim_name in err, (rc, err)
+
+
+@test
+def ra01_regression_a3_04_five_categories_cannot_share_one_locator():
+    """PHẢN CHỨNG AUDIT: manifest reseal cho cả năm hạng mục cùng trỏ MỘT locator vẫn `ok=true`.
+
+    Acceptance đòi SHA-256 cho TỪNG file trong năm hạng mục. Đếm entry không thay được đếm
+    OBJECT rời nhau - năm dòng trỏ một tệp là retention của một tệp, không phải của năm.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        one = next(e for e in manifest["entries"] if e["category"] == "source")
+        manifest["entries"] = [
+            {"category": c, "locator": one["locator"], "sha256": one["sha256"],
+             "bytes": one["bytes"]}
+            for c in artifacts.REQUIRED_CATEGORIES
+        ]
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["manifest_hash_ok"] is True, "fixture sai - sidecar phải vẫn khớp"
+        assert report["ok"] is False, "five categories sharing one file were certified"
+        assert report["manifest_invalid"] and "duplicate" in report["manifest_invalid"], report
+    # Chặn ngay từ đầu ghi: cùng một locator không được ghi nhận hai lần.
+    with tempfile.TemporaryDirectory() as tmp:
+        aset = artifacts.ArtifactSet(os.path.join(tmp, "run"), "dup")
+        aset.add("source", "same.txt", "x")
+        try:
+            aset.add("corpus", "same.txt", "x")
+        except artifacts.LocatorError as exc:
+            assert "already recorded" in exc.reason, exc.reason
+        else:
+            raise AssertionError("the same locator was recorded twice")
+
+
+@test
+def ra01_regression_a3_05_recorder_is_transparent_for_union_and_environb():
+    """PHẢN CHỨNG AUDIT: `os.environ | {}` ném TypeError dưới guard; `os.environb` ngoài tầm.
+
+    Guard làm hỏng cú pháp hợp lệ sẽ bị gỡ ra; guard bỏ sót nửa API thì bằng chứng "không đọc
+    biến nhạy cảm" chỉ đúng cho nửa còn lại.
+    """
+    marker = "FAKE-UNION-PROBE-TOKEN"
+    with guards.EnvGuard(inject={"GH_TOKEN": marker}) as recorder:
+        merged = os.environ | {"RA01_EXTRA": "1"}
+        assert isinstance(merged, dict)
+        assert merged["RA01_EXTRA"] == "1"
+        assert merged.get("GH_TOKEN") == marker
+        reversed_merge = {"RA01_EXTRA": "0"} | os.environ
+        assert reversed_merge.get("GH_TOKEN") == marker
+        union_reads = list(recorder.sensitive_reads())
+        environb_seen = None
+        if hasattr(os, "environb"):
+            environb_seen = os.environb.get(b"GH_TOKEN")
+    assert "GH_TOKEN" in union_reads, union_reads
+    if environb_seen is not None:
+        assert environb_seen == marker.encode(), environb_seen
+    assert "os.environb" in " ".join(guards.EnvGuard.COVERAGE["covered"])
+
+
+@test
+def ra01_regression_a3_05_environb_read_is_recorded():
+    """`os.environb[b"GH_TOKEN"]` phải đi vào CÙNG sổ với `os.environ` - một câu trả lời, không hai."""
+    if not hasattr(os, "environb"):
+        raise PlatformUnsupported("os.environb does not exist on this platform")
+    marker = "FAKE-ENVIRONB-PROBE"
+    with guards.EnvGuard(inject={"GH_TOKEN": marker}) as recorder:
+        value = os.environb[b"GH_TOKEN"]
+        reads = recorder.sensitive_reads()
+    assert value == marker.encode(), value
+    assert "GH_TOKEN" in reads, reads
 
 
 def main():

@@ -61,11 +61,11 @@ _TYPE_CHECKS = {
 # và lúc đó nó không còn bảo vệ gì nữa - chặn nhầm là một cách hỏng, không phải "an toàn hơn".
 #
 # Quy tắc: credential nằm ở DANH TỪ CUỐI. `access_token` là token; `token_budget` là budget.
-_SECRET_TAILS = frozenset(
+_SECRET_NOUNS = frozenset(
     {
         "token", "tokens", "secret", "secrets", "password", "passwords", "passwd", "pwd",
         "credential", "credentials", "cookie", "cookies", "passphrase", "auth",
-        "authorization", "bearer", "otp",
+        "authorization", "bearer", "otp", "apikey",
     }
 )
 
@@ -76,6 +76,36 @@ _SECRET_KEY_QUALIFIERS = frozenset(
      "client", "app", "service", "consumer"}
 )
 
+# Từ CUỐI biến khoá thành THUỘC TÍNH VỀ credential thay vì chính credential.
+# `authorization_url` là một địa chỉ; `token_budget` là một con số.
+_DESCRIPTOR_TAILS = frozenset(
+    {
+        "url", "uri", "endpoint", "id", "name", "type", "kind", "method", "scheme", "mode",
+        "policy", "status", "state", "provider", "source", "format", "hint", "prefix", "suffix",
+        "version", "budget", "count", "limit", "quota", "size", "length", "len", "expiry",
+        "expires", "at", "ttl", "enabled", "required", "present", "hash", "digest", "fingerprint",
+    }
+)
+
+# Từ biến `token(s)` thành ĐƠN VỊ ĐO. `requested_tokens` là số lượng, không phải credential.
+_MEASURE_WORDS = frozenset(
+    {
+        "requested", "remaining", "used", "total", "max", "min", "input", "output", "prompt",
+        "completion", "cached", "budget", "count", "num", "number", "estimated", "spent",
+        "consumed", "limit", "avg", "average", "per",
+    }
+)
+
+# Từ CUỐI biến khoá thành VẬT CHỨA credential - đây là hướng ngược lại của descriptor.
+# `authorization_header` và `client_secret_value` CHỞ giá trị thật.
+_CARRIER_WORDS = frozenset(
+    {
+        "header", "headers", "value", "values", "string", "blob", "data", "content", "body",
+        "payload", "raw", "plain", "plaintext", "encoded", "b64", "base64", "field", "param",
+        "params", "env", "material", "bytes", "text",
+    }
+)
+
 
 def _split_words(key):
     """Tách khoá thành từ - hiểu cả snake_case, kebab-case, dotted và camelCase."""
@@ -84,21 +114,49 @@ def _split_words(key):
 
 
 def _key_is_credential(key):
+    """Quyết theo TOÀN BỘ tập từ, không phải mỗi từ cuối.
+
+    Bản trước chỉ xét từ cuối và hỏng theo CẢ HAI hướng cùng lúc:
+      false negative - `authorization_header`, `client_secret_value` lọt vào ledger;
+      false positive - `requested_tokens`, `remaining_tokens` (con số) bị chặn.
+    Sửa false positive bằng cách nới từ cuối thì tự tay mở false negative - nên phải phân biệt ba
+    vai của từ: DANH TỪ bí mật, ĐƠN VỊ ĐO (biến nó thành số), và VẬT CHỨA (giữ nguyên giá trị thật).
+    """
     words = _split_words(key)
     if not words:
         return False
+    wordset = set(words)
     tail = words[-1]
-    if tail in _SECRET_TAILS:
+
+    has_carrier = bool(wordset & _CARRIER_WORDS)
+    has_secret_noun = bool(wordset & _SECRET_NOUNS)
+
+    # `key`/`keys` chỉ là bí mật khi có định ngữ; `public_key`, `reconcile_key`, `sort_key` thì không.
+    # Quét MỌI vị trí, không chỉ từ cuối: `api_key_string` vẫn là một api key.
+    key_is_secret = any(
+        word in ("key", "keys") and index > 0 and words[index - 1] in _SECRET_KEY_QUALIFIERS
+        for index, word in enumerate(words)
+    )
+
+    if not has_secret_noun and not key_is_secret:
+        return False
+    # Vật chứa thắng mọi thứ: có danh từ bí mật + vật chứa nghĩa là giá trị thật nằm ngay đây.
+    if has_carrier:
         return True
-    if tail in ("key", "keys"):
-        return (words[-2] if len(words) > 1 else "") in _SECRET_KEY_QUALIFIERS
-    return False
+    # Đơn vị đo trung hoà `token(s)`, nhưng KHÔNG trung hoà `secret`/`password`/`credential`.
+    if wordset & _MEASURE_WORDS and not (wordset & (_SECRET_NOUNS - {"token", "tokens"})):
+        return False
+    if tail in _DESCRIPTOR_TAILS:
+        return False
+    return True
 
 # Hình dạng credential thật, khớp trên GIÁ TRỊ. Một khoá vô hại (`note`) vẫn có thể chở token.
 _CREDENTIAL_VALUE = re.compile(
     r"gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|sk-ant-[A-Za-z0-9\-_]{16,}|"
     r"sk-[A-Za-z0-9]{32,}|AKIA[0-9A-Z]{16}|xox[abposr]-[A-Za-z0-9-]{10,}|GOCSPX-[A-Za-z0-9_-]{16,}|"
-    r"-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"-----BEGIN [A-Z ]*PRIVATE KEY-----|"
+    # Lược đồ HTTP Authorization: giá trị thật đi kèm chính nó, dù khoá có vô hại đến đâu.
+    r"\bBearer\s+\S+|\bBasic\s+[A-Za-z0-9+/=]{8,}"
 )
 
 # Trần độ sâu/kích thước: một payload lồng vô hạn là DoS cho chính bộ quét.
@@ -109,7 +167,10 @@ _MAX_PAYLOAD_NODES = 4096
 # `reviewed_sha: string` là chưa đủ: audit gọi `post_verdict` với "not-a-sha" và với một chuỗi
 # hình `ghp_…`, cả hai đều được PERSIST vào sổ bền. Verdict neo vào một thứ không phải commit thì
 # nó không neo vào đâu cả - §1 bất biến 9 đòi "exact SHA", và một SHA viết tắt cũng KHÔNG exact.
-GIT_OID_RE = re.compile(r"^[0-9a-f]{40}$")
+# `\Z` chứ KHÔNG phải `$`, và `fullmatch` chứ không phải `match`: trong Python `$` khớp cả TRƯỚC
+# một newline cuối chuỗi, nên `^[0-9a-f]{40}$` với `.match()` nhận `40hex + "\n"` và `post_verdict`
+# persist nguyên ký tự xuống dòng vào sổ bền. Một SHA có newline không phải exact SHA.
+GIT_OID_RE = re.compile(r"[0-9a-f]{40}\Z")
 
 _FORMATS = {
     "git_oid": (
@@ -317,10 +378,15 @@ def schema():
         # Ràng buộc payload được CÔNG BỐ, không chôn trong regex: người gọi phải biết trước cái gì
         # bị chặn, nếu không họ chỉ phát hiện ra lúc bị từ chối giữa production.
         "credential_surface": {
-            "rule": "a key is rejected when its LAST word is a secret noun; substring matching is "
-                    "not used, so session_id / authorization_url / token_budget / author / "
-                    "cookie_policy are accepted",
-            "rejected_key_tails": sorted(_SECRET_TAILS),
+            "rule": "a key is judged on its whole word set, not a substring and not the last word "
+                    "alone: a secret noun plus a carrier word is rejected (authorization_header, "
+                    "client_secret_value), a secret noun with a measure word or a descriptor tail "
+                    "is accepted (requested_tokens, remaining_tokens, token_budget, "
+                    "authorization_url, cookie_policy, auth_method)",
+            "secret_nouns": sorted(_SECRET_NOUNS),
+            "carrier_words_that_force_rejection": sorted(_CARRIER_WORDS),
+            "measure_words_that_neutralise_token": sorted(_MEASURE_WORDS),
+            "descriptor_tails_that_neutralise": sorted(_DESCRIPTOR_TAILS),
             "rejected_key_tail_key_qualifiers": sorted(_SECRET_KEY_QUALIFIERS),
             "rejected_value_shapes": "known credential prefixes (ghp_, github_pat_, sk-ant-, "
                                      "AKIA, xox*, GOCSPX-, PEM private key headers)",
@@ -388,7 +454,7 @@ def validate(name, params, _closed=_CLOSED_NAMES):
             )
         if "format" in meta:
             pattern, human = _FORMATS[meta["format"]]
-            if not pattern.match(value):
+            if not pattern.fullmatch(value):
                 raise ParameterError(
                     name,
                     "operation %r parameter %r rejected before execution - must be %s, got %r"

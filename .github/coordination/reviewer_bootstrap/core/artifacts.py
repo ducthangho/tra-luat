@@ -43,7 +43,35 @@ import posixpath
 import re
 import stat
 
-_SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
+# `\Z` + fullmatch, không phải `$` + match: `$` khớp cả trước newline cuối chuỗi.
+_SHA256_HEX = re.compile(r"[0-9a-f]{64}\Z")
+
+
+def _open_regular_for_write(path, locator):
+    """Mở để GHI, từ chối symlink và mọi thứ không phải tệp thường - kiểm trên chính descriptor."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    handle = os.fdopen(fd, "wb")
+    if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+        handle.close()
+        raise LocatorError(locator, "target is not a regular file after open")
+    return handle
+
+
+def _read_regular(path, locator):
+    """Đọc một tệp PHẢI là tệp thường. Trả bytes, hoặc ném LocatorError.
+
+    Dùng cho chính `manifest.json` và `manifest.sha256`: bản trước mở thẳng bằng `open()`, nên
+    manifest CỦA CHÍNH LƯỢT CHẠY có thể là symlink trỏ ra ngoài `run_root` và cả hai đầu ghi/kiểm
+    đều không thấy. Ràng buộc containment áp cho entry mà không áp cho tài liệu mô tả chúng thì
+    vẫn còn nguyên một cửa.
+    """
+    if os.path.islink(path):
+        raise LocatorError(locator, "is a symlink")
+    with open(path, "rb") as handle:
+        if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+            raise LocatorError(locator, "is not a regular file")
+        return handle.read()
 
 MANIFEST_NAME = "manifest.json"
 SIDECAR_NAME = "manifest.sha256"
@@ -179,21 +207,18 @@ class ArtifactSet:
             )
         if relative_name in (MANIFEST_NAME, SIDECAR_NAME):
             raise ValueError("artifact name %r collides with manifest files" % relative_name)
+        if any(e["locator"] == relative_name for e in self.entries):
+            raise LocatorError(relative_name, "locator already recorded in this manifest")
         target = safe_locator(self.run_root, relative_name)
         if isinstance(data, str):
             data = data.encode("utf-8")
         os.makedirs(os.path.dirname(target) or self.run_root, exist_ok=True)
         if os.path.islink(target):
             raise LocatorError(relative_name, "target already exists as a symlink")
-        # O_NOFOLLOW: chặn cả ca chen symlink vào giữa hai lời gọi (TOCTOU) trên nền hỗ trợ nó.
-        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
-        fd = os.open(target, flags, 0o600)
-        with os.fdopen(fd, "wb") as fh:
-            # fstat trên CHÍNH descriptor vừa mở: `os.open` thành công không có nghĩa ta đang giữ
-            # một tệp thường. Trên Windows `NUL` mở được và nuốt mọi thứ; O_NOFOLLOW thì không tồn
-            # tại ở đó. Kiểm sau khi mở là phép kiểm duy nhất không có khe TOCTOU.
-            if not stat.S_ISREG(os.fstat(fh.fileno()).st_mode):
-                raise LocatorError(relative_name, "target is not a regular file after open")
+        # O_NOFOLLOW chặn ca chen symlink giữa hai lời gọi (TOCTOU); fstat trên CHÍNH descriptor
+        # bắt phần còn lại - `os.open` thành công không có nghĩa ta đang giữ một tệp thường, và
+        # trên Windows `NUL` mở được, nuốt mọi thứ, trong khi O_NOFOLLOW không tồn tại ở đó.
+        with _open_regular_for_write(target, relative_name) as fh:
             fh.write(data)
         self.entries.append(
             {
@@ -238,9 +263,10 @@ class ArtifactSet:
         }
         blob = json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         raw = blob.encode("utf-8")
-        with open(os.path.join(self.run_root, MANIFEST_NAME), "wb") as fh:
+        # Chính manifest và sidecar cũng phải là tệp thường trong run_root - xem _read_regular.
+        with _open_regular_for_write(os.path.join(self.run_root, MANIFEST_NAME), MANIFEST_NAME) as fh:
             fh.write(raw)
-        with open(os.path.join(self.run_root, SIDECAR_NAME), "wb") as fh:
+        with _open_regular_for_write(os.path.join(self.run_root, SIDECAR_NAME), SIDECAR_NAME) as fh:
             fh.write((sha256_bytes(raw) + "\n").encode("utf-8"))
         return manifest
 
@@ -281,10 +307,12 @@ def verify(run_root):
         report["missing_files"].append(SIDECAR_NAME)
         return report
 
-    with open(manifest_path, "rb") as fh:
-        raw = fh.read()
-    with open(sidecar_path, "r", encoding="utf-8") as fh:
-        expected = fh.read().strip()
+    try:
+        raw = _read_regular(manifest_path, MANIFEST_NAME)
+        expected = _read_regular(sidecar_path, SIDECAR_NAME).decode("utf-8").strip()
+    except LocatorError as exc:
+        report["rejected_locators"].append({"locator": exc.locator, "reason": exc.reason})
+        return report
     report["manifest_hash_ok"] = sha256_bytes(raw) == expected
     if not report["manifest_hash_ok"]:
         # Manifest bị sửa sau khi niêm phong. Dừng ở đây: mọi entry bên trong nó đã mất thẩm quyền.
@@ -325,16 +353,24 @@ def verify(run_root):
     if self_block.get("locator") != MANIFEST_NAME:
         return _invalid("manifest does not describe itself")
 
+    # Một locator phục vụ nhiều hạng mục là retention GIẢ: manifest reseal cho cả năm category
+    # cùng trỏ MỘT tệp vẫn cho ok=true, verified_files=5, trong khi acceptance đòi SHA-256 cho
+    # TỪNG file. Đếm entry không thay được đếm OBJECT rời nhau.
+    seen_locators = set()
     present = set()
     for entry in entries:
         if not isinstance(entry, dict):
             return _invalid("malformed entry: %r" % (entry,))
+        if entry.get("locator") in seen_locators:
+            return _invalid("duplicate locator %r - each artifact needs its own file"
+                            % (entry.get("locator"),))
+        seen_locators.add(entry.get("locator"))
         locator_value, sha_value, bytes_value = (
             entry.get("locator"), entry.get("sha256"), entry.get("bytes"),
         )
         if not isinstance(locator_value, str):
             return _invalid("entry locator must be a string, got %r" % (locator_value,))
-        if not isinstance(sha_value, str) or not _SHA256_HEX.match(sha_value):
+        if not isinstance(sha_value, str) or not _SHA256_HEX.fullmatch(sha_value):
             return _invalid("entry %r has a malformed sha256: %r" % (locator_value, sha_value))
         if not isinstance(bytes_value, int) or isinstance(bytes_value, bool) or bytes_value < 0:
             return _invalid("entry %r has a malformed byte count: %r" % (locator_value, bytes_value))

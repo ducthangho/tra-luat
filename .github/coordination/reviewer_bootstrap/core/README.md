@@ -70,6 +70,18 @@ riêng. Test đó nay báo `[SKIP]` có nêu lý do (không phải `[FAIL]`, cũ
 `passed`), và bất biến no-follow vẫn được kiểm ở mọi nền bằng
 `ra01_regression_sec01_verify_refuses_non_regular_file_portable` dùng thư mục thay cho symlink.
 
+## Vòng audit thứ ba — năm finding spec trên head `c4784728`
+
+Suite `68/68` mà spec vẫn FAIL. Bài học của vòng này: **sửa một hướng của bộ lọc thì mở hướng kia**.
+
+| # | lỗ hổng | vì sao | đóng bằng |
+|---|---|---|---|
+| 1 | `authorization_header`, `client_secret_value` LỌT; `requested_tokens`, `remaining_tokens` bị CHẶN NHẦM | quyết theo mỗi TỪ CUỐI — hỏng cả hai hướng cùng lúc | quyết theo TOÀN BỘ tập từ với ba vai: **danh từ bí mật** · **đơn vị đo** (biến `token` thành số) · **vật chứa** (`header`/`value`/`blob` — giữ giá trị thật, thắng mọi thứ). Thêm value-shape `Bearer`/`Basic` |
+| 2 | `reviewed_sha` nhận `40hex + "\n"` và persist nguyên newline | `$` trong Python khớp cả **trước** newline cuối chuỗi, cộng `.match()` | `\Z` + `fullmatch`. Cùng lỗi ở `_SHA256_HEX` của manifest entry |
+| 3 | `builtins.__import__('requests')` và `runner = sp.run; runner([...])` cho `offenders=[]` | canonical hoá alias chỉ phủ import, không phủ gán biến; hai tên cho cùng một hàm | strip tiền tố `builtins.`, theo dõi **một tầng alias qua biến** (hội tụ 3 lượt). Phần còn lại khai trong `STATIC_SCANNER_COVERAGE.not_covered` và in ra qua `controller.py coverage` |
+| 4 | `manifest.json`/`manifest.sha256` mở thẳng, không no-follow; năm category cùng trỏ MỘT locator vẫn `ok=true` | containment áp cho entry mà không áp cho tài liệu mô tả chúng; đếm entry ≠ đếm object rời nhau | `_read_regular` (islink + `fstat` regular) cho chính manifest/sidecar; `_open_regular_for_write` lúc ghi; **từ chối locator trùng** ở cả `add()` lẫn `verify()` |
+| 5 | `os.environ \| {}` ném `TypeError` dưới guard; `os.environb` ngoài tầm recorder | `MutableMapping` không cấp `__or__`; POSIX có mapping thứ hai vào cùng environment | `__or__`/`__ror__`/`__ior__`; bọc luôn `os.environb`, ghi vào **cùng một sổ** |
+
 ## Điều lõi này KHÔNG hứa
 
 Ba tuyên bố bị **thu hẹp có chủ đích** so với g1, và mỗi cái có test đòi phần "không phủ" phải

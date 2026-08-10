@@ -51,6 +51,7 @@ def cmd_coverage(args):
         {
             "network_guard": guards.NetworkGuard.COVERAGE,
             "env_guard": guards.EnvGuard.COVERAGE,
+            "static_scanner": guards.STATIC_SCANNER_COVERAGE,
         },
         sys.stdout,
         ensure_ascii=False,

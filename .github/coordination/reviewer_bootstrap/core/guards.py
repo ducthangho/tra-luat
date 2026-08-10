@@ -58,33 +58,6 @@ def is_sensitive(name):
     return any(upper.startswith(p) for p in SENSITIVE_PREFIXES)
 
 
-# Phạm vi phủ của BỘ QUÉT TĨNH, khai ở đây để CLI `coverage` in ra được như dữ liệu thay vì
-# chôn trong docstring của suite. Một bộ quét tĩnh không bao giờ phủ hết; điều bắt buộc là nó
-# phải NÓI phần nó không phủ.
-STATIC_SCANNER_COVERAGE = {
-    "covered": (
-        "plain import / from-import of a forbidden module",
-        "importlib.import_module and __import__ with a constant target, including builtins.__import__",
-        "module aliases: import subprocess as sp / from subprocess import run as r",
-        "one level of variable aliasing: runner = sp.run then runner([...])",
-        "subprocess calls whose argv[0] is a constant network tool",
-        "the same calls written with keyword arguments: run(args=[...]), import_module(name=...)",
-        "Windows executable suffixes on argv[0]: gh.exe, curl.cmd, wget.bat",
-        "shell-string form: subprocess.run('gh api /user', shell=True) - first token only",
-        "os.system / os.popen",
-    ),
-    "not_covered": (
-        "a shell string whose first token is not the real binary (env VAR=1 gh, sh -c '...')",
-        "import target computed at runtime: importlib.import_module(name_from_variable)",
-        "argv built dynamically: subprocess.run([tool_var, ...])",
-        "indirection through getattr(subprocess, 'run') or a dict/list of callables",
-        "variable aliasing chained more than one level, or rebound inside a branch",
-        "eval / exec / compile, ctypes, direct syscalls",
-    ),
-    "real_boundary": "a network namespace (unshare -n) - static scanning is a smoke alarm, not a wall",
-}
-
-
 class NetworkAccessBlocked(RuntimeError):
     """Ném khi có bất kỳ lời gọi mạng nào. Đích danh, tức thời - không timeout, không treo."""
 

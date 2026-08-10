@@ -69,9 +69,12 @@ STATIC_SCANNER_COVERAGE = {
         "one level of variable aliasing: runner = sp.run then runner([...])",
         "subprocess calls whose argv[0] is a constant network tool",
         "the same calls written with keyword arguments: run(args=[...]), import_module(name=...)",
+        "Windows executable suffixes on argv[0]: gh.exe, curl.cmd, wget.bat",
+        "shell-string form: subprocess.run('gh api /user', shell=True) - first token only",
         "os.system / os.popen",
     ),
     "not_covered": (
+        "a shell string whose first token is not the real binary (env VAR=1 gh, sh -c '...')",
         "import target computed at runtime: importlib.import_module(name_from_variable)",
         "argv built dynamically: subprocess.run([tool_var, ...])",
         "indirection through getattr(subprocess, 'run') or a dict/list of callables",

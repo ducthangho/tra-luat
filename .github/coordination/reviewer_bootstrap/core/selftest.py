@@ -193,6 +193,30 @@ def _resolve_call(func_node, modules, funcs):
     return resolved
 
 
+_WINDOWS_EXEC_SUFFIXES = (".exe", ".com", ".bat", ".cmd", ".ps1")
+
+
+def _tool_name(argv0):
+    """Tên công cụ đã chuẩn hoá từ argv[0], hoặc None.
+
+    Hai dạng bản trước bỏ lọt, cả hai đều là cách gọi hoàn toàn bình thường:
+      `gh.exe`                    - đuôi thực thi của Windows;
+      `subprocess.run("gh api /user", shell=True)` - argv là MỘT chuỗi lệnh, không phải danh sách.
+    Chặn `gh` mà không chặn `gh.exe` là một lệnh cấm chỉ có hiệu lực trên POSIX.
+    """
+    if not argv0:
+        return None
+    # Dạng shell string: lấy token đầu. Không cố parse shell - chỉ cần biết binary nào được gọi.
+    head = argv0.strip().split()[0] if argv0.strip() else ""
+    head = os.path.basename(head.replace("\\", "/"))
+    lowered = head.lower()
+    for suffix in _WINDOWS_EXEC_SUFFIXES:
+        if lowered.endswith(suffix):
+            head = head[: -len(suffix)]
+            break
+    return head.lower() or None
+
+
 def _scan_escape_paths(directory, allowed):
     """Đường thoát mà `Import`/`ImportFrom` KHÔNG thấy (finding wp77-g1-sec-02).
 
@@ -225,8 +249,9 @@ def _scan_escape_paths(directory, allowed):
                 argv0 = _const_str(first)
                 if argv0 is None and isinstance(first, (ast.List, ast.Tuple)) and first.elts:
                     argv0 = _const_str(first.elts[0])
-                if argv0 and os.path.basename(argv0) in NETWORK_TOOLS:
-                    entry = (name, "subprocess:%s" % os.path.basename(argv0))
+                tool = _tool_name(argv0)
+                if tool in NETWORK_TOOLS:
+                    entry = (name, "subprocess:%s" % tool)
                     if entry not in allowed:
                         offenders.append(entry)
     return offenders
@@ -2228,6 +2253,122 @@ def ra01_regression_a4_05_scanner_reads_keyword_arguments():
         assert ("kw.py", "dynamic-import:requests") in offenders, sorted(offenders)
     assert any("keyword" in c for c in guards.STATIC_SCANNER_COVERAGE["covered"]), \
         "keyword-argument coverage is not declared"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# I. Vòng audit thứ năm — finding của verdict ab5b3c2 còn mở trên head sau đó
+# ─────────────────────────────────────────────────────────────────────────────
+@test
+def ra01_regression_a5_01_hardlinked_target_is_refused():
+    """PHẢN CHỨNG AUDIT: `manifest.json` đặt sẵn thành HARD LINK tới tệp ngoài `run_root`.
+
+    Ba lớp cũ đều XANH cho ca này - hardlink LÀ tệp thường, KHÔNG phải symlink, và path với
+    descriptor đúng là cùng một object. Thứ duy nhất phân biệt được là số liên kết: một artifact
+    ta vừa tạo phải có đúng một tên. Không có phép kiểm đó thì `finalize()` ghi đè tệp ngoài.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        os.makedirs(root)
+        outside = os.path.join(tmp, "outside.txt")
+        with open(outside, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("OUTSIDE\n")
+        try:
+            os.link(outside, os.path.join(root, artifacts.MANIFEST_NAME))
+        except (OSError, NotImplementedError, AttributeError) as exc:
+            raise PlatformUnsupported("cannot create a hard link here: %s" % exc)
+        aset = artifacts.ArtifactSet(root, "hardlink")
+        for category, name in (
+            ("source", "s.txt"), ("corpus", "c.txt"), ("per_case_matrix", "m.txt"),
+            ("runner_env_digest", "e.txt"), ("cleanup_record", "r.txt"),
+        ):
+            aset.add(category, name, category + "\n")
+        try:
+            aset.finalize()
+        except artifacts.LocatorError as exc:
+            assert "hard link" in exc.reason, exc.reason
+        else:
+            raise AssertionError("finalize wrote through a hard link out of run_root")
+        with open(outside, "r", encoding="utf-8") as fh:
+            assert fh.read() == "OUTSIDE\n", "the file outside run_root was overwritten"
+
+
+@test
+def ra01_regression_a5_02_sidecar_location_is_the_module_contract():
+    """PHẢN CHỨNG AUDIT: manifest khai lại `self.sha256_recorded_in` thành `attacker.sha256`
+    mà `verify()` vẫn `ok=true`.
+
+    Vị trí sidecar là hợp đồng của MODULE. Chấp nhận giá trị khác nghĩa là chứng nhận một tài liệu
+    tự mô tả sai, và người đọc tin lời khai đó sẽ đi tìm hash ở nhầm chỗ.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        manifest["self"]["sha256_recorded_in"] = "attacker.sha256"
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["manifest_hash_ok"] is True, "fixture sai - sidecar phải vẫn khớp"
+        assert report["ok"] is False, "a manifest that lies about its own sidecar was certified"
+        assert report["manifest_invalid"] and "attacker.sha256" in report["manifest_invalid"], report
+
+
+@test
+def ra01_regression_a5_03_hostile_input_gives_a_report_not_a_traceback():
+    """PHẢN CHỨNG AUDIT: `self` là scalar ném `AttributeError`; sidecar UTF-8 hỏng ném
+    `UnicodeDecodeError`.
+
+    Contract của module nói đầu vào là KHÔNG TIN CẬY và `verify()` trả báo cáo máy đọc được. Một
+    traceback không phải báo cáo - và gate gọi `verify` sẽ chết theo cách người đọc không sửa được.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        for value in (1, "text", [], None):
+            manifest = _load_manifest(root)
+            manifest["self"] = value
+            _reseal(root, manifest)
+            report = artifacts.verify(root)  # KHÔNG được ném
+            assert report["ok"] is False, value
+            assert report["manifest_invalid"], (value, report)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        with open(os.path.join(root, artifacts.SIDECAR_NAME), "wb") as fh:
+            fh.write(b"\xff\xfe\x00not utf-8")
+        report = artifacts.verify(root)  # KHÔNG được ném
+        assert report["ok"] is False
+        assert report["manifest_hash_ok"] is False, report
+        rc, _out, err = _run_cli("verify", "--root", root)
+        assert rc == 3, rc
+        assert "MANIFEST TAMPERED" in err, err
+
+
+@test
+def ra01_regression_a5_04_scanner_normalises_exe_suffix_and_shell_string():
+    """PHẢN CHỨNG AUDIT: `gh.exe` và `subprocess.run('gh api /user', shell=True)` cho offenders=[].
+
+    Chặn `gh` mà không chặn `gh.exe` là một lệnh cấm chỉ có hiệu lực trên POSIX.
+    """
+    cases = {
+        "kw.py": "import subprocess\ndef a():\n    subprocess.run(args=['gh', 'api', '/user'])\n",
+        "exe.py": "import subprocess\ndef a():\n    subprocess.run(['gh.exe', 'api', '/user'])\n",
+        "shell.py": "import subprocess\ndef a():\n    subprocess.run('gh api /user', shell=True)\n",
+        "winpath.py": "import subprocess\ndef a():\n    subprocess.run(['C:\\\\bin\\\\curl.EXE', 'x'])\n",
+    }
+    expected = {"kw.py": "gh", "exe.py": "gh", "shell.py": "gh", "winpath.py": "curl"}
+    for filename, source in cases.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, filename), "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(source)
+            offenders = _scan_escape_paths(tmp, allowed=set())
+            assert (filename, "subprocess:%s" % expected[filename]) in offenders, (filename, offenders)
+    # Đối trọng: công cụ vô hại KHÔNG được bắt nhầm, nếu không bộ quét sẽ bị tắt.
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "ok.py"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("import subprocess\ndef a():\n    subprocess.run(['python', '-c', 'pass'])\n")
+        assert _scan_escape_paths(tmp, allowed=set()) == []
+    covered = " ".join(guards.STATIC_SCANNER_COVERAGE["covered"])
+    assert "gh.exe" in covered and "shell-string" in covered, covered
 
 
 def main():

@@ -4,17 +4,20 @@
 
 **Verdict: `blocked`. Writer VẪN phải giữ trạng thái đóng băng.**
 
-Quan sát `2026-08-10T08:17:49Z`. Canonical `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb`.
+Đo lại trên host Windows trong generation 2 tại `2026-08-10T21:14:45+07:00` đến
+`2026-08-10T21:16:23+07:00`. Canonical `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb`.
 Commit EOL chuẩn `1880346d2be3c0be9a93de7624ee108d99b6c88c`.
 
 Blocker **cưỡng chế** đã ĐÓNG (#52 land, merge `578724e5` — xem §5). Blocker **kiểm kê** còn MỞ:
 
-- 73 remote branches chưa chứa commit EOL: **70 `close` · 2 `rebase` · 1 `finish rồi rebase`**.
+- 73 remote branches chưa chứa commit EOL: **69 `close` · 3 `rebase` · 1 `finish rồi rebase`**.
 - **43/73 branches có `owner=unknown`** — không có bằng chứng owner trực tiếp từ PR. Không suy owner
   từ namespace, tên nhánh hay tác giả commit.
-- 3 branches mang nội dung CHƯA land, đã đo đích danh (§4.3). Chúng không được `close`.
-- **Kiểm kê worktree KHÔNG đo được trong môi trường phiên này** (§2). Đây là blocker đo lường thật,
-  không phải "0 worktree".
+- 4 branches non-ancestor mang nội dung chưa land/chưa đủ evidence tương đương (§4.3). Chúng không
+  được `close`; riêng row 6 đã đổi từ `close` sang `rebase`.
+- `blocker_worktree_measurement=closed`: host inventory thật có **99 live, 0 prunable; 49 chứa EOL /
+  50 legacy; 94 clean / 5 dirty; 98 owner unknown** (§4.5). Việc đo xong không đồng nghĩa worktrees
+  đã được xử lý: 50 legacy, 5 dirty và owner/consent chưa đủ vẫn giữ writer inventory mở.
 
 Artifact này CHỈ là inventory/decision record. F2-D **không** xoá remote branch, không prune/remove
 worktree, không rebase, không force-push, không sửa dữ liệu dirty, không mở writer, không sửa hook/CI.
@@ -27,11 +30,13 @@ Mọi mục `close` chỉ được THỰC THI sau khi owner được xác nhận
 - Mission: [#48](https://github.com/ducthangho/tra-luat/issues/48), revision 2 ·
   plan hash `340b15a934cc27f2aa5d542973e12c268ab4db4307b390a77e66bc9d6a060d11`.
 - Human MCR: [MCR-48-01](https://github.com/ducthangho/tra-luat/issues/48#issuecomment-5227303367).
-- Packet: [#63](https://github.com/ducthangho/tra-luat/issues/63), revision 1 / generation 1 ·
+- Packet: [#63](https://github.com/ducthangho/tra-luat/issues/63), revision 1 / generation 2 ·
   spec hash `de63e124ed39a94108f87770c2bec9ec39a25119795ce9f6534d7084fd4d0fea`.
+- Human decision/lease generation 2: [#63 comment 5241393193](https://github.com/ducthangho/tra-luat/issues/63#issuecomment-5241393193) — Codex Executor, local Windows, kế thừa PR #80/head `fe9395ba3f2379e0a2b670ecfb6224103c944d54`.
+- Stable review findings: [#63 comment 5241307078](https://github.com/ducthangho/tra-luat/issues/63#issuecomment-5241307078) — `WP63-RV-01/02/03`.
 - Parent drain packet: [#49](https://github.com/ducthangho/tra-luat/issues/49) — `state:landed`.
 - Enforcement packet: [#52](https://github.com/ducthangho/tra-luat/issues/52) — `state:landed`.
-- Reconcile gần nhất: [#63 comment 5237539078](https://github.com/ducthangho/tra-luat/issues/63#issuecomment-5237539078).
+- Reconcile trước authorization: [#63 comment 5241334459](https://github.com/ducthangho/tra-luat/issues/63#issuecomment-5241334459).
 - Artifact tiền nhiệm: PR [#64](https://github.com/ducthangho/tra-luat/pull/64), head
   `86dc0705c796d4436df00d7accc47e219282c858` — **ĐÃ ĐÓNG** (không merge) theo chỉ đạo chủ kho, được
   THAY THẾ bởi PR #80 mang chính artifact này. Xem §6 — sai lệch đã sửa. Nhánh
@@ -40,81 +45,79 @@ Mọi mục `close` chỉ được THỰC THI sau khi owner được xác nhận
 Readback fail-closed, rc đọc trực tiếp:
 
 ```
+GET /pulls/80: state=open, draft=false, head=fe9395ba3f2379e0a2b670ecfb6224103c944d54
+git ls-remote origin refs/heads/claude/reopen-writer-eol-drain-b1dj5m
+→ fe9395ba3f2379e0a2b670ecfb6224103c944d54, rc=0
 git merge-base --is-ancestor 1880346d… b044f8b1…   → rc=0   EOL base là ancestor của canonical
 git merge-base --is-ancestor 91d5e8dc… b044f8b1…   → rc=0   base lúc mint là ancestor
 git merge-base --is-ancestor 578724e5… b044f8b1…   → rc=0   merge #52 là ancestor
 ```
 
-## 2. Phạm vi đo — GIỚI HẠN PHẢI ĐỌC TRƯỚC
+## 2. Phạm vi đo — host Windows thật
 
-Packet ghi `environment: local (Windows)`, `executor: codex`. Phiên thực thi này chạy trên
-**container Linux từ xa** (`uname -s -r` → `Linux 6.18.5-fc-v20`, cwd `/home/user/tra-luat`),
-executor `claude`. Hệ quả **không thể lách**:
+Phiên này khớp frozen packet: `executor=codex`, `environment=local-windows`, chạy trong isolated
+worktree `D:/Quốc hội/tra-luat/work/wp63-g2-codex` từ exact inherited head. Shared main worktree
+không bị switch hay sửa; mọi worktree khác chỉ được đọc. Isolated Executor worktree là entry thứ
+99, giải thích chênh `98 → 99` so với phép đo Reviewer ngay trước authorization.
 
-| Hạng mục | Đo được ở đây? | Lý do |
-|---|---|---|
-| Remote branches (`git branch -r`) | **CÓ** — đầy đủ 73/73 | ref từ `origin`, độc lập máy |
-| Local worktrees | **KHÔNG** | `git worktree list` chỉ thấy worktree của CHÍNH bản sao này |
-
-Đo thật trong môi trường này:
-
-```
-git worktree list --porcelain      → rc=0, ĐÚNG 1 worktree: /home/user/tra-luat (canonical, clean)
-git worktree prune --dry-run -v    → rc=0, 0 prunable
-```
-
-**Con số `1` này KHÔNG được đọc là "chỉ còn 1 worktree".** 58 worktrees mà artifact tiền nhiệm đo
-nằm trên máy Windows của chủ kho (`D:\Quốc hội\…`, `C:\Users\admin\.codex\worktrees\…`) — chúng
-không tồn tại trong container này và **không bị bác bỏ** bởi phép đo trên. §4.5 giữ chúng ở dạng
-**KẾ THỪA, CHƯA ĐO LẠI**, gắn nhãn rõ ràng. Kiểm kê worktree phải được chạy lại trên chính máy
-Windows đó thì acceptance của #63 mới đóng được.
+`git worktree list --porcelain` rc=0; stdout có 99 entry và được chép đủ vào §4.5. SHA-256 của
+stdout chuẩn hóa LF là `bdc47ef42ecf13a0fc7736aa92858320ee9c02aca893dffbe6519b4ffce168c7`.
+`git worktree prune --dry-run --verbose` rc=0, stdout rỗng: **0 prunable**. Không chạy prune thật,
+không remove/rebase và không ghi vào worktree nào khác.
 
 ## 3. Phương pháp
 
 ```text
 git fetch origin --prune
 git branch -r --no-contains 1880346d2be3c0be9a93de7624ee108d99b6c88c
-git merge-base --is-ancestor <tip> b044f8b1…            # bằng chứng "đã nằm trong canonical"
-git diff --name-status --diff-filter=A <canonical> <ref> # tệp CHỈ có trên nhánh
-git grep -q '<rNNN>' <canonical> -- CHANGELOG.md         # bằng chứng fix đã land
-git cat-file -e <canonical>:<path>                       # tệp có/không trên canonical
-git worktree list --porcelain ; git worktree prune --dry-run --verbose
+git merge-base --is-ancestor <exact-tip> b044f8b1…
+git -c safe.directory=<path> -C <path> status --short --untracked-files=all
+git merge-base --is-ancestor 1880346d… <worktree-head>
+git merge-base --is-ancestor <worktree-head> b044f8b1…
+git worktree list --porcelain
+git worktree prune --dry-run --verbose
 ```
 
 | Phép đo | rc | Kết quả |
 |---|---:|---|
-| `git fetch origin --prune` | 0 | 4 nhánh mới + 1 tag; base không drift |
-| `git branch -r` (tổng, trừ `origin/HEAD`) | 0 | **92** |
+| `git fetch origin --prune` | 0 | full remote refs refreshed; base không drift |
+| `git branch -r` (tổng, trừ `origin/HEAD`) | 0 | **93** |
 | `git branch -r --no-contains <EOL>` | 0 | **73** |
-| `git branch -r --contains <EOL>` | 0 | **19** |
-| `git worktree list --porcelain` | 0 | **1** (giới hạn môi trường — §2) |
+| `git branch -r --contains <EOL>` | 0 | **20** |
+| Parse bảng exact tips + đối chiếu remote refs | 0 | **73 rows; 0 resolve failure; 0 tip mismatch** |
+| Graph completeness | 0 | non-shallow; no replace/graft; canonical/r210 objects present |
+| `merge-base --is-ancestor <exact-tip> canonical` ×73 | 0 cho 69; 1 cho 4 | rows 1/6/13/49 non-ancestor |
+| `r210` exact tip `d82ef707f…` → canonical | 0 | ancestor |
+| `git worktree list --porcelain` | 0 | **99 live** (§4.5) |
 | `git worktree prune --dry-run --verbose` | 0 | 0 prunable |
-| `merge-base --is-ancestor <tip> canonical` ×73 | 0 cho 26; 1 cho 47 | 26 đã nằm trong canonical |
-| `diff --diff-filter=A canonical <ref>` ×73 | 0 cho 73/73 | chỉ **3** nhánh có tệp riêng |
+| `status --short` ×99 | 0 cho 99 | **94 clean / 5 dirty** |
 | PR mapping (`list_pull_requests`, state=all) | 0 | 49 PR; **30** nhánh có PR, **43** không |
 
-### 3.1 Lệch số so với mốc reconcile — ghi cả hai
+### 3.1 Graph completeness và exact-tip reconstruction
 
-Reconcile (`2026-08-10T08:03:39Z`) đo **93** remote heads; ở đây **92**. Chênh **1**.
-Tập legacy thì **BẰNG NHAU TUYỆT ĐỐI**: 73 = 73, và cả 73 tip khớp từng ký tự với artifact tiền
-nhiệm (0 mismatch trên 73 dòng).
+Phép đo full-history không dùng aggregate cũ. Script parse lại 73 dòng của §4.4, resolve từng SHA
+thành commit 40 ký tự, đối chiếu `refs/remotes/<branch>`, rồi chạy ancestry trên từng exact tip.
 
-Số học khớp với giả thiết `origin/HEAD`: ở đây `git branch -r | grep -c '^origin/HEAD'` → **0**
-(bản sao này không tạo ref đó), và `73 + 19 = 92`. Nếu phía reconcile có `origin/HEAD` thì nó rơi
-vào nhóm *chứa* EOL (trỏ `origin/master`), cho `73 + 20 = 93`. Đây là **suy luận số học, không phải
-phép đo trên máy kia** — ghi ra để phiên sau khỏi coi 92 là "mất một nhánh". Điểm cần nhớ: đại lượng
-mà acceptance quan tâm — tập 73 legacy — **không đổi**.
+```text
+git rev-parse --is-shallow-repository             false, rc=0
+git replace -l                                    <empty>, rc=0
+.git/info/grafts present                          false
+GIT_REPLACE_REF_BASE                              unset
+git cat-file -e b044f8b1…^{commit}                rc=0
+git cat-file -e d82ef707f…^{commit}                rc=0
+parsed_rows=73; tip_ref_mismatches=0
+ancestor_rc0=69; non_ancestor_rc1=4; other_rc=0
+non_ancestor_rows=1,6,13,49
+r210_row=16; r210_rc=0
+```
 
 ## 4. Remote branches chưa chứa EOL (73)
 
 ### 4.1 Quy ước bằng chứng
 
-Bốn lớp bằng chứng, xếp theo độ mạnh. Mỗi dòng dùng lớp MẠNH NHẤT nó có:
-
-1. **Ancestry** — `merge-base --is-ancestor <tip> canonical` rc=0. Chứng minh tuyệt đối.
-2. **Merged PR** — PR đã merge; nội dung land qua squash/rebase.
-3. **CHANGELOG** — số `rNNN` của nhánh có trong `CHANGELOG.md` canonical.
-4. **Không tệp riêng** — `diff --diff-filter=A` rỗng: không tệp nào chỉ tồn tại trên nhánh.
+Ancestry của **exact tip** là basis chính: 69 rows rc=0 được `close`; 4 rows rc=1 phải có evidence
+hai chiều hoặc giữ `rebase`/`finish rồi rebase`. CHANGELOG, merged PR và “0 added files” chỉ là
+corroboration; chúng không được dùng để tự đóng một non-ancestor row.
 
 Quy ước owner: chỉ ghi owner khi có **tác giả PR** làm bằng chứng trực tiếp. Ngoài ra là `unknown`.
 Tên nhánh (`claude/…`, `codex/…`) là **routing hint, KHÔNG phải owner evidence**.
@@ -133,21 +136,24 @@ mà migration EOL (F2-B) đã renormalize CRLF→LF hàng loạt, nên **không 
 tiền-EOL còn khớp** với canonical hậu-EOL. Sau ADR-0018, patch-id equivalence là công cụ MÙ với mọi
 nhánh tiền-EOL — đừng dùng nó làm bằng chứng land.
 
-### 4.3 Ba nhánh mang nội dung CHƯA land — đo đích danh
+### 4.3 Bốn nhánh non-ancestor — đo đích danh
 
 | Nhánh | Bằng chứng (rc trực tiếp) | Decision |
 |---|---|---|
+| `origin/claude/cuu-viec-treo-2026-08-03` | 2 commit riêng (`d347129…`, `6c148d3…`), 40 path đổi từ merge-base; so exact tip với canonical: 19 blob giống, **21 blob khác**; 9 test name `r323_/r324_` thêm bởi branch đều `git grep` canonical rc=**1**. Chưa có evidence hành vi hai chiều | `rebase` |
 | `origin/claude/ras-17-data-pr13-windows-bjovq2` | `git grep -q 'rasoat-anchor' <branch> -- scripts/` rc=**0**; trên canonical rc=**1** ⇒ tính năng `tl rasoat-anchor` VẮNG ở canonical | `rebase` |
 | `origin/claude/nlm-registry-sheet-dup-s22fk7` | 2 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:rasoat/KETQUA_R281_V1_V2_V3_2026-07-31.md` rc=**128** | `rebase` |
 | `origin/claude/audit-errors-patch-plan-56x4rq` | 1 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:docs/AUDIT_XAC_MINH_VA_KE_HOACH_VA_2026-07-31.md` rc=**128** | `finish rồi rebase` |
 
-Kiểm chéo âm tính: 30 nhánh nhóm CHANGELOG và 4 nhánh nhóm merged-PR đều có
-`diff --diff-filter=A` **rỗng (0/30, 0/4)** — không có nội dung nấp sau một dòng changelog.
-
-Đối chiếu: `70 close + 2 rebase + 1 finish rồi rebase = 73`.
-Phân lớp bằng chứng: `26 ancestry + 4 merged-PR + 30 CHANGELOG + 10 không-tệp-riêng + 3 chưa-land = 73`.
+Đối chiếu: `69 close + 3 rebase + 1 finish rồi rebase = 73`; phân lớp chính:
+`69 ancestor + 4 non-ancestor = 73`.
 
 ### 4.4 Bảng kiểm kê
+
+Bảng dưới được tái tạo trong generation 2 từ đúng 73 rows. Cột Tip hiển thị 12 hex để gọn nhưng
+mỗi giá trị đã resolve thành commit 40 hex và khớp exact current remote ref (`tip_ref_mismatches=0`).
+Với mọi row ngoài 1/6/13/49, basis quyết định chính là exact-tip ancestry rc=0; nội dung cuối dòng
+nếu khác chỉ là corroboration lịch sử.
 
 | # | Remote branch | Tip | Commit date | Owner / bằng chứng | Decision | Basis (lệnh + rc) |
 |---:|---|---|---|---|---|---|
@@ -156,7 +162,7 @@ Phân lớp bằng chứng: `26 ancestry + 4 merged-PR + 30 CHANGELOG + 10 khôn
 | 3 | `origin/claude/bhxh-41-2024-maintenance-jncsle` | `c0cbc96bbbee` | `2026-08-02T12:11:23+00:00` | `ducthangho` — tác giả PR #13 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 4 | `origin/claude/codex-exclude-dir` | `1050c17fb96b` | `2026-08-04T00:52:22+07:00` | `ducthangho` — tác giả PR #30 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 5 | `origin/claude/corpus-audit-write-2026-07-31-3twkfb` | `3500f1fde2b7` | `2026-07-31T04:34:33+00:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |
-| 6 | `origin/claude/cuu-viec-treo-2026-08-03` | `6c148d331e5d` | `2026-08-04T00:21:52+07:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |
+| 6 | `origin/claude/cuu-viec-treo-2026-08-03` | `6c148d331e5d` | `2026-08-04T00:21:52+07:00` | `unknown` | `rebase` | ancestry rc=1; 2 commit/40 path; 21 blob khác canonical; 9 test name vắng canonical — chưa có evidence hành vi hai chiều |
 | 7 | `origin/claude/deploy-v1-35-61-ci-5f7wdw` | `e094512a37ca` | `2026-07-29T02:48:58+00:00` | `ducthangho` — tác giả PR #2, #1 | `close` | PR #2, #1 merged; 0 tệp chỉ có trên nhánh |
 | 8 | `origin/claude/gate-04-05-t0f-hi76xl` | `eb9132f3aa2b` | `2026-08-02T09:45:41+00:00` | `ducthangho` — tác giả PR #12, #9, #8 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 9 | `origin/claude/legal-doc-review-architecture-2al46n` | `f39f98398d7b` | `2026-07-26T08:06:51+07:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |
@@ -225,28 +231,133 @@ Phân lớp bằng chứng: `26 ancestry + 4 merged-PR + 30 CHANGELOG + 10 khôn
 | 72 | `origin/codex/work-packet-bootstrap` | `cefdb73d2c42` | `2026-08-03T22:58:58+07:00` | `ducthangho` — tác giả PR #25 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 73 | `origin/codex/work-packet-bootstrap-2` | `8876c3a4d426` | `2026-08-03T23:28:44+07:00` | `ducthangho` — tác giả PR #26 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 
-### 4.5 Worktrees — KẾ THỪA, CHƯA ĐO LẠI
+### 4.5 Worktrees — đo lại trên host Windows
 
-**Không dòng nào dưới đây được đo trong phiên này.** Toàn bộ là bản sao từ artifact tiền nhiệm
-(PR #64, head `86dc0705`, đo `2026-08-09T00:48:42+07:00` trên máy Windows của chủ kho). Giữ lại vì
-xoá đi sẽ khiến phiên sau tưởng kiểm kê worktree đã sạch — nó chưa hề được chạy lại.
+`git worktree list --porcelain` rc=0: **99 live / 0 prunable**. `git worktree prune --dry-run
+--verbose` rc=0, stdout rỗng. Từng status dưới đây chạy với `safe.directory` chỉ trong command
+(không sửa global config): **94 clean / 5 dirty; 49 chứa EOL / 50 legacy; 98 owner unknown**.
 
-Tổng kế thừa: **58 worktrees live, 0 prunable · 8 chứa EOL / 50 legacy · 55 clean / 3 dirty ·
-57/58 `owner=unknown`**. Phân bổ decision kế thừa: `39 close + 11 rebase + 8 finish rồi rebase`.
+Decision được tính đúng một lần theo thứ tự fail-closed: dirty → `finish rồi rebase`; nếu clean và
+HEAD chứa EOL hoặc HEAD đã là ancestor canonical → `close`; nếu clean, legacy, divergent và detached
+→ `finish rồi rebase`; còn lại → `rebase`. Tally: **77 close + 9 rebase + 13 finish rồi rebase = 99**.
+Mọi `close` chỉ là đề xuất, phải có owner/consent trước khi thực thi.
 
-Ba worktrees **dirty** cần owner xử lý tại chỗ trước mọi thao tác:
+| # | Path | HEAD · commit date | Branch | Status / EOL | Owner | Decision |
+|---:|---|---|---|---|---|---|
+| 1 | `D:/Quốc hội/tra-luat` | `a55efcdfe18f8e924335e1d2d030e8fd65f6c077` · `2026-08-09T18:41:43+07:00` | `codex/f3-02-impact-policy` | dirty (11); EOL rc=0 | `unknown` | `finish rồi rebase` |
+| 2 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g6-codex` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `codex/wp60-g6-f3-01-github-schema` | clean; EOL rc=0 | `unknown` | `close` |
+| 3 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-codex` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `codex/wp60-g7-f3-01-github-schema` | clean; EOL rc=0 | `unknown` | `close` |
+| 4 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 5 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r2` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 6 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r3` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 7 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r4` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 8 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r5` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 9 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r6` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 10 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp60-g7-review-claude-r7` | `632401a58cae9452d52bd1548a9233a5a5844184` · `2026-08-10T05:43:27+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 11 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g6-codex` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `codex/wp68-g6-release-nested` | clean; EOL rc=0 | `unknown` | `close` |
+| 12 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g7-codex` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `codex/wp68-g7-release-nested` | dirty (2); EOL rc=0 | `unknown` | `finish rồi rebase` |
+| 13 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-codex` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `codex/wp68-g8-release-nested` | clean; EOL rc=0 | `unknown` | `close` |
+| 14 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r1` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 15 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r2` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 16 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r3` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 17 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r4` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 18 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r5` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 19 | `C:/Users/admin/.codex/visualizations/2026/08/09/019fe86a-b6f5-7d40-bd90-4a09003d8c40/mission54-wp68-g8-review-claude-r6` | `2a941f835c70864b2df0b96fd7e7b70ae9ab7c1d` · `2026-08-10T05:49:01+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 20 | `C:/Users/admin/.codex/worktrees/03aa/tra-luat` | `828ec8ff4aa6efd14733849d4e46a85fa4fedcaf` · `2026-08-07T16:11:00+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 21 | `C:/Users/admin/.codex/worktrees/18db/tra-luat` | `ac00d0ee3505b99d9bf12df56fd0173435bd0dc0` · `2026-08-07T16:32:20+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 22 | `C:/Users/admin/.codex/worktrees/1b4b/tra-luat` | `fc50a5416d8d6f4268ff7cb11965b362eee0f9ab` · `2026-08-07T01:15:54+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 23 | `C:/Users/admin/.codex/worktrees/305f/tra-luat` | `11feb3a70e77b68bc33545f277327d9727b22979` · `2026-08-09T10:21:36+07:00` | `codex/wp52-g3-ops-01` | clean; EOL rc=0 | `unknown` | `close` |
+| 24 | `C:/Users/admin/.codex/worktrees/431a/tra-luat` | `31602843cc7fd3e26b1c32627385573e18133469` · `2026-08-06T15:10:13+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 25 | `C:/Users/admin/.codex/worktrees/4411/tra-luat` | `377f4d130c0e4ba9439606d4943c476b93bbda05` · `2026-08-07T18:49:25+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 26 | `C:/Users/admin/.codex/worktrees/537d/tra-luat` | `def2bd46770bb6031b956b5ca6b472a79e8b39cb` · `2026-08-07T16:14:12+07:00` | `codex/f2-a-eol-policy-r3` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 27 | `C:/Users/admin/.codex/worktrees/68e8/tra-luat` | `0844c0bc24399fa4b8430750dc69f7388c23eb8b` · `2026-08-08T06:54:13+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 28 | `C:/Users/admin/.codex/worktrees/69be/tra-luat` | `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb` · `2026-08-09T17:33:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 29 | `C:/Users/admin/.codex/worktrees/6bde/tra-luat` | `b5cc5d688a75ad991e6272d62110237c9a06ff41` · `2026-08-08T21:47:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 30 | `C:/Users/admin/.codex/worktrees/71e5/mission54-wp60-g5-claude` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `claude/wp60-g5-f3-01-github-schema` | clean; EOL rc=0 | `unknown` | `close` |
+| 31 | `C:/Users/admin/.codex/worktrees/71e5/tra-luat` | `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb` · `2026-08-09T17:33:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 32 | `C:/Users/admin/.codex/worktrees/7563/tra-luat` | `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb` · `2026-08-09T17:33:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 33 | `C:/Users/admin/.codex/worktrees/94ee/tra-luat` | `91d5e8dc0133b1d9942d5868032aacf2ea9d2ff9` · `2026-08-09T00:07:42+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 34 | `C:/Users/admin/.codex/worktrees/b26f/tra-luat` | `2cc9576fcadf5649c532157ebeddb48b5c12472a` · `2026-08-07T13:00:32+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 35 | `C:/Users/admin/.codex/worktrees/bf26/tra-luat` | `91d5e8dc0133b1d9942d5868032aacf2ea9d2ff9` · `2026-08-09T00:07:42+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 36 | `C:/Users/admin/.codex/worktrees/cf7e/tra-luat` | `070cee76a63c4e32a55346c84216c94c09a6dc11` · `2026-08-07T18:49:25+07:00` | `codex/f2-a-eol-policy` | clean; EOL rc=1 | `unknown` | `close` |
+| 37 | `C:/Users/admin/.codex/worktrees/fd03/tra-luat` | `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb` · `2026-08-09T17:33:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 38 | `D:/Quốc hội/luot3_wt` | `1bdc16c73421f58545b635a186da172eb1ba8e6a` · `2026-08-03T02:04:23+07:00` | `claude/r325-noi-lai-duoi-vbhn` | clean; EOL rc=1 | `unknown` | `close` |
+| 39 | `D:/Quốc hội/p16_wt` | `7469d8c96df8f1db8a4b769fc69c5313fc14e331` · `2026-08-01T17:03:25+07:00` | `claude/r299-bridge-scope-va-chunks-apply` | clean; EOL rc=1 | `unknown` | `close` |
+| 40 | `D:/Quốc hội/rasoat_docs_wt` | `f39f98398d7bdb2927281e857f70bd6e5440b20f` · `2026-07-26T08:06:51+07:00` | `claude/legal-doc-review-architecture-2al46n` | clean; EOL rc=1 | `unknown` | `close` |
+| 41 | `D:/Quốc hội/rel05_wt` | `e9bea049f3413ff401110a4485757f5c7caa4a20` · `2026-08-03T01:00:01+07:00` | `claude/rel05-nlm08` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 42 | `D:/Quốc hội/tra-luat/.claude/worktrees/nifty-diffie-63b72e` | `39e860c725ff54f42f59a77fc5c259e135081683` · `2026-08-03T10:43:50+07:00` | `claude/nifty-diffie-63b72e` | clean; EOL rc=1 | `unknown` | `close` |
+| 43 | `D:/Quốc hội/tra-luat/.claude/worktrees/recursing-nightingale-76526b` | `1f22c7da9302d334a8d38a36ad5a0c85de2190d2` · `2026-08-03T02:37:32+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 44 | `D:/Quốc hội/tra-luat/.claude/worktrees/reverent-torvalds-6a0ab8` | `1050c17fb96b53ebd53f5487aeb779189a6aabb6` · `2026-08-04T00:52:22+07:00` | `claude/codex-exclude-dir` | clean; EOL rc=1 | `unknown` | `close` |
+| 45 | `D:/Quốc hội/tra-luat/.claude/worktrees/sad-clarke-fdf8f0` | `6159159583894e290602dce38ae3db2e31551293` · `2026-08-03T22:22:53+07:00` | `claude/sad-clarke-fdf8f0` | clean; EOL rc=1 | `unknown` | `close` |
+| 46 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp51-g1-f1-01-fix-codex` | `1880346d2be3c0be9a93de7624ee108d99b6c88c` · `2026-08-08T01:03:44+07:00` | `codex/wp51-g1-f1-01-fix` | dirty (1); EOL rc=0 | `unknown` | `finish rồi rebase` |
+| 47 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp51-g2-f1-01-fix-codex` | `3c8df84bfdf7fd6eed423333b4f4ea0fa66eaabe` · `2026-08-08T01:55:02+07:00` | `codex/wp51-g2-f1-01-fix` | clean; EOL rc=0 | `unknown` | `close` |
+| 48 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp55-f3-03-claude` | `a3e39573a269c94bb58ef75a4c1b5bd15dab4d76` · `2026-08-08T10:25:33+07:00` | `claude/wp55-f3-03` | clean; EOL rc=0 | `unknown` | `close` |
+| 49 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp57-g2-f3-00-governance-codex` | `d2bc8e0de88c29a95e63959e3bd8f6dcf14246a9` · `2026-08-08T12:02:33+07:00` | `codex/wp57-g2-f3-00-governance` | clean; EOL rc=0 | `unknown` | `close` |
+| 50 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp60-g1-claude` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `agent/wp60-g1-claude` | clean; EOL rc=0 | `unknown` | `close` |
+| 51 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp60-g1-f3-01-claude` | `2b1c6805db3527917db7e0df2d1f76a18273c3b3` · `2026-08-09T21:09:01+07:00` | `claude/wp60-g1-f3-01-github-schema` | clean; EOL rc=0 | `unknown` | `close` |
+| 52 | `D:/Quốc hội/tra-luat/.claude/worktrees/wp60-g2-f3-01-claude` | `7dd0e60ae9927ef640de70e00e70beeb120188b9` · `2026-08-10T04:17:27+07:00` | `claude/wp60-g2-f3-01-github-schema` | clean; EOL rc=0 | `unknown` | `close` |
+| 53 | `D:/Quốc hội/tra-luat/.codex/worktrees/d0-bootstrap-hardening` | `768b160511f0806be79303c79643ce6594ff35ee` · `2026-08-03T23:32:00+07:00` | `codex/d0-bootstrap-hardening` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 54 | `D:/Quốc hội/tra-luat/.codex/worktrees/d0-bootstrap-quote-fix` | `76435d6f4a51b6261fd51103089765aa3f3108ab` · `2026-08-03T23:49:52+07:00` | `codex/d0-bootstrap-quote-fix` | clean; EOL rc=1 | `unknown` | `close` |
+| 55 | `D:/Quốc hội/tra-luat/.codex/worktrees/d0-constitution-rescue` | `d1016d24647ef656c058788ed144c3bf6884f373` · `2026-08-04T02:57:37+07:00` | `codex/d0-constitution-rescue` | clean; EOL rc=1 | `unknown` | `close` |
+| 56 | `D:/Quốc hội/tra-luat/.codex/worktrees/d0-preview-already-landed` | `c5e8a9d42d6cf80ed14084a05056f5880941dd4c` · `2026-08-04T08:49:24+07:00` | `codex/d0-preview-already-landed` | clean; EOL rc=1 | `unknown` | `close` |
+| 57 | `D:/Quốc hội/tra-luat/.codex/worktrees/d0-workflow-controller` | `ac3fe25c17debccbab86d8d78b0be2a45e575aa6` · `2026-08-04T01:02:39+07:00` | `codex/d0-workflow-controller` | clean; EOL rc=1 | `unknown` | `close` |
+| 58 | `D:/Quốc hội/tra-luat/.codex/worktrees/release-v1-36-64` | `fd3d0e5e2e357c694523ccf9e69db2d6cf0196c7` · `2026-08-04T01:47:26+07:00` | `codex/release-v1.36.64` | clean; EOL rc=1 | `unknown` | `close` |
+| 59 | `D:/Quốc hội/tra-luat/.codex/worktrees/review-wp37-g2` | `c5e8a9d42d6cf80ed14084a05056f5880941dd4c` · `2026-08-04T08:49:24+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 60 | `D:/Quốc hội/tra-luat/.codex/worktrees/reviewer-cross-platform` | `65f5e4944709e431ad440ca04a63d5b29f8fc2b0` · `2026-08-04T16:23:04+08:00` | `codex/reviewer-cross-platform` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 61 | `D:/Quốc hội/tra-luat/.codex/worktrees/wp-bootstrap` | `c50700675ae541cee507126064f573c239e6604c` · `2026-08-03T23:22:42+07:00` | `codex/work-packet-bootstrap` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 62 | `D:/Quốc hội/tra-luat/.codex/worktrees/wp46-f1-docs` | `004bb98e0009efaa2f8817b5c98c86863e91cb59` · `2026-08-06T23:58:09+07:00` | `codex/wp46-f1-docs` | clean; EOL rc=1 | `unknown` | `close` |
+| 63 | `D:/Quốc hội/tra-luat/.codex/worktrees/wp47-f1-staleness` | `6f24f9008ad12e06d51970bc974178e456b04b8f` · `2026-08-07T01:05:56+07:00` | `codex/wp47-f1-staleness` | clean; EOL rc=1 | `unknown` | `close` |
+| 64 | `D:/Quốc hội/tra-luat/.codex/worktrees/wp66-baseline-578724e` | `578724e5fd046f3bc57024c601da7c2262ad2027` · `2026-08-09T11:20:19+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 65 | `D:/Quốc hội/tra-luat/.codex/worktrees/wp66-g1-codex` | `b0448c85e706f1726810acf6f6cbe82369e5499e` · `2026-08-09T15:20:46+07:00` | `agent/wp66-g1-codex` | clean; EOL rc=0 | `unknown` | `close` |
+| 66 | `D:/Quốc hội/tra-luat/AUDIT_WP77_AB5B3C2` | `ab5b3c2a193ed2a4b535e1688a3240d10eecbfbd` · `2026-08-10T08:26:51Z` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 67 | `D:/Quốc hội/tra-luat/AUDIT_WP77_C478472` | `c4784728fb67429b927f6837bd175ac6e18154af` · `2026-08-10T07:49:37Z` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 68 | `D:/Quốc hội/tra-luat/AUDIT_WP77_G1_176b402` | `176b402d413ebe1ea18c44430333506d021b2552` · `2026-08-10T05:29:50Z` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 69 | `D:/Quốc hội/tra-luat/AUDIT_WP77_G2_DC0DBF4` | `dc0dbf427740ee284bfa5bc3d03f9a47f1b69d06` · `2026-08-10T06:48:56Z` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 70 | `D:/Quốc hội/tra-luat/work/f2-d-reopen-writer` | `86dc0705c796d4436df00d7accc47e219282c858` · `2026-08-09T01:06:03+07:00` | `codex/f2-d-reopen-writer` | clean; EOL rc=0 | `unknown` | `close` |
+| 71 | `D:/Quốc hội/tra-luat/work/wp63-g2-codex` | `fe9395ba3f2379e0a2b670ecfb6224103c944d54` · `2026-08-10T08:42:30Z` | `<detached>` | clean; EOL rc=0 | `codex` (lease g2) | `close` |
+| 72 | `D:/Quốc hội/tra-luat-wt/f1-40-integration` | `b303a734b9afc4cbd5f23d179bc041cf1dd37380` · `2026-08-06T21:19:54+07:00` | `codex/f1-40-integration` | clean; EOL rc=1 | `unknown` | `close` |
+| 73 | `D:/Quốc hội/tra-luat-wt/f1-40-land` | `8be3398d60b8283615c60b444a96e7dff701aa70` · `2026-08-06T23:20:56+07:00` | `codex/f1-40-land` | clean; EOL rc=1 | `unknown` | `close` |
+| 74 | `D:/Quốc hội/tra-luat-wt/f1-40-land-review-8be3398` | `8be3398d60b8283615c60b444a96e7dff701aa70` · `2026-08-06T23:20:56+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 75 | `D:/Quốc hội/tra-luat-wt/followups-46-47-land-review-fc50a54` | `fc50a5416d8d6f4268ff7cb11965b362eee0f9ab` · `2026-08-07T01:15:54+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 76 | `D:/Quốc hội/tra-luat-wt/review-wp41-g2` | `cad2e32df83aa4959fc30e5a1e4d830c50386d06` · `2026-08-05T08:28:16+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 77 | `D:/Quốc hội/tra-luat-wt/review-wp41-g3` | `8bd09894f2e3a5f858b5bf6330d1b533de73faca` · `2026-08-05T16:06:06+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 78 | `D:/Quốc hội/tra-luat-wt/review-wp41-g4` | `06df58f6429710ae4adb6a60f4480a6773feb16e` · `2026-08-05T18:11:51+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 79 | `D:/Quốc hội/tra-luat-wt/review-wp42-g1` | `ac78b7c493ab50336ffd3e229bdcecc6e38fa60b` · `2026-08-05T22:51:12+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 80 | `D:/Quốc hội/tra-luat-wt/review-wp42-g2` | `8074ec9a1a934fdec4468a8825e3452dd3a48446` · `2026-08-06T02:42:09+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 81 | `D:/Quốc hội/tra-luat-wt/review-wp42-g3` | `98e91f280915953c16c623e846de01cf1e4b52ef` · `2026-08-06T06:48:27+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 82 | `D:/Quốc hội/tra-luat-wt/review-wp43-g1` | `d30e46aa6c6a6dc28cedca0db0ae0dd8fcad8207` · `2026-08-06T09:37:45+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 83 | `D:/Quốc hội/tra-luat-wt/review-wp44-g1` | `31602843cc7fd3e26b1c32627385573e18133469` · `2026-08-06T15:10:13+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 84 | `D:/Quốc hội/tra-luat-wt/review-wp45-g1` | `b303a734b9afc4cbd5f23d179bc041cf1dd37380` · `2026-08-06T21:19:54+07:00` | `<detached>` | clean; EOL rc=1 | `unknown` | `close` |
+| 85 | `D:/Quốc hội/tra-luat-wt/review-wp66-b0448c8` | `b0448c85e706f1726810acf6f6cbe82369e5499e` · `2026-08-09T15:20:46+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 86 | `D:/Quốc hội/tra-luat-wt/review-wp68-03f9919` | `03f9919266f712820a558548d8fd461b1c82436e` · `2026-08-09T20:02:58+07:00` | `<detached>` | dirty (10); EOL rc=0 | `unknown` | `finish rồi rebase` |
+| 87 | `D:/Quốc hội/tra-luat-wt/review-wp68-8b26cfb` | `8b26cfb11376727b6826000144f839fb3385358b` · `2026-08-09T16:50:24+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 88 | `D:/Quốc hội/tra-luat-wt/review-wp68-d7e3bc4` | `d7e3bc4ab39ac2a13eb96a96e55cc5f3f43030b3` · `2026-08-09T23:22:56+07:00` | `<detached>` | clean; EOL rc=0 | `unknown` | `close` |
+| 89 | `D:/Quốc hội/tra-luat-wt/wp-f3-03-nested` | `d7e3bc4ab39ac2a13eb96a96e55cc5f3f43030b3` · `2026-08-09T23:22:56+07:00` | `claude/wp-f3-03-release-nested` | clean; EOL rc=0 | `unknown` | `close` |
+| 90 | `D:/Quốc hội/tra-luat-wt/wp41-f1-01-codex` | `c5e8a9d42d6cf80ed14084a05056f5880941dd4c` · `2026-08-04T08:49:24+07:00` | `codex/wp41-g1-f1-01` | dirty (2); EOL rc=1 | `unknown` | `finish rồi rebase` |
+| 91 | `D:/Quốc hội/tra-luat-wt/wp41-g2-f1-01-codex` | `cad2e32df83aa4959fc30e5a1e4d830c50386d06` · `2026-08-05T08:28:16+07:00` | `codex/wp41-g2-f1-01` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 92 | `D:/Quốc hội/tra-luat-wt/wp41-g3-f1-01-codex` | `8bd09894f2e3a5f858b5bf6330d1b533de73faca` · `2026-08-05T16:06:06+07:00` | `codex/wp41-g3-f1-01` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 93 | `D:/Quốc hội/tra-luat-wt/wp41-g4-f1-01-codex` | `06df58f6429710ae4adb6a60f4480a6773feb16e` · `2026-08-05T18:11:51+07:00` | `codex/wp41-g4-f1-01` | clean; EOL rc=1 | `unknown` | `close` |
+| 94 | `D:/Quốc hội/tra-luat-wt/wp42-g1-f1-02-codex` | `ac78b7c493ab50336ffd3e229bdcecc6e38fa60b` · `2026-08-05T22:51:12+07:00` | `codex/wp42-g1-f1-02` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 95 | `D:/Quốc hội/tra-luat-wt/wp42-g2-f1-02-codex` | `8074ec9a1a934fdec4468a8825e3452dd3a48446` · `2026-08-06T02:42:09+07:00` | `codex/wp42-g2-f1-02` | clean; EOL rc=1 | `unknown` | `rebase` |
+| 96 | `D:/Quốc hội/tra-luat-wt/wp42-g3-f1-02-codex` | `98e91f280915953c16c623e846de01cf1e4b52ef` · `2026-08-06T06:48:27+07:00` | `codex/wp42-g3-f1-02` | clean; EOL rc=1 | `unknown` | `close` |
+| 97 | `D:/Quốc hội/tra-luat-wt/wp43-g1-f1-03-codex` | `d30e46aa6c6a6dc28cedca0db0ae0dd8fcad8207` · `2026-08-06T09:37:45+07:00` | `codex/wp43-g1-f1-03` | clean; EOL rc=1 | `unknown` | `close` |
+| 98 | `D:/Quốc hội/tra-luat-wt/wp44-g1-f1-04-codex` | `31602843cc7fd3e26b1c32627385573e18133469` · `2026-08-06T15:10:13+07:00` | `codex/wp44-g1-f1-04` | clean; EOL rc=1 | `unknown` | `close` |
+| 99 | `D:/Quốc hội/tra-luat-wt/wp45-g1-f1-05-codex` | `b303a734b9afc4cbd5f23d179bc041cf1dd37380` · `2026-08-06T21:19:54+07:00` | `codex/wp45-g1-f1-05` | clean; EOL rc=1 | `unknown` | `close` |
 
-1. `D:/Quốc hội/tra-luat` (`master`) — 6 mục untracked.
-2. `…/.claude/worktrees/wp51-g1-f1-01-fix-codex` — modified `scripts/tl_selftest.py`.
-3. `D:/Quốc hội/tra-luat-wt/wp41-f1-01-codex` — modified `scripts/tl_selftest.py`, untracked
-   `scripts/tl_core/test_fragments.py`.
+#### 4.5.1 Dirty status — raw paths phải bảo toàn
 
-Bốn detached legacy worktrees có commit riêng/không được ref tới, phải bảo toàn trước khi rebase:
-`…/.codex/worktrees/03aa`, `18db`, `4411`, `b26f` (đường dẫn đầy đủ trong PR #64).
+- Row 1: 11 untracked entries: bốn `AUDIT_WP77_*` directories, năm
+  `docs/research/2026-08-0{4,5}-*.md`, `work/f2-d-reopen-writer/`, và isolated
+  `work/wp63-g2-codex/` vừa được tạo. `status` rc=0.
+- Row 12: modified `scripts/tl_core/release.py`; untracked
+  `scripts/test_fragments/wp68_release_exclude_nested_repo.py`. `status` rc=0.
+- Row 46: modified `scripts/tl_selftest.py`. `status` rc=0.
+- Row 86: 10 untracked `tmp/review-r2/*` logs/artifact. `status` rc=0.
+- Row 90: modified `scripts/tl_selftest.py`; untracked `scripts/tl_core/test_fragments.py`.
+  `status` rc=0.
 
-Điều kiện đóng hạng mục này: chạy lại `git worktree list --porcelain`,
-`git worktree prune --dry-run --verbose`, `merge-base --is-ancestor` và `status --short` **trên
-chính máy Windows đó**, rồi thay bảng kế thừa bằng số đo mới.
+`blocker_worktree_measurement=closed`, nhưng 5 dirty rows, 50 legacy rows và 98 unknown owners vẫn
+là positive evidence để giữ `blocker_writer_inventory=open` và `writer_reopened=false`.
 
 ## 5. Enforcement inventory — cập nhật sau khi #52 land
 
@@ -272,52 +383,77 @@ Ba giới hạn dưới đây là thuộc tính của cơ chế #52 đã land, K
 `.githooks/pre-push` và `.github/workflows/ci.yml` là **exact write-set của #52**, nằm NGOÀI write-set
 F2-D; artifact này không sửa chúng.
 
-1. **Hook chỉ phủ máy đã cấu hình `core.hooksPath`.** Đo ngay tại container này:
-   `git config core.hooksPath` → **rc=1 (chưa đặt)**. Tức chính bản sao đang chạy kiểm kê này KHÔNG
-   được hook bảo vệ. Máy chưa cấu hình, hoặc `--no-verify`, đều đi vòng qua được. Hook là hàng rào
-   phía client, không phải cưỡng chế phía server.
+1. **Hook chỉ phủ máy đã cấu hình `core.hooksPath`.** Trên host/clone này,
+   `git config core.hooksPath` → `D:\Quốc hội\tra-luat\.githooks`, rc=0. Clone này được phủ, nhưng
+   máy/clone chưa cấu hình hoặc push với `--no-verify` vẫn đi vòng qua được. Hook là hàng rào phía
+   client, không phải cưỡng chế phía server.
 2. **Không hồi tố.** 73 nhánh legacy đã nằm sẵn trên `origin` TRƯỚC khi cơ chế land — chúng không bị
    chặn hồi tố, chỉ bị chặn ở **lần push kế tiếp**. Đừng đọc "#52 đã land" thành "73 nhánh đã an toàn".
 3. **Không có cưỡng chế phía server.** `master` hiện `protected: false` (đọc qua GitHub API,
    `list_branches`). Required status checks không bật.
 
-**Về branch protection / ruleset:** artifact tiền nhiệm ghi API trả HTTP 403 kèm
-`Upgrade to GitHub Pro or make this repository public to enable this feature`. Phiên này **không
-tái kiểm được** khẳng định đó: `curl` tới `api.github.com/…/protection` và `…/rulesets` đều trả
-**HTTP 403 nhưng với thông điệp KHÁC** — `GitHub access is not enabled for this session` — tức
-403 của **proxy phiên**, không phải 403 **theo gói của repo**. Hai cái này khác nhau và không được
-gộp. Vì vậy: **không khai required checks / branch protection / ruleset là khả dụng**, đồng thời
-**không khẳng định** đã tự tay xác minh nguyên nhân 403 là do private plan free. Điều đo được chắc
-chắn trong phiên này chỉ là `protected: false` trên `master`.
+**Về branch protection / ruleset:** generation 2 gọi trực tiếp cả hai API; mỗi lệnh rc=1, HTTP 403,
+message đúng `Upgrade to GitHub Pro or make this repository public to enable this feature`.
+`GET /branches/master` đồng thời trả `protected:false`, SHA `b044f8b1…`. Vì vậy không khai required
+checks/branch protection/ruleset là khả dụng.
 
-## 6. Sai lệch đã sửa so với artifact tiền nhiệm (PR #64)
+## 6. Finding disposition — generation 2
 
-Ghi ra để không ai chép lại lỗi này.
+- **WP63-RV-01 — fixed:** graph complete, bảng được parse lại từ 73 exact tips, 0 remote mismatch;
+  ancestry **69/4**, r210 rc=0, non-ancestor đúng rows 1/6/13/49. Claim 26/47 và r210 rc=1 cũ đã
+  bị loại khỏi artifact.
+- **WP63-RV-02 — fixed:** row 6 đổi `close → rebase`; basis ghi 2 commit riêng, 40 path, 21 blob
+  khác canonical và 9 test name vắng canonical. Không dùng CHANGELOG/0-added-files để close.
+- **WP63-RV-03 — fixed:** §4.5 là phép đo thật trên host Windows, không còn snapshot kế thừa;
+  list/prune/status/ancestry rc được ghi và cả 99 entries có path, exact HEAD/date, branch, status,
+  owner hoặc unknown, và đúng một decision.
 
-PR #64 ghi basis **`ancestor master`** cho khoảng 44 dòng `close`. Basis đó **không tái lập được**:
-
-```
-git merge-base --is-ancestor origin/claude/r210-rasoat-dot2 91d5e8dc…  → rc=1
-git merge-base --is-ancestor origin/claude/r210-rasoat-dot2 b044f8b1…  → rc=1
-```
-
-Chỉ **26/73** nhánh là ancestor của master — đo ở CẢ base cũ `91d5e8dc` lẫn canonical `b044f8b1`,
-cùng ra 26. Vì `91d5e8dc` là ancestor của `b044f8b1` (rc=0), ancestry có tính bắc cầu, nên con số
-không thể khác nhau giữa hai mốc: basis cũ sai tại thời điểm nó được ghi, không phải do trôi base.
-
-Hệ quả: **tập quyết định không đổi** (vẫn 70/2/1, cùng 3 nhánh ngoại lệ), nhưng **căn cứ đã được
-thay bằng bằng chứng chạy lại được** (§4.1). Một dòng `close` dựa trên basis sai vẫn là rủi ro xoá
-nhầm, kể cả khi kết luận tình cờ đúng.
+Finding kỹ thuật đã xử lý không tự gỡ operational block: inventory vẫn có residual writers và
+thiếu owner/consent. `operational_verdict=blocked` không đổi.
 
 ## 7. Điều kiện gỡ blocker
 
 Không đổi verdict và không mở lại writer cho tới khi đủ bằng chứng dương:
 
-1. **Kiểm kê worktree chạy lại trên máy Windows** — thay §4.5 bằng số đo thật (§2).
-2. 3 nhánh §4.3 đã rebase lên tip chứa EOL, hoặc owner quyết định bỏ có ghi nhận.
-3. 43 mục `owner=unknown` có owner, hoặc có quyết định human rõ ràng cho từng mục.
-4. 3 worktrees dirty được owner xử lý và kiểm lại.
-5. Mọi mục `close` được owner xác nhận trước khi xoá; không mất dirty hay commit riêng.
+1. 4 nhánh §4.3 đã rebase lên tip chứa EOL, hoặc owner quyết định bỏ có ghi nhận.
+2. 43 remote branches và 98 worktrees `owner=unknown` có owner, hoặc có quyết định human rõ ràng.
+3. 5 worktrees dirty được owner xử lý và kiểm lại; không mất file/commit riêng.
+4. 50 legacy worktrees được rebase/retire theo decision và consent; 13 mục `finish rồi rebase` phải
+   được bảo toàn trước mọi thao tác.
+5. Mọi mục `close` được owner xác nhận trước khi xoá.
 6. Chạy lại kiểm kê trên canonical mới, kết quả không còn residual writer trái chính sách.
 
-Cho tới lúc đó: giữ **#63, #49, #48 MỞ**. Không tuyên bố F2-D hoàn tất vận hành.
+Cho tới lúc đó: `blocker_enforcement=closed`, `blocker_worktree_measurement=closed`,
+`blocker_writer_inventory=open`, `writer_reopened=false`; giữ **#63, #49, #48 MỞ**. Không tuyên
+bố F2-D hoàn tất vận hành.
+
+## 8. Generation 2 validation evidence
+
+Các gate dưới đây chạy trong isolated worktree từ inherited PR head
+`fe9395ba3f2379e0a2b670ecfb6224103c944d54`, với working tree chỉ sửa artifact này:
+
+| Gate | Kết quả |
+|---|---|
+| `git diff --check` | rc=0 |
+| `python .githooks/eol_policy_test.py` | rc=0; **30/30 pass** |
+| `python .githooks/eol_policy.py --all --json` | rc=0; `ok=true`; scanned=299, checked=277, skipped=22, violations=0 |
+| `python scripts/tl.py --selftest` | rc=0; **1696/1696 pass** |
+| `python scripts/tl.py doc-claims-check --strict --json` | rc=0; `ok=true`; files_scanned=82, claims_flagged=353, flags=0 |
+| `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` | rc=0; `ok=true`; expected=179, checked=179; failed/extra/missing/required_missing/errors đều 0 |
+
+`release-verify` trả `package_hash_expected = package_hash_current =
+package_hash_full_tree = e004956449c30f7176769a6ede69eecd31029aa7dcac54d3daf3bfa28375c400`,
+`package_hash_self_match=true`, `package_hash_match=true`.
+
+So với canonical `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb`, các object ID ở inherited head
+giống hệt byte/tree:
+
+- `VERSION`: `8331824f0abcb019eba69092d8b525753cd84230`
+- `CHANGELOG.md`: `6d907f9421d8c4b033e04161378d8df4fd27dc98`
+- `RELEASE_MANIFEST.json`: `8fc90183877f8f9aa1fdbb4e4a4d42f82479bbcf`
+- `SKILL.md`: `2af1e16729ae5e932147a8b7332fef6ea362511a`
+- tree `references/golden`: `faa36333e9c75594c9760a270e28afc25c3fdd2f`
+
+`git diff --name-status b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb HEAD` tại inherited
+head chỉ có `A .github/coordination/f2-d-writer-inventory.md`; generation 2 tiếp tục giữ exact
+write-set một tệp này.

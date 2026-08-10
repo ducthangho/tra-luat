@@ -24,7 +24,7 @@ _PARENT = os.path.dirname(_HERE)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
 
-from core import artifacts, guards, operations  # noqa: E402
+from core import artifacts, guards, operations, scanner  # noqa: E402
 from core.fake_github import FakeGitHubError, seeded_store  # noqa: E402
 
 # rc quy ước - đọc được bằng máy, không phải "rc khác 0" chung chung.
@@ -51,7 +51,7 @@ def cmd_coverage(args):
         {
             "network_guard": guards.NetworkGuard.COVERAGE,
             "env_guard": guards.EnvGuard.COVERAGE,
-            "static_scanner": guards.STATIC_SCANNER_COVERAGE,
+            "static_scanner": scanner.COVERAGE,
         },
         sys.stdout,
         ensure_ascii=False,

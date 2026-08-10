@@ -30,6 +30,7 @@ rc quy ước: `0` ok · `2` bị TỪ CHỐI (op lạ, tham số sai, payload m
 | `ledger.py` | idempotence theo `reconcile_key`, bền qua ranh giới tiến trình, không mang timestamp |
 | `artifacts.py` | manifest + locator BỀN ràng buộc trong `run_root` + SHA-256 từng file + sidecar |
 | `guards.py` | tripwire env/subprocess/mạng, mỗi cái khai `COVERAGE` gồm cả `not_covered` |
+| `scanner.py` | bộ quét TĨNH: cài đặt **và** `COVERAGE` của nó ở CÙNG một chỗ |
 | `selftest.py` | phản chứng chạy được cho từng acceptance, và đối chứng dương cho từng tripwire |
 
 ## Generation 2 — năm finding của audit g1 đã đóng bằng test hồi quy
@@ -78,7 +79,7 @@ Suite `68/68` mà spec vẫn FAIL. Bài học của vòng này: **sửa một h�
 |---|---|---|---|
 | 1 | `authorization_header`, `client_secret_value` LỌT; `requested_tokens`, `remaining_tokens` bị CHẶN NHẦM | quyết theo mỗi TỪ CUỐI — hỏng cả hai hướng cùng lúc | quyết theo TOÀN BỘ tập từ với ba vai: **danh từ bí mật** · **đơn vị đo** (biến `token` thành số) · **vật chứa** (`header`/`value`/`blob` — giữ giá trị thật, thắng mọi thứ). Thêm value-shape `Bearer`/`Basic` |
 | 2 | `reviewed_sha` nhận `40hex + "\n"` và persist nguyên newline | `$` trong Python khớp cả **trước** newline cuối chuỗi, cộng `.match()` | `\Z` + `fullmatch`. Cùng lỗi ở `_SHA256_HEX` của manifest entry |
-| 3 | `builtins.__import__('requests')` và `runner = sp.run; runner([...])` cho `offenders=[]` | canonical hoá alias chỉ phủ import, không phủ gán biến; hai tên cho cùng một hàm | strip tiền tố `builtins.`, theo dõi **một tầng alias qua biến** (hội tụ 3 lượt). Phần còn lại khai trong `STATIC_SCANNER_COVERAGE.not_covered` và in ra qua `controller.py coverage` |
+| 3 | `builtins.__import__('requests')` và `runner = sp.run; runner([...])` cho `offenders=[]` | canonical hoá alias chỉ phủ import, không phủ gán biến; hai tên cho cùng một hàm | strip tiền tố `builtins.`, theo dõi **một tầng alias qua biến** (hội tụ 3 lượt). Phần còn lại khai trong `scanner.COVERAGE.not_covered` và in ra qua `controller.py coverage` |
 | 4 | `manifest.json`/`manifest.sha256` mở thẳng, không no-follow; năm category cùng trỏ MỘT locator vẫn `ok=true` | containment áp cho entry mà không áp cho tài liệu mô tả chúng; đếm entry ≠ đếm object rời nhau | `_read_regular` (islink + `fstat` regular) cho chính manifest/sidecar; `_open_regular_for_write` lúc ghi; **từ chối locator trùng** ở cả `add()` lẫn `verify()` |
 | 5 | `os.environ \| {}` ném `TypeError` dưới guard; `os.environb` ngoài tầm recorder | `MutableMapping` không cấp `__or__`; POSIX có mapping thứ hai vào cùng environment | `__or__`/`__ror__`/`__ior__`; bọc luôn `os.environb`, ghi vào **cùng một sổ** |
 

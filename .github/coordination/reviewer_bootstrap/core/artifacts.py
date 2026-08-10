@@ -72,7 +72,10 @@ def _open_regular_for_write(path, locator):
     """
     if os.path.islink(path):
         raise LocatorError(locator, "target is a symlink")
-    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
+    # KHÔNG O_TRUNC ở đây. `O_TRUNC` cắt tệp NGAY LÚC MỞ, tức trước khi các phép kiểm dưới đây
+    # chạy - và một lời từ chối phát ra sau khi dữ liệu đã mất thì không bảo vệ được gì. Cắt sau,
+    # khi đã biết chắc mình đang giữ đúng đối tượng.
+    flags = os.O_WRONLY | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
     fd = os.open(path, flags, 0o600)
     handle = os.fdopen(fd, "wb")
     try:
@@ -84,6 +87,16 @@ def _open_regular_for_write(path, locator):
             raise LocatorError(locator, "path is not a regular file (symlink or device)")
         if (on_disk.st_dev, on_disk.st_ino) != (opened.st_dev, opened.st_ino):
             raise LocatorError(locator, "path and opened file are different objects")
+        # HARD LINK: một inode có NHIỀU tên. Ba phép kiểm trên đều xanh cho một hardlink trỏ ra
+        # ngoài `run_root` - nó LÀ tệp thường, KHÔNG phải symlink, và path với descriptor đúng là
+        # cùng một object. Thứ phân biệt được chỉ có số liên kết: một artifact do ta vừa tạo phải
+        # có đúng một tên. Đây là đường auditor dùng để ghi đè tệp ngoài run_root qua manifest.json.
+        if opened.st_nlink != 1:
+            raise LocatorError(
+                locator, "target has %d hard links - it is reachable from outside run_root"
+                % opened.st_nlink
+            )
+        handle.truncate(0)
     except BaseException:
         handle.close()
         raise
@@ -345,7 +358,11 @@ def verify(run_root):
 
     try:
         raw = _read_regular(manifest_path, MANIFEST_NAME)
-        expected = _read_regular(sidecar_path, SIDECAR_NAME).decode("utf-8").strip()
+        # `errors="replace"`: một sidecar UTF-8 hỏng là ĐẦU VÀO THÙ ĐỊCH, không phải lỗi lập trình.
+        # Để nó ném UnicodeDecodeError là biến "báo cáo đỏ máy đọc được" thành một traceback -
+        # đúng thứ contract của module hứa sẽ không xảy ra. Chuỗi thay thế sẽ không khớp hash,
+        # nên ca này rơi vào `manifest_hash_ok: false` một cách tự nhiên.
+        expected = _read_regular(sidecar_path, SIDECAR_NAME).decode("utf-8", "replace").strip()
     except LocatorError as exc:
         report["rejected_locators"].append({"locator": exc.locator, "reason": exc.reason})
         return report
@@ -385,9 +402,21 @@ def verify(run_root):
             "manifest narrowed its own obligations - required_categories must be %s, got %r"
             % (list(REQUIRED_CATEGORIES), declared)
         )
-    self_block = manifest.get("self") or {}
+    # `manifest.get("self") or {}` sập với một scalar: `1 or {}` là `1`, rồi `.get` ném
+    # AttributeError. Manifest là đầu vào không tin cậy KỂ CẢ về kiểu của từng trường.
+    self_block = manifest.get("self")
+    if not isinstance(self_block, dict):
+        return _invalid("manifest self-description is not an object: %r" % (self_block,))
     if self_block.get("locator") != MANIFEST_NAME:
         return _invalid("manifest does not describe itself")
+    # Vị trí sidecar là HỢP ĐỒNG CỦA MODULE, không phải thứ manifest tự khai lại. Chấp nhận một
+    # giá trị khác nghĩa là tài liệu tự mô tả sai mà vẫn được chứng nhận - và người đọc tin lời
+    # khai đó sẽ đi tìm hash ở nhầm chỗ.
+    if self_block.get("sha256_recorded_in") != SIDECAR_NAME:
+        return _invalid(
+            "manifest claims its hash lives in %r, but the contract fixes it at %r"
+            % (self_block.get("sha256_recorded_in"), SIDECAR_NAME)
+        )
 
     # Một locator phục vụ nhiều hạng mục là retention GIẢ: manifest reseal cho cả năm category
     # cùng trỏ MỘT tệp vẫn cho ok=true, verified_files=5, trong khi acceptance đòi SHA-256 cho

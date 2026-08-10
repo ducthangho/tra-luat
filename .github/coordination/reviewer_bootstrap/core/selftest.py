@@ -39,7 +39,19 @@ _PARENT = os.path.dirname(_HERE)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
 
-from core import artifacts, guards, operations  # noqa: E402
+from core import artifacts, guards, operations, scanner  # noqa: E402
+# Bộ quét sống ở `core.scanner` cùng với khai báo phạm vi phủ của nó (finding vòng 5 mục 7).
+# Suite giữ COUNTER-TEST và chỉ mượn tên cho gọn - không giữ bản sao thứ hai của logic.
+from core.scanner import (  # noqa: E402
+    FORBIDDEN_IMPORTS,
+    NETWORK_TOOLS,
+    _const_str,
+    _dotted,
+    _scan_escape_paths,
+    _scan_forbidden_imports,
+    _scan_unguarded_env_access,
+    _tool_name,
+)
 from core.fake_github import FakeGitHubError, seeded_store  # noqa: E402
 from core.ledger import Ledger  # noqa: E402
 
@@ -59,20 +71,11 @@ EXPECTED_OPERATIONS = (
     "run_test",
 )
 
-FORBIDDEN_IMPORTS = {
-    "socket", "ssl", "http", "urllib", "urllib2", "urllib3", "requests", "httpx",
-    "ftplib", "smtplib", "telnetlib", "xmlrpc", "asyncio", "aiohttp",
-    "anthropic", "openai", "google", "boto3", "botocore",
-}
 
-# Binary có khả năng tự ra mạng. Bắt theo argv[0] hằng - đủ để chặn `subprocess.run(["gh", ...])`,
-# và KHÔNG hứa bắt được argv dựng động (xem `_ESCAPE_SCANNER_LIMITS`).
-NETWORK_TOOLS = {"gh", "curl", "wget", "git", "ssh", "scp", "nc", "ncat", "openssl", "pip", "npm"}
-
-# Giới hạn của chính bộ quét được khai ở `guards.STATIC_SCANNER_COVERAGE` để CLI `coverage` in ra
-# được như dữ liệu. Suite chỉ đọc lại, không giữ bản sao thứ hai - hai bản sẽ trôi lệch, và bên
-# quên cập nhật chính là bên công bố một claim rộng hơn thứ mình phủ.
-_ESCAPE_SCANNER_LIMITS = guards.STATIC_SCANNER_COVERAGE["not_covered"]
+# Giới hạn của bộ quét khai ở `core.scanner.COVERAGE`, NGAY CẠNH cài đặt của nó. Suite chỉ đọc
+# lại, không giữ bản sao thứ hai - hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên công
+# bố một claim rộng hơn thứ mình phủ. Đó đúng là điều đã xảy ra khi ba mảnh nằm ba nơi.
+_ESCAPE_SCANNER_LIMITS = scanner.COVERAGE["not_covered"]
 
 TESTS = []
 
@@ -90,192 +93,6 @@ def test(fn):
     TESTS.append(fn)
     return fn
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Bộ quét tĩnh dùng chung
-# ─────────────────────────────────────────────────────────────────────────────
-def _parse_dir(directory):
-    for name in sorted(os.listdir(directory)):
-        if name.endswith(".py"):
-            with open(os.path.join(directory, name), "r", encoding="utf-8") as fh:
-                yield name, ast.parse(fh.read(), filename=name)
-
-
-def _scan_forbidden_imports(directory, allowed):
-    """Liệt kê (tệp, module) import bị cấm trong `directory`, bỏ qua cặp nằm trong `allowed`."""
-    offenders = []
-    for name, tree in _parse_dir(directory):
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                roots = [alias.name.split(".")[0] for alias in node.names]
-            elif isinstance(node, ast.ImportFrom):
-                roots = [(node.module or "").split(".")[0]]
-            else:
-                continue
-            for module in roots:
-                if module in FORBIDDEN_IMPORTS and (name, module) not in allowed:
-                    offenders.append((name, module))
-    return offenders
-
-
-def _dotted(node):
-    """Tên chấm của một biểu thức gọi (`importlib.import_module`), hoặc None."""
-    bits = []
-    while isinstance(node, ast.Attribute):
-        bits.append(node.attr)
-        node = node.value
-    if isinstance(node, ast.Name):
-        bits.append(node.id)
-        return ".".join(reversed(bits))
-    return None
-
-
-def _const_str(node):
-    return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
-
-
-def _alias_map(tree):
-    """Bảng alias của một tệp: alias module -> module thật, và alias hàm -> 'module.hàm'.
-
-    Không có bảng này thì `import subprocess as sp` + `sp.run(["gh", ...])` cho `offenders=[]`,
-    và bộ quét chỉ bắt được kẻ tấn công không biết đổi tên - tức là không bắt được ai.
-    """
-    modules, funcs = {}, {}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                root = alias.name.split(".")[0]
-                modules[alias.asname or root] = root
-        elif isinstance(node, ast.ImportFrom):
-            module = (node.module or "").split(".")[0]
-            for alias in node.names:
-                funcs[alias.asname or alias.name] = "%s.%s" % (module, alias.name)
-
-    # Một tầng alias qua BIẾN: `runner = sp.run` rồi `runner([...])`. Bản trước mù với đường này,
-    # nên đổi tên hai lần là thoát - và "đổi tên hai lần" không phải kỹ thuật cao siêu gì.
-    for _ in range(3):  # lặp vài lượt để `a = sp; b = a.run` cũng hội tụ
-        changed = False
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Assign) or len(node.targets) != 1:
-                continue
-            target = node.targets[0]
-            if not isinstance(target, ast.Name):
-                continue
-            resolved = _resolve_call(node.value, modules, funcs)
-            if resolved and funcs.get(target.id) != resolved:
-                # Chỉ nhận alias trỏ tới thứ ta THỰC SỰ quan tâm, để không nuốt mọi phép gán.
-                root = resolved.split(".")[0]
-                if root in FORBIDDEN_IMPORTS or root in ("subprocess", "importlib", "os", "builtins"):
-                    funcs[target.id] = resolved
-                    if "." not in resolved:
-                        modules[target.id] = resolved
-                    changed = True
-        if not changed:
-            break
-    return modules, funcs
-
-
-def _resolve_call(func_node, modules, funcs):
-    """Tên gọi đã CANONICAL hoá qua bảng alias, hoặc None."""
-    dotted = _dotted(func_node)
-    if dotted is None:
-        return None
-    head, _dot, rest = dotted.partition(".")
-    if not rest:
-        resolved = funcs.get(head, head)
-    else:
-        base = funcs.get(head) or modules.get(head, head)
-        resolved = "%s.%s" % (base, rest)
-    # `builtins.__import__` và `__import__` là CÙNG một hàm; ghi hai tên cho cùng một thứ là mời
-    # người ta đi vòng qua tên còn lại.
-    if resolved.startswith("builtins."):
-        resolved = resolved[len("builtins."):]
-    return resolved
-
-
-def _scan_escape_paths(directory, allowed):
-    """Đường thoát mà `Import`/`ImportFrom` KHÔNG thấy (finding wp77-g1-sec-02).
-
-    Bắt ba lớp: import động có đích hằng, gọi tiến trình ngoài với argv[0] hằng nằm trong
-    NETWORK_TOOLS, và `os.system`/`os.popen`.
-    """
-    offenders = []
-    for name, tree in _parse_dir(directory):
-        modules, funcs = _alias_map(tree)
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Call):
-                continue
-            called = _resolve_call(node.func, modules, funcs)
-            # Tham số KEYWORD là cùng một lời gọi: `subprocess.run(args=[...])` và
-            # `importlib.import_module(name="requests")` hợp lệ y hệt dạng vị trí. Chỉ đọc
-            # `node.args` là bỏ lọt một nửa cách gọi hợp lệ của chính stdlib.
-            keywords = {kw.arg: kw.value for kw in node.keywords if kw.arg}
-            if called in ("importlib.import_module", "__import__") and (node.args or keywords):
-                target = _const_str(node.args[0] if node.args else keywords.get("name"))
-                if target and target.split(".")[0] in FORBIDDEN_IMPORTS:
-                    entry = (name, "dynamic-import:%s" % target.split(".")[0])
-                    if entry not in allowed:
-                        offenders.append(entry)
-            if called in ("os.system", "os.popen"):
-                entry = (name, "shell:%s" % called)
-                if entry not in allowed:
-                    offenders.append(entry)
-            if called and called.split(".")[0] == "subprocess" and (node.args or keywords):
-                first = node.args[0] if node.args else keywords.get("args")
-                argv0 = _const_str(first)
-                if argv0 is None and isinstance(first, (ast.List, ast.Tuple)) and first.elts:
-                    argv0 = _const_str(first.elts[0])
-                if argv0 and os.path.basename(argv0) in NETWORK_TOOLS:
-                    entry = (name, "subprocess:%s" % os.path.basename(argv0))
-                    if entry not in allowed:
-                        offenders.append(entry)
-    return offenders
-
-
-_SENSITIVE_LITERAL = re.compile(r"^(GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|AWS_|ANTHROPIC_|OPENAI_)")
-
-
-def _scan_unguarded_env_access(path):
-    """Truy cập biến nhạy cảm NGOÀI một khối `with ... EnvGuard(...)` (finding wp77-g1-spec-02).
-
-    Auditor chỉ ra `selftest.py:509` tự đọc đúng các biến cần bảo vệ TRƯỚC khi cài guard ở `:513`.
-    Một suite làm vậy đang tự tay tạo ra lần đọc mà nó tuyên bố là không có. Phép quét này biến
-    "đừng làm thế nữa" thành ràng buộc kiểm được.
-    """
-    with open(path, "r", encoding="utf-8") as fh:
-        tree = ast.parse(fh.read(), filename=os.path.basename(path))
-    modules, funcs = _alias_map(tree)
-
-    guarded = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.With):
-            if any("EnvGuard" in (_dotted(i.context_expr.func) or "")
-                   for i in node.items if isinstance(i.context_expr, ast.Call)):
-                guarded.append((node.body[0].lineno, node.end_lineno))
-
-    def inside_guard(lineno):
-        return any(start <= lineno <= end for start, end in guarded)
-
-    offenders = []
-
-    def note(lineno, what):
-        if not inside_guard(lineno):
-            offenders.append((lineno, what))
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            called = _resolve_call(node.func, modules, funcs)
-            if called in ("os.getenv", "os.environ.get", "os.environ.pop", "os.environ.setdefault"):
-                literal = _const_str(node.args[0]) if node.args else None
-                if literal and _SENSITIVE_LITERAL.match(literal.upper()):
-                    note(node.lineno, "%s(%r)" % (called, literal))
-            if called in ("os.environ.update", "os.environ.copy"):
-                note(node.lineno, "%s(...)" % called)
-        elif isinstance(node, ast.Subscript) and _resolve_call(node.value, modules, funcs) == "os.environ":
-            literal = _const_str(node.slice)
-            if literal and _SENSITIVE_LITERAL.match(literal.upper()):
-                note(node.lineno, "os.environ[%r]" % literal)
-    return offenders
 
 
 def _run_cli(*argv):
@@ -1091,7 +908,8 @@ def ra01_regression_spec02_suite_never_reads_protected_vars_outside_a_guard():
     """PHẢN CHỨNG AUDIT: `selftest.py:509` tự đọc biến cần bảo vệ TRƯỚC khi cài guard ở `:513`."""
     offenders = _scan_unguarded_env_access(os.path.join(_HERE, "selftest.py"))
     assert not offenders, offenders
-    for module in ("controller.py", "operations.py", "fake_github.py", "artifacts.py", "ledger.py"):
+    for module in ("controller.py", "operations.py", "fake_github.py", "artifacts.py",
+                   "ledger.py", "scanner.py"):
         assert not _scan_unguarded_env_access(os.path.join(_HERE, module)), module
 
 
@@ -1855,7 +1673,7 @@ def ra01_regression_a3_03_scanner_catches_builtins_import_and_variable_alias():
         ):
             assert expected in offenders, (expected, sorted(offenders))
     # Phần CÒN LẠI phải được khai, không được im lặng.
-    limits = guards.STATIC_SCANNER_COVERAGE["not_covered"]
+    limits = scanner.COVERAGE["not_covered"]
     assert limits, "a static scanner that claims no limits is lying"
     joined = " ".join(limits)
     assert "getattr" in joined and "dynamically" in joined, limits
@@ -2140,7 +1958,14 @@ def ra01_regression_a4_03_bytes_environment_keys_are_recognised():
     recorder = guards.EnvAccessRecorder({b"GH_TOKEN": b"x", b"PATH": b"/bin"})
     recorder.copy()
     assert "GH_TOKEN" in recorder.sensitive_reads(), recorder.sensitive_reads()
-    # Và đường thật: `env=` bytes truyền cho Popen phải bị ghi nhận VÀ scrub.
+    # Phần trên là BẤT BIẾN, chạy ở MỌI nền. Phần dưới là FIXTURE và chỉ dựng được trên POSIX:
+    # `CreateProcess` của Windows đòi environment dạng str, nên `env=` bytes ném TypeError ở đó -
+    # lỗi của FIXTURE, không phải của bất biến. Bản trước để nó nổ thành FAIL và làm gate Windows
+    # ĐỎ (82/83, rc=1) trong khi `is_sensitive` trên chính host đó vẫn trả lời đúng.
+    if os.name != "posix":
+        print("     bytes_child_env_fixture=skipped_non_posix (invariant above still asserted)")
+        return
+    print("     bytes_child_env_fixture=real")
     marker = b"FAKE-BYTES-CHILD-ENV"
     reader = "import os,sys; sys.stdout.write(os.environ.get('GH_TOKEN') or 'ABSENT')"
     hostile = {k.encode(): v.encode() for k, v in _portable_child_env({}).items()}
@@ -2204,7 +2029,9 @@ def ra01_regression_a4_04_existence_flags_are_not_credentials():
                 pass
             else:
                 raise AssertionError("carrier accepted after the flag exception: %r" % hostile)
-    assert operations.schema()["credential_surface"]["flag_tails_that_outrank_carriers"]
+    surface = operations.schema()["credential_surface"]
+    assert surface["boolean_flag_tails_that_outrank_carriers"]
+    assert surface["boolean_flag_tails_require_a_bool_value"] is True
 
 
 @test
@@ -2226,8 +2053,160 @@ def ra01_regression_a4_05_scanner_reads_keyword_arguments():
         offenders = set(_scan_escape_paths(tmp, allowed=set()))
         assert ("kw.py", "subprocess:gh") in offenders, sorted(offenders)
         assert ("kw.py", "dynamic-import:requests") in offenders, sorted(offenders)
-    assert any("keyword" in c for c in guards.STATIC_SCANNER_COVERAGE["covered"]), \
+    assert any("keyword" in c for c in scanner.COVERAGE["covered"]), \
         "keyword-argument coverage is not declared"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# I. Vòng audit thứ năm — finding của verdict ab5b3c2 còn mở trên head sau đó
+# ─────────────────────────────────────────────────────────────────────────────
+@test
+def ra01_regression_a6_01_flag_tails_require_a_boolean_value():
+    """PHẢN CHỨNG AUDIT: `client_secret_present: "s3cr3t"` được chấp nhận và PERSIST.
+
+    Ngoại lệ cờ trước đây chỉ xét TÊN. Nhưng một lá cờ thật mang `True`/`False`; bất cứ thứ gì
+    khác dưới cái tên đó là dữ liệu đang mượn danh nghĩa lá cờ để đi vào sổ bền - và tên càng
+    giống cờ thì càng ít ai soi.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        store = _store(tmp)
+        for index, key in enumerate((
+            "client_secret_present", "authorization_header_present",
+            "credential_rotation_enabled", "token_configured", "password_set",
+        )):
+            for value in ("s3cr3t-value", 1, 0, None, ["x"], {"a": 1}):
+                try:
+                    store.call("post_heartbeat", {
+                        "repo": REPO, "issue_number": 77,
+                        "reconcile_key": "k%d-%r" % (index, value),
+                        "payload": {key: value}})
+                except operations.CredentialSurfaceError as exc:
+                    assert key in str(exc), (key, str(exc))
+                else:
+                    raise AssertionError("flag name with a non-bool value accepted: %s=%r"
+                                         % (key, value))
+        assert len(store.ledger) == 0, "a non-bool flag reached the ledger"
+        # Cờ THẬT vẫn phải đi lọt, nếu không ràng buộc này chỉ là một lệnh cấm khác.
+        result = store.call("post_heartbeat", {
+            "repo": REPO, "issue_number": 77, "reconcile_key": "k-real-flags",
+            "payload": {"client_secret_present": False, "authorization_header_present": True,
+                        "credential_rotation_enabled": True, "token_count": 12,
+                        "secret_scan_status": "clean"}})
+        assert result["created"] is True
+        assert len(store.ledger) == 1
+
+
+@test
+def ra01_regression_a5_01_hardlinked_target_is_refused():
+    """PHẢN CHỨNG AUDIT: `manifest.json` đặt sẵn thành HARD LINK tới tệp ngoài `run_root`.
+
+    Ba lớp cũ đều XANH cho ca này - hardlink LÀ tệp thường, KHÔNG phải symlink, và path với
+    descriptor đúng là cùng một object. Thứ duy nhất phân biệt được là số liên kết: một artifact
+    ta vừa tạo phải có đúng một tên. Không có phép kiểm đó thì `finalize()` ghi đè tệp ngoài.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        os.makedirs(root)
+        outside = os.path.join(tmp, "outside.txt")
+        with open(outside, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("OUTSIDE\n")
+        try:
+            os.link(outside, os.path.join(root, artifacts.MANIFEST_NAME))
+        except (OSError, NotImplementedError, AttributeError) as exc:
+            raise PlatformUnsupported("cannot create a hard link here: %s" % exc)
+        aset = artifacts.ArtifactSet(root, "hardlink")
+        for category, name in (
+            ("source", "s.txt"), ("corpus", "c.txt"), ("per_case_matrix", "m.txt"),
+            ("runner_env_digest", "e.txt"), ("cleanup_record", "r.txt"),
+        ):
+            aset.add(category, name, category + "\n")
+        try:
+            aset.finalize()
+        except artifacts.LocatorError as exc:
+            assert "hard link" in exc.reason, exc.reason
+        else:
+            raise AssertionError("finalize wrote through a hard link out of run_root")
+        with open(outside, "r", encoding="utf-8") as fh:
+            assert fh.read() == "OUTSIDE\n", "the file outside run_root was overwritten"
+
+
+@test
+def ra01_regression_a5_02_sidecar_location_is_the_module_contract():
+    """PHẢN CHỨNG AUDIT: manifest khai lại `self.sha256_recorded_in` thành `attacker.sha256`
+    mà `verify()` vẫn `ok=true`.
+
+    Vị trí sidecar là hợp đồng của MODULE. Chấp nhận giá trị khác nghĩa là chứng nhận một tài liệu
+    tự mô tả sai, và người đọc tin lời khai đó sẽ đi tìm hash ở nhầm chỗ.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        manifest = _load_manifest(root)
+        manifest["self"]["sha256_recorded_in"] = "attacker.sha256"
+        _reseal(root, manifest)
+        report = artifacts.verify(root)
+        assert report["manifest_hash_ok"] is True, "fixture sai - sidecar phải vẫn khớp"
+        assert report["ok"] is False, "a manifest that lies about its own sidecar was certified"
+        assert report["manifest_invalid"] and "attacker.sha256" in report["manifest_invalid"], report
+
+
+@test
+def ra01_regression_a5_03_hostile_input_gives_a_report_not_a_traceback():
+    """PHẢN CHỨNG AUDIT: `self` là scalar ném `AttributeError`; sidecar UTF-8 hỏng ném
+    `UnicodeDecodeError`.
+
+    Contract của module nói đầu vào là KHÔNG TIN CẬY và `verify()` trả báo cáo máy đọc được. Một
+    traceback không phải báo cáo - và gate gọi `verify` sẽ chết theo cách người đọc không sửa được.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        for value in (1, "text", [], None):
+            manifest = _load_manifest(root)
+            manifest["self"] = value
+            _reseal(root, manifest)
+            report = artifacts.verify(root)  # KHÔNG được ném
+            assert report["ok"] is False, value
+            assert report["manifest_invalid"], (value, report)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "run")
+        _run_cli("produce", "--out", root, "--run-id", "r1")
+        with open(os.path.join(root, artifacts.SIDECAR_NAME), "wb") as fh:
+            fh.write(b"\xff\xfe\x00not utf-8")
+        report = artifacts.verify(root)  # KHÔNG được ném
+        assert report["ok"] is False
+        assert report["manifest_hash_ok"] is False, report
+        rc, _out, err = _run_cli("verify", "--root", root)
+        assert rc == 3, rc
+        assert "MANIFEST TAMPERED" in err, err
+
+
+@test
+def ra01_regression_a5_04_scanner_normalises_exe_suffix_and_shell_string():
+    """PHẢN CHỨNG AUDIT: `gh.exe` và `subprocess.run('gh api /user', shell=True)` cho offenders=[].
+
+    Chặn `gh` mà không chặn `gh.exe` là một lệnh cấm chỉ có hiệu lực trên POSIX.
+    """
+    cases = {
+        "kw.py": "import subprocess\ndef a():\n    subprocess.run(args=['gh', 'api', '/user'])\n",
+        "exe.py": "import subprocess\ndef a():\n    subprocess.run(['gh.exe', 'api', '/user'])\n",
+        "shell.py": "import subprocess\ndef a():\n    subprocess.run('gh api /user', shell=True)\n",
+        "winpath.py": "import subprocess\ndef a():\n    subprocess.run(['C:\\\\bin\\\\curl.EXE', 'x'])\n",
+    }
+    expected = {"kw.py": "gh", "exe.py": "gh", "shell.py": "gh", "winpath.py": "curl"}
+    for filename, source in cases.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, filename), "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(source)
+            offenders = _scan_escape_paths(tmp, allowed=set())
+            assert (filename, "subprocess:%s" % expected[filename]) in offenders, (filename, offenders)
+    # Đối trọng: công cụ vô hại KHÔNG được bắt nhầm, nếu không bộ quét sẽ bị tắt.
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(os.path.join(tmp, "ok.py"), "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("import subprocess\ndef a():\n    subprocess.run(['python', '-c', 'pass'])\n")
+        assert _scan_escape_paths(tmp, allowed=set()) == []
+    covered = " ".join(scanner.COVERAGE["covered"])
+    assert "gh.exe" in covered and "shell-string" in covered, covered
 
 
 def main():

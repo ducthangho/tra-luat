@@ -89,9 +89,11 @@ _DESCRIPTOR_TAILS = frozenset(
 
 # Từ CUỐI nói về SỰ TỒN TẠI hay SỐ LƯỢNG, không về giá trị. Đây là nhóm DUY NHẤT thắng được
 # "vật chứa": `authorization_header_present` là một cờ boolean, không phải một header thật.
-_FLAG_TAILS = frozenset(
-    {"present", "enabled", "disabled", "required", "missing", "set", "configured", "count",
-     "status", "expected", "supported"}
+# CHỈ những từ nói "có hay không". `count` và `status` đã nằm ở `_DESCRIPTOR_TAILS` - chúng mang
+# số và chuỗi hợp lệ, nên không thuộc nhóm bị ràng buộc kiểu bool ở dưới.
+_BOOLEAN_FLAG_TAILS = frozenset(
+    {"present", "enabled", "disabled", "required", "missing", "set", "configured",
+     "expected", "supported"}
 )
 
 # Từ biến `token(s)` thành ĐƠN VỊ ĐO. `requested_tokens` là số lượng, không phải credential.
@@ -120,7 +122,7 @@ def _split_words(key):
     return [w for w in re.split(r"[^A-Za-z0-9]+", spaced.lower()) if w]
 
 
-def _key_is_credential(key):
+def _key_is_credential(key, value=None):
     """Quyết theo TOÀN BỘ tập từ, không phải mỗi từ cuối.
 
     Bản trước chỉ xét từ cuối và hỏng theo CẢ HAI hướng cùng lúc:
@@ -147,11 +149,14 @@ def _key_is_credential(key):
 
     if not has_secret_noun and not key_is_secret:
         return False
-    # Cờ tồn tại/số lượng thắng vật chứa: `authorization_header_present` là boolean, không phải
-    # header thật. Đây là ngoại lệ HẸP có chủ đích - `remaining_tokens_header` (tail `header`)
-    # vẫn bị chặn, vì `header` không nói gì về sự tồn tại.
-    if tail in _FLAG_TAILS:
-        return False
+    # Cờ tồn tại thắng vật chứa: `authorization_header_present` là boolean, không phải header
+    # thật. Ngoại lệ này HẸP theo CẢ HAI chiều - tên VÀ kiểu.
+    #
+    # Chỉ xét tên là chưa đủ: `client_secret_present: "s3cr3t"` có tên của một lá cờ nhưng chở
+    # một chuỗi, và chuỗi đó đi thẳng vào sổ bền. Một lá cờ thật thì mang `True`/`False`; bất cứ
+    # thứ gì khác dưới cái tên đó là dữ liệu đang mượn danh nghĩa lá cờ.
+    if tail in _BOOLEAN_FLAG_TAILS:
+        return not isinstance(value, bool)
     # Vật chứa thắng phần còn lại: danh từ bí mật + vật chứa nghĩa là giá trị thật nằm ngay đây.
     if has_carrier:
         return True
@@ -374,7 +379,7 @@ def _scan_credential_surface(op_name, param, value):
         if isinstance(node, dict):
             for key, sub in node.items():
                 child = "%s.%s" % (path, key)
-                if isinstance(key, str) and _key_is_credential(key):
+                if isinstance(key, str) and _key_is_credential(key, sub):
                     raise CredentialSurfaceError(op_name, param, child, "key name %r" % key)
                 stack.append((sub, child, depth + 1))
         elif isinstance(node, (list, tuple)):
@@ -406,7 +411,8 @@ def schema():
                     "authorization_url, cookie_policy, auth_method)",
             "secret_nouns": sorted(_SECRET_NOUNS),
             "carrier_words_that_force_rejection": sorted(_CARRIER_WORDS),
-            "flag_tails_that_outrank_carriers": sorted(_FLAG_TAILS),
+            "boolean_flag_tails_that_outrank_carriers": sorted(_BOOLEAN_FLAG_TAILS),
+            "boolean_flag_tails_require_a_bool_value": True,
             "measure_words_that_neutralise_token": sorted(_MEASURE_WORDS),
             "descriptor_tails_that_neutralise": sorted(_DESCRIPTOR_TAILS),
             "rejected_key_tail_key_qualifiers": sorted(_SECRET_KEY_QUALIFIERS),

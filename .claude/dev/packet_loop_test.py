@@ -585,6 +585,46 @@ def case_doctrine_scan_bom_cum_tu_do(c: Ctx):
             raise AssertionError(f"bơm {cum!r} phải ĐỎ (rc=6), được rc={rc}")
 
 
+def case_doctrine_scan_bat_doctrine_THAT_tu_protocol(c: Ctx):
+    """Chép DÒNG THẬT từ docs/PROTOCOL_DA_PHIEN.md vào adapter ⇒ phải ĐỎ hết.
+
+    Đây là ca đắt nhất của bộ này. Bơm cụm từ do chính mình soạn chỉ chứng minh
+    danh sách khớp với chính nó; lấy dòng từ NGUỒN mới chứng minh nó phủ được
+    doctrine thật. Lần chạy đầu ca này bắt 4/9 — 5 dòng lọt CHỈ vì dấu nháy
+    ngược của Markdown (`merged`: … không khớp "merged: …"), đúng loại lỗ đã làm
+    ba lượt review trước trượt.
+
+    Ca này đọc protocol LÚC CHẠY, nên khi doctrine đổi câu chữ mà danh sách cấm
+    không theo, nó sẽ đỏ thay vì im lặng mục ruỗng.
+    """
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    if not proto.is_file():
+        raise AssertionError(f"thiếu {proto}")
+    neo = (
+        "| Dispatcher", "| Executor", "| Reviewer", "| Land Operator",
+        "| Người có thẩm quyền", "proposed →", "- `merged`", "- `integrated`",
+        "- `landed`", "- `complete`", "Mặc định: 3 attempt/packet",
+    )
+    dong = [
+        (i, l.strip())
+        for i, l in enumerate(proto.read_text(encoding="utf-8").splitlines(), 1)
+        if l.strip().startswith(neo) and len(l.strip()) >= 40
+    ]
+    if len(dong) < 8:
+        raise AssertionError(f"chỉ tìm được {len(dong)} dòng doctrine — mỏ neo có thể đã trôi")
+    lot = []
+    for n, (ln, s) in enumerate(dong):
+        r = _repo_gia(c.tmp, f"# Adapter\n\nĐọc trước: docs/PROTOCOL_DA_PHIEN.md.\n\n{s}\n",
+                      ten=f"that{n}")
+        rc, _, _ = run(c.script, ["doctrine-scan", "--root", r])
+        if rc != 6:
+            lot.append(f"protocol:{ln} rc={rc} :: {s[:80]}")
+    if lot:
+        raise AssertionError(
+            f"{len(lot)}/{len(dong)} dòng doctrine THẬT lọt lưới:\n  " + "\n  ".join(lot)
+        )
+
+
 def case_doctrine_scan_repo_that_sach(c: Ctx):
     """Adapter THẬT trong kho này phải sạch — nếu không thì tiêu chí là lời hứa."""
     rc, o, e = run(c.script, ["doctrine-scan", "--root", ROOT])
@@ -693,6 +733,7 @@ CASES = [
     ("void_sau_review_bi_chan", case_void_sau_review_bi_chan),
     ("doctrine_scan_sach_xanh", case_doctrine_scan_sach_xanh),
     ("doctrine_scan_bom_cum_tu_do", case_doctrine_scan_bom_cum_tu_do),
+    ("doctrine_scan_bat_doctrine_THAT_tu_protocol", case_doctrine_scan_bat_doctrine_THAT_tu_protocol),
     ("doctrine_scan_repo_that_sach", case_doctrine_scan_repo_that_sach),
     ("stdout_cp1252", case_stdout_cp1252),
     ("stdout_cp1258", case_stdout_cp1258),

@@ -126,6 +126,12 @@ FORBIDDEN_DOCTRINE_PHRASES = {
         "apply job",
         "người có thẩm quyền",
         "phiên land",
+        # Ô nội dung của bảng vai trò — tên vai không thôi thì quá hẹp, vì chép
+        # cả DÒNG mới là chép doctrine.
+        "sửa đúng effective write set trên branch của generation",
+        "reconcile durable inbox, chuyển state, cấp/thu hồi lease",
+        "đọc code, chạy kiểm tra read-only trên exact sha",
+        "start/pause/resume/reroute/override/authorize/apply/deploy",
     ],
     "dinh-nghia-trang-thai-hoan-tat": [
         "merged: pr đã vào nhánh đích",
@@ -152,9 +158,22 @@ def _cung_hoa_stdout() -> None:
             pass
 
 
+# Ký tự TRANG TRÍ của Markdown, bị bỏ trước khi so. Không có bước này thì chép
+# nguyên một dòng doctrine kèm dấu nháy ngược là lọt: `merged`: … không khớp
+# "merged: …". Đã ĐO: 5/9 dòng doctrine THẬT lọt lưới chỉ vì lớp trang trí này.
+# Bỏ cả gạch dưới nên `same_failure_limit` và `same failure limit` quy về một mối
+# — hai vế đều đi qua cùng phép chuẩn hoá nên vẫn khớp nhau.
+_TRANG_TRI = str.maketrans("", "", "`*_~")
+
+
 def _chuan_hoa(text: str) -> str:
-    """NFC + casefold + gộp khoảng trắng — dùng CHỈ cho doctrine-scan."""
-    text = unicodedata.normalize("NFC", text).casefold()
+    """NFC + casefold + bỏ trang trí Markdown + gộp khoảng trắng.
+
+    Dùng CHỈ cho doctrine-scan. Ở đây chuẩn hoá rộng là ĐÚNG HƯỚNG, ngược hẳn
+    với phép đếm finding: khớp rộng chỉ buộc adapter viết mỏng hơn (sai về phía
+    an toàn), còn khớp rộng ở finding-id sẽ gộp oan hai lỗi khác nhau.
+    """
+    text = unicodedata.normalize("NFC", text).casefold().translate(_TRANG_TRI)
     return " ".join(text.split())
 
 

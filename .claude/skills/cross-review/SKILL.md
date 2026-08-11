@@ -58,9 +58,13 @@ là MCP GitHub (`pull_request_review_write` với `method: create` rồi `submit
 ```bash
 python .claude/dev/packet_loop.py record-review --packet 55 --provider codex \
     --verdict changes_requested \
+    --reviewed-sha $(gh pr view 56 --json headRefOid -q .headRefOid) \
     --finding-id url-alias      --finding-desc "mô tả tự do, KHÔNG tham gia phép đếm" \
     --finding-id van-tay-lach   --finding-desc "mỗi lỗi một slug ổn định"
 ```
+
+`--reviewed-sha` phải là **exact head bạn thực sự đã đọc**, và phải khớp head đã đưa ra review; lệch
+thì lệnh thoát khác 0 và không ghi được bản duyệt. Head đổi giữa chừng ⇒ đọc lại, đừng duyệt bản cũ.
 
 `--finding-id` là **khoá đếm**: slug kebab-case do người review đặt và giữ NGUYÊN qua các lượt cho
 cùng một lỗi. Mô tả đổi thoải mái. Đặt slug mới cho một lỗi cũ là làm hỏng phép đếm — đó là lý do

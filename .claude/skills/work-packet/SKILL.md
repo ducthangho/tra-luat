@@ -48,7 +48,8 @@ python .claude/dev/packet_loop.py init          --packet 55 --mission 54 \
 python .claude/dev/packet_loop.py begin-attempt --packet 55 --provider claude
 python .claude/dev/packet_loop.py next-comment  --packet 55        # in văn bản → ĐĂNG lên Issue
 python .claude/dev/packet_loop.py record-post   --packet 55 --for reviewing --comment-id 5258163128
-python .claude/dev/packet_loop.py transition    --packet 55 --to reviewing --comment-id 5258163128
+python .claude/dev/packet_loop.py transition    --packet 55 --to reviewing --comment-id 5258163128 \
+                                                --head-sha $(git rev-parse HEAD)
 python .claude/dev/packet_loop.py void-attempt  --packet 55 --reason quota
 python .claude/dev/packet_loop.py status        --packet 55
 python .claude/dev/packet_loop.py where
@@ -57,6 +58,9 @@ python .claude/dev/packet_loop.py where
 `--comment-id` là **ID GitHub trả về lúc đăng**, không phải URL. Ghi sổ bằng `record-post` trước, rồi
 `transition` mới tiêu thụ được; mỗi ID dùng đúng một lần cho đúng một chuyển động. Tiến trình này
 không gọi mạng nên **không xác minh** ID có thật — đọc `--help` để thấy nó bảo đảm đúng những gì.
+
+Vào `reviewing` phải khai `--head-sha` là **exact head** đưa ra review. Bản duyệt sau đó phải neo
+đúng SHA ấy, và mở lượt mới sẽ xoá mỏ neo — nên có commit mới thì bản duyệt cũ hết hiệu lực.
 
 `--help` cho danh sách đầy đủ và ý nghĩa từng mã thoát. Mã thoát khác 0 ⇒ dừng và báo người; script
 tự nói lý do trên stderr.

@@ -17,7 +17,7 @@ Mã thoát
     5  dấu vết comment không hợp lệ — chưa đăng ký, sai transition, hoặc đã dùng
     6  doctrine-scan bắt được cụm từ bị cấm trong adapter
     7  guard chặn cứng một hành vi trong bảng
-    8  transition không hợp lệ theo state machine
+    8  trạng thái không hợp lệ — transition sai, lượt đang mở, init đè state
 
 Ba cơ chế dưới đây là LÕI của revision 2. Chúng thay ba cơ chế mà ba lượt review
 liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần chú thích từng chỗ.
@@ -562,7 +562,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Mã thoát: 0 ok · 2 sai đối số · 3 chạm trần · 4 sai provider · "
             "5 dấu vết comment không hợp lệ · 6 adapter chép doctrine · "
-            "7 hành vi bị chặn cứng · 8 transition không hợp lệ."
+            "7 hành vi bị chặn cứng · 8 trạng thái không hợp lệ."
         ),
     )
     p.add_argument("--state-dir", default=".claude/.packet_state", help="nơi giữ state cục bộ")

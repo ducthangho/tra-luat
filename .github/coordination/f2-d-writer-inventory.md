@@ -140,7 +140,7 @@ nhánh tiền-EOL — đừng dùng nó làm bằng chứng land.
 
 | Nhánh | Bằng chứng (rc trực tiếp) | Decision |
 |---|---|---|
-| `origin/claude/cuu-viec-treo-2026-08-03` | 2 commit riêng (`d347129…`, `6c148d3…`), 40 path đổi từ merge-base; so exact tip với canonical: 19 blob giống, **21 blob khác**; 9 test name `r323_/r324_` thêm bởi branch đều `git grep` canonical rc=**1**. Chưa có evidence hành vi hai chiều | `rebase` |
+| `origin/claude/cuu-viec-treo-2026-08-03` | 2 commit riêng (`d347129…`, `6c148d3…`), 40 path đổi từ merge-base; so exact tip với canonical: 19 blob giống, **21 blob khác**. Behavioral A/B trên `cmd_state_put` (dưới đây), cùng GAS giả + cùng script: tip rc=**2** fail-closed, **0 lần ghi**; canonical rc=**0** và **GHI 1 bản** qua `upload` không nguyên tử ⇒ chốt single-writer ADR-0016 CHƯA land | `rebase` |
 | `origin/claude/ras-17-data-pr13-windows-bjovq2` | Behavioral A/B trên exact tip/canonical, cùng fixture và command dưới đây: tip rc=**0**, lập 1 migration; canonical rc=**2**, CLI bác subcommand. Control trên tip không đủ Điều trả 0 migration + lý do fail-closed ⇒ khác biệt là hành vi, không phải lỗi dựng môi trường | `rebase` |
 | `origin/claude/nlm-registry-sheet-dup-s22fk7` | 2 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:rasoat/KETQUA_R281_V1_V2_V3_2026-07-31.md` rc=**128** | `rebase` |
 | `origin/claude/audit-errors-patch-plan-56x4rq` | 1 tệp chỉ có trên nhánh; `git cat-file -e b044f8b1:docs/AUDIT_XAC_MINH_VA_KE_HOACH_VA_2026-07-31.md` rc=**128** | `finish rồi rebase` |
@@ -161,6 +161,24 @@ trống; không dùng `GIT_CONFIG_*`):
   `ke_hoach.bo_qua=1`, `THIEU_DIEU_TRONG_CACHE:99`, `findings_sau.san_sang=false`. Control này chứng minh
   runner/CLI đã dựng đúng và fixture làm thay đổi kết quả theo dữ liệu đầu vào.
 
+Behavioral evidence row 6 (cùng doctrine: mỗi tree detached ở đúng SHA, `HOME` trỏ thư mục trống, không
+dùng `GIT_CONFIG_*`; **một script DUY NHẤT chạy y hệt trên cả hai cây**, không sửa code cây nào):
+
+- Đối tượng đo là `cmd_state_put` — đường GHI state điều phối. GAS giả bơm qua `_gas`, cố ý hỗ trợ **CẢ
+  HAI** action `upload` **và** `rasoat_state_cas`, nên bên nào gọi `upload` vẫn GHI ĐƯỢC. Không cây nào bị
+  đỏ vì stub thiếu; khác biệt dưới đây là THIẾT KẾ.
+- Positive: GAS giả trả `ping.capabilities=[]` (server cũ, chưa có CAS). Exact tip
+  `6c148d331e5dcdcc32f3b9474e806e6dcad76ac8`: rc=**2**, `error=GAS_CHUA_HO_TRO_RASOAT_STATE_CAS`,
+  `step=capability_check`, **writes=0**, chỉ gọi `get:ping` — dừng TRƯỚC mọi lần ghi. Canonical
+  `b044f8b14e9ea3ad5d91a7fb4f0d29a3fe8415eb` trên CÙNG GAS giả: rc=**0**, `ok=true`, **writes=1**,
+  gọi `get:list` → `post:upload` — không có capability check, ghi thẳng bằng đường KHÔNG nguyên tử.
+- Negative/control: cùng script, GAS giả trả `capabilities=["rasoat_state_cas"]`, chạy trên exact tip:
+  rc=**0**, `ok=true`, **writes=1**, gọi `get:ping` → `post:rasoat_state_cas`. Control chứng minh hai
+  điều: rc=2 ở trên là fail-closed CÓ CHỦ ĐÍCH chứ không phải harness hỏng, và tip ghi bằng action
+  nguyên tử chứ không bao giờ rơi về `upload`.
+- Kết luận hẹp: hành vi fail-closed single-writer (ADR-0016) có trên nhánh và **VẮNG** ở canonical ⇒ giữ
+  decision `rebase`. Đây là kết luận về ĐÚNG hành vi đã đo; 21 blob khác còn lại chưa được đo từng cái.
+
 Đối chiếu: `69 close + 3 rebase + 1 finish rồi rebase = 73`; phân lớp chính:
 `69 ancestor + 4 non-ancestor = 73`.
 
@@ -178,7 +196,7 @@ nếu khác chỉ là corroboration lịch sử.
 | 3 | `origin/claude/bhxh-41-2024-maintenance-jncsle` | `c0cbc96bbbee` | `2026-08-02T12:11:23+00:00` | `ducthangho` — tác giả PR #13 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 4 | `origin/claude/codex-exclude-dir` | `1050c17fb96b` | `2026-08-04T00:52:22+07:00` | `ducthangho` — tác giả PR #30 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 5 | `origin/claude/corpus-audit-write-2026-07-31-3twkfb` | `3500f1fde2b7` | `2026-07-31T04:34:33+00:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |
-| 6 | `origin/claude/cuu-viec-treo-2026-08-03` | `6c148d331e5d` | `2026-08-04T00:21:52+07:00` | `unknown` | `rebase` | ancestry rc=1; 2 commit/40 path; 21 blob khác canonical; 9 test name vắng canonical — chưa có evidence hành vi hai chiều |
+| 6 | `origin/claude/cuu-viec-treo-2026-08-03` | `6c148d331e5d` | `2026-08-04T00:21:52+07:00` | `unknown` | `rebase` | ancestry rc=1; 2 commit/40 path; 21 blob khác canonical; Behavioral A/B §4.3 trên `cmd_state_put`, cùng GAS giả (hỗ trợ cả `upload` lẫn `rasoat_state_cas`): tip rc=2 `GAS_CHUA_HO_TRO_RASOAT_STATE_CAS`, writes=0; canonical rc=0, writes=1 qua `post:upload`; control tip có CAS rc=0, writes=1 qua `post:rasoat_state_cas` |
 | 7 | `origin/claude/deploy-v1-35-61-ci-5f7wdw` | `e094512a37ca` | `2026-07-29T02:48:58+00:00` | `ducthangho` — tác giả PR #2, #1 | `close` | PR #2, #1 merged; 0 tệp chỉ có trên nhánh |
 | 8 | `origin/claude/gate-04-05-t0f-hi76xl` | `eb9132f3aa2b` | `2026-08-02T09:45:41+00:00` | `ducthangho` — tác giả PR #12, #9, #8 | `close` | `merge-base --is-ancestor <tip> canonical` rc=0 — nội dung ĐÃ nằm trong canonical |
 | 9 | `origin/claude/legal-doc-review-architecture-2al46n` | `f39f98398d7b` | `2026-07-26T08:06:51+07:00` | `unknown` | `close` | 0 tệp chỉ có trên nhánh (`diff --diff-filter=A` rỗng) — bị canonical thay thế |

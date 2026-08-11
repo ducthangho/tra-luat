@@ -79,8 +79,12 @@ class Ctx:
             sd,
         )
 
+    def head(self, luot: int) -> str:
+        """Head giả nhưng ĐÚNG DẠNG git oid, khác nhau theo lượt."""
+        return f"{luot:040x}"
+
     def den_reviewing(self, sd: Path, packet: int, luot: int):
-        """begin-attempt → record-post → transition reviewing."""
+        """begin-attempt → record-post → transition reviewing (neo head của lượt)."""
         rc, _, e = run(self.script, ["begin-attempt", "--packet", packet, "--provider", EXECUTOR], sd)
         _doi(0, rc, e, f"begin-attempt lượt {luot}")
         cid = str(9_000_000_000 + packet * 1000 + luot * 2)
@@ -88,12 +92,14 @@ class Ctx:
                        ["record-post", "--packet", packet, "--for", "reviewing", "--comment-id", cid], sd)
         _doi(0, rc, e, f"record-post lượt {luot}")
         rc, _, e = run(self.script,
-                       ["transition", "--packet", packet, "--to", "reviewing", "--comment-id", cid], sd)
+                       ["transition", "--packet", packet, "--to", "reviewing",
+                        "--comment-id", cid, "--head-sha", self.head(luot)], sd)
         _doi(0, rc, e, f"transition reviewing lượt {luot}")
         return cid
 
-    def review(self, sd, packet, ids, verdict="changes_requested", descs=()):
-        args = ["record-review", "--packet", packet, "--provider", REVIEWER, "--verdict", verdict]
+    def review(self, sd, packet, ids, verdict="changes_requested", descs=(), luot=1, sha=None):
+        args = ["record-review", "--packet", packet, "--provider", REVIEWER, "--verdict", verdict,
+                "--reviewed-sha", self.head(luot) if sha is None else sha]
         for i in ids:
             args += ["--finding-id", i]
         for d in descs:
@@ -136,7 +142,8 @@ def case_review_sai_provider_thoat_4(c: Ctx):
     rc, _, e = run(
         c.script,
         ["record-review", "--packet", 55, "--provider", EXECUTOR,
-         "--verdict", "changes_requested", "--finding-id", "sai-nen-review"],
+         "--verdict", "changes_requested", "--finding-id", "sai-nen-review",
+         "--reviewed-sha", c.head(1)],
         sd,
     )
     _doi(4, rc, e, "executor tự review chính mình phải bị chặn")
@@ -152,12 +159,138 @@ def case_cap_lan_4_thoat_3(c: Ctx):
     for n in (1, 2, 3):
         c.den_reviewing(sd, 55, n)
         # ID khác nhau mỗi lượt để KHÔNG kích same-failure — ca này chỉ đo trần lượt.
-        rc, _, e = c.review(sd, 55, [f"loi-khac-nhau-{n}"])
+        rc, _, e = c.review(sd, 55, [f"loi-khac-nhau-{n}"], luot=n)
         _doi(0, rc, e, f"review lượt {n}")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(3, rc, e, "lượt thứ 4 phải thoát 3")
     if c.state(sd, 55) != "blocked":
         raise AssertionError(f"state phải là blocked, đang là {c.state(sd, 55)!r}")
+
+
+def case_begin_attempt_lap_khong_tieu_them_tran(c: Ctx):
+    """Lượt ĐANG MỞ thì gọi lại begin-attempt không mở lượt mới, không tiêu trần.
+
+    Thiếu chốt này, gõ begin-attempt bốn lần liên tiếp đủ đưa một packet mặc định
+    về blocked dù chưa lượt nào chạy xong.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt lần 1")
+    for lan in (2, 3, 4):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+        if rc == 0:
+            raise AssertionError(f"begin-attempt lần {lan} khi lượt đang mở phải bị từ chối")
+    if c.state(sd, 55) == "blocked":
+        raise AssertionError("gọi lặp begin-attempt KHÔNG được làm cạn trần")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    import json
+    if json.loads(o.decode("utf-8"))["attempts_used"] != 1:
+        raise AssertionError("attempts_used phải giữ 1 sau các lần gọi lặp")
+
+
+def case_init_khong_ghi_de_state_da_blocked(c: Ctx):
+    """Không có đường nào hồi sinh một packet đã cạn trần bằng cách init lại."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, ["loi-lap-lai"])
+    _doi(0, rc, e, "review lượt 1")
+    c.den_reviewing(sd, 55, 2)
+    rc, _, e = c.review(sd, 55, ["loi-lap-lai"], luot=2)
+    _doi(3, rc, e, "same-failure phải chặn")
+    # init lại: phải bị từ chối, và state cũ KHÔNG được đổi
+    rc, _, e = c.init(sd)
+    if rc == 0:
+        raise AssertionError("init đè lên state đã tồn tại phải bị từ chối")
+    if c.state(sd, 55) != "blocked":
+        raise AssertionError("state blocked không được bị init xoá")
+
+
+def case_init_khong_co_co_ghi_de(c: Ctx):
+    rc, o, e = run(c.script, ["init", "--help"])
+    _doi(0, rc, e, "init --help")
+    txt = _txt(o).lower()
+    for co in ("--force-new", "--force", "--overwrite", "--reset", "--clobber"):
+        if co in txt:
+            raise AssertionError(f"init KHÔNG được có cờ ghi đè, nhưng thấy {co!r}")
+
+
+# --- bằng chứng review neo EXACT SHA ------------------------------------------
+
+
+def case_review_phai_neo_head_da_dua_ra_review(c: Ctx):
+    """--reviewed-sha khác head đã đưa ra review ⇒ từ chối, KHÔNG cho accepted."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, [], verdict="approve", sha="b" * 40)
+    _doi(5, rc, e, "approve trên SHA khác head đưa ra review phải bị từ chối")
+    if c.state(sd, 55) == "accepted":
+        raise AssertionError("KHÔNG được accepted khi bản duyệt không neo đúng head")
+
+
+def case_review_thieu_hoac_sai_dang_sha(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = run(c.script,
+                   ["record-review", "--packet", 55, "--provider", REVIEWER,
+                    "--verdict", "approve"], sd)
+    _doi(5, rc, e, "thiếu --reviewed-sha phải bị từ chối")
+    for xau in ("1bca750", "Z" * 40, "A" * 40, ""):
+        rc, _, e = c.review(sd, 55, [], verdict="approve", sha=xau)
+        if rc == 0:
+            raise AssertionError(f"--reviewed-sha sai dạng {xau!r} phải bị từ chối")
+
+
+def case_transition_reviewing_phai_khai_head(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000011"], sd)
+    _doi(0, rc, e, "record-post")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000011"], sd)
+    _doi(5, rc, e, "vào reviewing mà không khai --head-sha phải bị từ chối")
+
+
+def case_approve_neo_dung_head_thi_chay(c: Ctx):
+    """Chiều dương: đúng head thì approve chạy và ghi lại accepted_sha."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, [], verdict="approve")
+    _doi(0, rc, e, "approve đúng head")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    import json
+    st = json.loads(o.decode("utf-8"))
+    if st["state"] != "accepted" or st["accepted_sha"] != c.head(1):
+        raise AssertionError(f"accepted phải neo đúng SHA, đang là {st['accepted_sha']!r}")
+
+
+def case_head_moi_lam_ban_duyet_cu_het_hieu_luc(c: Ctx):
+    """Mở lượt mới (có commit mới) ⇒ head cũ không còn dùng để duyệt được."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, ["can-sua-them"])
+    _doi(0, rc, e, "changes_requested lượt 1")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt lượt 2")
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000012"], sd)
+    _doi(0, rc, e, "record-post")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "7770000012", "--head-sha", c.head(2)], sd)
+    _doi(0, rc, e, "transition reviewing lượt 2")
+    rc, _, e = c.review(sd, 55, [], verdict="approve", sha=c.head(1))
+    _doi(5, rc, e, "duyệt bằng head CŨ sau khi có commit mới phải bị từ chối")
 
 
 # --- (a..d) same-failure theo ID ----------------------------------------------
@@ -171,7 +304,7 @@ def case_same_failure_cung_id_qua_2_review(c: Ctx):
     rc, _, e = c.review(sd, 55, ["url-alias"])
     _doi(0, rc, e, "lần 1 cùng ID chưa được chặn")
     c.den_reviewing(sd, 55, 2)
-    rc, _, e = c.review(sd, 55, ["url-alias"])
+    rc, _, e = c.review(sd, 55, ["url-alias"], luot=2)
     _doi(3, rc, e, "lần 2 cùng ID phải chặn")
     if c.state(sd, 55) != "blocked":
         raise AssertionError("same-failure phải đưa state về blocked")
@@ -185,7 +318,7 @@ def case_same_failure_hai_id_khac_khong_kich(c: Ctx):
     rc, _, e = c.review(sd, 55, ["url-alias"])
     _doi(0, rc, e, "ID thứ nhất")
     c.den_reviewing(sd, 55, 2)
-    rc, _, e = c.review(sd, 55, ["van-tay-lach"])
+    rc, _, e = c.review(sd, 55, ["van-tay-lach"], luot=2)
     _doi(0, rc, e, "ID khác không được kích trần")
     if c.state(sd, 55) == "blocked":
         raise AssertionError("hai ID khác nhau không được làm blocked")
@@ -291,8 +424,14 @@ def case_comment_id_dung_lai_bi_tu_choi(c: Ctx):
     rc, _, e = run(c.script,
                    ["transition", "--packet", 55, "--to", "running", "--comment-id", cid_run], sd)
     _doi(0, rc, e, "transition running lần 1")
-    # vòng hai: tới reviewing rồi thử tiêu thụ LẠI đúng ID cũ cho cùng transition
-    c.den_reviewing(sd, 55, 2)
+    # vòng hai: quay lại reviewing (không cần lượt mới) rồi thử tiêu thụ LẠI ID cũ
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000013"], sd)
+    _doi(0, rc, e, "record-post reviewing vòng 2")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "7770000013", "--head-sha", c.head(1)], sd)
+    _doi(0, rc, e, "transition reviewing vòng 2")
     rc, _, e = run(c.script,
                    ["transition", "--packet", 55, "--to", "running", "--comment-id", cid_run], sd)
     _doi(5, rc, e, "ID đã tiêu thụ không được dùng lại")
@@ -447,8 +586,10 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
         (["next-comment", "--packet", 55], sd),
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
-        (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000009"], sd),
+        (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000009",
+          "--head-sha", "%040x" % 1], sd),
         (["record-review", "--packet", 55, "--provider", REVIEWER, "--verdict", "changes_requested",
+          "--reviewed-sha", "%040x" % 1,
           "--finding-id", "loi-co-dau-tieng-viet", "--finding-desc", "mô tả có dấu tiếng Việt"], sd),
         (["status", "--packet", 55], sd),
         (["doctrine-scan", "--root", r], None),
@@ -501,6 +642,14 @@ CASES = [
     ("init_cung_provider_thoat_4", case_init_cung_provider_thoat_4),
     ("review_sai_provider_thoat_4", case_review_sai_provider_thoat_4),
     ("cap_lan_4_thoat_3", case_cap_lan_4_thoat_3),
+    ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
+    ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
+    ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
+    ("review_phai_neo_head_da_dua_ra_review", case_review_phai_neo_head_da_dua_ra_review),
+    ("review_thieu_hoac_sai_dang_sha", case_review_thieu_hoac_sai_dang_sha),
+    ("transition_reviewing_phai_khai_head", case_transition_reviewing_phai_khai_head),
+    ("approve_neo_dung_head_thi_chay", case_approve_neo_dung_head_thi_chay),
+    ("head_moi_lam_ban_duyet_cu_het_hieu_luc", case_head_moi_lam_ban_duyet_cu_het_hieu_luc),
     ("same_failure_cung_id_qua_2_review", case_same_failure_cung_id_qua_2_review),
     ("same_failure_hai_id_khac_khong_kich", case_same_failure_hai_id_khac_khong_kich),
     ("same_failure_lap_trong_mot_review_tinh_mot", case_same_failure_lap_trong_mot_review_tinh_mot),

@@ -88,6 +88,9 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 # ID do GitHub TRẢ VỀ lúc đăng: id số, hoặc node id dạng "IC_kwDO...".
 COMMENT_ID_RE = re.compile(r"^(?:[0-9]{6,}|[A-Za-z]{2}_[A-Za-z0-9_-]{10,})$")
 
+# Bằng chứng review gắn EXACT SHA — git oid đầy đủ, không nhận dạng rút gọn.
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
 # --- (c) danh sách cụm từ doctrine BỊ CẤM trong adapter ------------------------
 # Đây là "đáy đo" mà revision 1 không có. Ba lượt review đều kết luận "adapter
 # chép doctrine" bằng mắt, và ba lượt đều bắt lại được — vì tiêu chí đọc bằng mắt
@@ -244,8 +247,18 @@ def cmd_init(a, state_dir: Path) -> int:
             f"(mức assurance khác nhau, xem protocol §8)",
         )
     p = _state_path(state_dir, a.packet)
-    if p.exists() and not a.force_new:
-        _die(RC_STATE, f"state đã tồn tại: {p}")
+    # KHÔNG có `--force-new`, và đừng thêm lại. Cờ đó ghi đè state cũ nên nó xoá
+    # sạch attempts_used/finding_counts và đưa một packet ĐÃ blocked về leased —
+    # tức là đường vòng qua đúng cái trần mà tệp này tồn tại để cưỡng chế. Tiến
+    # trình này không biết revision/generation và không có uỷ quyền của bên điều
+    # phối, nên nó KHÔNG phân biệt được reroute hợp lệ với hồi sinh một lease đã
+    # cạn. Reroute là việc của bên điều phối: cấp generation mới với state-dir mới.
+    if p.exists():
+        _die(
+            RC_STATE,
+            f"state đã tồn tại: {p}. Không ghi đè — reroute phải là generation mới "
+            f"do bên điều phối cấp, với --state-dir mới.",
+        )
     st = {
         "schema_version": 1,
         "packet": a.packet,
@@ -257,6 +270,9 @@ def cmd_init(a, state_dir: Path) -> int:
         "attempts_limit": a.attempts_limit,
         "same_failure_limit": a.same_failure_limit,
         "finding_counts": {},
+        "attempt_open": False,
+        "reviewing_head_sha": None,
+        "accepted_sha": None,
         "reviews": [],
         "posts": {},
         "history": [],
@@ -279,6 +295,15 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
     # Lượt đầu đi từ 'leased'; lượt rework đi từ 'running' sau changes_requested.
     if st["state"] not in ("leased", "running"):
         _die(RC_STATE, f"không mở được lượt từ state {st['state']!r}")
+    # Một lượt ĐANG MỞ thì không mở thêm được. Thiếu chốt này, gõ `begin-attempt`
+    # bốn lần liên tiếp sẽ đốt sạch trần dù chưa lượt nào chạy xong — trần bị
+    # tiêu bởi thao tác lặp, không phải bởi công việc thật.
+    if st["attempt_open"]:
+        _die(
+            RC_STATE,
+            f"lượt {st['attempts_used']} đang mở — đóng nó bằng một review trước đã. "
+            f"Gọi lại begin-attempt không mở lượt mới và không tiêu thêm trần.",
+        )
     if st["attempts_used"] >= st["attempts_limit"]:
         st["state"] = "blocked"
         st["history"].append({"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]})
@@ -290,6 +315,10 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
         )
     st["attempts_used"] += 1
     st["state"] = "running"
+    st["attempt_open"] = True
+    # Head cũ hết hiệu lực ngay khi mở lượt mới: có commit mới thì bản duyệt
+    # trước không còn nói về cây đang có nữa.
+    st["reviewing_head_sha"] = None
     st["history"].append({"event": "begin_attempt", "attempt": st["attempts_used"]})
     _save(state_dir, st)
     print(f"bắt đầu lượt {st['attempts_used']}/{st['attempts_limit']} — state {st['state']}")
@@ -326,6 +355,21 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"reviewer {a.provider!r} sai nền — packet này đòi {st['reviewer']!r}",
         )
 
+    # Bản duyệt phải neo ĐÚNG head đã đưa ra review. Không có chốt này thì
+    # `approve` đưa packet sang 'accepted' mà chẳng nói về commit nào — và một
+    # commit chưa ai đọc vẫn được coi là đã duyệt.
+    if not a.reviewed_sha:
+        _die(RC_TRACE, "record-review phải khai --reviewed-sha (exact head đã đọc)")
+    if not SHA_RE.match(a.reviewed_sha):
+        _die(RC_TRACE, f"--reviewed-sha {a.reviewed_sha!r} phải là git oid 40 ký tự hex thường")
+    if a.reviewed_sha != st["reviewing_head_sha"]:
+        _die(
+            RC_TRACE,
+            f"--reviewed-sha {a.reviewed_sha} KHÔNG khớp head đã đưa ra review "
+            f"({st['reviewing_head_sha']}). Head đổi ⇒ bản duyệt cũ hết hiệu lực, "
+            f"phải vào lại 'reviewing' với head mới.",
+        )
+
     ids = list(a.finding_id or [])
     if a.verdict == "changes_requested" and not ids:
         _die(RC_ARG, "verdict changes_requested phải có ít nhất một --finding-id SLUG")
@@ -342,11 +386,13 @@ def cmd_record_review(a, state_dir: Path) -> int:
     # lượt sẽ chặn oan ngay lượt đầu — đúng lỗi đã đo ở vòng 3.
     ids_duy_nhat = sorted(set(ids))
 
+    st["attempt_open"] = False
     st["reviews"].append(
         {
             "attempt": st["attempts_used"],
             "provider": a.provider,
             "verdict": a.verdict,
+            "reviewed_sha": a.reviewed_sha,
             "finding_ids": ids_duy_nhat,
             # (d) mô tả CHỈ để đọc. Nó không tham gia phép đếm, nên hai mô tả
             # khác nhau cùng một ID vẫn là một finding.
@@ -373,7 +419,12 @@ def cmd_record_review(a, state_dir: Path) -> int:
         )
 
     st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
-    st["history"].append({"event": "record_review", "verdict": a.verdict, "finding_ids": ids_duy_nhat})
+    if a.verdict == "approve":
+        st["accepted_sha"] = a.reviewed_sha
+    st["history"].append(
+        {"event": "record_review", "verdict": a.verdict,
+         "reviewed_sha": a.reviewed_sha, "finding_ids": ids_duy_nhat}
+    )
     _save(state_dir, st)
     print(
         f"đã ghi review {a.verdict} bởi {a.provider} — "
@@ -385,10 +436,20 @@ def cmd_record_review(a, state_dir: Path) -> int:
 def cmd_transition(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     _kiem_chuyen(st, a.to)
+    # Vào 'reviewing' phải khai ĐÚNG head đang đưa ra review. Đây là mỏ neo mà
+    # bản duyệt sẽ phải khớp: bất biến của protocol là bằng chứng review gắn
+    # exact SHA, head đổi thì bản duyệt cũ hết hiệu lực.
+    if a.to == "reviewing":
+        if not a.head_sha:
+            _die(RC_TRACE, "vào 'reviewing' phải khai --head-sha (exact head đưa ra review)")
+        if not SHA_RE.match(a.head_sha):
+            _die(RC_TRACE, f"--head-sha {a.head_sha!r} phải là git oid 40 ký tự hex thường")
     so = _tieu_thu_comment_id(st, a.comment_id, a.to)
     so["consumed_by"] = a.to
     truoc = st["state"]
     st["state"] = a.to
+    if a.to == "reviewing":
+        st["reviewing_head_sha"] = a.head_sha
     st["history"].append(
         {"event": "transition", "from": truoc, "to": a.to, "comment_id": a.comment_id}
     )
@@ -510,7 +571,6 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--reviewer", required=True)
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
-    q.add_argument("--force-new", action="store_true")
     q.set_defaults(fn=cmd_init)
 
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
@@ -527,6 +587,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
     q.add_argument("--verdict", required=True, choices=("approve", "changes_requested", "blocked"))
+    q.add_argument("--reviewed-sha", help="exact head đã đọc; phải khớp head đưa ra review")
     q.add_argument(
         "--finding-id",
         action="append",
@@ -543,6 +604,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--to", required=True)
     q.add_argument("--comment-id", help="ID GitHub trả về, đã ghi sổ bằng record-post")
+    q.add_argument("--head-sha", help="bắt buộc khi --to reviewing: exact head đưa ra review")
     q.set_defaults(fn=cmd_transition)
 
     q = sub.add_parser("record-post", help="ghi sổ ID comment GitHub trả về lúc đăng")

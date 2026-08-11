@@ -1107,7 +1107,11 @@ def _rasoat_fallback_plan(sub: str, script: str, rest: list[str]) -> dict:
 
 def _rasoat_map_positional(sub: str, rest) -> list:
     """#4: positional ĐẦU (số hiệu/file) → cờ chính của script rasoat đích (worksheet→--so-hieu, phuluc→--in),
-    để `tl rasoat worksheet 18/VBHN-VPQH` chạy như `... --so-hieu 18/VBHN-VPQH`. No-op nếu đã có cờ / là -h / sub khác."""
+    để `tl rasoat worksheet 18/VBHN-VPQH` chạy như `... --so-hieu 18/VBHN-VPQH`. No-op nếu đã có cờ / là -h / sub khác.
+
+    r310: đường DISPATCH không còn dùng hàm này (positional/alias nay do argparse lo — `fills` +
+    `flags:["--so-hieu","--sohieu","--so_hieu"]` trong RASOAT_SPECS). GIỮ lại vì nó là bản mô tả gọn nhất
+    của quy ước positional, và ca `rasoat_worksheet_positional_maps_so_hieu` vẫn khoá quy ước đó."""
     rest = list(rest or [])
     # B1: ALIAS cờ — skill dùng `--sohieu` (không gạch) nhưng worksheet đòi `--so-hieu`; phuluc đòi `--in` thay `--file`.
     # Chuẩn hoá để KHỎI nhớ flag riêng từng script con (§14: dùng lệnh sẵn có, đừng bắt nhớ chi tiết). No-op nếu khác.
@@ -1148,19 +1152,32 @@ def _rasoat_autocache_worksheet(rest: list, a) -> None:
 
 
 def cmd_rasoat(a) -> int:
-    """Passthrough tới script rà soát/backfill nếu có; nếu thiếu thì in fallback plan có cấu trúc."""
-    table = {
-        "keywords": "backfill_keywords_live.py",
-        "titles": "backfill_nlm_title.py",
-        "worksheet": "rasoat_worksheet.py",
-        "phuluc": "rasoat_phuluc.py",
-        "orchestrate": "registry_orchestrator.py",
-    }
-    script = table.get(a.sub)
-    if not script:
-        print(f"[tl] rasoat <sub> ∈ {list(table)}", file=sys.stderr)
+    """Passthrough tới script rà soát/backfill nếu có; nếu thiếu thì in fallback plan có cấu trúc.
+
+    r310 (RAS-01 vế metadata/CLI · RAS-14) — ba thay đổi HÀNH VI, mỗi cái vá một lỗ:
+      1. argv script con dựng từ NAMESPACE đã parse (`rasoat_child_argv`), không còn `argparse.REMAINDER`.
+      2. `apply_profile_offline` chạy TRƯỚC dispatch — script con thừa hưởng đúng TL_PROFILE/scope. Trước
+         đây `rasoat` nằm trong `_CREDS_LAZY_CMDS` nên `load_creds` KHÔNG chạy, và REMAINDER lại nuốt mất
+         `--profile`: script con ghi registry theo scope NỀN dù người gõ đã chỉ định hồ sơ (RAS-14).
+      3. Đường GHI đòi `--apply` TƯỜNG MINH. Thiếu `--apply` ⇒ bơm `dry_flag` của script con; script GHI
+         mà KHÔNG có chế độ DRY ⇒ TỪ CHỐI (fail-CLOSED) chứ không chạy liều — "chạy trần" phải chỉ-đọc."""
+    spec = _tl_registry.RASOAT_SPEC_BY_NAME.get(getattr(a, "sub", None) or "")
+    if not spec:
+        print(f"[tl] rasoat <sub> ∈ {list(_tl_registry.RASOAT_SPEC_BY_NAME)}", file=sys.stderr)
         return 1
-    rest = _rasoat_map_positional(a.sub, a.rest)
+    script = spec["script"]
+    # (2) scope TRƯỚC dispatch — offline (rasoat là lệnh creds-lazy, không được đòi token ở đây).
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
+    apply_on = bool(getattr(a, "apply", False))
+    # (3) cổng ghi fail-CLOSED: writer không có đường DRY thì KHÔNG có "chạy trần an toàn".
+    if spec.get("writes") and not apply_on and not spec.get("dry_flag"):
+        print(json.dumps({"ok": False, "error": "RASOAT_WRITE_NEEDS_APPLY", "sub": a.sub, "script": script,
+                          "write_scope": spec["writes"],
+                          "fix": f"`tl rasoat {a.sub} … --apply` để GHI; script con này KHÔNG có chế độ DRY "
+                                 "nên chạy trần bị từ chối thay vì ghi im lặng."},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    rest = _tl_registry.rasoat_child_argv(spec, a, apply_on=apply_on)
     if a.sub == "worksheet" and not getattr(a, "no_auto_cache", False):
         _rasoat_autocache_worksheet(rest, a)        # #3: tự dựng cache nếu thiếu (auto-chain ingest)
     name = script[:-3] if script.endswith(".py") else script
@@ -1171,7 +1188,8 @@ def cmd_rasoat(a) -> int:
     if fb.exists():
         return subprocess.call([sys.executable, str(fb)] + rest)
     plan = _rasoat_fallback_plan(a.sub, script, rest)
-    if "--json" in rest:
+    # `--json` nay do tl NUỐT (vòng inject cuối build_parser) chứ không còn nằm trong `rest` — đọc namespace.
+    if getattr(a, "json", False) or "--json" in rest:
         print(json.dumps(plan, ensure_ascii=False, indent=2))
     else:
         print(f"[tl] optional script chưa có: {script}. Đây là overlay core, không phải gói rasoat đầy đủ.", file=sys.stderr)
@@ -1426,8 +1444,17 @@ def _vbhn_verify_flags(text: str, expect_title: str = "", expect_gocs: list[str]
 
 def _focus_block(text: str, focus: str) -> str:
     focus = (focus or "").strip()
-    m = re.search(r"(?iu)\bĐiều\s+(\d+)\b", focus)
+    # r296 (P16-F15, cùng họ): `(\d+)\b` không nhận nổi focus "Điều 7a" ⇒ rơi thẳng xuống nhánh tìm-chuỗi
+    # và trả về một CỬA SỔ ±1500/5000 ký tự thay vì đúng khối Điều — so sánh official↔candidate (:1449)
+    # do đó đối chiếu nhầm vùng. Tách hậu tố chữ ra group RIÊNG: không hậu tố thì giữ nguyên đường
+    # `extract_dieu` (khoá int, không đổi hợp đồng); CÓ hậu tố thì đi `_slice_dieu` — hàm nhận str và
+    # sau r296 đã dừng đúng chỗ. (`_slice_dieu` là symbol của `nlm_ops`, resolve qua namespace tl sau
+    # bind — cùng khuôn với mọi tham chiếu chéo module khác trong tệp này.)
+    m = re.search(r"(?iu)\bĐiều\s+(\d+)([a-zđ]*)\b", focus)
     if m:
+        if m.group(2):
+            blk = _slice_dieu(text or "", m.group(1) + m.group(2))
+            return "" if blk.startswith("[không thấy Điều") else blk
         return extract_dieu(text or "", int(m.group(1))) or ""
     pos = _strip_accents(text or "").lower().find(_strip_accents(focus).lower())
     if pos < 0:
@@ -1735,22 +1762,50 @@ def cmd_rasoat_loop(a) -> int:
     # corpus cũng dry_rounds++ (dòng dưới) mà GAP chính là SẢN PHẨM của lệnh ⇒ càng tìm ra nhiều gap càng
     # dừng sớm, mất dữ liệu phát hiện IM LẶNG. `max_iter` vẫn là trần cứng duy nhất; `dry_rounds` giữ
     # nguyên vai trò tín hiệu hội tụ ở `converged` (frontier cạn toàn-gap ⇒ dry_rounds≥K ⇒ HỘI TỤ, đúng).
+    # r295/T1-c (RAS-04 + RAS-10 — audit lõi 31-07): MỘT định nghĩa hội tụ duy nhất.
+    #   khong_doc_duoc = ứng viên IN-CORPUS có bản đọc được NHƯNG đọc HỎNG (ném lỗi / ra rỗng)
+    #                    — đếm RIÊNG, KHÔNG bao giờ đụng `dry_rounds`, và CHẶN `converged`
+    #   khong_co_ban_doc = ứng viên IN-CORPUS không giải được GDoc id — CHỈ BÁO, không chặn hội tụ
+    # ★ Ranh giới giữa hai sổ trên là RANH GIỚI PHẢI GIỮ: gộp "không có bản đọc" vào "đọc hỏng" làm đỏ
+    #   `r256_no_infinite_loop_seen_dedup_holds` (harness của nó cho `_resolve_deep_target` trả gid=None
+    #   và khoá `rc=0`) — bắt được lúc chạy full suite. Registry có dòng hợp lệ không kèm Drive (vd mới
+    #   nạp NLM), coi đó là "lệnh hỏng" là siết quá tay và NGOÀI phạm vi phát hiện RAS-04 (nói về
+    #   `_read_doc_text`). Vẫn phải NÓI RA — doctrine "no silent caps".
+    #   dry_rounds     = CHỈ tăng khi đã đọc THÀNH CÔNG mà không sinh ứng viên mới
+    #   converged      = frontier cạn VÀ không có ca không-đọc-được VÀ (dry_rounds ≥ K HOẶC chưa từng có
+    #                    ứng viên nào ngay từ đầu)
+    # Vì sao: `converged:true` là lời khẳng định "đã soi hết, không còn gì mới". Bản cũ gộp lỗi đọc vào
+    # `dry_rounds` nên HAI lần đọc hỏng liên tiếp là đủ chạm K ⇒ lệnh tuyên bố HỘI TỤ, rc=0, trong khi
+    # thực tế chưa hề nhìn vào hai văn bản đó — mất phát hiện IM LẶNG, đúng lớp bệnh r256 đã trả giá.
+    # RAS-10 là vế còn lại của cùng một định nghĩa: frontier rỗng NGAY TỪ ĐẦU (base không dẫn đi đâu) là
+    # hội tụ THẬT, không phải "chưa đủ vòng-cạn" — bản cũ trả `converged:false` mãi mãi vì dry_rounds=0<K.
+    _co_ung_vien_ban_dau = bool(frontier)
+    khong_doc_duoc, khong_co_ban_doc = [], []
     while frontier and it < max_iter:
         it += 1
         c = frontier.pop(0)
         evaluated.append(c.get("sohieu_norm"))
         if not c.get("in_corpus"):
             gaps.append(c); dry_rounds += 1; continue
-        added = 0
+        _sh295 = c.get("sohieu") or c.get("sohieu_norm")
+        added, _hong = 0, ""
         try:
-            _e, _gid, _, _ = _resolve_deep_target(c.get("sohieu") or c.get("sohieu_norm"), entries)
-            if _gid:
-                _t = _read_doc_text(_gid, getattr(a, "config", None)) or ""
-                if _t:
-                    added = _rasoat_dedup_push(frontier, seen, _rasoat_expand_text(_t, entries))
-        except Exception:
-            added = 0
-        dry_rounds = 0 if added else dry_rounds + 1
+            _e, _gid, _, _ = _resolve_deep_target(_sh295, entries)
+            if not _gid:
+                khong_co_ban_doc.append(_sh295)      # không chặn hội tụ (xem ghi chú trên), vẫn báo
+                dry_rounds += 1
+                continue
+            _t = _read_doc_text(_gid, getattr(a, "config", None)) or ""
+            if not _t:
+                _hong = "DOC_RA_RONG"
+            else:
+                added = _rasoat_dedup_push(frontier, seen, _rasoat_expand_text(_t, entries))
+        except Exception as _err295:  # noqa: BLE001
+            _hong = type(_err295).__name__ + ": " + str(_err295)[:120]
+        if _hong:
+            khong_doc_duoc.append({"sohieu": _sh295, "ly_do": _hong})
+        else:
+            dry_rounds = 0 if added else dry_rounds + 1
     in_corpus_no_nlm = []
     for k in seen:
         for e in entries:
@@ -1760,27 +1815,43 @@ def cmd_rasoat_loop(a) -> int:
     gap_sh = sorted({c.get("sohieu") for c in gaps if c.get("sohieu")})
     # r252: NÓI RÕ vì sao dừng (doctrine "no silent caps") — trước đây nhánh not-converged in cứng
     # "chạm max-iter" nên ca dừng-vì-dry bị chẩn đoán SAI, người đọc đi tăng --max-iter mà vô ích.
-    stop_reason = "max_iter" if it >= max_iter and frontier else "frontier_empty"
-    out = {"ok": True, "gate": "rasoat-loop", "base": base_name, "iterations": it, "seen": len(seen),
+    stop_reason = ("max_iter" if it >= max_iter and frontier
+                   else ("frontier_empty_ngay_tu_dau" if not _co_ung_vien_ban_dau else "frontier_empty"))
+    _converged = ((not frontier) and not khong_doc_duoc
+                  and (dry_rounds >= K or not _co_ung_vien_ban_dau))
+    out = {"ok": not khong_doc_duoc, "gate": "rasoat-loop", "base": base_name, "iterations": it, "seen": len(seen),
            "evaluated": len(evaluated), "frontier_remaining": len(frontier),
            "stop_reason": stop_reason, "dry_rounds": dry_rounds, "max_iter": max_iter, "dry_rounds_target": K,
-           "converged": (not frontier) and dry_rounds >= K,
+           "converged": _converged,
+           "khong_doc_duoc": khong_doc_duoc, "khong_co_ban_doc": sorted(set(khong_co_ban_doc)),
            "gaps_missing_in_corpus": gap_sh, "in_corpus_not_on_nlm": sorted(set(in_corpus_no_nlm)),
            "note": "REPORT-ONLY: bản thiếu TRONG corpus chưa NLM → `tl ingest-missing --apply`; bản NGOÀI corpus (gaps) "
                    "→ discovery/tải (KH3, qua G1/G2/G3); đánh giá sâu từng cặp → `tl overlap`."}
+    if khong_doc_duoc:
+        # rc≠0 CHỈ ở ca này: lệnh KHÔNG LÀM ĐƯỢC VIỆC (có ứng viên không soi được ruột) — khác hẳn hai ca
+        # "báo cáo trung thực" là chạm max_iter / chưa đủ vòng-cạn, hai ca đó GIỮ rc=0 như cũ.
+        out["note"] = (f"CHƯA soi được ruột {len(khong_doc_duoc)} ứng viên IN-CORPUS ⇒ KHÔNG thể kết luận hội tụ. "
+                       "Xử lý `khong_doc_duoc` (kiểm gws/cache, hoặc nạp bản đọc được) rồi chạy lại. " + out["note"])
     if getattr(a, "json", False):
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
     else:
+        # r295/T1-c: thêm nhánh chẩn đoán THỨ BA — trước đây ca không-đọc-được bị in nhầm thành
+        # "chưa đủ vòng-cạn", người đọc đi tăng --dry-rounds mà vô ích (đúng lớp sai-chẩn-đoán r252 đã vá).
         _why252 = ("HỘI TỤ" if out["converged"] else
-                   (f"CHƯA hội tụ (chạm max-iter={max_iter}, còn {len(frontier)} ứng viên — tăng --max-iter)"
-                    if stop_reason == "max_iter" else
-                    f"frontier CẠN nhưng dry_rounds={dry_rounds} < {K} (chưa đủ vòng-cạn để chốt hội tụ)"))
+                   (f"KHÔNG kết luận được: {len(khong_doc_duoc)} ứng viên IN-CORPUS không soi được ruột"
+                    if khong_doc_duoc else
+                    (f"CHƯA hội tụ (chạm max-iter={max_iter}, còn {len(frontier)} ứng viên — tăng --max-iter)"
+                     if stop_reason == "max_iter" else
+                     f"frontier CẠN nhưng dry_rounds={dry_rounds} < {K} (chưa đủ vòng-cạn để chốt hội tụ)")))
         print(f"== rasoat-loop {base_name[:34]} · {it} vòng · seen={len(seen)} · {_why252} ==")
         print(f"  GAP ngoài corpus ({len(gap_sh)}): {', '.join(gap_sh[:12])}")
+        if khong_doc_duoc:
+            print(f"  KHÔNG đọc được ({len(khong_doc_duoc)}): "
+                  + ", ".join(f"{x['sohieu']} [{x['ly_do']}]" for x in khong_doc_duoc[:8]))
         if out["in_corpus_not_on_nlm"]:
             print(f"  Trong corpus CHƯA NLM ({len(out['in_corpus_not_on_nlm'])}): {', '.join(out['in_corpus_not_on_nlm'][:10])} → tl ingest-missing --apply")
         print("  " + out["note"])
-    return 0
+    return 2 if khong_doc_duoc else 0
 
 
 def cmd_footnote_map(a) -> int:
@@ -1913,6 +1984,34 @@ def cmd_cluster(a) -> int:
     return 0
 
 
+def _rasoat_corpus_hieu_luc(e) -> bool:
+    """PURE — r295/T1-c (RAS-13, audit lõi 31-07): một dòng registry có thuộc CORPUS HIỆU LỰC không.
+
+    "Có trong corpus" phải hiểu là DÙNG ĐƯỢC để đối chiếu, không phải "có dòng nào mang số hiệu đó".
+    Loại ĐÚNG BA thứ đã được chứng minh là dương-tính-giả:
+      · `corpus` ghi rõ "false"  (bản đã cố ý HẠ khỏi corpus)
+      · cat cách ly (`_is_quarantine_cat`: mọi biến thể 'quarantine'/'zzz')
+      · `row_kind == "ref"` (dòng tham chiếu, không phải bản văn trong kho)
+
+    ★ CỐ Ý KHÔNG dùng `_entry_corpus_true` (nó đòi == "true" nên coi THIẾU CỘT là ngoài corpus).
+    Ở đây "thiếu cột" là KHÔNG BIẾT, mà biến không-biết thành "thiếu corpus" chính là ÂM TÍNH GIẢ —
+    đúng thứ mà chốt S3 ngay trong `cmd_rasoat_chongcheo` ("KHÔNG có manifest → đừng khẳng định thiếu
+    corpus") sinh ra để chặn. Siết thêm vế đó làm đỏ `cluster_dup_sohieu_disambig` (fixture không có
+    cột `corpus`) — bắt được lúc chạy full suite, và đó là bằng chứng vế ấy nằm NGOÀI phát hiện RAS-13.
+
+    Trước bản vá, `rasoat-chongcheo` so số hiệu trên TOÀN `entries` nên một bản đã hạ `corpus=false`
+    hoặc đã đẩy vào quarantine vẫn làm lệnh kết luận "ĐÃ CÓ trong corpus" — giấu mất đúng khoảng trống
+    mà lệnh sinh ra để tìm. Đặt thành hàm dùng chung để hai call-site (`_in_corpus` và
+    `_resolve_cluster_member`) không thể trôi khỏi nhau như đã trôi.
+    """
+    try:
+        return (str(e.get("corpus") or "").strip().lower() != "false"
+                and not _is_quarantine_cat(_entry_cat(e))
+                and _entry_row_kind(e) != "ref")
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def cmd_rasoat_chongcheo(a) -> int:
     """E1 (v1 — lớp DISCOVERY): dựng TẬP LIÊN QUAN của 1 base = cụm lĩnh vực (E2) + footnote-amend (B3 nếu có --target/--text-file)
     + kiểm hiện diện corpus + cờ PENDING_EFFECT. So sánh quy phạm (OVERLAP_SCOPE/CONFLICT_NORM/PRIORITY/STALE_REF/GAP)
@@ -1940,8 +2039,13 @@ def cmd_rasoat_chongcheo(a) -> int:
         # VBHN KHÔNG năm ('19/VBHN-VPQH') còn corpus lưu year-qualified ('19-2025-VBHN-VPQH') nên so
         # exact MISS SẠCH. Docstring _sohieu_query_hits_entry nêu thẳng `in_corpus` là call-site của nó.
         # GIỮ vế cũ (so thô) — nới chỉ THÊM, không thay hành vi đang đúng.
+        # r295/T1-c (RAS-13): lọc theo CORPUS-HIỆU-LỰC trước khi so số hiệu. Bản cũ so số hiệu trên TOÀN
+        # `entries` nên một dòng `corpus=false` / cat quarantine / `row_kind=ref` cũng làm lệnh kết luận
+        # "ĐÃ CÓ trong corpus" — tức giấu mất đúng thứ lệnh chồng-chéo sinh ra để tìm. Trục lọc này KHÁC
+        # trục r255 (bare-VBHN, so số hiệu) nên hai vế cộng hưởng, không giẫm nhau.
         return any(_sohieu_query_hits_entry(k, _sohieu_key_entry(e))
-                   or norm_sohieu(_entry_sohieu(e)) == k for e in entries)
+                   or norm_sohieu(_entry_sohieu(e)) == k
+                   for e in entries if _rasoat_corpus_hieu_luc(e))
     related = []
     if c:
         for subj, sh in (c.get("members") or {}).items():
@@ -2142,8 +2246,11 @@ def _norm_compare_text(s: str) -> str:
 
 def _legal_refs(text: str) -> list[str]:
     """Rút các tham chiếu kiểu 'khoản 1 Điều 90' để bắt stale-ref trong bản tự ghép."""
+    # r296 (P16-F15, cùng họ): `\d+\b` làm tham chiếu tới điều có HẬU TỐ CHỮ rơi mất HOÀN TOÀN —
+    # "khoản 1 Điều 7a" không sinh ra ref nào (đo được). Hàm này dùng để BẮT stale-ref, nên bỏ sót ref là
+    # fail-OPEN: bản tự ghép trỏ sai vào Điều 7a sẽ đi qua mà không ai thấy.
     out = []
-    for m in re.finditer(r"(?iu)\b(?:khoản\s+\d+\s+)?Điều\s+\d+\b", text or ""):
+    for m in re.finditer(r"(?iu)\b(?:khoản\s+\d+\s+)?Điều\s+\d+[a-zđ]*\b", text or ""):
         ref = re.sub(r"\s+", " ", m.group(0).strip())
         if ref not in out:
             out.append(ref)
@@ -2513,7 +2620,17 @@ def _doc_text_any(file_id: str, *, entry=None, refresh: bool = False, config=Non
                         text, src = t, "docx"
                         _meta["markup_filter_ran"] = _mode != "raw"
                         try:   # r183: khai số đếm thật để caller/JSON nói được ĐÃ lọc cái gì
-                            _meta["markup_found"] = any(_imp("docx_markup").scan_file(p).values())
+                            _dm2 = _imp("docx_markup")
+                            _st2 = _dm2.scan_file(p)
+                            # r316: TÁCH «không đọc được» khỏi «đọc được và có markup». Trước đây
+                            # `any(...)` trên dict rỗng ⇒ markup_found=False, tức docx hỏng được
+                            # khai là SẠCH. Nay khai riêng, và markup_found để True (fail-CLOSED:
+                            # chưa-biết KHÔNG được lặng lẽ thành đã-sạch cho một tín hiệu pháp lý).
+                            if _st2.get(_dm2.UNREADABLE):
+                                _meta["markup_unreadable"] = True
+                                _meta["markup_found"] = True
+                            else:
+                                _meta["markup_found"] = any(_st2.values())
                         except Exception:  # noqa: BLE001
                             pass
                 elif kind == "pdf" or (kind == "" and head.startswith(b"%PDF")):
@@ -2666,10 +2783,19 @@ def _resolve_cluster_member(sh: str, subj: str, entries: list[dict]) -> dict:
     # so qua cổng bare-VBHN v1.33.47 + dùng _sohieu_key_entry (bắt cả entry sohieu RỖNG, số nằm trong TÊN).
     # GIỮ vế so thô. Hệ quả cố ý: `cands` rộng hơn ⇒ `ambiguous` có thể bật thêm — đúng nghĩa "số hiệu trỏ
     # ≥2 văn bản khác nhau", thà báo trùng-số-hiệu còn hơn báo THIẾU oan (lớp lỗi v1.33.47).
-    cands = [e for e in entries
-             if _sohieu_query_hits_entry(k, _sohieu_key_entry(e)) or norm_sohieu(_entry_sohieu(e)) == k]
+    _khop_so_hieu = [e for e in entries
+                     if _sohieu_query_hits_entry(k, _sohieu_key_entry(e)) or norm_sohieu(_entry_sohieu(e)) == k]
+    # r295/T1-c (RAS-13): khớp SỐ HIỆU chưa phải "có trong corpus". Lọc tiếp qua corpus-hiệu-lực — cùng
+    # predicate với `_in_corpus` của `rasoat-chongcheo` để hai đường không trôi khỏi nhau (trước đây chỉ
+    # nhánh `ambiguous` bên dưới biết tới quarantine, còn `in_corpus` thì không).
+    cands = [e for e in _khop_so_hieu if _rasoat_corpus_hieu_luc(e)]
     if not cands:
-        return {"in_corpus": False, "ambiguous": False}
+        # NÓI RA khi có bản mang đúng số hiệu nhưng NGOÀI corpus-hiệu-lực — im lặng ở đây thì người đọc
+        # tưởng kho chưa từng có văn bản này và đi tải lại bản đã cố ý hạ/cách ly.
+        _ngoai = [{"name": _entry_name(e), "cat": _entry_cat(e), "corpus": str(e.get("corpus") or ""),
+                   "row_kind": _entry_row_kind(e)} for e in _khop_so_hieu]
+        return {"in_corpus": False, "ambiguous": False,
+                **({"khop_so_hieu_ngoai_corpus": _ngoai} if _ngoai else {})}
 
     def _alive(e) -> int:
         hl = _strip_accents(str(e.get("hieuluc") or e.get("hieu_luc") or "")).lower()
@@ -2684,6 +2810,9 @@ def _resolve_cluster_member(sh: str, subj: str, entries: list[dict]) -> dict:
                                      _alive(e), 1 if _is_vbhn_entry(e) else 0, _yr(e)))
     # ambiguous CHỈ khi số hiệu trỏ ≥2 VĂN BẢN KHÁC NHAU thật (name-key khác nhau) — KHÔNG tính bản quarantine
     # hay bản trùng-lặp cùng tên (vd canonical + bản NLM/Drive cùng văn bản). Tránh nhãn nhiễu cho mọi thành viên.
+    # r295/T1-c: `cands` nay ĐÃ qua `_rasoat_corpus_hieu_luc` (bao trùm cả vế quarantine ở đây), nên phép
+    # lọc này thành thừa — GIỮ NGUYÊN có chủ đích làm chốt chặn tại chỗ: nếu ai đó nới `cands` trở lại thì
+    # ý "không tính bản quarantine" của nhãn `ambiguous` vẫn còn hiệu lực, không im lặng mất theo.
     live = [e for e in cands if not _is_quarantine_cat(_entry_cat(e))] or cands
     distinct = {_name_key(_entry_name(e)) for e in live}
     return {"in_corpus": True, "name": _entry_name(best), "drive_id": _entry_drive_id(best),
@@ -2864,6 +2993,220 @@ def _rasoat_check_lech(cu, moi):
     return lech
 
 
+def _rasoat_vong_doi_enums():
+    """PURE (r300): từ vựng đóng của vòng đời hồ sơ — `RASOAT_PLAN_SCHEMA.md` §3/§7.
+
+    CỐ Ý là HÀM chứ không phải hằng cấp module: `tl.py` bind COPY-globals (ADR-0002) và stub farm
+    chỉ nhận callable — hằng module tham chiếu từ trong hàm sẽ KHÔNG resolve qua `tl` (r90/r81 bắt)."""
+    return {"vong_doi": ("dang_ra", "tam_ngung", "da_dong", "da_dong_co_gioi_han"),
+            "q_verify": ("cho_tra_no", "dat", "khong_dat", "no_treo"),
+            "q_ingest": ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped",
+                         "out_of_scope", "da_quyet", "da_quyet_va_thi_hanh")}
+
+
+def _rasoat_vong_doi_findings(state):
+    """PURE (r300): 6 điều kiện ĐÓNG HỒ SƠ — `references/RASOAT_PLAN_SCHEMA.md` §7.1.
+
+    Vì sao là hàm chứ không phải prose: đo 01-08 trên hồ sơ thật `h7-3nd-bhxh-2025`, người thẩm tra
+    chốt "đã đóng" mà state KHÔNG có khoá nào nói thế, còn treo 5 đầu mối (claim chưa nhả · 1 duyệt
+    `cho_duyet` · 3 nợ kiểm chéo · 5 văn bản chưa lấy được · 7 trạng thái đã trôi thành câu văn xuôi).
+    Prose không chặn được chuyện đó; hàm này chặn.
+
+    Trả `{ve_hong: [...], du_dieu_kien: bool}` — `du_dieu_kien=True` ⇒ được đặt `da_dong`; False ⇒ CHỈ
+    được `da_dong_co_gioi_han` **và** mỗi vế hỏng phải có mục trong `vong_doi.gioi_han_da_biet`
+    (kiểm ở `_rasoat_vong_doi_dong_hop_le`). Hàm KHÔNG đọc đĩa, KHÔNG gọi mạng."""
+    st = state if isinstance(state, dict) else {}
+
+    def _q(k):
+        return [x for x in (st.get(k) or []) if isinstance(x, dict)]
+
+    _E = _rasoat_vong_doi_enums()
+    ve = []
+    if any(str(u.get("trang_thai")) in ("pending", "doing") for u in _q("q_units")):
+        ve.append("q_units_con_pending_hoac_doing")
+    if any(str(a.get("trang_thai")) == "cho_duyet" for a in _q("q_approvals")):
+        ve.append("q_approvals_con_cho_duyet")
+    qv = _q("q_verify")
+    if any(str(v.get("trang_thai")) not in _E["q_verify"] for v in qv):
+        ve.append("q_verify_thieu_trang_thai_enum")
+    elif any(str(v.get("trang_thai")) == "cho_tra_no" for v in qv):
+        ve.append("q_verify_con_cho_tra_no")
+    if any(str(i.get("trang_thai")) not in _E["q_ingest"] for i in _q("q_ingest")):
+        ve.append("q_ingest_trang_thai_ngoai_enum")
+    elif any(str(i.get("trang_thai")) in ("cho_tai", "cho_nguoi_tai") for i in _q("q_ingest")):
+        ve.append("q_ingest_con_van_ban_chua_lay_duoc")
+    cl = st.get("session_claim")
+    if not (cl is None or (isinstance(cl, dict) and cl.get("id") is None and cl.get("released_at"))):
+        ve.append("session_claim_chua_nha")
+    return {"ve_hong": ve, "du_dieu_kien": not ve}
+
+
+def _rasoat_vong_doi_dong_hop_le(state):
+    """PURE (r300): trạng thái `vong_doi` có KHỚP thực tế các hàng đợi không — fail-CLOSED.
+
+    Chặn đúng ba kiểu tự lừa: (a) khai `da_dong` trong khi còn vế hỏng; (b) khai
+    `da_dong_co_gioi_han` mà `gioi_han_da_biet` RỖNG (đóng im lặng — thứ đã xảy ra thật);
+    (c) `trang_thai` ngoài enum."""
+    st = state if isinstance(state, dict) else {}
+    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else None
+    if vd is None:
+        return {"ok": True, "loi": [], "ghi_chu": "chưa khai vòng đời — hồ sơ đang rà"}
+    loi = []
+    tt = str(vd.get("trang_thai") or "")
+    if tt not in _rasoat_vong_doi_enums()["vong_doi"]:
+        loi.append(f"TRANG_THAI_NGOAI_ENUM:{tt}")
+    f = _rasoat_vong_doi_findings(st)
+    if tt == "da_dong" and not f["du_dieu_kien"]:
+        loi.append("KHAI_DA_DONG_NHUNG_CON_VE_HONG:" + ",".join(f["ve_hong"]))
+    if tt == "da_dong_co_gioi_han" and not (vd.get("gioi_han_da_biet") or []):
+        loi.append("DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG")
+    return {"ok": not loi, "loi": loi, "ve_hong": f["ve_hong"]}
+
+
+def _rasoat_anchor_khuon():
+    """PURE (r313/RAS-17): khuôn ĐÓNG của `anchor.doc_deps[]` — `RASOAT_PLAN_SCHEMA.md` §7.2.
+
+    `text_hash` phải là HASH NỘI DUNG (`sha256:<64hex>`), KHÔNG phải địa chỉ định vị. Địa chỉ đi
+    trường RIÊNG `locator` — hai thứ khác bản chất: hash đổi khi NỘI DUNG đổi (đó là điều Loop C cần
+    biết), địa chỉ thì không. Nhét địa chỉ vào ô hash làm phép so «còn tươi?» luôn LỆCH ⇒ STALE giả.
+
+    CỐ Ý là HÀM chứ không phải hằng cấp module — cùng lý do `_rasoat_vong_doi_enums`: `tl.py` bind
+    COPY-globals (ADR-0002) và stub farm chỉ nhận callable; hằng module tra từ trong hàm KHÔNG resolve
+    qua `tl` (r90/r81 bắt)."""
+    return {"text_hash": r"^sha256:[0-9a-f]{64}$",
+            # dấu hiệu ĐỊA CHỈ bị nhét vào ô hash — lấy từ chính dạng `cite` đang dùng
+            # (`cache:18-2025-VBHN-VPQH#dieu54`), xem template MAU_BANG_TONG_HOP_PHAT_HIEN.json.
+            "locator_dau_hieu": ("cache:", "drive:", "nlm:", "#", "/")}
+
+
+def _rasoat_anchor_findings(units):
+    """PURE (r313/RAS-17): phân loại TỪNG `anchor.doc_deps[]` trong các đơn vị rà.
+
+    Vì sao cần: đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025` — **82/82 `doc_deps` ĐIỀN ĐỦ, 0/82 khớp
+    `sha256:<64hex>`**; ô `text_hash` đang chứa ĐỊA CHỈ ĐỊNH VỊ. «Điền đủ» nên không cổng nào kêu,
+    mà Loop C chạy lên sẽ báo **STALE giả 100%** (`RASOAT_PLAN_SCHEMA.md` §7.2). Đây là lớp bệnh
+    «trường có giá trị nhưng SAI LOẠI» — đếm rỗng/thiếu không bắt được, phải soi KHUÔN.
+
+    Trả `{tong, ok, rong, locator_trong_hash, sai_khuon, co_locator, mau, san_sang}`.
+    `san_sang=True` ⇔ có ít nhất 1 dep VÀ mọi dep đều `ok` — tiền đề DUY NHẤT để đặt
+    `vong_doi.anchor_con_hieu_luc: true` (cưỡng chế ở `_rasoat_anchor_hop_le`).
+    Hàm KHÔNG đọc đĩa, KHÔNG gọi mạng, KHÔNG sửa gì — chỉ ĐO."""
+    k = _rasoat_anchor_khuon()
+    rx = re.compile(k["text_hash"])
+    tong = ok = rong = loc_in_hash = sai = co_loc = 0
+    mau = []
+    for u in (units if isinstance(units, list) else []):
+        if not isinstance(u, dict):
+            continue
+        # nhận CẢ hai khuôn (§6 `phat_hien` lẫn bảng `noi_dung`) — cùng doctrine _rasoat_unit_shape
+        rows = u.get("phat_hien") if isinstance(u.get("phat_hien"), list) else u.get("noi_dung")
+        for r in (rows if isinstance(rows, list) else []):
+            if not isinstance(r, dict):
+                continue
+            anc = r.get("anchor") if isinstance(r.get("anchor"), dict) else {}
+            for dep in (anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []):
+                tong += 1
+                if not isinstance(dep, dict):
+                    sai += 1
+                    continue
+                if str(dep.get("locator") or "").strip():
+                    co_loc += 1
+                th = str(dep.get("text_hash") or "").strip()
+                if not th:
+                    rong += 1
+                    loai = "rong"
+                elif rx.match(th):
+                    ok += 1
+                    continue
+                elif any(s in th for s in k["locator_dau_hieu"]):
+                    loc_in_hash += 1
+                    loai = "locator_trong_hash"
+                else:
+                    sai += 1
+                    loai = "sai_khuon"
+                if len(mau) < 10:
+                    mau.append({"so_hieu": str(dep.get("so_hieu") or ""), "loai": loai,
+                                "text_hash": th[:80]})
+    return {"tong": tong, "ok": ok, "rong": rong, "locator_trong_hash": loc_in_hash,
+            "sai_khuon": sai, "co_locator": co_loc, "mau": mau,
+            "san_sang": bool(tong) and ok == tong}
+
+
+def _rasoat_anchor_hop_le(state, units=None):
+    """PURE (r313/RAS-17): fail-CLOSED cho `vong_doi.anchor_con_hieu_luc` — `RASOAT_PLAN_SCHEMA.md` §7.2.
+
+    TRƯỚC r313 KHÔNG mã nào cưỡng chế cờ này: nó chỉ sống trong prose + một ca selftest kiểm *tài liệu
+    có nhắc chữ đó không*. Tức đúng lớp tự-lừa mà `_rasoat_vong_doi_dong_hop_le` sinh ra để chặn —
+    khai `true` là Loop C chạy, không ai đối chiếu anchor có di trú thật chưa.
+
+    Ba vế, mỗi vế chặn một kiểu:
+      (a) khai `true` mà KHÔNG đưa đơn vị để kiểm ⇒ ĐỎ. Không kiểm được thì không được khai — im lặng
+          tin lời khai chính là cách STALE giả lọt.
+      (b) khai `true` mà anchor chưa `san_sang` ⇒ ĐỎ, kèm SỐ ĐẾM để biết còn bao xa.
+      (c) khai `false` TƯỜNG MINH mà thiếu `ly_do_anchor` ⇒ ĐỎ (§7.2 «BỎ QUA hồ sơ và NÓI RA lý do»).
+    Cờ VẮNG HẲN ⇒ ghi chú advisory, KHÔNG đỏ: hồ sơ đang rà chưa tới bước khai, đỏ ở đây là đỏ oan
+    ngày đầu ⇒ guard sẽ bị vô hiệu hoá (bài học §0.8). Ratchet siết theo chiều khai SAI, không siết
+    chiều CHƯA KHAI."""
+    st = state if isinstance(state, dict) else {}
+    vd = st.get("vong_doi") if isinstance(st.get("vong_doi"), dict) else None
+    if vd is None:
+        return {"ok": True, "loi": [], "findings": None,
+                "ghi_chu": "chưa khai vòng đời — hồ sơ đang rà"}
+    loi = []
+    f = _rasoat_anchor_findings(units) if units is not None else None
+    if vd.get("anchor_con_hieu_luc") is True:
+        if f is None:
+            loi.append("ANCHOR_KHAI_TRUE_NHUNG_KHONG_DUA_DON_VI_DE_KIEM")
+        elif not f["san_sang"]:
+            loi.append("ANCHOR_KHAI_TRUE_NHUNG_CHUA_DI_TRU:"
+                       f"ok={f['ok']}/{f['tong']},locator_trong_hash={f['locator_trong_hash']},"
+                       f"rong={f['rong']},sai_khuon={f['sai_khuon']}")
+    elif "anchor_con_hieu_luc" in vd and not str(vd.get("ly_do_anchor") or "").strip():
+        loi.append("ANCHOR_FALSE_NHUNG_THIEU_LY_DO")
+    return {"ok": not loi, "loi": loi, "findings": f}
+
+
+def _rasoat_anchor_quet(docs):
+    """PURE (r321 — RAS-17 vế `rasoat-merge`): soi neo trên N phiếu và CHỈ ĐÍCH DANH từng ô hỏng.
+
+    r313 đã dựng khuôn (`_rasoat_anchor_khuon`) + cưỡng chế cờ vòng đời (`_rasoat_anchor_hop_le`),
+    nhưng đường mà bản kiểm lõi nêu ĐÍCH DANH — «`_rasoat_unit_shape` không chạm `anchor` ⇒
+    `rasoat-merge` nuốt trọn» — vẫn chưa ai chạm. Đo trên master `c24a8b3` với hồ sơ BHXH thật
+    (82/82 ô neo sai khuôn): `tl rasoat-merge` trả `ok:true`, 40 phát hiện, **không MỘT khoá nào**
+    nhắc tới anchor. Cổng vòng đời không bịt được lỗ này: nó chỉ bắn khi hồ sơ đã khai `vong_doi`,
+    còn merge chạy từ lượt rà đầu tiên.
+
+    Khác `_rasoat_anchor_findings` (r313) ở MỤC ĐÍCH chứ không ở luật: hàm kia ĐẾM để phán cờ
+    `anchor_con_hieu_luc`; hàm này gắn `nguon` + `key` để người sửa biết mở FILE NÀO, PHÁT HIỆN NÀO.
+    Luật hợp lệ và từ vựng `loai` dùng CHUNG `_rasoat_anchor_khuon()` — một nguồn chân lý, không đẻ
+    bộ từ vựng thứ hai rồi để hai bên trôi khỏi nhau.
+
+    GIỮ THỨ TỰ đầu vào ⇒ tất định (điều kiện để golden/determinism khoá được)."""
+    k = _rasoat_anchor_khuon()
+    rx = re.compile(k["text_hash"])
+    ra = []
+    for ten, d in (docs or []):
+        if not isinstance(d, dict) or _rasoat_unit_shape(d) != "unit_v1":
+            continue
+        for ph in (d.get("phat_hien") or []):
+            if not isinstance(ph, dict):
+                continue
+            anc = ph.get("anchor") if isinstance(ph.get("anchor"), dict) else {}
+            deps = anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []
+            for i, dep in enumerate(deps):
+                th = str(dep.get("text_hash") or "").strip() if isinstance(dep, dict) else ""
+                if isinstance(dep, dict) and rx.match(th):
+                    continue
+                loai = ("sai_khuon" if not isinstance(dep, dict)
+                        else "rong" if not th
+                        else "locator_trong_hash" if any(s in th for s in k["locator_dau_hieu"])
+                        else "sai_khuon")
+                ra.append({"nguon": ten, "key": str(ph.get("key") or ""), "i": i,
+                           "so_hieu": str(dep.get("so_hieu") or "") if isinstance(dep, dict) else "",
+                           "loai": loai, "text_hash": th[:80]})
+    return ra
+
+
 def _rasoat_unit_shape(d):
     """PURE (r213/b): nhận diện khuôn MỘT file JSON rà soát — nguồn chân lý DUY NHẤT cho cả
     `tl rasoat-merge` lẫn `rasoat_phuluc.load_master`.
@@ -3015,6 +3358,94 @@ def _rasoat_meta_folder(a):
                 "`--folder-id <id>` hoặc đặt env TL_META_FOLDER_ID.")
 
 
+def _rasoat_state_validate(obj) -> tuple:
+    """PURE — r295 (RAS-09, audit lõi 31-07): validate `rasoat_plan.v1` TRƯỚC khi ghi lên Drive.
+
+    Trước bản vá, `state-put` chỉ `json.loads` rồi upload: root `[]`, JSON rỗng, `trang_thai` sai chính
+    tả — tất cả đều lọt. State là NGUỒN SỰ THẬT của lớp điều phối; ghi rác vào đó làm phiên kế nhiệm
+    đọc ra và quyết định sai, mà lỗi chỉ lộ ở lượt sau nên rất khó truy.
+
+    Đặc tả: `references/RASOAT_PLAN_SCHEMA.md` §2-§3. Trả (ok, errors[]). Chỉ kiểm những gì đặc tả CHỐT
+    (root object, schema, enum đóng, `unit_id` bắt buộc) — KHÔNG tự chế thêm ràng buộc ngoài đặc tả.
+
+    ★ Từ vựng đóng để TRONG hàm có chủ đích: hằng mức module của `tl_core/*` KHÔNG tự có mặt trong
+    namespace `tl` (chúng phải re-export tay như `_RASOAT_STATE_ALLOWED` ở `tl.py`), nên hằng rời là một
+    nguồn `NameError` chỉ lộ trên đường sản xuất. Chỉ hàm này dùng ⇒ giữ tại chỗ, hết đường trôi.
+    """
+    _TT_UNIT = ("pending", "doing", "done", "blocked", "stale")
+    _TT_INGEST = ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped", "out_of_scope")
+    _TT_NLM = ("pending", "added", "failed")
+    _LOAI_UNIT = ("ra_soat", "doi_chieu_bo_sung")
+    errs = []
+    if not isinstance(obj, dict):
+        return False, ["ROOT_KHONG_PHAI_OBJECT:" + type(obj).__name__]
+    if str(obj.get("schema") or "") != "rasoat_plan.v1":
+        errs.append("SCHEMA_SAI:" + str(obj.get("schema")))
+    _sc = obj.get("session_claim")
+    if _sc is not None:
+        if not isinstance(_sc, dict):
+            errs.append("SESSION_CLAIM_KHONG_PHAI_OBJECT")
+        elif not str(_sc.get("id") or "").strip():
+            errs.append("SESSION_CLAIM_THIEU_ID")
+    for _khoa, _tt_hop_le in (("q_units", _TT_UNIT), ("q_ingest", _TT_INGEST), ("q_nlm", _TT_NLM)):
+        _q = obj.get(_khoa)
+        if _q is None:
+            continue
+        if not isinstance(_q, list):
+            errs.append(_khoa.upper() + "_KHONG_PHAI_MANG")
+            continue
+        for _i, _x in enumerate(_q):
+            if not isinstance(_x, dict):
+                errs.append(f"{_khoa.upper()}[{_i}]_KHONG_PHAI_OBJECT")
+                continue
+            _tt = str(_x.get("trang_thai") or "")
+            if _tt and _tt not in _tt_hop_le:
+                errs.append(f"{_khoa.upper()}[{_i}].trang_thai_NGOAI_ENUM:{_tt}")
+            if _khoa == "q_units":
+                if not str(_x.get("unit_id") or "").strip():
+                    errs.append(f"Q_UNITS[{_i}]_THIEU_unit_id")
+                _loai = str(_x.get("loai") or "")
+                if _loai and _loai not in _LOAI_UNIT:
+                    errs.append(f"Q_UNITS[{_i}].loai_NGOAI_ENUM:{_loai}")
+    return (not errs), errs
+
+
+def _rasoat_state_newest(g, cands):
+    """r295 (RAS-03, audit lõi 31-07): chọn bản MỚI NHẤT theo `modifiedTime` — DÙNG CHUNG cho
+    `state-get` và `state-put`. Trả (pick, canh_bao[]).
+
+    Trước bản vá `state-get` chọn newest còn `state-put` so CAS với `olds[0]` THÔ ⇒ hai lệnh có thể
+    nhìn HAI tài liệu khác nhau, và ca trùng tên là có thật (chính code cũ đã phải in
+    `CO_n_BAN_TRUNG_TEN`). Hệ quả: `--expect-claim` khớp với bản CŨ rồi ghi đè bản MỚI của phiên khác —
+    đúng thứ ADR-0016 single-writer sinh ra để chặn.
+
+    Khi MỌI lượt hỏng `modifiedTime` (rỗng hết): xếp theo `id` để tất định, và NÓI RA — không im lặng
+    chọn theo thứ tự `list` trả về (thứ tự đó không cam kết, audit đã nêu ở phần rủi ro).
+    """
+    canh_bao = []
+    if not cands:
+        return None, canh_bao
+    if len(cands) == 1:
+        return cands[0], canh_bao
+    stamped = []
+    for c in cands:
+        try:
+            inf = (_gas_get_retry(g, "info", fileId=str(c.get("id"))) or {}).get("file") or {}
+        except Exception:  # noqa: BLE001
+            inf = {}
+        stamped.append((str(inf.get("modifiedTime") or ""), str(c.get("id") or ""), c))
+    if not any(t[0] for t in stamped):
+        stamped.sort(key=lambda t: t[1])
+        canh_bao.append("KHONG_DOC_DUOC_modifiedTime_CUA_BAN_NAO — chọn tất định theo id (%s); "
+                        "chưa chứng minh được là bản mới nhất." % stamped[0][2].get("id"))
+        return stamped[0][2], canh_bao
+    stamped.sort(key=lambda t: (t[0], t[1]), reverse=True)
+    pick = stamped[0][2]
+    canh_bao.append("CO_%d_BAN_TRUNG_TEN — chọn bản mới nhất (%s); bản cũ chưa được dọn, "
+                    "`state-put` lượt sau sẽ dọn." % (len(cands), pick.get("id")))
+    return pick, canh_bao
+
+
 def _rasoat_state_find(g, folder_id, name):
     """r213/a: tìm MỌI bản `name` trong folder `_meta/` (khớp tên CHÍNH XÁC — bài học
     `_index_old_candidates`: startswith từng suýt trash nhầm file backup của người dùng)."""
@@ -3027,6 +3458,11 @@ def cmd_state_get(a) -> int:
     """r213/a — ĐỌC state rà hồ sơ từ Drive `_meta/` (WRITE_PATHS_v1). READ-ONLY.
     rc=0 đọc được · rc=3 CHƯA CÓ trên Drive (lượt đầu — KHÔNG phải lỗi) · rc=2 lỗi thật."""
     import base64
+    # r295 (RAS-08, audit lõi 31-07): ÁP PROFILE TRƯỚC khi giải `_meta/`. Bản cũ gọi
+    # `_rasoat_meta_folder(a)` rồi mới `load_creds(...)` — mà `metaFolderId` chỉ vào env KHI profile được
+    # áp ⇒ `--profile <P>` bị bỏ qua sạch, lệnh báo META_FOLDER_ID_TRỐNG hoặc tệ hơn là dùng env còn sót
+    # của profile TRƯỚC ĐÓ. Cùng khuôn với `cmd_rasoat_loop`/`cmd_rasoat_chongcheo` (đã áp từ đầu hàm).
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))
     name = str(getattr(a, "name", "") or "rasoat_state.json").strip()
     as_json = bool(getattr(a, "json", False))
     ok, why = _rasoat_state_scope(name)
@@ -3054,22 +3490,9 @@ def cmd_state_get(a) -> int:
                              "name": name, "folderId": fid,
                              "note": "chưa có state trên Drive — lượt rà ĐẦU TIÊN của hồ sơ này"}, True)
         return 3
-    canh_bao = []
-    pick = cands[0]
-    if len(cands) > 1:
-        # >1 bản cùng tên = lần dọn trước hụt. Chọn bản MỚI NHẤT theo modifiedTime (`list` KHÔNG
-        # trả modifiedTime → phải hỏi `info` từng bản) và NÓI RA, không im lặng chọn bừa.
-        stamped = []
-        for c in cands:
-            try:
-                inf = (_gas_get_retry(g, "info", fileId=str(c.get("id"))) or {}).get("file") or {}
-            except Exception:  # noqa: BLE001
-                inf = {}
-            stamped.append((str(inf.get("modifiedTime") or ""), c))
-        stamped.sort(key=lambda t: t[0], reverse=True)
-        pick = stamped[0][1]
-        canh_bao.append("CO_%d_BAN_TRUNG_TEN — chọn bản mới nhất (%s); bản cũ chưa được dọn, "
-                        "`state-put` lượt sau sẽ dọn." % (len(cands), pick.get("id")))
+    # r295 (RAS-03): >1 bản cùng tên = lần dọn trước hụt. Chọn bản MỚI NHẤT qua helper DÙNG CHUNG với
+    # `state-put` — trước đây hai lệnh cài hai phép chọn khác nhau nên có thể nhìn hai tài liệu khác nhau.
+    pick, canh_bao = _rasoat_state_newest(g, cands)
     try:
         r = _gas_get_retry(g, "download", fileId=str(pick.get("id")))
         body = base64.b64decode(r["b64"]).decode("utf-8")
@@ -3107,6 +3530,7 @@ def cmd_state_put(a) -> int:
     ANYONE_WITH_LINK — state để mở link công khai là rò rỉ, phải tắt TƯỜNG MINH).
     THỨ TỰ AN TOÀN: tạo bản MỚI trước → mới dọn bản cũ. Chết giữa chừng = tồn 2 bản, `state-get`
     lấy bản mới nhất và lượt `state-put` sau dọn nốt; đảo thứ tự thì chết giữa chừng = MẤT state."""
+    apply_profile_offline(getattr(a, "config", None), getattr(a, "profile", None))   # r295 RAS-08 (xem state-get)
     name = str(getattr(a, "name", "") or "rasoat_state.json").strip()
     src = str(getattr(a, "in_file", "") or "").strip()
     dry = bool(getattr(a, "dry_run", False))
@@ -3123,6 +3547,15 @@ def cmd_state_put(a) -> int:
     except Exception as e:  # noqa: BLE001
         _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
                              "error": "IN_FILE_KHONG_PHAI_JSON_HOP_LE: " + str(e)}, True)
+        return 2
+    # r295 (RAS-09): JSON hợp lệ CHƯA phải state hợp lệ. Chốt thứ TƯ, cùng hạng ba chốt trong docstring.
+    _v_ok, _v_errs = _rasoat_state_validate(body_obj)
+    if not _v_ok:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "STATE_KHONG_HOP_LE", "loi": _v_errs,
+                             "fix": "đặc tả `references/RASOAT_PLAN_SCHEMA.md` §2-§3 — root là object, "
+                                    "`schema: rasoat_plan.v1`, `q_units[].unit_id` bắt buộc, "
+                                    "`trang_thai`/`loai` phải trong từ vựng đóng."}, True)
         return 2
     fid, err = _rasoat_meta_folder(a)
     if err:
@@ -3147,12 +3580,26 @@ def cmd_state_put(a) -> int:
                              "error": "LIST_FAILED: " + str(e)}, True)
         return 2
     expect = str(getattr(a, "expect_claim", "") or "").strip()
+    # r295 (RAS-02, audit lõi 31-07): state ĐÃ TỒN TẠI thì `--expect-claim` là BẮT BUỘC. Bản cũ bọc trọn
+    # khối CAS trong `if expect:` ⇒ không truyền cờ là bỏ qua sạch chốt single-writer, ghi đè thẳng
+    # claim của phiên khác — trái ADR-0016, và đúng thứ chốt thứ 3 trong docstring hứa là có.
+    # Chỉ create-first (chưa có bản nào) mới được miễn.
+    if olds and not expect:
+        _print_json_or_text({"schema": "rasoat_state_put.v1", "ok": False,
+                             "error": "THIEU_EXPECT_CLAIM", "so_ban_tren_drive": len(olds),
+                             "note": "state đã tồn tại ⇒ PHẢI `--expect-claim <id claim đang cầm>` "
+                                     "(single-writer, ADR-0016). Lấy id bằng `tl state-get --json` → "
+                                     "`state.session_claim.id`. Chỉ lượt TẠO MỚI mới được bỏ cờ này."}, True)
+        return 2
     if expect:
         import base64 as _b64
         cur_claim, doc_ok = "", False
         if olds:
+            # r295 (RAS-03): so CAS với bản MỚI NHẤT — cùng helper `state-get` dùng để đọc. Bản cũ lấy
+            # `olds[0]` THÔ nên khi có bản trùng tên, CAS soi bản CŨ rồi cho ghi đè bản MỚI.
+            _pick_cas, _cb_cas = _rasoat_state_newest(g, olds)
             try:
-                r = _gas_get_retry(g, "download", fileId=str(olds[0].get("id")))
+                r = _gas_get_retry(g, "download", fileId=str((_pick_cas or {}).get("id")))
                 cur = json.loads(_b64.b64decode(r["b64"]).decode("utf-8"))
                 cur_claim = str(((cur or {}).get("session_claim") or {}).get("id") or "")
                 doc_ok = True
@@ -3228,10 +3675,14 @@ def cmd_rasoat_merge(a) -> int:
     out_path = str(getattr(a, "out", "") or "").strip() or str(
         (p.parent if p.is_dir() else p.parent) / "BANG_MASTER.json")
     bo_qua_ban_sao = [{"nguon": f.name, "ly_do": "BAN_SAO_LUU_BI_BO_QUA"} for f in ban_sao]
+    # r321 (RAS-17): neo phải LỘ DIỆN ở MỌI chế độ — đếm ở ĐÂY, không phải trong nhánh ghi, để
+    # `--check` và `--dry-run` cũng thấy. Trước bản này `anchor` không có đường nào chạm tới.
+    anchor_hong = _rasoat_anchor_quet(docs)
     nen = {"schema": "rasoat_merge.v1", "in": str(p), "out": out_path,
            "so_file": len(files), "so_van_ban": len(merged.get("van_ban") or []),
            "so_phat_hien": len(merged.get("noi_dung") or []),
-           "bo_qua_ban_sao": bo_qua_ban_sao}
+           "bo_qua_ban_sao": bo_qua_ban_sao,
+           "so_anchor_hong": len(anchor_hong), "anchor_hong": anchor_hong}
     # r216 — CỔNG TRÙNG (fail-CLOSED): trùng `key`/`unit_id` ⇒ KHÔNG ghi. Ghi đè bằng bảng đã đếm
     # hai lần là mất luôn bản đúng để đối chiếu ở lượt sau.
     trung = _rasoat_trung_lap(docs)
@@ -3240,6 +3691,31 @@ def cmd_rasoat_merge(a) -> int:
                                  da_ghi=False, bo_qua=bo_qua,
                                  fix="mỗi phát hiện chỉ được nằm ở MỘT phiếu và mỗi `unit_id` chỉ "
                                      "một file; bản sao lưu đặt NGOÀI thư mục master/"), True)
+        return 2
+    # r290 (RAS-11 — audit lõi 31-07): nguồn KHÔNG ĐỌC ĐƯỢC phải fail-CLOSED y như cổng trùng r216 ngay
+    # trên. Bản cũ nhét `hong` vào `bo_qua` rồi VẪN `write_text` bảng master dựng từ phần input hợp lệ,
+    # xong mới `return 2` — tức đã ghi đè bảng bằng bản THIẾU trong khi lệnh báo lỗi. Người vận hành thấy
+    # rc=2 sẽ sửa file hỏng rồi chạy lại, nhưng bản đúng để đối chiếu đã mất từ lượt đó. Cùng một hậu quả
+    # mà r216 sinh ra để chặn: "bảng master sai mà vẫn ghi đè thì lần chạy sau không còn bản đúng".
+    if hong:
+        _print_json_or_text(dict(nen, ok=False, error="NGUON_HONG_KHONG_DOC_DUOC", da_ghi=False,
+                                 bo_qua=bo_qua, nguon_hong=hong,
+                                 fix="sửa hoặc bỏ các file JSON hỏng rồi chạy lại; bảng master GIỮ "
+                                     "NGUYÊN để còn đối chiếu"), True)
+        return 2
+    # r321 (RAS-17) — `--anchor-strict`: fail-CLOSED TRƯỚC mọi thao tác ghi, cùng khuôn r216/r290.
+    # KHÔNG bật mặc định, và đó là lựa chọn CÓ CHỦ Ý: hồ sơ đang lưu giữ 82/82 ô neo sai khuôn, bật
+    # mặc định là chặn đứng mọi hồ sơ CŨ vì một lỗi lượt rà không gây ra và chưa có đường sửa trọn
+    # (đo 02-08: 47/82 ô di trú được từ cache, 35/82 thì KHÔNG). Vì vậy mặc định LỘ DIỆN, cưỡng chế
+    # thì phải gọi tên — đúng khuôn r312 với ING-09: chặn cái MỚI, khai cái CŨ, không dọn lén.
+    if bool(getattr(a, "anchor_strict", False)) and anchor_hong:
+        _print_json_or_text(dict(nen, ok=False, error="ANCHOR_SAI_KHUON", da_ghi=False,
+                                 bo_qua=bo_qua,
+                                 fix="`anchor.doc_deps[].text_hash` phải khớp `sha256:<64hex>`; địa "
+                                     "chỉ định vị chuyển sang trường `locator` cùng dep. Ô KHÔNG "
+                                     "truy nguyên được thì ĐỂ TRỐNG và khai `anchor_con_hieu_luc:"
+                                     "false` + `ly_do_anchor`, ĐỪNG tính lại bằng bản hiện hành — "
+                                     "làm thế là khẳng định một độ tươi chưa hề kiểm."), True)
         return 2
     # r216 — `--check`: đối chiếu bảng master đang có với kết quả merge, KHÔNG ghi đè.
     if bool(getattr(a, "check", False)):
@@ -3261,21 +3737,40 @@ def cmd_rasoat_merge(a) -> int:
                                  "bảng master ĐI TRƯỚC tầng unit: chép phát hiện về `master/<unit>.json` "
                                  "rồi merge lại, ĐỪNG merge đè — merge lấy unit làm nguồn."), True)
         return 0 if (not lech and not bo_qua) else 2
-    Path(out_path).write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
     # Hoà giải state (khe hở H8): CHỈ khi người gọi trỏ --state; sửa tại chỗ là quyết định của họ.
-    hoa_giai = None
+    # r290 (RAS-12 + RAS-07): TOÀN BỘ khối này chuyển lên TRƯỚC mọi thao tác ghi. Bản cũ bọc trọn nó
+    # trong một `try/except` rồi nhét lỗi vào `hoa_giai["loi"]`, trong khi `ok = not bo_qua` ⇒ `--state`
+    # hỏng mà lệnh vẫn `ok:true`, rc=0, và bảng master thì đã ghi xong từ dòng trên.
+    hoa_giai, _st_moi = None, None
     st_path = str(getattr(a, "state", "") or "").strip()
     if st_path and Path(st_path).is_file():
         try:
             st = json.loads(Path(st_path).read_text(encoding="utf-8"))
-            uids = [f.stem for f in files if f.suffix == ".json"]
-            st2, thay_doi = _rasoat_state_reconcile(st, uids)
-            if thay_doi and not bool(getattr(a, "dry_run", False)):
-                Path(st_path).write_text(json.dumps(st2, ensure_ascii=False, indent=2), encoding="utf-8")
-            hoa_giai = {"state": st_path, "thay_doi": thay_doi,
-                        "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
         except Exception as e:  # noqa: BLE001
-            hoa_giai = {"state": st_path, "loi": str(e)}
+            _print_json_or_text(dict(nen, ok=False, error="STATE_HONG_KHONG_DOC_DUOC: " + str(e),
+                                     da_ghi=False, bo_qua=bo_qua, state=st_path,
+                                     fix="sửa file --state rồi chạy lại; CHƯA ghi gì cả"), True)
+            return 2
+        # RAS-07: `f.stem` KHÔNG phải định danh đơn vị. File `unit-a.json` mang `unit_id: unit-b` làm
+        # state đánh DONE cho unit-a — đơn vị chưa hề được rà — và bỏ sót unit-b. Nguồn sự thật là
+        # PAYLOAD; thiếu `unit_id` thì không chứng minh được đơn vị nào đã xong ⇒ fail-closed.
+        _uid_theo_file = [(_n, str((_d or {}).get("unit_id") or "").strip()) for _n, _d in docs]
+        _thieu_uid = [_n for _n, _u in _uid_theo_file if not _u]
+        if _thieu_uid:
+            _print_json_or_text(dict(nen, ok=False, error="STATE_HOA_GIAI_THIEU_UNIT_ID", da_ghi=False,
+                                     bo_qua=bo_qua, thieu_unit_id=_thieu_uid,
+                                     fix="mỗi phiếu `master/<unit>.json` phải mang `unit_id`; KHÔNG suy "
+                                         "ra từ tên file vì tên có thể lệch nội dung"), True)
+            return 2
+        _ten_lech = [{"file": _n, "unit_id": _u} for _n, _u in _uid_theo_file if Path(_n).stem != _u]
+        _st_moi, thay_doi = _rasoat_state_reconcile(st, [_u for _, _u in _uid_theo_file])
+        hoa_giai = {"state": st_path, "thay_doi": thay_doi, "ten_file_lech_unit_id": _ten_lech,
+                    "da_ghi": bool(thay_doi) and not bool(getattr(a, "dry_run", False))}
+    # Mọi cổng đã qua ⇒ MỚI được ghi. Atomic (staging + os.replace): bản cũ `write_text` thẳng, bị kill
+    # giữa chừng là để lại bảng master CỤT — đúng rủi ro "write_text chưa atomic" audit đã nêu.
+    _write_text_atomic(Path(out_path), json.dumps(merged, ensure_ascii=False, indent=2) + "\n")
+    if _st_moi is not None and hoa_giai.get("da_ghi"):
+        _write_text_atomic(Path(st_path), json.dumps(_st_moi, ensure_ascii=False, indent=2) + "\n")
     out = dict(nen, ok=not bo_qua, da_ghi=True,
                nguon=merged.get("_nguon"), thieu_o_metadata=merged.get("_thieu_o_metadata"))
     out.update({"bo_qua": bo_qua, "hoa_giai_state": hoa_giai,
@@ -3543,11 +4038,15 @@ def cmd_doc_patch(a) -> int:
                     "diem": [{"ma": r["ma"], "vung": r["vung"], "tim": r["tim"], "thay": r["thay"],
                               "ly_do": r["ly_do"]} for r in kq["ket_qua"]]})
     rec["doc_patch"] = {"lich_su": lich_su}
+    # r322 (RAS-18): TẠO `verify_flags` khi record chưa có, thay vì lặng lẽ bỏ cảnh báo. Bản r217
+    # ghi có điều kiện `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai «hash đã cũ» bốc
+    # hơi đúng lúc cần nhất, mà lệnh vẫn rc=0. Cảnh báo biến mất theo hình dạng dữ liệu là fail-OPEN.
     vf = rec.get("verify_flags")
-    if isinstance(vf, list):
-        vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
-                  "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
-                  % (len(kq["ket_qua"]), rid))
+    if not isinstance(vf, list):
+        vf = rec["verify_flags"] = []
+    vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
+              "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
+              % (len(kq["ket_qua"]), rid))
     tmp = target.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(rec, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(str(tmp), str(target))

@@ -495,10 +495,28 @@ def _live_state_diff(before_path: str, after_path: str, *, allowed: list[str] | 
     fb = _flatten_snapshot(_strip_snapshot_volatile(before))
     fa = _flatten_snapshot(_strip_snapshot_volatile(after))
     keys = sorted(set(fb) | set(fa))
+    # r287 (P16-T03): `command_versions.<tool>` do một SUBPROCESS ngoài đo (`_cmd_version_probe`), có
+    # timeout. Trên máy chuẩn `nlm --version` mất 3,2-7,3s: dưới tải, ảnh chụp này TimeoutExpired, ảnh kia
+    # kịp ⇒ 4 đường `{ok,error,returncode,version}` lệch ⇒ diff báo BẤT ĐỊNH và gate deploy ĐỎ (đã chặn
+    # deploy 3 lần 31-07/01-08). Đó KHÔNG phải tính bất định của tl — là nhiễu đo của công cụ ngoài.
+    # Miễn trừ CÓ ĐIỀU KIỆN, KHÔNG miễn mù: chỉ bỏ qua khi CHÍNH PHÉP ĐO không ổn định (`ok` khác nhau
+    # giữa hai ảnh = một bên probe hỏng). Hai bên CÙNG đo được mà version khác nhau ⇒ VẪN BÁO, vì đó là
+    # công cụ thật sự đổi phiên bản giữa hai lần chạy — điều đáng biết.
+    _probe_unstable = set()
+    for _t in {k.split(".")[1] for k in keys if k.startswith("command_versions.") and k.count(".") >= 2}:
+        if fb.get(f"command_versions.{_t}.ok", "<MISSING>") != fa.get(f"command_versions.{_t}.ok", "<MISSING>"):
+            _probe_unstable.add(_t)
     changes = []
     for k in keys:
         if fb.get(k, "<MISSING>") != fa.get(k, "<MISSING>"):
-            changes.append({"path": k, "before": fb.get(k, "<MISSING>"), "after": fa.get(k, "<MISSING>"), "allowed": _path_allowed(k, allowed)})
+            _ok = _path_allowed(k, allowed)
+            _why = None
+            if not _ok and k.startswith("command_versions.") and k.count(".") >= 2 and k.split(".")[1] in _probe_unstable:
+                _ok, _why = True, "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH"
+            _c = {"path": k, "before": fb.get(k, "<MISSING>"), "after": fa.get(k, "<MISSING>"), "allowed": _ok}
+            if _why:
+                _c["allowed_reason"] = _why      # NÓI RA vì sao được miễn — không miễn im lặng
+            changes.append(_c)
     unexpected = [c for c in changes if not c.get("allowed")]
     return {
         "ok": not unexpected,
@@ -700,7 +718,10 @@ def cmd_go_live_runbook(a) -> int:
 # ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
 
 
-def _cmd_version_probe(name: str, args: list[str] | None = None, *, timeout: int = 10) -> dict:
+def _cmd_version_probe(name: str, args: list[str] | None = None, *, timeout: int = 25) -> dict:
+    # r287 (P16-T03): 10s quá sát — `nlm --version` đo trên máy chuẩn mất 3,2-7,3s (uv + import nặng),
+    # dưới tải là vượt. Nới lên 25s để giảm nhiễu; phần CÒN LẠI của bệnh (nhiễu vẫn có thể xảy ra) do
+    # `_live_state_diff` xử bằng miễn-trừ-có-điều-kiện. Chỉ tốn thêm thời gian khi công cụ thật sự treo.
     exe = shutil.which(name)
     out = {"command": name, "path": exe or "", "ok": False, "version": "", "returncode": None}
     if not exe:

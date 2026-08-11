@@ -1,6 +1,9 @@
 __pycache__/
 *.pyc
 .claude/settings.local.json
+# r331: gốc worktree của agent Codex (mỗi worktree = 1 bản sao kho) — hạ tầng, không phải mã nguồn.
+# `#` chỉ là chú thích khi ĐỨNG ĐẦU DÒNG — viết sau pattern thì nó thành MỘT PHẦN của pattern.
+.codex/
 .tra_luat_cache/
 *.tmp
 *.dl

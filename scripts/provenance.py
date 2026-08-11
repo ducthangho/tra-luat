@@ -100,6 +100,27 @@ def build_warnings(meta: dict, now: datetime | None = None,
             if age is not None and age >= stale_days:
                 w.append({"level": "warn", "code": "verified_but_old",
                           "message": f"Đối chiếu official lần cuối ~{age} ngày trước{note} — cân nhắc kiểm lại nếu cần bản mới nhất."})
+
+    # --- r322 (RAS-18): record ĐÃ qua `doc-patch` ⇒ `text_hash` KHÔNG còn tả thân hiện tại ---
+    # `doc-patch` (r217) sửa thân record nhưng CỐ Ý không tính lại `text_hash`, và lý do đó THẬT:
+    # record không giữ bố cục dòng của `norm` nên không có cách tính lại trong CÙNG miền băm. Cái
+    # sai không nằm ở chỗ không tính lại — nằm ở chỗ điều đó chỉ được ghi vào `verify_flags`, mà
+    # trước r322 KHÔNG đường đọc nào lộ trường ấy (`provenance` lẫn `tra_cuu` đều 0 tham chiếu).
+    # Người tra thấy `content_hash` sạch sẽ và tin là bằng chứng còn giá trị.
+    # Khoá vào `doc_patch.lich_su` — trường CÓ CẤU TRÚC, ghi VÔ ĐIỀU KIỆN — chứ không dò chuỗi
+    # "DOC_PATCH:" trong `verify_flags`: văn xuôi đổi một chữ là phép dò gãy im lặng.
+    # Đòi ĐÚNG KIỂU list, không chỉ truthy: `{"lich_su": "rác"}` là chuỗi truthy ⇒ bản đầu của r322
+    # bắn cảnh báo với `len("rác")=3`, tức khai một con số bịa trên dữ liệu hỏng. Ca (c) của
+    # `r322_provenance_lo_doc_patch` khoá đúng chỗ này.
+    _dp = meta.get("doc_patch")
+    _ls_raw = _dp.get("lich_su") if isinstance(_dp, dict) else None
+    _lich_su = _ls_raw if isinstance(_ls_raw, list) else []
+    if _lich_su:
+        w.append({"level": "warn", "code": "doc_patch_text_hash_cu",
+                  "message": f"Record đã qua `doc-patch` {len(_lich_su)} lượt — `text_hash` vẫn là hash của "
+                             f"BẢN NGUỒN TRƯỚC khi sửa, KHÔNG tả thân đang đọc. Đừng dùng nó làm bằng chứng "
+                             f"đối sánh liên nguồn (bundle/NotebookLM); muốn bằng chứng sống thì hoàn tác "
+                             f"(`tl doc-patch --undo`) hoặc nạp lại nguồn."})
     return w
 
 

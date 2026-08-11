@@ -110,8 +110,17 @@ def _profile_lookup(profiles: dict, name: str) -> tuple[str, dict | None]:
 
 def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     profiles = _profiles_from_config(cfg)
+    _env_profile_before = (os.environ.get("TL_PROFILE") or "").strip()   # r281: đo TRƯỚC khi :129 ghi đè
     name0 = _selected_profile_name(profile, cfg)
     name, _hit = _profile_lookup(profiles, name0)
+    # r281 (P16-F08): scope KHÔNG do người gõ chọn (không --profile, không export TL_PROFILE) mà do
+    # `config.defaultProfile` quyết định thì phải NÓI RA MỘT LẦN — scope ghi vô hình đúng là thứ đã biến
+    # F08 thành P0. In 1 lần/process, chỉ khi profile THẬT và khác nền (nền = trạng thái mặc định, không ồn).
+    if (not profile) and (not _env_profile_before) and name != DEFAULT_PROFILE and name in profiles:
+        if not getattr(_apply_profile_env, "_default_profile_noted", False):
+            _apply_profile_env._default_profile_noted = True
+            print(f"[tl] profile = '{name}' (theo config.defaultProfile — KHÔNG phải --profile). "
+                  f"Muốn corpus nền: `--profile {DEFAULT_PROFILE}`.", file=sys.stderr)
     # v1.33.48 (rà Instruction 'Luật BHXH'): profile ĐƯỢC YÊU CẦU TƯỜNG MINH mà KHÔNG có trong config → KHÔNG
     # rơi ÂM THẦM về scope NỀN vbqppl nữa (trước: prof=fallback DEFAULT → TL_REGISTRY_DOC_ID/TL_NOTEBOOK_ID trỏ
     # VBQPPL base trong khi TL_PROFILE=tên-dự-án → ghi/push NHẦM corpus nền, đúng lớp sự cố 1.23.21 mà
@@ -119,6 +128,11 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
     # LOUD → guard hạ nguồn tự chặn (NO_NOTEBOOK_ID, PROFILE_CATEGORIES_OWN_REQUIRED, registry-id-empty blocker).
     if _hit is None and name0 != DEFAULT_PROFILE:
         prof = {}
+        # r286 (P16-F09): v1.33.48 mới bịt đường GHI (scope rỗng ⇒ guard hạ nguồn chặn). Đường ĐỌC vẫn
+        # thủng: `_load_manifest_full` gặp cache-miss sẽ gọi `manifest_export` với scope RỖNG ⇒ GAS trả
+        # manifest NỀN ⇒ ghi vào `CACHE/<tên ma>/` (BỀN VỮNG) và `exists`/`reg-query` trả corpus nền dưới
+        # NHÃN của tên gõ sai. Marker này là chốt chặn ở ĐÚNG MỘT CHỖ (`_load_manifest_full`) phủ mọi lệnh đọc.
+        os.environ["TL_PROFILE_MISSING"] = str(name0)
         print(f"[tl] ⚠ PROFILE_NOT_FOUND: '{name0}' không có trong config.profiles ({', '.join(sorted(profiles)) or '∅'}) "
               f"— KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm "
               f"block profiles vào config (xem SKILL.md corpus_profile).", file=sys.stderr)
@@ -126,6 +140,7 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
         # An empty dict is a valid, explicitly configured profile. Truthiness here
         # used to fall back to vbqppl and could redirect writes into the base corpus.
         prof = _hit if _hit is not None else (profiles.get(DEFAULT_PROFILE) or {})
+        os.environ.pop("TL_PROFILE_MISSING", None)   # r286: profile HỢP LỆ ⇒ gỡ chốt (kể cả khi trước đó có)
     os.environ["TL_PROFILE"] = name
     mapping = {
         "rootFolderId": "TL_ROOT_FOLDER_ID",
@@ -179,6 +194,27 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
         os.environ["TL_BASE_ALSO"] = "0" if prof.get("baseAlso") is False else "1"
         _written.append("TL_BASE_ALSO")
     os.environ[_mark] = ",".join(_written)   # r214: khoá do overlay NÀY ghi — lượt sau chỉ được xoá đúng chúng
+    # r325 (VIỆC 4.2 sổ bảo trì kho): profile dự án CÓ THẬT trong config nhưng `registryDocId` RỖNG.
+    # Đường GHI đã fail-closed từ 1.23.21 (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — đó là
+    # bản vá cho ĐÚNG sự cố 2026-06-30. Đường ĐỌC thì tới giờ vẫn IM: `TL_REGISTRY_DOC_ID` không được
+    # đặt ⇒ webapp `regSS_` rơi nhánh auto-discover = SỔ NỀN, và `reg-query`/`reg_get` trả dòng nền
+    # dưới NHÃN profile đang chọn. `scope`+`BASE_SCOPE_HIT` (r179 T7) chỉ nói được KHI ĐÃ CÓ dòng trả
+    # về; ca này người dùng đọc thấy 0 dòng / dòng nền mà không biết `--profile` đã thành NO-OP.
+    # ★Chỉ CẢNH BÁO, không chặn: lệnh ĐỌC trên sổ nền là chuyện hợp lệ, cái sai là làm nó IM LẶNG.
+    #  Nền (vbqppl) để rỗng là BÌNH THƯỜNG — webapp tự tìm Sheet `tra_luat_registry` theo tên.
+    if name != DEFAULT_PROFILE and name in profiles \
+            and not (os.environ.get("TL_REGISTRY_DOC_ID") or "").strip():
+        _noted = getattr(_apply_profile_env, "_reg_empty_noted", None)
+        if _noted is None:
+            _noted = set()
+            _apply_profile_env._reg_empty_noted = _noted
+        if name not in _noted:      # 1 lần / profile / process (đổi profile giữa chừng vẫn được báo)
+            _noted.add(name)
+            print(f"[tl] ⚠ PROFILE_REGISTRY_ID_EMPTY: profile '{name}' KHÔNG có `registryDocId` "
+                  f"⇒ mọi lệnh ĐỌC registry rơi về SỔ NỀN '{DEFAULT_PROFILE}' (dòng trả về là của NỀN, "
+                  f"không phải của profile này). Đường GHI đã bị chặn sẵn (rc=2). Sửa: thêm "
+                  f"`profiles.{name}.registryDocId` vào config, hoặc `tl profile-rebuild-registry "
+                  f"--profile \"{name}\"` để tạo registry RIÊNG.", file=sys.stderr)
     return {"profile": name, "profile_found": name in profiles, "profile_data": prof, "profiles": sorted(profiles)}
 
 
@@ -281,6 +317,9 @@ def _apply_unconfigured_profile_env(profile: str | None) -> None:
     name = str(profile or "").strip()
     if not name:
         return
+    # r286 (P16-F09): đây là đường HỢP LỆ theo §9 — profile env-only, KHÔNG có file config nào để tra.
+    # Phải GỠ chốt PROFILE_NOT_FOUND (nếu lượt trước đặt), nếu không lệnh đọc bị chặn oan.
+    os.environ.pop("TL_PROFILE_MISSING", None)
     previous = os.environ.get("TL_PROFILE", "")
     if previous and previous != name:
         for key in ("TL_ROOT_FOLDER_ID", "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_REGISTRY_DOC_ID",
@@ -297,17 +336,23 @@ def load_creds(config_path: str | None = None, profile: str | None = None) -> No
     ENV (TL_WEBAPP+TL_TOKEN) ĐỦ để chạy — KHÔNG bắt buộc file config, KỂ CẢ khi có --profile (§9): scope chi tiết
     lấy qua TL_REGISTRY_DOC_ID/TL_MANIFEST_ID/… (env) hoặc config mặc định nếu tình cờ có."""
     if os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN") and not config_path:
-        if profile:
-            applied = False
-            for p in _config_candidates(None):            # best-effort áp scope từ config mặc định nếu có
-                if p and _path_exists_safe(p):
-                    cfg = _read_json_file(p)
-                    if cfg:
-                        _apply_profile_env(cfg, profile)
-                        applied = True
-                        break
-            if not applied:
-                _apply_unconfigured_profile_env(profile)
+        # r281 (P16-F08, P0 ghi nhầm corpus): vòng quét config này TRƯỚC ĐÂY nằm trong `if profile:` ⇒ khi
+        # env đã có TL_WEBAPP/TL_TOKEN mà người dùng KHÔNG gõ --profile thì `config.defaultProfile` bị BỎ QUA
+        # HOÀN TOÀN — `_apply_profile_env` không chạy, TL_PROFILE không được đặt, `_active_profile()` trả
+        # vbqppl ⇒ MỌI lệnh GHI non-lazy đổ vào corpus NỀN trong im lặng, và mọi guard profile đều return
+        # sớm vì profile == DEFAULT_PROFILE. Nay quét KỂ CẢ khi profile=None: `_selected_profile_name` tự
+        # xếp hạng --profile > env TL_PROFILE > config.defaultProfile > vbqppl, nên bỏ guard là đủ và
+        # KHÔNG đảo thứ tự ưu tiên nào (env TL_PROFILE do người dùng export vẫn thắng defaultProfile).
+        applied = False
+        for p in _config_candidates(None):            # best-effort áp scope từ config mặc định nếu có
+            if p and _path_exists_safe(p):
+                cfg = _read_json_file(p)
+                if cfg:
+                    _apply_profile_env(cfg, profile)
+                    applied = True
+                    break
+        if not applied and profile:
+            _apply_unconfigured_profile_env(profile)
         return
     for p in _config_candidates(config_path):
         if p and _path_exists_safe(p):
@@ -763,6 +808,18 @@ def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
         if role == "registry" and mime and mime != REGISTRY_SHEET_MIME:
             finds.append({"check": "REGISTRY_NOT_SHEET_MIME", "severity": "critical", "profile": name,
                           "fileId": fid, "mime": mime, "note": "registry PHẢI là Google Sheet."})
+        # r320 (PRO-05): TRƯỚC ĐÂY kiểm MIME bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có
+        # phép kiểm loại nào. Một Google Doc đặt ở `manifestId`, parent đúng, đi qua doctor SẠCH TRƠN
+        # (đo: 0 finding) trong khi chính nó là thứ không đọc được — manifest được upload
+        # `mime=application/json`, `convert=false` (`_create_profile_manifest_json`) rồi tải về JSON-parse.
+        # Cố ý KHÔNG đòi đúng `application/json`: Drive có thể trả `text/plain` cho JSON upload, và bản
+        # text đó vẫn parse được — siết theo chuỗi MIME chính xác là đỏ OAN. Bất biến THẬT là "không phải
+        # tệp Google-native": native cần export mới ra nội dung, nên KHÔNG có đường nào đọc thành JSON.
+        if role == "manifest" and mime and mime.startswith("application/vnd.google-apps."):
+            finds.append({"check": "MANIFEST_NOT_JSON_MIME", "severity": "critical", "profile": name,
+                          "fileId": fid, "mime": mime,
+                          "note": "manifest PHẢI là tệp JSON thường (upload convert=false) — bản "
+                                  "Google-native không JSON-parse được; trỏ lại file .json thật."})
         if info.get("trashed"):
             finds.append({"check": f"{role.upper()}_TRASHED", "severity": "critical", "profile": name,
                           "fileId": fid, "note": f"{role} đang trong Trash — restore hoặc trỏ file khác."})

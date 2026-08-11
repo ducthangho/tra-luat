@@ -222,6 +222,21 @@ Router `scripts/transport.py` (`drive_op`/`run_batch`) định tuyến theo nhó
 - **Confirm-gate THEO LÔ**: `transport.run_batch(items, confirmed=False)` → `ConfirmRequired` liệt kê CẢ lô; xác nhận 1 lần (`confirmed=True`) rồi chạy hết. Đơn lẻ: `drive_op(op, confirmed=True)`.
 - **Fallback ồn ào**: gws chết/`TL_GWS_DISABLE=1` → stderr `[FALLBACK→GAS] op=…` rồi gọi GAS (trừ `upload`).
 - **Ngoại lệ chặn**: `ConfirmRequired` (C chưa confirm) · `DeferToShell` (D ở Chat) · `DeferToMCP` (mcp in-process, mang `.spec` để Claude gọi tool).
+- **Timeout phép dò (r327)**: `gws auth status` tốn **15–50s** (liệt kê 34 API + gọi mạng) — trần cũ 20s
+  nằm GIỮA vùng đó nên `is_available()` lật đỏ/xanh theo mạng, kéo `drive-push` rơi xuống gcloud thiếu
+  Drive scope ⇒ `[FAIL]` dù gws SỐNG. Nay 120s, chỉnh được: `TL_GWS_AUTH_TIMEOUT` ·
+  `TL_GWS_VERSION_TIMEOUT` (đè riêng) · `TL_GWS_TIMEOUT` (SÀN chung, **chỉ nâng**).
+- **Timeout đường GHI (r330)**: `update_content` **120s ĐÃ CHẶN THẬT** một lượt deploy gói 2.487.725 B
+  (`gws timeout sau 120.0s`); `TL_GWS_TIMEOUT=900` thì đẩy xong + byte-match. Nay **600s** cho ba lệnh
+  **GHI CÓ TẢI** (`upload` · `update_content` · `download`) + SÀN riêng `TL_GWS_WRITE_TIMEOUT`
+  (**chỉ nâng**, vì nó phủ nhiều lệnh mặc định khác nhau — cho hạ thì một số san phẳng cả nhóm).
+  Đo trên máy chuẩn: 2,49MB tốn **6–19s**, 25MB tốn **31–47s** (băng thông ~170–850 kB/s); ca hỏng suy ra
+  ≤ ~21 kB/s. Lệnh metadata (`mkdir`/`rename`/`delete`, đo 1,9–3,3s) **giữ nguyên** 60/60/30s — không
+  co giãn theo băng thông. ⚠ **Đừng áp công thức «2,4× ca chậm nhất đo được» của r327 ở đây**: mọi mẫu
+  đo được đều thuộc vùng LÀNH nên 2,4×19,3 = 46s, tức **thấp hơn cả 120s vốn đã hỏng**.
+- ⚠ **Thấy `auth=None`, hay `drive-push` chết vì `timeout`, ĐỪNG vội `gws auth login`** — đọc
+  `probe_error` trong `tl transport-info --json` trước: có chữ `timeout` nghĩa là **không dò được /
+  không kịp**, KHÔNG phải mất quyền. Thông điệp của `drive-push` nay tự nói câu này (r330).
 
 **A0.8 — Đo end-to-end (Code, gws auth oauth2; read=median 3 mẫu, mutate=1 mẫu).**
 
@@ -596,6 +611,33 @@ python scripts/tl.py hygiene scan --json
 python scripts/tl.py hygiene plan <số hiệu/tên> --json
 python scripts/tl.py rasoat keywords --json   # trả RASOAT_FALLBACK_PLAN nếu thiếu script thật
 ```
+
+### r310 — `rasoat <sub>` là lệnh THẬT, đường GHI đòi `--apply`
+
+Từ v1.36.44, `tl rasoat` không còn nuốt trọn đuôi dòng lệnh (`argparse.REMAINDER`). Mỗi nhánh là một
+subcommand khai đủ cờ, nên `tl rasoat <sub> --help` liệt kê được, cờ gõ sai bị TỪ CHỐI ngay thay vì rơi
+xuống script con, và `tool-inventory`/`workflow-audit --strict` nhìn thấy cả ba đường ghi.
+
+**Chạy trần = CHỈ ĐỌC. Muốn ghi phải gõ `--apply`.**
+
+```bash
+python scripts/tl.py rasoat keywords --manifest tra_luat_manifest.json            # DRY: kê worklist, KHÔNG ghi
+python scripts/tl.py rasoat keywords --manifest tra_luat_manifest.json --apply    # GHI registry (tukhoa)
+python scripts/tl.py rasoat titles --from-nlm <notebook_id>                       # DRY
+python scripts/tl.py rasoat titles --from-nlm <notebook_id> --apply --export      # GHI registry (nlm_title)
+python scripts/tl.py rasoat orchestrate boot                                      # DRY (chỉ in KẾ HOẠCH)
+python scripts/tl.py rasoat orchestrate end --apply --touched-drive               # GHI
+python scripts/tl.py rasoat worksheet 18/VBHN-VPQH --out-dir .                    # chỉ ghi file cục bộ
+python scripts/tl.py rasoat phuluc master.json --out-dir .                        # chỉ ghi file cục bộ
+```
+
+Hai điểm dễ vấp:
+
+- **`--profile` giờ thuộc về `tl`** (corpus profile), gõ TRƯỚC hay SAU subcommand đều được, và được áp
+  offline TRƯỚC khi gọi script con. Muốn truyền profile của **nlm CLI** cho `backfill_nlm_title.py` thì
+  dùng `--nlm-profile` — trước r310 hai nghĩa này đổi chỗ cho nhau trong im lặng (RAS-14).
+- **`--selftest` của bộ điều phối** đổi tên thành `--orchestrator-selftest` (`--selftest` ở tầng `tl` là
+  selftest của chính `tl`, main() đọc nó TRƯỚC khi dispatch).
 
 Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + số hiệu/hiệu lực; bản trùng/orphan chỉ đưa `QUARANTINE`, không trash, và chỉ chạy apply khi đã có xác nhận. `hygiene plan` không đưa cụm thiếu canonical vào tập apply; đọc `skipped_clusters[].skip_reason=MISSING_CANONICAL_REVIEW_ONLY` để rà tay. `hygiene scan` cũng đếm `title_mismatch_candidates` để soi các dòng tên file/metadata lệch trước khi rà soát, gồm `VBHN_BARE_NUMBER`/`VBHN_MISSING_YEAR_OR_DATE`, bộ cờ VBHN cấp Bộ `VBHN_MINISTRY_SCOPE`/`VBHN_MINISTRY_MISSING_YEAR`/`VBHN_MINISTRY_NAME_MISSING_YEAR`, `NLM_STATUS_MISMATCH`, `NLM_NOTEBOOK_ID_MISSING`, và `CORPUS_TRUE_NOT_ON_NLM`. `duplicate_sohieu_groups_raw` là thống kê thô; ưu tiên đọc `duplicate_identity_groups` khi quyết định dọn thật.
 

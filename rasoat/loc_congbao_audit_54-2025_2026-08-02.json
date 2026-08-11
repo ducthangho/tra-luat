@@ -1,0 +1,327 @@
+{
+  "input": "54-2025-g7.pdf",
+  "counts": {
+    "dong_chay": 58,
+    "so_trang": 0,
+    "chu_ky_so": 4
+  },
+  "dong_vao": 2071,
+  "dong_ra": 2009,
+  "chars_vao": 127302,
+  "chars_ra": 122791,
+  "canh_bao": [
+    "DAU_MUC_CONG_BAO_CON_LAI: dòng 1578 — nhãn mục của Công báo, KHÔNG tự bỏ được (Công báo in tên cơ quan hai lần; cắt máy sẽ ăn vào khối đầu). Cắt tay tới dòng mang số hiệu (`Số: …` / `Luật số: …`) rồi nạp lại."
+  ],
+  "bo": [
+    {
+      "dong": 1,
+      "loai": "chu_ky_so",
+      "noi_dung": "                           Người ký: CỔNG THÔNG TIN ĐIỆN TỬ CHÍNH PHỦ"
+    },
+    {
+      "dong": 2,
+      "loai": "chu_ky_so",
+      "noi_dung": "                           Email: thongtinchinhphu@chinhphu.vn"
+    },
+    {
+      "dong": 3,
+      "loai": "chu_ky_so",
+      "noi_dung": "                           Cơ quan: VĂN PHÒNG CHÍNH PHỦ"
+    },
+    {
+      "dong": 4,
+      "loai": "chu_ky_so",
+      "noi_dung": "                           Thời gian ký: 22.08.2025 15:10:29 +07:00"
+    },
+    {
+      "dong": 8,
+      "loai": "dong_chay",
+      "noi_dung": "38                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 46,
+      "loai": "dong_chay",
+      "noi_dung": "\f                    CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                             39"
+    },
+    {
+      "dong": 82,
+      "loai": "dong_chay",
+      "noi_dung": "\f40                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 114,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                         41"
+    },
+    {
+      "dong": 148,
+      "loai": "dong_chay",
+      "noi_dung": "\f42                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 181,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              43"
+    },
+    {
+      "dong": 219,
+      "loai": "dong_chay",
+      "noi_dung": "\f44                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 251,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                       45"
+    },
+    {
+      "dong": 284,
+      "loai": "dong_chay",
+      "noi_dung": "\f46                CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 317,
+      "loai": "dong_chay",
+      "noi_dung": "\f                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                       47"
+    },
+    {
+      "dong": 350,
+      "loai": "dong_chay",
+      "noi_dung": "\f48                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 386,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              49"
+    },
+    {
+      "dong": 420,
+      "loai": "dong_chay",
+      "noi_dung": "\f50                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 457,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              51"
+    },
+    {
+      "dong": 494,
+      "loai": "dong_chay",
+      "noi_dung": "\f52                CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 527,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              53"
+    },
+    {
+      "dong": 564,
+      "loai": "dong_chay",
+      "noi_dung": "\f54                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 600,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                        55"
+    },
+    {
+      "dong": 633,
+      "loai": "dong_chay",
+      "noi_dung": "\f56                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 668,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              57"
+    },
+    {
+      "dong": 702,
+      "loai": "dong_chay",
+      "noi_dung": "\f58                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 737,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              59"
+    },
+    {
+      "dong": 775,
+      "loai": "dong_chay",
+      "noi_dung": "\f60                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 813,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              61"
+    },
+    {
+      "dong": 851,
+      "loai": "dong_chay",
+      "noi_dung": "\f62                CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 887,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                            63"
+    },
+    {
+      "dong": 923,
+      "loai": "dong_chay",
+      "noi_dung": "\f64                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 962,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                          65"
+    },
+    {
+      "dong": 996,
+      "loai": "dong_chay",
+      "noi_dung": "\f66                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1028,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                          67"
+    },
+    {
+      "dong": 1062,
+      "loai": "dong_chay",
+      "noi_dung": "\f68                CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1097,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                           69"
+    },
+    {
+      "dong": 1132,
+      "loai": "dong_chay",
+      "noi_dung": "\f70                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1165,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              71"
+    },
+    {
+      "dong": 1202,
+      "loai": "dong_chay",
+      "noi_dung": "\f72                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1239,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              73"
+    },
+    {
+      "dong": 1274,
+      "loai": "dong_chay",
+      "noi_dung": "\f74                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1313,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                        75"
+    },
+    {
+      "dong": 1347,
+      "loai": "dong_chay",
+      "noi_dung": "\f76                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1386,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                           77"
+    },
+    {
+      "dong": 1421,
+      "loai": "dong_chay",
+      "noi_dung": "\f78                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1457,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              79"
+    },
+    {
+      "dong": 1495,
+      "loai": "dong_chay",
+      "noi_dung": "\f80                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1533,
+      "loai": "dong_chay",
+      "noi_dung": "\f                   CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                              81"
+    },
+    {
+      "dong": 1570,
+      "loai": "dong_chay",
+      "noi_dung": "\f82                CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1607,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                          83"
+    },
+    {
+      "dong": 1642,
+      "loai": "dong_chay",
+      "noi_dung": "\f84                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1679,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                       85"
+    },
+    {
+      "dong": 1714,
+      "loai": "dong_chay",
+      "noi_dung": "\f86                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1750,
+      "loai": "dong_chay",
+      "noi_dung": "\f                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                       87"
+    },
+    {
+      "dong": 1783,
+      "loai": "dong_chay",
+      "noi_dung": "\f88                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1822,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                       89"
+    },
+    {
+      "dong": 1856,
+      "loai": "dong_chay",
+      "noi_dung": "\f90                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1892,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                        91"
+    },
+    {
+      "dong": 1928,
+      "loai": "dong_chay",
+      "noi_dung": "\f92                 CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 1960,
+      "loai": "dong_chay",
+      "noi_dung": "\f                    CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                                  93"
+    },
+    {
+      "dong": 1996,
+      "loai": "dong_chay",
+      "noi_dung": "\f94                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025"
+    },
+    {
+      "dong": 2034,
+      "loai": "dong_chay",
+      "noi_dung": "\f                  CÔNG BÁO/Số 1083 + 1084/Ngày 23-8-2025                         95"
+    }
+  ]
+}

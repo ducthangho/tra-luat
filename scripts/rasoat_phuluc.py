@@ -23,8 +23,9 @@ Cấu trúc master: xem templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json
   - "bãi bỏ toàn bộ"                            -> 06-BN (Phụ lục IV)
   - "tạm ngưng/ngừng toàn bộ"                   -> 07-BN (Phụ lục V)
   - "nghiên cứu" / "mục f" / "chờ"             -> KHÔNG vào phụ lục (đưa danh sách Mục F)
-  - còn lại (sửa đổi/bổ sung/thay thế/bãi bỏ một phần/tạm ngưng hiệu lực/giải thích/hướng dẫn)
+  - sửa đổi/bổ sung/thay thế/bãi bỏ một phần/tạm ngưng hiệu lực/giải thích/hướng dẫn
                                                -> 04-BN (Phụ lục II)
+  - RỖNG hoặc ngoài từ vựng                    -> FAIL-CLOSED (không dựng phụ lục)
 
 Dedup: theo "key" nếu có; nếu trống thì theo (van_ban + can_cu + hinh_thuc) chuẩn hóa.
 Giữ bản đầu, gộp các văn bản trùng vào ghi chú, ĐẾM MỘT LẦN (đúng nguyên tắc Mục D).
@@ -36,7 +37,7 @@ Cách dùng:
   rasoat_phuluc.py --in master.json --out-dir .
   rasoat_phuluc.py --in thu_muc_cac_luat/ --out-dir .   # gộp nhiều file
 """
-import argparse, json, re, hashlib, datetime, unicodedata
+import argparse, json, re, hashlib, datetime, sys, unicodedata
 from pathlib import Path
 
 
@@ -46,10 +47,33 @@ def _norm(s):
     return re.sub(r"\s+", " ", s)
 
 
+class HinhThucKhongHopLe(ValueError):
+    """v1.36.45 (r311/DOC-01) — `hinh_thuc` RỖNG hoặc ngoài từ vựng. Trước đây hai ca này rơi
+    ÂM THẦM về "04"; nay nổ ra để `main()` gom lại và FAIL-CLOSED."""
+
+
+# v1.36.45 (r311/DOC-01) — nhóm 04 nay là NHẬN DIỆN DƯƠNG, không còn là cái sọt "còn lại".
+# Cố ý khớp CHỨA (không khớp bằng) vì người nhập hay viết kèm phạm vi ("sửa đổi, bổ sung Điều 54"):
+# giữ nguyên hành vi cho mọi giá trị HỢP LỆ đang chạy, chỉ chặn cái ngoài từ vựng.
+_HINH_THUC_04 = ("sửa đổi", "bổ sung", "thay thế", "bãi bỏ một phần",
+                 "tạm ngưng hiệu lực", "tạm ngừng hiệu lực", "giải thích", "hướng dẫn")
+
+
 def route(hinh_thuc):
+    """v1.36.45 (r311/DOC-01 — đo LIVE 02-08): FAIL-CLOSED thay cho fallback "04".
+
+    Bằng chứng bản cũ: `route("ban hanh moi") == "04"` (đáng lẽ 05), `route("bai bo toan bo") == "04"`
+    (đáng lẽ 06), `route("") == route("xyz la gi") == "04"`. Nghĩa là MỘT lỗi gõ dấu trong bảng master
+    đủ để một đề xuất "ban hành mới" bị đếm sang Mẫu 04-BN — sai cả phụ lục lẫn số liệu Mục D, và
+    KHÔNG có tín hiệu nào. Chính `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`_canh_bao_hinh_thuc`)
+    và `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md:272` đã chốt "không để route() fallback im lặng".
+
+    Chọn FAIL-CLOSED chứ KHÔNG bỏ dấu để đoán ý: `RASOAT_HOSO_LOOP.md:177` đã bắt buộc "CHỈ dùng giá
+    trị trong `_vocab_hinh_thuc`" ⇒ đoán ý ở tầng định tuyến phụ lục là thêm nguồn chân lý thứ hai.
+    Thứ tự nhánh là RÀNG BUỘC: "chờ bổ sung căn cứ" chứa "bổ sung" nên nhánh F PHẢI đứng trước 04."""
     h = _norm(hinh_thuc)
     if not h:
-        return "04"
+        raise HinhThucKhongHopLe("`hinh_thuc` RỖNG")
     if "ban hành mới" in h:
         return "05"
     if "bãi bỏ toàn bộ" in h:
@@ -58,7 +82,9 @@ def route(hinh_thuc):
         return "07"
     if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
         return "F"
-    return "04"
+    if any(k in h for k in _HINH_THUC_04):
+        return "04"
+    raise HinhThucKhongHopLe(f"{str(hinh_thuc)!r} ngoài từ vựng")
 
 
 def load_master(p):
@@ -69,14 +95,23 @@ def load_master(p):
     CHUỖI thành TỪNG KÝ TỰ rồi mới chết ở nơi khác ("'str' object has no attribute 'get'") — hỏng
     IM LẶNG trước, báo lỗi sai chỗ sau. Nay: khuôn lạ FAIL-CLOSED, nói rõ file nào."""
     path = Path(p)
-    files = sorted(path.glob("*.json")) if path.is_dir() else [path]
     try:
         import sys as _sys
         _sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from tl_core.lookup_ops import _rasoat_merge_units
+        from tl_core.lookup_ops import _rasoat_la_ban_sao, _rasoat_merge_units, _rasoat_trung_lap
     except Exception as e:  # noqa: BLE001
         raise SystemExit(f"[rasoat_phuluc] không nạp được tl_core.lookup_ops ({e}) — chạy từ trong "
                          f"cây skill, hoặc dựng bảng master trước bằng `tl rasoat-merge`.")
+    # r290 (RAS-15 — audit lõi 31-07): lọc BẢN SAO LƯU y như `tl rasoat-merge`. Bản cũ `glob("*.json")`
+    # nuốt cả `*.bak*.json`, nên chạy TRỰC TIẾP script này trên cùng thư mục mà wrapper đã lọc sạch lại
+    # đếm phát hiện HAI LẦN — chính sự cố r216 đo được 27-07 (40 → 53 phát hiện, 13 mã VD trùng), chỉ
+    # khác đường vào. Cùng một hàm `_rasoat_la_ban_sao` để hai đường không thể trôi khỏi nhau.
+    _tat_ca = sorted(path.glob("*.json")) if path.is_dir() else [path]
+    _ban_sao = [f for f in _tat_ca if path.is_dir() and _rasoat_la_ban_sao(f.name)]
+    files = [f for f in _tat_ca if f not in _ban_sao]
+    if _ban_sao:
+        print(f"[rasoat_phuluc] BỎ QUA {len(_ban_sao)} bản sao lưu: "
+              f"{', '.join(f.name for f in _ban_sao)}", file=sys.stderr)
     docs = []
     for f in files:
         try:
@@ -89,6 +124,15 @@ def load_master(p):
         raise SystemExit(f"[rasoat_phuluc] KHUÔN KHÔNG NHẬN RA: {ten}. Chờ 1 trong 2: khuôn bảng "
                          f"master (van_ban=DANH SÁCH + noi_dung) hoặc khuôn §6 master/<unit>.json "
                          f"(phat_hien). File có CẢ hai khoá cũng bị từ chối — không đoán.")
+    # r290 (RAS-06 — audit lõi 31-07): cổng TRÙNG r216 trước đây CHỈ có ở `tl rasoat-merge`. Chạy thẳng
+    # script này với hai phiếu trùng `key`, `dedup()` lặng lẽ GIỮ BẢN ĐẦU và VỨT bản sau — mất phát hiện
+    # mà không ai biết. Dùng chung `_rasoat_trung_lap` để phụ lục không bao giờ sinh ra từ nguồn đã trùng.
+    _trung = _rasoat_trung_lap(docs)
+    if _trung.get("key") or _trung.get("unit_id"):
+        raise SystemExit(f"[rasoat_phuluc] TRÙNG LẶP GIỮA CÁC NGUỒN — không dựng phụ lục. "
+                         f"key={[x.get('gia_tri') for x in _trung.get('key') or []]} "
+                         f"unit_id={[x.get('gia_tri') for x in _trung.get('unit_id') or []]}. "
+                         f"Mỗi phát hiện chỉ nằm ở MỘT phiếu, mỗi `unit_id` chỉ một file.")
     return merged.get("co_quan", ""), merged.get("van_ban", []), merged.get("noi_dung", [])
 
 
@@ -116,7 +160,10 @@ def dedup(items):
 def group_by_linhvuc(items):
     g = {}
     for it in items:
-        g.setdefault(it.get("linh_vuc", "(Chưa phân loại)"), []).append(it)
+        # r290 (RAS-16 — audit lõi 31-07): `dict.get(khoá, mặc_định)` CHỈ thay khi khoá VẮNG MẶT;
+        # `linh_vuc: ""` (rất thường gặp — template để trống) lọt qua nguyên vẹn và sinh heading RỖNG
+        # trong phụ lục trình. Phải chuẩn hoá theo GIÁ TRỊ, không theo sự tồn tại của khoá.
+        g.setdefault((it.get("linh_vuc") or "").strip() or "(Chưa phân loại)", []).append(it)
     return g
 
 
@@ -133,7 +180,8 @@ def table_03(van_ban):
         L.append(f"| | **LĨNH VỰC {lv.upper()}** | | | | |")
         loai_g = {}
         for r in rows:
-            loai_g.setdefault(r.get("loai", "Bộ luật, luật của Quốc hội"), []).append(r)
+            # r290 (RAS-16): cùng lớp lỗi với `linh_vuc` ngay trên — `loai: ""` sinh dòng phân nhóm rỗng.
+            loai_g.setdefault((r.get("loai") or "").strip() or "Bộ luật, luật của Quốc hội", []).append(r)
         for loai, rs in loai_g.items():
             L.append(f"| | *{loai}* | | | | |")
             for r in rs:
@@ -184,6 +232,19 @@ def main():
 
     co_quan, van_ban, noi_dung = load_master(a.inp)
     noi_dung = dedup(noi_dung)
+
+    # v1.36.45 (r311/DOC-01): kiểm TRỌN BỘ trước khi dựng, báo MỘT LẦN đủ mọi dòng sai — cùng lối
+    # "nói rõ file nào" của load_master. Nổ giữa vòng lặp thì người nhập phải sửa từng dòng một lượt.
+    _sai = []
+    for _i, it in enumerate(noi_dung, 1):
+        try:
+            route(it.get("hinh_thuc"))
+        except HinhThucKhongHopLe as e:
+            _sai.append(f"  #{_i} key={it.get('key') or '(trống)'} · van_ban={it.get('van_ban') or '(trống)'} → {e}")
+    if _sai:
+        raise SystemExit(f"[rasoat_phuluc] HÌNH THỨC XỬ LÝ KHÔNG HỢP LỆ ({len(_sai)} dòng) — KHÔNG dựng "
+                         "phụ lục. CHỈ dùng giá trị trong `_vocab_hinh_thuc` của "
+                         "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json:\n" + "\n".join(_sai))
 
     buckets = {"04": [], "05": [], "06": [], "07": [], "F": []}
     for it in noi_dung:

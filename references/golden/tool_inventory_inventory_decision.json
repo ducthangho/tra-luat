@@ -170,6 +170,7 @@
     "state-put",
     "status",
     "sweep",
+    "test-fragments-check",
     "the-thuc-build",
     "the-thuc-check",
     "the-thuc-normalize",
@@ -1393,6 +1394,56 @@
         "workflow_task": null,
         "write_scope": "registry"
       },
+      "rasoat keywords": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "rasoat orchestrate": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "rasoat phuluc": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "rasoat titles": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "registry"
+      },
+      "rasoat worksheet": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "rasoat-chongcheo": {
         "generated": true,
         "idempotency_contract": null,
@@ -1673,6 +1724,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "test-fragments-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "release_verify",
+        "write_scope": "none"
+      },
       "the-thuc-build": {
         "generated": true,
         "idempotency_contract": null,
@@ -1835,10 +1896,11 @@
       }
     },
     "counts": {
-      "generated_parsers": 152,
+      "generated_parsers": 153,
       "high_risk": 28,
-      "total": 159,
-      "write_commands": 82
+      "nested": 5,
+      "total": 165,
+      "write_commands": 87
     },
     "schema": "command_registry.v1"
   },

@@ -16,9 +16,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from verify_deep import (split_articles, t1_structure, ROMAN_PAT, extract_appendix,  # noqa: E402
-                         appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao)
+                         appendix_start, preamble_of, loc_rac_congbao, co_rac_congbao,
+                         tach_duoi_vbhn)                                             # noqa: E402  (r322)
 from keywords import extract_keywords  # noqa: E402  (v1.13.4: bắt tukhoa tất định lúc ingest)
-from docx_markup import MODES, has_markup, strip_markup, resolve_mode, warn_line, scan_file  # noqa: E402  (r182)
+from docx_markup import (MODES, UNREADABLE, has_markup, strip_markup, resolve_mode,  # noqa: E402  (r182)
+                         warn_line, scan_file, drop_drawing_measures)                # noqa: E402  (r316/r317)
 
 
 def _clean_md_artifacts(t: str) -> str:
@@ -56,6 +58,10 @@ def _docx_zip_text(path: str, mode: str = "strip") -> tuple:
     with zipfile.ZipFile(path) as _z:
         xml = read_member_bounded(_z, "word/document.xml").decode("utf-8", "replace")
     xml, st = strip_markup(xml, mode)
+    # r317: bỏ TRỊ ĐO DrawingML TRƯỚC khi bóc tag — nếu không, toạ độ EMU (`wp:posOffset`,
+    # `wp14:pctWidth/pctHeight`) chui vào thân Điều. Nhánh python-docx dưới đây KHÔNG dính,
+    # nên thiếu nó thì CÙNG một .docx cho hai kết quả khác nhau tuỳ máy. Xem docstring hàm.
+    xml = drop_drawing_measures(xml)
     # GIỮ bảng: xuống dòng theo đoạn & hàng bảng, tab giữa ô
     xml = (xml.replace("</w:p>", "\n")
               .replace("</w:tr>", "\n")
@@ -201,6 +207,9 @@ def main():
     ap.add_argument("--aliases", default="", help="Số hiệu tra cứu bổ sung, phân tách ';'")
     ap.add_argument("--as-appendix", action="store_true",
                     help="Văn bản CHỈ là phụ lục/mẫu: lưu nguyên khối phu_luc, không ép thành Điều, không FATAL.")
+    ap.add_argument("--as-appendix-auto", dest="as_appendix_auto", action="store_true",
+                    help="(r297) --as-appendix này do lệnh cha SUY ĐOÁN từ số hiệu, KHÔNG do người gõ. "
+                         "Nội dung được quyền PHỦ QUYẾT: thấy thân Điều thật thì DỪNG thay vì lưu sai.")
     ap.add_argument("--recorded-at", default="",
                     help="timestamp provenance tường minh; mặc định bỏ để cùng input tạo cùng cache bytes")
     ap.add_argument("--loc-congbao", dest="loc_congbao", action="store_true",
@@ -256,10 +265,28 @@ def main():
         _cb_flags.extend(co_rac_congbao(raw))
 
     if a.as_appendix:
+        # r297 (P16-F10) — PHỦ QUYẾT THEO NỘI DUNG, chỉ áp cho ca SUY ĐOÁN. Nhánh này bỏ `khoi_dau`
+        # (r215: nguồn DUY NHẤT chứng minh danh tính), bỏ kiểm T1, và đổi `document_variant` ⇒ đổi
+        # doc_key. Cái giá đó chấp nhận được khi NGƯỜI gõ `--as-appendix`; KHÔNG chấp nhận được khi nó
+        # đến từ một phép đoán trên chuỗi số hiệu. Nên: đoán mà nội dung có thân Điều thật ⇒ DỪNG
+        # (fail-CLOSED), để người quyết — chứ không lặng lẽ lưu toàn văn Luật thành phụ lục rồi rc=0.
+        # ★`--as-appendix` gõ TƯỜNG MINH đi thẳng, không đụng: phụ lục/mẫu CÓ Điều nội bộ là hợp lệ
+        #  (chính nhánh này giữ `split_articles(raw)` cho ca đó).
+        if getattr(a, "as_appendix_auto", False):
+            _n_dieu297 = len(split_articles(raw) or {})
+            if _n_dieu297 >= 2:
+                print(json.dumps({"error": "APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU",
+                                  "articles_found": _n_dieu297,
+                                  "hint": "Số hiệu gợi ý phụ lục nhưng nội dung có thân Điều — nhiều khả "
+                                          "năng đây là TOÀN VĂN. Chạy lại với --no-as-appendix để nạp "
+                                          "bình thường, hoặc --as-appendix tường minh nếu thật sự là phụ lục."},
+                                 ensure_ascii=False))
+                sys.exit(2)
         # v1.12.9: nạp văn bản PHỤ LỤC/MẪU độc lập — lưu nguyên khối, không yêu cầu Điều.
         body = ""           # không phân tích thân
         phu_luc = raw.strip()
         khoi_dau = ""       # r215: cả văn bản LÀ phụ lục ⇒ không có khối đầu riêng để giữ
+        xac_thuc = chu_thich = ""   # r322: phụ lục/mẫu độc lập không có khối đuôi VBHN
         arts = split_articles(raw)   # giữ Điều nội bộ của mẫu (nếu có), KHÔNG bắt buộc
         rep = {"flags": ["APPENDIX: nạp dạng phụ lục/mẫu — không kiểm cấu trúc Điều nghị định"]}
         rep["t1"] = {"tier": "T1", "ok": True, "fatal": False, "articles_found": len(arts)}
@@ -271,6 +298,12 @@ def main():
         _ap = appendix_start(raw)
         body = raw[:_ap] if _ap >= 0 else raw
         phu_luc = raw[_ap:].strip() if _ap >= 0 else ""
+        # r322: TÁCH KHỐI ĐUÔI VBHN (bảng «XÁC THỰC VĂN BẢN HỢP NHẤT» + danh sách chú thích hợp
+        # nhất «[n] …») khỏi THÂN trước khi bóc Điều — nếu không, cả hai đọng vào thân ĐIỀU CUỐI và
+        # trích nguyên văn sẽ nhả chú thích ra như thể là quy phạm (đo 02-08-2026: 40-2026 Điều 52
+        # có 40.406/40.637 ký tự là khối đuôi). Đặt SAU bước tách phụ lục để đúng với cả hai thứ tự
+        # đuôi-vs-phụ-lục; hai khối được GIỮ vào trường riêng chứ KHÔNG bỏ đi.
+        body, xac_thuc, chu_thich = tach_duoi_vbhn(body)
         # r215 (CACHE_BUILD_DANH_ROI_KHOI_DAU_VAN_BAN): GIỮ khối đầu văn bản. Trước r215 phần này bị
         # `split_articles` bỏ im lặng (`parts[0]`) nên record consolidated không lưu số hiệu/ngày ban
         # hành/căn cứ ⇒ mọi bản dựng lại từ `articles` là văn bản KHÔNG CÓ DANH TÍNH.
@@ -295,7 +328,13 @@ def main():
 
     # r182: markup sửa đổi là TÍN HIỆU PHÁP LÝ (bản đang sửa ≠ bản hiệu lực) — ghi vào record để
     # người tra thấy ngay. CHỈ ghi khi CÓ markup ⇒ văn bản sạch giữ NGUYÊN bytes cache như trước.
-    if _mk_st:
+    if _mk_st.get(UNREADABLE):
+        # r316: KHÔNG đọc được container ≠ sạch markup. Phải khai vào record, KHÔNG được lẫn vào
+        # câu MARKUP_SUA_DOI (câu đó khẳng định CÓ markup và đếm được — ở đây ta chưa biết gì).
+        rep["flags"].append("MARKUP_KHONG_DOC_DUOC: không mở được container .docx để đếm markup — "
+                            "CHƯA biết bản này có phải dự thảo đang sửa hay không (KHÔNG phải 'sạch'). "
+                            "Kiểm tay trước khi trích dẫn như quy phạm.")
+    elif _mk_st:
         rep["flags"].append("MARKUP_SUA_DOI: " + ", ".join(f"{k}={v}" for k, v in _mk_st.items())
                             + f" (che_do={_mk_mode}) — chữ w:del/gạch-ngang ĐÃ BỎ, w:ins là chữ MỚI THÊM")
 
@@ -317,12 +356,18 @@ def main():
                       "articles": len(nums), "terminal_article": (nums[-1] if nums else 0),
                       "has_phu_luc": bool(phu_luc), "phu_luc_chars": len(phu_luc),
                       "has_khoi_dau": bool(khoi_dau), "khoi_dau_chars": len(khoi_dau),
+                      "has_chu_thich": bool(chu_thich), "chu_thich_chars": len(chu_thich),
+                      "has_xac_thuc": bool(xac_thuc), "xac_thuc_chars": len(xac_thuc),
                       "is_appendix": bool(getattr(a, "as_appendix", False))},
         "coverage": coverage, "verify_flags": rep["flags"],
         "khoi_dau": khoi_dau,          # r215: khối đầu văn bản — nguồn DUY NHẤT chứng minh danh tính
         "articles": {str(n): arts[n] for n in nums},
         "has_phu_luc": bool(phu_luc),
         "phu_luc": phu_luc,
+        # r322: khối đuôi VBHN — GIỮ, không bỏ. `chu_thich` mang thông tin pháp lý («khoản này do
+        # luật nào sửa, hiệu lực từ bao giờ»); `xac_thuc` là bằng chứng danh tính (VPQH + 'Số:').
+        "chu_thich": chu_thich,
+        "xac_thuc": xac_thuc,
     }
     if _mk_st:
         record["markup"] = _mk_st

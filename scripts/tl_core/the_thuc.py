@@ -102,7 +102,8 @@ def _tt_dac_ta():
     {"__khai_trang__": lý_do} — consumer hỏi tới phải trả lời "chưa đặc tả", cấm giả vờ kiểm.
     Dùng cho: (a) test đối soát r170 — dựng văn bản mẫu rồi kiểm TỪNG thành phần khớp bảng, chặn
     builder và bảng trôi khỏi nhau; (b) tra cứu khi soạn tay. ĐÍCH ADR-0009: builder + bộ kiểm cùng
-    ĐỌC bảng này (nối theo trình tự 5 bước — docs/adr/0009); khi đó bảng là nguồn sự thật duy nhất.
+    ĐỌC bảng này (nối theo trình tự 5 bước — docs/adr/0009, cây nguồn dev NGOÀI gói kể từ r291);
+    khi đó bảng là nguồn sự thật duy nhất.
     ⚠ Sửa bảng này = sửa hành vi builder: phải kèm căn cứ nguyên văn, không "chỉnh cho đẹp"."""
     return {
         "hanh_chinh": {          # NĐ 30/2020 Phụ lục I

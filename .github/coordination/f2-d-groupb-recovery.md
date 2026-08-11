@@ -6,6 +6,7 @@ This record executes Packet `wp82` revision 4 / generation 3 under Mission #48 r
 
 - Initial lease: `wp82-r4-g3-codex-20260811T172240Z`
 - Rework lease: `wp82-r4-g3-codex-20260811T193620Z` (findings `WP82-R4-G3-F01` and `WP82-R4-G3-F02`)
+- Final rework lease: `wp82-r4-g3-codex-20260811T204048Z`, attempt 3/3 (finding `WP82-R4-G3-F03`)
 - Executor/environment: `codex` / `local`
 - Packet branch: `codex/wp82-g3-f2-d-b`
 - EOL base: `fbe5ab9e1ece3b45c065879bfd59dee2554db3e2`
@@ -15,6 +16,8 @@ This record executes Packet `wp82` revision 4 / generation 3 under Mission #48 r
 - Work-start evidence: [Issue #82 comment 5256598820](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5256598820).
 - Reviewer findings: [Issue #82 comment 5257440302](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5257440302).
 - Rework authority: [Issue #82 comment 5257928421](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5257928421), starting from packet head `87fac15375bf2cdc579125443deafe18347a7740` and ref-3 tip `1924038aaebdd1a099baa0e696524b887b93d68e`.
+- F03 reviewer verdict: [Issue #82 comment 5258551421](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5258551421); reconcile: [comment 5258599796](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5258599796).
+- F03 authority: [Issue #82 comment 5258615158](https://github.com/ducthangho/tra-luat/issues/82#issuecomment-5258615158), starting from packet head `79ae58779c0283aa9a4fff24baf4953196224080` and ref-4 tip `f1d6558aa103e13bcc57b6caf697f4f3515df16d`.
 
 Fail-closed preflight was completed before any ref write:
 
@@ -41,6 +44,13 @@ commit `eaa753bd331070ee36583e57f5fe2140861486ee` from exact tip
 `1924038aaebdd1a099baa0e696524b887b93d68e`. The remote tip was raw-read immediately before the write,
 the update was a normal fast-forward (`1924038a -> eaa753bd`), and no other Group B ref moved.
 
+Reviewer finding `WP82-R4-G3-F03` then showed that ref 4 had restored the r320 handler bridge but dropped
+its credential-lazy gate and its generated inventory registration. Under the final rework lease, ref 4
+alone was advanced by minimal single-parent commit `c17027db254e73984ade7e79c26aaac99eddbfde` from exact tip
+`f1d6558aa103e13bcc57b6caf697f4f3515df16d`. The remote tip was raw-read immediately before the write;
+the explicit non-force push was a normal fast-forward (`f1d6558a -> c17027d`), and the other three Group B
+refs did not move.
+
 The two required ancestry directions were then measured on the raw remote tip:
 
 1. `git merge-base --is-ancestor <old-tip> <remote-recovered-tip>` — the legacy content is retained.
@@ -51,7 +61,7 @@ The two required ancestry directions were then measured on the raw remote tip:
 | 1 | `claude/audit-errors-patch-plan-56x4rq` | `4c0332f052521a118da29607d7741da16033a846` | **recovered** | `f3d8d68503b5d0a9ed19eed955698ff201daa964` | 0 | 0 | 0 | 0 |
 | 2 | `claude/cuu-viec-treo-2026-08-03` | `6c148d331e5dcdcc32f3b9474e806e6dcad76ac8` | **recovered** | `42d8459b92b10d450e3d7b4e27796dabf30d778c` | 1, conflicts resolved | 0 | 0 | 0 |
 | 3 | `claude/nlm-registry-sheet-dup-s22fk7` | `0bb60d215c029377ac08ffb30024f18f301df68f` | **recovered + corrected** | `eaa753bd331070ee36583e57f5fe2140861486ee` | 1, conflicts resolved; corrective FF rc=0 | 0 | 0 | 0 |
-| 4 | `claude/ras-17-data-pr13-windows-bjovq2` | `411b3f3fb74945934a82c8dc203cd523e0d31cf0` | **recovered** | `f1d6558aa103e13bcc57b6caf697f4f3515df16d` | 1, conflicts resolved | 0 | 0 | 0 |
+| 4 | `claude/ras-17-data-pr13-windows-bjovq2` | `411b3f3fb74945934a82c8dc203cd523e0d31cf0` | **recovered + corrected** | `c17027db254e73984ade7e79c26aaac99eddbfde` | 1, conflicts resolved; corrective FF rc=0 | 0 | 0 | 0 |
 
 All four remote readbacks exactly matched the recovered tips in the table. No source branch was deleted;
 no force push, `--no-verify`, master write, LIVE call, writer opening, or ref outside these four source refs
@@ -121,22 +131,39 @@ The two branch-only documents are preserved byte-for-byte and remain absent on t
 
 Conflicts in release metadata, golden inventory, and `scripts/tl.py` were initially resolved to canonical;
 the r320 migration path and r321 scan path were both retained in `references/RASOAT_PLAN_SCHEMA.md`,
-`scripts/tl_core/lookup_ops.py`, and `scripts/tl_selftest.py`. A pre-push behavioral run then correctly
-caught that the r320 handler bridge was missing from canonical `scripts/tl.py` (rc=1,
-`AttributeError: cmd_rasoat_anchor`). Nothing had been pushed. The old handler exports were added beside
-the r321 export, syntax/EOL/diff checks were rerun, and the unpushed merge commit was amended to the final
-tip in the table.
+`scripts/tl_core/lookup_ops.py`, and `scripts/tl_selftest.py`. The initial recovery restored the missing
+r320 handler bridge, but reviewer A/B on a credentials-free archive proved a second live gate remained:
+`rasoat-anchor` was absent from `_CREDS_LAZY_CMDS`, so `main()` exited before the handler on a clean clone.
 
-The required behavior was remeasured with the same external fixtures and an empty HOME:
+Corrective commit `c17027d` restores exactly `"rasoat-anchor",` to `_CREDS_LAZY_CMDS` and regenerates
+`references/golden/tool_inventory_inventory_decision.json`. The generator decision is positive and
+branch-owned, not inferred from a configured development machine: old tip `411b3f3f` contains the command
+registration, pre-fix `f1d6558a` still has the parser/handler but omits both inventory entries, and the
+corrected golden is byte-for-byte equal to normalized output from
+`python scripts/tl.py tool-inventory --group inventory_decision --json` (direct rc=0). The generated delta
+is exactly the two `rasoat-anchor` entries plus derived counts `generated_parsers=154`, `total=166`, and
+`write_commands=88`; there is no unrelated inventory drift.
 
-| Tree / fixture | Direct result | Positive evidence |
-|---|---|---|
-| recovered tip / positive | rc=0 | `che_do=DRY`, `da_ghi=false`, `ke_hoach.di_tru=1`, `locator_trong_hash: 1 -> 0`, `findings_sau.san_sang=true` |
-| recovered tip / negative control | rc=0 | `ke_hoach.di_tru=0`, `ke_hoach.bo_qua=1`, `THIEU_DIEU_TRONG_CACHE:99`, `findings_sau.san_sang=false` |
-| EOL base / same positive | rc=2 | parser reports `invalid choice: 'rasoat-anchor'` |
+The same positive fixture was run from three `git archive` trees with no `.git`, empty per-tree
+`HOME`/`USERPROFILE`, and every `TL_*` / `TRA_LUAT_*` environment variable removed:
 
-This demonstrates the recovered behavior and the data-sensitive control; it is not a string-presence or
-one-way added-file inference.
+| Exact tree / positive fixture | Direct result | Handler evidence |
+|---|---:|---|
+| old tip `411b3f3fb74945934a82c8dc203cd523e0d31cf0` | rc=0 | schema=`rasoat_anchor.v1`, `che_do=DRY`, `da_ghi=false`, `di_tru=1`, `locator_trong_hash: 1 -> 0`, `san_sang=true` |
+| pre-fix `f1d6558aa103e13bcc57b6caf697f4f3515df16d` | rc=1 | stdout empty; stderr begins `[tl] Thiếu TL_WEBAPP/TL_TOKEN`; handler not reached |
+| corrected `c17027db254e73984ade7e79c26aaac99eddbfde` | rc=0 | schema=`rasoat_anchor.v1`, `che_do=DRY`, `da_ghi=false`, `di_tru=1`, `locator_trong_hash: 1 -> 0`, `san_sang=true` |
+
+The corrected source ref's full selftest returned direct rc=0 with `1699/1699`. Direct ancestry checks
+`411b3f3f -> c17027d`, `f1d6558a -> c17027d`, and `fbe5ab9e -> c17027d` each returned rc=0. Its complete
+diff from `f1d6558a` is exactly `scripts/tl.py` and the one generated golden; `VERSION`, `CHANGELOG.md`,
+`RELEASE_MANIFEST.json`, and `SKILL.md` have zero changed paths, and `git diff --check` returns rc=0.
+
+For completeness, a full source-tree `golden-test` reports one pre-existing coupled snapshot mismatch:
+`workflow_audit.json` expects 165 checked commands while the corrected generated inventory has 166. The
+targeted `tool_inventory_inventory_decision` case itself is green with actual bytes equal to expected.
+That unrelated golden path is outside the final lease's two-path source-ref write set and was not changed.
+The clean-clone handler A/B, generator equality, source selftest, ancestry, and protected fence above close
+`WP82-R4-G3-F03` without widening scope.
 
 ## Protected-path and ref-scope proof
 
@@ -163,14 +190,15 @@ handoff:
 | `python .githooks/eol_policy_test.py` | rc=0 | `30/30 dat` |
 | `python .githooks/eol_policy.py --all --json` | rc=0 | `ok=true`, checked=278, scanned=300, skipped=22, violations=0 |
 | `python scripts/tl.py --selftest` | rc=0 | `1696/1696` |
-| `python scripts/tl.py doc-claims-check --strict --json` | rc=0 | `ok=true`, files_scanned=82, flags=0; 353 non-blocking advisories remain enumerated |
-| `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` | rc=0 | `ok=true`, expected=179, checked=179; failed=0, extra=0, missing-from-manifest=0, required-missing=0, errors=0 |
+| `python scripts/tl.py doc-claims-check --strict --json` | rc=0 | `ok=true`, files_scanned=82, flags=0; 354 non-blocking advisories remain enumerated |
+| `python scripts/tl.py release-verify RELEASE_MANIFEST.json --root . --strict --json` | rc=0 | `ok=true`, expected=179, checked=179; failed=0, extra=0, missing-from-manifest=0, required-missing=0, errors=0 |
 
 ## Verdict
 
-All four and only four Group B source refs have exactly one disposition: **recovered**. Ref 3 additionally
-has the reviewed corrective fast-forward described above. Each raw remote tip contains both its exact old
-tip and the exact EOL base. Findings closed: `WP82-R4-G3-F01`, `WP82-R4-G3-F02`. Packet verdict:
+All four and only four Group B source refs have exactly one disposition: **recovered**. Refs 3 and 4
+additionally have the corrective fast-forwards described above. Each raw remote tip contains both its exact
+old tip and the exact EOL base. Findings closed: `WP82-R4-G3-F01`, `WP82-R4-G3-F02`,
+`WP82-R4-G3-F03`. Packet verdict:
 `ready_for_independent_rereview`;
 this record does not authorize review, merge, land, deploy,
 source-branch deletion, writer reopening, or closure of #48, #49, #52, #63, #82, or #84.

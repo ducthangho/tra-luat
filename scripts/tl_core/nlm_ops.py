@@ -1392,7 +1392,9 @@ def _nlm_preflight_report(notebook_id: str, *, probe: bool = True) -> dict:
     tệ nhất là hứa «còn 54,8 phút» trên phiên ĐÃ CHẾT với `warn` rỗng. Thay bằng thứ ĐO ĐƯỢC:
     `rotation_token_expired`/`rotation_token_min` (hạn thật trong jar) + verdict probe LIVE. `age_min`
     GIỮ nhưng đọc cho đúng nghĩa: thời gian từ LẦN XÁC THỰC THÀNH CÔNG GẦN NHẤT, KHÔNG phải tuổi cookie
-    và KHÔNG dự đoán được cái chết (van F7/`NLM_COOKIE_BATCH_MAX_MIN` vẫn dùng nó — GIỮ NGUYÊN ngưỡng)."""
+    và KHÔNG dự đoán được cái chết. r208d ĐỔI van F7 theo đúng đó: cổng lô KHÔNG còn chặn theo tuổi mà là
+    CANARY LIVE (`alive is False` → rc=2 `NLM_AUTH_DEAD_BEFORE_BATCH`); `age_min` chỉ còn nuôi CẢNH BÁO
+    `NLM_COOKIE_BATCH_WARN_MIN` (50′); hằng ngưỡng-CHẶN cũ đã GỠ — đừng hồi sinh tên đó trong doc/mã."""
     rep = {"alive": None, "why": "", "age_min": None, "warn": []}
     age = _nlm_auth_age_minutes()
     if age is not None:

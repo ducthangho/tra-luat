@@ -519,6 +519,25 @@ def cmd_profile_delete(a) -> int:
                "note": "Chưa xóa gì. Tách shared_source_id trước rồi chạy lại để tránh purge một phần."}
         print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
         return 2
+    # r320 (PRO-09 · ADR-0012 §4 — nâng từ mục RISK của sổ audit): `profile-delete` là mutation NẶNG
+    # NHẤT của họ profile (xoá nguồn NLM **bất khả nghịch** → trash Drive → gỡ config) mà TRƯỚC ĐÂY
+    # không đọc marker ở BẤT KỲ đâu — chạy khi trạng thái định danh hoàn toàn mù. Guard phải đứng
+    # TRƯỚC mutation ĐẦU TIÊN: đặt sau đây thì nguồn NLM đã xoá rồi, chặn cũng vô nghĩa.
+    # Chỉ chạy ở đường APPLY (DRY đã return ở trên) ⇒ không thêm call mạng cho đường xem-kế-hoạch.
+    _mk_meta = str((prof or {}).get("metaFolderId") or "").strip()
+    _mk_root = str((prof or {}).get("rootFolderId") or "").strip()
+    if _mk_meta or _mk_root:
+        try:
+            _mk_read = _marker_read(_gas(), _mk_root or _mk_meta, meta_id=_mk_meta or None)
+        except Exception as e:  # noqa: BLE001 — transport nổ là "mù trạng thái", KHÔNG phải "sạch"
+            _mk_read = {"error": f"{type(e).__name__}: {e}"}
+        _mk_blk = _marker_mutation_guard(_mk_read, name)
+        if _mk_blk:
+            out = {**plan, "ok": False, "error": "PROFILE_DELETE_MARKER_GUARD", "marker_guard": _mk_blk,
+                   "note": "CHƯA xoá gì — trạng thái marker mơ hồ/không hợp lệ. Repair bằng "
+                           "`profile-backfill-markers --profile-name <tên> --apply --force` rồi chạy lại."}
+            print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+            return 2
     # (MERGE Claude) backup config TRƯỚC khi gỡ → hồi phục được
     # r202 (doctrine r193): backup CHỨA token — ghi vào _config_backup_dir() NGOÀI cây skill;
     # trước đây with_suffix đặt `.bak.json` CẠNH config = gốc cây (sự cố Tầng-3 smoke 25-07).
@@ -864,15 +883,17 @@ def _cmd_profile_adopt_impl(a) -> int:
     _marker_result = None
     if _meta_id:
         _old_mk = _marker_read(g, folder, meta_id=_meta_id)
-        if _old_mk.get("error"):
-            _marker_result = {"ok": False, "verified": False, "error": _old_mk.get("error")}
-        elif len(set(_old_mk.get("marker_file_ids") or [])) > 1:
-            _marker_result = {"ok": False, "verified": False, "error": "MARKER_DUPLICATE",
-                              "fileIds": _old_mk.get("marker_file_ids")}
-        elif (_old_mk.get("found") and str((_old_mk.get("marker") or {}).get("profile") or "")
-              not in ("", name)):
-            _marker_result = {"ok": False, "verified": False, "error": "PROFILE_MARKER_NAME_CONFLICT",
-                              "existing_profile": (_old_mk.get("marker") or {}).get("profile")}
+        # r320 (PRO-03 · ADR-0012 §4): mutation marker đi qua GUARD CHUNG `_marker_mutation_guard`,
+        # KHÔNG tự dựng lại ba điều kiện rời. Chuỗi cũ kiểm đúng ba thứ — đọc lỗi / trùng marker /
+        # tên profile khác — nên marker HỎNG NỘI DUNG lọt sạch: `FINGERPRINT_MISMATCH` cho cả ba điều
+        # kiện đều False ⇒ rơi thẳng vào nhánh `_marker_write` = GHI ĐÈ bản hỏng (self-heal ngầm),
+        # đúng thứ ADR-0012 cấm. Đo được: guard trả MARKER_INVALID cho chính ca đó, còn adopt cho qua.
+        # Guard đã tồn tại từ r184 nhưng CHƯA TỪNG có call site sản xuất nào — chỉ một ca test gọi
+        # thẳng. Đây là định tuyến, không phải xây mới.
+        _blk = _marker_mutation_guard(_old_mk, name)
+        if _blk:
+            _marker_result = {"ok": False, "verified": False, **_blk,
+                              "fix": "profile-backfill-markers --profile-name <tên> --apply --force"}
         else:
             _marker_result = _marker_write(g, _meta_id,
                                            _marker_body(name, {**prof_block, "metaFolderId": _meta_id},

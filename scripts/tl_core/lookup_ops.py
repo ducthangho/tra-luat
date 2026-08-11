@@ -3445,6 +3445,45 @@ def cmd_rasoat_anchor(a) -> int:
                              so_dep_da_doi=kq["so_dep"], file_da_ghi=da_ghi,
                              undo="chép lại từ " + str(bak_dir) + " (mỗi file một bản `.{run_id}.json`)"), True)
     return 0
+def _rasoat_anchor_quet(docs):
+    """PURE (r321 — RAS-17 vế `rasoat-merge`): soi neo trên N phiếu và CHỈ ĐÍCH DANH từng ô hỏng.
+
+    r313 đã dựng khuôn (`_rasoat_anchor_khuon`) + cưỡng chế cờ vòng đời (`_rasoat_anchor_hop_le`),
+    nhưng đường mà bản kiểm lõi nêu ĐÍCH DANH — «`_rasoat_unit_shape` không chạm `anchor` ⇒
+    `rasoat-merge` nuốt trọn» — vẫn chưa ai chạm. Đo trên master `c24a8b3` với hồ sơ BHXH thật
+    (82/82 ô neo sai khuôn): `tl rasoat-merge` trả `ok:true`, 40 phát hiện, **không MỘT khoá nào**
+    nhắc tới anchor. Cổng vòng đời không bịt được lỗ này: nó chỉ bắn khi hồ sơ đã khai `vong_doi`,
+    còn merge chạy từ lượt rà đầu tiên.
+
+    Khác `_rasoat_anchor_findings` (r313) ở MỤC ĐÍCH chứ không ở luật: hàm kia ĐẾM để phán cờ
+    `anchor_con_hieu_luc`; hàm này gắn `nguon` + `key` để người sửa biết mở FILE NÀO, PHÁT HIỆN NÀO.
+    Luật hợp lệ và từ vựng `loai` dùng CHUNG `_rasoat_anchor_khuon()` — một nguồn chân lý, không đẻ
+    bộ từ vựng thứ hai rồi để hai bên trôi khỏi nhau.
+
+    GIỮ THỨ TỰ đầu vào ⇒ tất định (điều kiện để golden/determinism khoá được)."""
+    k = _rasoat_anchor_khuon()
+    rx = re.compile(k["text_hash"])
+    ra = []
+    for ten, d in (docs or []):
+        if not isinstance(d, dict) or _rasoat_unit_shape(d) != "unit_v1":
+            continue
+        for ph in (d.get("phat_hien") or []):
+            if not isinstance(ph, dict):
+                continue
+            anc = ph.get("anchor") if isinstance(ph.get("anchor"), dict) else {}
+            deps = anc.get("doc_deps") if isinstance(anc.get("doc_deps"), list) else []
+            for i, dep in enumerate(deps):
+                th = str(dep.get("text_hash") or "").strip() if isinstance(dep, dict) else ""
+                if isinstance(dep, dict) and rx.match(th):
+                    continue
+                loai = ("sai_khuon" if not isinstance(dep, dict)
+                        else "rong" if not th
+                        else "locator_trong_hash" if any(s in th for s in k["locator_dau_hieu"])
+                        else "sai_khuon")
+                ra.append({"nguon": ten, "key": str(ph.get("key") or ""), "i": i,
+                           "so_hieu": str(dep.get("so_hieu") or "") if isinstance(dep, dict) else "",
+                           "loai": loai, "text_hash": th[:80]})
+    return ra
 
 
 def _rasoat_unit_shape(d):
@@ -3915,10 +3954,14 @@ def cmd_rasoat_merge(a) -> int:
     out_path = str(getattr(a, "out", "") or "").strip() or str(
         (p.parent if p.is_dir() else p.parent) / "BANG_MASTER.json")
     bo_qua_ban_sao = [{"nguon": f.name, "ly_do": "BAN_SAO_LUU_BI_BO_QUA"} for f in ban_sao]
+    # r321 (RAS-17): neo phải LỘ DIỆN ở MỌI chế độ — đếm ở ĐÂY, không phải trong nhánh ghi, để
+    # `--check` và `--dry-run` cũng thấy. Trước bản này `anchor` không có đường nào chạm tới.
+    anchor_hong = _rasoat_anchor_quet(docs)
     nen = {"schema": "rasoat_merge.v1", "in": str(p), "out": out_path,
            "so_file": len(files), "so_van_ban": len(merged.get("van_ban") or []),
            "so_phat_hien": len(merged.get("noi_dung") or []),
-           "bo_qua_ban_sao": bo_qua_ban_sao}
+           "bo_qua_ban_sao": bo_qua_ban_sao,
+           "so_anchor_hong": len(anchor_hong), "anchor_hong": anchor_hong}
     # r216 — CỔNG TRÙNG (fail-CLOSED): trùng `key`/`unit_id` ⇒ KHÔNG ghi. Ghi đè bằng bảng đã đếm
     # hai lần là mất luôn bản đúng để đối chiếu ở lượt sau.
     trung = _rasoat_trung_lap(docs)
@@ -3938,6 +3981,20 @@ def cmd_rasoat_merge(a) -> int:
                                  bo_qua=bo_qua, nguon_hong=hong,
                                  fix="sửa hoặc bỏ các file JSON hỏng rồi chạy lại; bảng master GIỮ "
                                      "NGUYÊN để còn đối chiếu"), True)
+        return 2
+    # r321 (RAS-17) — `--anchor-strict`: fail-CLOSED TRƯỚC mọi thao tác ghi, cùng khuôn r216/r290.
+    # KHÔNG bật mặc định, và đó là lựa chọn CÓ CHỦ Ý: hồ sơ đang lưu giữ 82/82 ô neo sai khuôn, bật
+    # mặc định là chặn đứng mọi hồ sơ CŨ vì một lỗi lượt rà không gây ra và chưa có đường sửa trọn
+    # (đo 02-08: 47/82 ô di trú được từ cache, 35/82 thì KHÔNG). Vì vậy mặc định LỘ DIỆN, cưỡng chế
+    # thì phải gọi tên — đúng khuôn r312 với ING-09: chặn cái MỚI, khai cái CŨ, không dọn lén.
+    if bool(getattr(a, "anchor_strict", False)) and anchor_hong:
+        _print_json_or_text(dict(nen, ok=False, error="ANCHOR_SAI_KHUON", da_ghi=False,
+                                 bo_qua=bo_qua,
+                                 fix="`anchor.doc_deps[].text_hash` phải khớp `sha256:<64hex>`; địa "
+                                     "chỉ định vị chuyển sang trường `locator` cùng dep. Ô KHÔNG "
+                                     "truy nguyên được thì ĐỂ TRỐNG và khai `anchor_con_hieu_luc:"
+                                     "false` + `ly_do_anchor`, ĐỪNG tính lại bằng bản hiện hành — "
+                                     "làm thế là khẳng định một độ tươi chưa hề kiểm."), True)
         return 2
     # r216 — `--check`: đối chiếu bảng master đang có với kết quả merge, KHÔNG ghi đè.
     if bool(getattr(a, "check", False)):
@@ -4260,11 +4317,15 @@ def cmd_doc_patch(a) -> int:
                     "diem": [{"ma": r["ma"], "vung": r["vung"], "tim": r["tim"], "thay": r["thay"],
                               "ly_do": r["ly_do"]} for r in kq["ket_qua"]]})
     rec["doc_patch"] = {"lich_su": lich_su}
+    # r322 (RAS-18): TẠO `verify_flags` khi record chưa có, thay vì lặng lẽ bỏ cảnh báo. Bản r217
+    # ghi có điều kiện `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai «hash đã cũ» bốc
+    # hơi đúng lúc cần nhất, mà lệnh vẫn rc=0. Cảnh báo biến mất theo hình dạng dữ liệu là fail-OPEN.
     vf = rec.get("verify_flags")
-    if isinstance(vf, list):
-        vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
-                  "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
-                  % (len(kq["ket_qua"]), rid))
+    if not isinstance(vf, list):
+        vf = rec["verify_flags"] = []
+    vf.append("DOC_PATCH: %d điểm sửa theo điểm (run %s) — `text_hash` vẫn là hash của BẢN NGUỒN "
+              "trước khi sửa, KHÔNG tính lại (record không giữ bố cục dòng của bản gốc)."
+              % (len(kq["ket_qua"]), rid))
     tmp = target.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(rec, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(str(tmp), str(target))

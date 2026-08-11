@@ -194,6 +194,27 @@ def _apply_profile_env(cfg: dict, profile: str | None = None) -> dict:
         os.environ["TL_BASE_ALSO"] = "0" if prof.get("baseAlso") is False else "1"
         _written.append("TL_BASE_ALSO")
     os.environ[_mark] = ",".join(_written)   # r214: khoá do overlay NÀY ghi — lượt sau chỉ được xoá đúng chúng
+    # r325 (VIỆC 4.2 sổ bảo trì kho): profile dự án CÓ THẬT trong config nhưng `registryDocId` RỖNG.
+    # Đường GHI đã fail-closed từ 1.23.21 (PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE, rc=2) — đó là
+    # bản vá cho ĐÚNG sự cố 2026-06-30. Đường ĐỌC thì tới giờ vẫn IM: `TL_REGISTRY_DOC_ID` không được
+    # đặt ⇒ webapp `regSS_` rơi nhánh auto-discover = SỔ NỀN, và `reg-query`/`reg_get` trả dòng nền
+    # dưới NHÃN profile đang chọn. `scope`+`BASE_SCOPE_HIT` (r179 T7) chỉ nói được KHI ĐÃ CÓ dòng trả
+    # về; ca này người dùng đọc thấy 0 dòng / dòng nền mà không biết `--profile` đã thành NO-OP.
+    # ★Chỉ CẢNH BÁO, không chặn: lệnh ĐỌC trên sổ nền là chuyện hợp lệ, cái sai là làm nó IM LẶNG.
+    #  Nền (vbqppl) để rỗng là BÌNH THƯỜNG — webapp tự tìm Sheet `tra_luat_registry` theo tên.
+    if name != DEFAULT_PROFILE and name in profiles \
+            and not (os.environ.get("TL_REGISTRY_DOC_ID") or "").strip():
+        _noted = getattr(_apply_profile_env, "_reg_empty_noted", None)
+        if _noted is None:
+            _noted = set()
+            _apply_profile_env._reg_empty_noted = _noted
+        if name not in _noted:      # 1 lần / profile / process (đổi profile giữa chừng vẫn được báo)
+            _noted.add(name)
+            print(f"[tl] ⚠ PROFILE_REGISTRY_ID_EMPTY: profile '{name}' KHÔNG có `registryDocId` "
+                  f"⇒ mọi lệnh ĐỌC registry rơi về SỔ NỀN '{DEFAULT_PROFILE}' (dòng trả về là của NỀN, "
+                  f"không phải của profile này). Đường GHI đã bị chặn sẵn (rc=2). Sửa: thêm "
+                  f"`profiles.{name}.registryDocId` vào config, hoặc `tl profile-rebuild-registry "
+                  f"--profile \"{name}\"` để tạo registry RIÊNG.", file=sys.stderr)
     return {"profile": name, "profile_found": name in profiles, "profile_data": prof, "profiles": sorted(profiles)}
 
 
@@ -787,6 +808,18 @@ def _doctor_check_profile(name: str, prof: dict, infos: dict) -> list[dict]:
         if role == "registry" and mime and mime != REGISTRY_SHEET_MIME:
             finds.append({"check": "REGISTRY_NOT_SHEET_MIME", "severity": "critical", "profile": name,
                           "fileId": fid, "mime": mime, "note": "registry PHẢI là Google Sheet."})
+        # r320 (PRO-05): TRƯỚC ĐÂY kiểm MIME bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có
+        # phép kiểm loại nào. Một Google Doc đặt ở `manifestId`, parent đúng, đi qua doctor SẠCH TRƠN
+        # (đo: 0 finding) trong khi chính nó là thứ không đọc được — manifest được upload
+        # `mime=application/json`, `convert=false` (`_create_profile_manifest_json`) rồi tải về JSON-parse.
+        # Cố ý KHÔNG đòi đúng `application/json`: Drive có thể trả `text/plain` cho JSON upload, và bản
+        # text đó vẫn parse được — siết theo chuỗi MIME chính xác là đỏ OAN. Bất biến THẬT là "không phải
+        # tệp Google-native": native cần export mới ra nội dung, nên KHÔNG có đường nào đọc thành JSON.
+        if role == "manifest" and mime and mime.startswith("application/vnd.google-apps."):
+            finds.append({"check": "MANIFEST_NOT_JSON_MIME", "severity": "critical", "profile": name,
+                          "fileId": fid, "mime": mime,
+                          "note": "manifest PHẢI là tệp JSON thường (upload convert=false) — bản "
+                                  "Google-native không JSON-parse được; trỏ lại file .json thật."})
         if info.get("trashed"):
             finds.append({"check": f"{role.upper()}_TRASHED", "severity": "critical", "profile": name,
                           "fileId": fid, "note": f"{role} đang trong Trash — restore hoặc trỏ file khác."})

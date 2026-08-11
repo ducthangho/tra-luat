@@ -1,65 +1,725 @@
-# ★ v1.36.52 — r320: RAS-17 phần DỮ LIỆU — `tl rasoat-anchor`, đường ĐI QUA cổng r313 (2026-08-02)
+# ★ v1.36.67 — r335: kích hoạt topology test-fragment F1 (2026-08-06)
 
-**Phạm vi: MÃ của đường di trú. KHÔNG di trú 82 giá trị anchor của hồ sơ BHXH ở đợt này** — hồ sơ đó nằm
-trong `--out-dir` runtime, NGOÀI kho; con số 82 (`RASOAT_PLAN_SCHEMA.md` §7.2, đo 01-08) phải **đếm lại
-LIVE** bằng chính lệnh này trước khi chạy `--apply`. Đợt này giao *đường*, không giao *lượt ghi*.
+Mission F1 chuyển selftest sang mô hình fragment dành cho nhánh phát triển nhưng vẫn giữ gói phát hành
+độc lập với thư mục fragment: loader tự chọn topology, generator tạo một bundled module tất định, và
+release fail-closed nếu module bắt buộc đó bị thiếu.
 
-**Bệnh — không phải bug mới, mà là CỔNG KHÔNG CÓ CỬA.** r313 (v1.36.47) khoá `anchor.text_hash` vào khuôn
-`sha256:<64hex>`, tách `locator`, và cưỡng chế `anchor_con_hieu_luc`. Chặn thì được, nhưng **không mã nào
-di trú được giá trị cũ** ⇒ cổng đứng đó vĩnh viễn: hồ sơ nào cũng `san_sang=false`, Loop C không bao giờ
-chạy, và áp lực thực tế sẽ đổ vào việc **nới cổng** chứ không vào việc chữa dữ liệu. Đợt này mở cửa.
+- Năm packet F1 đã được review và tích hợp tuần tự; canary `wp45_fragment_canary` chứng minh legacy
+  selftest, dev fragment và generated bundle cùng chạy đúng một lần với cùng kết quả.
+- `scripts/tl_test_fragments_bundled.py` trở thành release-required file; `scripts/test_fragments/`
+  vẫn là dev-only và không lọt vào manifest/zip. Gói tiếp tục bị chặn ở trần dưới 200 tệp.
+- Activation chỉ đổi topology test/release cục bộ; không push, deploy, truy cập LIVE hoặc secret.
 
-**Vá — bốn hàm PURE (`tl_core/lookup_ops.py`) + một lệnh, đã bind qua `tl.py` (ADR-0002):**
-1. `_rasoat_anchor_pham_vi(dep)` — phạm vi hash HẸP NHẤT dep **tự khai**: `dieu` có giá trị ⇒ chỉ các Điều
-   đó (bỏ trùng, **sắp theo SỐ**); rỗng ⇒ toàn văn. Sắp theo CHUỖI là bẫy im lặng: `["10","9"]` vs `["9","10"]`
-   ra hai hash cho cùng một nội dung.
-2. `_rasoat_anchor_tinh_hash(doc, pv)` — `sha256:` + `doc_identity._content_hash` trên đúng phạm vi đó.
-   Thiếu Điều trong cache / cache không có toàn văn / rỗng sau chuẩn hoá ⇒ **RỖNG kèm lý do**, không có
-   đường nào trả hash-của-rỗng.
-3. `_rasoat_anchor_migrate_plan(units, doc_resolver)` — kế hoạch từng dep. **KHÔNG đọc đĩa**: nguồn bơm từ
-   ngoài, nên hàm test được và lệnh không có đường tự bịa hash khi thiếu nguồn.
-4. `_rasoat_anchor_ap_dung(units, ke_hoach)` — áp lên **bản sao**, FAIL-CLOSED TOÀN LÔ (khuôn `_docpatch_ap`).
+# ★ v1.36.66 — r334: Preview nhận biết bộ D0 đã land và trả JSON terminal (2026-08-04)
 
-**Ba luật đắt nhất, đều là luật KHÔNG LÀM:**
-- **KHÔNG ghi đè `text_hash` đã hợp khuôn**, kể cả khi tính lại ra khác ⇒ xếp `lech_noi_dung`. Lệch chính là
-  tín hiệu văn bản nền ĐÃ ĐỔI mà Loop C cần đọc; ghi đè cho «sạch bảng» là xoá phát hiện, xoá im lặng.
-- **KHÔNG tách nửa vời**: tách được địa chỉ mà không tính được hash ⇒ bỏ qua CẢ dep. Để lại ô hash rỗng chỉ
-  là đổi bệnh «trường sai LOẠI» thành bệnh «trường THIẾU» — bệnh sau thì mọi phép đếm rỗng đều thấy, nhưng
-  dữ liệu vẫn hỏng y hệt.
-- **KHÔNG chọn hộ**: `locator` đang có KHÁC địa chỉ trong ô hash ⇒ `XUNG_DOT_LOCATOR`, người quyết.
+`Invoke-SharedWorkPacketFlow.ps1 -Action Preview` trước đây chết ở PowerShell binder khi cả 23 nguồn D0
+đã sạch sau landing: `git status` trả mảng rỗng, nên caller chỉ thấy `Cannot bind ... empty array` thay vì
+kết quả máy đọc được. TDD khóa đúng public seam trước khi sửa (RED trên Windows PowerShell 5.1).
 
-**Lệnh `tl rasoat-anchor --in <master/>`** — DRY mặc định, GHI đòi `--apply --confirm yes` (hạng `medium`
-cùng `doc-patch`: ghi sai ở đây là ghi vào chính bằng chứng của hồ sơ đã đóng). Sao lưu ra `_anchor_bak/`
-**NGOÀI** `master/` — bản sao lẫn vào trong đó từng làm bảng master phồng 40 → 53 (r216). Báo cả
-`findings_truoc`/`findings_sau` bằng chính `_rasoat_anchor_findings`, nên «đã đủ điều kiện bật cờ chưa» là
-số đo, không phải lời khai. Chạy lại lượt hai ⇒ `di_tru=0` (idempotent) và mọi dep đổi trạng thái sang
-`khong_can`/`lech_noi_dung` — tức lệnh này cũng là phép ĐO độ tươi, không chỉ phép sửa.
+- Preview nay trả `ok:true`, `status:"already_landed"`, `next_action:null`; không sinh packet body và mọi
+  trường Issue/packet/branch đều `null`.
+- Chỉ kết luận terminal khi đủ 23 đường trên đĩa, `source_status` rỗng và diff của chúng khớp đúng
+  `origin/master`; clean nhưng lệch base vẫn fail-closed.
+- `CreateExecutor` không được nới quyền: không có `-DryRun` thì nguồn sạch vẫn bị từ chối trước Issue API.
+- Regression chạy qua controller thật với biên `git`/`gh` giả lập; giữ parity PowerShell 5.1/7 và chứng minh
+  `gh issue create` không được gọi. Không đổi runtime pháp luật, Drive hoặc NLM.
 
-**Tên trong `_CREDS_LAZY_CMDS`** (bài học r226): lệnh chỉ đọc `master/*.json` + cache cục bộ, nhưng thiếu
-dòng khai đó thì trên runner clone SẠCH `main()` `sys.exit` **TRƯỚC** handler ⇒ stdout rỗng, ca test gãy ở
-bước parse JSON chứ không ở chỗ hỏng thật.
+# ★ v1.36.65 — r333: land cứu hộ bộ hiến pháp D0 từ tree đã neo, không kéo code WIP (2026-08-04)
 
-**Bằng chứng DƯƠNG (4 mutation, không tin `rc=0`):**
-- sắp số Điều theo CHUỖI thay vì theo SỐ ⇒ `r320_anchor_di_tru_ke_hoach` **ĐỎ**
-- cho phép ghi đè hash đã hợp khuôn ⇒ `r320_anchor_di_tru_ke_hoach` + `r320_di_tru_qua_duoc_cong_r313` **ĐỎ**
-- áp NỬA LÔ thay vì fail-closed toàn lô ⇒ `r320_anchor_ap_dung_fail_closed_toan_lo` **ĐỎ**
-- bỏ `rasoat-anchor` khỏi `_CREDS_LAZY_CMDS` ⇒ `r320_di_tru_qua_duoc_cong_r313` **ĐỎ**
+**Nguồn cứu hộ được chốt theo đường A:** tag `rescue/d0-2026-08-04` trỏ root tree `dacc4e76`;
+`docs/` lấy từ tree `2db90d43`. PR chỉ mang phần hiến pháp đã đối chứng, không cherry-pick parent
+`d347129` vì parent đó còn 19 tệp code WIP chưa review.
 
-Ca `r320_di_tru_qua_duoc_cong_r313` chạy ĐÚNG đường sản xuất (subprocess, `HOME` trỏ thư mục trống) và khoá
-vế chốt: **cùng một bộ đơn vị, `_rasoat_anchor_hop_le` ĐỎ trước di trú và XANH sau di trú** — cổng r313 mở
-được bằng đường di trú, không phải bằng nới cổng.
+- Land 21 Markdown dev-side: `PROTOCOL_DA_PHIEN.md`, kế hoạch triển khai, ADR-0017–0033 và hai báo cáo research.
+- ADR-0001 đổi `Accepted` → `Superseded by ADR-0017`; thay đổi này đi cùng chính ADR-0017 trong một commit.
+- `CONTEXT.md` cứu hộ vẫn được giữ an toàn trong tag + bản sao ngoài repo, nhưng chưa land ở đợt này: bản đó
+  trỏ tới `scripts/test_fragments/wp` và `scripts/tl_test_fragments_bundled.py` là code D0 chưa tồn tại;
+  `release-verify` đã fail-closed đúng với `DOC_POINTERS_NOT_IN_PACKAGE`, nên không hạ cổng để ép xanh.
+- Kế hoạch dùng đúng blob `d83cec6b` 24.532 byte của tree đã neo, không dùng biến thể 30.392 byte ở `6c148d3`.
 
-**Cổng.** selftest **1609/1609** (master 1606, +3 ca) · `gen_instructions` 38/38 · `workflow-audit` ok ·
-`golden` 0-diff · `doc-claims-check` ok · `determinism` ok · `release-check --full` ok ·
-`release-verify --strict` **177/177**. Golden ghi lại vì kiểm kê lệnh đổi THẬT (`checked_commands` 164→165,
-`total` 164→165, `generated_parsers` 152→153, `tool_inventory` thêm đúng một tên) — đã soi
-`git diff -- references/golden/` trước khi commit, không tệp nào khác đổi. `RELEASE_MANIFEST.json` tái sinh,
-số tệp **177 không đổi** (không thêm/xoá tệp).
+**Ratchet có chủ đích:** `docs/**/*.md` tăng 21 → 42; Package vẫn 177 tệp vì `docs/` là dev-side,
+phép kiểm cây thật tăng 198 → 219 nhưng không nới trần import Package 200. TDD RED trước sửa: selftest
+`1642/1644`, chỉ `r209_cay_that_va_phan_chung` và `r291_docs_ngoai_goi` đỏ; loại `CONTEXT.md` treo
+khỏi write-set và cập nhật ratchet là hai thay đổi tương ứng, không đổi runtime/Drive/NLM.
 
-ruff F: DELTA theo TÊN = 0 trên `tl.py` (12 F821, y nguyên) và `tl_selftest.py` (344 tên, +8 lần gọi tên cũ);
-`lookup_ops.py` **+1 TÊN: `_content_hash`** — cố ý, đó là tên của `doc_identity` đã khai trong bảng stub
-`tl.py` và được re-home qua `bind()`; đã kiểm HÀNH VI (ca (b) và ca đường-sản-xuất đều gọi tới nó và xanh),
-không phải tên chết. `command_registry.py` 0 → 0.
+# ★ v1.36.64 — r332: một controller PowerShell điều phối trọn vòng D0 Codex → Claude (2026-08-04)
+
+**Ba giai đoạn trước đây cần nhiều lệnh rời nay có một entrypoint máy đọc được:**
+`docs/runbooks/Invoke-SharedWorkPacketFlow.ps1` bọc hai primitive đã harden
+`New-SharedWorkPacket.ps1` và `Fill-SharedWorkPacketPrompt.ps1` thành `Preview`, `CreateExecutor` và
+`PrepareReviewer`.
+
+- `Preview` luôn đo LIVE: auth/fetch/base/bootstrap/23 nguồn/PR; không nhận snapshot bypass và không gọi Issue API.
+- `CreateExecutor` chỉ tạo Issue thật khi có cờ `-ConfirmCreateIssue`, rồi điền prompt Codex và copy clipboard.
+- `PrepareReviewer` kiểm nhánh đúng `agent/wp<N>-g<G>-codex`, fetch lại và đòi `FETCH_HEAD` khớp exact
+  `REVIEW_READY` head trước khi dựng worktree detached/sạch; prompt Claude chỉ vào clipboard sau mọi gate.
+- Controller không push, mở/merge PR, đăng verdict, bump version hoặc deploy; các quyền này vẫn là cổng riêng.
+
+Regression `Test-InvokeSharedWorkPacketFlow.ps1`: `4/4` trên Windows PowerShell 5.1 và PowerShell 7, gồm
+đường dẫn `Quốc hội`, dấu nháy đơn, help UTF-8 BOM + LF, snapshot rejection, live shims và stale-head fail-close.
+Bộ bootstrap cũ vẫn `10/10`; CI Ubuntu/Windows của PR #31 và review Standards/Spec đều xanh, 0 finding.
+
+# ★ v1.36.63 — r331: `.codex/` (worktree agent Codex) không có trong bảng loại trừ ⇒ gate ĐỎ theo NƠI CHẠY (2026-08-04)
+
+**Triệu chứng khó tin nhất: cùng một commit, chạy chỗ này XANH chỗ kia ĐỎ.** Deploy từ main checkout
+(`tra-luat` gốc) ăn gate đỏ ở `release-check` + `release-verify`, trong khi CÙNG commit `0cea4a7`
+build từ worktree sạch thì xanh và đẩy Package v1.36.62 byte-match trót lọt.
+
+**Manifest LÀNH — đỏ hoàn toàn do tệp THỪA.** Bằng chứng dương từ `relverify.out`:
+
+```
+"expected_file_count": 177,  "checked_file_count": 177,  "failed": []
+"extra_files": [ 200 mục ]   ← 200/200 đều thuộc .codex/
+```
+
+`_RELEASE_EXCLUDE_DIRS` có `.claude` nhưng THIẾU `.codex`. Agent Codex đặt worktree ở
+`.codex/worktrees/<nhánh>/`, **mỗi worktree là một BẢN SAO ĐẦY ĐỦ của kho** (có `VERSION`, `SKILL.md`,
+`RELEASE_MANIFEST.json` riêng) — 4 worktree đang sống. Cây phát hành quét trúng chúng ⇒ mọi lượt gate
+chạy từ main checkout đều đỏ, còn worktree sạch không có `.codex/` nên không ai thấy.
+
+★ **Cạm bẫy đã suýt sập: lời khuyên tự động của deploy SAI ở ca này.** `[WARN] cây đã đổi so với manifest
+— chữa: release-manifest --out RELEASE_MANIFEST.json` đúng cho ca thêm/xoá tệp THẬT (bài học r238), nhưng
+ở đây nó sẽ **nướng 4 bản sao kho vào manifest** trong khi trần gói là **200 tệp CỨNG**. Đọc `failed: []`
++ `177/177` TRƯỚC khi tin lời khuyên: manifest không hề cũ.
+
+**Vá:** `+.codex` vào `_RELEASE_EXCLUDE_DIRS` (đúng khuôn `.claude`: GIỮ trong repo, CHỈ loại khỏi gói)
+và `+.codex/` vào `.gitignore`. Gói vẫn 177 tệp — **không tệp nào ra/vào**, nên không đụng kê khai slot.
+
+★ **Bẫy phụ, sập THẬT lúc viết bản vá này** (bắt được trước commit, đã khoá bằng vế 4 của ca test):
+trong cú pháp `.gitignore`, `#` **chỉ** mở chú thích khi ĐỨNG ĐẦU DÒNG. Viết `.codex/   # ghi chú` thì
+cả cụm thành MỘT pattern và **không bỏ qua gì cả** — im lặng, không lỗi, không cảnh báo.
+
+Ca `r331_codex_ngoai_cay_phat_hanh`: 4 vế từ 4 nguồn — hằng chính sách · HÀNH VI trên cây tổng hợp (kèm
+đối chứng cùng tên tệp ngoài `.codex/` phải VÀO gói) · loại đúng vì khoá `.codex` · `.gitignore` dòng độc lập.
+
+# ★ v1.36.62 — r330: timeout ĐƯỜNG GHI của `gws` chọn KHÔNG ĐO ⇒ `update_content` 120s CHẶN THẬT lượt deploy (2026-08-04)
+
+**Nối tiếp r327 — cùng một bệnh, nấc kế tiếp.** r327 vá phép DÒ (`auth status` 20s→120s) nên `drive-push`
+ĐÃ đi đúng tuyến gws; nó chết ngay ở bước sau, lần này là timeout của CHÍNH lệnh upload:
+
+```
+[drive-push] ✗ update lỗi: GwsError: gws timeout sau 120.0s
+(gcloud cũng không sẵn: gcloud auth print-access-token timed out after 30 seconds)
+```
+
+`update_content()` gọi `_run(..., timeout=120.0)` — hằng CỨNG, chưa ai đo. Gói deploy chỉ **2.487.725 B**
+mà vượt 120s. Đặt `TL_GWS_TIMEOUT=900` rồi chạy lại thì đẩy XONG + **BYTE-MATCH** (Drive md5
+`839a7177b4089098ad7d96f4a9234f11` = local) ⇒ knob của r327 làm đúng việc, nhưng **mặc định vẫn là tường**
+nên lượt deploy sau lại đâm vào đó trừ khi người vận hành nhớ khai env.
+
+## ĐO (máy chuẩn Windows, CÙNG đường mã, artifact TEST rồi xoá — KHÔNG đụng `SKILL_FILEID`)
+
+`update_content` theo CỠ payload — đo nhiều cỡ để **tách phí CỐ ĐỊNH khỏi phí THEO BYTE**:
+
+| cỡ payload | lượt đo | ghi chú |
+|---|---|---|
+| 1 KB | 3,3 · 5,7 · 3,5 s | = phí CỐ ĐỊNH (spawn + keyring + 1 vòng API) |
+| **2,49 MB** (đúng cỡ gói) | 6,1 · 11,5 · 7,5 s (03-08) · 9,8 · 19,3 · 13,2 s (04-08) | **max 19,3 s** |
+| 10 MB | 27,6 · 48,5 · 21,1 s | |
+| 25 MB | 42,5 · 46,7 · 30,8 s | |
+
+Các lệnh còn lại (payload 2,49 MB nếu có tải):
+
+| op | lượt đo | max | mặc định cũ | nay |
+|---|---|---:|---:|---:|
+| `upload` | 6,9 · 11,8 · 5,5 · 18,9 s (2,49MB) · 22,7 s (10MB) · 44,6 s (25MB) | 44,6 | 180 s | **600 s** |
+| `download` | 6,8 · 4,0 · 3,5 s | 6,8 | 300 s | **600 s** |
+| `copy_convert` (docx→GDoc) | 4,7 · 5,0 · 5,7 s | 5,7 | 180 s | GIỮ |
+| `mkdir` | 2,8 · 3,3 · 2,9 s | 3,3 | 60 s | GIỮ |
+| `_files_update` (rename) | 2,2 · 1,9 · 2,2 s | 2,2 | 60 s | GIỮ |
+
+★**Vì sao KHÔNG áp công thức r327 («2,4× ca chậm nhất ĐO được»)** — đây là điểm dễ sai nhất của đợt này.
+Ở r327 phép đo ĐÃ TRÙM vùng hỏng (15–50 s vắt qua trần 20 s) nên nhân 2,4 là hợp lệ. Ở đây **mọi mẫu đo
+được đều thuộc vùng LÀNH**: 2,4 × 19,3 = **46 s**, tức **THẤP HƠN cả 120 s vốn ĐÃ hỏng** — áp máy móc sẽ
+làm bệnh **nặng hơn**. Neo đúng phải là **ca hỏng QUAN SÁT ĐƯỢC**, không phải median ngày lành.
+
+★**Chọn hằng bằng BĂNG THÔNG suy ra:** phí ≈ (3–6 s cố định) + kích thước ÷ băng thông. Đo được
+**~170–850 kB/s**. Ca hỏng: 2,49 MB không xong trong 120 s ⇒ băng thông thực **≤ ~21 kB/s** (chậm hơn ca
+lành 8–40×; VPN/tether/nghẽn là đủ). Trần **600 s** phủ tới **~4,2 kB/s** — còn chịu được ca xấu hơn ca đã
+hỏng ~5× nữa, mà vẫn CÓ BIÊN (gws wedge không treo phiên vô hạn).
+
+★**Bất đối xứng chi phí — khác r327, phải nói rõ:** ở phép dò, chờ thừa chỉ tốn giây trong ca ĐÃ hỏng
+(cache 1 lần/phiên). Ở đường GHI, chờ thừa tốn wall-time THẬT. Vẫn chọn hào phóng vì deploy là việc HIẾM
+và **có người ngồi xem** (Ctrl-C được), còn chờ thiếu thì giết một lượt đẩy ĐANG CHẠY ĐÚNG rồi rơi xuống
+gcloud thiếu Drive scope ⇒ `[FAIL]` cứng.
+
+## Vá (5 vế, mỗi vế một ca test + mutation riêng)
+
+1. **`update_content` 120→600 s · `upload` 180→600 s · `download` 300→600 s.** CHỈ nâng lệnh **CÓ TẢI** —
+   chỉ chúng mới co giãn theo băng thông. `mkdir`/`rename`/`delete` đo 1,9–3,3 s (dư 18–27×) và
+   `copy_convert` 5,7 s (server-side, không cõng payload local) ⇒ **GIỮ NGUYÊN**. *«Không sửa cái đang
+   đúng»* — cùng lý lẽ r327 giữ `--version` ở 30 s.
+2. **Knob riêng `TL_GWS_WRITE_TIMEOUT`** theo đúng khuôn `_timeout(default, knob)` sẵn có, nhưng là
+   **SÀN (chỉ NÂNG)** chứ không đè — và đó là chủ đích: nó phủ NHIỀU lệnh có mặc định KHÁC nhau, cho hạ
+   thì MỘT con số sẽ **san phẳng cả nhóm**, đúng cái bẫy r327 đã vá, chỉ đổi phạm vi. Hợp thành:
+   `knob riêng (đè hẳn) → max(TL_GWS_WRITE_TIMEOUT, TL_GWS_TIMEOUT, default)`.
+3. **`download()` vẫn là điểm mù** — nó KHÔNG đi qua `_run` (stdout phải là BYTES) nên r327 đã phải gọi
+   `_timeout()` tay; quên `write=True` thì nó là lệnh CÓ TẢI duy nhất lọt sàn mới. Khoá bằng HÀNH VI
+   (đọc ngân sách thực nhận), không đọc mã.
+4. **Thông điệp SAI HƯỚNG — bệnh r327 lặp ở đường GHI.** `_drive_push_route` khuyên `gws auth login` cho
+   MỌI kiểu hỏng, mà **timeout ≠ mất quyền**. r327 đã KHAI sẵn `probe_error` nhưng **chưa ai đọc** — nay
+   route nhận `probe_error` và `cmd_drive_push` in câu KHẮC PHỤC đúng hướng khi lỗi ghi là timeout.
+   Cùng họ bài học r321/r322/r327: *«đã có lời khai» ≠ «có ai đọc lời khai»*.
+5. ★**Cùng bệnh, dạng NẶNG NHẤT — ở `deploy-package.sh` lời khuyên sai hướng bị CHẠY, không chỉ in.**
+   ``bad "... (cần `gws auth login` có quyền GHI Drive)"`` — **backtick trong chuỗi nháy KÉP của bash
+   THAY THẾ LỆNH**. Mỗi lần `drive-push` hỏng, `gws auth login` **khởi chạy thật**, và thông điệp in ra
+   *output của nó* thay vì tên lệnh. Twin `ps1` KHÔNG dính (nháy ĐƠN của PowerShell coi backtick là ký tự
+   thường) ⇒ đúng lớp **lệch hai nền** mà chỉ CHẠY THẬT mới thấy — bài học r244 lặp nguyên văn. Nay hai
+   bản mang **CÙNG MỘT CÂU, không ký tự nháy nào**, và ca test đối chiếu parity + chạy dòng thật.
+
+Test (5 ca, giả `subprocess` để **ghi lại ngân sách thực nhận** + mô phỏng lệnh tốn N giây, không chờ
+thật): `r330_write_du_gio_cho_goi_that` (phí 150 s — nằm GIỮA trần cũ 120 s và trần mới — phải xong, và
+ngân sách lệnh CÓ TẢI phải **lớn hơn** lệnh metadata) · `r330_write_knob_chi_nang_khong_ha` (gồm vế
+`download` lọt sàn) · `r330_write_env_meo_khong_vo_hieu` · `r330_timeout_khuyen_dung_huong` ·
+`r330_deploy_msg_khong_chay_lenh` (TỰ KIỂM CHỨNG: dòng CŨ phải tái hiện được việc `gws` bị gọi, dòng MỚI
+phải sạch — không tái hiện nổi thì ca ĐỎ).
+
+# ★ v1.36.61 — r329: bootstrap công cụ work-packet D0 + kê khai slot docs 19→21 (2026-08-03)
+
+**Bốn tệp mới NGOÀI GÓI** (tác giả Codex, nhánh `codex/work-packet-bootstrap`):
+`docs/runbooks/New-SharedWorkPacket.ps1` — script tạo Shared Work Packet (GitHub Issue): tự đo
+base_sha/PR-mở/23 nguồn D0, đòi `source_status` đúng M/untracked, `DryRun`/`SnapshotPath`,
+packet_id = `wp<số Issue thật>` qua hai bước create→edit, fail-closed mọi nhánh lỗi;
+cặp prompt `docs/prompts/CODEX_EXECUTOR_D0.md` + `docs/prompts/CLAUDE_REVIEWER_D0.md`
+(one-executor-per-packet, reviewer read-only tuyệt đối, approval gắn head SHA); bộ test
+`docs/runbooks/tests/Test-NewSharedWorkPacket.ps1` — 6 ca có shim git/gh, kể cả prompt-contract
+test khoá bất biến của chính hai prompt. Đo độc lập 03-08: 6/6 hai lượt chạy; DryRun trên cây
+canonical thật `ok:true` `ready_for_claim`.
+
+**Vế mã duy nhất: kê khai slot ratchet.** CI PR #25 đỏ `r291_docs_ngoai_goi` (1637/1638, CẢ HAI nền)
+vì `docs/**/*.md` 19 → 21 — **đỏ ĐÚNG THIẾT KẾ ratchet** («thêm/bớt tệp ⇒ đỏ, sửa CÓ CHỦ ĐÍCH kèm
+kê khai slot»), không phải hồi quy. Kê khai: mốc 196 → 198 (gói giữ 177 + 21 docs ngoài gói;
+trần 200 còn 2 khe theo phép đếm ratchet). Không đổi hành vi runtime nào.
+
+# ★ v1.36.60 — r328: đường dẫn NGOÀI ASCII vỡ ở khớp JSON của HAI script deploy (2026-08-03)
+
+**`deploy-package.ps1` chết `[FAIL] release-bundle báo ok nhưng KHÔNG có zip thật` + exit 2 — trong khi
+zip ĐÃ build đúng** (`file_count 177`, `reproducible true`, `bundle_sha256` khớp cả hai lượt). Đường
+vòng đang dùng là chạy qua junction ASCII `C:\qh\…` cho hết dấu; đó là NÉ, không phải vá.
+
+`tl.py` ghi JSON **UTF-8** (tl.py:86 `reconfigure`), nhưng PowerShell **GIẢI** stdout của lệnh native
+bằng `[Console]::OutputEncoding` — ĐO trên máy chuẩn: **windows-1258** (ANSI codepage VN), không phải
+UTF-8. `bundle1.out` vì thế chứa mojibake **ghi thẳng ra đĩa**:
+
+```
+"out": "D:\Quá»‘c há»™i\tra-luat\…"      ← thay vì  D:\Quốc hội\tra-luat\…
+```
+
+⇒ `Test-Path $out` trả **false cho tệp CÓ THẬT** ⇒ bước 2 dừng. Cắn MỌI đường dẫn ngoài ASCII, gồm cả
+đường canonical `D:\Quốc hội\…`. (Phiếu ban đầu đoán cp1252; đo ra **cp1258** — cùng ánh xạ 0x91→U+2018
+nên bằng chứng round-trip không phân biệt được hai bảng mã.)
+
+★**Vì sao sống lâu mà không ai thấy:** `deploy-package.cmd` `chcp 65001` TRƯỚC khi gọi pwsh ⇒ đường
+double-click SẠCH BỆNH. Đúng cách CLAUDE.md dạy gõ (`.\scripts\deploy-package.ps1 -Pull -Push` thẳng
+trong pwsh) thì KHÔNG qua .cmd ⇒ dính. Hai đường vào cùng script, một đường mù.
+
+**★ ĐO ĐƯỢC — SỬA CHỖ ĐỌC LÀ VÔ TÁC DỤNG** (cùng đầu vào, ambient cp1258):
+
+| bản vá thử | kết quả |
+|---|---|
+| chỉ `-Encoding utf8` ở chỗ ĐỌC | `EQ=False` · `Test-Path=False` — **không cứu được gì** |
+| chỉ `[Console]::OutputEncoding = UTF8` | `EQ=True` · `Test-Path=True` — **vế chịu lực** |
+
+Mojibake đóng băng ngay khâu GIẢI; tới lúc `Get-Content` chạy thì tệp trên đĩa đã sai rồi. Ghim cả hai
+chiều là để khỏi lệ thuộc mặc định theo phiên bản PowerShell, **không** phải vì chiều đọc tự nó chữa được.
+
+**Vá — `scripts/deploy-package.ps1`:** `[Console]::OutputEncoding` + `$OutputEncoding` = UTF-8 (no BOM);
+`$PSDefaultParameterValues['Out-File:Encoding']='utf8'` (toán tử `*>` gọi Out-File bên dưới); ghim
+`-Encoding utf8` cho **cả 9** lời gọi `Get-Content … -Raw`; xuất `PYTHONUTF8`/`PYTHONIOENCODING` xuống
+script con KHÔNG tự cứng hoá (`pkg_secret_scan.py`, `gen_instructions.py` — `tl.py` tự lo, ta gọi thẳng
+nhiều script khác; CI khai y hệt hai biến này).
+
+**★ TWIN `sh` MẮC CÙNG BỆNH — tìm ra nhờ ĐỐI CHIẾU PARITY, không phải đọc code** (đúng cảnh báo
+CLAUDE.md: *«hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt»*). `jget()` dùng
+`open()` **không nêu encoding** ⇒ codec LOCALE. Linux/Cowork locale UTF-8 nên vô hại — nhưng đo bằng
+Git Bash trên máy chuẩn (locale **cp1258**), CÙNG tệp JSON:
+
+- `ố` (U+1ED1 = `e1 bb 91`, 0x91 CÓ trong cp1258) → giải ra `U+2018 U+00E1 U+00BB` = **mojibake im lặng**.
+  Nó *có vẻ* chạy được vì `print` mã hoá LẠI bằng đúng codec sai đó nên lỗi **tự triệt tiêu** — một sự
+  sống sót tình cờ, không phải tính đúng đắn.
+- `Ố` (U+1ED0 = `e1 bb 90`, byte **0x90 KHÔNG ĐỊNH NGHĨA**) → `UnicodeDecodeError` thẳng. Mà `jget` có
+  `2>/dev/null` nên **NUỐT lỗi** rồi trả RỖNG ⇒ script báo *"KHÔNG có zip thật: '&lt;rỗng&gt;'"* — sai
+  địa chỉ, im lặng, không lần ra được nguyên nhân.
+
+Vá: `open(…, encoding='utf-8')` + `sys.stdout.reconfigure(encoding='utf-8', newline='\n')`.
+`newline='\n'` là **byte cuối cùng làm hai bản LỆCH**: trên Git Bash/Windows `print` dịch `\n`→`\r\n`
+mà `$( )` chỉ nuốt `\n`, nên đường dẫn còn ĐUÔI `\r` ⇒ `[ -s "$z" ]` trượt trên tệp có thật. (Có sẵn từ
+bản cũ, không do vá này — nhưng đo parity thì nó lòi ra, nên vá luôn.)
+
+**BẰNG CHỨNG (chạy THẬT, không đọc code — bài học r244):**
+- `deploy-package.ps1 -NoTest` chạy TRỌN trong worktree `D:\Quốc hội\…` ⇒ **rc=0**, bước 2 same-SHA
+  `51a06b16a1968ea2…` · 2.487.725 byte, bước 3 `178 tệp`, quét bí mật sạch, release-verify trong gói ok.
+- **MUTATION**: gỡ ĐÚNG một dòng `[Console]::OutputEncoding` ⇒ trở lại đúng triệu chứng gốc
+  `[FAIL] release-bundle báo ok nhưng KHÔNG có zip thật` + **rc=2**, đúng ở bước 2.
+- **PARITY hai bản trên CÙNG đầu vào** (cùng `release-bundle`, rút khoá `out`): **BYTE-MATCH `True`** —
+  `443a5c5175e1bb91632068e1bb99695c…` cho cả hai; chốt `[ -s "$z" ]` của sh PASS trên chuỗi vừa rút.
+
+**★★ MUTATION BẮT ĐƯỢC LỖI CỦA CHÍNH BỘ TEST — hai vế đầu XANH GIẢ, đã vá.** Đột biến M1/M2/M3 (ps1)
+đỏ đúng ca của nó, nhưng **M4 (gỡ `encoding='utf-8'` khỏi `open()` của `jget`) SỐNG SÓT cả ba ca**. Hai
+nguyên nhân ĐỘC LẬP, cùng hướng — đúng khuôn «hai lỗi độc lập mà cùng hướng» của §Bài học CLAUDE.md:
+
+1. **Guard khớp NHẦM NỬA KIA CỦA DÒNG.** Vị ngữ ban đầu là `"encoding='utf-8'" in dòng_jget`. Nhưng
+   dòng đó chứa chuỗi ấy **HAI LẦN** — một ở `open(...)`, một ở `reconfigure(...)`. Gỡ khỏi `open()`
+   thì bản sao ở `reconfigure()` vẫn làm vị ngữ ĐÚNG ⇒ guard xanh trên đúng thứ nó sinh ra để chặn.
+   Vá: soi **TỪNG lời gọi** bằng regex riêng (`open\(sys\.argv\[1\],encoding='utf-8'\)` và
+   `reconfigure\(encoding='utf-8',newline='\n'\)`), không dò chuỗi trên cả dòng.
+2. **`tl.py:93` CHE mất đột biến ở vế hành vi.** `os.environ.setdefault("PYTHONUTF8","1")` nằm sẵn
+   trong environ của tiến trình selftest và **truyền xuống tiến trình con**, nên `open()` TRẦN trong
+   payload vẫn ra UTF-8 ⇒ đột biến vô hình. Vá: chạy payload với env **thù địch** — `PYTHONUTF8=0`,
+   bỏ `PYTHONIOENCODING`, `LC_ALL=LANG=C`. Nay đột biến đỏ trên **CẢ HAI nền** (Linux: locale→ASCII ⇒
+   `UnicodeDecodeError`; Windows: cp1258 ⇒ mojibake), không chỉ trên máy dev.
+
+Đo lại sau khi vá: bản đã vá `ok4=True okD=True` · bản đột biến M4 `ok4=False okD=False`.
+★ Bài học chung: **vị ngữ dò chuỗi trên CẢ DÒNG là mù khi dòng có hai lời gọi cùng hình dạng**; và
+**tiến trình con thừa kế env của bộ test có thể chữa lành đúng khuyết tật đang đo** — muốn đo khuyết
+tật môi trường thì phải DỰNG môi trường đó, đừng để env của suite rò vào.
+⚠ Ghi chú đo đạc: chạy 4 suite SONG SONG làm vài ca chia sẻ cache/HOME đỏ giả (`r3_config_write_journaled`,
+`profile_config_lifecycle`, `r40_resolve_registry_doc_id_layers`; số trôi 1634–1636). Số CHỐT phải đo
+**chạy MỘT MÌNH**: nền `HEAD` = **1635/1635**, bản vá = **1638/1638** (đúng +3 ca, không mất ca nào).
+
+**Ba ca test (mỗi ca một vế, mutation riêng):**
+1. `r328_deploy_ep_utf8_hai_chieu` — chốt chống tái phát, khuôn HAI BỐI CẢNH r265 (cây git đòi đủ 4
+   dấu hiệu ở cả hai script; gói bung đòi ba script deploy VẮNG vì là dev-side).
+2. `r328_json_ngoai_ascii_khong_qua_codec_ansi` — HÀNH VI thuần Python (chạy được cả hai nền CI, không
+   cần pwsh): tái hiện cả hai mức hỏng (mojibake im lặng · `UnicodeDecodeError`), và chạy THẬT payload
+   `-c` **rút từ chính `deploy-package.sh`** (không chép lại — chép là trôi lệch), đòi stdout ra đúng
+   byte UTF-8 và KHÔNG có đuôi `\r`.
+3. `r328_ps1_roundtrip_pwsh_that` — đầu-cuối qua **pwsh THẬT**, đúng hình dạng `Invoke-Py`/`Get-Content`.
+   **TỰ KIỂM CHỨNG chống xanh giả:** đòi CẢ HAI vế — bản chưa vá phải LỆCH *và* bản đã vá phải KHỚP;
+   môi trường không tái hiện nổi bệnh thì ca ĐỎ chứ không xanh suông. Không có pwsh ⇒ bỏ qua (ca 1+2 phủ).
+
+# ★ v1.36.59 — r327: phép dò auth của `gws` có timeout NGẮN HƠN phí thật ⇒ `is_available()` nói dối (2026-08-03)
+
+**`drive-push` trượt ở bước đẩy cuối dù gate 8/8 xanh, nhiều phiên liền. Chẩn đoán cũ «hỏng tạm, chạy
+lại là được» SAI — và chính cái làm nó sống lâu là bệnh phụ thuộc MẠNG nên thỉnh thoảng tự khỏi.**
+
+`gws_bridge.auth_method()` gọi `_run(["auth","status"], timeout=20.0)` — hằng CỨNG, không env knob.
+Nhưng `gws auth status` liệt kê 34 API + gọi mạng. ĐO trên máy chuẩn Windows, CÙNG đường mã đó:
+
+| lượt đo | phí `gws auth status` |
+|---|---|
+| 02-08-2026 (3 lượt) | 29,1 · 39,7 · 50,5 s |
+| 03-08-2026 (3 lượt, đo lại lúc vá) | 18,9 · 15,4 · 17,1 s |
+| `gws --version` cùng tiến trình (đã gánh cold-start) | **3,7 s** |
+
+⇒ phí thật **dao động 15–50 s quanh trần 20 s**: phép dò **lật đỏ/xanh theo mạng**, không hỏng hẳn —
+nên `gws auth status` chạy tay vẫn ra `"auth_method":"oauth2"` rc=0 mà `tl` lại kết luận «gws chưa sẵn».
+Dây chuyền: `auth_method()`→`None` → `is_available()`→False → `cmd_drive_push` tính `gws_ok=False` →
+`_drive_push_route` rơi xuống gcloud → gcloud thiếu Drive scope ⇒ **`[FAIL] drive-push`**, dù gws SỐNG.
+`--via gws` KHÔNG cứu: nó vẫn đọc chính `gws_ok` từ phép dò hỏng.
+
+★**Bằng chứng nội tại có sẵn mà không ai đọc:** ngay dòng trên, `--version` được **30 s** kèm chú thích
+«bù gws cold-start», còn `auth status` — việc **nặng hơn hẳn** — chỉ được **20 s**. *Phép dò chậm nhất
+mang ngân sách ngắn nhất.* Đo mới còn cho thấy ngược hơn nữa: `--version` thật ra chỉ tốn **3,7 s** (dư
+8×), tức toàn bộ ngân sách rộng rãi đang nằm ở phép dò KHÔNG cần.
+
+**Vá (4 vế, mỗi vế một ca test + mutation riêng):**
+1. `_auth_probe()` **120 s** (≈2,4× ca chậm nhất từng đo) thay 20 s. `--version` **GIỮ 30 s** — đã đo dư
+   8×, không sửa cái đang đúng.
+2. **Env knob**, chỉnh không cần sửa mã: `TL_GWS_AUTH_TIMEOUT` · `TL_GWS_VERSION_TIMEOUT` (đè riêng
+   từng phép dò) và `TL_GWS_TIMEOUT` = **SÀN chung cho MỌI lệnh gws**. Sàn **chỉ NÂNG**: khai
+   `TL_GWS_TIMEOUT=120` nâng phép dò 30 s→120 s mà **không** hạ `download` 300 s→120 s — hạ trần một
+   cách vô tình chính là cái bẫy đang vá. Giải timeout ở **đúng một chỗ** (`_run`) nên thông điệp lỗi
+   khai đúng ngân sách đã dùng; `download()` không đi qua `_run` (stdout phải là BYTES) nên gọi
+   `_timeout()` tay — nếu quên, đó là lệnh gws DUY NHẤT sàn không với tới.
+3. **Env méo KHÔNG được biến knob thành công tắc TẮT timeout**: `0`/âm ⇒ chết tức thì, `inf`/`1e400` ⇒
+   treo vô hạn (gws wedge = phiên treo, mất luôn đường fallback). `_env_timeout()` chỉ nhận số **dương
+   hữu hạn**; rác/rỗng/`nan` ⇒ về mặc định.
+4. **Lộ diện lý do** — vì sao bệnh sống lâu: lỗi bị **NUỐT**. `auth_method()` nuốt `GwsError` nên
+   «dò không xong» và «dò xong, chưa auth bao giờ» **cùng** trả `None`; `availability_detail()` không
+   phân biệt nổi ⇒ người vận hành đọc `auth=None` rồi đi `gws auth login` — **sai hướng, không phải lỗi
+   quyền**. Tách `_auth_probe() -> (method, err)`, thêm khoá `probe_error` vào `availability_detail()`
+   (`transport-info --json` phơi sẵn). Cùng họ bài học r321/r322: *«đã có hàm» ≠ «có đường gọi»;
+   «đã có lời khai» ≠ «có ai đọc lời khai»* — lần này là **«đã có lỗi» ≠ «lỗi có lối ra»**.
+
+★**Bất đối xứng chi phí** (lý do chọn hào phóng): chờ THỪA chỉ tốn giây trong ca ĐÃ hỏng — phép dò cache
+1 lần/phiên và chỉ chạy khi binary `gws` có thật; chờ THIẾU thì trả lời **SAI** rồi định tuyến ngầm sang
+đường chết. Ngân sách timeout của một phép dò không phải chỗ để tiết kiệm.
+
+Đo end-to-end sau vá, gws THẬT trên máy chuẩn: `availability_detail()` → `ok:true`,
+`auth_method:"oauth2"`, `probe_error:""` trong 14,7 s.
+
+Test (4 ca, giả `subprocess` để **ghi lại ngân sách thực nhận** + mô phỏng lệnh tốn N giây, không chờ
+thật): `r327_auth_probe_du_gio_cho_gws_that` (phí 25 s — nằm GIỮA trần cũ 20 s và ca chậm nhất 50 s —
+phải ok=True, và ngân sách auth phải **lớn hơn** `--version`) · `r327_env_knob_chinh_duoc_timeout` ·
+`r327_env_meo_khong_vo_hieu_timeout` · `r327_probe_error_lo_dien`.
+
+# ★ v1.36.58 — r326: hạ tuyên bố quá tầm ở `RASOAT_HOSO_LOOP.md` §7, và bịt ĐIỂM MÙ con trỏ TÊN CA (2026-08-03)
+
+Nối tiếp T0-E/GATE-06 (r298). Lần đó ba ca tự-chứng-minh đã bị hạ tuyên bố **trong `scripts/tl_selftest.py`**,
+nhưng phạm vi T0-E chốt là CHỈ tệp đó ⇒ câu tuyên bố trong tài liệu vẫn nguyên.
+
+**Bệnh 1 — câu ở `references/RASOAT_HOSO_LOOP.md` §7 tuyên bố quá tầm.** Nguyên văn cũ: «Đường ghi hợp lệ —
+máy đọc được, guard `r210_loop_khong_ghi_trong_cay` khoá:». Đo lại chính ca đó: nó chỉ **lint khối khai báo
+`WRITE_PATHS_v1`** — không chạy vòng nào, không `git status`, không `release-verify`.
+
+**Vá 1.** Tách HAI TẦM: `r210_loop_khong_ghi_trong_cay` khoá **KHAI BÁO**; vế **CHẠY** do
+`r298_worklist_chay_kho_a3_a6` gánh (chạy khô A3→A6 trên `cmd_state_put`/`cmd_state_get` THẬT).
+**KHÔNG đổi tên ca** — dòng đó là con trỏ tới tên.
+
+**Bệnh 2 — điểm mù: KHÔNG cổng nào giữ con trỏ TÊN CA trong tài liệu.** Cả kế hoạch lẫn CHANGELOG r298
+đều tưởng `doc-claims-check` giữ con trỏ ấy — ĐÃ ĐO: KHÔNG. `_DOC_CLAIMS_R_RE` đòi `` sau `r210`, mà `_`
+là ký tự TỪ nên `findall` trả RỖNG cho cả một tên ca bịa hoàn toàn. Đổi/xoá tên ca thì tài liệu trỏ vào hư
+không mà **cả 5 cổng vẫn XANH** — cùng lớp bệnh GATE-06, khác tầng.
+
+**Vá 2 — `r326_con_tro_ten_ca_resolve`.** Bóc MỌI con trỏ `` `rNNN_snake` `` trong kịch bản, đối chiếu bảng
+tên đăng ký `_t110` bóc từ nguồn; fail-closed khi không bóc được con trỏ nào. Chống xanh-vô-điều-kiện bằng
+hai vế: (a) hai tên đó phải có trong `cases` đã CHẠY; (b) ★ phản chứng — bộ bóc phải BẮT được tên bịa và
+tên bịa KHÔNG được resolve.
+
+**Bằng chứng dương.** Phản chứng chạy THẬT, mỗi lượt đỏ ĐÚNG một ca: đổi tên ca được trỏ ⇒ ĐỎ;
+xoá sạch con trỏ ⇒ vẫn ĐỎ (fail-closed). Tài liệu khôi phục byte-identical sau mỗi lượt (sha256 + CRLF=0).
+
+**Ghi lại để lần sau khỏi trả giá:** đợt này bị chiếm số **bốn lần** (r313→r322→r324 đều bị lấy mất,
+chốt ở r326). Đo merge với master: **5/5 xung đột đều là tệp PHÁI SINH** (`CHANGELOG` · `RELEASE_MANIFEST` ·
+`SKILL.md` · `VERSION` · `tl.py`), còn `tl_selftest.py` và `RASOAT_HOSO_LOOP.md` auto-merge SẠCH — bằng chứng
+thực nghiệm cho đánh số trì hoãn của ADR-0017.
+
+# ★ v1.36.57 — r325: nối lại KHỐI ĐUÔI VBHN khi dựng toàn văn + WARN đường ĐỌC registry (2026-08-02)
+
+Hai việc bàn giao còn lại của lượt bảo trì kho LƯỢT 3. Sổ:
+`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_LUOT3_2026-08-02.md`.
+
+★**Phạm vi lượt này ĐÃ THU HẸP có chủ đích.** VIỆC 3 (khối chú thích đọng trong thân Điều cuối) tôi
+đã vá xong và đo trọn, nhưng đo lại origin ngay trước khi commit thì **PR #18 (`r323`,
+`claude/r323-tach-duoi-vbhn`) đang mở và làm CÙNG việc, RỘNG HƠN**: nó tách cả bảng «XÁC THỰC VĂN
+BẢN HỢP NHẤT» chứ không chỉ khối `[n]`, và bắt được `[n]` xuất hiện **inline trong 9/141 Điều** của
+`19-2026` — thứ mà phép đo của tôi (chạy trên thân Điều đã qua đường nạp) **không thấy**. Bản của họ
+tốt hơn ⇒ **tôi GỠ TRỌN bản vá trùng của mình** (`verify_deep.chu_thich_start` + nhánh trong
+`normalize_document` + 3 ca test), giữ đúng phần KHÔNG trùng. Cùng doctrine với `c2971dd`.
+
+**(A) r325 — lỗ CÒN LẠI sau r323: `_consolidated_text` không nối lại khối đuôi.** r323 tách
+«XÁC THỰC…» + chú thích hợp nhất ra `xac_thuc`/`chu_thich` (đúng và cần), nhưng **không đụng**
+`tl_core/extract_cache.py`. Mà đó là đường **dựng lại TOÀN VĂN từ record** — đường nuôi `doc-text`
+mặc định và **ghi đè khoá cache chuẩn `extract_<id>.txt`** (nguồn nuôi corpus/NLM). Tách ra trường
+riêng mà không nối lại ở đó = **im lặng đánh rơi**, ĐÚNG BẪY r215 đã trả giá với `phu_luc` (khi đó
+mất 6.030 ký tự phụ lục mà record VẪN CÓ lưu). Quy mô nếu để nguyên: `40-2026` mất **40.406 ký tự**
+chú thích, và `xac_thuc` chính là **bằng chứng danh tính** (VPQH + «Số:») mà r215 sinh ra để bảo vệ.
+
+Vá: `_consolidated_text` nối lại cả hai khối, thứ tự theo bố cục đo được (phụ lục → **xác thực** →
+**chú thích**), `rep` thêm hai cờ, dòng nhãn `doc-text` khai thêm «xác thực»/«chú thích».
+★**Forward-compatible, KHÔNG phụ thuộc thứ tự merge**: record dựng trước r323 không có hai khoá ⇒ cả
+hai rỗng ⇒ chuỗi ra **Y HỆT** bản cũ. Nên bản vá này an toàn kể cả khi r323 chưa land.
++1 ca `r325_dung_lai_khong_danh_roi_duoi_vbhn` (5 vế, gồm chiều ngược record-cũ-bất-động và ca chỉ
+có MỘT trong hai khối).
+
+**(B) VIỆC 4.2 — đường ĐỌC registry rơi về sổ NỀN trong im lặng.** Profile dự án **có thật** trong
+config mà `registryDocId` **rỗng** ⇒ `TL_REGISTRY_DOC_ID` không được đặt ⇒ webapp `regSS_` rơi nhánh
+auto-discover = sổ NỀN, người dùng đọc dòng nền dưới nhãn profile đang chọn. Đường GHI đã fail-closed
+từ 1.23.21 (`PROFILE_REGISTRY_ID_EMPTY_WOULD_CLOBBER_BASE`, rc=2 — vá cho sự cố 2026-06-30); đường
+ĐỌC tới nay vẫn im, và `scope`/`BASE_SCOPE_HIT` (r179 T7) chỉ nói được KHI ĐÃ CÓ dòng trả về.
+Nay `_apply_profile_env` in `PROFILE_REGISTRY_ID_EMPTY` ra stderr — **cảnh báo, KHÔNG chặn** (đọc sổ
+nền là hợp lệ; cái sai là im lặng), 1 lần/profile/process. Giữ IM ba chiều ngược: nền `vbqppl` rỗng
+là bình thường · profile có id đủ · người dùng tự export env. Không chồng lên `PROFILE_NOT_FOUND`.
+Chứng minh trên ĐƯỜNG SẢN XUẤT (`tl --config … --profile … profile-info`), không chỉ qua bind.
++6 ca `r325_*`.
+
+**(C) VIỆC 4.1 — đính chính §4.2 biên bản lượt 1** (chỉ `rasoat/`, ngoài gói): «.docx Công báo là
+container HỎNG (33/40 · 30/37 entry dùng `\`)» là **SAI**. Lượt 3 **đo lại ĐỘC LẬP** trên tệp
+89-2026 còn trên đĩa, sha256 khớp tuyệt đối `source.sha256` của record cache ⇒ **0 entry** dùng
+backslash, `word/document.xml` có đúng tên chuẩn, `python-docx` mở thẳng (775 đoạn). Hỏng nằm ở
+**đường tải của container web**, không ở tệp Công báo; lượt 1 đo sai vì `bash -c` **nuốt backslash**.
+★Đồng thời bắt được **mẫu số sai ở CẢ HAI sổ trước**: tệp này chỉ có **10** entry, không phải 37 —
+nên «30/37» lẫn «0/37» đều không phải số của tệp này (lượt 2 đúng kết luận nhưng bê nguyên mẫu số).
+**Bản vá r316 (`scan_file` hết fail-open) giữ nguyên, vẫn đúng vì lý do riêng của nó** — nó vá cổng
+an toàn pháp lý mặc định «sạch» khi mù, không phải vá container.
+
+★**Bẫy trả giá trong lượt này:** (1) `Path.write_text()` trên Windows **dịch `\n` → `\r\n`** — sửa
+một dòng làm cả tệp đổi kết dòng, `git diff` phồng 45 → 1.061 dòng, mà CI có bước *«Force LF
+checkout (hash parity với manifest)»*. (2) Kho này **kết dòng TRỘN THEO TỆP** (`verify_deep.py` LF ·
+`tl_selftest.py`/`tl.py`/`SKILL.md` CRLF) ⇒ quy tắc «ép hết về LF» là SAI, phải nắn theo **blob của
+chính tệp đó**. (3) `VERSION` khai ở **BA nơi** (`VERSION` · `scripts/tl.py` · `SKILL.md`) — quên
+một chỗ thì `r65_bundle_export_meta_and_guard` / `skill_md_version_matches_VERSION` bắt.
+# ★ v1.36.56 — r324: REL-05 + NLM-08 — cổng gói mù một tệp bắt buộc, doc kernel dạy van F7 đã chết (2026-08-02)
+
+**Hai mục P2 của sổ audit 01-08. Đo tận nơi TRƯỚC khi vá — và phép đo đã lật một phần đề bài.**
+
+**REL-05 — `release-verify` mù với `references/QUY_TRINH_RA_SOAT_3_TANG.md`.** Tệp chứa `PHA0_GATE_v1`
++ `BUG_LEDGER_v1` đã có mặt trong `_BARE_TOOL_STRICT_DOCS` (guard bare-tool ĐỌC nó) nhưng **0 hit**
+trong `_RELEASE_REQUIRED_FILES` ⇒ rơi khỏi gói thì **không cổng nào đỏ**. Đưa vào danh sách bắt buộc.
+Ca `r324_rel05_quy_trinh_3_tang_trong_required` khoá bằng **HÀNH VI**, không phải tư cách thành viên:
+dựng root giả thiếu đúng tệp đó → `_verify_release_manifest` phải nêu **ĐÍCH DANH** trong
+`required_missing` **và** trả `ok:false`. (Chỉ kiểm «có trong list» là lặp lại bẫy r321 «đã có hàm ≠
+đã có đường gọi».)
+
+**NLM-08 — doc kernel dạy van F7 đã bị GỠ từ r208d.** Đo được ba nơi:
+- `SKILL.md:171` khai «cookie >**50′** trước lô API >1 nguồn → **CHẶN**»;
+- `references/KERNEL_APPENDIX.md` §E khai cả hằng `NLM_COOKIE_BATCH_MAX_MIN` lẫn mã lỗi
+  `NLM_COOKIE_TOO_OLD_FOR_BATCH` — **cả hai không còn trong mã**, chính ca
+  `r208d_f7_canary_thay_chan_theo_tuoi` đang khoá `not hasattr(…MAX_MIN)`;
+- docstring `_nlm_preflight_report` (`nlm_ops.py`) tự khai «van F7 vẫn dùng nó — GIỮ NGUYÊN ngưỡng».
+
+Hành vi THẬT trong `cmd_ingest_missing`: `len(to_add) > 1` → **canary LIVE**; `alive is False` ⇒ rc=2
+`NLM_AUTH_DEAD_BEFORE_BATCH` **trước mọi side-effect**; `alive=None` KHÔNG kết luận ⇒ KHÔNG chặn (M2);
+tuổi >50′ (`NLM_COOKIE_BATCH_WARN_MIN`) **chỉ CẢNH BÁO**. Doc lệch đúng chiều nguy hiểm — dạy người vận
+hành tự dừng lô, thứ §4b tầng 3 CẤM. Sửa cả ba nơi; ca `r324_nlm08_doc_f7_khop_canary_live` khoá **HAI
+CHIỀU**: doc-set kernel không được hồi sinh tên đã chết, **và** thứ doc hứa phải có thật trong đường sản
+xuất (soi `inspect.getsource(cmd_ingest_missing)`).
+
+★ **`SKILL.md` giữ NGUYÊN 48.031 B.** Câu F7 mới cân **đúng 84 byte** bằng câu cũ, nên
+`references/golden/workflow_audit.json` (`size_bytes: 48031`) và ghi chú «đệm 97B» ở
+`references/GOTCHAS.md:16` **không phải sửa theo**. Đổi độ dài kernel là kéo theo 3 tệp khác.
+
+★ **Nơi thứ TƯ là BÁO GIẢ.** `docs/WORKFLOW_RASOAT_TU_DONG.md:277` cũng chứa tên hằng đã gỡ, nhưng đọc
+kỹ thì nó đang **MÔ TẢ ĐÚNG** việc đổi tên của r208d («…đổi tên `…MAX_MIN` → `…WARN_MIN`, vẫn 50′ nhưng
+chỉ CẢNH BÁO»), không dạy hành vi cũ ⇒ **KHÔNG sửa**. Sổ audit khai «3 nơi» là chính xác; quét theo TÊN
+rồi vá tất là cách làm hỏng một tài liệu đang đúng.
+# ★ v1.36.55 — r323: khối đuôi VBHN đọng trong THÂN ĐIỀU CUỐI (chú thích hợp nhất + bảng XÁC THỰC) (2026-08-02)
+
+**Triệu chứng đo được trên cache THẬT (02-08), 3/3 record VBHN nhiễm, 0 record khác:**
+
+```
+40-2026-VBHN-VPQH  Điều 52 : thân 40.637 ký tự — quy phạm chỉ    231  (99,4% là khối đuôi · 114 neo)
+19-2026-VBHN-VPQH  Điều 141: thân  8.573 ký tự — khối đuôi      4.073
+89-2026-VBHN-VPQH  Điều  79: thân  1.124 ký tự — khối đuôi      1.031
+54-2025-VBHN-VPQH  Điều 72 : 0 neo — sạch, KHÔNG bị đụng
+```
+
+VBHN kết thúc bằng hai khối **không phải quy phạm** đứng sau Điều cuối: bảng «XÁC THỰC VĂN BẢN HỢP
+NHẤT» (NĐ250 mục XIII) và danh sách định nghĩa chú thích hợp nhất «[n] …». Đường **ĐỌC**
+(`resolve.resolve_footnote_amendments`) cắt khối chú thích từ lâu; đường **NẠP** thì KHÔNG — nên cả
+hai đọng vào thân Điều cuối của record cache. Hệ quả: **trích nguyên văn Điều cuối nhả chú thích ra
+như thể là quy phạm**, và `19-2026` chính là VBHN đang thay thế Luật BHXH 41/2024.
+
+★**Bộ dò đã tồn tại nhưng chẩn đoán SAI ĐỊA CHỈ.** Cờ mềm sẵn có (`verify_deep` §1b, «Điều cuối dài
+bất thường») ĐÃ bắn trên `40-2026` — nhưng ghi là *«nghi phụ lục/mẫu chưa tách»*, nên không ai truy
+đúng nguyên nhân; và nó chỉ bắt 1/3 vì `19-2026`/`89-2026` lọt dưới ngưỡng 8000/8×.
+
+**Vá.** `verify_deep.tach_duoi_vbhn()` (PURE) + `vbhn_duoi_start()` dò **từ Điều ĐẦU TIÊN trở đi**.
+`normalize_document` gọi nó **sau** bước tách phụ lục nên đúng với cả hai thứ tự đuôi-vs-phụ-lục.
+
+★**Bản nháp neo ở Điều CUỐI (theo khuôn `appendix_start`) và ĐÃ HỎNG trên dữ liệu thật** — chỉ lộ ra
+lúc nạp lại record thật, đọc mã không thấy: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật
+khác** («[7] Điều 31 của Luật … quy định như sau: "Điều 31. Thẻ bảo hiểm y tế…"»), nên `ART_SPLIT`
+khớp SÂU TRONG khối đuôi và marker CUỐI CÙNG nằm SAU cả «[1]» lẫn «XÁC THỰC» ⇒ trả `-1` ⇒ **không cắt
+gì**. `40-2026` (114 chú thích) hỏng TRỌN; `19-2026` (10 chú thích) thoát chỉ vì trích ít — **thử mỗi
+nó thì bản nháp trông như ĐÚNG**. Phụ lục không có lớp bệnh này nên `appendix_start` giữ điểm neo cũ;
+hai bên **cố ý khác nhau**. Ca khoá: `r323_chu_thich_trich_dan_dieu_khong_lam_truot_moc`.
+Khối đầu (r215) do chính điểm neo Điều-đầu bảo vệ; marker INLINE (9/141 Điều của `19-2026` có marker
+giữa dòng) do khuôn neo **ĐẦU DÒNG** bảo vệ. Hai khối được **GIỮ** vào trường riêng
+`chu_thich` / `xac_thuc` (+ 4 trường đếm trong `structure`) chứ **không bỏ đi**: chú thích mang thông
+tin pháp lý «khoản này do luật nào sửa, hiệu lực từ bao giờ», còn khối xác thực là bằng chứng danh
+tính (VPQH + «Số:»). Không record nào mất một ký tự nào.
+
+★**Mốc «khối chú thích bắt đầu ở đâu» nay là MỘT định nghĩa** — `tl._FOOT_DEF_FIRST` (đường đọc) và
+`verify_deep.VBHN_CHU_THICH_DEF` (đường nạp), khoá bằng drift-lock `r323_khuon_chu_thich_khong_duoc_lech`
+(khuôn `r80_discovery_sites_mirror`). ★Hằng phải đặt ở **`tl.py`** chứ không phải `tl_core/resolve.py`:
+`resolve.bind()` REBASE `__globals__` từng hàm sang namespace sống của tl ⇒ hằng khai bên resolve là
+**mã chết**, hàm vẫn tra trong globals của tl. Khai thử ở resolve cho **NameError ngay trên đường sản
+xuất** — chính selftest bắt được (đúng lý do `_MARK_RE` xưa nay nằm ở `tl.py`).
+
+**Tiền kiểm chống cờ giả (chạy trước khi vá):** sau khi cắt, `TERMINAL_PAT` vẫn khớp **3/3** Điều
+cuối, và **0/3** còn trượt cờ «Điều cuối dài bất thường» ⇒ bản vá không đẻ cờ mới.
+
+**Cổng:** selftest **1621/1621** (1617 + 4 ca mới) · release-verify --strict rc=0 · determinism /
+doc-claims / workflow-audit --strict rc=0 · ruff F **delta +2** — báo trung thực: cả hai **cùng lớp
+F821-do-bind đã có sẵn** (`resolve.py` nền đã 360 F821 gồm cả `_MARK_RE`; `_TL_MODULE` trong selftest
+đã 2.159; kho **chưa từng** dùng `noqa: F821`) ⇒ với lớp hằng-qua-bind, "delta 0" là bất khả.
+
+**ĐÃ CHỮA DỮ LIỆU (2/3 record), nạp lại bằng chính bản vá này** — `cache-build --method exportdocx
+--gdoc-id`, giữ `method_rank=95`/`verified`; nạp **cache tạm** đo **8/8 cổng** rồi mới chép đè, bản cũ
+sao lưu ở `~/.tra_luat_cache/cache_bak_r323_2026-08-02/`:
+
+```
+40-2026  Điều 52 : thân 40.637 →   230   · chú thích 46.198 tách riêng · neo trong thân 114 → 0
+19-2026  Điều 141: thân  8.573 → 4.500   · chú thích  4.010 tách riêng · neo trong thân  10 → 0
+```
+
+Cổng 7 («0 ký tự QUY PHẠM nào đổi») so **sau khi bỏ hết khoảng trắng**: `40-2026` 0/51 Điều lệch;
+`19-2026` 0/140 lệch thực, 2 Điều (80·115) khác **chỉ ở khoảng trắng** — và đó là bản mới **SỬA ĐƯỢC**
+lỗi dính chữ «hủy bỏ|quyết định» mà lượt 12 đã ghi vào sổ. ⇒ So tuyệt đối là **sai chiều**: nó sẽ chặn
+chính bản vá tốt hơn.
+
+⚠ **`89-2026-VBHN-VPQH` CHƯA chữa được** — record không có `source.gdoc_id` (`method=file`,
+`rank=50`/`staged`) nên không có đường `exportdocx` để nạp lại mà giữ hạng. Cần người quyết nguồn.
+
+# ★ v1.36.54 — r322: RAS-18 — `doc-patch` để lại `text_hash` CŨ, bằng chứng đối sánh phải VÔ HIỆU (2026-08-02)
+
+**Sổ audit tả mục này là «`doc-patch` cố ý không tính lại `text_hash` ⇒ anchor sai âm thầm». Đo tận
+nơi thì lời tả đó ĐÚNG phần mô tả mà SAI phần quy lỗi — và bệnh thật nặng hơn:**
+
+| khẳng định trong sổ | đo được 02-08 |
+|---|---|
+| không tính lại `text_hash` | **ĐÚNG**, và lý do r217 nêu là THẬT: record không giữ bố cục dòng của `norm` ⇒ *không có cách* tính lại trong CÙNG miền băm. **Tính lại mới là sai** — đó là thay giá trị không rõ nguồn bằng giá trị TƯƠI |
+| «chỉ thiếu ghi chú» | **SAI.** `tra_cuu.py` dùng `text_hash` làm **bằng chứng đối sánh LIÊN NGUỒN** (`--expected-content-hash` từ bundle/NotebookLM). Sau một lượt patch, thân ĐÃ lệch mà hash VẪN khớp bundle ⇒ cổng fail-closed báo **KHỚP** đúng trên ca nó sinh ra để chặn, rồi trả nguyên văn đã sửa như thể bundle xác nhận |
+| «đã có cảnh báo trong `verify_flags`» | **CÓ NHƯNG VÔ HÌNH**: `provenance.py` 0 tham chiếu `verify_flags`, `tra_cuu.py` 0 tham chiếu; JSON ra chỉ có `content_hash`/`warnings`/`units`. Không đường đọc nào lộ nó |
+| — | **FAIL-OPEN chưa ai khai**: r217 ghi cờ trong `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai bốc hơi mà lệnh vẫn rc=0. (11/11 record hiện có đều là list ⇒ bẫy đang NGỦ, không phải đang chảy máu) |
+
+**Ba vế, mỗi vế một ca khoá riêng:**
+
+1. **Cổng** — `tra_cuu.py`: `--expected-content-hash` KHỚP + record có `doc_patch.lich_su`
+   ⇒ `hash_khop_nhung_da_doc_patch`, **rc=3, không trả nguyên văn**. Không tính lại hash; từ chối
+   chính cái "khớp" đã vô hiệu. `--allow-stale` vẫn là đường vượt (cùng cổng với nhánh lệch sẵn có),
+   và nhánh `hash_mismatch` cũ **không bị cướp**.
+2. **Lộ diện** — `provenance.build_warnings`: thêm mã `doc_patch_text_hash_cu` (level `warn`), nên
+   mọi đường đọc dựng cảnh báo đều khai, kể cả khi không ai truyền `--expected-content-hash`.
+3. **Fail-open** — `cmd_doc_patch`: **TẠO** `verify_flags` khi record chưa có, thay vì lặng lẽ bỏ.
+
+**Khoá vào `doc_patch.lich_su`** (trường CÓ CẤU TRÚC, ghi vô điều kiện) chứ không dò chuỗi
+`"DOC_PATCH:"` trong `verify_flags`: văn xuôi đổi một chữ là phép dò gãy IM LẶNG, mà `verify_flags`
+lại đúng là trường có thể vắng mặt.
+
+**Hai bệnh NỀN đo được cùng lượt, CỐ Ý không vá kèm** (ngoài phạm vi RAS-18, đã ghi tại chỗ):
+- `tra_cuu.py` **không** `reconfigure(encoding="utf-8")` như `tl.py` (tl.py:86/94) ⇒ trên máy chuẩn
+  Windows (stdout pipe = cp1258) mọi payload tiếng Việt vỡ `UnicodeEncodeError`. Nhánh
+  `hash_mismatch` CŨ vỡ y hệt — bệnh có trước r322.
+- `find_units` duyệt `doc["structure"]` như **list đơn vị**, còn record cache thật (**11/11**, do
+  `build_cache.py:84` + `normalize_document.py:347` ghi) để `structure` là **dict đếm** ⇒ duyệt dict
+  ra chuỗi rồi `AttributeError`. Cổng r322 nằm TRƯỚC `find_units` nên chặn đúng ở cả hai hình dạng.
+
+Test: `r322_cong_hash_vo_hieu_sau_doc_patch` (5 nhánh, chạy subprocess đường sản xuất) ·
+`r322_provenance_lo_doc_patch` · `r322_verify_flags_vang_van_phai_khai` (đường GHI thật).
+
+
+# ★ v1.36.53 — r321: RAS-17 vế `rasoat-merge` — neo hỏng hết đi lọt vào bảng master (2026-08-02)
+
+**Nối tiếp r313, KHÔNG chồng lấn.** r313 dựng khuôn (`_rasoat_anchor_khuon`) + cưỡng chế cờ vòng đời
+(`_rasoat_anchor_hop_le`). Mục này đóng vế còn lại, và là vế mà bản kiểm lõi nêu ĐÍCH DANH:
+«`_rasoat_unit_shape` không chạm `anchor` ⇒ `rasoat-merge` nuốt trọn».
+
+**Đo trên chính master `c24a8b3` (đã có r313), hồ sơ BHXH thật — 82/82 ô neo sai khuôn:**
+```
+tl rasoat-merge --in <master/> --json  →  ok: true · so_phat_hien: 40 · KHÔNG một khoá nào nhắc anchor
+```
+Cổng vòng đời của r313 không bịt được lỗ này: nó chỉ bắn khi hồ sơ **đã khai `vong_doi`**, còn
+`rasoat-merge` chạy từ lượt rà ĐẦU TIÊN và là đường sản phẩm cuối (§7.1 điều kiện đóng số 6 gọi thẳng
+`rasoat-merge --check` rc=0 — tức bảng master có thể nghiệm thu XANH trong khi 82/82 neo hỏng).
+
+**Vá.** `_rasoat_anchor_quet(docs)` — thuần, giữ thứ tự, trả từng ô hỏng kèm `nguon`/`key`/`so_hieu`/`i`
+để người sửa biết mở FILE nào, PHÁT HIỆN nào. Luật hợp lệ và từ vựng `loai` dùng **chung**
+`_rasoat_anchor_khuon()` của r313 — một nguồn chân lý, không đẻ bộ từ vựng thứ hai rồi để hai bên trôi
+khỏi nhau (có ca khoá riêng bất biến này). `cmd_rasoat_merge` khai `so_anchor_hong` + `anchor_hong` ở
+**MỌI** chế độ kể cả `--check`/`--dry-run`; `--anchor-strict` ⇒ rc=2 và **KHÔNG ghi**, đặt cùng chỗ với
+cổng r216/r290 (TRƯỚC mọi thao tác ghi).
+
+**Vì sao KHÔNG strict mặc định:** hồ sơ đang lưu giữ 82/82 ô sai khuôn — bật mặc định là chặn đứng mọi
+hồ sơ CŨ vì một lỗi lượt rà không gây ra và **chưa có đường sửa trọn**. Đúng khuôn r312 với ING-09:
+chặn cái MỚI, khai cái CŨ, không dọn lén.
+
+**Đo lại phần DỮ LIỆU (02-08) — sửa hai điều bàn giao cũ ghi sai:**
+
+| lớp | n | di trú tự động được? |
+|---|---|---|
+| `cache:<slug>` (± `#<8hex>`) | 47 | **ĐƯỢC** — cache giữ `text_hash` 64hex thật; 2 ô có `#<8hex>` đều KHỚP tiền tố bản hiện hành |
+| hex 16 ký tự (2 giá trị) | 17 | **KHÔNG** — khớp **0** bản, kể cả mọi `cache_bak_*` ⇒ không truy nguyên được |
+| `congbao:…` | 17 | **KHÔNG** — không có record cache |
+| `gdoc:…` | 1 | **KHÔNG** |
+
+1. «cache `docs/*.json` = 0 record» là đo trong **container rỗng**; trên máy giữ hồ sơ có đủ 11 bản.
+2. «mã ghi hexdigest TRẦN thiếu tiền tố (`build_cache.py:83`)» là **nhầm trường**: ô đó là `text_hash`
+   của RECORD CACHE (64hex thật, đúng), không phải `anchor.doc_deps[].text_hash` (do agent rà điền tay).
+
+⇒ Câu «tính lại bằng `_content_hash`» ở `RASOAT_PLAN_SCHEMA.md` §7.2 **chỉ đúng cho lớp `cache:`**. Áp cho
+cả 82 là thay giá trị không rõ nguồn bằng giá trị TƯƠI — khẳng định một độ tươi chưa hề kiểm, đúng thứ
+`anchor_con_hieu_luc` sinh ra để chặn. §7.2 nay ghi rõ phân rã này; ô không truy nguyên được thì ĐỂ TRỐNG.
+
+**Test** (3 ca, đều HÀNH VI — không grep chuỗi, vì lệnh này thuần cục bộ nên chạy thật được):
+`r321_anchor_quet_gan_nguon` (8 khẳng định — 3 lớp `loai` phá riêng lẻ, ô đúng không đẻ vế giả, dep
+không-phải-dict vẫn tính, thứ tự tất định) · `r321_quet_khop_findings_r313` (bất biến: số ô hỏng và
+phân lớp của hai đường soi phải BẰNG NHAU) · `r321_merge_lo_dien_va_strict_fail_closed` (rc + payload +
+**FILE CÓ BỊ GHI KHÔNG**, gồm cả chế độ `--check`).
+
+**Mutation** (mỗi vế hoàn nguyên riêng, đo trên chính bản này): bịt `_rasoat_anchor_quet` ⇒ đỏ đúng 3 ca
+mới · gỡ `return 2` của cổng (báo lỗi nhưng VẪN ghi — đúng lớp bệnh r290) ⇒ đỏ đúng ca strict.
+selftest **1614/1614** (đo SAU khi rebase lên r320); ruff F821 **0 tên mới** trên cả 4 tệp đụng tới
+(so tập TÊN, không so số đếm — `lookup_ops.py` 563→564 là THÊM CALL-SITE của helper vốn đã stub, đúng
+ca xanh đã ghi trong checklist).
+
+**Vế GHI DỮ LIỆU: CHỐT KHÔNG LÀM — và đó là kết cục ĐÚNG, không phải nợ.** Hồ sơ BHXH đã
+`da_dong_co_gioi_han` (người thẩm tra chốt 01-08, claim đã nhả) và `vong_doi` của nó ĐÃ tự khai chính
+xác: `anchor_con_hieu_luc: false` + `ly_do_anchor` mô tả đúng RAS-17. Tức hệ thống đang ở trạng thái
+TỰ MÔ TẢ ĐÚNG — Loop C bỏ qua hồ sơ này đúng như thiết kế, không có lỗi nào đang chảy máu. Sửa 82 ô
+tại chỗ là ghi đè một hồ sơ đã ký, phá bất biến §7.1 «đóng hồ sơ là ĐÓNG BĂNG, không phải dọn», mà
+đổi lại KHÔNG được gì: 35/82 ô vẫn hỏng ⇒ `anchor_con_hieu_luc` vẫn phải là `false`. Người dùng chốt
+**để nguyên** (02-08). Ghi lại đây để lượt sau đừng mở lại như một "việc còn treo".
+# ★ v1.36.52 — r320: ĐÓNG 4 mục CUỐI của sổ audit 31-07 — PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06 (2026-08-02)
+
+Bốn mục này là **toàn bộ phần còn lại** của nhóm "chưa có bằng chứng độc lập" (§Phụ lục kế hoạch: 6 mục,
+`RAS-14` đóng ở r310, `ING-03` tự tái hiện xong). Theo đúng dặn dò "dựng repro TRƯỚC", mỗi mục được tái
+hiện trên cây hôm nay rồi mới vá — **cả 4 đều CONFIRMED, sổ audit không mục nào bịa**.
+
+**T0-C trước khi mở Làn B (bắt buộc theo kế hoạch §III.2).** Đo ranh giới tệp với P16: `profile_mgmt.py`
+chạm gần nhất r268 · `profile_env.py` r286 (P16 dừng ở đây) · `zip_ingest.py` r268 · `ingest_ops.py`
+**r312** nhưng diff chỉ 1 hunk trong `_il_stage_plan`, **0 lần** chạm `_resume_identity_gate`. Không giao ⇒
+mở được.
+
+## PRO-03 + PRO-09 — guard marker viết đúng, test xanh, CHƯA TỪNG CHẠY
+
+**Nặng hơn sổ.** Sổ nói "`profile-adopt` không dùng mutation guard". Đo ra: `_marker_mutation_guard` (có từ
+r184, ADR-0012 §4 khai là **guard chung cho mọi mutation profile**) có **0 call site sản xuất** trong toàn
+kho — 3 tham chiếu duy nhất là định nghĩa, dòng khai `_STUB_MAP`, và **một ca test gọi thẳng**. Cùng lớp
+"chứng nhận RỖNG" mà r298 đã diệt 3 ca.
+
+- **PRO-03**: adopt tự dựng lại ba điều kiện rời (đọc lỗi / trùng marker / tên profile khác). Marker **hỏng
+  nội dung** lọt sạch: `FINGERPRINT_MISMATCH` cho cả ba điều kiện đều False ⇒ rơi thẳng vào `_marker_write`
+  = **ghi đè bản hỏng** (self-heal ngầm), đúng thứ ADR-0012 cấm. Đo: guard trả `MARKER_INVALID` cho chính ca
+  đó, adopt cho qua. Nay adopt định tuyến qua guard.
+- **PRO-09** (nâng từ mục RISK, theo §I.5 kế hoạch): `profile-delete` — mutation **nặng nhất** họ profile
+  (xoá nguồn NLM **bất khả nghịch** → trash Drive → gỡ config) — **không đọc marker ở bất kỳ đâu**. Nay guard
+  đứng **sau** cổng `--confirm` (DRY không tốn call mạng) và **trước** mutation ĐẦU TIÊN; chặn ⇒
+  `PROFILE_DELETE_MARKER_GUARD` rc=2, chưa xoá gì. Transport nổ = "mù trạng thái", KHÔNG phải "sạch".
+
+**Breaking có chủ đích:** adopt/delete lên marker không hợp lệ nay DỪNG thay vì tự chữa. Đường repair đã
+thiết kế sẵn (ADR-0012 §3): `profile-backfill-markers --profile-name <tên> --apply --force`.
+
+## PRO-05 — kiểm MIME bị khoá nhầm sau `role == "registry"`
+
+Nhánh `manifest` **không có phép kiểm loại nào**. Đo: Google Doc đặt ở `manifestId`, parent đúng ⇒ doctor
+**0 finding**, trong khi chính nó là thứ không đọc được (manifest upload `mime=application/json`,
+`convert=false` rồi tải về JSON-parse).
+
+Bất biến chọn là **"không phải tệp Google-native"**, không phải "đúng `application/json`": Drive có thể trả
+`text/plain` cho JSON upload và bản đó vẫn parse được — siết theo chuỗi MIME chính xác là **đỏ oan**. Ca test
+khoá cả hai chiều: `application/json` và `text/plain` **không** đỏ; Doc **và** Sheet đều bị bắt.
+
+## ING-04 — `if _jd and …` coi VẮNG MẶT là hợp lệ
+
+`_resume_identity_gate` so `journal.drive_id` với dòng canonical, nhưng bọc trong `if _jd and …` ⇒ journal ghi
+`drive_id=""` thì **bỏ qua so sánh**. Đo đúng kịch bản sổ: journal cũ (`drive_id=""`, có `identity_hash`) +
+registry đã trỏ sang GDoc **hoàn toàn khác** ⇒ cổng trả `None` = **cấp quyền ghi**. Đo thêm trên hàm THẬT:
+`source_sha256` **0 lần**; `identity_hash`/`plan_hash` chỉ bị kiểm **CÓ MẶT**, không đối chiếu **GIÁ TRỊ**.
+
+Nay: journal thiếu `drive_id` mà registry ĐÃ có dòng canonical ⇒ `RESUME_JOURNAL_NO_DRIVE_ID`.
+
+★ **Lượt đầu tôi siết QUÁ TAY và chính phản chứng bắt được**: bản vá ban đầu chặn cả khi người gọi khai
+`--drive-id` KHỚP canonical — mà khai rồi thì cổng phía trên đã đối chiếu, tức nguồn ĐÃ được chứng minh bằng
+đường khác. Thêm vế `not drive_id`. Ma trận 5 ca nay đều đúng.
+
+## ING-06 — tập đuôi khai HAI LẦN, đã trôi lệch
+
+ZIP planner `{.doc .docx .pdf .txt .md .rtf .odt}` vs child `ingest-local` `{.docx .doc .pdf .rtf .odt}`.
+Khe hở = đúng **`.txt`, `.md`** như sổ nêu. Chạy `validate_source_file` THẬT với fixture hợp lệ từng đuôi
+(zip có `[Content_Types].xml`+`word/document.xml`, `%PDF-`, OLE header, `{\rtf`): 5 đuôi `ok=True`, đúng 2
+đuôi đó trả `UNSUPPORTED_EXTENSION`. Planner hứa kế hoạch mà child **chắc chắn** không làm được.
+
+Nguồn sự thật DUY NHẤT nay ở `ingest_contract.INGEST_LOCAL_EXTS`; cả hai phía đọc từ đó. **Chọn THU planner
+về đúng năng lực child, KHÔNG nới child**: nới = cho upload `.txt`/`.md` rồi convert = quyết định **tính năng**
+(đổi thứ được ghi vào corpus), không phải sửa lỗi lệch sổ. Muốn mở thì mở tường minh ở một chỗ.
+
+**Test (+5 ca → 1598/1598).** `r320_pro03_adopt_va_delete_deu_qua_guard` · `r320_pro09_delete_chan_truoc_mutation_dau_tien`
+(khoá **THỨ TỰ** trong mã: guard < `nc.source_delete(` và < `g.get("trash"`, nhưng > `CONFIRM_YES_REQUIRED`) ·
+`r320_pro05_manifest_sai_loai_bi_bat` (4 phản chứng) · `r320_ing04_journal_thieu_drive_id_khong_cap_quyen`
+(ma trận 5 ca) · `r320_ing06_planner_va_child_cung_mot_nguon` (+ phản chứng đuôi hợp lệ vẫn qua cả hai phía).
+
+**ĐỎ-TRƯỚC (đo thật):** hoàn nguyên 5 tệp sản xuất về HEAD, GIỮ test ⇒ **1593/1598**, đỏ đúng **cả 5** ca
+r320, **không ca nào khác**. Sau vá 1598/1598.
+
+**Một ca CÓ SẴN đỏ — đúng, và nó đang mã hoá con bệnh.** `r107_zip_content_identity_normalized` dùng member
+`.txt` làm filler rồi khẳng định `plan.ok` — tức khẳng định planner **phải nhận** một đuôi không nạp được.
+Chủ đề thật của ca là **chuẩn hoá đường dẫn** (`./a` ≡ `a` cho `idempotency_key`, `plan_hash` khác), hoàn toàn
+không liên quan đuôi. Giữ NGUYÊN VĂN khẳng định, chỉ đổi filler sang `.docx`. Bằng chứng đổi filler là trung
+tính: ở lượt ĐỎ-TRƯỚC ca này **vẫn xanh** (`.docx` hợp lệ ở cả hai phía trước lẫn sau vá).
+
+**Và một check CÙNG LỚP trong `determinism-audit`.** `zip_member_order_stable` (`release.py:141`) cũng dùng
+member `.txt` làm filler rồi kèm vế `zp.ok`. Chủ đề của nó là **ổn định thứ tự member** (`zi1 == zi2` — vế này
+**vẫn đúng** sau vá); chỉ vế `ok` gãy vì 0 member được nhận. Đổi filler sang `.docx`, khẳng định gốc nguyên vẹn.
+Hai chỗ này (`r107` + `zip_member_order_stable`) là bằng chứng phụ rằng ING-06 có thật: khe hở đủ lâu để **hai**
+bộ kiểm khác nhau vô tình dựa vào nó.
+
+★ **Hai lỗi trong chính TEST của tôi, tự bắt được:** (1) soi `cmd_profile_adopt` — nó chỉ là wrapper
+`_ProfileEnvGuard` 181 ký tự, thân thật ở `_cmd_profile_adopt_impl`; soi nhầm wrapper thì test **xanh giả** vì
+chuỗi nào cũng vắng mặt. (2) neo thứ tự vào chuỗi `trash_assets` — chuỗi này có mặt SỚM trong dict `plan` nên
+phép so vị trí sai; đổi neo sang `g.get("trash"`.
 
 # ★ v1.36.51 — r319: đính chính KHẾ ƯỚC phụ thuộc — `requirements.txt` khai «stdlib-only» đúng với overlay core nhưng SAI với đường nạp (2026-08-02)
 

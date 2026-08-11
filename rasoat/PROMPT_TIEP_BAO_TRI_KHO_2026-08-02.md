@@ -1,5 +1,23 @@
 # PROMPT BÀN GIAO — sau lượt bảo trì kho 02-08-2026
 
+> # 🛑 LỖI THỜI — ĐÃ THI HÀNH XONG 02-08, ĐỪNG CHẠY LẠI TỪ FILE NÀY
+>
+> **VIỆC 1 và VIỆC 2 dưới đây đã ĐÓNG** ở lượt 2 (người dùng duyệt «đồng ý cả 2»).
+> Sổ: **`rasoat/BIEN_BAN_BAO_TRI_KHO_BHXH_LUOT2_2026-08-02.md`** ·
+> Prompt hiện hành: **`rasoat/PROMPT_TIEP_BAO_TRI_KHO_LUOT3_2026-08-02.md`**.
+>
+> * **VIỆC 1 — ĐÃ GHI**, nhưng **KHÔNG** phải sổ mà file này chỉ. Dòng `41-2024` nằm ở registry
+>   **NỀN `vbqppl`**, không ở sheet profile «Luật BHXH» ⇒ lệnh `--profile "Luật BHXH"` trong file này
+>   là **NO-OP báo `missed`** (`reg_bulk` UPDATE-only). Đã ghi bằng `--profile vbqppl`, readback 746 ký tự.
+>   Payload đã đổi tên → `rasoat/DA_THI_HANH_note_41-2024_bulk_2026-08-02.json`; **chạy lại = đè mất
+>   phần nối của phiên khác.**
+> * **VIỆC 2 — ĐÓNG bằng kết luận KHÔNG ĐÈ.** Đo từng Điều cho thấy bản Công báo **không chữa** khiếm
+>   khuyết đã nêu: `19-2026` có **y hệt** `markup={strike:2}`; `54-2025` (PDF) **trộn chú thích vào
+>   32/72 Điều**; `89-2026` — record đang dùng CÓ «VPQH + Số:», bản mới mới là bản THIẾU.
+>   Bảng «Đo được» ở VIỆC 2 bên dưới **chỉ đúng về bản MỚI**, không so với bản đang dùng ⇒ đừng dựa vào nó.
+> * **VIỆC 3 (sáu bản vá r314–r319)** vẫn đúng và đã land. **§4.2 của biên bản lượt 1 cần đính chính**:
+>   «.docx Công báo là container HỎNG» **không tái lập** (cùng sha256: 0/40 và 0/37 entry backslash).
+
 Dán nguyên khối này vào phiên mới. **Chạy trên MÁY CÓ CONFIG** (Windows `D:\Quốc hội\tra-luat`
 hoặc Cowork đã bootstrap) — hai mục đầu KHÔNG chạy được trên container web sạch.
 

@@ -222,6 +222,21 @@ Router `scripts/transport.py` (`drive_op`/`run_batch`) định tuyến theo nhó
 - **Confirm-gate THEO LÔ**: `transport.run_batch(items, confirmed=False)` → `ConfirmRequired` liệt kê CẢ lô; xác nhận 1 lần (`confirmed=True`) rồi chạy hết. Đơn lẻ: `drive_op(op, confirmed=True)`.
 - **Fallback ồn ào**: gws chết/`TL_GWS_DISABLE=1` → stderr `[FALLBACK→GAS] op=…` rồi gọi GAS (trừ `upload`).
 - **Ngoại lệ chặn**: `ConfirmRequired` (C chưa confirm) · `DeferToShell` (D ở Chat) · `DeferToMCP` (mcp in-process, mang `.spec` để Claude gọi tool).
+- **Timeout phép dò (r327)**: `gws auth status` tốn **15–50s** (liệt kê 34 API + gọi mạng) — trần cũ 20s
+  nằm GIỮA vùng đó nên `is_available()` lật đỏ/xanh theo mạng, kéo `drive-push` rơi xuống gcloud thiếu
+  Drive scope ⇒ `[FAIL]` dù gws SỐNG. Nay 120s, chỉnh được: `TL_GWS_AUTH_TIMEOUT` ·
+  `TL_GWS_VERSION_TIMEOUT` (đè riêng) · `TL_GWS_TIMEOUT` (SÀN chung, **chỉ nâng**).
+- **Timeout đường GHI (r330)**: `update_content` **120s ĐÃ CHẶN THẬT** một lượt deploy gói 2.487.725 B
+  (`gws timeout sau 120.0s`); `TL_GWS_TIMEOUT=900` thì đẩy xong + byte-match. Nay **600s** cho ba lệnh
+  **GHI CÓ TẢI** (`upload` · `update_content` · `download`) + SÀN riêng `TL_GWS_WRITE_TIMEOUT`
+  (**chỉ nâng**, vì nó phủ nhiều lệnh mặc định khác nhau — cho hạ thì một số san phẳng cả nhóm).
+  Đo trên máy chuẩn: 2,49MB tốn **6–19s**, 25MB tốn **31–47s** (băng thông ~170–850 kB/s); ca hỏng suy ra
+  ≤ ~21 kB/s. Lệnh metadata (`mkdir`/`rename`/`delete`, đo 1,9–3,3s) **giữ nguyên** 60/60/30s — không
+  co giãn theo băng thông. ⚠ **Đừng áp công thức «2,4× ca chậm nhất đo được» của r327 ở đây**: mọi mẫu
+  đo được đều thuộc vùng LÀNH nên 2,4×19,3 = 46s, tức **thấp hơn cả 120s vốn đã hỏng**.
+- ⚠ **Thấy `auth=None`, hay `drive-push` chết vì `timeout`, ĐỪNG vội `gws auth login`** — đọc
+  `probe_error` trong `tl transport-info --json` trước: có chữ `timeout` nghĩa là **không dò được /
+  không kịp**, KHÔNG phải mất quyền. Thông điệp của `drive-push` nay tự nói câu này (r330).
 
 **A0.8 — Đo end-to-end (Code, gws auth oauth2; read=median 3 mẫu, mutate=1 mẫu).**
 

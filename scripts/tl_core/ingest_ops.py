@@ -965,7 +965,15 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
     if q in ("digital", "ocr"):
         return q
     ext = Path(path or "").suffix.lower()
-    return "ocr" if ext in {".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"} else "digital"
+    # F2-A (ADR-0018), khuôn r251: tập đuôi được ĐẶT TÊN trong `ingest_contract` thay vì nằm trần
+    # ở đây, để cổng EOL (`wp49_eol_policy_index_blobs`) neo vào ĐÚNG hợp đồng, không vào một bản
+    # COPY sẽ trôi lệch. Import TRONG HÀM là bắt buộc, không phải thói quen: `bind` re-home
+    # `__globals__` của hàm này về namespace tl (bẫy I11), nên hằng module-level của ingest_ops
+    # KHÔNG tra được — đã đo: `_OCR_SOURCE_EXTS` mức module ném NameError, còn
+    # `_PDF_BROKEN_FONT_WARN` chỉ sống vì tl.py:1737 re-export tường minh. Import cục bộ tạo tên
+    # LOCAL nên không đụng globals; đây cũng là khuôn ingest_ops đã dùng ở 3 chỗ (671/1603/1758).
+    from tl_core.ingest_contract import OCR_SOURCE_EXTS
+    return "ocr" if ext in OCR_SOURCE_EXTS else "digital"
 
 
 _PDF_BROKEN_FONT_WARN = ("PDF_TEXT_LAYER_BROKEN_FONT: text-layer mất dấu (density<0.005) — Google-convert "
@@ -2285,6 +2293,19 @@ def _resume_identity_gate(*, apply: bool, journal: str, drive_id: str, name: str
             return {"error": "RESUME_IDENTITY_MISMATCH", "journal_drive_id": _jd,
                     "registry_drive_id": str(canon_drive_id).strip(),
                     "note": "Fingerprint journal không còn khớp dòng registry — nguồn đã đổi; replan."}
+        # r320 (ING-04 · ADR-0011/D5): `if _jd and …` ở trên BỎ QUA so sánh khi journal ghi
+        # `drive_id=""` — mà đó chính là ca sổ audit nêu. Đo được: journal cũ (`drive_id=""`, có
+        # identity_hash) + registry ĐÃ trỏ sang GDoc HOÀN TOÀN KHÁC ⇒ cổng trả None = CẤP QUYỀN GHI.
+        # Journal rỗng drive_id là "chưa chứng minh được nguồn", KHÔNG phải "đã chứng minh là khớp";
+        # coi vắng-mặt là hợp-lệ đúng là mẫu lỗi A của cả sổ audit.
+        # …nhưng CHỈ khi người gọi cũng KHÔNG khai `--drive-id`: khai rồi thì cổng ở trên đã đối chiếu
+        # với `canon_drive_id` (lệch ⇒ RESUME_IDENTITY_MISMATCH), tức nguồn ĐÃ được chứng minh bằng
+        # đường khác. Bỏ vế này là siết quá tay — chính phản chứng của ca test bắt được lượt đầu.
+        if not _jd and not str(drive_id or "").strip() and str(canon_drive_id or "").strip():
+            return {"error": "RESUME_JOURNAL_NO_DRIVE_ID", "registry_drive_id": str(canon_drive_id).strip(),
+                    "note": "Journal không ghi drive_id nên KHÔNG chứng minh được nối đúng nguồn, trong "
+                            "khi registry đã có dòng canonical. Dùng `--drive-id <id>` để khai tường minh "
+                            "(cổng sẽ đối chiếu), hoặc replan bằng profile-ingest thường."}
     return None
 
 
@@ -2656,8 +2677,11 @@ def _il_stage_plan(ctx):
     if not (f and Path(f).exists()):
         print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
               file=sys.stderr); return {"rc": 2}
+    # r320 (ING-06): đọc TỪ hợp đồng dùng chung — tập literal ở đây từng là bản khai THỨ HAI, và ZIP
+    # planner đã trôi lệch khỏi nó (thừa `.txt`/`.md`).
+    from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _IL_EXTS
     _source_check = validate_source_file(
-        f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt"}, direct_upload=(not bool(_from_drive))
+        f, allowed_exts=_IL_EXTS, direct_upload=(not bool(_from_drive))
     )
     if not _source_check.get("ok"):
         print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},

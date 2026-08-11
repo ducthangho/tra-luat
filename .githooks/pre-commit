@@ -2,7 +2,7 @@
 # tra-luat pre-commit guard (dev-side): chan commit secrets/binary lon.
 # Kich hoat: git config core.hooksPath .githooks
 # Escape co y (CHI khi chac chan): git commit --no-verify
-staged=$(git diff --cached --name-only --diff-filter=ACM)
+staged=$(git diff --cached --name-only --diff-filter=ACMRT)
 [ -z "$staged" ] && exit 0
 bad=$(printf '%s\n' "$staged" | grep -Ei '(\.enc$|\.env$|cookie|tl_secrets|client_secret|credentials.*\.json$|\.zip$|\.dl$)')
 if [ -n "$bad" ]; then
@@ -12,4 +12,28 @@ if [ -n "$bad" ]; then
   echo "Go stage: git restore --staged <file>. Neu CHAC CHAN co y: git commit --no-verify." >&2
   exit 1
 fi
+
+# ── EOL POLICY GUARD (F2-A, ADR-0018) ─────────────────────────────
+# Truoc day khoi nay la shell va hoi SAI CAU HOI: no so DANG xuong dong cua ban
+# STAGE voi ban HEAD, tuc la "tep nay co DOI dang khong", trong khi dieu can biet
+# la "tep nay co DUNG policy khong". Bon he qua no khong the thay:
+#   - tep da CRLF tu truoc van CRLF thi lot (khong co "flip" nao);
+#   - `git cat-file -e "HEAD:$f" || continue` bo qua tron tep MOI;
+#   - `for f in $staged` tach theo KHOANG TRANG, mot ten co dau cach thanh hai
+#     path ma roi im lang troi qua;
+#   - RENAME/COPY lot sach vi `--diff-filter=ACM` khong co R/C.
+#
+# Nay policy do `.gitattributes` dinh nghia (ADR-0018) va mot validator Python
+# DUNG CHUNG voi CI cuong che no, doc blob trong INDEX — khong tin working tree,
+# khong tin `core.autocrlf`, khong tach path bang shell.
+if command -v python >/dev/null 2>&1; then
+  PY=python
+elif command -v python3 >/dev/null 2>&1; then
+  PY=python3
+else
+  echo "=== pre-commit CHAN: khong tim thay python de chay EOL policy guard ===" >&2
+  echo "Cai python hoac dat no vao PATH. Guard KHONG duoc tu tat khi vang cong cu." >&2
+  exit 1
+fi
+"$PY" "$(git rev-parse --show-toplevel)/.githooks/eol_policy.py" --staged || exit 1
 exit 0

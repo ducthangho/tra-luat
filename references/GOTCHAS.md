@@ -13,7 +13,7 @@
 - **Trần mount ~343KB/file** — `tl.py` từng bị **CẮT CỤT** khi vượt (Cowork mount); self-heal chỉ cứu
   NUL-pad, **KHÔNG cứu cắt cụt**. Guard sống ở `workflow-audit`: `py_size` WARN >280KB / FAIL --strict
   >320KB (waiver `tl_selftest.py` — không bước Cowork nào import; hỏng thì fail ỒN ÀO).
-- **Kernel SKILL.md: WARN >48.128B (G1a) · CỨNG 49.152B** — đo 01-08: **48.031B, đệm 97B** tới WARN.
+- **Kernel SKILL.md: WARN >48.128B (G1a) · CỨNG 49.152B** — đo 07-08 (LF): **47.724B, đệm 404B** tới WARN.
   Đổi kernel ⇒ re-import Capabilities. Thêm chữ: bớt chỗ khác TRƯỚC.
 - **Bundle import ≤200 file** — cây dev 212 từng FAIL; đóng gói CHỈ qua `tl release-bundle`.
 
@@ -37,10 +37,10 @@
 - **Golden `workflow_audit` NHÚNG size SKILL.md + files_scanned** — mọi chỉnh SKILL.md/thêm file runtime
   phải `golden-test --write` LẠI (CÓ CHỦ ĐÍCH, diff phải giải thích được từng dòng) rồi mới manifest.
   **Golden diff bất ngờ = BUG — DỪNG, cấm --write che.**
-- `[B]` **«Repo ghi LF, riêng COMMANDS.md CRLF» — THIẾU (đo 28-07).** EOL theo TỆP: **8 tệp CRLF toàn
-  phần** — gồm `SKILL.md`, `tl.py`, `tl_selftest.py`, `COMMANDS.md` — 200 tệp LF, 0 hỗn hợp. **Sửa
-  bằng BYTE**: `write_text` nuốt sạch CR CẢ TỆP (r219 trả giá). COMMANDS.md: không mass-strip
-  trailing-space (125 dòng vốn có ` |` + CR).
+- `[B]` **«Khoá byte `* -text`, sửa EOL bằng BYTE» — BỊ BÁC (F2, ADR-0018).** `.gitattributes` ép
+  LF mọi text (`*.cmd`/`*.bat` CRLF; golden + binary `-text`); `.githooks/eol_policy.py` chặn CRLF
+  vào index, hook và CI chung lõi. Phái sinh ghi qua `_write_text_atomic` (canonical LF);
+  `newline="\n"` KHÔNG đủ — không đụng `\r` có sẵn.
 - **Commit message qua `-F <file>`** (tiếng Việt an toàn); secret-guard hook quét trước.
 - Gate phải kiểm **rc THẬT từng lệnh, output ra file rồi mới parse** — `cmd | python -c ...` từng NUỐT rc
   → commit lọt khi gate ĐỎ (xem `.claude/commands/gate.md`).

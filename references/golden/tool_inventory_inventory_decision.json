@@ -137,7 +137,6 @@
     "push-overflow",
     "quarantine-fix",
     "rasoat",
-    "rasoat-anchor",
     "rasoat-chongcheo",
     "rasoat-loop",
     "rasoat-merge",
@@ -171,6 +170,7 @@
     "state-put",
     "status",
     "sweep",
+    "test-fragments-check",
     "the-thuc-build",
     "the-thuc-check",
     "the-thuc-normalize",
@@ -1444,16 +1444,6 @@
         "workflow_task": null,
         "write_scope": "local"
       },
-      "rasoat-anchor": {
-        "generated": true,
-        "idempotency_contract": null,
-        "read_only": false,
-        "requires_confirm": true,
-        "risk": "medium",
-        "supports_dry_run": true,
-        "workflow_task": "rasoat_hoso",
-        "write_scope": "local"
-      },
       "rasoat-chongcheo": {
         "generated": true,
         "idempotency_contract": null,
@@ -1734,6 +1724,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "test-fragments-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "release_verify",
+        "write_scope": "none"
+      },
       "the-thuc-build": {
         "generated": true,
         "idempotency_contract": null,
@@ -1900,7 +1900,7 @@
       "high_risk": 28,
       "nested": 5,
       "total": 165,
-      "write_commands": 88
+      "write_commands": 87
     },
     "schema": "command_registry.v1"
   },

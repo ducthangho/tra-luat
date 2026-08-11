@@ -57,6 +57,7 @@
 | `tl nlm-query-plan <q> --source-id …` | READ-ONLY: kiểm số lượng nguồn NLM (mặc định 1-3, 5 hard cap) và chia batch trước khi hỏi |
 | `tl reg-delete --drive-ids id,… --confirm yes [--force]` | gỡ dòng registry (bọc reg_delete); chỉ xóa DÒNG, không đụng Drive/NLM. **(v1.34.45) `--confirm yes` BẮT BUỘC** (thiếu → CONFIRM_REQUIRED, rc=2) |
 | `tl release-verify RELEASE_MANIFEST.json --strict [--archive <zip> --expected-archive-sha256 <sha>]` | **READ-ONLY:** kiểm cây hiện tại với manifest; khi có `--archive`, kiểm thêm đúng một root portable, entry/metadata ZIP canonical, manifest nhúng, size+SHA từng member và tùy chọn khóa đúng byte archive bằng SHA mong đợi. |
+| `tl test-fragments-check [--root <repo>] [--json]` | **LAND-ONLY, READ-ONLY:** so exact bytes của `scripts/tl_test_fragments_bundled.py` committed với output generator từ thư mục fragment phát triển; stale/missing fail-closed. Worker không chạy gate này và không sửa bundled module land-only. |
 | `tl bench [--rounds N]` | đo hiệu năng tính năng in-code (offline) trên manifest |
 | `tl tvpl-url <số hiệu>` | URL tìm TVPL + luồng auto-download docx (Claude in Chrome login VIP → ~/Downloads → _HOP_NAP) |
 | `tl find-doc <số hiệu\|tên>` | tìm văn bản web = **Google site: + VBHN-first** (primitive dùng chung, thay search nội bộ kém) |

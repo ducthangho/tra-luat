@@ -84,13 +84,30 @@ def _consolidated_text(doc) -> tuple:
     kd_raw = d.get("khoi_dau")
     kd = str(kd_raw or "").strip()
     rep = {"khoi_dau": ("thieu_khoa" if "khoi_dau" not in d else ("co" if kd else "rong")),
-           "articles": len(arts), "phu_luc": bool(str(d.get("phu_luc") or "").strip()), "thieu": []}
+           "articles": len(arts), "phu_luc": bool(str(d.get("phu_luc") or "").strip()),
+           # r325: hai khối ĐUÔI VBHN mà r323 tách ra khỏi thân Điều cuối
+           "xac_thuc": bool(str(d.get("xac_thuc") or "").strip()),
+           "chu_thich": bool(str(d.get("chu_thich") or "").strip()), "thieu": []}
     if rep["khoi_dau"] == "thieu_khoa":
         rep["thieu"].append("khoi_dau")
     blocks = ([kd] if kd else []) + parts
     pl = str(d.get("phu_luc") or "").strip()
     if pl:
         blocks.append(pl)
+    # r325 — NỐI LẠI KHỐI ĐUÔI VBHN. r323 tách «XÁC THỰC VĂN BẢN HỢP NHẤT» + danh sách chú thích
+    # hợp nhất ra `xac_thuc`/`chu_thich` để thân Điều cuối hết nhả chú thích như thể là quy phạm —
+    # ĐÚNG và cần. Nhưng nó KHÔNG đụng hàm này, mà đây là đường dựng lại TOÀN VĂN từ record, đường
+    # nuôi `doc-text` mặc định và ghi đè khoá cache chuẩn `extract_<id>.txt`. Tách ra trường riêng
+    # mà không nối lại ở đây = **im lặng đánh rơi**, ĐÚNG BẪY r215 đã trả giá với `phu_luc` (khi đó
+    # mất 6.030 ký tự phụ lục mà record VẪN CÓ lưu). Với `40-2026` là 40.406 ký tự chú thích, và
+    # `xac_thuc` chính là bằng chứng danh tính (VPQH + «Số:») mà r215 sinh ra để bảo vệ.
+    # Thứ tự: theo đúng bố cục đo được trên 3 record VBHN — xác thực TRƯỚC, chú thích SAU.
+    # ★Record dựng TRƯỚC r323 không có hai khoá này ⇒ cả hai rỗng ⇒ chuỗi ra Y HỆT bản cũ, nên hàm
+    #  này an toàn kể cả khi r323 chưa land (forward-compatible, không phụ thuộc thứ tự merge).
+    for _k in ("xac_thuc", "chu_thich"):
+        _v = str(d.get(_k) or "").strip()
+        if _v:
+            blocks.append(_v)
     return "\n\n".join(blocks), rep
 
 
@@ -174,6 +191,10 @@ def cmd_extract(a) -> int:
                     _bits.insert(0, "khối đầu")
                 if _crep["phu_luc"]:
                     _bits.append("phụ lục")
+                if _crep.get("xac_thuc"):
+                    _bits.append("xác thực")       # r325
+                if _crep.get("chu_thich"):
+                    _bits.append("chú thích")      # r325
                 src = f"cache-build consolidated ({', '.join(_bits)}, no-cap)"
                 if _crep["thieu"]:
                     print(f"[tl] ⚠ [khoi-dau] record cache `{_sh_cache}` dựng TRƯỚC r215 — KHÔNG lưu khối "

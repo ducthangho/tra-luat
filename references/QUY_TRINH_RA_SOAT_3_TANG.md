@@ -111,7 +111,7 @@ Bỏ qua định nghĩa thuần, điều khoản thi hành, boilerplate.
 - **Kết luận mâu thuẫn KHÔNG dựa vào câu trả lời NLM**: kéo nguyên văn cả hai Điều từ cache (`tra_cuu.py --cite … --exact`), Claude đặt cạnh nhau so trực tiếp.
 
 ### VERIFY (bắt buộc trước khi ghi phát hiện)
-- Mọi đoạn «…» NLM → `nlm_qa.py verify`; "failed" → bỏ, lấy lại cache/raw.
+- Mọi đoạn «…» NLM → `tl nlm-query --source-id <sid> --strict-scope` (fail-closed rc=2 khi NLM không chứng minh được nguồn); "failed" → bỏ, lấy lại cache/raw.
 - Nguyên văn đưa vào Phiếu **luôn** từ cache/raw, không từ NLM.
 - Khẳng định phủ định ("không có trong Phụ lục/luật") → đối chiếu nguồn chính thức, gắn mức "cần kiểm tra".
 

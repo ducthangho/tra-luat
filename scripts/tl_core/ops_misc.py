@@ -1040,6 +1040,40 @@ def _drift_hint_lines(bd: dict, nb: str) -> list[str]:
     return out
 
 
+def _doc_dep_probe() -> list:
+    """r319 — PURE-đọc: phụ thuộc NGOÀI thư viện chuẩn của đường NẠP tài liệu, kèm HẬU QUẢ cụ thể.
+
+    Vì sao cần: `requirements.txt` khai «uses only Python standard library» — đúng với overlay core
+    (`tl.py`/`contract_check.py`) nhưng SAI với đường nạp (`ingest_to_cache`/`normalize_document`).
+    Hệ quả đo được 02-08: máy cài sạch không có `pypdf` ⇒ `assert_pdf_not_scanned` không đo được lớp
+    text ⇒ CHẶN mọi .pdf (r315). Trước r319 không lệnh nào nói ra điều đó trước khi đâm vào tường.
+
+    `bat_buoc=True` = thiếu là CHẶN CỨNG một đường nạp; `False` = giảm chất lượng, vẫn chạy."""
+    import shutil as _sh319
+
+    def _co_mod(ten):
+        try:
+            __import__(ten)
+            return True
+        except Exception:  # noqa: BLE001 — import hỏng cũng coi như không có
+            return False
+
+    return [
+        {"ten": "pypdf|pdfplumber", "bat_buoc": True,
+         "co": _co_mod("pypdf") or _co_mod("pdfplumber"),
+         "hau_qua": "MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). Cài: pip install pypdf"},
+        {"ten": "pdftotext (poppler-utils)", "bat_buoc": True,
+         "co": bool(_sh319.which("pdftotext")),
+         "hau_qua": "không bóc được text .pdf. Cài: apt-get install poppler-utils"},
+        {"ten": "python-docx", "bat_buoc": False, "co": _co_mod("docx"),
+         "hau_qua": "vẫn đọc .docx bằng nhánh bóc-tag (r317 đã hết rò trị đo DrawingML); "
+                    "có lib thì cấu trúc đoạn/bảng sát bản gốc hơn"},
+        {"ten": "antiword|catdoc", "bat_buoc": False,
+         "co": bool(_sh319.which("antiword") or _sh319.which("catdoc")),
+         "hau_qua": "không đọc được .doc CŨ (binary); .docx/.pdf không ảnh hưởng"},
+    ]
+
+
 def cmd_doctor(a) -> int:
     """Chẩn đoán phiên trống: script lõi (gốc HOẶC _fallback), optional, credential,
     API_CONTRACT↔tl EXPECT, webapp ping, (--deep) manifest_export + exporttext-scope probe. (--offline) bỏ phần webapp."""
@@ -1071,6 +1105,17 @@ def cmd_doctor(a) -> int:
     missing_opt = [fn for fn in optional if not where(fn)]
     add("optional rasoat/backfill", not missing_opt,
         "đủ" if not missing_opt else f"thiếu {len(missing_opt)} (chỉ ảnh hưởng tl rasoat): {', '.join(missing_opt[:5])}")
+    # r319: KHAI phụ thuộc NGOÀI stdlib của đường NẠP tài liệu. Trước đây không có chỗ nào nói ra:
+    # `requirements.txt` khai "stdlib only" nên máy cài sạch KHÔNG có `pypdf` ⇒ MỌI .pdf bị chặn
+    # (r315), mà người vận hành chỉ biết khi đã đâm vào tường giữa lượt nạp. Tên bắt đầu bằng
+    # "optional" ⇒ báo ĐỎ to nhưng KHÔNG lật rc (đúng nếp `optional rasoat/backfill`): máy không
+    # bao giờ nạp PDF vẫn xanh.
+    _dep = _doc_dep_probe()
+    _thieu_cung = [d for d in _dep if d["bat_buoc"] and not d["co"]]
+    _thieu_mem = [d for d in _dep if not d["bat_buoc"] and not d["co"]]
+    add("optional phụ thuộc nạp tài liệu", not _thieu_cung,
+        "đủ" + (f" (thiếu tuỳ chọn: {', '.join(d['ten'] for d in _thieu_mem)})" if _thieu_mem else "")
+        if not _thieu_cung else " · ".join(f"{d['ten']} THIẾU ⇒ {d['hau_qua']}" for d in _thieu_cung))
     cfg_paths = [Path(a.config)] if a.config else [Path.home()/".tra_luat_config.json", Path("/tmp/tra_luat_config.json")]
     cfg_hit = next((x for x in cfg_paths if x and x.exists()), None)
     env_ok = bool(os.environ.get("TL_WEBAPP") and os.environ.get("TL_TOKEN"))
@@ -1720,6 +1765,48 @@ def _merge_base_entries(profile_hits: list[dict], base_hits: list[dict]) -> list
     return out
 
 
+def _pfr_count(x) -> int:
+    """Đếm một trường có thể là số HOẶC danh sách (`reg_delete` trả cả hai kiểu tuỳ phiên bản GAS)."""
+    if isinstance(x, (list, tuple, set)):
+        return len(x)
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return -1          # KHÔNG đọc được ⇒ -1, để phép so ở dưới fail-closed chứ không coi là 0
+
+
+def _pfr_reg_delete_verdict(resp, requested_ids: list) -> dict:
+    """r289 (PRO-01): READBACK phía CLIENT cho `reg_delete` — biến response thành KẾT QUẢ có kiểm.
+
+    Vì sao không dùng `require_removed='yes'` (chốt phía server) — ĐÃ ĐO, và câu trả lời là KHÔNG:
+    `require_removed='yes'` chỉ xoá dòng có `nlm_status` bắt đầu `removed*` (API_CONTRACT §reg_delete).
+    Nhưng `profile-file-remove` **không hề ghi `nlm_status`** ở bất kỳ đường nào — nên bật `'yes'` sẽ
+    làm lệnh thành VÔ TÁC DỤNG với gần như mọi dòng (rơi hết vào `skipped_live`), tức đổi một lỗi
+    fail-open lấy một lỗi fail-silent. `'no'` giữ nguyên là hard-delete CÓ CHỦ ĐÍCH sau
+    `--apply --confirm yes` (cùng lý lẽ đã ghi ở `source_ops.py:954`).
+
+    Chốt thật nằm ở đây: `ok=true` của response **chưa phải** bằng chứng dòng đã bị gỡ —
+    `skipped_live>0` vẫn có thể đi kèm `ok=true`. Luật:
+      * response phải dương (`ok=true`);
+      * `skipped_live` phải bằng 0 — server từ chối gỡ dòng nào là ta CHƯA xong;
+      * `removed + not_found` phải phủ hết `requested` — `not_found` được chấp nhận vì chạy lại sau một
+        lượt thành công một phần thì dòng đã biến mất, không phải lỗi mới.
+    """
+    _ok, _why = step_result_ok(resp)
+    if not _ok:
+        return {"ok": False, "error": f"REG_DELETE_AM:{_why}", "resp": resp}
+    _want = len(requested_ids)
+    _removed, _nf, _skip = (_pfr_count(resp.get("removed")), _pfr_count(resp.get("not_found")),
+                            _pfr_count(resp.get("skipped_live")))
+    if _skip != 0:
+        return {"ok": False, "error": f"REG_DELETE_CON_SKIPPED_LIVE:{_skip}", "resp": resp}
+    if _removed < 0 or _nf < 0 or (_removed + _nf) < _want:
+        return {"ok": False,
+                "error": f"REG_DELETE_KHONG_PHU_HET:removed={_removed} not_found={_nf} requested={_want}",
+                "resp": resp}
+    return {"ok": True, "removed": _removed, "not_found": _nf, "requested": _want, "resp": resp}
+
+
 def cmd_profile_file_remove(a) -> int:
     profile = getattr(a, "target_profile", None) or getattr(a, "profile", None)
     ids = {x.strip() for x in (getattr(a, "drive_ids", None) or []) if x.strip()}
@@ -1775,37 +1862,91 @@ def cmd_profile_file_remove(a) -> int:
               file=sys.stderr)
         return 2
     load_creds(getattr(a, "config", None), profile)
+    # ── r289 (PRO-01, P1 fail-open PHÁ HUỶ — mục nguy hiểm nhất sổ audit) ────────────────────────────
+    # TRƯỚC: `_dr`/`r` của `nlm source_delete` và `drive trash` CHỈ được ghi nhật ký, KHÔNG kiểm; rồi
+    # `reg_delete` chạy VÔ ĐIỀU KIỆN; rồi `out = {**plan, "ok": True, ...}` GÁN CỨNG và `return 0`.
+    # ⇒ Mọi bước con hỏng vẫn `rc=0`, mà con trỏ registry ĐÃ BỊ THÁO: file Drive/nguồn NLM còn nguyên
+    # nhưng không còn dòng nào tra ra chúng — tài sản MỒ CÔI, và vì rc=0 nên không ai đi tìm.
+    # NAY: Helper 1 (`tl_core/txn.py`) — kết quả từng bước được KIỂM, `reg_delete` bị CHẶN (TxnBlocked)
+    # nếu một thao tác ĐƯỢC YÊU CẦU trước đó hỏng, `ok` được TÍNH, `rc` dẫn xuất, và output kê rõ
+    # ĐÃ GHI ĐƯỢC GÌ RỒI (`txn.wrote`) / CHƯA CHẮC (`txn.uncertain`) để người vận hành biết đi dọn đâu.
+    _t = Txn("profile-file-remove")
+    _want_nlm = bool(getattr(a, "delete_nlm", False))
+    _want_trash = bool(getattr(a, "trash_drive", False))
+    _keep_reg = bool(getattr(a, "keep_registry", False))
     nlm_results = []
     # v1.29.3 (AUDIT B1 #6): journal như profile-delete (NLM delete = forensic; trash = visibility) — cùng pattern.
     _pf_rid = None
-    if getattr(a, "delete_nlm", False) or getattr(a, "trash_drive", False):
-        _pf_rid = _apply_journal_start("profile-file-remove-assets", {"nlm": len(nlm_deletable) if getattr(a, "delete_nlm", False) else 0,
-                                                                      "trash": len(reg_ids) if getattr(a, "trash_drive", False) else 0})
-    if getattr(a, "delete_nlm", False):
+    if _want_nlm or _want_trash:
+        _pf_rid = _apply_journal_start("profile-file-remove-assets", {"nlm": len(nlm_deletable) if _want_nlm else 0,
+                                                                      "trash": len(reg_ids) if _want_trash else 0})
+    _blocked = None
+    if _want_nlm:
         nc = _imp("nlm_cli")
         for sid in nlm_deletable:       # CHỈ nguồn KHÔNG shared
             _journal_append(_pf_rid, {"t": "intent", "op": "nlm_source_delete", "key": sid, "set": {"irreversible": True}})
-            _dr = nc.source_delete(sid)
-            _journal_append(_pf_rid, {"t": "commit", "op": "nlm_source_delete", "key": sid, "ok": bool(_dr.get("ok"))})
+            try:
+                _dr = nc.source_delete(sid)
+            except Exception as e:  # noqa: BLE001 — transport nổ là bước HỎNG, không phải bước vắng mặt
+                _dr = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+            _journal_append(_pf_rid, {"t": "commit", "op": "nlm_source_delete", "key": sid,
+                                      "ok": bool(isinstance(_dr, dict) and _dr.get("ok"))})
+            _t.record(f"nlm_source_delete:{sid}", _dr, mutating=True, wrote={"nlm_source_id": sid})
             nlm_results.append({"source_id": sid, "result": _dr})
+    else:
+        _t.skipped("nlm_source_delete", "KHONG_YEU_CAU")
     g = _gas()
     trash_results = []
-    if getattr(a, "trash_drive", False):
+    if _want_trash:
         for did in reg_ids:
+            # Bước NLM hỏng ⇒ CHẶN ngay tại đây, không trash tiếp: mỗi mutation thừa là một thứ nữa
+            # phải đi dọn tay, trong khi đằng nào lệnh cũng đã hỏng.
+            try:
+                _t.guard(f"drive_trash:{did}")
+            except TxnBlocked as _blk:
+                _blocked = {"blocking_step": _blk.blocking_step, "attempted": _blk.attempted}
+                break
             _journal_append(_pf_rid, {"t": "intent", "op": "drive_trash", "key": did, "set": {}})
             try:
                 r = g.get("trash", fileId=did, confirm="yes")
             except Exception as e:  # noqa: BLE001
                 r = {"ok": False, "error": str(e)}
-            _journal_append(_pf_rid, {"t": "commit", "op": "drive_trash", "key": did, "ok": bool(r.get("ok"))})
+            _journal_append(_pf_rid, {"t": "commit", "op": "drive_trash", "key": did,
+                                      "ok": bool(isinstance(r, dict) and r.get("ok"))})
+            _t.record(f"drive_trash:{did}", r, mutating=True, wrote={"drive_id": did})
             trash_results.append({"drive_id": did, "result": r})
+    else:
+        _t.skipped("drive_trash", "KHONG_YEU_CAU")
     reg_result = None
-    if not getattr(a, "keep_registry", False):
-        reg_result = g.post("reg_delete", drive_ids=json.dumps(reg_ids), confirm="yes", require_removed="no")
-    out = {**plan, "ok": True, "nlm_deletes": nlm_results, "nlm_blocked_shared_source_id": nlm_blocked_shared,
-           "drive_trash": trash_results, "reg_delete": reg_result}
-    print(_json_dumps(out, deterministic=_deterministic_enabled(a)))
-    return 0
+    if _keep_reg:
+        _t.skipped("reg_delete", "KEEP_REGISTRY")
+    else:
+        # CỔNG QUAN TRỌNG NHẤT của mục này: con trỏ registry chỉ được tháo khi MỌI thao tác ĐƯỢC YÊU CẦU
+        # trước đó đã thành công. Hỏng ⇒ `TxnBlocked` ⇒ registry CÒN NGUYÊN ⇒ vẫn còn đường tra ra tài sản.
+        try:
+            _t.guard("reg_delete")
+        except TxnBlocked as _blk:
+            _blocked = _blocked or {"blocking_step": _blk.blocking_step, "attempted": _blk.attempted}
+        if _blocked is None:
+            try:
+                reg_result = g.post("reg_delete", drive_ids=json.dumps(reg_ids), confirm="yes", require_removed="no")
+            except Exception as e:  # noqa: BLE001
+                reg_result = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+            _t.record("reg_delete", _pfr_reg_delete_verdict(reg_result, reg_ids),
+                      mutating=True, wrote={"registry_drive_ids": reg_ids})
+    if not any(s.get("required") for s in _t.steps):
+        # Không thao tác nào ĐƯỢC YÊU CẦU (vd `--keep-registry` mà không `--delete-nlm`/`--trash-drive`).
+        # Trước đây in `ok:true, rc=0` cho một lệnh KHÔNG LÀM GÌ — nói dối theo hướng vô hại nhưng vẫn là
+        # nói dối. `ok` được TÍNH thì câu trả lời đúng là: chưa có gì được chứng minh.
+        _t.record("khong_co_thao_tac", {"ok": False, "error": "KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU"})
+    out = _t.conclude(**{**plan, "nlm_deletes": nlm_results,
+                         "nlm_blocked_shared_source_id": nlm_blocked_shared,
+                         "drive_trash": trash_results, "reg_delete": reg_result})
+    if _blocked:
+        out["blocked"] = _blocked
+    _rc = _t.rc()
+    print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=(sys.stderr if _rc else sys.stdout))
+    return _rc
 
 
 def cmd_registry_map(a) -> int:

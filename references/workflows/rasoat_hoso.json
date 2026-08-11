@@ -27,7 +27,7 @@
     "A2 nhan vai: `state-get` doc _meta/rasoat_state.json tu Drive -> ghi session_claim (id + gio + con tro tien do) -> `state-put --expect-claim <id cu>` (r213: KHONG can nguoi duyet; chot chan = danh sach ten dong + folder _meta bat buoc + expect-claim)",
     "A3 lay don vi pending uu tien cao nhat (SAU truoc, uu tien NLM-ready; nguon chua vao NLM -> phat hien mang muc_chac_chan=cho_verify_nlm)",
     "A4 ra 3 tang (T1 cache tat dinh -> T2 quet tho -> T3 dao sau) + frontier-expand; NLM chet -> che do khong-NLM (quet cache truc tiep)",
-    "A5 VERIFY tung phat hien (nlm_qa verify; nguyen van CHI tu cache/raw); fail verify -> KHONG ghi",
+    "A5 VERIFY tung phat hien (tl nlm-query --strict-scope; nguyen van CHI tu cache/raw); fail verify -> KHONG ghi",
     "A6 ghi master/<unit>.json (kem anchor + muc_chac_chan) local --out-dir NGOAI cay skill -> danh done -> `state-put` cap nhat state SAU MOI don vi (khong don cuoi phien)",
     "A7 ung vien moi -> Q-INGEST (lan staged, gom LO duyet 1 lan); nguon flip xong -> Q-NLM worker tuan tu nap sau",
     "A8 dong goi CHU DONG: nguong context 40% mem / 60% cung do tai RANH GIOI don vi (chat: max_units_per_session=6) -> checkpoint + note ban giao + NHA claim"
@@ -44,7 +44,8 @@
     "context cham nguong cung 60% (do tai ranh gioi don vi) -> dong goi",
     "moi don vi con lai deu blocked boi CUNG mot loi (chan dung that) -> bao nguoi 1 dong",
     "can ngan sach NLM (mac dinh 60 call/ho so) hoac quota TVPL bao het that",
-    "max-iter fail-safe cua rasoat-loop"
+    "max-iter fail-safe cua rasoat-loop",
+    "DONG HO SO (khac dong goi phien): du 6 ve §7.1 RASOAT_PLAN_SCHEMA -> vong_doi.trang_thai=da_dong; thieu ve nao -> da_dong_co_gioi_han + khai gioi_han_da_biet (CAM dong im lang)"
   ],
   "rules": [
     "phien chinh (dang cam session_claim) la BEN GHI DUY NHAT; agent ra read-only; worker Q-NLM chi goi NLM, tra JSON ve phien chinh",
@@ -53,7 +54,8 @@
     "state bien dong NAM NGOAI cay skill (package_hash) - chi MAU rong (templates/) nam trong cay",
     "khong /compact giua phien ra - ban giao qua file trung thuc hon tom tat co mat mat",
     "degrade-and-continue: loi co duong vong = workaround (don vi van den done), khong co = blocker (don vi blocked, KHONG gia done) - ca hai deu ghi so rasoat_bugs.md du 8 truong va VONG VAN TIEN",
-    "sua nong CHI khi chan dung toan cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE, loi le thi gom va sau luot ra"
+    "sua nong CHI khi chan dung toan cuc; va o canonical (test rXX_ + deploy tay) - CAM va tai LIVE, loi le thi gom va sau luot ra",
+    "Loop C chi chay khi vong_doi.anchor_con_hieu_luc=true; false -> BO QUA ho so va NOI RA ly do (anchor chua di tru -> STALE gia 100%)"
   ],
   "idempotency_contract": {
     "unit_of_progress": "1 don vi ra = 1 file master/<unit>.json + 1 lan cap nhat state",

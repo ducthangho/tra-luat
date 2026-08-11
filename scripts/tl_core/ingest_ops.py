@@ -965,7 +965,15 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
     if q in ("digital", "ocr"):
         return q
     ext = Path(path or "").suffix.lower()
-    return "ocr" if ext in {".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"} else "digital"
+    # F2-A (ADR-0018), khuôn r251: tập đuôi được ĐẶT TÊN trong `ingest_contract` thay vì nằm trần
+    # ở đây, để cổng EOL (`wp49_eol_policy_index_blobs`) neo vào ĐÚNG hợp đồng, không vào một bản
+    # COPY sẽ trôi lệch. Import TRONG HÀM là bắt buộc, không phải thói quen: `bind` re-home
+    # `__globals__` của hàm này về namespace tl (bẫy I11), nên hằng module-level của ingest_ops
+    # KHÔNG tra được — đã đo: `_OCR_SOURCE_EXTS` mức module ném NameError, còn
+    # `_PDF_BROKEN_FONT_WARN` chỉ sống vì tl.py:1737 re-export tường minh. Import cục bộ tạo tên
+    # LOCAL nên không đụng globals; đây cũng là khuôn ingest_ops đã dùng ở 3 chỗ (671/1603/1758).
+    from tl_core.ingest_contract import OCR_SOURCE_EXTS
+    return "ocr" if ext in OCR_SOURCE_EXTS else "digital"
 
 
 _PDF_BROKEN_FONT_WARN = ("PDF_TEXT_LAYER_BROKEN_FONT: text-layer mất dấu (density<0.005) — Google-convert "
@@ -1397,7 +1405,11 @@ def _dieu_head_marks(text: str) -> list:
     """Danh sách match TIÊU ĐỀ Điều. Không thấy tiêu đề đúng thể thức → lùi về luật cũ, để văn bản
     kiểu 'Điều 5 Quy định chung' (tên cùng dòng, không dấu) KHÔNG tệ đi so với trước."""
     marks = list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)[a-zđ]?[ \t]*(?:[.:]|$)", text or ""))
-    return marks if marks else list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)\b", text or ""))
+    # r296 (P16-F15, cùng họ): nhánh CHÍNH đã biết hậu tố chữ từ r229, nhưng nhánh LÙI thì không —
+    # đúng lớp "vá một reader, sót reader còn lại". Văn bản thể thức không-dấu-chấm mà có Điều chèn
+    # thêm ("Điều 5a Quy định…") mất ranh giới ⇒ `_split_by_dieu_chunks` gộp 5a vào thân Điều 5.
+    # Hậu tố nằm NGOÀI group(1) y như nhánh chính, để `int(m.group(1))` ở hạ nguồn giữ nguyên hợp đồng.
+    return marks if marks else list(re.finditer(r"(?mi)^[ \t]*Điều\s+(\d+)[a-zđ]?\b", text or ""))
 
 
 def _split_by_dieu_chunks(text: str, max_chars: int = 100000) -> list[dict]:
@@ -1503,6 +1515,46 @@ def _ingest_commit_call(g, okw: dict) -> dict:
                      if not d), "readback")
         r.setdefault("step", f"ingest_commit:{_dut}")
     return r
+
+
+# r291 (ING-03, P1 — Slice I4): marker BẮT BUỘC của `ingest_commit`. Lấy ĐÚNG theo định nghĩa server
+# (`doIngestCommit_`, references/Code.2.21.2p.gs:846-881): ba marker LUÔN có mặt dạng bool (khởi tạo
+# false), `rename_done` tự true khi không yêu cầu đổi tên, `upsert_done` tự true khi không yêu cầu ghi
+# registry. Server tự tính `out.ok` từ đúng bộ này — client chỉ việc ĐỌC, thay vì suy ra thành công từ
+# sự CÓ MẶT của `fileId`.
+#
+# `file` CỐ Ý KHÔNG nằm trong bộ này, dù kế hoạch ghi "readback row/file" — đã đo: cả hai stage READBACK
+# (`_pi_stage_readback` :1900-1916 và `_il_stage_readback`) đều rẽ nhánh `if _via_commit and org.get("file")`
+# → dựng readback từ response, NGƯỢC LẠI gọi `_verify_convert_readback` (thêm call Drive, **cùng bộ phép
+# kiểm**), rồi `if not rb_convert.get("ok"): return rc=2`. Nghĩa là `file` ĐÃ fail-closed ở ngay stage sau,
+# qua một đường dự phòng ĐANG HOẠT ĐỘNG. Đưa `file` vào cổng này là XOÁ đường dự phòng đó — mở rộng phạm
+# vi và thêm rủi ro, trong khi lỗ ING-03 (`ok:false` + `upsert_done:false` mà có `fileId`) đã bịt kín.
+# `row` thì NGƯỢC LẠI: không có đường nào khác kiểm dòng registry ở stage này — và "GDoc tồn tại nhưng
+# THIẾU dòng registry" chính là thiệt hại §6.2 Pha 3.5 liệt cho ING-03. Nên `row` BẮT BUỘC khi register.
+_INGEST_COMMIT_MARKERS = ("organize_done", "rename_done", "upsert_done")
+
+
+def _ingest_commit_verdict(org, okw=None) -> dict:
+    """r291 (ING-03): kết luận `ingest_commit` bằng KẾT QUẢ, không bằng HÌNH DẠNG.
+
+    TRƯỚC: cả hai call site gate bằng `org.get("fileId")` ⇒ response `ok:false` + `upsert_done:false`
+    mà có `fileId` **vẫn đi tiếp** — commit MỘT PHẦN được nhận là thành công, GDoc tồn tại mà thiếu dòng
+    registry (registry lệch Drive, và không ai biết). `grep upsert_done` toàn kho ra ĐÚNG 1 hit và hit
+    đó chỉ dùng để **đặt tên bước lỗi**, không gate gì.
+
+    `row` chỉ bắt buộc khi call CÓ yêu cầu ghi registry (`register='true'`) — đúng luật server:
+    `out.ok = organize_done && rename_done && upsert_done && file && (register!=='true' || row)`.
+    Đòi `row` cả khi không register là đỏ OAN đường hợp lệ. Vì sao `file` không vào bộ marker: xem
+    chú thích ở `_INGEST_COMMIT_MARKERS`.
+    """
+    _need = list(_INGEST_COMMIT_MARKERS)
+    if str((okw or {}).get("register", "")).strip().lower() == "true":
+        _need.append("row")
+    _ok, _why = step_result_ok(org, require_keys=_need)
+    if _ok:
+        return {"ok": True, "markers_checked": _need}
+    return {"ok": False, "error": _why, "markers_checked": _need,
+            "step": (org.get("step") if isinstance(org, dict) else "") or "ingest_commit"}
 
 
 def _ingest_commit_readback(resp: dict, *, expected_name: str, src_id: str, expected_src_name: str,
@@ -1834,10 +1886,18 @@ def _pi_stage_write(ctx):
             return {"rc": 2}
         org = _ingest_commit_call(g, okw)
     gdoc = org.get("fileId")
-    if not gdoc:
+    # r291 (ING-03) — call site 1/2 (profile-ingest). `bool(fileId)` KHÔNG phải bằng chứng commit xong:
+    # `doIngestCommit_` đặt `out.fileId` ngay sau organize, TRƯỚC register/readback ⇒ `ok:false` +
+    # `upsert_done:false` mà vẫn có `fileId`. Nay đòi ĐỦ marker theo đúng luật server.
+    # Nhánh sheet (`_is_sheet`) KHÔNG đi qua `ingest_commit` ⇒ giữ nguyên phép kiểm `fileId` cũ;
+    # `okw` cũng chỉ tồn tại ở nhánh non-sheet nên biểu thức điều kiện phải LƯỜI, đừng đảo thứ tự.
+    _icv = _ingest_commit_verdict(org, okw) if _via_commit else {"ok": bool(gdoc)}
+    if not (gdoc and _icv.get("ok")):
         print(json.dumps({"ok": False,
                           "step": ("copy_convert_sheets" if _is_sheet else
-                                   (org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                                   (_icv.get("step") or org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                          **({"error": _icv["error"], "markers_checked": _icv.get("markers_checked")}
+                             if _via_commit and not _icv.get("ok") else {}),
                           "detail": org},
                          ensure_ascii=False, indent=2), file=sys.stderr)
         return {"rc": 2}
@@ -2233,6 +2293,19 @@ def _resume_identity_gate(*, apply: bool, journal: str, drive_id: str, name: str
             return {"error": "RESUME_IDENTITY_MISMATCH", "journal_drive_id": _jd,
                     "registry_drive_id": str(canon_drive_id).strip(),
                     "note": "Fingerprint journal không còn khớp dòng registry — nguồn đã đổi; replan."}
+        # r320 (ING-04 · ADR-0011/D5): `if _jd and …` ở trên BỎ QUA so sánh khi journal ghi
+        # `drive_id=""` — mà đó chính là ca sổ audit nêu. Đo được: journal cũ (`drive_id=""`, có
+        # identity_hash) + registry ĐÃ trỏ sang GDoc HOÀN TOÀN KHÁC ⇒ cổng trả None = CẤP QUYỀN GHI.
+        # Journal rỗng drive_id là "chưa chứng minh được nguồn", KHÔNG phải "đã chứng minh là khớp";
+        # coi vắng-mặt là hợp-lệ đúng là mẫu lỗi A của cả sổ audit.
+        # …nhưng CHỈ khi người gọi cũng KHÔNG khai `--drive-id`: khai rồi thì cổng ở trên đã đối chiếu
+        # với `canon_drive_id` (lệch ⇒ RESUME_IDENTITY_MISMATCH), tức nguồn ĐÃ được chứng minh bằng
+        # đường khác. Bỏ vế này là siết quá tay — chính phản chứng của ca test bắt được lượt đầu.
+        if not _jd and not str(drive_id or "").strip() and str(canon_drive_id or "").strip():
+            return {"error": "RESUME_JOURNAL_NO_DRIVE_ID", "registry_drive_id": str(canon_drive_id).strip(),
+                    "note": "Journal không ghi drive_id nên KHÔNG chứng minh được nối đúng nguồn, trong "
+                            "khi registry đã có dòng canonical. Dùng `--drive-id <id>` để khai tường minh "
+                            "(cổng sẽ đối chiếu), hoặc replan bằng profile-ingest thường."}
     return None
 
 
@@ -2604,8 +2677,11 @@ def _il_stage_plan(ctx):
     if not (f and Path(f).exists()):
         print(f"[tl] ingest-local: không thấy file {f} (dùng <file> local HOẶC --drive-id <id> đã ở Drive)",
               file=sys.stderr); return {"rc": 2}
+    # r320 (ING-06): đọc TỪ hợp đồng dùng chung — tập literal ở đây từng là bản khai THỨ HAI, và ZIP
+    # planner đã trôi lệch khỏi nó (thừa `.txt`/`.md`).
+    from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _IL_EXTS
     _source_check = validate_source_file(
-        f, allowed_exts={".docx", ".doc", ".pdf", ".rtf", ".odt"}, direct_upload=(not bool(_from_drive))
+        f, allowed_exts=_IL_EXTS, direct_upload=(not bool(_from_drive))
     )
     if not _source_check.get("ok"):
         print(_json_dumps({"ok": False, "step": "source_validate", **_source_check},
@@ -2802,6 +2878,35 @@ def _il_stage_plan(ctx):
             print(f"[tl] ⚠ --replace-sohieu: {len(_dups_f1)} dòng cũ CÙNG số hiệu (lỏng-năm) sẽ SONG SONG "
                   f"tồn tại tới khi hạ bản — làm theo plan.replace_sohieu.post_steps SAU khi bản mới verify.",
                   file=sys.stderr)
+    # v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): cổng F1 ở trên chỉ chạy khi `if sohieu and …`.
+    # Đo thật trên 1319 dòng: 31 cụm / 66 dòng CÙNG `src_id` mà `drive_id` đôi một KHÁC — tức MỘT tệp
+    # nguồn đã ingest ≥2 lần, mỗi lần đẻ một GDoc + một dòng mới; 26/31 cụm có `sohieu` RỖNG nên cổng F1
+    # KHÔNG bao giờ chạy cho chúng. `--drive-id` là đường dễ dính nhất: người dùng trỏ lại đúng tệp nguồn
+    # đã nạp, `_resolve_drive_id_source` vui vẻ convert tiếp, và cổng duy nhất lại đứng sau `if sohieu`.
+    # Neo theo `src_id` (tệp NGUỒN) chứ không theo `drive_id` (GDoc kết quả — mỗi lần convert một id mới).
+    if _from_drive and not _prev and not getattr(a, "skip_live_check", False):
+        try:
+            _live_i9 = _manifest_entries(refresh=False)
+        except (SystemExit, Exception):  # noqa: BLE001 — cổng F1 ở trên đã fail-closed cho ca đọc hỏng
+            _live_i9 = []
+        _same_src = [e for e in _live_i9
+                     if str(e.get("src_id") or "").strip() == _from_drive
+                     and _entry_is_corpus_effective(e)]
+        if _same_src and not getattr(a, "replace_sohieu", False):
+            print(json.dumps({"ok": False, "step": "src_id_dedup_live", "aborted": True,
+                              "reason": "SOURCE_ALREADY_INGESTED", "src_id": _from_drive,
+                              "rows": [{"drive_id": _entry_drive_id(e), "name": _entry_name(e)[:80],
+                                        "sohieu": _entry_sohieu(e) or "", "cat": _entry_cat(e),
+                                        "row_kind": _entry_row_kind(e) or "",
+                                        "corpus": str(e.get("corpus") or "")} for e in _same_src[:10]],
+                              "note": "Tệp NGUỒN này đã được ingest trước đó — nạp tiếp sẽ đẻ thêm GDoc + dòng "
+                                      "registry TRÙNG (cổng số hiệu KHÔNG bắt được khi sohieu rỗng). Soi cụm: "
+                                      "`tl hygiene scan --json` → duplicates_by_src_id. Nạp lại CÓ CHỦ ĐÍCH: "
+                                      "--replace-sohieu (hạ bản cũ sau khi bản mới verify); tiếp tục dở dang: "
+                                      "--resume; ép bỏ (tự chịu rủi ro trùng): --skip-live-check."},
+                             ensure_ascii=False, indent=2), file=sys.stderr)
+            return {"rc": 2}
+
     if not getattr(a, "apply", False):
         plan["mode"] = "DRY"
         plan["note"] = (("--apply để chạy: dùng file Drive có sẵn (bỏ upload)→organize(convert/cat/stamp/register)"
@@ -3079,10 +3184,16 @@ def _il_stage_write(ctx):
         org = _ingest_commit_call(g, okw)
         gdoc = org.get("fileId")
         src_docx = org.get("srcId")
-        _step_ok("organize", fid, bool(gdoc), gdoc=gdoc, srcId=src_docx)
-        if not gdoc:
+        # r291 (ING-03) — call site 2/2 (ingest-local). CÙNG MỘT LỖ, HAI CHỖ: sửa một chỗ là để lại lỗ
+        # y hệt ở chỗ kia. Journal cũng phải ghi kết luận THẬT, không phải `bool(gdoc)` — nếu không thì
+        # `--resume` sau này đọc journal và tưởng stage organize đã xong.
+        _icv = _ingest_commit_verdict(org, okw)
+        _step_ok("organize", fid, bool(gdoc and _icv.get("ok")), gdoc=gdoc, srcId=src_docx)
+        if not (gdoc and _icv.get("ok")):
             print(json.dumps({"ok": False,
-                              "step": ((org.get("step") or "ingest_commit") if _via_commit else "organize"),
+                              "step": (_icv.get("step") or org.get("step") or "ingest_commit"),
+                              **({"error": _icv["error"], "markers_checked": _icv.get("markers_checked")}
+                                 if not _icv.get("ok") else {}),
                               "journal": run_id, "detail": org}, ensure_ascii=False), file=sys.stderr)
             return {"rc": 2}
     return {"gdoc": gdoc, "src_docx": src_docx, "org": org, "_via_commit": _via_commit,

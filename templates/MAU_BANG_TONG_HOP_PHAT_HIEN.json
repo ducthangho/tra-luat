@@ -1,7 +1,7 @@
 {
   "_schema": "mau_bang_tong_hop_phat_hien.v1",
   "_mo_ta": "MẪU bảng master phát hiện rà soát (bất biến, trong gói). Bên đọc DUY NHẤT: scripts/rasoat_phuluc.py — load_master() nhận 1 file JSON hoặc THƯ MỤC nhiều file *.json (gộp, append-only ở mức thư mục); field lạ (bắt đầu _) bị bỏ qua. THỰC THỂ biến động của từng hồ sơ ghi NGOÀI cây skill (xem references/RASOAT_PLAN_SCHEMA.md).",
-  "_canh_bao_hinh_thuc": "route() trong rasoat_phuluc.py khớp chuỗi CÓ DẤU cố định — giá trị sai chính tả/không dấu (vd 'sua doi bo sung', 'ban hanh moi') rơi ÂM THẦM về phụ lục 04. CHỈ dùng giá trị trong _vocab_hinh_thuc; test r209 khoá bộ từ vựng này.",
+  "_canh_bao_hinh_thuc": "route() trong rasoat_phuluc.py khớp chuỗi CÓ DẤU cố định. Từ v1.36.45 (r311/DOC-01) giá trị RỖNG hoặc ngoài từ vựng (vd 'sua doi bo sung', 'ban hanh moi') FAIL-CLOSED — rasoat_phuluc.py dừng, nêu đích danh dòng sai, KHÔNG dựng phụ lục; trước đó chúng rơi ÂM THẦM về phụ lục 04. CHỈ dùng giá trị trong _vocab_hinh_thuc; test r209 + r311 khoá bộ từ vựng này.",
   "_vocab_hinh_thuc": {
     "sửa đổi, bổ sung": "04",
     "thay thế": "04",
@@ -43,7 +43,7 @@
       "muc_chac_chan": "chac_chan",
       "anchor": {
         "doc_deps": [
-          {"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000", "dieu": ["54"]}
+          {"so_hieu": "18-2025-VBHN-VPQH", "text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000", "locator": "cache:18-2025-VBHN-VPQH#dieu54", "dieu": ["54"]}
         ],
         "cite": "cache:18-2025-VBHN-VPQH#dieu54",
         "skill_version": "1.35.45",

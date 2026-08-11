@@ -47,6 +47,29 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false   # native rc KHÔNG throw — ta tự kiểm $LASTEXITCODE
 
+# ── v1.36.60 (r328) ÉP UTF-8 CẢ HAI CHIỀU VỚI TIẾN TRÌNH CON — CẮN MỌI ĐƯỜNG DẪN NGOÀI ASCII ──
+# BỆNH (đo 03-08-2026 trên máy chuẩn): python ghi JSON **UTF-8**, nhưng PowerShell GIẢI stdout của
+# lệnh native bằng `[Console]::OutputEncoding` — trên máy này là **windows-1258** (ANSI codepage VN),
+# KHÔNG phải UTF-8. Bước 2 đọc `.out` ra `"out": "D:\\Quá»‘c há»™i\\…"` (mojibake ghi THẲNG ra đĩa)
+# ⇒ `Test-Path $out` trả false cho tệp CÓ THẬT ⇒ chết "[FAIL] release-bundle báo ok nhưng KHÔNG có
+# zip thật" + exit 2, dù zip đã build đúng (file_count 177, reproducible true, sha khớp cả hai lượt).
+#
+# ★ ĐO ĐƯỢC, ĐỪNG SỬA NỬA VỜI: chỉ thêm `-Encoding utf8` ở chỗ ĐỌC **KHÔNG cứu được** — lúc đó
+#   mojibake đã đóng băng từ khâu GIẢI, tệp trên đĩa đã sai. Bảng đo (cùng đầu vào, ambient cp1258):
+#     chỉ `-Encoding utf8` khi đọc → EQ=False · Test-Path=False   ← VÔ TÁC DỤNG
+#     chỉ `[Console]::OutputEncoding=UTF8` → EQ=True · Test-Path=True   ← VẾ CHỊU LỰC
+#   Ghim cả hai chiều để không phụ thuộc mặc định theo phiên bản PowerShell.
+# ★ Vì sao `deploy-package.cmd` che mất bệnh: nó `chcp 65001` TRƯỚC khi gọi pwsh. Đường CLAUDE.md
+#   dạy (`.\scripts\deploy-package.ps1 -Pull -Push` gõ thẳng trong pwsh) KHÔNG qua .cmd ⇒ dính.
+$Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+try { [Console]::OutputEncoding = $Utf8NoBom } catch { }   # chiều ĐỌC: giải stdout con bằng UTF-8
+$OutputEncoding = $Utf8NoBom                               # chiều GHI: dữ liệu ta bơm vào stdin con
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'    # `*> tệp` dùng Out-File bên dưới
+# Bơm UTF-8 xuống script con KHÔNG tự cứng hoá (pkg_secret_scan.py, gen_instructions.py…). tl.py tự
+# lo (tl.py:86/94) nhưng ta gọi THẲNG nhiều script khác; CI cũng khai đúng hai biến này.
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
+
 # ── Xác định GỐC REPO, và FAIL RÕ RÀNG nếu không tìm được ──
 # Mặc định script nằm ở <repo>\scripts\ nên gốc repo = lên HAI cấp. Nhưng nếu ai copy script ra chỗ
 # khác (vd D:\Quốc hội\) thì "lên hai cấp" ra `D:\` và bước 0 chết với thông báo vô nghĩa
@@ -110,9 +133,9 @@ function Invoke-Py {
 
 # ═════════════════ 0. VERSION khớp 3 chỗ · core.abbrev · không tụt sau master ═════════════════
 Say '0. Tiền kiểm'
-$VER  = (Get-Content (Join-Path $Root 'VERSION') -Raw).Trim()
-$V_TL = ([regex]::Match((Get-Content (Join-Path $Root 'scripts/tl.py') -Raw), '(?m)^VERSION = "([^"]+)"')).Groups[1].Value
-$V_SK = ([regex]::Match((Get-Content (Join-Path $Root 'SKILL.md') -Raw), 'LÕI VẬN HÀNH \(v([0-9.]+) — KERNEL\)')).Groups[1].Value
+$VER  = (Get-Content (Join-Path $Root 'VERSION') -Raw -Encoding utf8).Trim()
+$V_TL = ([regex]::Match((Get-Content (Join-Path $Root 'scripts/tl.py') -Raw -Encoding utf8), '(?m)^VERSION = "([^"]+)"')).Groups[1].Value
+$V_SK = ([regex]::Match((Get-Content (Join-Path $Root 'SKILL.md') -Raw -Encoding utf8), 'LÕI VẬN HÀNH \(v([0-9.]+) — KERNEL\)')).Groups[1].Value
 Write-Host "  VERSION=$VER · tl.py=$V_TL · SKILL.md=$V_SK"
 if ($VER -ne $V_TL -or $VER -ne $V_SK) {
   Bad '3 chỗ VERSION LỆCH — sửa cho khớp rồi chạy lại (selftest có guard skill_md_version_matches_VERSION).'
@@ -142,7 +165,7 @@ if ($LASTEXITCODE -eq 0 -and $behind -and [int]$behind -gt 0) {
       exit 1
     }
     Warn "đã fast-forward $behind commit từ origin/master — ĐỌC LẠI VERSION"
-    $VER = (Get-Content (Join-Path $Root 'VERSION') -Raw).Trim()
+    $VER = (Get-Content (Join-Path $Root 'VERSION') -Raw -Encoding utf8).Trim()
     Ok "VERSION sau khi cập nhật: v$VER"
   } else {
     Bad "cây TỤT SAU origin/master $behind commit — build bây giờ là đóng gói bản cũ."
@@ -169,7 +192,7 @@ if (-not $NoTest) {
     $f = Join-Path $State "$n.out"
     $rc = Invoke-Py -Argv $gates[$n] -OutFile $f
     # -Raw trên tệp RỖNG trả $null ⇒ [regex]::Match ném "Value cannot be null" (đã sập lượt đầu).
-    $txt = if (Test-Path $f) { [string](Get-Content $f -Raw) } else { '' }
+    $txt = if (Test-Path $f) { [string](Get-Content $f -Raw -Encoding utf8) } else { '' }
     if ($null -eq $txt) { $txt = '' }
     $pass = $false; $extra = ''
     if ($n -in @('selftest', 'gen_inst')) {
@@ -230,7 +253,7 @@ function Get-BundleOut {
   $f = Join-Path $State "bundle$Tag.out"
   $rc = Invoke-Py -Argv @('scripts/tl.py', 'release-bundle', '--out', $Want, '--json') -OutFile $f
   if ($rc -ne 0) { Bad "release-bundle lỗi (rc=$rc) — soi $f"; exit 2 }
-  try { $out = (Get-Content $f -Raw | ConvertFrom-Json).out } catch { Bad "không parse được output release-bundle — soi $f"; exit 2 }
+  try { $out = (Get-Content $f -Raw -Encoding utf8 | ConvertFrom-Json).out } catch { Bad "không parse được output release-bundle — soi $f"; exit 2 }
   if (-not $out -or -not (Test-Path $out) -or (Get-Item -Force $out).Length -eq 0) {
     Bad "release-bundle báo ok nhưng KHÔNG có zip thật: '$out' — soi $f"; exit 2
   }
@@ -253,7 +276,7 @@ try {
   $top = (Get-ChildItem -Force $tmp | Select-Object -First 1).Name
   $pkg = Join-Path $tmp $top
 
-  $zver = (Get-Content (Join-Path $pkg 'VERSION') -Raw).Trim()
+  $zver = (Get-Content (Join-Path $pkg 'VERSION') -Raw -Encoding utf8).Trim()
   if ($zver -ne $VER) { Bad "VERSION trong gói ($zver) ≠ repo ($VER)"; exit 2 }
   Ok "VERSION trong gói = $zver"
 
@@ -291,7 +314,7 @@ try {
     Push-Location $pkg
     try { & $PY @PYARGS 'scripts/tl.py' 'release-verify' 'RELEASE_MANIFEST.json' '--strict' '--json' *> $f }
     finally { Pop-Location }
-    if ((Get-Content $f -Raw) -match '"ok":\s*true') { Ok 'release-verify TRONG gói: ok' }
+    if ((Get-Content $f -Raw -Encoding utf8) -match '"ok":\s*true') { Ok 'release-verify TRONG gói: ok' }
     else { Bad "release-verify TRONG gói ĐỎ — soi $f"; exit 2 }
   } else { Warn 'gói không có RELEASE_MANIFEST.json — bỏ qua verify trong gói' }
 
@@ -317,7 +340,9 @@ if ($ForceOlder) { & $guard -Version $VER -ForceOlder } else { & $guard -Version
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & $PY @PYARGS 'scripts/tl.py' 'drive-push' $ZIP '--rename-to-file'
-if ($LASTEXITCODE -ne 0) { Bad 'drive-push lỗi (cần `gws auth login` có quyền GHI Drive)'; exit 3 }
+# r330 — thông điệp GIỮ PARITY với deploy-package.sh (cùng câu, không ký tự nháy nào): timeout ≠ mất
+# quyền. Bản ps1 KHÔNG dính bẫy thay-thế-lệnh của bash (nháy ĐƠN PowerShell coi backtick là thường).
+if ($LASTEXITCODE -ne 0) { Bad 'drive-push lỗi — nếu dòng lỗi ngay trên có chữ timeout thì KHÔNG phải mất quyền: ĐỪNG đi gws auth login, hãy chạy lại với TL_GWS_WRITE_TIMEOUT=900 (hoặc TL_GWS_TIMEOUT=900). Chỉ lỗi quyền thật mới cần gws auth login có quyền GHI Drive.'; exit 3 }
 Ok 'đã đẩy'
 
 # ═════════════════ 5. Verify SAU đẩy — byte-match ═════════════════
@@ -334,7 +359,7 @@ $dtmp = Join-Path ([IO.Path]::GetTempPath()) ("tlver_" + [Guid]::NewGuid().ToStr
 try {
   Expand-Archive -Path $dl -DestinationPath $dtmp -Force
   $dTop = (Get-ChildItem -Force $dtmp | Select-Object -First 1).Name
-  $dver = (Get-Content (Join-Path $dtmp "$dTop/VERSION") -Raw).Trim()
+  $dver = (Get-Content (Join-Path $dtmp "$dTop/VERSION") -Raw -Encoding utf8).Trim()
   if ($dver -ne $VER) { Bad "VERSION trên Drive ($dver) ≠ $VER"; exit 3 }
   Ok "VERSION trên Drive = $dver"
 } finally {

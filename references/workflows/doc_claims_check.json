@@ -40,7 +40,7 @@
     "L1 đường dẫn trong backtick · L3 link markdown tương đối (resolve từ vị trí tài liệu)",
     "L4 (r220) giàn giáo nháp {{...}}/TODO/TBD/FIXME/XXX ngoài fence+span; XXX kề '-' = ký pháp số hiệu, im",
     "L2 commit SHA qua git cat-file cục bộ · L7 con trỏ <file>.py:<dòng>",
-    "L5 version v1.x · L6 số hiệu đợt rNNN, tra CHANGELOG.md + references/changelog_archive/*.md",
+    "L5 version v1.x · L6 số hiệu đợt rNNN, tra CHANGELOG.md + kho lưu trữ changelog (dev-only, NGOÀI gói; vắng thì chỉ tra CHANGELOG.md)",
     "L8 (r219) tên lệnh `tl <cmd>` trong span backtick, tra references/golden/parser_surface.json",
     "L9 (r219) tài liệu mồ côi — chạy MỘT LẦN cuối lượt, chỉ khi quét đủ rộng (SKILL.md + references/)",
     "xếp cờ theo (file, dòng, lớp, trích dẫn, lý do) rồi in JSON tất định"

@@ -18,6 +18,26 @@ PLAN_SCHEMA = "ingest_plan.v2"
 MAX_DIRECT_UPLOAD_BYTES = 35 * 1024 * 1024
 _CONFIRM_VALUE = "yes"
 
+# r320 (ING-06): NGUỒN SỰ THẬT DUY NHẤT cho "đuôi nạp được". Trước đây tập này bị khai HAI LẦN, lệch
+# nhau: ZIP planner (`zip_ingest._ALLOWED_INGEST_EXTS`) nhận thêm `.txt`/`.md`, còn child `ingest-local`
+# (`_il_stage_plan` → `validate_source_file`) từ chối đúng hai đuôi đó bằng `UNSUPPORTED_EXTENSION`.
+# Hệ quả: planner hứa một kế hoạch mà child CHẮC CHẮN không thực hiện được — member vào plan rồi chết
+# ở bước sau, đúng lớp "nguồn sự thật nhân đôi" của sổ audit.
+#
+# Chọn THU planner về đúng năng lực child, KHÔNG nới child ra: nới nghĩa là cho phép upload `.txt`/`.md`
+# rồi convert — đó là quyết định TÍNH NĂNG (đổi thứ được ghi vào corpus), không phải sửa lỗi lệch sổ.
+# Muốn mở thì mở tường minh ở đây, một chỗ, và cả hai phía nhận cùng lúc.
+INGEST_LOCAL_EXTS = frozenset({".doc", ".docx", ".pdf", ".rtf", ".odt"})
+
+# F2-A (ADR-0018), khuôn r251: đuôi nguồn đi đường OCR (ảnh + PDF scan). Trước đây là set trần
+# trong thân `ingest_ops._profile_source_quality`; ĐẶT TÊN ở đây — cạnh hợp đồng anh em
+# `INGEST_LOCAL_EXTS` — để vừa là nguồn sự thật cho routing OCR, vừa là nguồn SUY RA khai báo
+# `-text` của các họ ảnh trong `.gitattributes`. Cổng `wp49_eol_policy_index_blobs` neo vào đây,
+# nên mở thêm một đuôi ảnh mà quên khai `-text` sẽ làm selftest đỏ ngay.
+# Ở `ingest_contract` chứ không ở `ingest_ops` vì hàm bên đó bị `bind` re-home `__globals__` về
+# namespace tl (bẫy I11) nên không tra được hằng module-level của chính nó — đã đo bằng NameError.
+OCR_SOURCE_EXTS = frozenset({".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"})
+
 
 def _nfc(value: Any) -> Any:
     """Normalize text without changing business meaning or path separators."""

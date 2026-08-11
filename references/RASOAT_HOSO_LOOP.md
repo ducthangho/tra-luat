@@ -58,7 +58,7 @@ nào**; **chặn làn ghi** ⇒ nhận việc nhưng khai rõ Loop B đứng (ch
 | **A2** | Nhận vai: `state-get` đọc state từ Drive → **HOÀ GIẢI đơn vị `doing`** (r213, khe hở H8 đo 26-07: phiên trước chết SAU khi ghi master nhưng TRƯỚC khi ghi state — `doing` mà ĐÃ có `master/<unit>.json` ⇒ `done`, không có ⇒ `pending`; `done` KHÔNG BAO GIỜ bị hạ) → ghi `session_claim` (id + giờ + `progress_ptr`) → `state-put`. Claim cũ quá hạn **30′** mà `progress_ptr` KHÔNG nhích → chiếm quyền; còn nhích → phiên sau LÙI | `tl state-get --json` · `tl rasoat-merge --state …` (hoà giải) · `tl state-put --in … --expect-claim <id cũ>` |
 | **A3** | Lấy đơn vị `pending` ưu tiên cao nhất: SÂU trước, và **ưu tiên NLM-ready** (nguồn đã `added` trong Q-NLM). Nguồn còn `pending` NLM → chỉ lấy khi hết việc khác, phát hiện tự mang `muc_chac_chan="cho_verify_nlm"` | `scripts/rasoat_worksheet.py` (chấm SÂU/ĐỐI CHIẾU/—) |
 | **A4** | Rà 3 tầng: T1 cache tất định → T2 quét thô → T3 đào sâu; mở rộng frontier | `tl extract --dieu N` · `tl tra_cuu --cite --exact` · `tl nlm-query`/`nlm-cross` scoped · `tl frontier-expand --json` |
-| **A5** | VERIFY từng phát hiện — **nguyên văn CHỈ từ cache/raw**; fail verify ⇒ KHÔNG ghi | `nlm_qa verify` (đường `tl`); chế độ không-NLM → §4b |
+| **A5** | VERIFY từng phát hiện — **nguyên văn CHỈ từ cache/raw**; fail verify ⇒ KHÔNG ghi | `tl nlm-query --source-id <sid> --strict-scope`; chế độ không-NLM → §4b |
 | **A6** | Ghi `master/<unit>.json` (kèm `anchor` + `muc_chac_chan`) → đánh `done` → **cập nhật state NGAY** (không dồn cuối phiên) | ghi NGOÀI cây skill (§7); `tl state-put --in <out-dir>/rasoat_state.json` |
 | **A7** | Ứng viên mới → Q-INGEST (§3); Điều liên quan mới → Q-UNITS; văn bản mới flip corpus → sinh đơn vị `doi_chieu_bo_sung` (§3.6) | phân loại theo phạm vi kickoff |
 | **A8** | **Đóng gói chủ động** (§8) → note bàn giao → NHẢ claim → thoát êm | state là file nên "thoát" = không làm gì thêm |
@@ -169,13 +169,14 @@ TRẢ VỀ (final message = JSON THUẦN, không văn xuôi, không bọc ```):
  "phat_hien": [{"key":"","linh_vuc":"","van_ban":"","can_cu":"","phan_tich":"",
    "hinh_thuc":"","lo_trinh":"","tieu_chi":"","ghi_chu":"",
    "muc_chac_chan":"chac_chan|can_kiem_tra|cho_verify_nlm",
-   "anchor":{"doc_deps":[{"so_hieu":"","text_hash":"","dieu":[]}],"cite":"","skill_version":"",
+   "anchor":{"doc_deps":[{"so_hieu":"","text_hash":"sha256:<64hex>","locator":"","dieu":[]}],"cite":"","skill_version":"",
              "verified_at":"","ttl_ngay":90}}],
  "ung_vien_nap": [{"so_hieu":"","ly_do":""}], "dieu_lien_quan_moi": []}
 
 QUY TẮC ĐIỀN:
 - `hinh_thuc` CHỈ dùng giá trị trong `templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json` (`_vocab_hinh_thuc`) —
-  sai chính tả/không dấu sẽ rơi ÂM THẦM vào phụ lục 04.
+  từ v1.36.45 (r311) sai chính tả/không dấu/để trống làm `rasoat_phuluc.py` DỪNG (fail-closed, nêu đích
+  danh dòng sai) chứ không còn rơi âm thầm vào phụ lục 04.
 - `so_hieu` PHẢI có NĂM (chuẩn `NN-YYYY-VBHN-XXX`).
 - Phát hiện chưa qua kiểm chéo NLM ⇒ `muc_chac_chan="cho_verify_nlm"` (phiên chính sẽ xếp vào Q-VERIFY).
 - Không chắc ⇒ nói KHÔNG CÓ / để `can_kiem_tra`; cấm bịa số hiệu, ngày, nội dung.
@@ -208,7 +209,7 @@ vị nào muốn đủ ô thì mang sẵn `van_ban_meta` (dict, tuỳ chọn) tr
 ## §7. ĐƯỜNG GHI LÚC CHẠY (bất biến §B.5: state biến động NGOÀI cây skill)
 
 Cây skill được hash toàn bộ vào `package_hash`; mọi file đổi theo lượt rà mà nằm trong cây sẽ làm
-`release-verify`/golden ĐỎ. Đường ghi hợp lệ — máy đọc được, guard `r210_loop_khong_ghi_trong_cay` khoá:
+`release-verify`/golden ĐỎ. Đường ghi hợp lệ — máy đọc được — khai trong khối dưới đây:
 
 <!-- WRITE_PATHS_v1
 _meta/rasoat_state.json
@@ -216,6 +217,13 @@ _meta/rasoat_state.json
 <out-dir>/rasoat_approvals.json
 <out-dir>/rasoat_bugs.md
 -->
+
+**Hai guard, hai tầm — đừng đọc gộp:** `r210_loop_khong_ghi_trong_cay` khoá **KHAI BÁO** — khối trên
+phải CÓ, và mọi đường khai trong đó phải NGOÀI cây skill (phản chứng: bơm một đường TRONG cây, hoặc bỏ
+hẳn khối, thì ca ĐỎ). Nó là LINT: không chạy vòng nào, không `git status`, không `release-verify` ⇒
+**không** chứng minh lúc CHẠY máy có ghi đúng chỗ đã khai. Vế CHẠY do `r298_worklist_chay_kho_a3_a6`
+gánh — chạy khô A3→A6 trên `cmd_state_put`/`cmd_state_get` THẬT (GAS giả CÓ TRẠNG THÁI), đòi state tiến
+đúng một nấc sau MỖI đơn vị, kèm phản chứng "gom ghi một phát cuối lượt" để phép đo phân biệt được.
 
 `_meta/…` = trên Drive trong profile hồ sơ (bền, sống qua kill/sandbox). `<out-dir>` = thư mục local
 NGOÀI cây skill (`--out-dir`), đẩy Drive theo lô ở checkpoint; Claude chat đẩy sau MỖI đơn vị vì sandbox
@@ -249,6 +257,22 @@ trình**. **KHÔNG `/compact` giữa phiên rà** — bàn giao qua file trung t
 
 Nghi thức: xong/trả đơn vị đang cầm → đẩy sổ → cập nhật state + note bàn giao → NHẢ claim → kết sổ registry
 (`tl manifest`; `tl ops-plan` đổ việc vệ sinh vào Q-APPROVALS chờ duyệt, KHÔNG tự `--apply`).
+
+**§8b. ĐÓNG HỒ SƠ (khác đóng gói phiên) — r300.** Đóng gói = kết thúc MỘT LƯỢT; đóng hồ sơ = kết thúc CẢ
+HỒ SƠ. Đặc tả đầy đủ: `references/RASOAT_PLAN_SCHEMA.md` §7 (khối `vong_doi` + 6 điều kiện đóng + 6 điều
+kiện mở hồ sơ kế tiếp). Ba điều dễ sai nhất:
+
+- **"Đóng" phải nằm TRONG FILE.** Đo 01-08 trên hồ sơ thật: người thẩm tra chốt đã đóng mà state không có
+  khoá nào nói thế, còn treo 5 đầu mối (claim chưa nhả · 1 `cho_duyet` · nợ kiểm chéo · văn bản chưa lấy
+  được · trạng thái văn xuôi). Thiếu vế nào ⇒ **`da_dong_co_gioi_han`** + khai vào `gioi_han_da_biet`;
+  **cấm đóng im lặng**.
+- **Đóng là ĐÓNG BĂNG, không phải dọn** — không xoá `master/`, `rasoat_bugs.md`, `rasoat_approvals.json`,
+  `BIEN_BAN_*`.
+- **Loop C chỉ chạy khi `vong_doi.anchor_con_hieu_luc: true`.** `false` ⇒ BỎ QUA hồ sơ và **nói ra lý do**;
+  chạy bừa trên anchor chưa di trú sẽ ra STALE giả 100% (§4 cảnh báo cùng chuyện).
+
+Mở hồ sơ kế tiếp: **`--out-dir` MỚI** (dùng lại thư mục cũ = bảng master phồng — `rasoat_phuluc.py --in`
+gộp CẢ thư mục), claim cũ đã nhả, kickoff khai lại quota, ghi `skill_version_toi_thieu`.
 
 ## §9bis. QUY ƯỚC GHI (r218)
 

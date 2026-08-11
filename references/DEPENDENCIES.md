@@ -3,6 +3,20 @@
 ## 9. PHỤ THUỘC
 `pip install -r requirements.txt`. Cần env `TL_WEBAPP` / `TL_TOKEN` (mirror `tra_luat_config.json`).
 
+**r319 — đính chính khế ước.** Overlay core (`tl.py`, `contract_check.py`) vẫn CHỈ dùng thư viện
+chuẩn, nhưng ĐƯỜNG NẠP TÀI LIỆU thì KHÔNG:
+
+| thứ | mức | thiếu thì sao |
+|---|---|---|
+| `pypdf` (hoặc `pdfplumber`) | **BẮT BUỘC** | CHẶN mọi `.pdf` — `reason=pdf_probe_unavailable`, exit 6 (r315) |
+| `pdftotext` (poppler-utils) | **BẮT BUỘC** | không bóc được text `.pdf` (nhị phân hệ thống, pip không cài được) |
+| `python-docx` | tuỳ chọn | vẫn đọc `.docx` bằng nhánh bóc-tag (r317 đã hết rò trị đo DrawingML) |
+| `antiword`/`catdoc` | tuỳ chọn | không đọc được `.doc` CŨ (binary) |
+
+Tự kiểm: `python scripts/tl.py doctor --json` → dòng `optional phụ thuộc nạp tài liệu` liệt kê
+thứ thiếu kèm HẬU QUẢ. Tên có tiền tố `optional` ⇒ báo ĐỎ nhưng KHÔNG lật rc (máy không nạp PDF
+vẫn xanh).
+
 ### Runtime overlay v1.18.0 — các lệnh bổ sung khi thiếu bộ rasoat đầy đủ
 - `--profile <name>` + `tl profile-info --json`: đọc config v2 đa-corpus; VBQPPL là profile nền lấy token/webapp, profile đang dùng quyết định folder/notebook/registry/manifest.
 - `tl link-priority <url...> --json`: xếp link tải cho người dùng theo TVPL → LuatVietnam → Công báo → official khác; không đổi canonical official-first.

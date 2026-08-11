@@ -1203,7 +1203,7 @@ def resolve_footnote_amendments(text: str, today: str | None = None, entries: li
     txt = re.sub(r"\[(\d{1,3})\](\d)", r"[\1] \2", txt)
     today = today or _dt.date.today().isoformat()
     # Khối CHÚ THÍCH = từ dòng bắt đầu '[n]' đầu tiên (def ở line-start; marker inline trong thân ở giữa dòng)
-    first = re.search(r"(?m)^\s*\[\d{1,3}\]\s", txt)
+    first = _FOOT_DEF_FIRST.search(txt)   # r322: hằng MIRROR — xem chú thích ở đầu module
     foot_region = txt[first.start():] if first else ""
     body_txt = txt[: first.start()] if first else txt
     # body-anchor fallback: marker inline trong thân → Điều/khoản đang theo dõi

@@ -137,9 +137,12 @@ def _determinism_audit(*, strict: bool = False, full: bool = False) -> dict:
 
             # Same zip contents with different member order must produce same dry-run plan after scrub.
             # Use in-process _zip_plan here to avoid nested CLI fan-out during strict audit; CLI path is covered by golden/smoke cases.
+            # r320 (ING-06): filler `.txt` → `.docx`. Chủ đề của check này là ỔN ĐỊNH THỨ TỰ member
+            # (`zi1 == zi2`), không liên quan đuôi; `.txt` chỉ tình cờ nằm đúng khe hở planner↔child vừa
+            # bịt, làm vế `plan.ok` gãy vì 0 member được nhận. Khẳng định gốc giữ nguyên.
             z1, z2 = tdp / "a.zip", tdp / "b.zip"
-            fitems = {"b.txt": "B", "a.txt": "A"}
-            for zp, order in [(z1, ["b.txt", "a.txt"]), (z2, ["a.txt", "b.txt"])]:
+            fitems = {"b.docx": "B", "a.docx": "A"}
+            for zp, order in [(z1, ["b.docx", "a.docx"]), (z2, ["a.docx", "b.docx"])]:
                 with zipfile.ZipFile(zp, "w") as zf:
                     for name in order:
                         zf.writestr(name, fitems[name])
@@ -198,6 +201,72 @@ def cmd_determinism_audit(a) -> int:
             print(f"[tl] determinism-audit: không lưu được report ({_e})", file=sys.stderr)
     _print_json_or_text(out, getattr(a, "json", False))
     return 0 if out.get("ok") else 2
+
+
+def _test_fragments_check(root: str | Path) -> dict:
+    """Compare the land-only bundled module with the sole source generator."""
+    repo_root = Path(root)
+    fragment_root = repo_root / "scripts" / "test_fragments"
+    bundled_path = repo_root / "scripts" / "tl_test_fragments_bundled.py"
+    payload = {
+        "ok": False,
+        "schema": "test_fragments_check.v1",
+        "fragment_root": "scripts/test_fragments",
+        "bundled_module": "scripts/tl_test_fragments_bundled.py",
+    }
+    if not fragment_root.is_dir():
+        return {**payload, "status": "invalid", "error": "FRAGMENT_ROOT_MISSING"}
+    if not bundled_path.is_file():
+        return {**payload, "status": "missing", "error": "BUNDLED_MODULE_MISSING"}
+
+    try:
+        from tl_core.test_fragments import generate_bundled_module_bytes
+        expected = generate_bundled_module_bytes(fragment_root)
+    except Exception as exc:  # noqa: BLE001 — gate converts generator/input faults to data
+        return {
+            **payload,
+            "status": "invalid",
+            "error": "GENERATED_BUNDLE_INPUT_INVALID",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    try:
+        actual = bundled_path.read_bytes()
+    except OSError as exc:
+        return {
+            **payload,
+            "status": "unreadable",
+            "error": "BUNDLED_MODULE_READ_FAILED",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+
+    expected_sha256 = hashlib.sha256(expected).hexdigest()
+    actual_sha256 = hashlib.sha256(actual).hexdigest()
+    if actual != expected:
+        return {
+            **payload,
+            "status": "stale",
+            "error": "GENERATED_BUNDLE_STALE",
+            "expected_sha256": expected_sha256,
+            "actual_sha256": actual_sha256,
+            "expected_bytes": len(expected),
+            "actual_bytes": len(actual),
+        }
+    return {
+        **payload,
+        "ok": True,
+        "status": "current",
+        "expected_sha256": expected_sha256,
+        "actual_sha256": actual_sha256,
+        "expected_bytes": len(expected),
+        "actual_bytes": len(actual),
+    }
+
+
+def cmd_test_fragments_check(a) -> int:
+    """Opt-in land gate for committed generated test-bundle freshness."""
+    payload = _test_fragments_check(getattr(a, "root", None) or HERE.parent)
+    _print_json_or_text(payload, getattr(a, "json", False))
+    return 0 if payload.get("ok") else 2
 
 
 def cmd_release_check(a) -> int:
@@ -323,10 +392,11 @@ def cmd_release_check(a) -> int:
 
 # ───────────────────────── release/package integrity ─────────────────────────
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
-                         ".claude", ".githooks", ".github",
+                         ".claude", ".codex", ".githooks", ".github",
                          "claude-code-best-practice",
                          "changelog_archive",
-                         "rasoat"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive).
+                         "rasoat",
+                         "docs"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive). r291 (T0-G, Q1 user CHỐT 01-08): +docs — 19 tệp (3 `docs/*.md` + 16 `docs/adr/*.md`) là hồ sơ THIẾT KẾ của người giữ (kế hoạch + ADR), runtime agent không đọc, mà chúng ăn 19/200 slot import trong khi quỹ chỉ còn 4 ⇒ trả quỹ về 23. GIỮ trong git y như rasoat/changelog_archive. ⚠ KHÔNG hạ cổng nào: `doc-claims-check` vẫn phủ `docs/` (r264) vì nó quét CÂY DEV qua `_DOC_CLAIMS_DEFAULT_PATHS`, không phải gói. r331: +`.codex` — SONG SINH của `.claude`, cùng lý do, chỉ khác tác nhân: agent Codex đặt worktree ở `.codex/worktrees/<nhánh>/`, mỗi worktree là MỘT BẢN SAO ĐẦY ĐỦ của kho (có `VERSION`/`SKILL.md`/`RELEASE_MANIFEST.json` riêng). Thiếu khoá này thì `release-verify` đếm chúng vào `extra_files` ⇒ gate ĐỎ ở MỌI lượt chạy từ main checkout, trong khi worktree sạch vẫn xanh — đỏ theo NƠI CHẠY chứ không theo nội dung, đúng lớp bệnh khó tin nhất. Đo 04-08-2026: 200 `extra_files`, 100% thuộc `.codex/`, mà `failed: []` và `expected/checked = 177/177` (manifest LÀNH). ★ Cạm bẫy: WARN của deploy khuyên `release-manifest --out …` — ở ca NÀY là SAI, nướng 4 bản sao kho vào manifest trong khi trần gói là 200 tệp CỨNG; lời khuyên đó chỉ đúng cho ca thêm/xoá tệp THẬT (r238).
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 
@@ -350,6 +420,12 @@ _RELEASE_EXCLUDE_NAMES = {
     "before.json", "after.json",
     "live_state_before.json", "live_state_after.json", "live_state_diff.json",
     "release_check_report.json", "determinism_report.json",
+    # F2-A (ADR-0018): `.editorconfig` là config DEV-SIDE, cùng hạng với `.githooks/`/`.github/`
+    # (đã loại qua _RELEASE_EXCLUDE_DIRS) — runtime agent trong gói không đọc nó. Không loại thì
+    # nó vừa ăn 1 khe trong trần 200 (kê khai slot 179 ở tl_selftest r291_docs_ngoai_goi hoá đỏ),
+    # vừa bị `release-verify --strict` hô extra_files vì manifest chưa có. Loại theo TÊN vì tệp
+    # nằm ở gốc kho, không có thư mục riêng để khoá.
+    ".editorconfig",
 }
 
 _RELEASE_WINDOWS_RESERVED = {
@@ -382,6 +458,7 @@ def _portable_release_relpath(rel: str) -> bool:
 
 _RELEASE_REQUIRED_FILES = [
     "VERSION",
+    "scripts/tl_test_fragments_bundled.py",
     "scripts/tl_core/__init__.py",
     "scripts/tl_core/deterministic.py",
     "scripts/tl_core/jsonio.py",
@@ -421,6 +498,7 @@ _RELEASE_REQUIRED_FILES = [
     "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",   # r209/H1: mẫu bảng master rà soát — bên đọc rasoat_phuluc.py
     "references/RASOAT_HOSO_LOOP.md",               # r210/H3-H4: kịch bản vòng lặp + prompt agent tl-rasoat (SKILL.md trỏ tới)
     "references/RASOAT_PLAN_SCHEMA.md",             # r209/H2: đặc tả state biến động (rasoat_plan.v1)
+    "references/QUY_TRINH_RA_SOAT_3_TANG.md",       # r324/REL-05: quy trình rà 3 tầng (PHA0_GATE_v1, BUG_LEDGER_v1)
 ]
 
 _RELEASE_REQUIRED_WORKFLOWS = [
@@ -463,6 +541,8 @@ def _release_should_include(path: Path, root: Path) -> bool:
     try:
         rel = path.relative_to(root)
     except ValueError:
+        return False
+    if len(rel.parts) > 2 and rel.parts[:2] == ("scripts", "test_fragments"):
         return False
     parts = set(rel.parts)
     if parts & _RELEASE_EXCLUDE_DIRS:
@@ -554,7 +634,22 @@ def _skill_links_findings(skill_text: str, manifest_paths) -> dict:
 # 10 nợ cũ khoanh BASELINE dưới. Fail-closed CHỈ với cặp MỚI ở tài liệu SỐNG — không baseline thì guard đỏ
 # 80 mục ngay ngày đầu và sẽ bị vô hiệu hoá (bài học §0.8 kế hoạch). Gỡ nợ = XOÁ mục baseline (ratchet:
 # sửa baseline = sửa code = qua ruff→selftest→CHANGELOG→review; test r209 khoá số đếm).
-_POINTER_ARCHIVE_DOCS = frozenset({"references/DOCTRINE_APPENDIX.md"})
+# r308 (T0-F/GATE-04): doc-set mở từ «references/*.md KHÔNG đệ quy + SKILL.md» ra «MỌI *.md CÓ TRONG
+# MANIFEST» — xem chỗ gọi trong _verify_release_manifest. Đo 02-08 trên gói 177 tệp: 34 .md, tầm cũ phủ
+# 30, ngoài tầm 4 (CHANGELOG · INSTALL · CONTEXT · scripts/_fallback/README). Mở tầm ⇒ pointer FAIL 0→40
+# (CHANGELOG 24 + INSTALL 16), bare-tool FAIL 0→0 (advisory 73→95 — lớp trần mở MIỄN PHÍ).
+# Hai tệp dưới vào hạng LƯU TRỮ vì bản chất là SỬ, không phải chỉ dẫn vận hành sống:
+#   CHANGELOG.md — chép các bản phát hành ĐÃ QUA nên tất yếu nhắc tên tệp TỪNG tồn tại
+#     (`Code.2.21.2n.gs`, `changelog_archive/`, 4 script deploy dev-side). Sửa thân = viết lại lịch sử.
+#   INSTALL.md   — khối `:7` TỰ KHAI "layout GỐC v1.x (tham chiếu lịch sử), nguồn chân lý = VERSION +
+#     SKILL.md + CHANGELOG" (Q3 chốt 01-08; r289 đã sửa 3 dòng MỆNH LỆNH deploy về `2.21.2p`, 14 nhắc
+#     `.gs` còn lại CỐ Ý giữ vì đang kể lịch sử bản vá).
+# CONTEXT.md + scripts/_fallback/README.md vào thẳng FAIL-CLOSED, 0 đồng (đo: 0 fail).
+_POINTER_ARCHIVE_DOCS = frozenset({
+    "references/DOCTRINE_APPENDIX.md",
+    "CHANGELOG.md",
+    "INSTALL.md",
+})
 # r218: TRẢ NỢ 6/10 mục. `doc-claims-check` (lệnh mới, đường quét độc lập) dựng lại ĐÚNG 6 cặp dưới đây
 # từ con số 0 — tức danh sách khoanh nợ này chính xác, chỉ là chưa ai trả. Đã sửa thân tài liệu nên chúng
 # không còn là hit; ratchet hạ 10 → 4, đi ĐÚNG chiều (ratchet chặn THÊM miễn trừ, không chặn bớt):
@@ -607,6 +702,59 @@ def _doc_pointer_findings(doc_texts: dict, manifest_paths, *, archive_docs=_POIN
                 fail.append(pair)
     return {"pointers_checked": checked, "pointers_fail": fail, "pointers_advisory": advisory,
             "pointers_baseline": baseline_hits, "pointers_ok": not fail}
+
+
+# r289 (H9b): LỚP THỨ HAI của guard con trỏ — tên công cụ viết TRẦN trong backtick, KHÔNG tiền tố thư mục.
+# `_doc_pointer_findings` đòi tiền tố `references/|templates/|scripts/` nên MÙ với dạng `nlm_qa.py verify`.
+# Ca thật đã trả giá: chỉ dẫn SỐNG «Ghi mỗi truy vấn NLM bằng `nlm_log.py add`» (QUY_TRINH) sống từ
+# v1.29.4 tới v1.35.44 mà KHÔNG cổng nào kêu — chỉ bị bắt bằng rà tay. Đo 01-08 trên gói 195 file:
+# 82 tên trần thiếu / 30 tài liệu, trong đó 57 nằm ở DOCTRINE_APPENDIX (lưu trữ). Vì vậy fail-closed
+# CHỈ cho tài liệu CHỈ-DẪN-VẬN-HÀNH-SỐNG; phần còn lại advisory — bật fail-closed toàn bộ = 82 mục đỏ
+# ngày đầu và guard sẽ bị vô hiệu hoá cho xong (đúng bài học §0.8 của H9).
+# Đối chiếu theo BASENAME trong package-set: `boot.py` nằm ở `scripts/_fallback/boot.py` vẫn hợp lệ.
+_BARE_TOOL_STRICT_DOCS = frozenset({
+    "SKILL.md",                                   # LÕI: bản đồ script + đường boot/cấp cứu
+    "references/QUY_TRINH_RA_SOAT_3_TANG.md",     # quy trình rà 3 tầng (PHA0_GATE_v1, BUG_LEDGER_v1)
+    "references/RASOAT_HOSO_LOOP.md",             # kịch bản vòng lặp + prompt agent tl-rasoat
+})
+_BARE_TOOL_BASELINE = frozenset({
+    # placeholder mô tả DẠNG con trỏ (`file.py:dòng`), không phải tệp thật — cùng họ `scripts/ten_file.py`
+    ("references/RASOAT_HOSO_LOOP.md", "file.py"),
+})
+_BARE_TOOL_SPAN_RE = re.compile(r"`([^`\n]{1,200})`")
+_BARE_TOOL_NAME_RE = re.compile(
+    r"(?<![A-Za-z0-9_./\-])([A-Za-z0-9_][A-Za-z0-9_.\-]*\.(?:py|sh|ps1|cmd|gs))(?![A-Za-z0-9_.\-/])")
+
+
+def _doc_bare_tool_findings(doc_texts: dict, manifest_paths, *, strict_docs=_BARE_TOOL_STRICT_DOCS,
+                            baseline=_BARE_TOOL_BASELINE) -> dict:
+    """PURE (r289/H9b): quét tên công cụ viết TRẦN (`nlm_qa.py`, `tl_rebuild.sh`) bên trong span backtick
+    và đối chiếu BASENAME với PACKAGE-SET. Chỉ xét token KHÔNG chứa `/` — dạng có tiền tố thư mục đã do
+    `_doc_pointer_findings` gác. Ratchet 2 tầng: tài liệu ngoài `strict_docs` → ADVISORY; cặp
+    (tài_liệu, tên) trong `baseline` → im lặng; cặp MỚI ở tài liệu SỐNG ⇒ fail-closed.
+    Manifest rỗng ⇒ mọi tên fail-closed (đồng nhất với hai guard anh em)."""
+    names = {str(p).rsplit("/", 1)[-1] for p in (manifest_paths or [])}
+    fail, advisory, baseline_hits, checked = [], [], [], 0
+    for doc in sorted(doc_texts or {}):
+        text = str(doc_texts.get(doc) or "")
+        hits = set()
+        for span in _BARE_TOOL_SPAN_RE.findall(text):
+            for tok in _BARE_TOOL_NAME_RE.findall(span):
+                if "/" not in tok:
+                    hits.add(tok)
+        for tok in sorted(hits):
+            checked += 1
+            if tok in names:
+                continue
+            pair = (doc, tok)
+            if pair in baseline:
+                baseline_hits.append(pair)
+            elif doc in strict_docs:
+                fail.append(pair)
+            else:
+                advisory.append(pair)
+    return {"bare_tools_checked": checked, "bare_tools_fail": fail, "bare_tools_advisory": advisory,
+            "bare_tools_baseline": baseline_hits, "bare_tools_ok": not fail}
 
 
 def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False) -> dict:
@@ -706,22 +854,47 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
             if not skill_links["links_ok"]:
                 errors.append("SKILL_LINKS_NOT_IN_PACKAGE:" + ",".join(skill_links["links_missing"][:10]))
                 ok = False
-    # r209 (H9): guard RATCHET con trỏ tài liệu SỐNG (references/|templates/|scripts/) trên
-    # SKILL.md + references/*.md — xem _doc_pointer_findings. Cặp MỚI đứt ⇒ fail-closed.
+    # r209 (H9): guard RATCHET con trỏ tài liệu SỐNG (references/|templates/|scripts/) — xem
+    # _doc_pointer_findings. Cặp MỚI đứt ⇒ fail-closed.
+    # r308 (T0-F/GATE-04): doc-set lấy từ MANIFEST (`expected`), không còn glob đĩa `references/*.md`.
+    # Hai khoảng mù của nguồn cũ, cả hai đều đo được trên gói 177 tệp:
+    #   (a) THIẾU — .md trong gói nhưng ngoài `references/` mức 1: CHANGELOG · INSTALL · CONTEXT ·
+    #       scripts/_fallback/README (4 tệp). Tài liệu ĐI THEO GÓI mà không cổng nào gác con trỏ.
+    #   (b) THỪA — .md nằm trong `references/` trên ĐĨA nhưng bị release-exclude: quét chúng là bắt
+    #       gate CÂY chịu trách nhiệm cho thứ KHÔNG vào artifact (cùng họ xanh-giả của REL-01).
+    # Đọc theo `expected` nên cũng tự đóng theo mọi thay đổi kiểm kê — thêm .md vào gói là guard phủ ngay.
+    # r309 (T0-F/1c): thêm THẺ MÁY ĐỌC `references/workflows/*.json` vào doc-set. Thẻ là chỉ dẫn vận hành
+    # y như .md, chỉ khác định dạng, mà TRƯỚC r309 không guard nào với tới vì lọc theo đuôi `.md`.
+    # Đo 02-08 (gói 177 tệp): 27 thẻ · 4 con trỏ · 1 ĐỨT — `doc_claims_check.json` trỏ
+    # `references/changelog_archive/` (dev-only, `_RELEASE_EXCLUDE_DIRS`). Đã SỬA LỜI THẺ, KHÔNG baseline:
+    # đúng tiền lệ r184 trên CHÍNH con trỏ này ở SKILL.md — «không nới auditor, sửa con trỏ».
+    # CỐ Ý KHÔNG mở sang `.json` khác: `references/golden/*.json` là ĐẦU RA GHI SẴN của test, đo được
+    # 11 con trỏ đứt mà PHẢI đứt — gồm `references/KHONG_CO_FILE.md`, chính là mồi cho bộ dò tệp-thiếu.
+    # Gác chúng = đỏ oan ngày đầu ⇒ guard bị vô hiệu hoá (bài học §0.8). Ranh giới này có test khoá.
+    def _guarded_doc(rel: str) -> bool:
+        low = rel.lower()
+        return low.endswith(".md") or (low.startswith("references/workflows/") and low.endswith(".json"))
+
     _doc_texts = {}
-    _doc_list = sorted((root / "references").glob("*.md")) if (root / "references").is_dir() else []
-    if _sk_path.exists():
-        _doc_list.append(_sk_path)
-    for _dp in _doc_list:
+    for _rel in sorted(k for k in expected if _guarded_doc(k)):
+        _dp = root / _rel
+        if not _dp.is_file():
+            continue          # tệp thiếu/không phải tệp đã do vòng `checks` ở trên báo — không báo hai lần
         try:
-            _doc_texts[_dp.relative_to(root).as_posix()] = _dp.read_text(encoding="utf-8", errors="replace")
+            _doc_texts[_rel] = _dp.read_text(encoding="utf-8", errors="replace")
         except OSError as _dp_err:
-            errors.append(f"DOC_POINTER_UNREADABLE:{_dp.name}:{type(_dp_err).__name__}")
+            errors.append(f"DOC_POINTER_UNREADABLE:{_rel}:{type(_dp_err).__name__}")
             ok = False
     doc_pointers = _doc_pointer_findings(_doc_texts, sorted(expected))
     if not doc_pointers["pointers_ok"]:
         errors.append("DOC_POINTERS_NOT_IN_PACKAGE:" +
                       ",".join(f"{d}->{l}" for d, l in doc_pointers["pointers_fail"][:10]))
+        ok = False
+    # r289 (H9b): lớp con trỏ TRẦN — xem _doc_bare_tool_findings. Fail-closed cho tài liệu SỐNG.
+    bare_tools = _doc_bare_tool_findings(_doc_texts, sorted(expected))
+    if not bare_tools["bare_tools_ok"]:
+        errors.append("DOC_BARE_TOOLS_NOT_IN_PACKAGE:" +
+                      ",".join(f"{d}->{t}" for d, t in bare_tools["bare_tools_fail"][:10]))
         ok = False
     package_hash_current_expected = hashlib.sha256("\n".join(
         f"{c['path']}\0{c.get('actual_size', -1)}\0{c.get('actual_sha256')}"
@@ -747,6 +920,7 @@ def _verify_release_manifest(root: Path, manifest: dict, *, strict: bool = False
         "required_missing": required_missing,
         "skill_links": skill_links,
         "doc_pointers": doc_pointers,
+        "bare_tools": bare_tools,
         "errors": errors,
         "package_hash_expected": manifest.get("package_hash"),
         "package_hash_current": package_hash_current_expected,
@@ -1177,8 +1351,28 @@ def cmd_release_bundle(a) -> int:
 # ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
 
 
+def _canonical_text(text: str) -> str:
+    """CRLF và CR đơn lẻ -> LF. Đây là phép chuẩn hoá text canonical của ADR-0018.
+
+    F2-A dựng hàm này vì `newline="\\n"` KHÔNG đủ và chỗ hụt rất dễ đọc nhầm: nó chỉ tắt phép
+    dịch `\\n`→`\\r\\n` của Python lúc GHI, nó không đụng tới `\\r` đã nằm sẵn TRONG chuỗi. Tức là
+    mọi artifact phái sinh dựng từ nội dung đọc ở một tệp CRLF (hoặc từ stdout một tiến trình
+    Windows) vẫn ra CRLF, kể cả khi ghi qua writer "đã ghim LF". Đúng lớp hỏng mà `.gitattributes`
+    một mình không chặn được, vì tệp phái sinh sinh ra rồi mới tới lượt git nhìn thấy.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _write_text_atomic(path: Path, text: str) -> None:
+    """Writer text CANONICAL + NGUYÊN TỬ: UTF-8, LF, không phụ thuộc OS hay `core.autocrlf`.
+
+    Đây là seam DUY NHẤT cho artifact tracked/derived — golden (`workflow.py` `golden-test
+    --write`), `RELEASE_MANIFEST.json`, determinism/release report, chunk manifest, OCR text.
+    Giữ nguyên ngữ nghĩa nguyên tử của v1.33.56 (F7): ghi ra tmp CÙNG thư mục rồi `os.replace`,
+    nên không ai đọc được bản nửa vời và không có race đổi-tên-qua-volume.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
+    text = _canonical_text(text)
     _fd, _tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
     with os.fdopen(_fd, "w", encoding="utf-8", errors="replace", newline="\n") as _f:   # v1.33.56 (F7): tmp duy nhất
         _f.write(text)

@@ -46,6 +46,13 @@ def bind(tl_module):
 
 def run() -> int:
     cases = []
+    # r285 (P16, TEST-ONLY): ẢNH CHỤP mọi hàm/lớp của module tl TRƯỚC khi chạy case nào. Test ở đây
+    # monkeypatch `_TL_MODULE` rất nhiều; khối nào quên khôi phục thì stub SỐNG TIẾP và làm mọi test
+    # SAU đó xanh GIẢ (ca thật: khối r87 rò `_manifest_entries`→[] + `_apply_gate`→pass-vô-điều-kiện,
+    # phát hiện 31-07 khi test r285 đọc phải manifest rỗng). Đối chiếu lại ở CUỐI `run()`.
+    import types as _ty285
+    _snap285 = {k: v for k, v in vars(_TL_MODULE).items()
+                if isinstance(v, (_ty285.FunctionType, _ty285.BuiltinFunctionType, type))}
     cases.append(("norm_sohieu", norm_sohieu("113/2025/QH15") == "113-2025-QH15"
                   and norm_sohieu("95/2026/NĐ-CP") == "95-2026-ND-CP"))
     cases.append(("norm_vbhn_vpqh_short", norm_sohieu("19/VPQH") == "19-VBHN-VPQH"
@@ -2799,6 +2806,67 @@ def run() -> int:
                   and os.environ.get("TL_BASE_ALSO") == "1"))
     _apply_profile_env(cfg6, "vbqppl")
 
+    # ═══ r325 (VIỆC 4.2 sổ bảo trì kho): profile dự án CÓ THẬT mà `registryDocId` RỖNG ⇒ mọi lệnh ĐỌC
+    # registry rơi về SỔ NỀN. Đường GHI đã fail-closed từ 1.23.21; đường ĐỌC tới nay vẫn IM LẶNG —
+    # đúng cái làm `--profile` thành NO-OP mà người dùng không hề biết. Phải WARN LOUD (stderr). ═══
+    import io as _io325, contextlib as _cl325
+    _cfg325 = {"schema": 2, "defaultProfile": "vbqppl", "profiles": {
+        "vbqppl": {"manifestId": "m1", "notebookId": "n1", "rootFolderId": "r1", "registryDocId": "g1"},
+        "p_rong": {"manifestId": "m9", "notebookId": "n9", "rootFolderId": "r9", "categories": "own"},
+        "p_du":   {"manifestId": "m8", "notebookId": "n8", "rootFolderId": "r8",
+                   "registryDocId": "g8", "categories": "own"},
+    }}
+
+    def _cap325(cfgx, name):
+        """→ (stderr, TL_REGISTRY_DOC_ID) sau khi áp profile; reset chốt 1-lần để đo lặp được."""
+        if hasattr(_apply_profile_env, "_reg_empty_noted"):
+            _apply_profile_env._reg_empty_noted.clear()
+        _buf = _io325.StringIO()
+        with _cl325.redirect_stderr(_buf):
+            _apply_profile_env(cfgx, name)
+        return _buf.getvalue(), (os.environ.get("TL_REGISTRY_DOC_ID") or "")
+
+    # (1) BẮT: profile thật + registryDocId rỗng → cảnh báo LOUD, nêu đích danh profile và sổ nền
+    _e1, _r1_325 = _cap325(_cfg325, "p_rong")
+    cases.append(("r325_warn_khi_registry_id_rong",
+                  "PROFILE_REGISTRY_ID_EMPTY" in _e1 and "p_rong" in _e1 and "vbqppl" in _e1
+                  and _r1_325 == ""))
+    # (2) CHIỀU NGƯỢC — profile có registryDocId đủ → TUYỆT ĐỐI im (cảnh báo oan làm người ta bỏ đọc cảnh báo)
+    _e2, _r2_325 = _cap325(_cfg325, "p_du")
+    cases.append(("r325_du_registry_id_thi_im", "PROFILE_REGISTRY_ID_EMPTY" not in _e2 and _r2_325 == "g8"))
+    # (3) CHIỀU NGƯỢC — NỀN để rỗng là BÌNH THƯỜNG (webapp tự tìm Sheet theo tên) → không báo
+    _cfg325b = {"schema": 2, "defaultProfile": "vbqppl",
+                "profiles": {"vbqppl": {"manifestId": "m1", "notebookId": "n1", "rootFolderId": "r1"}}}
+    _e3, _ = _cap325(_cfg325b, "vbqppl")
+    cases.append(("r325_nen_rong_khong_bao", "PROFILE_REGISTRY_ID_EMPTY" not in _e3))
+    # (4) KHÔNG chồng lên PROFILE_NOT_FOUND (tên ma đã có cảnh báo riêng, hai câu cùng lúc là nhiễu)
+    _e4, _ = _cap325(_cfg325, "ten_ma_khong_co")
+    cases.append(("r325_khong_chong_profile_not_found",
+                  "PROFILE_NOT_FOUND" in _e4 and "PROFILE_REGISTRY_ID_EMPTY" not in _e4))
+    # (5) env do NGƯỜI DÙNG export vẫn tính là CÓ → không báo oan
+    os.environ["TL_REGISTRY_DOC_ID"] = "nguoi_dung_dat"
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _buf5 = _io325.StringIO()
+    with _cl325.redirect_stderr(_buf5):
+        _apply_profile_env(_cfg325, "p_rong")
+    cases.append(("r325_env_nguoi_dung_dat_thi_im", "PROFILE_REGISTRY_ID_EMPTY" not in _buf5.getvalue()))
+    os.environ.pop("TL_REGISTRY_DOC_ID", None)
+    # (6) ồn ĐÚNG MỘT LẦN mỗi profile mỗi process
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _b6a, _b6b = _io325.StringIO(), _io325.StringIO()
+    with _cl325.redirect_stderr(_b6a):
+        _apply_profile_env(_cfg325, "p_rong")
+    with _cl325.redirect_stderr(_b6b):
+        _apply_profile_env(_cfg325, "p_rong")
+    cases.append(("r325_warn_chi_mot_lan",
+                  "PROFILE_REGISTRY_ID_EMPTY" in _b6a.getvalue()
+                  and "PROFILE_REGISTRY_ID_EMPTY" not in _b6b.getvalue()))
+    if hasattr(_apply_profile_env, "_reg_empty_noted"):
+        _apply_profile_env._reg_empty_noted.clear()
+    _apply_profile_env(cfg6, "vbqppl")
+
     # ═══ v1.30.1 (xử log LIVE 2026-07-03: #1 nlm-install 45s / #7 corpus lệch / #4 loai phi-chuẩn) — r7_* ═══
     # (#1) máy trạng thái cài nlm: bước kế dò từ ĐĨA (fetch→extract→install→done), idempotent.
     import tempfile as _tf7
@@ -5257,13 +5325,25 @@ def run() -> int:
         _ok64 = _ok64 and _e64.code == 2
     cases.append(("r64_generated_parsers_behavior", _ok64))
     # meta invariants: mọi spec sinh đều có meta generated=True; counts nhất quán; summary schema chuẩn.
-    _sum64 = _reg64.registry_summary()
-    cases.append(("r64_registry_meta_invariants",
-                  all(_reg64.COMMAND_META.get(sp["name"], {}).get("generated") for sp in _reg64.GENERATED_SPECS)
-                  and _sum64["counts"]["generated_parsers"] == len(_reg64.GENERATED_SPECS)
-                  and _sum64["schema"] == "command_registry.v1"
-                  and _sum64["counts"]["total"] == len(_reg64.COMMAND_META)
-                  and all(m["risk"] in ("low", "medium", "high") for m in _reg64.COMMAND_META.values())))
+    # r310 (RAS-01): bề mặt meta nay gồm CẢ lệnh LỒNG (`rasoat keywords`…) — `total` phải đếm theo
+    # `all_command_meta()`, không phải riêng COMMAND_META. Bất biến GIỮ NGUYÊN Ý NGHĨA (counts khớp bảng
+    # meta), chỉ mở đúng bằng bề mặt mà `registry_summary` thật sự kê; `nested` khoá riêng phần mới.
+    # Bọc try: ca này chạy Ở MỨC MODULE của `run()` (chưa có `_t110`), nên một AttributeError ở đây làm
+    # SẬP CẢ suite thay vì báo 1 ca đỏ — đúng lúc cần đo ĐỎ-TRƯỚC thì lại không đo được gì.
+    try:
+        _sum64 = _reg64.registry_summary()
+        _all64 = _reg64.all_command_meta()
+        _inv64 = bool(
+            all(_reg64.COMMAND_META.get(sp["name"], {}).get("generated") for sp in _reg64.GENERATED_SPECS)
+            and _sum64["counts"]["generated_parsers"] == len(_reg64.GENERATED_SPECS)
+            and _sum64["schema"] == "command_registry.v1"
+            and _sum64["counts"]["total"] == len(_all64)
+            and _sum64["counts"]["nested"] == len(_reg64.NESTED_COMMAND_META)
+            and len(_all64) == len(_reg64.COMMAND_META) + len(_reg64.NESTED_COMMAND_META)
+            and all(m["risk"] in ("low", "medium", "high") for m in _all64.values()))
+    except Exception:   # noqa: BLE001
+        _inv64 = False
+    cases.append(("r64_registry_meta_invariants", _inv64))
     # ═══ v1.33.59 (Pha G) — r65_*: siết-6 contract + bundle-export/guard + golden {FIXTURES}/raw-stability ═══
     import tl_core.command_registry as _reg65
     import tl_core.workflow as _w65
@@ -6549,7 +6629,14 @@ def run() -> int:
                 self.markers[fid] = body
                 return {"ok": True, "fileId": fid}
             return {"ok": True}
-    _keys86 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append")
+    # r285 (P16, TEST-ONLY — RÒ RỈ MONKEYPATCH): khối r87 phía dưới (~:6672-6674) còn thay THÊM
+    # `_manifest_entries`, `_reg_before_from_manifest`, `_apply_gate` nhưng BA tên đó không nằm trong
+    # danh sách khôi phục ⇒ stub SỐNG TIẾP tới hết `run()`. Hậu quả đo được: mọi test SAU đó mà không tự
+    # thay `_manifest_entries` đều thấy manifest RỖNG, và mọi test đi qua `_apply_gate` đều được cho qua
+    # VÔ ĐIỀU KIỆN — xanh GIẢ hàng loạt (đúng lớp `false-green-test-qua-bind`). Danh sách khôi phục PHẢI
+    # phủ TRỌN tập tên bị thay trong khối; `r285_khong_ro_ri_monkeypatch` dưới cuối `run()` canh việc này.
+    _keys86 = ("_gas", "load_creds", "apply_profile_offline", "_apply_journal_start", "_journal_append",
+               "_manifest_entries", "_reg_before_from_manifest", "_apply_gate")
     _sav86 = {k: getattr(_TL_MODULE, k) for k in _keys86}
     _jrn86 = []
     try:
@@ -7295,10 +7382,15 @@ def run() -> int:
     with _tf65.TemporaryDirectory() as _d65:
         _out65 = Path(_d65) / "b.zip"
         with _hush():
-            _rc65 = cmd_bundle_export(argparse.Namespace(root=None, out=str(_out65), note="r65", json=True))
-        with _zf65.ZipFile(_out65) as _z65:
-            _names65 = _z65.namelist()
-            _meta65 = json.loads(_z65.read([n for n in _names65 if n.endswith("BUNDLE_META.json")][0]).decode("utf-8"))
+            _rc65 = cmd_bundle_export(argparse.Namespace(
+                root=None, out=str(_out65), note="r65", json=True))
+        _names65, _meta65 = [], {}
+        if _rc65 == 0 and _out65.is_file():
+            with _zf65.ZipFile(_out65) as _z65:
+                _names65 = _z65.namelist()
+                _meta65 = json.loads(_z65.read(
+                    [n for n in _names65 if n.endswith("BUNDLE_META.json")][0]
+                ).decode("utf-8"))
         (Path(_d65) / "BUNDLE_META.json").write_text("{}", encoding="utf-8")
         _blocks65 = _imp("tl_gws")._bundle_meta_blocks_push(Path(_d65))
         _clean65 = Path(_d65) / "clean"
@@ -7932,7 +8024,15 @@ def run() -> int:
             if action == "bootstrap":
                 return {"inboxFolderId": "inbox97"}
             if action in ("organize", "ingest_commit"):   # r205: đường ingest_commit (thiếu 'file' → readback qua _verify_convert_readback như cũ)
-                return {"ok": True, "fileId": "gdoc97", "srcId": "src97"}
+                # r291: fake này TRƯỚC ĐÂY trả `ok/fileId/srcId` TRẦN — thiếu ba marker `*_done` và `row`
+                # mà `doIngestCommit_` (Code.2.21.2p.gs:846-881) khai là LUÔN có khi `ok:true`. Cổng
+                # ING-03 đọc đúng bộ đó, nên fake phải khớp HỢP ĐỒNG THẬT; giữ bản trần là bắt bản vá
+                # phải tin một `ok` trần — đúng cái bệnh đang chữa (cùng bài học fake `_G282` ở r289).
+                # VẪN CỐ Ý bỏ `file`: đó là chủ đích gốc của ca này (ép đi đường dự phòng
+                # `_verify_convert_readback`), và cổng r291 KHÔNG đòi `file` — xem `_INGEST_COMMIT_MARKERS`.
+                return {"ok": True, "fileId": "gdoc97", "srcId": "src97",
+                        "organize_done": True, "rename_done": True, "upsert_done": True,
+                        "row": {"drive_id": "gdoc97", "src_id": "src97"}}
             if action == "reg_get":
                 return {"ok": True, "rows": [{"drive_id": "gdoc97", "src_id": "src97",
                                                 "name": "Luat_01-2026-QH16_Test",
@@ -7942,9 +8042,13 @@ def run() -> int:
         def post(self, action, **kw):
             self.calls.append(("post", action))
             return {"ok": True, "fileId": "up97"}
+    # r285: khối này TRƯỚC ĐÂY chạy được nhờ stub `_manifest_entries` RÒ RỈ từ khối r87 (:6672) — tức
+    # xanh GIẢ: kịch bản «manifest rỗng ⇒ không trùng ⇒ nạp tiếp» chưa từng được khai báo ở đây. Nay
+    # khai TƯỜNG MINH đúng kịch bản đó (corpus trống, không có dòng nào để dedup).
     _keys97 = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-               "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+               "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+               "_manifest_entries")
     _sav97 = {k: getattr(_TL_MODULE, k) for k in _keys97}
     _realimp97 = _TL_MODULE._imp
     import tempfile as _tf97
@@ -7966,6 +8070,7 @@ def run() -> int:
         _jr97 = []
         _TL_MODULE._journal_append = lambda rid, rec: _jr97.append(rec)
         _TL_MODULE._imp = lambda name: (_NlmBoom97() if name == "nlm_cli" else _realimp97(name))
+        _TL_MODULE._manifest_entries = lambda refresh=False: []      # r285: khai tường minh (trước: rò từ r87)
         with _tf97.NamedTemporaryFile(suffix=".docx", delete=False) as _f97:
             _fp97 = _f97.name
         with _zf63.ZipFile(_fp97, "w") as _z97:
@@ -8715,11 +8820,17 @@ def run() -> int:
         cases.append(("r107_source_magic_and_structure",
                       _bad_source107.get("ok") is False and _good_source107.get("ok") is True))
 
+        # r314 (ING-06): đuôi filler đổi `.txt` → `.docx`. Chủ đề của ca này là CHUẨN HOÁ đường dẫn
+        # (`./a` ≡ `a` cho idempotency_key, nhưng plan_hash khác) — hoàn toàn không liên quan tới đuôi.
+        # `.txt` chỉ tình cờ được chọn làm filler, mà nó nằm đúng khe hở ING-06: planner nhận trong khi
+        # child `ingest-local` CHẮC CHẮN trả UNSUPPORTED_EXTENSION. Giữ `.txt` ở đây nghĩa là ca test
+        # KHẲNG ĐỊNH planner phải nhận một đuôi không nạp được — tức mã hoá chính con bệnh vào gate.
+        # Khẳng định gốc giữ NGUYÊN VĂN, chỉ đổi filler sang đuôi thật sự nạp được.
         _z1_107, _z2_107 = Path(_d107) / "one.zip", Path(_d107) / "two.zip"
         with _zf107.ZipFile(_z1_107, "w") as _z107:
-            _z107.writestr("./a.txt", "same")
+            _z107.writestr("./a.docx", "same")
         with _zf107.ZipFile(_z2_107, "w") as _z107:
-            _z107.writestr("a.txt", "same")
+            _z107.writestr("a.docx", "same")
         _zp1_107 = _zip107._zip_plan(str(_z1_107), mode="vbqppl", cat="01")
         _zp2_107 = _zip107._zip_plan(str(_z2_107), mode="vbqppl", cat="01")
         cases.append(("r107_zip_content_identity_normalized",
@@ -8730,7 +8841,7 @@ def run() -> int:
                       not _zip107._zip_is_safe_member("CON.txt")
                       and not _zip107._zip_is_safe_member("folder/name. ")))
         with _zf107.ZipFile(_z1_107, "w") as _z107:
-            _z107.writestr("a.txt", "tampered-after-plan")
+            _z107.writestr("a.docx", "tampered-after-plan")   # r314: theo filler mới ở trên
         _tamper107 = ""
         try:
             _zip107._safe_extract_zip_for_ingest(str(_z1_107), str(Path(_d107) / "out"), plan=_zp1_107)
@@ -9779,7 +9890,9 @@ def run() -> int:
                     return reg_get_resp
                 if action in ("organize", "ingest_commit"):   # r205: ingest_commit đếm chung 'organize' (số lần ghi Drive)
                     _calls["organize"] += 1
-                    return {"ok": True, "fileId": "GD114", "srcId": "SRC114"}
+                    return {"ok": True, "fileId": "GD114", "srcId": "SRC114",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "GD114", "src_id": "SRC114"}}
                 return {"ok": True, "fileId": "GD114"}
 
             def post(self, action, **kw):
@@ -9894,7 +10007,8 @@ def run() -> int:
         # chặn oan OVERFLOW_ROOM_UNKNOWN).
         _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                  "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+                 "_manifest_entries")   # r285: khai TƯỜNG MINH (trước: rò rỉ từ khối r87)
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         import tempfile as _tf114
@@ -9912,7 +10026,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb114"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd114", "srcId": "sr114"}
+                    return {"ok": True, "fileId": "gd114", "srcId": "sr114",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd114", "src_id": "sr114"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd114", "src_id": "sr114",
                                                    "name": "Luat_01-2026-QH16_Test",
@@ -9936,6 +10052,9 @@ def run() -> int:
                 "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
             _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb114", None)
             _TL_MODULE._gas = lambda: _G114()
+            # r285: corpus TRỐNG là kịch bản CỦA CHÍNH ca này (không có dòng nào để dedup) —
+            # trước đây nó mượn stub rò rỉ từ khối r87 nên chưa từng được khai ra.
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
             _TL_MODULE._ingest_target = _boom_target
             _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
             _TL_MODULE._apply_journal_start = lambda *a, **k: "run114"
@@ -10352,7 +10471,8 @@ def run() -> int:
         # B1/Q3a: cookie chết ở preflight → TỰ CHUYỂN add-tay (rc=0, nlm=SKIPPED_BY_FLAG), KHÔNG abort NLM_NOT_READY.
         _keys = ("load_creds", "_profile_policy_error", "_valid_cats", "_load_phapdien", "_ingest_local_cat_gate",
                  "_resolve_nlm_notebook", "_gas", "_ingest_target", "_verify_convert_readback",
-                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline")
+                 "_apply_journal_start", "_journal_append", "_imp", "apply_profile_offline",
+                 "_manifest_entries")   # r285: khai TƯỜNG MINH (trước: rò rỉ từ khối r87)
         _sav = {k: getattr(_TL_MODULE, k) for k in _keys}
         _realimp = _TL_MODULE._imp
         import tempfile as _tf
@@ -10371,7 +10491,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb115"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd115", "srcId": "sr115"}
+                    return {"ok": True, "fileId": "gd115", "srcId": "sr115",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd115", "src_id": "sr115"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd115", "src_id": "sr115",
                                                    "name": "Luat_01-2026-QH16_Test",
@@ -10392,6 +10514,9 @@ def run() -> int:
                 "need_mkdir": False, "cat_valid": True, "review_cat": False, "cat_note": ""}
             _TL_MODULE._resolve_nlm_notebook = lambda nid: ("nb115", None)
             _TL_MODULE._gas = lambda: _G115i()
+            # r285: corpus TRỐNG là kịch bản CỦA CHÍNH ca này (không có dòng nào để dedup) —
+            # trước đây nó mượn stub rò rỉ từ khối r87 nên chưa từng được khai ra.
+            _TL_MODULE._manifest_entries = lambda refresh=False: []
             _TL_MODULE._ingest_target = lambda g, sh, nm: (_ for _ in ()).throw(AssertionError("target in dead-cookie"))
             _TL_MODULE._verify_convert_readback = lambda g, **kw: {"ok": True, "checks": []}
             _TL_MODULE._apply_journal_start = lambda *a, **k: "run115i"
@@ -10536,7 +10661,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb116"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd116", "srcId": "sr116"}
+                    return {"ok": True, "fileId": "gd116", "srcId": "sr116",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd116", "src_id": "sr116"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd116", "src_id": "sr116",
                                                    "name": "Luat_02-2026-QH16_Test116",
@@ -11163,12 +11290,27 @@ def run() -> int:
                     else:
                         os.environ[_k] = _v
 
+    # r293 (hoà nhánh v1.36.33) — GỠ ca `r285_hang_cuoi_config_van_con_va_la_ngoai_le_duy_nhat` của
+    # nhánh này: PHIÊN KHÁC đã vá CÙNG lỗi trên master (`2b6da92` r292 v1.36.27) và bản của họ BAO TRỌN
+    # bản của tôi. Ca `r284` ngay dưới nay có 4 vế: ok1 (hằng escape còn trong danh sách thô) ∧ ok2 (loại
+    # ĐÚNG MỘT mục — bắt 'lọc quá tay' NGAY TẠI NGUYÊN NHÂN, thứ bản tôi không có) ∧ ok4 (mọi ứng viên
+    # còn lại nằm trong khung cô lập) ⇒ suy ra đúng mệnh đề ca đã gỡ khẳng định (`hằng escape là ứng viên
+    # NGOÀI tempdir DUY NHẤT`). Giữ cả hai = hai bản cùng một fix + HAI tên cho CÙNG một literal
+    # (`_HANG_CUOI_285` và `_ESCAPE284`) ⇒ hai nguồn sự thật. Xem mục ★ v1.36.33 CHANGELOG.
+
     def _c284_khung_test_khong_doc_config_that():
         # r284 CHỐT CHẶN TÁI PHÁT (ca thật 31-07: user chạy deploy trên cây canonical, selftest 1483/1490 —
         # 7 case r281/r283 ĐỎ vì `tra_luat_config.v2.json` nằm CẠNH skill, mà `_config_candidates` xếp
         # `HERE.parent` TRƯỚC `~/.tra_luat_config.json`; worktree không có tệp đó nên xanh GIẢ).
         # Chốt: bên trong khung cô lập, MỌI ứng viên config phải nằm trong tempdir — không được có đường
-        # nào trỏ ra kho thật. `/tmp/...` là hằng cuối của hàm, không tồn tại trên máy Windows, bỏ qua.
+        # nào trỏ ra kho thật.
+        # r292 — CA PHỤ THUỘC NỀN TẢNG (CI ubuntu ĐỎ liên tục r284→r291, Windows xanh; đo `--log-failed`:
+        # `1501/1502` rồi `1502/1503`, luôn đúng MỘT ca là ca này). Bộ lọc cũ loại theo TIỀN TỐ `/tmp/`.
+        # Trên Linux `TemporaryDirectory()` NẰM TRONG `/tmp/` ⇒ tiền tố ấy nuốt SẠCH cả 5 ứng viên hợp lệ,
+        # `_cands` rỗng, `bool(_cands)` = False ⇒ ĐỎ. Trên Windows tempdir là `C:\...\Temp\...` nên chỉ
+        # hằng bị loại ⇒ XANH. Nay loại ĐÚNG MỘT hằng escape theo GIÁ TRỊ — tất định trên mọi nền tảng.
+        _ESCAPE284 = "/tmp/tra_luat_config.json"   # hằng CUỐI của `_config_candidates` (profile_env.py:67):
+        # escape hatch CỐ Ý cho môi trường không HOME; tuyệt đối KHÔNG nằm trong tempdir ở bất kỳ nền tảng nào.
         import tempfile as _tf284g
         _sav = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
         _here = _TL_MODULE.HERE
@@ -11179,9 +11321,19 @@ def run() -> int:
                 os.environ["USERPROFILE"] = _d
                 os.chdir(_d)
                 _TL_MODULE.HERE = Path(_d) / "scripts"
-                _cands = [c for c in _TL_MODULE._config_candidates(None) if not c.startswith("/tmp/")]
+                _raw = _TL_MODULE._config_candidates(None)
+                _cands = [c for c in _raw if c != _ESCAPE284]
                 _real = Path(_d).resolve()
-                return bool(_cands) and all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                # (a) hằng escape PHẢI còn trong danh sách thô: ai đó đổi/bỏ nó thì bộ lọc dưới thành
+                #     vô nghĩa và ca này sẽ chứng nhận RỖNG — bắt ngay tại đây thay vì xanh giả.
+                ok1 = _ESCAPE284 in _raw
+                # (b) loại ĐÚNG MỘT mục — chốt chặn chính bệnh của bộ lọc tiền tố cũ: LỌC QUÁ TAY.
+                #     Trên Linux bộ lọc cũ loại 6/6; vế này làm ca đó ĐỎ ngay tại nguyên nhân.
+                ok2 = len(_cands) == len(_raw) - 1
+                ok3 = bool(_cands)
+                # (c) mọi ứng viên còn lại phải NẰM TRONG khung cô lập (bất biến gốc của r284)
+                ok4 = all(Path(c).resolve().is_relative_to(_real) for c in _cands)
+                return ok1 and ok2 and ok3 and ok4
             finally:
                 os.chdir(_cwd)
                 _TL_MODULE.HERE = _here
@@ -11255,6 +11407,15 @@ def run() -> int:
             def post(self, action, **kw):
                 if action == "reg_delete":
                     _calls282["reg_delete"] += 1
+                    # r289: fake này TRƯỚC ĐÂY trả `{"ok": True}` TRẦN — thiếu `removed`/`not_found`/
+                    # `skipped_live` mà API_CONTRACT §reg_delete khai là LUÔN có. Readback client của
+                    # PRO-01 đọc đúng ba trường đó, nên fake phải khớp HỢP ĐỒNG THẬT; giữ `{"ok": True}`
+                    # trần là bắt bản vá phải tin một `ok` trần — tức đúng cái bệnh đang chữa.
+                    try:
+                        _n = len(json.loads(kw.get("drive_ids") or "[]"))
+                    except Exception:  # noqa: BLE001
+                        _n = 0
+                    return {"ok": True, "requested": _n, "removed": _n, "not_found": 0, "skipped_live": 0}
                 return {"ok": True}
 
         class _NC282:
@@ -11488,6 +11649,317 @@ def run() -> int:
         return (_rc == 0 and isinstance(_exp, dict) and _exp.get("profile") == "DUAN"
                 and _exp.get("treeHash") == "TH_D")
     _t110("r283_export_doc_dung_cache_profile", _c283_export_cung_theo_profile)
+
+    def _run_manifest286(cfg_obj, profile, gas_entries=None, cfg_on_disk=True):
+        """r286 HÀNH VI: áp profile qua `apply_profile_offline` THẬT rồi đọc `_manifest_entries` THẬT.
+        Trả (entries|None, lỗi, các thư mục cache ĐƯỢC TẠO). GAS giả LUÔN trả manifest NỀN — đúng như
+        webapp làm khi scope rỗng: đó chính là cái bẫy của F09.
+        Cô lập HOME + cwd + HERE (bài học r284: thiếu HERE là test phụ thuộc máy)."""
+        import tempfile as _tf286
+        _keys286 = ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_REGISTRY_DOC_ID", "TL_MANIFEST_ID",
+                    "TL_CATEGORIES_MODE", "TL_MANIFEST_SCOPE", "TL_BASE_ALSO", "TL_ROOT_FOLDER_ID",
+                    "TL_META_FOLDER_ID", "TL_NOTEBOOK_ID", "TL_OVERFLOW_NOTEBOOK_ID",
+                    "TL_PROFILE_ENV_OVERLAY", "TL_WEBAPP", "TL_TOKEN", "HOME", "USERPROFILE")
+        _sav286 = {k: os.environ.get(k) for k in _keys286}
+        _savfn286 = {k: getattr(_TL_MODULE, k) for k in ("_gas", "_gas_get_retry", "CACHE", "HERE")}
+        _cwd286 = os.getcwd()
+        _nen286 = list(gas_entries if gas_entries is not None
+                       else [{"drive_id": "dNEN", "so_hieu": "45/2024/QH15", "name": "Luat_NEN"}])
+        with _tf286.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            try:
+                for _k in _keys286:
+                    os.environ.pop(_k, None)
+                os.environ["HOME"] = _d
+                os.environ["USERPROFILE"] = _d
+                os.chdir(_d)
+                _TL_MODULE.HERE = Path(_d) / "scripts"
+                if cfg_on_disk:
+                    with open(os.path.join(_d, ".tra_luat_config.json"), "w", encoding="utf-8") as _f:
+                        json.dump(cfg_obj, _f, ensure_ascii=False)
+                _cache286 = Path(_d) / ".tra_luat_cache"
+                _TL_MODULE.CACHE = _cache286
+                _TL_MODULE._gas = lambda: None
+                _TL_MODULE._gas_get_retry = lambda g, action, **kw: (
+                    {"ok": True, "entries": _nen286, "treeHash": "TH"} if action == "manifest_export"
+                    else {"ok": True})
+                _be = _io27.StringIO()
+                with _ctx27.redirect_stderr(_be):
+                    _TL_MODULE.apply_profile_offline(None, profile)
+                    try:
+                        _ents = _TL_MODULE._manifest_entries(refresh=False)
+                        _err = None
+                    except Exception as e:  # noqa: BLE001
+                        _ents, _err = None, str(e)
+                _dirs = sorted(p.name for p in _cache286.iterdir()) if _cache286.is_dir() else []
+                return _ents, _err, _dirs
+            finally:
+                os.chdir(_cwd286)
+                for _k, _v in _savfn286.items():
+                    setattr(_TL_MODULE, _k, _v)
+                for _k, _v in _sav286.items():
+                    if _v is None:
+                        os.environ.pop(_k, None)
+                    else:
+                        os.environ[_k] = _v
+
+    _cfg286 = {"webappUrl": "u", "token": "t",
+               "profiles": {"vbqppl": {"registryDocId": "REG_NEN"},
+                            "NQ80": {"registryDocId": "REG_80", "manifestId": "MAN_80", "categories": "own"}}}
+
+    def _c286_profile_ma_khong_muon_duoc_corpus_nen():
+        # P16-F09 LÕI: gõ sai 'NQ8O' (chữ O thay số 0) ⇒ TRƯỚC vá: trả TRỌN corpus NỀN dưới nhãn NQ8O.
+        # Nay fail-closed; và KHÔNG tạo thư mục cache mang tên ma — cache ma mới là thứ SỐNG SÓT sau lệnh.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ8O")
+        return _ents is None and "PROFILE_NOT_FOUND" in (_err or "") and "NQ8O" not in _dirs
+    _t110("r286_profile_ma_doc_fail_closed_khong_tao_cache", _c286_profile_ma_khong_muon_duoc_corpus_nen)
+
+    def _c286_profile_that_van_doc_duoc():
+        # PHẢN CHỨNG: profile THẬT ⇒ đọc bình thường (chốt không được chặn ca đúng).
+        _ents, _err, _dirs = _run_manifest286(_cfg286, "NQ80")
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN" and "NQ80" in _dirs
+    _t110("r286_profile_that_van_doc_binh_thuong", _c286_profile_that_van_doc_duoc)
+
+    def _c286_corpus_nen_van_doc_duoc():
+        # PHẢN CHỨNG: corpus NỀN (không truyền profile) không bị ảnh hưởng.
+        _ents, _err, _dirs = _run_manifest286(_cfg286, None)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_corpus_nen_van_doc_binh_thuong", _c286_corpus_nen_van_doc_duoc)
+
+    def _c286_env_only_khong_config_van_chay():
+        # PHẢN CHỨNG §9: profile env-only (KHÔNG có file config nào) là đường HỢP LỆ —
+        # `_apply_unconfigured_profile_env` chạy, chốt phải được GỠ, không được chặn oan.
+        _ents, _err, _dirs = _run_manifest286(None, "ENVONLY", cfg_on_disk=False)
+        return _err is None and bool(_ents) and _ents[0]["drive_id"] == "dNEN"
+    _t110("r286_env_only_profile_khong_bi_chan_oan", _c286_env_only_khong_config_van_chay)
+
+    def _c286_chot_duoc_go_khi_quay_ve_profile_that():
+        # Chốt là ENV ⇒ phải chứng minh nó được GỠ khi cùng-process chuyển sang profile hợp lệ; nếu không,
+        # một lần gõ sai sẽ làm hỏng mọi lệnh sau trong cùng tiến trình (vd `tl loop`).
+        _sav = {k: os.environ.get(k) for k in ("TL_PROFILE", "TL_PROFILE_MISSING", "TL_PROFILE_ENV_OVERLAY")}
+        try:
+            os.environ["TL_PROFILE_MISSING"] = "NQ8O"
+            _TL_MODULE._apply_profile_env(_cfg286, "NQ80")
+            return os.environ.get("TL_PROFILE_MISSING") is None
+        finally:
+            for _k, _v in _sav.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+    _t110("r286_chot_duoc_go_khi_doi_sang_profile_hop_le", _c286_chot_duoc_go_khi_quay_ve_profile_that)
+
+    def _diff287(before_cv, after_cv, extra_before=None, extra_after=None):
+        """r287: gọi `_live_state_diff` THẬT trên hai ảnh chụp ghi ra tệp (đúng đường determinism-audit)."""
+        # `_live_state_diff` là NỘI BỘ của tl_core.live (không có trong bind-list tl.py — đúng thiết kế,
+        # production gọi nó từ trong chính module). Lấy thẳng module: hàm ở đây ĐÃ được `bind()` rebase
+        # nên là ĐÚNG object mà đường sản xuất chạy, không phải bản chưa bind.
+        import tempfile as _tf287
+        import tl_core.live as _lv287
+        _b = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(before_cv), "volatile": {"generatedEpoch": 1}}
+        _a = {"schema": "live_state_snapshot.v1", "skill": {"version": "1.0"},
+              "command_versions": dict(after_cv), "volatile": {"generatedEpoch": 2}}
+        _b.update(extra_before or {})
+        _a.update(extra_after or {})
+        with _tf287.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _pb = os.path.join(_d, "b.json")
+            _pa = os.path.join(_d, "a.json")
+            for _p, _o in ((_pb, _b), (_pa, _a)):
+                with open(_p, "w", encoding="utf-8") as _f:
+                    json.dump(_o, _f, ensure_ascii=False)
+            return _lv287._live_state_diff(_pb, _pa)
+
+    _OK287 = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.4", "returncode": 0},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+    _TO287 = {"nlm": {"command": "nlm", "ok": False, "version": "", "returncode": None,
+                      "error": "TimeoutExpired: … timed out after 10 seconds"},
+              "python": {"command": "python", "ok": True, "version": "3.13.0", "returncode": 0}}
+
+    def _c287_probe_khong_on_dinh_duoc_mien():
+        # P16-T03 LÕI: một ảnh probe TIMEOUT, ảnh kia kịp ⇒ TRƯỚC vá: diff ok=false ⇒ gate deploy ĐỎ oan
+        # (đã chặn deploy 3 lần). Nay: miễn trừ, và phải NÓI RA lý do (không miễn im lặng).
+        _d = _diff287(_TO287, _OK287)
+        _cv = [c for c in _d["changes"] if c["path"].startswith("command_versions.nlm.")]
+        return (_d["ok"] is True and _d["unexpected_changes"] == [] and bool(_cv)
+                and all(c.get("allowed_reason") == "PROBE_CONG_CU_NGOAI_KHONG_ON_DINH" for c in _cv))
+    _t110("r287_probe_ngoai_khong_on_dinh_duoc_mien", _c287_probe_khong_on_dinh_duoc_mien)
+
+    def _c287_doi_chieu_nguoc_cung_duoc_mien():
+        # Đối xứng: timeout ở ảnh SAU cũng phải được miễn (bệnh xảy ra cả hai chiều — đã gặp cả hai).
+        return _diff287(_OK287, _TO287)["ok"] is True
+    _t110("r287_mien_doi_xung_ca_hai_chieu", _c287_doi_chieu_nguoc_cung_duoc_mien)
+
+    def _c287_version_doi_that_van_bao():
+        # ★PHẢN CHỨNG QUAN TRỌNG NHẤT: hai bên CÙNG đo được (ok=True cả hai) mà version KHÁC nhau ⇒ công
+        # cụ thật sự đổi phiên bản giữa hai lần chạy — VẪN PHẢI BÁO. Miễn trừ mù sẽ nuốt mất ca này.
+        _moi = {"nlm": {"command": "nlm", "ok": True, "version": "nlm version 0.9.5", "returncode": 0},
+                "python": _OK287["python"]}
+        _d = _diff287(_OK287, _moi)
+        return (_d["ok"] is False
+                and any(c["path"] == "command_versions.nlm.version" for c in _d["unexpected_changes"]))
+    _t110("r287_version_doi_that_van_bi_bao", _c287_version_doi_that_van_bao)
+
+    def _c287_khong_noi_long_duong_khac():
+        # PHẢN CHỨNG: miễn trừ CHỈ áp cho `command_versions.<tool>` có probe hỏng — mọi đường khác giữ
+        # nguyên fail-closed (không được nhân tiện nới lỏng cả diff).
+        _d = _diff287(_TO287, _OK287, extra_before={"registry": {"id": "REG_A"}},
+                      extra_after={"registry": {"id": "REG_B"}})
+        return (_d["ok"] is False
+                and [c["path"] for c in _d["unexpected_changes"]] == ["registry.id"])
+    _t110("r287_khong_noi_long_duong_ngoai_command_versions", _c287_khong_noi_long_duong_khac)
+
+    def _c287_hai_anh_giong_het_van_ok():
+        # PHẢN CHỨNG: hai ảnh giống hệt ⇒ ok=true, 0 thay đổi (bản vá không tự chế ra khác biệt).
+        _d = _diff287(_OK287, _OK287)
+        return _d["ok"] is True and _d["summary"]["changed"] == 0
+    _t110("r287_hai_anh_giong_het_van_ok", _c287_hai_anh_giong_het_van_ok)
+
+    # ═══ r288 (v1.36.26) — GATE-01: raw drift phải được GIẢI THÍCH TRỌN bởi khoá ĐÃ KHAI ═══
+    # Audit lõi 31-07 chẩn `golden-test` ghi `raw_stable:false` mà vẫn `ok:true` là gate xanh giả — ĐÚNG
+    # cơ chế. Nhưng ĐO ra triệu chứng NGƯỢC với cách audit/kế hoạch hiểu: 20 case golden chỉ 1 case
+    # raw-unstable (`sweep`), dòng lệch DUY NHẤT là `snapshot_age_s` — vốn ĐÃ khai volatile, tức lành.
+    # Cưỡng chế "raw_stable=false ⇒ ok=false" trần trụi (đề xuất gốc) làm gate ĐỎ NGAY ở case lành đó.
+    #
+    # ★ KHE HỞ THẬT (đo được, cả audit lẫn kế hoạch đều không nêu): `audit_projection` chỉ scrub theo
+    #   khoá đã khai, còn `_json_dumps(deterministic=True)` SẮP XẾP khoá ⇒ stdout lệch THỨ TỰ KHOÁ cho
+    #   projection y hệt. Đây đúng là lớp bug iteration-order của set/dict — bản cũ trả ok=true trọn vẹn.
+    # ★ Patch phải đặt trên MODULE `tl_core.workflow`: đã ĐO `_golden_test.__globals__ is
+    #   tl_core.workflow.__dict__` (bind COPY-globals như ocr.py, KHÔNG rebase về namespace tl như
+    #   ingest_ops) — patch nhầm chỗ là test xanh GIẢ.
+    import tl_core.workflow as _w288
+
+    def _raw288(pairs):
+        import json as _j288
+        return _j288.dumps(dict(pairs), ensure_ascii=False, indent=2) + chr(10)
+
+    def _golden288(raws, *, volatile=None, write=False):
+        """Chạy `_golden_test` THẬT trên một case bịa; `raws` = stdout của hai lượt liên tiếp."""
+        import json as _j288, tempfile as _tf288
+        from pathlib import Path as _P288
+        _seq, _td = list(raws), _tf288.mkdtemp()
+        _names = ("_GOLDEN_CASES", "_run_tl_json", "_golden_ensure_fixtures", "_golden_dir",
+                  "_golden_args", "_golden_env")
+        _saved = {k: getattr(_w288, k) for k in _names}
+        try:
+            _w288._GOLDEN_CASES = [{"id": "c288", "file": "c288.json", "args": ["x288"],
+                                    "volatile_keys": list(volatile or [])}]
+            _w288._golden_ensure_fixtures = lambda: None
+            _w288._golden_dir = lambda: _P288(_td)
+            _w288._golden_args = lambda case: ["x288"]
+            _w288._golden_env = lambda case: {}
+            _w288._run_tl_json = lambda args, **kw: (lambda s: {"stdout": s, "returncode": 0,
+                                                               "data": _j288.loads(s)})(_seq.pop(0))
+            return _w288._golden_test(write=write), _P288(_td) / "c288.json"
+        finally:
+            for _k, _v in _saved.items():
+                setattr(_w288, _k, _v)
+
+    # nội dung Y HỆT, chỉ khác THỨ TỰ KHOÁ ⇒ projection trùng, raw lệch
+    _ORDER288 = (_raw288([("schema", "x.v1"), ("alpha", 1), ("beta", 2)]),
+                 _raw288([("schema", "x.v1"), ("beta", 2), ("alpha", 1)]))
+    # chỉ khác Ở KHOÁ ĐÃ KHAI volatile ⇒ lành, phải GIỮ XANH (chính là ca `sweep` ngoài đời)
+    _VOL288 = (_raw288([("schema", "x.v1"), ("snapshot_age_s", 10)]),
+               _raw288([("schema", "x.v1"), ("snapshot_age_s", 11)]))
+
+    def _c288_helper_quy_dung_khoa():
+        # đơn vị. ★ r294 ĐỔI HỢP ĐỒNG: trả ĐƯỜNG DẪN (tuple gốc→lá) thay tên khoá lá.
+        #   Ca phần tử MẢNG trước đây ra `([], False)`; nay quy được về chính khoá chứa nó
+        #   (`('arr',)`, True). KHÔNG phải nới lỏng: nếu `arr` chưa khai thì người gọi vẫn ĐỎ —
+        #   ca `r294_mang_trong_khoa_chua_khai_van_do` khoá đúng KẾT QUẢ đó, thay vì khoá cơ chế.
+        _k1, _a1 = _w288._raw_drift_keys(*_VOL288)
+        _k2, _a2 = _w288._raw_drift_keys('{\n  "arr": [\n    1\n  ]\n}', '{\n  "arr": [\n    2\n  ]\n}')
+        _k3, _a3 = _w288._raw_drift_keys(_VOL288[0], _VOL288[0])
+        # dòng NGOÀI mọi khoá (banner không phải JSON) vẫn phải fail-closed
+        _k4, _a4 = _w288._raw_drift_keys('banner A\n{\n  "x": 1\n}', 'banner B\n{\n  "x": 1\n}')
+        return (_k1 == [("snapshot_age_s",)] and _a1 is True
+                and _k2 == [("arr",)] and _a2 is True
+                and _k3 == [] and _a3 is True
+                and _k4 == [] and _a4 is False)         # ★ [] mà attributed=False: KHÔNG được đọc thành "sạch"
+    _t110("r288_helper_quy_dong_lech_ve_khoa", _c288_helper_quy_dung_khoa)
+
+    def _c288_thu_tu_khoa_lech_bi_bat():
+        # ★ CA LÕI: projection ỔN ĐỊNH (đã sort) nhưng stdout BẤT ĐỊNH thật. Trước vá: ok=true.
+        _res, _ = _golden288(_ORDER288)
+        _c = _res["cases"][0]
+        return (_res["ok"] is False and _c["ok"] is False
+                and _c["projection_stable"] is True and _c["raw_stable"] is False
+                and _c["error"] == "RAW_UNSTABLE_UNDECLARED"
+                and _c["raw_drift_undeclared"] == ["alpha", "beta"])
+    _t110("r288_raw_lech_khoa_chua_khai_lam_do_case", _c288_thu_tu_khoa_lech_bi_bat)
+
+    def _c288_write_tu_choi_ghi_fixture():
+        # Lỗ NẶNG NHẤT của bản cũ: `--write` đóng băng luôn cái bất định vào golden. Nay phải TỪ CHỐI ghi.
+        _res, _p = _golden288(_ORDER288, write=True)
+        return (_res["ok"] is False and _res["cases"][0].get("written") is False
+                and not _p.exists())
+    _t110("r288_write_khong_ghi_fixture_khi_drift_chua_khai", _c288_write_tu_choi_ghi_fixture)
+
+    def _c288_khoa_da_khai_van_xanh():
+        # ★ PHẢN CHỨNG GIỮ `sweep` SỐNG: lệch đúng khoá đã khai volatile ⇒ KHÔNG được làm đỏ case.
+        _res, _ = _golden288(_VOL288, volatile=["snapshot_age_s"], write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is False and _c["ok"] is True
+                and _c.get("error") is None and _c["raw_drift_undeclared"] == [])
+    _t110("r288_drift_khoa_da_khai_khong_lam_do", _c288_khoa_da_khai_van_xanh)
+
+    def _c288_raw_on_dinh_khong_doi_gi():
+        # PHẢN CHỨNG: hai lượt stdout giống hệt ⇒ đường cũ nguyên vẹn, không sinh trường lạ.
+        _res, _ = _golden288((_VOL288[0], _VOL288[0]), write=True)
+        _c = _res["cases"][0]
+        return (_c["raw_stable"] is True and _c["ok"] is True
+                and "raw_drift_undeclared" not in _c)
+    _t110("r288_raw_on_dinh_giu_nguyen_duong_cu", _c288_raw_on_dinh_khong_doi_gi)
+
+    # ═══ r294 — GATE-01 hết BÁO GIẢ vì BẤT ĐỐI XỨNG quy-khoá ═══
+    # `audit_projection` che TRỌN CÂY CON của khoá đã khai (`out[key] = "<volatile>"`), còn
+    # `_raw_drift_keys` của r288 chỉ rút TÊN KHOÁ LÁ ⇒ drift bên trong khoá container ĐÃ KHAI
+    # sinh khoá lá "chưa khai" ⇒ RAW_UNSTABLE_UNDECLARED = BÁO GIẢ. Ca thật đã tái hiện được:
+    # `doc_claims_check_fixture` khai volatile `basis`, mà `basis` là dict 13 trường (`max_r`,
+    # `changelog_versions`, `sha_lens` là MẢNG…). Khi CHANGELOG.md bị ghi đúng vào khe giữa hai
+    # lượt chạy con — tức ĐÚNG LÚC LAND một bản — `max_r` nhảy số ⇒ gate ĐỎ oan.
+    _NEST294 = (_raw288([("schema", "x.v1"), ("basis", {"max_r": 292, "sha_lens": [7, 7]})]),
+                _raw288([("schema", "x.v1"), ("basis", {"max_r": 293, "sha_lens": [7, 8]})]))
+
+    def _c294_drift_trong_khoa_da_khai_khong_bao_gia():
+        # ĐỎ TRƯỚC / XANH SAU: khai `basis` volatile ⇒ mọi drift BÊN TRONG nó phải được tha,
+        # y như projection đã che trọn cây con ấy.
+        _res, _ = _golden288(_NEST294, volatile=["basis"], write=True)
+        _c = _res["cases"][0]
+        return (_c["projection_stable"] is True and _c["raw_stable"] is False
+                and _c["ok"] is True and _c.get("error") is None
+                and _c["raw_drift_undeclared"] == []
+                and "basis.max_r" in _c["raw_drift_keys"])
+    _t110("r294_drift_trong_khoa_da_khai_khong_bao_gia", _c294_drift_trong_khoa_da_khai_khong_bao_gia)
+
+    # lệch THỨ TỰ KHOÁ bên trong `basis`: projection (đã sort) vẫn ỔN ĐỊNH nên tới được nhánh raw.
+    # Nếu lệch GIÁ TRỊ mà không khai gì thì projection cũng lệch ⇒ bị chặn sớm hơn ở
+    # AUDIT_PROJECTION_UNSTABLE, KHÔNG tới nhánh này — đo được, nên ca dưới cố ý dùng lệch thứ tự.
+    _NESTORD294 = (_raw288([("schema", "x.v1"), ("basis", {"alpha": 1, "beta": 2})]),
+                   _raw288([("schema", "x.v1"), ("basis", {"beta": 2, "alpha": 1})]))
+
+    def _c294_drift_trong_khoa_chua_khai_van_do():
+        # PHẢN CHỨNG 1: KHÔNG được nới thành "cứ lồng nhau là tha". Cùng khuôn lồng nhưng KHÔNG khai
+        # `basis` ⇒ vẫn ĐỎ, và báo cáo chỉ đúng ĐƯỜNG DẪN `basis.alpha`, không phải tên lá trần.
+        _res, _ = _golden288(_NESTORD294, write=True)
+        _c = _res["cases"][0]
+        return (_c["projection_stable"] is True and _c["ok"] is False
+                and _c["error"] == "RAW_UNSTABLE_UNDECLARED"
+                and "basis.alpha" in _c["raw_drift_undeclared"])
+    _t110("r294_drift_trong_khoa_chua_khai_van_do", _c294_drift_trong_khoa_chua_khai_van_do)
+
+    def _c294_mang_trong_khoa_chua_khai_van_do():
+        # PHẢN CHỨNG 2: ca PHẦN TỬ MẢNG đổi cơ chế (nay quy được về khoá chứa) nhưng KẾT QUẢ giữ
+        # nguyên — khoá chứa chưa khai thì vẫn ĐỎ. Đây là vế bảo đảm r294 không mở lỗ fail-OPEN.
+        _arr = (_raw288([("schema", "x.v1"), ("arr", [1])]),
+                _raw288([("schema", "x.v1"), ("arr", [2])]))
+        _do, _ = _golden288(_arr, write=True)
+        _xanh, _ = _golden288(_arr, volatile=["arr"], write=True)
+        # khoá KẾT QUẢ (đỏ/xanh), KHÔNG khoá mã lỗi: chưa khai thì có thể bị chặn sớm hơn ở
+        # AUDIT_PROJECTION_UNSTABLE — vẫn là ĐỎ, vẫn là fail-closed, đó mới là điều cần bảo đảm.
+        return (_do["cases"][0]["ok"] is False
+                and _xanh["cases"][0]["ok"] is True
+                and _xanh["cases"][0]["raw_drift_undeclared"] == [])
+    _t110("r294_mang_trong_khoa_chua_khai_van_do", _c294_mang_trong_khoa_chua_khai_van_do)
 
     def _c117_sr_batch_and_noop():
         # A-#12: batch N sid trong 1 process; sid đã gỡ (deleted_count=0) → noop OK (idempotent, không FAIL).
@@ -18063,7 +18535,12 @@ def run() -> int:
 
     def _c188_docx_reader_bounded_wired():
         # document.xml vượt trần (env cap 1MB) → _docx_unzip_text trả "" fail-safe (không OOM) và
-        # docx_markup.scan_file trả 0 thể; docx thường (dưới trần) vẫn đọc bình thường.
+        # docx_markup.scan_file KHAI `UNREADABLE`; docx thường (dưới trần) vẫn đọc bình thường.
+        # ★r316 ĐỔI KHẾ ƯỚC ở dòng scan_file: bản gốc r188 đòi `sum(...) == 0`, tức docx vượt trần
+        #  được báo là SẠCH MARKUP. Đó chính là fail-open r316 đi chữa — và là ca THỨ HAI của nó
+        #  (ca thứ nhất: container CDN đặt tên entry bằng '\'). Vượt trần = KHÔNG ĐO ĐƯỢC, không
+        #  phải "đo được và bằng 0". Phần còn lại của r188 (reader bounded, không OOM, docx thường
+        #  vẫn đọc được, cap đọc đúng từ env) GIỮ NGUYÊN.
         import zipfile as _zf188
         _sv_env = os.environ.get("TL_DOCX_XML_MAX_MB")
         try:
@@ -18079,7 +18556,9 @@ def run() -> int:
                 _dm188 = __import__("docx_markup")
                 return (_TL_MODULE._docx_unzip_text(_big) == ""
                         and "văn bản 188" in _TL_MODULE._docx_unzip_text(_ok_doc)
-                        and sum(_dm188.scan_file(_big).values()) == 0
+                        and _dm188.scan_file(_big).get(_dm188.UNREADABLE) is True
+                        and not _dm188.scan_file(_ok_doc).get(_dm188.UNREADABLE)
+                        and sum(_dm188.scan_file(_ok_doc).values()) == 0
                         and _ie187.docx_xml_max_bytes() == 1024 * 1024)
         finally:
             if _sv_env is None:
@@ -18249,7 +18728,9 @@ def run() -> int:
                 if action == "bootstrap":
                     return {"inboxFolderId": "inb191"}
                 if action in ("organize", "ingest_commit"):   # r205
-                    return {"ok": True, "fileId": "gd191", "srcId": "sr191"}
+                    return {"ok": True, "fileId": "gd191", "srcId": "sr191",   # r291: khớp HỢP ĐỒNG THẬT (doIngestCommit_ luôn kèm 3 marker + row khi ok:true) — fake trần bắt cổng ING-03 phải tin một `ok` trần
+                            "organize_done": True, "rename_done": True, "upsert_done": True,
+                            "row": {"drive_id": "gd191", "src_id": "sr191"}}
                 if action == "reg_get":
                     return {"ok": True, "rows": [{"drive_id": "gd191", "src_id": "sr191",
                                                   "name": "Nghi_dinh_158_Test",
@@ -20496,13 +20977,43 @@ def run() -> int:
 
     def _c209_cay_that_va_phan_chung():
         # H9 nghiệm thu trên CÂY THẬT: 0 cặp fail sau H0+H1; advisory (DOCTRINE) vẫn ĐƯỢC BÁO;
-        # đủ 10 baseline hit (ratchet đang gài, không vacuous). PHẢN CHỨNG 2 CHIỀU: bơm đúng
+        # baseline hit đủ số (ratchet đang gài, không vacuous). PHẢN CHỨNG 2 CHIỀU: bơm đúng
         # dòng SKILL.md TRƯỚC-H0 → guard phải ĐỎ đúng 2 con trỏ ma.
+        #
+        # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
+        # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
+        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
+        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return True
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        pset = set(paths)
         docs = {}
-        for dp in sorted((root / "references").glob("*.md")) + [root / "SKILL.md"]:
-            docs[dp.relative_to(root).as_posix()] = dp.read_text(encoding="utf-8", errors="replace")
-        paths = []
+        for rel in sorted(p for p in paths if p.lower().endswith(".md")):
+            fp = root / rel
+            if fp.is_file():
+                docs[rel] = fp.read_text(encoding="utf-8", errors="replace")
+        r = _rel209._doc_pointer_findings(docs, paths)
+        ok1 = r["pointers_ok"] and r["pointers_fail"] == []
+        ok2 = len(r["pointers_advisory"]) >= 30
+        ok3 = len(r["pointers_baseline"]) == 3   # r218 trả 6 nợ, r226 trả thêm 1 (xem _POINTER_BASELINE)
+        # (d) tầm ĐÃ mở thật: 4 tệp .md ngoài `references/` mức 1 phải CÓ trong doc-set (r308/GATE-04),
+        #     nếu không thì ok1 xanh chỉ vì quét ít đi — đúng kiểu tự-chứng-minh mà T0-E vừa diệt.
+        ok4 = {"CHANGELOG.md", "INSTALL.md", "CONTEXT.md",
+               "scripts/_fallback/README.md"} <= set(docs)
+        cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
+        r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
+        ok5 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
+            ("SKILL.md", "scripts/tl_rebuild.sh"), ("SKILL.md", "scripts/build_parts.py")}
+        # (e) khoảng lệch đĩa-vs-gói CÓ THẬT — nếu rỗng thì (f)/(g) vacuous. Khoảng này là CƠ CHẾ, không
+        #     phải ngẫu nhiên: `_RELEASE_EXCLUDE_NAMES_ANYWHERE` cố ý GIỮ tệp dev-side trong git mà loại
+        #     khỏi gói (CLAUDE.md §TRẦN 200 TỆP). Đo 02-08: 11 tệp (4 `.gs` cũ · 2 changelog_archive ·
+        #     4 script deploy · pkg_secret_scan.py).
+        disk_only = []
         for sub in ("scripts", "references", "templates"):
             base = root / sub
             if base.is_dir():
@@ -20510,20 +21021,205 @@ def run() -> int:
                     if not q.is_file():
                         continue
                     rp = q.relative_to(root).as_posix()
-                    # mô phỏng package-set: loại runtime/cache như release walk
                     if "/.tl_state/" in ("/" + rp) or "__pycache__" in rp or rp.endswith(".pyc"):
                         continue
-                    paths.append(rp)
-        r = _rel209._doc_pointer_findings(docs, paths)
-        ok1 = r["pointers_ok"] and r["pointers_fail"] == []
-        ok2 = len(r["pointers_advisory"]) >= 30
-        ok3 = len(r["pointers_baseline"]) == 3   # r218 trả 6 nợ, r226 trả thêm 1 (xem _POINTER_BASELINE)
-        cu = "> `sh scripts/tl_rebuild.sh`. Soi mảnh hỏng: `python scripts/build_parts.py --verify`."
-        r2 = _rel209._doc_pointer_findings({"SKILL.md": cu}, paths)
-        ok4 = (not r2["pointers_ok"]) and set(r2["pointers_fail"]) == {
-            ("SKILL.md", "scripts/tl_rebuild.sh"), ("SKILL.md", "scripts/build_parts.py")}
-        return ok1 and ok2 and ok3 and ok4
+                    if rp not in pset:
+                        disk_only.append(rp)
+        ok6 = len(disk_only) > 0
+        # (f)+(g) PHÉP ĐO A/B trên CÙNG tài liệu: nguồn MANIFEST (đúng) phải ĐỎ; nguồn ĐĨA (bản cũ)
+        #         XANH — chính là con đường mà con trỏ hỏng đi lọt tới `release-verify`.
+        probe = sorted(disk_only)[0] if disk_only else ""
+        doc_probe = {"SKILL.md": "chạy `%s` nhé" % probe}
+        r3 = _rel209._doc_pointer_findings(doc_probe, paths)
+        ok7 = (not r3["pointers_ok"]) and r3["pointers_fail"] == [("SKILL.md", probe)]
+        r4 = _rel209._doc_pointer_findings(doc_probe, sorted(pset | set(disk_only)))
+        ok8 = r4["pointers_ok"]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
     _t110("r209_cay_that_va_phan_chung", _c209_cay_that_va_phan_chung)
+
+    def _c308_docset_lay_tu_manifest():
+        # r308 (T0-F/GATE-04): chứng minh WIRING trong `_verify_release_manifest` — doc-set lấy từ
+        # MANIFEST chứ không glob đĩa. Ca r209 ở trên gọi THẲNG helper nên không phủ đoạn nối; đây là
+        # chỗ từng sai. Cây GIẢ dựng tại chỗ để mỗi vế falsify được, không dựa vào cây thật.
+        import tempfile as _tf308, hashlib as _hl308
+        with _tf308.TemporaryDirectory() as _td:
+            root = _P209(_td)
+            files = {
+                "SKILL.md": "lõi skill\n",
+                # .md NGOÀI `references/` mức 1 — nguồn cũ MÙ hẳn; nay phải fail-closed
+                "CONTEXT.md": "chạy scripts/ma_song.py cho việc này\n",
+                # tài liệu LƯU TRỮ (r308 xếp hạng) — nhắc tên tệp đã xoá ⇒ advisory, KHÔNG đỏ
+                "CHANGELOG.md": "★ v0.0.1: bỏ scripts/ma_luu_tru.py\n",
+                "references/SONG.md": "xem references/SONG.md\n",
+                "scripts/tl.py": "x = 1\n",
+            }
+            for rel, body in files.items():
+                fp = root / rel
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(body, encoding="utf-8")
+            # tệp CÓ trên đĩa, NGOÀI gói (đúng lớp `_RELEASE_EXCLUDE_NAMES_ANYWHERE`): con trỏ hỏng
+            # trong nó KHÔNG được tính — quét nó là bắt gate CÂY chịu trách nhiệm cho thứ ngoài artifact.
+            (root / "references" / "NGOAI_GOI.md").write_text(
+                "chạy scripts/ma_ngoai_goi.py\n", encoding="utf-8")
+            entries = []
+            for rel in sorted(files):
+                raw = (root / rel).read_bytes()
+                entries.append({"path": rel, "size": len(raw),
+                                "sha256": _hl308.sha256(raw).hexdigest()})
+            basis = "\n".join("%s\0%d\0%s" % (e["path"], e["size"], e["sha256"]) for e in entries)
+            man = {"schema": "release_manifest.v1", "files": entries,
+                   "package_hash": _hl308.sha256(basis.encode("utf-8")).hexdigest()}
+            res = _rel209._verify_release_manifest(root, man)
+            dp = res.get("doc_pointers") or {}
+            fail, adv = set(dp.get("pointers_fail") or []), set(dp.get("pointers_advisory") or [])
+            scanned = {d for d, _ in fail | adv}
+            ok1 = ("CONTEXT.md", "scripts/ma_song.py") in fail          # (a) tầm ĐÃ mở
+            ok2 = ("CHANGELOG.md", "scripts/ma_luu_tru.py") in adv      # (b) lưu trữ ⇒ advisory
+            ok3 = ("CHANGELOG.md", "scripts/ma_luu_tru.py") not in fail #     …và KHÔNG đỏ
+            ok4 = "references/NGOAI_GOI.md" not in scanned              # (c) ngoài gói ⇒ ngoài tầm
+            # (d) phản chứng: bỏ CHANGELOG khỏi hạng lưu trữ ⇒ đúng cặp đó phải ĐỎ. Không có vế này thì
+            #     ok2/ok3 xanh cả khi guard mù tịt với CHANGELOG.
+            dp2 = _rel209._doc_pointer_findings(
+                {"CHANGELOG.md": files["CHANGELOG.md"]}, sorted(f["path"] for f in entries),
+                archive_docs=frozenset(), baseline=frozenset())
+            ok5 = (not dp2["pointers_ok"]) and dp2["pointers_fail"] == [
+                ("CHANGELOG.md", "scripts/ma_luu_tru.py")]
+            return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r308_docset_lay_tu_manifest", _c308_docset_lay_tu_manifest)
+
+    def _c309_the_workflow_trong_tam_guard():
+        # r309 (T0-F/1c): THẺ MÁY ĐỌC `references/workflows/*.json` vào tầm guard con trỏ. Ca khoá CẢ HAI
+        # vế của quyết định: thẻ VÀO tầm, và `references/golden/*.json` ĐỨNG NGOÀI — ranh giới là phần
+        # dễ trôi nhất, vì «mở cho .json» nghe như một luật đơn giản cho tới lúc đo.
+        import tempfile as _tf309, hashlib as _hl309
+        with _tf309.TemporaryDirectory() as _td:
+            root = _P209(_td)
+            files = {
+                "SKILL.md": "lõi\n",
+                # thẻ vận hành: con trỏ hỏng ⇒ PHẢI đỏ
+                "references/workflows/the_hong.json": '{"plan":["chạy scripts/ma_the.py"]}\n',
+                # đầu ra ghi sẵn của test: con trỏ hỏng là CỐ Ý (mồi cho bộ dò tệp-thiếu) ⇒ PHẢI im
+                "references/golden/fixture_moi.json": '{"path":"references/KHONG_CO_FILE.md"}\n',
+                "scripts/tl.py": "x = 1\n",
+            }
+            for rel, body in files.items():
+                fp = root / rel
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                fp.write_text(body, encoding="utf-8")
+            entries = []
+            for rel in sorted(files):
+                raw = (root / rel).read_bytes()
+                entries.append({"path": rel, "size": len(raw),
+                                "sha256": _hl309.sha256(raw).hexdigest()})
+            basis = "\n".join("%s\0%d\0%s" % (e["path"], e["size"], e["sha256"]) for e in entries)
+            man = {"schema": "release_manifest.v1", "files": entries,
+                   "package_hash": _hl309.sha256(basis.encode("utf-8")).hexdigest()}
+            dp = (_rel209._verify_release_manifest(root, man).get("doc_pointers") or {})
+            fail = set(dp.get("pointers_fail") or [])
+            scanned = {d for d, _ in fail | set(dp.get("pointers_advisory") or [])}
+            ok1 = ("references/workflows/the_hong.json", "scripts/ma_the.py") in fail   # thẻ TRONG tầm
+            ok2 = "references/golden/fixture_moi.json" not in scanned                   # golden NGOÀI tầm
+        # Cây THẬT: thẻ được quét thật (không phải chỉ đúng trên cây giả) và 0 đứt sau khi sửa lời thẻ.
+        root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return ok1 and ok2
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        cards = {p: (root / p).read_text(encoding="utf-8", errors="replace")
+                 for p in paths if p.startswith("references/workflows/") and p.endswith(".json")
+                 and (root / p).is_file()}
+        ok3 = len(cards) >= 20 and "references/workflows/doc_claims_check.json" in cards
+        r = _rel209._doc_pointer_findings(cards, paths)
+        ok4 = r["pointers_ok"] and r["pointers_fail"] == []
+        ok5 = r["pointers_checked"] > 0        # thẻ CÓ con trỏ để gác — không xanh vì rỗng
+        # phản chứng: trả lại đúng lời thẻ TRƯỚC r309 ⇒ ĐỎ đúng con trỏ dev-only đã gỡ
+        cu = "L6 số hiệu đợt rNNN, tra CHANGELOG.md + references/changelog_archive/*.md"
+        r2 = _rel209._doc_pointer_findings({"references/workflows/doc_claims_check.json": cu}, paths)
+        ok6 = (not r2["pointers_ok"]) and r2["pointers_fail"] == [
+            ("references/workflows/doc_claims_check.json", "references/changelog_archive/")]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r309_the_workflow_trong_tam_guard", _c309_the_workflow_trong_tam_guard)
+
+    def _c291_docs_ngoai_goi():
+        # T0-G (Q1 user CHỐT 01-08) — `docs/` GIỮ trong git, LOẠI khỏi GÓI (khuôn rasoat r249).
+        # Bốn vế cố ý lấy từ BỐN nguồn khác nhau, để không vế nào chứng minh chính nó:
+        #   (1) hằng chính sách · (2) sản phẩm manifest · (3) số đo ratchet · (4) CÂY THẬT.
+        # Vế (4) là phản chứng chống XANH-GIẢ: "vắng khỏi gói" có thể do .gitignore, do suffix,
+        # do tên bị loại — nên phải chứng minh chúng vắng ĐÚNG VÌ khoá `docs`, và vẫn CÒN trên đĩa.
+        root = _ROOT209
+        ok1 = "docs" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return ok1
+        j = _j209.loads(mf.read_text(encoding="utf-8"))
+        paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+        ok2 = not [p for p in paths if p.startswith("docs/")]
+        # RATCHET có chủ đích (nếp r209_baseline_ratchet): mốc 195 là số đo TRƯỚC r291. Thêm/bớt
+        # tệp trong gói ⇒ test này ĐỎ và phải sửa CÓ CHỦ ĐÍCH, kèm kê khai slot (trần 200).
+        # KÊ KHAI SLOT (hoà nhánh v1.36.32): 195 → **196**. Đúng MỘT tệp được thêm vào gói kể từ mốc đó:
+        #   + `scripts/tl_core/txn.py` — Helper 1 (Pha 1-0, r288), LÕI kết luận giao dịch mà PRO-01 (r289)
+        #     và ING-03 (r291-gate) đều dùng. Là mã RUNTIME nên KHÔNG loại khỏi gói được.
+        # Cổng này ĐỎ đúng lúc phải đỏ: nó bắt được đúng tệp đó khi hai nhánh hoà vào nhau.
+        # Sau khi `docs/` ra khỏi gói (T0-G), trần 200 còn **24 khe** (196 + 19 docs ngoài gói = 215 trên đĩa).
+        # KÊ KHAI SLOT (r329/v1.36.61 — PR #25 bootstrap work-packet D0): 196 → **198**. Thêm đúng HAI
+        # tệp docs NGOÀI GÓI: docs/prompts/CODEX_EXECUTOR_D0.md + docs/prompts/CLAUDE_REVIEWER_D0.md
+        # (.ps1 runbook/tests không tính — ratchet đếm *.md). Gói giữ 177; tổng 198/trần 200 — còn 2 khe.
+        # KÊ KHAI SLOT (r333/v1.36.65 — cứu hộ bộ hiến pháp D0): 21 → **42** Markdown dưới `docs/`.
+        # Thêm 2 protocol/plan + 17 ADR 0017–0033 + 2 báo cáo research, đều dev-side/ngoài gói.
+        # Gói vẫn 177; phép ratchet cây thật = 177 + 42 = 219. Không nới trần Package 200.
+        # KÊ KHAI SLOT (r335/v1.36.67 — activation Mission F1): 177 → **179**. Thêm đúng HAI
+        # runtime file: loader/generator `scripts/tl_core/test_fragments.py` và generated release module
+        # `scripts/tl_test_fragments_bundled.py`. Dev fragments vẫn ngoài gói; còn 21 khe dưới trần 200.
+        # KÊ KHAI SLOT (WP57/F3-00 rev2 — governance baseline): 42 → **43** Markdown dưới `docs/`.
+        # Thêm đúng ADR-0034; ADR vẫn dev-side/ngoài gói nên package giữ 179 và trần 200 không đổi.
+        # KÊ KHAI SLOT (WP57/F3-00 rev3 — automation-first): 43 → **47** Markdown dưới `docs/`.
+        # Thêm hai research note, ADR-0035 và manual successor prompt; cả bốn đều dev-side/ngoài gói.
+        # Phép ratchet cây thật = 179 + 47 = 226; trần package 200 không đổi.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 47 == 226
+        d = root / "docs"
+        tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
+        ok4 = (len(tren_dia) == 47
+               and all(not _rel209._release_should_include(q, root) for q in tren_dia)
+               and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
+                       for q in tren_dia))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c307_changelog_mot_version_mot_dot():
+        # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
+        # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version
+        # HAI LẦN với nội dung mâu thuẫn (nhánh giữ dải số riêng trong khi master đã tiêu dải đó).
+        # Nền ĐO TRƯỚC merge (`1a06ff1`) = 0 vi phạm, archive cũng 0 ⇒ cổng KHÔNG cần miễn trừ.
+        # Cố ý KHÔNG dùng vị ngữ "tiêu đề version không được lặp": v1.35.65 và v1.35.88 lặp HỢP LỆ
+        # vì là CÙNG một đợt tách hai mục (r229/r229, r251/r251) — vị ngữ theo SỐ ĐỢT tha đúng chỗ.
+        root = _ROOT209
+
+        def _viol(txt):
+            m = {}
+            for ln in txt.split("\n"):
+                g = _re209.match(r"^# \u2605 v(1\.\d+\.\d+)\b(.*)$", ln)
+                if not g:
+                    continue
+                rs = _re209.findall(r"\br(\d{2,4}[a-z]?)\b", g.group(2))
+                m.setdefault(g.group(1), set()).update(rs[:1])
+            return {v: sorted(r) for v, r in m.items() if len(r) > 1}
+
+        files = [p for p in [root / "CHANGELOG.md"] if p.exists()]
+        arc = root / "references" / "changelog_archive"
+        if arc.is_dir():
+            files.extend(sorted(arc.glob("*.md")))
+        ok1 = len(files) >= 1
+        ok2 = all(not _viol(f.read_text(encoding="utf-8", errors="replace")) for f in files)
+        # PHẢN CHỨNG TỰ MANG: thiếu vế này thì ca chỉ chứng minh "hôm nay sổ sạch", KHÔNG chứng minh
+        # cổng còn chạy — đúng lỗi TỰ-CHỨNG-MINH mà r298/T0-E vừa diệt ba ca.
+        gia = ("# \u2605 v1.36.41 \u2014 r307: mục thật\nthân bài\n"
+               "# \u2605 v1.36.41 \u2014 r999: mục giả CÙNG version KHÁC đợt\n")
+        ok3 = _viol(gia) == {"1.36.41": ["307", "999"]}
+        # ... và phải THA khi hai mục cùng version CÙNG đợt (khuôn v1.35.88/r251 có thật trên cây).
+        that = "# \u2605 v1.35.88 \u2014 r251: vế một\n# \u2605 v1.35.88 \u2014 r251: vế hai\n"
+        ok4 = _viol(that) == {}
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r307_changelog_mot_version_mot_dot", _c307_changelog_mot_version_mot_dot)
 
     def _c209_skill_md_khong_tro_file_ma():
         # H0 nghiệm thu: MỌI con trỏ references/|templates/|scripts/ trong SKILL.md tồn tại trên đĩa
@@ -20545,22 +21241,1166 @@ def run() -> int:
         return not bad
     _t110("r209_skill_md_khong_tro_file_ma", _c209_skill_md_khong_tro_file_ma)
 
+    def _c289_bare_tool_findings_pure():
+        # H9b: helper thuần — bắt tên công cụ TRẦN trong backtick (dạng `nlm_qa.py verify` mà
+        # _doc_pointer_findings MÙ vì đòi tiền tố thư mục). Khớp theo BASENAME trong package-set.
+        f = _rel209._doc_bare_tool_findings
+        pkg = ["scripts/co.py", "scripts/_fallback/boot.py", "references/y.md"]
+        strict = frozenset({"SKILL.md"})
+        # (a) tên trần THIẾU ở tài liệu SỐNG ⇒ fail; tên trần CÓ (kể cả nằm sâu _fallback/) ⇒ im
+        r = f({"SKILL.md": "chạy `ghost.py` rồi `co.py`, và `boot.py` nữa"}, pkg,
+              strict_docs=strict, baseline=frozenset())
+        ok1 = (r["bare_tools_fail"] == [("SKILL.md", "ghost.py")]) and not r["bare_tools_ok"]
+        # (b) token CÓ tiền tố thư mục ⇒ BỎ QUA (đã do _doc_pointer_findings gác, không đếm hai lần)
+        r2 = f({"SKILL.md": "xem `scripts/ghost2.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok2 = r2["bare_tools_ok"] and r2["bare_tools_checked"] == 0
+        # (c) NGOÀI backtick ⇒ không xét (tránh nuốt văn xuôi thường)
+        r3 = f({"SKILL.md": "chạy ghost3.py đi"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok3 = r3["bare_tools_ok"] and r3["bare_tools_checked"] == 0
+        # (d) tài liệu NGOÀI strict ⇒ advisory, KHÔNG chặn
+        r4 = f({"references/KHAC.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=frozenset())
+        ok4 = r4["bare_tools_ok"] and r4["bare_tools_advisory"] == [("references/KHAC.md", "ghost.py")]
+        # (e) baseline im lặng — và khớp theo CẶP: cùng tên ở doc KHÁC vẫn ĐỎ
+        bl = frozenset({("SKILL.md", "ghost.py")})
+        r5 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict, baseline=bl)
+        ok5 = r5["bare_tools_ok"] and r5["bare_tools_baseline"] == [("SKILL.md", "ghost.py")]
+        r6 = f({"SKILL.md": "`ghost.py`"}, pkg, strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        r6b = f({"references/K2.md": "`ghost.py`"}, pkg,
+                strict_docs=strict | {"references/K2.md"}, baseline=bl)
+        ok6 = r6["bare_tools_ok"] and (not r6b["bare_tools_ok"])
+        # (f) manifest rỗng ⇒ fail-closed (đồng nhất với hai guard anh em)
+        r7 = f({"SKILL.md": "`co.py`"}, [], strict_docs=strict, baseline=frozenset())
+        ok7 = not r7["bare_tools_ok"]
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r289_bare_tool_findings_pure", _c289_bare_tool_findings_pure)
+
+    def _c289_cay_that_bare_tools():
+        # H9b nghiệm thu CÂY THẬT: 0 fail ở tài liệu SỐNG sau khi dọn 7 tên ma của SKILL.md +
+        # `nlm_qa.py` của QUY_TRINH. Package-set lấy từ RELEASE_MANIFEST (nguồn sự thật của guard
+        # sản xuất) — KHÔNG mô phỏng bằng rglob đĩa: cây dev rộng hơn gói ⇒ xanh giả.
+        # PHẢN CHỨNG 2 CHIỀU: bơm lại đúng dòng SKILL.md §7 TRƯỚC-r289 ⇒ ĐỎ đúng 4 tên ma
+        # (`nlm_sources.py` CÓ THẬT trong gói nên phải im — chứng minh guard không bắt bừa).
+        root = _ROOT209
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return True
+        paths = sorted(str(x.get("path") or "") for x in
+                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+        # r308 (T0-F/GATE-04): doc-set = MỌI *.md trong manifest, khớp guard sản xuất. Lớp TRẦN mở tầm
+        # MIỄN PHÍ — đo 02-08: checked 160→237, FAIL 0→0, advisory 73→95 (4 tệp mới đều ngoài strict_docs).
+        docs = {}
+        for rel in sorted(p for p in paths if p.lower().endswith(".md")):
+            fp = root / rel
+            if fp.is_file():
+                docs[rel] = fp.read_text(encoding="utf-8", errors="replace")
+        r = _rel209._doc_bare_tool_findings(docs, paths)
+        ok1 = r["bare_tools_ok"] and r["bare_tools_fail"] == []
+        ok2 = len(r["bare_tools_advisory"]) >= 30      # DOCTRINE lưu trữ vẫn ĐƯỢC BÁO, không nuốt
+        ok3 = len(r["bare_tools_baseline"]) == 1       # placeholder `file.py` — ratchet đang gài
+        ok3b = {"CHANGELOG.md", "INSTALL.md", "CONTEXT.md",
+                "scripts/_fallback/README.md"} <= set(docs)   # tầm ĐÃ mở thật, không xanh vì quét ít
+        cu = ("- **NLM:** `nlm_push.py` · `nlm_qa.py` · `nlm_sources.py` (`-S`) · "
+              "`nlm_map.py` · `dedup_gate2.py`.")
+        r2 = _rel209._doc_bare_tool_findings({"SKILL.md": cu}, paths)
+        ok4 = (not r2["bare_tools_ok"]) and set(r2["bare_tools_fail"]) == {
+            ("SKILL.md", "nlm_push.py"), ("SKILL.md", "nlm_qa.py"),
+            ("SKILL.md", "nlm_map.py"), ("SKILL.md", "dedup_gate2.py")}
+        return ok1 and ok2 and ok3 and ok3b and ok4
+    _t110("r289_cay_that_bare_tools", _c289_cay_that_bare_tools)
+
+    def _c289_khong_con_lenh_ma_nlm_qa():
+        # r289/V2: `nlm_qa` là LỆNH MA (scripts/nlm_qa.py chưa từng có; không subcommand nào tên
+        # nlm-qa). Nó từng rò vào 4 tệp SỐNG, kể cả THẺ MÁY ĐỌC rasoat_hoso.json — tức bước A5
+        # VERIFY của Loop A trỏ vào hư không. Khoá: 3 tệp quy trình + thẻ không được nhắc lại,
+        # và lệnh thay thế `nlm-query --strict-scope` phải CÓ THẬT trong command registry.
+        root = _ROOT209
+        song = ["references/QUY_TRINH_RA_SOAT_3_TANG.md", "references/RASOAT_HOSO_LOOP.md",
+                "references/workflows/rasoat_hoso.json", "SKILL.md"]
+        ban = [p for p in song
+               if "nlm_qa" in (root / p).read_text(encoding="utf-8", errors="replace")]
+        ok1 = ban == []
+        from tl_core import command_registry as _cr289
+        _specs = getattr(_cr289, "GENERATED_SPECS", None)
+        names = {str(s.get("name") or "") for s in (_specs or [])}
+        ok2 = bool(_specs) and ("nlm-query" in names) and ("nlm-qa" not in names) and ("nlm_qa" not in names)
+        loop = (root / "references/RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        ok3 = "--strict-scope" in loop
+        return ok1 and ok2 and ok3
+    _t110("r289_khong_con_lenh_ma_nlm_qa", _c289_khong_con_lenh_ma_nlm_qa)
+
+    def _c300_vong_doi_sach():
+        # Trạng thái ĐỦ ĐIỀU KIỆN ĐÓNG (§7.1) — dùng làm nền cho mọi phản chứng dưới.
+        return {"q_units": [{"trang_thai": "done"}],
+                "q_approvals": [{"trang_thai": "da_duyet_va_da_chay"}],
+                "q_verify": [{"trang_thai": "dat"}],
+                "q_ingest": [{"trang_thai": "flipped"}],
+                "session_claim": {"id": None, "released_at": "2026-08-01"}}
+
+    def _c300_sau_ve_dong():
+        # r300: 6 vế điều kiện đóng là HÀNH VI (hàm thuần), không phải prose. Mỗi vế phá riêng lẻ
+        # phải nổi ĐÚNG mã của nó — nếu chỉ khoá "sạch thì True" thì hàm rỗng cũng qua.
+        from tl_core import lookup_ops as _lo300
+        f = _lo300._rasoat_vong_doi_findings
+        ok0 = f(_c300_vong_doi_sach())["du_dieu_kien"] is True
+        pha = [
+            ("q_units", [{"trang_thai": "doing"}], "q_units_con_pending_hoac_doing"),
+            ("q_approvals", [{"trang_thai": "cho_duyet"}], "q_approvals_con_cho_duyet"),
+            ("q_verify", [{"trang_thai": "cho_tra_no"}], "q_verify_con_cho_tra_no"),
+            ("q_verify", [{"ly_do": "DA_TRA_NO"}], "q_verify_thieu_trang_thai_enum"),
+            ("q_ingest", [{"trang_thai": "cho_tai"}], "q_ingest_con_van_ban_chua_lay_duoc"),
+            ("q_ingest", [{"trang_thai": "DA_QUYET: giu ban kho"}], "q_ingest_trang_thai_ngoai_enum"),
+            ("session_claim", {"id": "phien-x", "ts": "…"}, "session_claim_chua_nha"),
+        ]
+        for khoa, val, ma in pha:
+            st = _c300_vong_doi_sach()
+            st[khoa] = val
+            r = f(st)
+            if r["du_dieu_kien"] or ma not in r["ve_hong"]:
+                return False
+        # claim rỗng hẳn (None) cũng tính là đã nhả
+        st = _c300_vong_doi_sach()
+        st["session_claim"] = None
+        return ok0 and f(st)["du_dieu_kien"] is True
+    _t110("r300_vong_doi_sau_ve_dieu_kien_dong", _c300_sau_ve_dong)
+
+    def _c300_dong_fail_closed():
+        # Ba kiểu TỰ LỪA phải bị chặn: khai da_dong khi còn vế hỏng · da_dong_co_gioi_han mà giới hạn
+        # RỖNG (đóng im lặng — đã xảy ra thật trên hồ sơ BHXH) · trang_thai ngoài enum.
+        from tl_core import lookup_ops as _lo300
+        g = _lo300._rasoat_vong_doi_dong_hop_le
+        ok1 = g({})["ok"] is True                                   # chưa khai vòng đời ⇒ không phán
+        st = _c300_vong_doi_sach()
+        st["vong_doi"] = {"trang_thai": "da_dong"}
+        ok2 = g(st)["ok"] is True                                   # sạch + khai da_dong ⇒ hợp lệ
+        st2 = _c300_vong_doi_sach()
+        st2["q_approvals"] = [{"trang_thai": "cho_duyet"}]
+        st2["vong_doi"] = {"trang_thai": "da_dong"}
+        r2 = g(st2)
+        ok3 = (not r2["ok"]) and any(x.startswith("KHAI_DA_DONG_NHUNG_CON_VE_HONG") for x in r2["loi"])
+        st3 = dict(st2)
+        st3["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han", "gioi_han_da_biet": []}
+        ok4 = "DA_DONG_CO_GIOI_HAN_NHUNG_GIOI_HAN_RONG" in g(st3)["loi"]
+        st4 = dict(st2)
+        st4["vong_doi"] = {"trang_thai": "da_dong_co_gioi_han",
+                                            "gioi_han_da_biet": [{"loai": "de_xuat_chua_dinh_doat"}]}
+        ok5 = g(st4)["ok"] is True                                  # có khai giới hạn ⇒ chấp nhận
+        st5 = _c300_vong_doi_sach()
+        st5["vong_doi"] = {"trang_thai": "dong_roi"}
+        ok6 = any(x.startswith("TRANG_THAI_NGOAI_ENUM") for x in g(st5)["loi"])
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r300_vong_doi_dong_fail_closed", _c300_dong_fail_closed)
+
+    def _c313_anchor_khuon_findings():
+        # r313 (RAS-17, phần MÃ+GUARD — KHÔNG đụng dữ liệu): phân loại doc_deps theo KHUÔN.
+        # Ca dựng lại ĐÚNG lớp bệnh đã đo trên hồ sơ BHXH: 82/82 ĐIỀN ĐỦ mà 0/82 là hash thật —
+        # nên phép đếm "rỗng/thiếu" MÙ hoàn toàn, phải soi khuôn mới thấy.
+        from tl_core import lookup_ops as _lo313
+        f = _lo313._rasoat_anchor_findings
+        H = "sha256:" + "ab" * 32                      # 64 hex ⇒ hợp khuôn
+        def unit(deps):
+            return [{"phat_hien": [{"anchor": {"doc_deps": deps}}]}]
+        r = f(unit([{"so_hieu": "A", "text_hash": H}]))
+        ok1 = r["san_sang"] and r["ok"] == 1 and r["tong"] == 1
+        # (a) ĐỊA CHỈ nhét vào ô hash — đúng dạng `cite` thật đang dùng
+        r2 = f(unit([{"so_hieu": "B", "text_hash": "cache:18-2025-VBHN-VPQH#dieu54"}]))
+        ok2 = (not r2["san_sang"]) and r2["locator_trong_hash"] == 1 and r2["ok"] == 0
+        # (b) rỗng vs (c) rác — phân biệt được, không gộp một rọ
+        r3 = f(unit([{"so_hieu": "C", "text_hash": ""}, {"so_hieu": "D", "text_hash": "deadbeef"}]))
+        ok3 = r3["rong"] == 1 and r3["sai_khuon"] == 1 and r3["ok"] == 0
+        # (d) hash ĐÚNG ĐỘ DÀI nhưng CHỮ HOA / thiếu tiền tố ⇒ vẫn SAI (khuôn đóng, không nới)
+        r4 = f(unit([{"text_hash": "sha256:" + "AB" * 32}, {"text_hash": "ab" * 32}]))
+        ok4 = r4["ok"] == 0 and r4["sai_khuon"] == 2
+        # (e) `locator` là trường RIÊNG — đếm tách, và KHÔNG cứu được text_hash hỏng
+        r5 = f(unit([{"text_hash": "cache:x#y", "locator": "cache:x#y"}]))
+        ok5 = r5["co_locator"] == 1 and r5["locator_trong_hash"] == 1 and not r5["san_sang"]
+        # (f) tong=0 ⇒ KHÔNG san_sang (rỗng không phải "sạch" — đây là fail-closed, không vacuous)
+        ok6 = (not f([])["san_sang"]) and f([])["tong"] == 0 and not f(None)["san_sang"]
+        # (g) đọc được CẢ khuôn bảng `noi_dung` lẫn khuôn §6 `phat_hien`
+        r7 = f([{"noi_dung": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}])
+        ok7 = r7["ok"] == 1 and r7["san_sang"]
+        # (h) rác đủ kiểu KHÔNG được ném lỗi (hàm đo, không phải hàm phán)
+        r8 = f([None, "chuoi", {"phat_hien": "khong-phai-list"}, {"phat_hien": [None, {"anchor": 5}]}])
+        ok8 = r8["tong"] == 0
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8
+    _t110("r313_anchor_khuon_findings", _c313_anchor_khuon_findings)
+
+    def _c313_anchor_con_hieu_luc_fail_closed():
+        # r313 (RAS-17): cưỡng chế `vong_doi.anchor_con_hieu_luc`. TRƯỚC r313 cờ này CHỈ sống trong
+        # prose + 1 ca kiểm *tài liệu có nhắc chữ đó không* — không mã nào chặn việc khai bừa `true`,
+        # mà khai `true` là Loop C chạy trên anchor chưa di trú ⇒ STALE giả 100%.
+        from tl_core import lookup_ops as _lo313
+        g = _lo313._rasoat_anchor_hop_le
+        H = "sha256:" + "cd" * 32
+        good = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": H}]}}]}]
+        bad = [{"phat_hien": [{"anchor": {"doc_deps": [{"text_hash": "cache:a#b"}]}}]}]
+        # (a) khai true + anchor ĐÃ di trú ⇒ qua
+        ok1 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, good)["ok"] is True
+        # (b) khai true + anchor CHƯA di trú ⇒ ĐỎ, và lỗi phải NÓI RA số đếm
+        r2 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, bad)
+        ok2 = (not r2["ok"]) and any(x.startswith("ANCHOR_KHAI_TRUE_NHUNG_CHUA_DI_TRU") for x in r2["loi"]) \
+            and "locator_trong_hash=1" in r2["loi"][0]
+        # (c) khai true mà KHÔNG đưa đơn vị ⇒ ĐỎ. Không kiểm được thì không được khai —
+        #     im lặng tin lời khai chính là đường STALE giả lọt.
+        r3 = g({"vong_doi": {"anchor_con_hieu_luc": True}}, None)
+        ok3 = (not r3["ok"]) and "ANCHOR_KHAI_TRUE_NHUNG_KHONG_DUA_DON_VI_DE_KIEM" in r3["loi"]
+        # (d) khai false TƯỜNG MINH mà thiếu lý do ⇒ ĐỎ (§7.2 "không im lặng thoát")
+        r4 = g({"vong_doi": {"anchor_con_hieu_luc": False}}, None)
+        ok4 = (not r4["ok"]) and "ANCHOR_FALSE_NHUNG_THIEU_LY_DO" in r4["loi"]
+        ok5 = g({"vong_doi": {"anchor_con_hieu_luc": False, "ly_do_anchor": "chưa di trú"}}, None)["ok"] is True
+        # (e) cờ VẮNG HẲN ⇒ KHÔNG đỏ (hồ sơ đang rà chưa tới bước khai — ratchet siết chiều khai SAI,
+        #     không siết chiều CHƯA KHAI; đỏ oan ngày đầu là cách guard bị vô hiệu hoá, bài học §0.8)
+        ok6 = g({"vong_doi": {"trang_thai": "dang_ra"}}, None)["ok"] is True
+        ok7 = g({}, None)["ok"] is True and g(None, None)["ok"] is True
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r313_anchor_con_hieu_luc_fail_closed", _c313_anchor_con_hieu_luc_fail_closed)
+
+    def _c313_khuon_khop_dac_ta_va_tl():
+        # r313: ba vế lấy từ BA nguồn khác nhau — không vế nào tự chứng minh chính nó.
+        # (a) khuôn trong MÃ đúng thứ đặc tả §7.2 viết
+        from tl_core import lookup_ops as _lo313
+        _R313 = _P209(__file__).resolve().parent.parent
+        ok1 = _lo313._rasoat_anchor_khuon()["text_hash"] == r"^sha256:[0-9a-f]{64}$"
+        _spec = (_R313 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8")
+        ok2 = "sha256:<64hex>" in _spec and "anchor_con_hieu_luc" in _spec
+        # (b) TEMPLATE khai `locator` TÁCH khỏi `text_hash`, và text_hash mẫu HỢP khuôn
+        _tp = _j209.loads((_R313 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json")
+                          .read_text(encoding="utf-8"))
+        _dep = _tp["noi_dung"][0]["anchor"]["doc_deps"][0]
+        ok3 = "locator" in _dep and _re209.match(r"^sha256:[0-9a-f]{64}$", _dep["text_hash"])
+        # (c) ba hàm ĐÃ bind qua tl.py (ADR-0002 copy-globals) — thiếu bind thì agent gọi là NameError
+        _tl_src = (_R313 / "scripts" / "tl.py").read_text(encoding="utf-8")
+        ok4 = all(("'" + n + "'") in _tl_src for n in
+                  ("_rasoat_anchor_khuon", "_rasoat_anchor_findings", "_rasoat_anchor_hop_le"))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r313_khuon_khop_dac_ta_va_tl", _c313_khuon_khop_dac_ta_va_tl)
+
+    def _c321_anchor_quet_gan_nguon():
+        """v1.36.53 (r321/RAS-17 vế merge): `_rasoat_anchor_quet` CHỈ ĐÍCH DANH ô hỏng.
+
+        r313 đếm để phán cờ vòng đời; hàm này phải trả về ĐỦ để mở đúng file, đúng phát hiện."""
+        from tl_core import lookup_ops as _lo321
+        q = _lo321._rasoat_anchor_quet
+        _H = "sha256:" + ("a" * 64)
+
+        def _u(th, key="VD-01"):
+            return {"phat_hien": [{"key": key, "anchor": {"doc_deps": [
+                {"so_hieu": "41-2024-QH15", "text_hash": th}]}}]}
+        r = q([("unit-001.json", _u("cache:41-2024-qh15--consolidated"))])
+        ok0 = (len(r) == 1 and r[0]["nguon"] == "unit-001.json" and r[0]["key"] == "VD-01"
+               and r[0]["so_hieu"] == "41-2024-QH15" and r[0]["i"] == 0)
+        # Từ vựng `loai` dùng CHUNG với r313 — ba lớp, mỗi lớp phá riêng lẻ.
+        ok1 = r[0]["loai"] == "locator_trong_hash"
+        ok2 = q([("u.json", _u(""))])[0]["loai"] == "rong"
+        ok3 = q([("u.json", _u("a87061b41d2c788b"))])[0]["loai"] == "sai_khuon"   # ô thật hồ sơ BHXH
+        # Ô ĐÚNG khuôn ⇒ KHÔNG đẻ vế hỏng giả.
+        ok4 = q([("u.json", _u(_H))]) == []
+        # Khuôn KHÁC unit_v1 không bị quét nhầm; rác không làm vỡ.
+        ok5 = (q([("BANG.json", {"noi_dung": []})]) == [] and q([("la.json", {"x": 1})]) == []
+               and q([("none.json", None)]) == [] and q([]) == [] and q(None) == [])
+        # dep KHÔNG phải dict ⇒ vẫn tính là hỏng, không nuốt.
+        ok6 = q([("u.json", {"phat_hien": [{"key": "K", "anchor": {"doc_deps": ["rac"]}}]})])[0]["loai"] == "sai_khuon"
+        # GIỮ THỨ TỰ đầu vào ⇒ tất định (điều kiện để golden/determinism khoá được).
+        _uu = _u("cache:x")
+        ok7 = [x["nguon"] for x in q([("a.json", _uu), ("b.json", _uu)])] == ["a.json", "b.json"]
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r321_anchor_quet_gan_nguon", _c321_anchor_quet_gan_nguon)
+
+    def _c321_quet_khop_findings_r313():
+        """r321: hai đường soi neo KHÔNG được trôi khỏi nhau.
+
+        `_rasoat_anchor_quet` (đích danh, cho merge) và `_rasoat_anchor_findings` (đếm, cho cờ vòng
+        đời) dùng chung `_rasoat_anchor_khuon()`. Khoá bất biến: SỐ ô hỏng hai bên đếm phải BẰNG NHAU
+        — nếu mai ai đó sửa khuôn ở một đường, ca này đỏ thay vì để hai bên phán khác nhau âm thầm."""
+        from tl_core import lookup_ops as _lo321
+        _H = "sha256:" + ("b" * 64)
+        _u = {"phat_hien": [
+            {"key": "VD-01", "anchor": {"doc_deps": [
+                {"so_hieu": "A-2024-QH15", "text_hash": "cache:a--consolidated"},
+                {"so_hieu": "B-2024-QH15", "text_hash": _H},
+                {"so_hieu": "C-2024-QH15", "text_hash": ""}]}},
+            {"key": "VD-02", "anchor": {"doc_deps": [
+                {"so_hieu": "D-2024-QH15", "text_hash": "a87061b41d2c788b"}]}}]}
+        f = _lo321._rasoat_anchor_findings([_u])
+        q = _lo321._rasoat_anchor_quet([("unit-001.json", _u)])
+        ok0 = f["tong"] == 4 and f["ok"] == 1
+        ok1 = len(q) == f["tong"] - f["ok"] == 3
+        # Phân lớp cũng phải khớp, không chỉ tổng số.
+        _dem = {"rong": 0, "locator_trong_hash": 0, "sai_khuon": 0}
+        for x in q:
+            _dem[x["loai"]] += 1
+        ok2 = (_dem["rong"] == f["rong"] and _dem["locator_trong_hash"] == f["locator_trong_hash"]
+               and _dem["sai_khuon"] == f["sai_khuon"])
+        return ok0 and ok1 and ok2
+    _t110("r321_quet_khop_findings_r313", _c321_quet_khop_findings_r313)
+
+    def _c321_merge_lo_dien_va_strict_fail_closed():
+        """r321: `tl rasoat-merge` KHAI neo hỏng ở mọi chế độ; `--anchor-strict` chặn TRƯỚC khi ghi.
+
+        Test HÀNH VI qua chính `cmd_rasoat_merge` (lệnh thuần cục bộ, không mạng) chứ không grep mã:
+        vế đã hỏng ở lớp bệnh này là «ghi rồi mới báo lỗi» (r290), nên thứ phải khoá là FILE CÓ BỊ
+        GHI KHÔNG — chứ không phải chuỗi nào có mặt trong nguồn."""
+        import contextlib as _ct321, io as _io321, json as _j321, tempfile as _tf321
+        from types import SimpleNamespace as _NS321
+        from pathlib import Path as _P321
+        from tl_core import lookup_ops as _lo321
+
+        def _chay(th, strict, check=False):
+            with _tf321.TemporaryDirectory() as _d:
+                _m = _P321(_d) / "master"
+                _m.mkdir()
+                (_m / "unit-001.json").write_text(_j321.dumps(
+                    {"unit_id": "u1", "van_ban": "41-2024-QH15", "phat_hien": [
+                        {"key": "VD-01", "hinh_thuc": "sua_luat", "anchor": {"doc_deps": [
+                            {"so_hieu": "41-2024-QH15", "text_hash": th}]}}]},
+                    ensure_ascii=False), encoding="utf-8")
+                _out = _P321(_d) / "BANG_MASTER.json"
+                _buf = _io321.StringIO()
+                with _ct321.redirect_stdout(_buf):
+                    rc = _lo321.cmd_rasoat_merge(_NS321(
+                        in_dir=str(_m), out=str(_out), state=None, dry_run=False,
+                        check=check, anchor_strict=strict, json=True))
+                return rc, _j321.loads(_buf.getvalue()), _out.exists()
+
+        _bad, _good = "cache:41-2024-qh15--consolidated", "sha256:" + ("c" * 64)
+        # (a) strict + neo hỏng ⇒ rc=2, ok:false, và bảng master KHÔNG được ghi.
+        rc_a, js_a, co_a = _chay(_bad, True)
+        ok0 = rc_a == 2 and js_a.get("ok") is False and js_a.get("error") == "ANCHOR_SAI_KHUON"
+        ok1 = co_a is False and js_a.get("da_ghi") is False
+        # (b) KHÔNG strict ⇒ vẫn chạy (hồ sơ CŨ không bị chặn đứng) NHƯNG phải KHAI, kèm đích danh.
+        rc_b, js_b, co_b = _chay(_bad, False)
+        ok2 = rc_b == 0 and js_b.get("so_anchor_hong") == 1 and co_b is True
+        ok3 = (js_b.get("anchor_hong") or [{}])[0].get("key") == "VD-01"
+        # (c) strict + neo ĐÚNG khuôn ⇒ không chặn nhầm, vẫn ghi.
+        rc_c, js_c, co_c = _chay(_good, True)
+        ok4 = rc_c == 0 and js_c.get("so_anchor_hong") == 0 and co_c is True
+        # (d) `--check` (KHÔNG ghi đè) cũng phải khai — đây là chế độ người dùng chạy để nghiệm thu.
+        _rc_d, js_d, _co_d = _chay(_bad, False, check=True)
+        ok5 = js_d.get("so_anchor_hong") == 1
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r321_merge_lo_dien_va_strict_fail_closed", _c321_merge_lo_dien_va_strict_fail_closed)
+
+    # ═════ r322 (RAS-18): `doc-patch` để lại `text_hash` CŨ ⇒ bằng chứng đối sánh phải VÔ HIỆU ═════
+    # Đo trước khi vá (02-08): `doc-patch` (r217) sửa thân record mà KHÔNG tính lại `text_hash` — lý
+    # do r217 nêu là THẬT (record không giữ bố cục dòng của `norm`, không tính lại được trong cùng
+    # miền băm). Lỗi nằm chỗ khác: điều đó chỉ ghi vào `verify_flags`, mà `provenance.py` và
+    # `tra_cuu.py` đều 0 tham chiếu trường ấy ⇒ KHÔNG đường đọc nào lộ. Trong khi `tra_cuu.py` lại
+    # dùng `text_hash` làm bằng chứng đối sánh liên nguồn: sau patch, hash VẪN khớp bundle còn thân
+    # ĐÃ lệch ⇒ cổng fail-closed báo KHỚP đúng trên ca nó sinh ra để chặn.
+    def _c322_cong_hash_vo_hieu_sau_doc_patch():
+        """r322 vế CỔNG — chạy ĐÚNG đường sản xuất (`subprocess tra_cuu.py`).
+
+        Khoá HÀNH VI chứ không grep chuỗi: thứ phải chứng minh là lệnh CÓ TỪ CHỐI hay không, và từ
+        chối ĐÚNG ca — không được chặn nhầm record sạch (làm vậy là đổi một lỗi im lặng lấy một cổng
+        không ai dùng nổi), không được nuốt mất nhánh `hash_mismatch` sẵn có."""
+        import json as _js322, os as _os322, subprocess as _sp322, sys as _sys322, tempfile as _tf322
+        _H = "a" * 64
+
+        def _doc(co_patch):
+            # `structure` để dạng LIST đơn vị — đúng hình dạng `find_units` đòi (`label`/`level`/
+            # `text`). ⚠ Ghi lại một khác biệt ĐO ĐƯỢC 02-08, NGOÀI phạm vi r322: record cache thật
+            # (11/11, do `build_cache.py:84` + `normalize_document.py:347` ghi) để `structure` là
+            # DICT ĐẾM, nên `tra_cuu --cache-id` duyệt dict ra chuỗi rồi `AttributeError`. Cổng
+            # r322 nằm TRƯỚC `find_units` nên vẫn chặn đúng ở cả hai hình dạng; ca này dùng hình
+            # dạng list để kiểm được luôn nhánh trả kết quả bình thường.
+            d = {"schema": "tra-luat-bundle/1.9", "doc_key": "y--consolidated",
+                 "so_hieu": "158/2025/NĐ-CP", "number_symbol": "158/2025/NĐ-CP", "aliases": [],
+                 "title": "Nghị định thử", "text_hash": _H, "chars": 40, "verify_flags": [],
+                 "khoi_dau": "CHÍNH PHỦ", "articles": {"8": "Điều 8. người sử dụng lao động."},
+                 "phu_luc": "",
+                 "structure": [{"label": "Điều 8", "level": "article",
+                                "text": "Điều 8. người sử dụng lao động."}]}
+            if co_patch:
+                d["doc_patch"] = {"lich_su": [{"run_id": "doc-patch-XYZ", "so_diem": 1,
+                                               "delta_chars": 0, "sha_truoc": "0" * 64}]}
+            return d
+
+        def _chay(co_patch, expected, *extra, dp_raw=None):
+            with _tf322.TemporaryDirectory() as _td:
+                _cd = Path(_td) / "cache"
+                (_cd / "docs").mkdir(parents=True)
+                _d = _doc(co_patch)
+                if dp_raw is not None:
+                    _d["doc_patch"] = dp_raw
+                (_cd / "docs" / "y--consolidated.json").write_text(
+                    _js322.dumps(_d, ensure_ascii=False), encoding="utf-8")
+                p = _sp322.run([_sys322.executable, str(_ROOT209 / "scripts" / "tra_cuu.py"),
+                                "--cache-id", "158/2025/NĐ-CP", "--cache-dir", str(_cd),
+                                "--cite", "Điều 8", "--json", *(("--expected-content-hash", expected)
+                                                                if expected else ()), *extra],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=180,
+                               # ⚠ `tra_cuu.py` KHÔNG tự `reconfigure(encoding="utf-8")` như `tl.py`
+                               # (tl.py:86/94) ⇒ trên máy chuẩn Windows (stdout pipe = cp1258) mọi
+                               # payload tiếng Việt vỡ `UnicodeEncodeError`. Bệnh NỀN, có trước r322
+                               # (nhánh `hash_mismatch` cũ vỡ y hệt) — khai env cho ca chạy được,
+                               # KHÔNG lặng lẽ vá giùm ở đây.
+                               env=dict(_os322.environ, PYTHONIOENCODING="utf-8"))
+                out = p.stdout + p.stderr
+                return p.returncode, (_js322.loads(out[out.find("{"):out.rfind("}") + 1])
+                                      if "{" in out else {})
+
+        # (a) ★ca bệnh: hash KHỚP nhưng record đã doc-patch ⇒ TỪ CHỐI, không trả nguyên văn.
+        rc_a, js_a = _chay(True, _H)
+        ok0 = rc_a == 3 and js_a.get("error") == "hash_khop_nhung_da_doc_patch"
+        ok1 = js_a.get("doc_patch_so_luot") == 1 and js_a.get("doc_patch_run_id") == ["doc-patch-XYZ"]
+        # (b) record SẠCH, hash khớp ⇒ vẫn trả bình thường (không chặn nhầm người vô can).
+        rc_b, js_b = _chay(False, _H)
+        ok2 = rc_b == 0 and js_b.get("count", 0) >= 1
+        # (c) `--allow-stale` ⇒ đường vượt vẫn thông, cùng cổng với nhánh lệch sẵn có.
+        rc_c, _js_c = _chay(True, _H, "--allow-stale")
+        ok3 = rc_c == 0
+        # (d) hash LỆCH ⇒ vẫn là `hash_mismatch` cũ, cổng mới KHÔNG cướp nhánh của cổng cũ.
+        rc_d, js_d = _chay(True, "b" * 64)
+        ok4 = rc_d == 3 and js_d.get("error") == "hash_mismatch"
+        # (e) KHÔNG khai `--expected-content-hash` ⇒ không có bằng chứng nào để vô hiệu ⇒ không chặn,
+        #     nhưng phải LỘ bằng cảnh báo (vế `provenance`, khoá riêng ở ca dưới).
+        rc_e, js_e = _chay(True, "")
+        ok5 = rc_e == 0 and any(x.get("code") == "doc_patch_text_hash_cu"
+                                for x in (js_e.get("warnings") or []))
+        # (f) `lich_su` sai KIỂU (chuỗi truthy / doc_patch không phải dict) ⇒ KHÔNG được bật cổng.
+        #     Bản đầu r322 dùng `or []` nên chuỗi lọt qua và khai `doc_patch_so_luot` bịa theo `len()`
+        #     — chặn dựa trên số bịa thì cổng nói dối đúng lúc người ta tin nó nhất.
+        ok6 = all(_chay(False, _H, dp_raw=x)[0] == 0 for x in ("rác", {"lich_su": "rác"}, {}, None))
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r322_cong_hash_vo_hieu_sau_doc_patch", _c322_cong_hash_vo_hieu_sau_doc_patch)
+
+    def _c322_provenance_lo_doc_patch():
+        """r322 vế LỘ DIỆN — `build_warnings` phải khai record đã doc-patch.
+
+        Khoá vào `doc_patch.lich_su` (trường CÓ CẤU TRÚC, `cmd_doc_patch` ghi vô điều kiện) chứ không
+        dò chuỗi 'DOC_PATCH:' trong `verify_flags`: văn xuôi đổi một chữ là phép dò gãy IM LẶNG, và
+        chính `verify_flags` mới là trường có thể vắng mặt."""
+        import importlib.util as _ilu322
+        _sp = _ilu322.spec_from_file_location("provenance_r322", _ROOT209 / "scripts" / "provenance.py")
+        _m = _ilu322.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+
+        def _codes(meta):
+            return {x["code"] for x in _m.build_warnings(meta)}
+        _nen = {"doc_status": "promulgated", "verified_at": "2026-08-01", "document_variant": "vbhn",
+                "consolidation_checked": True}
+        # (a) có lịch sử patch ⇒ PHẢI khai.
+        ok0 = "doc_patch_text_hash_cu" in _codes(dict(_nen, doc_patch={"lich_su": [{"run_id": "r"}]}))
+        # (b) không patch ⇒ KHÔNG khai (cảnh báo bắn bừa thì người đọc học cách bỏ qua nó).
+        ok1 = "doc_patch_text_hash_cu" not in _codes(dict(_nen))
+        ok2 = "doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch={"lich_su": []}))
+        # (c) hình dạng lạ (doc_patch không phải dict / lich_su không phải list) ⇒ không được nổ.
+        ok3 = ("doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch="rác"))
+               and "doc_patch_text_hash_cu" not in _codes(dict(_nen, doc_patch={"lich_su": "rác"})))
+        # (d) thông điệp phải nói rõ hash là của bản TRƯỚC khi sửa — đó là thứ người đọc cần biết.
+        _w = [x for x in _m.build_warnings(dict(_nen, doc_patch={"lich_su": [{"run_id": "r"}]}))
+              if x["code"] == "doc_patch_text_hash_cu"][0]
+        ok4 = _w["level"] == "warn" and "TRƯỚC khi sửa" in _w["message"]
+        return ok0 and ok1 and ok2 and ok3 and ok4
+    _t110("r322_provenance_lo_doc_patch", _c322_provenance_lo_doc_patch)
+
+    def _c322_verify_flags_vang_van_phai_khai():
+        """r322 vế FAIL-OPEN — record KHÔNG có `verify_flags` thì `doc-patch` phải TẠO, không bỏ qua.
+
+        Bản r217 ghi có điều kiện `if isinstance(vf, list)` ⇒ record thiếu khoá thì lời khai «hash đã
+        cũ» bốc hơi mà lệnh vẫn rc=0. Chạy đường sản xuất thật (subprocess) vì đây là đường GHI."""
+        import json as _js322b, os as _os322b, subprocess as _sp322b, sys as _sys322b, tempfile as _tf322b
+        _rec = {"schema": "tra-luat-bundle/1.9", "doc_key": "z--consolidated",
+                "so_hieu": "158/2025/NĐ-CP", "number_symbol": "158/2025/NĐ-CP", "aliases": [],
+                "chars": 40, "khoi_dau": "CHÍNH PHỦ",     # ★CỐ Ý không có khoá `verify_flags`
+                "articles": {"8": "Điều 8. ngưởi sử dụng lao động."},
+                "phu_luc": "", "structure": {"khoi_dau_chars": 9, "phu_luc_chars": 0}}
+        with _tf322b.TemporaryDirectory() as _td:
+            _cd = Path(_td) / "cache"
+            (_cd / "docs").mkdir(parents=True)
+            _tgt = _cd / "docs" / "z--consolidated.json"
+            _tgt.write_text(_js322b.dumps(_rec, ensure_ascii=False), encoding="utf-8")
+            _dm = Path(_td) / "diem.json"
+            _dm.write_text(_js322b.dumps({"so_hieu": "158/2025/NĐ-CP",
+                                          "diem": [{"ma": "VD-34", "vung": "dieu:8", "tim": "ngưởi",
+                                                    "thay": "người", "ly_do": "đối chiếu Công báo"}]},
+                                         ensure_ascii=False), encoding="utf-8")
+            p = _sp322b.run([_sys322b.executable, str(_ROOT209 / "scripts" / "tl.py"), "doc-patch",
+                             "158/2025/NĐ-CP", "--diem", str(_dm), "--apply", "--confirm", "yes",
+                             "--cache-dir", str(_cd), "--json"],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace",
+                            timeout=180, env=dict(_os322b.environ,
+                                                  TL_JOURNAL_DIR=str(Path(_td) / "journal")))
+            _d = _js322b.loads(_tgt.read_text(encoding="utf-8"))
+            ok0 = p.returncode == 0 and _d["articles"]["8"] == "Điều 8. người sử dụng lao động."
+            # ★khẳng định chính: cảnh báo KHÔNG được bốc hơi chỉ vì record thiếu khoá chứa nó.
+            ok1 = isinstance(_d.get("verify_flags"), list) and any(
+                x.startswith("DOC_PATCH:") for x in _d["verify_flags"])
+            # và trường CÓ CẤU TRÚC — thứ `provenance`/`tra_cuu` khoá vào — vẫn phải đủ.
+            ok2 = len((_d.get("doc_patch") or {}).get("lich_su") or []) == 1
+        return ok0 and ok1 and ok2
+    _t110("r322_verify_flags_vang_van_phai_khai", _c322_verify_flags_vang_van_phai_khai)
+
+    # ═══ r327 — phép dò auth của gws: hằng CỨNG 20s < phí THẬT (đo 15–50s) ⇒ is_available() nói dối ═══
+    # `gws auth status` liệt kê 34 API + gọi mạng. Trần 20s nằm GIỮA vùng dao động nên phép dò lật
+    # đỏ/xanh theo mạng: chạy tay ra `oauth2`, mà tl kết luận "gws chưa sẵn" → drive-push rơi xuống
+    # gcloud (thiếu Drive scope) ⇒ [FAIL] mọi lượt deploy. KHÔNG chờ thật: giả `subprocess` để vừa GHI
+    # LẠI ngân sách timeout thực nhận, vừa mô phỏng lệnh tốn N giây.
+    import contextlib as _ctx327, subprocess as _sp327, types as _ty327
+    _ENVK327 = ("TL_GWS_TIMEOUT", "TL_GWS_AUTH_TIMEOUT", "TL_GWS_VERSION_TIMEOUT", "TL_GWS_DISABLE")
+
+    @_ctx327.contextmanager
+    def _env327(env):
+        keep = {k: os.environ.get(k) for k in _ENVK327}
+        try:
+            for k in _ENVK327:
+                os.environ.pop(k, None)
+            os.environ.update(env)
+            yield
+        finally:
+            for k in _ENVK327:
+                os.environ.pop(k, None)
+            os.environ.update({k: v for k, v in keep.items() if v is not None})
+
+    def _fake_sp327(auth_cost, auth_out='{"auth_method": "oauth2"}'):
+        """(fake_subprocess, seen) — `auth status` TỐN auth_cost giây: ngân sách nhỏ hơn ⇒ TimeoutExpired.
+        seen ghi [(loại_phép_dò, timeout_thực_nhận)] để khẳng định trực tiếp vào NGÂN SÁCH, không đoán."""
+        seen = []
+
+        def _run327(args, **kw):
+            tmo, is_auth = kw.get("timeout"), ("status" in args)
+            seen.append(("auth" if is_auth else "version", tmo))
+            if tmo is not None and tmo < (auth_cost if is_auth else 0.0):
+                raise _sp327.TimeoutExpired(args, tmo)
+            return _ty327.SimpleNamespace(returncode=0, stderr="",
+                                          stdout=(auth_out if is_auth else "gws 0.22.5"))
+        return _ty327.SimpleNamespace(run=_run327, TimeoutExpired=_sp327.TimeoutExpired), seen
+
+    def _avail327(gb, sp, env):
+        _osp, _oexe = gb.subprocess, gb.gws_exe
+        try:
+            gb.subprocess, gb.gws_exe = sp, (lambda: "/fake/gws")
+            with _env327(env):
+                gb.reset_cache()
+                return gb.availability_detail(force=True)
+        finally:
+            gb.subprocess, gb.gws_exe = _osp, _oexe
+            gb.reset_cache()
+
+    def _c327_auth_probe_du_gio_cho_gws_that():
+        """VẾ 1 — ngân sách phép dò auth phải PHỦ phí thật. 25s nằm GIỮA trần cũ (20s) và ca chậm nhất
+        đo được (50s): bản cũ ⇒ ok=False dù gws trả `oauth2`; bản vá ⇒ ok=True."""
+        gb = _imp("gws_bridge")
+        sp, seen = _fake_sp327(auth_cost=25.0)
+        d = _avail327(gb, sp, {})
+        b = dict(seen)
+        ok1 = d.get("ok") is True and d.get("auth_method") == "oauth2"
+        ok2 = b.get("auth", 0) >= 60.0
+        # Bằng chứng NỘI TẠI của bệnh cũ: phép dò NẶNG hơn hẳn (34 API + mạng) lại có ngân sách NGẮN
+        # hơn `--version` (20s < 30s). Khoá lại chiều đúng để không tái diễn.
+        ok3 = b.get("auth", 0) > b.get("version", 0)
+        return ok1 and ok2 and ok3
+    _t110("r327_auth_probe_du_gio_cho_gws_that", _c327_auth_probe_du_gio_cho_gws_that)
+
+    def _c327_env_knob_chinh_duoc_timeout():
+        """VẾ 2 — chỉnh được KHÔNG cần sửa mã: knob riêng ĐÈ hẳn; TL_GWS_TIMEOUT là SÀN (chỉ NÂNG)."""
+        gb = _imp("gws_bridge")
+        sp, seen = _fake_sp327(auth_cost=25.0)
+        d = _avail327(gb, sp, {"TL_GWS_AUTH_TIMEOUT": "10"})      # đè hẳn, kể cả HẠ dưới mặc định
+        okA = d.get("ok") is False and dict(seen).get("auth") == 10.0
+        sp2, seen2 = _fake_sp327(auth_cost=180.0)
+        d2 = _avail327(gb, sp2, {"TL_GWS_TIMEOUT": "240"})        # sàn nâng MỌI lệnh gws cùng lúc
+        okB = (d2.get("ok") is True and dict(seen2).get("auth") == 240.0
+               and dict(seen2).get("version") == 240.0)
+        sp3, seen3 = _fake_sp327(auth_cost=25.0)
+        _avail327(gb, sp3, {"TL_GWS_TIMEOUT": "240", "TL_GWS_AUTH_TIMEOUT": "45"})
+        okC = dict(seen3).get("auth") == 45.0 and dict(seen3).get("version") == 240.0  # riêng THẮNG sàn
+        with _env327({"TL_GWS_TIMEOUT": "60"}):
+            # SÀN, KHÔNG phải đè: nâng phép dò 30s→60s mà TUYỆT ĐỐI không hạ download 300s→60s.
+            okD = gb._timeout(30.0) == 60.0 and gb._timeout(300.0) == 300.0
+        return okA and okB and okC and okD
+    _t110("r327_env_knob_chinh_duoc_timeout", _c327_env_knob_chinh_duoc_timeout)
+
+    def _c327_env_meo_khong_vo_hieu_timeout():
+        """VẾ 3 — knob "cho dễ thở" KHÔNG được biến thành công tắc tắt timeout. 0/âm ⇒ chết tức thì,
+        inf/1e400 ⇒ treo vô hạn (gws wedge = phiên treo, không còn fallback). Rác ⇒ về mặc định."""
+        gb = _imp("gws_bridge")
+        oks = []
+        for v in ("0", "0.0", "-5", "inf", "-inf", "nan", "1e400", "rác", "", "   "):
+            with _env327({"TL_GWS_AUTH_TIMEOUT": v, "TL_GWS_TIMEOUT": v}):
+                oks.append(gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 120.0
+                           and gb._timeout(300.0) == 300.0)
+        with _env327({"TL_GWS_AUTH_TIMEOUT": " 45.5 "}):     # số hợp lệ (kể cả thừa khoảng trắng) vẫn ăn
+            oks.append(gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 45.5)
+        return all(oks) and len(oks) == 11
+    _t110("r327_env_meo_khong_vo_hieu_timeout", _c327_env_meo_khong_vo_hieu_timeout)
+
+    def _c327_probe_error_lo_dien():
+        """VẾ 4 — vì sao bệnh SỐNG LÂU: lỗi bị NUỐT. «dò không xong» và «dò xong, chưa auth» CÙNG trả
+        None ⇒ người vận hành đọc `auth=None` rồi đi `gws auth login` (sai hướng — không phải lỗi quyền).
+        Hai ca đó nay phải PHÂN BIỆT ĐƯỢC ở availability_detail()."""
+        gb = _imp("gws_bridge")
+        sp, _ = _fake_sp327(auth_cost=999.0)
+        d = _avail327(gb, sp, {"TL_GWS_AUTH_TIMEOUT": "5"})
+        okA = (d.get("ok") is False and d.get("auth_method") is None
+               and "timeout" in (d.get("probe_error") or "").lower())
+        sp2, _ = _fake_sp327(auth_cost=0.0, auth_out='{"auth_method": "none"}')
+        d2 = _avail327(gb, sp2, {})
+        okB = (d2.get("ok") is False and d2.get("auth_method") == "none"
+               and (d2.get("probe_error") or "") == "")     # KHÔNG đổ oan cho phép dò
+        return okA and okB
+    _t110("r327_probe_error_lo_dien", _c327_probe_error_lo_dien)
+
+    # ── r328: ĐƯỜNG DẪN NGOÀI ASCII vỡ ở khớp JSON của hai script deploy ─────────────────────────
+    # ĐO 03-08-2026 trên máy chuẩn: `[Console]::OutputEncoding` = **windows-1258**, nên PowerShell
+    # GIẢI stdout UTF-8 của python bằng cp1258 ⇒ `bundle1.out` chứa mojibake GHI THẲNG RA ĐĨA
+    # (`D:\\Quá»‘c há»™i\\…`) ⇒ `Test-Path $out` false trên tệp CÓ THẬT ⇒ deploy chết exit 2 dù zip
+    # build đúng. Twin `sh` mắc CÙNG bệnh ở `jget` (`open()` không nêu encoding ⇒ codec LOCALE).
+    _R328_UNIT = "\u1ed1"          # 'ố' U+1ED1 = e1 bb 91 — 0x91 hợp lệ trong cp1258 (mojibake IM LẶNG)
+    _R328_HARD = "\u1ed0"          # 'Ố' U+1ED0 = e1 bb 90 — 0x90 KHÔNG ĐỊNH NGHĨA ⇒ ném thẳng
+
+    def _c328_deploy_ep_utf8_hai_chieu():
+        """r328 VẾ 1 — CHỐT CHỐNG TÁI PHÁT (khuôn hai bối cảnh r265). Đây là vế GREP, cố ý: nó chỉ giữ
+        cho bản vá không bị dọn đi; phần HÀNH VI nằm ở hai ca r328 bên dưới.
+        ★ Vì sao đòi CẢ HAI chiều: đã ĐO, chỉ ghim chiều ĐỌC là VÔ TÁC DỤNG — mojibake đóng băng ngay
+          khâu GIẢI, tệp trên đĩa đã sai (`-Encoding utf8` khi đọc → EQ=False; `[Console]::OutputEncoding`
+          → EQ=True). Ai gỡ dòng OutputEncoding mà giữ `-Encoding utf8` sẽ thấy ca này ĐỎ.
+        ★ GÓI BUNG (không `.git`): ba script deploy là dev-side, PHẢI VẮNG — còn là lọt bundle (r265)."""
+        import re as _re328
+        _root = _ROOT209
+        if not (_root / ".git").exists():
+            return (not (_root / "scripts" / "deploy-package.ps1").exists()
+                    and not (_root / "scripts" / "deploy-package.sh").exists()
+                    and not (_root / "scripts" / "deploy-guard.ps1").exists())
+        _ps1 = (_root / "scripts" / "deploy-package.ps1").read_text(encoding="utf-8", errors="replace")
+        _sh = (_root / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        # chiều ĐỌC stdout tiến trình con — VẾ CHỊU LỰC
+        ok1 = "[Console]::OutputEncoding = $Utf8NoBom" in _ps1
+        # chiều GHI của toán tử `*>` (nó gọi Out-File bên dưới) — khỏi lệ thuộc mặc định theo bản PS
+        ok2 = "$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'" in _ps1
+        # MỌI `Get-Content … -Raw` phải ghim encoding; đếm chỗ CHƯA ghim phải = 0
+        _gc = _re328.findall(r"Get-Content [^\n]*?-Raw(?! -Encoding utf8)", _ps1)
+        ok3 = len(_gc) == 0 and _ps1.count("-Raw -Encoding utf8") >= 9
+        # twin sh: jget phải nêu encoding CẢ HAI chiều (ĐỌC tệp + GHI stdout).
+        # ★ ĐO BẰNG MUTATION, KHÔNG đoán: bản đầu viết `"encoding='utf-8'" in dòng` ⇒ đột biến gỡ
+        #   encoding khỏi `open()` VẪN XANH, vì vế `reconfigure(encoding='utf-8',…)` cùng dòng đã làm
+        #   chuỗi đó đúng. Guard khớp NHẦM NỬA KIA của dòng = guard không guard. Nay soi TỪNG lời gọi.
+        _jg = _re328.search(r"^jget\(\) \{.*$", _sh, _re328.M)
+        _ln = _jg.group(0) if _jg else ""
+        ok4 = (bool(_jg)
+               and bool(_re328.search(r"open\(\s*sys\.argv\[1\]\s*,\s*encoding='utf-8'\s*\)", _ln))
+               and bool(_re328.search(r"reconfigure\(\s*encoding='utf-8'\s*,\s*newline='\\n'\s*\)", _ln)))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r328_deploy_ep_utf8_hai_chieu", _c328_deploy_ep_utf8_hai_chieu)
+
+    def _c328_json_ngoai_ascii_khong_qua_codec_ansi():
+        """r328 VẾ 2 — HÀNH VI, thuần Python nên chạy được trên CẢ HAI nền CI (không cần pwsh).
+        (a) Tái hiện ĐÚNG cơ chế: byte UTF-8 của tl.py bị GIẢI bằng codec ANSI ⇒ chuỗi KHÁC bản gốc.
+            Hai mức độ, cả hai đều làm hỏng deploy nhưng khác cách:
+              · 'ố' (0x91 CÓ trong cp1258) → mojibake IM LẶNG, `Test-Path` false, không ai biết vì sao;
+              · 'Ố' (0x90 KHÔNG ĐỊNH NGHĨA) → UnicodeDecodeError; `jget` có `2>/dev/null` nên NUỐT lỗi
+                rồi trả RỖNG ⇒ sh báo "KHÔNG có zip thật: '<rỗng>'" — sai địa chỉ.
+        (b) Chạy THẬT payload `-c` RÚT TỪ chính deploy-package.sh (không chép lại — chép là trôi lệch):
+            đòi stdout ra ĐÚNG byte UTF-8, và KHÔNG có đuôi '\\r' (bẫy `$( )` chỉ nuốt '\\n')."""
+        import json as _j328, os as _o328, re as _re328, subprocess as _sp328
+        import sys as _s328, tempfile as _tf328
+        want = "D:\\Qu%sc h%si\\tra-luat-skill-v1.36.60-gws3env.zip" % (_R328_UNIT, "\u1ed9")
+        raw = _j328.dumps({"ok": True, "out": want}, ensure_ascii=False).encode("utf-8")
+        # (a1) giải bằng cp1258 (ĐÚNG [Console]::OutputEncoding đo được) ⇒ PHẢI khác bản gốc
+        okA = _j328.loads(raw.decode("cp1258"))["out"] != want
+        # (a2) giải bằng UTF-8 ⇒ PHẢI bằng bản gốc  (nếu vế này hỏng thì phép đo vô nghĩa)
+        okB = _j328.loads(raw.decode("utf-8"))["out"] == want
+        # (a3) 'Ố' — codec ANSI ném thẳng, không phải chỉ méo
+        hard = _j328.dumps({"out": "D:\\QU%sC" % _R328_HARD}, ensure_ascii=False).encode("utf-8")
+        try:
+            hard.decode("cp1258"); okC = False
+        except UnicodeDecodeError:
+            okC = True
+        if not (_ROOT209 / ".git").exists():
+            return okA and okB and okC          # gói bung: không có script sh để rút payload
+        _sh = (_ROOT209 / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        _m = _re328.search(r'^jget\(\) \{ \$PY -c "([^"]+)"', _sh, _re328.M)
+        if not _m:
+            return False                        # đổi hình dạng jget ⇒ ca này phải ĐỎ để người sửa biết
+        # ★ MÔI TRƯỜNG THÙ ĐỊCH — BẮT BUỘC, đã ĐO: chạy payload với env THỪA KẾ thì đột biến gỡ
+        #   `encoding='utf-8'` khỏi `open()` VẪN XANH, vì tl.py:93 `setdefault("PYTHONUTF8","1")` nằm
+        #   sẵn trong environ của tiến trình selftest và truyền xuống con ⇒ con chạy UTF-8 mode nên
+        #   `open()` trần cũng ra UTF-8. Gỡ đúng ba biến đó thì `open()` trần rơi về codec LOCALE:
+        #   Linux `LC_ALL=C` → ASCII ⇒ UnicodeDecodeError · Windows → cp1258 ⇒ mojibake. Đỏ CẢ HAI nền.
+        _env = dict(_o328.environ)
+        _env["PYTHONUTF8"] = "0"
+        _env.pop("PYTHONIOENCODING", None)
+        _env["LC_ALL"] = _env["LANG"] = "C"
+        with _tf328.TemporaryDirectory() as _td:
+            _f = _td + "/b.out"
+            open(_f, "wb").write(raw)
+            _r = _sp328.run([_s328.executable, "-c", _m.group(1), _f, "out"],
+                            capture_output=True, timeout=60, env=_env)
+            okD = _r.returncode == 0 and _r.stdout == want.encode("utf-8") + b"\n"
+        return okA and okB and okC and okD
+    _t110("r328_json_ngoai_ascii_khong_qua_codec_ansi", _c328_json_ngoai_ascii_khong_qua_codec_ansi)
+
+    def _c328_ps1_roundtrip_pwsh_that():
+        """r328 VẾ 3 — HÀNH VI ĐẦU-CUỐI qua pwsh THẬT, đúng đường `Invoke-Py`/`Get-Content` của ps1
+        (bài học r244: script đa nền phải CHẠY trên nền đó, đọc code không lộ ra lớp lỗi này).
+        ★ TỰ KIỂM CHỨNG, chống XANH GIẢ: harness đòi CẢ HAI — bản CHƯA vá phải LỆCH *và* bản ĐÃ vá
+          phải KHỚP. Nếu môi trường không tái hiện nổi bệnh (ambient đã UTF-8, ép hostile thất bại)
+          thì vế 'brokenMatch' hoá True và ca ĐỎ — thà đỏ còn hơn xanh mà chẳng đo được gì.
+        ★ Không có pwsh (container Cowork) ⇒ bỏ qua: vế 1 (grep) + vế 2 (thuần Python) vẫn phủ."""
+        import json as _j328, os as _o328, shutil as _sh328, subprocess as _sp328, sys as _s328
+        import tempfile as _tf328
+        if not _sh328.which("pwsh"):
+            return True
+        harness = (
+            "param([string]$Py,[string]$Emit,[string]$Want,[string]$Work)\n"
+            "$u8 = [System.Text.UTF8Encoding]::new($false)\n"
+            "$save = [Console]::OutputEncoding\n"
+            # cp1258 = ambient THẬT của máy dev; Latin1 (có sẵn mọi nền) là bản lùi cho Linux runner
+            "try { $hostile = [System.Text.Encoding]::GetEncoding(1258) }\n"
+            "catch { $hostile = [System.Text.Encoding]::Latin1 }\n"
+            "$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'\n"
+            "function Get-Out([bool]$Fix, [string]$Tag) {\n"
+            "  [Console]::OutputEncoding = $hostile\n"
+            "  if ($Fix) { [Console]::OutputEncoding = $u8 }\n"
+            "  $f = Join-Path $Work \"x_$Tag.out\"\n"
+            "  & $Py $Emit $Want *> $f\n"          # ĐÚNG hình dạng Invoke-Py
+            "  $t = if ($Fix) { [string](Get-Content $f -Raw -Encoding utf8) }\n"
+            "       else      { [string](Get-Content $f -Raw) }\n"
+            "  return ($t | ConvertFrom-Json).out\n"
+            "}\n"
+            "try {\n"
+            "  $broken = Get-Out $false 'broken'\n"
+            "  $fixed  = Get-Out $true  'fixed'\n"
+            "} finally { [Console]::OutputEncoding = $save }\n"
+            "$res = [ordered]@{ brokenMatch = ($broken -eq $Want)\n"
+            "                   fixedMatch  = ($fixed  -eq $Want)\n"
+            "                   fixedExists = [bool](Test-Path $fixed) }\n"
+            "[IO.File]::WriteAllText((Join-Path $Work 'res.json'),"
+            " (ConvertTo-Json $res -Compress), $u8)\n"
+        )
+        emit = (
+            "import json, os, sys\n"
+            "sys.stdout.reconfigure(encoding='utf-8')\n"   # y hệt tl.py:86 — nguồn byte UTF-8
+            "sys.stdout.write(json.dumps({'ok': True, 'out': os.path.abspath(sys.argv[1])},"
+            " ensure_ascii=False) + '\\n')\n"
+        )
+        with _tf328.TemporaryDirectory() as _td:
+            _hp, _ep = _o328.path.join(_td, "h.ps1"), _o328.path.join(_td, "emit.py")
+            open(_hp, "w", encoding="utf-8").write(harness)
+            open(_ep, "w", encoding="utf-8").write(emit)
+            want = _o328.path.join(_td, "Qu%sc h%si" % (_R328_UNIT, "\u1ed9"))
+            _o328.makedirs(want, exist_ok=True)
+            _r = _sp328.run(["pwsh", "-NoProfile", "-File", _hp, _s328.executable, _ep, want, _td],
+                            capture_output=True, timeout=180)
+            _rp = _o328.path.join(_td, "res.json")
+            if _r.returncode != 0 or not _o328.path.exists(_rp):
+                return False
+            res = _j328.loads(open(_rp, encoding="utf-8").read())
+        return (res.get("brokenMatch") is False        # bệnh PHẢI tái hiện được
+                and res.get("fixedMatch") is True      # bản vá PHẢI chữa được
+                and res.get("fixedExists") is True)    # và đường dẫn đọc lại PHẢI trỏ tệp thật
+    _t110("r328_ps1_roundtrip_pwsh_that", _c328_ps1_roundtrip_pwsh_that)
+    # ═══ r330 — timeout ĐƯỜNG GHI: hằng chọn KHÔNG ĐO ⇒ `update_content` 120s CHẶN THẬT lượt deploy ═══
+    # r327 vá phép DÒ; đường GHI vẫn nguyên hằng cứng. Gói 2.487.725 B chết `gws timeout sau 120.0s`,
+    # đặt `TL_GWS_TIMEOUT=900` thì đẩy XONG + BYTE-MATCH ⇒ knob đúng việc nhưng MẶC ĐỊNH vẫn là tường.
+    # ★KHÔNG chờ thật: giả `subprocess` để vừa GHI LẠI ngân sách thực nhận, vừa mô phỏng lệnh tốn N giây.
+    import contextlib as _ctx330, subprocess as _sp330, types as _ty330
+    _ENVK330 = ("TL_GWS_TIMEOUT", "TL_GWS_WRITE_TIMEOUT", "TL_GWS_AUTH_TIMEOUT", "TL_GWS_VERSION_TIMEOUT")
+
+    @_ctx330.contextmanager
+    def _env330(env):
+        keep = {k: os.environ.get(k) for k in _ENVK330}
+        try:
+            for k in _ENVK330:
+                os.environ.pop(k, None)
+            os.environ.update(env)
+            yield
+        finally:
+            for k in _ENVK330:
+                os.environ.pop(k, None)
+            os.environ.update({k: v for k, v in keep.items() if v is not None})
+
+    def _op330(args):
+        """Nhận DẠNG lệnh gws từ argv. `--upload` là thứ tách update_content khỏi _files_update và
+        upload khỏi mkdir — cùng động từ `update`/`create`, khác hẳn chi phí (có TẢI vs metadata)."""
+        a = [str(x) for x in args]
+        up = "--upload" in a
+        if "update" in a:
+            return "update_content" if up else "files_update"
+        if "create" in a:
+            return "upload" if up else "mkdir"
+        if "--output" in a:
+            return "download"
+        return "other"
+
+    def _fake_sp330(cost=0.0):
+        """(fake_subprocess, seen) — lệnh TỐN cost giây: ngân sách nhỏ hơn ⇒ TimeoutExpired.
+        seen ghi [(dạng_lệnh, timeout_thực_nhận)] để khẳng định TRỰC TIẾP vào NGÂN SÁCH, không đoán."""
+        seen = []
+
+        def _r(args, **kw):
+            tmo = kw.get("timeout")
+            seen.append((_op330(args), tmo))
+            if tmo is not None and tmo < cost:
+                raise _sp330.TimeoutExpired(args, tmo)
+            return _ty330.SimpleNamespace(returncode=0, stderr="", stdout='{"id":"F1","name":"p.zip"}')
+        return _ty330.SimpleNamespace(run=_r, TimeoutExpired=_sp330.TimeoutExpired), seen
+
+    def _with330(gb, sp, env, fn):
+        _osp, _oexe = gb.subprocess, gb.gws_exe
+        try:
+            gb.subprocess, gb.gws_exe = sp, (lambda: "/fake/gws")
+            with _env330(env):
+                return fn()
+        finally:
+            gb.subprocess, gb.gws_exe = _osp, _oexe
+
+    def _c330_write_du_gio_cho_goi_that():
+        """VẾ 1 — ngân sách đường GHI phải PHỦ ca THẬT. 150s nằm GIỮA trần cũ (120s, đã chứng minh
+        CHẶN gói 2,49MB) và ca nới rộng chạy xong ⇒ bản cũ GwsError, bản vá xong.
+        ★Bằng chứng NỘI TẠI của bệnh (cùng họ r327): lệnh CÕNG CẢ GÓI lại có ngân sách chỉ gấp 2× lệnh
+        metadata thuần (120s vs mkdir 60s) — trong khi chỉ nó mới co giãn theo băng thông."""
+        gb = _imp("gws_bridge")
+        _p330 = str(_ROOT209 / "VERSION")
+        sp, seen = _fake_sp330(cost=150.0)
+        r = _with330(gb, sp, {}, lambda: gb.update_content("F1", _p330, mime="application/zip"))
+        b = dict(seen)
+        ok1 = (r or {}).get("ok") is True and b.get("update_content", 0) >= 600.0
+        sp2, seen2 = _fake_sp330(cost=150.0)
+        r2 = _with330(gb, sp2, {}, lambda: gb.upload("p.zip", _p330, mime="application/zip"))
+        ok2 = (r2 or {}).get("ok") is True and dict(seen2).get("upload", 0) >= 600.0
+        sp3, seen3 = _fake_sp330()
+        _with330(gb, sp3, {}, lambda: gb.mkdir("d"))
+        ok3 = b.get("update_content", 0) > dict(seen3).get("mkdir", 0)
+        return ok1 and ok2 and ok3
+    _t110("r330_write_du_gio_cho_goi_that", _c330_write_du_gio_cho_goi_that)
+
+    def _c330_write_knob_chi_nang_khong_ha():
+        """VẾ 2 — `TL_GWS_WRITE_TIMEOUT` là SÀN RIÊNG nhóm GHI CÓ TẢI: NÂNG được, HẠ thì KHÔNG.
+        Cho hạ thì MỘT con số san phẳng cả nhóm (upload/update/download mặc định khác nhau) — đúng cái
+        bẫy r327 đã vá, chỉ đổi phạm vi. Và nó KHÔNG được chạm lệnh ĐỌC."""
+        gb = _imp("gws_bridge")
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "900"}):
+            okA = gb._timeout(600.0, write=True) == 900.0
+            okB = gb._timeout(30.0) == 30.0                      # lệnh ĐỌC không dính sàn của nhóm GHI
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "100"}):
+            okC = gb._timeout(600.0, write=True) == 600.0        # KHÔNG hạ
+        with _env330({"TL_GWS_TIMEOUT": "1200"}):
+            okD = gb._timeout(600.0, write=True) == 1200.0       # sàn CHUNG vẫn nâng được nhóm GHI
+        with _env330({"TL_GWS_WRITE_TIMEOUT": "900", "TL_GWS_TIMEOUT": "1200"}):
+            okE = gb._timeout(600.0, write=True) == 1200.0       # hai sàn ⇒ lấy CAO nhất
+        with _env330({"TL_GWS_AUTH_TIMEOUT": "45", "TL_GWS_WRITE_TIMEOUT": "900"}):
+            okF = gb._timeout(120.0, "TL_GWS_AUTH_TIMEOUT") == 45.0   # knob RIÊNG vẫn thắng mọi sàn
+        # `download` KHÔNG đi qua `_run` (stdout phải là BYTES) ⇒ điểm mù kinh điển: r327 đã dính đúng
+        # kiểu này với TL_GWS_TIMEOUT. Kiểm bằng HÀNH VI, không đọc mã.
+        sp, seen = _fake_sp330()
+
+        def _dl():
+            try:
+                gb.download("F1", str(_ROOT209 / "_khong_ton_tai_r330.bin"))
+            except Exception:      # noqa: BLE001  — fake không ghi file ⇒ raise; chỉ cần NGÂN SÁCH
+                pass
+        _with330(gb, sp, {"TL_GWS_WRITE_TIMEOUT": "900"}, _dl)
+        okG = dict(seen).get("download") == 900.0
+        return okA and okB and okC and okD and okE and okF and okG
+    _t110("r330_write_knob_chi_nang_khong_ha", _c330_write_knob_chi_nang_khong_ha)
+
+    def _c330_write_env_meo_khong_vo_hieu():
+        """VẾ 3 — knob MỚI cũng không được thành công tắc TẮT timeout: 0/âm ⇒ chết tức thì, inf/1e400 ⇒
+        treo vô hạn (gws wedge = mất luôn đường fallback). Rác/rỗng ⇒ về mặc định."""
+        gb = _imp("gws_bridge")
+        oks = []
+        for v in ("0", "0.0", "-5", "inf", "-inf", "nan", "1e400", "rác", "", "   "):
+            with _env330({"TL_GWS_WRITE_TIMEOUT": v}):
+                oks.append(gb._timeout(600.0, write=True) == 600.0)
+        with _env330({"TL_GWS_WRITE_TIMEOUT": " 750.5 "}):
+            oks.append(gb._timeout(600.0, write=True) == 750.5)
+        return all(oks) and len(oks) == 11
+    _t110("r330_write_env_meo_khong_vo_hieu", _c330_write_env_meo_khong_vo_hieu)
+
+    def _c330_timeout_khuyen_dung_huong():
+        """VẾ 4 — bệnh r327 LẶP Ở ĐƯỜNG GHI: `timeout` ≠ `mất quyền`, mà mọi thông điệp hỏng của
+        drive-push đều chỉ sang `gws auth login`. `r327_probe_error_lo_dien` khoá cho phép DÒ; đây khoá
+        cho ROUTE (khi phép dò chết vì timeout) và cho chính đường GHI.
+        Lưu ý phép khẳng định: câu vá CỐ Ý chứa «ĐỪNG `gws auth login`» nên không thể assert bằng
+        «không có chuỗi auth login» — phải đòi ĐỦ ĐÔI: nêu knob ĐÚNG + phủ định lời khuyên SAI."""
+        _g330 = _imp("tl_gws")
+        _hint, _route = _g330._gws_timeout_hint, _g330._drive_push_route
+        h = _hint("GwsError: gws timeout sau 120.0s")
+        okA = "TL_GWS_WRITE_TIMEOUT" in h and "ĐỪNG" in h
+        okB = _hint("gws rc=1: PERMISSION_DENIED") == ""      # KHÔNG đổ oan cho ngân sách khi mất quyền thật
+        _, n1 = _route("gws", False, False, probe_error="gws timeout sau 120.0s")
+        okC = "TL_GWS_TIMEOUT" in n1 and "ĐỪNG" in n1
+        _, n2 = _route("gws", False, False)                   # không rõ lý do ⇒ GIỮ NGUYÊN lời cũ
+        okD = "gws auth login" in n2 and "ĐỪNG" not in n2
+        _, n3 = _route("auto", False, True, probe_error="gws timeout sau 120.0s")
+        okE = "FALLBACK" in n3 and "TIMEOUT" in n3
+        _, n4 = _route("auto", False, False, probe_error="gws timeout sau 120.0s")
+        _a4 = n4.split("hoặc (b)")[0]                         # vế (a) = gws; vế (b) là gcloud, kệ nó
+        okF = "TL_GWS_WRITE_TIMEOUT" in _a4 and "ĐỪNG" in _a4
+        return okA and okB and okC and okD and okE and okF
+    _t110("r330_timeout_khuyen_dung_huong", _c330_timeout_khuyen_dung_huong)
+
+    def _c330_deploy_msg_khong_chay_lenh():
+        """VẾ 5 — CÙNG bệnh, dạng NẶNG NHẤT. Ở `deploy-package.sh` lời khuyên sai hướng không chỉ được
+        IN mà bị CHẠY: backtick trong chuỗi nháy KÉP của bash là THAY THẾ LỆNH, nên mỗi lần drive-push
+        hỏng thì `gws auth login` KHỞI CHẠY THẬT (và thông điệp in ra output của nó thay vì tên lệnh).
+        ★ Twin `ps1` KHÔNG dính — nháy ĐƠN của PowerShell coi backtick là ký tự thường ⇒ đúng lớp lệch
+          hai nền mà chỉ CHẠY THẬT mới thấy (bài học r244: parity là thứ duy nhất bắt được).
+        ★ TỰ KIỂM CHỨNG, chống XANH GIẢ: đòi CẢ HAI — dòng CŨ phải TÁI HIỆN được bệnh (gws bị gọi) và
+          dòng MỚI phải sạch. Harness không tái hiện nổi bệnh thì ca ĐỎ, thà đỏ hơn xanh mà không đo gì."""
+        import re as _re330, shutil as _sh330, subprocess as _sp330, tempfile as _tf330
+        _shp = (_ROOT209 / "scripts" / "deploy-package.sh").read_text(encoding="utf-8", errors="replace")
+        _psp = (_ROOT209 / "scripts" / "deploy-package.ps1").read_text(encoding="utf-8", errors="replace")
+        _m = _re330.search(r'bad "(drive-push lỗi[^"]*)"', _shp)
+        _n = _re330.search(r"Bad '(drive-push lỗi[^']*)'", _psp)
+        if not _m or not _n:
+            return False
+        okA = _m.group(1) == _n.group(1)                 # PARITY hai nền: CÙNG MỘT CÂU
+        okB = "`" not in _m.group(1)                     # hết thay-thế-lệnh
+        okC = "TL_GWS_WRITE_TIMEOUT" in _m.group(1) and "ĐỪNG" in _m.group(1)
+        # ★ ĐÃ TRẢ GIÁ: gọi `["bash", …]` theo TÊN từ Python trên Windows trúng **app-execution alias
+        #   của WSL** (`C:\\Windows\\System32\\bash.exe`) chứ không phải Git Bash — nó trả rc=1 với
+        #   stdout UTF-16 «Catastrophic failure», stderr RỖNG, tức HỎNG CÂM. `shutil.which` lại ra Git
+        #   Bash: hai bên PHÂN GIẢI KHÁC NHAU. Phải dùng đường dẫn TUYỆT ĐỐI, và phải THỬ bash chạy nổi
+        #   đã (`exit 7`) — để phân biệt «môi trường không chạy được bash» với «bệnh không tái hiện».
+        _bash = _sh330.which("bash")
+
+        def _bash_dung_duoc():
+            try:
+                return _sp330.run([_bash, "-c", "exit 7"], capture_output=True, timeout=60).returncode == 7
+            except Exception:      # noqa: BLE001
+                return False
+        if not _bash or not _bash_dung_duoc():
+            return okA and okB and okC                   # không có bash dùng được ⇒ ba vế tĩnh vẫn phủ
+        _new = [ln for ln in _shp.split("\n") if 'drive-push "$ZIP"' in ln]
+        if len(_new) != 1:
+            return False
+        _old = ('$TL drive-push "$ZIP" --rename-to-file || { bad "drive-push lỗi '
+                '(cần `gws auth login` có quyền GHI Drive)"; exit 3; }')
+
+        def _goi(line):
+            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng."""
+            with _tf330.TemporaryDirectory() as _td:
+                _sp = os.path.join(_td, "p.sh")
+                with open(_sp, "w", encoding="utf-8", newline="\n") as _f:
+                    _f.write("bad(){ :; }\ngws(){ echo CALLED >> goi.txt; }\nTL=false\nZIP=x\n" + line + "\n")
+                _sp330.run([_bash, "p.sh"], cwd=_td, capture_output=True, timeout=60)
+                return os.path.exists(os.path.join(_td, "goi.txt"))
+        return okA and okB and okC and _goi(_old) and not _goi(_new[0])
+    _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
+
+    # ═══ r331 — `.codex/` (gốc worktree agent Codex) KHÔNG được tính vào cây phát hành ═══
+    def _c331_codex_ngoai_cay_phat_hanh():
+        # BỆNH ĐO 04-08-2026: agent Codex đặt worktree ở `.codex/worktrees/<nhánh>/`, mỗi worktree là
+        # MỘT BẢN SAO ĐẦY ĐỦ của kho. `_RELEASE_EXCLUDE_DIRS` có `.claude` mà THIẾU `.codex` ⇒
+        # `release-verify` đếm chúng vào `extra_files`: 200 mục, 100% thuộc `.codex/`, trong khi
+        # `failed: []` và `expected/checked = 177/177` (manifest LÀNH). Hậu quả: gate ĐỎ ở MỌI lượt
+        # chạy từ main checkout, còn worktree sạch vẫn XANH — đỏ theo NƠI CHẠY, không theo nội dung.
+        # Bốn vế lấy từ BỐN nguồn khác nhau để không vế nào tự chứng minh mình:
+        #   (1) hằng chính sách · (2) HÀNH VI trên cây tổng hợp · (3) đúng KHOÁ `.codex` gây loại
+        #   · (4) .gitignore — vế văn bản, chống đúng cái bẫy đã sập khi viết bản vá này.
+        import tempfile as _tf331
+        from pathlib import Path as _P331
+        from tl_core import release as _rel331
+        ok1 = ".codex" in _rel331._RELEASE_EXCLUDE_DIRS
+
+        # (2) HÀNH VI trên cây TỔNG HỢP (không phụ thuộc máy có .codex thật hay không — CI thì không).
+        #     Đối chứng cùng tên tệp ở NGOÀI `.codex/` phải VÀO gói: nếu cả hai cùng bị loại thì phép
+        #     đo này vô nghĩa (có thể do suffix/tên), nên đối chứng là phần chịu lực của vế.
+        with _tf331.TemporaryDirectory() as _d331:
+            _r331 = _P331(_d331)
+            trong = _r331 / ".codex" / "worktrees" / "nhanh-x" / "scripts" / "tl.py"
+            ngoai = _r331 / "scripts" / "tl.py"
+            for q in (trong, ngoai):
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x", encoding="utf-8")
+            ok2 = (not _rel331._release_should_include(trong, _r331)
+                   and _rel331._release_should_include(ngoai, _r331))
+            # (3) loại ĐÚNG VÌ khoá `.codex`, không phải vì khoá khác lẫn trong đường dẫn.
+            ok3 = set(trong.relative_to(_r331).parts) & _rel331._RELEASE_EXCLUDE_DIRS == {".codex"}
+
+        # (4) `.gitignore`: `.codex/` phải là dòng ĐỘC LẬP. Trong cú pháp gitignore, `#` chỉ mở chú
+        #     thích khi ĐỨNG ĐẦU DÒNG — viết `.codex/   # ghi chú` thì cả cụm thành MỘT pattern và
+        #     KHÔNG bỏ qua gì cả. Bẫy này đã sập THẬT lúc viết r331 (bắt được trước khi commit).
+        _gi = (_ROOT209 / ".gitignore").read_text(encoding="utf-8", errors="replace")
+        ok4 = any(ln.strip() == ".codex/" for ln in _gi.splitlines())
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r331_codex_ngoai_cay_phat_hanh", _c331_codex_ngoai_cay_phat_hanh)
+
+    def _c300_dac_ta_khop_ma():
+        # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
+        from tl_core import lookup_ops as _lo300
+        _sch = (_ROOT209 / "references" / "RASOAT_PLAN_SCHEMA.md").read_text(encoding="utf-8", errors="replace")
+        ok1 = "## 7. Vòng đời HỒ SƠ" in _sch
+        _e300 = _lo300._rasoat_vong_doi_enums()
+        ok2 = all(t in _sch for t in _e300["vong_doi"])
+        ok3 = all(t in _sch for t in _e300["q_verify"]) and all(t in _sch for t in _e300["q_ingest"])
+        _the = _j209.loads((_ROOT209 / "references" / "workflows" / "rasoat_hoso.json")
+                           .read_text(encoding="utf-8"))
+        ok4 = any("DONG HO SO" in str(s) for s in (_the.get("stop_conditions") or []))
+        ok5 = any("anchor_con_hieu_luc" in str(s) for s in (_the.get("rules") or []))
+        _loop = (_ROOT209 / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8", errors="replace")
+        ok6 = "§8b" in _loop and "anchor_con_hieu_luc" in _loop
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r300_dac_ta_vong_doi_khop_ma", _c300_dac_ta_khop_ma)
+
     def _c209_master_template_va_vocab():
         # H1: template đọc được bằng ĐÚNG bên đọc (load_master); vocab 10/10 route đúng bucket;
-        # bẫy không-dấu KHOÁ LẠI làm bằng chứng ('ban hanh moi' rơi 04 thay vì 05 → doc cảnh báo là THẬT);
         # so_hieu mẫu theo chuẩn bất biến NN-YYYY-VBHN-XXX.
+        # v1.36.45 (r311/DOC-01): ok3 TRƯỚC ĐÂY khoá `route("ban hanh moi") == "04"` — tức khoá CHÍNH
+        # CÁI BUG làm kỳ vọng, nên không ai sửa được nó mà không làm đỏ selftest. Nay đảo chiều: bẫy
+        # không-dấu phải FAIL-CLOSED (xem r311_route_hinh_thuc_fail_closed cho bộ ca đầy đủ).
         tp = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
         d = _j209.loads(tp.read_text(encoding="utf-8"))
         co, vb, nd = _rp209.load_master(str(tp))
         ok1 = bool(co) and len(vb) == 1 and len(nd) == 1
         vocab = d.get("_vocab_hinh_thuc") or {}
         ok2 = len(vocab) == 10 and all(_rp209.route(k) == v for k, v in vocab.items())
-        ok3 = _rp209.route("sua doi bo sung") == "04" and _rp209.route("ban hanh moi") == "04"
+        ok3 = True
+        for _bad209 in ("sua doi bo sung", "ban hanh moi"):
+            try:
+                _rp209.route(_bad209); ok3 = False
+            except _rp209.HinhThucKhongHopLe:
+                pass
         ok4 = _re209.fullmatch(r"\d+-\d{4}-VBHN-[A-Z]+", vb[0].get("so_hieu") or "") is not None
         ok5 = (nd[0].get("muc_chac_chan") in (d.get("_muc_chac_chan_enum") or [])
                and (nd[0].get("anchor") or {}).get("ttl_ngay") == 90)
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r209_master_template_va_vocab", _c209_master_template_va_vocab)
+
+    def _c311_route_hinh_thuc_fail_closed():
+        """v1.36.45 (r311/DOC-01 — đo LIVE 02-08): `route()` KHÔNG còn dồn im lặng về "04".
+
+        Bản cũ trả "04" cho CẢ "ban hanh moi" (đáng lẽ 05), "bai bo toan bo" (đáng lẽ 06), "" và
+        "xyz la gi" ⇒ một lỗi gõ dấu đủ để đổi phụ lục VÀ số liệu Mục D mà không có tín hiệu nào."""
+        import os as _os311
+        import subprocess as _sp311
+        import sys as _sys311
+        import tempfile as _tf311
+        _tp311 = _ROOT209 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
+        _vocab = (_j209.loads(_tp311.read_text(encoding="utf-8")).get("_vocab_hinh_thuc") or {})
+        # (a) TỪ VỰNG HỢP LỆ vẫn định tuyến y như cũ — fail-closed KHÔNG được siết vào luồng đang chạy.
+        ok0 = len(_vocab) == 10 and all(_rp209.route(k) == v for k, v in _vocab.items())
+        # Giá trị hợp lệ VIẾT KÈM PHẠM VI là cách người nhập thật hay dùng ⇒ phải còn chạy.
+        ok1 = (_rp209.route("sửa đổi, bổ sung Điều 54") == "04"
+               and _rp209.route("Bãi bỏ toàn bộ") == "06"
+               and _rp209.route("tạm ngưng hiệu lực toàn bộ") == "04")
+        # (b) FAIL-CLOSED: rỗng / khoảng trắng / None / không dấu / ngoài từ vựng.
+        ok2 = True
+        for _bad in ("", "   ", None, "ban hanh moi", "bai bo toan bo", "sua doi bo sung", "xyz la gi"):
+            try:
+                _rp209.route(_bad); ok2 = False                       # ĐỎ trước r311 (mọi ca trả "04")
+            except _rp209.HinhThucKhongHopLe:
+                pass
+        # (c) "chờ bổ sung căn cứ" CHỨA "bổ sung" ⇒ khoá THỨ TỰ nhánh: F phải xét trước 04.
+        ok3 = _rp209.route("chờ bổ sung căn cứ") == "F"
+        # (d) ĐƯỜNG SẢN XUẤT: subprocess trên bảng master có 1 dòng sai — phải rc≠0, KHÔNG ghi phụ lục,
+        #     và nêu ĐÍCH DANH dòng sai. A/B: cùng bảng đó sửa đúng chính tả thì rc=0 và rơi vào 05.
+        def _master311(ht):
+            return {"co_quan": "CQ", "van_ban": [{"so_hieu": "18-2025-VBHN-VPQH", "ten": "X"}],
+                    "noi_dung": [{"key": "VD-A", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": "sửa đổi, bổ sung"},
+                                 {"key": "VD-B", "van_ban": "18-2025-VBHN-VPQH", "can_cu": "c",
+                                  "phan_tich": "p", "hinh_thuc": ht}]}
+        _env311 = dict(_os311.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+
+        def _chay311(ht, sub):
+            with _tf311.TemporaryDirectory() as _d:
+                _f = _P209(_d) / "master.json"
+                _f.write_text(_j209.dumps(_master311(ht), ensure_ascii=False), encoding="utf-8")
+                _od = _P209(_d) / sub
+                _r = _sp311.run([_sys311.executable, str(_ROOT209 / "scripts" / "rasoat_phuluc.py"),
+                                 "--in", str(_f), "--out-dir", str(_od)],
+                                capture_output=True, text=True, encoding="utf-8", env=_env311, timeout=120)
+                return _r, (_od / "PHU_LUC_03_07_BN_TONG_HOP.md").is_file(), (_r.stdout or "").strip()
+        _rx, _co_file, _ = _chay311("ban hanh moi", "xau")
+        _msg = (_rx.stderr or "") + (_rx.stdout or "")
+        ok4 = (_rx.returncode != 0 and "HÌNH THỨC XỬ LÝ KHÔNG HỢP LỆ" in _msg
+               and "VD-B" in _msg and not _co_file)                   # ĐỎ trước r311 (rc=0, im lặng)
+        _ry, _co_file2, _so = _chay311("ban hành mới", "tot")
+        _out311 = {}
+        try:
+            _out311 = _j209.loads(_so.splitlines()[-1])
+        except Exception:  # noqa: BLE001
+            pass
+        ok5 = (_ry.returncode == 0 and _co_file2
+               and _out311.get("counts", {}).get("05") == 1
+               and _out311.get("counts", {}).get("04") == 1)
+        # (e) PHẢN CHỨNG — tái hiện THUẬT TOÁN CŨ trên chính dữ liệu này: cái sọt "còn lại → 04" nuốt
+        #     gọn "ban hanh moi". Chứng minh test cắn nếu ai đó revert, không chỉ "bản mới chạy xanh".
+        def _route_cu(h):
+            h = _rp209._norm(h)
+            if not h:
+                return "04"
+            if "ban hành mới" in h:
+                return "05"
+            if "bãi bỏ toàn bộ" in h:
+                return "06"
+            if ("tạm ngưng toàn bộ" in h) or ("tạm ngừng toàn bộ" in h):
+                return "07"
+            if ("nghiên cứu" in h) or ("mục f" in h) or h.startswith("chờ"):
+                return "F"
+            return "04"
+        ok6 = all(_route_cu(x) == "04" for x in ("", "   ", "ban hanh moi", "bai bo toan bo", "xyz la gi"))
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r311_route_hinh_thuc_fail_closed", _c311_route_hinh_thuc_fail_closed)
+
+    def _c312_src_id_dup_lo_dien():
+        """v1.36.46 (r312/ING-09 — đo LIVE registry 02-08): nhân đôi theo TỆP NGUỒN (`src_id`).
+
+        Đo thật trên 1319 dòng tab `files`: 31 cụm / 66 dòng cùng `src_id` mà `drive_id` đôi một KHÁC.
+        Ba detector đang có đều MÙ: 26/31 cụm `sohieu` RỖNG · 27/31 cụm `name` khác nhau (bản Việt
+        «Phu_luc_2-A» vs bản Anh «Annex_2-A» của CÙNG phụ lục) · md5 tính trên GDoc đã convert nên mỗi
+        lần một khác · 31/31 cụm `drive_id` đôi một khác nên khoá chính cũng không bắt."""
+        from tl_core.hygiene import _hygiene_groups as _hg312, _src_id_dup_groups as _sd312
+        # Fixture DỰNG THEO ĐÚNG hình dạng cụm thật (EVFTA): cùng src_id, drive_id khác, sohieu RỖNG,
+        # tên Việt/Anh khác nhau, md5 khác nhau.
+        _fx = [
+            {"id": "g1", "drive_id": "g1", "src_id": "SRC-A", "name": "EVFTA_PL_Phu_luc_2-A",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m1"},
+            {"id": "g2", "drive_id": "g2", "src_id": "SRC-A", "name": "EVFTA_PL_Annex_2-A_Bieu_thue",
+             "so_hieu": "", "cat": "23_Ngoai_giao_dieu_uoc", "corpus": "true", "row_kind": "own", "md5": "m2"},
+        ]
+        _g = _hg312(_fx)
+        ok0 = len(_sd312(_fx)) == 1 and len(_g["duplicates_by_src_id"]) == 1   # ĐỎ trước r312 (không có khoá)
+        # BẰNG CHỨNG MÙ — chính cụm này KHÔNG hiện ra ở ba detector cũ. Đây là lý do phải có detector riêng;
+        # nếu ai đó "gộp cho gọn" vào một trong ba, vế này ĐỎ.
+        ok1 = (not _g["duplicates_by_sohieu"] and not _g["duplicates_by_name"]
+               and not _g["duplicates_by_md5"])
+        # PHẢN CHỨNG 1: cùng src_id NHƯNG cùng drive_id = MỘT dòng đọc hai lần, KHÔNG phải nhân đôi.
+        _fx2 = [dict(_fx[0]), dict(_fx[0])]
+        ok2 = len(_sd312(_fx2)) == 0
+        # PHẢN CHỨNG 2: src_id RỖNG không được gom thành một cụm khổng lồ.
+        _fx3 = [dict(e, src_id="") for e in _fx]
+        ok3 = len(_sd312(_fx3)) == 0
+        # PHẢN CHỨNG 3: không corpus-effective ⇒ ngoài tầm (đã hạ bản/quarantine rồi thì hết là nợ).
+        _fx4 = [dict(e, corpus="false") for e in _fx]
+        ok4 = len(_sd312(_fx4)) == 0
+        # PHẢN CHỨNG 4: row_kind=ref là con trỏ, không phải bản nạp.
+        _fx5 = [dict(e, row_kind="ref") for e in _fx]
+        ok5 = len(_sd312(_fx5)) == 0
+        # Cụm 3 dòng (có thật: src_id 1bAT9Ad… x3) vẫn ra ĐÚNG MỘT cụm, không tách đôi.
+        _fx6 = _fx + [dict(_fx[0], id="g3", drive_id="g3", name="EVFTA_PL_Phu_luc_2-A_ban_3", md5="m3")]
+        _s6 = _sd312(_fx6)
+        ok6 = len(_s6) == 1 and len(next(iter(_s6.values()))) == 3
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r312_src_id_dup_lo_dien", _c312_src_id_dup_lo_dien)
+
+    def _c312_cong_ingest_chan_nguon_da_nap():
+        """v1.36.46 (r312/ING-09): cổng `src_id_dedup_live` trong `_il_stage_plan`.
+
+        Cổng F1 cũ đứng SAU `if sohieu and …` ⇒ 26/31 cụm thật (sohieu rỗng) không bao giờ được xét.
+        Test đọc THẲNG mã nguồn stage vì thân stage gọi mạng — khoá VỊ TRÍ và ĐIỀU KIỆN, hai thứ đã sai."""
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ingest_ops.py").read_text(encoding="utf-8", errors="replace")
+        _blk = _src[_src.find("def _il_stage_plan"):_src.find("def _il_stage_confirm")]
+        ok0 = "SOURCE_ALREADY_INGESTED" in _blk and "src_id_dedup_live" in _blk
+        # Cổng mới KHÔNG được nấp sau `if sohieu` — phải neo `_from_drive`, độc lập với số hiệu.
+        _i_new = _blk.find("src_id_dedup_live")
+        _i_f1 = _blk.find("if sohieu and not _prev")
+        ok1 = _i_f1 != -1 and _i_new > _i_f1                      # nằm SAU cổng F1, KHÔNG lồng trong nó
+        # CHỈ lấy DÒNG điều kiện (không lấy cả thân) — thân có `replace_sohieu` nên so chuỗi cả khối
+        # sẽ báo nhầm là "có dính số hiệu".
+        _i_cond = _blk.find("if _from_drive and not _prev")
+        _cond = _blk[_i_cond:_blk.find("\n", _i_cond)]
+        ok2 = _i_cond != -1 and "_from_drive" in _cond and "sohieu" not in _cond  # cổng KHÔNG gate theo số hiệu
+        # Neo theo src_id (tệp NGUỒN), KHÔNG theo drive_id (GDoc kết quả — mỗi lần convert một id mới).
+        ok3 = 'str(e.get("src_id") or "").strip() == _from_drive' in _blk
+        # Có đường thoát tường minh + chặn TRƯỚC khi rẽ DRY/apply (chặn cả DRY = thấy sớm, không ghi gì).
+        ok4 = all(t in _blk for t in ("--skip-live-check", "--replace-sohieu", "--resume"))
+        ok5 = _blk.find('plan["mode"] = "DRY"') > _i_new
+        return ok0 and ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r312_cong_ingest_chan_nguon_da_nap", _c312_cong_ingest_chan_nguon_da_nap)
 
     def _c209_bang_c_du_truong():
         # H1b: qua rasoat_phuluc, phụ lục 04 KHÔNG rơi mất mức chắc chắn + cite (nối vào cột Ghi chú).
@@ -20606,8 +22446,15 @@ def run() -> int:
         return rows, bad
 
     def _c210_loop_khong_ghi_trong_cay():
-        # H3: MỌI đường ghi lúc chạy phải NGOÀI cây skill (state biến động lọt cây ⇒ package_hash lệch,
-        # release-verify/golden ĐỎ — r193/r202 đã trả giá). PHẢN CHỨNG 2 CHIỀU ở cuối.
+        # H3: tài liệu PHẢI KHAI đường ghi, và MỌI đường đã khai phải NGOÀI cây skill (state biến động
+        # lọt cây ⇒ package_hash lệch, release-verify/golden ĐỎ — r193/r202 đã trả giá).
+        # ★ PHẠM VI THẬT (hạ tuyên bố ở r298 — GATE-06/T0-E): ca này là LINT KHAI BÁO trên khối
+        #   `WRITE_PATHS_v1`. Nó KHÔNG chạy vòng nào, KHÔNG `git status`, KHÔNG `release-verify`, nên
+        #   KHÔNG chứng minh được lúc chạy máy có ghi đúng chỗ đã khai hay không. Trước r298 dòng này
+        #   tự nhận là vế CHẠY — và chính lối nghiệm-thu-bằng-lint ấy để lọt lỗi `rasoat-loop` cài OR
+        #   thay AND (mất tới 60% GAP, rc=0, im lặng) suốt cả Đợt 2 lẫn Đợt 3, mãi r256 mới bắt được.
+        #   Vế CHẠY nay do `r298_worklist_chay_kho_a3_a6` gánh.
+        # PHẢN CHỨNG 2 CHIỀU ở cuối.
         rows, bad = _write_paths210(_LOOP210)
         ok1 = rows is not None and len(rows) >= 3 and not bad
         ok2 = any(r.startswith("_meta/") for r in (rows or [])) and any("<out-dir>" in r for r in (rows or []))
@@ -20638,6 +22485,9 @@ def run() -> int:
     def _c210_agent_prompt_dung_schema():
         # H4: prompt agent phải trả ĐÚNG bộ trường của mẫu master (drift = phiên chính ghi hụt dữ liệu),
         # và phải khai ranh giới read-only + cấm nguyên-văn-từ-RAG.
+        # ★ PHẠM VI THẬT (hạ tuyên bố ở r298 — GATE-06/T0-E): so BỘ TRƯỜNG giữa mẫu JSON và prose, tức
+        #   LINT TÀI LIỆU. Không dựng agent, không chạy prompt ⇒ không chứng minh agent thật trả đúng
+        #   schema. Đây là guard chống DRIFT giữa hai tài liệu, đừng đọc thành bảo chứng hành vi.
         tp = _ROOT210 / "templates" / "MAU_BANG_TONG_HOP_PHAT_HIEN.json"
         nd = _j209.loads(tp.read_text(encoding="utf-8"))["noi_dung"][0]
         ok1 = all(('"' + k + '"') in _LOOP210 for k in nd if not k.startswith("_"))
@@ -20789,10 +22639,35 @@ def run() -> int:
     def _sua_nong211(phan_loai, chan_dung, moi_truong):
         """PURE: luật sửa nóng — CHỈ chặn đứng toàn cục mới được bỏ vòng rà đi vá, và vá ở CANONICAL
         theo quy trình (test rXX_ + deploy tay). Không có nhánh nào vá tại LIVE: deploy là bước tay
-        nên vá tại chỗ sẽ bị đè ở lần deploy sau, và mọi kết luận sau đó hết tái lập."""
+        nên vá tại chỗ sẽ bị đè ở lần deploy sau, và mọi kết luận sau đó hết tái lập.
+
+        r298 (GATE-06 — T0-E): bất biến THẬT của luật là "ĐÍCH vá độc lập với NƠI phát hiện lỗi", nên
+        `moi_truong` cố ý KHÔNG đổi kết quả. Trước r298 điều đó không được KIỂM: `ok3` dưới đây khẳng
+        định "không đầu vào nào khiến máy vá tại LIVE" nhưng nó đúng vì TỪ VỰNG trả về (`phan_loai_la` ·
+        `va_tai_canonical` · `gom_va_sau_luot_ra`) không chứa chuỗi con `"live"` — hằng đúng theo cấu
+        trúc hàm, KHÔNG phải theo luật. Chứng nhận rỗng đúng vùng lớp điều phối mà W0 sợ nhất.
+        Nay `_sua_nong211_vi_pham` dựng THẾ GIỚI VI PHẠM để cùng phép đo ấy falsify được."""
         if phan_loai not in ("workaround", "blocker"):
             return "phan_loai_la"
-        return "va_tai_canonical" if chan_dung else "gom_va_sau_luot_ra"
+        if not chan_dung:
+            return "gom_va_sau_luot_ra"
+        return "va_tai_canonical"           # kể cả khi moi_truong == "live" — đó LÀ bất biến
+
+    def _sua_nong211_vi_pham(phan_loai, chan_dung, moi_truong):
+        """Thế giới VI PHẠM, chỉ để PHẢN CHỨNG: vá ngay tại NƠI phát hiện. Nếu phép đo của `ok3` có nội
+        dung thì nó PHẢI bắt được hàm này; nếu không bắt được thì phép đo ấy vô nghĩa với cả luật thật."""
+        if phan_loai not in ("workaround", "blocker"):
+            return "phan_loai_la"
+        if not chan_dung:
+            return "gom_va_sau_luot_ra"
+        return "va_tai_live" if moi_truong == "live" else "va_tai_canonical"
+
+    def _co_va_tai_live211(fn):
+        """PURE: tồn tại đầu vào nào khiến `fn` vá tại LIVE không? Dùng CHUNG cho luật thật và luật vi
+        phạm — một phép đo chỉ có nội dung khi đã soi được HAI thế giới và trả kết quả KHÁC nhau."""
+        return any("live" in fn(pl, cd, mt)
+                   for pl in ("workaround", "blocker", "linh_tinh")
+                   for cd in (True, False) for mt in ("live", "canonical"))
 
     def _c211_sua_nong_chi_khi_chan_dung():
         # H5: "sửa nóng CHỈ khi chặn đứng; còn lại gom vá sau lượt rà" — và LIVE không bao giờ là nơi vá.
@@ -20800,9 +22675,9 @@ def run() -> int:
                   for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
         ok2 = all(_sua_nong211(pl, True, mt) == "va_tai_canonical"
                   for pl in ("workaround", "blocker") for mt in ("live", "canonical"))
-        # PHẢN CHỨNG: không tồn tại đầu vào nào khiến máy vá tại LIVE
-        ok3 = not [1 for pl in ("workaround", "blocker", "linh_tinh") for cd in (True, False)
-                   for mt in ("live", "canonical") if "live" in _sua_nong211(pl, cd, mt)]
+        # PHẢN CHỨNG: không tồn tại đầu vào nào khiến máy vá tại LIVE (nội dung của phép đo này do
+        # `r298_sua_nong_phep_do_falsify_duoc` bảo chứng — xem ghi chú ở đó)
+        ok3 = not _co_va_tai_live211(_sua_nong211)
         ok4 = _sua_nong211("nghiem_trong", True, "live") == "phan_loai_la"  # hạng lạ ⇒ không tự suy diễn
         blk, _e = _block211(_QT211, "BUG_LEDGER_v1")
         ok5 = blk is not None and blk.get("sua_nong") \
@@ -20812,28 +22687,61 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
     _t110("r211_sua_nong_chi_khi_chan_dung", _c211_sua_nong_chi_khi_chan_dung)
 
+    def _c298_sua_nong_phep_do_falsify_duoc():
+        """r298 (GATE-06 — T0-E): chứng minh phép đo của `ok3` (r211) PHÂN BIỆT ĐƯỢC, tức nó không
+        xanh vô điều kiện. ĐỎ TRƯỚC: trên cây trước r298 ca này không chạy nổi — suite chưa hề dựng
+        thế giới vi phạm nào để soi, và đó CHÍNH LÀ bệnh: `ok3` chưa bao giờ được chứng minh là có
+        thể sai. Ai gỡ `_sua_nong211_vi_pham` hoặc làm nó hết vi phạm thì ca này ĐỎ ngay."""
+        ok1 = _co_va_tai_live211(_sua_nong211_vi_pham) is True    # phép đo BẮT được thế giới vi phạm
+        ok2 = _co_va_tai_live211(_sua_nong211) is False           # …và luật THẬT thì sạch
+        # bất biến "ĐÍCH vá độc lập với NƠI phát hiện": luật thật GIỮ, luật vi phạm PHÁ (2 chiều)
+        ok3 = all(_sua_nong211(pl, cd, "live") == _sua_nong211(pl, cd, "canonical")
+                  for pl in ("workaround", "blocker", "linh_tinh") for cd in (True, False))
+        ok4 = any(_sua_nong211_vi_pham(pl, cd, "live") != _sua_nong211_vi_pham(pl, cd, "canonical")
+                  for pl in ("workaround", "blocker") for cd in (True, False))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r298_sua_nong_phep_do_falsify_duoc", _c298_sua_nong_phep_do_falsify_duoc)
+
+    # r298 (GATE-06 — T0-E): `nlm_query_calls` từng là HẰNG SỐ 0 ở CẢ HAI nhánh return, trong khi
+    # `ok3`/`ok4` của `r211_pha0_chan_som_truoc_khi_tieu_nlm` kiểm chính hằng đó ⇒ tự chứng minh.
+    # Nay ĐẾM THẬT, và đếm theo LỆNH mà chính tài liệu khai ở `PHA0_GATE_v1` (`gate[k][0]`), nên test
+    # còn bắt được cả DRIFT TÀI LIỆU: ai nhét một lệnh truy vấn vào cổng là đỏ.
+    _NLM_TRUY_VAN298 = ("nlm-query", "nlm_query", "notebook-query", "notebook_query", "nlm-ask")
+
+    def _la_call_truy_van298(lenh):
+        """PURE: lệnh này có TIÊU một call TRUY VẤN NLM không? Canary `nlm-auth-status <nb>` dùng
+        `notebook_get` — theo đúng dòng `ngan_sach_truoc_cong` của tài liệu, KHÔNG trừ ngân sách 60."""
+        return any(t in str(lenh or "").lower() for t in _NLM_TRUY_VAN298)
+
     def _pha0_run211(gate, hong, can_nlm=True):
         """PURE: chạy cổng PHA 0 theo ĐÚNG thứ tự đã khai (b1–b4 trước; b5–b6 CHỈ khi lượt cần NLM).
         Trả: đã chạy bước nào · có dừng sớm không · chế độ NLM · làn ghi · số call TRUY VẤN NLM đã tiêu
-        (cổng không bao giờ được tiêu call truy vấn nào — canary là notebook_get, ngoài ngân sách 60)."""
+        (cổng không bao giờ được tiêu call truy vấn nào — canary là notebook_get, ngoài ngân sách 60).
+
+        r298 (GATE-06 — T0-E): `nlm_query_calls` ĐẾM THẬT, lấy từ LỆNH mà chính tài liệu khai
+        (`gate[k][0]`) — bước nào CHẠY thì lệnh của bước đó đã tiêu. Trước r298 trường này là HẰNG SỐ 0
+        ở CẢ HAI nhánh `return`, mà `ok3`/`ok4` lại kiểm đúng hằng ấy ⇒ chứng nhận rỗng. Đếm theo lệnh
+        khai còn được thêm một tầng: nhét lệnh truy vấn vào cổng là test ĐỎ (bắt drift TÀI LIỆU)."""
         truoc = [k for k in gate if k[:2] in ("b1", "b2", "b3", "b4")]
         sau = [k for k in gate if k[:2] in ("b5", "b6")]
-        da_chay, so, lan_ghi, che_do = [], [], "mo", "nlm"
+        da_chay, so, lan_ghi, che_do, calls = [], [], "mo", "nlm", 0
         for k in truoc + (sau if can_nlm else []):
             da_chay.append(k[:2])
+            if _la_call_truy_van298((gate[k] or [""])[0]):
+                calls += 1                      # bước đã CHẠY ⇒ lệnh của nó đã tiêu
             if k[:2] not in hong:
                 continue
             verdict = (gate[k] or [""])[-1]
             if verdict == "chan_dung":
                 return {"da_chay": da_chay, "dung_som": True, "bao_1_dong": True, "che_do": che_do,
-                        "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so + [k[:2]]}
+                        "lan_ghi": lan_ghi, "nlm_query_calls": calls, "so": so + [k[:2]]}
             so.append(k[:2])
             if verdict == "chan_lan_ghi":
                 lan_ghi = "dung"
             elif verdict == "co_fallback":
                 che_do = "khong_nlm"
         return {"da_chay": da_chay, "dung_som": False, "bao_1_dong": False, "che_do": che_do,
-                "lan_ghi": lan_ghi, "nlm_query_calls": 0, "so": so}
+                "lan_ghi": lan_ghi, "nlm_query_calls": calls, "so": so}
 
     def _c211_pha0_chan_som_truoc_khi_tieu_nlm():
         # H6: PHA 0 mở rộng — doctor/precheck/profile + canary probe LIVE. Hỏng chặn đứng ⇒ DỪNG SỚM khi
@@ -20868,6 +22776,35 @@ def run() -> int:
         ok9 = (gate.get("ngan_sach_truoc_cong") or [""])[0].startswith("0 call truy van NLM")
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7 and ok8 and ok9
     _t110("r211_pha0_chan_som_truoc_khi_tieu_nlm", _c211_pha0_chan_som_truoc_khi_tieu_nlm)
+
+    def _c298_pha0_dem_call_truy_van_that():
+        """r298 (GATE-06 — T0-E): `nlm_query_calls` phải ĐẾM THẬT chứ không phải hằng 0.
+        ĐỎ TRƯỚC (đo được): trên bản cũ, `ok4` dưới đây ra 0 thay vì 1 — cổng bị nhét lệnh TRUY VẤN
+        mà máy vẫn báo "0 call", và `r211_pha0_*` vẫn xanh. Đó đúng là chứng nhận rỗng."""
+        gate, _e = _block211(_QT211, "PHA0_GATE_v1")
+        if gate is None:
+            return False
+        _k6 = [k for k in gate if k[:2] == "b6"]
+        if len(_k6) != 1:
+            return False
+        # (a) cổng THẬT: không bước nào là lệnh truy vấn ⇒ 0 call ở MỌI tổ hợp
+        ok1 = _pha0_run211(gate, set())["nlm_query_calls"] == 0
+        ok2 = _pha0_run211(gate, {"b6"})["nlm_query_calls"] == 0
+        ok3 = _pha0_run211(gate, set(), can_nlm=False)["nlm_query_calls"] == 0
+        # (b) PHẢN CHỨNG: nhét lệnh TRUY VẤN vào b6 ⇒ phép đo PHẢI thấy (bản cũ ra 0 ⇒ ĐỎ)
+        _gia_q = dict(gate)
+        _gia_q[_k6[0]] = ["tl nlm-query --json"] + list(gate[_k6[0]][1:])
+        ok4 = _pha0_run211(_gia_q, set())["nlm_query_calls"] == 1
+        # (c) chặn đứng ở b1 ⇒ chưa chạm b5/b6 nên VẪN 0, dù b6 là lệnh truy vấn — đây mới là nội dung
+        #     thật của lời hứa "dừng sớm khi CHƯA tiêu call truy vấn nào"
+        ok5 = _pha0_run211(_gia_q, {"b1"})["nlm_query_calls"] == 0
+        # (d) lượt KHÔNG cần NLM ⇒ không probe ⇒ 0
+        ok6 = _pha0_run211(_gia_q, set(), can_nlm=False)["nlm_query_calls"] == 0
+        # (e) phép đo phân biệt được canary (notebook_get) với lệnh truy vấn — nếu không, (a) vô nghĩa
+        ok7 = (not _la_call_truy_van298("tl nlm-auth-status <notebook_id> --json")) \
+            and _la_call_truy_van298("tl nlm-query --json")
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
+    _t110("r298_pha0_dem_call_truy_van_that", _c298_pha0_dem_call_truy_van_that)
 
     def _c211_kickoff_du_muc_va_hang_so():
         # H6: hợp đồng giao việc ĐỦ 8 mục, mục nào không có mặc định thì phải hỏi, và bộ hằng số
@@ -21368,6 +23305,43 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5
     _t110("r215_consolidated_text_dung_lai_du_khoi_dau_va_phu_luc", _c215_consolidated_text)
 
+    def _c325_dung_lai_khong_danh_roi_duoi_vbhn():
+        """r325 — KHỐI ĐUÔI VBHN phải được NỐI LẠI khi dựng toàn văn từ record.
+
+        r323 tách «XÁC THỰC VĂN BẢN HỢP NHẤT» + chú thích hợp nhất ra `xac_thuc`/`chu_thich` (đúng:
+        thân Điều cuối hết nhả chú thích như quy phạm) nhưng KHÔNG đụng `_consolidated_text` — mà
+        đây là đường dựng lại toàn văn nuôi `doc-text` mặc định và ghi đè `extract_<id>.txt`.
+        Không nối lại = im lặng đánh rơi, ĐÚNG bẫy r215 đã trả giá với `phu_luc`."""
+        _ec = _mod215("extract_cache.py", "_ec325")
+        _arts = {"1": "Điều 1. Phạm vi điều chỉnh\nNghị định này…", "2": "Điều 2. Đối tượng áp dụng\nNgười…"}
+        _XT325 = "XÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\nLê Quang Mạnh"
+        _CT325 = ("[1] Luật Nhà giáo số 73/2025/QH15 có căn cứ ban hành như sau: …\n"
+                  "[2] Khoản này được sửa đổi theo điểm a khoản 1 Điều 2 của Luật số 74/2025/QH15, "
+                  "có hiệu lực kể từ ngày 01 tháng 7 năm 2025.")
+        # (1) record r323+ : CẢ HAI khối được nối lại, đúng thứ tự bố cục (phụ lục → xác thực → chú thích)
+        _t1, _r1 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215,
+                                           "xac_thuc": _XT325, "chu_thich": _CT325})
+        ok1 = ("XÁC THỰC VĂN BẢN HỢP NHẤT" in _t1 and "[1] Luật Nhà giáo" in _t1
+               and _r1["xac_thuc"] is True and _r1["chu_thich"] is True
+               and _t1.index("PHỤ LỤC I") < _t1.index("XÁC THỰC VĂN BẢN HỢP NHẤT") < _t1.index("[1] Luật Nhà giáo"))
+        # (2) KHÔNG mất chữ: dài hơn bản không-có-đuôi ĐÚNG bằng hai khối (+ 2 dấu nối)
+        _t2, _r2 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215})
+        ok2 = len(_t1) == len(_t2) + len("\n\n") * 2 + len(_XT325) + len(_CT325)
+        # (3) CHIỀU NGƯỢC — record dựng TRƯỚC r323 (KHÔNG có hai khoá): chuỗi ra Y HỆT bản cũ, cờ False.
+        #     Đây là điều kiện để bản vá này an toàn BẤT KỂ r323 đã land hay chưa.
+        ok3 = (_r2["xac_thuc"] is False and _r2["chu_thich"] is False
+               and "XÁC THỰC" not in _t2 and "[1]" not in _t2)
+        # (4) khoá RỖNG (văn bản thật sự không có đuôi) cũng bất động, không đẻ dấu nối thừa
+        _t4, _r4 = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "phu_luc": _PL215,
+                                           "xac_thuc": "", "chu_thich": ""})
+        ok4 = _t4 == _t2 and _r4["xac_thuc"] is False
+        # (5) chỉ có MỘT trong hai khối → nối đúng cái có, không chèn khoảng trống cho cái vắng
+        _t5, _ = _ec._consolidated_text({"khoi_dau": _KD215, "articles": _arts, "chu_thich": _CT325})
+        ok5 = _t5.endswith(_CT325) and "XÁC THỰC" not in _t5 and not _t5.endswith("\n\n" + "\n\n" + _CT325)
+        return ok1 and ok2 and ok3 and ok4 and ok5
+    _t110("r325_dung_lai_khong_danh_roi_duoi_vbhn", _c325_dung_lai_khong_danh_roi_duoi_vbhn)
+
+
     def _c215_thieu_khoi_dau_pure():
         """Cổng «text vào thẳng thân» — bắt đúng ca, và KHÔNG đẻ báo động giả trên corpus đang chạy."""
         _lo = _mod215("lookup_ops.py", "_lo215")
@@ -21631,6 +23605,500 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7
     _t110("r216_merge_fail_closed_tren_duong_san_xuat", _c216_merge_fail_closed_tren_duong_san_xuat)
 
+    # ═══ r290 (v1.36.30) — T1-a Làn A: VALIDATE TRỌN TRƯỚC KHI GHI (RAS-06/07/11/12/15/16) ═══
+    # Audit lõi 31-07. Cùng một mẫu bệnh với r216 nhưng ở các nhánh r216 chưa phủ: lệnh phát hiện lỗi,
+    # trả rc=2 — MÀ ĐÃ GHI ĐÈ xong bảng master. Đo A/B trên cây HEAD trước khi vá (đường sản xuất thật):
+    #   RAS-11 input hỏng : da_ghi=True,  BẢNG MASTER BỊ GHI ĐÈ bằng bản THIẾU
+    #   RAS-12 state hỏng : rc=0, ok=True (lỗi chỉ nằm trong field phụ `hoa_giai_state.loi`)
+    #   RAS-07 tên≠unit_id: unit-a→done (đơn vị CHƯA HỀ RÀ), unit-b→pending (dù master của nó có thật)
+    #   RAS-15/16 phụ lục : bản sao lưu bị GỘP (đếm hai lần) + heading LĨNH VỰC rỗng
+    _MASTER290 = {"unit_id": "unit-001", "van_ban": "212-2025-ND-CP", "ten": "ND 212",
+                  "phat_hien": [{"key": "VD-10", "linh_vuc": "", "hinh_thuc": "nghiên cứu"}]}
+
+    def _tl290(*args):
+        import subprocess as _sp290, sys as _sy290
+        _r = _sp290.run([_sy290.executable, str(_ROOT209 / "scripts" / "tl.py"), *args],
+                        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        try:
+            _j = json.loads(_r.stdout[_r.stdout.find("{"):])
+        except Exception:  # noqa: BLE001
+            _j = {}
+        return _r.returncode, _j
+
+    def _c290_merge_validate_truoc_khi_ghi():
+        """RAS-11 + RAS-12, chạy ĐÚNG đường sản xuất (subprocess) — cái đã cắn là hành vi của LỆNH."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            _out = Path(_td) / "BANG_MASTER.json"
+            # (0) PHẢN CHỨNG: hồ sơ SẠCH vẫn ghi như cũ — bản vá không siết quá tay
+            _rc0, _j0 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok0 = _rc0 == 0 and _j0.get("da_ghi") is True and _out.is_file()
+            _truoc = _out.read_bytes()
+            # (a) RAS-11: thêm file JSON HỎNG ⇒ KHÔNG được ghi đè bảng master đang có
+            (_d / "unit-002.json").write_text("{ khong phai json", encoding="utf-8")
+            _rc1, _j1 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out), "--json")
+            ok1 = (_rc1 == 2 and _j1.get("error") == "NGUON_HONG_KHONG_DOC_DUOC"
+                   and _j1.get("da_ghi") is False and _out.read_bytes() == _truoc
+                   and [x["nguon"] for x in _j1.get("nguon_hong") or []] == ["unit-002.json"])
+            (_d / "unit-002.json").unlink()
+            # (b) RAS-12: --state hỏng ⇒ transaction ĐỎ và KHÔNG ghi master (trước: rc=0/ok=true/đã ghi)
+            _out2 = Path(_td) / "BANG_MASTER_2.json"
+            _st = Path(_td) / "state.json"; _st.write_text("{ hong", encoding="utf-8")
+            _rc2, _j2 = _tl290("rasoat-merge", "--in", str(_d), "--out", str(_out2),
+                               "--state", str(_st), "--json")
+            ok2 = (_rc2 == 2 and _j2.get("ok") is False and _j2.get("da_ghi") is False
+                   and str(_j2.get("error") or "").startswith("STATE_HONG_KHONG_DOC_DUOC")
+                   and not _out2.exists())
+            # (c) fail-closed khi KHÔNG chứng minh được đơn vị nào đã xong (thiếu unit_id + có --state)
+            _d3 = Path(_td) / "m3"; _d3.mkdir()
+            (_d3 / "x.json").write_text(json.dumps({"van_ban": [], "noi_dung": [{"key": "K1"}]},
+                                                   ensure_ascii=False), encoding="utf-8")
+            _out3 = Path(_td) / "BANG_MASTER_3.json"
+            _st3 = Path(_td) / "state3.json"
+            _st3.write_text(json.dumps({"q_units": []}, ensure_ascii=False), encoding="utf-8")
+            _rc3, _j3 = _tl290("rasoat-merge", "--in", str(_d3), "--out", str(_out3),
+                               "--state", str(_st3), "--json")
+            ok3 = (_rc3 == 2 and _j3.get("error") == "STATE_HOA_GIAI_THIEU_UNIT_ID"
+                   and _j3.get("da_ghi") is False and not _out3.exists())
+        return ok0 and ok1 and ok2 and ok3
+    _t110("r290_merge_validate_tron_truoc_khi_ghi", _c290_merge_validate_truoc_khi_ghi)
+
+    def _c290_state_hoa_giai_neo_unit_id():
+        """RAS-07: hoà giải state phải neo `payload.unit_id`, KHÔNG phải `f.stem`.
+
+        Bản cũ SAI CẢ HAI CHIỀU cùng lúc (đo được): đánh done cho đơn vị chưa hề rà, đồng thời đẩy về
+        pending đơn vị đã có master — tức vừa bỏ sót vừa rà lại."""
+        import tempfile as _tf290
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            # tên file 'unit-a' NHƯNG nội dung là 'unit-b'
+            (_d / "unit-a.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-b"),
+                                                       ensure_ascii=False), encoding="utf-8")
+            _st = Path(_td) / "state.json"
+            _st.write_text(json.dumps({"schema": "rasoat_plan.v1",
+                                       "q_units": [{"unit_id": "unit-a", "trang_thai": "doing"},
+                                                   {"unit_id": "unit-b", "trang_thai": "doing"}]},
+                                      ensure_ascii=False), encoding="utf-8")
+            _rc, _j = _tl290("rasoat-merge", "--in", str(_d), "--out", str(Path(_td) / "M.json"),
+                             "--state", str(_st), "--json")
+            _cuoi = {u["unit_id"]: u["trang_thai"]
+                     for u in json.loads(_st.read_text(encoding="utf-8"))["q_units"]}
+            # phải NÓI RA chuyện tên file lệch nội dung, không im lặng
+            _lech = (_j.get("hoa_giai_state") or {}).get("ten_file_lech_unit_id") or []
+            return (_rc == 0 and _cuoi == {"unit-a": "pending", "unit-b": "done"}
+                    and [x["file"] for x in _lech] == ["unit-a.json"])
+    _t110("r290_state_hoa_giai_neo_unit_id_khong_neo_ten_file", _c290_state_hoa_giai_neo_unit_id)
+
+    def _c290_phuluc_truc_tiep_ngang_wrapper():
+        """RAS-15 + RAS-16 + RAS-06: chạy THẲNG `rasoat_phuluc.py` phải có cùng cổng như wrapper merge."""
+        import subprocess as _sp290, sys as _sy290, tempfile as _tf290
+        _script = str(_ROOT209 / "scripts" / "rasoat_phuluc.py")
+
+        def _run(_indir, _outdir):
+            return _sp290.run([_sy290.executable, _script, "--in", str(_indir), "--out-dir", str(_outdir)],
+                              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
+        with _tf290.TemporaryDirectory() as _td:
+            _d = Path(_td) / "master"; _d.mkdir()
+            (_d / "unit-001.json").write_text(json.dumps(_MASTER290, ensure_ascii=False), encoding="utf-8")
+            # RAS-15: bản sao lưu để lẫn ⇒ phải BỎ QUA và KHAI BÁO (trước: gộp ⇒ đếm hai lần)
+            (_d / "unit-001.bak.truoc.json").write_text(json.dumps(_MASTER290, ensure_ascii=False),
+                                                        encoding="utf-8")
+            _od = Path(_td) / "out"
+            _r = _run(_d, _od)
+            _md = "".join(f.read_text(encoding="utf-8") for f in sorted(_od.rglob("*.md"))) if _od.is_dir() else ""
+            ok1 = _r.returncode == 0 and "BỎ QUA" in (_r.stdout + _r.stderr)
+            # RAS-16: `linh_vuc: ""` ⇒ "(Chưa phân loại)", KHÔNG phải heading rỗng
+            ok2 = "CHƯA PHÂN LOẠI" in _md.upper() and "**LĨNH VỰC **" not in _md
+            # RAS-06: hai phiếu TRÙNG key (tên khác nhau, không phải .bak) ⇒ fail-closed, không dựng phụ lục
+            (_d / "unit-002.json").write_text(json.dumps(dict(_MASTER290, unit_id="unit-002"),
+                                                         ensure_ascii=False), encoding="utf-8")
+            _r2 = _run(_d, Path(_td) / "out2")
+            ok3 = _r2.returncode != 0 and "TRÙNG LẶP" in (_r2.stdout + _r2.stderr)
+        return ok1 and ok2 and ok3
+    _t110("r290_phuluc_truc_tiep_cung_cong_voi_wrapper", _c290_phuluc_truc_tiep_ngang_wrapper)
+
+    # ═══ r296 (v1.36.33) — P16-F15: CẢ HỌ regex "Điều N" phải nhận HẬU TỐ CHỮ (7a/7b/7đ) ═══
+    # Luật sửa đổi CHÈN THÊM điều bằng cách đánh số 7a/7b/7đ. Khuôn cũ đặt ranh giới `\b` NGAY SAU cụm
+    # số: giữa "7" và "a" cả hai đều là ký tự từ nên KHÔNG có ranh giới ⇒ khuôn TRƯỢT. Tuỳ vai trò của
+    # khuôn trong hàm mà cùng một lỗi ra ba loại hại KHÁC nhau — cả ba đều đo được, không suy diễn:
+    #   (1) điểm DỪNG  (`_slice_dieu`, `_DIEU_ANY`, nhánh lùi `_dieu_head_marks`) ⇒ trả NỘI DUNG CỦA
+    #       ĐIỀU KHÁC dưới danh nghĩa điều được hỏi — nặng nhất, vì skill hợp đồng "đúng từng chữ";
+    #   (2) BẮT tham chiếu (`_legal_refs`) ⇒ bỏ sót ref = fail-OPEN cho cổng dò stale-ref;
+    #   (3) NHẬN DẠNG (`_focus_block`, `short_title`) ⇒ tụt xuống nhánh lùi / trả rỗng.
+    # ★NEO thì KHÔNG đụng: `^\s*Điều\s+{n}\b` phải giữ `\b` — chính nó chặn "Điều 7" khớp vào "Điều 7a".
+    _TXT296 = ("Điều 7. Nguyên tắc chung\n1. Nội dung của Điều 7.\n\n"
+               "Điều 7a. Điều bổ sung thứ nhất\n1. Nội dung RIÊNG của Điều 7a.\n\n"
+               "Điều 7b. Điều bổ sung thứ hai\n1. Nội dung RIÊNG của Điều 7b.\n\n"
+               "Điều 8. Điều kế tiếp\n1. Nội dung của Điều 8.\n")
+
+    def _c296_slice_dung_truoc_hau_to():
+        # (1) hại NẶNG NHẤT: hỏi Điều 7 mà nhận về nguyên văn của cả 7a lẫn 7b.
+        b = _TL_MODULE._slice_dieu(_TXT296, "7")
+        return (b.startswith("Điều 7.") and "Điều 7a" not in b and "Điều 7b" not in b
+                and "Nội dung của Điều 7." in b)
+    _t110("r296_slice_dieu_dung_truoc_dieu_hau_to_chu", _c296_slice_dung_truoc_hau_to)
+
+    def _c296_slice_hoi_thang_hau_to():
+        # Hỏi THẲNG "7a": NEO vốn đã đúng, nhưng điểm dừng hỏng nên vẫn nuốt luôn 7b — tức ngay cả
+        # truy vấn hợp lệ nhất cũng sai. Ca này phân định rạch ròi "neo đúng / dừng sai".
+        b = _TL_MODULE._slice_dieu(_TXT296, "7a")
+        return b.startswith("Điều 7a.") and "RIÊNG của Điều 7a" in b and "Điều 7b" not in b
+    _t110("r296_slice_dieu_hoi_thang_dieu_hau_to_chu", _c296_slice_hoi_thang_hau_to)
+
+    def _c296_extract_dieu_dung_truoc_hau_to():
+        # `extract_dieu` lấy điểm dừng từ `_DIEU_ANY` của tl.py — đường sản xuất qua bind, không tự
+        # tiêm `_DIEU_ANY` vào module (tiêm tay là đúng bẫy false-green-test-qua-bind).
+        b = _TL_MODULE.extract_dieu(_TXT296, 7) or ""
+        return b.startswith("Điều 7.") and "Điều 7a" not in b
+    _t110("r296_extract_dieu_dung_truoc_dieu_hau_to_chu", _c296_extract_dieu_dung_truoc_hau_to)
+
+    def _c296_legal_refs_bat_hau_to():
+        # (2) fail-OPEN: "khoản 1 Điều 7a" trước vá KHÔNG sinh ra ref nào ⇒ bản tự ghép trỏ sai vào
+        # Điều 7a đi lọt cổng stale-ref mà không ai thấy.
+        r = _TL_MODULE._legal_refs("Áp dụng khoản 1 Điều 7a và Điều 7 và khoản 2 Điều 8 của Luật này.")
+        return "khoản 1 Điều 7a" in r and "Điều 7" in r and "khoản 2 Điều 8" in r
+    _t110("r296_legal_refs_bat_duoc_ref_hau_to_chu", _c296_legal_refs_bat_hau_to)
+
+    def _c296_dieu_head_marks_nhanh_lui():
+        # Nhánh CHÍNH của `_dieu_head_marks` đã biết hậu tố từ r229; nhánh LÙI thì không — đúng lớp
+        # "vá một reader, sót reader còn lại". Fixture thể thức KHÔNG-dấu-chấm ép chạy nhánh lùi.
+        _d296 = ("Điều 5 Quy định chung\nnội dung\n"
+                 "Điều 5a Quy định bổ sung\nnội dung\n"
+                 "Điều 6 Giải thích\nnội dung\n")
+        ms = _TL_MODULE._dieu_head_marks(_d296)
+        return (len(ms) == 3 and ms[1].group(0).strip().startswith("Điều 5a")
+                and [m.group(1) for m in ms] == ["5", "5", "6"])   # hậu tố NGOÀI group(1): int() hạ nguồn không đổi
+    _t110("r296_dieu_head_marks_nhanh_lui_thay_dieu_hau_to_chu", _c296_dieu_head_marks_nhanh_lui)
+
+    def _c296_focus_block_hau_to():
+        # (3) trước vá `_focus_block` không nhận ra "Điều 7a" là một Điều ⇒ rơi xuống nhánh tìm-chuỗi
+        # và trả một CỬA SỔ ±1500/5000 ký tự (ở fixture này là gần trọn văn bản, bắt đầu từ Điều 7).
+        blk = _TL_MODULE._focus_block(_TXT296, "Điều 7a")
+        return blk.startswith("Điều 7a.") and "Điều 7b" not in blk
+    _t110("r296_focus_block_cat_dung_dieu_hau_to_chu", _c296_focus_block_hau_to)
+
+    def _r296_rasoat_worksheet_nobind():
+        """Nạp THẲNG scripts/rasoat_worksheet.py — script này chạy độc lập (subprocess), KHÔNG qua
+        tl/bind, nên gọi qua bind sẽ không chứng minh được đường sản xuất của nó."""
+        import importlib.util as _ilu296
+        _sp296 = _ilu296.spec_from_file_location("rasoat_worksheet_nobind_r296",
+                                                 _ROOT209 / "scripts" / "rasoat_worksheet.py")
+        _m296 = _ilu296.module_from_spec(_sp296)
+        _sp296.loader.exec_module(_m296)
+        return _m296
+
+    def _c296_short_title_hau_to():
+        _rw296 = _r296_rasoat_worksheet_nobind()
+        return (_rw296.short_title("Điều 7a. Điều bổ sung thứ nhất\nnội dung") == "Điều bổ sung thứ nhất"
+                and _rw296.short_title("Điều 7. Nguyên tắc chung\nnội dung") == "Nguyên tắc chung")
+    _t110("r296_short_title_khong_rong_voi_dieu_hau_to_chu", _c296_short_title_hau_to)
+
+    def _c296_neo_khong_noi_long():
+        # ★PHẢN CHỨNG "KHÔNG ĐƯỢC ĐỔI" (xanh TRƯỚC lẫn SAU vá — CÓ CHỦ ĐÍCH): nới điểm DỪNG tuyệt đối
+        # không được nới lây sang NEO. Văn bản CHỈ có Điều 7a, hỏi "Điều 7" ⇒ phải báo KHÔNG THẤY.
+        # Nếu ai đó "tiện tay" đổi neo thành `\d+[a-zđ]*` thì ca này ĐỎ ngay — đó là việc của nó.
+        _chi_7a = "Điều 7a. Chỉ có điều này\n1. Nội dung.\n"
+        return (_TL_MODULE._slice_dieu(_chi_7a, "7").startswith("[không thấy Điều 7]")
+                and _TL_MODULE._focus_block(_chi_7a, "Điều 7") == ""
+                and (_TL_MODULE.extract_dieu(_chi_7a, 7) or "") == "")
+    _t110("r296_neo_khong_noi_long_dieu_7_van_khong_khop_7a", _c296_neo_khong_noi_long)
+
+    def _c296_khong_con_bay_trong_ma_san_xuat():
+        """CHỐT CHẶN TÁI PHÁT: cấm khuôn «Điều», `\\s+`, rồi `\\d+` DÍNH LIỀN `\\b` trong mã SẢN XUẤT.
+        Chính khuôn đó là bẫy — không có ranh giới giữa chữ số và chữ cái nên mọi Điều hậu tố bị trượt.
+        Quét theo GIÁ TRỊ dòng (không theo tiền tố đường dẫn — bài học r292/CI-ubuntu).
+        ★Phạm vi CÓ GIỚI HẠN và NÓI RA, không cắt im lặng:
+          · BỎ QUA `tl_selftest.py` — r229 CỐ Ý giữ luật CŨ làm phản chứng ("nếu vế này sai thì fixture
+            không còn tái hiện được bug"); cấm ở đó là cấm đúng thứ chứng minh fixture còn sống.
+          · BỎ QUA dòng CHÚ THÍCH — bản vá phải được quyền trích lại khuôn cũ để giải thích (r296 và
+            r229 đều có). Bẫy nằm giữa dòng code kèm chú thích đuôi thì VẪN bị bắt.
+        Đo lúc land: 5 vi phạm trên bản chưa vá (tl.py · ingest_ops · lookup_ops ×2 · nlm_ops) → 0."""
+        import re as _re296g
+        _bay296 = _re296g.compile(r"Điều\\s\+\(?\\d\+\)?\\b")
+        _vp296 = []
+        for _p296 in sorted((_ROOT209 / "scripts").rglob("*.py")):
+            if _p296.name == "tl_selftest.py":
+                continue
+            try:
+                _src296 = _p296.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            for _i296, _ln296 in enumerate(_src296.splitlines(), 1):
+                if _ln296.strip().startswith("#"):
+                    continue
+                if _bay296.search(_ln296):
+                    _vp296.append(_p296.name + ":" + str(_i296))
+        if _vp296:
+            print("  [r296 bẫy ranh-giới-sau-số] còn ở: " + ", ".join(_vp296[:12]), file=_hsys.stderr)
+        return not _vp296
+    _t110("r296_khong_con_bay_ranh_gioi_ngay_sau_so", _c296_khong_con_bay_trong_ma_san_xuat)
+
+    # ═══ r297 (v1.36.34) — P16-F10: `--as-appendix` hết TỰ BẬT theo TIÊU ĐỀ / khớp-con ═══
+    # Bật `--as-appendix` KHÔNG phải chuyện nhãn: `normalize_document` khi đó đặt `body=""`,
+    # `khoi_dau=""` (r215 nói rõ khối đầu là NGUỒN DUY NHẤT chứng minh danh tính), gán T1
+    # `ok:true` VÔ ĐIỀU KIỆN, `coverage=appendix_only`, `document_variant=appendix` ⇒ ĐỔI doc_key.
+    # Tức là TOÀN VĂN một Luật bị lưu thành phụ lục, mất danh tính, không qua kiểm cấu trúc — mà vẫn
+    # `ok:true` rc=0. Suy đoán rẻ tiền không được phép gây hậu quả đắt như vậy một cách IM LẶNG.
+    _CU297 = ("phu_luc", "phu luc", "phuluc", "phụ lục", "-pl", "_pl")   # LUẬT CŨ, giữ để phản chứng
+
+    def _cu297(so_hieu, title=""):
+        """Tái hiện ĐÚNG luật cũ: ghép số hiệu + TIÊU ĐỀ rồi khớp-con."""
+        return any(k in (so_hieu + " " + title).lower() for k in _CU297)
+
+    def _itc297():
+        """Nạp THẲNG scripts/ingest_to_cache.py — script chạy độc lập (subprocess), KHÔNG qua bind."""
+        import importlib.util as _ilu297
+        _sp297 = _ilu297.spec_from_file_location("ingest_to_cache_nobind_r297",
+                                                 _ROOT209 / "scripts" / "ingest_to_cache.py")
+        _m297 = _ilu297.module_from_spec(_sp297)
+        _sp297.loader.exec_module(_m297)
+        return _m297
+
+    def _c297_khong_dinh_tieu_de():
+        # (a) — hại ĐÃ ĐO ở Pha 1: Luật CÓ phụ lục thường ghi thẳng "… và Phụ lục …" trên TIÊU ĐỀ.
+        _sh, _ti = "45/2019/QH14", "Bộ luật Lao động và Phụ lục danh mục nghề nặng nhọc"
+        _moi = _itc297().suy_doan_phu_luc(_sh)[0]
+        return _moi is False and _cu297(_sh, _ti) is True   # vế 2: fixture còn tái hiện được bug
+    _t110("r297_suy_doan_phu_luc_khong_dinh_den_tieu_de", _c297_khong_dinh_tieu_de)
+
+    def _c297_token_nguyen_ven():
+        # (b) — "-pl"/"_pl" khớp-con: số hiệu của cơ quan viết tắt bắt đầu bằng PL cũng trúng.
+        _sh = "29/2024/TT-PLTW"
+        _moi = _itc297().suy_doan_phu_luc(_sh)[0]
+        return _moi is False and _cu297(_sh) is True
+    _t110("r297_suy_doan_phu_luc_token_phai_nguyen_ven", _c297_token_nguyen_ven)
+
+    def _c297_khong_mat_do_phu():
+        # ★"KHÔNG ĐƯỢC ĐỔI": siết khuôn tuyệt đối không được LÀM MẤT ca phụ lục THẬT. Cả luật cũ lẫn
+        # luật mới đều phải nhận — nếu ca này đỏ thì bản vá đã đổi thành âm-tính-giả, hại hơn bệnh cũ.
+        _that = ["45-2019-QH14-PL1", "45-2019-QH14_pl", "PHU_LUC-2024", "phuluc-05", "Phụ lục IV/2023"]
+        _f = _itc297().suy_doan_phu_luc
+        return all(_f(s)[0] is True and _cu297(s) is True for s in _that)
+    _t110("r297_suy_doan_phu_luc_van_bat_du_ca_phu_luc_that", _c297_khong_mat_do_phu)
+
+    _LUAT297 = ("LUẬT\nSố: 45/2019/QH14\n\nCăn cứ Hiến pháp;\n\n"
+                "Điều 1. Phạm vi điều chỉnh\nNội dung điều 1.\n\n"
+                "Điều 2. Đối tượng áp dụng\nNội dung điều 2.\n\n"
+                "Điều 3. Giải thích từ ngữ\nNội dung điều 3.\n")
+    _PL297 = "PHỤ LỤC I\nDANH MỤC NGHỀ NẶNG NHỌC\n\n1. Nghề A\n2. Nghề B\n"
+
+    def _nd297(noi_dung, extra):
+        """Chạy `normalize_document.py` THẬT bằng subprocess — đúng đường mà `cache-build` đi."""
+        import subprocess as _sp, tempfile as _tf297
+        with _tf297.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "in.txt")
+            with open(_src, "w", encoding="utf-8") as _f:
+                _f.write(noi_dung)
+            _cmd = [_hsys.executable, "-X", "utf8",
+                    str(_ROOT209 / "scripts" / "normalize_document.py"),
+                    "--input", _src, "--number-symbol", "45-2019-QH14-PL1",
+                    "--out", _hos.path.join(_d, "o.json")] + list(extra)
+            _p = _sp.run(_cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            return _p.returncode, (_p.stdout or "")
+
+    def _c297_phu_quyet_chan_toan_van():
+        # Cổng CHÍNH: số hiệu đoán là phụ lục nhưng nội dung có thân Điều ⇒ DỪNG (fail-CLOSED),
+        # thay vì lưu toàn văn Luật thành phụ lục rồi báo ok:true.
+        _rc, _out = _nd297(_LUAT297, ["--as-appendix", "--as-appendix-auto"])
+        return _rc == 2 and "APPENDIX_TU_SUY_DOAN_NHUNG_CO_THAN_DIEU" in _out
+    _t110("r297_phu_quyet_noi_dung_chan_toan_van_bi_doan_nham", _c297_phu_quyet_chan_toan_van)
+
+    def _c297_tuong_minh_khong_bi_phu_quyet():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): người gõ `--as-appendix` TƯỜNG MINH thì đi thẳng.
+        # Phụ lục/mẫu CÓ Điều nội bộ là hợp lệ — chính nhánh đó giữ `split_articles(raw)` cho ca này.
+        # Cổng mới CHỈ soi ca SUY ĐOÁN; nếu ca này đỏ nghĩa là đã siết lây sang quyền của người dùng.
+        _rc, _out = _nd297(_LUAT297, ["--as-appendix"])
+        return _rc == 0 and '"ok": true' in _out
+    _t110("r297_as_appendix_tuong_minh_khong_bi_phu_quyet", _c297_tuong_minh_khong_bi_phu_quyet)
+
+    def _c297_phu_luc_that_van_qua():
+        # Phụ lục THẬT (0 Điều) đi qua cổng tự động bình thường — cổng không chặn bừa.
+        _rc, _out = _nd297(_PL297, ["--as-appendix", "--as-appendix-auto"])
+        return _rc == 0 and '"coverage": "appendix_only"' in _out
+    _t110("r297_phu_luc_that_van_qua_duoc_cong_tu_dong", _c297_phu_luc_that_van_qua)
+
+    # ═══ r299 (v1.36.36) — P16-F11 + P16-F26: cầu nối OCR/chunks ═══
+    # F11: cầu nối KHÔNG chuyển `--config`/`--profile` xuống tiến trình CON. Mà cả ba lệnh cầu nối
+    #      (`ingest-ocr`, `profile-ingest-ocr`, `profile-ingest-chunks`) đều nằm trong
+    #      `_CREDS_LAZY_CMDS` ⇒ `main()` cũng KHÔNG áp profile hộ. Con vì thế tự dò `_config_candidates`
+    #      và tự chọn profile theo `config.defaultProfile`: cha được chỉ scope A, con GHI vào scope B,
+    #      im lặng. Cùng lớp bệnh F08 (r281), chỉ khác là đi qua ranh giới TIẾN TRÌNH.
+    # F26: `profile-ingest-chunks --apply` CHƯA BAO GIỜ chạy được — plan chỉ nối `--apply` TRẦN, trong
+    #      khi `authorize_apply` đòi CẢ `--confirm yes` LẪN `--expected-plan-hash` ⇒ CONFIRM_REQUIRED
+    #      100%. `ocr.py` đã có khuôn HAI BƯỚC đúng từ v1.34.53/C1; nhánh chunks bị sót.
+    import tl_core.ocr as _ocr299         # `_bridge_ocr_plan` là NỘI BỘ ocr.py (không có trong bind-list —
+    import tl_core.chunking as _ch299     #  đúng thiết kế); lấy thẳng module = đúng object đường sản xuất chạy.
+
+    class _A299:
+        pass
+
+    class _stub_child299:
+        """Thay `_run_child_tl` ở ĐÚNG HAI namespace mà đường sản xuất tra tên. ĐO ĐƯỢC, không đoán —
+        và cả hai đều KHÔNG phải `_TL_MODULE`:
+
+        · `_profile_ingest_chunks_plan` gọi `chunk-verify` ⇒ giải tên từ `tl_core.chunking.__dict__`
+          (bind của chunking/ocr SAO CHÉP tên tl vào globals RIÊNG, KHÔNG rebase `__globals__`).
+        · DRY/apply nằm trong `_bridge_run_child_apply`. Tên này chunking lấy từ tl, nhưng vật trong
+          `tl.__dict__` KHÔNG phải hàm thật — nó là `_stub` CHUYỂN TIẾP LƯỜI của `_STUB_MAP`
+          (`return getattr(_mod, _name)(*a, **kw)`). Nghĩa là thân hàm luôn chạy trong namespace của
+          MODULE GỐC ⇒ `_run_child_tl` ở đó giải từ `tl_core.ocr.__dict__`.
+          ★Hệ quả tổng quát: patch `_TL_MODULE.<tên>` KHÔNG chặn được lời gọi NẰM TRONG một hàm lấy
+           qua bind-list — phải patch MODULE GỐC. Đây chính là bài học harness r114 kho đã ghi
+           ("patch `_TL_MODULE._run_child_tl` không ăn"), nay có cơ chế kèm theo.
+        Thiếu một trong hai thì stub không ăn, con chạy THẬT (đụng mạng/Drive) và test đo nhầm.
+        Khôi phục TRỌN cả hai tên trong `__exit__` (kỷ luật r285)."""
+
+        def __init__(self, fn):
+            self.fn = fn
+
+        def __enter__(self):
+            self._sav = (_ch299._run_child_tl, _ocr299._run_child_tl)
+            _ch299._run_child_tl = self.fn
+            _ocr299._run_child_tl = self.fn
+            return self
+
+        def __exit__(self, *_e):
+            _ch299._run_child_tl, _ocr299._run_child_tl = self._sav
+            return False
+
+    def _plan_ocr299(mode, **kw):
+        import tempfile as _tf299
+        with _tf299.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "s.pdf")
+            _txt = _hos.path.join(_d, "s.txt")
+            _cfg = _hos.path.join(_d, "cfg.json")
+            with open(_src, "wb") as _f:
+                _f.write(b"%PDF-1.4\n")
+            for _p, _c in ((_txt, "Điều 1. A\n"), (_cfg, "{}")):
+                with open(_p, "w", encoding="utf-8") as _f:
+                    _f.write(_c)
+            _a = _A299()
+            _a.file, _a.text_file, _a.ocr_verified, _a.apply = _src, _txt, True, False
+            _a.config, _a.profile = _cfg, "vbqppl"
+            for _k in ("name", "sohieu", "goc", "hieuluc", "loai", "cat", "chunk_max_chars"):
+                setattr(_a, _k, None)
+            for _k, _v in kw.items():
+                setattr(_a, _k, _v)
+            return _ocr299._bridge_ocr_plan(_a, mode=mode), _src, _cfg
+
+    def _c299_ocr_forward_ca_hai_nhanh():
+        for _mode in ("vbqppl", "profile"):
+            _p, _src, _cfg = _plan_ocr299(_mode, cat=("hinh-su" if _mode == "vbqppl" else None))
+            _c = _p.get("planned_child_dry") or []
+            if not ("--config" in _c and _c[_c.index("--config") + 1] == _cfg):
+                return False
+            if not ("--profile" in _c and _c[_c.index("--profile") + 1] == "vbqppl"):
+                return False
+        return True
+    _t110("r299_bridge_ocr_forward_config_va_profile_ca_hai_nhanh", _c299_ocr_forward_ca_hai_nhanh)
+
+    def _c299_ocr_duong_tep_van_o_index_1():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): cờ mới nối ở CUỐI, `child[1]` vẫn phải là ĐƯỜNG TỆP —
+        # guard hạ nguồn (khuôn r251) đọc đúng ô đó. Chèn cờ vào giữa là làm hỏng một cổng khác.
+        for _mode in ("vbqppl", "profile"):
+            _p, _src, _cfg = _plan_ocr299(_mode, cat=("hinh-su" if _mode == "vbqppl" else None))
+            _c = _p.get("planned_child_dry") or []
+            if len(_c) < 2 or _c[1] != _src:
+                return False
+        return True
+    _t110("r299_bridge_ocr_duong_tep_van_o_index_1", _c299_ocr_duong_tep_van_o_index_1)
+
+    def _plan_chunks299(apply_):
+        """Dựng manifest chunk thật rồi gọi `_profile_ingest_chunks_plan` — trả (plan, cfg, thumuc)."""
+        import tempfile as _tf299
+        _d = _tf299.mkdtemp()
+        _md = _hos.path.join(_d, "c1.md")
+        _man = _hos.path.join(_d, "m.json")
+        _cfg = _hos.path.join(_d, "cfg.json")
+        with open(_md, "w", encoding="utf-8") as _f:
+            _f.write("---\n{}\n---\nĐiều 1. A\n")
+        with open(_cfg, "w", encoding="utf-8") as _f:
+            _f.write("{}")
+        with open(_man, "w", encoding="utf-8") as _f:
+            json.dump({"schema": "chunk_manifest.v1", "mode": "profile", "source_file": _md,
+                       "source_hash": "h", "chunk_count": 1,
+                       "chunks": [{"index": 1, "path": _md, "expected_name": "c1", "sha256": "s"}]},
+                      _f, ensure_ascii=False)
+        _a = _A299()
+        _a.manifest, _a.apply, _a.profile, _a.config = _man, apply_, "vbqppl", _cfg
+        _a.allow_default = _a.skip_live_check = False
+        _a.confirm = "yes"
+        _a.continue_on_error = False
+        with _stub_child299(lambda *_x, **_k: {"ok": True, "json": {}}):
+            return _ch299._profile_ingest_chunks_plan(_a), _cfg, _a
+
+    def _c299_chunks_plan_co_command_dry():
+        _p, _cfg, _a = _plan_chunks299(True)
+        _rec = (_p.get("planned_child_commands") or [{}])[0]
+        _dry, _cmd = _rec.get("command_dry"), _rec.get("command") or []
+        return (isinstance(_dry, list) and "--apply" not in _dry
+                and "--apply" in _cmd and _cmd[_cmd.index("--apply") + 1:_cmd.index("--apply") + 3] == ["--confirm", "yes"]
+                and len(_dry) > 1 and _dry[1] == _cmd[1])      # đường tệp ở index 1 của CẢ HAI
+    _t110("r299_chunks_plan_tach_command_dry_va_apply_co_confirm", _c299_chunks_plan_co_command_dry)
+
+    def _c299_chunks_forward_config():
+        _p, _cfg, _a = _plan_chunks299(False)
+        _cmd = ((_p.get("planned_child_commands") or [{}])[0]).get("command") or []
+        return ("--config" in _cmd and _cmd[_cmd.index("--config") + 1] == _cfg
+                and "--profile" in _cmd and _cmd[_cmd.index("--profile") + 1] == "vbqppl")
+    _t110("r299_chunks_forward_config_va_profile", _c299_chunks_forward_config)
+
+    def _c299_chunks_apply_chay_hai_buoc():
+        """Đường APPLY THẬT: phải gọi con HAI lần — DRY (không --apply) lấy `plan_hash`, rồi apply kèm
+        `--expected-plan-hash` ĐÚNG hash đó. Bản cũ gọi MỘT lần với `--apply` trần ⇒ chết CONFIRM_REQUIRED."""
+        _p, _cfg, _a = _plan_chunks299(True)
+        _goi = []
+
+        def _fake299(cmd, *_x, **_k):
+            _goi.append(list(cmd))
+            if "--apply" in cmd:
+                return {"ok": True, "json": {"applied": True}}
+            return {"ok": True, "json": {"plan_hash": "HASH299"}}
+        with _stub_child299(_fake299), _hush():   # lệnh in JSON + tiến độ per-chunk — không xả ra console deploy
+            _rc = _ch299.cmd_profile_ingest_chunks(_a)
+        # bỏ lần gọi `chunk-verify` của plan; còn lại phải đúng 2 lần cho 1 chunk
+        _con = [c for c in _goi if c and c[0] == "profile-ingest"]
+        return (_rc == 0 and len(_con) == 2
+                and "--apply" not in _con[0]
+                and "--apply" in _con[1] and "--confirm" in _con[1]
+                and _con[1][-2:] == ["--expected-plan-hash", "HASH299"])
+    _t110("r299_chunks_apply_chay_hai_buoc_va_chen_expected_plan_hash", _c299_chunks_apply_chay_hai_buoc)
+
+    def _c299_chunks_dry_hong_thi_dung_truoc_side_effect():
+        """DRY không trả `plan_hash` ⇒ KHÔNG được chạy lệnh apply (fail TRƯỚC side-effect)."""
+        _p, _cfg, _a = _plan_chunks299(True)
+        _goi = []
+
+        def _fake299b(cmd, *_x, **_k):
+            _goi.append(list(cmd))
+            return {"ok": True, "json": {}}              # không có plan_hash
+        with _stub_child299(_fake299b), _hush():
+            _rc = _ch299.cmd_profile_ingest_chunks(_a)
+        _con = [c for c in _goi if c and c[0] == "profile-ingest"]
+        return _rc != 0 and len(_con) == 1 and "--apply" not in _con[0]
+    _t110("r299_chunks_dry_hong_thi_khong_chay_apply", _c299_chunks_dry_hong_thi_dung_truoc_side_effect)
+
+    def _c299_authorize_apply_van_doi_ca_hai():
+        # ★"KHÔNG ĐƯỢC ĐỔI" (xanh trước lẫn sau): cổng của CON giữ nguyên fail-CLOSED. Ca này chứng minh
+        # vì sao `--apply` TRẦN không thể chạy — tức F26 là bệnh THẬT chứ không phải suy diễn — và canh
+        # cho lượt sau đừng "chữa" F26 bằng cách nới cổng con.
+        import tl_core.ingest_contract as _ic299
+        _thieu_hash = _ic299.authorize_apply(apply=True, confirm="yes", expected_plan_hash=None,
+                                             actual_plan_hash="H")
+        _thieu_confirm = _ic299.authorize_apply(apply=True, confirm=None, expected_plan_hash="H",
+                                                actual_plan_hash="H")
+        _du = _ic299.authorize_apply(apply=True, confirm="yes", expected_plan_hash="H", actual_plan_hash="H")
+        return (_thieu_hash.get("error") == "EXPECTED_PLAN_HASH_REQUIRED"
+                and _thieu_confirm.get("error") == "CONFIRM_REQUIRED"
+                and _du.get("ok") is True)
+    _t110("r299_authorize_apply_van_doi_ca_confirm_lan_hash", _c299_authorize_apply_van_doi_ca_hai)
+
+
+
+
+
     # ═════ r217: (a) sửa-theo-điểm `doc-patch` · (b) bộ lọc nguồn Công báo ở đường nạp ═════
     # Bối cảnh (lượt rà 6+7, 27-07): đối chiếu bản kho ↔ bản Công báo ra ND 159 lệch 17 điểm, ND 158
     # lệch 111 điểm, và kết luận là KHÔNG BẢN NÀO TRÙM BẢN NÀO ⇒ thay trọn gói là đánh đổi mù. Còn
@@ -21886,6 +24354,130 @@ def run() -> int:
             ok3 = Path(_j.get("cache_file") or "").is_file()
         return ok1 and ok2 and ok3
     _t110("r217_ingest_file_khong_doc_bang_locale", _c217_ingest_file_khong_doc_bang_locale)
+
+    # ═════ r323 — KHỐI ĐUÔI VBHN đọng trong THÂN ĐIỀU CUỐI (bảng XÁC THỰC + chú thích hợp nhất) ═════
+    # Đo 02-08-2026 trên cache THẬT — 3/3 record VBHN nhiễm, 0 record khác:
+    #     40-2026 Điều 52 : thân 40.637 mà quy phạm chỉ  231  (99,4% là khối đuôi · 114 neo)
+    #     19-2026 Điều 141: thân  8.573 — khối đuôi 4.073
+    #     89-2026 Điều  79: thân  1.124 — khối đuôi 1.031
+    # Đường ĐỌC (`resolve.resolve_footnote_amendments`) cắt khối chú thích từ lâu; đường NẠP thì KHÔNG
+    # ⇒ trích nguyên văn Điều cuối nhả chú thích ra NHƯ THỂ LÀ QUY PHẠM. Cờ mềm sẵn có ("Điều cuối dài
+    # bất thường", verify_deep §1b) CHỈ bắt được 40-2026 và còn chẩn đoán SAI ĐỊA CHỈ ("nghi phụ lục
+    # chưa tách"); 19-2026 và 89-2026 lọt dưới ngưỡng 8000/8×.
+    _VBHN323 = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                "Độc lập - Tự do - Hạnh phúc\n\n"
+                "VĂN PHÒNG QUỐC HỘI\n\n"
+                "Số: 99/VBHN-VPQH\n\n"
+                "LUẬT THỬ NGHIỆM\n\n"
+                "Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;\n\n"
+                "Điều 1. Phạm vi điều chỉnh\n"
+                "Luật này quy định về việc thử nghiệm[1] cho mục đích kiểm thử.\n\n"
+                "Điều 2. Giải thích từ ngữ\n"
+                "Trong Luật này, thử nghiệm là phép kiểm.\n\n"
+                "Điều 3. Quy định chi tiết\n"
+                "Chính phủ quy định chi tiết các điều, khoản được giao trong Luật.\n\n"
+                " \n\tXÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\n\n\nNguyễn Văn A\n \n\n"
+                "[1] Luật Sửa đổi số 11/2025/QH15 có căn cứ ban hành như sau:\n"
+                "“Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;”\n"
+                "[2] Khoản này được sửa đổi, bổ sung theo quy định tại khoản 1 Điều 2 của Luật số\n"
+                "11/2025/QH15, có hiệu lực kể từ ngày 01 tháng 7 năm 2026.\n")
+    # ĐỐI CHỨNG: nghị định thường — KHÔNG có khối đuôi VBHN.
+    _ND323 = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n\nCHÍNH PHỦ\nSố: 12/2025/NĐ-CP\n\n"
+              "Điều 1. Phạm vi điều chỉnh\nNội dung điều 1.\n\n"
+              "Điều 2. Đối tượng áp dụng\nNội dung điều 2.\n\n"
+              "Điều 3. Hiệu lực thi hành\nNghị định này có hiệu lực từ ngày 01 tháng 7 năm 2025.\n")
+
+    def _nd323(noi_dung, sohieu):
+        """Chạy `normalize_document.py` THẬT bằng subprocess — đúng đường `cache-build` đi (doctrine
+        false-green-test-qua-bind: gọi qua đường ĐÃ BIND không chứng minh được đường sản xuất)."""
+        import json as _j323, subprocess as _sp323, tempfile as _tf323
+        with _tf323.TemporaryDirectory(ignore_cleanup_errors=True) as _d:
+            _src = _hos.path.join(_d, "in.txt")
+            _out = _hos.path.join(_d, "o.json")
+            with open(_src, "w", encoding="utf-8") as _f:
+                _f.write(noi_dung)
+            _p = _sp323.run([_hsys.executable, "-X", "utf8",
+                             str(_ROOT209 / "scripts" / "normalize_document.py"),
+                             "--input", _src, "--number-symbol", sohieu, "--out", _out,
+                             "--document-variant", "consolidated"],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if _p.returncode != 0:
+                return _p.returncode, None
+            with open(_out, encoding="utf-8") as _f:
+                return 0, _j323.load(_f)
+
+    def _c323_khuon_khong_lech():
+        """DRIFT-LOCK: mốc «khối chú thích bắt đầu ở đâu» phải là MỘT định nghĩa. `tl_core` chưa bao
+        giờ import script gốc `scripts/` nên KHÔNG dùng chung được bằng import — bất biến này là thứ
+        DUY NHẤT giữ hai bên khỏi trôi (cùng khuôn r80_discovery_sites_mirror).
+        ★So với `tl._FOOT_DEF_FIRST` chứ KHÔNG phải `resolve._FOOT_DEF_FIRST`: `resolve.bind()` rebase
+        `__globals__` sang namespace của tl, nên hằng khai bên resolve là MÃ CHẾT — khai thử ở đó cho
+        NameError ngay trên đường sản xuất, chính selftest bắt được."""
+        return (_r217_verify_deep_nobind().VBHN_CHU_THICH_DEF.pattern
+                == _TL_MODULE._FOOT_DEF_FIRST.pattern)
+    _t110("r323_khuon_chu_thich_khong_duoc_lech", _c323_khuon_khong_lech)
+
+    def _c323_tach_duoi_qua_duong_nap():
+        """(a) thân Điều CUỐI sạch cả hai khối · (b) hai khối được GIỮ vào trường riêng chứ không bỏ ·
+        (c) quy phạm thật của Điều cuối còn nguyên · (d) marker INLINE giữa văn bản KHÔNG bị cắt oan ·
+        (e) khối đầu (r215) không suy suyển vì phép cắt nằm ở ĐUÔI."""
+        _rc, _r = _nd323(_VBHN323, "99-2026-VBHN-VPQH")
+        if _rc != 0 or not _r:
+            return False
+        _arts = _r["articles"]
+        _last = _arts[max(_arts, key=lambda k: int(k))]
+        ok_a = ("XÁC THỰC" not in _last) and ("[1]" not in _last) and ("[2]" not in _last)
+        ok_b = (_r.get("chu_thich") or "").startswith("[1]") \
+            and "XÁC THỰC VĂN BẢN HỢP NHẤT" in (_r.get("xac_thuc") or "")
+        ok_c = "Quy định chi tiết" in _last and "Chính phủ quy định chi tiết" in _last
+        ok_d = "[1]" in _arts["1"]        # tham chiếu inline là NỘI DUNG, không phải mốc cắt
+        _st = _r["structure"]
+        ok_e = bool(_st["has_chu_thich"]) and _st["chu_thich_chars"] > 0 and bool(_st["has_xac_thuc"])
+        ok_f = "VĂN PHÒNG QUỐC HỘI" in (_r.get("khoi_dau") or "")
+        return ok_a and ok_b and ok_c and ok_d and ok_e and ok_f
+    _t110("r323_tach_duoi_vbhn_qua_duong_nap_that", _c323_tach_duoi_qua_duong_nap)
+
+    def _c323_khong_co_duoi_thi_bat_bien():
+        """CHIỀU NGƯỢC (bắt siết-quá-tay): tài liệu KHÔNG có khối đuôi phải đi qua NGUYÊN VẸN —
+        chuỗi ra = chuỗi vào, hai trường mới rỗng, thân Điều cuối không hụt chữ nào. Nghiệm trên
+        cache thật: 54-2025 (0 neo) giữ đúng 107.985 ký tự trước/sau phép tách."""
+        _vd323 = _r217_verify_deep_nobind()
+        _than, _xt, _ct = _vd323.tach_duoi_vbhn(_ND323)
+        if not (_than == _ND323 and _xt == "" and _ct == ""):
+            return False
+        _rc, _r = _nd323(_ND323, "12-2025-ND-CP")
+        if _rc != 0 or not _r:
+            return False
+        _arts = _r["articles"]
+        _last = _arts[max(_arts, key=lambda k: int(k))]
+        return ((_r.get("chu_thich") or "") == "" and (_r.get("xac_thuc") or "") == ""
+                and _r["structure"]["has_chu_thich"] is False
+                and _r["structure"]["has_xac_thuc"] is False
+                and "Nghị định này có hiệu lực" in _last)
+    _t110("r323_khong_co_duoi_thi_bat_bien", _c323_khong_co_duoi_thi_bat_bien)
+
+    def _c323_chu_thich_trich_dan_dieu_khong_lam_truot_moc():
+        """PHẢN CHỨNG cho bản nháp: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật khác**
+        nên `ART_SPLIT` khớp SÂU TRONG khối đuôi. Bản nháp neo ở marker «Điều N.» CUỐI CÙNG ⇒ mốc rơi
+        SAU cả «[1]» lẫn «XÁC THỰC» ⇒ `vbhn_duoi_start` trả -1 ⇒ **KHÔNG CẮT GÌ**.
+        Đo dữ liệu thật 02-08: `40-2026` (114 chú thích) hỏng TRỌN — thân Điều 52 giữ nguyên 40.637
+        ký tự trong khi quy phạm thật chỉ 231; `19-2026` (10 chú thích) thoát chỉ vì trích ít, nên
+        nếu chỉ thử trên nó thì bản nháp trông như ĐÚNG. Nay neo ở Điều ĐẦU."""
+        _vd = _r217_verify_deep_nobind()
+        _doc = ("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n\nVĂN PHÒNG QUỐC HỘI\nSố: 98/VBHN-VPQH\n\n"
+                "Điều 1. Phạm vi điều chỉnh\nLuật này quy định về A[1].\n\n"
+                "Điều 2. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2026.\n\n"
+                " \n\tXÁC THỰC VĂN BẢN HỢP NHẤT\nCHỦ NHIỆM\n\nNguyễn Văn A\n\n"
+                "[1] Điều 31 của Luật số 51/2025/QH15 quy định như sau:\n"
+                "“Điều 31. Thẻ bảo hiểm y tế\nThẻ bảo hiểm y tế được cấp cho người tham gia.”\n")
+        _than, _xt, _ct = _vd.tach_duoi_vbhn(_doc)
+        ok_a = _than != _doc and _ct.startswith("[1]") and "XÁC THỰC VĂN BẢN HỢP NHẤT" in _xt
+        ok_b = "Thẻ bảo hiểm y tế" not in _than      # Điều BỊ TRÍCH DẪN không được ở lại thân
+        ok_c = "Phạm vi điều chỉnh" in _than and "có hiệu lực thi hành từ ngày 01 tháng 7" in _than
+        ok_d = "VĂN PHÒNG QUỐC HỘI" in _than and "Số: 98/VBHN-VPQH" in _than   # khối đầu không bị cắt oan
+        return ok_a and ok_b and ok_c and ok_d
+    _t110("r323_chu_thich_trich_dan_dieu_khong_lam_truot_moc",
+          _c323_chu_thich_trich_dan_dieu_khong_lam_truot_moc)
 
     # ───────────────────────── r218: doc-claims-check (kiểm trích dẫn cơ học) ─────────────────────────
     # Doctrine tra-luat (false-green-test-qua-bind): gọi qua đường ĐÃ BIND không chứng minh gì ⇒ MỌI ca
@@ -23651,6 +26243,391 @@ def run() -> int:
                   _rc252d == 0 and _o252d.get("iterations") <= 3
                   and _o252d.get("seen") == 3 and _o252d.get("frontier_remaining") == 0))
 
+    # ═══ r295 (v1.36.32) — T1-c Làn A: MỘT định nghĩa hội tụ (RAS-04 + RAS-10, audit lõi 31-07) ═══
+    # ★ ĐỔI SỐ khi land (01-08): khối này ra đời mang mã `r291_*`/`r290/T1-c`, nhưng CẢ HAI số đã bị
+    #   chiếm bởi bản land trước (r291 = `docs/` ra khỏi gói/T0-G · r290 = rasoat-merge fail-CLOSED),
+    #   nên CẢ HAI nửa T1-c (vòng rà + state, mã cũ `r291_*`/`r293_*`) được gom về MỘT mã `r295`.
+    #   Biến cục bộ nửa state còn giữ hậu tố `293` (vd `_rc293c`) — cố ý không đổi: chúng là tên cục bộ
+    #   trong `run()`, không phải mã ca, và đổi thêm chỉ làm nhiễu diff mà không thêm thông tin.
+    # Đặt NGAY SAU r255/r256 vì cùng đối tượng và dùng chung khuôn `_r255_run` — `_mp261` vá Ở MỌI CỬA
+    # (tl + mọi module giữ bản sao globals), khác hẳn setattr trần chỉ vá một cửa.
+    # RAS-04 và RAS-10 nhìn thì ngược nhau (một bên đòi lỗi KHÔNG được tính là hội tụ, bên kia đòi
+    # frontier-rỗng-từ-đầu PHẢI là hội tụ) — thực ra là hai vế của MỘT định nghĩa:
+    #     converged = frontier cạn ∧ khong_doc_duoc = 0 ∧ (dry_rounds ≥ K ∨ chưa từng có ứng viên nào)
+    # A/B trên cây HEAD trước khi vá: hai lỗi đọc ⇒ dry_rounds=2 chạm K ⇒ **converged:true, rc=0**, tức
+    # lệnh tuyên bố "đã soi hết" trong khi chưa hề nhìn vào hai văn bản; frontier rỗng từ đầu ⇒
+    # **converged:false** vĩnh viễn vì dry_rounds=0 < K.
+    def _r295_run(cands, K=2, max_iter=12, doc_loi=False):
+        """Như `_r255_run` nhưng ứng viên IN-CORPUS có gid THẬT, và đường đọc có thể ném lỗi."""
+        _sav, _n = {}, {"i": 0}
+        try:
+            _mp261(_sav, "_manifest_entries", lambda *_a, **_k: [])
+            _mp261(_sav, "apply_profile_offline", lambda *_a, **_k: None)
+            _mp261(_sav, "_entry_on_nlm_live", lambda _e: True)
+            _mp261(_sav, "_frontier_doc_text", lambda _a: ("BASE TEXT", "gid0", "BASE"))
+
+            def _exp295(_t, _e):
+                _n["i"] += 1
+                return list(cands) if _n["i"] == 1 else []
+            _mp261(_sav, "_rasoat_expand_text", _exp295)
+            _mp261(_sav, "_resolve_deep_target", lambda _sh, *_a, **_k: (None, "gid-" + str(_sh), None, None))
+
+            def _read295(*_a, **_k):
+                if doc_loi:
+                    raise RuntimeError("gws chet")
+                return "RUOT VAN BAN"
+            _mp261(_sav, "_read_doc_text", _read295)
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
+                    config=None, profile=None, refresh=False, json=True, deterministic=True,
+                    dry_rounds=K, max_iter=max_iter, text_file=None, target="x"))
+            return _rc, json.loads(_b.getvalue())
+        finally:
+            _mpr261(_sav)
+
+    _CAND295 = [{"sohieu": "10/2020/ND-CP", "sohieu_norm": norm_sohieu("10/2020/ND-CP"),
+                 "in_corpus": True, "priority": 1},
+                {"sohieu": "11/2020/ND-CP", "sohieu_norm": norm_sohieu("11/2020/ND-CP"),
+                 "in_corpus": True, "priority": 1}]
+
+    # RAS-04: lỗi đọc vào sổ RIÊNG `khong_doc_duoc`, KHÔNG đụng `dry_rounds`, và CHẶN hội tụ + rc≠0
+    _rc295a, _o295a = _r295_run(_CAND295, doc_loi=True)
+    cases.append(("r295_loi_doc_khong_thanh_hoi_tu",
+                  _rc295a == 2 and _o295a.get("converged") is False and _o295a.get("ok") is False
+                  and _o295a.get("dry_rounds") == 0
+                  and len(_o295a.get("khong_doc_duoc") or []) == 2))
+    # RAS-10: base không dẫn đi đâu ⇒ HỘI TỤ THẬT, có `stop_reason` riêng để không chẩn đoán nhầm
+    _rc295b, _o295b = _r295_run([])
+    cases.append(("r295_frontier_rong_tu_dau_la_hoi_tu",
+                  _rc295b == 0 and _o295b.get("converged") is True
+                  and _o295b.get("stop_reason") == "frontier_empty_ngay_tu_dau"
+                  and _o295b.get("dry_rounds") == 0))
+    # ★ PHẢN CHỨNG chống siết-quá-tay: đọc ĐƯỢC mà không sinh ứng viên mới ⇒ vẫn hội tụ, rc=0 y như cũ
+    _rc295c, _o295c = _r295_run(_CAND295)
+    cases.append(("r295_doc_duoc_van_hoi_tu_nhu_cu",
+                  _rc295c == 0 and _o295c.get("converged") is True and _o295c.get("ok") is True
+                  and _o295c.get("dry_rounds") == 2 and (_o295c.get("khong_doc_duoc") or []) == []))
+    # ★ PHẢN CHỨNG RANH GIỚI (bắt được nhờ r256 đỏ): ứng viên IN-CORPUS mà KHÔNG giải được GDoc id là
+    #   sổ KHÁC — chỉ BÁO, KHÔNG chặn hội tụ, KHÔNG đổi rc. Gộp hai sổ làm đỏ
+    #   `r256_no_infinite_loop_seen_dedup_holds` và siết quá phạm vi RAS-04 (nói về `_read_doc_text`).
+    _sav295, _n295 = {}, {"i": 0}
+    try:
+        _mp261(_sav295, "_manifest_entries", lambda *_a, **_k: [])
+        _mp261(_sav295, "apply_profile_offline", lambda *_a, **_k: None)
+        _mp261(_sav295, "_entry_on_nlm_live", lambda _e: True)
+        _mp261(_sav295, "_frontier_doc_text", lambda _a: ("BASE TEXT", "gid0", "BASE"))
+
+        def _exp295b(_t, _e):
+            _n295["i"] += 1
+            return list(_CAND295) if _n295["i"] == 1 else []
+        _mp261(_sav295, "_rasoat_expand_text", _exp295b)
+        _mp261(_sav295, "_resolve_deep_target", lambda *_a, **_k: (None, None, None, None))
+        _mp261(_sav295, "_read_doc_text", lambda *_a, **_k: "")
+        _b295 = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b295):
+            _rc295d = _TL_MODULE.cmd_rasoat_loop(argparse.Namespace(
+                config=None, profile=None, refresh=False, json=True, deterministic=True,
+                dry_rounds=2, max_iter=12, text_file=None, target="x"))
+        _o295d = json.loads(_b295.getvalue())
+    finally:
+        _mpr261(_sav295)
+    cases.append(("r295_khong_co_ban_doc_chi_bao_khong_chan_hoi_tu",
+                  _rc295d == 0 and _o295d.get("converged") is True
+                  and (_o295d.get("khong_doc_duoc") or []) == []
+                  and len(_o295d.get("khong_co_ban_doc") or []) == 2))
+
+    # ═══ r295 (tiếp) — RAS-13: "có trong corpus" phải là CORPUS-HIỆU-LỰC ═══
+    # Trước vá, `rasoat-chongcheo` so số hiệu trên TOÀN `entries` nên dòng đã hạ `corpus=false`, dòng
+    # quarantine, dòng `row_kind=ref` đều làm lệnh kết luận "ĐÃ CÓ trong corpus" — giấu mất đúng khoảng
+    # trống mà lệnh sinh ra để tìm. Đo A/B trên cây HEAD: cả ba ca đều `in_corpus:true`.
+    _f295 = _TL_MODULE._rasoat_corpus_hieu_luc
+    cases.append(("r295_corpus_hieu_luc_predicate",
+                  _f295({"corpus": "true", "cat": "01", "row_kind": "own"}) is True
+                  and _f295({"corpus": "TRUE", "cat": "01", "row_kind": "own"}) is True
+                  # ★ THIẾU CỘT `corpus` ⇒ True: "không biết" ≠ "ngoài corpus". Biến không-biết thành
+                  #   loại-bỏ là ÂM TÍNH GIẢ — chính chốt S3 trong `cmd_rasoat_chongcheo` cấm điều đó,
+                  #   và siết vế ấy đã làm đỏ `cluster_dup_sohieu_disambig` (fixture không có cột corpus).
+                  and _f295({"cat": "01", "row_kind": "own"}) is True
+                  and _f295({"corpus": "false", "cat": "01", "row_kind": "own"}) is False
+                  and _f295({"corpus": "FALSE", "cat": "01", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "_ZZZ_QUARANTINE_taluat", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "QUARANTINE", "row_kind": "own"}) is False
+                  and _f295({"corpus": "true", "cat": "01", "row_kind": "ref"}) is False))
+
+    def _ent295(**kw):
+        return [dict({"so_hieu": "20/2021/ND-CP", "name": "ND 20/2021", "cat": "01",
+                      "row_kind": "own", "drive_id": "d1"}, **kw)]
+    _rm295f = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem", _ent295(corpus="false"))
+    _rm295q = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem",
+                                                 _ent295(corpus="true", cat="_ZZZ_QUARANTINE_taluat"))
+    _rm295r = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem",
+                                                 _ent295(corpus="true", row_kind="ref"))
+    _rm295t = _TL_MODULE._resolve_cluster_member("20/2021/ND-CP", "bao hiem", _ent295(corpus="true"))
+    cases.append(("r295_cluster_member_khong_nhan_dong_ngoai_corpus",
+                  _rm295f.get("in_corpus") is False and _rm295q.get("in_corpus") is False
+                  and _rm295r.get("in_corpus") is False
+                  # phải NÓI RA là có bản mang đúng số hiệu nhưng NGOÀI corpus — im lặng thì người đọc
+                  # tưởng kho chưa từng có văn bản này và đi tải lại đúng bản đã cố ý hạ/cách ly
+                  and [x["name"] for x in _rm295f.get("khop_so_hieu_ngoai_corpus") or []] == ["ND 20/2021"]
+                  # ★ PHẢN CHỨNG: dòng corpus THẬT vẫn nhận bình thường
+                  and _rm295t.get("in_corpus") is True and _rm295t.get("name") == "ND 20/2021"))
+
+    # ═══ r295 — T1-d Làn A: state rà hồ sơ (RAS-02/03/08/09, audit lõi 31-07) ═══
+    # A/B đo trên cây HEAD trước khi vá, CHẠY `cmd_state_put` THẬT với GAS giả:
+    #   RAS-02 state đã có mà KHÔNG truyền --expect-claim ⇒ **rc=0, ĐÃ upload** — đè thẳng claim phiên khác
+    #   RAS-03 hai bản trùng tên, --expect-claim khớp bản CŨ ⇒ **rc=0, ĐÃ upload** — xoá mất bản MỚI
+    #   RAS-09 root `[]` / `q_units` sai enum ⇒ **rc=0, ĐÃ upload rác** vào nguồn sự thật điều phối
+    #   RAS-08 `metaFolderId` chỉ nạp được qua profile ⇒ **rc=2 META_FOLDER_ID_TRỐNG** (áp profile SAU khi
+    #          đã giải folder nên `--profile` bị bỏ qua sạch)
+    class _FakeG293:
+        def __init__(self, files, docs):
+            self.files, self.docs, self.goi = files, docs, []
+
+        def get(self, action, **kw):
+            self.goi.append(("get", action, kw))
+            if action == "list":
+                return {"items": list(self.files)}
+            if action == "info":
+                return {"file": {"modifiedTime": next((f.get("mt", "") for f in self.files
+                                                       if f["id"] == kw.get("fileId")), "")}}
+            if action == "download":
+                import base64 as _b293
+                return {"b64": _b293.b64encode(json.dumps(self.docs[kw.get("fileId")],
+                                                          ensure_ascii=False).encode()).decode()}
+            return {"ok": True}
+
+        def post(self, action, **kw):
+            self.goi.append(("post", action, kw))
+            return {"fileId": "moi", "ok": True}
+
+    def _put293(files, docs, body, expect=None, env_meta="F_META", profile_nap=None):
+        """Chạy `cmd_state_put` THẬT; trả (rc, out, da_upload)."""
+        import tempfile as _tf293
+        _sav = {}
+        _g293 = _FakeG293(files, docs)
+        _p293 = Path(_tf293.mkdtemp()) / "in.json"
+        _p293.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+        _env_cu = _hos.environ.get("TL_META_FOLDER_ID")
+        try:
+            _mp261(_sav, "load_creds", lambda *_a, **_k: None)
+            _mp261(_sav, "_gas", lambda: _g293)
+            _mp261(_sav, "_apply_journal_start", lambda *_a, **_k: "rid293")
+            _mp261(_sav, "_journal_append", lambda *_a, **_k: None)
+
+            def _apo293(_cfg=None, _prof=None, *_a, **_k):
+                if profile_nap:
+                    _hos.environ["TL_META_FOLDER_ID"] = profile_nap
+            _mp261(_sav, "apply_profile_offline", _apo293)
+            if env_meta is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = env_meta
+            _b = _hio.StringIO()
+            with _hush(), _ctx27.redirect_stdout(_b):
+                _rc = _TL_MODULE.cmd_state_put(argparse.Namespace(
+                    config=None, profile="P", name="rasoat_state.json", in_file=str(_p293),
+                    dry_run=False, folder_id="", json=True, expect_claim=expect, deterministic=True))
+            _txt = _b.getvalue()
+            return (_rc, json.loads(_txt[_txt.find("{"):]) if "{" in _txt else {},
+                    any(c[0] == "post" and c[1] == "upload" for c in _g293.goi))
+        finally:
+            _mpr261(_sav)
+            if _env_cu is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = _env_cu
+
+    _ST293 = {"schema": "rasoat_plan.v1", "session_claim": {"id": "PHIEN-MOI"}}
+    _F1_293 = [{"id": "f1", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T10:00:00Z"}]
+    _D1_293 = {"f1": {"schema": "rasoat_plan.v1", "session_claim": {"id": "A"}}}
+
+    # RAS-02 — state ĐÃ TỒN TẠI thì `--expect-claim` là BẮT BUỘC (ADR-0016 single-writer)
+    _rc293, _o293, _up293 = _put293(_F1_293, _D1_293, _ST293, expect=None)
+    cases.append(("r295_state_put_da_ton_tai_bat_buoc_expect_claim",
+                  _rc293 == 2 and _o293.get("error") == "THIEU_EXPECT_CLAIM" and _up293 is False))
+    # RAS-03 — CAS phải soi bản MỚI NHẤT, không phải `olds[0]` thô. `list` cố ý trả bản CŨ TRƯỚC.
+    _F2_293 = [{"id": "cu", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T09:00:00Z"},
+               {"id": "moi", "name": "rasoat_state.json", "type": "file", "mt": "2026-08-01T11:00:00Z"}]
+    _D2_293 = {"cu": {"schema": "rasoat_plan.v1", "session_claim": {"id": "A"}},
+               "moi": {"schema": "rasoat_plan.v1", "session_claim": {"id": "B"}}}
+    _rc293b, _o293b, _up293b = _put293(_F2_293, _D2_293, _ST293, expect="A")
+    cases.append(("r295_state_put_cas_soi_ban_moi_nhat",
+                  _rc293b == 2 and _o293b.get("error") == "CLAIM_LECH"
+                  and _o293b.get("claim_tren_drive") == "B" and _up293b is False))
+    # ★ PHẢN CHỨNG: expect khớp bản MỚI ⇒ vẫn ghi được (không biến CAS thành chặn-tất-cả)
+    _rc293c, _o293c, _up293c = _put293(_F2_293, _D2_293, _ST293, expect="B")
+    cases.append(("r295_state_put_expect_khop_ban_moi_van_ghi", _rc293c == 0 and _up293c is True))
+    # RAS-09 — JSON hợp lệ CHƯA phải state hợp lệ
+    _rc293d, _o293d, _up293d = _put293([], {}, ["khong", "phai", "state"])
+    _rc293e, _o293e, _up293e = _put293([], {}, {"schema": "rasoat_plan.v1",
+                                                "q_units": [{"trang_thai": "xong"}]})
+    cases.append(("r295_state_put_validate_rasoat_plan_v1",
+                  _rc293d == 2 and _o293d.get("error") == "STATE_KHONG_HOP_LE" and _up293d is False
+                  and _rc293e == 2 and _o293e.get("error") == "STATE_KHONG_HOP_LE" and _up293e is False
+                  and any("unit_id" in str(x) for x in (_o293e.get("loi") or []))))
+    # RAS-08 — áp profile TRƯỚC khi giải `_meta/` (trước vá: rc=2 META_FOLDER_ID_TRỐNG)
+    _rc293f, _o293f, _up293f = _put293([], {}, _ST293, env_meta=None, profile_nap="F_TU_PROFILE")
+    cases.append(("r295_state_ap_profile_truoc_khi_giai_meta_folder", _rc293f == 0 and _up293f is True))
+    # ★ PHẢN CHỨNG: tạo-mới (chưa có bản nào) vẫn được miễn `--expect-claim` như thiết kế
+    _rc293g, _o293g, _up293g = _put293([], {}, _ST293, expect=None)
+    cases.append(("r295_state_put_tao_moi_van_duoc_mien_expect_claim",
+                  _rc293g == 0 and _o293g.get("ok") is True and _up293g is True))
+
+    # ═══ r298 (GATE-06 — T0-E): CHẠY KHÔ worklist A3→A6 trên ĐƯỜNG SẢN XUẤT ═══
+    # Hai ca `r210_loop_khong_ghi_trong_cay` / `r210_agent_prompt_dung_schema` là LINT TÀI LIỆU (đã hạ
+    # tuyên bố tại chỗ). Ca này gánh vế CHẠY: `cmd_state_put` + `cmd_state_get` THẬT trên GAS giả CÓ
+    # TRẠNG THÁI (upload ghi thật, trash xoá thật), khoá đúng bất biến kịch bản hứa ở A3→A6 —
+    # **state cập nhật sau MỖI đơn vị**, không gom một phát cuối lượt (phiên chết giữa chừng ⇒ mất dấu).
+    class _FakeG298:
+        """GAS giả CÓ TRẠNG THÁI — khác `_FakeG293` (vô trạng thái) ở chỗ đọc-sau-ghi thấy bản vừa ghi,
+        nhờ vậy vòng A3→A6 mới chạy khô được đầu-cuối thay vì mô phỏng."""
+
+        def __init__(self):
+            self.files, self.docs, self.n, self.up, self.trash = [], {}, 0, 0, 0
+
+        def get(self, action, **kw):
+            if action == "list":
+                return {"items": list(self.files)}
+            if action == "info":
+                return {"file": {"modifiedTime": next((f.get("mt", "") for f in self.files
+                                                       if f["id"] == kw.get("fileId")), "")}}
+            if action == "download":
+                import base64 as _b298
+                return {"b64": _b298.b64encode(json.dumps(self.docs[kw.get("fileId")],
+                                                          ensure_ascii=False).encode()).decode()}
+            if action == "trash":
+                _oid = kw.get("fileId")
+                self.trash += 1
+                self.files = [f for f in self.files if f["id"] != _oid]
+                self.docs.pop(_oid, None)
+                return {"ok": True}
+            return {"ok": True}
+
+        def post(self, action, **kw):
+            if action == "upload":
+                import base64 as _b298
+                self.n += 1
+                self.up += 1
+                _fid = "u%d" % self.n
+                self.files.append({"id": _fid, "name": kw.get("name"), "type": "file",
+                                   "mt": "2026-08-01T10:%02d:00Z" % self.n})
+                self.docs[_fid] = json.loads(_b298.b64decode(kw.get("b64")).decode("utf-8"))
+                return {"fileId": _fid, "ok": True}
+            return {"ok": True}
+
+    def _phien298(g, fn):
+        """Chạy `fn()` với GAS giả `g` đã gắn vào đường sản xuất (khuôn `_put293`)."""
+        import tempfile as _tf298
+        _sav, _env_cu = {}, _hos.environ.get("TL_META_FOLDER_ID")
+        try:
+            _mp261(_sav, "load_creds", lambda *_a, **_k: None)
+            _mp261(_sav, "_gas", lambda: g)
+            _mp261(_sav, "_apply_journal_start", lambda *_a, **_k: "rid298")
+            _mp261(_sav, "_journal_append", lambda *_a, **_k: None)
+            _mp261(_sav, "apply_profile_offline", lambda *_a, **_k: None)
+            _hos.environ["TL_META_FOLDER_ID"] = "F_META"
+            return fn(_tf298.mkdtemp())
+        finally:
+            _mpr261(_sav)
+            if _env_cu is None:
+                _hos.environ.pop("TL_META_FOLDER_ID", None)
+            else:
+                _hos.environ["TL_META_FOLDER_ID"] = _env_cu
+
+    def _ghi298(tmp, body, expect=None):
+        _p = Path(tmp) / ("s%d.json" % abs(hash(json.dumps(body, sort_keys=True))))
+        _p.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+        _b = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b):
+            _rc = _TL_MODULE.cmd_state_put(argparse.Namespace(
+                config=None, profile="P", name="rasoat_state.json", in_file=str(_p),
+                dry_run=False, folder_id="", json=True, expect_claim=expect, deterministic=True))
+        return _rc
+
+    def _doc298():
+        _b = _hio.StringIO()
+        with _hush(), _ctx27.redirect_stdout(_b):
+            _rc = _TL_MODULE.cmd_state_get(argparse.Namespace(
+                config=None, profile="P", name="rasoat_state.json", folder_id="",
+                json=True, deterministic=True))
+        _t = _b.getvalue()
+        return _rc, (json.loads(_t[_t.find("{"):]) if "{" in _t else {})
+
+    def _worklist298(gom_cuoi_luot=False):
+        """A3→A6 cho 3 đơn vị. `gom_cuoi_luot=True` dựng thế giới VI PHẠM (chỉ ghi một phát ở cuối)
+        để chứng minh phép đo dưới đây PHÂN BIỆT ĐƯỢC — không có nó thì lời hứa 'sau MỖI đơn vị'
+        lại là một chứng nhận rỗng nữa."""
+        g = _FakeG298()
+        anh_chup = []
+
+        def _than(tmp):
+            _plan = {"schema": "rasoat_plan.v1", "session_claim": {"id": "S298"},
+                     "q_units": [{"unit_id": "U%d" % i, "loai": "ra_soat", "trang_thai": "pending"}
+                                 for i in range(3)]}
+            _ghi298(tmp, _plan, expect=None)          # A2: tạo mới ⇒ được miễn expect-claim
+            for i in range(3):                        # A3→A6: mỗi vòng = MỘT đơn vị
+                _rc_g, _out = _doc298()
+                _st = (_out or {}).get("state") or {}
+                _st["q_units"][i]["trang_thai"] = "done"
+                if not gom_cuoi_luot:
+                    _ghi298(tmp, _st, expect="S298")
+                anh_chup.append([u["trang_thai"] for u in (_doc298()[1].get("state") or {})
+                                 .get("q_units", [])])
+                if gom_cuoi_luot:
+                    _plan = _st
+            if gom_cuoi_luot:
+                _ghi298(tmp, _plan, expect="S298")
+            return anh_chup
+        return _phien298(g, _than), g
+
+    def _c298_worklist_chay_kho_a3_a6():
+        _chup, _g = _worklist298()
+        # (a) sau MỖI đơn vị, state TRÊN DRIVE đã tiến đúng một nấc — đọc lại bằng `cmd_state_get` thật
+        ok1 = _chup == [["done", "pending", "pending"],
+                        ["done", "done", "pending"],
+                        ["done", "done", "done"]]
+        ok2 = _g.up == 4                      # 1 tạo mới + 3 lần ghi sau mỗi đơn vị
+        ok3 = len(_g.files) == 1              # dọn bản cũ ⇒ không đẻ bản trùng tên
+        ok4 = _g.trash == 3
+        # (b) ★ PHẢN CHỨNG: gom ghi một phát cuối lượt ⇒ phép đo PHẢI thấy khác. Không có vế này thì
+        #     ok1 lại là "xanh vô điều kiện" đúng bệnh GATE-06 mà T0-E sinh ra để diệt.
+        _chup_xau, _g_xau = _worklist298(gom_cuoi_luot=True)
+        ok5 = _chup_xau == [["pending", "pending", "pending"],
+                            ["pending", "pending", "pending"],
+                            ["pending", "pending", "pending"]]
+        ok6 = _chup != _chup_xau and _g_xau.up == 2
+        return ok1 and ok2 and ok3 and ok4 and ok5 and ok6
+    _t110("r298_worklist_chay_kho_a3_a6", _c298_worklist_chay_kho_a3_a6)
+
+    # ═══ r326 (v1.36.58) — T0-F: CON TRỎ TÊN CA trong tài liệu phải RESOLVE ═══
+    # `references/RASOAT_HOSO_LOOP.md` §7 trỏ ĐÍCH DANH hai tên ca để phân vai KHAI BÁO vs CHẠY (r326 hạ
+    # tuyên bố quá tầm ở đó — trước r326 câu ấy nhận `r210_loop_khong_ghi_trong_cay` "khoá" cả vế CHẠY).
+    # Cả kế hoạch lẫn CHANGELOG r298 đều TƯỞNG `doc-claims-check` giữ con trỏ ấy — ĐÃ ĐO 02-08: KHÔNG.
+    # `_DOC_CLAIMS_R_RE` = `\br(\d{2,4})[a-z]?\b`, mà `_` là ký tự TỪ nên `\b` KHÔNG khớp sau `r210` ⇒
+    # `findall` trả RỖNG cho cả một tên ca BỊA hoàn toàn. Tức đổi/xoá tên ca thì tài liệu trỏ vào hư
+    # không mà 5 cổng vẫn XANH — đúng lớp bệnh GATE-06, chỉ khác tầng: con trỏ tài liệu KHÔNG AI GIỮ.
+    def _c326_con_tro_ten_ca_resolve():
+        _dk325 = set(re.findall(r'_t110\(\s*"([A-Za-z0-9_]+)"',
+                                (_ROOT210 / "scripts" / "tl_selftest.py")
+                                .read_text(encoding="utf-8", errors="replace")))
+        _hai325 = {"r210_loop_khong_ghi_trong_cay", "r298_worklist_chay_kho_a3_a6"}
+        # (a) bảng tên bóc từ NGUỒN phải khớp THỰC TẾ đã chạy (hai tên này đăng ký TRƯỚC ca này) —
+        #     chống trường hợp regex bóc rác rồi mọi phép so dưới thành xanh vô điều kiện.
+        _daco325 = {n for n, _ in cases}
+        ok1 = bool(_dk325) and _hai325 <= _dk325 and _hai325 <= _daco325
+        # (b) MỌI con trỏ `rNNN_snake` trong kịch bản phải là ca CÓ THẬT (fail-closed nếu trỏ rỗng)
+        _ct325 = set(re.findall(r"`(r\d{2,4}[a-z]?_[A-Za-z0-9_]+)`", _LOOP210))
+        ok2 = len(_ct325) >= 2 and _ct325 <= _dk325
+        # (c) đúng HAI VAI đang được trỏ — mất một vế là §7 lại gộp KHAI BÁO với CHẠY như trước r326
+        ok3 = _hai325 <= _ct325
+        # (d) ★ PHẢN CHỨNG: bộ bóc con trỏ phải BẮT được tên bịa, và tên bịa KHÔNG được resolve.
+        #     Thiếu vế này thì (b) chỉ chứng minh "không có gì để kiểm", không phải "kiểm rồi và sạch".
+        _gia325 = set(re.findall(r"`(r\d{2,4}[a-z]?_[A-Za-z0-9_]+)`",
+                                 "kịch bản trỏ `r999_ten_ma_khong_ton_tai` vào hư không"))
+        ok4 = _gia325 == {"r999_ten_ma_khong_ton_tai"} and not (_gia325 <= _dk325)
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r326_con_tro_ten_ca_resolve", _c326_con_tro_ten_ca_resolve)
 
     # ═══ r257 (v1.35.95) — P15: corpus-relation-sweep dùng vị từ THÔ ở cổng vbhn_broken ═══
     # `str(ent.get("corpus")) != "true"` = site DUY NHẤT trong repo so cột corpus KHÔNG chuẩn hoá (28 site khác
@@ -23920,8 +26897,17 @@ def run() -> int:
                              "ngoai span: commit fadedbc khong co trong kho.\n", encoding="utf-8")
             _r264 = {f["reason"] for f in _wf264._doc_claims_check(paths=[str(_p264)])["flags"]}
         ok4 = {"PATH_MISSING", "SHA_NOT_A_COMMIT"} <= _r264
-        # PHẢN CHỨNG 2 — tệp kế hoạch CÒN LẠI trong docs/ KHÔNG được ăn ké nhãn lịch sử
-        ok5 = "docs/WORKFLOW_RASOAT_TU_DONG.md" not in _wf264._DOC_CLAIMS_HISTORICAL
+        # PHẢN CHỨNG 2 — nhãn lịch sử KHÔNG được LAN ra cả `docs/`.
+        # ★ r289/Q2 (user chốt 01-08) ĐẢO vế cũ: r264 khoá «WORKFLOW_RASOAT_TU_DONG.md KHÔNG được
+        #   historical» để chứng minh việc phủ `docs/` có răng. Nay CẢ HAI tài liệu kế hoạch đã chuyển
+        #   LƯU TRỮ có chủ đích (tự khai ở dòng đầu; đường dẫn/lệnh trong thân là PHÁT HIỆN của tài liệu,
+        #   không phải con trỏ để đi theo — nguồn sự thật vận hành đã dời sang `references/`).
+        #   Ý ĐỒ GỐC vẫn được giữ, chỉ đổi cách khoá: (a) nhãn phải đúng là tài liệu ĐÃ KHAI, và
+        #   (b) TUYỆT ĐỐI không được khai cả thư mục `docs/` — làm thế thì ADR và mọi tệp docs/ khác
+        #   hết bị bắt cứng, đúng cái "trang trí" mà r264 sinh ra để chặn. Vế răng-thật nằm ở ok4.
+        ok5 = ("docs/WORKFLOW_RASOAT_TU_DONG.md" in _wf264._DOC_CLAIMS_HISTORICAL
+               and not any(str(_h264).rstrip("/") in ("docs", "docs/adr")
+                           for _h264 in _wf264._DOC_CLAIMS_HISTORICAL))
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r264_doc_claims_phu_docs", _c264_doc_claims_docs)
 
@@ -24279,6 +27265,2483 @@ def run() -> int:
                and _sum["missing_sohieu"] == 1)
         return bool(ok1 and ok2 and ok3 and ok4 and ok5)
     _t110("r276_sohieu_khong_nam_detector", _c276_sohieu_khong_nam_detector)
+
+    # r294 (hoà nhánh v1.36.34) — GỠ 3 ca `r286_*` (đóng băng `snapshot_age_s` ở RAW) và helper của chúng:
+    # phiên khác đã land GATE-01 theo thiết kế KHÁC trên master (`3f614de` r288 v1.36.28 — quy raw drift về
+    # KHOÁ ĐÃ KHAI) và trong chính commit đó đã CÂN NHẮC RỒI BÁC phương án đóng băng: "raw hết là raw, mất
+    # luôn khả năng phát hiện bất định THẬT". ĐO trên cây này sau khi tắt đóng băng: `golden-test` 6 lượt,
+    # lượt 3 và 6 có `sweep raw_stable=False` với `raw_drift_keys=['snapshot_age_s']`, `undeclared=[]`
+    # ⇒ `ok=True`, `rc=0`. Tức cơ chế của họ MỘT MÌNH giữ `sweep` xanh, và giữ được cả THÔNG TIN drift.
+    # `_resolve286` GIỮ LẠI (r289/r290/r291 dùng) — xem mục ★ v1.36.34 CHANGELOG.
+    def _resolve286(fn):
+        """Gỡ stub `_STUB_MAP` để lấy HÀM THẬT đang chạy + globals THẬT của nó.
+
+        BẪY đã trả giá khi viết ca này: `_TL_MODULE.cmd_sweep` là STUB (`tl.py:_make_tl_stub`) ủy quyền
+        `getattr(tl_core.hygiene, 'cmd_sweep')`. Trong tiến trình SẠCH, hàm thật được re-home
+        `__globals__` về `tl.__dict__` nên monkeypatch `_TL_MODULE._manifest_entries` ăn (đó là lý do
+        ca r41 ở đầu tệp chạy được). Nhưng tới CUỐI dãy selftest, `tl_core.hygiene` đã bị nạp lại
+        (đường self-heal) ⇒ `hygiene.cmd_sweep.__globals__ is tl.__dict__` là **False** ⇒ patch trên
+        `_TL_MODULE` KHÔNG tới nơi, lệnh rơi xuống gọi webapp THẬT và chết vì seal-mạng (rc=2, stdout
+        rỗng). Vá đúng chỗ: patch trên globals của CHÍNH hàm sẽ chạy, không đoán theo tên module.
+        """
+        _seen = 0
+        while getattr(fn, "__tl_stub__", None) and _seen < 5:
+            _mk, _nm = fn.__tl_stub__
+            fn = getattr(getattr(_TL_MODULE, "_tl_" + _mk), _nm)
+            _seen += 1
+        return fn
+
+    # ═══ r287 (v1.36.25) — Slice G0.1b: CƯỠNG CHẾ raw stability trong golden-test ═══
+    # Trước vá: `raw_stable` được TÍNH, thậm chí sinh `raw_diff`, nhưng `rec["ok"]` dẫn xuất THUẦN từ so
+    # sánh projection ⇒ hai stdout KHÁC BYTE mà cùng projection vẫn `top ok=true, rc=0`, và `--write` vẫn
+    # GHI ĐÈ fixture từ một lệnh đang bất định. Fail-open: đã BÁO mà KHÔNG cưỡng chế.
+
+    def _harness287(fn, *, write, drift):
+        """Chạy `_golden_test` với `_run_tl_json` GIẢ: hai lượt cùng payload, khác byte khi `drift`.
+
+        Cô lập tuyệt đối: `_golden_dir` trỏ vào tempdir ⇒ dù cổng có hỏng thì `--write` cũng chỉ ghi vào
+        thư mục tạm, KHÔNG BAO GIỜ đụng `references/golden/` thật (ca này phải an toàn cả khi nó ĐỎ).
+        """
+        import tempfile as _tf287, pathlib as _pl287
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _payload = {"ok": True, "schema": "r287.v1", "n": 1, "note": "cùng projection"}
+        _s1 = json.dumps(_payload, ensure_ascii=False, indent=2)
+        _s2 = (_s1 + " ") if drift else _s1        # thêm 1 space: KHÁC BYTE, json.loads ra CÙNG dict
+        _turn = {"i": 0}
+
+        def _fake287(args, *, timeout=60, env_extra=None):
+            _turn["i"] += 1
+            _t = _s2 if (_turn["i"] % 2 == 0) else _s1
+            return {"ok": True, "cmd": [], "returncode": 0, "data": json.loads(_t),
+                    "parse_error": "", "stdout": _t}
+
+        _sav = {k: _g.get(k) for k in ("_run_tl_json", "_golden_dir")}
+        with _tf287.TemporaryDirectory() as _d:
+            try:
+                _g["_run_tl_json"] = _fake287
+                _g["_golden_dir"] = lambda: _pl287.Path(_d) / "golden"
+                _out = fn(write=write)
+                _files = sorted(p.name for p in (_pl287.Path(_d) / "golden").glob("*.json"))
+                return _out, _files
+            finally:
+                for _k, _v in _sav.items():
+                    _g[_k] = _v
+
+    def _c301_raw_drift_lam_do_gate():
+        # ĐẶC TẢ: bơm hai stdout KHÁC BYTE / CÙNG projection ⇒ PHẢI ĐỎ, với mã lỗi RIÊNG.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _gt = _g["_golden_test"]
+        _out, _ = _harness287(_gt, write=False, drift=True)
+        _c = _out["cases"][0]
+        do_dung_cach = (_out.get("ok") is False
+                        and _out.get("error") == "RAW_UNSTABLE_UNDECLARED"
+                        and len(_out.get("raw_unstable_cases") or []) == _out["case_count"]
+                        and _c.get("ok") is False
+                        and _c.get("raw_stable") is False
+                        and _c.get("error") == "RAW_UNSTABLE_UNDECLARED"
+                        and bool(_c.get("raw_diff")))
+        # PHẢN CHỨNG: KHÔNG bơm drift thì cổng phải IM — không được biến thành "luôn đỏ" (cổng luôn đỏ
+        # cũng vô dụng y như cổng luôn xanh). Fixture chưa tồn tại nên lỗi ĐÚNG phải là GOLDEN_FILE_MISSING,
+        # tức đã đi QUA cổng raw và chết ở bước so fixture — chứng minh cổng không nuốt oan.
+        _out2, _ = _harness287(_gt, write=False, drift=False)
+        khong_do_oan = (_out2["cases"][0].get("raw_stable") is True
+                        and _out2["cases"][0].get("error") == "GOLDEN_FILE_MISSING"
+                        and _out2.get("error") != "RAW_UNSTABLE_UNDECLARED")
+        return bool(do_dung_cach and khong_do_oan)
+    _t110("r301_golden_raw_drift_lam_do_gate", _c301_raw_drift_lam_do_gate)
+
+    def _c301_write_cam_ghi_khi_raw_bat_dinh():
+        # `--write` là đường NGUY HIỂM nhất: ghi fixture từ lệnh bất định là ĐÓNG BĂNG cái ngẫu nhiên vào
+        # golden, rồi mọi lượt sau so với nó. Trước vá vẫn ghi (`written: true`). Nay: CẤM ghi, `ok=false`,
+        # `write_refused=true`, và thư mục golden phải KHÔNG có tệp nào được sinh ra.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _gt = _g["_golden_test"]
+        _out, _files = _harness287(_gt, write=True, drift=True)
+        cam_ghi = (_out.get("ok") is False
+                   and _out.get("error") == "RAW_UNSTABLE_UNDECLARED"
+                   and _out.get("write_refused") is True
+                   and all(c.get("written") is False for c in _out["cases"])
+                   and _files == [])
+        # PHẢN CHỨNG: không drift thì `--write` vẫn phải ghi được (cổng chỉ chặn ĐÚNG ca bất định,
+        # không khoá luôn đường regen hợp lệ).
+        _out2, _files2 = _harness287(_gt, write=True, drift=False)
+        van_ghi_duoc = (_out2.get("ok") is True
+                        and all(c.get("written") is True for c in _out2["cases"])
+                        and len(_files2) == _out2["case_count"])
+        return bool(cam_ghi and van_ghi_duoc)
+    _t110("r301_write_cam_ghi_khi_raw_bat_dinh", _c301_write_cam_ghi_khi_raw_bat_dinh)
+
+    def _c301_rc_khac_0_qua_lenh_that():
+        # Cưỡng chế phải tới được TẦNG LỆNH: `cmd_golden_test` trả rc≠0 (không chỉ payload ok=false).
+        # rc là thứ `deploy-package.sh`/CI thật sự đọc — dừng ở payload là cổng vẫn lọt.
+        _g = _resolve286(_TL_MODULE.cmd_golden_test).__globals__
+        _cmd = _resolve286(_TL_MODULE.cmd_golden_test)
+        _out_box = {}
+
+        def _run_cmd(write, drift):
+            def _call(*, write=write):
+                _b = _io27.StringIO()
+                with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                    _rc = _cmd(build_parser().parse_args(
+                        ["golden-test", "--json"] + (["--write"] if write else [])))
+                _out_box["rc"] = _rc
+                return json.loads(_b.getvalue())
+            return _harness287(_call, write=write, drift=drift)
+
+        _payload, _ = _run_cmd(False, True)
+        return bool(_out_box.get("rc") not in (0, None)
+                    and _payload.get("error") == "RAW_UNSTABLE_UNDECLARED")
+    _t110("r301_rc_khac_0_qua_lenh_that", _c301_rc_khac_0_qua_lenh_that)
+
+    # ═══ r288 (v1.36.26) — Pha 1-0: HỢP ĐỒNG Helper 1 (kết luận giao dịch, §5 Mẫu A + §6.1) ═══
+    # Helper CHƯA gắn vào lệnh nào (đúng acceptance §6.1) — các ca dưới khoá HỢP ĐỒNG, để 4 slice T2/T3
+    # sau DÙNG chứ không SỬA. Mỗi điều của hợp đồng có ít nhất một ca, kèm phản chứng.
+
+    def _c302_vi_ngu_ket_qua_duong_fail_closed():
+        # Điều 2 (ok TÍNH, không GÁN) bắt đầu từ vị ngữ: cái gì mới được TÍNH là "dương".
+        # Điểm chết của ING-03 nằm ĐÚNG ở đây — suy ra thành công từ sự CÓ MẶT của một trường khác.
+        _sr = _TL_MODULE.step_result_ok
+        duong = (_sr(True)[0] is True
+                 and _sr({"ok": True})[0] is True
+                 and _sr({"ok": True, "organize_done": True, "upsert_done": True, "file": {"id": "x"}},
+                         require_keys=("organize_done", "upsert_done", "file"))[0] is True)
+        am = (_sr(False)[0] is False and _sr(None)[0] is False
+              # ING-03 nguyên bản: response CÓ fileId nhưng ok:false + upsert_done:false ⇒ PHẢI âm
+              and _sr({"ok": False, "fileId": "1AbC", "upsert_done": False})[0] is False
+              # THIẾU khoá `ok` = ÂM. "Không có tin xấu" KHÔNG phải "tin tốt".
+              and _sr({"fileId": "1AbC"})[0] is False
+              and _sr("ok")[0] is False and _sr(1)[0] is False and _sr([{"ok": True}])[0] is False)
+        # đủ `ok` nhưng THIẾU marker ⇒ vẫn âm, và lý do phải NÊU ĐÍCH DANH marker thiếu (để đọc log là biết)
+        _ok4, _why4 = _sr({"ok": True, "organize_done": True}, require_keys=("organize_done", "upsert_done"))
+        marker = (_ok4 is False and "upsert_done" in _why4 and "organize_done" not in _why4)
+        return bool(duong and am and marker)
+    _t110("r302_helper1_vi_ngu_ket_qua_duong_fail_closed", _c302_vi_ngu_ket_qua_duong_fail_closed)
+
+    def _c302_ok_duoc_tinh_va_rc_dan_xuat():
+        # Điều 2 + điều 4. Kể cả khi caller CỐ gán `ok: True` vào envelope, kết luận vẫn phải là kết luận
+        # TÍNH ĐƯỢC — đây là phản chứng trực tiếp cho `out = {**plan, "ok": True, ...}` của PRO-01.
+        _T = _TL_MODULE.Txn
+        t1 = _T("op-xanh")
+        t1.record("b1", {"ok": True})
+        t1.record("b2", True)
+        xanh = (t1.ok() is True and t1.rc() == 0)
+        t2 = _T("op-do")
+        t2.record("b1", {"ok": True})
+        t2.record("b2", {"ok": False, "error": "GAS_500"})
+        t2.record("b3", {"ok": True})                      # bước SAU vẫn dương cũng không cứu được
+        do = (t2.ok() is False and t2.rc() == 2)
+        # gán đè bị BỎ QUA có chủ đích
+        _env = t2.conclude(ok=True, rc=0, plan="x")
+        khong_gan_de = (_env["ok"] is False and _env.get("plan") == "x" and "rc" not in _env
+                        and _env["txn"]["failed_step"] == "b2" and _env["txn"]["failed_error"] == "GAS_500"
+                        and _env.get("step") == "op-do:b2")
+        # sổ RỖNG ⇒ KHÔNG được coi là thành công (không có gì được chứng minh)
+        rong = (_T("op-rong").ok() is False and _T("op-rong").rc() == 2)
+        # bước KHÔNG bắt buộc hỏng thì không lật kết luận
+        t3 = _T("op-tuychon")
+        t3.record("b1", {"ok": True})
+        t3.record("phu", {"ok": False}, required=False)
+        tuy_chon = (t3.ok() is True and t3.rc() == 0)
+        return bool(xanh and do and khong_gan_de and rong and tuy_chon)
+    _t110("r302_helper1_ok_duoc_tinh_va_rc_dan_xuat", _c302_ok_duoc_tinh_va_rc_dan_xuat)
+
+    def _c302_chan_mutation_phia_sau_va_ke_da_ghi():
+        # Điều 3 (CHẶN, không chỉ đánh dấu) + điều 5 (đã ghi được gì rồi).
+        # Đây là kịch bản PRO-01 thu nhỏ: xoá nguồn NLM HỎNG, rồi vẫn định tháo con trỏ registry.
+        _T, _B = _TL_MODULE.Txn, _TL_MODULE.TxnBlocked
+        t = _T("profile-file-remove")
+        t.record("nlm_source_delete", {"ok": False, "error": "NLM_403"},
+                 mutating=True, wrote={"nlm_source_id": "s1"})
+        _da_chan = False
+        try:
+            t.guard("reg_delete")                          # PHẢI ném — không được đi tiếp
+        except _B as _e:
+            _da_chan = (_e.blocking_step == "nlm_source_delete" and _e.attempted == "reg_delete")
+        # `can_mutate` là cùng một sự thật, dạng vị ngữ
+        van_biet = (t.can_mutate() is False)
+        # bản kê: bước mutating ÂM KHÔNG vào `wrote` (chưa chứng minh được đã ghi) mà vào `uncertain`
+        ke = (t.wrote() == [] and [u["step"] for u in t.uncertain()] == ["nlm_source_delete"])
+        # Phản chứng: mọi bước dương ⇒ guard IM, và `wrote` kê ĐÚNG thứ đã ghi (đường về cho người dọn)
+        t2 = _T("profile-file-remove")
+        t2.record("nlm_source_delete", {"ok": True}, mutating=True, wrote={"nlm_source_id": "s1"})
+        t2.guard("reg_delete")
+        t2.record("reg_delete", {"ok": True, "removed": 1}, mutating=True, wrote={"registry_drive_ids": ["d1"]})
+        _w = t2.wrote()
+        khong_chan_oan = (t2.ok() is True and t2.uncertain() == []
+                          and [x["step"] for x in _w] == ["nlm_source_delete", "reg_delete"]
+                          and _w[1]["wrote"] == {"registry_drive_ids": ["d1"]})
+        # `skipped` phải PHÂN BIỆT được với hỏng: bỏ qua không lật `ok`, cũng không đếm là bước bắt buộc
+        t3 = _T("op")
+        t3.skipped("nlm_source_delete", "KHONG_YEU_CAU")
+        t3.record("reg_delete", {"ok": True})
+        bo_qua = (t3.ok() is True and t3.first_failure() is None
+                  and t3.steps[0].get("skipped") is True and t3.steps[0].get("ok") is None)
+        return bool(_da_chan and van_biet and ke and khong_chan_oan and bo_qua)
+    _t110("r302_helper1_chan_mutation_phia_sau_va_ke_da_ghi", _c302_chan_mutation_phia_sau_va_ke_da_ghi)
+
+    # DANH SÁCH GẮN Helper 1 — cập nhật CÓ CHỦ ĐÍCH mỗi khi một slice gắn helper vào một module.
+    # r288 mở ca này với danh sách RỖNG (acceptance §6.1: "chưa gắn vào lệnh nào"). r289 (PRO-01) thêm
+    # `ops_misc.py`. Slice sau (ING-03 → `ingest_ops.py`) phải tự thêm tên mình ở đây — nghĩa là việc gắn
+    # helper vào một đường GHI mới không bao giờ lọt qua review im lặng.
+    _HELPER1_DA_GAN = {"ops_misc.py",          # r289 PRO-01
+                       "ingest_ops.py"}        # r291 ING-03
+
+    def _c302_helper1_chi_gan_o_noi_da_khai():
+        import pathlib as _pl288
+        _hits = []
+        for _p in sorted(_pl288.Path(_TL_MODULE.HERE / "tl_core").glob("*.py")):
+            if _p.name == "txn.py":            # chính module helper
+                continue
+            _t = _p.read_text(encoding="utf-8", errors="replace")
+            if "Txn(" in _t or "TxnBlocked" in _t or "step_result_ok(" in _t:
+                _hits.append(_p.name)
+        return set(_hits) == _HELPER1_DA_GAN
+    _t110("r302_helper1_chi_gan_o_noi_da_khai", _c302_helper1_chi_gan_o_noi_da_khai)
+
+    # ═══ r289 (v1.36.27) — PRO-01: `profile-file-remove` fail-closed (Slice P0, ưu tiên #2 sổ audit) ═══
+    # TRƯỚC: kết quả `nlm source_delete` / `drive trash` chỉ được ghi NHẬT KÝ, không kiểm; `reg_delete`
+    # chạy VÔ ĐIỀU KIỆN; `out = {**plan, "ok": True, ...}` GÁN CỨNG rồi `return 0`. Mọi bước con hỏng vẫn
+    # rc=0 mà con trỏ registry ĐÃ BỊ THÁO ⇒ tài sản MỒ CÔI và không ai đi tìm (vì rc=0).
+
+    def _run289(*, delete_nlm=False, trash_drive=False, keep_registry=False,
+                nlm_ok=True, trash_ok=True, reg_resp=None, ids=("d1",)):
+        """Chạy `cmd_profile_file_remove` --apply --confirm yes trên GAS/NLM GIẢ. Trả (rc, payload, calls)."""
+        _calls = []
+        _reg_default = {"ok": True, "removed": len(ids), "not_found": 0, "skipped_live": 0}
+
+        class _FkG289:
+            def get(self, action, **kw):
+                _calls.append(("get", action, kw))
+                return {"ok": True} if trash_ok else {"ok": False, "error": "DRIVE_403"}
+
+            def post(self, action, **kw):
+                _calls.append(("post", action, kw))
+                return _reg_default if reg_resp is None else reg_resp
+
+        class _FkNc289:
+            def source_delete(self, sid):
+                _calls.append(("nlm", "source_delete", {"sid": sid}))
+                return {"ok": True} if nlm_ok else {"ok": False, "error": "NLM_403"}
+
+        _real = _resolve286(_TL_MODULE.cmd_profile_file_remove)
+        _g = _real.__globals__
+        _names = ("apply_profile_offline", "_profile_policy_error", "_profile_manifest_entries_for",
+                  "_profile_live_source_ids", "_profile_deletable_sources", "load_creds", "_gas", "_imp",
+                  "_apply_journal_start", "_journal_append")
+        _sav = {k: _g.get(k) for k in _names}
+        _ents = [{"drive_id": i, "nlm_source_id": "s_" + i, "name": "N_" + i} for i in ids]
+        try:
+            _g["apply_profile_offline"] = lambda *a, **k: None
+            _g["_profile_policy_error"] = lambda **k: None
+            _g["_profile_manifest_entries_for"] = lambda *a, **k: (_ents, None)
+            _g["_profile_live_source_ids"] = lambda m: ["s_" + _e["drive_id"] for _e in m]
+            _g["_profile_deletable_sources"] = lambda e, s: (list(s), [])
+            _g["load_creds"] = lambda *a, **k: None
+            _g["_gas"] = lambda: _FkG289()
+            _g["_imp"] = lambda n: _FkNc289()
+            _g["_apply_journal_start"] = lambda *a, **k: "run289"
+            _g["_journal_append"] = lambda *a, **k: None
+            _b, _e2 = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e2):
+                _rc = _real(argparse.Namespace(
+                    config=None, profile=None, target_profile="P", refresh=False, drive_ids=list(ids),
+                    delete_nlm=delete_nlm, trash_drive=trash_drive, keep_registry=keep_registry,
+                    apply=True, confirm="yes", json=True))
+            _txt = (_b.getvalue() or "") + (_e2.getvalue() or "")
+            try:
+                _pay = json.loads(_txt)
+            except Exception:  # noqa: BLE001
+                _pay = {"_khong_parse_duoc": _txt[:400]}
+            return _rc, _pay, _calls
+        finally:
+            for _k, _v in _sav.items():
+                _g[_k] = _v
+
+    def _da_goi_reg_delete(calls):
+        return any(c[0] == "post" and c[1] == "reg_delete" for c in calls)
+
+    def _c303_duong_xanh_van_chay_du():
+        # PHẢN CHỨNG NỀN: cổng mới không được chặn oan đường hợp lệ. Cả 3 cờ bật, mọi bước dương ⇒
+        # rc=0, gọi đủ nlm+trash+reg_delete, và bản kê `wrote` liệt ĐÚNG 3 thứ đã ghi.
+        _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True)
+        _w = [x["step"] for x in _p.get("txn", {}).get("wrote", [])]
+        return (_rc == 0 and _p.get("ok") is True and _da_goi_reg_delete(_c)
+                and _w == ["nlm_source_delete:s_d1", "drive_trash:d1", "reg_delete"]
+                and _p["txn"]["uncertain"] == [] and _p["txn"]["failed_step"] is None)
+    _t110("r303_pfr_duong_xanh_van_chay_du", _c303_duong_xanh_van_chay_du)
+
+    def _c303_ma_tran_buoc_con_hong_khong_thao_registry():
+        # LÕI CỦA MỤC: ma trận `--delete-nlm` × `--trash-drive` × `--keep-registry`, mỗi ô có ca BƯỚC CON
+        # HỎNG ⇒ đòi rc≠0 VÀ registry CÒN NGUYÊN (không gọi `reg_delete` lần nào).
+        _oks = []
+        for _kr in (False, True):
+            # (a) NLM hỏng — trash bật hay tắt cũng phải chặn tới registry
+            for _tr in (False, True):
+                _rc, _p, _c = _run289(delete_nlm=True, trash_drive=_tr, keep_registry=_kr, nlm_ok=False)
+                _oks.append(_rc != 0 and _p.get("ok") is False and not _da_goi_reg_delete(_c))
+                if _tr:      # bước NLM hỏng ⇒ trash phía sau cũng bị CHẶN, không tạo thêm rác phải dọn
+                    _oks.append(not any(c[0] == "get" and c[1] == "trash" for c in _c)
+                                and _p.get("blocked", {}).get("blocking_step") == "nlm_source_delete:s_d1")
+            # (b) trash hỏng (NLM tắt) ⇒ vẫn phải chặn tới registry
+            _rc, _p, _c = _run289(trash_drive=True, keep_registry=_kr, trash_ok=False)
+            _oks.append(_rc != 0 and _p.get("ok") is False and not _da_goi_reg_delete(_c))
+        # (c) mọi bước con dương nhưng CHÍNH `reg_delete` hỏng ⇒ rc≠0 (trước đây `ok:True` gán cứng nuốt sạch)
+        _rc, _p, _c = _run289(delete_nlm=True, trash_drive=True, reg_resp={"ok": False, "error": "GAS_500"})
+        _oks.append(_rc != 0 and _p.get("ok") is False and _p["txn"]["failed_step"] == "reg_delete")
+        return all(_oks)
+    _t110("r303_pfr_ma_tran_buoc_con_hong_khong_thao_registry", _c303_ma_tran_buoc_con_hong_khong_thao_registry)
+
+    def _c303_reg_delete_readback_khong_tin_ok_tran():
+        # `require_removed='no'` PHẢI giữ (lệnh này không hề ghi `nlm_status`; bật 'yes' là biến lệnh thành
+        # vô tác dụng — đổi fail-open lấy fail-silent). Chốt chuyển sang READBACK phía client: `ok=true`
+        # của response CHƯA phải bằng chứng dòng đã gỡ.
+        _rc0, _p0, _c0 = _run289()
+        _giu_co = any(c[0] == "post" and c[2].get("require_removed") == "no" for c in _c0)
+        # (1) ok=true nhưng server BỎ QUA dòng live ⇒ PHẢI đỏ
+        _rc1, _p1, _ = _run289(reg_resp={"ok": True, "removed": 0, "not_found": 0, "skipped_live": 1})
+        # (2) ok=true nhưng removed+not_found KHÔNG phủ hết requested ⇒ PHẢI đỏ
+        _rc2, _p2, _ = _run289(ids=("d1", "d2"),
+                               reg_resp={"ok": True, "removed": 1, "not_found": 0, "skipped_live": 0})
+        # (3) chạy lại sau lượt thành công một phần: dòng đã biến mất ⇒ `not_found` phủ nốt ⇒ KHÔNG đỏ oan
+        _rc3, _p3, _ = _run289(ids=("d1", "d2"),
+                               reg_resp={"ok": True, "removed": 1, "not_found": 1, "skipped_live": 0})
+        return (_rc0 == 0 and _giu_co
+                and _rc1 != 0 and "SKIPPED_LIVE" in str(_p1["txn"]["failed_error"])
+                and _rc2 != 0 and "KHONG_PHU_HET" in str(_p2["txn"]["failed_error"])
+                and _rc3 == 0 and _p3.get("ok") is True)
+    _t110("r303_pfr_reg_delete_readback_khong_tin_ok_tran", _c303_reg_delete_readback_khong_tin_ok_tran)
+
+    def _c303_khong_thao_tac_nao_khong_con_bao_xanh():
+        # `--keep-registry` mà không `--delete-nlm`/`--trash-drive` = lệnh KHÔNG LÀM GÌ. Trước đây in
+        # `ok:true, rc=0`. `ok` được TÍNH thì câu trả lời đúng là: chưa có gì được chứng minh.
+        _rc, _p, _c = _run289(keep_registry=True)
+        return (_rc != 0 and _p.get("ok") is False and _c == []
+                and _p["txn"]["failed_error"] == "KHONG_CO_THAO_TAC_NAO_DUOC_YEU_CAU")
+    _t110("r303_pfr_khong_thao_tac_nao_khong_con_bao_xanh", _c303_khong_thao_tac_nao_khong_con_bao_xanh)
+
+    # ═══ r290 (v1.36.28) — RAS-01 vế `changes_pull`: "DRY" MÀ VẪN GHI (Slice R1, T2) ═══
+    # `registry_orchestrator.run()` gọi `gas.post("changes_pull")` ở phase=boot TRƯỚC cổng
+    # `if args.dry or not args.apply` — trong khi chính nhánh DRY in "chế độ DRY — không gọi action ghi".
+
+    def _run290(*, dry, apply_, phase="boot"):
+        """Chạy `registry_orchestrator.run()` THẬT với module `gas` GIẢ. Trả (plan, calls)."""
+        import sys as _sys290, types as _ty290, importlib as _il290
+        _calls = []
+
+        _fake = _ty290.ModuleType("gas")
+        _fake.get = lambda action, **kw: (_calls.append(("get", action, kw))
+                                          or {"ok": True, "version": "2.21.2p", "count": 0})
+        _fake.post = lambda action, **kw: (_calls.append(("post", action, kw))
+                                           or {"ok": True, "count": 0, "applied": 0, "sheetApplied": True})
+        _sav_gas = _sys290.modules.get("gas")
+        _sav_path = list(_sys290.path)
+        _sys290.modules["gas"] = _fake
+        if str(_TL_MODULE.HERE) not in _sys290.path:
+            _sys290.path.insert(0, str(_TL_MODULE.HERE))
+        try:
+            _ro = _il290.import_module("registry_orchestrator")
+            _ns = argparse.Namespace(phase=phase, dry=dry, apply=apply_, manifest=None, touched_drive=False,
+                                     min_version="2.13.7", regen_threshold=40, bulk_threshold=8,
+                                     tukhoa_threshold=8)
+            _b = _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_io27.StringIO()):
+                _d = _ro.run(_ns)
+            return (_d or {}), _calls, _b.getvalue()
+        finally:
+            if _sav_gas is None:
+                _sys290.modules.pop("gas", None)
+            else:
+                _sys290.modules["gas"] = _sav_gas
+            _sys290.path[:] = _sav_path
+
+    def _c304_dry_khong_goi_action_ghi():
+        # LÕI: DRY ⇒ TUYỆT ĐỐI không `post` action nào. `changes_pull` không chỉ vá Sheet
+        # (applySheet mặc định true) mà `doChangesPull_` còn LUÔN ghi lại `TL_CHANGES_TOKEN` ⇒ TIÊU THỤ
+        # cửa sổ delta, nên `applySheet=false` cũng KHÔNG cứu được: một lượt "dry" nuốt mất thay đổi mà
+        # lượt --apply thật lẽ ra phải thấy. Vì vậy chốt là KHÔNG GỌI, không phải gọi-nhẹ-hơn.
+        _d, _c, _txt = _run290(dry=True, apply_=False)
+        _khong_post = not any(x[0] == "post" for x in _c)
+        _khong_pull = not any(x[1] == "changes_pull" for x in _c)
+        # và không được đoán bừa độ tươi: kế hoạch phải lấy nhánh BẢO THỦ + nói rõ vì sao
+        _bao_thu = {"regen2", "changes_init"} <= set(_d.get("plan") or [])
+        _noi_ro = any("changes_pull" in r and "DRY" in r for r in (_d.get("reasons") or []))
+        # cờ --dry và "không --apply" là HAI đường vào cùng một cổng — phải bịt cả hai
+        _d2, _c2, _ = _run290(dry=False, apply_=False)
+        _ca_hai = not any(x[0] == "post" for x in _c2)
+        return bool(_khong_post and _khong_pull and _bao_thu and _noi_ro and _ca_hai)
+    _t110("r304_orch_dry_khong_goi_action_ghi", _c304_dry_khong_goi_action_ghi)
+
+    def _c304_apply_van_goi_changes_pull():
+        # PHẢN CHỨNG: --apply THẬT vẫn phải gọi `changes_pull` — vá không được biến thành "bỏ hẳn tính năng".
+        _d, _c, _ = _run290(dry=False, apply_=True)
+        return any(x[0] == "post" and x[1] == "changes_pull" for x in _c)
+    _t110("r304_orch_apply_van_goi_changes_pull", _c304_apply_van_goi_changes_pull)
+
+    def _c304_decide_not_probed_bao_thu():
+        # Trạng thái mới `not_probed` phải xếp cùng nhánh bảo thủ với `no_baseline` — "chưa đo" KHÔNG
+        # được suy thành "chắc ít thay đổi" (đó đúng là lớp fail-open đang chữa), và lý do phải nêu DRY.
+        import sys as _sys290b, importlib as _il290b
+        if str(_TL_MODULE.HERE) not in _sys290b.path:
+            _sys290b.path.insert(0, str(_TL_MODULE.HERE))
+        _ro = _il290b.import_module("registry_orchestrator")
+        _np = _ro.decide("2.21.2p", "not_probed", None, 0)
+        _nb = _ro.decide("2.21.2p", "no_baseline", None, 0)
+        return (_np["plan"] == _nb["plan"]
+                and any("DRY" in r and "changes_pull" in r for r in _np["reasons"]))
+    _t110("r304_orch_decide_not_probed_bao_thu", _c304_decide_not_probed_bao_thu)
+
+    # ═══ r291 (v1.36.30) — ING-03: `ingest_commit` kết luận bằng KẾT QUẢ, không bằng HÌNH DẠNG ═══
+    # `grep upsert_done` toàn kho ra ĐÚNG 1 hit (`ingest_ops.py:1502`) và hit đó chỉ dùng để ĐẶT TÊN
+    # bước lỗi — không gate gì. Cả HAI call site (`_pi_stage_write` ~:1836, `_il_stage_write` ~:3080)
+    # gate bằng `org.get("fileId")`, mà `doIngestCommit_` đặt `out.fileId` NGAY SAU organize, TRƯỚC
+    # register/readback ⇒ `ok:false` + `upsert_done:false` mà vẫn có `fileId` ⇒ commit MỘT PHẦN được
+    # nhận là thành công: GDoc tồn tại mà THIẾU dòng registry (registry lệch Drive, không ai biết).
+
+    def _org291(**over):
+        """Response `ingest_commit` ĐẦY ĐỦ theo đúng hình dạng server (Code.2.21.2p.gs:846-881)."""
+        _base = {"ok": True, "organize_done": True, "rename_done": True, "upsert_done": True,
+                 "fileId": "1GDOC291", "srcId": "1SRC291",
+                 "row": {"drive_id": "1GDOC291"}, "file": {"id": "1GDOC291", "name": "N.gdoc"},
+                 "src_file": {"id": "1SRC291"}}
+        _base.update(over)
+        return _base
+
+    def _c305_verdict_doi_du_marker():
+        # HỢP ĐỒNG cổng: đọc ĐÚNG bộ marker server tự dùng để tính `out.ok`.
+        _v = _TL_MODULE._ingest_commit_verdict
+        _okw = {"register": "true"}
+        _duong = _v(_org291(), _okw).get("ok") is True
+        # Bản mẫu ING-03 nguyên văn: ok:false + upsert_done:false NHƯNG CÓ fileId ⇒ PHẢI ÂM
+        _bai_hoc = _v(_org291(ok=False, upsert_done=False), _okw).get("ok") is False
+        # từng marker thiếu/sai ⇒ âm, và lý do NÊU ĐÍCH DANH marker đó
+        _tung_marker = []
+        for _k in ("organize_done", "rename_done", "upsert_done", "row"):
+            _r = _v(_org291(**{_k: False}), _okw)
+            _tung_marker.append(_r.get("ok") is False and _k in str(_r.get("error")))
+        # marker VẮNG MẶT hẳn (không phải False) cũng phải âm — "không có tin xấu" ≠ "tin tốt"
+        _thieu_han = _org291(); _thieu_han.pop("upsert_done")
+        _vang = _v(_thieu_han, _okw).get("ok") is False
+        # thiếu hẳn khoá `ok`, hoặc response không phải dict ⇒ âm (fail-closed)
+        _khong_ok = _org291(); _khong_ok.pop("ok")
+        _tho = (_v(_khong_ok, _okw).get("ok") is False and _v(None, _okw).get("ok") is False
+                and _v("1GDOC291", _okw).get("ok") is False)
+        # PHẢN CHỨNG: call KHÔNG yêu cầu ghi registry ⇒ KHÔNG được đòi `row` (đỏ oan đường hợp lệ).
+        # Đúng luật server: out.ok = … && (register!=='true' || row).
+        _khong_reg = _org291(); _khong_reg.pop("row")
+        _mien_row = (_v(_khong_reg, {"register": "false"}).get("ok") is True
+                     and _v(_khong_reg, {"register": "true"}).get("ok") is False)
+        # `file` CO Y KHONG nam trong cong (chu thich tai `_INGEST_COMMIT_MARKERS`): ca hai stage
+        # READBACK da fail-closed tren `file` qua duong du phong `_verify_convert_readback` DANG
+        # HOAT DONG. Khang dinh TUONG MINH o day de ai them `file` vao cong phai doc ly do truoc.
+        _khong_file = _org291(); _khong_file.pop("file")
+        _mien_file = (_v(_khong_file, _okw).get("ok") is True
+                      and "file" not in _TL_MODULE._INGEST_COMMIT_MARKERS)
+        return bool(_duong and _bai_hoc and all(_tung_marker) and _vang and _tho
+                    and _mien_row and _mien_file)
+    _t110("r305_ingest_commit_verdict_doi_du_marker", _c305_verdict_doi_du_marker)
+
+    def _c305_ca_hai_call_site_deu_co_cong():
+        # "SỬA CẢ HAI — sửa một chỗ là để lại lỗ y hệt ở chỗ kia" (§Slice I4). Khoá bằng cách đọc mã:
+        # mỗi stage WRITE phải GỌI cổng, và không stage nào còn gate CHỈ bằng `if not gdoc:`.
+        import inspect as _insp291
+        _oks = []
+        for _fn in (_TL_MODULE._pi_stage_write, _TL_MODULE._il_stage_write):
+            _src = _insp291.getsource(_resolve286(_fn))
+            _oks.append("_ingest_commit_verdict(" in _src and "if not gdoc:" not in _src)
+        return len(_oks) == 2 and all(_oks)
+    _t110("r305_ca_hai_call_site_deu_co_cong", _c305_ca_hai_call_site_deu_co_cong)
+
+    def _c305_stage_write_chan_commit_mot_phan():
+        # HÀNH VI qua `_il_stage_write` THẬT (đường ingest-local): bơm response commit-MỘT-PHẦN (có
+        # fileId, thiếu marker) ⇒ PHẢI rc=2 VÀ journal `_step_ok` phải ghi FALSE — nếu journal vẫn ghi
+        # `bool(gdoc)` như cũ thì `--resume` sau này đọc journal và tưởng stage organize đã xong.
+        # `_step`/`_step_ok` đến từ ctx (không phải globals) và `okw` do chính stage dựng (register=true).
+        _real = _resolve286(_TL_MODULE._il_stage_write)
+        _g = _real.__globals__
+        _names = ("_ingest_commit_supported", "_ingest_commit_call")
+        _sav = {k: _g.get(k) for k in _names}
+        _steps = []
+
+        def _chay(org):
+            _steps.clear()
+            _g["_ingest_commit_supported"] = lambda g: True
+            _g["_ingest_commit_call"] = lambda g, okw: org
+            _b, _e = _io27.StringIO(), _io27.StringIO()
+            with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e):
+                _r = _real({"g": object(), "fid": "1UP291", "name": "Luat_01-2026-QH16_X", "cat": "20",
+                            "sohieu": "01-2026-QH15", "goc": "", "loai": "Luật", "hieuluc": "Còn",
+                            "run_id": "run291", "_prev": {},
+                            "_step": lambda *a, **k: None,
+                            "_step_ok": lambda name, key, ok, **k: _steps.append((name, bool(ok)))})
+            return _r, _e.getvalue()
+        try:
+            # (1) commit MỘT PHẦN: có fileId, ok:false, upsert_done:false ⇒ CHẶN, journal ghi FALSE
+            _r1, _err1 = _chay(_org291(ok=False, upsert_done=False))
+            _chan = (_r1.get("rc") == 2 and _steps == [("organize", False)] and "upsert_done" in _err1)
+            # (2) PHẢN CHỨNG: response ĐỦ marker ⇒ đi tiếp bình thường, journal ghi TRUE
+            _r2, _ = _chay(_org291())
+            _di_tiep = (_r2.get("gdoc") == "1GDOC291" and _r2.get("rc") is None
+                        and _steps == [("organize", True)])
+        finally:
+            for _k, _v in _sav.items():
+                _g[_k] = _v
+        return bool(_chan and _di_tiep)
+    _t110("r305_stage_write_chan_commit_mot_phan", _c305_stage_write_chan_commit_mot_phan)
+
+    # ═══ r292 (v1.36.31) — RAS-05: `backfill_keywords_live` hết MẤT DỮ LIỆU IM LẶNG (Slice R0, T2) ═══
+    # Ba lỗ cùng Mẫu A: (1) `done` vừa là sổ-đã-xong VỪA là BỘ LỌC worklist ⇒ doc `exporttext` lỗi bị
+    # ghi `done[gid]='err'` và **loại VĨNH VIỄN**; (2) `reg_bulk` không kiểm `ok`, mà item đã đánh
+    # `done='ok'` từ TRƯỚC lúc gọi; (3) `remaining` tính từ chính `done` đã nhiễm ⇒ in "XONG TẤT CẢ."
+    # và `main()` return None ⇒ rc=0. Báo thành công cho một việc chưa xong.
+
+    def _bkl292():
+        """Nạp `backfill_keywords_live` với `gas`/`keywords`/`verify_deep` GIẢ. Trả (module, calls)."""
+        import sys as _s292, types as _t292, importlib as _i292
+        _calls = []
+        _fg = _t292.ModuleType("gas")
+        _fg.get = lambda action, **kw: (_calls.append(("get", action, kw)) or _BOX292["exporttext"](kw))
+        _fg.post = lambda action, **kw: (_calls.append(("post", action, kw)) or _BOX292["regbulk"](kw))
+        _fk = _t292.ModuleType("keywords"); _fk.extract_keywords = lambda rec: _BOX292["kw"](rec)
+        _fv = _t292.ModuleType("verify_deep"); _fv.split_articles = lambda t: [t]
+        _sav = {n: _s292.modules.get(n) for n in ("gas", "keywords", "verify_deep", "backfill_keywords_live")}
+        for _n, _m in (("gas", _fg), ("keywords", _fk), ("verify_deep", _fv)):
+            _s292.modules[_n] = _m
+        _s292.modules.pop("backfill_keywords_live", None)
+        if str(_TL_MODULE.HERE) not in _s292.path:
+            _s292.path.insert(0, str(_TL_MODULE.HERE))
+        try:
+            return _i292.import_module("backfill_keywords_live"), _calls, _sav
+        except Exception:
+            for _n, _m in _sav.items():
+                if _m is None:
+                    _s292.modules.pop(_n, None)
+                else:
+                    _s292.modules[_n] = _m
+            raise
+
+    _BOX292 = {"exporttext": lambda kw: {"ok": True, "text": "Điều 1. X"},
+               "regbulk": lambda kw: {"ok": True, "patched": 99},
+               "kw": lambda rec: "tu,khoa"}
+
+    def _c306_migrate_v1_dua_doc_loi_QUAY_LAI():
+        # LỖ (1): sổ v1 đang nằm trên máy người giữ là BẰNG CHỨNG thiệt hại (§6.2 Pha 3.5) — phải ĐỌC
+        # ĐƯỢC, không được vứt. Ánh xạ: ok→committed · empty→blocked · err*→RETRYABLE.
+        # Chính vế cuối là bản vá: doc từng bị `err` nay QUAY LẠI worklist thay vì mất vĩnh viễn.
+        import sys as _s
+        _m, _c, _sav = _bkl292()
+        try:
+            _v1 = {"done": {"g1": "ok", "g2": "empty", "g3": "err", "g4": "err:HTTP 500"},
+                   "patched": 7, "empty": 1, "err": 2}
+            _p = _m.migrate_progress(_v1)
+            _anh_xa = (_p["state"] == {"g1": "committed", "g2": "blocked",
+                                       "g3": "retryable", "g4": "retryable"}
+                       and _p["patched"] == 7 and _p["schema"] == _m.PROGRESS_SCHEMA)
+            _wl = [{"drive_id": g} for g in ("g1", "g2", "g3", "g4", "g5")]
+            # g3/g4 (từng 'err') PHẢI quay lại hàng đợi; g1/g2 là kết cục ⇒ rời hàng đợi
+            _quay_lai = [w["drive_id"] for w in _m.pending(_wl, _p)] == ["g3", "g4", "g5"]
+            # v2 nạp lại không bị migrate lần hai (bất biến)
+            _idem = _m.migrate_progress(_p)["state"] == _p["state"]
+            # sổ rỗng/hỏng ⇒ khung v2 sạch, không nổ
+            _rong = _m.migrate_progress(None)["state"] == {} and _m.migrate_progress({})["state"] == {}
+            return bool(_anh_xa and _quay_lai and _idem and _rong)
+        finally:
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r306_bkl_migrate_v1_dua_doc_loi_quay_lai", _c306_migrate_v1_dua_doc_loi_QUAY_LAI)
+
+    def _c306_reg_bulk_verdict_khong_tin_ok_tran():
+        # LỖ (2): `ok=true` CHƯA đủ — lô có thể `patched < gửi` (dòng không khớp drive_id); phần hụt
+        # CHƯA được ghi nên cả lô phải quay về `retryable`, không được đánh dấu xong.
+        import sys as _s
+        _m, _c, _sav = _bkl292()
+        try:
+            _v = _m.reg_bulk_verdict
+            return bool(_v({"ok": True, "patched": 3}, 3)[0] is True
+                        and _v({"ok": True, "patched": 5}, 3)[0] is True        # dư không sao
+                        and _v({"ok": True, "patched": 2}, 3)[0] is False       # HỤT ⇒ âm
+                        and "HUT" in _v({"ok": True, "patched": 2}, 3)[1]
+                        and _v({"ok": False, "error": "GAS_500"}, 3)[0] is False
+                        and _v({"patched": 3}, 3)[0] is False                   # thiếu khoá ok ⇒ âm
+                        and _v(None, 3)[0] is False and _v("ok", 3)[0] is False)
+        finally:
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r306_bkl_reg_bulk_verdict_khong_tin_ok_tran", _c306_reg_bulk_verdict_khong_tin_ok_tran)
+
+    def _c306_main_khong_con_bao_xong_oan():
+        # HÀNH VI end-to-end qua `main()` THẬT. Ba kịch bản, mỗi cái khoá một lỗ.
+        import sys as _s, tempfile as _tf292, json as _j292, pathlib as _pl292
+        _m, _calls, _sav = _bkl292()
+        _sav_argv = list(_s.argv)
+        try:
+            with _tf292.TemporaryDirectory() as _d:
+                _man = _pl292.Path(_d) / "man.json"
+                _man.write_text(_j292.dumps({"entries": [
+                    {"drive_id": "g1", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s1", "name": "A", "so_hieu": "1/2026"},
+                    {"drive_id": "g2", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s2", "name": "B", "so_hieu": "2/2026"}]}), encoding="utf-8")
+
+                def _chay(prog_path):
+                    _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man),
+                               "--progress", str(prog_path), "--batch", "40"]
+                    _b, _e = _io27.StringIO(), _io27.StringIO()
+                    with _ctx27.redirect_stdout(_b), _ctx27.redirect_stderr(_e):
+                        _rc = _m.main()
+                    _js = [ln for ln in _b.getvalue().splitlines() if ln.startswith("{")]
+                    return _rc, (_j292.loads(_js[-1]) if _js else {}), _b.getvalue() + _e.getvalue()
+
+                # (A) LỖ (1): `exporttext` hỏng ⇒ rc≠0, doc vào `retryable`, KHÔNG in "XONG TẤT CẢ."
+                _BOX292["exporttext"] = lambda kw: {"ok": False, "error": "EXPORT_403"}
+                _p1 = _pl292.Path(_d) / "p1.json"
+                _rcA, _oA, _txtA = _chay(_p1)
+                _stA = _j292.loads(_p1.read_text(encoding="utf-8"))["state"]
+                _A = (_rcA != 0 and _oA.get("ok") is False and _oA.get("con_lai") == 2
+                      and _stA == {"g1": "retryable", "g2": "retryable"}
+                      and "XONG TẤT CẢ" not in _txtA)
+                # …và chạy lại LẦN HAI vẫn thấy đủ 2 doc (trước vá: mất vĩnh viễn)
+                _BOX292["exporttext"] = lambda kw: {"ok": True, "text": "Điều 1. X"}
+                _rcA2, _oA2, _ = _chay(_p1)
+                _A2 = (_rcA2 == 0 and _oA2.get("con_lai") == 0 and _oA2.get("xu_ly_dot_nay") == 2)
+
+                # (B) LỖ (2): `reg_bulk` hỏng ⇒ KHÔNG đánh dấu xong, cả lô về `retryable`, rc≠0
+                _BOX292["regbulk"] = lambda kw: {"ok": False, "error": "GAS_500"}
+                _p2 = _pl292.Path(_d) / "p2.json"
+                _rcB, _oB, _txtB = _chay(_p2)
+                _stB = _j292.loads(_p2.read_text(encoding="utf-8"))["state"]
+                _B = (_rcB != 0 and _oB.get("con_lai") == 2
+                      and set(_stB.values()) == {"retryable"} and "XONG TẤT CẢ" not in _txtB)
+                # `ok:true` mà patched HỤT cũng phải về retryable
+                _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 1}
+                _p3 = _pl292.Path(_d) / "p3.json"
+                _rcB2, _oB2, _ = _chay(_p3)
+                _B2 = (_rcB2 != 0 and set(_j292.loads(_p3.read_text(encoding="utf-8"))["state"].values()) == {"retryable"})
+
+                # (C) PHẢN CHỨNG: mọi thứ dương ⇒ rc=0, "XONG TẤT CẢ.", state committed
+                _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 2}
+                _p4 = _pl292.Path(_d) / "p4.json"
+                _rcC, _oC, _txtC = _chay(_p4)
+                _stC = _j292.loads(_p4.read_text(encoding="utf-8"))["state"]
+                _C = (_rcC == 0 and _oC.get("ok") is True and _oC.get("con_lai") == 0
+                      and set(_stC.values()) == {"committed"} and "XONG TẤT CẢ" in _txtC)
+                # (D) không bóc được từ khoá = kết cục XÁC ĐỊNH ⇒ `blocked`, rời worklist, rc=0
+                _BOX292["kw"] = lambda rec: ""
+                _p5 = _pl292.Path(_d) / "p5.json"
+                _rcD, _oD, _ = _chay(_p5)
+                _D = (_rcD == 0 and _oD.get("con_lai") == 0 and _oD.get("bo_qua_co_ly_do") == 2
+                      and set(_j292.loads(_p5.read_text(encoding="utf-8"))["state"].values()) == {"blocked"})
+                return bool(_A and _A2 and _B and _B2 and _C and _D)
+        finally:
+            _BOX292["exporttext"] = lambda kw: {"ok": True, "text": "Điều 1. X"}
+            _BOX292["regbulk"] = lambda kw: {"ok": True, "patched": 99}
+            _BOX292["kw"] = lambda rec: "tu,khoa"
+            _s.argv = _sav_argv
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r306_bkl_main_khong_con_bao_xong_oan", _c306_main_khong_con_bao_xong_oan)
+
+
+    # ═══ r310 (v1.36.44) — RAS-01 vế metadata/CLI + RAS-14: `rasoat` hết argparse.REMAINDER ═══
+    # BỆNH KÉP của một dòng `p.add_argument("rest", nargs=argparse.REMAINDER)`:
+    #   (a) không cờ nào được KHAI ⇒ ba đường GHI registry (keywords/titles/orchestrate) VÔ HÌNH với
+    #       tool-inventory và workflow-audit --strict — cổng WRITE_CMD_NO_GATE chỉ soi cái nó nhìn thấy;
+    #   (b) RAS-14: `--profile` gõ SAU sub bị đẩy nguyên cho script con, mà `backfill_nlm_title.py` có
+    #       `--profile` RIÊNG (profile nlm CLI) ⇒ corpus profile của tl KHÔNG được áp, script con nhận nhầm.
+
+    def _ps309(parser, argv):
+        """parse_args KHÔNG ném SystemExit. `_t110` chỉ bắt Exception, mà argparse thoát bằng SystemExit
+        (BaseException) ⇒ một hồi quy ở bề mặt `rasoat` sẽ GIẾT cả suite thay vì làm đỏ đúng ca của nó —
+        đo được điều này khi chạy ĐỎ-TRƯỚC. Trả None nếu parser từ chối."""
+        try:
+            with _hush():
+                return parser.parse_args(argv)
+        except SystemExit:
+            return None
+
+    def _c309_sub_la_lenh_that_khong_con_remainder():
+        # Bề mặt parser: `rasoat` phải là subparsers THẬT với 5 nhánh, KHÔNG còn positional `rest`.
+        import argparse as _ap309
+        _p309 = build_parser()
+        _sub309 = next(a for a in _p309._actions if isinstance(a, _ap309._SubParsersAction))
+        _ras = _sub309.choices["rasoat"]
+        _nested = next((a for a in _ras._actions if isinstance(a, _ap309._SubParsersAction)), None)
+        _co_nested = _nested is not None and sorted(_nested.choices) == sorted(
+            s["name"] for s in _reg64.RASOAT_SPECS)
+        _het_remainder = all(a.nargs != _ap309.REMAINDER for a in _ras._actions)
+        # `tl rasoat` TRẦN không được dispatch (main() rẽ nhánh help theo `fn is None`)
+        _tran_khong_fn = getattr(_ps309(_p309, ["rasoat"]), "fn", None) is None
+        # ...còn mỗi sub thì PHẢI có handler
+        _sub_co_fn = all(getattr(_ps309(_p309, ["rasoat", n]), "fn", None) is not None
+                         for n in ("keywords", "titles", "orchestrate"))
+        # cờ LẠ nay bị TỪ CHỐI (trước: REMAINDER nuốt và đẩy xuống script con)
+        try:
+            with _hush():
+                _p309.parse_args(["rasoat", "keywords", "--khong-ton-tai", "x"])
+            _tu_choi_co_la = False
+        except SystemExit as _e:
+            _tu_choi_co_la = _e.code == 2
+        return bool(_co_nested and _het_remainder and _tran_khong_fn and _sub_co_fn and _tu_choi_co_la)
+    _t110("r310_rasoat_sub_la_lenh_that_khong_con_remainder", _c309_sub_la_lenh_that_khong_con_remainder)
+
+    def _c309_ras14_profile_sau_sub_thuoc_ve_tl():
+        # RAS-14 (bằng chứng HAI CHIỀU). Chiều 1: `--profile` sau sub được TL parse, KHÔNG rơi xuống argv
+        # script con. Chiều 2: profile của nlm CLI vẫn gửi được — qua `--nlm-profile` — nên vá KHÔNG
+        # biến thành "bỏ hẳn tính năng".
+        _p309 = build_parser()
+        _ns = _ps309(_p309, ["rasoat", "titles", "--from-nlm", "nb1", "--profile", "Luật BHXH"])
+        if _ns is None:
+            return False
+        _argv = _reg64.rasoat_child_argv(_reg64.RASOAT_SPEC_BY_NAME["titles"], _ns, apply_on=False)
+        _tl_giu = getattr(_ns, "profile", None) == "Luật BHXH" and "--profile" not in _argv
+        _ns2 = _ps309(_p309, ["rasoat", "titles", "--from-nlm", "nb1", "--nlm-profile", "dev",
+                              "--profile", "Luật BHXH"])
+        if _ns2 is None:
+            return False
+        _argv2 = _reg64.rasoat_child_argv(_reg64.RASOAT_SPEC_BY_NAME["titles"], _ns2, apply_on=True)
+        _hai_nghia_tach = (getattr(_ns2, "profile", None) == "Luật BHXH"
+                           and "--profile" in _argv2
+                           and _argv2[_argv2.index("--profile") + 1] == "dev")
+        # `--profile` đặt TRƯỚC subcommand vẫn sống (SUPPRESS không đè) — hồi quy P4-03
+        _truoc = getattr(_ps309(_p309, ["--profile", "P", "rasoat", "keywords"]), "profile", None) == "P"
+        return bool(_tl_giu and _hai_nghia_tach and _truoc)
+    _t110("r310_ras14_profile_sau_sub_thuoc_ve_tl", _c309_ras14_profile_sau_sub_thuoc_ve_tl)
+
+    def _c309_chay_tran_chi_doc_apply_moi_ghi():
+        # Cổng GHI: thiếu `--apply` ⇒ argv script con mang `dry_flag`; có `--apply` ⇒ KHÔNG mang.
+        # PHẢN CHỨNG kèm theo: nhánh không-ghi (worksheet/phuluc) không được tự dựng `--dry` từ đâu ra.
+        _p309 = build_parser()
+
+        def _argv(sub, extra=()):
+            _ns = _ps309(_p309, ["rasoat", sub] + list(extra))
+            if _ns is None:
+                return []
+            _sp = _reg64.RASOAT_SPEC_BY_NAME[sub]
+            return _reg64.rasoat_child_argv(_sp, _ns, apply_on=bool(getattr(_ns, "apply", False)))
+        _tran = ("--dry" in _argv("keywords", ["--manifest", "m.json"])
+                 and "--dry" in _argv("titles", ["--from-nlm", "nb"])
+                 and _argv("orchestrate")[:2] == ["boot", "--dry"])
+        _apply = ("--dry" not in _argv("keywords", ["--manifest", "m.json", "--apply"])
+                  and "--dry" not in _argv("titles", ["--from-nlm", "nb", "--apply"])
+                  and "--apply" in _argv("orchestrate", ["end", "--apply"])
+                  and "--dry" not in _argv("orchestrate", ["end", "--apply"]))
+        _khong_ghi = ("--dry" not in _argv("worksheet", ["18/VBHN-VPQH"])
+                      and "--dry" not in _argv("phuluc", ["m.json"]))
+        # positional vẫn map sang cờ chính (hồi quy #4) + alias `--sohieu`/`--file`
+        _pos = (_argv("worksheet", ["18/VBHN-VPQH"])[:2] == ["--so-hieu", "18/VBHN-VPQH"]
+                and _argv("worksheet", ["--sohieu", "x"])[:2] == ["--so-hieu", "x"]
+                and _argv("phuluc", ["m.json"])[:2] == ["--in", "m.json"]
+                and _argv("phuluc", ["--file", "m.json"])[:2] == ["--in", "m.json"])
+        return bool(_tran and _apply and _khong_ghi and _pos)
+    _t110("r310_chay_tran_chi_doc_apply_moi_ghi", _c309_chay_tran_chi_doc_apply_moi_ghi)
+
+    def _c309_writer_khong_co_dry_bi_tu_choi():
+        # Fail-CLOSED: writer KHÔNG khai `dry_flag` thì "chạy trần" phải bị TỪ CHỐI (rc=2), không được
+        # rơi xuống subprocess. Đây là lưới cho sub GHI thêm sau này — chính lớp lỗi RAS-01 đang chữa.
+        import io as _io309, contextlib as _c309m, types as _t309, json as _j309
+        # Patch trên globals của HÀM THẬT (xem bẫy hai-module-tl ghi ở ca kế tiếp), không qua _mp261.
+        _g309 = _resolve286(_TL_MODULE.cmd_rasoat).__globals__
+        _goi = []
+        _sav309 = {k: _g309.get(k) for k in ("apply_profile_offline", "subprocess", "_healed_script_path")}
+        _sav_map = dict(_reg64.RASOAT_SPEC_BY_NAME)
+        try:
+            _g309["apply_profile_offline"] = lambda *a, **k: None
+            _g309["subprocess"] = _t309.SimpleNamespace(call=lambda *a, **k: _goi.append(a) or 0)
+            _g309["_healed_script_path"] = lambda n: "/gia/" + n + ".py"
+            _reg64.RASOAT_SPEC_BY_NAME["ghi-khong-dry"] = {
+                "name": "ghi-khong-dry", "script": "khong_ton_tai.py", "writes": "registry",
+                "dry_flag": None, "args": []}
+            _ns = _t309.SimpleNamespace(sub="ghi-khong-dry", apply=False, config=None, profile=None, json=True)
+            _err = _io309.StringIO()
+            with _c309m.redirect_stderr(_err), _c309m.redirect_stdout(_io309.StringIO()):
+                _rc = cmd_rasoat(_ns)
+            _payload = _j309.loads(_err.getvalue().strip().splitlines()[-1])
+            _tu_choi = (_rc == 2 and _payload.get("ok") is False
+                        and _payload.get("error") == "RASOAT_WRITE_NEEDS_APPLY" and not _goi)
+            # PHẢN CHỨNG: cùng spec đó, có `--apply` ⇒ ĐƯỢC đi tiếp tới dispatch (vá không được biến
+            # thành "chặn sạch đường ghi").
+            _ns2 = _t309.SimpleNamespace(sub="ghi-khong-dry", apply=True, config=None, profile=None, json=True)
+            with _c309m.redirect_stderr(_io309.StringIO()), _c309m.redirect_stdout(_io309.StringIO()):
+                _rc2 = cmd_rasoat(_ns2)
+            return bool(_tu_choi and _rc2 == 0 and len(_goi) == 1)
+        finally:
+            _reg64.RASOAT_SPEC_BY_NAME.clear()
+            _reg64.RASOAT_SPEC_BY_NAME.update(_sav_map)
+            for _k, _v in _sav309.items():
+                _g309[_k] = _v
+    _t110("r310_writer_khong_co_dry_bi_tu_choi", _c309_writer_khong_co_dry_bi_tu_choi)
+
+    def _c309_ap_profile_offline_truoc_dispatch():
+        # `rasoat` nằm trong `_CREDS_LAZY_CMDS` ⇒ main() KHÔNG gọi load_creds. Nếu handler cũng không áp
+        # profile thì script con ghi theo scope NỀN. Đo THỨ TỰ: profile phải được áp TRƯỚC subprocess.call.
+        #
+        # BẪY ĐÃ TRẢ GIÁ khi viết ca này (cùng lớp với `_resolve286`, ghi lại vì nó tái diễn được):
+        # `python scripts/tl.py --selftest` chạy tl.py là `__main__`, rồi `tl_selftest` `import tl` nạp
+        # tl.py LẦN HAI thành module `tl` — lần nạp sau REBASE `__globals__` của hàm tl_core sang
+        # `tl.__dict__`, trong khi `_TL_MODULE` là `__main__`. Hệ quả: `_mp261` ăn với tên là STUB
+        # (`apply_profile_offline` → nó ủy quyền sang `tl_core.profile_env`, mà `_MODS261` có patch),
+        # nhưng KHÔNG ăn với tên chỉ sống trong namespace tl (`subprocess`, `_healed_script_path`) —
+        # lệnh rơi xuống chạy script con THẬT, `rc` là rc của script đó. Vá đúng chỗ: patch trên
+        # globals của CHÍNH hàm sẽ chạy (`_resolve286`), y như ca r287.
+        import types as _t309, io as _io309, contextlib as _c309m
+        _g309 = _resolve286(_TL_MODULE.cmd_rasoat).__globals__
+        _nhat_ky = []
+        _sav309 = {k: _g309.get(k) for k in ("apply_profile_offline", "subprocess", "_healed_script_path")}
+        try:
+            _g309["apply_profile_offline"] = lambda cfg=None, prof=None: _nhat_ky.append(("profile", cfg, prof))
+            _g309["subprocess"] = _t309.SimpleNamespace(
+                call=lambda argv, **k: _nhat_ky.append(("call", list(argv))) or 0)
+            _g309["_healed_script_path"] = lambda n: "/gia/" + n + ".py"
+            _ns = _t309.SimpleNamespace(sub="keywords", apply=False, config="/tmp/c.json",
+                                        profile="Luật BHXH", manifest="m.json", budget=None, batch=None,
+                                        all=False, progress=None, json=False)
+            with _c309m.redirect_stdout(_io309.StringIO()), _c309m.redirect_stderr(_io309.StringIO()):
+                _rc = cmd_rasoat(_ns)
+            _thu_tu = ([k for k, *_ in _nhat_ky] == ["profile", "call"]
+                       and _nhat_ky[0][1:] == ("/tmp/c.json", "Luật BHXH"))
+            _argv_con = _nhat_ky[1][1] if len(_nhat_ky) > 1 else []
+            return bool(_rc == 0 and _thu_tu and "--manifest" in _argv_con and "--dry" in _argv_con)
+        finally:
+            for _k, _v in _sav309.items():
+                _g309[_k] = _v
+    _t110("r310_ap_profile_offline_truoc_dispatch", _c309_ap_profile_offline_truoc_dispatch)
+
+    def _c309_audit_nhin_thay_moi_writer_long():
+        # Inventory/strict audit phải THẤY ba đường ghi lồng, và validate_registry phải soi được chúng.
+        _sum = _reg64.registry_summary()
+        _co_mat = all(f"rasoat {n}" in _sum["commands"] for n in
+                      ("keywords", "titles", "orchestrate", "worksheet", "phuluc"))
+        _ghi = all(_sum["commands"][f"rasoat {n}"]["write_scope"] == "registry"
+                   and _sum["commands"][f"rasoat {n}"]["read_only"] is False
+                   and _sum["commands"][f"rasoat {n}"]["supports_dry_run"] is True
+                   for n in ("keywords", "titles", "orchestrate"))
+        _p309 = build_parser()
+        _rv = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                       contracts=_IDEMPOTENCY_CONTRACTS)
+        _sach = bool(_rv.get("ok")) and _rv.get("issues") == []
+        # ĐỎ-TRƯỚC hoá: writer lồng THIẾU cổng phải bị bắt (nếu không thì lưới này chỉ là trang trí)
+        _sav_meta = dict(_reg64.NESTED_COMMAND_META)
+        try:
+            _reg64.NESTED_COMMAND_META["rasoat keywords"] = dict(_sav_meta["rasoat keywords"],
+                                                                 supports_dry_run=False)
+            _rv2 = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                            contracts=_IDEMPOTENCY_CONTRACTS)
+            _bat_duoc = "WRITE_CMD_NO_GATE:rasoat keywords" in _rv2.get("issues", [])
+            # ...và sub GHI thêm mới mà QUÊN meta cũng bị bắt (chiều ngược)
+            _reg64.NESTED_COMMAND_META.clear()
+            _reg64.NESTED_COMMAND_META.update(_sav_meta)
+            _reg64.NESTED_COMMAND_META.pop("rasoat titles")
+            _rv3 = _reg64.validate_registry(_p309, _TL_MODULE, load_card=_load_workflow_card,
+                                            contracts=_IDEMPOTENCY_CONTRACTS)
+            _bat_thieu_meta = "RASOAT_SUB_NOT_IN_REGISTRY:titles" in _rv3.get("issues", [])
+        finally:
+            _reg64.NESTED_COMMAND_META.clear()
+            _reg64.NESTED_COMMAND_META.update(_sav_meta)
+        return bool(_co_mat and _ghi and _sach and _bat_duoc and _bat_thieu_meta)
+    _t110("r310_audit_nhin_thay_moi_writer_long", _c309_audit_nhin_thay_moi_writer_long)
+
+    def _c309_bkl_dry_khong_dong_gi():
+        # Vế script con: `--dry` KHÔNG gọi exporttext/reg_bulk và KHÔNG ghi checkpoint. Một "dry" mà vẫn
+        # dịch sổ tiến độ chính là bệnh RAS-01, chỉ đổi chỗ.
+        import sys as _s, tempfile as _tf309, pathlib as _pl309, io as _io309, contextlib as _ctx309
+        import json as _j309b
+        _m, _calls, _sav = _bkl292()
+        _sav_argv = _s.argv
+        try:
+            with _tf309.TemporaryDirectory() as _d:
+                _man = _pl309.Path(_d) / "m.json"
+                _man.write_text(_j309b.dumps({"entries": [
+                    {"drive_id": "g1", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s1", "name": "A", "so_hieu": "1/2026"},
+                    {"drive_id": "g2", "mime": "application/vnd.google-apps.document",
+                     "nlm_source_id": "s2", "name": "B", "so_hieu": "2/2026"}]}), encoding="utf-8")
+                _prog = _pl309.Path(_d) / "p.json"
+                _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man),
+                           "--progress", str(_prog), "--dry"]
+                _b = _io309.StringIO()
+                try:
+                    # argparse thoát bằng SystemExit (BaseException) — `_t110` không bắt được ⇒ thiếu
+                    # `--dry` sẽ GIẾT cả suite thay vì làm đỏ ca này. Bắt tại chỗ.
+                    with _ctx309.redirect_stdout(_b), _ctx309.redirect_stderr(_io309.StringIO()):
+                        _rc = _m.main()
+                except SystemExit as _e:
+                    _rc = _e.code if isinstance(_e.code, int) else 2
+                _js = [ln for ln in _b.getvalue().splitlines() if ln.startswith("{")]
+                _out = _j309b.loads(_js[-1]) if _js else {}
+                _dry = (_rc == 0 and _out.get("dry") is True and _out.get("con_lai") == 2
+                        and not _calls and not _prog.exists())
+                # PHẢN CHỨNG: bỏ `--dry` ⇒ script ĐI đường ghi thật (có call, có checkpoint)
+                _s.argv = ["backfill_keywords_live.py", "--manifest", str(_man), "--progress", str(_prog)]
+                with _ctx309.redirect_stdout(_io309.StringIO()), _ctx309.redirect_stderr(_io309.StringIO()):
+                    _m.main()
+                _that = bool(_calls) and _prog.exists()
+                return bool(_dry and _that)
+        finally:
+            _s.argv = _sav_argv
+            for _n, _mm in _sav.items():
+                (_s.modules.pop(_n, None) if _mm is None else _s.modules.__setitem__(_n, _mm))
+    _t110("r310_bkl_dry_khong_dong_gi", _c309_bkl_dry_khong_dong_gi)
+
+
+    # ═══ r320 (v1.36.52) — T2-a/T2-c/T2-d: 4 mục CUỐI của sổ audit 31-07 đã tự dựng repro ═══
+    # PRO-03 · PRO-09 · PRO-05 · ING-04 · ING-06. Cả 5 đều thuộc mẫu lỗi A (kết luận bằng HÌNH DẠNG /
+    # coi VẮNG MẶT là hợp lệ) hoặc mẫu "nguồn sự thật nhân đôi" — hai mẫu chi phối của sổ audit.
+
+    def _c314_pro03_adopt_va_delete_deu_qua_guard():
+        # PRO-03 + PRO-09. `_marker_mutation_guard` có từ r184, ADR-0012 §4 khai là guard CHUNG, nhưng
+        # ĐO ĐƯỢC: 0 call site sản xuất — chỉ một ca test gọi thẳng. Guard đúng mà chưa từng chạy.
+        import inspect as _i314
+        _gd = _TL_MODULE._marker_mutation_guard
+        _body = _TL_MODULE._marker_body("HoSoX", {"rootFolderId": "R", "metaFolderId": "M",
+                                                  "registryDocId": "REG", "manifestId": "MAN",
+                                                  "notebookId": "NB"})
+        _hong = dict(_body); _hong["registryDocId"] = "BI_DOI"      # sửa tay ⇒ fingerprint lệch
+        _mr_hong = {"found": True, "marker": _hong, "marker_file_ids": ["MK1"], "fileId": "MK1", "error": ""}
+        _mr_lanh = {"found": True, "marker": _body, "marker_file_ids": ["MK1"], "fileId": "MK1", "error": ""}
+        _chan = (_gd(_mr_hong, "HoSoX") or {}).get("error") == "MARKER_INVALID"
+        _cho_qua = _gd(_mr_lanh, "HoSoX") is None                  # phản chứng: marker lành KHÔNG bị chặn
+        # ...và HAI đường ghi PHẢI gọi guard (không tự dựng lại điều kiện rời)
+        # `cmd_profile_adopt` chỉ là wrapper `_ProfileEnvGuard` 2 dòng — thân thật ở `_impl`. Soi nhầm
+        # wrapper thì test XANH GIẢ vì chuỗi nào cũng vắng mặt.
+        _src_adopt = _i314.getsource(_resolve286(_TL_MODULE._cmd_profile_adopt_impl))
+        _src_del = _i314.getsource(_resolve286(_TL_MODULE.cmd_profile_delete))
+        _noi_tuyen = ("_marker_mutation_guard(" in _src_adopt) and ("_marker_mutation_guard(" in _src_del)
+        # chuỗi ba-điều-kiện cũ của adopt phải BIẾN MẤT (nếu còn là còn đường vòng qua guard)
+        _het_duong_vong = "PROFILE_MARKER_NAME_CONFLICT" not in _src_adopt
+        return bool(_chan and _cho_qua and _noi_tuyen and _het_duong_vong)
+    _t110("r320_pro03_adopt_va_delete_deu_qua_guard", _c314_pro03_adopt_va_delete_deu_qua_guard)
+
+    def _c314_pro09_delete_chan_truoc_mutation_dau_tien():
+        # PRO-09: guard phải đứng TRƯỚC mutation ĐẦU TIÊN. Đặt sau thì nguồn NLM đã xoá (BẤT KHẢ NGHỊCH)
+        # rồi, chặn cũng vô nghĩa. Khoá bằng THỨ TỰ trong mã: vị trí guard < vị trí `source_delete`.
+        import inspect as _i314
+        _src = _i314.getsource(_resolve286(_TL_MODULE.cmd_profile_delete))
+        _i_guard = _src.find("_marker_mutation_guard(")
+        _i_nlm = _src.find("nc.source_delete(")          # vòng xoá nguồn NLM (BẤT KHẢ NGHỊCH)
+        _i_trash = _src.find('g.get("trash"')            # vòng trash Drive — KHÔNG neo vào chuỗi
+        _i_confirm = _src.find("CONFIRM_YES_REQUIRED")   # `trash_assets`, nó có mặt sớm trong dict `plan`
+        return bool(_i_guard > 0 and _i_nlm > 0 and _i_trash > 0 and _i_confirm > 0
+                    and _i_guard < _i_nlm                 # trước khi xoá nguồn NLM
+                    and _i_guard < _i_trash               # trước khi trash Drive
+                    and _i_confirm < _i_guard             # nhưng SAU cổng confirm (DRY không tốn call)
+                    and "PROFILE_DELETE_MARKER_GUARD" in _src)
+    _t110("r320_pro09_delete_chan_truoc_mutation_dau_tien", _c314_pro09_delete_chan_truoc_mutation_dau_tien)
+
+    def _c314_pro05_manifest_sai_loai_bi_bat():
+        # PRO-05: kiểm MIME từng bị khoá sau `role == "registry"` ⇒ nhánh manifest KHÔNG có phép kiểm
+        # loại nào; Google Doc đặt ở manifestId, parent đúng ⇒ doctor SẠCH TRƠN (đo: 0 finding).
+        _f = _TL_MODULE._doctor_check_profile
+        _P = {"rootFolderId": "R", "metaFolderId": "M", "registryDocId": "REG",
+              "manifestId": "MAN", "notebookId": "NB"}
+        _SHEET = _TL_MODULE.REGISTRY_SHEET_MIME
+        _GDOC = "application/vnd.google-apps.document"
+
+        def _chay(man_mime, man_extra=None):
+            return [x["check"] for x in _f("HoSoX", _P, {
+                "REG": {"mimeType": _SHEET, "parents": ["M"]},
+                "MAN": dict({"mimeType": man_mime, "parents": ["M"]}, **(man_extra or {}))})]
+        _bat = _chay(_GDOC) == ["MANIFEST_NOT_JSON_MIME"]
+        # PHẢN CHỨNG 1: `application/json` và `text/plain` đều KHÔNG được đỏ oan — Drive trả text/plain
+        # cho JSON upload là chuyện thường, và bản text đó vẫn parse được.
+        _khong_do_oan = _chay("application/json") == [] and _chay("text/plain") == []
+        # PHẢN CHỨNG 2: Sheet ở manifestId cũng là native ⇒ vẫn bắt (không chỉ bắt riêng Doc)
+        _bat_ca_sheet = _chay(_SHEET) == ["MANIFEST_NOT_JSON_MIME"]
+        # PHẢN CHỨNG 3: cổng KHÁC của manifest không bị vá này nuốt mất
+        _con_song = set(_chay(_GDOC, {"parents": ["NGOAI"], "trashed": True})) == {
+            "MANIFEST_NOT_JSON_MIME", "MANIFEST_TRASHED", "MISPLACED_ASSET"}
+        # PHẢN CHỨNG 4: registry vẫn theo luật RIÊNG của nó (phải là Sheet)
+        _reg_giu = [x["check"] for x in _f("HoSoX", _P, {
+            "REG": {"mimeType": _GDOC, "parents": ["M"]},
+            "MAN": {"mimeType": "application/json", "parents": ["M"]}})] == ["REGISTRY_NOT_SHEET_MIME"]
+        return bool(_bat and _khong_do_oan and _bat_ca_sheet and _con_song and _reg_giu)
+    _t110("r320_pro05_manifest_sai_loai_bi_bat", _c314_pro05_manifest_sai_loai_bi_bat)
+
+    def _c314_ing04_journal_thieu_drive_id_khong_cap_quyen():
+        # ING-04: `if _jd and …` BỎ QUA so sánh khi journal ghi `drive_id=""` — đúng ca sổ audit nêu.
+        # Journal rỗng drive_id là "CHƯA chứng minh được nguồn", không phải "đã chứng minh là khớp".
+        _G = _resolve286(_TL_MODULE._resume_identity_gate)
+        _head = {"t": "run_start", "name": "Luat X", "drive_id": "",
+                 "identity_hash": "IH", "plan_hash": "PH"}
+
+        def _e(**kw):
+            return (_G(journal="run-cu", name="Luat X", journal_head=_head, **kw) or {}).get("error")
+        _chan = _e(apply=True, drive_id="", canon_drive_id="GD_MOI") == "RESUME_JOURNAL_NO_DRIVE_ID"
+        # PHẢN CHỨNG 1 (bắt được lỗi siết-quá-tay của chính bản vá ở lượt đầu): khai `--drive-id` KHỚP
+        # canonical = ĐÃ chứng minh nguồn bằng đường khác ⇒ phải CHO QUA.
+        _khai_dung = _e(apply=True, drive_id="GD_MOI", canon_drive_id="GD_MOI") is None
+        # PHẢN CHỨNG 2: khai lệch vẫn rơi vào cổng CŨ, không bị vá mới nuốt mất
+        _khai_lech = _e(apply=True, drive_id="GD_KHAC", canon_drive_id="GD_MOI") == "RESUME_IDENTITY_MISMATCH"
+        # PHẢN CHỨNG 3: registry CHƯA có dòng canonical ⇒ không có gì để đối chiếu ⇒ không chặn oan
+        _chua_co = _e(apply=True, drive_id="", canon_drive_id="") is None
+        # PHẢN CHỨNG 4: journal CÓ drive_id nhưng lệch ⇒ vẫn là MISMATCH (đường cũ nguyên vẹn)
+        _head2 = dict(_head, drive_id="GD_CU")
+        _cu_nguyen = (_G(apply=True, journal="run-cu", drive_id="", name="Luat X",
+                         canon_drive_id="GD_MOI", journal_head=_head2) or {}).get(
+                             "error") == "RESUME_IDENTITY_MISMATCH"
+        return bool(_chan and _khai_dung and _khai_lech and _chua_co and _cu_nguyen)
+    _t110("r320_ing04_journal_thieu_drive_id_khong_cap_quyen",
+          _c314_ing04_journal_thieu_drive_id_khong_cap_quyen)
+
+    def _c314_ing06_planner_va_child_cung_mot_nguon():
+        # ING-06: tập đuôi từng được khai HAI LẦN và đã trôi lệch — planner nhận `.txt`/`.md` mà child
+        # `ingest-local` CHẮC CHẮN trả UNSUPPORTED_EXTENSION. Nay MỘT nguồn sự thật.
+        import tempfile as _t314, os as _o314
+        import tl_core.zip_ingest as _z314
+        from tl_core.ingest_contract import INGEST_LOCAL_EXTS as _EXTS, validate_source_file as _vsf
+        _mot_nguon = set(_z314._ALLOWED_INGEST_EXTS) == set(_EXTS)
+        _het_khe_ho = not (set(_z314._ALLOWED_INGEST_EXTS) - set(_EXTS))
+        # HÀNH VI: `.txt`/`.md` nay bị planner skip ĐÚNG lý do child sẽ nêu (không còn hứa suông)
+        with _t314.TemporaryDirectory() as _d:
+            _hanh_vi = True
+            for _ext in (".txt", ".md"):
+                _p = _o314.path.join(_d, "x" + _ext)
+                open(_p, "wb").write("Điều 1.\n".encode("utf-8") * 5)
+                _hanh_vi = _hanh_vi and (_ext not in _z314._ALLOWED_INGEST_EXTS) and (
+                    _vsf(_p, allowed_exts=_EXTS).get("error") == "UNSUPPORTED_EXTENSION")
+            # PHẢN CHỨNG: đuôi thật sự nạp được vẫn qua CẢ HAI phía (vá không thu quá tay)
+            _phan_chung = True
+            for _ext in (".pdf", ".rtf"):
+                _p = _o314.path.join(_d, "y" + _ext)
+                open(_p, "wb").write(b"%PDF-1.7\n" + b"x" * 200 if _ext == ".pdf" else b"{\\rtf1 x}")
+                _phan_chung = _phan_chung and (_ext in _z314._ALLOWED_INGEST_EXTS) and (
+                    _vsf(_p, allowed_exts=_EXTS).get("ok") is True)
+        return bool(_mot_nguon and _het_khe_ho and _hanh_vi and _phan_chung)
+    _t110("r320_ing06_planner_va_child_cung_mot_nguon", _c314_ing06_planner_va_child_cung_mot_nguon)
+    # ---- r314 + r315: hai cổng báo SAI thủ phạm (đo 02-08 trên 3 bản Công báo) ------------
+    def _mod314(fname, alias):
+        """Nạp THẲNG scripts/<fname> — KHÔNG qua tl/bind (bẫy false-green r212)."""
+        import importlib.util as _ilu313
+        _sp = _ilu313.spec_from_file_location(alias, _ROOT209 / "scripts" / fname)
+        _m = _ilu313.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _c314_sohieu_corroborated_nhan_dang_gach_cheo():
+        """CHIỀU THUẬN — nới không-năm của VBHN phải chạy với CẢ dạng khoá LẪN dạng in.
+
+        r221 vá chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` luôn là KHOÁ.
+        Nhưng `ingest_to_cache --help` bảo người dùng gõ dạng IN ('vd 18/VBHN-VPQH') và đường
+        nạp chuyển thẳng chuỗi đó xuống ⇒ trước r314, dạng gạch chéo trượt `fullmatch`, mất
+        phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08, CÙNG tệp: gạch chéo 3/3 cờ oan · gạch nối 0/3.
+        """
+        f = _mod314("verify_deep.py", "verify_deep_r314").sohieu_corroborated
+        _doc19 = "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n"
+        # (1) dạng IN (gạch chéo) — ca ĐỎ trước r314
+        ok1 = f("19/2026/VBHN-VPQH", _doc19)
+        # (2) ★PARITY là bất biến thật: cùng tài liệu thì hai dạng PHẢI cho CÙNG câu trả lời.
+        #     Ca này bắt được bản vá NỬA VỜI mà ca (1) đơn lẻ có thể bỏ lọt.
+        ok2 = f("19/2026/VBHN-VPQH", _doc19) == f("19-2026-VBHN-VPQH", _doc19)
+        # (3) số hiệu CHỈ có ở khối XÁC THỰC cuối bài (bố cục VBHN thật), dạng gạch chéo
+        _doc54 = "x" * 9000 + "\nVĂN PHÒNG QUỐC HỘI\nSố: 54/VBHN-VPQH\n" + "y" * 500
+        ok3 = f("54/2025/VBHN-VPQH", _doc54) and f("54/2025/VBHN-VPQH", _doc54) == f("54-2025-VBHN-VPQH", _doc54)
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r314_sohieu_corroborated_nhan_dang_gach_cheo", _c314_sohieu_corroborated_nhan_dang_gach_cheo)
+
+    def _c314_khong_noi_regex_dung_chung():
+        """CHIỀU NGƯỢC — nới ngăn cách KHÔNG được biến thành nới cổng.
+
+        ★Chốt đắt nhất: `_VBHN_WITHYEAR_RE` còn dùng ở classify/hygiene/resolve/lookup_ops để
+         canh BẤT BIẾN KHOÁ registry (CHỈ gạch nối, NN-YYYY-VBHN-XXX). Nếu ai đó 'vá' bằng cách
+         nới regex dùng chung thay vì nắn bản sao cục bộ, ca này ĐỎ — và đó đúng là điều phải xảy ra.
+        """
+        _m = _mod314("verify_deep.py", "verify_deep_r314b")
+        f = _m.sohieu_corroborated
+        ok1 = _m._VBHN_WITHYEAR_RE.fullmatch("19/2026/VBHN-VPQH") is None      # regex CHUNG còn nguyên
+        ok2 = _m._VBHN_WITHYEAR_RE.fullmatch("19-2026-VBHN-VPQH") is not None  # …và vẫn nhận khoá thật
+        # số hiệu SAI vẫn phải bị bắt, bất kể dạng ngăn cách
+        ok3 = not f("20/2026/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        ok4 = not f("99/2099/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        # rác nén ra chuỗi rỗng: sau khi thay '/'→'-' vẫn phải RỚT, không được khớp mọi văn bản
+        ok5 = not f("///", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        # ★GIỚI HẠN CÓ CHỦ Ý, ghi ra để không ai tưởng là lỗ: bản in KHÔNG mang năm nên NĂM sai
+        #  vẫn khớp ('19/2027' ≡ '19/2026' trên cùng bản in). Đó là phép nới của r221, KHÔNG
+        #  phải hệ quả của r314 — chốt lại đây để sau này ai siết năm thì siết CÓ Ý THỨC.
+        ok6 = f("19/2027/VBHN-VPQH", "VĂN PHÒNG QUỐC HỘI\nSố: 19/VBHN-VPQH\n")
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5 and ok6)
+
+    _t110("r314_khong_noi_regex_dung_chung", _c314_khong_noi_regex_dung_chung)
+
+    def _c315_thieu_thu_vien_khong_bi_goi_la_ban_scan():
+        """CHIỀU THUẬN — thiếu pdfplumber+pypdf phải ra lỗi CỦA MÁY, không phải phán về TÀI LIỆU.
+
+        Trước r315, `pdf_text_layer_chars` thiếu cả hai thư viện cũng `return 0`, mà 0 = «PDF
+        scan» ⇒ máy thiếu thư viện bị báo thành «bản SCAN» + khuyên đi tìm nguồn khác. Mà
+        `requirements.txt` khai stdlib-only ⇒ CÀI SẠCH LÀ CHẶN MỌI PDF. Đo 02-08 trên
+        `54-2025-g7.pdf` (pdftotext bóc 167.433 ký tự): chưa cài pypdf ⇒ reason=scanned_pdf ·
+        cài rồi ⇒ ok:true, 72 Điều. CÙNG một tệp.
+        """
+        _m = _mod314("ingest_to_cache.py", "ingest_to_cache_r315")
+        _sav = {k: _hsys.modules.get(k, "___absent___") for k in ("pdfplumber", "pypdf")}
+        try:
+            # None trong sys.modules ⇒ `import X` ném ImportError (chặn thư viện, hermetic)
+            _hsys.modules["pdfplumber"] = None
+            _hsys.modules["pypdf"] = None
+            # (1) KHÔNG đo được ⇒ None, KHÁC HẲN 0. Đường dò không chạm tệp nên path giả là đủ.
+            ok1 = _m.pdf_text_layer_chars("/khong/co/that.pdf") is None
+            # (2) vẫn fail-CLOSED (không nạp mù) nhưng ném ĐÚNG lớp lỗi
+            try:
+                _m.assert_pdf_not_scanned("/khong/co/that.pdf")
+                ok2 = ok3 = False
+            except _m.PdfProbeUnavailableError as _e:
+                ok2 = True
+                # (3) thông điệp phải nói RÕ hai điều: lỗi thuộc về MÁY, và cách sửa cụ thể
+                _s = str(_e)
+                ok3 = ("KHUYẾT CỦA MÁY" in _s) and ("pip install pypdf" in _s)
+            except _m.ScannedPDFError:
+                ok2 = ok3 = False     # ← đúng cái lỗi r315 đi chữa
+        finally:
+            for _k, _v in _sav.items():
+                (_hsys.modules.pop(_k, None) if _v == "___absent___" else _hsys.modules.__setitem__(_k, _v))
+        # (4) hai lớp lỗi PHẢI tách họ — gộp là handler `__main__` lại nhập hai lối xử lý làm một
+        ok4 = not issubclass(_m.PdfProbeUnavailableError, _m.ScannedPDFError)
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r315_thieu_thu_vien_khong_bi_goi_la_ban_scan", _c315_thieu_thu_vien_khong_bi_goi_la_ban_scan)
+
+    def _c315_do_duoc_0_van_la_ban_scan():
+        """CHIỀU NGƯỢC — cái đắt nhất: đừng nới tới mức PDF scan THẬT lọt qua.
+
+        Quy tắc cứng của người dùng: PDF scan TUYỆT ĐỐI không nạp. r315 chỉ tách «không đo được»
+        ra khỏi «đo được = 0»; đo được 0 thì vẫn phải là ScannedPDFError như cũ.
+        """
+        _m = _mod314("ingest_to_cache.py", "ingest_to_cache_r315b")
+        _sav_fn = _m.pdf_text_layer_chars
+        try:
+            # (1) đo ĐƯỢC và = 0 ⇒ vẫn là bản SCAN (KHÔNG được đổi sang lỗi thiếu thư viện)
+            _m.pdf_text_layer_chars = lambda *_a, **_k: 0
+            try:
+                _m.assert_pdf_not_scanned("bat_ky.pdf"); ok1 = False
+            except _m.PdfProbeUnavailableError:
+                ok1 = False
+            except _m.ScannedPDFError:
+                ok1 = True
+            # (2) đo được và ĐỦ ngưỡng ⇒ không ném gì
+            _m.pdf_text_layer_chars = lambda *_a, **_k: 2536   # trang 1 của 54-2025-g7.pdf đo thật
+            try:
+                _m.assert_pdf_not_scanned("bat_ky.pdf"); ok2 = True
+            except Exception:  # noqa: BLE001
+                ok2 = False
+        finally:
+            _m.pdf_text_layer_chars = _sav_fn
+        # (3) ★KHÔNG CỘNG DỒN hai đường dò: bản cũ nuôi CHUNG biến `total` nên pdfplumber hỏng
+        #     giữa chừng rồi pypdf chạy tiếp là cộng CHỒNG. Đường dò nào trả số TRƯỚC thì thắng.
+        _sav_a, _sav_b = _m._pdf_chars_pdfplumber, _m._pdf_chars_pypdf
+        try:
+            _m._pdf_chars_pdfplumber = lambda *_a, **_k: 5
+            _m._pdf_chars_pypdf = lambda *_a, **_k: 7
+            ok3 = _m.pdf_text_layer_chars("bat_ky.pdf") == 5          # 5, KHÔNG phải 12
+            # đường 1 câm ⇒ rơi xuống đường 2 (chứ không phải bỏ luôn)
+            _m._pdf_chars_pdfplumber = lambda *_a, **_k: None
+            ok4 = _m.pdf_text_layer_chars("bat_ky.pdf") == 7
+        finally:
+            _m._pdf_chars_pdfplumber, _m._pdf_chars_pypdf = _sav_a, _sav_b
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r315_do_duoc_0_van_la_ban_scan", _c315_do_duoc_0_van_la_ban_scan)
+
+    # ---- r316 + r317: hai lỗ của đường đọc .docx (đo 02-08 trên 2 bản Công báo) -----------
+    def _r316_docx(alias):
+        import importlib.util as _ilu316
+        _sp = _ilu316.spec_from_file_location(alias, _ROOT209 / "scripts" / "docx_markup.py")
+        _m = _ilu316.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m
+
+    def _r316_make_docx(path, doc_xml, *, backslash=False, thieu_member=False):
+        """Dựng .docx tối thiểu — ba dạng: bình thường · tên entry '\\' · THIẾU HẲN member.
+
+        `backslash=True` tái hiện container HỎNG của CDN Công báo (Word vẫn mở được, nhưng
+        `word/document.xml` theo tên chuẩn thì KHÔNG có).
+
+        ★BẪY ĐA NỀN đã đỏ THẬT trên gate `windows-latest` (chính ca này, 1605/1606): KHÔNG truyền
+         tên chứa '\\' vào `ZipInfo(...)` — `ZipInfo.__init__` có `if os.sep != "/" and os.sep in
+         filename: filename = filename.replace(os.sep, "/")`, mà trên Windows `os.sep == "\\"` ⇒
+         fixture "hỏng" bị NẮN THÀNH HỢP LỆ, `scan_file` đọc được và ca test đỏ OAN. Gán
+         `.filename` SAU khi dựng thì không đi qua phép nắn đó. Đúng bài học CLAUDE.md: thứ gì
+         đa nền phải CHẠY THẬT trên nền đó rồi ĐỐI CHIẾU PARITY — Linux xanh không nói gì về Windows.
+        """
+        import zipfile as _zf316
+        with _zf316.ZipFile(path, "w", _zf316.ZIP_DEFLATED) as _z:
+            if thieu_member:
+                _z.writestr("word/styles.xml", "<x/>")   # có tệp, nhưng KHÔNG có document.xml
+            elif backslash:
+                _zi = _zf316.ZipInfo("word/placeholder.xml")
+                _zi.filename = "word\\document.xml"      # gán SAU ⇒ không bị nắn os.sep
+                _z.writestr(_zi, doc_xml)
+            else:
+                _z.writestr("word/document.xml", doc_xml)
+        return str(path)
+
+    _R316_MARKUP = ('<w:document><w:body><w:p><w:r><w:rPr><w:strike/></w:rPr>'
+                    '<w:t>chữ đã gạch</w:t></w:r></w:p></w:body></w:document>')
+    _R316_SACH = ('<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi điều chỉnh</w:t>'
+                  '</w:r></w:p></w:body></w:document>')
+
+    def _c316_khong_doc_duoc_khong_phai_sach_markup():
+        """CHIỀU THUẬN — container không đọc được phải KHAI BÁO, không được im như tài liệu sạch.
+
+        Ca thật 02-08: .docx Công báo qua `g7.cdnchinhphu.vn` đặt tên 33/40 entry bằng '\\' ⇒
+        `scan_file` nuốt exception, trả mọi-thể-=-0, và tôi đã kết luận SAI «SẠCH markup».
+        Sự thật (sau khi nắn tên entry): `strike=2`. Word/LibreOffice mở tệp đó bình thường ⇒
+        chỉ cần một reader chịu tên '\\' là markup đi thẳng vào kho mà không ai khai."""
+        import tempfile as _tf316
+        _m = _r316_docx("docx_markup_r316")
+        with _tf316.TemporaryDirectory() as _td:
+            _p = _Path315 = __import__("pathlib").Path(_td)
+            import zipfile as _zfck
+            _hong = _r316_make_docx(_p / "hong.docx", _R316_MARKUP, backslash=True)
+            _tot = _r316_make_docx(_p / "tot.docx", _R316_MARKUP)
+            _thieu = _r316_make_docx(_p / "thieu.docx", _R316_MARKUP, thieu_member=True)
+            # ★TỰ KIỂM FIXTURE trước khi kiểm hành vi. Trên Windows, `_RealGetContents` dựng lại
+            #  `ZipInfo(tên)` LÚC ĐỌC nên '\\'→'/' bị nắn ở CẢ chiều đọc ⇒ container kiểu CDN
+            #  THẬT SỰ đọc được ở đó, không có gì "hỏng" để kiểm (khớp việc Word mở tệp ấy bình
+            #  thường). Vậy: dạng backslash CHỈ được đòi khi nền này thật sự làm nó hỏng; còn khế
+            #  ước luôn được kiểm bằng dạng THIẾU MEMBER — dựng được trên MỌI nền.
+            with _zfck.ZipFile(_hong) as _zz:
+                _hong_that = "word/document.xml" not in _zz.namelist()
+            _st_hong, _st_tot = _m.scan_file(_hong), _m.scan_file(_tot)
+            # (1) KHÔNG đọc được ⇒ cờ UNREADABLE, KHÔNG phải dict đếm toàn 0
+            ok1 = _m.scan_file(_thieu).get(_m.UNREADABLE) is True          # nền nào cũng chạy
+            if _hong_that:                                                  # Linux/macOS
+                ok1 = ok1 and _st_hong.get(_m.UNREADABLE) is True and "strike" not in _st_hong
+            # (2) ★ĐỐI CHỨNG QUYẾT ĐỊNH: CÙNG nội dung, chỉ khác cách đặt tên entry — bản đọc được
+            #     phải thấy strike. Đây là ca chứng minh "hỏng" KHÁC "sạch", không phải trùng hợp.
+            ok2 = _st_tot.get("strike") == 1 and not _st_tot.get(_m.UNREADABLE)
+            # (3) cảnh báo phải KÊU TO và nói đúng bản chất (chưa biết ≠ sạch)
+            # neo vào dạng hỏng-THẬT trên MỌI nền (`_thieu`), KHÔNG vào `_st_hong` — trên
+            # Windows bản backslash ĐỌC ĐƯỢC nên warn_line ở đó là câu MARKUP, không phải
+            # câu "không đọc được" (đã đỏ thật ở lượt mô phỏng os.sep='\\').
+            _w = _m.warn_line(_m.scan_file(_thieu), "thieu.docx")
+            ok3 = "KHÔNG ĐỌC ĐƯỢC" in _w and "KHÔNG phải 'sạch'" in _w
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r316_khong_doc_duoc_khong_phai_sach_markup", _c316_khong_doc_duoc_khong_phai_sach_markup)
+
+    def _c316_tai_lieu_sach_van_im_lang():
+        """CHIỀU NGƯỢC — đừng biến mọi thứ thành tiếng ồn: tài liệu SẠCH vẫn phải IM.
+
+        Nếu `warn_line` kêu cả với tài liệu sạch thì cảnh báo mất giá trị, và ca r182
+        «văn bản sạch giữ NGUYÊN bytes cache» cũng vỡ."""
+        import tempfile as _tf316b
+        _m = _r316_docx("docx_markup_r316b")
+        with _tf316b.TemporaryDirectory() as _td:
+            _p = __import__("pathlib").Path(_td)
+            _st = _m.scan_file(_r316_make_docx(_p / "sach.docx", _R316_SACH))
+            ok1 = not _st.get(_m.UNREADABLE) and not any(_st.values())
+            ok2 = _m.warn_line(_st, "sach.docx") == ""          # IM LẶNG
+            # tệp không tồn tại cũng là "không đọc được", không phải "sạch"
+            ok3 = _m.scan_file(str(_p / "khong-co.docx")).get(_m.UNREADABLE) is True
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r316_tai_lieu_sach_van_im_lang", _c316_tai_lieu_sach_van_im_lang)
+
+    def _c317_tri_do_drawing_khong_lot_vao_than_dieu():
+        """CHIỀU THUẬN — toạ độ EMU của DrawingML KHÔNG được thành chữ của văn bản.
+
+        Đo 02-08: 19-2026 có `2927786221920` ngay trong khối đầu và 2 số ở Điều 141; 89-2026 có
+        Điều 72 dính chuỗi **59 chữ số**. Nhánh python-docx KHÔNG dính ⇒ cùng một .docx cho hai
+        kết quả khác nhau tuỳ máy CÓ hay KHÔNG có python-docx."""
+        _m = _r316_docx("docx_markup_r317")
+        _xml = ('<w:p><w:r><w:drawing><wp:anchor>'
+                '<wp:posOffset>2927786221920</wp:posOffset>'
+                '<wp14:pctWidth>0</wp14:pctWidth><wp14:pctHeight>12345678901</wp14:pctHeight>'
+                '</wp:anchor></w:drawing></w:r>'
+                '<w:r><w:t>Điều 141. Hiệu lực thi hành</w:t></w:r></w:p>')
+        _out = _m.drop_drawing_measures(_xml)
+        # (1) ★CẢ HAI namespace: `wp:` TRẦN và `wp14:`. Bản vá đầu viết `wp14?` — regex đó parse ra
+        #     "wp1"+"4" tuỳ chọn nên KHÔNG khớp `wp:` trần: `wp14:pctWidth` bị bỏ còn
+        #     `wp:posOffset` vẫn lọt, ra chuỗi số CỤT trông như đã sửa xong. Ca này bắt đúng đột biến đó.
+        ok1 = "2927786221920" not in _out and "12345678901" not in _out
+        # (2) chữ THẬT của văn bản còn nguyên
+        ok2 = "Điều 141. Hiệu lực thi hành" in _out
+        # (3) NỐI VÀO ĐƯỜNG CHẠY THẬT (bài học r219: guard không nối vào gate chỉ là tài liệu)
+        _plain = _m.plain_from_document_xml(_xml)
+        ok3 = ("2927786221920" not in _plain and "12345678901" not in _plain
+               and "Điều 141. Hiệu lực thi hành" in _plain)
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r317_tri_do_drawing_khong_lot_vao_than_dieu", _c317_tri_do_drawing_khong_lot_vao_than_dieu)
+
+    def _c317_khong_an_lem_chu_that():
+        """CHIỀU NGƯỢC — ba thứ TUYỆT ĐỐI không được mất khi dọn trị đo."""
+        _m = _r316_docx("docx_markup_r317b")
+        # (1) ★BẤT BIẾN BYTES: tài liệu KHÔNG có drawing ⇒ chuỗi ra = chuỗi VÀO. Vỡ cái này là
+        #     mọi record cache đã nạp đổi text_hash — đúng thứ r182 đã cẩn thận giữ.
+        _sach = "<w:document><w:body><w:p><w:r><w:t>Điều 1. Phạm vi</w:t></w:r></w:p></w:body></w:document>"
+        ok1 = _m.drop_drawing_measures(_sach) == _sach
+        # (2) ★TEXT-BOX trong drawing là chữ THẬT (letterhead VBQPPL hay nằm đó) — xoá cả khối
+        #     `w:drawing` sẽ ăn mất nó, nên phép dọn phải nhắm ĐÚNG hai namespace trị-đo.
+        _tb = ('<w:drawing><wp:anchor><wp:posOffset>999888777666</wp:posOffset>'
+               '<w:txbxContent><w:p><w:r><w:t>VĂN PHÒNG QUỐC HỘI</w:t></w:r></w:p>'
+               '</w:txbxContent></wp:anchor></w:drawing>')
+        _o2 = _m.drop_drawing_measures(_tb)
+        ok2 = "999888777666" not in _o2 and "VĂN PHÒNG QUỐC HỘI" in _o2
+        # (3) ★SỐ THẬT trong w:t phải SỐNG: văn bản luật có số dài (số hiệu tài khoản, mã số thuế…).
+        #     Nếu ai "vá" bằng cách quét số ≥9 chữ số trên TEXT thì ca này ĐỎ — và phải ĐỎ.
+        _num = "<w:p><w:r><w:t>Tài khoản số 1234567890123 tại Kho bạc.</w:t></w:r></w:p>"
+        ok3 = "1234567890123" in _m.plain_from_document_xml(_m.drop_drawing_measures(_num))
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r317_khong_an_lem_chu_that", _c317_khong_an_lem_chu_that)
+
+    # ---- r318: hai bộ lọc rác Công báo sai trên CHÍNH bản Công báo (đo 02-08) ---------------
+    _R318_KY4 = ("Người ký: CỔNG THÔNG TIN ĐIỆN TỬ CHÍNH PHỦ\nEmail: thongtinchinhphu@chinhphu.vn\n"
+                 "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\nThời gian ký: 22.08.2025 15:10:29 +07:00\n")
+    _R318_KY3 = ("Ký bởi: CÔNG BÁO NƯỚC CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+                 "Cơ quan: VĂN PHÒNG CHÍNH PHỦ\nNgày ký: 2026-03-05 13:25:42 +07:00\n")
+    _R318_THAN = ("\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\n\n"
+                  "LUẬT\nĐiều 1. Phạm vi điều chỉnh\nNội dung.\n")
+
+    def _c318_chu_ky_so_bat_ca_hai_bien_the():
+        """CHIỀU THUẬN — khối chữ ký số Công báo có ÍT NHẤT HAI biến thể; bản cũ chỉ bắt bộ 4.
+
+        Đo 02-08: 54-2025 (CB 1083+1084) dùng «Người ký/Email/Cơ quan/Thời gian ký» → bắt 4/4;
+        19-2026 (CB 133) dùng «Ký bởi/Cơ quan/Ngày ký» → `chu_ky_so=0`, CẢ BA dòng chui vào
+        KHỐI ĐẦU — mà khối đầu là nguồn DUY NHẤT chứng minh danh tính (r215)."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318")
+        r4 = _m.loc_rac_congbao(_R318_KY4 + _R318_THAN)
+        r3 = _m.loc_rac_congbao(_R318_KY3 + _R318_THAN)
+        ok1 = r4["counts"]["chu_ky_so"] == 4 and "Người ký:" not in r4["text"]
+        ok2 = r3["counts"]["chu_ky_so"] == 3 and "Ký bởi:" not in r3["text"]   # ← ĐỎ trước r318
+        # ★khối đầu phải bắt đầu ĐÚNG ở quốc hiệu sau khi lọc — đó mới là điều người dùng thấy
+        ok3 = all(x["text"].lstrip().startswith("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM") for x in (r3, r4))
+        # thân văn bản KHÔNG được suy suyển
+        ok4 = all("Điều 1. Phạm vi điều chỉnh" in x["text"] for x in (r3, r4))
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r318_chu_ky_so_bat_ca_hai_bien_the", _c318_chu_ky_so_bat_ca_hai_bien_the)
+
+    def _c318_khong_nuot_than_van_ban():
+        """CHIỀU NGƯỢC — nới nhận dạng khối chữ ký KHÔNG được ăn vào chữ THẬT.
+
+        Dãy nhãn phải có `nguoi_ky` mới tính là khối chữ ký; thiếu nó thì hai-ba dòng thân bài
+        vô tình mở đầu bằng «Cơ quan:»/«Ngày ký:» đủ để nuốt mất quy phạm."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318b")
+        # (1) dãy 3 dòng nhãn NHƯNG KHÔNG có người ký ⇒ KHÔNG bỏ
+        _gia = ("Cơ quan: Bộ Tài chính\nNgày ký: 01/01/2026\nEmail: abc@btc.gov.vn\n") + _R318_THAN
+        r = _m.loc_rac_congbao(_gia)
+        ok1 = r["counts"]["chu_ky_so"] == 0 and "Cơ quan: Bộ Tài chính" in r["text"]
+        # (2) chỉ 2 dòng nhãn (có cả người ký) vẫn DƯỚI ngưỡng 3 ⇒ KHÔNG bỏ
+        r2 = _m.loc_rac_congbao("Người ký: X\nCơ quan: Y\n" + _R318_THAN)
+        ok2 = r2["counts"]["chu_ky_so"] == 0
+        # (3) phản chứng NỘI TẠI của r217 vẫn đứng: giữ + bỏ = vào, và text ra = join(giữ)
+        ok3 = r["dong_vao"] == r["dong_ra"] + len(r["bo"])
+        return bool(ok1 and ok2 and ok3)
+
+    _t110("r318_khong_nuot_than_van_ban", _c318_khong_nuot_than_van_ban)
+
+    def _c318_dau_muc_dung_ca_hai_chieu():
+        """CẢ HAI CHIỀU trên CÙNG một tệp — `CB_DAU_MUC` cũ vừa bỏ sót vừa bắt nhầm.
+
+        Đo trên 54-2025: nhãn THẬT «VĂN BẢN PHÁP LUẬT KHÁC» (dòng 10) KHÔNG khớp mẫu cũ, còn
+        dòng thứ ba của tiêu đề «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / VĂN BẢN QUY PHẠM
+        PHÁP LUẬT» (dòng 1578) thì BỊ khớp."""
+        _m = _mod314("verify_deep.py", "verify_deep_r318c")
+        # (1) ÂM TÍNH GIẢ cũ: nhãn mục thật phải được KHAI BÁO
+        r1 = _m.loc_rac_congbao("VĂN BẢN PHÁP LUẬT KHÁC\n" + _R318_THAN)
+        ok1 = any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r1["canh_bao"])
+        # (2) DƯƠNG TÍNH GIẢ cũ: dòng nối của tiêu đề Chương KHÔNG được báo
+        r2 = _m.loc_rac_congbao(_R318_THAN + "\nChương VI\nHIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG\n"
+                                             "VĂN BẢN QUY PHẠM PHÁP LUẬT\n\nĐiều 53. Thời điểm.\n")
+        ok2 = not any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r2["canh_bao"])
+        # (3) họ cũ vẫn phải bắt khi nó đứng MỘT MÌNH (không nới thành bỏ sót ngược lại)
+        r3 = _m.loc_rac_congbao("VĂN BẢN QUY PHẠM PHÁP LUẬT\n" + _R318_THAN)
+        ok3 = any(c.startswith("DAU_MUC_CONG_BAO_CON_LAI") for c in r3["canh_bao"])
+        # (4) ★LỜI KHUYÊN: câu cũ («cắt tay tới dòng mang số hiệu») NGUY HIỂM HƠN thứ nó cảnh báo —
+        #     VBHN đặt «Số: …» ở KHỐI KÝ CUỐI, làm theo đúng chữ là xoá sạch Chương I→N.
+        _c = [c for c in r1["canh_bao"] if c.startswith("DAU_MUC_CONG_BAO_CON_LAI")][0]
+        ok4 = ("bỏ ĐÚNG" in _c) and ("ĐỪNG cắt" in _c) and ("KHỐI KÝ CUỐI" in _c)
+        # (5) KHAI BÁO chứ KHÔNG tự bỏ (giữ nguyên quyết định r217: bytes corpus đã nạp không đổi)
+        ok5 = "VĂN BẢN PHÁP LUẬT KHÁC" in r1["text"]
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+
+    _t110("r318_dau_muc_dung_ca_hai_chieu", _c318_dau_muc_dung_ca_hai_chieu)
+
+    # ---- r319: khế ước phụ thuộc — `requirements.txt` khai SAI đúng chỗ đắt nhất -------------
+    def _c319_khai_dung_phu_thuoc_nap_tai_lieu():
+        """CHIỀU THUẬN — thiếu `pypdf` phải bị KHAI ra TRƯỚC khi đâm vào tường.
+
+        `requirements.txt` khai «uses only Python standard library» — đúng với overlay core, SAI
+        với đường nạp: thiếu `pypdf` là CHẶN mọi .pdf (r315). Trước r319 không lệnh nào nói ra."""
+        _sav = {k: _hsys.modules.get(k, "___absent___") for k in ("pypdf", "pdfplumber")}
+        try:
+            _hsys.modules["pypdf"] = None
+            _hsys.modules["pdfplumber"] = None
+            _dep = _TL_MODULE._doc_dep_probe()
+            _pdf = [d for d in _dep if d["ten"] == "pypdf|pdfplumber"]
+            ok1 = len(_pdf) == 1 and _pdf[0]["co"] is False and _pdf[0]["bat_buoc"] is True
+            # hậu quả phải CỤ THỂ + kèm cách sửa, không phải "thiếu thư viện" chung chung
+            ok2 = "pdf" in _pdf[0]["hau_qua"].lower() and "pip install pypdf" in _pdf[0]["hau_qua"]
+        finally:
+            for _k, _v in _sav.items():
+                (_hsys.modules.pop(_k, None) if _v == "___absent___" else _hsys.modules.__setitem__(_k, _v))
+        # ★`requirements.txt` phải VỪA khai `pypdf` VỪA còn hợp lệ cho `pip install -r`
+        _req = (_ROOT209 / "requirements.txt").read_text(encoding="utf-8")
+        _goi = [l.strip() for l in _req.splitlines() if l.strip() and not l.strip().startswith("#")]
+        ok3 = any(g.startswith("pypdf") for g in _goi)
+        # KHÔNG còn KHAI SAI, và phải chỉ được đường tự kiểm.
+        # ★Kiểm theo DÒNG KHAI cũ nguyên văn, KHÔNG theo chuỗi con: bản mới TRÍCH LẠI câu cũ để
+        #  ghi bối cảnh («…trước r319 là SAI»), nên kiểm chuỗi con sẽ ĐỎ oan — đã dính một lượt.
+        _dong_cu = "# tra-luat overlay core uses only Python standard library."
+        ok4 = all(l.strip() != _dong_cu for l in _req.splitlines()) and "doctor" in _req
+        return bool(ok1 and ok2 and ok3 and ok4)
+
+    _t110("r319_khai_dung_phu_thuoc_nap_tai_lieu", _c319_khai_dung_phu_thuoc_nap_tai_lieu)
+
+    def _c319_khong_bien_tuy_chon_thanh_chan_cung():
+        """CHIỀU NGƯỢC — hai thứ KHÔNG được làm quá tay.
+
+        (a) `python-docx`/`antiword` là TUỲ CHỌN: r317 đã làm nhánh không-lib hết rò, nên khai
+            chúng là bắt buộc sẽ chặn oan những máy chạy .docx hoàn toàn bình thường.
+        (b) Dòng doctor phải mang tiền tố `optional` — nếp có sẵn để check ĐỎ mà KHÔNG lật rc;
+            máy không bao giờ nạp PDF không đáng bị doctor báo hỏng."""
+        _dep = _TL_MODULE._doc_dep_probe()
+        _theo_ten = {d["ten"]: d for d in _dep}
+        ok1 = _theo_ten["python-docx"]["bat_buoc"] is False
+        ok2 = _theo_ten["antiword|catdoc"]["bat_buoc"] is False
+        # mọi mục phải đủ khoá + có câu hậu quả (không được để rỗng cho có)
+        ok3 = all(set(d) >= {"ten", "bat_buoc", "co", "hau_qua"} and d["hau_qua"].strip() for d in _dep)
+        # ★NỐI VÀO ĐƯỜNG CHẠY THẬT: doctor phải có dòng đó, và tên bắt đầu bằng 'optional'
+        _src = (_ROOT209 / "scripts" / "tl_core" / "ops_misc.py").read_text(encoding="utf-8")
+        ok4 = '"optional phụ thuộc nạp tài liệu"' in _src
+        # ★bẫy I11 (r312 đã trả giá): helper tl_core MỚI phải khai trong bảng stub của tl.py,
+        #  không thì `bind()` re-home __globals__ ⇒ NameError LÚC CHẠY (đã dính thật ở lượt này).
+        ok5 = "'_doc_dep_probe'" in (_ROOT209 / "scripts" / "tl.py").read_text(encoding="utf-8")
+        return bool(ok1 and ok2 and ok3 and ok4 and ok5)
+
+    _t110("r319_khong_bien_tuy_chon_thanh_chan_cung", _c319_khong_bien_tuy_chon_thanh_chan_cung)
+
+    # ═══ r324 — REL-05 + NLM-08 (sổ audit 01-08, cả hai P2) ═══
+    # REL-05: `references/QUY_TRINH_RA_SOAT_3_TANG.md` (chứa PHA0_GATE_v1 + BUG_LEDGER_v1) đã nằm trong
+    # `_BARE_TOOL_STRICT_DOCS` nên guard bare-tool ĐỌC nó — nhưng KHÔNG cổng nào bắt nó VẮNG MẶT: rơi khỏi
+    # gói thì `release-verify` vẫn xanh. Khoá bằng HÀNH VI (root giả thiếu tệp ⇒ phải nêu ĐÍCH DANH + ok
+    # false), không chỉ kiểm tư cách thành viên: danh sách còn đó mà đường gọi bị bỏ là bài học r321.
+    def _c324_rel05_quy_trinh_3_tang_bat_buoc():
+        import tempfile as _tf324
+        from pathlib import Path as _P324
+        _n324 = "references/QUY_TRINH_RA_SOAT_3_TANG.md"
+        if _n324 not in _rel209._RELEASE_REQUIRED_FILES:
+            return False
+        with _tf324.TemporaryDirectory() as _d324:
+            _kq324 = _rel209._verify_release_manifest(
+                _P324(_d324), {"schema": "release_manifest.v1", "files": []}, strict=False)
+        if _kq324.get("ok") or _n324 not in (_kq324.get("required_missing") or []):
+            return False
+        return (_ROOT209 / "references" / "QUY_TRINH_RA_SOAT_3_TANG.md").is_file()
+
+    _t110("r324_rel05_quy_trinh_3_tang_trong_required", _c324_rel05_quy_trinh_3_tang_bat_buoc)
+
+    # NLM-08: r208d đã đổi van F7 sang CANARY LIVE (bỏ chặn-theo-tuổi), nhưng doc-set kernel vẫn dạy hành
+    # vi CŨ suốt nhiều bản — SKILL.md «cookie >50′ → CHẶN», KERNEL_APPENDIX còn khai cả TÊN HẰNG lẫn MÃ
+    # LỖI đã gỡ khỏi mã. Lệch đúng chiều nguy hiểm: dạy người vận hành TỰ DỪNG LÔ — thứ §4b tầng 3 CẤM.
+    # Khoá HAI CHIỀU: doc không được hồi sinh tên đã chết, VÀ thứ doc hứa phải CÓ THẬT trong mã (bài học
+    # r321 «đã có hàm ≠ đã có đường gọi», soi ngược lại chính đường sản xuất `cmd_ingest_missing`).
+    def _c324_nlm08_doc_f7_khop_canary():
+        _chet324 = ("NLM_COOKIE_BATCH_MAX_MIN", "NLM_COOKIE_TOO_OLD_FOR_BATCH")
+        _sk324 = (_ROOT209 / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        _ka324 = (_ROOT209 / "references" / "KERNEL_APPENDIX.md").read_text(encoding="utf-8", errors="replace")
+        for _t324 in (_sk324, _ka324):
+            if any(_x324 in _t324 for _x324 in _chet324):
+                return False
+        if "canary LIVE" not in _sk324:
+            return False
+        if not ("NLM_AUTH_DEAD_BEFORE_BATCH" in _ka324 and "NLM_COOKIE_BATCH_WARN_MIN" in _ka324):
+            return False
+        import inspect as _ins324
+        import tl_core.ingest_ops as _io324
+        _src324 = _ins324.getsource(_io324.cmd_ingest_missing)
+        return ("NLM_AUTH_DEAD_BEFORE_BATCH" in _src324
+                and _TL_MODULE.NLM_COOKIE_BATCH_WARN_MIN == 50
+                and not hasattr(_TL_MODULE, "NLM_COOKIE_BATCH_MAX_MIN"))
+
+    _t110("r324_nlm08_doc_f7_khop_canary_live", _c324_nlm08_doc_f7_khop_canary)
+
+
+    # ═══ F1-01 / wp41 — deterministic test-fragment loader (ADR-0031) ═══
+    # Test qua interface của deep internal module; fixture chỉ dùng TemporaryDirectory, không chạm repo.
+    import builtins as _bi41, importlib as _il41, os as _os41
+    import subprocess as _sp41, tempfile as _tf41
+    from pathlib import Path as _P41
+
+    def _write_fragment41(root, stem, body="return True"):
+        path = _P41(root) / f"{stem}.py"
+        path.write_text(
+            f'TEST_ID = "{stem}"\n\n'
+            f'def run(tl_module):\n    {body}\n',
+            encoding="utf-8", newline="\n")
+        return path
+
+    def _write_source41(root, name, source):
+        path = _P41(root) / name
+        path.write_text(source, encoding="utf-8", newline="\n")
+        return path
+
+    def _hostile_exception41(body):
+        return (
+            'class _Meta(type):\n'
+            '    @property\n'
+            '    def __name__(cls):\n'
+            '        raise SystemExit(0)\n\n'
+            'class Boom(Exception, metaclass=_Meta):\n'
+            '    pass\n\n'
+            f'{body}\n')
+
+    def _error_code41(loader, fn):
+        try:
+            fn()
+        except loader.FragmentError as exc:
+            return exc.code
+        return ""
+
+    def _c41_fragment_zero():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            loaded = loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write", "r3_bust_cache_after_write"))
+        return loaded == ()
+
+    _t110("wp41_fragment_loader_zero", _c41_fragment_zero)
+
+    def _c41_fragment_one():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_loader_one")
+            loaded = loader.load_fragment_cases(root)
+            return (len(loaded) == 1 and loaded[0].test_id == "wp41_loader_one"
+                    and loaded[0].run(object()) is True)
+
+    _t110("wp41_fragment_loader_one", _c41_fragment_one)
+
+    def _c41_fragment_many_deterministic():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_loader_zulu")
+            _write_fragment41(root, "wp41_loader_alpha")
+            first = loader.load_fragment_cases(root)
+            second = loader.load_fragment_cases(root)
+        expected = ["wp41_loader_alpha", "wp41_loader_zulu"]
+        return ([case.test_id for case in first] == expected
+                and [case.test_id for case in second] == expected)
+
+    _t110("wp41_fragment_loader_many_deterministic", _c41_fragment_many_deterministic)
+
+    def _c41_duplicate_fragment_path():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            path = _write_fragment41(root, "wp41_duplicate_path")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, candidate_paths=(path, path)))
+        return code == "DUPLICATE_FRAGMENT_PATH"
+
+    _t110("wp41_fragment_duplicate_path_rejected", _c41_duplicate_fragment_path)
+
+    def _c41_duplicate_wp_id():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_duplicate_id")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, existing_ids=("wp41_duplicate_id",)))
+        return code == "DUPLICATE_TEST_ID"
+
+    _t110("wp41_fragment_duplicate_wp_id_rejected", _c41_duplicate_wp_id)
+
+    def _c41_grandfather_exact_only():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            allowed = loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write", "r3_bust_cache_after_write")) == ()
+            too_many = _error_code41(loader, lambda: loader.load_fragment_cases(
+                root, existing_ids=("r3_bust_cache_after_write",) * 3))
+            other = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, existing_ids=("legacy_x", "legacy_x")))
+        return allowed and too_many == "DUPLICATE_TEST_ID" and other == "DUPLICATE_TEST_ID"
+
+    _t110("wp41_fragment_grandfather_exact_only", _c41_grandfather_exact_only)
+
+    def _c41_malformed_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_malformed_contract.py", 'TEST_ID = "wp41_malformed_contract"\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_malformed_contract_rejected", _c41_malformed_contract)
+
+    def _c41_syntax_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_syntax_error.py", 'TEST_ID = "wp41_syntax_error"\ndef run(:\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_SYNTAX"
+
+    _t110("wp41_fragment_syntax_error_diagnosable", _c41_syntax_error)
+
+    def _c41_hostile_syntax_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_syntax_error_alpha.py",
+                'import builtins\n\n'
+                'class _Meta(type):\n'
+                '    def __getattribute__(cls, name):\n'
+                '        if name == "__name__":\n'
+                '            raise KeyboardInterrupt()\n'
+                '        return super().__getattribute__(name)\n\n'
+                'class Boom(SyntaxError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_compile = builtins.compile\n\n'
+                'def hostile_compile(source, filename, mode, *args, **kwargs):\n'
+                '    if filename == "wp41_hostile_syntax_error_beta.py":\n'
+                '        raise Boom("fixture syntax blocked")\n'
+                '    return _original_compile(source, filename, mode, *args, **kwargs)\n\n'
+                'builtins.compile = hostile_compile\n'
+                'TEST_ID = "wp41_hostile_syntax_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_syntax_error_beta")
+            original_compile = _bi41.compile
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _bi41.compile = original_compile
+        return code == "FRAGMENT_SYNTAX"
+
+    _t110(
+        "wp41_fragment_hostile_syntax_error_name_diagnosable",
+        _c41_hostile_syntax_error_name)
+
+    def _c41_import_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_import_error.py", 'raise RuntimeError("boom")\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_import_error_diagnosable", _c41_import_error)
+
+    def _c41_system_exit_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "wp41_system_exit_import.py", "raise SystemExit(0)\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_system_exit_import_diagnosable", _c41_system_exit_import)
+
+    def _c41_keyboard_interrupt_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_keyboard_interrupt_import.py", "raise KeyboardInterrupt()\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110("wp41_fragment_keyboard_interrupt_import_diagnosable", _c41_keyboard_interrupt_import)
+
+    def _c41_hostile_exception_name_import():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_import.py",
+                _hostile_exception41("raise Boom()"))
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_IMPORT"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_import_diagnosable",
+        _c41_hostile_exception_name_import)
+
+    def _c41_system_exit_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_system_exit_run", "raise SystemExit(0)")
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_system_exit_run_diagnosable", _c41_system_exit_run)
+
+    def _c41_keyboard_interrupt_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp41_keyboard_interrupt_run", "raise KeyboardInterrupt()")
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110(
+        "wp41_fragment_keyboard_interrupt_run_diagnosable",
+        _c41_keyboard_interrupt_run)
+
+    def _c41_hostile_exception_name_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_run.py",
+                _hostile_exception41(
+                    'TEST_ID = "wp41_hostile_exception_name_run"\n\n'
+                    'def run(tl_module):\n'
+                    '    raise Boom()'))
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_run_diagnosable",
+        _c41_hostile_exception_name_run)
+
+    def _c41_fragment_read_error():
+        loader = _il41.import_module("tl_core.test_fragments")
+        # v1.36.67 (CI master 31205216133 / wp51) — fix ca tự dựng path lệch sau resolve,
+        # không ăn may theo TEMP tên dài; nền không dựng được thì FAIL LOUD.
+        with _tf41.TemporaryDirectory() as parent:
+            physical_root = _P41(parent) / "physical"
+            linked_root = _P41(parent) / "linked"
+            physical_root.mkdir()
+            if _os41.name == "nt":
+                junction_result = _sp41.run(
+                    [_os41.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", "mklink", "/J",
+                     str(linked_root), str(physical_root)],
+                    capture_output=True, text=True, encoding="utf-8", errors="replace")
+                if junction_result.returncode != 0:
+                    raise AssertionError(
+                        "JUNCTION_CREATE_FAILED:"
+                        f"{junction_result.returncode}:{junction_result.stderr.strip()}")
+            else:
+                try:
+                    linked_root.symlink_to(physical_root, target_is_directory=True)
+                except OSError as exc:
+                    raise AssertionError("DIRECTORY_SYMLINK_CREATE_FAILED") from exc
+            try:
+                if linked_root == linked_root.resolve(strict=True):
+                    raise AssertionError("PATH_MISMATCH_NOT_CREATED")
+                target = _write_fragment41(linked_root, "wp41_read_error")
+                if target == target.resolve(strict=True):
+                    raise AssertionError("FRAGMENT_PATH_MISMATCH_NOT_CREATED")
+                original_read_text = _P41.read_text
+
+                def blocked_read_text(path, *args, **kwargs):
+                    if path.name == "wp41_read_error.py":
+                        raise OSError("fixture read blocked")
+                    return original_read_text(path, *args, **kwargs)
+
+                _P41.read_text = blocked_read_text
+                try:
+                    code = _error_code41(
+                        loader, lambda: loader.load_fragment_cases(linked_root))
+                finally:
+                    _P41.read_text = original_read_text
+            finally:
+                if _os41.name == "nt":
+                    linked_root.rmdir()
+                else:
+                    linked_root.unlink()
+        return code == "FRAGMENT_READ"
+
+    _t110("wp41_fragment_read_error_diagnosable", _c41_fragment_read_error)
+
+    def _c41_hostile_read_error_name():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_read_error_alpha.py",
+                'import pathlib\n\n'
+                'class _Meta(type):\n'
+                '    @property\n'
+                '    def __name__(cls):\n'
+                '        raise SystemExit(0)\n\n'
+                'class Boom(OSError, metaclass=_Meta):\n'
+                '    pass\n\n'
+                '_original_read_text = pathlib.Path.read_text\n\n'
+                'def blocked_read_text(path, *args, **kwargs):\n'
+                '    if path.name == "wp41_hostile_read_error_beta.py":\n'
+                '        raise Boom()\n'
+                '    return _original_read_text(path, *args, **kwargs)\n\n'
+                'pathlib.Path.read_text = blocked_read_text\n'
+                'TEST_ID = "wp41_hostile_read_error_alpha"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            _write_fragment41(root, "wp41_hostile_read_error_beta")
+            original_read_text = _P41.read_text
+            try:
+                code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+            finally:
+                _P41.read_text = original_read_text
+        return code == "FRAGMENT_READ"
+
+    _t110(
+        "wp41_fragment_hostile_read_error_name_diagnosable",
+        _c41_hostile_read_error_name)
+
+    def _c41_signature_system_exit():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_signature_system_exit.py",
+                'TEST_ID = "wp41_signature_system_exit"\n\n'
+                'class Run:\n'
+                '    @property\n'
+                '    def __signature__(self):\n'
+                '        raise SystemExit(0)\n'
+                '    def __call__(self, tl_module):\n'
+                '        return True\n\n'
+                'run = Run()\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_signature_system_exit_diagnosable", _c41_signature_system_exit)
+
+    def _c41_hostile_exception_name_signature():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_hostile_exception_name_signature.py",
+                _hostile_exception41(
+                    'TEST_ID = "wp41_hostile_exception_name_signature"\n\n'
+                    'class Run:\n'
+                    '    @property\n'
+                    '    def __signature__(self):\n'
+                    '        raise Boom()\n'
+                    '    def __call__(self, tl_module):\n'
+                    '        return True\n\n'
+                    'run = Run()'))
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110(
+        "wp41_fragment_hostile_exception_name_signature_diagnosable",
+        _c41_hostile_exception_name_signature)
+
+    def _c41_result_bool_system_exit():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_result_bool_system_exit.py",
+                'TEST_ID = "wp41_result_bool_system_exit"\n\n'
+                'class Result:\n'
+                '    def __bool__(self):\n'
+                '        raise SystemExit(0)\n\n'
+                'def run(tl_module):\n'
+                '    return Result()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: bool(loaded[0].run(object())))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_result_bool_system_exit_diagnosable", _c41_result_bool_system_exit)
+
+    def _c41_async_run_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_async_run.py",
+                'TEST_ID = "wp41_async_run"\n\n'
+                'async def run(tl_module):\n'
+                '    raise AssertionError("must not be deferred")\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_async_run_rejected", _c41_async_run_contract)
+
+    def _c41_generator_run_contract():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_generator_run.py",
+                'TEST_ID = "wp41_generator_run"\n\n'
+                'def run(tl_module):\n'
+                '    raise AssertionError("must not be deferred")\n'
+                '    yield True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_generator_run_rejected", _c41_generator_run_contract)
+
+    def _c41_deferred_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_deferred_result.py",
+                'TEST_ID = "wp41_deferred_result"\n\n'
+                'async def deferred():\n'
+                '    raise AssertionError("must not be deferred")\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_deferred_result_rejected", _c41_deferred_result)
+
+    def _c41_generator_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_generator_result.py",
+                'TEST_ID = "wp41_generator_result"\n\n'
+                'def deferred():\n'
+                '    yield True\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_generator_result_rejected", _c41_generator_result)
+
+    def _c41_async_generator_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_async_generator_result.py",
+                'TEST_ID = "wp41_async_generator_result"\n\n'
+                'async def deferred():\n'
+                '    yield True\n\n'
+                'def run(tl_module):\n'
+                '    return deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_async_generator_result_rejected", _c41_async_generator_result)
+
+    def _c41_custom_awaitable_result():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_custom_awaitable_result.py",
+                'TEST_ID = "wp41_custom_awaitable_result"\n\n'
+                'class Deferred:\n'
+                '    def __await__(self):\n'
+                '        if False:\n'
+                '            yield None\n'
+                '        return True\n\n'
+                'def run(tl_module):\n'
+                '    return Deferred()\n')
+            loaded = loader.load_fragment_cases(root)
+            code = _error_code41(loader, lambda: loaded[0].run(object()))
+        return code == "FRAGMENT_EXECUTION"
+
+    _t110("wp41_fragment_custom_awaitable_result_rejected", _c41_custom_awaitable_result)
+
+    def _c41_path_traversal():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as parent:
+            root = _P41(parent) / "fragments"; root.mkdir()
+            outside = _write_fragment41(parent, "wp41_outside")
+            code = _error_code41(
+                loader, lambda: loader.load_fragment_cases(root, candidate_paths=(outside,)))
+        return code == "PATH_TRAVERSAL"
+
+    _t110("wp41_fragment_path_traversal_rejected", _c41_path_traversal)
+
+    def _c41_invalid_fragment_path():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(root, "not-a-packet.py", "x = 1\n")
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "INVALID_FRAGMENT_PATH"
+
+    _t110("wp41_fragment_invalid_path_rejected", _c41_invalid_fragment_path)
+
+    def _c41_invalid_diagnostic_deterministic():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            alpha = _write_source41(root, "alpha.txt", "x = 1\n")
+            zulu = _write_source41(root, "zulu.txt", "x = 1\n")
+            observed = []
+            for candidates in ((zulu, alpha), (alpha, zulu)):
+                try:
+                    loader.load_fragment_cases(root, candidate_paths=candidates)
+                except loader.FragmentPathError as exc:
+                    observed.append((exc.code, exc.fragment))
+        return observed == [("INVALID_FRAGMENT_PATH", "alpha.txt")] * 2
+
+    _t110("wp41_fragment_invalid_diagnostic_deterministic", _c41_invalid_diagnostic_deterministic)
+
+    def _c41_path_id_mismatch():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_path_name.py",
+                'TEST_ID = "wp41_other_name"\n\ndef run(tl_module):\n    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp41_fragment_path_id_mismatch_rejected", _c41_path_id_mismatch)
+
+    def _c41_test_id_subclass():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp41_test_id_subclass.py",
+                'class TestId(str):\n'
+                '    def __ne__(self, other):\n'
+                '        raise SystemExit(0)\n'
+                '    def __hash__(self):\n'
+                '        raise SystemExit(0)\n\n'
+                'TEST_ID = TestId("wp41_test_id_subclass")\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp41_fragment_test_id_subclass_rejected", _c41_test_id_subclass)
+
+    def _c41_cwd_independent():
+        loader = _il41.import_module("tl_core.test_fragments")
+        old_cwd = _hos.getcwd()
+        with _tf41.TemporaryDirectory() as parent:
+            root = _P41(parent) / "fragments"; root.mkdir()
+            elsewhere = _P41(parent) / "elsewhere"; elsewhere.mkdir()
+            _write_fragment41(root, "wp41_cwd_beta")
+            _write_fragment41(root, "wp41_cwd_alpha")
+            try:
+                _hos.chdir(elsewhere)
+                ids = [case.test_id for case in loader.load_fragment_cases(root)]
+            finally:
+                _hos.chdir(old_cwd)
+        return ids == ["wp41_cwd_alpha", "wp41_cwd_beta"]
+
+    _t110("wp41_fragment_cwd_independent", _c41_cwd_independent)
+
+    def _c41_fragment_discovery_adapter():
+        loader = _il41.import_module("tl_core.test_fragments")
+        scripts_root = _P41(__file__).resolve().parent
+        existing_ids = [name for name, _ in cases]
+        existing_ids.append("wp41_fragment_discovery_adapter")
+        try:
+            loaded = loader.load_runtime_fragment_cases(
+                scripts_root, existing_ids=existing_ids)
+        except loader.FragmentError as exc:
+            print(f"  [fragment-loader] {exc}", file=_hsys.stderr)
+            raise
+        for fragment in loaded:
+            _t110(fragment.test_id, lambda fragment=fragment: fragment.run(globals()["_TL_MODULE"]))
+        return True
+
+    _t110("wp41_fragment_discovery_adapter", _c41_fragment_discovery_adapter)
+
+    # F1-02 / wp42 — index/resolver dùng chung cho legacy và packet test IDs.
+    def _c42_test_id_index_resolves_legacy_wp_and_fake():
+        loader = _il41.import_module("tl_core.test_fragments")
+        legacy_ids = ["r210_loop_khong_ghi_trong_cay",
+                      "r3_bust_cache_after_write", "r3_bust_cache_after_write"]
+        with _tf41.TemporaryDirectory() as root:
+            _write_fragment41(root, "wp42_pointer_exists")
+            fragments = loader.load_fragment_cases(root, existing_ids=legacy_ids)
+            index = loader.build_test_id_index(legacy_ids, fragments)
+        legacy = index.resolve("r210_loop_khong_ghi_trong_cay")
+        packet = index.resolve("wp42_pointer_exists")
+        return (legacy is not None and legacy.kind == "legacy"
+                and packet is not None and packet.kind == "packet"
+                and index.resolve("r999_ten_ma_khong_ton_tai") is None
+                and index.resolve("wp999_ten_ma_khong_ton_tai") is None)
+
+    _t110("wp42_test_id_index_resolves_legacy_wp_and_fake",
+          _c42_test_id_index_resolves_legacy_wp_and_fake)
+
+    def _c42_test_id_index_discovers_legacy_source():
+        loader = _il41.import_module("tl_core.test_fragments")
+        index = loader.load_test_id_index(_ROOT210)
+        with _tf41.TemporaryDirectory() as tmp:
+            root = _P41(tmp)
+            scripts_dir = root / "scripts"
+            fragment_dir = scripts_dir / "test_fragments"
+            fragment_dir.mkdir(parents=True)
+            _write_source41(
+                scripts_dir, "tl_selftest.py",
+                'def run():\n'
+                '    cases = []\n'
+                '    cases.append(("r210_metadata_known", True))\n')
+            _write_source41(
+                fragment_dir, "wp42_metadata_only.py",
+                'from pathlib import Path\n'
+                'TEST_ID = "wp42_metadata_only"\n'
+                'Path(__file__).with_suffix(".executed").write_text("boom")\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            metadata_index = loader.load_test_id_index(root)
+            side_effect = fragment_dir / "wp42_metadata_only.executed"
+            metadata_safe = (metadata_index.resolve("wp42_metadata_only") is not None
+                             and not side_effect.exists())
+        return (index.resolve("r210_loop_khong_ghi_trong_cay") is not None
+                and index.resolve("r298_worklist_chay_kho_a3_a6") is not None
+                and index.resolve("r326_con_tro_ten_ca_resolve") is not None
+                and index.resolve("wp41_fragment_loader_zero") is not None
+                and index.resolve("wp41_fragment_discovery_adapter") is not None
+                and metadata_safe)
+
+    _t110("wp42_test_id_index_discovers_legacy_source",
+          _c42_test_id_index_discovers_legacy_source)
+
+    def _doc_claims_fixture42(pointer_text):
+        with _tf41.TemporaryDirectory() as tmp:
+            root = _P41(tmp)
+            scripts_dir = root / "scripts"
+            fragment_dir = scripts_dir / "test_fragments"
+            docs_dir = root / "docs"
+            fragment_dir.mkdir(parents=True)
+            docs_dir.mkdir()
+            _write_source41(
+                scripts_dir, "tl_selftest.py",
+                'def run():\n'
+                '    cases = []\n'
+                '    _t110("r210_loop_khong_ghi_trong_cay", lambda: True)\n')
+            _write_fragment41(fragment_dir, "wp42_pointer_exists")
+            doc = docs_dir / "pointer.md"
+            doc.write_text(pointer_text, encoding="utf-8", newline="\n")
+            return _TL_MODULE._doc_claims_check([str(doc)], root=root)
+
+    def _c42_doc_claims_resolves_legacy_and_wp():
+        out = _doc_claims_fixture42(
+            "Legacy `r210_loop_khong_ghi_trong_cay`; packet `wp42_pointer_exists`.\n")
+        basis = out.get("basis") or {}
+        return (out.get("ok") is True and not out.get("flags")
+                and basis.get("test_ids_known") == 2
+                and "L12" not in (out.get("layers_skipped") or {}))
+
+    _t110("wp42_doc_claims_resolves_legacy_and_wp",
+          _c42_doc_claims_resolves_legacy_and_wp)
+
+    def _c42_doc_claims_rejects_fake_test_ids():
+        out = _doc_claims_fixture42(
+            "Fake `r999_ten_ma_khong_ton_tai`; fake `wp999_ten_ma_khong_ton_tai`.\n")
+        flags = [flag for flag in (out.get("flags") or [])
+                 if flag.get("reason") == "TEST_ID_UNKNOWN"]
+        return (out.get("ok") is False
+                and [flag.get("claim") for flag in flags]
+                == ["r999_ten_ma_khong_ton_tai", "wp999_ten_ma_khong_ton_tai"])
+
+    _t110("wp42_doc_claims_rejects_fake_test_ids",
+          _c42_doc_claims_rejects_fake_test_ids)
+
+    def _c42_test_id_index_collision_policy():
+        loader = _il41.import_module("tl_core.test_fragments")
+        grandfather = loader.build_test_id_index(
+            ["r3_bust_cache_after_write", "r3_bust_cache_after_write"])
+
+        def _duplicate_code(ids):
+            try:
+                loader.build_test_id_index(ids)
+            except loader.FragmentDuplicateError as exc:
+                return exc.code
+            return ""
+
+        fragment = loader.FragmentCase(
+            test_id="wp42_collision", run=lambda _tl: True,
+            source_path=_P41("wp42_collision.py"))
+        try:
+            loader.build_test_id_index(["wp42_collision"], [fragment])
+        except loader.FragmentDuplicateError as exc:
+            cross_source = exc.code
+        else:
+            cross_source = ""
+
+        return (grandfather.resolve("r3_bust_cache_after_write") is not None
+                and _duplicate_code(["r210_loop_khong_ghi_trong_cay"] * 2)
+                == "DUPLICATE_TEST_ID"
+                and _duplicate_code(["r3_bust_cache_after_write"] * 3)
+                == "DUPLICATE_TEST_ID"
+                and cross_source == "DUPLICATE_TEST_ID")
+
+    _t110("wp42_test_id_index_collision_policy",
+          _c42_test_id_index_collision_policy)
+
+    def _c42_computed_test_id_rejected():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_computed_test_id.py",
+                'TEST_ID = "wp42_computed_" + "test_id"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp42_fragment_computed_test_id_rejected",
+          _c42_computed_test_id_rejected)
+
+    def _c42_duplicate_literal_test_id_rejected():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_duplicate_literal.py",
+                'TEST_ID = "wp42_duplicate_literal"\n'
+                'TEST_ID = "wp42_duplicate_literal"\n\n'
+                'def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "FRAGMENT_CONTRACT"
+
+    _t110("wp42_fragment_duplicate_literal_test_id_rejected",
+          _c42_duplicate_literal_test_id_rejected)
+
+    def _c42_path_mismatch_precedes_missing_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_mismatch_missing_run.py",
+                'TEST_ID = "wp42_other_missing_run"\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp42_fragment_path_mismatch_precedes_missing_run",
+          _c42_path_mismatch_precedes_missing_run)
+
+    def _c42_path_mismatch_precedes_async_run():
+        loader = _il41.import_module("tl_core.test_fragments")
+        with _tf41.TemporaryDirectory() as root:
+            _write_source41(
+                root, "wp42_mismatch_async_run.py",
+                'TEST_ID = "wp42_other_async_run"\n\n'
+                'async def run(tl_module):\n'
+                '    return True\n')
+            code = _error_code41(loader, lambda: loader.load_fragment_cases(root))
+        return code == "PATH_ID_MISMATCH"
+
+    _t110("wp42_fragment_path_mismatch_precedes_async_run",
+          _c42_path_mismatch_precedes_async_run)
+
+    # r285: đối chiếu ảnh chụp đầu `run()` — tên nào KHÁC identity là monkeypatch bị BỎ QUÊN.
+    # Khối test nào cũng phải khôi phục TRỌN tập tên nó đã thay; rò một tên là mọi case sau đó
+    # chạy trên bản giả mà không ai biết (xanh GIẢ). In đích danh để sửa được ngay.
+    _leak285 = sorted(k for k, v in _snap285.items() if getattr(_TL_MODULE, k, None) is not v)
+    if _leak285:
+        print(f"  [rò rỉ monkeypatch] {len(_leak285)} tên KHÔNG được khôi phục: {', '.join(_leak285[:12])}",
+              file=_hsys.stderr)
+    cases.append(("r285_khong_ro_ri_monkeypatch", not _leak285))
+
+    # F1-03 / wp43 — bundled output là data-only, canonical UTF-8/LF trên mọi checkout EOL.
+    def _c43_bundled_generator_byte_canonical():
+        loader = _il41.import_module("tl_core.test_fragments")
+        source_lf = (
+            'TEST_ID = "wp43_generator_utf8"\n\n'
+            'def run(tl_module):\n'
+            '    return "Luật" == "Luật"\n')
+        expected = (
+            '# -*- coding: utf-8 -*-\n'
+            '"""Generated by tl_core.test_fragments; do not edit."""\n\n'
+            'BUNDLED_FRAGMENT_SOURCES = (\n'
+            '    ("wp43_generator_utf8.py", '
+            '"TEST_ID = \\"wp43_generator_utf8\\"\\n\\ndef run(tl_module):\\n'
+            '    return \\"Luật\\" == \\"Luật\\"\\n"),\n'
+            ')\n').encode("utf-8")
+
+        outputs = []
+        for raw_source in (source_lf.encode("utf-8"),
+                           source_lf.replace("\n", "\r\n").encode("utf-8")):
+            with _tf41.TemporaryDirectory() as root:
+                path = _P41(root) / "wp43_generator_utf8.py"
+                path.write_bytes(raw_source)
+                outputs.append(loader.generate_bundled_module_bytes(root))
+                outputs.append(loader.generate_bundled_module_bytes(
+                    root, candidate_paths=(path,)))
+
+        namespace = {}
+        exec(outputs[0], namespace)
+        public_names = {name for name in namespace if not name.startswith("__")}
+        return (all(output == expected for output in outputs)
+                and type(outputs[0]) is bytes
+                and not outputs[0].startswith(b"\xef\xbb\xbf")
+                and b"\r" not in outputs[0]
+                and outputs[0].decode("utf-8") == expected.decode("utf-8")
+                and public_names == {"BUNDLED_FRAGMENT_SOURCES"}
+                and namespace["BUNDLED_FRAGMENT_SOURCES"]
+                == (("wp43_generator_utf8.py", source_lf),))
+
+    _t110("wp43_bundled_generator_byte_canonical",
+          _c43_bundled_generator_byte_canonical)
+
+    def _c43_release_excludes_only_canonical_fragment_prefix():
+        from tl_core import release as release43
+        excluded = {
+            "scripts/test_fragments/wp43_hidden.py",
+            "scripts/test_fragments/nested/hidden.txt",
+        }
+        retained = {
+            "test_fragments/root_keep.py",
+            "other/test_fragments/keep.py",
+            "scripts/other/test_fragments/keep.py",
+            "scripts/test_fragments.py",
+        }
+        with _tf41.TemporaryDirectory() as root:
+            repo = _P41(root)
+            (repo / "VERSION").write_text("test\n", encoding="utf-8", newline="\n")
+            for relative in sorted(excluded | retained):
+                path = repo / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(relative, encoding="utf-8", newline="\n")
+            manifest = release43._build_release_manifest(repo)
+        included = {entry["path"] for entry in manifest["files"]}
+        return excluded.isdisjoint(included) and retained <= included
+
+    _t110("wp43_release_excludes_only_canonical_fragment_prefix",
+          _c43_release_excludes_only_canonical_fragment_prefix)
+
+    # F1-04 / wp44 — dev chạy source fragments; release chỉ ship bundled adapter.
+    def _c44_dev_topology_prefers_fragments():
+        loader = _il41.import_module("tl_core.test_fragments")
+        runtime_loader = getattr(loader, "load_runtime_fragment_cases", None)
+        if not callable(runtime_loader):
+            return False
+        with _tf41.TemporaryDirectory() as parent:
+            parent = _P41(parent)
+            bundled_source = parent / "bundled-source"
+            bundled_source.mkdir()
+            _write_fragment41(bundled_source, "wp44_bundle_beta")
+            _write_fragment41(bundled_source, "wp44_bundle_alpha")
+            bundled_bytes = loader.generate_bundled_module_bytes(bundled_source)
+
+            dev_scripts = parent / "dev" / "scripts"
+            dev_fragments = dev_scripts / "test_fragments"
+            dev_fragments.mkdir(parents=True)
+            _write_fragment41(dev_fragments, "wp44_dev_beta")
+            _write_fragment41(dev_fragments, "wp44_dev_alpha")
+            (dev_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (dev_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_dev_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
+            bundle_scripts = parent / "bundle" / "scripts"
+            bundle_scripts.mkdir(parents=True)
+            (bundle_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (bundle_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_bundle_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
+            empty_scripts = parent / "empty" / "scripts"
+            (empty_scripts / "test_fragments").mkdir(parents=True)
+            (empty_scripts / "tl_test_fragments_bundled.py").write_bytes(bundled_bytes)
+            (empty_scripts / "tl_selftest.py").write_text(
+                '_t110("r44_empty_legacy", lambda: True)\n',
+                encoding="utf-8", newline="\n")
+
+            dev_cases = runtime_loader(dev_scripts)
+            bundle_cases = runtime_loader(bundle_scripts)
+            empty_cases = runtime_loader(empty_scripts)
+            dev_index = loader.load_test_id_index(dev_scripts.parent)
+            bundle_index = loader.load_test_id_index(bundle_scripts.parent)
+            empty_index = loader.load_test_id_index(empty_scripts.parent)
+        return (
+            [case.test_id for case in dev_cases]
+            == ["wp44_dev_alpha", "wp44_dev_beta"]
+            and [case.test_id for case in bundle_cases]
+            == ["wp44_bundle_alpha", "wp44_bundle_beta"]
+            and [case.test_id for case in empty_cases]
+            == ["wp44_bundle_alpha", "wp44_bundle_beta"]
+            and dev_index.resolve("wp44_dev_alpha") is not None
+            and dev_index.resolve("wp44_bundle_alpha") is None
+            and bundle_index.resolve("wp44_bundle_alpha") is not None
+            and bundle_index.resolve("wp44_dev_alpha") is None
+            and empty_index.resolve("wp44_bundle_alpha") is not None
+            and all(case.run(globals()["_TL_MODULE"])
+                    for case in (*dev_cases, *bundle_cases, *empty_cases))
+        )
+
+    _t110("wp44_dev_topology_prefers_fragments",
+          _c44_dev_topology_prefers_fragments)
+
+    _release_fixture_cache44 = {}
+
+    def _release_fixture44():
+        if _release_fixture_cache44:
+            return _release_fixture_cache44
+        import types as _ty44
+        import zipfile as _zf44
+        from tl_core import release as release44
+
+        bundled_rel = "scripts/tl_test_fragments_bundled.py"
+        result = {
+            "topology_ok": False,
+            "missing_named": False,
+            "file_count": 0,
+        }
+        with _tf41.TemporaryDirectory() as parent:
+            parent = _P41(parent)
+            source_root = _P41(__file__).resolve().parent.parent
+            candidate = parent / "candidate"
+            for entry in release44._build_release_manifest(source_root)["files"]:
+                source = source_root / entry["path"]
+                target = candidate / entry["path"]
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(source.read_bytes())
+
+            fragment_root = candidate / "scripts" / "test_fragments"
+            fragment_root.mkdir(parents=True)
+            _write_fragment41(fragment_root, "wp44_release_hidden")
+            bundled_bytes = _il41.import_module(
+                "tl_core.test_fragments").generate_bundled_module_bytes(fragment_root)
+            bundled_path = candidate / bundled_rel
+            bundled_path.write_bytes(bundled_bytes)
+
+            manifest = release44._build_release_manifest(candidate)
+            verified = release44._verify_release_manifest(candidate, manifest, strict=True)
+            manifest_paths = [entry["path"] for entry in manifest["files"]]
+            out_zip = parent / "candidate-release.zip"
+            args = _ty44.SimpleNamespace(
+                root=str(candidate), out=str(out_zip), top="tra-luat", json=True)
+            with _hush():
+                bundle_rc = release44.cmd_release_bundle(args)
+            zip_names = []
+            zip_bundled_bytes = b""
+            if bundle_rc == 0 and out_zip.is_file():
+                with _zf44.ZipFile(out_zip) as archive:
+                    zip_names = archive.namelist()
+                    zip_bundled_bytes = archive.read(f"tra-luat/{bundled_rel}")
+
+            result["file_count"] = len(zip_names)
+            result["topology_ok"] = (
+                bundled_rel in release44._RELEASE_REQUIRED_FILES
+                and manifest.get("ok") is True
+                and manifest.get("required_missing") == []
+                and verified.get("ok") is True
+                and manifest_paths.count(bundled_rel) == 1
+                and not any(path.startswith("scripts/test_fragments/")
+                            for path in manifest_paths)
+                and bundle_rc == 0
+                and zip_names.count(f"tra-luat/{bundled_rel}") == 1
+                and not any(name.startswith("tra-luat/scripts/test_fragments/")
+                            for name in zip_names)
+                and zip_bundled_bytes == bundled_bytes
+                and len(zip_names) == manifest["file_count"] + 1
+                and len(zip_names) < 200
+            )
+
+            bundled_path.unlink()
+            missing_manifest = release44._build_release_manifest(candidate)
+            missing_verify = release44._verify_release_manifest(
+                candidate, manifest, strict=True)
+            result["missing_named"] = (
+                missing_manifest.get("ok") is False
+                and bundled_rel in (missing_manifest.get("required_missing") or [])
+                and missing_verify.get("ok") is False
+                and bundled_rel in (missing_verify.get("required_missing") or [])
+                and any(item.get("path") == bundled_rel
+                        and item.get("error") == "MISSING"
+                        for item in (missing_verify.get("failed") or []))
+            )
+        _release_fixture_cache44.update(result)
+        return _release_fixture_cache44
+
+    _t110("wp44_release_bundle_topology_under_200",
+          lambda: _release_fixture44()["topology_ok"])
+    _t110("wp44_missing_bundled_module_named",
+          lambda: _release_fixture44()["missing_named"])
+
+    # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
+    # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.
+    def _c42_complete_runtime_test_ids_unique():
+        loader = _il41.import_module("tl_core.test_fragments")
+        guard_id = "wp42_complete_runtime_test_ids_unique"
+        try:
+            loader.build_test_id_index([name for name, _ in cases] + [guard_id])
+        except loader.FragmentDuplicateError as exc:
+            print(f"  [test-id-registry] {exc}", file=_hsys.stderr)
+            return False
+        return True
+
+    _t110("wp42_complete_runtime_test_ids_unique",
+          _c42_complete_runtime_test_ids_unique)
 
     ok = sum(1 for _, p in cases if p)
     for n, p in cases:

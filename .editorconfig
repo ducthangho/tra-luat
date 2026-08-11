@@ -1,0 +1,40 @@
+# F2-A (ADR-0018) — editor phải đồng ý với Git, không cãi nhau.
+# `.gitattributes` cưỡng chế ở tầng index; tệp này cưỡng chế ở tầng editor. Thiếu nó thì editor
+# vẫn ghi CRLF trên Windows và mọi lần lưu lại đẻ ra một lần renormalize không ai yêu cầu.
+# Dev-side: bị loại khỏi gói phát hành qua `_RELEASE_EXCLUDE_NAMES` trong scripts/tl_core/release.py.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.py]
+indent_size = 4
+
+[*.{json,yml,yaml,js}]
+indent_size = 2
+
+[*.md]
+# Markdown dùng hai space cuối dòng làm hard break — trim là đổi NGHĨA, không phải dọn rác.
+trim_trailing_whitespace = false
+
+# Song ánh với `.gitattributes`: script Windows giữ CRLF.
+[*.{cmd,bat}]
+end_of_line = crlf
+
+# Golden byte fixtures so BYTE: editor không được đụng vào dạng xuống dòng hay khoảng trắng cuối.
+[references/golden/**]
+end_of_line = unset
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Binary khai `-text` trong `.gitattributes` — editor cũng không được chuẩn hoá.
+# Danh sách này phải ĐỒNG BỘ với khối binary của `.gitattributes`; `wp49_eol_policy_index_blobs`
+# đối chiếu hai tệp với nhau nên lệch một đuôi là selftest đỏ, không phải phát hiện bằng mắt.
+[*.{pdf,doc,docx,rtf,odt,xls,xlsx,png,jpg,jpeg,tif,tiff,zip,enc,pyc,pyo}]
+end_of_line = unset
+insert_final_newline = false
+trim_trailing_whitespace = false

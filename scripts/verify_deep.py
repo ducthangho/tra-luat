@@ -81,7 +81,15 @@ def sohieu_corroborated(so_hieu, raw):
         return True
     # VBHN: khoá registry mang NĂM tiêm thêm (bất biến NN-YYYY-VBHN-XXX, chống tái dùng số)
     # còn bản in chính thức KHÔNG có năm ⇒ chấp nhận dạng không-năm là khớp.
-    m = _VBHN_WITHYEAR_RE.fullmatch(so_hieu)
+    # r314 (v1.36.48) — nhánh nới-không-năm này CHẾT LẶNG với số hiệu dạng GẠCH CHÉO. r221 vá
+    # chiều «khoá gạch-nối vs bản in gạch-chéo» nên mặc định `so_hieu` LUÔN là khoá registry;
+    # nhưng `ingest_to_cache --help` lại bảo người dùng gõ dạng IN ("Số hiệu canonical, vd
+    # 18/VBHN-VPQH") và đường nạp chuyển THẲNG chuỗi đó xuống đây ⇒ '19/2026/VBHN-VPQH' trượt
+    # fullmatch, mất luôn phép nới, đẻ `T1-nhẹ` OAN. Đo 02-08 trên 3 bản Công báo, CÙNG tệp:
+    # gõ gạch chéo ⇒ 3/3 cờ oan · gõ gạch nối ⇒ 0/3.
+    # ★Chỉ nắn NGĂN CÁCH của BẢN SAO cục bộ — KHÔNG nới `_VBHN_WITHYEAR_RE` dùng chung, vì ở
+    #  classify/hygiene/resolve/lookup_ops nó canh ĐÚNG bất biến khoá registry (chỉ gạch nối).
+    m = _VBHN_WITHYEAR_RE.fullmatch(so_hieu.replace("/", "-"))
     return bool(m and _sohieu_fold("{}-VBHN-{}".format(m.group(1), m.group(3))) in scope)
 
 
@@ -132,9 +140,28 @@ def preamble_of(raw):
 CB_DONG_CHAY = re.compile(
     r"^\s*(?:\d{1,4}\s+)?CÔNG\s+BÁO\s*/\s*Số\s+[^/\n]*/\s*Ngày\s+\d{1,2}\s*-\s*\d{1,2}\s*-\s*\d{4}\s*(?:\d{1,4}\s*)?$")
 CB_SO_TRANG = re.compile(r"^\s*\d{1,4}\s*$")
-CB_CHU_KY_SO = (re.compile(r"^\s*Người\s+ký\s*:"), re.compile(r"^\s*Email\s*:"),
-                re.compile(r"^\s*Cơ\s+quan\s*:"), re.compile(r"^\s*Thời\s+gian\s+ký\s*:"))
-CB_DAU_MUC = re.compile(r"^\s*(?:VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHẦN\s+VĂN\s+BẢN\s+QUY\s+PHẠM\s+PHÁP\s+LUẬT)\s*$")
+# r318: khối chữ ký số Công báo có ÍT NHẤT HAI biến thể. Bản cũ ghép CỨNG đúng bộ 4 nhãn theo
+# ĐÚNG thứ tự (Người ký/Email/Cơ quan/Thời gian ký) nên biến thể 3 dòng lọt sạch. Đo 02-08:
+#   · 54-2025 (CB 1083+1084): «Người ký:/Email:/Cơ quan:/Thời gian ký:»  → bắt đủ 4/4
+#   · 19-2026 (CB 133):       «Ký bởi:/Cơ quan:/Ngày ký:»                → chu_ky_so=0, CẢ BA
+#     dòng chui vào KHỐI ĐẦU (khối đầu là nguồn DUY NHẤT chứng minh danh tính — r215).
+# Nay: tập NHÃN đóng + dò DÃY LIỀN 3–4 dòng mà MỌI dòng đều khớp một nhãn.
+CB_CHU_KY_NHAN = (
+    ("nguoi_ky", re.compile(r"^\s*(?:Người\s+ký|Ký\s+bởi)\s*:")),
+    ("co_quan",  re.compile(r"^\s*Cơ\s+quan\s*:")),
+    ("thoi_gian", re.compile(r"^\s*(?:Thời\s+gian\s+ký|Ngày\s+ký)\s*:")),
+    ("email",    re.compile(r"^\s*Email\s*:")),
+)
+CB_CHU_KY_SO = tuple(p for _, p in CB_CHU_KY_NHAN)   # giữ tên cũ cho caller ngoài (tương thích)
+# r318: nhãn MỤC của Công báo. Bản cũ CHỈ có họ «VĂN BẢN QUY PHẠM PHÁP LUẬT» ⇒ bỏ sót nhãn THẬT
+# «VĂN BẢN PHÁP LUẬT KHÁC» (đo trên 54-2025, dòng 10) — mà lại KHỚP NHẦM dòng thứ ba của một
+# TIÊU ĐỀ CHƯƠNG bị xuống dòng (dòng 1578: «Chương VI / HIỆU LỰC VÀ NGUYÊN TẮC ÁP DỤNG / VĂN BẢN
+# QUY PHẠM PHÁP LUẬT»). Sai CẢ HAI CHIỀU trên CÙNG một tệp.
+CB_DAU_MUC = re.compile(r"^\s*(?:PHẦN\s+)?VĂN\s+BẢN\s+"
+                        r"(?:QUY\s+PHẠM\s+PHÁP\s+LUẬT|PHÁP\s+LUẬT\s+KHÁC)\s*$")
+# Dòng MỞ ĐẦU một tiêu đề chia phần của VĂN BẢN (Chương/Phần/Mục + số). Nhãn mục Công báo KHÔNG
+# bao giờ đứng ngay sau dòng như vậy ⇒ dùng làm phép loại trừ dương-tính-giả.
+CB_TIEU_DE_CHIA = re.compile(r"^\s*(?:Chương|Phần|Mục)\s+[IVXLCDM\d]+\s*$", re.I)
 
 
 def loc_rac_congbao(raw):
@@ -177,10 +204,25 @@ def loc_rac_congbao(raw):
     for i, ln in enumerate(lines):
         if i not in bo and CB_SO_TRANG.match(ln) and _ke_dong_chay(i):
             bo[i] = "so_trang"
-    for i in range(n - 3):
-        if all(CB_CHU_KY_SO[k].match(lines[i + k]) for k in range(4)):
-            for k in range(4):
-                bo.setdefault(i + k, "chu_ky_so")
+    # r318: dò DÃY LIỀN 3–4 dòng mà MỌI dòng khớp một nhãn chữ-ký-số, THỨ TỰ TỰ DO (hai biến thể
+    # Công báo xếp nhãn khác nhau). Thử dãy DÀI trước để không cắt cụt khối 4 dòng thành 3.
+    # ★ĐÒI dãy phải có nhãn `nguoi_ky`: đó là thứ neo «đây là khối chữ ký», nếu không thì hai dòng
+    #  thân bài vô tình bắt đầu bằng «Cơ quan:»/«Ngày ký:» đủ để nuốt mất chữ THẬT.
+    def _nhan_chu_ky(ln):
+        for ten, pat in CB_CHU_KY_NHAN:
+            if pat.match(ln):
+                return ten
+        return None
+
+    for i in range(n):
+        for L in (4, 3):
+            if i + L > n or any((i + k) in bo for k in range(L)):
+                continue
+            tens = [_nhan_chu_ky(lines[i + k]) for k in range(L)]
+            if all(tens) and "nguoi_ky" in tens:
+                for k in range(L):
+                    bo.setdefault(i + k, "chu_ky_so")
+                break
 
     giu = [ln for i, ln in enumerate(lines) if i not in bo]
     out = "\n".join(giu)
@@ -188,11 +230,31 @@ def loc_rac_congbao(raw):
         raise AssertionError("LOC_CONGBAO_PHAN_CHUNG_HONG: %d giữ + %d bỏ ≠ %d dòng vào" % (len(giu), len(bo), n))
 
     canh_bao = []
-    con_dau_muc = [i + 1 for i, ln in enumerate(lines) if i not in bo and CB_DAU_MUC.match(ln)]
+    # r318: LOẠI TRỪ dương-tính-giả — nhãn mục thật KHÔNG bao giờ là dòng nối của một tiêu đề
+    # Chương/Phần/Mục. Nhìn lui tối đa 2 dòng KHÔNG-TRỐNG; gặp «Chương VI» ⇒ đây là tiêu đề bị
+    # xuống dòng, không phải nhãn mục.
+    def _la_duoi_tieu_de(i):
+        thay = 0
+        for j in range(i - 1, -1, -1):
+            if not lines[j].strip():
+                continue
+            if CB_TIEU_DE_CHIA.match(lines[j]):
+                return True
+            thay += 1
+            if thay >= 2:
+                return False
+        return False
+
+    con_dau_muc = [i + 1 for i, ln in enumerate(lines)
+                   if i not in bo and CB_DAU_MUC.match(ln) and not _la_duoi_tieu_de(i)]
     if con_dau_muc:
-        canh_bao.append("DAU_MUC_CONG_BAO_CON_LAI: dòng %s — nhãn mục của Công báo, KHÔNG tự bỏ được "
-                        "(Công báo in tên cơ quan hai lần; cắt máy sẽ ăn vào khối đầu). Cắt tay tới dòng "
-                        "mang số hiệu (`Số: …` / `Luật số: …`) rồi nạp lại."
+        # r318: lời khuyên CŨ («cắt tay tới dòng mang số hiệu») NGUY HIỂM HƠN thứ nó cảnh báo —
+        # với VBHN, dòng «Số: …» nằm ở KHỐI KÝ CUỐI bản, làm theo đúng chữ là XOÁ SẠCH Chương I→N.
+        # Nay chỉ tay đúng dòng cần bỏ, và nói rõ phạm vi: bỏ ĐÚNG dòng đó, không cắt theo neo.
+        canh_bao.append("DAU_MUC_CONG_BAO_CON_LAI: dòng %s — nhãn MỤC của Công báo (không thuộc văn "
+                        "bản), CỐ Ý không tự bỏ. Cách sửa: bỏ ĐÚNG (các) dòng nêu trên rồi nạp lại. "
+                        "★ĐỪNG cắt từ đầu bản tới dòng «Số: …»: với VBHN dòng đó nằm ở KHỐI KÝ CUỐI, "
+                        "cắt theo neo sẽ xoá sạch thân văn bản."
                         % ", ".join(str(x) for x in con_dau_muc))
     sot = [i + 1 for i, ln in enumerate(lines) if i not in bo and "CÔNG BÁO/" in ln.replace("  ", " ")]
     if sot:
@@ -237,6 +299,67 @@ def extract_appendix(raw):
     """→ khối phụ lục (từ heading 'PHỤ LỤC <số>' đầu tiên sau Điều cuối tới hết). '' nếu không có."""
     i = appendix_start(raw)
     return raw[i:].strip() if i >= 0 else ""
+
+
+# ── r322 — KHỐI ĐUÔI của VĂN BẢN HỢP NHẤT ────────────────────────────────────────────────
+# VBHN kết thúc bằng HAI khối KHÔNG PHẢI quy phạm, đứng SAU Điều cuối:
+#   (1) bảng «XÁC THỰC VĂN BẢN HỢP NHẤT» (NĐ250 mục XIII — thể thức; cũng chính là nơi in
+#       layout VPQH 'Số: NN/VBHN-XXX', xem chú thích dòng 44 và cổng TT-VBHN-XAC-THUC);
+#   (2) danh sách ĐỊNH NGHĨA chú thích hợp nhất «[n] …» — mỗi mục nói khoản nào do luật nào
+#       sửa và hiệu lực từ bao giờ.
+# Đường ĐỌC (`resolve.resolve_footnote_amendments`) tách (2) từ lâu bằng ĐÚNG khuôn dưới đây;
+# đường NẠP thì KHÔNG, nên cả hai khối đọng lại trong THÂN ĐIỀU CUỐI của record cache.
+# Đo 02-08-2026 trên cache thật (3/3 record VBHN nhiễm, 0 record khác):
+#     40-2026 Điều 52 : thân 40.637 mà quy phạm chỉ  231  (99,4% là khối đuôi)
+#     19-2026 Điều 141: thân  8.573 — khối đuôi 4.073
+#     89-2026 Điều  79: thân  1.124 — khối đuôi 1.031
+# Hệ quả: trích nguyên văn Điều cuối nhả chú thích ra như thể là quy phạm. Cờ mềm sẵn có
+# ("Điều cuối dài bất thường", §1b) CHỈ bắt được 40-2026 và còn chẩn đoán SAI ĐỊA CHỈ
+# ("nghi phụ lục chưa tách"); hai record kia lọt dưới ngưỡng 8000/8×.
+# ★KHÔNG cắt bỏ — cả hai khối được GIỮ vào trường riêng của record: chú thích mang thông tin
+#  pháp lý, còn khối xác thực là bằng chứng danh tính (VPQH + Số:).
+# ★Khuôn (2) phải TRÙNG TUYỆT ĐỐI `resolve._FOOT_DEF_FIRST` — hai module không import lẫn nhau
+#  nên bất biến này do ca khoá `r322_khuon_chu_thich_khong_duoc_lech` canh.
+VBHN_CHU_THICH_DEF = re.compile(r"(?m)^\s*\[\d{1,3}\]\s")
+VBHN_XAC_THUC_PAT = re.compile(r"(?m)^[ \t]*XÁC\s+THỰC\s+VĂN\s+BẢN\s+HỢP\s+NHẤT[ \t]*$")
+
+
+def vbhn_duoi_start(raw):
+    """→ chỉ số nơi KHỐI ĐUÔI VBHN bắt đầu (sớm nhất giữa «XÁC THỰC…» và mục chú thích «[n] »),
+    dò từ Điều ĐẦU TIÊN trở đi; -1 nếu không có.
+
+    ★Neo ở Điều ĐẦU, KHÔNG phải Điều CUỐI như `appendix_start`. Bản nháp neo Điều cuối và ĐÃ HỎNG
+    trên dữ liệu thật: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật khác** («[7] Điều 31
+    của Luật … quy định như sau: "Điều 31. Thẻ bảo hiểm y tế…"»), nên `ART_SPLIT` khớp SÂU TRONG khối
+    đuôi và marker CUỐI CÙNG nằm SAU cả «[1]» lẫn «XÁC THỰC» ⇒ dò từ đó ra -1 ⇒ **không cắt gì**.
+    Đo 02-08-2026: `40-2026` (114 chú thích) hỏng TRỌN — thân Điều 52 giữ nguyên 40.637 ký tự trong
+    khi quy phạm thật chỉ 231; `19-2026` (10 chú thích) thoát chỉ vì trích ít. Phụ lục không có lớp
+    bệnh này nên `appendix_start` neo Điều cuối vẫn đúng — hai bên CỐ Ý khác nhau ở điểm neo.
+
+    Neo ở Điều đầu là để không cắt nhầm vào KHỐI ĐẦU văn bản (r215: nguồn DUY NHẤT chứng minh danh
+    tính). Phần bảo vệ còn lại nằm ở chính khuôn: cả hai mẫu đều neo ĐẦU DÒNG, mà tham chiếu «[n]»
+    inline trong thân Điều luôn nằm GIỮA dòng (đo: 9/141 Điều của `19-2026` có marker inline, 0 ở
+    đầu dòng), còn «XÁC THỰC VĂN BẢN HỢP NHẤT» phải khớp TOÀN DÒNG."""
+    first_art = ART_SPLIT.search(raw or "")
+    start = first_art.start() if first_art else 0
+    cands = [m.start() for m in (VBHN_CHU_THICH_DEF.search(raw or "", start),
+                                 VBHN_XAC_THUC_PAT.search(raw or "", start)) if m]
+    return min(cands) if cands else -1
+
+
+def tach_duoi_vbhn(raw):
+    """→ (than, xac_thuc, chu_thich). PURE — không đọc/ghi file, không in.
+
+    Không có khối đuôi ⇒ trả `(raw, "", "")` NGUYÊN VẸN: văn bản thường (nghị định, thông tư,
+    luật chưa hợp nhất) phải đi qua bất biến — ca khoá `r322_khong_co_duoi_thi_bat_bien`."""
+    i = vbhn_duoi_start(raw)
+    if i < 0:
+        return raw, "", ""
+    than, duoi = raw[:i], raw[i:]
+    j = VBHN_CHU_THICH_DEF.search(duoi)
+    if j:
+        return than.rstrip(), duoi[:j.start()].strip(), duoi[j.start():].strip()
+    return than.rstrip(), duoi.strip(), ""
 
 
 def garbage_ratio(text):

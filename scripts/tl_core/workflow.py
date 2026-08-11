@@ -22,6 +22,8 @@ import time       # noqa: F401
 import zipfile    # noqa: F401
 from pathlib import Path  # noqa: F401
 
+from tl_core.test_fragments import FragmentError, find_test_id_pointers, load_test_id_index
+
 _TL = None
 
 
@@ -773,10 +775,10 @@ _DOC_CLAIMS_SCHEMA = "doc_claims_check.v1"
 # con trỏ chết ở đó KHÔNG cổng nào bắt. Đo khi mở: 18/19 tệp SẠCH tuyệt đối; 12 cờ còn lại dồn hết vào
 # MỘT tệp và là NỘI DUNG của nó, không phải lỗi (xem _DOC_CLAIMS_HISTORICAL).
 _DOC_CLAIMS_DEFAULT_PATHS = ("CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md", "references", "docs")
-# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4
-# (giàn giáo nháp). CỐ Ý DỪNG Ở ĐÂY — L10/L11 đã ĐO và BỊ BÁC, xem `_DOC_CLAIMS_BAC_L10_L11`
-# bên dưới; đừng "bổ sung nốt" mà không đo lại.
-_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
+# r219 mở thêm L8 (tên lệnh `tl <cmd>` không tồn tại) + L9 (tài liệu mồ côi); r220 trả nốt L4.
+# Hai đề xuất lịch sử L10/L11 đã ĐO và BỊ BÁC (xem `_DOC_CLAIMS_BAC_L10_L11`). F1-02 dùng L12 cho
+# test-ID pointer vì đây là invariant mới, không hồi sinh hai lớp đã bác.
+_DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L12")
 # §2.2 nói thẳng: «tài liệu lịch sử được phép dẫn tệp đã xoá». Ba nguồn dưới đây GHI LẠI QUÁ KHỨ, không
 # phải con trỏ để đi theo — DOCTRINE_APPENDIX tự khai «TOÀN BỘ thân SKILL.md trước refactor v1.16.0,
 # GIỮ NGUYÊN để tra cứu lý do», changelog thì theo định nghĩa là sổ. Đo 28-07: 127/134 cờ L1 nằm ở đúng
@@ -791,7 +793,12 @@ _DOC_CLAIMS_LAYERS = ("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9")
 # duy nhất là XOÁ nội dung phát hiện — tức phá tài liệu để làm vui lòng bộ kiểm.
 _DOC_CLAIMS_HISTORICAL = ("CHANGELOG.md", "references/changelog_archive/",
                           "references/DOCTRINE_APPENDIX.md",
-                          "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md")
+                          "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+                          # r289/Q2 (user chốt 01-08): cả HAI tài liệu kế hoạch chuyển LƯU TRỮ. Chúng tự khai
+                          # ở dòng đầu; đường dẫn/lệnh trong thân là PHÁT HIỆN của tài liệu (tệp đã chết,
+                          # lệnh đã đổi tên), KHÔNG phải con trỏ để đi theo. Nguồn sự thật VẬN HÀNH đã dời
+                          # sang `references/RASOAT_HOSO_LOOP.md` + `RASOAT_PLAN_SCHEMA.md` + thẻ rasoat_hoso.
+                          "docs/WORKFLOW_RASOAT_TU_DONG.md")
 _DOC_CLAIMS_FIXTURES = "references/golden/fixtures/"
 # §2.4 che nhiễu: token mang các ký tự này là GIÀN GIÁO/placeholder, không phải trích dẫn thật.
 _DOC_CLAIMS_NOISE_CHARS = "<>{}*$"
@@ -1034,10 +1041,20 @@ def _doc_claims_context(root: Path) -> dict:
             commands, cmd_src = set(_ps), _DOC_CLAIMS_PARSER_SURFACE
     except (OSError, ValueError):
         pass
+    test_id_index, test_id_error = None, None
+    try:
+        test_id_index = load_test_id_index(root)
+    except FragmentError as exc:
+        test_id_error = {"code": exc.code, "fragment": exc.fragment, "detail": exc.detail}
+    test_id_kinds = {}
+    if test_id_index is not None:
+        for entry in test_id_index.entries:
+            test_id_kinds[entry.kind] = test_id_kinds.get(entry.kind, 0) + 1
     return {"version": cur, "version_text": ver_txt, "changelog_versions": cl_versions,
             "changelog_rs": cl_rs, "floor_version": floor_v, "floor_r": floor_r, "max_r": max_r,
             "pyindex": pyindex, "root": root, "_deleted": None, "toplevel": toplevel,
-            "sha_lens": sha_lens, "commands": commands,
+            "sha_lens": sha_lens, "commands": commands, "test_id_index": test_id_index,
+            "test_id_error": test_id_error,
             "basis": {"version": ver_txt, "sha_lens": sorted(sha_lens),
                       "changelog_files": len(_cl_files),
                       "changelog_versions": len(cl_versions), "changelog_rs": len(cl_rs),
@@ -1046,6 +1063,8 @@ def _doc_claims_context(root: Path) -> dict:
                       "floor_r": floor_r, "max_r": max_r,
                       "commands_source": cmd_src,
                       "commands_known": len(commands) if commands else 0,
+                      "test_ids_known": len(test_id_index.entries) if test_id_index is not None else 0,
+                      "test_id_kinds": test_id_kinds,
                       "layers_bac": dict(_DOC_CLAIMS_BAC_L10_L11),
                       "note": "tập tra cứu = CHANGELOG.md + references/changelog_archive/*.md, quét "
                               "toàn văn; dưới sàn ⇒ advisory (khuyết của sổ, không phải trích dẫn sai)"}}
@@ -1101,7 +1120,7 @@ def _doc_claims_sha_state(ctx: dict, sha: str) -> str:
 
 def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
                          root: Path, ctx: dict) -> list:
-    """Sáu lớp kiểm CƠ HỌC. Mỗi phát hiện là dict; `_advisory=True` ⇒ xếp vào advisories (không fail
+    """Các lớp kiểm CƠ HỌC. Mỗi phát hiện là dict; `_advisory=True` ⇒ xếp vào advisories (không fail
     --strict). Ranh giới cờ-vs-advisory là điều KHIẾN báo cáo dùng được: cái máy CHẮC CHẮN sai mới là cờ."""
     out = []
     rel = _doc_claims_rel(doc, root)
@@ -1281,6 +1300,15 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
             if not cmd or cmd in ctx["commands"]:
                 continue
             _add("L8", sp.start(), "tl " + cmd, "TL_COMMAND_UNKNOWN", advisory=historical)
+
+    # ── L12 (F1-02): con trỏ tên ca selftest legacy/packet dùng CHUNG resolver của fragment loader ──
+    test_ids = ctx.get("test_id_index")
+    if test_ids is not None:
+        for sp in _DOC_CLAIMS_SPAN_RE.finditer(nofence):
+            for test_id, offset in find_test_id_pointers(sp.group(1)):
+                if test_ids.resolve(test_id) is None:
+                    _add("L12", sp.start() + 1 + offset, test_id, "TEST_ID_UNKNOWN",
+                         advisory=historical)
     return out
 
 
@@ -1353,6 +1381,11 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
                 "missing_paths": sorted(bad), "usage_error": True}
     ctx = _doc_claims_context(root)
     flags, advisories, checked = [], [], 0
+    if ctx.get("test_id_error"):
+        flags.append({"layer": "L12", "file": "scripts/tl_selftest.py", "line": 1,
+                      "claim": "test-id-index", "reason": "TEST_ID_INDEX_UNAVAILABLE",
+                      "detail": ctx["test_id_error"]})
+        checked += 1
     scanned = {}
     for f in files:
         try:
@@ -1389,6 +1422,8 @@ def _doc_claims_check(paths=None, *, root: Path = None) -> dict:
         skipped["L8"] = "thiếu " + _DOC_CLAIMS_PARSER_SURFACE
     if not l9_ran:
         skipped["L9"] = "lượt quét không đủ rộng (cần SKILL.md + ≥1 tệp references/)"
+    if ctx.get("test_id_index") is None:
+        skipped["L12"] = "không dựng được shared test-ID index"
     return {"ok": not flags, "schema": _DOC_CLAIMS_SCHEMA, "roots": roots,
             "files_scanned": len(files), "claims_flagged": checked,
             "flags": flags, "advisories": advisories,
@@ -1646,7 +1681,39 @@ def _golden_test(*, write: bool = False) -> dict:
             cases.append(rec)
             continue
         if not rec["raw_stable"]:
+            # r288 (GATE-01 — audit lõi 31-07): raw drift HẾT là ghi chú quan sát. Mọi dòng stdout lệch phải
+            # QUY được về một khoá ĐÃ KHAI trong `volatile_keys`/`path_keys` của chính case; chạm khoá CHƯA
+            # KHAI — hoặc có dòng không quy được về khoá nào — ⇒ case ĐỎ và `--write` TỪ CHỐI ghi fixture
+            # (lỗ nặng nhất của bản cũ: đóng băng luôn cái bất định vào golden).
+            # ★ ĐO TRƯỚC KHI VÁ (31-07, scripts/.tl_state/deploy/golden.out): 20 case, ĐÚNG 1 case
+            #   raw-unstable (`sweep`), dòng lệch DUY NHẤT là `snapshot_age_s` — vốn ĐÃ khai volatile.
+            #   Nên bản vá này giữ `sweep` XANH. Hai phương án từng cân nhắc và BÁC:
+            #   (a) "raw_stable=false ⇒ ok=false" trần trụi → gate ĐỎ NGAY ở case hoàn toàn lành;
+            #   (b) scrub/đóng băng `snapshot_age_s` khỏi raw → raw hết là raw, mất luôn khả năng phát
+            #       hiện bất định THẬT, và tự mâu thuẫn với chính điều "không nới định nghĩa raw-stability".
             rec["raw_diff"] = _first_text_diff(_raw1, _raw2)
+            # r294: `_raw_drift_keys` nay trả ĐƯỜNG DẪN khoá (tuple gốc→lá). Một đường dẫn coi là ĐÃ
+            # KHAI nếu BẤT KỲ mắt xích nào của nó được khai — ĐỐI XỨNG với `audit_projection`, vốn che
+            # TRỌN CÂY CON của khoá đã khai (`deterministic.py`: `out[key] = "<volatile>"`). Trước r294
+            # phép so là `k not in ...` trên TÊN KHOÁ LÁ ⇒ drift bên trong một khoá container ĐÃ KHAI
+            # (vd `basis` của `doc_claims_check_fixture` — dict 13 trường) sinh khoá lá chưa khai ⇒
+            # RAW_UNSTABLE_UNDECLARED = BÁO GIẢ, đúng cái hậu quả mà chú thích trên đã BÁC phương án (a)
+            # để tránh. Báo cáo vẫn in dạng `cha.con` cho người đọc; phép so dùng TUPLE nên khoá có dấu
+            # chấm trong tên không bị tách nhầm.
+            _khai294 = volatile_keys | path_keys
+            _drift_keys, _all_attributed = _raw_drift_keys(_raw1, _raw2)
+            _undeclared = [".".join(p) for p in _drift_keys if not (set(p) & _khai294)]
+            rec["raw_drift_keys"] = [".".join(p) for p in _drift_keys]
+            rec["raw_drift_undeclared"] = _undeclared
+            rec["raw_drift_attributed"] = _all_attributed
+            if _undeclared or not _all_attributed:
+                rec.update({"ok": False, "error": "RAW_UNSTABLE_UNDECLARED", "written": False,
+                            "note": ("stdout lệch ở khoá CHƯA khai volatile/path — khai vào case nếu đúng là "
+                                     "giá trị volatile, KHÔNG nới định nghĩa raw-stability"
+                                     if _undeclared else
+                                     "stdout lệch ở dòng KHÔNG quy được về khoá JSON nào ⇒ fail-closed")})
+                cases.append(rec)
+                continue
         actual = projected_text1
         actual_hash = hashlib.sha256(actual.encode("utf-8")).hexdigest()
         rec["actual_sha256"] = actual_hash
@@ -1664,7 +1731,19 @@ def _golden_test(*, write: bool = False) -> dict:
                 rec["error"] = "GOLDEN_MISMATCH"
         cases.append(rec)
     ok = all(c.get("ok") for c in cases)
-    return {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    out = {"ok": ok, "schema": "golden_test.v1", "golden_dir": str(gdir), "case_count": len(cases), "cases": cases}
+    # r293 (hoà nhánh): mã lỗi RIÊNG nổi lên TOP để người đọc phân biệt "fixture lệch" (GOLDEN_MISMATCH —
+    # chữa bằng cách xem lại thay đổi) với "lệnh bất định" (RAW_UNSTABLE_UNDECLARED — CẤM regen, phải làm
+    # tất định trước). Hai bệnh khác nhau, cách chữa NGƯỢC nhau; gộp một mã là mời người ta chạy `--write`
+    # cho xong. Cơ chế phát hiện là của r288 (quy-khoá) — khối này CHỈ nổi kết luận lên đầu payload để
+    # CI/`deploy-package.sh` đọc được mà không phải duyệt 20 case.
+    _raw_bad = [c["id"] for c in cases if c.get("error") == "RAW_UNSTABLE_UNDECLARED"]
+    if _raw_bad:
+        out["error"] = "RAW_UNSTABLE_UNDECLARED"
+        out["raw_unstable_cases"] = _raw_bad
+        if write:
+            out["write_refused"] = True
+    return out
 
 
 def cmd_golden_test(a) -> int:
@@ -1717,6 +1796,57 @@ def _unique_preserve_order(items) -> list[str]:
         seen.add(s)
         out.append(s)
     return out
+
+def _raw_key_paths_by_line(text: str) -> list[tuple]:
+    """r294: với MỖI dòng của `text`, trả ĐƯỜNG DẪN khoá JSON (tuple gốc→lá) chứa dòng đó.
+
+    Dựa vào ĐỘ THỤT: stdout của gate luôn là JSON `indent=2` (`deterministic.py` `_json_dumps`), nên
+    độ thụt CHÍNH LÀ độ sâu lồng. Dòng `"k":` ở thụt d là con của khoá gần nhất có thụt < d.
+    Dòng KHÔNG phải khoá (phần tử mảng, ngoặc đóng/mở) nhận đường dẫn của khoá đang mở — nhờ vậy một
+    phần tử mảng lệch bên trong khoá ĐÃ KHAI không còn bị coi là "không quy được".
+    Dòng ở NGOÀI mọi khoá (vd banner không phải JSON) nhận `()` ⇒ người gọi vẫn fail-closed.
+    """
+    import re as _re294
+    out, stack = [], []          # stack: [(thụt, tên khoá), …]
+    for ln in text.splitlines():
+        s = ln.lstrip()
+        ind = len(ln) - len(s)
+        while stack and stack[-1][0] >= ind:
+            stack.pop()
+        m = _re294.match(r'"((?:[^"\\]|\\.)*)"\s*:', s)
+        if m:
+            out.append(tuple(k for _i, k in stack) + (m.group(1),))
+            stack.append((ind, m.group(1)))
+        else:
+            out.append(tuple(k for _i, k in stack))
+    return out
+
+
+def _raw_drift_keys(a: str, b: str) -> tuple[list[tuple], bool]:
+    """r288 (GATE-01 — audit lõi 31-07): quy MỌI dòng stdout lệch giữa hai lượt về KHOÁ JSON của nó.
+
+    r294: trả **ĐƯỜNG DẪN** khoá (tuple gốc→lá) thay cho tên khoá lá, để phép so của người gọi ĐỐI XỨNG
+    được với `audit_projection` — vốn che TRỌN CÂY CON của khoá đã khai. Bản r288 trả tên lá nên drift
+    nằm BÊN TRONG một khoá container đã khai bị hô là chưa khai ⇒ BÁO GIẢ.
+
+    Trả `(danh sách đường dẫn đã sắp xếp, quy_được_hết)`. Dòng lệch nào nằm NGOÀI mọi khoá ⇒
+    `quy_được_hết=False`, và người gọi PHẢI fail-closed. Tuyệt đối không được đọc "không quy được khoá
+    nào" thành "không có khoá nào lệch" — đó đúng là chỗ fail-OPEN mà GATE-01 sinh ra để chặn.
+    """
+    import difflib as _dl288
+    a_lines, b_lines = a.splitlines(), b.splitlines()
+    a_paths, b_paths = _raw_key_paths_by_line(a), _raw_key_paths_by_line(b)
+    keys, attributed = set(), True
+    for tag, i1, i2, j1, j2 in _dl288.SequenceMatcher(None, a_lines, b_lines, autojunk=False).get_opcodes():
+        if tag == "equal":
+            continue
+        for p in a_paths[i1:i2] + b_paths[j1:j2]:
+            if p:
+                keys.add(p)
+            else:
+                attributed = False
+    return sorted(keys), attributed
+
 
 def _first_text_diff(expected: str, actual: str) -> dict:
     exp_lines = expected.splitlines()

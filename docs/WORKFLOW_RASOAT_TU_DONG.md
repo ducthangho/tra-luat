@@ -1,6 +1,20 @@
-# WORKFLOW RÀ SOÁT TỰ ĐỘNG HOÁ CAO — "NHÀ MÁY RÀ SOÁT" (đề xuất, chưa triển khai)
+# WORKFLOW RÀ SOÁT TỰ ĐỘNG HOÁ CAO — "NHÀ MÁY RÀ SOÁT"
 
-> Trạng thái: ĐỀ XUẤT thiết kế (docs-only). Bổ sung cho `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md`
+> # ⛔ TÀI LIỆU LƯU TRỮ — HỒ SƠ THIẾT KẾ, KHÔNG PHẢI CHỈ DẪN VẬN HÀNH
+>
+> Đóng băng ở lượt 26-07-2026. **Nguồn sự thật VẬN HÀNH** nằm ở `references/`:
+> `RASOAT_HOSO_LOOP.md` · `RASOAT_PLAN_SCHEMA.md` · `workflows/rasoat_hoso.json` ·
+> `QUY_TRINH_RA_SOAT_3_TANG.md`. **Lệch nhau ⇒ `references/` THẮNG.**
+>
+> ⚠ **Nhiều lệnh trong §4/§4a/§4c đã ĐỔI TÊN hoặc bị BÁC** sau khi tài liệu đóng băng — ví dụ
+> `notebook_query` → `tl nlm-query --strict-scope`; `hygiene sweep` → `tl sweep`; bẫy "`nlm-add --drive-id`
+> hỏng với PDF" đã bị đo BÁC 31-07. Trước khi làm theo bất kỳ lệnh nào ở đây, đối chiếu
+> `references/COMMANDS.md` + `tl <lệnh> --help`.
+>
+> ⚠ Mọi con số (`§0b`, ngân sách, ngưỡng) là ảnh chụp 25–26/07. Bản đo lại + backlog còn hiệu lực nằm
+> ngoài kho tại `_docs_lam_viec\KE_HOACH_HOP_NHAT_2026-08-01.md`.
+>
+> Bổ sung cho `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md`
 > (kiến trúc + hiện trạng + hạng mục); tài liệu này mô tả **workflow vận hành** — dòng chảy, hàng đợi,
 > sự kiện, và cách đạt tự động hoá cao nhất trong khuôn khổ 3 điểm dừng có chủ đích.
 > Yêu cầu gốc (2026-07-25): tự động hoá cao nhất; **giữa chừng nạp thêm nguồn**; **sửa lỗi phát hiện được**;

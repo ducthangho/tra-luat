@@ -81,6 +81,12 @@ GENERATED_SPECS = [
           "help": "SHA-256 archive mong đợi (dùng với --archive) để chốt byte đã giao"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "test-fragments-check", "handler": "cmd_test_fragments_check",
+     "help": "LAND-ONLY READ-ONLY: fail nếu bundled test module committed lệch generator trên source tree",
+     "args": [
+         {"flags": ["--root"], "help": "repo root chứa scripts/test_fragments; mặc định HERE.parent"},
+         {"flags": ["--json"], "action": "store_true"},
+     ]},
     {"name": "bundle-export", "handler": "cmd_bundle_export",
      "help": "NHÁNH SONG SONG: xuất bundle giao nộp (zip + BUNDLE_META.json, GIỮ VERSION fork-point) — ADR-0001; không đổi version, không drive-push",
      "args": [
@@ -965,6 +971,7 @@ GENERATED_SPECS = [
          {"flags": ['--state'], "help": 'kèm HOÀ GIẢI state: đơn vị doing mà ĐÃ có master → done, không có → pending'},
          {"flags": ['--dry-run'], "dest": 'dry_run', "action": 'store_true', "help": 'không ghi lại --state (vẫn xuất bảng master)'},
          {"flags": ['--check'], "action": 'store_true', "help": 'r216: ĐỐI CHIẾU bảng master đang có với kết quả merge, KHÔNG ghi đè; lệch ⇒ rc=2 kèm danh sách'},
+         {"flags": ['--anchor-strict'], "dest": 'anchor_strict', "action": 'store_true', "help": 'r321 (RAS-17): anchor.doc_deps[].text_hash sai khuôn sha256:<64hex> ⇒ rc=2, KHÔNG ghi. Mặc định chỉ khai so_anchor_hong'},
          {"flags": ['--json'], "action": 'store_true'},
      ]},
     {"name": 'state-get', "handler": 'cmd_state_get',
@@ -1551,6 +1558,175 @@ def register_generated(sub, tl_module) -> list[str]:
     return made
 
 
+# ───── r310 (RAS-01 vế metadata/CLI · RAS-14): `rasoat <sub>` là LỆNH THẬT, hết argparse.REMAINDER ─────
+# BỆNH. `rasoat` khai đúng hai thứ: một positional `sub` và `rest=argparse.REMAINDER`. REMAINDER nuốt TRỌN
+# phần đuôi dòng lệnh, nên:
+#   (a) KHÔNG cờ nào của `rasoat` được KHAI ⇒ ba đường GHI (`keywords`/`titles`/`orchestrate` — cả ba đều
+#       `reg_bulk`/`changes_pull` vào registry THẬT) vô hình với `tool-inventory` và `workflow-audit
+#       --strict`: không meta, không cổng, không ai đối chiếu. Cổng WRITE_CMD_NO_GATE chỉ soi được cái nó
+#       NHÌN THẤY, và nó không nhìn thấy gì ở đây.
+#   (b) RAS-14: `--profile` gõ SAU sub bị đẩy NGUYÊN cho script con. `backfill_nlm_title.py` có `--profile`
+#       RIÊNG (profile của **nlm CLI**, không phải corpus profile của tl) ⇒ `tl rasoat titles --profile
+#       "Luật BHXH"` âm thầm ĐỔI NGHĨA: corpus profile của tl KHÔNG được áp (scope rơi về vbqppl nền), còn
+#       script con nhận nhầm tên hồ sơ làm profile nlm. Hai lỗi cùng một dòng REMAINDER.
+# VÁ. Mỗi sub là một subparser khai ĐỦ cờ; cờ script con được ÁNH XẠ TƯỜNG MINH bằng khoá `child`
+# (`child=None` = cờ chỉ sống ở tầng tl, KHÔNG chuyển xuống). `--profile` nay thuộc về tl (áp offline
+# TRƯỚC dispatch); profile của nlm CLI đổi tên thành `--nlm-profile` nên hai nghĩa hết chồng lên nhau.
+# Đường GHI đòi `--apply` TƯỜNG MINH; thiếu `--apply` ⇒ tl bơm `dry_flag` của script con (fail-CLOSED:
+# script không có chế độ DRY thì TỪ CHỐI chạy, xem `cmd_rasoat`).
+RASOAT_SPECS = [
+    {"name": "keywords", "script": "backfill_keywords_live.py", "writes": "registry", "dry_flag": "--dry",
+     "help": "backfill cột `tukhoa` cho doc trên NLM (reg_bulk) — GHI registry, đòi --apply",
+     "args": [
+         {"flags": ["--manifest"], "child": "--manifest", "help": "tra_luat_manifest.json"},
+         {"flags": ["--budget"], "child": "--budget", "type": int, "help": "ngân sách giây/đợt (mặc định script con: 200)"},
+         {"flags": ["--batch"], "child": "--batch", "type": int, "help": "vá reg_bulk mỗi N doc (mặc định script con: 40)"},
+         {"flags": ["--all"], "child": "--all", "action": "store_true", "help": "cả doc chưa lên NLM (mặc định chỉ NLM)"},
+         {"flags": ["--progress"], "child": "--progress", "help": "file checkpoint tiến độ"},
+         {"flags": ["--apply"], "child": None, "action": "store_true",
+          "help": "GHI THẬT vào registry; thiếu cờ này = chạy DRY (script con nhận --dry)"},
+     ]},
+    {"name": "titles", "script": "backfill_nlm_title.py", "writes": "registry", "dry_flag": "--dry",
+     "help": "đồng bộ nlm_title (+describe) vào registry bằng 1 call reg_bulk — GHI registry, đòi --apply",
+     "args": [
+         {"flags": ["--from-nlm"], "child": "--from-nlm", "help": "notebook_id — lấy nguồn qua nlm CLI"},
+         {"flags": ["--nlm-json"], "child": "--nlm-json", "help": "dump MCP/JSON [{id,title,desc?,keywords?}]"},
+         {"flags": ["--manifest"], "child": "--manifest", "help": "tra_luat_manifest.json (thay thế)"},
+         {"flags": ["--all-sources"], "child": "--all-sources", "action": "store_true", "help": "--from-nlm: mọi nguồn"},
+         {"flags": ["--with-describe"], "child": "--with-describe", "action": "store_true"},
+         {"flags": ["--desc-col"], "child": "--desc-col", "help": "cột registry để vá describe (phải tồn tại sẵn)"},
+         {"flags": ["--source-ids"], "child": "--source-ids", "help": "giới hạn describe theo id (phân tách dấu phẩy)"},
+         {"flags": ["--limit"], "child": "--limit", "type": int, "help": "giới hạn số nguồn describe"},
+         {"flags": ["--cols"], "child": "--cols", "help": "cột registry cần vá (mặc định script con: nlm_title)"},
+         {"flags": ["--nlm-bin"], "child": "--nlm-bin"},
+         {"flags": ["--docker"], "child": "--docker"},
+         # RAS-14: KHÔNG để tên `--profile` — nó là profile của **nlm CLI**, còn `--profile` của tl là
+         # corpus profile. Trùng tên = trùng nghĩa, và REMAINDER cũ khiến hai nghĩa đó ĐỔI CHỖ im lặng.
+         {"flags": ["--nlm-profile"], "child": "--profile",
+          "help": "profile của **nlm CLI** (KHÁC `--profile` corpus của tl — RAS-14)"},
+         {"flags": ["--cmd-list"], "child": "--cmd-list"},
+         {"flags": ["--cmd-describe"], "child": "--cmd-describe"},
+         {"flags": ["--timeout"], "child": "--timeout", "type": int},
+         {"flags": ["--export"], "child": "--export", "action": "store_true", "help": "manifest_export sau backfill"},
+         {"flags": ["--apply"], "child": None, "action": "store_true",
+          "help": "GHI THẬT vào registry; thiếu cờ này = chạy DRY (script con nhận --dry)"},
+     ]},
+    {"name": "orchestrate", "script": "registry_orchestrator.py", "writes": "registry", "dry_flag": "--dry",
+     "help": "bộ điều phối sổ cái theo THỜI ĐIỂM (boot/end) — GHI registry, đòi --apply",
+     "args": [
+         {"dest": "phase", "nargs": "?", "choices": ["boot", "end"], "default": "boot", "child_positional": True},
+         {"flags": ["--manifest"], "child": "--manifest"},
+         {"flags": ["--regen-threshold"], "child": "--regen-threshold", "type": int},
+         {"flags": ["--bulk-threshold"], "child": "--bulk-threshold", "type": int},
+         {"flags": ["--tukhoa-threshold"], "child": "--tukhoa-threshold", "type": int},
+         {"flags": ["--touched-drive"], "child": "--touched-drive", "action": "store_true"},
+         {"flags": ["--min-version"], "child": "--min-version"},
+         # KHÔNG đặt tên `--selftest`: root parser của tl đã có `--selftest` và main() đọc `a.selftest`
+         # TRƯỚC dispatch ⇒ trùng tên sẽ chạy selftest của TL thay vì của script con.
+         {"flags": ["--orchestrator-selftest"], "child": "--selftest", "action": "store_true",
+          "help": "chạy selftest của registry_orchestrator.py (22/22, offline)"},
+         {"flags": ["--apply"], "child": "--apply", "action": "store_true",
+          "help": "GHI THẬT; thiếu cờ này = chạy DRY (script con nhận --dry)"},
+     ]},
+    {"name": "worksheet", "script": "rasoat_worksheet.py", "writes": None, "dry_flag": None,
+     "help": "dựng worksheet rà soát từ cache cấu trúc — chỉ ghi file cục bộ trong --out-dir",
+     "args": [
+         {"dest": "target", "nargs": "?", "metavar": "so-hieu", "fills": "so_hieu",
+          "help": "số hiệu canonical (tương đương --so-hieu)"},
+         {"flags": ["--so-hieu", "--sohieu", "--so_hieu"], "dest": "so_hieu", "child": "--so-hieu"},
+         {"flags": ["--variant"], "child": "--variant"},
+         {"flags": ["--cache-dir"], "child": "--cache-dir"},
+         {"flags": ["--out-dir"], "child": "--out-dir"},
+         {"flags": ["--title"], "child": "--title"},
+         # Cờ này VỐN đã được `cmd_rasoat` đọc (`getattr(a, "no_auto_cache", False)`) nhưng CHƯA TỪNG được
+         # khai ở đâu — REMAINDER nuốt mất nên nó luôn False. Nay khai thật ở tầng tl (không chuyển xuống).
+         {"flags": ["--no-auto-cache"], "child": None, "action": "store_true",
+          "help": "TẮT tự dựng cache khi thiếu docs/<sh>--<variant>.json"},
+     ]},
+    {"name": "phuluc", "script": "rasoat_phuluc.py", "writes": None, "dry_flag": None,
+     "help": "dựng phụ lục rà soát từ bảng master — chỉ ghi file cục bộ trong --out-dir",
+     "args": [
+         {"dest": "target", "nargs": "?", "metavar": "in", "fills": "inp",
+          "help": "file master.json hoặc thư mục .json (tương đương --in)"},
+         {"flags": ["--in", "--file"], "dest": "inp", "child": "--in"},
+         {"flags": ["--out-dir"], "child": "--out-dir"},
+         {"flags": ["--title"], "child": "--title"},
+     ]},
+]
+
+RASOAT_SPEC_BY_NAME = {s["name"]: s for s in RASOAT_SPECS}
+
+
+def _rasoat_dest(arg: dict) -> str:
+    """dest của một mục spec — tường minh, hoặc suy từ cờ ĐẦU (khuôn argparse)."""
+    if arg.get("dest"):
+        return arg["dest"]
+    return arg["flags"][0].lstrip("-").replace("-", "_")
+
+
+def register_rasoat(parent, tl_module) -> list[str]:
+    """Sinh subparser THẬT cho `rasoat <sub>` từ RASOAT_SPECS. Trả list tên đã sinh.
+
+    KHÔNG set `fn` trên parser CHA: `tl rasoat` trần phải rơi vào nhánh help của main() (rc=2), không
+    được dispatch với `sub=None`."""
+    rsub = parent.add_subparsers(dest="sub")
+    made = []
+    for spec in RASOAT_SPECS:
+        p = rsub.add_parser(spec["name"], **({"help": spec["help"]} if spec.get("help") else {}))
+        for a in spec["args"]:
+            kw = {k: v for k, v in a.items()
+                  if k not in ("flags", "dest", "child", "child_positional", "fills")}
+            if a.get("flags"):
+                if "dest" in a:
+                    kw["dest"] = a["dest"]
+                p.add_argument(*a["flags"], **kw)
+            else:
+                p.add_argument(a["dest"], **kw)
+        p.set_defaults(fn=getattr(tl_module, "cmd_rasoat"))
+        made.append(spec["name"])
+    return made
+
+
+def rasoat_child_argv(spec: dict, ns, *, apply_on: bool = False) -> list[str]:
+    """Dựng argv cho script con TỪ NAMESPACE đã parse (thay REMAINDER).
+
+    `child=None` ⇒ cờ chỉ sống ở tầng tl. `fills` ⇒ positional điền cho cờ chính khi cờ đó trống (giữ
+    hành vi `tl rasoat worksheet 18/VBHN-VPQH` = `--so-hieu 18/VBHN-VPQH`). Thiếu `--apply` trên đường
+    GHI ⇒ nối `dry_flag` của script con."""
+    vals = {}
+    for a in spec["args"]:
+        d = _rasoat_dest(a)
+        vals[d] = getattr(ns, d, a.get("default"))
+    for a in spec["args"]:                       # positional → cờ chính (chỉ khi cờ chính TRỐNG)
+        fills = a.get("fills")
+        if not fills:
+            continue
+        d = _rasoat_dest(a)
+        if vals.get(d) and not vals.get(fills):
+            vals[fills] = vals[d]
+        vals[d] = None
+    head, tail = [], []
+    for a in spec["args"]:
+        d = _rasoat_dest(a)
+        v = vals.get(d)
+        if v is None or v is False or v == "":
+            continue
+        if a.get("child_positional"):
+            head.append(str(v))
+            continue
+        child = a.get("child")
+        if not child:
+            continue
+        if a.get("action") == "store_true":
+            tail.append(child)
+        else:
+            tail += [child, str(v)]
+    argv = head + tail
+    if spec.get("writes") and not apply_on and spec.get("dry_flag"):
+        argv.append(spec["dry_flag"])
+    return argv
+
+
 # ───────────────────────── E1: metadata ─────────────────────────
 def _m(risk, read_only, write_scope, confirm, dry_run, det_json, task, contract, card_required, module, generated=False,
        nlm_fallback=None):
@@ -1576,6 +1752,7 @@ COMMAND_META = {
     "determinism-audit":    _m("low", True, "none", False, False, True, "workflow_audit", None, True, "release", True),
     "release-manifest":     _m("low", False, "local", False, True, True, "release_manifest", None, True, "release", True),
     "release-verify":       _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),
+    "test-fragments-check": _m("low", True, "none", False, False, True, "release_verify", None, True, "release", True),
     "release-bundle":       _m("medium", False, "local", False, False, True, "release_bundle", None, True, "release", True),
     "bundle-export":        _m("low", False, "local", False, False, True, "bundle_export", None, True, "release", True),
     "release-check":        _m("medium", False, "local", False, False, True, "release_check", None, True, "release", generated=True),
@@ -1746,18 +1923,43 @@ COMMAND_META = {
 }
 
 
+# r310 (RAS-01 vế metadata/CLI): meta cho lệnh LỒNG `<cha> <con>`. Trước đây registry chỉ biết tên
+# TOP-LEVEL nên mọi writer nằm dưới một subcommand đều VÔ HÌNH với `tool-inventory`/`workflow-audit
+# --strict` — đúng ba đường GHI của `rasoat`. Khoá = ĐƯỜNG DẪN đầy đủ ngăn bằng dấu cách.
+# `deterministic_json_required=False`: handler chung là `cmd_rasoat` (passthrough sang script con), không
+# phải lệnh JSON của determinism-era; ép cổng _json_dumps ở đây sẽ là cờ GIẢ.
+NESTED_COMMAND_META = {
+    "rasoat keywords":    _m("medium", False, "registry", False, True, False, None, None, False, "lookup_ops"),
+    "rasoat titles":      _m("medium", False, "registry", False, True, False, None, None, False, "lookup_ops"),
+    "rasoat orchestrate": _m("medium", False, "registry", False, True, False, None, None, False, "lookup_ops"),
+    # worksheet/phuluc chỉ sinh file trong --out-dir ⇒ write_scope local, không cần cổng ngoài-repo.
+    "rasoat worksheet":   _m("low", False, "local", False, False, False, None, None, False, "lookup_ops"),
+    "rasoat phuluc":      _m("low", False, "local", False, False, False, None, None, False, "lookup_ops"),
+}
+
+
+def all_command_meta() -> dict:
+    """COMMAND_META + NESTED_COMMAND_META — bề mặt ĐẦY ĐỦ mà audit/inventory phải soi."""
+    return {**COMMAND_META, **NESTED_COMMAND_META}
+
+
 def registry_summary() -> dict:
-    """E3: cho tool-inventory — metadata rút gọn, sort key tất định."""
+    """E3: cho tool-inventory — metadata rút gọn, sort key tất định.
+
+    r310: gộp cả lệnh LỒNG (`rasoat keywords`…) — inventory phải kê MỌI public writer, kể cả writer nằm
+    dưới một subcommand. `counts.nested` tách riêng để đọc được delta khi thêm/bớt nhánh lồng."""
+    _all = all_command_meta()
     cmds = {}
-    for name in sorted(COMMAND_META):
-        m = COMMAND_META[name]
+    for name in sorted(_all):
+        m = _all[name]
         cmds[name] = {k: m[k] for k in ("risk", "read_only", "write_scope", "requires_confirm",
                                         "supports_dry_run", "workflow_task", "idempotency_contract", "generated")}
     counts = {
         "total": len(cmds),
-        "generated_parsers": sum(1 for m in COMMAND_META.values() if m["generated"]),
-        "high_risk": sum(1 for m in COMMAND_META.values() if m["risk"] == "high"),
-        "write_commands": sum(1 for m in COMMAND_META.values() if not m["read_only"]),
+        "generated_parsers": sum(1 for m in _all.values() if m["generated"]),
+        "high_risk": sum(1 for m in _all.values() if m["risk"] == "high"),
+        "write_commands": sum(1 for m in _all.values() if not m["read_only"]),
+        "nested": len(NESTED_COMMAND_META),
     }
     return {"schema": "command_registry.v1", "counts": counts, "commands": cmds}
 
@@ -1770,12 +1972,24 @@ _CONTRACT_REQUIRED = {"ingest", "nlm-add", "recat", "source-rename", "source-del
                       "dedup-corpus"}   # v1.34.63 B1 (apply high-risk — contract dedup_corpus)
 
 
+def _parser_for_path(sub, name: str):
+    """r310: resolve tên lệnh (kể cả LỒNG, `"rasoat keywords"`) → parser. None nếu không có nhánh nào."""
+    parts = name.split()
+    p = sub.choices.get(parts[0])
+    for seg in parts[1:]:
+        if p is None:
+            return None
+        nxt = next((a for a in p._actions if isinstance(a, argparse._SubParsersAction)), None)
+        p = nxt.choices.get(seg) if nxt else None
+    return p
+
+
 def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> dict:
     """E4: đối chiếu registry ↔ parser ↔ cards ↔ contracts. Trả {issues:[], warnings:[]} — issues = fail."""
     issues, warnings = [], []
     sub = next(a for a in parser._actions if isinstance(a, argparse._SubParsersAction))
-    for name, m in sorted(COMMAND_META.items()):
-        p = sub.choices.get(name)
+    for name, m in sorted(all_command_meta().items()):
+        p = _parser_for_path(sub, name)
         if p is None:
             issues.append(f"REGISTRY_CMD_NOT_IN_PARSER:{name}")
             continue
@@ -1835,8 +2049,13 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
                 warnings.append(f"GATE_SCAN_FAILED:{name}:{type(e).__name__}")
     # chiều ngược: contract key nào không có lệnh nào tham chiếu → warning (card mồ côi đã có audit riêng)
     if isinstance(contracts, dict):
-        used = {m["idempotency_contract"] for m in COMMAND_META.values() if m["idempotency_contract"]}
+        used = {m["idempotency_contract"] for m in all_command_meta().values() if m["idempotency_contract"]}
         for k in sorted(set(contracts) - used):
             warnings.append(f"CONTRACT_UNREFERENCED_BY_REGISTRY:{k}")
+    # r310 (RAS-01): chiều NGƯỢC cho nhánh `rasoat` — mỗi sub trong RASOAT_SPECS PHẢI có meta. Không có
+    # lưới này thì thêm một sub GHI mới lại tái diễn đúng lỗ cũ: writer chạy được mà audit không biết.
+    for _s in RASOAT_SPECS:
+        if f"rasoat {_s['name']}" not in NESTED_COMMAND_META:
+            issues.append(f"RASOAT_SUB_NOT_IN_REGISTRY:{_s['name']}")
     return {"schema": "registry_validate.v1", "ok": not issues, "issues": issues, "warnings": warnings,
-            "checked_commands": len(COMMAND_META)}
+            "checked_commands": len(all_command_meta())}

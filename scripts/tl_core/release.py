@@ -203,6 +203,72 @@ def cmd_determinism_audit(a) -> int:
     return 0 if out.get("ok") else 2
 
 
+def _test_fragments_check(root: str | Path) -> dict:
+    """Compare the land-only bundled module with the sole source generator."""
+    repo_root = Path(root)
+    fragment_root = repo_root / "scripts" / "test_fragments"
+    bundled_path = repo_root / "scripts" / "tl_test_fragments_bundled.py"
+    payload = {
+        "ok": False,
+        "schema": "test_fragments_check.v1",
+        "fragment_root": "scripts/test_fragments",
+        "bundled_module": "scripts/tl_test_fragments_bundled.py",
+    }
+    if not fragment_root.is_dir():
+        return {**payload, "status": "invalid", "error": "FRAGMENT_ROOT_MISSING"}
+    if not bundled_path.is_file():
+        return {**payload, "status": "missing", "error": "BUNDLED_MODULE_MISSING"}
+
+    try:
+        from tl_core.test_fragments import generate_bundled_module_bytes
+        expected = generate_bundled_module_bytes(fragment_root)
+    except Exception as exc:  # noqa: BLE001 — gate converts generator/input faults to data
+        return {
+            **payload,
+            "status": "invalid",
+            "error": "GENERATED_BUNDLE_INPUT_INVALID",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    try:
+        actual = bundled_path.read_bytes()
+    except OSError as exc:
+        return {
+            **payload,
+            "status": "unreadable",
+            "error": "BUNDLED_MODULE_READ_FAILED",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+
+    expected_sha256 = hashlib.sha256(expected).hexdigest()
+    actual_sha256 = hashlib.sha256(actual).hexdigest()
+    if actual != expected:
+        return {
+            **payload,
+            "status": "stale",
+            "error": "GENERATED_BUNDLE_STALE",
+            "expected_sha256": expected_sha256,
+            "actual_sha256": actual_sha256,
+            "expected_bytes": len(expected),
+            "actual_bytes": len(actual),
+        }
+    return {
+        **payload,
+        "ok": True,
+        "status": "current",
+        "expected_sha256": expected_sha256,
+        "actual_sha256": actual_sha256,
+        "expected_bytes": len(expected),
+        "actual_bytes": len(actual),
+    }
+
+
+def cmd_test_fragments_check(a) -> int:
+    """Opt-in land gate for committed generated test-bundle freshness."""
+    payload = _test_fragments_check(getattr(a, "root", None) or HERE.parent)
+    _print_json_or_text(payload, getattr(a, "json", False))
+    return 0 if payload.get("ok") else 2
+
+
 def cmd_release_check(a) -> int:
     """Offline deterministic acceptance harness. No subprocess, no Drive/NLM writes."""
     out_dir = Path(getattr(a, "out_dir", None) or tempfile.mkdtemp(prefix="tl_release_check_"))
@@ -326,11 +392,11 @@ def cmd_release_check(a) -> int:
 
 # ───────────────────────── release/package integrity ─────────────────────────
 _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "node_modules", ".tl_state", "tmp", "reports", "dist",
-                         ".claude", ".githooks", ".github",
+                         ".claude", ".codex", ".githooks", ".github",
                          "claude-code-best-practice",
                          "changelog_archive",
                          "rasoat",
-                         "docs"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive). r291 (T0-G, Q1 user CHỐT 01-08): +docs — 19 tệp (3 `docs/*.md` + 16 `docs/adr/*.md`) là hồ sơ THIẾT KẾ của người giữ (kế hoạch + ADR), runtime agent không đọc, mà chúng ăn 19/200 slot import trong khi quỹ chỉ còn 4 ⇒ trả quỹ về 23. GIỮ trong git y như rasoat/changelog_archive. ⚠ KHÔNG hạ cổng nào: `doc-claims-check` vẫn phủ `docs/` (r264) vì nó quét CÂY DEV qua `_DOC_CLAIMS_DEFAULT_PATHS`, không phải gói.
+                         "docs"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive). r291 (T0-G, Q1 user CHỐT 01-08): +docs — 19 tệp (3 `docs/*.md` + 16 `docs/adr/*.md`) là hồ sơ THIẾT KẾ của người giữ (kế hoạch + ADR), runtime agent không đọc, mà chúng ăn 19/200 slot import trong khi quỹ chỉ còn 4 ⇒ trả quỹ về 23. GIỮ trong git y như rasoat/changelog_archive. ⚠ KHÔNG hạ cổng nào: `doc-claims-check` vẫn phủ `docs/` (r264) vì nó quét CÂY DEV qua `_DOC_CLAIMS_DEFAULT_PATHS`, không phải gói. r331: +`.codex` — SONG SINH của `.claude`, cùng lý do, chỉ khác tác nhân: agent Codex đặt worktree ở `.codex/worktrees/<nhánh>/`, mỗi worktree là MỘT BẢN SAO ĐẦY ĐỦ của kho (có `VERSION`/`SKILL.md`/`RELEASE_MANIFEST.json` riêng). Thiếu khoá này thì `release-verify` đếm chúng vào `extra_files` ⇒ gate ĐỎ ở MỌI lượt chạy từ main checkout, trong khi worktree sạch vẫn xanh — đỏ theo NƠI CHẠY chứ không theo nội dung, đúng lớp bệnh khó tin nhất. Đo 04-08-2026: 200 `extra_files`, 100% thuộc `.codex/`, mà `failed: []` và `expected/checked = 177/177` (manifest LÀNH). ★ Cạm bẫy: WARN của deploy khuyên `release-manifest --out …` — ở ca NÀY là SAI, nướng 4 bản sao kho vào manifest trong khi trần gói là 200 tệp CỨNG; lời khuyên đó chỉ đúng cho ca thêm/xoá tệp THẬT (r238).
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
 
@@ -354,6 +420,12 @@ _RELEASE_EXCLUDE_NAMES = {
     "before.json", "after.json",
     "live_state_before.json", "live_state_after.json", "live_state_diff.json",
     "release_check_report.json", "determinism_report.json",
+    # F2-A (ADR-0018): `.editorconfig` là config DEV-SIDE, cùng hạng với `.githooks/`/`.github/`
+    # (đã loại qua _RELEASE_EXCLUDE_DIRS) — runtime agent trong gói không đọc nó. Không loại thì
+    # nó vừa ăn 1 khe trong trần 200 (kê khai slot 179 ở tl_selftest r291_docs_ngoai_goi hoá đỏ),
+    # vừa bị `release-verify --strict` hô extra_files vì manifest chưa có. Loại theo TÊN vì tệp
+    # nằm ở gốc kho, không có thư mục riêng để khoá.
+    ".editorconfig",
 }
 
 _RELEASE_WINDOWS_RESERVED = {
@@ -386,6 +458,7 @@ def _portable_release_relpath(rel: str) -> bool:
 
 _RELEASE_REQUIRED_FILES = [
     "VERSION",
+    "scripts/tl_test_fragments_bundled.py",
     "scripts/tl_core/__init__.py",
     "scripts/tl_core/deterministic.py",
     "scripts/tl_core/jsonio.py",
@@ -425,6 +498,7 @@ _RELEASE_REQUIRED_FILES = [
     "templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json",   # r209/H1: mẫu bảng master rà soát — bên đọc rasoat_phuluc.py
     "references/RASOAT_HOSO_LOOP.md",               # r210/H3-H4: kịch bản vòng lặp + prompt agent tl-rasoat (SKILL.md trỏ tới)
     "references/RASOAT_PLAN_SCHEMA.md",             # r209/H2: đặc tả state biến động (rasoat_plan.v1)
+    "references/QUY_TRINH_RA_SOAT_3_TANG.md",       # r324/REL-05: quy trình rà 3 tầng (PHA0_GATE_v1, BUG_LEDGER_v1)
 ]
 
 _RELEASE_REQUIRED_WORKFLOWS = [
@@ -467,6 +541,8 @@ def _release_should_include(path: Path, root: Path) -> bool:
     try:
         rel = path.relative_to(root)
     except ValueError:
+        return False
+    if len(rel.parts) > 2 and rel.parts[:2] == ("scripts", "test_fragments"):
         return False
     parts = set(rel.parts)
     if parts & _RELEASE_EXCLUDE_DIRS:
@@ -1275,8 +1351,28 @@ def cmd_release_bundle(a) -> int:
 # ── I11 (v1.34.18): leftover-sweep từ tl.py (affinity-tốt-nhất) ──
 
 
+def _canonical_text(text: str) -> str:
+    """CRLF và CR đơn lẻ -> LF. Đây là phép chuẩn hoá text canonical của ADR-0018.
+
+    F2-A dựng hàm này vì `newline="\\n"` KHÔNG đủ và chỗ hụt rất dễ đọc nhầm: nó chỉ tắt phép
+    dịch `\\n`→`\\r\\n` của Python lúc GHI, nó không đụng tới `\\r` đã nằm sẵn TRONG chuỗi. Tức là
+    mọi artifact phái sinh dựng từ nội dung đọc ở một tệp CRLF (hoặc từ stdout một tiến trình
+    Windows) vẫn ra CRLF, kể cả khi ghi qua writer "đã ghim LF". Đúng lớp hỏng mà `.gitattributes`
+    một mình không chặn được, vì tệp phái sinh sinh ra rồi mới tới lượt git nhìn thấy.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _write_text_atomic(path: Path, text: str) -> None:
+    """Writer text CANONICAL + NGUYÊN TỬ: UTF-8, LF, không phụ thuộc OS hay `core.autocrlf`.
+
+    Đây là seam DUY NHẤT cho artifact tracked/derived — golden (`workflow.py` `golden-test
+    --write`), `RELEASE_MANIFEST.json`, determinism/release report, chunk manifest, OCR text.
+    Giữ nguyên ngữ nghĩa nguyên tử của v1.33.56 (F7): ghi ra tmp CÙNG thư mục rồi `os.replace`,
+    nên không ai đọc được bản nửa vời và không có race đổi-tên-qua-volume.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
+    text = _canonical_text(text)
     _fd, _tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=str(path.parent))
     with os.fdopen(_fd, "w", encoding="utf-8", errors="replace", newline="\n") as _f:   # v1.33.56 (F7): tmp duy nhất
         _f.write(text)

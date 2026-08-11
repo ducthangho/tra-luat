@@ -2,7 +2,7 @@
 
 - **Trạng thái:** Kế hoạch thi công chi tiết
 - **Ngày chốt:** 2026-08-03
-- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0033
+- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0034
 - **Mục tiêu:** từ repo hiện tại đi tới hai executor Claude/Codex chạy song song an toàn, tự bàn giao,
   tiếp tục qua Windows/cloud/Android và land có phê duyệt.
 
@@ -21,6 +21,8 @@ Tài liệu này là kế hoạch thi công, không thay thế protocol. Ký hi�
 7. Windows tắt không làm mất packet; cloud tiếp tục, packet local chờ controller trở lại.
 8. Android đọc prompt/state và gọi cùng operation `land apply` cho exact head SHA.
 9. Worker không có credential LIVE; deploy là cổng phê duyệt riêng.
+10. Mission Plan, Packet Spec và Session Plan có ranh giới version hóa; thay đổi material đi qua Change Request.
+11. Executor, Reviewer, Approver và Land Operator tách vai; evidence/authorization đều neo exact SHA trên GitHub.
 
 ## 2. Trạng thái xuất phát và các blocker
 
@@ -29,18 +31,11 @@ Kiểm tại 2026-08-03:
 - local `master` ở `e8134a2`, sau `origin/master=ac63cd7` chín commit;
 - worktree canonical đang bẩn và có nhiều worktree/phiên khác; không được stage hàng loạt từ cây này;
 - Codex CLI `0.146.0` chạy được;
-- Claude Code: npm từng trỏ binary không hợp lệ cho Windows và đã gỡ trong preflight; **đo lại 03-08
-  ~09:45: native `2.1.220` tại `C:\Users\admin\.local\bin\claude.exe` CHẠY ĐƯỢC, `where.exe claude`
-  chỉ một đường** ⇒ T0-01 chỉ còn `claude doctor` + login/workspace trust;
+- Claude Code npm `2.1.220` từng trỏ tới binary không hợp lệ cho Windows; bản npm đã được gỡ
+  trong preflight nhưng native binary chưa được cài, nên `claude --version` chưa qua;
 - `.gitattributes` vẫn `* -text`; `CLAUDE.md` vẫn bắt mọi phiên bump release metadata;
 - chưa có fragment harness, change-impact policy, Issue Forms, adapters, dispatcher, reconciler, local controller
-  hay `land apply` operation;
-- **ĐÃ ĐO 03-08 (~09:40): cổng tài liệu KHÔNG còn là blocker** — `doc-claims-check --strict` trên worktree
-  sạch tách từ `origin/master` + trọn bộ D0 (kể cả kế hoạch này) = `ok:true`, 0 blocking; advisory đều thuộc
-  tài liệu cũ có sẵn (chi tiết phụ lục §13);
-- PR #22 (r327/v1.36.59 — vá phép dò auth `gws`) MỞ lúc đo ~09:45 nhưng **ĐÃ MERGE trước ~10:15**:
-  `origin/master` nay = r327/v1.36.59, số trống kế tiếp **r328/v1.36.60**, 0 PR mở ⇒ cửa sổ
-  zero-open-PR ĐANG MỞ — đo lại `gh pr list --state open` ngay trước khi dùng.
+  hay `land apply` operation.
 
 Hệ quả: chưa được chạy hai **writer code** theo protocol ngay. Trước activation, chỉ cho phép hai phiên
 read-only hoặc pilot thủ công với write set do người giữ đối chiếu.
@@ -48,13 +43,20 @@ read-only hoặc pilot thủ công với write set do người giữ đối chi�
 ## 3. Nguyên tắc chia việc và commit
 
 - Mỗi work packet cho ra một kết quả tự đủ, một PR và một rollback point.
+- Mỗi phiên chỉ giữ một vai trò và một đơn vị công việc; substep trong spec ở cùng phiên, việc ngoài spec thành
+  successor Packet và phiên mới.
 - Không gộp migration EOL, dispatcher, provider adapter và land automation trong một PR.
 - PR hạ tầng nhạy cảm phải cross-review hoặc human review; không dùng `review_deferred`.
+- Same-provider fallback phải là phiên read-only độc lập và ghi assurance thấp hơn; không giả thành cross-review.
+- Executor có thể được ủy quyền làm Land Operator cho exact SHA nhưng không tự trở thành Reviewer/Approver.
+- GitHub facts + deterministic reconciler single-writer giữ authority; Executor chỉ phát evidence, reconciler
+  mới dispatch Reviewer độc lập. Agent hoặc workflow không tự nối vai trò/transition.
+- GitHub Agentic Workflows chỉ là provider adapter/canary sau interface chung, có pinned lock, safe outputs,
+  permission tối thiểu và kill switch; public preview không được làm state machine.
+- Cho tới khi auto-dispatch được promote, mọi phiên phải đóng gói handoff và prompt Claude/Codex có thể sao chép
+  cho vai trò kế tiếp, neo exact SHA/generation và stop conditions.
 - Trước activation, foundation PR được land tuần tự theo quy trình release cũ; không chạy song song
   hai PR cùng chạm `scripts/tl.py`, `scripts/tl_selftest.py`, release policy hoặc metadata.
-- Foundation land theo giao thức cũ ⇒ chọn `r`/version **ở phút chót**: quét `gh pr list --state open`
-  VÀ VERSION của mọi nhánh remote trước khi chốt số (48h qua đụng số 5 lần; r327/v1.36.59 đã vào master
-  qua PR #22 — số trống lúc đo ~10:15 là r328/v1.36.60).
 - Sau activation, tối đa hai executor ghi; dispatcher chỉ cấp lease sau khi closure của hai packet không giao.
 - Tài liệu, schema, policy và test đi cùng code làm chúng xanh; không tạo PR “code trước, guard sau”.
 
@@ -67,15 +69,18 @@ flowchart LR
     F1 --> EOL["F2: EOL migration"]
     EOL --> S1["F3: Protocol + safety"]
     S1 --> CUT["F4: Zero-legacy cutover"]
-    CUT --> A3["A3: Dispatcher shadow"]
+    CUT --> A2["A2: Test economics + tiered gates"]
+    A2 --> A3["A3: Dispatcher shadow"]
     A3 --> A4["A4: Cloud canary"]
     A4 --> A5["A5: Dual provider"]
     A5 --> A6["A6: Successor + Android"]
     A6 --> A7["A7: Local controller"]
     A7 --> A8["A8: Land automation"]
+    A8 --> A9["A9: Skill engineering + upstream adoption"]
 ```
 
-`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8.
+`Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8. A9 là pha hardening mở rộng,
+không được chặn hoặc chen vào critical path A2–A8.
 
 ## 5. Kế hoạch work packet chi tiết
 
@@ -83,22 +88,19 @@ flowchart LR
 
 | Packet | Nội dung | Phụ thuộc | Nghiệm thu |
 |---|---|---|---|
-| D0-01 | Tạo worktree từ `origin/master`; mang sang CONTEXT, protocol, **ADR-0001 (bản đánh dấu Superseded)**, ADR-0017–0033, research và kế hoạch này; KHÔNG mang tệp M khác của cây bẩn (vd `docs/WORKFLOW_RASOAT_TU_DONG.md` — khác chủ) | không | diff chỉ docs/CONTEXT; không cuốn runtime bẩn |
-| D0-02 | Chuẩn hóa liên kết, planned path và con trỏ tài liệu | D0-01 | `doc-claims-check --strict`, link check, `git diff --check` xanh — baseline ĐÃ XANH (đo 03-08, phụ lục §13); đo lại trên đúng cây sẽ commit |
+| D0-01 | Tạo worktree từ `origin/master`; mang sang CONTEXT, protocol, ADR-0017–0033, research và kế hoạch này | không | diff chỉ docs/CONTEXT; không cuốn runtime bẩn |
+| D0-02 | Chuẩn hóa liên kết, planned path và con trỏ tài liệu | D0-01 | `doc-claims-check --strict`, link check, `git diff --check` xanh |
 | D0-03 | PR docs-only và review chéo/human | D0-02 | merge vào canonical; ghi base SHA cho foundation |
 
 Kill switch: nếu PR có runtime diff hoặc doc gate đỏ, đóng PR và tạo lại từ worktree sạch; không “dọn”
 canonical bằng reset.
 
-D0 **không bump version/r, không regen manifest**: docs-only nằm ngoài gói (tiền lệ PR #16/r321
-«ngoài gói»). Ai bump ở D0 là sai giao thức.
-
 ### T0 — Toolchain và GitHub baseline
 
 | Packet | Nội dung | Phụ thuộc | Nghiệm thu |
 |---|---|---|---|
-| T0-01 | ĐÃ ĐO 03-08: native 2.1.220 chạy được, npm đã gỡ, winget KHÔNG có ⇒ chỉ còn xác nhận một-bản-duy-nhất + doctor + login/trust | D0 | `where.exe claude` đúng MỘT đường; `claude doctor`, login và workspace trust qua |
-| T0-02 | Kiểm Codex CLI/app, Git, GitHub CLI, Python 3.12, PowerShell 7 (đo 03-08: codex-cli 0.146.0 ✓, `gh auth` ✓); CHẠY THỬ mọi cờ dùng ở runbook §8: `--remote-control`, `--worktree`, `codex exec --output-schema`/`-o`, `codex … review`, `-s`/`-a` | D0 | tất cả `--version` xanh; **cờ chưa kiểm không được vào runbook chuẩn**; không lộ token |
+| T0-01 | Gỡ cài Claude npm bị lệch platform; cài một bản native/WinGet duy nhất | D0 | `claude --version`, `claude doctor`, login và workspace trust qua |
+| T0-02 | Kiểm Codex CLI/app, Git, GitHub CLI, Python 3.12, PowerShell 7 | D0 | tất cả `--version`/`gh auth status` xanh; không lộ token |
 | T0-03 | Chốt nhãn, environment và actor allowlist trên GitHub | D0 | có owner, backup owner và test account không quyền |
 | T0-04 | Kiểm kê worktree/PR/branch đang sống | D0 | mỗi writer có owner và quyết định finish/push/close |
 
@@ -107,18 +109,15 @@ T0 không thêm provider secret vào GitHub.
 ### F1 — Test fragment và bundled topology
 
 Pha này tuần tự vì chạm legacy harness/release. Đích file đã chốt:
-`planned:scripts/test_fragments/`, `planned:scripts/tl_core/test_fragments.py` và
-`planned:scripts/tl_test_fragments_bundled.py`.
-
-Loader/generator là tệp MỚI + điểm móc tối thiểu vào harness — KHÔNG rewrite monolith CRLF trước F2;
-mọi writer ghi UTF-8/LF tường minh (ADR-0031).
+`scripts/test_fragments/`, `scripts/tl_core/test_fragments.py` và
+`scripts/tl_test_fragments_bundled.py`.
 
 | Packet | Write set chính | Kết quả | Nghiệm thu |
 |---|---|---|---|
 | F1-01 | legacy harness + loader mới | API discover fragment theo tên tất định; từ chối ID/path sai | fixture root tạm: zero/one/many/duplicate/malformed |
 | F1-02 | loader + resolver doc/test ID | registry lập chỉ mục cả `rNNN_*` và `wp<issue>_<slug>` | legacy pointer, wp pointer và fake pointer có phản chứng |
 | F1-03 | generator + release predicate | sinh bundled module UTF-8/LF; exclude đúng canonical prefix | byte output giống Windows–Linux; basename cùng tên ở chỗ khác không bị loại |
-| F1-04 | release required files/topology | dev chạy fragment; bundle chỉ mang bundled module | thiếu bundled module fail đích danh TRÊN FIXTURE; required-check thật chỉ bật ở F4 cùng activation (ADR-0031); bundle dưới trần file |
+| F1-04 | release required files/topology | dev chạy fragment; bundle chỉ mang bundled module | thiếu bundled module fail đích danh; bundle dưới trần file |
 | F1-05 | một regression test canary | chuyển/thêm một test mới bằng wp ID | legacy selftest và fragment test cùng xanh |
 
 Promotion gate F1: full selftest, release behavior, determinism và parity hai OS xanh; generator và module
@@ -131,11 +130,11 @@ không có hai implementation khác nhau.
 | F2-00 | Freeze writer mới; owner của mọi worktree push/handoff/close | danh sách writer về zero; chốt EOL base SHA |
 | F2-A | `.gitattributes`, `.editorconfig`, validator blob-index và hook Python | test file mới, Unicode, space, LF/CRLF; hook không chỉ so với HEAD |
 | F2-B | Chỉ `git add --renormalize .` | diff chỉ newline; không thay nội dung logical |
-| F2-C | Tái sinh manifest/golden/artifact; SKILL.md đổi cỡ byte sau LF ⇒ tái sinh golden `workflow_audit.json` + sửa TAY claim ở `references/GOTCHAS.md` dòng 16 + cập nhật rule tạm change-impact (nếu đã seed) | Windows–Linux cùng blob/hash và full gate xanh |
+| F2-C | Tái sinh manifest/golden/artifact | Windows–Linux cùng blob/hash và full gate xanh |
 | F2-D | Mở lại writer | mọi branch cũ rebase trên EOL base; branch chưa rebase bị chặn |
 
-F2 đổi byte MỌI tệp trong gói ⇒ `package_hash` mới: kết thúc F2 phải deploy bản mới (deploy-guard
-đơn điệu) và user re-import Capabilities (SKILL.md đổi byte).
+F2-D phải có Packet Issue và phiên vận hành riêng trước khi mở lại writer. Nếu Mission F2 hiện hành từng coi F2-D
+chỉ là checklist nội bộ, việc tách này đi qua Mission Change Request; không sửa ngầm kế hoạch sau khi F2-A/B/C đã land.
 
 Rollback: chỉ quay lại trước F2-A khi chưa merge. Sau merge, không revert riêng F2-B; pause và sửa
 policy/parity bằng maintenance PR mới.
@@ -147,14 +146,15 @@ Sau F2, có thể chạy tối đa hai packet trong các nhóm ghi không giao. 
 
 | Packet | Nhóm ghi | Nội dung | Phụ thuộc |
 |---|---|---|---|
-| F3-01 | GitHub schema | Issue Forms mission/packet, JSON schema handoff/state/command | F2 |
-| F3-02 | Impact policy | policy/schema/stdlib validator, closure có hướng, candidate report read-only | F2 |
-| F3-03 | Agent adapters | `work-packet`, `cross-review`, `land-packets`; `CLAUDE.md` và `AGENTS.md` chỉ trỏ protocol | F2 |
-| F3-04 | Security | permissions tối thiểu, security paths, CODEOWNERS, cấm LIVE credential trong worker | F2 |
-| F3-05 | Derived metadata | `planned:changelog.d/`, worker cấm version/r number, land-owned metadata | F1, F2 |
-| F3-06 | Worker gate | manifest tạm ngoài repo, fragment tests, write-set/EOL/security checks, không provider secret | F3-01…05 |
+| F3-00 | Governance contract | glossary; MCR/revision; durable orchestration; `gh-aw` adapter boundary; tiered selftest; manual successor prompt; review/land authority; ADR | MCR-54-02 |
+| F3-01 | GitHub schema | Issue Forms mission/packet/change request, JSON schema handoff/review/land/state/command | F2, F3-00 |
+| F3-02 | Impact policy | policy/schema/stdlib validator, closure có hướng, candidate report read-only | F2, F3-00 |
+| F3-03 | Agent adapters | `work-packet`, `cross-review`, `land-packets`; `CLAUDE.md` và `AGENTS.md` chỉ trỏ protocol | F2, F3-00 |
+| F3-04 | Security | permissions tối thiểu, security paths, CODEOWNERS, cấm LIVE credential trong worker | F2, F3-00 |
+| F3-05 | Derived metadata | `planned:changelog.d/`, worker cấm version/r number, land-owned metadata | F1, F2, F3-00 |
+| F3-06 | Worker gate | classifier + aggregator; manifest tạm ngoài repo; fragment tests; evidence/write-set/EOL/security checks; không provider secret | F3-01…05 |
 | F3-07 | Land gate | generate bundled/changelog/version/manifest, parity, dry-run `land prepare` | F3-01…06 |
-| F3-08 | Adapter parity | test Claude/Codex adapter cùng schema, stop condition và completion contract | F3-03, F3-06 |
+| F3-08 | Adapter parity | test Claude/Codex adapter cùng schema, role/session boundary, stop condition và completion contract | F3-03, F3-06 |
 
 Không cho F3-06 và deferred numbering active riêng. Cả hai chỉ bật trong F4.
 
@@ -165,16 +165,28 @@ Không cho F3-06 và deferred numbering active riêng. Cả hai chỉ bật tron
 3. Chạy worker gate và land gate trên ba fixture: code-only, docs-only, fragment-only.
 4. Land activation PR ghi `protocol_version: 1` và `protocol_cutover_sha`.
 5. Chuyển required checks một lần; xóa/disable legacy writer path.
-6. Cập nhật đoạn «PHÁT HÀNH & NHÁNH (ADR-0001)» ở `SKILL.md` dòng 38 và bảng dòng 306 sang ADR-0017 —
-   tệp byte-lock 48.031 B: cân bằng byte hoặc chấp nhận cascade golden/GOTCHAS/manifest; user re-import
-   Capabilities sau khi land.
-7. Chạy hai packet canary thủ công, write set không giao, một Codex và một Claude.
+6. Chạy hai packet canary thủ công, write set không giao, một Codex và một Claude.
 
 Foundation gate chỉ xanh khi hai canary cùng qua worker gate, merge tuần tự vào integration và land mà
 không ai sửa release metadata trên worker branch.
 
-Rollback F4: revert activation PR (trả required checks về legacy) — CHỈ hợp lệ khi chưa packet wp nào
-land; sau packet đầu tiên chỉ fix-forward, không quay lui.
+### A2 — Test economics và gate selftest phân tầng
+
+Pha này được ưu tiên ngay sau F4 và trước model orchestration để giảm chi phí của mọi canary sau. Không activate
+selector bằng cách lọc output của harness eager hoặc shard modulo; full suite hiện hành vẫn là oracle trong thời
+gian shadow.
+
+| Packet | Kết quả | Nghiệm thu/promotion |
+|---|---|---|
+| A2-01 | duration/event instrumentation và stable catalog cho 1.696 ca | báo top cost theo group/callable; instrumentation không đổi verdict |
+| A2-02 | tách callable/group, fake clock/temp và cleanup global state | group chạy độc lập, đảo thứ tự không đổi kết quả |
+| A2-03 | bỏ subprocess/golden lặp, cache parser an toàn, sửa nghĩa/help `release-check --full` | golden chỉ chạy một lần/checkpoint; help và behavior cùng test |
+| A2-04 | parallel full theo process/group trên Windows + Linux | tổng hợp tất định, failure/log không mất, serial/full parity |
+| A2-05 | affected-test selector chạy shadow 2–4 tuần | mọi T1/T2 selection so với full; false-negative bằng 0; unknown luôn full |
+| A2-06 | activate policy T0–T5, exact-identity reuse và rollback switch | classifier + aggregator required; fixture path/risk/catalog/security/release/EOL fail-closed |
+
+Promotion gate A2: median packet feedback giảm có số đo; T3 full hai OS vẫn giữ; không đổi số/ý nghĩa ca test;
+selector policy/catalog/runner được version hóa và evidence đủ để dựng lại vì sao một group chạy hoặc bị bỏ.
 
 ### A3 — Dispatcher shadow, chưa gọi model
 
@@ -199,10 +211,11 @@ retry cùng ID chỉ apply một lần; chain hỏng chuyển `paused` có audit
 ### A4 — Cloud canary một provider
 
 1. A4-01: provider-neutral executor interface và output schema.
-2. A4-02: chọn provider canary theo credential có thể scope/quota; không dùng session token cá nhân chép
-   vào prompt hay repo.
+2. A4-02: implementation canary có thể là GitHub Agentic Workflows hoặc runner native sau cùng interface;
+   `gh-aw` Markdown compile/pin lock, safe outputs, read-only mặc định và feature flag/kill switch.
 3. A4-03: OIDC broker là đích; secret provider trực tiếp chỉ là bước chuyển tiếp có owner/expiry.
-4. A4-04: một packet offline, `max_parallel_workers=1`, không successor, không security path.
+4. A4-04: chọn provider theo credential có thể scope/quota; một packet offline,
+   `max_parallel_workers=1`, không successor/security path và không dùng session token cá nhân chép vào prompt/repo.
 5. A4-05: thu hồi credential và quota test; workflow branch code không nhìn thấy credential.
 
 Nếu tài khoản không có credential automation được hỗ trợ, A4 `paused`; không lách bằng raw cookie/token.
@@ -210,10 +223,14 @@ Nếu tài khoản không có credential automation được hỗ trợ, A4 `pau
 ### A5 — Dual provider và review phân tầng
 
 - A5-01: adapter Claude và Codex cùng executor contract.
-- A5-02: reviewer read-only, verdict schema `approve|changes_requested|blocked`.
-- A5-03: `cross_approved`, `same_provider_approved`, `review_deferred` và các risk không được defer.
+- A5-02: reconciler nhận Executor evidence, validate exact identity rồi tự dispatch reviewer context/worktree mới,
+  read-only; verdict schema `approve|changes_requested|blocked`.
+- A5-03: `cross_approved`, `human_audited` (GitHub identity bền, độc lập, audit evidence + verdict trên exact SHA),
+  `same_provider_approved`, `review_deferred` và các risk không được defer.
 - A5-04: rate-limit/quota fingerprint, reset time và circuit breaker; quota failure không tính attempt nội dung.
 - A5-05: canary hai packet không giao; Claude review Codex và Codex review Claude.
+- A5-06: `changes_requested` trả stable finding IDs cho Executor generation hợp lệ; commit mới tự thu hồi verdict,
+  CI và authorization cũ; approve mới cho phép frontier kế tiếp.
 
 ### A6 — Successor tự động và Android
 
@@ -247,6 +264,82 @@ core; không tạo generic self-hosted runner.
 Promotion gate A8: chạy nhiều mission liên tiếp không stale lease, event loss, duplicate packet,
 out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ bị từ chối có audit.
 
+### A9 — Skill engineering và tiếp nhận upstream có kiểm soát
+
+Pha này chỉ bắt đầu sau khi A8 đã promote. Không vendor/cài toàn bộ một bộ skill cộng đồng vào runtime package;
+mọi tiếp nhận phải provider-neutral, pin exact upstream identity, có provenance và qua behavior fixtures. Workflow,
+plugin hoặc persona bên ngoài chỉ là adapter/tư vấn, không được nhận authority dispatch, review, land, merge hay deploy.
+
+Số thứ tự packet KHÔNG tạo dependency. Chỉ cột `Phụ thuộc` dưới đây có hiệu lực, và nó ánh xạ thẳng sang
+`depends_on` của Packet Issue (`docs/PROTOCOL_DA_PHIEN.md` §3.2). Theo §5 của cùng tài liệu, packet chỉ được
+dispatch sau khi TẤT CẢ predecessor đã integrated vào `mission/<issue>/integration`; accepted, approved hay
+mới mở PR đều chưa đủ, và dispatcher không cấp lease cho packet còn predecessor chưa integrated. Ngoài cột
+đó, mọi packet A9 mang thêm predecessor ngầm định `A8 promoted`: A9 không mở khi A8 chưa promote.
+
+| Packet | Kết quả | Phụ thuộc | Nghiệm thu/promotion |
+|---|---|---|---|
+| A9-01 | inventory nguồn, license, exact upstream commit/version, telemetry/network surface và owner/update policy | A8 promoted | lock/provenance dựng lại được; auto-update từ nhánh động bị cấm; chưa đổi runtime |
+| A9-02 | skill `source-driven-legal-development` provider-neutral | A9-01, A9-03 | ưu tiên nguồn chính thức; ghi version/ngày hiệu lực/deep link; nội dung truy xuất là dữ liệu không đáng tin; conflict với protocol/spec phải được báo, không tự giải quyết |
+| A9-03 | skill conformance/eval harness | A9-01 | fixture kiểm trigger, progressive disclosure, tool allowlist/denylist, prompt injection, one-task/one-role, exact-SHA drift và package/token budget |
+| A9-04 | verification evidence contract và negative/mutation fixtures cho completion claim | A9-03 | claim gắn command mới chạy, exact identity, runner/OS, rc + số đếm dương; gate giả hoặc thiếu bằng chứng phải fail |
+| A9-05 | review-feedback intake dùng stable finding ID | A9-04 | finding neo reviewed SHA/spec; Executor xác minh rồi sửa và chỉ phát `ready_for_rereview`; commit mới thu hồi verdict/evidence cũ; reply đúng review thread khi có |
+| A9-06 | sandbox pilot allowlist `verification-before-completion`, `systematic-debugging`, `receiving-code-review` | A9-01, A9-03, A9-04, A9-05 | user-level/dev-side, pin version, telemetry off, zero authority; promote/pause/rollback theo đúng tiêu chí ở tiểu mục dưới, không theo phép đọc số tự do |
+| A9-07 | snapshot/reference dev-side đã pin cho Claude/Codex adapter practices | A9-01 | không vào runtime package; claim về provider feature được đối chiếu tài liệu chính thức; update chỉ qua reviewed diff |
+
+```mermaid
+flowchart LR
+    A8P["A8 promoted"] --> P1["A9-01 inventory/provenance/pin"]
+    P1 --> P3["A9-03 conformance harness"]
+    P1 --> P2["A9-02 skill legal-development"]
+    P3 --> P2
+    P3 --> P4["A9-04 evidence contract"]
+    P4 --> P5["A9-05 review-feedback intake"]
+    P1 --> P6["A9-06 sandbox pilot"]
+    P3 --> P6
+    P4 --> P6
+    P5 --> P6
+    P1 --> P7["A9-07 snapshot/reference"]
+```
+
+Vì sao fan-in của A9-06 rộng: pilot chỉ đo được khi đã có pin/provenance của đúng bản upstream (A9-01), harness
+bắt được trigger conflict và vi phạm one-task/one-role (A9-03), và hợp đồng bằng chứng cho completion claim
+(A9-04). Allowlist pilot chứa `receiving-code-review`, nên A9-05 phải integrated trước để review-feedback intake
+là hợp đồng của ta; chạy ngược lại thì chính skill upstream định nghĩa review lane, đúng thứ A9 cấm. Thiếu bất kỳ
+predecessor nào thì A9-06 không được dispatch, kể cả dưới dạng thử nghiệm thủ công ngoài packet.
+
+A9-07 chỉ tiếp nhận snapshot/reference cho nguồn ĐÃ nằm trong inventory/provenance/pin của A9-01 đã integrated.
+Nguồn chưa có trong inventory đi qua revision A9-01 mới; không mở rộng write set của A9-07 và không snapshot
+trước rồi kiểm kê sau.
+
+A9 không tạo một self-review lane mới. Chỉ deterministic reconciler của A3–A8 được dispatch task Reviewer độc lập;
+persona/skill không gọi persona có authority. Pattern đo-trước-tối-ưu được triển khai tại A2, không trì hoãn sang A9.
+
+#### Tiêu chí promote/pause/rollback của pilot A9-06
+
+Baseline đo TRƯỚC khi bật allowlist, trên cùng tập packet fixture, cùng runner/OS, cùng exact SHA và cùng catalog
+A2; lượt baseline và lượt pilot dùng cùng số lần lặp rồi ghi cùng một bộ số. Không có baseline dựng lại được thì
+số đo của pilot là dữ liệu quan sát, không phải promotion evidence.
+
+| Chỉ số | Định nghĩa đo | Chiều/ngưỡng đạt | Trigger pause/rollback |
+|---|---|---|---|
+| rework do thiếu bằng chứng | số packet phải làm lại vì completion claim bị fixture A9-04 hoặc Reviewer bác | giảm so với baseline; đây là chiều lợi ích duy nhất cho phép promote | không giảm |
+| trigger conflict | số lần từ hai skill trở lên cùng claim một task, hoặc skill kích hoạt ngoài trigger đã khai ở A9-01 | phải bằng 0, suy ra từ one-task/one-role chứ không phải chỉ tiêu thương lượng | bất kỳ lần nào lớn hơn 0 |
+| token | tổng input cộng output token trên mỗi packet, lấy median và p95 | không vượt baseline nhân ceiling đã chốt; neo vào `used/reserved/limit` của A6-03, không tạo cơ chế budget thứ hai | vượt ceiling |
+| latency | wall-clock trên mỗi packet, lấy median và p95 | không vượt baseline nhân ceiling đã chốt | vượt ceiling |
+
+Rollback trigger không phụ thuộc số đo, áp dụng song song: conformance hoặc negative fixture của A9-03/A9-04 đỏ;
+phát hiện escalation authority, network hay telemetry ngoài allowlist; skill upstream đổi identity so với pin của
+A9-01. Bất kỳ trigger nào bật thì gỡ khỏi sandbox trước, phân tích sau.
+
+Ceiling token/latency, số lần lặp và cửa sổ đo là quyết định material của Mission A9 và HIỆN CHƯA ĐƯỢC CHỐT; kế
+hoạch này không tự đặt ngưỡng thay Mission. Tới khi human hoặc MCR của Mission A9 ghi các giá trị đó vào Packet
+Spec A9-06, pilot chỉ được `pause` hoặc rollback và KHÔNG được promote. Thiếu ngưỡng là fail-closed, không phải
+quyền diễn giải của phiên đang chạy.
+
+Promotion gate A9: behavior và negative fixtures xanh; provenance/license/pin đầy đủ; không tăng authority hoặc
+network surface ngoài allowlist; riêng pilot A9-06 xét theo đúng tiểu mục tiêu chí ở trên chứ không theo phán đoán
+"lợi ích đo được". Nếu không đạt, giữ upstream ở trạng thái tài liệu tham khảo dev-side hoặc rollback khỏi sandbox.
+
 ## 6. Ma trận song song theo pha
 
 | Pha | Số writer tối đa | Điều kiện |
@@ -254,17 +347,15 @@ out-of-effective-write-set hay sai derived metadata; stale SHA và actor lạ b�
 | D0–F2 | 1 | canonical bẩn, release metadata/EOL/harness là nút toàn cục |
 | F3 trước activation | 2 do người giữ | worktree riêng, write set/closure đối chiếu thủ công |
 | F4 canary | 2 | một Claude, một Codex; không giao effective write set |
+| A2 test economics | 1 với harness/runner; 2 cho read-only profiling | full oracle giữ tuần tự tới khi isolation/parallel parity xanh |
 | A3 shadow | 2 | chỉ fake store/dry-run; zero model/secret/canonical write |
 | A4 cloud canary | 1 | một provider, một packet, không successor |
 | A5–A8 | 2 mặc định | dispatcher cấp lease; integration/land vẫn single-writer |
+| A9 skill engineering | 2 nếu write set không giao | core skill/eval single-writer; upstream research/pilot chỉ read-only hoặc sandbox độc lập |
 
 ## 7. Runbook cài đặt và kiểm tra Windows
 
 ### 7.1 Sửa Claude Code trước
-
-> **Đo 03-08 ~09:45: bước này ĐÃ HOÀN THÀNH** — native 2.1.220 tại `C:\Users\admin\.local\bin\claude.exe`,
-> `where.exe claude` đúng một đường. Giữ runbook dưới đây để tái lập máy mới; việc còn lại chỉ là
-> `claude doctor` + login/workspace trust.
 
 Máy hiện không có Microsoft Desktop App Installer/WinGet, vì vậy dùng native installer chính thức
 của Anthropic là đường chuẩn. Chỉ giữ một installation. Thực hiện trong PowerShell 64-bit bình
@@ -323,6 +414,10 @@ Trên GitHub, tạo mission Issue và hai packet Issue. Đóng băng objective, 
 executor và environment trước khi claim. Nếu chưa có dispatcher, người giữ phải tự tính closure và xác
 nhận hai tập không giao.
 
+Nếu objective/acceptance/risk/envelope hoặc đồ thị Packet của Mission cần đổi, ghi Mission Change Request, pause
+phần bị ảnh hưởng, lập impact analysis và chờ human approval trước revision/plan hash mới. Không chỉnh body rồi để
+lease cũ tiếp tục. Packet đổi contract phải revision + generation mới; thay đổi Session Plan trong spec thì không.
+
 ### 8.2 Tạo integration branch và hai worktree
 
 ```powershell
@@ -336,9 +431,8 @@ git -C $Repo fetch origin master
 git -C $Repo branch "mission/$Mission/integration" origin/master
 git -C $Repo push -u origin "mission/$Mission/integration"
 
-# base = head integration hiện tại (ADR-0027); mission mới thì nó trùng origin/master
-git -C $Repo worktree add "$WtRoot\wp101-codex" -b "agent/wp101-g1-codex" "mission/$Mission/integration"
-git -C $Repo worktree add "$WtRoot\wp102-claude" -b "agent/wp102-g1-claude" "mission/$Mission/integration"
+git -C $Repo worktree add "$WtRoot\wp101-codex" -b "agent/wp101-g1-codex" origin/master
+git -C $Repo worktree add "$WtRoot\wp102-claude" -b "agent/wp102-g1-claude" origin/master
 git -C $Repo worktree list
 ```
 
@@ -361,7 +455,7 @@ Prompt ban đầu:
 Đọc docs/PROTOCOL_DA_PHIEN.md và AGENTS.md.
 Nhận packet wp101, generation 1, executor codex, branch agent/wp101-g1-codex.
 Chỉ sửa effective write set ghi trong Issue <URL>.
-Không sửa VERSION, CHANGELOG.md, RELEASE_MANIFEST.json, bundled test module, security path hoặc file ngoài set.
+Không sửa VERSION, CHANGELOG.md, RELEASE_MANIFEST.json, bundled test module, security path hoặc file ngoà set.
 Thêm regression test trong fragment wp101_*; chạy worker gate.
 Khi xong, commit/push branch, mở PR vào mission/100/integration và xuất handoff đúng schema.
 Nếu closure thiếu, generation/spec sai, cần LIVE hoặc gần hết budget: PAUSE, không tự nới quyền.
@@ -409,6 +503,10 @@ agent “tự chia nhau file” trong chat.
 
 - Claude PR do Codex review read-only; Codex PR do Claude/human review read-only.
 - Reviewer không checkout và ghi vào executor worktree.
+- Nếu provider kia hết quota, reviewer cùng provider phải ở phiên/context/worktree mới, ghi
+  `same_provider_approved`; packet nhạy cảm vẫn cần cross-provider hoặc human audit.
+- Review evidence ghi exact SHA, hai trục Spec và Standards/Security, test tự chạy, findings và verdict. Head đổi
+  làm approval cũ hết hiệu lực.
 - Mỗi PR rebase trên integration head mới và chạy lại worker gate trước merge.
 - Dispatcher/người giữ merge từng PR vào integration, không cho hai executor tự merge.
 
@@ -419,7 +517,10 @@ codex exec -C <review-worktree> -s read-only review --base origin/mission/100/in
   'Review theo Spec và Standards/Security; không sửa file; xuất verdict có evidence.'
 ```
 
-Sau cùng, land worktree duy nhất sinh version/changelog/bundled module/manifest và draft PR vào canonical.
+Sau cùng, land worktree duy nhất sinh version/changelog/bundled module/manifest và draft PR vào canonical. Approver
+ủy quyền exact head SHA; Land Operator chỉ thực hiện điều kiện đã ghi. Executor có thể làm operator nhưng không tự
+review/approve diff của mình. Merge vào integration là `integrated`; chỉ canonical + hậu-merge gate + bookkeeping
+mới là `landed`.
 
 ### 8.7 Kết thúc và dọn worktree
 
@@ -464,6 +565,17 @@ Mỗi epic lưu một report non-normative gồm:
 - kill switch/rollback đã test;
 - quyết định promote, pause hay rollback và người duyệt.
 
+Ngoài report epic, mỗi transition giữ evidence tối thiểu ngay trên GitHub:
+
+- **Executor:** provider/role/session/generation, base/head SHA, changed paths, RED/GREEN hoặc phản chứng, lệnh/rc và
+  số đếm dương, việc chưa chạy, handoff/successor;
+- **Reviewer:** phiên độc lập, reviewed SHA, Spec + Standards/Security, test tự chạy, findings, verdict và assurance;
+- **Land:** Approver, authorization URL, exact SHA, Land Operator, merge method/commit, pre/post-merge checks và
+  bookkeeping/dependency đã cập nhật.
+
+Evidence của SHA cũ không được tái sử dụng sau commit mới. Log dài được liên kết bằng URL; comment giữ kết luận,
+rc và số đếm đủ để người duyệt không phải tin lời “passed”.
+
 ## 11. Definition of done của kế hoạch
 
 Kế hoạch chỉ được đánh dấu hoàn tất khi toàn bộ tiêu chí mục 17 của protocol đã có evidence,
@@ -476,6 +588,9 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - Windows reboot/local recovery và cloud-host-off test;
 - Android stale-head/unauthorized-actor test;
 - mission chỉ `complete` sau canonical readback; deploy không tự chạy.
+- upstream skill/reference có exact pin, provenance, license và network/telemetry inventory;
+- skill conformance fixtures bắt được prompt injection, authority escalation và completion claim thiếu bằng chứng;
+- không upstream persona/plugin nào có quyền tự dispatch Reviewer, merge, land hoặc deploy.
 
 ## 12. Nguồn khả năng nền tảng
 
@@ -488,33 +603,6 @@ không chỉ vì hai terminal cùng chạy. Tối thiểu phải có:
 - [Codex Windows sandbox](https://openai.com/index/building-codex-windows-sandbox/)
 - [GitHub Actions concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
 - [GitHub workflow dispatch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
-
-## 13. Phụ lục — số đo nền 2026-08-03 (~09:45, non-normative)
-
-Đo bởi phiên độc lập trên worktree sạch tách từ `origin/master` (`ac63cd7` = r326/v1.36.58);
-ADR/Protocol thắng nếu số liệu dưới đây cũ đi.
-
-- **Cổng tài liệu:** HAI lần `doc-claims-check --strict` trên worktree sạch + trọn bộ D0
-  (CONTEXT + PROTOCOL + ADR-0001-Superseded + ADR-0017…0033 + research + kế hoạch này, lần 2 gồm cả
-  kế hoạch): `ok:true`, rc=0, **0 blocking**; ~314 advisory đều thuộc tài liệu CŨ có sẵn
-  (vd `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md`), không phải bộ D0. Quy ước `planned:` qua cổng
-  thật, không cần dạy thêm mã. Lưu ý cơ chế: tài liệu `docs/` thuộc lớp historical ⇒ path-missing
-  chỉ là ADVISORY — nghĩa là cổng không chặn, nhưng cũng KHÔNG chứng minh mọi con trỏ trong docs/ sống.
-- **Đo lần 3 (~10:15, SAU khi hoàn thiện kế hoạch, trên nền master MỚI r327/v1.36.59):** `ok:true`,
-  314 advisory đúng baseline cũ, **0 advisory thuộc bản kế hoạch hoàn thiện**. Vẫn phải đo lại y hệt
-  trên đúng cây sẽ commit khi vào PR D0 (D0-02).
-- **Toolchain:** `claude` native 2.1.220 (một đường duy nhất, xem §7.1); `codex-cli 0.146.0`;
-  winget KHÔNG có; `gh auth` OK (tài khoản ducthangho).
-- **Git:** PR #22 (r327/v1.36.59, nhánh `nifty-diffie-63b72e`, vá phép dò auth `gws`) MỞ lúc ~09:45 và
-  **ĐÃ MERGE trước ~10:15** — master nay r327/v1.36.59, 0 PR mở, số trống kế tiếp r328/v1.36.60;
-  cửa sổ zero-open-PR ĐANG MỞ cho D0. 9 worktree sống (đo ~02:00 cùng ngày): cây chính
-  (bẩn ~19 tệp M + bộ ADR untracked) · luot3_wt · p16_wt · rasoat_docs_wt · rebase19_wt (detached) ·
-  rel05_wt · wt_r323 · nifty-diffie-63b72e · recursing-nightingale-76526b — đầu vào trực tiếp cho
-  T0-04 và F2-00.
-- **`.gitattributes` @HEAD:** `* -text` (khoá byte, v1.33.61) + `*.sh text eol=lf` +
-  `references/golden/** -text` — khớp tiên đề §2; F2-A thay chính sách này.
-- **CLAUDE.md** dòng 74 và 91 vẫn dạy bump VERSION mọi đợt — đích sửa của F3-03.
-- **PROTOCOL** có mục 17 thật (dòng 482) — con trỏ ở §11 đúng.
-- **Phạm vi doc-claims:** roots = CHANGELOG.md · SKILL.md · CLAUDE.md · CONTEXT.md · references ·
-  docs (`scripts/tl_core/workflow.py` dòng 775); lớp mồ côi L9 phủ cả `docs/adr` (dòng 822-824) —
-  17 ADR mới KHÔNG nổ L9 trong cả hai lần đo.
+- [Superpowers](https://github.com/obra/superpowers)
+- [Agent Skills](https://github.com/addyosmani/agent-skills)
+- [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice)

@@ -27,6 +27,7 @@
   "basis": "<volatile>",
   "by_layer": {
     "L1": 1,
+    "L12": 0,
     "L2": 1,
     "L3": 1,
     "L4": 2,
@@ -115,7 +116,8 @@
     "L6",
     "L7",
     "L8",
-    "L9"
+    "L9",
+    "L12"
   ],
   "layers_skipped": {
     "L9": "lượt quét không đủ rộng (cần SKILL.md + ≥1 tệp references/)"

@@ -965,7 +965,15 @@ def _profile_source_quality(path: str, explicit: str = "auto") -> str:
     if q in ("digital", "ocr"):
         return q
     ext = Path(path or "").suffix.lower()
-    return "ocr" if ext in {".pdf", ".png", ".jpg", ".jpeg", ".tif", ".tiff"} else "digital"
+    # F2-A (ADR-0018), khuôn r251: tập đuôi được ĐẶT TÊN trong `ingest_contract` thay vì nằm trần
+    # ở đây, để cổng EOL (`wp49_eol_policy_index_blobs`) neo vào ĐÚNG hợp đồng, không vào một bản
+    # COPY sẽ trôi lệch. Import TRONG HÀM là bắt buộc, không phải thói quen: `bind` re-home
+    # `__globals__` của hàm này về namespace tl (bẫy I11), nên hằng module-level của ingest_ops
+    # KHÔNG tra được — đã đo: `_OCR_SOURCE_EXTS` mức module ném NameError, còn
+    # `_PDF_BROKEN_FONT_WARN` chỉ sống vì tl.py:1737 re-export tường minh. Import cục bộ tạo tên
+    # LOCAL nên không đụng globals; đây cũng là khuôn ingest_ops đã dùng ở 3 chỗ (671/1603/1758).
+    from tl_core.ingest_contract import OCR_SOURCE_EXTS
+    return "ocr" if ext in OCR_SOURCE_EXTS else "digital"
 
 
 _PDF_BROKEN_FONT_WARN = ("PDF_TEXT_LAYER_BROKEN_FONT: text-layer mất dấu (density<0.005) — Google-convert "

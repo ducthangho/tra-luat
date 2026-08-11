@@ -209,7 +209,7 @@ vị nào muốn đủ ô thì mang sẵn `van_ban_meta` (dict, tuỳ chọn) tr
 ## §7. ĐƯỜNG GHI LÚC CHẠY (bất biến §B.5: state biến động NGOÀI cây skill)
 
 Cây skill được hash toàn bộ vào `package_hash`; mọi file đổi theo lượt rà mà nằm trong cây sẽ làm
-`release-verify`/golden ĐỎ. Đường ghi hợp lệ — máy đọc được, guard `r210_loop_khong_ghi_trong_cay` khoá:
+`release-verify`/golden ĐỎ. Đường ghi hợp lệ — máy đọc được — khai trong khối dưới đây:
 
 <!-- WRITE_PATHS_v1
 _meta/rasoat_state.json
@@ -217,6 +217,13 @@ _meta/rasoat_state.json
 <out-dir>/rasoat_approvals.json
 <out-dir>/rasoat_bugs.md
 -->
+
+**Hai guard, hai tầm — đừng đọc gộp:** `r210_loop_khong_ghi_trong_cay` khoá **KHAI BÁO** — khối trên
+phải CÓ, và mọi đường khai trong đó phải NGOÀI cây skill (phản chứng: bơm một đường TRONG cây, hoặc bỏ
+hẳn khối, thì ca ĐỎ). Nó là LINT: không chạy vòng nào, không `git status`, không `release-verify` ⇒
+**không** chứng minh lúc CHẠY máy có ghi đúng chỗ đã khai. Vế CHẠY do `r298_worklist_chay_kho_a3_a6`
+gánh — chạy khô A3→A6 trên `cmd_state_put`/`cmd_state_get` THẬT (GAS giả CÓ TRẠNG THÁI), đòi state tiến
+đúng một nấc sau MỖI đơn vị, kèm phản chứng "gom ghi một phát cuối lượt" để phép đo phân biệt được.
 
 `_meta/…` = trên Drive trong profile hồ sơ (bền, sống qua kill/sandbox). `<out-dir>` = thư mục local
 NGOÀI cây skill (`--out-dir`), đẩy Drive theo lô ở checkpoint; Claude chat đẩy sau MỖI đơn vị vì sandbox

@@ -8,7 +8,7 @@ nên nếu mọi packet cùng sửa monolith thì hai worker code gần như kh�
 
 `scripts/tl_selftest.py` vì vậy trở thành legacy harness ổn định. Test mới được viết thành fragment chính xác
 `scripts/test_fragments/wp<issue>_<slug>.py`; worker auto-discover tất định và từ chối ID trùng, nên hai packet
-có hai write set độc lập. Phiên land sinh bundled module `planned:scripts/tl_test_fragments_bundled.py` tất định từ toàn
+có hai write set độc lập. Phiên land sinh bundled module `scripts/tl_test_fragments_bundled.py` tất định từ toàn
 bộ fragment. Fragment vẫn được track để audit và chạy trong dev/CI nhưng bị loại khỏi release manifest; bundle
 chỉ mang module sinh để không ăn trần 200 file. Bundled module là tệp phái sinh land-only và trở thành required
 release file cùng lúc activation, không được bật required check trước khi generator/module đã land.
@@ -20,7 +20,7 @@ phải xây loader/generator và kiểm cả topology dev lẫn bundle, nhưng c
 
 Foundation thi công fragment harness trước maintenance EOL để giảm contention mà chưa cần cửa sổ freeze; mọi
 writer của loader/generator phải ghi UTF-8 với LF tường minh, không dựa vào newline mặc định của Windows. Release
-filter loại đúng prefix `planned:scripts/test_fragments/`, không loại mọi thư mục trùng basename. Gate phải kiểm theo hành
+filter loại đúng prefix `scripts/test_fragments/`, không loại mọi thư mục trùng basename. Gate phải kiểm theo hành
 vi: topology dev chạy fragment; topology bundle không chứa fragment nhưng chứa bundled module; thiếu module phải
 fail với lỗi đích danh, không chỉ kiểm “tên thư mục có trong exclude list”.
 

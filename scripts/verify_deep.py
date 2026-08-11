@@ -301,6 +301,67 @@ def extract_appendix(raw):
     return raw[i:].strip() if i >= 0 else ""
 
 
+# ── r322 — KHỐI ĐUÔI của VĂN BẢN HỢP NHẤT ────────────────────────────────────────────────
+# VBHN kết thúc bằng HAI khối KHÔNG PHẢI quy phạm, đứng SAU Điều cuối:
+#   (1) bảng «XÁC THỰC VĂN BẢN HỢP NHẤT» (NĐ250 mục XIII — thể thức; cũng chính là nơi in
+#       layout VPQH 'Số: NN/VBHN-XXX', xem chú thích dòng 44 và cổng TT-VBHN-XAC-THUC);
+#   (2) danh sách ĐỊNH NGHĨA chú thích hợp nhất «[n] …» — mỗi mục nói khoản nào do luật nào
+#       sửa và hiệu lực từ bao giờ.
+# Đường ĐỌC (`resolve.resolve_footnote_amendments`) tách (2) từ lâu bằng ĐÚNG khuôn dưới đây;
+# đường NẠP thì KHÔNG, nên cả hai khối đọng lại trong THÂN ĐIỀU CUỐI của record cache.
+# Đo 02-08-2026 trên cache thật (3/3 record VBHN nhiễm, 0 record khác):
+#     40-2026 Điều 52 : thân 40.637 mà quy phạm chỉ  231  (99,4% là khối đuôi)
+#     19-2026 Điều 141: thân  8.573 — khối đuôi 4.073
+#     89-2026 Điều  79: thân  1.124 — khối đuôi 1.031
+# Hệ quả: trích nguyên văn Điều cuối nhả chú thích ra như thể là quy phạm. Cờ mềm sẵn có
+# ("Điều cuối dài bất thường", §1b) CHỈ bắt được 40-2026 và còn chẩn đoán SAI ĐỊA CHỈ
+# ("nghi phụ lục chưa tách"); hai record kia lọt dưới ngưỡng 8000/8×.
+# ★KHÔNG cắt bỏ — cả hai khối được GIỮ vào trường riêng của record: chú thích mang thông tin
+#  pháp lý, còn khối xác thực là bằng chứng danh tính (VPQH + Số:).
+# ★Khuôn (2) phải TRÙNG TUYỆT ĐỐI `resolve._FOOT_DEF_FIRST` — hai module không import lẫn nhau
+#  nên bất biến này do ca khoá `r322_khuon_chu_thich_khong_duoc_lech` canh.
+VBHN_CHU_THICH_DEF = re.compile(r"(?m)^\s*\[\d{1,3}\]\s")
+VBHN_XAC_THUC_PAT = re.compile(r"(?m)^[ \t]*XÁC\s+THỰC\s+VĂN\s+BẢN\s+HỢP\s+NHẤT[ \t]*$")
+
+
+def vbhn_duoi_start(raw):
+    """→ chỉ số nơi KHỐI ĐUÔI VBHN bắt đầu (sớm nhất giữa «XÁC THỰC…» và mục chú thích «[n] »),
+    dò từ Điều ĐẦU TIÊN trở đi; -1 nếu không có.
+
+    ★Neo ở Điều ĐẦU, KHÔNG phải Điều CUỐI như `appendix_start`. Bản nháp neo Điều cuối và ĐÃ HỎNG
+    trên dữ liệu thật: khối chú thích VBHN **trích dẫn nguyên văn Điều của luật khác** («[7] Điều 31
+    của Luật … quy định như sau: "Điều 31. Thẻ bảo hiểm y tế…"»), nên `ART_SPLIT` khớp SÂU TRONG khối
+    đuôi và marker CUỐI CÙNG nằm SAU cả «[1]» lẫn «XÁC THỰC» ⇒ dò từ đó ra -1 ⇒ **không cắt gì**.
+    Đo 02-08-2026: `40-2026` (114 chú thích) hỏng TRỌN — thân Điều 52 giữ nguyên 40.637 ký tự trong
+    khi quy phạm thật chỉ 231; `19-2026` (10 chú thích) thoát chỉ vì trích ít. Phụ lục không có lớp
+    bệnh này nên `appendix_start` neo Điều cuối vẫn đúng — hai bên CỐ Ý khác nhau ở điểm neo.
+
+    Neo ở Điều đầu là để không cắt nhầm vào KHỐI ĐẦU văn bản (r215: nguồn DUY NHẤT chứng minh danh
+    tính). Phần bảo vệ còn lại nằm ở chính khuôn: cả hai mẫu đều neo ĐẦU DÒNG, mà tham chiếu «[n]»
+    inline trong thân Điều luôn nằm GIỮA dòng (đo: 9/141 Điều của `19-2026` có marker inline, 0 ở
+    đầu dòng), còn «XÁC THỰC VĂN BẢN HỢP NHẤT» phải khớp TOÀN DÒNG."""
+    first_art = ART_SPLIT.search(raw or "")
+    start = first_art.start() if first_art else 0
+    cands = [m.start() for m in (VBHN_CHU_THICH_DEF.search(raw or "", start),
+                                 VBHN_XAC_THUC_PAT.search(raw or "", start)) if m]
+    return min(cands) if cands else -1
+
+
+def tach_duoi_vbhn(raw):
+    """→ (than, xac_thuc, chu_thich). PURE — không đọc/ghi file, không in.
+
+    Không có khối đuôi ⇒ trả `(raw, "", "")` NGUYÊN VẸN: văn bản thường (nghị định, thông tư,
+    luật chưa hợp nhất) phải đi qua bất biến — ca khoá `r322_khong_co_duoi_thi_bat_bien`."""
+    i = vbhn_duoi_start(raw)
+    if i < 0:
+        return raw, "", ""
+    than, duoi = raw[:i], raw[i:]
+    j = VBHN_CHU_THICH_DEF.search(duoi)
+    if j:
+        return than.rstrip(), duoi[:j.start()].strip(), duoi[j.start():].strip()
+    return than.rstrip(), duoi.strip(), ""
+
+
 def garbage_ratio(text):
     """Tỷ lệ ký tự rác kiểu OCR hỏng (~, \\x, ký tự lạ) trên ký tự chữ."""
     letters = sum(1 for c in text if c.isalpha())

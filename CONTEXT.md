@@ -4,6 +4,27 @@ Thuật ngữ chuẩn dùng trong SKILL.md, CHANGELOG, commit message và các p
 File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết định kiến trúc ở `docs/adr/`
 (cây nguồn dev — r291: KHÔNG nằm trong gói phát hành).
 
+## Điều phối đa phiên
+
+- **Mission Plan** — kế hoạch chuẩn của một mục tiêu lớn, gồm outcome, acceptance, risk, budget và đồ thị Packet.
+  Thay đổi material chỉ có hiệu lực qua Mission Change Request được phê duyệt và một revision mới.
+- **Packet Spec** — hợp đồng đóng băng của một đơn vị công việc tự đủ: objective, acceptance, write set,
+  dependency, executor và environment. Khác **Session Plan**, đây là phạm vi được phép ghi và nghiệm thu.
+- **Session Plan** — trình tự chiến thuật của một phiên để hoàn thành đúng một vai trò trên một Packet/review/land.
+  Có thể đổi trong phiên nếu không làm đổi Packet Spec; việc ngoài spec trở thành successor Packet và phiên mới.
+- **Mission Change Request (MCR)** — yêu cầu có audit để đổi Mission Plan, ghi lý do, tác động, quyết định của
+  người có thẩm quyền và revision bị thay thế. MCR không tự có hiệu lực chỉ vì agent đề xuất.
+- **Executor** — vai trò duy nhất được ghi vào branch/worktree của generation để thực hiện Packet Spec.
+- **Reviewer** — vai trò độc lập, read-only với branch Executor, kiểm Spec và Standards/Security trên exact SHA
+  rồi ghi verdict. Cùng provider chỉ được tính là độc lập khi dùng một phiên khác và assurance thấp hơn.
+- **Approver** — người có thẩm quyền chấp nhận exact SHA và điều kiện land; output của agent không tự tạo quyền này.
+- **Land Operator** — người hoặc agent chỉ thực hiện thao tác land đã được Approver ủy quyền bền và có điều kiện.
+  Executor có thể kiêm Land Operator nhưng không nhờ đó trở thành Reviewer hay Approver của code mình.
+- **Merged** — một PR đã được hợp nhất vào nhánh đích của chính PR đó; chưa khẳng định kết quả đã vào canonical.
+- **Integrated** — Packet đã được merge tuần tự vào mission integration branch sau worker gate và review.
+- **Landed** — kết quả đã xuất hiện trên canonical ở exact SHA được duyệt, hậu-merge gate xanh và bookkeeping xong.
+- **Mission complete** — mọi Packet cần thiết đã landed, final acceptance/readback đạt và không còn lease/công việc mở.
+
 ## Bản thể & phát hành
 
 - **Canonical** — cây git chính thức duy nhất tại `D:\Quốc hội\tra-luat` (remote `github.com/ducthangho/tra-luat`).

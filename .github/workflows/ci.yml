@@ -48,11 +48,55 @@ jobs:
           # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
           # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
           fetch-depth: 0
+      # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
+      # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
+      - name: PR head contains required EOL base
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EOL_BASE_SHA: 1880346d2be3c0be9a93de7624ee108d99b6c88c
+        run: |
+          set -eu
+          test -n "$PR_HEAD_SHA"
+          git cat-file -e "${PR_HEAD_SHA}^{commit}"
+          git cat-file -e "${EOL_BASE_SHA}^{commit}"
+          git merge-base --is-ancestor "$EOL_BASE_SHA" "$PR_HEAD_SHA"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: py_compile
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
+      # F2-A (ADR-0018): validator EOL dùng CHUNG với `.githooks/pre-commit`. Hook chỉ phủ máy
+      # dev đã bật `core.hooksPath`; CI là đường TỰ ĐỘNG, và guard không nối vào đường tự động
+      # thì guard chỉ là tài liệu (bài học r225). Chạy trên CẢ ubuntu lẫn windows vì cả lớp hỏng
+      # này là lớp hỏng theo NỀN TẢNG.
+      - name: eol-policy selftest
+        run: python .githooks/eol_policy_test.py
+      - name: pre-push selftest
+        run: python .githooks/pre_push_test.py
+      # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
+      # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
+      #
+      # CHẶN NGAY TỪ F2-A, KHÔNG `continue-on-error`: đây là CI policy, thuộc commit policy.
+      # Hệ quả CÓ CHỦ ĐÍCH và đã lường trước: chạy CI ở ĐÚNG commit F2-A sẽ ĐỎ, vì 10 blob CRLF
+      # di sản vẫn còn trong index cho tới khi F2-B (`git add --renormalize .`) dọn. Ba commit
+      # A/B/C là MỘT đơn vị land; trạng thái trung gian đỏ là đúng, còn hạ cổng để A tự xanh thì
+      # cổng sẽ fail-open ở HEAD cuối — đắt hơn nhiều. Đo ở HEAD cuối: 0 vi phạm.
+      - name: eol-policy survey
+        run: python .githooks/eol_policy.py --all --json
+      # Canonical selftest chạy ở CÂY DEV, nơi `scripts/test_fragments/` và `.editorconfig` đều
+      # có. Gói phát hành KHÔNG có cả hai (bị `_RELEASE_EXCLUDE_DIRS`/`_RELEASE_EXCLUDE_NAMES`
+      # loại), nên một fragment có thể XANH ở dev mà NỔ ở gói. Đã xảy ra thật ở vòng 3:
+      # `wp49_eol_policy_index_blobs` đọc `.editorconfig`, selftest dev 1696/1696 nhưng selftest
+      # trong bundle giải nén báo FAIL. Bước này dựng bundle, giải nén, rồi chạy các bundled
+      # fragment case THẬT trên đúng topology đó.
+      #
+      # Ở ĐÚNG commit F2-A bước này ĐỎ (`TEST_ID_SET_MISMATCH`): bundled module là artifact phái
+      # sinh, thuộc F2-C, nên ở A nó chưa mang `wp49`. Cùng hạng với hai bước eol ở trên — A/B/C
+      # là MỘT đơn vị land, đo ở HEAD cuối mới là phép đo thật.
+      - name: bundled-fragment check (topology gói)
+        run: python .github/checks/bundle_fragment_check.py --json
       - name: gen_instructions selftest
         run: python scripts/gen_instructions.py --selftest
       - name: tl selftest

@@ -170,6 +170,7 @@
     "state-put",
     "status",
     "sweep",
+    "test-fragments-check",
     "the-thuc-build",
     "the-thuc-check",
     "the-thuc-normalize",
@@ -1723,6 +1724,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "test-fragments-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "release_verify",
+        "write_scope": "none"
+      },
       "the-thuc-build": {
         "generated": true,
         "idempotency_contract": null,
@@ -1885,10 +1896,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 152,
+      "generated_parsers": 153,
       "high_risk": 28,
       "nested": 5,
-      "total": 164,
+      "total": 165,
       "write_commands": 87
     },
     "schema": "command_registry.v1"

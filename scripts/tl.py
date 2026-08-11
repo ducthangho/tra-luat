@@ -1636,6 +1636,7 @@ _STUB_MAP = {
         '_manifest_dirty_marker',   # F2 r191 marker manifest bẩn sau lệnh ghi (note CUỐI dòng — I11)
         '_journal_append', '_journal_dir', '_journal_new_run_id', '_journal_path', '_journal_resume_state', '_journaled_reg_clear',
         '_expect_precondition_verdict',   # r279 chốt CAS trước khi ghi registry (note CUỐI dòng — I11)
+        '_reg_rows_split_by_drive_id', '_reg_row_for_drive_id',   # r281 reg_get nở theo src_id → chọn dòng KHỚP KHOÁ (I11)
         '_journaled_reg_upsert', '_journaled_reg_write', '_load_linhvuc', '_load_manifest_full', '_load_phapdien', '_manifest_cache_age_seconds',
         '_verified_reg_write_unlocked', '_journaled_reg_write_unlocked', '_verified_reg_upsert_unlocked',   # r185/WP6 lane (I11)
         '_manifest_entries', '_manifest_placeholder', '_mime_from_info', '_notebook_from_manifest_json', '_rebuild_manifest_index', '_reg_before_from_manifest',

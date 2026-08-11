@@ -503,6 +503,27 @@ def case_void_attempt_allowlist(c: Ctx):
     _doi(0, rc, e, "quota phải hoàn được lượt")
 
 
+def case_void_xong_van_mo_lai_duoc_luot(c: Ctx):
+    """Chiều BẮT OAN: hoàn lượt vì quota không được khoá cứng packet.
+
+    Nếu `void-attempt` trả trần mà quên đóng lượt đang mở thì begin-attempt sau
+    đó bị từ chối vĩnh viễn — một lỗi hạ tầng tạm thời hoá thành ngõ cụt.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt lần 1")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(0, rc, e, "void vì quota")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "sau khi hoàn lượt phải mở lại được lượt")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    import json
+    if json.loads(o.decode("utf-8"))["attempts_used"] != 1:
+        raise AssertionError("hoàn rồi mở lại phải cho attempts_used = 1")
+
+
 def case_void_attempt_ly_do_tu_che_bi_tu_choi(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
@@ -667,6 +688,7 @@ CASES = [
     ("record_post_trung_id_bi_tu_choi", case_record_post_trung_id_bi_tu_choi),
     ("transition_khong_hop_le_thoat_8", case_transition_khong_hop_le_thoat_8),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
+    ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),
     ("void_sau_review_bi_chan", case_void_sau_review_bi_chan),
     ("doctrine_scan_sach_xanh", case_doctrine_scan_sach_xanh),

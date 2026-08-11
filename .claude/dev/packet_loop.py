@@ -339,6 +339,10 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
             f"lượt {st['attempts_used']} đã có review — không hoàn được lượt đã tiêu thụ nội dung",
         )
     st["attempts_used"] -= 1
+    # Đóng luôn lượt đang mở. Thiếu dòng này thì hoàn lượt vì quota lại KHOÁ CỨNG
+    # packet: trần đã trả về nhưng `attempt_open` còn bật nên không mở lại được
+    # lượt nào — biến một lỗi hạ tầng tạm thời thành ngõ cụt vĩnh viễn.
+    st["attempt_open"] = False
     st["history"].append({"event": "void_attempt", "reason": a.reason})
     _save(state_dir, st)
     print(f"đã hoàn một lượt vì {a.reason} — còn dùng {st['attempts_used']}/{st['attempts_limit']}")

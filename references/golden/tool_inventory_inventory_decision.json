@@ -137,6 +137,7 @@
     "push-overflow",
     "quarantine-fix",
     "rasoat",
+    "rasoat-anchor",
     "rasoat-chongcheo",
     "rasoat-loop",
     "rasoat-merge",
@@ -1444,6 +1445,16 @@
         "workflow_task": null,
         "write_scope": "local"
       },
+      "rasoat-anchor": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": "rasoat_hoso",
+        "write_scope": "local"
+      },
       "rasoat-chongcheo": {
         "generated": true,
         "idempotency_contract": null,
@@ -1896,11 +1907,11 @@
       }
     },
     "counts": {
-      "generated_parsers": 153,
+      "generated_parsers": 154,
       "high_risk": 28,
       "nested": 5,
-      "total": 165,
-      "write_commands": 87
+      "total": 166,
+      "write_commands": 88
     },
     "schema": "command_registry.v1"
   },

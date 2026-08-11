@@ -1311,6 +1311,7 @@ _CREDS_LAZY_CMDS = frozenset({
     "rasoat-merge",   # handler tự khai "Không gọi mạng, không NLM" — thuần cục bộ, không có đường dùng creds
     "state-get",      # handler CÓ `except SystemExit → CAN_WEBAPP_LIVE` (rc=2 + JSON) nhưng là CODE CHẾT khi main() thoát trước
     "state-put",      # nhánh `--dry-run` return TRƯỚC load_creds (cục bộ thuần) + cùng `CAN_WEBAPP_LIVE` chết như trên
+    "rasoat-anchor",  # r320: chỉ đọc master/*.json + cache cục bộ (CÙNG LỚP rasoat-merge/doc-patch) — thiếu dòng này thì CI clone sạch sys.exit TRƯỚC handler
 })
 
 

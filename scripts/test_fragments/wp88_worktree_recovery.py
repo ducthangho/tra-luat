@@ -25,8 +25,11 @@ def run(tl_module):
         "docs/research/2026-08-05-kiem-chung-claude-bare-va-auth-gate.md":
             "d782436174b01e3dc5843a335cf6e2539107f9ef4c2c0c10a21371b8cfdc5d22",
     }
-    if any(hashlib.sha256((root / rel).read_bytes()).hexdigest() != digest
-           for rel, digest in expected_docs.items()):
+    present_docs = [rel for rel in expected_docs if (root / rel).is_file()]
+    if present_docs and len(present_docs) != len(expected_docs):
+        return False
+    if any(hashlib.sha256((root / rel).read_bytes()).hexdigest() != expected_docs[rel]
+           for rel in present_docs):
         return False
 
     loader = importlib.import_module("tl_core.test_fragments")

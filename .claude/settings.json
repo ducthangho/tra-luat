@@ -33,13 +33,23 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pretooluse_guard.py"
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse_guard.py\""
           }
         ]
       }

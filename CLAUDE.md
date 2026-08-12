@@ -63,6 +63,52 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   phân bằng NUL-check 8KB + trần 2MB. Bảng mẫu bí mật ĐỂ MỘT CHỖ: `scripts/pkg_secret_scan.py`, dùng
   chung cho cả `sh` lẫn `ps1` — hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
 
+## Gọi agent đa nền (chi tiết: `docs/GOI_AGENT_DA_NEN.md`)
+- **KHÔNG viết script spawn agent.** Dùng CLI CHÍNH THỨC: `claude`
+  (`@anthropic-ai/claude-code`) và `codex` (`@openai/codex`). `.claude/dev/launcher.py`
+  CHỈ dựng chốt quanh một lệnh bất kỳ rồi chạy lệnh đó — không biết agent nào, không
+  prompt dựng sẵn. Wrapper tự chế sẽ phải bám theo cờ/biến/xác thực của hai CLI khác
+  nhau rồi trôi lệch âm thầm.
+- `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
+  Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
+  có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
+  cài phần thiếu khi phiên remote khởi động.
+- **Windows KHÔNG có lệnh `python3`** (chỉ `python`, `py`). Đừng bắt cài thêm bí danh;
+  tài liệu và script phải nhận cả ba tên.
+- **Neo theo KHO, không theo đường dẫn.** Đường dẫn tuyệt đối là thứ duy nhất không
+  mang được sang máy khác — phiên remote clone vào đường dẫn không ai biết trước.
+  Dùng `--expected-repo` + `--expected-root-commit` (vân tay bền nhất: sống qua đổi
+  tên/chuyển chủ/fork, đọc được không cần mạng).
+
+## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+- **`print` giết cả lượt chạy trước khi logic kịp sai.** Console máy Việt là cp1258 nên
+  in đường dẫn có dấu ném `UnicodeEncodeError`, rc=1. Bẫy ở ĐẦU RA chứ không ở đối số:
+  git nhận đúng, trả đúng, rồi câu print giết. Mọi CLI phải ép stdout/stderr sang UTF-8
+  TRƯỚC khi in gì.
+- **`taskkill /T /F` KHÔNG đáng tin.** Trả `rc=1 Access denied` ngay trên tiến trình do
+  chính mình sinh, trong khi `Stop-Process -Force` giết được. Đã giết thì phải KIỂM LẠI;
+  "đã gọi lệnh giết" ≠ "đã chết". Tách mã 124 (quá hạn + đã giết) khỏi 125 (quá hạn +
+  KHÔNG giết được) — trả 124 khi tiến trình còn sống là chốt nói dối.
+- **ZOMBIE tính là đã chết.** Con vừa bị giết nằm ở trạng thái Z tới khi được `wait` thu
+  hồi, mà `os.kill(pid,0)` với zombie vẫn thành công ⇒ báo "chưa giết được" cho tiến
+  trình đã chết hẳn.
+- **`endswith` để so danh tính = lỗ giả mạo.** `--expected-repo github.com/o/r` từng KHỚP
+  remote `https://evil.example/github.com/o/r.git`. Nêu host ⇒ đòi bằng nhau tuyệt đối.
+- **Đột biến ghi vào tệp THẬT rồi khôi phục trong `finally` là bom hẹn giờ.** Lượt chạy bị
+  SIGTERM cắt giữa chừng ⇒ `finally` không chạy ⇒ tệp ở lại trạng thái đã méo, và lượt sau
+  đọc bản méo làm "bản gốc". Một bản vá NGƯỢC (`if False:` thay cho chốt chống giết nhầm
+  PID) đã đi thẳng vào commit theo đường này. Đột biến phải chạy trên BẢN SAO TẠM.
+- **Test không được nhét PID của chính nó vào thứ mình đang thử giết.** Ở lượt đột biến
+  "giết liều" — đúng lượt cần đo — bộ test tự sát (exit 143). Đó chính là nguyên nhân gốc
+  của gạch đầu dòng trên.
+- **Đột biến SỐNG SÓT không luôn nghĩa là test yếu.** Đo rồi mới biết: `-uall` so với mặc
+  định KHÔNG đổi sạch/bẩn (chỉ `-uno` mới làm chốt mù), và ca "rc=0 mà rỗng" được chặn ở
+  BỐN lớp độc lập nên phải đột biến ghép cả bốn. Đột biến sai chỗ ≠ mã sai.
+- **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
+  `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
+  MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
+  `$CLAUDE_PROJECT_DIR`.
+
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).
 - Không đọc/ghi secrets (`*.enc`, `tl_secrets*`, `*cookie*`, `*token*`, `credentials*`) ngoài đúng quy trình

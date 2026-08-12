@@ -39,6 +39,7 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   9   va chạm run_id/short_id
   10  không xác định được danh tính tiến trình → từ chối giết
   11  kho không đúng (remote/commit gốc lệch)
+  12  thiếu công cụ bắt buộc (xem `doctor`)
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
 """
@@ -75,6 +76,7 @@ MA_DANH_TINH = 10
 MA_KHO = 11
 MA_QUA_HAN = 124
 MA_GIET_HUT = 125
+MA_THIEU_CONG_CU = 12
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 # git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
@@ -734,6 +736,98 @@ def lenh_stop(a) -> int:
     return MA_OK if "da tat" in ket else MA_DANH_TINH
 
 
+# ------------------------------------------------------------ kiểm công cụ môi trường
+
+# Vì sao có `doctor`: cùng một lệnh phải chạy được ở máy Windows của người dùng,
+# ở máy macOS/Linux, và trong container của phiên remote — mà ba nơi đó KHÔNG có
+# cùng bộ công cụ. Container Claude Code trên web ĐÃ ĐO ngày 12-08-2026: có
+# python/git/node/claude, KHÔNG có codex, gh, pwsh. Thiếu công cụ mà chỉ lộ ra
+# giữa chừng thì lượt chạy hỏng ở chỗ khó đọc; hỏi trước thì hỏng ở chỗ dễ đọc.
+#
+# Bảng này KHÔNG cài gì cả — nó chỉ đo và chỉ ra lệnh cài chính thức. Việc cài do
+# hook phiên (.claude/hooks/session-start.sh) hoặc do người dùng làm.
+CONG_CU = [
+    {"ten": "git", "bat_buoc": True, "ung_vien": ["git"],
+     "vi_sao": "moi chot neo HEAD/ref/worktree deu qua git",
+     "cai": {"Windows": "winget install --id Git.Git -e",
+             "Darwin": "xcode-select --install  (hoac: brew install git)",
+             "Linux": "sudo apt-get install -y git"}},
+    {"ten": "python", "bat_buoc": True, "ung_vien": ["python3", "python", "py"],
+     "vi_sao": "chinh launcher nay chay bang python",
+     # Windows KHONG co lenh `python3` (chi `python` va `py`) - dung doi tai lieu
+     # bat nguoi ta cai them mot bi danh; nhan CA BA ten la du.
+     "cai": {"Windows": "winget install --id Python.Python.3.12 -e",
+             "Darwin": "brew install python@3.12",
+             "Linux": "sudo apt-get install -y python3"}},
+    {"ten": "claude", "bat_buoc": False, "ung_vien": ["claude"],
+     "vi_sao": "CLI chinh thuc de goi phien Claude (khong tu viet script spawn)",
+     "cai": {"*": "npm install -g @anthropic-ai/claude-code"}},
+    {"ten": "codex", "bat_buoc": False, "ung_vien": ["codex"],
+     "vi_sao": "CLI chinh thuc de goi phien Codex (khong tu viet script spawn)",
+     "cai": {"*": "npm install -g @openai/codex"}},
+    # rg (ripgrep): codex và Claude Code đều gọi nó để tìm trong mã. Nhanh hơn
+    # grep nhiều lần, tôn trọng .gitignore, và đọc UTF-8 đúng — quan trọng với kho
+    # tiếng Việt, nơi `findstr` của Windows đọc sai dấu. Không bắt buộc vì mọi chốt
+    # trong tệp này chạy được khi thiếu nó; chỉ là công cụ tra cứu bị chậm và mù hơn.
+    {"ten": "rg", "bat_buoc": False, "ung_vien": ["rg"],
+     "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
+     "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
+             "Darwin": "brew install ripgrep",
+             "Linux": "sudo apt-get install -y ripgrep"}},
+    {"ten": "node", "bat_buoc": False, "ung_vien": ["node"],
+     "vi_sao": "can de cai hai CLI tren",
+     "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
+             "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"}},
+]
+
+
+def _phien_ban(duong_dan: str) -> str:
+    """Đọc phiên bản, không để một công cụ hỏng treo cả lượt kiểm."""
+    try:
+        p = subprocess.run([duong_dan, "--version"], capture_output=True, text=True,
+                           timeout=15, encoding="utf-8", errors="replace")
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    ra = (p.stdout or "") + (p.stderr or "")   # nhiều CLI in phiên bản ra stderr
+    dong = [d.strip() for d in ra.splitlines() if d.strip()]
+    return dong[0][:80] if dong else ""
+
+
+def lenh_doctor(a) -> int:
+    he = platform.system()
+    ket = []
+    thieu_bat_buoc = []
+    for c in CONG_CU:
+        thay = None
+        for ten in c["ung_vien"]:
+            d = shutil.which(ten)
+            if d:
+                thay = {"goi_bang": ten, "duong_dan": d, "phien_ban": _phien_ban(d)}
+                break
+        cai = c["cai"].get(he) or c["cai"].get("*") or ""
+        ket.append({"ten": c["ten"], "bat_buoc": c["bat_buoc"], "co": thay is not None,
+                    "vi_sao": c["vi_sao"], "lenh_cai": cai, **(thay or {})})
+        if thay is None and c["bat_buoc"]:
+            thieu_bat_buoc.append(c["ten"])
+
+    if a.json:
+        print(json.dumps({"ok": not thieu_bat_buoc, "he_dieu_hanh": he,
+                          "python_dang_chay": sys.version.split()[0],
+                          "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc},
+                         ensure_ascii=False, indent=2))
+    else:
+        print(f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
+        for c in ket:
+            dau = "co  " if c["co"] else ("THIEU" if c["bat_buoc"] else "khong")
+            mo_ta = f"{c.get('phien_ban', '')}" if c["co"] else c["vi_sao"]
+            print(f"  {dau:<5} {c['ten']:<8} {mo_ta}")
+            if not c["co"]:
+                print(f"        cai bang: {c['lenh_cai']}")
+        print("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
+                                else "THIEU " + ", ".join(thieu_bat_buoc)))
+    return MA_THIEU_CONG_CU if thieu_bat_buoc else MA_OK
+
+
 # ----------------------------------------------------------------------- CLI
 
 def _them_chot(p):
@@ -773,6 +867,10 @@ def build_parser():
     s.add_argument("--run-root", required=True)
     s.add_argument("--id", default=None, help="run_id day du hoac short_id")
     s.set_defaults(fn=lenh_status)
+
+    d = sub.add_parser("doctor", help="kiem cong cu moi truong (KHONG cai gi)")
+    d.add_argument("--json", action="store_true")
+    d.set_defaults(fn=lenh_doctor)
 
     k = sub.add_parser("stop", help="dung mot luot chay (giet ca cay tien trinh)")
     k.add_argument("--run-root", required=True)

@@ -851,6 +851,56 @@ def t52_so_hong_KHONG_duoc_im_lang():
         bang("khong doc duoc" in r.stdout, f"khong noi ro so nao hong: {r.stdout}")
 
 
+# ------------------------------------------ kiểm công cụ môi trường (doctor)
+
+MA_THIEU_CONG_CU = 12
+
+
+@ca
+def t53_doctor_bao_du_khi_du():
+    r = chay("doctor", "--json")
+    bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+    d = json.loads(r.stdout)
+    ten = {c["ten"] for c in d["cong_cu"]}
+    bang({"git", "python", "claude", "codex", "rg"} <= ten, f"thieu muc trong bang: {ten}")
+    bang(d["ok"] is True and not d["thieu_bat_buoc"], f"bao thieu oan: {d['thieu_bat_buoc']}")
+
+
+@ca
+def t54_doctor_thieu_cong_cu_bat_buoc_thi_DO():
+    """PATH rỗng: không thấy git lẫn python ⇒ phải thoát 12, không phải 0.
+
+    Một `doctor` luôn xanh thì vô dụng — đây là ca làm nó đỏ.
+    """
+    env = dict(os.environ, PATH="")
+    r = chay("doctor", "--json", env=env)
+    bang(r.returncode == MA_THIEU_CONG_CU, f"mong doi {MA_THIEU_CONG_CU}, duoc {r.returncode}")
+    d = json.loads(r.stdout)
+    bang("git" in d["thieu_bat_buoc"], f"khong bao thieu git: {d['thieu_bat_buoc']}")
+
+
+@ca
+def t55_doctor_nhan_python_khong_can_ten_python3():
+    """Windows KHÔNG có lệnh `python3`, chỉ có `python` và `py`.
+
+    Bắt người dùng cài thêm một bí danh là sửa sai chỗ; nhận cả ba tên mới đúng.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim khong duoi .exe)"
+    with San() as s:
+        binh = s / "bin"
+        binh.mkdir()
+        gia = binh / "python"
+        gia.write_text("#!/bin/sh\necho 'Python 3.99.0'\n", encoding="utf-8")
+        gia.chmod(0o755)
+        env = dict(os.environ, PATH=str(binh))
+        r = chay("doctor", "--json", env=env)
+        d = json.loads(r.stdout)
+        py = next(c for c in d["cong_cu"] if c["ten"] == "python")
+        bang(py["co"] is True and py.get("goi_bang") == "python",
+             f"khong nhan ra `python` khi thieu `python3`: {py}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -910,6 +960,9 @@ DOT_BIEN = [
     ("so_hong_im_lang",
      ('    return MA_THAM_SO if hong else MA_OK', '    return MA_OK'),
      ["t52_so_hong_KHONG_duoc_im_lang"]),
+    ("doctor_luon_xanh",
+     ('        if thay is None and c["bat_buoc"]:', '        if False:'),
+     ["t54_doctor_thieu_cong_cu_bat_buoc_thi_DO"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),

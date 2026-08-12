@@ -133,6 +133,9 @@ objective: <một kết quả tự đủ>
 write_set:
   - type: exact | prefix
     path: <repo-relative-path>
+ref_set:
+  - type: exact | prefix
+    ref: <fully-qualified-git-ref>
 depends_on: []
 executor: claude | codex
 environment: cloud | local
@@ -159,6 +162,12 @@ generation mới trước khi chạy tiếp.
 phiên; agent không tự mở write set. Findings của Reviewer được sửa trong cùng Packet khi spec vẫn đủ; finding cho
 thấy chính spec thiếu thì verdict là `blocked` và đi qua revision mới.
 
+`ref_set` là phạm vi Git ref song song với phạm vi tệp của `write_set`: nó liệt kê chính xác hoặc theo prefix
+những ref mà Packet được phép tạo, cập nhật hoặc xóa. Ref thực tế không được khai là vi phạm, kể cả khi diff tệp
+vẫn nằm hoàn toàn trong `write_set`; `write_set` không diễn đạt được rủi ro ref. Tên ref phải ở dạng đầy đủ
+`refs/...`, và validator so nó với `ref_set` chứ không suy từ branch đang checkout. Tiền lệ đo được là wp82 phải
+ràng buộc các ref thu hồi bằng `acceptance_criteria` vì Packet Spec lúc đó chưa có trường máy đọc được này.
+
 ### 3.3 State projection, event journal và recovery snapshot
 
 Dispatcher sở hữu một JSON state projection có schema version trong comment riêng. Projection giữ revision,
@@ -183,6 +192,82 @@ Mỗi revision của mission active có recovery snapshot JSON trong workflow ar
 repo cho phép; artifact là backup có hạn, không phải nguồn sự thật. Khi apply, final state hash và mission ID được
 neo vào commit canonical. Threat model này chống mất/sửa nhầm một object, không chống repository administrator
 có chủ ý phá mọi bản sao. Comment, review và handoff của agent vẫn là dữ liệu, không mang thẩm quyền.
+
+#### 3.3.1 Checkpoint hash canonical có version
+
+Mỗi state-event sinh sau khi checkpoint schema được cài trên canonical **phải** khai
+`checkpoint_schema_id`, `checkpoint_schema_version`, `state_hash_fields`, `basis_object` và `state_hash`.
+Registry duy nhất cho tập trường/kiểu có thứ tự của từng `event_type` là
+`.github/coordination/checkpoint-schema.v1.json`; schema của chính registry là
+`.github/coordination/schemas/checkpoint-schema.v1.schema.json`. Validator stdlib phải đọc và kiểm cả hai; thiếu,
+hỏng cú pháp, schema/version lạ hoặc event type không có trong registry đều fail-closed. `.github/schemas/state.schema.json`
+thuộc wp60 đang blocked phải khớp `checkpoint_schema_id`/`checkpoint_schema_version` khi wp60 được unblock;
+quy tắc phối hợp này không tự đổi spec, revision hay state của wp60.
+
+`state_hash_fields` là mảng tên trường theo thứ tự lexicographic code point do registry ghim cho event type. Nó là bằng chứng đọc được, nhưng
+không trao cho event quyền tự chọn tập trường. Yêu cầu cũ chỉ bắt mỗi event tự công bố `state_hash_fields` là điều
+kiện cần nhưng chưa đủ: wp88 Fork A (Issue #88 comment 5264350972) công bố 48 trường và tái lập được
+`3574a68d4cfc62918e6e91e0301e7d0939ca7e5cc56bb06c6f69e35b34242428`; Fork B (comment 5264354085)
+công bố 26 trường và tái lập được `f16d7dffaba9c19d6b3612611b00a4158e7cc85e57f74e361b9b3460b71b247c`.
+Hai event cùng predecessor `184522125afd0bf3996708784e0d5c1ca934825c11a2e085da0815216450dfac`, và validator chỉ
+kiểm basis tự công bố sẽ cho cả hai pass. Registry tập trung mới làm basis canonical.
+
+Lõi định danh chung trong registry xuất phát từ giao 20 khóa mà hai Reconciler wp88 độc lập cùng chọn và bất đồng
+0 giá trị, sau khi loại hai khóa riêng của wp88 là `f2d_closed_by_wp88` và `row_12_outcome`: `base_sha`,
+`generation`, `land_head_sha`, `last_consumed_event_id`, `merge_commit`, `merge_method`, `mission_issue`,
+`mission_plan_hash`, `mission_revision`, `mission_state`, `next_role`, `packet_id`, `packet_issue`,
+`packet_revision`, `post_merge_ci_run_id`, `prev_event_hash`, `spec_hash`, `state`. Trường mở rộng theo event type
+phải có căn cứ trong hợp đồng transition/evidence (ví dụ event/fact identity, review exact SHA hoặc land
+authorization) ghi ngay trong registry; Reconciler không thêm trường tùy hứng.
+
+Basis được ghim nguyên văn, không phụ thuộc serializer mặc định của nền tảng:
+
+```text
+state_hash = SHA-256(UTF-8(compact-sorted JSON của basis_object))
+compact     = separators ',' và ':', không khoảng trắng
+sorted      = khóa object theo code point, lexicographic và đệ quy
+array       = giữ nguyên thứ tự đã đặc tả, tuyệt đối không sort
+encoding    = UTF-8 không BOM, không trailing LF
+basis_object = chính xác tập trường registry của event_type
+```
+
+Thiếu một trường, thừa một trường, sai kiểu, `state_hash_fields` khác thứ tự registry hoặc hash lệch đều
+fail-closed. `null`, boolean, integer, number, string, array và object giữ đúng kiểu JSON; không ép chuỗi thành số
+hay coi boolean là integer. Trường giải thích/prose/disposition/ghi chú vẫn được mang ở ngoài `basis_object` làm
+bằng chứng cho người đọc nhưng không được dịch chuyển head. Bằng chứng đo được từ wp88: 28 trường chỉ Fork A có,
+trong đó `f04_disposition`, `f02_state`, `f04_duplicate_review_comment_id`, `open_findings`, `blocking_findings`,
+`branch`, `landed_at`, `target_ref`, đã từng nằm trong hash basis dù là diễn giải hoặc metadata trình bày.
+
+Schema v1 chỉ áp dụng tiến về trước cho event sinh **sau commit canonical cài registry**. Fork A, Fork B và repair
+head `6aafeaba9f11fad6f719cfff6f5cfd07088581bf356474c7c7a3607f8684ff64` ở Issue #88 comment
+5264973649 là bằng chứng lịch sử bất biến: không sửa, xóa, rút lại, tính lại theo schema mới hoặc đảo quyết định
+chọn Fork B.
+
+#### 3.3.2 Đọc lại head và xử lý sibling
+
+Ngay trước append, Reconciler phải đọc lại head hiện tại từ **raw journal**, không dùng label hay projection. Nếu
+đã có sibling cùng `prev_event_hash`, cùng `checkpoint_schema_id`/`checkpoint_schema_version` và cùng canonical
+`basis_object`/`state_hash`, đó là retry idempotent: giữ một logical head và không append transition thứ hai. Nếu
+cùng predecessor nhưng schema, basis hoặc hash khác, Reconciler phải fail-closed: PAUSE, ghi durable conflict,
+đặt `next_role: human`; không agent tie-break, không “first append wins”, không đoán. Quy tắc này nâng bất biến
+ADR-0033 “retry cùng ID không tạo transition thứ hai” lên mức hash, vì hai fork wp88 đã cùng tiêu thụ fact
+5264250136 mà vẫn tạo được hai transition.
+
+#### 3.3.3 Basis của body lấy từ GitHub
+
+Hash body Issue/comment phải đọc trường `.body` trực tiếp từ REST JSON. Không hash JSON wrapper, output có thêm LF
+hay chuỗi HTML-escaped. Đường đọc GitHub qua MCP đã được đo là có thể đổi `"` thành `&#34;` và `>` thành `&gt;`;
+nếu chỉ có representation đó thì phải HTML-unescape đúng một lần để khôi phục raw body trước khi hash, nhưng đường
+REST raw vẫn là chuẩn. Tiền lệ wp84 cho thấy cùng spec có hash đúng `2e07767f...` sau unescape nhưng thành
+`c35a0434...` nếu hash representation đã escape.
+
+Mọi handoff có `handoff_body_sha256` phải công bố `handoff_body_hash_basis` đủ để bên thứ ba tái lập: nguồn raw
+REST `.body`; marker đầu/cuối và occurrence xác định chính xác đoạn payload; quy tắc chuẩn hóa CRLF/CR thành LF;
+trường `handoff_body_sha256` được để trống theo đúng một dạng đã khai để tránh tự tham chiếu; có hay không `rstrip`;
+UTF-8 có hay không BOM; marker có nằm trong basis và có trailing LF hay không. Thiếu một thuộc tính basis trên là
+fail-closed, không thử nhiều biến thể rồi chọn hash tình cờ khớp. Tiền lệ wp87 cho thấy năm tập trường post-state
+hợp lý vẫn không tái lập được các token `f6c79bb8...`/`a875517a...`; checkpoint không tái tính được chỉ là token
+nối chuỗi, không đủ để dựng lại projection.
 
 ## 4. State machine và lease
 
@@ -258,6 +343,13 @@ Effective-write-set exclusion áp dụng toàn repo, kể cả giữa hai missio
 Mở rộng phạm vi hay đổi closure là revision mới, generation mới và cấp lại lease. Khi change-impact policy đổi,
 dispatcher pause và re-evaluate mọi packet chưa terminal; generation chỉ được giữ nếu closure/check/hash không
 đổi. Không dùng nhóm file đối xứng để khóa rộng và không hợp thức hóa pin số đo động vốn nên được sinh hoặc bỏ.
+
+Khi Packet land, `write_set` của revision đó khóa lại cùng lịch sử; nó không trao quyền sửa tệp vô thời hạn và tệp
+đã land không mặc nhiên thuộc một worker cũ. Muốn sửa tiếp chỉ có hai đường hợp lệ: mint Packet mới sở hữu tệp,
+hoặc mở rộng `write_set` của một Packet đang mở bằng revision/generation mới rồi cấp lease lại. Sửa tệp đã land
+khi không Packet active nào sở hữu là vi phạm dù branch có nguồn gốc từ Packet cũ. Tiền lệ là branch
+`codex/wp63-row49-behavior-evidence` sửa artifact của wp63 sau khi wp63 đã merge và không Packet nào phủ; cách xử
+lý hợp lệ là đưa exact path đó vào wp82 revision 2, không hợp thức hóa quyền sở hữu ngầm của branch.
 
 Seed foundation chạy read-only để lập candidate từ tri thức máy đã có trong `doc-claims-check`, golden và release
 gate; human review từng rule trước khi ghi canonical. Nếu check phát `impact_hint` máy đọc được cho coupling ngoài

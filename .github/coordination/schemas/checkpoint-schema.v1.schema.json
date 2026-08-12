@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/.github/coordination/schemas/checkpoint-schema.v1.schema.json",
+  "title": "tra-luat canonical checkpoint registry v1",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "checkpoint_schema_id",
+    "checkpoint_schema_version",
+    "field_order",
+    "applies_to_events_created_after",
+    "historical_hashes_immutable",
+    "common_identity_basis",
+    "event_types"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "checkpoint_schema_id": {"type": "string", "minLength": 1},
+    "checkpoint_schema_version": {"const": 1},
+    "field_order": {"const": "lexicographic_code_point"},
+    "applies_to_events_created_after": {"const": "canonical_installation_commit"},
+    "historical_hashes_immutable": {"const": true},
+    "common_identity_basis": {
+      "type": "object",
+      "required": ["evidence", "fields"],
+      "properties": {
+        "evidence": {"type": "string", "minLength": 1},
+        "fields": {"type": "array", "minItems": 18, "items": {"type": "object"}}
+      },
+      "additionalProperties": false
+    },
+    "event_types": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["evidence", "additional_fields"],
+        "properties": {
+          "evidence": {"type": "string", "minLength": 1},
+          "additional_fields": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

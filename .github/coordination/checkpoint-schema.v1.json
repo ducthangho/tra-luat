@@ -1,0 +1,80 @@
+{
+  "$schema": "./schemas/checkpoint-schema.v1.schema.json",
+  "schema_version": 1,
+  "checkpoint_schema_id": "tra-luat.checkpoint-state-event",
+  "checkpoint_schema_version": 1,
+  "field_order": "lexicographic_code_point",
+  "applies_to_events_created_after": "canonical_installation_commit",
+  "historical_hashes_immutable": true,
+  "common_identity_basis": {
+    "evidence": "Intersection of the 20 equal-valued keys independently selected by wp88 Fork A (5264350972) and Fork B (5264354085), after excluding the wp88-only f2d_closed_by_wp88 and row_12_outcome keys.",
+    "fields": [
+      {"name": "base_sha", "types": ["string", "null"], "format": "git_oid"},
+      {"name": "generation", "types": ["integer"]},
+      {"name": "land_head_sha", "types": ["string", "null"], "format": "git_oid"},
+      {"name": "last_consumed_event_id", "types": ["integer", "null"]},
+      {"name": "merge_commit", "types": ["string", "null"], "format": "git_oid"},
+      {"name": "merge_method", "types": ["string", "null"], "enum": ["merge", "squash", "rebase", null]},
+      {"name": "mission_issue", "types": ["integer"]},
+      {"name": "mission_plan_hash", "types": ["string", "null"], "format": "sha256"},
+      {"name": "mission_revision", "types": ["integer"]},
+      {"name": "mission_state", "types": ["string"]},
+      {"name": "next_role", "types": ["string", "null"]},
+      {"name": "packet_id", "types": ["string", "null"]},
+      {"name": "packet_issue", "types": ["integer", "null"]},
+      {"name": "packet_revision", "types": ["integer", "null"]},
+      {"name": "post_merge_ci_run_id", "types": ["integer", "null"]},
+      {"name": "prev_event_hash", "types": ["string", "null"], "format": "sha256"},
+      {"name": "spec_hash", "types": ["string", "null"], "format": "sha256"},
+      {"name": "state", "types": ["string"]}
+    ]
+  },
+  "event_types": {
+    "packet_transition": {
+      "evidence": "Protocol sections 3.3 and 4: a consumed durable fact causes one packet state transition.",
+      "additional_fields": [
+        {"name": "event_type", "types": ["string"], "enum": ["packet_transition"]},
+        {"name": "event_id", "types": ["integer"]},
+        {"name": "transition_from", "types": ["string", "null"]},
+        {"name": "transition_to", "types": ["string"]},
+        {"name": "consumed_fact_id", "types": ["integer", "null"]}
+      ]
+    },
+    "mission_transition": {
+      "evidence": "Protocol sections 3.1 and 3.3: Mission revision/state transitions consume durable facts.",
+      "additional_fields": [
+        {"name": "event_type", "types": ["string"], "enum": ["mission_transition"]},
+        {"name": "event_id", "types": ["integer"]},
+        {"name": "transition_from", "types": ["string", "null"]},
+        {"name": "transition_to", "types": ["string"]},
+        {"name": "consumed_fact_id", "types": ["integer", "null"]}
+      ]
+    },
+    "review_transition": {
+      "evidence": "Protocol sections 7 and 8: review evidence is bound to an exact SHA, assurance and verdict.",
+      "additional_fields": [
+        {"name": "event_type", "types": ["string"], "enum": ["review_transition"]},
+        {"name": "event_id", "types": ["integer"]},
+        {"name": "transition_from", "types": ["string", "null"]},
+        {"name": "transition_to", "types": ["string"]},
+        {"name": "consumed_fact_id", "types": ["integer", "null"]},
+        {"name": "reviewed_sha", "types": ["string"], "format": "git_oid"},
+        {"name": "review_assurance", "types": ["string"], "enum": ["cross_approved", "human_audited", "same_provider_approved", "review_deferred"]},
+        {"name": "review_verdict", "types": ["string"], "enum": ["approve", "changes_requested", "blocked"]}
+      ]
+    },
+    "land_transition": {
+      "evidence": "Protocol section 7: land evidence binds authorization, approver and exact authorized head.",
+      "additional_fields": [
+        {"name": "event_type", "types": ["string"], "enum": ["land_transition"]},
+        {"name": "event_id", "types": ["integer"]},
+        {"name": "transition_from", "types": ["string", "null"]},
+        {"name": "transition_to", "types": ["string"]},
+        {"name": "consumed_fact_id", "types": ["integer", "null"]},
+        {"name": "authorized_head_sha", "types": ["string"], "format": "git_oid"},
+        {"name": "authorization_url", "types": ["string"]},
+        {"name": "approver", "types": ["string"]}
+      ]
+    }
+  }
+}

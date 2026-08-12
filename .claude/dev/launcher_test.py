@@ -901,6 +901,171 @@ def t55_doctor_nhan_python_khong_can_ten_python3():
              f"khong nhan ra `python` khi thieu `python3`: {py}")
 
 
+# ------------------------------- các ca do vòng AUDIT THỨ HAI của codex tìm ra
+
+@ca
+def t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con():
+    """TOCTOU thật: hash xong rồi con vẫn mở lại đường dẫn GỐC.
+
+    Codex đo được: đổi nội dung sau khi run.json xuất hiện, con đọc bản ĐÃ ĐỔI —
+    neo prompt bị qua mặt hoàn toàn. Với {PROMPT_FILE} con đọc bản chụp bất biến.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        p = s / "nhiem_vu.txt"
+        p.write_text("NOI DUNG GOC", encoding="utf-8")
+        sha = hashlib.sha256(p.read_bytes()).hexdigest()
+        ra = s / "con-doc-duoc.txt"
+        # con ngủ 1.5s rồi mới đọc — thừa thời gian cho kẻ đổi tệp
+        ma_con = (f"import pathlib,time\ntime.sleep(1.5)\n"
+                  f"pathlib.Path({str(ra)!r}).write_text("
+                  f"pathlib.Path('{{PROMPT_FILE}}').read_text(encoding='utf-8'), encoding='utf-8')")
+        pr = subprocess.Popen(
+            [PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+             "--run-root", str(rr), "--prompt-file", str(p),
+             "--expected-prompt-sha256", sha, "--", PY, "-c", ma_con],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            for _ in range(100):
+                time.sleep(0.05)
+                if rr.is_dir() and any((d / "run.json").is_file() for d in rr.iterdir()):
+                    break
+            p.write_text("KE TAN CONG DA DOI", encoding="utf-8")
+            pr.wait(timeout=40)
+            bang(ra.exists(), "con khong chay")
+            bang(ra.read_text(encoding="utf-8") == "NOI DUNG GOC",
+                 f"con doc phai ban DA DOI: {ra.read_text(encoding='utf-8')!r}")
+        finally:
+            if pr.poll() is None:
+                pr.kill()
+                pr.wait(timeout=10)
+
+
+@ca
+def t57_host_KHONG_co_dau_cham_van_phai_chan():
+    """`localhost/o/r` là host-qualified nhưng không có dấu chấm.
+
+    Bản trước phân biệt bằng dấu chấm nên coi nó là 'owner/repo' rồi khớp hậu tố —
+    remote `evil.example/localhost/o/r` lọt qua.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://evil.example/localhost/o/r.git")
+        r = chay("check", "--expected-repo", "localhost/o/r", cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"host khong dau cham bi gia mao lot: {r.returncode}")
+
+
+@ca
+def t58_expected_repo_mot_doan_bi_TU_CHOI():
+    """`--expected-repo r` phải bị từ chối, không phải khớp bừa.
+
+    Help ghi rõ owner/repo; nhận một đoạn nghĩa là bất kỳ chủ nào có kho tên đó
+    đều qua.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://evil.example/attacker/r.git")
+        r = chay("check", "--expected-repo", "r", cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"mot doan duoc chap nhan: {r.returncode}")
+
+
+@ca
+def t59_so_KHONG_luu_doi_so_nguyen_van():
+    """Token/prompt truyền qua dòng lệnh không được nằm lại trong sổ."""
+    bi_mat = "ghp_DOI_SO_NHAY_CAM_0987654321"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
+                 PY, "-c", "pass", "--token", bi_mat)
+        bang(r.returncode == 0, f"{r.returncode}: {r.stderr}")
+        noi_dung = (next(rr.iterdir()) / "run.json").read_text(encoding="utf-8")
+        bang(bi_mat not in noi_dung, "DOI SO NHAY CAM nam trong run.json")
+        d = json.loads(noi_dung)
+        bang(d["lenh"]["so_doi_so"] == 4, f"mat dau vet lenh: {d['lenh']}")
+        bang(d["lenh"]["van_tay"], "khong co van tay de doi chieu")
+
+
+@ca
+def t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc():
+    """Hai tệp RỖNG tên git/python vẫn làm `shutil.which` thấy — nhưng chạy thì hỏng.
+
+    Có mặt trong PATH không phải bằng chứng dùng được.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can .exe rong)"
+    with San() as s:
+        binh = s / "bin"
+        binh.mkdir()
+        for ten in ("git", "python"):
+            gia = binh / ten
+            gia.write_text("", encoding="utf-8")
+            gia.chmod(0o755)
+        env = dict(os.environ, PATH=str(binh))
+        r = chay("doctor", "--json", env=env)
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"doctor xanh voi cong cu khong chay duoc: {r.returncode}")
+        d = json.loads(r.stdout)
+        git = next(c for c in d["cong_cu"] if c["ten"] == "git")
+        bang(git["co"] is False and git.get("co_mat_nhung_khong_chay_duoc"),
+             f"khong noi ro 'co ma hong': {git}")
+
+
+@ca
+def t61_run_root_khong_ghi_duoc_KHONG_do_traceback():
+    """Lỗi môi trường phải ra mã thoát, không phải nguyên stack Python."""
+    if os.geteuid() == 0 if hasattr(os, "geteuid") else False:
+        return "bo qua khi chay bang root (chmod khong chan duoc root)"
+    with San() as s:
+        repo = tao_repo(s)
+        khoa = s / "khoa"
+        khoa.mkdir()
+        khoa.chmod(0o500)
+        try:
+            r = chay("run", "--workspace", str(repo), "--run-root", str(khoa / "runs"),
+                     "--", PY, "-c", "pass")
+            bang(r.returncode == MA_THAM_SO, f"mong doi {MA_THAM_SO}, duoc {r.returncode}")
+            bang("Traceback" not in r.stderr, f"do traceback tho: {r.stderr[-200:]}")
+        finally:
+            khoa.chmod(0o700)
+
+
+@ca
+def t62_qua_han_ma_khong_giet_het_cay_phai_tra_125():
+    """Mẹ chết nhưng CHÁU chưa xác nhận ⇒ 125, không phải 124.
+
+    Đây là lỗi CHẶN số 1 của vòng audit: nhánh dự phòng ghi "da tat (CON CHAU CO
+    THE CON SONG)" — chứa đúng substring mà phía gọi dò — nên hạn chót trả 124
+    trong khi cháu vẫn ghi tiếp vào workspace.
+
+    CHỈ ĐO ĐƯỢC TRÊN WINDOWS: trên POSIX `killpg` giết theo NHÓM nên cả cây luôn
+    chết cùng lúc, không có trạng thái "mẹ chết cháu sống" để dựng. Nói thẳng là
+    chưa đo được ở đây còn hơn dựng một ca giả rồi tưởng đã phủ.
+    """
+    if not LA_WINDOWS:
+        return "chi do duoc tren Windows (POSIX killpg giet ca nhom nen khong dung duoc ca me-chet-chau-song)"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        dau = s / "chau-con-song.txt"
+        ma_con = (f"import subprocess,sys,time;"
+                  f"subprocess.Popen([sys.executable,'-c',"
+                  f"\"import time;time.sleep(8);open({str(dau)!r},'w').write('song')\"]);"
+                  f"time.sleep(60)")
+        han = (datetime.now(timezone.utc) + timedelta(seconds=2)).isoformat()
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--deadline-utc", han, "--", PY, "-c", ma_con)
+        time.sleep(10)
+        chau_song = dau.exists()
+        if chau_song:
+            bang(r.returncode == MA_GIET_HUT,
+                 f"chau con song ma tra {r.returncode} (phai {MA_GIET_HUT})")
+        else:
+            bang(r.returncode == MA_QUA_HAN,
+                 f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -921,18 +1086,36 @@ DOT_BIEN = [
       'if False:\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")'),
      ["t15_prompt_rong_bi_chan_du_sha_dung"]),
     ("giet_lieu_khong_can_khoa",
-     ('if _khoa_danh_tinh(pid) != khoa:\n        return "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)"',
-      'if False:\n        return "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)"'),
+     ('    if _khoa_danh_tinh(pid) != khoa:\n        return KetGiet(False, False, "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)")',
+      '    if False:\n        return KetGiet(False, False, "tu choi giet")'),
      ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
     # DA DO bang git that: `-uall` so voi mac dinh (`normal`) KHONG doi sach/ban,
     # chi doi do chi tiet liet ke (`?? thumuc/` thay vi tung tep). Chi `-uno` moi
     # lam chot MU. Dot bien dau tien cua toi nham vao `-uall` nen song sot - do la
     # dot bien sai, khong phai ma sai.
+    ("bao_da_giet_du_chua_giet",
+     ('    return MA_OK if ket.tron_ven else MA_DANH_TINH', '    return MA_OK'),
+     ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
+    # Giao thuc giet bang CHUOI la nguyen nhan goc cua loi 124-khi-chau-con-song.
+    # Dot bien nay dung lai dung no: coi "me chet" la du, bo qua ca_cay.
+    ("124_khi_chau_con_song",
+     ('                ma = MA_QUA_HAN if ket_giet.tron_ven else MA_GIET_HUT',
+      '                ma = MA_QUA_HAN if ket_giet.me_da_chet else MA_GIET_HUT'),
+     ["t62_qua_han_ma_khong_giet_het_cay_phai_tra_125"]),
     ("khong_cat_thong_tin_dang_nhap",
      ("(?:[^@/]*@)?", "(?:)?"),
      ["t45_token_trong_URL_KHONG_duoc_lo_ra"]),
+    # Khoi phuc DUNG hanh vi truoc khi va: so hau to. Mot dot bien nay dung lai ca
+    # ba lo (gia mao host co dau cham, host khong dau cham, expected mot doan) - vi
+    # ca ba deu la HE QUA cua cung mot quyet dinh sai.
+    ("quay_ve_so_hau_to",
+     ('    doan_m = m.split("/")',
+      '    return t == m or t.endswith("/" + m)\n    doan_m = m.split("/")'),
+     ["t48_host_gia_mao_KHONG_duoc_khop",
+      "t57_host_KHONG_co_dau_cham_van_phai_chan",
+      "t58_expected_repo_mot_doan_bi_TU_CHOI"]),
     ("so_URL_tho_khong_chuan_hoa",
-     ('    co_host = "." in m.split("/", 1)[0]', '    co_host = True'),
+     ('    doan_m = m.split("/")', '    return t == m\n    doan_m = m.split("/")'),
      ["t44_bon_cach_viet_URL_cung_mot_danh_tinh",
       "t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh"]),
     ("lay_cwd_thay_vi_goc_repo",
@@ -947,13 +1130,6 @@ DOT_BIEN = [
      ('    for luong in (sys.stdout, sys.stderr):',
       '    for luong in ():'),
      ["t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau"]),
-    ("host_gia_mao_van_khop",
-     ('    co_host = "." in m.split("/", 1)[0]', '    co_host = False'),
-     ["t48_host_gia_mao_KHONG_duoc_khop"]),
-    ("bao_da_giet_du_chua_giet",
-     ('    return MA_OK if "da tat" in ket else MA_DANH_TINH',
-      '    return MA_OK'),
-     ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
     ("de_len_quyet_dinh_cua_stop",
      ('    if so_moi.get("trang_thai") == "da_dung":', '    if False:'),
      ["t50_stop_roi_runner_KHONG_duoc_de_len_so"]),
@@ -963,6 +1139,17 @@ DOT_BIEN = [
     ("doctor_luon_xanh",
      ('        if thay is None and c["bat_buoc"]:', '        if False:'),
      ["t54_doctor_thieu_cong_cu_bat_buoc_thi_DO"]),
+    ("khong_chup_prompt",
+     ('        if any("{PROMPT_FILE}" in x for x in lenh_con):',
+      '        if False:'),
+     ["t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con"]),
+    ("luu_argv_nguyen_van",
+     ('"ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",',
+      '"ten": a.name, "lenh": [str(x) for x in a.lenh], "trang_thai": "dang_chay",'),
+     ["t59_so_KHONG_luu_doi_so_nguyen_van"]),
+    ("doctor_tin_which",
+     ('            chay_duoc, pb = _phien_ban(d)', '            chay_duoc, pb = True, ""'),
+     ["t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),
@@ -986,6 +1173,7 @@ def chay_dot_bien() -> int:
     global LAUNCHER_DANG_DUNG
     goc = LAUNCHER.read_text(encoding="utf-8")
     hong = 0
+    khong_do = 0
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
         for ten, cap, phai_chet in DOT_BIEN:
@@ -1002,21 +1190,34 @@ def chay_dot_bien() -> int:
             ban_sao = tam / "launcher.py"
             ban_sao.write_text(moi_ma, encoding="utf-8")
             LAUNCHER_DANG_DUNG = ban_sao
-            chet = []
+            chet, bo_qua = [], []
             for fn in CA:
                 if fn.__name__ not in phai_chet:
                     continue
                 try:
-                    fn()
+                    kq = fn()
+                    # Ca TỰ BỎ QUA trên nền này thì đột biến KHÔNG ĐO ĐƯỢC, chứ
+                    # không phải "test yếu". Audit codex: trên Windows t03 và t50
+                    # bỏ qua nên gate 14/14 thành BẤT KHẢ THI ở đúng nền cần nghiệm
+                    # thu — một cổng không bao giờ xanh được thì người ta sẽ bỏ qua nó.
+                    if isinstance(kq, str):
+                        bo_qua.append(fn.__name__)
                 except AssertionError:
                     chet.append(fn.__name__)
                 except Exception as e:  # noqa: BLE001
                     chet.append(f"{fn.__name__}({type(e).__name__})")
-            ok = len(chet) == len(phai_chet)
+            can_do = len(phai_chet) - len(bo_qua)
+            if can_do == 0:
+                khong_do += 1
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: "
+                      f"{', '.join(bo_qua)})")
+                continue
+            ok = len(chet) == can_do
             if not ok:
                 hong += 1
-            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{len(phai_chet)}: "
-                  f"{', '.join(chet) or '(khong ca nao chet)'}")
+            ghi_chu = f" [bo qua: {', '.join(bo_qua)}]" if bo_qua else ""
+            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{can_do}: "
+                  f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
     finally:
         LAUNCHER_DANG_DUNG = LAUNCHER
         shutil.rmtree(tam, ignore_errors=True)
@@ -1025,7 +1226,7 @@ def chay_dot_bien() -> int:
         if LAUNCHER.read_text(encoding="utf-8") != goc:
             print("  !! launcher.py DA BI DOI - dot bien ro ri ra tep that")
             hong += 1
-    return hong
+    return hong, khong_do
 
 
 # ---------------------------------------------------------------------- main
@@ -1033,8 +1234,10 @@ def chay_dot_bien() -> int:
 def main() -> int:
     if "--dot-bien" in sys.argv:
         print("TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:")
-        hong = chay_dot_bien()
-        print(f"\nDOT BIEN: {len(DOT_BIEN) - hong}/{len(DOT_BIEN)} dat")
+        hong, khong_do = chay_dot_bien()
+        do_duoc = len(DOT_BIEN) - khong_do
+        print(f"\nDOT BIEN: {do_duoc - hong}/{do_duoc} dat"
+              + (f"  ({khong_do} khong do duoc tren nen nay)" if khong_do else ""))
         return 1 if hong else 0
 
     if not shutil.which("git"):

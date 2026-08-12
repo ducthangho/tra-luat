@@ -58,9 +58,21 @@ fi
 # --- phụ thuộc Python của kho
 PY=python3
 co python3 || PY=python
+# Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
+# SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac
+# (pypdf>=4.0 khong ghim tran).
 if [ -f requirements.txt ]; then
-  echo "[session-start] cai requirements.txt ..."
-  "$PY" -m pip install --quiet -r requirements.txt || echo "[session-start] CANH BAO: pip that bai"
+  DAU="${TMPDIR:-/tmp}/.tl_reqs_$( "$PY" -c "import hashlib,sys;print(hashlib.sha256(open('requirements.txt','rb').read()).hexdigest()[:16])" )"
+  if [ -f "$DAU" ]; then
+    echo "[session-start] requirements.txt khong doi — bo qua pip"
+  else
+    echo "[session-start] cai requirements.txt ..."
+    if "$PY" -m pip install --quiet -r requirements.txt; then
+      : > "$DAU"
+    else
+      echo "[session-start] CANH BAO: pip that bai"
+    fi
+  fi
 fi
 
 # --- BẰNG CHỨNG DƯƠNG, không tin "đã cài xong". doctor thoát khác 0 khi thiếu

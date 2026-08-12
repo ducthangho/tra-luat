@@ -34,10 +34,13 @@ chỉ là cảnh báo — có phiên không cần gọi agent nào cả.
 
 Đã đo trong container Claude Code web (12-08-2026): có `python`, `git`, `node`,
 `claude`, `rg`; **không có** `codex`, `gh`, `pwsh`. Hook
-`.claude/hooks/session-start.sh` cài phần thiếu khi phiên remote khởi động.
+`.claude/hooks/session-start.sh` cài `codex`, `claude` và `ripgrep` — **không** cài
+`gh` và `pwsh`: kho này dùng GitHub qua MCP chứ không qua `gh`, và không còn đường
+nào cần PowerShell.
 
-Trên Windows **không có lệnh `python3`**, chỉ `python` và `py`. Đừng cài thêm bí
-danh — `doctor` nhận cả ba tên.
+**Không được giả định Windows có `python3`.** Bản cài phổ biến chỉ có `python` và
+`py` (bản Microsoft Store thì có thêm `python3`). Đừng bắt cài thêm bí danh —
+`doctor` nhận cả ba tên.
 
 ## Các chốt
 
@@ -99,7 +102,7 @@ sống, nên phía gọi tưởng đã dọn xong.
 
 ## Ba đường vào, cùng một lệnh
 
-- **Máy cá nhân** — `cd` vào kho rồi chạy. Windows dùng `python`, không `python3`.
+- **Máy cá nhân** — `cd` vào kho rồi chạy. Trên Windows gọi `python` (đừng cho rằng có `python3`).
 - **Điện thoại / Claude Code web** — phiên remote clone kho vào container; hook
   `SessionStart` cài công cụ; lệnh giống hệt vì không có đường dẫn cứng nào.
 - **CI** — đặt `TL_WORKSPACE`, còn lại giống hệt.
@@ -107,10 +110,15 @@ sống, nên phía gọi tưởng đã dọn xong.
 ## Chạy bộ phản chứng
 
 ```bash
-python .claude/dev/launcher_test.py             # 55 ca
-python .claude/dev/launcher_test.py --dot-bien  # 14 đột biến, mỗi cái phải giết đúng ca chỉ định
+python .claude/dev/launcher_test.py             # 62 ca
+python .claude/dev/launcher_test.py --dot-bien  # 17 đột biến, mỗi cái phải giết đúng ca chỉ định
 ```
 
-Ba ca tự bỏ qua trên Windows (git giả, giết con cháu, `stop` giết thật) vì cần
-cây tiến trình thật. **Chưa chạy trên Windows thì đường Windows chưa được nghiệm
-thu** — đúng bài học "script đa nền phải chạy THẬT trên nền đó".
+Một số ca tự bỏ qua tuỳ nền và bộ test **nói rõ ca nào**: trên Windows là các ca
+cần shim shell hoặc cây tiến trình POSIX; trên Linux là ca "mẹ chết mà cháu còn
+sống" (POSIX `killpg` giết theo nhóm nên không dựng được trạng thái đó). Đột biến
+nhắm vào một ca bị bỏ qua sẽ báo **KHONG DO DUOC** thay vì tính là hỏng — một cổng
+không bao giờ xanh được thì người ta sẽ bỏ qua nó.
+
+**Chưa chạy trên Windows thì đường Windows chưa được nghiệm thu** — đúng bài học
+"script đa nền phải chạy THẬT trên nền đó".

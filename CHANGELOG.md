@@ -1,3 +1,24 @@
+# ★ dev-side — launcher đa nền + môi trường agent (2026-08-12)
+
+Không bump `VERSION`: toàn bộ thay đổi nằm trong `.claude/` và `docs/` — hai thư mục đã
+có trong `_RELEASE_EXCLUDE_DIRS`, nên gói phát hành, `RELEASE_MANIFEST.json` và trần 200
+tệp đều không đổi. Ghi lại ở đây vì quy trình đòi mọi commit phải có vết trong CHANGELOG,
+kể cả khi runtime triển khai đứng yên.
+
+- `.claude/dev/launcher.py` — các chốt "gọi agent tất định" chuyển từ hai script PowerShell
+  (chỉ chạy được Windows) sang Python 3: neo HEAD/ref/worktree sạch, neo prompt theo sha256,
+  hạn chót + giết cả cây tiến trình, sổ lượt chạy, nhận diện KHO thay cho neo đường dẫn,
+  và `doctor` kiểm công cụ. Mỗi chốt một mã thoát riêng.
+- KHÔNG viết script spawn agent: launcher chỉ bọc chốt quanh một lệnh bất kỳ; việc gọi
+  agent do CLI chính thức `claude` / `codex` đảm nhiệm.
+- `.claude/hooks/session-start.sh` + đăng ký SessionStart — container Claude Code web thiếu
+  codex/gh/pwsh; hook cài phần cần rồi đòi bằng chứng dương qua `doctor`.
+- Sửa bẫy tự khoá: `PreToolUse` từng dùng đường dẫn TƯƠNG ĐỐI nên khi cwd trôi vào thư mục
+  con thì mọi lệnh Bash chết trước khi chạy.
+- Hai vòng audit của Codex trên Windows thật tìm ra 6 + 7 lỗi; tất cả đã vá, mỗi lỗi khoá
+  bằng một ca phản chứng. `.claude/dev/launcher_test.py`: 62 ca + 17 đột biến.
+- Bài học đã ghi vào `CLAUDE.md`; hướng dẫn ở `docs/GOI_AGENT_DA_NEN.md`.
+
 # ★ v1.36.67 — r335: kích hoạt topology test-fragment F1 (2026-08-06)
 
 Mission F1 chuyển selftest sang mô hình fragment dành cho nhánh phát triển nhưng vẫn giữ gói phát hành

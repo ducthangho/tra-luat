@@ -72,9 +72,10 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
   Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
   có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
-  cài phần thiếu khi phiên remote khởi động.
-- **Windows KHÔNG có lệnh `python3`** (chỉ `python`, `py`). Đừng bắt cài thêm bí danh;
-  tài liệu và script phải nhận cả ba tên.
+  cài codex/claude/ripgrep (KHÔNG cài gh, pwsh: kho dùng GitHub qua MCP, không còn
+  đường nào cần PowerShell).
+- **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
+  Đừng bắt cài thêm bí danh; tài liệu và script phải nhận cả ba tên.
 - **Neo theo KHO, không theo đường dẫn.** Đường dẫn tuyệt đối là thứ duy nhất không
   mang được sang máy khác — phiên remote clone vào đường dẫn không ai biết trước.
   Dùng `--expected-repo` + `--expected-root-commit` (vân tay bền nhất: sống qua đổi

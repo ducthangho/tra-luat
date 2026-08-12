@@ -174,7 +174,7 @@ def _giet_cay(pid: int, khoa: str | None) -> str:
     """Giết tiến trình VÀ con cháu. Trả về chuỗi mô tả việc đã làm."""
     if khoa is None:
         return "tu choi giet: khong co khoa danh tinh"
-    if False:
+    if _khoa_danh_tinh(pid) != khoa:
         return "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)"
     he = platform.system()
     if he == "Windows":

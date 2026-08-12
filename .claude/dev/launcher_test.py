@@ -42,8 +42,13 @@ def ca(fn):
 
 # ------------------------------------------------------------------ khung chạy
 
+# Đường dẫn launcher THỰC SỰ được gọi. Chế độ đột biến trỏ biến này sang một bản
+# sao tạm; tệp trong kho không bao giờ bị ghi (xem chay_dot_bien).
+LAUNCHER_DANG_DUNG = LAUNCHER
+
+
 def chay(*doi_so, cwd=None, env=None) -> subprocess.CompletedProcess:
-    return subprocess.run([PY, str(LAUNCHER), *doi_so], capture_output=True,
+    return subprocess.run([PY, str(LAUNCHER_DANG_DUNG), *doi_so], capture_output=True,
                           text=True, cwd=cwd, env=env)
 
 
@@ -488,7 +493,7 @@ def t33_stop_giet_that():
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
-        pr = subprocess.Popen([PY, str(LAUNCHER), "run", "--workspace", str(repo),
+        pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                                "--run-root", str(rr), "--", PY, "-c",
                                "import time; time.sleep(60)"],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -746,10 +751,23 @@ DOT_BIEN = [
 
 
 def chay_dot_bien() -> int:
+    """Chạy đột biến trên BẢN SAO TẠM, KHÔNG bao giờ ghi vào launcher.py thật.
+
+    ĐÃ TRẢ GIÁ (2026-08-12): bản trước ghi thẳng vào launcher.py rồi khôi phục
+    trong `finally`. Một lượt chạy bị SIGTERM cắt giữa chừng thì `finally` KHÔNG
+    chạy, tệp thật ở lại trạng thái đã méo (`if False:` thay cho chốt chống giết
+    nhầm PID) — và lượt đột biến KẾ TIẾP đọc đúng bản méo đó làm "bản gốc", khôi
+    phục về nó, xoá luôn bản sao. Bản méo đi thẳng vào commit và đã được đẩy lên.
+    Dấu hiệu duy nhất lộ ra là một đột biến báo "khong tim thay doan de dot bien":
+    đoạn cần sửa đã bị chính nó thay mất từ lượt trước.
+
+    Sửa ở TẦNG chứ không vá triệu chứng: tệp dưới quản lý phiên bản không bao giờ
+    bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
+    """
+    global LAUNCHER_DANG_DUNG
     goc = LAUNCHER.read_text(encoding="utf-8")
-    sao = LAUNCHER.with_suffix(".bak-dotbien")
-    sao.write_text(goc, encoding="utf-8")
     hong = 0
+    tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
         for ten, cap, phai_chet in DOT_BIEN:
             if isinstance(cap, tuple):
@@ -762,7 +780,9 @@ def chay_dot_bien() -> int:
             moi_ma = goc
             for c, m in cap:
                 moi_ma = moi_ma.replace(c, m, 1)
-            LAUNCHER.write_text(moi_ma, encoding="utf-8")
+            ban_sao = tam / "launcher.py"
+            ban_sao.write_text(moi_ma, encoding="utf-8")
+            LAUNCHER_DANG_DUNG = ban_sao
             chet = []
             for fn in CA:
                 if fn.__name__ not in phai_chet:
@@ -779,8 +799,13 @@ def chay_dot_bien() -> int:
             print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{len(phai_chet)}: "
                   f"{', '.join(chet) or '(khong ca nao chet)'}")
     finally:
-        LAUNCHER.write_text(goc, encoding="utf-8")
-        sao.unlink(missing_ok=True)
+        LAUNCHER_DANG_DUNG = LAUNCHER
+        shutil.rmtree(tam, ignore_errors=True)
+        # Chốt cuối: tệp thật PHẢI y nguyên. Không tin `finally` - lượt trước
+        # chết vì tin nó.
+        if LAUNCHER.read_text(encoding="utf-8") != goc:
+            print("  !! launcher.py DA BI DOI - dot bien ro ri ra tep that")
+            hong += 1
     return hong
 
 

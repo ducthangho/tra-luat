@@ -17,7 +17,6 @@ import ctypes
 import dataclasses
 import json
 import os
-import pathlib
 import re
 import selectors
 import shutil
@@ -28,7 +27,7 @@ import sys
 import tempfile
 import time
 import uuid
-from typing import Iterable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 try:
     import resource
@@ -74,6 +73,7 @@ class SandboxConfig:
     cpu_period_us: int = 100_000
     cpu_seconds: int = 2
     output_bytes: int = 65_536
+    retained_output_paths: Sequence[str] = ()
     expected_distro: str | None = "Ubuntu 24.04.4 LTS"
     expected_kernel: str | None = "6.18.33.2-microsoft-standard-WSL2"
 
@@ -90,11 +90,16 @@ class SandboxResult:
     fingerprint: Mapping[str, object]
     resource_report: Mapping[str, object]
     cleanup: Mapping[str, object]
+    retained_outputs: Mapping[str, bytes]
 
     def as_dict(self) -> dict[str, object]:
         data = dataclasses.asdict(self)
         data["stdout"] = self.stdout.decode("utf-8", "replace")
         data["stderr"] = self.stderr.decode("utf-8", "replace")
+        data["retained_outputs"] = {
+            name: value.decode("utf-8", "replace")
+            for name, value in self.retained_outputs.items()
+        }
         return data
 
 
@@ -124,6 +129,10 @@ def fingerprint() -> dict[str, object]:
             ["stat", "-fc", "%T", "/sys/fs/cgroup"], text=True
         ).strip()
         controllers = set(_read_text("/sys/fs/cgroup/cgroup.controllers").split())
+        enabled_controllers = set(
+            item.lstrip("+")
+            for item in _read_text("/sys/fs/cgroup/cgroup.subtree_control").split()
+        )
     except (OSError, subprocess.SubprocessError) as exc:
         raise PlatformUnsupported("PlatformUnsupported: cgroup v2 is unavailable") from exc
     if fs_type != "cgroup2fs":
@@ -132,6 +141,12 @@ def fingerprint() -> dict[str, object]:
     if missing:
         raise PlatformUnsupported(
             "PlatformUnsupported: missing cgroup controllers: %s" % ", ".join(missing)
+        )
+    disabled = sorted(_REQUIRED_CONTROLLERS - enabled_controllers)
+    if disabled:
+        raise PlatformUnsupported(
+            "PlatformUnsupported: cgroup controllers not enabled for children: %s"
+            % ", ".join(disabled)
         )
     absent = [tool for tool in _REQUIRED_TOOLS if shutil.which(tool) is None]
     if absent:
@@ -147,6 +162,7 @@ def fingerprint() -> dict[str, object]:
         "architecture": os.uname().machine,
         "cgroup": "v2",
         "cgroup_controllers": sorted(controllers),
+        "cgroup_subtree_control": sorted(enabled_controllers),
         "parent_uid": os.geteuid(),
         "tools": {tool: shutil.which(tool) for tool in _REQUIRED_TOOLS},
     }
@@ -165,6 +181,15 @@ def _validate_config(config: SandboxConfig, fp: Mapping[str, object]) -> tuple[s
         raise SandboxError("command must be a non-empty sequence of non-empty strings")
     if any(_SECRET_VALUE.search(part) for part in config.command):
         raise SandboxError("candidate argv contains credential-shaped material")
+    for locator in config.retained_output_paths:
+        if (
+            not isinstance(locator, str)
+            or not locator
+            or os.path.isabs(locator)
+            or "\\" in locator
+            or any(part in ("", ".", "..") for part in locator.split("/"))
+        ):
+            raise SandboxError("unsafe retained output locator: %r" % (locator,))
     numeric = {
         "timeout_seconds": config.timeout_seconds,
         "memory_bytes": config.memory_bytes,
@@ -210,19 +235,54 @@ def _read_kv(path: str) -> dict[str, int]:
     return result
 
 
+def _read_retained_outputs(
+    writable: str, locators: Sequence[str], byte_limit: int
+) -> dict[str, bytes]:
+    """Read declared scratch outputs without following candidate links."""
+    retained: dict[str, bytes] = {}
+    for locator in locators:
+        path = os.path.join(writable, *locator.split("/"))
+        try:
+            on_disk = os.lstat(path)
+        except FileNotFoundError:
+            continue
+        if not stat.S_ISREG(on_disk.st_mode) or on_disk.st_size > byte_limit:
+            raise SandboxError("retained output is unsafe or oversized: %s" % locator)
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(fd, "rb") as handle:
+            opened = os.fstat(handle.fileno())
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or (opened.st_dev, opened.st_ino) != (on_disk.st_dev, on_disk.st_ino)
+                or opened.st_nlink != 1
+            ):
+                raise SandboxError("retained output changed identity: %s" % locator)
+            retained[locator] = handle.read(byte_limit + 1)
+        if len(retained[locator]) > byte_limit:
+            raise SandboxError("retained output exceeds byte limit: %s" % locator)
+    return retained
+
+
 class _Cgroup:
     def __init__(self, config: SandboxConfig):
         self.path = os.path.join("/sys/fs/cgroup", "wp86-%s" % uuid.uuid4().hex)
         os.mkdir(self.path, 0o700)
-        _write(os.path.join(self.path, "memory.max"), config.memory_bytes)
-        swap = os.path.join(self.path, "memory.swap.max")
-        if os.path.exists(swap):
-            _write(swap, 0)
-        _write(os.path.join(self.path, "pids.max"), config.pids_max)
-        _write(
-            os.path.join(self.path, "cpu.max"),
-            "%d %d" % (config.cpu_quota_us, config.cpu_period_us),
-        )
+        try:
+            _write(os.path.join(self.path, "memory.max"), config.memory_bytes)
+            swap = os.path.join(self.path, "memory.swap.max")
+            if os.path.exists(swap):
+                _write(swap, 0)
+            _write(os.path.join(self.path, "pids.max"), config.pids_max)
+            _write(
+                os.path.join(self.path, "cpu.max"),
+                "%d %d" % (config.cpu_quota_us, config.cpu_period_us),
+            )
+        except BaseException:
+            try:
+                os.rmdir(self.path)
+            except OSError:
+                pass
+            raise
 
     def attach_self_preexec(self) -> None:
         os.setsid()
@@ -292,8 +352,14 @@ def _bind_readonly(source: str, destination: str) -> None:
 
 def _drop_bounding_set(libc) -> None:
     PR_CAPBSET_DROP = 24
-    for capability in range(0, 64):
-        libc.prctl(PR_CAPBSET_DROP, capability, 0, 0, 0)
+    last_capability = int(_read_text("/proc/sys/kernel/cap_last_cap"))
+    for capability in range(last_capability + 1):
+        if libc.prctl(PR_CAPBSET_DROP, capability, 0, 0, 0) != 0:
+            errno_value = ctypes.get_errno()
+            raise SandboxError(
+                "cannot drop capability %d from bounding set: errno %d"
+                % (capability, errno_value)
+            )
 
 
 def _enter_final_user_namespace() -> None:
@@ -310,6 +376,8 @@ def _enter_final_user_namespace() -> None:
     if libc.unshare(CLONE_NEWUSER) != 0:
         errno_value = ctypes.get_errno()
         raise SandboxError("cannot create final user namespace: errno %d" % errno_value)
+
+
 def _clear_privileges_and_chroot(rootfs: str) -> None:
     libc = ctypes.CDLL(None, use_errno=True)
     PR_SET_NO_NEW_PRIVS = 38
@@ -324,7 +392,9 @@ def _clear_privileges_and_chroot(rootfs: str) -> None:
     # A freshly-created user namespace grants capabilities in that namespace.
     # Drop its bounding and effective/permitted/inheritable sets as well.
     _drop_bounding_set(libc)
-    libc.prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0)
+    if libc.prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != 0:
+        errno_value = ctypes.get_errno()
+        raise SandboxError("cannot clear ambient capabilities: errno %d" % errno_value)
     class _CapHeader(ctypes.Structure):
         _fields_ = [("version", ctypes.c_uint32), ("pid", ctypes.c_int)]
     class _CapData(ctypes.Structure):
@@ -409,7 +479,7 @@ def _child_init(encoded: str) -> int:
     _mkdir(writable, 0o700)
     os.chown(writable, 1000, 1000)
     _mount("--bind", writable, os.path.join(rootfs, "scratch"))
-    _mount("-o", "remount,bind,rw,nosuid,nodev", os.path.join(rootfs, "scratch"))
+    _mount("-o", "remount,bind,rw,nosuid,nodev,noexec", os.path.join(rootfs, "scratch"))
     os.chown(os.path.join(rootfs, "scratch"), 1000, 1000)
     _mkdir(os.path.join(rootfs, "scratch", "home"), 0o700)
     _mkdir(os.path.join(rootfs, "scratch", "tmp"), 0o700)
@@ -506,7 +576,7 @@ def run(config: SandboxConfig) -> SandboxResult:
     os.chmod(run_root, 0o700)
     writable = os.path.join(run_root, "writable")
     rootfs = os.path.join(run_root, "rootfs")
-    cgroup = _Cgroup(config)
+    cgroup: _Cgroup | None = None
     spec = {
         "target": target,
         "rootfs": rootfs,
@@ -541,7 +611,9 @@ def run(config: SandboxConfig) -> SandboxResult:
     forced: str | None = None
     truncated = False
     returncode = 125
+    retained_outputs: dict[str, bytes] = {}
     try:
+        cgroup = _Cgroup(config)
         process = subprocess.Popen(
             argv,
             stdin=subprocess.DEVNULL,
@@ -557,8 +629,14 @@ def run(config: SandboxConfig) -> SandboxResult:
         )
         returncode = process.returncode
         resource_report = cgroup.report()
+        retained_outputs = _read_retained_outputs(
+            writable, config.retained_output_paths, config.output_bytes
+        )
     finally:
-        cleanup.update(cgroup.cleanup())
+        if cgroup is not None:
+            cleanup.update(cgroup.cleanup())
+        else:
+            cleanup.update({"cgroup_empty": True, "cgroup_removed": True, "remaining_pids": []})
         try:
             shutil.rmtree(run_root)
             cleanup["scratch_removed"] = True
@@ -583,6 +661,7 @@ def run(config: SandboxConfig) -> SandboxResult:
         fingerprint=fp,
         resource_report=resource_report,
         cleanup=cleanup,
+        retained_outputs=retained_outputs,
     )
 
 

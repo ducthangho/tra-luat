@@ -203,8 +203,6 @@ def keyword_anchors(inventory_keywords: Sequence[str]) -> dict[str, dict[str, ob
         "title": ("title", 1),
         "description": ("description", 1),
         "$defs": ({"x": {"type": "integer"}}, []),
-        "default": (1, 1),
-        "examples": ([1], [1]),
     }
     report: dict[str, dict[str, object]] = {}
     for keyword in sorted(set(inventory_keywords)):
@@ -212,10 +210,18 @@ def keyword_anchors(inventory_keywords: Sequence[str]) -> dict[str, dict[str, ob
             schema, valid_value, invalid_value = micro[keyword]
             good = not validate(schema, valid_value)
             bad = bool(validate(schema, invalid_value))
+        elif keyword in ("default", "examples"):
+            annotation_value = 1 if keyword == "default" else [1]
+            schema = {"type": "integer", keyword: annotation_value}
+            # Annotation values never authorize an otherwise-invalid instance.
+            # This is an executable positive/negative tooth, not a hardcoded
+            # flag for keywords whose values are intentionally non-assertive.
+            good = not validate(schema, 1)
+            bad = bool(validate(schema, "annotation-is-not-authority"))
         elif keyword in annotations:
             good_value, bad_value = annotations[keyword]
             good = not schema_shape_errors({keyword: good_value})
-            bad = bool(schema_shape_errors({keyword: bad_value})) if keyword not in ("default", "examples") else True
+            bad = bool(schema_shape_errors({keyword: bad_value}))
         else:
             good = bad = False
         report[keyword] = {

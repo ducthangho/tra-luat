@@ -1,17 +1,14 @@
 """Executable counterexamples for the RA-02 Linux sandbox.
 
-Run as the trusted WSL parent:
-
-    sudo python3 selftest.py
-
-Every candidate program is materialised under a disposable *target* and is only
-executed through :mod:`runner`; no candidate program is run bare.
+Every candidate program is materialised under a disposable target and executed
+only through :mod:`runner`.  Positive controls are measured before each
+negative containment claim so a missing fixture/binary can never masquerade as
+"blocked".
 """
 
 from __future__ import annotations
 
 import argparse
-import contextlib
 import hashlib
 import json
 import os
@@ -22,14 +19,15 @@ import subprocess
 import sys
 import tempfile
 import threading
-import time
+import urllib.request
+import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import runner  # noqa: E402
 
 
-CANDIDATE = r'''import json, os, pathlib, signal, socket, subprocess, sys, time, urllib.request
+CANDIDATE = r'''import json, os, pathlib, signal, socket, subprocess, sys, time, urllib.error, urllib.request
 
 mode = sys.argv[1]
 if mode == "healthy":
@@ -45,42 +43,72 @@ if mode == "healthy":
     pathlib.Path("/scratch/healthy.txt").write_text("healthy-control\n")
     print(json.dumps(facts, sort_keys=True))
 elif mode == "credentials":
-    shaped = ("TOKEN", "SECRET", "PASSWORD", "CREDENTIAL", "ANTHROPIC", "OPENAI", "AWS_")
-    env_hits = sorted(k for k in os.environ if any(s in k.upper() for s in shaped))
-    argv = pathlib.Path("/proc/self/cmdline").read_bytes()
-    fd_hits = []
+    markers = json.loads(pathlib.Path("/target/markers.json").read_text())
+    marker_bytes = {name: value.encode() for name, value in markers.items()}
+    fd_targets = []
     for item in pathlib.Path("/proc/self/fd").iterdir():
-        try:
-            target = os.readlink(item)
-            if "marker" in target.lower() or "socket" in target.lower(): fd_hits.append(target)
+        try: fd_targets.append(os.readlink(item).encode("utf-8", "replace"))
         except OSError: pass
-    assert not env_hits, env_hits
-    assert b"WP86_SECRET_MARKER" not in argv
-    assert not fd_hits, fd_hits
-    print(json.dumps({"env_hits": env_hits, "fd_hits": fd_hits, "proc_pid_count": len(list(pathlib.Path('/proc').glob('[0-9]*')))}))
+    surfaces = {
+        "env": json.dumps(dict(os.environ), sort_keys=True).encode(),
+        "argv": pathlib.Path("/proc/self/cmdline").read_bytes(),
+        "cwd": os.readlink("/proc/self/cwd").encode(),
+        "fd": b"\0".join(fd_targets),
+    }
+    proc_chunks = []
+    for process in pathlib.Path("/proc").glob("[0-9]*"):
+        for leaf in ("cmdline", "environ"):
+            try: proc_chunks.append((process / leaf).read_bytes())
+            except OSError: pass
+        try: proc_chunks.append(os.readlink(process / "cwd").encode())
+        except OSError: pass
+        try:
+            for fd in (process / "fd").iterdir():
+                try: proc_chunks.append(os.readlink(fd).encode())
+                except OSError: pass
+        except OSError: pass
+    surfaces["procfs"] = b"\0".join(proc_chunks)
+    hits = {
+        surface: sorted(name for name, marker in marker_bytes.items() if marker in raw)
+        for surface, raw in surfaces.items()
+    }
+    assert all(not value for value in hits.values()), hits
+    print(json.dumps({"channels_scanned": sorted(surfaces), "hits": hits, "proc_pid_count": len(list(pathlib.Path('/proc').glob('[0-9]*')))}, sort_keys=True))
 elif mode == "network":
-    host, port, metadata4, metadata6 = sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5]
+    host, port, metadata4, metadata6, unix_path = sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5], sys.argv[6]
     attempts = {}
-    def blocked(name, fn):
-        try: fn(); attempts[name] = False
-        except BaseException: attempts[name] = True
-    blocked("ipv4", lambda: socket.create_connection((host, port), .25))
-    blocked("ipv6", lambda: socket.create_connection(("::1", port), .25))
-    blocked("loopback", lambda: socket.create_connection(("127.0.0.1", port), .25))
-    blocked("metadata4", lambda: socket.create_connection((metadata4, port), .25))
-    blocked("metadata6", lambda: socket.create_connection((metadata6, port), .25))
-    blocked("dns_resolution", lambda: socket.getaddrinfo("wp86-nonexistent.invalid", 80))
+    def blocked(name, fn, allow_missing=False):
+        try:
+            fn(); attempts[name] = False
+        except FileNotFoundError:
+            if not allow_missing: raise
+            attempts[name] = True
+        except (OSError, subprocess.CalledProcessError, urllib.error.URLError):
+            attempts[name] = True
+    blocked("tcp_ipv4", lambda: socket.create_connection((host, port), .4))
+    blocked("tcp_ipv6", lambda: socket.create_connection(("::1", port), .4))
+    blocked("loopback_ipv4", lambda: socket.create_connection(("127.0.0.1", port), .4))
+    blocked("metadata_ipv4", lambda: socket.create_connection((metadata4, port), .4))
+    blocked("metadata_ipv6", lambda: socket.create_connection((metadata6, port), .4))
+    blocked("dns_resolution", lambda: socket.getaddrinfo("wp86-fixture.invalid", 80))
     def udp():
-        s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(.25); s.sendto(b"dns",(host,port)); s.recv(4)
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(.4); sock.sendto(b"dns", (host, port)); sock.recv(16)
     blocked("dns_udp", udp)
     def tcp_dns():
-        s=socket.create_connection((host,port),.25); s.sendall(b"dns"); s.recv(4)
+        with socket.create_connection((host, port), .4) as sock:
+            sock.sendall(b"dns"); sock.recv(16)
     blocked("dns_tcp", tcp_dns)
-    blocked("raw_url", lambda: urllib.request.urlopen("http://%s:%d/" % (host,port), timeout=.25).read())
-    blocked("curl_subprocess", lambda: subprocess.run(["/usr/bin/curl","--max-time","1","http://%s:%d/"%(host,port)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL))
-    blocked("wget_subprocess", lambda: subprocess.run(["/usr/bin/wget","-T","1","-qO-","http://%s:%d/"%(host,port)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL))
-    assert all(attempts.values()), attempts
-    print(json.dumps(attempts,sort_keys=True))
+    url = "http://%s:%d/" % (host, port)
+    blocked("raw_url", lambda: urllib.request.urlopen(url, timeout=.4).read())
+    blocked("curl_subprocess", lambda: subprocess.run(["/usr/bin/curl", "--max-time", "1", "-fsS", url], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+    blocked("wget_subprocess", lambda: subprocess.run(["/usr/bin/wget", "-T", "1", "-qO-", url], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+    def unix_escape():
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.settimeout(.4); sock.connect(unix_path); sock.sendall(b"unix"); sock.recv(16)
+    blocked("unix_socket_escape", unix_escape, allow_missing=True)
+    assert len(attempts) == 12 and all(attempts.values()), attempts
+    print(json.dumps(attempts, sort_keys=True))
 elif mode == "filesystem":
     target=pathlib.Path("/target"); failures={}
     ops={
@@ -139,6 +167,8 @@ class _Fixture:
     def __init__(self, family: int, address: str, port: int, socktype: int):
         self.socket = socket.socket(family, socktype)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if family == socket.AF_INET6:
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
         self.socket.bind((address, port))
         self.socket.settimeout(.1)
         self.stop = False
@@ -146,19 +176,19 @@ class _Fixture:
 
     def start(self):
         if self.socket.type == socket.SOCK_STREAM:
-            self.socket.listen(8)
+            self.socket.listen(16)
         self.thread.start()
 
     def _serve(self):
+        response = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
         while not self.stop:
             try:
                 if self.socket.type == socket.SOCK_STREAM:
                     conn, _ = self.socket.accept()
                     with conn:
-                        conn.recv(128)
-                        conn.sendall(b"ok")
+                        conn.recv(256); conn.sendall(response)
                 else:
-                    data, peer = self.socket.recvfrom(128)
+                    data, peer = self.socket.recvfrom(256)
                     self.socket.sendto(b"ok", peer)
             except (socket.timeout, OSError):
                 pass
@@ -169,21 +199,60 @@ class _Fixture:
         self.thread.join(timeout=.5)
 
 
+class _UnixFixture:
+    def __init__(self, path: pathlib.Path):
+        self.path = path
+        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.socket.bind(str(path)); self.socket.listen(4); self.socket.settimeout(.1)
+        self.stop = False
+        self.thread = threading.Thread(target=self._serve, daemon=True)
+
+    def start(self):
+        self.thread.start()
+
+    def _serve(self):
+        while not self.stop:
+            try:
+                conn, _ = self.socket.accept()
+                with conn:
+                    conn.recv(32); conn.sendall(b"ok")
+            except (socket.timeout, OSError):
+                pass
+
+    def close(self):
+        self.stop = True; self.socket.close(); self.thread.join(timeout=.5)
+        try: self.path.unlink()
+        except FileNotFoundError: pass
+
+
 def _host_ipv4() -> str:
     for value in subprocess.check_output(["hostname", "-I"], text=True).split():
         if "." in value and not value.startswith("127."):
             return value
-    return "127.0.0.1"
+    raise RuntimeError("fixture_gap: no non-loopback IPv4 address")
 
 
 def _run(target: pathlib.Path, scratch: pathlib.Path, mode: str, *args: str, **limits):
-    config = runner.SandboxConfig(
-        target_root=str(target),
-        scratch_root=str(scratch),
-        command=["/usr/bin/python3", "/target/candidate.py", mode, *args],
-        **limits,
-    )
-    return runner.run(config)
+    return runner.run(runner.SandboxConfig(
+        target_root=str(target), scratch_root=str(scratch),
+        command=["/usr/bin/python3", "/target/candidate.py", mode, *args], **limits,
+    ))
+
+
+def _alias_present(address: str) -> bool:
+    return address in subprocess.check_output(["ip", "addr", "show", "dev", "lo"], text=True)
+
+
+def _control_tcp(address: str, port: int) -> bool:
+    with socket.create_connection((address, port), .8) as conn:
+        conn.sendall(b"GET / HTTP/1.0\r\n\r\n")
+        return b"200 OK" in conn.recv(128)
+
+
+def _control_udp(address: str, port: int) -> bool:
+    family = socket.AF_INET6 if ":" in address else socket.AF_INET
+    with socket.socket(family, socket.SOCK_DGRAM) as sock:
+        sock.settimeout(.8); sock.sendto(b"dns", (address, port)); return sock.recv(16) == b"ok"
 
 
 def main(argv=None) -> int:
@@ -201,44 +270,98 @@ def main(argv=None) -> int:
     guard = root / "guard.txt"; guard.write_text("guard\n", encoding="utf-8")
     (target / "escape").symlink_to(guard.parent, target_is_directory=True)
     before = (target / "data.txt").read_bytes(), guard.read_bytes()
-    tests = []
-    fixtures = []
-    aliases = []
-    try:
-        def check(name, expected, result):
-            passed = result.classification == expected and result.cleanup.get("descendants_gone") is True
-            details = result.as_dict()
-            details["stdout"] = {"bytes": len(result.stdout), "sha256": hashlib.sha256(result.stdout).hexdigest(), "preview": result.stdout[:256].decode("utf-8", "replace")}
-            details["stderr"] = {"bytes": len(result.stderr), "sha256": hashlib.sha256(result.stderr).hexdigest(), "preview": result.stderr[:256].decode("utf-8", "replace")}
-            tests.append({"name": name, "expected": expected, "actual": result.classification, "passed": passed, "result": details})
+    marker_values = {
+        name: "WP86_%s_%s" % (name.upper(), uuid.uuid4().hex)
+        for name in ("env", "argv", "cwd", "fd", "procfs")
+    }
+    (target / "markers.json").write_text(json.dumps(marker_values), encoding="utf-8")
+    tests: list[dict[str, object]] = []
+    fixtures: list[object] = []
+    aliases: list[tuple[str, str, str]] = []
 
+    def check(name, expected, result):
+        marker_leak = any(
+            marker.encode() in result.stdout or marker.encode() in result.stderr
+            for marker in marker_values.values()
+        )
+        passed = (
+            result.classification == expected
+            and result.cleanup.get("descendants_gone") is True
+            and not marker_leak
+        )
+        details = result.as_dict()
+        details["stdout"] = {"bytes": len(result.stdout), "sha256": hashlib.sha256(result.stdout).hexdigest(), "preview": result.stdout[:512].decode("utf-8", "replace")}
+        details["stderr"] = {"bytes": len(result.stderr), "sha256": hashlib.sha256(result.stderr).hexdigest(), "preview": result.stderr[:512].decode("utf-8", "replace")}
+        tests.append({"name": name, "expected": expected, "actual": result.classification, "passed": passed, "credential_marker_leak": marker_leak, "result": details})
+
+    try:
         check("healthy_positive_control", "ok", _run(target, scratch, "healthy"))
 
-        saved = {k: os.environ.get(k) for k in ("GH_TOKEN", "GITHUB_TOKEN", "AWS_SECRET_ACCESS_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY")}
+        saved_env = os.environ.get("WP86_PARENT_CREDENTIAL_MARKER")
+        os.environ["WP86_PARENT_CREDENTIAL_MARKER"] = marker_values["env"]
+        cwd_control = root / marker_values["cwd"]; cwd_control.mkdir()
+        fd_path = root / marker_values["fd"]; fd_path.write_text("control")
+        fd_handle = fd_path.open("rb")
+        helper_env = dict(os.environ); helper_env["WP86_PROCFS_CONTROL"] = marker_values["procfs"]
+        helper = subprocess.Popen(
+            [sys.executable, "-c", "import time; print('ready', flush=True); time.sleep(30)", marker_values["argv"]],
+            cwd=cwd_control, env=helper_env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        )
         try:
-            for index, key in enumerate(saved): os.environ[key] = "WP86_SECRET_MARKER_%d" % index
-            check("credential_env_argv_fd_procfs", "ok", _run(target, scratch, "credentials"))
+            if helper.stdout is None or helper.stdout.readline().strip() != b"ready":
+                raise RuntimeError("fixture_gap: credential control helper did not start")
+            controls = {
+                "env": os.environ["WP86_PARENT_CREDENTIAL_MARKER"] == marker_values["env"],
+                "argv": marker_values["argv"].encode() in pathlib.Path("/proc/%d/cmdline" % helper.pid).read_bytes(),
+                "cwd": marker_values["cwd"] in os.readlink("/proc/%d/cwd" % helper.pid),
+                "fd": marker_values["fd"] in os.readlink("/proc/self/fd/%d" % fd_handle.fileno()),
+                "procfs": marker_values["procfs"].encode() in pathlib.Path("/proc/%d/environ" % helper.pid).read_bytes(),
+            }
+            tests.append({"name": "credential_channel_controls", "passed": all(controls.values()), "evidence": controls})
+            check("credential_env_argv_cwd_fd_procfs", "ok", _run(target, scratch, "credentials"))
         finally:
-            for key, value in saved.items():
-                if value is None: os.environ.pop(key, None)
-                else: os.environ[key] = value
+            helper.terminate(); helper.wait(timeout=2); fd_handle.close()
+            if saved_env is None: os.environ.pop("WP86_PARENT_CREDENTIAL_MARKER", None)
+            else: os.environ["WP86_PARENT_CREDENTIAL_MARKER"] = saved_env
 
         host = _host_ipv4(); port = 43861
         metadata4, metadata6 = "169.254.169.254", "fd00:ec2::254"
         for family, address, prefix in ((socket.AF_INET, metadata4, "32"), (socket.AF_INET6, metadata6, "128")):
             version = "-4" if family == socket.AF_INET else "-6"
-            added = subprocess.run(["ip", version, "addr", "add", "%s/%s" % (address, prefix), "dev", "lo"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-            if added: aliases.append((version, address, prefix))
-        for family, address, socktype in ((socket.AF_INET,"0.0.0.0",socket.SOCK_STREAM),(socket.AF_INET,"0.0.0.0",socket.SOCK_DGRAM),(socket.AF_INET6,"::",socket.SOCK_STREAM)):
-            try:
-                fixture=_Fixture(family,address,port,socktype); fixture.start(); fixtures.append(fixture)
-            except OSError:
-                pass
-        control = socket.create_connection((host, port), .5)
-        control.sendall(b"control"); assert control.recv(2) == b"ok"; control.close()
-        if any(item[1] == metadata4 for item in aliases):
-            control = socket.create_connection((metadata4, port), .5); control.close()
-        check("network_dns_loopback_metadata", "ok", _run(target, scratch, "network", host, str(port), metadata4, metadata6))
+            if not _alias_present(address):
+                completed = subprocess.run(["ip", version, "addr", "add", "%s/%s" % (address, prefix), "dev", "lo"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if completed.returncode == 0: aliases.append((version, address, prefix))
+            if not _alias_present(address):
+                tests.append({"name": "network_fixture_positive_controls", "passed": False, "evidence": {"fixture_gap": "alias bind failed: %s" % address}})
+                raise RuntimeError("fixture_gap: alias bind failed: %s" % address)
+        for family, address, socktype in (
+            (socket.AF_INET, "0.0.0.0", socket.SOCK_STREAM),
+            (socket.AF_INET, "0.0.0.0", socket.SOCK_DGRAM),
+            (socket.AF_INET6, "::", socket.SOCK_STREAM),
+        ):
+            fixture = _Fixture(family, address, port, socktype); fixture.start(); fixtures.append(fixture)
+        unix_fixture = _UnixFixture(root / "outside-scratch.sock"); unix_fixture.start(); fixtures.append(unix_fixture)
+        url = "http://%s:%d/" % (host, port)
+        controls = {
+            "tcp_ipv4": _control_tcp(host, port),
+            "udp_ipv4": _control_udp(host, port),
+            "dns_udp": _control_udp(host, port),
+            "dns_tcp": _control_tcp(host, port),
+            "dns_resolution": _control_udp(host, port),
+            "tcp_ipv6": _control_tcp("::1", port),
+            "loopback_ipv4": _control_tcp("127.0.0.1", port),
+            "metadata_ipv4": _control_tcp(metadata4, port),
+            "metadata_ipv6": _control_tcp(metadata6, port),
+            "raw_url": urllib.request.urlopen(url, timeout=.8).read() == b"ok",
+            "curl": shutil.which("curl") is not None and subprocess.run(["curl", "--max-time", "1", "-fsS", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0,
+            "wget": shutil.which("wget") is not None and subprocess.run(["wget", "-T", "1", "-qO-", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0,
+        }
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as unix_control:
+            unix_control.settimeout(.8); unix_control.connect(str(unix_fixture.path)); unix_control.sendall(b"unix")
+            controls["unix_socket"] = unix_control.recv(16) == b"ok"
+        tests.append({"name": "network_fixture_positive_controls", "passed": all(controls.values()), "evidence": controls})
+        if all(controls.values()):
+            check("network_dns_loopback_metadata_unix", "ok", _run(target, scratch, "network", host, str(port), metadata4, metadata6, str(unix_fixture.path)))
 
         check("target_readonly_escape_and_links", "ok", _run(target, scratch, "filesystem", str(guard)))
         assert ((target / "data.txt").read_bytes(), guard.read_bytes()) == before
@@ -254,11 +377,13 @@ def main(argv=None) -> int:
         shutil.rmtree(root, ignore_errors=True)
     passed = sum(1 for item in tests if item["passed"])
     report = {"ok": passed == len(tests) and bool(tests), "passed": passed, "total": len(tests), "tests": tests}
+    encoded = json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n"
+    if any(marker in encoded for marker in marker_values.values()):
+        raise RuntimeError("credential marker leaked into sandbox report")
     if args.output:
-        output = pathlib.Path(args.output).resolve()
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        output = pathlib.Path(args.output).resolve(); output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(encoded, encoding="utf-8")
+    print(encoded, end="")
     return 0 if report["ok"] else 1
 
 

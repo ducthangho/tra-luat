@@ -6,7 +6,9 @@ results, validators, snapshots or labels from the candidate target.
 
 from __future__ import annotations
 
+import hashlib
 import re
+from types import MappingProxyType
 from typing import Mapping
 
 DIALECT = "https://json-schema.org/draft/2020-12/schema"
@@ -18,17 +20,53 @@ EXPECTED_FILES = (
     "command.schema.json",
 )
 
-PINS = {
-    "protocol_commit_sha": "ea92ec960a23026ab345d8e9b97b36479a66d240",
-    "protocol_file_sha256": "57f6dde9ce348414b32dcd33a71dae52102a5726130149579926906e15d7916d",
-    "mission_issue": 76,
-    "mission_revision": 3,
-    "mission_plan_hash": "346f9a6d89cf327b67d7ce7b7ea1e7b769f59a3bd90518afa9da5cec280ebde0",
-    "packet_issue": 86,
-    "packet_revision": 4,
-    "packet_generation": 4,
-    "packet_spec_hash": "3a15ea7229d790e40da4e8973348b0727224abd716463605923056d4289c1913",
-}
+_PIN_ITEMS = (
+    ("protocol_commit_sha", "ea92ec960a23026ab345d8e9b97b36479a66d240"),
+    ("protocol_path", "docs/PROTOCOL_DA_PHIEN.md"),
+    ("protocol_file_git_oid", "541e911d272b4b75afb072f25008e8149f97084c"),
+    ("protocol_file_sha256", "57f6dde9ce348414b32dcd33a71dae52102a5726130149579926906e15d7916d"),
+    ("mission_issue", 76),
+    ("mission_revision", 3),
+    ("mission_plan_hash", "346f9a6d89cf327b67d7ce7b7ea1e7b769f59a3bd90518afa9da5cec280ebde0"),
+    ("packet_issue", 86),
+    ("packet_revision", 4),
+    ("packet_generation", 4),
+    ("packet_spec_hash", "3a15ea7229d790e40da4e8973348b0727224abd716463605923056d4289c1913"),
+)
+PINS = MappingProxyType(dict(_PIN_ITEMS))
+
+
+def verify_pin_readback(readback: Mapping[str, object], protocol_source: bytes) -> dict[str, str]:
+    """Bind runtime authority and exact protocol bytes before any evaluation.
+
+    ``readback`` is supplied by the trusted dispatcher rather than inferred
+    from candidate data.  Comparing it to a private immutable tuple catches a
+    monkeypatched/corrupted public pin mapping as well as stale dispatcher
+    facts.  The Git blob oid and SHA-256 independently bind the supplied source
+    bytes; a path or commit label alone is not treated as evidence.
+    """
+    installed = dict(PINS)
+    expected = dict(_PIN_ITEMS)
+    if installed != expected:
+        raise ValueError("installed answer-key pins were mutated")
+    if dict(readback) != expected:
+        missing = sorted(set(expected) - set(readback))
+        extra = sorted(set(readback) - set(expected))
+        changed = sorted(
+            key for key in set(expected) & set(readback) if expected[key] != readback[key]
+        )
+        raise ValueError(
+            "pin readback mismatch: missing=%s extra=%s changed=%s"
+            % (missing, extra, changed)
+        )
+    sha256 = hashlib.sha256(protocol_source).hexdigest()
+    header = ("blob %d\0" % len(protocol_source)).encode("ascii")
+    git_oid = hashlib.sha1(header + protocol_source).hexdigest()
+    if sha256 != expected["protocol_file_sha256"]:
+        raise ValueError("protocol source SHA-256 mismatch")
+    if git_oid != expected["protocol_file_git_oid"]:
+        raise ValueError("protocol source Git blob mismatch")
+    return {"sha256": sha256, "git_oid": git_oid}
 
 TOP_FIELDS = {
     "handoff.schema.json": frozenset({

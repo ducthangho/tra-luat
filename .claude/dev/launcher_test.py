@@ -1368,6 +1368,196 @@ def t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con():
              f"stderr={(ds[0] / 'stderr.log').read_text(encoding='utf-8')!r}")
 
 
+@ca
+def t68_kho_duong_dan_SAU_neu_host_van_phai_QUA():
+    """`--expected-repo` nêu host + đường dẫn ≥4 đoạn (GitLab subgroup, GHE lồng).
+
+    Bản trước chỉ nhận ĐÚNG 3 đoạn nên danh tính đầy đủ, đúng từng ký tự, bị TỪ
+    CHỐI — kèm thông điệp tự mâu thuẫn "mong doi X, thuc te [X]". Người dùng
+    GitLab/GHE mất hẳn lựa chọn neo-theo-host.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://gitlab.com/nhom/nhom-con/kho.git")
+        r = chay("check", "--workspace", str(repo),
+                 "--expected-repo", "gitlab.com/nhom/nhom-con/kho")
+        bang(r.returncode == MA_OK,
+             f"danh tinh DAY DU bi chan oan: rc={r.returncode} {r.stderr}")
+        # vẫn phải là BẰNG NHAU tuyệt đối: đổi một đoạn giữa là chặn
+        r2 = chay("check", "--workspace", str(repo),
+                  "--expected-repo", "gitlab.com/nhom/khac/kho")
+        bang(r2.returncode == MA_KHO, f"doan giua sai ma van qua: {r2.returncode}")
+        # và host giả mạo vẫn phải chặn
+        r3 = chay("check", "--workspace", str(repo),
+                  "--expected-repo", "evil.example/nhom/nhom-con/kho")
+        bang(r3.returncode == MA_KHO, f"host gia mao lot: {r3.returncode}")
+
+
+@ca
+def t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so():
+    """`stop` một lượt đã chạy xong: không đổi sổ, không hô "PID da bi tai dung".
+
+    Bản trước ghi đè trang_thai="da_dung" lên lượt vừa "xong" bình thường VÀ báo
+    "khoa danh tinh KHAC (PID da bi tai dung)" + rc=10 — hô hoán đúng mối nguy mà
+    khoá danh tính sinh ra để bắt, trong ca vô hại và phổ biến nhất.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        thu_muc = next(p for p in rr.iterdir() if p.is_dir())
+        truoc = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
+        bang(truoc["trang_thai"] == "xong", f"tien de sai: {truoc['trang_thai']}")
+        r = chay("stop", "--run-root", str(rr), "--id", truoc["short_id"])
+        sau = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
+        bang(sau["trang_thai"] == "xong",
+             f"stop de len luot da xong: trang_thai={sau['trang_thai']}")
+        bang("tai dung" not in (r.stdout + r.stderr),
+             f"chan doan SAI 'PID da bi tai dung' cho tien trinh chi don gian la da thoat: {r.stdout}")
+        bang(r.returncode == MA_OK, f"mong doi {MA_OK}, duoc {r.returncode}")
+
+
+@ca
+def t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN():
+    """Có {PROMPT_FILE} mà không truyền --prompt-file ⇒ chặn, không đi tiếp im lặng.
+
+    Bản trước: con nhận CHUỖI NGUYÊN VĂN "{PROMPT_FILE}" làm đường dẫn, rc=0, sổ
+    ghi "xong". Người vận hành tin prompt đã neo; agent nhận đường dẫn vô nghĩa.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+                 "--", PY, "-c", "import sys;print(sys.argv[1])", "{PROMPT_FILE}")
+        bang(r.returncode == MA_THAM_SO,
+             f"mong doi {MA_THAM_SO}, duoc {r.returncode}: {r.stdout} {r.stderr}")
+
+
+@ca
+def t71_ban_chup_prompt_phai_KIN_va_bi_XOA():
+    """prompt.snapshot: 0600 lúc tồn tại, và bị xoá sau khi con thoát.
+
+    argv đã bị bỏ khỏi sổ vì có thể chứa bí mật; ghi TOÀN VĂN prompt ra đĩa
+    world-readable VĨNH VIỄN là mở rộng bề mặt lộ chứ không thu hẹp.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        pf = s / "prompt.txt"
+        pf.write_text("BI-MAT-KHONG-DE-LO\n", encoding="utf-8")
+        sha = hashlib.sha256(pf.read_bytes()).hexdigest()
+        rr = s / "runs"
+        # con ĐỌC bản chụp rồi in quyền của nó ra, nên đo được lúc nó CÒN tồn tại
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--prompt-file", str(pf), "--expected-prompt-sha256", sha,
+                 "--", PY, "-c",
+                 "import os,stat,sys;print(oct(stat.S_IMODE(os.stat(sys.argv[1]).st_mode)))",
+                 "{PROMPT_FILE}")
+        bang(r.returncode == MA_OK, f"rc={r.returncode}: {r.stderr}")
+        thu_muc = next(p for p in rr.iterdir() if p.is_dir())
+        quyen = (thu_muc / "stdout.log").read_text(encoding="utf-8").strip()
+        if not LA_WINDOWS:
+            bang(quyen == "0o600", f"ban chup KHONG kin: quyen={quyen}")
+        bang(not (thu_muc / "prompt.snapshot").exists(),
+             "ban chup con nam lai tren dia sau khi con thoat")
+        # xin giữ thì phải còn
+        rr2 = s / "runs2"
+        r2 = chay("run", "--workspace", str(repo), "--run-root", str(rr2),
+                  "--giu-ban-chup", "--prompt-file", str(pf),
+                  "--expected-prompt-sha256", sha, "--", PY, "-c", "pass")
+        bang(r2.returncode == MA_OK, f"rc={r2.returncode}: {r2.stderr}")
+        tm2 = next(p for p in rr2.iterdir() if p.is_dir())
+        bang((tm2 / "prompt.snapshot").exists(), "--giu-ban-chup ma van xoa")
+
+
+@ca
+def t72_bi_ngat_KHONG_duoc_ghi_thanh_xong():
+    """Ctrl-C giữa lượt chạy: sổ phải nói bị ngắt, không phải "xong".
+
+    `trang_thai` là trường `status` liệt kê, nên ghi "xong" cho một lượt bị cắt
+    giữa chừng là nói dối đúng chỗ người/máy đang đọc. Cùng lớp lỗi với t50.
+    """
+    if LA_WINDOWS:
+        return "SIGINT tren Windows khong cung ngu nghia; can ca rieng"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "run",
+                               "--workspace", str(repo), "--run-root", str(rr),
+                               "--", PY, "-c", "import time;time.sleep(30)"],
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        try:
+            f = None
+            for _ in range(200):
+                time.sleep(0.05)
+                ds = [p for p in rr.iterdir() if p.is_dir()] if rr.is_dir() else []
+                if ds and (ds[0] / "run.json").is_file():
+                    x = json.loads((ds[0] / "run.json").read_text(encoding="utf-8"))
+                    if x.get("pid"):
+                        f = ds[0] / "run.json"
+                        break
+            bang(f is not None, "khong thay pid trong so")
+            time.sleep(0.3)
+            os.kill(pr.pid, signal.SIGINT)
+            pr.communicate(timeout=60)
+            d = json.loads(f.read_text(encoding="utf-8"))
+            bang(d["trang_thai"] == "bi_ngat",
+                 f"bi ngat ma so ghi trang_thai={d['trang_thai']!r}")
+        finally:
+            if pr.poll() is None:
+                pr.kill()
+                pr.wait(timeout=10)
+
+
+@ca
+def t73_doctor_phai_do_bash_va_npm():
+    """doctor phải đo thứ môi trường THẬT SỰ phụ thuộc.
+
+    settings.json gọi hook qua `bash`, session-start.sh rẽ nhánh trên `npm`.
+    Thiếu chúng thì hook hỏng, mà doctor cũ vẫn in "DU CONG CU BAT BUOC".
+    """
+    r = chay("doctor", "--json")
+    d = json.loads(r.stdout)
+    ten = {c["ten"] for c in d["cong_cu"]}
+    bang({"bash", "npm"} <= ten, f"doctor khong do bash/npm: {sorted(ten)}")
+
+
+@ca
+def t74_dut_ong_KHONG_duoc_nuot_ma_that():
+    """Người đọc đóng ống giữa chừng KHÔNG được đổi kết luận của doctor.
+
+    Bản trước bắt BrokenPipeError ở `main` rồi trả 141, nên `doctor | head` trên
+    môi trường LÀNH cũng ra 141 (đo được 20/20 lượt) — phía gọi kiểm `rc != 0`
+    vẫn báo "THIEU CONG CU" oan, đúng triệu chứng mà bản va truoc dinh dep.
+    """
+    pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "doctor"],
+                          stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    pr.stdout.close()          # doc 0 byte roi dong: moi luot in deu vo ong
+    ma = pr.wait(timeout=120)
+    bang(ma == MA_OK, f"moi truong DU cong cu ma dut ong lam ra ma {ma}")
+
+
+@ca
+def t75_tep_tam_mo_coi_bi_don():
+    """Tệp tạm của writer bị SIGKILL giữa chừng không được tích luỹ vĩnh viễn.
+
+    Tên tạm riêng theo pid+uuid (bản vá vòng 2) nên KHÔNG bao giờ bị ghi đè —
+    khác tên cố định cũ vốn tự lành. Rác nằm trong thư mục của lượt ĐÃ CHẾT nên
+    phải quét từ run_root; quét thư mục đang ghi thì chẳng dọn được gì.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        cu = next(p for p in rr.iterdir() if p.is_dir())
+        rac_cu = cu / "run.json.99999.deadbeef.tmp"
+        rac_cu.write_text("rac", encoding="utf-8")
+        os.utime(rac_cu, (time.time() - 2 * 86400,) * 2)
+        rac_moi = cu / "run.json.88888.cafe1234.tmp"
+        rac_moi.write_text("rac", encoding="utf-8")
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        bang(not rac_cu.exists(), "tep tam mo coi cu KHONG duoc don")
+        bang(rac_moi.exists(), "don ca tep tam DANG dung cua writer khac")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -1387,16 +1577,20 @@ DOT_BIEN = [
      ('if not b.strip():\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")',
       'if False:\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")'),
      ["t15_prompt_rong_bi_chan_du_sha_dung"]),
+    # Neo chuyển từ `if _khoa_danh_tinh(pid) != khoa:` sang `elif hien != khoa:`
+    # khi _giet_cay tách "đã chết" khỏi "PID tái dùng" (vòng 3 đợt 2). Ý định
+    # KHÔNG đổi: bỏ chốt khoá ⇒ giết liều theo PID trần.
     ("giet_lieu_khong_can_khoa",
-     ('    if _khoa_danh_tinh(pid) != khoa:\n        return KetGiet(False, False, "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)")',
-      '    if False:\n        return KetGiet(False, False, "tu choi giet")'),
+     ('    elif hien != khoa:', '    elif False:'),
      ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
     # DA DO bang git that: `-uall` so voi mac dinh (`normal`) KHONG doi sach/ban,
     # chi doi do chi tiet liet ke (`?? thumuc/` thay vi tung tep). Chi `-uno` moi
     # lam chot MU. Dot bien dau tien cua toi nham vao `-uall` nen song sot - do la
     # dot bien sai, khong phai ma sai.
+    # Neo chuyển khi lenh_stop tách 10 (TỪ CHỐI) khỏi 125 (giết chưa trọn vẹn).
+    # Ý định KHÔNG đổi: stop báo thành công dù chưa giết được gì.
     ("bao_da_giet_du_chua_giet",
-     ('    return MA_OK if ket.tron_ven else MA_DANH_TINH', '    return MA_OK'),
+     ('    if ket.tron_ven:\n        return MA_OK', '    if True:\n        return MA_OK'),
      ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
     # Giao thuc giet bang CHUOI la nguyen nhan goc cua loi 124-khi-chau-con-song.
     # Dot bien nay dung lai dung no: coi "me chet" la du, bo qua ca_cay.
@@ -1494,6 +1688,48 @@ DOT_BIEN = [
      ("    run_root = Path(a.run_root).expanduser().resolve()\n    rid, sid = _cap_id(run_root)",
       "    run_root = Path(a.run_root).expanduser()\n    rid, sid = _cap_id(run_root)"),
      ["t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con"]),
+    # --- vòng 3 đợt 2: 12 mục NÊN SỬA.
+    ("kho_bo_o_dung_ba_doan",
+     ("    if len(doan_m) >= 3:", "    if len(doan_m) == 3:"),
+     ["t68_kho_duong_dan_SAU_neu_host_van_phai_QUA"]),
+    ("stop_de_len_luot_da_xong",
+     ('    if so.get("trang_thai") in TRANG_THAI_KET_THUC:', '    if False:'),
+     ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
+    # Neo phải kèm chú thích: "if hien is None:" trần xuất hiện TRƯỚC ở nhánh
+    # Windows của _con_song, mà replace(...,1) chỉ đổi chỗ ĐẦU TIÊN — đột biến
+    # rơi vào nhánh không chạy trên Linux và báo "khong ca nao chet" oan.
+    ("chet_roi_van_bao_PID_tai_dung",
+     ("    if hien is None:\n        # TIẾN TRÌNH ĐÃ BIẾN MẤT",
+      "    if False:\n        # TIẾN TRÌNH ĐÃ BIẾN MẤT"),
+     ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
+    ("PROMPT_FILE_mo_coi_di_tiep",
+     ('    elif any("{PROMPT_FILE}" in x for x in lenh_con):', '    elif False:'),
+     ["t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN"]),
+    # Hai nửa của cùng một bảo đảm: ghi hở quyền, và để lại trên đĩa.
+    ("ban_chup_de_ho_quyen",
+     ("        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)",
+      "        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)"),
+     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
+    ("ban_chup_de_lai_tren_dia",
+     ('    if ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup:', '    if False:'),
+     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
+    ("ngat_ghi_thanh_xong",
+     ('        ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat',
+      '        ban_ghi["trang_thai"] = ("xong" if bi_ngat'),
+     ["t72_bi_ngat_KHONG_duoc_ghi_thanh_xong"]),
+    ("doctor_bo_do_bash",
+     ('    {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],',
+      '    {"ten": "bash_da_dot_bien", "bat_buoc": False, "ung_vien": ["bash"],'),
+     ["t73_doctor_phai_do_bash_va_npm"]),
+    ("khong_don_tep_tam_mo_coi",
+     ('        for cu in run_root.glob("*/run.json.*.tmp"):',
+      '        for cu in run_root.glob("KHONG-KHOP-GI-CA"):'),
+     ["t75_tep_tam_mo_coi_bi_don"]),
+    ("dut_ong_nuot_ma_that",
+     ("    try:\n        print(chuoi)\n        return True\n"
+      "    except BrokenPipeError:\n        return False",
+      "    print(chuoi)\n    return True"),
+     ["t74_dut_ong_KHONG_duoc_nuot_ma_that"]),
 ]
 
 
@@ -1579,6 +1815,12 @@ def main() -> int:
         do_duoc = len(DOT_BIEN) - khong_do
         print(f"\nDOT BIEN: {do_duoc - hong}/{do_duoc} dat"
               + (f"  ({khong_do} khong do duoc tren nen nay)" if khong_do else ""))
+        if do_duoc == 0:
+            # SÀN. Bảng mà MỌI đột biến đều không đo được sẽ in "0/0 dat" rồi
+            # thoát 0 — thoả đúng hình thức "hai số BẰNG NHAU" mà chứng minh CON
+            # SỐ KHÔNG. Đây là cổng xanh nhờ rc=0, thứ CLAUDE.md dặn đừng tin.
+            print("!! KHONG do duoc dot bien nao tren nen nay - cong nay KHONG chung minh gi")
+            return 1
         return 1 if hong else 0
 
     if not shutil.which("git"):

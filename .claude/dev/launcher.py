@@ -42,6 +42,16 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   12  thiếu công cụ bắt buộc (xem `doctor`)
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
+  130 bị ngắt (Ctrl-C) — đã giết con
+  141 đầu ra bị cắt ống ở chỗ không giữ được kết luận (128+SIGPIPE)
+  1   mã thoát của con nằm ngoài 0..255; số THẬT ở `ma_thoat_that` trong sổ
+
+CẢNH BÁO VỀ CHÍNH BẢNG TRÊN: với `run`, mã thoát của TIẾN TRÌNH CON được trả
+nguyên vẹn, nên nó ĐÈ LÊN mọi mã ở đây — `rc=124` không phân biệt được "launcher
+cưỡng chế hạn chót" với "con tự thoát 124" (con chạy `timeout(1)`, hoặc con là
+một launcher khác). Phía gọi TỰ ĐỘNG phải đọc `trang_thai` trong `run.json`
+(`xong` · `qua_han` · `bi_ngat` · `da_dung` · `hong`) chứ đừng suy từ mã trần.
+`check`/`status`/`stop`/`doctor` không có con nên bảng trên là dứt khoát.
 """
 
 from __future__ import annotations
@@ -77,6 +87,9 @@ MA_KHO = 11
 MA_QUA_HAN = 124
 MA_GIET_HUT = 125
 MA_THIEU_CONG_CU = 12
+
+# Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
+TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 # git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
@@ -119,9 +132,14 @@ def _git(workspace: str | os.PathLike, *doi_so: str) -> tuple[int, str, str]:
     if not shutil.which("git"):
         return (127, "", "khong tim thay git trong PATH")
     try:
+        # timeout BẮT BUỘC: một `git` treo (ổ mạng, credential helper hỏi mật khẩu,
+        # vỏ bọc doanh nghiệp) sẽ treo LUÔN cả đường cưỡng chế hạn chót — đúng thứ
+        # mà --deadline-utc tồn tại để bảo đảm. Audit vòng 3: chỉ _phien_ban có timeout.
         p = subprocess.run(["git", "-C", str(workspace), *doi_so],
                            capture_output=True, text=True, encoding="utf-8",
-                           errors="replace")
+                           errors="replace", timeout=120)
+    except subprocess.TimeoutExpired:
+        return (127, "", "git treo qua 120s")
     except OSError as e:  # git bị xoá giữa chừng, quyền, ...
         return (127, "", str(e))
     return (p.returncode, p.stdout, p.stderr)
@@ -159,14 +177,14 @@ def _khoa_danh_tinh(pid: int) -> str | None:
             return f"linux:{sau[19]}"  # trường 22 tính từ 1 = starttime
         if he == "Darwin":
             p = subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, timeout=15)
             v = p.stdout.strip()
             return f"darwin:{v}" if v else None
         if he == "Windows":
             p = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
                  f"(Get-Process -Id {pid} -ErrorAction Stop).StartTime.Ticks"],
-                capture_output=True, text=True)
+                capture_output=True, text=True, timeout=30)
             v = p.stdout.strip()
             return f"win:{v}" if v.isdigit() else None
     except (OSError, ValueError, IndexError):
@@ -323,8 +341,15 @@ def _giet_rieng(anh: dict[int, str], tin_hieu: int) -> None:
             pass
 
 
-def _con_song(pid: int) -> bool:
+def _con_song(pid: int, khoa: str | None = None) -> bool:
     """Tiến trình còn sống không. Dùng để KIỂM SAU khi giết, không đoán.
+
+    `khoa` là khoá danh tính mong đợi. Có nó thì "còn sống" nghĩa là ĐÚNG tiến
+    trình cũ còn sống. Thiếu nó, trên Windows hàm này chỉ hỏi được "có tiến trình
+    nào mang PID này không" — mà giữa taskkill và lúc kiểm có tới ~2 lần gọi
+    powershell (~vài giây, audit vòng 3 đếm được), thừa chỗ để PID bị tái dùng ⇒
+    đọc thành "chưa giết được" và trả 125 GIẢ. Fail-closed nên an toàn, nhưng là
+    báo động nhầm mà chỉ cần so khoá là hết.
 
     ZOMBIE PHẢI TÍNH LÀ ĐÃ CHẾT. Con của chính ta, sau khi bị giết, nằm ở trạng
     thái Z cho tới khi được `wait` thu hồi — mà `os.kill(pid, 0)` với zombie vẫn
@@ -333,7 +358,10 @@ def _con_song(pid: int) -> bool:
     đỏ ngay lượt chạy đầu — đúng việc của phản chứng).
     """
     if platform.system() == "Windows":
-        return _khoa_danh_tinh(pid) is not None
+        hien = _khoa_danh_tinh(pid)
+        if hien is None:
+            return False
+        return khoa is None or hien == khoa
     trang_thai = Path(f"/proc/{pid}/stat")
     if trang_thai.exists():
         try:
@@ -350,8 +378,11 @@ def _con_song(pid: int) -> bool:
     except OSError:
         return False
     if platform.system() == "Darwin":  # không có /proc: hỏi ps
-        p = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
-                           capture_output=True, text=True)
+        try:
+            p = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
+                               capture_output=True, text=True, timeout=15)
+        except (OSError, subprocess.SubprocessError):
+            return True          # không đo được ⇒ KHÔNG dám nói là đã chết
         return not p.stdout.strip().startswith("Z")
     return True
 
@@ -371,10 +402,13 @@ class KetGiet:
       mo_ta       — chỉ để người đọc, KHÔNG ai được quyết định dựa vào nó
     """
 
-    def __init__(self, me_da_chet: bool, ca_cay: bool, mo_ta: str):
+    def __init__(self, me_da_chet: bool, ca_cay: bool, mo_ta: str, tu_choi: bool = False):
         self.me_da_chet = me_da_chet
         self.ca_cay = ca_cay
         self.mo_ta = mo_ta
+        # tu_choi = KHÔNG hề gửi tín hiệu nào (thiếu khoá / khoá lệch). Khác hẳn
+        # "đã giết mà chưa trọn vẹn", nên phía gọi trả mã khác nhau: 10 vs 125.
+        self.tu_choi = tu_choi
 
     @property
     def tron_ven(self) -> bool:
@@ -384,7 +418,7 @@ class KetGiet:
         return self.mo_ta
 
 
-def _giet_windows(pid: int) -> KetGiet:
+def _giet_windows(pid: int, khoa: str | None = None) -> KetGiet:
     """Giết trên Windows: taskkill trước, rồi TerminateProcess nếu vẫn sống.
 
     ĐÃ ĐO (codex, 12-08-2026): `taskkill /PID x /T /F` trả rc=1 "Access denied"
@@ -398,12 +432,16 @@ def _giet_windows(pid: int) -> KetGiet:
     xuống nhánh này ta nói thẳng là con cháu có thể còn sống.
     """
     buoc = []
-    p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
-                       capture_output=True, text=True)
-    buoc.append(f"taskkill rc={p.returncode}")
+    try:
+        p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
+                           capture_output=True, text=True, timeout=30)
+        ma_tk = p.returncode
+    except (OSError, subprocess.SubprocessError):
+        ma_tk = None             # treo/không chạy được: coi như /T KHÔNG chạy
+    buoc.append(f"taskkill rc={ma_tk}")
     # CHỈ taskkill rc=0 mới là bằng chứng CẢ CÂY. rc khác 0 nghĩa là /T không chạy,
     # nên dù mẹ có chết (do nhánh dưới) thì con cháu vẫn CHƯA được xác nhận.
-    if p.returncode == 0 and not _con_song(pid):
+    if ma_tk == 0 and not _con_song(pid, khoa):
         return KetGiet(True, True, "; ".join(buoc) + "; da tat ca cay")
     try:
         import ctypes
@@ -419,7 +457,7 @@ def _giet_windows(pid: int) -> KetGiet:
     except (OSError, AttributeError, ValueError) as e:
         buoc.append(f"ctypes loi: {e}")
     time.sleep(0.3)
-    if _con_song(pid):
+    if _con_song(pid, khoa):
         return KetGiet(False, False, "; ".join(buoc) + "; KHONG GIET DUOC")
     buoc.append("me da tat NHUNG CON CHAU CHUA XAC NHAN (taskkill /T that bai)")
     return KetGiet(True, False, "; ".join(buoc))
@@ -432,11 +470,23 @@ def _giet_cay(pid: int, khoa: str | None) -> KetGiet:
     câu mô tả nghe-như-thành-công lọt qua.
     """
     if khoa is None:
-        return KetGiet(False, False, "tu choi giet: khong co khoa danh tinh")
-    if _khoa_danh_tinh(pid) != khoa:
-        return KetGiet(False, False, "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)")
+        return KetGiet(False, False, "tu choi giet: khong co khoa danh tinh", tu_choi=True)
+    hien = _khoa_danh_tinh(pid)
+    if hien is None:
+        # TIẾN TRÌNH ĐÃ BIẾN MẤT — KHÔNG phải "PID bị tái dùng". Bản trước gộp hai
+        # chuyện NGƯỢC NHAU vào một câu và một mã: `stop` một lượt vừa chạy xong
+        # bình thường báo "PID da bi tai dung" + rc=10, tức là hô hoán đúng cái
+        # mối nguy mà khoá danh tính sinh ra để bắt, trong ca vô hại và PHỔ BIẾN
+        # nhất (audit vòng 3: 7/12 lần đua). Chỉ còn con cháu là đáng hỏi.
+        con = _thanh_vien_nhom(pid)
+        if not con:               # [] = đã chứng minh rỗng · None = không có /proc
+            return KetGiet(True, True, "tien trinh da khong con chay")
+    elif hien != khoa:
+        return KetGiet(False, False,
+                       "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)",
+                       tu_choi=True)
     if platform.system() == "Windows":
-        return _giet_windows(pid)
+        return _giet_windows(pid, khoa)
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
     # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
     # không thể tìm lại (xem _chup_cay).
@@ -595,10 +645,17 @@ def _kho_khop(thuc_te: str, mong_doi: str) -> bool:
     #   hậu tố với remote 'evil.example/localhost/o/r' — giả mạo lọt.
     # · một đoạn duy nhất ('r') cũng được nhận, nên bất kỳ chủ nào có kho tên 'r'
     #   đều khớp, dù help ghi rõ phải là owner/repo.
-    if len(doan_m) == 3:
-        return t == m                      # host/owner/repo -> bằng nhau tuyệt đối
+    if len(doan_m) >= 3:
+        # ≥3 đoạn = người ta ĐÃ nêu host ⇒ đòi bằng nhau tuyệt đối.
+        # KHÔNG bó ở đúng 3 (audit vòng 3): GitLab subgroup và GHE lồng nhau có
+        # 4+ đoạn và LÀ danh tính hợp lệ. Bó ở 3 thì `--expected-repo
+        # gitlab.com/nhom/nhom-con/kho` bị TỪ CHỐI dù đúng từng ký tự, kèm thông
+        # điệp tự mâu thuẫn "mong doi X, thuc te [X]" — người đọc đi tìm lỗi ở
+        # remote chứ không ở chốt. Và người dùng GitLab/GHE mất hẳn lựa chọn
+        # neo-theo-host. Bằng-nhau-tuyệt-đối nên tính an ninh không đổi.
+        return t == m
     if len(doan_m) != 2:
-        return False                       # ngoài hai dạng đó = viết sai, KHÔNG đoán
+        return False                       # 1 đoạn = viết sai, KHÔNG đoán
     doan_t = t.split("/")
     return len(doan_t) > 2 and doan_t[-2:] == doan_m
 
@@ -731,6 +788,20 @@ def _cap_id(run_root: Path) -> tuple[str, str]:
         # --run-root không ghi được: nói ra bằng mã thoát, đừng để traceback thô
         # rơi ra ngoài (audit codex: PermissionError WinError 5 lộ nguyên stack).
         raise Chan(MA_THAM_SO, f"khong dung duoc --run-root {run_root}: {e}") from None
+    # Dọn tệp tạm mồ côi TOÀN run_root. Tên tạm riêng theo writer nên không bao
+    # giờ bị ghi đè (khác tên cố định cũ vốn tự lành), và writer bị SIGKILL giữa
+    # `write_text` và `os.replace` để lại rác vĩnh viễn. Phải quét từ run_root:
+    # rác nằm trong thư mục của lượt ĐÃ CHẾT, mà lượt đó không ai ghi lại nữa.
+    try:
+        for cu in run_root.glob("*/run.json.*.tmp"):
+            try:
+                if time.time() - cu.stat().st_mtime > 86400:
+                    cu.unlink()
+            except OSError:
+                pass
+    except OSError:
+        pass
+
     for _ in range(64):
         rid = uuid.uuid4().hex
         sid = rid[:8]
@@ -885,7 +956,18 @@ def lenh_run(a) -> int:
         if hashlib.sha256(b).hexdigest() != kq["prompt_sha256"]:
             raise Chan(MA_PROMPT, "prompt DOI giua luc kiem va luc chay")
         ban_chup = thu_muc / "prompt.snapshot"
-        ban_chup.write_bytes(b)
+        # 0600 NGAY TỪ LÚC TẠO. `write_bytes` để lại 0644 theo umask, tức là MỌI
+        # user đọc được — mà prompt là thứ có thể chứa bí mật, chính vì thế
+        # `_tom_tat_lenh` đã bỏ argv ra khỏi sổ. Bỏ argv (phù du) rồi ghi toàn văn
+        # prompt ra đĩa world-readable VĨNH VIỄN là mở rộng bề mặt lộ, không phải
+        # thu hẹp (audit vòng 3). Thư mục cũng siết 0700.
+        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(_fd, "wb") as _f:
+            _f.write(b)
+        try:
+            os.chmod(thu_muc, 0o700)
+        except OSError:
+            pass                 # Windows/ổ lạ không chỉnh được: không phải lý do dừng
         ban_ghi["prompt_ban_chup"] = str(ban_chup)
         if any("{PROMPT_FILE}" in x for x in lenh_con):
             lenh_con = [x.replace("{PROMPT_FILE}", str(ban_chup)) for x in lenh_con]
@@ -893,6 +975,14 @@ def lenh_run(a) -> int:
         else:
             ban_ghi["prompt_kin_hoan_toan"] = False
         _ghi_so(thu_muc, ban_ghi)
+    elif any("{PROMPT_FILE}" in x for x in lenh_con):
+        # Có chỗ thay mà không có gì để thay: con nhận CHUỖI NGUYÊN VĂN
+        # "{PROMPT_FILE}" làm đường dẫn, rc=0, sổ ghi "xong" — người vận hành tin
+        # prompt đã được neo còn agent nhận một đường dẫn vô nghĩa. Im lặng ở đây
+        # là fail-open, nên chặn hẳn.
+        raise Chan(MA_THAM_SO,
+                   "lenh co {PROMPT_FILE} nhung khong truyen --prompt-file: "
+                   "con se nhan chuoi nguyen van")
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
     f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
@@ -922,6 +1012,7 @@ def lenh_run(a) -> int:
 
     han = _doc_iso(kq["deadline_utc"]) if kq["deadline_utc"] else None
     qua_han = False
+    bi_ngat = False
     try:
         if han is None:
             ma = p.wait()
@@ -943,6 +1034,7 @@ def lenh_run(a) -> int:
                     pass
     except KeyboardInterrupt:
         ban_ghi["ly_do_dung"] = "bi ngat: " + _giet_cay(p.pid, khoa).mo_ta
+        bi_ngat = True
         ma = 130
     finally:
         f_out.close()
@@ -968,7 +1060,19 @@ def lenh_run(a) -> int:
         ban_ghi["trang_thai"] = "da_dung"
         ban_ghi["ly_do_dung"] = so_moi.get("ly_do_dung") or ban_ghi.get("ly_do_dung")
     else:
-        ban_ghi["trang_thai"] = "qua_han" if qua_han else "xong"
+        # "xong" nghĩa là CHẠY HẾT. Bản trước để Ctrl-C rơi vào nhánh này: lượt
+        # chạy bị ngắt giữa chừng và con bị giết, mà `trang_thai` — đúng trường
+        # `status` liệt kê — nói là kết thúc bình thường. Cùng lớp lỗi với t50.
+        ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
+                                 else "qua_han" if qua_han else "xong")
+    # Bản chụp prompt đã hết việc khi con thoát. Giữ lại = để nội dung prompt
+    # nằm trên đĩa vô thời hạn; mặc định xoá, ai cần truy vết thì xin tường minh.
+    if ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup:
+        try:
+            Path(ban_ghi["prompt_ban_chup"]).unlink()
+            ban_ghi["prompt_ban_chup_da_xoa"] = True
+        except OSError:
+            pass
     ban_ghi.update(ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma_that)
     _ghi_so(thu_muc, ban_ghi)
     if a.json:
@@ -989,7 +1093,7 @@ def lenh_status(a) -> int:
         so = _doc_so(thu_muc)
         if so is None:
             raise Chan(MA_THAM_SO, f"so luot chay hong: {thu_muc}")
-        print(json.dumps(so, ensure_ascii=False, indent=2))
+        _in_an_toan(json.dumps(so, ensure_ascii=False, indent=2))
         return MA_OK
     ds = []
     hong = False
@@ -1006,7 +1110,7 @@ def lenh_status(a) -> int:
                 # hệt như "không có lượt nào". Nói ra, và trả mã khác 0.
                 ds.append({"thu_muc": p.name, "loi": "run.json khong doc duoc"})
                 hong = True
-    print(json.dumps(ds, ensure_ascii=False, indent=2))
+    _in_an_toan(json.dumps(ds, ensure_ascii=False, indent=2))
     return MA_THAM_SO if hong else MA_OK
 
 
@@ -1024,12 +1128,25 @@ def lenh_stop(a) -> int:
     if khoa is None:
         print("KET LUAN  : TU CHOI - khong co khoa danh tinh, khong giet theo PID tran")
         return MA_DANH_TINH
+    # VẪN chạy _giet_cay kể cả khi sổ nói đã kết thúc: nhãn có thể cũ, và chốt
+    # danh tính phải được hỏi (t31). Chỉ KHÔNG đổi nhãn của một lượt đã kết thúc —
+    # bản trước ghi đè trang_thai="da_dung" lên lượt vừa "xong" bình thường, tức
+    # sổ nói nó bị dừng trong khi nó chạy hết. Đúng lớp lỗi mà t50 khoá ở chiều
+    # ngược lại (runner đè lên quyết định của stop); chiều này bị bỏ sót.
     ket = _giet_cay(int(pid), khoa)
-    so.update(trang_thai="da_dung", ly_do_dung=ket.mo_ta,
-              giet_tron_ven=ket.tron_ven, ket_thuc_utc=_bay_gio().isoformat())
-    _ghi_so(thu_muc, so)
-    print(f"KET LUAN  : {ket.mo_ta}")
-    return MA_OK if ket.tron_ven else MA_DANH_TINH
+    if so.get("trang_thai") in TRANG_THAI_KET_THUC:
+        print(f"KET LUAN  : luot chay da ket thuc tu truoc "
+              f"(trang_thai={so['trang_thai']}); {ket.mo_ta}")
+    else:
+        so.update(trang_thai="da_dung", ly_do_dung=ket.mo_ta,
+                  giet_tron_ven=ket.tron_ven, ket_thuc_utc=_bay_gio().isoformat())
+        _ghi_so(thu_muc, so)
+        print(f"KET LUAN  : {ket.mo_ta}")
+    if ket.tron_ven:
+        return MA_OK
+    # TỪ CHỐI giết (10) KHÁC đã-giết-mà-chưa-trọn-vẹn (125). Bản trước trả 10 cho
+    # cả hai, nên một cảnh báo "còn tiến trình mồ côi" đọc y hệt "không có khoá".
+    return MA_DANH_TINH if ket.tu_choi else MA_GIET_HUT
 
 
 # ------------------------------------------------------------ kiểm công cụ môi trường
@@ -1070,6 +1187,18 @@ CONG_CU = [
      "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
              "Darwin": "brew install ripgrep",
              "Linux": "sudo apt-get install -y ripgrep"}},
+    # bash: `.claude/settings.json` gọi hook qua bash và session-start.sh là bash
+    # script. Máy Windows KHÔNG có Git Bash thì hook hỏng, mà doctor cũ vẫn in
+    # "DU CONG CU BAT BUOC" — đo thiếu đúng chỗ môi trường phụ thuộc (audit vòng 3).
+    {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],
+     "vi_sao": "hook SessionStart la bash script; Windows can Git Bash",
+     "cai": {"Windows": "winget install --id Git.Git -e  (kem Git Bash)",
+             "Darwin": "co san", "Linux": "sudo apt-get install -y bash"}},
+    # npm: session-start.sh rẽ nhánh trên `co npm`, không phải trên `node`.
+    {"ten": "npm", "bat_buoc": False, "ung_vien": ["npm"],
+     "vi_sao": "hook cai hai CLI agent bang npm; co node chua chac co npm",
+     "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
+             "Darwin": "brew install node", "Linux": "sudo apt-get install -y npm"}},
     {"ten": "node", "bat_buoc": False, "ung_vien": ["node"],
      "vi_sao": "can de cai hai CLI tren",
      "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
@@ -1094,6 +1223,22 @@ def _phien_ban(duong_dan: str) -> tuple[bool, str]:
     if p.returncode != 0 or not dong:
         return (False, dong[0][:80] if dong else f"rc={p.returncode}, khong in gi")
     return (True, dong[0][:80])
+
+
+def _in_an_toan(chuoi: str) -> bool:
+    """In một dòng; ống bị đóng thì thôi, KHÔNG đổi kết luận đã tính xong.
+
+    Audit vòng 3: `main` bắt BrokenPipeError rồi trả 141, nên `doctor | head`
+    trên môi trường LÀNH cũng ra 141 (20/20 lượt) — phía gọi kiểm `rc != 0` vẫn
+    báo "THIEU CONG CU" oan, đúng triệu chứng mà bản vá trước định dẹp; còn lúc
+    THIẾU công cụ thì 141 lại nuốt mất mã 12. Mã thoát phải là kết luận, không
+    phải chuyện người đọc có chịu đọc hết hay không.
+    """
+    try:
+        print(chuoi)
+        return True
+    except BrokenPipeError:
+        return False
 
 
 def lenh_doctor(a) -> int:
@@ -1122,24 +1267,28 @@ def lenh_doctor(a) -> int:
             thieu_bat_buoc.append(c["ten"])
 
     if a.json:
-        print(json.dumps({"ok": not thieu_bat_buoc, "he_dieu_hanh": he,
-                          "python_dang_chay": sys.version.split()[0],
-                          "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc},
-                         ensure_ascii=False, indent=2))
+        _in_an_toan(json.dumps({"ok": not thieu_bat_buoc, "he_dieu_hanh": he,
+                                "python_dang_chay": sys.version.split()[0],
+                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc},
+                               ensure_ascii=False, indent=2))
     else:
-        print(f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
+        con_ong = _in_an_toan(
+            f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
         for c in ket:
+            if not con_ong:
+                break
             hong = c.get("co_mat_nhung_khong_chay_duoc")
             dau = "co  " if c["co"] else ("HONG" if hong else
                                           ("THIEU" if c["bat_buoc"] else "khong"))
             mo_ta = c.get("phien_ban", "") if c["co"] else c["vi_sao"]
-            print(f"  {dau:<5} {c['ten']:<8} {mo_ta}")
-            if hong:
-                print(f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
-            if not c["co"]:
-                print(f"        cai bang: {c['lenh_cai']}")
-        print("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
-                                else "THIEU " + ", ".join(thieu_bat_buoc)))
+            con_ong = _in_an_toan(f"  {dau:<5} {c['ten']:<8} {mo_ta}")
+            if hong and con_ong:
+                con_ong = _in_an_toan(
+                    f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
+            if not c["co"] and con_ong:
+                con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
+        _in_an_toan("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
+                                      else "THIEU " + ", ".join(thieu_bat_buoc)))
     return MA_THIEU_CONG_CU if thieu_bat_buoc else MA_OK
 
 
@@ -1175,6 +1324,8 @@ def build_parser():
     _them_chot(r)
     r.add_argument("--run-root", required=True)
     r.add_argument("--name", default="")
+    r.add_argument("--giu-ban-chup", action="store_true",
+                   help="giu prompt.snapshot sau khi con thoat (mac dinh XOA: no chua noi dung prompt)")
     r.add_argument("lenh", nargs=argparse.REMAINDER)
     r.set_defaults(fn=lenh_run)
 
@@ -1216,20 +1367,31 @@ def main(argv=None) -> int:
     if getattr(a, "lenh", None) and a.lenh and a.lenh[0] == "--":
         a.lenh = a.lenh[1:]
     try:
-        return a.fn(a)
+        ma = a.fn(a)
     except Chan as e:
-        print(f"CHAN [{e.ma}]: {e.thong_diep}", file=sys.stderr)
-        return e.ma
+        # In lỗi cũng có thể vỡ ống (stderr gộp vào ống rồi bị cắt). `except
+        # BrokenPipeError` bên dưới là ANH EM của `except Chan`, KHÔNG bọc thân
+        # nó — nên câu print này mà ném thì traceback thô rơi ra ngoài.
+        try:
+            print(f"CHAN [{e.ma}]: {e.thong_diep}", file=sys.stderr)
+        except (BrokenPipeError, OSError):
+            pass
+        ma = e.ma
     except BrokenPipeError:
-        # Đầu ra bị cắt ống (`doctor | head`): không đổ traceback, nhưng cũng KHÔNG
-        # được báo thành công. Ngoại lệ ném ra giữa lúc in nên hàm chưa kịp trả mã
-        # thật — trả 0 ở đây thì `doctor | head` lúc THIẾU công cụ sẽ thành "đủ".
-        # 141 = 128+SIGPIPE, quy ước sẵn có cho "bị cắt ống", và khác 0.
+        # Tới đây nghĩa là ống vỡ ở chỗ KHÔNG qua `_in_an_toan`, nên chưa có kết
+        # luận nào để giữ. 141 = 128+SIGPIPE, khác 0 nên không báo thành công oan.
+        ma = 141
+    # Ống đã đóng thì lúc dọn dẹp Python cũng không flush được, và ngoại lệ ở đó
+    # KHÔNG ai bắt: nó in "Exception ignored" rồi ĐỔI mã thoát thành 120. Trỏ fd 1
+    # sang devnull để mã ta vừa quyết định là mã thật sự đi ra ngoài.
+    try:
+        sys.stdout.flush()
+    except (BrokenPipeError, OSError):
         try:
             os.dup2(os.open(os.devnull, os.O_WRONLY), 1)
         except OSError:
             pass
-        return 141
+    return ma
 
 
 if __name__ == "__main__":

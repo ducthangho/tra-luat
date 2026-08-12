@@ -1,3 +1,62 @@
+# ★ dev-side — vá nốt 12 mục NÊN SỬA của audit vòng 3 (2026-08-12)
+
+Không bump `VERSION`: chỉ `.claude/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`
+giữ nguyên `file_count: 179`.
+
+Bộ phản chứng **75/75 (qua 73, bỏ qua 2, hỏng 0)** · đột biến **32/32 đạt** ·
+`ruff --select F` sạch.
+
+- **Chốt kho hết chặn oan đường dẫn sâu.** Bó ở ĐÚNG 3 đoạn nên
+  `gitlab.com/nhom/nhom-con/kho` (GitLab subgroup, GHE lồng nhau) bị TỪ CHỐI dù đúng
+  từng ký tự, kèm thông điệp tự mâu thuẫn `mong doi X, thuc te [X]`. Nay ≥3 đoạn =
+  đã nêu host = bằng nhau tuyệt đối; tính an ninh không đổi, chỉ hết chặn oan.
+- **`stop` thôi vu oan và thôi đổi nhãn.** Một lượt vừa chạy xong bình thường bị báo
+  `khoa danh tinh KHAC (PID da bi tai dung)` + rc=10 — hô đúng mối nguy mà khoá danh
+  tính sinh ra để bắt, trong ca vô hại và phổ biến nhất (7/12 lần trong phép đua) —
+  rồi ghi đè `trang_thai="da_dung"` lên lượt đã "xong". Nay tách "tiến trình đã không
+  còn chạy" khỏi "PID bị tái dùng", và không đổi nhãn của lượt đã kết thúc. `KetGiet`
+  thêm `tu_choi` để **10 (TỪ CHỐI giết)** khác **125 (đã giết mà chưa trọn vẹn)**.
+- **`{PROMPT_FILE}` mồ côi bị chặn.** Có chỗ thay mà không truyền `--prompt-file` thì
+  con nhận đúng chuỗi `{PROMPT_FILE}` làm đường dẫn, rc=0, sổ ghi "xong".
+- **Bản chụp prompt kín và không ở lại.** `0600` ngay từ lúc tạo (`write_bytes` để lại
+  0644 theo umask ⇒ mọi user đọc được), thư mục `0700`, xoá khi con thoát trừ khi
+  `--giu-ban-chup`. Bỏ argv khỏi sổ vì có thể chứa bí mật rồi ghi toàn văn prompt ra
+  đĩa world-readable vĩnh viễn là mở rộng bề mặt lộ, không phải thu hẹp.
+- **Ctrl-C không còn ghi thành "xong".** `trang_thai` mới `bi_ngat`; đây là trường
+  `status` liệt kê nên ghi "xong" cho lượt bị cắt giữa chừng là nói dối đúng chỗ
+  người/máy đang đọc. Cùng lớp lỗi với t50.
+- **Đứt ống thôi nuốt mã thật.** `doctor | head` trên môi trường LÀNH từng ra 141
+  (20/20 lượt) nên phía gọi kiểm `rc != 0` báo "THIẾU CÔNG CỤ" oan; lúc THIẾU thì 141
+  lại nuốt mất mã 12. Nay in qua `_in_an_toan`, kết luận không phụ thuộc việc người
+  đọc có chịu đọc hết hay không: đo lại 0/0/0 khi đủ và 12/12/12 khi thiếu, ở cả ba
+  kiểu cắt ống. `main` cũng flush trước khi trả, tránh mã 120 do lỗi flush lúc dọn dẹp.
+- **Timeout cho MỌI subprocess trên đường giết** (`git` 120s, `ps`/`powershell` 15–30s,
+  `taskkill` 30s). Trước chỉ `_phien_ban` có: một `powershell` treo là treo luôn đường
+  cưỡng chế hạn chót — đúng thứ `--deadline-utc` tồn tại để bảo đảm.
+- **`_con_song` trên Windows so KHOÁ**, không chỉ hỏi "có tiến trình nào mang PID này".
+  Giữa `taskkill` và lúc kiểm có ~2 lần gọi `powershell`, thừa chỗ để PID bị tái dùng
+  ⇒ đọc thành "chưa giết được" và trả **125 giả**.
+- **`doctor` đo `bash` và `npm`** — hai thứ môi trường thật sự phụ thuộc (`settings.json`
+  gọi hook qua bash; `session-start.sh` rẽ nhánh trên `npm`) mà bảng cũ không hỏi.
+- **Cổng đột biến có SÀN.** Bảng mà mọi đột biến đều không đo được in `0/0 dat` rồi
+  thoát 0 — thoả hình thức "hai số bằng nhau" mà chứng minh con số không.
+- **Dấu mốc pip thành bằng chứng DƯƠNG.** Mốc cũ nói "từng cài sha này ở TMPDIR này",
+  nên A→B→A bỏ qua sai (môi trường đang là B) và hai dự án cùng `requirements.txt`
+  dùng chung mốc. Nay mốc neo theo cả sha lẫn `sys.prefix`, nằm trong `.git/` của dự
+  án, và trước khi tin mốc còn hỏi `pip install --dry-run`.
+- **Dọn tệp tạm mồ côi** quét từ `run_root` (rác nằm ở thư mục của lượt ĐÃ CHẾT — quét
+  thư mục đang ghi thì chẳng dọn được gì).
+- **Hook ghim `"shell": "bash"` + `${CLAUDE_PROJECT_DIR}` dạng ngoặc.** Máy Windows
+  không có Git Bash thì chuỗi lệnh được giao cho PowerShell, ở đó `bash` không tồn tại
+  VÀ `$CLAUDE_PROJECT_DIR` là biến PowerShell chưa định nghĩa nên nở ra rỗng — hai lỗi
+  độc lập, cùng hướng. Không dùng exec form (`args`) dù tài liệu khuyến nghị: client cũ
+  bỏ qua `args` sẽ chạy `bash` trần, mà `PreToolUse` hỏng thì mọi lệnh Bash chết trước
+  khi chạy — đúng bẫy tự khoá đã ghi trong CLAUDE.md.
+- Tài liệu: bảng mã thoát bổ sung 130/141/1 và **cảnh báo mã của con đè lên cả bảng**
+  với `run` (phía gọi tự động phải đọc `trang_thai`); `{PROMPT_FILE}` lần đầu được ghi
+  vào tài liệu và ví dụ chủ đạo chuyển sang dùng nó; ghi rõ cách đăng ký hook kèm trích
+  dẫn tài liệu chính thức.
+
 # ★ dev-side — vá 3 lỗi CHẶN của audit vòng 3 (2026-08-12)
 
 Không bump `VERSION`: chỉ `.claude/dev/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`

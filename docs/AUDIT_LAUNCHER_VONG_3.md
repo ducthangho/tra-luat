@@ -4,7 +4,10 @@
 > `★ dev-side — vá 3 lỗi CHẶN của audit vòng 3` trong `CHANGELOG.md`. Khoá bằng
 > t63…t67 + 5 đột biến; bộ phản chứng 67/67, đột biến 22/22. §1 vá làm HAI lớp vì
 > lớp đầu (chỉ đếm thành viên nhóm) vẫn để lọt ca cháu `setsid()` — đã đo lại cả
-> hai biến thể trên bản vá. Các mục NÊN SỬA / GHI NHẬN bên dưới **chưa** đụng tới.
+> hai biến thể trên bản vá. **12 mục NÊN SỬA cũng đã vá nốt** (đợt 2) — xem mục
+> `★ dev-side — vá nốt 12 mục NÊN SỬA của audit vòng 3`. Sau hai đợt: bộ phản chứng
+> 75/75, đột biến 32/32. Phần GHI NHẬN giữ nguyên làm hồ sơ đo đạc; riêng §19 (tệp tạm
+> mồ côi) và §17 (`_con_song` không so khoá) đã vá kèm.
 
 
 

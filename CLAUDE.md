@@ -94,7 +94,9 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   hồi, mà `os.kill(pid,0)` với zombie vẫn thành công ⇒ báo "chưa giết được" cho tiến
   trình đã chết hẳn.
 - **`endswith` để so danh tính = lỗ giả mạo.** `--expected-repo github.com/o/r` từng KHỚP
-  remote `https://evil.example/github.com/o/r.git`. Nêu host ⇒ đòi bằng nhau tuyệt đối.
+  remote `https://evil.example/github.com/o/r.git`. Nêu host (≥3 đoạn) ⇒ đòi bằng nhau
+  tuyệt đối — KHÔNG bó ở đúng 3 đoạn, vì GitLab subgroup/GHE lồng nhau có 4+ đoạn và bó
+  như thế là chặn oan chính danh tính đúng (audit vòng 3).
 - **Đột biến ghi vào tệp THẬT rồi khôi phục trong `finally` là bom hẹn giờ.** Lượt chạy bị
   SIGTERM cắt giữa chừng ⇒ `finally` không chạy ⇒ tệp ở lại trạng thái đã méo, và lượt sau
   đọc bản méo làm "bản gốc". Một bản vá NGƯỢC (`if False:` thay cho chốt chống giết nhầm

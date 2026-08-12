@@ -61,11 +61,34 @@ co python3 || PY=python
 # Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
 # SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac
 # (pypdf>=4.0 khong ghim tran).
+#
+# Audit vong 3 - dau moc la BANG CHUNG AM ("tung cai sha nay"), khong phai bang
+# chung DUONG ("goi dang co"). Do duoc hai ca sai:
+#   A->B->A : buoc 3 BO QUA vi moc cua A con, trong khi moi truong dang la B.
+#   hai du an khac nhau, requirements.txt GIONG HET, chung TMPDIR: du an sau bo
+#   qua du chua bao gio cai o do (sai han khi moi du an mot venv).
+# Sua hai chuyen: (1) moc neo theo CA sha LAN sys.prefix (venv nao), va nam trong
+# .git/ cua du an chu khong phai TMPDIR dung chung; (2) truoc khi tin moc, DOI
+# BANG CHUNG DUONG bang `pip install --dry-run` - no im lang va nhanh khi da du,
+# va bao thieu khi moi truong khong con khop.
 if [ -f requirements.txt ]; then
-  DAU="${TMPDIR:-/tmp}/.tl_reqs_$( "$PY" -c "import hashlib,sys;print(hashlib.sha256(open('requirements.txt','rb').read()).hexdigest()[:16])" )"
+  KHO_MOC="$("$PY" -c "import subprocess,sys;print(subprocess.run(['git','rev-parse','--git-dir'],capture_output=True,text=True).stdout.strip() or '.')" 2>/dev/null || echo .)"
+  VAN_TAY="$( "$PY" -c "
+import hashlib, sys
+h = hashlib.sha256(open('requirements.txt','rb').read()).hexdigest()[:16]
+print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
+  DAU="$KHO_MOC/.tl_reqs_$VAN_TAY"
+  CAN_CAI=1
   if [ -f "$DAU" ]; then
-    echo "[session-start] requirements.txt khong doi — bo qua pip"
-  else
+    # Moc noi da cai. Kiem lai bang bang chung duong truoc khi tin.
+    if "$PY" -m pip install --dry-run --quiet -r requirements.txt >/dev/null 2>&1; then
+      echo "[session-start] requirements.txt khong doi va moi truong con khop — bo qua pip"
+      CAN_CAI=0
+    else
+      echo "[session-start] moc con nhung moi truong KHONG con khop — cai lai"
+    fi
+  fi
+  if [ "$CAN_CAI" = 1 ]; then
     echo "[session-start] cai requirements.txt ..."
     if "$PY" -m pip install --quiet -r requirements.txt; then
       : > "$DAU"

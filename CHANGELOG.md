@@ -1,3 +1,36 @@
+# ★ dev-side — vá 3 lỗi CHẶN của audit vòng 3 (2026-08-12)
+
+Không bump `VERSION`: chỉ `.claude/dev/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`
+giữ nguyên `file_count: 179`, gói phát hành không đổi.
+
+Vòng audit thứ ba (`docs/AUDIT_LAUNCHER_VONG_3.md`) tìm 3 lỗi CHẶN — **cả ba nằm ở POSIX**,
+nền launcher chạy hằng ngày, chứ không phải ở Windows như dự đoán:
+
+- **`ca_cay=True` là khẳng định KHÔNG có bằng chứng.** Vòng chờ thoát ngay khi tiến trình
+  MẸ chết, nên `killpg(SIGKILL)` không bao giờ được gửi: cháu chỉ cần `SIG_IGN` cho SIGTERM
+  (hoặc `setsid()` rời nhóm) là sống tiếp trong khi hạn chót trả 124 "đã giết được" — đúng
+  "chốt nói dối" mà vòng 2 đã vá cho Windows rồi bỏ quên ở POSIX. Nay đo bằng HAI lớp độc
+  lập, mỗi lớp phủ một ca lớp kia không thấy: `_chup_cay` chụp cây con cháu + khoá danh
+  tính TRƯỚC khi phát tín hiệu (bắt kẻ đã rời nhóm — sau khi mẹ chết là không tìm lại được),
+  `_thanh_vien_nhom` đếm thành viên nhóm còn sống, zombie tính là đã chết (bắt kẻ sinh SAU
+  lúc chụp). `_giet_rieng` giết từng pid có kiểm khoá vì `killpg` không với tới kẻ đã
+  `setsid()`. Không đo được ⇒ `ca_cay=False` ⇒ 125, không đoán bừa thành 124.
+- **`_cap_id` không giành được `short_id`.** Bản vá vòng 2 đổi sang `mkdir` độc quyền và
+  ghi rằng khe hở đã đóng, nhưng thư mục tên `{sid}-{rid}` nên nó chỉ chặn trùng `run_id`
+  ĐẦY ĐỦ (uuid4 — chưa ai lo); trùng `short_id`, thứ làm `status`/`stop` trỏ nhầm lượt, vẫn
+  lọt vì hai bên ra hai TÊN khác nhau. Sửa ở tầng: bỏ `rid` khỏi tên, thư mục lượt chạy tên
+  ĐÚNG BẰNG `short_id` nên `mkdir` chính là hành vi giành, nguyên tử ở tầng hệ tệp và không
+  thêm tệp mốc nào vào `run-root`. `run_id` đầy đủ nằm trong `run.json`, `_tim_luot` tra được.
+- **`--run-root` tương đối làm neo prompt fail-OPEN.** Con chạy với `cwd=gốc repo` còn
+  launcher có thể đứng ở thư mục con, nên đường dẫn bản chụp thay vào `{PROMPT_FILE}` trỏ
+  trượt: con không đọc được gì, mà sổ vẫn ghi `prompt_kin_hoan_toan=true` và lượt chạy trả
+  `rc=0`/`xong`. Sửa bằng `.resolve()` ở cả `run`/`status`/`stop`.
+
+Khoá bằng 5 ca mới (t63…t67) + 5 đột biến. Bộ phản chứng **67/67 (qua 65, bỏ qua 2, hỏng 0)**,
+đột biến **22/22 đạt** (1 không đo được: t62 là fixture Windows). Lý do bỏ qua t62 trên POSIX
+được sửa vì nó SAI SỰ THẬT — trạng thái "mẹ chết cháu sống" dựng được trên Linux, và t63/t66/t67
+là ba biến thể của nó.
+
 # ★ dev-side — launcher đa nền + môi trường agent (2026-08-12)
 
 Không bump `VERSION`: toàn bộ thay đổi nằm trong `.claude/` và `docs/` — hai thư mục đã

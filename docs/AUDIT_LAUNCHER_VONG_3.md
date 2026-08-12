@@ -1,5 +1,13 @@
 # Audit vòng 3 — `.claude/dev/launcher.py` @ `0345ab3`
 
+> **TRẠNG THÁI VÁ.** Ba lỗi CHẶN (§1, §2, §3) đã vá ngay sau báo cáo này — xem mục
+> `★ dev-side — vá 3 lỗi CHẶN của audit vòng 3` trong `CHANGELOG.md`. Khoá bằng
+> t63…t67 + 5 đột biến; bộ phản chứng 67/67, đột biến 22/22. §1 vá làm HAI lớp vì
+> lớp đầu (chỉ đếm thành viên nhóm) vẫn để lọt ca cháu `setsid()` — đã đo lại cả
+> hai biến thể trên bản vá. Các mục NÊN SỬA / GHI NHẬN bên dưới **chưa** đụng tới.
+
+
+
 **Nền chạy:** Linux (container Claude Code web thật), Python 3.11.15, git 2.43.0.
 **Worktree:** tách rời từ `origin/claude/wp55-r2g2-executor-p4tee0`, **không sửa một tệp nào** —
 `git status --porcelain` và `git diff --stat` rỗng ở đầu, giữa và cuối phiên.

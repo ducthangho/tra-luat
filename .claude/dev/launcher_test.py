@@ -18,6 +18,7 @@ import os
 import platform
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -101,6 +102,32 @@ class San:
 def bang(dieu_kien, thong_diep):
     if not dieu_kien:
         raise AssertionError(thong_diep)
+
+
+def _con_song_that(pid: int) -> bool:
+    """Còn sống THẬT — zombie tính là ĐÃ CHẾT.
+
+    Bộ test phải hỏi độc lập với launcher (không import nó, kể cả khi đang chạy
+    bản đột biến), nhưng vẫn phải đúng cái luật mà launcher dùng: `os.kill(pid,0)`
+    thành công với cả zombie, nên chỉ dùng nó là báo "còn sống" cho tiến trình đã
+    chết hẳn.
+    """
+    st = Path(f"/proc/{pid}/stat")
+    if st.exists():
+        try:
+            nd = st.read_text()
+            return nd[nd.rindex(")") + 2:].split()[0] != "Z"
+        except (OSError, ValueError, IndexError):
+            return False
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    if platform.system() == "Darwin":
+        p = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
+                           capture_output=True, text=True)
+        return not p.stdout.strip().startswith("Z")
+    return True
 
 
 # ------------------------------------------------------------- chốt: workspace
@@ -1044,7 +1071,11 @@ def t62_qua_han_ma_khong_giet_het_cay_phai_tra_125():
     chưa đo được ở đây còn hơn dựng một ca giả rồi tưởng đã phủ.
     """
     if not LA_WINDOWS:
-        return "chi do duoc tren Windows (POSIX killpg giet ca nhom nen khong dung duoc ca me-chet-chau-song)"
+        # SỬA vòng 3: lý do bỏ qua cũ ("POSIX killpg giết cả nhóm nên KHÔNG dựng
+        # được ca mẹ-chết-cháu-sống") là SAI SỰ THẬT — dựng được, và khi dựng thì
+        # bản cũ trả 124 với cháu còn sống. Bản POSIX của ca này là t63; ở đây chỉ
+        # còn đúng phần fixture riêng của Windows (cháu ngây thơ + taskkill /T).
+        return "fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)"
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
@@ -1064,6 +1095,277 @@ def t62_qua_han_ma_khong_giet_het_cay_phai_tra_125():
         else:
             bang(r.returncode == MA_QUA_HAN,
                  f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+
+
+@ca
+def t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi():
+    """POSIX: mẹ chết mà CHÁU CÙNG NHÓM còn sống ⇒ không được trả 124.
+
+    ĐÂY LÀ CA MÀ VÒNG 2 TIN LÀ KHÔNG DỰNG ĐƯỢC. t62 bỏ qua trên POSIX với lý do
+    "killpg giết cả nhóm nên cả cây luôn chết cùng lúc" — chỉ đúng với cháu ngây
+    thơ. Cháu chỉ cần `SIG_IGN` cho SIGTERM là sống nguyên VẪN TRONG NHÓM, và
+    bản trước thoát vòng chờ ngay khi MẸ chết nên `killpg(SIGKILL)` không bao giờ
+    được gửi ⇒ hạn chót trả 124 ("đã giết được") với cháu đang chạy tiếp.
+
+    Ca này neo HAI thứ:
+      1. mã thoát phải KHỚP THỰC TẾ (cháu sống ⇒ 125, cháu chết ⇒ 124) — chốt
+         chống nói dối, y hệt t62;
+      2. trên POSIX phải THẬT SỰ giết được (leo thang SIGKILL tới cả nhóm).
+    """
+    if LA_WINDOWS:
+        return "ca nay dung SIG_IGN cua POSIX; duong Windows la t62"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        dau = s / "chau-con-song.txt"
+        chau_py = s / "chau.py"
+        chau_py.write_text(
+            "import os, signal, sys, time\n"
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN)  # phot lo, VAN trong nhom\n"
+            "open(sys.argv[1], 'w').write(str(os.getpid()))\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        me_py = s / "me.py"
+        me_py.write_text(
+            "import subprocess, sys, time\n"
+            "subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]])\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--deadline-utc", mai_sau(2),
+                 "--", PY, str(me_py), str(chau_py), str(dau))
+        for _ in range(40):          # chờ cháu kịp ghi pid
+            if dau.exists():
+                break
+            time.sleep(0.05)
+        bang(dau.exists(), "thi nghiem hong: chau chua kip ghi pid")
+        chau = int(dau.read_text().strip())
+        time.sleep(0.5)
+        # ZOMBIE PHẢI TÍNH LÀ ĐÃ CHẾT — `os.kill(pid, 0)` THÀNH CÔNG với zombie.
+        # Cháu mất mẹ nên được init nhận nuôi, mà init trong container không phải
+        # lúc nào cũng thu hồi ngay ⇒ nó nằm ở trạng thái Z khá lâu. Bản đầu của
+        # ca này dùng os.kill(pid,0) và báo ĐỎ oan cho một bản vá ĐÚNG — đúng cái
+        # bẫy đã ghi sẵn trong docstring của `_con_song` mà vẫn đạp phải.
+        chau_song = _con_song_that(chau)
+        try:
+            if chau_song:
+                bang(r.returncode == MA_GIET_HUT,
+                     f"chau {chau} CON SONG ma tra {r.returncode} (phai {MA_GIET_HUT})")
+            else:
+                bang(r.returncode == MA_QUA_HAN,
+                     f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+            bang(not chau_song,
+                 f"POSIX phai leo thang SIGKILL toi ca nhom, nhung chau {chau} van song")
+        finally:
+            if chau_song:
+                try:
+                    os.kill(chau, signal.SIGKILL)
+                except OSError:
+                    pass
+
+
+@ca
+def t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem():
+    """Cháu sinh ra SAU khi đã chụp cây (mẹ bắt SIGTERM rồi mới đẻ) — lớp NHÓM bắt.
+
+    Bổ đôi với t66: ảnh chụp bắt kẻ đã rời nhóm, đếm thành viên nhóm bắt kẻ sinh
+    sau lúc chụp. Không lớp nào phủ được ca của lớp kia, nên cả hai đều phải có.
+    Ca thật: tiến trình dọn dẹp trong tay bắt tín hiệu lại đẻ thêm việc.
+    """
+    if LA_WINDOWS:
+        return "dua tren SIGTERM cua POSIX; duong Windows la t62"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        dau = s / "chau-con-song.txt"
+        chau_py = s / "chau.py"
+        chau_py.write_text(
+            "import os, sys, time\n"
+            "open(sys.argv[1], 'w').write(str(os.getpid()))\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        me_py = s / "me.py"
+        me_py.write_text(
+            "import os, signal, subprocess, sys, time\n"
+            "def tay(sig, khung):\n"
+            "    subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]])\n"
+            "    os._exit(0)          # me chet NGAY, chau vua sinh o lai trong nhom\n"
+            "signal.signal(signal.SIGTERM, tay)\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--deadline-utc", mai_sau(2),
+                 "--", PY, str(me_py), str(chau_py), str(dau))
+        for _ in range(40):
+            if dau.exists():
+                break
+            time.sleep(0.05)
+        bang(dau.exists(), "thi nghiem hong: chau chua kip ghi pid")
+        chau = int(dau.read_text().strip())
+        time.sleep(0.5)
+        chau_song = _con_song_that(chau)
+        try:
+            if chau_song:
+                bang(r.returncode == MA_GIET_HUT,
+                     f"chau {chau} sinh sau luc chup VAN CON SONG ma tra "
+                     f"{r.returncode} (phai {MA_GIET_HUT})")
+            else:
+                bang(r.returncode == MA_QUA_HAN,
+                     f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+        finally:
+            if chau_song:
+                try:
+                    os.kill(chau, signal.SIGKILL)
+                except OSError:
+                    pass
+
+
+@ca
+def t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet():
+    """Cháu tự `setsid()` rời nhóm ⇒ `killpg` KHÔNG với tới. Vẫn không được nói dối.
+
+    Bản vá đầu của vòng 3 chỉ đếm THÀNH VIÊN NHÓM nên ca này vẫn lọt: nhóm rỗng
+    thật (cháu đã ra ngoài) ⇒ vẫn trả 124 với cháu đang chạy. Phải chụp CÂY con
+    cháu TRƯỚC khi phát tín hiệu — sau khi mẹ chết, cháu được init nhận nuôi nên
+    mất cả liên kết nhóm LẪN liên kết cha, không còn đường nào tìm ra.
+    """
+    if LA_WINDOWS:
+        return "setsid la khai niem POSIX; duong Windows la t62"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        dau = s / "chau-con-song.txt"
+        chau_py = s / "chau.py"
+        chau_py.write_text(
+            "import os, sys, time\n"
+            "open(sys.argv[1], 'w').write(str(os.getpid()))\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        me_py = s / "me.py"
+        me_py.write_text(
+            "import subprocess, sys, time\n"
+            "subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]],\n"
+            "                 start_new_session=True)   # setsid(): ra khoi nhom\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--deadline-utc", mai_sau(2),
+                 "--", PY, str(me_py), str(chau_py), str(dau))
+        for _ in range(40):
+            if dau.exists():
+                break
+            time.sleep(0.05)
+        bang(dau.exists(), "thi nghiem hong: chau chua kip ghi pid")
+        chau = int(dau.read_text().strip())
+        time.sleep(0.5)
+        chau_song = _con_song_that(chau)
+        try:
+            if chau_song:
+                bang(r.returncode == MA_GIET_HUT,
+                     f"chau {chau} da setsid VAN CON SONG ma tra {r.returncode} "
+                     f"(phai {MA_GIET_HUT})")
+            else:
+                bang(r.returncode == MA_QUA_HAN,
+                     f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+        finally:
+            if chau_song:
+                try:
+                    os.kill(chau, signal.SIGKILL)
+                except OSError:
+                    pass
+
+
+@ca
+def t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai():
+    """short_id phải được giành NGUYÊN TỬ, không phải bằng "quét rồi mkdir".
+
+    ĐÃ TRẢ GIÁ HAI LẦN. Bản vá vòng 2 đổi sang `thu_muc.mkdir(parents=False)` và
+    tuyên bố khe hở đã đóng — nhưng tên thư mục là "{sid}-{rid}" nên mkdir độc
+    quyền chỉ chặn trùng run_id ĐẦY ĐỦ; hai tiến trình cùng chọn trúng một
+    short_id vẫn tạo được hai thư mục khác tên (audit vòng 3 ép được bằng cách
+    cho hai luồng quét xong rồi mới mkdir). Nay short_id được giành bằng mốc
+    `.sid-<id>` tạo O_EXCL — tên mốc CHỈ chứa sid nên va chạm là thật sự nguyên tử.
+
+    CHÍNH CUỘC ĐUA thì KHÔNG dựng được qua seam dòng lệnh — nó cần chặn hai
+    tiến trình ở đúng khe giữa "quét" và "mkdir" (audit vòng 3 làm được bằng
+    Path-proxy trong tiến trình). Thứ neo được ở đây là TÍNH CHẤT CẤU TRÚC khiến
+    cuộc đua không còn tồn tại: **tên thư mục ĐÚNG BẰNG short_id**, nên `mkdir`
+    không exist_ok chính là hành vi giành, nguyên tử ở tầng hệ tệp. Bản cũ đặt
+    tên "{sid}-{rid}" nên ca này ĐỎ trên nó.
+
+    Ép tất định bằng cách bơm `sitecustomize.py` qua PYTHONPATH để `uuid4` luôn
+    trả cùng 8 hex đầu — vẫn đi qua CLI thật, nên đột biến vẫn đo được.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        gia = s / "ep_uuid"
+        gia.mkdir()
+        (gia / "sitecustomize.py").write_text(
+            "import uuid\n"
+            "class _U:\n"
+            "    def __init__(self, h): self.hex = h\n"
+            "_n = [0]\n"
+            "def _gia():\n"
+            "    _n[0] += 1\n"
+            "    return _U('deadbeef' + '%024x' % _n[0])\n"
+            "uuid.uuid4 = _gia\n", encoding="utf-8")
+        moi = dict(os.environ)
+        moi["PYTHONPATH"] = str(gia) + os.pathsep + moi.get("PYTHONPATH", "")
+
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--", PY, "-c", "pass", env=moi)
+        bang(r.returncode == MA_OK, f"luot dau phai qua, duoc {r.returncode}: {r.stderr}")
+        ds = [p for p in rr.iterdir() if p.is_dir()]
+        bang(len(ds) == 1, f"mong doi 1 thu muc, thay {[p.name for p in ds]}")
+        so = json.loads((ds[0] / "run.json").read_text(encoding="utf-8"))
+        bang(ds[0].name == so["short_id"],
+             f"ten thu muc phai DUNG BANG short_id de mkdir la hanh vi gianh: "
+             f"ten={ds[0].name!r}, short_id={so['short_id']!r}")
+
+        # run_id đầy đủ KHÔNG còn trong tên nữa — `status --id <run_id>` vẫn phải tra được.
+        r_id = chay("status", "--run-root", str(rr), "--id", so["run_id"])
+        bang(r_id.returncode == MA_OK,
+             f"tra theo run_id day du hong: {r_id.returncode} {r_id.stderr}")
+
+        # short_id 'deadbeef' đã bị giành; mọi lần thử đều ra đúng nó ⇒ phải BỎ CUỘC
+        # bằng mã va chạm, KHÔNG được cấp lại hay ghi đè lượt cũ.
+        r2 = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                  "--", PY, "-c", "pass", env=moi)
+        bang(r2.returncode == MA_VA_CHAM,
+             f"short_id da bi giu ma van cap lai: rc={r2.returncode}")
+        bang(len([p for p in rr.iterdir() if p.is_dir()]) == 1,
+             "luot thu hai da de len thu muc cua luot dau")
+
+
+@ca
+def t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con():
+    """`--run-root` tương đối + chạy từ THƯ MỤC CON: con vẫn phải đọc được prompt.
+
+    Con được sinh với `cwd=gốc repo`, còn launcher có thể đứng ở thư mục con
+    (`tim_workspace` quảng cáo đúng điều đó). Không `resolve()` thì đường dẫn bản
+    chụp thay vào {PROMPT_FILE} là tương đối theo cwd của LAUNCHER, con đọc theo
+    cwd của NÓ ⇒ trượt. Audit vòng 3 đo được bản cũ: sổ ghi
+    prompt_kin_hoan_toan=True, con in "No such file or directory", mà lượt chạy
+    vẫn trả rc=0 và trạng thái "xong" — fail-OPEN kèm khẳng định SAI trong sổ.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        sau = repo / "con" / "sau"
+        sau.mkdir(parents=True)
+        pf = s / "prompt.txt"
+        pf.write_text("NOI-DUNG-PROMPT-NEO\n", encoding="utf-8")
+        sha = hashlib.sha256(pf.read_bytes()).hexdigest()
+        r = chay("run", "--run-root", "runs-tuong-doi",
+                 "--prompt-file", str(pf), "--expected-prompt-sha256", sha,
+                 "--", PY, "-c", "import sys; print(open(sys.argv[1]).read())",
+                 "{PROMPT_FILE}", cwd=str(sau))
+        bang(r.returncode == MA_OK,
+             f"mong doi {MA_OK}, duoc {r.returncode}: {r.stdout} {r.stderr}")
+        rr = sau / "runs-tuong-doi"
+        ds = [p for p in rr.iterdir() if p.is_dir()]
+        bang(len(ds) == 1, f"mong doi 1 thu muc luot chay, thay {len(ds)}")
+        so = json.loads((ds[0] / "run.json").read_text(encoding="utf-8"))
+        bang(so.get("prompt_kin_hoan_toan") is True,
+             f"prompt_kin_hoan_toan={so.get('prompt_kin_hoan_toan')}")
+        ra = (ds[0] / "stdout.log").read_text(encoding="utf-8")
+        bang("NOI-DUNG-PROMPT-NEO" in ra,
+             f"con KHONG doc duoc ban chup (so van khoe kin hoan toan). stdout={ra!r}, "
+             f"stderr={(ds[0] / 'stderr.log').read_text(encoding='utf-8')!r}")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -1153,6 +1455,45 @@ DOT_BIEN = [
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),
+    # --- vòng 3: ba lỗi CHẶN. Mỗi đột biến dựng lại ĐÚNG hành vi của bản cũ.
+    # Nhóm luôn "rỗng" = đúng lời nói dối cũ: mẹ chết thì coi như cả cây chết,
+    # nên SIGKILL không bao giờ được gửi và cháu phớt lờ SIGTERM sống tiếp.
+    # Đúng lời nói dối của bản cũ: mẹ chết thì coi như cả cây chết, nên SIGKILL
+    # không bao giờ được gửi.
+    # CHỈ giết t63, KHÔNG giết t66 — đã đo: cháu của t66 không phớt lờ SIGTERM
+    # nên `_giet_rieng` hạ nó ngay ở phát đầu, cây SẠCH THẬT và 124 là trung
+    # thực. Đột biến sai chỗ ≠ mã sai; t66 do `khong_chup_cay` phủ.
+    ("me_chet_la_coi_nhu_ca_cay_chet",
+     ("        con = _con_lai()\n        if con is None:",
+      "        con = set() if not _con_song(pid) else _con_lai()\n        if con is None:"),
+     ["t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi"]),
+    # Bỏ lớp đếm THÀNH VIÊN NHÓM -> chỉ còn ảnh chụp, nên cháu sinh SAU lúc chụp
+    # không ai đếm. (t63/t66 vẫn sống nhờ ảnh chụp: hai lớp phủ hai ca khác nhau,
+    # cùng doctrine với bo_kiem_rong_CA_BON_LOP — đột biến sai chỗ ≠ mã sai.)
+    ("nhom_luon_rong",
+     ("def _thanh_vien_nhom(pgid: int) -> list[int] | None:\n    \"\"\"PID còn SỐNG",
+      "def _thanh_vien_nhom(pgid: int) -> list[int] | None:\n    return []\n    \"\"\"PID còn SỐNG"),
+     ["t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem"]),
+    # Bỏ ảnh chụp cây -> chỉ còn bằng chứng theo NHÓM, nên kẻ đã setsid() vừa
+    # không bị giết vừa không bị đếm: đúng bản vá NỬA VỜI đầu tiên của vòng 3.
+    ("khong_chup_cay",
+     ("def _chup_cay(pid: int) -> dict[int, str] | None:\n    \"\"\"Ảnh chụp",
+      "def _chup_cay(pid: int) -> dict[int, str] | None:\n    return {}\n    \"\"\"Ảnh chụp"),
+     ["t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet"]),
+    # Trả rid vào TÊN thư mục = đúng bản cũ: mkdir hết là hành vi giành short_id,
+    # hai lượt cùng sid lại cùng tồn tại được.
+    ("rid_quay_lai_ten_thu_muc",
+     [("        thu_muc = run_root / sid\n        try:\n            thu_muc.mkdir(parents=False)",
+       "        thu_muc = run_root / f\"{sid}-{rid}\"\n        try:\n            thu_muc.mkdir(parents=False)"),
+      ("    thu_muc = run_root / sid       # tên = short_id: xem `_cap_id`",
+       "    thu_muc = run_root / f\"{sid}-{rid}\"")],
+     ["t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai"]),
+    # Bỏ resolve() -> bản chụp đi tới con dưới dạng đường dẫn tương đối theo cwd
+    # của LAUNCHER, con đọc theo cwd của NÓ.
+    ("run_root_khong_resolve",
+     ("    run_root = Path(a.run_root).expanduser().resolve()\n    rid, sid = _cap_id(run_root)",
+      "    run_root = Path(a.run_root).expanduser()\n    rid, sid = _cap_id(run_root)"),
+     ["t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con"]),
 ]
 
 

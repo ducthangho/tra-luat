@@ -174,6 +174,155 @@ def _khoa_danh_tinh(pid: int) -> str | None:
     return None
 
 
+def _thanh_vien_nhom(pgid: int) -> list[int] | None:
+    """PID còn SỐNG trong nhóm tiến trình `pgid`. Zombie KHÔNG tính là sống.
+
+    Trả `[]` = đã CHỨNG MINH nhóm rỗng · danh sách = còn người · `None` = KHÔNG
+    đo được (và khi đó tuyệt đối không được khẳng định "cả cây đã chết").
+
+    VÌ SAO CẦN (audit vòng 3, đo trên Linux): `_con_song(pid)` chỉ nói về tiến
+    trình MẸ. Bản trước thoát vòng chờ ngay khi mẹ chết rồi trả
+    KetGiet(True, True, "SIGTERM: da tat ca cay") — nên `killpg(SIGKILL)` bên
+    dưới KHÔNG BAO GIỜ được gửi, và một tiến trình CHÁU chỉ cần `SIG_IGN` cho
+    SIGTERM là sống sót nguyên vẹn trong khi hạn chót trả 124 ("đã giết được").
+    Dựng lại được bằng hai cách, cả hai đều ra 124 với cháu còn sống:
+      · cháu gọi setsid() rồi rời nhóm
+      · cháu ở NGUYÊN trong nhóm, chỉ phớt lờ SIGTERM  <- ca này nhóm vẫn thấy
+    Đúng lớp lỗi mà vòng 2 đã vá cho Windows: "đã gọi lệnh giết" ≠ "đã chết".
+
+    GIỚI HẠN: đây chỉ là bằng chứng theo NHÓM — cháu tự `setsid()` đã rời nhóm
+    nên hàm này KHÔNG thấy nó. Phần đó do `_chup_cay` lo (chụp trước khi giết).
+    """
+    he = platform.system()
+    if he == "Linux":
+        try:
+            ds = [p for p in Path("/proc").iterdir() if p.name.isdigit()]
+        except OSError:
+            return None
+        ra = []
+        for p in ds:
+            try:
+                nd = (p / "stat").read_text()
+                sau = nd[nd.rindex(")") + 2:].split()
+                if sau[0] == "Z":          # zombie = đã chết, chờ thu hồi
+                    continue
+                if int(sau[2]) == pgid:    # trường 5 tính từ 1 = pgrp
+                    ra.append(int(p.name))
+            except (OSError, ValueError, IndexError):
+                continue   # tiến trình biến mất giữa lúc quét: coi như đã chết
+        return ra
+    if he == "Darwin":  # không có /proc — hỏi ps, và CÓ timeout
+        try:
+            p = subprocess.run(["ps", "-A", "-o", "pid=,pgid=,state="],
+                               capture_output=True, text=True, timeout=15)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if p.returncode != 0:
+            return None
+        ra = []
+        for dong in p.stdout.splitlines():
+            phan = dong.split()
+            if len(phan) < 3:
+                continue
+            try:
+                if int(phan[1]) == pgid and not phan[2].startswith("Z"):
+                    ra.append(int(phan[0]))
+            except ValueError:
+                continue
+        return ra
+    return None
+
+
+def _chup_cay(pid: int) -> dict[int, str] | None:
+    """Ảnh chụp {pid: khoá danh tính} của `pid`, MỌI hậu duệ, và mọi thành viên nhóm.
+
+    PHẢI chụp TRƯỚC khi giết. Cháu đã `setsid()` thì đã rời NHÓM; đến khi mẹ chết
+    nó được init nhận nuôi nên mất nốt liên kết CHA — sau thời điểm đó không còn
+    đường nào tìm ra nó nữa. Chụp trước là cách duy nhất giữ được danh sách phải
+    kiểm, và cũng là cách duy nhất GIẾT được nó (`killpg` không với tới).
+
+    Kèm khoá danh tính từng pid để lúc kiểm/giết lại không đụng nhầm một PID đã
+    bị tái dùng — cùng doctrine với `_khoa_danh_tinh`.
+
+    Còn lại đúng một khe không phủ được, nói thẳng: tiến trình sinh ra SAU lúc
+    chụp rồi lập tức `setsid()`. Nó không ở trong ảnh, cũng không ở trong nhóm.
+    """
+    he = platform.system()
+    if he == "Linux":
+        try:
+            ds = [p for p in Path("/proc").iterdir() if p.name.isdigit()]
+        except OSError:
+            return None
+        tt = {}
+        for p in ds:
+            try:
+                nd = (p / "stat").read_text()
+                sau = nd[nd.rindex(")") + 2:].split()
+                if sau[0] == "Z":                     # zombie = đã chết
+                    continue
+                tt[int(p.name)] = (int(sau[1]), int(sau[2]), f"linux:{sau[19]}")
+            except (OSError, ValueError, IndexError):
+                continue
+    elif he == "Darwin":
+        try:
+            p = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,pgid=,state="],
+                               capture_output=True, text=True, timeout=15)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if p.returncode != 0:
+            return None
+        tt = {}
+        for dong in p.stdout.splitlines():
+            phan = dong.split()
+            if len(phan) < 4 or phan[3].startswith("Z"):
+                continue
+            try:                                       # ps không cho starttime gọn
+                tt[int(phan[0])] = (int(phan[1]), int(phan[2]), "")
+            except ValueError:
+                continue
+    else:
+        return None
+    con = {}
+    for q, (cha, _, _) in tt.items():
+        con.setdefault(cha, []).append(q)
+    ra, hang = {}, [pid]
+    while hang:                                        # duyệt cây theo liên kết cha
+        q = hang.pop()
+        if q in ra or q not in tt:
+            continue
+        ra[q] = tt[q][2]
+        hang.extend(con.get(q, []))
+    for q, (_, nhom, khoa) in tt.items():              # + thành viên nhóm không phải hậu duệ
+        if nhom == pid:
+            ra.setdefault(q, khoa)
+    ra.pop(os.getpid(), None)                          # tuyệt đối không tự giết mình
+    return ra
+
+
+def _con_song_dung_khoa(pid: int, khoa: str) -> bool:
+    """Còn sống VÀ vẫn đúng tiến trình cũ. Khoá rỗng = không có khoá để so."""
+    if not _con_song(pid):
+        return False
+    if not khoa:
+        return True
+    return _khoa_danh_tinh(pid) == khoa
+
+
+def _giet_rieng(anh: dict[int, str], tin_hieu: int) -> None:
+    """Gửi tín hiệu tới TỪNG pid trong ảnh chụp, có kiểm khoá danh tính trước.
+
+    Cần vì `killpg` không với tới tiến trình đã tự `setsid()` rời nhóm. Kiểm khoá
+    nên không bao giờ giết nhầm một PID đã bị tái dùng — đúng chốt số 4 ở đầu tệp.
+    """
+    for q, khoa in anh.items():
+        if q == os.getpid() or not _con_song_dung_khoa(q, khoa):
+            continue
+        try:
+            os.kill(q, tin_hieu)
+        except OSError:
+            pass
+
+
 def _con_song(pid: int) -> bool:
     """Tiến trình còn sống không. Dùng để KIỂM SAU khi giết, không đoán.
 
@@ -215,7 +364,10 @@ class KetGiet:
     — chứa đúng chuỗi đó — nên hạn chót trả 124 trong khi tiến trình CHÁU vẫn sống.
     Giao thức bằng chuỗi tự do là mời lỗi; nay ba sự thật tách bạch:
       me_da_chet  — đã xác nhận tiến trình mẹ biến mất
-      ca_cay      — có bằng chứng CẢ CÂY đã chết (taskkill /T rc=0, hoặc killpg)
+      ca_cay      — có BẰNG CHỨNG không còn ai sống ngoài mẹ: taskkill /T rc=0
+                    (Windows) hoặc nhóm tiến trình đã rỗng (POSIX). Vòng 3 sửa:
+                    trước đây POSIX đặt True chỉ vì killpg KHÔNG NÉM LỖI, tức là
+                    suy đoán chứ không đo — xem _thanh_vien_nhom.
       mo_ta       — chỉ để người đọc, KHÔNG ai được quyết định dựa vào nó
     """
 
@@ -285,28 +437,57 @@ def _giet_cay(pid: int, khoa: str | None) -> KetGiet:
         return KetGiet(False, False, "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)")
     if platform.system() == "Windows":
         return _giet_windows(pid)
-    # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm
+    # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
+    # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
+    # không thể tìm lại (xem _chup_cay).
+    anh = _chup_cay(pid)
+
+    def _con_lai():
+        """Ai còn sống: ảnh chụp (bắt cả kẻ đã rời nhóm) HỢP thành viên nhóm hiện
+        tại (bắt cả kẻ sinh sau lúc chụp). None = không đo được ⇒ KHÔNG khẳng định."""
+        nhom = _thanh_vien_nhom(pid)
+        if nhom is None or anh is None:
+            return None
+        return {q for q, k in anh.items() if _con_song_dung_khoa(q, k)} | set(nhom)
+
     try:
         os.killpg(pid, signal.SIGTERM)
     except (ProcessLookupError, PermissionError, OSError) as e:
         return KetGiet(False, False, f"killpg SIGTERM loi: {e}")
+    if anh:
+        _giet_rieng(anh, signal.SIGTERM)   # killpg không với tới kẻ đã setsid()
     for _ in range(20):  # 2 giây chờ tự chết tử tế
         time.sleep(0.1)
-        # Hỏi _con_song chứ không killpg(0): nhóm tiến trình còn tồn tại chừng nào
-        # zombie chưa được thu hồi, nên killpg(0) không phân biệt được sống/chết.
-        if not _con_song(pid):
-            # killpg giết theo NHÓM nên cả cây con cháu cùng nhóm đều nhận tín hiệu
-            return KetGiet(True, True, "SIGTERM: da tat ca cay")
+        # KHÔNG hỏi mỗi _con_song(pid): mẹ chết KHÔNG chứng minh cháu chết. Cũng
+        # không killpg(0): nhóm còn tồn tại chừng nào zombie chưa được thu hồi.
+        con = _con_lai()
+        if con is None:
+            # Không đo được: chỉ dám khẳng định về MẸ, ca_cay=False để phía gọi
+            # trả 125 chứ không nói dối bằng 124.
+            if not _con_song(pid):
+                return KetGiet(True, False, "SIGTERM: me da chet, KHONG do duoc cay")
+            continue
+        if not con:
+            return KetGiet(True, True, "SIGTERM: cay da sach")
     try:
         os.killpg(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass                       # nhóm đã sạch giữa chừng
     except OSError as e:
         return KetGiet(False, False, f"killpg SIGKILL loi: {e}")
+    if anh:
+        _giet_rieng(anh, signal.SIGKILL)
     time.sleep(0.3)
     # KIỂM LẠI kể cả sau SIGKILL: tiến trình ở trạng thái D (chờ I/O) không chết
     # ngay, và báo "đã tắt" lúc nó còn sống là đúng thứ lỗi vừa bắt được ở Windows.
-    if _con_song(pid):
-        return KetGiet(False, False, "SIGKILL: KHONG GIET DUOC")
-    return KetGiet(True, True, "SIGKILL: da tat ca cay")
+    con = _con_lai()
+    if con is None:
+        return KetGiet(not _con_song(pid), False,
+                       "SIGKILL: KHONG do duoc cay - KHONG khang dinh ca cay")
+    if not con:
+        return KetGiet(True, True, "SIGKILL: cay da sach")
+    return KetGiet(pid not in con, False,
+                   f"SIGKILL: con {len(con)} tien trinh song {sorted(con)[:5]}")
 
 
 # -------------------------------------------------------------------- các chốt
@@ -556,11 +737,20 @@ def _cap_id(run_root: Path) -> tuple[str, str]:
         da_co = {p.name.split("-", 1)[0] for p in run_root.iterdir() if p.is_dir()}
         if sid in da_co:
             continue
-        thu_muc = run_root / f"{sid}-{rid}"
+        # Thư mục lượt chạy tên ĐÚNG BẰNG short_id, nên `mkdir` không exist_ok
+        # CHÍNH LÀ hành vi giành short_id, nguyên tử ở tầng hệ tệp.
+        #
+        # ĐÃ TRẢ GIÁ HAI LẦN. Bản đầu "quét rồi mkdir" có khe hở giữa hai bước.
+        # Bản vá vòng 2 đổi sang mkdir độc quyền và ghi rằng khe hở đã đóng —
+        # NHƯNG KHÔNG: lúc đó thư mục tên "{sid}-{rid}", nên mkdir chỉ chặn
+        # trùng run_id ĐẦY ĐỦ (uuid4, 2^128 — chưa ai lo). Trùng short_id, thứ
+        # làm status/stop trỏ NHẦM lượt, vẫn lọt vì hai bên ra hai tên KHÁC
+        # nhau và cả hai mkdir đều thành công (audit vòng 3 ép được bằng cách
+        # cho hai luồng quét xong rồi mới mkdir). Bỏ rid khỏi TÊN là sửa ở
+        # tầng: không còn cách nào để hai lượt cùng sid cùng tồn tại.
+        # run_id đầy đủ vẫn nằm trong run.json và `_tim_luot` vẫn tra được.
+        thu_muc = run_root / sid
         try:
-            # mkdir KHÔNG exist_ok = hành vi GIÀNH nguyên tử: hai tiến trình cùng
-            # chọn trúng một id thì đúng một bên tạo được. "Quét rồi mkdir" của bản
-            # trước có khe hở giữa hai bước (audit codex chỉ ra).
             thu_muc.mkdir(parents=False)
         except FileExistsError:
             continue
@@ -620,14 +810,20 @@ def _doc_so(thu_muc: Path) -> dict | None:
 
 
 def _tim_luot(run_root: Path, dinh_danh: str) -> Path | None:
-    """Tìm theo run_id đầy đủ HOẶC short_id."""
+    """Tìm theo run_id đầy đủ HOẶC short_id.
+
+    Tên thư mục CHỈ là short_id (xem `_cap_id`), nên run_id đầy đủ phải tra
+    trong sổ. Thử khớp tên trước để không phải đọc mọi run.json cho ca thường.
+    """
     if not run_root.is_dir():
         return None
-    for p in sorted(run_root.iterdir()):
-        if not p.is_dir():
-            continue
-        sid, _, rid = p.name.partition("-")
-        if dinh_danh in (sid, rid, p.name):
+    ds = [p for p in sorted(run_root.iterdir()) if p.is_dir()]
+    for p in ds:
+        if p.name == dinh_danh:
+            return p
+    for p in ds:
+        so = _doc_so(p)
+        if so and dinh_danh == so.get("run_id"):
             return p
     return None
 
@@ -657,9 +853,16 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
-    run_root = Path(a.run_root).expanduser()
+    # resolve() BẮT BUỘC, không phải cho đẹp: con được sinh với cwd=gốc repo, còn
+    # launcher có thể đang đứng ở THƯ MỤC CON (tim_workspace quảng cáo đúng điều
+    # đó). Với --run-root TƯƠNG ĐỐI, đường dẫn bản chụp thay vào {PROMPT_FILE} là
+    # tương đối theo cwd của LAUNCHER nhưng con lại đọc theo cwd của NÓ ⇒ con
+    # không thấy tệp. Audit vòng 3 đo được: sổ ghi prompt_kin_hoan_toan=True,
+    # con in "No such file or directory", mà lượt chạy vẫn trả rc=0 và "xong" —
+    # neo prompt fail-OPEN kèm một lời khẳng định SAI trong sổ.
+    run_root = Path(a.run_root).expanduser().resolve()
     rid, sid = _cap_id(run_root)   # _cap_id đã TẠO thư mục (giành chỗ nguyên tử)
-    thu_muc = run_root / f"{sid}-{rid}"
+    thu_muc = run_root / sid       # tên = short_id: xem `_cap_id`
 
     ban_ghi = {
         "version": VERSION, "run_id": rid, "short_id": sid,
@@ -778,7 +981,7 @@ def lenh_run(a) -> int:
 
 
 def lenh_status(a) -> int:
-    run_root = Path(a.run_root).expanduser()
+    run_root = Path(a.run_root).expanduser().resolve()   # xem lenh_run
     if a.id:
         thu_muc = _tim_luot(run_root, a.id)
         if thu_muc is None:
@@ -808,7 +1011,7 @@ def lenh_status(a) -> int:
 
 
 def lenh_stop(a) -> int:
-    run_root = Path(a.run_root).expanduser()
+    run_root = Path(a.run_root).expanduser().resolve()   # xem lenh_run
     thu_muc = _tim_luot(run_root, a.id)
     if thu_muc is None:
         raise Chan(MA_THAM_SO, f"khong thay luot chay: {a.id}")

@@ -491,6 +491,119 @@ def case_transition_khong_hop_le_thoat_8(c: Ctx):
     _doi(8, rc, e, "leased → accepted phải bị từ chối")
 
 
+def case_accepted_chi_dat_duoc_qua_record_review(c: Ctx):
+    """`accepted` phải có ĐÚNG MỘT cửa vào: record-review --verdict approve.
+
+    Lỗ đã đo: khi `accepted` còn là đích hợp lệ của `transition`, một lệnh
+    `transition --to accepted` kèm comment-id hợp lệ đi thẳng vào `accepted` với
+    `reviews: []` và `accepted_sha: null` — mỏ neo SHA bị vô hiệu hoàn toàn.
+
+    Ca này thử từ MỌI state mà CLI với tới được, chứ không chỉ chỗ đã hở, để lần
+    sau có ai mở lại một cửa khác thì vẫn bị bắt.
+    """
+    import json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+
+    def thu_accepted(nhan, cid):
+        rc, _, e = run(c.script,
+                       ["record-post", "--packet", 55, "--for", "accepted", "--comment-id", cid], sd)
+        _doi(0, rc, e, f"record-post accepted ({nhan})")
+        rc, _, e = run(c.script,
+                       ["transition", "--packet", 55, "--to", "accepted", "--comment-id", cid], sd)
+        if rc == 0:
+            raise AssertionError(f"[{nhan}] transition --to accepted phải bị từ chối")
+        if c.state(sd, 55) == "accepted":
+            raise AssertionError(f"[{nhan}] state KHÔNG được thành accepted")
+
+    thu_accepted("từ leased", "8880000101")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    thu_accepted("từ running", "8880000102")
+    cid = str(9_000_000_000 + 55 * 1000 + 2)
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", cid], sd)
+    _doi(0, rc, e, "record-post reviewing")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", cid, "--head-sha", c.head(1)], sd)
+    _doi(0, rc, e, "transition reviewing")
+    thu_accepted("từ reviewing", "8880000103")
+
+    # và bất biến: nếu có accepted thì PHẢI có review + accepted_sha
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    st = json.loads(o.decode("utf-8"))
+    if st["state"] == "accepted" and (not st["reviews"] or not st["accepted_sha"]):
+        raise AssertionError("accepted mà không có review/accepted_sha là vô nghĩa")
+
+
+def case_vao_reviewing_phai_co_luot_dang_mo(c: Ctx):
+    """Sau changes_requested, quay lại `reviewing` phải mở lượt mới trước.
+
+    Lỗ đã đo: không có chốt này thì hai review dồn vào CÙNG một attempt, nên lặp
+    một finding đủ khoá cứng packet trong khi mới tiêu 1/3 lượt — trần same-failure
+    bắn đúng lúc trần attempt còn nguyên.
+    """
+    import json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, ["loi-can-sua"])
+    _doi(0, rc, e, "changes_requested lượt 1")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    if json.loads(o.decode("utf-8"))["attempt_open"]:
+        raise AssertionError("sau review, lượt phải đóng")
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "8882000001"], sd)
+    _doi(0, rc, e, "record-post")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "8882000001", "--head-sha", c.head(2)], sd)
+    if rc == 0:
+        raise AssertionError("vào reviewing khi không có lượt mở phải bị từ chối")
+    # chiều DƯƠNG: mở lượt rồi thì vào được
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt lượt 2")
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "8882000002"], sd)
+    _doi(0, rc, e, "record-post 2")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "8882000002", "--head-sha", c.head(2)], sd)
+    _doi(0, rc, e, "mở lượt rồi thì phải vào được reviewing")
+
+
+def case_doctrine_scan_bat_qua_ngat_dong(c: Ctx):
+    """Doctrine bị XUỐNG DÒNG kiểu Markdown thường vẫn phải bị bắt.
+
+    Đã ĐO trước khi sửa: 3/3 cụm thử lọt sạch vì bộ so chạy theo DÒNG VẬT LÝ.
+    Ngắt dòng là thứ người viết làm vô thức, nên chốt nào thua nó thì thua
+    thường xuyên chứ không phải hiếm.
+    """
+    nl = "\n"
+    bien_the = [
+        ("ngắt trước accepted",
+         "proposed → ready → leased → running → reviewing" + nl + "→ accepted → integrated → landed"),
+        ("ngắt giữa cụm merged", "merged: PR đã vào" + nl + "nhánh đích của PR"),
+        ("ngắt giữa ô vai trò",
+         "Sửa đúng effective write set" + nl + "trên branch của generation"),
+        ("ngắt + nháy ngược", "`merged`: PR đã vào" + nl + "`nhánh` đích của PR"),
+        ("ngắt qua dòng trống", "merged: PR đã vào" + nl + nl + "nhánh đích của PR"),
+        ("ngắt ba mảnh",
+         "proposed → ready → leased →" + nl + "running → reviewing →" + nl + "accepted → integrated → landed"),
+    ]
+    lot = []
+    for i, (ten, txt) in enumerate(bien_the):
+        r = _repo_gia(c.tmp, "# Adapter" + nl + nl + txt + nl, ten=f"ngat{i}")
+        rc, _, _ = run(c.script, ["doctrine-scan", "--root", r])
+        if rc != 6:
+            lot.append(f"{ten} (rc={rc})")
+    if lot:
+        raise AssertionError(f"{len(lot)}/{len(bien_the)} biến thể ngắt dòng LỌT: {', '.join(lot)}")
+
+
 # --- §8 quota không tiêu thụ attempt -------------------------------------------
 
 
@@ -727,6 +840,9 @@ CASES = [
     ("record_post_id_sai_dang_bi_tu_choi", case_record_post_id_sai_dang_bi_tu_choi),
     ("record_post_trung_id_bi_tu_choi", case_record_post_trung_id_bi_tu_choi),
     ("transition_khong_hop_le_thoat_8", case_transition_khong_hop_le_thoat_8),
+    ("accepted_chi_dat_duoc_qua_record_review", case_accepted_chi_dat_duoc_qua_record_review),
+    ("vao_reviewing_phai_co_luot_dang_mo", case_vao_reviewing_phai_co_luot_dang_mo),
+    ("doctrine_scan_bat_qua_ngat_dong", case_doctrine_scan_bat_qua_ngat_dong),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),

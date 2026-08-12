@@ -68,13 +68,24 @@ LY_DO_VOID = ("quota", "rate_limit", "infrastructure", "permission")
 
 # State machine cục bộ của một packet đang chạy. Tên đầy đủ và ngữ nghĩa của
 # từng state thuộc protocol; ở đây chỉ có phần executor thực sự đi qua.
+#
+# `accepted` CỐ Ý KHÔNG có mặt làm đích của bất kỳ chuyển động nào ở bảng này.
+# Nó chỉ được ghi bởi `record-review --verdict approve`, tức là ĐÚNG MỘT ĐƯỜNG.
+# Bài học phải trả giá: khi `accepted` còn là đích hợp lệ của `transition`, một
+# lệnh `transition --to accepted` kèm comment-id hợp lệ đi thẳng vào `accepted`
+# với `reviews: []` và `accepted_sha: null` — tức mỏ neo SHA vừa dựng bị vô hiệu
+# hoàn toàn. Canh từng cửa một là thua; chỉ để lại MỘT cửa mới thắng.
+# Đừng thêm "accepted" vào đây, kể cả cho tiện.
 CHUYEN_HOP_LE = {
     "leased": ("running",),
     "running": ("reviewing",),
-    "reviewing": ("accepted", "running", "blocked"),
+    "reviewing": ("running", "blocked"),
     "accepted": (),
     "blocked": (),
 }
+
+# Các state chỉ được ghi bởi luồng review, không bao giờ bởi `transition`.
+STATE_CHI_DO_REVIEW_GHI = ("accepted",)
 
 # --- (a) same-failure theo ID ỔN ĐỊNH ----------------------------------------
 # Vì sao không dùng vân tay văn xuôi: ba lượt review liên tiếp lách được nó bằng
@@ -175,6 +186,43 @@ def _chuan_hoa(text: str) -> str:
     """
     text = unicodedata.normalize("NFC", text).casefold().translate(_TRANG_TRI)
     return " ".join(text.split())
+
+
+def _phang_ca_tep(raw: str):
+    """Ép CẢ TỆP về một chuỗi chuẩn hoá, kèm bản đồ vị trí → số dòng.
+
+    Vì sao không so từng dòng: quét theo DÒNG VẬT LÝ thì một câu doctrine bị
+    xuống dòng theo lối Markdown bình thường sẽ lọt sạch — đã ĐO, 3/3 cụm thử
+    (state machine ngắt trước "accepted", định nghĩa `merged`, ô bảng vai trò)
+    đều cho rc=0. Ngắt dòng là thứ người viết làm vô thức, nên chốt nào thua nó
+    thì thua thường xuyên, không phải hiếm.
+
+    Đây là lớp lách THỨ HAI liên tiếp bị bắt ở cùng một cơ chế (trước đó là dấu
+    nháy ngược). Nên lần này chữa tận gốc: so trên VĂN BẢN LOGIC, không phải trên
+    cách nó được bẻ dòng.
+    """
+    phan, ban_do, vi_tri = [], [], 0
+    for so_dong, dong in enumerate(raw.splitlines(), 1):
+        n = _chuan_hoa(dong)
+        if not n:
+            continue
+        if phan:
+            phan.append(" ")
+            vi_tri += 1
+        ban_do.append((vi_tri, so_dong))
+        phan.append(n)
+        vi_tri += len(n)
+    return "".join(phan), ban_do
+
+
+def _dong_tai(ban_do, offset: int) -> int:
+    """Vị trí trong chuỗi phẳng → số dòng gốc gần nhất."""
+    so = ban_do[0][1] if ban_do else 0
+    for bat_dau, so_dong in ban_do:
+        if bat_dau > offset:
+            break
+        so = so_dong
+    return so
 
 
 def _die(rc: int, msg: str) -> None:
@@ -458,7 +506,26 @@ def cmd_record_review(a, state_dir: Path) -> int:
 
 def cmd_transition(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
+    # Chặn TƯỜNG MINH trước khi tra bảng, để thông điệp nói đúng lý do thay vì
+    # rơi vào lỗi "transition không hợp lệ" chung chung.
+    if a.to in STATE_CHI_DO_REVIEW_GHI:
+        _die(
+            RC_STATE,
+            f"{a.to!r} KHÔNG đạt được bằng `transition`. Chỉ `record-review --verdict approve` "
+            f"ghi được state này, vì nó phải neo `--reviewed-sha` khớp head đã đưa ra review. "
+            f"Có đường vòng vào đây là mỏ neo SHA coi như không tồn tại.",
+        )
     _kiem_chuyen(st, a.to)
+    # Vào 'reviewing' phải có một lượt ĐANG MỞ. Thiếu chốt này, sau một lượt
+    # changes_requested (state 'running', attempt_open False) vẫn quay lại
+    # 'reviewing' được mà không mở lượt mới — nên hai review dồn vào CÙNG một
+    # attempt, và lặp một finding đủ khoá cứng packet trong khi mới tiêu 1 lượt.
+    if a.to == "reviewing" and not st["attempt_open"]:
+        _die(
+            RC_STATE,
+            "vào 'reviewing' phải có một lượt đang mở — chạy `begin-attempt` trước. "
+            "Không có chốt này thì hai review dồn vào cùng một lượt.",
+        )
     # Vào 'reviewing' phải khai ĐÚNG head đang đưa ra review. Đây là mỏ neo mà
     # bản duyệt sẽ phải khớp: bất biến của protocol là bằng chứng review gắn
     # exact SHA, head đổi thì bản duyệt cũ hết hiệu lực.
@@ -541,12 +608,16 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
             raw = f.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as e:
             _die(RC_ARG, f"không đọc được {f}: {e}")
-        for i, dong in enumerate(raw.splitlines(), 1):
-            norm = _chuan_hoa(dong)
-            for nhom, cum_list in FORBIDDEN_DOCTRINE_PHRASES.items():
-                for cum in cum_list:
-                    if _chuan_hoa(cum) in norm:
-                        dinh.append((str(f), nhom, cum, i))
+        phang, ban_do = _phang_ca_tep(raw)
+        for nhom, cum_list in FORBIDDEN_DOCTRINE_PHRASES.items():
+            for cum in cum_list:
+                kim = _chuan_hoa(cum)
+                if not kim:
+                    continue
+                tu = phang.find(kim)
+                while tu != -1:
+                    dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))
+                    tu = phang.find(kim, tu + len(kim))
 
     if dinh:
         for f, nhom, cum, i in dinh:

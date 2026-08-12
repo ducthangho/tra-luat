@@ -39,7 +39,8 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   9   va chạm run_id/short_id
   10  không xác định được danh tính tiến trình → từ chối giết
   11  kho không đúng (remote/commit gốc lệch)
-  124 quá hạn trong lúc chạy (giống `timeout(1)`)
+  124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
+  125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
 """
 
 from __future__ import annotations
@@ -73,6 +74,7 @@ MA_VA_CHAM = 9
 MA_DANH_TINH = 10
 MA_KHO = 11
 MA_QUA_HAN = 124
+MA_GIET_HUT = 125
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 # git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
@@ -170,17 +172,91 @@ def _khoa_danh_tinh(pid: int) -> str | None:
     return None
 
 
+def _con_song(pid: int) -> bool:
+    """Tiến trình còn sống không. Dùng để KIỂM SAU khi giết, không đoán.
+
+    ZOMBIE PHẢI TÍNH LÀ ĐÃ CHẾT. Con của chính ta, sau khi bị giết, nằm ở trạng
+    thái Z cho tới khi được `wait` thu hồi — mà `os.kill(pid, 0)` với zombie vẫn
+    THÀNH CÔNG. Bản đầu của hàm này quên điều đó nên báo "khong giet duoc" cho một
+    tiến trình đã chết hẳn, và hạn chót trả 125 thay vì 124 (bắt được nhờ t27/t28
+    đỏ ngay lượt chạy đầu — đúng việc của phản chứng).
+    """
+    if platform.system() == "Windows":
+        return _khoa_danh_tinh(pid) is not None
+    trang_thai = Path(f"/proc/{pid}/stat")
+    if trang_thai.exists():
+        try:
+            noi_dung = trang_thai.read_text()
+            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
+        except (OSError, ValueError, IndexError):
+            return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True  # tồn tại nhưng khác chủ
+    except OSError:
+        return False
+    if platform.system() == "Darwin":  # không có /proc: hỏi ps
+        p = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
+                           capture_output=True, text=True)
+        return not p.stdout.strip().startswith("Z")
+    return True
+
+
+def _giet_windows(pid: int) -> str:
+    """Giết trên Windows: taskkill trước, rồi TerminateProcess nếu vẫn sống.
+
+    ĐÃ ĐO (codex, 12-08-2026): `taskkill /PID x /T /F` trả rc=1 "Access denied"
+    ngay cả trên tiến trình do CHÍNH mình sinh ra, trong khi `Stop-Process -Force`
+    lại giết được — nghĩa là không được coi taskkill là đường duy nhất. Tệ hơn:
+    bản trước trả "taskkill rc=1" mà phía gọi vẫn báo quá-hạn-đã-xử-lý, nên
+    tiến trình mẹ LẪN cháu sống tiếp sau hạn chót. Đó là chốt nói dối.
+
+    TerminateProcess qua ctypes không cần tiến trình ngoài nên không dính lớp
+    quyền của taskkill.exe; đổi lại nó KHÔNG diệt con cháu, nên khi phải rơi
+    xuống nhánh này ta nói thẳng là con cháu có thể còn sống.
+    """
+    buoc = []
+    p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
+                       capture_output=True, text=True)
+    buoc.append(f"taskkill rc={p.returncode}")
+    if not _con_song(pid):
+        return "; ".join(buoc) + "; da tat"
+    try:
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        PROCESS_TERMINATE = 0x0001
+        h = k32.OpenProcess(PROCESS_TERMINATE, False, int(pid))
+        if h:
+            ok = k32.TerminateProcess(h, 1)
+            k32.CloseHandle(h)
+            buoc.append(f"TerminateProcess ok={bool(ok)}")
+        else:
+            buoc.append(f"OpenProcess that bai (err={k32.GetLastError()})")
+    except (OSError, AttributeError, ValueError) as e:
+        buoc.append(f"ctypes loi: {e}")
+    time.sleep(0.3)
+    if _con_song(pid):
+        return "; ".join(buoc) + "; KHONG GIET DUOC"
+    buoc.append("da tat (CON CHAU CO THE CON SONG - taskkill /T that bai)")
+    return "; ".join(buoc)
+
+
 def _giet_cay(pid: int, khoa: str | None) -> str:
-    """Giết tiến trình VÀ con cháu. Trả về chuỗi mô tả việc đã làm."""
+    """Giết tiến trình VÀ con cháu. Trả về chuỗi mô tả việc đã làm.
+
+    Chuỗi trả về CHỈ được chứa "da tat" khi đã KIỂM LẠI thấy tiến trình biến mất.
+    Phía gọi đọc dấu hiệu đó để quyết định mã thoát, nên nói dối ở đây là biến
+    hạn chót thành trang trí.
+    """
     if khoa is None:
         return "tu choi giet: khong co khoa danh tinh"
     if _khoa_danh_tinh(pid) != khoa:
         return "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)"
-    he = platform.system()
-    if he == "Windows":
-        p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
-                           capture_output=True, text=True)
-        return f"taskkill rc={p.returncode}"
+    if platform.system() == "Windows":
+        return _giet_windows(pid)
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm
     try:
         os.killpg(pid, signal.SIGTERM)
@@ -188,14 +264,19 @@ def _giet_cay(pid: int, khoa: str | None) -> str:
         return f"killpg SIGTERM loi: {e}"
     for _ in range(20):  # 2 giây chờ tự chết tử tế
         time.sleep(0.1)
-        try:
-            os.killpg(pid, 0)
-        except (ProcessLookupError, OSError):
+        # Hỏi _con_song chứ không killpg(0): nhóm tiến trình còn tồn tại chừng nào
+        # zombie chưa được thu hồi, nên killpg(0) không phân biệt được sống/chết.
+        if not _con_song(pid):
             return "SIGTERM: da tat"
     try:
         os.killpg(pid, signal.SIGKILL)
     except OSError as e:
         return f"killpg SIGKILL loi: {e}"
+    time.sleep(0.3)
+    # KIỂM LẠI kể cả sau SIGKILL: tiến trình ở trạng thái D (chờ I/O) không chết
+    # ngay, và báo "đã tắt" lúc nó còn sống là đúng thứ lỗi vừa bắt được ở Windows.
+    if _con_song(pid):
+        return "SIGKILL: KHONG GIET DUOC"
     return "SIGKILL: da tat"
 
 
@@ -276,6 +357,36 @@ def _commit_goc(ws) -> list[str]:
     return [d.strip() for d in out.splitlines() if d.strip()]
 
 
+def _kho_khop(thuc_te: str, mong_doi: str) -> bool:
+    """So danh tính kho. `thuc_te` luôn dạng 'host/owner/repo'.
+
+    LỖ AN NINH ĐÃ CÓ THẬT (codex đo, 12-08-2026): bản trước dùng
+    `r.endswith("/" + can)`, nên `--expected-repo github.com/o/r` KHỚP với remote
+    `https://evil.example/github.com/o/r.git`. Một kho do người khác dựng, đặt
+    đúng cái tên đường dẫn đó, sẽ qua chốt — chốt nhận diện kho thành vô dụng
+    đúng lúc cần nhất.
+
+    Luật nay theo Ý ĐỊNH của người viết:
+    · nêu HOST ('github.com/o/r' — đoạn đầu có dấu chấm) ⇒ đòi BẰNG NHAU tuyệt đối.
+    · không nêu host ('o/r') ⇒ so N đoạn CUỐI, đúng bằng số đoạn người ta viết.
+      Đây là lựa chọn của người dùng: không nói host thì không chặn theo host.
+      Muốn chặt thì nêu host, hoặc dùng --expected-root-commit.
+
+    So KHÔNG phân biệt hoa/thường: GitHub coi 'Owner/Repo' và 'owner/repo' là một
+    kho, và bản trước chặn oan chính bản clone hợp lệ (codex đo: rc=11).
+    """
+    t = thuc_te.strip().lower().strip("/")
+    m = mong_doi.strip().lower().strip("/")
+    if not t or not m:
+        return False
+    co_host = "." in m.split("/", 1)[0]
+    if co_host:
+        return t == m
+    doan_t = t.split("/")
+    doan_m = m.split("/")
+    return len(doan_t) > len(doan_m) and doan_t[-len(doan_m):] == doan_m
+
+
 def tim_workspace(chi_dinh: str | None) -> str:
     """Tìm gốc repo mà KHÔNG cần ai truyền đường dẫn tuyệt đối.
 
@@ -296,8 +407,7 @@ def chot_kho(ws: str, kho_mong_doi: str | None, goc_mong_doi: str | None) -> dic
         can = kho_mong_doi.strip().lower().rstrip("/")
         if can.endswith(".git"):
             can = can[:-4]
-        # cho phép viết 'owner/repo' hoặc đầy đủ 'host/owner/repo'
-        khop = any(r == can or r.endswith("/" + can) for r in remotes)
+        khop = any(_kho_khop(r, can) for r in remotes)
         if not khop:
             raise Chan(MA_KHO, f"kho lech: mong doi {can}, thuc te {remotes or '(khong co remote)'}")
     if goc_mong_doi:
@@ -521,8 +631,12 @@ def lenh_run(a) -> int:
                 ma = p.wait(timeout=max(0.0, con_lai))
             except subprocess.TimeoutExpired:
                 qua_han = True
-                ban_ghi["ly_do_dung"] = "qua han: " + _giet_cay(p.pid, khoa)
-                ma = MA_QUA_HAN
+                ket_giet = _giet_cay(p.pid, khoa)
+                ban_ghi["ly_do_dung"] = "qua han: " + ket_giet
+                # Quá hạn mà KHÔNG giết được là chuyện khác hẳn quá hạn đã xử lý.
+                # ĐÃ ĐO (codex/Windows): taskkill Access denied -> mẹ và cháu sống
+                # tiếp, mà launcher vẫn trả 124 nên phía gọi tưởng đã dọn xong.
+                ma = MA_QUA_HAN if "da tat" in ket_giet else MA_GIET_HUT
                 try:
                     p.wait(timeout=5)
                 except subprocess.TimeoutExpired:
@@ -538,8 +652,24 @@ def lenh_run(a) -> int:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"
         ma = MA_DANH_TINH
 
-    ban_ghi.update(trang_thai=("qua_han" if qua_han else "xong"),
-                   ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma)
+    # Mã thoát của tiến trình con có thể nằm ngoài 0..255 (Windows trả -1 =
+    # 4294967295). Trả thẳng ra thì bị cắt còn 255 hoặc 0 - phía gọi đọc nhầm
+    # "hỏng" thành "xong". Giữ số THẬT trong sổ, trả ra một mã hợp lệ.
+    ma_that = ma
+    if not isinstance(ma, int) or not (0 <= ma <= 255):
+        ban_ghi["ma_thoat_that"] = ma
+        ma = 1
+
+    # Có thể `stop` đã ghi "da_dung" trong lúc ta còn chờ. Đừng đè lên quyết định
+    # đó: ĐÃ ĐO (codex) - stop ghi da_dung xong runner ghi đè thành "xong", nên
+    # sổ nói lượt chạy kết thúc bình thường trong khi thực tế nó bị dừng.
+    so_moi = _doc_so(thu_muc) or {}
+    if so_moi.get("trang_thai") == "da_dung":
+        ban_ghi["trang_thai"] = "da_dung"
+        ban_ghi["ly_do_dung"] = so_moi.get("ly_do_dung") or ban_ghi.get("ly_do_dung")
+    else:
+        ban_ghi["trang_thai"] = "qua_han" if qua_han else "xong"
+    ban_ghi.update(ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma_that)
     _ghi_so(thu_muc, ban_ghi)
     if a.json:
         print(json.dumps(ban_ghi, ensure_ascii=False))
@@ -562,14 +692,22 @@ def lenh_status(a) -> int:
         print(json.dumps(so, ensure_ascii=False, indent=2))
         return MA_OK
     ds = []
+    hong = False
     if run_root.is_dir():
         for p in sorted(run_root.iterdir()):
-            so = _doc_so(p) if p.is_dir() else None
+            if not p.is_dir():
+                continue
+            so = _doc_so(p)
             if so:
                 ds.append({k: so.get(k) for k in
                            ("short_id", "ten", "trang_thai", "ma_thoat", "bat_dau_utc")})
+            elif (p / "run.json").exists():
+                # Sổ hỏng mà im lặng bỏ qua là fail-open: danh sách rỗng trông
+                # hệt như "không có lượt nào". Nói ra, và trả mã khác 0.
+                ds.append({"thu_muc": p.name, "loi": "run.json khong doc duoc"})
+                hong = True
     print(json.dumps(ds, ensure_ascii=False, indent=2))
-    return MA_OK
+    return MA_THAM_SO if hong else MA_OK
 
 
 def lenh_stop(a) -> int:
@@ -590,7 +728,10 @@ def lenh_stop(a) -> int:
     so.update(trang_thai="da_dung", ly_do_dung=ket, ket_thuc_utc=_bay_gio().isoformat())
     _ghi_so(thu_muc, so)
     print(f"KET LUAN  : {ket}")
-    return MA_OK if "da tat" in ket or "rc=0" in ket else MA_DANH_TINH
+    # CHỈ "da tat" mới là thành công. Bản trước còn nhận "rc=0" - mà taskkill có
+    # thể rc=0 rồi tiến trình vẫn sống, và chuỗi giờ ghép nhiều bước nên "rc=0"
+    # của bước đầu lẫn với thất bại ở bước sau.
+    return MA_OK if "da tat" in ket else MA_DANH_TINH
 
 
 # ----------------------------------------------------------------------- CLI
@@ -640,7 +781,24 @@ def build_parser():
     return ap
 
 
+def _cung_hoa_dau_ra() -> None:
+    """Ép stdout/stderr sang UTF-8 TRƯỚC khi in bất cứ thứ gì.
+
+    ĐÃ ĐO TRÊN WINDOWS (codex, 12-08-2026): console mặc định là cp1258 ở máy tiếng
+    Việt, nên `print(duong_dan_co_dau)` ném UnicodeEncodeError và launcher chết rc=1
+    — CHÍNH ca mà tệp này khoe là đã sửa. Bẫy nằm ở ĐẦU RA, không phải ở đối số:
+    subprocess truyền đường dẫn đúng, git trả về đúng, rồi câu `print` giết cả lượt.
+    Cùng lệnh đó với PYTHONUTF8=1 thì rc=0 — bằng chứng nó là lỗi encode console.
+    """
+    for luong in (sys.stdout, sys.stderr):
+        try:
+            luong.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass  # luồng bị thay bằng thứ không reconfigure được: thà chạy tiếp
+
+
 def main(argv=None) -> int:
+    _cung_hoa_dau_ra()
     a = build_parser().parse_args(argv)
     if getattr(a, "lenh", None) and a.lenh and a.lenh[0] == "--":
         a.lenh = a.lenh[1:]

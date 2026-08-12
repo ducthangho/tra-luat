@@ -6,7 +6,7 @@ trường hợp làm nó ĐỎ. Mỗi ca dưới đây neo đúng một hành vi
 (subprocess) chứ không import — seam là dòng lệnh, vì đó là thứ phiên khác,
 điện thoại và remote thực sự gọi.
 
-Chạy:  python3 .claude/dev/launcher_test.py            (chạy tất cả)
+Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Windows KHÔNG có python3)
        python3 .claude/dev/launcher_test.py --dot-bien (tự đột biến: chứng minh có răng)
 """
 
@@ -724,6 +724,133 @@ def t46_run_cung_dung_duoc_neo_kho():
         bang(not dau.exists(), "lenh VAN chay du kho da lech")
 
 
+# --------------------------------- các ca do codex tìm ra khi chạy THẬT trên Windows
+
+MA_GIET_HUT = 125
+
+
+@ca
+def t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau():
+    """Console cp1258 (máy Windows tiếng Việt) làm `print` ném UnicodeEncodeError.
+
+    Bẫy nằm ở ĐẦU RA chứ không ở đối số: git nhận đường dẫn đúng, trả về đúng, rồi
+    câu print giết cả lượt chạy — đúng ca mà t04 tưởng đã chứng minh là an toàn.
+    Ở Linux dựng lại lớp lỗi đó bằng PYTHONIOENCODING=ascii.
+    """
+    with San() as s:
+        repo = tao_repo(s, ten="Quốc hội - kho")
+        env = dict(os.environ, PYTHONIOENCODING="ascii")
+        r = chay("check", "--workspace", str(repo), env=env)
+        bang(r.returncode == MA_OK,
+             f"console khong UTF-8 lam launcher chet: {r.returncode} {r.stderr[-300:]}")
+
+
+@ca
+def t48_host_gia_mao_KHONG_duoc_khop():
+    """LỖ AN NINH codex đo được: `endswith('/'+can)` cho phép host bất kỳ giả mạo.
+
+    `--expected-repo github.com/o/r` từng KHỚP remote
+    `https://evil.example/github.com/o/r.git` — chốt nhận diện kho thành vô dụng
+    đúng lúc cần nhất.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://evil.example/github.com/ducthangho/tra-luat.git")
+        r = chay("check", "--expected-repo", "github.com/ducthangho/tra-luat", cwd=str(repo))
+        bang(r.returncode == MA_KHO,
+             f"HOST GIA MAO duoc chap nhan: {r.returncode} {r.stdout}")
+
+
+@ca
+def t49_owner_repo_khong_phan_biet_hoa_thuong():
+    """GitHub coi Owner/Repo và owner/repo là MỘT kho; chặn oan là chặn sai."""
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://github.com/DucThangHo/Tra-Luat.git")
+        r = chay("check", "--expected-repo", "ducthangho/tra-luat", cwd=str(repo))
+        bang(r.returncode == MA_OK, f"ban clone hop le bi chan: {r.returncode}")
+
+
+@ca
+def t50_stop_roi_runner_KHONG_duoc_de_len_so():
+    """`stop` ghi da_dung xong runner ghi đè thành `xong` — sổ nói lượt chạy kết
+    thúc bình thường trong khi thực tế nó bị người ta dừng.
+
+    Dựng TẤT ĐỊNH: bản đầu của ca này gọi `stop` thật rồi chờ, nên nó xanh hay đỏ
+    tuỳ ai ghi sổ sau — đột biến bỏ hẳn chốt vẫn xanh. Nay tự đặt sổ về "da_dung"
+    (đúng thứ `stop` để lại) rồi mới cho tiến trình con kết thúc: chỉ còn đúng một
+    thứ quyết định kết quả, là chốt hợp nhất trong runner.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can kiem rieng)"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        moc = s / "moc.txt"
+        pr = subprocess.Popen(
+            [PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+             "--run-root", str(rr), "--", PY, "-c",
+             f"import pathlib,time\nwhile not pathlib.Path({str(moc)!r}).exists(): time.sleep(0.05)"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            f = None
+            for _ in range(200):
+                time.sleep(0.05)
+                ds = list(rr.iterdir()) if rr.is_dir() else []
+                if ds and (ds[0] / "run.json").is_file():
+                    x = json.loads((ds[0] / "run.json").read_text(encoding="utf-8"))
+                    if x.get("pid"):
+                        f = ds[0] / "run.json"
+                        break
+            bang(f is not None, "khong thay pid trong so")
+            d = json.loads(f.read_text(encoding="utf-8"))
+            d["trang_thai"] = "da_dung"
+            d["ly_do_dung"] = "SIGTERM: da tat"
+            f.write_text(json.dumps(d), encoding="utf-8")
+            moc.write_text("xong", encoding="utf-8")   # cho con thoat
+            pr.wait(timeout=30)
+            cuoi = json.loads(f.read_text(encoding="utf-8"))
+            bang(cuoi["trang_thai"] == "da_dung",
+                 f"runner de len quyet dinh cua stop: trang_thai={cuoi['trang_thai']}")
+            bang(cuoi.get("ly_do_dung") == "SIGTERM: da tat",
+                 f"ly do dung bi xoa: {cuoi.get('ly_do_dung')}")
+        finally:
+            if pr.poll() is None:
+                pr.kill()
+                pr.wait(timeout=10)
+
+
+@ca
+def t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut():
+    """Con chết vì tín hiệu → returncode âm (Windows: 4294967295). Trả thẳng ra thì
+    bị cắt còn 0/255 và phía gọi đọc 'hỏng' thành 'xong'."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can tin hieu POSIX)"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
+                 PY, "-c", "import os, signal; os.kill(os.getpid(), signal.SIGKILL)")
+        bang(r.returncode not in (0,), f"con bi giet ma launcher tra {r.returncode}")
+        bang(0 <= r.returncode <= 255, f"ma thoat ngoai khoang: {r.returncode}")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d.get("ma_thoat_that") is not None or d.get("ma_thoat") not in (0, None),
+             f"so khong giu ma thoat THAT: {d.get('ma_thoat')} / {d.get('ma_thoat_that')}")
+
+
+@ca
+def t52_so_hong_KHONG_duoc_im_lang():
+    """Sổ hỏng bị bỏ qua im lặng thì danh sách rỗng trông hệt như 'chưa chạy gì'."""
+    with San() as s:
+        rr = s / "runs"
+        (rr / "12345678-deadbeef").mkdir(parents=True)
+        (rr / "12345678-deadbeef" / "run.json").write_text("{khong-phai-json",
+                                                           encoding="utf-8")
+        r = chay("status", "--run-root", str(rr))
+        bang(r.returncode != 0, f"so hong ma van rc=0: {r.stdout}")
+        bang("khong doc duoc" in r.stdout, f"khong noi ro so nao hong: {r.stdout}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -755,8 +882,7 @@ DOT_BIEN = [
      ("(?:[^@/]*@)?", "(?:)?"),
      ["t45_token_trong_URL_KHONG_duoc_lo_ra"]),
     ("so_URL_tho_khong_chuan_hoa",
-     ('khop = any(r == can or r.endswith("/" + can) for r in remotes)',
-      'khop = any(r == can for r in remotes)'),
+     ('    co_host = "." in m.split("/", 1)[0]', '    co_host = True'),
      ["t44_bon_cach_viet_URL_cung_mot_danh_tinh",
       "t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh"]),
     ("lay_cwd_thay_vi_goc_repo",
@@ -767,6 +893,23 @@ DOT_BIEN = [
     ("khong_remote_thi_coi_la_khop",
      ("        if not khop:", "        if not khop and remotes:"),
      ["t42_khong_co_remote_van_bi_chan_khi_doi_kho"]),
+    ("bo_cung_hoa_dau_ra",
+     ('    for luong in (sys.stdout, sys.stderr):',
+      '    for luong in ():'),
+     ["t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau"]),
+    ("host_gia_mao_van_khop",
+     ('    co_host = "." in m.split("/", 1)[0]', '    co_host = False'),
+     ["t48_host_gia_mao_KHONG_duoc_khop"]),
+    ("bao_da_giet_du_chua_giet",
+     ('    return MA_OK if "da tat" in ket else MA_DANH_TINH',
+      '    return MA_OK'),
+     ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
+    ("de_len_quyet_dinh_cua_stop",
+     ('    if so_moi.get("trang_thai") == "da_dung":', '    if False:'),
+     ["t50_stop_roi_runner_KHONG_duoc_de_len_so"]),
+    ("so_hong_im_lang",
+     ('    return MA_THAM_SO if hong else MA_OK', '    return MA_OK'),
+     ["t52_so_hong_KHONG_duoc_im_lang"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),

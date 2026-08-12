@@ -21176,10 +21176,12 @@ def run() -> int:
         # KÊ KHAI SLOT (WP57/F3-00 rev3 — automation-first): 43 → **47** Markdown dưới `docs/`.
         # Thêm hai research note, ADR-0035 và manual successor prompt; cả bốn đều dev-side/ngoài gói.
         # Phép ratchet cây thật = 179 + 47 = 226; trần package 200 không đổi.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 47 == 226
+        # KÊ KHAI SLOT (wp88/F2-D-WT — thu hồi research row 1): 47 → **52** Markdown dưới `docs/`.
+        # Thêm đúng năm research doc wp88, đều dev-side/ngoài gói; cây thật = 179 + 52 = 231.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 52 == 231
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 47
+        ok4 = (len(tren_dia) == 52
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

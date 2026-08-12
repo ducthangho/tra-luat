@@ -1018,15 +1018,15 @@ def main(argv=None) -> int:
         print(f"CHAN [{e.ma}]: {e.thong_diep}", file=sys.stderr)
         return e.ma
     except BrokenPipeError:
-        # Đầu ra bị cắt ống (`doctor | head`) không phải lỗi của ta. Bản trước đổ
-        # nguyên traceback và thoát khác 0 — hook đọc mã đó rồi báo "THIEU CONG CU"
-        # oan, làm hỏng cả lượt khởi động phiên. Đóng stdout tử tế rồi im lặng.
+        # Đầu ra bị cắt ống (`doctor | head`): không đổ traceback, nhưng cũng KHÔNG
+        # được báo thành công. Ngoại lệ ném ra giữa lúc in nên hàm chưa kịp trả mã
+        # thật — trả 0 ở đây thì `doctor | head` lúc THIẾU công cụ sẽ thành "đủ".
+        # 141 = 128+SIGPIPE, quy ước sẵn có cho "bị cắt ống", và khác 0.
         try:
-            sys.stdout.close()
+            os.dup2(os.open(os.devnull, os.O_WRONLY), 1)
         except OSError:
             pass
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno() if hasattr(sys.stdout, "fileno") else 1)
-        return MA_OK
+        return 141
 
 
 if __name__ == "__main__":

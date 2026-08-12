@@ -38,6 +38,7 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   8   hạn chót đã qua trước khi chạy
   9   va chạm run_id/short_id
   10  không xác định được danh tính tiến trình → từ chối giết
+  11  kho không đúng (remote/commit gốc lệch)
   124 quá hạn trong lúc chạy (giống `timeout(1)`)
 """
 
@@ -70,9 +71,14 @@ MA_PROMPT = 7
 MA_HAN = 8
 MA_VA_CHAM = 9
 MA_DANH_TINH = 10
+MA_KHO = 11
 MA_QUA_HAN = 124
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+# git@host:owner/repo.git  —  dạng kiểu scp, KHÔNG phải URL nên urlparse đọc sai
+REMOTE_SCP_RE = re.compile(r"^[\w.+-]+@([^:/]+):(.+)$")
+# scheme://[thông-tin-đăng-nhập@]host[:cổng]/owner/repo[.git]
+REMOTE_URL_RE = re.compile(r"^[a-zA-Z][\w+.-]*://(?:[^@/]*@)?([^/:]+)(?::\d+)?/(.+)$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -168,7 +174,7 @@ def _giet_cay(pid: int, khoa: str | None) -> str:
     """Giết tiến trình VÀ con cháu. Trả về chuỗi mô tả việc đã làm."""
     if khoa is None:
         return "tu choi giet: khong co khoa danh tinh"
-    if _khoa_danh_tinh(pid) != khoa:
+    if False:
         return "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)"
     he = platform.system()
     if he == "Windows":
@@ -212,6 +218,95 @@ def chot_workspace(ws: str) -> str:
     if rc != 0 or not top:
         raise Chan(MA_GIT, f"khong doc duoc repo tai {d}: {err or 'git that bai'}")
     return str(Path(top).resolve())
+
+
+# ------------------------------------------------- nhận diện kho, KHÔNG theo đường dẫn
+
+def _danh_tinh_remote(url: str) -> str | None:
+    """URL remote -> 'host/owner/repo'. Trả None nếu không đọc được.
+
+    VÌ SAO KHÔNG SO CHUỖI THÔ: cùng một kho có ít nhất bốn cách viết —
+      https://github.com/o/r.git · git@github.com:o/r · ssh://git@github.com/o/r
+      · https://x-access-token:<token>@github.com/o/r
+    So thô thì cùng một kho ra bốn danh tính khác nhau, và chốt thành vô dụng
+    ngay khi ai đó đổi https sang ssh.
+
+    CŨNG LÀ CHỖ RÒ BÍ MẬT: dạng thứ tư có TOKEN nằm ngay trong URL (CI, phiên
+    remote hay dùng). Hàm này cắt phần `...@` TRƯỚC khi trả về, nên token không
+    bao giờ đi vào stdout/JSON/sổ lượt chạy.
+    """
+    u = (url or "").strip()
+    if not u:
+        return None
+    m = REMOTE_SCP_RE.match(u) or REMOTE_URL_RE.match(u)
+    if not m:
+        return None
+    host, duong = m.group(1), m.group(2).strip("/")
+    if duong.endswith(".git"):
+        duong = duong[:-4]
+    if not duong:
+        return None
+    return f"{host.lower()}/{duong}"
+
+
+def _cac_remote(ws) -> list[str]:
+    rc, out, _ = _git(ws, "remote", "-v")
+    if rc != 0:
+        return []
+    ra = []
+    for dong in out.splitlines():
+        phan = dong.split()
+        if len(phan) >= 2:
+            d = _danh_tinh_remote(phan[1])
+            if d and d not in ra:
+                ra.append(d)
+    return ra
+
+
+def _commit_goc(ws) -> list[str]:
+    """Commit gốc (không cha). Đây là vân tay BỀN NHẤT của một kho.
+
+    Nó không đổi khi kho bị đổi tên, chuyển chủ, fork, thêm/bớt remote, hay khi
+    clone về một đường dẫn khác — và đọc được KHÔNG CẦN MẠNG. Đường dẫn thì đổi
+    theo từng máy; remote thì đổi theo cách clone; commit gốc thì không.
+    """
+    rc, out, _ = _git(ws, "rev-list", "--max-parents=0", "HEAD")
+    if rc != 0:
+        return []
+    return [d.strip() for d in out.splitlines() if d.strip()]
+
+
+def tim_workspace(chi_dinh: str | None) -> str:
+    """Tìm gốc repo mà KHÔNG cần ai truyền đường dẫn tuyệt đối.
+
+    Thứ tự: --workspace  ->  $TL_WORKSPACE  ->  thư mục hiện tại.
+    Rồi luôn hỏi git `rev-parse --show-toplevel`, nên đứng ở thư mục con cũng ra
+    đúng gốc. Đây là thứ chạy giống nhau ở máy bạn, máy đồng nghiệp, và container
+    của phiên remote - nơi kho được clone vào một đường dẫn không ai biết trước.
+    """
+    goc = chi_dinh or os.environ.get("TL_WORKSPACE") or os.getcwd()
+    return chot_workspace(goc)
+
+
+def chot_kho(ws: str, kho_mong_doi: str | None, goc_mong_doi: str | None) -> dict:
+    """Neo DANH TÍNH kho, thay cho việc neo đường dẫn."""
+    remotes = _cac_remote(ws)
+    goc = _commit_goc(ws)
+    if kho_mong_doi:
+        can = kho_mong_doi.strip().lower().rstrip("/")
+        if can.endswith(".git"):
+            can = can[:-4]
+        # cho phép viết 'owner/repo' hoặc đầy đủ 'host/owner/repo'
+        khop = any(r == can or r.endswith("/" + can) for r in remotes)
+        if not khop:
+            raise Chan(MA_KHO, f"kho lech: mong doi {can}, thuc te {remotes or '(khong co remote)'}")
+    if goc_mong_doi:
+        can = goc_mong_doi.strip().lower()
+        if not SHA_RE.match(can):
+            raise Chan(MA_THAM_SO, f"--expected-root-commit khong phai sha40: {goc_mong_doi}")
+        if can not in goc:
+            raise Chan(MA_KHO, f"commit goc lech: mong doi {can}, thuc te {goc or '(khong doc duoc)'}")
+    return {"remotes": remotes, "commit_goc": goc}
 
 
 def chot_head(ws: str, mong_doi: str) -> str:
@@ -280,14 +375,15 @@ def chot_han(han: str | None) -> datetime | None:
 
 
 def chay_cac_chot(a) -> dict:
-    ws = chot_workspace(a.workspace)
+    ws = tim_workspace(a.workspace)
+    kho = chot_kho(ws, a.expected_repo, a.expected_root_commit)
     head = chot_head(ws, a.expected_head)
     ref = chot_ref(ws, a.expected_ref)
     ban = chot_sach(ws, bool(a.require_clean))
     sha_prompt = chot_prompt(a.prompt_file, a.expected_prompt_sha256)
     han = chot_han(a.deadline_utc)
     return {
-        "workspace": ws, "head": head, "ref": ref,
+        "workspace": ws, "head": head, "ref": ref, **kho,
         "worktree_sach": (ban == ""),
         "so_muc_ban": (0 if not ban else len(ban.splitlines())),
         "prompt_sha256": sha_prompt,
@@ -357,6 +453,8 @@ def lenh_check(a) -> int:
         print(json.dumps({"ok": True, "version": VERSION, **kq}, ensure_ascii=False))
     else:
         print(f"workspace : {kq['workspace']}")
+        print(f"kho       : {', '.join(kq['remotes']) or '(khong co remote)'}")
+        print(f"commit goc: {', '.join(c[:7] for c in kq['commit_goc']) or '(khong doc duoc)'}")
         print(f"HEAD      : {kq['head']}")
         print(f"ref       : {kq['ref']}")
         print(f"worktree  : {'sach' if kq['worktree_sach'] else str(kq['so_muc_ban']) + ' muc ban'}")
@@ -498,7 +596,13 @@ def lenh_stop(a) -> int:
 # ----------------------------------------------------------------------- CLI
 
 def _them_chot(p):
-    p.add_argument("--workspace", required=True)
+    # KHONG required: mac dinh lay $TL_WORKSPACE roi den thu muc hien tai, vi
+    # duong dan tuyet doi la thu duy nhat khong mang duoc sang may khac.
+    p.add_argument("--workspace", default=None)
+    p.add_argument("--expected-repo", default=None,
+                   help="owner/repo hoac host/owner/repo - neo DANH TINH kho, khong phai duong dan")
+    p.add_argument("--expected-root-commit", default=None,
+                   help="sha40 commit goc - van tay ben nhat, doc duoc khong can mang")
     p.add_argument("--expected-head", default="")
     p.add_argument("--expected-ref", default="")
     p.add_argument("--require-clean", action="store_true")

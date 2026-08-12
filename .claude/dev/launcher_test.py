@@ -547,6 +547,155 @@ def t36_so_ghi_nguyen_tu():
         json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
 
 
+# ------------------------------------- nhận diện kho (đường dẫn KHÔNG mang được sang máy khác)
+
+MA_KHO = 11
+
+
+def them_remote(d: Path, url: str):
+    subprocess.run(["git", "-C", str(d), "remote", "add", "origin", url], capture_output=True)
+
+
+def commit_goc(d: Path) -> str:
+    p = subprocess.run(["git", "-C", str(d), "rev-list", "--max-parents=0", "HEAD"],
+                       capture_output=True, text=True)
+    return p.stdout.strip().splitlines()[0]
+
+
+@ca
+def t37_khong_can_truyen_workspace():
+    """Đứng trong kho là đủ — đường dẫn tuyệt đối không mang sang máy khác được."""
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("check", cwd=str(repo))
+        bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+        bang(str(repo.resolve()) in r.stdout, f"khong ra dung goc: {r.stdout}")
+
+
+@ca
+def t38_dung_o_thu_muc_CON_van_ra_GOC():
+    """Phải hỏi `rev-parse --show-toplevel`, không lấy cwd.
+
+    Lấy cwd thì đứng ở scripts/ sẽ neo nhầm tầng và mọi chốt phía sau đo sai chỗ.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        con = repo / "a" / "b"
+        con.mkdir(parents=True)
+        r = chay("check", cwd=str(con))
+        bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+        bang(str(repo.resolve()) in r.stdout and str(con) not in r.stdout,
+             f"ra cwd thay vi goc repo: {r.stdout}")
+
+
+@ca
+def t39_bien_moi_truong_TL_WORKSPACE():
+    with San() as s:
+        repo = tao_repo(s)
+        ngoai = s / "ngoai"
+        ngoai.mkdir()
+        env = dict(os.environ, TL_WORKSPACE=str(repo))
+        r = chay("check", cwd=str(ngoai), env=env)
+        bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+
+
+@ca
+def t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh():
+    """Cùng một kho GitHub, clone về hai chỗ khác nhau (hoặc hai máy khác nhau).
+
+    Neo theo đường dẫn thì hỏng ngay khi đổi máy. Neo theo remote + commit gốc thì
+    cả hai qua — kể cả khi bản thứ hai dùng URL dạng ssh và nằm ở thư mục có dấu.
+    """
+    with San() as s:
+        a = tao_repo(s, ten="ban-A")
+        them_remote(a, "https://github.com/ducthangho/tra-luat.git")
+        sha_goc = commit_goc(a)
+        b = s / "Tài liệu" / "ban-B"
+        b.parent.mkdir(parents=True)
+        subprocess.run(["git", "clone", "--quiet", str(a), str(b)], capture_output=True)
+        subprocess.run(["git", "-C", str(b), "remote", "set-url", "origin",
+                        "git@github.com:ducthangho/tra-luat.git"], capture_output=True)
+        for d in (a, b):
+            r = chay("check", "--expected-repo", "ducthangho/tra-luat",
+                     "--expected-root-commit", sha_goc, cwd=str(d))
+            bang(r.returncode == MA_OK, f"{d.name} bi chan: {r.returncode} {r.stderr}")
+
+
+@ca
+def t41_kho_khac_bi_chan():
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://github.com/nguoi-khac/kho-khac.git")
+        r = chay("check", "--expected-repo", "ducthangho/tra-luat", cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"mong doi {MA_KHO}, duoc {r.returncode}")
+
+
+@ca
+def t42_khong_co_remote_van_bi_chan_khi_doi_kho():
+    """Kho chưa có remote KHÔNG được coi là "khớp vì không biết" — đó là fail-open."""
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("check", "--expected-repo", "ducthangho/tra-luat", cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"mong doi {MA_KHO}, duoc {r.returncode}")
+
+
+@ca
+def t43_commit_goc_lech_bi_chan():
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("check", "--expected-root-commit", "c" * 40, cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"mong doi {MA_KHO}, duoc {r.returncode}")
+
+
+@ca
+def t44_bon_cach_viet_URL_cung_mot_danh_tinh():
+    """https · git@host:o/r · ssh:// · có cổng — cùng kho phải ra cùng danh tính.
+
+    So chuỗi thô thì đổi https sang ssh là chốt báo "kho khác" ngay.
+    """
+    dang = ["https://github.com/ducthangho/tra-luat.git",
+            "git@github.com:ducthangho/tra-luat.git",
+            "ssh://git@github.com/ducthangho/tra-luat",
+            "https://github.com:443/ducthangho/tra-luat.git"]
+    with San() as s:
+        for i, url in enumerate(dang):
+            repo = tao_repo(s, ten=f"r{i}")
+            them_remote(repo, url)
+            r = chay("check", "--expected-repo", "ducthangho/tra-luat", cwd=str(repo))
+            bang(r.returncode == MA_OK, f"dang URL bi coi la kho khac: {url} -> {r.returncode}")
+
+
+@ca
+def t45_token_trong_URL_KHONG_duoc_lo_ra():
+    """CI và phiên remote hay có `https://x-access-token:<token>@github.com/...`.
+
+    Phần đăng nhập phải bị cắt TRƯỚC khi in, nếu không mỗi lượt chạy là một lần rò
+    bí mật vào stdout, JSON và sổ lượt chạy.
+    """
+    bi_mat = "ghp_TOKEN_KHONG_DUOC_LO_1234567890"
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, f"https://x-access-token:{bi_mat}@github.com/ducthangho/tra-luat.git")
+        r = chay("check", "--expected-repo", "ducthangho/tra-luat", "--json", cwd=str(repo))
+        bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+        bang(bi_mat not in r.stdout and bi_mat not in r.stderr,
+             "TOKEN LO RA trong dau ra launcher")
+        bang("github.com/ducthangho/tra-luat" in r.stdout, f"khong nhan ra kho: {r.stdout}")
+
+
+@ca
+def t46_run_cung_dung_duoc_neo_kho():
+    with San() as s:
+        repo = tao_repo(s)
+        them_remote(repo, "https://github.com/khac/khac.git")
+        dau = s / "da-chay.txt"
+        r = chay("run", "--expected-repo", "ducthangho/tra-luat",
+                 "--run-root", str(s / "runs"), "--",
+                 PY, "-c", f"open({str(dau)!r},'w').write('x')", cwd=str(repo))
+        bang(r.returncode == MA_KHO, f"mong doi {MA_KHO}, duoc {r.returncode}")
+        bang(not dau.exists(), "lenh VAN chay du kho da lech")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -574,6 +723,22 @@ DOT_BIEN = [
     # chi doi do chi tiet liet ke (`?? thumuc/` thay vi tung tep). Chi `-uno` moi
     # lam chot MU. Dot bien dau tien cua toi nham vao `-uall` nen song sot - do la
     # dot bien sai, khong phai ma sai.
+    ("khong_cat_thong_tin_dang_nhap",
+     ("(?:[^@/]*@)?", "(?:)?"),
+     ["t45_token_trong_URL_KHONG_duoc_lo_ra"]),
+    ("so_URL_tho_khong_chuan_hoa",
+     ('khop = any(r == can or r.endswith("/" + can) for r in remotes)',
+      'khop = any(r == can for r in remotes)'),
+     ["t44_bon_cach_viet_URL_cung_mot_danh_tinh",
+      "t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh"]),
+    ("lay_cwd_thay_vi_goc_repo",
+     ('    goc = chi_dinh or os.environ.get("TL_WORKSPACE") or os.getcwd()\n    return chot_workspace(goc)',
+      '    goc = chi_dinh or os.environ.get("TL_WORKSPACE") or os.getcwd()\n'
+      '    chot_workspace(goc)\n    return str(Path(goc).resolve())'),
+     ["t38_dung_o_thu_muc_CON_van_ra_GOC"]),
+    ("khong_remote_thi_coi_la_khop",
+     ("        if not khop:", "        if not khop and remotes:"),
+     ["t42_khong_co_remote_van_bi_chan_khi_doi_kho"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),

@@ -42,7 +42,7 @@ class OracleError(RuntimeError):
     pass
 
 
-_FRESH_RUNNER_CACHE: dict[tuple[str, str], Mapping[str, object]] = {}
+_FRESH_RUNNER_CACHE: dict[tuple[str, str, str], Mapping[str, object]] = {}
 
 
 def _json_no_duplicates(raw: str, locator: str) -> object:
@@ -174,14 +174,15 @@ def _validate_source_readback(
 
 
 def _validate_runner_report(
-    report: Mapping[str, object] | None, candidate_head: str
+    report: Mapping[str, object] | None, candidate_head: str, target_root: str
 ) -> dict[str, object]:
     if report is not None:
         raise OracleError(
             "external runner report rejected; oracle measures the sandbox in-process"
         )
     runner_sha = sha256_file(SANDBOX / "runner.py")
-    cache_key = (candidate_head, runner_sha)
+    resolved_target = str(pathlib.Path(target_root).resolve())
+    cache_key = (candidate_head, runner_sha, resolved_target)
     measured_report = _FRESH_RUNNER_CACHE.get(cache_key)
     if measured_report is None:
         try:
@@ -192,6 +193,8 @@ def _validate_runner_report(
                     str(SANDBOX / "selftest.py"),
                     "--candidate-head",
                     candidate_head,
+                    "--repo-root",
+                    resolved_target,
                 ],
                 stderr=subprocess.PIPE,
                 text=True,
@@ -216,6 +219,26 @@ def _validate_runner_report(
         or report.get("total") != len(tests)
     ):
         raise OracleError("runner report did not pass a non-empty measured suite")
+    source_binding = report.get("candidate_source_binding")
+    if (
+        not isinstance(source_binding, Mapping)
+        or source_binding.get("repo_root") != resolved_target
+        or source_binding.get("candidate_commit_sha") != candidate_head
+        or source_binding.get("checkout_head_sha") != candidate_head
+        or not re.fullmatch(r"[0-9a-f]{40}", str(source_binding.get("candidate_tree_sha", "")))
+        or not re.fullmatch(
+            r"[0-9a-f]{64}", str(source_binding.get("source_inventory_sha256", ""))
+        )
+    ):
+        raise OracleError("runner report candidate source binding mismatch")
+    source_files = source_binding.get("source_files")
+    expected_source_files = {
+        ".github/coordination/reviewer_bootstrap/sandbox/__init__.py",
+        ".github/coordination/reviewer_bootstrap/sandbox/runner.py",
+        ".github/coordination/reviewer_bootstrap/sandbox/selftest.py",
+    }
+    if not isinstance(source_files, Mapping) or set(source_files) != expected_source_files:
+        raise OracleError("runner report candidate source inventory mismatch")
     by_name = {
         item.get("name"): item
         for item in tests
@@ -241,6 +264,35 @@ def _validate_runner_report(
         raise OracleError("runner report missing measured controls: %s" % missing)
     if any(item.get("passed") is not True for item in by_name.values()):
         raise OracleError("runner report contains a failed/fixture-gap control")
+    class_matrix = report.get("counterexample_classes")
+    expected_class_keys = {
+        "sandbox_escape_classes": {
+            "network", "dns", "loopback", "metadata", "target_write",
+            "path_escape", "fd_leak",
+        },
+        "resource_classes": {
+            "cpu", "memory", "pid", "output", "timeout", "descendant_cleanup",
+        },
+    }
+    if not isinstance(class_matrix, Mapping) or set(class_matrix) != set(expected_class_keys):
+        raise OracleError("runner report counterexample class groups mismatch")
+    for group, expected_keys in expected_class_keys.items():
+        entries = class_matrix.get(group)
+        if not isinstance(entries, Mapping) or set(entries) != expected_keys:
+            raise OracleError("runner report counterexample class keys mismatch: %s" % group)
+        for class_name, entry in entries.items():
+            if (
+                not isinstance(entry, Mapping)
+                or entry.get("passed") is not True
+                or entry.get("test_id") not in by_name
+                or not isinstance(entry.get("evidence"), Mapping)
+                or not entry.get("evidence")
+                or by_name[entry["test_id"]].get("passed") is not True
+            ):
+                raise OracleError(
+                    "runner report counterexample class lacks independent evidence: %s"
+                    % class_name
+                )
     actual_runner_sha = runner_sha
     if report.get("runner_implementation_sha256") != actual_runner_sha:
         raise OracleError("runner report implementation binding mismatch")
@@ -308,6 +360,8 @@ def _validate_runner_report(
         "candidate_head": candidate_head,
         "sandbox_executions": measured_executions,
         "runner_implementation_sha256": actual_runner_sha,
+        "candidate_source_binding": dict(source_binding),
+        "counterexample_classes": dict(class_matrix),
         "measured_report": report,
     }
 
@@ -394,7 +448,7 @@ def evaluate(
         protocol_binding = verify_pin_readback(pin_readback, protocol_source)
     except ValueError as exc:
         raise OracleError("pin/source preflight refused evaluation: %s" % exc) from exc
-    runner_binding = _validate_runner_report(runner_report, candidate_head)
+    runner_binding = _validate_runner_report(runner_report, candidate_head, target_root)
     measured_runner_report = runner_binding["measured_report"]
     assert isinstance(measured_runner_report, Mapping)
     runner_tests = measured_runner_report["tests"]
@@ -412,6 +466,11 @@ def evaluate(
     ):
         raise OracleError("candidate schema bytes changed during provenance readback")
     _validate_source_readback(git_source, candidate_source_readback, candidate_head)
+    if (
+        runner_binding["candidate_source_binding"].get("candidate_tree_sha")
+        != git_source.get("candidate_tree_sha")
+    ):
+        raise OracleError("sandbox and oracle candidate tree bindings disagree")
     direct_errors: dict[str, list[str]] = {}
     inventories: dict[str, list[str]] = {}
     all_keywords: set[str] = set()
@@ -448,22 +507,8 @@ def evaluate(
     }
     engine_metadata = _engine_metadata()
     required_counterexamples = {
-        "sandbox_escape_classes": {
-            name: by_name.get(name, {}).get("passed") is True
-            for name in (
-                "network_dns_loopback_metadata_unix",
-                "target_readonly_escape_and_links",
-                "retained_output_intermediate_symlink_rejected",
-                "credential_env_argv_cwd_fd_procfs",
-            )
-        },
-        "resource_classes": {
-            name: by_name.get(name, {}).get("passed") is True
-            for name in (
-                "cpu_busy_loop", "memory_hog", "pid_fork_bomb", "stdout_flood",
-                "timeout_and_descendant_cleanup",
-            )
-        },
+        "sandbox_escape_classes": runner_binding["counterexample_classes"]["sandbox_escape_classes"],
+        "resource_classes": runner_binding["counterexample_classes"]["resource_classes"],
         "fake_validators": {
             item["stable_id"]: item["classification"] for item in mutation["results"]
         },

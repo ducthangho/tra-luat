@@ -13,6 +13,7 @@ import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 CORE = HERE.parent / "core"
+SANDBOX = HERE.parent / "sandbox"
 if __package__:
     from core.artifacts import verify
     from .answer_key import EXPECTED_FILES, PINS, check_contract
@@ -38,10 +39,14 @@ def _materialise(root: pathlib.Path) -> str:
     schema_dir = root / ".github" / "schemas"; schema_dir.mkdir(parents=True)
     for name in EXPECTED_FILES:
         (schema_dir / name).write_text(SCHEMA_FIXTURES[name] + "\n", encoding="utf-8")
+    sandbox_dir = root / ".github" / "coordination" / "reviewer_bootstrap" / "sandbox"
+    sandbox_dir.mkdir(parents=True)
+    for name in ("__init__.py", "runner.py", "selftest.py"):
+        shutil.copy2(SANDBOX / name, sandbox_dir / name)
     _git(root, "init", "--quiet")
     _git(root, "config", "user.name", "WP86 Synthetic Fixture")
     _git(root, "config", "user.email", "wp86-fixture@invalid.example")
-    _git(root, "add", ".github/schemas")
+    _git(root, "add", ".github/schemas", ".github/coordination/reviewer_bootstrap/sandbox")
     subprocess.check_call(
         ["git", "-C", str(root), "commit", "--quiet", "-m", "synthetic five-schema candidate"],
         env={**os.environ, "GIT_AUTHOR_DATE": "2026-08-12T00:00:00Z", "GIT_COMMITTER_DATE": "2026-08-12T00:00:00Z"},
@@ -78,6 +83,61 @@ def main(argv=None) -> int:
     try:
         healthy = run(target, artifact_root=str(artifacts))
         tests.append({"name": "healthy_five_schema_oracle", "passed": healthy["ok"] and healthy["healthy_positive_control_ran"] and all(healthy["B1_B6"].values()), "evidence": {"schema_count": healthy["schema_count"], "inventory": healthy["keyword_inventory_total"], "differential": healthy["differential"], "corpus_counts": healthy["corpus_counts"], "healthy": healthy["healthy_positive_control_evidence"], "required_counterexamples": healthy["required_counterexamples"], "B1_B6": healthy["B1_B6"]}})
+        measured_runner = healthy["healthy_positive_control_evidence"]["measured_report"]
+        source_binding = measured_runner.get("candidate_source_binding", {})
+        expected_source_paths = {
+            ".github/coordination/reviewer_bootstrap/sandbox/__init__.py",
+            ".github/coordination/reviewer_bootstrap/sandbox/runner.py",
+            ".github/coordination/reviewer_bootstrap/sandbox/selftest.py",
+        }
+        tests.append({
+            "name": "standalone_sandbox_binds_repo_checkout_tree_and_source_bytes",
+            "passed": (
+                source_binding.get("candidate_commit_sha") == fixture_head
+                and source_binding.get("checkout_head_sha") == fixture_head
+                and isinstance(source_binding.get("candidate_tree_sha"), str)
+                and len(source_binding.get("candidate_tree_sha", "")) == 40
+                and set(source_binding.get("source_files", {})) == expected_source_paths
+                and all(
+                    isinstance(item, dict)
+                    and len(item.get("git_blob_oid", "")) == 40
+                    and len(item.get("sha256", "")) == 64
+                    and item.get("byte_count", 0) > 0
+                    for item in source_binding.get("source_files", {}).values()
+                )
+            ),
+            "evidence": source_binding,
+        })
+        required = healthy["required_counterexamples"]
+        expected_escape = {
+            "network", "dns", "loopback", "metadata", "target_write",
+            "path_escape", "fd_leak",
+        }
+        expected_resource = {
+            "cpu", "memory", "pid", "output", "timeout", "descendant_cleanup",
+        }
+        class_groups = {
+            "sandbox_escape_classes": expected_escape,
+            "resource_classes": expected_resource,
+        }
+        class_matrix_ok = True
+        for group, expected_keys in class_groups.items():
+            entries = required.get(group, {})
+            class_matrix_ok = class_matrix_ok and set(entries) == expected_keys
+            class_matrix_ok = class_matrix_ok and all(
+                isinstance(item, dict)
+                and isinstance(item.get("test_id"), str)
+                and bool(item["test_id"])
+                and isinstance(item.get("evidence"), dict)
+                and bool(item["evidence"])
+                and item.get("passed") is True
+                for item in entries.values()
+            )
+        tests.append({
+            "name": "required_counterexamples_exact_class_mapping",
+            "passed": class_matrix_ok,
+            "evidence": {group: required.get(group) for group in class_groups},
+        })
         fake_results = {item["stable_id"]: item for item in healthy["fake_validators"]["results"]}
         tests.append({"name": "five_fakes_execute_and_are_killed", "passed": healthy["fake_validators"]["score"] == "5/5" and all(item["protocol_result_used"] for item in fake_results.values()), "evidence": healthy["fake_validators"]})
         stdout_forger = fake_results["stdout_forger"]
@@ -131,6 +191,45 @@ def main(argv=None) -> int:
         except OracleError as exc:
             arbitrary_rejected = True; arbitrary_error = str(exc)
         tests.append({"name": "arbitrary_40hex_candidate_rejected", "passed": arbitrary_rejected and "provenance" in arbitrary_error, "evidence": arbitrary_error})
+
+        standalone_fake_output = temp / "standalone-fake-head-green-evidence.json"
+        standalone = subprocess.run(
+            [
+                sys.executable,
+                "-B",
+                str(SANDBOX / "selftest.py"),
+                "--repo-root",
+                str(target),
+                "--candidate-head",
+                "0" * 40,
+                "--output",
+                str(standalone_fake_output),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=15,
+        )
+        try:
+            standalone_error = json.loads(standalone.stdout)
+        except ValueError:
+            standalone_error = {}
+        tests.append({
+            "name": "standalone_sandbox_arbitrary_40hex_is_red_and_unretained",
+            "passed": (
+                standalone.returncode != 0
+                and standalone_error.get("ok") is False
+                and standalone_error.get("error", {}).get("name")
+                == "CandidateProvenanceError"
+                and not standalone_fake_output.exists()
+            ),
+            "evidence": {
+                "rc": standalone.returncode,
+                "stdout": standalone_error,
+                "stderr": standalone.stderr,
+                "green_evidence_exists": standalone_fake_output.exists(),
+            },
+        })
 
         wrong_checkout = temp / "wrong-checkout"; shutil.copytree(target, wrong_checkout)
         (wrong_checkout / "unrelated.txt").write_text("different tree\n", encoding="utf-8")

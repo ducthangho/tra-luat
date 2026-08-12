@@ -14,8 +14,10 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import tempfile
@@ -29,6 +31,92 @@ if __package__:
 else:
     sys.path.insert(0, str(HERE))
     import runner  # type: ignore[no-redef]  # noqa: E402
+
+
+class CandidateProvenanceError(RuntimeError):
+    """The declared candidate cannot be bound to the required Git checkout."""
+
+
+_REQUIRED_SOURCE_PATHS = (
+    ".github/coordination/reviewer_bootstrap/sandbox/__init__.py",
+    ".github/coordination/reviewer_bootstrap/sandbox/runner.py",
+    ".github/coordination/reviewer_bootstrap/sandbox/selftest.py",
+)
+
+
+def _git_read(root: pathlib.Path, *args: str, text: bool = True):
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(root), *args],
+            stderr=subprocess.PIPE,
+            text=text,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise CandidateProvenanceError(
+            "candidate Git provenance unavailable: %s" % " ".join(args)
+        ) from exc
+
+
+def _candidate_source_binding(repo_root: str, candidate_head: str) -> dict[str, object]:
+    if not re.fullmatch(r"[0-9a-f]{40}", candidate_head):
+        raise CandidateProvenanceError(
+            "candidate_head must be an exact lowercase 40-hex Git oid"
+        )
+    root = pathlib.Path(repo_root).resolve()
+    if not root.is_dir():
+        raise CandidateProvenanceError("required repo root is missing or not a directory")
+    toplevel = pathlib.Path(
+        _git_read(root, "rev-parse", "--show-toplevel").strip()
+    ).resolve()
+    if toplevel != root:
+        raise CandidateProvenanceError("required repo root is not the Git top-level")
+    commit = _git_read(root, "rev-parse", "--verify", "%s^{commit}" % candidate_head).strip()
+    checkout_head = _git_read(root, "rev-parse", "--verify", "HEAD^{commit}").strip()
+    if commit != candidate_head or checkout_head != candidate_head:
+        raise CandidateProvenanceError(
+            "candidate checkout HEAD does not match the declared commit"
+        )
+    tree = _git_read(root, "rev-parse", "%s^{tree}" % candidate_head).strip()
+    source_files: dict[str, dict[str, object]] = {}
+    for locator in _REQUIRED_SOURCE_PATHS:
+        blob_oid = _git_read(
+            root, "rev-parse", "%s:%s" % (candidate_head, locator)
+        ).strip()
+        git_bytes = _git_read(root, "cat-file", "blob", blob_oid, text=False)
+        path = root / locator
+        try:
+            info = os.lstat(path)
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                raise CandidateProvenanceError(
+                    "candidate source is not a single-link regular file: %s" % locator
+                )
+            disk_bytes = path.read_bytes()
+        except CandidateProvenanceError:
+            raise
+        except OSError as exc:
+            raise CandidateProvenanceError(
+                "candidate source cannot be read: %s" % locator
+            ) from exc
+        if disk_bytes != git_bytes:
+            raise CandidateProvenanceError(
+                "candidate source bytes differ from the declared Git blob: %s" % locator
+            )
+        source_files[locator] = {
+            "git_blob_oid": blob_oid,
+            "sha256": hashlib.sha256(disk_bytes).hexdigest(),
+            "byte_count": len(disk_bytes),
+        }
+    source_inventory = json.dumps(
+        source_files, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return {
+        "repo_root": str(root),
+        "candidate_commit_sha": commit,
+        "checkout_head_sha": checkout_head,
+        "candidate_tree_sha": tree,
+        "source_files": source_files,
+        "source_inventory_sha256": hashlib.sha256(source_inventory).hexdigest(),
+    }
 
 
 CANDIDATE = r'''import json, os, pathlib, signal, socket, subprocess, sys, time, urllib.error, urllib.request
@@ -360,10 +448,28 @@ def _control_getaddrinfo(resolv_conf: pathlib.Path, name: str) -> bool:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", help="optional JSON evidence locator outside candidate target")
+    parser.add_argument(
+        "--repo-root",
+        required=True,
+        help="required Git top-level whose checked-out candidate source is measured",
+    )
     parser.add_argument("--candidate-head", required=True, help="exact candidate Git commit bound to this run")
     args = parser.parse_args(argv)
-    if not __import__("re").fullmatch(r"[0-9a-f]{40}", args.candidate_head):
-        raise SystemExit("--candidate-head must be an exact 40-hex commit")
+    try:
+        candidate_source_binding = _candidate_source_binding(
+            args.repo_root, args.candidate_head
+        )
+    except CandidateProvenanceError as exc:
+        print(json.dumps({
+            "schema_version": 1,
+            "ok": False,
+            "candidate_head": args.candidate_head,
+            "error": {
+                "name": "CandidateProvenanceError",
+                "message": str(exc),
+            },
+        }, ensure_ascii=False, sort_keys=True))
+        return 2
     if os.geteuid() != 0:
         print(json.dumps({"ok": False, "error": "trusted parent must run as root"}))
         return 2
@@ -397,6 +503,12 @@ def main(argv=None) -> int:
             and not marker_leak
         )
         details = result.as_dict()
+        try:
+            protocol = json.loads(result.stdout)
+        except (UnicodeDecodeError, ValueError):
+            protocol = None
+        if isinstance(protocol, dict):
+            details["protocol"] = protocol
         details["stdout"] = {"bytes": len(result.stdout), "sha256": hashlib.sha256(result.stdout).hexdigest(), "preview": result.stdout[:512].decode("utf-8", "replace")}
         details["stderr"] = {"bytes": len(result.stderr), "sha256": hashlib.sha256(result.stderr).hexdigest(), "preview": result.stderr[:512].decode("utf-8", "replace")}
         tests.append({"name": name, "expected": expected, "actual": result.classification, "passed": passed, "credential_marker_leak": marker_leak, "result": details})
@@ -525,16 +637,151 @@ def main(argv=None) -> int:
     passed = sum(1 for item in tests if item["passed"])
     completed_at = datetime.datetime.now(datetime.timezone.utc)
     sandbox_executions = sum(isinstance(item.get("result"), dict) for item in tests)
+    by_name = {item["name"]: item for item in tests}
+    network_test = by_name["network_dns_loopback_metadata_unix"]
+    network_protocol = network_test["result"].get("protocol", {})
+    network_controls = by_name["network_fixture_positive_controls"].get("evidence", {})
+    filesystem_test = by_name["target_readonly_escape_and_links"]
+    filesystem_protocol = filesystem_test["result"].get("protocol", {})
+    credential_test = by_name["credential_env_argv_cwd_fd_procfs"]
+    credential_protocol = credential_test["result"].get("protocol", {})
+    credential_controls = by_name["credential_channel_controls"].get("evidence", {})
+
+    def channel_class(
+        test_id: str,
+        positive_names: tuple[str, ...],
+        negative_names: tuple[str, ...],
+    ) -> dict[str, object]:
+        positive = {name: network_controls.get(name) for name in positive_names}
+        negative = {name: network_protocol.get(name) for name in negative_names}
+        return {
+            "test_id": test_id,
+            "passed": (
+                by_name[test_id]["passed"] is True
+                and all(value is True for value in positive.values())
+                and all(value is True for value in negative.values())
+            ),
+            "evidence": {
+                "positive_control_test_id": "network_fixture_positive_controls",
+                "positive_channels": positive,
+                "blocked_channels": negative,
+            },
+        }
+
+    def resource_class(test_id: str, *, cleanup_only: bool = False) -> dict[str, object]:
+        item = by_name[test_id]
+        result = item["result"]
+        cleanup = result.get("cleanup", {})
+        if cleanup_only:
+            passed_class = item["passed"] is True and cleanup.get("descendants_gone") is True
+            evidence = {"cleanup": cleanup}
+        else:
+            passed_class = item["passed"] is True and item.get("actual") == item.get("expected")
+            evidence = {
+                "expected": item.get("expected"),
+                "actual": item.get("actual"),
+                "resource_report": result.get("resource_report", {}),
+            }
+        return {"test_id": test_id, "passed": passed_class, "evidence": evidence}
+
+    target_write_names = (
+        "create", "overwrite", "rename", "delete", "chmod", "symlink",
+        "hardlink", "ads",
+    )
+    path_escape_names = ("relative_escape", "absolute_escape", "preexisting_symlink")
+    target_write_evidence = {
+        name: filesystem_protocol.get(name) for name in target_write_names
+    }
+    path_escape_evidence = {
+        name: filesystem_protocol.get(name) for name in path_escape_names
+    }
+    credential_hits = credential_protocol.get("hits", {})
+    fd_evidence = {
+        "positive_control": credential_controls.get("fd"),
+        "channel_scanned": "fd" in credential_protocol.get("channels_scanned", []),
+        "child_hits": credential_hits.get("fd"),
+    }
+    counterexample_classes = {
+        "sandbox_escape_classes": {
+            "network": channel_class(
+                "network_dns_loopback_metadata_unix",
+                ("tcp_ipv4", "udp_ipv4", "tcp_ipv6", "raw_url", "curl", "wget", "unix_socket"),
+                ("tcp_ipv4", "tcp_ipv6", "raw_url", "curl_subprocess", "wget_subprocess", "unix_socket_escape"),
+            ),
+            "dns": channel_class(
+                "network_dns_loopback_metadata_unix",
+                ("dns_udp", "dns_tcp", "dns_resolution"),
+                ("dns_udp", "dns_tcp", "dns_resolution"),
+            ),
+            "loopback": channel_class(
+                "network_dns_loopback_metadata_unix",
+                ("loopback_ipv4", "tcp_ipv6"),
+                ("loopback_ipv4", "tcp_ipv6"),
+            ),
+            "metadata": channel_class(
+                "network_dns_loopback_metadata_unix",
+                ("metadata_ipv4", "metadata_ipv6"),
+                ("metadata_ipv4", "metadata_ipv6"),
+            ),
+            "target_write": {
+                "test_id": "target_readonly_escape_and_links",
+                "passed": filesystem_test["passed"] is True and all(
+                    value is True for value in target_write_evidence.values()
+                ),
+                "evidence": {"blocked_operations": target_write_evidence},
+            },
+            "path_escape": {
+                "test_id": "target_readonly_escape_and_links",
+                "passed": (
+                    filesystem_test["passed"] is True
+                    and all(value is True for value in path_escape_evidence.values())
+                    and by_name["retained_output_intermediate_symlink_rejected"]["passed"] is True
+                ),
+                "evidence": {
+                    "blocked_operations": path_escape_evidence,
+                    "retained_symlink_test_id": "retained_output_intermediate_symlink_rejected",
+                    "retained_symlink_rejected": by_name["retained_output_intermediate_symlink_rejected"]["passed"],
+                },
+            },
+            "fd_leak": {
+                "test_id": "credential_env_argv_cwd_fd_procfs",
+                "passed": (
+                    credential_test["passed"] is True
+                    and fd_evidence["positive_control"] is True
+                    and fd_evidence["channel_scanned"] is True
+                    and fd_evidence["child_hits"] == []
+                ),
+                "evidence": fd_evidence,
+            },
+        },
+        "resource_classes": {
+            "cpu": resource_class("cpu_busy_loop"),
+            "memory": resource_class("memory_hog"),
+            "pid": resource_class("pid_fork_bomb"),
+            "output": resource_class("stdout_flood"),
+            "timeout": resource_class("timeout_and_descendant_cleanup"),
+            "descendant_cleanup": resource_class(
+                "timeout_and_descendant_cleanup", cleanup_only=True
+            ),
+        },
+    }
+    counterexample_classes_ok = all(
+        item.get("passed") is True
+        for group in counterexample_classes.values()
+        for item in group.values()
+    )
     report = {
         "schema_version": 1,
         "run_id": run_id,
         "started_at": started_at.isoformat(),
         "completed_at": completed_at.isoformat(),
         "candidate_head": args.candidate_head,
+        "candidate_source_binding": candidate_source_binding,
         "runner_implementation_sha256": hashlib.sha256((HERE / "runner.py").read_bytes()).hexdigest(),
         "sandbox_executions": sandbox_executions,
         "healthy_sandbox_execution_count": sum(item.get("name") == "healthy_positive_control" and item.get("passed") is True for item in tests),
-        "ok": passed == len(tests) and bool(tests),
+        "counterexample_classes": counterexample_classes,
+        "ok": passed == len(tests) and bool(tests) and counterexample_classes_ok,
         "passed": passed,
         "total": len(tests),
         "tests": tests,

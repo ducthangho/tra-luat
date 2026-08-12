@@ -19,7 +19,10 @@ import sys
 import tempfile
 from typing import Mapping, Sequence
 
-from corpus import Case
+if __package__:
+    from .corpus import Case
+else:
+    from corpus import Case
 
 
 FAKE_IDS = (
@@ -48,7 +51,6 @@ def _blind_request(fake_id: str, cases: Sequence[Case]) -> dict[str, object]:
                 "locator": case.locator,
                 "order": index,
                 "raw": case.raw,
-                "held_out": case.held_out,
             }
             for index, case in enumerate(cases)
         ],
@@ -71,9 +73,13 @@ def _worker(fake_id: str, request_path: pathlib.Path, result_path: pathlib.Path)
         elif fake_id == "stdout_forger":
             valid = True
         elif fake_id == "path_aware_detector":
-            # This is intentionally a *real* path/order guess.  Blind locators,
-            # deterministic reordering and held-out cases make it incorrect.
-            valid = ("valid" in item["locator"].lower()) or item["order"] % 2 == 0
+            # A real path/name/order cheat: opaque locators remove label words,
+            # and deterministic shuffling breaks the remaining order guess.
+            locator = item["locator"].lower()
+            if any(word in locator for word in ("valid", "invalid", "pass", "fail")):
+                valid = "invalid" not in locator and "fail" not in locator
+            else:
+                valid = item["order"] < len(cases) // 2
         elif fake_id == "control_masked":
             print("worker crashed before publishing a verdict", file=sys.stderr)
             return 7
@@ -134,25 +140,26 @@ def _run_one(
     target.mkdir(); scratch.mkdir()
     shutil.copyfile(__file__, target / "fake_validators.py")
     shutil.copyfile(pathlib.Path(__file__).with_name("corpus.py"), target / "corpus.py")
-    request_path = target / "request.json"
-    request_path.write_text(
-        json.dumps(_blind_request(fake_id, cases), ensure_ascii=False, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    request_text = json.dumps(
+        _blind_request(fake_id, cases), ensure_ascii=False, sort_keys=True
+    ) + "\n"
     command = list(command_prefix or ("/usr/bin/python3", "/target/fake_validators.py"))
     command += [
         "--worker",
         fake_id,
         "--request",
-        "/target/request.json",
+        "/scratch/request.json",
         "--result",
         "/scratch/result.json",
     ]
     try:
-        sandbox_dir = pathlib.Path(__file__).resolve().parent.parent / "sandbox"
-        sys.path.insert(0, str(sandbox_dir))
         try:
-            import runner as sandbox_runner
+            if __package__:
+                from sandbox import runner as sandbox_runner
+            else:
+                sandbox_dir = pathlib.Path(__file__).resolve().parent.parent / "sandbox"
+                sys.path.insert(0, str(sandbox_dir))
+                import runner as sandbox_runner
 
             completed = sandbox_runner.run(sandbox_runner.SandboxConfig(
                 target_root=str(target),
@@ -160,6 +167,7 @@ def _run_one(
                 command=command,
                 timeout_seconds=10,
                 retained_output_paths=("result.json",),
+                scratch_input_files={"request.json": request_text},
             ))
         except (OSError, RuntimeError) as exc:
             return {
@@ -205,6 +213,9 @@ def _run_one(
                 "killing_case_ids": ["protocol_violation"],
                 "protocol_result_used": True,
                 "worker_rc": completed.returncode,
+                "sandbox_executed": True,
+                "sandbox_fingerprint": completed.fingerprint,
+                "sandbox_cleanup": completed.cleanup,
                 "deceptive_stdout_detected": "ALL CASES PASS" in stdout,
                 "stdout_sha256": hashlib.sha256(completed.stdout).hexdigest(),
                 "reason": "wrong result protocol/version/identity",
@@ -226,12 +237,21 @@ def _run_one(
                 "reason": "incomplete or non-boolean verdict matrix",
             }
         killers = [case.case_id for case in cases if by_id[case.case_id] != case.expected]
+        held_out_killers = [
+            case.case_id for case in cases
+            if case.held_out and by_id[case.case_id] != case.expected
+        ]
         return {
             "stable_id": fake_id,
             "classification": "killed" if killers else "survived",
-            "killing_case_ids": killers[:8],
+            "killing_case_ids": killers,
+            "kill_count": len(killers),
+            "held_out_killing_case_ids": held_out_killers,
             "protocol_result_used": True,
             "worker_rc": completed.returncode,
+            "sandbox_executed": True,
+            "sandbox_fingerprint": completed.fingerprint,
+            "sandbox_cleanup": completed.cleanup,
             "deceptive_stdout_detected": "ALL CASES PASS" in stdout,
             "stdout_sha256": hashlib.sha256(completed.stdout).hexdigest(),
         }

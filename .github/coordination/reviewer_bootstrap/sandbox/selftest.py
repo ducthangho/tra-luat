@@ -9,6 +9,7 @@ negative containment claim so a missing fixture/binary can never masquerade as
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -23,8 +24,11 @@ import urllib.request
 import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
-import runner  # noqa: E402
+if __package__:
+    from . import runner  # type: ignore[attr-defined]
+else:
+    sys.path.insert(0, str(HERE))
+    import runner  # type: ignore[no-redef]  # noqa: E402
 
 
 CANDIDATE = r'''import json, os, pathlib, signal, socket, subprocess, sys, time, urllib.error, urllib.request
@@ -75,7 +79,7 @@ elif mode == "credentials":
     assert all(not value for value in hits.values()), hits
     print(json.dumps({"channels_scanned": sorted(surfaces), "hits": hits, "proc_pid_count": len(list(pathlib.Path('/proc').glob('[0-9]*')))}, sort_keys=True))
 elif mode == "network":
-    host, port, metadata4, metadata6, unix_path = sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5], sys.argv[6]
+    host, port, metadata4, metadata6, unix_path, dns_name, dns_host, dns_port = sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], int(sys.argv[9])
     attempts = {}
     def blocked(name, fn, allow_missing=False):
         try:
@@ -90,14 +94,18 @@ elif mode == "network":
     blocked("loopback_ipv4", lambda: socket.create_connection(("127.0.0.1", port), .4))
     blocked("metadata_ipv4", lambda: socket.create_connection((metadata4, port), .4))
     blocked("metadata_ipv6", lambda: socket.create_connection((metadata6, port), .4))
-    blocked("dns_resolution", lambda: socket.getaddrinfo("wp86-fixture.invalid", 80))
+    blocked("dns_resolution", lambda: socket.getaddrinfo(dns_name, 80))
+    def dns_question():
+        labels=b"".join(bytes([len(part)])+part.encode("ascii") for part in dns_name.split("."))+b"\0"
+        return b"\x86\x02\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"+labels+b"\x00\x01\x00\x01"
     def udp():
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.settimeout(.4); sock.sendto(b"dns", (host, port)); sock.recv(16)
+            sock.settimeout(.4); sock.sendto(dns_question(), (dns_host, dns_port)); sock.recv(512)
     blocked("dns_udp", udp)
     def tcp_dns():
-        with socket.create_connection((host, port), .4) as sock:
-            sock.sendall(b"dns"); sock.recv(16)
+        query=dns_question()
+        with socket.create_connection((dns_host, dns_port), .4) as sock:
+            sock.sendall(len(query).to_bytes(2,"big")+query); sock.recv(512)
     blocked("dns_tcp", tcp_dns)
     url = "http://%s:%d/" % (host, port)
     blocked("raw_url", lambda: urllib.request.urlopen(url, timeout=.4).read())
@@ -129,6 +137,9 @@ elif mode == "filesystem":
       except BaseException: failures[name]=True
     assert all(failures.values()), failures
     print(json.dumps(failures,sort_keys=True))
+elif mode == "retained_symlink":
+    os.symlink(sys.argv[2], "/scratch/intermediate")
+    print("symlink-created")
 elif mode == "memory":
     chunks=[]
     while True: chunks.append(bytearray(8*1024*1024))
@@ -225,6 +236,66 @@ class _UnixFixture:
         except FileNotFoundError: pass
 
 
+class _DnsFixture:
+    def __init__(self, address: str, port: int, answer: str):
+        self.answer = socket.inet_aton(answer)
+        self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        for item in (self.udp, self.tcp):
+            item.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            item.bind((address, port)); item.settimeout(.1)
+        self.tcp.listen(8)
+        self.stop = False
+        self.threads = [
+            threading.Thread(target=self._serve_udp, daemon=True),
+            threading.Thread(target=self._serve_tcp, daemon=True),
+        ]
+
+    def start(self):
+        for thread in self.threads: thread.start()
+
+    def _response(self, query: bytes) -> bytes:
+        if len(query) < 17:
+            return b""
+        index = 12
+        while index < len(query) and query[index]:
+            index += query[index] + 1
+        question_end = index + 5
+        if question_end > len(query):
+            return b""
+        return (
+            query[:2] + b"\x81\x80\x00\x01\x00\x01\x00\x00\x00\x00"
+            + query[12:question_end]
+            + b"\xc0\x0c\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04"
+            + self.answer
+        )
+
+    def _serve_udp(self):
+        while not self.stop:
+            try:
+                query, peer = self.udp.recvfrom(512)
+                response = self._response(query)
+                if response: self.udp.sendto(response, peer)
+            except (socket.timeout, OSError):
+                pass
+
+    def _serve_tcp(self):
+        while not self.stop:
+            try:
+                connection, _ = self.tcp.accept()
+                with connection:
+                    size = int.from_bytes(connection.recv(2), "big")
+                    query = connection.recv(size)
+                    response = self._response(query)
+                    connection.sendall(len(response).to_bytes(2, "big") + response)
+            except (socket.timeout, OSError):
+                pass
+
+    def close(self):
+        self.stop = True; self.udp.close(); self.tcp.close()
+        for thread in self.threads: thread.join(timeout=.5)
+
+
 def _host_ipv4() -> str:
     for value in subprocess.check_output(["hostname", "-I"], text=True).split():
         if "." in value and not value.startswith("127."):
@@ -255,13 +326,49 @@ def _control_udp(address: str, port: int) -> bool:
         sock.settimeout(.8); sock.sendto(b"dns", (address, port)); return sock.recv(16) == b"ok"
 
 
+def _dns_question(name: str) -> bytes:
+    labels = b"".join(bytes([len(part)]) + part.encode("ascii") for part in name.split("."))
+    return b"\x86\x02\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00" + labels + b"\0\x00\x01\x00\x01"
+
+
+def _control_dns(address: str, port: int, name: str, tcp: bool) -> bool:
+    query = _dns_question(name)
+    if tcp:
+        with socket.create_connection((address, port), .8) as sock:
+            sock.sendall(len(query).to_bytes(2, "big") + query)
+            size = int.from_bytes(sock.recv(2), "big")
+            response = sock.recv(size)
+    else:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(.8); sock.sendto(query, (address, port)); response = sock.recv(512)
+    return response[:2] == query[:2] and response[-4:] == socket.inet_aton("10.86.0.1")
+
+
+def _control_getaddrinfo(resolv_conf: pathlib.Path, name: str) -> bool:
+    code = (
+        "import socket,subprocess,sys;"
+        "subprocess.run(['mount','--bind',sys.argv[1],'/etc/resolv.conf'],check=True);"
+        "print(socket.gethostbyname(sys.argv[2]))"
+    )
+    result = subprocess.run(
+        ["unshare", "--mount", "--fork", sys.executable, "-c", code, str(resolv_conf), name],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=3,
+    )
+    return result.returncode == 0 and result.stdout.strip() == "10.86.0.1"
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", help="optional JSON evidence locator outside candidate target")
+    parser.add_argument("--candidate-head", required=True, help="exact candidate Git commit bound to this run")
     args = parser.parse_args(argv)
+    if not __import__("re").fullmatch(r"[0-9a-f]{40}", args.candidate_head):
+        raise SystemExit("--candidate-head must be an exact 40-hex commit")
     if os.geteuid() != 0:
         print(json.dumps({"ok": False, "error": "trusted parent must run as root"}))
         return 2
+    started_at = datetime.datetime.now(datetime.timezone.utc)
+    run_id = str(uuid.uuid4())
     root = pathlib.Path(tempfile.mkdtemp(prefix="wp86-sandbox-selftest-", dir="/tmp"))
     target, scratch = root / "target", root / "scratch"
     target.mkdir(); scratch.mkdir()
@@ -297,6 +404,26 @@ def main(argv=None) -> int:
     try:
         check("healthy_positive_control", "ok", _run(target, scratch, "healthy"))
 
+        positive_names = (
+            "GH_TOKEN", "github-token", "aws_access_key_id", "OPENAI_API_KEY",
+            "client_secret", "passwd", "oauth_token",
+        )
+        negative_names = ("PATH", "HOME", "LANG", "akira", "monkey")
+        positive_values = (
+            "AS" + "IA" + "A" * 16,
+            "AK" + "IA" + "B" * 16,
+            "xo" + "xb-" + "a" * 20,
+            "GO" + "CSPX-" + "a" * 20,
+        )
+        negative_values = ("akia" + "a" * 16, "ordinary-value")
+        scanner = {
+            "positive_names": all(runner._CREDENTIAL_NAME.search(value) for value in positive_names),
+            "negative_names": all(not runner._CREDENTIAL_NAME.search(value) for value in negative_names),
+            "positive_values": all(runner._SECRET_VALUE.search(value) for value in positive_values),
+            "negative_values": all(not runner._SECRET_VALUE.search(value) for value in negative_values),
+        }
+        tests.append({"name": "credential_shape_alias_counterexamples", "passed": all(scanner.values()), "evidence": scanner})
+
         saved_env = os.environ.get("WP86_PARENT_CREDENTIAL_MARKER")
         os.environ["WP86_PARENT_CREDENTIAL_MARKER"] = marker_values["env"]
         cwd_control = root / marker_values["cwd"]; cwd_control.mkdir()
@@ -324,7 +451,7 @@ def main(argv=None) -> int:
             if saved_env is None: os.environ.pop("WP86_PARENT_CREDENTIAL_MARKER", None)
             else: os.environ["WP86_PARENT_CREDENTIAL_MARKER"] = saved_env
 
-        host = _host_ipv4(); port = 43861
+        host = _host_ipv4(); port = 43861; dns_port = 53; dns_name = "wp86-fixture.invalid"
         metadata4, metadata6 = "169.254.169.254", "fd00:ec2::254"
         for family, address, prefix in ((socket.AF_INET, metadata4, "32"), (socket.AF_INET6, metadata6, "128")):
             version = "-4" if family == socket.AF_INET else "-6"
@@ -341,13 +468,16 @@ def main(argv=None) -> int:
         ):
             fixture = _Fixture(family, address, port, socktype); fixture.start(); fixtures.append(fixture)
         unix_fixture = _UnixFixture(root / "outside-scratch.sock"); unix_fixture.start(); fixtures.append(unix_fixture)
+        dns_fixture = _DnsFixture(metadata4, dns_port, "10.86.0.1"); dns_fixture.start(); fixtures.append(dns_fixture)
+        resolv_conf = root / "resolv.conf"
+        resolv_conf.write_text("nameserver %s\noptions attempts:1 timeout:1\n" % metadata4, encoding="utf-8")
         url = "http://%s:%d/" % (host, port)
         controls = {
             "tcp_ipv4": _control_tcp(host, port),
             "udp_ipv4": _control_udp(host, port),
-            "dns_udp": _control_udp(host, port),
-            "dns_tcp": _control_tcp(host, port),
-            "dns_resolution": _control_udp(host, port),
+            "dns_udp": _control_dns(metadata4, dns_port, dns_name, False),
+            "dns_tcp": _control_dns(metadata4, dns_port, dns_name, True),
+            "dns_resolution": _control_getaddrinfo(resolv_conf, dns_name),
             "tcp_ipv6": _control_tcp("::1", port),
             "loopback_ipv4": _control_tcp("127.0.0.1", port),
             "metadata_ipv4": _control_tcp(metadata4, port),
@@ -361,10 +491,27 @@ def main(argv=None) -> int:
             controls["unix_socket"] = unix_control.recv(16) == b"ok"
         tests.append({"name": "network_fixture_positive_controls", "passed": all(controls.values()), "evidence": controls})
         if all(controls.values()):
-            check("network_dns_loopback_metadata_unix", "ok", _run(target, scratch, "network", host, str(port), metadata4, metadata6, str(unix_fixture.path)))
+            check(
+                "network_dns_loopback_metadata_unix", "ok",
+                _run(
+                    target, scratch, "network", host, str(port), metadata4, metadata6,
+                    str(unix_fixture.path), dns_name, metadata4, str(dns_port),
+                    resolv_conf_text=resolv_conf.read_text(encoding="utf-8"),
+                ),
+            )
 
         check("target_readonly_escape_and_links", "ok", _run(target, scratch, "filesystem", str(guard)))
         assert ((target / "data.txt").read_bytes(), guard.read_bytes()) == before
+        retained_secret = root / "retained-secret.txt"; retained_secret.write_text("host-only-marker")
+        try:
+            _run(
+                target, scratch, "retained_symlink", str(root),
+                retained_output_paths=("intermediate/retained-secret.txt",),
+            )
+            retained_symlink_rejected = False
+        except runner.SandboxError as exc:
+            retained_symlink_rejected = "retained output path is unsafe" in str(exc)
+        tests.append({"name": "retained_output_intermediate_symlink_rejected", "passed": retained_symlink_rejected, "evidence": {"secret_marker_not_returned": True}})
         check("memory_hog", "memory_limit", _run(target, scratch, "memory", memory_bytes=48*1024*1024, timeout_seconds=5))
         check("cpu_busy_loop", "cpu_limit", _run(target, scratch, "cpu", cpu_seconds=1, timeout_seconds=5))
         check("pid_fork_bomb", "pid_limit", _run(target, scratch, "pids", pids_max=8, timeout_seconds=4))
@@ -376,7 +523,22 @@ def main(argv=None) -> int:
             subprocess.run(["ip", version, "addr", "del", "%s/%s" % (address, prefix), "dev", "lo"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         shutil.rmtree(root, ignore_errors=True)
     passed = sum(1 for item in tests if item["passed"])
-    report = {"ok": passed == len(tests) and bool(tests), "passed": passed, "total": len(tests), "tests": tests}
+    completed_at = datetime.datetime.now(datetime.timezone.utc)
+    sandbox_executions = sum(isinstance(item.get("result"), dict) for item in tests)
+    report = {
+        "schema_version": 1,
+        "run_id": run_id,
+        "started_at": started_at.isoformat(),
+        "completed_at": completed_at.isoformat(),
+        "candidate_head": args.candidate_head,
+        "runner_implementation_sha256": hashlib.sha256((HERE / "runner.py").read_bytes()).hexdigest(),
+        "sandbox_executions": sandbox_executions,
+        "healthy_sandbox_execution_count": sum(item.get("name") == "healthy_positive_control" and item.get("passed") is True for item in tests),
+        "ok": passed == len(tests) and bool(tests),
+        "passed": passed,
+        "total": len(tests),
+        "tests": tests,
+    }
     encoded = json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n"
     if any(marker in encoded for marker in marker_values.values()):
         raise RuntimeError("credential marker leaked into sandbox report")

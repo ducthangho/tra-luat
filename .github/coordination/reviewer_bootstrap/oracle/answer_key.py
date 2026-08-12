@@ -26,14 +26,22 @@ _PIN_ITEMS = (
     ("protocol_file_git_oid", "541e911d272b4b75afb072f25008e8149f97084c"),
     ("protocol_file_sha256", "57f6dde9ce348414b32dcd33a71dae52102a5726130149579926906e15d7916d"),
     ("mission_issue", 76),
-    ("mission_revision", 3),
-    ("mission_plan_hash", "346f9a6d89cf327b67d7ce7b7ea1e7b769f59a3bd90518afa9da5cec280ebde0"),
+    ("mission_revision", 4),
+    ("mission_plan_hash", "fcf1578230123ab6f7e4a3ac1742e7f59920b2852bb1ccf508be5a4869f29d16"),
     ("packet_issue", 86),
-    ("packet_revision", 4),
-    ("packet_generation", 4),
-    ("packet_spec_hash", "3a15ea7229d790e40da4e8973348b0727224abd716463605923056d4289c1913"),
+    ("packet_revision", 5),
+    ("packet_generation", 5),
+    ("packet_spec_hash", "c32781b26fa45c79772b7b5351b4111de8ea9fbde2456f1948e4b2fddd6217d6"),
 )
 PINS = MappingProxyType(dict(_PIN_ITEMS))
+
+INDEPENDENT_ENGINE_PIN = MappingProxyType({
+    "name": "python-jsonschema",
+    "version": "4.10.3",
+    "digest_sha256": "e72373a7afa42ce20643ba291828efd2ab1f9f73ccc91c915431556eae806cf7",
+    "implementation_files": 26,
+    "dialect": DIALECT,
+})
 
 
 def verify_pin_readback(readback: Mapping[str, object], protocol_source: bytes) -> dict[str, str]:

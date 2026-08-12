@@ -56,8 +56,14 @@ _SAFE_ENV = {
     "PYTHONUNBUFFERED": "1",
 }
 _SECRET_VALUE = re.compile(
-    r"(?i)(?:github_pat_|gh[pousr]_|bearer\s+|basic\s+|sk-[a-z0-9]|"
-    r"AKIA[0-9A-Z]{8,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)"
+    r"(?:AKIA|ASIA)[0-9A-Z]{8,}|"
+    r"(?i:github_pat_|gh[pousr]_|bearer\s+|basic\s+|sk-[a-z0-9]|"
+    r"xox[baprs]-|gocspx-|-----BEGIN [A-Z ]*PRIVATE KEY-----)"
+)
+_CREDENTIAL_NAME = re.compile(
+    r"(?i)(?:^|[_-])(?:token|secret|pass(?:word|wd)?|credential|api[_-]?key|"
+    r"access[_-]?key|private[_-]?key|oauth|github|gitlab|anthropic|openai|"
+    r"aws|azure|gcp|google|stripe|slack)(?:$|[_-])"
 )
 
 
@@ -74,6 +80,8 @@ class SandboxConfig:
     cpu_seconds: int = 2
     output_bytes: int = 65_536
     retained_output_paths: Sequence[str] = ()
+    scratch_input_files: Mapping[str, str] = dataclasses.field(default_factory=dict)
+    resolv_conf_text: str | None = None
     expected_distro: str | None = "Ubuntu 24.04.4 LTS"
     expected_kernel: str | None = "6.18.33.2-microsoft-standard-WSL2"
 
@@ -181,7 +189,17 @@ def _validate_config(config: SandboxConfig, fp: Mapping[str, object]) -> tuple[s
         raise SandboxError("command must be a non-empty sequence of non-empty strings")
     if any(_SECRET_VALUE.search(part) for part in config.command):
         raise SandboxError("candidate argv contains credential-shaped material")
-    for locator in config.retained_output_paths:
+    if config.resolv_conf_text is not None:
+        if (
+            not isinstance(config.resolv_conf_text, str)
+            or not config.resolv_conf_text
+            or len(config.resolv_conf_text.encode("utf-8")) > 4096
+            or "\0" in config.resolv_conf_text
+            or _SECRET_VALUE.search(config.resolv_conf_text)
+        ):
+            raise SandboxError("unsafe trusted resolv.conf fixture")
+    declared_locators = tuple(config.retained_output_paths) + tuple(config.scratch_input_files)
+    for locator in declared_locators:
         if (
             not isinstance(locator, str)
             or not locator
@@ -190,6 +208,9 @@ def _validate_config(config: SandboxConfig, fp: Mapping[str, object]) -> tuple[s
             or any(part in ("", ".", "..") for part in locator.split("/"))
         ):
             raise SandboxError("unsafe retained output locator: %r" % (locator,))
+    for locator, content in config.scratch_input_files.items():
+        if not isinstance(content, str) or len(content.encode("utf-8")) > config.output_bytes:
+            raise SandboxError("unsafe or oversized scratch input: %s" % locator)
     numeric = {
         "timeout_seconds": config.timeout_seconds,
         "memory_bytes": config.memory_bytes,
@@ -240,26 +261,51 @@ def _read_retained_outputs(
 ) -> dict[str, bytes]:
     """Read declared scratch outputs without following candidate links."""
     retained: dict[str, bytes] = {}
-    for locator in locators:
-        path = os.path.join(writable, *locator.split("/"))
-        try:
-            on_disk = os.lstat(path)
-        except FileNotFoundError:
-            continue
-        if not stat.S_ISREG(on_disk.st_mode) or on_disk.st_size > byte_limit:
-            raise SandboxError("retained output is unsafe or oversized: %s" % locator)
-        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-        with os.fdopen(fd, "rb") as handle:
-            opened = os.fstat(handle.fileno())
-            if (
-                not stat.S_ISREG(opened.st_mode)
-                or (opened.st_dev, opened.st_ino) != (on_disk.st_dev, on_disk.st_ino)
-                or opened.st_nlink != 1
-            ):
-                raise SandboxError("retained output changed identity: %s" % locator)
-            retained[locator] = handle.read(byte_limit + 1)
-        if len(retained[locator]) > byte_limit:
-            raise SandboxError("retained output exceeds byte limit: %s" % locator)
+    root_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        root_fd = os.open(writable, root_flags)
+    except OSError as exc:
+        raise SandboxError("retained output root is unsafe") from exc
+    try:
+        for locator in locators:
+            parts = locator.split("/")
+            directory_fd = os.dup(root_fd)
+            try:
+                for component in parts[:-1]:
+                    next_fd = os.open(
+                        component,
+                        os.O_RDONLY
+                        | getattr(os, "O_DIRECTORY", 0)
+                        | getattr(os, "O_NOFOLLOW", 0),
+                        dir_fd=directory_fd,
+                    )
+                    os.close(directory_fd)
+                    directory_fd = next_fd
+                try:
+                    fd = os.open(
+                        parts[-1],
+                        os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                        dir_fd=directory_fd,
+                    )
+                except FileNotFoundError:
+                    continue
+                with os.fdopen(fd, "rb") as handle:
+                    opened = os.fstat(handle.fileno())
+                    if (
+                        not stat.S_ISREG(opened.st_mode)
+                        or opened.st_nlink != 1
+                        or opened.st_size > byte_limit
+                    ):
+                        raise SandboxError("retained output is unsafe or oversized: %s" % locator)
+                    retained[locator] = handle.read(byte_limit + 1)
+            except OSError as exc:
+                raise SandboxError("retained output path is unsafe: %s" % locator) from exc
+            finally:
+                os.close(directory_fd)
+            if len(retained[locator]) > byte_limit:
+                raise SandboxError("retained output exceeds byte limit: %s" % locator)
+    finally:
+        os.close(root_fd)
     return retained
 
 
@@ -485,6 +531,13 @@ def _child_init(encoded: str) -> int:
     _mkdir(os.path.join(rootfs, "scratch", "tmp"), 0o700)
     os.chown(os.path.join(rootfs, "scratch", "home"), 1000, 1000)
     os.chown(os.path.join(rootfs, "scratch", "tmp"), 1000, 1000)
+    for locator, content in spec.get("scratch_input_files", {}).items():
+        destination = os.path.join(rootfs, "scratch", *locator.split("/"))
+        _mkdir(os.path.dirname(destination), 0o700)
+        with open(destination, "w", encoding="utf-8") as handle:
+            handle.write(content)
+        os.chown(destination, 1000, 1000)
+        os.chmod(destination, 0o400)
     _mount("-t", "proc", "-o", "nosuid,nodev,noexec,hidepid=2", "proc", os.path.join(rootfs, "proc"))
     _mount("-t", "tmpfs", "-o", "mode=0755,nosuid,noexec", "tmpfs", os.path.join(rootfs, "dev"))
     for name, mode, major, minor in (
@@ -494,11 +547,21 @@ def _child_init(encoded: str) -> int:
         ("urandom", stat.S_IFCHR | 0o444, 1, 9),
     ):
         os.mknod(os.path.join(rootfs, "dev", name), mode, os.makedev(major, minor))
-    for name in ("hosts", "nsswitch.conf", "resolv.conf", "ld.so.cache"):
+    for name in ("hosts", "nsswitch.conf", "ld.so.cache"):
         source = os.path.join("/etc", name)
         if os.path.isfile(source):
             shutil.copyfile(source, os.path.join(rootfs, "etc", name))
             os.chmod(os.path.join(rootfs, "etc", name), 0o444)
+    resolv_conf_text = spec.get("resolv_conf_text")
+    resolv_target = os.path.join(rootfs, "etc", "resolv.conf")
+    if resolv_conf_text is None:
+        if os.path.isfile("/etc/resolv.conf"):
+            shutil.copyfile("/etc/resolv.conf", resolv_target)
+    else:
+        with open(resolv_target, "w", encoding="utf-8") as handle:
+            handle.write(resolv_conf_text)
+    if os.path.exists(resolv_target):
+        os.chmod(resolv_target, 0o444)
     return _launch_final_candidate(spec, rootfs)
 
 
@@ -584,6 +647,8 @@ def run(config: SandboxConfig) -> SandboxResult:
         "command": list(config.command),
         "cpu_seconds": config.cpu_seconds,
         "output_bytes": config.output_bytes,
+        "resolv_conf_text": config.resolv_conf_text,
+        "scratch_input_files": dict(config.scratch_input_files),
     }
     encoded = base64.urlsafe_b64encode(
         json.dumps(spec, sort_keys=True, separators=(",", ":")).encode("utf-8")

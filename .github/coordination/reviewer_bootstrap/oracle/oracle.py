@@ -2,38 +2,47 @@
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import importlib.metadata
 import json
 import os
 import pathlib
+import re
 import stat
+import subprocess
 import sys
 from typing import Mapping, Sequence
 
 HERE = pathlib.Path(__file__).resolve().parent
 CORE = HERE.parent / "core"
 SANDBOX = HERE.parent / "sandbox"
-sys.path.insert(0, str(CORE))
-from artifacts import ArtifactSet, sha256_file, verify  # noqa: E402
-
-from answer_key import (  # noqa: E402
-    DIALECT,
-    EXPECTED_FILES,
-    PINS,
-    check_contract,
-    verify_pin_readback,
-)
-from corpus import Case, build  # noqa: E402
-from engine import inventory, keyword_anchors, schema_shape_errors, validate  # noqa: E402
-from fake_validators import (  # noqa: E402
-    classification_path_proofs,
-    mutation_score,
-)
+if __package__:
+    from core.artifacts import ArtifactSet, sha256_file, verify
+    from .answer_key import (
+        DIALECT, EXPECTED_FILES, INDEPENDENT_ENGINE_PIN, PINS,
+        check_contract, verify_pin_readback,
+    )
+    from .corpus import Case, build
+    from .engine import inventory, keyword_anchors, schema_shape_errors, validate
+    from .fake_validators import classification_path_proofs, mutation_score
+else:
+    sys.path.insert(0, str(CORE))
+    from artifacts import ArtifactSet, sha256_file, verify  # noqa: E402
+    from answer_key import (  # noqa: E402
+        DIALECT, EXPECTED_FILES, INDEPENDENT_ENGINE_PIN, PINS,
+        check_contract, verify_pin_readback,
+    )
+    from corpus import Case, build  # noqa: E402
+    from engine import inventory, keyword_anchors, schema_shape_errors, validate  # noqa: E402
+    from fake_validators import classification_path_proofs, mutation_score  # noqa: E402
 
 
 class OracleError(RuntimeError):
     pass
+
+
+_FRESH_RUNNER_CACHE: dict[tuple[str, str], Mapping[str, object]] = {}
 
 
 def _json_no_duplicates(raw: str, locator: str) -> object:
@@ -104,14 +113,52 @@ def _load_schemas(
     }
 
 
+def _git(root: pathlib.Path, *args: str, text: bool = True):
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(root), *args],
+            stderr=subprocess.PIPE,
+            text=text,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise OracleError("candidate Git provenance unavailable: %s" % " ".join(args)) from exc
+
+
 def source_readback(target_root: str, candidate_head: str) -> dict[str, object]:
-    """Measure exact candidate schema bytes for a trusted dispatcher readback."""
-    if not isinstance(candidate_head, str) or not __import__("re").fullmatch(
-        r"[0-9a-f]{40}", candidate_head
-    ):
+    """Bind commit/tree/blob objects, checkout state and exact schema bytes."""
+    if not isinstance(candidate_head, str) or not re.fullmatch(r"[0-9a-f]{40}", candidate_head):
         raise OracleError("candidate_head must be an exact 40-hex Git oid")
-    _, measured = _load_schemas(target_root)
-    return {"candidate_head": candidate_head, **measured}
+    root = pathlib.Path(target_root).resolve()
+    commit = _git(root, "rev-parse", "--verify", "%s^{commit}" % candidate_head).strip()
+    checkout_head = _git(root, "rev-parse", "--verify", "HEAD^{commit}").strip()
+    if commit != candidate_head or checkout_head != candidate_head:
+        raise OracleError("candidate checkout/head does not match declared commit")
+    tree = _git(root, "rev-parse", "%s^{tree}" % candidate_head).strip()
+    inventory = _git(
+        root, "ls-tree", "--name-only", "%s:.github/schemas" % candidate_head
+    ).splitlines()
+    if sorted(inventory) != sorted(EXPECTED_FILES):
+        raise OracleError("candidate Git tree schema inventory mismatch")
+    status = _git(root, "status", "--porcelain=v1", "--", ".github/schemas").strip()
+    if status:
+        raise OracleError("candidate schema checkout is dirty or untracked")
+    _, measured = _load_schemas(str(root))
+    blob_oids: dict[str, str] = {}
+    for name in EXPECTED_FILES:
+        locator = ".github/schemas/%s" % name
+        blob = _git(root, "rev-parse", "%s:%s" % (candidate_head, locator)).strip()
+        git_bytes = _git(root, "cat-file", "blob", blob, text=False)
+        disk_bytes = _read_regular_schema(root / locator, name)
+        if git_bytes != disk_bytes:
+            raise OracleError("candidate schema bytes differ from Git blob: %s" % name)
+        blob_oids[name] = blob
+    return {
+        "candidate_head": candidate_head,
+        "candidate_commit_sha": commit,
+        "candidate_tree_sha": tree,
+        "schema_blob_oids": blob_oids,
+        **measured,
+    }
 
 
 def _validate_source_readback(
@@ -119,17 +166,50 @@ def _validate_source_readback(
     readback: Mapping[str, object],
     candidate_head: str,
 ) -> None:
-    expected = {"candidate_head": candidate_head, **measured}
+    expected = dict(measured)
+    if expected.get("candidate_head") != candidate_head:
+        raise OracleError("measured source does not match candidate head")
     if dict(readback) != expected:
         raise OracleError("candidate schema source readback mismatch")
 
 
-def _validate_runner_report(report: Mapping[str, object] | None) -> dict[str, object]:
-    if not isinstance(report, Mapping):
-        raise OracleError("measured runner report is required; no default evidence exists")
+def _validate_runner_report(
+    report: Mapping[str, object] | None, candidate_head: str
+) -> dict[str, object]:
+    if report is not None:
+        raise OracleError(
+            "external runner report rejected; oracle measures the sandbox in-process"
+        )
+    runner_sha = sha256_file(SANDBOX / "runner.py")
+    cache_key = (candidate_head, runner_sha)
+    measured_report = _FRESH_RUNNER_CACHE.get(cache_key)
+    if measured_report is None:
+        try:
+            raw = subprocess.check_output(
+                [
+                    sys.executable,
+                    "-B",
+                    str(SANDBOX / "selftest.py"),
+                    "--candidate-head",
+                    candidate_head,
+                ],
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=90,
+            )
+            parsed = json.loads(raw)
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            raise OracleError("fresh sandbox measurement failed") from exc
+        if not isinstance(parsed, Mapping):
+            raise OracleError("fresh sandbox measurement is not an object")
+        measured_report = parsed
+        _FRESH_RUNNER_CACHE[cache_key] = measured_report
+    report = measured_report
     tests = report.get("tests")
     if (
-        report.get("ok") is not True
+        report.get("schema_version") != 1
+        or report.get("candidate_head") != candidate_head
+        or report.get("ok") is not True
         or not isinstance(tests, list)
         or not tests
         or report.get("passed") != report.get("total")
@@ -152,12 +232,45 @@ def _validate_runner_report(report: Mapping[str, object] | None) -> dict[str, ob
         "pid_fork_bomb",
         "stdout_flood",
         "timeout_and_descendant_cleanup",
+        "target_readonly_escape_and_links",
+        "retained_output_intermediate_symlink_rejected",
+        "credential_shape_alias_counterexamples",
     }
     missing = sorted(required - set(by_name))
     if missing:
         raise OracleError("runner report missing measured controls: %s" % missing)
     if any(item.get("passed") is not True for item in by_name.values()):
         raise OracleError("runner report contains a failed/fixture-gap control")
+    actual_runner_sha = runner_sha
+    if report.get("runner_implementation_sha256") != actual_runner_sha:
+        raise OracleError("runner report implementation binding mismatch")
+    if not re.fullmatch(
+        r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+        str(report.get("run_id", "")),
+    ):
+        raise OracleError("runner report run_id is missing or malformed")
+    try:
+        started = datetime.datetime.fromisoformat(str(report["started_at"]))
+        completed = datetime.datetime.fromisoformat(str(report["completed_at"]))
+    except (KeyError, ValueError) as exc:
+        raise OracleError("runner report timestamps are missing or malformed") from exc
+    now = datetime.datetime.now(datetime.timezone.utc)
+    if (
+        started.tzinfo is None
+        or completed.tzinfo is None
+        or completed < started
+        or (completed - started).total_seconds() > 300
+        or (now - completed).total_seconds() > 900
+        or (completed - now).total_seconds() > 30
+    ):
+        raise OracleError("runner report is stale, future-dated or implausible")
+    measured_executions = sum(isinstance(item.get("result"), Mapping) for item in tests)
+    if (
+        report.get("sandbox_executions") != measured_executions
+        or measured_executions <= 0
+        or report.get("healthy_sandbox_execution_count") != 1
+    ):
+        raise OracleError("runner report does not prove nonzero sandbox execution")
     healthy = by_name["healthy_positive_control"]
     result = healthy.get("result")
     if not isinstance(result, Mapping):
@@ -191,6 +304,11 @@ def _validate_runner_report(report: Mapping[str, object] | None) -> dict[str, ob
         "report_sha256": hashlib.sha256(
             json.dumps(report, ensure_ascii=False, sort_keys=True).encode("utf-8")
         ).hexdigest(),
+        "run_id": report["run_id"],
+        "candidate_head": candidate_head,
+        "sandbox_executions": measured_executions,
+        "runner_implementation_sha256": actual_runner_sha,
+        "measured_report": report,
     }
 
 
@@ -202,13 +320,16 @@ def _engine_metadata() -> dict[str, object]:
     for path in files:
         digest.update(path.relative_to(package).as_posix().encode("utf-8") + b"\0")
         digest.update(path.read_bytes())
-    return {
+    measured = {
         "name": "python-jsonschema",
         "version": importlib.metadata.version("jsonschema"),
         "digest_sha256": digest.hexdigest(),
         "dialect": DIALECT,
         "implementation_files": len(files),
     }
+    if measured != dict(INDEPENDENT_ENGINE_PIN):
+        raise OracleError("independent jsonschema engine pin mismatch: %r" % measured)
+    return measured
 
 
 def _differential(schema: Mapping[str, object], document: object) -> tuple[bool, str]:
@@ -273,9 +394,24 @@ def evaluate(
         protocol_binding = verify_pin_readback(pin_readback, protocol_source)
     except ValueError as exc:
         raise OracleError("pin/source preflight refused evaluation: %s" % exc) from exc
-    runner_binding = _validate_runner_report(runner_report)
+    runner_binding = _validate_runner_report(runner_report, candidate_head)
+    measured_runner_report = runner_binding["measured_report"]
+    assert isinstance(measured_runner_report, Mapping)
+    runner_tests = measured_runner_report["tests"]
+    assert isinstance(runner_tests, list)
+    by_name = {
+        item["name"]: item
+        for item in runner_tests
+        if isinstance(item, Mapping) and isinstance(item.get("name"), str)
+    }
     schemas, measured_source = _load_schemas(target_root)
-    _validate_source_readback(measured_source, candidate_source_readback, candidate_head)
+    git_source = source_readback(target_root, candidate_head)
+    if (
+        measured_source.get("schema_bundle_sha256") != git_source.get("schema_bundle_sha256")
+        or measured_source.get("schema_file_sha256") != git_source.get("schema_file_sha256")
+    ):
+        raise OracleError("candidate schema bytes changed during provenance readback")
+    _validate_source_readback(git_source, candidate_source_readback, candidate_head)
     direct_errors: dict[str, list[str]] = {}
     inventories: dict[str, list[str]] = {}
     all_keywords: set[str] = set()
@@ -311,13 +447,51 @@ def evaluate(
         for name in EXPECTED_FILES
     }
     engine_metadata = _engine_metadata()
+    required_counterexamples = {
+        "sandbox_escape_classes": {
+            name: by_name.get(name, {}).get("passed") is True
+            for name in (
+                "network_dns_loopback_metadata_unix",
+                "target_readonly_escape_and_links",
+                "retained_output_intermediate_symlink_rejected",
+                "credential_env_argv_cwd_fd_procfs",
+            )
+        },
+        "resource_classes": {
+            name: by_name.get(name, {}).get("passed") is True
+            for name in (
+                "cpu_busy_loop", "memory_hog", "pid_fork_bomb", "stdout_flood",
+                "timeout_and_descendant_cleanup",
+            )
+        },
+        "fake_validators": {
+            item["stable_id"]: item["classification"] for item in mutation["results"]
+        },
+        "schema_count": len(schemas),
+        "healthy_positive_control_ran": runner_binding["sandbox_executions"] > 0,
+        "healthy_sandbox_execution_count": measured_runner_report["healthy_sandbox_execution_count"],
+        "keyword_inventory_total": len(all_keywords),
+        "corpus_cases_per_schema": per_schema_counts,
+        "differential_implementations": 1,
+    }
+    b1_b6 = {
+        "B1_git_commit_tree_blob_binding": git_source["candidate_commit_sha"] == candidate_head,
+        "B2_same_fixture_dns_controls": by_name["network_fixture_positive_controls"]["passed"] is True,
+        "B3_scratch_materialized_blind_corpus": all(
+            item.get("protocol_result_used") is True and item.get("sandbox_executed") is True
+            for item in mutation["results"]
+        ),
+        "B4_fresh_measured_runner_binding": runner_binding["candidate_head"] == candidate_head,
+        "B5_nonzero_healthy_sandbox_execution": runner_binding["sandbox_executions"] > 0,
+        "B6_five_file_protocol_fakes_killed": mutation["counts"]["killed"] == 5,
+    }
     report: dict[str, object] = {
         "ok": False,
         "pins": {
             **PINS,
             "candidate_head": candidate_head,
             "protocol_binding": protocol_binding,
-            "candidate_schema_source": measured_source,
+            "candidate_schema_source": git_source,
             **_trusted_hashes(),
         },
         "schema_count": len(schemas),
@@ -336,6 +510,8 @@ def evaluate(
         "mutation_classification_path_proofs": mutation_paths,
         "healthy_positive_control_ran": True,
         "healthy_positive_control_evidence": runner_binding,
+        "required_counterexamples": required_counterexamples,
+        "B1_B6": b1_b6,
     }
     report["ok"] = (
         len(schemas) == 5
@@ -346,9 +522,10 @@ def evaluate(
         and mutation["counts"]["killed"] == 5
         and mutation["counts"]["survived"] == 0
         and all(item["passed"] for item in mutation_paths.values())
+        and all(b1_b6.values())
     )
     if artifact_root is not None:
-        artifact_set = ArtifactSet(artifact_root, "wp86-r4-g4-%s" % candidate_head[:12])
+        artifact_set = ArtifactSet(artifact_root, "wp86-r5-g5-%s" % candidate_head[:12])
         corpus_payload = [{
             "schema": case.schema_name, "case_id": case.case_id, "locator": case.locator,
             "raw": case.raw, "held_out": case.held_out,
@@ -356,10 +533,10 @@ def evaluate(
         artifact_set.add("source", "source/pins.json", json.dumps(report["pins"], indent=2, sort_keys=True) + "\n")
         artifact_set.add("corpus", "corpus/objects.json", json.dumps(corpus_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
         artifact_set.add("per_case_matrix", "matrix/results.json", json.dumps(matrix, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
-        artifact_set.add("runner_env_digest", "runner/environment.json", json.dumps({"runner": runner_report, "runner_binding": runner_binding, "differential": engine_metadata}, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+        artifact_set.add("runner_env_digest", "runner/environment.json", json.dumps({"runner": measured_runner_report, "runner_binding": runner_binding, "differential": engine_metadata}, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
         resource_timeout = {
             item["name"]: item.get("result", {}).get("resource_report", {})
-            for item in runner_report["tests"]
+            for item in measured_runner_report["tests"]
             if item.get("name") in {
                 "memory_hog", "cpu_busy_loop", "pid_fork_bomb",
                 "stdout_flood", "timeout_and_descendant_cleanup",
@@ -368,7 +545,7 @@ def evaluate(
         artifact_set.add("runner_env_digest", "runner/resource-timeout.json", json.dumps(resource_timeout, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
         cleanup_evidence = {
             item["name"]: item.get("result", {}).get("cleanup", {})
-            for item in runner_report["tests"]
+            for item in measured_runner_report["tests"]
             if isinstance(item, Mapping)
         }
         artifact_set.add("cleanup_record", "cleanup/record.json", json.dumps({"oracle_candidate_code_executed": False, "candidate_treated_as_json_data": True, "sandbox_cleanup": cleanup_evidence}, indent=2, sort_keys=True) + "\n")

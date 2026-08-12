@@ -463,12 +463,35 @@ def t31_stop_tu_choi_khi_khoa_danh_tinh_khac():
         thu_muc = next(rr.iterdir())
         f = thu_muc / "run.json"
         d = json.loads(f.read_text(encoding="utf-8"))
-        d["pid"] = os.getpid()               # PID CÓ THẬT (chính test này)
-        d["khoa_danh_tinh"] = "linux:0"      # nhưng khoá KHÔNG khớp
-        f.write_text(json.dumps(d), encoding="utf-8")
-        r = chay("stop", "--run-root", str(rr), "--id", d["short_id"])
-        bang(r.returncode == MA_DANH_TINH, f"mong doi {MA_DANH_TINH}, duoc {r.returncode}")
-        bang("tai dung" in r.stdout or "KHAC" in r.stdout, f"khong noi ro ly do: {r.stdout}")
+
+        # PID phải là tiến trình THẬT nhưng TUYỆT ĐỐI không phải của bộ test.
+        # ĐÃ TRẢ GIÁ: bản trước dùng os.getpid(). Chốt còn nguyên thì vô hại vì
+        # launcher từ chối; nhưng ở lượt đột biến "giết liều" - đúng lượt cần đo -
+        # launcher làm đúng việc nó được bảo và killpg CHÍNH nhóm tiến trình của bộ
+        # test. Bộ test tự sát (exit 143), `finally` không chạy, launcher.py ở lại
+        # trạng thái đã đột biến và đi thẳng vào commit.
+        # Tiến trình mồi nằm ở SESSION RIÊNG nên killpg của nó không chạm tới ai khác.
+        them = ({"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if LA_WINDOWS
+                else {"start_new_session": True})
+        moi = subprocess.Popen([PY, "-c", "import time; time.sleep(30)"],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **them)
+        try:
+            d["pid"] = moi.pid
+            d["khoa_danh_tinh"] = "linux:0"   # khoá KHÔNG khớp với tiến trình đó
+            f.write_text(json.dumps(d), encoding="utf-8")
+            r = chay("stop", "--run-root", str(rr), "--id", d["short_id"])
+            bang(r.returncode == MA_DANH_TINH, f"mong doi {MA_DANH_TINH}, duoc {r.returncode}")
+            bang("tai dung" in r.stdout or "KHAC" in r.stdout, f"khong noi ro ly do: {r.stdout}")
+            # Bằng chứng QUAN SÁT ĐƯỢC, không chỉ là mã thoát: tiến trình vô can
+            # phải còn sống. Đây là thứ mà đột biến "giết liều" làm đỏ.
+            time.sleep(0.5)
+            bang(moi.poll() is None, "tien trinh VO CAN da bi giet du khoa khong khop")
+        finally:
+            moi.kill()
+            try:
+                moi.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                pass
 
 
 @ca

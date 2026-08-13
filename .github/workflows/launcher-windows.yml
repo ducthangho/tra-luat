@@ -11,16 +11,24 @@ name: launcher (Windows that)
 # ghi trong docstring `_cung_hoa_dau_ra`. Ở đây cố ý KHÔNG đặt hai biến đó, để chốt
 # tự đứng bằng chân nó.
 
+# Windows ton GAP DOI phut va kho dang cham tran Free (xem r245 trong ci.yml),
+# nen KHONG bat theo moi push nhanh: goi tay khi can, tu dong khi vao master,
+# hoac gan nhan `windows` cho PR dung toi duong phu thuoc nen.
 on:
   workflow_dispatch:
   push:
-    branches: [codex/audit-4-posix, codex/audit-4-windows, master]
+    branches: [master]
     paths:
       - '.claude/dev/**'
       - '.github/workflows/launcher-windows.yml'
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - '.claude/dev/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   launcher:
@@ -29,6 +37,10 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    # PR chi chay khi duoc gan nhan `windows`; push master va goi tay thi luon chay.
+    if: >-
+      github.event_name != 'pull_request'
+      || contains(github.event.pull_request.labels.*.name, 'windows')
     timeout-minutes: 40
     steps:
       - name: Checkout LF

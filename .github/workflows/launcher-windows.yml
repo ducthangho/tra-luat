@@ -88,11 +88,27 @@ jobs:
         run: |
           # Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.
           # Neu Windows khac, hook doc ma nay se bao "THIEU CONG CU" oan.
+          #
+          # BAN DAU viet `... doctor | Invoke-Expression $cat | Out-Null` de dung MOT dong
+          # cho ca hai kieu cat. SAI, va sai theo kieu te nhat: `Invoke-Expression` khong
+          # nhan doi tuong tu ONG (tham so -Command khong ValueFromPipeline), nen buoc chet
+          # ngay o vong lap dau voi "The input object cannot be bound to any parameters".
+          # He qua: buoc nay DO tu lan chay dau, va vi no dung TRUOC ba probe con lai nen
+          # cp1258 / t62 / taskkill CHUA TUNG chay lan nao tren Windows. Mot dong pwsh viet
+          # mu (khong co Windows de thu) da khoa toan bo phan do Windows lai. Nay dung
+          # scriptblock: dang duy nhat vua tham so hoa duoc kieu cat, vua khong dinh
+          # Invoke-Expression.
           $loi = 0
-          foreach ($cat in 'Select-Object -First 1', 'Out-Null') {
-            python .claude/dev/launcher.py doctor | Invoke-Expression $cat | Out-Null
+          $kieu_cat = @(
+            @{ ten = 'Select-Object -First 1'
+               ham = { python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null } },
+            @{ ten = 'Out-Null'
+               ham = { python .claude/dev/launcher.py doctor | Out-Null } }
+          )
+          foreach ($cat in $kieu_cat) {
+            & $cat.ham
             $ma = $LASTEXITCODE
-            Write-Host ("du cong cu  | {0,-22} -> rc={1} (mong doi 0)" -f $cat, $ma)
+            Write-Host ("du cong cu  | {0,-22} -> rc={1} (mong doi 0)" -f $cat.ten, $ma)
             if ($ma -ne 0) { $loi++ }
           }
           # Thieu cong cu: thu hep PATH con moi thu muc python => mat git
@@ -116,8 +132,12 @@ jobs:
           git init -q "Quoc hoi ban do\kho"
           git -C "Quoc hoi ban do\kho" -c user.email=a@b -c user.name=c commit -q --allow-empty -m x
           python .claude\dev\launcher.py check --workspace "Quoc hoi ban do\kho"
-          echo rc=%ERRORLEVEL% (mong doi 0)
-          if not "%ERRORLEVEL%"=="0" exit /b 1
+          rem CHOT %ERRORLEVEL% NGAY, truoc khi `echo` chay: cmd cap nhat ERRORLEVEL theo
+          rem lenh gan nhat, nen doc no SAU mot cau echo la doc ma cua echo chu khong con
+          rem la ma cua python. Chot roi so bang bien rieng thi khong con cho cai nay tro.
+          set MA=%ERRORLEVEL%
+          echo rc=%MA% (mong doi 0)
+          if not "%MA%"=="0" exit /b 1
 
       - name: 'Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)'
         if: runner.os == 'Windows'

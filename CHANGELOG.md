@@ -49,6 +49,25 @@ cffi` là xong; ghi lại để phiên sau không mất lần nữa đi truy `tl
 Đo sau khi vá (Linux, container này): `tl selftest` **1697/1697**, và toàn bộ 13 bước của
 job `gate` đều `rc=0`.
 
+**Và một lỗ nữa, do CI Windows lộ ra: phép đo `dut ong` KHÔNG HỀ CHẠY.** Bước probe viết
+`… doctor | Invoke-Expression $cat | Out-Null` để dùng MỘT dòng cho hai kiểu cắt ống.
+`Invoke-Expression` **không nhận đối tượng từ ống** (`-Command` không `ValueFromPipeline`)
+nên nó chết ngay vòng lặp đầu: *"The input object cannot be bound to any parameters"*. Hệ
+quả không nằm ở bước đó: probe này đứng **TRƯỚC** ba probe còn lại, nên `cp1258`, `t62` và
+`taskkill /T` **chưa từng chạy lần nào** trên Windows — job đỏ ở bước 9 và dừng. Một dòng
+pwsh viết mù (không có Windows để thử) đã khoá toàn bộ phần đo Windows lại, đúng bài học
+"script đa nền phải chạy THẬT trên nền đó". Nay dùng scriptblock: tham số hoá được kiểu
+cắt mà không dính `Invoke-Expression`.
+
+Nhân đó siết luôn probe `cp1258`: nó đọc `%ERRORLEVEL%` **sau** một câu `echo`, mà cmd cập
+nhật `ERRORLEVEL` theo lệnh gần nhất ⇒ có đường đọc phải mã của `echo`. Nay chốt vào biến
+riêng ngay sau lệnh python. Chưa quan sát được nó báo sai (bước này chưa từng chạy), nhưng
+đây đúng hạng "cổng xanh nhờ rc=0" mà `CLAUDE.md` dặn không được tin.
+
+Điểm đáng ghi: bộ phản chứng và bộ đột biến trên Windows **đều xanh** ở lượt này
+(`77/77`, `DOT BIEN: 24/24 dat`, cây làm việc `sach`) — thứ đỏ là phép đo, không phải thứ
+được đo. Bốn vòng audit không thấy nổi, vì không vòng nào chạy được pwsh.
+
 # ★ dev-side — vòng 5: vá 4 lỗi do lượt CI Windows ĐẦU TIÊN lộ ra (2026-08-13)
 
 Không bump `VERSION`; chỉ `.claude/` + CHANGELOG. `RELEASE_MANIFEST.json` giữ 179 tệp.

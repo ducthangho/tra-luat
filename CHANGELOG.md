@@ -68,6 +68,28 @@ riêng ngay sau lệnh python. Chưa quan sát được nó báo sai (bước n�
 (`77/77`, `DOT BIEN: 24/24 dat`, cây làm việc `sach`) — thứ đỏ là phép đo, không phải thứ
 được đo. Bốn vòng audit không thấy nổi, vì không vòng nào chạy được pwsh.
 
+**Và ngay lượt probe chạy được lần đầu, nó đo ra một điều không ai đoán:**
+
+```
+du cong cu  | Select-Object -First 1 -> rc=   (RỖNG)
+du cong cu  | Out-Null               -> rc=0
+thieu cong cu | Select -First 1      -> rc=0  (mong doi 12)
+```
+
+`Select-Object -First N` cắt ống bằng `StopUpstreamCommandsException`, và khi đó PowerShell
+**không đặt `$LASTEXITCODE`** cho lệnh native bị cắt: lần đầu nó còn `$null` (in ra rỗng),
+lần sau nó **giữ nguyên giá trị của lệnh TRƯỚC** (0) — nên ca "thiếu công cụ" báo 0 trong
+khi `doctor` thật sự trả 12. Tức trên Windows, `$LASTEXITCODE` sau một ống bị cắt **không
+phải mã của tiến trình con**: khẳng định `rc=0` qua kênh đó là cổng XANH GIẢ, khẳng định
+`rc=12` là cổng ĐỎ OAN. Cả hai đều sai, và cùng một dòng lệnh cho cả hai.
+
+Nay probe chỉ **chốt** qua ống chạy trọn vẹn (`Out-Null`), còn kiểu cắt giữa chừng thì in ra
+làm hồ sơ — kèm mốc nhận biết `$LASTEXITCODE = 77` đặt trước để chứng minh PowerShell không
+đặt lại nó, thay vì bắt người đọc tin lời. Đường cắt-giữa-chừng vẫn được đo THẬT, nhưng bởi
+`t74`: nó spawn con từ Python, đọc 1 byte rồi đóng ống, và đọc `returncode` **trực tiếp** từ
+tiến trình con — kênh không đi qua PowerShell nên không dính bệnh này. `t74` đã xanh trên
+`windows-latest`, nên bảo đảm "đứt ống không nuốt mã thật" vẫn có bằng chứng trên nền đó.
+
 # ★ dev-side — vòng 5: vá 4 lỗi do lượt CI Windows ĐẦU TIÊN lộ ra (2026-08-13)
 
 Không bump `VERSION`; chỉ `.claude/` + CHANGELOG. `RELEASE_MANIFEST.json` giữ 179 tệp.

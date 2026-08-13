@@ -98,29 +98,46 @@ jobs:
           # mu (khong co Windows de thu) da khoa toan bo phan do Windows lai. Nay dung
           # scriptblock: dang duy nhat vua tham so hoa duoc kieu cat, vua khong dinh
           # Invoke-Expression.
+          # DO DUOC O LUOT DAU TIEN BUOC NAY THUC SU CHAY (13-08), va ket qua bat ngo:
+          #     du cong cu  | Select-Object -First 1 -> rc=   (RONG)
+          #     du cong cu  | Out-Null               -> rc=0
+          #     thieu cong cu | Select -First 1      -> rc=0  (mong doi 12)
+          # `Select-Object -First N` CAT ONG bang StopUpstreamCommandsException. Khi do
+          # PowerShell KHONG dat $LASTEXITCODE cho lenh native bi cat: lan dau no con
+          # $null (in ra rong), lan sau no GIU NGUYEN gia tri cua lenh TRUOC do (0) - nen
+          # ca "thieu cong cu" bao 0 trong khi doctor that su tra 12.
+          # => Tren Windows, $LASTEXITCODE SAU mot ong bi cat KHONG PHAI ma cua tien trinh
+          #    con. Khang dinh gi qua kenh do la khang dinh thu PowerShell khong cung cap:
+          #    cho rc=0 thi la cong XANH GIA, cho rc=12 thi la cong DO OAN. Ca hai deu sai.
+          # Nen o day CHI khang dinh qua ong chay TRON VEN (`Out-Null`), con kieu cat giua
+          # chung thi IN RA de lam ho so chu KHONG lay lam chot.
+          # Duong cat-giua-chung van duoc do THAT, nhung boi `t74` trong bo phan chung: no
+          # spawn con tu Python, doc dung 1 byte roi dong ong, va doc returncode TRUC TIEP
+          # tu tien trinh con - kenh do khong di qua PowerShell nen khong dinh be nay.
+          # `t74` DA XANH tren windows-latest, tuc bao dam "dut ong khong nuot ma that" van
+          # co bang chung tren nen nay; buoc probe nay khong phai cho do.
           $loi = 0
-          $kieu_cat = @(
-            @{ ten = 'Select-Object -First 1'
-               ham = { python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null } },
-            @{ ten = 'Out-Null'
-               ham = { python .claude/dev/launcher.py doctor | Out-Null } }
-          )
-          foreach ($cat in $kieu_cat) {
-            & $cat.ham
-            $ma = $LASTEXITCODE
-            Write-Host ("du cong cu  | {0,-22} -> rc={1} (mong doi 0)" -f $cat.ten, $ma)
-            if ($ma -ne 0) { $loi++ }
-          }
+          python .claude/dev/launcher.py doctor | Out-Null
+          $ma = $LASTEXITCODE
+          Write-Host "CHOT | du cong cu   | Out-Null -> rc=$ma (mong doi 0)"
+          if ($ma -ne 0) { $loi++ }
           # Thieu cong cu: thu hep PATH con moi thu muc python => mat git
           $duong = Split-Path (Get-Command python).Source
           $cu = $env:PATH
           try {
             $env:PATH = $duong
-            python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null
+            python .claude/dev/launcher.py doctor | Out-Null
             $ma = $LASTEXITCODE
-            Write-Host "thieu cong cu | Select -First 1      -> rc=$ma (mong doi 12)"
+            Write-Host "CHOT | thieu cong cu | Out-Null -> rc=$ma (mong doi 12)"
             if ($ma -ne 12) { $loi++ }
           } finally { $env:PATH = $cu }
+          # HO SO (khong phai chot): chung minh ngu nghia PowerShell bang MOC NHAN BIET, de
+          # lan sau khong ai tuong day la loi cua launcher roi di "va" nham cho.
+          # Dat $LASTEXITCODE = 77 truoc. Neu sau khi chay lenh native BI CAT ONG ma no VAN
+          # bang 77, thi da chung minh: PowerShell khong he dat lai no.
+          $global:LASTEXITCODE = 77
+          python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null
+          Write-Host "ho so| du cong cu | Select -First 1 -> LASTEXITCODE=$LASTEXITCODE (dat truoc = 77; van 77 nghia la PowerShell KHONG dat lai)"
           if ($loi) { Write-Host "CO $loi truong hop SAI"; exit 1 }
 
       - name: 'Probe: console cp1258 + duong dan co dau tieng Viet'

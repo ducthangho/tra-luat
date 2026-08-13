@@ -1,3 +1,377 @@
+# ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
+
+Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ
+không phải "đã chứng minh rỗng". Nhưng lượt `launcher (windows-latest)` ngay sau đó đỏ:
+
+```
+HONG t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so: mong doi 0, duoc 125
+81/82 ca (qua 69, bo qua 12, hong 1)
+```
+
+Vì phép đo đứng sau điều kiện đó là `_thanh_vien_nhom` — **nhóm tiến trình, khái niệm
+POSIX** — nên trên Windows nó luôn trả `None`. Trước bản vá, `not None` là True nên
+Windows đi qua nhánh "đã không còn chạy" **nhờ chính con bọ**. Vá xong thì Windows không
+còn đường nào chạm nhánh đó, rơi xuống `taskkill` trên một PID **không còn tồn tại**,
+rc≠0 ⇒ 125 "không giết được". Một bản vá đúng làm lộ ra rằng nền kia chưa bao giờ có
+phép đo của mình.
+
+- **Windows được cấp phép đo riêng.** `hien is None` đã chứng minh *mẹ* đã tắt; hậu duệ
+  thì hỏi ảnh chụp: `{}` nghĩa là không tiến trình sống nào nhận `pid` làm tổ tiên.
+  Vẫn giữ nguyên doctrine — `None` vẫn là không đo được, vẫn không kết luận (`t83` khoá
+  cả hai vế; `t78` giữ nguyên).
+- **Fail-closed của ảnh chụp phải CÓ PHẠM VI.** Bản vòng 7 trả `None` ngay khi **bất kỳ**
+  tiến trình nào trên máy thiếu `CreationDate`, kể cả tiến trình hệ thống chẳng liên quan.
+  Như thế ảnh có dùng được hay không lại tuỳ trạng thái máy ở chỗ khác — mà từ mục trên,
+  ảnh rỗng chính là đường quyết định 0-hay-125. Nay dòng mù được **giữ lại** kèm dấu
+  `KHONG_DOC_DUOC_KHOA` (truy vấn CIM trả thêm `ParentProcessId` cho cả dòng lỗi, nên nối
+  được cây), và chỉ trả `None` nếu dấu đó **rơi vào cây**. `t81` mạnh lên hai vế ngược
+  nhau: mù TRONG cây ⇒ `None`; mù NGOÀI cây ⇒ ảnh vẫn dùng được.
+
+Hai đột biến của vòng 7 mất neo vì đúng những dòng đó bị viết lại. **Chuyển neo, không
+nới điều kiện** (nếp đã ghi): `none_nhom_thanh_cay_rong` neo sang nhánh Windows và nhận
+thêm `t83` làm ca đích; `chup_cay_bo_qua_dong_thieu` neo sang chỗ đánh dấu — lớp KHÁC với
+`chup_cay_khong_fail_closed_trong_cay` (một bên bỏ DẤU, bên kia bỏ phép KIỂM).
+
+Đo: **83/83 ca** (qua 82, bỏ qua 1, hỏng 0) · **đột biến 42/42** (1 không đo được) ·
+ruff F sạch · 17/17 bước gate `rc=0` · `tl selftest 1697/1697`.
+
+Ghi rõ ranh giới bằng chứng: mục thứ nhất có **số đo thật trên `windows-latest`** (t69 đỏ
+125). Mục thứ hai là **suy luận**, chưa quan sát được `_chup_cay` trả `None` trên runner —
+nó trở nên đáng sửa vì mục thứ nhất khiến ảnh chụp thành đường quyết định.
+
+**Lượt sau đó: `t69` xanh, `t78` đỏ — và lần này là FIXTURE.** `t78` khẳng định "không đo
+được ≠ cây rỗng" nhưng chỉ bịt `_thanh_vien_nhom`, để `_chup_cay` **thật** chạy. Trên Linux
+`_chup_cay` gọi `powershell` (không có) nên ném rồi trả `None` — ca xanh nhờ **máy dev
+thiếu công cụ**, không nhờ điều nó khẳng định. Trên `windows-latest` nó chạy thật và trả
+`{}` cho một PID không tồn tại: bằng chứng ĐO ĐƯỢC và hợp lệ, đúng thứ `t83` khẳng định ⇒
+`t78` đỏ ở đó. Bịt nốt phép đo Windows trong fixture. **Sửa fixture, không nới chốt** —
+muốn thử "không đo được" thì phải dựng cho bằng được trạng thái đó ở mọi nền. Đã soi cả
+bốn ca stub `platform.system() == "Windows"`; chỉ `t78` có hình dạng này.
+
+**Lượt kế: cả bộ test, bộ đột biến và BA probe đầu đều qua — đỏ ở probe cuối, lại là
+fixture.** `taskkill rc=128 : ERROR: The process "6156" not found`. Nguyên nhân:
+`Start-Process -ArgumentList 'a','b'` **nối các phần tử bằng dấu cách mà KHÔNG đặt dấu
+nháy**, nên `-ArgumentList '-c','import time;time.sleep(60)'` tới python thành `-c`
+`import` `time;…` ⇒ chạy chương trình tên `import` ⇒ `SyntaxError` ⇒ chết ngay, và một
+giây sau `taskkill` không tìm thấy PID. Suốt thời gian probe này chỉ **in** kết quả mà
+không khẳng định gì thì lỗi đó **vô hình**; vòng 7 siết nó thành chốt và nó lộ ra ngay
+lượt đầu — đúng lý do phải siết. Nay truyền một chuỗi có dấu nháy lồng, và **kiểm tiền đề**
+(tiến trình mồi còn sống) trước khi đo, để tách "fixture hỏng" khỏi "kết luận về taskkill".
+
+# ★ dev-side — audit launcher vòng 7: fail-closed cho Job Object và phép đo Windows (2026-08-13)
+
+Không bump `VERSION`. Vòng rà soát thứ bảy vá năm lỗ hổng đo/giết cây Windows:
+
+- kiểm kết quả `SetInformationJobObject`, đóng handle và trả thất bại nếu không đặt được giới hạn;
+- cấp phát lại danh sách PID trong Job Object khi sức chứa ban đầu thiếu;
+- không còn đọc trạng thái “không đo được nhóm” như bằng chứng “nhóm rỗng”;
+- ảnh cây CIM fail-closed nếu một dòng thiếu `CreationDate` hoặc sai khuôn;
+- cổng đột biến yêu cầu ít nhất 70% bảng đo được trên mỗi nền, thay vì chỉ yêu cầu một ca.
+
+Thêm năm phản chứng `t78`–`t82` và năm đột biến tương ứng. Workflow Windows cũng
+không còn xanh khi `t62` tự bỏ qua hoặc probe `taskkill /T` trả mã khác 0/còn tiến trình.
+Báo cáo và số đo đầy đủ ở `docs/AUDIT_LAUNCHER_VONG_7.md`.
+
+**Kèm một vết nữa của cùng họ bệnh, lần thứ tư trong đợt: minh chứng của một bẫy lại trở
+thành chính bẫy đó.** Probe "đứt ống" đặt `$LASTEXITCODE = 77` làm mốc để CHỨNG MINH
+PowerShell không đặt lại nó sau ống bị cắt. Lượt chạy trả về đúng như dự đoán —
+`LASTEXITCODE=77`, và cả ba phép đo đều ĐÚNG (`rc=0` khi đủ công cụ, `rc=12` khi thiếu) —
+**mà bước vẫn ĐỎ**. Vì dòng cuối của bước là một lệnh native trong ống bị cắt, nên runner
+gọi `pwsh -command ". 'script'"` rồi lấy mã thoát từ trạng thái còn sót lại đó: cái mốc
+diễn giải thành phán quyết. Nay bước `exit 0` tường minh — phán quyết là `$loi`, không
+phải tàn dư của lệnh cuối.
+
+# ★ dev-side — vòng 6: ba cổng ĐỎ của kho mà CI chỉ kịp báo MỘT (2026-08-13)
+
+Không bump `VERSION`. `RELEASE_MANIFEST.json` giữ **179 tệp** — không tệp runtime nào
+được thêm; chỉ hai bản ghi đổi sha256 (`CHANGELOG.md`, `scripts/tl_selftest.py`).
+
+CI báo đúng một dòng `tl selftest 1696/1697` rồi `exit 1`, nên **mọi bước sau đó không
+hề chạy**. Chạy trọn bộ gác tại chỗ mới thấy **ba** cổng đỏ chứ không phải một. Đây
+đúng lớp bệnh "cổng dừng ở lỗi ĐẦU TIÊN che mất phần còn lại" — số của CI là sàn, không
+phải tổng.
+
+- **`r291_docs_ngoai_goi` — ratchet đếm `docs/*.md`, 52 → 55.** Ba tài liệu dev-side của
+  sáu vòng audit (`GOI_AGENT_DA_NEN.md`, `AUDIT_LAUNCHER_VONG_3.md`,
+  `AUDIT_LAUNCHER_VONG_4_POSIX.md`) làm ratchet đỏ ĐÚNG LÚC phải đỏ. Đã KÊ KHAI SLOT
+  theo nếp có sẵn ngay tại ca: gói giữ 179, cây thật 179 + 55 = 234, trần Package 200
+  không nhúc nhích. Đây là **ca duy nhất CI kịp báo**.
+- **`doc-claims-check --strict` — 5 cờ L7 `PYLOC_FILE_MISSING`.** Báo cáo vòng 3 trỏ vào
+  mã bằng dạng hai chấm `launcher.py:NNN`, mà L7 tra tên trần trong `pyindex` — danh sách **TRẮNG**
+  `scripts`, `scripts/tl_core`, `scripts/_fallback`, `.` — nên `.claude/dev/` không thể giải
+  được. Thêm đường dẫn cũng KHÔNG cứu: regex neo `\b[A-Za-z0-9_]` **nuốt mất dấu chấm
+  đầu**, `.claude/dev/…` bị đọc thành `claude/dev/…` ⇒ vẫn thiếu tệp. Đo cả ba dạng rồi
+  mới chọn: chuyển sang `` `launcher.py` dòng 293-299 ``. Ghi chú giải thích bẫy **tự đạp
+  vào bẫy** ở bản đầu (nêu ví dụ bằng số dòng THẬT ⇒ L7 bắt đúng ba lần): ví dụ trong tài
+  liệu về một cổng cũng là dữ liệu cổng đó quét, nên viết `NNN` thay cho chữ số. Rồi
+  **chính mục CHANGELOG này** đạp vào lần thứ ba khi thuật lại bẫy đó — cùng một câu, cùng
+  một cổng. Ba lần trong một đợt: bất cứ chỗ nào `doc-claims-check` quét (kể cả sổ) thì ví
+  dụ phải viết `NNN`.
+- **`release-verify --strict` — manifest ấm ở HAI bản ghi.** `CHANGELOG.md` lệch từ
+  đợt trước (vòng 5 sửa sổ mà không tái sinh manifest), `scripts/tl_selftest.py` lệch vì
+  đợt này. Đã tái sinh bằng `release-manifest --out RELEASE_MANIFEST.json`; đã kiểm
+  `file_count` vẫn 179 và `extra_files`/`missing` vẫn rỗng TRƯỚC khi thay tệp — cạm bẫy
+  "tái sinh manifest nuốt cả bản sao kho" (r238) chỉ đúng khi cây có tệp thừa, không phải
+  ca này.
+
+**Bài học để lại — chẩn đoán SAI đã được công bố trước khi đo.** Phiên trước đọc
+`1696/1697` rồi nói (trong bình luận PR lẫn tệp bàn giao) rằng đó "nghi vấn hàng đầu là
+golden/kiểm kê tệp trôi". Chạy thật thì `golden-test` và `determinism-audit` đều XANH; ca đỏ
+là ratchet `docs/*.md`, còn hai cổng đỏ khác thì chẩn đoán đó không hề nhắc tới. `CLAUDE.md`
+đã viết sẵn "ĐừNG ĐOÁN: chạy `--selftest`, đọc dòng `[X]`, lấy tên ca, rồi mới sửa" —
+lời khuyên đúng, đã không làm theo.
+
+**Môi trường: `--selftest` không chạy được trong container này cho tới khi cài `cffi`.**
+`pypdf` → `cryptography` (bản apt ở `/usr/lib/python3/dist-packages`) nổ
+`pyo3_runtime.PanicException: Python API call failed`, gốc là `ModuleNotFoundError:
+_cffi_backend`. Nó giết cả lượt ở `_c319_khong_bien_tuy_chon_thanh_chan_cung` **trước khi**
+bộ test kịp đếm, nên local không ra nổi dòng `N/N` để so với CI — trông như cùng một
+triệu chứng với CI mà thực ra là hai bệnh khác hẳn (CI báo `r319` **[OK]**). `pip install
+cffi` là xong; ghi lại để phiên sau không mất lần nữa đi truy `tl.py`.
+
+Đo sau khi vá (Linux, container này): `tl selftest` **1697/1697**, và toàn bộ 13 bước của
+job `gate` đều `rc=0`.
+
+**Và một lỗ nữa, do CI Windows lộ ra: phép đo `dut ong` KHÔNG HỀ CHẠY.** Bước probe viết
+`… doctor | Invoke-Expression $cat | Out-Null` để dùng MỘT dòng cho hai kiểu cắt ống.
+`Invoke-Expression` **không nhận đối tượng từ ống** (`-Command` không `ValueFromPipeline`)
+nên nó chết ngay vòng lặp đầu: *"The input object cannot be bound to any parameters"*. Hệ
+quả không nằm ở bước đó: probe này đứng **TRƯỚC** ba probe còn lại, nên `cp1258`, `t62` và
+`taskkill /T` **chưa từng chạy lần nào** trên Windows — job đỏ ở bước 9 và dừng. Một dòng
+pwsh viết mù (không có Windows để thử) đã khoá toàn bộ phần đo Windows lại, đúng bài học
+"script đa nền phải chạy THẬT trên nền đó". Nay dùng scriptblock: tham số hoá được kiểu
+cắt mà không dính `Invoke-Expression`.
+
+Nhân đó siết luôn probe `cp1258`: nó đọc `%ERRORLEVEL%` **sau** một câu `echo`, mà cmd cập
+nhật `ERRORLEVEL` theo lệnh gần nhất ⇒ có đường đọc phải mã của `echo`. Nay chốt vào biến
+riêng ngay sau lệnh python. Chưa quan sát được nó báo sai (bước này chưa từng chạy), nhưng
+đây đúng hạng "cổng xanh nhờ rc=0" mà `CLAUDE.md` dặn không được tin.
+
+Điểm đáng ghi: bộ phản chứng và bộ đột biến trên Windows **đều xanh** ở lượt này
+(`77/77`, `DOT BIEN: 24/24 dat`, cây làm việc `sach`) — thứ đỏ là phép đo, không phải thứ
+được đo. Bốn vòng audit không thấy nổi, vì không vòng nào chạy được pwsh.
+
+**Và ngay lượt probe chạy được lần đầu, nó đo ra một điều không ai đoán:**
+
+```
+du cong cu  | Select-Object -First 1 -> rc=   (RỖNG)
+du cong cu  | Out-Null               -> rc=0
+thieu cong cu | Select -First 1      -> rc=0  (mong doi 12)
+```
+
+`Select-Object -First N` cắt ống bằng `StopUpstreamCommandsException`, và khi đó PowerShell
+**không đặt `$LASTEXITCODE`** cho lệnh native bị cắt: lần đầu nó còn `$null` (in ra rỗng),
+lần sau nó **giữ nguyên giá trị của lệnh TRƯỚC** (0) — nên ca "thiếu công cụ" báo 0 trong
+khi `doctor` thật sự trả 12. Tức trên Windows, `$LASTEXITCODE` sau một ống bị cắt **không
+phải mã của tiến trình con**: khẳng định `rc=0` qua kênh đó là cổng XANH GIẢ, khẳng định
+`rc=12` là cổng ĐỎ OAN. Cả hai đều sai, và cùng một dòng lệnh cho cả hai.
+
+Nay probe chỉ **chốt** qua ống chạy trọn vẹn (`Out-Null`), còn kiểu cắt giữa chừng thì in ra
+làm hồ sơ — kèm mốc nhận biết `$LASTEXITCODE = 77` đặt trước để chứng minh PowerShell không
+đặt lại nó, thay vì bắt người đọc tin lời. Đường cắt-giữa-chừng vẫn được đo THẬT, nhưng bởi
+`t74`: nó spawn con từ Python, đọc 1 byte rồi đóng ống, và đọc `returncode` **trực tiếp** từ
+tiến trình con — kênh không đi qua PowerShell nên không dính bệnh này. `t74` đã xanh trên
+`windows-latest`, nên bảo đảm "đứt ống không nuốt mã thật" vẫn có bằng chứng trên nền đó.
+
+# ★ dev-side — vòng 5: vá 4 lỗi do lượt CI Windows ĐẦU TIÊN lộ ra (2026-08-13)
+
+Không bump `VERSION`; chỉ `.claude/` + CHANGELOG. `RELEASE_MANIFEST.json` giữ 179 tệp.
+
+Lượt `launcher (Windows that)` chạy được lần đầu sau khi Actions hồi phục. Bốn vòng
+audit trước đều đo trên Linux; runner `windows-latest` lộ ngay **3 ca đỏ trên Windows**
+và **1 đột biến sống sót trên Linux CI** mà máy dev không thấy.
+
+- **`t56` — nhúng đường dẫn vào MÃ NGUỒN Python.** Trên Windows đường dẫn bản chụp có
+  dạng `C:\Users\…`, mà `\U` là escape unicode ⇒ `SyntaxError` ⇒ con chết trước khi
+  làm gì, báo "con khong chay". Nay đường dẫn đi qua **argv**, không nhúng vào nguồn.
+  Lỗi fixture, không phải lỗi launcher.
+- **`t61` — `chmod(0o500)` trên THƯ MỤC là no-op ở Windows** (run-root vẫn ghi được ⇒
+  rc=0 thay vì 2), còn ở POSIX thì root ghi xuyên quyền nên ca phải tự bỏ qua. Nay đặt
+  một **TỆP** làm thành phần đường dẫn ⇒ `mkdir` buộc phải hỏng ở mọi nền, mọi user.
+  Ca từ "bỏ qua khi root + đỏ trên Windows" thành **chạy được khắp nơi**.
+- **`t69` — con `-c pass` thoát trước khi `_khoa_danh_tinh` kịp chạy.** `Get-Process`
+  KHÔNG thấy tiến trình đã thoát (POSIX thì `/proc/<pid>` còn ở dạng zombie nên đọc
+  được) ⇒ sổ ghi `khoa_danh_tinh=null` ⇒ `stop` từ chối bằng mã 10. Fixture nay dùng
+  con sống đủ lâu và **kiểm tiền đề** là khoá đã lấy được. Sổ thêm `khoa_thieu_ly_do`
+  để lần sau không phải đoán vì sao thiếu khoá.
+- **`t74` — ca PHI-TẤT-ĐỊNH do chính vòng 4 viết.** Nó cho người đọc đóng ống ngay rồi
+  trông chờ ống vỡ; nhưng stdout Python nối ống là block-buffered 8KB và ống hệ điều
+  hành đệm thêm 64KB, nên với đầu ra NHỎ không lần ghi nào hỏng và đột biến sống sót.
+  Xanh ở máy dev, **ĐỎ trên CI**. Nay dựng sổ vượt 8KB, **đọc đúng 1 byte** rồi đóng ⇒
+  lần ghi kế tiếp buộc phải vỡ ống. Hết phụ thuộc thời điểm.
+
+**Một bản vá bị HOÀN NGUYÊN giữa chừng, ghi lại vì nó đáng nhớ.** Bản đầu chữa `t69`
+bằng cách cho `lenh_stop` trả `MA_OK` khi thiếu khoá mà lượt chạy đã kết thúc. Nó đụng
+thẳng `t32_stop_tu_choi_khi_khong_co_khoa` — cùng một kịch bản, một bên đòi 10, một bên
+đòi 0. `t32` mới là bên giữ doctrine: trên Linux `stop` trả 0 vì `_giet_cay` **ĐO được**
+tiến trình đã biến mất, không phải vì suy ra từ nhãn trong sổ; thiếu khoá nghĩa là không
+đo được gì cả. Sửa fixture chứ không nới chốt.
+
+CÒN TREO — `_khoa_danh_tinh` mất khoá với con ngắn ngủi trên Windows là lỗi THẬT, mới
+chỉ né trong fixture. Bản vá gốc là lấy danh tính từ HANDLE mà `Popen` đang giữ
+(`GetProcessTimes`), vì handle sống qua lúc tiến trình thoát. Chưa làm vì `.NET
+StartTime.Ticks` (epoch năm 1, giờ ĐỊA PHƯƠNG) và `FILETIME` (epoch 1601, UTC) lệch
+epoch lẫn múi giờ — chuyển đổi sai thì khoá không bao giờ khớp và chốt hoá ra luôn từ
+chối. Cần đo trên Windows thật trước khi đụng.
+
+**Lượt CI Windows thứ hai** (sau ba bản vá trên): bộ phản chứng **77/77, hỏng 0** —
+ba ca đỏ đã hết. Còn 4 đột biến báo SAI, hoá ra là ba chuyện khác nhau:
+
+- `lay_cwd_thay_vi_goc_repo` — **lỗi test thật**. `t38` so `str(con)` với stdout đã
+  `resolve()`; trên runner thư mục tạm ở dạng **8.3 short path** (`RUNNER~1`) còn đầu
+  ra ở dạng dài (`runneradmin`), nên `str(con) not in r.stdout` **luôn đúng** kể cả khi
+  launcher trả về cwd ⇒ khẳng định rỗng nghĩa, đột biến thoát. Nay resolve cả hai vế.
+- `ban_chup_de_ho_quyen` · `ban_chup_de_lai_tren_dia` — `t71` **cố ý** bỏ qua đúng hai
+  khẳng định đó trên Windows (hợp đồng bản chụp khác nhau theo nền, vòng 4), nên đột
+  biến không thể giết dù ca đích VẪN CHẠY.
+- `124_khi_chau_con_song` — `t62` **chạy được lần đầu và QUA**, nhưng chỉ đo được khi
+  đường giết THẤT BẠI; trên runner `taskkill /T` thành công nên cháu chết thật và 124
+  là trung thực.
+
+Bảng `DOT_BIEN` nay nhận **phần tử thứ tư tuỳ chọn** `('posix'|'windows', lý do)` cho
+những đột biến không thể đo trên một nền dù ca đích vẫn chạy. **Lý do là bắt buộc và
+được IN RA** — đây không phải chỗ giấu thất bại, và sàn "0 đo được ⇒ đỏ" vẫn nguyên.
+Trước đó chúng báo SAI oan, mà một cổng không bao giờ xanh được thì người ta sẽ bỏ qua
+nó — đúng cái bẫy đã ghi trong chú thích `can_do`.
+
+Cổng Linux: **77/77** (qua 76, bỏ qua **1**, hỏng 0) · đột biến **34/34**
+(1 không đo được) · ruff F sạch. Số bỏ qua giảm từ 2 xuống 1 nhờ `t61`.
+
+# ★ dev-side — audit launcher vòng 4 POSIX: không xoá prompt khi wrapper còn cháu (2026-08-13)
+
+Không bump `VERSION`; chỉ `.claude/`, `docs/` và CHANGELOG.
+
+- `run` không còn xoá `prompt.snapshot` ngay khi tiến trình wrapper thoát.
+  Trước khi xoá, launcher phải chứng minh nhóm tiến trình POSIX đã rỗng;
+  nếu cháu còn sống hoặc không đo được thì giữ bản chụp 0600 cho cháu
+  đọc. Phản chứng `t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau`
+  dựng wrapper sinh cháu đọc trễ; đột biến `xoa_prompt_khi_wrapper_vua_thoat`
+  khôi phục đúng lỗi cũ và bị t76 giết.
+- **Hệ quả đa nền của luật mới, vá kèm.** "Không đo được thì giữ" trên Windows
+  nghĩa là *luôn luôn* giữ: `_thanh_vien_nhom` trả `None` ở mọi nền không phải
+  Linux/Darwin, nên `cay_da_chet` không bao giờ đúng và bản chụp sẽ nằm lại vô
+  thời hạn — đúng thứ mà việc bỏ argv khỏi sổ đã tránh. Hai việc: `_cap_id` quét
+  dọn `prompt.snapshot` quá hạn (gộp vào chỗ đã dọn `.tmp` mồ côi), và `t71` nói
+  đúng hợp đồng theo nền thay vì đòi một bảo đảm Windows không thể giữ. Khoá bằng
+  `t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay` + đột biến
+  `khong_quet_ban_chup_qua_han`.
+- Báo cáo và số đo Linux: `docs/AUDIT_LAUNCHER_VONG_4_POSIX.md`.
+  Cổng cuối: **77/77** (qua 75, bỏ qua 2, hỏng 0), **34/34** đột biến
+  (1 không đo được trên Linux), ruff F sạch.
+
+# ★ dev-side — vá nốt 12 mục NÊN SỬA của audit vòng 3 (2026-08-12)
+
+Không bump `VERSION`: chỉ `.claude/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`
+giữ nguyên `file_count: 179`.
+
+Bộ phản chứng **75/75 (qua 73, bỏ qua 2, hỏng 0)** · đột biến **32/32 đạt** ·
+`ruff --select F` sạch.
+
+- **Chốt kho hết chặn oan đường dẫn sâu.** Bó ở ĐÚNG 3 đoạn nên
+  `gitlab.com/nhom/nhom-con/kho` (GitLab subgroup, GHE lồng nhau) bị TỪ CHỐI dù đúng
+  từng ký tự, kèm thông điệp tự mâu thuẫn `mong doi X, thuc te [X]`. Nay ≥3 đoạn =
+  đã nêu host = bằng nhau tuyệt đối; tính an ninh không đổi, chỉ hết chặn oan.
+- **`stop` thôi vu oan và thôi đổi nhãn.** Một lượt vừa chạy xong bình thường bị báo
+  `khoa danh tinh KHAC (PID da bi tai dung)` + rc=10 — hô đúng mối nguy mà khoá danh
+  tính sinh ra để bắt, trong ca vô hại và phổ biến nhất (7/12 lần trong phép đua) —
+  rồi ghi đè `trang_thai="da_dung"` lên lượt đã "xong". Nay tách "tiến trình đã không
+  còn chạy" khỏi "PID bị tái dùng", và không đổi nhãn của lượt đã kết thúc. `KetGiet`
+  thêm `tu_choi` để **10 (TỪ CHỐI giết)** khác **125 (đã giết mà chưa trọn vẹn)**.
+- **`{PROMPT_FILE}` mồ côi bị chặn.** Có chỗ thay mà không truyền `--prompt-file` thì
+  con nhận đúng chuỗi `{PROMPT_FILE}` làm đường dẫn, rc=0, sổ ghi "xong".
+- **Bản chụp prompt kín và không ở lại.** `0600` ngay từ lúc tạo (`write_bytes` để lại
+  0644 theo umask ⇒ mọi user đọc được), thư mục `0700`, xoá khi con thoát trừ khi
+  `--giu-ban-chup`. Bỏ argv khỏi sổ vì có thể chứa bí mật rồi ghi toàn văn prompt ra
+  đĩa world-readable vĩnh viễn là mở rộng bề mặt lộ, không phải thu hẹp.
+- **Ctrl-C không còn ghi thành "xong".** `trang_thai` mới `bi_ngat`; đây là trường
+  `status` liệt kê nên ghi "xong" cho lượt bị cắt giữa chừng là nói dối đúng chỗ
+  người/máy đang đọc. Cùng lớp lỗi với t50.
+- **Đứt ống thôi nuốt mã thật.** `doctor | head` trên môi trường LÀNH từng ra 141
+  (20/20 lượt) nên phía gọi kiểm `rc != 0` báo "THIẾU CÔNG CỤ" oan; lúc THIẾU thì 141
+  lại nuốt mất mã 12. Nay in qua `_in_an_toan`, kết luận không phụ thuộc việc người
+  đọc có chịu đọc hết hay không: đo lại 0/0/0 khi đủ và 12/12/12 khi thiếu, ở cả ba
+  kiểu cắt ống. `main` cũng flush trước khi trả, tránh mã 120 do lỗi flush lúc dọn dẹp.
+- **Timeout cho MỌI subprocess trên đường giết** (`git` 120s, `ps`/`powershell` 15–30s,
+  `taskkill` 30s). Trước chỉ `_phien_ban` có: một `powershell` treo là treo luôn đường
+  cưỡng chế hạn chót — đúng thứ `--deadline-utc` tồn tại để bảo đảm.
+- **`_con_song` trên Windows so KHOÁ**, không chỉ hỏi "có tiến trình nào mang PID này".
+  Giữa `taskkill` và lúc kiểm có ~2 lần gọi `powershell`, thừa chỗ để PID bị tái dùng
+  ⇒ đọc thành "chưa giết được" và trả **125 giả**.
+- **`doctor` đo `bash` và `npm`** — hai thứ môi trường thật sự phụ thuộc (`settings.json`
+  gọi hook qua bash; `session-start.sh` rẽ nhánh trên `npm`) mà bảng cũ không hỏi.
+- **Cổng đột biến có SÀN.** Bảng mà mọi đột biến đều không đo được in `0/0 dat` rồi
+  thoát 0 — thoả hình thức "hai số bằng nhau" mà chứng minh con số không.
+- **Dấu mốc pip thành bằng chứng DƯƠNG.** Mốc cũ nói "từng cài sha này ở TMPDIR này",
+  nên A→B→A bỏ qua sai (môi trường đang là B) và hai dự án cùng `requirements.txt`
+  dùng chung mốc. Nay mốc neo theo cả sha lẫn `sys.prefix`, nằm trong `.git/` của dự
+  án, và trước khi tin mốc còn hỏi `pip install --dry-run`.
+- **Dọn tệp tạm mồ côi** quét từ `run_root` (rác nằm ở thư mục của lượt ĐÃ CHẾT — quét
+  thư mục đang ghi thì chẳng dọn được gì).
+- **Hook ghim `"shell": "bash"` + `${CLAUDE_PROJECT_DIR}` dạng ngoặc.** Máy Windows
+  không có Git Bash thì chuỗi lệnh được giao cho PowerShell, ở đó `bash` không tồn tại
+  VÀ `$CLAUDE_PROJECT_DIR` là biến PowerShell chưa định nghĩa nên nở ra rỗng — hai lỗi
+  độc lập, cùng hướng. Không dùng exec form (`args`) dù tài liệu khuyến nghị: client cũ
+  bỏ qua `args` sẽ chạy `bash` trần, mà `PreToolUse` hỏng thì mọi lệnh Bash chết trước
+  khi chạy — đúng bẫy tự khoá đã ghi trong CLAUDE.md.
+- Tài liệu: bảng mã thoát bổ sung 130/141/1 và **cảnh báo mã của con đè lên cả bảng**
+  với `run` (phía gọi tự động phải đọc `trang_thai`); `{PROMPT_FILE}` lần đầu được ghi
+  vào tài liệu và ví dụ chủ đạo chuyển sang dùng nó; ghi rõ cách đăng ký hook kèm trích
+  dẫn tài liệu chính thức.
+
+# ★ dev-side — vá 3 lỗi CHẶN của audit vòng 3 (2026-08-12)
+
+Không bump `VERSION`: chỉ `.claude/dev/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`
+giữ nguyên `file_count: 179`, gói phát hành không đổi.
+
+Vòng audit thứ ba (`docs/AUDIT_LAUNCHER_VONG_3.md`) tìm 3 lỗi CHẶN — **cả ba nằm ở POSIX**,
+nền launcher chạy hằng ngày, chứ không phải ở Windows như dự đoán:
+
+- **`ca_cay=True` là khẳng định KHÔNG có bằng chứng.** Vòng chờ thoát ngay khi tiến trình
+  MẸ chết, nên `killpg(SIGKILL)` không bao giờ được gửi: cháu chỉ cần `SIG_IGN` cho SIGTERM
+  (hoặc `setsid()` rời nhóm) là sống tiếp trong khi hạn chót trả 124 "đã giết được" — đúng
+  "chốt nói dối" mà vòng 2 đã vá cho Windows rồi bỏ quên ở POSIX. Nay đo bằng HAI lớp độc
+  lập, mỗi lớp phủ một ca lớp kia không thấy: `_chup_cay` chụp cây con cháu + khoá danh
+  tính TRƯỚC khi phát tín hiệu (bắt kẻ đã rời nhóm — sau khi mẹ chết là không tìm lại được),
+  `_thanh_vien_nhom` đếm thành viên nhóm còn sống, zombie tính là đã chết (bắt kẻ sinh SAU
+  lúc chụp). `_giet_rieng` giết từng pid có kiểm khoá vì `killpg` không với tới kẻ đã
+  `setsid()`. Không đo được ⇒ `ca_cay=False` ⇒ 125, không đoán bừa thành 124.
+- **`_cap_id` không giành được `short_id`.** Bản vá vòng 2 đổi sang `mkdir` độc quyền và
+  ghi rằng khe hở đã đóng, nhưng thư mục tên `{sid}-{rid}` nên nó chỉ chặn trùng `run_id`
+  ĐẦY ĐỦ (uuid4 — chưa ai lo); trùng `short_id`, thứ làm `status`/`stop` trỏ nhầm lượt, vẫn
+  lọt vì hai bên ra hai TÊN khác nhau. Sửa ở tầng: bỏ `rid` khỏi tên, thư mục lượt chạy tên
+  ĐÚNG BẰNG `short_id` nên `mkdir` chính là hành vi giành, nguyên tử ở tầng hệ tệp và không
+  thêm tệp mốc nào vào `run-root`. `run_id` đầy đủ nằm trong `run.json`, `_tim_luot` tra được.
+- **`--run-root` tương đối làm neo prompt fail-OPEN.** Con chạy với `cwd=gốc repo` còn
+  launcher có thể đứng ở thư mục con, nên đường dẫn bản chụp thay vào `{PROMPT_FILE}` trỏ
+  trượt: con không đọc được gì, mà sổ vẫn ghi `prompt_kin_hoan_toan=true` và lượt chạy trả
+  `rc=0`/`xong`. Sửa bằng `.resolve()` ở cả `run`/`status`/`stop`.
+
+Khoá bằng 5 ca mới (t63…t67) + 5 đột biến. Bộ phản chứng **67/67 (qua 65, bỏ qua 2, hỏng 0)**,
+đột biến **22/22 đạt** (1 không đo được: t62 là fixture Windows). Lý do bỏ qua t62 trên POSIX
+được sửa vì nó SAI SỰ THẬT — trạng thái "mẹ chết cháu sống" dựng được trên Linux, và t63/t66/t67
+là ba biến thể của nó.
+
+# ★ dev-side — launcher đa nền + môi trường agent (2026-08-12)
+
+Không bump `VERSION`: toàn bộ thay đổi nằm trong `.claude/` và `docs/` — hai thư mục đã
+có trong `_RELEASE_EXCLUDE_DIRS`, nên gói phát hành, `RELEASE_MANIFEST.json` và trần 200
+tệp đều không đổi. Ghi lại ở đây vì quy trình đòi mọi commit phải có vết trong CHANGELOG,
+kể cả khi runtime triển khai đứng yên.
+
+- `.claude/dev/launcher.py` — các chốt "gọi agent tất định" chuyển từ hai script PowerShell
+  (chỉ chạy được Windows) sang Python 3: neo HEAD/ref/worktree sạch, neo prompt theo sha256,
+  hạn chót + giết cả cây tiến trình, sổ lượt chạy, nhận diện KHO thay cho neo đường dẫn,
+  và `doctor` kiểm công cụ. Mỗi chốt một mã thoát riêng.
+- KHÔNG viết script spawn agent: launcher chỉ bọc chốt quanh một lệnh bất kỳ; việc gọi
+  agent do CLI chính thức `claude` / `codex` đảm nhiệm.
+- `.claude/hooks/session-start.sh` + đăng ký SessionStart — container Claude Code web thiếu
+  codex/gh/pwsh; hook cài phần cần rồi đòi bằng chứng dương qua `doctor`.
+- Sửa bẫy tự khoá: `PreToolUse` từng dùng đường dẫn TƯƠNG ĐỐI nên khi cwd trôi vào thư mục
+  con thì mọi lệnh Bash chết trước khi chạy.
+- Hai vòng audit của Codex trên Windows thật tìm ra 6 + 7 lỗi; tất cả đã vá, mỗi lỗi khoá
+  bằng một ca phản chứng. `.claude/dev/launcher_test.py`: 62 ca + 17 đột biến.
+- Bài học đã ghi vào `CLAUDE.md`; hướng dẫn ở `docs/GOI_AGENT_DA_NEN.md`.
+
 # ★ v1.36.67 — r335: kích hoạt topology test-fragment F1 (2026-08-06)
 
 Mission F1 chuyển selftest sang mô hình fragment dành cho nhánh phát triển nhưng vẫn giữ gói phát hành

@@ -1,0 +1,216 @@
+name: launcher (Windows that)
+
+# VÌ SAO CÓ TỆP NÀY, tách khỏi ci.yml
+# Bốn vòng audit của launcher.py đều đo trên Linux. Mọi bảo đảm Windows —
+# taskkill/T, _giet_windows, _khoa_danh_tinh qua powershell, console cp1258 — chưa
+# ai chạy lần nào; t62 tồn tại đúng để đo điều đó và CHƯA TỪNG chạy. Runner
+# `windows-latest` là Windows thật, nên đây là cách đo mà không cần máy Windows.
+#
+# KHÔNG gộp vào ci.yml: job ở đó đặt PYTHONUTF8=1 và PYTHONIOENCODING=utf-8, mà đó
+# CHÍNH LÀ thứ che lỗi cp1258 — bài học "cùng lệnh đó với PYTHONUTF8=1 thì rc=0" đã
+# ghi trong docstring `_cung_hoa_dau_ra`. Ở đây cố ý KHÔNG đặt hai biến đó, để chốt
+# tự đứng bằng chân nó.
+
+# Windows ton GAP DOI phut va kho dang cham tran Free (xem r245 trong ci.yml),
+# nen KHONG bat theo moi push nhanh: goi tay khi can, tu dong khi vao master,
+# hoac gan nhan `windows` cho PR dung toi duong phu thuoc nen.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.claude/dev/**'
+      - '.github/workflows/launcher-windows.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - '.claude/dev/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  launcher:
+    strategy:
+      fail-fast: false        # phải thấy CẢ HAI nền để lập bảng parity
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    # PR chi chay khi duoc gan nhan `windows`; push master va goi tay thi luon chay.
+    if: >-
+      github.event_name != 'pull_request'
+      || contains(github.event.pull_request.labels.*.name, 'windows')
+    timeout-minutes: 40
+    steps:
+      - name: Checkout LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Su that ve nen chay
+        shell: pwsh
+        run: |
+          python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+          python -c "import sys;print('stdout encoding:',sys.stdout.encoding)"
+          Write-Host "PYTHONUTF8      = '$env:PYTHONUTF8'      (rong = tot, chot phai tu dung)"
+          Write-Host "PYTHONIOENCODING= '$env:PYTHONIOENCODING' (rong = tot)"
+          foreach ($t in 'python','python3','py','git','powershell','taskkill') {
+            $c = Get-Command $t -ErrorAction SilentlyContinue
+            Write-Host ("  {0,-11} {1}" -f $t, $(if ($c) { $c.Source } else { '(khong co)' }))
+          }
+
+      - name: doctor
+        run: python .claude/dev/launcher.py doctor
+
+      - name: Bo phan chung (day du, giu nguyen danh sach bo qua)
+        run: python .claude/dev/launcher_test.py
+
+      - name: Tu dot bien
+        run: python .claude/dev/launcher_test.py --dot-bien
+
+      - name: Cay lam viec phai SACH sau khi chay test
+        shell: pwsh
+        run: |
+          $ban = git status --porcelain
+          if ($ban) { Write-Host "BAN:`n$ban"; exit 1 }
+          Write-Host 'sach'
+
+      # --- Cac phep do RIENG cho Windows, khong nam trong bo test ---------------
+
+      - name: 'Probe: dut ong KHONG duoc nuot ma that'
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.
+          # Neu Windows khac, hook doc ma nay se bao "THIEU CONG CU" oan.
+          #
+          # BAN DAU viet `... doctor | Invoke-Expression $cat | Out-Null` de dung MOT dong
+          # cho ca hai kieu cat. SAI, va sai theo kieu te nhat: `Invoke-Expression` khong
+          # nhan doi tuong tu ONG (tham so -Command khong ValueFromPipeline), nen buoc chet
+          # ngay o vong lap dau voi "The input object cannot be bound to any parameters".
+          # He qua: buoc nay DO tu lan chay dau, va vi no dung TRUOC ba probe con lai nen
+          # cp1258 / t62 / taskkill CHUA TUNG chay lan nao tren Windows. Mot dong pwsh viet
+          # mu (khong co Windows de thu) da khoa toan bo phan do Windows lai. Nay dung
+          # scriptblock: dang duy nhat vua tham so hoa duoc kieu cat, vua khong dinh
+          # Invoke-Expression.
+          # DO DUOC O LUOT DAU TIEN BUOC NAY THUC SU CHAY (13-08), va ket qua bat ngo:
+          #     du cong cu  | Select-Object -First 1 -> rc=   (RONG)
+          #     du cong cu  | Out-Null               -> rc=0
+          #     thieu cong cu | Select -First 1      -> rc=0  (mong doi 12)
+          # `Select-Object -First N` CAT ONG bang StopUpstreamCommandsException. Khi do
+          # PowerShell KHONG dat $LASTEXITCODE cho lenh native bi cat: lan dau no con
+          # $null (in ra rong), lan sau no GIU NGUYEN gia tri cua lenh TRUOC do (0) - nen
+          # ca "thieu cong cu" bao 0 trong khi doctor that su tra 12.
+          # => Tren Windows, $LASTEXITCODE SAU mot ong bi cat KHONG PHAI ma cua tien trinh
+          #    con. Khang dinh gi qua kenh do la khang dinh thu PowerShell khong cung cap:
+          #    cho rc=0 thi la cong XANH GIA, cho rc=12 thi la cong DO OAN. Ca hai deu sai.
+          # Nen o day CHI khang dinh qua ong chay TRON VEN (`Out-Null`), con kieu cat giua
+          # chung thi IN RA de lam ho so chu KHONG lay lam chot.
+          # Duong cat-giua-chung van duoc do THAT, nhung boi `t74` trong bo phan chung: no
+          # spawn con tu Python, doc dung 1 byte roi dong ong, va doc returncode TRUC TIEP
+          # tu tien trinh con - kenh do khong di qua PowerShell nen khong dinh be nay.
+          # `t74` DA XANH tren windows-latest, tuc bao dam "dut ong khong nuot ma that" van
+          # co bang chung tren nen nay; buoc probe nay khong phai cho do.
+          $loi = 0
+          python .claude/dev/launcher.py doctor | Out-Null
+          $ma = $LASTEXITCODE
+          Write-Host "CHOT | du cong cu   | Out-Null -> rc=$ma (mong doi 0)"
+          if ($ma -ne 0) { $loi++ }
+          # Thieu cong cu: thu hep PATH con moi thu muc python => mat git
+          $duong = Split-Path (Get-Command python).Source
+          $cu = $env:PATH
+          try {
+            $env:PATH = $duong
+            python .claude/dev/launcher.py doctor | Out-Null
+            $ma = $LASTEXITCODE
+            Write-Host "CHOT | thieu cong cu | Out-Null -> rc=$ma (mong doi 12)"
+            if ($ma -ne 12) { $loi++ }
+          } finally { $env:PATH = $cu }
+          # HO SO (khong phai chot): chung minh ngu nghia PowerShell bang MOC NHAN BIET, de
+          # lan sau khong ai tuong day la loi cua launcher roi di "va" nham cho.
+          # Dat $LASTEXITCODE = 77 truoc. Neu sau khi chay lenh native BI CAT ONG ma no VAN
+          # bang 77, thi da chung minh: PowerShell khong he dat lai no.
+          $global:LASTEXITCODE = 77
+          python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null
+          Write-Host "ho so| du cong cu | Select -First 1 -> LASTEXITCODE=$LASTEXITCODE (dat truoc = 77; van 77 nghia la PowerShell KHONG dat lai)"
+          if ($loi) { Write-Host "CO $loi truong hop SAI"; exit 1 }
+          # BUOC PHAI THOAT TUONG MINH. Da tra gia: buoc nay tung DO voi $loi = 0 va ca
+          # ba phep do ĐÚNG. Ly do — chinh cai bay no vua chung minh: dong cuoi cua buoc
+          # la mot lenh native trong ONG BI CAT, nen `$LASTEXITCODE` con nguyen moc 77 va
+          # `$?` la $false; runner goi `pwsh -command ". 'script'"` roi lay ma thoat tu do
+          # ⇒ moc DIEN GIAI thanh phan quyet. Phan quyet cua buoc la `$loi`, khong phai
+          # tan du cua lenh cuoi. (Lan thu tu cung mot ho benh trong dot nay: minh chung
+          # cua mot bay lai tro thanh chinh bay do.)
+          exit 0
+
+      - name: 'Probe: console cp1258 + duong dan co dau tieng Viet'
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          chcp 1258
+          mkdir "Quoc hoi ban do"
+          git init -q "Quoc hoi ban do\kho"
+          git -C "Quoc hoi ban do\kho" -c user.email=a@b -c user.name=c commit -q --allow-empty -m x
+          python .claude\dev\launcher.py check --workspace "Quoc hoi ban do\kho"
+          rem CHOT %ERRORLEVEL% NGAY, truoc khi `echo` chay: cmd cap nhat ERRORLEVEL theo
+          rem lenh gan nhat, nen doc no SAU mot cau echo la doc ma cua echo chu khong con
+          rem la ma cua python. Chot roi so bang bien rieng thi khong con cho cai nay tro.
+          set MA=%ERRORLEVEL%
+          echo rc=%MA% (mong doi 0)
+          if not "%MA%"=="0" exit /b 1
+
+      - name: 'Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)'
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          python -c @"
+          import importlib.util, sys
+          sp = importlib.util.spec_from_file_location('LT', '.claude/dev/launcher_test.py')
+          M = importlib.util.module_from_spec(sp); sys.modules['LT'] = M; sp.loader.exec_module(M)
+          fn = next(f for f in M.CA if f.__name__.startswith('t62_'))
+          try:
+              kq = fn()
+              if isinstance(kq, str):
+                  print('t62: BO QUA BAT NGO ->', kq); sys.exit(1)
+              print('t62: QUA')
+          except AssertionError as e:
+              print('t62: DO ->', e); sys.exit(1)
+          "@
+
+      - name: 'Probe: taskkill /T tren tien trinh do CHINH minh sinh'
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai
+          # Windows noi chung. Day la phep do TRUC TIEP khang dinh do.
+          # `Start-Process -ArgumentList 'a','b'` NOI cac phan tu bang DAU CACH ma
+          # KHONG dat dau nhay. Ban dau viet -ArgumentList '-c','import time;...' nen
+          # python nhan `-c import time;time.sleep(60)`, tach ra thanh `-c` `import`
+          # `time;...` => chay chuong trinh `import` => SyntaxError => CHET NGAY.
+          # Mot giay sau taskkill bao rc=128 "The process not found". Suot thoi gian
+          # buoc nay chi IN ket qua (khong khang dinh gi) thi loi do vo hinh; codex
+          # sieu no thanh chot o vong 7 va no lo ra ngay luot dau. Truyen MOT chuoi
+          # co dau nhay long vao la dung.
+          $p = Start-Process python -ArgumentList '-c "import time; time.sleep(60)"' -PassThru
+          Start-Sleep -Seconds 1
+          # KIEM TIEN DE truoc khi do (nep t69 vong 5): neu tien trinh moi da chet thi
+          # taskkill khong do duoc gi ca, va "rc!=0" luc do la loi FIXTURE chu khong
+          # phai ket luan ve taskkill. Phai tach hai chuyen do ra.
+          if (-not (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)) {
+            Write-Host "FIXTURE HONG: tien trinh moi sinh da chet truoc khi do - KHONG DO DUOC"
+            exit 1
+          }
+          $ra = & taskkill /PID $p.Id /T /F 2>&1
+          $ma = $LASTEXITCODE
+          Write-Host "taskkill rc=$ma : $ra"
+          Start-Sleep -Seconds 1
+          $con = Get-Process -Id $p.Id -ErrorAction SilentlyContinue
+          Write-Host "tien trinh con song? $([bool]$con)"
+          if ($con) { Stop-Process -Id $p.Id -Force }
+          if ($ma -ne 0 -or $con) { exit 1 }
+          exit 0

@@ -53,6 +53,19 @@ Thiếu, hoặc có trong PATH mà không chạy được ⇒ thoát `12` **trư
 kèm rc=0 trong khi `codex` vắng mặt — vì `bat_buoc` là thuộc tính của *công cụ*,
 mà "cần hay không" lại là thuộc tính của *lượt*. Một cờ tĩnh không nói được cả hai.
 
+Thêm `--cai-neu-thieu` thì thiếu là **dựng ngay trong lượt** rồi đo lại — dùng cho
+phiên nhận kho *sau* SessionStart, nơi hook không bao giờ chạy:
+
+```bash
+python .claude/dev/launcher.py run --require-tool codex --cai-neu-thieu ... -- codex exec ...
+```
+
+Vẫn thoát `12` nếu cài xong mà công cụ **vẫn không dùng được** — `rc=0` của trình
+cài không phải bằng chứng. Ca này gặp thật khi gỡ lỗi: một trình cài dựng đúng tệp
+nhưng không đặt được bit thực thi, `rc` vẫn 0, và chốt chặn đúng. Công cụ không có
+trong bảng `CONG_CU` thì launcher **không bịa** lệnh cài — nó nói thẳng là không
+tự cài được. Mặc định cờ này TẮT.
+
 ### Chạy được ≠ dùng được: chốt xác thực
 
 ```bash

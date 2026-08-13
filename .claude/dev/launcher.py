@@ -973,7 +973,29 @@ def chot_han(han: str | None) -> datetime | None:
 
 # ------------------------------------------- chốt công cụ CỦA LƯỢT + chốt xác thực
 
-def chot_cong_cu(ten_ds) -> list[dict]:
+def _chon_lenh_cai(c, he: str):
+    """argv cài đầu tiên mà trình cài của nó THỰC SỰ có trên máy này.
+
+    Trả None khi nền này không có argv, hoặc có mà trình cài vắng mặt — hai ca
+    khác nhau nhưng cùng một kết luận: KHÔNG tự cài được, và phải nói ra.
+    """
+    if not c:
+        return None
+    ung_vien = (c.get("cai_lenh", {}).get(he) or c.get("cai_lenh", {}).get("*") or [])
+    return next((argv for argv in ung_vien if shutil.which(argv[0])), None)
+
+
+def _chay_lenh_cai(argv) -> dict:
+    """Chạy một lệnh cài. KHÔNG shell: argv dạng list (bẫy số 1 đầu tệp)."""
+    try:
+        p = subprocess.run([shutil.which(argv[0]), *argv[1:]], capture_output=True,
+                           text=True, timeout=900, encoding="utf-8", errors="replace")
+        return {"lenh": argv, "rc": p.returncode, "ok": p.returncode == 0}
+    except (OSError, subprocess.SubprocessError) as e:
+        return {"lenh": argv, "rc": None, "ok": False, "loi": str(e)[:200]}
+
+
+def chot_cong_cu(ten_ds, cai: bool = False) -> list[dict]:
     """Công cụ mà LƯỢT NÀY cần: phải có mặt VÀ chạy được.
 
     Vì sao không dùng cờ `bat_buoc` trong bảng CONG_CU: bắt buộc là thuộc tính của
@@ -984,18 +1006,43 @@ def chot_cong_cu(ten_ds) -> list[dict]:
     chết ở chỗ khó đọc, đúng thứ mà `doctor` sinh ra để chặn.
 
     `shutil.which` KHÔNG đủ (xem `_phien_ban`): tệp rỗng đúng tên vẫn làm which vui.
+
+    `cai=True` (cờ --cai-neu-thieu) thì thiếu là DỰNG NGAY trong lượt. Vì sao cần:
+    hook SessionStart chỉ chạy được khi kho đã có mặt lúc phiên khởi động, mà phiên
+    sinh bằng chương trình nhận kho SAU đó — ĐÃ ĐO 13-08-2026: container không có
+    `codex` dù hook viết đúng, chỉ vì lúc hook đáng lẽ chạy thì `settings.json`
+    chưa tồn tại. Một đường dựng công cụ chỉ nằm ở hook là đường CÓ ĐIỀU KIỆN.
+    Mặc định vẫn TẮT: tự cài sau lưng người dùng là vượt quyền.
     """
     ra = []
+    he = platform.system()
     for ten in ten_ds or []:
         d = shutil.which(ten)
+        chay_duoc, pb = _phien_ban(d) if d else (False, "")
+        da_cai = None
+        if not chay_duoc and cai:
+            argv = _chon_lenh_cai(next((x for x in CONG_CU if x["ten"] == ten), None), he)
+            if argv is None:
+                raise Chan(MA_THIEU_CONG_CU,
+                           f"`{ten}` thieu va KHONG co lenh cai may-doc-duoc cho {he} "
+                           f"(khong bia lenh: xem bang CONG_CU)")
+            da_cai = _chay_lenh_cai(argv)
+            # ĐO LẠI. rc=0 cua trinh cai KHONG phai bang chung cong cu dung duoc —
+            # cung bai hoc voi `_phien_ban`. Bo phep do nay la fail-OPEN.
+            d = shutil.which(ten)
+            chay_duoc, pb = _phien_ban(d) if d else (False, "")
         if not d:
             raise Chan(MA_THIEU_CONG_CU,
-                       f"luot nay khai can `{ten}` nhung khong tim thay trong PATH")
-        chay_duoc, pb = _phien_ban(d)
+                       f"luot nay khai can `{ten}` nhung khong tim thay trong PATH"
+                       + (f" (da chay `{' '.join(da_cai['lenh'])}`, rc={da_cai['rc']})"
+                          if da_cai else ""))
         if not chay_duoc:
             raise Chan(MA_THIEU_CONG_CU,
                        f"`{ten}` co o {d} nhung KHONG chay duoc: {pb}")
-        ra.append({"ten": ten, "duong_dan": d, "phien_ban": pb})
+        muc = {"ten": ten, "duong_dan": d, "phien_ban": pb}
+        if da_cai:
+            muc["da_cai"] = da_cai
+        ra.append(muc)
     return ra
 
 
@@ -1080,7 +1127,8 @@ def chay_cac_chot(a) -> dict:
     han = chot_han(a.deadline_utc)
     # Công cụ TRƯỚC xác thực: không probe được thứ chưa có mặt, và thông điệp
     # "thiếu codex" hữu ích hơn hẳn "probe hỏng".
-    cong_cu = chot_cong_cu(getattr(a, "require_tool", None))
+    cong_cu = chot_cong_cu(getattr(a, "require_tool", None),
+                           bool(getattr(a, "cai_neu_thieu", False)))
     xac_thuc = chot_xac_thuc(getattr(a, "auth_probe", None))
     return {
         "workspace": ws, "head": head, "ref": ref, **kho,
@@ -1670,23 +1718,14 @@ def _thu_cai(ket: list[dict], he: str) -> tuple[list[dict], list[str]]:
     for c in CONG_CU:
         if c["ten"] not in thieu:
             continue
-        ung_vien = (c.get("cai_lenh", {}).get(he) or c.get("cai_lenh", {}).get("*") or [])
-        chon = next((argv for argv in ung_vien if shutil.which(argv[0])), None)
+        chon = _chon_lenh_cai(c, he)
         if chon is None:
             # Không có argv cho nền này, HOẶC có mà trình cài không tồn tại. Cả hai
             # đều là "không tự cài được" và PHẢI lộ ra: im lặng bỏ qua sẽ làm
             # `--cai` trông như đã làm xong việc.
             khong_duoc.append(c["ten"])
             continue
-        try:
-            p = subprocess.run([shutil.which(chon[0]), *chon[1:]], capture_output=True,
-                               text=True, timeout=900, encoding="utf-8", errors="replace")
-            rc = p.returncode
-        except (OSError, subprocess.SubprocessError) as e:
-            da_thu.append({"ten": c["ten"], "lenh": chon, "rc": None, "ok": False,
-                           "loi": str(e)[:200]})
-            continue
-        da_thu.append({"ten": c["ten"], "lenh": chon, "rc": rc, "ok": rc == 0})
+        da_thu.append({"ten": c["ten"], **_chay_lenh_cai(chon)})
     return da_thu, khong_duoc
 
 
@@ -1753,6 +1792,9 @@ def _them_chot(p):
     p.add_argument("--deadline-utc", default=None)
     p.add_argument("--require-tool", action="append", default=None, metavar="TEN",
                    help="cong cu LUOT NAY can (lap lai duoc). Thieu hoac khong chay duoc => 12")
+    p.add_argument("--cai-neu-thieu", action="store_true",
+                   help="--require-tool ma thieu thi CAI ngay trong luot roi DO LAI. "
+                        "Mac dinh tat: tu cai sau lung nguoi dung la vuot quyen")
     p.add_argument("--auth-probe", action="append", default=None, metavar="LENH",
                    help='lenh chung minh DA XAC THUC (lap lai duoc). Ten chuong trinh '
                         'tran, hoac mang JSON: \'["codex","login","status"]\'. '

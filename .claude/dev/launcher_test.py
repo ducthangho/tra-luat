@@ -2006,10 +2006,11 @@ def t90_auth_hong_thi_con_KHONG_duoc_chay():
 
 # --------------------------------------------- doctor: kiểm rồi CÀI, một hợp đồng
 
-def _san_doctor(s: Path) -> Path:
-    """PATH cô lập: git/python thật (shim), npm giả ghi dấu, KHÔNG có codex.
+def _san_cach_ly(s: Path, npm_than: str) -> Path:
+    """PATH CÔ LẬP: chỉ git/python thật (shim) + một `npm` do ca tự định nghĩa.
 
-    Cô lập là bắt buộc: máy người dùng có sẵn codex thì ca này thành vô nghĩa.
+    Cô lập là bắt buộc: máy chạy test có sẵn codex thì mọi ca dưới đây thành vô
+    nghĩa mà vẫn xanh — đúng loại "xanh nhờ môi trường" mà bộ này tồn tại để chặn.
     """
     binh = s / "bin"
     binh.mkdir(exist_ok=True)
@@ -2017,12 +2018,37 @@ def _san_doctor(s: Path) -> Path:
         t = binh / ten
         t.write_text(f'#!/bin/sh\nexec "{that}" "$@"\n', encoding="utf-8")
         t.chmod(0o755)
-    dau = s / "npm-da-chay.dau"
     npm = binh / "npm"
-    npm.write_text(f'#!/bin/sh\nif [ "$1" = "--version" ]; then echo 9.9.9; exit 0; fi\n'
-                   f'echo "$@" >> {dau}\nexit 0\n', encoding="utf-8")
+    npm.write_text(npm_than, encoding="utf-8")
     npm.chmod(0o755)
     return binh
+
+
+def _san_doctor(s: Path) -> Path:
+    """npm giả chỉ GHI DẤU, không cài gì."""
+    dau = s / "npm-da-chay.dau"
+    return _san_cach_ly(
+        s, f'#!/bin/sh\nif [ "$1" = "--version" ]; then echo 9.9.9; exit 0; fi\n'
+           f'echo "$@" >> {dau}\nexit 0\n')
+
+
+def _npm_cai_that(binh_se_la: Path) -> str:
+    """npm giả CÀI THẬT: dựng một `codex` chạy được, như trình cài tử tế.
+
+    `chmod` phải gọi bằng ĐƯỜNG DẪN TUYỆT ĐỐI: sân này cô lập PATH xuống đúng
+    thư mục bin giả, mà `chmod` là lệnh ngoài (`printf` thì là builtin của sh).
+    Gọi trần thì nó "command not found", tệp ở lại 0644, `shutil.which` bỏ qua vì
+    không có bit thực thi — và ca này đỏ với thông điệp "khong tim thay trong PATH"
+    trong khi tệp rành rành nằm đó. Đã mất một lượt gỡ vì chuyện này.
+    """
+    chmod = shutil.which("chmod") or "/bin/chmod"
+    return ('#!/bin/sh\n'
+            'if [ "$1" = "--version" ]; then echo 9.9.9; exit 0; fi\n'
+            'case "$*" in\n'
+            f'  *@openai/codex*) printf \'#!/bin/sh\\necho "codex-cli 9.9.9"\\n\' '
+            f'> "{binh_se_la}/codex"; "{chmod}" +x "{binh_se_la}/codex" ;;\n'
+            'esac\n'
+            'exit 0\n')
 
 
 @ca
@@ -2065,6 +2091,83 @@ def t93_cai_khong_chay_duoc_phai_BAO_chu_khong_im_lang():
         bang("khong_tu_cai_duoc" in d, f"doctor --cai khong bao cao gi: {sorted(d)}")
         bang("rg" in d["khong_tu_cai_duoc"],
              f"rg khong cai duoc ma khong bao: {d['khong_tu_cai_duoc']}")
+
+
+# ---- công cụ dựng NGAY TRONG LƯỢT: phiên nhận kho SAU SessionStart vẫn phải chạy
+#
+# ĐÃ ĐO 13-08-2026: phiên sinh bằng chương trình (origin claude_code_mcp_seed) nhận
+# kho SAU khi phiên đã khởi động, nên lúc SessionStart đáng lẽ chạy thì
+# `.claude/settings.json` chưa tồn tại — hook không thể chạy, container không có
+# codex, dù hook viết hoàn toàn đúng. Một đường dựng công cụ chỉ nằm ở hook là
+# đường có điều kiện. Chốt phải tự dựng được.
+
+@ca
+def t95_thieu_cong_cu_ma_bat_cai_neu_thieu_thi_TU_CAI():
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _san_cach_ly(s, _npm_cai_that(s / "bin"))
+        r = chay("check", "--workspace", str(repo), "--require-tool", "codex",
+                 "--cai-neu-thieu", env=dict(os.environ, PATH=str(binh)))
+        bang(r.returncode == MA_OK,
+             f"khong tu dung duoc cong cu: {r.returncode}: {r.stdout}{r.stderr}")
+        bang((binh / "codex").exists(), "bao xanh ma codex khong he duoc cai")
+
+
+@ca
+def t96_cai_neu_thieu_MAC_DINH_TAT():
+    """Không có cờ thì TUYỆT ĐỐI không tự cài — kể cả khi cài được.
+
+    Cùng lý do với `doctor` mặc định chỉ đọc: tự cài sau lưng người dùng là vượt
+    quyền, và một chốt âm thầm đổi máy người ta là chốt không ai dám bật.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _san_cach_ly(s, _npm_cai_that(s / "bin"))
+        r = chay("check", "--workspace", str(repo), "--require-tool", "codex",
+                 env=dict(os.environ, PATH=str(binh)))
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"mong doi {MA_THIEU_CONG_CU}, duoc {r.returncode}")
+        bang(not (binh / "codex").exists(), "DA TU CAI du khong ai bao — vuot quyen")
+
+
+@ca
+def t97_trinh_cai_thoat_0_ma_KHONG_cai_gi_van_phai_DO():
+    """rc=0 của trình cài KHÔNG phải bằng chứng công cụ đã dùng được.
+
+    Cùng bài học với `_phien_ban`: phải ĐO LẠI sau khi cài. Bỏ phép đo lại thì
+    `--cai-neu-thieu` biến thành "đã chạy lệnh cài nên coi như xong" — fail-OPEN.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        # npm "thanh cong" nhung khong dung ra tep nao
+        binh = _san_cach_ly(s, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 9.9.9; '
+                               'exit 0; fi\nexit 0\n')
+        r = chay("check", "--workspace", str(repo), "--require-tool", "codex",
+                 "--cai-neu-thieu", env=dict(os.environ, PATH=str(binh)))
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"tin rc cua trinh cai: mong doi {MA_THIEU_CONG_CU}, duoc {r.returncode}")
+
+
+@ca
+def t98_khong_co_lenh_cai_may_doc_duoc_thi_noi_thang():
+    """Công cụ lạ (không có trong bảng) thì `--cai-neu-thieu` không bịa ra lệnh."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _san_cach_ly(s, '#!/bin/sh\nexit 0\n')
+        r = chay("check", "--workspace", str(repo), "--require-tool", "cong-cu-la-hoac",
+                 "--cai-neu-thieu", env=dict(os.environ, PATH=str(binh)))
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"mong doi {MA_THIEU_CONG_CU}, duoc {r.returncode}")
+        bang("cai" in (r.stderr or "").lower(),
+             f"khong noi ro vi sao khong tu cai duoc: {r.stderr!r}")
 
 
 @ca
@@ -2174,8 +2277,13 @@ DOT_BIEN = [
      ('"ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",',
       '"ten": a.name, "lenh": [str(x) for x in a.lenh], "trang_thai": "dang_chay",'),
      ["t59_so_KHONG_luu_doi_so_nguyen_van"]),
+    # Neo kem theo dong `if chay_duoc:` de tro DUNG vao `_do_cong_cu`. Neo cu chi la
+    # mot dong, va sau khi `chot_cong_cu` co them nhanh do-lai-sau-khi-cai (cung
+    # thut 12 dau cach) thi no khop nham cho DUNG TRUOC trong tep -> dot bien roi
+    # vao ham khac va t60 khong chet. Dot bien sai cho, khong phai test yeu.
     ("doctor_tin_which",
-     ('            chay_duoc, pb = _phien_ban(d)', '            chay_duoc, pb = True, ""'),
+     ('            chay_duoc, pb = _phien_ban(d)\n            if chay_duoc:',
+      '            chay_duoc, pb = True, ""\n            if chay_duoc:'),
      ["t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
@@ -2328,8 +2436,10 @@ DOT_BIEN = [
     # Tin `which`, khong chay thu --version. Doi ung voi `doctor_tin_which` nhung o
     # chot CUA LUOT: hai cho doc lap, moi cho mot ca.
     ("chot_cong_cu_tin_which",
-     ('        chay_duoc, pb = _phien_ban(d)\n        if not chay_duoc:',
-      '        chay_duoc, pb = True, ""\n        if not chay_duoc:'),
+     ('        d = shutil.which(ten)\n'
+      '        chay_duoc, pb = _phien_ban(d) if d else (False, "")',
+      '        d = shutil.which(ten)\n'
+      '        chay_duoc, pb = (True, "") if d else (False, "")'),
      ["t85_require_tool_co_mat_nhung_khong_chay_duoc_van_DO"]),
     ("bo_chot_xac_thuc",
      ('    for tho in probe_ds or []:', '    for tho in []:'),
@@ -2351,6 +2461,28 @@ DOT_BIEN = [
     ("cai_khong_bao_thu_khong_cai_duoc",
      ('            khong_duoc.append(c["ten"])\n            continue', '            continue'),
      ["t93_cai_khong_chay_duoc_phai_BAO_chu_khong_im_lang"]),
+
+    # --- vòng 8 đợt 2: dựng công cụ NGAY TRONG LƯỢT.
+    # Luôn bật ⇒ tự cài sau lưng người dùng. Xanh mà vượt quyền.
+    ("cai_neu_thieu_luon_bat",
+     ('                           bool(getattr(a, "cai_neu_thieu", False)))',
+      '                           True)'),
+     ["t96_cai_neu_thieu_MAC_DINH_TAT"]),
+    # DUNG LAI fail-OPEN: cai xong thi TIN rc cua trinh cai, khong do lai. t95 (trinh
+    # cai tu te) VAN xanh — chi t97 chet. Do dung la bang chung "rc cua trinh cai
+    # khong thay duoc phep do lai".
+    ("cai_xong_tin_rc_khong_do_lai",
+     ('            d = shutil.which(ten)\n'
+      '            chay_duoc, pb = _phien_ban(d) if d else (False, "")\n'
+      '        if not d:',
+      '            d = d or ten\n'
+      '            chay_duoc, pb = True, "(tin trinh cai)"\n'
+      '        if not d:'),
+     ["t97_trinh_cai_thoat_0_ma_KHONG_cai_gi_van_phai_DO"]),
+    # Bia ra lenh cai cho cong cu khong co trong bang -> chay lung tung roi bao xanh.
+    ("bia_lenh_cai_cho_cong_cu_la",
+     ('            if argv is None:', '            if False:'),
+     ["t98_khong_co_lenh_cai_may_doc_duoc_thi_noi_thang"]),
 ]
 
 

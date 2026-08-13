@@ -31,6 +31,13 @@ LAUNCHER = Path(__file__).resolve().parent / "launcher.py"
 PY = sys.executable or "python3"
 LA_WINDOWS = platform.system() == "Windows"
 
+# Bản GỐC của hai hàm DÙNG CHUNG. `_tai_launcher_thu()` nạp một bản launcher
+# riêng, nhưng `m.subprocess` và `m.platform` vẫn TRỎ VÀO CÙNG object module của
+# tiến trình test — gán đè lên chúng là vá TOÀN CỤC, mọi ca chạy sau đều thấy bản
+# giả. Giữ bản gốc ở đây để t94 canh; xem chú thích của nó.
+GOC_SUBPROCESS_RUN = subprocess.run
+GOC_PLATFORM_SYSTEM = platform.system
+
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
 
@@ -1802,7 +1809,6 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
     chứng "đã tắt" trên Windows, đó chính là đường quyết định 0-hay-125.
     """
     m = _tai_launcher_thu()
-    m.platform.system = lambda: "Windows"
 
     def _ra(dong):
         class P:
@@ -1810,13 +1816,23 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
             stdout = dong
         m.subprocess.run = lambda *_a, **_k: P()
 
-    # (a) tien trinh mu la CON cua 10 => khong do duoc
-    _ra("OK|10|1|123\nERR|11|10|NO_CREATION_DATE\n")
-    bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
-    # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
-    _ra("OK|10|1|123\nOK|12|10|456\nERR|11|1|NO_CREATION_DATE\n")
-    bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
-         "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
+    # try/finally BẮT BUỘC: hai phép gán dưới đây rơi vào module DÙNG CHUNG, không
+    # phải vào bản launcher vừa nạp. Bản trước không trả lại nên `subprocess.run`
+    # giả sống tới hết tiến trình test — ca nào chạy sau mà gọi `chay()` sẽ nhận
+    # 'P' object has no attribute 'stderr'. Không lộ ra vì tình cờ không ca nào sau
+    # t81 dùng `chay()`; thêm ca mới ở cuối tệp là vỡ ngay. t94 canh chuyện này.
+    try:
+        m.platform.system = lambda: "Windows"
+        # (a) tien trinh mu la CON cua 10 => khong do duoc
+        _ra("OK|10|1|123\nERR|11|10|NO_CREATION_DATE\n")
+        bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
+        # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
+        _ra("OK|10|1|123\nOK|12|10|456\nERR|11|1|NO_CREATION_DATE\n")
+        bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
+             "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
+    finally:
+        subprocess.run = GOC_SUBPROCESS_RUN
+        platform.system = GOC_PLATFORM_SYSTEM
 
 
 @ca
@@ -1835,18 +1851,22 @@ def t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung():
     m = _tai_launcher_thu()
     m._khoa_danh_tinh = lambda _pid: None          # me da tat, do duoc
     m._thanh_vien_nhom = lambda _pid: None         # phep do POSIX: mu tren Windows
-    m.platform.system = lambda: "Windows"
     goi = []
     m._giet_windows = lambda *_a, **_k: (goi.append(True) or m.KetGiet(False, False, "duong giet"))
 
-    m._chup_cay = lambda _pid: {}                  # DO DUOC va rong
-    kq = m._giet_cay(12345, "win:1")
-    bang(kq.tron_ven and kq.ca_cay and not goi,
-         "anh chup RONG la bang chung du, khong duoc roi xuong duong giet")
+    # `m.platform` la module DUNG CHUNG (xem t81) — phai tra lai.
+    try:
+        m.platform.system = lambda: "Windows"
+        m._chup_cay = lambda _pid: {}              # DO DUOC va rong
+        kq = m._giet_cay(12345, "win:1")
+        bang(kq.tron_ven and kq.ca_cay and not goi,
+             "anh chup RONG la bang chung du, khong duoc roi xuong duong giet")
 
-    m._chup_cay = lambda _pid: None                # KHONG DO DUOC
-    kq2 = m._giet_cay(12345, "win:1")
-    bang(goi and not kq2.tron_ven, "None bi doc thanh rong: ket luan khong bang chung")
+        m._chup_cay = lambda _pid: None            # KHONG DO DUOC
+        kq2 = m._giet_cay(12345, "win:1")
+        bang(goi and not kq2.tron_ven, "None bi doc thanh rong: ket luan khong bang chung")
+    finally:
+        platform.system = GOC_PLATFORM_SYSTEM
 
 
 def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
@@ -1861,6 +1881,208 @@ def t82_dot_bien_khong_duoc_mat_qua_30_phan_tram():
     bang(_dot_bien_du_san(35, 10), "moc Windows da do 25/35 phai duoc chap nhan")
     bang(not _dot_bien_du_san(35, 11), "24/35 (<70%) phai lam cong do")
     bang(not _dot_bien_du_san(35, 30), "5/35 khong duoc xanh")
+
+
+# ---------------- vòng 8: công cụ là ĐIỀU KIỆN của lượt, và "chạy được" ≠ "dùng được"
+#
+# Hai lỗ ĐÃ ĐO trên chính container phiên remote (13-08-2026):
+#   A. `doctor` in "DU CONG CU BAT BUOC" + rc=0 trong khi `codex` KHÔNG có mặt —
+#      vì codex là bat_buoc=False toàn cục. Lượt cần gọi codex qua được chốt rồi
+#      chết ở chỗ khó đọc, đúng thứ mà chú thích đầu mục `doctor` nói nó tồn tại
+#      để chặn.
+#   B. `codex` chưa xác thực in "401 Unauthorized" rồi thoát rc=0; launcher truyền
+#      lại mã con nên sổ ghi trang_thai="xong", ma_thoat=0. Một lượt KHÔNG HỀ CHẠY
+#      được ghi thành thành công.
+# Cả hai đều là ca "rc biết nói dối" — cùng họ với t03.
+
+MA_CHUA_XAC_THUC = 13
+
+
+def _bin_gia(goc: Path, ten: str, than: str) -> Path:
+    """Dựng một CLI giả CHẠY ĐƯỢC trong goc/bin; trả về thư mục bin."""
+    binh = goc / "bin"
+    binh.mkdir(exist_ok=True)
+    t = binh / ten
+    t.write_text(than, encoding="utf-8")
+    t.chmod(0o755)
+    return binh
+
+
+def _path_co(binh: Path) -> dict:
+    return dict(os.environ, PATH=str(binh) + os.pathsep + os.environ.get("PATH", ""))
+
+
+@ca
+def t84_require_tool_thieu_thi_DO():
+    """Công cụ của LƯỢT thiếu ⇒ 12, không phải để lượt chạy rồi chết giữa chừng."""
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("check", "--workspace", str(repo),
+                 "--require-tool", "khong-co-cong-cu-nay-dau")
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"mong doi {MA_THIEU_CONG_CU}, duoc {r.returncode}: {r.stderr}")
+
+
+@ca
+def t85_require_tool_co_mat_nhung_khong_chay_duoc_van_DO():
+    """Tệp RỖNG trong PATH: `which` thấy, chạy thì hỏng. Cùng doctrine với t60."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can .exe rong)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _bin_gia(s, "cong-cu-gia", "")
+        r = chay("check", "--workspace", str(repo),
+                 "--require-tool", "cong-cu-gia", env=_path_co(binh))
+        bang(r.returncode == MA_THIEU_CONG_CU,
+             f"xanh voi cong cu khong chay duoc: {r.returncode}")
+
+
+@ca
+def t86_require_tool_du_thi_qua():
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("check", "--workspace", str(repo), "--require-tool", "git")
+        bang(r.returncode == MA_OK, f"bao thieu oan git: {r.returncode}: {r.stderr}")
+
+
+@ca
+def t87_rc0_nhung_401_trong_dau_ra_phai_DO():
+    """CA GỐC của bug: probe thoát 0 mà in 401. rc nói xanh, nội dung nói đỏ.
+
+    Bỏ ca này thì chốt xác thực chỉ còn là chốt kiểm rc — tức là không có gì.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _bin_gia(s, "probe", "#!/bin/sh\necho 'stream error: 401 Unauthorized'\nexit 0\n")
+        r = chay("check", "--workspace", str(repo), "--auth-probe", str(binh / "probe"))
+        bang(r.returncode == MA_CHUA_XAC_THUC,
+             f"mong doi {MA_CHUA_XAC_THUC}, duoc {r.returncode}: {r.stdout}{r.stderr}")
+
+
+@ca
+def t88_auth_probe_rc_khac_0_cung_DO():
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _bin_gia(s, "probe", "#!/bin/sh\nexit 7\n")
+        r = chay("check", "--workspace", str(repo), "--auth-probe", str(binh / "probe"))
+        bang(r.returncode == MA_CHUA_XAC_THUC,
+             f"mong doi {MA_CHUA_XAC_THUC}, duoc {r.returncode}")
+
+
+@ca
+def t89_auth_probe_sach_thi_qua():
+    """Chốt phải XANH được, không thì người ta gỡ nó ra."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _bin_gia(s, "probe", "#!/bin/sh\necho 'Logged in as tester'\nexit 0\n")
+        r = chay("check", "--workspace", str(repo), "--auth-probe", str(binh / "probe"))
+        bang(r.returncode == MA_OK, f"chan oan luot da xac thuc: {r.returncode}: {r.stderr}")
+
+
+@ca
+def t90_auth_hong_thi_con_KHONG_duoc_chay():
+    """Chốt đứng TRƯỚC lượt gọi, không phải kiểm sau khi đã tốn một lượt."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        repo = tao_repo(s)
+        binh = _bin_gia(s, "probe", "#!/bin/sh\necho '401 Unauthorized'\nexit 0\n")
+        dau = s / "con-da-chay.dau"
+        con = binh / "con"
+        con.write_text(f"#!/bin/sh\n: > {dau}\n", encoding="utf-8")
+        con.chmod(0o755)
+        r = chay("run", "--workspace", str(repo), "--run-root", str(s / "rr"),
+                 "--auth-probe", str(binh / "probe"), "--", str(con))
+        bang(r.returncode == MA_CHUA_XAC_THUC,
+             f"mong doi {MA_CHUA_XAC_THUC}, duoc {r.returncode}")
+        bang(not dau.exists(), "con DA CHAY du chot xac thuc do — chot dat sai cho")
+
+
+# --------------------------------------------- doctor: kiểm rồi CÀI, một hợp đồng
+
+def _san_doctor(s: Path) -> Path:
+    """PATH cô lập: git/python thật (shim), npm giả ghi dấu, KHÔNG có codex.
+
+    Cô lập là bắt buộc: máy người dùng có sẵn codex thì ca này thành vô nghĩa.
+    """
+    binh = s / "bin"
+    binh.mkdir(exist_ok=True)
+    for ten, that in (("git", shutil.which("git")), ("python3", sys.executable)):
+        t = binh / ten
+        t.write_text(f'#!/bin/sh\nexec "{that}" "$@"\n', encoding="utf-8")
+        t.chmod(0o755)
+    dau = s / "npm-da-chay.dau"
+    npm = binh / "npm"
+    npm.write_text(f'#!/bin/sh\nif [ "$1" = "--version" ]; then echo 9.9.9; exit 0; fi\n'
+                   f'echo "$@" >> {dau}\nexit 0\n', encoding="utf-8")
+    npm.chmod(0o755)
+    return binh
+
+
+@ca
+def t91_doctor_mac_dinh_KHONG_duoc_cai_gi():
+    """Mặc định chỉ ĐO. Tự cài đè lên máy cá nhân của người ta là vượt quyền."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        binh = _san_doctor(s)
+        chay("doctor", "--json", env=dict(os.environ, PATH=str(binh)))
+        bang(not (s / "npm-da-chay.dau").exists(),
+             "doctor mac dinh DA GOI npm — mac dinh phai la chi doc")
+
+
+@ca
+def t92_doctor_cai_thi_phai_goi_lenh_cai_that():
+    """`--cai` mà không cài gì thì là lời hứa suông."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        binh = _san_doctor(s)
+        r = chay("doctor", "--json", "--cai", env=dict(os.environ, PATH=str(binh)))
+        dau = s / "npm-da-chay.dau"
+        bang(dau.exists(), f"--cai KHONG goi npm lan nao: {r.stdout}{r.stderr}")
+        bang("codex" in dau.read_text(encoding="utf-8"),
+             f"goi npm nhung khong cai codex: {dau.read_text(encoding='utf-8')}")
+
+
+@ca
+def t93_cai_khong_chay_duoc_phai_BAO_chu_khong_im_lang():
+    """Bảng `cai` cũ là chữ CHO NGƯỜI ĐỌC ("(hoac: brew install git)") — không
+    exec được. Công cụ không có lệnh cài máy-đọc-được phải LỘ RA, đừng im lặng
+    bỏ qua rồi để `--cai` trông như đã làm xong việc."""
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can shim .cmd)"
+    with San() as s:
+        binh = _san_doctor(s)      # PATH khong co apt-get/sudo ⇒ rg khong cai duoc
+        r = chay("doctor", "--json", "--cai", env=dict(os.environ, PATH=str(binh)))
+        d = json.loads(r.stdout)
+        bang("khong_tu_cai_duoc" in d, f"doctor --cai khong bao cao gi: {sorted(d)}")
+        bang("rg" in d["khong_tu_cai_duoc"],
+             f"rg khong cai duoc ma khong bao: {d['khong_tu_cai_duoc']}")
+
+
+@ca
+def t94_khong_ca_nao_duoc_de_lai_ban_va_TOAN_CUC():
+    """Ca canh cuối bộ: module dùng chung phải nguyên vẹn.
+
+    ĐÃ CẮN THẬT: t81 vá `m.subprocess.run`/`m.platform.system`, mà hai thứ đó là
+    module DÙNG CHUNG chứ không thuộc bản launcher vừa nạp — bản giả sống tới hết
+    tiến trình. Suốt nhiều vòng audit không ai thấy, chỉ vì tình cờ không ca nào
+    xếp sau t81 gọi `chay()`. Nghĩa là bộ test đang ĐÚNG NHỜ THỨ TỰ, một bảo đảm
+    tự vỡ ngay khi thêm ca mới ở cuối tệp.
+
+    Ca này phải nằm SAU mọi ca vá module (CA chạy theo thứ tự khai báo).
+    """
+    bang(subprocess.run is GOC_SUBPROCESS_RUN,
+         "mot ca truoc do de lai `subprocess.run` gia — bo test dang phu thuoc THU TU")
+    bang(platform.system is GOC_PLATFORM_SYSTEM,
+         "mot ca truoc do de lai `platform.system` gia")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -2096,6 +2318,39 @@ DOT_BIEN = [
      ('            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):',
       '            if len(phan) != 4 or phan[0] != "OK":'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+
+    # --- vòng 8: chốt công cụ CỦA LƯỢT + chốt xác thực.
+    # Bỏ hẳn chốt công cụ ⇒ quay lại đúng hành vi cũ: thiếu codex vẫn xanh.
+    ("bo_chot_cong_cu_cua_luot",
+     ('    for ten in ten_ds or []:', '    for ten in []:'),
+     ["t84_require_tool_thieu_thi_DO",
+      "t85_require_tool_co_mat_nhung_khong_chay_duoc_van_DO"]),
+    # Tin `which`, khong chay thu --version. Doi ung voi `doctor_tin_which` nhung o
+    # chot CUA LUOT: hai cho doc lap, moi cho mot ca.
+    ("chot_cong_cu_tin_which",
+     ('        chay_duoc, pb = _phien_ban(d)\n        if not chay_duoc:',
+      '        chay_duoc, pb = True, ""\n        if not chay_duoc:'),
+     ["t85_require_tool_co_mat_nhung_khong_chay_duoc_van_DO"]),
+    ("bo_chot_xac_thuc",
+     ('    for tho in probe_ds or []:', '    for tho in []:'),
+     ["t87_rc0_nhung_401_trong_dau_ra_phai_DO",
+      "t88_auth_probe_rc_khac_0_cung_DO",
+      "t90_auth_hong_thi_con_KHONG_duoc_chay"]),
+    # DOT BIEN QUAN TRONG NHAT cua vong nay: dung lai DUNG con bug goc — chot xac
+    # thuc chi con kiem rc, bo phan doc NOI DUNG. t88 (rc!=0) VAN xanh, nen chi t87
+    # va t90 chet. Do la bang chung "kiem rc" khong thay duoc "kiem noi dung".
+    ("xac_thuc_chi_kiem_rc_nhu_bug_goc",
+     ('        if khop:', '        if False:'),
+     ["t87_rc0_nhung_401_trong_dau_ra_phai_DO",
+      "t90_auth_hong_thi_con_KHONG_duoc_chay"]),
+    ("doctor_cai_khong_lam_gi",
+     ('    if getattr(a, "cai", False):', '    if False:'),
+     ["t92_doctor_cai_thi_phai_goi_lenh_cai_that",
+      "t93_cai_khong_chay_duoc_phai_BAO_chu_khong_im_lang"]),
+    # Im lang bo qua thu khong cai duoc: `--cai` trong nhu da lam xong viec.
+    ("cai_khong_bao_thu_khong_cai_duoc",
+     ('            khong_duoc.append(c["ten"])\n            continue', '            continue'),
+     ["t93_cai_khong_chay_duoc_phai_BAO_chu_khong_im_lang"]),
 ]
 
 

@@ -27,37 +27,21 @@ co() { command -v "$1" >/dev/null 2>&1; }
 
 echo "[session-start] goc du an: $GOC"
 
-# --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
-# cache sau khi hook xong, nên lần sau vào thẳng).
-if co npm; then
-  if ! co codex; then
-    echo "[session-start] cai @openai/codex ..."
-    npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
-  fi
-  if ! co claude; then
-    echo "[session-start] cai @anthropic-ai/claude-code ..."
-    npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai claude that bai"
-  fi
-else
-  echo "[session-start] CANH BAO: khong co npm — bo qua phan CLI agent"
-fi
-
-# --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
-# lệnh tìm gãy giữa chừng chứ không tự lùi về grep.
-if ! co rg; then
-  if co apt-get; then
-    echo "[session-start] cai ripgrep ..."
-    (apt-get install -y -qq ripgrep >/dev/null 2>&1 \
-      || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1) \
-      || echo "[session-start] CANH BAO: cai ripgrep that bai"
-  else
-    echo "[session-start] CANH BAO: khong co rg va khong co apt-get"
-  fi
-fi
-
-# --- phụ thuộc Python của kho
+# --- Công cụ: MỘT hợp đồng "kiểm rồi cài", nằm trong launcher chứ không chép lại
+# ở đây. Bản trước dựng lại logic cài (npm cho hai CLI, apt-get cho ripgrep) ngay
+# trong hook, nên bảng công cụ sống ở HAI chỗ và trôi khỏi nhau — `doctor` biết
+# lệnh cài chính thức của từng nền, còn hook chỉ biết nhánh Linux.
+#
+# `doctor --cai` cài xong sẽ ĐO LẠI: báo cáo là trạng thái SAU CÙNG, không phải
+# "đã chạy lệnh cài" (rc của trình cài không phải bằng chứng công cụ dùng được).
+# Ở đây KHÔNG kiểm mã thoát: thiếu công cụ KHÔNG bắt buộc thì không phải lý do
+# giết phiên. Cổng thật là lệnh `doctor` cuối tệp.
 PY=python3
 co python3 || PY=python
+echo "[session-start] kiem va cai cong cu:"
+"$PY" .claude/dev/launcher.py doctor --cai || true
+
+# --- phụ thuộc Python của kho ($PY đã chọn ở trên)
 # Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
 # SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac
 # (pypdf>=4.0 khong ghim tran).

@@ -27,16 +27,59 @@ lớp lỗi mà `## Bài học đắt giá` trong `CLAUDE.md` đã trả giá nh
 ```bash
 python .claude/dev/launcher.py doctor          # người đọc
 python .claude/dev/launcher.py doctor --json   # máy đọc
+python .claude/dev/launcher.py doctor --cai    # thiếu thì CÀI rồi đo lại
 ```
 
 Thoát `12` khi thiếu công cụ **bắt buộc** (git, python). Thiếu `claude`/`codex`
 chỉ là cảnh báo — có phiên không cần gọi agent nào cả.
 
+`--cai` dùng bảng `cai_lenh` (argv theo nền, thử lần lượt `apt-get` rồi
+`sudo apt-get`) rồi **đo lại** — báo cáo là trạng thái sau cùng, không phải lời
+hứa "đã chạy lệnh cài". Công cụ không có lệnh cài máy-đọc-được trên nền đang chạy
+sẽ vào `khong_tu_cai_duoc`, **không** bị bỏ qua im lặng. Mặc định `--cai` TẮT: tự
+cài đè lên máy cá nhân của người dùng là vượt quyền.
+
+### Công cụ của LƯỢT, không phải cờ tĩnh
+
+`doctor` trả lời "máy này có gì". Câu hỏi khác — "**lượt này** cần gì" — hỏi ngay
+tại chốt:
+
+```bash
+python .claude/dev/launcher.py run --require-tool codex ... -- codex exec ...
+```
+
+Thiếu, hoặc có trong PATH mà không chạy được ⇒ thoát `12` **trước khi** sinh con.
+Đo được ngày 13-08-2026 trong container remote: `doctor` in `DU CONG CU BAT BUOC`
+kèm rc=0 trong khi `codex` vắng mặt — vì `bat_buoc` là thuộc tính của *công cụ*,
+mà "cần hay không" lại là thuộc tính của *lượt*. Một cờ tĩnh không nói được cả hai.
+
+### Chạy được ≠ dùng được: chốt xác thực
+
+```bash
+--auth-probe '["codex","login","status"]'    # mảng JSON: mọi nền đọc giống nhau
+--auth-probe /duong/dan/probe                # hoặc tên chương trình trần
+```
+
+Thoát `13` — tách khỏi `12` vì cách chữa khác hẳn: `12` là **cài**, `13` là
+**đăng nhập**. Chốt đọc **nội dung** đầu ra chứ không đọc mỗi `rc`: một lệnh
+`codex` chưa xác thực in `401 Unauthorized` rồi thoát **rc=0**, và launcher truyền
+lại mã con nên sổ ghi `trang_thai: "xong", ma_thoat: 0` — một lượt *không hề chạy*
+được ghi thành thành công. Cùng họ với bẫy số 3 ở đầu `launcher.py`.
+
+Không tách chuỗi theo khoảng trắng và không qua shell: quy tắc trích dẫn của
+`cmd.exe` khác POSIX, nên mảng JSON là dạng duy nhất đọc giống nhau ở mọi nền.
+
 Đã đo trong container Claude Code web (12-08-2026): có `python`, `git`, `node`,
 `claude`, `rg`; **không có** `codex`, `gh`, `pwsh`. Hook
-`.claude/hooks/session-start.sh` cài `codex`, `claude` và `ripgrep` — **không** cài
+`.claude/hooks/session-start.sh` gọi đúng một lệnh `doctor --cai` — **không** cài
 `gh` và `pwsh`: kho này dùng GitHub qua MCP chứ không qua `gh`, và không còn đường
-nào cần PowerShell.
+nào cần PowerShell. Hook không chép lại logic cài nữa; bảng công cụ sống một chỗ
+duy nhất là `CONG_CU` trong `launcher.py`.
+
+**Hook chỉ chạy nếu kho có mặt lúc phiên khởi động.** Đo được 13-08-2026: phiên
+sinh bằng chương trình (`origin: claude_code_mcp_seed`) nhận kho *sau* SessionStart,
+nên `settings.json` chưa tồn tại lúc hook đáng lẽ chạy ⇒ container không có `codex`
+dù hook viết đúng. Phiên kiểu đó phải tự gọi `doctor --cai` sau khi có kho.
 
 **Không được giả định Windows có `python3`.** Bản cài phổ biến chỉ có `python` và
 `py` (bản Microsoft Store thì có thêm `python3`). Đừng bắt cài thêm bí danh —

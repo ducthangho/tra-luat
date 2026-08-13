@@ -39,7 +39,10 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   9   va chạm run_id/short_id
   10  không xác định được danh tính tiến trình → từ chối giết
   11  kho không đúng (remote/commit gốc lệch)
-  12  thiếu công cụ bắt buộc (xem `doctor`)
+  12  thiếu công cụ bắt buộc (xem `doctor`) — kể cả công cụ mà LƯỢT NÀY khai
+      bằng --require-tool, và cả ca "có trong PATH nhưng không chạy được"
+  13  công cụ chạy được nhưng CHƯA XÁC THỰC (--auth-probe in 401/Unauthorized).
+      Tách khỏi 12 vì cách chữa khác hẳn: 12 là cài, 13 là đăng nhập.
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
   130 bị ngắt (Ctrl-C) — đã giết con
@@ -87,6 +90,7 @@ MA_KHO = 11
 MA_QUA_HAN = 124
 MA_GIET_HUT = 125
 MA_THIEU_CONG_CU = 12
+MA_CHUA_XAC_THUC = 13
 
 # Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
@@ -967,6 +971,105 @@ def chot_han(han: str | None) -> datetime | None:
     return d
 
 
+# ------------------------------------------- chốt công cụ CỦA LƯỢT + chốt xác thực
+
+def chot_cong_cu(ten_ds) -> list[dict]:
+    """Công cụ mà LƯỢT NÀY cần: phải có mặt VÀ chạy được.
+
+    Vì sao không dùng cờ `bat_buoc` trong bảng CONG_CU: bắt buộc là thuộc tính của
+    LƯỢT, không phải của công cụ. Phiên chỉ sửa văn bản không cần codex; phiên gọi
+    codex thì thiếu nó là chặn. Một cờ tĩnh không diễn đạt được cả hai, và ĐÃ ĐO
+    ngày 13-08-2026 ngay trong container phiên remote: `doctor` in "DU CONG CU BAT
+    BUOC" kèm rc=0 trong khi `codex` vắng mặt — lượt cần codex qua được chốt rồi
+    chết ở chỗ khó đọc, đúng thứ mà `doctor` sinh ra để chặn.
+
+    `shutil.which` KHÔNG đủ (xem `_phien_ban`): tệp rỗng đúng tên vẫn làm which vui.
+    """
+    ra = []
+    for ten in ten_ds or []:
+        d = shutil.which(ten)
+        if not d:
+            raise Chan(MA_THIEU_CONG_CU,
+                       f"luot nay khai can `{ten}` nhung khong tim thay trong PATH")
+        chay_duoc, pb = _phien_ban(d)
+        if not chay_duoc:
+            raise Chan(MA_THIEU_CONG_CU,
+                       f"`{ten}` co o {d} nhung KHONG chay duoc: {pb}")
+        ra.append({"ten": ten, "duong_dan": d, "phien_ban": pb})
+    return ra
+
+
+# Dấu của "chưa đăng nhập" trong đầu ra. Cố ý RỘNG: bỏ sót một dấu thì chốt fail-OPEN
+# và ta quay lại đúng con bug đang chữa, còn nhận nhầm thì người dùng thấy ngay và
+# sửa được. Lệch cán cân về phía chặn.
+DAU_CHUA_XAC_THUC = re.compile(
+    r"\b401\b|\b403\b|unauthorized|unauthenticated|not\s+logged\s*in|"
+    r"please\s+log\s*in|login\s+required|sign\s*in\s+required|"
+    r"authentication\s+(?:required|failed)|(?:invalid|missing|no)\s+api\s*key|"
+    r"credentials?\s+(?:not\s+found|missing|invalid)", re.I)
+
+
+def _phan_tich_probe(gia_tri: str) -> list[str]:
+    """`--auth-probe` → argv. Nhận tên chương trình trần, hoặc MẢNG JSON.
+
+    KHÔNG tách chuỗi theo khoảng trắng và KHÔNG qua shell: quy tắc trích dẫn của
+    cmd.exe khác POSIX, nên "tách chuỗi" là đúng loại bẫy đa nền mà cả tệp này
+    tồn tại để tránh (xem bẫy số 1 ở đầu tệp). Mảng JSON thì mọi nền đọc giống hệt.
+    """
+    g = (gia_tri or "").strip()
+    if not g:
+        raise Chan(MA_THAM_SO, "--auth-probe rong")
+    if not g.startswith("["):
+        return [g]
+    try:
+        v = json.loads(g)
+    except json.JSONDecodeError as e:
+        raise Chan(MA_THAM_SO, f"--auth-probe dang JSON khong doc duoc: {e}") from None
+    if not isinstance(v, list) or not v or not all(isinstance(x, str) and x for x in v):
+        raise Chan(MA_THAM_SO, "--auth-probe dang JSON phai la mang chuoi KHONG rong")
+    return v
+
+
+def chot_xac_thuc(probe_ds) -> list[dict]:
+    """Chạy được ≠ dùng được.
+
+    ĐÃ ĐO: `codex` chưa xác thực in "stream error: 401 Unauthorized" rồi thoát
+    **rc=0**. Launcher truyền nguyên mã của con nên sổ ghi trang_thai="xong",
+    ma_thoat=0 — một lượt KHÔNG HỀ CHẠY được ghi thành thành công, và cả chuỗi
+    điều phối phía trên tin theo. Vì thế chốt này đọc NỘI DUNG, không đọc mỗi rc:
+    rc=0 mà đầu ra có dấu chưa đăng nhập vẫn là ĐỎ. Cùng doctrine với `_git_mot_dong`.
+    """
+    ra = []
+    for tho in probe_ds or []:
+        argv = _phan_tich_probe(tho)
+        d = shutil.which(argv[0])
+        if not d:
+            raise Chan(MA_THIEU_CONG_CU,
+                       f"khong chay duoc --auth-probe: khong tim thay `{argv[0]}`")
+        try:
+            # timeout BẮT BUỘC: một probe treo (chờ nhập mật khẩu, chờ trình duyệt)
+            # sẽ treo luôn cả lượt — mà chốt này đứng TRƯỚC đường cưỡng chế hạn chót.
+            p = subprocess.run([d, *argv[1:]], capture_output=True, text=True,
+                               timeout=120, encoding="utf-8", errors="replace")
+        except subprocess.TimeoutExpired:
+            raise Chan(MA_CHUA_XAC_THUC,
+                       f"--auth-probe `{argv[0]}` treo qua 120s — coi nhu chua xac thuc") from None
+        except OSError as e:
+            raise Chan(MA_THIEU_CONG_CU, f"khong chay duoc --auth-probe `{argv[0]}`: {e}") from None
+        dau_ra = (p.stdout or "") + (p.stderr or "")
+        khop = DAU_CHUA_XAC_THUC.search(dau_ra)
+        if khop:
+            raise Chan(MA_CHUA_XAC_THUC,
+                       f"`{argv[0]}` chua xac thuc (rc={p.returncode}, dau hieu "
+                       f"{khop.group(0)!r}) — rc KHONG phai bang chung")
+        if p.returncode != 0:
+            raise Chan(MA_CHUA_XAC_THUC,
+                       f"--auth-probe `{argv[0]}` thoat {p.returncode}: "
+                       f"{dau_ra.strip().splitlines()[0][:120] if dau_ra.strip() else '(khong in gi)'}")
+        ra.append({"probe": argv, "rc": p.returncode})
+    return ra
+
+
 def chay_cac_chot(a) -> dict:
     ws = tim_workspace(a.workspace)
     kho = chot_kho(ws, a.expected_repo, a.expected_root_commit)
@@ -975,12 +1078,18 @@ def chay_cac_chot(a) -> dict:
     ban = chot_sach(ws, bool(a.require_clean))
     sha_prompt = chot_prompt(a.prompt_file, a.expected_prompt_sha256)
     han = chot_han(a.deadline_utc)
+    # Công cụ TRƯỚC xác thực: không probe được thứ chưa có mặt, và thông điệp
+    # "thiếu codex" hữu ích hơn hẳn "probe hỏng".
+    cong_cu = chot_cong_cu(getattr(a, "require_tool", None))
+    xac_thuc = chot_xac_thuc(getattr(a, "auth_probe", None))
     return {
         "workspace": ws, "head": head, "ref": ref, **kho,
         "worktree_sach": (ban == ""),
         "so_muc_ban": (0 if not ban else len(ban.splitlines())),
         "prompt_sha256": sha_prompt,
         "deadline_utc": (han.isoformat() if han else None),
+        "cong_cu_luot": cong_cu,
+        "xac_thuc": xac_thuc,
     }
 
 
@@ -1399,27 +1508,47 @@ def lenh_stop(a) -> int:
 # python/git/node/claude, KHÔNG có codex, gh, pwsh. Thiếu công cụ mà chỉ lộ ra
 # giữa chừng thì lượt chạy hỏng ở chỗ khó đọc; hỏi trước thì hỏng ở chỗ dễ đọc.
 #
-# Bảng này KHÔNG cài gì cả — nó chỉ đo và chỉ ra lệnh cài chính thức. Việc cài do
-# hook phiên (.claude/hooks/session-start.sh) hoặc do người dùng làm.
+# Mặc định bảng này KHÔNG cài gì — chỉ đo và chỉ ra lệnh cài chính thức. Tự cài đè
+# lên máy cá nhân của người dùng là vượt quyền. `doctor --cai` là lựa chọn CÓ Ý
+# THỨC của người gọi; khi đó `cai_lenh` bên dưới mới được dùng.
+#
+# HAI trường cài, cố ý tách:
+#   `cai`      — chữ CHO NGƯỜI ĐỌC. Có ghi chú ngoặc ("(hoac: brew install git)"),
+#                KHÔNG exec được. Bản trước chỉ có trường này, nên bất kỳ ai định
+#                cho `--cai` chạy thẳng nó sẽ exec cả phần ghi chú.
+#   `cai_lenh` — argv MÁY ĐỌC ĐƯỢC, theo nền, dạng DANH SÁCH ỨNG VIÊN thử theo thứ
+#                tự (apt-get rồi sudo apt-get: container chạy bằng root không có
+#                sudo, máy thật thì ngược lại). Không có ứng viên nào chạy được thì
+#                công cụ đó vào `khong_tu_cai_duoc` — LỘ RA, không im lặng bỏ qua.
 CONG_CU = [
     {"ten": "git", "bat_buoc": True, "ung_vien": ["git"],
      "vi_sao": "moi chot neo HEAD/ref/worktree deu qua git",
      "cai": {"Windows": "winget install --id Git.Git -e",
              "Darwin": "xcode-select --install  (hoac: brew install git)",
-             "Linux": "sudo apt-get install -y git"}},
+             "Linux": "sudo apt-get install -y git"},
+     "cai_lenh": {"Windows": [["winget", "install", "--id", "Git.Git", "-e"]],
+                  "Darwin": [["brew", "install", "git"]],
+                  "Linux": [["apt-get", "install", "-y", "git"],
+                            ["sudo", "apt-get", "install", "-y", "git"]]}},
     {"ten": "python", "bat_buoc": True, "ung_vien": ["python3", "python", "py"],
      "vi_sao": "chinh launcher nay chay bang python",
      # Windows KHONG co lenh `python3` (chi `python` va `py`) - dung doi tai lieu
      # bat nguoi ta cai them mot bi danh; nhan CA BA ten la du.
      "cai": {"Windows": "winget install --id Python.Python.3.12 -e",
              "Darwin": "brew install python@3.12",
-             "Linux": "sudo apt-get install -y python3"}},
+             "Linux": "sudo apt-get install -y python3"},
+     "cai_lenh": {"Windows": [["winget", "install", "--id", "Python.Python.3.12", "-e"]],
+                  "Darwin": [["brew", "install", "python@3.12"]],
+                  "Linux": [["apt-get", "install", "-y", "python3"],
+                            ["sudo", "apt-get", "install", "-y", "python3"]]}},
     {"ten": "claude", "bat_buoc": False, "ung_vien": ["claude"],
      "vi_sao": "CLI chinh thuc de goi phien Claude (khong tu viet script spawn)",
-     "cai": {"*": "npm install -g @anthropic-ai/claude-code"}},
+     "cai": {"*": "npm install -g @anthropic-ai/claude-code"},
+     "cai_lenh": {"*": [["npm", "install", "-g", "@anthropic-ai/claude-code"]]}},
     {"ten": "codex", "bat_buoc": False, "ung_vien": ["codex"],
      "vi_sao": "CLI chinh thuc de goi phien Codex (khong tu viet script spawn)",
-     "cai": {"*": "npm install -g @openai/codex"}},
+     "cai": {"*": "npm install -g @openai/codex"},
+     "cai_lenh": {"*": [["npm", "install", "-g", "@openai/codex"]]}},
     # rg (ripgrep): codex và Claude Code đều gọi nó để tìm trong mã. Nhanh hơn
     # grep nhiều lần, tôn trọng .gitignore, và đọc UTF-8 đúng — quan trọng với kho
     # tiếng Việt, nơi `findstr` của Windows đọc sai dấu. Không bắt buộc vì mọi chốt
@@ -1428,23 +1557,40 @@ CONG_CU = [
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
      "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
              "Darwin": "brew install ripgrep",
-             "Linux": "sudo apt-get install -y ripgrep"}},
+             "Linux": "sudo apt-get install -y ripgrep"},
+     "cai_lenh": {"Windows": [["winget", "install", "--id", "BurntSushi.ripgrep.MSVC", "-e"]],
+                  "Darwin": [["brew", "install", "ripgrep"]],
+                  "Linux": [["apt-get", "install", "-y", "ripgrep"],
+                            ["sudo", "apt-get", "install", "-y", "ripgrep"]]}},
     # bash: `.claude/settings.json` gọi hook qua bash và session-start.sh là bash
     # script. Máy Windows KHÔNG có Git Bash thì hook hỏng, mà doctor cũ vẫn in
     # "DU CONG CU BAT BUOC" — đo thiếu đúng chỗ môi trường phụ thuộc (audit vòng 3).
     {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],
      "vi_sao": "hook SessionStart la bash script; Windows can Git Bash",
      "cai": {"Windows": "winget install --id Git.Git -e  (kem Git Bash)",
-             "Darwin": "co san", "Linux": "sudo apt-get install -y bash"}},
+             "Darwin": "co san", "Linux": "sudo apt-get install -y bash"},
+     # Windows/Darwin cố ý KHÔNG có argv: bash tới theo Git Bash chứ không phải một
+     # gói riêng, và trên macOS nó có sẵn. Bịa một lệnh ở đây thì `--cai` sẽ chạy
+     # thứ không cài đúng thứ đang thiếu — thà báo "khong tu cai duoc".
+     "cai_lenh": {"Linux": [["apt-get", "install", "-y", "bash"],
+                            ["sudo", "apt-get", "install", "-y", "bash"]]}},
     # npm: session-start.sh rẽ nhánh trên `co npm`, không phải trên `node`.
     {"ten": "npm", "bat_buoc": False, "ung_vien": ["npm"],
      "vi_sao": "hook cai hai CLI agent bang npm; co node chua chac co npm",
      "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
-             "Darwin": "brew install node", "Linux": "sudo apt-get install -y npm"}},
+             "Darwin": "brew install node", "Linux": "sudo apt-get install -y npm"},
+     "cai_lenh": {"Windows": [["winget", "install", "--id", "OpenJS.NodeJS.LTS", "-e"]],
+                  "Darwin": [["brew", "install", "node"]],
+                  "Linux": [["apt-get", "install", "-y", "npm"],
+                            ["sudo", "apt-get", "install", "-y", "npm"]]}},
     {"ten": "node", "bat_buoc": False, "ung_vien": ["node"],
      "vi_sao": "can de cai hai CLI tren",
      "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
-             "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"}},
+             "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"},
+     "cai_lenh": {"Windows": [["winget", "install", "--id", "OpenJS.NodeJS.LTS", "-e"]],
+                  "Darwin": [["brew", "install", "node"]],
+                  "Linux": [["apt-get", "install", "-y", "nodejs", "npm"],
+                            ["sudo", "apt-get", "install", "-y", "nodejs", "npm"]]}},
 ]
 
 
@@ -1483,8 +1629,12 @@ def _in_an_toan(chuoi: str) -> bool:
         return False
 
 
-def lenh_doctor(a) -> int:
-    he = platform.system()
+def _do_cong_cu(he: str) -> tuple[list[dict], list[str]]:
+    """Đo một lượt: trả (bảng kết quả, danh sách thiếu-bắt-buộc).
+
+    Tách khỏi `lenh_doctor` để `--cai` ĐO LẠI sau khi cài — báo cáo phải là trạng
+    thái SAU CÙNG, không phải trạng thái trước lúc cài kèm lời hứa "đã chạy lệnh".
+    """
     ket = []
     thieu_bat_buoc = []
     for c in CONG_CU:
@@ -1507,11 +1657,56 @@ def lenh_doctor(a) -> int:
         ket.append(muc)
         if thay is None and c["bat_buoc"]:
             thieu_bat_buoc.append(c["ten"])
+    return ket, thieu_bat_buoc
+
+
+def _thu_cai(ket: list[dict], he: str) -> tuple[list[dict], list[str]]:
+    """Cài những thứ đang thiếu. Trả (đã thử, không tự cài được).
+
+    KHÔNG dùng shell: argv đi dạng list, đúng lý do ở bẫy số 1 đầu tệp.
+    """
+    da_thu, khong_duoc = [], []
+    thieu = {m["ten"] for m in ket if not m["co"]}
+    for c in CONG_CU:
+        if c["ten"] not in thieu:
+            continue
+        ung_vien = (c.get("cai_lenh", {}).get(he) or c.get("cai_lenh", {}).get("*") or [])
+        chon = next((argv for argv in ung_vien if shutil.which(argv[0])), None)
+        if chon is None:
+            # Không có argv cho nền này, HOẶC có mà trình cài không tồn tại. Cả hai
+            # đều là "không tự cài được" và PHẢI lộ ra: im lặng bỏ qua sẽ làm
+            # `--cai` trông như đã làm xong việc.
+            khong_duoc.append(c["ten"])
+            continue
+        try:
+            p = subprocess.run([shutil.which(chon[0]), *chon[1:]], capture_output=True,
+                               text=True, timeout=900, encoding="utf-8", errors="replace")
+            rc = p.returncode
+        except (OSError, subprocess.SubprocessError) as e:
+            da_thu.append({"ten": c["ten"], "lenh": chon, "rc": None, "ok": False,
+                           "loi": str(e)[:200]})
+            continue
+        da_thu.append({"ten": c["ten"], "lenh": chon, "rc": rc, "ok": rc == 0})
+    return da_thu, khong_duoc
+
+
+def lenh_doctor(a) -> int:
+    he = platform.system()
+    ket, thieu_bat_buoc = _do_cong_cu(he)
+    da_thu_cai, khong_tu_cai_duoc = [], []
+    if getattr(a, "cai", False):
+        da_thu_cai, khong_tu_cai_duoc = _thu_cai(ket, he)
+        if da_thu_cai:
+            # ĐO LẠI. `rc=0` của trình cài KHÔNG phải bằng chứng công cụ đã dùng
+            # được — cùng bài học với `_phien_ban`.
+            ket, thieu_bat_buoc = _do_cong_cu(he)
 
     if a.json:
         _in_an_toan(json.dumps({"ok": not thieu_bat_buoc, "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
-                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc},
+                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc,
+                                "da_thu_cai": da_thu_cai,
+                                "khong_tu_cai_duoc": khong_tu_cai_duoc},
                                ensure_ascii=False, indent=2))
     else:
         con_ong = _in_an_toan(
@@ -1529,6 +1724,12 @@ def lenh_doctor(a) -> int:
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
             if not c["co"] and con_ong:
                 con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
+        for t in da_thu_cai:
+            _in_an_toan(f"  cai   {t['ten']:<8} {' '.join(t['lenh'])} -> "
+                        + ("OK" if t["ok"] else f"HONG (rc={t['rc']})"))
+        if khong_tu_cai_duoc:
+            _in_an_toan("  KHONG TU CAI DUOC: " + ", ".join(khong_tu_cai_duoc)
+                        + " (xem dong 'cai bang:' o tren)")
         _in_an_toan("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
                                       else "THIEU " + ", ".join(thieu_bat_buoc)))
     return MA_THIEU_CONG_CU if thieu_bat_buoc else MA_OK
@@ -1550,6 +1751,12 @@ def _them_chot(p):
     p.add_argument("--prompt-file", default=None)
     p.add_argument("--expected-prompt-sha256", default=None)
     p.add_argument("--deadline-utc", default=None)
+    p.add_argument("--require-tool", action="append", default=None, metavar="TEN",
+                   help="cong cu LUOT NAY can (lap lai duoc). Thieu hoac khong chay duoc => 12")
+    p.add_argument("--auth-probe", action="append", default=None, metavar="LENH",
+                   help='lenh chung minh DA XAC THUC (lap lai duoc). Ten chuong trinh '
+                        'tran, hoac mang JSON: \'["codex","login","status"]\'. '
+                        'In 401/Unauthorized => 13, KE CA khi rc=0')
     p.add_argument("--json", action="store_true")
 
 
@@ -1576,8 +1783,11 @@ def build_parser():
     s.add_argument("--id", default=None, help="run_id day du hoac short_id")
     s.set_defaults(fn=lenh_status)
 
-    d = sub.add_parser("doctor", help="kiem cong cu moi truong (KHONG cai gi)")
+    d = sub.add_parser("doctor", help="kiem cong cu moi truong (mac dinh KHONG cai gi)")
     d.add_argument("--json", action="store_true")
+    d.add_argument("--cai", action="store_true",
+                   help="thieu thi CAI bang lenh chinh thuc roi DO LAI. Mac dinh tat: "
+                        "tu cai de len may ca nhan cua nguoi dung la vuot quyen")
     d.set_defaults(fn=lenh_doctor)
 
     k = sub.add_parser("stop", help="dung mot luot chay (giet ca cay tien trinh)")

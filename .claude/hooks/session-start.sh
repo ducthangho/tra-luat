@@ -54,9 +54,30 @@ fi
 # thanh "Incorrect API key provided: sk-thu-n***" — tuc bearer DA toi OpenAI qua
 # proxy, va thu duy nhat con thieu la mot khoa THAT.
 # Im lang o day se de lai mot cong cu TRONG NHU dung duoc, nen thieu khoa thi noi ra.
+#
+# HAI DUONG NAP, theo dung thu tu uu tien:
+#   1. CODEX_AUTH_JSON — noi dung `~/.codex/auth.json` bung nguyen tu may da
+#      `codex login` bang tai khoan ChatGPT. Day la duong DUY NHAT dung duoc goi
+#      ChatGPT Plus/Pro o container khong co trinh duyet: dang nhap ChatGPT la
+#      OAuth qua localhost, khong dien duoc o day. LUU Y: tep do chua REFRESH
+#      TOKEN, tuc mot bi mat song lau — dat no o cho nao thi cho do can duoc coi
+#      la kho bi mat.
+#   2. OPENAI_API_KEY — khoa API tra tien theo luot. GOI CHATGPT PRO KHONG KEM
+#      khoa API va khong kem tin dung API; do la hai thu tinh tien khac nhau.
 if co codex; then
   if codex login status >/dev/null 2>&1; then
     echo "[session-start] codex: da dang nhap"
+  elif [ -n "${CODEX_AUTH_JSON:-}" ]; then
+    mkdir -p "$HOME/.codex"
+    # 0600 NGAY TU LUC TAO: `printf > tep` de lai quyen theo umask, ma day la
+    # refresh token. Cung ly le voi ban chup prompt trong launcher.
+    ( umask 077; printf '%s' "$CODEX_AUTH_JSON" > "$HOME/.codex/auth.json" )
+    if codex login status >/dev/null 2>&1; then
+      echo "[session-start] codex: da nap phien dang nhap tu CODEX_AUTH_JSON"
+    else
+      echo "[session-start] CANH BAO: CODEX_AUTH_JSON co nhung khong dung duoc -"
+      echo "[session-start]   dang nhap lai tren may that roi bung lai ~/.codex/auth.json"
+    fi
   elif [ -n "${OPENAI_API_KEY:-}" ]; then
     if printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key >/dev/null 2>&1; then
       echo "[session-start] codex: da dang nhap bang OPENAI_API_KEY"
@@ -65,7 +86,9 @@ if co codex; then
     fi
   else
     echo "[session-start] CANH BAO: codex DA CAI nhung CHUA DANG NHAP - moi lenh se tra 401."
-    echo "[session-start]   Dat OPENAI_API_KEY cho moi truong nay, hoac chay tay:"
+    echo "[session-start]   Goi ChatGPT: chay \`codex login\` tren may that roi dat noi dung"
+    echo "[session-start]   ~/.codex/auth.json vao bien CODEX_AUTH_JSON cua moi truong nay."
+    echo "[session-start]   Khoa API (tinh tien rieng): dat OPENAI_API_KEY, hoac chay tay:"
     echo "[session-start]   printf %s \"\$KHOA\" | codex login --with-api-key"
   fi
 fi

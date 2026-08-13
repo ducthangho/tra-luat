@@ -60,9 +60,16 @@ trong môi trường **bị codex bỏ qua** (OpenAI trả đúng chữ `Missing
 không đặt nó); khoá phải nằm trong `~/.codex/auth.json`, ghi bằng `codex login
 --with-api-key` (đọc STDIN, không cần trình duyệt). Chứng minh hết đường bằng khoá giả:
 sau `login`, lỗi đổi từ `Missing bearer` thành `Incorrect API key provided: sk-thu-n***`
-— transport/TLS/proxy đều thông, thứ duy nhất còn thiếu là một khoá THẬT. Hook
-`session-start.sh` nay đăng nhập bằng `OPENAI_API_KEY` nếu có và **nói ra** khi không
-có; ngưỡng "có mặt ⇒ xanh" là của `doctor` nên không sửa ở đây. `gh` thì cài được nhưng
+— transport/TLS/proxy đều thông, thứ duy nhất còn thiếu là một khoá THẬT. Nhưng khoá
+API thường là đường **sai**: README của chính gói khuyên đăng nhập bằng tài khoản
+ChatGPT để dùng Codex trong gói Plus/Pro/…, còn khoá API *"requires additional setup"* —
+gói ChatGPT **không kèm** khoá API lẫn tín dụng API, hai thứ tính tiền tách biệt. Container
+không có trình duyệt vẫn đăng nhập ChatGPT được bằng **`codex login --device-auth`**
+(in mã dùng một lần, hạn 15 phút, duyệt trên máy bất kỳ) — đã đo: luồng này **đi qua
+được proxy**. Hook `session-start.sh` nay nạp theo thứ tự `CODEX_AUTH_JSON` (bưng
+`~/.codex/auth.json` từ máy đã đăng nhập; **chứa refresh token** nên ghi bằng `umask
+077` và phải coi là bí mật) → `OPENAI_API_KEY` → **nói ra** khi không có gì; ngưỡng "có
+mặt ⇒ xanh" là của `doctor` nên không sửa ở đây. `gh` thì cài được nhưng
 **mọi** lời gọi API trả 403 "An org admin must connect the Claude GitHub App" ⇒ phiên
 remote không mở được PR, không gắn được nhãn, không gọi được `workflow_dispatch`; chỉ
 `git push` đi được vì nó qua proxy git riêng. Nên workflow Windows nhận thêm tiền tố

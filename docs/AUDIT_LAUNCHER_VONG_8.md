@@ -150,8 +150,22 @@ thành `Incorrect API key provided: sk-thu-n***`. Nghĩa là transport, TLS và 
 thông báo lỗi ⇒ proxy chuyển tiếp nguyên văn, **không** tiêm khoá OpenAI (khác với
 `GH_TOKEN=proxy-inject` vốn được tiêm cho GitHub).
 
-Hook `session-start.sh` nay đăng nhập bằng `OPENAI_API_KEY` nếu có, và **nói ra**
-khi không có. Ghi rõ để ai đó cầm `doctor` quyết định: hiện `doctor` vẫn đọc
+**Nhưng khoá API thường là đường SAI.** README của chính gói `@openai/codex` (đọc tại
+chỗ) khuyên đăng nhập bằng tài khoản ChatGPT để dùng Codex trong gói Plus/Pro/
+Business/Edu/Enterprise; khoá API là đường riêng, *"requires additional setup"*.
+Gói ChatGPT **không kèm** khoá API và **không kèm** tín dụng API — hai thứ tính tiền
+tách biệt. Với người chỉ có gói ChatGPT, dùng `--with-api-key` là mở một hoá đơn
+thứ hai chứ không phải tiêu gói đang có.
+
+Container không có trình duyệt vẫn đăng nhập ChatGPT được: **`codex login
+--device-auth`** in một liên kết và một mã dùng một lần (hạn 15 phút), duyệt trên
+máy bất kỳ. ĐÃ ĐO 13-08: luồng này **đi qua được proxy** — mã hiện ra bình thường.
+Đây là đường tốt nhất cho phiên remote vì không phải mang bí mật đi đâu cả.
+
+Hook `session-start.sh` nay nạp phiên đăng nhập theo thứ tự: `CODEX_AUTH_JSON`
+(nội dung `~/.codex/auth.json` bưng từ máy đã đăng nhập ChatGPT — tiện cho phiên
+remote lặp lại, nhưng **chứa refresh token** nên phải coi là bí mật; ghi bằng
+`umask 077`), rồi `OPENAI_API_KEY`, và **nói ra** khi không có gì cả. Ghi rõ để ai đó cầm `doctor` quyết định: hiện `doctor` vẫn đọc
 `codex` là "có" trong đúng lượt mà hook vừa cảnh báo nó chưa đăng nhập — hai dòng
 đứng cạnh nhau trong một lần chạy. Ngưỡng "có mặt ⇒ xanh" là của `doctor`, không
 sửa ở đây.

@@ -1712,10 +1712,20 @@ def t75_tep_tam_mo_coi_bi_don():
 
 @ca
 def t78_khong_do_duoc_nhom_KHONG_phai_cay_rong():
-    """None từ phép quét không được biến thành bằng chứng cả cây đã chết."""
+    """None từ phép quét không được biến thành bằng chứng cả cây đã chết.
+
+    PHẢI bịt CẢ HAI phép đo. Bản đầu chỉ bịt `_thanh_vien_nhom` rồi để `_chup_cay`
+    THẬT chạy — trên Linux nó gọi `powershell` (không có) nên ném rồi trả None, tức
+    ca xanh nhờ MÁY DEV THIẾU CÔNG CỤ chứ không nhờ điều được khẳng định. Trên
+    windows-latest `_chup_cay` chạy thật, trả `{}` cho một PID không tồn tại — bằng
+    chứng ĐO ĐƯỢC và hợp lệ (đó là điều `t83` khẳng định) — nên ca này đỏ ở đó.
+    Sửa FIXTURE, không nới chốt: muốn thử "không đo được" thì phải dựng cho bằng
+    được trạng thái không đo được, ở mọi nền.
+    """
     m = _tai_launcher_thu()
     m._khoa_danh_tinh = lambda _pid: None
-    m._thanh_vien_nhom = lambda _pid: None
+    m._thanh_vien_nhom = lambda _pid: None     # phep do POSIX
+    m._chup_cay = lambda _pid: None            # phep do Windows
     m.platform.system = lambda: "Windows"
     da_goi = []
     m._giet_windows = lambda *_a, **_k: (da_goi.append(True) or m.KetGiet(False, False, "khong do duoc"))

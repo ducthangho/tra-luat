@@ -39,6 +39,15 @@ Ghi rõ ranh giới bằng chứng: mục thứ nhất có **số đo thật tr�
 125). Mục thứ hai là **suy luận**, chưa quan sát được `_chup_cay` trả `None` trên runner —
 nó trở nên đáng sửa vì mục thứ nhất khiến ảnh chụp thành đường quyết định.
 
+**Lượt sau đó: `t69` xanh, `t78` đỏ — và lần này là FIXTURE.** `t78` khẳng định "không đo
+được ≠ cây rỗng" nhưng chỉ bịt `_thanh_vien_nhom`, để `_chup_cay` **thật** chạy. Trên Linux
+`_chup_cay` gọi `powershell` (không có) nên ném rồi trả `None` — ca xanh nhờ **máy dev
+thiếu công cụ**, không nhờ điều nó khẳng định. Trên `windows-latest` nó chạy thật và trả
+`{}` cho một PID không tồn tại: bằng chứng ĐO ĐƯỢC và hợp lệ, đúng thứ `t83` khẳng định ⇒
+`t78` đỏ ở đó. Bịt nốt phép đo Windows trong fixture. **Sửa fixture, không nới chốt** —
+muốn thử "không đo được" thì phải dựng cho bằng được trạng thái đó ở mọi nền. Đã soi cả
+bốn ca stub `platform.system() == "Windows"`; chỉ `t78` có hình dạng này.
+
 # ★ dev-side — audit launcher vòng 7: fail-closed cho Job Object và phép đo Windows (2026-08-13)
 
 Không bump `VERSION`. Vòng rà soát thứ bảy vá năm lỗ hổng đo/giết cây Windows:

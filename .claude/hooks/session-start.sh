@@ -41,6 +41,39 @@ co python3 || PY=python
 echo "[session-start] kiem va cai cong cu:"
 "$PY" .claude/dev/launcher.py doctor --cai || true
 
+# --- Xác thực codex. Container phù du: ~/.codex/auth.json mất theo container, nên
+# phải làm lại mỗi phiên. KHÔNG dùng API key: kho này đăng nhập bằng tài khoản
+# ChatGPT, API key tính tiền riêng nên là trả hai lần cho cùng một việc.
+#
+# Hook KHÔNG làm được việc tương tác, nên nó không giả vờ: thiếu đường không tương
+# tác thì IN THẲNG lệnh người dùng cần chạy, chứ không cảnh báo mơ hồ rồi để lượt
+# sau chết ở chỗ khó đọc.
+if command -v codex >/dev/null 2>&1; then
+  # BẰNG CHỨNG DƯƠNG qua chính chốt của launcher: nó đọc NỘI DUNG đầu ra, không đọc
+  # rc — `codex` chưa đăng nhập có lệnh in 401 mà vẫn thoát 0.
+  da_xac_thuc() {
+    "$PY" .claude/dev/launcher.py check \
+      --auth-probe '["codex","login","status"]' >/dev/null 2>&1
+  }
+  if da_xac_thuc; then
+    echo "[session-start] codex: da xac thuc"
+  elif [ -n "${CODEX_ACCESS_TOKEN:-}" ]; then
+    echo "[session-start] codex: dang nhap bang CODEX_ACCESS_TOKEN ..."
+    printenv CODEX_ACCESS_TOKEN | codex login --with-access-token >/dev/null 2>&1 || true
+    # Hỏi LẠI. rc của lệnh login không phải bằng chứng đã đăng nhập được.
+    if da_xac_thuc; then
+      echo "[session-start] codex: xac thuc OK"
+    else
+      echo "[session-start] CANH BAO: co CODEX_ACCESS_TOKEN nhung van CHUA xac thuc"
+      echo "[session-start]   token co the da het han (~10 ngay) — chay: codex login --device-auth"
+    fi
+  else
+    echo "[session-start] codex CHUA xac thuc. Chay lenh nay MOT LAN cho container nay:"
+    echo "[session-start]     codex login --device-auth"
+    echo "[session-start]   (in ra ma, duyet bang dien thoai; dung tai khoan ChatGPT, khong ton credit API)"
+  fi
+fi
+
 # --- phụ thuộc Python của kho ($PY đã chọn ở trên)
 # Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
 # SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac

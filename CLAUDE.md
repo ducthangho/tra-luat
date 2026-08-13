@@ -62,6 +62,24 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   đường Windows từng mù hoàn toàn với secrets trong tệp ẩn. Nay quét cả tệp không mở rộng, tránh nhị
   phân bằng NUL-check 8KB + trần 2MB. Bảng mẫu bí mật ĐỂ MỘT CHỖ: `scripts/pkg_secret_scan.py`, dùng
   chung cho cả `sh` lẫn `ps1` — hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
+- **KHÔNG cấp lease review trước khi CHỨNG MINH reviewer chạy được.** Đã đốt HAI lease liên tiếp
+  (wp55 r2 #1 và #2) vì cùng một chuyện: cấp xong mới phát hiện `codex` chưa cài / chưa đăng nhập,
+  lease hết hạn mà không ai cầm. Cổng bắt buộc, chạy trên ĐÚNG máy sắp chạy reviewer:
+  `python .claude/dev/launcher.py check --require-tool codex --auth-probe '["codex","login","status"]'`
+  — `0` mới được cấp. `12` = thiếu công cụ (đi cài), `13` = chưa đăng nhập (đi login). Hai mã, hai
+  cách chữa, đừng gộp.
+- **Prompt reviewer phải COMMIT VÀO KHO, đừng chỉ sống trong comment GitHub.** Neo sha256 vẫn giữ
+  nguyên tác dụng. Đã trả giá 13-08-2026: prompt wp55 (sha `46a833cc…`) chỉ nằm trong `<details>`
+  của comment #55, mà phiên được giao việc lại KHÔNG có quyền GitHub API ⇒ có codex, có lease, có
+  cây mã, vẫn không chạy được vì thiếu đúng cái đề bài. Thứ cả lượt phụ thuộc mà nằm sau một API
+  worker chưa chắc có quyền thì đó là phụ thuộc ẩn.
+- **Quyền GitHub gắn theo XUẤT XỨ phiên, không theo môi trường.** Đo trên 20+ phiên CÙNG một
+  `environment_id`: phiên `origin: desktop_app`/`android` (bạn tự mở từ app, qua bộ chọn kho) có
+  GitHub API; phiên `origin: claude_code_mcp_seed` (đẻ bằng `create_session`) thì `api.github.com`
+  trả 403 *"An org admin must connect the Claude GitHub App"* — thông điệp này SAI nguyên nhân và
+  đã lừa 4 phiên đi cài lại App. Dấu hiệu nhìn thấy được: phiên có quyền thì hồ sơ có trường
+  `session_context.outcomes`. Git đọc/ghi thì MỌI phiên đều có (proxy tự tiêm credential), nên việc
+  gì cần chắc chắn thì đi qua git, đừng đi qua API.
 
 ## Gọi agent đa nền (chi tiết: `docs/GOI_AGENT_DA_NEN.md`)
 - **KHÔNG viết script spawn agent.** Dùng CLI CHÍNH THỨC: `claude`
@@ -72,8 +90,27 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
   Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
   có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
-  cài codex/claude/ripgrep (KHÔNG cài gh, pwsh: kho dùng GitHub qua MCP, không còn
-  đường nào cần PowerShell).
+  gọi đúng một lệnh `doctor --cai` (KHÔNG cài gh, pwsh: kho dùng GitHub qua MCP, không
+  còn đường nào cần PowerShell).
+- **Bắt buộc là thuộc tính của LƯỢT, không phải của công cụ.** `doctor` trả lời "máy này
+  có gì"; câu hỏi "lượt này cần gì" hỏi tại chốt: `--require-tool codex`. Đã đo 13-08-2026:
+  `doctor` in `DU CONG CU BAT BUOC` + rc=0 trong khi codex vắng mặt.
+- **Chạy được ≠ dùng được.** `--auth-probe` đọc NỘI DUNG đầu ra chứ không đọc rc: một lệnh
+  codex chưa xác thực in `401 Unauthorized` rồi thoát **rc=0**, launcher truyền lại mã con
+  nên sổ ghi `trang_thai: "xong"` cho một lượt KHÔNG HỀ CHẠY. Mã riêng: **13**.
+- **Hook SessionStart chỉ chạy khi kho ĐÃ CÓ lúc phiên khởi động.** Phiên `mcp_seed` nhận kho
+  SAU đó ⇒ `settings.json` chưa tồn tại ⇒ hook không chạy ⇒ không có codex, dù hook viết đúng.
+  Phiên kiểu đó tự dựng bằng `doctor --cai` hoặc `--cai-neu-thieu`.
+- **`codex exec` TREO VÔ HẠN nếu stdin còn mở** — nó "Reading additional input from stdin..."
+  rồi đứng im (đo được: rc=124 sau 240s, không in gì khác). Gọi trực tiếp thì PHẢI `< /dev/null`.
+  Qua `launcher.py run` thì miễn nhiễm sẵn (`stdin=DEVNULL`), và đầu ra con nằm ở
+  `stdout.log`/`stderr.log` trong thư mục lượt chạy chứ không đổ ra terminal.
+- **Xác thực codex: dùng thuê bao, đừng dùng API key.** `codex login --device-auth` in mã, duyệt
+  bằng điện thoại — không cần trình duyệt trong container, và ăn theo gói ChatGPT thay vì tiêu
+  credit API (trả hai lần cho cùng một việc). Đo 13-08-2026: `access_token` hạn ~10 ngày, có
+  `refresh_token`; muốn chạy không người trực thì mới cần `CODEX_ACCESS_TOKEN` +
+  `--with-access-token`. Cảnh báo `websocket` của proxy KHÔNG chặn — HTTPS fallback đủ, đã đo
+  bằng lượt codex thật.
 - **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
   Đừng bắt cài thêm bí danh; tài liệu và script phải nhận cả ba tên.
 - **Neo theo KHO, không theo đường dẫn.** Đường dẫn tuyệt đối là thứ duy nhất không

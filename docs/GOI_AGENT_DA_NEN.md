@@ -82,6 +82,45 @@ lại mã con nên sổ ghi `trang_thai: "xong", ma_thoat: 0` — một lượt 
 Không tách chuỗi theo khoảng trắng và không qua shell: quy tắc trích dẫn của
 `cmd.exe` khác POSIX, nên mảng JSON là dạng duy nhất đọc giống nhau ở mọi nền.
 
+### Xác thực codex: dùng thuê bao, đừng dùng API key
+
+```bash
+codex login --device-auth      # in ra mã, duyệt bằng điện thoại
+codex login status             # "Logged in using ChatGPT"
+```
+
+`--device-auth` không cần trình duyệt trong container và ăn theo gói ChatGPT. Dùng
+API key là **trả hai lần** cho cùng một việc khi đã có thuê bao.
+
+Đo 13-08-2026 sau một lần đăng nhập thật: `~/.codex/auth.json` (0600) chứa
+`access_token` hạn **~10 ngày** kèm `refresh_token`, `auth_mode` là ChatGPT,
+`OPENAI_API_KEY: None`. Chỉ khi cần chạy **không người trực** mới nên đi đường
+`CODEX_ACCESS_TOKEN` + `codex login --with-access-token` (đọc từ stdin) — đổi lại,
+`auth.json` chứa refresh token là bí mật sống lâu, cân nhắc trước khi đưa vào biến
+môi trường.
+
+Container phù du nên `auth.json` mất theo container. Hook không làm được việc tương
+tác, nên nó **in thẳng lệnh cần chạy** thay vì cảnh báo mơ hồ.
+
+### Bẫy: `codex exec` treo vô hạn nếu stdin còn mở
+
+```bash
+codex exec --skip-git-repo-check "..." < /dev/null     # BẮT BUỘC khi gọi TRỰC TIẾP
+```
+
+Thiếu `< /dev/null` thì nó in đúng một dòng `Reading additional input from stdin...`
+rồi đứng im — đo được `rc=124` sau 240 giây, không có dấu hiệu nào khác. Gọi qua
+`launcher.py run` thì miễn nhiễm sẵn (`stdin=subprocess.DEVNULL`), nhưng máy ASUS,
+CI và script gọi tay thì dính.
+
+Cũng nhớ: qua launcher, **đầu ra của con không đổ ra terminal** mà nằm ở
+`stdout.log` / `stderr.log` trong thư mục lượt chạy. Đừng kết luận "codex không in
+gì" khi mới chỉ nhìn terminal.
+
+Cảnh báo `websocket` của `codex doctor` (proxy phiên không hỗ trợ nâng cấp
+WebSocket) **không chặn** — HTTPS fallback đủ, đã đo bằng lượt codex thật chạy
+qua launcher.
+
 Đã đo trong container Claude Code web (12-08-2026): có `python`, `git`, `node`,
 `claude`, `rg`; **không có** `codex`, `gh`, `pwsh`. Hook
 `.claude/hooks/session-start.sh` gọi đúng một lệnh `doctor --cai` — **không** cài

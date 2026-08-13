@@ -24,8 +24,16 @@ name: launcher (Windows that)
 # Nhu vay truoc doi nay, mot phien remote KHONG CO CACH NAO cham toi thiet bi do
 # Windows — thiet bi ton tai nhung khong ai voi toi. Nay: day len tien to
 # `do-windows/**` la chay.
-# ⚠ BO LOC `paths` VAN AP: commit duoc day phai dung toi `.claude/dev/**` hoac chinh
-# tep workflow nay, khong thi job KHONG chay — va "khong chay" trong ra y het "xanh".
+# ⚠ BO LOC `paths` VAN AP, va no xet TAT CA commit CO TRONG LUOT PUSH chu khong phai
+# cay lam viec. Nen cach dung DUY NHAT chac chan la TAO MOI nhanh:
+#     git push origin HEAD:refs/heads/do-windows/<ten-moi>
+# Luot tao nhanh mang theo ca day commit nen chac chan co commit dung toi `.claude/dev/`.
+# DAY THEM vao mot nhanh do-windows DA CO thi luot push chi gom commit MOI — commit do
+# khong dung toi `.claude/dev/` la job KHONG chay. Da tu dap phai 13-08.
+# Khong bo `paths` di cho gon duoc: job nay chay ca bo phan chung LAN 50 dot bien tren
+# Windows (tran 40 phut, tinh gap doi phut), nen cho no chay theo moi commit vao master
+# la an het han muc — dung thu ma #96 vua cat.
+# Va nho: "khong chay" trong tab Actions trong Y HET "xanh".
 on:
   workflow_dispatch:
   push:

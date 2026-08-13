@@ -187,10 +187,17 @@ Hệ quả cụ thể: **một phiên như phiên này không mở được PR, 
 proxy git riêng chứ không qua API. Trước đợt này, điều đó nghĩa là thiết bị đo
 Windows tồn tại nhưng phiên remote **không có cách nào chạm tới**.
 
-Nên workflow nhận thêm tiền tố nhánh `do-windows/**` ở cần gạt `push`: đẩy một
-commit có dụng tới `.claude/dev/**` lên tiền tố đó là phép đo chạy. Bộ lọc `paths`
-vẫn áp — commit không dụng tới các đường đó thì job **không chạy**, và "không chạy"
-trông y hệt "xanh".
+Nên workflow nhận thêm tiền tố nhánh `do-windows/**` ở cần gạt `push`.
+
+Cách dùng **duy nhất chắc chắn** là **tạo mới** một nhánh:
+`git push origin HEAD:refs/heads/do-windows/<tên-mới>`. Bộ lọc `paths` vẫn áp, và nó
+xét **mọi commit có trong lượt push** chứ không phải cây làm việc — lượt tạo nhánh
+mang theo cả dãy commit nên chắc chắn có commit dụng tới `.claude/dev/`. Đẩy thêm
+vào một nhánh `do-windows` **đã có** thì lượt push chỉ gồm commit mới, và commit đó
+không dụng tới `.claude/dev/` là job **không chạy** — đã tự đạp phải ngay trong đợt
+này. Không bỏ `paths` đi cho gọn được: job chạy cả bộ phản chứng lẫn 50 đột biến
+trên Windows (trần 40 phút, tính gấp đôi phút), nên cho nó chạy theo mọi commit vào
+master là ăn hết hạn mức — đúng thứ mà #96 vừa cắt.
 
 ## Ghi nhận
 

@@ -52,6 +52,32 @@ nốt phần còn lại — nó chỉ lộ khi có ca **đo thật**, và ca đo
 tượng rồi trả `True` vì không có ngoại lệ nào. Nay hỏi bằng `GetExitCodeProcess`
 (259 = `STILL_ACTIVE`).
 
+**Hai công cụ "có mặt" mà không dùng được, đo tại chỗ.** `doctor` báo `co codex` trong
+đúng lượt mà mọi `codex exec` trả **401** — lớp nói dối cao hơn lớp `which` đã vá: chạy
+được `--version` chưa phải gọi được. Nguyên nhân đo được, không suy: `OPENAI_API_KEY`
+trong môi trường **bị codex bỏ qua** (OpenAI trả đúng chữ `Missing bearer`, trong khi
+`curl` cùng proxy với bearer giả lại trả `Incorrect API key` ⇒ header đi lọt, codex chỉ
+không đặt nó); khoá phải nằm trong `~/.codex/auth.json`, ghi bằng `codex login
+--with-api-key` (đọc STDIN, không cần trình duyệt). Chứng minh hết đường bằng khoá giả:
+sau `login`, lỗi đổi từ `Missing bearer` thành `Incorrect API key provided: sk-thu-n***`
+— transport/TLS/proxy đều thông, thứ duy nhất còn thiếu là một khoá THẬT. Hook
+`session-start.sh` nay đăng nhập bằng `OPENAI_API_KEY` nếu có và **nói ra** khi không
+có; ngưỡng "có mặt ⇒ xanh" là của `doctor` nên không sửa ở đây. `gh` thì cài được nhưng
+**mọi** lời gọi API trả 403 "An org admin must connect the Claude GitHub App" ⇒ phiên
+remote không mở được PR, không gắn được nhãn, không gọi được `workflow_dispatch`; chỉ
+`git push` đi được vì nó qua proxy git riêng. Nên workflow Windows nhận thêm tiền tố
+nhánh `do-windows/` ở cần gạt `push` — cần gạt duy nhất mà một phiên chỉ có git kéo
+được. Bộ lọc `paths` vẫn áp: commit không dụng tới `.claude/dev/` thì job KHÔNG chạy, và
+"không chạy" trông y hệt "xanh".
+
+**`cffi` vào hook, vì thiếu nó thì `--selftest` chết ở chỗ đọc rất sai.** Ngay sau khi
+hook chạy `pip install -r requirements.txt`, `import pypdf` ném
+`pyo3_runtime.PanicException` — **không phải** ngoại lệ Python thường, nó giết cả tiến
+trình, nên `--selftest` không in nổi dòng `N/N` và trông y hệt "có ca đỏ" trong khi mọi
+ca đều xanh. `pypdf` kéo `cryptography` bản apt, và bản đó thiếu `cffi` thì panic. Cài
+xong: **1697/1697**. Không đưa vào `requirements.txt` — đây là khuyết của MÔI TRƯỜNG,
+không phải phụ thuộc của sản phẩm.
+
 Đo: **91/91 ca** (qua 88, bỏ qua 3, hỏng 0) · **đột biến 50/50** (2 không đo được trên
 Linux) · ruff F sạch · 17/17 bước gate `rc=0` · `tl selftest 1697/1697` ·
 `RELEASE_MANIFEST` giữ **179** mục (không tệp runtime nào được thêm) · ratchet `docs/`

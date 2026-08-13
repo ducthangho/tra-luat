@@ -42,6 +42,34 @@ else
   echo "[session-start] CANH BAO: khong co npm — bo qua phan CLI agent"
 fi
 
+# --- Xac thuc codex. CAI XONG KHONG PHAI LA DUNG DUOC, va day la lop noi doi cao
+# hon lop `which` ma doctor da va: `codex --version` chay rc=0 nen doctor bao "co
+# codex", trong khi MOI lenh `codex exec` tra 401. DO DUOC 13-08 tren container
+# Claude Code web, hai su that tach roi nhau:
+#   · `OPENAI_API_KEY` trong moi truong bi codex BO QUA — goi di KHONG kem bearer,
+#     OpenAI tra dung chu "Missing bearer or basic authentication in header";
+#   · khoa phai nam trong `~/.codex/auth.json`, ghi bang `codex login --with-api-key`,
+#     doc tu STDIN nen chay duoc khong can trinh duyet.
+# Da chung minh het duong bang khoa GIA: sau khi login, loi doi tu "Missing bearer"
+# thanh "Incorrect API key provided: sk-thu-n***" — tuc bearer DA toi OpenAI qua
+# proxy, va thu duy nhat con thieu la mot khoa THAT.
+# Im lang o day se de lai mot cong cu TRONG NHU dung duoc, nen thieu khoa thi noi ra.
+if co codex; then
+  if codex login status >/dev/null 2>&1; then
+    echo "[session-start] codex: da dang nhap"
+  elif [ -n "${OPENAI_API_KEY:-}" ]; then
+    if printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key >/dev/null 2>&1; then
+      echo "[session-start] codex: da dang nhap bang OPENAI_API_KEY"
+    else
+      echo "[session-start] CANH BAO: co OPENAI_API_KEY nhung codex login THAT BAI"
+    fi
+  else
+    echo "[session-start] CANH BAO: codex DA CAI nhung CHUA DANG NHAP - moi lenh se tra 401."
+    echo "[session-start]   Dat OPENAI_API_KEY cho moi truong nay, hoac chay tay:"
+    echo "[session-start]   printf %s \"\$KHOA\" | codex login --with-api-key"
+  fi
+fi
+
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
 # lệnh tìm gãy giữa chừng chứ không tự lùi về grep.
 if ! co rg; then
@@ -95,6 +123,24 @@ print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
     else
       echo "[session-start] CANH BAO: pip that bai"
     fi
+  fi
+fi
+
+# --- cffi: BAT BUOC de `import pypdf` khong NO. DO DUOC 13-08 tren container Claude
+# Code web ngay sau khi hook nay chay pip: `pypdf` keo `cryptography` (ban apt), ma
+# ban do thieu `cffi` thi nem `pyo3_runtime.PanicException` — KHONG phai ngoai le
+# Python thuong, no giet ca tien trinh. Hau qua doc rat sai: `--selftest` chet giua
+# chung nen KHONG in noi dong `N/N`, trong y het "co ca do", trong khi cac ca deu
+# xanh. Cai xong: 1697/1697.
+# Khong dua vao requirements.txt vi day la khuyet cua MOI TRUONG (ban cryptography
+# cai bang apt), khong phai mot phu thuoc cua san pham.
+if ! "$PY" -c "import pypdf" >/dev/null 2>&1; then
+  echo "[session-start] pypdf khong nap duoc — cai cffi (thieu no thi cryptography ban apt panic)"
+  "$PY" -m pip install --quiet cffi || echo "[session-start] CANH BAO: cai cffi that bai"
+  if "$PY" -c "import pypdf" >/dev/null 2>&1; then
+    echo "[session-start] pypdf: nap duoc sau khi cai cffi"
+  else
+    echo "[session-start] CANH BAO: pypdf VAN khong nap duoc — selftest se chet giua chung"
   fi
 fi
 

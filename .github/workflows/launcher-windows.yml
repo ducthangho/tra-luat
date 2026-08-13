@@ -14,10 +14,22 @@ name: launcher (Windows that)
 # Windows ton GAP DOI phut va kho dang cham tran Free (xem r245 trong ci.yml),
 # nen KHONG bat theo moi push nhanh: goi tay khi can, tu dong khi vao master,
 # hoac gan nhan `windows` cho PR dung toi duong phu thuoc nen.
+#
+# NHANH `do-windows/**` — can gat DUY NHAT ma mot phien chi co git keo duoc.
+# Do duoc 13-08 tu phien Claude Code web: `gh` cai duoc nhung MOI loi goi REST lan
+# GraphQL deu tra 403 "GitHub access is not enabled for this session. An org admin
+# must connect the Claude GitHub App" — nghia la khong mo duoc PR (khong gan duoc
+# nhan `windows`) va khong goi duoc `workflow_dispatch`. Chi `git push` di duoc, vi
+# no qua proxy git rieng chu khong qua API.
+# Nhu vay truoc doi nay, mot phien remote KHONG CO CACH NAO cham toi thiet bi do
+# Windows — thiet bi ton tai nhung khong ai voi toi. Nay: day len tien to
+# `do-windows/**` la chay.
+# ⚠ BO LOC `paths` VAN AP: commit duoc day phai dung toi `.claude/dev/**` hoac chinh
+# tep workflow nay, khong thi job KHONG chay — va "khong chay" trong ra y het "xanh".
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, 'do-windows/**']
     paths:
       - '.claude/dev/**'
       - '.github/workflows/launcher-windows.yml'

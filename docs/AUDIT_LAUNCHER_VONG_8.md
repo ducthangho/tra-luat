@@ -123,6 +123,61 @@ nó, nhưng chính nó dính. Nay hỏi bằng `GetExitCodeProcess` (259 = `STIL
   không giết được ca nào. Nhánh **thả treo hỏng** thì đo được, và `t86` đo nó.
 - Job Object thật có hơn 512 PID (nợ từ vòng 7) vẫn chưa dựng.
 
+## Hai công cụ "có mặt" mà không dùng được — đo tại chỗ, 13-08
+
+### `codex`: cài xong, `--version` rc=0, mọi lệnh 401
+
+`doctor` báo `co codex  codex-cli 0.147.0`. Cùng lượt chạy đó, `codex exec` trả
+`401`. Đây là lớp nói dối **cao hơn** lớp `which` mà `doctor` đã vá: chạy được
+`--version` vẫn chưa phải gọi được.
+
+Nguyên nhân tách làm hai, cả hai đều đo được chứ không suy:
+
+1. **`OPENAI_API_KEY` trong môi trường bị codex bỏ qua.** Đặt biến rồi gọi, OpenAI
+   trả đúng chữ `Missing bearer or basic authentication in header` — tức yêu cầu đi
+   ra **không mang bearer nào cả**. Đối chứng: `curl` cùng lúc, cùng proxy, với
+   `Authorization: Bearer <khoá giả>` thì OpenAI trả `Incorrect API key provided:
+   <khoá giả>`. Vậy header đi lọt; codex chỉ không đặt nó.
+2. **Khoá phải nằm trong `~/.codex/auth.json`**, ghi bằng `codex login --with-api-key`
+   — đọc từ STDIN nên chạy được không cần trình duyệt.
+
+Đã chứng minh hết đường bằng một khoá giả: sau `login`, lỗi đổi từ `Missing bearer`
+thành `Incorrect API key provided: sk-thu-n***`. Nghĩa là transport, TLS và proxy
+đều thông; thứ duy nhất còn thiếu là một khoá **thật**.
+
+Đối chứng thêm cho câu hỏi "proxy có tự tiêm khoá không": gửi bearer
+`proxy-inject` tới `api.openai.com` thì OpenAI trả lại **đúng chuỗi đó** trong
+thông báo lỗi ⇒ proxy chuyển tiếp nguyên văn, **không** tiêm khoá OpenAI (khác với
+`GH_TOKEN=proxy-inject` vốn được tiêm cho GitHub).
+
+Hook `session-start.sh` nay đăng nhập bằng `OPENAI_API_KEY` nếu có, và **nói ra**
+khi không có. Ghi rõ để ai đó cầm `doctor` quyết định: hiện `doctor` vẫn đọc
+`codex` là "có" trong đúng lượt mà hook vừa cảnh báo nó chưa đăng nhập — hai dòng
+đứng cạnh nhau trong một lần chạy. Ngưỡng "có mặt ⇒ xanh" là của `doctor`, không
+sửa ở đây.
+
+Còn một nhiễu vô hại: proxy **không hỗ trợ nâng cấp WebSocket** (README của proxy
+nói thẳng), nên codex thử `wss://` 5 lần, in 5 dòng `ERROR ... 401`, rồi mới lùi về
+HTTPS. Dễ đọc nhầm thành lỗi xác thực ở tầng mạng — không phải.
+
+### `gh`: cài được, nhưng mọi lời gọi API bị chặn ở tầng phiên
+
+`gh 2.63.2` cài xong chạy được. `gh api repos/{owner}/{repo}` và
+`gh workflow run` đều trả `403 GitHub access is not enabled for this session. An
+org admin must connect the Claude GitHub App for this organization.`; `gh pr list`
+trả `403` từ GraphQL với ghi chú chỉ phục vụ "the pinned set of PR-review
+operations". `GH_TOKEN` trong môi trường là chuỗi giữ chỗ `proxy-inject`.
+
+Hệ quả cụ thể: **một phiên như phiên này không mở được PR, không gắn được nhãn
+`windows`, không gọi được `workflow_dispatch`.** Chỉ `git push` đi được, vì nó qua
+proxy git riêng chứ không qua API. Trước đợt này, điều đó nghĩa là thiết bị đo
+Windows tồn tại nhưng phiên remote **không có cách nào chạm tới**.
+
+Nên workflow nhận thêm tiền tố nhánh `do-windows/**` ở cần gạt `push`: đẩy một
+commit có dụng tới `.claude/dev/**` lên tiền tố đó là phép đo chạy. Bộ lọc `paths`
+vẫn áp — commit không dụng tới các đường đó thì job **không chạy**, và "không chạy"
+trông y hệt "xanh".
+
 ## Ghi nhận
 
 - Trước sửa, trên commit `b666ded`: `83/83` ca (qua 82, bỏ qua 1) · đột biến `42/42`

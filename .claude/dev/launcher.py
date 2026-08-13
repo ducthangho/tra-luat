@@ -181,9 +181,14 @@ def _khoa_danh_tinh(pid: int) -> str | None:
             v = p.stdout.strip()
             return f"darwin:{v}" if v else None
         if he == "Windows":
+            # Win32_Process.CreationDate chu KHONG Get-Process.StartTime: `_chup_cay`
+            # phai lay ca cay trong MOT lan goi, ma nguon duy nhat cho ca pid lan
+            # ParentProcessId lan thoi diem tao la CIM. Hai nguon khac nhau thi
+            # `.Ticks` lech dinh dang/epoch, khoa khong bao gio khop, va chot hoa ra
+            # LUON tu choi giet - hong am tham theo chieu nguoc lai.
             p = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-                 f"(Get-Process -Id {pid} -ErrorAction Stop).StartTime.Ticks"],
+                 f'(Get-CimInstance Win32_Process -Filter "ProcessId={pid}").CreationDate.Ticks'],
                 capture_output=True, text=True, timeout=30)
             v = p.stdout.strip()
             return f"win:{v}" if v.isdigit() else None
@@ -298,6 +303,29 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
                 tt[int(phan[0])] = (int(phan[1]), int(phan[2]), "")
             except ValueError:
                 continue
+    elif he == "Windows":
+        # Windows KHONG co process group, nen chi con duong lien ket CHA-CON.
+        # Mot lan goi lay het pid|ppid|ticks; loc hau due o duoi dung chung khuon
+        # voi POSIX. Day la thu thay cho `_thanh_vien_nhom` (von tra None o day).
+        try:
+            pr = subprocess.run(
+                ["powershell", "-NoProfile", "-NonInteractive", "-Command",
+                 "Get-CimInstance Win32_Process | ForEach-Object { if ($_.CreationDate) "
+                 "{ \"$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } }"],
+                capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if pr.returncode != 0:
+            return None
+        tt = {}
+        for dong in pr.stdout.splitlines():
+            phan = dong.strip().split("|")
+            if len(phan) != 3:
+                continue
+            try:
+                tt[int(phan[0])] = (int(phan[1]), 0, f"win:{phan[2]}")
+            except ValueError:
+                continue
     else:
         return None
     con = {}
@@ -310,9 +338,10 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             continue
         ra[q] = tt[q][2]
         hang.extend(con.get(q, []))
-    for q, (_, nhom, khoa) in tt.items():              # + thành viên nhóm không phải hậu duệ
-        if nhom == pid:
-            ra.setdefault(q, khoa)
+    if he != "Windows":       # process group la khai niem POSIX
+        for q, (_, nhom, khoa) in tt.items():          # + thành viên nhóm không phải hậu duệ
+            if nhom == pid:
+                ra.setdefault(q, khoa)
     ra.pop(os.getpid(), None)                          # tuyệt đối không tự giết mình
     return ra
 
@@ -418,7 +447,98 @@ class KetGiet:
         return self.mo_ta
 
 
-def _giet_windows(pid: int, khoa: str | None = None) -> KetGiet:
+def _job_windows(pid: int):
+    """Nhốt tiến trình vào một Job Object. Trả handle, hoặc None nếu không được.
+
+    VÌ SAO PHẢI CÓ: `taskkill /T` duyệt cây CHA-CON tại thời điểm chạy, nên một
+    tiến trình mà cha đã thoát trước đó (MỒ CÔI) không nằm trong cây và sống sót
+    nguyên vẹn. `_chup_cay` cũng đi đúng những liên kết ấy nên bỏ sót y hệt —
+    nó chỉ nâng "tin rc=0" thành "kiểm từng pid", không phủ được ca mồ côi.
+    Job Object là cơ chế DUY NHẤT trên Windows giữ được cả hậu duệ mồ côi: tiến
+    trình con sinh ra đã ở trong job của cha, và ở lại đó kể cả khi cha chết.
+
+    KHE HỞ, nói thẳng: `Popen` không cho gán job lúc tạo (không có CREATE_SUSPENDED),
+    nên có một khoảng rất ngắn giữa lúc sinh con và lúc gán. Con nào sinh cháu
+    trong khoảng đó thì cháu nằm ngoài job. Hẹp hơn hẳn khe cũ, nhưng không phải
+    không có.
+    """
+    if platform.system() != "Windows":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+        job = k32.CreateJobObjectW(None, None)
+        if not job:
+            return None
+
+        class _GIOI_HAN(ctypes.Structure):
+            _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64),
+                        ("PerJobUserTimeLimit", ctypes.c_int64),
+                        ("LimitFlags", wintypes.DWORD),
+                        ("MinimumWorkingSetSize", ctypes.c_size_t),
+                        ("MaximumWorkingSetSize", ctypes.c_size_t),
+                        ("ActiveProcessLimit", wintypes.DWORD),
+                        ("Affinity", ctypes.POINTER(ctypes.c_ulong)),
+                        ("PriorityClass", wintypes.DWORD),
+                        ("SchedulingClass", wintypes.DWORD)]
+
+        class _IO(ctypes.Structure):
+            _fields_ = [("ReadOperationCount", ctypes.c_uint64),
+                        ("WriteOperationCount", ctypes.c_uint64),
+                        ("OtherOperationCount", ctypes.c_uint64),
+                        ("ReadTransferCount", ctypes.c_uint64),
+                        ("WriteTransferCount", ctypes.c_uint64),
+                        ("OtherTransferCount", ctypes.c_uint64)]
+
+        class _MO_RONG(ctypes.Structure):
+            _fields_ = [("BasicLimitInformation", _GIOI_HAN),
+                        ("IoInfo", _IO),
+                        ("ProcessMemoryLimit", ctypes.c_size_t),
+                        ("JobMemoryLimit", ctypes.c_size_t),
+                        ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                        ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+        tt = _MO_RONG()
+        tt.BasicLimitInformation.LimitFlags = 0x2000   # KILL_ON_JOB_CLOSE
+        k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt))
+        h = k32.OpenProcess(0x1F0FFF, False, int(pid))  # PROCESS_ALL_ACCESS
+        if not h:
+            k32.CloseHandle(job)
+            return None
+        ok = k32.AssignProcessToJobObject(job, h)
+        k32.CloseHandle(h)
+        if not ok:
+            k32.CloseHandle(job)
+            return None
+        return job
+    except (OSError, AttributeError, ValueError):
+        return None
+
+
+def _pid_trong_job(job) -> list[int] | None:
+    """PID còn trong job. [] = đã chứng minh rỗng · None = không đọc được."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+
+        class _DS(ctypes.Structure):
+            _fields_ = [("NumberOfAssignedProcesses", wintypes.DWORD),
+                        ("NumberOfProcessIdsInList", wintypes.DWORD),
+                        ("ProcessIdList", ctypes.c_size_t * 512)]
+
+        ds = _DS()
+        if not k32.QueryInformationJobObject(job, 3, ctypes.byref(ds),
+                                             ctypes.sizeof(ds), None):
+            return None
+        return [int(ds.ProcessIdList[i]) for i in range(ds.NumberOfProcessIdsInList)]
+    except (OSError, AttributeError, ValueError):
+        return None
+
+
+def _giet_windows(pid: int, khoa: str | None = None,
+                  anh: dict[int, str] | None = None, job=None) -> KetGiet:
     """Giết trên Windows: taskkill trước, rồi TerminateProcess nếu vẫn sống.
 
     ĐÃ ĐO (codex, 12-08-2026): `taskkill /PID x /T /F` trả rc=1 "Access denied"
@@ -432,6 +552,24 @@ def _giet_windows(pid: int, khoa: str | None = None) -> KetGiet:
     xuống nhánh này ta nói thẳng là con cháu có thể còn sống.
     """
     buoc = []
+    if job is not None:
+        # Job Object phu duoc ca hau due MO COI, thu ma taskkill /T va anh chup
+        # theo lien ket cha-con deu bo sot. Dung no TRUOC, va DOI bang chung:
+        # danh sach pid trong job phai RONG.
+        try:
+            import ctypes
+            ctypes.windll.kernel32.TerminateJobObject(job, 1)
+        except (OSError, AttributeError, ValueError) as e:
+            buoc.append(f"TerminateJobObject loi: {e}")
+        else:
+            time.sleep(0.3)
+            con_job = _pid_trong_job(job)
+            if con_job == []:
+                return KetGiet(True, True, "job: da tat ca cay")
+            if con_job:
+                buoc.append(f"job con {len(con_job)} tien trinh")
+            else:
+                buoc.append("job: khong doc duoc danh sach pid")
     try:
         p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
                            capture_output=True, text=True, timeout=30)
@@ -441,8 +579,21 @@ def _giet_windows(pid: int, khoa: str | None = None) -> KetGiet:
     buoc.append(f"taskkill rc={ma_tk}")
     # CHỈ taskkill rc=0 mới là bằng chứng CẢ CÂY. rc khác 0 nghĩa là /T không chạy,
     # nên dù mẹ có chết (do nhánh dưới) thì con cháu vẫn CHƯA được xác nhận.
+    # `taskkill /T rc=0` KHONG phai bang chung ca cay chet. Nó duyet cay CHA-CON
+    # tai thoi diem chay, nen mot tien trinh mà cha đã thoat truoc do (mo coi) KHONG
+    # nam trong cay do va song sot nguyen ven. Vòng 2 đã bắt đúng lớp lỗi này ở chỗ
+    # khác; ở đây nó nấp sau rc=0. Nay doi bang chung tung pid tu ANH CHUP.
     if ma_tk == 0 and not _con_song(pid, khoa):
-        return KetGiet(True, True, "; ".join(buoc) + "; da tat ca cay")
+        if anh is None:
+            return KetGiet(True, False, "; ".join(buoc)
+                           + "; me da tat, KHONG chup duoc cay - KHONG khang dinh ca cay")
+        _giet_rieng(anh, signal.SIGTERM)       # tren Windows = TerminateProcess
+        time.sleep(0.3)
+        con_lai = [q for q, k in anh.items() if _con_song_dung_khoa(q, k)]
+        if not con_lai:
+            return KetGiet(True, True, "; ".join(buoc) + "; ca cay da tat")
+        return KetGiet(True, False, "; ".join(buoc)
+                       + f"; con {len(con_lai)} tien trinh song {sorted(con_lai)[:5]}")
     try:
         import ctypes
         k32 = ctypes.windll.kernel32
@@ -463,7 +614,7 @@ def _giet_windows(pid: int, khoa: str | None = None) -> KetGiet:
     return KetGiet(True, False, "; ".join(buoc))
 
 
-def _giet_cay(pid: int, khoa: str | None) -> KetGiet:
+def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
     """Giết tiến trình VÀ con cháu. Trả KetGiet, KHÔNG trả chuỗi.
 
     Phía gọi quyết định mã thoát bằng `.tron_ven`, nên không còn cách nào để một
@@ -486,7 +637,9 @@ def _giet_cay(pid: int, khoa: str | None) -> KetGiet:
                        "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)",
                        tu_choi=True)
     if platform.system() == "Windows":
-        return _giet_windows(pid, khoa)
+        # Chup TRUOC khi giet: sau khi me chet, hau due mo coi khong con duong nao
+        # tim lai (cung ly le nhu POSIX, xem `_chup_cay`).
+        return _giet_windows(pid, khoa, _chup_cay(pid), job)
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
     # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
     # không thể tìm lại (xem _chup_cay).
@@ -1006,8 +1159,13 @@ def lenh_run(a) -> int:
         f_out.close(); f_err.close()
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
 
+    # Nhot con vao Job Object NGAY sau khi sinh: chi co no giu duoc hau due mo coi
+    # tren Windows (xem `_job_windows`). Tren POSIX tra None, khong anh huong gi.
+    job = _job_windows(p.pid)
     khoa = _khoa_danh_tinh(p.pid)
     ban_ghi.update(pid=p.pid, khoa_danh_tinh=khoa)
+    if platform.system() == "Windows":
+        ban_ghi["job_windows"] = job is not None
     if khoa is None:
         # Nói RÕ vì sao thiếu, đừng để phía đọc phải đoán. Con thoát quá nhanh là
         # ca lành; không lấy được khoá cho một tiến trình CÒN SỐNG mới là ca đáng lo.
@@ -1032,7 +1190,7 @@ def lenh_run(a) -> int:
                 ma = p.wait(timeout=max(0.0, con_lai))
             except subprocess.TimeoutExpired:
                 qua_han = True
-                ket_giet = _giet_cay(p.pid, khoa)
+                ket_giet = _giet_cay(p.pid, khoa, job)
                 ban_ghi["ly_do_dung"] = "qua han: " + ket_giet.mo_ta
                 ban_ghi["giet_tron_ven"] = ket_giet.tron_ven
                 # 124 CHỈ khi cả cây đã chết. Mẹ chết mà cháu chưa xác nhận vẫn là
@@ -1043,7 +1201,7 @@ def lenh_run(a) -> int:
                 except subprocess.TimeoutExpired:
                     pass
     except KeyboardInterrupt:
-        ban_ghi["ly_do_dung"] = "bi ngat: " + _giet_cay(p.pid, khoa).mo_ta
+        ban_ghi["ly_do_dung"] = "bi ngat: " + _giet_cay(p.pid, khoa, job).mo_ta
         bi_ngat = True
         ma = 130
     finally:

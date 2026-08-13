@@ -1091,21 +1091,49 @@ def t62_qua_han_ma_khong_giet_het_cay_phai_tra_125():
         repo = tao_repo(s)
         rr = s / "runs"
         dau = s / "chau-con-song.txt"
-        ma_con = (f"import subprocess,sys,time;"
-                  f"subprocess.Popen([sys.executable,'-c',"
-                  f"\"import time;time.sleep(8);open({str(dau)!r},'w').write('song')\"]);"
-                  f"time.sleep(60)")
-        han = (datetime.now(timezone.utc) + timedelta(seconds=2)).isoformat()
+        # CA MO COI: `giua` sinh `chau` roi THOAT NGAY. Den luc giet, cay cha-con
+        # tinh tu me KHONG con chua chau (cha no da chet), nen ca `taskkill /T` lan
+        # `_chup_cay` deu bo sot - `taskkill /T` duyet dung nhung lien ket ay.
+        # Chi Job Object giu duoc hau due mo coi.
+        (s / "chau.py").write_text(
+            "import os, sys, time\n"
+            "open(sys.argv[1], 'w').write(str(os.getpid()))\n"
+            "time.sleep(60)\n", encoding="utf-8")
+        (s / "giua.py").write_text(
+            "import subprocess, sys\n"
+            "subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]])\n",
+            encoding="utf-8")
+        (s / "me.py").write_text(
+            "import subprocess, sys, time\n"
+            "subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2],\n"
+            "                  sys.argv[3]]).wait()\n"
+            "time.sleep(60)\n", encoding="utf-8")
         r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
-                 "--deadline-utc", han, "--", PY, "-c", ma_con)
-        time.sleep(10)
-        chau_song = dau.exists()
-        if chau_song:
-            bang(r.returncode == MA_GIET_HUT,
-                 f"chau con song ma tra {r.returncode} (phai {MA_GIET_HUT})")
-        else:
-            bang(r.returncode == MA_QUA_HAN,
-                 f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+                 "--deadline-utc", mai_sau(3),
+                 "--", PY, str(s / "me.py"), str(s / "giua.py"),
+                 str(s / "chau.py"), str(dau))
+        for _ in range(60):
+            if dau.exists():
+                break
+            time.sleep(0.05)
+        bang(dau.exists(), "thi nghiem hong: chau chua kip ghi pid")
+        chau = int(dau.read_text().strip())
+        time.sleep(0.5)
+        chau_song = _con_song_that(chau)
+        try:
+            if chau_song:
+                bang(r.returncode == MA_GIET_HUT,
+                     f"chau MO COI {chau} con song ma tra {r.returncode} "
+                     f"(phai {MA_GIET_HUT})")
+            else:
+                bang(r.returncode == MA_QUA_HAN,
+                     f"da giet het cay ma tra {r.returncode} (phai {MA_QUA_HAN})")
+        finally:
+            if chau_song:
+                try:
+                    os.kill(chau, 9)
+                except OSError:
+                    pass
 
 
 @ca

@@ -1740,9 +1740,10 @@ DOT_BIEN = [
      ('                ma = MA_QUA_HAN if ket_giet.tron_ven else MA_GIET_HUT',
       '                ma = MA_QUA_HAN if ket_giet.me_da_chet else MA_GIET_HUT'),
      ["t62_qua_han_ma_khong_giet_het_cay_phai_tra_125"],
-     ("windows", "chi do duoc khi duong giet THAT BAI; tren runner taskkill /T thanh cong "
-                 "nen chau chet that va 124 la trung thuc - xem muc CON TREO ve bang chung "
-                 "cay tien trinh tren Windows")),
+     ("posix", "KHONG DUNG DUOC tren ca hai nen, va da DO chu khong doan: t62 nay dung "
+               "fixture MO COI - ca kho nhat dung duoc - the ma Job Object van giet duoc "
+               "chau, nen nhanh 'chau con song' khong the cham toi. Dot bien nay chi song "
+               "lai khi ai do dung duoc mot ca ma duong giet THAT BAI that su.")),
     ("khong_cat_thong_tin_dang_nhap",
      ("(?:[^@/]*@)?", "(?:)?"),
      ["t45_token_trong_URL_KHONG_duoc_lo_ra"]),

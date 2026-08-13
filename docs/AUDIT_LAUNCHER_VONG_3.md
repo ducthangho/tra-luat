@@ -17,6 +17,19 @@
 **Không chạy được:** mọi phép thử cần Windows thật (VIỆC 2 trọn vẹn). Nói rõ ở từng chỗ,
 không suy diễn.
 
+> **Cách viết con trỏ dòng — ĐỪNG "chuẩn hoá" về dạng `tệp.py:NNN`.** Con trỏ vào
+> `.claude/dev/*.py` trong báo cáo này cố ý viết `` `launcher.py` dòng 293-299 `` chứ không
+> phải `launcher.py:NNN`. Lớp L7 của `doc-claims-check` chỉ tra tên trần trong `pyindex` —
+> mà `pyindex` là DANH SÁCH TRẮNG `scripts`, `scripts/tl_core`, `scripts/_fallback`, `.`
+> nên `.claude/dev/` không nằm trong đó. Thêm đường dẫn cũng không cứu được: regex neo bằng
+> `\b[A-Za-z0-9_]` nên **nuốt mất dấu chấm đầu** — dạng `.claude/dev/launcher.py:NNN` bị đọc
+> thành `claude/dev/…` (mất dấu chấm) → vẫn `PYLOC_FILE_MISSING`. Đã đo cả ba dạng. Đổi về
+> dạng hai chấm ⇒ gate ĐỎ ở bước `doc-claims-check --strict`.
+>
+> Chính ghi chú này cũng đạp vào bẫy ở lần viết đầu: nó nêu ví dụ bằng số dòng THẬT nên L7
+> bắt đúng ba lần. Ví dụ trong tài liệu về một cổng cũng là dữ liệu cổng đó quét — viết `NNN`
+> thay cho chữ số là cách duy nhất nêu được dạng sai mà không tạo ra nó.
+
 ---
 
 ## VIỆC 1 — chạy thật, báo số
@@ -79,7 +92,7 @@ thay `subprocess.run` bằng bộ đếm) — xem GHI NHẬN §17. Nó xác nh�
 ## §1. POSIX: `ca_cay=True` là LỜI KHẲNG ĐỊNH KHÔNG CÓ BẰNG CHỨNG → trả 124 trong khi cháu còn sống
 
 Nghi vấn 4.1 của bạn **đúng, và rộng hơn bạn nghĩ**. `setsid` chỉ là một đường; đường thứ hai
-đơn giản hơn nhiều: **cháu chỉ cần phớt lờ SIGTERM**. Vòng chờ ở `launcher.py:293-299` thoát
+đơn giản hơn nhiều: **cháu chỉ cần phớt lờ SIGTERM**. Vòng chờ ở `launcher.py` dòng 293-299 thoát
 ngay khi **tiến trình mẹ** chết, nên `SIGKILL` ở dòng 301 **không bao giờ được gửi**.
 
 Tái hiện (`thu41.sh`, hai biến thể, không sửa launcher):
@@ -113,7 +126,7 @@ nhưng **nhận tín hiệu ≠ đã chết**, và đó chính là khoảng các
 
 - `docs/GOI_AGENT_DA_NEN.md:118-119` — *"trên Linux là ca 'mẹ chết mà cháu còn sống' (POSIX
   `killpg` giết theo nhóm nên **không dựng được trạng thái đó**)"*. Tôi dựng được, hai cách.
-- `launcher_test.py:1046` (lý do bỏ qua t62) — *"CHỈ ĐO ĐƯỢC TRÊN WINDOWS: trên POSIX `killpg`
+- `launcher_test.py` dòng 1046 (lý do bỏ qua t62) — *"CHỈ ĐO ĐƯỢC TRÊN WINDOWS: trên POSIX `killpg`
   giết theo NHÓM nên **cả cây luôn chết cùng lúc**"*. Chỉ đúng với cháu ngây thơ như fixture
   hiện tại (`time.sleep(8)`); sai với cháu `setsid` hoặc cháu bắt SIGTERM.
 
@@ -177,7 +190,7 @@ xuống đúng thứ đo được: *"không còn tiến trình sống trong NHÓ
 
 ## §2. `_cap_id`: "mkdir ĐỘC QUYỀN" **không** chặn trùng `short_id` — bản vá vòng 2 không đóng đúng lỗ nó nói
 
-Comment `launcher.py:562-566` viết: *"mkdir KHÔNG exist_ok = hành vi GIÀNH nguyên tử: hai tiến
+Comment `launcher.py` dòng 562-566 viết: *"mkdir KHÔNG exist_ok = hành vi GIÀNH nguyên tử: hai tiến
 trình cùng chọn trúng một id thì đúng một bên tạo được. 'Quét rồi mkdir' của bản trước có khe
 hở giữa hai bước (audit codex chỉ ra)."*
 
@@ -369,7 +382,7 @@ con exit  12 -> launcher rc=12       con exit  3 -> launcher rc=3
 
 `rc=124` **không** phân biệt được "launcher cưỡng chế hạn chót và giết được cả cây" với
 "con tự thoát 124" — mà con thoát 124 là chuyện thường (con chạy `timeout(1)`, hoặc con là một
-launcher khác). Bảng mã ở `launcher.py:30-44` và `GOI_AGENT_DA_NEN.md:87-98` trình bày các mã
+launcher khác). Bảng mã ở `launcher.py` dòng 30-44 và `GOI_AGENT_DA_NEN.md:87-98` trình bày các mã
 này như ngữ nghĩa của launcher, **không một chữ cảnh báo**.
 
 Sổ **có** phân biệt (`trang_thai` = `qua_han` / `xong`). Đề xuất tối thiểu: ghi rõ trong cả hai
@@ -569,7 +582,7 @@ của dự án thay vì `TMPDIR`; hoặc kiểm bằng chứng dương (`pip ins
 **§16. VIỆC 4.2 — sạch.** Không chỗ nào trong `launcher.py` quyết định dựa vào chuỗi. Cả ba
 điểm quyết định dùng boolean: `ma = MA_QUA_HAN if ket_giet.tron_ven else MA_GIET_HUT` (736),
 `return MA_OK if ket.tron_ven else MA_DANH_TINH` (829), `giet_tron_ven=` (733, 826). `mo_ta`
-chỉ chảy vào `ly_do_dung` và `print`. `launcher_test.py:808/815` có so chuỗi `"SIGTERM: da tat"`
+chỉ chảy vào `ly_do_dung` và `print`. `launcher_test.py` dòng 808/815 có so chuỗi `"SIGTERM: da tat"`
 nhưng đó là **fixture tự nó ghi ra rồi kiểm còn nguyên** (t50), không phụ thuộc chữ của sản xuất.
 Nhắc nhẹ: `KetGiet.__str__` trả `mo_ta`, nên `f"{ket}"` vẫn ra chuỗi — cửa quay lại lối cũ vẫn mở,
 chỉ là hiện chưa ai đi.

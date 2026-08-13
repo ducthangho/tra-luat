@@ -1,3 +1,54 @@
+# ★ dev-side — vòng 6: ba cổng ĐỎ của kho mà CI chỉ kịp báo MỘT (2026-08-13)
+
+Không bump `VERSION`. `RELEASE_MANIFEST.json` giữ **179 tệp** — không tệp runtime nào
+được thêm; chỉ hai bản ghi đổi sha256 (`CHANGELOG.md`, `scripts/tl_selftest.py`).
+
+CI báo đúng một dòng `tl selftest 1696/1697` rồi `exit 1`, nên **mọi bước sau đó không
+hề chạy**. Chạy trọn bộ gác tại chỗ mới thấy **ba** cổng đỏ chứ không phải một. Đây
+đúng lớp bệnh "cổng dừng ở lỗi ĐẦU TIÊN che mất phần còn lại" — số của CI là sàn, không
+phải tổng.
+
+- **`r291_docs_ngoai_goi` — ratchet đếm `docs/*.md`, 52 → 55.** Ba tài liệu dev-side của
+  sáu vòng audit (`GOI_AGENT_DA_NEN.md`, `AUDIT_LAUNCHER_VONG_3.md`,
+  `AUDIT_LAUNCHER_VONG_4_POSIX.md`) làm ratchet đỏ ĐÚNG LÚC phải đỏ. Đã KÊ KHAI SLOT
+  theo nếp có sẵn ngay tại ca: gói giữ 179, cây thật 179 + 55 = 234, trần Package 200
+  không nhúc nhích. Đây là **ca duy nhất CI kịp báo**.
+- **`doc-claims-check --strict` — 5 cờ L7 `PYLOC_FILE_MISSING`.** Báo cáo vòng 3 trỏ vào
+  mã bằng dạng hai chấm `launcher.py:NNN`, mà L7 tra tên trần trong `pyindex` — danh sách **TRẮNG**
+  `scripts`, `scripts/tl_core`, `scripts/_fallback`, `.` — nên `.claude/dev/` không thể giải
+  được. Thêm đường dẫn cũng KHÔNG cứu: regex neo `\b[A-Za-z0-9_]` **nuốt mất dấu chấm
+  đầu**, `.claude/dev/…` bị đọc thành `claude/dev/…` ⇒ vẫn thiếu tệp. Đo cả ba dạng rồi
+  mới chọn: chuyển sang `` `launcher.py` dòng 293-299 ``. Ghi chú giải thích bẫy **tự đạp
+  vào bẫy** ở bản đầu (nêu ví dụ bằng số dòng THẬT ⇒ L7 bắt đúng ba lần): ví dụ trong tài
+  liệu về một cổng cũng là dữ liệu cổng đó quét, nên viết `NNN` thay cho chữ số. Rồi
+  **chính mục CHANGELOG này** đạp vào lần thứ ba khi thuật lại bẫy đó — cùng một câu, cùng
+  một cổng. Ba lần trong một đợt: bất cứ chỗ nào `doc-claims-check` quét (kể cả sổ) thì ví
+  dụ phải viết `NNN`.
+- **`release-verify --strict` — manifest ấm ở HAI bản ghi.** `CHANGELOG.md` lệch từ
+  đợt trước (vòng 5 sửa sổ mà không tái sinh manifest), `scripts/tl_selftest.py` lệch vì
+  đợt này. Đã tái sinh bằng `release-manifest --out RELEASE_MANIFEST.json`; đã kiểm
+  `file_count` vẫn 179 và `extra_files`/`missing` vẫn rỗng TRƯỚC khi thay tệp — cạm bẫy
+  "tái sinh manifest nuốt cả bản sao kho" (r238) chỉ đúng khi cây có tệp thừa, không phải
+  ca này.
+
+**Bài học để lại — chẩn đoán SAI đã được công bố trước khi đo.** Phiên trước đọc
+`1696/1697` rồi nói (trong bình luận PR lẫn tệp bàn giao) rằng đó "nghi vấn hàng đầu là
+golden/kiểm kê tệp trôi". Chạy thật thì `golden-test` và `determinism-audit` đều XANH; ca đỏ
+là ratchet `docs/*.md`, còn hai cổng đỏ khác thì chẩn đoán đó không hề nhắc tới. `CLAUDE.md`
+đã viết sẵn "ĐừNG ĐOÁN: chạy `--selftest`, đọc dòng `[X]`, lấy tên ca, rồi mới sửa" —
+lời khuyên đúng, đã không làm theo.
+
+**Môi trường: `--selftest` không chạy được trong container này cho tới khi cài `cffi`.**
+`pypdf` → `cryptography` (bản apt ở `/usr/lib/python3/dist-packages`) nổ
+`pyo3_runtime.PanicException: Python API call failed`, gốc là `ModuleNotFoundError:
+_cffi_backend`. Nó giết cả lượt ở `_c319_khong_bien_tuy_chon_thanh_chan_cung` **trước khi**
+bộ test kịp đếm, nên local không ra nổi dòng `N/N` để so với CI — trông như cùng một
+triệu chứng với CI mà thực ra là hai bệnh khác hẳn (CI báo `r319` **[OK]**). `pip install
+cffi` là xong; ghi lại để phiên sau không mất lần nữa đi truy `tl.py`.
+
+Đo sau khi vá (Linux, container này): `tl selftest` **1697/1697**, và toàn bộ 13 bước của
+job `gate` đều `rc=0`.
+
 # ★ dev-side — vòng 5: vá 4 lỗi do lượt CI Windows ĐẦU TIÊN lộ ra (2026-08-13)
 
 Không bump `VERSION`; chỉ `.claude/` + CHANGELOG. `RELEASE_MANIFEST.json` giữ 179 tệp.
